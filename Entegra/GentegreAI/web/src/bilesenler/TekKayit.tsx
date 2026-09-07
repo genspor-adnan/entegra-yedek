@@ -18,6 +18,10 @@ interface Props {
       ÜTS: solda canli hesap, sagda test hesabi). Listede olmayan alan
       cizilmez; not SON kutunun altina gider. */
   gruplar?: { baslik: string; alanlar: string[] }[];
+  /** Yalnizca bu alanlar, VERILEN SIRAYLA cizilir (or. anamnez panelindeki
+      vital izgarasi: tansiyon, nabiz, SpO2, ates...). Verilmezse katalogtaki
+      butun alanlar cizilir. */
+  alanSirasi?: string[];
   /** Karsilikli dislanan onay kutulari: anahtar alan ISARETLENINCE listedeki
       alanlar kaldirilir (or. ÜTS canli/test secimi radyo gibi davranir). */
   dislar?: Record<string, string[]>;
@@ -57,8 +61,8 @@ interface Props {
  * doldurup Kaydet derse detay farkinda "eklenen" olarak gider.
  */
 export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, gruplar,
-                           dislar, ustAlanlar, aramaAc, secilenAdlar, ekAlanlar,
-                           ekAlanlarSira }: Props) {
+                           alanSirasi, dislar, ustAlanlar, aramaAc, secilenAdlar,
+                           ekAlanlar, ekAlanlarSira }: Props) {
   const satir: Satir = durum.guncel[0] ?? {};
 
   const degis = (ad: string, deger: unknown) => {
@@ -134,13 +138,28 @@ export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, grupla
     );
   };
 
-  const alanCiz = (a: KartAlanMeta) => (
-    <label key={a.ad} className={`alan tip-${a.tip}`}>
-      <span className="etiket">{a.baslik}</span>
-      {girdi(a)}
-    </label>
-  );
-  const alanlar = meta.alanlar.filter(a => a.ad !== 'id' && !a.gizli);
+  const tumAlanlar = meta.alanlar.filter(a => a.ad !== 'id' && !a.gizli);
+  // ESLESEN ALAN (mockup ".ikili"): "Tansiyon" tek etiket altinda sistolik +
+  //   diyastolik, "Boy / Kilo" tek etiket altinda iki kutu. Eslesen alan
+  //   kendi satirini ALMAZ.
+  const eslesenAdlar = new Set(tumAlanlar.map(a => a.eslesAlan).filter(Boolean));
+
+  const alanCiz = (a: KartAlanMeta) => {
+    const hedef = a.eslesAlan ? tumAlanlar.find(x => x.ad === a.eslesAlan) : undefined;
+    return (
+      <label key={a.ad} className={`alan tip-${a.tip}${hedef ? ' ikili' : ''}`}>
+        <span className="etiket">{a.baslik}</span>
+        {girdi(a)}
+        {hedef && girdi(hedef)}
+      </label>
+    );
+  };
+
+  const alanlar = (alanSirasi?.length
+    ? alanSirasi.map(ad => tumAlanlar.find(a => a.ad === ad))
+        .filter((a): a is KartAlanMeta => !!a)
+    : tumAlanlar
+  ).filter(a => !eslesenAdlar.has(a.ad));
 
   if (gruplar?.length) {
     const bul = new Map(alanlar.map(a => [a.ad, a]));

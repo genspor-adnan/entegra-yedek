@@ -53,7 +53,11 @@ interface Props {
       ya da ek bolum ekleyebilir (Firma Bilgileri'nde e-Belge sekmesi: Genel /
       Seri / XSLT / tur ayarlari). Verilmezse sekme dogrudan cizilir. */
   sekmeSarmalayici?(sekmeBasligi: string, icerik: React.ReactNode,
-                    deger: Record<string, Deger>): React.ReactNode;
+                    deger: Record<string, Deger>,
+                    /** Bir DETAYI (ör. vitaller) etiket+kutu ızgarası olarak
+                        istenen yere çizer - anamnez sekmesinin sağ paneline
+                        düzenlenebilir vital ızgarası koymak için. */
+                    izgaraCiz?: (detayAd: string) => React.ReactNode): React.ReactNode;
   /** SERIDIN USTUNDE cizilen ekran-ozel baglam kutulari (or. muayene kartinda
       hasta/alerji/aktif ilac - mockup muayene_karti.html). Kart degerini alir
       cunku hangi hastanin gosterilecegi karttan cikar. */
@@ -113,7 +117,9 @@ interface Props {
                                  gridKipi?: boolean;
                                  /** Salt gorunum: duzenleme sekmenin arac
                                      cubugundaki uclardan yapilir. */
-                                 salt?: boolean }>;
+                                 salt?: boolean;
+                                 /** Baslikta "＋" yok: satiri sunucu ucu acar. */
+                                 ekleGizli?: boolean }>;
   /**
    * DETAY SEKMESI GRID YERINE TEK KAYIT IZGARASI: en ustteki satir (detayin
    * kendi siralamasina gore SONUNCU olcum) mockup'taki gibi etiket + kutu
@@ -123,8 +129,12 @@ interface Props {
    */
   detayIzgara?: Record<string, { baslik?: string; sinif?: string;
                                  yeniDugmesi?: boolean; not?: string;
+                                 /** Yalnız bu alanlar, verilen sırayla. */
+                                 alanSirasi?: string[];
                                  /** Gecmis listesinde CIZILMEYECEK alanlar. */
                                  gecmisGizli?: string[] }>;
+  /** Sekmesi acilmayacak detaylar (ekranda baska yerde ciziliyorsa). */
+  gizliDetaylar?: string[];
   /** Bu EKRANDA acilmayacak sekmeler (ör. Aday kartinda "Fatura Bilgileri").
       Ayni kart farkli ekranlarda farkli genislikte kullanilabilsin diye. */
   gizliSekmeler?: string[];
@@ -178,7 +188,7 @@ const SEKME_IKON: Record<string, string> = {
 };
 const sekmeIkonu = (baslik: string) => SEKME_IKON[baslik] ?? '▫️';
 
-export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, tazeleAnahtari, onKaydedildi, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, gizliDetaylar, tazeleAnahtari, onKaydedildi, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
@@ -510,12 +520,13 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
   const sekmeler = useMemo<SekmeTanimi[]>(
     () => sekmeleriKur({ gruplar, meta, kaynak, deger, yeniMi, personelGibiKart,
                          yerTutucuSekmeler, gizliSekmeler, seritAlanlari, detayGrupta,
+                         gizliDetaylar,
                          // Kosullu sekme DETAY alanina da bakabilir (ör. personelde
                          //   "Prim Rolleri" yalniz ozluk.calismaSekli = 3 iken):
                          //   isaret degisince sekme ANINDA gorunur/kaybolur.
                          detaySatirlari: ad => detaylar[ad]?.guncel ?? [] }),
     [gruplar, meta, kaynak, deger, yeniMi, personelGibiKart, yerTutucuSekmeler,
-     gizliSekmeler, seritAlanlari, detayGrupta, detaylar]);
+     gizliSekmeler, seritAlanlari, detayGrupta, gizliDetaylar, detaylar]);
 
   const [aktifSekme, setAktifSekme] = useState<string | null>(null);
   const kayitAnahtari = `${kaynak}:${id}`;
@@ -1302,6 +1313,7 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
                 hatalar={alanHatalari}
                 kutuSinif={detayGrupta?.[d.ad]?.sinif}
                 sadeGrid={detayGrupta?.[d.ad]?.sade}
+                ekleGizli={detayGrupta?.[d.ad]?.ekleGizli}
                 gizliAlanlar={detayGrupta?.[d.ad]?.gizli
                   ? new Set(detayGrupta[d.ad].gizli) : undefined}
                 etiketAlanlari={detayGrupta?.[d.ad]?.etiket
@@ -1314,7 +1326,29 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
         const ustte = gomulu.some(d => detayGrupta?.[d.ad]?.ustte);
         const tumu = gomulu.length === 0 ? tam
           : ustte ? <>{tablolar}{tam}</> : <>{tam}{tablolar}</>;
-        return sekmeSarmalayici ? sekmeSarmalayici(aktif.baslik, tumu, deger) : tumu;
+        // IZGARA CIZICI: ekran bir DETAYI (or. vitaller) istedigi yere
+        //   etiket+kutu izgarasi olarak koyabilsin - anamnez sekmesinin sag
+        //   paneli boyle: hekim sikayeti yazarken vitali AYNI ekranda girer.
+        const izgaraCiz = (detayAd: string) => {
+          const d = (meta?.detaylar ?? []).find(x => x.ad === detayAd);
+          if (!d) return null;
+          const ayar = detayIzgara?.[detayAd] ?? {};
+          return (
+            <div className={ayar.sinif}>
+              <TekKayit
+                meta={d}
+                durum={detaylar[d.ad] ?? bosDetay()}
+                saltOkunur={salt || d.saltOkunur}
+                onDegis={yeni => setDetaylar(t => ({ ...t, [d.ad]: yeni }))}
+                baslik={ayar.baslik ?? d.baslik}
+                alanSirasi={ayar.alanSirasi}
+                not={ayar.not}
+              />
+            </div>
+          );
+        };
+        return sekmeSarmalayici
+          ? sekmeSarmalayici(aktif.baslik, tumu, deger, izgaraCiz) : tumu;
       })()}
 
       {/* Stok > ÜTS: stok_uts 1:1 uzanti (119) - grid degil TEK kayit formu.
@@ -1476,6 +1510,7 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
               saltOkunur={salt || aktif.detay.saltOkunur}
               onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
               baslik={ayar.baslik ?? aktif.detay.baslik}
+              alanSirasi={ayar.alanSirasi}
               not={ayar.not}
             />
             {gecmis.length > 0 && (

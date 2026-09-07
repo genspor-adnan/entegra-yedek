@@ -10,7 +10,6 @@ import { KaynakArama } from '../bilesenler/KaynakArama';
 import { MuayeneDurumSeridi } from '../bilesenler/MuayeneDurumSeridi';
 import { MuayeneOzetSeridi } from '../bilesenler/MuayeneOzetSeridi';
 import { MuayeneSonucOzeti } from '../bilesenler/MuayeneSonucOzeti';
-import { MuayeneVitalPaneli } from '../bilesenler/MuayeneVitalPaneli';
 import { MuayeneIstemSonuc } from '../bilesenler/MuayeneIstemSonuc';
 import {
   type EBelgeMesaji, type Kosul, type ListeSatiri, type RandevuBolumDugumu, hataMetni,
@@ -2177,7 +2176,7 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         //   Sarmalayici o sekmenin ALTINA sonuc panelini koyar - gridi
         //   kaldirmadan, cunku "gorduм" isareti ve aciliyet orada duruyor.
         sekmeSarmalayici={tanim.kaynak === 'muayene' && kartId !== 'yeni'
-          ? (baslik, icerik) => (
+          ? (baslik, icerik, _deger, izgaraCiz) => (
               baslik.includes('Anamnez')
                 // MOCKUP IKI PANEL (461): solda sikayet/hikaye/ozgecmis,
                 //   sagda SON vital olcumu. Hekim sikayeti yazarken
@@ -2187,7 +2186,12 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
                   <div className="muayene-ikili">
                     <div className="mi-sol">{icerik}</div>
                     <div className="mi-sag">
-                      <MuayeneVitalPaneli muayeneId={Number(kartId)} />
+                      {/* VITAL IZGARASI DUZENLENEBILIR (kullanici): okunur
+                          panel yerine muayenenin SON olcumu - hekim sikayeti
+                          yazarken tansiyonu ayni ekranda girer. Sira mockup:
+                          tansiyon/nabiz/SpO2 · ates/solunum/agri ·
+                          boy-kilo/BKI/bel. */}
+                      {izgaraCiz?.('vitaller')}
                       {/* Mockup'ta vitalin ALTINDA "Bugunku sonuclar": hekim
                           anamnezi yazarken bugun ne ciktigini yaninda ister. */}
                       <MuayeneSonucOzeti muayeneId={Number(kartId)} />
@@ -2207,16 +2211,13 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
                                 onClick={() => setIcdAramaAcik(true)}>
                           ＋ ICD-10 Ekle
                         </button>
-                        <button type="button" className="d teh"
-                                onClick={() => void aksiyon('muayene.taniSil',
-                                                            { id: Number(kartId) })}>
-                          🗑 Kaldır
-                        </button>
+                        {/* Kaldir/duzenle GRID BASLIGINDA (ikonlu kip):
+                            secili satira uygulanir. */}
                         {/* Sık / son / önceki listeleri ARAMA PENCERESINDE
                             (kullanıcı): tek yerde, aramayla aynı akışta. */}
                       </div>
                     )}
-                    {baslik === 'Muayene' && (
+                    {baslik === 'Fizik Muayene' && (
                       <div className="muayene-arac">
                         <button type="button" className="d"
                                 onClick={() => void aksiyon('muayene.sablon',
@@ -2295,8 +2296,12 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         //   sablondan acilir, secim kutusu yanlis bir vaat olurdu; deger/taraf
         //   ise mockup'ta yok.
         tazeleAnahtari={kartTazele}
+        // VITAL BULGULAR SEKMESI YOK (kullanici): olcum anamnez sekmesinin
+        //   sag panelinde duzenleniyor - ayni veriyi iki sekmede gostermek
+        //   hangisinin gecerli oldugunu belirsiz birakiyordu.
+        gizliDetaylar={tanim.kaynak === 'muayene' ? ['vitaller'] : undefined}
         detayGrupta={tanim.kaynak === 'muayene'
-          ? { bulgular: { grup: 'Muayene', gizli: ['degerSayi', 'taraf'],
+          ? { bulgular: { grup: 'Fizik Muayene', gizli: ['degerSayi', 'taraf'],
                           etiket: ['sablonAlanId'], sinif: 'bulgu-gridi',
                           // Cerceve, baslik ve "+ Satır"/sil yok (kullanici):
                           //   satirlar SABLONDAN acilir, elle satir eklemek
@@ -2311,15 +2316,26 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
               // GenGrid gorunumu + SALT OKUNUR (kullanici): satir ici kutu
               //   yok, duz metin. Ekleme/kaldirma sekmenin arac cubugundaki
               //   uclarla yapilir - kural ve silme izi tek yerde.
-              tanilar: { grup: 'Tanı / Karar', gizli: ['sira', 'baslangicTarihi'],
-                         sinif: 'tani-gridi', ustte: true, sade: true,
-                         gridKipi: true, salt: true } }
+              // GRID KIPI (kullanici): satir basinda tek secim kutusu, ust
+              //   satirda duzenle/sil ikonlari, duzenleme MODALDE. Cerceve
+              //   yok. Satir EKLEME kapali - ICD kodu "＋ ICD-10 Ekle"
+              //   ucundan gelir, bos satir yarim kayit olurdu.
+              tanilar: { grup: 'Tanı (ICD-10)', gizli: ['sira', 'baslangicTarihi'],
+                         sinif: 'tani-gridi', ustte: true,
+                         gridKipi: true, ekleGizli: true } }
           : undefined}
         // VITAL BULGULAR MOCKUP IZGARASI: son olcum etiket+kutu izgarasinda
         //   (3 sutun), eski olcumler altta salt gorunum. Grid satirlarinda
         //   14 sayisal kolon yan yana okunmuyordu.
         detayIzgara={tanim.kaynak === 'muayene'
           ? { vitaller: { baslik: 'Vital bulgular', sinif: 'vital-izgara-kip',
+                          // Anamnez panelindeki sira (kullanici): tansiyon,
+                          //   nabiz, SpO2 · ates, solunum, agri · boy-kilo,
+                          //   BKI, bel. Glukoz/GKS ve olcum kimligi Vital
+                          //   Bulgular sekmesinde.
+                          alanSirasi: ['sistolik', 'nabiz', 'spo2',
+                                       'ates', 'solunum', 'agriVas',
+                                       'boyCm', 'bki', 'belCevresiCm'],
                           yeniDugmesi: true,
                           not: 'Ölçüm zamanı ve kaynağı kayıtta kalır; '
                              + 'BKİ o anki boy/kilodan hesaplanır.',

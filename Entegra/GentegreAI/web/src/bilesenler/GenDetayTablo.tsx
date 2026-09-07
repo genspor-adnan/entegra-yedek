@@ -106,6 +106,12 @@ interface Props {
    */
   sadeGrid?: boolean;
   /**
+   * SATIR EKLEME KAPALI: başlıktaki "＋" çizilmez. Satırın anahtarını ekran
+   * değil SUNUCU koyuyorsa (tanıda ICD kodu "＋ ICD-10 Ekle" ucundan gelir)
+   * boş satır açmak yarım kayıt üretirdi.
+   */
+  ekleGizli?: boolean;
+  /**
    * Arama pencerelerinin KAYNAKLARINI daraltir (ör. prim planinin rolu
    * "Gönderen" degilse dis hekimler hic listelenmesin). Alanin kendi
    * `aramaKaynagi` degerini EZER; verilmezse o kullanilir.
@@ -174,7 +180,7 @@ function gunFarki(bas: string, bit: string): number | null {
 
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
                                modalDuzenle, taslakKural, cipler, kutuSinif,
-                               gizliAlanlar, etiketAlanlari, sadeGrid,
+                               gizliAlanlar, etiketAlanlari, sadeGrid, ekleGizli,
                                aramaKaynaklari, aramaEkFiltre,
                                modalAltBilesen }: Props) {
   /**
@@ -581,6 +587,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                   tek anlamli alani secilecek KISI - once bos satir acip sonra
                   hucreden arama penceresini actirmak fazladan bir adimdi.
                   Ayri bir arama dugmesi de yok: iki dugme ayni isi yapiyordu. */}
+              {!ekleGizli && (
               <button type="button" className="d bir ikon-dugme"
                       title={tarafAlani ? `${tarafAlani.baslik} ara ve ekle` : 'Yeni satır'}
                       disabled={!satirEklenebilir}
@@ -588,6 +595,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                         if (tarafAlani) { setTarafAramaAcik(true); return }
                         if (modalDuzenle) modalAc('yeni'); else satirEkle();
                       }}>＋</button>
+              )}
               {/* Duzenle / Sil USTTE (kullanici): satir sonunda her satirda
                   tekrar edip gridi kalabaliklastiriyordu. Secim yoksa pasif ve
                   sebebi title'da - seri/XSLT gridleriyle ayni desen. */}

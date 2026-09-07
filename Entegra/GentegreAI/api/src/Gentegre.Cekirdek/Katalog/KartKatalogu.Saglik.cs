@@ -298,55 +298,55 @@ public static partial class KartKatalogu
             //   hekim yazdiginin son kelimesini goruyordu. 4000 sinir hem
             //   dogrulama hem cok satirli kutu (uzun-metin kurali).
             new("sikayet", "sikayet", "metin", EnFazlaUzunluk: 4000,
-                Baslik: "Şikâyet", Grup: "Anamnez"),
+                Baslik: "Şikâyet", Grup: "Anamnez & Vital"),
             new("hikaye", "hikaye", "metin", EnFazlaUzunluk: 4000,
-                Baslik: "Hikâye", Grup: "Anamnez"),
+                Baslik: "Hikâye", Grup: "Anamnez & Vital"),
             // Ozgecmis / soygecmis / aliskanlik BURADA SERBEST NOTTUR; yapisal
             //   karsiliklari hastanin tibbi gecmisinde (Faz 1 ortak platform)
             //   yasar - muayene aninda yazilan not oraya islenir.
             new("ozgecmisNotu", "ozgecmis_notu", "metin", Baslik: "Özgeçmiş",
-                Grup: "Anamnez"),
+                Grup: "Anamnez & Vital"),
             new("soygecmisNotu", "soygecmis_notu", "metin", Baslik: "Soygeçmiş",
-                Grup: "Anamnez"),
+                Grup: "Anamnez & Vital"),
             new("aliskanlikNotu", "aliskanlik_notu", "metin", Baslik: "Alışkanlıklar",
-                Grup: "Anamnez"),
+                Grup: "Anamnez & Vital"),
 
             // --------------------------------------------- fizik muayene ----
             new("sablonId", "sablon_id", "kod", KodTablosu: "public.v_muayene_sablon_lookup",
-                Baslik: "Muayene Şablonu", Grup: "Muayene"),
+                Baslik: "Muayene Şablonu", Grup: "Fizik Muayene"),
             // Sablondan DERLENEN metin: rapora ve e-Nabiz pakete giden budur.
             //   Bulgular sekmesindeki alanlardan uretilir, hekim duzeltebilir.
             new("bulguOzet", "bulgu_ozet", "metin", Baslik: "Muayene Bulguları",
-                Grup: "Muayene"),
+                Grup: "Fizik Muayene"),
 
             // ---------------------------------------------- tani / karar ----
             // Degerlendirme/plan SERBEST METIN: rapora ve e-Nabiz'a giden
             //   karar cumlesi tek satirlik kutuya sigmiyordu (uzun metin
             //   kurali >= 400 karakterde cok satirli kutu cizer).
             new("karar", "karar", "metin", EnFazlaUzunluk: 4000,
-                Baslik: "Değerlendirme / Plan", Grup: "Tanı / Karar"),
+                Baslik: "Değerlendirme / Plan", Grup: "Tanı (ICD-10)"),
             new("yonlendirme", "yonlendirme", "kod", SabitKodlar: YonlendirmeKodlari,
-                Baslik: "Yönlendirme", Grup: "Tanı / Karar", AltGrup: "Sevk"),
+                Baslik: "Yönlendirme", Grup: "Tanı (ICD-10)", AltGrup: "Sevk"),
             new("sevkTesisKodu", "sevk_tesis_kodu", "metin", EnFazlaUzunluk: 20,
-                Baslik: "Sevk Tesis Kodu", Grup: "Tanı / Karar", AltGrup: "Sevk"),
+                Baslik: "Sevk Tesis Kodu", Grup: "Tanı (ICD-10)", AltGrup: "Sevk"),
             new("sevkKlinikKod", "sevk_klinik_kod", "metin", EnFazlaUzunluk: 20,
-                Baslik: "Sevk Klinik Kodu", Grup: "Tanı / Karar", AltGrup: "Sevk"),
+                Baslik: "Sevk Klinik Kodu", Grup: "Tanı (ICD-10)", AltGrup: "Sevk"),
             new("sevkNeden", "sevk_neden", "kod", Baslik: "Sevk Nedeni",
-                Grup: "Tanı / Karar", AltGrup: "Sevk"),
+                Grup: "Tanı (ICD-10)", AltGrup: "Sevk"),
             new("kontrolOnerisiGun", "kontrol_onerisi_gun", "sayi",
-                Baslik: "Kontrol (gün)", Grup: "Tanı / Karar", AltGrup: "Takip"),
+                Baslik: "Kontrol (gün)", Grup: "Tanı (ICD-10)", AltGrup: "Takip"),
             new("kontrolRandevuId", "kontrol_randevu_id", "sayi",
-                Baslik: "Kontrol Randevu Id", Grup: "Tanı / Karar", AltGrup: "Takip"),
+                Baslik: "Kontrol Randevu Id", Grup: "Tanı (ICD-10)", AltGrup: "Takip"),
             new("vakaTuru", "vaka_turu", "kod", Baslik: "Vaka Türü",
-                Grup: "Tanı / Karar", AltGrup: "Takip"),
+                Grup: "Tanı (ICD-10)", AltGrup: "Takip"),
 
             // -------------------------------------------------- gönderim ----
             new("enabizDurum", "enabiz_durum", "kod", Yazilabilir: false,
-                Baslik: "e-Nabız Durumu", Grup: "Tanı / Karar", AltGrup: "Gönderim"),
+                Baslik: "e-Nabız Durumu", Grup: "Tanı (ICD-10)", AltGrup: "Gönderim"),
             new("tamamlayanId", "tamamlayan_id", "sayi", Yazilabilir: false,
-                Baslik: "Tamamlayan", Grup: "Tanı / Karar", AltGrup: "Gönderim"),
+                Baslik: "Tamamlayan", Grup: "Tanı (ICD-10)", AltGrup: "Gönderim"),
             new("tamamlanma", "tamamlanma", "tarih", Yazilabilir: false,
-                Baslik: "Tamamlanma", Grup: "Tanı / Karar", AltGrup: "Gönderim")
+                Baslik: "Tamamlanma", Grup: "Tanı (ICD-10)", AltGrup: "Gönderim")
         },
         Detaylar: new DetayTanimi[]
         {
@@ -361,14 +361,18 @@ public static partial class KartKatalogu
                 //   okuma sirasi budur - alfabetik ya da tablo sirasi degil.
                 //   Birim ETIKETTE: kutuya birim yazilamaz, ama hangi birimde
                 //   girilecegi belli olmazsa 36,8 ile 98,2 ayni kutuya duser.
-                new("sistolik", "sistolik", "sayi", Baslik: "Sistolik (mmHg)"),
+                // TANSIYON TEK ETIKET, IKI KUTU (mockup ".ikili"): sistolik ve
+                //   diyastolik ayri okunmaz, "158 / 96" birlikte anlam tasir.
+                new("sistolik", "sistolik", "sayi", EslesAlan: "diyastolik",
+                    Baslik: "Tansiyon (mmHg)"),
                 new("diyastolik", "diyastolik", "sayi", Baslik: "Diyastolik (mmHg)"),
                 new("nabiz", "nabiz", "sayi", Baslik: "Nabız (/dk)"),
                 new("spo2", "spo2", "sayi", Baslik: "SpO₂ (%)"),
                 new("ates", "ates", "ondalik", Baslik: "Ateş (°C)"),
                 new("solunum", "solunum", "sayi", Baslik: "Solunum (/dk)"),
                 new("agriVas", "agri_vas", "sayi", Baslik: "Ağrı (VAS 0-10)"),
-                new("boyCm", "boy_cm", "ondalik", Baslik: "Boy (cm)"),
+                new("boyCm", "boy_cm", "ondalik", EslesAlan: "kiloKg",
+                    Baslik: "Boy / Kilo (cm/kg)"),
                 new("kiloKg", "kilo_kg", "ondalik", Baslik: "Kilo (kg)"),
                 // BKI SAKLANIR: boy/kilo sonradan duzeltilse bile o anki
                 //   olcumun degeri degismemeli - kayit tarihcedir.
@@ -392,7 +396,11 @@ public static partial class KartKatalogu
             new("tanilar", "public.tani", "muayene_id", new KartAlani[]
             {
                 new("id", "id", "sayi", Yazilabilir: false),
-                new("icdKod", "icd_kod", "kod", Zorunlu: true,
+                // ICD KODU DEGISTIRILEMEZ (kullanici): tani satiri "＋ ICD-10
+                //   Ekle" ucuyla acilir; kodu kartta degistirmek ayni satiri
+                //   baska bir hastaliga cevirip gecmisi bozardi - yanlis tani
+                //   kaldirilir, dogrusu eklenir.
+                new("icdKod", "icd_kod", "kod", Zorunlu: true, Yazilabilir: false,
                     KodTablosu: "public.v_icd_lookup", AramaKaynagi: "icd",
                     Baslik: "ICD-10"),
                 // TANI ADI: kod tek basina okunmuyor ("I21.0" kimseye bir sey

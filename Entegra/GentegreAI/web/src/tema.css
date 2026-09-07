@@ -2833,7 +2833,26 @@ input.skt-gecmis {
 .kaynak-arama tr.tiklanir:hover { background: var(--mor2) }
 
 /* Tanı gridi SOLA YANAŞIK (kullanıcı): sol kenarı sekmenin araç çubuğuyla
-   (＋ ICD-10 Ekle) aynı çizgide; sağda kutularla aynı boşluk kalır. */
-.tani-gridi { margin: 0 10px 0 0 }
+   (＋ ICD-10 Ekle) aynı çizgide; sağda kutularla aynı boşluk kalır.
+   ÇERÇEVE YOK ama başlık şeridi DURUR: seçili satırın düzenle/sil ikonları
+   orada (kutu-cercevesiz sınıfı başlığı da gizliyor, o yüzden ayrı). */
+.kagrup.tani-gridi { margin: 0 10px 0 0; border: 0; background: transparent;
+                     padding: 0 }
+.kagrup.tani-gridi > h6 { padding-left: 0 }
 .kaynak-arama-arac { display: flex; gap: 6px; align-items: center; flex-wrap: wrap }
 .kaynak-arama-arac .ara-kutu { flex: 1; min-width: 180px }
+
+/* Anamnez sağ panelindeki vital ızgarası: üç sütun, etiket üstte; "Tansiyon"
+   ve "Boy / Kilo" tek etiket altında İKİ kutu (mockup .ikili). */
+.mi-sag .vital-izgara-kip .alan-izgara { grid-template-columns: 1fr 1fr 1fr; gap: 8px }
+.mi-sag .vital-izgara-kip .alan { grid-template-columns: 1fr; row-gap: 2px; align-items: start }
+.mi-sag .vital-izgara-kip .alan .etiket { grid-column: 1; font-size: 10.5px }
+.mi-sag .vital-izgara-kip .alan input,
+.mi-sag .vital-izgara-kip .alan select { grid-column: 1; min-width: 0 }
+/* "Tansiyon" ve "Boy / Kilo": tek etiket, YAN YANA iki kutu (tek sütun
+   kuralı bunları alt alta düşürüyordu). */
+.mi-sag .vital-izgara-kip .alan.ikili { grid-template-columns: 1fr 1fr; column-gap: 4px }
+.mi-sag .vital-izgara-kip .alan.ikili .etiket { grid-column: 1 / -1 }
+.mi-sag .vital-izgara-kip .alan.ikili input { grid-column: auto; width: 100%; min-width: 0 }
+.vital-izgara-kip .alan.ikili { grid-template-columns: 1fr 1fr; column-gap: 4px }
+.vital-izgara-kip .alan.ikili .etiket { grid-column: 1 / -1 }

@@ -100,10 +100,16 @@ export function sekmeleriKur(secenek: {
    * sistem/normal/bulgu tablosu - iki ayri sekme degil).
    */
   detayGrupta?: Record<string, { grup: string }>;
+  /**
+   * SEKMESI ACILMAYACAK detaylar. Detay ekranda BASKA bir yerde cizildiginde
+   * (or. vitaller anamnez sekmesinin sag panelinde) ayrica sekme acmak ayni
+   * veriyi iki yerde gosterirdi.
+   */
+  gizliDetaylar?: string[];
 }): SekmeTanimi[] {
   const { gruplar, meta, kaynak, deger, yeniMi, personelGibiKart,
           yerTutucuSekmeler, gizliSekmeler, seritAlanlari, detayGrupta,
-          detaySatirlari = () => [] } = secenek;
+          gizliDetaylar, detaySatirlari = () => [] } = secenek;
   const dokumanliKart = personelGibiKart || kaynak === 'kisi' || kaynak === 'cari' || kaynak === 'stok';
   const yorumMedyaSekmesiVar = (yerTutucuSekmeler ?? []).includes('Yorum / Medya');
   const s: SekmeTanimi[] = gruplar
@@ -140,8 +146,8 @@ export function sekmeleriKur(secenek: {
     }
   }
   meta?.detaylar.forEach(d => {
-    // Bir grup sekmesine gomulen detay kendi sekmesini almaz.
-    if (detayGrupta?.[d.ad]) return;
+    // Bir grup sekmesine gomulen ya da baska yerde cizilen detay sekme almaz.
+    if (detayGrupta?.[d.ad] || gizliDetaylar?.includes(d.ad)) return;
     // KOSULLU sekme (ör. stok "Paket"): ilgili kutu isaretli degilse sekme
     //   hic acilmaz - bos sekme "burada doldurulacak bir sey var" izlenimi
     //   verir. Kutu isaretlenince ANINDA gorunur (deger state'i degisir).

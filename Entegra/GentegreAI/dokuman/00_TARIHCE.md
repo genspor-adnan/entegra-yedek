@@ -8130,3 +8130,24 @@ akışı da hekimi iki adıma zorluyordu. Arama sunucuda: ekran katalog taşıma
 - **GenForm `tazeleAnahtari`**: ekranın kendi düğmeleri (tanı ekle, şablon
   uygula, tümü normal…) satırı SUNUCUDA açıyor; kart onu ancak yeniden
   okuyunca görüyordu - kullanıcı "eklendi diyor ama göremiyorum" diyordu.
+
+### Sekme adları ve vital ızgarasının yeri (kullanıcı)
+
+Sekmeler mockup adlarını aldı: **Anamnez & Vital · Fizik Muayene ·
+Tanı (ICD-10) · İstem & Sonuçlar**.
+
+- **Vital Bulgular sekmesi kaldırıldı**; ölçüm anamnez sekmesinin sağ
+  panelinde **düzenlenebilir** ızgarada (okunur panel yerine). Aynı veriyi iki
+  sekmede göstermek hangisinin geçerli olduğunu belirsiz bırakıyordu.
+  GenForm'a `gizliDetaylar` (sekmesi açılmayan detay) ve `sekmeSarmalayici`'ye
+  dördüncü parametre `izgaraCiz(detayAd)` eklendi - ekran bir detayı istediği
+  yere etiket+kutu ızgarası olarak koyabiliyor.
+- Sıra kullanıcının istediği gibi: tansiyon · nabız · SpO₂ / ateş · solunum ·
+  ağrı / boy-kilo · BKİ · bel. **Tansiyon** ve **Boy / Kilo** tek etiket
+  altında iki kutu (`EslesAlan`; TekKayit'e eşleşen alan desteği eklendi) -
+  "158 / 96" birlikte anlam taşır.
+- Tanı gridi grid kipinde: satır başında tek seçim kutusu, başlık şeridinde
+  ✎ / 🗑, düzenleme modalde. Satır **ekleme kapalı** (`ekleGizli`) - ICD kodu
+  "＋ ICD-10 Ekle" ucundan gelir, boş satır yarım kayıt olurdu. `icdKod` artık
+  yazılamaz: kodu değiştirmek satırı başka bir hastalığa çevirip geçmişi
+  bozardı; yanlış tanı kaldırılır, doğrusu eklenir.
