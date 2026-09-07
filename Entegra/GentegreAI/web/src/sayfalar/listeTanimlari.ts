@@ -441,7 +441,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   UTS ile KARISTIRILMAZ: UTS tibbi cihaz, ITS ilac; ayri kurum, ayri
     //   servis, ayri ekran.
     kaynak: 'its-bildirim', rota: 'its-bildirim', baslik: 'İTS Bildirimleri',
-    yol: 'Yonetim › İTS Bildirimleri',
+    yol: 'Stok & Hizmet › İTS › Bildirimler',
     aksiyonEkrani: 'its-liste',
     tarihAlani: 'islemTarihi',
     cipler: [
@@ -451,8 +451,11 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
-    menuAd: 'İTS Bildirimleri', ic: '💊', yetkiKodu: 'stok',
+    // ITS, UTS'nin HEMEN ONUNDE (kullanici): ikisi ayri kurum ve ayri servis
+    //   (ITS ilac, UTS tibbi cihaz) ama ayni is - karekod bildirimi; yan yana
+    //   dururlar. Sira 68: UTS alt grubu 70'ten basliyor.
+    menuSira: 68, menuGrup: 'Stok & Hizmet', menuAltGrup: 'İTS',
+    menuAd: 'Bildirimler', ic: '💊', yetkiKodu: 'stok',
   },
   {
     // RECETELER (413) - muayenede yazilan ilaclar. Recete bir BELGEDIR:

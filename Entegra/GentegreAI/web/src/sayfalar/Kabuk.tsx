@@ -91,6 +91,11 @@ const ALTGRUP_IKON: Record<string, string> = {
   'Prim': '%',
   // Laboratuvarin uc dali (kullanici): ortak akis (istem, numune, sonuc)
   //   grubun kokunde kalir, dala ozel ekranlar bu basliklarin altinda.
+  // Karekod bildirimi iki kurum: ITS ilac, UTS tibbi cihaz - notr disli
+  //   ikisini de aynilastiriyordu.
+  'İTS': '💊',
+  'ÜTS': '🩺',
+  'Muayene Ayarları': '🩺',
   'Biyokimya': '⚗️',
   'Mikrobiyoloji': '🦠',
   'Genetik': '🧬',
