@@ -7681,3 +7681,29 @@ soruyorsunuz?" diye başlıyordu ve kullanıcı bunu "cevap vermedi, ekran
 önerdi" diye okuyordu - artık başlık ve adımlar önce geliyor, çekince
 parantez içinde sonda; (2) `**kalın**` yazımı yalnız panelde çiziliyordu,
 sohbette yıldızlar ham görünüyordu (`Kalinla` ortak bileşene alındı).
+
+---
+
+## 07.09.2026 — Rehbere SÜREÇ konuları (`db/451`)
+
+"Biyokimya hasta testleri işleyiş süreci nedir, hangi aşamalardan geçiyor?"
+sorusu ekran önerisine düşüyordu. Katalogdaki konular **tek işi** anlatıyordu
+(istem açma, numune kabul); kullanıcı ise sık sık **işleyişi** soruyor.
+
+Yedi süreç konusu eklendi: laboratuvar (istemden onaylı sonuca, 10 adım),
+hasta yolculuğu (randevudan tahsilata), radyoloji, kültür/mikrobiyoloji,
+genetik, dış laboratuvar, satış (ERP: tekliften tahsilata). Adımlar gerçek
+akışı anlatıyor - durum kodları `labKodlari.ts` ile birebir, düğme adları
+aksiyon kataloğundan (🏷 Barkod Üret, 🩸 Alındı İşaretle, ✅ Uzman Onayı…).
+
+**Sıra 200'den başlıyor**: eşit puanda tek-iş konusu önce gelir - "numune
+nasıl kabul edilir" sorana bütün süreci okutmak, sorunun cevabını saklamaktır.
+Doğrulandı: "numune nasıl kabul edilir" hâlâ `lab-numune-kabul`, "laboratuvar
+süreci nasıl işler" `lab-surec`.
+
+**Anahtar çakışması**: dış lab konusundaki "laboratuvar" kelimesi genel
+laboratuvar sürecini kendine çekiyordu (benzerlik puanı yüksek); o kelime
+anahtardan çıkarıldı - dış lab özel bir dal, genel süreç değil.
+
+**Modül alanı boş bırakıldı**: süreç birden çok modüle dokunuyor, tek modül
+yazıp "bu modül kapalı" uyarısı basmak yanıltırdı.
