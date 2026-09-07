@@ -8105,3 +8105,9 @@ Sistem 215 px, Normal 60 px, kalan bulgu metnine.
   ve ekleme sunucuda) · **🗑 Kaldır** (`GET /tanilar` + `DELETE /tani/{id}` -
   silme izi kartla aynı yoldan) · Sık kullandıklarım · Önceki tanılar. Tanı
   tablosu da sade grid: çerçeve, başlık ve satır içi ekle/sil yok.
+
+**＋ ICD-10 Ekle** artık arama penceresi açıyor (kullanıcı: "gelen ekranda tanı
+arayabilmem lazım"): yeni genel bileşen `KaynakArama` bir liste kaynağında
+yazdıkça arar (kod başlar / ad içerir, 300 ms debounce) ve seçilen satırı
+döndürür. ICD ~20 bin satır - combo kullanılamaz, "önce yaz sonra listeden seç"
+akışı da hekimi iki adıma zorluyordu. Arama sunucuda: ekran katalog taşımaz.

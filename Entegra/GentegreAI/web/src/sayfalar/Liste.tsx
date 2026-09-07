@@ -6,6 +6,7 @@ import { GenGrid } from '../bilesenler/GenGrid';
 import { RandevuTakvimi } from '../bilesenler/RandevuTakvimi';
 import { GenForm } from '../bilesenler/GenForm';
 import { MuayeneBaglamSeridi } from '../bilesenler/MuayeneBaglamSeridi';
+import { KaynakArama } from '../bilesenler/KaynakArama';
 import { MuayeneDurumSeridi } from '../bilesenler/MuayeneDurumSeridi';
 import { MuayeneOzetSeridi } from '../bilesenler/MuayeneOzetSeridi';
 import { MuayeneSonucOzeti } from '../bilesenler/MuayeneSonucOzeti';
@@ -202,6 +203,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   //   ve isteyen muayene kart izgarasinda degil, baglam seridindeki "Bugun"
   //   kutusuna basinca acilan pencerede. Kart govdesi sekmelere kaliyor.
   const [muayeneBilgiAcik, setMuayeneBilgiAcik] = useState(false);
+  /** ICD arama penceresi açık mı (tanı sekmesi "＋ ICD-10 Ekle"). */
+  const [icdAramaAcik, setIcdAramaAcik] = useState(false);
   // Kart kapanip baska kayit acilinca pencere ACIK KALMASIN.
   useEffect(() => { setMuayeneBilgiAcik(false) }, [kartId]);
   // Belge (fatura/siparis) karti da MODAL: liste arkada kalir, rota degismez.
@@ -2130,6 +2133,24 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       />
     )}
 
+    {/* ICD ARAMA (kullanici: "gelen ekranda tani arayabilmeliyim"): yazdikca
+        arar, secilen kod SUNUCUDA tani satirina donusur (ana tani varsa ek). */}
+    {icdAramaAcik && kartId !== null && kartId !== 'yeni' && (
+      <KaynakArama
+        kaynak="icd" baslik="ICD-10 tanı ara"
+        ekKosul={{ alan: 'aktif', op: 'esit', deger: 1 }}
+        onKapat={() => setIcdAramaAcik(false)}
+        onSec={satir => {
+          setIcdAramaAcik(false);
+          void guvenli(async () => {
+            const y = await api.muayeneTaniEkle(Number(kartId), String(satir.kod));
+            mesaj(y.mesaj);
+            setYenile(t => t + 1);
+          });
+        }}
+      />
+    )}
+
     {kartId !== null && tanim.kartYolu && !tanim.ozelKart && (
       <GenForm
         kaynak={tanim.kaynak}
@@ -2166,8 +2187,7 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
                         {/* Tek mavi dugme (kullanici): ICD kodu/adi SORULUR,
                             katalog aramasi ve ekleme sunucuda. */}
                         <button type="button" className="d bir"
-                                onClick={() => void aksiyon('muayene.taniAra',
-                                                            { id: Number(kartId) })}>
+                                onClick={() => setIcdAramaAcik(true)}>
                           ＋ ICD-10 Ekle
                         </button>
                         <button type="button" className="d teh"

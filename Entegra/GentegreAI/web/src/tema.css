@@ -2823,3 +2823,10 @@ input.skt-gecmis {
 .vital-izgara-kip .alan .etiket { grid-column: 1; font-size: 10.5px }
 .vital-izgara-kip .alan input,
 .vital-izgara-kip .alan select { grid-column: 1 }
+
+/* KAYNAK ARAMA PENCERESI (ICD, ilac...): arama kutusu + sonuc tablosu. */
+.kaynak-arama { display: flex; flex-direction: column; gap: 8px }
+.kaynak-arama .ara-kutu { width: 100% }
+.kaynak-arama .ara-kutu input { width: 100% }
+.kaynak-arama tr.tiklanir { cursor: pointer }
+.kaynak-arama tr.tiklanir:hover { background: var(--mor2) }
