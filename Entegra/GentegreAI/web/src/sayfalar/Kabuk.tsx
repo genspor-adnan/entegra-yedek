@@ -60,8 +60,8 @@ const GRUP_IKON: Record<string, string> = {
   'Kayıt Kabul': '🚑',
   'Radyoloji': '☢️',
   // e-Nabiz (kullanici): Radyolojiden sonra ayri ana menu. Bayrak emojisi
-  //   Windows'ta harf olarak cizildigi icin uydu/gonderim ikonu.
-  'e-Nabız': '📡',
+  //   Windows'ta harf olarak ciziliyordu; "nabiz" = atan kalp.
+  'e-Nabız': '💓',
   // Klinik moduller (360): kurum profilinde kapaliysa menude hic gorunmezler.
   'Muayene': '🩺',
   'Laboratuvar': '🧪',
