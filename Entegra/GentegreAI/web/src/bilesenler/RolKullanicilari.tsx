@@ -156,7 +156,7 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
             {/* Listelerdeki oval arama kutusu. */}
             <div className="ara-kutu alt-bosluk">
               <span>🔍</span>
-              <input autoFocus value={arama}
+              <input type="search" autoFocus value={arama}
                      placeholder="Kullanıcı ara (ad, kod, e-posta)…"
                      onChange={e => setArama(e.target.value)} />
             </div>

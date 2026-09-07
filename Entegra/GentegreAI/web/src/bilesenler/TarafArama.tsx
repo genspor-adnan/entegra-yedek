@@ -399,7 +399,7 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
         <div className="cipler" style={{ margin: 0 }}>
           <div className="ara-kutu">
             <span>🔍</span>
-            <input
+            <input type="search"
               ref={kutu}
               placeholder={yerTutucu ?? 'Ara…'}
               value={metin}

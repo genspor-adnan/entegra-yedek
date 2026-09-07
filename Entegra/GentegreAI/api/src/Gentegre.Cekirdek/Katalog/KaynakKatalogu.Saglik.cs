@@ -196,8 +196,12 @@ public static partial class KaynakKatalogu
             new("id",          "b.id",              "sayi",  "Id", Varsayilan: false),
             new("siraNo",      "bb.sira_no",        "metin", "Sıra", Hizalama: "orta",
                                                     Genislik: 70),
-            new("saat",        "b.belge_tarihi",    "tarih", "Saat", Hizalama: "orta",
-                                                    Bicim: "HH:mm", Genislik: 70),
+            // TARIH + SAAT (kullanici): calisma listesi gun suzgeciyle acilsa da
+            //   gecmis gune bakildiginda yalniz saat hangi gun oldugunu
+            //   soylemiyordu.
+            new("saat",        "b.belge_tarihi",    "tarih", "Tarih / Saat",
+                                                    Hizalama: "orta",
+                                                    Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
             new("protokolNo",  "coalesce(b.belge_no, '')", "metin", "Protokol",
                                                     Hizalama: "orta", Genislik: 130),
             new("hastaAdi",    "h.unvan",           "metin", "Hasta", Genislik: 220),
@@ -205,8 +209,10 @@ public static partial class KaynakKatalogu
                                                     Genislik: 110, Varsayilan: false),
             new("tcNo",        "coalesce(h.vkno, '')", "metin", "T.C. No", Hizalama: "orta",
                                                     Genislik: 110, Varsayilan: false),
-            new("hekimAdi",    "coalesce(p.ad, '')", "metin", "Hekim", Genislik: 170),
+            // BOLUM HEKIMDEN ONCE (kullanici): calisma listesinde once hangi
+            //   bolume, sonra hangi hekime bakiliyor - siralama okuma sirasi.
             new("bolumAdi",    "coalesce(d.ad, '')", "metin", "Bölüm", Genislik: 140),
+            new("hekimAdi",    "coalesce(p.ad, '')", "metin", "Hekim", Genislik: 170),
             new("kurumAdi",    "coalesce(k.unvan, 'Özel')", "metin", "Kurum", Genislik: 150),
             new("oncelikAdi",
                 "case bb.oncelik when 2 then 'Acil' when 1 then 'Öncelikli' else '' end",

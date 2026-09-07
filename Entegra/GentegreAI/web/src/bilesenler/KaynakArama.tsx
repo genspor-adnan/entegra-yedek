@@ -110,7 +110,7 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
         <div className="kaynak-arama-arac">
           <span className="ara-kutu">
             <span>🔍</span>
-            <input ref={kutu} value={metin} placeholder="Kod ya da ad…"
+            <input type="search" ref={kutu} value={metin} placeholder="Kod ya da ad…"
                    onChange={e => { setMetin(e.target.value); setKip('') }} />
           </span>
           <button type="button" className={`d${kip === 'sik' ? ' bir' : ''}`}

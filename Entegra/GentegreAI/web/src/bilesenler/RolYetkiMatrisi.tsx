@@ -310,7 +310,7 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
         {/* Listelerdeki oval arama kutusuyla ayni gorunum (kullanici). */}
         <div className="ara-kutu dar">
           <span>🔍</span>
-          <input
+          <input type="search"
             placeholder="Yetki ara…" value={arama}
             onChange={e => setArama(e.target.value)} />
         </div>

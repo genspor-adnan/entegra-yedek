@@ -623,7 +623,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                 // Listedeki "Bu listede ara" kutusuyla AYNI oval gorunum.
                 <span className="ara-kutu satir-arasi">
                   <span>🔍</span>
-                  <input value={arama} placeholder="Satırlarda ara…"
+                  <input type="search" value={arama} placeholder="Satırlarda ara…"
                          onChange={e => { setArama(e.target.value); setSecili(null); }} />
                 </span>
               )}

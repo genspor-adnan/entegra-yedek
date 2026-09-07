@@ -2873,3 +2873,15 @@ input.skt-gecmis {
 .kart-baglam .kb-hucre { display: flex; flex-direction: column; min-width: 0 }
 .kart-baglam .kb-hucre > .kb-bas { margin: 0 0 2px 2px }
 .kart-baglam .kb-hucre > .kb-kutu { flex: 1 }
+
+/* ARAMA KUTUSUNDA TEMIZLEME (×) - kullanici: "clear için x ekle".
+   `type=search` tarayicinin kendi temizleme dugmesini getirir; WebKit'te
+   varsayilan gorunum soluk ve kucuk, burada okunur hale getiriliyor.
+   Dugme yalniz DEGER VARKEN cizilir - bos kutuda anlamsiz olurdu. */
+.ara-kutu input[type='search']::-webkit-search-cancel-button {
+  -webkit-appearance: none; appearance: none;
+  width: 13px; height: 13px; cursor: pointer; opacity: .55;
+  background: var(--soluk);
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 4l8 8M12 4l-8 8' stroke='black' stroke-width='2.2' stroke-linecap='round'/></svg>") center/contain no-repeat;
+}
+.ara-kutu input[type='search']::-webkit-search-cancel-button:hover { opacity: 1 }

@@ -221,7 +221,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
           <div className="cipler" style={{ margin: 10 }}>
             <div className="ara-kutu">
               <span>🔍</span>
-              <input
+              <input type="search"
                 ref={kutu}
                 autoFocus
                 placeholder={ilacAranir ? "Stok, hizmet ya da ilaç (barkod) ara…"

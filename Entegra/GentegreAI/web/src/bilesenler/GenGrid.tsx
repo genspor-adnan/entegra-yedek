@@ -627,7 +627,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
         {!aramaGizli && (
         <div className="ara-kutu dar">
           <span>🔍</span>
-          <input
+          <input type="search"
             placeholder={cev('Bu listede ara…')}
             onChange={e => aramaDegisti(e.target.value)}
           />
