@@ -1311,7 +1311,7 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           //   ekranlarindaki grid ile ayni davranis.
           || kaynak === 'dokuman'
           || aktif.detay.alanlar.some(a => a.tip === 'kod' && a.aramaKaynagi);
-        return (
+        const grid = (
         <GenDetayTablo
           meta={aktif.detay}
           durum={detaylar[aktif.detay.ad] ?? bosDetay()}
@@ -1367,6 +1367,11 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
             : undefined}
         />
         );
+        // SARMALAYICI DETAY SEKMESINDE DE CALISIR (461): muayenenin
+        //   "Istem & Sonuclar" paneli bir DETAY sekmesinin altina giriyor;
+        //   sarmalayici yalniz grup sekmelerinde cagrildigi icin panel hic
+        //   cizilmiyordu (grid "satir yok" derken sonuclar duruyordu).
+        return sekmeSarmalayici ? sekmeSarmalayici(aktif.baslik, grid, deger) : grid;
       })()}
 
       {/* Hizmet > Fiyatlar: kalemin gectigi fiyat listesi satirlari
