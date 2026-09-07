@@ -7730,3 +7730,32 @@ seçicide de aynı sorun yaşanmıştı); grup 📡, kuyruk 📤 ikonuyla.
 
 Menüye taşınacak başka e-Nabız ekranı yoktu - kuyruk tek ekrandı. Mockup'ta
 bekleyenler: ayarlar/kod eşleme, hasta geçmişi, veri kalitesi, paket kartı.
+
+---
+
+## 07.09.2026 — Laboratuvar menüsü üç dala ayrıldı (`db/453`)
+
+25 ekranlık düz Laboratuvar menüsü alt başlıklara alındı (kullanıcı):
+**Biyokimya · Mikrobiyoloji · Genetik**.
+
+**Ortak akış grubun kökünde kaldı**: İstemler, Numune Kabul, Sonuçlar, Tetkik
+Kataloğu, Paneller, Dış Lab Gönderimleri, Dış Laboratuvarlar. Üç dal da aynı
+ekrandan yürüyor - "İstemler"i Biyokimya'nın altına koymak, mikrobiyoloji
+teknisyenine kendi ekranını yanlış başlıkta arattırırdı.
+
+- **Biyokimya**: Serum İndeksi, Kalite Kontrol (İKK), Kontrol Lotları,
+  Westgard Kuralları, Dış Kalite (DKK), Cihazlar, Cihaz Eşleme, Cihaz
+  Mesajları, Cihaz Olayları (otomasyon + kalite).
+- **Mikrobiyoloji**: Kültür Çalışma Listesi, Organizmalar, Antibiyotikler,
+  Besiyerleri.
+- **Genetik**: Vakalar, Varyantlar, Dizileme Runları, Genler, Panel Kataloğu.
+
+Alt grubun menüdeki yeri ilk üyesinin `menuSira` değerinden geliyor; sıralar
+buna göre yeniden verildi (ortak 10-52, Biyokimya 60-76, Mikrobiyoloji 80-86,
+Genetik 90-98). Dalın altındaki iki öğe yeniden adlandırıldı: "Mikrobiyoloji"
+→ Kültür Çalışma Listesi, "Genetik" → Vakalar ("Genetik › Genetik" okunuyordu);
+Genetik Panelleri → Panel Kataloğu (kökteki lab "Paneller" ile karışmasın).
+
+**Rotalar değişmedi**; `db/453` yalnız rehber kataloğundaki menü yolu/adını
+günceller - katalog eski yolu söylerse asistan artık var olmayan bir menüye
+gönderir. Alt grup ikonları: ⚗️ · 🦠 · 🧬.

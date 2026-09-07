@@ -403,7 +403,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   tanimi. Randevu tarafindaki radyoloji_cihaz'dan AYRI: o cekim
     //   planlamasi, bu entegrasyon kaydi.
     kaynak: 'cihaz', rota: 'cihaz', baslik: 'Cihazlar',
-    yol: 'Laboratuvar › Cihazlar',
+    yol: 'Laboratuvar › Biyokimya › Cihazlar',
     kartYolu: '/cihaz', kartBaslik: 'Cihaz',
     aksiyonEkrani: 'cihaz-liste',
     cipler: [
@@ -415,14 +415,14 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   ayri bir grupta durmasi onu her seferinde menu degistirmeye
     //   zorluyordu. Sira lab ekranlarinin ARDINDAN (70/80).
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar',
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya',
     menuAd: 'Cihazlar', ic: '🔌', yetkiKodu: 'cihaz', menuSira: 70,
   },
   {
     // CIHAZ MESAJLARI (432) - gelen ham mesajlar. Ham metin "İçerik"
     //   penceresinde okunur: cozumleme hatasinda bakilacak tek yer orasi.
     kaynak: 'cihaz-mesaj', rota: 'cihaz-mesaj', baslik: 'Cihaz Mesajları',
-    yol: 'Laboratuvar › Cihaz Mesajları',
+    yol: 'Laboratuvar › Biyokimya › Cihaz Mesajları',
     aksiyonEkrani: 'cihaz-mesaj-liste',
     tarihAlani: 'eklemeTarihi',
     icerikAlani: 'ham', icerikBaslik: 'Ham Cihaz Mesajı',
@@ -433,8 +433,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar',
-    menuAd: 'Cihaz Mesajları', ic: '📡', yetkiKodu: 'cihaz', menuSira: 80,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya',
+    menuAd: 'Cihaz Mesajları', ic: '📡', yetkiKodu: 'cihaz', menuSira: 74,
   },
   {
     // ITS BILDIRIM KUYRUGU (427) - ilac karekod bildirimleri.
@@ -701,7 +701,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Paneller', menuSira: 50,
+    menuGrup: 'Laboratuvar', menuAd: 'Paneller', menuSira: 45,
     ic: '🧬', yetkiKodu: 'lab.tetkik',
   },
   {
@@ -709,7 +709,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   Varsayilan cip "Okuma Zamani Geldi": 24 saatlik plakayi 3. gunde
     //   okumak negatif raporu guvenilmez yapar, gecikme once gorunmeli.
     kaynak: 'lab-kultur', rota: 'lab-kultur', baslik: 'Kültür Çalışma Listesi',
-    yol: 'Laboratuvar › Mikrobiyoloji',
+    yol: 'Laboratuvar › Mikrobiyoloji › Kültür Çalışma Listesi',
     aksiyonEkrani: 'lab-kultur-liste',
     tarihAlani: 'ekimZamani',
     cipler: [
@@ -726,14 +726,14 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Mikrobiyoloji', menuSira: 35,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Mikrobiyoloji', menuAd: 'Kültür Çalışma Listesi', menuSira: 80,
     ic: '🦠', yetkiKodu: 'lab.kultur',
   },
   {
     // GENETIK VAKA LISTESI (439) - laboratuvarin gunluk ekrani.
     //   Varsayilan cip "Acik Vakalar": onaylanmis vaka masada is degildir.
     kaynak: 'lab-genetik-vaka', rota: 'lab-genetik-vaka',
-    baslik: 'Genetik Vakalar', yol: 'Laboratuvar › Genetik',
+    baslik: 'Genetik Vakalar', yol: 'Laboratuvar › Genetik › Vakalar',
     aksiyonEkrani: 'lab-genetik-liste',
     tarihAlani: 'eklemeTarihi',
     cipler: [
@@ -748,14 +748,14 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Genetik', menuSira: 37,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Genetik', menuAd: 'Vakalar', menuSira: 90,
     ic: '🧬', yetkiKodu: 'lab.genetik',
   },
   {
     // VARYANT HAVUZU (439): ACMG kanitlari ve sinif birlikte durur -
     //   "neden patojenik" sorusu listeden cevaplanir.
     kaynak: 'lab-varyant', rota: 'lab-varyant', baslik: 'Varyantlar',
-    yol: 'Laboratuvar › Varyantlar',
+    yol: 'Laboratuvar › Genetik › Varyantlar',
     aksiyonEkrani: 'lab-varyant-liste',
     cipler: [
       { ad: 'Raporlanan', filtre: { alan: 'raporla', op: 'esit', deger: 1 } },
@@ -764,13 +764,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Varyantlar', menuSira: 38,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Genetik', menuAd: 'Varyantlar', menuSira: 92,
     ic: '🔬', yetkiKodu: 'lab.genetik',
   },
   {
     // DIZILEME RUN'LARI (439): kontroller gecmediyse run raporlanamaz.
     kaynak: 'lab-genetik-run', rota: 'lab-genetik-run', baslik: 'Dizileme Runları',
-    yol: 'Laboratuvar › Runlar',
+    yol: 'Laboratuvar › Genetik › Dizileme Runları',
     aksiyonEkrani: 'lab-genetik-run-liste',
     tarihAlani: 'tarih',
     cipler: [
@@ -779,7 +779,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Dizileme Runları', menuSira: 62,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Genetik', menuAd: 'Dizileme Runları', menuSira: 94,
     ic: '📚', yetkiKodu: 'lab.genetik',
   },
   {
@@ -787,7 +787,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   Varsayilan cip "Ret / Uyari": kapatilmamis ret once gorunmeli,
     //   cunku o testin hasta sonuclari oto-onaya girmiyor.
     kaynak: 'lab-kk-olcum', rota: 'lab-kk-olcum', baslik: 'Kalite Kontrol (İKK)',
-    yol: 'Laboratuvar › Kalite Kontrol',
+    yol: 'Laboratuvar › Biyokimya › Kalite Kontrol',
     aksiyonEkrani: 'lab-kk-liste',
     tarihAlani: 'olcumZamani',
     cipler: [
@@ -797,13 +797,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Kalite Kontrol', menuSira: 39,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Kalite Kontrol', menuSira: 62,
     ic: '📉', yetkiKodu: 'lab.kk',
   },
   {
     // DIS KALITE (442): donem bazli, SDI ile degerlendirilir.
     kaynak: 'lab-dkk', rota: 'lab-dkk', baslik: 'Dış Kalite (DKK)',
-    yol: 'Laboratuvar › Dış Kalite',
+    yol: 'Laboratuvar › Biyokimya › Dış Kalite',
     kartYolu: '/lab-dkk', kartBaslik: 'DKK Sonucu',
     aksiyonEkrani: 'lab-dkk-liste',
     cipler: [
@@ -812,13 +812,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Dış Kalite', menuSira: 41,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Dış Kalite', menuSira: 68,
     ic: '🌍', yetkiKodu: 'lab.kk',
   },
   {
     // KONTROL LOTLARI (442): hedef/SD lot basinadir, kart detayinda.
     kaynak: 'lab-kk-lot', rota: 'lab-kk-lot', baslik: 'Kontrol Lotları',
-    yol: 'Laboratuvar › Kontrol Lotları',
+    yol: 'Laboratuvar › Biyokimya › Kontrol Lotları',
     kartYolu: '/lab-kk-lot', kartBaslik: 'Kontrol Lotu',
     aksiyonEkrani: 'lab-kk-lot-liste',
     cipler: [
@@ -827,7 +827,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Kontrol Lotları', menuSira: 74,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Kontrol Lotları', menuSira: 64,
     ic: '🧴', yetkiKodu: 'lab.kk',
   },
   {
@@ -845,7 +845,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Dış Lab Gönderimleri', menuSira: 45,
+    menuGrup: 'Laboratuvar', menuAd: 'Dış Lab Gönderimleri', menuSira: 50,
     ic: '📦', yetkiKodu: 'lab.dislab',
   },
   {
@@ -860,14 +860,14 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Dış Laboratuvarlar', menuSira: 80,
+    menuGrup: 'Laboratuvar', menuAd: 'Dış Laboratuvarlar', menuSira: 52,
     ic: '🏥', yetkiKodu: 'lab.dislab',
   },
   {
     // SERUM INDEKSI ESIKLERI (444): test bazli HIL sinirlari. Potasyum
     //   hemolizden 20 indekste etkilenir, sodyum 200'de bile etkilenmez.
     kaynak: 'lab-indeks-esik', rota: 'lab-indeks-esik',
-    baslik: 'Serum İndeksi Eşikleri', yol: 'Laboratuvar › Serum İndeksi',
+    baslik: 'Serum İndeksi Eşikleri', yol: 'Laboratuvar › Biyokimya › Serum İndeksi',
     kartYolu: '/lab-indeks-esik', kartBaslik: 'Serum İndeksi Eşiği',
     aksiyonEkrani: 'lab-indeks-esik-liste',
     cipler: [
@@ -877,13 +877,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Serum İndeksi', menuSira: 43,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Serum İndeksi', menuSira: 60,
     ic: '🩸', yetkiKodu: 'lab.tetkik',
   },
   {
     // WESTGARD KURAL SETI (442): tetkik bos = varsayilan set.
     kaynak: 'lab-kk-kural', rota: 'lab-kk-kural', baslik: 'Westgard Kuralları',
-    yol: 'Laboratuvar › Westgard Kuralları',
+    yol: 'Laboratuvar › Biyokimya › Westgard Kuralları',
     kartYolu: '/lab-kk-kural', kartBaslik: 'Westgard Kuralı',
     aksiyonEkrani: 'lab-kk-kural-liste',
     cipler: [
@@ -892,13 +892,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Westgard Kuralları', menuSira: 76,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Westgard Kuralları', menuSira: 66,
     ic: '⚙️', yetkiKodu: 'lab.kk',
   },
   {
     // CIHAZ OLAYLARI (442): LJ'deki kaymanin nedeni cogu zaman burada.
     kaynak: 'lab-cihaz-olay', rota: 'lab-cihaz-olay', baslik: 'Cihaz Olayları',
-    yol: 'Laboratuvar › Cihaz Olayları',
+    yol: 'Laboratuvar › Biyokimya › Cihaz Olayları',
     kartYolu: '/lab-cihaz-olay', kartBaslik: 'Cihaz Olayı',
     aksiyonEkrani: 'lab-cihaz-olay-liste',
     tarihAlani: 'zaman',
@@ -909,13 +909,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Cihaz Olayları', menuSira: 78,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Cihaz Olayları', menuSira: 76,
     ic: '🔧', yetkiKodu: 'lab.kk',
   },
   {
     // GEN KATALOGU (439): transkript zorunlu - HGVS gosterimi ona goredir.
     kaynak: 'lab-gen', rota: 'lab-gen', baslik: 'Gen Kataloğu',
-    yol: 'Laboratuvar › Genler',
+    yol: 'Laboratuvar › Genetik › Genler',
     kartYolu: '/lab-gen', kartBaslik: 'Gen',
     aksiyonEkrani: 'lab-gen-liste',
     cipler: [
@@ -924,13 +924,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Genler', menuSira: 70,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Genetik', menuAd: 'Genler', menuSira: 96,
     ic: '🧬', yetkiKodu: 'lab.gen',
   },
   {
     // GENETIK PANEL KATALOGU (439): gen listesi raporun ekidir.
     kaynak: 'lab-genetik-panel', rota: 'lab-genetik-panel',
-    baslik: 'Genetik Panelleri', yol: 'Laboratuvar › Genetik Panelleri',
+    baslik: 'Genetik Panelleri', yol: 'Laboratuvar › Genetik › Panel Kataloğu',
     kartYolu: '/lab-genetik-panel', kartBaslik: 'Genetik Paneli',
     aksiyonEkrani: 'lab-genetik-panel-liste',
     cipler: [
@@ -939,13 +939,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Genetik Panelleri', menuSira: 72,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Genetik', menuAd: 'Panel Kataloğu', menuSira: 98,
     ic: '🗂️', yetkiKodu: 'lab.gen',
   },
   {
     // ORGANIZMA KATALOGU (436): rapor ve direnc surveyansi buna dayanir.
     kaynak: 'lab-organizma', rota: 'lab-organizma', baslik: 'Organizma Kataloğu',
-    yol: 'Laboratuvar › Organizmalar',
+    yol: 'Laboratuvar › Mikrobiyoloji › Organizmalar',
     kartYolu: '/lab-organizma', kartBaslik: 'Organizma',
     aksiyonEkrani: 'lab-organizma-liste',
     cipler: [
@@ -955,13 +955,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Organizmalar', menuSira: 64,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Mikrobiyoloji', menuAd: 'Organizmalar', menuSira: 82,
     ic: '🧫', yetkiKodu: 'lab.mikro',
   },
   {
     // ANTIBIYOTIK KATALOGU (436): "basamak" kademeli bildirimi yonetir.
     kaynak: 'lab-antibiyotik', rota: 'lab-antibiyotik', baslik: 'Antibiyotik Kataloğu',
-    yol: 'Laboratuvar › Antibiyotikler',
+    yol: 'Laboratuvar › Mikrobiyoloji › Antibiyotikler',
     kartYolu: '/lab-antibiyotik', kartBaslik: 'Antibiyotik',
     aksiyonEkrani: 'lab-antibiyotik-liste',
     cipler: [
@@ -971,13 +971,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Antibiyotikler', menuSira: 66,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Mikrobiyoloji', menuAd: 'Antibiyotikler', menuSira: 84,
     ic: '💊', yetkiKodu: 'lab.mikro',
   },
   {
     // BESIYERI KATALOGU (436): okuma plani buradaki saatlerden kurulur.
     kaynak: 'lab-besiyeri', rota: 'lab-besiyeri', baslik: 'Besiyeri Kataloğu',
-    yol: 'Laboratuvar › Besiyerleri',
+    yol: 'Laboratuvar › Mikrobiyoloji › Besiyerleri',
     kartYolu: '/lab-besiyeri', kartBaslik: 'Besiyeri',
     aksiyonEkrani: 'lab-besiyeri-liste',
     cipler: [
@@ -986,7 +986,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Besiyerleri', menuSira: 68,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Mikrobiyoloji', menuAd: 'Besiyerleri', menuSira: 86,
     ic: '🧪', yetkiKodu: 'lab.mikro',
   },
   {
@@ -994,7 +994,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   farkliysa gerekir; listenin bos olmasi normaldir.
     kaynak: 'lab-cihaz-esleme', rota: 'lab-cihaz-esleme',
     baslik: 'Cihaz Test Eşleme',
-    yol: 'Laboratuvar › Cihaz Eşleme',
+    yol: 'Laboratuvar › Biyokimya › Cihaz Eşleme',
     kartYolu: '/lab-cihaz-esleme', kartBaslik: 'Cihaz Test Eşlemesi',
     aksiyonEkrani: 'lab-cihaz-esleme-liste',
     cipler: [
@@ -1003,7 +1003,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Cihaz Eşleme', menuSira: 60,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Cihaz Eşleme', menuSira: 72,
     ic: '🔌', yetkiKodu: 'lab.cihaz',
   },
   {

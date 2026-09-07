@@ -89,6 +89,11 @@ const GRUP_IKON: Record<string, string> = {
     olmayan alt grup eskisi gibi ⚙️ kalir. */
 const ALTGRUP_IKON: Record<string, string> = {
   'Prim': '%',
+  // Laboratuvarin uc dali (kullanici): ortak akis (istem, numune, sonuc)
+  //   grubun kokunde kalir, dala ozel ekranlar bu basliklarin altinda.
+  'Biyokimya': '⚗️',
+  'Mikrobiyoloji': '🦠',
+  'Genetik': '🧬',
 };
 
 /** Cevrilmis grup adindan ikona: menu adi dile gore degisince Turkce anahtarli
