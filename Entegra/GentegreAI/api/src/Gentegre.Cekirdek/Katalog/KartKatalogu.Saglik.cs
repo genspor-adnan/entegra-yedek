@@ -320,8 +320,11 @@ public static partial class KartKatalogu
                 Grup: "Muayene"),
 
             // ---------------------------------------------- tani / karar ----
-            new("karar", "karar", "metin", Baslik: "Değerlendirme / Plan",
-                Grup: "Tanı / Karar"),
+            // Degerlendirme/plan SERBEST METIN: rapora ve e-Nabiz'a giden
+            //   karar cumlesi tek satirlik kutuya sigmiyordu (uzun metin
+            //   kurali >= 400 karakterde cok satirli kutu cizer).
+            new("karar", "karar", "metin", EnFazlaUzunluk: 4000,
+                Baslik: "Değerlendirme / Plan", Grup: "Tanı / Karar"),
             new("yonlendirme", "yonlendirme", "kod", SabitKodlar: YonlendirmeKodlari,
                 Baslik: "Yönlendirme", Grup: "Tanı / Karar", AltGrup: "Sevk"),
             new("sevkTesisKodu", "sevk_tesis_kodu", "metin", EnFazlaUzunluk: 20,

@@ -233,6 +233,19 @@ export const api = {
     gonder<{ acilan: number; bulguOzet: string; mesaj: string }>(
       `/api/muayene/${muayeneId}/sablon/${sablonId}`, {}),
 
+  /** Tani onerileri: bu HASTANIN onceki tanilari + bu HEKIMIN son 90 gunde
+      en cok yazdiklari (mockup "Onceki tanilar" / "Sik kullandiklarim"). */
+  muayeneTaniOnerileri: (muayeneId: number) =>
+    istek<{
+      onceki: { kod: string; ad: string; kronik: number; son: string }[];
+      sik: { kod: string; ad: string; adet: number }[];
+    }>(`/api/muayene/${muayeneId}/tani-onerileri`),
+
+  /** Listeden secilen ICD kodunu tani satiri olarak ekler (ana tani varsa EK). */
+  muayeneTaniEkle: (muayeneId: number, icdKod: string) =>
+    gonder<{ eklendi: boolean; mesaj: string }>(
+      `/api/muayene/${muayeneId}/tani/${encodeURIComponent(icdKod)}`, {}),
+
   /** Bos bulgu satirlarini "normal" isaretler (mockup "Tumu normal isaretle").
       Bulgu METNI YAZILMIS satira dokunmaz - o hekimin karari. */
   muayeneTumuNormal: (muayeneId: number) =>

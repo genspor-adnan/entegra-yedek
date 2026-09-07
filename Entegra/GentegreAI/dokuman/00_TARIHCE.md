@@ -8046,3 +8046,24 @@ kutu değil etiket - satırlar şablondan açılır, seçim kutusu "burası
 değiştirilebilir" diye yanlış vaat veriyordu. GenDetayTablo'ya `etiketAlanlari`,
 `detayGrupta` seçeneğine `gizli` / `etiket` / `sinif` eklendi. Genişlikler:
 Sistem 215 px, Normal 60 px, kalan bulgu metnine.
+
+### Tanı / Karar sekmesi mockup düzenine (kullanıcı)
+
+- Tanı tablosu artık ayrı sekme değil: `detayGrupta` ile "Tanı / Karar"
+  sekmesinin **üstünde** (`ustte`) - hekim önce ICD girer, sevk/takip alanları
+  kararı yazarken dolar. `sira` ve `baslangicTarihi` gride çizilmiyor (sıralama
+  sunucuda, kronik başlangıcı hastanın Kronik Tanılar ekranında).
+- **`GET /api/muayene/{id}/tani-onerileri`** + **`POST /api/muayene/{id}/tani/{icd}`**
+  (mockup "⭐ Sık kullandıklarım" / "🕘 Önceki tanılar"): önceki = bu HASTANIN
+  başka muayenelerindeki tanılar, sık = bu HEKİMİN son 90 günde en çok
+  yazdıkları. Kronik hastanın tanısı her muayenede elle yazılırken kod
+  kayabiliyordu - aynı hastalık iki ayrı ICD ile yazılınca rapor ve e-Nabız
+  ikiye bölünür. Ana tanı varsa eklenen satır **ek tanı** olur: ana tanıyı
+  sormadan değiştirmek tamamlama ve 103 paketinin dayandığı kaydı oynatırdı.
+- Fizik muayene tablosu **sade grid** (kullanıcı): çerçeve, başlık şeridi,
+  "+ Satır" ve satır sonundaki silme düğmesi yok - satırlar şablondan açılır,
+  elle satır eklemek sistem listesini bozar. GenDetayTablo'ya `sadeGrid`.
+- Süre iki yerde de rozet oldu (uyarı bandı + "Bugün" kutusu); bandın zemini
+  gri rozetle aynı renk olduğu için oradaki gri rozet kenarlıklı.
+- `karar` alanı 4000 karakter: değerlendirme/plan tek satırlık kutuya
+  sığmıyordu.

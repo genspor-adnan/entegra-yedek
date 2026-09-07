@@ -99,6 +99,13 @@ interface Props {
    */
   etiketAlanlari?: ReadonlySet<string>;
   /**
+   * SADE GRID: cerceve, baslik seridi ("+ Satır" dahil) ve satir sonundaki
+   * silme dugmesi CIZILMEZ - satirlarin nereden geldigi ekranin isi degilse
+   * (fizik muayene satirlari sablondan acilir) bunlar yanlis vaat ve
+   * kalabalik. Hucreler yine duzenlenebilir.
+   */
+  sadeGrid?: boolean;
+  /**
    * Arama pencerelerinin KAYNAKLARINI daraltir (ör. prim planinin rolu
    * "Gönderen" degilse dis hekimler hic listelenmesin). Alanin kendi
    * `aramaKaynagi` degerini EZER; verilmezse o kullanilir.
@@ -167,7 +174,8 @@ function gunFarki(bas: string, bit: string): number | null {
 
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
                                modalDuzenle, taslakKural, cipler, kutuSinif,
-                               gizliAlanlar, etiketAlanlari, aramaKaynaklari, aramaEkFiltre,
+                               gizliAlanlar, etiketAlanlari, sadeGrid,
+                               aramaKaynaklari, aramaEkFiltre,
                                modalAltBilesen }: Props) {
   /**
    * KAMPANYA SATIRI (268): "Kapsam" TEK kolondur (iskonto_yeri_id) ama
@@ -561,7 +569,9 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const aramaVar = modalDuzenle && (durum.guncel.length > 20 || arama !== '');
 
   return (
-    <div className={`kagrup${kutuSinif ? ` ${kutuSinif}` : ''}`}>
+    <div className={`kagrup${sadeGrid ? ' kutu-cercevesiz' : ''}`
+                    + `${kutuSinif ? ` ${kutuSinif}` : ''}`}>
+      {!sadeGrid && (
       <h6>
         {meta.baslik}
         {!saltOkunur && (
@@ -632,6 +642,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           )
         )}
       </h6>
+      )}
 
       {/* KOLONU COK OLAN DETAY GRIDI (prim satirlari): tablo modal genisligini
           asinca en sagdaki kolonlar (satir silme ✖ dahil) ERISILEMEZ oluyordu.
@@ -975,7 +986,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                   )}
                 </td>
               ))}
-              {!modalDuzenle && !saltOkunur && (
+              {!modalDuzenle && !saltOkunur && !sadeGrid && (
                 <td className="hiza-orta">
                   <button type="button" className={`d teh${ikonlu ? ' ikon-dugme' : ''}`}
                           title={ikonlu ? 'Satırı sil' : undefined}

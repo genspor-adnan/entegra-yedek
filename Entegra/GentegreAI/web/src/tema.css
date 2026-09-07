@@ -2792,6 +2792,9 @@ input.skt-gecmis {
   border-radius: var(--r); background: var(--yuz2); font-size: 11px;
 }
 .muayene-uyari .sonuk:last-child { margin-left: auto }
+/* Bandin zemini gri rozetle ayni renk: bandda gri rozet kenarlikla ayrilir. */
+.muayene-uyari .rozet.gri,
+.kb-kutu .rozet.gri { background: var(--yuz); border: 1px solid var(--cizgi2) }
 
 /* FIZIK MUAYENE ARAC CUBUGU (mockup muayene_karti.html): sablon ve
    "tumu normal" dugmeleri tablonun ustunde. */
@@ -2808,3 +2811,7 @@ input.skt-gecmis {
 /* "Normal" yalniz bir onay kutusu - basligi kadar yer yeter. */
 .bulgu-gridi table th:nth-child(2),
 .bulgu-gridi table td:nth-child(2) { width: 60px; text-align: center }
+
+/* Tanı tablosu (mockup tanı paneli): ICD kodu dar, tanı adı geniş kalsın. */
+.tani-gridi table th:first-child,
+.tani-gridi table td:first-child { width: 240px }

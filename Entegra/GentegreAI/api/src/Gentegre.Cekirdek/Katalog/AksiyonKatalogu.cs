@@ -869,6 +869,15 @@ public static class AksiyonKatalogu
                 // Mockup fizik muayene araç çubuğu: şablonla açılmış boş
                 //   satırları tek tıkla "normal" işaretler. Yazılmış bulguya
                 //   dokunmaz - kural uçta.
+                // Mockup tanı araç çubuğu: hastanın önceki tanıları ve
+                //   hekimin sık yazdıkları - kod aramak yerine listeden seçmek
+                //   aynı hastalığın iki ayrı ICD ile yazılmasını önler.
+                new("muayene.taniOnceki", "🕘 Önceki Tanılar", "muayene",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "muayene", Islem: Islem.Degistir, KayitGerekir: true, Sira: 36),
+                new("muayene.taniSik", "⭐ Sık Tanılarım", "muayene",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "muayene", Islem: Islem.Degistir, KayitGerekir: true, Sira: 37),
                 new("muayene.normal", "☑ Tümü Normal", "muayene",
                     Hedef: "sagtus,palet",
                     KaynakKodu: "muayene", Islem: Islem.Degistir, KayitGerekir: true, Sira: 35),

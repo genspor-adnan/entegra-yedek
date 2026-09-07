@@ -107,7 +107,7 @@ interface Props {
    * cizilecek alanlar (satirin kimligi - sunucunun yazdigi degerler).
    */
   detayGrupta?: Record<string, { grup: string; gizli?: string[]; etiket?: string[];
-                                 sinif?: string }>;
+                                 sinif?: string; ustte?: boolean; sade?: boolean }>;
   /** Bu EKRANDA acilmayacak sekmeler (ör. Aday kartinda "Fatura Bilgileri").
       Ayni kart farkli ekranlarda farkli genislikte kullanilabilsin diye. */
   gizliSekmeler?: string[];
@@ -1267,10 +1267,7 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
         //   ALTINDA sistem/normal/bulgu tablosu - ayri sekme degil.
         const gomulu = (meta?.detaylar ?? [])
           .filter(d => detayGrupta?.[d.ad]?.grup === aktif.baslik);
-        const tumu = gomulu.length === 0 ? tam : (
-          <>
-            {tam}
-            {gomulu.map(d => (
+        const tablolar = gomulu.map(d => (
               <GenDetayTablo
                 key={d.ad}
                 meta={d}
@@ -1278,15 +1275,19 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
                 saltOkunur={salt || d.saltOkunur}
                 hatalar={alanHatalari}
                 kutuSinif={detayGrupta?.[d.ad]?.sinif}
+                sadeGrid={detayGrupta?.[d.ad]?.sade}
                 gizliAlanlar={detayGrupta?.[d.ad]?.gizli
                   ? new Set(detayGrupta[d.ad].gizli) : undefined}
                 etiketAlanlari={detayGrupta?.[d.ad]?.etiket
                   ? new Set(detayGrupta[d.ad].etiket) : undefined}
                 onDegis={yeni => setDetaylar(t => ({ ...t, [d.ad]: yeni }))}
               />
-            ))}
-          </>
-        );
+        ));
+        // USTTE: tanida tablo ONCE gelir (mockup) - hekim once ICD girer,
+        //   sevk/takip alanlari karari yazarken doldurulur.
+        const ustte = gomulu.some(d => detayGrupta?.[d.ad]?.ustte);
+        const tumu = gomulu.length === 0 ? tam
+          : ustte ? <>{tablolar}{tam}</> : <>{tam}{tablolar}</>;
         return sekmeSarmalayici ? sekmeSarmalayici(aktif.baslik, tumu, deger) : tumu;
       })()}
 

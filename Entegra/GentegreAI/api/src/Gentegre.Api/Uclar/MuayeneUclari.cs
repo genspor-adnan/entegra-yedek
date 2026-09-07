@@ -267,6 +267,95 @@ public static class MuayeneUclari
                                     izlemeNo = baglam.IzlemeNo });
         });
 
+        // GET /api/muayene/{id}/tani-onerileri - mockup "⭐ Sık kullandıklarım"
+        //   ve "🕘 Önceki tanılar" listeleri.
+        //
+        //   ÖNCEKİ: bu HASTANIN başka muayenelerinde yazılmış tanılar. Kronik
+        //   hastada tanı her muayenede yeniden yazılıyordu; kod aramak yerine
+        //   listeden seçmek hem hızlı hem de kodun aynı kalmasını sağlıyor
+        //   (aynı hastalık iki ayrı ICD ile yazılınca rapor ikiye bölünür).
+        //   SIK: bu HEKİMİN son 90 günde en çok yazdığı kodlar - poliklinikte
+        //   tanı dağılımı dardır, ilk beş kod işin çoğunu görür.
+        grup.MapGet("/{id:int}/tani-onerileri", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var onceki = await baglanti.ListeAsync(
+                "select t.icd_kod, coalesce(i.ad, '') as ad, max(t.kronik) as kronik, " +
+                "       max(m.muayene_tarihi)::date::text as son " +
+                "  from public.tani t " +
+                "  join public.muayene m on m.id = t.muayene_id " +
+                "  left join public.icd i on i.kod = t.icd_kod " +
+                " where m.taraf_id = (select taraf_id from public.muayene where id = @p0) " +
+                "   and m.id <> @p0 " +
+                " group by t.icd_kod, i.ad " +
+                " order by max(m.muayene_tarihi) desc limit 20",
+                null, [id],
+                o => new { kod = o.GetString(0), ad = o.GetString(1),
+                           kronik = o.GetInt32(2), son = o.GetString(3) }, iptal);
+
+            var sik = await baglanti.ListeAsync(
+                "select t.icd_kod, coalesce(i.ad, '') as ad, count(*)::int as adet " +
+                "  from public.tani t " +
+                "  join public.muayene m on m.id = t.muayene_id " +
+                "  left join public.icd i on i.kod = t.icd_kod " +
+                " where m.personel_id = (select personel_id from public.muayene where id = @p0) " +
+                "   and m.muayene_tarihi >= now() - interval '90 days' " +
+                " group by t.icd_kod, i.ad " +
+                " order by count(*) desc, max(m.muayene_tarihi) desc limit 15",
+                null, [id],
+                o => new { kod = o.GetString(0), ad = o.GetString(1), adet = o.GetInt32(2) }, iptal);
+
+            return Results.Ok(new { id, onceki, sik, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/muayene/{id}/tani/{icdKod} - listeden seçilen tanıyı ekle
+        //   Ana tanı ZATEN VARSA yeni satır EK tanı olur: ana tanıyı sessizce
+        //   değiştirmek, tamamlama ve e-Nabız 103 paketinin dayandığı kaydı
+        //   hekime sormadan oynatmak demekti.
+        grup.MapPost("/{id:int}/tani/{icdKod}", async (
+            int id, string icdKod, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var kodVar = await baglanti.TekDegerAsync<int>(
+                "select count(*) from public.icd where kod = @p0", islem, [icdKod], iptal);
+            if (kodVar == 0)
+                throw GentegreHatasi.Dogrulama($"ICD kodu bulunamadi: {icdKod}");
+
+            var zaten = await baglanti.TekDegerAsync<int>(
+                "select count(*) from public.tani where muayene_id = @p0 and icd_kod = @p1",
+                islem, [id, icdKod], iptal);
+            if (zaten > 0)
+                return Results.Ok(new { id, icdKod, eklendi = false,
+                                        mesaj = "Bu tani zaten listede.",
+                                        izlemeNo = baglam.IzlemeNo });
+
+            var anaVar = await baglanti.TekDegerAsync<int>(
+                "select count(*) from public.tani where muayene_id = @p0 and tur = 1",
+                islem, [id], iptal);
+
+            await baglanti.CalistirAsync(
+                "insert into public.tani (muayene_id, icd_kod, tur, kesinlik, ekleyen) " +
+                "values (@p0, @p1, @p2, 1, @p3)",
+                islem, [id, icdKod, anaVar > 0 ? 2 : 1, baglam.KullaniciId], iptal);
+            await islem.CommitAsync(iptal);
+
+            return Results.Ok(new { id, icdKod, eklendi = true,
+                                    mesaj = anaVar > 0 ? "Ek tani eklendi." : "Ana tani eklendi.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
         // POST /api/muayene/{id}/tumu-normal - açık bulgu satırlarını "normal"
         //   işaretle (mockup muayene_karti.html "Tümü normal işaretle").
         //   Hekim yalnızca SAPANI yazar; normalleri tek tek işaretlemek

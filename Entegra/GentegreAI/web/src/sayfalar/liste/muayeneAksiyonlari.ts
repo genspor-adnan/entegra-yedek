@@ -26,7 +26,8 @@ export async function muayeneAksiyonu(
 ): Promise<boolean> {
   if (kod !== 'muayene.al' && kod !== 'muayene.tamamla'
       && kod !== 'muayene.sablon' && kod !== 'muayene.ozet'
-      && kod !== 'muayene.normal'
+      && kod !== 'muayene.normal' && kod !== 'muayene.taniOnceki'
+      && kod !== 'muayene.taniSik'
       && kod !== 'muayene.istem') return false;
 
   const id = Number(satir?.id ?? 0);
@@ -64,6 +65,33 @@ export async function muayeneAksiyonu(
     await guvenli(async () => {
       const y = await api.muayeneTumuNormal(id);
       mesaj(y.mesaj);
+      b.tazele();
+    });
+    return true;
+  }
+
+  // TANI ONERILERI (mockup tani araç çubugu): kronik hastanin tanisi her
+  //   muayenede yeniden yazilirken kod degisebiliyordu - ayni hastalik iki ICD
+  //   ile yazilinca rapor ve e-Nabiz ikiye bolunur. Liste sunucudan gelir;
+  //   secilen kod yine SUNUCUDA satira donusur (ana tani varsa EK tani).
+  if (kod === 'muayene.taniOnceki' || kod === 'muayene.taniSik') {
+    await guvenli(async () => {
+      const y = await api.muayeneTaniOnerileri(id);
+      const liste = kod === 'muayene.taniOnceki'
+        ? y.onceki.map(t => ({ kod: t.kod,
+            ad: `${t.kod} · ${t.ad}${t.kronik ? ' · kronik' : ''} · ${t.son}` }))
+        : y.sik.map(t => ({ kod: t.kod, ad: `${t.kod} · ${t.ad} · ${t.adet} kez` }));
+      if (liste.length === 0) {
+        mesaj(kod === 'muayene.taniOnceki'
+          ? 'Bu hastanın önceki tanısı yok.'
+          : 'Son 90 günde yazdığınız tanı yok.');
+        return;
+      }
+      const secim = await secimSor(kod === 'muayene.taniOnceki'
+        ? 'Önceki tanılar' : 'Sık kullandıklarım', liste);
+      if (!secim) return;
+      const s = await api.muayeneTaniEkle(id, secim);
+      mesaj(s.mesaj);
       b.tazele();
     });
     return true;

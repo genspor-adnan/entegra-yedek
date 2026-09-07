@@ -205,9 +205,11 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
         {/* ALT SATIR (kullanici): baslama tarihi-saati, bitis saati ve sure. */}
         <div className="kb-ic sonuk">
           {bas ? (
-            <span>
-              {bas} – {bit || '…'}{gecen ? ` · ${gecen}` : ''}
-            </span>
+            <>
+              <span>{bas} – {bit || '…'}</span>
+              {/* Sure ROZET (kullanici): bandaki olculerle ayni gorunum. */}
+              {gecen ? <span className="rozet gri">{gecen}</span> : null}
+            </>
           ) : <span>Muayeneye alınmadı</span>}
         </div>
       </div>

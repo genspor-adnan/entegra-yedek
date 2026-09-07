@@ -2159,6 +2159,20 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
                     {/* FIZIK MUAYENE ARAC CUBUGU (mockup): sablon uygula ve
                         "tumu normal" - ikisi de SUNUCU ucuna gider, satirlari
                         istemci degistirmez. */}
+                    {baslik.startsWith('Tanı') && (
+                      <div className="muayene-arac">
+                        <button type="button" className="d"
+                                onClick={() => void aksiyon('muayene.taniSik',
+                                                            { id: Number(kartId) })}>
+                          ⭐ Sık kullandıklarım
+                        </button>
+                        <button type="button" className="d"
+                                onClick={() => void aksiyon('muayene.taniOnceki',
+                                                            { id: Number(kartId) })}>
+                          🕘 Önceki tanılar
+                        </button>
+                      </div>
+                    )}
                     {baslik === 'Muayene' && (
                       <div className="muayene-arac">
                         <button type="button" className="d"
@@ -2222,7 +2236,17 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         //   ise mockup'ta yok.
         detayGrupta={tanim.kaynak === 'muayene'
           ? { bulgular: { grup: 'Muayene', gizli: ['degerSayi', 'taraf'],
-                          etiket: ['sablonAlanId'], sinif: 'bulgu-gridi' } }
+                          etiket: ['sablonAlanId'], sinif: 'bulgu-gridi',
+                          // Cerceve, baslik ve "+ Satır"/sil yok (kullanici):
+                          //   satirlar SABLONDAN acilir, elle satir eklemek
+                          //   sistem listesini bozar - sablonun isi.
+                          sade: true },
+              // TANI TABLOSU "Tanı / Karar" SEKMESINDE (mockup): ICD · Tür ·
+              //   Kesinlik · Taraf · Kronik · Not. `sira` ve `baslangicTarihi`
+              //   mockup'ta yok - siralama sunucuda, kronik tarihi hastanin
+              //   Kronik Tanilar ekraninda yasar.
+              tanilar: { grup: 'Tanı / Karar', gizli: ['sira', 'baslangicTarihi'],
+                         sinif: 'tani-gridi', ustte: true } }
           : undefined}
         seritAlanlari={tanim.kaynak === 'muayene'
           ? ['bolumId', 'personelId', 'tur', 'ustMuayeneId', 'baslangic', 'bitis']

@@ -71,8 +71,10 @@ export function MuayeneDurumSeridi({ muayeneId }: { muayeneId: number }) {
       </span>
       {tani > 1 && <span className="sonuk">{tani} tanı</span>}
       {bekleyen > 0 && <span className="rozet uyari">{bekleyen} sonuç bekliyor</span>}
+      {/* Sure de ROZET (kullanici): banttaki diger olculer rozet, sure duz
+          metin kaldigi icin bandin ortasinda kayboluyordu. */}
       {gecen && (
-        <span className="sonuk">{tamamlandi ? 'süre' : 'açık'} {gecen}</span>
+        <span className="rozet gri">{tamamlandi ? 'süre' : 'açık'} {gecen}</span>
       )}
       <span className="sonuk">
         {tamamlandi
