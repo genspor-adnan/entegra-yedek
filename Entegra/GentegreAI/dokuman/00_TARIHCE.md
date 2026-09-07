@@ -8085,3 +8085,23 @@ Sistem 215 px, Normal 60 px, kalan bulgu metnine.
   kayıt *"sayi bekleniyor"* ile reddediliyordu. Çevirici hem noktayı hem
   **virgülü** kabul eder (Türkçe klavyede ondalık ayırıcı virgül); iki ayırıcı
   birden varsa değer belirsiz sayılıp reddedilir.
+
+### İstem & Sonuçlar sekmesi + tanı araç çubuğu (kullanıcı)
+
+- **Bağ gridi kalktı**: `muayene_istem` satırındaki hedef tablo/id teknik
+  alanlardı, hekime bir şey söylemiyordu; "gördüm" işareti zaten panelde
+  düğme. Sekme mockup'taki gibi **araç çubuğu + tek istem tablosu +
+  ayrıntılar**.
+- Panele **istem özeti** eklendi (mockup kolonları): Tür · Tetkik/İşlem ·
+  Aciliyet · Nerede · İstem · Numune/Çekim · Sonuç · Durum. Laboratuvar ve
+  görüntüleme TEK listede - hekim için "istem" tek kavramdır, modülü değil
+  sonucu arar. Ayrıntı (tetkik satırları, kültür, rapor) altta kalır.
+- `＋ Laboratuvar` / `＋ Görüntüleme` düğmeleri: liste ekranında tür soruluyordu,
+  kartta zaten belli. Görüntüleme seçiminde hizmet listesi artık
+  **modalitesi olanlarla** sınırlı (`hizmet.modalite` kolonu kaynak kataloğuna
+  eklendi) - 459 kuralı modalitesiz hizmetle açılan istemi zaten reddediyordu,
+  listede göstermek seçilemeyecek satır teklif etmekti.
+- Tanı sekmesi araç çubuğu: **＋ ICD-10 Ekle** (kod/ad sorulur, katalog araması
+  ve ekleme sunucuda) · **🗑 Kaldır** (`GET /tanilar` + `DELETE /tani/{id}` -
+  silme izi kartla aynı yoldan) · Sık kullandıklarım · Önceki tanılar. Tanı
+  tablosu da sade grid: çerçeve, başlık ve satır içi ekle/sil yok.

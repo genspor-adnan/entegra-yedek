@@ -246,6 +246,16 @@ export const api = {
     gonder<{ eklendi: boolean; mesaj: string }>(
       `/api/muayene/${muayeneId}/tani/${encodeURIComponent(icdKod)}`, {}),
 
+  /** Kartin tani satirlari (arac cubugundaki sil icin). */
+  muayeneTanilari: (muayeneId: number) =>
+    istek<{ tanilar: { id: number; kod: string; ad: string; tur: number }[] }>(
+      `/api/muayene/${muayeneId}/tanilar`),
+
+  /** Tani satirini kaldirir (kartla AYNI uc - silme izi tek yoldan). */
+  muayeneTaniSil: (muayeneId: number, taniId: number) =>
+    istek<{ mesaj: string }>(`/api/muayene/${muayeneId}/tani/${taniId}`,
+                             { method: 'DELETE' }),
+
   /** Bos bulgu satirlarini "normal" isaretler (mockup "Tumu normal isaretle").
       Bulgu METNI YAZILMIS satira dokunmaz - o hekimin karari. */
   muayeneTumuNormal: (muayeneId: number) =>

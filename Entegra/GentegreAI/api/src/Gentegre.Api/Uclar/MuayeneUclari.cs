@@ -267,6 +267,51 @@ public static class MuayeneUclari
                                     izlemeNo = baglam.IzlemeNo });
         });
 
+        // GET /api/muayene/{id}/tanilar - kartın tanı satırları (araç
+        //   çubuğundaki "sil" için: hangi satırın kaldırılacağı SUNUCUDAN
+        //   gelen listeden seçilir, ekranın elindeki taslaktan değil).
+        grup.MapGet("/{id:int}/tanilar", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var satirlar = await baglanti.ListeAsync(
+                "select t.id, t.icd_kod, coalesce(i.ad, '') as ad, t.tur " +
+                "  from public.tani t " +
+                "  left join public.icd i on i.kod = t.icd_kod " +
+                " where t.muayene_id = @p0 " +
+                " order by t.tur asc, t.sira asc, t.id asc",
+                null, [id],
+                o => new { id = o.GetInt32(0), kod = o.GetString(1),
+                           ad = o.GetString(2), tur = o.GetInt16(3) }, iptal);
+
+            return Results.Ok(new { id, tanilar = satirlar, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // DELETE /api/muayene/{id}/tani/{taniId} - tanı satırını kaldır
+        //   Kart üzerinden de silinebilir; araç çubuğundaki sil AYNI ucu
+        //   kullanır ki silme izi (log) tek yoldan geçsin.
+        grup.MapDelete("/{id:int}/tani/{taniId:int}", async (
+            int id, int taniId, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var silinen = await baglanti.CalistirAsync(
+                "delete from public.tani where id = @p0 and muayene_id = @p1",
+                null, [taniId, id], iptal);
+            if (silinen == 0) return Results.NotFound(new { hata = new
+                { kod = "BULUNAMADI", mesaj = "Tani satiri bulunamadi." } });
+
+            return Results.Ok(new { id, taniId, mesaj = "Tani kaldirildi.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
         // GET /api/muayene/{id}/tani-onerileri - mockup "⭐ Sık kullandıklarım"
         //   ve "🕘 Önceki tanılar" listeleri.
         //

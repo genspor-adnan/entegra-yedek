@@ -94,6 +94,86 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
         </div>
       )}
 
+      {/* İSTEM ÖZETİ (mockup muayene_karti.html "İstem & Sonuçlar" tablosu):
+          laboratuvar ve görüntüleme TEK listede - hekim için "istem" tek
+          kavramdır, modülü değil sonucu arar. Ayrıntı (tetkik satırları,
+          kültür, rapor) aşağıdaki kutularda kalır. */}
+      <div className="kagrup istem-ozet">
+        <h6>İstemler <span className="not">
+          {veri.istemler.length + veri.radyoloji.length} istem
+        </span></h6>
+        <table className="detay-tablo">
+          <thead>
+            <tr>
+              <th>Tür</th><th>Tetkik / İşlem</th><th className="hiza-orta">Aciliyet</th>
+              <th>Nerede</th><th className="hiza-orta">İstem</th>
+              <th className="hiza-orta">Numune / Çekim</th>
+              <th>Sonuç</th><th className="hiza-orta">Durum</th>
+            </tr>
+          </thead>
+          <tbody>
+            {veri.istemler.map(i => {
+              const istemId = Number(i.id);
+              const satirlar = veri.sonuclar.filter(s => Number(s.istemId) === istemId);
+              const adlar = satirlar.slice(0, 3).map(s => String(s.ad ?? '')).join(', ');
+              const durum = Number(i.durum ?? 1);
+              const acil = Number(i.oncelik ?? 1) === 3;
+              return (
+                <tr key={`L${istemId}`}>
+                  <td>Lab</td>
+                  <td>
+                    <b>{String(i.istemNo ?? '')}</b>
+                    {adlar && <span className="sonuk"> · {adlar}
+                      {satirlar.length > 3 ? ` +${satirlar.length - 3}` : ''}</span>}
+                  </td>
+                  <td className="hiza-orta">
+                    {acil ? <span className="rozet hata">Acil</span> : '—'}
+                  </td>
+                  <td>Laboratuvar</td>
+                  <td className="hiza-orta">
+                    {i.istemTarihi ? tarihSaat(i.istemTarihi) : '—'}
+                  </td>
+                  {/* Numune zamanı istem SATIRINDA tutulur (tüp bazlı) -
+                      özet satırında tek bir zaman yok. */}
+                  <td className="hiza-orta sonuk">—</td>
+                  <td>{String(i.onayli ?? 0)}/{String(i.tetkik ?? 0)} onaylı</td>
+                  <td className="hiza-orta">
+                    <span className={`rozet ${durum === 5 ? 'olumlu'
+                                              : durum === 9 ? 'gri' : 'uyari'}`}>
+                      {ISTEM_DURUM[durum] ?? ''}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+            {veri.radyoloji.map(r => {
+              const durum = Number(r.durum ?? 0);
+              const sonuc = String(r.sonuc ?? '').trim();
+              return (
+                <tr key={`R${String(r.id)}`}>
+                  <td>Görüntüleme</td>
+                  <td>{String(r.tetkik ?? '')}</td>
+                  <td className="hiza-orta sonuk">—</td>
+                  <td>Radyoloji</td>
+                  <td className="hiza-orta sonuk">—</td>
+                  <td className="hiza-orta">
+                    {r.cekimTarihi ? tarihSaat(r.cekimTarihi) : '—'}
+                  </td>
+                  <td>{sonuc ? sonuc.slice(0, 80) : (r.onayTarihi ? 'rapor onaylı' : '—')}</td>
+                  <td className="hiza-orta">
+                    <span className={`rozet ${r.onayTarihi ? 'olumlu' : 'uyari'}`}>
+                      {r.onayTarihi ? 'Raporlandı'
+                        : r.cekimTarihi ? 'Rapor bekliyor'
+                        : durum >= 2 ? 'Çekimde' : 'Sırada'}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
       {veri.istemler.map(i => {
         const istemId = Number(i.id);
         const satirlar = veri.sonuclar.filter(s => Number(s.istemId) === istemId);

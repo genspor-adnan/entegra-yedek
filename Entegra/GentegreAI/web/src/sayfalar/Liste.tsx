@@ -699,7 +699,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
    * ve listeye ozel tek tuk isler - hepsi ekranin kendi state'ine sikica bagli.
    */
   async function aksiyon(kod: string, satir?: ListeSatiri | null,
-                         secililer?: ListeSatiri[]) {
+                         secililer?: ListeSatiri[],
+                         /** Ekran-ozel ek girdi (or. tani arama metni). */
+                         ek?: string) {
     const kartaGit = (kayitId: unknown) => git(`${tanim.kartYolu}/${kayitId}`);
 
     try {
@@ -825,7 +827,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
       if (await muayeneAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
-      })) return;
+      }, ek)) return;
 
       if (await ilacAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
@@ -2161,6 +2163,18 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
                         istemci degistirmez. */}
                     {baslik.startsWith('Tanı') && (
                       <div className="muayene-arac">
+                        {/* Tek mavi dugme (kullanici): ICD kodu/adi SORULUR,
+                            katalog aramasi ve ekleme sunucuda. */}
+                        <button type="button" className="d bir"
+                                onClick={() => void aksiyon('muayene.taniAra',
+                                                            { id: Number(kartId) })}>
+                          ＋ ICD-10 Ekle
+                        </button>
+                        <button type="button" className="d teh"
+                                onClick={() => void aksiyon('muayene.taniSil',
+                                                            { id: Number(kartId) })}>
+                          🗑 Kaldır
+                        </button>
                         <button type="button" className="d"
                                 onClick={() => void aksiyon('muayene.taniSik',
                                                             { id: Number(kartId) })}>
@@ -2187,10 +2201,27 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
                         </button>
                       </div>
                     )}
-                    {icerik}
-                    {baslik.includes('Sonuç') && (
-                      <MuayeneIstemSonuc muayeneId={Number(kartId)} />
-                    )}
+                    {/* ISTEM & SONUCLAR (mockup): BAG GRIDI CIZILMEZ - hedef
+                        tablo/id teknik alanlar, hekime bir sey soylemiyor;
+                        "gordum" isareti panelde dugme. Sekme mockup'taki
+                        gibi arac cubugu + tek istem tablosu + ayrintilar. */}
+                    {baslik.includes('Sonuç') ? (
+                      <>
+                        <div className="muayene-arac">
+                          <button type="button" className="d"
+                                  onClick={() => void aksiyon('muayene.istemLab',
+                                                              { id: Number(kartId) })}>
+                            ＋ Laboratuvar
+                          </button>
+                          <button type="button" className="d"
+                                  onClick={() => void aksiyon('muayene.istemGoruntuleme',
+                                                              { id: Number(kartId) })}>
+                            ＋ Görüntüleme
+                          </button>
+                        </div>
+                        <MuayeneIstemSonuc muayeneId={Number(kartId)} />
+                      </>
+                    ) : icerik}
                   </>
                 )
             )
@@ -2245,8 +2276,10 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
               //   Kesinlik · Taraf · Kronik · Not. `sira` ve `baslangicTarihi`
               //   mockup'ta yok - siralama sunucuda, kronik tarihi hastanin
               //   Kronik Tanilar ekraninda yasar.
+              // Cerceve/baslik/ekle-sil YOK (kullanici): ekleme ve kaldirma
+              //   sekme arac cubugundaki dugmelerden, sunucu ucuyla yapilir.
               tanilar: { grup: 'Tanı / Karar', gizli: ['sira', 'baslangicTarihi'],
-                         sinif: 'tani-gridi', ustte: true } }
+                         sinif: 'tani-gridi', ustte: true, sade: true } }
           : undefined}
         // VITAL BULGULAR MOCKUP IZGARASI: son olcum etiket+kutu izgarasinda
         //   (3 sutun), eski olcumler altta salt gorunum. Grid satirlarinda

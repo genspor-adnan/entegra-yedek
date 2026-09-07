@@ -342,6 +342,12 @@ public static partial class KaynakKatalogu
                 "           where k.id = h.kategori), '')",
                                "metin", "Kategori", Filtrelenebilir: false),
             new("kategori", "h.kategori", "sayi", "Kategori Id", Varsayilan: false),
+            // MODALITE: hizmet bir RADYOLOJI tetkiki mi (BT/MR/USG...) - 459
+            //   kurali modalitesiz hizmetle radyoloji istemi acilmasini
+            //   engelliyor; istem ekranlari listeyi bununla suzer.
+            new("modalite", "coalesce(h.modalite, 0)", "kod", "Modalite",
+                                            Hizalama: "orta", Genislik: 110,
+                                            Varsayilan: false),
             // KDV ve BIRIM listede GORUNMEZ (kullanici): hizmet listesinde
             //   kategori/kod/ad okunuyor, oran ve birim kartin ve kalem
             //   penceresinin isi. Kolonlar kaldirilmadi - arama/kalem
