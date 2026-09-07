@@ -8067,3 +8067,21 @@ Sistem 215 px, Normal 60 px, kalan bulgu metnine.
   gri rozetle aynı renk olduğu için oradaki gri rozet kenarlıklı.
 - `karar` alanı 4000 karakter: değerlendirme/plan tek satırlık kutuya
   sığmıyordu.
+
+### Vital Bulgular sekmesi mockup ızgarası (kullanıcı)
+
+- GenForm'a **`detayIzgara`**: detay sekmesi grid yerine **tek kayıt ızgarası**
+  çizer - en üstteki satır (sıralama `zaman desc` olduğu için SON ölçüm)
+  mockup'taki gibi 3 sütun etiket+kutu, eski ölçümler altta "Önceki ölçümler"
+  listesinde salt görünüm. 14 sayısal kolonu grid satırında yan yana okumak
+  mümkün değildi. "＋ Yeni ölçüm" başa boş satır açar (zaman = şimdi).
+- Alan **sırası mockup'tan**: tansiyon · nabız · SpO₂ · ateş · solunum · ağrı ·
+  boy/kilo · BKİ · bel · glukoz · GKS, en altta ölçümün kimliği (zaman, kaynak,
+  ölçen). Başlıklara **birim** yazıldı: kutuya birim konulamıyor, birimsiz
+  başlıkta 36,8 ile 98,2 aynı kutuya düşüyordu. `olcenId` artık personel
+  lookup'ı (ham id değil).
+- **Yeni alan tipi `ondalik`** (Çekirdek + web sözleşmesi): ateş, boy, kilo ve
+  BKİ `numeric` kolonlar ama katalogda `sayi` (tam sayı) idi - "36,6" girilince
+  kayıt *"sayi bekleniyor"* ile reddediliyordu. Çevirici hem noktayı hem
+  **virgülü** kabul eder (Türkçe klavyede ondalık ayırıcı virgül); iki ayırıcı
+  birden varsa değer belirsiz sayılıp reddedilir.

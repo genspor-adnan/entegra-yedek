@@ -2815,3 +2815,11 @@ input.skt-gecmis {
 /* Tanı tablosu (mockup tanı paneli): ICD kodu dar, tanı adı geniş kalsın. */
 .tani-gridi table th:first-child,
 .tani-gridi table td:first-child { width: 240px }
+
+/* VITAL BULGULAR IZGARASI (mockup muayene_karti.html): alanlar UC SUTUN,
+   etiket ustte - grid satirinda 14 sayisal kolon yan yana okunmuyordu. */
+.vital-izgara-kip .alan-izgara { grid-template-columns: 1fr 1fr 1fr; gap: 8px 12px }
+.vital-izgara-kip .alan { grid-template-columns: 1fr; row-gap: 2px; align-items: start }
+.vital-izgara-kip .alan .etiket { grid-column: 1; font-size: 10.5px }
+.vital-izgara-kip .alan input,
+.vital-izgara-kip .alan select { grid-column: 1 }

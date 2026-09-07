@@ -108,6 +108,17 @@ interface Props {
    */
   detayGrupta?: Record<string, { grup: string; gizli?: string[]; etiket?: string[];
                                  sinif?: string; ustte?: boolean; sade?: boolean }>;
+  /**
+   * DETAY SEKMESI GRID YERINE TEK KAYIT IZGARASI: en ustteki satir (detayin
+   * kendi siralamasina gore SONUNCU olcum) mockup'taki gibi etiket + kutu
+   * izgarasinda duzenlenir; eski satirlar altta salt gorunum listede kalir.
+   * Vital bulgular boyle: hekim "bu muayenenin olcumu"nu okur/duzeltir,
+   * gecmis olcumler kayit tarihcesidir.
+   */
+  detayIzgara?: Record<string, { baslik?: string; sinif?: string;
+                                 yeniDugmesi?: boolean; not?: string;
+                                 /** Gecmis listesinde CIZILMEYECEK alanlar. */
+                                 gecmisGizli?: string[] }>;
   /** Bu EKRANDA acilmayacak sekmeler (ör. Aday kartinda "Fatura Bilgileri").
       Ayni kart farkli ekranlarda farkli genislikte kullanilabilsin diye. */
   gizliSekmeler?: string[];
@@ -154,7 +165,7 @@ const SEKME_IKON: Record<string, string> = {
 };
 const sekmeIkonu = (baslik: string) => SEKME_IKON[baslik] ?? '▫️';
 
-export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, onKaydedildi, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, onKaydedildi, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
@@ -1336,7 +1347,8 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
         && !(kaynak === 'dis-hekim' && aktif.detay.ad === 'hekim')
         // Hizmet > Fiyatlar: kartin kendi fiyat gridi KALKTI (kullanici) -
         //   sekme yalniz fiyat listelerindeki fiyatlari gosterir (asagida).
-        && !(kaynak === 'hizmet' && aktif.detay.ad === 'fiyatlar') && (() => {
+        && !(kaynak === 'hizmet' && aktif.detay.ad === 'fiyatlar')
+        && !detayIzgara?.[aktif.detay.ad] && (() => {
         /**
          * GRID KIPI: satir ici duzenleme yerine SECIM KUTUSU + ust satirda
          * ekle/duzenle/sil + grid menusu (kolonlar / CSV) - liste
@@ -1418,6 +1430,51 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
         //   sarmalayici yalniz grup sekmelerinde cagrildigi icin panel hic
         //   cizilmiyordu (grid "satir yok" derken sonuclar duruyordu).
         return sekmeSarmalayici ? sekmeSarmalayici(aktif.baslik, grid, deger) : grid;
+      })()}
+
+      {/* DETAY IZGARASI (mockup vital bulgular): en ustteki satir etiket+kutu
+          izgarasinda duzenlenir, gecmis satirlar altta salt gorunum. */}
+      {aktif?.tur === 'detay' && detayIzgara?.[aktif.detay.ad] && (() => {
+        const ayar = detayIzgara[aktif.detay.ad];
+        const durum = detaylar[aktif.detay.ad] ?? bosDetay();
+        const gecmis = durum.guncel.slice(1);
+        return (
+          <div className={ayar.sinif}>
+            {ayar.yeniDugmesi && !salt && (
+              <div className="muayene-arac">
+                <button type="button" className="d"
+                        onClick={() => setDetaylar(t => {
+                          const d = t[aktif.detay.ad] ?? bosDetay();
+                          // Yeni olcum EN USTE: izgara hep en son olcumu gosterir.
+                          const yeniSatir: Record<string, unknown> = {
+                            zaman: new Date().toISOString().slice(0, 16) };
+                          return { ...t, [aktif.detay.ad]:
+                            { ...d, guncel: [yeniSatir, ...d.guncel] } };
+                        })}>
+                  ＋ Yeni ölçüm
+                </button>
+              </div>
+            )}
+            <TekKayit
+              meta={aktif.detay}
+              durum={durum}
+              saltOkunur={salt || aktif.detay.saltOkunur}
+              onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
+              baslik={ayar.baslik ?? aktif.detay.baslik}
+              not={ayar.not}
+            />
+            {gecmis.length > 0 && (
+              <GenDetayTablo
+                meta={{ ...aktif.detay, baslik: `Önceki ölçümler (${gecmis.length})` }}
+                durum={{ ...durum, guncel: gecmis }}
+                saltOkunur
+                hatalar={alanHatalari}
+                gizliAlanlar={ayar.gecmisGizli ? new Set(ayar.gecmisGizli) : undefined}
+                onDegis={() => {}}
+              />
+            )}
+          </div>
+        );
       })()}
 
       {/* Hizmet > Fiyatlar: kalemin gectigi fiyat listesi satirlari

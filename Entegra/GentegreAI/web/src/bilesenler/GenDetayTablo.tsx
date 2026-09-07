@@ -973,7 +973,8 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                     />
                   ) : (
                     <input
-                      className={a.tip === 'sayi' || a.tip === 'para' ? 'hiza-sag' : undefined}
+                      className={a.tip === 'sayi' || a.tip === 'para' || a.tip === 'ondalik'
+                                 ? 'hiza-sag' : undefined}
                       value={String(satir[a.ad] ?? '')}
                       maxLength={a.enFazlaUzunluk ?? undefined}
                       inputMode={a.tip === 'sayi' ? 'numeric' : undefined}

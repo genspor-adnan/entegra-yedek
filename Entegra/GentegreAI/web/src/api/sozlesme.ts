@@ -249,7 +249,9 @@ export interface PaketIcerikSatiri {
  * (KartAlanMeta) ayni kumeyi kullanir - iki yerde ayri yazilinca sunucuya yeni
  * bir tip eklendiginde birinde unutuluyordu.
  */
-export type AlanTipi = 'metin' | 'sayi' | 'para' | 'tarih' | 'zaman' | 'kod' | 'mantik';
+/** "ondalik" = olculen kesirli deger (ates 36,6 · BKI 30,4); "sayi" tam sayi. */
+export type AlanTipi = 'metin' | 'sayi' | 'ondalik' | 'para' | 'tarih' | 'zaman'
+                     | 'kod' | 'mantik';
 
 /** §2.4 kolon metasi. Yetkisiz kolon bu listede HIC donmez. */
 export interface KolonMeta {

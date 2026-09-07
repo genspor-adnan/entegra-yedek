@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 using Gentegre.Cekirdek.Sozlesme;
 
@@ -59,6 +59,19 @@ public static class DegerCevirici
         };
     }
 
+    private static decimal OndalikCoz(string s, string alanAdi, string alanBasligi)
+    {
+        var d = s.Trim();
+        if (d.Contains(',') && d.Contains('.'))
+            throw GentegreHatasi.Dogrulama($"{alanBasligi}: sayi cozulemedi ({s}).",
+                new AlanHatasi(alanAdi, "Sayisal deger olmali."));
+        d = d.Replace(',', '.');
+        return decimal.TryParse(d, NumberStyles.Number, CultureInfo.InvariantCulture, out var o)
+            ? o
+            : throw GentegreHatasi.Dogrulama($"{alanBasligi}: sayi cozulemedi ({s}).",
+                  new AlanHatasi(alanAdi, "Sayisal deger olmali."));
+    }
+
     private static object? MetinCevir(string s, string tip, string alanAdi, string alanBasligi)
         => tip switch
         {
@@ -70,6 +83,16 @@ public static class DegerCevirici
                          ? t
                          : throw GentegreHatasi.Dogrulama($"{alanBasligi}: tarih cozulemedi ({s}).",
                                new AlanHatasi(alanAdi, "Gecersiz tarih.")),
+
+            // "ondalik": olculen deger (ates 36,6 · boy 174,5 · BKI 30,4).
+            //   "sayi" TAM SAYIDIR ve olcum alanlarinda 36,6 girilince kayit
+            //   "sayi bekleniyor" ile reddediliyordu. VIRGUL DE KABUL EDILIR:
+            //   Turkce klavyede ondalik ayirici virguldur; kullaniciyi nokta
+            //   yazmaya zorlamak yerine sunucu tek ayiriciyi normalize eder
+            //   (iki ayirici varsa deger belirsizdir - reddedilir).
+            "ondalik" => string.IsNullOrWhiteSpace(s)
+                       ? null
+                       : OndalikCoz(s, alanAdi, alanBasligi),
 
             "sayi" => string.IsNullOrWhiteSpace(s)
                        ? null

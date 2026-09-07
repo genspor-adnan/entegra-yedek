@@ -356,25 +356,33 @@ public static partial class KartKatalogu
             new("vitaller", "public.muayene_vital", "muayene_id", new KartAlani[]
             {
                 new("id", "id", "sayi", Yazilabilir: false),
-                new("zaman", "zaman", "tarih", Baslik: "Zaman"),
-                new("kaynak", "kaynak", "kod", SabitKodlar: VitalKaynakKodlari,
-                    Baslik: "Kaynak"),
-                new("sistolik", "sistolik", "sayi", Baslik: "Sistolik"),
-                new("diyastolik", "diyastolik", "sayi", Baslik: "Diyastolik"),
-                new("nabiz", "nabiz", "sayi", Baslik: "Nabız"),
-                new("solunum", "solunum", "sayi", Baslik: "Solunum"),
-                new("ates", "ates", "sayi", Baslik: "Ateş"),
-                new("spo2", "spo2", "sayi", Baslik: "SpO2"),
-                new("boyCm", "boy_cm", "sayi", Baslik: "Boy (cm)"),
-                new("kiloKg", "kilo_kg", "sayi", Baslik: "Kilo (kg)"),
+                // SIRA MOCKUP'TAN (muayene_karti.html vital izgarasi): tansiyon,
+                //   nabiz, SpO2, ates, solunum, agri, boy/kilo, BKI, bel. Klinik
+                //   okuma sirasi budur - alfabetik ya da tablo sirasi degil.
+                //   Birim ETIKETTE: kutuya birim yazilamaz, ama hangi birimde
+                //   girilecegi belli olmazsa 36,8 ile 98,2 ayni kutuya duser.
+                new("sistolik", "sistolik", "sayi", Baslik: "Sistolik (mmHg)"),
+                new("diyastolik", "diyastolik", "sayi", Baslik: "Diyastolik (mmHg)"),
+                new("nabiz", "nabiz", "sayi", Baslik: "Nabız (/dk)"),
+                new("spo2", "spo2", "sayi", Baslik: "SpO₂ (%)"),
+                new("ates", "ates", "ondalik", Baslik: "Ateş (°C)"),
+                new("solunum", "solunum", "sayi", Baslik: "Solunum (/dk)"),
+                new("agriVas", "agri_vas", "sayi", Baslik: "Ağrı (VAS 0-10)"),
+                new("boyCm", "boy_cm", "ondalik", Baslik: "Boy (cm)"),
+                new("kiloKg", "kilo_kg", "ondalik", Baslik: "Kilo (kg)"),
                 // BKI SAKLANIR: boy/kilo sonradan duzeltilse bile o anki
                 //   olcumun degeri degismemeli - kayit tarihcedir.
-                new("bki", "bki", "sayi", Baslik: "BKİ"),
-                new("belCevresiCm", "bel_cevresi_cm", "sayi", Baslik: "Bel (cm)"),
-                new("agriVas", "agri_vas", "sayi", Baslik: "Ağrı (VAS)"),
-                new("glukozParmak", "glukoz_parmak", "sayi", Baslik: "Parmak Glukoz"),
+                new("bki", "bki", "ondalik", Baslik: "BKİ"),
+                new("belCevresiCm", "bel_cevresi_cm", "sayi", Baslik: "Bel çevresi (cm)"),
+                new("glukozParmak", "glukoz_parmak", "sayi", Baslik: "Parmak glukoz (mg/dL)"),
                 new("gks", "gks", "sayi", Baslik: "GKS"),
-                new("olcenId", "olcen_id", "sayi", Baslik: "Ölçen"),
+                // Olcum kimligi EN SONDA: hekimin okudugu deger yukarida,
+                //   "kim, ne zaman, nereden" altta.
+                new("zaman", "zaman", "zaman", Baslik: "Ölçüm zamanı"),
+                new("kaynak", "kaynak", "kod", SabitKodlar: VitalKaynakKodlari,
+                    Baslik: "Kaynak"),
+                new("olcenId", "olcen_id", "kod", KodTablosu: "public.v_personel_lookup",
+                    Baslik: "Ölçen"),
             }, SubeKolonu: null, Sirala: "zaman desc, id desc",
                Baslik: "Vital Bulgular", LogTabloId: 962),
 

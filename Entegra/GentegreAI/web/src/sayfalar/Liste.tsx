@@ -2248,6 +2248,21 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
               tanilar: { grup: 'Tanı / Karar', gizli: ['sira', 'baslangicTarihi'],
                          sinif: 'tani-gridi', ustte: true } }
           : undefined}
+        // VITAL BULGULAR MOCKUP IZGARASI: son olcum etiket+kutu izgarasinda
+        //   (3 sutun), eski olcumler altta salt gorunum. Grid satirlarinda
+        //   14 sayisal kolon yan yana okunmuyordu.
+        detayIzgara={tanim.kaynak === 'muayene'
+          ? { vitaller: { baslik: 'Vital bulgular', sinif: 'vital-izgara-kip',
+                          yeniDugmesi: true,
+                          not: 'Ölçüm zamanı ve kaynağı kayıtta kalır; '
+                             + 'BKİ o anki boy/kilodan hesaplanır.',
+                          // Gecmis listesi OZET: takip edilen olculer kalir,
+                          //   antropometri ve tek seferlik degerler ust
+                          //   izgarada zaten gorunur.
+                          gecmisGizli: ['boyCm', 'kiloKg', 'bki', 'belCevresiCm',
+                                        'glukozParmak', 'gks', 'olcenId',
+                                        'agriVas'] } }
+          : undefined}
         seritAlanlari={tanim.kaynak === 'muayene'
           ? ['bolumId', 'personelId', 'tur', 'ustMuayeneId', 'baslangic', 'bitis']
           : undefined}

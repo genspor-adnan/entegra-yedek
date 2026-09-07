@@ -7,7 +7,7 @@
 public sealed record KartAlani(
     string Ad,                     // API adi: "faturaUnvan"
     string Kolon,                  // db kolonu: "fatura_unvan"
-    string Tip,                    // metin | sayi | para | tarih | kod | mantik
+    string Tip,                    // metin | sayi | ondalik | para | tarih | zaman | kod | mantik
     bool Yazilabilir = true,
     bool Zorunlu = false,
     int? EnFazlaUzunluk = null,
