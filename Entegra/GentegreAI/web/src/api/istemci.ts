@@ -387,6 +387,10 @@ export const api = {
   },
 
   /** Muayene karti "Istem & Sonuclar" sekmesi (443): bag + SONUCUN KENDISI. */
+  /** Muayene listesi ozet seridi (461): poliklinigin o gunku hali. */
+  muayeneOzet: (gun?: string) =>
+    istek<never>(`/api/muayene/ozet${gun ? `?gun=${gun}` : ''}`),
+
   muayeneSonuclari: (muayeneId: number) =>
     istek<{ muayeneId: number; belgeId: number | null;
             baglar: Record<string, unknown>[];

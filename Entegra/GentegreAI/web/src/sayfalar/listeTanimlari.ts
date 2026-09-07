@@ -600,6 +600,11 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'muayene', rota: 'muayene', baslik: 'Muayeneler',
     yol: 'Muayene › Muayeneler',
     kartYolu: '/muayene', kartBaslik: 'Muayene',
+    // KART IZGARASINDAN CIKANLAR (kullanici): hasta, basvuru protokol id,
+    //   muayene no ve kayit tarihi BAGLAM SERIDINDE zaten var; durum ise
+    //   baslik rozetine tasindi. Izgara boylece yalnizca hekimin YAZDIGI
+    //   alanlarla kaliyor (tur, bolum, hekim, sure).
+    gizliKartAlanlari: ['tarafId', 'durum', 'belgeId', 'muayeneNo', 'muayeneTarihi'],
     aksiyonEkrani: 'muayene-liste',
     tarihAlani: 'muayeneTarihi',
     cipler: [

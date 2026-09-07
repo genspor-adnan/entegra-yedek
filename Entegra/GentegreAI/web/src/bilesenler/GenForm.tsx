@@ -60,6 +60,10 @@ interface Props {
   ustBaglam?(deger: Record<string, Deger>): React.ReactNode;
   /** Kart ARAC CUBUGUNUN sagina yaslanan durum ozeti (mockup .statusbar). */
   altBilgi?(deger: Record<string, Deger>): React.ReactNode;
+  /** Kart BASLIGINDA (surum rozetinin yaninda) ekran-ozel rozet - or.
+      muayene durumu. Kart alan izgarasinda ayri bir kutu tutmaktansa
+      basligda durur (kullanici). */
+  baslikEk?(deger: Record<string, Deger>): React.ReactNode;
   /** Kaydet/Sil'in yanina ekran-ozel EYLEM dugmeleri (mockup muayene kartinda
       "Muayeneye Al · Tamamla · Istem Ac · Sablon"). Dugmeler yalnizca ucu
       cagirir; kural sunucuda kalir. */
@@ -133,7 +137,7 @@ const SEKME_IKON: Record<string, string> = {
 const sekmeIkonu = (baslik: string) => SEKME_IKON[baslik] ?? '▫️';
 
 export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarmalayici, onKaydedildi, yerTutucuSekmeler,
-                          ustBaglam, altBilgi, ekAraclar,
+                          ustBaglam, altBilgi, ekAraclar, baslikEk,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
   const { kullanici } = useOturum();
@@ -790,6 +794,7 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
             </span>
           )}
           {surum && <span className="rozet gri">surum {surum}</span>}
+          {baslikEk?.(deger)}
           {salt && <span className="rozet uyari">salt okunur</span>}
         </>
       }

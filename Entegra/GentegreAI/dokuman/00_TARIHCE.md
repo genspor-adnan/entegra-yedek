@@ -7923,3 +7923,48 @@ açıklamaya iz düşüldü.
 
 Geri alınabilir: değişen her satırın eski değeri `_yedek_hizmet_modalite_460`
 tablosunda; göç yeniden çalıştırılırsa önce eski değerler geri yüklenir.
+
+---
+
+## 07.09.2026 — Muayene ekranları mockup'a yaklaştırıldı (461)
+
+Hedef: `Ekranlar/Muayene/muayene_karti.html` ve `muayene_listesi.html`.
+Kullanıcının kuralı: zorunlu sapmalar kalsın (gerekçesiyle), gereksiz sapmalar
+düzelsin - önce ortak tema/bileşen, sonra layout, en son ekran detayı.
+
+### Zorunlu sapmalar (dokunulmadı)
+
+| Sapma | Neden |
+|---|---|
+| Kart MODAL, mockup'ta tam sayfa pencere | Ürün kabuğu ortak: liste arkada kalır, geri dönüşte süzgeç korunur |
+| Alanlar/sekmeler sunucu metadata'sından | Yetkisi olmayan alan hiç dönmez; mockup'taki sabit form karşılığı yok |
+| e-Reçete / Rapor / Sevk / Dosyalar / Dikte / AI Özet sekmeleri yok | Backend'leri henüz yok - boş sekme "bozuk" görünür |
+| Vitalde H/panik rozeti yok | Eşik klinik karardır; ekranda uydurulan sınır hekimi yanlış yönlendirir. Sunucu bayrak döndürünce eklenecek |
+
+### Düzeltilen sapmalar
+
+- **Bağlam şeridi**: Hasta · Alerji/Kronik · Aktif ilaçlar · Bugün (mockup
+  `.hdr.k4`). Alerji ve ilaç ayrı sekmedeydi - hekim reçete yazarken
+  bakmıyordu.
+- **İki panel**: Anamnez sekmesi solda form, sağda **vital ızgarası**
+  (3 sütun) + **bugünkü sonuçlar** (panikler üstte, kırmızı rozet).
+- **Durum şeridi** (mockup `.statusbar`): ana tanı rozeti, geçen süre,
+  "Tamamla → başvuru tahakkuk · e-Nabız paketi".
+- **Kart eylemleri**: Muayeneye Al · İstem Aç · Şablon Uygula · Tamamla artık
+  kartta; listedeki **aynı işleyiciye** gider (kural ve yetki tek yerde).
+- **Liste özet şeridi** (`GET /api/muayene/ozet`): bugünkü muayene, randevu,
+  ortalama süre, bekleyen, gelen sonuç, **tanı girilmemiş tamamlanan** ve
+  e-Nabız gönderimi. Tanısız tamamlanan muayene başvuruyu tahakkuka
+  düşürmüyor - gün sonunda görülmesi gereken sayı bu.
+- **Kart ızgarası sadeleşti** (kullanıcı): hasta, durum, başvuru protokol id,
+  muayene no ve kayıt tarihi ızgaradan çıktı - ilk dördü bağlam şeridinde
+  zaten var, durum başlıkta rozete taşındı. Izgarada yalnız hekimin YAZDIĞI
+  alanlar kaldı.
+
+GenForm'a dört slot eklendi (`ustBaglam`, `altBilgi`, `ekAraclar`,
+`baslikEk`); hepsi ekran-özel, generic kart davranışı değişmedi.
+
+**Tuzaklar**: (1) `@p0 + 1` PG'de timestamp + integer değil - gün aralığı
+`interval '1 day'` ile; (2) `radyoloji_rapor.onay_zamani` yok, kolon adı
+`onay_tarihi`; (3) `.mo-deger` hem global hem kap içinde tanımlanınca tema
+sınıf çakışması testi kırıldı - global ad kaldırıldı.

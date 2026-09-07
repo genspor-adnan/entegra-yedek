@@ -7,6 +7,7 @@ import { RandevuTakvimi } from '../bilesenler/RandevuTakvimi';
 import { GenForm } from '../bilesenler/GenForm';
 import { MuayeneBaglamSeridi } from '../bilesenler/MuayeneBaglamSeridi';
 import { MuayeneDurumSeridi } from '../bilesenler/MuayeneDurumSeridi';
+import { MuayeneOzetSeridi } from '../bilesenler/MuayeneOzetSeridi';
 import { MuayeneSonucOzeti } from '../bilesenler/MuayeneSonucOzeti';
 import { MuayeneVitalPaneli } from '../bilesenler/MuayeneVitalPaneli';
 import { MuayeneIstemSonuc } from '../bilesenler/MuayeneIstemSonuc';
@@ -79,6 +80,13 @@ import { DONUSUM_MENUSU, KASA_ARAC_MENUSU, LISTELER, type ListeTanimi }
 // Tanimlar ayri dosyada (listeTanimlari); disaridan alisilmis yol bozulmasin
 //   diye buradan da disa aktarilir (App.tsx / Kabuk.tsx LISTELER'i buradan alir).
 export { LISTELER };
+
+/** Muayene durum kodlari (kart metasindaki SabitKodlar ile ayni) - baslik
+    rozeti icin. Kod->ad cevrimi tek satirlik, ek istek gerektirmesin. */
+const MUAYENE_DURUM: Record<string, string> = {
+  '1': 'Açık', '2': 'Sonuç Bekliyor', '3': 'Tamamlandı',
+  '4': 'Ek Not Eklendi', '0': 'İptal',
+};
 
 /** Kirilma yolu ("Satis › Satış Faturaları") parca parca cevrilir: ayrac
     korunur, her parca menu sozlugunden gecer. */
@@ -1773,6 +1781,10 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       //   gridin ustunde. Cipi olan kutu tiklaninca o suzgeci acar.
       ustPanel={tanim.kaynak === 'lab-sonuc'
         ? <LabOzetSeridi yenile={yenile} onCip={setCipIndeks} />
+        // MUAYENE LISTESI OZET SERIDI (461, mockup muayene_listesi.html):
+        //   poliklinigin o gunku hali - kac muayene, ort. sure, bekleyen,
+        //   sonuc gelen, tanisiz tamamlanan, e-Nabiz.
+        : tanim.kaynak === 'muayene' ? <MuayeneOzetSeridi />
         : undefined}
       // LABORATUVAR (446): mockup'larda tablo ile secili kaydin ayrintisi
       //   AYNI ekranda durur (tetkik/tup plani, antibiyogram, varyantlar).
@@ -2149,6 +2161,19 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         // MUAYENE BAGLAM SERIDI (461, mockup muayene_karti.html): hasta,
         //   alerji/kronik, aktif ilac ve bugunun notu her sekmenin ustunde
         //   durur - hekim ilac yazarken alerjiyi ayri sekmede aramamali.
+        // DURUM BASLIKTA ROZET (kullanici): alan izgarasinda kutu tutmak
+        //   yerine kartin ustunde - hasta/protokol/tarih bilgisi zaten
+        //   baglam seridinde, izgara yalnizca YAZILAN alanlara kaliyor.
+        baslikEk={tanim.kaynak === 'muayene'
+          ? (d) => {
+              const kod = String(d.durum ?? '');
+              const ad = MUAYENE_DURUM[kod] ?? '';
+              if (!ad) return null;
+              const sinif = kod === '3' ? 'olumlu' : kod === '0' ? 'gri'
+                          : kod === '2' ? 'uyari' : 'mavi';
+              return <span className={`rozet ${sinif}`}>{ad}</span>;
+            }
+          : undefined}
         ustBaglam={tanim.kaynak === 'muayene' && kartId !== 'yeni'
           ? () => <MuayeneBaglamSeridi muayeneId={Number(kartId)} />
           : undefined}

@@ -2730,3 +2730,28 @@ input.skt-gecmis {
   display: inline-block; max-width: 190px; overflow: hidden;
   text-overflow: ellipsis; vertical-align: bottom; white-space: nowrap;
 }
+
+/* MUAYENE LISTESI OZET SERIDI (461) - mockup muayene_listesi.html ustundeki
+   kutular. Lab ozet seridiyle ayni dil: ince cerceve, 10.5px baslik,
+   18px sayi; vurgu renkleri pano kutularindan. */
+.muayene-ozet {
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px;
+  padding: 8px 10px; border-bottom: 1px solid var(--cizgi2); background: var(--yuz2);
+}
+@media (max-width: 1200px) { .muayene-ozet { grid-template-columns: repeat(4, minmax(0, 1fr)) } }
+@media (max-width: 760px)  { .muayene-ozet { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+.mo-kutu {
+  border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--yuz);
+  padding: 5px 8px; min-width: 0;
+}
+.mo-bas { font-size: 10.5px; color: var(--soluk); white-space: nowrap;
+          overflow: hidden; text-overflow: ellipsis }
+/* Kap icinde tanimli: `.mo-kutu.uy .mo-deger` varyanti var, global ad
+   birakmak sinifi iki anlamli yapardi (tema testi). */
+.mo-kutu .mo-deger { font-size: 18px; font-weight: 700; color: var(--mor); line-height: 1.2 }
+.mo-ek { font-size: 10.5px; color: var(--soluk); white-space: nowrap;
+         overflow: hidden; text-overflow: ellipsis }
+.mo-kutu.uy  { border-color: var(--uyarikenar); background: var(--uyarizem) }
+.mo-kutu.uy  .mo-deger { color: var(--uyari) }
+.mo-kutu.teh { border-color: var(--hata); background: var(--hatazem) }
+.mo-kutu.teh .mo-deger { color: var(--hata) }

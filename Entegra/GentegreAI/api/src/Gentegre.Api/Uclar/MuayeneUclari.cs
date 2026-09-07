@@ -28,6 +28,93 @@ public static class MuayeneUclari
         var grup = yol.MapGroup("/api/muayene").WithTags("Muayene").RequireAuthorization();
 
         // POST /api/muayene/{id}/al - "Muayeneye Al"
+        // GET /api/muayene/ozet?gun=YYYY-MM-DD - LISTE OZET SERIDI (461)
+        //
+        // Mockup `muayene_listesi.html` ustundeki alti kutu: poliklinigin o
+        //   gunku hali. Tek uctan gelir - alti ayri istek ekranin yarisini
+        //   dolu yarisini bos gosterirdi (radyoloji/lab panosu deseni).
+        //
+        // SAYILAR SUBEYE SUZULUR: baska subenin poliklinigi bu ekranin isi
+        //   degil; yetki katmani zaten subeyi baglama koyuyor.
+        grup.MapGet("/ozet", async (
+            string? gun, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Gor);
+
+            var tarih = DateTime.TryParse(gun, out var t) ? t.Date : DateTime.Today;
+            var sube = baglam.SubeId ?? 0;
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var sayac = await baglanti.TekAsync("""
+                select
+                  count(*)                                        as "muayene",
+                  count(*) filter (where m.durum = 1)             as "acik",
+                  count(*) filter (where m.durum = 2)             as "tamamlanan",
+                  -- ORTALAMA SURE yalniz TAMAMLANANLARDA anlamli: acik
+                  --   muayenenin suresi "simdiye kadar" demek, ortalamayi
+                  --   suni sekilde buyutur.
+                  coalesce(round(avg(extract(epoch from (m.tamamlanma - m.baslangic)) / 60)
+                           filter (where m.durum = 2 and m.baslangic is not null
+                                     and m.tamamlanma is not null)), 0) as "ortDk",
+                  -- BEKLEYEN: muayeneye hic alinmamis kayit (baslangic bos).
+                  count(*) filter (where m.baslangic is null and m.durum = 1) as "bekleyen",
+                  coalesce(max(extract(epoch from (now() - m.ekleme_tarihi)) / 60)
+                           filter (where m.baslangic is null and m.durum = 1), 0)::int
+                                                                  as "enUzunBeklemeDk",
+                  -- TANI GIRILMEMIS: tamamlanmis ama tanisi olmayan muayene -
+                  --   basvuru tahakkuka dusmez, e-Nabiz paketi eksik alanda kalir.
+                  count(*) filter (where m.durum = 2 and not exists
+                      (select 1 from public.tani ta where ta.muayene_id = m.id))
+                                                                  as "tanisiz"
+                  from public.muayene m
+                 where m.muayene_tarihi >= @p0 and m.muayene_tarihi < @p0 + interval '1 day'
+                   and (@p1 = 0 or m.sube_id = @p1)
+                """, null, [tarih, sube], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            // SONUC: bugun ONAYLANAN lab satiri ve raporlanan radyoloji -
+            //   "sonuc geldi" bilgisi hekimin siradaki isini belirler.
+            var sonuc = await baglanti.TekAsync("""
+                select
+                  (select count(*) from public.lab_sonuc s
+                    where s.onay_zamani >= @p0 and s.onay_zamani < @p0 + interval '1 day') as "lab",
+                  (select count(*) from public.radyoloji_rapor r
+                    where r.onay_tarihi >= @p0
+                      and r.onay_tarihi < @p0 + interval '1 day') as "radyoloji",
+                  (select count(*) from public.lab_istem_satir ls
+                     join public.lab_istem li on li.id = ls.istem_id
+                    where ls.durum in (1, 2) and li.istem_tarihi >= @p0 - interval '7 days')
+                                                                             as "bekleyenTetkik"
+                """, null, [tarih], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            // e-NABIZ: bugunku muayene paketleri (kaynak_tur = 2) kacinci
+            //   gonderildi. Bildirim yukumlulugu gun icinde izlenmeli.
+            var enabiz = await baglanti.TekAsync("""
+                select count(*) as "toplam",
+                       count(*) filter (where p.durum = 3) as "gonderilen"
+                  from public.enabiz_paket p
+                 where p.kaynak_tur = 2 and p.uretim_tarihi >= @p0
+                   and p.uretim_tarihi < @p0 + interval '1 day'
+                   and (@p1 = 0 or p.sube_id = @p1)
+                """, null, [tarih, sube], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            var randevu = await baglanti.TekAsync("""
+                select count(*) as "randevu",
+                       count(*) filter (where r.durum = 4) as "gelmedi"
+                  from public.randevu r
+                 where r.baslangic >= @p0 and r.baslangic < @p0 + interval '1 day'
+                   and (@p1 = 0 or r.sube_id = @p1)
+                """, null, [tarih, sube], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            return Results.Ok(new
+            {
+                gun = tarih.ToString("yyyy-MM-dd"),
+                sayac, sonuc, enabiz, randevu, izlemeNo = baglam.IzlemeNo,
+            });
+        });
+
         grup.MapPost("/{id:int}/al", async (
             int id, BaglamCozucu cozucu, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
