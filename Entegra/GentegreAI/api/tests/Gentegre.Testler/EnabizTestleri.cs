@@ -90,4 +90,51 @@ public class EnabizTestleri : IClassFixture<VeritabaniOlgusu>
             + "where kod = 'enabiz-surec'");
         Assert.True(adim >= 5, $"süreç konusu eksik ({adim} adım)");
     }
+
+    // ------------------------------------------------- SKRS klinik (455) ---
+
+    /// <summary>Kaynak dosyayı diskten okur (bin/Debug'dan yukarı çıkarak).</summary>
+    private static string Kaynak(params string[] parcalar)
+    {
+        var dizin = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dizin is not null && !Directory.Exists(Path.Combine(dizin.FullName, "src")))
+            dizin = dizin.Parent;
+        Assert.NotNull(dizin);
+        var yol = Path.Combine([dizin!.FullName, "src", .. parcalar]);
+        Assert.True(File.Exists(yol), $"kaynak bulunamadı: {yol}");
+        return File.ReadAllText(yol);
+    }
+
+    [Fact]
+    public void SKRS_senkronu_KLINIKLER_listesini_de_ceker()
+    {
+        // Kodda "SKRS'de klinik listesi yok" notu duruyordu; katalog ASCII ile
+        //   arandığı için bulunamamış. Liste adı Türkçe: "KLİNİKLER".
+        var kaynak = Kaynak("Gentegre.Api", "Uclar", "EntegrasyonUclari.cs");
+        Assert.Contains("\"KLİNİKLER\"", kaynak, StringComparison.Ordinal);
+        Assert.Contains("skrs.klinik", kaynak, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Klinik_kodu_BOLUM_KODUNDAN_da_okunur()
+    {
+        // Ayrı kolon yok (kullanıcı): SKRS klinik kodu bölümün kendi kod
+        //   alanında durur. Üretici elle eşlemeyi ÖNCE dener (istisna), yoksa
+        //   bölüm kodunu okur - kod sayısal değilse kurumun kendi kodlamasıdır
+        //   ve USS'ye gönderilmez.
+        var kaynak = Kaynak("Gentegre.Api", "Servisler", "EnabizPaketUretici.cs");
+        Assert.Contains("from public.departman d", kaynak, StringComparison.Ordinal);
+        Assert.Contains("d.kod ~ '^[0-9]+$'", kaynak, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SKRS_klinik_LOOKUPU_var()
+    {
+        if (!_olgu.Baglandi(nameof(SKRS_klinik_LOOKUPU_var))) return;
+        // Liste boş olabilir (senkron çalışmamış olabilir) ama GÖRÜNÜM
+        //   olmalı: kart lookup'ı olmayan görünüme bakarsa kart hiç açılmaz.
+        var sayi = await _olgu.Gerekli().TekDegerAsync<int>(
+            "select count(*) from public.v_skrs_klinik_lookup");
+        Assert.True(sayi >= 0);
+    }
 }

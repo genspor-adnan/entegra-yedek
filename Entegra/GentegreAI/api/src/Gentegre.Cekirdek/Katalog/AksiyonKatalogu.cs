@@ -228,6 +228,11 @@ public static class AksiyonKatalogu
                 new("entegrasyon.skrs-senkron", "⟳ SKRS Listelerini Güncelle",
                     "entegrasyon", Islem: Islem.Degistir, KayitGerekir: true, Sira: 50,
                     UrunModu: 2),
+                // SKRS klinik kodlarini BOLUM KODUNA yazar (455): e-Nabiz
+                //   paketlerindeki klinik alani bolum kodundan okunur.
+                new("entegrasyon.skrs-klinik", "🏥 SKRS Klinik Kodlarını Eşle",
+                    "entegrasyon", Islem: Islem.Degistir, KayitGerekir: true, Sira: 55,
+                    UrunModu: 2),
             },
 
             // HAKEDIS SATIRLARI (324): satirlar tahsilattan DOGAR - elle

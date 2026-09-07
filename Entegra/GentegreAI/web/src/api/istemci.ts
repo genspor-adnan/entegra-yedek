@@ -1480,6 +1480,15 @@ export const api = {
   skrsListeSenkron: (id: number) =>
     gonder<{ satirSayisi: number; mesaj: string }>(`/api/entegrasyon/${id}/skrs-senkron`, {}),
 
+  /**
+   * SKRS klinik kodlarini BOLUM KODUNA yazar (455). Dolu koda dokunmaz -
+   * kurum kendi kodlamasini yapmis olabilir.
+   */
+  skrsKlinikEsle: (id: number) =>
+    gonder<{ eslenen: number; skrsKodSayisi: number; mesaj: string;
+             eslesmeyen: { id: number; ad: string }[] }>(
+      `/api/entegrasyon/${id}/skrs-klinik-esle`, {}),
+
   /** Prim satirlarini ONAYLA / onayi kaldir (330) - onayli satir kilitlidir. */
   primOnayla: (govde: { satirlar: number[]; geriAl?: boolean }) =>
     gonder<{ satirSayisi: number; geriAl: boolean }>('/api/prim/onayla', govde),

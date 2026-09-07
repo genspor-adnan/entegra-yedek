@@ -209,10 +209,20 @@ public sealed class EnabizPaketUretici
                        'belge.belge_tarihi', ''
                   from public.belge b where b.id = @p0
                 union all select 'KlinikKodu',
-                       coalesce((select k.skrs_kod from public.enabiz_kod_esleme k
-                                  where k.esleme_turu = 'KLINIK' and k.yerel_id = bb.bolum_id
-                                    and k.aktif = 1 limit 1), ''),
-                       'enabiz_kod_esleme.KLINIK', 'SKRS Klinik'
+                       -- KLINIK KODU IKI KAYNAKTAN (455): once ELLE ESLEME
+                       --   (istisna: bolum kodu SKRS kodu degilse kurum burada
+                       --   soyler), yoksa BOLUMUN KENDI KODU - SKRS klinik
+                       --   listesinden dolduruldugu icin dogrudan USS kodudur.
+                       --   Kod sayisal degilse kurumun kendi kodlamasidir,
+                       --   USS'ye gonderilmez.
+                       coalesce(
+                         (select k.skrs_kod from public.enabiz_kod_esleme k
+                           where k.esleme_turu = 'KLINIK' and k.yerel_id = bb.bolum_id
+                             and k.aktif = 1 limit 1),
+                         (select d.kod from public.departman d
+                           where d.id = bb.bolum_id and d.kod ~ '^[0-9]+$'),
+                         ''),
+                       'departman.kod / enabiz_kod_esleme.KLINIK', 'SKRS Klinik'
                   from public.belge_basvuru bb where bb.id = @p0
                 union all select 'HekimKimlikNo',
                        coalesce((select t.vkno from public.taraf t where t.id = bb.personel_id), ''),

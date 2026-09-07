@@ -39,10 +39,11 @@ public static class EntegrasyonUclari
         // 340: hekim branşı ve sigorta türü de SKRS'den gelir.
         ("PERSONEL BRANŞ KODU", "hekim.brans"),
         ("SİGORTALI TÜRÜ",      "taraf.sigorta_turu"),
-        // KLINIK: SKRS'de BOYLE BIR LISTE YOK (499 listenin tamami tarandi -
-        //   /api/entegrasyon/{id}/skrs-listeler). Bolum/klinik kumesi kurumun
-        //   kendi departman agacindan geliyor; aday ad birakmak her senkronda
-        //   sahte bir "yok" raporu uretirdi.
+        // KLINIK (455): once "SKRS'de boyle bir liste yok" diye not dusulmustu -
+        //   katalog ASCII ile ("KLINIK") arandigi icin bulunamamis. Turkce
+        //   yazimla liste duruyor: "KLİNİKLER". Kodlar `skrs.klinik` listesine
+        //   yazilir; bolum kodu eslemesi oradan beslenir.
+        ("KLİNİKLER",           "skrs.klinik"),
     };
 
     /// <summary>
@@ -134,6 +135,79 @@ public static class EntegrasyonUclari
 
             return Results.Ok(new { ad, guid, toplam = kodlar.Count, satirlar,
                                     izlemeNo = baglam.IzlemeNo });
+        });
+
+        // ------------------------------------------- SKRS klinik eşleme ----
+        // POST /api/entegrasyon/{id}/skrs-klinik-esle
+        //
+        // Bölüm adlarını SKRS klinik adlarıyla eşleştirir ve **kodu boş olan**
+        //   bölümlerin `kod` alanına SKRS klinik kodunu yazar.
+        //
+        // AYRI KOLON YOK (kullanıcı): kod bölümün kendi kimlik alanıdır;
+        //   e-Nabız için ikinci bir kod kolonu, iki yerde tutulan ve zamanla
+        //   ayrışan bir kod demekti.
+        //
+        // DOLU KODA DOKUNULMAZ: kurum kendi kodlamasını yapmış olabilir;
+        //   toplu işlem onu ezerse hem bildirim hem kurumun kendi düzeni
+        //   bozulur. Eşleşmeyenler rapora düşer, elle seçilir.
+        grup.MapPost("/{id:int}/skrs-klinik-esle", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("entegrasyon", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var toplamKod = await baglanti.TekDegerAsync<int>(
+                "select count(*) from public.v_skrs_klinik_lookup", null, [], iptal);
+
+            // Eşleme ADA göre, Türkçe-duyarsız normalize ile (il/ilçe deseni,
+            //   340). TEK eşleşme şartı: iki SKRS kliniği aynı ada düşüyorsa
+            //   hangisinin doğru olduğunu makine bilemez - o bölüm elle
+            //   seçilsin diye boş bırakılır.
+            var yazilan = toplamKod == 0 ? 0 : await baglanti.TekDegerAsync<int>("""
+                with aday as (
+                    select d.id as departman_id,
+                           (select min(k.id) from public.v_skrs_klinik_lookup k
+                             where public.fn_ara_metin(split_part(k.ad, ' - ', 2))
+                                   = public.fn_ara_metin(d.ad)) as kod,
+                           (select count(*) from public.v_skrs_klinik_lookup k
+                             where public.fn_ara_metin(split_part(k.ad, ' - ', 2))
+                                   = public.fn_ara_metin(d.ad)) as adet
+                      from public.departman d
+                     where coalesce(nullif(trim(d.kod), ''), null) is null
+                       and coalesce(d.durum, 1) = 1
+                ),
+                yazim as (
+                    update public.departman d
+                       set kod = a.kod::text, degistiren = @p0, degistirme_tarihi = now()
+                      from aday a
+                     where d.id = a.departman_id and a.adet = 1
+                    returning 1
+                )
+                select count(*)::int from yazim
+                """, null, [baglam.KullaniciId], iptal);
+
+            var kalan = await baglanti.ListeAsync("""
+                select d.id, d.ad, coalesce(d.kod, '') as "kod"
+                  from public.departman d
+                 where coalesce(nullif(trim(d.kod), ''), null) is null
+                   and coalesce(d.durum, 1) = 1
+                 order by d.ad limit 50
+                """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            return Results.Ok(new
+            {
+                eslenen = yazilan,
+                eslesmeyen = kalan,
+                skrsKodSayisi = toplamKod,
+                mesaj = toplamKod == 0
+                    ? "SKRS klinik listesi boş - önce SKRS senkronunu çalıştırın."
+                    : $"{yazilan} bölümün kodu SKRS klinik kodundan dolduruldu; "
+                      + $"{kalan.Count} bölüm elle bekliyor.",
+                izlemeNo = baglam.IzlemeNo,
+            });
         });
 
         // ---------------------------------------------------- bağlantı sına --

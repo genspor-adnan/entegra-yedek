@@ -81,6 +81,25 @@ export function GenelAyarlar() {
           setYenile(t => t + 1);
         });
         return;
+      // SKRS klinik kodlarini BOLUM KODUNA yazar (455). Dolu kod korunur:
+      //   kurum kendi kodlamasini yapmis olabilir.
+      case 'entegrasyon.skrs-klinik':
+        if (!satir) return;
+        if (String(satir.kod ?? '') !== 'SKRS') {
+          mesaj('Bu işlem yalnız SKRS hesabında çalışır.');
+          return;
+        }
+        if (!await onay('Kodu BOŞ olan bölümlere SKRS klinik kodu yazılacak '
+                        + '(dolu kodlara dokunulmaz). Devam edilsin mi?')) return;
+        await guvenli(async () => {
+          const y = await api.skrsKlinikEsle(Number(satir.id));
+          mesaj(y.eslesmeyen.length > 0
+            ? `${y.mesaj} Eşleşmeyen: `
+              + y.eslesmeyen.slice(0, 8).map(b => b.ad).join(', ')
+            : y.mesaj);
+          setYenile(t => t + 1);
+        });
+        return;
     }
   }
 

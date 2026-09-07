@@ -487,8 +487,13 @@ public static partial class KartKatalogu
             new("id",                 "id",                  "sayi",  Yazilabilir: false),
             // Kod bos birakilabilir (254): 41 eski departmanda kod yok, zorunlu
             //   yapmak hepsini elle kodlamayi gerektirirdi.
+            //
+            // e-NABIZ (455): bu kod ayni zamanda USS paketlerindeki KLINIK
+            //   kodudur - SKRS "KLİNİKLER" listesinden gelir ve Entegrasyon
+            //   ekranindaki "SKRS klinik esle" ile bos kodlar toplu doldurulur.
+            //   AYRI KOLON YOK: iki yerde tutulan kod zamanla ayrisirdi.
             new("kod",                "kod",                 "metin", EnFazlaUzunluk: 20,
-                Baslik: "Kod", Grup: "Kimlik"),
+                Baslik: "Kod (SKRS klinik kodu)", Grup: "Kimlik"),
             new("ad",                 "ad",                  "metin", Zorunlu: true,
                 EnFazlaUzunluk: 100, Baslik: "Bölüm", Grup: "Kimlik"),
             // Ust birim (257): secilirse departman digerinin ALTINA gecer.

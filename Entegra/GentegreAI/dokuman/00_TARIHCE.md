@@ -7821,3 +7821,39 @@ kodlarını senkron etmeden görebilmek için salt okunur bir uç eklendi:
 `GET /api/entegrasyon/{id}/skrs-liste?ad=KLİNİKLER`. Kodları çekme çağrısı şu
 an SKRS tarafında HTTP 500 dönüyor (katalog çağrısı çalışıyor, `GetSkrsObject`
 düşüyor) - senkron bağlanınca tekrar denenecek.
+
+---
+
+## 07.09.2026 — SKRS klinik senkronu (`db/455`)
+
+e-Nabız'ın her paketinde "Muayene Yapılan (Poli)Klinik" var ve kodu SKRS'nin
+**KLİNİKLER** listesinden gelir. Kodda "SKRS'de klinik listesi yok (499 liste
+tarandı)" notu duruyordu - katalog ASCII ile (`KLINIK`) arandığı için
+bulunamamış; Türkçe yazımla liste yerinde.
+
+**Ayrı kolon yok (kullanıcı).** SKRS kodu bölümün kendi `kod` alanına yazılır:
+e-Nabız için ikinci bir kod kolonu, iki yerde tutulan ve zamanla ayrışan bir
+kod demekti. Bölüm kartındaki alanın başlığı bunu söylüyor.
+
+- SKRS senkronuna `KLİNİKLER → skrs.klinik` eklendi; kodlar `kod_liste`/
+  `kod_deger`e yazılıyor, `v_skrs_klinik_lookup` seçim için hazır.
+- `POST /api/entegrasyon/{id}/skrs-klinik-esle` + Entegrasyon ekranında
+  **🏥 SKRS Klinik Kodlarını Eşle**: bölüm adlarını SKRS klinik adlarıyla
+  eşleştirir, **kodu boş** bölümlere kodu yazar. **Dolu koda dokunmaz** -
+  kurum kendi kodlamasını yapmış olabilir (kurulumdaki `HST-*` kodları öyle).
+  Aynı ada iki SKRS kliniği düşüyorsa hangisi doğru makine bilemez: o bölüm
+  boş kalır ve rapora düşer.
+- Paket üreticisi klinik kodunu iki kaynaktan okur: önce elle eşleme
+  (`enabiz_kod_esleme` KLINIK - istisna), yoksa **bölüm kodu** (yalnız
+  sayısalsa; `HST-LAB` gibi kendi kodlaması USS'ye gönderilmez).
+
+Sınama: geçici dört SKRS kodu ile çalıştırıldı - Dahiliye/Göz/Çocuk/Ortopedi
+eşleşti, `HST-*` kodlu 20 bölüme dokunulmadı, 22 bölüm elle listeye düştü;
+sınama verisi geri alındı. Üretici ifadesi başvuru üzerinde doğrulandı
+(rollback ile).
+
+**SKRS servisi şu an HTTP 500 dönüyor** (katalog çağrısı bile) - senkron
+servis düzelince çalıştırılacak; kurulum hazır.
+
+**Testler**: API **159** (klinik listesi senkronda, üretici bölüm kodunu okur,
+lookup görünümü var), web **460**.
