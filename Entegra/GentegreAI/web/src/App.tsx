@@ -21,6 +21,7 @@ import { Kategoriler } from './sayfalar/Kategoriler';
 import { YapayZeka } from './sayfalar/YapayZeka';
 import { UtsSorgu } from './sayfalar/UtsSorgu';
 import { RadyolojiPanosu } from './sayfalar/RadyolojiPanosu';
+import { EnabizPanosu } from './sayfalar/EnabizPanosu';
 import { RadyolojiRapor } from './sayfalar/RadyolojiRapor';
 import { RadyolojiRaporCikti } from './sayfalar/RadyolojiRaporCikti';
 import { LabRaporCikti } from './sayfalar/LabRaporCikti';
@@ -109,6 +110,7 @@ function Yollar() {
         {yetki('uts') && <Route path="/uts-sorgu" element={<UtsSorgu />} />}
         {/* Radyoloji panosu (320): liste degil - sayac/doluluk/uyari ekrani. */}
         {yetki('radyoloji') && <Route path="/radyoloji-pano" element={<RadyolojiPanosu />} />}
+        {yetki('entegrasyon') && <Route path="/enabiz-pano" element={<EnabizPanosu />} />}
         {/* Radyoloji raporu: generic kart degil - bolumler sablondan uretilir,
             onay iki asamali ve onaydan sonra rapor kilitlenir (283/284). */}
         {yetki('radyoloji') && <Route path="/radyoloji/rapor/:istemId" element={<RadyolojiRapor />} />}

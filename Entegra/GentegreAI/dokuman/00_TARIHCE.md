@@ -7759,3 +7759,42 @@ Genetik Panelleri → Panel Kataloğu (kökteki lab "Paneller" ile karışmasın
 **Rotalar değişmedi**; `db/453` yalnız rehber kataloğundaki menü yolu/adını
 günceller - katalog eski yolu söylerse asistan artık var olmayan bir menüye
 gönderir. Alt grup ikonları: ⚗️ · 🦠 · 🧬.
+
+---
+
+## 07.09.2026 — e-Nabız: paket kartı, veri kalitesi panosu, kod eşleme (`db/454`)
+
+Faz 1 (415-417) kuyruğu, paket üretimini ve göndericiyi kurmuştu; ekran olarak
+yalnız kuyruk vardı. Kuyrukta "Eksik Alan" yazan satırın **neyi eksik**
+olduğunu görmenin yolu yoktu.
+
+**Paket kartı** kuyruk satırının altında açılıyor: her USS alanı için değer,
+geldiği kaynak kolon, SKRS listesi ve sorun; yanında son gönderim denemeleri
+(USS kodu/mesajı, süre). Geçersiz alanlar üstte. **Salt okunur** - paket elle
+düzeltilmez, kaynak düzeltilip yeniden üretilir; aksi hâlde USS'ye giden veri
+ile hastanın dosyasındaki ayrışırdı.
+
+**Veri kalitesi panosu** (`/enabiz-pano`, mockup `enabiz_veri_kalitesi.html`):
+gönderim oranı, ilk denemede başarı, süre sınırı içinde kalanlar, açık
+hatalı/eksik alanlı paket, eşlenmemiş kod + paket türü kırılımı, en sık hata,
+alan bazında eksikler, hekim kırılımı, son 14 gün serisi. Tek uçtan beslenir
+(radyoloji panosu deseni): altı ayrı istek ekranın yarısını boş gösterirdi.
+
+**Kod eşleme** ekranı (`/enabiz-kod-esleme`) açıldı - tablo 415'ten beri vardı,
+ekranı yoktu. Eşleme türü **sabit liste**: "klinik" ile "Klinik" iki ayrı tür
+sayılırsa paket üreticisi eşlemeyi bulamaz.
+
+İlk çalıştırmada gerçek veri kendini gösterdi: 24 paketin 7'si "Eksik Alan",
+sebebi `KlinikKodu` (kod eşlemesi yok) ve `HekimKimlikNo` (taraf.vkno boş) -
+panonun sorduğu soru ilk denemede cevabını verdi.
+
+**Tuzak**: `generate_series(current_date - 13, …)` timestamptz üretiyor,
+`g.gun + 1` "operator does not exist: timestamp with time zone + integer" ile
+düşüyordu; gün aritmetiği için `::date`.
+
+**Testler**: API **156** (yeni `EnabizTestleri`: liste/kart aynı tabloya bakar,
+eşleme türü sabit listeden, aksiyonlar var, rehber kataloğu yeni ekranları
+bilir, süreç konusu anlatılır), web **460**. Belge: sözleşme §9.16.
+
+**Bekleyen**: USS test hesabı / KTS tescili - gerçek XML şeması ve hasta
+geçmişi (USS'den okuma) ona bağlı.

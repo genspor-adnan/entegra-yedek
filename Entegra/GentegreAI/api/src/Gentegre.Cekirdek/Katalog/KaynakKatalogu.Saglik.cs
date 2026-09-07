@@ -405,6 +405,37 @@ public static partial class KaynakKatalogu
     /// anında bulmak, hatayı hekim ekrandan ayrıldıktan saatler sonra geri
     /// getirirdi - bu yüzden liste eksikleri ayrı çipte gösterir.
     /// </summary>
+    /// <summary>
+    /// e-NABIZ KOD EŞLEME (454) — yerel tanım ile SKRS kodu arasındaki köprü.
+    ///
+    /// Hasta cinsiyeti, medeni hali gibi alanlar zaten SKRS koduyla tutulur
+    /// (340); burası klinik, başvuru türü, geliş şekli, sonuç birimi gibi
+    /// KURUMUN KENDİ tanımları içindir. Eşleme yoksa paket "eksik alan" ile
+    /// kuyrukta bekler - USS bilmediği kodu reddeder.
+    /// </summary>
+    private static KaynakTanimi EnabizKodEsleme() => new(
+        Ad: "enabiz-kod-esleme",
+        YetkiKodu: "entegrasyon",
+        Kaynak: "public.enabiz_kod_esleme e",
+        SubeKolonu: null,                    // eşleme kurum geneli tanımdır
+        VarsayilanSirala: "e.esleme_turu asc, e.yerel_kod asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id", "e.id", "sayi", "Id", Varsayilan: false),
+            new("eslemeTuru", "e.esleme_turu", "metin", "Eşleme Türü", Genislik: 170),
+            new("yerelKod", "e.yerel_kod", "metin", "Yerel Kod", Hizalama: "orta",
+                                 Genislik: 140),
+            new("yerelId", "e.yerel_id", "sayi", "Yerel Id", Varsayilan: false),
+            new("skrsListe", "e.skrs_liste", "metin", "SKRS Listesi", Genislik: 180),
+            new("skrsKod", "e.skrs_kod", "metin", "SKRS Kodu", Hizalama: "orta",
+                                 Genislik: 120),
+            new("skrsAd", "e.skrs_ad", "metin", "SKRS Karşılığı", Genislik: 260),
+            new("durumAdi", "case e.aktif when 1 then 'Aktif' else 'Pasif' end",
+                                 "metin", "Durum", Hizalama: "orta", Bicim: "rozet",
+                                 Genislik: 90, Filtrelenebilir: false),
+            new("aktif", "e.aktif", "kod", "Aktif Kodu", Varsayilan: false),
+        });
+
     private static KaynakTanimi EnabizPaket() => new(
         Ad: "enabiz-paket",
         YetkiKodu: "entegrasyon",

@@ -60,6 +60,7 @@ import { genetikAksiyonu } from './liste/genetikAksiyonlari';
 import { kkAksiyonu } from './liste/kkAksiyonlari';
 import { disLabAksiyonu } from './liste/disLabAksiyonlari';
 import { LabDetayPaneli, labDetayVarMi } from '../bilesenler/LabDetayPaneli';
+import { EnabizPaketPaneli } from '../bilesenler/EnabizPaketPaneli';
 import { LabOzetSeridi } from '../bilesenler/LabOzetSeridi';
 import { aiBaglamAyarla } from '../bilesenler/aiBaglam';
 import { DokumanKlasorPaneli, type KlasorSecimi } from '../bilesenler/DokumanKlasorPaneli';
@@ -1774,6 +1775,12 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       //   Teknisyen listeyi kaybetmeden ayrintiya bakabilmeli.
       altPanel={labDetayVarMi(tanim.kaynak) && seciliSatir
         ? <LabDetayPaneli kaynak={tanim.kaynak} satir={seciliSatir} />
+        // e-NABIZ (454): "Eksik Alan" yazan satirin cevabi paketin
+        //   alanlarinda. Kart yerine grid alti: kuyrukta calisan kisi
+        //   listeyi kaybetmeden hangi alanin bos oldugunu gormeli.
+        : tanim.kaynak === 'enabiz-paket' && seciliSatir
+            && Number(seciliSatir.id ?? 0) > 0
+        ? <EnabizPaketPaneli paketId={Number(seciliSatir.id)} />
         : undefined}
       ekGorunum={tanim.kaynak === 'randevu' ? {
         ad: 'Takvim', ik: '📅',

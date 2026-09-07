@@ -313,6 +313,19 @@ export const api = {
   aiOneriGizle: (kod: string, gizle: boolean) =>
     gonder<{ mesaj: string }>('/api/ai/oneri/gizle', { kod, gizle }),
 
+  /**
+   * e-NABIZ PAKET KARTI (454): paketin USS alanlari ve gonderim denemeleri.
+   * SALT OKUNUR - paket elle duzeltilmez, kaynak duzeltilip yeniden uretilir.
+   */
+  enabizPaketOku: (id: number) =>
+    istek<{ paket: Record<string, unknown>;
+            alanlar: Record<string, unknown>[];
+            denemeler: Record<string, unknown>[] }>(`/api/enabiz/paket/${id}`),
+
+  /** e-Nabiz veri kalitesi panosu (454): donem "YYYY-MM". */
+  enabizVeriKalitesi: (ay: string) =>
+    istek<never>(`/api/enabiz/veri-kalitesi?ay=${encodeURIComponent(ay)}`),
+
   labIstemOku: (id: number) =>
     istek<Record<string, unknown>>(`/api/lab/istem/${id}`),
 

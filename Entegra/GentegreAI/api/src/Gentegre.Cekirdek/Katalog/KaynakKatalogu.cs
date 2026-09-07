@@ -176,6 +176,7 @@ public static partial class KaynakKatalogu
         Ekle(LabNumune());
         Ekle(LabSonuc());
         Ekle(LabCihazEsleme());
+        Ekle(EnabizKodEsleme());
         // MIKROBIYOLOJI (436): kultur calisma listesi + kataloglar.
         Ekle(LabKultur());
         Ekle(LabBesiyeri());

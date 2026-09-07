@@ -1205,6 +1205,45 @@ göre ayarla.
 
 ---
 
+## 9.16 e-Nabız ekranları (454)
+
+Faz 1'de (415-417) kuyruk, paket üretimi ve gönderici vardı; ekran olarak
+yalnız kuyruk görünüyordu. Üç eksik kapandı:
+
+```http
+GET  /api/enabiz/paket/{id}            // paket kartı: alanlar + denemeler
+GET  /api/enabiz/veri-kalitesi?ay=YYYY-MM   // uyum panosu
+```
+
+**Paket kartı** kuyruk satırının altında açılır (grid altı panel; kuyrukta
+çalışan kişi listeyi kaybetmeden bakabilmeli). İçerik: her USS alanı için
+`ussAlan · deger · kaynakAlan · skrsListe · gecerli · sorun` ve son 20 gönderim
+denemesi (`zaman · sonuc · httpKod · ussKod · ussMesaj · sureMs`). Geçersiz
+alanlar üstte listelenir.
+
+**Panel SALT OKUNURDUR.** Paket elle düzeltilmez: eksik kaynakta (hasta kartı,
+başvuru, muayene) düzeltilir ve paket "Yeniden Üret" ile kaynaktan yeniden
+üretilir - paketi elle düzeltmek, USS'ye giden veri ile hastanın dosyasındaki
+veriyi birbirinden ayırırdı.
+
+**Veri kalitesi panosu** (`/enabiz-pano`, mockup `enabiz_veri_kalitesi.html`)
+tek uçtan beslenir: gönderim oranı, ilk denemede başarı, süre sınırı içinde
+kalanlar, açık hatalı/eksik alanlı paket, eşlenmemiş kod; paket türüne göre
+kırılım, son 30 günün en sık hatası (hata sınıfı ile), alan bazında eksikler
+("neyi düzeltirsem kaç paket kurtulur"), eksik alanlı paketi olan hekimler ve
+son 14 günün serisi. Her sayaç ilgili ekrana götürür.
+
+**Kod eşleme** (`/enabiz-kod-esleme`, kaynak + kart) yerel tanım ile SKRS kodu
+arasındaki köprüdür: `esleme_turu` (klinik, başvuru türü, geliş/çıkış şekli,
+muayene türü, sonuç birimi, tetkik, radyoloji modalitesi — **sabit liste**),
+`yerel_kod`/`yerel_id`, `skrs_liste`/`skrs_kod`/`skrs_ad`. Eşleme yoksa paket
+"Eksik Alan" ile kuyrukta bekler; USS bilmediği kodu reddeder.
+
+Yetki: hepsi `entegrasyon` (pano ve kart GÖR, işlemler DEĞİŞTİR).
+Rehber kataloğu ve "e-Nabız süreci" konusu `db/454` ile güncellenir.
+
+---
+
 ---
 
 ## 10. Sürümleme

@@ -537,6 +537,182 @@ public static class MuayeneUclari
     {
         var grup = yol.MapGroup("/api/enabiz").WithTags("e-Nabız").RequireAuthorization();
 
+        // GET /api/enabiz/paket/{id} - PAKET KARTI (454).
+        //
+        // Kuyrukta "Eksik Alan" yazan satirin cevabi burada: hangi USS alani
+        //   bos, hangi kaynak kolondan gelmesi gerekiyordu, kacinci denemede
+        //   ne hatasi alindi. SALT OKUNUR: paket elle duzeltilmez, kaynak
+        //   duzeltilip yeniden uretilir.
+        grup.MapGet("/paket/{id:long}", async (
+            long id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("entegrasyon", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var paket = await baglanti.TekAsync("""
+                select p.id, p.paket_no as "paketNo", t.kod as "turKod", t.ad as "turAdi",
+                       t.uss_paket_kodu as "ussPaket", t.uss_surum as "ussSurum",
+                       p.islem, p.kaynak_tur as "kaynakTur", p.kaynak_id as "kaynakId",
+                       coalesce(h.unvan, '') as "hastaAdi", p.hasta_id as "hastaId",
+                       coalesce(k.ad, '') as "hekimAdi",
+                       p.olay_tarihi as "olayTarihi", p.uretim_tarihi as "uretimTarihi",
+                       p.son_tarih as "sonTarih", p.planlanan, p.durum, p.deneme,
+                       p.son_deneme as "sonDeneme", p.uss_paket_id as "ussPaketId",
+                       p.hata_kodu as "hataKodu", p.hata_mesaj as "hataMesaj",
+                       p.hata_sinifi as "hataSinifi", p.icerik_hash as "icerikHash",
+                       p.onceki_paket_id as "oncekiPaketId",
+                       t.zorunlu_alanlar as "zorunluAlanlar"
+                  from public.enabiz_paket p
+                  join public.enabiz_paket_turu t on t.id = p.paket_turu_id
+                  left join public.taraf h on h.id = p.hasta_id
+                  left join public.v_personel_lookup k on k.id = p.hekim_id
+                 where p.id = @p0
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            if (paket is null)
+                return Results.NotFound(new { hata = new
+                    { kod = "BULUNAMADI", mesaj = "Paket bulunamadı." } });
+
+            // ALANLAR: gecersiz olanlar USTTE - ekranin isi eksigi gostermek.
+            var alanlar = await baglanti.ListeAsync("""
+                select a.uss_alan as "ussAlan", a.deger, a.kaynak_alan as "kaynakAlan",
+                       a.skrs_liste as "skrsListe", a.gecerli, a.sorun, a.sira
+                  from public.enabiz_paket_alan a
+                 where a.paket_id = @p0
+                 order by a.gecerli asc, a.sira, a.id
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            var denemeler = await baglanti.ListeAsync("""
+                select g.zaman, g.ortam, g.http_kod as "httpKod", g.sonuc,
+                       g.uss_kod as "ussKod", g.uss_mesaj as "ussMesaj",
+                       g.sure_ms as "sureMs"
+                  from public.enabiz_gonderim g
+                 where g.paket_id = @p0
+                 order by g.zaman desc, g.id desc
+                 limit 20
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            return Results.Ok(new { paket, alanlar, denemeler, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // GET /api/enabiz/veri-kalitesi?ay=YYYY-MM - UYUM PANOSU (454).
+        //
+        // Mockup: Ekranlar/E-Nabiz/enabiz_veri_kalitesi.html. Soru sunucuda
+        //   cevaplanir: alti ayri istek atmak ekranin yarisini bos gosterirdi.
+        grup.MapGet("/veri-kalitesi", async (
+            string? ay, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("entegrasyon", Islem.Gor);
+
+            // Donem: "2026-09" -> ayin ilk gunu. Verilmezse icinde bulundugumuz ay.
+            var bas = DateTime.TryParse((ay ?? "") + "-01", out var d)
+                ? new DateTime(d.Year, d.Month, 1)
+                : new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            var son = bas.AddMonths(1);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var sayac = await baglanti.TekAsync("""
+                select count(*) as "uretilen",
+                       count(*) filter (where p.durum = 3) as "gonderilen",
+                       count(*) filter (where p.durum = 3 and p.deneme <= 1) as "ilkDenemede",
+                       -- SURE SINIRI: paketin son_tarih'i gecmeden gonderildi mi?
+                       count(*) filter (where p.durum = 3 and p.son_tarih is not null
+                                          and p.son_deneme <= p.son_tarih) as "suredeGiden",
+                       count(*) filter (where p.durum = 3 and p.son_tarih is not null)
+                           as "sureOlculen",
+                       count(*) filter (where p.durum = 4) as "hatali",
+                       count(*) filter (where p.durum = 0) as "eksikAlanli",
+                       count(*) filter (where p.durum in (1, 2)) as "bekleyen"
+                  from public.enabiz_paket p
+                 where p.uretim_tarihi >= @p0 and p.uretim_tarihi < @p1
+                   and (@p2 = 0 or p.sube_id = @p2)
+                """, null, [bas, son, baglam.SubeId ?? 0], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            // ESLENMEMIS KOD: gecersiz alanin SKRS listesi varsa eksik olan bir
+            //   kod eslemesidir - "kod eslemeye git" isaretini bu sayi verir.
+            var eslemeEksik = await baglanti.ListeAsync("""
+                select a.skrs_liste as "skrsListe", count(distinct a.deger) as "adet"
+                  from public.enabiz_paket_alan a
+                  join public.enabiz_paket p on p.id = a.paket_id
+                 where a.gecerli = 0 and coalesce(a.skrs_liste, '') <> ''
+                   and p.uretim_tarihi >= @p0 and p.uretim_tarihi < @p1
+                 group by a.skrs_liste order by 2 desc limit 10
+                """, null, [bas, son], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            var turler = await baglanti.ListeAsync("""
+                select t.kod, t.ad, t.uss_paket_kodu as "ussPaket",
+                       count(p.id) as "uretilen",
+                       count(p.id) filter (where p.durum = 3) as "gonderilen",
+                       count(p.id) filter (where p.durum = 4) as "hatali",
+                       count(p.id) filter (where p.durum = 0) as "eksik"
+                  from public.enabiz_paket_turu t
+                  left join public.enabiz_paket p on p.paket_turu_id = t.id
+                       and p.uretim_tarihi >= @p0 and p.uretim_tarihi < @p1
+                 group by t.id, t.kod, t.ad, t.uss_paket_kodu, t.aktif
+                 order by t.aktif desc, count(p.id) desc, t.ad
+                """, null, [bas, son], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            // EN SIK HATA: kok neden burada gorunur - ayni hata yuz paketi
+            //   birden dusuruyorsa duzeltilecek tek yer vardir.
+            var hatalar = await baglanti.ListeAsync("""
+                select coalesce(nullif(p.hata_kodu, ''), 'BILINMIYOR') as "kod",
+                       max(p.hata_mesaj) as "mesaj", p.hata_sinifi as "sinif",
+                       count(*) as "adet"
+                  from public.enabiz_paket p
+                 where p.durum = 4 and p.uretim_tarihi >= @p0 - interval '30 days'
+                 group by 1, p.hata_sinifi order by count(*) desc limit 8
+                """, null, [bas], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            // ALAN BAZINDA EKSIK: "neyi duzeltirsem kac paket kurtulur".
+            var eksikAlanlar = await baglanti.ListeAsync("""
+                select a.uss_alan as "ussAlan", max(a.kaynak_alan) as "kaynakAlan",
+                       max(a.sorun) as "sorun", count(distinct a.paket_id) as "paket"
+                  from public.enabiz_paket_alan a
+                  join public.enabiz_paket p on p.id = a.paket_id
+                 where a.gecerli = 0 and p.durum in (0, 4)
+                 group by a.uss_alan order by count(distinct a.paket_id) desc limit 10
+                """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            var hekimler = await baglanti.ListeAsync("""
+                select coalesce(k.ad, '(hekimsiz)') as "hekim",
+                       count(*) as "paket",
+                       count(*) filter (where p.durum = 0) as "eksik",
+                       count(*) filter (where p.durum = 3) as "gonderilen"
+                  from public.enabiz_paket p
+                  left join public.v_personel_lookup k on k.id = p.hekim_id
+                 where p.uretim_tarihi >= @p0 and p.uretim_tarihi < @p1
+                 group by 1 having count(*) filter (where p.durum = 0) > 0
+                 order by 3 desc limit 10
+                """, null, [bas, son], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            var gunluk = await baglanti.ListeAsync("""
+                -- generate_series TIMESTAMPTZ uretir; gun aritmetigi icin DATE'e
+                --   cevrilir (timestamptz + integer diye bir islec yok).
+                select g.gun as "gun",
+                       count(p.id) as "uretilen",
+                       count(p.id) filter (where p.durum = 3) as "gonderilen",
+                       count(p.id) filter (where p.durum = 4) as "hatali"
+                  from (select d::date as gun
+                          from generate_series(current_date - 13, current_date,
+                                               interval '1 day') d) g
+                  left join public.enabiz_paket p
+                         on p.uretim_tarihi >= g.gun and p.uretim_tarihi < g.gun + 1
+                 group by g.gun order by g.gun
+                """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            return Results.Ok(new
+            {
+                donem = bas.ToString("yyyy-MM"),
+                sayac, turler, hatalar, eksikAlanlar, eslemeEksik, hekimler, gunluk,
+                izlemeNo = baglam.IzlemeNo,
+            });
+        });
+
         // POST /api/enabiz/paket/{id}/yeniden-uret
         grup.MapPost("/paket/{id:long}/yeniden-uret", async (
             long id, BaglamCozucu cozucu, VeriKaynagi veri,

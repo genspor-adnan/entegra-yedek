@@ -2638,3 +2638,20 @@ input.skt-gecmis {
    diyorsa kullanici oraya bir tikla gitmeli - metni okuyup menude aramasin. */
 .ai-ekranlar { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px }
 .ai-ekranlar .d { height: 24px }
+
+/* e-NABIZ GUNLUK SERI (454): son 14 gunun paket sayisi. Cubugun kirmizi
+   kismi HATALI paketler - kesinti gunu tek bakista gorunsun (butun gun
+   kirmizi ise sorun kurumda degil serviste). */
+.pano-seri { display: flex; align-items: flex-end; gap: 6px; padding: 10px 12px }
+.pano-seri .sutun { flex: 1; text-align: center }
+.pano-seri .cubuk {
+  position: relative; background: var(--mor); border-radius: 2px 2px 0 0;
+  min-height: 2px; margin: 0 auto; width: 100%; max-width: 26px;
+}
+.pano-seri .cubuk i { position: absolute; left: 0; right: 0; bottom: 0; background: var(--hata) }
+.pano-seri .gun { font-size: 10px; color: var(--soluk); margin-top: 3px }
+
+/* PAKET KARTI (454): kuyruk satirinin altinda acilan salt okunur detay. */
+.enabiz-detay { display: grid; grid-template-columns: 1.3fr 1fr; gap: 10px }
+@media (max-width: 1100px) { .enabiz-detay { grid-template-columns: 1fr } }
+.enabiz-detay .eksik td { background: var(--uyarizem) }

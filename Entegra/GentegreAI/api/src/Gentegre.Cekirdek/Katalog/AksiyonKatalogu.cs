@@ -719,6 +719,10 @@ public static class AksiyonKatalogu
 
             ["lab-tetkik-liste"] = Crud("lab-tetkik", "lab-tetkik", "lab.tetkik"),
             ["lab-panel-liste"] = Crud("lab-panel", "lab-panel", "lab.tetkik"),
+            // e-NABIZ KOD ESLEME (454): duz katalog - ekle/duzenle/sil.
+            ["enabiz-kod-esleme-liste"] =
+                Crud("enabiz-kod-esleme", "enabiz-kod-esleme", "entegrasyon"),
+
             ["lab-cihaz-esleme-liste"] =
                 Crud("lab-cihaz-esleme", "lab-cihaz-esleme", "lab.cihaz",
                      "＋ Yeni", silHedef: "sagtus,palet", yazdir: false),

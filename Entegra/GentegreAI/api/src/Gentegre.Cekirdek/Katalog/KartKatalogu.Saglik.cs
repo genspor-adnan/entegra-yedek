@@ -1153,4 +1153,59 @@ public static partial class KartKatalogu
             }, SubeKolonu: null, Sirala: "sira, id", Baslik: "Tetkikler",
                LogTabloId: 962)
         });
+
+    /// <summary>
+    /// e-NABIZ KOD EŞLEME KARTI (454).
+    ///
+    /// Eşleme türü SERBEST METİN değil sabit listedir: "klinik" ile "Klinik"
+    /// iki ayrı tür sayılırsa paket üreticisi eşlemeyi bulamaz ve alan yine
+    /// eksik kalır.
+    /// </summary>
+    private static KartTanimi EnabizKodEslemeKarti() => new(
+        Ad: "enabiz-kod-esleme",
+        YetkiKodu: "entegrasyon",
+        Tablo: "public.enabiz_kod_esleme",
+        LogTabloId: 1093,
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["aktif"] = (short)1,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("eslemeTuru", "esleme_turu", "kod", Zorunlu: true,
+                SabitKodlar: EnabizEslemeTurleri, Baslik: "Eşleme Türü", Grup: "Eşleme"),
+            new("yerelKod", "yerel_kod", "metin", EnFazlaUzunluk: 60,
+                Baslik: "Yerel Kod", Grup: "Eşleme"),
+            new("yerelId", "yerel_id", "sayi", Baslik: "Yerel Kayıt Id", Grup: "Eşleme"),
+            new("aktif", "aktif", "kod", SabitKodlar: EnabizAktifKodlari,
+                Baslik: "Durum", Grup: "Eşleme"),
+
+            new("skrsListe", "skrs_liste", "metin", Zorunlu: true, EnFazlaUzunluk: 60,
+                Baslik: "SKRS Listesi", Grup: "SKRS"),
+            new("skrsKod", "skrs_kod", "metin", Zorunlu: true, EnFazlaUzunluk: 30,
+                Baslik: "SKRS Kodu", Grup: "SKRS"),
+            new("skrsAd", "skrs_ad", "metin", EnFazlaUzunluk: 200,
+                Baslik: "SKRS Karşılığı", Grup: "SKRS"),
+        });
+
+    /// <summary>Eşleme türü: paket üreticisinin aradığı anahtar.</summary>
+    private static readonly Dictionary<string, string> EnabizEslemeTurleri = new()
+    {
+        ["klinik"] = "Klinik / Bölüm",
+        ["basvuru_turu"] = "Başvuru Türü",
+        ["gelis_sekli"] = "Geliş Şekli",
+        ["cikis_sekli"] = "Çıkış Şekli",
+        ["muayene_turu"] = "Muayene Türü",
+        ["sonuc_birimi"] = "Sonuç Birimi (lab)",
+        ["tetkik"] = "Tetkik / Hizmet",
+        ["radyoloji_modalite"] = "Radyoloji Modalitesi",
+    };
+
+    private static readonly Dictionary<string, string> EnabizAktifKodlari = new()
+    {
+        ["1"] = "Aktif",
+        ["0"] = "Pasif",
+    };
 }
