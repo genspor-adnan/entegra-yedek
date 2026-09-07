@@ -1038,8 +1038,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     urunModu: 2,
     // Nukleer ikon RADYOLOJI ANA MENUSUNUN (Kabuk.GRUP_IKON); calisma listesi
     //   modalitelerin ekranidir (kullanici).
+    // EN USTTE (kullanici): radyolojinin gunluk isi burada - istem de
+    //   bu ekranin arac cubugundan acilir (ayri istem ekrani yok).
     menuGrup: 'Radyoloji', menuAd: 'Çalışma Listesi', ic: '🖥️', yetkiKodu: 'radyoloji',
-    menuSira: 10,
+    menuSira: 1,
   },
   {
     // RAPOR SABLONLARI (283/288): bolum iskeleti, makrolar ve skor alanlari.
