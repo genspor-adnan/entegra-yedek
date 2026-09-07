@@ -7798,3 +7798,26 @@ bilir, süreç konusu anlatılır), web **460**. Belge: sözleşme §9.16.
 
 **Bekleyen**: USS test hesabı / KTS tescili - gerçek XML şeması ve hasta
 geçmişi (USS'den okuma) ona bağlı.
+
+### Aynı gün — ekran kontrolü ve iki düzeltme
+
+Ekran görüntüsü kontrolünde iki şey çıktı:
+
+**Eşleme türü kodları YANLIŞTI.** Kartta sunduğum liste küçük harfliydi
+(`klinik`, `basvuru_turu`…); paket üreticisi ise `KLINIK` ve `BASVURU_TURU`
+arıyor. Kullanıcı kaydı girer, satır durur, hiçbir pakete dokunmazdı. Liste
+üreticinin gerçekten okuduğu **iki** türe indirildi (büyük harf, birebir) -
+okunmayan tür sunmak, boşuna kayıt girdirmektir. Ayrıca hangi alanın eşleştiği
+türe göre değişiyor: KLİNİK'te `yerel_id` (bölüm), başvuru türünde `yerel_kod`;
+kart artık bölümü lookup'tan seçtiriyor ve başlıklar bunu söylüyor. Listede ham
+kod yerine okunur ad ve bölüm karşılığı gösteriliyor.
+
+**Kart sekmelerinin ikonu yoktu** (nötr "▫️"): Eşleme 🔗 · SKRS 🏥 · Çevrim 🔁.
+
+**SKRS'de klinik listesi VAR.** Kodda "499 listenin tamamı tarandı, klinik yok"
+notu duruyordu; arama Türkçe karakterle yapılınca **KLİNİKLER** listesi
+çıkıyor (101 paket mockup'ı da `departman.skrs_klinik_kod` diyor). Liste
+kodlarını senkron etmeden görebilmek için salt okunur bir uç eklendi:
+`GET /api/entegrasyon/{id}/skrs-liste?ad=KLİNİKLER`. Kodları çekme çağrısı şu
+an SKRS tarafında HTTP 500 dönüyor (katalog çağrısı çalışıyor, `GetSkrsObject`
+düşüyor) - senkron bağlanınca tekrar denenecek.

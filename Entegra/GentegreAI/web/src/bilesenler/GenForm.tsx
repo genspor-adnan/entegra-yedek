@@ -117,6 +117,8 @@ const SEKME_IKON: Record<string, string> = {
   'Stok Durumu': '📦', 'Hareketler': '🔄', 'Fiyatlar': '🏷️',
   'Ek Alanlar': '➕', 'Reçete': '🧪', 'Paket İçeriği': '🧺',
   'Satırlar': '📄', 'Sevkiyat': '🚚', 'Özlük': '🗂️', 'Ayarlar': '⚙️',
+  // e-Nabiz kod eslemesi (454): notr kare iki sekmeyi de aynilastiriyordu.
+  'Eşleme': '🔗', 'SKRS': '🏥', 'Çevrim': '🔁',
 };
 const sekmeIkonu = (baslik: string) => SEKME_IKON[baslik] ?? '▫️';
 

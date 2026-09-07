@@ -1176,9 +1176,15 @@ public static partial class KartKatalogu
             new("id", "id", "sayi", Yazilabilir: false),
             new("eslemeTuru", "esleme_turu", "kod", Zorunlu: true,
                 SabitKodlar: EnabizEslemeTurleri, Baslik: "Eşleme Türü", Grup: "Eşleme"),
+            // HANGI ALAN ESLESIR, TURE GORE DEGISIR: paket üreticisi KLINIK'te
+            //   `yerel_id` (bölüm), BAŞVURU TÜRÜ'nde `yerel_kod` üzerinden
+            //   arar. İkisi de kartta duruyor; başlıklar hangisinin ne zaman
+            //   dolacağını söyler - yanlış alanı doldurmak eşlemeyi sessizce
+            //   çalışmaz hâle getirirdi.
+            new("yerelId", "yerel_id", "kod", KodTablosu: "public.v_randevu_bolum_lookup",
+                Baslik: "Bölüm (KLİNİK eşlemesi için)", Grup: "Eşleme"),
             new("yerelKod", "yerel_kod", "metin", EnFazlaUzunluk: 60,
-                Baslik: "Yerel Kod", Grup: "Eşleme"),
-            new("yerelId", "yerel_id", "sayi", Baslik: "Yerel Kayıt Id", Grup: "Eşleme"),
+                Baslik: "Yerel Kod (başvuru türü için)", Grup: "Eşleme"),
             new("aktif", "aktif", "kod", SabitKodlar: EnabizAktifKodlari,
                 Baslik: "Durum", Grup: "Eşleme"),
 
@@ -1191,16 +1197,18 @@ public static partial class KartKatalogu
         });
 
     /// <summary>Eşleme türü: paket üreticisinin aradığı anahtar.</summary>
+    /// <summary>
+    /// Eşleme türü: paket üreticisinin ARADIĞI anahtar (büyük harf, birebir).
+    ///
+    /// Listede YALNIZ üreticinin bugün okuduğu türler var. Okunmayan bir tür
+    /// sunmak, kullanıcıya boşuna kayıt girdirmek olurdu - satır durur ama
+    /// hiçbir pakete dokunmaz. Üretici yeni tür okumaya başladığında buraya
+    /// bir satır eklenir.
+    /// </summary>
     private static readonly Dictionary<string, string> EnabizEslemeTurleri = new()
     {
-        ["klinik"] = "Klinik / Bölüm",
-        ["basvuru_turu"] = "Başvuru Türü",
-        ["gelis_sekli"] = "Geliş Şekli",
-        ["cikis_sekli"] = "Çıkış Şekli",
-        ["muayene_turu"] = "Muayene Türü",
-        ["sonuc_birimi"] = "Sonuç Birimi (lab)",
-        ["tetkik"] = "Tetkik / Hizmet",
-        ["radyoloji_modalite"] = "Radyoloji Modalitesi",
+        ["KLINIK"] = "Klinik / Bölüm (bölüm ile eşleşir)",
+        ["BASVURU_TURU"] = "Başvuru Türü (yerel kod ile eşleşir)",
     };
 
     private static readonly Dictionary<string, string> EnabizAktifKodlari = new()

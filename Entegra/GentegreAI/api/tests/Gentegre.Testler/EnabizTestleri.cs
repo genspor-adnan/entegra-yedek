@@ -42,7 +42,10 @@ public class EnabizTestleri : IClassFixture<VeritabaniOlgusu>
         Assert.NotNull(alan);
         Assert.Equal("kod", alan!.Tip);
         Assert.NotNull(alan.SabitKodlar);
-        Assert.Contains("klinik", alan.SabitKodlar!.Keys);
+        // Kodlar üreticinin aradığı anahtarla BİREBİR: küçük harfle yazılan
+        //   bir tür hiçbir pakete dokunmazdı.
+        Assert.Contains("KLINIK", alan.SabitKodlar!.Keys);
+        Assert.Contains("BASVURU_TURU", alan.SabitKodlar!.Keys);
     }
 
     [Fact]

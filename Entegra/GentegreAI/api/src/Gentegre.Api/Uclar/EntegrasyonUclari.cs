@@ -99,6 +99,43 @@ public static class EntegrasyonUclari
             return Results.Ok(new { toplam = katalog.Count, satirlar, izlemeNo = baglam.IzlemeNo });
         });
 
+        // ------------------------------------------- SKRS liste ONIZLEME ----
+        // GET /api/entegrasyon/{id}/skrs-liste?ad=KLİNİKLER&ara=…
+        //
+        // Bir listenin KODLARINI senkron etmeden gösterir. Eşlemeyi kuran kişi
+        //   "SKRS'de bu kodun karşılığı ne" sorusunu ancak listeyi görerek
+        //   cevaplıyordu; kod eşleme ekranına elle SKRS kodu yazmak, yanlış
+        //   kodun paketin içine sessizce girmesi demekti.
+        grup.MapGet("/{id:int}/skrs-liste", async (
+            int id, string ad, string? ara, BaglamCozucu cozucu, VeriKaynagi veri,
+            IHttpClientFactory istemciler, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("entegrasyon", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var hesap = await HesapOkuAsync(baglanti, id, iptal);
+            if (!string.Equals(hesap.Kod, "SKRS", StringComparison.OrdinalIgnoreCase))
+                throw GentegreHatasi.IsKurali("Bu işlem yalnız SKRS hesabında çalışır.");
+
+            var katalog = await SkrsKatalogAsync(hesap, istemciler, iptal);
+            if (!katalog.TryGetValue(Anahtar(ad ?? ""), out var guid))
+                throw GentegreHatasi.IsKurali(
+                    $"SKRS kod listesinde \"{ad}\" yok. Adları /skrs-listeler ile görebilirsiniz.");
+
+            var kodlar = await SkrsListesiCekAsync(hesap, guid, istemciler, iptal);
+            var suz = Anahtar(ara ?? "");
+            var satirlar = kodlar
+                .Where(k => suz.Length == 0 || Anahtar(k.Ad).Contains(suz, StringComparison.Ordinal)
+                            || k.Kod.Contains(suz, StringComparison.Ordinal))
+                .Take(500)
+                .Select(k => new { kod = k.Kod, ad = k.Ad, ust = k.Ust })
+                .ToList();
+
+            return Results.Ok(new { ad, guid, toplam = kodlar.Count, satirlar,
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
         // ---------------------------------------------------- bağlantı sına --
         // Kimlik ve adres doğru mu: servise en ucuz çağrı yapılır, sonuç
         //   kayda yazılır (son_kullanim / son_sonuc) - kullanıcı ekranda görür.

@@ -416,15 +416,26 @@ public static partial class KaynakKatalogu
     private static KaynakTanimi EnabizKodEsleme() => new(
         Ad: "enabiz-kod-esleme",
         YetkiKodu: "entegrasyon",
-        Kaynak: "public.enabiz_kod_esleme e",
+        Kaynak: "public.enabiz_kod_esleme e "
+              + "  left join public.v_randevu_bolum_lookup b on b.id = e.yerel_id",
         SubeKolonu: null,                    // eşleme kurum geneli tanımdır
         VarsayilanSirala: "e.esleme_turu asc, e.yerel_kod asc",
         Kolonlar: new KolonTanimi[]
         {
             new("id", "e.id", "sayi", "Id", Varsayilan: false),
-            new("eslemeTuru", "e.esleme_turu", "metin", "Eşleme Türü", Genislik: 170),
+            // Ham kod SUZGEC icin durur, ekranda OKUNUR ad gosterilir:
+            //   "KLINIK" teknik anahtardir, kullanicinin dili degil.
+            new("eslemeTuruAdi",
+                "case e.esleme_turu when 'KLINIK' then 'Klinik / Bölüm' "
+                + "when 'BASVURU_TURU' then 'Başvuru Türü' else e.esleme_turu end",
+                                 "metin", "Eşleme Türü", Genislik: 170,
+                                 Filtrelenebilir: false),
+            new("eslemeTuru", "e.esleme_turu", "metin", "Tür Kodu", Hizalama: "orta",
+                                 Genislik: 130, Varsayilan: false),
+            new("yerelAdi", "coalesce(b.ad, e.yerel_kod)", "metin", "Yerel Karşılık",
+                                 Genislik: 180),
             new("yerelKod", "e.yerel_kod", "metin", "Yerel Kod", Hizalama: "orta",
-                                 Genislik: 140),
+                                 Genislik: 120, Varsayilan: false),
             new("yerelId", "e.yerel_id", "sayi", "Yerel Id", Varsayilan: false),
             new("skrsListe", "e.skrs_liste", "metin", "SKRS Listesi", Genislik: 180),
             new("skrsKod", "e.skrs_kod", "metin", "SKRS Kodu", Hizalama: "orta",
