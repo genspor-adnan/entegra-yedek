@@ -54,6 +54,10 @@ interface Props {
       Seri / XSLT / tur ayarlari). Verilmezse sekme dogrudan cizilir. */
   sekmeSarmalayici?(sekmeBasligi: string, icerik: React.ReactNode,
                     deger: Record<string, Deger>): React.ReactNode;
+  /** SERIDIN USTUNDE cizilen ekran-ozel baglam kutulari (or. muayene kartinda
+      hasta/alerji/aktif ilac - mockup muayene_karti.html). Kart degerini alir
+      cunku hangi hastanin gosterilecegi karttan cikar. */
+  ustBaglam?(deger: Record<string, Deger>): React.ReactNode;
   /** Ust seritte kalacak alan adlari. Verilmezse "Kimlik" grubunun TAMAMI seritte
       (varsayilan davranis). Verilirse serit bunlarla sinirlanir, grubun kalani
       "Kimlik" sekmesine duser - kimlik alani cok olan kartlarda serit sismesin. */
@@ -123,6 +127,7 @@ const SEKME_IKON: Record<string, string> = {
 const sekmeIkonu = (baslik: string) => SEKME_IKON[baslik] ?? '▫️';
 
 export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarmalayici, onKaydedildi, yerTutucuSekmeler,
+                          ustBaglam,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
   const { kullanici } = useOturum();
@@ -784,6 +789,10 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
       }
       ustSerit={(
         <>
+        {/* EKRAN-OZEL BAGLAM (461): kimlik seridinin USTUNDE. Muayenede
+            alerji/kronik/aktif ilac hekimin yazarken gormesi gereken bilgi -
+            ayri sekmede durursa bakilmaz. */}
+        {ustBaglam?.(deger)}
         {kimlikAlanlari.length > 0 && (
         <div className="kaid">
           {/* AVATAR (305, kullanici: "ad soyadin soluna avatar ekle"): ad ve

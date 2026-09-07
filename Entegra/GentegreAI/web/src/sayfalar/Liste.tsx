@@ -5,6 +5,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { RandevuTakvimi } from '../bilesenler/RandevuTakvimi';
 import { GenForm } from '../bilesenler/GenForm';
+import { MuayeneBaglamSeridi } from '../bilesenler/MuayeneBaglamSeridi';
 import { MuayeneIstemSonuc } from '../bilesenler/MuayeneIstemSonuc';
 import {
   type EBelgeMesaji, type Kosul, type ListeSatiri, type RandevuBolumDugumu, hataMetni,
@@ -2123,6 +2124,12 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
                 )}
               </>
             )
+          : undefined}
+        // MUAYENE BAGLAM SERIDI (461, mockup muayene_karti.html): hasta,
+        //   alerji/kronik, aktif ilac ve bugunun notu her sekmenin ustunde
+        //   durur - hekim ilac yazarken alerjiyi ayri sekmede aramamali.
+        ustBaglam={tanim.kaynak === 'muayene' && kartId !== 'yeni'
+          ? () => <MuayeneBaglamSeridi muayeneId={Number(kartId)} />
           : undefined}
         baslik={tanim.kartBaslik ?? tanim.baslik.replace(/ler$|lar$/, '')}
         yerTutucuSekmeler={tanim.yerTutucuSekmeler}

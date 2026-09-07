@@ -2664,3 +2664,28 @@ input.skt-gecmis {
 .enabiz-detay { display: grid; grid-template-columns: 1.3fr 1fr; gap: 10px }
 @media (max-width: 1100px) { .enabiz-detay { grid-template-columns: 1fr } }
 .enabiz-detay .eksik td { background: var(--uyarizem) }
+
+/* ===================================================================
+   KART BAGLAM SERIDI (461) - mockup Ekranlar/Muayene/muayene_karti.html
+   ustundeki dort kutu (.hdr.k4): Hasta · Alerji/Kronik · Aktif ilaclar ·
+   Bugun. Mockup'ta oldugu gibi ACIK ZEMIN uzerinde ince cerceveli kutular,
+   etiket 10.5px soluk, icerik 11.5px - kart alan izgarasiyla ayni yogunluk.
+   =================================================================== */
+.kart-baglam {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  padding: 8px 10px; background: var(--yuz2); border-bottom: 1px solid var(--cizgi2);
+}
+@media (max-width: 1100px) { .kart-baglam { grid-template-columns: repeat(2, 1fr) } }
+@media (max-width: 700px)  { .kart-baglam { grid-template-columns: 1fr } }
+.kart-baglam .kb-kutu {
+  border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--yuz);
+  padding: 5px 8px; min-width: 0;
+}
+.kart-baglam .kb-bas { font-size: 10.5px; color: var(--soluk); margin-bottom: 2px }
+.kart-baglam .kb-ic {
+  font-size: 11.5px; line-height: 1.6; display: flex; flex-wrap: wrap;
+  gap: 4px; align-items: center; min-width: 0;
+}
+/* Ilac adi rozet DEGIL (mockup): rozet "uyari" demek, ilac listesi bilgidir. */
+.kart-baglam .kb-ilac { white-space: nowrap }
+.kart-baglam .kb-ilac + .kb-ilac::before { content: '· '; color: var(--soluk) }
