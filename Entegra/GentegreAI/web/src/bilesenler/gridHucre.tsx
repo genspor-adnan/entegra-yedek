@@ -201,6 +201,12 @@ export function ikonHucre(deger: unknown, kolon: KolonMeta) {
  */
 const ROZET_DESENI: { desen: RegExp; sinif: string }[] = [
   { desen: /GECİKTİ/i, sinif: 'hata' },
+  // Muayene listesi "Uyarı" kolonu (461): onem sirasi renkte de gorunsun.
+  { desen: /^PANİK/i, sinif: 'hata' },
+  { desen: /^Alerji/i, sinif: 'uyari' },
+  { desen: /^Tanı girilmedi/i, sinif: 'uyari' },
+  { desen: /^Sonuç geldi/i, sinif: 'olumlu' },
+  { desen: /^Online$/i, sinif: 'mavi' },
   { desen: /gün var$/i, sinif: 'gri' },
   { desen: /sa sonra$/i, sinif: 'gri' },
 ];

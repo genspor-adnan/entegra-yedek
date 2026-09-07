@@ -37,11 +37,64 @@ public static partial class KaynakKatalogu
                                                      Genislik: 110, Varsayilan: false),
             new("bolumAdi",      "coalesce(d.ad, '')", "metin", "Bölüm", Genislik: 150),
             new("hekimAdi",      "coalesce(p.ad, '')", "metin", "Hekim", Genislik: 180),
+            // KANAL (461, mockup muayene_listesi.html "Kanal"): hastanin nasil
+            //   geldigi - uzaktan (teletip) muayene ile yuz yuze ayni listede
+            //   durur, hekim hangisine hazirlanacagini bilmeli.
+            // Kanal YALNIZ iletisim bicimi: uzaktan (teletip) mi, yuz yuze mi.
+            //   Muayenenin TURU (kontrol/konsultasyon) ayri bilgidir ve
+            //   "Tür" kolonunda durur - ikisini tek kolona sikistirmak
+            //   "Kontrol" ile "Online"i ayni sutunda yarisirdi.
+            new("kanal",
+                "case m.tur when 2 then 'Online' else 'Yüz yüze' end",
+                                          "metin", "Kanal", Hizalama: "orta",
+                                          Bicim: "rozet", Genislik: 110,
+                                          Filtrelenebilir: false),
+
+            // UYARI (461): hekimin satira bakmadan once gormesi gerekeni TEK
+            //   kolonda toplar. Sira ONEM sirasi: panik deger > alerji >
+            //   tamamlanmis ama tanisiz > yeni gelen sonuc. Karar SUNUCUDA
+            //   uretilir - istemci "alerji var mi" diye ayrica sorgulamaz.
+            // UYARI (461): hekimin satira bakmadan once gormesi gerekeni TEK
+            //   kolonda toplar. Sira ONEM sirasi: panik deger > alerji >
+            //   tamamlanmis ama tanisiz > sonuc geldi. Karar SUNUCUDA uretilir;
+            //   istemci "alerji var mi" diye ayrica sorgulamaz.
+            //
+            // ISTEM MUAYENEYE DEGIL BASVURUYA BAGLI: `muayene_istem` yalniz
+            //   muayeneden acilan istemi baglar; bankodan/kabulden acilan
+            //   tetkik yalnizca belge (basvuru) uzerinden gorunur. Ilk surum
+            //   bag tablosuna bakiyordu ve uyari hep bos kaliyordu.
+            new("uyari",
+                """
+                case
+                  when exists (
+                    select 1 from public.lab_istem li
+                      join public.lab_istem_satir ls on ls.istem_id = li.id
+                      join public.lab_sonuc so on so.istem_satir_id = ls.id
+                     where li.belge_id = m.belge_id and so.panik = 1)
+                    then 'PANİK sonuç'
+                  when exists (
+                    select 1 from public.hasta_alerji al
+                     where al.hasta_id = m.taraf_id and coalesce(al.aktif, 1) = 1)
+                    then 'Alerji kaydı var'
+                  when m.durum = 3 and not exists (
+                    select 1 from public.tani ta where ta.muayene_id = m.id)
+                    then 'Tanı girilmedi'
+                  when m.durum = 2 and exists (
+                    select 1 from public.lab_istem li
+                      join public.lab_istem_satir ls on ls.istem_id = li.id
+                      join public.lab_sonuc so on so.istem_satir_id = ls.id
+                     where li.belge_id = m.belge_id and so.onay_zamani is not null)
+                    then 'Sonuç geldi'
+                  else '' end
+                """,                      "metin", "Uyarı", Hizalama: "orta",
+                                          Bicim: "rozet", Genislik: 140,
+                                          Filtrelenebilir: false, Siralanabilir: false),
+
             new("turAdi",
                 "case m.tur when 2 then 'Uzaktan' when 3 then 'Konsültasyon' "
                 + "when 4 then 'Kontrol' else 'Yüz Yüze' end",
                                                      "metin", "Tür", Hizalama: "orta",
-                                                     Bicim: "rozet", Genislik: 120,
+                                                     Bicim: "rozet", Varsayilan: false, Genislik: 120,
                                                      Filtrelenebilir: false),
             new("tur",           "m.tur",            "kod",   "Tür Kodu", Varsayilan: false),
             // TANI ARTIK SATIRDA (409): listede ANA tanı gösterilir - hekim
