@@ -469,7 +469,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Muayene', menuAd: 'Reçeteler', ic: '💊', yetkiKodu: 'muayene',
+    menuSira: 30, menuGrup: 'Muayene', menuAd: 'Reçeteler', ic: '💊', yetkiKodu: 'muayene',
   },
   {
     // TIBBI OZET (420) - hasta basina tek satir: alerji / kronik / ilac.
@@ -480,7 +480,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     aksiyonEkrani: 'cikti-liste',
     tarihAlani: 'sonMuayene',
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Muayene', menuAd: 'Tıbbi Özet', ic: '📖', yetkiKodu: 'muayene',
+    menuSira: 40, menuGrup: 'Muayene', menuAd: 'Tıbbi Özet', ic: '📖', yetkiKodu: 'muayene',
   },
   {
     // KRONIK TANILAR (420) - muayenede "kronik" isaretlenen tani buraya
@@ -496,7 +496,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Muayene', menuAd: 'Kronik Tanılar', ic: '🩹', yetkiKodu: 'muayene',
+    menuSira: 50, menuGrup: 'Muayene', menuAd: 'Kronik Tanılar', ic: '🩹', yetkiKodu: 'muayene',
   },
   {
     // GECMIS OLAYLAR (420) - ameliyat / girisim / yatis / asi / travma.
@@ -506,7 +506,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     aksiyonEkrani: 'cari-liste',
     tarihAlani: 'tarih',
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Muayene', menuAd: 'Geçmiş Olaylar', ic: '🏥', yetkiKodu: 'muayene',
+    menuSira: 60, menuGrup: 'Muayene', menuAd: 'Geçmiş Olaylar', ic: '🏥', yetkiKodu: 'muayene',
   },
   {
     // HASTA ALERJILERI (413) - ETKEN MADDE bazli. Marka uzerinden tutmak
@@ -520,7 +520,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Muayene', menuAd: 'Alerjiler', ic: '⚠️', yetkiKodu: 'muayene',
+    menuSira: 70, menuGrup: 'Muayene', menuAd: 'Alerjiler', ic: '⚠️', yetkiKodu: 'muayene',
   },
   {
     // HASTANIN KULLANDIGI ILACLAR (413) - recete satirlarinin kopyasi DEGIL:
@@ -535,14 +535,14 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Muayene', menuAd: 'Kullanılan İlaçlar', ic: '🧾', yetkiKodu: 'muayene',
+    menuSira: 80, menuGrup: 'Muayene', menuAd: 'Kullanılan İlaçlar', ic: '🧾', yetkiKodu: 'muayene',
   },
   {
     // MUAYENE SABLONLARI (411) - brans/kisisel fizik muayene sablonlari.
     //   Alanlar kartin "Alanlar" detayinda; sablon uygulaninca her alan bir
     //   bulgu satiri olarak acilir ve "normal" isaretlenir.
     kaynak: 'muayene-sablon', rota: 'muayene-sablon', baslik: 'Muayene Şablonları',
-    yol: 'Ayarlar › Muayene Şablonları',
+    yol: 'Muayene › Muayene Ayarları › Muayene Şablonları',
     kartYolu: '/muayene-sablon', kartBaslik: 'Muayene Şablonu',
     aksiyonEkrani: 'cari-liste',
     cipler: [
@@ -550,14 +550,14 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Yönetim', menuAltGrup: 'Muayene',
+    menuSira: 90, menuGrup: 'Muayene', menuAltGrup: 'Muayene Ayarları',
     menuAd: 'Muayene Şablonları', ic: '📋', yetkiKodu: 'muayene',
   },
   {
     // METIN MAKROLARI (411) - kisayoldan hazir metin. Sablon ALAN tanimlar,
     //   makro METIN uretir: biri yapiyi, oteki hizi cozer.
     kaynak: 'metin-makro', rota: 'metin-makro', baslik: 'Metin Makroları',
-    yol: 'Ayarlar › Metin Makroları',
+    yol: 'Muayene › Muayene Ayarları › Metin Makroları',
     kartYolu: '/metin-makro', kartBaslik: 'Metin Makrosu',
     aksiyonEkrani: 'cari-liste',
     cipler: [
@@ -565,7 +565,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Yönetim', menuAltGrup: 'Muayene',
+    menuSira: 92, menuGrup: 'Muayene', menuAltGrup: 'Muayene Ayarları',
     menuAd: 'Metin Makroları', ic: '⌨️', yetkiKodu: 'muayene',
   },
   {
@@ -587,7 +587,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Muayene', menuAd: 'Çalışma Listesi', ic: '📋', yetkiKodu: 'muayene',
+    menuSira: 20, menuGrup: 'Muayene', menuAd: 'Çalışma Listesi', ic: '📋', yetkiKodu: 'muayene',
   },
   {
     // MUAYENE (409, Faz 1): tip merkezindeki uzman hekim muayenesi -
@@ -606,7 +606,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Muayene', menuAd: 'Muayeneler', ic: '🩺', yetkiKodu: 'muayene',
+    menuSira: 10, menuGrup: 'Muayene', menuAd: 'Muayeneler', ic: '🩺', yetkiKodu: 'muayene',
   },
   {
     // LABORATUVAR ISTEMLERI (360): biyokimya / mikrobiyoloji / genetik.
