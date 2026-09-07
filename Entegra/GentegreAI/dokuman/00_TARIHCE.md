@@ -7968,3 +7968,19 @@ GenForm'a dört slot eklendi (`ustBaglam`, `altBilgi`, `ekAraclar`,
 `interval '1 day'` ile; (2) `radyoloji_rapor.onay_zamani` yok, kolon adı
 `onay_tarihi`; (3) `.mo-deger` hem global hem kap içinde tanımlanınca tema
 sınıf çakışması testi kırıldı - global ad kaldırıldı.
+
+### Anamnez sekmesi (kullanıcı: "mockup gibi olsun")
+
+Mockup'ta anamnez tek sütun akar ve etiket alanın **üstünde** durur; şikâyet
+~2, hikâye ~3 satırlık serbest metin kutusudur. Kartta ise alanlar iki-sütun
+ızgarada, etiket solda ve tek satırlık `input` olarak çiziliyordu.
+
+- `sikayet` / `hikaye` alanlarına `EnFazlaUzunluk: 4000` verildi - uzun metin
+  kuralı (≥400) bunları `textarea` çiziyor. Sunucu tarafı kural: alanın kaç
+  satır olacağı ekranda değil **kart kataloğunda** belli.
+- `hikaye` başlığı "Hikâye" oldu (mockup yazımı).
+- `ozgecmisNotu` / `soygecmisNotu` / `aliskanlikNotu` alanlarındaki
+  `AltGrup: "Geçmiş"` kaldırıldı - mockup'ta ara başlık yok, akış tek parça.
+- `tema.css`: yalnız `.muayene-ikili .mi-sol` içinde ızgara tek sütuna iner,
+  etiket üste geçer, `textarea` en az 54 px (hikâye 72 px). Kapsam sol panele
+  bağlı - genel kart yerleşimi değişmedi.

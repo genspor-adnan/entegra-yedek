@@ -283,17 +283,23 @@ public static partial class KartKatalogu
                 Baslik: "İsteyen Muayene (Konsültasyon)", Grup: "Kimlik", AltGrup: "Süre"),
 
             // --------------------------------------------------- anamnez ----
-            new("sikayet", "sikayet", "metin", Baslik: "Şikayet", Grup: "Anamnez"),
-            new("hikaye", "hikaye", "metin", Baslik: "Hikaye", Grup: "Anamnez"),
+            // SIKAYET/HIKAYE COK SATIRLI (mockup muayene_karti.html): kolon `text`
+            //   ama sinir verilmedigi icin kart TEK SATIRLIK kutu ciziyordu -
+            //   hekim yazdiginin son kelimesini goruyordu. 4000 sinir hem
+            //   dogrulama hem cok satirli kutu (uzun-metin kurali).
+            new("sikayet", "sikayet", "metin", EnFazlaUzunluk: 4000,
+                Baslik: "Şikayet", Grup: "Anamnez"),
+            new("hikaye", "hikaye", "metin", EnFazlaUzunluk: 4000,
+                Baslik: "Hikâye", Grup: "Anamnez"),
             // Ozgecmis / soygecmis / aliskanlik BURADA SERBEST NOTTUR; yapisal
             //   karsiliklari hastanin tibbi gecmisinde (Faz 1 ortak platform)
             //   yasar - muayene aninda yazilan not oraya islenir.
             new("ozgecmisNotu", "ozgecmis_notu", "metin", Baslik: "Özgeçmiş",
-                Grup: "Anamnez", AltGrup: "Geçmiş"),
+                Grup: "Anamnez"),
             new("soygecmisNotu", "soygecmis_notu", "metin", Baslik: "Soygeçmiş",
-                Grup: "Anamnez", AltGrup: "Geçmiş"),
+                Grup: "Anamnez"),
             new("aliskanlikNotu", "aliskanlik_notu", "metin", Baslik: "Alışkanlıklar",
-                Grup: "Anamnez", AltGrup: "Geçmiş"),
+                Grup: "Anamnez"),
 
             // --------------------------------------------- fizik muayene ----
             new("sablonId", "sablon_id", "kod", KodTablosu: "public.v_muayene_sablon_lookup",

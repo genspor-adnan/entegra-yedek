@@ -2755,3 +2755,17 @@ input.skt-gecmis {
 .mo-kutu.uy  .mo-deger { color: var(--uyari) }
 .mo-kutu.teh { border-color: var(--hata); background: var(--hatazem) }
 .mo-kutu.teh .mo-deger { color: var(--hata) }
+
+/* MUAYENE ANAMNEZ SOL SUTUNU (461) - mockup muayene_karti.html: her alan
+   TAM GENISLIK, etiket USTTE, sikayet/hikaye cok satirli. Genel kart
+   izgarasi iki sutun ve etiket solda; anamnez metni bu duzende dar kaliyor
+   ve mockup ailesinden kopuyordu. Kural YALNIZ bu sutuna baglidir. */
+.muayene-ikili .mi-sol .alan-izgara { grid-template-columns: 1fr; gap: 8px 0 }
+.muayene-ikili .mi-sol .alan { grid-template-columns: 1fr; row-gap: 2px; align-items: start }
+.muayene-ikili .mi-sol .alan .etiket { grid-column: 1; font-size: 10.5px }
+.muayene-ikili .mi-sol .alan input,
+.muayene-ikili .mi-sol .alan select,
+.muayene-ikili .mi-sol .alan textarea { grid-column: 1 }
+/* Sikayet iki, hikaye uc satir (mockup oranlari). */
+.muayene-ikili .mi-sol .alan textarea { min-height: 54px }
+.muayene-ikili .mi-sol .tip-metin:nth-of-type(2) textarea { min-height: 72px }
