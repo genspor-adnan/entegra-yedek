@@ -145,12 +145,50 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tanilar, tazele }:
         )}
       </div>
 
+      {/* RECETE YOKKEN DE MOCKUP DUZENI (kullanici: "alti bos"): baslik
+          izgarasi ve bos ilac tablosu, ilk ilac eklenince ayni yerde dolar -
+          bos sayfa "burada ne olacak" sorusunu cevapsiz birakiyordu. */}
       {veri && veri.receteler.length === 0 && (
-        <p className="not ic">
-          Bu muayenede reçete yok. <b>＋ İlaç</b> ile ilk ilacı ekleyin -
-          reçete kendiliğinden açılır; imzalanınca e-Nabız reçete paketi
-          kuyruğa girer.
-        </p>
+        <div className="kagrup">
+          <h6>
+            Yeni reçete
+            <span className="rozet gri">Taslak</span>
+            <span className="not">＋ İlaç ile ilk ilaç eklenince açılır</span>
+          </h6>
+          <div className="recete-baslik">
+            <div className="rb-kutu">
+              <div className="rb-etiket">Reçete türü</div>
+              <div className="rb-deger">Normal</div>
+            </div>
+            <div className="rb-kutu">
+              <div className="rb-etiket">Provizyon</div>
+              <div className="rb-deger sonuk">Medula kapısı açık değil</div>
+            </div>
+            <div className="rb-kutu">
+              <div className="rb-etiket">Tanı</div>
+              <div className="rb-deger">{tanilar || <span className="sonuk">—</span>}</div>
+            </div>
+            <div className="rb-kutu">
+              <div className="rb-etiket">Açıklama</div>
+              <div className="rb-deger sonuk">—</div>
+            </div>
+          </div>
+          <table className="detay-tablo">
+            <thead>
+              <tr>
+                <th>İlaç (barkod)</th><th>Doz</th><th>Periyot</th>
+                <th>Kullanım</th><th className="hiza-orta">Süre</th>
+                <th className="hiza-sag">Kutu</th><th>Not</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colSpan={7} className="bos">
+                Henüz ilaç yok - <b>＋ İlaç</b> ile ekleyin; imzalanınca
+                e-Nabız reçete paketi kuyruğa girer.
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
       )}
 
       {veri?.receteler.map(r => {

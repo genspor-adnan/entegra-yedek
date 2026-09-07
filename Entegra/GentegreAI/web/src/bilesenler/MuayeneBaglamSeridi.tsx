@@ -120,8 +120,10 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
           {/* CINSIYET + YAS ADIN SAGINDA (kullanici: "K 45y"): doz, referans
               araligi ve tetkik karari once bu ikisine bakar. Ikisi de
               SUNUCUDAN hazir metin gelir - yas hesabini ekran yapmaz. */}
+          {/* ROZET DEGIL DUZ METIN (kullanici): ad satirinda ikinci bir
+              cerceve gorsel gurultuydu. */}
           {(cinsiyet || yas) && (
-            <span className="rozet gri" title="Cinsiyet · yaş">
+            <span className="sonuk" title="Cinsiyet · yaş">
               {/* Cinsiyet SIMGESI + harf (kullanici: "Ali Er ♂E 48y"): simge
                   bir bakista, harf de yazidan okunanla ayni olsun. */}
               {cinsiyet === 'E' ? '♂' : cinsiyet === 'K' ? '♀' : ''}

@@ -860,11 +860,16 @@ public static class AksiyonKatalogu
                 new("muayene.tamamla", "✔ Tamamla", "muayene",
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "muayene", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                // ISTEM AC ve SABLON UYGULA LISTEDE YOK (kullanici): ikisi de
+                //   muayene KARTININ sekmelerinde yapiliyor (Istem & Sonuclar,
+                //   Fizik Muayene). Listede tekrar etmek, hangi muayeneye
+                //   uygulandigini karti acmadan gormeyi zorlastiriyordu.
+                //   Aksiyon KODLARI duruyor - kart arac cubugu onlari cagiriyor.
                 new("muayene.istem", "🔬 İstem Aç", "muayene",
-                    Hedef: "araccubugu,sagtus,palet",
+                    Hedef: "sagtus",
                     KaynakKodu: "muayene", Islem: Islem.Degistir, KayitGerekir: true, Sira: 25),
                 new("muayene.sablon", "📋 Şablon Uygula", "muayene",
-                    Hedef: "araccubugu,sagtus,palet",
+                    Hedef: "sagtus",
                     KaynakKodu: "muayene", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30),
                 // Mockup fizik muayene araç çubuğu: şablonla açılmış boş
                 //   satırları tek tıkla "normal" işaretler. Yazılmış bulguya
