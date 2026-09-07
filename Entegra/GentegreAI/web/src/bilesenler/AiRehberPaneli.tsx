@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { useAiBaglam } from './aiBaglam';
+import { Kalinla } from './kalinMetin';
 
 /**
  * AI REHBER PANELİ (447) — sağ altta duran yol gösterici.
@@ -43,12 +44,6 @@ const ORNEKLER = [
   'Bir cariye fatura nasıl keserim?',
   'Hastanın laboratuvar sonucuna nereden bakarım?',
 ];
-
-/** **kalın** yazımını güvenle çizer (HTML enjekte edilmez). */
-function Kalinla({ metin }: { metin: string }) {
-  const parcalar = metin.split(/\*\*(.+?)\*\*/g);
-  return <>{parcalar.map((p, i) => (i % 2 === 1 ? <b key={i}>{p}</b> : p))}</>;
-}
 
 /**
  * Kart rotasindan kayit: "/cari/4868" -> ("cari", 4868). Liste rotasinda

@@ -313,11 +313,24 @@ public static class AiUclari
 
             var yanit = kalem.ToString();
 
+            // EKRAN DÜĞMESİ: "yeni randevu aç" diyen kullanıcı metin değil
+            //   ekranı bekliyor. Rota mesajla saklanır (mesaj yeniden
+            //   yüklendiğinde düğme kaybolmasın); YETKİ süzgecinden geçmiş
+            //   rotalar - rehber yetkisiz ekranın rotasını zaten döndürmez.
+            //   Asistan ekranı KENDİ AÇMAZ: düğmeye kullanıcı basar.
+            var ekranVerisi = JsonSerializer.Serialize(new
+            {
+                // Alan adları KÜÇÜK harfle yazılır: bu jsonb doğrudan istemciye
+                //   gidiyor, uçların camelCase sözleşmesinden geçmiyor.
+                ekranlar = rehberYanit.OnerilenEkranlar
+                    .Select(e => new { rota = e.Rota, yol = e.Yol }).ToList(),
+            });
+
             var bMesaj = await baglanti.TekAsync("""
-                insert into public.ai_mesaj (sohbet_id, rol, metin, model)
-                values (@p0, 2, @p1, @p2)
+                insert into public.ai_mesaj (sohbet_id, rol, metin, model, veri)
+                values (@p0, 2, @p1, @p2, @p3::jsonb)
                 returning id
-                """, null, [sohbetId, yanit, rehberYanit.Model],
+                """, null, [sohbetId, yanit, rehberYanit.Model, ekranVerisi],
                 OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { mesajId = Convert.ToInt32(bMesaj!["id"]), kayit = 0,

@@ -526,10 +526,12 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
         }
 
         // Yakın diğer konular: "bunu mu demek istediniz" yerine ekran önerisi.
+        // ADIMLAR ÖNCE, ÇEKİNCE SONRA. Eski metin düşük güvende yalnız
+        //   "sanırım şunu soruyorsunuz?" diyordu; adımlar altta dursa da
+        //   kullanıcı bunu "cevap vermedi, ekran önerdi" diye okuyordu.
         var cevap = $"**{baslik}** — {adimlar.Count} adım:";
-        if (guven < 0.55m)
-            cevap = $"Sanırım **{baslik}** konusunu soruyorsunuz. Farklı bir şey "
-                  + "kastettiyseniz sorunuzu biraz açar mısınız?";
+        if (guven < 0.45m)
+            cevap += " (tam emin değilim; başka bir şey kastettiyseniz sorunuzu açın)";
 
         var anaAksiyon = await baglanti.TekDegerAsync<string>(
             "select aksiyon_ekrani from public.ai_rehber_ekran "

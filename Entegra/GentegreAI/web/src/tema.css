@@ -2633,3 +2633,8 @@ input.skt-gecmis {
 .rehber-oneri .bas b { flex: 1 }
 .rehber-oneri .bas .d { height: 18px; padding: 0 5px; font-size: 10px }
 .rehber-oneri .ac { color: var(--soluk); margin-top: 2px }
+
+/* SOHBET CEVABININ EKRAN DUGMELERI (450): rehber "su ekrandan yaparsin"
+   diyorsa kullanici oraya bir tikla gitmeli - metni okuyup menude aramasin. */
+.ai-ekranlar { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px }
+.ai-ekranlar .d { height: 24px }

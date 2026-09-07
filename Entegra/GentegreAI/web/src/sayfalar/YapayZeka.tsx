@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { guvenli } from '../bilesenler/mesaj';
+import { Kalinla } from '../bilesenler/kalinMetin';
 
 /**
  * YAPAY ZEKA (341/343) — İletişim & AI › Yapay Zeka.
@@ -41,6 +43,19 @@ function tabloVerisi(veri: unknown): Record<string, unknown>[] | null {
   return Array.isArray(d) && d.length > 0 ? d as Record<string, unknown>[] : null;
 }
 
+/**
+ * Rehber cevabının EKRANLARI (450): `{ ekranlar: [{ rota, yol }] }`.
+ * Araç sonucu (satır dizisi) değil - tablo çizimiyle karışmasın diye ayrı
+ * okunur. Rotalar sunucuda yetki süzgecinden geçti.
+ */
+function ekranVerisi(veri: unknown): { rota: string; yol: string }[] {
+  if (veri === null || veri === undefined) return [];
+  const d = typeof veri === 'string' ? JSON.parse(veri) as unknown : veri;
+  if (!d || Array.isArray(d) || typeof d !== 'object') return [];
+  const e = (d as { ekranlar?: unknown }).ekranlar;
+  return Array.isArray(e) ? e as { rota: string; yol: string }[] : [];
+}
+
 /** Mockup "Excel'e aktar": gorunen tabloyu CSV olarak indirir (Excel acar). */
 function csvIndir(satirlar: Record<string, unknown>[], ad: string) {
   const kolonlar = Object.keys(satirlar[0]);
@@ -65,6 +80,7 @@ const BASLIK: Record<string, string> = {
 
 export function YapayZeka() {
   const { kullanici } = useOturum();
+  const git = useNavigate();
 
   const [sohbetler, setSohbetler] = useState<Record<string, unknown>[]>([]);
   const [araclar, setAraclar] = useState<Arac[]>([]);
@@ -222,6 +238,7 @@ export function YapayZeka() {
 
             {mesajlar.map(m => {
               const tablo = tabloVerisi(m.veri);
+              const ekranlar = m.rol === 2 ? ekranVerisi(m.veri) : [];
               const mTaslak = taslaklar.filter(t => t.mesajId === m.id);
               const log = gunluk.find(l => Number(l.mesajId ?? 0) === m.id);
               return (
@@ -237,7 +254,20 @@ export function YapayZeka() {
                     )}
                   </div>
 
-                  <div className="ai-metin">{m.metin}</div>
+                  <div className="ai-metin"><Kalinla metin={m.metin} /></div>
+
+                  {/* Rehber cevabının ekranları: kullanıcı "aç" diyor, metin
+                      değil ekran bekliyor. Açma kararı yine kullanıcının. */}
+                  {ekranlar.length > 0 && (
+                    <div className="ai-ekranlar">
+                      {ekranlar.map(e => (
+                        <button key={e.rota} className="d bir"
+                                onClick={() => git(e.rota)}>
+                          ➜ {e.yol} ekranını aç
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
                   {tablo && (
                     <div className="ai-tablo">

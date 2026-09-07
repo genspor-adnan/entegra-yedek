@@ -7666,3 +7666,18 @@ yapılmaz, model düşünce katalog cevabı, yetkisiz ekran modele gönderilmez,
 katalog konuyu bulduysa model çağrılmaz), web **460**. Belge: sözleşme §9.15.
 
 **Bekleyen**: API anahtarı ve kontör yüklemesi (bakiye şu an 0).
+
+### Aynı gün — sohbet cevabında ekran düğmesi
+
+Kullanıcı "yeni randevu aç" dedi, doğru adımları aldı ama **ekran açılmadı**:
+Yapay Zeka ekranı cevabı düz metin çiziyordu, panelin "Ekranı aç" düğmesi
+orada yoktu. Rehber cevabının yetkili ekranları artık mesajla birlikte
+(`ai_mesaj.veri` → `{ekranlar:[{rota,yol}]}`) saklanıyor ve balonun altında
+düğme olarak çiziliyor - mesaj yeniden yüklendiğinde de duruyor. **Asistan
+ekranı kendi açmıyor**: düğmeye kullanıcı basıyor.
+
+Yanında iki küçük düzeltme: (1) düşük güvende cevap "Sanırım şunu
+soruyorsunuz?" diye başlıyordu ve kullanıcı bunu "cevap vermedi, ekran
+önerdi" diye okuyordu - artık başlık ve adımlar önce geliyor, çekince
+parantez içinde sonda; (2) `**kalın**` yazımı yalnız panelde çiziliyordu,
+sohbette yıldızlar ham görünüyordu (`Kalinla` ortak bileşene alındı).
