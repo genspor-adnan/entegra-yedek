@@ -2336,7 +2336,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // MUAYENE ALTINDA, AYARLARIN USTUNDE (kullanici): ilac katalogu recete
     //   yazan hekimin gunluk baktigi liste - ayar degil, calisma ekrani.
     menuSira: 85, menuGrup: 'Muayene',
-    menuAd: 'İlaç Kataloğu', ic: '💊', yetkiKodu: 'katalog', urunModu: 2,
+    // Ikon Receteler ile ayni 💊 idi (kullanici); 📖 de Tibbi Ozet'te kullaniliyor.
+    menuAd: 'İlaç Kataloğu', ic: '📕', yetkiKodu: 'katalog', urunModu: 2,
   },
   {
     // Rol'un durum kolonu "durum" degil "aktif" - DURUM_CIPLERI (alan:'durum') buraya

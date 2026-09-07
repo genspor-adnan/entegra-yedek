@@ -608,6 +608,15 @@ table.grid tr.flt input {
   grid-column: 2; border: 1px solid var(--cizgi); border-radius: 2px; background: var(--yuz);
   height: 23px; padding: 0 6px; font-size: 12px; width: 100%; color: var(--yazi);
 }
+/* UZUN METIN (bildirim govdesi, onam metni): tek satirlik kutuda yazilan
+   gorunmuyordu. Yukseklik SATIRA gore, kullanici dikeyde buyutebilir. */
+.alan textarea {
+  grid-column: 2; border: 1px solid var(--cizgi); border-radius: 2px; background: var(--yuz);
+  padding: 3px 6px; font: inherit; font-size: 12px; width: 100%; color: var(--yazi);
+  resize: vertical; min-height: 46px; line-height: 1.45;
+}
+.alan textarea:focus { outline: 2px solid var(--mor2); border-color: var(--dugkenar) }
+.alan textarea:disabled { background: var(--yuz2); color: var(--soluk) }
 .alan input:focus, .alan select:focus, .inp:focus { outline: 2px solid var(--mor2); border-color: var(--dugkenar) }
 .alan input:disabled, .alan select:disabled, .inp:disabled { background: var(--yuz2); color: var(--soluk) }
 /* Mockup .ikili: deger + birim TEK etiket altinda yan yana (or. Raf Ömrü: sayi + Gün/Ay/Yıl). */

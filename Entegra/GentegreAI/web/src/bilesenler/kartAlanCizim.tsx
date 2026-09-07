@@ -191,6 +191,20 @@ export function alanCizici(b: AlanCizimBaglami) {
           disabled={salt || !a.yazilabilir}
           onChange={v => setDeger(d => ({ ...d, [a.ad]: v }))}
         />
+      ) : a.tip === 'metin' && (a.enFazlaUzunluk ?? 0) >= 400 ? (
+        // UZUN METIN COK SATIRLI (kullanici): bildirim sablonunun govdesi,
+        //   onam metni gibi alanlar 4000 karaktere kadar; tek satirlik kutuda
+        //   yazilani gormeden yaziliyordu. Esik alan tanimindan gelir -
+        //   sunucu "bu alan uzun" bilgisini zaten enFazlaUzunluk ile veriyor,
+        //   sozlesmeye yeni bayrak eklemek gerekmedi.
+        <textarea
+          key={a.ad}
+          rows={4}
+          value={String(deger[a.ad] ?? '')}
+          maxLength={a.enFazlaUzunluk ?? undefined}
+          disabled={salt || !a.yazilabilir}
+          onChange={e => setDeger(d => ({ ...d, [a.ad]: e.target.value }))}
+        />
       ) : (
         <input
           key={a.ad}
