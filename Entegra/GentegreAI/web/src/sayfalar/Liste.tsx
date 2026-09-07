@@ -6,6 +6,8 @@ import { GenGrid } from '../bilesenler/GenGrid';
 import { RandevuTakvimi } from '../bilesenler/RandevuTakvimi';
 import { GenForm } from '../bilesenler/GenForm';
 import { MuayeneBaglamSeridi } from '../bilesenler/MuayeneBaglamSeridi';
+import { MuayeneDurumSeridi } from '../bilesenler/MuayeneDurumSeridi';
+import { MuayeneVitalPaneli } from '../bilesenler/MuayeneVitalPaneli';
 import { MuayeneIstemSonuc } from '../bilesenler/MuayeneIstemSonuc';
 import {
   type EBelgeMesaji, type Kosul, type ListeSatiri, type RandevuBolumDugumu, hataMetni,
@@ -2117,12 +2119,27 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         //   kaldirmadan, cunku "gorduм" isareti ve aciliyet orada duruyor.
         sekmeSarmalayici={tanim.kaynak === 'muayene' && kartId !== 'yeni'
           ? (baslik, icerik) => (
-              <>
-                {icerik}
-                {baslik.includes('Sonuç') && (
-                  <MuayeneIstemSonuc muayeneId={Number(kartId)} />
-                )}
-              </>
+              baslik.includes('Anamnez')
+                // MOCKUP IKI PANEL (461): solda sikayet/hikaye/ozgecmis,
+                //   sagda SON vital olcumu. Hekim sikayeti yazarken
+                //   tansiyonu ayni ekranda gormeli - vital ayri sekmede
+                //   kalirsa bakilmadan yazilir.
+                ? (
+                  <div className="muayene-ikili">
+                    <div className="mi-sol">{icerik}</div>
+                    <div className="mi-sag">
+                      <MuayeneVitalPaneli muayeneId={Number(kartId)} />
+                    </div>
+                  </div>
+                )
+                : (
+                  <>
+                    {icerik}
+                    {baslik.includes('Sonuç') && (
+                      <MuayeneIstemSonuc muayeneId={Number(kartId)} />
+                    )}
+                  </>
+                )
             )
           : undefined}
         // MUAYENE BAGLAM SERIDI (461, mockup muayene_karti.html): hasta,
@@ -2130,6 +2147,9 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         //   durur - hekim ilac yazarken alerjiyi ayri sekmede aramamali.
         ustBaglam={tanim.kaynak === 'muayene' && kartId !== 'yeni'
           ? () => <MuayeneBaglamSeridi muayeneId={Number(kartId)} />
+          : undefined}
+        altBilgi={tanim.kaynak === 'muayene' && kartId !== 'yeni'
+          ? () => <MuayeneDurumSeridi muayeneId={Number(kartId)} />
           : undefined}
         baslik={tanim.kartBaslik ?? tanim.baslik.replace(/ler$|lar$/, '')}
         yerTutucuSekmeler={tanim.yerTutucuSekmeler}

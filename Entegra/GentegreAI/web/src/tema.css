@@ -2689,3 +2689,31 @@ input.skt-gecmis {
 /* Ilac adi rozet DEGIL (mockup): rozet "uyari" demek, ilac listesi bilgidir. */
 .kart-baglam .kb-ilac { white-space: nowrap }
 .kart-baglam .kb-ilac + .kb-ilac::before { content: '· '; color: var(--soluk) }
+
+/* MUAYENE KARTI IKI PANEL (461) - mockup muayene_karti.html ".ikiPanel":
+   solda anamnez formu, sagda vital + gunun sonuclari. Dar ekranda alt alta
+   duser (metin tasmasin, kutular bozulmasin). */
+.muayene-ikili { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 10px }
+@media (max-width: 1180px) { .muayene-ikili { grid-template-columns: 1fr } }
+.muayene-ikili .mi-sol, .muayene-ikili .mi-sag { min-width: 0 }
+
+/* VITAL IZGARASI - mockup'taki 3 kolonlu alan izgarasi (etiket ustte,
+   deger buyuk). Kart alan izgarasiyla ayni yogunluk ve kenarlik. */
+.vital-panel { margin: 0 }
+.vital-izgara { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 8px }
+@media (max-width: 1400px) { .vital-izgara { grid-template-columns: repeat(2, 1fr) } }
+.vt-kutu {
+  border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--yuz);
+  padding: 4px 7px; min-width: 0;
+}
+.vt-etiket { font-size: 10.5px; color: var(--soluk) }
+.vt-deger { font-size: 13px; font-weight: 600; color: var(--yazi); white-space: nowrap }
+.vt-birim { font-size: 10.5px; font-weight: 400; color: var(--soluk) }
+
+/* KART ALT BILGI SERIDI (461) - mockup .statusbar. Dugmelerin SOLUNDA degil,
+   satirin solunda durur ve buyumeyi o alir; dugmeler saga yaslanir. */
+.kart-alt-bilgi {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: 11px; color: var(--soluk); margin-right: auto; min-width: 0;
+}
+.muayene-durum { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }

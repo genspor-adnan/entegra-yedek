@@ -58,6 +58,8 @@ interface Props {
       hasta/alerji/aktif ilac - mockup muayene_karti.html). Kart degerini alir
       cunku hangi hastanin gosterilecegi karttan cikar. */
   ustBaglam?(deger: Record<string, Deger>): React.ReactNode;
+  /** Kart ARAC CUBUGUNUN sagina yaslanan durum ozeti (mockup .statusbar). */
+  altBilgi?(deger: Record<string, Deger>): React.ReactNode;
   /** Ust seritte kalacak alan adlari. Verilmezse "Kimlik" grubunun TAMAMI seritte
       (varsayilan davranis). Verilirse serit bunlarla sinirlanir, grubun kalani
       "Kimlik" sekmesine duser - kimlik alani cok olan kartlarda serit sismesin. */
@@ -127,7 +129,7 @@ const SEKME_IKON: Record<string, string> = {
 const sekmeIkonu = (baslik: string) => SEKME_IKON[baslik] ?? '▫️';
 
 export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarmalayici, onKaydedildi, yerTutucuSekmeler,
-                          ustBaglam,
+                          ustBaglam, altBilgi,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
   const { kullanici } = useOturum();
@@ -962,6 +964,9 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
       onKapat={kapatIstendi}
       alt={
         <>
+          {/* DURUM OZETI (461): mockup'ta kartin altinda bir serit - "neyim
+              eksik" sorusu Tamamla'ya basmadan once cevaplanmali. */}
+          {altBilgi && <span className="kart-alt-bilgi">{altBilgi(deger)}</span>}
           {!salt && (
             <button className="d bir" disabled={kaydediyor} onClick={() => void kaydet()}>
               {kaydediyor ? 'Kaydediliyor…' : 'Kaydet'}
