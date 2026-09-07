@@ -8111,3 +8111,22 @@ arayabilmem lazım"): yeni genel bileşen `KaynakArama` bir liste kaynağında
 yazdıkça arar (kod başlar / ad içerir, 300 ms debounce) ve seçilen satırı
 döndürür. ICD ~20 bin satır - combo kullanılamaz, "önce yaz sonra listeden seç"
 akışı da hekimi iki adıma zorluyordu. Arama sunucuda: ekran katalog taşımaz.
+
+### ICD arama penceresi · sık/önceki · katalog kullanım sayacı (461)
+
+- **`db/461`** `kullanici_katalog` tablosu: metin anahtarlı kataloglarda
+  (ICD-10 gibi, anahtar kodun kendisi) **kullanıcı bazlı sık/son kullanım**
+  sayacı. `kullanici_arama` anahtarı `bigint` olduğu için ICD'yi taşıyamıyordu.
+  Sayaç kullanıcı bazlı: bir hekimin sık tanısı diğerininkiyle aynı değil.
+  Uçlar: `GET/POST /api/liste/{kaynak}/kullanilan[/{kod}]`.
+- Pencerede araç çubuğu: arama kutusu · **⭐ Sık Kullandıklarım** ·
+  **📁 Önceki Tanılar** (bu HASTANIN diğer muayenelerindeki tanılar). "Son
+  kullandıklarım" düğmesi kullanıcı isteğiyle kaldırıldı - sık listesi zaten
+  onu kapsıyordu. Sayaç **seçim anında** işlenir: kayıt kaydedilmese bile
+  hekim o kodla çalışmıştır.
+- Tanı gridi: **Tanı adı** kolonu eklendi (ICD kataloğundan çözülür,
+  satırda saklanmaz - ad güncellenirse kayıt da güncel kalır), ICD kolonu
+  daraldı, grid sola yanaşık, GenGrid görünümü + salt okunur.
+- **GenForm `tazeleAnahtari`**: ekranın kendi düğmeleri (tanı ekle, şablon
+  uygula, tümü normal…) satırı SUNUCUDA açıyor; kart onu ancak yeniden
+  okuyunca görüyordu - kullanıcı "eklendi diyor ama göremiyorum" diyordu.

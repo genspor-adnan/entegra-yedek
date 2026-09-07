@@ -107,7 +107,13 @@ interface Props {
    * cizilecek alanlar (satirin kimligi - sunucunun yazdigi degerler).
    */
   detayGrupta?: Record<string, { grup: string; gizli?: string[]; etiket?: string[];
-                                 sinif?: string; ustte?: boolean; sade?: boolean }>;
+                                 sinif?: string; ustte?: boolean; sade?: boolean;
+                                 /** GenGrid gorunumu: satir ici kutu yok,
+                                     hucreler duz metin (liste gridi gibi). */
+                                 gridKipi?: boolean;
+                                 /** Salt gorunum: duzenleme sekmenin arac
+                                     cubugundaki uclardan yapilir. */
+                                 salt?: boolean }>;
   /**
    * DETAY SEKMESI GRID YERINE TEK KAYIT IZGARASI: en ustteki satir (detayin
    * kendi siralamasina gore SONUNCU olcum) mockup'taki gibi etiket + kutu
@@ -122,6 +128,13 @@ interface Props {
   /** Bu EKRANDA acilmayacak sekmeler (ör. Aday kartinda "Fatura Bilgileri").
       Ayni kart farkli ekranlarda farkli genislikte kullanilabilsin diye. */
   gizliSekmeler?: string[];
+  /**
+   * DISARIDAN TAZELEME: sayi degisince kart sunucudan YENIDEN okunur. Ekranin
+   * kendi dugmeleri (tani ekle, sablon uygula, tumu normal...) sunucuda satir
+   * acar; kart o satirlari ancak yeniden okuyunca gorur - kullanici "eklendi
+   * diyor ama goremiyorum" diyordu.
+   */
+  tazeleAnahtari?: number;
   /** Bu EKRANDA zorunlu sayilacak alanlar (ör. Aday kartinda "Temsilci").
       Katalogda zorunlu YAPILMAZ: ayni alan Musteri kartinda bos olabilir ve
       eski kayitlarin duzenlenmesini kilitlerdi. */
@@ -165,7 +178,7 @@ const SEKME_IKON: Record<string, string> = {
 };
 const sekmeIkonu = (baslik: string) => SEKME_IKON[baslik] ?? '▫️';
 
-export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, onKaydedildi, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, tazeleAnahtari, onKaydedildi, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
@@ -361,7 +374,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
     } finally {
       setYukleniyor(false);
     }
-  }, [kaynak, id, yeniMi, yeniKayitVarsayilanlari, zorunluAlanlar]);
+  }, [kaynak, id, yeniMi, yeniKayitVarsayilanlari, zorunluAlanlar, tazeleAnahtari]);
 
   useEffect(() => { void yukle() }, [yukle]);
 
@@ -1283,7 +1296,9 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
                 key={d.ad}
                 meta={d}
                 durum={detaylar[d.ad] ?? bosDetay()}
-                saltOkunur={salt || d.saltOkunur}
+                saltOkunur={salt || d.saltOkunur || !!detayGrupta?.[d.ad]?.salt}
+                modalDuzenle={detayGrupta?.[d.ad]?.gridKipi}
+                ikonlu={detayGrupta?.[d.ad]?.gridKipi}
                 hatalar={alanHatalari}
                 kutuSinif={detayGrupta?.[d.ad]?.sinif}
                 sadeGrid={detayGrupta?.[d.ad]?.sade}

@@ -1,7 +1,8 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
+using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
 
 namespace Gentegre.Api.Uclar;
@@ -28,6 +29,68 @@ public static class ListeUclari
                 baglam.SubeId, baglam.Kapsam, baglam.IzlemeNo, baglam.KullaniciId, iptal);
 
             return Results.Ok(yanit);
+        });
+
+        // GET /api/liste/{kaynak}/kullanilan - metin anahtarlı katalogda
+        //   kullanıcının SIK ve SON kullandıkları (461).
+        //
+        //   Poliklinikte tanı dağılımı dardır: ilk beş kod işin çoğunu görür.
+        //   Arama penceresi boşken bunları göstermek, hem yazmayı kaldırır hem
+        //   de aynı hastalığın hep AYNI kodla yazılmasını sağlar.
+        grup.MapGet("/{kaynak}/kullanilan", async (
+            string kaynak, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            var tanim = KaynakKatalogu.Bul(kaynak) ?? throw GentegreHatasi.Bulunamadi();
+            baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
+
+            // Ad ALANI kataloğun kendisinden okunur; kaynak beyaz listede
+            //   (KaynakKatalogu) olduğu için tablo adı istekten GELMEZ.
+            var sik = await veri.ListeAsync(
+                "select k.kod, coalesce(i.ad, '') as ad, k.say " +
+                "  from public.kullanici_katalog k " +
+                "  left join public.icd i on i.kod = k.kod " +
+                " where k.kullanici_id = @p0 and k.kaynak = @p1 " +
+                " order by k.say desc, k.son_tarih desc limit 10",
+                [baglam.KullaniciId, kaynak],
+                o => new { kod = o.GetString(0), ad = o.GetString(1), say = o.GetInt32(2) },
+                iptal);
+
+            var son = await veri.ListeAsync(
+                "select k.kod, coalesce(i.ad, '') as ad, k.son_tarih " +
+                "  from public.kullanici_katalog k " +
+                "  left join public.icd i on i.kod = k.kod " +
+                " where k.kullanici_id = @p0 and k.kaynak = @p1 " +
+                " order by k.son_tarih desc limit 10",
+                [baglam.KullaniciId, kaynak],
+                o => new { kod = o.GetString(0), ad = o.GetString(1),
+                           tarih = o.GetDateTime(2) },
+                iptal);
+
+            return Results.Ok(new { kaynak, sik, son, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/liste/{kaynak}/kullanilan/{kod} - katalog kullanım sayacı
+        //   Seçim ANINDA işaretlenir: kayıt kaydedilmese bile hekim o kodla
+        //   çalışmıştır; sayacı kaydetmeye bağlamak sık kullanılanı geç ve
+        //   eksik doldururdu.
+        grup.MapPost("/{kaynak}/kullanilan/{kod}", async (
+            string kaynak, string kod, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            var tanim = KaynakKatalogu.Bul(kaynak) ?? throw GentegreHatasi.Bulunamadi();
+            baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
+
+            await veri.CalistirAsync(
+                "insert into public.kullanici_katalog (kullanici_id, kaynak, kod) " +
+                "values (@p0, @p1, @p2) " +
+                "on conflict (kullanici_id, kaynak, kod) " +
+                "do update set say = public.kullanici_katalog.say + 1, son_tarih = now()",
+                [baglam.KullaniciId, kaynak, kod], iptal);
+
+            return Results.Ok(new { isaretlendi = true, izlemeNo = baglam.IzlemeNo });
         });
 
         // GET /api/liste/{kaynak}/kolonlar  - yetkisiz kolon bu listede de DONMEZ (§2.4)

@@ -205,6 +205,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [muayeneBilgiAcik, setMuayeneBilgiAcik] = useState(false);
   /** ICD arama penceresi açık mı (tanı sekmesi "＋ ICD-10 Ekle"). */
   const [icdAramaAcik, setIcdAramaAcik] = useState(false);
+  /** Kartı sunucudan yeniden okutur: ekran düğmeleri (tanı ekle, şablon
+      uygula, tümü normal...) satırı SUNUCUDA açar; kart onu ancak yeniden
+      okuyunca gösterir. */
+  const [kartTazele, setKartTazele] = useState(0);
   // Kart kapanip baska kayit acilinca pencere ACIK KALMASIN.
   useEffect(() => { setMuayeneBilgiAcik(false) }, [kartId]);
   // Belge (fatura/siparis) karti da MODAL: liste arkada kalir, rota degismez.
@@ -829,7 +833,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       })) return;
 
       if (await muayeneAksiyonu(kod, satir, {
-        tazele: () => setYenile(t => t + 1),
+        // Muayene aksiyonlari kaydi SUNUCUDA degistirir: liste kadar ACIK
+        //   KART da tazelenmeli.
+        tazele: () => { setYenile(t => t + 1); setKartTazele(t => t + 1) },
       }, ek)) return;
 
       if (await ilacAksiyonu(kod, satir, {
@@ -2139,13 +2145,24 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       <KaynakArama
         kaynak="icd" baslik="ICD-10 tanı ara"
         ekKosul={{ alan: 'aktif', op: 'esit', deger: 1 }}
+        // ÖNCEKİ TANILAR bu HASTANIN başka muayenelerinden gelir - kronik
+        //   hastada aynı tanı her muayenede yeniden yazılırken kod kayabilir.
+        oncekiBaslik="Önceki Tanılar"
+        onceki={async () => {
+          const y = await api.muayeneTaniOnerileri(Number(kartId));
+          return y.onceki.map(t => ({ kod: t.kod, ad: t.ad }));
+        }}
         onKapat={() => setIcdAramaAcik(false)}
         onSec={satir => {
           setIcdAramaAcik(false);
           void guvenli(async () => {
             const y = await api.muayeneTaniEkle(Number(kartId), String(satir.kod));
+            // SAYAÇ SEÇİM ANINDA (461): kayıt kaydedilmese bile hekim o kodla
+            //   çalışmıştır; sayacı kaydetmeye bağlamak listeyi geç doldurur.
+            void api.katalogKullanildi('icd', String(satir.kod)).catch(() => {});
             mesaj(y.mesaj);
             setYenile(t => t + 1);
+            setKartTazele(t => t + 1);
           });
         }}
       />
@@ -2195,16 +2212,8 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
                                                             { id: Number(kartId) })}>
                           🗑 Kaldır
                         </button>
-                        <button type="button" className="d"
-                                onClick={() => void aksiyon('muayene.taniSik',
-                                                            { id: Number(kartId) })}>
-                          ⭐ Sık kullandıklarım
-                        </button>
-                        <button type="button" className="d"
-                                onClick={() => void aksiyon('muayene.taniOnceki',
-                                                            { id: Number(kartId) })}>
-                          🕘 Önceki tanılar
-                        </button>
+                        {/* Sık / son / önceki listeleri ARAMA PENCERESINDE
+                            (kullanıcı): tek yerde, aramayla aynı akışta. */}
                       </div>
                     )}
                     {baslik === 'Muayene' && (
@@ -2285,6 +2294,7 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         //   (kutu) · Bulgu (metin). Sistem satirin kimligidir - satirlar
         //   sablondan acilir, secim kutusu yanlis bir vaat olurdu; deger/taraf
         //   ise mockup'ta yok.
+        tazeleAnahtari={kartTazele}
         detayGrupta={tanim.kaynak === 'muayene'
           ? { bulgular: { grup: 'Muayene', gizli: ['degerSayi', 'taraf'],
                           etiket: ['sablonAlanId'], sinif: 'bulgu-gridi',
@@ -2298,8 +2308,12 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
               //   Kronik Tanilar ekraninda yasar.
               // Cerceve/baslik/ekle-sil YOK (kullanici): ekleme ve kaldirma
               //   sekme arac cubugundaki dugmelerden, sunucu ucuyla yapilir.
+              // GenGrid gorunumu + SALT OKUNUR (kullanici): satir ici kutu
+              //   yok, duz metin. Ekleme/kaldirma sekmenin arac cubugundaki
+              //   uclarla yapilir - kural ve silme izi tek yerde.
               tanilar: { grup: 'Tanı / Karar', gizli: ['sira', 'baslangicTarihi'],
-                         sinif: 'tani-gridi', ustte: true, sade: true } }
+                         sinif: 'tani-gridi', ustte: true, sade: true,
+                         gridKipi: true, salt: true } }
           : undefined}
         // VITAL BULGULAR MOCKUP IZGARASI: son olcum etiket+kutu izgarasinda
         //   (3 sutun), eski olcumler altta salt gorunum. Grid satirlarinda

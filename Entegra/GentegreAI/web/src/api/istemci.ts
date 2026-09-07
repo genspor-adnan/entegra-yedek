@@ -246,6 +246,17 @@ export const api = {
     gonder<{ eklendi: boolean; mesaj: string }>(
       `/api/muayene/${muayeneId}/tani/${encodeURIComponent(icdKod)}`, {}),
 
+  /** Metin anahtarli katalogda (ICD...) kullanicinin SIK ve SON kullandiklari. */
+  katalogKullanilan: (kaynak: string) =>
+    istek<{ sik: { kod: string; ad: string; say: number }[];
+            son: { kod: string; ad: string; tarih: string }[] }>(
+      `/api/liste/${kaynak}/kullanilan`),
+
+  /** Katalog kullanim sayaci (secim aninda). */
+  katalogKullanildi: (kaynak: string, kod: string) =>
+    gonder<{ isaretlendi: boolean }>(
+      `/api/liste/${kaynak}/kullanilan/${encodeURIComponent(kod)}`, {}),
+
   /** Kartin tani satirlari (arac cubugundaki sil icin). */
   muayeneTanilari: (muayeneId: number) =>
     istek<{ tanilar: { id: number; kod: string; ad: string; tur: number }[] }>(

@@ -395,6 +395,11 @@ public static partial class KartKatalogu
                 new("icdKod", "icd_kod", "kod", Zorunlu: true,
                     KodTablosu: "public.v_icd_lookup", AramaKaynagi: "icd",
                     Baslik: "ICD-10"),
+                // TANI ADI: kod tek basina okunmuyor ("I21.0" kimseye bir sey
+                //   soylemiyor). Katalogdan COZULUR, tani satirinda saklanmaz -
+                //   ICD adi guncellenirse kayit da guncel kalir. Yazilamaz.
+                new("taniAd", "(select x.ad from public.icd x where x.kod = tani.icd_kod)",
+                    "metin", Yazilabilir: false, Baslik: "Tanı"),
                 new("tur", "tur", "kod", SabitKodlar: TaniTuruKodlari, Baslik: "Tür"),
                 new("kesinlik", "kesinlik", "kod", SabitKodlar: TaniKesinlikKodlari,
                     Baslik: "Kesinlik"),

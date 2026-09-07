@@ -2812,9 +2812,10 @@ input.skt-gecmis {
 .bulgu-gridi table th:nth-child(2),
 .bulgu-gridi table td:nth-child(2) { width: 60px; text-align: center }
 
-/* Tanı tablosu (mockup tanı paneli): ICD kodu dar, tanı adı geniş kalsın. */
+/* Tanı tablosu (mockup tanı paneli): ICD KODU DAR (kullanıcı: %60 küçülsün),
+   kalan genişlik tanı adına gider - okunan kolon odur. */
 .tani-gridi table th:first-child,
-.tani-gridi table td:first-child { width: 240px }
+.tani-gridi table td:first-child { width: 96px }
 
 /* VITAL BULGULAR IZGARASI (mockup muayene_karti.html): alanlar UC SUTUN,
    etiket ustte - grid satirinda 14 sayisal kolon yan yana okunmuyordu. */
@@ -2830,3 +2831,9 @@ input.skt-gecmis {
 .kaynak-arama .ara-kutu input { width: 100% }
 .kaynak-arama tr.tiklanir { cursor: pointer }
 .kaynak-arama tr.tiklanir:hover { background: var(--mor2) }
+
+/* Tanı gridi SOLA YANAŞIK (kullanıcı): sol kenarı sekmenin araç çubuğuyla
+   (＋ ICD-10 Ekle) aynı çizgide; sağda kutularla aynı boşluk kalır. */
+.tani-gridi { margin: 0 10px 0 0 }
+.kaynak-arama-arac { display: flex; gap: 6px; align-items: center; flex-wrap: wrap }
+.kaynak-arama-arac .ara-kutu { flex: 1; min-width: 180px }
