@@ -91,6 +91,8 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.KaliteKontrolServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.DisLabServisi>();
 // AI REHBER (447): katalog okur, veri yazmaz - kayit degistirmez.
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.RehberServisi>();
+// AI KONTROLLU ONERI (449): kayittaki eksikleri isaret eder, yazmaz.
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.OneriServisi>();
 kurucu.Services.AddHostedService<Gentegre.Api.Servisler.CihazDinleyici>();
 kurucu.Services.AddScoped<KasaDeposu>();
 kurucu.Services.AddScoped<GunlukDeposu>();

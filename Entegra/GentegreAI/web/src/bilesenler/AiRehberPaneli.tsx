@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
+import { useAiBaglam } from './aiBaglam';
 
 /**
  * AI REHBER PANELİ (447) — sağ altta duran yol gösterici.
@@ -18,6 +19,10 @@ import { hataMetni } from '../api/sozlesme';
  */
 
 interface Adim { no: number; metin: string; ekran?: string; rota?: string }
+interface Oneri {
+  kod: string; seviye: number; baslik: string; aciklama: string;
+  alan: string; ekran: string; rota?: string;
+}
 interface Ekran { kaynak: string; ad: string; rota: string; yol: string; menuGrup: string }
 interface Aksiyon { kod: string; ad: string; ekran: string }
 interface Yanit {
@@ -43,9 +48,23 @@ function Kalinla({ metin }: { metin: string }) {
   return <>{parcalar.map((p, i) => (i % 2 === 1 ? <b key={i}>{p}</b> : p))}</>;
 }
 
+/**
+ * Kart rotasindan kayit: "/cari/4868" -> ("cari", 4868). Liste rotasinda
+ * (ornegin "/cari") kayit YOKTUR - oneri de istenmez.
+ */
+function rotadanKayit(rota: string): { kaynak: string; id: number } | null {
+  const p = rota.split('/').filter(Boolean);
+  if (p.length < 2) return null;
+  const id = Number(p[1]);
+  return Number.isInteger(id) && id > 0 ? { kaynak: p[0], id } : null;
+}
+
 export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
   const git = useNavigate();
   const konum = useLocation();
+  const [oneriler, setOneriler] = useState<Oneri[]>([]);
+  // Acik kart (modal) baglami; yoksa rotadan cozulur.
+  const acikKayit = useAiBaglam();
   const [acik, setAcik] = useState(false);
   const [soru, setSoru] = useState('');
   const [yanit, setYanit] = useState<Yanit | null>(null);
@@ -54,6 +73,27 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
   const kutu = useRef<HTMLInputElement>(null);
 
   useEffect(() => { if (acik) kutu.current?.focus() }, [acik]);
+
+  // BU KAYITTA: panel acikken ve KART rotasindaysak kaydin eksikleri
+  //   sorulmadan gosterilir - kullanici "gondere basinca" ogrenmesin.
+  useEffect(() => {
+    if (!acik) return;
+    const kayit = acikKayit ?? rotadanKayit(konum.pathname);
+    if (!kayit) { setOneriler([]); return }
+    let iptal = false;
+    void (async () => {
+      try {
+        const y = await api.aiOneri(kayit.kaynak, kayit.id);
+        if (!iptal) setOneriler(y.oneriler as Oneri[]);
+      } catch { if (!iptal) setOneriler([]) }   // oneri zorunlu degil
+    })();
+    return () => { iptal = true };
+  }, [acik, konum.pathname, acikKayit]);
+
+  const oneriGizle = async (kod: string) => {
+    setOneriler(o => o.filter(x => x.kod !== kod));
+    try { await api.aiOneriGizle(kod, true) } catch { /* tercih kaydedilemedi */ }
+  };
 
   const sor = useCallback(async (metin: string) => {
     const s = metin.trim();
@@ -90,6 +130,32 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
       </div>
 
       <div className="rehber-govde">
+        {/* Kaydin eksikleri: seviye sirasiyla (engel -> uyari -> bilgi).
+            Asistan bunlari DUZELTMEZ; isaret eder. */}
+        {oneriler.length > 0 && (
+          <div className="rehber-oneriler">
+            <div className="rehber-not">Bu kayıtta</div>
+            {oneriler.map(o => (
+              <div key={o.kod} className={`rehber-oneri s${o.seviye}`}>
+                <div className="bas">
+                  <b>{o.seviye === 3 ? '⛔' : o.seviye === 2 ? '⚠' : 'ℹ'} {o.baslik}</b>
+                  <button className="d" title="Bunu bir daha gösterme"
+                          onClick={() => void oneriGizle(o.kod)}>✖</button>
+                </div>
+                <div className="ac">{o.aciklama}</div>
+                {/* Zaten o ekrandaysak dugme gurultu: kullanici bulundugu
+                    yere "git" demez. */}
+                {o.rota && o.rota !== konum.pathname && (
+                  <button className="d rehber-git"
+                          onClick={() => { git(o.rota!); setAcik(false) }}>
+                    Ekranı aç
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
         {!yanit && !yukleniyor && !hata && (
           <div className="rehber-ornek">
             <div className="rehber-not">Ne yapmak istediğinizi yazın:</div>

@@ -298,6 +298,21 @@ export const api = {
     istek<{ sayaclar: Record<string, number>;
             cihazlar: Record<string, unknown>[] }>('/api/lab/ozet'),
 
+  /**
+   * AI KONTROLLU ONERI (449): acik kaydin eksikleri. Kurallar sunucuda;
+   * panel yalniz cizer - istemcide is kurali yok.
+   */
+  aiOneri: (kaynak: string, kayitId: number) =>
+    gonder<{ kaynak: string; kayitId: number; engel: number; uyari: number;
+             bilgi: number;
+             oneriler: { kod: string; seviye: number; baslik: string;
+                         aciklama: string; alan: string; ekran: string;
+                         rota?: string }[] }>('/api/ai/oneri', { kaynak, kayitId }),
+
+  /** "Bunu bir daha gosterme": kural silinmez, bu kullanici icin susar. */
+  aiOneriGizle: (kod: string, gizle: boolean) =>
+    gonder<{ mesaj: string }>('/api/ai/oneri/gizle', { kod, gizle }),
+
   labIstemOku: (id: number) =>
     istek<Record<string, unknown>>(`/api/lab/istem/${id}`),
 

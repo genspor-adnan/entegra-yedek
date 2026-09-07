@@ -1103,6 +1103,58 @@ gerekli araçtır, varsayılan olarak tüm rollere açılır; kurum isterse kapa
 
 ---
 
+## 9.14 AI Kontrollü Öneri — Faz 3 (449)
+
+**Sınır aynı: asistan İŞARET EDER, YAZMAZ.** Faz 1-2 "nerede / nasıl"
+diyordu; Faz 3 **açık kaydın** bir sonraki adımını engelleyecek eksikleri
+söyler ("bu caride VKN yok, e-Fatura GİB'de reddedilir"). Alan doldurmaz,
+kaydetmez, göndermez, onaylamaz.
+
+```http
+POST /api/ai/oneri         // { kaynak, kayitId }
+POST /api/ai/oneri/gizle   // { kod, gizle }
+```
+
+| Alan | Ne |
+|---|---|
+| `oneriler[]` | `{ kod, seviye, baslik, aciklama, alan, ekran, rota? }` |
+| `seviye` | **1 bilgi · 2 uyarı · 3 engel** — engel = sonraki adım (gönderim, faturalama, provizyon) bu eksik giderilmeden yapılamaz |
+| `engel`, `uyari`, `bilgi` | Seviye sayıları (kart rozeti için) |
+| `alan` | Kart üzerinde işaret edilecek alan adı (sözleşme adı) |
+| `rota` | Yalnız kullanıcının **yetkili** olduğu ekran için dolar |
+
+**Kural AI'ya yazdırılmaz.** Her öneri `ai_oneri_kural` tablosundaki bir
+satıra bağlıdır; koşulu kurumun kendi verisinde çalışan bir SQL'dir
+(`select exists(...)`, tek parametre = kayıt id). Dil modeli bağlandığında
+yalnız **metni** güzelleştirir, **kararı** değil - "bence şu daha iyi" diyen
+bir asistan denetimde savunulamaz. Koşulu bozuk bir kural bütün paneli
+düşürmez; o kural atlanır.
+
+**İlk küme (449): cari · fatura · başvuru.** Cari: VKN/TCKN yok (engel),
+vergi dairesi yok, adres yok (engel), e-Fatura mükellefiyeti hiç
+sorgulanmamış, e-posta yok. Fatura: kalem yok (engel), alıcı VKN yok
+(engel), alıcı adresi yok, alıcı e-Fatura mükellefi, taslak, vade yok.
+Başvuru: hekim yok, ödeyen kurum yok, kurum başvurusunda provizyon yok
+(engel), hizmet satırı yok.
+
+**Kural ailesini KAYIT belirler.** `belge` tablosu iki ekranı birden besler:
+fatura/irsaliye/teklif ve **başvuru** (tür 19). Liste tanımında ikisinin de
+kaynağı `belge`, rotaları ayrı - istemcinin söylediği kaynak yalnız ipucudur,
+aile sunucuda kaydın türünden çözülür. (Bu ayrım olmadan başvuru kartında
+"faturada kalem yok" uyarısı çıkıyordu.)
+
+**Gürültü kontrolü.** Seviyeye göre sıralanır (engel → uyarı → bilgi), en çok
+**beş** öneri döner, kullanıcı bir kuralı "bir daha gösterme" ile
+susturabilir (`ai_oneri_gizli`; kural silinmez, o kullanıcı için susar). On
+uyarı gösteren asistan kapatılır.
+
+**Yetki**: uç `ai.rehber` ister; ayrıca her kuralın `yetki_kodu`'na GÖR
+yetkisi olmayan kullanıcıya o öneri hiç üretilmez - göremediği kaydın
+eksiğini saymak da bir sızıntıdır. Öneri sayısı ve kodları `ai_rehber_log`'a
+(`kaynak = 4`) yazılır: hep görmezden gelinen kural ölçülebilsin.
+
+---
+
 ---
 
 ## 10. Sürümleme

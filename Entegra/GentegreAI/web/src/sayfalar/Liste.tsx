@@ -61,6 +61,7 @@ import { kkAksiyonu } from './liste/kkAksiyonlari';
 import { disLabAksiyonu } from './liste/disLabAksiyonlari';
 import { LabDetayPaneli, labDetayVarMi } from '../bilesenler/LabDetayPaneli';
 import { LabOzetSeridi } from '../bilesenler/LabOzetSeridi';
+import { aiBaglamAyarla } from '../bilesenler/aiBaglam';
 import { DokumanKlasorPaneli, type KlasorSecimi } from '../bilesenler/DokumanKlasorPaneli';
 import { fiyatListesiAksiyonu } from './liste/fiyatListesiAksiyonlari';
 import { ebelgeAksiyonu } from './liste/ebelgeAksiyonlari';
@@ -188,6 +189,18 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [yeniBelgeTuru, setYeniBelgeTuru] = useState<number | null>(null);
   // Mevcut belgeyi ac (salt gorunum) - ayni modal, id ile.
   const [acikBelgeId, setAcikBelgeId] = useState<number | null>(null);
+
+  // AI REHBER BAGLAMI (449): acik kart hangisi? Belge/basvuru karti MODAL
+  //   aciliyor, rota degismiyor - panel kaydin id'sini baska turlu bilemez.
+  useEffect(() => {
+    // Kaynak ham haliyle gonderilir (basvuru ekraninda da 'belge'); hangi
+    //   kural ailesinin calisacagina SUNUCU kayda bakarak karar verir.
+    const kayit = acikBelgeId !== null
+      ? { kaynak: tanim.kaynak, id: acikBelgeId }
+      : (typeof kartId === 'number' ? { kaynak: tanim.kaynak, id: kartId } : null);
+    aiBaglamAyarla(kayit);
+    return () => aiBaglamAyarla(null);
+  }, [acikBelgeId, kartId, tanim.kaynak]);
   // Kasa islem karti MODAL (tahsilat/odeme): liste arkada acik kalir.
   const [kasaTuru, setKasaTuru] = useState<number | null>(null);
   // Ekstre satirindan acilan MEVCUT kasa islemi (salt gorunum/duzenleme).

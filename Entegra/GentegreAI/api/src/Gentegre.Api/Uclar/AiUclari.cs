@@ -30,6 +30,7 @@ public static class AiUclari
     public sealed record SoruIstegi(string Metin, string? Arac, JsonElement? Parametre,
                                     Dictionary<string, object?>? Baglam);
     public sealed record TaslakIstegi(int TaslakId, bool Iptal);
+    public sealed record GizleIstegi(string Kod, bool Gizle);
     public sealed record GeriBildirimIstegi(int MesajId, short Deger);
 
 
@@ -59,6 +60,42 @@ public static class AiUclari
                 yanit.Uyarilar, yanit.KonuKod, yanit.KaynakTuru, yanit.KontorBakiye,
                 izlemeNo = baglam.IzlemeNo,
             });
+        });
+
+        // ----------------------------------------------- kontrollu oneri --
+        // POST /api/ai/oneri - acik kaydin eksikleri (449, Faz 3).
+        //
+        // OKUR VE ISARET EDER, YAZMAZ. Her oneri `ai_oneri_kural` satirina
+        //   bagli; kural AI'ya yazdirilmaz. Kullanicinin goremedigi kaynagin
+        //   onerisi uretilmez.
+        grup.MapPost("/oneri", async (
+            OneriServisi.Istek istek, OneriServisi oneri, BaglamCozucu cozucu,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("ai.rehber", Islem.Gor);
+
+            var yanit = await oneri.OnerilerAsync(istek, baglam, iptal);
+            return Results.Ok(new
+            {
+                yanit.Kaynak, yanit.KayitId, yanit.Oneriler,
+                yanit.Engel, yanit.Uyari, yanit.Bilgi, izlemeNo = baglam.IzlemeNo,
+            });
+        });
+
+        // POST /api/ai/oneri/gizle - "bunu bir daha gosterme".
+        //   Kural SILINMEZ; yalniz bu kullanici icin susar - on uyari gosteren
+        //   asistan kapatilir, ama kuralin kendisi kurumun kurali.
+        grup.MapPost("/oneri/gizle", async (
+            GizleIstegi istek, OneriServisi oneri, BaglamCozucu cozucu,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("ai.rehber", Islem.Gor);
+
+            await oneri.GizleAsync(istek.Kod, istek.Gizle, baglam, iptal);
+            return Results.Ok(new { mesaj = istek.Gizle ? "Uyarı gizlendi." : "Uyarı geri açıldı.",
+                                    izlemeNo = baglam.IzlemeNo });
         });
 
         // ------------------------------------------------------- sohbetler --

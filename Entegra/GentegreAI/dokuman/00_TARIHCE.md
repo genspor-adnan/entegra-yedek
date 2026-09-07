@@ -7582,3 +7582,48 @@ onaylı" hatası veriyor - bu bir kural, hata değil.
 
 **Testler**: `Aksiyon_ekrani_KATALOGDAN_gelir_tahminle_degil` regresyonu
 eklendi. API **136** test.
+
+---
+
+## 07.09.2026 — AI Faz 3: kontrollü öneri (`db/449`)
+
+Faz 1-2 "nerede / nasıl" diyordu. Faz 3 **açık kayda** bakar ve bir sonraki
+adımı engelleyecek eksiği söyler - kullanıcı bunu bugüne kadar ancak
+"Gönder"e bastığında öğreniyordu.
+
+**Sınır değişmedi: işaret eder, yazmaz.** Alan doldurmaz, kaydetmez,
+göndermez, onaylamaz. `OneriServisi` kaynağında iş tablosuna yazan tek SQL
+yok; testle bağlandı (`Oneri_servisi_YALNIZ_AI_TABLOLARINA_yazar`).
+
+**Kural AI'ya yazdırılmadı.** Her öneri `ai_oneri_kural` satırıdır; koşulu
+kurumun kendi verisinde çalışan bir `select exists(...)`, tek parametresi
+kayıt id. Model bağlanınca yalnız metni güzelleştirecek, kararı değil.
+İlk küme 15 kural: cari (VKN, vergi dairesi, adres, mükellefiyet sorgusu,
+e-posta), fatura (kalem, alıcı VKN/adres, mükellefe e-Arşiv, taslak, vade),
+başvuru (hekim, ödeyen kurum, provizyon, hizmet satırı). Seviye **1 bilgi ·
+2 uyarı · 3 engel**.
+
+### İki tuzak
+
+**Aynı tablo, iki ekran.** `belge` hem faturayı hem başvuruyu (tür 19)
+taşıyor; liste tanımında ikisinin de kaynağı `belge`. İlk sürümde başvuru
+kartında hiç öneri çıkmadı (başvuru kuralları `basvuru` kaynağında duruyordu),
+fatura kuralları da başvuruda "kalem yok" diye bağırıyordu. Çözüm iki katmanlı:
+kuralların koşuluna tür süzgeci, **aile kararı ise kayda soruluyor** -
+istemcinin dediği kaynak yalnız ipucu (`OneriServisi.AileAsync`).
+
+**Panel kartın altında kalıyordu.** Kart modali perdesinin (`.kaperde`)
+z-index'i 320/420, panelinki 60'tı: öneriler çiziliyor ama tıklanamıyordu.
+Panel ve düğmesi 430'a alındı.
+
+**Gürültü kontrolü**: seviyeye göre sıralı, en çok beş öneri, kullanıcı bir
+kuralı susturabiliyor (`ai_oneri_gizli` - kural silinmez, o kullanıcı için
+susar). Zaten bulunduğu ekranın "Ekranı aç" düğmesi çizilmiyor.
+
+**Ölçüm**: öneri sayısı ve kodları `ai_rehber_log`'a (`kaynak = 4`) yazılıyor;
+hep görmezden gelinen kural böyle bulunacak.
+
+**Testler**: API **142** (yeni `OneriTestleri`: aile çözümü, yetkisize öneri
+yok, gizle/geri aç, bozuk kural paneli düşürmez, yazma yasağı), web **460**
+(panelde öneri çizimi, liste rotasında istek yok, seviye sınıfı, susturma).
+Belge: sözleşme §9.14.
