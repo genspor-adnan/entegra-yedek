@@ -60,6 +60,10 @@ interface Props {
   ustBaglam?(deger: Record<string, Deger>): React.ReactNode;
   /** Kart ARAC CUBUGUNUN sagina yaslanan durum ozeti (mockup .statusbar). */
   altBilgi?(deger: Record<string, Deger>): React.ReactNode;
+  /** Kaydet/Sil'in yanina ekran-ozel EYLEM dugmeleri (mockup muayene kartinda
+      "Muayeneye Al · Tamamla · Istem Ac · Sablon"). Dugmeler yalnizca ucu
+      cagirir; kural sunucuda kalir. */
+  ekAraclar?(deger: Record<string, Deger>): React.ReactNode;
   /** Ust seritte kalacak alan adlari. Verilmezse "Kimlik" grubunun TAMAMI seritte
       (varsayilan davranis). Verilirse serit bunlarla sinirlanir, grubun kalani
       "Kimlik" sekmesine duser - kimlik alani cok olan kartlarda serit sismesin. */
@@ -129,7 +133,7 @@ const SEKME_IKON: Record<string, string> = {
 const sekmeIkonu = (baslik: string) => SEKME_IKON[baslik] ?? '▫️';
 
 export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarmalayici, onKaydedildi, yerTutucuSekmeler,
-                          ustBaglam, altBilgi,
+                          ustBaglam, altBilgi, ekAraclar,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
   const { kullanici } = useOturum();
@@ -975,6 +979,9 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           {!yeniMi && yetki.sil && (
             <button className="d teh" onClick={() => void sil()}>Sil</button>
           )}
+          {/* EKRAN-OZEL EYLEMLER (461): mockup'ta bunlar kartin arac
+              cubugunda - hekim listeye donup satir secmeden isini bitirmeli. */}
+          {!yeniMi && ekAraclar?.(deger)}
           {/* HASTA KARTI EYLEM DUGMELERI (kullanici) - Sil'in saginda.
               MERNIS ve provizyon/mustehaklik sorgusu DIS SERVISE gider; o
               servisler henuz bagli DEGIL, dugmeler yerlesimde duruyor ve

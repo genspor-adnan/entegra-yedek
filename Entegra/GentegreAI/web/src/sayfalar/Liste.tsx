@@ -7,6 +7,7 @@ import { RandevuTakvimi } from '../bilesenler/RandevuTakvimi';
 import { GenForm } from '../bilesenler/GenForm';
 import { MuayeneBaglamSeridi } from '../bilesenler/MuayeneBaglamSeridi';
 import { MuayeneDurumSeridi } from '../bilesenler/MuayeneDurumSeridi';
+import { MuayeneSonucOzeti } from '../bilesenler/MuayeneSonucOzeti';
 import { MuayeneVitalPaneli } from '../bilesenler/MuayeneVitalPaneli';
 import { MuayeneIstemSonuc } from '../bilesenler/MuayeneIstemSonuc';
 import {
@@ -2129,6 +2130,9 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
                     <div className="mi-sol">{icerik}</div>
                     <div className="mi-sag">
                       <MuayeneVitalPaneli muayeneId={Number(kartId)} />
+                      {/* Mockup'ta vitalin ALTINDA "Bugunku sonuclar": hekim
+                          anamnezi yazarken bugun ne ciktigini yaninda ister. */}
+                      <MuayeneSonucOzeti muayeneId={Number(kartId)} />
                     </div>
                   </div>
                 )
@@ -2150,6 +2154,25 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
           : undefined}
         altBilgi={tanim.kaynak === 'muayene' && kartId !== 'yeni'
           ? () => <MuayeneDurumSeridi muayeneId={Number(kartId)} />
+          : undefined}
+        // MUAYENE EYLEMLERI KARTTA (461): ayni aksiyon kodlari listedekiyle
+        //   BIREBIR ayni isleyiciye gider - kural ve yetki tek yerde kalir.
+        ekAraclar={tanim.kaynak === 'muayene' && kartId !== 'yeni'
+          ? (d) => {
+              const satir = { id: Number(kartId), hastaAdi: String(d.tarafAdi ?? '') };
+              const dugme = (kod: string, ad: string, sinif = 'd') => (
+                <button key={kod} type="button" className={sinif}
+                        onClick={() => void aksiyon(kod, satir)}>{ad}</button>
+              );
+              return (
+                <>
+                  {dugme('muayene.al', '▶ Muayeneye Al')}
+                  {dugme('muayene.istem', '🧪 İstem Aç')}
+                  {dugme('muayene.sablon', '📋 Şablon Uygula')}
+                  {dugme('muayene.tamamla', '✓ Tamamla')}
+                </>
+              );
+            }
           : undefined}
         baslik={tanim.kartBaslik ?? tanim.baslik.replace(/ler$|lar$/, '')}
         yerTutucuSekmeler={tanim.yerTutucuSekmeler}
