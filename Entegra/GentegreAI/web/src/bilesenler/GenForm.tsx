@@ -68,6 +68,15 @@ interface Props {
       "Muayeneye Al · Tamamla · Istem Ac · Sablon"). Dugmeler yalnizca ucu
       cagirir; kural sunucuda kalir. */
   ekAraclar?(deger: Record<string, Deger>): React.ReactNode;
+  /**
+   * KIMLIK SERIDINI EKRANIN ISTEDIGI YERE TASIR. Verilirse serit kartin
+   * ustunde cizilmez; sarmalayici dondurdugu dugumu nereye koyacagina karar
+   * verir (muayene karti: seridi bir modala alip baglam seridindeki "Bugun"
+   * kutusundan aciyor - hekimin gunluk isi sekmelerde, kimlik alanlari
+   * arada bir bakilan bilgi).
+   */
+  seritSarmalayici?(serit: React.ReactNode,
+                    deger: Record<string, Deger>): React.ReactNode;
   /** Ust seritte kalacak alan adlari. Verilmezse "Kimlik" grubunun TAMAMI seritte
       (varsayilan davranis). Verilirse serit bunlarla sinirlanir, grubun kalani
       "Kimlik" sekmesine duser - kimlik alani cok olan kartlarda serit sismesin. */
@@ -136,7 +145,7 @@ const SEKME_IKON: Record<string, string> = {
 };
 const sekmeIkonu = (baslik: string) => SEKME_IKON[baslik] ?? '▫️';
 
-export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, sekmeSarmalayici, onKaydedildi, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, onKaydedildi, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
@@ -804,7 +813,8 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
             alerji/kronik/aktif ilac hekimin yazarken gormesi gereken bilgi -
             ayri sekmede durursa bakilmaz. */}
         {ustBaglam?.(deger)}
-        {kimlikAlanlari.length > 0 && (
+        {kimlikAlanlari.length > 0 && (() => {
+        const kimlikSeridi = (
         <div className="kaid">
           {/* AVATAR (305, kullanici: "ad soyadin soluna avatar ekle"): ad ve
               soyadin bas harfleri. Kisi kartlarinda kimin karti oldugunu tek
@@ -949,7 +959,9 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
             </div>
           )}
         </div>
-        )}
+        );
+        return seritSarmalayici ? seritSarmalayici(kimlikSeridi, deger) : kimlikSeridi;
+        })()}
         {/* RADYOLOJI ISTEMI (310): akis seridi + ozet KIMLIK SERIDININ ALTINDA,
             sekmelerin USTUNDE - hangi sekmede olursan ol "istem nerede"
             gorunmeli (mockup radyoloji_istem_karti.html). Yeni kayitta yok. */}

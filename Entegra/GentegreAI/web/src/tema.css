@@ -2769,3 +2769,15 @@ input.skt-gecmis {
 /* Sikayet iki, hikaye uc satir (mockup oranlari). */
 .muayene-ikili .mi-sol .alan textarea { min-height: 54px }
 .muayene-ikili .mi-sol .tip-metin:nth-of-type(2) textarea { min-height: 72px }
+
+/* MUAYENE BAGLAM SERIDI - "Bugun" kutusu tiklanabilir (kullanici): kimlik
+   alanlari (tur/bolum/hekim/baslama/bitis/isteyen muayene) buradan acilan
+   pencerede duruyor. Kutunun tiklanir oldugu gorunmeli. */
+.kb-kutu.kb-tikla { cursor: pointer }
+.kb-kutu.kb-tikla:hover { border-color: var(--vurgu); background: var(--yuz2) }
+.kb-kutu.kb-tikla:focus-visible { outline: 2px solid var(--vurgu); outline-offset: 1px }
+
+/* Kimlik seridi PENCERE ICINDE: kart govdesindeki serit kenarligi/gri zemini
+   pencerede gereksiz - alanlar tek sutunda okunur akar. */
+.muayene-bilgi .kaid { border: none; background: none; padding: 0 }
+.muayene-bilgi .alan-izgara { grid-template-columns: 1fr 1fr }

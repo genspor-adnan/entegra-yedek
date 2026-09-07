@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// MUAYENE ve LABORATUVAR ISTEM kartlari (360).
@@ -273,9 +273,11 @@ public static partial class KartKatalogu
             // BASLANGIC / BITIS = HEKIMIN suresi (USS Muayene Baslangic-Bitis);
             //   muayeneTarihi kaydin acilisidir, ikisi ayni sey degil. Ekranin
             //   dugmeleri yazar (Muayeneye Al / Tamamla), elle girilmez.
-            new("baslangic", "baslangic", "tarih", Yazilabilir: false,
-                Baslik: "Muayeneye Alındı", Grup: "Kimlik", AltGrup: "Süre"),
-            new("bitis", "bitis", "tarih", Yazilabilir: false,
+            // TIP "zaman": muayenenin gun ici SAATI onemli - "28 sa 45 dk acik"
+            //   suresi bu iki damgadan cikar, gun cozunurlugu onu olcemez.
+            new("baslangic", "baslangic", "zaman", Yazilabilir: false,
+                Baslik: "Başlama", Grup: "Kimlik", AltGrup: "Süre"),
+            new("bitis", "bitis", "zaman", Yazilabilir: false,
                 Baslik: "Bitiş", Grup: "Kimlik", AltGrup: "Süre"),
             new("randevuId", "randevu_id", "sayi", Baslik: "Randevu Id",
                 Grup: "Kimlik", AltGrup: "Süre"),
@@ -288,7 +290,7 @@ public static partial class KartKatalogu
             //   hekim yazdiginin son kelimesini goruyordu. 4000 sinir hem
             //   dogrulama hem cok satirli kutu (uzun-metin kurali).
             new("sikayet", "sikayet", "metin", EnFazlaUzunluk: 4000,
-                Baslik: "Şikayet", Grup: "Anamnez"),
+                Baslik: "Şikâyet", Grup: "Anamnez"),
             new("hikaye", "hikaye", "metin", EnFazlaUzunluk: 4000,
                 Baslik: "Hikâye", Grup: "Anamnez"),
             // Ozgecmis / soygecmis / aliskanlik BURADA SERBEST NOTTUR; yapisal

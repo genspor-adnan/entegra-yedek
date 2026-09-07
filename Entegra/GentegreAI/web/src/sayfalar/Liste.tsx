@@ -198,6 +198,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     useState<{ belgeNo: string; satirlar: EBelgeMesaji[] } | null>(null);
   const [donusum, setDonusum] =
     useState<{ belgeId: number; belgeTur: number; hedef?: number } | null>(null);
+  // MUAYENE KIMLIK ALANLARI MODALDA (kullanici): tur/bolum/hekim/baslama/bitis
+  //   ve isteyen muayene kart izgarasinda degil, baglam seridindeki "Bugun"
+  //   kutusuna basinca acilan pencerede. Kart govdesi sekmelere kaliyor.
+  const [muayeneBilgiAcik, setMuayeneBilgiAcik] = useState(false);
+  // Kart kapanip baska kayit acilinca pencere ACIK KALMASIN.
+  useEffect(() => { setMuayeneBilgiAcik(false) }, [kartId]);
   // Belge (fatura/siparis) karti da MODAL: liste arkada kalir, rota degismez.
   const [yeniBelgeTuru, setYeniBelgeTuru] = useState<number | null>(null);
   // Mevcut belgeyi ac (salt gorunum) - ayni modal, id ile.
@@ -2175,7 +2181,23 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
             }
           : undefined}
         ustBaglam={tanim.kaynak === 'muayene' && kartId !== 'yeni'
-          ? () => <MuayeneBaglamSeridi muayeneId={Number(kartId)} />
+          ? () => (
+            <MuayeneBaglamSeridi muayeneId={Number(kartId)}
+                                 onBugun={() => setMuayeneBilgiAcik(true)} />
+          )
+          : undefined}
+        // KIMLIK SERIDI MODALA TASINDI (kullanici): serit kart govdesinde
+        //   cizilmez; "Bugun" kutusuna basilinca ayni GenForm alanlariyla
+        //   (yani ayni deger/dogrulama/kaydetme yoluyla) pencerede acilir.
+        seritSarmalayici={tanim.kaynak === 'muayene' && kartId !== 'yeni'
+          ? (serit) => (muayeneBilgiAcik ? (
+              <Modal baslik="Muayene bilgileri" dar enUst
+                     onKapat={() => setMuayeneBilgiAcik(false)}
+                     alt={<button type="button" className="d"
+                                  onClick={() => setMuayeneBilgiAcik(false)}>Kapat</button>}>
+                <div className="muayene-bilgi">{serit}</div>
+              </Modal>
+            ) : null)
           : undefined}
         altBilgi={tanim.kaynak === 'muayene' && kartId !== 'yeni'
           ? () => <MuayeneDurumSeridi muayeneId={Number(kartId)} />

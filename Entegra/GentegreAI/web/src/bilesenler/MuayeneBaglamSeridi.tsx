@@ -29,7 +29,8 @@ async function listele(kaynak: string, hastaId: number): Promise<Satir[]> {
   } catch { return [] }
 }
 
-export function MuayeneBaglamSeridi({ muayeneId }: { muayeneId: number }) {
+export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
+  { muayeneId: number; onBugun?(): void }) {
   // KART DEGERI YETMIYOR: kartta hastanin ADI ve protokol NUMARASI yok
   //   (kod alanlari id tutar). Ayni bilgi muayene LISTESINDE hazir - tek
   //   satir cekmek, hasta/protokol/tur/hekim icin ayri ayri sorgudan ucuz.
@@ -138,9 +139,19 @@ export function MuayeneBaglamSeridi({ muayeneId }: { muayeneId: number }) {
 
       {/* BUGUN: mockup'ta "acilden yonlendirme · panik sonuc" gibi o gune ait
           notlar var. Elimizdeki karsilik: muayene turu, bolum/hekim, bekleyen
-          istem ve ana tani - hepsi SUNUCUDAN gelen alanlar. */}
-      <div className="kb-kutu">
-        <div className="kb-bas">Bugün</div>
+          istem ve ana tani - hepsi SUNUCUDAN gelen alanlar.
+          TIKLANINCA kimlik alanlari (tur, bolum, hekim, baslama/bitis, isteyen
+          muayene) modalda acilir (kullanici): bu alanlar arada bir duzeltilir,
+          kart izgarasinda surekli yer kaplamalari gerekmiyor. */}
+      <div className={`kb-kutu${onBugun ? ' kb-tikla' : ''}`}
+           role={onBugun ? 'button' : undefined}
+           tabIndex={onBugun ? 0 : undefined}
+           title={onBugun ? 'Muayene bilgilerini aç' : undefined}
+           onClick={onBugun}
+           onKeyDown={e => {
+             if (onBugun && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onBugun() }
+           }}>
+        <div className="kb-bas">Bugün{onBugun ? <span className="sonuk"> · düzenle</span> : null}</div>
         <div className="kb-ic">
           {tur ? <span className="rozet gri">{tur}</span> : null}
           {bolum ? <span>{bolum}</span> : null}

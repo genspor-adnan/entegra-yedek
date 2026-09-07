@@ -7984,3 +7984,19 @@ Mockup'ta anamnez tek sütun akar ve etiket alanın **üstünde** durur; şikây
 - `tema.css`: yalnız `.muayene-ikili .mi-sol` içinde ızgara tek sütuna iner,
   etiket üste geçer, `textarea` en az 54 px (hikâye 72 px). Kapsam sol panele
   bağlı - genel kart yerleşimi değişmedi.
+
+### Kimlik alanları pencereye taşındı (kullanıcı)
+
+- `baslangic`/`bitis` tipi `tarih` → **`zaman`**: kart artık saati de gösteriyor
+  ("06.09.2026 15:24"). Muayene süresi bu iki damgadan çıkıyor; gün
+  çözünürlüğü onu ölçmüyordu. Liste kolonları zaten `HH:mm` biçimliydi.
+- `baslangic` başlığı "Muayeneye Alındı" → **"Başlama"**, `sikayet` başlığı
+  mockup yazımıyla **"Şikâyet"**.
+- `randevuId` kart ızgarasından çıktı (ham id hekime bir şey söylemiyor).
+- **Kimlik şeridi kart gövdesinden kalktı**: GenForm'a `seritSarmalayici`
+  eklendi - şerit düğümünü ekrana teslim eder, ekran nereye koyacağına karar
+  verir. Muayenede bağlam şeridindeki **"Bugün"** kutusuna basınca "Muayene
+  bilgileri" penceresinde açılıyor (Tür · Bölüm · Hekim · Başlama · Bitiş ·
+  İsteyen Muayene). Alanlar aynı GenForm alanları: değer, doğrulama ve
+  kaydetme yolu değişmedi - pencerede ayrı bir Kaydet yok, kartın Kaydet'i
+  yazıyor.

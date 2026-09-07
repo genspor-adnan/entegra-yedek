@@ -603,8 +603,12 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // KART IZGARASINDAN CIKANLAR (kullanici): hasta, basvuru protokol id,
     //   muayene no ve kayit tarihi BAGLAM SERIDINDE zaten var; durum ise
     //   baslik rozetine tasindi. Izgara boylece yalnizca hekimin YAZDIGI
-    //   alanlarla kaliyor (tur, bolum, hekim, sure).
-    gizliKartAlanlari: ['tarafId', 'durum', 'belgeId', 'muayeneNo', 'muayeneTarihi'],
+    //   alanlarla kaliyor (tur, bolum, hekim, sure). randevuId de cikti: ham id
+    //   hekime bir sey soylemiyor. Kalan alanlar (Tur, Bolum, Hekim, Baslama,
+    //   Bitis, isteyen muayene) kart govdesinde degil, baglam seridindeki
+    //   "Bugun" kutusundan acilan pencerede (Liste.seritSarmalayici).
+    gizliKartAlanlari: ['tarafId', 'durum', 'belgeId', 'muayeneNo', 'muayeneTarihi',
+                        'randevuId'],
     aksiyonEkrani: 'muayene-liste',
     tarihAlani: 'muayeneTarihi',
     cipler: [
