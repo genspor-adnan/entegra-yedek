@@ -264,10 +264,18 @@ public static partial class KartKatalogu
                 Baslik: "Kayıt Tarihi", Grup: "Kimlik"),
             new("tur", "tur", "kod", SabitKodlar: MuayeneTuruKodlari,
                 Baslik: "Tür", Grup: "Kimlik"),
+            // BOLUM ve HEKIM MUAYENE KARTINDAN DEGISTIRILEMEZ (kullanici).
+            //   Ikisi de basvurunun yonlendirmesidir: muayene "Muayeneye Al"
+            //   ile o bolumun/hekimin adina acilir, tahakkuk ve e-Nabiz paketi
+            //   bu ikisine baglidir. Kart uzerinden degistirmek, acilmis
+            //   istemleri ve tahakkuku baska bir bolume tasirdi - hekim
+            //   degisimi ayri bir surectir (yeniden yonlendirme).
+            //   Kural SUNUCUDA: yazilamaz alan istekte gelirse 400 doner,
+            //   istemci yalnizca kapali cizer.
             new("bolumId", "bolum_id", "kod", KodTablosu: "public.v_departman_lookup",
-                Baslik: "Bölüm", Grup: "Kimlik"),
+                Yazilabilir: false, Baslik: "Bölüm", Grup: "Kimlik"),
             new("personelId", "personel_id", "kod", KodTablosu: "public.v_personel_lookup",
-                Baslik: "Hekim", Grup: "Kimlik"),
+                Yazilabilir: false, Baslik: "Hekim", Grup: "Kimlik"),
             new("durum", "durum", "kod", SabitKodlar: MuayeneDurumKodlari,
                 Baslik: "Durum", Grup: "Kimlik"),
             // BASLANGIC / BITIS = HEKIMIN suresi (USS Muayene Baslangic-Bitis);

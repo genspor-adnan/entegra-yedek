@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// MUAYENE ve LABORATUVAR listeleri (360).
@@ -15,6 +15,9 @@ public static partial class KaynakKatalogu
         YetkiKodu: "muayene",
         Kaynak: "public.muayene m "
               + "  join public.taraf h on h.id = m.taraf_id "
+              // Hasta demografisi (cinsiyet/dogum) baglam seridinde gosterilir:
+              //   "ZEYNEP DEMIR K 45y". Ayri istek atmak yerine ayni satirda.
+              + "  left join public.taraf_hasta th on th.id = h.id "
               + "  left join public.belge b on b.id = m.belge_id "
               + "  left join public.v_personel_lookup p on p.id = m.personel_id "
               + "  left join public.v_departman_lookup d on d.id = m.bolum_id",
@@ -134,6 +137,30 @@ public static partial class KaynakKatalogu
                                                      Genislik: 110, Varsayilan: false),
             new("tamamlanma",    "m.tamamlanma",     "tarih", "Tamamlandı", Hizalama: "orta",
                                                      Bicim: "HH:mm", Genislik: 110,
+                                                     Varsayilan: false),
+            new("bitis",         "m.bitis",          "tarih", "Bitiş", Hizalama: "orta",
+                                                     Bicim: "HH:mm", Genislik: 110,
+                                                     Varsayilan: false),
+            // CINSIYET HARFI ve YAS SUNUCUDA hesaplanir: "45 y" istemcide
+            //   dogum tarihinden cikarilirsa her ekran kendi kuralini yazar
+            //   (ay/gun kirilimi, vefat, tarihsiz hasta). Tek yer, tek kural.
+            new("cinsiyetKisa",
+                "case coalesce(th.cinsiyet, 0) when 1 then 'E' when 2 then 'K' else '' end",
+                                                     "metin", "C.", Hizalama: "orta",
+                                                     Genislik: 40, Filtrelenebilir: false,
+                                                     Varsayilan: false),
+            // Bebeklerde yil yerine ay/gun: "3 ay" ile "0 y" arasindaki fark
+            //   doz ve referans araligi kararini degistirir.
+            new("yasMetni",
+                "case when th.dogum_tarihi is null then '' "
+                + "when age(th.dogum_tarihi) >= interval '2 years' "
+                + "     then extract(year from age(th.dogum_tarihi))::int::text || 'y' "
+                + "when age(th.dogum_tarihi) >= interval '1 month' "
+                + "     then (extract(year from age(th.dogum_tarihi))::int * 12 "
+                + "           + extract(month from age(th.dogum_tarihi))::int)::text || 'ay' "
+                + "else (current_date - th.dogum_tarihi)::text || 'g' end",
+                                                     "metin", "Yaş", Hizalama: "orta",
+                                                     Genislik: 70, Filtrelenebilir: false,
                                                      Varsayilan: false)
         });
 

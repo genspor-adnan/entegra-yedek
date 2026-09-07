@@ -18,6 +18,24 @@ type Satir = Record<string, unknown>;
 
 const metin = (v: unknown) => String(v ?? '').trim();
 
+const ZAMAN = (v: unknown, saatli: boolean) => {
+  const d = v ? new Date(String(v)) : null;
+  if (!d || Number.isNaN(d.getTime())) return '';
+  const g = d.toLocaleDateString('tr-TR');
+  const sa = d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  return saatli ? `${g} ${sa}` : sa;
+};
+
+/** "25 dk" · "1 sa 05 dk" - baslamamissa bos. Bitis yoksa SUREN muayene. */
+function sure(baslangic: unknown, bitis: unknown): string {
+  const b = baslangic ? new Date(String(baslangic)).getTime() : NaN;
+  if (!Number.isFinite(b)) return '';
+  const s = bitis ? new Date(String(bitis)).getTime() : Date.now();
+  const dk = Math.max(0, Math.round((s - b) / 60000));
+  return dk < 60 ? `${dk} dk`
+                 : `${Math.floor(dk / 60)} sa ${String(dk % 60).padStart(2, '0')} dk`;
+}
+
 /** Listeyi bir kez çeker; hata olursa şerit sessizce boş kalır. */
 async function listele(kaynak: string, hastaId: number): Promise<Satir[]> {
   try {
@@ -82,6 +100,13 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
   const tur = metin(ust?.turAdi);
   const bekleyen = Number(ust?.bekleyenIstem ?? 0);
   const anaTani = metin(ust?.anaTani);
+  const cinsiyet = metin(ust?.cinsiyetKisa);
+  const yas = metin(ust?.yasMetni);
+  // Muayenenin gun icindeki penceresi: "06.09.2026 15:24 – 15:49 · 25 dk".
+  //   Bitis bossa muayene SURUYOR - gecen sure yine yazilir.
+  const bas = ZAMAN(ust?.baslangic, true);
+  const bit = ZAMAN(ust?.bitis ?? ust?.tamamlanma, false);
+  const gecen = sure(ust?.baslangic, ust?.bitis ?? ust?.tamamlanma);
 
   return (
     <div className="kart-baglam">
@@ -89,8 +114,22 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
         <div className="kb-bas">Hasta</div>
         <div className="kb-ic">
           <b>{hastaAdi || '—'}</b>
-          {metin(ust?.dosyaNo) ? <span className="sonuk">· {metin(ust?.dosyaNo)}</span> : null}
-          {protokol ? <span className="sonuk">· {protokol}</span> : null}
+          {/* CINSIYET + YAS ADIN SAGINDA (kullanici: "K 45y"): doz, referans
+              araligi ve tetkik karari once bu ikisine bakar. Ikisi de
+              SUNUCUDAN hazir metin gelir - yas hesabini ekran yapmaz. */}
+          {(cinsiyet || yas) && (
+            <span className="rozet gri" title="Cinsiyet · yaş">
+              {[cinsiyet, yas].filter(Boolean).join(' ')}
+            </span>
+          )}
+        </div>
+        {/* Dosya ve protokol numarasi ADIN ALTINDA (kullanici): ad satirini
+            uzatmiyor. ETIKETSIZ (kullanici): numaralarin bicimi kendini
+            soyluyor, "Dosya"/"Protokol" kelimeleri satiri sisiriyordu. */}
+        <div className="kb-ic sonuk">
+          {metin(ust?.dosyaNo) ? <span>{metin(ust?.dosyaNo)}</span> : null}
+          {protokol ? <span>· {protokol}</span> : null}
+          {!metin(ust?.dosyaNo) && !protokol ? <span>—</span> : null}
         </div>
       </div>
 
@@ -162,6 +201,14 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
           {anaTani ? <span className="rozet olumlu" title="Ana tanı">{anaTani}</span> : null}
           {!tur && !bolum && !hekim && bekleyen === 0 && !anaTani
             && <span className="sonuk">—</span>}
+        </div>
+        {/* ALT SATIR (kullanici): baslama tarihi-saati, bitis saati ve sure. */}
+        <div className="kb-ic sonuk">
+          {bas ? (
+            <span>
+              {bas} – {bit || '…'}{gecen ? ` · ${gecen}` : ''}
+            </span>
+          ) : <span>Muayeneye alınmadı</span>}
         </div>
       </div>
     </div>

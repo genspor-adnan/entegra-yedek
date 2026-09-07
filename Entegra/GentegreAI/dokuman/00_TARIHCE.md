@@ -8006,3 +8006,19 @@ en altta sistemin yazdığı Başlama/Bitiş (`seritAlanlari` hem listeyi hem s�
 verir; katalog sırası değişmedi). Şikâyet/Hikâye kutuları %40 kısaldı ve eşit
 yükseklikte (41 px) - `rows=4` niteliği `min-height`i ezdiği için yükseklik
 `height` ile veriliyor.
+
+### Bağlam şeridi ve kilitli alanlar (kullanıcı)
+
+- **Bölüm ve Hekim muayene kartından değiştirilemez** (`Yazilabilir: false`).
+  İkisi başvurunun yönlendirmesidir; tahakkuk, açılmış istemler ve e-Nabız
+  paketi bunlara bağlı - kart üzerinden değiştirmek muayeneyi başka bölüme
+  taşırdı. Hekim değişimi ayrı süreçtir (yeniden yönlendirme). Kural sunucuda:
+  yazılamaz alan istekte gelirse `400`, istemci alanı kapalı çizer.
+- Muayene listesine **`cinsiyetKisa`** (E/K) ve **`yasMetni`** kolonları
+  eklendi (`taraf_hasta` join). Yaş SUNUCUDA hesaplanır: 2 yaş altı ay,
+  1 ay altı gün olarak - doz ve referans aralığı kararı bu kırılıma bakar;
+  her ekranın kendi yaş hesabını yazması aynı hastayı iki farklı yaşta
+  gösterirdi. `bitis` kolonu da listeye eklendi.
+- Bağlam şeridi: hasta adının sağında `E 36y` rozeti, altında etiketsiz
+  dosya/protokol numarası; "Bugün" kutusunun altında muayenenin penceresi
+  ("07.09.2026 01:02 – 01:35 · 33 dk"; bitiş yoksa süren muayene).
