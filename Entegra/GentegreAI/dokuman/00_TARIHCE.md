@@ -8151,3 +8151,29 @@ Tanı (ICD-10) · İstem & Sonuçlar**.
   "＋ ICD-10 Ekle" ucundan gelir, boş satır yarım kayıt olurdu. `icdKod` artık
   yazılamaz: kodu değiştirmek satırı başka bir hastalığa çevirip geçmişi
   bozardı; yanlış tanı kaldırılır, doğrusu eklenir.
+
+### Mockup'un kalan sekmeleri (kullanıcı)
+
+Muayene kartı mockup'taki sekmelerin tamamını taşıyor; sıra da mockup'tan
+(GenForm `sekmeSirasi`): Anamnez & Vital · Fizik Muayene · Tanı (ICD-10) ·
+İstem & Sonuçlar · e-Reçete · Rapor · Sevk / Konsültasyon · İşlem & Ücret ·
+Geçmiş · Dosyalar.
+
+- **Tek uç** `GET /api/muayene/{id}/sekme-verisi`: e-Reçete (reçete + ilaç
+  satırları), konsültasyonlar (bu muayeneden istenen muayeneler), İşlem & Ücret
+  (başvuru belgesinin satırları) ve Geçmiş (aynı hastanın diğer muayeneleri).
+  Dördü sekme değiştikçe ayrı istenirse kart açılışı dört gidiş dönüş yapardı.
+- **Bu sekmeler yazmaz**: reçete Reçeteler ekranında, ücret satırı başvuru
+  belgesinde, konsültasyon yeni bir muayene olarak oluşur - aynı kural iki
+  yerde yazılmasın. Ücret sekmesi tutarları başvurudan okur (indirim, sigorta
+  payı ve tahakkuk kararı orada).
+- **Dosyalar**: doküman modülü `muayene` kaynağını da kabul ediyor (beyaz
+  listeye eklendi). Hastanın getirdiği dış tetkik/epikriz O MUAYENEYE aittir -
+  hasta kartına asılınca hangi muayenede değerlendirildiği kayboluyordu.
+- **`db/462` `muayene_rapor`**: istirahat / sağlık durumu / ilaç kullanım /
+  iş göremezlik raporu. Muayene kartına alan olarak eklenseydi bir muayenede
+  iki rapor yazılamaz, iptal edilenin izi kalmazdı. Gün sayısı hekimin
+  yazdığıdır (iş günü/tatil kuralı kuruma göre değişir; tarih farkından
+  otomatik üretmek yanlış rapor verirdi). Hasta/hekim/şube tetikle
+  muayeneden gelir - ekranda sorulan bir şey değil.
+- GenForm: `ekSekmeler` (ekrana özel sekme), `sekmeSirasi`, `gizliDetaylar`.

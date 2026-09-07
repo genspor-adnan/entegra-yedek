@@ -7,6 +7,11 @@ import { RandevuTakvimi } from '../bilesenler/RandevuTakvimi';
 import { GenForm } from '../bilesenler/GenForm';
 import { MuayeneBaglamSeridi } from '../bilesenler/MuayeneBaglamSeridi';
 import { KaynakArama } from '../bilesenler/KaynakArama';
+import {
+  useMuayeneSekmeVerisi, MuayeneReceteSekmesi, MuayeneKonsultasyonSekmesi,
+  MuayeneUcretSekmesi, MuayeneGecmisSekmesi,
+} from '../bilesenler/MuayeneSekmeleri';
+import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
 import { MuayeneDurumSeridi } from '../bilesenler/MuayeneDurumSeridi';
 import { MuayeneOzetSeridi } from '../bilesenler/MuayeneOzetSeridi';
 import { MuayeneSonucOzeti } from '../bilesenler/MuayeneSonucOzeti';
@@ -208,6 +213,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       uygula, tümü normal...) satırı SUNUCUDA açar; kart onu ancak yeniden
       okuyunca gösterir. */
   const [kartTazele, setKartTazele] = useState(0);
+  /** Muayene kartının ek sekmeleri (e-Reçete, ücret, geçmiş, konsültasyon):
+      tek uçtan gelen ortak veri; kart tazelendikçe yenilenir. */
+  const sekmeVerisi = useMuayeneSekmeVerisi(
+    tanim.kaynak === 'muayene' && typeof kartId === 'number' ? kartId : 0, kartTazele);
   // Kart kapanip baska kayit acilinca pencere ACIK KALMASIN.
   useEffect(() => { setMuayeneBilgiAcik(false) }, [kartId]);
   // Belge (fatura/siparis) karti da MODAL: liste arkada kalir, rota degismez.
@@ -2198,6 +2207,13 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
                     </div>
                   </div>
                 )
+                : baslik.startsWith('Sevk') ? (
+                  // Sevk alanlarinin ALTINDA bu muayeneden istenen
+                  //   konsultasyonlar (mockup "Sevk / Konsultasyon").
+                  <MuayeneKonsultasyonSekmesi veri={sekmeVerisi.veri}
+                                              hata={sekmeVerisi.hata}
+                                              icerik={icerik} />
+                )
                 : (
                   <>
                     {/* FIZIK MUAYENE ARAC CUBUGU (mockup): sablon uygula ve
@@ -2296,6 +2312,34 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         //   sablondan acilir, secim kutusu yanlis bir vaat olurdu; deger/taraf
         //   ise mockup'ta yok.
         tazeleAnahtari={kartTazele}
+        // MOCKUP SIRASI (muayene_karti.html): hekimin is akisi - once
+        //   anamnez ve muayene, sonra tani, istem, recete/rapor, en sonda
+        //   sevk, ucret, gecmis ve dosyalar.
+        sekmeSirasi={tanim.kaynak === 'muayene'
+          ? ['Anamnez', 'Fizik Muayene', 'Tanı', 'İstem & Sonuçlar', 'e-Reçete',
+             'Rapor', 'Sevk', 'İşlem & Ücret', 'Geçmiş', 'Dosyalar']
+          : undefined}
+        // MOCKUP EK SEKMELERI (muayene_karti.html): e-Recete · Sevk /
+        //   Konsultasyon · Islem & Ucret · Gecmis · Dosyalar. Icerik gercek
+        //   kayitlardan gelir (tek uc: /api/muayene/{id}/sekme-verisi);
+        //   yazma islemleri kendi ekranlarinda kalir.
+        ekSekmeler={tanim.kaynak === 'muayene' && kartId !== 'yeni' && kartId !== null
+          ? [
+              { anahtar: 'ozel:recete', baslik: 'e-Reçete',
+                ciz: () => <MuayeneReceteSekmesi veri={sekmeVerisi.veri}
+                                                 hata={sekmeVerisi.hata} /> },
+              { anahtar: 'ozel:ucret', baslik: 'İşlem & Ücret',
+                ciz: () => <MuayeneUcretSekmesi veri={sekmeVerisi.veri}
+                                                hata={sekmeVerisi.hata} /> },
+              { anahtar: 'ozel:gecmis', baslik: 'Geçmiş',
+                ciz: () => <MuayeneGecmisSekmesi veri={sekmeVerisi.veri}
+                                                 hata={sekmeVerisi.hata} /> },
+              { anahtar: 'ozel:dosyalar', baslik: 'Dosyalar',
+                ciz: () => <DokumanGalerisi kartAdi="muayene"
+                                            kaynakId={Number(kartId)}
+                                            saltOkunur={false} /> },
+            ]
+          : undefined}
         // VITAL BULGULAR SEKMESI YOK (kullanici): olcum anamnez sekmesinin
         //   sag panelinde duzenleniyor - ayni veriyi iki sekmede gostermek
         //   hangisinin gecerli oldugunu belirsiz birakiyordu.

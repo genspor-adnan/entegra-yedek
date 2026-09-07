@@ -267,6 +267,106 @@ public static class MuayeneUclari
                                     izlemeNo = baglam.IzlemeNo });
         });
 
+        // GET /api/muayene/{id}/sekme-verisi - mockup'taki e-Reçete, Sevk /
+        //   Konsültasyon, İşlem & Ücret ve Geçmiş sekmelerinin verisi.
+        //
+        //   TEK UÇ: dördü de aynı muayenenin çevresindeki kayıtlar ve hepsi
+        //   sekme değiştikçe ayrı ayrı istenirse kart açılışı dört ek gidiş
+        //   dönüş yapar. Yetki muayene üzerinden çözülür; her sorgu ya
+        //   muayenenin kendisine ya da başvurusuna bağlıdır.
+        grup.MapGet("/{id:int}/sekme-verisi", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var m = await baglanti.TekAsync(
+                "select m.belge_id, m.taraf_id, m.ust_muayene_id " +
+                "  from public.muayene m where m.id = @p0",
+                null, [id],
+                o => new { BelgeId = o.IsDBNull(0) ? (int?)null : o.GetInt32(0),
+                           HastaId = o.GetInt32(1),
+                           UstId = o.IsDBNull(2) ? (int?)null : o.GetInt32(2) }, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Muayene bulunamadi.");
+
+            // e-REÇETE: reçete başlıkları + satırları. İlaç adı satırda SAKLI
+            //   (ilaç kataloğu değişse bile yazılan ilaç değişmemeli).
+            var receteler = await baglanti.ListeAsync(
+                "select r.id, r.recete_no as \"receteNo\", r.tur, r.durum, " +
+                "       r.aciklama, r.imza_zamani as \"imzaZamani\", " +
+                "       r.medula_gonderim as \"medulaGonderim\", " +
+                "       r.medula_sonuc as \"medulaSonuc\", r.ekleme_tarihi as \"tarih\", " +
+                "       coalesce(p.ad, '') as hekim, " +
+                "       (select count(*) from public.recete_satir s where s.recete_id = r.id) as ilac " +
+                "  from public.recete r " +
+                "  left join public.v_personel_lookup p on p.id = r.hekim_id " +
+                " where r.muayene_id = @p0 order by r.id desc",
+                null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            var receteSatirlari = await baglanti.ListeAsync(
+                "select s.recete_id as \"receteId\", s.ilac_barkod as \"barkod\", " +
+                "       s.ilac_ad as \"ilac\", s.doz, s.periyot, s.kullanim_sekli as \"kullanim\", " +
+                "       s.sure_gun as \"sureGun\", s.kutu, s.aciklama, " +
+                "       s.etkilesim_uyari as \"uyari\" " +
+                "  from public.recete_satir s " +
+                "  join public.recete r on r.id = s.recete_id " +
+                " where r.muayene_id = @p0 order by s.recete_id desc, s.sira, s.id",
+                null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            // KONSÜLTASYON: bu muayeneden İSTENEN muayeneler (ust_muayene_id)
+            //   ve varsa bu muayeneyi İSTEYEN muayene.
+            var konsultasyonlar = await baglanti.ListeAsync(
+                "select k.id, coalesce(d.ad, '') as bolum, coalesce(p.ad, '') as hekim, " +
+                "       k.muayene_tarihi as tarih, k.durum, " +
+                "       coalesce((select i.ad from public.tani t " +
+                "                   join public.icd i on i.kod = t.icd_kod " +
+                "                  where t.muayene_id = k.id and t.tur = 1 limit 1), '') as \"anaTani\" " +
+                "  from public.muayene k " +
+                "  left join public.v_departman_lookup d on d.id = k.bolum_id " +
+                "  left join public.v_personel_lookup p on p.id = k.personel_id " +
+                " where k.ust_muayene_id = @p0 order by k.id desc",
+                null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            // İŞLEM & ÜCRET: başvuru belgesinin satırları - muayene, tetkik ve
+            //   işlemlerin ücreti başvuruda toplanır (tahakkuk oradan çıkar).
+            var islemler = m.BelgeId is null
+                ? new List<IDictionary<string, object>>()
+                : await baglanti.ListeAsync(
+                    "select bs.id, coalesce(h.kod, '') as kod, " +
+                    "       coalesce(h.ad, coalesce(st.ad, '')) as ad, " +
+                    "       bs.adet, bs.birim_fiyat as \"birimFiyat\", bs.iskonto, " +
+                    "       bs.tutar, bs.kdv, " +
+                    "       bs.aciklama " +
+                    "  from public.belge_satir bs " +
+                    "  left join public.hizmet h on h.id = bs.hizmet_id " +
+                    "  left join public.stok st on st.id = bs.stok_id " +
+                    " where bs.belge_id = @p0 order by bs.sira, bs.id",
+                    null, [m.BelgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            // GEÇMİŞ: aynı hastanın diğer muayeneleri (en yeni önce).
+            var gecmis = await baglanti.ListeAsync(
+                "select g.id, g.muayene_tarihi as tarih, coalesce(d.ad, '') as bolum, " +
+                "       coalesce(p.ad, '') as hekim, g.durum, " +
+                "       coalesce(nullif(g.sikayet, ''), '') as sikayet, " +
+                "       coalesce((select i.ad from public.tani t " +
+                "                   join public.icd i on i.kod = t.icd_kod " +
+                "                  where t.muayene_id = g.id and t.tur = 1 limit 1), '') as \"anaTani\" " +
+                "  from public.muayene g " +
+                "  left join public.v_departman_lookup d on d.id = g.bolum_id " +
+                "  left join public.v_personel_lookup p on p.id = g.personel_id " +
+                " where g.taraf_id = @p1 and g.id <> @p0 " +
+                " order by g.muayene_tarihi desc, g.id desc limit 50",
+                null, [id, m.HastaId], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            return Results.Ok(new { muayeneId = id, belgeId = m.BelgeId,
+                                    ustMuayeneId = m.UstId,
+                                    receteler, receteSatirlari, konsultasyonlar,
+                                    islemler, gecmis, izlemeNo = baglam.IzlemeNo });
+        });
+
         // GET /api/muayene/{id}/tanilar - kartın tanı satırları (araç
         //   çubuğundaki "sil" için: hangi satırın kaldırılacağı SUNUCUDAN
         //   gelen listeden seçilir, ekranın elindeki taslaktan değil).

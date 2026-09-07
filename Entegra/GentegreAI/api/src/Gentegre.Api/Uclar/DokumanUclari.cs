@@ -179,6 +179,9 @@ public static class DokumanUclari
         "sube" => "sube",
         // Radyoloji istem kagidi (310) - kaynak_id istem kimligidir.
         "radyoloji-istem" => "radyoloji-istem",
+        // Muayene DOSYALARI (mockup muayene_karti.html "Dosyalar"): disaridan
+        //   gelen tetkik, epikriz, ragit... kaynak_id muayene kimligidir.
+        "muayene" => "muayene",
         // KURUMSAL KLASOR (419): kaynagi bir KART OLMAYAN dokuman. Prosedur,
         //   talimat, sozlesme sablonu... kaynak_id klasor kimligidir. Bu
         //   olmadan kurumsal dokuman yuklenemiyordu - her dokumanin bir karta
@@ -194,6 +197,7 @@ public static class DokumanUclari
         "hasta" => "personel",
         "ebelge-xslt" => "ebelge_xslt",
         "radyoloji-istem" => "radyoloji",
+        "muayene" => "muayene",
         // Kurumsal klasore yukleme DOKUMAN yetkisiyle (kaynak kart yok).
         "klasor" => "dokuman",
         _ => kartAdi

@@ -246,6 +246,15 @@ export const api = {
     gonder<{ eklendi: boolean; mesaj: string }>(
       `/api/muayene/${muayeneId}/tani/${encodeURIComponent(icdKod)}`, {}),
 
+  /** Muayene kartinin ek sekmeleri (e-Recete, konsultasyon, ucret, gecmis). */
+  muayeneSekmeVerisi: (muayeneId: number) =>
+    istek<{
+      belgeId: number | null; ustMuayeneId: number | null;
+      receteler: Record<string, unknown>[]; receteSatirlari: Record<string, unknown>[];
+      konsultasyonlar: Record<string, unknown>[]; islemler: Record<string, unknown>[];
+      gecmis: Record<string, unknown>[];
+    }>(`/api/muayene/${muayeneId}/sekme-verisi`),
+
   /** Metin anahtarli katalogda (ICD...) kullanicinin SIK ve SON kullandiklari. */
   katalogKullanilan: (kaynak: string) =>
     istek<{ sik: { kod: string; ad: string; say: number }[];

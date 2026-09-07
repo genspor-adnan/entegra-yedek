@@ -153,6 +153,14 @@ public static partial class KartKatalogu
     private static readonly Dictionary<string, string> PrimBelgeTuruKodlari =
         new() { ["15,16"] = "Fatura / Fiş", ["17"] = "Tahakkuk" };
 
+    /// <summary>Muayene raporu türleri (462).</summary>
+    private static readonly Dictionary<string, string> RaporTuruKodlari =
+        new() { ["1"] = "İstirahat", ["2"] = "Sağlık durumu", ["3"] = "İlaç kullanım",
+                ["4"] = "İş göremezlik" };
+
+    private static readonly Dictionary<string, string> RaporDurumKodlari =
+        new() { ["0"] = "İptal", ["1"] = "Taslak", ["2"] = "Onaylı" };
+
     private static readonly Dictionary<string, string> CinsiyetKodlari =
         new() { ["1"] = "Erkek", ["2"] = "Kadın" };
 

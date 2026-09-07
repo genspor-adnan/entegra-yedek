@@ -106,10 +106,24 @@ export function sekmeleriKur(secenek: {
    * veriyi iki yerde gosterirdi.
    */
   gizliDetaylar?: string[];
+  /**
+   * EKRANA OZEL EK SEKMELER (mockup muayene karti: e-Recete, Rapor,
+   * Sevk/Konsultasyon, Islem & Ucret, Gecmis, Dosyalar). Icerigi ekran cizer;
+   * cerceve yalnizca sekmeyi acar. Yeni kayitta acilmaz - hepsi kaydedilmis
+   * bir muayeneye baglidir.
+   */
+  ekSekmeler?: { anahtar: string; baslik: string }[];
+  /**
+   * SEKME SIRASI (basliklara gore): listede adi gecen sekmeler bu sirayla
+   * one alinir, kalanlar arkalarinda dogal sirasinda kalir. Muayene karti
+   * mockup'taki sirayi kullanir - hekimin is akisi budur.
+   */
+  sekmeSirasi?: string[];
 }): SekmeTanimi[] {
   const { gruplar, meta, kaynak, deger, yeniMi, personelGibiKart,
           yerTutucuSekmeler, gizliSekmeler, seritAlanlari, detayGrupta,
-          gizliDetaylar, detaySatirlari = () => [] } = secenek;
+          gizliDetaylar, ekSekmeler, sekmeSirasi,
+          detaySatirlari = () => [] } = secenek;
   const dokumanliKart = personelGibiKart || kaynak === 'kisi' || kaynak === 'cari' || kaynak === 'stok';
   const yorumMedyaSekmesiVar = (yerTutucuSekmeler ?? []).includes('Yorum / Medya');
   const s: SekmeTanimi[] = gruplar
@@ -236,5 +250,19 @@ export function sekmeleriKur(secenek: {
   if (kaynak === 'radyoloji-istem' && !yeniMi) {
     s.push({ tur: 'ozel', anahtar: 'ozel:dokuman', baslik: 'İstem Kâğıdı' });
   }
+  // Ekrana ozel ek sekmeler EN SONA: mockup'taki sira (e-Recete, Rapor,
+  //   Sevk, Islem & Ucret, Gecmis, Dosyalar) ekranin verdigi siradir.
+  if (!yeniMi)
+    (ekSekmeler ?? []).forEach(e =>
+      s.push({ tur: 'ozel', anahtar: e.anahtar, baslik: e.baslik }));
+
+  if (sekmeSirasi?.length) {
+    const yer = (b: string) => {
+      const i = sekmeSirasi.findIndex(x => b.startsWith(x));
+      return i < 0 ? sekmeSirasi.length : i;
+    };
+    s.sort((a, b) => yer(a.baslik) - yer(b.baslik));
+  }
+
   return s;
 }

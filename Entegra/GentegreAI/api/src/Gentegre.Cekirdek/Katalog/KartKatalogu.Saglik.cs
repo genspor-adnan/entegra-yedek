@@ -326,19 +326,19 @@ public static partial class KartKatalogu
             new("karar", "karar", "metin", EnFazlaUzunluk: 4000,
                 Baslik: "Değerlendirme / Plan", Grup: "Tanı (ICD-10)"),
             new("yonlendirme", "yonlendirme", "kod", SabitKodlar: YonlendirmeKodlari,
-                Baslik: "Yönlendirme", Grup: "Tanı (ICD-10)", AltGrup: "Sevk"),
+                Baslik: "Yönlendirme", Grup: "Sevk / Konsültasyon"),
             new("sevkTesisKodu", "sevk_tesis_kodu", "metin", EnFazlaUzunluk: 20,
-                Baslik: "Sevk Tesis Kodu", Grup: "Tanı (ICD-10)", AltGrup: "Sevk"),
+                Baslik: "Sevk Tesis Kodu", Grup: "Sevk / Konsültasyon"),
             new("sevkKlinikKod", "sevk_klinik_kod", "metin", EnFazlaUzunluk: 20,
-                Baslik: "Sevk Klinik Kodu", Grup: "Tanı (ICD-10)", AltGrup: "Sevk"),
+                Baslik: "Sevk Klinik Kodu", Grup: "Sevk / Konsültasyon"),
             new("sevkNeden", "sevk_neden", "kod", Baslik: "Sevk Nedeni",
-                Grup: "Tanı (ICD-10)", AltGrup: "Sevk"),
+                Grup: "Sevk / Konsültasyon"),
             new("kontrolOnerisiGun", "kontrol_onerisi_gun", "sayi",
-                Baslik: "Kontrol (gün)", Grup: "Tanı (ICD-10)", AltGrup: "Takip"),
+                Baslik: "Kontrol (gün)", Grup: "Sevk / Konsültasyon", AltGrup: "Takip"),
             new("kontrolRandevuId", "kontrol_randevu_id", "sayi",
-                Baslik: "Kontrol Randevu Id", Grup: "Tanı (ICD-10)", AltGrup: "Takip"),
+                Baslik: "Kontrol Randevu Id", Grup: "Sevk / Konsültasyon", AltGrup: "Takip"),
             new("vakaTuru", "vaka_turu", "kod", Baslik: "Vaka Türü",
-                Grup: "Tanı (ICD-10)", AltGrup: "Takip"),
+                Grup: "Sevk / Konsültasyon", AltGrup: "Takip"),
 
             // -------------------------------------------------- gönderim ----
             new("enabizDurum", "enabiz_durum", "kod", Yazilabilir: false,
@@ -437,6 +437,32 @@ public static partial class KartKatalogu
                 new("taraf", "taraf", "kod", SabitKodlar: TarafKodlari, Baslik: "Taraf"),
             }, SubeKolonu: null, Sirala: "id asc",
                Baslik: "Bulgular", LogTabloId: 964),
+
+            // RAPOR (462): muayeneden çıkan istirahat / durum / ilaç kullanım
+            //   raporları. Rapor muayenenin ÇIKTISIDIR ve kendi numarası,
+            //   tarih aralığı, onayı olan ayrı bir kayıttır.
+            new("raporlar", "public.muayene_rapor", "muayene_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("tur", "tur", "kod", SabitKodlar: RaporTuruKodlari, Baslik: "Tür"),
+                new("raporNo", "rapor_no", "metin", EnFazlaUzunluk: 20, Baslik: "Rapor No"),
+                new("baslangic", "baslangic", "tarih", Baslik: "Başlangıç"),
+                new("bitis", "bitis", "tarih", Baslik: "Bitiş"),
+                // GUN HEKIMIN YAZDIGIDIR: is gunu/tatil kurali kuruma gore
+                //   degisir, tarih farkindan otomatik uretmek yanlis rapor
+                //   verirdi.
+                new("gun", "gun", "sayi", Baslik: "Gün"),
+                new("icdKod", "icd_kod", "kod", KodTablosu: "public.v_icd_lookup",
+                    AramaKaynagi: "icd", Baslik: "Tanı (ICD-10)"),
+                new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 500,
+                    Baslik: "Açıklama"),
+                new("durum", "durum", "kod", SabitKodlar: RaporDurumKodlari,
+                    Baslik: "Durum"),
+            }, SubeKolonu: "sube_id", Sirala: "id desc",
+               Baslik: "Rapor", LogTabloId: 966,
+               // Yeni satirda hasta muayeneden gelir: rapor hastaya baglidir,
+               //   hasta secimi kullaniciya sorulacak bir sey degil.
+               YeniSatirVarsayilanlari: new Dictionary<string, object?> { ["durum"] = 1 }),
 
             // ISTEMLER: asil kayit modul tablosunda (lab_istem, radyoloji_istem,
             //   belge_satir); burasi bag ve durum tablosu - "İstem & Sonuçlar"

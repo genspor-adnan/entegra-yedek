@@ -27,8 +27,12 @@ public sealed class DokumanDeposu
         //   "klasor" (419): KURUMSAL dokuman - kaynagi bir kart DEGIL, klasor.
         //   Prosedur, talimat, sozlesme sablonu bir personelin ya da stogun
         //   eki degildir; bu kaynak olmadan kurumsal dokuman hic yuklenemezdi.
+        //   "muayene" (mockup muayene karti "Dosyalar"): hastanin getirdigi dis
+        //   tetkik, epikriz, rapor - o MUAYENEYE aittir, hasta kartina degil:
+        //   hangi muayenede degerlendirildigi bilgisi kayboluyordu.
         new(StringComparer.Ordinal)
-            { "taraf", "stok", "ebelge-xslt", "sube", "radyoloji-istem", "klasor" };
+            { "taraf", "stok", "ebelge-xslt", "sube", "radyoloji-istem", "klasor",
+              "muayene" };
 
     /// <summary>
     /// KABUL EDILEN ICERIK TIPLERI.

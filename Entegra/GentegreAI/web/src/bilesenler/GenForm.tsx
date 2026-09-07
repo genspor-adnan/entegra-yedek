@@ -135,6 +135,15 @@ interface Props {
                                  gecmisGizli?: string[] }>;
   /** Sekmesi acilmayacak detaylar (ekranda baska yerde ciziliyorsa). */
   gizliDetaylar?: string[];
+  /**
+   * EKRANA OZEL EK SEKMELER: baslik + icerigi cizen fonksiyon (mockup muayene
+   * kartinin e-Recete / Rapor / Sevk / Islem & Ucret / Gecmis / Dosyalar
+   * sekmeleri). Cerceve yalnizca sekmeyi acar; iceriginin verisini ve
+   * kurallarini ekran (ve sunucu uclari) tasir. Yeni kayitta acilmaz.
+   */
+  ekSekmeler?: { anahtar: string; baslik: string; ciz(): React.ReactNode }[];
+  /** Sekme sirasi (basliklara gore) - mockup sirasi. */
+  sekmeSirasi?: string[];
   /** Bu EKRANDA acilmayacak sekmeler (ör. Aday kartinda "Fatura Bilgileri").
       Ayni kart farkli ekranlarda farkli genislikte kullanilabilsin diye. */
   gizliSekmeler?: string[];
@@ -188,7 +197,7 @@ const SEKME_IKON: Record<string, string> = {
 };
 const sekmeIkonu = (baslik: string) => SEKME_IKON[baslik] ?? '▫️';
 
-export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, gizliDetaylar, tazeleAnahtari, onKaydedildi, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, onKaydedildi, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
@@ -521,12 +530,16 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
     () => sekmeleriKur({ gruplar, meta, kaynak, deger, yeniMi, personelGibiKart,
                          yerTutucuSekmeler, gizliSekmeler, seritAlanlari, detayGrupta,
                          gizliDetaylar,
+                         ekSekmeler: ekSekmeler?.map(e => ({ anahtar: e.anahtar,
+                                                             baslik: e.baslik })),
+                         sekmeSirasi,
                          // Kosullu sekme DETAY alanina da bakabilir (ör. personelde
                          //   "Prim Rolleri" yalniz ozluk.calismaSekli = 3 iken):
                          //   isaret degisince sekme ANINDA gorunur/kaybolur.
                          detaySatirlari: ad => detaylar[ad]?.guncel ?? [] }),
     [gruplar, meta, kaynak, deger, yeniMi, personelGibiKart, yerTutucuSekmeler,
-     gizliSekmeler, seritAlanlari, detayGrupta, gizliDetaylar, detaylar]);
+     gizliSekmeler, seritAlanlari, detayGrupta, gizliDetaylar, ekSekmeler,
+     sekmeSirasi, detaylar]);
 
   const [aktifSekme, setAktifSekme] = useState<string | null>(null);
   const kayitAnahtari = `${kaynak}:${id}`;
@@ -1537,6 +1550,10 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
             </div>
           : <HizmetListeFiyatlari hizmetId={id as number} />
       )}
+
+      {/* EKRANA OZEL EK SEKME (mockup muayene karti): icerigi ekran cizer. */}
+      {aktif?.tur === 'ozel'
+        && ekSekmeler?.find(e => e.anahtar === aktif.anahtar)?.ciz()}
 
       {aktif?.tur === 'ozel' && kaynak === 'rol' && aktif.anahtar === 'ozel:yetkiler' && (
         <RolYetkiMatrisi rolId={id as number} saltOkunur={salt} />
