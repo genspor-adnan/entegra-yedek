@@ -91,6 +91,14 @@ interface Props {
    */
   gizliAlanlar?: ReadonlySet<string>;
   /**
+   * DUZ METIN cizilen alanlar: kutu/combo yerine degerin kendisi. Satirin
+   * KIMLIGINI tasiyan ve sunucunun yazdigi alanlar icindir (ör. fizik muayene
+   * satirindaki "Sistem" - satirlar sablondan acilir, hekim yalniz normal
+   * isaretini ve bulgu metnini girer). Kapali combo da ayni isi gorurdu ama
+   * "burasi degistirilebilir" izlenimi birakiyordu.
+   */
+  etiketAlanlari?: ReadonlySet<string>;
+  /**
    * Arama pencerelerinin KAYNAKLARINI daraltir (ör. prim planinin rolu
    * "Gönderen" degilse dis hekimler hic listelenmesin). Alanin kendi
    * `aramaKaynagi` degerini EZER; verilmezse o kullanilir.
@@ -159,7 +167,7 @@ function gunFarki(bas: string, bit: string): number | null {
 
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
                                modalDuzenle, taslakKural, cipler, kutuSinif,
-                               gizliAlanlar, aramaKaynaklari, aramaEkFiltre,
+                               gizliAlanlar, etiketAlanlari, aramaKaynaklari, aramaEkFiltre,
                                modalAltBilesen }: Props) {
   /**
    * KAMPANYA SATIRI (268): "Kapsam" TEK kolondur (iskonto_yeri_id) ama
@@ -732,7 +740,9 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                 <td key={a.ad}>
                   {/* TELEFON her yerde ayni (genel kural): gride de ulke kodlu,
                       gruplu kutu gelir; gecersiz numara kirmizi cerceve alir. */}
-                  {telefonAlaniMi(a.ad) ? (
+                  {etiketAlanlari?.has(a.ad) ? (
+                    <span className="hucre-etiket">{gorunum(satir, a)}</span>
+                  ) : telefonAlaniMi(a.ad) ? (
                     <span className={telefonGecerliMi(String(satir[a.ad] ?? '')) ? '' : 'tel-gecersiz'}>
                       <TelefonGirdi
                         value={String(satir[a.ad] ?? '')}

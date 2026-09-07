@@ -2796,3 +2796,15 @@ input.skt-gecmis {
 /* FIZIK MUAYENE ARAC CUBUGU (mockup muayene_karti.html): sablon ve
    "tumu normal" dugmeleri tablonun ustunde. */
 .muayene-arac { display: flex; gap: 6px; margin: 0 0 8px; flex-wrap: wrap }
+
+/* Detay gridinde DUZ METIN hucre (GenDetayTablo.etiketAlanlari): satirin
+   kimligini tasiyan, sunucunun yazdigi alan - kutu cizilmez. */
+.hucre-etiket { display: inline-block; padding: 2px 0 }
+
+/* Fizik muayene tablosu: "Sistem" kolonu dar (kullanici: yarisi), kalan
+   genislik BULGU metnine gider - hekimin yazdigi yer orasi. */
+.bulgu-gridi table th:first-child,
+.bulgu-gridi table td:first-child { width: 215px }
+/* "Normal" yalniz bir onay kutusu - basligi kadar yer yeter. */
+.bulgu-gridi table th:nth-child(2),
+.bulgu-gridi table td:nth-child(2) { width: 60px; text-align: center }

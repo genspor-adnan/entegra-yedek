@@ -94,12 +94,12 @@ export function sekmeleriKur(secenek: {
   /** Detay satirlarini okur - "ozluk.calismaSekli=3" gibi kosullu sekmeler icin. */
   detaySatirlari?: (detayAd: string) => Record<string, unknown>[];
   /**
-   * DETAYI BIR GRUP SEKMESININ ICINE GOMER: `{ bulgular: 'Muayene' }`.
+   * DETAYI BIR GRUP SEKMESININ ICINE GOMER: `{ bulgular: { grup: 'Muayene' } }`.
    * Detay kendi sekmesini ALMAZ, tablosu o grubun alanlarinin altina cizilir
    * (mockup muayene_karti.html "Fizik Muayene": ust satirda sablon, altinda
    * sistem/normal/bulgu tablosu - iki ayri sekme degil).
    */
-  detayGrupta?: Record<string, string>;
+  detayGrupta?: Record<string, { grup: string }>;
 }): SekmeTanimi[] {
   const { gruplar, meta, kaynak, deger, yeniMi, personelGibiKart,
           yerTutucuSekmeler, gizliSekmeler, seritAlanlari, detayGrupta,

@@ -100,11 +100,14 @@ interface Props {
       kalir; deger tasinir, form onu gostermez. */
   gizliAlanlar?: string[];
   /**
-   * DETAYI GRUP SEKMESINE GOMER: `{ bulgular: 'Muayene' }`. Detay kendi
-   * sekmesini almaz; tablosu o grubun alanlarinin ALTINA cizilir. Mockup
-   * "Fizik Muayene" boyle: ustte sablon, altinda sistem/bulgu tablosu.
+   * DETAYI GRUP SEKMESINE GOMER: `{ bulgular: { grup: 'Muayene' } }`. Detay
+   * kendi sekmesini almaz; tablosu o grubun alanlarinin ALTINA cizilir.
+   * Mockup "Fizik Muayene" boyle: ustte sablon, altinda sistem/bulgu tablosu.
+   * `gizli` o gride cizilmeyecek alanlar, `etiket` ise kutu yerine DUZ METIN
+   * cizilecek alanlar (satirin kimligi - sunucunun yazdigi degerler).
    */
-  detayGrupta?: Record<string, string>;
+  detayGrupta?: Record<string, { grup: string; gizli?: string[]; etiket?: string[];
+                                 sinif?: string }>;
   /** Bu EKRANDA acilmayacak sekmeler (ör. Aday kartinda "Fatura Bilgileri").
       Ayni kart farkli ekranlarda farkli genislikte kullanilabilsin diye. */
   gizliSekmeler?: string[];
@@ -1263,7 +1266,7 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
         // GRUBA GOMULU DETAY (mockup "Fizik Muayene"): sablon alanlarinin
         //   ALTINDA sistem/normal/bulgu tablosu - ayri sekme degil.
         const gomulu = (meta?.detaylar ?? [])
-          .filter(d => detayGrupta?.[d.ad] === aktif.baslik);
+          .filter(d => detayGrupta?.[d.ad]?.grup === aktif.baslik);
         const tumu = gomulu.length === 0 ? tam : (
           <>
             {tam}
@@ -1274,6 +1277,11 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
                 durum={detaylar[d.ad] ?? bosDetay()}
                 saltOkunur={salt || d.saltOkunur}
                 hatalar={alanHatalari}
+                kutuSinif={detayGrupta?.[d.ad]?.sinif}
+                gizliAlanlar={detayGrupta?.[d.ad]?.gizli
+                  ? new Set(detayGrupta[d.ad].gizli) : undefined}
+                etiketAlanlari={detayGrupta?.[d.ad]?.etiket
+                  ? new Set(detayGrupta[d.ad].etiket) : undefined}
                 onDegis={yeni => setDetaylar(t => ({ ...t, [d.ad]: yeni }))}
               />
             ))}

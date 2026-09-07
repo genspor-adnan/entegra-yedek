@@ -8040,6 +8040,9 @@ yükseklikte (41 px) - `rows=4` niteliği `min-height`i ezdiği için yükseklik
   kılardı; o hekimin kararı. Sekme araç çubuğundaki iki düğme (Şablon Uygula ·
   Tümü normal) uca gider, satırları istemci değiştirmez.
 
-**Zorunlu sapma:** grid'de mockup'ta olmayan "Değer" ve "Taraf" kolonları
-duruyor - `muayene_bulgu` alanları; kaldırmak sayısal ölçümü (GKS) ve taraf
-(sağ/sol) bilgisini girilemez yapardı.
+Tablo mockup'taki **üç kolona** indi (kullanıcı): Sistem (düz metin) · Normal
+(kutu) · Bulgu (metin). `degerSayi` ve `taraf` gride çizilmiyor; `sablonAlanId`
+kutu değil etiket - satırlar şablondan açılır, seçim kutusu "burası
+değiştirilebilir" diye yanlış vaat veriyordu. GenDetayTablo'ya `etiketAlanlari`,
+`detayGrupta` seçeneğine `gizli` / `etiket` / `sinif` eklendi. Genişlikler:
+Sistem 215 px, Normal 60 px, kalan bulgu metnine.

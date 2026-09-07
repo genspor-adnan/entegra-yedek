@@ -2216,7 +2216,14 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         // FIZIK MUAYENE TEK SEKME (mockup muayene_karti.html): "Bulgular"
         //   detayi ayri sekme degil, "Muayene" sekmesinde sablon alanlarinin
         //   ALTINDA - hekim sablonu secip ayni ekranda dolduruyor.
-        detayGrupta={tanim.kaynak === 'muayene' ? { bulgular: 'Muayene' } : undefined}
+        //   Mockup tablosu UC KOLON (kullanici): Sistem (etiket) · Normal
+        //   (kutu) · Bulgu (metin). Sistem satirin kimligidir - satirlar
+        //   sablondan acilir, secim kutusu yanlis bir vaat olurdu; deger/taraf
+        //   ise mockup'ta yok.
+        detayGrupta={tanim.kaynak === 'muayene'
+          ? { bulgular: { grup: 'Muayene', gizli: ['degerSayi', 'taraf'],
+                          etiket: ['sablonAlanId'], sinif: 'bulgu-gridi' } }
+          : undefined}
         seritAlanlari={tanim.kaynak === 'muayene'
           ? ['bolumId', 'personelId', 'tur', 'ustMuayeneId', 'baslangic', 'bitis']
           : undefined}
