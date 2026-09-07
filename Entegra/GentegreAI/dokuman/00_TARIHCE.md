@@ -7707,3 +7707,26 @@ anahtardan çıkarıldı - dış lab özel bir dal, genel süreç değil.
 
 **Modül alanı boş bırakıldı**: süreç birden çok modüle dokunuyor, tek modül
 yazıp "bu modül kapalı" uyarısı basmak yanıltırdı.
+
+---
+
+## 07.09.2026 — e-Nabız ana menüsü (`db/452`)
+
+e-Nabız Gönderim Kuyruğu, Yönetim › Ortak Platform altındaydı: günlük işleyen
+bir akış (paket üretimi, gönderim, hata takibi) ayarlar menüsünün dibinde
+aranıyordu. Artık **Radyolojiden sonra** kendi ana menüsü var (kullanıcı).
+
+Grup sırası liste tanımı dizisindeki ilk öğeden geldiği için tanım Radyoloji
+ile Cari arasına taşındı. **Rota ve kaynak değişmedi** (`/enabiz-paket`):
+menüdeki yeri değişti, adresi değil - eski link, favori ve rehber adımı
+kırılmasın.
+
+Rehber kataloğu da güncellendi (`db/452`): ekranın menü yolu ve arama anahtarı
+yeni yerine göre yazıldı - katalog eski yolu söylerse asistan kullanıcıyı
+artık var olmayan bir menüye gönderir.
+
+İkon notu: bayrak emojisi (🇹🇷) Windows'ta "TR" harfleri olarak çiziliyor (dil
+seçicide de aynı sorun yaşanmıştı); grup 📡, kuyruk 📤 ikonuyla.
+
+Menüye taşınacak başka e-Nabız ekranı yoktu - kuyruk tek ekrandı. Mockup'ta
+bekleyenler: ayarlar/kod eşleme, hasta geçmişi, veri kalitesi, paket kartı.

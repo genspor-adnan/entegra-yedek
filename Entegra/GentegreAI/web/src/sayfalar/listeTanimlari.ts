@@ -455,25 +455,6 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuAd: 'İTS Bildirimleri', ic: '💊', yetkiKodu: 'stok',
   },
   {
-    // e-NABIZ GONDERIM KUYRUGU (415) - uretilen paketler ve durumlari.
-    //   "Eksik Alan" bir HATA DEGIL: paket uretildi ama zorunlu alani bos
-    //   oldugu icin kuyruga girmedi; duzeltilince kaynaktan yeniden uretilir.
-    kaynak: 'enabiz-paket', rota: 'enabiz-paket', baslik: 'e-Nabız Kuyruğu',
-    yol: 'Yonetim › e-Nabız Kuyruğu',
-    aksiyonEkrani: 'enabiz-liste',
-    tarihAlani: 'olayTarihi',
-    cipler: [
-      { ad: 'Eksik Alan',  filtre: { alan: 'durum', op: 'esit', deger: 0 } },
-      { ad: 'Bekleyen',    filtre: { alan: 'durum', op: 'esit', deger: 1 } },
-      { ad: 'Gönderildi',  filtre: { alan: 'durum', op: 'esit', deger: 3 } },
-      { ad: 'Hatalı',      filtre: { alan: 'durum', op: 'esit', deger: 4 } },
-      { ad: 'Tümü' },
-    ],
-    urunModu: 2, modul: 'muayene',
-    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
-    menuAd: 'e-Nabız Kuyruğu', ic: '🇹🇷', yetkiKodu: 'entegrasyon',
-  },
-  {
     // RECETELER (413) - muayenede yazilan ilaclar. Recete bir BELGEDIR:
     //   imzalaninca degismez, ilac adi satira kopyalanir.
     kaynak: 'recete', rota: 'recete', baslik: 'Reçeteler',
@@ -1166,6 +1147,38 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Radyoloji', menuAd: 'Sonuç Teslim', ic: '📦',
     yetkiKodu: 'radyoloji', menuSira: 16,
   },
+  // ===================================================================
+  //  e-NABIZ ana menusu (kullanici): RADYOLOJIDEN SONRA gelir.
+  //
+  //  Grup sirasi dizideki ILK ogeden geldigi icin bu blok Radyoloji ile Cari
+  //  arasinda durur. Kuyruk eskiden Yonetim › Ortak Platform altindaydi;
+  //  e-Nabiz gunluk isleyen bir akis (paket uretimi, gonderim, hata takibi),
+  //  ayarlar menusunun dibinde aranmamali.
+  // ===================================================================
+  {
+    // e-NABIZ GONDERIM KUYRUGU (415) - uretilen paketler ve durumlari.
+    //   "Eksik Alan" bir HATA DEGIL: paket uretildi ama zorunlu alani bos
+    //   oldugu icin kuyruga girmedi; duzeltilince kaynaktan yeniden uretilir.
+    kaynak: 'enabiz-paket', rota: 'enabiz-paket', baslik: 'e-Nabız Kuyruğu',
+    // ROTA VE KAYNAK DEGISMEDI: menudeki yeri degisti, adresi degil - eski
+    //   link, favori ve rehber adimi kirilmasin.
+    yol: 'e-Nabız › Gönderim Kuyruğu',
+    aksiyonEkrani: 'enabiz-liste',
+    tarihAlani: 'olayTarihi',
+    cipler: [
+      { ad: 'Eksik Alan',  filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Bekleyen',    filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Gönderildi',  filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Hatalı',      filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'muayene',
+    // Bayrak emojisi Windows'ta "TR" harfleri olarak cizilir (dil secicide de
+    //   ayni sorun yasanmisti) - gonderim kuyruguna anlamli ikon.
+    menuGrup: 'e-Nabız', menuAd: 'Gönderim Kuyruğu', ic: '📤',
+    yetkiKodu: 'entegrasyon', menuSira: 10,
+  },
+
   // CARI grubu ana menude RADYOLOJIDEN SONRA (kullanici).
   {
     // KURUM ICMALI (289): SGK payi tek tek faturalanmaz, donem sonu toplanip
