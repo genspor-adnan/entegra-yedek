@@ -122,7 +122,10 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
               SUNUCUDAN hazir metin gelir - yas hesabini ekran yapmaz. */}
           {(cinsiyet || yas) && (
             <span className="rozet gri" title="Cinsiyet · yaş">
-              {[cinsiyet, yas].filter(Boolean).join(' ')}
+              {/* Cinsiyet SIMGESI + harf (kullanici: "Ali Er ♂E 48y"): simge
+                  bir bakista, harf de yazidan okunanla ayni olsun. */}
+              {cinsiyet === 'E' ? '♂' : cinsiyet === 'K' ? '♀' : ''}
+              {cinsiyet}{yas ? ` ${yas}` : ''}
             </span>
           )}
         </div>
@@ -201,7 +204,6 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
                if (onBugun && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onBugun() }
              }}>
         <div className="kb-ic">
-          {tur ? <span className="rozet gri">{tur}</span> : null}
           {bolum ? <span>{bolum}</span> : null}
           {hekim ? <span className="sonuk">· {hekim}</span> : null}
           {bekleyen > 0 && (
@@ -220,6 +222,9 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
               {gecen ? <span className="rozet gri">{gecen}</span> : null}
             </>
           ) : <span>Muayeneye alınmadı</span>}
+          {/* Muayene turu (Yuz yuze / Online) SURENIN SAGINDA (kullanici):
+              ust satir bolum ve hekime kaliyor. */}
+          {tur ? <span className="rozet gri">{tur}</span> : null}
         </div>
         </div>
       </div>
