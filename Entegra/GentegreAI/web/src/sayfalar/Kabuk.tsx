@@ -18,10 +18,29 @@ interface MenuOgesi {
   ic: string;
   rz: string;
   grup?: string;
+  /** Grubun CEVRILMEMIS adi: sira tablosu dilden bagimsiz eslessin. */
+  grupHam?: string;
   altGrup?: string;
   /** Grup ICINDEKI sira (kucuk once). Gruplarin kendi sirasi degismez. */
   sira?: number;
 }
+
+/**
+ * ANA MENU GRUP SIRASI (kullanici) — HASTA AKISINA gore: kayit kabul, muayene,
+ * sonra tetkik (laboratuvar, radyoloji), sonra bildirim. Grup sirasi eskiden
+ * `listeTanimlari` dizisindeki ILK ogeden geliyordu; sirayi degistirmek icin
+ * tanim bloklarini dosyada tasimak gerekiyordu ve Cari, Muayene'nin onune
+ * dusuyordu.
+ *
+ * Ad CEVRILMEMIS yazilir (grupHam): dil degisince sira degismemeli. Listede
+ * OLMAYAN grup, tanim sirasindaki yerini korur ve bu listedekilerden SONRA
+ * gelir; Yonetim her zaman en sondadir (asagida).
+ */
+const GRUP_SIRA = [
+  'İletişim & AI', 'Randevu', 'Kayıt Kabul', 'Muayene', 'Laboratuvar',
+  'Radyoloji', 'e-Nabız', 'Cari', 'CRM', 'Stok & Hizmet', 'Muhasebe',
+  'Satış', 'Alış', 'Kasa', 'Banka', 'İK', 'Demirbaş', 'Doküman',
+];
 
 type MenuSatiri =
   | { tur: 'duz'; m: MenuOgesi }
@@ -149,6 +168,7 @@ export function Kabuk() {
       yol: `/${l.rota ?? l.kaynak}`, ad: cm(l.menuAd), ic: l.ic,
       rz: l.ozelSayfa ? 'ayar' : 'liste',
       grup: l.menuGrup ? cm(l.menuGrup) : undefined,
+      grupHam: l.menuGrup,
       altGrup: l.menuAltGrup ? cm(l.menuAltGrup) : undefined,
       sira: l.menuSira,
     }));
@@ -161,6 +181,24 @@ export function Kabuk() {
   //   icin menunun ortasina dusuyordu. Ayarlar/roller gibi seyrek kullanilan
   //   ekranlar en altta olsun diye grup burada sona alinir - dil degisince ad
   //   da degistiginden cevirili adlar da kontrol edilir.
+  // GRUP SIRASI: once GRUP_SIRA'daki duzen, sonra listede olmayanlar kendi
+  //   sirasinda. Duz ogeler (grubu olmayan, or. Ana Sayfa) YERINDE kalir -
+  //   yalniz grup satirlari kendi aralarinda siralanir.
+  const grupYeri = (sat: MenuSatiri) => {
+    if (sat.tur !== 'grup') return -1;
+    const ham = sat.alt.find(m => m.grupHam)?.grupHam ?? sat.ad;
+    const i = GRUP_SIRA.indexOf(ham);
+    return i < 0 ? GRUP_SIRA.length : i;
+  };
+  const grupSatirlari = satirlar.filter(x => x.tur === 'grup');
+  const sirali = [...grupSatirlari]
+    .map((sat, i) => ({ sat, i }))
+    .sort((a, b) => grupYeri(a.sat) - grupYeri(b.sat) || a.i - b.i)
+    .map(x => x.sat);
+  let sayac = 0;
+  for (let i = 0; i < satirlar.length; i++)
+    if (satirlar[i].tur === 'grup') satirlar[i] = sirali[sayac++];
+
   const YONETIM_ADLARI = ['Yönetim', 'Administration', 'Verwaltung'];
   const yonetimIndeks = satirlar.findIndex(
     s => s.tur === 'grup' && YONETIM_ADLARI.includes(s.ad));
