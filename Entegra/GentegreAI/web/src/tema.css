@@ -2767,8 +2767,11 @@ input.skt-gecmis {
 .muayene-ikili .mi-sol .alan select,
 .muayene-ikili .mi-sol .alan textarea { grid-column: 1 }
 /* Sikayet iki, hikaye uc satir (mockup oranlari). */
-.muayene-ikili .mi-sol .alan textarea { min-height: 54px }
-.muayene-ikili .mi-sol .tip-metin:nth-of-type(2) textarea { min-height: 72px }
+/* Yukseklikler kullanici istegiyle %40 kisaldi (~68 -> 41 px) ve hikaye
+   sikayetle AYNI yukseklikte (kullanici). YUKSEKLIK
+   `height` ile verilir: `rows=4` niteligi min-height'i ezip kutuyu yine dort
+   satir yapiyordu. Metin uzarsa kutu kendi kaydirmasiyla devam eder. */
+.muayene-ikili .mi-sol .alan textarea { height: 41px; min-height: 0 }
 
 /* MUAYENE BAGLAM SERIDI - "Bugun" kutusu tiklanabilir (kullanici): kimlik
    alanlari (tur/bolum/hekim/baslama/bitis/isteyen muayene) buradan acilan

@@ -8000,3 +8000,9 @@ Mockup'ta anamnez tek sütun akar ve etiket alanın **üstünde** durur; şikây
   İsteyen Muayene). Alanlar aynı GenForm alanları: değer, doğrulama ve
   kaydetme yolu değişmedi - pencerede ayrı bir Kaydet yok, kartın Kaydet'i
   yazıyor.
+
+Pencere alan sırası kullanıcı isteğiyle: Bölüm · Hekim · Tür · İsteyen Muayene,
+en altta sistemin yazdığı Başlama/Bitiş (`seritAlanlari` hem listeyi hem sırayı
+verir; katalog sırası değişmedi). Şikâyet/Hikâye kutuları %40 kısaldı ve eşit
+yükseklikte (41 px) - `rows=4` niteliği `min-height`i ezdiği için yükseklik
+`height` ile veriliyor.

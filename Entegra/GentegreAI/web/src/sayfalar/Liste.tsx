@@ -2186,6 +2186,13 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
                                  onBugun={() => setMuayeneBilgiAcik(true)} />
           )
           : undefined}
+        // PENCEREDEKI ALAN SIRASI (kullanici): once hekimin sectikleri
+        //   (bolum, hekim, tur, isteyen muayene), EN ALTTA sistemin yazdigi
+        //   baslama/bitis damgalari. `seritAlanlari` hem listeyi hem SIRAYI
+        //   belirler; katalogdaki tanim sirasi degismedi.
+        seritAlanlari={tanim.kaynak === 'muayene'
+          ? ['bolumId', 'personelId', 'tur', 'ustMuayeneId', 'baslangic', 'bitis']
+          : undefined}
         // KIMLIK SERIDI MODALA TASINDI (kullanici): serit kart govdesinde
         //   cizilmez; "Bugun" kutusuna basilinca ayni GenForm alanlariyla
         //   (yani ayni deger/dogrulama/kaydetme yoluyla) pencerede acilir.
