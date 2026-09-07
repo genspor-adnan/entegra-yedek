@@ -94,8 +94,9 @@ const ALTGRUP_IKON: Record<string, string> = {
   // Karekod bildirimi iki kurum: ITS ilac, UTS tibbi cihaz - notr disli
   //   ikisini de aynilastiriyordu.
   'İTS': '💊',
-  'ÜTS': '🩺',
-  'Muayene Ayarları': '🩺',
+  // UTS = tibbi CIHAZ takibi (kullanici): cihaz simgesi - stetoskop muayeneyi,
+  //   rontgen goruntulemeyi cagristiriyordu.
+  'ÜTS': '🔌',
   'Biyokimya': '⚗️',
   'Mikrobiyoloji': '🦠',
   'Genetik': '🧬',

@@ -2280,6 +2280,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // BILDIRIM SABLONLARI (399): kod SABIT (kodla cagrilir), metin serbest.
     kaynak: 'bildirim-sablon', baslik: 'Bildirim Şablonları',
     yol: 'Yonetim › Bildirim Şablonları', kartYolu: '/bildirim-sablon',
+    aksiyonEkrani: 'bildirim-sablon-liste',
     cipler: DURUM_CIPLERI,
     menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
     menuAd: 'Bildirim Şablonları', ic: '💬', yetkiKodu: 'bildirim_sablon',
@@ -2311,23 +2312,30 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // KLINIK KATALOGLAR (400): durum + dosyadan yukleme. Liste degil,
     //   ozel sayfa - iki katalog ve iki dosya kutusu.
     kaynak: 'katalog-ayarlar', rota: 'katalog-ayarlar', baslik: 'Klinik Kataloglar',
-    yol: 'Yonetim › Ortak Platform › Klinik Kataloglar', ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    yol: 'Muayene › Muayene Ayarları › Klinik Kataloglar', ozelSayfa: true,
+    // ICD-10 ve ilac katalogunun DURUM/YUKLEME ekrani: ikisi de Muayene
+    //   Ayarlari altinda oldugu icin kurulum ekrani da orada (kullanici).
+    menuSira: 96, menuGrup: 'Muayene', menuAltGrup: 'Muayene Ayarları',
     menuAd: 'Klinik Kataloglar', ic: '📚', yetkiKodu: 'katalog', urunModu: 2,
   },
   {
     // ICD-10 (400): senkron doldurur, ekran SALT GORUNUM - elle tani kodu
     //   yazmak katalogu bozar (e-Nabiz ve provizyon ayni kodu bekler).
-    kaynak: 'icd', baslik: 'ICD-10 Tanı Kataloğu', yol: 'Yonetim › ICD-10',
+    kaynak: 'icd', baslik: 'ICD-10 Tanı Kataloğu',
+    yol: 'Muayene › Muayene Ayarları › ICD-10 Tanı',
     aksiyonEkrani: 'cikti-liste',
-    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    // AYARLARIN ALTINDA (kullanici): katalog SALT GORUNUM, senkron doldurur -
+    //   hekimin gunluk isi degil, kurulum tarafi.
+    menuSira: 94, menuGrup: 'Muayene', menuAltGrup: 'Muayene Ayarları',
     menuAd: 'ICD-10 Tanı', ic: '🩺', yetkiKodu: 'katalog', urunModu: 2,
   },
   {
     // ILAC (400): barkod birincil; e-Recete ve sarf bunu okur.
-    kaynak: 'ilac', baslik: 'İlaç Kataloğu', yol: 'Yonetim › İlaç Kataloğu',
+    kaynak: 'ilac', baslik: 'İlaç Kataloğu', yol: 'Muayene › İlaç Kataloğu',
     aksiyonEkrani: 'ilac-liste',
-    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    // MUAYENE ALTINDA, AYARLARIN USTUNDE (kullanici): ilac katalogu recete
+    //   yazan hekimin gunluk baktigi liste - ayar degil, calisma ekrani.
+    menuSira: 85, menuGrup: 'Muayene',
     menuAd: 'İlaç Kataloğu', ic: '💊', yetkiKodu: 'katalog', urunModu: 2,
   },
   {

@@ -724,6 +724,15 @@ public static class AksiyonKatalogu
 
             ["lab-tetkik-liste"] = Crud("lab-tetkik", "lab-tetkik", "lab.tetkik"),
             ["lab-panel-liste"] = Crud("lab-panel", "lab-panel", "lab.tetkik"),
+            // BILDIRIM SABLONLARI (399): kart vardi ama ekran ARAC CUBUGU
+            //   tanimli degildi - kullanici kayit ekleyemiyor, bunu "yetkim
+            //   yok" saniyordu. Kod SABIT (kodla cagrilir), metin serbest.
+            //   Sil ARAC CUBUGUNDA (kullanici: "ekle/duzenle/sil butonlari"):
+            //   varsayilan Crud silmeyi yalniz sag tus/palete koyar.
+            ["bildirim-sablon-liste"] =
+                Crud("bildirim-sablon", "bildirim-sablon", "bildirim_sablon",
+                     silHedef: null),
+
             // e-NABIZ KOD ESLEME (454): duz katalog - ekle/duzenle/sil.
             ["enabiz-kod-esleme-liste"] =
                 Crud("enabiz-kod-esleme", "enabiz-kod-esleme", "entegrasyon"),
