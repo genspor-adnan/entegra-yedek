@@ -298,18 +298,18 @@ public static partial class KartKatalogu
             //   hekim yazdiginin son kelimesini goruyordu. 4000 sinir hem
             //   dogrulama hem cok satirli kutu (uzun-metin kurali).
             new("sikayet", "sikayet", "metin", EnFazlaUzunluk: 4000,
-                Baslik: "Şikâyet", Grup: "Anamnez & Vital"),
+                Baslik: "Şikâyet", Grup: "Anamnez"),
             new("hikaye", "hikaye", "metin", EnFazlaUzunluk: 4000,
-                Baslik: "Hikâye", Grup: "Anamnez & Vital"),
+                Baslik: "Hikâye", Grup: "Anamnez"),
             // Ozgecmis / soygecmis / aliskanlik BURADA SERBEST NOTTUR; yapisal
             //   karsiliklari hastanin tibbi gecmisinde (Faz 1 ortak platform)
             //   yasar - muayene aninda yazilan not oraya islenir.
             new("ozgecmisNotu", "ozgecmis_notu", "metin", Baslik: "Özgeçmiş",
-                Grup: "Anamnez & Vital"),
+                Grup: "Anamnez"),
             new("soygecmisNotu", "soygecmis_notu", "metin", Baslik: "Soygeçmiş",
-                Grup: "Anamnez & Vital"),
+                Grup: "Anamnez"),
             new("aliskanlikNotu", "aliskanlik_notu", "metin", Baslik: "Alışkanlıklar",
-                Grup: "Anamnez & Vital"),
+                Grup: "Anamnez"),
 
             // --------------------------------------------- fizik muayene ----
             new("sablonId", "sablon_id", "kod", KodTablosu: "public.v_muayene_sablon_lookup",
@@ -326,13 +326,13 @@ public static partial class KartKatalogu
             new("karar", "karar", "metin", EnFazlaUzunluk: 4000,
                 Baslik: "Değerlendirme / Plan", Grup: "Tanı (ICD-10)"),
             new("yonlendirme", "yonlendirme", "kod", SabitKodlar: YonlendirmeKodlari,
-                Baslik: "Yönlendirme", Grup: "Sevk / Konsültasyon"),
+                Baslik: "Yönlendirme", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
             new("sevkTesisKodu", "sevk_tesis_kodu", "metin", EnFazlaUzunluk: 20,
-                Baslik: "Sevk Tesis Kodu", Grup: "Sevk / Konsültasyon"),
+                Baslik: "Sevk Tesis Kodu", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
             new("sevkKlinikKod", "sevk_klinik_kod", "metin", EnFazlaUzunluk: 20,
-                Baslik: "Sevk Klinik Kodu", Grup: "Sevk / Konsültasyon"),
+                Baslik: "Sevk Klinik Kodu", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
             new("sevkNeden", "sevk_neden", "kod", Baslik: "Sevk Nedeni",
-                Grup: "Sevk / Konsültasyon"),
+                Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
             new("kontrolOnerisiGun", "kontrol_onerisi_gun", "sayi",
                 Baslik: "Kontrol (gün)", Grup: "Sevk / Konsültasyon", AltGrup: "Takip"),
             new("kontrolRandevuId", "kontrol_randevu_id", "sayi",
