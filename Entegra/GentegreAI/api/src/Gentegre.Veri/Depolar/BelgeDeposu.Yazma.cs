@@ -78,6 +78,11 @@ public sealed partial class BelgeDeposu
         ["bolumId"] = "bolum_id", ["personelId"] = "personel_id",
         // Odeyen kurum (289) da basvuruya ozgu - 296 ile buraya tasindi.
         ["odeyenKurumId"] = "odeyen_kurum_id",
+        // SOZLESME / ALT KURUM / SGK KATKISI (469): odeme rotasini bunlar
+        //   belirler. Tek sozlesme varsa DB tetigi kendisi atar; birden
+        //   fazlaysa secilmeden kayit kabul edilmez.
+        ["sozlesmeId"] = "sozlesme_id", ["altKurum"] = "alt_kurum",
+        ["sgkKullan"] = "sgk_kullan",
         // Basvuru sekmesi (298): kayit kabulun doldurdugu alanlar.
         ["basvuruTuru"] = "basvuru_turu", ["gelisSekli"] = "gelis_sekli",
         ["gelisNedeni"] = "gelis_nedeni", ["oda"] = "oda", ["siraNo"] = "sira_no",
@@ -436,6 +441,12 @@ public sealed partial class BelgeDeposu
         await using (var komut = Komut(baglanti, islem, sql, parametreler))
             satirId = Convert.ToInt32(await komut.ExecuteScalarAsync(iptal));
 
+        // ODEME DAGILIMI (470/472): bes kova ayri tabloda. Kural SUNUCUDA -
+        //   istemci acik kova gondermediyse dagilim sozlesmenin listelerinden
+        //   yeniden hesaplanir.
+        await DagilimYazAsync(baglanti, islem, satirId, satir,
+                              (short)JsonSayi(satir, "pay", 0), tutar, iptal);
+
         // Lot / seri izlemi: stok izlemliyse satirin miktari lotlara dagitilir.
         //   ANA BIRIM miktari (`miktar`) verilir - lot bakiyesi de stok bakiyesi
         //   gibi ana birimde tutulur; "2 kutu" degil "24 adet" dagitilir (143).
@@ -443,6 +454,83 @@ public sealed partial class BelgeDeposu
             await IzlemYazAsync(baglanti, islem, belgeId, satirId, sid, sira,
                                 Sayi(belge, "tur"), miktar, satir, belge, turStokEtkiler,
                                 uyarilar, iptal);
+    }
+
+    /// <summary>
+    /// Satirin ODEME DAGILIMI (470): bes kova.
+    ///
+    /// UC YOL, tek kural:
+    ///  1. DONUSUM HEDEFI (pay > 0): satir zaten TEK payin belgesidir - tutarin
+    ///     tamami o kovaya yazilir. Yeniden dagitmak, tahakkuku kendi kaynagina
+    ///     gore ikinci kez bolerdi.
+    ///  2. ISTEMCI ACIK KOVA GONDERDI: elle sabitlenir (`elle = 1`); fiyat
+    ///     listesi degisse de dokunulmaz - kullanici bilerek yazmistir.
+    ///  3. Aksi halde SUNUCU HESAPLAR: rota + sozlesmenin SUT/TTB listeleri.
+    /// </summary>
+    private async Task DagilimYazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int satirId, Dictionary<string, JsonElement> satir, short pay, decimal tutar,
+        CancellationToken iptal)
+    {
+        decimal? Kova(string ad)
+        {
+            var v = JsonOndalik(satir, ad, -1);
+            return v < 0 ? null : v;
+        }
+
+        var sgk    = Kova("sgk");
+        var oss    = Kova("oss");
+        var hProv  = Kova("hastaProvizyon");
+        var hEk    = Kova("hastaEkKatki");
+        var katkı  = Kova("sgkKatilimPayi");
+        var elleGeldi = sgk is not null || oss is not null || hProv is not null
+                     || hEk is not null || katkı is not null;
+
+        if (pay is >= 1 and <= 5)
+        {
+            // Hedef satir tek kovadir: hangi kova oldugunu `pay` soyler.
+            sgk   = pay == 2 ? tutar : 0m;
+            oss   = pay == 3 ? tutar : 0m;
+            hProv = pay == 1 ? tutar : 0m;
+            hEk   = pay == 4 ? tutar : 0m;
+            katkı = pay == 5 ? tutar : (katkı ?? 0m);
+            elleGeldi = true;
+        }
+
+        if (!elleGeldi)
+        {
+            await using var tazele = Komut(baglanti, islem,
+                "select public.fn_belge_satir_dagilim_tazele(@p0)", [satirId]);
+            await tazele.ExecuteNonQueryAsync(iptal);
+            return;
+        }
+
+        // Acik gelen kovalarin toplami satir tutarini tutmali: eksigi hasta ek
+        //   katkisina yazmak, dengeyi bozmadan "artan hastanindir" kuralini
+        //   uygular (DB tetigi zaten toplami dogruluyor).
+        var toplam = (sgk ?? 0) + (oss ?? 0) + (hProv ?? 0) + (hEk ?? 0);
+        if (Math.Abs(toplam - tutar) > 0.005m) hEk = (hEk ?? 0) + (tutar - toplam);
+
+        await using var komut = Komut(baglanti, islem,
+            "insert into public.belge_satir_dagilim " +
+            "       (belge_satir_id, rota, sgk, oss, hasta_provizyon, hasta_ek_katki, " +
+            "        sgk_katilim_payi, sgk_provizyon_no, elle, ekleyen) " +
+            "values (@p0, coalesce((select public.fn_dagilim_rota(k.tur, bb.alt_kurum, " +
+            "                              bb.sgk_kullan) " +
+            "                         from public.belge_satir bs " +
+            "                         join public.belge_basvuru bb on bb.id = bs.belge_id " +
+            "                         join public.taraf_kurum k on k.id = bb.odeyen_kurum_id " +
+            "                        where bs.id = @p0), 1), " +
+            "        @p1, @p2, @p3, @p4, @p5, @p6, 1, @p7) " +
+            "on conflict (belge_satir_id) do update " +
+            "   set sgk = excluded.sgk, oss = excluded.oss, " +
+            "       hasta_provizyon = excluded.hasta_provizyon, " +
+            "       hasta_ek_katki = excluded.hasta_ek_katki, " +
+            "       sgk_katilim_payi = excluded.sgk_katilim_payi, " +
+            "       sgk_provizyon_no = excluded.sgk_provizyon_no, " +
+            "       elle = 1, degistirme_tarihi = now()",
+            [satirId, sgk ?? 0m, oss ?? 0m, hProv ?? 0m, hEk ?? 0m, katkı ?? 0m,
+             JsonMetin(satir, "provizyonNo"), 0]);
+        await komut.ExecuteNonQueryAsync(iptal);
     }
 
     // ============================================================ lot / seri ====

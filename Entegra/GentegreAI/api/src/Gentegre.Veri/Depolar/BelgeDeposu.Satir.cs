@@ -289,8 +289,18 @@ public sealed partial class BelgeDeposu
                    v.belge_dovizi as "belgeDovizi", v.kapanma_durum as "kapanmaDurum",
                    -- Odeme paylasimi (289/290): donusum penceresi hangi payin
                    --   ne kadarinin acik oldugunu gostersin.
-                   v.kurum_tutar as "kurumTutar", v.hasta_tutar as "hastaTutar",
-                   v.kurum_kalan as "kurumKalan", v.hasta_kalan as "hastaKalan",
+                   -- BES KOVA (470): "kurum payi" artik SGK ve sigorta olarak
+                   --   ayri; hasta payi da provizyon ve ek katki olarak.
+                   v.rota, v.sgk, v.oss, v.hasta_provizyon as "hastaProvizyon",
+                   v.hasta_ek_katki as "hastaEkKatki",
+                   v.sgk_katilim_payi as "sgkKatilimPayi",
+                   v.sgk_kalan as "sgkKalan", v.oss_kalan as "ossKalan",
+                   v.hasta_provizyon_kalan as "hastaProvizyonKalan",
+                   v.hasta_ek_katki_kalan as "hastaEkKatkiKalan",
+                   (v.sgk + v.oss) as "kurumTutar",
+                   (v.hasta_provizyon + v.hasta_ek_katki) as "hastaTutar",
+                   (v.sgk_kalan + v.oss_kalan) as "kurumKalan",
+                   (v.hasta_provizyon_kalan + v.hasta_ek_katki_kalan) as "hastaKalan",
                    -- Kalem adi (293): stok disi satirlarda (hizmet/masraf) ad
                    --   yoktu, donusum penceresinde satir BOS gorunuyordu.
                    v.kalem_kodu as "kalemKodu", v.kalem_adi as "kalemAdi",

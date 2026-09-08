@@ -208,10 +208,32 @@ public sealed partial class BelgeDeposu
                    s.karsilama, s.provizyon_no as "provizyonNo",
                    s.kurum_kapatilan as "kurumKapatilan",
                    s.hasta_kapatilan as "hastaKapatilan",
+                   -- ODEME DAGILIMI (470): bes kova, kapanma ve tahsilat
+                   --   sayaclariyla. Kart "+" ile acilan alt satirda bunu
+                   --   gosterir; kalanlar SUNUCUDAN gelir, istemci cikarmaz.
+                   coalesce(dg.rota, 0) as "rota",
+                   coalesce(dg.sgk, 0) as "sgk", coalesce(dg.oss, 0) as "oss",
+                   coalesce(dg.hasta_provizyon, 0) as "hastaProvizyon",
+                   coalesce(dg.hasta_ek_katki, 0) as "hastaEkKatki",
+                   coalesce(dg.sgk_katilim_payi, 0) as "sgkKatilimPayi",
+                   coalesce(dg.sgk_kapatilan, 0) as "sgkKapatilan",
+                   coalesce(dg.oss_kapatilan, 0) as "ossKapatilan",
+                   coalesce(dg.hasta_provizyon_kapatilan, 0) as "hastaProvizyonKapatilan",
+                   coalesce(dg.hasta_ek_katki_kapatilan, 0) as "hastaEkKatkiKapatilan",
+                   coalesce(dg.sgk_tahsil, 0) as "sgkTahsil",
+                   coalesce(dg.oss_tahsil, 0) as "ossTahsil",
+                   coalesce(dg.hasta_provizyon_tahsil, 0) as "hastaProvizyonTahsil",
+                   coalesce(dg.hasta_ek_katki_tahsil, 0) as "hastaEkKatkiTahsil",
+                   coalesce(dg.sgk_katilim_tahsil, 0) as "sgkKatilimTahsil",
+                   coalesce(dg.sgk_liste, 0) as "sgkListe",
+                   coalesce(dg.huv_liste, 0) as "huvListe",
+                   coalesce(dg.sgk_provizyon_no, '') as "sgkProvizyonNo",
+                   coalesce(dg.elle, 0) as "dagilimElle",
                    -- Kalemi fiyatlayan kampanya kurali (274) - satir geri
                    --   yuklendiginde bag korunsun, Kaydet onu silmesin.
                    s.kampanya_satir_id as "kampanyaSatirId"
               from public.belge_satir s
+              left join public.belge_satir_dagilim dg on dg.belge_satir_id = s.id
               left join public.stok   st on st.id = s.stok_id
               left join public.hizmet hz on hz.id = s.hizmet_id
               left join public.masraf ms on ms.id = s.masraf_id
@@ -280,11 +302,22 @@ public sealed partial class BelgeDeposu
 
         if (pay > 0)
         {
-            var payTutar = Convert.ToDecimal(
-                (pay == 1 ? k["hasta_tutar"] : k["kurum_tutar"]) ?? 0m);
+            // KOVA ADI PAY KODUNDAN (470): 1 hasta provizyon · 2 sgk · 3 oss ·
+            //   4 hasta ek katki. Dagilim yoksa (ERP satiri) eski kolonlara
+            //   duser - 474'e kadar iki yol da yasiyor.
+            var kovaAd = pay switch
+            {
+                2 => "dg_sgk", 3 => "dg_oss", 4 => "dg_hasta_ek_katki",
+                _ => "dg_hasta_provizyon",
+            };
+            var payTutar = k.TryGetValue(kovaAd, out var kv)
+                ? Convert.ToDecimal(kv ?? 0m)
+                : Convert.ToDecimal((pay == 1 ? k["hasta_tutar"] : k["kurum_tutar"]) ?? 0m);
             // Kalan pay: kismi donusumde ayni paydan ikinci kez alinmasin.
-            var kapanan = Convert.ToDecimal(
-                (pay == 1 ? k["hasta_kapatilan"] : k["kurum_kapatilan"]) ?? 0m);
+            var kapanan = k.TryGetValue(kovaAd + "_kapatilan", out var kk)
+                ? Convert.ToDecimal(kk ?? 0m)
+                : Convert.ToDecimal(
+                    (pay == 1 ? k["hasta_kapatilan"] : k["kurum_kapatilan"]) ?? 0m);
             var kalan = payTutar - kapanan;
             if (payTutarSecim is { } secim && secim > 0 && secim < kalan) kalan = secim;
             payKalan = kalan;

@@ -504,9 +504,14 @@ public static class RadyolojiUclari
                            b.belge_tarihi as "belgeTarihi",
                            coalesce(b.kdv_tutari, 0) as "kdvToplam",
                            coalesce(b.genel_toplam, 0) as "genelToplam",
-                           coalesce((select sum(s.kurum_tutar) from public.belge_satir s
+                           coalesce((select sum(dg.sgk + dg.oss) from public.belge_satir s
+                             join public.belge_satir_dagilim dg
+                               on dg.belge_satir_id = s.id
                                       where s.belge_id = b.id), 0) as "kurumTutar",
-                           coalesce((select sum(s.hasta_tutar) from public.belge_satir s
+                           coalesce((select sum(dg.hasta_provizyon + dg.hasta_ek_katki)
+                              from public.belge_satir s
+                              join public.belge_satir_dagilim dg
+                                on dg.belge_satir_id = s.id
                                       where s.belge_id = b.id), 0) as "hastaTutar"
                       from public.belge b where b.id = @p0
                     """, null, [ozetId], OkuyucuGenisletmeleri.Sozluk, iptal);
@@ -1936,9 +1941,13 @@ public static class RadyolojiUclari
                    --   kolonlari kullaniliyor (belge_satir semasi).
                    s.giris_depo_id as "girisDepoId", s.cikis_depo_id as "cikisDepoId",
                    s.kaynak_tur as "kaynakTur", s.kaynak_id as "kaynakId",
-                   s.pay, s.kurum_tutar as "kurumTutar", s.hasta_tutar as "hastaTutar",
+                   s.pay, coalesce(dg.sgk + dg.oss, 0) as "kurumTutar",
+                   coalesce(dg.hasta_provizyon + dg.hasta_ek_katki, 0)
+                     as "hastaTutar",
                    s.sira
-              from public.belge_satir s where s.belge_id = @p0 order by s.sira, s.id
+              from public.belge_satir s
+              left join public.belge_satir_dagilim dg on dg.belge_satir_id = s.id
+             where s.belge_id = @p0 order by s.sira, s.id
             """, null, [belgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
         return (belge, mevcut.Select(SatirGovdesi).ToList());

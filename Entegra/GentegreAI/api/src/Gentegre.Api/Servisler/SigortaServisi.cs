@@ -293,17 +293,13 @@ public sealed class SigortaServisi(
              where id = @p0
             """, [provizyonId, nedenKodu, aciklama, baglam.KullaniciId], iptal);
 
-        // PAY GERİ ALINIR: iptal edilen provizyonun kurum payı hastaya döner.
-        //   Bırakılsaydı iptal edilmiş bir provizyonun tutarı kurumdan
-        //   tahsil edilecekmiş gibi görünürdü.
-        await _veri.CalistirAsync("""
-            update public.belge_satir bs
-               set kurum_tutar = 0,
-                   hasta_tutar = round(bs.miktar * bs.iskontolu_birim_fiyat, 4),
-                   karsilama = 0
-              from public.sigorta_provizyon_satir s
-             where s.provizyon_id = @p0 and bs.id = s.belge_satir_id
-            """, [provizyonId], iptal);
+        // PAY GERİ ALINIR: iptal edilen provizyonun sigorta payı düşer ve
+        //   dağılım LİSTE fiyatına döner. Bırakılsaydı iptal edilmiş bir
+        //   provizyonun tutarı kurumdan tahsil edilecekmiş gibi görünürdü.
+        //   Kural sunucuda tek yerde (472): burada tazeleme ÇAĞRILIR, kova
+        //   elle yazılmaz - yoksa aynı hesap iki yerde dururdu.
+        await _veri.CalistirAsync("select public.fn_sigorta_pay_geri_al(@p0)",
+                                  [provizyonId], iptal);
         await _veri.CalistirAsync("select public.fn_sigorta_ozet_tazele(@p0)",
                                   [provizyonId], iptal);
 

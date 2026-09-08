@@ -230,6 +230,31 @@ public static partial class KaynakKatalogu
                 "  where bb.id = b.id)",
                                                       "sayi", "Ödeyen Kurum Id",
                                                       Varsayilan: false, Siralanabilir: false),
+            // SOZLESME / ALT KURUM / SGK KATKISI (469): odeme rotasinin
+            //   girdileri. Kart bunlari okuyup yaziyor; listede gorunur kolon
+            //   degiller ama kart acilirken deger buradan gelir.
+            new("sozlesmeId",
+                "(select bb.sozlesme_id from public.belge_basvuru bb where bb.id = b.id)",
+                                                      "sayi", "Sözleşme Id",
+                                                      Varsayilan: false, Siralanabilir: false),
+            new("altKurum",
+                "(select bb.alt_kurum from public.belge_basvuru bb where bb.id = b.id)",
+                                                      "kod", "Alt Kurum",
+                                                      Varsayilan: false, Siralanabilir: false),
+            new("sgkKullan",
+                "(select bb.sgk_kullan from public.belge_basvuru bb where bb.id = b.id)",
+                                                      "mantik", "SGK Katkısı",
+                                                      Varsayilan: false, Siralanabilir: false),
+            new("altKurumAdi",
+                "coalesce((select d.ad from public.belge_basvuru bb " +
+                "            join public.kod_deger d on d.deger = bb.alt_kurum and d.dil = 0 " +
+                "            join public.kod_liste l on l.id = d.liste_id " +
+                "                                   and l.kod = 'kurum.alt_kurum' " +
+                "           where bb.id = b.id), '')",
+                                                      "metin", "Poliçe / Alt Kurum",
+                                                      Hizalama: "orta", Bicim: "rozet",
+                                                      Genislik: 150, Varsayilan: false,
+                                                      Filtrelenebilir: false),
             new("bolumId",
                 "coalesce((select bb.bolum_id from public.belge_basvuru bb " +
                 "           where bb.id = b.id), " +

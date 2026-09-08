@@ -204,6 +204,90 @@ public static class BelgeUclari
             });
         });
 
+        // POST /api/belge/{id}/dagit - satirlarin ODEME DAGILIMINI tazele (472).
+        //   Kural SUNUCUDA: rota sozlesmeden, fiyatlar SUT/TTB listelerinden.
+        //   Istemci yalnizca "yeniden hesapla" der; provizyon tutari verirse
+        //   liste fiyati yerine ONAYLANAN gecer.
+        grup.MapPost("/{id:int}/dagit", async (
+            int id, DagitIstegi? istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Degistir);
+
+            var satirlar = await veri.ListeAsync(
+                "select id from public.belge_satir where belge_id = @p0 order by sira, id",
+                [id], o => o.GetInt32(0), iptal);
+            if (satirlar.Count == 0)
+                throw GentegreHatasi.IsKurali("Belgede satır yok.");
+
+            // ELLE sabitlenmis dagilima fonksiyon zaten dokunmaz; burada da
+            //   ayrica sorgulamaya gerek yok - tek kural tek yerde.
+            var prov = istek?.SgkProvizyon?
+                .Where(x => x.SatirId > 0).ToDictionary(x => x.SatirId, x => x) ?? [];
+
+            foreach (var satirId in satirlar)
+            {
+                prov.TryGetValue(satirId, out var p);
+                await veri.CalistirAsync(
+                    "select public.fn_belge_satir_dagilim_tazele(@p0, @p1, @p2)",
+                    [satirId, p?.Tutar, istek?.OssProvizyon], iptal);
+                if (p?.ProvizyonNo is { Length: > 0 } no)
+                    await veri.CalistirAsync(
+                        "update public.belge_satir_dagilim " +
+                        "   set sgk_provizyon_no = @p1, sgk_provizyon_durum = 1, " +
+                        "       degistirme_tarihi = now() " +
+                        " where belge_satir_id = @p0", [satirId, no], iptal);
+            }
+
+            // Rota 3/5'te satir tutari kovalardan yeniden dogar: belge dip
+            //   toplami da tazelenmeli, yoksa baslik eski tutari gosterir.
+            await veri.CalistirAsync("select public.fn_belge_diptoplam(@p0)", [id], iptal);
+
+            return Results.Ok(new { id, satir = satirlar.Count,
+                mesaj = $"{satirlar.Count} satırın ödeme dağılımı yenilendi.",
+                izlemeNo = baglam.IzlemeNo });
+        });
+
+        // GET /api/kurum/{id}/sozlesmeler - basvuru kartinin sozlesme secicisi.
+        yol.MapGet("/api/kurum/{id:int}/sozlesmeler", async (
+            int id, DateOnly? tarih, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("cari", Islem.Gor);
+
+            var gun = tarih ?? DateOnly.FromDateTime(DateTime.Now);
+            var satirlar = await veri.ListeAsync("""
+                select s.id, s.ad, s.alt_kurum, s.sozlesme_no, s.durum,
+                       coalesce(d.ad, '') as alt_kurum_adi,
+                       s.fiyat_listesi_id, s.sgk_fiyat_listesi_id, s.sgk_kurum_id,
+                       s.varsayilan_karsilama, k.tur,
+                       public.fn_dagilim_rota(k.tur, s.alt_kurum, 1) as rota
+                  from public.kurum_sozlesme s
+                  join public.taraf_kurum k on k.id = s.kurum_id
+                  left join public.kod_deger d
+                         on d.deger = s.alt_kurum and d.dil = 0
+                        and d.liste_id = (select l.id from public.kod_liste l
+                                           where l.kod = 'kurum.alt_kurum')
+                 where s.kurum_id = @p0 and s.durum = 1
+                   and (s.baslangic is null or s.baslangic <= @p1)
+                   and (s.bitis is null or s.bitis >= @p1)
+                 order by s.alt_kurum, s.id
+                """, [id, gun],
+                o => new { id = o.GetInt32(0), ad = o.GetString(1),
+                           altKurum = o.GetInt16(2), sozlesmeNo = o.GetString(3),
+                           durum = o.GetInt16(4), altKurumAdi = o.GetString(5),
+                           fiyatListesiId = o.IsDBNull(6) ? (int?)null : o.GetInt32(6),
+                           sgkFiyatListesiId = o.IsDBNull(7) ? (int?)null : o.GetInt32(7),
+                           sgkKurumId = o.IsDBNull(8) ? (int?)null : o.GetInt32(8),
+                           varsayilanKarsilama = o.GetDecimal(9),
+                           tur = o.GetInt16(10), rota = o.GetInt16(11) }, iptal);
+
+            return Results.Ok(new { kurumId = id, sozlesmeler = satirlar,
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
         // POST /api/belge/{id}/rezerve - siparis satirlarini depoda ayir (142)
         grup.MapPost("/{id:int}/rezerve", async (
             int id, RezerveIstegi? istek, BaglamCozucu cozucu, BelgeDeposu depo,
@@ -624,6 +708,24 @@ public static class BelgeUclari
     }
 
     /// <summary>Rezervasyon istegi - 142. Ac=false rezervi kaldirir.</summary>
+    /// <summary>
+    /// Dağılım tazeleme isteği (472). İstemci KURAL göndermez - yalnız
+    /// provizyonun ONAYLADIĞI tutarı; kovalara nasıl dağılacağını rota bilir.
+    /// </summary>
+    public sealed class DagitIstegi
+    {
+        public List<SgkProvizyonSatiri>? SgkProvizyon { get; set; }
+        /// <summary>Sigortanın onayladığı tutar (satır bazlı değilse belge geneli).</summary>
+        public decimal? OssProvizyon { get; set; }
+    }
+
+    public sealed class SgkProvizyonSatiri
+    {
+        public int SatirId { get; set; }
+        public decimal? Tutar { get; set; }
+        public string? ProvizyonNo { get; set; }
+    }
+
     public sealed class RezerveIstegi
     {
         public bool Ac { get; set; } = true;
@@ -702,6 +804,8 @@ public static class BelgeUclari
         // Basvuru uzantisi (296): basvurulan BOLUM ve karsilayan HEKIM -
         //   belge_basvuru tablosuna yazilir (ana belgede kolonlari yok).
         "teslimAlanId" or "fiyatListesiId" or "teklifDurum" or "odeyenKurumId" or
+        // SOZLESME / ALT KURUM / SGK KATKISI (469): odeme rotasinin girdileri.
+        "sozlesmeId" or "altKurum" or "sgkKullan" or
         // Basvuru sekmesi (298) - kod/sayi alanlari.
         "kampanyaId" or "bolumId" or "personelId" or "basvuruTuru" or "gelisSekli"
         or "gelisNedeni" or "oda"

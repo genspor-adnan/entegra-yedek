@@ -74,6 +74,11 @@ public sealed partial class BelgeDeposu
                    --   unvan ve vergi bilgisi hastadan kopyalanirsa fatura
                    --   yanlis kisiye kesilmis gorunur (289).
                    ok.unvan as odeyen_unvan, ok.vkno as odeyen_vkno,
+                   -- SGK CARISI (468): TSS/Karma'da SGK payi ODEYENDEN farkli
+                   --   bir cariye faturalanir; sozlesmeden okunur.
+                   sz.sgk_kurum_id,
+                   (select t2.unvan from public.taraf t2 where t2.id = sz.sgk_kurum_id)
+                     as sgk_kurum_unvan,
                    ok.vd as odeyen_vd,
                    b.proje_id, b.sube_id, b.vade_gun, b.giris_depo_id, b.cikis_depo_id,
                    b.satici_id, bb.bolum_id, bb.personel_id,
@@ -82,6 +87,7 @@ public sealed partial class BelgeDeposu
               left join public.belge_basvuru bb on bb.id = b.id
               left join public.kasa_islem_turu kt on kt.kod = b.tur
               left join public.taraf ok on ok.id = bb.odeyen_kurum_id
+              left join public.kurum_sozlesme sz on sz.id = bb.sozlesme_id
              where b.id = @p0
             """, baglanti, islem))
         {
@@ -119,8 +125,19 @@ public sealed partial class BelgeDeposu
                    s.giris_depo_id, s.cikis_depo_id, s.izleme, s.izleme_kodu,
                    s.stok_durum_degis, s.proje_id, s.kalan_miktar, s.belge_id,
                    s.kurum_tutar, s.hasta_tutar, s.kurum_kapatilan, s.hasta_kapatilan,
-                   s.tutar, s.tutar_kdvli, s.birim_fiyat_kdvli
+                   s.tutar, s.tutar_kdvli, s.birim_fiyat_kdvli,
+                   -- DAGILIM KOVALARI (470): donusum artik ince pay koduyla
+                   --   calisir - SGK tahakkuku ile sigorta faturasi ayri
+                   --   belgelere gider, ikisi tek "kurum payi" degildir.
+                   coalesce(dg.sgk, 0) as dg_sgk, coalesce(dg.oss, 0) as dg_oss,
+                   coalesce(dg.hasta_provizyon, 0) as dg_hasta_provizyon,
+                   coalesce(dg.hasta_ek_katki, 0) as dg_hasta_ek_katki,
+                   coalesce(dg.sgk_kapatilan, 0) as dg_sgk_kapatilan,
+                   coalesce(dg.oss_kapatilan, 0) as dg_oss_kapatilan,
+                   coalesce(dg.hasta_provizyon_kapatilan, 0) as dg_hasta_provizyon_kapatilan,
+                   coalesce(dg.hasta_ek_katki_kapatilan, 0) as dg_hasta_ek_katki_kapatilan
               from public.belge_satir s
+              left join public.belge_satir_dagilim dg on dg.belge_satir_id = s.id
              where s.id = any(@p0)
              order by s.sira
              for update
@@ -176,14 +193,28 @@ public sealed partial class BelgeDeposu
 
                 // PAY DONUSUMU: sinir miktar degil TUTAR. Ayni pay ikinci kez
                 //   donusturulemez - yoksa kurum payi iki faturaya girerdi.
-                var payTutar = Convert.ToDecimal((pay == 1 ? ks2["hasta_tutar"] : ks2["kurum_tutar"]) ?? 0m);
-                var payKapanan = Convert.ToDecimal(
-                    (pay == 1 ? ks2["hasta_kapatilan"] : ks2["kurum_kapatilan"]) ?? 0m);
+                // KOVA ADI PAY KODUNDAN (470): 1 hasta provizyon · 2 sgk ·
+                //   3 oss · 4 hasta ek katki. Katilim payi (5) donusturulemez -
+                //   ciro degil, SGK'ya emanettir.
+                if (pay == 5)
+                    throw GentegreHatasi.IsKurali(
+                        "SGK katılım payı belgeye dönüştürülemez - ciro değil, SGK'ya emanettir.");
+                var kovaAd = pay switch
+                {
+                    2 => "dg_sgk", 3 => "dg_oss", 4 => "dg_hasta_ek_katki",
+                    _ => "dg_hasta_provizyon",
+                };
+                var payTutar = Convert.ToDecimal(ks2[kovaAd] ?? 0m);
+                var payKapanan = Convert.ToDecimal(ks2[kovaAd + "_kapatilan"] ?? 0m);
                 var payKalan = payTutar - payKapanan;
                 if (payKalan <= 0)
-                    throw GentegreHatasi.IsKurali(
-                        pay == 1 ? "Bu satırın hasta payı zaten kapatılmış."
-                                 : "Bu satırın kurum payı zaten kapatılmış.");
+                    throw GentegreHatasi.IsKurali(pay switch
+                    {
+                        2 => "Bu satırın SGK payı zaten kapatılmış.",
+                        3 => "Bu satırın sigorta payı zaten kapatılmış.",
+                        4 => "Bu satırın hasta ek katkısı zaten kapatılmış.",
+                        _ => "Bu satırın hasta payı zaten kapatılmış.",
+                    });
 
                 // TUTAR SECIMI (352): payin kalanindan KUCUK bir tutar da
                 //   donusturulebilir (tahsil edilen kadar fis); kalan kaynakta
@@ -235,12 +266,18 @@ public sealed partial class BelgeDeposu
             ["tipi"] = kaynak["tipi"],
             // KURUM PAYI KURUMA FATURALANIR (289): hedef belgenin carisi hasta
             //   degil odeyen kurumdur - fatura sigortaya/SGK'ya kesilir.
-            ["tarafId"] = pay == 2 && kaynak["odeyen_kurum_id"] is { } ok
+            // KURUM PAYLARI (2 SGK · 3 sigorta) kuruma faturalanir; hasta
+            //   kovalari (1 provizyon · 4 ek katki) hastaya. SGK carisi
+            //   sozlesmede ayri tutulur (TSS/Karma'da odeyenden FARKLIDIR) -
+            //   BelgeDonusum sorgusu onu `sgk_kurum_id` olarak getirir.
+            ["tarafId"] = pay == 2 && kaynak["sgk_kurum_id"] is { } sk ? sk
+                          : pay is 2 or 3 && kaynak["odeyen_kurum_id"] is { } ok
                           ? ok : kaynak["taraf_id"],
-            ["tarafUnvan"] = pay == 2 && kaynak["odeyen_unvan"] is { } ou
+            ["tarafUnvan"] = pay == 2 && kaynak["sgk_kurum_unvan"] is { } su ? su
+                             : pay is 2 or 3 && kaynak["odeyen_unvan"] is { } ou
                              ? ou : kaynak["taraf_unvan"],
-            ["tarafVkno"] = pay == 2 ? kaynak["odeyen_vkno"] : kaynak["taraf_vkno"],
-            ["tarafVd"] = pay == 2 ? kaynak["odeyen_vd"] : kaynak["taraf_vd"],
+            ["tarafVkno"] = pay is 2 or 3 ? kaynak["odeyen_vkno"] : kaynak["taraf_vkno"],
+            ["tarafVd"] = pay is 2 or 3 ? kaynak["odeyen_vd"] : kaynak["taraf_vd"],
             ["tarafAdresId"] = kaynak["taraf_adres_id"],
             ["belgeTarihi"] = belgeTarihi ?? Saat.Simdi,
             ["belgeDovizi"] = kaynak["belge_dovizi"],

@@ -50,10 +50,15 @@ public static class KasaUclari
         if (kalanTutar <= 0) return 0;
 
         var acik = await baglanti.ListeAsync("""
-            select t.satir_id as "satirId", t.hasta_kalan as "hastaKalan",
-                   t.kurum_kalan as "kurumKalan"
+            select t.satir_id as "satirId",
+                   t.hasta_provizyon_kalan as "hastaProvizyonKalan",
+                   t.hasta_ek_katki_kalan as "hastaEkKatkiKalan",
+                   t.sgk_katilim_kalan as "sgkKatilimKalan",
+                   t.oss_kalan as "ossKalan", t.sgk_kalan as "sgkKalan"
               from public.v_belge_satir_tahsilat t
-             where t.belge_id = @p0 and (t.hasta_kalan + t.kurum_kalan) > 0
+             where t.belge_id = @p0
+               and (t.hasta_provizyon_kalan + t.hasta_ek_katki_kalan
+                  + t.sgk_katilim_kalan + t.oss_kalan + t.sgk_kalan) > 0
              order by t.sira, t.satir_id
             """, null, [belgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
@@ -65,9 +70,17 @@ public static class KasaUclari
             if (kalanTutar <= 0) break;
             var satirId = Convert.ToInt32(sa["satirId"]);
 
+            // FIFO SIRASI (470): once HASTANIN odedigi kovalar - provizyon
+            //   payi, ek katki, sonra SGK katilim payi (emanet). Kurum
+            //   kovalari (sigorta, SGK) en sonda: onlar tahakkuk/faturayla
+            //   kapanir, kasadan degil. Yanlis sira, hastanin verdigi parayi
+            //   kurumun borcuna sayardi.
             foreach (var (pay, payKalan) in new[]
-                     { ((short)1, Convert.ToDecimal(sa["hastaKalan"])),
-                       ((short)2, Convert.ToDecimal(sa["kurumKalan"])) })
+                     { ((short)1, Convert.ToDecimal(sa["hastaProvizyonKalan"])),
+                       ((short)4, Convert.ToDecimal(sa["hastaEkKatkiKalan"])),
+                       ((short)5, Convert.ToDecimal(sa["sgkKatilimKalan"])),
+                       ((short)3, Convert.ToDecimal(sa["ossKalan"])),
+                       ((short)2, Convert.ToDecimal(sa["sgkKalan"])) })
             {
                 if (kalanTutar <= 0 || payKalan <= 0) continue;
                 var tutar = Math.Round(Math.Min(payKalan, kalanTutar), 2);
@@ -95,6 +108,13 @@ public static class KasaUclari
                 update public.kasa_islem set belge_id = coalesce(belge_id, @p1)
                  where id = @p0
                 """, tx, [kasaIslemId, belgeId], iptal);
+
+        // SGK KATILIM PAYI EMANETI (473): tahsil edilen katilim payi hastanin
+        //   borcundan dusmez, SGK'ya aittir - hasta carisinden SGK carisine
+        //   virman yazilir. Fonksiyon toplami kendisi okur; katilim yoksa
+        //   hicbir sey yapmaz.
+        await baglanti.CalistirAsync(
+            "select public.fn_sgk_katilim_emanet_yaz(@p0)", tx, [kasaIslemId], iptal);
 
         await tx.CommitAsync(iptal);
         return yazilan;
@@ -244,15 +264,38 @@ public static class KasaUclari
 
             var satirlar = await baglanti.ListeAsync("""
                 select t.satir_id as "satirId", t.sira, t.kalem, t.kalem_kod as "kalemKod",
-                       t.tutar, t.hasta_tutar as "hastaTutar", t.kurum_tutar as "kurumTutar",
-                       t.hasta_tahsil as "hastaTahsil", t.kurum_tahsil as "kurumTahsil",
-                       t.hasta_kalan as "hastaKalan", t.kurum_kalan as "kurumKalan",
+                       t.tutar, t.rota,
+                       -- BES KOVA (470): her biri ayri satirda tahsil edilir.
+                       t.hasta_provizyon_tutar as "hastaProvizyonTutar",
+                       t.hasta_ek_katki_tutar  as "hastaEkKatkiTutar",
+                       t.sgk_katilim_tutar     as "sgkKatilimTutar",
+                       t.oss_tutar             as "ossTutar",
+                       t.sgk_tutar             as "sgkTutar",
+                       t.hasta_provizyon_tahsil as "hastaProvizyonTahsil",
+                       t.hasta_ek_katki_tahsil  as "hastaEkKatkiTahsil",
+                       t.sgk_katilim_tahsil     as "sgkKatilimTahsil",
+                       t.oss_tahsil             as "ossTahsil",
+                       t.sgk_tahsil             as "sgkTahsil",
+                       t.hasta_provizyon_kalan as "hastaProvizyonKalan",
+                       t.hasta_ek_katki_kalan  as "hastaEkKatkiKalan",
+                       t.sgk_katilim_kalan     as "sgkKatilimKalan",
+                       t.oss_kalan             as "ossKalan",
+                       t.sgk_kalan             as "sgkKalan",
                        coalesce((select sum(d.tutar) from public.kasa_islem_dagitim d
                                   where d.belge_satir_id = t.satir_id and d.pay = 1
-                                    and d.kasa_islem_id = @p1), 0) as "buIslemHasta",
+                                    and d.kasa_islem_id = @p1), 0) as "buIslem1",
                        coalesce((select sum(d.tutar) from public.kasa_islem_dagitim d
                                   where d.belge_satir_id = t.satir_id and d.pay = 2
-                                    and d.kasa_islem_id = @p1), 0) as "buIslemKurum"
+                                    and d.kasa_islem_id = @p1), 0) as "buIslem2",
+                       coalesce((select sum(d.tutar) from public.kasa_islem_dagitim d
+                                  where d.belge_satir_id = t.satir_id and d.pay = 3
+                                    and d.kasa_islem_id = @p1), 0) as "buIslem3",
+                       coalesce((select sum(d.tutar) from public.kasa_islem_dagitim d
+                                  where d.belge_satir_id = t.satir_id and d.pay = 4
+                                    and d.kasa_islem_id = @p1), 0) as "buIslem4",
+                       coalesce((select sum(d.tutar) from public.kasa_islem_dagitim d
+                                  where d.belge_satir_id = t.satir_id and d.pay = 5
+                                    and d.kasa_islem_id = @p1), 0) as "buIslem5"
                   from public.v_belge_satir_tahsilat t
                  where t.belge_id = @p0
                 """, null, [belgeId, kasaIslemId ?? 0], OkuyucuGenisletmeleri.Sozluk, iptal);
@@ -311,12 +354,15 @@ public static class KasaUclari
 
             if (istek.Otomatik)
             {
-                // FIFO: satir sirasina gore once HASTA payi, sonra kurum payi.
-                //   Hasta once cunku kasadan gelen tahsilat cogunlukla hastanin;
-                //   kurum payi icmalle kapanir.
+                // FIFO: satir sirasina gore once HASTANIN odedigi kovalar
+                //   (provizyon payi, ek katki, katilim payi), sonra kurum
+                //   kovalari. Kasadan gelen para cogunlukla hastanindir; SGK
+                //   ve sigorta paylari icmal/faturayla kapanir.
                 var acik = await baglanti.ListeAsync("""
-                    select t.satir_id as "satirId", t.hasta_kalan as "hastaKalan",
-                           t.kurum_kalan as "kurumKalan"
+                    select t.satir_id as "satirId",
+                           t.hasta_provizyon_kalan as "p1", t.hasta_ek_katki_kalan as "p4",
+                           t.sgk_katilim_kalan as "p5", t.oss_kalan as "p3",
+                           t.sgk_kalan as "p2"
                       from public.v_belge_satir_tahsilat t
                      where t.belge_id = @p0
                      order by t.sira, t.satir_id
@@ -328,8 +374,11 @@ public static class KasaUclari
                     if (kalanTutar <= 0) break;
                     var satirId = Convert.ToInt32(sa["satirId"]);
                     foreach (var (pay, kalan) in new[]
-                             { ((short)1, Convert.ToDecimal(sa["hastaKalan"])),
-                               ((short)2, Convert.ToDecimal(sa["kurumKalan"])) })
+                             { ((short)1, Convert.ToDecimal(sa["p1"])),
+                               ((short)4, Convert.ToDecimal(sa["p4"])),
+                               ((short)5, Convert.ToDecimal(sa["p5"])),
+                               ((short)3, Convert.ToDecimal(sa["p3"])),
+                               ((short)2, Convert.ToDecimal(sa["p2"])) })
                     {
                         if (kalanTutar <= 0 || kalan <= 0) continue;
                         var pay_tutar = Math.Min(kalan, kalanTutar);
@@ -351,6 +400,11 @@ public static class KasaUclari
                            (kasa_islem_id, belge_satir_id, pay, tutar, ekleyen)
                     values (@p0, @p1, @p2, @p3, @p4)
                     """, tx, [id, y.SatirId, y.Pay, y.Tutar, baglam.KullaniciId], iptal);
+
+            // SGK KATILIM PAYI EMANETI (473): dagitim degistiyse virman da
+            //   yeniden hesaplanir - fonksiyon toplami kendisi okur.
+            await baglanti.CalistirAsync(
+                "select public.fn_sgk_katilim_emanet_yaz(@p0)", tx, [id], iptal);
 
             // Belgesiz tahsilat dagitilinca belgeye BAGLANIR (322): avansin
             //   hangi belgeye sayildigi kasa isleminden de okunabilsin.
@@ -446,7 +500,9 @@ public static class KasaUclari
                 // Belgede kalan yoksa devam etmenin anlami yok: sonraki avans
                 //   da dagitilamaz, bosuna sorgu olur.
                 var kalanVar = await baglanti.TekDegerAsync<decimal>("""
-                    select coalesce(sum(t.hasta_kalan + t.kurum_kalan), 0)
+                    select coalesce(sum(t.hasta_provizyon_kalan + t.hasta_ek_katki_kalan
+                                      + t.sgk_katilim_kalan + t.oss_kalan
+                                      + t.sgk_kalan), 0)
                       from public.v_belge_satir_tahsilat t where t.belge_id = @p0
                     """, null, [istek.BelgeId], iptal);
                 if (kalanVar <= 0) break;

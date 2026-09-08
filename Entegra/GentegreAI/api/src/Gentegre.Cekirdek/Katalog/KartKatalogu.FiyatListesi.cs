@@ -71,7 +71,16 @@ public static partial class KartKatalogu
                 Baslik: "KDV", Grup: "Genel", AltGrup: "Detay"),
             // KATILIM PAYI (291): listenin varsayilani - satirda
             //   girilmeyen kalemlerde bu tutar hastadan alinir.
-            new("katkiTutar", "katki_tutar", "para", Baslik: "Katılım Payı",
+            new("katkiTutar", "katki_tutar", "para", Baslik: "SGK Katılım Payı",
+                Grup: "Genel", AltGrup: "Detay"),
+            // EK KATKI (468, kullanici: "bunu fiyat listesine koysak daha
+            //   anlasilir olur"): hastane farki. Katilim payi gibi liste
+            //   varsayilani + satir istisnasi - sozlesmede sayi tutulmaz,
+            //   musteri "bu listede ne aliyorum" sorusunu listede goru.
+            new("ekKatkiTipi", "ek_katki_tipi", "kod",
+                KodListesi: "fiyat_listesi.ek_katki_tipi", Baslik: "Ek Katkı",
+                Grup: "Genel", AltGrup: "Detay", EslesAlan: "ekKatkiDeger"),
+            new("ekKatkiDeger", "ek_katki_deger", "para", Baslik: "Ek Katkı Değeri",
                 Grup: "Genel", AltGrup: "Detay"),
             // GECERLILIK ARALIGI da Detay kutusunun altinda (kullanici): iki
             //   tarih icin ayri bir kutu fazladan bir kat gorsel gurultuydu.
@@ -119,7 +128,11 @@ public static partial class KartKatalogu
                 new("fiyat",     "fiyat",     "para", Zorunlu: true, Baslik: "Fiyat"),
                 // KATILIM PAYI (291): SUT bedeliyle AYNI SATIRDA durur - islem
                 //   secilince ikisi birlikte gelsin. 0 ise listenin varsayilani.
-                new("katkiTutar","katki_tutar","para", Baslik: "Katılım Payı"),
+                new("katkiTutar","katki_tutar","para", Baslik: "SGK Katılım"),
+                // Satirdaki kural LISTEYI EZER (0 = listenin varsayilani).
+                new("ekKatkiTipi", "ek_katki_tipi", "kod",
+                    KodListesi: "fiyat_listesi.ek_katki_tipi", Baslik: "Ek Katkı Tipi"),
+                new("ekKatkiDeger","ek_katki_deger","para", Baslik: "Ek Katkı"),
                 new("dovizCinsi","doviz_cinsi","kod", Baslik: "Döviz"),
                 new("kdvDahil",  "kdv_dahil", "kod",  SabitKodlar: KdvDahilKodlari, Baslik: "KDV"),
                 new("birim",     "birim",     "kod",  KodListesi: "stok.ana_birim", Baslik: "Birim"),

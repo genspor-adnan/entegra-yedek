@@ -768,43 +768,53 @@ public static partial class KartKatalogu
         alanlar.Add(new KartAlani("kurum", "kurum", "mantik", Baslik: "Kurum", Gizli: true));
 
         var detaylar = (c.Detaylar ?? Array.Empty<DetayTanimi>()).ToList();
-        // SOZLESME BASLIGI - 1:1 (kurumun kendisi zaten sozlesmenin tarafi).
-        detaylar.Add(new DetayTanimi("sozlesme", "public.taraf_kurum", "id", new KartAlani[]
+        // KURUM TURU 1:1 kalir - kurumun kendisine ait tek bilgi (468).
+        //   Sozlesmeye ait ne varsa asagidaki 1:N gride tasindi.
+        detaylar.Add(new DetayTanimi("kurumRolu", "public.taraf_kurum", "id", new KartAlani[]
         {
-            new("id",             "id",               "sayi",  Yazilabilir: false),
-            new("tur",            "tur",              "kod",   Zorunlu: true,
+            new("id",  "id",  "sayi", Yazilabilir: false),
+            new("tur", "tur", "kod",  Zorunlu: true,
                 KodListesi: "taraf.kurum_turu", Baslik: "Kurum Türü"),
-            new("sozlesmeNo",     "sozlesme_no",      "metin", EnFazlaUzunluk: 40, Baslik: "Sözleşme No"),
-            new("baslangic",      "baslangic",        "tarih", Baslik: "Başlama"),
-            new("bitis",          "bitis",            "tarih", Baslik: "Bitiş"),
-            new("durum",          "durum",            "mantik", Baslik: "Aktif"),
-            // SOZLESME FIYAT LISTESI (302, kullanici: "kampanya soluna fiyat
-            //   listesi ekle"). Kampanya yalniz INDIRIM tasiyabilir; anlasmanin
-            //   BAZ listesi burada aciktan yazilir. Cozum sirasi:
-            //   kampanya listesi > sozlesme listesi > kurumun cari listesi >
-            //   hastanin listesi (fn_belge_varsayilan_liste).
-            //   Yalniz SATIS yonlu listeler: kuruma hizmet SATILIYOR, alis
-            //   listesi burada anlamsiz olurdu.
+        }, SubeKolonu: null, Baslik: "Kurum Türü", LogTabloId: 909, TekSatir: true));
+
+        // SOZLESMELER - 1:N (468, kullanici: "alt kurum sozlesmeye bagli;
+        //   birden fazla sozlesme varsa hasta secer"). Ayni sigorta sirketiyle
+        //   OSS, TSS ve Karma police ayri sartlarla calisilir; tek satira
+        //   sigdirmak kurumu uc kez cari acmayi gerektiriyordu.
+        detaylar.Add(new DetayTanimi("sozlesmeler", "public.kurum_sozlesme", "kurum_id",
+        new KartAlani[]
+        {
+            new("id",  "id",  "sayi", Yazilabilir: false),
+            new("ad",  "ad",  "metin", EnFazlaUzunluk: 120, Baslik: "Sözleşme"),
+            // ALT KURUM = police turu (OSS/TSS/Karma) ya da SGK'da devredilen
+            //   kurum. Lookup kurum TURUNE gore suzulur (v_alt_kurum_lookup.ust_id).
+            new("altKurum", "alt_kurum", "kod",
+                KodTablosu: "public.v_alt_kurum_lookup", Baslik: "Alt Kurum / Poliçe"),
+            new("sozlesmeNo", "sozlesme_no", "metin", EnFazlaUzunluk: 60, Baslik: "Sözleşme No"),
+            new("baslangic",  "baslangic",   "tarih", Baslik: "Başlama"),
+            new("bitis",      "bitis",       "tarih", Baslik: "Bitiş"),
+            new("durum",      "durum",       "mantik", Baslik: "Aktif"),
+            // TARIFE listesi: hastanenin fiyati (TTB/HUV ya da kuruma ozel).
             new("fiyatListesiId", "fiyat_listesi_id", "kod",
-                KodTablosu: "public.v_fiyat_listesi_satis_lookup", Baslik: "Fiyat Listesi"),
-            // Anlasma kosulu artik KAMPANYA (268): kampanyanin kendi fiyat
-            //   listesi ve indirim satirlari var - ikisini ayri secmek ayni
-            //   bilgiyi iki yere yazmak olurdu.
-            new("kampanyaId",     "kampanya_id",      "kod",
+                KodTablosu: "public.v_fiyat_listesi_satis_lookup", Baslik: "Tarife Listesi"),
+            // SUT listesi: SGK bedeli + katilim payi + EK KATKI kurali. Ek
+            //   katki artik listede (kullanici: "fiyat listesine koysak daha
+            //   anlasilir olur") - sozlesmede sayi tutulmaz.
+            new("sgkFiyatListesiId", "sgk_fiyat_listesi_id", "kod",
+                KodTablosu: "public.v_fiyat_listesi_satis_lookup", Baslik: "SUT Listesi"),
+            // SGK payinin faturalanacagi cari: TSS/Karma'da odeyen kurumdan
+            //   FARKLIDIR (sigorta sirketi ile SGK ayri kayitlardir).
+            new("sgkKurumId", "sgk_kurum_id", "kod",
+                KodTablosu: "public.v_kurum_lookup", Baslik: "SGK Carisi"),
+            new("kampanyaId", "kampanya_id", "kod",
                 KodTablosu: "public.v_kampanya_lookup", Baslik: "Kampanya"),
-            // ODEME PAYLASIMI (289): kurum payi NASIL faturalanir - SGK donem
-            //   icmali ister, sigorta sirketleri cogunlukla vaka bazli fatura.
-            new("faturalamaModu", "faturalama_modu",  "kod",
+            new("faturalamaModu", "faturalama_modu", "kod",
                 KodListesi: "kurum.faturalama_modu", Baslik: "Faturalama"),
-            // PAY HESAPLAMA MODU (291): sigorta sirketleri ORAN, SGK sabit
-            //   KATILIM PAYI ile calisir - satir tutari buna gore bolunur.
-            new("paylasimModu",   "paylasim_modu",    "kod",
-                KodListesi: "kurum.paylasim_modu", Baslik: "Pay Hesabı"),
-            // Provizyon girilmediginde uygulanacak karsilama orani (%).
             new("varsayilanKarsilama", "varsayilan_karsilama", "para",
                 Baslik: "Varsayılan Karşılama %"),
-            new("aciklama",       "aciklama",         "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama"),
-        }, SubeKolonu: null, Baslik: "Sözleşme", LogTabloId: 909, TekSatir: true));
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama"),
+        }, SubeKolonu: "sube_id", Sirala: "alt_kurum, id", Baslik: "Sözleşmeler",
+           LogTabloId: 909));
 
 
         return c with

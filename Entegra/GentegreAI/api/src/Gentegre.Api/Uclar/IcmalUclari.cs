@@ -40,7 +40,10 @@ public static class IcmalUclari
                  where bb.odeyen_kurum_id = @p0
                    and b.durum = 0
                    and b.belge_tarihi >= @p1 and b.belge_tarihi < (@p2::date + 1)
-                   and s.kurum_tutar > s.kurum_kapatilan
+                   -- KURUM PAYI = SGK + SIGORTA kovalari (470). Ikisi ayri
+                   --   cariye faturalanabilir ama ICMAL odeyen kurumun
+                   --   dosyasidir: her iki kova da onun alacagidir.
+                   and (dg.sgk + dg.oss) > (dg.sgk_kapatilan + dg.oss_kapatilan)
                    and coalesce(s.pay, 0) = 0
                    and not exists (select 1 from public.kurum_icmal_satir ks
                                     where ks.belge_satir_id = s.id)
@@ -66,10 +69,13 @@ public static class IcmalUclari
                        b.belge_tarihi as "belgeTarihi",
                        coalesce(h.unvan, '') as "hasta",
                        coalesce(hz.ad, st.ad, '') as "kalem",
-                       s.tutar, s.kurum_tutar as "kurumTutar",
-                       s.kurum_kapatilan as "kurumKapatilan",
-                       (s.kurum_tutar - s.kurum_kapatilan) as "kalan"
+                       s.tutar, (dg.sgk + dg.oss) as "kurumTutar",
+                       dg.sgk as "sgkTutar", dg.oss as "ossTutar",
+                       coalesce(dg.sgk_katilim_payi, 0) as "katilimPayi",
+                       (dg.sgk_kapatilan + dg.oss_kapatilan) as "kurumKapatilan",
+                       (dg.sgk + dg.oss - dg.sgk_kapatilan - dg.oss_kapatilan) as "kalan"
                   from public.belge_satir s
+                  join public.belge_satir_dagilim dg on dg.belge_satir_id = s.id
                   join public.belge b on b.id = s.belge_id
                   join public.belge_basvuru bb on bb.id = b.id
                   left join public.taraf  h  on h.id  = b.taraf_id
@@ -79,10 +85,17 @@ public static class IcmalUclari
                  order by b.belge_tarihi, b.id, s.sira
                 """, null, [kurumId, donemBas, donemBit], OkuyucuGenisletmeleri.Sozluk, iptal);
 
+            // KATILIM PAYI ALACAKTAN DUSER (473): hastadan SGK adina toplandi,
+            //   kurumun odeyecegi tutar o kadar azalir. Ciroya girmez, ama
+            //   mutabakatta gorunmezse kurum fazla odeme yapar.
+            var toplam = satirlar.Sum(x => Convert.ToDecimal(x["kalan"] ?? 0m));
+            var katilim = satirlar.Sum(x => Convert.ToDecimal(x["katilimPayi"] ?? 0m));
             return Results.Ok(new
             {
                 satirlar,
-                toplam = satirlar.Sum(x => Convert.ToDecimal(x["kalan"] ?? 0m)),
+                toplam,
+                katilimToplam = katilim,
+                netAlacak = toplam - katilim,
             });
         });
 
@@ -113,8 +126,10 @@ public static class IcmalUclari
             //   aynı metin olsun.
             var adet = await baglanti.CalistirAsync("""
                 insert into public.kurum_icmal_satir (icmal_id, belge_satir_id, tutar)
-                select @p3, s.id, s.kurum_tutar - s.kurum_kapatilan
+                select @p3, s.id,
+                       dg.sgk + dg.oss - dg.sgk_kapatilan - dg.oss_kapatilan
                   from public.belge_satir s
+                  join public.belge_satir_dagilim dg on dg.belge_satir_id = s.id
                   join public.belge b on b.id = s.belge_id
                   join public.belge_basvuru bb on bb.id = b.id
                 """ + AcikKurumPayiKosulu,
