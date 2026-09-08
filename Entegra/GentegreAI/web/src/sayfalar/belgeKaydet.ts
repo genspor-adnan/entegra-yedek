@@ -350,6 +350,15 @@ return {
         ? { karsilama: hamSayi(s.karsilama) } : {}),
     ...(s.katkiTutar !== undefined && s.katkiTutar !== ''
         ? { katkiTutar: hamSayi(s.katkiTutar) } : {}),
+    // SGK (SUT) BEDELI (483): TSS/Karma/SGK rotalarinda satirin IKINCI
+    //   fiyatidir. Yalniz sozlesmenin SUT listesinde kalem YOKSA ekrandan
+    //   gelir - o zaman sunucu bu bedeli sabitler ve kovalari rotaya gore
+    //   boler. Gonderilmezse (null) eski davranis: listeden cozulur.
+    //   BOS DEGIL SIFIR da anlamlidir: "SGK bu hizmeti odemiyor".
+    ...(s.sgkGerekli && s.sgkListe !== undefined && s.sgkListe !== ''
+        ? { sgkListe: hamSayi(s.sgkListe) } : {}),
+    ...(s.huvListe !== undefined && s.huvListe !== ''
+        ? { huvListe: hamSayi(s.huvListe) } : {}),
     izlemeKodu: s.izlemeKodu,
     izleme: s.izleme || (s.izlemeKodu ? 1 : 0),
     // Termin (140): bos string DEGIL null gider - sunucu tarih bekliyor.

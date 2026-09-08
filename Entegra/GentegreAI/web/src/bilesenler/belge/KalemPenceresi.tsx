@@ -66,6 +66,25 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    * geri uretmek "12," gibi ara yazimlarda ondalik ayracini yiyordu.
    */
   const [brutMetni, setBrutMetni] = useState(() => baslangicBrutMetni(satir, basvuruMu));
+  /**
+   * SGK (SUT) BEDELI KUTUSUNDAKI METIN - 483.
+   *
+   * TSS / Karma / SGK rotalarinda satirda IKI fiyat calisir: SGK'nin odedigi
+   * SUT bedeli ve tarife (TTB/HUV) bedeli. Ekran bugune kadar yalniz tarifeyi
+   * soruyordu; sozlesmenin SUT listesinde kalem yoksa SGK payi sessizce sifir
+   * kaliyor ve tutarin tamami sigortaya/hastaya yaziliyordu (kullanici: "bana
+   * sadece bir defa sigorta ucretini sordu, oysa sgk sut fiyatini da bulup
+   * atmasi gerekirdi; eger yoksa ekrandan onu almasi gerekir").
+   *
+   * Kutu ANA FIYATLA AYNI MODDA yazilir (dahil/haric); satirda saklanan
+   * `sgkListe` her zaman MATRAHTIR - kovalar KDV haric tutulur.
+   */
+  const [sutMetni, setSutMetni] = useState(() => {
+    const ham = String(satir.sgkListe ?? '');
+    if (ham === '') return '';
+    return (basvuruMu || Number(satir.kdvDahil ?? 0) === 1)
+      ? moduCevir(ham, satir.kdv, true) : ham;
+  });
   const [hata, setHata] = useState<string | null>(null);
   /** Lot penceresi acik mi - miktar/fiyat girildikten SONRA acilir. */
   const [izlemAcik, setIzlemAcik] = useState(false);
@@ -144,6 +163,14 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
     if (!r.stokId && !r.hizmetId) { setHata('Stok ya da hizmet seçilmeli.'); return }
     if (adet <= 0) { setHata('Miktar sıfırdan büyük olmalı.'); return }
     if (dovizli && kur <= 0) { setHata('Kur sıfırdan büyük olmalı.'); return }
+    // SGK (SUT) BEDELI ZORUNLU (483): bu rotada SGK bir pay oder ve bedel
+    //   listeden cozulemedi. Bos birakilirsa pay sessizce sifir kalir ve
+    //   tutarin tamami sigortaya/hastaya yuklenir - sessiz para hatasi.
+    //   "SGK bu hizmeti odemiyor" da gecerli bir cevaptir: 0 yazilir.
+    if (r.sgkGerekli && String(r.sgkListe ?? '').trim() === '') {
+      setHata('SGK (SUT) bedeli girilmeli. SGK bu hizmeti ödemiyorsa 0 yazın.');
+      return;
+    }
     // Izlemli stokta once LOT dagitimi: miktar ve fiyat girildikten sonra lot
     //   ekrani acilir, kalem ancak dagitim tamamlaninca gride eklenir.
     if (izlemGerekli) { setHata(null); setIzlemAcik(true); return }
@@ -286,6 +313,41 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
               </label>
             )}
 
+            {/* SGK (SUT) BEDELI (483) - yalniz SGK payi olan rotalarda
+                (TSS/Karma/SGK). Ustteki fiyat SIGORTANIN/hastanin odedigi
+                tarife bedelidir; bu ise SGK'nin odedigidir. Ikisi ayri
+                fiyattir ve satirda birlikte yasar. */}
+            {r.sgkGerekli && !transferMi && (
+              <label className="alan">
+                <span className="etiket">SGK (SUT) Bedeli</span>
+                <span className="ikili">
+                  {/* Ana fiyat kutusuyla ayni desen: DAHIL modunda kullanicinin
+                      yazdigi BRUT metin ayri tutulur, satira MATRAH yazilir -
+                      her tusa basista matrahtan geri uretmek "12," gibi ara
+                      yazimlarda ondalik ayracini yiyordu. */}
+                  <input className="hiza-sag" onKeyDown={tus}
+                         value={kdvDahil ? sutMetni : String(r.sgkListe ?? '')}
+                         title={r.sgkListeBulundu
+                           ? 'Sözleşmenin SUT listesinden geldi - değiştirebilirsiniz'
+                           : 'SUT listesinde bu kalem yok: bedeli siz girin'}
+                         onChange={e => {
+                           const v = e.target.value;
+                           if (kdvDahil) setSutMetni(v);
+                           setR(x => ({ ...x,
+                             sgkListe: kdvDahil ? moduCevir(v, x.kdv, false) : v }));
+                         }} />
+                  <input className="birim" value={r.fiyatDovizi || yerelPara}
+                         readOnly tabIndex={-1} />
+                </span>
+                {!r.sgkListeBulundu && (
+                  <span className="ipucu uyari">
+                    SUT listesinde fiyat bulunamadı - SGK payı için bedeli girin
+                    (ödenmiyorsa 0).
+                  </span>
+                )}
+              </label>
+            )}
+
             {/* Iskonto ve KDV HER TURDE girilir - irsaliyede de matrah/KDV
                 hesaplanir (dip toplam ondan cikar), yalniz gridde gosterilmez. */}
             {!transferMi && !vergisiz && (
@@ -320,6 +382,13 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                           // Kutudaki SAYI DEGISMEZ, anlami degisir: "yazdigim
                           //   100 aslinda KDV dahildi" demek matrahi dusurur.
                           if (yeniDahil) setBrutMetni(yazili);
+                          // SUT kutusu ANA FIYATLA AYNI MODDA yazilir (483):
+                          //   kutudaki SAYI degismez, anlami degisir - o
+                          //   yuzden cevrim SAKLANAN matrah uzerinden yapilir.
+                          const sut = String(r.sgkListe ?? '');
+                          if (yeniDahil) setSutMetni(sut);
+                          setR(x => ({ ...x,
+                            sgkListe: moduCevir(sut, x.kdv, !yeniDahil) }));
                           setR(x => ({ ...x, kdvDahil: yeniDahil ? 1 : 0,
                                        [alan]: moduCevir(yazili, x.kdv, !yeniDahil),
                                        birimFiyatKdvli: yeniDahil

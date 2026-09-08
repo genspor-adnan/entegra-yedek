@@ -27,6 +27,10 @@ export interface SatirDagilimi {
   sgkProvizyonNo: string;
   /** 1 ise dağılım elle sabitlendi: fiyat listesi değişse de dokunulmaz. */
   elle: number;
+  /** 1 ise SUT bedeli EKRANDAN girildi (483): tazeleme onu listeyle ezmez. */
+  sgkListeElle: number;
+  /** 1 ise tarife (TTB/HUV) bedeli ekrandan girildi (483). */
+  huvListeElle: number;
 }
 
 export interface SatirDurumu {
@@ -113,6 +117,23 @@ export interface SatirDurumu {
    * çizer. İstemci kova hesaplamaz; `POST /api/belge/{id}/dagit` yeniler.
    */
   dagilim?: SatirDagilimi;
+  /**
+   * SGK (SUT) BEDELİ - 483. TSS/Karma/SGK rotalarında satırda İKİ fiyat
+   * çalışır: SGK'nın ödediği SUT bedeli ve tarife (TTB/HUV) bedeli. Sözleşmenin
+   * SUT listesinde kalem yoksa bu bedel EKRANDAN alınır; sunucuya girdi olarak
+   * gider, kovaları yine rota kuralı böler.
+   *
+   * MATRAH (KDV hariç) saklanır - kovalarla aynı birim.
+   */
+  sgkListe?: string;
+  /** Tarife (TTB/HUV) bedeli ekrandan (483) - liste boşsa kullanılır. */
+  huvListe?: string;
+  /** Bu satırda SGK payı var mı (rota 3/4/5): ekran SUT kutusunu buna göre açar. */
+  sgkGerekli?: boolean;
+  /** SUT bedeli LİSTEDEN çözülebildi mi - false ise kullanıcıdan istenir. */
+  sgkListeBulundu?: boolean;
+  /** Ödeme rotası (483): 1 Özel · 2 ÖSS · 3 TSS · 4 Karma · 5 SGK. */
+  rota?: number;
   /**
    * FIYAT GIRIS MODU (kullanici): kalemin fiyati KDV DAHIL bir listeden mi
    * geldi. Yalniz EKRAN icin - sunucuya GONDERILMEZ (`belgeGovdesi` alanlari
@@ -253,7 +274,15 @@ export function yanittanSatirlar(
       sgkListe: Number(r.sgkListe ?? 0), huvListe: Number(r.huvListe ?? 0),
       sgkProvizyonNo: String(r.sgkProvizyonNo ?? ''),
       elle: Number(r.dagilimElle ?? 0),
+      sgkListeElle: Number(r.sgkListeElle ?? 0),
+      huvListeElle: Number(r.huvListeElle ?? 0),
     } : undefined,
+    // SGK (SUT) BEDELI (483): kayitli satirda dagilimdan geri gelir - kutu
+    //   kullanicinin girdigi bedeli gostersin, bos acilip yeniden sorulmasin.
+    rota: r.rota != null ? Number(r.rota) : undefined,
+    sgkGerekli: [3, 4, 5].includes(Number(r.rota ?? 0)),
+    sgkListe: Number(r.sgkListe ?? 0) > 0 ? String(r.sgkListe) : '',
+    sgkListeBulundu: Number(r.sgkListe ?? 0) > 0,
     birimFiyatKdvli: r.birimFiyatKdvli != null ? String(r.birimFiyatKdvli) : undefined,
     kurumKapatilan: r.kurumKapatilan != null ? Number(r.kurumKapatilan) : undefined,
     hastaKapatilan: r.hastaKapatilan != null ? Number(r.hastaKapatilan) : undefined,

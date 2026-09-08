@@ -217,6 +217,17 @@ public static partial class KartKatalogu
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 80,
                 Baslik: "Açıklama", Grup: "Genel", AltGrup: "Detay"),
 
+            // UYGULANABILIRLIK (482, kullanici: "dogum erkek icin olmaz,
+            //   prostat sadece erkeklere ve 20 yasindan sonra"). Kural KARTTA
+            //   durur: ucret satiri, lab istemi, radyoloji istemi ve paket
+            //   ayni kapidan gecer. Bos birakilirsa hizmet HERKESE yapilir.
+            new("cinsiyet", "cinsiyet", "kod", SabitKodlar: HizmetCinsiyetKodlari,
+                Baslik: "Cinsiyet", Grup: "Genel", AltGrup: "Uygulanabilirlik"),
+            new("yasAlt",   "yas_alt",  "sayi", Baslik: "En Küçük Yaş",
+                Grup: "Genel", AltGrup: "Uygulanabilirlik", EslesAlan: "yasUst"),
+            new("yasUst",   "yas_ust",  "sayi", Baslik: "En Büyük Yaş",
+                Grup: "Genel", AltGrup: "Uygulanabilirlik"),
+
             new("muhKodu",  "muh_kodu",  "metin", EnFazlaUzunluk: 20,
                 Baslik: "Muhasebe Kodu", Grup: "Genel", AltGrup: "Kodlar"),
             new("ozelKod",  "ozel_kod",  "metin", EnFazlaUzunluk: 40,

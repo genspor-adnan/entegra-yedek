@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (242 ad, 72 tanesi birden cok dosyada)
+## Fonksiyonlar (245 ad, 72 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -25,8 +25,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_belge_no_anahtar` | `025_fn_belge_no.sql` | — |
 | `fn_belge_no_uret` | `366_numara_onek_yil.sql` | 025_fn_belge_no.sql, 087_numara_kesme_duzeltmesi.sql, 152_numara_sablonu.sql |
 | `fn_belge_rezerve` | `142_siparis_rezervasyon.sql` | — |
-| `fn_belge_satir_dagilim_hesapla` | `478_pay_kolonlari_dusur.sql` | 476_dagilim_sayac_tazele.sql |
-| `fn_belge_satir_dagilim_tazele` | `476_dagilim_sayac_tazele.sql` | 472_dagilim_sigorta_prim.sql, 474_dagilim_tazele_duzeltme.sql |
+| `fn_belge_satir_dagilim_hesapla` | `483_dagilim_sut_bedeli_ekrandan.sql` | 476_dagilim_sayac_tazele.sql, 478_pay_kolonlari_dusur.sql, 481_dagilim_kdvli_fiyat.sql |
+| `fn_belge_satir_dagilim_tazele` | `483_dagilim_sut_bedeli_ekrandan.sql` | 472_dagilim_sigorta_prim.sql, 474_dagilim_tazele_duzeltme.sql, 476_dagilim_sayac_tazele.sql |
 | `fn_belge_satir_dagit` | `470_belge_satir_dagilim.sql` | — |
 | `fn_belge_satir_hesap` | `190_belge_fisle.sql` | — |
 | `fn_belge_satir_kapatma` | `191_kapanma_tazele.sql` | 082_belge_donusum.sql |
@@ -106,6 +106,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_hesap_atama_adi` | `197_kasa_atama_tek_alan.sql` | 196_kasa_atama.sql |
 | `fn_hesap_plani_alt_ac` | `076_fn_kasa.sql` | — |
 | `fn_hizmet_modalite_coz` | `460_hizmet_modalite_onarim.sql` | — |
+| `fn_hizmet_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
 | `fn_ilac_alerji_kontrol` | `414_metin_sadelestir.sql` | 413_recete.sql |
 | `fn_ilac_fiyat` | `406_ilac_fiyat.sql` | — |
 | `fn_ilac_fiyat_golge_tazele` | `406_ilac_fiyat.sql` | — |
@@ -209,6 +210,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_belge_basvuru_sozlesme` | `469_basvuru_sozlesme.sql` | — |
 | `tg_belge_satir_dagilim_denge` | `470_belge_satir_dagilim.sql` | — |
 | `tg_belge_satir_rol_dogrula` | `361_prim_rol_isaretleri.sql` | — |
+| `tg_belge_satir_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
 | `tg_departman_dongu_engel` | `257_departman_ustbirim.sql` | — |
 | `tg_kasa_dagitim_kontrol` | `471_dagilim_kapanma_tahsil.sql` | 321_tahsilat_satir_dagitim.sql, 323_tahsilat_kdv_dahil.sql |
 | `tg_kasa_dagitim_sil_tazele` | `354_kasa_islem_silme_kosullari.sql` | — |
@@ -243,6 +245,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_radyoloji_istem_guncelle` | `287_radyoloji_accession_tetik.sql` | — |
 | `tg_radyoloji_istem_hazirla` | `287_radyoloji_accession_tetik.sql` | — |
 | `tg_radyoloji_istem_hizmet` | `459_radyoloji_istem_hizmet_kontrolu.sql` | — |
+| `tg_radyoloji_istem_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
 | `tg_randevu_cakisma` | `317_randevu_tetkik_uyum.sql` | 316_randevu_cihaz_kaynagi.sql |
 | `tg_sube_vkn_dogrula` | `170_sube_vkn_dogrula.sql` | — |
 | `tg_tani_kronik_yansit` | `420_hasta_tibbi_gecmis.sql` | — |
@@ -251,7 +254,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (122 ad, 37 tanesi birden cok dosyada)
+## Gorunumler (122 ad, 38 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -308,7 +311,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_hesap_ekstre` | `111_ekstre_doviz_gruplu.sql` | 077_v_ekstre.sql, 097_ekstre_kaynak_kayit.sql |
 | `v_hesap_lookup` | `071_kasa_master.sql` | — |
 | `v_hesap_plani_lookup` | `074_muhasebe.sql` | — |
-| `v_hizmet_lookup` | `071_kasa_master.sql` | — |
+| `v_hizmet_lookup` | `482_hizmet_cinsiyet_yas.sql` | 071_kasa_master.sql |
 | `v_iade_edilebilir_satir` | `133_iade_irsaliye.sql` | 132_iade_satirlari.sql |
 | `v_icd_lookup` | `409_muayene_v1.sql` | — |
 | `v_is_merkezi_lookup` | `429_uretim_v1.sql` | — |

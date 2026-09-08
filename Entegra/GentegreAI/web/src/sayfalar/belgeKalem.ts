@@ -84,6 +84,22 @@ export interface KalemFiyati {
    * kaydediliyordu.
    */
   kdvDahil?: number | null;
+  /**
+   * ÖDEME ROTASI (483): 1 Özel · 2 ÖSS · 3 TSS · 4 Karma · 5 SGK. Sözleşmeden
+   * çıkar; ekran "bu satırda SGK payı var mı" sorusunu buradan öğrenir.
+   */
+  rota?: number | null;
+  /** TSS/Karma/SGK rotalarında satırın bir de SGK (SUT) bedeli olmalı. */
+  sgkGerekli?: boolean | null;
+  /**
+   * Sözleşmenin SUT listesinden çözülen SGK bedeli. **null ise listede yok** -
+   * ekran bedeli kullanıcıdan ister. Bulunamayınca sessizce 0 yazmak, tutarın
+   * tamamını sigortaya/hastaya yükler (kullanıcı: "sgk sut fiyatını da bulup
+   * atması gerekirdi, eğer yoksa ekrandan onu alması gerekir").
+   */
+  sgkFiyat?: number | null;
+  /** SUT listesinin fiyatı KDV dahil mi. */
+  sgkKdvDahil?: number | null;
 }
 
 /**
@@ -118,8 +134,41 @@ export function kampanyaKalemFiyati(f: KalemFiyati):
   };
 }
 
+/**
+ * SGK (SUT) TARAFINI SATIRA ISLER - 483.
+ *
+ * Tarife fiyatindan AYRI yurur: TSS'de satirda iki fiyat vardir ve tarife
+ * cozulemese bile SGK bedeli sorulmalidir. `sgkGerekli` kutuyu acar,
+ * `sgkListe` bos kalirsa ekran uyarir - eskiden bedel bulunamayinca sessizce
+ * 0 yaziliyor, tutarin tamami sigortaya/hastaya yukleniyordu.
+ */
+export function sgkBedeliUygula(satir: SatirDurumu, f: KalemFiyati): SatirDurumu {
+  const gerekli = !!f.sgkGerekli;
+  if (!gerekli) {
+    // Rota degisti ve artik SGK payi yok: eski bedel satirda kalmasin.
+    return satir.sgkGerekli ? { ...satir, sgkGerekli: false, sgkListe: '' } : satir;
+  }
+  // SUT listesi BRUT tutuluyorsa matraha inilir - kovalar KDV haric saklanir.
+  const dahil = Number(f.sgkKdvDahil ?? 0) === 1;
+  const bulundu = f.sgkFiyat != null && f.sgkFiyat > 0;
+  return {
+    ...satir,
+    rota: f.rota ?? satir.rota,
+    sgkGerekli: true,
+    sgkListeBulundu: bulundu,
+    // Kullanicinin ELLE girdigi bedel korunur: liste sonradan sorulsa da
+    //   ekranda yazilan kaybolmasin.
+    sgkListe: bulundu
+      ? String(dahil ? matraha(f.sgkFiyat!, satir.kdv ?? 0) : f.sgkFiyat)
+      : (satir.sgkListe ?? ''),
+  };
+}
+
 /** Kampanyali fiyati BELGE SATIRINA isler. Fiyat cozulemezse satir aynen doner. */
 export function kampanyaFiyatiUygula(satir: SatirDurumu, f: KalemFiyati): SatirDurumu {
+  // SGK bedeli tarife fiyatindan BAGIMSIZ islenir: tarife listede yoksa da
+  //   SUT kutusu acilmali (TSS satirinda iki fiyat vardir).
+  satir = sgkBedeliUygula(satir, f);
   const y = kampanyaKalemFiyati(f);
   if (!y) return satir;
 

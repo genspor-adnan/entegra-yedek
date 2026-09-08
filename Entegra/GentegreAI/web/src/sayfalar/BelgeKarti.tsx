@@ -907,13 +907,20 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
 
     // FIYAT LISTESI ONCELIKLI (205/207): belgenin listesi varsa fiyat ORADAN
     //   gelir; kartin kendi fiyati yalniz listede kalem yoksa kalir.
-    if (fiyatListesiId || kampanyaId) {
+    // SOZLESMELI BASVURUDA LISTE OLMASA DA SORULUR (483): uc yalniz fiyati
+    //   degil ROTAYI da doner - TSS'de kalemin bir de SGK (SUT) bedeli var ve
+    //   sozlesmenin tarife listesi bos olsa bile o bedel sorulmali.
+    if (fiyatListesiId || kampanyaId || basvuruBilgi.sozlesmeId) {
       try {
         // Fiyat LISTE + KAMPANYA (274): baz listeden, indirim kampanyadan.
         //   Kampanya yoksa uc liste fiyatini doner.
         const f = await api.fiyatKalem(
           sec.tip === 'hizmet' ? { hizmetId: Number(sec.id) } : { stokId: Number(sec.id) },
-          { tarafId: cari?.id ?? null, kurumId: odeyenKurumId, listeId: fiyatListesiId });
+          { tarafId: cari?.id ?? null, kurumId: odeyenKurumId, listeId: fiyatListesiId,
+            // SOZLESME (483): rota ve SUT listesi ondan cikar - TSS'de kalemin
+            //   bir de SGK bedeli vardir ve pencere onu sorar.
+            sozlesmeId: basvuruBilgi.sozlesmeId ?? null,
+            sgkKullan: basvuruBilgi.sgkKullan ?? null });
         yeni = kampanyaFiyatiUygula(yeni, f);
       } catch { /* liste fiyati alinamazsa kart fiyati kalir */ }
     }

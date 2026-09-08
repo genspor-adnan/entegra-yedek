@@ -451,7 +451,9 @@ export const api = {
    * rota sozlesmeden, fiyatlar SUT/TTB listelerinden sunucuda cozulur.
    */
   belgeDagit: (belgeId: number, govde?: {
-    sgkProvizyon?: { satirId: number; tutar?: number; provizyonNo?: string }[];
+    /** `sgkListe`: SUT bedeli EKRANDAN (483) - liste boşsa kullanıcı girer. */
+    sgkProvizyon?: { satirId: number; tutar?: number; provizyonNo?: string;
+                     sgkListe?: number; huvListe?: number }[];
     ossProvizyon?: number;
   }) =>
     gonder<{ id: number; satir: number; mesaj: string }>(
@@ -1300,16 +1302,26 @@ export const api = {
    */
   fiyatKalem: (kalem: { stokId?: number; hizmetId?: number },
                kaynak: { tarafId?: number | null; kurumId?: number | null;
-                         listeId?: number | null }) =>
+                         listeId?: number | null; sozlesmeId?: number | null;
+                         sgkKullan?: number | null }) =>
     istek<{ fiyat: number | null; bazFiyat: number | null; dovizCinsi: string;
             kdvDahil: number; kaynak: string; kampanyaId: number | null;
             listeId: number | null; satirId: number | null; tip: number | null;
-            iskontoTipi: number | null; iskonto: number | null }>(
+            iskontoTipi: number | null; iskonto: number | null;
+            /** Odeme rotasi (483): 1 Ozel · 2 OSS · 3 TSS · 4 Karma · 5 SGK. */
+            rota: number; sgkGerekli: boolean;
+            /** null ise SUT LISTESINDE YOK - bedel ekrandan istenir. */
+            sgkFiyat: number | null; sgkListesiId: number | null;
+            sgkKdvDahil: number; sgkKatilim: number }>(
       '/api/fiyat/kalem?'
       + (kalem.stokId ? `stokId=${kalem.stokId}` : `hizmetId=${kalem.hizmetId}`)
       + (kaynak.tarafId ? `&tarafId=${kaynak.tarafId}` : '')
       + (kaynak.kurumId ? `&kurumId=${kaynak.kurumId}` : '')
-      + (kaynak.listeId ? `&listeId=${kaynak.listeId}` : '')),
+      + (kaynak.listeId ? `&listeId=${kaynak.listeId}` : '')
+      // SOZLESME (483): SUT listesi ve rota ondan cikar - kurumun tek
+      //   sozlesmesi yoksa sunucu hangi tarifeyi uygulayacagini bilemez.
+      + (kaynak.sozlesmeId ? `&sozlesmeId=${kaynak.sozlesmeId}` : '')
+      + (kaynak.sgkKullan != null ? `&sgkKullan=${kaynak.sgkKullan}` : '')),
 
   /** Depo bazli min/max seviye (099). Miktarlara DOKUNMAZ. */
   stokDurumLimit: (stokId: number, depoId: number,

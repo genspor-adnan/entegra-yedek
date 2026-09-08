@@ -213,6 +213,7 @@ public sealed partial class BelgeDeposu
                         then round(coalesce(dg.sgk + dg.oss, 0) * 100 / s.tutar, 4)
                         else 0 end as "karsilama",
                    s.provizyon_no as "provizyonNo",
+                   coalesce(s.uygunluk_notu, '') as "uygunlukNotu",
                    coalesce(dg.sgk_kapatilan + dg.oss_kapatilan, 0) as "kurumKapatilan",
                    coalesce(dg.hasta_provizyon_kapatilan
                           + dg.hasta_ek_katki_kapatilan, 0) as "hastaKapatilan",
@@ -237,6 +238,10 @@ public sealed partial class BelgeDeposu
                    coalesce(dg.huv_liste, 0) as "huvListe",
                    coalesce(dg.sgk_provizyon_no, '') as "sgkProvizyonNo",
                    coalesce(dg.elle, 0) as "dagilimElle",
+                   -- SUT / tarife bedeli EKRANDAN mi girildi (483): kart geri
+                   --   yuklendiginde kutu kullanicinin yazdigini gostersin.
+                   coalesce(dg.sgk_liste_elle, 0) as "sgkListeElle",
+                   coalesce(dg.huv_liste_elle, 0) as "huvListeElle",
                    -- Kalemi fiyatlayan kampanya kurali (274) - satir geri
                    --   yuklendiginde bag korunsun, Kaydet onu silmesin.
                    s.kampanya_satir_id as "kampanyaSatirId"

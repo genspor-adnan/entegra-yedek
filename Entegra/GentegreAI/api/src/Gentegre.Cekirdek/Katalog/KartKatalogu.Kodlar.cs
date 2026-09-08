@@ -169,6 +169,14 @@ public static partial class KartKatalogu
     private static readonly Dictionary<string, string> CinsiyetKodlari =
         new() { ["1"] = "Erkek", ["2"] = "Kadın" };
 
+    /// <summary>
+    /// Hizmetin cinsiyet kısıtı (482). Hastanınkinden FARKLI bir liste:
+    /// burada "farketmez" gerçek bir seçenektir - hizmetlerin çoğu her iki
+    /// cinsiyete de uygulanır ve boş bırakmak "bilinmiyor" demek değildir.
+    /// </summary>
+    private static readonly Dictionary<string, string> HizmetCinsiyetKodlari =
+        new() { ["0"] = "Farketmez", ["1"] = "Yalnız Erkek", ["2"] = "Yalnız Kadın" };
+
     // taraf_personel.CALISMA_SEKLI - GENINI karsiligi yok (047_personel_ozluk_ogrenim.sql).
 
     // taraf_personel.CALISMA_SEKLI - GENINI karsiligi yok (047_personel_ozluk_ogrenim.sql).

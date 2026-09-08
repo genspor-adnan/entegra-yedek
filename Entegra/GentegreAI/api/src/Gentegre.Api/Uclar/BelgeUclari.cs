@@ -27,6 +27,7 @@ public static class BelgeUclari
             var belge = BaslikDegerleri(istek.Belge);
             BelgeTarihiSaatle(belge);
             var satirlar = istek.Satirlar ?? new List<Dictionary<string, JsonElement>>();
+            UygunlukZorlamaYetkisi(baglam, satirlar);
 
             var (id, uyarilar) = await depo.KaydetAsync(belge, satirlar, istek.Secenekler,
                 baglam.Yazma, iptal);
@@ -166,6 +167,7 @@ public static class BelgeUclari
 
             var belge = BaslikDegerleri(istek.Belge);
             var satirlar = istek.Satirlar ?? new List<Dictionary<string, JsonElement>>();
+            UygunlukZorlamaYetkisi(baglam, satirlar);
 
             var (belgeId, uyarilar) = await depo.GuncelleAsync(id, belge, satirlar,
                 istek.Secenekler, baglam.Yazma,
@@ -230,8 +232,9 @@ public static class BelgeUclari
             {
                 prov.TryGetValue(satirId, out var p);
                 await veri.CalistirAsync(
-                    "select public.fn_belge_satir_dagilim_tazele(@p0, @p1, @p2)",
-                    [satirId, p?.Tutar, istek?.OssProvizyon], iptal);
+                    "select public.fn_belge_satir_dagilim_tazele(@p0, @p1, @p2, @p3, @p4)",
+                    [satirId, p?.Tutar, istek?.OssProvizyon,
+                     p?.SgkListe, p?.HuvListe], iptal);
                 if (p?.ProvizyonNo is { Length: > 0 } no)
                     await veri.CalistirAsync(
                         "update public.belge_satir_dagilim " +
@@ -724,6 +727,16 @@ public static class BelgeUclari
         public int SatirId { get; set; }
         public decimal? Tutar { get; set; }
         public string? ProvizyonNo { get; set; }
+        /// <summary>
+        /// SUT bedeli EKRANDAN (483). Sözleşmenin SUT listesinde satır yoksa
+        /// SGK payı sessizce sıfır kalıyordu; kullanıcı bedeli buradan verir ve
+        /// dağılımda SABİTLENİR - sonraki tazelemeler listeden gelenle ezmez.
+        /// Provizyonun ONAYLADIĞI tutar (<see cref="Tutar"/>) bundan ayrıdır:
+        /// o gelirse SUT bedelinin yerine geçer.
+        /// </summary>
+        public decimal? SgkListe { get; set; }
+        /// <summary>Tarife (TTB/HUV) bedeli ekrandan (483) - liste boşsa.</summary>
+        public decimal? HuvListe { get; set; }
     }
 
     public sealed class RezerveIstegi
@@ -772,6 +785,24 @@ public static class BelgeUclari
     /// dis sistemler) o anki saat damgalanir. Gecmis bir gunun 00:00'i ELLE
     /// secilmis kabul edilir ve dokunulmaz.
     /// </summary>
+    /// <summary>
+    /// CİNSİYET/YAŞ KURALINI AŞMA YETKİSİ (482).
+    ///
+    /// Kuralın gerçek istisnaları var (erkekte meme kanseri şüphesi, yaşı
+    /// belirsiz hasta) - bu yüzden gerekçeli geçişe izin verilir. Ama gerekçe
+    /// yazmak herkesin işi değil: hizmet tanımını değiştirebilen kişi kuralı
+    /// aşabilir de. Gerekçe satırda kalır; kim, neden zorladı görünür.
+    /// </summary>
+    private static void UygunlukZorlamaYetkisi(
+        IstekBaglami baglam, IEnumerable<Dictionary<string, JsonElement>> satirlar)
+    {
+        var zorlayan = satirlar.Any(x =>
+            x.TryGetValue("uygunlukNotu", out var v)
+            && v.ValueKind == JsonValueKind.String
+            && !string.IsNullOrWhiteSpace(v.GetString()));
+        if (zorlayan) baglam.YetkiIste("hizmet", Islem.Degistir);
+    }
+
     private static void BelgeTarihiSaatle(Dictionary<string, object?> belge)
     {
         var simdi = DateTime.Now;

@@ -217,3 +217,57 @@ describe('KDV DAHIL liste fiyati (kullanici)', () => {
     expect(Number(kampanyaFiyatiUygula(s, { fiyat: 120 }).birimFiyat)).toBe(120);
   });
 });
+
+describe('SGK (SUT) bedeli - 483', () => {
+  // Kullanici: "basvuru ekledim, TSS olarak. Bana sadece bir defa sigorta
+  //   ucretini sordu; oysa SGK SUT fiyatini da bulup atmasi gerekirdi. Eger
+  //   yoksa ekrandan onu almasi gerekir."
+  it('TSS rotasinda SUT listesi bossa kutu ACILIR ve bedel bos gelir', () => {
+    const s = { ...bosSatir(1), hizmetId: 900, kdv: '0' };
+    const y = kampanyaFiyatiUygula(s, { fiyat: 2000, rota: 3, sgkGerekli: true });
+    expect(y.sgkGerekli).toBe(true);
+    expect(y.sgkListeBulundu).toBe(false);
+    expect(y.sgkListe).toBe('');
+  });
+
+  it('SUT listesinde fiyat varsa bedel HAZIR gelir', () => {
+    const s = { ...bosSatir(1), hizmetId: 900, kdv: '0' };
+    const y = kampanyaFiyatiUygula(s, {
+      fiyat: 2000, rota: 3, sgkGerekli: true, sgkFiyat: 800 });
+    expect(y.sgkListeBulundu).toBe(true);
+    expect(Number(y.sgkListe)).toBe(800);
+  });
+
+  it('SUT listesi KDV DAHIL ise bedel matraha inilir', () => {
+    // Kovalar KDV haric saklanir: brut 960 / 1,20 = 800.
+    const s = { ...bosSatir(1), hizmetId: 900, kdv: '20' };
+    const y = kampanyaFiyatiUygula(s, {
+      fiyat: 2000, rota: 3, sgkGerekli: true, sgkFiyat: 960, sgkKdvDahil: 1 });
+    expect(Number(y.sgkListe)).toBeCloseTo(800, 4);
+  });
+
+  it('OSS rotasinda kutu ACILMAZ - o satirda SGK payi yok', () => {
+    const s = { ...bosSatir(1), hizmetId: 900, kdv: '0' };
+    const y = kampanyaFiyatiUygula(s, { fiyat: 1000, rota: 2, sgkGerekli: false });
+    expect(y.sgkGerekli).toBeFalsy();
+  });
+
+  it('rota degisip SGK payi kalkinca eski bedel satirdan SILINIR', () => {
+    // Karma sozlesmede "SGK katkisi kullanilsin" kapatilirsa rota 2'ye doner:
+    //   satirda kalan SUT bedeli hayalet bir SGK payi uretirdi.
+    const s = { ...bosSatir(1), hizmetId: 900, kdv: '0',
+                sgkGerekli: true, sgkListe: '800' };
+    const y = kampanyaFiyatiUygula(s, { fiyat: 4200, rota: 2, sgkGerekli: false });
+    expect(y.sgkGerekli).toBe(false);
+    expect(y.sgkListe).toBe('');
+  });
+
+  it('kullanicinin ELLE girdigi bedel, liste bos donunce korunur', () => {
+    // Kalem yeniden fiyatlaninca (liste degisti, kurum degisti) SUT listesi
+    //   yine bos donuyor - ekranda yazili olan silinmemeli.
+    const s = { ...bosSatir(1), hizmetId: 900, kdv: '0',
+                sgkGerekli: true, sgkListe: '800' };
+    const y = kampanyaFiyatiUygula(s, { fiyat: 2500, rota: 3, sgkGerekli: true });
+    expect(y.sgkListe).toBe('800');
+  });
+});

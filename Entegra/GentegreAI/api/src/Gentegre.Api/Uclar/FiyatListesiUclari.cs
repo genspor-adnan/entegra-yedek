@@ -161,6 +161,7 @@ public static class FiyatListesiUclari
         //   ile kampanya arasindaki bag (kampanya.fiyat_listesi_id) kacar.
         yol.MapGet("/api/fiyat/kalem", async (
             int? tarafId, int? kurumId, int? stokId, int? hizmetId, int? listeId,
+            int? sozlesmeId, short? sgkKullan,
             BaglamCozucu cozucu, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
         {
@@ -218,6 +219,15 @@ public static class FiyatListesiUclari
                 }
             }
 
+            // 4) SGK (SUT) BEDELI (483). TSS / Karma / SGK rotalarinda satirda
+            //    IKI fiyat calisir: SGK'nin odedigi SUT bedeli ve tarife bedeli.
+            //    Ekran yalniz tarife bedelini soruyordu; SUT listesi bossa SGK
+            //    payi sessizce sifir kaliyordu (kullanici: "sgk sut fiyatini da
+            //    bulup atmasi gerekirdi, yoksa ekrandan almasi gerekir").
+            //    Burada bulunani doneriz, BULAMAZSAK ekran sorar.
+            var sut = await SutBedeliAsync(baglanti, sozlesmeId, kurumId, sgkKullan,
+                                           stok, hizmet, iptal);
+
             return Results.Ok(new
             {
                 fiyat,
@@ -233,6 +243,16 @@ public static class FiyatListesiUclari
                 tip,
                 iskontoTipi,
                 iskonto,
+                // --- SGK / SUT (483) ---
+                rota = sut.Rota,
+                // SGK payi bu rotada var mi: ekran SUT kutusunu buna gore acar.
+                sgkGerekli = sut.SgkGerekli,
+                // Cozulen SUT bedeli - null ise LISTEDE YOK, ekran soracak.
+                sgkFiyat = sut.SgkFiyat,
+                sgkListesiId = sut.SgkListesiId,
+                sgkKdvDahil = sut.SgkKdvDahil,
+                // SUT listesinin katilim payi (hastadan alinir, ciro disi).
+                sgkKatilim = sut.SgkKatilim,
             });
         }).WithTags("FiyatListesi").RequireAuthorization();
 
@@ -399,6 +419,64 @@ public static class FiyatListesiUclari
         if (subeId != 0 && baglam.SubeId is { } aktif && subeId != aktif)
             throw GentegreHatasi.Yasak("Bu liste başka bir şubeye ait.");
         return (o.GetString(0), o.GetInt16(1));
+    }
+
+    /// <summary>
+    /// Kalemin SGK (SUT) tarafi - 483. `SgkFiyat` null ise SOZLESMENIN SUT
+    /// LISTESINDE O KALEM YOK: ekran bedeli kullanicidan ister, yoksa SGK payi
+    /// sifir kalir ve tutarin tamami sigortaya/hastaya yazilir.
+    /// </summary>
+    private sealed record SutBedeli(
+        short Rota, bool SgkGerekli, decimal? SgkFiyat, int? SgkListesiId,
+        short SgkKdvDahil, decimal SgkKatilim)
+    {
+        /// <summary>Kurum/sozlesme yok: ozel hasta - SGK payi da yok.</summary>
+        public static SutBedeli Yok => new(1, false, null, null, 0, 0m);
+    }
+
+    /// <summary>
+    /// Sozlesmenin SUT listesinden kalemin SGK bedelini cozer (483).
+    ///
+    /// Rota SOZLESMEDEN cikar (kurum turu + alt kurum + "SGK katkisi
+    /// kullanilsin"); SGK payi yalniz TSS (3), Karma (4) ve SGK (5)
+    /// rotalarinda vardir. Oteki rotalarda kutu hic acilmaz - olmayan bir
+    /// bedeli sormak, kullaniciyi yanlis yere sayi yazmaya davet eder.
+    /// </summary>
+    private static async Task<SutBedeli> SutBedeliAsync(
+        Npgsql.NpgsqlConnection baglanti, int? sozlesmeId, int? kurumId,
+        short? sgkKullan, int? stokId, int? hizmetId, CancellationToken iptal)
+    {
+        if (sozlesmeId is not > 0 && kurumId is not > 0) return SutBedeli.Yok;
+
+        short rota = 1;
+        int? sutListesi = null;
+        await using (var komut = baglanti.Komut(
+            "select public.fn_dagilim_rota(k.tur, coalesce(s.alt_kurum, 0)::smallint, " +
+            "                              coalesce(@p2, 1)::smallint), " +
+            "       s.sgk_fiyat_listesi_id " +
+            "  from public.kurum_sozlesme s " +
+            "  join public.taraf_kurum k on k.id = s.kurum_id " +
+            " where s.id = coalesce(@p0, public.fn_kurum_sozlesme_sec(@p1))",
+            null, sozlesmeId is 0 ? null : sozlesmeId, kurumId is 0 ? null : kurumId,
+            sgkKullan))
+        {
+            await using var o = await komut.ExecuteReaderAsync(iptal);
+            if (!await o.ReadAsync(iptal)) return SutBedeli.Yok;
+            rota       = o.IsDBNull(0) ? (short)1 : o.GetInt16(0);
+            sutListesi = o.IsDBNull(1) ? null : o.GetInt32(1);
+        }
+
+        var gerekli = rota is 3 or 4 or 5;
+        if (!gerekli) return new SutBedeli(rota, false, null, sutListesi, 0, 0m);
+        if (sutListesi is not { } liste)
+            // Sozlesmede SUT listesi hic secilmemis: bedel yalniz ekrandan gelebilir.
+            return new SutBedeli(rota, true, null, null, 0, 0m);
+
+        var f = await ListeFiyatiAsync(baglanti, liste, stokId, hizmetId, iptal);
+        // Fiyat 0 da "yok" sayilir: SUT listesinde 0 TL'lik satir, unutulmus
+        //   satirdir - kullaniciya sorulmasi dogru olan durumdur.
+        var fiyat = f.Fiyat is > 0 ? f.Fiyat : null;
+        return new SutBedeli(rota, true, fiyat, liste, f.KdvDahil, f.Katki);
     }
 
     /// <summary>Listeden cozulen fiyat + katilim payi (291).</summary>

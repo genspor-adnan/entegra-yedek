@@ -375,6 +375,9 @@ public sealed partial class BelgeDeposu
             "kampanya_satir_id",
             // Hedef satirda hangi kovayi kapattigi (470) + provizyon numarasi.
             "provizyon_no", "pay",
+            // CINSIYET/YAS KURALI GEREKCEYLE asildiysa sebebi (482): bos ise
+            //   kural uygulanmistir. Yetki kontrolu ucda, iz burada.
+            "uygunluk_notu",
             "sube_id", "ekleyen"
         };
         var parametreler = new List<object?>
@@ -394,6 +397,7 @@ public sealed partial class BelgeDeposu
             JsonTarih(satir, "teslimTarihi"),
             JsonSayiNull(satir, "kampanyaSatirId"),
             JsonMetin(satir, "provizyonNo"), (short)JsonSayi(satir, "pay", 0),
+            JsonMetin(satir, "uygunlukNotu"),
             (short)baglam.SubeZorunlu(), baglam.KullaniciId
         };
 
@@ -463,8 +467,16 @@ public sealed partial class BelgeDeposu
 
         if (!elleGeldi)
         {
+            // SUT / TARIFE BEDELI EKRANDAN (483): sozlesmenin listesi bos
+            //   kalabiliyor - TSS'de "SUT 2026" listesinde satir yoksa SGK payi
+            //   sessizce 0 cikiyor ve tutarin tamami sigortaya yaziliyordu.
+            //   Kullanici bedeli ucret penceresinde girerse BURADAN gecer;
+            //   kovalari yine rota kurali boler, istemci hesap yapmaz.
+            var sgkListe = Kova("sgkListe");
+            var huvListe = Kova("huvListe");
             await using var tazele = Komut(baglanti, islem,
-                "select public.fn_belge_satir_dagilim_tazele(@p0)", [satirId]);
+                "select public.fn_belge_satir_dagilim_tazele(@p0, null, null, @p1, @p2)",
+                [satirId, sgkListe, huvListe]);
             await tazele.ExecuteNonQueryAsync(iptal);
             return;
         }
