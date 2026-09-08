@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Göz Dal Merkezi — Hasta Listesi (Ünite Akışı) — Mockup (Gentegre AI · Göz)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">👁 Göz Dal Merkezi — Hasta Listesi <span class="sp">03.09.2026 · Kabul → Ön tetkik → Muayene → Görüntüleme → Karar · 4 hekim · 2 tekniker</span></div>
+  <div class="toolbar">
+    <div class="btn ok">📢 Sıradakini Çağır</div><div class="btn primary">👁 Detaylı Muayene</div><div class="btn">👤 Göz Hasta Kartı</div><div class="btn">📷 Görüntüleme İstemi</div><div class="btn">👓 Gözlük Reçetesi</div>
+    <div class="sepv"></div><div class="btn">💉 Enjeksiyon Listesi (6)</div><div class="btn">🔪 Ameliyat Listesi (3)</div><div class="btn">🔦 Lazer (2)</div>
+    <div class="sepv"></div><div class="btn sp">📊 Ünite Panosu</div>
+  </div>
+  <div class="arama">
+    <div class="kutu">🔍 Hasta, protokol…</div>
+    <span class="chip on">Tümü (34)</span><span class="chip">Ön tetkik bekleyen (6)</span><span class="chip">Muayene bekleyen (9)</span><span class="chip">Görüntülemede (4)</span><span class="chip">Karar / sonuç (3)</span><span class="chip">Tamamlanan (12)</span>
+    <span class="sepv"></span><span class="chip">👨‍⚕️ Hekim ▾</span><span class="chip">🏥 Ünite ▾</span><span class="chip">💧 Dilate</span><span class="chip">⚡ Acil</span><span class="chip">🔁 Postop kontrol</span>
+  </div>
+  <div class="kanban">
+    <div class="kol"><div class="kb">1 · Kabul / bekleme <span class="sp">5</span></div>
+      <div class="is"><b>Ayşe Yılmaz · 39 K</b>Rutin muayene · Dr. Aksoy<span class="sonuk">09:40 · randevu ✔ · SGK</span></div>
+      <div class="is"><b>Hasan Öz · 63 E</b>Katarakt kontrol · Dr. Aksoy<span class="sonuk">09:50 · postop 1. hafta</span></div>
+      <div class="is"><b>Nur Gül · 34 K</b>Gözlük kontrol · Dr. Yalçın<span class="sonuk">10:00 · randevusuz</span></div>
+    </div>
+    <div class="kol"><div class="kb">2 · Ön tetkik (tekniker) <span class="sp">6</span></div>
+      <div class="is"><b>Mehmet Kaya · 58 E</b>Otoref ✔ · Tonometri ✔ · <span class="rz sari">GİB 26/24</span><span class="sonuk">Tekn. Z. Ak · 12 dk</span></div>
+      <div class="is"><b>Fatma Demir · 63 K</b>Otoref ✔ · Tonometri —<span class="sonuk">DM · yıllık DR taraması</span></div>
+      <div class="is"><b>Kerem Us · 45 E</b>Pakimetri · <span class="rz mor">dilatasyon 10:05</span><span class="sonuk">tropikamid · 20 dk</span></div>
+    </div>
+    <div class="kol" style="border-color:#2f6db3"><div class="kb">3 · Hekim muayenesi <span class="sp">9</span></div>
+      <div class="is" style="border-color:#2f6db3;background:#eef4fc"><b>Selin Ar · 27 K</b>Dr. Aksoy · Oda 1 · <span class="rz mavi">muayenede 8 dk</span><span class="sonuk">kırmızı göz · konjonktivit?</span></div>
+      <div class="is"><b>Zeynep Ak · 44 K</b>Dr. Aksoy · sırada<span class="sonuk">otoref −2,25 / −2,00 · GİB 15/16</span></div>
+      <div class="is"><b>Can Öz · 31 E</b>Dr. Yalçın · sırada<span class="sonuk">refraktif cerrahi ön değerlendirme</span></div>
+      <div class="is"><b>Ali Vural · 71 E</b>Dr. Çelik (retina) · <span class="rz kir">dilate hazır</span><span class="sonuk">AMD takip · enjeksiyon kararı</span></div>
+    </div>
+    <div class="kol"><div class="kb">4 · Görüntüleme / test <span class="sp">4</span></div>
+      <div class="is"><b>Ali Vural · 71 E</b>OCT makula + FAF<span class="sonuk">OCT-1 · 10:20 · <span class="rz ok">çekildi</span></span></div>
+      <div class="is"><b>Mehmet Kaya · 58 E</b>Görme alanı 24-2 + OCT RNFL<span class="sonuk">HFA · sırada · glokom şüphesi</span></div>
+      <div class="is"><b>Hasan Öz · 63 E</b>Biyometri (IOL) — OS<span class="sonuk">IOLMaster · 2. göz planı</span></div>
+    </div>
+    <div class="kol"><div class="kb">5 · Karar / işlem <span class="sp">3</span></div>
+      <div class="is"><b>Ali Vural · 71 E</b><span class="rz kir">Anti-VEGF OD</span> · bugün enjeksiyon odası<span class="sonuk">4. doz · onam ✔ · 11:30</span></div>
+      <div class="is"><b>Fatma Demir · 63 K</b>Gözlük reçetesi + 6 ay kontrol<span class="sonuk">optik: e-reçete</span></div>
+      <div class="is"><b>Hasan Öz · 63 E</b>OS katarakt ameliyat planı<span class="sonuk">10.09 · Dr. Aksoy · fako + IOL</span></div>
+    </div>
+  </div>
+  <div class="dg"><table>
+    <thead><tr><th class="orta">Sıra</th><th>Hasta</th><th class="orta">Yaş/C</th><th>Protokol</th><th>Hekim</th><th>Geliş nedeni</th><th class="orta">Otoref</th><th class="orta">GİB (OD/OS)</th><th class="orta">Dilate</th><th class="orta">Görüntüleme</th><th>Uyarı</th><th class="orta">İstasyon</th><th class="orta">Bekleme</th></tr></thead>
+    <tbody>
+      <tr class="sel"><td class="orta">14</td><td><b>Mehmet Kaya</b></td><td class="orta">58 E</td><td>2026/20390</td><td>Dr. Aksoy</td><td>Glokom şüphesi · aile öyküsü</td><td class="orta">✔</td><td class="orta"><span class="rz sari">26 / 24</span></td><td class="orta">—</td><td class="orta">GA + OCT sırada</td><td><span class="rz sari">DM · HT</span></td><td class="orta"><span class="rz">Görüntüleme</span></td><td class="orta">18 dk</td></tr>
+      <tr><td class="orta">15</td><td>Ali Vural</td><td class="orta">71 E</td><td>2026/20408</td><td>Dr. Çelik</td><td>Yaş tip AMD takip · OD</td><td class="orta">✔</td><td class="orta">14 / 15</td><td class="orta"><span class="rz mor">✔ 09:55</span></td><td class="orta">OCT ✔ FAF ✔</td><td><span class="rz kir">Anti-VEGF 4. doz</span> <span class="rz">Antikoagülan</span></td><td class="orta"><span class="rz mavi">Karar</span></td><td class="orta">—</td></tr>
+      <tr><td class="orta">16</td><td>Hasan Öz</td><td class="orta">63 E</td><td>2026/20421</td><td>Dr. Aksoy</td><td>OD katarakt postop 1. hafta · OS plan</td><td class="orta">✔</td><td class="orta">16 / 17</td><td class="orta">—</td><td class="orta">Biyometri OS</td><td><span class="rz ok">Postop sorunsuz</span></td><td class="orta"><span class="rz">Görüntüleme</span></td><td class="orta">9 dk</td></tr>
+      <tr><td class="orta">17</td><td>Fatma Demir</td><td class="orta">63 K</td><td>2026/20415</td><td>Dr. Çelik</td><td>DM · yıllık DR taraması</td><td class="orta">✔</td><td class="orta">—</td><td class="orta">bekliyor</td><td class="orta">Fundus foto plan</td><td><span class="rz sari">DM 12 yıl · HbA1c 8,1</span></td><td class="orta"><span class="rz sari">Ön tetkik</span></td><td class="orta">6 dk</td></tr>
+    </tbody></table></div>
+  <div class="statusbar"><span>34 hasta · ort. toplam süre 68 dk · en uzun bekleme 31 dk (görüntüleme)</span><span class="sp">İstasyonlar: kabul → ön tetkik (otoref/tonometri/pakimetri) → muayene → görüntüleme → karar/işlem; dilatasyon zamanlayıcısı 20 dk</span></div>
+</div>
+<div class="not"><b>Göz merkezi farkı.</b> Hasta bir ziyarette birden çok istasyondan geçer; tekniker ön tetkik verileri (otorefraktometre, tonometre, pakimetri) cihazdan otomatik muayeneye düşer; dilatasyon süresi takip edilir; görüntüleme (OCT/GA/FAF) hekim isteğiyle aynı gün; karar: gözlük, ilaç, lazer, intravitreal enjeksiyon, ameliyat planı. Liste kaynağı: <code>belge_basvuru</code> + <code>goz_ziyaret_istasyon</code>.</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

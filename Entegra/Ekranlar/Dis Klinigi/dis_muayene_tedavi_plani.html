@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diş Muayenesi ve Tedavi Planı — Mockup (Gentegre AI · Diş Kliniği)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .odont{display:grid;grid-template-columns:repeat(16,1fr);gap:3px;padding:8px 12px}
+  .odont .d{border:1px solid var(--line);border-radius:4px;background:#fff;text-align:center;font-size:10.5px;padding:3px 0;position:relative;cursor:default}
+  .odont .d b{display:block;font-size:11px;color:#1c4374}
+  .odont .d i{display:block;font-style:normal;font-size:14px;line-height:16px}
+  .odont .d.curuk{background:#fdf1d6;border-color:#e0b66a}
+  .odont .d.dolgu{background:#dbe8f8;border-color:#7fa8d9}
+  .odont .d.eksik{background:#eceff2;color:#9aa5b1}
+  .odont .d.kanal{background:#f1ecfa;border-color:#b79be0}
+  .odont .d.kron{background:#fff4d6;border-color:#d9a12b}
+  .odont .d.implant{background:#e2f3e8;border-color:#6dbb86}
+  .odont .d.plan{outline:2px dashed #b3261e;outline-offset:-2px}
+  .odont .d.sec{box-shadow:0 0 0 2px #2f6db3}
+  .odont .ust{grid-column:1/-1;font-size:10.5px;color:var(--muted);padding:2px 0}
+  .yuzey{display:inline-grid;grid-template-columns:repeat(3,14px);grid-template-rows:repeat(3,14px);gap:1px;vertical-align:middle;margin-left:6px}
+  .yuzey span{background:#eef2f6;border:1px solid var(--line2);font-size:8px;line-height:12px;text-align:center}
+  .yuzey span.on{background:#e0b66a}
+  .perio{display:grid;grid-template-columns:70px repeat(16,1fr);gap:2px;font-size:10px;padding:6px 12px}
+  .perio div{text-align:center;padding:2px 0;border-bottom:1px solid var(--line2)}
+  .perio .b{color:#3a5573;font-weight:bold;text-align:left}
+  .perio .k{color:#b3261e;font-weight:bold}
+  .lej{display:flex;gap:10px;flex-wrap:wrap;font-size:10.5px;padding:4px 12px;color:var(--muted)}
+  .lej span{display:inline-flex;gap:4px;align-items:center}
+  .lej i{width:12px;height:12px;border:1px solid var(--line);border-radius:2px;display:inline-block}
+  .cizelge{display:grid;grid-template-columns:70px repeat(4,1fr);gap:2px;padding:8px 12px;font-size:11px}
+  .cizelge .h{background:linear-gradient(#f4f7fb,#e7eef6);font-weight:bold;color:#2c4a6b;text-align:center;padding:5px;border-radius:3px}
+  .cizelge .s{color:var(--muted);text-align:right;padding-right:6px;padding-top:4px}
+  .cizelge .r{border:1px solid var(--line2);border-radius:3px;padding:4px 6px;background:#fff;min-height:40px}
+  .cizelge .r b{display:block;color:#1c4374}
+  .cizelge .r.dolu{background:#eef4fc;border-color:#cfe0f5}
+  .cizelge .r.acil{background:#fbe9e7;border-color:#f3c4bf}
+  .cizelge .r.geldi{background:#e2f3e8;border-color:#bfe3cb}
+  .cizelge .r.lab{background:#fdf6e3;border-color:#f2ddbf}
+  .cizelge .r.bos{background:#fbfcfd;color:var(--muted)}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🦷 Diş Muayenesi &amp; Tedavi Planı — Ayşe Yılmaz · 39 K <span class="sp">başvuru 2026/20417 · Dt. A. Kaya · muayene 8840 · plan TP-2026/0412</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div><div class="btn ok">✔ Muayeneyi Tamamla</div>
+    <div class="sepv"></div><div class="btn">📋 Proforma / Plan Onayı</div><div class="btn">🗓 Seansları Planla</div><div class="btn">💊 e-Reçete</div><div class="btn">🩻 RVG / Pano İste</div><div class="btn">🧪 Lab İş Emri</div><div class="btn">📝 Onam</div>
+    <div class="sepv"></div><div class="btn">📋 Şablon ▾</div><div class="btn">🎙 Dikte</div><div class="btn sp">✖ Kapat</div>
+  </div>
+  <div class="hdr k4" style="background:#fff8f0">
+    <div class="fld"><label>Şikâyet</label><div class="inp">Sol üst arka dişte soğukta ve kendiliğinden ağrı, 1 haftadır; gece uyandırıyor.</div></div>
+    <div class="fld"><label>Tıbbi uyarılar</label><div class="inp ro"><span class="rz kir">Penisilin alerjisi</span> <span class="rz sari">Hipotiroidi</span> · gebelik yok · antikoagülan yok · TA 120/78</div></div>
+    <div class="fld"><label>Dental anamnez</label><div class="inp ro">Son diş hekimi ziyareti 14.05.2026 · bruksizm (+) · sigara yok</div></div>
+    <div class="fld"><label>Ödeyen</label><div class="inp ro">Özel · fiyat listesi: Özel 2026 · kampanya: yok</div></div>
+  </div>
+  <div class="sekmeler"><div class="sekme on">Muayene &amp; Bulgular</div><div class="sekme">Tanı</div><div class="sekme">Tedavi Planı (7)</div><div class="sekme">Seans Programı</div><div class="sekme">Proforma &amp; Onay</div></div>
+  <div class="pnl">
+    <div class="ikiPanel">
+      <div>
+        <div class="hdr" style="grid-template-columns:1fr;border:none">
+          <div class="fld"><label>Ekstraoral</label><div class="inp">Simetrik · lenf nodu (−) · TME sağ klik, ağrısız · ağız açıklığı 42 mm</div></div>
+          <div class="fld"><label>İntraoral yumuşak doku</label><div class="inp">Mukoza doğal · dil doğal · diş eti: bölgesel kanama (47 çevresi) · lezyon yok</div></div>
+          <div class="fld"><label>Oklüzyon</label><div class="inp combo">Angle Sınıf I · overjet 3 mm · overbite 2 mm · aşınma fasetleri (bruksizm)</div></div>
+          <div class="fld"><label>Hijyen</label><div class="inp combo">Orta · plak indeksi %28 · diş taşı: alt ön lingual</div></div>
+          <div class="fld"><label>Vitalite / perküsyon</label><div class="inp">26: soğuk (+ uzamış), perküsyon (+), palpasyon (−) · 36: soğuk (+), perküsyon (−)</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="grp" style="margin:10px"><div class="gb">Bugünkü bulgular (odontograma işlenir)</div>
+          <div class="dg"><table><thead><tr><th>Diş</th><th>Yüzey</th><th>Bulgu</th><th>Kaynak</th></tr></thead>
+            <tbody>
+              <tr><td><b>26</b></td><td>—</td><td>İrreversibl pulpitis · periapikal lezyon 3 mm</td><td>klinik + RVG</td></tr>
+              <tr><td><b>36</b></td><td>O, D</td><td>Derin çürük, pulpaya yakın · eski amalgam kırık</td><td>klinik + RVG</td></tr>
+              <tr><td>24</td><td>V</td><td>Servikal çürük</td><td>klinik</td></tr>
+              <tr><td>35</td><td>O</td><td>Mine çürüğü</td><td>klinik</td></tr>
+              <tr><td>47</td><td>—</td><td>Periimplant mukozit (kanama, cep 5 mm)</td><td>periodontal</td></tr>
+            </tbody></table></div>
+          <div style="padding:6px 10px;display:flex;gap:6px"><div class="btn">＋ Bulgu</div><div class="btn">🦷 Odontogramda işaretle</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="pnl">
+    <div class="toolbar" style="border-top:none"><div class="inp" style="flex:1">🔍 ICD-10 (K00–K14) …</div><div class="btn">＋</div><div class="btn">⭐ Sık: K02.1 · K04.0 · K04.5 · K05.1 · K08.1</div></div>
+    <div class="dg"><table><thead><tr><th>ICD-10</th><th>Tanı</th><th>Diş</th><th class="orta">Tür</th></tr></thead>
+      <tbody>
+        <tr><td><b>K04.0</b></td><td>Pulpitis (irreversibl)</td><td>26</td><td class="orta"><span class="rz mavi">Ana</span></td></tr>
+        <tr><td>K04.5</td><td>Kronik apikal periodontitis</td><td>26</td><td class="orta">Ek</td></tr>
+        <tr><td>K02.1</td><td>Dentin çürüğü</td><td>36, 24, 35</td><td class="orta">Ek</td></tr>
+        <tr><td>K05.1</td><td>Kronik gingivitis (periimplant)</td><td>47</td><td class="orta">Ek</td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Tanı diş bazlı (`tani.dis_no`); e-Nabız 103 Diş Muayene paketi tanı + işlemleri diş numarasıyla ister.</div>
+  </div>
+  <div class="pnl">
+    <div class="toolbar" style="border-top:none"><div class="btn primary">＋ İşlem</div><div class="btn">📦 Paket (kanal + kron)</div><div class="btn">↕ Faz / Öncelik</div><div class="btn">🔁 Alternatif Plan (B)</div><div class="btn">💰 Fiyat listesi: Özel 2026 ▾</div><div class="btn sp">🧮 Toplam: 19.400 → indirim %7 → <b>18.000 ₺</b></div></div>
+    <div class="dg"><table>
+      <thead><tr><th class="orta">Faz</th><th class="orta">Sıra</th><th>Diş</th><th>Yüzey</th><th>İşlem (SUT / özel kod)</th><th>Hekim</th><th class="orta">Seans</th><th class="sag">Liste</th><th class="sag">İnd.</th><th class="sag">Net</th><th class="orta">Lab</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr class="grup"><td colspan="12">Faz 1 — Acil / ağrı giderme</td></tr>
+        <tr><td class="orta">1</td><td class="orta">1</td><td><b>26</b></td><td>—</td><td>DİŞ.3.12 Kanal tedavisi (3 kanallı)</td><td>Dt. A. Kaya</td><td class="orta">3</td><td class="sag">3.600</td><td class="sag">0</td><td class="sag">3.600</td><td class="orta">—</td><td class="orta"><span class="rz mavi">1/3 yapıldı</span></td></tr>
+        <tr><td class="orta">1</td><td class="orta">2</td><td>26</td><td>—</td><td>DİŞ.1.19 Lokal anestezi (rejyonel)</td><td>Dt. A. Kaya</td><td class="orta">×3</td><td class="sag">150</td><td class="sag">0</td><td class="sag">450</td><td class="orta">—</td><td class="orta"><span class="rz mavi">1/3</span></td></tr>
+        <tr class="grup"><td colspan="12">Faz 2 — Restoratif</td></tr>
+        <tr><td class="orta">2</td><td class="orta">3</td><td><b>36</b></td><td>OD</td><td>DİŞ.3.13 Kanal tedavisi (2 kanallı)</td><td>Dt. A. Kaya</td><td class="orta">2</td><td class="sag">2.800</td><td class="sag">−200</td><td class="sag">2.600</td><td class="orta">—</td><td class="orta"><span class="rz">Planlı</span></td></tr>
+        <tr><td class="orta">2</td><td class="orta">4</td><td>24</td><td>V</td><td>DİŞ.3.01 Kompozit dolgu (1 yüzey)</td><td>Dt. A. Kaya</td><td class="orta">1</td><td class="sag">1.200</td><td class="sag">−100</td><td class="sag">1.100</td><td class="orta">—</td><td class="orta"><span class="rz">Planlı</span></td></tr>
+        <tr><td class="orta">2</td><td class="orta">5</td><td>35</td><td>O</td><td>DİŞ.3.01 Kompozit dolgu (1 yüzey)</td><td>Dt. A. Kaya</td><td class="orta">1</td><td class="sag">1.200</td><td class="sag">−100</td><td class="sag">1.100</td><td class="orta">—</td><td class="orta"><span class="rz">Planlı</span></td></tr>
+        <tr class="grup"><td colspan="12">Faz 3 — Protetik</td></tr>
+        <tr><td class="orta">3</td><td class="orta">6</td><td>26</td><td>—</td><td>DİŞ.5.21 Zirkonyum kron (+ post-core)</td><td>Dt. B. Demir</td><td class="orta">3</td><td class="sag">7.500</td><td class="sag">−500</td><td class="sag">7.000</td><td class="orta"><span class="rz sari">LB-0388</span></td><td class="orta"><span class="rz">Planlı</span></td></tr>
+        <tr><td class="orta">3</td><td class="orta">7</td><td>36</td><td>—</td><td>DİŞ.5.21 Zirkonyum kron</td><td>Dt. B. Demir</td><td class="orta">3</td><td class="sag">7.500</td><td class="sag">−500</td><td class="sag">7.000</td><td class="orta"><span class="rz">lab</span></td><td class="orta"><span class="rz">Planlı</span></td></tr>
+        <tr class="grup"><td colspan="12">Faz 4 — İdame</td></tr>
+        <tr><td class="orta">4</td><td class="orta">8</td><td>47</td><td>—</td><td>DİŞ.4.05 Periimplant bakım + hijyen eğitimi</td><td>Dt. Hij. S. Al</td><td class="orta">1</td><td class="sag">900</td><td class="sag">0</td><td class="sag">900</td><td class="orta">—</td><td class="orta"><span class="rz">Planlı</span></td></tr>
+        <tr><td class="orta">4</td><td class="orta">9</td><td>Tüm</td><td>—</td><td>Gece plağı (bruksizm)</td><td>Dt. A. Kaya</td><td class="orta">2</td><td class="sag">2.500</td><td class="sag">0</td><td class="sag">2.500</td><td class="orta"><span class="rz">lab</span></td><td class="orta"><span class="rz sari">Öneri (onaysız)</span></td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Plan satırı = diş + yüzey + hizmet (SUT/özel kod) + hekim + seans sayısı + fiyat (liste/kampanya/iskonto) + lab bağı. Fazlar klinik öncelik; alternatif plan (B) karşılaştırmalı proforma. Satır yapıldıkça başvuru satırına (ücret) düşer; SGK kapsamı için SUT eşlemesi ve karşılama oranı (289).</div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table>
+      <thead><tr><th class="orta">Seans</th><th class="orta">Tarih</th><th>Ünit / hekim</th><th class="orta">Süre</th><th>Plan satırları</th><th>Ön koşul</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr><td class="orta">1</td><td class="orta">01.09.2026 09:00</td><td>Ünit 1 · Dt. A. Kaya</td><td class="orta">45 dk</td><td>26 kanal 1/3 · anestezi · RVG</td><td>—</td><td class="orta"><span class="rz ok">Yapıldı</span></td></tr>
+        <tr class="sel"><td class="orta">2</td><td class="orta">03.09.2026 09:00</td><td>Ünit 1 · Dt. A. Kaya</td><td class="orta">40 dk</td><td>26 kanal 2/3 (şekillendirme)</td><td>—</td><td class="orta"><span class="rz mavi">Bugün · ünitte</span></td></tr>
+        <tr><td class="orta">3</td><td class="orta">10.09.2026 09:00</td><td>Ünit 1 · Dt. A. Kaya</td><td class="orta">45 dk</td><td>26 kanal 3/3 (dolum) + post-core</td><td>seans 2</td><td class="orta"><span class="rz">Randevulu</span></td></tr>
+        <tr><td class="orta">4</td><td class="orta">10.09.2026 09:45</td><td>Ünit 1 · Dt. B. Demir</td><td class="orta">30 dk</td><td>26 kron ölçü → lab LB-0388</td><td>seans 3</td><td class="orta"><span class="rz">Randevulu</span></td></tr>
+        <tr><td class="orta">5</td><td class="orta">17.09.2026</td><td>Ünit 1 · Dt. A. Kaya</td><td class="orta">60 dk</td><td>36 kanal 1/2 + 35 dolgu</td><td>—</td><td class="orta"><span class="rz sari">Planlanacak</span></td></tr>
+        <tr><td class="orta">6</td><td class="orta">~19.09.2026</td><td>Ünit 2 · Dt. B. Demir</td><td class="orta">30 dk</td><td>26 kron prova</td><td>lab teslimi (7 iş günü)</td><td class="orta"><span class="rz sari">Lab bekliyor</span></td></tr>
+        <tr><td class="orta">…</td><td class="orta"></td><td></td><td class="orta"></td><td>36 kanal 2/2 · 24 dolgu · 36 kron ölçü/prova/teslim · 47 idame</td><td></td><td class="orta"><span class="rz sari">Planlanacak</span></td></tr>
+      </tbody></table></div>
+    <div style="padding:8px 12px;display:flex;gap:6px"><div class="btn primary">🗓 Kalan seansları randevuya dönüştür</div><div class="btn">↔ Sürükle-bırak takvim</div></div>
+    <div class="ic sonuk">Seans = randevu + plan satırı bağı; ön koşul (önceki seans, lab teslimi) sıralamayı kilitler; süre hizmet kartındaki standart süreden.</div>
+  </div>
+  <div class="pnl">
+    <div class="ikiPanel">
+      <div class="hdr" style="grid-template-columns:1fr 1fr">
+        <div class="fld"><label>Proforma no</label><div class="inp ro">PF-2026/0412 · 01.09.2026</div></div>
+        <div class="fld"><label>Geçerlilik</label><div class="inp">30 gün · 01.10.2026</div></div>
+        <div class="fld"><label>Toplam / indirim / net</label><div class="inp ro">19.400 − 1.400 = <b>18.000 ₺</b> (KDV dahil)</div></div>
+        <div class="fld"><label>Ödeme seçeneği</label><div class="inp combo">Peşin %5 ek indirim · 6 taksit (POS) · seans başı ödeme</div></div>
+        <div class="fld"><label>Hasta onayı</label><div class="inp"><span class="rz ok">Onaylandı 01.09.2026 · tablet imza</span> · onaysız satır: gece plağı</div></div>
+        <div class="fld"><label>Alternatif plan B</label><div class="inp">26 kanal + amalgam dolgu (kron yerine) · 36 çekim + implant → 24.500 ₺ · sunuldu, seçilmedi</div></div>
+      </div>
+      <div class="grp" style="margin:10px"><div class="gb">Proforma önizleme</div>
+        <div class="ic" style="font-size:11.5px">
+          <b>Ayşe Yılmaz</b> · Tedavi Planı Proforması · Dt. A. Kaya<br>
+          Faz 1 · 26 kanal tedavisi (3 seans) + anestezi ………… 4.050<br>
+          Faz 2 · 36 kanal, 24 ve 35 kompozit ……………………… 4.800<br>
+          Faz 3 · 26 ve 36 zirkonyum kron (lab dahil) …………… 14.000<br>
+          Faz 4 · Periimplant bakım ………………………………………… 900<br>
+          <b>Toplam 19.400 · indirim 1.400 · net 18.000 ₺</b><br>
+          <span class="sonuk">Fiyatlar 30 gün geçerlidir; tedavi sırasında değişen bulgular planı değiştirebilir, ek işlemler ayrıca bilgilendirilir. Ödeme: seans başı / 6 taksit.</span>
+        </div>
+        <div style="padding:0 10px 10px;display:flex;gap:6px"><div class="btn primary">✍ Hastaya imzalat (tablet)</div><div class="btn">🖨 PDF</div><div class="btn">📤 Portala / WhatsApp</div></div></div>
+    </div>
+  </div>
+  <div class="statusbar"><span>Muayene 8840 · plan 9 satır (8 onaylı) · 4 faz · 3/7 yapıldı</span><span class="sp">Tamamla → başvuru tahakkuk (yapılan işlemler) · e-Nabız Diş Muayene paketi · odontogram güncellenir</span></div>
+</div>
+<div class="not"><b>Yapı.</b> Genel <code>muayene</code> + diş uzantısı <code>dis_muayene</code> (ekstra/intraoral, oklüzyon, hijyen, vitalite); bulgular odontograma; <b>tedavi planı</b> ayrı yaşam döngüsü (taslak → sunuldu → onaylı → sürüyor → tamamlandı), satırları başvuru satırlarına yapıldıkça düşer (ücretlendirme muayene anında değil işlem anında). Proforma = planın hasta imzalı PDF'i (doküman).</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

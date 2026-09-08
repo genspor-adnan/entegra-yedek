@@ -1,4 +1,4 @@
-﻿object StokAramaFrame: TStokAramaFrame
+object StokAramaFrame: TStokAramaFrame
   Left = 0
   Top = 0
   Width = 451
@@ -154,7 +154,7 @@
     Left = 0
     Top = 297
     Caption = 'Pasifleri de g'#246'ster'
-    TabOrder = 21
+    TabOrder = 12
     Transparent = True
   end
   object ComboMARKA: TcxImageComboBox
@@ -407,10 +407,9 @@
     Left = 0
     Top = 0
     Width = 451
-    Height = 28
+    Height = 26
     AutoSize = True
-    ButtonHeight = 24
-    ButtonWidth = 62
+    ButtonWidth = 47
     Caption = 'AletCubugu'
     Color = clTeal
     DrawingStyle = dsGradient
@@ -440,7 +439,7 @@
     end
     object LabelSonArananlar: TToolButton
       Tag = 5
-      Left = 62
+      Left = 47
       Top = 0
       Caption = 'Son'
       ImageIndex = 21
@@ -448,7 +447,7 @@
     end
     object LabelSikArananlar: TToolButton
       Tag = 3
-      Left = 124
+      Left = 94
       Top = 0
       Caption = 'S'#305'k'
       ImageIndex = 31
@@ -472,7 +471,7 @@
       end>
     Properties.ReadOnly = True
     Properties.OnButtonClick = EditKategoriPropertiesButtonClick
-    TabOrder = 22
+    TabOrder = 20
     Width = 122
   end
 end

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>e-Nabız Paket 101 — Hasta Kayıt — Mockup (Gentegre AI · e-Nabız)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📦 e-Nabız Paketi — PK-2026-091230 · <b>101 Hasta Kayıt</b> <span class="sp">USS paket 101 · veri setleri: Gönderim Paketi Genel + Hasta Kabul + Vatandaş/Yabancı (+ Hasta Özlük seçimli) · USVS 2.2</span></div>
+  <div class="toolbar">
+    <div class="btn primary">📤 Gönder</div><div class="btn">🧪 Doğrula</div><div class="btn">🔄 Kaynaktan Yeniden Üret</div>
+    <div class="sepv"></div><div class="btn">👁 XML</div><div class="btn">📋 Yanıt</div><div class="btn">↗ Başvuruya Git</div><div class="btn">↗ Hasta Kartı</div>
+    <div class="sepv"></div><div class="btn">✎ Güncelleme Paketi</div><div class="btn danger">🗑 Silme Paketi</div><div class="btn sp">✖ Kapat</div>
+  </div>
+  <div class="hdr k4">
+    <div class="fld"><label>Paket Türü</label><div class="inp big">101 · Hasta Kayıt <span class="rz mavi">USS</span></div></div>
+    <div class="fld"><label>Kaynak</label><div class="inp">Başvuru BŞV-2026/20417 · Ayşe Yılmaz · Teletıp RND-11842</div></div>
+    <div class="fld"><label>Mesaj Tipi</label><div class="inp combo">Kaydet <span class="sonuk">· Güncelle / Sil / Sorgula</span></div></div>
+    <div class="fld"><label>Durum</label><div class="inp"><span class="rz sari">Eksik alan</span> <span class="sonuk">Özlük VS 2 zorunlu alan boş — Özlük kapsam dışı bırakılırsa gönderilebilir</span></div></div>
+    <div class="fld"><label>Tetik</label><div class="inp ro">Başvuru açıldı (tür 19) · 03.09.2026 18:41</div></div>
+    <div class="fld"><label>Olay / Son Tarih</label><div class="inp ro">18:41 · süre sınırı 24 s → 04.09 18:41</div></div>
+    <div class="fld"><label>İçerik Hash</label><div class="inp ro">7f3a9c…</div></div>
+    <div class="fld"><label>USS Paket Kimliği</label><div class="inp ro">— <span class="sonuk">(gönderimde döner)</span></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on">Gönderim Paketi Genel (5)</div><div class="sekme">Hasta Kimlik — Vatandaş / Yabancı (3)</div><div class="sekme">Hasta Kabul (11)</div><div class="sekme">Hasta Özlük (seçimli)</div><div class="sekme">XML</div><div class="sekme">Gönderim Geçmişi</div>
+  </div>
+  <div class="pnl"><div class="dg"><table>
+    <thead><tr><th>USS Veri Elemanı</th><th class="orta">Durum</th><th>Format</th><th>Değer</th><th>Kaynak alan</th><th>SKRS</th><th class="orta">Kontrol</th><th>Not / İş kuralı</th></tr></thead>
+    <tbody><tr><td>Kurum</td><td class="orta"><span class="rz kir">Zorunlu</span></td><td class="sonuk">A(10)</td><td>11xxxxxx · Gentegre Tıp Merkezi</td><td class="sonuk">entegrasyon_hesap.uygulama_kodu (ENABIZ)</td><td class="sonuk">SKRS Kurum Kodu</td><td class="orta"><span class="rz ok">✔</span></td><td class="sonuk"></td></tr><tr><td>Protokol Numarası</td><td class="orta"><span class="rz kir">Zorunlu</span></td><td class="sonuk">A(35)</td><td>11xxxxxx-2026-20417</td><td class="sonuk">belge.belge_no → <b>USS formatı: kurum-yıl-sıra</b></td><td class="sonuk">—</td><td class="orta"><span class="rz ok">✔</span></td><td class="sonuk">2. segment = kurum kodu; Online Protokol'de olmalı</td></tr><tr><td>İşlem Zamanı</td><td class="orta"><span class="rz kir">Zorunlu</span></td><td class="sonuk">GGAAYYYY SS:DD</td><td>03.09.2026 18:41</td><td class="sonuk">belge.belge_tarihi (başvuru açılış)</td><td class="sonuk">—</td><td class="orta"><span class="rz ok">✔</span></td><td class="sonuk">sistem zamanı ile farkı izin verilen aralıkta</td></tr><tr><td>Hekim Kimlik Numarası</td><td class="orta"><span class="rz kir">Zorunlu</span></td><td class="sonuk">N(11)</td><td>1234567****</td><td class="sonuk">taraf.vkno (hekim) — <b>T.C. kimlik</b>, tescil no değil</td><td class="sonuk">SKRS Doktor Bilgi Bankası</td><td class="orta"><span class="rz ok">✔</span></td><td class="sonuk">ÇKYS'de kayıtlı olmalı</td></tr><tr><td>Muayene Yapılan (Poli)Klinik</td><td class="orta"><span class="rz kir">Zorunlu</span></td><td class="sonuk">A(6)</td><td>1000 · İç Hastalıkları</td><td class="sonuk">departman.skrs_klinik_kod</td><td class="sonuk">c04bee57-… Klinik</td><td class="orta"><span class="rz ok">✔</span></td><td class="sonuk"></td></tr></tbody></table></div>
+    <div class="ic sonuk">Her USS paketinde bulunur. Hekim alanı <b>T.C. kimlik</b>tir (USVS "Hekim Kimlik Numarası", SKRS Doktor Bilgi Bankası); tescil/diploma no ayrıca hekim kartında tutulur.</div>
+  </div>
+  <div class="pnl"><div class="dg"><table>
+    <thead><tr><th>USS Veri Elemanı</th><th class="orta">Durum</th><th>Format</th><th>Değer</th><th>Kaynak alan</th><th>SKRS</th><th class="orta">Kontrol</th><th>Not / İş kuralı</th></tr></thead>
+    <tbody><tr><td>Hasta Kimlik Numarası</td><td class="orta"><span class="rz kir">Zorunlu</span></td><td class="sonuk">N(11)</td><td>1234567****</td><td class="sonuk">taraf.vkno (hasta)</td><td class="sonuk">—</td><td class="orta"><span class="rz ok">✔</span></td><td class="sonuk">Vatandaş VS; yabancı ise Yabancı VS (Pasaport No, Ad, Soyad, Doğum Tarihi, Cinsiyet, Uyruk, Yabancı Hasta Türü)</td></tr><tr><td>Anne T.C. Kimlik Numarası</td><td class="orta"><span class="rz pas">Seçimli</span></td><td class="sonuk">N(11)</td><td>—</td><td class="sonuk">taraf_hasta.anne_tckn</td><td class="sonuk">—</td><td class="orta"><span class="rz pas">—</span></td><td class="sonuk"></td></tr><tr><td>Doğum Sırası</td><td class="orta"><span class="rz pas">Seçimli</span></td><td class="sonuk">N(2)</td><td>—</td><td class="sonuk">taraf_hasta.dogum_sirasi (yok)</td><td class="sonuk">2a66899f-… Doğum Sırası</td><td class="orta"><span class="rz pas">—</span></td><td class="sonuk">yenidoğan/çoğul gebelik için; kart alanı eklenmedi</td></tr></tbody></table></div>
+    <div class="ic sonuk">Vatandaş VS: kimlik no yeter (demografi MERNİS'ten çözülür). Yabancı VS: Pasaport No, Ad, Soyad, Doğum Tarihi, Cinsiyet, Uyruk, Yabancı Hasta Türü — hepsi zorunlu (<code>taraf_hasta.pasaport_no / uyruk / yabanci_hasta_turu</code> mevcut). Kimliksiz hasta: Vatansız VS.</div>
+  </div>
+  <div class="pnl"><div class="dg"><table>
+    <thead><tr><th>USS Veri Elemanı</th><th class="orta">Durum</th><th>Format</th><th>Değer</th><th>Kaynak alan</th><th>SKRS</th><th class="orta">Kontrol</th><th>Not / İş kuralı</th></tr></thead>
+    <tbody><tr><td>Kabul Zamanı</td><td class="orta"><span class="rz kir">Zorunlu</span></td><td class="sonuk">GGAAYYYY SS:DD</td><td>03.09.2026 18:41</td><td class="sonuk">belge.belge_tarihi</td><td class="sonuk">—</td><td class="orta"><span class="rz ok">✔</span></td><td class="sonuk">≥ doğum tarihi · = İşlem Zamanı</td></tr><tr><td>Kabul Şekli</td><td class="orta"><span class="rz kir">Zorunlu</span></td><td class="sonuk">N(2)</td><td>1 · Normal (sevksiz)</td><td class="sonuk">belge_basvuru.gelis_sekli → enabiz_kod_esleme (KABUL_SEKLI)</td><td class="sonuk">d100a73b-… Kabul Şekli</td><td class="orta"><span class="rz ok">✔</span></td><td class="sonuk">Kurum içi/dışı sevkli ise Sevk alanları zorunlu</td></tr><tr><td>Sevk Tanısı</td><td class="orta"><span class="rz sari">Koşullu</span></td><td class="sonuk">A(8)</td><td>—</td><td class="sonuk">belge_basvuru.sevk_tanisi (ICD-10, 1+)</td><td class="sonuk">SKRS ICD-10</td><td class="orta"><span class="rz pas">—</span></td><td class="sonuk">yalnız sevkli kabulde</td></tr><tr><td>Sevk Tarihi</td><td class="orta"><span class="rz sari">Koşullu</span></td><td class="sonuk">GGAAYYYY SS:DD</td><td>—</td><td class="sonuk">belge_basvuru.sevk_tarihi</td><td class="sonuk">—</td><td class="orta"><span class="rz pas">—</span></td><td class="sonuk">≤ kabul zamanı</td></tr><tr><td>Geldiği (Poli)Klinik</td><td class="orta"><span class="rz sari">Koşullu</span></td><td class="sonuk">A(6)</td><td>—</td><td class="sonuk">belge_basvuru.sevk_klinik_kod</td><td class="sonuk">c04bee57-… Klinik</td><td class="orta"><span class="rz pas">—</span></td><td class="sonuk"></td></tr><tr><td>Vaka Türü</td><td class="orta"><span class="rz kir">Zorunlu</span></td><td class="sonuk">N(2)</td><td>1 · Normal</td><td class="sonuk">belge_basvuru.vaka_turu (yeni kolon)</td><td class="sonuk">46380e82-… Vaka Türü</td><td class="orta"><span class="rz ok">✔</span></td><td class="sonuk">adli / iş kazası / trafik…</td></tr><tr><td>Adli Vaka Geliş Şekli</td><td class="orta"><span class="rz sari">Koşullu</span></td><td class="sonuk">N(1)</td><td>—</td><td class="sonuk">belge_basvuru.adli_gelis_sekli (yeni)</td><td class="sonuk">0bce62cb-…</td><td class="orta"><span class="rz pas">—</span></td><td class="sonuk">Vaka Türü = Adli ise zorunlu</td></tr><tr><td>Ambulans ile Geliş Durumu</td><td class="orta"><span class="rz pas">Seçimli</span></td><td class="sonuk">N(1)</td><td>2 · Hayır</td><td class="sonuk">belge_basvuru.ambulans_hasta_no dolu mu</td><td class="sonuk">e3d9e3d6-…</td><td class="orta"><span class="rz ok">✔</span></td><td class="sonuk"></td></tr><tr><td>SGK Takip Numarası</td><td class="orta"><span class="rz pas">Seçimli</span></td><td class="sonuk">A(8)</td><td>—</td><td class="sonuk">belge_provizyon.takip_no</td><td class="sonuk">—</td><td class="orta"><span class="rz pas">—</span></td><td class="sonuk">Medula provizyon alındıysa</td></tr><tr><td>Protokol Numarası</td><td class="orta"><span class="rz sari">Koşullu</span></td><td class="sonuk">A(50)</td><td>11xxxxxx-2026-20417</td><td class="sonuk">belge.belge_no</td><td class="sonuk">—</td><td class="orta"><span class="rz ok">✔</span></td><td class="sonuk"></td></tr></tbody></table></div>
+    <div class="ic sonuk">Hasta Kabul VS (USVS s.118). Koşullu alanlar Kabul Şekli'ne bağlı: sevkli ise Sevk Tanısı + Sevk Tarihi + Geldiği Klinik zorunlu. 2016 güncellemesiyle Olay/Afet grubu (Hayati Tehlike Durumu, Glasgow Koma Skalası) seçimli eklendi — acil modülüyle.</div>
+  </div>
+  <div class="pnl"><div class="dg"><table>
+    <thead><tr><th>USS Veri Elemanı</th><th class="orta">Durum</th><th>Format</th><th>Değer</th><th>Kaynak alan</th><th>SKRS</th><th class="orta">Kontrol</th><th>Not / İş kuralı</th></tr></thead>
+    <tbody><tr><td>Sosyal Güvence Durumu</td><td class="orta"><span class="rz kir">Zorunlu</span></td><td class="sonuk">N(2)</td><td>1 · SGK</td><td class="sonuk">taraf_hasta_kurum / taraf.sigorta_turu → eşleme</td><td class="sonuk">530da738-…</td><td class="orta"><span class="rz ok">✔</span></td><td class="sonuk">Hasta Özlük VS pakete <b>seçimli</b> eklenir (ilk kabulde / değişince)</td></tr><tr class=sel><td>Ağırlık / Boy</td><td class="orta"><span class="rz kir">Zorunlu</span></td><td class="sonuk">N(6) / N(3)</td><td>— / —</td><td class="sonuk">muayene vital alanları (yok)</td><td class="sonuk">—</td><td class="orta"><span class="rz kir">✖</span></td><td class="sonuk">Özlük VS gönderilecekse zorunlu → muayene tabloya vital alanlar</td></tr><tr class=sel><td>Ameliyat / Yaralanma Geçmişi · Özürlülük</td><td class="orta"><span class="rz kir">Zorunlu</span></td><td class="sonuk">N(2)</td><td>—</td><td class="sonuk">hasta özgeçmiş (yok)</td><td class="sonuk">SKRS</td><td class="orta"><span class="rz kir">✖</span></td><td class="sonuk">Özlük VS için gerekli; ilk sürümde Özlük gönderilmez</td></tr><tr><td>Adres Tipi · Kodu Seviyesi · Adres Kodu · Açık Adres</td><td class="orta"><span class="rz kir">Zorunlu</span></td><td class="sonuk">A(15)</td><td>İkamet · İlçe · 34xxxx · Yukarı Dudullu…</td><td class="sonuk">taraf_adres (il/ilce.skrs_kod → SKRS Adres Kodu)</td><td class="sonuk">SKRS Adres Kodu</td><td class="orta"><span class="rz ok">✔</span></td><td class="sonuk">340 ile il/ilçe SKRS kodlu; mahalle/köy kodu yok</td></tr><tr><td>Telefon Tipi · Numarası</td><td class="orta"><span class="rz kir">Zorunlu</span></td><td class="sonuk">N(10)</td><td>Cep · 532…</td><td class="sonuk">taraf.cep_tel</td><td class="sonuk">e387c902-…</td><td class="orta"><span class="rz ok">✔</span></td><td class="sonuk"></td></tr><tr><td>Medeni Hali · Kan Grubu · Meslek · Öğrenim</td><td class="orta"><span class="rz sari">Koşullu</span></td><td class="sonuk">N(2)</td><td>Evli · A Rh+ · — · —</td><td class="sonuk">taraf_hasta.medeni_hal / kan_grubu (SKRS) · meslek (metin!)</td><td class="sonuk">SKRS</td><td class="orta"><span class="rz ok">✔</span></td><td class="sonuk">meslek SKRS Meslek Kodu ister → taraf_hasta.meslek_kod eklenecek</td></tr><tr><td>Alerjiler · Düzenli İlaçlar · Protez/Ortez</td><td class="orta"><span class="rz pas">Seçimli</span></td><td class="sonuk">A(9)/A(50)/A(10)</td><td>Penisilin (Z88.0)</td><td class="sonuk">hasta özgeçmiş (yok)</td><td class="sonuk">ICD-10 / İlaç / SUT</td><td class="orta"><span class="rz pas">—</span></td><td class="sonuk"></td></tr><tr><td>Sigara / Alkol / Madde Kullanımı</td><td class="orta"><span class="rz sari">Koşullu</span></td><td class="sonuk">N(2)</td><td>—</td><td class="sonuk">hasta özgeçmiş (yok)</td><td class="sonuk">SKRS</td><td class="orta"><span class="rz pas">—</span></td><td class="sonuk"></td></tr></tbody></table></div>
+    <div class="ic"><span class="rz sari">Karar</span> Hasta Özlük VS ilk sürümde 101'e <b>eklenmez</b> (ayar: <code>enabiz_paket_turu.zorunlu_alanlar</code> kapsamı). Eklenecekse hasta kartına özgeçmiş alanları (ağırlık/boy, ameliyat/yaralanma geçmişi, özürlülük, alışkanlıklar, meslek kodu) gerekir.</div>
+  </div>
+  <div class="pnl">
+    <div class="ic" style="font-family:Consolas,monospace;font-size:11px;color:#4d5d6e;white-space:pre">&lt;Paket Tip="101" MesajTipi="Kaydet" Surum="2.2"&gt;
+  &lt;GonderimPaketiGenel&gt;
+    &lt;Kurum&gt;11xxxxxx&lt;/Kurum&gt;
+    &lt;ProtokolNumarasi&gt;11xxxxxx-2026-20417&lt;/ProtokolNumarasi&gt;
+    &lt;IslemZamani&gt;03092026 18:41&lt;/IslemZamani&gt;
+    &lt;HekimKimlikNumarasi&gt;1234567****&lt;/HekimKimlikNumarasi&gt;
+    &lt;MuayeneYapilanKlinik&gt;1000&lt;/MuayeneYapilanKlinik&gt;
+  &lt;/GonderimPaketiGenel&gt;
+  &lt;Vatandas&gt;&lt;HastaKimlikNumarasi&gt;1234567****&lt;/HastaKimlikNumarasi&gt;&lt;/Vatandas&gt;
+  &lt;HastaKabul&gt;
+    &lt;KabulZamani&gt;03092026 18:41&lt;/KabulZamani&gt;
+    &lt;KabulSekli&gt;1&lt;/KabulSekli&gt;
+    &lt;VakaTuru&gt;1&lt;/VakaTuru&gt;
+    &lt;AmbulansIleGelisDurumu&gt;2&lt;/AmbulansIleGelisDurumu&gt;
+    &lt;ProtokolNumarasi&gt;11xxxxxx-2026-20417&lt;/ProtokolNumarasi&gt;
+  &lt;/HastaKabul&gt;
+&lt;/Paket&gt;</div>
+    <div class="ic sonuk">Eleman adları USVS HL7 metin kodlarına (ör. <code>KABUL_ZAMANI</code>) göre üretilir; şema USS güncel XSD'sinden alınır, burada okunabilir örnek. Kimlikler ekranda maskeli.</div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th class="orta">#</th><th class="orta">Zaman</th><th class="orta">Ortam</th><th class="orta">Mesaj Tipi</th><th>Sonuç</th><th>USS Mesajı</th></tr></thead>
+      <tbody><tr><td class="orta">—</td><td class="orta">—</td><td class="orta">—</td><td class="orta">—</td><td class="sonuk">henüz gönderilmedi</td><td class="sonuk">doğrulama: Özlük VS kapsam dışı → 19 alan hazır</td></tr></tbody></table></div>
+  </div>
+
+  <div class="statusbar"><span>Genel 5 · Kimlik 1 · Kabul 6 dolu / 11 · Özlük kapsam dışı</span><span>Süre sınırına 23 s 40 dk</span><span class="sp">103 Muayene paketi başvuru tamamlanınca aynı protokol no ile; 106 Hasta Çıkış: Çıkış Zamanı + Çıkış Şekli (+ Sevk Tanısı / Sevk Edilen Klinik)</span></div>
+</div>
+<div class="not"><b>Kaynak.</b> Veri elemanları Ulusal Sağlık Veri Sözlüğü 2.2 — Gönderim Paketi Genel VS (s.115), Hasta Kabul VS (s.118), Vatandaş VS (s.231), Yabancı VS (s.241), Hasta Özlük VS (s.125). USS 101 şemasının güncel sürümü (2016 Olay/Afet ekleri, 2021 YBBYS notları) kılavuzla doğrulanır; alan listesi <code>enabiz_paket_turu.zorunlu_alanlar</code>'da veri olarak tutulur. Protokol no <b>USS formatı</b> (kurum-yıl-sıra) için başvuru numara şablonuna kurum kodu öneki eklenir ya da paket üretiminde türetilir.</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

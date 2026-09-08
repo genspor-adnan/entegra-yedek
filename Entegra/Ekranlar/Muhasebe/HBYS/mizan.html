@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mizan — Genel / Kesin / Aylık — Mockup (Gentegre AI · Muhasebe · HBYS)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .dg td.k{font-family:Consolas,monospace;white-space:nowrap}
+  .dg tr.t1 td{font-weight:bold;background:#f4f7fb;color:#1c4374}
+  .dg tr.t2 td{font-weight:bold}
+  .dg tr.top td{border-top:2px solid #1c4374;font-weight:bold;background:#eef2f7}
+  .ind1{padding-left:18px} .ind2{padding-left:36px} .ind3{padding-left:54px}
+  .kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:8px 12px}
+  .kpi .kart{min-width:0}
+  .bar2{display:flex;align-items:flex-end;gap:3px;height:70px}
+  .bar2 i{flex:1;background:#4d8fd6;display:block}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📒 Mizan <span class="sp">hesap_plani · muhasebe_fis_satir · mali_donem 2026 · 01.01–31.08.2026 · şube: Tümü</span></div>
+  <div class="toolbar">
+    <div class="btn">📅 Dönem: 2026 · Ocak–Ağustos ▾</div><div class="btn">Seviye: <b>3</b> ▾</div><div class="btn">Tür: Genel ▾ <span class="sonuk">(genel / kesin / aylık / kümülatif)</span></div>
+    <div class="sepv"></div><div class="btn">Hareketsizleri gizle ☑</div><div class="btn">Döviz ▾</div><div class="btn">🏢 Şube ▾</div><div class="btn">🏷 Masraf merkezi ▾</div>
+    <div class="sepv"></div><div class="btn">🔍 Hesap ekstresi</div><div class="btn">⚖ Denge kontrolü <span class="rz ok">✔</span></div><div class="btn sp">📥 Excel · 🖨 · e-Defter</div>
+  </div>
+  <div class="kpi">
+    <div class="kart"><div class="b">Borç toplamı</div><div class="d">48.912.400</div></div>
+    <div class="kart"><div class="b">Alacak toplamı</div><div class="d">48.912.400</div></div>
+    <div class="kart"><div class="b">Fark</div><div class="d">0,00 <small>dengeli</small></div></div>
+    <div class="kart"><div class="b">Fiş</div><div class="d">3.412 <small>· 84 taslak</small></div></div>
+    <div class="kart"><div class="b">Eşleşmemiş belge</div><div class="d" style="color:#8a6218">23 <small>muhasebe_eslestirme</small></div></div>
+    <div class="kart"><div class="b">Son fiş</div><div class="d">31.08 <small>· dönem açık</small></div></div>
+  </div>
+  <div class="dg"><table>
+    <thead><tr><th style="width:26px"></th><th>Hesap</th><th>Ad</th><th class="sag">Borç</th><th class="sag">Alacak</th><th class="sag">Borç bakiye</th><th class="sag">Alacak bakiye</th><th class="sag">Önceki dönem bakiye</th><th class="orta">Hareket</th></tr></thead>
+    <tbody>
+      <tr class="t1"><td>▾</td><td class="k">1</td><td>DÖNEN VARLIKLAR</td><td class="sag">31.240.100</td><td class="sag">27.810.300</td><td class="sag">3.429.800</td><td class="sag"></td><td class="sag">2.918.400</td><td class="orta"></td></tr>
+      <tr class="t2"><td>▾</td><td class="k ind1">10</td><td>HAZIR DEĞERLER</td><td class="sag">14.120.000</td><td class="sag">13.480.000</td><td class="sag">640.000</td><td class="sag"></td><td class="sag">512.000</td><td class="orta"></td></tr>
+      <tr><td></td><td class="k ind2">100</td><td>Kasa</td><td class="sag">1.820.000</td><td class="sag">1.790.000</td><td class="sag">30.000</td><td class="sag"></td><td class="sag">22.000</td><td class="orta">412</td></tr>
+      <tr><td></td><td class="k ind2">102</td><td>Bankalar</td><td class="sag">11.900.000</td><td class="sag">11.420.000</td><td class="sag">480.000</td><td class="sag"></td><td class="sag">410.000</td><td class="orta">1.180</td></tr>
+      <tr><td></td><td class="k ind2">108</td><td>Diğer hazır değerler (POS)</td><td class="sag">400.000</td><td class="sag">270.000</td><td class="sag">130.000</td><td class="sag"></td><td class="sag">80.000</td><td class="orta">96</td></tr>
+      <tr class="t2"><td>▾</td><td class="k ind1">12</td><td>TİCARİ ALACAKLAR</td><td class="sag">15.600.000</td><td class="sag">13.100.000</td><td class="sag">2.500.000</td><td class="sag"></td><td class="sag">2.210.000</td><td class="orta"></td></tr>
+      <tr><td></td><td class="k ind2">120</td><td>Alıcılar (SGK, kurumlar, hastalar)</td><td class="sag">15.100.000</td><td class="sag">12.700.000</td><td class="sag">2.400.000</td><td class="sag"></td><td class="sag">2.120.000</td><td class="orta">2.940</td></tr>
+      <tr><td></td><td class="k ind2">121</td><td>Alacak senetleri</td><td class="sag">500.000</td><td class="sag">400.000</td><td class="sag">100.000</td><td class="sag"></td><td class="sag">90.000</td><td class="orta">14</td></tr>
+      <tr><td></td><td class="k ind2">15</td><td>Stoklar (sarf, kontrast, ilaç)</td><td class="sag">1.520.100</td><td class="sag">1.230.300</td><td class="sag">289.800</td><td class="sag"></td><td class="sag">196.400</td><td class="orta">388</td></tr>
+      <tr class="t1"><td>▸</td><td class="k">2</td><td>DURAN VARLIKLAR</td><td class="sag">2.140.000</td><td class="sag">1.318.700</td><td class="sag">11.827.800</td><td class="sag"></td><td class="sag">13.146.500</td><td class="orta"></td></tr>
+      <tr class="t1"><td>▸</td><td class="k">3</td><td>KISA VADELİ YABANCI KAYNAKLAR</td><td class="sag">9.210.000</td><td class="sag">10.980.000</td><td class="sag"></td><td class="sag">1.770.000</td><td class="sag">1.640.000</td><td class="orta"></td></tr>
+      <tr class="t1"><td>▸</td><td class="k">4</td><td>UZUN VADELİ YABANCI KAYNAKLAR</td><td class="sag">2.400.000</td><td class="sag">640.000</td><td class="sag"></td><td class="sag">3.296.000</td><td class="sag">5.056.000</td><td class="orta"></td></tr>
+      <tr class="t1"><td>▸</td><td class="k">5</td><td>ÖZKAYNAKLAR</td><td class="sag">0</td><td class="sag">0</td><td class="sag"></td><td class="sag">9.180.000</td><td class="sag">9.180.000</td><td class="orta"></td></tr>
+      <tr class="t1"><td>▾</td><td class="k">6</td><td>GELİR TABLOSU HESAPLARI</td><td class="sag">1.840.000</td><td class="sag">15.720.000</td><td class="sag"></td><td class="sag">13.880.000</td><td class="sag">—</td><td class="orta"></td></tr>
+      <tr><td></td><td class="k ind1">600</td><td>Yurt içi satışlar (tetkik / muayene / işlem)</td><td class="sag">120.000</td><td class="sag">15.400.000</td><td class="sag"></td><td class="sag">15.280.000</td><td class="sag">—</td><td class="orta">2.860</td></tr>
+      <tr><td></td><td class="k ind1">610/611</td><td>Satış iadeleri / iskontoları</td><td class="sag">1.100.000</td><td class="sag">0</td><td class="sag">1.100.000</td><td class="sag"></td><td class="sag">—</td><td class="orta">210</td></tr>
+      <tr><td></td><td class="k ind1">642/646</td><td>Faiz ve kambiyo gelirleri</td><td class="sag">0</td><td class="sag">320.000</td><td class="sag"></td><td class="sag">320.000</td><td class="sag">—</td><td class="orta">40</td></tr>
+      <tr><td></td><td class="k ind1">660/656</td><td>Finansman giderleri / kambiyo zararı</td><td class="sag">620.000</td><td class="sag">0</td><td class="sag">620.000</td><td class="sag"></td><td class="sag">—</td><td class="orta">60</td></tr>
+      <tr class="t1"><td>▾</td><td class="k">7</td><td>MALİYET HESAPLARI</td><td class="sag">12.980.000</td><td class="sag">0</td><td class="sag">12.980.000</td><td class="sag"></td><td class="sag">—</td><td class="orta"></td></tr>
+      <tr><td></td><td class="k ind1">740</td><td>Hizmet üretim maliyeti</td><td class="sag">8.960.000</td><td class="sag">0</td><td class="sag">8.960.000</td><td class="sag"></td><td class="sag">—</td><td class="orta">1.420</td></tr>
+      <tr><td></td><td class="k ind1">760</td><td>Pazarlama satış dağıtım giderleri</td><td class="sag">640.000</td><td class="sag">0</td><td class="sag">640.000</td><td class="sag"></td><td class="sag">—</td><td class="orta">88</td></tr>
+      <tr><td></td><td class="k ind1">770</td><td>Genel yönetim giderleri</td><td class="sag">3.380.000</td><td class="sag">0</td><td class="sag">3.380.000</td><td class="sag"></td><td class="sag">—</td><td class="orta">610</td></tr>
+      <tr class="top"><td></td><td></td><td>TOPLAM</td><td class="sag">48.912.400</td><td class="sag">48.912.400</td><td class="sag">30.127.400</td><td class="sag">30.127.400</td><td class="sag"></td><td class="orta">3.412</td></tr>
+    </tbody></table></div>
+  <div class="statusbar"><span>Seviye 3 · 148 hesap · 92 hareketli</span><span>Kaynak: <code>muhasebe_fis_satir</code> (durum: kayıtlı) × <code>hesap_plani</code> ağacı</span><span class="sp">Satıra çift tık → hesap ekstresi · üç nokta → masraf merkezi kırılımı</span></div>
+</div>
+<div class="not"><b>Mizan türleri.</b> Genel (dönem içi), kesin (kapanış fişleri sonrası), aylık (seçilen ay hareketleri + devir), kümülatif. Denge kontrolü fiş bazlı (borç = alacak) ve mizan bazlı. Masraf merkezi kırılımı <code>muhasebe_fis_satir.merkez_id</code> ile — maliyet modülünün gider çekme kaynağı.</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

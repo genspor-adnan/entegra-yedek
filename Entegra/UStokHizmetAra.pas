@@ -253,7 +253,8 @@ var
 
 implementation
 
-uses Fetautil,PrjConst, FetaClassExtensions,LocOnFly, System.JSON, System.Math, UVeriMotor;
+uses Fetautil,PrjConst, FetaClassExtensions,LocOnFly, System.JSON, System.Math, UVeriMotor,
+     UGS1Barkod;
 
 var
   UserInitiated:Boolean=True;
@@ -1532,6 +1533,8 @@ begin
 end;
 
 procedure TStokHizmetAraDlg.JvTimer1Timer(Sender: TObject);
+var
+  Bilgi: TGS1Bilgi;
 begin
 //  if (TabListe.Active)and(TabListe.RecordCount>0) then
 //    SonSecilenID := TabListe.FieldByName('ID').AsInteger
@@ -1548,16 +1551,17 @@ begin
   end else
      AramaListesiniEskiHalineCevir := True;
   // FiyatlariGetir,KalanAdetGetir
+  // Barkoddan urun numarasi: karekod, iki asamali okuyucunun urun okutmasi,
+  // parantezli etiket ve duz EAN ayni cozumleyiciden gecer (UGS1Barkod).
+  // Eski kod '17'nin barkodun 17. karakterinde oldugunu varsayiyordu; araya
+  // (20) varyant gibi bir alan girdiginde o varsayim bozuluyordu.
   OkunanBarkod := Trim(EditBarkodu.Text);
-  if EditBarkodu.Text<>'' then begin
-     if (pos('01', OkunanBarkod)=1)and(pos('17', OkunanBarkod)=17) then //Karekod 01 ile ba?lay?p 14 karakter stokkodu
-         OkunanBarkod := copy(OkunanBarkod,3,14)
-     else if (pos('(01)', OkunanBarkod)>0) then //Karekod ?r : (10) BL005222511       (01) 8681489704423
-         OkunanBarkod := Tablo.KarekodOku(1, OkunanBarkod)
-     else
-         OkunanBarkod :=  OkunanBarkod;  //yoksa kendisi
-     if pos('0', OkunanBarkod)=1 then  //ba??nda s?f?r varsa atal?m
-          OkunanBarkod := copy(OkunanBarkod, 2, 300);
+  if OkunanBarkod <> '' then
+  begin
+    if GS1Coz(OkunanBarkod, Bilgi) and (Bilgi.UrunNo <> '') then
+      OkunanBarkod := Bilgi.UrunNo                 // bastaki sifir zaten atilmis
+    else if Pos('0', OkunanBarkod) = 1 then        // AI yok: eski davranis
+      OkunanBarkod := Copy(OkunanBarkod, 2, 300);
   end;
 
   if PageControl1.ActivePage = SheetStok then
@@ -1576,8 +1580,8 @@ begin
      else
          OkunanBarkod :=  OkunanBarkod;  //yoksa kendisi
      if pos('0', OkunanBarkod)=1 then  //ba??nda s?f?r varsa atal?m
-          OkunanBarkod := copy(OkunanBarkod, 2, 300);     *)
-  end;
+          OkunanBarkod := copy(OkunanBarkod, 2, 300);
+  end;   *)
 end;
 
 function TStokHizmetAraDlg.ITSPaketEkle(UrunID: Integer): Boolean;

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hasta Sonuç Raporu — Mikrobiyoloji (Kültür ve Antibiyogram) — Mockup (Gentegre AI · Laboratuvar)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  body{background:#d9dee5}
+  .sayfa{max-width:900px;margin:0 auto 18px;background:#fff;border:1px solid var(--line);box-shadow:0 6px 22px rgba(20,40,70,.18);padding:22px 28px;font-size:11.5px;color:#1f2d3a}
+  .ust{display:grid;grid-template-columns:1fr 2fr 1fr;gap:10px;align-items:center;border-bottom:2px solid #1c4374;padding-bottom:8px}
+  .ust .logo{font-weight:bold;color:#1c4374;font-size:14px}
+  .ust .kurum{text-align:center}
+  .ust .kurum b{font-size:14px;display:block}
+  .ust .rozetler{text-align:right;font-size:10px;color:var(--muted)}
+  .ust .rozetler span{display:inline-block;border:1px solid var(--line);border-radius:3px;padding:2px 6px;margin-left:4px}
+  h1{font-size:14px;text-align:center;margin:10px 0 8px;color:#1c4374;letter-spacing:.5px}
+  .kimlik{display:grid;grid-template-columns:repeat(4,1fr);gap:3px 14px;border:1px solid var(--line2);padding:8px 10px;border-radius:3px;background:#fbfcfd}
+  .kimlik div{font-size:11px} .kimlik b{color:#3a5573}
+  .kimlik .tam{grid-column:span 2}
+  table.rp{border-collapse:collapse;width:100%;margin:10px 0}
+  table.rp th{background:#eef2f7;border:1px solid var(--line2);padding:4px 6px;text-align:left;font-size:10.5px;color:#3a5573}
+  table.rp td{border:1px solid var(--line2);padding:3px 6px;font-size:11px;vertical-align:top}
+  table.rp tr.grup td{background:#f4f7fb;font-weight:bold;color:#1c4374}
+  .sag{text-align:right} .orta{text-align:center}
+  .b{font-weight:bold} .kir{color:#b3261e;font-weight:bold} .sari{color:#8a6218;font-weight:bold}
+  .panik{background:#fbe9e7}
+  .yorum{border:1px solid var(--line2);border-left:4px solid #2f6db3;padding:6px 10px;margin:8px 0;font-size:11px;background:#fbfcfd}
+  .uyari{border:1px solid #f3c4bf;border-left:4px solid #b3261e;padding:6px 10px;margin:8px 0;font-size:11px;background:#fdf4f3}
+  .alt{border-top:2px solid #1c4374;margin-top:12px;padding-top:6px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:10.5px}
+  .imza{border:1px dashed var(--line);padding:6px 8px;min-height:54px;font-size:10.5px}
+  .kucuk{font-size:10px;color:var(--muted)}
+  .barkod{font-family:'Libre Barcode 128',monospace;font-size:22px;letter-spacing:2px}
+  .zaman{display:flex;gap:14px;font-size:10.5px;color:#3a5573;margin:6px 0;flex-wrap:wrap}
+  .zaman span b{color:#1f2d3a}
+  .not{max-width:900px;font-size:11px}
+
+</style>
+</head>
+<body>
+
+<div class="sayfa">
+
+  <div class="ust">
+    <div class="logo">GENTEGRE<br><span class="kucuk">TIP MERKEZİ · Tıbbi Laboratuvar</span></div>
+    <div class="kurum"><b>TIBBİ MİKROBİYOLOJİ LABORATUVARI</b><span class="kucuk">Ruhsat No: 34-XXXX · Sorumlu: Uzm. Dr. L. Kaya (Tıbbi Biyokimya) · Yukarı Dudullu Mah. … Ümraniye / İstanbul · 0216 … · lab@…</span></div>
+    <div class="rozetler"><span>Akılcı Laboratuvar</span><span>TS EN ISO 15189</span><span>Dış KK: KBUDEK</span><br><span class="barkod">2603187701</span></div>
+  </div>
+
+  <h1>KÜLTÜR VE ANTİBİYOGRAM SONUÇ RAPORU</h1>
+  <div class="kimlik">
+    <div><b>Hasta:</b> FATMA DEMİR</div><div><b>T.C. No:</b> 9876543****</div><div><b>Doğum / Cinsiyet:</b> 03.02.1963 · 63 · K</div><div><b>Protokol:</b> 2026/20415</div>
+    <div><b>İsteyen hekim:</b> Uzm. Dr. Ali Koç · Dahiliye</div><div><b>Klinik:</b> Dahiliye</div><div><b>Ödeyen:</b> SGK</div><div><b>Rapor No:</b> LAB-2026/31868-1</div>
+    <div class="tam"><b>Klinik bilgi:</b> Dizüri, sık idrara çıkma · N39.0 ön tanı · antibiyotik kullanımı: yok (son 7 gün)</div><div><b>Rapor türü:</b> <span class="b">NİHAİ</span> (ön rapor 03.09 09:30: "Gram negatif basil üremesi")</div><div><b>Sayfa:</b> 1 / 1</div>
+  </div>
+  <div class="zaman"><span>Numune alım: <b>02.09.2026 17:00</b></span><span>Lab kabul: <b>17:25</b></span><span>Ekim: <b>17:30</b></span><span>Üreme: <b>03.09 09:20</b></span><span>İdentifikasyon: <b>03.09 11:05</b></span><span>Antibiyogram: <b>04.09 08:40</b></span><span>Onay: <b>04.09 09:10</b></span></div>
+
+  <table class="rp">
+    <thead><tr><th style="width:22%">Tetkik</th><th>Numune / ön işlem</th><th style="width:30%">Sonuç</th><th style="width:16%">Yöntem</th><th class="orta" style="width:10%">Onay</th></tr></thead>
+    <tbody>
+      <tr><td>İdrar kültürü</td><td>Orta akım idrar · kabul 17:25 · barkod 2603187540 · numune kalitesi uygun (kabul &lt; 2 s, soğuk zincir)</td><td><b><i>Escherichia coli</i> — 100.000 CFU/mL</b> (anlamlı bakteriüri)</td><td>Kantitatif ekim (CLED, kanlı agar) · 37 °C 24 s</td><td class="orta">04.09 09:10 MA</td></tr>
+      <tr><td>Direkt bakı</td><td>Aynı numune</td><td>Lökosit ++ · Bakteri + (Gram negatif basil) · Epitel az</td><td>Gram boyama · mikroskopi</td><td class="orta">03.09 09:30 BS</td></tr>
+      <tr><td>İdentifikasyon</td><td>İzolat #1</td><td><i>Escherichia coli</i> · güven %99,8</td><td>MALDI-TOF MS (VITEK MS)</td><td class="orta">03.09 11:05 MA</td></tr>
+      <tr><td>Direnç mekanizması</td><td>İzolat #1</td><td>ESBL: <b>Negatif</b> · Karbapenemaz: Negatif</td><td>VITEK 2 AST-N + fenotipik doğrulama</td><td class="orta">04.09 08:40 MA</td></tr>
+    </tbody>
+  </table>
+
+  <table class="rp">
+    <thead><tr><th colspan="5">ANTİBİYOGRAM — <i>E. coli</i> (İzolat #1) · Yöntem: VITEK 2 (MIC) + disk difüzyon · Yorum standardı: <b>EUCAST 2026 v16</b> · Kademeli bildirim uygulanmıştır</th></tr>
+      <tr><th style="width:34%">Antibiyotik</th><th class="sag" style="width:14%">MIC (µg/mL)</th><th class="orta" style="width:12%">Zon (mm)</th><th class="orta" style="width:12%">Yorum</th><th>Not</th></tr></thead>
+    <tbody>
+      <tr class="grup"><td colspan="5">1. basamak (komplike olmayan sistit için öncelikli)</td></tr>
+      <tr><td>Nitrofurantoin</td><td class="sag">≤ 16</td><td class="orta">—</td><td class="orta"><span class="rz ok">S</span></td><td>Duyarlı — yalnız alt üriner sistem enfeksiyonu için</td></tr>
+      <tr><td>Fosfomisin (trometamol)</td><td class="sag">—</td><td class="orta">24</td><td class="orta"><span class="rz ok">S</span></td><td>Duyarlı — tek doz</td></tr>
+      <tr><td>Trimetoprim-sülfametoksazol</td><td class="sag">≥ 320</td><td class="orta">—</td><td class="orta"><span class="rz kir">R</span></td><td>Dirençli</td></tr>
+      <tr class="grup"><td colspan="5">2. basamak</td></tr>
+      <tr><td>Amoksisilin-klavulanik asit</td><td class="sag">8</td><td class="orta">—</td><td class="orta"><span class="rz ok">S</span></td><td>Duyarlı (sistit kesim noktası)</td></tr>
+      <tr><td>Sefuroksim (oral)</td><td class="sag">4</td><td class="orta">—</td><td class="orta"><span class="rz ok">S</span></td><td>Duyarlı</td></tr>
+      <tr><td>Siprofloksasin</td><td class="sag">≥ 4</td><td class="orta">—</td><td class="orta"><span class="rz kir">R</span></td><td>Dirençli — florokinolon grubu</td></tr>
+      <tr><td>Ampisilin</td><td class="sag">≥ 32</td><td class="orta">—</td><td class="orta"><span class="rz kir">R</span></td><td>Dirençli</td></tr>
+      <tr class="grup"><td colspan="5">Parenteral / komplike enfeksiyon (klinisyen isteğiyle bildirilir)</td></tr>
+      <tr><td>Seftriakson</td><td class="sag">≤ 1</td><td class="orta">—</td><td class="orta"><span class="rz ok">S</span></td><td>Duyarlı</td></tr>
+      <tr><td>Gentamisin</td><td class="sag">≤ 1</td><td class="orta">—</td><td class="orta"><span class="rz ok">S</span></td><td>Duyarlı</td></tr>
+      <tr><td>Piperasilin-tazobaktam</td><td class="sag">≤ 4</td><td class="orta">—</td><td class="orta"><span class="rz ok">S</span></td><td>Duyarlı</td></tr>
+      <tr><td>Meropenem</td><td class="sag">≤ 0,25</td><td class="orta">—</td><td class="orta"><span class="rz ok">S</span></td><td>Duyarlı — kısıtlı bildirim (ESBL negatif)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="yorum"><b>Uzman yorumu:</b> Anlamlı bakteriüri; ESBL negatif <i>E. coli</i>. Komplike olmayan sistitte akılcı antibiyotik kullanımı ilkeleri gereği nitrofurantoin veya fosfomisin ilk seçenek olarak önerilir; florokinolon ve TMP-SMX dirençlidir. S = duyarlı (standart doz), I = artırılmış maruziyette duyarlı, R = dirençli (EUCAST tanımları).</div>
+  <div class="kucuk">Kademeli bildirim: geniş spektrumlu ajanlar yalnız gerektiğinde raporlanır (Akılcı Antibiyotik Kullanımı). Bildirimi zorunlu etken/direnç durumunda enfeksiyon kontrol komitesi ve e-Nabız bildirimi yapılır (bu izolatta gerekmedi). Önceki kültür: 11.11.2025 — üreme yok. MA: Uzm. Dr. M. Arslan · BS: Tekn. B. Sel.</div>
+
+  <div class="alt">
+    <div><b>Onaylayan:</b><div class="imza">Uzm. Dr. M. Arslan<br>Tıbbi Mikrobiyoloji Uzmanı · Dip. Tescil 23456<br><span class="kucuk">e-imza · 04.09.2026 09:10</span></div></div>
+    <div><b>Numune:</b> Orta akım idrar · steril kap · barkod 2603187540<br><b>Alan:</b> hasta (talimatla) · <b>Kabul:</b> Tekn. R. Al<br><b>Besiyeri lot:</b> CLED 4471 · Kanlı 4468 · KK ✔</div>
+    <div><b>Doğrulama:</b> QR / e-Nabız<br><span class="kucuk">Ön rapor 03.09 09:30 hekime mesajla iletildi. Nihai rapor e-Nabız Tetkik Sonuç paketi ile gönderildi · 04.09.2026 09:15.</span></div>
+  </div>
+</div>
+<div class="not"><b>Mikrobiyoloji raporu gereklilikleri:</b> numune türü/kalitesi ve ön işlem · direkt bakı · üreme miktarı (CFU/mL) ve organizma (identifikasyon yöntemi + güven) · direnç mekanizması · antibiyogram: yöntem, MIC/zon, yorum standardı ve sürümü (EUCAST/CLSI), kademeli bildirim, S/I/R tanımları · ön/nihai rapor ve zamanları · bildirimi zorunlu durum · onaylayan uzman e-imza. Kaynak: <code>lab_kultur</code>, <code>lab_kultur_ureme</code>, <code>lab_antibiyogram</code>.</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

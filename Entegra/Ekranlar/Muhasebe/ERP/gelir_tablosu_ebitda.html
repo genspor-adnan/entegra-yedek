@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gelir Tablosu ve EBITDA — Üretim İşletmesi (ERP) — Mockup (Gentegre AI · Muhasebe · ERP)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .dg td.k{font-family:Consolas,monospace;white-space:nowrap}
+  .dg tr.t1 td{font-weight:bold;background:#f4f7fb;color:#1c4374}
+  .dg tr.t2 td{font-weight:bold}
+  .dg tr.top td{border-top:2px solid #1c4374;font-weight:bold;background:#eef2f7}
+  .ind1{padding-left:18px} .ind2{padding-left:36px}
+  .kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:8px 12px}
+  .bar2{display:flex;align-items:flex-end;gap:3px;height:70px}
+  .bar2 i{flex:1;background:#4d8fd6;display:block}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📈 Gelir Tablosu &amp; EBITDA <span class="sp">01.01–31.08.2026 · 2025 aynı dönem · 7/A · üretim/ticaret</span></div>
+  <div class="toolbar"><div class="btn">📅 Dönem ▾</div><div class="btn">↔ Karşılaştır ▾</div><div class="btn">Kırılım: Aylık ▾</div><div class="btn">Format: THP ▾</div><div class="btn">🏢 Şube ▾</div><div class="btn">📁 Ürün grubu / proje ▾</div><div class="btn sp">📥 · 🖨</div></div>
+  <div class="sekmeler"><div class="sekme on">Gelir Tablosu</div><div class="sekme">EBITDA Köprüsü</div><div class="sekme">Aylık Kırılım</div><div class="sekme">Yönetim Formatı (ürün grubu)</div></div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th>Kalem</th><th class="sag">2026 (8 ay)</th><th class="sag">% satış</th><th class="sag">2025 (8 ay)</th><th class="sag">%</th></tr></thead>
+      <tbody>
+        <tr class="t1"><td>A. BRÜT SATIŞLAR (600 yurt içi 46.100.000 · 601 ihracat 6.800.000)</td><td class="sag">52.900.000</td><td class="sag"></td><td class="sag">41.300.000</td><td class="sag">+28%</td></tr>
+        <tr class="t1"><td>B. SATIŞ İNDİRİMLERİ (610 iade · 611 iskonto · 612 diğer)</td><td class="sag">−2.150.000</td><td class="sag"></td><td class="sag">−1.700.000</td><td class="sag"></td></tr>
+        <tr class="t2"><td>C. NET SATIŞLAR</td><td class="sag">50.750.000</td><td class="sag">%100</td><td class="sag">39.600.000</td><td class="sag">+28%</td></tr>
+        <tr class="t1"><td>D. SATIŞLARIN MALİYETİ</td><td class="sag">−31.600.000</td><td class="sag">%62</td><td class="sag">−25.700.000</td><td class="sag"></td></tr>
+        <tr><td class="ind1">620 Satılan mamul maliyeti (710+720+730 → 152 → 620)</td><td class="sag">−23.200.000</td><td class="sag"></td><td class="sag"></td><td class="sag"></td></tr>
+        <tr><td class="ind1">621 Satılan ticari mal maliyeti</td><td class="sag">−3.600.000</td><td class="sag"></td><td class="sag"></td><td class="sag"></td></tr>
+        <tr><td class="ind1">622 Satılan hizmet maliyeti (fason/montaj hizmeti)</td><td class="sag">−4.800.000</td><td class="sag"></td><td class="sag"></td><td class="sag"></td></tr>
+        <tr class="t2"><td>BRÜT SATIŞ KÂRI</td><td class="sag">19.150.000</td><td class="sag">%38</td><td class="sag">13.900.000</td><td class="sag">+38%</td></tr>
+        <tr class="t1"><td>E. FAALİYET GİDERLERİ</td><td class="sag">−9.280.000</td><td class="sag">%18</td><td class="sag">−7.900.000</td><td class="sag"></td></tr>
+        <tr><td class="ind1">630 AR-GE · 631 Pazarlama satış dağıtım (4.160.000) · 632 Genel yönetim (5.120.000)</td><td class="sag"></td><td class="sag"></td><td class="sag"></td><td class="sag"></td></tr>
+        <tr class="t2"><td>FAALİYET KÂRI (EBIT)</td><td class="sag">9.870.000</td><td class="sag">%19,4</td><td class="sag">6.000.000</td><td class="sag">+65%</td></tr>
+        <tr><td>F. Diğer olağan gelir (642 faiz · 646 kambiyo kârı · 649 diğer)</td><td class="sag">2.500.000</td><td class="sag"></td><td class="sag">1.800.000</td><td class="sag"></td></tr>
+        <tr><td>G. Diğer olağan gider (653 komisyon · 656 kambiyo zararı)</td><td class="sag">−1.100.000</td><td class="sag"></td><td class="sag">−900.000</td><td class="sag"></td></tr>
+        <tr><td>H. Finansman giderleri (660/661 faiz)</td><td class="sag">−760.000</td><td class="sag"></td><td class="sag">−980.000</td><td class="sag"></td></tr>
+        <tr class="t2"><td>OLAĞAN KÂR</td><td class="sag">10.510.000</td><td class="sag">%20,7</td><td class="sag">5.920.000</td><td class="sag"></td></tr>
+        <tr><td>Olağandışı gelir/gider (671/689) — sayım farkı, ceza</td><td class="sag">−80.000</td><td class="sag"></td><td class="sag">−40.000</td><td class="sag"></td></tr>
+        <tr><td>Vergi karşılığı (%25)</td><td class="sag">−2.607.500</td><td class="sag"></td><td class="sag">−1.470.000</td><td class="sag"></td></tr>
+        <tr class="top"><td>DÖNEM NET KÂRI</td><td class="sag">7.822.500</td><td class="sag">%15,4</td><td class="sag">4.410.000</td><td class="sag">+77%</td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Not: bilançoda "dönem net kârı 1.900.000" konsolide örnek şube içindir; bu tablo tüm şirket. SMM = stok çıkış maliyeti (ağırlıklı ortalama) — maliyet modülü GÜG eksik/fazla yüklemesi 630/631'e değil <b>620'ye düzeltme</b> olarak (ayar).</div>
+  </div>
+  <div class="pnl">
+    <div class="kpi"><div class="kart"><div class="b">Net satış</div><div class="d">50.750 K</div></div><div class="kart"><div class="b">EBITDA</div><div class="d">12.210 K</div></div><div class="kart"><div class="b">EBITDA marjı</div><div class="d">%24,1 <small>2025: %19,8</small></div></div><div class="kart"><div class="b">Düzeltilmiş EBITDA</div><div class="d">12.290 K</div></div><div class="kart"><div class="b">EBIT</div><div class="d">9.870 K</div></div><div class="kart"><div class="b">Net borç / EBITDA (yıllık)</div><div class="d">0,17×</div></div></div>
+    <div class="dg"><table><thead><tr><th>EBITDA köprüsü</th><th class="sag">2026 (8 ay)</th><th>Kaynak</th></tr></thead>
+      <tbody>
+        <tr><td>Dönem net kârı</td><td class="sag">7.822.500</td><td></td></tr>
+        <tr><td>+ Vergi</td><td class="sag">2.607.500</td><td>691</td></tr>
+        <tr><td>+ Finansman giderleri (faiz) · + kambiyo zararı (politika: dahil)</td><td class="sag">760.000 + 1.100.000</td><td>660/661 · 656/653</td></tr>
+        <tr><td>− Faiz ve kambiyo gelirleri</td><td class="sag">−2.500.000</td><td>642/646/649</td></tr>
+        <tr><td>+ Olağandışı gider</td><td class="sag">80.000</td><td>689</td></tr>
+        <tr class="t2"><td>= EBIT</td><td class="sag">9.870.000</td><td></td></tr>
+        <tr><td>+ Amortisman ve itfa (257/268 karşılık hareketleri — 730 içindeki 1.900.000 · 770 içindeki 320.000 · 760 120.000)</td><td class="sag">2.340.000</td><td>hesap planı ebitda_sinif = amortisman</td></tr>
+        <tr class="t2"><td>= EBITDA</td><td class="sag"><b>12.210.000</b></td><td>%24,1</td></tr>
+        <tr><td>+ Tek seferlik (fabrika taşınma 80.000)</td><td class="sag">80.000</td><td><code>ebitda_duzeltme</code></td></tr>
+        <tr class="top"><td>= Düzeltilmiş EBITDA</td><td class="sag"><b>12.290.000</b></td><td>%24,2</td></tr>
+      </tbody></table></div>
+    <div class="ikiPanel">
+      <div class="grp" style="margin:10px"><div class="gb">EBITDA — ürün grubu / faaliyet</div>
+        <div class="dg"><table><thead><tr><th>Grup</th><th class="sag">Net satış</th><th class="sag">EBITDA</th><th class="sag">Marj</th></tr></thead>
+          <tbody><tr><td>Sandalyeler</td><td class="sag">15.700.000</td><td class="sag">4.900.000</td><td class="sag">%31</td></tr><tr><td>Masalar</td><td class="sag">13.100.000</td><td class="sag">3.600.000</td><td class="sag">%27</td></tr><tr><td>Setler</td><td class="sag">9.400.000</td><td class="sag">2.100.000</td><td class="sag">%22</td></tr><tr><td>Ticari mal (aksesuar)</td><td class="sag">5.100.000</td><td class="sag">900.000</td><td class="sag">%18</td></tr><tr><td>Fason / hizmet</td><td class="sag">7.450.000</td><td class="sag">2.400.000</td><td class="sag">%32</td></tr><tr><td>Dağıtılmamış genel</td><td class="sag">—</td><td class="sag">−1.690.000</td><td class="sag"></td></tr></tbody></table></div></div>
+      <div class="grp" style="margin:10px"><div class="gb">EBITDA marjı — 12 ay</div><div class="ic"><div class="bar2"><i style="height:50%"></i><i style="height:52%"></i><i style="height:48%"></i><i style="height:55%"></i><i style="height:58%"></i><i style="height:60%"></i><i style="height:63%"></i><i style="height:61%"></i><i style="height:66%"></i><i style="height:68%"></i><i style="height:70%"></i><i style="height:72%"></i></div><div class="sonuk">Eyl 25 → Ağu 26 · %18 → %25 · ihracat payı ve kapasite kullanımı</div></div></div>
+    </div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th>Bin ₺</th><th class="sag">Oca</th><th class="sag">Şub</th><th class="sag">Mar</th><th class="sag">Nis</th><th class="sag">May</th><th class="sag">Haz</th><th class="sag">Tem</th><th class="sag">Ağu</th><th class="sag">Toplam</th></tr></thead>
+      <tbody>
+        <tr class="t2"><td>Net satışlar</td><td class="sag">5.600</td><td class="sag">5.700</td><td class="sag">6.100</td><td class="sag">6.300</td><td class="sag">6.500</td><td class="sag">6.700</td><td class="sag">6.900</td><td class="sag">6.950</td><td class="sag">50.750</td></tr>
+        <tr><td>SMM</td><td class="sag">−3.600</td><td class="sag">−3.620</td><td class="sag">−3.850</td><td class="sag">−3.950</td><td class="sag">−4.030</td><td class="sag">−4.130</td><td class="sag">−4.200</td><td class="sag">−4.220</td><td class="sag">−31.600</td></tr>
+        <tr><td>Faaliyet giderleri</td><td class="sag">−1.120</td><td class="sag">−1.130</td><td class="sag">−1.150</td><td class="sag">−1.160</td><td class="sag">−1.170</td><td class="sag">−1.180</td><td class="sag">−1.180</td><td class="sag">−1.190</td><td class="sag">−9.280</td></tr>
+        <tr class="t2"><td>EBIT</td><td class="sag">880</td><td class="sag">950</td><td class="sag">1.100</td><td class="sag">1.190</td><td class="sag">1.300</td><td class="sag">1.390</td><td class="sag">1.520</td><td class="sag">1.540</td><td class="sag">9.870</td></tr>
+        <tr><td>+ Amortisman</td><td class="sag">290</td><td class="sag">290</td><td class="sag">292</td><td class="sag">292</td><td class="sag">294</td><td class="sag">294</td><td class="sag">294</td><td class="sag">294</td><td class="sag">2.340</td></tr>
+        <tr class="top"><td>EBITDA</td><td class="sag">1.170</td><td class="sag">1.240</td><td class="sag">1.392</td><td class="sag">1.482</td><td class="sag">1.594</td><td class="sag">1.684</td><td class="sag">1.814</td><td class="sag">1.834</td><td class="sag">12.210</td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th>Bin ₺ · yönetim formatı</th><th class="sag">Sandalye</th><th class="sag">Masa</th><th class="sag">Set</th><th class="sag">Ticari</th><th class="sag">Hizmet</th><th class="sag">Genel</th><th class="sag">Toplam</th></tr></thead>
+      <tbody>
+        <tr class="t2"><td>Net satış</td><td class="sag">15.700</td><td class="sag">13.100</td><td class="sag">9.400</td><td class="sag">5.100</td><td class="sag">7.450</td><td class="sag">—</td><td class="sag">50.750</td></tr>
+        <tr><td>Değişken maliyet (710 + 720 + değişken 730 / alış)</td><td class="sag">−8.100</td><td class="sag">−7.400</td><td class="sag">−5.900</td><td class="sag">−3.700</td><td class="sag">−3.900</td><td class="sag">—</td><td class="sag">−29.000</td></tr>
+        <tr class="t2"><td>Katkı payı</td><td class="sag">7.600</td><td class="sag">5.700</td><td class="sag">3.500</td><td class="sag">1.400</td><td class="sag">3.550</td><td class="sag">—</td><td class="sag">21.750</td></tr>
+        <tr><td>Sabit üretim (730 sabit — nakit)</td><td class="sag">−1.600</td><td class="sag">−1.300</td><td class="sag">−800</td><td class="sag">—</td><td class="sag">−600</td><td class="sag">—</td><td class="sag">−4.300</td></tr>
+        <tr><td>760 + 770 (nakit)</td><td class="sag">−1.100</td><td class="sag">−800</td><td class="sag">−600</td><td class="sag">−500</td><td class="sag">−550</td><td class="sag">−1.690</td><td class="sag">−5.240</td></tr>
+        <tr class="t2"><td>EBITDA</td><td class="sag">4.900</td><td class="sag">3.600</td><td class="sag">2.100</td><td class="sag">900</td><td class="sag">2.400</td><td class="sag">−1.690</td><td class="sag">12.210</td></tr>
+        <tr><td>Amortisman</td><td class="sag">−900</td><td class="sag">−700</td><td class="sag">−300</td><td class="sag">—</td><td class="sag">−120</td><td class="sag">−320</td><td class="sag">−2.340</td></tr>
+        <tr class="top"><td>EBIT</td><td class="sag">4.000</td><td class="sag">2.900</td><td class="sag">1.800</td><td class="sag">900</td><td class="sag">2.280</td><td class="sag">−2.010</td><td class="sag">9.870</td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Ürün grubu kırılımı maliyet modülü (ürün maliyet + satış satırı ürün grubu) ile; stok değişimi etkisi (üretilen ≠ satılan) "stok değişimi" satırında gösterilir (opsiyon).</div>
+  </div>
+  <div class="statusbar"><span>2026 8 ay · net satış 50,75 M · EBITDA 12,21 M (%24,1) · net kâr 7,82 M</span></div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

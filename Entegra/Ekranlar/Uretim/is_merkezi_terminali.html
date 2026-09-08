@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İş Merkezi Terminali — Atölye Ekranı — Mockup (Gentegre AI · Üretim)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🖥 İş Merkezi Terminali — Döşeme Atölyesi <span class="sp">tablet / dokunmatik · personel kartı okut · 03.09.2026 10:42</span></div>
+
+  <div class="toolbar">
+    <div class="btn">👤 S. Aydın <span class="rz ok">vardiya 08:00–17:00</span></div>
+    <div class="btn">👤 N. Koç</div>
+    <div class="btn">🪪 Kart Okut</div>
+    <div class="sepv"></div>
+    <div class="btn">📷 Barkod: emir / operasyon</div>
+    <div class="btn sp">⚙ Döşeme Atölyesi ▾</div>
+  </div>
+
+  <div class="kanban">
+    <div class="kol"><div class="kb">⏳ Sırada <span class="sp">3</span></div>
+      <div class="is"><b>ÜE-2026/0144 · 40 Döşeme</b>Masa 160 Meşe × 12<span class="sonuk">termin 12.09 · malzeme %70</span></div>
+      <div class="is"><b>ÜE-2026/0147 · 40 Döşeme</b>Sandalye Klasik × 24<span class="sonuk">termin 09.09 · malzeme %100</span></div>
+      <div class="is"><b>ÜE-2026/0139 · 30 Kaplama</b><span class="rz mor">Fason</span> dönüş bekleniyor<span class="sonuk">termin 29.08 · <span class="rz kir">gecikti</span></span></div>
+    </div>
+    <div class="kol" style="border-color:#2f6db3"><div class="kb">▶ Devam Eden <span class="sp">1</span></div>
+      <div class="is" style="border-color:#2f6db3;background:#eef4fc"><b>ÜE-2026/0142 · 40 Döşeme</b>Sandalye Klasik Ceviz × 60<span class="sonuk">36 tamam · 1 ret · 22,4 s</span>
+        <div class="bar m" style="margin-top:4px"><i style="width:60%"></i></div></div>
+    </div>
+    <div class="kol"><div class="kb">⏸ Duraklatıldı <span class="sp">0</span></div></div>
+    <div class="kol"><div class="kb">🔬 KK Bekliyor <span class="sp">1</span></div>
+      <div class="is"><b>ÜE-2026/0142 · parti 3</b>8 adet · döşeme kontrolü<span class="sonuk">KK: dikiş / gerginlik</span></div>
+    </div>
+    <div class="kol"><div class="kb">✔ Bugün Biten <span class="sp">2</span></div>
+      <div class="is"><b>ÜE-2026/0145 · 10 Karışım</b>Cila 40 Lt<span class="sonuk">09:10 · E. Yılmaz</span></div>
+      <div class="is"><b>ÜE-2026/0142 · parti 2</b>16 adet mamul girişi<span class="sonuk">09:55 · S. Aydın</span></div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <div class="gb">▶ ÜE-2026/0142 · Opr. 40 Döşeme · Sandalye Klasik Ceviz <span class="sp">başladı 02.09 11:30 · S. Aydın, N. Koç</span></div>
+    <div class="ic" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <div class="hdr" style="grid-template-columns:1fr 1fr;padding:0;background:none;border:none">
+          <div class="fld"><label>Tamamlanan Adet</label><div class="inp big">36 <span class="sonuk">/ 60</span></div></div>
+          <div class="fld"><label>Bu Girişte</label><div class="inp big">＋ 8</div></div>
+          <div class="fld"><label>Ret / Fire</label><div class="inp">1 <span class="sonuk">kontrplak çatlak</span></div></div>
+          <div class="fld"><label>Ret Nedeni</label><div class="inp combo">Malzeme hatası</div></div>
+          <div class="fld" style="grid-column:span 2"><label>Sarf (bu operasyonun bileşenleri)</label>
+            <div class="inp">HM-0220 Kumaş <b>3,6 m</b> · lot <span class="rz sari">KMS-0819</span> &nbsp;·&nbsp; HM-0230 Sünger <b>1,44 m²</b> <span class="sonuk">— 8 adet için otomatik, düzeltilebilir</span></div></div>
+          <div class="fld" style="grid-column:span 2"><label>Not</label><div class="inp">Bej kumaş 2. top açıldı.</div></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start">
+        <div class="btn ok" style="justify-content:center;padding:18px;font-size:14px">✔ Adet Bildir (8)</div>
+        <div class="btn" style="justify-content:center;padding:18px;font-size:14px">⏸ Duraklat</div>
+        <div class="btn" style="justify-content:center;padding:18px;font-size:14px">🔬 KK'ya Gönder</div>
+        <div class="btn" style="justify-content:center;padding:18px;font-size:14px">⚠ Arıza / Duruş</div>
+        <div class="btn primary" style="justify-content:center;padding:18px;font-size:14px;grid-column:span 2">■ Operasyonu Bitir → 50 Cila'ya Aktar</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <div class="gb">👷 Zaman Kayıtları <span class="sp">personel × operasyon · işçilik maliyeti buradan</span></div>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Personel</th><th>Emir / Opr.</th><th class="orta">Başlangıç</th><th class="orta">Bitiş</th><th class="sag">Süre (s)</th><th class="sag">Adet</th><th class="orta">Tür</th><th class="sag">Saat Ücreti</th><th class="sag">Tutar</th></tr></thead>
+        <tbody>
+          <tr><td>S. Aydın</td><td>ÜE-0142 · 40</td><td class="orta">02.09 11:30</td><td class="orta">02.09 17:00</td><td class="sag">5,5</td><td class="sag">12</td><td class="orta"><span class="rz">Üretim</span></td><td class="sag">160</td><td class="sag">880</td></tr>
+          <tr><td>N. Koç</td><td>ÜE-0142 · 40</td><td class="orta">02.09 11:30</td><td class="orta">02.09 17:00</td><td class="sag">5,5</td><td class="sag">10</td><td class="orta"><span class="rz">Üretim</span></td><td class="sag">160</td><td class="sag">880</td></tr>
+          <tr><td>S. Aydın</td><td>ÜE-0142 · 40</td><td class="orta">03.09 08:00</td><td class="orta">03.09 08:40</td><td class="sag">0,7</td><td class="sag">—</td><td class="orta"><span class="rz sari">Duruş · kumaş bekleme</span></td><td class="sag">160</td><td class="sag">107</td></tr>
+          <tr class="sel"><td>S. Aydın, N. Koç</td><td>ÜE-0142 · 40</td><td class="orta">03.09 08:40</td><td class="orta"><span class="rz mavi">devam</span></td><td class="sag">2,0</td><td class="sag">14</td><td class="orta"><span class="rz">Üretim</span></td><td class="sag">160</td><td class="sag">640</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="statusbar"><span>Döşeme Atölyesi · 2 personel aktif</span><span>Bugün: 24 adet · 1 ret · 0,7 s duruş</span><span class="sp">Son senkron 10:41 · çevrimdışı kuyruk boş</span></div>
+</div>
+
+<div class="not">
+  <b>Terminal</b> tek amaçlı: operasyon başlat / adet bildir / bitir. Adet bildirimi o operasyonun bileşenlerini <b>geri-yıkama</b> ile sarf eder (oran = adet ÷ emir adedi), lot seçimi FIFO — kullanıcı değiştirebilir.
+  "Operasyonu Bitir" bir sonraki sırayı "Sırada"ya düşürür; son operasyon bitince <b>mamul girişi</b> önerilir (KK zorunluysa önce KK).
+  Duruş türleri kod listesi (arıza, malzeme bekleme, kalıp değişimi…) — OEE için. Delphi karşılığı <code>URETIMOPERASYONPERSONEL</code> + <code>URETIMOLCUM</code> + <code>UIsEmriPersonelZaman</code>.
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

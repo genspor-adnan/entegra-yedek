@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratuvar — Süreç ve Tablolar — Mockup (Gentegre AI · Laboratuvar)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .win{max-width:1080px}
+  .icerik{padding:6px 18px 22px;font-size:13px;line-height:1.65}
+  h2{font-size:15px;color:#1c4374;border-bottom:1px solid var(--line2);padding-bottom:5px;margin:22px 0 10px}
+  h3{font-size:13.5px;color:#2c4a6b;margin:16px 0 6px}
+  code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:1px 4px;font-size:12px}
+  .icerik table{border-collapse:collapse;width:100%;margin:8px 0 14px}
+  .icerik th{background:linear-gradient(#f4f7fb,#e7eef6);border:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:12px;color:#3a5573}
+  .icerik td{border:1px solid var(--line2);padding:6px 8px;font-size:12.5px;vertical-align:top}
+  .kutu{border:1px solid var(--line2);background:#fbfcfd;border-radius:4px;padding:10px 12px;margin:10px 0}
+  .uyari{border:1px solid #f2ddbf;background:#fdf9f1;border-radius:4px;padding:9px 11px;margin:10px 0;color:var(--uyari)}
+  .tamam{border:1px solid #bfe3cb;background:#f1f8f3;border-radius:4px;padding:9px 11px;margin:10px 0;color:#245c37}
+  .akis{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+  .akis .a{border:1px solid var(--line);background:#fff;border-radius:14px;padding:4px 12px;font-size:12px}
+  .akis .a.v{background:#eef4fc;border-color:#cfe0f5;color:#2f6db3;font-weight:bold}
+  .akis .ok2{color:var(--muted)}
+  ul{margin:6px 0 12px 18px;padding:0} li{margin:3px 0}
+  .kucuk{font-size:11.5px;color:var(--muted)}
+  .durumlar{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+
+  .tablo{border:1px solid var(--line2);border-radius:4px;margin:12px 0;overflow:hidden}
+  .tablo .tb{background:linear-gradient(#f4f7fb,#e7eef6);padding:6px 10px;font-weight:bold;color:#1c4374;display:flex;gap:10px;align-items:center;font-size:13px}
+  .tablo .tb .rz{font-weight:normal}
+  .tablo .tb .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:11.5px}
+  .tablo table{margin:0}
+  .tablo td.k{font-family:Consolas,monospace;font-size:12px;white-space:nowrap}
+  .tablo td.t{font-family:Consolas,monospace;font-size:11.5px;color:#4d5d6e;white-space:nowrap}
+  .tablo tr.pk td.k{font-weight:bold}
+  .tablo .alt{padding:6px 10px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line2);background:#fbfcfd}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🧪 Laboratuvar Modülü (LIS) — Süreç, Cihaz Entegrasyonu, Tablolar <span class="sp">Gentegre AI · tasarım notu · 03.09.2026</span></div>
+  <div class="icerik">
+
+    <div class="kutu">
+      <b>Tek cümlede:</b> İstem başvurudan doğar, numune barkodla kimliklenir, cihazlar barkodu okuyup LIS'e sonuç döner (ASTM/HL7),
+      sonuç referans/delta/panik/KK kurallarından geçip iki aşamalı onaylanır, rapor hekime-portala-e-Nabız'a gider;
+      mikrobiyoloji (kültür → identifikasyon → antibiyogram) ve genetik (örnek → run → varyant → ACMG rapor) aynı omurgada bölüm-özel akışlarla yürür.
+      <br><span class="kucuk">Mockuplar: <code>lab_istem_numune_kabul.html</code> · <code>lab_biyokimya_sonuc_onay.html</code> · <code>lab_mikrobiyoloji.html</code> ·
+      <code>lab_genetik.html</code> · <code>lab_cihaz_entegrasyonu.html</code> · <code>lab_kalite_kontrol.html</code> · sonuç formları: <code>lab_sonuc_formu_*.html</code></span>
+    </div>
+
+    <h2>1. Ortak omurga</h2>
+    <div class="akis">
+      <span class="a">Tetkik kataloğu (hizmet + LIS)</span><span class="ok2">→</span>
+      <span class="a v">İstem (muayene / teletıp / banko / dış kurum)</span><span class="ok2">→</span>
+      <span class="a">Etiket + numune alma</span><span class="ok2">→</span>
+      <span class="a">Kabul (kalite, TAT başlar)</span><span class="ok2">→</span>
+      <span class="a">Cihaz host query → çalış</span><span class="ok2">→</span>
+      <span class="a">Sonuç + bayrak + serum indeksi</span><span class="ok2">→</span>
+      <span class="a">Kural: referans · delta · panik · KK</span><span class="ok2">→</span>
+      <span class="a">Teknik onay → uzman onayı (ya da oto)</span><span class="ok2">→</span>
+      <span class="a">Rapor · bildirim · e-Nabız</span><span class="ok2">→</span>
+      <span class="a">Saklama / imha</span>
+    </div>
+    <table>
+      <tr><th style="width:40px">#</th><th style="width:190px">Adım</th><th>Ne olur</th><th style="width:230px">Kayıt</th></tr>
+      <tr><td>1</td><td><b>Katalog</b></td><td>Tetkik = hizmet kartı (SUT, fiyat) + LIS özellikleri (numune/tüp, birim, referans aralıkları yaş/cinsiyet, panik, delta, TAT, LOINC, oto-onay, cihaz). Paneller. Dış lab tetkikleri tedarikçiye bağlı.</td><td><code>lab_tetkik</code>, <code>lab_tetkik_referans</code>, <code>lab_panel</code></td></tr>
+      <tr><td>2</td><td><b>İstem</b></td><td>Muayene "İstem" sekmesi, teletıp, banko, dış kurum portalı (teleradyoloji ile aynı desen) ya da check-up paketi. Başvuruya bağlı; tetkikler başvuru satırı (ücret, provizyon).</td><td><code>lab_istem</code>, <code>lab_istem_satir</code>, <code>belge_satir</code></td></tr>
+      <tr><td>3</td><td><b>Numune</b></td><td>Tüp planı otomatik (aynı numune tipi → tek barkod); etiket; alım zamanı/alan; kabulde kalite (hemoliz/lipemi/ikter, yetersiz, yanlış tüp) → ret + yeniden alım; alikot; saklama/imha; her hareket zincire yazılır.</td><td><code>lab_numune</code>, <code>lab_numune_hareket</code></td></tr>
+      <tr><td>4</td><td><b>Cihaz</b></td><td>Çift yönde cihaz barkodu okur → LIS'e sorar (host query) → istem listesi → sonuç ORU/ASTM R ile döner; tek yönde çalışma listesi indirilir. Mesaj ham saklanır, kod eşlemeyle tetkiğe bağlanır, birim dönüştürülür. Eşlenmemiş kod/barkod → sahipsiz kuyruk.</td><td><code>lab_cihaz</code>, <code>lab_cihaz_test_esleme</code>, <code>lab_cihaz_mesaj</code>, <code>lab_cihaz_calisma_listesi</code></td></tr>
+      <tr><td>5</td><td><b>Kurallar</b></td><td>Referans (yaş/cinsiyet/gebelik) → bayrak; delta check (önceki onaylı sonuç, % ve gün); panik listesi → bildirim akışı; ölçüm aralığı dışı → dilüsyon/tekrar; serum indeksi → etkilenen testlere hemoliz bayrağı; KK reddi → oto-onay kapalı.</td><td><code>lab_sonuc</code> bayrak/delta/panik alanları</td></tr>
+      <tr><td>6</td><td><b>Onay</b></td><td>Oto-onay (kural geçen rutin testler) · teknik onay (teknisyen) · uzman onayı. Acil tek aşama. Onaylı sonuç değişmez; düzeltme = iptal + yeni satır + "düzeltilmiş rapor". Prim rolleri (İsteyen, Onaylayan) onaydan doğar.</td><td><code>lab_sonuc</code>, <code>belge_satir_rol</code></td></tr>
+      <tr><td>7</td><td><b>Panik</b></td><td>Panik sonuçta telefon/SMS/mesaj; karşı teyit zorunlu; 10 dk teyit yoksa yükseltme. Kan kültürü pozitifliği, kritik mikroorganizma aynı akış.</td><td><code>lab_panik_bildirim</code></td></tr>
+      <tr><td>8</td><td><b>Rapor / teslim</b></td><td>Kısmi ve nihai rapor (kümülatif, önceki sonuçlarla), e-imzalı PDF; hekime bildirim, hasta portalı, dış kurum portalı/HL7; e-Nabız Tetkik Sonuç paketi (LOINC/SKRS tetkik, SKRS birim).</td><td><code>lab_rapor</code>, <code>enabiz_paket</code></td></tr>
+      <tr><td>9</td><td><b>Kalite</b></td><td>İKK: kontrol lotu hedef/SD, günlük ölçüm (cihazdan), Westgard; ret → düzeltici faaliyet + hasta sonuçları gözden geçirme. DKK dönem sonuçları, SDI. Kalibrasyon/bakım/reaktif lot cihaz olayları. ISO 15189 raporları.</td><td><code>lab_kk_*</code>, <code>lab_dkk_sonuc</code>, <code>lab_cihaz_olay</code></td></tr>
+      <tr><td>10</td><td><b>Dış lab</b></td><td>Katalogda dış lab'a işaretli tetkik: gönderim listesi, kurye/sıcaklık, sonuç PDF/HL7 ile alınır, alış faturası eşleştirilir.</td><td><code>lab_dis_gonderim</code></td></tr>
+    </table>
+
+    <h2>2. Bölüm-özel akışlar</h2>
+    <h3>Biyokimya / hematoloji / hormon / idrar</h3>
+    <ul>
+      <li>Yüksek hacim, dakika TAT; tam otomasyon (host query, oto-onay %70+). Acil testler STAT kuyruğu.</li>
+      <li>Hematolojide cihaz scattergram bayrakları (IG, blast şüphesi) → periferik yayma isteği (manuel diferansiyel girişi).</li>
+      <li>İdrar: strip + sediment (UF-5000) + mikroskopi onayı.</li>
+    </ul>
+    <h3>Mikrobiyoloji</h3>
+    <div class="akis"><span class="a">Numune + direkt bakı (Gram)</span><span class="ok2">→</span><span class="a">Ekim (besiyeri seti)</span><span class="ok2">→</span><span class="a">İnkübasyon · planlı okumalar</span><span class="ok2">→</span><span class="a">Üreme → ön rapor</span><span class="ok2">→</span><span class="a">İdentifikasyon (MALDI-TOF / VITEK)</span><span class="ok2">→</span><span class="a">Antibiyogram (MIC / disk, EUCAST)</span><span class="ok2">→</span><span class="a">Uzman yorumu (kademeli bildirim)</span><span class="ok2">→</span><span class="a">Rapor · enfeksiyon kontrol bildirimi</span></div>
+    <ul>
+      <li>TAT gün; ara raporlar (Gram, üreme, ön ID) hekime anında; kan kültürü pozitif → panik akışı.</li>
+      <li>Cihazlar: BACTEC alarmı (tek yön), MALDI-TOF ID dosyası, VITEK AST (HL7 BCI) → antibiyogram satırları; uzman S/I/R değiştirebilir (gerekçe).</li>
+      <li>Direnç mekanizması (MRSA/ESBL/CRE/VRE) → enfeksiyon kontrol komitesine bildirim, e-Nabız bildirimi zorunlu etkenler paketi.</li>
+    </ul>
+    <h3>Genetik</h3>
+    <div class="akis"><span class="a">Vaka + ayrıntılı onam</span><span class="ok2">→</span><span class="a">Numune → DNA/RNA izolasyon + kalite</span><span class="ok2">→</span><span class="a">Kütüphane → run (NGS) / PCR</span><span class="ok2">→</span><span class="a">Pipeline → VCF · kalite metrikleri</span><span class="ok2">→</span><span class="a">Filtre → varyant değerlendirme (ACMG)</span><span class="ok2">→</span><span class="a">Doğrulama (Sanger) · segregasyon</span><span class="ok2">→</span><span class="a">Rapor (e-imza) · danışmanlık</span><span class="ok2">→</span><span class="a">Yeniden değerlendirme listesi</span></div>
+    <ul>
+      <li>Vaka bazlı, TAT hafta; onam: test, tesadüfi bulgu tercihi, aile paylaşımı, veri saklama/araştırma (ayrı satırlar).</li>
+      <li>Ham veri (FASTQ/BAM/VCF) nesne depoda; DB'de yol + hash + run metrikleri. Pipeline sürümü raporda.</li>
+      <li>Varyant sözlüğü: aynı varyantın sınıfı değişince önceki vakalar yeniden değerlendirme listesine. Aile vakaları bağlı (trio, kaskad).</li>
+      <li>Somatik: tümör yüzdesi, VAF eşiği, tier I–IV, tedavi hedefleri.</li>
+    </ul>
+
+    <h2>3. Cihaz entegrasyonu — teknik</h2>
+    <table>
+      <tr><th style="width:200px">Konu</th><th>Karar</th></tr>
+      <tr><td>Katman</td><td>LIS ara katmanı (servis): cihaz başına dinleyici (TCP sunucu/istemci, seri, klasör, API) + protokol sürücüsü (ASTM E1381 düşük seviye + E1394 kayıt / HL7 v2.x MLLP / CSV) → ortak sonuç modeli. Middleware (cobas infinity, WAM, Data Innovations) varsa tek HL7 bağlantısı.</td></tr>
+      <tr><td>Kimlik</td><td>Numune barkodu tek anahtar; cihaz PID'yi taşısa da bağlama barkodla. Barkod formatı: 10 hane + kontrol hanesi; kontrol numunesi barkodları ayrı seri (KK'ya yönlenir).</td></tr>
+      <tr><td>Çift yön</td><td>Host query (cihaz sorar) tercih; yoksa çalışma listesi indirme. Tekrar/dilüsyon istekleri LIS'ten cihaza yeni istem.</td></tr>
+      <tr><td>Güvenilirlik</td><td>Ham mesaj önce yazılır sonra işlenir (kayıp yok); ACK zorunlu; bağlantı kopunca yeniden bağlanma + alarm (BT'ye mesaj); işlenmeyen mesajlar yeniden işlenebilir.</td></tr>
+      <tr><td>Eşleme</td><td>Cihaz test kodu → tetkik; birim/çarpan/ondalık LIS'te; cihaz referansı kullanılmaz; bayrak eşleme (H/L, &gt; ölçüm aralığı, serum indeksi → etkilenen testler).</td></tr>
+      <tr><td>Genetik cihazlar</td><td>Run klasörü izleme (SampleSheet ile vaka eşleme), pipeline çıktısı (VCF) içe aktarma; PCR sonuç dosyası (Ct → sonuç kuralı).</td></tr>
+      <tr><td>Güvenlik</td><td>Cihaz ağı ayrı VLAN; dinleyici yalnız beyaz listeden kabul; ham mesajlarda kimlik maskeli görünüm.</td></tr>
+    </table>
+
+    <h2>4. Tablolar ve alanlar</h2>
+    <h3>Katalog</h3>
+<div class="tablo">
+  <div class="tb"><code>lab_tetkik</code> <span class="rz ok">yeni</span> <span class="sp">tetkik kataloğu — hizmet kartına bağlı (ücret/SUT oradan)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hizmet_id</td><td class="t">int</td><td>→ hizmet (SUT kodu, fiyat, KDV) — 1:1</td></tr><tr><td class="k">kod</td><td class="t">varchar(20)</td><td>LIS kodu (BK-001)</td></tr><tr><td class="k">ad / kisa_ad</td><td class="t">varchar</td><td>rapor adı / grid adı</td></tr><tr><td class="k">bolum</td><td class="t">smallint</td><td>1 biyokimya · 2 hematoloji · 3 hormon/immün · 4 mikrobiyoloji · 5 genetik · 6 idrar · 7 koagülasyon · 8 dış lab</td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>1 sayısal · 2 metin · 3 seçenekli · 4 kültür · 5 genetik/varyant · 6 panel (başlık)</td></tr><tr><td class="k">numune_tipi</td><td class="t">smallint</td><td>serum / plazma / tam kan / idrar / sürüntü / doku / DNA… (kod listesi)</td></tr><tr><td class="k">tup_tipi</td><td class="t">smallint</td><td>sarı jel / mor EDTA / mavi sitrat / gri florür / transport / kap…</td></tr><tr><td class="k">numune_hacim_ml</td><td class="t">numeric</td><td></td></tr><tr><td class="k">birim</td><td class="t">varchar(20)</td><td>rapor birimi</td></tr><tr><td class="k">ondalik</td><td class="t">smallint</td><td></td></tr><tr><td class="k">loinc</td><td class="t">varchar(12)</td><td>LOINC kodu (e-Nabız / dış paylaşım)</td></tr><tr><td class="k">skrs_tetkik_kod</td><td class="t">varchar(20)</td><td>e-Nabız Tetkik Sonuç paketi için</td></tr><tr><td class="k">yontem</td><td class="t">varchar(100)</td><td>enzimatik, ECLIA, PCR, NGS…</td></tr><tr><td class="k">hedef_tat_dk</td><td class="t">int</td><td>rutin TAT</td></tr><tr><td class="k">acil_tat_dk</td><td class="t">int</td><td></td></tr><tr><td class="k">delta_yuzde / delta_gun</td><td class="t">numeric / int</td><td>delta check eşiği ve bakılacak süre</td></tr><tr><td class="k">oto_onay</td><td class="t">smallint</td><td>kural geçerse otomatik onay</td></tr><tr><td class="k">panik_alt / panik_ust</td><td class="t">numeric</td><td>panik değer sınırları (cinsiyet/yaşa göre referans tablosunda da olabilir)</td></tr><tr><td class="k">olculebilir_alt / olculebilir_ust</td><td class="t">numeric</td><td>cihaz ölçüm aralığı; dışı → dilüsyon/tekrar</td></tr><tr><td class="k">varsayilan_cihaz_id</td><td class="t">int</td><td></td></tr><tr><td class="k">dis_lab_id</td><td class="t">int</td><td>dış laboratuvara gönderiliyorsa → taraf</td></tr><tr><td class="k">hazirlik_notu</td><td class="t">varchar(400)</td><td>açlık, ilaç…</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_tetkik_referans</code> <span class="rz ok">yeni</span> <span class="sp">referans aralıkları — yaş/cinsiyet/gebelik bazlı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">tetkik_id</td><td class="t">int</td><td></td></tr><tr><td class="k">cinsiyet</td><td class="t">smallint</td><td>boş = her ikisi</td></tr><tr><td class="k">yas_alt_gun / yas_ust_gun</td><td class="t">int</td><td>gün cinsinden (yenidoğan hassasiyeti)</td></tr><tr><td class="k">gebelik</td><td class="t">smallint</td><td>0 hayır · 1 trimester1 · 2 · 3</td></tr><tr><td class="k">alt / ust</td><td class="t">numeric</td><td>sayısal</td></tr><tr><td class="k">metin</td><td class="t">varchar(100)</td><td>metin sonuç için beklenen (Negatif)</td></tr><tr><td class="k">panik_alt / panik_ust</td><td class="t">numeric</td><td>gruba özel panik</td></tr><tr><td class="k">kaynak</td><td class="t">varchar(100)</td><td>üretici / literatür / laboratuvar</td></tr><tr><td class="k">gecerli_bas</td><td class="t">date</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_panel</code> <span class="rz ok">yeni</span> <span class="sp">paneller / profiller (Karaciğer paneli, Kardiyo NGS 62 gen)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">kod / ad</td><td class="t">varchar</td><td></td></tr><tr><td class="k">bolum</td><td class="t">smallint</td><td></td></tr><tr><td class="k">hizmet_id</td><td class="t">int</td><td>panel tek kalem ücretleniyorsa</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_panel_satir</code> <span class="rz ok">yeni</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">panel_id</td><td class="t">int</td><td></td></tr><tr><td class="k">tetkik_id</td><td class="t">int</td><td></td></tr><tr><td class="k">sira</td><td class="t">smallint</td><td></td></tr><tr><td class="k">gen</td><td class="t">varchar(20)</td><td>genetik panelde gen adı (HGNC)</td></tr>
+  </table>
+</div><h3>İstem ve numune</h3>
+<div class="tablo">
+  <div class="tb"><code>lab_istem</code> <span class="rz ok">yeni</span> <span class="sp">istem başlığı — başvuruya bağlı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">istem_no</td><td class="t">varchar(20)</td><td>LAB-yyyy/nnnnn</td></tr><tr><td class="k">belge_id</td><td class="t">int</td><td>→ belge (başvuru tür 19); dış istemde dış kurumun başvurusu</td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td>→ taraf</td></tr><tr><td class="k">isteyen_hekim_id</td><td class="t">int</td><td>→ taraf_hekim (prim rolü İsteyen)</td></tr><tr><td class="k">kaynak</td><td class="t">smallint</td><td>1 muayene · 2 teletıp · 3 banko · 4 dış kurum portalı · 5 check-up paketi</td></tr><tr><td class="k">dis_kurum_id</td><td class="t">int</td><td>→ taraf (dış lab müşterisi)</td></tr><tr><td class="k">oncelik</td><td class="t">smallint</td><td>1 rutin · 2 öncelikli · 3 acil</td></tr><tr><td class="k">klinik_bilgi</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">tani_icd</td><td class="t">varchar(8)</td><td>istem tanısı (SUT/e-Nabız)</td></tr><tr><td class="k">istem_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>1 açık · 2 numune alındı · 3 çalışılıyor · 4 kısmi sonuç · 5 tamamlandı · 0 iptal</td></tr><tr><td class="k">sube_id</td><td class="t">int</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_istem_satir</code> <span class="rz ok">yeni</span> <span class="sp">istenen tetkikler</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">istem_id</td><td class="t">int</td><td></td></tr><tr><td class="k">tetkik_id</td><td class="t">int</td><td></td></tr><tr><td class="k">panel_id</td><td class="t">int</td><td>panelden geldiyse</td></tr><tr><td class="k">belge_satir_id</td><td class="t">int</td><td>→ belge_satir (ücret)</td></tr><tr><td class="k">numune_id</td><td class="t">int</td><td>→ lab_numune (hangi tüpte)</td></tr><tr><td class="k">cihaz_id</td><td class="t">int</td><td>atanan cihaz</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>1 bekliyor · 2 cihaza gönderildi · 3 sonuç geldi · 4 teknik onay · 5 onaylı · 6 tekrar · 7 dış lab · 0 iptal/ret</td></tr><tr><td class="k">dis_lab_gonderim_id</td><td class="t">int</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_numune</code> <span class="rz ok">yeni</span> <span class="sp">numune = barkod</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">barkod</td><td class="t">varchar(20)</td><td>unique; etiket</td></tr><tr><td class="k">istem_id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">numune_tipi / tup_tipi</td><td class="t">smallint</td><td></td></tr><tr><td class="k">alim_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">alan_id</td><td class="t">int</td><td>hemşire/personel</td></tr><tr><td class="k">alim_yeri</td><td class="t">smallint</td><td>kan alma / servis / ev / dış kurum</td></tr><tr><td class="k">kabul_zamani</td><td class="t">timestamp</td><td>TAT başlangıcı</td></tr><tr><td class="k">kabul_eden_id</td><td class="t">int</td><td></td></tr><tr><td class="k">kalite</td><td class="t">smallint</td><td>1 uygun · 2 hemoliz · 3 lipemi · 4 ikter · 5 yetersiz · 6 pıhtı · 7 yanlış tüp · 8 etiketsiz</td></tr><tr><td class="k">hemoliz_idx / lipemi_idx / ikter_idx</td><td class="t">smallint</td><td>cihaz serum indeksleri</td></tr><tr><td class="k">ret</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ret_neden</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ret_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">ana_numune_id</td><td class="t">int</td><td>alikot ise ana numune</td></tr><tr><td class="k">saklama_yeri</td><td class="t">varchar(60)</td><td>dolap/raf/kutu/pozisyon</td></tr><tr><td class="k">saklama_sicaklik</td><td class="t">smallint</td><td></td></tr><tr><td class="k">imha_tarihi</td><td class="t">date</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>1 etiketlendi · 2 alındı · 3 kabul · 4 cihazda · 5 saklamada · 6 imha · 0 ret</td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table><div class="alt">indeks: barkod unique · (hasta_id, alim_zamani)</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_numune_hareket</code> <span class="rz ok">yeni</span> <span class="sp">zincir (chain of custody) — her el değiştirme</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">bigint</td><td></td></tr><tr><td class="k">numune_id</td><td class="t">int</td><td></td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">olay</td><td class="t">smallint</td><td>alındı · taşındı · kabul · cihaza yüklendi · alikot · saklamaya · dış laba · imha</td></tr><tr><td class="k">kullanici_id</td><td class="t">int</td><td></td></tr><tr><td class="k">konum</td><td class="t">varchar(60)</td><td></td></tr><tr><td class="k">sicaklik</td><td class="t">numeric</td><td>kurye/soğuk zincir</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_dis_gonderim</code> <span class="rz ok">yeni</span> <span class="sp">dış laboratuvara gönderim</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">dis_lab_id</td><td class="t">int</td><td>→ taraf (tedarikçi)</td></tr><tr><td class="k">gonderim_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">kurye / takip_no</td><td class="t">varchar</td><td></td></tr><tr><td class="k">sicaklik_kaydi</td><td class="t">jsonb</td><td></td></tr><tr><td class="k">sonuc_alindi</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">sonuc_dosya_id</td><td class="t">int</td><td>PDF</td></tr><tr><td class="k">fatura_belge_id</td><td class="t">int</td><td>alış faturası</td></tr>
+  </table>
+</div><h3>Sonuç</h3>
+<div class="tablo">
+  <div class="tb"><code>lab_sonuc</code> <span class="rz ok">yeni</span> <span class="sp">tetkik sonucu — satır başına bir (tekrarlar geçmişe)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">bigint</td><td></td></tr><tr><td class="k">istem_satir_id</td><td class="t">int</td><td></td></tr><tr><td class="k">numune_id</td><td class="t">int</td><td></td></tr><tr><td class="k">tetkik_id</td><td class="t">int</td><td></td></tr><tr><td class="k">deger_sayisal</td><td class="t">numeric</td><td></td></tr><tr><td class="k">deger_metin</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">deger_kod</td><td class="t">smallint</td><td>seçenekli (Negatif/Pozitif)</td></tr><tr><td class="k">birim</td><td class="t">varchar(20)</td><td></td></tr><tr><td class="k">ham_deger / ham_birim</td><td class="t">varchar</td><td>cihazdan geldiği gibi</td></tr><tr><td class="k">cihaz_id</td><td class="t">int</td><td></td></tr><tr><td class="k">cihaz_mesaj_id</td><td class="t">bigint</td><td>→ lab_cihaz_mesaj (izlenebilirlik)</td></tr><tr><td class="k">olcum_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">bayrak</td><td class="t">varchar(10)</td><td>H / L / HH / LL / A (anormal) / &gt; / &lt;</td></tr><tr><td class="k">cihaz_bayrak</td><td class="t">varchar(60)</td><td>cihazın kendi bayrakları</td></tr><tr><td class="k">referans_alt / referans_ust / referans_metin</td><td class="t"></td><td>raporda gösterilen (o anki referans kaydından kopya)</td></tr><tr><td class="k">panik</td><td class="t">smallint</td><td>panik değer mi</td></tr><tr><td class="k">delta_onceki_deger / delta_yuzde / delta_uyari</td><td class="t">numeric / smallint</td><td></td></tr><tr><td class="k">dilusyon</td><td class="t">numeric</td><td></td></tr><tr><td class="k">tekrar_no</td><td class="t">smallint</td><td></td></tr><tr><td class="k">teknik_onay_id / teknik_onay_zamani</td><td class="t">int / timestamp</td><td></td></tr><tr><td class="k">onay_id / onay_zamani</td><td class="t">int / timestamp</td><td>uzman</td></tr><tr><td class="k">oto_onay</td><td class="t">smallint</td><td></td></tr><tr><td class="k">yorum</td><td class="t">varchar(400)</td><td>rapor yorumu</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>1 geldi · 2 teknik onay · 3 onaylı · 4 iptal (düzeltme) · 5 tekrar bekliyor</td></tr><tr><td class="k">duzeltme_neden</td><td class="t">varchar(200)</td><td>onaylı sonuç düzeltildiyse — eski satır 4, yeni satır</td></tr><tr><td class="k">enabiz_durum</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table><div class="alt">onaylı sonuç asla güncellenmez; düzeltme = iptal + yeni satır (rapor 'düzeltilmiş rapor' damgası)</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_panik_bildirim</code> <span class="rz ok">yeni</span> <span class="sp">panik/kritik değer bildirimi ve teyit</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">sonuc_id</td><td class="t">bigint</td><td></td></tr><tr><td class="k">bildiren_id</td><td class="t">int</td><td></td></tr><tr><td class="k">bildirim_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">bildirilen_ad</td><td class="t">varchar(120)</td><td>hekim/hemşire</td></tr><tr><td class="k">bildirilen_taraf_id</td><td class="t">int</td><td></td></tr><tr><td class="k">kanal</td><td class="t">smallint</td><td>telefon / SMS / mesaj / portal</td></tr><tr><td class="k">teyit_zamani</td><td class="t">timestamp</td><td>okuma-geri</td></tr><tr><td class="k">teyit_eden</td><td class="t">varchar(120)</td><td></td></tr><tr><td class="k">yukseltme</td><td class="t">smallint</td><td>teyit gelmeyince yönetici</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_rapor</code> <span class="rz ok">yeni</span> <span class="sp">sonuç raporu (istem bazlı, kümülatif / düzeltilmiş)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">istem_id</td><td class="t">int</td><td></td></tr><tr><td class="k">surum</td><td class="t">smallint</td><td></td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>1 kısmi · 2 nihai · 3 düzeltilmiş</td></tr><tr><td class="k">pdf_dosya_id</td><td class="t">int</td><td>e-imzalı</td></tr><tr><td class="k">olusturma</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">teslim</td><td class="t">jsonb</td><td>portal / SMS / HL7 / e-Nabız zamanları</td></tr>
+  </table>
+</div><h3>Mikrobiyoloji</h3>
+<div class="tablo">
+  <div class="tb"><code>lab_kultur</code> <span class="rz ok">yeni</span> <span class="sp">kültür çalışması — istem satırı başına</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">istem_satir_id</td><td class="t">int</td><td></td></tr><tr><td class="k">numune_id</td><td class="t">int</td><td></td></tr><tr><td class="k">kultur_tipi</td><td class="t">smallint</td><td>idrar / kan / boğaz / balgam / yara / gaita / BOS / genital / mantar / mikobakteri</td></tr><tr><td class="k">ekim_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">eken_id</td><td class="t">int</td><td></td></tr><tr><td class="k">besiyerleri</td><td class="t">smallint[]</td><td>kod listesi (kanlı, EMB, MacConkey, çikolata, Sabouraud, CLED…)</td></tr><tr><td class="k">direkt_bakı</td><td class="t">varchar(200)</td><td>Gram / lökosit / epitel (numune kalitesi)</td></tr><tr><td class="k">inkubasyon_kosul</td><td class="t">varchar(60)</td><td>37°C aerob / CO₂ / anaerob</td></tr><tr><td class="k">planli_okuma</td><td class="t">timestamp[]</td><td>24/48/72 s</td></tr><tr><td class="k">sonuc_ozet</td><td class="t">varchar(400)</td><td>üreme yok / normal flora / anlamlı üreme</td></tr><tr><td class="k">kritik</td><td class="t">smallint</td><td>kan kültürü +, MRSA/ESBL/CRE</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>1 ekim · 2 inkübasyon · 3 üreme · 4 identifikasyon · 5 antibiyogram · 6 rapor bekliyor · 7 onaylı</td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_kultur_okuma</code> <span class="rz ok">yeni</span> <span class="sp">planlı okumalar</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">kultur_id</td><td class="t">int</td><td></td></tr><tr><td class="k">okuma_no</td><td class="t">smallint</td><td>24 / 48 / 72 s</td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">okuyan_id</td><td class="t">int</td><td></td></tr><tr><td class="k">besiyeri</td><td class="t">smallint</td><td></td></tr><tr><td class="k">bulgu</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">ureme</td><td class="t">smallint</td><td>0 yok · 1 var</td></tr><tr><td class="k">on_rapor</td><td class="t">smallint</td><td>hekime ara rapor gitti</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_kultur_ureme</code> <span class="rz ok">yeni</span> <span class="sp">izole edilen organizma</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">kultur_id</td><td class="t">int</td><td></td></tr><tr><td class="k">organizma_kod</td><td class="t">varchar(20)</td><td>SNOMED CT / SKRS mikroorganizma</td></tr><tr><td class="k">organizma_ad</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">koloni_sayisi</td><td class="t">varchar(30)</td><td>CFU/mL / +,++,+++</td></tr><tr><td class="k">id_yontem</td><td class="t">smallint</td><td>MALDI-TOF / VITEK / manuel / PCR</td></tr><tr><td class="k">id_guven</td><td class="t">numeric</td><td>% (MALDI skor)</td></tr><tr><td class="k">direnc_mekanizmasi</td><td class="t">varchar(100)</td><td>ESBL, MRSA, VRE, CRE…</td></tr><tr><td class="k">enfeksiyon_kontrol_bildirim</td><td class="t">timestamp</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_antibiyogram</code> <span class="rz ok">yeni</span> <span class="sp">antibiyotik duyarlılık</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">ureme_id</td><td class="t">int</td><td></td></tr><tr><td class="k">antibiyotik_kod</td><td class="t">varchar(20)</td><td>kod listesi (WHONET/ATC)</td></tr><tr><td class="k">yontem</td><td class="t">smallint</td><td>MIC (cihaz) / disk difüzyon / E-test</td></tr><tr><td class="k">mic</td><td class="t">varchar(15)</td><td>≤0,25 / ≥32</td></tr><tr><td class="k">zon_mm</td><td class="t">smallint</td><td></td></tr><tr><td class="k">yorum_cihaz</td><td class="t">char(1)</td><td>S / I / R</td></tr><tr><td class="k">yorum</td><td class="t">char(1)</td><td>raporlanan (uzman değiştirebilir)</td></tr><tr><td class="k">yorum_kaynak</td><td class="t">smallint</td><td>cihaz / uzman</td></tr><tr><td class="k">degisiklik_gerekce</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">kilavuz</td><td class="t">varchar(30)</td><td>EUCAST 2026 / CLSI M100</td></tr><tr><td class="k">raporda_goster</td><td class="t">smallint</td><td>kademeli bildirim</td></tr><tr><td class="k">sira</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div><h3>Genetik</h3>
+<div class="tablo">
+  <div class="tb"><code>lab_genetik_vaka</code> <span class="rz ok">yeni</span> <span class="sp">genetik vaka — istem satırı + klinik bağlam</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">vaka_no</td><td class="t">varchar(20)</td><td>GEN-yyyy/nnnn</td></tr><tr><td class="k">istem_satir_id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">test_tipi</td><td class="t">smallint</td><td>NGS panel / WES / WGS / Sanger / PCR / RT-PCR / MLPA / karyotip / FISH / array</td></tr><tr><td class="k">panel_id</td><td class="t">int</td><td></td></tr><tr><td class="k">germline_somatik</td><td class="t">smallint</td><td>1 germline · 2 somatik</td></tr><tr><td class="k">endikasyon</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">icd</td><td class="t">varchar(8)</td><td></td></tr><tr><td class="k">hpo_terimleri</td><td class="t">varchar(20)[]</td><td>fenotip (HPO)</td></tr><tr><td class="k">aile_oykusu</td><td class="t">text</td><td></td></tr><tr><td class="k">pedigree_dosya_id</td><td class="t">int</td><td></td></tr><tr><td class="k">ilgili_vaka_ids</td><td class="t">int[]</td><td>aile üyeleri (trio, segregasyon)</td></tr><tr><td class="k">onam_id</td><td class="t">int</td><td>→ onam (tür: genetik test)</td></tr><tr><td class="k">tesadufi_bulgu_tercih</td><td class="t">smallint</td><td>istiyor / istemiyor</td></tr><tr><td class="k">veri_saklama_yil</td><td class="t">smallint</td><td></td></tr><tr><td class="k">arastirma_izni</td><td class="t">smallint</td><td></td></tr><tr><td class="k">tumor_yuzdesi</td><td class="t">smallint</td><td>somatik</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>numune · izolasyon · kütüphane · run · analiz · yorum · doğrulama · rapor bekliyor · onaylı</td></tr><tr><td class="k">hedef_tat_gun</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_genetik_ornek</code> <span class="rz ok">yeni</span> <span class="sp">DNA/RNA örneği ve kalite</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">vaka_id</td><td class="t">int</td><td></td></tr><tr><td class="k">numune_id</td><td class="t">int</td><td></td></tr><tr><td class="k">materyal</td><td class="t">smallint</td><td>DNA / RNA / cfDNA</td></tr><tr><td class="k">izolasyon_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">izolasyon_kit</td><td class="t">varchar(60)</td><td></td></tr><tr><td class="k">konsantrasyon_ng_ul</td><td class="t">numeric</td><td></td></tr><tr><td class="k">a260_280 / a260_230</td><td class="t">numeric</td><td></td></tr><tr><td class="k">kalite_skor</td><td class="t">varchar(20)</td><td>DIN/RIN</td></tr><tr><td class="k">saklama_yeri</td><td class="t">varchar(60)</td><td>−80 kutu/pozisyon</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_genetik_run</code> <span class="rz ok">yeni</span> <span class="sp">dizileme / PCR koşusu</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">run_no</td><td class="t">varchar(20)</td><td></td></tr><tr><td class="k">cihaz_id</td><td class="t">int</td><td></td></tr><tr><td class="k">tarih</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">kit / flowcell / lot</td><td class="t">varchar</td><td></td></tr><tr><td class="k">q30</td><td class="t">numeric</td><td></td></tr><tr><td class="k">toplam_okuma</td><td class="t">bigint</td><td></td></tr><tr><td class="k">pozitif_kontrol / negatif_kontrol</td><td class="t">smallint</td><td>geçti mi</td></tr><tr><td class="k">pipeline_surum</td><td class="t">varchar(40)</td><td></td></tr><tr><td class="k">referans_genom</td><td class="t">varchar(10)</td><td>GRCh38</td></tr><tr><td class="k">ham_veri_yolu</td><td class="t">varchar(300)</td><td>nesne depo (FASTQ/BAM) — DB'de yol + hash</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_genetik_run_ornek</code> <span class="rz ok">yeni</span> <span class="sp">run içindeki örnek metrikleri</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">run_id / ornek_id</td><td class="t">int</td><td></td></tr><tr><td class="k">kutuphane_id</td><td class="t">varchar(40)</td><td></td></tr><tr><td class="k">indeks</td><td class="t">varchar(20)</td><td></td></tr><tr><td class="k">ort_derinlik</td><td class="t">numeric</td><td></td></tr><tr><td class="k">kapsama_20x</td><td class="t">numeric</td><td>%</td></tr><tr><td class="k">kontaminasyon</td><td class="t">numeric</td><td>%</td></tr><tr><td class="k">cinsiyet_dogrulama</td><td class="t">smallint</td><td></td></tr><tr><td class="k">vcf_yolu / bam_yolu</td><td class="t">varchar(300)</td><td></td></tr><tr><td class="k">kalite_gecti</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_varyant</code> <span class="rz ok">yeni</span> <span class="sp">raporlanabilir varyant değerlendirmesi (vaka bazlı)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">vaka_id</td><td class="t">int</td><td></td></tr><tr><td class="k">gen</td><td class="t">varchar(20)</td><td>HGNC</td></tr><tr><td class="k">transkript</td><td class="t">varchar(30)</td><td>NM_…</td></tr><tr><td class="k">hgvs_c / hgvs_p / hgvs_g</td><td class="t">varchar</td><td></td></tr><tr><td class="k">kromozom / pozisyon / ref / alt</td><td class="t"></td><td>GRCh38</td></tr><tr><td class="k">zigosite</td><td class="t">smallint</td><td>het / hom / hemi / mozaik</td></tr><tr><td class="k">kalitim</td><td class="t">smallint</td><td>AD / AR / XL / mt</td></tr><tr><td class="k">derinlik / vaf</td><td class="t">int / numeric</td><td></td></tr><tr><td class="k">gnomad_af</td><td class="t">numeric</td><td></td></tr><tr><td class="k">clinvar_id / clinvar_sinif</td><td class="t">varchar</td><td></td></tr><tr><td class="k">acmg_kriterler</td><td class="t">varchar(20)[]</td><td>PS4, PM2, PP3…</td></tr><tr><td class="k">acmg_sinif</td><td class="t">smallint</td><td>1 benign … 5 patojenik; VUS = 3</td></tr><tr><td class="k">somatik_tier</td><td class="t">smallint</td><td>I–IV (AMP/ASCO/CAP)</td></tr><tr><td class="k">degerlendirme_notu</td><td class="t">text</td><td></td></tr><tr><td class="k">degerlendiren_id / degerlendirme_zamani</td><td class="t">int / timestamp</td><td></td></tr><tr><td class="k">dogrulama</td><td class="t">smallint</td><td>Sanger istendi / doğrulandı</td></tr><tr><td class="k">raporda</td><td class="t">smallint</td><td>ana bulgu / bildir / bildirme</td></tr><tr><td class="k">tesadufi</td><td class="t">smallint</td><td>ACMG SF listesi</td></tr><tr><td class="k">yeniden_degerlendirme_tarihi</td><td class="t">date</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table><div class="alt">aynı varyant (gen+hgvs_c) başka vakada sınıf değiştirirse önceki vakalar 'yeniden değerlendirme' listesine</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_varyant_sozluk</code> <span class="rz ok">yeni</span> <span class="sp">kurum varyant bilgi bankası (sınıf geçmişi)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">gen / transkript / hgvs_c</td><td class="t"></td><td>unique</td></tr><tr><td class="k">guncel_sinif</td><td class="t">smallint</td><td></td></tr><tr><td class="k">kanit_ozeti</td><td class="t">text</td><td></td></tr><tr><td class="k">son_degerlendirme</td><td class="t">date</td><td></td></tr><tr><td class="k">vaka_sayisi</td><td class="t">int</td><td></td></tr>
+  </table>
+</div><h3>Cihaz entegrasyonu</h3>
+<div class="tablo">
+  <div class="tb"><code>lab_cihaz</code> <span class="rz ok">yeni</span> <span class="sp">analizör kartı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">kod / ad</td><td class="t">varchar</td><td></td></tr><tr><td class="k">bolum</td><td class="t">smallint</td><td></td></tr><tr><td class="k">uretici / model / seri_no</td><td class="t">varchar</td><td></td></tr><tr><td class="k">demirbas_id</td><td class="t">int</td><td>→ demirbas</td></tr><tr><td class="k">protokol</td><td class="t">smallint</td><td>1 ASTM E1381/E1394 · 2 HL7 v2.x · 3 CSV/dosya · 4 API · 5 seri ham</td></tr><tr><td class="k">baglanti_tipi</td><td class="t">smallint</td><td>TCP sunucu / TCP istemci / seri / klasör / API</td></tr><tr><td class="k">host / port / com / klasor</td><td class="t">varchar</td><td></td></tr><tr><td class="k">yon</td><td class="t">smallint</td><td>1 tek yön (cihaz→LIS) · 2 çift yön</td></tr><tr><td class="k">host_query</td><td class="t">smallint</td><td>cihaz barkodla istem sorar</td></tr><tr><td class="k">kodlama</td><td class="t">varchar(20)</td><td>UTF-8 / ISO-8859-9</td></tr><tr><td class="k">mesaj_ayrac</td><td class="t">varchar(20)</td><td>ASTM frame / MLLP</td></tr><tr><td class="k">dinleyici_durum</td><td class="t">smallint</td><td>bağlı / kapalı / hata</td></tr><tr><td class="k">son_mesaj_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_cihaz_test_esleme</code> <span class="rz ok">yeni</span> <span class="sp">cihaz test kodu → LIS tetkiği</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">cihaz_id</td><td class="t">int</td><td></td></tr><tr><td class="k">cihaz_kod</td><td class="t">varchar(30)</td><td></td></tr><tr><td class="k">cihaz_ad</td><td class="t">varchar(100)</td><td></td></tr><tr><td class="k">tetkik_id</td><td class="t">int</td><td></td></tr><tr><td class="k">cihaz_birim / lis_birim</td><td class="t">varchar(20)</td><td></td></tr><tr><td class="k">carpan</td><td class="t">numeric</td><td>birim dönüşümü</td></tr><tr><td class="k">ondalik</td><td class="t">smallint</td><td></td></tr><tr><td class="k">bayrak_esleme</td><td class="t">jsonb</td><td>cihaz bayrağı → LIS bayrağı/aksiyon</td></tr><tr><td class="k">oto_onay</td><td class="t">smallint</td><td>bu cihaz-test için oto-onay izinli</td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr>
+  </table><div class="alt">unique (cihaz_id, cihaz_kod)</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_cihaz_mesaj</code> <span class="rz ok">yeni</span> <span class="sp">ham mesaj günlüğü (denetim + yeniden işleme)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">bigint</td><td></td></tr><tr><td class="k">cihaz_id</td><td class="t">int</td><td></td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">yon</td><td class="t">smallint</td><td>gelen / giden</td></tr><tr><td class="k">mesaj_tipi</td><td class="t">varchar(20)</td><td>ORU^R01 / QRY / ASTM R / Q / ACK</td></tr><tr><td class="k">barkod</td><td class="t">varchar(20)</td><td></td></tr><tr><td class="k">ham</td><td class="t">text</td><td>orijinal mesaj</td></tr><tr><td class="k">islem_durum</td><td class="t">smallint</td><td>1 işlendi · 2 sahipsiz (kod/barkod yok) · 3 hata · 4 yeniden işlendi</td></tr><tr><td class="k">hata</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">islenen_sonuc_ids</td><td class="t">bigint[]</td><td></td></tr>
+  </table><div class="alt">indeks: (cihaz_id, zaman) · (barkod) · saklama: 2 yıl (ayar)</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_cihaz_calisma_listesi</code> <span class="rz ok">yeni</span> <span class="sp">cihaza gönderilen istemler (çift yön)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">bigint</td><td></td></tr><tr><td class="k">cihaz_id</td><td class="t">int</td><td></td></tr><tr><td class="k">numune_id</td><td class="t">int</td><td></td></tr><tr><td class="k">istem_satir_id</td><td class="t">int</td><td></td></tr><tr><td class="k">gonderim_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>host query yanıtı / indirme / tekrar / dilüsyon</td></tr><tr><td class="k">ack</td><td class="t">smallint</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_cihaz_olay</code> <span class="rz ok">yeni</span> <span class="sp">kalibrasyon / bakım / arıza / reaktif lot</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">cihaz_id</td><td class="t">int</td><td></td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>kalibrasyon · günlük/haftalık/aylık bakım · arıza · reaktif lot · servis</td></tr><tr><td class="k">tetkik_id</td><td class="t">int</td><td>kalibrasyon/reaktif için</td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">yapan_id</td><td class="t">int</td><td></td></tr><tr><td class="k">lot / skt</td><td class="t">varchar / date</td><td></td></tr><tr><td class="k">gecerlilik_bitis</td><td class="t">timestamp</td><td>kalibrasyon</td></tr><tr><td class="k">detay</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div><h3>Kalite kontrol</h3>
+<div class="tablo">
+  <div class="tb"><code>lab_kk_lot</code> <span class="rz ok">yeni</span> <span class="sp">kontrol materyali lotu ve hedefleri</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">cihaz_id / tetkik_id</td><td class="t">int</td><td></td></tr><tr><td class="k">materyal_ad</td><td class="t">varchar(100)</td><td></td></tr><tr><td class="k">lot</td><td class="t">varchar(30)</td><td></td></tr><tr><td class="k">seviye</td><td class="t">smallint</td><td>1 / 2 / 3</td></tr><tr><td class="k">skt</td><td class="t">date</td><td></td></tr><tr><td class="k">hedef / sd</td><td class="t">numeric</td><td>üretici</td></tr><tr><td class="k">lab_ort / lab_sd</td><td class="t">numeric</td><td>kümülatif</td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_kk_olcum</code> <span class="rz ok">yeni</span> <span class="sp">KK ölçümü</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">bigint</td><td></td></tr><tr><td class="k">kk_lot_id</td><td class="t">int</td><td></td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">deger</td><td class="t">numeric</td><td></td></tr><tr><td class="k">z</td><td class="t">numeric</td><td></td></tr><tr><td class="k">kaynak</td><td class="t">smallint</td><td>cihaz / elle</td></tr><tr><td class="k">cihaz_mesaj_id</td><td class="t">bigint</td><td></td></tr><tr><td class="k">ihlal_kural</td><td class="t">varchar(20)</td><td>1₃ₛ / 2₂ₛ / R₄ₛ / 4₁ₛ / 10ₓ</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>kabul / uyarı / ret</td></tr><tr><td class="k">aksiyon</td><td class="t">varchar(400)</td><td>düzeltici faaliyet</td></tr><tr><td class="k">onay_id</td><td class="t">int</td><td></td></tr>
+  </table><div class="alt">ret → o test için oto-onay kapanır (lab_sonuc.oto_onay=0) ve hasta sonuçları gözden geçirme listesine</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_kk_kural</code> <span class="rz ok">yeni</span> <span class="sp">test bazlı Westgard seti</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">tetkik_id / cihaz_id</td><td class="t">int</td><td></td></tr><tr><td class="k">kural</td><td class="t">varchar(10)</td><td></td></tr><tr><td class="k">etki</td><td class="t">smallint</td><td>uyarı / ret</td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>lab_dkk_sonuc</code> <span class="rz ok">yeni</span> <span class="sp">dış kalite (KBUDEK / RIQAS / CAP)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">program</td><td class="t">varchar(40)</td><td></td></tr><tr><td class="k">donem</td><td class="t">varchar(10)</td><td></td></tr><tr><td class="k">tetkik_id</td><td class="t">int</td><td></td></tr><tr><td class="k">ornek_kod</td><td class="t">varchar(20)</td><td></td></tr><tr><td class="k">sonucumuz / hedef / sd</td><td class="t">numeric</td><td></td></tr><tr><td class="k">sdi</td><td class="t">numeric</td><td></td></tr><tr><td class="k">degerlendirme</td><td class="t">smallint</td><td>kabul / uyarı / ret</td></tr><tr><td class="k">aksiyon</td><td class="t">varchar(400)</td><td></td></tr>
+  </table>
+</div><h3>Mevcut tablolara ek</h3>
+<div class="tablo">
+  <div class="tb"><code>hizmet</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">tetkik = hizmet kartı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">laboratuvar</td><td class="t">smallint</td><td>1 = lab tetkiği (lab_tetkik ile 1:1)</td></tr><tr><td class="k">loinc</td><td class="t">varchar(12)</td><td>e-Nabız / paylaşım</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>belge_satir_rol</code> <span class="rz pas">mevcut</span> <span class="sp">prim</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">—</td><td class="t"></td><td>İsteyen (hekim) · Onaylayan (uzman) rolleri onaylı sonuçtan otomatik — mevcut Prim modülü</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>onam</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">genetik onam türleri</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">tur</td><td class="t">smallint</td><td>+ 6 genetik test · 7 tesadüfi bulgu tercihi · 8 veri saklama/araştırma</td></tr>
+  </table>
+</div>
+
+    <h2>5. Ekranlar</h2>
+    <table>
+      <tr><th style="width:250px">Ekran</th><th>Görev</th><th style="width:230px">Mockup</th></tr>
+      <tr><td>İstem &amp; Numune Kabul</td><td>İstem listesi, tüp planı, etiket, alım/kabul, ret, dış lab gönderimi.</td><td><code>lab_istem_numune_kabul.html</code></td></tr>
+      <tr><td>Biyokimya Çalışma Listesi / Onay</td><td>Cihaz sonuçları, bayrak/delta/panik, tekrar/dilüsyon, teknik+uzman onay, panik bildirimi.</td><td><code>lab_biyokimya_sonuc_onay.html</code></td></tr>
+      <tr><td>Mikrobiyoloji</td><td>Kültür takibi, okuma, identifikasyon, antibiyogram, ön/nihai rapor.</td><td><code>lab_mikrobiyoloji.html</code></td></tr>
+      <tr><td>Genetik</td><td>Vaka listesi, varyant değerlendirme (ACMG), run kalite, rapor.</td><td><code>lab_genetik.html</code></td></tr>
+      <tr><td>Cihaz Entegrasyonu</td><td>Cihazlar, test kodu eşleme, ham mesaj izleme, kalibrasyon/bakım.</td><td><code>lab_cihaz_entegrasyonu.html</code></td></tr>
+      <tr><td>Kalite Kontrol</td><td>İKK Levey-Jennings/Westgard, DKK, düzeltici faaliyet.</td><td><code>lab_kalite_kontrol.html</code></td></tr>
+      <tr><td>Hasta Sonuç Formları</td><td>Akılcı Laboratuvar / ISO 15189 uyumlu rapor şablonları: biyokimya-hematoloji (kümülatif, TAT, panik), mikrobiyoloji (kültür + kademeli antibiyogram, EUCAST), genetik (varyant tablosu, ACMG, sınırlılıklar).</td><td><code>lab_sonuc_formu_biyokimya.html</code> · <code>lab_sonuc_formu_mikrobiyoloji.html</code> · <code>lab_sonuc_formu_genetik.html</code></td></tr>
+      <tr><td>Tetkik Kataloğu <span class="kucuk">(sonra)</span></td><td>Referans aralıkları, panik, TAT, tüp, LOINC, oto-onay, panel.</td><td>—</td></tr>
+      <tr><td>Hasta Sonuç Görüntüleme <span class="kucuk">(mevcut ekranlara)</span></td><td>Muayene/teletıp "Tetkikler" sekmesi, hasta portalı "Belgelerim"; kümülatif tablo + grafik.</td><td>—</td></tr>
+      <tr><td>Dış Kurum Portalı <span class="kucuk">(teleradyoloji ile ortak)</span></td><td>Dış müşteri istem/sonuç.</td><td><code>../Teleradyoloji/telerad_kurum_portali.html</code> deseni</td></tr>
+    </table>
+
+    <h2>6. Entegrasyonlar</h2>
+    <table>
+      <tr><th style="width:200px">Servis</th><th>Kullanım</th></tr>
+      <tr><td>Cihazlar (ASTM / HL7 / dosya)</td><td>Bkz. §3.</td></tr>
+      <tr><td>e-Nabız</td><td>Tetkik Talep + Tetkik Sonuç paketleri (LOINC/SKRS tetkik, SKRS birim); bildirimi zorunlu etkenler.</td></tr>
+      <tr><td>Medula</td><td>Provizyon / tetkik SUT kodları (mevcut başvuru akışı).</td></tr>
+      <tr><td>Prim</td><td>İsteyen / Onaylayan rolleri.</td></tr>
+      <tr><td>SMS / Mesaj</td><td>Panik bildirimi, sonuç hazır, ret bildirimi, cihaz alarmı (BT).</td></tr>
+      <tr><td>Nesne depo</td><td>Genetik ham veri, rapor PDF (<code>dosya</code>).</td></tr>
+      <tr><td>Demirbaş</td><td>Cihaz kartı ↔ demirbaş (bakım, servis sözleşmesi).</td></tr>
+    </table>
+
+    <h2>7. Ayarlar &amp; yetkiler</h2>
+    <ul>
+      <li>Oto-onay açık/kapalı (bölüm ve tetkik bazlı); iki aşamalı onay zorunlu mu; acil tek aşama.</li>
+      <li>Panik teyit süresi ve yükseltme; delta varsayılanları; TAT uyarı eşikleri.</li>
+      <li>Barkod formatı/etiket şablonu; tüp birleştirme kuralı; numune saklama süresi ve imha.</li>
+      <li>Ham mesaj saklama süresi; cihaz alarm alıcıları.</li>
+      <li>Yetkiler: <code>lab.istem</code> · <code>lab.numune</code> · <code>lab.sonuc.teknik</code> · <code>lab.sonuc.onay</code> (bölüm bazlı) · <code>lab.mikro</code> · <code>lab.genetik</code> · <code>lab.cihaz</code> · <code>lab.kk</code> · <code>lab.katalog</code> · <code>lab.ham_mesaj</code>.</li>
+    </ul>
+
+    <div class="tamam">
+      <b>İlk sürüm:</b> katalog + referans, istem/numune/barkod, 2–3 biyokimya-hematoloji cihazı (HL7/ASTM çift yön), kural motoru (referans/delta/panik), iki aşamalı onay, rapor, İKK.
+      Sonraya: mikrobiyoloji tam akış + VITEK/MALDI, genetik (NGS pipeline entegrasyonu, varyant sözlüğü), dış lab, DKK, e-Nabız tetkik paketleri.
+    </div>
+  </div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

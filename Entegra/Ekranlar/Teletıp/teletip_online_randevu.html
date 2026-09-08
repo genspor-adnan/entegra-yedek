@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hasta Portalı — Online Randevu ve Ödeme — Mockup (Gentegre AI · Teletıp)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win" style="max-width:1000px">
+  <div class="title">📱 Hasta Portalı — Online Görüşme Randevusu <span class="sp">portal.kurum.com · mobil uyumlu · hasta girişi: T.C. + SMS</span></div>
+
+  <div class="akis" style="display:flex;gap:6px;padding:10px 14px;align-items:center;background:#f7fafc;border-bottom:1px solid var(--line2)">
+    <span class="rz ok">1 Branş / Hekim</span> → <span class="rz ok">2 Tarih / Saat</span> → <span class="rz mavi">3 Bilgiler &amp; Onam</span> → <span class="rz">4 Ödeme</span> → <span class="rz">5 Onay</span>
+  </div>
+
+  <div class="ikiPanel">
+    <div>
+      <div class="hdr" style="grid-template-columns:1fr">
+        <div class="fld"><label>Seçilen</label><div class="inp ro big">Online Muayene — Dahiliye · Dr. Ali Koç · Çar 09.09.2026 18:40 · 20 dk · 750,00 ₺</div></div>
+        <div class="fld"><label class="req">Görüşme Nedeni (kısa)</label><div class="inp">3 gündür ateş ve boğaz ağrısı</div></div>
+        <div class="fld"><label>Mevcut İlaçlar / Alerji</label><div class="inp">Penisilin alerjisi</div></div>
+        <div class="fld"><label>Dosya Ekle (tahlil, fotoğraf)</label><div class="inp">📎 kan_tahlili_0109.pdf · 📷 IMG_2231.jpg <span class="sonuk">— virüs taraması</span></div></div>
+        <div class="fld"><label>Kimlik Doğrulama</label><div class="inp ro"><span class="rz ok">KPS ile doğrulandı</span> 12345678901 · 1987</div></div>
+      </div>
+      <div class="grp" style="margin:10px"><div class="gb">Onamlar <span class="sp">her biri ayrı, zaman damgalı saklanır</span></div>
+        <div class="ic">
+          <div>☑ <b>Uzaktan sağlık hizmeti bilgilendirme ve rıza</b> metnini okudum, kabul ediyorum.</div>
+          <div>☑ <b>KVKK</b> aydınlatma metnini okudum.</div>
+          <div>☑ Kamera / mikrofon kullanımına izin veriyorum.</div>
+          <div>☐ Görüşmenin <b>kaydedilmesine</b> rıza veriyorum <span class="sonuk">(seçmeli — vermezseniz görüşme kayıtsız yapılır)</span></div>
+          <div>☑ e-Nabız geçmişimin hekim tarafından görülmesine izin veriyorum.</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="grp" style="margin:10px"><div class="gb">Ödeme <span class="sp">sanal POS · 3D Secure</span></div>
+        <div class="hdr" style="grid-template-columns:1fr 1fr;border:none">
+          <div class="fld" style="grid-column:span 2"><label>Tutar</label><div class="inp big">750,00 ₺ <span class="sonuk">KDV dahil · iade: 24 saat öncesine kadar tam</span></div></div>
+          <div class="fld" style="grid-column:span 2"><label>Kart</label><div class="inp">**** **** **** 4421</div></div>
+          <div class="fld"><label>SKT</label><div class="inp">09/28</div></div>
+          <div class="fld"><label>CVV</label><div class="inp">•••</div></div>
+          <div class="fld" style="grid-column:span 2"><label>Fatura</label><div class="inp combo">Kendime · e-Arşiv · e-posta ile</div></div>
+        </div>
+        <div style="padding:0 10px 10px;display:flex;gap:8px">
+          <div class="btn" style="flex:1;justify-content:center">‹ Geri</div>
+          <div class="btn primary" style="flex:2;justify-content:center;padding:10px">🔒 Öde ve Randevuyu Onayla</div>
+        </div>
+      </div>
+      <div class="grp" style="margin:10px"><div class="gb">Onay sonrası ne olur</div>
+        <div class="ic">
+          <ul style="margin:0 0 0 16px;padding:0">
+            <li>SMS + e-posta: randevu özeti ve <b>tek kullanımlık görüşme bağlantısı</b> (saatinden 15 dk önce aktif).</li>
+            <li>Randevu <code>randevu</code> tablosuna, ön ödeme <code>tahsilat</code>'a düşer; başvuru görüşme başlayınca açılır.</li>
+            <li>Hekimin bekleme odasında görünürsünüz; 10 dk gelmezseniz "gelmedi" sayılır (iade kuralı uygulanır).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>Adım 3 / 5</span><span class="sp">Yardım: 0850 … · canlı destek 09:00–18:00</span></div>
+</div>
+<div class="not"><b>Kaynak ekranlar.</b> Bilgilendirme/onam metinleri ve 2FA kuralları <code>../USBS/usbs_onam.html</code>, <code>../USBS/usbs_giris_2fa.html</code>; burada ürün tarafı: hizmet seçimi + ödeme + belge yükleme. Kurum içi personel aynı randevuyu <code>../Randevu/randevu_karti.html</code> üzerinden "Online" kanalıyla açabilir (telefonla arayan hasta için); ödeme linki SMS ile gider.</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

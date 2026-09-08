@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mikrobiyoloji — Kültür, İdentifikasyon, Antibiyogram — Mockup (Gentegre AI · Laboratuvar)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🦠 Mikrobiyoloji — Kültür Takibi <span class="sp">Uzm. Dr. M. Arslan · MALDI-TOF · VITEK 2 · BACTEC · 03.09.2026</span></div>
+  <div class="toolbar">
+    <div class="btn">🧫 Ekim Kaydet</div><div class="btn">👁 Okuma (24/48 s)</div><div class="btn">🔬 İdentifikasyon</div><div class="btn">💊 Antibiyogram</div><div class="btn ok">✔ Rapor Onayla</div>
+    <div class="sepv"></div><div class="btn">📄 Ön Rapor (Gram)</div><div class="btn">🚨 Kritik (kan kültürü +)</div><div class="btn">🏥 Enfeksiyon Kontrol Bildirimi</div><div class="btn sp">🖨 Yazdır</div>
+  </div>
+  <div class="arama">
+    <div class="kutu">🔍 Barkod, hasta, numune…</div>
+    <span class="chip">Ekim</span><span class="chip on">İnkübasyon</span><span class="chip">Üreme +</span><span class="chip">Antibiyogram</span><span class="chip">Rapor bekliyor</span><span class="chip">Tümü</span>
+    <span class="sepv"></span><span class="chip">🩸 Kan kültürü</span><span class="chip">💧 İdrar</span><span class="chip">🗣 Boğaz</span><span class="chip">🧪 Diğer</span><span class="chip">⏰ Okuma zamanı geldi</span>
+  </div>
+  <div class="dg"><table>
+    <thead><tr><th style="width:26px"></th><th>Barkod</th><th>Hasta</th><th>Numune</th><th>Tetkik</th><th class="orta">Ekim</th><th>Besiyeri</th><th class="orta">Gram / Direkt</th><th class="orta">24 s</th><th class="orta">48 s</th><th>Üreme / Organizma</th><th class="orta">AB</th><th class="orta">Durum</th></tr></thead>
+    <tbody>
+      <tr class="sel"><td></td><td>2603187703</td><td>A. Yılmaz</td><td>Boğaz sürüntü</td><td>Boğaz kültürü</td><td class="orta">03.09 09:40</td><td>Kanlı agar · EMB</td><td class="orta">—</td><td class="orta"><span class="rz sari">bekliyor 09:40</span></td><td class="orta">—</td><td class="sonuk">—</td><td class="orta">—</td><td class="orta"><span class="rz mavi">İnkübasyon</span></td></tr>
+      <tr><td></td><td>2603187540</td><td>F. Demir</td><td>Orta akım idrar</td><td>İdrar kültürü + AB</td><td class="orta">02.09 17:30</td><td>CLED · Kanlı</td><td class="orta">Lökosit ++</td><td class="orta">✔ üreme</td><td class="orta">—</td><td><b>E. coli</b> · 10⁵ CFU/mL · MALDI 99,8</td><td class="orta"><span class="rz mavi">VITEK</span></td><td class="orta"><span class="rz sari">Antibiyogram</span></td></tr>
+      <tr><td></td><td>2603187490</td><td>H. Öz</td><td>Kan (aerob/anaerob)</td><td>Kan kültürü ×2</td><td class="orta">02.09 12:10</td><td>BACTEC şişe</td><td class="orta"><span class="rz kir">GPC kümeler</span></td><td class="orta"><span class="rz kir">+ 14 s</span></td><td class="orta">—</td><td><b>S. aureus</b> · MALDI 99,9 · <span class="rz kir">MRSA?</span></td><td class="orta"><span class="rz mavi">VITEK</span></td><td class="orta"><span class="rz kir">Kritik · bildirildi</span></td></tr>
+      <tr><td></td><td>2603187402</td><td>K. Us</td><td>Balgam</td><td>Balgam kültürü</td><td class="orta">02.09 10:00</td><td>Kanlı · Çikolata · MacConkey</td><td class="orta">Kalite uygun (&lt;10 epitel)</td><td class="orta">normal flora</td><td class="orta">normal flora</td><td>Üreme yok / normal flora</td><td class="orta">—</td><td class="orta"><span class="rz ok">Rapor bekliyor</span></td></tr>
+      <tr><td></td><td>2603187377</td><td>S. Ar</td><td>Vajinal sürüntü</td><td>Kültür + mikoloji</td><td class="orta">01.09 15:20</td><td>Sabouraud · Kanlı</td><td class="orta">Maya hücreleri</td><td class="orta">✔</td><td class="orta">✔</td><td><b>C. albicans</b></td><td class="orta">—</td><td class="orta"><span class="rz ok">Onaylı</span></td></tr>
+    </tbody></table></div>
+  <div class="ikiPanel">
+    <div class="grp" style="margin:10px"><div class="gb">💊 Antibiyogram — 2603187540 · E. coli <span class="sp">VITEK 2 AST-N · EUCAST 2026 · MIC</span></div>
+      <div class="dg"><table>
+        <thead><tr><th>Antibiyotik</th><th class="sag">MIC (µg/mL)</th><th class="orta">Yorum</th><th class="orta">Kaynak</th><th>Not</th></tr></thead>
+        <tbody>
+          <tr><td>Ampisilin</td><td class="sag">≥ 32</td><td class="orta"><span class="rz kir">R</span></td><td class="orta">cihaz</td><td></td></tr>
+          <tr><td>Amoksisilin-klavulanat</td><td class="sag">8</td><td class="orta"><span class="rz ok">S</span></td><td class="orta">cihaz</td><td></td></tr>
+          <tr><td>Sefuroksim</td><td class="sag">4</td><td class="orta"><span class="rz ok">S</span></td><td class="orta">cihaz</td><td></td></tr>
+          <tr><td>Seftriakson</td><td class="sag">≤ 1</td><td class="orta"><span class="rz ok">S</span></td><td class="orta">cihaz</td><td>ESBL negatif</td></tr>
+          <tr><td>Siprofloksasin</td><td class="sag">≥ 4</td><td class="orta"><span class="rz kir">R</span></td><td class="orta">cihaz</td><td></td></tr>
+          <tr><td>Nitrofurantoin</td><td class="sag">≤ 16</td><td class="orta"><span class="rz ok">S</span></td><td class="orta">cihaz</td><td>idrar için önerilir</td></tr>
+          <tr><td>TMP-SMX</td><td class="sag">≥ 320</td><td class="orta"><span class="rz kir">R</span></td><td class="orta">cihaz</td><td></td></tr>
+          <tr><td>Fosfomisin</td><td class="sag">—</td><td class="orta"><span class="rz ok">S</span></td><td class="orta">disk (manuel)</td><td>zon 24 mm</td></tr>
+        </tbody></table></div>
+      <div class="ic sonuk">Raporda gösterim: <b>kademeli bildirim</b> (1. basamak ajanlar önce, ESBL/karbapenemaz varsa uyarı). Uzman S/I/R'yi değiştirebilir (kaynak: uzman, gerekçe zorunlu).</div>
+    </div>
+    <div>
+      <div class="grp" style="margin:10px"><div class="gb">🧫 Okuma kaydı — 2603187703 · Boğaz kültürü</div>
+        <div class="hdr" style="grid-template-columns:1fr 1fr;border:none">
+          <div class="fld"><label>Okuma</label><div class="inp combo">24 saat · 04.09 09:40</div></div>
+          <div class="fld"><label>Okuyan</label><div class="inp combo">Tekn. B. Sel</div></div>
+          <div class="fld"><label>Kanlı agar</label><div class="inp combo">Beta-hemolitik koloniler · orta yoğunluk</div></div>
+          <div class="fld"><label>EMB</label><div class="inp combo">Üreme yok</div></div>
+          <div class="fld"><label>Sonraki adım</label><div class="inp combo">MALDI-TOF identifikasyon + Bacitracin/PYR</div></div>
+          <div class="fld"><label>Ön rapor</label><div class="inp">☑ "Beta-hemolitik streptokok üremesi, identifikasyon sürüyor" → hekime</div></div>
+        </div>
+      </div>
+      <div class="grp" style="margin:10px"><div class="gb">Rapor önizleme — 2603187540</div>
+        <div class="ic"><b>İdrar kültürü:</b> <i>Escherichia coli</i> — 100.000 CFU/mL (anlamlı bakteriüri).<br><b>Antibiyogram:</b> Nitrofurantoin S · Amoksisilin-klavulanat S · Sefuroksim S · Seftriakson S · Siprofloksasin R · TMP-SMX R · Ampisilin R.<br><span class="sonuk">Yorum: ESBL negatif. Komplike olmayan sistitte nitrofurantoin ilk seçenek.</span>
+          <div style="margin-top:6px;display:flex;gap:6px"><div class="btn ok">✔ Onayla &amp; Gönder</div><div class="btn">✎ Düzenle</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>5 kültür · 1 kritik (kan +) · 1 antibiyogram bekliyor</span><span class="sp">Organizma: SNOMED/SKRS mikroorganizma listesi · AB yorumu EUCAST sürümüyle saklanır</span></div>
+</div>
+<div class="not"><b>Süreç.</b> Numune → ekim (besiyeri seti tetkik kataloğundan) → inkübasyon → planlı okumalar (24/48/72 s; kan kültürü cihaz alarmı) → üreme varsa identifikasyon (MALDI-TOF / VITEK / manuel testler) → antibiyogram (VITEK MIC / disk difüzyon) → uzman onayı → rapor. Ara raporlar (Gram, ön üreme) hekime anında gider; kan kültürü pozitifliği panik akışına girer; MRSA/ESBL/CRE enfeksiyon kontrol komitesine bildirim. Tablolar: <code>lab_kultur</code>, <code>lab_kultur_okuma</code>, <code>lab_kultur_ureme</code>, <code>lab_antibiyogram</code>.</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

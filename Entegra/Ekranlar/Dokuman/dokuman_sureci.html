@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Doküman Yönetimi — Süreç ve Tablolar — Mockup (Gentegre AI · Doküman)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .win{max-width:1080px}
+  .icerik{padding:6px 18px 22px;font-size:13px;line-height:1.65}
+  h2{font-size:15px;color:#1c4374;border-bottom:1px solid var(--line2);padding-bottom:5px;margin:22px 0 10px}
+  h3{font-size:13.5px;color:#2c4a6b;margin:16px 0 6px}
+  code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:1px 4px;font-size:12px}
+  .icerik table{border-collapse:collapse;width:100%;margin:8px 0 14px}
+  .icerik th{background:linear-gradient(#f4f7fb,#e7eef6);border:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:12px;color:#3a5573}
+  .icerik td{border:1px solid var(--line2);padding:6px 8px;font-size:12.5px;vertical-align:top}
+  .kutu{border:1px solid var(--line2);background:#fbfcfd;border-radius:4px;padding:10px 12px;margin:10px 0}
+  .uyari{border:1px solid #f2ddbf;background:#fdf9f1;border-radius:4px;padding:9px 11px;margin:10px 0;color:var(--uyari)}
+  .tamam{border:1px solid #bfe3cb;background:#f1f8f3;border-radius:4px;padding:9px 11px;margin:10px 0;color:#245c37}
+  .akis{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+  .akis .a{border:1px solid var(--line);background:#fff;border-radius:14px;padding:4px 12px;font-size:12px}
+  .akis .a.v{background:#eef4fc;border-color:#cfe0f5;color:#2f6db3;font-weight:bold}
+  .akis .ok2{color:var(--muted)}
+  ul{margin:6px 0 12px 18px;padding:0} li{margin:3px 0}
+  .kucuk{font-size:11.5px;color:var(--muted)}
+  .durumlar{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+
+  .tablo{border:1px solid var(--line2);border-radius:4px;margin:12px 0;overflow:hidden}
+  .tablo .tb{background:linear-gradient(#f4f7fb,#e7eef6);padding:6px 10px;font-weight:bold;color:#1c4374;display:flex;gap:10px;align-items:center;font-size:13px}
+  .tablo .tb .rz{font-weight:normal}
+  .tablo .tb .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:11.5px}
+  .tablo table{margin:0}
+  .tablo td.k{font-family:Consolas,monospace;font-size:12px;white-space:nowrap}
+  .tablo td.t{font-family:Consolas,monospace;font-size:11.5px;color:#4d5d6e;white-space:nowrap}
+  .tablo tr.pk td.k{font-weight:bold}
+  .tablo .alt{padding:6px 10px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line2);background:#fbfcfd}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📁 Doküman Yönetimi Modülü — Süreç, Veri Modeli, Alanlar <span class="sp">Gentegre AI · tasarım notu · 03.09.2026 · mevcut 057–060/160 üzerine</span></div>
+  <div class="icerik">
+
+    <div class="kutu">
+      <b>Tek cümlede:</b> Bugünkü doküman altyapısı (<code>dokuman</code> polimorfik başlık + <code>dokuman_icerik</code> hash-dedup + kart galerisi + paylaşım linki)
+      <b>korunur</b>; üstüne kurumsal klasör ağacı, sürüm/onay/yayın döngüsü, erişim sınıfları (KVKK), saklama-imha, tam metin arama ve
+      okuma görevleri eklenir. Kart galerileri aynı tabloyu görmeye devam eder; yeni ekranlar kaynak-üstü görünümdür.
+      <br><span class="kucuk">Mockuplar: <code>dokuman_listesi.html</code> · <code>dokuman_karti.html</code> · <code>dokuman_onay_kuyrugu.html</code> · <code>dokuman_ayarlar.html</code> ·
+      mevcut: kartlarda "Resim / Doküman" sekmesi (<code>DokumanGalerisi</code>)</span>
+    </div>
+
+    <h2>0. Mevcut durum (envanter)</h2>
+    <table>
+      <tr><th style="width:230px">Parça</th><th>Ne var</th><th style="width:220px">Kaynak</th></tr>
+      <tr><td><code>dokuman</code></td><td>kaynak+kaynak_id (taraf/stok/radyoloji-istem/ebelge-xslt), ad, content_type, boyut, hash, sira, varsayilan (kapak/varsayılan XSLT), paylasim_kodu, belge_turu (serbest), yon, durum, şube+denetim. 30 kayıt.</td><td>057, 058, 060, 160</td></tr>
+      <tr><td><code>dokuman_icerik</code></td><td>hash PK, bytea, referans_sayisi — aynı içerik ikinci kez yazılmaz (eski GENDEPO.DOSYA deseni).</td><td>059</td></tr>
+      <tr><td>API</td><td><code>/api/dokuman/{kart}/{id}</code>: liste, yükle, varsayılan, düzenle (ad/belge türü), sil, paylaş; <code>/api/dokuman-icerik/{id}</code> indirme; <code>/api/dokuman-paylasim/{kod}</code> kimliksiz.</td><td><code>DokumanUclari.cs</code></td></tr>
+      <tr><td>UI</td><td><code>DokumanGalerisi</code> (kart sekmesi: personel, kişi, cari, stok; radyoloji istem modalı; XSLT şablonları), <code>KartResimKutusu</code> (kapak).</td><td><code>kartSekmeleri.ts</code></td></tr>
+      <tr><td>Delphi kökeni</td><td>DOKUMAN (ad, klasör, tür, sürüm, tarih) + IMAJ (YERI/YER_ID) + GENDEPO.DOSYA (FILESTREAM, hash). Klasör/sürüm kavramı eski üründe vardı, PG'de henüz yok.</td><td><code>belge-depolama.md</code></td></tr>
+    </table>
+
+    <h2>1. Yaşam döngüsü</h2>
+    <div class="akis">
+      <span class="a">Yükle / şablondan üret</span><span class="ok2">→</span>
+      <span class="a">Virüs tarama · hash · dedup</span><span class="ok2">→</span>
+      <span class="a">OCR / metin · önizleme</span><span class="ok2">→</span>
+      <span class="a v">Taslak (meta: tür, klasör, etiket, gizlilik)</span><span class="ok2">→</span>
+      <span class="a">Onay akışı (inceleme → onay)</span><span class="ok2">→</span>
+      <span class="a">Yayın (e-imza · eski sürüm arşiv · okuma görevi)</span><span class="ok2">→</span>
+      <span class="a">Kullanım (kart, arama, paylaşım, bağlantı)</span><span class="ok2">→</span>
+      <span class="a">Gözden geçirme / yeni sürüm</span><span class="ok2">→</span>
+      <span class="a">Saklama süresi → imha</span>
+    </div>
+    <table>
+      <tr><th style="width:40px">#</th><th style="width:190px">Adım</th><th>Ne olur</th><th style="width:230px">Kayıt</th></tr>
+      <tr><td>1</td><td><b>Giriş</b></td><td>Kart galerisi (mevcut), Doküman listesi "Yükle", şablondan üretme (alanlı docx → pdf), portal (hasta/dış kurum yükler), tarayıcı/e-posta (sonra). Tür ve klasör varsayılanı kaynağa göre.</td><td><code>dokuman</code>, <code>dokuman_surum</code> v1</td></tr>
+      <tr><td>2</td><td><b>İçerik işleme</b></td><td>Virüs taraması → hash → <code>dokuman_icerik</code> (varsa referans +1) → &gt; eşik ise nesne depo → metin çıkarma (PDF/OCR) → tsvector → önizleme üretimi. Hepsi hash'e bağlı, tekrar yapılmaz.</td><td><code>dokuman_icerik</code> yeni kolonlar</td></tr>
+      <tr><td>3</td><td><b>Meta</b></td><td>Kod (şablondan), tür, klasör, etiket, gizlilik, sahip, geçerlilik, gözden geçirme periyodu, saklama kuralı; ek bağlantılar (dokuman_iliski). AI özet/etiket önerisi kullanıcı onayıyla.</td><td><code>dokuman</code> ek kolonlar, <code>dokuman_iliski</code></td></tr>
+      <tr><td>4</td><td><b>Onay</b></td><td>Türün akışı: adımlar rol/kişi/dinamik (klasör sorumlusu); süre, hatırlatma, yükseltme; e-imza zorunlu adım. Ret → hazırlayana geri, yeni sürüm. Sürümsüz türlerde (resim, tetkik sonucu) akış yok → doğrudan yayında.</td><td><code>dokuman_onay(_adim)</code></td></tr>
+      <tr><td>5</td><td><b>Yayın</b></td><td>Onaylanan sürüm yayında (dokuman.hash/surum_no güncellenir), önceki arşiv; PAdES e-imzalı kopya; okuma görevi (rol kapsamı); bildirim (Mesajlar).</td><td><code>dokuman_surum</code>, <code>dokuman_okuma</code></td></tr>
+      <tr><td>6</td><td><b>Kullanım</b></td><td>Kart galerileri (değişmez), klasör/etiket/tam metin arama, önizleme, indirme (filigran: özel nitelikli), paylaşım linki (süre/şifre/sayaç), bağlı kayıtlardan "?" ile prosedür açma. Her erişim günlüğe.</td><td><code>dokuman_olay</code>, <code>dokuman_paylasim</code></td></tr>
+      <tr><td>7</td><td><b>Gözden geçirme</b></td><td>Periyot dolunca sahibe görev; "değişiklik yok" → tarih ilerler; değişiklik → yeni sürüm + akış. Geçerlilik bitişi (sözleşme) → yenileme görevi.</td><td><code>dokuman.sonraki_gozden_gecirme</code></td></tr>
+      <tr><td>8</td><td><b>Saklama / imha</b></td><td>Kural: başlangıç (yükleme / geçerlilik bitişi / kaynak olayı) + süre; bitince imha listesi → onay → içerik silinir (referans 0 → fiziksel), başlık "imha edildi" kalır, olay loglanır.</td><td><code>dokuman_saklama</code>, <code>dokuman.imha_tarihi</code></td></tr>
+    </table>
+
+    <h2>2. Durumlar</h2>
+    <div class="durumlar">
+      <span class="rz pas">1 Taslak</span> → <span class="rz sari">2 Onayda</span> → <span class="rz ok">3 Yayında</span> → <span class="rz pas">4 Arşiv</span> → <span class="rz kir">5 İmha edildi</span>
+      &nbsp;|&nbsp; <span class="rz">0 Silindi</span> (mantıksal) · <span class="kucuk">sürümsüz tür: yükleme = yayında</span>
+    </div>
+
+    <h2>3. Erişim modeli</h2>
+    <table>
+      <tr><th style="width:220px">Katman</th><th>Kural</th></tr>
+      <tr><td>Kaynak kart izni</td><td>Mevcut <code>rol_yetki</code>: personel kartını görebilen, personelin dokümanlarını görür (bugünkü davranış). Kurumsal klasörlerde kaynak yok → klasör izni.</td></tr>
+      <tr><td>Klasör izni</td><td><code>dokuman_erisim</code> (rol/kullanıcı × oku/indir/düzenle/paylaş/sil/onayla), alt klasörlere devralınır.</td></tr>
+      <tr><td>Doküman izni</td><td>İstisna: klasörden farklı kişi/rol; süreli izin.</td></tr>
+      <tr><td>Gizlilik sınıfı</td><td>Herkese açık / kurum içi / gizli / <b>özel nitelikli</b> (hasta, personel sağlık/ceza) — sınıf, izinden bağımsız üst kısıt: gerekçe zorunlu, filigran, link için onay, erişim günlüğü. Hasta ve personel kaynaklı dokümanlar otomatik özel nitelikli.</td></tr>
+      <tr><td>Paylaşım linki</td><td>Mevcut token korunur; son kullanma, şifre, indirme izni, açılma sayacı, iptal, günlük.</td></tr>
+    </table>
+
+    <h2>4. Tablolar ve alanlar</h2>
+    <h3>Mevcut (057–060, 160) — olduğu gibi kalır</h3>
+<div class="tablo">
+  <div class="tb"><code>dokuman</code> <span class="rz pas">mevcut</span> <span class="sp">doküman başlığı — kaynak polimorfik</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">kaynak / kaynak_id</td><td class="t">varchar(20) / int</td><td><b>mevcut</b> — taraf · stok · radyoloji-istem · ebelge-xslt · hasta … (birincil bağlantı)</td></tr><tr><td class="k">ad</td><td class="t">varchar(200)</td><td><b>mevcut</b></td></tr><tr><td class="k">content_type / boyut / hash</td><td class="t"></td><td><b>mevcut</b> — hash → dokuman_icerik (yayındaki sürüm)</td></tr><tr><td class="k">sira / varsayilan</td><td class="t">smallint</td><td><b>mevcut</b> — kapak resmi / varsayılan XSLT</td></tr><tr><td class="k">paylasim_kodu</td><td class="t">varchar(40)</td><td><b>mevcut</b> — 058 kimliksiz link</td></tr><tr><td class="k">belge_turu</td><td class="t">varchar(80)</td><td><b>mevcut</b> — serbest metin; yeni: belge_turu_id ile eşlenir, metin görünüm için kalır</td></tr><tr><td class="k">yon</td><td class="t">smallint</td><td><b>mevcut</b> — 160 gelen/giden (e-belge şablonu)</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td><b>mevcut</b> — genişler: 1 taslak · 2 onayda · 3 yayında · 4 arşiv · 5 imha edildi · 0 silindi</td></tr><tr><td class="k">sube_id + denetim</td><td class="t"></td><td><b>mevcut</b></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dokuman_icerik</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">hash-dedup içerik</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">hash</td><td class="t">varchar(64)</td><td><b>mevcut</b> PK</td></tr><tr><td class="k">icerik</td><td class="t">bytea</td><td><b>mevcut</b></td></tr><tr><td class="k">content_type / boyut / referans_sayisi / ekleme_tarihi</td><td class="t"></td><td><b>mevcut</b></td></tr><tr><td class="k">depo</td><td class="t">smallint</td><td>yeni — 1 bytea · 2 nesne depo</td></tr><tr><td class="k">nesne_yolu</td><td class="t">varchar(300)</td><td>yeni — nesne depodaysa (icerik NULL)</td></tr><tr><td class="k">metin</td><td class="t">text</td><td>yeni — OCR/PDF metni (tam metin arama)</td></tr><tr><td class="k">metin_tsv</td><td class="t">tsvector</td><td>yeni — GIN indeks</td></tr><tr><td class="k">onizleme_hash</td><td class="t">varchar(64)</td><td>yeni — üretilmiş önizleme (PDF/thumbnail) içeriği</td></tr><tr><td class="k">virus_tarama</td><td class="t">smallint</td><td>yeni — 0 bekliyor · 1 temiz · 2 engellendi</td></tr>
+  </table><div class="alt">metin hash'e bağlı — aynı içerik ikinci kez OCR edilmez.</div>
+</div><h3>dokuman'a eklenecek kolonlar</h3>
+<div class="tablo">
+  <div class="tb"><code>dokuman (ek)</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">yönetim katmanı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">kod</td><td class="t">varchar(30)</td><td>PR-07 — tür kod şablonundan; unique (kurum)</td></tr><tr><td class="k">klasor_id</td><td class="t">int</td><td>→ dokuman_klasor (kaynak klasörleri sanal: kaynak/kaynak_id'den türetilir)</td></tr><tr><td class="k">belge_turu_id</td><td class="t">int</td><td>→ dokuman_turu</td></tr><tr><td class="k">aciklama</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">etiketler</td><td class="t">varchar(40)[]</td><td>GIN indeks</td></tr><tr><td class="k">gizlilik</td><td class="t">smallint</td><td>1 herkese açık · 2 kurum içi · 3 gizli · 4 özel nitelikli (KVKK)</td></tr><tr><td class="k">sahip_id</td><td class="t">int</td><td>→ kullanici</td></tr><tr><td class="k">surum_no</td><td class="t">smallint</td><td>yayındaki sürüm (dokuman_surum ile aynı)</td></tr><tr><td class="k">surumlu</td><td class="t">smallint</td><td>sürüm takibi açık mı (resimlerde kapalı)</td></tr><tr><td class="k">akis_id</td><td class="t">int</td><td>→ dokuman_akis (onay şablonu)</td></tr><tr><td class="k">gecerli_bas / gecerli_bit</td><td class="t">date</td><td>geçerlilik; bitişe yaklaşınca görev</td></tr><tr><td class="k">gozden_gecirme_ay</td><td class="t">smallint</td><td>periyot</td></tr><tr><td class="k">son_gozden_gecirme</td><td class="t">date</td><td></td></tr><tr><td class="k">sonraki_gozden_gecirme</td><td class="t">date</td><td></td></tr><tr><td class="k">saklama_kurali_id</td><td class="t">int</td><td>→ dokuman_saklama; boşsa türden</td></tr><tr><td class="k">saklama_bitis</td><td class="t">date</td><td>hesaplanan</td></tr><tr><td class="k">imha_tarihi</td><td class="t">timestamp</td><td>içerik silindi</td></tr><tr><td class="k">dil</td><td class="t">varchar(5)</td><td></td></tr><tr><td class="k">kaynak_dokuman_id</td><td class="t">int</td><td>şablondan üretildiyse</td></tr><tr><td class="k">ozet</td><td class="t">varchar(1000)</td><td>AI/kullanıcı özeti</td></tr><tr><td class="k">ozet_onayli</td><td class="t">smallint</td><td></td></tr><tr><td class="k">okuma_zorunlu</td><td class="t">smallint</td><td>yayında okuma görevi üret</td></tr><tr><td class="k">imza_dosya_hash</td><td class="t">varchar(64)</td><td>e-imzalı (PAdES) kopya</td></tr>
+  </table>
+</div><h3>Yeni tablolar</h3>
+<div class="tablo">
+  <div class="tb"><code>dokuman_klasor</code> <span class="rz ok">yeni</span> <span class="sp">klasör ağacı (kurumsal) — kaynak klasörleri sanal</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">ust_id</td><td class="t">int</td><td></td></tr><tr><td class="k">ad</td><td class="t">varchar(120)</td><td></td></tr><tr><td class="k">yol</td><td class="t">varchar(400)</td><td>Kurumsal/Kalite — hızlı arama</td></tr><tr><td class="k">varsayilan_tur_id / varsayilan_akis_id / varsayilan_gizlilik</td><td class="t"></td><td></td></tr><tr><td class="k">kod_sablonu</td><td class="t">varchar(60)</td><td>{tür}-{sıra:02}</td></tr><tr><td class="k">sira</td><td class="t">smallint</td><td></td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dokuman_turu</code> <span class="rz ok">yeni</span> <span class="sp">belge türü kataloğu (060'daki serbest metnin yerine)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">ad</td><td class="t">varchar(80)</td><td>Prosedür, Sözleşme, İş Sözleşmesi, Ürün resmi, e-Fatura XSLT…</td></tr><tr><td class="k">kisaltma</td><td class="t">varchar(10)</td><td>PR, TL, SZ</td></tr><tr><td class="k">surumlu</td><td class="t">smallint</td><td></td></tr><tr><td class="k">akis_id</td><td class="t">int</td><td></td></tr><tr><td class="k">gozden_gecirme_ay</td><td class="t">smallint</td><td></td></tr><tr><td class="k">saklama_kurali_id</td><td class="t">int</td><td></td></tr><tr><td class="k">gizlilik</td><td class="t">smallint</td><td>varsayılan</td></tr><tr><td class="k">kaynaklar</td><td class="t">varchar(20)[]</td><td>hangi kartlarda seçilebilir (taraf, stok, hasta…)</td></tr><tr><td class="k">icerik_tipleri</td><td class="t">varchar(20)[]</td><td>izinli uzantılar</td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dokuman_surum</code> <span class="rz ok">yeni</span> <span class="sp">sürüm geçmişi</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">dokuman_id</td><td class="t">int</td><td></td></tr><tr><td class="k">surum_no</td><td class="t">smallint</td><td></td></tr><tr><td class="k">hash</td><td class="t">varchar(64)</td><td>→ dokuman_icerik</td></tr><tr><td class="k">content_type / boyut</td><td class="t"></td><td></td></tr><tr><td class="k">degisiklik_notu</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">yukleyen_id</td><td class="t">int</td><td></td></tr><tr><td class="k">yukleme</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>1 taslak · 2 onayda · 3 yayında · 4 arşiv · 5 reddedildi</td></tr><tr><td class="k">yayin_tarihi</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">arsiv_tarihi</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">imza_dosya_hash</td><td class="t">varchar(64)</td><td></td></tr><tr><td class="k">onay_id</td><td class="t">int</td><td>→ dokuman_onay</td></tr>
+  </table><div class="alt">unique (dokuman_id, surum_no); yayında en fazla bir sürüm</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dokuman_iliski</code> <span class="rz ok">yeni</span> <span class="sp">ek bağlantılar (birincil kaynak dokuman.kaynak'ta)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">dokuman_id</td><td class="t">int</td><td></td></tr><tr><td class="k">kaynak</td><td class="t">varchar(20)</td><td>taraf / stok / belge / lab_tetkik / lab_cihaz / uretim_emri / telerad_kurum …</td></tr><tr><td class="k">kaynak_id</td><td class="t">int</td><td></td></tr><tr><td class="k">rol</td><td class="t">varchar(60)</td><td>ilgili prosedür, ek, sözleşme…</td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t"></td><td></td></tr>
+  </table><div class="alt">unique (dokuman_id, kaynak, kaynak_id)</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dokuman_akis</code> <span class="rz ok">yeni</span> <span class="sp">onay akışı şablonu</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">ad</td><td class="t">varchar(80)</td><td></td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dokuman_akis_adim</code> <span class="rz ok">yeni</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">akis_id</td><td class="t">int</td><td></td></tr><tr><td class="k">sira</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ad</td><td class="t">varchar(60)</td><td>İnceleme / Onay / Yayın</td></tr><tr><td class="k">rol_id</td><td class="t">int</td><td>→ rol; ya da</td></tr><tr><td class="k">kullanici_id</td><td class="t">int</td><td>sabit kişi; ya da</td></tr><tr><td class="k">dinamik</td><td class="t">smallint</td><td>1 sahip · 2 klasör sorumlusu · 3 bölüm sorumlusu</td></tr><tr><td class="k">karar_turu</td><td class="t">smallint</td><td>inceleme (uygun/düzelt) · onay (onay/ret) · yayın (sistem)</td></tr><tr><td class="k">sure_gun</td><td class="t">smallint</td><td></td></tr><tr><td class="k">hatirlat_gun / yukselt_gun</td><td class="t">smallint</td><td></td></tr><tr><td class="k">e_imza_zorunlu</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dokuman_onay</code> <span class="rz ok">yeni</span> <span class="sp">başlatılmış onay süreci (sürüm başına)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">dokuman_id / surum_id</td><td class="t">int</td><td></td></tr><tr><td class="k">akis_id</td><td class="t">int</td><td></td></tr><tr><td class="k">baslatan_id</td><td class="t">int</td><td></td></tr><tr><td class="k">baslama</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">guncel_adim</td><td class="t">smallint</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>1 sürüyor · 2 tamamlandı · 3 reddedildi · 4 geri çekildi</td></tr><tr><td class="k">bitis</td><td class="t">timestamp</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dokuman_onay_adim</code> <span class="rz ok">yeni</span> <span class="sp">adım kararları</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">onay_id</td><td class="t">int</td><td></td></tr><tr><td class="k">sira</td><td class="t">smallint</td><td></td></tr><tr><td class="k">atanan_rol_id / atanan_kullanici_id</td><td class="t">int</td><td></td></tr><tr><td class="k">karar</td><td class="t">smallint</td><td>0 bekliyor · 1 uygun/onay · 2 düzelt/ret · 3 geri gönder</td></tr><tr><td class="k">karar_veren_id</td><td class="t">int</td><td></td></tr><tr><td class="k">karar_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">not</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">imza_hash</td><td class="t">varchar(64)</td><td>e-imza zorunluysa</td></tr><tr><td class="k">hatirlatma_sayisi</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dokuman_erisim</code> <span class="rz ok">yeni</span> <span class="sp">doküman / klasör bazlı izin (rol veya kullanıcı)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hedef_tur</td><td class="t">smallint</td><td>1 klasör · 2 doküman</td></tr><tr><td class="k">hedef_id</td><td class="t">int</td><td></td></tr><tr><td class="k">rol_id / kullanici_id</td><td class="t">int</td><td>biri dolu</td></tr><tr><td class="k">oku / indir / duzenle / paylas / sil / onayla</td><td class="t">smallint</td><td>bit bayrakları</td></tr><tr><td class="k">devral</td><td class="t">smallint</td><td>alt klasörlere geçer</td></tr><tr><td class="k">gecerli_bit</td><td class="t">date</td><td>süreli izin</td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table><div class="alt">etkin izin = kaynak kart izni (mevcut rol_yetki) ∪ klasör izni ∪ doküman izni − gizlilik sınıfı kısıtı</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dokuman_paylasim</code> <span class="rz ok">yeni</span> <span class="sp">paylaşım linkleri (058'in genişlemesi — çoklu link)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">dokuman_id</td><td class="t">int</td><td></td></tr><tr><td class="k">kod</td><td class="t">varchar(40)</td><td>→ mevcut paylasim_kodu ilk kayıt olarak taşınır</td></tr><tr><td class="k">olusturan_id</td><td class="t">int</td><td></td></tr><tr><td class="k">son_kullanma</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">sifre_hash</td><td class="t">varchar(100)</td><td></td></tr><tr><td class="k">indirme_izni</td><td class="t">smallint</td><td></td></tr><tr><td class="k">azami_acilma</td><td class="t">int</td><td></td></tr><tr><td class="k">acilma_sayisi</td><td class="t">int</td><td></td></tr><tr><td class="k">alici_eposta</td><td class="t">varchar(120)</td><td>bilgi</td></tr><tr><td class="k">iptal</td><td class="t">timestamp</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dokuman_okuma</code> <span class="rz ok">yeni</span> <span class="sp">okuma görevi / 'okudum' kaydı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">dokuman_id / surum_id</td><td class="t">int</td><td></td></tr><tr><td class="k">kullanici_id</td><td class="t">int</td><td></td></tr><tr><td class="k">atanma</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">son_tarih</td><td class="t">date</td><td></td></tr><tr><td class="k">okuma_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">onay_yontemi</td><td class="t">smallint</td><td>tık / parola / e-imza</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>bekliyor / okundu / süresi geçti</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dokuman_olay</code> <span class="rz ok">yeni</span> <span class="sp">erişim ve işlem günlüğü (KVKK erişim kaydı)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">bigint</td><td></td></tr><tr><td class="k">dokuman_id</td><td class="t">int</td><td></td></tr><tr><td class="k">surum_id</td><td class="t">int</td><td></td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">kullanici_id</td><td class="t">int</td><td>null = paylaşım linki</td></tr><tr><td class="k">paylasim_id</td><td class="t">int</td><td></td></tr><tr><td class="k">olay</td><td class="t">smallint</td><td>yükleme · görüntüleme · indirme · düzenleme · sürüm · onay · yayın · paylaşım oluşturma · link açılma · imha · erişim reddi</td></tr><tr><td class="k">gerekce</td><td class="t">varchar(200)</td><td>özel nitelikli erişimde zorunlu</td></tr><tr><td class="k">ip</td><td class="t">varchar(45)</td><td></td></tr><tr><td class="k">kanal</td><td class="t">smallint</td><td>uygulama / portal / link / API</td></tr>
+  </table><div class="alt">indeks: (dokuman_id, zaman) · (kullanici_id, zaman); silinmez</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dokuman_saklama</code> <span class="rz ok">yeni</span> <span class="sp">saklama kuralları</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">ad</td><td class="t">varchar(80)</td><td>VUK 10 yıl · İK ayrılış+10 · sağlık 15 yıl · kalite süresiz</td></tr><tr><td class="k">baslangic</td><td class="t">smallint</td><td>1 yükleme · 2 geçerlilik bitişi · 3 kaynak olayı (işten ayrılış, sözleşme bitişi)</td></tr><tr><td class="k">sure_ay</td><td class="t">int</td><td>0 = süresiz</td></tr><tr><td class="k">imha_yontemi</td><td class="t">smallint</td><td>1 içerik sil, kayıt kalsın · 2 tamamen sil</td></tr><tr><td class="k">onay_gerekli</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dokuman_sablon</code> <span class="rz ok">yeni</span> <span class="sp">şablondan doküman üretme (Word/HTML alanlı)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">ad</td><td class="t">varchar(120)</td><td></td></tr><tr><td class="k">dokuman_id</td><td class="t">int</td><td>şablon dosyası (docx/html)</td></tr><tr><td class="k">belge_turu_id</td><td class="t">int</td><td></td></tr><tr><td class="k">kaynak</td><td class="t">varchar(20)</td><td>hangi karttan üretilir (taraf, personel, belge)</td></tr><tr><td class="k">alanlar</td><td class="t">jsonb</td><td>{{unvan}}, {{tarih}} eşlemeleri</td></tr><tr><td class="k">cikti</td><td class="t">smallint</td><td>docx / pdf</td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div><h3>Mevcut sistemle bağ</h3>
+<div class="tablo">
+  <div class="tb"><code>islem_log / kullanici / rol</code> <span class="rz pas">mevcut</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">—</td><td class="t"></td><td>işlem logu mevcut deseniyle (kart değişiklikleri); okuma/indirme olayları ayrıca dokuman_olay'da</td></tr><tr><td class="k">rol_yetki</td><td class="t"></td><td>yeni yetkiler: dokuman.liste · dokuman.klasor · dokuman.tur · dokuman.akis · dokuman.onayla · dokuman.ozel_nitelikli · dokuman.imha · dokuman.ham (paylaşım günlüğü)</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>mesaj_ek / ai_taslak</code> <span class="rz pas">mevcut</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">—</td><td class="t"></td><td>mesaj ekleri ve AI taslakları bugün kendi tablolarında; 2. aşamada dokuman'a (kaynak = mesaj / ai) taşınıp tek depo + dedup kullanılır</td></tr>
+  </table>
+</div>
+
+    <h2>5. Geçiş (mevcut veriden)</h2>
+    <ul>
+      <li>Mevcut 30 <code>dokuman</code> satırı: <code>belge_turu</code> metni → <code>dokuman_turu</code> (yoksa oluştur), <code>surum_no</code>=1, <code>dokuman_surum</code> v1 satırı, <code>durum</code>=3 yayında, gizlilik kaynağa göre (taraf-personel/hasta → özel nitelikli, stok resmi → herkese açık, XSLT → kurum içi).</li>
+      <li><code>paylasim_kodu</code> → <code>dokuman_paylasim</code> ilk satır; eski kolon uyumluluk için kalır (kimliksiz uç aynı).</li>
+      <li>Kart galerisi API'si değişmez; liste yanıtına yeni alanlar (kod, sürüm, durum, gizlilik) eklenir; yükleme yeni sürüm üretir (sürümlü türde).</li>
+      <li>Mesaj ekleri ve AI taslakları 2. aşamada <code>dokuman</code>'a (kaynak = mesaj / ai).</li>
+    </ul>
+
+    <h2>6. Ekranlar</h2>
+    <table>
+      <tr><th style="width:250px">Ekran</th><th>Görev</th><th style="width:220px">Mockup</th></tr>
+      <tr><td>Doküman Listesi</td><td>Klasör ağacı + kaynak-üstü grid + önizleme; tam metin/etiket arama; toplu işlemler.</td><td><code>dokuman_listesi.html</code></td></tr>
+      <tr><td>Doküman Kartı</td><td>Meta, sürümler (karşılaştır/geri dön), bağlantılar, onay akışı, erişim &amp; paylaşım, metin/AI, günlük.</td><td><code>dokuman_karti.html</code></td></tr>
+      <tr><td>Onay Kuyruğu &amp; Görevler</td><td>Onayımı bekleyen, okumam gereken, gözden geçirme, süresi dolacak.</td><td><code>dokuman_onay_kuyrugu.html</code></td></tr>
+      <tr><td>Ayarlar</td><td>Klasörler, belge türleri, onay akışları, saklama/KVKK sınıfları, depo (bytea/nesne, OCR, virüs).</td><td><code>dokuman_ayarlar.html</code></td></tr>
+      <tr><td>Kart galerisi <span class="kucuk">(mevcut)</span></td><td>Aynı tablo; yeni rozetler (sürüm, durum, gizlilik) ve "Yeni sürüm".</td><td><code>DokumanGalerisi</code></td></tr>
+      <tr><td>Ana sayfa görev kartı</td><td>Onay / okuma / gözden geçirme sayaçları.</td><td>—</td></tr>
+    </table>
+
+    <h2>7. Entegrasyonlar</h2>
+    <table>
+      <tr><th style="width:200px">Servis</th><th>Kullanım</th></tr>
+      <tr><td>Nesne depo (S3/MinIO)</td><td>Büyük içerik (eşik ayarlı), yurt içi; DB'de hash + yol.</td></tr>
+      <tr><td>OCR / metin çıkarma</td><td>PDF metin, görsel OCR (tr); tsvector arama.</td></tr>
+      <tr><td>Virüs taraması</td><td>Yüklemede; engellenen içerik saklanmaz.</td></tr>
+      <tr><td>e-İmza</td><td>Onay adımı ve yayın (PAdES); mevcut e-imza altyapısı (rapor/reçete ile aynı).</td></tr>
+      <tr><td>Office → PDF</td><td>Önizleme ve şablon çıktısı (LibreOffice servis).</td></tr>
+      <tr><td>AI</td><td>Özet/etiket/benzer doküman önerisi; yalnız taslak, kullanıcı onaylar; çağrı <code>ai_arac_log</code>'a.</td></tr>
+      <tr><td>Mesajlar</td><td>Onay/okuma/gözden geçirme bildirimleri; paylaşım linki mesajla gönderme.</td></tr>
+      <tr><td>Modüller</td><td>Lab (prosedür/talimat bağlantısı, cihaz servis sözleşmesi), Teleradyoloji/Teletıp (kurum sözleşmeleri, hasta dosyaları), İK (özlük), Cari (sözleşmeler), e-Belge (XSLT), Üretim (çizim/talimat), Demirbaş (garanti/servis).</td></tr>
+    </table>
+
+    <h2>8. Yetkiler &amp; ayarlar</h2>
+    <ul>
+      <li><code>dokuman.liste</code> · <code>dokuman.klasor</code> · <code>dokuman.tur</code> · <code>dokuman.akis</code> · <code>dokuman.onayla</code> (adım rolüyle) · <code>dokuman.ozel_nitelikli</code> · <code>dokuman.imha</code> · <code>dokuman.paylas</code> · <code>dokuman.gunluk</code>.</li>
+      <li>Ayarlar: bytea/nesne eşiği, azami dosya ve izinli türler, OCR açık/kapalı, filigran metni, paylaşım varsayılan süresi, okuma görevi varsayılanı, imha onayı zorunlu mu.</li>
+    </ul>
+
+    <div class="tamam">
+      <b>İlk sürüm:</b> dokuman ek kolonları + tür/klasör tabloları + sürüm + basit 2 adımlı onay + liste/kart ekranları + erişim sınıfları + günlük; mevcut galeri ve paylaşım aynen.
+      Sonraya: tam metin/OCR, nesne depo, şablondan üretme, okuma görevleri, saklama/imha otomasyonu, AI özet, mesaj eklerinin taşınması.
+    </div>
+  </div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

@@ -479,7 +479,7 @@ object IzlemeDlg: TIzlemeDlg
       Cursor = crHandPoint
       Caption = 'Raf '#214'mr'#252' : '
       Transparent = True
-      OnClick = LblKalanMiktarClick
+      OnClick = EditRafOmruClick
     end
     object EditRafOmru: TcxLabel
       Left = 952

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teletıp Süreci — İşleyiş — Mockup (Gentegre AI · Teletıp)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .win{max-width:1080px}
+  .icerik{padding:6px 18px 22px;font-size:13px;line-height:1.65}
+  h2{font-size:15px;color:#1c4374;border-bottom:1px solid var(--line2);padding-bottom:5px;margin:22px 0 10px}
+  h3{font-size:13.5px;color:#2c4a6b;margin:16px 0 6px}
+  code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:1px 4px;font-size:12px}
+  .icerik table{border-collapse:collapse;width:100%;margin:8px 0 14px}
+  .icerik th{background:linear-gradient(#f4f7fb,#e7eef6);border:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:12px;color:#3a5573}
+  .icerik td{border:1px solid var(--line2);padding:6px 8px;font-size:12.5px;vertical-align:top}
+  .kutu{border:1px solid var(--line2);background:#fbfcfd;border-radius:4px;padding:10px 12px;margin:10px 0}
+  .uyari{border:1px solid #f2ddbf;background:#fdf9f1;border-radius:4px;padding:9px 11px;margin:10px 0;color:var(--uyari)}
+  .tamam{border:1px solid #bfe3cb;background:#f1f8f3;border-radius:4px;padding:9px 11px;margin:10px 0;color:#245c37}
+  .akis{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+  .akis .a{border:1px solid var(--line);background:#fff;border-radius:14px;padding:4px 12px;font-size:12px}
+  .akis .a.v{background:#eef4fc;border-color:#cfe0f5;color:#2f6db3;font-weight:bold}
+  .akis .ok2{color:var(--muted)}
+  ul{margin:6px 0 12px 18px;padding:0} li{margin:3px 0}
+  .kucuk{font-size:11.5px;color:var(--muted)}
+  .durumlar{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+
+  .tablo{border:1px solid var(--line2);border-radius:4px;margin:12px 0;overflow:hidden}
+  .tablo .tb{background:linear-gradient(#f4f7fb,#e7eef6);padding:6px 10px;font-weight:bold;color:#1c4374;display:flex;gap:10px;align-items:center;font-size:13px}
+  .tablo .tb .rz{font-weight:normal}
+  .tablo .tb .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:11.5px}
+  .tablo table{margin:0}
+  .tablo td.k{font-family:Consolas,monospace;font-size:12px;white-space:nowrap}
+  .tablo td.t{font-family:Consolas,monospace;font-size:11.5px;color:#4d5d6e;white-space:nowrap}
+  .tablo tr.pk td.k{font-weight:bold}
+  .tablo .alt{padding:6px 10px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line2);background:#fbfcfd}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🩺 Teletıp Modülü — Süreç, Veri Modeli, Entegrasyon <span class="sp">Gentegre AI · tasarım notu · 03.09.2026</span></div>
+  <div class="icerik">
+
+    <div class="kutu">
+      <b>Tek cümlede:</b> Teletıp, mevcut <b>randevu → başvuru → tahsilat → e-Nabız</b> zincirine "online kanal" eklemektir:
+      hasta portaldan randevu alır ve öder, hekim panelinden çağırır, şifreli odada görüşür, muayeneyi aynı başvuru kartında kapatır;
+      belgeler (özet, e-Reçete, e-Arşiv) portala düşer, muayene e-Nabız'a gider. Mevzuat tarafı <code>../USBS/</code> mockuplarında;
+      burada ürün akışı.
+      <br><span class="kucuk">Mockuplar: <code>teletip_hizmet_ve_musaitlik.html</code> · <code>teletip_online_randevu.html</code> · <code>teletip_hekim_paneli.html</code> ·
+      <code>teletip_gorusme_ekrani.html</code> · <code>teletip_gorusme_listesi.html</code> · <code>teletip_hasta_portali.html</code></span>
+    </div>
+
+    <h2>1. Uçtan uca akış</h2>
+    <div class="akis">
+      <span class="a">Hizmet + müsaitlik tanımı</span><span class="ok2">→</span>
+      <span class="a v">📱 Hasta randevu alır + onam + ödeme</span><span class="ok2">→</span>
+      <span class="a">SMS/e-posta bağlantı</span><span class="ok2">→</span>
+      <span class="a">2FA giriş · bekleme odası</span><span class="ok2">→</span>
+      <span class="a">👨‍⚕️ Hekim çağırır → başvuru açılır</span><span class="ok2">→</span>
+      <span class="a">🎥 Görüşme</span><span class="ok2">→</span>
+      <span class="a">Muayene + ICD-10 + e-Reçete/rapor</span><span class="ok2">→</span>
+      <span class="a">✔ Tamamla → başvuru kapanır</span><span class="ok2">→</span>
+      <span class="a">Belgeler portala · e-Nabız kuyruk</span><span class="ok2">→</span>
+      <span class="a">Kontrol / takip</span>
+    </div>
+
+    <table>
+      <tr><th style="width:40px">#</th><th style="width:200px">Adım</th><th>Ne olur</th><th style="width:230px">Kayıt</th></tr>
+      <tr><td>1</td><td><b>Tanım</b></td><td>Hizmet kartına "uzaktan" bayrağı, süre, kanal, ön ödeme ve iade kuralı; hekim müsaitliği randevu bölümüne "Online" kanalı olarak eklenir. Hekim ÇKYS doğrulaması ve e-imza sertifikası kontrol edilir.</td><td><code>hizmet.uzaktan</code>, <code>teletip_hizmet</code>, <code>randevu_bolum_ayar</code> (kanal)</td></tr>
+      <tr><td>2</td><td><b>Randevu (portal / personel)</b></td><td>Hasta portalda branş → hekim → slot seçer; kimlik KPS ile doğrulanır; görüşme nedeni + dosya; <b>onamlar</b> ayrı ayrı zaman damgalı; <b>ön ödeme</b> sanal POS. Personel aynı randevuyu içeriden açıp ödeme linki gönderebilir.</td><td><code>randevu</code> (kanal=online), <code>teletip_gorusme</code>, <code>onam</code>, <code>tahsilat</code> (avans), <code>dosya</code></td></tr>
+      <tr><td>3</td><td><b>Bağlantı</b></td><td>Onay SMS + e-posta; tek kullanımlık, süreli bağlantı (15 dk önce aktif). Hatırlatma 24 s / 1 s önce.</td><td><code>teletip_gorusme.baglanti_token</code>, <code>bildirim</code></td></tr>
+      <tr><td>4</td><td><b>Giriş / bekleme</b></td><td>T.C. + SMS kodu; cihaz testi; bekleme odasında görünür. 10 dk gelmezse "gelmedi" (iade kuralı).</td><td><code>teletip_olay</code> (iz kaydı)</td></tr>
+      <tr><td>5</td><td><b>Çağırma → başvuru</b></td><td>Hekim çağırınca <b>başvuru</b> (belge tür 19) otomatik açılır: hizmet satırı, ön ödeme tahsilatı bağlanır, hekim satıra "Uygulayan" rolüyle yazılır (prim). Onam eksikse çağırma pasif.</td><td><code>belge</code> (19), <code>belge_satir</code>, <code>belge_satir_rol</code></td></tr>
+      <tr><td>6</td><td><b>Görüşme</b></td><td>WebRTC/SRTP şifreli oda, yurt içi TURN; dosya paylaşımı (virüs taraması); konsültan/tercüman ekleme; kayıt yalnız rıza varsa. Her olay iz kaydına.</td><td><code>teletip_olay</code>, <code>teletip_kayit</code> (rıza varsa)</td></tr>
+      <tr><td>7</td><td><b>Muayene</b></td><td>Anamnez, bulgu, ICD-10 (zorunlu), karar (uzaktan uygun / yüz yüze yönlendir), e-Reçete (Medula, e-imza), istem, rapor. Mevcut muayene ekranıyla aynı; yalnız "uzaktan" bayrağı.</td><td><code>muayene</code>, <code>tani</code>, <code>recete</code>, <code>istem</code></td></tr>
+      <tr><td>8</td><td><b>Tamamla</b></td><td>Başvuru kapanır (tür 19 → tahakkuk 17: prim satırı burada doğar). Muayene özeti e-imzalı PDF; e-Arşiv fatura; hastaya SMS; e-Nabız muayene paketi kuyruğa.</td><td><code>belge</code> (17), <code>dosya</code>, <code>enabiz_paket</code></td></tr>
+      <tr><td>9</td><td><b>Takip</b></td><td>Kontrol önerisi portala düşer; hasta tek tıkla kontrol randevusu alır; mesajlaşma mevcut modülle (sohbet = randevu).</td><td><code>mesaj_sohbet</code>, <code>randevu</code></td></tr>
+      <tr><td>10</td><td><b>Saklama / imha</b></td><td>Kayıt (varsa) şifreli, yurt içi; süre dolunca otomatik silinir, silme loglanır. Dosyalar <code>dosya</code> deposunda saklama süresiyle.</td><td><code>teletip_kayit</code>, <code>dosya.imha_tarihi</code></td></tr>
+    </table>
+
+    <h2>2. Durumlar</h2>
+    <div class="durumlar">
+      <span class="rz">1 Planlı</span> → <span class="rz sari">2 Bekleme</span> → <span class="rz mavi">3 Görüşmede</span> → <span class="rz ok">4 Tamamlandı</span>
+      &nbsp;|&nbsp; <span class="rz kir">5 Gelmedi</span> · <span class="rz pas">0 İptal</span> (hasta / kurum / ödeme yok / hekim)
+    </div>
+    <ul>
+      <li>Ödeme zorunluysa ödenmemiş randevu 30 dk sonra otomatik iptal (slot serbest).</li>
+      <li>Gelmedi → iade kuralı hizmet tanımından; İptal (hasta, 24 s önce) → tam iade; hekim iptali → tam iade + yeniden randevu teklifi.</li>
+      <li>Başvuru yalnız "Görüşmede" durumunda açılır; iptal/gelmedi'de başvuru yoktur, avans tahsilatı iade/mahsup edilir.</li>
+    </ul>
+
+    <h2>3. Veri modeli (öneri, PG)</h2>
+    <table>
+      <tr><th style="width:230px">Tablo</th><th>Alanlar (özet)</th><th style="width:150px">Mevcut / yeni</th></tr>
+      <tr><td><code>hizmet</code> (ek kolonlar)</td><td>uzaktan smallint, uzaktan_sure_dk, uzaktan_kanal (görüntülü/ses/mesaj), on_odeme smallint, iade_kurali smallint, portalda smallint, usbs_kapsam smallint</td><td>mevcut + kolon</td></tr>
+      <tr><td><code>randevu</code> (ek)</td><td>kanal smallint (yüz yüze / online), teletip_id?</td><td>mevcut + kolon</td></tr>
+      <tr><td><code>randevu_bolum_ayar</code> (ek)</td><td>kanal, tampon_dk, en_erken_saat, en_gec_gun, hasta_kendisi_alabilir</td><td>mevcut + kolon</td></tr>
+      <tr><td><code>teletip_gorusme</code></td><td>id, randevu_id, hasta_id, hekim_id, hizmet_id, belge_id? (başvuru), baglanti_token, token_gecerli_bas/bit, oda_id, plan_bas, gercek_bas, gercek_bit, sure_sn, durum, gelmedi_dk, iptal_neden, kayit_rizasi smallint, kayit_dosya_id?, tercuman_id?, konsultan_id?, baglanti_kalite jsonb, sube_id…</td><td>yeni</td></tr>
+      <tr><td><code>onam</code></td><td>id, hasta_id, randevu_id?, teletip_id?, tur (bilgilendirme / kvkk / kamera / kayıt / e-Nabız paylaşım), metin_surum, verildi smallint, tarih, ip, cihaz, geri_cekme_tarih?</td><td>yeni (USBS ile ortak)</td></tr>
+      <tr><td><code>teletip_olay</code></td><td>id, teletip_id, zaman, olay (bağlantı üretildi / giriş denemesi / giriş / oda açıldı / dosya / kayıt başladı / bitti / erişim), kullanici_id?, hasta_id?, kaynak_ip, hedef, sonuc, aciklama</td><td>yeni (iz kaydı, USBS md 21)</td></tr>
+      <tr><td><code>teletip_kayit</code></td><td>id, teletip_id, dosya_id (şifreli), anahtar_ref, saklama_bitis, imha_tarih?, imha_log</td><td>yeni (koşullu)</td></tr>
+      <tr><td><code>teletip_kayit_erisim</code></td><td>id, kayit_id, isteyen_id, gerekce, onaylayan1, onaylayan2, tarih</td><td>yeni (koşullu)</td></tr>
+      <tr><td><code>tahsilat</code> (ek)</td><td>randevu_id? (avans), pos_islem_no, iade_islem_no?</td><td>mevcut + kolon</td></tr>
+      <tr><td><code>hasta_portal_kullanici</code></td><td>id, hasta_id, telefon, e_posta, son_giris, cihaz_jeton, durum</td><td>yeni</td></tr>
+      <tr><td><code>bildirim</code></td><td>id, hasta_id, kanal (SMS/e-posta/push), tur, icerik, gonderim, durum</td><td>yeni (ortak)</td></tr>
+      <tr><td>kod listeleri</td><td><code>teletip.durum</code> · <code>teletip.iptal_neden</code> · <code>teletip.kanal</code> · <code>onam.tur</code> · <code>teletip.olay</code></td><td>yeni</td></tr>
+    </table>
+
+    <h3>3b. Tablo ve alan listesi</h3>
+    <h3>Mevcut tablolara eklenecek kolonlar</h3>
+<div class="tablo">
+  <div class="tb"><code>hizmet</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">uzaktan hizmet tanımı — hizmet kartı üzerinde</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">uzaktan</td><td class="t">smallint</td><td>1 = uzaktan verilebilir (portalda ve online slotlarda görünür)</td></tr><tr><td class="k">uzaktan_sure_dk</td><td class="t">smallint</td><td>slot süresi; boşsa randevu bölüm ayarının slot_dk'sı</td></tr><tr><td class="k">uzaktan_kanal</td><td class="t">smallint</td><td>1 görüntülü · 2 ses · 3 yazılı (mesaj)</td></tr><tr><td class="k">on_odeme</td><td class="t">smallint</td><td>0 yok · 1 zorunlu · 2 isteğe bağlı</td></tr><tr><td class="k">iade_kurali</td><td class="t">smallint</td><td>kod listesi teletip.iade_kurali (24 s tam iade / kesintili / iade yok)</td></tr><tr><td class="k">portalda</td><td class="t">smallint</td><td>hasta kendisi alabilir mi</td></tr><tr><td class="k">usbs_kapsam</td><td class="t">smallint</td><td>USBS kapsamındaki hizmet mi (muayene kuralları uygulanır)</td></tr><tr><td class="k">rapor_verilebilir</td><td class="t">smallint</td><td>uzaktan muayenede rapor türleri: 0 yok · 1 sınırlı · 2 tümü</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>randevu</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">randevu (mevcut: sube_id, bolum, hekim_id, hasta_id, baslangic, sure_dk, durum, hizmet_id, tip, kaynak, belge_id)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">kanal</td><td class="t">smallint</td><td>1 yüz yüze · 2 online — online ise teletıp kaydı zorunlu</td></tr><tr><td class="k">teletip_id</td><td class="t">int</td><td>→ teletip_gorusme (1:1)</td></tr><tr><td class="k">kaynak</td><td class="t">smallint</td><td><b>mevcut</b> — 3 = hasta portalı değeri eklenir</td></tr><tr><td class="k">odeme_durum</td><td class="t">smallint</td><td>0 gerekmiyor · 1 bekliyor · 2 ödendi · 3 iade edildi (liste rozeti)</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>randevu_bolum_ayar</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">hekim müsaitliği (mevcut: departman_id, hekim_id, saatler, slot_dk, calisma_gunleri, aktif)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">kanal</td><td class="t">smallint</td><td>1 yüz yüze · 2 online — aynı hekim iki satır</td></tr><tr><td class="k">tampon_dk</td><td class="t">smallint</td><td>görüşmeler arası boşluk</td></tr><tr><td class="k">en_erken_saat</td><td class="t">smallint</td><td>randevu en erken kaç saat sonra alınabilir</td></tr><tr><td class="k">en_gec_gun</td><td class="t">smallint</td><td>en fazla kaç gün ileri</td></tr><tr><td class="k">hasta_kendisi_alabilir</td><td class="t">smallint</td><td>portalda görünür</td></tr><tr><td class="k">hizmet_ids</td><td class="t">int[]</td><td>bu slotlarda sunulan uzaktan hizmetler (boş = tümü)</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>randevu_istisna</code> <span class="rz ok">yeni</span> <span class="sp">müsaitlik istisnası — kapalı gün / ek slot</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hekim_id</td><td class="t">int</td><td></td></tr><tr><td class="k">tarih</td><td class="t">date</td><td></td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>1 kapalı · 2 ek slot</td></tr><tr><td class="k">baslangic_saat / bitis_saat</td><td class="t">varchar(5)</td><td>ek slot aralığı</td></tr><tr><td class="k">kanal</td><td class="t">smallint</td><td></td></tr><tr><td class="k">aciklama</td><td class="t">varchar(200)</td><td>kongre, izin…</td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>tahsilat (kasa_islem)</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">ön ödeme</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">randevu_id</td><td class="t">int</td><td>avans randevuya bağlı; başvuru açılınca belge_id'ye mahsup</td></tr><tr><td class="k">pos_islem_no</td><td class="t">varchar(40)</td><td>sanal POS işlem / sipariş no</td></tr><tr><td class="k">pos_karti_son4</td><td class="t">varchar(4)</td><td>iade için</td></tr><tr><td class="k">iade_islem_no</td><td class="t">varchar(40)</td><td></td></tr><tr><td class="k">iade_tarihi</td><td class="t">timestamp</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>taraf_hasta</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">portal ve izinler</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">portal_aktif</td><td class="t">smallint</td><td>portal hesabı açık mı</td></tr><tr><td class="k">enabiz_izin / enabiz_izin_tarihi</td><td class="t">smallint / timestamp</td><td>e-Nabız geçmişi okuma izni (onam tablosu ile senkron)</td></tr>
+  </table>
+</div><h3>Yeni tablolar</h3>
+<div class="tablo">
+  <div class="tb"><code>teletip_gorusme</code> <span class="rz ok">yeni</span> <span class="sp">online görüşme — randevu ile 1:1, başvuru ile 0..1</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">randevu_id</td><td class="t">int</td><td>→ randevu (unique)</td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td>→ taraf</td></tr><tr><td class="k">hekim_id</td><td class="t">int</td><td>→ taraf_hekim</td></tr><tr><td class="k">hizmet_id</td><td class="t">int</td><td>→ hizmet (uzaktan=1)</td></tr><tr><td class="k">belge_id</td><td class="t">int</td><td>→ belge (başvuru tür 19) — çağırma anında dolar</td></tr><tr><td class="k">kanal</td><td class="t">smallint</td><td>görüntülü / ses / yazılı</td></tr><tr><td class="k">baglanti_token</td><td class="t">varchar(64)</td><td>tek kullanımlık görüşme bağlantısı (hash)</td></tr><tr><td class="k">token_gecerli_bas / token_gecerli_bit</td><td class="t">timestamp</td><td>randevu −15 dk … +sure+30 dk</td></tr><tr><td class="k">oda_id</td><td class="t">varchar(64)</td><td>WebRTC oda kimliği</td></tr><tr><td class="k">plan_bas</td><td class="t">timestamp</td><td>randevu saati</td></tr><tr><td class="k">hasta_baglandi</td><td class="t">timestamp</td><td>bekleme odasına giriş</td></tr><tr><td class="k">gercek_bas / gercek_bit</td><td class="t">timestamp</td><td>hekim başlattı / bitirdi</td></tr><tr><td class="k">sure_sn</td><td class="t">int</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>0 iptal · 1 planlı · 2 bekleme · 3 görüşmede · 4 tamamlandı · 5 gelmedi</td></tr><tr><td class="k">iptal_neden</td><td class="t">smallint</td><td>kod listesi teletip.iptal_neden</td></tr><tr><td class="k">iptal_eden</td><td class="t">smallint</td><td>1 hasta · 2 kurum · 3 hekim · 4 sistem (ödeme yok)</td></tr><tr><td class="k">gelmedi_dk</td><td class="t">smallint</td><td>beklenen süre (ayar kopyası)</td></tr><tr><td class="k">kayit_rizasi</td><td class="t">smallint</td><td>0 yok · 1 var</td></tr><tr><td class="k">kayit_id</td><td class="t">int</td><td>→ teletip_kayit</td></tr><tr><td class="k">tercuman_id / konsultan_id</td><td class="t">int</td><td>→ taraf</td></tr><tr><td class="k">gorusme_nedeni</td><td class="t">varchar(400)</td><td>hastanın yazdığı</td></tr><tr><td class="k">hasta_notu</td><td class="t">varchar(400)</td><td>ilaç / alerji beyanı</td></tr><tr><td class="k">baglanti_kalite</td><td class="t">jsonb</td><td>gecikme, paket kaybı, cihaz — sorun analizi</td></tr><tr><td class="k">ozet_dosya_id</td><td class="t">int</td><td>e-imzalı muayene özeti PDF → dosya</td></tr><tr><td class="k">sube_id</td><td class="t">int</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table><div class="alt">indeks: (hekim_id, plan_bas) hekim paneli · (hasta_id, plan_bas) portal · (durum, plan_bas) bekleme odası</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>onam</code> <span class="rz ok">yeni</span> <span class="sp">hasta onamları — USBS ile ortak; her onam ayrı satır, zaman damgalı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">randevu_id</td><td class="t">int</td><td>hangi randevu için (genel onamlar boş)</td></tr><tr><td class="k">teletip_id</td><td class="t">int</td><td></td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>1 bilgilendirme+rıza · 2 KVKK · 3 kamera/mikrofon · 4 kayıt · 5 e-Nabız paylaşım</td></tr><tr><td class="k">metin_id</td><td class="t">int</td><td>→ onam_metni (sürümlü)</td></tr><tr><td class="k">verildi</td><td class="t">smallint</td><td>1 verildi · 0 reddedildi</td></tr><tr><td class="k">tarih</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">kanal</td><td class="t">smallint</td><td>portal / mobil / kurum içi (personel adına)</td></tr><tr><td class="k">ip / cihaz</td><td class="t">varchar</td><td>iz</td></tr><tr><td class="k">geri_cekme_tarih</td><td class="t">timestamp</td><td>hasta geri çekti</td></tr>
+  </table><div class="alt">unique (hasta_id, randevu_id, tur) — aynı randevu için tek kayıt, güncelleme yeni satır açmaz</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>onam_metni</code> <span class="rz ok">yeni</span> <span class="sp">onam metinleri, sürümlü</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td></td></tr><tr><td class="k">surum</td><td class="t">smallint</td><td></td></tr><tr><td class="k">baslik</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">metin</td><td class="t">text</td><td>HTML</td></tr><tr><td class="k">gecerli_bas</td><td class="t">date</td><td></td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td>yeni sürüm gelince eski pasif; eski onamlar eski sürüme bağlı kalır</td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>teletip_olay</code> <span class="rz ok">yeni</span> <span class="sp">iz kaydı — USBS md 21; silinmez, güncellenmez</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">bigint</td><td></td></tr><tr><td class="k">teletip_id</td><td class="t">int</td><td></td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">olay</td><td class="t">smallint</td><td>bağlantı üretildi · SMS gitti · giriş denemesi · giriş · bekleme · çağrıldı · oda açıldı · dosya · kayıt başladı/bitti · bitirildi · erişim · silme</td></tr><tr><td class="k">aktor_tur</td><td class="t">smallint</td><td>1 hasta · 2 hekim · 3 personel · 4 sistem</td></tr><tr><td class="k">aktor_id</td><td class="t">int</td><td>kullanıcı / hasta</td></tr><tr><td class="k">kaynak_ip</td><td class="t">varchar(45)</td><td></td></tr><tr><td class="k">hedef</td><td class="t">varchar(200)</td><td>adres / oda / dosya</td></tr><tr><td class="k">sonuc</td><td class="t">smallint</td><td>başarılı / başarısız</td></tr><tr><td class="k">aciklama</td><td class="t">varchar(400)</td><td></td></tr>
+  </table><div class="alt">indeks: (teletip_id, zaman) · saklama süresi ayar (mevzuat)</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>teletip_kayit</code> <span class="rz ok">yeni</span> <span class="sp">görüşme kaydı — yalnız rıza varsa; şifreli, yurt içi</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">teletip_id</td><td class="t">int</td><td></td></tr><tr><td class="k">dosya_id</td><td class="t">int</td><td>→ dosya (şifreli içerik)</td></tr><tr><td class="k">anahtar_ref</td><td class="t">varchar(100)</td><td>anahtar yönetim referansı (uygulama sunucusunda değil)</td></tr><tr><td class="k">sure_sn</td><td class="t">int</td><td></td></tr><tr><td class="k">boyut</td><td class="t">bigint</td><td></td></tr><tr><td class="k">saklama_bitis</td><td class="t">date</td><td>mevzuat süresi</td></tr><tr><td class="k">imha_tarih</td><td class="t">timestamp</td><td>otomatik silme zamanı</td></tr><tr><td class="k">imha_log_id</td><td class="t">bigint</td><td>→ teletip_olay (silme kaydı)</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>teletip_kayit_erisim</code> <span class="rz ok">yeni</span> <span class="sp">kayda erişim — çift onay + gerekçe</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">kayit_id</td><td class="t">int</td><td></td></tr><tr><td class="k">isteyen_id</td><td class="t">int</td><td></td></tr><tr><td class="k">gerekce</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">onaylayan1_id / onaylayan1_tarih</td><td class="t">int / timestamp</td><td></td></tr><tr><td class="k">onaylayan2_id / onaylayan2_tarih</td><td class="t">int / timestamp</td><td></td></tr><tr><td class="k">erisim_tarih</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>bekliyor / onaylı / reddedildi / kullanıldı</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>teletip_dosya</code> <span class="rz ok">yeni</span> <span class="sp">görüşme öncesi/sırası paylaşılan dosyalar (hasta ↔ hekim)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">teletip_id</td><td class="t">int</td><td></td></tr><tr><td class="k">dosya_id</td><td class="t">int</td><td>→ dosya</td></tr><tr><td class="k">yukleyen_tur</td><td class="t">smallint</td><td>1 hasta · 2 hekim</td></tr><tr><td class="k">yukleyen_id</td><td class="t">int</td><td></td></tr><tr><td class="k">virus_tarama</td><td class="t">smallint</td><td>0 bekliyor · 1 temiz · 2 engellendi</td></tr><tr><td class="k">aciklama</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">yuklenme</td><td class="t">timestamp</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>hasta_portal_kullanici</code> <span class="rz ok">yeni</span> <span class="sp">portal hesabı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td>unique</td></tr><tr><td class="k">telefon</td><td class="t">varchar(20)</td><td>SMS 2FA</td></tr><tr><td class="k">e_posta</td><td class="t">varchar(120)</td><td></td></tr><tr><td class="k">son_giris</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">basarisiz_deneme</td><td class="t">smallint</td><td></td></tr><tr><td class="k">kilit_bitis</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">cihaz_jeton</td><td class="t">varchar(200)</td><td>push</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>bildirim</code> <span class="rz ok">yeni</span> <span class="sp">SMS / e-posta / push kuyruğu — ortak</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">bigint</td><td></td></tr><tr><td class="k">taraf_id</td><td class="t">int</td><td></td></tr><tr><td class="k">kanal</td><td class="t">smallint</td><td>1 SMS · 2 e-posta · 3 push</td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>randevu onayı · bağlantı · hatırlatma · belge · 2FA kodu · iptal</td></tr><tr><td class="k">kaynak_tur / kaynak_id</td><td class="t">smallint / int</td><td>randevu, teletıp…</td></tr><tr><td class="k">icerik</td><td class="t">text</td><td></td></tr><tr><td class="k">planlanan</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">gonderim</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>bekliyor / gönderildi / hata</td></tr><tr><td class="k">saglayici_ref</td><td class="t">varchar(80)</td><td>SMS servis mesaj id</td></tr>
+  </table>
+</div><div class='kucuk'>Klinik kayıt (<code>muayene</code>, <code>tani</code>, <code>recete</code>) tabloları teletıp'a özel değil; tanımları <code>../E-Nabız/enabiz_sureci.html</code> §3'te. Muayene satırında <code>tur</code> = uzaktan olur.</div>
+
+    <div class="uyari">
+      <b>Başvuru/tahakkuk kuralı korunur:</b> teletıp başvurusu da tür 19'dur, prim satırı doğurmaz; "Muayeneyi Tamamla" tahakkuka (17) çevirir, prim orada oluşur.
+      Ön ödeme tahsilatı randevuya bağlı avanstır; başvuru açılınca başvuruya mahsup edilir.
+    </div>
+
+    <h2>4. Entegrasyonlar</h2>
+    <table>
+      <tr><th style="width:200px">Servis</th><th>Kullanım</th><th style="width:220px">Hesap (Entegrasyon ekranı)</th></tr>
+      <tr><td>Sanal POS</td><td>Ön ödeme, iade; 3D Secure.</td><td><code>entegrasyon_hesap</code> kod POS</td></tr>
+      <tr><td>SMS / e-posta</td><td>Bağlantı, hatırlatma, belgeler, 2FA kodu.</td><td>SMS, SMTP</td></tr>
+      <tr><td>KPS</td><td>Hasta kimlik doğrulama (opsiyonel).</td><td>KPS</td></tr>
+      <tr><td>ÇKYS</td><td>Hekim unvan/uzmanlık doğrulama.</td><td>CKYS</td></tr>
+      <tr><td>Medula</td><td>e-Reçete / e-Rapor gönderimi (e-imza).</td><td>MEDULA</td></tr>
+      <tr><td>e-Nabız / USS</td><td>Muayene, tanı, reçete bildirimi; hasta geçmişi okuma (rıza ile). Bkz. <code>../E-Nabız/enabiz_sureci.html</code>.</td><td>ENABIZ</td></tr>
+      <tr><td>Görüşme altyapısı</td><td>WebRTC SFU + TURN (yurt içi); oda/jeton üretimi; kayıt (koşullu).</td><td>WEBRTC</td></tr>
+      <tr><td>e-Arşiv</td><td>Hasta faturası.</td><td>EFATURA</td></tr>
+      <tr><td>Mesajlaşma / AI</td><td>Mevcut <code>mesaj</code> modülü (sohbet = randevu); AI asistan görüşme sonrası özet taslağı (hekim onayı ile).</td><td>—</td></tr>
+    </table>
+
+    <h2>5. Ekranlar</h2>
+    <table>
+      <tr><th style="width:250px">Ekran</th><th>Görev</th><th style="width:220px">Mockup</th></tr>
+      <tr><td>Hizmet &amp; Müsaitlik (Ayarlar)</td><td>Uzaktan hizmetler, ücret, ön ödeme/iade kuralı; hekim online takvimi.</td><td><code>teletip_hizmet_ve_musaitlik.html</code></td></tr>
+      <tr><td>Hasta Portalı — Randevu</td><td>Branş/hekim/slot, bilgi + dosya, onamlar, ödeme.</td><td><code>teletip_online_randevu.html</code></td></tr>
+      <tr><td>Hekim Paneli</td><td>Bekleme odası, hasta özeti, çağır, günlük özet, mesajlar.</td><td><code>teletip_hekim_paneli.html</code></td></tr>
+      <tr><td>Görüşme Ekranı</td><td>Video + muayene/reçete/istem/rapor/ücret yan paneli; tamamla.</td><td><code>teletip_gorusme_ekrani.html</code></td></tr>
+      <tr><td>Görüşme Listesi (kurum)</td><td>Tüm görüşmeler; ödeme, onam, e-Nabız durumu; iade, tekrar gönder.</td><td><code>teletip_gorusme_listesi.html</code></td></tr>
+      <tr><td>Hasta Portalı — Görüşmelerim</td><td>Yaklaşan/geçmiş, belgeler, ödemeler, onam yönetimi, kontrol randevusu.</td><td><code>teletip_hasta_portali.html</code></td></tr>
+      <tr><td>USBS ekranları</td><td>Onam metni, 2FA, bekleme, görüşme altyapısı, iz kaydı, uyum haritası.</td><td><code>../USBS/*.html</code></td></tr>
+    </table>
+
+    <h2>6. Ayarlar (Ayarlar › Teletıp)</h2>
+    <ul>
+      <li>Ön ödeme zorunlu mu; iade kuralı varsayılanı; ödenmemiş randevu iptal süresi (30 dk).</li>
+      <li>Gelmedi süresi (10 dk); bağlantı aktifleşme süresi (15 dk önce); hatırlatma zamanları.</li>
+      <li>Kayıt özelliği açık/kapalı (kapalıysa rıza maddesi hiç sorulmaz); saklama süresi.</li>
+      <li>Onam metinleri ve sürümleri (metin değişince yeni sürüm, eski onamlar geçerli kalır).</li>
+      <li>KPS doğrulama zorunlu mu; e-Nabız geçmişi okuma varsayılanı.</li>
+      <li>Portal markalama, çalışma saatleri, destek hattı.</li>
+    </ul>
+
+    <h2>7. Yetkiler</h2>
+    <table>
+      <tr><th style="width:260px">Yetki</th><th>Kapsam</th></tr>
+      <tr><td><code>teletip.tanim</code></td><td>Hizmet ve müsaitlik tanımı.</td></tr>
+      <tr><td><code>teletip.hekim</code></td><td>Hekim paneli ve görüşme ekranı (yalnız kendi hastaları).</td></tr>
+      <tr><td><code>teletip.liste / iade</code></td><td>Kurum listesi; iade işlemi ayrı yetki.</td></tr>
+      <tr><td><code>teletip.kayit_izle</code></td><td>Görüşme kaydına erişim — çift onay + gerekçe.</td></tr>
+      <tr><td><code>teletip.iz_kaydi</code></td><td>İz kaydı görüntüleme (denetim).</td></tr>
+    </table>
+
+    <div class="tamam">
+      <b>İlk sürüm:</b> hizmet/müsaitlik, portal randevu + ödeme + onam, hekim paneli, görüşme (kayıtsız), muayene tamamlama, belgeler, e-Nabız kuyruğu.
+      Sonraya: kayıt + erişim zinciri, tercüman/konsültan, AI özet, mobil uygulama push.
+    </div>
+  </div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

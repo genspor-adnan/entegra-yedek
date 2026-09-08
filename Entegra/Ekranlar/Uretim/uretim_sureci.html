@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Üretim Süreci — İşleyiş — Mockup (Gentegre AI · Üretim)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .win{max-width:1080px}
+  .icerik{padding:6px 18px 22px;font-size:13px;line-height:1.65}
+  h2{font-size:15px;color:#1c4374;border-bottom:1px solid var(--line2);padding-bottom:5px;margin:22px 0 10px}
+  h3{font-size:13.5px;color:#2c4a6b;margin:16px 0 6px}
+  code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:1px 4px;font-size:12px}
+  .icerik table{border-collapse:collapse;width:100%;margin:8px 0 14px}
+  .icerik th{background:linear-gradient(#f4f7fb,#e7eef6);border:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:12px;color:#3a5573}
+  .icerik td{border:1px solid var(--line2);padding:6px 8px;font-size:12.5px;vertical-align:top}
+  .kutu{border:1px solid var(--line2);background:#fbfcfd;border-radius:4px;padding:10px 12px;margin:10px 0}
+  .uyari{border:1px solid #f2ddbf;background:#fdf9f1;border-radius:4px;padding:9px 11px;margin:10px 0;color:var(--uyari)}
+  .tamam{border:1px solid #bfe3cb;background:#f1f8f3;border-radius:4px;padding:9px 11px;margin:10px 0;color:#245c37}
+  .akis{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+  .akis .a{border:1px solid var(--line);background:#fff;border-radius:14px;padding:4px 12px;font-size:12px}
+  .akis .a.v{background:#eef4fc;border-color:#cfe0f5;color:#2f6db3;font-weight:bold}
+  .akis .ok2{color:var(--muted)}
+  ul{margin:6px 0 12px 18px;padding:0} li{margin:3px 0}
+  .kucuk{font-size:11.5px;color:var(--muted)}
+  .durumlar{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🏭 Üretim Modülü — Süreç ve Veri Modeli <span class="sp">Gentegre AI · tasarım notu · 03.09.2026</span></div>
+  <div class="icerik">
+
+    <div class="kutu">
+      <b>Tek cümlede:</b> <b>Ürün ağacı</b> (BOM/reçete) mamulün tarifidir; <b>planlama</b> sipariş + min stok'tan ihtiyacı çıkarır;
+      <b>üretim emri</b> tarifi belirli bir adede çarpıp <b>malzeme sarfı → operasyonlar → mamul girişi → maliyet</b> zincirini yürütür.
+      Her adım stok belgesi üretir, hepsi emre bağlıdır (yeri / yer_id), iptal ters kayıtla olur.
+      <br><span class="kucuk">Mockuplar: <code>urun_agaci_listesi.html</code> · <code>urun_agaci_karti.html</code> · <code>uretim_planlama.html</code> ·
+      <code>uretim_emri_listesi.html</code> · <code>uretim_emri_karti.html</code> · <code>is_merkezi_terminali.html</code></span>
+    </div>
+
+    <h2>1. Uçtan uca akış</h2>
+    <div class="akis">
+      <span class="a">Satış siparişi / min stok</span><span class="ok2">→</span>
+      <span class="a">📅 Planlama (MRP)</span><span class="ok2">→</span>
+      <span class="a v">🏭 Üretim emri (Taslak)</span><span class="ok2">→</span>
+      <span class="a">Malzeme kontrolü</span><span class="ok2">→</span>
+      <span class="a">✔ Onay</span><span class="ok2">→</span>
+      <span class="a">📤 Sarf fişi (rezerv/çıkış)</span><span class="ok2">→</span>
+      <span class="a">⚙ Operasyonlar (terminal)</span><span class="ok2">→</span>
+      <span class="a">🔬 Kalite kontrol</span><span class="ok2">→</span>
+      <span class="a">📦 Mamul girişi (lot)</span><span class="ok2">→</span>
+      <span class="a">🧮 Maliyet kapanışı</span><span class="ok2">→</span>
+      <span class="a">🔒 Emir kapalı</span>
+    </div>
+
+    <table>
+      <tr><th style="width:40px">#</th><th style="width:190px">Adım</th><th>Ne olur</th><th style="width:210px">Üretilen kayıt / belge</th></tr>
+      <tr><td>1</td><td><b>Tetik</b></td><td>Satış siparişi satırı (siparişe üretim), planlama sonucu (stoğa), ana emrin yarı mamul satırı (alt emir) ya da elle.</td><td>—</td></tr>
+      <tr><td>2</td><td><b>Planlama</b> <span class="kucuk">(isteğe bağlı)</span></td><td>Dönem için <code>gerekli = sipariş + rezerve + min − (mevcut + açık üretim)</code>; ağaç çok seviyeli patlatılır; yarı mamul → üretim, hammadde → satınalma talebi. Kapasite tablosu uyarı verir.</td><td><code>uretim_plan</code>, <code>uretim_plan_satir</code>; seçilenlerden emir + satınalma talebi</td></tr>
+      <tr><td>3</td><td><b>Emir açılır (Taslak)</b></td><td>Mamul + varsayılan ağaç sürümü + adet + termin. Ağaç emre <b>kopyalanır</b> (satır ve operasyon): sonradan ağaç değişse emir değişmez. Miktar = ağaç miktarı × adet × (1+fire).</td><td><code>uretim_emri</code>, <code>uretim_emri_satir</code>, <code>uretim_operasyon</code></td></tr>
+      <tr><td>4</td><td><b>Malzeme kontrolü</b></td><td>Sarf deposu mevcut ÷ gerekli. Eksikse: satınalma talebi, alternatif bileşen, ya da alt üretim emri. Yeterliyse rezerve konur.</td><td><code>stok_rezerv</code> (emir bazlı)</td></tr>
+      <tr><td>5</td><td><b>Onay</b></td><td>Yetkili onaylar; emir no kesinleşir, terminalde görünür. Onaylı emirde ağaç yenilenebilir, üretimde emirde yenilenemez.</td><td>durum 2</td></tr>
+      <tr><td>6</td><td><b>Başlat / sarf</b></td><td>İki mod (opsiyon): <b>tek seferde</b> — Başlat'ta tüm bileşenler sarf fişiyle çıkar; <b>geri-yıkama</b> — her operasyonun adet bildirimi o operasyonun bileşenlerini oranla çıkarır. İzlemeli bileşende lot FIFO / seçim.</td><td><code>belge</code> tür <b>sarf çıkış</b> (yeri = emir), <code>stok_izleme</code> düşümü</td></tr>
+      <tr><td>7</td><td><b>Operasyonlar</b></td><td>Rota sırasıyla iş merkezinde; terminalden başlat / adet bildir / duraklat / bitir; personel-zaman kaydı işçilik maliyetinin kaynağı. Fason operasyonda fason çıkış/giriş irsaliyesi.</td><td><code>uretim_operasyon</code>, <code>uretim_zaman</code>, <code>uretim_durus</code></td></tr>
+      <tr><td>8</td><td><b>Kalite kontrol</b></td><td>Operasyonda "KK" işaretliyse adet KK'ya düşer; geçen → sonraki operasyon, kalan → ret (fire belgesi) ya da yeniden işlem.</td><td><code>uretim_olcum</code>, <code>belge</code> tür <b>fire</b></td></tr>
+      <tr><td>9</td><td><b>Mamul girişi</b></td><td>Kısmi parti parti; mamul deposuna giriş, lot = emir no (opsiyon: parti no eki). Sipariş satırına "üretildi" düşer.</td><td><code>belge</code> tür <b>üretim giriş</b>, <code>stok_izleme</code> yeni lot</td></tr>
+      <tr><td>10</td><td><b>Maliyet kapanışı</b></td><td>Gerçek: sarf tutarı (hareket fiyatı) + işçilik (saat × ücret) + GÜG (%). Üretilen adede bölünür, mamul girişlerinin birim fiyatı güncellenir, stok ağırlıklı ortalama yeniden hesaplanır. Plan/gerçek farkı raporlanır.</td><td><code>uretim_maliyet</code>, giriş belgesi birim fiyat güncellemesi</td></tr>
+      <tr><td>11</td><td><b>Kapat</b></td><td>Kalan rezerv serbest, açık operasyon kapanır, sipariş satırı tamamlanır. Kapalı emir değişmez; düzeltme ters emirle.</td><td>durum 7</td></tr>
+    </table>
+
+    <h2>2. Durumlar</h2>
+    <div class="durumlar">
+      <span class="rz pas">0 İptal</span> <span class="rz pas">1 Taslak</span> → <span class="rz sari">2 Onaylı</span> → <span class="rz">3 Planlandı</span> →
+      <span class="rz mavi">4 Üretimde</span> → <span class="rz mavi">5 Kısmi tamamlandı</span> → <span class="rz ok">6 Tamamlandı</span> → <span class="rz pas">7 Kapatıldı</span>
+      &nbsp; <span class="rz kir">Gecikti</span> <span class="kucuk">= termin geçti ve durum &lt; 6 (hesaplanan, saklanmaz)</span>
+    </div>
+    <ul>
+      <li>Taslak → Onaylı: yetki. Onaylı → Üretimde: ilk operasyon başladı ya da "Başlat". Üretimde → Kısmi: ilk mamul girişi. → Tamamlandı: üretilen ≥ emir adedi. → Kapatıldı: maliyet kapandı.</li>
+      <li>İptal: Taslak/Onaylı'da serbest; Üretimde ise mevcut sarf ve girişler <b>ters kayıtla</b> kapatılır, iptal nedeni zorunlu.</li>
+      <li>Delphi <code>URETIMEMRI.DURUM</code> serbest tanımlı listeydi; burada sabit akış + geçiş kuralı önerilir (kullanıcı ad değiştirebilir, sırayı değiştiremez).</li>
+    </ul>
+
+    <h2>3. Veri modeli (öneri, PG)</h2>
+    <table>
+      <tr><th style="width:230px">Tablo</th><th>Alanlar (özet)</th><th style="width:170px">Delphi karşılığı</th></tr>
+      <tr><td><code>urun_agaci</code></td><td>id, kod, ad, <b>stok_id</b> (mamul), tur (mamul/yarı mamul/set), cikti_miktar, birim, surum smallint, varsayilan smallint, alternatif_ad?, gecerli_bas/bit, sarf_depo_id?, mamul_depo_id?, tavsiye_satis_katsayi, maliyet_malzeme / maliyet_iscilik / maliyet_gug / maliyet_tarih, durum, notlar, sube_id, ekleyen…<br><span class="kucuk">benzersiz (kod, surum)</span></td><td>URETIMRECETE</td></tr>
+      <tr><td><code>urun_agaci_satir</code></td><td>id, agac_id, sira, <b>bilesen_stok_id</b>, alt_agac_id? (yarı mamulse), tur (hammadde/sarf/ambalaj/yarı mamul), miktar numeric(18,6), birim, fire_yuzde, operasyon_sira? (hangi operasyonda sarf), depo_id?, alternatif_grup?, aciklama</td><td>URETIMRECETEDETAY</td></tr>
+      <tr><td><code>urun_agaci_operasyon</code></td><td>id, agac_id, sira, ad, is_merkezi_id, hazirlik_dk, birim_sure_dk, saat_ucreti?, kalite_kontrol smallint, fason smallint, fason_taraf_id?, aciklama</td><td>URETIMRECETEOPR</td></tr>
+      <tr><td><code>is_merkezi</code></td><td>id, kod, ad, sube_id, gunluk_kapasite_saat, saat_ucreti, lokasyon, durum</td><td>(ISMERKEZI kolonu, tablo yok)</td></tr>
+      <tr><td><code>uretim_plan</code> / <code>uretim_plan_satir</code></td><td>plan: id, no, donem_bas/bit, sube_id, depo_id, kapsam, durum. satır: plan_id, stok_id, agac_id?, seviye, mevcut, rezerve, siparis, acik_uretim, min_stok, gerekli, en_gec_baslangic, karar (üretim/satınalma/yeterli), uretilen_emir_id?, talep_id?</td><td>URETIMPLANLAMA(+DETAY)</td></tr>
+      <tr><td><code>uretim_emri</code></td><td>id, no, tur (siparişe/stoğa/fason/alt), <b>stok_id</b>, <b>agac_id + agac_surum</b> (sabit), adet, birim, uretilen_adet, plan_bas, termin, gercek_bas/bit, oncelik, sarf_depo_id, mamul_depo_id, kaynak_belge_id?/kaynak_satir_id?, ust_emir_id?, plan_satir_id?, proje_id?, sorumlu_id, talep_eden_id, mamul_lot, sarf_modu (tek/geri-yıkama), durum, iptal_neden?, sube_id…</td><td>URETIMEMRI</td></tr>
+      <tr><td><code>uretim_emri_satir</code></td><td>id, emir_id, agac_satir_id?, bilesen_stok_id, alt_emir_id?, operasyon_sira?, birim_ihtiyac, fire_yuzde, gerekli, rezerve, sarf_edilen, birim_maliyet, tutar, durum</td><td>URETIMEMRIDETAY</td></tr>
+      <tr><td><code>uretim_operasyon</code></td><td>id, emir_id, sira, ad, is_merkezi_id, plan_saat, gercek_saat, tamamlanan, ret, kk_gerekli, fason, fason_cikis_belge_id?, fason_giris_belge_id?, bas, bit, durum (bekliyor/devam/duraklatıldı/KK/bitti)</td><td>URETIMOPERASYON</td></tr>
+      <tr><td><code>uretim_zaman</code></td><td>id, operasyon_id, taraf_id (personel), bas, bit, sure_saat, adet, tur (üretim/duruş/hazırlık), durus_kodu?, saat_ucreti, tutar</td><td>URETIMOPERASYONPERSONEL, UIsEmriPersonelZaman</td></tr>
+      <tr><td><code>uretim_olcum</code></td><td>id, operasyon_id, tarih, konu, olcen_id, adet_gecti, adet_ret, ret_neden, deger?, aciklama</td><td>URETIMOLCUM</td></tr>
+      <tr><td><code>uretim_maliyet</code></td><td>id, emir_id, kapanis_tarih, malzeme, iscilik, gug, fason, toplam, uretilen_adet, birim, plan_birim, fark</td><td>URETIMOPERASYONMALIYET</td></tr>
+      <tr><td>belge türleri</td><td><b>sarf çıkış</b>, <b>üretim giriş</b>, <b>fire</b>, <b>fason çıkış/giriş</b> — mevcut <code>belge</code>/<code>belge_satir</code> yapısında yeni tür kodları; <code>yeri</code> = üretim emri, <code>yer_id</code> = emir id (belge dönüşüm izi ile aynı desen).</td><td>FATBASLIK TUR (üretim fişleri)</td></tr>
+      <tr><td>kod listeleri</td><td><code>uretim.emir_turu</code> · <code>uretim.durum</code> · <code>uretim.bilesen_turu</code> · <code>uretim.durus_nedeni</code> · <code>uretim.ret_nedeni</code> · <code>uretim.sarf_modu</code></td><td>GENINI BOLUM</td></tr>
+    </table>
+
+    <div class="uyari">
+      <b>Ağaç emre kopyalanır, referans verilmez.</b> Emir açıldığı andaki bileşen/operasyon listesi emirde yaşar; ağaç sürümü değişse
+      açık emir etkilenmez. "Ağaçtan Yenile" yalnız Taslak/Onaylı emirde çalışır. Aynı kural Delphi'de KAYNAKRECETEID/HEDEFRECETEID ile yarım uygulanmıştı.
+    </div>
+
+    <h2>4. Stok ve maliyet etkisi</h2>
+    <table>
+      <tr><th style="width:190px">Olay</th><th>Stok hareketi</th><th>Maliyet</th></tr>
+      <tr><td>Rezerve</td><td>Hareket yok; <code>stok_durum.rezerve</code> artar, kullanılabilir düşer.</td><td>—</td></tr>
+      <tr><td>Sarf</td><td>Sarf deposundan çıkış (tür sarf çıkış); izlemeli bileşende lot düşer.</td><td>Hareket anındaki ağırlıklı ortalama → emir malzeme maliyeti.</td></tr>
+      <tr><td>Fire / ret</td><td>Fire deposuna giriş ya da doğrudan zarar (opsiyon).</td><td>Fire tutarı emre kalır (mamule dağılır) ya da gider (opsiyon).</td></tr>
+      <tr><td>Mamul girişi</td><td>Mamul deposuna giriş, yeni lot; kısmi girişler aynı lot.</td><td>Geçici birim fiyat = plan maliyet; kapanışta gerçek fiyatla güncellenir.</td></tr>
+      <tr><td>Fason</td><td>Fason çıkış irsaliyesi (bileşenler tedarikçiye) → fason giriş irsaliyesi (işlenmiş).</td><td>Fason faturası emre bağlanır (yeri/yer_id), fason maliyeti kalemi.</td></tr>
+      <tr><td>Kapanış</td><td>Rezerv serbest.</td><td>Toplam ÷ üretilen; mamul stok kartı ağırlıklı ortalama yeniden; plan/gerçek farkı raporu.</td></tr>
+    </table>
+
+    <h2>5. Ekranlar</h2>
+    <table>
+      <tr><th style="width:230px">Ekran</th><th>Görev</th><th style="width:200px">Mockup</th></tr>
+      <tr><td>Ürün Ağaçları listesi</td><td>Ağaç/sürüm/alternatif yönetimi, toplu maliyet hesabı, "nerede kullanılıyor".</td><td><code>urun_agaci_listesi.html</code></td></tr>
+      <tr><td>Ürün Ağacı kartı</td><td>Bileşen ağacı (çok seviyeli), rota, maliyet, alternatifler, sürümler, ekler.</td><td><code>urun_agaci_karti.html</code></td></tr>
+      <tr><td>Üretim Planlama</td><td>Dönem ihtiyacı, çok seviyeli patlatma, kapasite, seçili satırlardan emir/talep.</td><td><code>uretim_planlama.html</code></td></tr>
+      <tr><td>Üretim Emirleri listesi</td><td>Durum/termin/iş merkezi filtreli takip, ilerleme, gecikme.</td><td><code>uretim_emri_listesi.html</code></td></tr>
+      <tr><td>Üretim Emri kartı</td><td>Malzeme, operasyon, stok hareketleri, personel/zaman, KK, maliyet, bağlı emirler.</td><td><code>uretim_emri_karti.html</code></td></tr>
+      <tr><td>İş Merkezi Terminali</td><td>Atölye dokunmatik: sırada/devam/KK/biten; başlat, adet bildir, duraklat, bitir; zaman kaydı.</td><td><code>is_merkezi_terminali.html</code></td></tr>
+      <tr><td>Üretim Panosu <span class="kucuk">(sonra)</span></td><td>İş merkezi doluluk, gecikenler, OEE, plan/gerçek maliyet.</td><td>—</td></tr>
+    </table>
+
+    <h2>6. Ayarlar (Ayarlar › Üretim)</h2>
+    <ul>
+      <li>Sarf modu varsayılanı: tek seferde / geri-yıkama.</li>
+      <li>Mamul lot kuralı: emir no / emir no + parti / elle.</li>
+      <li>Onay zorunlu mu, kim onaylar (rol).</li>
+      <li>GÜG yüzdesi ve işçilik ücret kaynağı (iş merkezi / personel kartı).</li>
+      <li>Fire: fire deposu / doğrudan gider.</li>
+      <li>KK varsayılanı: operasyon bazlı işaret; ret nedenleri listesi.</li>
+      <li>Planlama kapsamı varsayılanı: sipariş + min stok; geriye planlama için rota süresi kullan.</li>
+    </ul>
+
+    <h2>7. Yetkiler</h2>
+    <table>
+      <tr><th style="width:230px">Yetki</th><th>Kapsam</th></tr>
+      <tr><td><code>uretim.agac.gor / duzenle</code></td><td>Ağaç ve maliyet görme / düzenleme (maliyet rakamları ayrı yetki).</td></tr>
+      <tr><td><code>uretim.emir.gor / duzenle / onayla / iptal</code></td><td>Emir yaşam döngüsü.</td></tr>
+      <tr><td><code>uretim.terminal</code></td><td>Atölye terminali (yalnız kendi iş merkezi).</td></tr>
+      <tr><td><code>uretim.maliyet.kapat</code></td><td>Maliyet kapanışı ve stok fiyat güncellemesi.</td></tr>
+      <tr><td><code>uretim.plan</code></td><td>Planlama çalıştırma, emir/talep üretme.</td></tr>
+    </table>
+
+    <div class="tamam">
+      <b>İlk sürüm kapsamı:</b> ağaç (tek seviye + yarı mamul), emir, tek seferde sarf, kısmi mamul girişi, basit maliyet (malzeme + işçilik).
+      Sonraya: geri-yıkama, fason, KK akışı, kapasite planlama, OEE panosu.
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Muayene Kartı — Uzman Hekim — Mockup (Gentegre AI · Muayene)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🩺 Muayene — Mehmet Kaya · 58 E · Dahiliye <span class="sp">Protokol 2026/20390 · Uzm. Dr. Ali Koç · başladı 10:28 · 12 dk · muayene.id 8812</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div><div class="btn ok">✔ Muayeneyi Tamamla</div>
+    <div class="sepv"></div><div class="btn">💊 e-Reçete</div><div class="btn">🔬 İstem</div><div class="btn">📄 Rapor</div><div class="btn">↗ Sevk / Konsültasyon</div><div class="btn">🗓 Kontrol Randevusu</div>
+    <div class="sepv"></div><div class="btn">📋 Şablon ▾</div><div class="btn">📋 Önceki muayeneden kopyala</div><div class="btn">🎙 Dikte</div><div class="btn">🤖 AI Özet</div>
+    <div class="sepv"></div><div class="btn">🖨 Muayene Özeti</div><div class="btn sp">✖ Kapat</div>
+  </div>
+  <div class="hdr k4" style="background:#fff8f0">
+    <div class="fld"><label>Hasta</label><div class="inp ro big">Mehmet Kaya · 12345678901 · 58 E · SGK</div></div>
+    <div class="fld"><label>Alerji / Kronik</label><div class="inp ro"><span class="rz kir">Alerji: yok</span> <span class="rz sari">DM tip 2 (E11)</span> <span class="rz sari">HT (I10)</span> <span class="rz sari">Hiperlipidemi</span></div></div>
+    <div class="fld"><label>Aktif ilaçlar</label><div class="inp ro">Metformin 1000 2×1 · Ramipril 5 1×1 · Atorvastatin 20 1×1 <span class="sonuk">· e-Nabız ✔</span></div></div>
+    <div class="fld"><label>Bugün</label><div class="inp ro">Acilden yönlendirme · <span class="rz kir">Troponin 412 panik</span> · <span class="rz ok">EKG çekildi</span></div></div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on">Anamnez &amp; Vital</div><div class="sekme">Fizik Muayene</div><div class="sekme">Tanı (ICD-10)</div><div class="sekme">İstem &amp; Sonuçlar</div><div class="sekme">e-Reçete</div><div class="sekme">Rapor</div><div class="sekme">Sevk / Konsültasyon</div><div class="sekme">İşlem &amp; Ücret</div><div class="sekme">Geçmiş</div><div class="sekme">Dosyalar</div>
+  </div>
+  <div class="pnl ikiPanel">
+    <div class="hdr" style="grid-template-columns:1fr;border:none">
+      <div class="fld"><label class="req">Şikâyet</label><div class="inp" style="min-height:44px;align-items:flex-start">Göğüste baskı hissi, 2 saattir; sol kola yayılıyor. Terleme.</div></div>
+      <div class="fld"><label>Hikâye</label><div class="inp" style="min-height:64px;align-items:flex-start">Sabah 08:00'de istirahatte başlayan retrosternal ağrı, 20 dk sürdü, tekrarladı. Nefes darlığı eşlik ediyor. Daha önce benzer atak yok. Sigara 20 paket/yıl, 3 yıl önce bırakmış.</div></div>
+      <div class="fld"><label>Özgeçmiş / Soygeçmiş</label><div class="inp ro">DM tip 2 (2018), HT (2015), hiperlipidemi · Ameliyat: apendektomi (1998) · Baba MI 61 y <span class="sonuk">— tıbbi özetten, düzenle ↗</span></div></div>
+      <div class="fld"><label>Alışkanlıklar</label><div class="inp">Sigara: bırakmış (20 p/y) · Alkol: yok · Egzersiz: az</div></div>
+      <div class="fld"><label>Sistem sorgusu</label><div class="inp combo">Şablon: Dahiliye — kardiyovasküler (+), solunum (+dispne), GİS (−), GÜS (−), nörolojik (−)</div></div>
+    </div>
+    <div>
+      <div class="grp" style="margin:10px"><div class="gb">Vital bulgular <span class="sp">hemşire girişi 10:20 · cihazdan (tansiyon aleti BT) ✔</span></div>
+        <div class="hdr" style="grid-template-columns:1fr 1fr 1fr;border:none">
+          <div class="fld"><label>Tansiyon</label><div class="inp">158 / 96 <span class="sonuk">mmHg</span> <span class="rz sari">H</span></div></div>
+          <div class="fld"><label>Nabız</label><div class="inp">96 <span class="sonuk">/dk</span></div></div>
+          <div class="fld"><label>SpO₂</label><div class="inp">95 <span class="sonuk">%</span></div></div>
+          <div class="fld"><label>Ateş</label><div class="inp">36,8 <span class="sonuk">°C</span></div></div>
+          <div class="fld"><label>Solunum</label><div class="inp">20 <span class="sonuk">/dk</span></div></div>
+          <div class="fld"><label>Ağrı (VAS)</label><div class="inp">6 / 10</div></div>
+          <div class="fld"><label>Boy / Kilo</label><div class="inp">174 / 92 <span class="sonuk">cm/kg</span></div></div>
+          <div class="fld"><label>BKİ</label><div class="inp ro">30,4 <span class="rz sari">obez I</span></div></div>
+          <div class="fld"><label>Bel çevresi</label><div class="inp">104 cm</div></div>
+        </div>
+      </div>
+      <div class="grp" style="margin:10px"><div class="gb">Bugünkü sonuçlar <span class="sp">acilden</span></div>
+        <div class="dg"><table><thead><tr><th>Tetkik</th><th class="sag">Sonuç</th><th>Ref.</th><th class="orta">Bayrak</th></tr></thead>
+          <tbody><tr><td>Troponin T hs</td><td class="sag"><b>412</b> ng/L</td><td>&lt; 14</td><td class="orta"><span class="rz kir">PANİK</span></td></tr><tr><td>CK-MB</td><td class="sag">38 U/L</td><td>&lt; 25</td><td class="orta"><span class="rz sari">H</span></td></tr><tr><td>Glukoz</td><td class="sag">142 mg/dL</td><td>70–100</td><td class="orta"><span class="rz sari">H</span></td></tr><tr><td>EKG</td><td class="sag">V1–V4 ST ↑</td><td>—</td><td class="orta"><span class="rz kir">!</span></td></tr></tbody></table></div></div>
+    </div>
+  </div>
+  <div class="pnl">
+    <div class="toolbar" style="border-top:none"><span class="chip on">Şablon: Dahiliye genel</span><span class="chip">Kardiyoloji</span><span class="chip">Serbest metin</span><div class="btn">Tümü normal işaretle</div><div class="btn sp">🖼 Vücut şeması</div></div>
+    <div class="dg"><table>
+      <thead><tr><th style="width:180px">Sistem</th><th class="orta" style="width:80px">Normal</th><th>Bulgu</th></tr></thead>
+      <tbody>
+        <tr><td>Genel görünüm</td><td class="orta">☐</td><td>Soluk, terli, anksiyöz. GKS 15.</td></tr>
+        <tr><td>Baş-boyun</td><td class="orta">☑</td><td class="sonuk">Doğal</td></tr>
+        <tr><td>Kardiyovasküler</td><td class="orta">☐</td><td>S1 S2 ritmik, taşikardik; üfürüm yok; periferik nabızlar alınıyor; JVD yok.</td></tr>
+        <tr><td>Solunum</td><td class="orta">☐</td><td>Bilateral bazallerde ince raller (+).</td></tr>
+        <tr><td>Batın</td><td class="orta">☑</td><td class="sonuk">Doğal</td></tr>
+        <tr><td>Ekstremite</td><td class="orta">☑</td><td class="sonuk">Ödem yok</td></tr>
+        <tr><td>Nörolojik</td><td class="orta">☑</td><td class="sonuk">Doğal</td></tr>
+        <tr><td>Cilt</td><td class="orta">☑</td><td class="sonuk">Doğal</td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Şablon alanları branşa göre (<code>muayene_sablon</code>); "Normal" işaretlenen sistem raporda "doğal" olarak geçer. Serbest metin her zaman ek olarak yazılabilir. Değerler <code>muayene_bulgu</code>'da alan/deger olarak saklanır (raporlanabilir).</div>
+  </div>
+  <div class="pnl">
+    <div class="toolbar" style="border-top:none"><div class="inp" style="flex:1">🔍 ICD-10 kod / ad… (I21)</div><div class="btn">＋ Ekle</div><div class="btn">⭐ Sık kullandıklarım ▾</div><div class="btn">🕘 Önceki tanılar ▾</div></div>
+    <div class="dg"><table>
+      <thead><tr><th>ICD-10</th><th>Tanı</th><th class="orta">Tür</th><th class="orta">Kesinlik</th><th class="orta">Taraf</th><th class="orta">Kronik</th><th>Not</th><th></th></tr></thead>
+      <tbody>
+        <tr><td><b>I21.0</b></td><td>Akut transmural miyokard enfarktüsü, ön duvar</td><td class="orta"><span class="rz mavi">Ana</span></td><td class="orta">Ön tanı</td><td class="orta">—</td><td class="orta">—</td><td>STEMI · acil sevk</td><td>🗑</td></tr>
+        <tr><td>E11.9</td><td>Tip 2 diyabetes mellitus, komplikasyonsuz</td><td class="orta">Ek</td><td class="orta">Kesin</td><td class="orta">—</td><td class="orta">✔</td><td>kronik listeden</td><td>🗑</td></tr>
+        <tr><td>I10</td><td>Esansiyel hipertansiyon</td><td class="orta">Ek</td><td class="orta">Kesin</td><td class="orta">—</td><td class="orta">✔</td><td></td><td>🗑</td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Ana tanı zorunlu (tamamlama ve e-Nabız 103). SKRS ICD-10 listesi (cinsiyet/yaş kısıtı kontrolü). Kronik işaretlenen tanı hastanın tıbbi özetine düşer. SUT kuralı: tanı-işlem uyumu uyarısı.</div>
+  </div>
+  <div class="pnl">
+    <div class="toolbar" style="border-top:none"><div class="btn">＋ Laboratuvar</div><div class="btn">＋ Görüntüleme</div><div class="btn">＋ Konsültasyon</div><div class="btn">＋ İşlem (EKG, pansuman…)</div><div class="btn">📋 Panel ▾ (Kardiyak, Diyabet takip…)</div><div class="btn sp">🔬 Tüm sonuçlar (kümülatif)</div></div>
+    <div class="dg"><table>
+      <thead><tr><th>Tür</th><th>Tetkik / İşlem</th><th class="orta">Aciliyet</th><th>Nerede</th><th class="orta">İstem</th><th class="orta">Numune / Çekim</th><th class="sag">Sonuç</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr><td>Lab</td><td>Troponin T hs (tekrar, 3 s)</td><td class="orta"><span class="rz kir">Acil</span></td><td>Merkez lab</td><td class="orta">10:35</td><td class="orta">—</td><td class="sag">—</td><td class="orta"><span class="rz sari">Numune bekliyor</span></td></tr>
+        <tr><td>Lab</td><td>Kardiyak panel (CK-MB, LDH, lipid, HbA1c)</td><td class="orta"><span class="rz kir">Acil</span></td><td>Merkez lab</td><td class="orta">10:35</td><td class="orta">—</td><td class="sag">—</td><td class="orta"><span class="rz sari">Numune bekliyor</span></td></tr>
+        <tr><td>Görüntüleme</td><td>Akciğer PA</td><td class="orta"><span class="rz kir">Acil</span></td><td>Radyoloji-1</td><td class="orta">10:36</td><td class="orta">—</td><td class="sag">—</td><td class="orta"><span class="rz">Sırada</span></td></tr>
+        <tr><td>Konsültasyon</td><td>Kardiyoloji — Dr. B. Tan</td><td class="orta"><span class="rz kir">Acil</span></td><td>Poliklinik</td><td class="orta">10:36</td><td class="orta">—</td><td class="sag">—</td><td class="orta"><span class="rz mavi">Bildirildi · geliyor</span></td></tr>
+        <tr><td>İşlem</td><td>EKG (12 derivasyon)</td><td class="orta">—</td><td>Dahiliye-2</td><td class="orta">10:22</td><td class="orta">10:24</td><td class="sag">V1–V4 ST ↑</td><td class="orta"><span class="rz ok">Yapıldı</span></td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">İstemler <code>lab_istem</code> / <code>radyoloji_istem</code> / <code>konsultasyon</code>'a düşer, başvuru satırı (ücret) otomatik. Sonuç gelince bu sekme + liste rozeti + bildirim. Kümülatif sonuç görünümü: <code>../Lab/</code>.</div>
+  </div>
+  <div class="pnl">
+    <div class="toolbar" style="border-top:none"><div class="btn">＋ İlaç</div><div class="btn">📋 Reçete şablonu ▾</div><div class="btn">🕘 Önceki reçeteyi kopyala</div><div class="btn">⚠ Etkileşim / Alerji / Doz kontrolü <span class="rz ok">temiz</span></div><div class="btn sp">✍ e-İmzala &amp; Medula'ya Gönder</div></div>
+    <div class="hdr" style="grid-template-columns:1fr 1fr 1fr 1fr"><div class="fld"><label>Reçete türü</label><div class="inp combo">Normal</div></div><div class="fld"><label>Provizyon</label><div class="inp ro">SGK · takip 8F2A… ✔</div></div><div class="fld"><label>Tanı</label><div class="inp ro">I21.0 · E11.9 · I10</div></div><div class="fld"><label>Açıklama</label><div class="inp">Acil serviste uygulanacak</div></div></div>
+    <div class="dg"><table>
+      <thead><tr><th>İlaç (barkod)</th><th>Form</th><th>Doz</th><th>Periyot</th><th>Kullanım</th><th>Süre</th><th class="sag">Kutu</th><th>Not</th></tr></thead>
+      <tbody>
+        <tr><td>Asetilsalisilik asit 300 mg · 8699…</td><td>tablet</td><td>1</td><td>1×1</td><td>oral · çiğnenerek</td><td>1 gün</td><td class="sag">1</td><td>yükleme dozu</td></tr>
+        <tr><td>Klopidogrel 300 mg · 8699…</td><td>tablet</td><td>1</td><td>1×1</td><td>oral</td><td>1 gün</td><td class="sag">1</td><td>yükleme</td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">İlaç listesi SKRS/RxNorm-benzeri barkod kataloğu (<code>ilac</code>); etkileşim/alerji kontrolü kayıtlı alerji + aktif ilaçlarla. İmzalanınca <code>recete.durum</code> = imzalı, e-Nabız Reçete paketi kuyruğa.</div>
+  </div>
+  <div class="pnl">
+    <div class="toolbar" style="border-top:none"><div class="btn">＋ Rapor</div><div class="btn">📋 Rapor şablonu ▾</div><div class="btn sp">✍ e-İmzala</div></div>
+    <div class="dg"><table>
+      <thead><tr><th>Tür</th><th>Alt tür</th><th class="orta">Başlangıç</th><th class="orta">Süre</th><th>Tanı</th><th>Açıklama</th><th class="orta">İmza</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr><td>İstirahat</td><td>İş göremezlik</td><td class="orta">03.09.2026</td><td class="orta">10 gün</td><td>I21.0</td><td>Akut MI nedeniyle istirahat</td><td class="orta">—</td><td class="orta"><span class="rz sari">Taslak</span></td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Türler: istirahat, ilaç kullanım (SUT), durum bildirir, sağlık kurulu (çok hekimli), engelli sağlık kurulu. Medula rapor gönderimi tür bazlı. USS Rapor Türü/Tarihi/Detayı alanları buradan.</div>
+  </div>
+  <div class="pnl">
+    <div class="hdr" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="fld"><label>Karar</label><div class="inp combo">Kurum dışına sevk (acil) <span class="sonuk">· yönlendirme yok / kurum içi / kurum dışı / yatış önerisi</span></div></div>
+      <div class="fld"><label>Sevk edilen tesis</label><div class="inp combo">X Eğitim ve Araştırma Hastanesi · 11yyyyyy</div></div>
+      <div class="fld"><label>Klinik</label><div class="inp combo">Kardiyoloji · koroner anjiyografi</div></div>
+      <div class="fld" style="grid-column:span 2"><label>Sevk nedeni / notu</label><div class="inp">STEMI ön tanısı, primer PCI için 112 ile transfer. Yükleme dozları verildi.</div></div>
+      <div class="fld"><label>Ambulans</label><div class="inp combo">112 çağrıldı · 10:38</div></div>
+    </div>
+    <div class="grp" style="margin:10px"><div class="gb">Konsültasyon isteği <span class="sp">kurum içi</span></div>
+      <div class="dg"><table><thead><tr><th>Branş / Hekim</th><th>Soru</th><th class="orta">İstem</th><th class="orta">Yanıt</th><th class="orta">Durum</th></tr></thead>
+        <tbody><tr><td>Kardiyoloji · Dr. B. Tan</td><td>STEMI? Transfer öncesi değerlendirme</td><td class="orta">10:36</td><td class="orta">—</td><td class="orta"><span class="rz mavi">Bekliyor</span></td></tr></tbody></table></div></div>
+    <div class="ic sonuk">Sevk → <code>muayene.yonlendirme</code> + USS Sevk / 106 Hasta Çıkış (Çıkış Şekli = kurum dışına sevk, Sevk Tanısı, Sevk Edilen Klinik). Konsültasyon → karşı hekimin listesine düşer, yanıtı bu muayeneye bağlı ayrı muayene kaydı.</div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table>
+      <thead><tr><th>SUT / Kod</th><th>İşlem</th><th class="orta">Kaynak</th><th class="sag">Adet</th><th class="sag">Tutar</th><th>Ödeyen</th><th class="orta">Rol (prim)</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr><td>520030</td><td>Uzman hekim muayenesi</td><td class="orta">otomatik</td><td class="sag">1</td><td class="sag">SUT</td><td>SGK</td><td class="orta">Uygulayan: Dr. A. Koç</td><td class="orta"><span class="rz ok">Kayıtlı</span></td></tr>
+        <tr><td>700100</td><td>EKG</td><td class="orta">işlem</td><td class="sag">1</td><td class="sag">SUT</td><td>SGK</td><td class="orta">Uygulayan: Hemş. N. Koç</td><td class="orta"><span class="rz ok">Kayıtlı</span></td></tr>
+        <tr><td>900.xxx</td><td>Troponin T hs</td><td class="orta">lab istem</td><td class="sag">2</td><td class="sag">SUT</td><td>SGK</td><td class="orta">İsteyen: Dr. A. Koç</td><td class="orta"><span class="rz ok">Kayıtlı</span></td></tr>
+        <tr><td>800.xxx</td><td>Akciğer PA</td><td class="orta">rad istem</td><td class="sag">1</td><td class="sag">SUT</td><td>SGK</td><td class="orta">İsteyen</td><td class="orta"><span class="rz ok">Kayıtlı</span></td></tr>
+        <tr><td>—</td><td>Fark ücreti (özel oda)</td><td class="orta">elle</td><td class="sag">1</td><td class="sag">0,00</td><td>Hasta</td><td class="orta">—</td><td class="orta"><span class="rz pas">—</span></td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Başvuru satırları (<code>belge_satir</code>); muayene ücreti başvuru açılınca otomatik, istemler eklendikçe satır; tamamlamada başvuru tür 19 → tahakkuk 17 (prim burada doğar). Medula hizmet kaydı kayıt kabul ekranından. Kurum fark kuralları <code>kurum_sozlesme</code>.</div>
+  </div>
+  <div class="pnl ikiPanel">
+    <div class="grp" style="margin:10px"><div class="gb">Önceki muayeneler (kurum) <span class="sp">son 5</span></div>
+      <div class="dg"><table><thead><tr><th>Tarih</th><th>Hekim</th><th>Tanı</th><th>Özet</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>12.03.2025</td><td>Dr. A. Koç</td><td>E11.9 · I10</td><td>DM kontrolü; HbA1c 7,4; doz artırıldı</td><td>📂 · ↺ kopyala</td></tr>
+          <tr><td>10.09.2024</td><td>Dr. A. Koç</td><td>E11.9</td><td>Yıllık kontrol; göz dibi önerildi</td><td>📂</td></tr>
+          <tr><td>14.02.2024</td><td>Dr. D. Su</td><td>K29.7</td><td>Gastrit; PPI 4 hafta</td><td>📂</td></tr>
+        </tbody></table></div></div>
+    <div class="grp" style="margin:10px"><div class="gb">e-Nabız / dış kurum <span class="sp">izin ✔ · anlık</span></div>
+      <div class="ic">22.03.2026 X Devlet Hast. Kardiyoloji · I10 · EKO: EF %55<br>08.01.2026 Y ASM · Z00.0 · lipid paneli<br><span class="sonuk">Ayrıntı: <code>../E-Nabız/enabiz_hasta_gecmisi.html</code></span></div></div>
+  </div>
+  <div class="pnl">
+    <div class="toolbar" style="border-top:none"><div class="btn">＋ Dosya / Fotoğraf</div><div class="btn">📋 Onam Formu ▾</div><div class="btn">🖨 Yazdır</div></div>
+    <ul class="liste">
+      <li>📄 EKG_20260903_1024.pdf <span class="sp">cihazdan · 10:24</span></li>
+      <li>📄 Acil servis notu <span class="sp">Dr. S. Yıldırım · 09:40</span></li>
+      <li>📝 Onam — invazif işlem bilgilendirme <span class="sp">imza bekliyor (tablet)</span></li>
+    </ul>
+    <div class="ic sonuk">Doküman altyapısı (<code>dokuman</code>, kaynak = belge/başvuru; hasta → özel nitelikli). Onamlar <code>onam</code> tablosu (tür: işlem onamı).</div>
+  </div>
+  <div class="statusbar"><span>Tanı ✔ ana · İstem 4 · Reçete taslak · Rapor taslak · Sevk: kurum dışı</span><span>Süre 12 dk</span><span class="sp">Tamamla → başvuru tahakkuk · e-Nabız 103 + 106 · özet PDF · hasta portalı</span></div>
+</div>
+<div class="not"><b>Tamamlama kuralı.</b> Ana tanı + (yüz yüze) fizik muayene en az bir sistem + karar. Tamamlanmış muayene salt okunur; ek not "ek muayene notu" olarak eklenir (düzeltme izi). Uzaktan muayene aynı kart, <code>tur</code> = uzaktan, fizik muayene sekmesi "hasta beyanı/görsel" moduna döner (<code>../Teletıp/</code>, <code>../USBS/usbs_muayene.html</code>).</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

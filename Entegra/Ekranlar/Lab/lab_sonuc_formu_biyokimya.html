@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hasta Sonuç Raporu — Biyokimya / Hematoloji — Mockup (Gentegre AI · Laboratuvar)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  body{background:#d9dee5}
+  .sayfa{max-width:900px;margin:0 auto 18px;background:#fff;border:1px solid var(--line);box-shadow:0 6px 22px rgba(20,40,70,.18);padding:22px 28px;font-size:11.5px;color:#1f2d3a}
+  .ust{display:grid;grid-template-columns:1fr 2fr 1fr;gap:10px;align-items:center;border-bottom:2px solid #1c4374;padding-bottom:8px}
+  .ust .logo{font-weight:bold;color:#1c4374;font-size:14px}
+  .ust .kurum{text-align:center}
+  .ust .kurum b{font-size:14px;display:block}
+  .ust .rozetler{text-align:right;font-size:10px;color:var(--muted)}
+  .ust .rozetler span{display:inline-block;border:1px solid var(--line);border-radius:3px;padding:2px 6px;margin-left:4px}
+  h1{font-size:14px;text-align:center;margin:10px 0 8px;color:#1c4374;letter-spacing:.5px}
+  .kimlik{display:grid;grid-template-columns:repeat(4,1fr);gap:3px 14px;border:1px solid var(--line2);padding:8px 10px;border-radius:3px;background:#fbfcfd}
+  .kimlik div{font-size:11px} .kimlik b{color:#3a5573}
+  .kimlik .tam{grid-column:span 2}
+  table.rp{border-collapse:collapse;width:100%;margin:10px 0}
+  table.rp th{background:#eef2f7;border:1px solid var(--line2);padding:4px 6px;text-align:left;font-size:10.5px;color:#3a5573}
+  table.rp td{border:1px solid var(--line2);padding:3px 6px;font-size:11px;vertical-align:top}
+  table.rp tr.grup td{background:#f4f7fb;font-weight:bold;color:#1c4374}
+  .sag{text-align:right} .orta{text-align:center}
+  .b{font-weight:bold} .kir{color:#b3261e;font-weight:bold} .sari{color:#8a6218;font-weight:bold}
+  .panik{background:#fbe9e7}
+  .yorum{border:1px solid var(--line2);border-left:4px solid #2f6db3;padding:6px 10px;margin:8px 0;font-size:11px;background:#fbfcfd}
+  .uyari{border:1px solid #f3c4bf;border-left:4px solid #b3261e;padding:6px 10px;margin:8px 0;font-size:11px;background:#fdf4f3}
+  .alt{border-top:2px solid #1c4374;margin-top:12px;padding-top:6px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:10.5px}
+  .imza{border:1px dashed var(--line);padding:6px 8px;min-height:54px;font-size:10.5px}
+  .kucuk{font-size:10px;color:var(--muted)}
+  .barkod{font-family:'Libre Barcode 128',monospace;font-size:22px;letter-spacing:2px}
+  .zaman{display:flex;gap:14px;font-size:10.5px;color:#3a5573;margin:6px 0;flex-wrap:wrap}
+  .zaman span b{color:#1f2d3a}
+  .not{max-width:900px;font-size:11px}
+
+</style>
+</head>
+<body>
+
+<div class="sayfa">
+
+  <div class="ust">
+    <div class="logo">GENTEGRE<br><span class="kucuk">TIP MERKEZİ · Tıbbi Laboratuvar</span></div>
+    <div class="kurum"><b>TIBBİ BİYOKİMYA · HEMATOLOJİ LABORATUVARI</b><span class="kucuk">Ruhsat No: 34-XXXX · Sorumlu: Uzm. Dr. L. Kaya (Tıbbi Biyokimya) · Yukarı Dudullu Mah. … Ümraniye / İstanbul · 0216 … · lab@…</span></div>
+    <div class="rozetler"><span>Akılcı Laboratuvar</span><span>TS EN ISO 15189</span><span>Dış KK: KBUDEK</span><br><span class="barkod">2603187701</span></div>
+  </div>
+
+  <h1>HASTA SONUÇ RAPORU</h1>
+  <div class="kimlik">
+    <div><b>Hasta:</b> AYŞE YILMAZ</div><div><b>T.C. No:</b> 1234567****</div><div><b>Doğum / Cinsiyet:</b> 12.05.1987 · 39 · K</div><div><b>Protokol:</b> 2026/20417</div>
+    <div><b>İsteyen hekim:</b> Uzm. Dr. Ali Koç · Dahiliye</div><div><b>Klinik:</b> Dahiliye (online)</div><div><b>Ödeyen:</b> Özel</div><div><b>Rapor No:</b> LAB-2026/31877-2</div>
+    <div class="tam"><b>Klinik bilgi / tanı:</b> Boğaz ağrısı, ateş · J03.9 · Penisilin alerjisi</div><div><b>Rapor türü:</b> <span class="b">NİHAİ</span> (kısmi rapor 09:58'de yayınlandı)</div><div><b>Sayfa:</b> 1 / 1</div>
+  </div>
+  <div class="zaman"><span>Numune alım: <b>03.09.2026 09:12</b></span><span>Lab kabul: <b>09:16</b></span><span>Sonuç: <b>11:44</b></span><span>Onay: <b>11:52</b></span><span>Rapor: <b>11:53</b></span><span>Toplam süre (TAT): <b>2 s 37 dk</b></span></div>
+
+  <table class="rp">
+    <thead><tr><th style="width:24%">Tetkik</th><th class="sag" style="width:9%">Sonuç</th><th style="width:8%">Birim</th><th style="width:15%">Referans aralığı</th><th class="orta" style="width:6%">Bayrak</th><th class="sag" style="width:10%">Önceki (14.05.26)</th><th style="width:12%">Yöntem / Cihaz</th><th style="width:8%">Numune</th><th class="orta" style="width:8%">Onay</th></tr></thead>
+    <tbody>
+      <tr class="grup"><td colspan="9">BİYOKİMYA · Serum · barkod 2603187701 · alım 09:12 · kabul 09:16</td></tr>
+      <tr><td>Glukoz (açlık)</td><td class="sag">96</td><td>mg/dL</td><td>70 – 100</td><td class="orta"></td><td class="sag">98</td><td>Enzimatik · Cobas c503</td><td>Serum</td><td class="orta">11:52 LK</td></tr>
+      <tr><td>Üre</td><td class="sag">28</td><td>mg/dL</td><td>17 – 43</td><td class="orta"></td><td class="sag">31</td><td>Kinetik UV · c503</td><td>Serum</td><td class="orta">11:52 LK</td></tr>
+      <tr><td>Kreatinin</td><td class="sag">0,74</td><td>mg/dL</td><td>0,51 – 0,95</td><td class="orta"></td><td class="sag">0,71</td><td>Enzimatik · c503</td><td>Serum</td><td class="orta">11:52 LK</td></tr>
+      <tr><td>eGFR (CKD-EPI 2021)</td><td class="sag">&gt; 90</td><td>mL/dk/1,73m²</td><td>&gt; 60</td><td class="orta"></td><td class="sag">&gt; 90</td><td>Hesaplama</td><td>—</td><td class="orta">—</td></tr>
+      <tr><td>ALT</td><td class="sag">21</td><td>U/L</td><td>&lt; 35</td><td class="orta"></td><td class="sag">19</td><td>IFCC · c503</td><td>Serum</td><td class="orta">11:52 LK</td></tr>
+      <tr><td>AST</td><td class="sag">24</td><td>U/L</td><td>&lt; 35</td><td class="orta"></td><td class="sag">22</td><td>IFCC · c503</td><td>Serum</td><td class="orta">11:52 LK</td></tr>
+      <tr><td>CRP</td><td class="sag b">24,0</td><td>mg/L</td><td>&lt; 5,0</td><td class="orta sari">H ↑</td><td class="sag">3,1</td><td>İmmünotürbidimetrik · c503</td><td>Serum</td><td class="orta">11:52 LK</td></tr>
+      <tr><td>TSH</td><td class="sag">3,10</td><td>mIU/L</td><td>0,40 – 4,00</td><td class="orta"></td><td class="sag">2,80</td><td>ECLIA · Cobas e801</td><td>Serum</td><td class="orta">11:52 LK</td></tr>
+      <tr class="grup"><td colspan="9">HEMATOLOJİ · Tam kan (EDTA) · barkod 2603187702 · alım 09:12 · kabul 09:16</td></tr>
+      <tr><td>WBC (Lökosit)</td><td class="sag b">11,2</td><td>10³/µL</td><td>4,0 – 10,0</td><td class="orta sari">H ↑</td><td class="sag">7,1</td><td>Flow sitometri · XN-1000</td><td>Tam kan</td><td class="orta">10:40 oto*</td></tr>
+      <tr><td>Nötrofil</td><td class="sag b">8,4 (%75)</td><td>10³/µL</td><td>2,0 – 7,0</td><td class="orta sari">H ↑</td><td class="sag">4,2</td><td>XN-1000</td><td>Tam kan</td><td class="orta">10:40 oto*</td></tr>
+      <tr><td>Lenfosit</td><td class="sag">2,1 (%19)</td><td>10³/µL</td><td>1,0 – 3,5</td><td class="orta"></td><td class="sag">2,3</td><td>XN-1000</td><td>Tam kan</td><td class="orta">10:40 oto*</td></tr>
+      <tr><td>Hemoglobin</td><td class="sag">12,8</td><td>g/dL</td><td>12,0 – 16,0</td><td class="orta"></td><td class="sag">12,9</td><td>SLS · XN-1000</td><td>Tam kan</td><td class="orta">10:40 oto*</td></tr>
+      <tr><td>Hematokrit</td><td class="sag">38,5</td><td>%</td><td>36 – 46</td><td class="orta"></td><td class="sag">38,9</td><td>XN-1000</td><td>Tam kan</td><td class="orta">10:40 oto*</td></tr>
+      <tr><td>MCV</td><td class="sag">86</td><td>fL</td><td>80 – 100</td><td class="orta"></td><td class="sag">87</td><td>XN-1000</td><td>Tam kan</td><td class="orta">10:40 oto*</td></tr>
+      <tr><td>Trombosit</td><td class="sag">268</td><td>10³/µL</td><td>150 – 400</td><td class="orta"></td><td class="sag">255</td><td>XN-1000</td><td>Tam kan</td><td class="orta">10:40 oto*</td></tr>
+      <tr><td>HbA1c</td><td class="sag">5,4</td><td>%</td><td>&lt; 5,7 (normal)</td><td class="orta"></td><td class="sag">—</td><td>HPLC · c503 (NGSP)</td><td>Tam kan</td><td class="orta">11:52 LK</td></tr>
+      <tr class="grup"><td colspan="9">İDRAR · Spot idrar · barkod 2603187704 · alım 09:20 · kabul 09:22</td></tr>
+      <tr><td>Tam idrar tetkiki — strip</td><td class="sag" colspan="2">Protein (−) · Glukoz (−) · Keton (−) · Lökosit esteraz (−) · Nitrit (−) · pH 6,0 · Dansite 1.015</td><td>—</td><td class="orta"></td><td class="sag">—</td><td>Strip · UF-5000 / manuel</td><td>İdrar</td><td class="orta">10:05 BS</td></tr>
+      <tr><td>Sediment</td><td class="sag" colspan="2">Lökosit 1–2/BBA · Eritrosit 0–1 · Epitel az · Bakteri yok</td><td>—</td><td class="orta"></td><td class="sag">—</td><td>Mikroskopi</td><td>İdrar</td><td class="orta">10:05 BS</td></tr>
+    </tbody>
+  </table>
+
+  <div class="yorum"><b>Uzman yorumu:</b> Akut faz yanıtı (CRP ↑, nötrofilik lökositoz) klinik ön tanı (akut tonsillit) ile uyumlu. Tiroid fonksiyonu ötiroid. Boğaz kültürü ayrı raporda (LAB-2026/31877-3, 48 saat).</div>
+  <div class="kucuk">* oto: Laboratuvar oto-onay kuralı (referans aralığı içi + delta kontrolü + cihaz bayrağı yok + iç kalite kontrol geçerli) ile teknik onaylı; uzman gözetiminde. LK: Uzm. Dr. L. Kaya · BS: Tekn. B. Sel.
+  Referans aralıkları yaş/cinsiyete göre laboratuvar tarafından belirlenmiştir; ↑/↓ referans dışı, <span class="kir">PANİK</span> kritik değer (hekime bildirildi, teyit saati raporda). Önceki sonuç: bu laboratuvardaki son onaylı sonuç. Delta uyarısı: bir önceki sonuçtan anlamlı fark. Ölçüm belirsizliği ve yöntem bilgileri istek üzerine verilir.</div>
+
+  <div class="alt">
+    <div><b>Onaylayan:</b><div class="imza">Uzm. Dr. L. Kaya<br>Tıbbi Biyokimya Uzmanı · Dip. Tescil 12345<br><span class="kucuk">e-imza · 03.09.2026 11:52 · 5070 sayılı kanun</span></div></div>
+    <div><b>Numune kalitesi:</b> Uygun (hemoliz idx 12 · lipemi 8 · ikter 4)<br><b>Numune alan:</b> Hemş. N. Koç<br><b>Kabul eden:</b> Tekn. R. Al<br><b>Dış lab:</b> —</div>
+    <div><b>Doğrulama:</b> QR / e-Nabız<br><span class="kucuk">Rapor e-Nabız'a gönderildi (Tetkik Sonuç paketi) · 03.09.2026 12:00 · hasta portalında görüntülenebilir · Bu rapor elektronik olarak imzalanmıştır, ıslak imza gerektirmez.</span></div>
+  </div>
+</div>
+<div class="not"><b>Akılcı Laboratuvar / ISO 15189 rapor gereklilikleri (kapsananlar):</b> laboratuvar kimliği ve sorumlusu · hasta kimliği (maskeli) · isteyen hekim/klinik · numune tipi, alım-kabul-sonuç-onay zamanları (TAT) · tetkik adı, sonuç, birim (SI), referans aralığı, bayrak · yöntem/cihaz · önceki sonuç (kümülatif) · panik değer ve bildirim · numune kalitesi (serum indeksleri) · onaylayan uzman + e-imza · kısmi/nihai/düzeltilmiş rapor ayrımı · sayfa no · yorum. Kaynak: <code>lab_sonuc</code>, <code>lab_numune</code>, <code>lab_rapor</code>.</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

@@ -20,7 +20,8 @@ uses
   cxMaskEdit, cxDropDownEdit, cxImageComboBox, dxDateRanges,
   dxScrollbarAnnotations, FireDAC.Stan.Intf, FireDAC.Stan.Option,
   FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
-  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
+  UGS1Barkod;
 
 type
   TIzlemeDlg = class(TForm)
@@ -114,6 +115,20 @@ type
       AShift: TShiftState; var AHandled: Boolean);
     procedure LblKalanMiktarClick(Sender: TObject);
   private
+    { --- Barkod okuma ------------------------------------------------------
+      Iki asamali ("line") okuyucularda once yalniz urun numarasi, ardindan
+      lot + SKT okutulur. Ilk okutma burada bekletilir; ikinci okutma gelince
+      satir eklenir. Bekleme suresi asilirsa dusurulur ki eski bir okutma
+      yanlis urune yazilmasin. }
+    FBeklenenUrunNo : string;
+    FBeklemeZamani  : TDateTime;
+    FEskiBaslik     : string;
+    function  RafOmruSor: Boolean;
+    function  BarkodUrunUyuyor(const AUrunNo: string): Boolean;
+    function  BarkodMevcutSatiraEkle(const ABilgi: TGS1Bilgi): Boolean;
+    function  BarkodLotSatiriEkle(const ABilgi: TGS1Bilgi): Boolean;
+    procedure BarkodBeklemeBaslat(const AUrunNo: string);
+    procedure BarkodBeklemeBitir;
     procedure TempTabloOlustur;
     // A8 okuma tarafi: aday listesini sp_Prog_Izleme_Aday_Json'dan doldurur
     function AdaydanDoldur(const AYontem: string): Boolean;
@@ -605,12 +620,23 @@ begin
       ' ELSE '+VarToStr(Adet)+' END  WHERE IZLEMID = '+TabIzlem.FieldByName('UPDID').AsString,[],[]);
 end;
 
-procedure TIzlemeDlg.EditRafOmruClick(Sender: TObject);
+function TIzlemeDlg.RafOmruSor: Boolean;
 var RafOmru : Variant;
     Yil : Integer;
 begin
+   // Raf omru stok kartina aittir, izleme satirina degil. Grid'de yarim kalmis
+   // bos bir satir varsa odak degisince post edilmeye calisilir ve BeforePost
+   // "Izlem bilgisini giriniz!" deyip iptal eder; kullanici raf omrunu hic
+   // giremez. Bos satiri once iptal ediyoruz.
+   if (TabIzlem.State in [dsInsert, dsEdit]) and
+      (TabIzlem.FieldByName('SERINO').AsString = '') and
+      (TabIzlem.FieldByName('LOTNO').AsString = '') then
+      TabIzlem.Cancel;
+
    RafOmru := Tablo.AciklamaGetir('STOKLAR','RAFOMRU_SURE', StokID);   // mevcut degeri on-doldur
-   if TGirisKutusuEx.BilgiAlEx('Raf Ömrü',TGirdiDenetimleri.Create.Edit('Raf Ömrü Kaç Yıl?',@RafOmru)) <> mrOk then
+   Result := TGirisKutusuEx.BilgiAlEx('Raf Ömrü',
+               TGirdiDenetimleri.Create.Edit('Raf Ömrü Kaç Yıl?',@RafOmru)) = mrOk;
+   if not Result then
         Exit;
    Yil := StrToIntDef(Trim(VarToStr(RafOmru)),0);
    RafOmruSure := Yil;   // ekrandan alinan degeri degiskene de yaz (BeforePost SKT/URT hesabinda kullanilir)
@@ -618,6 +644,11 @@ begin
    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update STOKLAR set RAFOMRU_SURE='+IntToStr(Yil)+
       ', RAFOMRU_BIRIM=3 where ID='+IntToStr(StokID),[],[]);
    EditRafOmru.Caption := IntToStr(Yil)+' Yıl';
+end;
+
+procedure TIzlemeDlg.EditRafOmruClick(Sender: TObject);
+begin
+   RafOmruSor;
 end;
 
 procedure TIzlemeDlg.DtsIzlemStateChange(Sender: TObject);
@@ -632,7 +663,7 @@ end;
 
 procedure TIzlemeDlg.EditAraKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  EditAra.PostEditValue;
+    EditAra.PostEditValue;
 end;
 
 procedure TIzlemeDlg.EditAraPropertiesEditValueChanged(Sender: TObject);
@@ -642,10 +673,182 @@ begin
   TabIzlem.Open;
 end;
 
-procedure TIzlemeDlg.EditBarkodKeyUp(Sender: TObject; var Key: Word;  Shift: TShiftState);
-begin
-  //
+{ ---------------------------------------------------------------------------
+  Barkod okuma. Iki kisim:
+    1) GS1Coz  (UGS1Barkod)  - barkodu cozer, turunu belirler
+    2) asagidaki yordamlar    - turune gore izleme satirini ekler/gunceller
+  Cozumleyici ayri birimde oldugu icin stok/hizmet arama ve stok arama frame'i
+  de ayni okumayi kullanabilir (orada urun no ile stok listelenir).
+  --------------------------------------------------------------------------- }
 
+const
+  BarkodBeklemeSaniye = 120;   //< 1. okutmanin gecerlilik suresi
+
+function TIzlemeDlg.BarkodUrunUyuyor(const AUrunNo: string): Boolean;
+begin
+  Result := True;
+  if (AUrunNo = '') or (StokID <= 0) then
+    Exit;                                   // urun baglami yoksa kontrol edilemez
+
+  // Urun numarasi iki yerde tutulabiliyor: STOKLAR.URUNNO ya da stok kartinin
+  // barkod satirlari (STOKBARKOD). Stok/hizmet arama ekrani barkodu STOKBARKOD
+  // uzerinden buluyor; burada ayni yerlere bakmazsak arama urunu buluyor ama
+  // izleme "bu urune ait degil" diyor.
+  // Not: eski kodda parantez yoktu ve "ID=x and URUNNO=a or URUNNO=b" seklinde
+  // yazildigi icin ikinci kosul ID kontrolunu devre disi birakiyordu.
+  Tablo.TablodanSorguAc(1,
+    'select S.ID from STOKLAR S where S.ID=' + IntToStr(StokID) +
+    ' and (S.URUNNO=' + QuotedStr(AUrunNo) +
+    ' or S.URUNNO=' + QuotedStr('0' + AUrunNo) +
+    ' or exists (select 1 from STOKBARKOD B where B.STOKID=S.ID' +
+    ' and (B.BARKOD=' + QuotedStr(AUrunNo) +
+    ' or B.BARKOD=' + QuotedStr('0' + AUrunNo) + ')))');
+  Result := Tablo.Query1.RecordCount > 0;
+  if not Result then
+    ShowMessage(KarekodAitDegil);
+end;
+
+function TIzlemeDlg.BarkodMevcutSatiraEkle(const ABilgi: TGS1Bilgi): Boolean;
+begin
+  Result := False;
+  if TabIzlem.State in [dsEdit, dsInsert] then
+    TabIzlem.Cancel;
+
+  TabIzlem.First;
+  if (ABilgi.SeriNo <> '') and TabIzlem.Locate('SERINO', ABilgi.SeriNo, []) then
+    Result := True
+  else if (ABilgi.Lot <> '') and TabIzlem.Locate('LOTNO', ABilgi.Lot, []) then
+    Result := True;
+
+  if not Result then
+    Exit;
+
+  TabIzlem.Edit;
+  TabIzlem.FieldByName('KALAN').AsFloat := TabIzlem.FieldByName('KALAN').AsFloat + 1.0;
+  TabIzlem.Post;
+end;
+
+function TIzlemeDlg.BarkodLotSatiriEkle(const ABilgi: TGS1Bilgi): Boolean;
+begin
+  Result := False;
+
+  // Barkod tarih tasiyorsa BeforePost raf omru ister (SKT<->URT esitlemesi
+  // icin). Tanimli degilse satiri ekleyip kullaniciyi "raf omru yok" hatasina
+  // dusurmek yerine simdi soralim ve stok kartina kaydedelim.
+  if (RafOmruSure <= 0) and (ABilgi.SktVar or ABilgi.UretimVar) then
+  begin
+    RafOmruSor;
+    if RafOmruSure <= 0 then
+      Exit;                                  // vazgecildi: satir eklenmez
+  end;
+
+  // Cikis (secim) kipinde yeni satir acilmaz; okutulan lot listede bulunup
+  // adedi artirilir.
+  if GridFatIzlemViewSEC.Visible then
+    Exit(BarkodMevcutSatiraEkle(ABilgi));
+
+  if BarkodMevcutSatiraEkle(ABilgi) then
+    Exit(True);                              // ayni lot/seri zaten listede
+
+  if TabIzlem.State = dsBrowse then
+    TabIzlem.Append;
+
+  if GridFatIzlemViewSERINO.Visible and (ABilgi.SeriNo <> '') then
+    TabIzlem.FieldByName('SERINO').AsString := ABilgi.SeriNo;
+  if GridFatIzlemViewLOTNO.Visible and (ABilgi.Lot <> '') then
+    TabIzlem.FieldByName('LOTNO').AsString := ABilgi.Lot;
+  if GridFatIzlemViewSKT.Visible and ABilgi.SktVar then
+    TabIzlem.FieldByName('SKT').AsDateTime := ABilgi.Skt;
+  if GridFatIzlemViewSKT.Visible and ABilgi.UretimVar then
+    TabIzlem.FieldByName('URT').AsDateTime := ABilgi.Uretim;
+
+  if GridFatIzlemViewMIKTAR.Visible then
+  begin
+    if ABilgi.MiktarVar and (ABilgi.Miktar > 0) then
+      TabIzlem.FieldByName('KALAN').AsFloat := ABilgi.Miktar
+    else if ABilgi.SeriNo <> '' then
+      TabIzlem.FieldByName('KALAN').AsFloat := 1.0;   // seri no tek adedi gosterir
+  end;
+
+  TabIzlem.Post;
+  Result := True;
+end;
+
+procedure TIzlemeDlg.BarkodBeklemeBaslat(const AUrunNo: string);
+begin
+  FBeklenenUrunNo := AUrunNo;
+  FBeklemeZamani  := Now;
+  if FEskiBaslik = '' then
+    FEskiBaslik := Caption;
+  Caption := FEskiBaslik + '   »   lot / SKT barkodu bekleniyor';
+end;
+
+procedure TIzlemeDlg.BarkodBeklemeBitir;
+begin
+  FBeklenenUrunNo := '';
+  if FEskiBaslik <> '' then
+    Caption := FEskiBaslik;
+end;
+
+procedure TIzlemeDlg.EditBarkodKeyUp(Sender: TObject; var Key: Word;  Shift: TShiftState);
+var
+  Bilgi : TGS1Bilgi;
+  Metin : string;
+begin
+  if Key <> VK_RETURN then
+    Exit;
+
+  // DevExpress'te yazma/yapistirma sirasinda canli metin Text'tedir;
+  // EditValue ancak PostEditValue ile guncellenir ve burada bos gelir.
+  Metin := Trim(EditBarkod.Text);
+  if Metin = '' then
+    Exit;
+
+  try
+    // 1) Cozumleme
+    if not GS1Coz(Metin, Bilgi) then
+    begin
+      ShowMessage('Barkod cozulemedi: ' + Metin);
+      Exit;
+    end;
+
+    // Bekleyen ilk okutma eskidiyse dusur: aradan zaman gectiyse kullanici
+    // muhtemelen baska bir urunle ilgileniyordur.
+    if (FBeklenenUrunNo <> '') and
+       (SecondsBetween(Now, FBeklemeZamani) > BarkodBeklemeSaniye) then
+      BarkodBeklemeBitir;
+
+    // 2) Satir islemi
+    case Bilgi.Tur of
+      btGS1UrunNo, btDuzUrunNo:
+        // Iki asamali okuyucunun 1. okutmasi: yalniz urun numarasi geldi.
+        if BarkodUrunUyuyor(Bilgi.UrunNo) then
+          BarkodBeklemeBaslat(Bilgi.UrunNo);
+
+      btGS1LotSkt:
+        // 2. okutma: lot / SKT geldi ama urun numarasi yok. Hangi urune
+        // yazilacagi ancak onceki okutmadan bilinir.
+        if FBeklenenUrunNo = '' then
+          ShowMessage('Once urun barkodunu okutun, ardindan lot / SKT barkodunu.')
+        else
+        begin
+          BarkodLotSatiriEkle(Bilgi);
+          BarkodBeklemeBitir;
+        end;
+
+      btGS1Tam:
+        // Karekod: urun ve lot/SKT tek okutmada.
+        if BarkodUrunUyuyor(Bilgi.UrunNo) then
+        begin
+          BarkodLotSatiriEkle(Bilgi);
+          BarkodBeklemeBitir;
+        end;
+    end;
+  finally
+    EditBarkod.Text := '';
+    if EditBarkod.CanFocus then
+      EditBarkod.SetFocus;
+  end;
 end;
 (*
 procedure TIzlemeDlg.EditBarkodKeyUp(Sender: TObject; var Key: Word;  Shift: TShiftState);
@@ -1197,6 +1400,19 @@ var Fark : Real;
              Result := Say=1;
     end;
 begin
+   // Kullanicinin hicbir sey girmedigi satir: grid odagi biraktiginda (ornegin
+   // Raf Omru etiketine tiklaninca) otomatik acilmis satiri post etmeye
+   // calisir. "Izlem bilgisini giriniz" demek yaniltici; sessizce iptal
+   // ediyoruz. Yarim dolu satirda uyari asagida aynen devam eder.
+   //   KALAN ve URT bakilmaz: NewRecord ikisine de varsayilan yaziyor
+   //   (KALAN=1, URT=1990-01-01 sentinel ya da bugun), yani satir bos olsa da
+   //   dolu gorunurler. Kullanicinin girmesi gereken alanlar seri/lot/SKT'dir.
+   if (TabIzlem.FieldByName('SERINO').AsString = '') and
+      (TabIzlem.FieldByName('LOTNO').AsString = '') and
+      ((TabIzlem.FieldByName('SKT').AsString = '') or
+       (TabIzlem.FieldByName('SKT').AsDateTime <= EncodeDate(1990, 1, 1))) then
+      Abort;
+
    if ((IzlemTur in [izl_SeriNo,izl_Karekod,izl_SeriNo_LotNo] )and(TabIzlem.FieldByName('SERINO').AsString=''))or
       ((IzlemTur in [izl_LotNo, izl_LotNo_SKT])and(TabIzlem.FieldByName('LOTNO').AsString='')) then begin
       Showmessage(IZBilgi_gir);

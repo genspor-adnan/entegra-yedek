@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rasyo (Oran) Analizi — Mockup (Gentegre AI · Muhasebe · HBYS)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .dg td.k{font-family:Consolas,monospace;white-space:nowrap}
+  .dg tr.t1 td{font-weight:bold;background:#f4f7fb;color:#1c4374}
+  .dg tr.t2 td{font-weight:bold}
+  .dg tr.top td{border-top:2px solid #1c4374;font-weight:bold;background:#eef2f7}
+  .ind1{padding-left:18px} .ind2{padding-left:36px} .ind3{padding-left:54px}
+  .kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:8px 12px}
+  .kpi .kart{min-width:0}
+  .bar2{display:flex;align-items:flex-end;gap:3px;height:70px}
+  .bar2 i{flex:1;background:#4d8fd6;display:block}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📐 Rasyo Analizi <span class="sp">31.08.2026 · karşılaştırma 31.12.2025 · sektör kıyası: özel görüntüleme merkezleri (kurum girişi)</span></div>
+  <div class="toolbar"><div class="btn">📅 Tarih ▾</div><div class="btn">↔ Karşılaştır ▾</div><div class="btn">🎯 Hedefler / sektör ortalaması</div><div class="btn">📈 Trend (12 çeyrek)</div><div class="btn">⚠ Eşik uyarıları</div><div class="btn sp">📥 Excel · 🖨</div></div>
+  <div class="sekmeler"><div class="sekme on">Likidite</div><div class="sekme">Finansal Yapı (Kaldıraç)</div><div class="sekme">Faaliyet (Devir)</div><div class="sekme">Kârlılık</div><div class="sekme">Sektörel (Görüntüleme)</div><div class="sekme">Trend</div></div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th>Oran</th><th>Formül</th><th class="sag">31.08.2026</th><th class="sag">31.12.2025</th><th class="sag">Hedef / sektör</th><th class="orta">Durum</th><th>Yorum</th></tr></thead>
+      <tbody>
+        <tr><td><b>Cari oran</b></td><td>Dönen varlıklar / KVYK</td><td class="sag">1,94</td><td class="sag">1,78</td><td class="sag">1,5 – 2,0</td><td class="orta"><span class="rz ok">iyi</span></td><td>Alacak ağırlıklı; SGK tahsilat vadesine bağlı</td></tr>
+        <tr><td><b>Asit-test (likidite) oranı</b></td><td>(Dönen − stoklar) / KVYK</td><td class="sag">1,77</td><td class="sag">1,66</td><td class="sag">≥ 1,0</td><td class="orta"><span class="rz ok">iyi</span></td><td></td></tr>
+        <tr><td><b>Nakit oranı</b></td><td>Hazır değerler / KVYK</td><td class="sag">0,36</td><td class="sag">0,31</td><td class="sag">≥ 0,2</td><td class="orta"><span class="rz ok">iyi</span></td><td>POS alacakları dahil</td></tr>
+        <tr><td>Net işletme sermayesi</td><td>Dönen − KVYK</td><td class="sag">1.659.800</td><td class="sag">1.278.400</td><td class="sag">&gt; 0</td><td class="orta"><span class="rz ok">iyi</span></td><td></td></tr>
+        <tr><td>Nakit çevrim süresi (gün)</td><td>Alacak gün + stok gün − borç gün</td><td class="sag">58</td><td class="sag">64</td><td class="sag">&lt; 60</td><td class="orta"><span class="rz sari">sınırda</span></td><td>SGK 45 gün, kurumlar 90 gün</td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th>Oran</th><th>Formül</th><th class="sag">31.08.2026</th><th class="sag">31.12.2025</th><th class="sag">Hedef / sektör</th><th class="orta">Durum</th><th>Yorum</th></tr></thead>
+      <tbody>
+        <tr><td><b>Kaldıraç oranı</b></td><td>Toplam yabancı kaynak / Aktif</td><td class="sag">%33</td><td class="sag">%42</td><td class="sag">≤ %50</td><td class="orta"><span class="rz ok">iyi</span></td><td>Leasing amortize oldukça düşüyor</td></tr>
+        <tr><td><b>Borç / özkaynak</b></td><td>Yabancı kaynak / Özkaynak</td><td class="sag">0,50</td><td class="sag">0,71</td><td class="sag">≤ 1,0</td><td class="orta"><span class="rz ok">iyi</span></td><td></td></tr>
+        <tr><td>Özkaynak / aktif</td><td></td><td class="sag">%67</td><td class="sag">%58</td><td class="sag">≥ %50</td><td class="orta"><span class="rz ok">iyi</span></td><td></td></tr>
+        <tr><td>Duran varlık / özkaynak</td><td></td><td class="sag">1,16</td><td class="sag">1,40</td><td class="sag">≤ 1,0</td><td class="orta"><span class="rz sari">izle</span></td><td>Cihaz yatırımı kısmen borçla; 3T MR kararı bunu artırır</td></tr>
+        <tr><td>Faiz karşılama oranı</td><td>EBIT / Finansman gideri</td><td class="sag">2,1×</td><td class="sag">1,4×</td><td class="sag">≥ 3×</td><td class="orta"><span class="rz sari">izle</span></td><td></td></tr>
+        <tr><td>Net borç / EBITDA (yıllık)</td><td>(Mali borç − nakit) / EBITDA</td><td class="sag">0,7×</td><td class="sag">1,4×</td><td class="sag">≤ 2,5×</td><td class="orta"><span class="rz ok">iyi</span></td><td>Yeni yatırım kapasitesi var</td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th>Oran</th><th>Formül</th><th class="sag">2026 (yıllık)</th><th class="sag">2025</th><th class="sag">Hedef</th><th class="orta">Durum</th><th>Yorum</th></tr></thead>
+      <tbody>
+        <tr><td><b>Alacak devir hızı / tahsil süresi</b></td><td>Net satış / ort. ticari alacak · 365/devir</td><td class="sag">9,1× · 40 gün</td><td class="sag">8,2× · 45 gün</td><td class="sag">≤ 45 gün</td><td class="orta"><span class="rz ok">iyi</span></td><td>SGK 45 · kurum 90 · özel 0 karması</td></tr>
+        <tr><td>Stok devir hızı / stok günü</td><td>SMM / ort. stok</td><td class="sag">55× · 7 gün</td><td class="sag">62× · 6 gün</td><td class="sag">≤ 15 gün</td><td class="orta"><span class="rz ok">iyi</span></td><td>Kontrast/sarf ağırlıklı</td></tr>
+        <tr><td>Borç ödeme süresi</td><td>Ticari borç / (SMM/365)</td><td class="sag">28 gün</td><td class="sag">31 gün</td><td class="sag">30–45</td><td class="orta">—</td><td></td></tr>
+        <tr><td>Aktif devir hızı</td><td>Net satış / aktif</td><td class="sag">1,41×</td><td class="sag">1,10×</td><td class="sag">≥ 1,0</td><td class="orta"><span class="rz ok">iyi</span></td><td></td></tr>
+        <tr><td>Duran varlık devir hızı</td><td>Net satış / MDV</td><td class="sag">1,81×</td><td class="sag">1,34×</td><td class="sag"></td><td class="orta">—</td><td>Cihaz verimliliği (doluluk %64)</td></tr>
+        <tr><td>Özkaynak devir hızı</td><td></td><td class="sag">2,1×</td><td class="sag">1,9×</td><td class="sag"></td><td class="orta">—</td><td></td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th>Oran</th><th>Formül</th><th class="sag">2026 (8 ay)</th><th class="sag">2025 (8 ay)</th><th class="sag">Hedef / sektör</th><th class="orta">Durum</th><th>Yorum</th></tr></thead>
+      <tbody>
+        <tr><td><b>Brüt kâr marjı</b></td><td>Brüt kâr / net satış</td><td class="sag">%37,3</td><td class="sag">%35,4</td><td class="sag">%35–45</td><td class="orta"><span class="rz ok">iyi</span></td><td></td></tr>
+        <tr><td><b>EBITDA marjı</b></td><td>EBITDA / net satış</td><td class="sag">%21,9</td><td class="sag">%17,5</td><td class="sag">%20–30</td><td class="orta"><span class="rz ok">iyi</span></td><td></td></tr>
+        <tr><td>Faaliyet kârı marjı (EBIT)</td><td></td><td class="sag">%9,2</td><td class="sag">%5,9</td><td class="sag">≥ %8</td><td class="orta"><span class="rz ok">iyi</span></td><td></td></tr>
+        <tr><td>Net kâr marjı</td><td></td><td class="sag">%5,8</td><td class="sag">%2,9</td><td class="sag">≥ %5</td><td class="orta"><span class="rz ok">iyi</span></td><td></td></tr>
+        <tr><td><b>Özkaynak kârlılığı (ROE, yıllık)</b></td><td>Net kâr / ort. özkaynak</td><td class="sag">%12,6</td><td class="sag">%5,6</td><td class="sag">≥ %15</td><td class="orta"><span class="rz sari">izle</span></td><td></td></tr>
+        <tr><td>Aktif kârlılığı (ROA, yıllık)</td><td></td><td class="sag">%7,9</td><td class="sag">%3,2</td><td class="sag">≥ %6</td><td class="orta"><span class="rz ok">iyi</span></td><td></td></tr>
+        <tr><td>Yatırılan sermaye getirisi (ROIC)</td><td>EBIT×(1−t) / (özkaynak + mali borç)</td><td class="sag">%10,4</td><td class="sag">%4,8</td><td class="sag">≥ sermaye maliyeti</td><td class="orta">—</td><td></td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th>Sektörel gösterge</th><th>Formül / kaynak</th><th class="sag">Ağu 2026</th><th class="sag">Ağu 2025</th><th class="sag">Hedef</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr><td>Gelir / çekim</td><td>Net satış / tetkik sayısı</td><td class="sag">373 ₺</td><td class="sag">331 ₺</td><td class="sag">↑</td><td class="orta"><span class="rz ok">iyi</span></td></tr>
+        <tr><td>Maliyet / çekim</td><td>Tam maliyet / tetkik</td><td class="sag">323 ₺</td><td class="sag">334 ₺</td><td class="sag">↓</td><td class="orta"><span class="rz ok">iyi</span></td></tr>
+        <tr><td>Cihaz doluluk (ağırlıklı)</td><td>Çalışılan dk / kapasite</td><td class="sag">%64</td><td class="sag">%58</td><td class="sag">≥ %70</td><td class="orta"><span class="rz sari">izle</span></td></tr>
+        <tr><td>Gelir / cihaz (aylık, MR)</td><td></td><td class="sag">698 K</td><td class="sag">590 K</td><td class="sag"></td><td class="orta">—</td></tr>
+        <tr><td>Personel gideri / net satış</td><td>Bordro + hakediş / satış</td><td class="sag">%41</td><td class="sag">%44</td><td class="sag">≤ %40</td><td class="orta"><span class="rz sari">sınırda</span></td></tr>
+        <tr><td>Sarf + kontrast / net satış</td><td></td><td class="sag">%8,0</td><td class="sag">%7,1</td><td class="sag">≤ %8</td><td class="orta"><span class="rz sari">sınırda</span></td></tr>
+        <tr><td>SGK geliri payı</td><td></td><td class="sag">%48</td><td class="sag">%54</td><td class="sag">≤ %50</td><td class="orta"><span class="rz ok">iyi</span></td></tr>
+        <tr><td>Radyolog hakediş / rapor</td><td></td><td class="sag">63 ₺</td><td class="sag">58 ₺</td><td class="sag"></td><td class="orta">—</td></tr>
+        <tr><td>Tahsilat oranı (SGK kesinti sonrası)</td><td>Tahsil edilen / faturalanan</td><td class="sag">%96,8</td><td class="sag">%95,1</td><td class="sag">≥ %97</td><td class="orta"><span class="rz sari">izle</span></td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Sektörel göstergeler finansal tablolar + maliyet modülü (çekim, doluluk, hakediş) birleşimi; hedefler kurum tarafından girilir (<code>rasyo_tanim.hedef</code>), eşik aşımı ana sayfa görev kartına düşer.</div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th>Oran</th><th class="sag">2023 Ç4</th><th class="sag">2024 Ç2</th><th class="sag">2024 Ç4</th><th class="sag">2025 Ç2</th><th class="sag">2025 Ç4</th><th class="sag">2026 Ç2</th><th class="sag">2026 Ağu</th></tr></thead>
+      <tbody>
+        <tr><td>Cari oran</td><td class="sag">1,42</td><td class="sag">1,55</td><td class="sag">1,61</td><td class="sag">1,70</td><td class="sag">1,78</td><td class="sag">1,88</td><td class="sag">1,94</td></tr>
+        <tr><td>Kaldıraç</td><td class="sag">%58</td><td class="sag">%54</td><td class="sag">%50</td><td class="sag">%46</td><td class="sag">%42</td><td class="sag">%36</td><td class="sag">%33</td></tr>
+        <tr><td>EBITDA marjı</td><td class="sag">%12</td><td class="sag">%14</td><td class="sag">%15</td><td class="sag">%17</td><td class="sag">%18</td><td class="sag">%21</td><td class="sag">%22</td></tr>
+        <tr><td>ROE (yıllık)</td><td class="sag">%1</td><td class="sag">%3</td><td class="sag">%4</td><td class="sag">%5</td><td class="sag">%6</td><td class="sag">%10</td><td class="sag">%13</td></tr>
+        <tr><td>Alacak tahsil süresi</td><td class="sag">58</td><td class="sag">52</td><td class="sag">48</td><td class="sag">46</td><td class="sag">45</td><td class="sag">42</td><td class="sag">40</td></tr>
+        <tr><td>Doluluk</td><td class="sag">%48</td><td class="sag">%52</td><td class="sag">%55</td><td class="sag">%57</td><td class="sag">%58</td><td class="sag">%62</td><td class="sag">%64</td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="statusbar"><span>42 oran · 6 grup · 5 eşik uyarısı</span><span class="sp">Formüller <code>rasyo_tanim</code> (şablon satırı referanslı), sonuçlar <code>rasyo_deger</code> dönem bazlı</span></div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

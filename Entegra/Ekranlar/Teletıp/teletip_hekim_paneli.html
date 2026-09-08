@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hekim Paneli — Bugünkü Online Görüşmeler — Mockup (Gentegre AI · Teletıp)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">👨‍⚕️ Teletıp — Hekim Paneli · Dr. Ali Koç · Dahiliye <span class="sp">03.09.2026 Çarşamba · 18:00–21:00 online</span></div>
+
+  <div class="toolbar">
+    <div class="btn ok">▶ Sıradakini Çağır</div>
+    <div class="btn">📋 Hasta Özeti</div>
+    <div class="btn">💬 Hastaya Mesaj</div>
+    <div class="btn">⏱ 5 dk Gecikme Bildir</div>
+    <div class="sepv"></div>
+    <div class="btn">🗓 Takvimim</div>
+    <div class="btn">🎥 Kamera / Mikrofon Testi <span class="rz ok">OK</span></div>
+    <div class="btn sp">🔴 Müsait değilim</div>
+  </div>
+
+  <div class="ucPanel">
+    <div>
+      <div class="gb" style="padding:6px 10px;font-weight:bold;color:#2c4a6b;background:var(--head);border-bottom:1px solid var(--line2)">Bekleme Odası (3)</div>
+      <ul class="liste">
+        <li class="sel">🟢 <b>18:40</b> Ayşe Yılmaz <span class="sp">bağlandı 18:36 · onam ✔ · ödeme ✔</span></li>
+        <li>🟡 <b>19:00</b> Mehmet Kaya <span class="sp">bağlanmadı · SMS gitti</span></li>
+        <li>⚪ <b>19:20</b> Fatma Demir <span class="sp">TT-003 kontrol · ödeme ✔</span></li>
+      </ul>
+      <div class="gb" style="padding:6px 10px;font-weight:bold;color:#2c4a6b;background:var(--head);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)">Tamamlanan (2)</div>
+      <ul class="liste">
+        <li>✔ 18:00 Can Öz <span class="sp">tamamlandı · e-Reçete ✔ · e-Nabız ✔</span></li>
+        <li>✔ 18:20 Zeynep Ak <span class="sp">tamamlandı · rapor taslak</span></li>
+      </ul>
+      <div class="gb" style="padding:6px 10px;font-weight:bold;color:#2c4a6b;background:var(--head);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)">Gelmedi (1)</div>
+      <ul class="liste"><li>✖ 17:40 Ali Vural <span class="sp">10 dk beklendi · iade kuralı: yok</span></li></ul>
+    </div>
+    <div>
+      <div class="hdr" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="fld"><label>Hasta</label><div class="inp big">Ayşe Yılmaz · 39 · K</div></div>
+        <div class="fld"><label>Randevu</label><div class="inp">RND-2026/11842 · TT-001 · 18:40 · 20 dk</div></div>
+        <div class="fld"><label>Durum</label><div class="inp"><span class="rz ok">Bekleme odasında</span> <span class="rz ok">Onam 3/3</span> <span class="rz ok">Ödendi 750</span></div></div>
+        <div class="fld" style="grid-column:span 3"><label>Görüşme Nedeni</label><div class="inp ro">3 gündür ateş ve boğaz ağrısı · Penisilin alerjisi</div></div>
+      </div>
+      <div class="sekmeler"><div class="sekme on">Özet</div><div class="sekme">Önceki Görüşmeler (2)</div><div class="sekme">e-Nabız Geçmişi</div><div class="sekme">Yüklenen Dosyalar (2)</div><div class="sekme">Tetkikler</div></div>
+      <div class="pnl ic">
+        <div class="grp" style="margin:6px 0"><div class="gb">Kronik / Alerji / İlaç</div><div class="ic">Hipotiroidi (2021) · Penisilin alerjisi · Levotiroksin 50 mcg</div></div>
+        <div class="grp" style="margin:6px 0"><div class="gb">Son Görüşme · 14.05.2026 · Dr. Koç</div><div class="ic">ÜSYE, J06.9 · semptomatik tedavi · kontrol önerildi</div></div>
+        <div class="grp" style="margin:6px 0"><div class="gb">Yüklenen Dosyalar</div><div class="ic">📎 kan_tahlili_0109.pdf (CRP 24, WBC 11.2) · 📷 IMG_2231.jpg (boğaz)</div></div>
+      </div>
+      <div class="pnl">
+        <div class="dg"><table><thead><tr><th>Tarih</th><th>Kanal</th><th>Hekim</th><th>Tanı</th><th>Karar</th><th>Belgeler</th></tr></thead>
+          <tbody>
+            <tr><td>14.05.2026</td><td>Online</td><td>Dr. A. Koç</td><td>J06.9 ÜSYE</td><td>semptomatik · kontrol</td><td>📄 özet · 💊 reçete</td></tr>
+            <tr><td>02.02.2026</td><td>Online</td><td>Dr. A. Koç</td><td>E03.9 Hipotiroidi</td><td>doz aynı · 3 ay TSH</td><td>📄 özet</td></tr>
+          </tbody></table></div>
+      </div>
+      <div class="pnl ic">
+        <div class="grp" style="margin:6px 0"><div class="gb">e-Nabız (izin ✔ · anlık) <span class="sp">saklanmaz · sorgu loglanır</span></div>
+          <div class="ic">Kronik: E03.9 (2021) · Alerji: <span class="rz kir">Penisilin</span> · Aktif ilaç: Levotiroksin 50 mcg<br>
+          Son dış muayene: 22.03.2026 X Devlet Hast. Endokrinoloji · Son tahlil: TSH 3,1 (22.03.2026)
+          <div style="margin-top:6px"><div class="btn">📖 Tam geçmişi aç</div></div></div></div>
+      </div>
+      <div class="pnl">
+        <ul class="liste">
+          <li>📎 kan_tahlili_0109.pdf <span class="sp">01.09.2026 · hasta yükledi · virüs taraması ✔</span></li>
+          <li>📷 IMG_2231.jpg <span class="sp">03.09.2026 · boğaz fotoğrafı · 2,1 MB</span></li>
+        </ul>
+      </div>
+      <div class="pnl">
+        <div class="dg"><table><thead><tr><th>Tarih</th><th>Tetkik</th><th class="sag">Sonuç</th><th>Ref.</th><th>Kaynak</th></tr></thead>
+          <tbody>
+            <tr><td>01.09.2026</td><td>CRP</td><td class="sag"><span class="rz sari">24 mg/L</span></td><td>&lt; 5</td><td>hasta dosyası</td></tr>
+            <tr><td>01.09.2026</td><td>WBC</td><td class="sag">11,2</td><td>4–10</td><td>hasta dosyası</td></tr>
+            <tr><td>22.03.2026</td><td>TSH</td><td class="sag">3,1 mIU/L</td><td>0,4–4,0</td><td>e-Nabız</td></tr>
+          </tbody></table></div>
+      </div>
+      <div style="padding:8px 12px;display:flex;gap:8px">
+        <div class="btn ok" style="flex:1;justify-content:center;padding:12px;font-size:13px">🎥 Görüşmeyi Başlat</div>
+        <div class="btn" style="justify-content:center;padding:12px">Ertele ▾</div>
+      </div>
+    </div>
+    <div>
+      <div class="gb" style="padding:6px 10px;font-weight:bold;color:#2c4a6b;background:var(--head);border-bottom:1px solid var(--line2)">Bugün</div>
+      <div class="ozet" style="flex-direction:column">
+        <div class="kart"><div class="b">Planlı / Tamamlanan</div><div class="d">9 / 2</div></div>
+        <div class="kart"><div class="b">Ortalama süre</div><div class="d">17 <small>dk</small></div></div>
+        <div class="kart"><div class="b">Bekleyen belge</div><div class="d">1 <small>rapor taslak (Zeynep Ak)</small></div></div>
+        <div class="kart"><div class="b">e-Nabız gönderim</div><div class="d">2 / 2 <small>başarılı</small></div></div>
+      </div>
+      <div class="gb" style="padding:6px 10px;font-weight:bold;color:#2c4a6b;background:var(--head);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)">Mesajlar</div>
+      <ul class="liste"><li>💬 Mehmet Kaya: "5 dk gecikeceğim" <span class="sp">18:52</span></li><li>💬 Sekreter: "19:20 hastası tetkik yükledi" <span class="sp">18:30</span></li></ul>
+    </div>
+  </div>
+  <div class="statusbar"><span>Bağlantı: WebRTC · TURN yurt içi · 42 ms</span><span class="sp">Çağırma hastaya SMS + portal bildirimi gönderir</span></div>
+</div>
+<div class="not"><b>Kural.</b> "Görüşmeyi Başlat" onam eksikse pasif (USBS md 17-18). Başlatınca <b>başvuru</b> (belge tür 19) otomatik açılır: hizmet satırı TT-001, ön ödeme tahsilatı başvuruya bağlanır; hekim rolü "Uygulayan" olarak satıra yazılır (prim için). Mesajlar mevcut <code>mesaj</code> modülünü kullanır (sohbet = randevu).</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

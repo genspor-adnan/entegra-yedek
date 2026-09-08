@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Göz Dal Merkezi — Süreç ve Tablolar — Mockup (Gentegre AI · Göz)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .win{max-width:1080px}
+  .icerik{padding:6px 18px 22px;font-size:13px;line-height:1.65}
+  h2{font-size:15px;color:#1c4374;border-bottom:1px solid var(--line2);padding-bottom:5px;margin:22px 0 10px}
+  h3{font-size:13.5px;color:#2c4a6b;margin:16px 0 6px}
+  code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:1px 4px;font-size:12px}
+  .icerik table{border-collapse:collapse;width:100%;margin:8px 0 14px}
+  .icerik th{background:linear-gradient(#f4f7fb,#e7eef6);border:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:12px;color:#3a5573}
+  .icerik td{border:1px solid var(--line2);padding:6px 8px;font-size:12.5px;vertical-align:top}
+  .kutu{border:1px solid var(--line2);background:#fbfcfd;border-radius:4px;padding:10px 12px;margin:10px 0}
+  .uyari{border:1px solid #f2ddbf;background:#fdf9f1;border-radius:4px;padding:9px 11px;margin:10px 0;color:var(--uyari)}
+  .tamam{border:1px solid #bfe3cb;background:#f1f8f3;border-radius:4px;padding:9px 11px;margin:10px 0;color:#245c37}
+  .akis{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+  .akis .a{border:1px solid var(--line);background:#fff;border-radius:14px;padding:4px 12px;font-size:12px}
+  .akis .a.v{background:#eef4fc;border-color:#cfe0f5;color:#2f6db3;font-weight:bold}
+  .akis .ok2{color:var(--muted)}
+  ul{margin:6px 0 12px 18px;padding:0} li{margin:3px 0}
+  .kucuk{font-size:11.5px;color:var(--muted)}
+  .durumlar{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+
+  .tablo{border:1px solid var(--line2);border-radius:4px;margin:12px 0;overflow:hidden}
+  .tablo .tb{background:linear-gradient(#f4f7fb,#e7eef6);padding:6px 10px;font-weight:bold;color:#1c4374;display:flex;gap:10px;align-items:center;font-size:13px}
+  .tablo .tb .rz{font-weight:normal}
+  .tablo .tb .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:11.5px}
+  .tablo table{margin:0}
+  .tablo td.k{font-family:Consolas,monospace;font-size:12px;white-space:nowrap}
+  .tablo td.t{font-family:Consolas,monospace;font-size:11.5px;color:#4d5d6e;white-space:nowrap}
+  .tablo tr.pk td.k{font-weight:bold}
+  .tablo .alt{padding:6px 10px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line2);background:#fbfcfd}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">👁 Göz Dal Merkezi Modülü — Süreç, Veri Modeli, Alanlar <span class="sp">Gentegre AI · tasarım notu · 03.09.2026 · Muayene + Lab cihaz katmanı üzerine</span></div>
+  <div class="icerik">
+
+    <div class="kutu">
+      <b>Tek cümlede:</b> Genel muayene modülünün üstüne <b>OD/OS ikili ölçüm</b> tabloları (görme, refraksiyon, GİB, ön segment, fundus, motilite, ek testler),
+      cihazdan otomatik ön tetkik (otoref/tonometre/pakimetre), görüntüleme ölçümlerinin ayrıştırılıp <b>trend/progresyon</b>e dönüşmesi (OCT/GA/biyometri),
+      gözlük/kontakt lens reçetesi, ve işlem hattı (intravitreal enjeksiyon, lazer, ameliyat: biyometri→IOL→preop→time-out→postop) eklenir;
+      hasta göz özeti ve hastalık takip protokolleri (glokom/DR/AMD) kartı besler.
+      <br><span class="kucuk">Mockuplar: <code>goz_hasta_listesi.html</code> · <code>goz_hasta_karti.html</code> · <code>goz_detayli_muayene.html</code> · <code>goz_gozluk_recetesi.html</code> ·
+      <code>goz_goruntuleme_cihazlar.html</code> · <code>goz_islem_planlama.html</code>. Bağlı: <code>../Muayene/</code> · <code>../Lab/lab_cihaz_entegrasyonu.html</code> · <code>../Radyoloji/</code> · <code>../E-Nabız/</code> · <code>../Prim/</code></span>
+    </div>
+
+    <h2>1. Ziyaret akışı (istasyonlar)</h2>
+    <div class="akis">
+      <span class="a">Randevu / kabul (ünite slotu)</span><span class="ok2">→</span>
+      <span class="a">Ön tetkik (tekniker): otoref · K · GİB · CCT · VA</span><span class="ok2">→</span>
+      <span class="a">Dilatasyon (gerekirse, 20 dk)</span><span class="ok2">→</span>
+      <span class="a v">Hekim: detaylı muayene (OD/OS)</span><span class="ok2">→</span>
+      <span class="a">Görüntüleme / test (aynı gün)</span><span class="ok2">→</span>
+      <span class="a">Hekim değerlendirmesi + tanı</span><span class="ok2">→</span>
+      <span class="a">Karar: gözlük · damla · lazer · enjeksiyon · ameliyat · kontrol</span><span class="ok2">→</span>
+      <span class="a">Tamamla → tahakkuk · e-Nabız · özet</span><span class="ok2">→</span>
+      <span class="a">Takip protokolü / postop</span>
+    </div>
+    <table>
+      <tr><th style="width:40px">#</th><th style="width:200px">Adım</th><th>Ne olur</th><th style="width:230px">Kayıt</th></tr>
+      <tr><td>1</td><td><b>Kabul</b></td><td>Başvuru (mevcut kayıt kabul), ünite/hekim; ziyaret istasyon kaydı açılır; sıra no.</td><td><code>belge</code> 19, <code>goz_ziyaret_istasyon</code></td></tr>
+      <tr><td>2</td><td><b>Ön tetkik</b></td><td>Tekniker cihazlarda ölçer; otoref/keratometri, NCT GİB, pakimetri, VA (UCVA/mevcut gözlük/pinhole) doğrudan tablolara (kaynak=cihaz/tekniker). Dilatasyon damlası + zamanlayıcı. GİB &gt; 30 panik → hekime anında.</td><td><code>goz_muayene</code> (açık), <code>goz_refraksiyon</code>, <code>goz_tonometri</code>, <code>goz_gorme</code></td></tr>
+      <tr><td>3</td><td><b>Detaylı muayene</b></td><td>Hekim: subjektif refraksiyon + BCVA, Goldmann GİB, biyomikroskopi (şablon, LOCS/Van Herick kodları, şema/foto), fundus (C/D, ISNT, makula, DR evresi, AMD evresi, şema), motilite/pupil/renk, gonyoskopi ve ek testler. Önceki muayeneden kopyalama, dikte.</td><td><code>goz_on_segment</code>, <code>goz_fundus</code>, <code>goz_motilite</code>, <code>goz_ek_test</code></td></tr>
+      <tr><td>4</td><td><b>Görüntüleme</b></td><td>İstem → cihaz çalışma listesi (DICOM MWL) ya da tekniker seçimi → sonuç DICOM/PDF/XML → ölçümler ayrıştırılır (RNFL, MD, AL, K…) → hekim değerlendirmesi; progresyon analizi (RNFL eğimi, GA olay/eğim). Görüntüler PACS/VNA + <code>dokuman</code>.</td><td><code>goz_goruntuleme</code>, <code>goz_goruntuleme_olcum</code>, <code>goz_biyometri</code></td></tr>
+      <tr><td>5</td><td><b>Tanı &amp; plan</b></td><td>ICD-10 H00–H59 (göz + taraf), değerlendirme, plan; kronik göz tanısı → hastalık takip protokolü (hedef GİB, periyotlar, bazal).</td><td><code>tani</code>, <code>goz_hastalik_takip</code></td></tr>
+      <tr><td>6</td><td><b>Reçeteler</b></td><td>Gözlük reçetesi (refraksiyondan aktarım, transpozisyon, PD, cam özellikleri, SGK hak, optik QR/e-reçete), kontakt lens (deneme, oturuş), damla e-reçetesi (göz alanıyla).</td><td><code>goz_gozluk_recetesi</code>, <code>goz_kontakt_lens</code>, <code>recete</code></td></tr>
+      <tr><td>7</td><td><b>İşlem kararı</b></td><td>Enjeksiyon (protokol, doz no, ilaç lot/UTS, OCT dayanağı), lazer (tür, parametreler), ameliyat (biyometri → IOL formül karşılaştırma → IOL seçimi ve stok ayırma → onam → ameliyathane listesi → preop tetkik → checklist/time-out → ameliyat notu → malzeme düşümü/UTS).</td><td><code>goz_islem</code> + <code>goz_enjeksiyon</code> / <code>goz_lazer</code> / <code>goz_ameliyat</code>, <code>goz_ameliyat_kontrol</code>, <code>goz_islem_malzeme</code></td></tr>
+      <tr><td>8</td><td><b>Tamamla</b></td><td>Genel muayene kuralları + göz: BCVA ve GİB en az bir göz, ana tanı; başvuru tahakkuk (SUT: muayene, biyomikroskopi, tonometri, gonyoskopi, GA, OCT…); e-Nabız 103 + Tıbbi Görüntüleme; muayene özeti → hasta portalı; göz özeti güncellenir.</td><td><code>muayene.durum</code>, <code>goz_hasta_ozet</code></td></tr>
+      <tr><td>9</td><td><b>Takip / postop</b></td><td>Protokolden otomatik kontrol randevuları (1. gün/1. hafta/1. ay…), postop muayeneler işlem kaydına bağlı; komplikasyon kodlama; kalite göstergeleri (endoftalmi, refraktif sürpriz, VA kazancı, GİB hedef uyumu, DR tarama oranı).</td><td><code>goz_islem_protokol</code>, <code>goz_muayene.postop_islem_id</code></td></tr>
+    </table>
+
+    <h2>2. Kurallar</h2>
+    <ul>
+      <li><b>Her ölçüm göz bazlı</b> (OD/OS/OU) + kaynak (hekim/tekniker/cihaz/beyan) + zaman; ondalık/Snellen/logMAR dönüşümü otomatik; sph/cyl transpozisyon otomatik.</li>
+      <li>GİB &gt; 21 bayrak, &gt; 30 panik; CCT düzeltmesi bilgilendirici; hedef GİB takip protokolünden.</li>
+      <li>Cihaz ölçümü hekim doğrulamadan "ön veri"; hekim onayıyla muayene verisi. Cihaz referans aralıkları kullanılmaz (normatif veri sadece bayrak).</li>
+      <li>Onaylı muayene değişmez; düzeltme izli. Görüntüleme değerlendirmesi ayrı e-imzalı rapor olabilir (teleradyoloji ile ortak desen).</li>
+      <li>İşlemde <b>doğru göz</b> teyidi zorunlu (time-out); IOL güç/aks biyometriyle çift kontrol; implant/ilaç seri-lot UTS bildirimi.</li>
+      <li>Trend: aynı ölçüm kodunun zaman serisi (RNFL, MD, GİB, VA, CMT, AL); progresyon eşikleri protokolde.</li>
+    </ul>
+
+    <h2>3. Tablolar ve alanlar</h2>
+    <h3>Ziyaret ve muayene çekirdeği (genel muayene tablolarının üstüne)</h3>
+<div class="tablo">
+  <div class="tb"><code>goz_ziyaret_istasyon</code> <span class="rz ok">yeni</span> <span class="sp">aynı ziyarette istasyon geçişleri (kabul → ön tetkik → muayene → görüntüleme → karar/işlem)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">belge_id</td><td class="t">int</td><td>→ belge (başvuru)</td></tr><tr><td class="k">istasyon</td><td class="t">smallint</td><td>1 kabul · 2 ön tetkik · 3 muayene · 4 görüntüleme · 5 karar/işlem · 6 tamamlandı</td></tr><tr><td class="k">giris / cikis</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">oda</td><td class="t">varchar(30)</td><td></td></tr><tr><td class="k">personel_id</td><td class="t">int</td><td></td></tr><tr><td class="k">dilatasyon_zamani</td><td class="t">timestamp</td><td>damla zamanı; 20 dk hazır</td></tr><tr><td class="k">dilatasyon_ilac</td><td class="t">varchar(60)</td><td></td></tr><tr><td class="k">sira_no</td><td class="t">smallint</td><td></td></tr><tr><td class="k">not</td><td class="t">varchar(200)</td><td></td></tr>
+  </table><div class="alt">liste kanbanı ve bekleme süreleri buradan</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_muayene</code> <span class="rz ok">yeni</span> <span class="sp">genel muayene kaydının göz uzantısı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">muayene_id</td><td class="t">int</td><td>→ muayene (1:1)</td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">muayene_turu</td><td class="t">smallint</td><td>1 tam · 2 kontrol · 3 postop · 4 acil · 5 tarama (DR) · 6 preop · 7 refraktif değerlendirme · 8 kontakt lens</td></tr><tr><td class="k">dilate</td><td class="t">smallint</td><td></td></tr><tr><td class="k">dilatasyon_ilac</td><td class="t">varchar(60)</td><td></td></tr><tr><td class="k">sablon_id</td><td class="t">int</td><td>→ muayene_sablon (göz)</td></tr><tr><td class="k">postop_islem_id</td><td class="t">int</td><td>postop kontrol ise → goz_islem</td></tr><tr><td class="k">takip_id</td><td class="t">int</td><td>→ goz_hastalik_takip (glokom/DR/AMD protokolü)</td></tr><tr><td class="k">degerlendirme</td><td class="t">text</td><td></td></tr><tr><td class="k">plan</td><td class="t">text</td><td></td></tr><tr><td class="k">hasta_egitimi</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">gozluk_recete_id</td><td class="t">int</td><td></td></tr><tr><td class="k">kontrol_gun</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_gorme</code> <span class="rz ok">yeni</span> <span class="sp">görme keskinliği</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz_muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz</td><td class="t">smallint</td><td>1 OD (sağ) · 2 OS (sol) · 3 OU (her iki) — her ölçüm satırında</td></tr><tr><td class="k">kaynak</td><td class="t">smallint</td><td>1 hekim · 2 tekniker · 3 cihaz (otomatik) · 4 hasta beyanı</td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td>ölçüm zamanı</td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>1 UCVA · 2 mevcut gözlükle · 3 pinhole · 4 BCVA · 5 yakın · 6 kontakt lensle · 7 postop</td></tr><tr><td class="k">esel</td><td class="t">smallint</td><td>Snellen / ETDRS / logMAR / Lea / Teller (pediatri)</td></tr><tr><td class="k">mesafe_m</td><td class="t">numeric</td><td>6 / 4 / 0,4</td></tr><tr><td class="k">deger_ondalik</td><td class="t">numeric(4,2)</td><td>0,80</td></tr><tr><td class="k">deger_snellen</td><td class="t">varchar(10)</td><td>20/25</td></tr><tr><td class="k">deger_logmar</td><td class="t">numeric(4,2)</td><td>hesaplı</td></tr><tr><td class="k">deger_metin</td><td class="t">varchar(20)</td><td>PH / EH / IH (parmak sayma / el hareketi / ışık hissi)</td></tr><tr><td class="k">yakin_jaeger</td><td class="t">varchar(6)</td><td>J1</td></tr><tr><td class="k">not</td><td class="t">varchar(100)</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_refraksiyon</code> <span class="rz ok">yeni</span> <span class="sp">refraksiyon ölçümleri</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz_muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz</td><td class="t">smallint</td><td>1 OD (sağ) · 2 OS (sol) · 3 OU (her iki) — her ölçüm satırında</td></tr><tr><td class="k">kaynak</td><td class="t">smallint</td><td>1 hekim · 2 tekniker · 3 cihaz (otomatik) · 4 hasta beyanı</td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td>ölçüm zamanı</td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>1 otorefraktometre · 2 subjektif · 3 sikloplejik · 4 retinoskopi · 5 mevcut gözlük (lensmetre) · 6 reçete</td></tr><tr><td class="k">sph</td><td class="t">numeric(5,2)</td><td>0,25 adım</td></tr><tr><td class="k">cyl</td><td class="t">numeric(5,2)</td><td></td></tr><tr><td class="k">aks</td><td class="t">smallint</td><td>0–180</td></tr><tr><td class="k">add</td><td class="t">numeric(4,2)</td><td></td></tr><tr><td class="k">prizma / taban</td><td class="t">numeric / smallint</td><td></td></tr><tr><td class="k">va</td><td class="t">numeric(4,2)</td><td>bu düzeltmeyle VA</td></tr><tr><td class="k">k1 / k1_aks / k2 / k2_aks</td><td class="t">numeric / smallint</td><td>keratometri (D)</td></tr><tr><td class="k">pd_uzak / pd_yakin</td><td class="t">numeric</td><td>mm (mono OD/OS)</td></tr><tr><td class="k">cihaz_id</td><td class="t">int</td><td></td></tr><tr><td class="k">guven</td><td class="t">smallint</td><td>cihaz güven skoru</td></tr><tr><td class="k">vertex_mm</td><td class="t">numeric</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_tonometri</code> <span class="rz ok">yeni</span> <span class="sp">GİB ve pakimetri</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz_muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz</td><td class="t">smallint</td><td>1 OD (sağ) · 2 OS (sol) · 3 OU (her iki) — her ölçüm satırında</td></tr><tr><td class="k">kaynak</td><td class="t">smallint</td><td>1 hekim · 2 tekniker · 3 cihaz (otomatik) · 4 hasta beyanı</td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td>ölçüm zamanı</td></tr><tr><td class="k">yontem</td><td class="t">smallint</td><td>1 NCT · 2 Goldmann · 3 iCare · 4 Tono-Pen · 5 dijital</td></tr><tr><td class="k">gib</td><td class="t">numeric(4,1)</td><td>mmHg (ortalama)</td></tr><tr><td class="k">olcumler</td><td class="t">numeric[]</td><td>cihaz tekil ölçümler</td></tr><tr><td class="k">cct_um</td><td class="t">smallint</td><td>pakimetri</td></tr><tr><td class="k">duzeltilmis_gib</td><td class="t">numeric(4,1)</td><td></td></tr><tr><td class="k">hedef_gib</td><td class="t">numeric(4,1)</td><td>takip protokolünden</td></tr><tr><td class="k">bayrak</td><td class="t">smallint</td><td>1 yüksek (&gt;21) · 2 panik (&gt;30)</td></tr><tr><td class="k">damla_sonrasi_dk</td><td class="t">smallint</td><td>son damladan geçen süre</td></tr><tr><td class="k">cihaz_id</td><td class="t">int</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_on_segment</code> <span class="rz ok">yeni</span> <span class="sp">biyomikroskopi — şablon alanları</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz_muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz</td><td class="t">smallint</td><td>1 OD (sağ) · 2 OS (sol) · 3 OU (her iki) — her ölçüm satırında</td></tr><tr><td class="k">kaynak</td><td class="t">smallint</td><td>1 hekim · 2 tekniker · 3 cihaz (otomatik) · 4 hasta beyanı</td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td>ölçüm zamanı</td></tr><tr><td class="k">alan</td><td class="t">varchar(40)</td><td>kapak · konjonktiva · kornea · on_kamara · iris · pupil · lens · gozyasi …</td></tr><tr><td class="k">normal</td><td class="t">smallint</td><td></td></tr><tr><td class="k">deger_metin</td><td class="t">text</td><td></td></tr><tr><td class="k">deger_kod</td><td class="t">varchar(20)</td><td>LOCS III (NO2 NC2 C1 P0) · Van Herick 1-4 · hücre/flare 0-4+</td></tr><tr><td class="k">deger_sayi</td><td class="t">numeric</td><td>BUT sn · Schirmer mm · pupil mm</td></tr><tr><td class="k">sema_json</td><td class="t">jsonb</td><td>ön segment çizimi / işaretler</td></tr><tr><td class="k">foto_dokuman_id</td><td class="t">int</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_fundus</code> <span class="rz ok">yeni</span> <span class="sp">arka segment</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz_muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz</td><td class="t">smallint</td><td>1 OD (sağ) · 2 OS (sol) · 3 OU (her iki) — her ölçüm satırında</td></tr><tr><td class="k">kaynak</td><td class="t">smallint</td><td>1 hekim · 2 tekniker · 3 cihaz (otomatik) · 4 hasta beyanı</td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td>ölçüm zamanı</td></tr><tr><td class="k">yontem</td><td class="t">smallint</td><td>90D / 78D / indirekt / fundus foto</td></tr><tr><td class="k">dilate</td><td class="t">smallint</td><td></td></tr><tr><td class="k">disk_metin</td><td class="t">text</td><td></td></tr><tr><td class="k">cd_yatay / cd_dikey</td><td class="t">numeric(3,2)</td><td></td></tr><tr><td class="k">disk_kanama / ppa / isnt_ihlal</td><td class="t">smallint</td><td></td></tr><tr><td class="k">makula_metin</td><td class="t">text</td><td></td></tr><tr><td class="k">makula_bulgu</td><td class="t">smallint[]</td><td>drusen · ödem · atrofi · ERM · delik · kanama…</td></tr><tr><td class="k">damar_metin</td><td class="t">text</td><td></td></tr><tr><td class="k">periferi_metin</td><td class="t">text</td><td></td></tr><tr><td class="k">vitreus</td><td class="t">varchar(100)</td><td></td></tr><tr><td class="k">dr_evre</td><td class="t">smallint</td><td>ETDRS: R0 yok · R1 hafif NPDR · R2 orta · R3 ağır · R4 PDR</td></tr><tr><td class="k">dmo</td><td class="t">smallint</td><td>0 yok · 1 non-center · 2 center-involving</td></tr><tr><td class="k">amd_evre</td><td class="t">smallint</td><td>AREDS / kuru-yaş</td></tr><tr><td class="k">sema_json</td><td class="t">jsonb</td><td>fundus çizimi</td></tr><tr><td class="k">foto_dokuman_id</td><td class="t">int</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_motilite</code> <span class="rz ok">yeni</span> <span class="sp">motilite / şaşılık / pupil / alan (konfrontasyon)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz_muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">cover_uzak / cover_yakin</td><td class="t">varchar(40)</td><td>orto / ET / XT / HT + prizma dioptri</td></tr><tr><td class="k">duksiyon_json</td><td class="t">jsonb</td><td>9 bakış pozisyonu · kısıtlılık −4…0</td></tr><tr><td class="k">prizma_olcum</td><td class="t">jsonb</td><td></td></tr><tr><td class="k">stereopsis</td><td class="t">varchar(20)</td><td>TNO / Titmus</td></tr><tr><td class="k">worth</td><td class="t">varchar(20)</td><td></td></tr><tr><td class="k">nistagmus</td><td class="t">varchar(60)</td><td></td></tr><tr><td class="k">kyn_cm</td><td class="t">smallint</td><td>konverjans yakın noktası</td></tr><tr><td class="k">pupil_od_mm / pupil_os_mm</td><td class="t">numeric</td><td>fotopik/mezopik</td></tr><tr><td class="k">rapd</td><td class="t">smallint</td><td>0 yok · 1 OD · 2 OS</td></tr><tr><td class="k">renk_gorme</td><td class="t">varchar(20)</td><td>Ishihara 17/17</td></tr><tr><td class="k">konfrontasyon</td><td class="t">varchar(60)</td><td></td></tr><tr><td class="k">hertel_od / hertel_os / hertel_taban</td><td class="t">smallint</td><td></td></tr><tr><td class="k">mrd1_od / mrd1_os</td><td class="t">numeric</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_ek_test</code> <span class="rz ok">yeni</span> <span class="sp">gonyoskopi, Amsler, kontrast, kuru göz vb. serbest yapıda</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz_muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz</td><td class="t">smallint</td><td>1 OD (sağ) · 2 OS (sol) · 3 OU (her iki) — her ölçüm satırında</td></tr><tr><td class="k">kaynak</td><td class="t">smallint</td><td>1 hekim · 2 tekniker · 3 cihaz (otomatik) · 4 hasta beyanı</td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td>ölçüm zamanı</td></tr><tr><td class="k">test</td><td class="t">varchar(40)</td><td>gonyoskopi · amsler · kontrast · schirmer · but · osdi · renk · ekzoftalmometri…</td></tr><tr><td class="k">deger_json</td><td class="t">jsonb</td><td>gonyo: 4 kadran Shaffer, pigment, PAS</td></tr><tr><td class="k">deger_metin</td><td class="t">text</td><td></td></tr><tr><td class="k">deger_sayi</td><td class="t">numeric</td><td></td></tr>
+  </table>
+</div><h3>Reçeteler</h3>
+<div class="tablo">
+  <div class="tb"><code>goz_gozluk_recetesi</code> <span class="rz ok">yeni</span> <span class="sp">gözlük reçetesi</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">hekim_id</td><td class="t">int</td><td></td></tr><tr><td class="k">recete_no</td><td class="t">varchar(20)</td><td>GZ-yyyy/nnnnn</td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>1 uzak · 2 yakın · 3 bifokal · 4 progresif · 5 ara · 6 güneş/koruyucu</td></tr><tr><td class="k">kullanim</td><td class="t">smallint</td><td>sürekli / okuma / bilgisayar</td></tr><tr><td class="k">od_sph / od_cyl / od_aks / od_add / od_prizma / od_taban / od_pd / od_seg</td><td class="t"></td><td>OD değerleri</td></tr><tr><td class="k">os_sph / os_cyl / os_aks / os_add / os_prizma / os_taban / os_pd / os_seg</td><td class="t"></td><td>OS değerleri</td></tr><tr><td class="k">pd_yakin</td><td class="t">numeric</td><td></td></tr><tr><td class="k">cam_malzeme</td><td class="t">smallint</td><td></td></tr><tr><td class="k">kaplamalar</td><td class="t">smallint[]</td><td>AR, sert, fotokromik, mavi, polarize</td></tr><tr><td class="k">tasarim</td><td class="t">varchar(60)</td><td></td></tr><tr><td class="k">not_optik</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">gecerlilik_bitis</td><td class="t">date</td><td></td></tr><tr><td class="k">sgk_hak</td><td class="t">smallint</td><td>cam/çerçeve hak durumu (Medula)</td></tr><tr><td class="k">imza_zamani / imza_hash</td><td class="t"></td><td></td></tr><tr><td class="k">optik_taraf_id</td><td class="t">int</td><td>verildiği optik (anlaşmalı)</td></tr><tr><td class="k">optik_teslim</td><td class="t">date</td><td></td></tr><tr><td class="k">qr_kod</td><td class="t">varchar(60)</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>taslak / imzalı / verildi / iptal</td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_kontakt_lens</code> <span class="rz ok">yeni</span> <span class="sp">kontakt lens reçetesi / deneme</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz</td><td class="t">smallint</td><td>1 OD (sağ) · 2 OS (sol) · 3 OU (her iki) — her ölçüm satırında</td></tr><tr><td class="k">lens_tur</td><td class="t">smallint</td><td>yumuşak günlük/aylık · torik · multifokal · RGP · skleral · ortho-k</td></tr><tr><td class="k">marka_model</td><td class="t">varchar(80)</td><td></td></tr><tr><td class="k">sph / cyl / aks / add</td><td class="t">numeric</td><td>vertex düzeltmeli</td></tr><tr><td class="k">bc / dia</td><td class="t">numeric</td><td></td></tr><tr><td class="k">oturus</td><td class="t">varchar(100)</td><td></td></tr><tr><td class="k">va</td><td class="t">numeric</td><td></td></tr><tr><td class="k">deneme</td><td class="t">smallint</td><td></td></tr><tr><td class="k">kullanim_saat</td><td class="t">smallint</td><td></td></tr><tr><td class="k">bakim_notu</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>recete / recete_satir</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">göz damlaları — genel e-reçete tabloları</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">—</td><td class="t"></td><td><b>mevcut (Muayene)</b>: recete_satir.uygulama_gozu (OD/OS/OU) eki</td></tr>
+  </table>
+</div><h3>Görüntüleme ve cihazlar</h3>
+<div class="tablo">
+  <div class="tb"><code>goz_goruntuleme</code> <span class="rz ok">yeni</span> <span class="sp">görüntüleme / tanısal test çalışması</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz</td><td class="t">smallint</td><td>1 OD (sağ) · 2 OS (sol) · 3 OU (her iki) — her ölçüm satırında</td></tr><tr><td class="k">tetkik</td><td class="t">smallint</td><td>OCT makula · OCT RNFL/GCC · OCT ön seg · OCT-A · FAF · FA/ICGA · fundus foto · görme alanı · topografi · pakimetri haritası · biyometri · endotel · UBM · B-scan USG · ERG/VEP</td></tr><tr><td class="k">hizmet_id</td><td class="t">int</td><td>SUT / ücret</td></tr><tr><td class="k">belge_satir_id</td><td class="t">int</td><td></td></tr><tr><td class="k">cihaz_id</td><td class="t">int</td><td>→ goz_cihaz</td></tr><tr><td class="k">istem_zamani / cekim_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">teknisyen_id</td><td class="t">int</td><td></td></tr><tr><td class="k">dilate</td><td class="t">smallint</td><td></td></tr><tr><td class="k">study_uid</td><td class="t">varchar(64)</td><td>DICOM</td></tr><tr><td class="k">dokuman_ids</td><td class="t">int[]</td><td>PDF/JPG/DICOM → dokuman</td></tr><tr><td class="k">ham_dosya_yolu</td><td class="t">varchar(300)</td><td>XML/CSV</td></tr><tr><td class="k">kalite</td><td class="t">smallint</td><td>sinyal / güvenilirlik</td></tr><tr><td class="k">degerlendirme</td><td class="t">text</td><td>hekim</td></tr><tr><td class="k">degerlendiren_id / degerlendirme_zamani</td><td class="t"></td><td></td></tr><tr><td class="k">ai_on_okuma</td><td class="t">jsonb</td><td>DR tarama vb. (hekim onayı şart)</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>istendi · çekildi · değerlendirildi · iptal</td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_goruntuleme_olcum</code> <span class="rz ok">yeni</span> <span class="sp">ayrıştırılmış ölçümler (trend için)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">bigint</td><td></td></tr><tr><td class="k">goruntuleme_id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz</td><td class="t">smallint</td><td></td></tr><tr><td class="k">olcum</td><td class="t">varchar(40)</td><td>rnfl_ort · rnfl_sup/inf/nas/temp · gcc · cmt · disk_alan · rim_alan · md · psd · vfi · ght · guvenilirlik · k1 · k2 · al · acd · lt · wtw · cct · endotel_yog · ka_max</td></tr><tr><td class="k">deger</td><td class="t">numeric</td><td></td></tr><tr><td class="k">birim</td><td class="t">varchar(10)</td><td></td></tr><tr><td class="k">normal_pct</td><td class="t">numeric</td><td>cihaz normatif veri</td></tr><tr><td class="k">bayrak</td><td class="t">smallint</td><td></td></tr>
+  </table><div class="alt">indeks: (hasta_id via goruntuleme, goz, olcum, zaman) → trend/progresyon</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_biyometri</code> <span class="rz ok">yeni</span> <span class="sp">biyometri + IOL hesabı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">goruntuleme_id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz</td><td class="t">smallint</td><td></td></tr><tr><td class="k">al / k1 / k1_aks / k2 / k2_aks / acd / lt / wtw / cct</td><td class="t">numeric</td><td></td></tr><tr><td class="k">snr</td><td class="t">smallint</td><td></td></tr><tr><td class="k">hedef_ref</td><td class="t">numeric</td><td></td></tr><tr><td class="k">hesaplar</td><td class="t">jsonb</td><td>formül → {güç: beklenen ref} tablosu</td></tr><tr><td class="k">secilen_iol_model / a_sabiti / guc / torik_silindir / aks</td><td class="t"></td><td></td></tr><tr><td class="k">secen_id / secim_zamani</td><td class="t"></td><td></td></tr><tr><td class="k">stok_seri_lot_id</td><td class="t">int</td><td>ayrılan IOL</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_cihaz</code> <span class="rz ok">yeni</span> <span class="sp">göz cihazları (Lab cihaz katmanıyla aynı entegrasyon modeli)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">kod / ad</td><td class="t">varchar</td><td></td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>otoref · tonometre · pakimetre · OCT · GA · fundus · topografi · biyometri · endotel · USG</td></tr><tr><td class="k">uretici / model / seri_no</td><td class="t">varchar</td><td></td></tr><tr><td class="k">demirbas_id</td><td class="t">int</td><td></td></tr><tr><td class="k">protokol</td><td class="t">smallint</td><td>DICOM · seri metin · dosya (XML/CSV/PDF) · API</td></tr><tr><td class="k">baglanti</td><td class="t">varchar(120)</td><td>AE/host/port/COM/klasör</td></tr><tr><td class="k">mwl</td><td class="t">smallint</td><td>DICOM modality worklist</td></tr><tr><td class="k">olcum_esleme</td><td class="t">jsonb</td><td>cihaz alanı → olcum kodu</td></tr><tr><td class="k">dinleyici_durum</td><td class="t">smallint</td><td></td></tr><tr><td class="k">son_mesaj</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_cihaz_mesaj</code> <span class="rz ok">yeni</span> <span class="sp">ham mesaj/dosya günlüğü</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">bigint</td><td></td></tr><tr><td class="k">cihaz_id</td><td class="t">int</td><td></td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">hasta_eslesme</td><td class="t">varchar(40)</td><td>protokol/barkod/ad+doğum</td></tr><tr><td class="k">ham</td><td class="t">text</td><td></td></tr><tr><td class="k">dosya_yolu</td><td class="t">varchar(300)</td><td></td></tr><tr><td class="k">islem_durum</td><td class="t">smallint</td><td>işlendi / sahipsiz / hata</td></tr>
+  </table>
+</div><h3>İşlemler: enjeksiyon, lazer, ameliyat, postop</h3>
+<div class="tablo">
+  <div class="tb"><code>goz_islem</code> <span class="rz ok">yeni</span> <span class="sp">işlem başlığı (tüm türler)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">muayene_id</td><td class="t">int</td><td>karar verilen muayene</td></tr><tr><td class="k">belge_id</td><td class="t">int</td><td>işlem günü başvurusu</td></tr><tr><td class="k">goz</td><td class="t">smallint</td><td></td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>1 intravitreal enjeksiyon · 2 lazer · 3 ameliyat · 4 küçük cerrahi (şalazyon, pterjium) · 5 periokuler enjeksiyon</td></tr><tr><td class="k">islem_kod</td><td class="t">varchar(20)</td><td>SUT</td></tr><tr><td class="k">hizmet_id</td><td class="t">int</td><td></td></tr><tr><td class="k">endikasyon_icd</td><td class="t">varchar(10)</td><td></td></tr><tr><td class="k">planlanan_tarih / uygulama_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">hekim_id</td><td class="t">int</td><td></td></tr><tr><td class="k">yardimci_ids</td><td class="t">int[]</td><td></td></tr><tr><td class="k">salon</td><td class="t">varchar(30)</td><td></td></tr><tr><td class="k">anestezi</td><td class="t">smallint</td><td>topikal / lokal / sedasyon / genel</td></tr><tr><td class="k">anestezi_konsultasyon</td><td class="t">smallint</td><td></td></tr><tr><td class="k">onam_id</td><td class="t">int</td><td>→ onam (işlem onamı)</td></tr><tr><td class="k">time_out</td><td class="t">jsonb</td><td>kimlik, göz, işlem, malzeme teyitleri</td></tr><tr><td class="k">bulgular</td><td class="t">text</td><td></td></tr><tr><td class="k">komplikasyon</td><td class="t">smallint</td><td>kod listesi</td></tr><tr><td class="k">komplikasyon_notu</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">postop_protokol_id</td><td class="t">int</td><td>→ goz_islem_protokol</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>planlı · hazır · uygulandı · iptal · ertelendi</td></tr><tr><td class="k">ucret_belge_satir_id</td><td class="t">int</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_enjeksiyon</code> <span class="rz ok">yeni</span> <span class="sp">intravitreal enjeksiyon detayı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">islem_id</td><td class="t">int</td><td></td></tr><tr><td class="k">ilac</td><td class="t">smallint</td><td>aflibersept · ranibizumab · bevasizumab · faricimab · deksametazon implant · triamsinolon</td></tr><tr><td class="k">doz_mg</td><td class="t">numeric</td><td></td></tr><tr><td class="k">doz_no</td><td class="t">smallint</td><td>seri içinde</td></tr><tr><td class="k">protokol</td><td class="t">smallint</td><td>yükleme · PRN · treat&amp;extend · sabit aralık</td></tr><tr><td class="k">aralik_hafta</td><td class="t">smallint</td><td></td></tr><tr><td class="k">giris_yeri / igne</td><td class="t">varchar</td><td></td></tr><tr><td class="k">stok_seri_lot_id</td><td class="t">int</td><td>→ stok_seri_lot (UTS ilaç/implant bildirimi)</td></tr><tr><td class="k">islem_sonrasi_gib</td><td class="t">numeric</td><td></td></tr><tr><td class="k">isik_hissi</td><td class="t">smallint</td><td></td></tr><tr><td class="k">sonraki_planlanan</td><td class="t">date</td><td></td></tr><tr><td class="k">oct_cmt_oncesi</td><td class="t">smallint</td><td>karar dayanağı</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_lazer</code> <span class="rz ok">yeni</span> <span class="sp">lazer detayı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">islem_id</td><td class="t">int</td><td></td></tr><tr><td class="k">lazer_tur</td><td class="t">smallint</td><td>SLT · ALT · YAG kapsülotomi · iridotomi · PRP · fokal/grid · mikropuls · retinopeksi · vitreolizis</td></tr><tr><td class="k">dalga_boyu_nm</td><td class="t">smallint</td><td></td></tr><tr><td class="k">guc_mw / enerji_mj</td><td class="t">numeric</td><td></td></tr><tr><td class="k">spot_um</td><td class="t">smallint</td><td></td></tr><tr><td class="k">sure_ms</td><td class="t">smallint</td><td></td></tr><tr><td class="k">spot_sayisi</td><td class="t">smallint</td><td></td></tr><tr><td class="k">alan</td><td class="t">varchar(60)</td><td>360° / kadran / saat</td></tr><tr><td class="k">lens</td><td class="t">varchar(40)</td><td>kontakt lens</td></tr><tr><td class="k">seans_no</td><td class="t">smallint</td><td>PRP çoklu seans</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_ameliyat</code> <span class="rz ok">yeni</span> <span class="sp">ameliyat detayı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">islem_id</td><td class="t">int</td><td></td></tr><tr><td class="k">ameliyat_tur</td><td class="t">smallint</td><td>fako+IOL · ECCE · sekonder IOL · trabekülektomi · tüp · PPV · skleral çökertme · pterjium · DCR · pitozis · şaşılık · keratoplasti (PK/DALK/DMEK) · refraktif (LASIK/PRK/SMILE) · ICL</td></tr><tr><td class="k">biyometri_id</td><td class="t">int</td><td></td></tr><tr><td class="k">iol_model / iol_guc / iol_aks</td><td class="t"></td><td>planlanan</td></tr><tr><td class="k">uygulanan_iol_seri_lot_id</td><td class="t">int</td><td>UTS implant bildirimi</td></tr><tr><td class="k">teknik</td><td class="t">text</td><td>kesi, viskoelastik, gaz/silikon, sütür</td></tr><tr><td class="k">sure_dk</td><td class="t">smallint</td><td></td></tr><tr><td class="k">kanama_ml</td><td class="t">smallint</td><td></td></tr><tr><td class="k">intraop_komplikasyon</td><td class="t">smallint</td><td>PCR, zonül diyalizi, vitreus kaybı…</td></tr><tr><td class="k">ameliyat_notu</td><td class="t">text</td><td>e-imzalı</td></tr><tr><td class="k">patoloji_gonderildi</td><td class="t">smallint</td><td></td></tr><tr><td class="k">preop_checklist_id</td><td class="t">int</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_ameliyat_kontrol</code> <span class="rz ok">yeni</span> <span class="sp">preop / time-out kontrol listesi</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">islem_id</td><td class="t">int</td><td></td></tr><tr><td class="k">madde</td><td class="t">varchar(120)</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td></td></tr><tr><td class="k">kullanici_id / zaman</td><td class="t"></td><td></td></tr><tr><td class="k">not</td><td class="t">varchar(200)</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_islem_protokol</code> <span class="rz ok">yeni</span> <span class="sp">işlem türüne göre postop takip planı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">islem_tur / ameliyat_tur / lazer_tur</td><td class="t">smallint</td><td></td></tr><tr><td class="k">kontroller</td><td class="t">jsonb</td><td>[{gün:1, içerik:'VA, GİB, ön kamara'}, {gün:7…}, {gün:30…}]</td></tr><tr><td class="k">ilaclar</td><td class="t">jsonb</td><td>postop damla şeması</td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_islem_malzeme</code> <span class="rz ok">yeni</span> <span class="sp">kullanılan malzeme (IOL, viskoelastik, gaz, ilaç) — stok düşümü</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">islem_id</td><td class="t">int</td><td></td></tr><tr><td class="k">stok_id</td><td class="t">int</td><td></td></tr><tr><td class="k">seri_lot_id</td><td class="t">int</td><td></td></tr><tr><td class="k">adet</td><td class="t">numeric</td><td></td></tr><tr><td class="k">uts_bildirim_id</td><td class="t">int</td><td></td></tr>
+  </table>
+</div><h3>Hastalık takibi ve hasta göz özeti</h3>
+<div class="tablo">
+  <div class="tb"><code>goz_hastalik_takip</code> <span class="rz ok">yeni</span> <span class="sp">kronik göz hastalığı protokolü (glokom · DR · AMD · üveit · keratokonus · ambliyopi)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">goz</td><td class="t">smallint</td><td></td></tr><tr><td class="k">hastalik</td><td class="t">smallint</td><td></td></tr><tr><td class="k">icd_kod</td><td class="t">varchar(10)</td><td></td></tr><tr><td class="k">evre</td><td class="t">varchar(30)</td><td>POAG erken/orta/ileri · DR R0-R4 · AMD kuru/yaş</td></tr><tr><td class="k">baslangic</td><td class="t">date</td><td></td></tr><tr><td class="k">hekim_id</td><td class="t">int</td><td></td></tr><tr><td class="k">hedef_gib</td><td class="t">numeric</td><td>glokom</td></tr><tr><td class="k">bazal_json</td><td class="t">jsonb</td><td>bazal GA/OCT/VA değerleri</td></tr><tr><td class="k">kontrol_periyot_ay</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ga_periyot_ay / oct_periyot_ay</td><td class="t">smallint</td><td></td></tr><tr><td class="k">sonraki_kontrol</td><td class="t">date</td><td></td></tr><tr><td class="k">progresyon_durum</td><td class="t">smallint</td><td>stabil · şüpheli · progresyon</td></tr><tr><td class="k">son_analiz</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">tedavi_ozeti</td><td class="t">text</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>goz_hasta_ozet</code> <span class="rz ok">yeni</span> <span class="sp">materyalize göz özeti (OD/OS son değerler) — hasta kartı üst şeridi</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">hasta_id</td><td class="t">int</td><td>PK</td></tr><tr><td class="k">goz</td><td class="t">smallint</td><td></td></tr><tr><td class="k">son_bcva / son_ref / son_gib / son_cct / son_cd / son_rnfl / son_md / son_cmt / lens_locs</td><td class="t"></td><td>son onaylı değerler + tarihleri</td></tr><tr><td class="k">aktif_tanilar</td><td class="t">varchar(10)[]</td><td></td></tr><tr><td class="k">aktif_tedavi</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">guncelleme</td><td class="t">timestamp</td><td></td></tr>
+  </table><div class="alt">muayene/görüntüleme onayında tetikleyici ile güncellenir</div>
+</div><h3>Mevcut tablolara ek</h3>
+<div class="tablo">
+  <div class="tb"><code>muayene</code> <span class="rz pas">mevcut</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">—</td><td class="t"></td><td><b>mevcut (Muayene modülü)</b>; göz muayenesi tur=1 yüz yüze, sablon=göz; goz_muayene 1:1</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>muayene_sablon(_alan)</code> <span class="rz sari">mevcut + kolon</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">—</td><td class="t"></td><td>göz şablonları: alanlar OD/OS ikili (alan tanımında goz_bazli=1); tipler: LOCS, Van Herick, Shaffer kodlu seçenekler; şema tipi (ön segment/fundus çizimi)</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>stok / stok_seri_lot / uts_bildirim</code> <span class="rz pas">mevcut</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">—</td><td class="t"></td><td>IOL, intravitreal ilaç, gaz: seri-lot takibi ve UTS verme bildirimi (mevcut UTS modülü)</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>onam</code> <span class="rz sari">mevcut + kolon</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">tur</td><td class="t">smallint</td><td>+ intravitreal enjeksiyon · lazer · katarakt/refraktif/vitreoretinal ameliyat · kontakt lens</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>randevu / randevu_bolum_ayar</code> <span class="rz sari">mevcut + kolon</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">kaynak_tipi</td><td class="t">smallint</td><td>ön tetkik / muayene / görüntüleme / enjeksiyon / ameliyat slotları — ünite bazlı kapasite</td></tr>
+  </table>
+</div>
+
+    <h2>4. Ekranlar</h2>
+    <table>
+      <tr><th style="width:250px">Ekran</th><th>Görev</th><th style="width:230px">Mockup</th></tr>
+      <tr><td>Hasta Listesi (ünite akışı)</td><td>İstasyon kanbanı + grid; sıra çağırma; ön tetkik/dilatasyon durumu; enjeksiyon/ameliyat/lazer listeleri.</td><td><code>goz_hasta_listesi.html</code></td></tr>
+      <tr><td>Göz Hasta Kartı</td><td>OD/OS özeti, ziyaretler, reçeteler, görüntüleme arşivi, hastalık takip planı + trend, işlemler.</td><td><code>goz_hasta_karti.html</code></td></tr>
+      <tr><td>Detaylı Göz Muayenesi</td><td>7 sekme OD/OS: görme &amp; refraksiyon, tonometri &amp; pakimetri, ön segment, fundus, motilite/pupil/alan, gonyoskopi &amp; ek testler, tanı &amp; plan.</td><td><code>goz_detayli_muayene.html</code></td></tr>
+      <tr><td>Gözlük / Kontakt Lens Reçetesi</td><td>Refraksiyondan aktarım, cam/lens özellikleri, SGK hak, optik entegrasyon, geçmiş.</td><td><code>goz_gozluk_recetesi.html</code></td></tr>
+      <tr><td>Görüntüleme &amp; Cihazlar</td><td>Günlük çekimler, OCT/GA sonuç değerlendirme, biyometri + IOL hesabı, cihaz entegrasyonu.</td><td><code>goz_goruntuleme_cihazlar.html</code></td></tr>
+      <tr><td>İşlemler</td><td>Enjeksiyon listesi/uygulama, lazer, ameliyat planı + ameliyathane listesi, preop checklist, postop takip.</td><td><code>goz_islem_planlama.html</code></td></tr>
+      <tr><td>Tekniker ön tetkik ekranı <span class="kucuk">(sonra)</span></td><td>Cihaz sonuçlarını hasta ile eşleştirme, VA girişi, dilatasyon.</td><td>—</td></tr>
+      <tr><td>DR tarama panosu <span class="kucuk">(sonra)</span></td><td>DM hastalarında yıllık fundus tarama oranı, AI ön okuma kuyruğu.</td><td>—</td></tr>
+    </table>
+
+    <h2>5. Entegrasyonlar</h2>
+    <table>
+      <tr><th style="width:220px">Servis / modül</th><th>Kullanım</th></tr>
+      <tr><td>Cihazlar</td><td>Otoref/keratometre, NCT/pakimetre (seri metin) · OCT, GA, fundus, biyometri (DICOM/XML/PDF) · topografi, endotel (dosya). Lab ara katmanıyla aynı dinleyici/sürücü modeli; DICOM MWL ile çalışma listesi.</td></tr>
+      <tr><td>PACS / VNA</td><td>Göz görüntüleri (DICOM OP/OPT/OPV); viewer; teleoftalmoloji ikinci görüş (Teleradyoloji deseni).</td></tr>
+      <tr><td>Muayene modülü</td><td>Genel muayene, tanı, istem, e-reçete, rapor, ücret, tamamla.</td></tr>
+      <tr><td>Stok / UTS</td><td>IOL, intravitreal ilaç, viskoelastik, gaz: seri-lot, UTS verme bildirimi; ameliyat malzeme seti düşümü.</td></tr>
+      <tr><td>Medula / SUT</td><td>Gözlük cam/çerçeve hakkı, işlem paketleri (katarakt), anti-VEGF rapor/onay.</td></tr>
+      <tr><td>e-Nabız</td><td>103 Muayene, Tıbbi Görüntüleme, Reçete (damla + optik), Sevk.</td></tr>
+      <tr><td>Optik</td><td>Gözlük reçetesi QR/e-reçete; anlaşmalı optik portalı (teslim bildirimi).</td></tr>
+      <tr><td>Prim</td><td>Uygulayan (muayene, işlem), İsteyen (görüntüleme), Raporlayan (OCT/GA değerlendirme).</td></tr>
+      <tr><td>Randevu</td><td>Ünite bazlı slotlar (ön tetkik/muayene/görüntüleme/enjeksiyon/ameliyat kapasitesi); postop otomatik randevular.</td></tr>
+      <tr><td>AI</td><td>DR tarama ön okuma, OCT segmentasyon uyarıları, muayene özeti — hekim onayı şart.</td></tr>
+    </table>
+
+    <h2>6. Yetkiler &amp; ayarlar</h2>
+    <ul>
+      <li><code>goz.on_tetkik</code> (tekniker) · <code>goz.muayene</code> · <code>goz.goruntuleme.cek</code> · <code>goz.goruntuleme.degerlendir</code> · <code>goz.recete.gozluk</code> · <code>goz.islem.planla</code> · <code>goz.islem.uygula</code> · <code>goz.ameliyat.liste</code> · <code>goz.takip.protokol</code> · <code>goz.cihaz</code>.</li>
+      <li>Ayarlar: VA eşeli varsayılanı (ondalık/Snellen/logMAR), GİB bayrak/panik eşikleri, dilatasyon süresi, IOL formül seti ve A-sabitleri, postop protokoller, enjeksiyon protokolleri, cihaz eşlemeleri, DR tarama periyodu.</li>
+    </ul>
+
+    <div class="tamam">
+      <b>İlk sürüm:</b> ünite akışı listesi, detaylı muayene (OD/OS tablolar, şablon), otoref/tonometre entegrasyonu, gözlük reçetesi, OCT/GA sonuç kaydı (PDF + ölçüm), hasta göz özeti, enjeksiyon listesi/uygulama, katarakt ameliyat planı (biyometri → IOL → checklist), postop protokol.
+      Sonraya: DICOM MWL/viewer, progresyon analizi motoru, kontakt lens, lazer parametre kütüphanesi, DR tarama panosu/AI, optik portalı, teleoftalmoloji.
+    </div>
+  </div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

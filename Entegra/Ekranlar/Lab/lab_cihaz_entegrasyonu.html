@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratuvar Cihaz Entegrasyonu — Bağlantı, Eşleme, Mesaj İzleme — Mockup (Gentegre AI · Laboratuvar)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🖥 Cihaz Entegrasyonu <span class="sp">Ayarlar › Laboratuvar › Cihazlar · LIS ara katmanı (middleware) · 03.09.2026 11:45</span></div>
+  <div class="toolbar">
+    <div class="btn primary">＋ Cihaz</div><div class="btn">✎ Düzenle</div><div class="btn">🔌 Bağlantı Sına</div><div class="btn">🔄 Yeniden Başlat (dinleyici)</div>
+    <div class="sepv"></div><div class="btn">🔁 Test Kodu Eşleme</div><div class="btn">📜 Ham Mesajlar</div><div class="btn">🧪 Kontrol Sonuçları</div><div class="btn sp">📊 Cihaz Panosu</div>
+  </div>
+  <div class="sekmeler"><div class="sekme on">Cihazlar</div><div class="sekme">Test Kodu Eşleme · Cobas c503</div><div class="sekme">Ham Mesaj İzleme</div><div class="sekme">Kalibrasyon / Bakım</div></div>
+  <div class="pnl">
+    <div class="dg"><table>
+      <thead><tr><th style="width:26px"></th><th>Cihaz</th><th>Bölüm</th><th>Üretici / Model</th><th class="orta">Protokol</th><th>Bağlantı</th><th class="orta">Yön</th><th class="orta">Host Query</th><th class="orta">Son mesaj</th><th class="sag">Bugün sonuç</th><th class="sag">Hata</th><th class="orta">KK</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td></td><td><b>Cobas c503</b></td><td>Biyokimya</td><td>Roche · cobas pro</td><td class="orta"><span class="rz mavi">HL7 v2.5.1 (LIS2-A2)</span></td><td>TCP 10.30.0.21:5100</td><td class="orta">Çift yön</td><td class="orta">✔</td><td class="orta">11:44:02</td><td class="sag">1.842</td><td class="sag">3</td><td class="orta"><span class="rz ok">geçerli</span></td><td class="orta"><span class="rz ok">Bağlı</span></td></tr>
+        <tr><td></td><td>Cobas e801</td><td>Hormon / İmmün</td><td>Roche · cobas pro</td><td class="orta"><span class="rz mavi">HL7 v2.5.1</span></td><td>TCP 10.30.0.21:5101</td><td class="orta">Çift yön</td><td class="orta">✔</td><td class="orta">11:43:50</td><td class="sag">612</td><td class="sag">0</td><td class="orta"><span class="rz ok">geçerli</span></td><td class="orta"><span class="rz ok">Bağlı</span></td></tr>
+        <tr><td></td><td>XN-1000</td><td>Hematoloji</td><td>Sysmex</td><td class="orta"><span class="rz">ASTM E1394 / LIS1-A</span></td><td>TCP 10.30.0.25:6000</td><td class="orta">Çift yön</td><td class="orta">✔</td><td class="orta">11:42:11</td><td class="sag">402</td><td class="sag">0</td><td class="orta"><span class="rz ok">geçerli</span></td><td class="orta"><span class="rz ok">Bağlı</span></td></tr>
+        <tr><td></td><td>UF-5000</td><td>İdrar</td><td>Sysmex</td><td class="orta"><span class="rz">ASTM E1394</span></td><td>Seri COM3 → TCP dönüştürücü</td><td class="orta">Tek yön (cihaz→LIS)</td><td class="orta">—</td><td class="orta"><span class="rz kir">10:02:40</span></td><td class="sag">88</td><td class="sag">12</td><td class="orta">—</td><td class="orta"><span class="rz kir">Bağlantı yok</span></td></tr>
+        <tr><td></td><td>VITEK 2</td><td>Mikrobiyoloji</td><td>bioMérieux</td><td class="orta"><span class="rz mavi">HL7 (BCI)</span></td><td>TCP 10.30.0.31:7000</td><td class="orta">Çift yön</td><td class="orta">✔</td><td class="orta">11:10:05</td><td class="sag">14 AB</td><td class="sag">0</td><td class="orta">—</td><td class="orta"><span class="rz ok">Bağlı</span></td></tr>
+        <tr><td></td><td>MALDI-TOF (VITEK MS)</td><td>Mikrobiyoloji</td><td>bioMérieux</td><td class="orta"><span class="rz">CSV / paylaşım klasörü</span></td><td>\\lab-ms\export</td><td class="orta">Tek yön</td><td class="orta">—</td><td class="orta">11:05:00</td><td class="sag">9 ID</td><td class="sag">0</td><td class="orta">—</td><td class="orta"><span class="rz ok">İzleniyor</span></td></tr>
+        <tr><td></td><td>BACTEC FX</td><td>Mikrobiyoloji</td><td>BD</td><td class="orta"><span class="rz">ASTM</span></td><td>TCP 10.30.0.33:5000</td><td class="orta">Tek yön (alarm)</td><td class="orta">—</td><td class="orta">09:58:12</td><td class="sag">2 pozitif</td><td class="sag">0</td><td class="orta">—</td><td class="orta"><span class="rz ok">Bağlı</span></td></tr>
+        <tr><td></td><td>NextSeq 550</td><td>Genetik</td><td>Illumina</td><td class="orta"><span class="rz mor">Run klasörü + API</span></td><td>\\seq01\runs · BaseSpace</td><td class="orta">Tek yön</td><td class="orta">—</td><td class="orta">03.09 08:30</td><td class="sag">1 run</td><td class="sag">0</td><td class="orta">—</td><td class="orta"><span class="rz ok">İzleniyor</span></td></tr>
+        <tr><td></td><td>QuantStudio 5</td><td>Genetik</td><td>Thermo</td><td class="orta"><span class="rz">Sonuç dosyası (xlsx/csv)</span></td><td>\\qs5\export</td><td class="orta">Tek yön</td><td class="orta">—</td><td class="orta">02.09 16:40</td><td class="sag">24</td><td class="sag">0</td><td class="orta">—</td><td class="orta"><span class="rz ok">İzleniyor</span></td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Host query: cihaz barkodu okur → LIS'e "bu numunede ne çalışacağım?" sorar (ASTM Q / HL7 QRY) → LIS istem listesini döner → sonuç geri gelir (ASTM R / HL7 ORU). Tek yönlü cihazlarda çalışma listesi cihaza elle/indirme ile.</div>
+  </div>
+  <div class="pnl">
+    <div class="toolbar" style="border-top:none"><div class="btn">＋ Eşleme</div><div class="btn">📥 Cihaz test listesini çek</div><div class="btn">⚠ Eşlenmemiş: <b>2</b></div></div>
+    <div class="dg"><table>
+      <thead><tr><th>Cihaz kodu</th><th>Cihaz test adı</th><th>LIS tetkik</th><th>Birim (cihaz → LIS)</th><th class="sag">Çarpan</th><th class="orta">Ondalık</th><th>Bayrak eşleme</th><th class="orta">Oto-onay</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr><td>20411</td><td>GLUC3</td><td>BK-001 Glukoz</td><td>mg/dL → mg/dL</td><td class="sag">1</td><td class="orta">0</td><td>H/L → H/L · &gt; → tekrar (dilüsyon)</td><td class="orta">✔</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr><td>20471</td><td>CREJ2</td><td>BK-004 Kreatinin</td><td>µmol/L → mg/dL</td><td class="sag">0,0113</td><td class="orta">2</td><td>H/L</td><td class="orta">✔</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr><td>20780</td><td>TNT-hs</td><td>BK-045 Troponin T hs</td><td>ng/L → ng/L</td><td class="sag">1</td><td class="orta">0</td><td>H → panik kontrol</td><td class="orta">✖ (her zaman uzman)</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr><td>SI-H / SI-L / SI-I</td><td>Serum indeksleri</td><td>— (numune kalitesi)</td><td>index</td><td class="sag">1</td><td class="orta">0</td><td>H &gt; 30 → K, LDH, AST'yi "hemoliz" bayrağıyla işaretle</td><td class="orta">—</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr class="sel"><td>29070</td><td>NT-proBNP</td><td><span class="rz kir">eşlenmedi</span></td><td>pg/mL</td><td class="sag">—</td><td class="orta">—</td><td>—</td><td class="orta">—</td><td class="orta"><span class="rz kir">Eşlenmemiş</span></td></tr>
+        <tr><td>20990</td><td>MG-2</td><td><span class="rz kir">eşlenmedi</span></td><td>mmol/L</td><td class="sag">—</td><td class="orta">—</td><td>—</td><td class="orta">—</td><td class="orta"><span class="rz kir">Eşlenmemiş</span></td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Eşlenmemiş kodla gelen sonuç "sahipsiz sonuç" kuyruğuna düşer; eşleme yapılınca geriye dönük işlenir. Birim dönüşümü ve ondalık LIS tarafında; cihaz referans aralığı <b>kullanılmaz</b> (LIS kataloğu esas).</div>
+  </div>
+  <div class="pnl">
+    <div class="toolbar" style="border-top:none"><span class="chip on">Son 1 saat</span><span class="chip">Hatalı</span><span class="chip">Cobas c503</span><span class="chip">XN-1000</span><div class="btn sp">📥 Dışa aktar</div></div>
+    <div class="dg"><table>
+      <thead><tr><th class="orta">Zaman</th><th>Cihaz</th><th class="orta">Yön</th><th class="orta">Tür</th><th>Barkod</th><th>Özet</th><th class="orta">İşlem</th></tr></thead>
+      <tbody>
+        <tr><td class="orta">11:44:02</td><td>Cobas c503</td><td class="orta">← LIS</td><td class="orta">ORU^R01</td><td>2603187701</td><td>7 sonuç (GLUC3 142 H, CRP 24 H, TSH 3,1 …) + SI-H 12</td><td class="orta"><span class="rz ok">işlendi</span></td></tr>
+        <tr><td class="orta">11:43:55</td><td>Cobas c503</td><td class="orta">→ cihaz</td><td class="orta">ORR / QCK</td><td>2603187701</td><td>Host query yanıtı: 7 test</td><td class="orta"><span class="rz ok">ACK</span></td></tr>
+        <tr><td class="orta">11:43:54</td><td>Cobas c503</td><td class="orta">← LIS</td><td class="orta">QRY^Q02</td><td>2603187701</td><td>Barkod sorgusu</td><td class="orta"><span class="rz ok">yanıtlandı</span></td></tr>
+        <tr><td class="orta">11:41:10</td><td>Cobas c503</td><td class="orta">← LIS</td><td class="orta">ORU^R01</td><td>2603187633</td><td>NT-proBNP 1.240 (kod 29070)</td><td class="orta"><span class="rz kir">eşlenmemiş kod → sahipsiz</span></td></tr>
+        <tr><td class="orta">11:40:30</td><td>XN-1000</td><td class="orta">← LIS</td><td class="orta">ASTM R</td><td>2603187702</td><td>CBC 24 parametre + scattergram bayrakları (IG↑)</td><td class="orta"><span class="rz ok">işlendi</span></td></tr>
+        <tr><td class="orta">10:02:40</td><td>UF-5000</td><td class="orta">—</td><td class="orta">bağlantı</td><td>—</td><td>Socket kapandı (ECONNRESET) · 3 yeniden deneme</td><td class="orta"><span class="rz kir">alarm → BT</span></td></tr>
+        <tr><td class="orta">09:58:12</td><td>BACTEC FX</td><td class="orta">← LIS</td><td class="orta">ASTM R</td><td>2603187490</td><td>Şişe pozitif · 14,2 s · aerob</td><td class="orta"><span class="rz kir">kritik → mikrobiyoloji</span></td></tr>
+      </tbody></table></div>
+    <div class="ic" style="font-family:Consolas,monospace;font-size:11px;color:#4d5d6e;white-space:pre">MSH|^~\&amp;|cobas pro||LIS||20260903114402||ORU^R01|1093|P|2.5.1
+PID|||1234567****||YILMAZ^AYSE||19870512|F
+OBR|1||2603187701|20411^GLUC3|||20260903114001
+OBX|1|NM|20411^GLUC3||142|mg/dL|70-100|H|||F|||20260903114001
+OBX|2|NM|SI-H^Hemolysis||12|index|||||F</div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table>
+      <thead><tr><th>Cihaz</th><th>Olay</th><th class="orta">Tarih</th><th>Yapan</th><th>Detay</th><th class="orta">Sonraki</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr><td>Cobas c503</td><td>Kalibrasyon · Glukoz</td><td class="orta">03.09 07:10</td><td>Tekn. R. Al</td><td>Kalibratör lot 4471 · geçerli 7 gün</td><td class="orta">10.09</td><td class="orta"><span class="rz ok">Geçerli</span></td></tr>
+        <tr><td>Cobas c503</td><td>Reaktif lot değişimi · CRP</td><td class="orta">02.09 16:00</td><td>Tekn. R. Al</td><td>Lot 88213 → 88240 · KK 2 seviye geçti</td><td class="orta">—</td><td class="orta"><span class="rz ok">Onaylı</span></td></tr>
+        <tr><td>XN-1000</td><td>Günlük bakım</td><td class="orta">03.09 07:00</td><td>Tekn. B. Sel</td><td>Yıkama · background ✔</td><td class="orta">04.09</td><td class="orta"><span class="rz ok">Yapıldı</span></td></tr>
+        <tr><td>UF-5000</td><td>Arıza · bağlantı</td><td class="orta">03.09 10:02</td><td>BT</td><td>Seri dönüştürücü yanıt vermiyor · servis çağrıldı</td><td class="orta">—</td><td class="orta"><span class="rz kir">Açık</span></td></tr>
+        <tr><td>NextSeq 550</td><td>Aylık bakım · yıkama</td><td class="orta">01.09</td><td>Biyolog E. Yıl</td><td>Illumina servis raporu #A-2291</td><td class="orta">01.10</td><td class="orta"><span class="rz ok">Yapıldı</span></td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Kalibrasyon süresi dolmuş ya da KK reddedilmiş testte sonuç <b>otomatik onaylanmaz</b>, ekranda "KK geçersiz" bayrağı. Bakım/arıza kayıtları cihaz kartında; cihaz mevcut <code>demirbas</code> ile bağlanır.</div>
+  </div>
+  <div class="statusbar"><span>9 cihaz · 8 bağlı · 1 arıza</span><span>Bugün 2.960 sonuç · 15 hatalı mesaj · 2 eşlenmemiş kod</span><span class="sp">Dinleyiciler LIS ara katmanında (Windows servisi / Docker); mesajlar <code>lab_cihaz_mesaj</code></span></div>
+</div>
+<div class="not"><b>Mimari.</b> Her cihaz için bir dinleyici (TCP sunucu/istemci, seri port, klasör izleme); protokol sürücüsü (ASTM E1381/E1394, HL7 v2.x, CSV) mesajı ortak modele çevirir: barkod + test kodu + değer + birim + bayraklar + zaman + cihaz. Ham mesaj her zaman saklanır (denetim). Çift yönde LIS çalışma listesini cihaza verir (host query ya da indirme). Middleware ürünleri (Roche cobas infinity, Sysmex WAM, Data Innovations IM) varsa LIS onlara tek HL7 bağlantısıyla konuşur.</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hasta Listesi — Grup & Analiz</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
+    --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46; --grpbg:#fbfcfd;
+    /* satir renkleri */
+    --s-alj:#fbe6ae; --s-alj-t:#7a5407;   /* kritik alerji            */
+    --s-eks:#fdf1e2; --s-eks-t:#8a5a12;   /* kimlik / iletisim eksik  */
+    --s-pas:#dcdcdc; --s-pas-t:#7a7a7a;   /* pasif / vefat            */
+    --s-brc:#f7cfcf; --s-brc-t:#7d1f1f;   /* acik borc                */
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1360px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .dot{width:9px;height:9px;border-radius:50%;background:#7fb2e6;box-shadow:0 0 0 2px rgba(255,255,255,.25) inset}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;color:var(--ink);cursor:default;display:flex;gap:5px;align-items:center}
+  .btn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#2e7d46;background:linear-gradient(#4fae68,#2e7d46);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#a3312f;background:linear-gradient(#d9534f,#b83b37);color:#fff;font-weight:bold}
+  .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
+  .wrap{display:grid;grid-template-columns:230px 1fr 250px;gap:0}
+  /* SOL: menu + arama */
+  .gorev{background:#f4f7fa;border-right:1px solid var(--line2);padding:6px 6px 10px}
+  .gorev h5{margin:6px 4px 4px;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .ltabs{display:flex;gap:2px;margin:-6px -6px 8px;padding:6px 6px 0;background:var(--head2);border-bottom:1px solid var(--line)}
+  .ltab{flex:1;text-align:center;padding:6px 8px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);
+    border-bottom:none;border-radius:4px 4px 0 0;color:var(--muted);cursor:pointer}
+  .ltab.active{background:#f4f7fa;color:var(--navy);font-weight:bold}
+  .lpane{display:none}.lpane.active{display:block}
+  .gtus{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:3px;font-size:11.5px;color:var(--ink);cursor:pointer}
+  .gtus:hover{background:#e7eef7}
+  .gtus.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .gtus .ic{width:16px;text-align:center}
+  .gtus .n{margin-left:auto;font-size:10px;color:#5b6b7c;background:#dde6ef;border-radius:9px;padding:0 6px}
+  .gtus.on .n{background:rgba(255,255,255,.25);color:#fff}
+  .achips{display:flex;gap:4px;margin-bottom:8px}
+  .achips .minibtn{flex:1;justify-content:center}
+  .agrid{display:grid;grid-template-columns:78px 1fr;gap:5px 6px;align-items:center}
+  .agrid label{font-size:10.5px;color:var(--muted);text-align:right}
+  .inp{border:1px solid var(--line);border-radius:2px;background:#fff;height:22px;padding:0 6px;
+    font-size:11.5px;color:var(--ink);display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .combo{position:relative;padding-right:16px}
+  .combo::after{content:"▾";position:absolute;right:6px;top:3px;color:var(--muted);font-size:10px}
+  .chk{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink);margin-top:5px}
+  /* ORTA */
+  .center{min-width:0;display:flex;flex-direction:column}
+  .filtre{display:flex;gap:5px;padding:8px 10px 7px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line2);background:#fbfcfe}
+  .minibtn{border:1px solid var(--line);background:linear-gradient(#fff,#eef3f8);border-radius:3px;padding:3px 8px;font-size:11px;
+    display:inline-flex;align-items:center;gap:5px;cursor:pointer}
+  .minibtn:hover{border-color:var(--selbd);background:linear-gradient(#fff,#dce8f6)}
+  .minibtn.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .dg{border:1px solid var(--line);border-radius:3px;overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:5px 7px;font-size:10.5px;color:#3a5573;font-weight:bold;white-space:nowrap;
+    text-transform:uppercase;letter-spacing:.2px;position:sticky;top:0}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:4px 7px;font-size:11.5px;white-space:nowrap}
+  .dg tr:hover td{background:#f2f7fd}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.s-alj td{background:var(--s-alj);color:var(--s-alj-t)}
+  .dg tr.s-eks td{background:var(--s-eks);color:var(--s-eks-t)}
+  .dg tr.s-brc td{background:var(--s-brc);color:var(--s-brc-t)}
+  .dg tr.s-pas td{background:var(--s-pas);color:var(--s-pas-t)}
+  .dg tr.s-pas td.ad{text-decoration:line-through}
+  .dg .c{text-align:center}
+  .dg .r{text-align:right;font-family:"Segoe UI",Tahoma}
+  .dg tfoot td{background:linear-gradient(#eef4fa,#e2eaf3);border-top:1px solid var(--line);font-weight:bold;color:var(--navy)}
+  .pill{font-size:9.5px;padding:1px 6px;border-radius:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+  .p-ok{background:#e9f6ed;color:#2e7d46;border-color:#cbe7d3}
+  .p-kri{background:#fdf6e3;color:#a9791a;border-color:#eeddb4}
+  .p-yok{background:#fbe9e9;color:#b23b3b;border-color:#f0c9c9}
+  .p-inf{background:#e6f0fb;color:#2f6db3;border-color:#cfe0f4}
+  .p-pas{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
+  .lgnd{display:flex;gap:11px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:8px;align-items:center}
+  .sw{width:22px;height:11px;border:1px solid #b9c6d4;border-radius:2px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.55}
+  .sayfalama{display:flex;align-items:center;gap:6px;padding:7px 10px;border-top:1px solid var(--line2);background:#fbfcfe;font-size:11px;color:var(--muted)}
+  /* alt detay */
+  .tabs{display:flex;gap:2px;padding:0 10px;background:var(--head2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tab{padding:6px 13px;font-size:11.5px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);cursor:pointer;position:relative;top:1px}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+  .tab .b{display:inline-block;min-width:16px;text-align:center;background:#cdd9e6;color:#34506e;border-radius:9px;
+    font-size:10px;padding:0 5px;margin-left:6px;font-weight:bold}
+  .pane{display:none;padding:10px}
+  .pane.active{display:block}
+  .kutu{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:8px 10px}
+  .kutu h6{margin:0 0 6px;font-size:10.5px;letter-spacing:.3px;text-transform:uppercase;color:#7b8ea3}
+  .kv{display:flex;justify-content:space-between;gap:10px;padding:2px 0;font-size:11.5px;border-bottom:1px dotted var(--line2)}
+  .kv:last-child{border-bottom:none}
+  .kv b{color:var(--navy)}
+  /* SAG */
+  .side{border-left:1px solid var(--line2);background:#f8fafc;padding:10px}
+  .sidebox{background:#fff;border:1px solid var(--line2);border-radius:3px;padding:8px 9px;font-size:11.5px;margin-bottom:10px}
+  .sidebox h6{margin:0 0 6px;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#7b8ea3}
+  .foto{height:120px;border:1px dashed var(--line);border-radius:3px;background:#eef3f8;
+    display:flex;align-items:center;justify-content:center;color:#9aa9b8;font-size:11px;margin-bottom:8px}
+  .uyari{background:#fdeaea;border:1px solid #f2caca;border-radius:3px;padding:7px 8px;font-size:11px;color:#8f2c2a;margin-bottom:10px;line-height:1.45}
+  .maprow{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#f7fafc;border-top:1px solid var(--line2);font-size:10px;color:var(--muted)}
+  .maprow b{color:#3d6294}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+
+  /* --- Liste GORUNUM sekmeleri (Liste / Grup / Analiz) ekleri --- */
+  .tabs{margin-top:0}
+  .kpiler{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+  .kpi{border:1px solid var(--line);border-radius:4px;background:#fff;padding:8px 10px;display:flex;
+    flex-direction:column;gap:2px}
+  .kpi .k{font-size:10.5px;color:var(--muted)}
+  .kpi .v{font-size:17px;font-weight:bold;color:var(--navy)}
+  .kpi .v.ok{color:var(--ok)} .kpi .v.teh{color:#b23b3b}
+  .kpi .a{font-size:10.5px;color:var(--muted)}
+  .row{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-top:10px}
+  .col{flex:1;min-width:330px}
+  .kirilim{display:grid;grid-template-columns:78px 1fr;gap:6px 8px;align-items:center;
+    border:1px solid var(--line2);border-radius:4px;background:#fbfcfd;padding:8px 10px}
+  .kirilim label{font-size:10.5px;color:var(--muted);text-align:right}
+  .seg2{display:flex;flex-wrap:wrap;gap:4px}
+  .seg2 .s{border:1px solid var(--line);background:linear-gradient(#fbfcfe,#eef3f8);border-radius:3px;
+    padding:4px 9px;font-size:11px;color:var(--ink);cursor:pointer}
+  .seg2 .s.on{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .dg tr.g1 td{background:#f4f8fc;font-weight:bold}
+  .dg tr.g2 td{color:#40566e}
+  .grafik{display:flex;align-items:flex-end;gap:14px;height:130px;padding:8px 4px;
+    border:1px solid var(--line2);border-radius:3px;background:#fff}
+  .cub{flex:1;display:flex;align-items:flex-end;gap:3px;height:100%;position:relative}
+  .cub i{flex:1;background:linear-gradient(#5b93d1,#2f6db3);border-radius:2px 2px 0 0}
+  .cub i.t{background:linear-gradient(#7dc79a,#2e7d46)}
+  .cub span{position:absolute;bottom:-16px;left:0;right:0;text-align:center;font-size:10px;color:var(--muted)}
+  .grafik + .hint{margin-top:20px}
+  .lej{display:inline-block;width:10px;height:10px;border-radius:2px;background:#2f6db3;vertical-align:-1px}
+  .lej.t{background:#2e7d46}
+  .kutu{margin-bottom:10px}
+  .minibtn{margin-bottom:5px}
+  .statusbar{padding:6px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted)}
+  .pane{padding:0}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title"><span class="dot"></span>Hasta Listesi — Liste / Grup / Analiz
+    <span class="sp">Kayıt Kabul › Hastalar · görünüm sekmeleri (liste düğmesinin yanı)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Yeni Hasta</div>
+    <div class="btn">✎ Kartı Aç</div>
+    <div class="btn">➕ Başvuru Aç (Kabul)</div>
+    <span class="sepv"></span>
+    <div class="btn">📊 Excel</div>
+    <div class="btn">🖨️ Yazdır</div>
+    <span class="sepv"></span>
+    <div class="btn">🔎 Süzgeç</div>
+  </div>
+
+  <!-- GORUNUM SEKMELERI: liste dugmesinin yaninda (kullanici). Ayni suzgec,
+       uc farkli okuma: satirlar / kirilim / ozet. -->
+  <div class="tabs">
+    <div class="tab active" data-t="liste">📋 Liste <span class="b">18.442</span></div>
+    <div class="tab" data-t="grup">🗂 Grup</div>
+    <div class="tab" data-t="analiz">📊 Analiz</div>
+  </div>
+
+  <div class="hint" style="margin:10px 12px 0">
+    Üç görünüm de <b>aynı süzgeci</b> kullanır (sol menü + arama + çipler): Liste satırları,
+    <b>Grup</b> kırılımı, <b>Analiz</b> özeti verir. Grup ya da Analiz’de bir satıra tıklamak
+    süzgeci daraltıp Liste’ye döner — “bu 84 borçlu kim” sorusu tek tıkla cevaplanır.
+  </div>
+
+  <!-- ============================================================ LISTE == -->
+  <div class="pane active" data-p="liste">
+    <div style="padding:12px">
+      <div class="dg"><table>
+        <thead><tr><th>Dosya No</th><th>Ad Soyad</th><th class="c">Cinsiyet</th><th class="c">Yaş</th>
+                   <th>Ödeyen Kurum</th><th>Grup</th><th class="r">Açık Borç</th><th>Son Başvuru</th></tr></thead>
+        <tbody>
+          <tr class="sel"><td>00000123</td><td class="ad">ALİ DÖNMEZ</td><td class="c">♂ E</td><td class="c">18</td>
+              <td>Özel</td><td><span class="pill p-inf">VIP</span> <span class="pill p-inf">Kronik</span></td>
+              <td class="r">1.250,00</td><td>03.09.2026 13:49</td></tr>
+          <tr><td>00000119</td><td class="ad">AYŞE KOÇ</td><td class="c">♀ K</td><td class="c">42</td>
+              <td>SGK</td><td><span class="pill p-inf">Kronik</span></td><td class="r">0,00</td><td>02.09.2026 09:20</td></tr>
+          <tr><td>00000117</td><td class="ad">MEHMET ARSLAN</td><td class="c">♂ E</td><td class="c">57</td>
+              <td>Özel Yaşam Sigorta</td><td><span class="pill p-inf">Check-up</span></td>
+              <td class="r">3.400,00</td><td>29.08.2026 15:05</td></tr>
+        </tbody>
+        <tfoot><tr><td colspan="6">3 / 18.442 kayıt (mockup kısaltması — tam liste hasta_listesi.html)</td>
+                   <td class="r">4.650,00</td><td></td></tr></tfoot>
+      </table></div>
+      <div class="sayfalama">« önceki · 1 2 3 … 615 · sonraki »</div>
+    </div>
+  </div>
+
+  <!-- ============================================================= GRUP == -->
+  <div class="pane" data-p="grup">
+    <div style="padding:12px">
+      <div class="kirilim">
+        <label>Kırılım</label>
+        <div class="seg2"><span class="s on">Hasta Grubu</span><span class="s">Segment</span>
+          <span class="s">Ödeyen Kurum</span><span class="s">Geliş Kaynağı</span>
+          <span class="s">Yaş Aralığı</span><span class="s">Cinsiyet</span><span class="s">Şube</span></div>
+        <label>2. kırılım</label>
+        <div class="seg2"><span class="s">— yok —</span><span class="s on">Ödeyen Kurum</span>
+          <span class="s">Segment</span><span class="s">Şube</span></div>
+      </div>
+
+      <div class="dg" style="margin-top:10px"><table>
+        <thead><tr><th style="width:280px">Hasta Grubu / Ödeyen Kurum</th><th class="c">Hasta</th>
+                   <th class="c">Başvuru</th><th class="r">Ciro</th><th class="r">Tahsilat</th>
+                   <th class="r">Açık Borç</th><th class="r">Ort. Başvuru</th><th class="c">Pay</th></tr></thead>
+        <tbody>
+          <tr class="g1"><td><b>▾ VIP</b></td><td class="c">312</td><td class="c">1.204</td>
+              <td class="r">6.420.000</td><td class="r">6.190.000</td><td class="r">230.000</td>
+              <td class="r">5.332</td><td class="c">28%</td></tr>
+          <tr class="g2"><td>&nbsp;&nbsp;&nbsp;Özel (kendi öder)</td><td class="c">208</td><td class="c">790</td>
+              <td class="r">4.180.000</td><td class="r">4.090.000</td><td class="r">90.000</td>
+              <td class="r">5.291</td><td class="c">18%</td></tr>
+          <tr class="g2"><td>&nbsp;&nbsp;&nbsp;Özel Yaşam Sigorta</td><td class="c">104</td><td class="c">414</td>
+              <td class="r">2.240.000</td><td class="r">2.100.000</td><td class="r">140.000</td>
+              <td class="r">5.410</td><td class="c">10%</td></tr>
+          <tr class="g1"><td><b>▸ Kronik</b></td><td class="c">1.870</td><td class="c">6.940</td>
+              <td class="r">9.140.000</td><td class="r">8.700.000</td><td class="r">440.000</td>
+              <td class="r">1.317</td><td class="c">40%</td></tr>
+          <tr class="g1"><td><b>▸ Check-up</b></td><td class="c">640</td><td class="c">1.020</td>
+              <td class="r">3.060.000</td><td class="r">3.010.000</td><td class="r">50.000</td>
+              <td class="r">3.000</td><td class="c">13%</td></tr>
+          <tr class="g1"><td><b>▸ Personel Yakını</b></td><td class="c">96</td><td class="c">288</td>
+              <td class="r">410.000</td><td class="r">402.000</td><td class="r">8.000</td>
+              <td class="r">1.424</td><td class="c">2%</td></tr>
+          <tr class="g1"><td><b>▸ (Grupsuz)</b></td><td class="c">15.524</td><td class="c">21.310</td>
+              <td class="r">3.870.000</td><td class="r">3.640.000</td><td class="r">230.000</td>
+              <td class="r">182</td><td class="c">17%</td></tr>
+        </tbody>
+        <tfoot><tr><td>Toplam</td><td class="c">18.442</td><td class="c">30.762</td>
+                   <td class="r">22.900.000</td><td class="r">22.042.000</td><td class="r">958.000</td>
+                   <td class="r">744</td><td class="c">100%</td></tr></tfoot>
+      </table></div>
+
+      <div class="hint">Satıra tıklamak listeyi o gruba süzer; <b>▸</b> ikinci kırılımı açar.
+        “Grupsuz” satırı bilerek durur — <b>etiketlenmemiş</b> hasta kütlesi burada görünür.</div>
+
+      <div class="row">
+        <div class="col">
+          <div class="kutu"><h6>Etiket Bulutu (en çok kullanılan)</h6>
+            <div style="padding:8px">
+              <span class="pill p-inf" style="font-size:13px">Kronik 1.870</span>
+              <span class="pill p-inf" style="font-size:12px">Check-up 640</span>
+              <span class="pill p-inf">VIP 312</span>
+              <span class="pill p-inf">SMS İzinli 9.204</span>
+              <span class="pill p-inf">Personel Yakını 96</span>
+              <span class="pill p-kri">Riskli (90+ borç) 41</span>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="kutu"><h6>Toplu İşlem (seçili gruba)</h6>
+            <div style="padding:8px">
+              <div class="minibtn">🏷 Etiket ekle / kaldır</div>
+              <div class="minibtn">📩 SMS / e-posta gönder (izinli olanlara)</div>
+              <div class="minibtn">💰 Fiyat listesi ata</div>
+              <div class="minibtn">📊 Excel’e aktar</div>
+              <div class="hint">Toplu işlem <b>izin</b> ve <b>yetki</b> kontrolünden geçer:
+                SMS yalnız izinli hastalara gider, fiyat listesi atama “ayar” yetkisi ister.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================== ANALIZ == -->
+  <div class="pane" data-p="analiz">
+    <div style="padding:12px">
+      <div class="kpiler">
+        <div class="kpi"><span class="k">Hasta</span><span class="v">18.442</span><span class="a">yeni (30 gün): 412</span></div>
+        <div class="kpi"><span class="k">Aktif Hasta</span><span class="v">6.318</span><span class="a">son 12 ayda başvurmuş</span></div>
+        <div class="kpi"><span class="k">Ciro</span><span class="v">22,9 M₺</span><span class="a">KDV dahil</span></div>
+        <div class="kpi"><span class="k">Tahsilat</span><span class="v ok">22,0 M₺</span><span class="a">%96,2</span></div>
+        <div class="kpi"><span class="k">Açık Borç</span><span class="v teh">958 B₺</span><span class="a">41 hasta 90+ gün</span></div>
+        <div class="kpi"><span class="k">Hasta Başı Ciro</span><span class="v">1.242 ₺</span><span class="a">aktif hastada 3.625 ₺</span></div>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <div class="col">
+          <div class="kutu"><h6>Yeni Hasta / Başvuru (aylık)</h6>
+            <div style="padding:10px">
+              <div class="grafik">
+                <div class="cub"><i style="height:40%"></i><i class="t" style="height:62%"></i><span>Nis</span></div>
+                <div class="cub"><i style="height:52%"></i><i class="t" style="height:70%"></i><span>May</span></div>
+                <div class="cub"><i style="height:46%"></i><i class="t" style="height:58%"></i><span>Haz</span></div>
+                <div class="cub"><i style="height:70%"></i><i class="t" style="height:86%"></i><span>Tem</span></div>
+                <div class="cub"><i style="height:58%"></i><i class="t" style="height:72%"></i><span>Ağu</span></div>
+                <div class="cub"><i style="height:88%"></i><i class="t" style="height:94%"></i><span>Eyl</span></div>
+              </div>
+              <div class="hint"><span class="lej"></span> Yeni hasta &nbsp; <span class="lej t"></span> Başvuru</div>
+            </div>
+          </div>
+
+          <div class="kutu"><h6>Yaş / Cinsiyet Dağılımı</h6>
+            <div style="padding:0 0 6px">
+              <div class="dg"><table>
+                <thead><tr><th>Yaş</th><th class="c">Kadın</th><th class="c">Erkek</th><th class="c">Toplam</th><th class="r">Ciro</th></tr></thead>
+                <tbody>
+                  <tr><td>0-17</td><td class="c">1.204</td><td class="c">1.318</td><td class="c">2.522</td><td class="r">1.980.000</td></tr>
+                  <tr><td>18-44</td><td class="c">4.610</td><td class="c">3.980</td><td class="c">8.590</td><td class="r">9.420.000</td></tr>
+                  <tr><td>45-64</td><td class="c">2.740</td><td class="c">2.510</td><td class="c">5.250</td><td class="r">8.120.000</td></tr>
+                  <tr><td>65+</td><td class="c">1.130</td><td class="c">950</td><td class="c">2.080</td><td class="r">3.380.000</td></tr>
+                </tbody>
+              </table></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="kutu"><h6>Ödeyen Kurum Kırılımı</h6>
+            <div class="dg"><table>
+              <thead><tr><th>Kurum</th><th class="c">Hasta</th><th class="r">Ciro</th><th class="r">Tahsilat</th><th class="c">%</th></tr></thead>
+              <tbody>
+                <tr><td>Özel (kendi öder)</td><td class="c">11.940</td><td class="r">13.700.000</td><td class="r">13.410.000</td><td class="c">60%</td></tr>
+                <tr><td>Özel Yaşam Sigorta</td><td class="c">3.210</td><td class="r">5.480.000</td><td class="r">5.120.000</td><td class="c">24%</td></tr>
+                <tr><td>SGK</td><td class="c">3.292</td><td class="r">3.720.000</td><td class="r">3.512.000</td><td class="c">16%</td></tr>
+              </tbody>
+            </table></div>
+          </div>
+
+          <div class="kutu"><h6>Açık Borç Yaşlandırma</h6>
+            <div class="dg"><table>
+              <thead><tr><th>Dilim</th><th class="c">Hasta</th><th class="r">Tutar</th><th class="c">Pay</th></tr></thead>
+              <tbody>
+                <tr><td>0-30 gün</td><td class="c">316</td><td class="r">612.000</td><td class="c">64%</td></tr>
+                <tr><td>31-60</td><td class="c">88</td><td class="r">204.000</td><td class="c">21%</td></tr>
+                <tr><td>61-90</td><td class="c">32</td><td class="r">88.000</td><td class="c">9%</td></tr>
+                <tr class="s-brc"><td>90+</td><td class="c">41</td><td class="r">54.000</td><td class="c">6%</td></tr>
+              </tbody>
+            </table></div>
+            <div class="hint">90+ satırına tıklamak listeyi <b>Riskli</b> hastalara süzer.</div>
+          </div>
+
+          <div class="kutu"><h6>Kaynak / Referans</h6>
+            <div class="dg"><table>
+              <thead><tr><th>Kaynak</th><th class="c">Hasta</th><th class="r">Ciro</th></tr></thead>
+              <tbody>
+                <tr><td>Dış hekim sevki</td><td class="c">2.410</td><td class="r">7.180.000</td></tr>
+                <tr><td>Tavsiye</td><td class="c">4.980</td><td class="r">6.020.000</td></tr>
+                <tr><td>Web / çağrı merkezi</td><td class="c">3.120</td><td class="r">4.410.000</td></tr>
+                <tr><td>Kurum sözleşmesi</td><td class="c">1.640</td><td class="r">3.180.000</td></tr>
+                <tr><td>Belirtilmemiş</td><td class="c">6.292</td><td class="r">2.110.000</td></tr>
+              </tbody>
+            </table></div>
+            <div class="hint">Dış hekim satırı, <b>Gönderen</b> işaretli hekimlerin getirdiği hastadır
+              (prim rolü 361) — prim planı bu kırılımla doğrulanır.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="kutu"><h6>Gereken tablo ve alanlar — Liste Grup / Analiz</h6>
+        <div class="dg"><table>
+          <thead><tr><th>Kaynak</th><th>Alanlar / hesap</th><th>Açıklama</th></tr></thead>
+          <tbody>
+            <tr><td><b>taraf_grup</b> (yeni)</td><td>taraf_id, grup_kod, baslangic, bitis</td>
+                <td>Grup kırılımı ve etiket bulutu. Tarihli: geçmiş gruplar korunur.</td></tr>
+            <tr><td><b>v_hasta_analiz</b> (yeni)</td>
+                <td>taraf_id, basvuru_sayisi, ciro, tahsil, acik_borc, son_basvuru</td>
+                <td>Hem hasta kartı hem liste analizi aynı görünümden beslenir.</td></tr>
+            <tr><td><b>v_hasta_kirilim</b> (yeni)</td>
+                <td>kirilim_kod, deger, hasta_sayisi, basvuru, ciro, tahsilat, acik_borc</td>
+                <td>Grup sekmesindeki pivot; 1. ve 2. kırılım parametre.</td></tr>
+            <tr><td><b>v_hasta_yaslandirma</b> (yeni)</td><td>taraf_id, dilim, tutar</td>
+                <td>Yaşlandırma tablosu ve “Riskli” süzgeci.</td></tr>
+            <tr><td><b>taraf / taraf_hasta</b> (mevcut)</td>
+                <td>dogum_tarihi, cinsiyet, sube_id, kampanya_id, fiyat_listesi_id</td>
+                <td>Yaş/cinsiyet/şube kırılımları.</td></tr>
+            <tr><td><b>taraf_izin</b> (yeni)</td><td>izin_kod, durum</td>
+                <td>Toplu SMS/e-posta yalnız izinli hastalara.</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">Süzgeç: Tüm Hastalar · 18.442 kayıt · görünüm: Grup (Hasta Grubu × Ödeyen Kurum)</div>
+</div>
+
+<script>
+  // Gorunum sekmeleri (Liste / Grup / Analiz) - liste mockuplariyla ayni desen.
+  var tabs = document.querySelectorAll('.tab'), panes = document.querySelectorAll('.pane');
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      tabs.forEach(function (x) { x.classList.remove('active') });
+      panes.forEach(function (x) { x.classList.remove('active') });
+      t.classList.add('active');
+      var p = document.querySelector('.pane[data-p="' + t.dataset.t + '"]');
+      if (p) p.classList.add('active');
+    });
+  });
+  // Kirilim secimi (tek secim, satir icinde).
+  document.querySelectorAll('.seg2').forEach(function (g) {
+    g.querySelectorAll('.s').forEach(function (s) {
+      s.addEventListener('click', function () {
+        g.querySelectorAll('.s').forEach(function (x) { x.classList.remove('on') });
+        s.classList.add('on');
+      });
+    });
+  });
+  // Satir secimi.
+  document.querySelectorAll('.dg tbody tr').forEach(function (tr) {
+    tr.addEventListener('click', function () {
+      var g = tr.closest('table');
+      g.querySelectorAll('tbody tr').forEach(function (x) { x.classList.remove('sel') });
+      tr.classList.add('sel');
+    });
+  });
+</script>
+
+</body>
+</html>

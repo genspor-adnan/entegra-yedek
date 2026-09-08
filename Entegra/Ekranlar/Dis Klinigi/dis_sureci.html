@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diş Kliniği — Süreç ve Tablolar — Mockup (Gentegre AI · Diş Kliniği)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .win{max-width:1080px}
+  .icerik{padding:6px 18px 22px;font-size:13px;line-height:1.65}
+  h2{font-size:15px;color:#1c4374;border-bottom:1px solid var(--line2);padding-bottom:5px;margin:22px 0 10px}
+  h3{font-size:13.5px;color:#2c4a6b;margin:16px 0 6px}
+  code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:1px 4px;font-size:12px}
+  .icerik table{border-collapse:collapse;width:100%;margin:8px 0 14px}
+  .icerik th{background:linear-gradient(#f4f7fb,#e7eef6);border:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:12px;color:#3a5573}
+  .icerik td{border:1px solid var(--line2);padding:6px 8px;font-size:12.5px;vertical-align:top}
+  .kutu{border:1px solid var(--line2);background:#fbfcfd;border-radius:4px;padding:10px 12px;margin:10px 0}
+  .uyari{border:1px solid #f2ddbf;background:#fdf9f1;border-radius:4px;padding:9px 11px;margin:10px 0;color:var(--uyari)}
+  .tamam{border:1px solid #bfe3cb;background:#f1f8f3;border-radius:4px;padding:9px 11px;margin:10px 0;color:#245c37}
+  .akis{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+  .akis .a{border:1px solid var(--line);background:#fff;border-radius:14px;padding:4px 12px;font-size:12px}
+  .akis .a.v{background:#eef4fc;border-color:#cfe0f5;color:#2f6db3;font-weight:bold}
+  .akis .ok2{color:var(--muted)}
+  ul{margin:6px 0 12px 18px;padding:0} li{margin:3px 0}
+  .kucuk{font-size:11.5px;color:var(--muted)}
+  .durumlar{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+
+  .tablo{border:1px solid var(--line2);border-radius:4px;margin:12px 0;overflow:hidden}
+  .tablo .tb{background:linear-gradient(#f4f7fb,#e7eef6);padding:6px 10px;font-weight:bold;color:#1c4374;display:flex;gap:10px;align-items:center;font-size:13px}
+  .tablo .tb .rz{font-weight:normal}
+  .tablo .tb .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:11.5px}
+  .tablo table{margin:0}
+  .tablo td.k{font-family:Consolas,monospace;font-size:12px;white-space:nowrap}
+  .tablo td.t{font-family:Consolas,monospace;font-size:11.5px;color:#4d5d6e;white-space:nowrap}
+  .tablo tr.pk td.k{font-weight:bold}
+  .tablo .alt{padding:6px 10px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line2);background:#fbfcfd}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🦷 Diş Kliniği Modülü — Süreç, Veri Modeli, Alanlar <span class="sp">Gentegre AI · tasarım notu · 03.09.2026 · Muayene + Randevu + Radyoloji + Prim + Kasa üzerine</span></div>
+  <div class="icerik">
+    <div class="kutu">
+      <b>Tek cümlede:</b> Diş kliniğinde iş birimi <b>tedavi planı</b>dır: muayene bulguları odontograma işlenir, diş/yüzey bazlı plan satırları fiyatlanıp proforma olarak hastaya onaylatılır,
+      plan <b>seanslara</b> (ünit + hekim + süre) bölünür, her seansta yapılan işlem ücretlendirilir (başvuru satırı), sarf düşer, odontogram güncellenir;
+      lab gerektiren işler <b>iş emri</b> ile protez laboratuvarına gidip prova/teslim randevularını tetikler; ödeme taksit planıyla, hekim hakedişi tahsilat − lab − sarf bazıyla.
+      Mevcut hizmet kataloğunda 319 DİŞ.* SUT kalemi hazır.
+      <br><span class="kucuk">Mockuplar: <code>dis_gunluk_akis.html</code> · <code>dis_hasta_karti.html</code> (odontogram, periodontal) · <code>dis_muayene_tedavi_plani.html</code> · <code>dis_seans_kaydi.html</code> · <code>dis_lab_isemri.html</code> · <code>dis_odeme_plani.html</code>. Bağlı: <code>../Muayene/</code> · <code>../Randevu/</code> · <code>../Radyoloji/</code> · <code>../Prim/</code> · <code>../E-Nabız/</code> · <code>../Dokuman/</code></span>
+    </div>
+
+    <h2>1. Akış</h2>
+    <div class="akis">
+      <span class="a">Randevu (ünit + hekim) / acil</span><span class="ok2">→</span>
+      <span class="a">Kabul · başvuru · tıbbi uyarılar</span><span class="ok2">→</span>
+      <span class="a v">Muayene · odontogram · RVG/pano · periodontal</span><span class="ok2">→</span>
+      <span class="a">Tanı (diş bazlı)</span><span class="ok2">→</span>
+      <span class="a">Tedavi planı (fazlar, alternatif) · fiyat</span><span class="ok2">→</span>
+      <span class="a">Proforma · hasta onayı · onam · ödeme planı</span><span class="ok2">→</span>
+      <span class="a">Seans programı (randevular, ön koşullar)</span><span class="ok2">→</span>
+      <span class="a">Seans: uygulama · sarf · RVG · reçete · ücret</span><span class="ok2">→</span>
+      <span class="a">Lab iş emri → prova → teslim</span><span class="ok2">→</span>
+      <span class="a">Plan tamamlandı · idame / kontrol</span>
+    </div>
+    <table>
+      <tr><th style="width:40px">#</th><th style="width:210px">Adım</th><th>Ne olur</th><th style="width:240px">Kayıt</th></tr>
+      <tr><td>1</td><td><b>Randevu / kabul</b></td><td>Randevu ünit kaynaklı (hekim + ünit + süre); acil ağrı hastası ünit boşluğuna; kabulde başvuru (tür 19), tıbbi uyarılar (alerji, antikoagülan, gebelik, DM) şeritte.</td><td><code>randevu(+unit_id)</code>, <code>belge</code></td></tr>
+      <tr><td>2</td><td><b>Muayene</b></td><td>Genel muayene + diş uzantısı (ekstra/intraoral, oklüzyon, TME, hijyen, vitalite); bulgular odontograma diş/yüzey/durum olarak; RVG/pano istemi (Radyoloji, ünit yanı sensör); periodontal kayıt (6 nokta) hijyenist girişi.</td><td><code>muayene</code>, <code>dis_muayene</code>, <code>dis_odontogram</code>, <code>dis_periodontal(_olcum)</code>, <code>radyoloji_istem</code></td></tr>
+      <tr><td>3</td><td><b>Tanı</b></td><td>ICD-10 K00–K14 diş bazlı; e-Nabız Diş Muayene paketi diş numarasıyla.</td><td><code>tani.dis_no</code></td></tr>
+      <tr><td>4</td><td><b>Tedavi planı</b></td><td>Diş × yüzey × işlem (DİŞ.* SUT/özel) satırları; faz ve sıra; hekim; seans sayısı ve ücretlendirme kuralı hizmet kartından; fiyat listesi/kampanya/kurum payı; alternatif plan (B); lab gerektirenler işaretli; öneri satırları (onaysız).</td><td><code>dis_tedavi_plani(_satir)</code>, <code>hizmet</code> ekleri</td></tr>
+      <tr><td>5</td><td><b>Proforma &amp; onay</b></td><td>Plan PDF (faz özetli, geçerlilik, ödeme seçenekleri) tablet imza / portal; işlem onamları (kanal, çekim, implant, protez…); ödeme planı (taksit → kasa plan kayıtları; peşinat avans).</td><td><code>dis_tedavi_plani.proforma_*</code>, <code>onam</code>, <code>dis_odeme_plani</code>, <code>kasa_islem</code></td></tr>
+      <tr><td>6</td><td><b>Seans programı</b></td><td>Plan satırları seanslara bölünür; ön koşul (önceki seans, lab teslimi) sıralamayı kilitler; randevular ünit takvimine; hatırlatma SMS.</td><td><code>randevu.plan_satir_ids / on_kosul_randevu_id</code></td></tr>
+      <tr><td>7</td><td><b>Seans</b></td><td>Ünit ekranı: yapılan işlem (plan satırı, seans no), uygulama notu (endodonti çalışma boyu vb.), anestezi, RVG, sarf (işlem seti → sarf fişi, UTS lot), reçete, komplikasyon, sterilizasyon paketi, sonraki seans. "Yapıldı" → başvuru satırı (ücretlendirme kuralına göre), odontogram sonuç durumu, plan ilerlemesi, prim rolü.</td><td><code>dis_seans</code>, <code>dis_seans_islem</code>, <code>dis_seans_sarf</code>, <code>belge_satir</code></td></tr>
+      <tr><td>8</td><td><b>Laboratuvar</b></td><td>Lab gerektiren satır → iş emri (ölçü/STL, malzeme, renk, ek istek, dosyalar) → gönderim → lab aşamaları → teslim + kalite → prova randevusu → geri gönderim/teslim; lab faturası eşlenir, garanti izlenir; gecikme uyarısı.</td><td><code>dis_lab</code>, <code>dis_lab_isemri(_asama)</code></td></tr>
+      <tr><td>9</td><td><b>Ücret &amp; tahsilat</b></td><td>Yapılan işlem tutarı başvuruda birikir; tahsilat satıra dağıtılır; "tahsil edilen kadar fiş, kalanı tahakkuk" (352); kurum payı (SGK/ÖSS) 289; taksit gecikmesi uyarı; teslim öncesi bakiye kuralı.</td><td><code>belge_satir</code>, <code>kasa_islem(_dagitim)</code></td></tr>
+      <tr><td>10</td><td><b>Hakediş</b></td><td>Prim modülü: rol Uygulayan (hekim/hijyenist), baz = tahsil − lab − sarf (ayar), dönem hakedişi.</td><td><code>hakedis(_satir)</code>, <code>prim_plani</code></td></tr>
+      <tr><td>11</td><td><b>Tamamlama / idame</b></td><td>Plan tamamlandı → kontrol/idame randevuları (6 ay), hatırlatma; odontogram güncel; e-Nabız paketleri.</td><td><code>dis_tedavi_plani.durum</code></td></tr>
+    </table>
+
+    <h2>2. Durumlar</h2>
+    <div class="durumlar">
+      <b>Plan:</b> <span class="rz pas">1 Taslak</span> → <span class="rz sari">2 Sunuldu</span> → <span class="rz ok">3 Onaylı</span> → <span class="rz mavi">4 Sürüyor</span> → <span class="rz ok">5 Tamamlandı</span> · <span class="rz pas">6 İptal</span> · <span class="rz pas">7 Süresi doldu</span>
+      &nbsp; <b>Plan satırı:</b> planlı → sürüyor → yapıldı · iptal · ertelendi &nbsp; <b>Lab:</b> ölçü bekliyor → gönderildi → tasarım onayı → üretim → geldi → prova → (geri) → teslim edildi
+    </div>
+    <ul>
+      <li>Odontogram: her diş için aktif tek "mevcut durum" + planlanan/tamamlanan katmanlar; işlem bitince hizmet kartındaki sonuç kodu dişe yazılır (kron, dolgu, eksik…).</li>
+      <li>Ücretlendirme muayene anında değil <b>işlem anında</b> (seans); çok seanslı işlemde kural: tamamlanınca / seans başına oran / adet.</li>
+      <li>Plan değişirse (yeni bulgu) yeni sürüm/ek proforma; onaylı satır fiyatı değişmez.</li>
+      <li>Çocuk hasta: süt/karma dentisyon, veli onamı, pedodonti şablonu; ortodonti planı ayrı modül (sonra).</li>
+    </ul>
+
+    <h2>3. Tablolar ve alanlar</h2>
+    <h3>Odontogram ve periodontal kayıt</h3>
+<div class="tablo">
+  <div class="tb"><code>dis_odontogram</code> <span class="rz ok">yeni</span> <span class="sp">hasta × diş × durum — sürümlü bulgu/işlem katmanı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td>→ taraf</td></tr><tr><td class="k">dis_no</td><td class="t">smallint</td><td>FDI: daimi 11–48, süt 51–85</td></tr><tr><td class="k">dentisyon</td><td class="t">smallint</td><td>1 daimi · 2 süt · 3 karma (yaşa göre otomatik)</td></tr><tr><td class="k">yuzeyler</td><td class="t">varchar(8)</td><td>M D O V L I (çoklu: 'OD')</td></tr><tr><td class="k">durum_kod</td><td class="t">smallint</td><td>kod listesi dis.durum: sağlam · çürük (başlangıç/dentin/derin) · dolgu (amalgam/kompozit/inlay) · kanal tedavili · kron · köprü ayağı/gövdesi · implant · eksik · çekim endikasyonu · gömülü · kırık · aşınma · mobil · süt kalıntısı · sürmemiş · protez</td></tr><tr><td class="k">katman</td><td class="t">smallint</td><td>1 mevcut · 2 planlanan · 3 tamamlanan</td></tr><tr><td class="k">kaynak</td><td class="t">smallint</td><td>1 muayene · 2 RVG/pano · 3 hasta beyanı · 4 dış kayıt · 5 seans (işlem sonucu)</td></tr><tr><td class="k">muayene_id / seans_id / plan_satir_id</td><td class="t">int</td><td>hangi kayıttan doğdu</td></tr><tr><td class="k">tarih</td><td class="t">date</td><td></td></tr><tr><td class="k">not</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td>yeni durum eskisini pasifleştirir (geçmiş kalır)</td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table><div class="alt">indeks (hasta_id, dis_no, aktif); odontogram = aktif satırların katman katman çizimi; tarih kaydırıcı geçmişten okur</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dis_periodontal</code> <span class="rz ok">yeni</span> <span class="sp">periodontal kayıt oturumu</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">tarih</td><td class="t">date</td><td></td></tr><tr><td class="k">olcen_id</td><td class="t">int</td><td>hijyenist/hekim</td></tr><tr><td class="k">plak_indeksi / bop_oran / cep5_sayisi / ort_cal</td><td class="t">numeric</td><td>hesaplı özet</td></tr><tr><td class="k">evre / derece</td><td class="t">varchar(5)</td><td>AAP 2017 sınıflaması</td></tr><tr><td class="k">not</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dis_periodontal_olcum</code> <span class="rz ok">yeni</span> <span class="sp">diş × 6 nokta ölçüm</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">bigint</td><td></td></tr><tr><td class="k">periodontal_id</td><td class="t">int</td><td></td></tr><tr><td class="k">dis_no</td><td class="t">smallint</td><td></td></tr><tr><td class="k">cep_mv / cep_v / cep_dv / cep_ml / cep_l / cep_dl</td><td class="t">smallint</td><td>mm</td></tr><tr><td class="k">cekilme_*</td><td class="t">smallint</td><td>6 nokta diş eti çekilmesi</td></tr><tr><td class="k">kanama_*</td><td class="t">smallint</td><td>6 nokta BOP</td></tr><tr><td class="k">mobilite</td><td class="t">smallint</td><td>0–3</td></tr><tr><td class="k">furkasyon</td><td class="t">smallint</td><td>0–3</td></tr><tr><td class="k">plak</td><td class="t">smallint</td><td>yüzey bazlı</td></tr>
+  </table>
+</div><h3>Muayene, tanı, tedavi planı</h3>
+<div class="tablo">
+  <div class="tb"><code>dis_muayene</code> <span class="rz ok">yeni</span> <span class="sp">genel muayene kaydının diş uzantısı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">muayene_id</td><td class="t">int</td><td>→ muayene (1:1)</td></tr><tr><td class="k">ekstraoral / intraoral_yumusak</td><td class="t">text</td><td></td></tr><tr><td class="k">oklüzyon_sinif</td><td class="t">smallint</td><td>Angle I/II/III</td></tr><tr><td class="k">overjet_mm / overbite_mm</td><td class="t">numeric</td><td></td></tr><tr><td class="k">tme_bulgu</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">hijyen_durum</td><td class="t">smallint</td><td>iyi/orta/kötü</td></tr><tr><td class="k">plak_indeksi</td><td class="t">numeric</td><td></td></tr><tr><td class="k">bruksizm / sigara / agiz_solunumu</td><td class="t">smallint</td><td>alışkanlıklar (hasta_aliskanlik ile senkron)</td></tr><tr><td class="k">dmft_d / dmft_m / dmft_f</td><td class="t">smallint</td><td>hesaplı (odontogramdan)</td></tr><tr><td class="k">vitalite_json</td><td class="t">jsonb</td><td>diş → soğuk/elektrik/perküsyon/palpasyon</td></tr><tr><td class="k">dental_anamnez</td><td class="t">text</td><td>son ziyaret, şikâyet geçmişi, önceki tedaviler</td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>tani (mevcut, ek)</code> <span class="rz sari">mevcut + kolon</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">dis_no</td><td class="t">smallint</td><td>yeni — diş bazlı tanı (K00–K14); e-Nabız Diş Muayene paketi ister</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dis_tedavi_plani</code> <span class="rz ok">yeni</span> <span class="sp">tedavi planı başlığı — ayrı yaşam döngüsü</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">plan_no</td><td class="t">varchar(20)</td><td>TP-yyyy/nnnn</td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">muayene_id</td><td class="t">int</td><td>planın doğduğu muayene</td></tr><tr><td class="k">hekim_id</td><td class="t">int</td><td>planı yapan</td></tr><tr><td class="k">varyant</td><td class="t">char(1)</td><td>A / B (alternatif planlar)</td></tr><tr><td class="k">ana_plan_id</td><td class="t">int</td><td>alternatifin bağlı olduğu</td></tr><tr><td class="k">fiyat_listesi_id / kampanya_id / odeyen_kurum_id</td><td class="t">int</td><td>fiyatlama kimliği (274/289 deseni)</td></tr><tr><td class="k">toplam / indirim / net</td><td class="t">numeric</td><td></td></tr><tr><td class="k">indirim_oran</td><td class="t">numeric</td><td>plan geneli</td></tr><tr><td class="k">odeme_secenegi</td><td class="t">smallint</td><td>peşin / taksit / seans başı</td></tr><tr><td class="k">taksit_sayisi</td><td class="t">smallint</td><td></td></tr><tr><td class="k">proforma_no</td><td class="t">varchar(20)</td><td></td></tr><tr><td class="k">proforma_dosya_id</td><td class="t">int</td><td>imzalı PDF → dokuman</td></tr><tr><td class="k">gecerlilik_bitis</td><td class="t">date</td><td></td></tr><tr><td class="k">hasta_onay_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">onay_yontemi</td><td class="t">smallint</td><td>tablet imza / ıslak / portal</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>1 taslak · 2 sunuldu · 3 onaylı · 4 sürüyor · 5 tamamlandı · 6 iptal · 7 süresi doldu</td></tr><tr><td class="k">iptal_neden</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">sube_id</td><td class="t">int</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dis_tedavi_plani_satir</code> <span class="rz ok">yeni</span> <span class="sp">plan satırı — diş × yüzey × işlem</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">plan_id</td><td class="t">int</td><td></td></tr><tr><td class="k">faz</td><td class="t">smallint</td><td>1 acil · 2 restoratif · 3 protetik · 4 idame (kurum tanımlar)</td></tr><tr><td class="k">sira</td><td class="t">smallint</td><td></td></tr><tr><td class="k">dis_no</td><td class="t">smallint</td><td>0 = ağız geneli</td></tr><tr><td class="k">dis_nolar</td><td class="t">smallint[]</td><td>köprü/protez: birden çok diş</td></tr><tr><td class="k">yuzeyler</td><td class="t">varchar(8)</td><td></td></tr><tr><td class="k">hizmet_id</td><td class="t">int</td><td>→ hizmet (DİŞ.* SUT / özel kod)</td></tr><tr><td class="k">hekim_id</td><td class="t">int</td><td>uygulayacak</td></tr><tr><td class="k">seans_sayisi</td><td class="t">smallint</td><td>hizmet kartından varsayılan</td></tr><tr><td class="k">yapilan_seans</td><td class="t">smallint</td><td></td></tr><tr><td class="k">liste_fiyat / iskonto / net</td><td class="t">numeric</td><td></td></tr><tr><td class="k">kurum_tutar / hasta_tutar / karsilama</td><td class="t">numeric</td><td>289 paylaşımı (SGK/ÖSS)</td></tr><tr><td class="k">ucretlendirme_kurali</td><td class="t">smallint</td><td>1 tamamlanınca · 2 seans başına oran · 3 adet</td></tr><tr><td class="k">lab_gerekir</td><td class="t">smallint</td><td></td></tr><tr><td class="k">lab_isemri_id</td><td class="t">int</td><td></td></tr><tr><td class="k">onam_tur</td><td class="t">smallint</td><td>gerekli onam türü</td></tr><tr><td class="k">hasta_onayli</td><td class="t">smallint</td><td>proformada onaylandı mı (öneri satırları hariç)</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>1 planlı · 2 sürüyor · 3 yapıldı · 4 iptal · 5 ertelendi</td></tr><tr><td class="k">tamamlanma</td><td class="t">date</td><td></td></tr><tr><td class="k">belge_satir_ids</td><td class="t">int[]</td><td>ücretlendirildiği başvuru satırları (seans bazlı birden çok)</td></tr><tr><td class="k">not</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table><div class="alt">unique (plan_id, sira); tamamlanan satır odontograma 'tamamlanan' katman yazar</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>hizmet (mevcut, ek)</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">diş hizmet kartı alanları</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">dis_bazli</td><td class="t">smallint</td><td>yeni — işlem diş/yüzey ister mi (0 ağız geneli)</td></tr><tr><td class="k">yuzey_bazli</td><td class="t">smallint</td><td>yeni</td></tr><tr><td class="k">standart_seans / standart_sure_dk</td><td class="t">smallint</td><td>yeni</td></tr><tr><td class="k">lab_gerekir</td><td class="t">smallint</td><td>yeni</td></tr><tr><td class="k">onam_tur</td><td class="t">smallint</td><td>yeni</td></tr><tr><td class="k">ucretlendirme_kurali</td><td class="t">smallint</td><td>yeni — varsayılan</td></tr><tr><td class="k">odontogram_sonuc_kod</td><td class="t">smallint</td><td>yeni — işlem bitince dişin yeni durumu (dolgu, kron, eksik…)</td></tr><tr><td class="k">islem_grubu</td><td class="t">smallint</td><td>yeni — restoratif / endodonti / protetik / cerrahi / periodontal / ortodonti / pedodonti / estetik (pano)</td></tr>
+  </table>
+</div><h3>Seans (uygulama)</h3>
+<div class="tablo">
+  <div class="tb"><code>dis_seans</code> <span class="rz ok">yeni</span> <span class="sp">ünit seansı — randevu + plan satırları</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">randevu_id</td><td class="t">int</td><td></td></tr><tr><td class="k">belge_id</td><td class="t">int</td><td>başvuru (o günkü)</td></tr><tr><td class="k">hasta_id / hekim_id / asistan_id</td><td class="t">int</td><td></td></tr><tr><td class="k">unit_id</td><td class="t">int</td><td>→ dis_unit</td></tr><tr><td class="k">plan_id</td><td class="t">int</td><td></td></tr><tr><td class="k">baslangic / bitis</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">sure_dk</td><td class="t">smallint</td><td></td></tr><tr><td class="k">anestezi_tur / anestezi_ilac / anestezi_doz / anestezi_saat</td><td class="t"></td><td></td></tr><tr><td class="k">uygulama_notu</td><td class="t">text</td><td></td></tr><tr><td class="k">komplikasyon</td><td class="t">smallint</td><td>kod listesi</td></tr><tr><td class="k">hastaya_talimat</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">sonraki_plan</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">sterilizasyon_paket_id</td><td class="t">int</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>açık / bitti / iptal</td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dis_seans_islem</code> <span class="rz ok">yeni</span> <span class="sp">seansta yapılan işlemler</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">seans_id</td><td class="t">int</td><td></td></tr><tr><td class="k">plan_satir_id</td><td class="t">int</td><td></td></tr><tr><td class="k">hizmet_id</td><td class="t">int</td><td></td></tr><tr><td class="k">dis_no / yuzeyler</td><td class="t"></td><td></td></tr><tr><td class="k">seans_no</td><td class="t">smallint</td><td>2/3</td></tr><tr><td class="k">tamamlandi</td><td class="t">smallint</td><td>işlem bitti mi</td></tr><tr><td class="k">calisma_boyu_json</td><td class="t">jsonb</td><td>endodonti: kanal → mm</td></tr><tr><td class="k">belge_satir_id</td><td class="t">int</td><td>ücretlendirme</td></tr><tr><td class="k">odontogram_id</td><td class="t">int</td><td>yazılan sonuç durumu</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dis_seans_sarf</code> <span class="rz ok">yeni</span> <span class="sp">seans malzeme sarfı (işlem setinden)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">seans_id</td><td class="t">int</td><td></td></tr><tr><td class="k">stok_id</td><td class="t">int</td><td></td></tr><tr><td class="k">miktar / birim</td><td class="t"></td><td></td></tr><tr><td class="k">seri_lot_id</td><td class="t">int</td><td>UTS'li malzeme</td></tr><tr><td class="k">kaynak</td><td class="t">smallint</td><td>set / elle / barkod</td></tr><tr><td class="k">maliyet</td><td class="t">numeric</td><td></td></tr><tr><td class="k">sarf_belge_id</td><td class="t">int</td><td>sarf fişi</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>hizmet_sarf_seti</code> <span class="rz ok">yeni</span> <span class="sp">işlem başına standart sarf (Üretim ağacı deseni)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hizmet_id</td><td class="t">int</td><td></td></tr><tr><td class="k">stok_id</td><td class="t">int</td><td></td></tr><tr><td class="k">miktar / birim</td><td class="t"></td><td></td></tr><tr><td class="k">seans_basi</td><td class="t">smallint</td><td>her seansta mı / bir kez</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dis_unit</code> <span class="rz ok">yeni</span> <span class="sp">ünit (koltuk)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">kod / ad</td><td class="t">varchar</td><td></td></tr><tr><td class="k">sube_id</td><td class="t">int</td><td></td></tr><tr><td class="k">demirbas_id</td><td class="t">int</td><td></td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>genel / cerrahi / hijyen / pedodonti</td></tr><tr><td class="k">rvg_cihaz_id</td><td class="t">int</td><td>ünit yanı sensör</td></tr><tr><td class="k">depo_id</td><td class="t">int</td><td>ünit sarf deposu</td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>randevu (mevcut, ek)</code> <span class="rz sari">mevcut + kolon</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">unit_id</td><td class="t">int</td><td>yeni — ünit kaynağı; çakışma kontrolü hekim + ünit</td></tr><tr><td class="k">plan_satir_ids</td><td class="t">int[]</td><td>yeni — seans için planlanan satırlar</td></tr><tr><td class="k">on_kosul_randevu_id</td><td class="t">int</td><td>yeni — sıra kilidi</td></tr><tr><td class="k">lab_isemri_id</td><td class="t">int</td><td>yeni — prova/teslim randevusu</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dis_sterilizasyon_paket / dis_otoklav_cevrim</code> <span class="rz ok">yeni</span> <span class="sp">sterilizasyon izlenebilirliği</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">paket: id, barkod, icerik (set), cevrim_id, hazirlayan, tarih, skt, kullanildi_seans_id</td><td class="t"></td><td></td></tr><tr><td class="k">çevrim: id, otoklav_id, cevrim_no, tarih, sicaklik/sure, kimyasal_ind, biyolojik_ind, sonuc, operator</td><td class="t"></td><td></td></tr>
+  </table>
+</div><h3>Protez laboratuvarı</h3>
+<div class="tablo">
+  <div class="tb"><code>dis_lab</code> <span class="rz ok">yeni</span> <span class="sp">anlaşmalı laboratuvar</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">taraf_id</td><td class="t">int</td><td>→ taraf (tedarikçi)</td></tr><tr><td class="k">dijital</td><td class="t">smallint</td><td>STL kabul</td></tr><tr><td class="k">portal_adres</td><td class="t">varchar</td><td></td></tr><tr><td class="k">sla_gun_json</td><td class="t">jsonb</td><td>iş türü → iş günü</td></tr><tr><td class="k">fiyat_listesi_id</td><td class="t">int</td><td>lab fiyatları (alış)</td></tr><tr><td class="k">kurye_gunleri</td><td class="t">varchar(20)</td><td></td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dis_lab_isemri</code> <span class="rz ok">yeni</span> <span class="sp">iş emri</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">isemri_no</td><td class="t">varchar(20)</td><td>LB-yyyy/nnnn</td></tr><tr><td class="k">lab_id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id / hekim_id</td><td class="t">int</td><td></td></tr><tr><td class="k">plan_satir_id</td><td class="t">int</td><td></td></tr><tr><td class="k">is_turu</td><td class="t">smallint</td><td>kron · köprü · lamina · inlay/onlay · implant üstü · total/bölümlü protez · gece plağı · ortodontik aparey · geçici</td></tr><tr><td class="k">dis_nolar</td><td class="t">smallint[]</td><td></td></tr><tr><td class="k">malzeme</td><td class="t">smallint</td><td>zirkonya · lityum disilikat · metal-porselen · akrilik · PEEK…</td></tr><tr><td class="k">renk</td><td class="t">varchar(20)</td><td>Vita</td></tr><tr><td class="k">olcu_tipi</td><td class="t">smallint</td><td>geleneksel / dijital STL</td></tr><tr><td class="k">ek_istek</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">dosya_ids</td><td class="t">int[]</td><td>STL, foto → dokuman</td></tr><tr><td class="k">gonderim_tarihi / beklenen_tarih / teslim_tarihi</td><td class="t">date</td><td></td></tr><tr><td class="k">asama</td><td class="t">smallint</td><td>ölçü bekliyor · gönderildi · tasarım onayı · üretim · geldi · prova · geri gönderildi · teslim edildi · iptal</td></tr><tr><td class="k">kalite_kontrol</td><td class="t">smallint</td><td></td></tr><tr><td class="k">lab_fiyat</td><td class="t">numeric</td><td></td></tr><tr><td class="k">alis_fatura_satir_id</td><td class="t">int</td><td>lab faturası eşlemesi</td></tr><tr><td class="k">garanti_bitis</td><td class="t">date</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dis_lab_isemri_asama</code> <span class="rz ok">yeni</span> <span class="sp">aşama geçmişi</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">isemri_id</td><td class="t">int</td><td></td></tr><tr><td class="k">asama</td><td class="t">smallint</td><td></td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">kullanici_id</td><td class="t">int</td><td></td></tr><tr><td class="k">not</td><td class="t">varchar(300)</td><td></td></tr><tr><td class="k">randevu_id</td><td class="t">int</td><td>prova/teslim</td></tr>
+  </table>
+</div><h3>Ücret, ödeme planı, hakediş</h3>
+<div class="tablo">
+  <div class="tb"><code>belge / belge_satir (mevcut)</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">başvuru ve ücretlendirme</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">belge_satir.plan_satir_id / seans_id / dis_no</td><td class="t">int / smallint</td><td>yeni — hangi plan satırı ve seanstan, hangi diş</td></tr><tr><td class="k">—</td><td class="t"></td><td>yapılan işlem → başvuru satırı (tür 19) → fiş/fatura/tahakkuk; tahsilat satıra dağıtım (321); tutar bazlı dönüşüm (352); kurum payı (289)</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dis_odeme_plani</code> <span class="rz ok">yeni</span> <span class="sp">taksit planı (kasa plan kayıtlarının üstü)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">tedavi_plani_id</td><td class="t">int</td><td></td></tr><tr><td class="k">toplam / pesinat / taksit_sayisi / taksit_tutar</td><td class="t">numeric</td><td></td></tr><tr><td class="k">ilk_vade</td><td class="t">date</td><td></td></tr><tr><td class="k">odeme_yontemi</td><td class="t">smallint</td><td>POS taksit / nakit / havale / kurum</td></tr><tr><td class="k">kasa_plan_ids</td><td class="t">int[]</td><td>→ kasa_islem (plan)</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>hakedis / prim_plani (mevcut)</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">hekim hakedişi</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">baz</td><td class="t">smallint</td><td>mevcut Prim: + 'tahsil − lab − sarf' bazı (dis)</td></tr><tr><td class="k">—</td><td class="t"></td><td>rol Uygulayan seans işleminden; lab maliyeti iş emrinden, sarf seanstan düşülür</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>onam (mevcut, ek)</code> <span class="rz sari">mevcut + kolon</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">tur</td><td class="t">smallint</td><td>+ dental genel · kanal · çekim/cerrahi · implant · protez · beyazlatma · ortodonti · pedodonti (veli)</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>radyoloji_istem (mevcut, ek)</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">RVG / pano / CBCT</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">dis_no</td><td class="t">smallint</td><td>yeni</td></tr><tr><td class="k">seans_id</td><td class="t">int</td><td>yeni — ünit yanı çekim</td></tr>
+  </table>
+</div>
+
+    <h2>4. Ekranlar</h2>
+    <table>
+      <tr><th style="width:250px">Ekran</th><th>Görev</th><th style="width:230px">Mockup</th></tr>
+      <tr><td>Günlük Akış / Ünit Çizelgesi</td><td>Ünit × saat takvimi, bekleyen/ünitte/tamamlanan, lab teslimleri, acil ekleme, tahsilat.</td><td><code>dis_gunluk_akis.html</code></td></tr>
+      <tr><td>Diş Hasta Kartı</td><td>Odontogram (katmanlı, tarihli), periodontal kayıt, tedavi geçmişi, görüntüler, planlar &amp; ücret, lab, onam/belgeler.</td><td><code>dis_hasta_karti.html</code></td></tr>
+      <tr><td>Muayene &amp; Tedavi Planı</td><td>Bulgular, tanı, plan satırları (faz, fiyat, lab), seans programı, proforma &amp; onay.</td><td><code>dis_muayene_tedavi_plani.html</code></td></tr>
+      <tr><td>Seans Kaydı (ünit ekranı)</td><td>Uygulama, sarf/lot, anestezi/reçete, plan satırları "yapıldı", ücret/tahsilat.</td><td><code>dis_seans_kaydi.html</code></td></tr>
+      <tr><td>Protez Lab İş Emirleri</td><td>İş emri listesi/kartı, aşamalar, lab performansı, fatura eşleme.</td><td><code>dis_lab_isemri.html</code></td></tr>
+      <tr><td>Ödeme Planı &amp; Klinik Panosu</td><td>Taksitler, borçlu hastalar, hekim hakedişi, işlem grubu kârlılığı, sterilizasyon/ünit.</td><td><code>dis_odeme_plani.html</code></td></tr>
+      <tr><td>Hizmet kartı (diş ekleri) <span class="kucuk">(ayarlar)</span></td><td>Diş/yüzey bazlı, seans, süre, lab, onam, ücretlendirme kuralı, sarf seti, odontogram sonuç kodu.</td><td>—</td></tr>
+      <tr><td>Ortodonti / pedodonti <span class="kucuk">(sonra)</span></td><td>Braket/plak takip, büyüme, veli portalı.</td><td>—</td></tr>
+    </table>
+
+    <h2>5. Entegrasyonlar</h2>
+    <table>
+      <tr><th style="width:220px">Modül / servis</th><th>Kullanım</th></tr>
+      <tr><td>Muayene</td><td>Genel muayene, tanı, reçete, tamamlama kuralları; diş uzantısı 1:1.</td></tr>
+      <tr><td>Randevu</td><td>Ünit kaynağı, hekim + ünit çakışma, seans zinciri, lab tetikli randevular, hatırlatma.</td></tr>
+      <tr><td>Radyoloji</td><td>RVG/pano/CBCT istemi ve DICOM; ünit yanı sensör; diş numarası.</td></tr>
+      <tr><td>Stok / UTS</td><td>İşlem sarf seti, ünit deposu, implant/greft/lot UTS bildirimi.</td></tr>
+      <tr><td>Kasa / belge</td><td>Başvuru satırı, tahsilat dağıtımı, taksit planı, avans, fiş/tahakkuk (352), kurum payı (289), dönem icmali (SGK).</td></tr>
+      <tr><td>Prim</td><td>Hekim/hijyenist hakedişi (tahsil − lab − sarf).</td></tr>
+      <tr><td>Muhasebe / maliyet</td><td>İşlem grubu kârlılığı; lab ve sarf maliyeti; ünit = maliyet merkezi.</td></tr>
+      <tr><td>Doküman / onam</td><td>Proforma PDF, onam formları (tablet), lab dosyaları (STL/foto), dış raporlar.</td></tr>
+      <tr><td>e-Nabız / Medula</td><td>Diş Muayene paketi (diş bazlı tanı/işlem), e-reçete, SUT provizyon.</td></tr>
+      <tr><td>Hasta portalı / mesaj</td><td>Proforma onayı, randevu, taksit hatırlatma, tedavi sonrası talimat.</td></tr>
+      <tr><td>Demirbaş</td><td>Ünit, otoklav, RVG bakım; sterilizasyon çevrim kayıtları.</td></tr>
+    </table>
+
+    <h2>6. Yetkiler &amp; ayarlar</h2>
+    <ul>
+      <li><code>dis.muayene</code> · <code>dis.plan.yaz</code> · <code>dis.plan.fiyat_degistir</code> · <code>dis.plan.onayla</code> · <code>dis.seans</code> · <code>dis.lab</code> · <code>dis.odeme_plani</code> · <code>dis.hakedis_gor</code> · <code>dis.sterilizasyon</code> · hijyenist rolü (periodontal, hijyen işlemleri).</li>
+      <li>Ayarlar: faz tanımları, ücretlendirme kuralı varsayılanı, proforma geçerlilik süresi, teslim öncesi bakiye kuralı, hakediş bazı, lab SLA/gecikme uyarısı, hatırlatma zamanları, odontogram durum kodları ve renkleri.</li>
+    </ul>
+
+    <div class="tamam"><b>İlk sürüm:</b> ünit çizelgesi, odontogram (mevcut/planlanan/tamamlanan), diş muayene uzantısı, tedavi planı + proforma/onay, seans kaydı (işlem yapıldı → ücret), sarf seti, lab iş emri temel akış, taksit planı, hakediş bazı. Sonraya: periodontal 6 nokta ekranı, dijital lab portalı/STL, sterilizasyon izlenebilirliği, klinik panosu, ortodonti/pedodonti, hasta portalı proforma onayı.</div>
+  </div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

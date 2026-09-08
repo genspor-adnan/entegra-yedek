@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Doküman Kartı — Mockup (Gentegre AI · Doküman)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📄 Doküman — PR-07 Numune Kabul ve Ret Prosedürü <span class="sp">dokuman.id 1188 · v4 yayında · v5 onay bekliyor · hash 9c1f…</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div><div class="btn">📂 Aç / Önizle</div><div class="btn">⬇ İndir</div><div class="btn">✎ Yeni Sürüm Yükle</div><div class="btn">🔗 Paylaş</div>
+    <div class="sepv"></div><div class="btn ok">✔ Onaya Gönder</div><div class="btn">📣 Yayınla</div><div class="btn">🗄 Arşivle</div><div class="btn danger pas">🗑 Sil</div>
+    <div class="sepv"></div><div class="btn">✍ e-İmzala</div><div class="btn">🤖 AI Özet</div><div class="btn sp">✖ Kapat</div>
+  </div>
+  <div class="hdr k4">
+    <div class="fld"><label class="req">Ad</label><div class="inp big">PR-07 Numune Kabul ve Ret Prosedürü</div></div>
+    <div class="fld"><label>Doküman Kodu</label><div class="inp">PR-07 <span class="sonuk">· şablon: {tür}-{sıra}</span></div></div>
+    <div class="fld"><label class="req">Belge Türü</label><div class="inp combo">Prosedür <span class="sonuk">· kullanıcı yazabilir (060)</span></div></div>
+    <div class="fld"><label>Durum</label><div class="inp"><span class="rz ok">Yayında v4</span> <span class="rz sari">v5 onayda</span></div></div>
+    <div class="fld"><label class="req">Klasör</label><div class="inp combo">Kurumsal › Kalite / Prosedürler (ISO)</div></div>
+    <div class="fld"><label>Sahip</label><div class="inp combo">S. Öz · Kalite</div></div>
+    <div class="fld"><label>Gizlilik</label><div class="inp combo">Kurum içi <span class="sonuk">· herkese açık / kurum içi / gizli / özel nitelikli (KVKK)</span></div></div>
+    <div class="fld"><label>Etiketler</label><div class="inp"><span class="rz">ISO 15189</span> <span class="rz">Laboratuvar</span> <span class="rz">Preanalitik</span> ＋</div></div>
+    <div class="fld"><label>Geçerlilik</label><div class="inp">28.08.2026 — 01.09.2027 <span class="sonuk">· gözden geçirme 12 ay</span></div></div>
+    <div class="fld"><label>Saklama / İmha</label><div class="inp combo">Süresiz (kalite kaydı) <span class="sonuk">· KVKK sınıfına göre otomatik</span></div></div>
+    <div class="fld"><label>Dil</label><div class="inp combo">Türkçe</div></div>
+    <div class="fld"><label>Açıklama</label><div class="inp">Preanalitik süreç; ISO 15189 5.4.</div></div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on">🕘 Sürümler (5)</div><div class="sekme">🔀 Bağlantılar (2)</div><div class="sekme">✔ Onay Akışı</div><div class="sekme">🔐 Erişim &amp; Paylaşım</div><div class="sekme">📝 Metin / AI</div><div class="sekme">📜 Günlük</div>
+  </div>
+  <div class="pnl">
+    <div class="toolbar" style="border-top:none"><div class="btn">✎ Yeni Sürüm</div><div class="btn">↔ Karşılaştır (v4 ↔ v5)</div><div class="btn">↩ Bu sürüme dön</div><div class="btn sp">⬇ Tümünü indir</div></div>
+    <div class="dg"><table>
+      <thead><tr><th class="orta">Sürüm</th><th class="orta">Tarih</th><th>Yükleyen</th><th>Değişiklik notu</th><th class="orta">Boyut</th><th class="orta">Hash</th><th class="orta">e-İmza</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr><td class="orta">v5</td><td class="orta">02.09.2026</td><td>S. Öz</td><td>Serum indeksi eşikleri eklendi (H&gt;30)</td><td class="orta">318 KB</td><td class="orta">a77e…</td><td class="orta">—</td><td class="orta"><span class="rz sari">Onay bekliyor</span></td></tr>
+        <tr class="sel"><td class="orta">v4</td><td class="orta">28.08.2026</td><td>S. Öz</td><td>Ret nedenleri kod listesiyle uyumlandı</td><td class="orta">312 KB</td><td class="orta">9c1f…</td><td class="orta"><span class="rz ok">✔ Kalite Yön.</span></td><td class="orta"><span class="rz ok">Yayında</span></td></tr>
+        <tr><td class="orta">v3</td><td class="orta">10.03.2026</td><td>S. Öz</td><td>Dış kurum numuneleri bölümü</td><td class="orta">301 KB</td><td class="orta">5b02…</td><td class="orta">✔</td><td class="orta"><span class="rz pas">Arşiv</span></td></tr>
+        <tr><td class="orta">v2</td><td class="orta">11.09.2025</td><td>L. Kaya</td><td>Yıllık gözden geçirme</td><td class="orta">298 KB</td><td class="orta">5b02…</td><td class="orta">✔</td><td class="orta"><span class="rz pas">Arşiv · içerik v3 ile aynı (dedup)</span></td></tr>
+        <tr><td class="orta">v1</td><td class="orta">02.01.2025</td><td>L. Kaya</td><td>İlk yayın</td><td class="orta">240 KB</td><td class="orta">1d9a…</td><td class="orta">✔</td><td class="orta"><span class="rz pas">Arşiv</span></td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Her sürüm ayrı <code>dokuman_surum</code> satırı, içerik hash ile <code>dokuman_icerik</code>'te (aynı içerik tekrar yazılmaz). Yayındaki sürüm <code>dokuman.hash</code>; kart galerisi ve paylaşım linki her zaman yayındaki sürümü verir.</div>
+  </div>
+  <div class="pnl">
+    <div class="toolbar" style="border-top:none"><div class="btn">＋ Bağlantı</div><div class="btn pas">✖ Kaldır</div></div>
+    <div class="dg"><table>
+      <thead><tr><th>Kaynak</th><th>Kayıt</th><th class="orta">Birincil</th><th>Rol</th><th class="orta">Eklendi</th></tr></thead>
+      <tbody>
+        <tr><td>Klasör</td><td>Kurumsal › Kalite / Prosedürler</td><td class="orta">✔</td><td>ana konum</td><td class="orta">02.01.2025</td></tr>
+        <tr><td>Lab tetkik</td><td>Numune kabul (tüm bölümler)</td><td class="orta">—</td><td>ilgili prosedür — kabul ekranında "?" ile açılır</td><td class="orta">10.03.2026</td></tr>
+        <tr><td>Cihaz</td><td>Cobas c503</td><td class="orta">—</td><td>serum indeksi eşikleri</td><td class="orta">02.09.2026</td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Mevcut <code>dokuman.kaynak/kaynak_id</code> birincil bağlantı olarak kalır; ek bağlantılar <code>dokuman_iliski</code>. Böylece bir sözleşme hem cari kartında hem "Sözleşmeler" klasöründe görünür, tek içerik.</div>
+  </div>
+  <div class="pnl">
+    <div class="hdr" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="fld"><label>Akış şablonu</label><div class="inp combo">Kalite dokümanı: Hazırlayan → İnceleyen → Onaylayan → Yayın</div></div>
+      <div class="fld"><label>Kapsam</label><div class="inp ro">v5 · başlatan S. Öz · 02.09.2026 14:10</div></div>
+      <div class="fld"><label>Yayın sonrası</label><div class="inp combo">Eski sürüm arşive · ilgili rollere "okudum" zorunlu</div></div>
+    </div>
+    <div class="dg"><table>
+      <thead><tr><th class="orta">Adım</th><th>Rol / Kişi</th><th class="orta">Karar</th><th class="orta">Tarih</th><th>Not</th></tr></thead>
+      <tbody>
+        <tr><td class="orta">1</td><td>Hazırlayan · S. Öz</td><td class="orta"><span class="rz ok">Gönderdi</span></td><td class="orta">02.09 14:10</td><td>Serum indeksi eşikleri</td></tr>
+        <tr><td class="orta">2</td><td>İnceleyen · Uzm. Dr. L. Kaya (Biyokimya)</td><td class="orta"><span class="rz ok">Uygun</span></td><td class="orta">02.09 16:40</td><td>Eşik 30 yerine 25 önerisi → kabul</td></tr>
+        <tr class="sel"><td class="orta">3</td><td>Onaylayan · Kalite Yöneticisi</td><td class="orta"><span class="rz sari">Bekliyor</span></td><td class="orta">—</td><td><span class="sonuk">hatırlatma 2 gün sonra</span></td></tr>
+        <tr><td class="orta">4</td><td>Yayın · sistem</td><td class="orta">—</td><td class="orta">—</td><td>onayla birlikte v5 yayında, v4 arşiv, Laboratuvar rolüne okuma görevi</td></tr>
+      </tbody></table></div>
+    <div style="padding:8px 12px;display:flex;gap:6px"><div class="btn ok">✔ Onayla</div><div class="btn danger">✖ Reddet (gerekçe)</div><div class="btn">↩ Hazırlayana geri gönder</div></div>
+  </div>
+  <div class="pnl">
+    <div class="ikiPanel">
+      <div>
+        <div class="toolbar" style="border-top:none"><div class="btn">＋ Rol / Kullanıcı</div><div class="btn">Klasörden devral <span class="rz ok">açık</span></div></div>
+        <div class="dg"><table>
+          <thead><tr><th>Kim</th><th class="orta">Oku</th><th class="orta">İndir</th><th class="orta">Düzenle</th><th class="orta">Paylaş</th><th class="orta">Sil</th><th>Kaynak</th></tr></thead>
+          <tbody>
+            <tr><td>Rol · Laboratuvar</td><td class="orta">✔</td><td class="orta">✔</td><td class="orta">—</td><td class="orta">—</td><td class="orta">—</td><td class="sonuk">klasör</td></tr>
+            <tr><td>Rol · Kalite</td><td class="orta">✔</td><td class="orta">✔</td><td class="orta">✔</td><td class="orta">✔</td><td class="orta">—</td><td class="sonuk">klasör</td></tr>
+            <tr><td>Kullanıcı · S. Öz (sahip)</td><td class="orta">✔</td><td class="orta">✔</td><td class="orta">✔</td><td class="orta">✔</td><td class="orta">✔</td><td class="sonuk">sahip</td></tr>
+            <tr><td>Rol · Yönetim</td><td class="orta">✔</td><td class="orta">✔</td><td class="orta">—</td><td class="orta">—</td><td class="orta">—</td><td class="sonuk">gizlilik sınıfı</td></tr>
+          </tbody></table></div>
+      </div>
+      <div>
+        <div class="grp" style="margin:10px"><div class="gb">🔗 Paylaşım linkleri <span class="sp">058 · kimliksiz token</span></div>
+          <div class="dg"><table><thead><tr><th>Link</th><th>Oluşturan</th><th class="orta">Son kullanma</th><th class="orta">Şifre</th><th class="sag">Açılma</th><th class="orta">Durum</th></tr></thead>
+            <tbody><tr><td>…/d/9f3aK2…</td><td>S. Öz · 28.08</td><td class="orta">28.09.2026</td><td class="orta">✔</td><td class="sag">7</td><td class="orta"><span class="rz ok">Aktif</span> · iptal</td></tr></tbody></table></div>
+          <div class="ic sonuk">Mevcut paylaşım koduna son kullanma, şifre, indirme izni ve açılma günlüğü eklenir. "Özel nitelikli" sınıfta link yalnız yetkili onayıyla.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="pnl">
+    <div class="ikiPanel">
+      <div class="grp" style="margin:10px"><div class="gb">Çıkarılan metin (OCR / PDF) <span class="sp">tam metin arama için · 4.120 kelime</span></div>
+        <div class="ic" style="max-height:200px;overflow:auto;font-size:11.5px;color:#4d5d6e">1. AMAÇ — Laboratuvara ulaşan numunelerin kabul ve ret kriterlerini tanımlamak… 4.2 Ret nedenleri: hemolizli numune (serum indeksi H &gt; 30), lipemik, ikterik, yetersiz hacim, pıhtılı, yanlış tüp, etiketsiz/uyumsuz etiket… 5. Ret durumunda isteyen hekime mesaj ve yeniden alım…</div></div>
+      <div class="grp" style="margin:10px"><div class="gb">🤖 AI özet &amp; etiket önerisi <span class="sp">taslak · kullanıcı onaylar</span></div>
+        <div class="ic">Özet: Numune kabul kriterleri, ret nedenleri ve bildirim adımları. <br>Önerilen etiketler: <span class="rz">Preanalitik</span> <span class="rz">Numune ret</span> <span class="rz">ISO 15189 5.4</span><br>Benzer dokümanlar: TL-09 Kan Alma Talimatı (v3) · FR-11 Numune Ret Formu
+          <div style="margin-top:6px;display:flex;gap:6px"><div class="btn ok">✔ Özeti kabul et</div><div class="btn">Etiketleri ekle</div></div></div></div>
+    </div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table>
+      <thead><tr><th class="orta">Zaman</th><th>Kim</th><th>Olay</th><th>Detay</th><th>IP / kanal</th></tr></thead>
+      <tbody>
+        <tr><td class="orta">03.09 09:02</td><td>N. Koç (Lab)</td><td>Okudu</td><td>v4 · portal içi görüntüleme</td><td>10.0.0.41</td></tr>
+        <tr><td class="orta">02.09 16:40</td><td>L. Kaya</td><td>İnceleme onayı</td><td>v5 · not eklendi</td><td>10.0.0.12</td></tr>
+        <tr><td class="orta">02.09 14:10</td><td>S. Öz</td><td>Yeni sürüm yüklendi</td><td>v5 · 318 KB · a77e…</td><td>10.0.0.8</td></tr>
+        <tr><td class="orta">30.08 11:15</td><td>— (link)</td><td>Paylaşım linki açıldı</td><td>…/d/9f3aK2 · indirildi</td><td>85.x.x.x</td></tr>
+        <tr><td class="orta">28.08 17:00</td><td>Kalite Yön.</td><td>Yayınlandı</td><td>v4 · v3 arşive · 12 kişiye okuma görevi</td><td>10.0.0.3</td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Günlük <code>dokuman_olay</code>; mevcut <code>islem_log</code> ile birlikte (kim/ne zaman) — okuma olayı da yazılır (KVKK erişim kaydı).</div>
+  </div>
+  <div class="statusbar"><span>Yayında v4 · 12/12 okudu</span><span>Onay: 2/3</span><span class="sp">İçerik <code>dokuman_icerik</code> (bytea, dedup); büyük dosyalar için nesne depo seçeneği (ayar)</span></div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

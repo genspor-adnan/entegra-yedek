@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Muayene Şablonları ve Hekim Tercihleri — Mockup (Gentegre AI · Muayene)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📋 Muayene Şablonları &amp; Hekim Tercihleri <span class="sp">Ayarlar › Muayene · branş şablonları · sık tanı · reçete/rapor şablonları · makrolar</span></div>
+  <div class="sekmeler"><div class="sekme on">Fizik Muayene Şablonları</div><div class="sekme">Sık Tanılar</div><div class="sekme">Reçete Şablonları</div><div class="sekme">İstem Panelleri</div><div class="sekme">Metin Makroları</div><div class="sekme">Kurallar</div></div>
+  <div class="pnl ikiPanel">
+    <div>
+      <div class="toolbar" style="border-top:none"><div class="btn primary">＋ Şablon</div><div class="btn">⧉ Kopyala</div><div class="btn">✎</div></div>
+      <div class="dg"><table><thead><tr><th>Şablon</th><th>Branş</th><th class="orta">Kapsam</th><th class="orta">Alan</th><th class="orta">Durum</th></tr></thead>
+        <tbody>
+          <tr class="sel"><td>Dahiliye genel</td><td>Dahiliye</td><td class="orta">Kurum</td><td class="orta">8 sistem · 3 skor</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr><td>Kardiyoloji</td><td>Kardiyoloji</td><td class="orta">Kurum</td><td class="orta">6 sistem · NYHA · GRACE</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr><td>Dermatoloji — lezyon</td><td>Dermatoloji</td><td class="orta">Kurum</td><td class="orta">vücut şeması · 5 alan</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr><td>Pediatri — büyüme</td><td>Çocuk</td><td class="orta">Kurum</td><td class="orta">persentil · aşı</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr><td>Uzaktan muayene (genel)</td><td>Tümü</td><td class="orta">Kurum</td><td class="orta">beyan/görsel · 4 alan</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr><td>Dr. A. Koç — DM kontrol</td><td>Dahiliye</td><td class="orta">Kişisel</td><td class="orta">ayak muayenesi · göz dibi</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        </tbody></table></div>
+    </div>
+    <div>
+      <div class="toolbar" style="border-top:none"><div class="btn">＋ Alan</div><div class="btn">↕ Sıra</div><div class="btn">👁 Önizle</div></div>
+      <div class="dg"><table><thead><tr><th class="orta">Sıra</th><th>Alan</th><th>Tip</th><th>Seçenekler / birim</th><th class="orta">Zorunlu</th><th class="orta">Normal metni</th></tr></thead>
+        <tbody>
+          <tr><td class="orta">1</td><td>Genel görünüm</td><td>metin + normal</td><td>—</td><td class="orta">—</td><td class="orta">"Doğal"</td></tr>
+          <tr><td class="orta">2</td><td>Kardiyovasküler</td><td>metin + normal</td><td>—</td><td class="orta">✔</td><td class="orta">"S1 S2 ritmik, üfürüm yok"</td></tr>
+          <tr><td class="orta">3</td><td>Solunum</td><td>metin + normal</td><td>—</td><td class="orta">✔</td><td class="orta">"Solunum sesleri doğal"</td></tr>
+          <tr><td class="orta">4</td><td>Batın</td><td>metin + normal</td><td>—</td><td class="orta">—</td><td class="orta">"Rahat, defans yok"</td></tr>
+          <tr><td class="orta">5</td><td>Ödem</td><td>seçenekli</td><td>yok / +1 / +2 / +3</td><td class="orta">—</td><td class="orta">"yok"</td></tr>
+          <tr><td class="orta">6</td><td>Ağrı (VAS)</td><td>sayı</td><td>0–10</td><td class="orta">—</td><td class="orta">—</td></tr>
+          <tr><td class="orta">7</td><td>NYHA sınıfı</td><td>seçenekli</td><td>I / II / III / IV</td><td class="orta">—</td><td class="orta">—</td></tr>
+          <tr><td class="orta">8</td><td>Diyabetik ayak</td><td>alt şablon</td><td>nabız, his, ülser</td><td class="orta">—</td><td class="orta">—</td></tr>
+        </tbody></table></div>
+      <div class="ic sonuk">Alan tipleri: metin, metin+normal, sayı (birim/aralık), seçenekli, çoklu seçim, tarih, vücut şeması işareti, skor (hesaplı: BKİ, GRACE, CHA₂DS₂-VASc), alt şablon. Değerler <code>muayene_bulgu</code>'ya alan bazlı; raporlama ve USS için eşleme.</div>
+    </div>
+  </div>
+  <div class="pnl">
+    <div class="toolbar" style="border-top:none"><span class="chip on">Dr. A. Koç</span><span class="chip">Dahiliye (kurum)</span><div class="btn">＋ Ekle</div><div class="btn sp">📥 Kullanım sıklığından öner</div></div>
+    <div class="dg"><table><thead><tr><th>ICD-10</th><th>Tanı</th><th class="sag">Kullanım (12 ay)</th><th>Varsayılan tür</th><th>Bağlı reçete şablonu</th><th>Bağlı istem paneli</th></tr></thead>
+      <tbody>
+        <tr><td>E11.9</td><td>Tip 2 DM</td><td class="sag">412</td><td>Ek · kronik</td><td>DM standart</td><td>Diyabet takip</td></tr>
+        <tr><td>I10</td><td>Esansiyel HT</td><td class="sag">388</td><td>Ek · kronik</td><td>HT standart</td><td>HT yıllık</td></tr>
+        <tr><td>J06.9</td><td>ÜSYE</td><td class="sag">201</td><td>Ana</td><td>ÜSYE semptomatik</td><td>—</td></tr>
+        <tr><td>K29.7</td><td>Gastrit</td><td class="sag">96</td><td>Ana</td><td>PPI 4 hafta</td><td>—</td></tr>
+        <tr><td>N39.0</td><td>İdrar yolu enfeksiyonu</td><td class="sag">84</td><td>Ana</td><td>—</td><td>TİT + kültür</td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th>Şablon</th><th>Kapsam</th><th>İlaçlar</th><th>Tanı</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr><td>DM standart</td><td>Dr. A. Koç</td><td>Metformin 1000 2×1 · 3 kutu</td><td>E11.9</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr><td>HT standart</td><td>Dahiliye</td><td>Ramipril 5 1×1 · 3 kutu</td><td>I10</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr><td>ÜSYE semptomatik</td><td>Kurum</td><td>Parasetamol 500 3×1 · 1 kutu; Pseudoefedrin…</td><td>J06.9</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        <tr><td>MI yükleme (acil)</td><td>Dahiliye</td><td>ASA 300 · Klopidogrel 300</td><td>I21</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Şablon uygulanınca doz/periyot/süre hasta kilo-yaş kurallarıyla kontrol edilir; alerji ve etkileşim kontrolü her zaman çalışır.</div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th>Panel</th><th>Kapsam</th><th>İçerik</th><th class="orta">Tür</th></tr></thead>
+      <tbody>
+        <tr><td>Diyabet takip</td><td>Dahiliye</td><td>HbA1c, açlık glukoz, lipid, kreatinin, mikroalbümin, göz dibi (konsültasyon)</td><td class="orta">Lab + konsültasyon</td></tr>
+        <tr><td>Kardiyak (acil)</td><td>Kurum</td><td>Troponin, CK-MB, EKG, Akciğer PA</td><td class="orta">Lab + işlem + rad</td></tr>
+        <tr><td>Check-up 40+</td><td>Kurum · paket fiyat</td><td>Hemogram, biyokimya, TİT, EKG, Akciğer PA, USG batın</td><td class="orta">Paket (hizmet)</td></tr>
+        <tr><td>HT yıllık</td><td>Dahiliye</td><td>Kreatinin, K, lipid, TİT, EKG, EKO (konsültasyon)</td><td class="orta">Lab + rad</td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th>Kısayol</th><th>Alan</th><th>Metin</th><th>Kapsam</th></tr></thead>
+      <tbody>
+        <tr><td>.fmn</td><td>Fizik muayene</td><td>"Genel durum iyi, bilinç açık, koopere, oryante. Sistem muayeneleri doğal."</td><td>Kurum</td></tr>
+        <tr><td>.dmk</td><td>Hikâye</td><td>"DM tanılı hasta rutin kontrol için başvurdu. Hipoglisemi tarif etmiyor. İlaç uyumu iyi."</td><td>Dr. A. Koç</td></tr>
+        <tr><td>.ktr</td><td>Karar</td><td>"3 ay sonra kontrol, tetkikler ile."</td><td>Dr. A. Koç</td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Dikte (ses→metin) çıktısı da makro gibi alana düşer; AI özet taslağı hekim onayıyla.</div>
+  </div>
+  <div class="pnl">
+    <div class="hdr" style="grid-template-columns:1fr 1fr">
+      <div class="fld"><label>Tamamlama için zorunlu</label><div class="inp">☑ Ana tanı · ☑ Şikâyet · ☑ En az 1 sistem bulgusu (yüz yüze) · ☐ Vital · ☑ Karar</div></div>
+      <div class="fld"><label>Muayene süresi</label><div class="inp">Başlangıç = "Muayeneye Al" · bitiş = "Tamamla" · USS Muayene Başlangıç/Bitiş</div></div>
+      <div class="fld"><label>Tamamlanmış muayene düzenleme</label><div class="inp combo">Salt okunur + "ek not" (24 saat içinde düzeltme, gerekçeli)</div></div>
+      <div class="fld"><label>Kronik tanı otomatik</label><div class="inp combo">"Kronik" işaretlenen tanı tıbbi özete düşer; sonraki muayenede ek tanı olarak önerilir</div></div>
+      <div class="fld"><label>Aynı gün aynı branş</label><div class="inp combo">Uyarı (SUT: 10 gün içinde kontrol ücretsiz)</div></div>
+      <div class="fld"><label>Konsültasyon yanıt süresi</label><div class="inp">Acil 30 dk · rutin 24 s · hatırlatma</div></div>
+      <div class="fld"><label>e-Nabız</label><div class="inp combo">Tamamla → 103 (ve 106 sevk/çıkışta) otomatik</div></div>
+      <div class="fld"><label>Hasta portalı</label><div class="inp combo">Muayene özeti + reçete + rapor otomatik paylaşılır (hekim notu hariç)</div></div>
+    </div>
+  </div>
+  <div class="statusbar"><span>6 şablon · 5 sık tanı · 4 reçete şablonu · 4 panel · 3 makro</span></div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Genetik Test Raporu — NGS Panel — Mockup (Gentegre AI · Laboratuvar)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  body{background:#d9dee5}
+  .sayfa{max-width:900px;margin:0 auto 18px;background:#fff;border:1px solid var(--line);box-shadow:0 6px 22px rgba(20,40,70,.18);padding:22px 28px;font-size:11.5px;color:#1f2d3a}
+  .ust{display:grid;grid-template-columns:1fr 2fr 1fr;gap:10px;align-items:center;border-bottom:2px solid #1c4374;padding-bottom:8px}
+  .ust .logo{font-weight:bold;color:#1c4374;font-size:14px}
+  .ust .kurum{text-align:center}
+  .ust .kurum b{font-size:14px;display:block}
+  .ust .rozetler{text-align:right;font-size:10px;color:var(--muted)}
+  .ust .rozetler span{display:inline-block;border:1px solid var(--line);border-radius:3px;padding:2px 6px;margin-left:4px}
+  h1{font-size:14px;text-align:center;margin:10px 0 8px;color:#1c4374;letter-spacing:.5px}
+  .kimlik{display:grid;grid-template-columns:repeat(4,1fr);gap:3px 14px;border:1px solid var(--line2);padding:8px 10px;border-radius:3px;background:#fbfcfd}
+  .kimlik div{font-size:11px} .kimlik b{color:#3a5573}
+  .kimlik .tam{grid-column:span 2}
+  table.rp{border-collapse:collapse;width:100%;margin:10px 0}
+  table.rp th{background:#eef2f7;border:1px solid var(--line2);padding:4px 6px;text-align:left;font-size:10.5px;color:#3a5573}
+  table.rp td{border:1px solid var(--line2);padding:3px 6px;font-size:11px;vertical-align:top}
+  table.rp tr.grup td{background:#f4f7fb;font-weight:bold;color:#1c4374}
+  .sag{text-align:right} .orta{text-align:center}
+  .b{font-weight:bold} .kir{color:#b3261e;font-weight:bold} .sari{color:#8a6218;font-weight:bold}
+  .panik{background:#fbe9e7}
+  .yorum{border:1px solid var(--line2);border-left:4px solid #2f6db3;padding:6px 10px;margin:8px 0;font-size:11px;background:#fbfcfd}
+  .uyari{border:1px solid #f3c4bf;border-left:4px solid #b3261e;padding:6px 10px;margin:8px 0;font-size:11px;background:#fdf4f3}
+  .alt{border-top:2px solid #1c4374;margin-top:12px;padding-top:6px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:10.5px}
+  .imza{border:1px dashed var(--line);padding:6px 8px;min-height:54px;font-size:10.5px}
+  .kucuk{font-size:10px;color:var(--muted)}
+  .barkod{font-family:'Libre Barcode 128',monospace;font-size:22px;letter-spacing:2px}
+  .zaman{display:flex;gap:14px;font-size:10.5px;color:#3a5573;margin:6px 0;flex-wrap:wrap}
+  .zaman span b{color:#1f2d3a}
+  .not{max-width:900px;font-size:11px}
+
+</style>
+</head>
+<body>
+
+<div class="sayfa">
+
+  <div class="ust">
+    <div class="logo">GENTEGRE<br><span class="kucuk">TIP MERKEZİ · Tıbbi Laboratuvar</span></div>
+    <div class="kurum"><b>TIBBİ GENETİK LABORATUVARI</b><span class="kucuk">Ruhsat No: 34-XXXX · Sorumlu: Uzm. Dr. L. Kaya (Tıbbi Biyokimya) · Yukarı Dudullu Mah. … Ümraniye / İstanbul · 0216 … · lab@…</span></div>
+    <div class="rozetler"><span>Akılcı Laboratuvar</span><span>TS EN ISO 15189</span><span>Dış KK: KBUDEK</span><br><span class="barkod">2603187701</span></div>
+  </div>
+
+  <h1>GENETİK TEST RAPORU — GERMLINE NGS PANEL</h1>
+  <div class="kimlik">
+    <div><b>Hasta:</b> SELİN AR</div><div><b>T.C. No:</b> 5555555****</div><div><b>Doğum / Cinsiyet:</b> 21.07.1999 · 27 · K</div><div><b>Vaka No:</b> GEN-2026/0412</div>
+    <div><b>İsteyen hekim:</b> Uzm. Dr. B. Tan · Kardiyoloji (Deniz Tıp Merkezi)</div><div><b>Endikasyon:</b> Ailesel HCM (I42.2) · baba HCM (+), amcada ani ölüm</div><div><b>Ödeyen:</b> Özel</div><div><b>Rapor No:</b> GEN-2026/0412-R1 · v1</div>
+    <div class="tam"><b>Test:</b> Kardiyomiyopati NGS paneli (62 gen) · germline · hedef zenginleştirme (hibridizasyon) · Illumina NextSeq 550 · referans GRCh38</div><div><b>Onam:</b> Genetik test onamı v2 ✔ · tesadüfi bulgu: <b>istemiyor</b></div><div><b>Sayfa:</b> 1 / 2</div>
+  </div>
+  <div class="zaman"><span>Numune alım: <b>20.08.2026</b> (EDTA tam kan, barkod 2603187090)</span><span>Lab kabul: <b>20.08.2026</b></span><span>DNA izolasyon: <b>21.08</b> (48 ng/µL · A260/280 1,84)</span><span>Dizileme: <b>RUN-0931 · 03.09</b></span><span>Rapor: <b>10.09.2026</b></span><span>TAT: <b>21 gün</b></span></div>
+
+  <div class="uyari"><b>SONUÇ: POZİTİF — Klinik olarak anlamlı (patojenik) varyant saptandı.</b><br>
+  <b>MYBPC3</b> geninde <b>c.1504C&gt;T p.(Arg502Trp)</b> heterozigot <b>patojenik</b> varyant. Hipertrofik kardiyomiyopati (otozomal dominant) ile ilişkilidir ve hastanın fenotipini açıklar.</div>
+
+  <table class="rp">
+    <thead><tr><th colspan="9">RAPORLANAN VARYANTLAR (ACMG/AMP 2015 + ClinGen kuralları)</th></tr>
+      <tr><th>Gen</th><th>Transkript · HGVS (c.)</th><th>HGVS (p.)</th><th class="orta">Zigosite</th><th class="orta">Kalıtım</th><th class="orta">gnomAD AF</th><th>ClinVar</th><th>ACMG kanıtları</th><th class="orta">Sınıf</th></tr></thead>
+    <tbody>
+      <tr class="panik"><td><b>MYBPC3</b></td><td>NM_000256.3:c.1504C&gt;T</td><td>p.(Arg502Trp)</td><td class="orta">Het</td><td class="orta">AD</td><td class="orta">0,00002</td><td>Pathogenic (3★, VCV000042540)</td><td>PS4 · PP1_Strong · PM2 · PP3 · PP5</td><td class="orta kir">Patojenik (5)</td></tr>
+      <tr><td>MYH7</td><td>NM_000257.4:c.2389G&gt;A</td><td>p.(Ala797Thr)</td><td class="orta">Het</td><td class="orta">AD</td><td class="orta">0,0004</td><td>Conflicting</td><td>PM2_Supporting · PP3</td><td class="orta sari">VUS (3)</td></tr>
+    </tbody>
+  </table>
+  <div class="kucuk">Benign / olası benign varyantlar ve tesadüfi bulgular (ACMG SF v3.2 listesi) hasta tercihi doğrultusunda raporlanmamıştır. Sınıf tanımları: 5 patojenik · 4 olası patojenik · 3 klinik önemi belirsiz (VUS) · 2 olası benign · 1 benign. Nomenklatür: HGVS v21. Doğrulama: MYBPC3 varyantı Sanger dizileme ile doğrulandı (09.09.2026).</div>
+
+  <div class="yorum"><b>Yorum:</b> MYBPC3 p.(Arg502Trp) HCM'nin en sık patojenik varyantlarından biridir; çok sayıda ailede hastalıkla segregasyonu gösterilmiştir. Hastanın klinik bulguları ve aile öyküsü ile uyumludur. MYH7 p.(Ala797Thr) varyantının klinik önemi belirsizdir; tek başına tanı koydurucu değildir, yeni kanıtlar oluştukça yeniden değerlendirilecektir (laboratuvar varyant bilgi bankası).</div>
+  <div class="yorum"><b>Öneriler:</b> (1) Genetik danışmanlık. (2) Birinci derece akrabalara (baba, kardeşler, çocuklar) hedefe yönelik kaskad tarama — MYBPC3 c.1504C&gt;T için Sanger; taşıyıcılara kardiyolojik izlem. (3) Kardiyoloji takibi (EKO, Holter, ani kardiyak ölüm risk değerlendirmesi). (4) VUS için 12 ay sonra yeniden değerlendirme.</div>
+
+  <table class="rp">
+    <thead><tr><th colspan="4">YÖNTEM VE KALİTE</th></tr></thead>
+    <tbody>
+      <tr><td style="width:22%"><b>Yöntem</b></td><td colspan="3">Periferik kandan DNA izolasyonu (kolon, kit lot …); hedef bölge zenginleştirme (hibridizasyon probu, 62 gen kodlayıcı ekzon ±20 bp intronik); NextSeq 550 2×150 bp; biyoinformatik: BWA-MEM2 · GATK 4.5 · VEP 111 · in-house filtre v3.2; CNV analizi: panel tabanlı okuma derinliği algoritması (büyük delesyon/duplikasyon için MLPA önerilir).</td></tr>
+      <tr><td><b>Kalite metrikleri</b></td><td colspan="3">Ortalama derinlik 212× · hedef bölgenin %99,1'i ≥ 20× · Q30 %93 · kontaminasyon %0,3 · cinsiyet doğrulama uyumlu · pozitif/negatif kontrol geçti · kapsama dışı bölgeler: ek tablo (sayfa 2).</td></tr>
+      <tr><td><b>Sınırlılıklar</b></td><td colspan="3">Panel dışı genler, derin intronik ve düzenleyici bölge varyantları, tekrar ekspansiyonları, %10 altı mozaisizm, dengeli yapısal varyantlar saptanamaz. Negatif sonuç kalıtsal kardiyomiyopatiyi dışlamaz. Varyant sınıflaması bilimsel bilgi geliştikçe değişebilir.</td></tr>
+      <tr><td><b>Gen listesi</b></td><td colspan="3">ACTC1, ACTN2, BAG3, CSRP3, DES, DSC2, DSG2, DSP, FLNC, GLA, JPH2, JUP, LAMP2, LMNA, MYBPC3, MYH7, MYL2, MYL3, PKP2, PLN, PRKAG2, RBM20, SCN5A, TNNC1, TNNI3, TNNT2, TPM1, TTN, TTR, … (62 gen — tam liste sayfa 2)</td></tr>
+      <tr><td><b>Veri saklama</b></td><td colspan="3">Ham veri (FASTQ/BAM/VCF) 10 yıl şifreli saklanır (hasta onamı); istek üzerine VCF verilir. Araştırma kullanımı: izin verilmedi.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alt">
+    <div><b>Raporu hazırlayan:</b><div class="imza">Biyolog E. Yıl (Analiz)<br>Uzm. Dr. G. Tekin<br>Tıbbi Genetik Uzmanı · Dip. Tescil 34567<br><span class="kucuk">e-imza · 10.09.2026 15:20</span></div></div>
+    <div><b>Numune:</b> EDTA tam kan · barkod 2603187090<br><b>Kabul:</b> Tekn. R. Al · 20.08.2026<br><b>Run:</b> RUN-0931 · kit lot … · flowcell …<br><b>Doğrulama:</b> Sanger 09.09.2026</div>
+    <div><b>Doğrulama:</b> QR / e-Nabız<br><span class="kucuk">Rapor isteyen hekime (dış kurum portalı + HL7) ve hasta portalına iletildi. Genetik veriler özel nitelikli kişisel veridir (KVKK md. 6); paylaşım yalnız hasta onamıyla. Bu rapor genetik danışmanlık eşliğinde değerlendirilmelidir.</span></div>
+  </div>
+</div>
+<div class="not"><b>Genetik rapor gereklilikleri:</b> test adı/kapsamı, yöntem, referans genom ve pipeline sürümü · endikasyon ve onam (tesadüfi bulgu tercihi) · net sonuç ifadesi (pozitif/negatif/VUS) · varyant tablosu (HGVS c./p., transkript, zigosite, kalıtım, popülasyon frekansı, ClinVar, ACMG kanıt kodları, sınıf) · yorum ve klinik ilişki · öneriler (danışmanlık, kaskad, izlem) · kalite metrikleri ve sınırlılıklar · gen listesi ve kapsama · doğrulama · veri saklama/KVKK · imzalar. Kaynak: <code>lab_genetik_vaka</code>, <code>lab_varyant</code>, <code>lab_genetik_run(_ornek)</code>.</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

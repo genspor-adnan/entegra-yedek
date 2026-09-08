@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Üretim Emirleri — Liste — Mockup (Gentegre AI · Üretim)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🏭 Üretim Emirleri <span class="sp">Gentegre AI · Üretim · Merkez</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Yeni Emir</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="btn">⧉ Kopyala</div>
+    <div class="btn pas">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn ok">✔ Onayla</div>
+    <div class="btn">▶ Üretime Başlat</div>
+    <div class="btn">📦 Mamul Girişi</div>
+    <div class="btn">🔒 Kapat</div>
+    <div class="sepv"></div>
+    <div class="btn">📊 Pano</div>
+    <div class="btn sp">🖨 Yazdır ▾</div>
+  </div>
+
+  <div class="arama">
+    <div class="kutu">🔍 Emir no, mamul, sipariş, müşteri…</div>
+    <span class="chip">Taslak</span><span class="chip">Onaylı</span><span class="chip on">Üretimde</span><span class="chip">Tamamlandı</span><span class="chip">Tümü</span>
+    <span class="sepv"></span>
+    <span class="chip">📅 Termin: Bu hafta ▾</span>
+    <span class="chip">🏭 İş Merkezi ▾</span>
+    <span class="chip">⚠ Geciken</span>
+  </div>
+
+  <div class="dg">
+    <table>
+      <thead><tr>
+        <th style="width:26px"></th><th>Emir No</th><th class="orta">Tür</th><th>Mamul</th><th class="sag">Adet</th><th class="sag">Üretilen</th>
+        <th style="width:110px">İlerleme</th><th>Ağaç / Sürüm</th><th>Kaynak</th><th class="orta">Başlangıç</th><th class="orta">Termin</th>
+        <th>Aktif Operasyon</th><th class="sag">Malz. Hazır</th><th class="sag">Maliyet</th><th class="orta">Durum</th>
+      </tr></thead>
+      <tbody>
+        <tr class="sel"><td>▸</td><td><b>ÜE-2026/0142</b></td><td class="orta"><span class="rz mavi">Siparişe</span></td><td>MAM-1001 · Sandalye Klasik Ceviz</td>
+          <td class="sag">60</td><td class="sag">36</td><td><div class="bar"><i style="width:60%"></i></div></td><td>BOM-0001 v3</td><td>SAT-2026/0891 · Deniz Mobilya</td>
+          <td class="orta">28.08.2026</td><td class="orta">05.09.2026</td><td>40 Döşeme · Atölye</td><td class="sag"><span class="rz ok">%100</span></td><td class="sag">61.400</td><td class="orta"><span class="rz mavi">Üretimde</span></td></tr>
+        <tr><td></td><td>ÜE-2026/0143</td><td class="orta"><span class="rz">Stoğa</span></td><td>YM-2001 · Sandalye İskeleti Ceviz</td>
+          <td class="sag">80</td><td class="sag">80</td><td><div class="bar"><i style="width:100%"></i></div></td><td>BOM-0002 v1</td><td>ÜE-2026/0142 (alt emir)</td>
+          <td class="orta">26.08.2026</td><td class="orta">30.08.2026</td><td class="sonuk">—</td><td class="sag"><span class="rz ok">%100</span></td><td class="sag">66.900</td><td class="orta"><span class="rz ok">Tamamlandı</span></td></tr>
+        <tr><td></td><td>ÜE-2026/0144</td><td class="orta"><span class="rz mavi">Siparişe</span></td><td>MAM-1002 · Yemek Masası 160 Meşe</td>
+          <td class="sag">12</td><td class="sag">0</td><td><div class="bar m"><i style="width:0%"></i></div></td><td>BOM-0003 v1</td><td>SAT-2026/0902 · Ev Dekor Ltd.</td>
+          <td class="orta">04.09.2026</td><td class="orta">12.09.2026</td><td class="sonuk">—</td><td class="sag"><span class="rz sari">%70</span></td><td class="sag">—</td><td class="orta"><span class="rz sari">Onaylı</span></td></tr>
+        <tr><td></td><td>ÜE-2026/0145</td><td class="orta"><span class="rz">Stoğa</span></td><td>YM-2010 · Cila Karışımı</td>
+          <td class="sag">40 Lt</td><td class="sag">40</td><td><div class="bar"><i style="width:100%"></i></div></td><td>BOM-0005 v2</td><td>Planlama PL-2026/09</td>
+          <td class="orta">01.09.2026</td><td class="orta">01.09.2026</td><td class="sonuk">—</td><td class="sag"><span class="rz ok">%100</span></td><td class="sag">3.600</td><td class="orta"><span class="rz ok">Tamamlandı</span></td></tr>
+        <tr><td></td><td>ÜE-2026/0146</td><td class="orta"><span class="rz mavi">Siparişe</span></td><td>SET-3001 · Yemek Grubu Meşe/Ceviz</td>
+          <td class="sag">4</td><td class="sag">0</td><td><div class="bar m"><i style="width:0%"></i></div></td><td>BOM-0004 v1</td><td>SAT-2026/0910 · Yıldız Otel</td>
+          <td class="orta">—</td><td class="orta">20.09.2026</td><td class="sonuk">—</td><td class="sag"><span class="rz kir">%0</span></td><td class="sag">—</td><td class="orta"><span class="rz pas">Taslak</span></td></tr>
+        <tr><td></td><td>ÜE-2026/0139</td><td class="orta"><span class="rz mor">Fason</span></td><td>MAM-1001 · Sandalye Klasik Ceviz</td>
+          <td class="sag">30</td><td class="sag">18</td><td><div class="bar s"><i style="width:60%"></i></div></td><td>BOM-0006 v1</td><td>SAT-2026/0877 · Deniz Mobilya</td>
+          <td class="orta">20.08.2026</td><td class="orta"><span class="rz kir">29.08.2026</span></td><td>30 Kaplama · Fason Öztürk</td><td class="sag"><span class="rz ok">%100</span></td><td class="sag">33.100</td><td class="orta"><span class="rz kir">Gecikti</span></td></tr>
+        <tr><td></td><td>ÜE-2026/0131</td><td class="orta"><span class="rz">Stoğa</span></td><td>MAM-1001 · Sandalye Klasik Ceviz</td>
+          <td class="sag">20</td><td class="sag">20</td><td><div class="bar"><i style="width:100%"></i></div></td><td>BOM-0001 v2</td><td>Min. stok</td>
+          <td class="orta">11.08.2026</td><td class="orta">18.08.2026</td><td class="sonuk">—</td><td class="sag"><span class="rz ok">%100</span></td><td class="sag">31.300</td><td class="orta"><span class="rz pas">Kapatıldı</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="statusbar"><span>7 emir · 2 üretimde · 1 gecikmiş</span><span>Seçili: ÜE-2026/0142 · 36 / 60</span><span class="sp">Termin sıralı · gecikenler kırmızı</span></div>
+</div>
+
+<div class="not">
+  <b>Emir türü</b>: Siparişe (satış siparişi satırından, sipariş kapanınca emir de kapanır) · Stoğa (planlama / min stok) · Fason (operasyon dış tedarikçide; fason irsaliyesi çıkar/girer) · Alt emir (ana emrin yarı mamulü).
+  <b>Malz. Hazır</b>: sarf deposundaki mevcut ÷ gerekli; %100 değilse "Eksik Malzeme" penceresi açılır (satınalma talebi üret).
+  <b>Durumlar</b>: Taslak → Onaylı → Üretimde → (Kısmi) → Tamamlandı → Kapatıldı; İptal her aşamada, stok hareketi varsa ters kayıtla.
+  Delphi karşılığı <code>URETIMEMRI</code> (EMIRTURU, RECETEID, TERMINTARIHI, TALEPEDEN, URETIMPLANID) — DURUM listesi orada serbest tanımlı; burada sabit akış önerilir.
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

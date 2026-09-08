@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İş Merkezi / Makine Kapasite ve Finans Kartı (ERP) — Mockup (Gentegre AI · Muhasebe · ERP)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🏭 İş Merkezi Kapasite &amp; Finans — Kesimhane · CNC-1 <span class="sp">is_merkezi IM-01 · demirbaş CNC router · Ağustos 2026</span></div>
+  <div class="toolbar"><div class="btn primary">💾 Kaydet</div><div class="btn">📉 Amortisman</div><div class="btn">🔧 Bakım Sözleşmesi</div><div class="btn">📈 OEE Trendi</div><div class="btn">🔀 Yatırım Senaryosu (2. CNC)</div><div class="btn sp">🖨</div></div>
+  <div class="sekmeler"><div class="sekme on">Yatırım &amp; Saat Ücreti</div><div class="sekme">Kapasite · OEE</div><div class="sekme">Başabaş &amp; Yatırım</div></div>
+  <div class="pnl">
+    <div class="hdr k4">
+      <div class="fld"><label>Makineler</label><div class="inp">CNC router (2021 · 3.200.000) · panel ebatlama (2019 · 1.400.000)</div></div>
+      <div class="fld"><label>Amortisman</label><div class="inp combo">Doğrusal · 10 yıl · aylık 38.300 + 20.100</div></div>
+      <div class="fld"><label>Bakım sözleşmesi</label><div class="inp">CNC · 96.000 ₺/yıl · 8.000/ay</div></div>
+      <div class="fld"><label>Enerji</label><div class="inp">kurulu güç 45 kW · ort. 14.900 kWh/ay</div></div>
+      <div class="fld"><label>Personel</label><div class="inp">4 operatör + 1 ustabaşı + 1 yardımcı · 6 FTE</div></div>
+      <div class="fld"><label>Vardiya</label><div class="inp combo">2 vardiya · 26 gün</div></div>
+      <div class="fld"><label>Saat ücreti (720)</label><div class="inp ro">945 ₺ / makine saati (312.000 / 330)</div></div>
+      <div class="fld"><label>GÜG oranı (730)</label><div class="inp ro">900 ₺ / makine saati · bütçe 850 (doluluk %85)</div></div>
+    </div>
+    <div class="dg"><table><thead><tr><th>Saat ücreti bileşeni</th><th class="sag">Aylık ₺</th><th class="sag">₺ / makine saati</th><th>Not</th></tr></thead>
+      <tbody>
+        <tr><td>Direkt işçilik (720)</td><td class="sag">312.000</td><td class="sag">945</td><td>Üretim modülü is_merkezi.saat_ucreti → <b>1.845</b> (720+730) olarak güncellenir</td></tr>
+        <tr><td>Endirekt işçilik</td><td class="sag">84.000</td><td class="sag">255</td><td></td></tr>
+        <tr><td>Amortisman</td><td class="sag">58.400</td><td class="sag">177</td><td></td></tr>
+        <tr><td>Bakım + endirekt malzeme</td><td class="sag">58.300</td><td class="sag">177</td><td></td></tr>
+        <tr><td>Enerji + bina + KK payları</td><td class="sag">96.300</td><td class="sag">292</td><td>dağıtımdan</td></tr>
+        <tr class="grup"><td>Toplam</td><td class="sag">609.000</td><td class="sag"><b>1.845</b></td><td>rota süreleri × bu oran = standart operasyon maliyeti</td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="pnl">
+    <div class="ozet">
+      <div class="kart"><div class="b">Kapasite</div><div class="d">416 <small>saat</small></div></div>
+      <div class="kart"><div class="b">Planlı duruş</div><div class="d">24 <small>bakım, KK</small></div></div>
+      <div class="kart"><div class="b">Arıza / bekleme</div><div class="d">14 <small>3 olay</small></div></div>
+      <div class="kart"><div class="b">Çalışılan</div><div class="d">330 <small>doluluk %79</small></div></div>
+      <div class="kart"><div class="b">OEE</div><div class="d">%68 <small>K %79 · P %88 · Q %98</small></div></div>
+      <div class="kart"><div class="b">Hazırlık süresi payı</div><div class="d">%11 <small>küçük partiler</small></div></div>
+    </div>
+    <div class="dg"><table><thead><tr><th>Vardiya</th><th class="sag">Saat</th><th class="sag">Çalışılan</th><th class="sag">Doluluk</th><th class="sag">Üretilen (ms)</th><th class="sag">Duruş</th><th>Not</th></tr></thead>
+      <tbody>
+        <tr><td>08:00–16:00</td><td class="sag">208</td><td class="sag">192</td><td class="sag">%92</td><td class="sag">184</td><td class="sag">8</td><td>tam</td></tr>
+        <tr><td>16:00–24:00</td><td class="sag">208</td><td class="sag">138</td><td class="sag">%66</td><td class="sag">128</td><td class="sag">6</td><td>operatör eksik (1)</td></tr>
+        <tr><td>Gece (kapalı)</td><td class="sag">—</td><td class="sag">—</td><td class="sag">—</td><td class="sag">—</td><td class="sag">—</td><td>senaryo: 3. vardiya vs 2. CNC</td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Kaynak: <code>uretim_zaman</code> (üretim/duruş/hazırlık türleri), <code>uretim_olcum</code> (ret). OEE = kullanılabilirlik × performans × kalite.</div>
+  </div>
+  <div class="pnl">
+    <div class="ikiPanel">
+      <div class="hdr" style="grid-template-columns:1fr 1fr">
+        <div class="fld"><label>Aylık sabit gider (merkez)</label><div class="inp ro">297.000 ₺ (730 + endirekt)</div></div>
+        <div class="fld"><label>Katkı / makine saati</label><div class="inp ro">ort. ürün katkısı 2.900 ₺ / ms</div></div>
+        <div class="fld"><label>Başabaş makine saati</label><div class="inp ro big">102 s / ay <span class="sonuk">· gerçek 330</span></div></div>
+        <div class="fld"><label>Darboğaz</label><div class="inp ro">Kesim değil — Boyahane (%50 doluluk ama sıra 50'de bekleme)</div></div>
+      </div>
+      <div class="grp" style="margin:10px"><div class="gb">Yatırım senaryosu — 2. CNC (2027)</div>
+        <div class="dg"><table><thead><tr><th>Gösterge</th><th class="sag">Mevcut</th><th class="sag">2. CNC</th><th class="sag">3. vardiya</th></tr></thead>
+          <tbody>
+            <tr><td>Yatırım</td><td class="sag">—</td><td class="sag">4,1 M</td><td class="sag">0</td></tr>
+            <tr><td>Ek aylık sabit</td><td class="sag">—</td><td class="sag">71.000 (amort + bakım)</td><td class="sag">92.000 (personel)</td></tr>
+            <tr><td>Ek kapasite (ms/ay)</td><td class="sag">—</td><td class="sag">+416</td><td class="sag">+208</td></tr>
+            <tr><td>Ek katkı (talep 200 ms)</td><td class="sag">—</td><td class="sag">580.000</td><td class="sag">580.000</td></tr>
+            <tr><td>Geri ödeme</td><td class="sag">—</td><td class="sag">~9 ay</td><td class="sag">—</td></tr>
+            <tr><td>Risk</td><td class="sag">—</td><td class="sag">talep düşerse sabit yük</td><td class="sag">personel bulma, gece kalite</td></tr>
+          </tbody></table></div></div>
+    </div>
+  </div>
+  <div class="statusbar"><span>IM-01 · saat ücreti 1.845 · doluluk %79 · OEE %68</span><span class="sp">Kaynaklar: is_merkezi · demirbaş · bordro · uretim_zaman · uretim_olcum · maliyet_merkez_donem</span></div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

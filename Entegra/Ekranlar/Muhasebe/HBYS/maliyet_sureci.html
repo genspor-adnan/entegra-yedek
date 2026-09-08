@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Görüntüleme Merkezi Maliyetlendirme — Süreç ve Tablolar — Mockup (Gentegre AI · Muhasebe · HBYS)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .win{max-width:1080px}
+  .icerik{padding:6px 18px 22px;font-size:13px;line-height:1.65}
+  h2{font-size:15px;color:#1c4374;border-bottom:1px solid var(--line2);padding-bottom:5px;margin:22px 0 10px}
+  h3{font-size:13.5px;color:#2c4a6b;margin:16px 0 6px}
+  code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:1px 4px;font-size:12px}
+  .icerik table{border-collapse:collapse;width:100%;margin:8px 0 14px}
+  .icerik th{background:linear-gradient(#f4f7fb,#e7eef6);border:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:12px;color:#3a5573}
+  .icerik td{border:1px solid var(--line2);padding:6px 8px;font-size:12.5px;vertical-align:top}
+  .kutu{border:1px solid var(--line2);background:#fbfcfd;border-radius:4px;padding:10px 12px;margin:10px 0}
+  .uyari{border:1px solid #f2ddbf;background:#fdf9f1;border-radius:4px;padding:9px 11px;margin:10px 0;color:var(--uyari)}
+  .tamam{border:1px solid #bfe3cb;background:#f1f8f3;border-radius:4px;padding:9px 11px;margin:10px 0;color:#245c37}
+  .akis{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+  .akis .a{border:1px solid var(--line);background:#fff;border-radius:14px;padding:4px 12px;font-size:12px}
+  .akis .a.v{background:#eef4fc;border-color:#cfe0f5;color:#2f6db3;font-weight:bold}
+  .akis .ok2{color:var(--muted)}
+  ul{margin:6px 0 12px 18px;padding:0} li{margin:3px 0}
+  .kucuk{font-size:11.5px;color:var(--muted)}
+  .durumlar{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+
+  .tablo{border:1px solid var(--line2);border-radius:4px;margin:12px 0;overflow:hidden}
+  .tablo .tb{background:linear-gradient(#f4f7fb,#e7eef6);padding:6px 10px;font-weight:bold;color:#1c4374;display:flex;gap:10px;align-items:center;font-size:13px}
+  .tablo .tb .rz{font-weight:normal}
+  .tablo .tb .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:11.5px}
+  .tablo table{margin:0}
+  .tablo td.k{font-family:Consolas,monospace;font-size:12px;white-space:nowrap}
+  .tablo td.t{font-family:Consolas,monospace;font-size:11.5px;color:#4d5d6e;white-space:nowrap}
+  .tablo tr.pk td.k{font-weight:bold}
+  .tablo .alt{padding:6px 10px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line2);background:#fbfcfd}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🧮 Maliyetlendirme Modülü (Görüntüleme Merkezi) — Süreç, Veri Modeli, Alanlar <span class="sp">Gentegre AI · tasarım notu · 03.09.2026</span></div>
+  <div class="icerik">
+
+    <div class="kutu">
+      <b>Tek cümlede:</b> Dönem giderleri kaynaklarından (muhasebe fişi, bordro, amortisman, stok sarf, hakediş, alış faturası, sayaç) maliyet merkezlerine çekilir,
+      yardımcı merkezler dağıtım anahtarlarıyla (m², çekim, hasta, cihaz dk, ağırlıklı rapor, gelir) kademeli olarak cihaz merkezlerine kapatılır;
+      cihaz merkezinin tam maliyeti gerçek sürücülerle (çekim süresi, sarf, rapor) <b>tetkik birim maliyetine</b> iner; gelir başvuru satırlarından
+      ödeyen bazında eşlenir → tetkik / modalite / ödeyen / kurum sözleşmesi / radyolog / referans kârlılığı; standart reçete (protokol) ile sapma, kapasite ve başabaş, yatırım senaryosu.
+      <br><span class="kucuk">Mockuplar: <code>maliyet_merkezleri.html</code> · <code>tetkik_maliyet_karti.html</code> · <code>donem_maliyet_raporu.html</code> · <code>cihaz_kapasite_finans.html</code>.
+      Bağlı: <code>../Radyoloji/</code> (protokol, sarf, istem, cihaz) · <code>../Prim/</code> (hakediş) · <code>../Teleradyoloji/</code> (dış raporlama gelir/gider) · muhasebe · demirbaş · kurum sözleşmesi</span>
+    </div>
+
+    <h2>1. Akış (aylık kapanış)</h2>
+    <div class="akis">
+      <span class="a">Tanım: merkezler · kalemler · anahtarlar · kurallar · reçeteler</span><span class="ok2">→</span>
+      <span class="a v">Dönem aç · giderleri çek</span><span class="ok2">→</span>
+      <span class="a">Anahtar değerleri hesapla</span><span class="ok2">→</span>
+      <span class="a">Kademeli dağıtım</span><span class="ok2">→</span>
+      <span class="a">Merkez tam maliyet · ₺/dk</span><span class="ok2">→</span>
+      <span class="a">Tetkik birim maliyeti (gerçek sürücüler)</span><span class="ok2">→</span>
+      <span class="a">Gelir eşleme · marjlar</span><span class="ok2">→</span>
+      <span class="a">Onay · kilit · raporlar · (7A fişi)</span><span class="ok2">→</span>
+      <span class="a">Senaryo / sözleşme / yatırım kararı</span>
+    </div>
+    <table>
+      <tr><th style="width:40px">#</th><th style="width:200px">Adım</th><th>Ne olur</th><th style="width:230px">Kayıt</th></tr>
+      <tr><td>1</td><td><b>Tanım</b></td><td>Maliyet merkezi ağacı (cihaz bazlı ana merkezler, yardımcı, genel yönetim); gider kalemi kategori/davranışı; muhasebe hesap eşlemesi; dağıtım anahtarları ve aşamalı kural sırası; cihaz finans parametreleri; tetkik standart reçeteleri (radyoloji protokolünden türetilmiş).</td><td><code>masraf_merkezi</code>, <code>masraf</code>, <code>maliyet_anahtar</code>, <code>maliyet_dagitim_kurali</code>, <code>cihaz_finans</code>, <code>tetkik_maliyet_recetesi</code></td></tr>
+      <tr><td>2</td><td><b>Gider çekme</b></td><td>Dönem açılır; muhasebe fişleri (masraf yeri/hesap), bordro (merkez), amortisman tablosu, stok sarf (radyoloji_sarf), hakediş (dönem), alış faturaları (servis, dış raporlama), sayaç değerleri çekilir; eşleşmeyenler kuyruğa; elle gider eklenebilir.</td><td><code>maliyet_donem</code>, <code>maliyet_gider</code></td></tr>
+      <tr><td>3</td><td><b>Anahtarlar</b></td><td>Çekim, hasta, cihaz dk, m², FTE, ağırlıklı rapor, gelir, kontrastlı çekim — otomatik sorgu; düzeltme gerekçeli.</td><td><code>maliyet_anahtar_deger</code></td></tr>
+      <tr><td>4</td><td><b>Dağıtım</b></td><td>Kademeli: bina → PACS/BT → kayıt → hemşirelik → raporlama → genel yönetim; her satır izlenebilir. Sonuç: merkez tam maliyeti, ₺/dk, doluluk.</td><td><code>maliyet_dagitim</code>, <code>maliyet_merkez_donem</code></td></tr>
+      <tr><td>5</td><td><b>Tetkik maliyeti</b></td><td>Her tetkik için gerçek ortalama süre × merkez ₺/dk (amortisman, bakım, personel, enerji ayrı), gerçek sarf, hakediş (rol Raporlayan), dağıtılan pay / adet; standart ile sapma.</td><td><code>tetkik_maliyet</code></td></tr>
+      <tr><td>6</td><td><b>Gelir &amp; marj</b></td><td>Başvuru satırlarından tetkik × ödeyen geliri; paket gelirleri alt tetkiklere dağıtılır; katkı payı ve net marj; kurum sözleşmesi ve referans kârlılığı.</td><td><code>tetkik_maliyet_odeyen</code>, <code>maliyet_paket_dagitim</code></td></tr>
+      <tr><td>7</td><td><b>Onay / kilit</b></td><td>Dönem onaylanır, kilitlenir; raporlar; isteğe bağlı 7A maliyet fişi muhasebeye.</td><td><code>maliyet_donem.durum</code></td></tr>
+      <tr><td>8</td><td><b>Karar desteği</b></td><td>Senaryolar (doluluk, fiyat/ödeyen karması, personel, sarf fiyatı, yeni cihaz); sözleşme yenilemede maliyet tabanı; yatırım başabaş/geri ödeme.</td><td><code>maliyet_senaryo</code>, <code>cihaz_kullanim</code></td></tr>
+    </table>
+
+    <h2>2. Kurallar</h2>
+    <ul>
+      <li><b>Kaynaktan çek, elle yazma:</b> gider satırı kaynak tür+id taşır; yeniden çekimde çiftlenmez; elle satır gerekçeli.</li>
+      <li><b>Sabit / değişken ayrımı</b> kalemde; katkı payı analizi (SUT altı fiyat kararı) buna dayanır.</li>
+      <li><b>Sürücüler gerçek verilerden:</b> çekim süresi (istem başlangıç-bitiş), sarf (radyoloji_sarf), rapor (radyoloji_rapor), duruş (cihaz kapatma), slot (randevu). Standart reçete yalnız karşılaştırma ve fiyat teklifi için.</li>
+      <li><b>Kademeli dağıtım</b> ilk sürüm; karşılıklı (reciprocal) sonra. Sıra ve anahtar değişirse dönem yeniden dağıtılır (kilitli dönemde yasak).</li>
+      <li>Amortisman: muhasebe (VUK) ile maliyet ömrü ayrışabilir; raporda hangisi kullanıldığı yazılır.</li>
+      <li>Paket gelirleri (check-up) alt tetkiklere liste fiyatı oranıyla dağıtılır; dağıtılmamış paket uyarı verir.</li>
+      <li>Kilitli dönem değişmez; düzeltme = dönemi aç (yetki) → yeniden dağıt → yeniden onay (günlük).</li>
+    </ul>
+
+    <h2>3. Tablolar ve alanlar</h2>
+    <h3>Mevcut tablolar (kullanılır / genişler)</h3>
+<div class="tablo">
+  <div class="tb"><code>masraf_merkezi</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">maliyet merkezi ağacı — mevcut tablo</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">id / kod / ad / ust_id</td><td class="t"></td><td><b>mevcut</b></td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>yeni — 1 ana (üretim/cihaz) · 2 yardımcı · 3 genel yönetim</td></tr><tr><td class="k">cihaz_id</td><td class="t">int</td><td>yeni — → radyoloji_cihaz / demirbas (cihaz bazlı merkez)</td></tr><tr><td class="k">departman_id</td><td class="t">int</td><td>yeni</td></tr><tr><td class="k">alan_m2</td><td class="t">numeric</td><td>yeni — dağıtım anahtarı</td></tr><tr><td class="k">fte</td><td class="t">numeric</td><td>yeni</td></tr><tr><td class="k">muhasebe_hesap_kodlari</td><td class="t">varchar[]</td><td>yeni — 770/740/760 alt hesap eşleşmesi (gider çekme)</td></tr><tr><td class="k">kapasite_dk_ay</td><td class="t">int</td><td>yeni — teorik kapasite</td></tr><tr><td class="k">sorumlu_id</td><td class="t">int</td><td>yeni</td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>masraf</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">gider kalemi kataloğu — mevcut</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">id / kod / ad</td><td class="t"></td><td><b>mevcut</b></td></tr><tr><td class="k">kategori</td><td class="t">smallint</td><td>yeni — amortisman · bakım · personel · hakediş · malzeme · enerji · bina · BT · dış hizmet · yönetim · finansman</td></tr><tr><td class="k">davranis</td><td class="t">smallint</td><td>yeni — 1 sabit · 2 değişken · 3 yarı değişken</td></tr><tr><td class="k">varsayilan_anahtar_id</td><td class="t">int</td><td>yeni — dağıtım anahtarı</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>demirbas</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">cihaz/sabit kıymet — mevcut</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">amortisman_yontem / omur_ay / kalinti_oran / alis_bedeli / alis_tarihi</td><td class="t"></td><td><b>mevcut/varsa</b> — amortisman tablosu üretimi</td></tr><tr><td class="k">maliyet_omru_ay</td><td class="t">smallint</td><td>yeni — maliyet muhasebesi ömrü (VUK'tan farklı olabilir)</td></tr><tr><td class="k">servis_sozlesme_yillik</td><td class="t">numeric</td><td>yeni</td></tr><tr><td class="k">servis_bitis</td><td class="t">date</td><td>yeni</td></tr><tr><td class="k">sigorta_yillik</td><td class="t">numeric</td><td>yeni</td></tr><tr><td class="k">finansman_aylik</td><td class="t">numeric</td><td>yeni — leasing taksiti (bilgi)</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>radyoloji_protokol / radyoloji_protokol_malzeme / radyoloji_sarf / radyoloji_istem / radyoloji_rapor / radyoloji_cihaz_kapatma</code> <span class="rz pas">mevcut</span> <span class="sp">gerçekleşen sürücüler — mevcut</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">—</td><td class="t"></td><td>çekim süresi (istem başlangıç-bitiş), sarf (kontrast mL, set), rapor sayısı ve modalite, cihaz duruş süreleri — maliyet hesabı bunları okur, yazmaz</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>hakedis / hakedis_satir / belge_satir_rol</code> <span class="rz pas">mevcut</span> <span class="sp">radyolog hakedişi, gönderen primi — mevcut Prim</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">—</td><td class="t"></td><td>dönem hakediş tutarı → Raporlama merkezi gideri; rol Raporlayan ile tetkik bazına iner</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>belge / belge_satir / kurum_sozlesme / fiyat_listesi</code> <span class="rz pas">mevcut</span> <span class="sp">gelir — mevcut</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">—</td><td class="t"></td><td>başvuru satırları (hizmet, ödeyen kurum, fiyat, iskonto, tahsilat) → tetkik/ödeyen geliri; paket satırı gelir dağıtımı gerekir</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>muhasebe_fis / muhasebe_fis_satir</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">gider kaynağı — mevcut</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">masraf_merkezi_id</td><td class="t">int</td><td>yeni — fiş satırında masraf yeri (yoksa hesap koduyla eşleme)</td></tr>
+  </table>
+</div><h3>Yeni tablolar</h3>
+<div class="tablo">
+  <div class="tb"><code>maliyet_donem</code> <span class="rz ok">yeni</span> <span class="sp">aylık maliyet dönemi</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">yil / ay</td><td class="t">smallint</td><td></td></tr><tr><td class="k">sube_id</td><td class="t">int</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>1 açık · 2 giderler çekildi · 3 dağıtıldı · 4 onaylı/kilitli</td></tr><tr><td class="k">dagitim_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">dagitan_id</td><td class="t">int</td><td></td></tr><tr><td class="k">onay_id / onay_zamani</td><td class="t"></td><td></td></tr><tr><td class="k">toplam_gelir / toplam_gider / net</td><td class="t">numeric</td><td>özet</td></tr><tr><td class="k">muhasebe_fis_id</td><td class="t">int</td><td>7A maliyet fişi (opsiyon)</td></tr><tr><td class="k">not</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table><div class="alt">unique (yil, ay, sube_id)</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>maliyet_gider</code> <span class="rz ok">yeni</span> <span class="sp">dönem gider satırı (merkez × kalem)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">donem_id</td><td class="t">int</td><td></td></tr><tr><td class="k">merkez_id</td><td class="t">int</td><td>→ masraf_merkezi</td></tr><tr><td class="k">masraf_id</td><td class="t">int</td><td>→ masraf (kalem)</td></tr><tr><td class="k">tutar</td><td class="t">numeric</td><td></td></tr><tr><td class="k">davranis</td><td class="t">smallint</td><td>kalemden kopya, düzeltilebilir</td></tr><tr><td class="k">kaynak_tur</td><td class="t">smallint</td><td>1 muhasebe fişi · 2 bordro · 3 amortisman · 4 stok sarf · 5 hakediş · 6 alış faturası · 7 sayaç · 8 elle</td></tr><tr><td class="k">kaynak_id</td><td class="t">int</td><td></td></tr><tr><td class="k">aciklama</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">dagitilabilir</td><td class="t">smallint</td><td>yardımcı merkez gideri dağıtıma girer</td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table><div class="alt">indeks (donem_id, merkez_id); kaynak_tur+kaynak_id ile tekrar çekimde çift kayıt önlenir</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>maliyet_anahtar</code> <span class="rz ok">yeni</span> <span class="sp">dağıtım anahtarı tanımı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">kod / ad</td><td class="t">varchar</td><td>cekim · hasta · cihaz_dk · m2 · agirlikli_rapor · gelir · fte · kontrastli_cekim</td></tr><tr><td class="k">hesap_kaynagi</td><td class="t">smallint</td><td>1 otomatik sorgu · 2 merkez kartı · 3 elle</td></tr><tr><td class="k">sorgu</td><td class="t">varchar(60)</td><td>hesap fonksiyonu adı</td></tr><tr><td class="k">aciklama</td><td class="t">varchar(200)</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>maliyet_anahtar_deger</code> <span class="rz ok">yeni</span> <span class="sp">dönemde merkez başına anahtar değeri</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">donem_id</td><td class="t">int</td><td></td></tr><tr><td class="k">anahtar_id</td><td class="t">int</td><td></td></tr><tr><td class="k">merkez_id</td><td class="t">int</td><td></td></tr><tr><td class="k">deger</td><td class="t">numeric</td><td></td></tr><tr><td class="k">otomatik</td><td class="t">smallint</td><td></td></tr><tr><td class="k">duzeltme_gerekce</td><td class="t">varchar(200)</td><td></td></tr>
+  </table><div class="alt">unique (donem_id, anahtar_id, merkez_id)</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>maliyet_dagitim_kurali</code> <span class="rz ok">yeni</span> <span class="sp">aşamalı dağıtım kuralı (kaynak merkez → hedefler, anahtar, sıra)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">sira</td><td class="t">smallint</td><td>aşama</td></tr><tr><td class="k">kaynak_merkez_id</td><td class="t">int</td><td></td></tr><tr><td class="k">anahtar_id</td><td class="t">int</td><td></td></tr><tr><td class="k">hedef_kapsam</td><td class="t">smallint</td><td>1 tüm merkezler · 2 ana merkezler · 3 liste</td></tr><tr><td class="k">hedef_merkez_ids</td><td class="t">int[]</td><td></td></tr><tr><td class="k">yontem</td><td class="t">smallint</td><td>1 kademeli (step-down) · 2 doğrudan · 3 karşılıklı (sonra)</td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>maliyet_dagitim</code> <span class="rz ok">yeni</span> <span class="sp">dönem dağıtım satırları (izlenebilir)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">bigint</td><td></td></tr><tr><td class="k">donem_id</td><td class="t">int</td><td></td></tr><tr><td class="k">kural_id</td><td class="t">int</td><td></td></tr><tr><td class="k">asama</td><td class="t">smallint</td><td></td></tr><tr><td class="k">kaynak_merkez_id</td><td class="t">int</td><td></td></tr><tr><td class="k">hedef_merkez_id</td><td class="t">int</td><td></td></tr><tr><td class="k">anahtar_deger / anahtar_toplam / oran</td><td class="t">numeric</td><td></td></tr><tr><td class="k">tutar</td><td class="t">numeric</td><td></td></tr>
+  </table><div class="alt">hedef merkezin tam maliyeti = direkt gider + Σ dağıtım</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>maliyet_merkez_donem</code> <span class="rz ok">yeni</span> <span class="sp">merkez dönem özeti (materyalize)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">donem_id / merkez_id</td><td class="t">int</td><td>PK</td></tr><tr><td class="k">direkt_degisken / direkt_sabit / dagitilan / tam_maliyet</td><td class="t">numeric</td><td></td></tr><tr><td class="k">cekim / calisma_dk / kapasite_dk / doluluk</td><td class="t"></td><td></td></tr><tr><td class="k">gelir / katki_payi / net</td><td class="t">numeric</td><td></td></tr><tr><td class="k">maliyet_dk</td><td class="t">numeric</td><td>tam maliyet / çalışma dk</td></tr><tr><td class="k">birim_maliyet / birim_gelir</td><td class="t">numeric</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>tetkik_maliyet_recetesi</code> <span class="rz ok">yeni</span> <span class="sp">tetkik standart kaynak reçetesi (protokolün maliyet görünümü)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hizmet_id</td><td class="t">int</td><td>→ hizmet (tetkik)</td></tr><tr><td class="k">merkez_id</td><td class="t">int</td><td>hangi cihazda</td></tr><tr><td class="k">gecerli_bas</td><td class="t">date</td><td>sürümlü</td></tr><tr><td class="k">kaynak_tur</td><td class="t">smallint</td><td>1 cihaz dk · 2 personel dk (rol) · 3 malzeme (stok) · 4 hakediş (rol) · 5 enerji · 6 dış hizmet · 7 dağıtılan pay</td></tr><tr><td class="k">kaynak_id</td><td class="t">int</td><td>stok_id / rol / personel rolü</td></tr><tr><td class="k">miktar</td><td class="t">numeric</td><td></td></tr><tr><td class="k">birim</td><td class="t">varchar(10)</td><td></td></tr><tr><td class="k">birim_fiyat</td><td class="t">numeric</td><td>hesap anındaki (merkez ₺/dk, stok ort., prim planı)</td></tr><tr><td class="k">tutar</td><td class="t">numeric</td><td></td></tr><tr><td class="k">kaynak_referans</td><td class="t">varchar(60)</td><td>radyoloji_protokol.sure_dk / protokol_malzeme</td></tr>
+  </table><div class="alt">standart maliyet = Σ tutar; radyoloji protokolünden otomatik türetilir, elle düzeltilir</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>tetkik_maliyet</code> <span class="rz ok">yeni</span> <span class="sp">dönem × tetkik gerçekleşen birim maliyet ve marj</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">donem_id</td><td class="t">int</td><td></td></tr><tr><td class="k">hizmet_id</td><td class="t">int</td><td></td></tr><tr><td class="k">merkez_id</td><td class="t">int</td><td></td></tr><tr><td class="k">adet</td><td class="t">int</td><td></td></tr><tr><td class="k">ort_sure_dk</td><td class="t">numeric</td><td>gerçek (istem)</td></tr><tr><td class="k">ort_sarf_tutar</td><td class="t">numeric</td><td>gerçek (radyoloji_sarf)</td></tr><tr><td class="k">malzeme / personel / hakedis / cihaz / bakim / enerji / dagitilan / genel</td><td class="t">numeric</td><td>birim başına unsurlar</td></tr><tr><td class="k">degisken_birim / sabit_birim / birim_maliyet</td><td class="t">numeric</td><td></td></tr><tr><td class="k">standart_birim</td><td class="t">numeric</td><td>reçeteden</td></tr><tr><td class="k">sapma_oran</td><td class="t">numeric</td><td></td></tr><tr><td class="k">gelir / ort_gelir / katki_payi / marj / marj_oran</td><td class="t">numeric</td><td></td></tr>
+  </table><div class="alt">unique (donem_id, hizmet_id, merkez_id); trend bu tablodan</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>tetkik_maliyet_odeyen</code> <span class="rz ok">yeni</span> <span class="sp">dönem × tetkik × ödeyen kurum marjı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">donem_id / hizmet_id / odeyen_kurum_id</td><td class="t">int</td><td>PK (odeyen null = özel hasta)</td></tr><tr><td class="k">adet / gelir / ort_fiyat / sut_orani</td><td class="t">numeric</td><td></td></tr><tr><td class="k">birim_maliyet / marj / marj_oran / katki_oran</td><td class="t">numeric</td><td></td></tr><tr><td class="k">vade_gun</td><td class="t">smallint</td><td>sözleşmeden</td></tr><tr><td class="k">finansman_maliyeti</td><td class="t">numeric</td><td>opsiyon</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>maliyet_paket_dagitim</code> <span class="rz ok">yeni</span> <span class="sp">paket (check-up) gelirinin tetkiklere dağıtımı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">paket_hizmet_id</td><td class="t">int</td><td></td></tr><tr><td class="k">alt_hizmet_id</td><td class="t">int</td><td></td></tr><tr><td class="k">oran</td><td class="t">numeric</td><td>liste fiyatı oranı / elle</td></tr><tr><td class="k">gecerli_bas</td><td class="t">date</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>cihaz_finans</code> <span class="rz ok">yeni</span> <span class="sp">cihaz maliyet parametreleri (demirbaş üstü)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">cihaz_id</td><td class="t">int</td><td>→ radyoloji_cihaz</td></tr><tr><td class="k">demirbas_id</td><td class="t">int</td><td></td></tr><tr><td class="k">merkez_id</td><td class="t">int</td><td></td></tr><tr><td class="k">yatirim_toplam</td><td class="t">numeric</td><td>cihaz + kurulum + yükseltmeler</td></tr><tr><td class="k">maliyet_omru_ay</td><td class="t">smallint</td><td></td></tr><tr><td class="k">kalinti_oran</td><td class="t">numeric</td><td></td></tr><tr><td class="k">aylik_amortisman</td><td class="t">numeric</td><td>hesaplı</td></tr><tr><td class="k">servis_aylik / sigorta_aylik / enerji_aylik_tahmin</td><td class="t">numeric</td><td></td></tr><tr><td class="k">kapasite_saat_gun / gun_ay / slot_dk</td><td class="t"></td><td>teorik kapasite</td></tr><tr><td class="k">planli_durus_dk_ay</td><td class="t">int</td><td></td></tr><tr><td class="k">finansman_aylik / finansman_bitis</td><td class="t"></td><td>bilgi</td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>cihaz_kullanim</code> <span class="rz ok">yeni</span> <span class="sp">dönem × cihaz kullanım/doluluk</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">donem_id / cihaz_id</td><td class="t">int</td><td>PK</td></tr><tr><td class="k">kapasite_dk / planli_durus_dk / ariza_dk / calisilan_dk</td><td class="t">int</td><td></td></tr><tr><td class="k">doluluk</td><td class="t">numeric</td><td></td></tr><tr><td class="k">cekim / slot / dolu_slot / gelmeyen_slot</td><td class="t">int</td><td>randevu + istem</td></tr><tr><td class="k">ort_cekim_dk</td><td class="t">numeric</td><td></td></tr><tr><td class="k">saat_dilimi_json</td><td class="t">jsonb</td><td>dilim bazlı doluluk</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>maliyet_senaryo</code> <span class="rz ok">yeni</span> <span class="sp">senaryo analizi kayıtları</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">ad</td><td class="t">varchar(120)</td><td></td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>doluluk · fiyat/ödeyen karması · personel · sarf fiyatı · yeni cihaz · dış raporlama</td></tr><tr><td class="k">baz_donem_id</td><td class="t">int</td><td></td></tr><tr><td class="k">kapsam</td><td class="t">smallint</td><td>merkez / tetkik / kurum</td></tr><tr><td class="k">kapsam_id</td><td class="t">int</td><td></td></tr><tr><td class="k">varsayimlar</td><td class="t">jsonb</td><td></td></tr><tr><td class="k">sonuc</td><td class="t">jsonb</td><td>birim maliyet, net, başabaş</td></tr><tr><td class="k">olusturan_id / zaman</td><td class="t"></td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>maliyet_ayar</code> <span class="rz ok">yeni</span> <span class="sp">hesap ayarları</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">anahtar / deger</td><td class="t"></td><td>amortisman kaynağı (VUK/maliyet ömrü) · enerji bölüşüm yöntemi (sayaç/dk) · rapor ağırlıkları (MR 3, BT 2…) · finansman maliyeti % · 7A fiş üret · dağıtım yöntemi</td></tr>
+  </table>
+</div>
+
+    <h2>4. Ekranlar</h2>
+    <table>
+      <tr><th style="width:250px">Ekran</th><th>Görev</th><th style="width:230px">Mockup</th></tr>
+      <tr><td>Maliyet Merkezleri &amp; Dağıtım</td><td>Merkez ağacı/kartı, dönem gider kalemleri (kaynaktan çekme), anahtarlar, aşamalı dağıtım.</td><td><code>maliyet_merkezleri.html</code></td></tr>
+      <tr><td>Tetkik Maliyet Kartı</td><td>Birim maliyet unsurları (gerçek/standart), standart reçete, ödeyen bazlı marj, senaryo.</td><td><code>tetkik_maliyet_karti.html</code></td></tr>
+      <tr><td>Dönem Maliyet &amp; Kârlılık Raporu</td><td>Modalite/merkez, tetkik, ödeyen/kurum, radyolog/referans kârlılığı, 12 ay trend; dönem kapatma.</td><td><code>donem_maliyet_raporu.html</code></td></tr>
+      <tr><td>Cihaz Kapasite &amp; Finans</td><td>Yatırım/amortisman/servis, kapasite-doluluk (saat dilimi), başabaş, yenileme senaryosu.</td><td><code>cihaz_kapasite_finans.html</code></td></tr>
+      <tr><td>Sözleşme maliyet tabanı <span class="kucuk">(kurum sözleşmesi ekranına ek)</span></td><td>Yenilemede tetkik bazlı maliyet/marj görünümü.</td><td>—</td></tr>
+      <tr><td>Ayarlar › Maliyet</td><td>Rapor ağırlıkları, enerji bölüşümü, amortisman kaynağı, finansman %, 7A fişi.</td><td>—</td></tr>
+    </table>
+
+    <h2>5. Entegrasyonlar</h2>
+    <table>
+      <tr><th style="width:220px">Modül</th><th>Veri</th></tr>
+      <tr><td>Muhasebe</td><td>Gider fişleri (masraf yeri), 7A maliyet fişi çıktısı (opsiyon).</td></tr>
+      <tr><td>Demirbaş</td><td>Cihaz alış bedeli, amortisman tablosu, servis sözleşmesi.</td></tr>
+      <tr><td>İK / bordro</td><td>Personel merkezi ve maliyeti (FTE, bordro toplamı).</td></tr>
+      <tr><td>Stok</td><td>Kontrast/sarf ağırlıklı ortalama, radyoloji_sarf tüketimi.</td></tr>
+      <tr><td>Radyoloji</td><td>Protokol (süre/malzeme), istem süreleri, rapor sayıları, cihaz duruşları.</td></tr>
+      <tr><td>Prim</td><td>Radyolog hakedişi (gider), gönderen primi (referans kârlılığı).</td></tr>
+      <tr><td>Belge / kurum sözleşmesi</td><td>Tetkik gelirleri ödeyen bazında; sözleşme fiyatı ve vade.</td></tr>
+      <tr><td>Teleradyoloji</td><td>Gelen raporlama geliri (kurum), giden dış raporlama gideri.</td></tr>
+      <tr><td>Randevu</td><td>Slot/doluluk, gelmeyen randevu.</td></tr>
+    </table>
+
+    <h2>6. Yetkiler</h2>
+    <ul><li><code>maliyet.tanim</code> · <code>maliyet.donem</code> (çek/dağıt) · <code>maliyet.onay</code> (kilit/aç) · <code>maliyet.rapor</code> · <code>maliyet.senaryo</code> · <code>maliyet.hakedis_gor</code> (radyolog bazlı gider görünürlüğü ayrı).</li></ul>
+
+    <div class="tamam">
+      <b>İlk sürüm:</b> merkez/kalem/anahtar tanımları, gider çekme (fiş + bordro + amortisman + sarf + hakediş), kademeli dağıtım, merkez ve tetkik birim maliyeti, ödeyen marjı, dönem raporu, kilit.
+      Sonraya: standart reçete sapma analizi, saat dilimi doluluk, senaryo motoru, 7A fişi, karşılıklı dağıtım, sözleşme ekranı entegrasyonu.
+    </div>
+  </div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

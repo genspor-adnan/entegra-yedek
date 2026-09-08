@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ERP — Maliyet Muhasebesi ve Finansal Tablolar — Süreç ve Tablolar — Mockup (Gentegre AI · Muhasebe · ERP)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .win{max-width:1080px}
+  .icerik{padding:6px 18px 22px;font-size:13px;line-height:1.65}
+  h2{font-size:15px;color:#1c4374;border-bottom:1px solid var(--line2);padding-bottom:5px;margin:22px 0 10px}
+  h3{font-size:13.5px;color:#2c4a6b;margin:16px 0 6px}
+  code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:1px 4px;font-size:12px}
+  .icerik table{border-collapse:collapse;width:100%;margin:8px 0 14px}
+  .icerik th{background:linear-gradient(#f4f7fb,#e7eef6);border:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:12px;color:#3a5573}
+  .icerik td{border:1px solid var(--line2);padding:6px 8px;font-size:12.5px;vertical-align:top}
+  .kutu{border:1px solid var(--line2);background:#fbfcfd;border-radius:4px;padding:10px 12px;margin:10px 0}
+  .uyari{border:1px solid #f2ddbf;background:#fdf9f1;border-radius:4px;padding:9px 11px;margin:10px 0;color:var(--uyari)}
+  .tamam{border:1px solid #bfe3cb;background:#f1f8f3;border-radius:4px;padding:9px 11px;margin:10px 0;color:#245c37}
+  .akis{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+  .akis .a{border:1px solid var(--line);background:#fff;border-radius:14px;padding:4px 12px;font-size:12px}
+  .akis .a.v{background:#eef4fc;border-color:#cfe0f5;color:#2f6db3;font-weight:bold}
+  .akis .ok2{color:var(--muted)}
+  ul{margin:6px 0 12px 18px;padding:0} li{margin:3px 0}
+  .kucuk{font-size:11.5px;color:var(--muted)}
+  .durumlar{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+
+  .tablo{border:1px solid var(--line2);border-radius:4px;margin:12px 0;overflow:hidden}
+  .tablo .tb{background:linear-gradient(#f4f7fb,#e7eef6);padding:6px 10px;font-weight:bold;color:#1c4374;display:flex;gap:10px;align-items:center;font-size:13px}
+  .tablo .tb .rz{font-weight:normal}
+  .tablo .tb .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:11.5px}
+  .tablo table{margin:0}
+  .tablo td.k{font-family:Consolas,monospace;font-size:12px;white-space:nowrap}
+  .tablo td.t{font-family:Consolas,monospace;font-size:11.5px;color:#4d5d6e;white-space:nowrap}
+  .tablo tr.pk td.k{font-weight:bold}
+  .tablo .alt{padding:6px 10px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line2);background:#fbfcfd}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🧮 ERP Maliyet Muhasebesi (7/A) &amp; Finansal Tablolar — Süreç, Veri Modeli, Alanlar <span class="sp">Gentegre AI · Muhasebe · ERP · 03.09.2026</span></div>
+  <div class="icerik">
+    <div class="kutu">
+      <b>Tek cümlede:</b> Üretim modülünün emir bazlı gerçekleşen verisi (sarf 710, zaman 720) doğrudan emre; dolaylı giderler (730) masraf merkezlerinde toplanıp
+      yardımcı → esas → emir olarak yüklenir; kapanan emir mamul stok girişi (152) olur, satışta 620 SMM; ticari mal alış + masraf dağıtımıyla 153/621.
+      Ürün standart maliyeti (ağaç + rota) ile sapma analizi, müşteri/kanal/proje kârlılığı, iş merkezi kapasite-OEE; üstünde mizan, bilanço, gelir tablosu, EBITDA ve rasyo/kovenant.
+      HBYS setinden farkı: sürücüler tetkik/cihaz değil <b>emir / iş merkezi / ürün ağacı / stok değerleme</b>; 7/A yansıtma zorunlu; stok değişimi ve WIP.
+      <br><span class="kucuk">Mockuplar: <code>maliyet_merkezleri.html</code> · <code>urun_maliyet_karti.html</code> · <code>donem_karlilik_raporu.html</code> · <code>is_merkezi_kapasite_finans.html</code> ·
+      <code>mizan.html</code> · <code>bilanco.html</code> · <code>gelir_tablosu_ebitda.html</code> · <code>rasyo_analizi.html</code>. Bağlı: <code>../../Uretim/</code> · HBYS seti <code>../HBYS/</code></span>
+    </div>
+
+    <h2>1. Aylık kapanış akışı</h2>
+    <div class="akis">
+      <span class="a">Tanım: merkezler = iş merkezleri · anahtarlar · bütçe GÜG oranı · standart maliyetler</span><span class="ok2">→</span>
+      <span class="a v">Dönem aç · 710/720 emirlerden · 730/760/770 fiş-bordro-amortisman</span><span class="ok2">→</span>
+      <span class="a">Yardımcı → esas dağıtım</span><span class="ok2">→</span>
+      <span class="a">GÜG yükleme (esas → emir) · eksik/fazla</span><span class="ok2">→</span>
+      <span class="a">Emir kapanışı → 152 giriş fiyatı · stok ort. güncelle</span><span class="ok2">→</span>
+      <span class="a">Ürün birim maliyeti · sapma · marj</span><span class="ok2">→</span>
+      <span class="a">7/A yansıtma fişi · stok değerleme</span><span class="ok2">→</span>
+      <span class="a">Mizan → bilanço · gelir tablosu · EBITDA · rasyolar</span><span class="ok2">→</span>
+      <span class="a">Onay · kilit · fiyat listesi / standart güncelleme</span>
+    </div>
+    <table>
+      <tr><th style="width:40px">#</th><th style="width:210px">Adım</th><th>Ne olur</th><th style="width:230px">Kayıt</th></tr>
+      <tr><td>1</td><td><b>Tanım</b></td><td>Esas üretim yerleri = Üretim modülü iş merkezleri; yardımcı ve genel merkezler; her esas merkez için yükleme anahtarı (makine saati / işçilik saati) ve bütçe GÜG oranı; ürün standart maliyetleri (ağaç + rota × saat ücretleri).</td><td><code>masraf_merkezi</code> ek, <code>is_merkezi</code>, <code>urun_standart_maliyet</code></td></tr>
+      <tr><td>2</td><td><b>Ay içi (anlık)</b></td><td>Sarf fişi → emre 710 (hareket fiyatı); zaman kaydı → emre 720 (bordro saat ücreti); bütçe oranıyla GÜG ön yükleme; fason faturası emre. Açık emir birikimi (WIP) anlık görünür.</td><td><code>uretim_maliyet</code></td></tr>
+      <tr><td>3</td><td><b>Gider çekme</b></td><td>730 (endirekt işçilik, amortisman, enerji, bakım, endirekt malzeme), 760, 770 fiş/bordro/amortisman/fatura/sayaçtan merkezlere; direkt 710/720 emirlerden özetlenir (mutabakat: fiş 710 = Σ emir sarf).</td><td><code>maliyet_gider</code></td></tr>
+      <tr><td>4</td><td><b>Dağıtım + yükleme</b></td><td>Bina/enerji/bakım/depo/KK/planlama kademeli olarak esas merkezlere; esas merkez 730 toplamı / anahtar = gerçek yükleme oranı; emirlere gerçek oranla yeniden yükleme ya da bütçe oranı + eksik/fazla farkı (ayar) → 620 düzeltmesi.</td><td><code>maliyet_dagitim</code>, <code>maliyet_merkez_donem</code></td></tr>
+      <tr><td>5</td><td><b>Emir kapanışı</b></td><td>Kapanan emir toplamı / üretilen adet → mamul giriş belgesi birim fiyatı güncellenir; stok ağırlıklı ortalama yeniden; alt emir maliyeti üst emre yarı mamul olarak.</td><td>Üretim modülü + <code>stok_hareket</code></td></tr>
+      <tr><td>6</td><td><b>Ürün maliyeti &amp; sapma</b></td><td>Dönem × ürün: gerçek birim, standart, sapma kırılımı (fiyat / miktar / verimlilik / GÜG hacim); müşteri-kanal-proje marjı (gelir satış satırlarından, SMM stok çıkış maliyetinden).</td><td><code>urun_maliyet_donem</code>, <code>urun_maliyet_musteri</code>, <code>proje_maliyet_donem</code></td></tr>
+      <tr><td>7</td><td><b>Ticari mal</b></td><td>Alış faturası + masraf faturaları (nakliye, gümrük, sigorta) dağıtım anahtarıyla 153 maliyetine; satışta 621.</td><td><code>belge_satir.masraf_dagitim_json</code></td></tr>
+      <tr><td>8</td><td><b>Stok değerleme &amp; yansıtma</b></td><td>150/151/152/153 dönem sonu değerleri, sayım farkları; 7/A yansıtma fişleri (711/721/731 → 151/152; 761/771 → 631/632) otomatik.</td><td><code>stok_degerleme_donem</code>, <code>muhasebe_fis</code></td></tr>
+      <tr><td>9</td><td><b>Finansal tablolar</b></td><td>Mizan (7/A bakiye 0 kontrolü), bilanço (stoklar değerlemeden), gelir tablosu (620/621/622 + stok değişimi opsiyonu), EBITDA (amortisman 730/760/770 içinden), rasyolar + kovenantlar.</td><td>ortak finansal tablolar</td></tr>
+      <tr><td>10</td><td><b>Karar</b></td><td>Standart maliyet ve fiyat listesi güncelleme önerisi, kapasite/yatırım senaryosu (2. makine vs vardiya), müşteri/kanal fiyat politikası, proje aşım uyarısı.</td><td><code>maliyet_senaryo</code>, <code>fiyat_listesi</code></td></tr>
+    </table>
+
+    <h2>2. HBYS setinden farklar</h2>
+    <table>
+      <tr><th style="width:220px">Konu</th><th>HBYS (görüntüleme merkezi)</th><th>ERP (üretim/ticaret)</th></tr>
+      <tr><td>Maliyet nesnesi</td><td>Tetkik (hizmet)</td><td>Ürün / üretim emri / ticari mal / proje</td></tr>
+      <tr><td>Direkt maliyet kaynağı</td><td>Çekim süresi × cihaz ₺/dk, sarf, radyolog hakediş</td><td>Emir sarf fişleri (710), zaman kayıtları (720), fason</td></tr>
+      <tr><td>Dolaylı gider</td><td>Merkez tam maliyeti / dk</td><td>730 GÜG yükleme oranı (bütçe/gerçek), eksik/fazla yükleme</td></tr>
+      <tr><td>Stok</td><td>Sarf stoğu (küçük)</td><td>150/151/152/153 değerleme, WIP, sayım, SMM = stok çıkışı</td></tr>
+      <tr><td>Standart</td><td>Protokol reçetesi</td><td>Ürün ağacı + rota, sürümlü; sapma kırılımı</td></tr>
+      <tr><td>Kârlılık boyutları</td><td>Modalite, tetkik, ödeyen kurum, radyolog, referans</td><td>Ürün grubu, müşteri, kanal, proje, iş merkezi</td></tr>
+      <tr><td>7/A</td><td>740 hizmet üretim → 622</td><td>710/720/730 → 151/152 → 620; 621 ticari; 622 hizmet</td></tr>
+      <tr><td>Gelir tablosu ekleri</td><td>—</td><td>İhracat (601), stok değişimi, kur değerlemesi, kovenantlar</td></tr>
+    </table>
+
+    <h2>3. Tablolar ve alanlar</h2>
+    <h3>Mevcut (kullanılır / genişler)</h3>
+<div class="tablo">
+  <div class="tb"><code>masraf_merkezi</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">maliyet merkezi ağacı — mevcut</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">tur</td><td class="t">smallint</td><td>yeni — 1 esas üretim yeri · 2 yardımcı üretim yeri · 3 ticari (satın alma/satış/sevkiyat) · 4 genel yönetim · 5 proje</td></tr><tr><td class="k">is_merkezi_id</td><td class="t">int</td><td>yeni — → is_merkezi (Üretim): esas üretim yeri = iş merkezi</td></tr><tr><td class="k">yukleme_anahtari</td><td class="t">smallint</td><td>yeni — 1 makine saati · 2 direkt işçilik saati · 3 direkt işçilik ₺ · 4 üretim adedi · 5 malzeme ₺</td></tr><tr><td class="k">butce_gug_orani</td><td class="t">numeric</td><td>yeni — ay içi ön yükleme oranı (₺/anahtar)</td></tr><tr><td class="k">muhasebe_hesap_kodlari</td><td class="t">varchar[]</td><td>yeni — 710/720/730 masraf yeri alt hesapları</td></tr><tr><td class="k">alan_m2 / fte / kapasite_saat_ay</td><td class="t"></td><td>yeni</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>is_merkezi (Üretim modülü)</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">saat ücreti = 720 + 730 yükleme oranı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">saat_ucreti_iscilik / saat_ucreti_gug</td><td class="t">numeric</td><td>yeni — maliyet modülü dönem kapanışında günceller; rota standart maliyeti bunlarla</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>uretim_emri / uretim_emri_satir / uretim_zaman / uretim_maliyet / uretim_islem_malzeme</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">Üretim modülü gerçekleşen sürücüler</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">uretim_maliyet.gug_yuklenen / gug_orani_kaynak</td><td class="t">numeric / smallint</td><td>yeni — yüklenen GÜG ve oran türü (bütçe/gerçek)</td></tr><tr><td class="k">uretim_maliyet.sapma_fiyat / sapma_miktar / sapma_verimlilik / sapma_gug_hacim</td><td class="t">numeric</td><td>yeni — standart sapma kırılımı</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>stok / stok_hareket / stok_fiyat</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">stok değerleme (ağırlıklı ortalama · lot maliyeti)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">stok.standart_maliyet / standart_maliyet_tarihi</td><td class="t">numeric / date</td><td>yeni — ürün ağacından standart</td></tr><tr><td class="k">stok.maliyet_sinifi</td><td class="t">smallint</td><td>yeni — 150 hammadde · 151 yarı mamul · 152 mamul · 153 ticari · 157 diğer</td></tr><tr><td class="k">stok_hareket.maliyet_kaynak</td><td class="t">smallint</td><td>yeni — alış / üretim kapanış / masraf dağıtım / sayım</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>belge / belge_satir (alış faturası masraf dağıtımı)</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">ithalat/nakliye/gümrük masraflarının ticari mal maliyetine eklenmesi</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">belge_satir.masraf_dagitim_json</td><td class="t">jsonb</td><td>yeni — masraf faturası → hangi alış satırlarına, anahtar (tutar/miktar/ağırlık)</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>muhasebe_fis_satir / hesap_plani / mali_donem</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">mevcut — merkez_id, proje_id, hizmet_id kırılımı; 7/A yansıtma fişleri</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">hesap_plani.ebitda_sinif</td><td class="t">smallint</td><td>yeni — amortisman · faiz gideri · faiz/kambiyo geliri · vergi · olağandışı</td></tr><tr><td class="k">hesap_plani.maliyet_sinifi</td><td class="t">smallint</td><td>yeni — 710/720/730/740/760/770/780 grubu (gider çekme eşlemesi)</td></tr>
+  </table>
+</div><h3>Yeni tablolar (HBYS setiyle ortak yapı, ERP sürücüleri)</h3>
+<div class="tablo">
+  <div class="tb"><code>maliyet_donem</code> <span class="rz ok">yeni</span> <span class="sp">aylık maliyet dönemi</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">yil / ay / sube_id</td><td class="t"></td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>açık · giderler çekildi · dağıtıldı · GÜG yüklendi · onaylı/kilitli</td></tr><tr><td class="k">gug_oran_turu</td><td class="t">smallint</td><td>bütçe / gerçek</td></tr><tr><td class="k">gug_eksik_fazla</td><td class="t">numeric</td><td>dönem kapanışında 620'ye/630'a</td></tr><tr><td class="k">yansitma_fis_id</td><td class="t">int</td><td>7/A yansıtma (711/721/731 → 151/152 · 761/771 → 631/632)</td></tr><tr><td class="k">onay_id / onay_zamani</td><td class="t"></td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>maliyet_gider</code> <span class="rz ok">yeni</span> <span class="sp">dönem gider satırı (merkez × kalem × 7/A hesap)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">donem_id / merkez_id / masraf_id</td><td class="t">int</td><td></td></tr><tr><td class="k">hesap_grubu</td><td class="t">smallint</td><td>710 · 720 · 730 · 740 · 760 · 770 · 780</td></tr><tr><td class="k">tutar</td><td class="t">numeric</td><td></td></tr><tr><td class="k">davranis</td><td class="t">smallint</td><td>sabit / değişken / yarı değişken</td></tr><tr><td class="k">kaynak_tur</td><td class="t">smallint</td><td>muhasebe fişi · bordro · amortisman · stok sarf (endirekt) · üretim emri sarf (direkt) · zaman kaydı (direkt işçilik) · fason faturası · alış faturası · sayaç · elle</td></tr><tr><td class="k">kaynak_id</td><td class="t">int</td><td></td></tr><tr><td class="k">uretim_emri_id</td><td class="t">int</td><td>direkt kalemlerde (710/720) emre doğrudan</td></tr><tr><td class="k">proje_id</td><td class="t">int</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>maliyet_anahtar / maliyet_anahtar_deger</code> <span class="rz ok">yeni</span> <span class="sp">anahtar tanımı ve dönem değerleri</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">kod</td><td class="t">varchar</td><td>makine_saati · iscilik_saati · m2 · kwh · bakim_saati · kontrol_adedi · malzeme_hareketi · uretim_adedi · gelir · fte</td></tr><tr><td class="k">deger (merkez × dönem)</td><td class="t">numeric</td><td>uretim_zaman, uretim_olcum, sarf fişleri, sayaç, merkez kartından otomatik</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>maliyet_dagitim_kurali / maliyet_dagitim</code> <span class="rz ok">yeni</span> <span class="sp">aşamalı dağıtım (yardımcı → esas) ve GÜG yükleme (esas → emir)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">asama / kaynak_merkez_id / anahtar_id / hedef</td><td class="t"></td><td>HBYS ile aynı</td></tr><tr><td class="k">hedef_tur</td><td class="t">smallint</td><td>yeni — 1 merkez · 2 üretim emri (GÜG yükleme satırı)</td></tr><tr><td class="k">uretim_emri_id</td><td class="t">int</td><td>yükleme satırında</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>maliyet_merkez_donem</code> <span class="rz ok">yeni</span> <span class="sp">merkez dönem özeti</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">direkt_iscilik_720 / gug_730 / dagitilan / toplam</td><td class="t">numeric</td><td></td></tr><tr><td class="k">anahtar_toplam / yukleme_orani / yuklenen / eksik_fazla</td><td class="t">numeric</td><td></td></tr><tr><td class="k">kapasite_saat / calisilan_saat / doluluk / oee</td><td class="t"></td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>urun_standart_maliyet</code> <span class="rz ok">yeni</span> <span class="sp">ürün standart maliyet kartı (ağaç + rota → sürümlü)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">stok_id</td><td class="t">int</td><td></td></tr><tr><td class="k">urun_agaci_id / surum</td><td class="t">int</td><td></td></tr><tr><td class="k">gecerli_bas</td><td class="t">date</td><td></td></tr><tr><td class="k">fiyat_kaynagi</td><td class="t">smallint</td><td>ağırlıklı ort. / son alış / liste / bütçe</td></tr><tr><td class="k">gug_oran_turu</td><td class="t">smallint</td><td></td></tr><tr><td class="k">malzeme / iscilik / gug / fason / toplam</td><td class="t">numeric</td><td></td></tr><tr><td class="k">satirlar_json</td><td class="t">jsonb</td><td>bileşen/operasyon kırılımı (ekran tablosu)</td></tr><tr><td class="k">tavsiye_katsayi / onerilen_fiyat</td><td class="t">numeric</td><td></td></tr><tr><td class="k">hesaplayan_id / zaman</td><td class="t"></td><td></td></tr>
+  </table><div class="alt">stok.standart_maliyet bu tablonun güncel satırıdır</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>urun_maliyet_donem</code> <span class="rz ok">yeni</span> <span class="sp">dönem × ürün gerçekleşen birim maliyet, sapma ve marj</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">donem_id / stok_id</td><td class="t">int</td><td>PK</td></tr><tr><td class="k">uretilen_adet / satilan_adet</td><td class="t">numeric</td><td></td></tr><tr><td class="k">malzeme / iscilik / gug / fason / fire / birim_maliyet</td><td class="t">numeric</td><td>emir kapanışlarından adet ağırlıklı</td></tr><tr><td class="k">standart_birim / sapma_oran / sapma_fiyat / sapma_miktar / sapma_verimlilik / sapma_gug</td><td class="t">numeric</td><td></td></tr><tr><td class="k">net_satis / smm / brut_kar / brut_oran / tam_maliyet_yonetim / net_marj</td><td class="t">numeric</td><td>760/770 payı yalnız yönetim görünümü</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>urun_maliyet_musteri</code> <span class="rz ok">yeni</span> <span class="sp">dönem × ürün × müşteri/kanal marjı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">donem_id / stok_id / taraf_id / kanal</td><td class="t"></td><td>PK</td></tr><tr><td class="k">adet / gelir / ort_fiyat / iskonto_oran / smm / brut_kar / kanal_gideri / katki / vade_gun / finansman</td><td class="t">numeric</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>proje_maliyet_donem</code> <span class="rz ok">yeni</span> <span class="sp">proje bazlı maliyet ve tamamlanma</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">donem_id / proje_id</td><td class="t">int</td><td>PK</td></tr><tr><td class="k">sozlesme / faturalanan / maliyet_kumulatif / tahmini_toplam / tamamlanma_oran / tahmini_marj</td><td class="t">numeric</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>planda / uyarı / aşım</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>stok_degerleme_donem</code> <span class="rz ok">yeni</span> <span class="sp">dönem × stok sınıfı (150/151/152/153/WIP)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">donem_id / sinif</td><td class="t"></td><td>PK</td></tr><tr><td class="k">donem_basi / giris / cikis / donem_sonu / sayim_farki / devir_gun</td><td class="t">numeric</td><td></td></tr><tr><td class="k">yontem</td><td class="t">smallint</td><td>ağırlıklı ort. / FIFO lot / emir maliyeti</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>is_merkezi_finans / is_merkezi_kullanim</code> <span class="rz ok">yeni</span> <span class="sp">makine yatırım-amortisman-bakım parametreleri; dönem kapasite, OEE</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">is_merkezi_id / demirbas_ids / yatirim_toplam / maliyet_omru_ay / aylik_amortisman / bakim_aylik / enerji_kw</td><td class="t"></td><td></td></tr><tr><td class="k">kullanim: kapasite_saat / planli_durus / ariza / calisilan / hazirlik / doluluk / oee_k / oee_p / oee_q</td><td class="t"></td><td>uretim_zaman + uretim_olcum</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>maliyet_senaryo · finansal_tablo_sablon(_satir) · finansal_donem_deger · ebitda_duzeltme · finansal_ayar · rasyo_tanim · rasyo_deger · finansal_kontrol</code> <span class="rz mavi">ortak</span> <span class="sp">HBYS setiyle aynı tanımlar</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">rasyo_tanim.kovenant_id</td><td class="t">int</td><td>yeni — kredi sözleşmesi kovenant seti</td></tr><tr><td class="k">finansal_ayar</td><td class="t"></td><td>gug_eksik_fazla_hedef (620 / 630) · stok_degisimi_satiri · ihracat_kur_degerleme</td></tr>
+  </table>
+</div>
+
+    <h2>4. Ekranlar</h2>
+    <table>
+      <tr><th style="width:250px">Ekran</th><th>Görev</th><th style="width:230px">Mockup</th></tr>
+      <tr><td>Maliyet Merkezleri &amp; Dağıtım</td><td>İş merkezi = maliyet merkezi; 7/A gider çekme; anahtarlar; dağıtım + GÜG yükleme.</td><td><code>maliyet_merkezleri.html</code></td></tr>
+      <tr><td>Ürün Maliyet Kartı</td><td>Gerçek/standart birim maliyet, ağaç+rota standart, emir sapmaları, müşteri/kanal marjı, senaryo, fiyat önerisi.</td><td><code>urun_maliyet_karti.html</code></td></tr>
+      <tr><td>Dönem Kârlılık Raporu</td><td>Ürün grubu, müşteri/kanal, proje, iş merkezi kapasite, stok değerleme, trend.</td><td><code>donem_karlilik_raporu.html</code></td></tr>
+      <tr><td>İş Merkezi Kapasite &amp; Finans</td><td>Saat ücreti bileşenleri, OEE, başabaş, yatırım/vardiya senaryosu.</td><td><code>is_merkezi_kapasite_finans.html</code></td></tr>
+      <tr><td>Mizan · Bilanço · Gelir Tablosu/EBITDA · Rasyo</td><td>ERP hesap yapısı (7/A, stoklar, ihracat, kovenant).</td><td><code>mizan.html</code> · <code>bilanco.html</code> · <code>gelir_tablosu_ebitda.html</code> · <code>rasyo_analizi.html</code></td></tr>
+    </table>
+
+    <h2>5. Entegrasyonlar</h2>
+    <table>
+      <tr><th style="width:200px">Modül</th><th>Veri</th></tr>
+      <tr><td>Üretim</td><td>Emir sarf/zaman/fason/fire, kapanış maliyeti, iş merkezi, ürün ağacı/rota, OEE.</td></tr>
+      <tr><td>Stok</td><td>Hareket maliyeti, ağırlıklı ortalama / lot, sayım, sınıf (150–157).</td></tr>
+      <tr><td>Satın alma / belge</td><td>Alış faturası, masraf dağıtımı, fason faturası; satış faturaları (gelir, kanal, müşteri, proje).</td></tr>
+      <tr><td>Muhasebe</td><td>7/A fişleri, yansıtma, amortisman, kur değerlemesi, kapanış.</td></tr>
+      <tr><td>İK / bordro</td><td>Saat ücretleri, FTE, endirekt işçilik.</td></tr>
+      <tr><td>Demirbaş</td><td>Makine yatırımı, amortisman, bakım sözleşmesi.</td></tr>
+      <tr><td>Proje</td><td>Proje bazlı maliyet/gelir, tamamlanma.</td></tr>
+      <tr><td>Fiyat listesi / kampanya</td><td>Standart maliyet → fiyat önerisi; iskonto etkisi marjda.</td></tr>
+    </table>
+
+    <div class="tamam"><b>İlk sürüm (ERP):</b> merkez=iş merkezi eşlemesi, 710/720 emirden otomatik, 730 çekme + tek aşamalı yükleme (bütçe oranı), emir kapanış → stok fiyatı, ürün standart/gerçek/sapma, ürün grubu ve müşteri marjı, mizan/bilanço/gelir tablosu/EBITDA, temel rasyolar. Sonraya: kademeli dağıtım, sapma kırılımı, proje tamamlanma, stok değişimi satırı, kovenant izleme, senaryo motoru, TFRS.</div>
+  </div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

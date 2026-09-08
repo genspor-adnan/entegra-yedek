@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Göz Hasta Kartı — Oftalmolojik Özet — Mockup (Gentegre AI · Göz)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .odos{display:grid;grid-template-columns:150px 1fr 1fr;gap:0;border:1px solid var(--line2);border-radius:4px;overflow:hidden;margin:8px 12px}
+  .odos>div{padding:5px 8px;border-bottom:1px solid var(--line2);border-right:1px solid var(--line2);font-size:11.5px}
+  .odos>div:nth-child(3n){border-right:none}
+  .odos .h{background:linear-gradient(#f4f7fb,#e7eef6);font-weight:bold;color:#2c4a6b;text-align:center}
+  .odos .l{background:#fbfcfd;color:#3a5573;font-weight:bold}
+  .odos .v{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+  .odos .v .inp{min-height:22px;padding:1px 6px;flex:1}
+  .odos .v .k{width:58px;flex:none;text-align:center}
+  .od{color:#b3261e;font-weight:bold} .os{color:#2f6db3;font-weight:bold}
+  .goz-sema{display:inline-block;width:110px;height:110px;border-radius:50%;border:2px solid #cdd6e0;background:radial-gradient(circle,#fbe9e7 0 18%,#fff 19% 60%,#eef4fc 61% 100%);position:relative;margin:6px}
+  .goz-sema i{position:absolute;font-style:normal;font-size:10px;color:#b3261e}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">👤 Göz Hasta Kartı — Mehmet Kaya · 58 E <span class="sp">taraf_hasta + goz_hasta_ozet · 6 ziyaret · son 03.09.2026</span></div>
+  <div class="toolbar"><div class="btn primary">👁 Yeni Muayene</div><div class="btn">👓 Gözlük Reçeteleri</div><div class="btn">📷 Görüntüleme Arşivi</div><div class="btn">💉 Enjeksiyon Takibi</div><div class="btn">🔪 Ameliyatlar</div><div class="btn">📈 Trend (GİB · RNFL · VA)</div><div class="btn">🖨 Özet</div><div class="btn sp">↗ Genel Hasta Kartı / Tıbbi Özet</div></div>
+  <div class="hdr k4" style="background:#fff8f0">
+    <div class="fld"><label>Hasta</label><div class="inp ro big">Mehmet Kaya · 12345678901 · 58 E · SGK</div></div>
+    <div class="fld"><label>Sistemik</label><div class="inp ro"><span class="rz sari">DM tip 2</span> <span class="rz sari">HT</span> <span class="rz">Alerji: yok</span> <span class="rz">İlaç: metformin, ramipril</span></div></div>
+    <div class="fld"><label>Göz tanıları (aktif)</label><div class="inp ro"><span class="rz kir">H40.1 POAG şüphesi OU</span> <span class="rz sari">H52.1 Miyopi OU</span> <span class="rz">H25.1 Nükleer katarakt OD (erken)</span></div></div>
+    <div class="fld"><label>Aile / risk</label><div class="inp ro">Baba glokom · DM 8 yıl · sigara bırakmış</div></div>
+  </div>
+  <div class="sekmeler"><div class="sekme on">Göz Özeti (OD/OS)</div><div class="sekme">Ziyaretler (6)</div><div class="sekme">Gözlük / Lens (3)</div><div class="sekme">Görüntüleme (5)</div><div class="sekme">Takip: Glokom</div><div class="sekme">Enjeksiyon / Lazer / Ameliyat</div></div>
+  <div class="pnl">
+<div class="odos"><div class="h">Parametre</div><div class="h od">OD · Sağ</div><div class="h os">OS · Sol</div><div class="l">Son BCVA</div><div class="v"><span class="b">0,8</span> (20/25) · pinhole 1,0</div><div class="v"><span class="b">1,0</span> (20/20)</div><div class="l">Son refraksiyon</div><div class="v">−2,25 / −0,50 × 90 · add +2,00</div><div class="v">−2,00 / −0,75 × 85 · add +2,00</div><div class="l">GİB (son / en yüksek)</div><div class="v"><span class="rz sari">26</span> mmHg (03.09) · maks 28 (12.03.25)</div><div class="v"><span class="rz sari">24</span> mmHg · maks 25</div><div class="l">Pakimetri (CCT)</div><div class="v">532 µm</div><div class="v">528 µm</div><div class="l">C/D oranı</div><div class="v"><span class="rz sari">0,6</span> (vertikal 0,65)</div><div class="v">0,5</div><div class="l">RNFL ort. (OCT)</div><div class="v"><span class="rz sari">78 µm</span> · inferior incelme</div><div class="v">86 µm · normal sınırda</div><div class="l">Görme alanı (24-2)</div><div class="v">MD <span class="rz sari">−3,2 dB</span> · PSD 3,1 · üst arkuat defekt</div><div class="v">MD −1,1 dB · PSD 1,8 · normal</div><div class="l">Gonyoskopi</div><div class="v">Açık (Shaffer 3-4), pigment +</div><div class="v">Açık (3-4)</div><div class="l">Lens</div><div class="v">Nükleer skleroz NO2 NC2 (LOCS III)</div><div class="v">Şeffaf / NO1</div><div class="l">Makula (OCT)</div><div class="v">Normal · CMT 262 µm</div><div class="v">Normal · CMT 258 µm</div><div class="l">Retina periferi</div><div class="v">DR yok</div><div class="v">DR yok</div><div class="l">Aktif tedavi</div><div class="v">Latanoprost 1×1 akşam (başlangıç 12.03.25)</div><div class="v">Latanoprost 1×1</div></div>
+    <div class="ic sonuk">Özet alanları son onaylı muayene/görüntülemeden türetilir (<code>goz_hasta_ozet</code> materyalize görünüm); ok işaretleri önceki ziyarete göre eğilim. Trend grafikleri: GİB, RNFL, MD, VA, CMT.</div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th>Tarih</th><th>Hekim</th><th>Neden</th><th class="orta">BCVA OD/OS</th><th class="orta">GİB OD/OS</th><th>Tanı</th><th>Karar</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>03.09.2026</td><td>Dr. Aksoy</td><td>Glokom takip · 6 ay</td><td class="orta">0,8 / 1,0</td><td class="orta"><span class="rz sari">26 / 24</span></td><td>H40.1 · H25.1</td><td>GA + OCT · ilaç değişimi değerlendirilecek</td><td>📂</td></tr>
+        <tr><td>12.03.2026</td><td>Dr. Aksoy</td><td>Glokom takip</td><td class="orta">0,8 / 1,0</td><td class="orta">19 / 18</td><td>H40.1</td><td>Latanoprost devam · 6 ay</td><td>📂</td></tr>
+        <tr><td>10.09.2025</td><td>Dr. Aksoy</td><td>Glokom takip</td><td class="orta">0,9 / 1,0</td><td class="orta">20 / 19</td><td>H40.1</td><td>GA stabil</td><td>📂</td></tr>
+        <tr><td>12.03.2025</td><td>Dr. Aksoy</td><td>İlk başvuru · bulanık görme</td><td class="orta">0,9 / 1,0</td><td class="orta"><span class="rz kir">28 / 25</span></td><td>H40.1 · H52.1</td><td>Latanoprost başlandı · gözlük · GA + OCT bazal</td><td>📂</td></tr>
+        <tr><td>12.03.2025</td><td>Tekn. Z. Ak</td><td>Ön tetkik</td><td class="orta">—</td><td class="orta">28 / 25</td><td>—</td><td>otoref, pakimetri</td><td>📂</td></tr>
+        <tr><td>14.02.2024</td><td>Dr. Yalçın</td><td>Gözlük kontrolü</td><td class="orta">1,0 / 1,0</td><td class="orta">18 / 18</td><td>H52.1</td><td>Gözlük yenilendi</td><td>📂</td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th>Tarih</th><th>Tür</th><th class="orta">OD sph/cyl/ax</th><th class="orta">OS sph/cyl/ax</th><th class="orta">Add</th><th class="orta">PD</th><th>Cam / lens</th><th>Hekim</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr><td>12.03.2025</td><td>Gözlük · progresif</td><td class="orta">−2,25 / −0,50 × 90</td><td class="orta">−2,00 / −0,75 × 85</td><td class="orta">+2,00</td><td class="orta">64 (32/32)</td><td>Organik 1.6 · AR · mavi filtre</td><td>Dr. Aksoy</td><td class="orta"><span class="rz ok">Aktif · optik: verildi</span></td></tr>
+        <tr><td>14.02.2024</td><td>Gözlük · uzak</td><td class="orta">−2,00 / −0,50 × 90</td><td class="orta">−1,75 / −0,75 × 85</td><td class="orta">—</td><td class="orta">64</td><td>Organik 1.5</td><td>Dr. Yalçın</td><td class="orta"><span class="rz pas">Eski</span></td></tr>
+        <tr><td>2019</td><td>Gözlük (dış)</td><td class="orta">−1,75 / −0,50 × 90</td><td class="orta">−1,50 / −0,50 × 90</td><td class="orta">—</td><td class="orta">—</td><td>hasta beyanı</td><td>—</td><td class="orta"><span class="rz pas">Eski</span></td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th>Tarih</th><th>Tetkik</th><th class="orta">Göz</th><th>Cihaz</th><th>Ana ölçümler</th><th class="orta">Görüntü</th><th class="orta">Rapor</th></tr></thead>
+      <tbody>
+        <tr><td>03.09.2026</td><td>OCT RNFL + GCC</td><td class="orta">OU</td><td>Spectralis</td><td>RNFL OD 78 (inf 61 ↓) · OS 86 · GCC OD 74</td><td class="orta">🖼 DICOM</td><td class="orta">bekliyor</td></tr>
+        <tr><td>03.09.2026</td><td>Görme alanı 24-2 SITA</td><td class="orta">OU</td><td>HFA3</td><td>OD MD −3,2 PSD 3,1 GHT dışı · OS MD −1,1 · güvenilirlik ✔</td><td class="orta">📄 PDF</td><td class="orta">bekliyor</td></tr>
+        <tr><td>12.03.2026</td><td>OCT RNFL</td><td class="orta">OU</td><td>Spectralis</td><td>OD 82 · OS 88</td><td class="orta">🖼</td><td class="orta">✔</td></tr>
+        <tr><td>12.03.2025</td><td>Görme alanı 24-2 (bazal)</td><td class="orta">OU</td><td>HFA3</td><td>OD MD −1,8 · OS −0,6</td><td class="orta">📄</td><td class="orta">✔</td></tr>
+        <tr><td>12.03.2025</td><td>Fundus fotoğrafı + OCT makula</td><td class="orta">OU</td><td>Kowa / Spectralis</td><td>CMT 262/258 · DR yok</td><td class="orta">🖼</td><td class="orta">✔</td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="pnl">
+    <div class="ikiPanel">
+      <div class="grp" style="margin:10px"><div class="gb">Glokom takip planı <span class="sp">goz_hastalik_takip · protokol: POAG şüphesi</span></div>
+        <div class="hdr" style="grid-template-columns:1fr 1fr;border:none">
+          <div class="fld"><label>Hedef GİB</label><div class="inp">≤ 18 mmHg (bazal 28 → %30 düşüş)</div></div>
+          <div class="fld"><label>Durum</label><div class="inp"><span class="rz sari">Hedef dışı · progresyon şüphesi</span></div></div>
+          <div class="fld"><label>Tedavi</label><div class="inp">Latanoprost 1×1 · 18 ay · uyum: iyi (beyan)</div></div>
+          <div class="fld"><label>Sonraki</label><div class="inp">GA 6 ay · OCT 6 ay · GİB 3 ay · gonyoskopi yıllık</div></div>
+        </div></div>
+      <div class="grp" style="margin:10px"><div class="gb">Trend — GİB (mmHg) · RNFL (µm) · MD (dB)</div>
+        <div class="dg"><table><thead><tr><th>Tarih</th><th class="sag">GİB OD</th><th class="sag">GİB OS</th><th class="sag">RNFL OD</th><th class="sag">MD OD</th><th class="sag">C/D OD</th></tr></thead>
+          <tbody><tr><td>12.03.2025</td><td class="sag">28</td><td class="sag">25</td><td class="sag">88</td><td class="sag">−1,8</td><td class="sag">0,5</td></tr><tr><td>10.09.2025</td><td class="sag">20</td><td class="sag">19</td><td class="sag">86</td><td class="sag">−2,0</td><td class="sag">0,5</td></tr><tr><td>12.03.2026</td><td class="sag">19</td><td class="sag">18</td><td class="sag">82</td><td class="sag">—</td><td class="sag">0,55</td></tr><tr><td>03.09.2026</td><td class="sag"><span class="rz sari">26</span></td><td class="sag">24</td><td class="sag"><span class="rz sari">78</span></td><td class="sag"><span class="rz sari">−3,2</span></td><td class="sag">0,6</td></tr></tbody></table></div>
+        <div class="ic sonuk">Progresyon analizi (RNFL eğimi −4 µm/yıl, GA olay analizi) → hekime uyarı.</div></div>
+    </div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th>Tarih</th><th>Tür</th><th class="orta">Göz</th><th>İşlem</th><th>Hekim</th><th>Sonuç / not</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr><td colspan="7" class="sonuk">Kayıt yok — planlanan: SLT (lazer trabeküloplasti) OD değerlendirme (03.09.2026 kararı bekliyor)</td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="statusbar"><span>6 ziyaret · 3 reçete · 5 görüntüleme · 1 takip protokolü</span><span class="sp">Genel tıbbi özet (alerji/kronik/ilaç) ortak <code>hasta_*</code> tablolarından; bu kart göz katmanı</span></div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

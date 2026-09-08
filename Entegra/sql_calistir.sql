@@ -1,2 +1,6 @@
-﻿DECLARE @Kosullar nvarchar(max)=N'{"Mod":0,"Sayfa":0,"TopN":100,"Pasifler":1,"Arama":"","Sirala":"","SubeList":"1","TekSubeTum":10,"SubeId":1,"KulId":1}';
-EXEC dbo.sp_Prog_Cari_Liste_Json2 @Kosullar, 1;
+﻿select top 10 M.ID, M.EKLEMETARIHI, M.MESAJTIPI, M.HTTPKODU,
+       left(cast(M.MESAJ as nvarchar(max)), 4000) as MESAJ
+from BILIM_GENDEPO.dbo.EBELGE E
+join BILIM_GENDEPO.dbo.EBELGEMESAJ M on M.EBELGEID=E.ID
+where E.FATBASLIKID=114166
+order by M.ID desc;

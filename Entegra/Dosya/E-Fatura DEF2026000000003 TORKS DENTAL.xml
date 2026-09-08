@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+<cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+<cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+<cbc:ProfileID>TEMELFATURA</cbc:ProfileID>
+<cbc:ID>DEF2026000000003</cbc:ID>
+<cbc:CopyIndicator>false</cbc:CopyIndicator>
+<cbc:UUID>C04336B7-8727-4BDF-9A96-71AE5E70704C</cbc:UUID>
+<cbc:IssueDate>2026-09-02</cbc:IssueDate>
+<cbc:IssueTime>17:31:27</cbc:IssueTime>
+<cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+<cbc:Note>özel dipnot</cbc:Note>
+<cbc:Note>DEF2026000000003</cbc:Note>
+<cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+<cbc:LineCountNumeric>3</cbc:LineCountNumeric>
+<cac:OrderReference>
+<cbc:ID>101275</cbc:ID>
+<cbc:IssueDate>2026-08-18</cbc:IssueDate>
+</cac:OrderReference>
+<cac:AdditionalDocumentReference>
+<cbc:ID>101276</cbc:ID>
+<cbc:IssueDate>2026-09-02</cbc:IssueDate>
+<cbc:DocumentTypeCode>SIPARIS</cbc:DocumentTypeCode>
+<cbc:DocumentType>Sipariş</cbc:DocumentType>
+</cac:AdditionalDocumentReference>
+<cac:DespatchDocumentReference>
+<cbc:ID>104157</cbc:ID>
+<cbc:IssueDate>2026-09-02</cbc:IssueDate>
+</cac:DespatchDocumentReference>
+<cac:DespatchDocumentReference>
+<cbc:ID>104158</cbc:ID>
+<cbc:IssueDate>2026-09-02</cbc:IssueDate>
+</cac:DespatchDocumentReference>
+<cac:AccountingSupplierParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="TCKN">12345678901</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>Proimtech Sağlık Ürünleri A.Ş.</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>aaaaaa</cbc:StreetName>
+<cbc:CitySubdivisionName>üsküdar</cbc:CitySubdivisionName>
+<cbc:CityName>İSTANBUL</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>çankaya</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>Proimtech Sağlık Ürünleri A.Ş.</cbc:RegistrationName></cac:PartyLegalEntity>
+<cac:Person>
+<cbc:FirstName>Proimtech Sağlık Ürünleri</cbc:FirstName>
+<cbc:FamilyName>A.Ş.</cbc:FamilyName>
+</cac:Person>
+</cac:Party>
+</cac:AccountingSupplierParty>
+<cac:AccountingCustomerParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="VKN">8560691548</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>TORKS DENTAL SAĞLIK HİZMETLERİ SANAYİ TİCARET LTD.ŞTİ.</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>BAHÇELİEVLER MAH. MUZAFFER IŞIN CAD. 6/16 </cbc:StreetName>
+<cbc:CitySubdivisionName>MERKEZ</cbc:CitySubdivisionName>
+<cbc:CityName>BOLU</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>BOLU</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>TORKS DENTAL SAĞLIK HİZMETLERİ SANAYİ TİCARET LTD.ŞTİ.</cbc:RegistrationName></cac:PartyLegalEntity>
+</cac:Party>
+</cac:AccountingCustomerParty>
+<cac:TaxTotal>
+<cbc:TaxAmount currencyID="TRY">1246.01</cbc:TaxAmount>
+<cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">12460.07</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">1246.01</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+</cac:TaxTotal>
+<cac:LegalMonetaryTotal>
+<cbc:LineExtensionAmount currencyID="TRY">12460.07</cbc:LineExtensionAmount>
+<cbc:TaxExclusiveAmount currencyID="TRY">12460.07</cbc:TaxExclusiveAmount>
+<cbc:TaxInclusiveAmount currencyID="TRY">13706.08</cbc:TaxInclusiveAmount>
+<cbc:PayableAmount currencyID="TRY">13706.08</cbc:PayableAmount>
+</cac:LegalMonetaryTotal>
+<cac:InvoiceLine>
+<cbc:ID>1</cbc:ID>
+<cbc:Note>Lot No: IP0013231696 Miktar: 1.000000</cbc:Note>
+<cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+<cbc:LineExtensionAmount currencyID="TRY">55.00</cbc:LineExtensionAmount>
+<cac:TaxTotal><cbc:TaxAmount currencyID="TRY">5.50</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">55.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">5.50</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>
+<cac:Item>
+<cbc:Name>BL Açık Ölçü Postu Kısa NP -</cbc:Name>
+<cbc:BrandName>Bilimplant</cbc:BrandName>
+<cbc:ModelName>Açık Ölçü Postu</cbc:ModelName>
+<cac:BuyersItemIdentification><cbc:ID>IP0013</cbc:ID></cac:BuyersItemIdentification>
+<cac:SellersItemIdentification><cbc:ID>IP0013</cbc:ID></cac:SellersItemIdentification>
+<cac:ManufacturersItemIdentification><cbc:ID>8681489704324</cbc:ID></cac:ManufacturersItemIdentification>
+<cac:StandardItemIdentification><cbc:ID schemeID="GTIN">8681489704324</cbc:ID></cac:StandardItemIdentification>
+<cac:AdditionalItemProperty><cbc:Name>LOTNO</cbc:Name><cbc:Value>IP0013231696</cbc:Value></cac:AdditionalItemProperty>
+</cac:Item>
+<cac:Price><cbc:PriceAmount currencyID="TRY">55.00</cbc:PriceAmount></cac:Price>
+</cac:InvoiceLine>
+<cac:InvoiceLine>
+<cbc:ID>2</cbc:ID>
+<cbc:Note>Lot No: 254271 Uretim Tarihi: 09.09.2025 Miktar: 1.000000</cbc:Note>
+<cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+<cbc:LineExtensionAmount currencyID="TRY">90.00</cbc:LineExtensionAmount>
+<cac:TaxTotal><cbc:TaxAmount currencyID="TRY">9.00</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">90.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">9.00</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>
+<cac:Item>
+<cbc:Name>BL Multi-unit Açık Ölçü Postu NP&amp;RP</cbc:Name>
+<cbc:BrandName>Bilimplant</cbc:BrandName>
+<cbc:ModelName>Açık Ölçü Postu</cbc:ModelName>
+<cac:BuyersItemIdentification><cbc:ID>IP0026</cbc:ID></cac:BuyersItemIdentification>
+<cac:SellersItemIdentification><cbc:ID>IP0026</cbc:ID></cac:SellersItemIdentification>
+<cac:ManufacturersItemIdentification><cbc:ID>8681489704607</cbc:ID></cac:ManufacturersItemIdentification>
+<cac:StandardItemIdentification><cbc:ID schemeID="GTIN">8681489704607</cbc:ID></cac:StandardItemIdentification>
+<cac:AdditionalItemProperty><cbc:Name>LOTNO</cbc:Name><cbc:Value>254271</cbc:Value></cac:AdditionalItemProperty>
+</cac:Item>
+<cac:Price><cbc:PriceAmount currencyID="TRY">90.00</cbc:PriceAmount></cac:Price>
+</cac:InvoiceLine>
+<cac:InvoiceLine>
+<cbc:ID>3</cbc:ID>
+<cbc:Note>Lot No: e3444 Uretim Tarihi: 05.07.2026 Miktar: 1.000000</cbc:Note>
+<cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+<cbc:LineExtensionAmount currencyID="TRY">12315.07</cbc:LineExtensionAmount>
+<cac:TaxTotal><cbc:TaxAmount currencyID="TRY">1231.507</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">12315.07</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">1231.507</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>
+<cac:Item>
+<cbc:Name>Cerrahi Set</cbc:Name>
+<cbc:BrandName>Bilimplant</cbc:BrandName>
+<cbc:ModelName>Cerrahi Set</cbc:ModelName>
+<cac:BuyersItemIdentification><cbc:ID>CERS</cbc:ID></cac:BuyersItemIdentification>
+<cac:SellersItemIdentification><cbc:ID>CERS</cbc:ID></cac:SellersItemIdentification>
+<cac:ManufacturersItemIdentification><cbc:ID>8681489703938</cbc:ID></cac:ManufacturersItemIdentification>
+<cac:StandardItemIdentification><cbc:ID schemeID="GTIN">8681489703938</cbc:ID></cac:StandardItemIdentification>
+<cac:AdditionalItemProperty><cbc:Name>LOTNO</cbc:Name><cbc:Value>e3444</cbc:Value></cac:AdditionalItemProperty>
+</cac:Item>
+<cac:Price><cbc:PriceAmount currencyID="TRY">12315.072</cbc:PriceAmount></cac:Price>
+</cac:InvoiceLine>
+</Invoice>

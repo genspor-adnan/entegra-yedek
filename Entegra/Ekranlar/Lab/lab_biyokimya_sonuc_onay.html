@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Biyokimya — Çalışma Listesi ve Sonuç Onayı — Mockup (Gentegre AI · Laboratuvar)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🧫 Biyokimya / Hematoloji — Çalışma Listesi &amp; Sonuç Onayı <span class="sp">Uzm. Dr. L. Kaya · Cobas c503 · XN-1000 · 03.09.2026 11:40</span></div>
+  <div class="toolbar">
+    <div class="btn ok">✔ Onayla</div><div class="btn">✔✔ Toplu Onay (kural geçen)</div><div class="btn">🔁 Tekrar Çalış</div><div class="btn">💧 Dilüsyon</div><div class="btn">🚨 Panik Bildir</div>
+    <div class="sepv"></div><div class="btn">📈 Hasta Geçmişi / Delta</div><div class="btn">🔬 Cihaz Ham Veri</div><div class="btn">📝 Yorum Ekle</div><div class="btn sp">🖨 Rapor</div>
+  </div>
+  <div class="arama">
+    <div class="kutu">🔍 Barkod, hasta, tetkik…</div>
+    <span class="chip">Cihazda</span><span class="chip on">Onay bekliyor</span><span class="chip">Teknik onaylı</span><span class="chip">Onaylı</span><span class="chip">Tümü</span>
+    <span class="sepv"></span><span class="chip">⚡ Acil</span><span class="chip">🚩 Bayraklı</span><span class="chip">Δ Delta</span><span class="chip">🚨 Panik</span><span class="chip">⏰ TAT aşımı</span><span class="chip">🖥 Cihaz ▾</span>
+  </div>
+  <div class="ozet">
+    <div class="kart"><div class="b">Cihazda</div><div class="d">48 <small>numune</small></div></div>
+    <div class="kart"><div class="b">Onay bekliyor</div><div class="d">31</div></div>
+    <div class="kart"><div class="b">Otomatik onaylanan (bugün)</div><div class="d">%71 <small>kural: ref içi + delta ok + bayrak yok</small></div></div>
+    <div class="kart"><div class="b">Panik açık</div><div class="d" style="color:#b3261e">2 <small>teyit bekliyor</small></div></div>
+    <div class="kart"><div class="b">TAT aşımı</div><div class="d" style="color:#8a6218">3</div></div>
+    <div class="kart"><div class="b">Cihaz durumu</div><div class="d"><span class="rz ok">c503</span> <span class="rz ok">XN</span> <span class="rz kir">UF-5000</span></div></div>
+  </div>
+  <div class="ucPanel" style="grid-template-columns:330px 1fr">
+    <div>
+      <ul class="liste">
+        <li class="sel">🔴 <b>2603187601</b> M. Kaya 58E <span class="sp">ACİL · Troponin panik</span></li>
+        <li>🟡 <b>2603187701</b> A. Yılmaz 39K <span class="sp">CRP ↑ · TSH Δ</span></li>
+        <li>🟢 <b>2603187702</b> A. Yılmaz 39K <span class="sp">Hemogram · kural geçti</span></li>
+        <li>🟡 <b>2603187650</b> Z. Ak 44K <span class="sp">fT4 ↓</span></li>
+        <li>🟢 <b>2603187640</b> C. Öz 31E <span class="sp">tekrar numune</span></li>
+        <li>⚪ <b>2603187633</b> H. Öz 63E <span class="sp">cihazda · c503</span></li>
+      </ul>
+    </div>
+    <div>
+      <div class="hdr" style="grid-template-columns:1fr 1fr 1fr 1fr">
+        <div class="fld"><label>Hasta</label><div class="inp ro big">Mehmet Kaya · 58 E</div></div>
+        <div class="fld"><label>Numune</label><div class="inp ro">2603187601 · Serum · alım 08:53 · kabul 08:55</div></div>
+        <div class="fld"><label>İsteyen</label><div class="inp ro">Acil · Dr. S. Yıldırım · <span class="rz kir">ACİL</span></div></div>
+        <div class="fld"><label>TAT</label><div class="inp ro">hedef 60 dk · geçen 47 dk</div></div>
+      </div>
+      <div class="dg"><table>
+        <thead><tr><th>Tetkik</th><th class="sag">Sonuç</th><th>Birim</th><th>Referans</th><th class="orta">Bayrak</th><th class="sag">Önceki (12.03.25)</th><th class="orta">Δ</th><th class="orta">Cihaz</th><th class="orta">Ölçüm</th><th class="orta">Tekrar</th><th class="orta">Durum</th></tr></thead>
+        <tbody>
+          <tr class="sel"><td><b>Troponin T hs</b></td><td class="sag"><b>412</b></td><td>ng/L</td><td>&lt; 14</td><td class="orta"><span class="rz kir">🚨 PANİK</span></td><td class="sag">8</td><td class="orta"><span class="rz kir">+5050%</span></td><td class="orta">c503</td><td class="orta">09:31</td><td class="orta">✔ 09:38 · 418</td><td class="orta"><span class="rz sari">Onay bekliyor</span></td></tr>
+          <tr><td>CK-MB</td><td class="sag">38</td><td>U/L</td><td>&lt; 25</td><td class="orta"><span class="rz sari">H</span></td><td class="sag">14</td><td class="orta"><span class="rz sari">+171%</span></td><td class="orta">c503</td><td class="orta">09:31</td><td class="orta">—</td><td class="orta"><span class="rz sari">Onay bekliyor</span></td></tr>
+          <tr><td>Glukoz</td><td class="sag">142</td><td>mg/dL</td><td>70–100 (açlık)</td><td class="orta"><span class="rz sari">H</span></td><td class="sag">98</td><td class="orta">+45%</td><td class="orta">c503</td><td class="orta">09:30</td><td class="orta">—</td><td class="orta"><span class="rz sari">Onay bekliyor</span></td></tr>
+          <tr><td>Kreatinin</td><td class="sag">1,1</td><td>mg/dL</td><td>0,7–1,2</td><td class="orta">—</td><td class="sag">1,0</td><td class="orta">—</td><td class="orta">c503</td><td class="orta">09:30</td><td class="orta">—</td><td class="orta"><span class="rz ok">Oto-onay</span></td></tr>
+          <tr><td>Potasyum</td><td class="sag">6,3</td><td>mmol/L</td><td>3,5–5,1</td><td class="orta"><span class="rz kir">🚨 PANİK</span></td><td class="sag">4,4</td><td class="orta"><span class="rz sari">+43%</span></td><td class="orta">c503</td><td class="orta">09:30</td><td class="orta"><span class="rz sari">hemoliz indeksi 45</span></td><td class="orta"><span class="rz kir">Tekrar iste</span></td></tr>
+          <tr><td>Sodyum</td><td class="sag">138</td><td>mmol/L</td><td>136–145</td><td class="orta">—</td><td class="sag">140</td><td class="orta">—</td><td class="orta">c503</td><td class="orta">09:30</td><td class="orta">—</td><td class="orta"><span class="rz ok">Oto-onay</span></td></tr>
+          <tr><td>Hemoglobin</td><td class="sag">13,9</td><td>g/dL</td><td>13,5–17,5</td><td class="orta">—</td><td class="sag">14,2</td><td class="orta">—</td><td class="orta">XN-1000</td><td class="orta">09:12</td><td class="orta">—</td><td class="orta"><span class="rz ok">Onaylı</span></td></tr>
+          <tr><td>WBC</td><td class="sag">12,4</td><td>10³/µL</td><td>4–10</td><td class="orta"><span class="rz sari">H</span></td><td class="sag">7,1</td><td class="orta">+75%</td><td class="orta">XN-1000</td><td class="orta">09:12</td><td class="orta">—</td><td class="orta"><span class="rz ok">Onaylı</span></td></tr>
+        </tbody></table></div>
+      <div class="ikiPanel">
+        <div class="grp" style="margin:10px"><div class="gb">🚨 Panik değer bildirimi <span class="sp">Troponin 412 · K 6,3</span></div>
+          <div class="hdr" style="grid-template-columns:1fr 1fr;border:none">
+            <div class="fld"><label>Bildirilen</label><div class="inp combo">Dr. S. Yıldırım · Acil · 0532…</div></div>
+            <div class="fld"><label>Kanal</label><div class="inp combo">Telefon + SMS + mesaj</div></div>
+            <div class="fld"><label>Bildiren / zaman</label><div class="inp ro">L. Kaya · 09:40</div></div>
+            <div class="fld"><label>Teyit (okuma-geri)</label><div class="inp"><span class="rz sari">bekliyor</span> <span class="sonuk">10 dk içinde yoksa yükselt</span></div></div>
+          </div></div>
+        <div class="grp" style="margin:10px"><div class="gb">Karar</div>
+          <div class="ic">Troponin: tekrar tutarlı (418) → <b>onayla + panik</b>. Potasyum: hemoliz indeksi 45 → <b>yeni numune</b> (istek otomatik, hemşireye mesaj). Glukoz: açlık şüpheli → yorum "tokluk olabilir".
+            <div style="margin-top:6px;display:flex;gap:6px"><div class="btn ok">✔ Seçilileri Onayla</div><div class="btn">🔁 K için Yeni Numune</div><div class="btn">📝 Yorum</div></div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>Oto-onay kuralı: referans içi + Δ &lt; eşik + cihaz bayrağı yok + KK geçerli</span><span>İki aşama: teknik onay (teknisyen) → uzman onayı; acil tek aşama</span><span class="sp">Onay → sonuç raporu + e-Nabız Tetkik Sonuç paketi + hekime bildirim</span></div>
+</div>
+<div class="not"><b>Sonuç kaynağı.</b> Cihaz ASTM/HL7 ile ham sonucu + bayrakları + serum indekslerini (H/L/I) gönderir (<code>lab_cihaz_mesaj</code> → <code>lab_sonuc</code>). Delta check hastanın önceki onaylı sonucuna göre (<code>lab_tetkik.delta_yuzde / delta_gun</code>). Panik değer listesi tetkik kataloğunda; bildirim + teyit <code>lab_panik_bildirim</code>'e. Tekrar/dilüsyon cihaza yeniden istem olarak gider (LIS → cihaz sorgusu, host query).</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

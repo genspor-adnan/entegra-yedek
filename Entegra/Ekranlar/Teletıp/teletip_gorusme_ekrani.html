@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Görüşme Ekranı — Hekim Çalışma Alanı — Mockup (Gentegre AI · Teletıp)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🎥 Online Görüşme — Ayşe Yılmaz · Dr. Ali Koç <span class="sp">RND-2026/11842 · BŞV-2026/20417 · 18:41 başladı · 07:12 · şifreli oda</span></div>
+  <div style="display:grid;grid-template-columns:1fr 420px">
+    <div style="background:#1f2d3a;min-height:520px;position:relative;color:#fff">
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:40px;opacity:.35">👩 hasta görüntüsü</div>
+      <div style="position:absolute;right:14px;top:14px;width:160px;height:110px;background:#34495e;border:2px solid #fff;border-radius:4px;display:flex;align-items:center;justify-content:center;opacity:.9">👨‍⚕️ siz</div>
+      <div style="position:absolute;left:14px;top:14px;display:flex;gap:6px"><span class="rz ok">● Canlı</span><span class="rz">Kayıt: yok (rıza verilmedi)</span><span class="rz mavi">Tercüman: —</span></div>
+      <div style="position:absolute;bottom:0;left:0;right:0;display:flex;gap:8px;justify-content:center;padding:12px;background:linear-gradient(transparent,rgba(0,0,0,.6))">
+        <div class="btn">🎤 Mikrofon</div><div class="btn">📷 Kamera</div><div class="btn">🖥 Ekran Paylaş</div><div class="btn">📎 Dosya</div><div class="btn">💬 Sohbet</div><div class="btn">➕ Konsültan / Tercüman</div>
+        <div class="btn danger">■ Görüşmeyi Bitir</div>
+      </div>
+    </div>
+    <div style="border-left:1px solid var(--line2)">
+      <div class="sekmeler"><div class="sekme on">Muayene</div><div class="sekme">e-Reçete</div><div class="sekme">İstem</div><div class="sekme">Rapor</div><div class="sekme">Ücret</div></div>
+      <div class="pnl hdr" style="grid-template-columns:1fr">
+        <div class="fld"><label class="req">Şikayet / Anamnez</label><div class="inp" style="min-height:48px;align-items:flex-start">3 gündür 38,5 ateş, boğaz ağrısı, yutma güçlüğü. Öksürük yok.</div></div>
+        <div class="fld"><label>Bulgular (hasta beyanı + görsel)</label><div class="inp" style="min-height:40px;align-items:flex-start">Tonsiller hiperemik, eksüda mevcut (fotoğraf). CRP 24.</div></div>
+        <div class="fld"><label class="req">Tanı (ICD-10)</label><div class="inp combo"><span class="rz mavi">J03.9</span> Akut tonsillit, tanımlanmamış <span class="sonuk">· ana</span></div></div>
+        <div class="fld"><label>Ek Tanı</label><div class="inp combo">＋ ekle</div></div>
+        <div class="fld"><label>Karar</label><div class="inp combo">Uzaktan tedavi uygun · 5 gün sonra kontrol (TT-003)</div></div>
+        <div class="fld"><label>Yüz Yüze Yönlendirme</label><div class="inp combo">Gerekmiyor <span class="sonuk">· gerekirse: acil / poliklinik randevusu</span></div></div>
+        <div class="fld"><label>Hekim Notu (hastaya görünmez)</label><div class="inp">Penisilin alerjisi → makrolid.</div></div>
+      </div>
+      <div class="pnl">
+        <div class="grp" style="margin:8px 10px"><div class="gb">e-Reçete (taslak) <span class="sp">Medula · e-imza gerekli</span></div>
+          <div class="toolbar" style="border:none"><div class="btn">＋ İlaç</div><div class="btn">📋 Şablon ▾</div><div class="btn">⚠ Etkileşim / Alerji Kontrolü <span class="rz ok">temiz</span></div></div>
+          <div class="dg"><table><thead><tr><th>İlaç (barkod)</th><th>Doz</th><th>Periyot</th><th>Süre</th><th class="sag">Kutu</th></tr></thead>
+            <tbody><tr><td>Klaritromisin 500 mg film tb · 8699…</td><td>1</td><td>2×1</td><td>7 gün</td><td class="sag">1</td></tr><tr><td>Parasetamol 500 mg tb · 8699…</td><td>1</td><td>gerekirse 3×1</td><td>5 gün</td><td class="sag">1</td></tr></tbody></table></div>
+          <div class="ic sonuk">Reçete türü: Normal · Penisilin alerjisi → penisilin grubu engellendi</div>
+        </div>
+      </div>
+      <div class="pnl">
+        <div class="grp" style="margin:8px 10px"><div class="gb">İstem <span class="sp">tetkik / görüntüleme — yüz yüze ünitede yapılır</span></div>
+          <div class="toolbar" style="border:none"><div class="btn">＋ Laboratuvar</div><div class="btn">＋ Görüntüleme</div><div class="btn">＋ Konsültasyon</div></div>
+          <div class="dg"><table><thead><tr><th>Tür</th><th>Tetkik</th><th>Nerede</th><th class="orta">Aciliyet</th><th class="orta">Durum</th></tr></thead>
+            <tbody><tr><td>Lab</td><td>Boğaz kültürü</td><td>Merkez lab · randevusuz</td><td class="orta">Normal</td><td class="orta"><span class="rz sari">taslak</span></td></tr>
+                   <tr><td>Lab</td><td>Tam kan + CRP (kontrol)</td><td>Merkez lab</td><td class="orta">5 gün sonra</td><td class="orta"><span class="rz sari">taslak</span></td></tr></tbody></table></div>
+          <div class="ic sonuk">İstem başvuruya bağlanır; hasta portalında "Tetkik randevusu al" olarak görünür.</div>
+        </div>
+      </div>
+      <div class="pnl">
+        <div class="grp" style="margin:8px 10px"><div class="gb">Rapor <span class="sp">istirahat / ilaç / durum bildirir — e-imza</span></div>
+          <div class="hdr" style="grid-template-columns:1fr 1fr;border:none">
+            <div class="fld"><label>Rapor Türü</label><div class="inp combo">İstirahat (iş göremezlik)</div></div>
+            <div class="fld"><label>Süre</label><div class="inp">2 gün · 03.09–04.09.2026</div></div>
+            <div class="fld" style="grid-column:span 2"><label>Açıklama</label><div class="inp">Akut tonsillit nedeniyle istirahat uygundur.</div></div>
+          </div>
+          <div class="ic sonuk">Uzaktan muayenede verilebilecek rapor türleri ayarlarda sınırlanır (USBS kapsamı).</div>
+        </div>
+      </div>
+      <div class="pnl">
+        <div class="grp" style="margin:8px 10px"><div class="gb">Ücret <span class="sp">başvuru satırları · ön ödeme mahsubu</span></div>
+          <div class="dg"><table><thead><tr><th>Hizmet</th><th class="sag">Tutar</th><th class="sag">İndirim</th><th class="sag">Net</th><th>Ödeyen</th></tr></thead>
+            <tbody><tr><td>TT-001 Online Muayene — Dahiliye</td><td class="sag">750,00</td><td class="sag">0,00</td><td class="sag">750,00</td><td>Hasta</td></tr></tbody></table></div>
+          <div class="ozet"><div class="kart"><div class="b">Toplam</div><div class="d">750,00</div></div><div class="kart"><div class="b">Ön ödeme (mahsup)</div><div class="d">750,00 <small>POS · 01.09</small></div></div><div class="kart"><div class="b">Kalan</div><div class="d">0,00</div></div></div>
+          <div class="ic sonuk">Ek hizmet eklenirse kalan portalda ödeme linkiyle tahsil edilir; e-Arşiv tamamlamada kesilir.</div>
+        </div>
+      </div>
+      <div style="padding:8px 10px;display:flex;gap:6px;flex-wrap:wrap">
+        <div class="btn">💾 Kaydet</div><div class="btn">✍ e-İmzala &amp; Gönder (reçete)</div><div class="btn">🧾 Ücret: 750 ✔ ödendi</div>
+        <div class="btn ok sp">✔ Muayeneyi Tamamla</div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>Kalan süre 12:48</span><span>Bağlantı iyi · 38 ms</span><span>Onam 3/3 · kayıt rızası yok</span><span class="sp">İz kaydı: giriş, başlatma, dosya, bitirme — her adım loglanır</span></div>
+</div>
+<div class="not"><b>Tamamlama kuralı.</b> ICD-10 ana tanı yoksa "Muayeneyi Tamamla" pasif; tamamlanınca başvuru kapanır, <b>e-Nabız muayene paketi</b> kuyruğa düşer, hasta portalına özet PDF (e-imzalı) + reçete SMS'i gider, kontrol önerildiyse portalda tek tıkla TT-003 randevusu. Görüşme altyapısı ayrıntısı <code>../USBS/usbs_gorusme.html</code>, muayene sekmeleri <code>../USBS/usbs_muayene_sekmeler.html</code>.</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

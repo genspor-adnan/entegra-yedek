@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maliyet Merkezleri ve Dağıtım — Üretim İşletmesi (ERP) — Mockup (Gentegre AI · Muhasebe · ERP)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .klasor li{padding:4px 10px;border-bottom:none;font-size:11.5px}
+  .klasor li .sp{color:var(--muted);font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🏷 Maliyet Merkezleri &amp; Dağıtım — Üretim / Ticaret İşletmesi <span class="sp">masraf_merkezi (mevcut) + is_merkezi (Üretim) · Ağustos 2026 · mobilya üretimi örneği</span></div>
+  <div class="toolbar"><div class="btn primary">＋ Merkez</div><div class="btn">✎ Düzenle</div><div class="btn">🔑 Dağıtım Anahtarı</div><div class="btn">📥 Muhasebeden Gider Çek (710/720/730/740/760/770)</div><div class="btn ok">🧮 Dönemi Dağıt</div><div class="btn sp">📊 Dönem Raporu</div></div>
+  <div class="sekmeler"><div class="sekme on">Merkez Ağacı</div><div class="sekme">Gider Kalemleri (Ağustos)</div><div class="sekme">Dağıtım Anahtarları</div><div class="sekme">Aşamalı Dağıtım · GÜG Yükleme</div></div>
+  <div class="pnl ucPanel" style="grid-template-columns:330px 1fr">
+    <div>
+      <ul class="liste klasor">
+        <li>🏢 <b>Şirket</b></li>
+        <li class="s1">🏭 <b>Esas üretim yerleri</b> <span class="sp">= is_merkezi</span></li>
+        <li class="s2 sel">Kesimhane · CNC-1 <span class="sp">iş merkezi</span></li>
+        <li class="s2">Montaj-1 / Montaj-2 <span class="sp">iş merkezi</span></li>
+        <li class="s2">Döşeme Atölyesi <span class="sp">iş merkezi</span></li>
+        <li class="s2">Boyahane / Cila <span class="sp">iş merkezi</span></li>
+        <li class="s2">Paketleme <span class="sp">iş merkezi</span></li>
+        <li class="s1">🧰 <b>Yardımcı üretim yerleri</b></li>
+        <li class="s2">Bakım-onarım</li>
+        <li class="s2">Kalite kontrol</li>
+        <li class="s2">Depo / iç lojistik</li>
+        <li class="s2">Planlama / üretim yönetimi</li>
+        <li class="s2">Enerji (kompresör, kazan)</li>
+        <li class="s1">🛒 <b>Ticari faaliyet</b></li>
+        <li class="s2">Satın alma</li>
+        <li class="s2">Satış / pazarlama (760)</li>
+        <li class="s2">Sevkiyat / dağıtım</li>
+        <li class="s1">🏛 <b>Genel yönetim (770)</b></li>
+        <li class="s2">Yönetim / muhasebe / İK / BT</li>
+        <li class="s2">Bina (fabrika + ofis)</li>
+        <li class="s1">📁 Projeler <span class="sp">proje bazlı maliyet (mevcut proje)</span></li>
+      </ul>
+    </div>
+    <div>
+      <div class="hdr k4">
+        <div class="fld"><label>Merkez</label><div class="inp big">Kesimhane · CNC-1</div></div>
+        <div class="fld"><label>Tür</label><div class="inp combo">Esas üretim yeri (7/A: 730 GÜG toplanır)</div></div>
+        <div class="fld"><label>Bağlı iş merkezi (Üretim)</label><div class="inp combo">IM-01 Kesimhane · saat ücreti 180 ₺ (bordro+GÜG)</div></div>
+        <div class="fld"><label>Demirbaş</label><div class="inp combo">CNC router (2021 · 3,2 M) · panel ebatlama (2019)</div></div>
+        <div class="fld"><label>Kapasite (ay)</label><div class="inp">2 vardiya × 8 s × 26 gün = <b>24.960 dk</b> · gerçek 19.800 (%79)</div></div>
+        <div class="fld"><label>Muhasebe eşleme</label><div class="inp">720.01 (direkt işçilik) · 730.01 (GÜG) masraf yeri KES</div></div>
+        <div class="fld"><label>Alan / FTE</label><div class="inp">420 m² · 6,0 FTE</div></div>
+        <div class="fld"><label>Yükleme anahtarı (GÜG → emir)</label><div class="inp combo">Makine saati</div></div>
+      </div>
+      <div class="grp" style="margin:10px"><div class="gb">Ağustos 2026 · Kesimhane giderleri <span class="sp">direkt + dağıtılan → GÜG oranı</span></div>
+        <div class="dg"><table><thead><tr><th>Gider kalemi</th><th class="orta">7/A hesap</th><th class="orta">Kaynak</th><th class="sag">Direkt</th><th class="sag">Dağıtılan</th><th class="sag">Toplam</th><th class="orta">Davranış</th></tr></thead>
+          <tbody>
+            <tr><td>Direkt işçilik (operatörler)</td><td class="orta">720</td><td class="orta">bordro · zaman kaydı</td><td class="sag">312.000</td><td class="sag">—</td><td class="sag">312.000</td><td class="orta"><span class="rz mavi">Değişken</span></td></tr>
+            <tr><td>Endirekt işçilik (ustabaşı, forklift)</td><td class="orta">730</td><td class="orta">bordro</td><td class="sag">84.000</td><td class="sag">—</td><td class="sag">84.000</td><td class="orta"><span class="rz">Sabit</span></td></tr>
+            <tr><td>Amortisman (CNC, ebatlama)</td><td class="orta">730</td><td class="orta">demirbaş</td><td class="sag">58.400</td><td class="sag">—</td><td class="sag">58.400</td><td class="orta"><span class="rz">Sabit</span></td></tr>
+            <tr><td>Endirekt malzeme (testere, zımpara, yağ)</td><td class="orta">730</td><td class="orta">stok sarf (sarf fişi · merkez)</td><td class="sag">27.300</td><td class="sag">—</td><td class="sag">27.300</td><td class="orta"><span class="rz mavi">Değişken</span></td></tr>
+            <tr><td>Bakım-onarım payı</td><td class="orta">730</td><td class="orta">dağıtım · bakım saati</td><td class="sag">—</td><td class="sag">31.000</td><td class="sag">31.000</td><td class="orta"><span class="rz">Sabit</span></td></tr>
+            <tr><td>Enerji payı</td><td class="orta">730</td><td class="orta">dağıtım · kW × makine saati</td><td class="sag">—</td><td class="sag">46.200</td><td class="sag">46.200</td><td class="orta"><span class="rz mavi">Yarı değişken</span></td></tr>
+            <tr><td>Kalite kontrol payı</td><td class="orta">730</td><td class="orta">dağıtım · kontrol adedi</td><td class="sag">—</td><td class="sag">12.100</td><td class="sag">12.100</td><td class="orta"><span class="rz">Sabit</span></td></tr>
+            <tr><td>Bina payı</td><td class="orta">730</td><td class="orta">dağıtım · m²</td><td class="sag">—</td><td class="sag">38.000</td><td class="sag">38.000</td><td class="orta"><span class="rz">Sabit</span></td></tr>
+            <tr class="grup"><td>Toplam (730 GÜG = 297.000 · 720 = 312.000)</td><td></td><td></td><td class="sag">481.700</td><td class="sag">127.300</td><td class="sag"><b>609.000</b></td><td></td></tr>
+          </tbody></table></div>
+        <div class="ozet"><div class="kart"><div class="b">Makine saati (Ağustos)</div><div class="d">330 <small>saat · 19.800 dk</small></div></div><div class="kart"><div class="b">GÜG yükleme oranı</div><div class="d">900 <small>₺ / makine saati</small></div></div><div class="kart"><div class="b">Direkt işçilik oranı</div><div class="d">945 <small>₺ / saat (312 K / 330)</small></div></div><div class="kart"><div class="b">Emirlere yüklenen GÜG</div><div class="d">288.900 <small>· eksik yükleme 8.100</small></div></div><div class="kart"><div class="b">Üretim modülü saat ücreti</div><div class="d">180 ₺/dk?</div><div class="sonuk">→ 1.845 ₺/saat (720+730) güncelle</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="pnl">
+    <div class="toolbar" style="border-top:none"><div class="btn">📥 710 Direkt ilk madde (sarf fişleri)</div><div class="btn">📥 720 Direkt işçilik (zaman kayıtları)</div><div class="btn">📥 730 GÜG (fiş + bordro + amortisman)</div><div class="btn">📥 740/760/770</div><div class="btn">＋ Elle</div></div>
+    <div class="dg"><table>
+      <thead><tr><th>Gider kalemi</th><th class="orta">Hesap</th><th>Merkez</th><th class="orta">Kaynak belge</th><th class="sag">Tutar</th><th class="orta">Davranış</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr><td>Hammadde sarfı (kereste, kontrplak, kumaş, sünger…)</td><td class="orta">710</td><td>Üretim emirleri (doğrudan)</td><td class="orta">sarf çıkış fişleri · 214 emir</td><td class="sag">2.140.000</td><td class="orta"><span class="rz mavi">Değişken</span></td><td class="orta"><span class="rz ok">Emirlere işlendi</span></td></tr>
+        <tr><td>Direkt işçilik — 5 iş merkezi</td><td class="orta">720</td><td>İş merkezleri</td><td class="orta">uretim_zaman × bordro saat ücreti</td><td class="sag">1.180.000</td><td class="orta"><span class="rz mavi">Değişken</span></td><td class="orta"><span class="rz ok">Emirlere işlendi</span></td></tr>
+        <tr><td>Endirekt işçilik</td><td class="orta">730</td><td>Yardımcı + esas</td><td class="orta">bordro 08/2026</td><td class="sag">410.000</td><td class="orta"><span class="rz">Sabit</span></td><td class="orta"><span class="rz ok">Aktarıldı</span></td></tr>
+        <tr><td>Amortisman (makine, tesis)</td><td class="orta">730</td><td>Esas + yardımcı</td><td class="orta">demirbaş tablosu</td><td class="sag">286.000</td><td class="orta"><span class="rz">Sabit</span></td><td class="orta"><span class="rz ok">Aktarıldı</span></td></tr>
+        <tr><td>Elektrik / doğalgaz</td><td class="orta">730</td><td>Enerji merkezi</td><td class="orta">fatura · alt sayaç</td><td class="sag">198.000</td><td class="orta"><span class="rz mavi">Yarı değişken</span></td><td class="orta"><span class="rz sari">sayaç girilmedi</span></td></tr>
+        <tr><td>Fason işçilik (kaplama)</td><td class="orta">730 / emir</td><td>Emir bazlı</td><td class="orta">fason faturası · 12 emir</td><td class="sag">96.000</td><td class="orta"><span class="rz mavi">Değişken</span></td><td class="orta"><span class="rz ok">Emirlere işlendi</span></td></tr>
+        <tr><td>Bakım malzeme + dış servis</td><td class="orta">730</td><td>Bakım-onarım</td><td class="orta">alış faturaları</td><td class="sag">74.000</td><td class="orta"><span class="rz">Sabit</span></td><td class="orta"><span class="rz ok">Aktarıldı</span></td></tr>
+        <tr><td>Satış ekibi, reklam, fuar, nakliye</td><td class="orta">760</td><td>Satış/pazarlama · sevkiyat</td><td class="orta">bordro + faturalar</td><td class="sag">520.000</td><td class="orta"><span class="rz">Sabit</span></td><td class="orta"><span class="rz ok">Aktarıldı</span></td></tr>
+        <tr><td>Yönetim, muhasebe, BT, kira (ofis)</td><td class="orta">770</td><td>Genel yönetim</td><td class="orta">bordro + faturalar</td><td class="sag">640.000</td><td class="orta"><span class="rz">Sabit</span></td><td class="orta"><span class="rz ok">Aktarıldı</span></td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">710/720 doğrudan üretim emrine (Üretim modülü sarf ve zaman kayıtları); 730 önce merkezde toplanır, yükleme oranıyla emirlere; 760/770 dönem gideri (ürüne yüklenmez, gelir tablosuna). Muhasebe fişleri masraf yeriyle (<code>muhasebe_fis_satir.merkez_id</code>).</div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table>
+      <thead><tr><th>Anahtar</th><th>Kaynak</th><th class="orta">Kesim</th><th class="orta">Montaj</th><th class="orta">Döşeme</th><th class="orta">Boya</th><th class="orta">Paket</th><th>Kullanan</th></tr></thead>
+      <tbody>
+        <tr><td>Makine saati</td><td>uretim_zaman (opr) · iş merkezi</td><td class="orta">330</td><td class="orta">—</td><td class="orta">—</td><td class="orta">210</td><td class="orta">—</td><td>Enerji, amortisman payı, GÜG yükleme</td></tr>
+        <tr><td>Direkt işçilik saati</td><td>uretim_zaman</td><td class="orta">340</td><td class="orta">1.120</td><td class="orta">980</td><td class="orta">420</td><td class="orta">260</td><td>GÜG yükleme (emek yoğun merkezler)</td></tr>
+        <tr><td>Alan (m²)</td><td>merkez kartı</td><td class="orta">420</td><td class="orta">600</td><td class="orta">380</td><td class="orta">300</td><td class="orta">250</td><td>Bina, temizlik</td></tr>
+        <tr><td>Bakım saati</td><td>bakım iş emirleri</td><td class="orta">38</td><td class="orta">12</td><td class="orta">9</td><td class="orta">22</td><td class="orta">4</td><td>Bakım-onarım</td></tr>
+        <tr><td>Kurulu güç × saat (kWh)</td><td>sayaç / kW</td><td class="orta">14.900</td><td class="orta">2.100</td><td class="orta">1.800</td><td class="orta">9.400</td><td class="orta">900</td><td>Enerji</td></tr>
+        <tr><td>Kontrol adedi</td><td>uretim_olcum</td><td class="orta">120</td><td class="orta">210</td><td class="orta">180</td><td class="orta">160</td><td class="orta">40</td><td>Kalite kontrol</td></tr>
+        <tr><td>Malzeme hareketi (satır)</td><td>sarf/giriş fişleri</td><td class="orta">840</td><td class="orta">1.100</td><td class="orta">620</td><td class="orta">300</td><td class="orta">700</td><td>Depo / iç lojistik</td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table>
+      <thead><tr><th class="orta">Aşama</th><th>Kaynak merkez</th><th class="sag">Tutar</th><th>Anahtar</th><th>Hedefler</th></tr></thead>
+      <tbody>
+        <tr><td class="orta">1</td><td>Bina</td><td class="sag">412.000</td><td>m²</td><td>tüm merkezler</td></tr>
+        <tr><td class="orta">2</td><td>Enerji</td><td class="sag">198.000</td><td>kWh</td><td>esas + yardımcı üretim</td></tr>
+        <tr><td class="orta">3</td><td>Bakım-onarım</td><td class="sag">148.000</td><td>bakım saati</td><td>esas üretim</td></tr>
+        <tr><td class="orta">4</td><td>Depo / iç lojistik</td><td class="sag">96.000</td><td>malzeme hareketi</td><td>esas üretim</td></tr>
+        <tr><td class="orta">5</td><td>Kalite kontrol · planlama</td><td class="sag">121.000</td><td>kontrol adedi / işçilik saati</td><td>esas üretim</td></tr>
+        <tr class="grup"><td class="orta">6</td><td>Esas üretim merkezleri GÜG (730) → üretim emirleri</td><td class="sag">1.212.000</td><td>makine saati (Kesim, Boya) · işçilik saati (Montaj, Döşeme, Paket)</td><td>açık/kapanan emirler (uretim_maliyet.gug)</td></tr>
+        <tr><td class="orta">—</td><td>760 / 770</td><td class="sag">1.160.000</td><td>—</td><td>ürüne yüklenmez; gelir tablosu 631/632 · kârlılık raporunda ürün grubuna gelir oranıyla (bilgi)</td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Yükleme oranı = merkez 730 toplamı / anahtar toplamı (ay sonu gerçek) ya da bütçe oranı (ay içi ön yükleme) — fark "eksik/fazla yükleme" olarak 730 kapanışında. Kapanan emir maliyeti: 710 + 720 + yüklenen 730 → mamul stok (152) → satılınca 620/621.</div>
+  </div>
+  <div class="statusbar"><span>17 merkez · 6 aşama · Ağustos 7/A toplamı 5,54 M</span><span class="sp">Üretim modülü (uretim_maliyet) ile aynı GÜG oranı; is_merkezi.saat_ucreti bu ekrandan güncellenir</span></div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

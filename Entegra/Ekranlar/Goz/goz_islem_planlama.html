@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Göz İşlemleri — Enjeksiyon, Lazer, Ameliyat Planlama ve Takip — Mockup (Gentegre AI · Göz)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .odos{display:grid;grid-template-columns:150px 1fr 1fr;gap:0;border:1px solid var(--line2);border-radius:4px;overflow:hidden;margin:8px 12px}
+  .odos>div{padding:5px 8px;border-bottom:1px solid var(--line2);border-right:1px solid var(--line2);font-size:11.5px}
+  .odos>div:nth-child(3n){border-right:none}
+  .odos .h{background:linear-gradient(#f4f7fb,#e7eef6);font-weight:bold;color:#2c4a6b;text-align:center}
+  .odos .l{background:#fbfcfd;color:#3a5573;font-weight:bold}
+  .odos .v{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+  .odos .v .inp{min-height:22px;padding:1px 6px;flex:1}
+  .odos .v .k{width:58px;flex:none;text-align:center}
+  .od{color:#b3261e;font-weight:bold} .os{color:#2f6db3;font-weight:bold}
+  .goz-sema{display:inline-block;width:110px;height:110px;border-radius:50%;border:2px solid #cdd6e0;background:radial-gradient(circle,#fbe9e7 0 18%,#fff 19% 60%,#eef4fc 61% 100%);position:relative;margin:6px}
+  .goz-sema i{position:absolute;font-style:normal;font-size:10px;color:#b3261e}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🔪 Göz İşlemleri — Planlama &amp; Takip <span class="sp">intravitreal enjeksiyon · lazer · ameliyathane · postop · 03.09.2026</span></div>
+  <div class="sekmeler"><div class="sekme on">💉 Enjeksiyon Listesi</div><div class="sekme">🔦 Lazer</div><div class="sekme">🔪 Ameliyat Planı · H. Öz OS</div><div class="sekme">✅ Preop Kontrol Listesi</div><div class="sekme">🩹 Postop Takip</div></div>
+  <div class="pnl">
+    <div class="toolbar" style="border-top:none"><div class="btn primary">＋ Enjeksiyon Planla</div><div class="btn ok">✔ Uygulandı</div><div class="btn">📋 Onam</div><div class="btn">📦 İlaç / Lot (UTS)</div><div class="btn">🗓 Sonraki Doz</div><div class="btn sp">📊 Anti-VEGF Panosu</div></div>
+    <div class="dg"><table>
+      <thead><tr><th class="orta">Saat</th><th>Hasta</th><th class="orta">Göz</th><th>Endikasyon</th><th>İlaç</th><th class="orta">Doz #</th><th class="orta">Protokol</th><th class="orta">Son OCT CMT</th><th class="orta">Onam</th><th class="orta">Lot / UTS</th><th>Hekim</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td class="orta">11:30</td><td><b>Ali Vural · 71 E</b></td><td class="orta"><span class="od">OD</span></td><td>Yaş tip AMD (H35.32)</td><td>Aflibersept 2 mg</td><td class="orta">4</td><td class="orta">Treat &amp; extend · 8 hf</td><td class="orta"><span class="rz sari">412 µm ↑ (önceki 348)</span></td><td class="orta"><span class="rz ok">✔ bugün</span></td><td class="orta">LOT A1234 · UTS ✔</td><td>Dr. Çelik</td><td class="orta"><span class="rz mavi">Bugün · odada</span></td></tr>
+        <tr><td class="orta">11:45</td><td>Fatma Demir · 63 K</td><td class="orta"><span class="os">OS</span></td><td>Diyabetik makula ödemi (H36.0)</td><td>Ranibizumab 0,5 mg</td><td class="orta">2</td><td class="orta">Yükleme 3 ay</td><td class="orta">395 µm</td><td class="orta"><span class="rz ok">✔</span></td><td class="orta">LOT R778</td><td>Dr. Çelik</td><td class="orta"><span class="rz">Planlı</span></td></tr>
+        <tr><td class="orta">12:00</td><td>Nazmi Er · 68 E</td><td class="orta"><span class="od">OD</span></td><td>RVO makula ödemi (H34.8)</td><td>Deksametazon implant</td><td class="orta">1</td><td class="orta">—</td><td class="orta">510 µm</td><td class="orta"><span class="rz sari">bekliyor</span></td><td class="orta">—</td><td>Dr. Çelik</td><td class="orta"><span class="rz sari">Onam eksik</span></td></tr>
+        <tr><td class="orta">—</td><td>Ali Vural · 71 E</td><td class="orta"><span class="od">OD</span></td><td>Yaş tip AMD</td><td>Aflibersept</td><td class="orta">5</td><td class="orta">T&amp;E · 10 hf (uzat)</td><td class="orta">—</td><td class="orta">—</td><td class="orta">—</td><td>Dr. Çelik</td><td class="orta"><span class="rz pas">Sonraki: 12.11.2026</span></td></tr>
+      </tbody></table></div>
+    <div class="grp" style="margin:10px"><div class="gb">Uygulama kaydı — Ali Vural OD · doz 4 <span class="sp">goz_enjeksiyon</span></div>
+      <div class="hdr" style="grid-template-columns:1fr 1fr 1fr 1fr;border:none">
+        <div class="fld"><label>Göz doğrulama (time-out)</label><div class="inp">☑ Hasta ☑ Göz OD işaretli ☑ İlaç/doz ☑ Onam</div></div>
+        <div class="fld"><label>Hazırlık</label><div class="inp">Povidon iyot %5 · topikal anestezi · blefarosta</div></div>
+        <div class="fld"><label>Giriş yeri / iğne</label><div class="inp">İnferotemporal 3,5 mm limbus · 30G</div></div>
+        <div class="fld"><label>Uygulama zamanı</label><div class="inp">11:34 · Dr. Çelik · Hemş. S. Ay</div></div>
+        <div class="fld"><label>İşlem sonrası GİB / VA</label><div class="inp">GİB 18 · ışık hissi (+) · SPA yok</div></div>
+        <div class="fld"><label>Komplikasyon</label><div class="inp combo">Yok</div></div>
+        <div class="fld"><label>Sonraki plan</label><div class="inp">Kontrol + OCT 8 hafta → doz 5 (uzatma kararı)</div></div>
+        <div class="fld"><label>İlaç / lot / UTS</label><div class="inp ro">Aflibersept 2 mg · LOT A1234 · SKT 03.2027 · UTS verme ✔ (implant/ilaç bildirimi)</div></div>
+      </div></div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table>
+      <thead><tr><th class="orta">Tarih</th><th>Hasta</th><th class="orta">Göz</th><th>Lazer türü</th><th>Endikasyon</th><th>Parametreler</th><th>Hekim</th><th class="orta">Onam</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr><td class="orta">17.09.2026</td><td>Mehmet Kaya</td><td class="orta"><span class="od">OD</span></td><td>SLT (selektif lazer trabeküloplasti)</td><td>POAG progresyon</td><td>360° · 100 spot · 0,8 mJ (plan)</td><td>Dr. Aksoy</td><td class="orta"><span class="rz sari">alınacak</span></td><td class="orta"><span class="rz">Planlı</span></td></tr>
+        <tr><td class="orta">03.09.2026</td><td>Fatma Demir</td><td class="orta"><span class="os">OS</span></td><td>Fokal/grid makula lazer</td><td>DMÖ (non-center)</td><td>532 nm · 100 µm · 100 ms · 60 spot</td><td>Dr. Çelik</td><td class="orta">✔</td><td class="orta"><span class="rz ok">Uygulandı 12:10</span></td></tr>
+        <tr><td class="orta">28.08.2026</td><td>Kerem Us</td><td class="orta"><span class="od">OD</span></td><td>Nd:YAG kapsülotomi</td><td>Arka kapsül opasifikasyonu</td><td>1,8 mJ · 22 atış</td><td>Dr. Aksoy</td><td class="orta">✔</td><td class="orta"><span class="rz ok">Uygulandı · kontrol 1 hf</span></td></tr>
+        <tr><td class="orta">20.08.2026</td><td>Sevim Al</td><td class="orta"><span class="os">OS</span></td><td>Lazer iridotomi</td><td>Dar açı (PACS)</td><td>YAG · 3 mJ · saat 11</td><td>Dr. Aksoy</td><td class="orta">✔</td><td class="orta"><span class="rz ok">Uygulandı</span></td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Türler: SLT/ALT, YAG kapsülotomi, iridotomi, PRP (panretinal), fokal/grid, mikropuls, retinopeksi. Parametreler ve spot sayısı <code>goz_lazer</code>; SUT işlem satırı; ışın güvenliği time-out.</div>
+  </div>
+  <div class="pnl">
+    <div class="hdr k4">
+      <div class="fld"><label>Hasta / göz</label><div class="inp ro big">Hasan Öz · 63 E · <span class="os">OS</span></div></div>
+      <div class="fld"><label>Ameliyat</label><div class="inp combo">Fakoemülsifikasyon + IOL (torik)</div></div>
+      <div class="fld"><label>Tarih / salon / cerrah</label><div class="inp">10.09.2026 · 09:30 · Salon 1 · Dr. E. Aksoy</div></div>
+      <div class="fld"><label>Anestezi</label><div class="inp combo">Topikal + intrakameral · anestezi konsültasyonu: gerekmiyor</div></div>
+      <div class="fld"><label>Endikasyon / tanı</label><div class="inp">H25.1 senil nükleer katarakt OS · BCVA 0,4 · LOCS NO4</div></div>
+      <div class="fld"><label>IOL (biyometriden)</label><div class="inp ro">Model X torik T2 · +21,5 D · aks 93° · hedef −0,18 · stok: seri 77812 ayrıldı</div></div>
+      <div class="fld"><label>Risk / özel durum</label><div class="inp">Pseudoeksfoliasyon: yok · zonül: sağlam · pupil: iyi dilate · tamsulosin: <span class="rz sari">kullanıyor (IFIS riski)</span></div></div>
+      <div class="fld"><label>Onam</label><div class="inp"><span class="rz ok">Ameliyat onamı ✔ 03.09</span> · torik IOL bilgilendirme ✔ · fark ücreti bilgilendirme ✔</div></div>
+      <div class="fld"><label>Preop tetkik</label><div class="inp">Hemogram, glukoz, HbA1c, koagülasyon, EKG → <span class="rz ok">tamam</span></div></div>
+      <div class="fld"><label>Preop ilaç</label><div class="inp">Antibiyotik damla 3 gün · NSAİİ damla · midriyatik (sabah)</div></div>
+      <div class="fld"><label>Ücret</label><div class="inp">SGK paket + torik IOL farkı (hasta) · provizyon ✔</div></div>
+      <div class="fld"><label>Durum</label><div class="inp"><span class="rz ok">Planlandı · liste onaylı</span></div></div>
+    </div>
+    <div class="grp" style="margin:10px"><div class="gb">Ameliyathane listesi · 10.09.2026 · Salon 1</div>
+      <div class="dg"><table><thead><tr><th class="orta">Saat</th><th>Hasta</th><th class="orta">Göz</th><th>Ameliyat</th><th>Cerrah</th><th>IOL / malzeme</th><th class="orta">Anestezi</th><th class="orta">Onam</th><th class="orta">Durum</th></tr></thead>
+        <tbody>
+          <tr><td class="orta">09:00</td><td>Ayten Su · 70 K</td><td class="orta"><span class="od">OD</span></td><td>Fako + IOL</td><td>Dr. Aksoy</td><td>Model X +22,0</td><td class="orta">Topikal</td><td class="orta">✔</td><td class="orta"><span class="rz ok">Hazır</span></td></tr>
+          <tr class="sel"><td class="orta">09:30</td><td>Hasan Öz · 63 E</td><td class="orta"><span class="os">OS</span></td><td>Fako + torik IOL</td><td>Dr. Aksoy</td><td>Model X T2 +21,5 · 93°</td><td class="orta">Topikal</td><td class="orta">✔</td><td class="orta"><span class="rz ok">Hazır · IFIS önlemi</span></td></tr>
+          <tr><td class="orta">10:15</td><td>Rıza Kal · 58 E</td><td class="orta"><span class="od">OD</span></td><td>Pterjium eksizyonu + greft</td><td>Dr. Yalçın</td><td>Fibrin yapıştırıcı</td><td class="orta">Lokal</td><td class="orta">✔</td><td class="orta"><span class="rz ok">Hazır</span></td></tr>
+          <tr><td class="orta">11:00</td><td>Ali Vural · 71 E</td><td class="orta"><span class="os">OS</span></td><td>Pars plana vitrektomi + ERM</td><td>Dr. Çelik</td><td>23G · gaz SF6</td><td class="orta">Lokal + sedasyon</td><td class="orta"><span class="rz sari">bekliyor</span></td><td class="orta"><span class="rz sari">Anestezi konsültasyonu</span></td></tr>
+        </tbody></table></div></div>
+  </div>
+  <div class="pnl">
+    <div class="ic">
+      <b>Preop kontrol listesi — Hasan Öz OS · fako + torik IOL</b> <span class="sonuk">(WHO cerrahi güvenlik + göz özel)</span>
+      <div class="dg"><table><thead><tr><th>Madde</th><th class="orta">Durum</th><th>Kim / zaman</th></tr></thead>
+        <tbody>
+          <tr><td>Kimlik doğrulama (bileklik + sözlü)</td><td class="orta">☑</td><td>Hemş. S. Ay · 09:05</td></tr>
+          <tr><td><b>Doğru göz işaretlendi (OS)</b> — hasta ile teyit</td><td class="orta">☑</td><td>Dr. Aksoy · 09:08</td></tr>
+          <tr><td>Onam formu imzalı, kapsam doğru</td><td class="orta">☑</td><td>Hemş. S. Ay</td></tr>
+          <tr><td>IOL güç / model / aks biyometriyle uyumlu, kutu okundu (seri/lot)</td><td class="orta">☑</td><td>Dr. Aksoy + hemşire (çift kontrol)</td></tr>
+          <tr><td>Alerji / antikoagülan / alfa bloker (tamsulosin) sorgulandı</td><td class="orta">☑</td><td>IFIS: iris kancası hazır</td></tr>
+          <tr><td>Dilatasyon yeterli (≥ 6 mm)</td><td class="orta">☑</td><td>6,5 mm · 09:20</td></tr>
+          <tr><td>Preop tetkikler / vital</td><td class="orta">☑</td><td>TA 138/84 · glukoz 128</td></tr>
+          <tr><td>Antibiyotik profilaksi / povidon iyot</td><td class="orta">☐</td><td>salonda</td></tr>
+          <tr><td>Time-out (ekip: hasta, göz, işlem, IOL)</td><td class="orta">☐</td><td>salonda · 09:28</td></tr>
+        </tbody></table></div>
+      <div class="sonuk">Kontrol listesi tamamlanmadan "Ameliyata Al" pasif. Kayıt <code>goz_ameliyat_kontrol</code>.</div>
+    </div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table>
+      <thead><tr><th>Hasta / göz / ameliyat</th><th class="orta">Ameliyat</th><th class="orta">1. gün</th><th class="orta">1. hafta</th><th class="orta">1. ay</th><th class="orta">3. ay</th><th>Son durum</th><th class="orta">Komplikasyon</th></tr></thead>
+      <tbody>
+        <tr><td>Hasan Öz · OD · Fako + IOL</td><td class="orta">27.08.2026</td><td class="orta"><span class="rz ok">✔ VA 0,5 · GİB 16</span></td><td class="orta"><span class="rz ok">✔ 03.09 · VA 0,9 · −0,12</span></td><td class="orta">27.09 planlı</td><td class="orta">—</td><td>Sorunsuz · damla azaltıldı</td><td class="orta">Yok</td></tr>
+        <tr><td>Kerem Us · OD · YAG kapsülotomi</td><td class="orta">28.08.2026</td><td class="orta">—</td><td class="orta"><span class="rz sari">04.09 planlı</span></td><td class="orta">—</td><td class="orta">—</td><td>GİB kontrolü</td><td class="orta">—</td></tr>
+        <tr><td>Ali Vural · OD · IVT doz 4</td><td class="orta">03.09.2026</td><td class="orta"><span class="rz sari">telefon takibi</span></td><td class="orta">—</td><td class="orta">—</td><td class="orta">—</td><td>Endoftalmi uyarı belirtileri anlatıldı</td><td class="orta">—</td></tr>
+        <tr><td>Sevim Al · OS · İridotomi</td><td class="orta">20.08.2026</td><td class="orta">✔</td><td class="orta">✔ açık</td><td class="orta">—</td><td class="orta">—</td><td>GİB 14 · açı açık</td><td class="orta">Yok</td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Postop protokol ameliyat türüne göre otomatik randevu planı (<code>goz_islem_protokol</code>); her kontrol normal göz muayenesidir (<code>goz_muayene.postop_islem_id</code>); komplikasyon kodlanır (endoftalmi, GİB artışı, kistoid makula ödemi…); kalite göstergeleri: postop endoftalmi oranı, refraktif sürpriz (±0,5 D), VA kazancı.</div>
+  </div>
+  <div class="statusbar"><span>Enjeksiyon 3 · lazer 1 · ameliyat 4 (10.09) · postop 4</span><span class="sp">İşlem malzemeleri (IOL, ilaç, gaz) stok/UTS'den seri-lot ile düşer; SUT paket ücretlendirme</span></div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

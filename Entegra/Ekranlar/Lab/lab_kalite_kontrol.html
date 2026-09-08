@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratuvar — İç ve Dış Kalite Kontrol — Mockup (Gentegre AI · Laboratuvar)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📉 Kalite Kontrol — İKK / DKK <span class="sp">Biyokimya · Cobas c503 · Glukoz · Eylül 2026</span></div>
+  <div class="toolbar">
+    <div class="btn primary">＋ KK Sonucu (elle)</div><div class="btn">🔬 Cihazdan KK al</div><div class="btn">📈 Levey-Jennings</div><div class="btn">⚙ Westgard Kuralları</div><div class="btn">🧪 Kontrol Lotu / Hedef</div>
+    <div class="sepv"></div><div class="btn">🌍 Dış Kalite (DKK) Sonuç Gir</div><div class="btn">📑 Aylık KK Raporu</div><div class="btn sp">🖨 Yazdır</div>
+  </div>
+  <div class="hdr k4">
+    <div class="fld"><label>Cihaz / Test</label><div class="inp combo">Cobas c503 · Glukoz (GLUC3)</div></div>
+    <div class="fld"><label>Kontrol materyali</label><div class="inp combo">PreciControl ClinChem Multi 1 · lot 552211 · SKT 03.2027</div></div>
+    <div class="fld"><label>Hedef / SD (lot)</label><div class="inp">Seviye 1: 92 ± 2,8 · Seviye 2: 248 ± 6,2 mg/dL <span class="sonuk">· laboratuvar kümülatif</span></div></div>
+    <div class="fld"><label>Kural seti</label><div class="inp combo">Westgard: 1₃ₛ ret · 2₂ₛ ret · R₄ₛ ret · 4₁ₛ uyarı · 10ₓ uyarı</div></div>
+  </div>
+  <div class="ikiPanel">
+    <div>
+      <div class="grp" style="margin:10px"><div class="gb">Levey-Jennings · Seviye 1 · son 20 gün <span class="sp">yeşil ±1SD · sarı ±2SD · kırmızı ±3SD</span></div>
+        <div class="ic" style="position:relative;height:150px;background:linear-gradient(to bottom,#fbe9e7 0,#fbe9e7 16%,#fdf6e3 16%,#fdf6e3 33%,#e2f3e8 33%,#e2f3e8 67%,#fdf6e3 67%,#fdf6e3 84%,#fbe9e7 84%);border-radius:4px">
+          <div style="position:absolute;left:0;right:0;top:50%;border-top:1px dashed #2c4a6b"></div>
+          <div style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-around">
+            <span style="margin-bottom:52%">●</span><span style="margin-bottom:46%">●</span><span style="margin-bottom:58%">●</span><span style="margin-bottom:50%">●</span><span style="margin-bottom:40%">●</span><span style="margin-bottom:55%">●</span><span style="margin-bottom:62%">●</span><span style="margin-bottom:48%">●</span><span style="margin-bottom:53%">●</span><span style="margin-bottom:57%">●</span><span style="margin-bottom:60%">●</span><span style="margin-bottom:63%">●</span><span style="margin-bottom:66%">●</span><span style="margin-bottom:64%;color:#8a6218">●</span><span style="margin-bottom:70%;color:#8a6218">●</span><span style="margin-bottom:49%">●</span><span style="margin-bottom:51%">●</span><span style="margin-bottom:47%">●</span><span style="margin-bottom:88%;color:#b3261e">●</span><span style="margin-bottom:50%">●</span>
+          </div>
+        </div>
+        <div class="ic sonuk">02.09: 1₃ₛ ihlali (+3,2 SD) → kalibrasyon yenilendi, KK tekrar ✔, önceki hasta sonuçları gözden geçirildi (14 numune, 0 değişiklik). 29–30.08: 4₁ₛ uyarısı (kayma eğilimi) → reaktif lot değişimi.</div>
+      </div>
+    </div>
+    <div>
+      <div class="grp" style="margin:10px"><div class="gb">KK ölçümleri (son 8)</div>
+        <div class="dg"><table>
+          <thead><tr><th class="orta">Tarih</th><th class="orta">Sev.</th><th class="sag">Sonuç</th><th class="sag">Z</th><th class="orta">Kural</th><th class="orta">Kaynak</th><th>Aksiyon</th><th class="orta">Onay</th></tr></thead>
+          <tbody>
+            <tr><td class="orta">03.09 07:05</td><td class="orta">1</td><td class="sag">93</td><td class="sag">+0,4</td><td class="orta">—</td><td class="orta">cihaz</td><td></td><td class="orta">✔</td></tr>
+            <tr><td class="orta">03.09 07:05</td><td class="orta">2</td><td class="sag">246</td><td class="sag">−0,3</td><td class="orta">—</td><td class="orta">cihaz</td><td></td><td class="orta">✔</td></tr>
+            <tr class="sel"><td class="orta">02.09 07:10</td><td class="orta">1</td><td class="sag">101</td><td class="sag">+3,2</td><td class="orta"><span class="rz kir">1₃ₛ</span></td><td class="orta">cihaz</td><td>Kalibrasyon + tekrar</td><td class="orta">✔ ret</td></tr>
+            <tr><td class="orta">02.09 07:40</td><td class="orta">1</td><td class="sag">92</td><td class="sag">0,0</td><td class="orta">—</td><td class="orta">cihaz</td><td>tekrar</td><td class="orta">✔</td></tr>
+            <tr><td class="orta">01.09 07:02</td><td class="orta">1</td><td class="sag">96</td><td class="sag">+1,4</td><td class="orta"><span class="rz sari">4₁ₛ</span></td><td class="orta">cihaz</td><td>izle</td><td class="orta">✔</td></tr>
+            <tr><td class="orta">31.08 07:00</td><td class="orta">1</td><td class="sag">96</td><td class="sag">+1,3</td><td class="orta">—</td><td class="orta">cihaz</td><td></td><td class="orta">✔</td></tr>
+          </tbody></table></div></div>
+      <div class="grp" style="margin:10px"><div class="gb">Dış kalite (DKK) · KBUDEK / RIQAS · Biyokimya</div>
+        <div class="dg"><table>
+          <thead><tr><th>Program</th><th class="orta">Dönem</th><th>Test</th><th class="sag">Sonucumuz</th><th class="sag">Hedef</th><th class="sag">SDI</th><th class="orta">Değerlendirme</th></tr></thead>
+          <tbody>
+            <tr><td>KBUDEK</td><td class="orta">2026-08</td><td>Glukoz</td><td class="sag">118</td><td class="sag">116,4</td><td class="sag">+0,5</td><td class="orta"><span class="rz ok">Kabul</span></td></tr>
+            <tr><td>KBUDEK</td><td class="orta">2026-08</td><td>Kreatinin</td><td class="sag">2,31</td><td class="sag">2,20</td><td class="sag">+1,9</td><td class="orta"><span class="rz sari">Uyarı</span></td></tr>
+            <tr><td>RIQAS</td><td class="orta">2026-08</td><td>TSH</td><td class="sag">4,8</td><td class="sag">4,9</td><td class="sag">−0,3</td><td class="orta"><span class="rz ok">Kabul</span></td></tr>
+          </tbody></table></div></div>
+    </div>
+  </div>
+  <div class="statusbar"><span>Bugün KK: 38 test × 2 seviye · 1 ret · 2 uyarı</span><span class="sp">KK geçersizken o testin hasta sonuçları oto-onaya girmez (<code>lab_kk_olcum.durum</code>)</span></div>
+</div>
+<div class="not"><b>Kurallar.</b> Kontrol lotu başına hedef/SD (üretici + laboratuvar kümülatif); ölçümler cihazdan otomatik (kontrol barkodu) ya da elle; Westgard kural seti test bazlı; ret → düzeltici faaliyet kaydı zorunlu + etkilenen hasta sonuçlarının gözden geçirilmesi. DKK sonuçları dönem bazlı girilir, SDI hesaplanır. ISO 15189 dosyası için aylık rapor. Tablolar: <code>lab_kk_lot</code>, <code>lab_kk_olcum</code>, <code>lab_kk_kural</code>, <code>lab_dkk_sonuc</code>, <code>lab_cihaz_olay</code>.</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

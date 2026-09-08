@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teleradyoloji Çalışma Listesi — Raporlama Merkezi — Mockup (Gentegre AI · Teleradyoloji)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🛰 Teleradyoloji — Çalışma Listesi (Raporlama Merkezi) <span class="sp">Gentegre AI · Teleradyoloji · 03.09.2026 14:20</span></div>
+  <div class="toolbar">
+    <div class="btn primary">📝 Rapor Yaz</div><div class="btn">👤 Bana Ata</div><div class="btn">↔ Yeniden Ata</div><div class="btn">🖼 Görüntüle (PACS)</div>
+    <div class="sepv"></div><div class="btn">🚨 Kritik Bulgu</div><div class="btn">💬 Kuruma Mesaj</div><div class="btn">🔁 Ek Görüntü İste</div>
+    <div class="sepv"></div><div class="btn">📊 Pano</div><div class="btn sp">🖨 Yazdır ▾</div>
+  </div>
+  <div class="arama">
+    <div class="kutu">🔍 Hasta, erişim no, kurum…</div>
+    <span class="chip on">Bekleyen</span><span class="chip">Bende</span><span class="chip">Taslak</span><span class="chip">Onaylı</span><span class="chip">Tümü</span>
+    <span class="sepv"></span><span class="chip">🏥 Kurum ▾</span><span class="chip">🩻 Modalite ▾</span><span class="chip">⚡ Acil</span><span class="chip">⏰ SLA aşımı</span><span class="chip">🌙 Gece</span>
+  </div>
+  <div class="ozet">
+    <div class="kart"><div class="b">Bekleyen</div><div class="d">37 <small>· 6 acil</small></div></div>
+    <div class="kart"><div class="b">SLA aşımı</div><div class="d" style="color:#b3261e">3</div></div>
+    <div class="kart"><div class="b">Bende</div><div class="d">5</div></div>
+    <div class="kart"><div class="b">Bugün onaylanan</div><div class="d">112 <small>· ort. 38 dk</small></div></div>
+    <div class="kart"><div class="b">Kritik bulgu (açık)</div><div class="d" style="color:#8a6218">1 <small>teyit bekliyor</small></div></div>
+    <div class="kart"><div class="b">Aktif kurum</div><div class="d">9 <small>· 3 gece nöbet</small></div></div>
+  </div>
+  <div class="dg"><table>
+    <thead><tr><th style="width:26px"></th><th class="orta">Öncelik</th><th>Kurum</th><th>Hasta</th><th class="orta">Yaş/C</th><th class="orta">Modalite</th><th>Tetkik</th><th class="orta">Çekim</th><th class="orta">Geldi</th><th class="orta">SLA</th><th class="orta">Kalan</th><th>Klinik Bilgi</th><th>Radyolog</th><th class="orta">Görüntü</th><th class="orta">Durum</th></tr></thead>
+    <tbody>
+      <tr class="sel"><td></td><td class="orta"><span class="rz kir">ACİL</span></td><td>Yıldız Hast. (Bursa)</td><td>M. Kaya</td><td class="orta">58 E</td><td class="orta">BT</td><td>Beyin BT (kontrastsız)</td><td class="orta">13:42</td><td class="orta">13:51</td><td class="orta">30 dk</td><td class="orta"><span class="rz kir">−4 dk</span></td><td>Ani konuşma bozukluğu, inme?</td><td class="sonuk">—</td><td class="orta"><span class="rz ok">120 img</span></td><td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+      <tr><td></td><td class="orta"><span class="rz kir">ACİL</span></td><td>Deniz Tıp Merkezi</td><td>A. Şen</td><td class="orta">34 K</td><td class="orta">BT</td><td>Toraks BT Anjiyo</td><td class="orta">13:55</td><td class="orta">14:03</td><td class="orta">30 dk</td><td class="orta">13 dk</td><td>PE şüphesi, D-dimer ↑</td><td>Dr. E. Ay</td><td class="orta"><span class="rz ok">340 img</span></td><td class="orta"><span class="rz mavi">Okunuyor</span></td></tr>
+      <tr><td></td><td class="orta"><span class="rz sari">Öncelikli</span></td><td>Yıldız Hast. (Bursa)</td><td>S. Demir</td><td class="orta">71 K</td><td class="orta">MR</td><td>Lomber MR</td><td class="orta">12:10</td><td class="orta">12:31</td><td class="orta">4 s</td><td class="orta">2 s 11 dk</td><td>Bel ağrısı, sol bacağa yayılan</td><td class="sonuk">—</td><td class="orta"><span class="rz ok">210 img</span></td><td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+      <tr><td></td><td class="orta"><span class="rz">Rutin</span></td><td>Ege Görüntüleme</td><td>K. Us</td><td class="orta">45 E</td><td class="orta">MR</td><td>Diz MR sağ</td><td class="orta">10:20</td><td class="orta">10:44</td><td class="orta">24 s</td><td class="orta">20 s</td><td>Menisküs?</td><td>Dr. C. Er</td><td class="orta"><span class="rz ok">180 img</span></td><td class="orta"><span class="rz mavi">Taslak</span></td></tr>
+      <tr><td></td><td class="orta"><span class="rz">Rutin</span></td><td>Deniz Tıp Merkezi</td><td>F. Ak</td><td class="orta">29 K</td><td class="orta">US</td><td>Tiroid USG</td><td class="orta">09:15</td><td class="orta">09:20</td><td class="orta">24 s</td><td class="orta">19 s</td><td>Nodül takip</td><td class="sonuk">—</td><td class="orta"><span class="rz ok">24 img</span></td><td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+      <tr><td></td><td class="orta"><span class="rz">Rutin</span></td><td>Anadolu Dış Hekimi</td><td>Z. Ak</td><td class="orta">40 K</td><td class="orta">CR</td><td>Akciğer PA</td><td class="orta">dün 17:40</td><td class="orta">dün 17:41</td><td class="orta">24 s</td><td class="orta"><span class="rz kir">−3 s</span></td><td>Öksürük 3 hafta</td><td class="sonuk">—</td><td class="orta"><span class="rz ok">2 img</span></td><td class="orta"><span class="rz kir">SLA aşımı</span></td></tr>
+      <tr><td></td><td class="orta"><span class="rz sari">Öncelikli</span></td><td>Yıldız Hast. (Bursa)</td><td>H. Öz</td><td class="orta">63 E</td><td class="orta">BT</td><td>Batın BT kontrastlı</td><td class="orta">11:05</td><td class="orta">11:30</td><td class="orta">4 s</td><td class="orta">50 dk</td><td>Karın ağrısı, apandisit?</td><td>Dr. E. Ay</td><td class="orta"><span class="rz sari">eksik seri</span></td><td class="orta"><span class="rz mor">Ek görüntü istendi</span></td></tr>
+      <tr><td></td><td class="orta"><span class="rz">Rutin</span></td><td>Ege Görüntüleme</td><td>B. Can</td><td class="orta">52 E</td><td class="orta">MR</td><td>Beyin MR</td><td class="orta">08:30</td><td class="orta">08:52</td><td class="orta">24 s</td><td class="orta">—</td><td>Baş ağrısı</td><td>Dr. C. Er</td><td class="orta"><span class="rz ok">260 img</span></td><td class="orta"><span class="rz ok">Onaylı 13:10</span></td></tr>
+    </tbody></table></div>
+  <div class="statusbar"><span>37 bekleyen · 5 bende · 3 SLA aşımı</span><span>Kalan = SLA − (şimdi − geldi); acil 30 dk · öncelikli 4 s · rutin 24 s (sözleşmeden)</span><span class="sp">Görüntüler kurum PACS'ından DICOM ile geldi; yerelde 90 gün önbellek</span></div>
+</div>
+<div class="not"><b>Kimin ekranı?</b> Raporlama merkezinin (bizim kurum) radyologları. Satır = <code>telerad_istek</code>: gönderen kurumun istemi + DICOM çalışması + SLA. Atama otomatik (modalite/uzmanlık/nöbet) ya da elle. "Ek görüntü iste" gönderen kuruma mesaj + durum. Mevcut <code>../Radyoloji/radyoloji_calisma_listesi.html</code> kurum içi listedir; bu ekran çok-kurumlu ve SLA'lıdır.</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

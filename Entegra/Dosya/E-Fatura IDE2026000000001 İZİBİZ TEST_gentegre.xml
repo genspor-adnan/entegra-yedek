@@ -1,0 +1,182 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+         xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+	<cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+	<cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+	<cbc:ProfileID>ILAC_TIBBICIHAZ</cbc:ProfileID>
+	<cbc:ID>IDE2026000000001</cbc:ID>
+	<cbc:CopyIndicator>false</cbc:CopyIndicator>
+	<cbc:UUID>2427FA87-8CC4-4CD2-8B86-EE2AC9117CA3</cbc:UUID>
+	<cbc:IssueDate>2026-08-24</cbc:IssueDate>
+	<cbc:IssueTime>12:37:57</cbc:IssueTime>
+	<cbc:InvoiceTypeCode>TEVKIFAT</cbc:InvoiceTypeCode>
+	<cbc:Note>Malı Teslim Alan : İSTANBUL BEYKOZ DEVLET HASTANESİ DÖNER SERMAYE İŞLETMESİ</cbc:Note>
+	<cbc:Note>İşlem Numarası : 1</cbc:Note>
+	<cbc:Note>Hasta Adı : TEST HASTA</cbc:Note>
+	<cbc:Note>Operasyon Tarihi : 27.07.2026</cbc:Note>
+	<cbc:Note>Tevkifat Nedeni: 626 - Diğer Teslimler [KDVGUT-(I/C-2.1.3.3.7)] (2/10)</cbc:Note>
+	<cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+	<cbc:LineCountNumeric>1</cbc:LineCountNumeric>
+  <cac:OrderReference>
+    <cbc:ID>Y_K5618_02_0484</cbc:ID>
+    <cbc:IssueDate>2026-05-21</cbc:IssueDate>
+  </cac:OrderReference>	
+	<cac:AccountingSupplierParty>
+		<cac:Party>
+			<cac:PartyIdentification>
+				<cbc:ID schemeID="VKN">4700971634</cbc:ID>
+			</cac:PartyIdentification>
+			<cac:PartyIdentification>
+				<cbc:ID schemeID="MERSISNO">470097163400001</cbc:ID>
+			</cac:PartyIdentification>
+			<cac:PartyIdentification>
+				<cbc:ID schemeID="TICARETSICILNO">126690-5</cbc:ID>
+			</cac:PartyIdentification>
+			<cac:PartyName>
+				<cbc:Name>İDEAMED SAĞLIK HİZMETLERİ TİCARET LİMİTED ŞİRKETİ</cbc:Name>
+			</cac:PartyName>
+			<cac:PostalAddress>
+				<cbc:StreetName>SEYRANTEPE MAH.  DİLEK SOKAK NO : 19/A KAĞITHANE / İSTANBUL</cbc:StreetName>
+				<cbc:CitySubdivisionName>KAĞITHANE</cbc:CitySubdivisionName>
+				<cbc:CityName>İSTANBUL</cbc:CityName>
+				<cbc:PostalZone>34418</cbc:PostalZone>
+				<cac:Country>
+					<cbc:Name>Turkiye</cbc:Name>
+				</cac:Country>
+			</cac:PostalAddress>
+			<cac:PartyTaxScheme>
+				<cac:TaxScheme>
+					<cbc:Name>MASLAK</cbc:Name>
+				</cac:TaxScheme>
+			</cac:PartyTaxScheme>
+			<cac:PartyLegalEntity>
+				<cbc:RegistrationName>İDEAMED SAĞLIK HİZMETLERİ TİCARET LİMİTED ŞİRKETİ</cbc:RegistrationName>
+			</cac:PartyLegalEntity>
+			<cac:Contact>
+				<cbc:Telephone>0212 325 4194</cbc:Telephone>
+				<cbc:ElectronicMail>info@ideamedsaglik.com</cbc:ElectronicMail>
+			</cac:Contact>
+		</cac:Party>
+	</cac:AccountingSupplierParty>
+	<cac:AccountingCustomerParty>
+		<cac:Party>
+			<cac:PartyIdentification>
+				<cbc:ID schemeID="VKN">2940035696</cbc:ID>
+			</cac:PartyIdentification>
+			<cac:PartyName>
+				<cbc:Name>DEVLET MALZEME OFİSİ GENEL MÜDÜRLÜĞÜ</cbc:Name>
+			</cac:PartyName>
+			<cac:PostalAddress>
+				<cbc:StreetName>DEVLET MH. İNÖNÜ BULV.NO:18 </cbc:StreetName>
+				<cbc:CitySubdivisionName>ÇANKAYA</cbc:CitySubdivisionName>
+				<cbc:CityName>ANKARA</cbc:CityName>
+				<cac:Country>
+					<cbc:Name>Turkiye</cbc:Name>
+				</cac:Country>
+			</cac:PostalAddress>
+			<cac:PartyTaxScheme>
+				<cac:TaxScheme>
+					<cbc:Name>ANKARA KURUMLAR</cbc:Name>
+				</cac:TaxScheme>
+			</cac:PartyTaxScheme>
+			<cac:PartyLegalEntity>
+				<cbc:RegistrationName>DEVLET MALZEME OFİSİ GENEL MÜDÜRLÜĞÜ</cbc:RegistrationName>
+			</cac:PartyLegalEntity>
+		</cac:Party>
+	</cac:AccountingCustomerParty>
+	<cac:TaxTotal>
+		<cbc:TaxAmount currencyID="TRY">0.10</cbc:TaxAmount>
+		<cac:TaxSubtotal>
+			<cbc:TaxableAmount currencyID="TRY">1.00</cbc:TaxableAmount>
+			<cbc:TaxAmount currencyID="TRY">0.10</cbc:TaxAmount>
+			<cbc:Percent>10</cbc:Percent>
+			<cac:TaxCategory>
+				<cac:TaxScheme>
+					<cbc:Name>KDV</cbc:Name>
+					<cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+				</cac:TaxScheme>
+			</cac:TaxCategory>
+		</cac:TaxSubtotal>
+	</cac:TaxTotal>
+	<cac:WithholdingTaxTotal>
+		<cbc:TaxAmount currencyID="TRY">0.02</cbc:TaxAmount>
+		<cac:TaxSubtotal>
+			<cbc:TaxableAmount currencyID="TRY">0.10</cbc:TaxableAmount>
+			<cbc:TaxAmount currencyID="TRY">0.02</cbc:TaxAmount>
+			<cbc:Percent>20</cbc:Percent>
+			<cac:TaxCategory>
+				<cac:TaxScheme>
+					<cbc:Name>Diğer Teslimler [KDVGUT-(I/C-2.1.3.3.7)] (2/10)</cbc:Name>
+					<cbc:TaxTypeCode>626</cbc:TaxTypeCode>
+				</cac:TaxScheme>
+			</cac:TaxCategory>
+		</cac:TaxSubtotal>
+	</cac:WithholdingTaxTotal>
+	<cac:LegalMonetaryTotal>
+		<cbc:LineExtensionAmount currencyID="TRY">1.00</cbc:LineExtensionAmount>
+		<cbc:TaxExclusiveAmount currencyID="TRY">1.00</cbc:TaxExclusiveAmount>
+		<cbc:TaxInclusiveAmount currencyID="TRY">1.10</cbc:TaxInclusiveAmount>
+		<cbc:PayableAmount currencyID="TRY">1.08</cbc:PayableAmount>
+	</cac:LegalMonetaryTotal>
+	<cac:InvoiceLine>
+		<cbc:ID>1</cbc:ID>
+		<cbc:Note>( 1 Adet 80229889 ÜRT: 16.12.2024 SKT: 16.12.2027 )</cbc:Note>
+		<cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="TRY">1.00</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="TRY">0.10</cbc:TaxAmount>
+			<cac:TaxSubtotal>
+				<cbc:TaxableAmount currencyID="TRY">1.00</cbc:TaxableAmount>
+				<cbc:TaxAmount currencyID="TRY">0.10</cbc:TaxAmount>
+				<cbc:Percent>10</cbc:Percent>
+				<cac:TaxCategory>
+					<cac:TaxScheme>
+						<cbc:Name>KDV</cbc:Name>
+						<cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+					</cac:TaxScheme>
+				</cac:TaxCategory>
+			</cac:TaxSubtotal>
+		</cac:TaxTotal>
+		<cac:WithholdingTaxTotal>
+			<cbc:TaxAmount currencyID="TRY">0.02</cbc:TaxAmount>
+			<cac:TaxSubtotal>
+				<cbc:TaxableAmount currencyID="TRY">0.10</cbc:TaxableAmount>
+				<cbc:TaxAmount currencyID="TRY">0.02</cbc:TaxAmount>
+				<cbc:Percent>20</cbc:Percent>
+				<cac:TaxCategory>
+					<cac:TaxScheme>
+						<cbc:Name>Diğer Teslimler [KDVGUT-(I/C-2.1.3.3.7)] (2/10)</cbc:Name>
+						<cbc:TaxTypeCode>626</cbc:TaxTypeCode>
+					</cac:TaxScheme>
+				</cac:TaxCategory>
+			</cac:TaxSubtotal>
+		</cac:WithholdingTaxTotal>
+		<cac:Item>
+			<cbc:Name>PULS PLUS HIP KIT</cbc:Name>
+			<cbc:ModelName>AP3150</cbc:ModelName>
+			<cac:BuyersItemIdentification>
+				<cbc:ID>5678</cbc:ID>
+			</cac:BuyersItemIdentification>
+			<cac:SellersItemIdentification>
+				<cbc:ID>00-5150-482-01</cbc:ID>
+			</cac:SellersItemIdentification>
+			<cac:ManufacturersItemIdentification>
+				<cbc:ID>+H1240051504820116</cbc:ID>
+			</cac:ManufacturersItemIdentification>
+			<cac:StandardItemIdentification>
+				<cbc:ID schemeID="GTIN">+H1240051504820116</cbc:ID>
+			</cac:StandardItemIdentification>
+			<cac:AdditionalItemProperty>
+				<cbc:Name>LOTNO</cbc:Name>
+				<cbc:Value>80229889</cbc:Value>
+			</cac:AdditionalItemProperty>
+			<cac:AdditionalItemIdentification>
+				<cbc:ID schemeID="TIBBICIHAZ">(UNO)+H1240051504820116(LNO)80229889(URT)241216</cbc:ID>
+			</cac:AdditionalItemIdentification>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="TRY">1.00</cbc:PriceAmount>
+		</cac:Price>
+	</cac:InvoiceLine>
+</Invoice>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Genetik — Panel Analizi, Varyant Değerlendirme, Rapor — Mockup (Gentegre AI · Laboratuvar)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🧬 Genetik Laboratuvarı — Vaka Çalışma Alanı <span class="sp">Uzm. Dr. G. Tekin · NextSeq 550 · QuantStudio 5 · 03.09.2026</span></div>
+  <div class="toolbar">
+    <div class="btn">🧪 DNA İzolasyon</div><div class="btn">📚 Kütüphane / Run</div><div class="btn">🔎 Varyant Filtrele</div><div class="btn">🏷 ACMG Sınıfla</div><div class="btn ok">✔ Rapor Onayla</div>
+    <div class="sepv"></div><div class="btn">📋 Onam Kontrol</div><div class="btn">👨‍👩‍👧 Aile / Segregasyon</div><div class="btn">🔁 Sanger Doğrulama İste</div><div class="btn sp">🖨 Rapor</div>
+  </div>
+  <div class="sekmeler"><div class="sekme on">Vaka Listesi</div><div class="sekme">Vaka · S. Ar · Kardiyomiyopati Paneli</div><div class="sekme">Run / Kalite</div><div class="sekme">Rapor</div></div>
+  <div class="pnl">
+    <div class="arama"><div class="kutu">🔍 Hasta, vaka no, gen…</div><span class="chip">Numune</span><span class="chip">İzolasyon</span><span class="chip">Run'da</span><span class="chip on">Analiz</span><span class="chip">Rapor bekliyor</span><span class="chip">Tümü</span><span class="sepv"></span><span class="chip">NGS panel</span><span class="chip">WES</span><span class="chip">PCR / RT-PCR</span><span class="chip">Sanger</span><span class="chip">Karyotip</span></div>
+    <div class="dg"><table>
+      <thead><tr><th style="width:26px"></th><th>Vaka</th><th>Hasta</th><th>Endikasyon / ICD</th><th>Test</th><th class="orta">Onam</th><th class="orta">Numune</th><th class="orta">DNA (ng/µL · 260/280)</th><th class="orta">Run</th><th class="orta">Kapsama</th><th class="sag">Varyant (filtre sonrası)</th><th class="orta">TAT</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td></td><td><b>GEN-2026/0412</b></td><td>S. Ar · 27 K</td><td>Ailesel HCM · I42.2</td><td>Kardiyomiyopati NGS paneli (62 gen)</td><td class="orta"><span class="rz ok">✔ v2</span></td><td class="orta">EDTA 2603187090</td><td class="orta">48 · 1,84</td><td class="orta">RUN-0931</td><td class="orta"><span class="rz ok">%99,1 ≥20×</span></td><td class="sag">3</td><td class="orta">14 / 21 g</td><td class="orta"><span class="rz mavi">Analiz</span></td></tr>
+        <tr><td></td><td>GEN-2026/0410</td><td>B. Can · 52 E</td><td>Kolon Ca · C18.9</td><td>Somatik panel (tümör, 50 gen)</td><td class="orta"><span class="rz ok">✔</span></td><td class="orta">FFPE blok</td><td class="orta">12 · 1,72 <span class="rz sari">düşük</span></td><td class="orta">RUN-0931</td><td class="orta"><span class="rz sari">%94</span></td><td class="sag">2</td><td class="orta">9 / 14 g</td><td class="orta"><span class="rz mavi">Analiz</span></td></tr>
+        <tr><td></td><td>GEN-2026/0408</td><td>N. Gül · 34 K</td><td>Tekrarlayan gebelik kaybı</td><td>Trombofili PCR (FV Leiden, FII, MTHFR)</td><td class="orta"><span class="rz ok">✔</span></td><td class="orta">EDTA</td><td class="orta">—</td><td class="orta">QS5-0218</td><td class="orta">—</td><td class="sag">—</td><td class="orta">3 / 5 g</td><td class="orta"><span class="rz ok">Rapor bekliyor</span></td></tr>
+        <tr><td></td><td>GEN-2026/0405</td><td>Bebek Ak · 0 E</td><td>Hipotoni · dismorfi</td><td>WES trio</td><td class="orta"><span class="rz sari">anne onamı eksik</span></td><td class="orta">EDTA ×3</td><td class="orta">bekliyor</td><td class="orta">—</td><td class="orta">—</td><td class="sag">—</td><td class="orta">2 / 45 g</td><td class="orta"><span class="rz sari">Numune</span></td></tr>
+        <tr><td></td><td>GEN-2026/0399</td><td>D. Su · 41 K</td><td>Meme Ca aile öyküsü</td><td>BRCA1/2 NGS</td><td class="orta"><span class="rz ok">✔</span></td><td class="orta">EDTA</td><td class="orta">55 · 1,86</td><td class="orta">RUN-0928</td><td class="orta"><span class="rz ok">%99,6</span></td><td class="sag">1</td><td class="orta">18 / 21 g</td><td class="orta"><span class="rz mavi">Sanger doğrulama</span></td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="pnl">
+    <div class="hdr" style="grid-template-columns:1fr 1fr 1fr 1fr">
+      <div class="fld"><label>Hasta</label><div class="inp ro big">Selin Ar · 27 K</div></div>
+      <div class="fld"><label>Endikasyon</label><div class="inp ro">Ailesel hipertrofik kardiyomiyopati · baba HCM (+), ani ölüm amca</div></div>
+      <div class="fld"><label>Test / Panel</label><div class="inp ro">Kardiyomiyopati NGS · 62 gen · GRCh38 · pipeline v3.2</div></div>
+      <div class="fld"><label>Onam</label><div class="inp ro"><span class="rz ok">Genetik test onamı v2</span> · tesadüfi bulgu: <b>istemiyor</b> · veri saklama: 10 yıl</div></div>
+    </div>
+    <div class="toolbar" style="border-top:none"><span class="chip on">Filtre: MAF &lt; %1 · panel genleri · kodlayıcı/splice</span><span class="chip">Tüm varyantlar (1.284)</span><span class="chip">Yalnız P/LP/VUS</span><div class="btn sp">🔗 ClinVar · gnomAD · Franklin</div></div>
+    <div class="dg"><table>
+      <thead><tr><th>Gen</th><th>Transkript · HGVS c.</th><th>HGVS p.</th><th class="orta">Zigosite</th><th class="orta">Kalıtım</th><th class="sag">Derinlik / VAF</th><th class="sag">gnomAD AF</th><th>ClinVar</th><th>ACMG kriterleri</th><th class="orta">Sınıf</th><th class="orta">Rapor</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td><b>MYBPC3</b></td><td>NM_000256.3:c.1504C&gt;T</td><td>p.(Arg502Trp)</td><td class="orta">Het</td><td class="orta">AD</td><td class="sag">184× · 0,49</td><td class="sag">0,00002</td><td><span class="rz kir">Pathogenic (3★)</span></td><td>PS4 · PP1_Strong · PM2 · PP3 · PP5</td><td class="orta"><span class="rz kir">Patojenik (5)</span></td><td class="orta">☑ Ana bulgu</td></tr>
+        <tr><td>MYH7</td><td>NM_000257.4:c.2389G&gt;A</td><td>p.(Ala797Thr)</td><td class="orta">Het</td><td class="orta">AD</td><td class="sag">156× · 0,51</td><td class="sag">0,0004</td><td><span class="rz sari">VUS / conflicting</span></td><td>PM2_Supporting · PP3</td><td class="orta"><span class="rz sari">VUS (3)</span></td><td class="orta">☑ Bildir (VUS)</td></tr>
+        <tr><td>TTN</td><td>NM_001267550.2:c.58784G&gt;A</td><td>p.(Arg19595His)</td><td class="orta">Het</td><td class="orta">AD</td><td class="sag">98× · 0,47</td><td class="sag">0,003</td><td>Likely benign</td><td>BS1 · BP4</td><td class="orta"><span class="rz ok">Olası benign (2)</span></td><td class="orta">☐</td></tr>
+      </tbody></table></div>
+    <div class="ikiPanel">
+      <div class="grp" style="margin:10px"><div class="gb">Değerlendirme notu · MYBPC3 c.1504C&gt;T</div>
+        <div class="ic">HCM ile ilişkili bilinen patojenik varyant (ClinVar 3★; çoklu aile segregasyonu). Hastanın fenotipiyle uyumlu. <b>Öneri:</b> birinci derece akrabalara kaskad tarama (Sanger, hedefe yönelik); kardiyoloji takibi; genetik danışmanlık.
+          <div style="margin-top:6px;display:flex;gap:6px"><div class="btn">🔁 Sanger ile doğrula</div><div class="btn">👨‍👩‍👧 Aile üyesi vaka aç (baba)</div></div></div></div>
+      <div class="grp" style="margin:10px"><div class="gb">Run / kalite · RUN-0931</div>
+        <div class="ic">NextSeq 550 · 03.09 · Q30 %93 · toplam okuma 2,1 M · ortalama derinlik 212× · %99,1 hedef ≥20× · kontaminasyon %0,3 · cinsiyet doğrulama ✔ (XX) · pozitif kontrol ✔<br><span class="sonuk">Pipeline: BWA-MEM2 · GATK 4.5 · VEP 111 · in-house filtre v3.2 · referans GRCh38</span></div></div>
+    </div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table>
+      <thead><tr><th>Run</th><th>Cihaz</th><th class="orta">Tarih</th><th>Kit / Panel</th><th class="sag">Örnek</th><th class="sag">Q30</th><th class="sag">Okuma</th><th class="sag">Ort. derinlik</th><th class="orta">Kontrol</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr><td>RUN-0931</td><td>NextSeq 550</td><td class="orta">03.09.2026</td><td>Kardiyo 62 + Somatik 50</td><td class="sag">12</td><td class="sag">%93</td><td class="sag">24,8 M</td><td class="sag">205×</td><td class="orta"><span class="rz ok">PK ✔ NK ✔</span></td><td class="orta"><span class="rz ok">Tamam · analizde</span></td></tr>
+        <tr><td>RUN-0928</td><td>NextSeq 550</td><td class="orta">29.08.2026</td><td>BRCA + HBOC</td><td class="sag">8</td><td class="sag">%94</td><td class="sag">18,2 M</td><td class="sag">310×</td><td class="orta"><span class="rz ok">✔</span></td><td class="orta"><span class="rz ok">Tamam</span></td></tr>
+        <tr><td>QS5-0218</td><td>QuantStudio 5</td><td class="orta">02.09.2026</td><td>Trombofili RT-PCR</td><td class="sag">24</td><td class="sag">—</td><td class="sag">—</td><td class="sag">—</td><td class="orta"><span class="rz ok">✔ Ct kontrol</span></td><td class="orta"><span class="rz ok">Tamam</span></td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Run başına: kit lot, flow cell, kontrol örnekleri, metrikler; örnek başına kalite (derinlik, kapsama, kontaminasyon). Kalitesiz örnek → yeniden kütüphane / yeniden numune.</div>
+  </div>
+  <div class="pnl">
+    <div class="hdr" style="grid-template-columns:1fr 1fr">
+      <div class="fld"><label>Rapor türü</label><div class="inp combo">Germline panel raporu · ACMG/AMP 2015 + ClinGen</div></div>
+      <div class="fld"><label>İmzalayanlar</label><div class="inp">Uzm. Dr. G. Tekin (Tıbbi Genetik) · Biyolog E. Yıl (analiz)</div></div>
+      <div class="fld" style="grid-column:span 2"><label>Sonuç</label><div class="inp" style="min-height:60px;align-items:flex-start"><b>MYBPC3 c.1504C&gt;T p.(Arg502Trp) heterozigot — Patojenik.</b> Hipertrofik kardiyomiyopati ile ilişkili. MYH7 c.2389G&gt;A — klinik önemi belirsiz (VUS); yeniden değerlendirme önerilir.</div></div>
+      <div class="fld" style="grid-column:span 2"><label>Öneriler</label><div class="inp">Genetik danışmanlık · kaskad tarama (1. derece akrabalar) · kardiyoloji takibi. Tesadüfi bulgu bildirimi hasta tercihiyle yapılmadı.</div></div>
+      <div class="fld"><label>Sınırlılıklar</label><div class="inp">Panel dışı genler, derin intronik, büyük CNV (MLPA ile), mozaisizm &lt; %10.</div></div>
+      <div class="fld"><label>Ekler</label><div class="inp">Kapsama tablosu · yöntem · gen listesi · VCF (istekle)</div></div>
+    </div>
+    <div style="padding:8px 12px;display:flex;gap:6px"><div class="btn ok">✍ e-İmzala &amp; Onayla</div><div class="btn">👁 PDF Önizle</div><div class="btn">📤 Hekime + Portala Gönder</div></div>
+  </div>
+  <div class="statusbar"><span>5 vaka · 2 analiz · 1 rapor bekliyor · 1 onam eksik</span><span class="sp">Varyant verisi <code>lab_varyant</code> (HGVS, ACMG); onam <code>onam</code> (tür: genetik test / tesadüfi bulgu / veri saklama); ham veri (FASTQ/BAM/VCF) nesne depoda, DB'de yalnız yol + hash</span></div>
+</div>
+<div class="not"><b>Genetik farkı.</b> Vaka bazlı, TAT gün/hafta; onam ayrıntılı (tesadüfi bulgu tercihi, aile paylaşımı, veri saklama süresi); ham veri büyük (FASTQ/BAM) — nesne depo; varyant yorumu sürümlüdür (ACMG kriterleri + kanıt + tarih); aynı varyant başka hastada çıkınca "yeniden değerlendirme" listesi; aile vakaları birbirine bağlanır (segregasyon). Somatik testlerde tümör yüzdesi, VAF eşiği, tedaviye yönelik tier sınıflaması (AMP/ASCO/CAP).</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

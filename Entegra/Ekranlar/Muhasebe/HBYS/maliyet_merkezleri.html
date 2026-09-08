@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maliyet Merkezleri ve Dağıtım Anahtarları — Görüntüleme Merkezi — Mockup (Gentegre AI · Muhasebe · HBYS)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .klasor li{padding:4px 10px;border-bottom:none;font-size:11.5px}
+  .klasor li .sp{color:var(--muted);font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🏷 Maliyet Merkezleri &amp; Dağıtım <span class="sp">Görüntüleme Merkezi · masraf_merkezi (mevcut) + maliyet_dagitim_anahtari · Ağustos 2026</span></div>
+  <div class="toolbar"><div class="btn primary">＋ Merkez</div><div class="btn">✎ Düzenle</div><div class="btn">🔑 Dağıtım Anahtarı</div><div class="btn">📥 Muhasebeden Gider Çek</div><div class="btn ok">🧮 Dönemi Dağıt</div><div class="btn sp">📊 Dönem Raporu</div></div>
+  <div class="sekmeler"><div class="sekme on">Merkez Ağacı</div><div class="sekme">Gider Kalemleri (Ağustos)</div><div class="sekme">Dağıtım Anahtarları</div><div class="sekme">Aşamalı Dağıtım</div></div>
+  <div class="pnl ucPanel" style="grid-template-columns:330px 1fr">
+    <div>
+      <ul class="liste klasor">
+        <li>🏢 <b>Görüntüleme Merkezi</b> <span class="sp">toplam</span></li>
+        <li class="s1">🩻 <b>Ana (üretim) merkezleri</b></li>
+        <li class="s2 sel">MR-1 · Siemens 1.5T <span class="sp">cihaz</span></li>
+        <li class="s2">BT-1 · 64 kesit <span class="sp">cihaz</span></li>
+        <li class="s2">USG-1 / USG-2 <span class="sp">cihaz</span></li>
+        <li class="s2">Mamografi <span class="sp">cihaz</span></li>
+        <li class="s2">Röntgen (DR) <span class="sp">cihaz</span></li>
+        <li class="s2">Kemik dansitometre <span class="sp">cihaz</span></li>
+        <li class="s2">Raporlama (radyologlar) <span class="sp">hizmet</span></li>
+        <li class="s1">🧰 <b>Yardımcı merkezler</b></li>
+        <li class="s2">Kayıt / resepsiyon / çağrı</li>
+        <li class="s2">Hemşirelik / enjeksiyon odası</li>
+        <li class="s2">PACS / bilgi işlem</li>
+        <li class="s2">Temizlik / teknik hizmet</li>
+        <li class="s1">🏛 <b>Genel yönetim</b></li>
+        <li class="s2">Yönetim / muhasebe / İK</li>
+        <li class="s2">Bina (kira, ortak giderler)</li>
+        <li class="s2">Pazarlama / kurum ilişkileri</li>
+      </ul>
+    </div>
+    <div>
+      <div class="hdr k4">
+        <div class="fld"><label>Merkez</label><div class="inp big">MR-1 · Siemens Magnetom 1.5T</div></div>
+        <div class="fld"><label>Tür</label><div class="inp combo">Ana (üretim) · cihaz bazlı</div></div>
+        <div class="fld"><label>Bağlı cihaz (demirbaş)</label><div class="inp combo">DMB-0042 · MR · 2022 · 18,5 M ₺</div></div>
+        <div class="fld"><label>Sorumlu</label><div class="inp combo">Baş tekniker A. Yıldız</div></div>
+        <div class="fld"><label>Kapasite (ay)</label><div class="inp">12 saat × 26 gün = <b>18.720 dk</b> · çekim başı ort. 28 dk → ~ 670 çekim</div></div>
+        <div class="fld"><label>Muhasebe hesabı eşleme</label><div class="inp">770.01.MR1 · 740.01.MR1 (masraf yeri)</div></div>
+        <div class="fld"><label>Alan (m²)</label><div class="inp">85</div></div>
+        <div class="fld"><label>Personel (FTE)</label><div class="inp">2,0 tekniker · 0,5 hemşire</div></div>
+      </div>
+      <div class="grp" style="margin:10px"><div class="gb">Ağustos 2026 · MR-1 giderleri <span class="sp">direkt + dağıtılan</span></div>
+        <div class="dg"><table><thead><tr><th>Gider kalemi</th><th class="orta">Kaynak</th><th class="sag">Direkt</th><th class="sag">Dağıtılan</th><th class="sag">Toplam</th><th class="sag">Pay</th></tr></thead>
+          <tbody>
+            <tr><td>Amortisman (cihaz + kurulum)</td><td class="orta">demirbaş</td><td class="sag">154.200</td><td class="sag">—</td><td class="sag">154.200</td><td class="sag">%31</td></tr>
+            <tr><td>Servis / bakım sözleşmesi</td><td class="orta">tedarikçi faturası</td><td class="sag">62.500</td><td class="sag">—</td><td class="sag">62.500</td><td class="sag">%13</td></tr>
+            <tr><td>Personel — tekniker/hemşire (bordro)</td><td class="orta">bordro</td><td class="sag">96.400</td><td class="sag">—</td><td class="sag">96.400</td><td class="sag">%19</td></tr>
+            <tr><td>Radyolog raporlama (hakediş)</td><td class="orta">hakediş</td><td class="sag">—</td><td class="sag">71.800</td><td class="sag">71.800</td><td class="sag">%14</td></tr>
+            <tr><td>Kontrast madde + sarf</td><td class="orta">stok sarf (radyoloji_sarf)</td><td class="sag">38.900</td><td class="sag">—</td><td class="sag">38.900</td><td class="sag">%8</td></tr>
+            <tr><td>Enerji (helyum/soğutma/elektrik)</td><td class="orta">sayaç / fatura</td><td class="sag">21.300</td><td class="sag">—</td><td class="sag">21.300</td><td class="sag">%4</td></tr>
+            <tr><td>PACS / BT payı</td><td class="orta">dağıtım · çekim sayısı</td><td class="sag">—</td><td class="sag">9.100</td><td class="sag">9.100</td><td class="sag">%2</td></tr>
+            <tr><td>Kayıt / resepsiyon payı</td><td class="orta">dağıtım · hasta sayısı</td><td class="sag">—</td><td class="sag">8.700</td><td class="sag">8.700</td><td class="sag">%2</td></tr>
+            <tr><td>Bina / kira payı</td><td class="orta">dağıtım · m²</td><td class="sag">—</td><td class="sag">17.400</td><td class="sag">17.400</td><td class="sag">%3</td></tr>
+            <tr><td>Genel yönetim payı</td><td class="orta">dağıtım · gelir</td><td class="sag">—</td><td class="sag">19.200</td><td class="sag">19.200</td><td class="sag">%4</td></tr>
+            <tr class="grup"><td>Toplam</td><td></td><td class="sag">373.300</td><td class="sag">126.200</td><td class="sag"><b>499.500</b></td><td class="sag">%100</td></tr>
+          </tbody></table></div>
+        <div class="ozet"><div class="kart"><div class="b">Çekim (Ağustos)</div><div class="d">612</div></div><div class="kart"><div class="b">Cihaz çalışma</div><div class="d">15.480 <small>dk · doluluk %83</small></div></div><div class="kart"><div class="b">Maliyet / dk</div><div class="d">32,3 <small>₺</small></div></div><div class="kart"><div class="b">Ort. maliyet / çekim</div><div class="d">816 <small>₺</small></div></div><div class="kart"><div class="b">Ort. gelir / çekim</div><div class="d">1.140 <small>₺ · marj %28</small></div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="pnl">
+    <div class="toolbar" style="border-top:none"><div class="btn">📥 Muhasebe fişlerinden çek (770/740/760)</div><div class="btn">📥 Bordro</div><div class="btn">📥 Amortisman tablosu</div><div class="btn">📥 Stok sarf</div><div class="btn">📥 Hakediş</div><div class="btn">＋ Elle gider</div></div>
+    <div class="dg"><table>
+      <thead><tr><th>Gider kalemi</th><th>Kategori</th><th>Merkez</th><th class="orta">Kaynak belge</th><th class="sag">Tutar</th><th class="orta">Davranış</th><th class="orta">Durum</th></tr></thead>
+      <tbody>
+        <tr><td>Amortisman — MR-1</td><td>Amortisman</td><td>MR-1</td><td class="orta">demirbaş amortisman tablosu · 08/2026</td><td class="sag">154.200</td><td class="orta"><span class="rz">Sabit</span></td><td class="orta"><span class="rz ok">Aktarıldı</span></td></tr>
+        <tr><td>Siemens servis sözleşmesi</td><td>Bakım</td><td>MR-1</td><td class="orta">Alış faturası ALF-2026/0412</td><td class="sag">62.500</td><td class="orta"><span class="rz">Sabit</span></td><td class="orta"><span class="rz ok">Aktarıldı</span></td></tr>
+        <tr><td>Gadolinyum kontrast (sarf)</td><td>Malzeme</td><td>MR-1</td><td class="orta">radyoloji_sarf · 184 uygulama</td><td class="sag">31.400</td><td class="orta"><span class="rz mavi">Değişken</span></td><td class="orta"><span class="rz ok">Aktarıldı</span></td></tr>
+        <tr><td>Bordro — tekniker (MR)</td><td>Personel</td><td>MR-1</td><td class="orta">bordro 08/2026 · 2,0 FTE</td><td class="sag">78.000</td><td class="orta"><span class="rz">Sabit</span></td><td class="orta"><span class="rz ok">Aktarıldı</span></td></tr>
+        <tr><td>Radyolog hakedişi (Ağustos)</td><td>Personel</td><td>Raporlama</td><td class="orta">hakedis · 5 radyolog</td><td class="sag">248.600</td><td class="orta"><span class="rz mavi">Değişken</span></td><td class="orta"><span class="rz ok">Aktarıldı</span></td></tr>
+        <tr><td>Elektrik</td><td>Enerji</td><td>Bina → alt sayaç</td><td class="orta">fatura · sayaç bölüşümü</td><td class="sag">64.000</td><td class="orta"><span class="rz mavi">Yarı değişken</span></td><td class="orta"><span class="rz sari">sayaç girilmedi</span></td></tr>
+        <tr><td>Kira</td><td>Bina</td><td>Bina</td><td class="orta">kira faturası</td><td class="sag">180.000</td><td class="orta"><span class="rz">Sabit</span></td><td class="orta"><span class="rz ok">Aktarıldı</span></td></tr>
+        <tr><td>PACS lisans + sunucu</td><td>BT</td><td>PACS / BT</td><td class="orta">fatura</td><td class="sag">42.000</td><td class="orta"><span class="rz">Sabit</span></td><td class="orta"><span class="rz ok">Aktarıldı</span></td></tr>
+        <tr><td>Teleradyoloji dış raporlama</td><td>Dış hizmet</td><td>Raporlama</td><td class="orta">alış faturası · 38 rapor</td><td class="sag">19.000</td><td class="orta"><span class="rz mavi">Değişken</span></td><td class="orta"><span class="rz ok">Aktarıldı</span></td></tr>
+        <tr><td>Yönetim maaşları + muhasebe</td><td>Personel</td><td>Yönetim</td><td class="orta">bordro</td><td class="sag">210.000</td><td class="orta"><span class="rz">Sabit</span></td><td class="orta"><span class="rz ok">Aktarıldı</span></td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Giderler kaynağından otomatik çekilir (muhasebe fişi masraf yeri, bordro merkezi, amortisman, stok sarf, hakediş); eşleşmeyen hesaplar "sınıflandırılmamış" kuyruğuna. Sabit/değişken davranışı başabaş analizi için.</div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table>
+      <thead><tr><th>Anahtar</th><th>Tanım</th><th>Kaynak</th><th class="orta">MR-1</th><th class="orta">BT-1</th><th class="orta">USG</th><th class="orta">MG</th><th class="orta">XR</th><th class="orta">Rapor.</th><th>Kullanan dağıtım</th></tr></thead>
+      <tbody>
+        <tr><td>Çekim sayısı</td><td>Dönemde tamamlanan tetkik</td><td>radyoloji_istem</td><td class="orta">612</td><td class="orta">840</td><td class="orta">1.410</td><td class="orta">380</td><td class="orta">1.920</td><td class="orta">—</td><td>PACS/BT, hemşirelik</td></tr>
+        <tr><td>Hasta sayısı</td><td>Tekil başvuru</td><td>belge (başvuru)</td><td class="orta">590</td><td class="orta">800</td><td class="orta">1.300</td><td class="orta">380</td><td class="orta">1.850</td><td class="orta">—</td><td>Kayıt/resepsiyon</td></tr>
+        <tr><td>Cihaz çalışma dk</td><td>Çekim süreleri toplamı</td><td>radyoloji_istem (başlangıç–bitiş)</td><td class="orta">15.480</td><td class="orta">9.240</td><td class="orta">21.150</td><td class="orta">5.700</td><td class="orta">7.680</td><td class="orta">—</td><td>Enerji, teknik hizmet</td></tr>
+        <tr><td>Alan (m²)</td><td>Kullanılan alan</td><td>merkez kartı</td><td class="orta">85</td><td class="orta">70</td><td class="orta">40</td><td class="orta">25</td><td class="orta">35</td><td class="orta">60</td><td>Bina, temizlik</td></tr>
+        <tr><td>Rapor sayısı (ağırlıklı)</td><td>Rapor × modalite ağırlığı (MR 3 · BT 2 · US 1 · MG 1,5 · XR 0,5)</td><td>radyoloji_rapor</td><td class="orta">1.836</td><td class="orta">1.680</td><td class="orta">1.410</td><td class="orta">570</td><td class="orta">960</td><td class="orta">—</td><td>Raporlama merkezi → cihazlara</td></tr>
+        <tr><td>Gelir</td><td>Dönem hasılatı</td><td>belge satırları</td><td class="orta">698 K</td><td class="orta">520 K</td><td class="orta">310 K</td><td class="orta">140 K</td><td class="orta">190 K</td><td class="orta">—</td><td>Genel yönetim, pazarlama</td></tr>
+        <tr><td>Personel (FTE)</td><td>Kadro</td><td>taraf_personel</td><td class="orta">2,5</td><td class="orta">2,0</td><td class="orta">1,0</td><td class="orta">1,0</td><td class="orta">1,5</td><td class="orta">5,0</td><td>İK, yemek</td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Anahtar değerleri dönem kapanışında otomatik hesaplanır (<code>maliyet_anahtar_deger</code>); elle düzeltilebilir (gerekçeli).</div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table>
+      <thead><tr><th class="orta">Aşama</th><th>Kaynak merkez</th><th class="sag">Tutar</th><th>Anahtar</th><th>Hedefler</th><th class="orta">Yöntem</th></tr></thead>
+      <tbody>
+        <tr><td class="orta">1</td><td>Bina (kira, ortak gider, temizlik)</td><td class="sag">246.000</td><td>m²</td><td>tüm merkezler (yardımcı dahil)</td><td class="orta">kademeli</td></tr>
+        <tr><td class="orta">2</td><td>PACS / BT</td><td class="sag">51.100</td><td>çekim sayısı</td><td>cihaz merkezleri + raporlama</td><td class="orta">kademeli</td></tr>
+        <tr><td class="orta">3</td><td>Kayıt / resepsiyon</td><td class="sag">74.300</td><td>hasta sayısı</td><td>cihaz merkezleri</td><td class="orta">kademeli</td></tr>
+        <tr><td class="orta">4</td><td>Hemşirelik / enjeksiyon</td><td class="sag">41.200</td><td>kontrastlı çekim</td><td>MR, BT</td><td class="orta">kademeli</td></tr>
+        <tr><td class="orta">5</td><td>Raporlama (radyolog hakediş + dış rapor)</td><td class="sag">267.600</td><td>ağırlıklı rapor</td><td>cihaz merkezleri</td><td class="orta">kademeli</td></tr>
+        <tr><td class="orta">6</td><td>Genel yönetim + pazarlama</td><td class="sag">288.000</td><td>gelir</td><td>cihaz merkezleri</td><td class="orta">son aşama</td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Kademeli (step-down) dağıtım: yardımcı merkezler sırayla kapanır, karşılıklı hizmet basitleştirilir. Sonuç: her cihaz merkezinin tam maliyeti → tetkik birim maliyeti. Sıra ve anahtar <code>maliyet_dagitim_kurali</code>; dönem çalıştırması <code>maliyet_dagitim</code> satırları (izlenebilir).</div>
+  </div>
+  <div class="statusbar"><span>15 merkez · 6 dağıtım aşaması · Ağustos: gider 1,94 M ₺ · gelir 1,86 M ₺ + dış raporlama 148 K</span><span class="sp">masraf_merkezi mevcut tablo; muhasebe masraf yerleriyle eşleşir</span></div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

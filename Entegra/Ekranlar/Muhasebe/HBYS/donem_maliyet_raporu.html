@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dönem Maliyet ve Kârlılık Raporu — Görüntüleme Merkezi — Mockup (Gentegre AI · Muhasebe · HBYS)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📊 Dönem Maliyet &amp; Kârlılık — Ağustos 2026 <span class="sp">maliyet_donem · kapanış 02.09.2026 · durum: onaylı</span></div>
+  <div class="toolbar"><div class="btn">📅 Dönem ▾</div><div class="btn">🔒 Dönem Kapat / Aç</div><div class="btn">🧮 Yeniden Dağıt</div><div class="btn">↔ Önceki dönemle karşılaştır</div><div class="btn">📤 Muhasebeye maliyet fişi</div><div class="btn sp">📥 Excel</div></div>
+  <div class="ozet">
+    <div class="kart"><div class="b">Gelir (tetkik)</div><div class="d">1.858 K <small>₺</small></div></div>
+    <div class="kart"><div class="b">Dış raporlama geliri</div><div class="d">148 K</div></div>
+    <div class="kart"><div class="b">Toplam gider</div><div class="d">1.942 K</div></div>
+    <div class="kart"><div class="b">Net</div><div class="d">64 K <small>· %3,2</small></div></div>
+    <div class="kart"><div class="b">Katkı payı</div><div class="d">1.196 K <small>· %60</small></div></div>
+    <div class="kart"><div class="b">Başabaş doluluk</div><div class="d">%78 <small>(gerçek %80)</small></div></div>
+  </div>
+  <div class="sekmeler"><div class="sekme on">Modalite / merkez kârlılığı</div><div class="sekme">Tetkik bazlı</div><div class="sekme">Ödeyen / kurum kârlılığı</div><div class="sekme">Radyolog / referans</div><div class="sekme">12 ay trend</div></div>
+  <div class="pnl">
+    <div class="dg"><table>
+      <thead><tr><th>Merkez</th><th class="sag">Çekim</th><th class="sag">Doluluk</th><th class="sag">Gelir</th><th class="sag">Değişken gider</th><th class="sag">Katkı payı</th><th class="sag">Direkt sabit</th><th class="sag">Dağıtılan</th><th class="sag">Tam maliyet</th><th class="sag">Net</th><th class="sag">Net %</th><th class="sag">Birim maliyet</th><th class="sag">Birim gelir</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td><b>MR-1</b></td><td class="sag">612</td><td class="sag">%83</td><td class="sag">698.000</td><td class="sag">142.000</td><td class="sag">556.000</td><td class="sag">231.300</td><td class="sag">126.200</td><td class="sag">499.500</td><td class="sag"><b>198.500</b></td><td class="sag">%28</td><td class="sag">816</td><td class="sag">1.140</td></tr>
+        <tr><td><b>BT-1</b></td><td class="sag">840</td><td class="sag">%61</td><td class="sag">520.000</td><td class="sag">118.000</td><td class="sag">402.000</td><td class="sag">204.000</td><td class="sag">98.000</td><td class="sag">420.000</td><td class="sag">100.000</td><td class="sag">%19</td><td class="sag">500</td><td class="sag">619</td></tr>
+        <tr><td><b>USG-1/2</b></td><td class="sag">1.410</td><td class="sag">%68</td><td class="sag">310.000</td><td class="sag">96.000</td><td class="sag">214.000</td><td class="sag">120.000</td><td class="sag">72.000</td><td class="sag">288.000</td><td class="sag">22.000</td><td class="sag">%7</td><td class="sag">204</td><td class="sag">220</td></tr>
+        <tr><td><b>Mamografi</b></td><td class="sag">380</td><td class="sag">%44</td><td class="sag">140.000</td><td class="sag">31.000</td><td class="sag">109.000</td><td class="sag">88.000</td><td class="sag">41.000</td><td class="sag">160.000</td><td class="sag"><span class="rz kir">−20.000</span></td><td class="sag"><span class="rz kir">−14%</span></td><td class="sag">421</td><td class="sag">368</td></tr>
+        <tr><td><b>Röntgen</b></td><td class="sag">1.920</td><td class="sag">%52</td><td class="sag">190.000</td><td class="sag">42.000</td><td class="sag">148.000</td><td class="sag">96.000</td><td class="sag">70.000</td><td class="sag">208.000</td><td class="sag"><span class="rz kir">−18.000</span></td><td class="sag"><span class="rz kir">−9%</span></td><td class="sag">108</td><td class="sag">99</td></tr>
+        <tr><td><b>Dansitometre</b></td><td class="sag">210</td><td class="sag">%35</td><td class="sag">— (paket)</td><td class="sag">6.000</td><td class="sag">—</td><td class="sag">24.000</td><td class="sag">12.000</td><td class="sag">42.000</td><td class="sag"><span class="rz kir">−42.000</span></td><td class="sag">—</td><td class="sag">200</td><td class="sag">0</td></tr>
+        <tr><td>Dış raporlama (teleradyoloji gelen)</td><td class="sag">418 rapor</td><td class="sag">—</td><td class="sag">148.000</td><td class="sag">96.000</td><td class="sag">52.000</td><td class="sag">14.000</td><td class="sag">10.000</td><td class="sag">120.000</td><td class="sag">28.000</td><td class="sag">%19</td><td class="sag">287</td><td class="sag">354</td></tr>
+        <tr class="grup"><td>Toplam</td><td class="sag">5.372</td><td class="sag">%64</td><td class="sag">2.006.000</td><td class="sag">531.000</td><td class="sag">1.481.000</td><td class="sag">777.300</td><td class="sag">429.200</td><td class="sag">1.737.500</td><td class="sag"><b>268.500</b></td><td class="sag">%13</td><td class="sag"></td><td class="sag"></td></tr>
+      </tbody></table></div>
+    <div class="ic"><span class="rz sari">Bulgular</span> Mamografi ve röntgen tam maliyette zararda ama katkı payı pozitif (kapasite ve hasta akışı sağlıyor); dansitometre check-up paketinde gelir paylaştırılmamış → paket gelir dağıtımı gerekli (<code>maliyet_paket_dagitim</code>). Toplam net 268 K; genel yönetim (288 K) merkezlere dağıtıldığında kurum neti 64 K (üstteki kart).</div>
+  </div>
+  <div class="pnl">
+    <div class="arama"><div class="kutu">🔍 Tetkik…</div><span class="chip on">Tümü</span><span class="chip">Zararda</span><span class="chip">MR</span><span class="chip">BT</span><span class="chip">US</span><span class="chip">MG/XR</span><span class="sepv"></span><span class="chip">📉 Sapma &gt; %10</span></div>
+    <div class="dg"><table>
+      <thead><tr><th>Tetkik</th><th>Merkez</th><th class="sag">Adet</th><th class="sag">Std. maliyet</th><th class="sag">Gerçek maliyet</th><th class="sag">Sapma</th><th class="sag">Ort. gelir</th><th class="sag">Marj</th><th class="sag">Marj %</th><th class="sag">Ort. süre</th><th class="sag">Toplam net</th></tr></thead>
+      <tbody>
+        <tr><td>Kontrastlı beyin MR</td><td>MR-1</td><td class="sag">184</td><td class="sag">1.158</td><td class="sag">1.212</td><td class="sag"><span class="rz sari">+4,7%</span></td><td class="sag">1.486</td><td class="sag">274</td><td class="sag">%18</td><td class="sag">32 dk</td><td class="sag">50.400</td></tr>
+        <tr><td>Kontrastsız lomber MR</td><td>MR-1</td><td class="sag">210</td><td class="sag">760</td><td class="sag">742</td><td class="sag"><span class="rz ok">−2,4%</span></td><td class="sag">1.010</td><td class="sag">268</td><td class="sag">%27</td><td class="sag">21 dk</td><td class="sag">56.300</td></tr>
+        <tr><td>Diz MR</td><td class="sag">MR-1</td><td class="sag">146</td><td class="sag">720</td><td class="sag">698</td><td class="sag">−3,1%</td><td class="sag">960</td><td class="sag">262</td><td class="sag">%27</td><td class="sag">19 dk</td><td class="sag">38.300</td></tr>
+        <tr><td>Toraks BT kontrastlı</td><td>BT-1</td><td class="sag">160</td><td class="sag">640</td><td class="sag">688</td><td class="sag"><span class="rz sari">+7,5%</span></td><td class="sag">790</td><td class="sag">102</td><td class="sag">%13</td><td class="sag">14 dk</td><td class="sag">16.300</td></tr>
+        <tr><td>Batın BT kontrastlı</td><td>BT-1</td><td class="sag">140</td><td class="sag">690</td><td class="sag">720</td><td class="sag">+4,3%</td><td class="sag">820</td><td class="sag">100</td><td class="sag">%12</td><td class="sag">15 dk</td><td class="sag">14.000</td></tr>
+        <tr><td>Beyin BT kontrastsız</td><td>BT-1</td><td class="sag">310</td><td class="sag">310</td><td class="sag">298</td><td class="sag">−3,9%</td><td class="sag">410</td><td class="sag">112</td><td class="sag">%27</td><td class="sag">7 dk</td><td class="sag">34.700</td></tr>
+        <tr><td>Batın USG</td><td>USG</td><td class="sag">620</td><td class="sag">190</td><td class="sag">204</td><td class="sag">+7,4%</td><td class="sag">220</td><td class="sag">16</td><td class="sag">%7</td><td class="sag">15 dk</td><td class="sag">9.900</td></tr>
+        <tr><td>Mamografi bilateral</td><td>MG</td><td class="sag">380</td><td class="sag">360</td><td class="sag">421</td><td class="sag"><span class="rz kir">+17%</span></td><td class="sag">368</td><td class="sag"><span class="rz kir">−53</span></td><td class="sag"><span class="rz kir">−14%</span></td><td class="sag">15 dk</td><td class="sag"><span class="rz kir">−20.100</span></td></tr>
+        <tr><td>Akciğer PA</td><td>XR</td><td class="sag">1.100</td><td class="sag">95</td><td class="sag">104</td><td class="sag">+9,5%</td><td class="sag">92</td><td class="sag"><span class="rz kir">−12</span></td><td class="sag"><span class="rz kir">−13%</span></td><td class="sag">4 dk</td><td class="sag"><span class="rz kir">−13.200</span></td></tr>
+        <tr><td>Kemik dansitometresi</td><td>DXA</td><td class="sag">210</td><td class="sag">180</td><td class="sag">200</td><td class="sag">+11%</td><td class="sag"><span class="rz sari">0 (paket)</span></td><td class="sag">—</td><td class="sag">—</td><td class="sag">12 dk</td><td class="sag">—</td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Sapma = gerçek / standart − 1 (süre, sarf, doluluk kaynaklı). Zararda görünen düşük ücretli tetkikler için karar: fiyat (özel/kurum), süre optimizasyonu, ya da hasta akışı değeri (MR/BT'ye yönlendirme).</div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table>
+      <thead><tr><th>Ödeyen / kurum</th><th class="sag">Çekim</th><th class="sag">Gelir</th><th class="sag">Ort. fiyat / SUT %</th><th class="sag">Tam maliyet</th><th class="sag">Net</th><th class="sag">Net %</th><th class="sag">Katkı %</th><th class="sag">Vade (gün)</th><th>Sözleşme</th><th>Öneri</th></tr></thead>
+      <tbody>
+        <tr><td>SGK</td><td class="sag">3.120</td><td class="sag">890.000</td><td class="sag">SUT · %100</td><td class="sag">1.020.000</td><td class="sag"><span class="rz kir">−130.000</span></td><td class="sag"><span class="rz kir">−15%</span></td><td class="sag">%58</td><td class="sag">45</td><td>—</td><td>hacim/kapasite; katkı pozitif</td></tr>
+        <tr><td>Özel hasta</td><td class="sag">980</td><td class="sag">640.000</td><td class="sag">liste · SUT ×2,1</td><td class="sag">330.000</td><td class="sag">310.000</td><td class="sag">%48</td><td class="sag">%80</td><td class="sag">0</td><td>—</td><td></td></tr>
+        <tr><td>Sigorta A (anlaşmalı)</td><td class="sag">520</td><td class="sag">210.000</td><td class="sag">SUT ×1,6</td><td class="sag">160.000</td><td class="sag">50.000</td><td class="sag">%24</td><td class="sag">%72</td><td class="sag">60</td><td>2026 · 31.12</td><td>yenilemede +%12</td></tr>
+        <tr><td>Yıldız Hastanesi (kurum)</td><td class="sag">380</td><td class="sag">118.000</td><td class="sag">SUT ×1,15</td><td class="sag">128.000</td><td class="sag"><span class="rz kir">−10.000</span></td><td class="sag"><span class="rz kir">−8%</span></td><td class="sag">%64</td><td class="sag">90</td><td>2026 · 31.12</td><td>taban SUT ×1,3 · vade 45</td></tr>
+        <tr><td>Deniz Tıp Merkezi (teleradyoloji gelen)</td><td class="sag">372 rapor</td><td class="sag">148.000</td><td class="sag">tarife</td><td class="sag">120.000</td><td class="sag">28.000</td><td class="sag">%19</td><td class="sag">%35</td><td class="sag">30</td><td>2026</td><td></td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Kurum sözleşmesi fiyatları <code>kurum_sozlesme</code>/<code>fiyat_listesi</code>'nden; vade finansman maliyeti (opsiyonel, aylık %) net'e eklenebilir. Bu tablo sözleşme yenileme ekranına "maliyet tabanı" olarak açılır.</div>
+  </div>
+  <div class="pnl">
+    <div class="ikiPanel">
+      <div class="dg"><table><thead><tr><th>Radyolog</th><th class="sag">Rapor</th><th class="sag">Hakediş</th><th class="sag">Rapor başı</th><th class="sag">Gelir katkısı</th><th class="sag">Ort. TAT</th></tr></thead>
+        <tbody>
+          <tr><td>Dr. E. Ay</td><td class="sag">1.240</td><td class="sag">78.400</td><td class="sag">63</td><td class="sag">690.000</td><td class="sag">31 dk</td></tr>
+          <tr><td>Dr. C. Er</td><td class="sag">1.080</td><td class="sag">66.900</td><td class="sag">62</td><td class="sag">540.000</td><td class="sag">44 dk</td></tr>
+          <tr><td>Dr. D. Su</td><td class="sag">910</td><td class="sag">58.100</td><td class="sag">64</td><td class="sag">402.000</td><td class="sag">40 dk</td></tr>
+          <tr><td>Dış radyolog (gece)</td><td class="sag">380</td><td class="sag">45.200</td><td class="sag">119</td><td class="sag">170.000</td><td class="sag">35 dk</td></tr>
+        </tbody></table></div>
+      <div class="dg"><table><thead><tr><th>Referans (gönderen hekim / kurum)</th><th class="sag">Hasta</th><th class="sag">Gelir</th><th class="sag">Net</th><th class="sag">Prim (Gönderen rolü)</th><th class="sag">Net − prim</th></tr></thead>
+        <tbody>
+          <tr><td>Dr. K. Yılmaz (dış · ortopedi)</td><td class="sag">86</td><td class="sag">92.000</td><td class="sag">26.000</td><td class="sag">9.200</td><td class="sag">16.800</td></tr>
+          <tr><td>Yıldız Hastanesi</td><td class="sag">380</td><td class="sag">118.000</td><td class="sag"><span class="rz kir">−10.000</span></td><td class="sag">—</td><td class="sag"><span class="rz kir">−10.000</span></td></tr>
+          <tr><td>İç poliklinik (Dahiliye)</td><td class="sag">410</td><td class="sag">210.000</td><td class="sag">58.000</td><td class="sag">—</td><td class="sag">58.000</td></tr>
+        </tbody></table></div>
+    </div>
+    <div class="ic sonuk">Hakediş ve gönderen primi Prim modülünden (<code>hakedis_satir</code>, rol Raporlayan/Gönderen); referans kârlılığı pazarlama kararına girdi.</div>
+  </div>
+  <div class="pnl">
+    <div class="dg"><table><thead><tr><th>Ay</th><th class="sag">Çekim</th><th class="sag">Doluluk</th><th class="sag">Gelir</th><th class="sag">Gider</th><th class="sag">Net</th><th class="sag">MR birim maliyet</th><th class="sag">BT birim maliyet</th><th class="sag">Kontrast ₺/mL</th><th class="sag">Hakediş / rapor</th></tr></thead>
+      <tbody>
+        <tr><td>2025-09</td><td class="sag">4.810</td><td class="sag">%58</td><td class="sag">1.540 K</td><td class="sag">1.610 K</td><td class="sag"><span class="rz kir">−70 K</span></td><td class="sag">902</td><td class="sag">548</td><td class="sag">17,8</td><td class="sag">58</td></tr>
+        <tr><td>2025-12</td><td class="sag">5.020</td><td class="sag">%61</td><td class="sag">1.690 K</td><td class="sag">1.720 K</td><td class="sag"><span class="rz kir">−30 K</span></td><td class="sag">874</td><td class="sag">530</td><td class="sag">18,9</td><td class="sag">60</td></tr>
+        <tr><td>2026-03</td><td class="sag">5.210</td><td class="sag">%63</td><td class="sag">1.810 K</td><td class="sag">1.850 K</td><td class="sag"><span class="rz kir">−40 K</span></td><td class="sag">850</td><td class="sag">512</td><td class="sag">20,1</td><td class="sag">61</td></tr>
+        <tr><td>2026-06</td><td class="sag">5.290</td><td class="sag">%64</td><td class="sag">1.900 K</td><td class="sag">1.900 K</td><td class="sag">0</td><td class="sag">830</td><td class="sag">505</td><td class="sag">20,8</td><td class="sag">62</td></tr>
+        <tr class="sel"><td>2026-08</td><td class="sag">5.372</td><td class="sag">%64</td><td class="sag">2.006 K</td><td class="sag">1.942 K</td><td class="sag"><span class="rz ok">+64 K</span></td><td class="sag">816</td><td class="sag">500</td><td class="sag">21,3</td><td class="sag">63</td></tr>
+      </tbody></table></div>
+    <div class="ic sonuk">Birim maliyet düşüşü doluluk artışından; kontrast fiyat artışı (%20/yıl) sarf takibinin önemini gösteriyor. Trend verisi <code>tetkik_maliyet</code> dönem satırlarından.</div>
+  </div>
+  <div class="statusbar"><span>Ağustos 2026 · onaylı · dağıtım 02.09 09:40 · 6 aşama</span><span class="sp">Muhasebeye 7A maliyet fişi (opsiyon) · dönem kilitli</span></div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

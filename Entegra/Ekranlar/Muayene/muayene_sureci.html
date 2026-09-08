@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Muayene Modülü — Süreç ve Tablolar — Mockup (Gentegre AI · Muayene)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+  .win{max-width:1080px}
+  .icerik{padding:6px 18px 22px;font-size:13px;line-height:1.65}
+  h2{font-size:15px;color:#1c4374;border-bottom:1px solid var(--line2);padding-bottom:5px;margin:22px 0 10px}
+  h3{font-size:13.5px;color:#2c4a6b;margin:16px 0 6px}
+  code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:1px 4px;font-size:12px}
+  .icerik table{border-collapse:collapse;width:100%;margin:8px 0 14px}
+  .icerik th{background:linear-gradient(#f4f7fb,#e7eef6);border:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:12px;color:#3a5573}
+  .icerik td{border:1px solid var(--line2);padding:6px 8px;font-size:12.5px;vertical-align:top}
+  .kutu{border:1px solid var(--line2);background:#fbfcfd;border-radius:4px;padding:10px 12px;margin:10px 0}
+  .uyari{border:1px solid #f2ddbf;background:#fdf9f1;border-radius:4px;padding:9px 11px;margin:10px 0;color:var(--uyari)}
+  .tamam{border:1px solid #bfe3cb;background:#f1f8f3;border-radius:4px;padding:9px 11px;margin:10px 0;color:#245c37}
+  .akis{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+  .akis .a{border:1px solid var(--line);background:#fff;border-radius:14px;padding:4px 12px;font-size:12px}
+  .akis .a.v{background:#eef4fc;border-color:#cfe0f5;color:#2f6db3;font-weight:bold}
+  .akis .ok2{color:var(--muted)}
+  ul{margin:6px 0 12px 18px;padding:0} li{margin:3px 0}
+  .kucuk{font-size:11.5px;color:var(--muted)}
+  .durumlar{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+
+  .tablo{border:1px solid var(--line2);border-radius:4px;margin:12px 0;overflow:hidden}
+  .tablo .tb{background:linear-gradient(#f4f7fb,#e7eef6);padding:6px 10px;font-weight:bold;color:#1c4374;display:flex;gap:10px;align-items:center;font-size:13px}
+  .tablo .tb .rz{font-weight:normal}
+  .tablo .tb .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:11.5px}
+  .tablo table{margin:0}
+  .tablo td.k{font-family:Consolas,monospace;font-size:12px;white-space:nowrap}
+  .tablo td.t{font-family:Consolas,monospace;font-size:11.5px;color:#4d5d6e;white-space:nowrap}
+  .tablo tr.pk td.k{font-weight:bold}
+  .tablo .alt{padding:6px 10px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line2);background:#fbfcfd}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🩺 Muayene Modülü (Uzman Hekim Polikliniği) — Süreç, Veri Modeli, Alanlar <span class="sp">Gentegre AI · tasarım notu · 03.09.2026</span></div>
+  <div class="icerik">
+
+    <div class="kutu">
+      <b>Tek cümlede:</b> Kayıt kabulün açtığı başvuru hekimin çalışma listesine düşer; hekim çağırır, muayene kartında anamnez-vital-fizik muayene (branş şablonu),
+      tanı (ICD-10), istem (lab/rad/konsültasyon → ilgili modüller), e-reçete, rapor, sevk ve ücretlendirmeyi tek yerden yürütür; tamamlayınca başvuru
+      tahakkuka döner, e-Nabız 103/106 kuyruğa girer, özet hastaya gider, kronik tanı/ilaç/alerji hastanın tıbbi özetine işlenir.
+      Uzaktan muayene (Teletıp) aynı kartın <code>tur = uzaktan</code> halidir.
+      <br><span class="kucuk">Mockuplar: <code>muayene_listesi.html</code> · <code>muayene_karti.html</code> (10 sekme) · <code>hasta_tibbi_ozet.html</code> · <code>muayene_sablonlari.html</code>.
+      Bağlı: <code>../Kayıt Kabul/</code> · <code>../Lab/</code> · <code>../Radyoloji/</code> · <code>../Teletıp/</code> · <code>../E-Nabız/</code> · <code>../Prim/</code></span>
+    </div>
+
+    <h2>1. Akış</h2>
+    <div class="akis">
+      <span class="a">Randevu / kayıt kabul → başvuru (tür 19)</span><span class="ok2">→</span>
+      <span class="a">Hemşire: vital + ön bilgi</span><span class="ok2">→</span>
+      <span class="a v">Hekim listesi → çağır → muayeneye al</span><span class="ok2">→</span>
+      <span class="a">Anamnez · fizik muayene (şablon)</span><span class="ok2">→</span>
+      <span class="a">Tanı (ICD-10)</span><span class="ok2">→</span>
+      <span class="a">İstem → lab/rad/konsültasyon → sonuç bekle</span><span class="ok2">→</span>
+      <span class="a">e-Reçete · rapor · sevk · kontrol</span><span class="ok2">→</span>
+      <span class="a">Tamamla → tahakkuk · e-Nabız · özet</span><span class="ok2">→</span>
+      <span class="a">Tıbbi özet güncellenir</span>
+    </div>
+    <table>
+      <tr><th style="width:40px">#</th><th style="width:200px">Adım</th><th>Ne olur</th><th style="width:230px">Kayıt</th></tr>
+      <tr><td>1</td><td><b>Başvuru</b></td><td>Kayıt kabul (mevcut): protokol, hekim, provizyon, muayene ücreti satırı. Randevulu hasta geldiğinde otomatik. Online hasta teletıp çağırmasıyla.</td><td><code>belge</code> 19, <code>belge_basvuru</code>, <code>belge_satir</code></td></tr>
+      <tr><td>2</td><td><b>Ön hazırlık (hemşire)</b></td><td>Vital ölçüm (cihazdan BT/elle), boy-kilo, ön şikâyet, alerji doğrulama; sıra numarası.</td><td><code>muayene</code> (açık), <code>muayene_vital</code></td></tr>
+      <tr><td>3</td><td><b>Çağırma</b></td><td>Hekim listesinden "Sıradakini Çağır" → bekleme ekranı/anons; "Muayeneye Al" başlangıç zamanı (USS Muayene Başlangıç).</td><td><code>belge_basvuru.cagirma_zamani</code>, <code>muayene.baslangic</code></td></tr>
+      <tr><td>4</td><td><b>Anamnez &amp; fizik muayene</b></td><td>Branş şablonu (sistem bazlı alanlar, "normal" işareti, skorlar, vücut şeması), makro/dikte/AI taslak; özgeçmiş tıbbi özetten gelir, muayene anındaki değişiklik özete işlenir.</td><td><code>muayene</code> metin alanları, <code>muayene_bulgu</code></td></tr>
+      <tr><td>5</td><td><b>Tanı</b></td><td>SKRS ICD-10; ana tanı zorunlu; ek/ön; kronik işareti → <code>hasta_kronik_tani</code>. Sık tanı listesi, önceki tanılar.</td><td><code>tani</code></td></tr>
+      <tr><td>6</td><td><b>İstem</b></td><td>Lab (→ <code>lab_istem</code>), görüntüleme (→ <code>radyoloji_istem</code>), konsültasyon (→ <code>konsultasyon</code>, karşı hekim listesine düşer), işlem (EKG, pansuman → başvuru satırı); paneller. Sonuç gelince muayene "sonuç bekliyor" → bildirim; panik teyit.</td><td><code>muayene_istem</code> + modül tabloları</td></tr>
+      <tr><td>7</td><td><b>e-Reçete</b></td><td>İlaç kataloğu, şablon, alerji/etkileşim/doz kontrolü, e-imza → Medula; e-Nabız Reçete paketi; aktif ilaç listesine işlenir.</td><td><code>recete</code>, <code>recete_satir</code>, <code>hasta_ilac</code></td></tr>
+      <tr><td>8</td><td><b>Rapor / sevk</b></td><td>Rapor türleri (istirahat, ilaç, durum, kurul) e-imza/Medula; sevk kurum içi/dışı (tesis + klinik + neden), 112; USS Sevk/106.</td><td><code>rapor</code>, <code>muayene.yonlendirme*</code></td></tr>
+      <tr><td>9</td><td><b>Ücret</b></td><td>Muayene satırı otomatik; istem/işlem satırları eklendikçe; kurum fark kuralları; prim rolleri (Uygulayan/İsteyen).</td><td><code>belge_satir</code>, <code>belge_satir_rol</code></td></tr>
+      <tr><td>10</td><td><b>Tamamla</b></td><td>Kural: ana tanı + şikâyet + (yüz yüze) ≥1 sistem bulgusu + karar. Başvuru 19 → 17 (prim doğar), e-Nabız 103 (+106 sevk/çıkış), özet PDF (e-imzalı) → hasta portalı, kontrol randevusu önerisi, tıbbi özet güncellemesi. Muayene salt okunur; ek not/düzeltme izli.</td><td><code>muayene.durum=3</code>, <code>enabiz_paket</code>, <code>dokuman</code></td></tr>
+      <tr><td>11</td><td><b>Konsültasyon yanıtı</b></td><td>Konsültan kendi listesinde görür, ayrı muayene (tur=3, ust_muayene_id) yazar; isteyen hekime bildirim; ücret konsültasyon satırı.</td><td><code>konsultasyon</code>, <code>muayene</code></td></tr>
+      <tr><td>12</td><td><b>Kontrol / takip</b></td><td>Kontrol önerisi → randevu; kronik izlem göstergeleri (HbA1c, LDL, TA, göz dibi) hedef/periyotla; gecikince hasta ve hekime hatırlatma.</td><td><code>hasta_takip_gostergesi</code>, <code>randevu</code></td></tr>
+    </table>
+
+    <h2>2. Durumlar</h2>
+    <div class="durumlar">
+      <span class="rz">1 Açık</span> → <span class="rz sari">2 Sonuç bekliyor</span> → <span class="rz ok">3 Tamamlandı</span> → <span class="rz mavi">4 Ek not eklendi</span> · <span class="rz pas">0 İptal</span>
+      &nbsp; liste rozetleri: Bekliyor · Bekleme odası (online) · Muayenede · Sonuç bekliyor · Tamamlandı · Gelmedi (başvuru/randevu durumundan)
+    </div>
+
+    <h2>3. Tablolar ve alanlar</h2>
+    <h3>Muayene çekirdeği</h3>
+<div class="tablo">
+  <div class="tb"><code>muayene</code> <span class="rz ok">yeni</span> <span class="sp">başvuru başına klinik kayıt (e-Nabız dokümanındaki tanımın tamamı)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">belge_id</td><td class="t">int</td><td>→ belge (başvuru tür 19) — 1:1 (konsültasyon yanıtı ayrı muayene, ust_muayene_id ile)</td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td>→ taraf</td></tr><tr><td class="k">hekim_id</td><td class="t">int</td><td>→ taraf_hekim</td></tr><tr><td class="k">departman_id</td><td class="t">int</td><td>klinik (SKRS klinik kodu buradan)</td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>SKRS MUAYENE TÜRÜ: 1 yüz yüze · 2 uzaktan · 3 konsültasyon · 4 kontrol</td></tr><tr><td class="k">ust_muayene_id</td><td class="t">int</td><td>konsültasyon yanıtı → isteyen muayene</td></tr><tr><td class="k">randevu_id / teletip_id</td><td class="t">int</td><td></td></tr><tr><td class="k">baslangic / bitis</td><td class="t">timestamp</td><td>Muayeneye Al / Tamamla (USS Muayene Başlangıç-Bitiş)</td></tr><tr><td class="k">sikayet</td><td class="t">text</td><td>USS Şikâyet A(500)</td></tr><tr><td class="k">hikaye</td><td class="t">text</td><td>USS Hikâye</td></tr><tr><td class="k">sistem_sorgusu</td><td class="t">jsonb</td><td>şablon</td></tr><tr><td class="k">ozgecmis_notu / soygecmis_notu / aliskanlik_notu</td><td class="t">text</td><td>muayene anındaki serbest not; yapısal veri hasta_tibbi_gecmis'te</td></tr><tr><td class="k">bulgu_ozet</td><td class="t">text</td><td>USS Bulgu A(500) — şablondan derlenen</td></tr><tr><td class="k">sablon_id</td><td class="t">int</td><td>→ muayene_sablon</td></tr><tr><td class="k">karar</td><td class="t">text</td><td>değerlendirme / plan</td></tr><tr><td class="k">yonlendirme</td><td class="t">smallint</td><td>0 yok · 1 kurum içi sevk · 2 kurum dışı sevk · 3 yatış önerisi · 4 acil</td></tr><tr><td class="k">sevk_tesis_kodu / sevk_klinik_kod / sevk_neden</td><td class="t">varchar / varchar / smallint</td><td>USS Sevk / 106</td></tr><tr><td class="k">vaka_turu</td><td class="t">smallint</td><td>SKRS (başvurudan kopya)</td></tr><tr><td class="k">kontrol_onerisi_gun</td><td class="t">smallint</td><td>kontrol planı</td></tr><tr><td class="k">kontrol_randevu_id</td><td class="t">int</td><td></td></tr><tr><td class="k">ozet_dosya_id</td><td class="t">int</td><td>e-imzalı muayene özeti PDF → dokuman</td></tr><tr><td class="k">ai_ozet</td><td class="t">text</td><td>taslak</td></tr><tr><td class="k">ai_ozet_onayli</td><td class="t">smallint</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>1 açık · 2 sonuç bekliyor · 3 tamamlandı · 4 ek not eklendi · 0 iptal</td></tr><tr><td class="k">tamamlayan_id / tamamlanma</td><td class="t">int / timestamp</td><td></td></tr><tr><td class="k">enabiz_durum</td><td class="t">smallint</td><td></td></tr><tr><td class="k">sube_id</td><td class="t">int</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table><div class="alt">indeks: (hekim_id, baslangic) · (hasta_id, baslangic) · unique belge_id (konsültasyon hariç)</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>muayene_vital</code> <span class="rz ok">yeni</span> <span class="sp">vital bulgular (hemşire/hekim/cihaz; muayene başına birden çok ölçüm)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">olcen_id</td><td class="t">int</td><td></td></tr><tr><td class="k">kaynak</td><td class="t">smallint</td><td>1 elle · 2 cihaz (BT tansiyon aleti) · 3 hasta beyanı (uzaktan)</td></tr><tr><td class="k">sistolik / diyastolik</td><td class="t">smallint</td><td>mmHg</td></tr><tr><td class="k">nabiz</td><td class="t">smallint</td><td></td></tr><tr><td class="k">solunum</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ates</td><td class="t">numeric(4,1)</td><td></td></tr><tr><td class="k">spo2</td><td class="t">smallint</td><td></td></tr><tr><td class="k">boy_cm / kilo_kg</td><td class="t">numeric</td><td></td></tr><tr><td class="k">bki</td><td class="t">numeric(4,1)</td><td>hesaplı</td></tr><tr><td class="k">bel_cevresi_cm</td><td class="t">smallint</td><td></td></tr><tr><td class="k">agri_vas</td><td class="t">smallint</td><td>0–10</td></tr><tr><td class="k">glukoz_parmak</td><td class="t">smallint</td><td></td></tr><tr><td class="k">gks</td><td class="t">smallint</td><td></td></tr><tr><td class="k">bas_cevresi_cm</td><td class="t">numeric</td><td>pediatri</td></tr><tr><td class="k">persentil</td><td class="t">jsonb</td><td>pediatri</td></tr>
+  </table><div class="alt">USS Ağırlık/Boy/Tansiyon/Ateş/Nabız buradan (son ölçüm)</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>muayene_bulgu</code> <span class="rz ok">yeni</span> <span class="sp">şablon alan değerleri (fizik muayene, skorlar)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">bigint</td><td></td></tr><tr><td class="k">muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">sablon_alan_id</td><td class="t">int</td><td>→ muayene_sablon_alan</td></tr><tr><td class="k">normal</td><td class="t">smallint</td><td>1 = normal işaretlendi (normal metni raporda)</td></tr><tr><td class="k">deger_metin</td><td class="t">text</td><td></td></tr><tr><td class="k">deger_sayi</td><td class="t">numeric</td><td></td></tr><tr><td class="k">deger_kod</td><td class="t">smallint</td><td>seçenekli</td></tr><tr><td class="k">deger_json</td><td class="t">jsonb</td><td>vücut şeması koordinatları / çoklu seçim</td></tr><tr><td class="k">taraf</td><td class="t">smallint</td><td>sağ/sol/bilateral</td></tr>
+  </table><div class="alt">unique (muayene_id, sablon_alan_id)</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>tani</code> <span class="rz ok">yeni</span> <span class="sp">muayene tanıları</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">icd_kod</td><td class="t">varchar(10)</td><td>→ icd10 (SKRS)</td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>1 ana · 2 ek · 3 ön tanı · 4 sevk tanısı</td></tr><tr><td class="k">kesinlik</td><td class="t">smallint</td><td>1 kesin · 2 ön · 3 şüpheli · 4 dışlandı</td></tr><tr><td class="k">taraf</td><td class="t">smallint</td><td></td></tr><tr><td class="k">kronik</td><td class="t">smallint</td><td>tıbbi özete düşer</td></tr><tr><td class="k">baslangic_tarihi</td><td class="t">date</td><td>kronik için</td></tr><tr><td class="k">not</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">sira</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table><div class="alt">muayene başına tek ana tanı (kısıt); USS Ana/Ek Tanı</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>icd10</code> <span class="rz ok">yeni</span> <span class="sp">SKRS ICD-10 listesi</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">kod</td><td class="t">varchar(10)</td><td>PK</td></tr><tr><td class="k">ad</td><td class="t">varchar(300)</td><td></td></tr><tr><td class="k">ust_kod</td><td class="t">varchar(10)</td><td></td></tr><tr><td class="k">cinsiyet_kisiti</td><td class="t">smallint</td><td></td></tr><tr><td class="k">yas_alt / yas_ust</td><td class="t">smallint</td><td></td></tr><tr><td class="k">bildirimi_zorunlu</td><td class="t">smallint</td><td>bulaşıcı hastalık</td></tr><tr><td class="k">kronik_aday</td><td class="t">smallint</td><td></td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr><tr><td class="k">skrs_surum</td><td class="t">varchar(10)</td><td></td></tr>
+  </table><div class="alt">SKRS senkronuna eklenir (EntegrasyonUclari.SkrsTablolari)</div>
+</div><h3>İstem, reçete, rapor, sevk</h3>
+<div class="tablo">
+  <div class="tb"><code>muayene_istem</code> <span class="rz ok">yeni</span> <span class="sp">muayeneden çıkan istemlerin birleşik görünümü (bağ tablosu)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>1 lab · 2 görüntüleme · 3 konsültasyon · 4 işlem · 5 dış tetkik</td></tr><tr><td class="k">hedef_tablo / hedef_id</td><td class="t">varchar / int</td><td>lab_istem_satir · radyoloji_istem · konsultasyon · belge_satir</td></tr><tr><td class="k">aciliyet</td><td class="t">smallint</td><td></td></tr><tr><td class="k">panel_id</td><td class="t">int</td><td>→ istem_paneli</td></tr><tr><td class="k">istem_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">sonuc_durum</td><td class="t">smallint</td><td>0 bekliyor · 1 kısmi · 2 tamam · 3 iptal</td></tr><tr><td class="k">sonuc_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">hekim_gordu</td><td class="t">timestamp</td><td>sonuç görüldü işareti</td></tr>
+  </table><div class="alt">asıl kayıtlar modül tablolarında; bu tablo 'İstem & Sonuçlar' sekmesi ve bildirim için</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>konsultasyon</code> <span class="rz ok">yeni</span> <span class="sp">kurum içi konsültasyon</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">isteyen_muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">istenen_departman_id</td><td class="t">int</td><td></td></tr><tr><td class="k">istenen_hekim_id</td><td class="t">int</td><td>boş = bölüm havuzu</td></tr><tr><td class="k">soru</td><td class="t">text</td><td></td></tr><tr><td class="k">aciliyet</td><td class="t">smallint</td><td></td></tr><tr><td class="k">istem_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">yanit_muayene_id</td><td class="t">int</td><td>→ muayene (tur=3)</td></tr><tr><td class="k">yanit_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">yanit_ozet</td><td class="t">text</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>bekliyor / kabul / yanıtlandı / reddedildi</td></tr><tr><td class="k">belge_satir_id</td><td class="t">int</td><td>ücret</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>recete</code> <span class="rz ok">yeni</span> <span class="sp">e-Reçete başlığı</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id / hekim_id</td><td class="t">int</td><td></td></tr><tr><td class="k">recete_no</td><td class="t">varchar(20)</td><td>Medula e-reçete no</td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>normal / kırmızı / yeşil / mor / turuncu</td></tr><tr><td class="k">provizyon_id</td><td class="t">int</td><td>→ belge_provizyon</td></tr><tr><td class="k">aciklama</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">imza_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">imza_hash</td><td class="t">varchar(64)</td><td></td></tr><tr><td class="k">medula_gonderim</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">medula_sonuc</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>1 taslak · 2 imzalı · 3 Medula kabul · 4 iptal</td></tr><tr><td class="k">enabiz_durum</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>recete_satir</code> <span class="rz ok">yeni</span> <span class="sp">ilaçlar</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">recete_id</td><td class="t">int</td><td></td></tr><tr><td class="k">ilac_barkod</td><td class="t">varchar(20)</td><td>→ ilac</td></tr><tr><td class="k">ilac_ad</td><td class="t">varchar(200)</td><td>kopya</td></tr><tr><td class="k">doz</td><td class="t">varchar(20)</td><td></td></tr><tr><td class="k">periyot</td><td class="t">varchar(20)</td><td>2×1</td></tr><tr><td class="k">kullanim_sekli</td><td class="t">smallint</td><td>SKRS</td></tr><tr><td class="k">sure_gun</td><td class="t">smallint</td><td></td></tr><tr><td class="k">kutu</td><td class="t">smallint</td><td></td></tr><tr><td class="k">aciklama</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">sira</td><td class="t">smallint</td><td></td></tr><tr><td class="k">etkilesim_uyari</td><td class="t">varchar(200)</td><td>kontrol sonucu (kabul edildiyse gerekçe)</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>ilac</code> <span class="rz ok">yeni</span> <span class="sp">ilaç kataloğu (SKRS İlaç / barkod)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">barkod</td><td class="t">varchar(20)</td><td>PK</td></tr><tr><td class="k">ad</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">etken_madde</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">form</td><td class="t">varchar(60)</td><td></td></tr><tr><td class="k">atc</td><td class="t">varchar(10)</td><td></td></tr><tr><td class="k">recete_turu</td><td class="t">smallint</td><td></td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr><tr><td class="k">skrs_surum</td><td class="t">varchar(10)</td><td></td></tr>
+  </table><div class="alt">etkileşim/alerji için etken madde eşlemesi (alerji kaydı etken bazlı)</div>
+</div>
+<div class="tablo">
+  <div class="tb"><code>rapor</code> <span class="rz ok">yeni</span> <span class="sp">hekim raporu (istirahat, ilaç, durum bildirir, sağlık kurulu)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>SKRS RAPOR TÜRÜ</td></tr><tr><td class="k">alt_tur</td><td class="t">smallint</td><td></td></tr><tr><td class="k">baslangic / bitis</td><td class="t">date</td><td></td></tr><tr><td class="k">sure_gun</td><td class="t">smallint</td><td></td></tr><tr><td class="k">tani_icd</td><td class="t">varchar(10)</td><td></td></tr><tr><td class="k">detay</td><td class="t">text</td><td>USS Rapor Detayı A(1024)</td></tr><tr><td class="k">gecerlilik</td><td class="t">smallint</td><td>SKRS Raporun Geçerlilik Süresi</td></tr><tr><td class="k">kurul</td><td class="t">smallint</td><td>sağlık kurulu ise</td></tr><tr><td class="k">kurul_uyeleri</td><td class="t">int[]</td><td></td></tr><tr><td class="k">imza_zamani / imza_hash</td><td class="t"></td><td></td></tr><tr><td class="k">medula_no</td><td class="t">varchar(30)</td><td></td></tr><tr><td class="k">pdf_dosya_id</td><td class="t">int</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>taslak / imzalı / iptal</td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div><h3>Hasta tıbbi geçmişi (muayeneden bağımsız, kümülatif)</h3>
+<div class="tablo">
+  <div class="tb"><code>hasta_alerji</code> <span class="rz ok">yeni</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>ilaç / gıda / çevresel / lateks / kontrast</td></tr><tr><td class="k">etken</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">etken_madde_kod</td><td class="t">varchar(20)</td><td>ilaç alerjisinde etken madde (etkileşim kontrolü)</td></tr><tr><td class="k">reaksiyon</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">siddet</td><td class="t">smallint</td><td>hafif / orta / şiddetli / anafilaksi</td></tr><tr><td class="k">kaynak</td><td class="t">smallint</td><td>hasta beyanı / hekim / e-Nabız</td></tr><tr><td class="k">dogrulandi</td><td class="t">smallint</td><td></td></tr><tr><td class="k">kayit_muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>hasta_kronik_tani</code> <span class="rz ok">yeni</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">icd_kod</td><td class="t">varchar(10)</td><td></td></tr><tr><td class="k">baslangic</td><td class="t">date</td><td></td></tr><tr><td class="k">bitis</td><td class="t">date</td><td>remisyon</td></tr><tr><td class="k">takip_hekim_id</td><td class="t">int</td><td></td></tr><tr><td class="k">kaynak</td><td class="t">smallint</td><td></td></tr><tr><td class="k">kayit_muayene_id</td><td class="t">int</td><td></td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>aktif / kontrol altında / geçmiş</td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>hasta_ilac</code> <span class="rz ok">yeni</span> <span class="sp">aktif / geçmiş ilaç listesi</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">ilac_barkod / ilac_ad</td><td class="t"></td><td></td></tr><tr><td class="k">doz / periyot</td><td class="t">varchar</td><td></td></tr><tr><td class="k">baslangic / bitis</td><td class="t">date</td><td></td></tr><tr><td class="k">recete_satir_id</td><td class="t">int</td><td>bizden reçetelendiyse</td></tr><tr><td class="k">kaynak</td><td class="t">smallint</td><td>reçete / hasta beyanı / e-Nabız</td></tr><tr><td class="k">uyum</td><td class="t">smallint</td><td>düzenli / aralıklı / bırakmış</td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>hasta_gecmis_olay</code> <span class="rz ok">yeni</span> <span class="sp">ameliyat / girişim / yatış / aşı / travma</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>ameliyat · girişim · yatış · aşı · travma · transfüzyon</td></tr><tr><td class="k">ad</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">kod</td><td class="t">varchar(20)</td><td>SUT / aşı kodu</td></tr><tr><td class="k">tarih</td><td class="t">date</td><td></td></tr><tr><td class="k">kurum</td><td class="t">varchar(120)</td><td></td></tr><tr><td class="k">not</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">kaynak</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>hasta_aile_oykusu</code> <span class="rz ok">yeni</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">yakinlik</td><td class="t">smallint</td><td>anne / baba / kardeş / çocuk / büyükanne…</td></tr><tr><td class="k">icd_kod</td><td class="t">varchar(10)</td><td></td></tr><tr><td class="k">aciklama</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">yas</td><td class="t">smallint</td><td>tanı/ölüm yaşı</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>hasta_aliskanlik</code> <span class="rz ok">yeni</span> <span class="sp">sigara / alkol / madde / egzersiz / beslenme</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>SKRS Tütün Kullanımı / Alkol / Madde</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>kullanıyor / bırakmış / hiç</td></tr><tr><td class="k">miktar</td><td class="t">varchar(40)</td><td>20 paket/yıl</td></tr><tr><td class="k">baslangic / birakma</td><td class="t">date</td><td></td></tr><tr><td class="k">guncelleme</td><td class="t">date</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>hasta_takip_gostergesi</code> <span class="rz ok">yeni</span> <span class="sp">kronik izlem göstergeleri (HbA1c, LDL, TA…) — türetilmiş görünüm + hedef</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td></td></tr><tr><td class="k">gosterge</td><td class="t">varchar(30)</td><td>lab tetkik / vital / işlem (göz dibi)</td></tr><tr><td class="k">hedef_metin</td><td class="t">varchar(40)</td><td></td></tr><tr><td class="k">periyot_ay</td><td class="t">smallint</td><td></td></tr><tr><td class="k">son_deger / son_tarih</td><td class="t"></td><td>son lab/vital'den</td></tr><tr><td class="k">sonraki_tarih</td><td class="t">date</td><td>gecikme uyarısı</td></tr>
+  </table><div class="alt">değerler lab_sonuc / muayene_vital'den okunur; bu tablo hedef ve periyodu tutar</div>
+</div><h3>Şablon ve tercihler</h3>
+<div class="tablo">
+  <div class="tb"><code>muayene_sablon</code> <span class="rz ok">yeni</span> <span class="sp">fizik muayene / anamnez şablonu</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">ad</td><td class="t">varchar(80)</td><td></td></tr><tr><td class="k">departman_id</td><td class="t">int</td><td>branş</td></tr><tr><td class="k">kapsam</td><td class="t">smallint</td><td>1 kurum · 2 kişisel</td></tr><tr><td class="k">hekim_id</td><td class="t">int</td><td>kişisel</td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>yüz yüze / uzaktan / kontrol</td></tr><tr><td class="k">varsayilan</td><td class="t">smallint</td><td></td></tr><tr><td class="k">surum</td><td class="t">smallint</td><td></td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>muayene_sablon_alan</code> <span class="rz ok">yeni</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">sablon_id</td><td class="t">int</td><td></td></tr><tr><td class="k">sira</td><td class="t">smallint</td><td></td></tr><tr><td class="k">grup</td><td class="t">varchar(60)</td><td>sistem adı</td></tr><tr><td class="k">ad</td><td class="t">varchar(80)</td><td></td></tr><tr><td class="k">tip</td><td class="t">smallint</td><td>metin · metin+normal · sayı · seçenekli · çoklu · tarih · vücut şeması · skor · alt şablon</td></tr><tr><td class="k">secenekler</td><td class="t">jsonb</td><td></td></tr><tr><td class="k">birim / alt / ust</td><td class="t"></td><td></td></tr><tr><td class="k">normal_metni</td><td class="t">varchar(200)</td><td></td></tr><tr><td class="k">zorunlu</td><td class="t">smallint</td><td></td></tr><tr><td class="k">hesap_formulu</td><td class="t">varchar(200)</td><td>skor</td></tr><tr><td class="k">uss_alan</td><td class="t">varchar(40)</td><td>USS eşleme (Bulgu, Ağırlık…)</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>sik_tani</code> <span class="rz ok">yeni</span> <span class="sp">hekim / branş sık tanı listesi</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">hekim_id / departman_id</td><td class="t">int</td><td></td></tr><tr><td class="k">icd_kod</td><td class="t">varchar(10)</td><td></td></tr><tr><td class="k">varsayilan_tur</td><td class="t">smallint</td><td></td></tr><tr><td class="k">kronik</td><td class="t">smallint</td><td></td></tr><tr><td class="k">recete_sablon_id / istem_panel_id</td><td class="t">int</td><td></td></tr><tr><td class="k">kullanim_sayisi</td><td class="t">int</td><td>otomatik</td></tr><tr><td class="k">sira</td><td class="t">smallint</td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>recete_sablon / recete_sablon_satir</code> <span class="rz ok">yeni</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">id / ad / kapsam / hekim_id / tani_icd</td><td class="t"></td><td></td></tr><tr><td class="k">satır: ilac_barkod, doz, periyot, sure_gun, kutu, kullanim_sekli</td><td class="t"></td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>istem_paneli / istem_paneli_satir</code> <span class="rz ok">yeni</span> <span class="sp">istem grupları (lab paneli + rad + işlem + konsültasyon karışık)</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">id / ad / kapsam / departman_id / hizmet_id (paket)</td><td class="t"></td><td></td></tr><tr><td class="k">satır: tur, hedef (lab_tetkik_id / radyoloji tetkik / hizmet_id / departman_id), aciliyet</td><td class="t"></td><td></td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>metin_makro</code> <span class="rz ok">yeni</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">kisayol</td><td class="t">varchar(20)</td><td>.fmn</td></tr><tr><td class="k">alan</td><td class="t">varchar(40)</td><td></td></tr><tr><td class="k">metin</td><td class="t">text</td><td></td></tr><tr><td class="k">kapsam / hekim_id</td><td class="t"></td><td></td></tr>
+  </table>
+</div><h3>Mevcut tablolara ek</h3>
+<div class="tablo">
+  <div class="tb"><code>belge_basvuru</code> <span class="rz sari">mevcut + kolon</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">hekim_id / bolum_id</td><td class="t">int</td><td><b>mevcut</b> — muayene listesi bunlardan</td></tr><tr><td class="k">sira_no</td><td class="t">smallint</td><td><b>mevcut</b> — sıra çağırma</td></tr><tr><td class="k">cagirma_zamani</td><td class="t">timestamp</td><td>yeni — sıra ekranı</td></tr><tr><td class="k">muayene_id</td><td class="t">int</td><td>yeni — hızlı erişim</td></tr><tr><td class="k">vaka_turu / sevk_* / cikis_*</td><td class="t"></td><td>yeni — e-Nabız dokümanında</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>belge_satir_rol</code> <span class="rz pas">mevcut</span> <span class="sp">prim rolleri</span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">—</td><td class="t"></td><td>Uygulayan (hekim) muayene satırında; İsteyen istem satırlarında; Onaylayan lab/rad — mevcut Prim modülü, otomatik</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>onam</code> <span class="rz sari">mevcut + kolon</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">tur</td><td class="t">smallint</td><td>+ işlem onamı (invazif), ilaç bilgilendirme</td></tr>
+  </table>
+</div>
+<div class="tablo">
+  <div class="tb"><code>dokuman</code> <span class="rz pas">mevcut</span> <span class="sp"></span></div>
+  <table>
+    <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
+    <tr><td class="k">kaynak</td><td class="t"></td><td>+ 'muayene' (EKG PDF, fotoğraf, dış belge) — hasta kaynaklı → özel nitelikli</td></tr>
+  </table>
+</div>
+
+    <h2>4. Ekranlar</h2>
+    <table>
+      <tr><th style="width:250px">Ekran</th><th>Görev</th><th style="width:220px">Mockup</th></tr>
+      <tr><td>Muayene Listesi (hekim)</td><td>Günün hastaları, sıra çağırma, uyarı rozetleri (alerji/kronik/sonuç/panik), online hastalar, konsültasyonlar.</td><td><code>muayene_listesi.html</code></td></tr>
+      <tr><td>Muayene Kartı</td><td>Anamnez &amp; vital · fizik muayene (şablon) · tanı · istem &amp; sonuçlar · e-reçete · rapor · sevk/konsültasyon · işlem &amp; ücret · geçmiş · dosyalar.</td><td><code>muayene_karti.html</code></td></tr>
+      <tr><td>Hasta Tıbbi Özeti</td><td>Alerji, kronik, ilaç, ameliyat/aşı, aile, alışkanlık, takip göstergeleri, zaman çizgisi; e-Nabız karşılaştırma.</td><td><code>hasta_tibbi_ozet.html</code></td></tr>
+      <tr><td>Şablonlar &amp; Tercihler</td><td>Branş/kişisel fizik muayene şablonları, sık tanı, reçete şablonu, istem paneli, makro, tamamlama kuralları.</td><td><code>muayene_sablonlari.html</code></td></tr>
+      <tr><td>Hemşire ön hazırlık <span class="kucuk">(sonra)</span></td><td>Vital giriş, cihaz bağlantısı, sıra yönetimi.</td><td>—</td></tr>
+      <tr><td>Bekleme salonu ekranı <span class="kucuk">(sonra)</span></td><td>Sıra/oda anonsu (maskeli ad).</td><td>—</td></tr>
+      <tr><td>Konsültasyon kuyruğu <span class="kucuk">(sonra)</span></td><td>Bana gelen / benim istediğim konsültasyonlar.</td><td>—</td></tr>
+    </table>
+
+    <h2>5. Entegrasyonlar</h2>
+    <table>
+      <tr><th style="width:200px">Servis / modül</th><th>Kullanım</th></tr>
+      <tr><td>Kayıt Kabul</td><td>Başvuru, provizyon, Medula hizmet kaydı, tahsilat (mevcut ekranlar).</td></tr>
+      <tr><td>Lab / Radyoloji</td><td>İstem → modül; sonuç → muayene sekmesi + bildirim; panik teyit.</td></tr>
+      <tr><td>Teletıp</td><td>Aynı kart, uzaktan modu; görüşme ekranı yan paneli bu kartın sekmeleridir.</td></tr>
+      <tr><td>e-Nabız</td><td>103 Muayene, 106 Çıkış, Reçete, Sevk; hasta geçmişi okuma (izin).</td></tr>
+      <tr><td>Medula</td><td>Provizyon, e-reçete, e-rapor.</td></tr>
+      <tr><td>SKRS</td><td>ICD-10, ilaç, klinik, muayene/vaka/rapor türleri (mevcut senkron genişler).</td></tr>
+      <tr><td>Prim</td><td>Uygulayan / İsteyen / Onaylayan rolleri → hakediş.</td></tr>
+      <tr><td>Doküman</td><td>EKG/fotoğraf/dış belge, özet PDF; onam formları (tablet imza).</td></tr>
+      <tr><td>Mesajlar / AI</td><td>Sonuç, konsültasyon, panik bildirimleri; AI özet/dikte taslakları (hekim onayı).</td></tr>
+      <tr><td>Cihazlar</td><td>Tansiyon/nabız/SpO₂ (BT), EKG (PDF + ölçüm), tartı — Lab cihaz katmanıyla aynı desen.</td></tr>
+    </table>
+
+    <h2>6. Yetkiler &amp; ayarlar</h2>
+    <ul>
+      <li><code>muayene.liste</code> (kendi hastaları) · <code>muayene.yaz</code> · <code>muayene.tamamla</code> · <code>muayene.duzelt</code> (24 s, gerekçeli) · <code>muayene.baska_hekim</code> (bölüm sorumlusu / nöbet) · <code>muayene.sablon</code> · <code>recete.imza</code> · <code>rapor.imza</code> · <code>hasta.tibbi_ozet.yaz</code> · <code>konsultasyon.yanit</code>.</li>
+      <li>Ayarlar: tamamlama kuralları, düzeltme penceresi, kronik otomasyonu, sıra çağırma/anons, konsültasyon süreleri, e-Nabız otomatik, portal paylaşımı, dikte/AI açık-kapalı.</li>
+    </ul>
+
+    <div class="tamam">
+      <b>İlk sürüm:</b> hekim listesi + çağırma, muayene kartı (anamnez, vital, şablonlu fizik muayene, tanı, istem, reçete, ücret, tamamla), tıbbi özet (alerji/kronik/ilaç), sık tanı ve makrolar, e-Nabız 103.
+      Sonraya: rapor türleri/Medula, konsültasyon akışı, takip göstergeleri, cihaz vital, dikte/AI, bekleme salonu ekranı, hemşire ekranı.
+    </div>
+  </div>
+</div>
+
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>
