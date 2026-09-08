@@ -21,6 +21,14 @@ import type { Deger } from '../kartAlanCizim';
  * gridler, ilgili kisiler. GenForm bu 350 satirdan arindirilinca geriye veri
  * akisi (yukleme, kaydetme, sekme secimi) kaldi.
  */
+/**
+ * NOTLAR KUTUSU TAM GENISLIK (484, kullanici: "kurum karti notlar saga dogru
+ * genislesin"). Sol sutunda İletişim'in altinda yarim genislikte durunca not
+ * alani iki-uc kelimede satir kiriyordu - serbest metin en genis kutuyu
+ * hak eder. Cari'de zaten boyleydi; kurum da ayni yerlesimi kullanir.
+ */
+const NOTLAR_TAM_GENISLIK = new Set(['cari', 'kurum']);
+
 export function KartGrupSekmesi(p: KartGrupSekmesiProps) {
   const {
     aktif, kaynak, id, yeniMi, meta, salt, personelGibiKart, deger, setDeger,
@@ -183,7 +191,7 @@ const adliBlok = (
                 );
               })()}
             </div>
-            {notlar && kaynak !== 'cari' && (
+            {notlar && !NOTLAR_TAM_GENISLIK.has(kaynak) && (
               <div className="kagrup">
                 <h6>{notlar[0]}</h6>
                 <div className="alan-izgara tek-sutun">{renderAlanListesi(notlar[1])}</div>
@@ -382,7 +390,7 @@ const adliBlok = (
             />
           );
         })()}
-        {!iletisim && notlar && kaynak !== 'cari' && (
+        {!iletisim && notlar && !NOTLAR_TAM_GENISLIK.has(kaynak) && (
           <div className="kagrup" key="Notlar">
             <h6>{notlar[0]}</h6>
             <div className="alan-izgara tek-sutun">{renderAlanListesi(notlar[1])}</div>
@@ -666,7 +674,7 @@ return (
         adres olarak konur. Ayni taraf_adres tablosu, tek satir. */}
     {/* Kullanici: "notlar ilgili kişiler altına gelsin" - Cari'de Notlar kutusu
         artik İletişim'in yaninda degil, İlgili Kişiler tablosunun altinda. */}
-    {kaynak === 'cari' && aktif.baslik === 'Genel' && notlar && (
+    {NOTLAR_TAM_GENISLIK.has(kaynak) && aktif.baslik === 'Genel' && notlar && (
       <div className="kasira">
         <div className="kagrup" key="Notlar">
           <h6>{notlar[0]}</h6>

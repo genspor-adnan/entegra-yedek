@@ -220,19 +220,21 @@ public static partial class KartKatalogu
             // Hizmet birimi stogunkiyle AYNI listeden (51 Adet, 57 Kg...).
             new("birim",    "birim",    "kod",   KodListesi: "stok.ana_birim",
                 Baslik: "Birim", Grup: "Genel", AltGrup: "Detay"),
-            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 80,
-                Baslik: "Açıklama", Grup: "Genel", AltGrup: "Detay"),
-
             // UYGULANABILIRLIK (482, kullanici: "dogum erkek icin olmaz,
             //   prostat sadece erkeklere ve 20 yasindan sonra"). Kural KARTTA
             //   durur: ucret satiri, lab istemi, radyoloji istemi ve paket
             //   ayni kapidan gecer. Bos birakilirsa hizmet HERKESE yapilir.
+            //   AYRI KUTU DEGIL, BIRIMIN ALTINDA (484, kullanici): uc alan
+            //   icin ikinci bir kutu acmak, hizmetin "kime yapilir" bilgisini
+            //   KDV/birim gibi temel tanimlardan koparıyordu.
             new("cinsiyet", "cinsiyet", "kod", SabitKodlar: HizmetCinsiyetKodlari,
-                Baslik: "Cinsiyet", Grup: "Genel", AltGrup: "Uygulanabilirlik"),
+                Baslik: "Cinsiyet", Grup: "Genel", AltGrup: "Detay"),
             new("yasAlt",   "yas_alt",  "sayi", Baslik: "En Küçük Yaş",
-                Grup: "Genel", AltGrup: "Uygulanabilirlik", EslesAlan: "yasUst"),
+                Grup: "Genel", AltGrup: "Detay", EslesAlan: "yasUst"),
             new("yasUst",   "yas_ust",  "sayi", Baslik: "En Büyük Yaş",
-                Grup: "Genel", AltGrup: "Uygulanabilirlik"),
+                Grup: "Genel", AltGrup: "Detay"),
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 80,
+                Baslik: "Açıklama", Grup: "Genel", AltGrup: "Detay"),
 
             // SUT / HUV KODU (484). Kolon `sut_kodu` bastan beri vardi ama
             //   kartta girisi yoktu - yazilamayan kolon, olmayan kolondur.

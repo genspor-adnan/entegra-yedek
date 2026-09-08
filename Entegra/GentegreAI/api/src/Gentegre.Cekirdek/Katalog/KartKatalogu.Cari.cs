@@ -775,6 +775,27 @@ public static partial class KartKatalogu
             //   TASINIYOR (Gizli): cari olarak girilmis eski kayitlarin
             //   verisi kaydetmede silinmesin.
             "ilkTemas" or "sektor" or "altSektor" or "bolge" => a with { Gizli = true },
+            // ÜTS KURUM NO KURUMDA GIZLI (484, kullanici). KUN, ÜTS verme
+            //   bildiriminde (225) MALIN TESLIM EDILDIGI saglik tesisini
+            //   tanimlar - tibbi cihaz alicisi carinin alanidir. Anlasmali
+            //   kurum (sigorta / SGK) mal teslim alan taraf degil, odemeyi
+            //   yapan taraftir; kartinda karsiligi olmayan bir soruydu.
+            //   Kolon DURUYOR, deger TASINIYOR: ayni taraf hem tedarikci hem
+            //   anlasmali kurum olabilir, kurum kartindan kaydetmek onun ÜTS
+            //   numarasini silmesin.
+            "utsKurumNo" => a with { Gizli = true },
+            // KISI ALANLARI VE ROL KUTULARI KURUMDA GIZLI (484, kullanici:
+            //   "ad, soyad, kisi, musteri, tedarikci check'lerini kaldir").
+            //   Ad/Soyad ve "Kişi" bir GERCEK KISI carisinin alanlaridir -
+            //   kurumun unvani vardir, adi soyadi yoktur. Musteri/Tedarikci
+            //   ise cari ROLLERI: anlasmali kurumun rolu zaten `kurum`
+            //   bayragidir ve kart onu kendisi yaziyor; kutuyu kullaniciya
+            //   sormak, isaretini kaldirmasi hâlinde kurumu kendi listesinden
+            //   dusurebilecegi anlamina geliyordu.
+            //   Degerler TASINIYOR (Gizli): ayni taraf hem tedarikci hem
+            //   anlasmali kurum olabilir - kurum kartindan kaydetmek oteki
+            //   rolunu silmesin.
+            "ad" or "soyad" or "kisi" or "musteri" or "tedarikci" => a with { Gizli = true },
             // TEMSILCI ILE KURUM TURU YER DEGISTIRDI (484, kullanici).
             //   Kimlik seridinde artik KURUM TURU duruyor: hangi anlasma
             //   kurallarinin isleyecegini (Ozel / OSS / SGK) o belirler,
