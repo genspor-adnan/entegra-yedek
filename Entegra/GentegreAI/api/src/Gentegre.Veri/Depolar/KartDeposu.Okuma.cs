@@ -232,6 +232,11 @@ public sealed partial class KartDeposu
             "public.v_entegrasyon_hesap_lookup",
             // Cihaz ara katmani (432).
             "public.v_cihaz_lookup",
+            // ISTEM KARTI (479): tetkigin baglanacagi tup - istem basina suzulur.
+            "public.v_lab_numune_lookup",
+            // KURUM SOZLESMESI ve ALT KURUM (468): basvuru ve kurum karti.
+            "public.v_kurum_sozlesme_lookup",
+            "public.v_alt_kurum_lookup",
             // Lab v1 (433/434): tetkik ve panel secimi (panel satiri, cihaz
             //   eslemesi ve tetkik kartinin varsayilan cihazi).
             "public.v_lab_tetkik_lookup", "public.v_lab_panel_lookup",

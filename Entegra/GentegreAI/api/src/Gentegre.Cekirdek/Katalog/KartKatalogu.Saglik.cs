@@ -226,6 +226,44 @@ public static partial class KartKatalogu
         ["4"] = "Sonuçlandı", ["5"] = "Onaylandı", ["9"] = "İptal"
     };
 
+    /// <summary>`lab_istem.oncelik` (433) - cihazda STAT sirasini belirler.</summary>
+    private static readonly Dictionary<string, string> LabOncelikKodlari = new()
+    {
+        ["1"] = "Normal", ["2"] = "Öncelikli", ["3"] = "ACİL"
+    };
+
+    /// <summary>`lab_istem.kaynak` (433) - istem NEREDEN acildi.</summary>
+    private static readonly Dictionary<string, string> LabKaynakKodlari = new()
+    {
+        ["1"] = "Muayene istemi", ["2"] = "Teletıp", ["3"] = "Banko",
+        ["4"] = "Dış kurum", ["5"] = "Check-up"
+    };
+
+    /// <summary>`lab_numune.durum` (433).</summary>
+    private static readonly Dictionary<string, string> LabNumuneDurumKodlari = new()
+    {
+        ["0"] = "Ret", ["1"] = "Etiketlendi", ["2"] = "Alındı", ["3"] = "Kabul",
+        ["4"] = "Çalışıldı"
+    };
+
+    /// <summary>
+    /// `lab_numune.kalite` (433) - ret nedeniyle AYNI kod uzayi. Tek liste
+    /// olmasi bilincli: "hemolizli ama calisildi" ile "hemolizli, reddedildi"
+    /// ayni gozlemdir; farki `ret` bayragi soyler.
+    /// </summary>
+    private static readonly Dictionary<string, string> LabKaliteKodlari = new()
+    {
+        ["1"] = "Uygun", ["2"] = "Hemolizli", ["3"] = "Lipemik", ["4"] = "İkterik",
+        ["5"] = "Yetersiz miktar", ["6"] = "Pıhtılı", ["7"] = "Yanlış tüp",
+        ["8"] = "Etiketsiz", ["9"] = "Diğer"
+    };
+
+    /// <summary>`lab_numune.alim_yeri` (433).</summary>
+    private static readonly Dictionary<string, string> LabAlimYeriKodlari = new()
+    {
+        ["1"] = "Kan alma", ["2"] = "Servis", ["3"] = "Ev", ["4"] = "Dış"
+    };
+
     /// <summary>
     /// Lab istem SATIRI durumu (433/434). Servis, katalog ve ekran ayni
     /// listeye bakmali - yoksa listede "onayli" gorunen satirin sonucu
@@ -1204,30 +1242,57 @@ public static partial class KartKatalogu
         {
             new("id", "id", "sayi", Yazilabilir: false),
 
+            // KIMLIK SERIDI (mockup lab_hasta_istem_karti.html): hasta, istem
+            //   numarasi ve ONCELIK her sekmede ustte durur - acil istem
+            //   sekme degistirince gozden kaybolmamali.
             new("tarafId", "taraf_id", "kod", Zorunlu: true,
                 KodTablosu: "public.v_hasta_lookup", AramaKaynagi: "hasta",
-                Baslik: "Hasta", Grup: "İstem"),
-            new("belgeId", "belge_id", "sayi",
-                Baslik: "Başvuru (Protokol Id)", Grup: "İstem"),
+                Baslik: "Hasta", Grup: "Kimlik"),
             new("istemNo", "istem_no", "metin", EnFazlaUzunluk: 30,
-                Baslik: "İstem No", Grup: "İstem"),
-            new("istemTarihi", "istem_tarihi", "tarih", Zorunlu: true,
-                Baslik: "İstem Tarihi", Grup: "İstem"),
-            new("bolum", "bolum", "kod", SabitKodlar: LabBolumKodlari,
-                Baslik: "Bölüm", Grup: "İstem"),
-            new("personelId", "personel_id", "kod", KodTablosu: "public.v_personel_lookup",
-                Baslik: "İsteyen Hekim", Grup: "İstem"),
+                Baslik: "İstem No", Grup: "Kimlik"),
+            new("oncelik", "oncelik", "kod", SabitKodlar: LabOncelikKodlari,
+                Baslik: "Öncelik", Grup: "Kimlik"),
             new("durum", "durum", "kod", SabitKodlar: LabDurumKodlari,
-                Baslik: "Durum", Grup: "İstem"),
+                Baslik: "Durum", Grup: "Kimlik"),
+
+            // ISTEM: kim, ne zaman, nereden istedi.
+            new("istemTarihi", "istem_tarihi", "tarih", Zorunlu: true,
+                Baslik: "İstem Tarihi", Grup: "İstem", AltGrup: "İstem"),
+            new("bolum", "bolum", "kod", SabitKodlar: LabBolumKodlari,
+                Baslik: "Bölüm", Grup: "İstem", AltGrup: "İstem"),
+            new("personelId", "personel_id", "kod", KodTablosu: "public.v_personel_lookup",
+                Baslik: "İsteyen Hekim", Grup: "İstem", AltGrup: "İstem"),
+            // KAYNAK (433): muayene / teletip / banko / dis kurum / check-up.
+            //   Numunenin nereden geldigi kabul kararini degistirir.
+            new("kaynak", "kaynak", "kod", SabitKodlar: LabKaynakKodlari,
+                Baslik: "Kaynak", Grup: "İstem", AltGrup: "İstem"),
+            new("disKurumId", "dis_kurum_id", "kod", KodTablosu: "public.v_kurum_lookup",
+                Baslik: "Dış Kurum", Grup: "İstem", AltGrup: "İstem"),
+            new("belgeId", "belge_id", "sayi",
+                Baslik: "Başvuru (Protokol Id)", Grup: "İstem", AltGrup: "İstem"),
+
+            // KLINIK BILGI olmadan sonuc yorumlanamaz: "neden istendi"
+            //   sorusunun cevabi raporun bir parcasidir.
+            new("klinikBilgi", "klinik_bilgi", "metin", EnFazlaUzunluk: 500,
+                Baslik: "Klinik Bilgi", Grup: "İstem", AltGrup: "Klinik"),
+            // ICD KODU METINDIR ("J03.9"), sayisal lookup id'si degil: kod
+            //   tablosuna baglamak "bos deger sayiya cevrilemedi" hatasi
+            //   veriyordu. Ad cozumu ekranda ICD arama penceresinden gelir.
+            new("taniIcd", "tani_icd", "metin", EnFazlaUzunluk: 20,
+                Baslik: "Tanı (ICD-10)", Grup: "İstem", AltGrup: "Klinik"),
 
             // Numune ve sonuc zamanlari AYRI: "ne zaman alindi / ne zaman cikti"
             //   laboratuvarin temel performans sorusudur.
             new("numuneTarihi", "numune_tarihi", "tarih",
-                Baslik: "Numune Alma", Grup: "Süreç"),
+                Baslik: "Numune Alma", Grup: "Süreç", AltGrup: "Zaman"),
             new("sonucTarihi", "sonuc_tarihi", "tarih",
-                Baslik: "Sonuç", Grup: "Süreç"),
+                Baslik: "Sonuç", Grup: "Süreç", AltGrup: "Zaman"),
+            // HEDEF BITIS = sozu verilen sure (TAT). Saat KABULDE baslar;
+            //   sunucu kabul aninda yazar, elle degistirilebilir.
+            new("hedefBitis", "hedef_bitis", "zaman",
+                Baslik: "Hedef Bitiş (TAT)", Grup: "Süreç", AltGrup: "Zaman"),
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300,
-                Baslik: "Açıklama", Grup: "Süreç")
+                Baslik: "Açıklama", Grup: "Süreç", AltGrup: "Zaman")
         },
         Detaylar: new DetayTanimi[]
         {
@@ -1264,11 +1329,57 @@ public static partial class KartKatalogu
                     Baslik: "Referans Aralığı"),
                 new("isaret", "isaret", "kod", SabitKodlar: LabIsaretKodlari,
                     Baslik: "Değerlendirme"),
-                new("cihaz", "cihaz", "metin", EnFazlaUzunluk: 60, Baslik: "Cihaz"),
+                new("cihazId", "cihaz_id", "kod", KodTablosu: "public.v_cihaz_lookup",
+                    Baslik: "Cihaz"),
+                new("cihaz", "cihaz", "metin", EnFazlaUzunluk: 60,
+                    Baslik: "Cihaz (metin)"),
+                // NUMUNE BAGI (433): satir hangi tupten calisilacak. Tup plani
+                //   "Barkod Üret" ile cikar; burada gorunur olmasi, "bu tetkik
+                //   hangi tupte" sorusunu kart icinde cevaplar.
+                new("numuneId", "numune_id", "kod", KodTablosu: "public.v_lab_numune_lookup",
+                    Baslik: "Numune / Barkod"),
                 new("sonucTarihi", "sonuc_tarihi", "tarih", Baslik: "Sonuç Zamanı"),
                 new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama")
             }, SubeKolonu: null, Sirala: "sira, id", Baslik: "Tetkikler",
-               LogTabloId: 962)
+               LogTabloId: 962),
+
+            // NUMUNELER (mockup "Etiketler" kutusu): tup plani, alim/kabul
+            //   zamanlari ve KALITE. Ret nedeni gorunur kalir - hasta ikinci
+            //   kez kan verirken ayni hatayla geri gelmesin.
+            new DetayTanimi("numuneler", "public.lab_numune", "istem_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("barkod", "barkod", "metin", EnFazlaUzunluk: 40, Yazilabilir: false,
+                    Baslik: "Barkod"),
+                new("numuneTipi", "numune_tipi", "kod", SabitKodlar: LabNumuneTipiKodlari,
+                    Baslik: "Numune"),
+                new("tupTipi", "tup_tipi", "kod", SabitKodlar: LabTupTipiKodlari,
+                    Baslik: "Tüp"),
+                new("durum", "durum", "kod", SabitKodlar: LabNumuneDurumKodlari,
+                    Baslik: "Durum"),
+                new("alanId", "alan_id", "kod", KodTablosu: "public.v_personel_lookup",
+                    Baslik: "Alan"),
+                new("alimYeri", "alim_yeri", "kod", SabitKodlar: LabAlimYeriKodlari,
+                    Baslik: "Alım Yeri"),
+                new("alimZamani", "alim_zamani", "zaman", Baslik: "Alım"),
+                new("kabulZamani", "kabul_zamani", "zaman", Baslik: "Kabul"),
+                new("kalite", "kalite", "kod", SabitKodlar: LabKaliteKodlari,
+                    Baslik: "Kalite"),
+                // SERUM INDEKSI: sonucun guvenilirlik olcusu (hemoliz/lipemi/
+                //   ikter). Esigi asan deger tetkigi otomatik reddettirir.
+                new("hemolizIdx", "hemoliz_idx", "sayi", Baslik: "Hemoliz"),
+                new("lipemiIdx", "lipemi_idx", "sayi", Baslik: "Lipemi"),
+                new("ikterIdx", "ikter_idx", "sayi", Baslik: "İkter"),
+                new("saklamaYeri", "saklama_yeri", "metin", EnFazlaUzunluk: 60,
+                    Baslik: "Saklama Yeri"),
+                new("saklamaSicaklik", "saklama_sicaklik", "sayi", Baslik: "°C"),
+                new("ret", "ret", "mantik", Baslik: "Ret"),
+                new("retNeden", "ret_neden", "kod", SabitKodlar: LabKaliteKodlari,
+                    Baslik: "Ret Nedeni"),
+                new("retAciklama", "ret_aciklama", "metin", EnFazlaUzunluk: 300,
+                    Baslik: "Ret Açıklaması"),
+            }, SubeKolonu: "sube_id", Sirala: "id", Baslik: "Numuneler",
+               LogTabloId: 963)
         });
 
     /// <summary>
