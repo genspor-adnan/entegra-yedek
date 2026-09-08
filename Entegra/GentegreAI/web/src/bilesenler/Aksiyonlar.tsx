@@ -50,6 +50,11 @@ export function GenToolbar({ aksiyonlar, calistir, altSecenekler }: CalistirProp
   altSecenekler?: Record<string, AltSecenek[]>;
 }) {
   const gorunen = aksiyonlar.filter(a => hedefte(a, 'araccubugu'));
+  // IKINCI SIRA (hedef "araccubugu2"): gunluk akisin disinda kalan, daha
+  //   seyrek kullanilan islemler (mockup'ta ayracin sagindakiler). Birinci
+  //   sirayi uzatmak, asil dugmeleri gorsel olarak bogardi. Sagda durur -
+  //   arac cubugu zaten saga yasli, ikinci sira onun altina hizalanir.
+  const ikinciSira = aksiyonlar.filter(a => hedefte(a, 'araccubugu2'));
   const [acikMenu, setAcikMenu] = useState<string | null>(null);
 
   // Disari tiklaninca menu kapansin - acik menu ekranda unutulmasin.
@@ -60,11 +65,9 @@ export function GenToolbar({ aksiyonlar, calistir, altSecenekler }: CalistirProp
     return () => window.removeEventListener('click', kapat);
   }, [acikMenu]);
 
-  if (gorunen.length === 0) return null;
+  if (gorunen.length === 0 && ikinciSira.length === 0) return null;
 
-  return (
-    <div className="arac-cubugu">
-      {gorunen.map(a => {
+  const dugme = (a: AksiyonYaniti) => {
         const alt = altSecenekler?.[a.kod];
         return (
           <span key={a.kod} className={alt ? 'dugme-menu' : undefined}>
@@ -98,7 +101,17 @@ export function GenToolbar({ aksiyonlar, calistir, altSecenekler }: CalistirProp
             )}
           </span>
         );
-      })}
+  };
+
+  // Tek sirada eskisi gibi TEK kap: ikinci sira yoksa fazladan sarmalayici
+  //   koymak, saga yaslama duzenini bozardi.
+  if (ikinciSira.length === 0)
+    return <div className="arac-cubugu">{gorunen.map(dugme)}</div>;
+
+  return (
+    <div className="arac-cubugu-sar">
+      <div className="arac-cubugu">{gorunen.map(dugme)}</div>
+      <div className="arac-cubugu ikinci">{ikinciSira.map(dugme)}</div>
     </div>
   );
 }

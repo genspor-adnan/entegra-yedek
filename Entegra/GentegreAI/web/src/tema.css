@@ -847,6 +847,10 @@ input.skt-gecmis {
 
 /* ------------------------------------------------------------- aksiyon ---- */
 .arac-cubugu { display: flex; gap: 6px; align-items: center }
+/* Ikinci sira (hedef "araccubugu2"): seyrek kullanilan islemler asagi iner
+   ve SAGA yaslanir - birinci sira ekranin asil eylemlerini tutar. */
+.arac-cubugu-sar { display: flex; flex-direction: column; gap: 5px; align-items: stretch }
+.arac-cubugu.ikinci { justify-content: flex-end }
 .sag-tus {
   position: fixed; z-index: 30; background: var(--yuz); border: 1px solid var(--cizgi);
   border-radius: var(--r); box-shadow: 0 14px 36px rgba(20, 40, 70, .18); padding: 4px; min-width: 210px;

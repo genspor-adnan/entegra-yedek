@@ -11,7 +11,11 @@ public sealed record AksiyonTanimi(
     string Kod,                    // "belge.yeni", "ebelge.gonder"
     string Ad,
     string Grup,
-    /// <summary>Hangi yuzeyde gorunur: araccubugu | sagtus | palet (virgullu).</summary>
+    /// <summary>
+    /// Hangi yuzeyde gorunur: araccubugu | araccubugu2 | sagtus | palet
+    /// (virgullu). "araccubugu2" = arac cubugunun IKINCI sirasi, saga yasli:
+    /// gunluk akisin disinda kalan seyrek islemler birinci sirayi bogmasin.
+    /// </summary>
     string Hedef = "araccubugu,sagtus,palet",
     string? Kisayol = null,
     /// <summary>Kaynak yetkisi (or. "cari") + islem. Null ise AksiyonYetkisi bakilir.</summary>
@@ -589,14 +593,14 @@ public static class AksiyonKatalogu
                 // Numune kabul ekranindakiyle AYNI kod: sevk mantigi tek
                 //   yerde (disLabAksiyonlari) kalir, dugme iki listede durur.
                 new("lab.dis-gonder", "📦 Dış Lab'a Gönder", "lab-istem",
-                    Hedef: "araccubugu,sagtus,palet",
+                    Hedef: "araccubugu2,sagtus,palet",
                     KaynakKodu: "lab.dislab", Islem: Islem.Ekle, KayitGerekir: true,
                     Sira: 60),
                 // SAKLAMA YERI: calisilmayi bekleyen tup nerede? Kayitsiz
                 //   buzdolabi, tekrar calisma gerektiginde numuneyi
                 //   bulunamaz hale getirir (mockup "🧊 Saklama Yeri").
                 new("lab.saklama", "🧊 Saklama Yeri", "lab-istem",
-                    Hedef: "araccubugu,sagtus,palet",
+                    Hedef: "araccubugu2,sagtus,palet",
                     KaynakKodu: "lab.numune", Islem: Islem.Degistir, KayitGerekir: true,
                     Sira: 65),
             ],
