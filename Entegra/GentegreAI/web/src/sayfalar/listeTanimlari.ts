@@ -633,12 +633,16 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   kalintisi): listede lab isine ait tek dugme yoktu.
     aksiyonEkrani: 'lab-istem-liste',
     tarihAlani: 'istemTarihi',
+    // CIPLER = mockup lab_istem_numune_kabul.html arama seridi: bankonun
+    //   sorusu "hangi tup bekliyor", "hangisi reddedildi". Sonuc asamalari
+    //   (Calisiliyor / Sonuclandi / Onaylandi) Sonuclar ekraninin isi;
+    //   burada ACIL ve DIS ISTEM one cikar - ikisi de siraya girmez.
     cipler: [
-      { ad: 'İstendi',     filtre: { alan: 'durum', op: 'esit', deger: 1 } },
-      { ad: 'Numune',      filtre: { alan: 'durum', op: 'esit', deger: 2 } },
-      { ad: 'Çalışılıyor', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
-      { ad: 'Sonuçlandı',  filtre: { alan: 'durum', op: 'esit', deger: 4 } },
-      { ad: 'Onaylandı',   filtre: { alan: 'durum', op: 'esit', deger: 5 } },
+      { ad: 'Numune Bekliyor', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Kabul Edildi',    filtre: { alan: 'durum', op: 'buyukEsit', deger: 2 } },
+      { ad: 'Ret',             filtre: { alan: 'retSayisi', op: 'buyuk', deger: 0 } },
+      { ad: 'Acil',            filtre: { alan: 'oncelik', op: 'esit', deger: 3 } },
+      { ad: 'Dış İstem',       filtre: { alan: 'disIstem', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',

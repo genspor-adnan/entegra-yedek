@@ -24,6 +24,9 @@ public static class LabUclari
     public sealed record NumuneDurumIstegi(short Durum, short? Kalite, short? RetNeden,
                                            string? Aciklama);
 
+    /// <summary>Tüplerin saklama yeri ve sıcaklığı (mockup "🧊 Saklama Yeri").</summary>
+    public sealed record SaklamaIstegi(string? Yer, decimal? Sicaklik);
+
     public sealed record OnayIstegi(short? Asama);
 
     public sealed record DuzeltmeIstegi(string Deger, string Neden);
@@ -87,13 +90,43 @@ public static class LabUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("lab", Islem.Gor);
 
+            // Mockup lab_istem_numune_kabul.html sag panel: hasta satiri
+            //   "Ayse Yilmaz · 39 K · 1234567****" - yas/cinsiyet ve MASKELI
+            //   kimlik ekranda birlikte durur (banko tupu hastayla eslerken
+            //   ad benzerligine guvenemez). Kimlik son dort hane gizli
+            //   gelir: dogrulama icin ilk yedi hane yeter.
+            // HAZIRLIK NOTU tetkik katalogundan toplanir (lab_tetkik.
+            //   hazirlik_notu): "8 saat ac", "sabah ilaci alinmadan" gibi
+            //   kosul saglanmadiysa sonuc yorumlanamaz.
             var basli = await veri.TekAsync("""
                 select i.id, i.istem_no, i.istem_tarihi, i.durum, i.oncelik,
                        i.taraf_id, coalesce(nullif(trim(h.ad || ' ' || h.soyad), ''),
                                             h.unvan) as hasta,
-                       i.klinik_bilgi, i.tani_icd, i.hedef_bitis, i.belge_id
+                       i.klinik_bilgi, i.tani_icd, i.hedef_bitis, i.belge_id,
+                       case coalesce(th.cinsiyet, 0)
+                            when 1 then 'E' when 2 then 'K' else '' end as cinsiyet,
+                       case when th.dogum_tarihi is null then ''
+                            when age(th.dogum_tarihi) >= interval '2 years'
+                                 then extract(year from age(th.dogum_tarihi))::int::text || 'y'
+                            when age(th.dogum_tarihi) >= interval '1 month'
+                                 then (extract(year from age(th.dogum_tarihi))::int * 12
+                                     + extract(month from age(th.dogum_tarihi))::int)::text || 'ay'
+                            else (current_date - th.dogum_tarihi)::text || 'g' end as yas,
+                       case when coalesce(h.vkno, '') = '' then ''
+                            else left(h.vkno, greatest(length(h.vkno) - 4, 0))
+                               || repeat('*', least(length(h.vkno), 4)) end as kimlik,
+                       coalesce(bg.belge_no, '') as protokol,
+                       coalesce(p.ad, '') as hekim,
+                       coalesce((select string_agg(distinct nullif(trim(t2.hazirlik_notu), ''),
+                                                   ' · ')
+                                   from public.lab_istem_satir s2
+                                   join public.lab_tetkik t2 on t2.id = s2.tetkik_id
+                                  where s2.istem_id = i.id and s2.durum <> 0), '') as hazirlik
                   from public.lab_istem i
                   join public.taraf h on h.id = i.taraf_id
+                  left join public.taraf_hasta th on th.id = i.taraf_id
+                  left join public.belge bg on bg.id = i.belge_id
+                  left join public.v_personel_lookup p on p.id = i.personel_id
                  where i.id = @p0
                 """, [id],
                 o => new { Id = o.GetInt32(0), IstemNo = o.GetString(1),
@@ -102,7 +135,10 @@ public static class LabUclari
                            Hasta = o.GetString(6), Klinik = o.GetString(7),
                            Tani = o.GetString(8),
                            HedefBitis = o.IsDBNull(9) ? (DateTime?)null : o.GetDateTime(9),
-                           BelgeId = o.IsDBNull(10) ? (int?)null : o.GetInt32(10) }, iptal)
+                           BelgeId = o.IsDBNull(10) ? (int?)null : o.GetInt32(10),
+                           Cinsiyet = o.GetString(11), Yas = o.GetString(12),
+                           Kimlik = o.GetString(13), Protokol = o.GetString(14),
+                           Hekim = o.GetString(15), Hazirlik = o.GetString(16) }, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
 
             // Sonuç ONAYLI satırın kendisinden okunur; bayrak/referans o gün
@@ -116,10 +152,27 @@ public static class LabUclari
                        -- BOLUM ekranin gruplama olcusu (mockup: "Biyokimya /
                        --   Hematoloji / Mikrobiyoloji"): satirin kendisinde
                        --   yok, tetkik katalogundan gelir.
-                       coalesce(t.bolum, 0) as bolum
+                       coalesce(t.bolum, 0) as bolum,
+                       -- NUMUNE KABUL KOLONLARI (mockup: Numune · Tup · Barkod ·
+                       --   Alindi · Kabul · Hedef TAT · Cihaz). Tup plani
+                       --   uretilmemisse tetkik katalogunun ONERDIGI numune/tup
+                       --   gosterilir - banko hangi tupu hazirlayacagini
+                       --   barkod basilmadan da gormeli.
+                       coalesce(n.numune_tipi, t.numune_tipi, 0)::smallint as numune_tipi,
+                       coalesce(n.tup_tipi, t.tup_tipi, 0)::smallint as tup_tipi,
+                       n.alim_zamani, n.kabul_zamani,
+                       -- ACIL istemde sozu verilen sure farklidir; hangisinin
+                       --   gecerli oldugu ekranda gorunmezse gecikme yanlis
+                       --   olculur.
+                       case when i.oncelik = 3 then coalesce(t.acil_tat_dk, t.hedef_tat_dk)
+                            else t.hedef_tat_dk end as hedef_tat,
+                       coalesce(c.kod, c.ad, '') as cihaz
                   from public.lab_istem_satir s
+                  join public.lab_istem i on i.id = s.istem_id
                   left join public.lab_numune n on n.id = s.numune_id
                   left join public.lab_tetkik t on t.id = s.tetkik_id
+                  left join public.cihaz c
+                         on c.id = coalesce(s.cihaz_id, t.varsayilan_cihaz_id)
                   left join lateral (
                         select * from public.lab_sonuc x
                          where x.istem_satir_id = s.id and x.durum <> 4
@@ -147,12 +200,30 @@ public static class LabUclari
                     OlcumZamani = o.IsDBNull(16) ? (DateTime?)null : o.GetDateTime(16),
                     OnayZamani = o.IsDBNull(17) ? (DateTime?)null : o.GetDateTime(17),
                     Yorum = o.IsDBNull(18) ? "" : o.GetString(18),
-                    Bolum = o.GetInt16(19) }, iptal);
+                    Bolum = o.GetInt16(19),
+                    NumuneTipi = o.GetInt16(20), TupTipi = o.GetInt16(21),
+                    Alim = o.IsDBNull(22) ? (DateTime?)null : o.GetDateTime(22),
+                    Kabul = o.IsDBNull(23) ? (DateTime?)null : o.GetDateTime(23),
+                    HedefTat = o.IsDBNull(24) ? (int?)null : o.GetInt32(24),
+                    Cihaz = o.GetString(25) }, iptal);
 
+            // NUMUNEYI ALAN ve KALITE mockup'ta sag panelde: "Hemsire N. Koc ·
+            //   Kan alma 2", "Uygun / hemoliz…". Kabul edilmis tup icin bu iki
+            //   alan sonucun guvenilirlik kaydidir.
             var numuneler = await veri.ListeAsync("""
-                select id, barkod, numune_tipi, tup_tipi, durum, alim_zamani,
-                       kabul_zamani, ret, ret_neden, ret_aciklama
-                  from public.lab_numune where istem_id = @p0 order by id
+                select n.id, n.barkod, n.numune_tipi, n.tup_tipi, n.durum,
+                       n.alim_zamani, n.kabul_zamani, n.ret, n.ret_neden,
+                       n.ret_aciklama, coalesce(n.kalite, 0)::smallint as kalite,
+                       coalesce(a.ad, '') as alan,
+                       -- 433: 1 kan alma · 2 servis · 3 ev · 4 dış. Numunenin
+                       --   NEREDE alindigi kalite tartismasinda ilk sorudur.
+                       case coalesce(n.alim_yeri, 1) when 2 then 'Servis'
+                            when 3 then 'Ev' when 4 then 'Dış' else 'Kan alma' end
+                         as alim_yeri,
+                       coalesce(n.saklama_yeri, '') as saklama_yeri
+                  from public.lab_numune n
+                  left join public.v_personel_lookup a on a.id = n.alan_id
+                 where n.istem_id = @p0 order by n.id
                 """, [id],
                 o => new { Id = o.GetInt32(0), Barkod = o.GetString(1),
                            NumuneTipi = o.GetInt16(2), TupTipi = o.GetInt16(3),
@@ -161,12 +232,16 @@ public static class LabUclari
                            Kabul = o.IsDBNull(6) ? (DateTime?)null : o.GetDateTime(6),
                            Ret = o.GetInt16(7) == 1,
                            RetNeden = o.IsDBNull(8) ? (short?)null : o.GetInt16(8),
-                           RetAciklama = o.GetString(9) }, iptal);
+                           RetAciklama = o.GetString(9), Kalite = o.GetInt16(10),
+                           Alan = o.GetString(11), AlimYeri = o.GetString(12),
+                           SaklamaYeri = o.GetString(13) }, iptal);
 
             return Results.Ok(new { basli.Id, basli.IstemNo, basli.Tarih, basli.Durum,
                                     basli.Oncelik, basli.HastaId, basli.Hasta,
                                     basli.Klinik, basli.Tani, basli.HedefBitis,
-                                    basli.BelgeId, numuneler, satirlar,
+                                    basli.BelgeId, basli.Cinsiyet, basli.Yas,
+                                    basli.Kimlik, basli.Protokol, basli.Hekim,
+                                    basli.Hazirlik, numuneler, satirlar,
                                     izlemeNo = baglam.IzlemeNo });
         });
 
@@ -234,6 +309,50 @@ public static class LabUclari
             var mesaj = await servis.NumuneDurumAsync(id, istek.Durum, istek.Kalite,
                 istek.RetNeden, istek.Aciklama ?? "", baglam, iptal);
             return Results.Ok(new { id, mesaj, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/lab/istem/{id}/numune-durum - İSTEMİN TÜM TÜPLERİ.
+        //   Mockup araç çubuğu ("✔ Numune Kabul" / "✖ Numune Ret") istem
+        //   satırının üzerindedir: banko hastanın tüplerini birlikte işler.
+        grup.MapPost("/istem/{id:int}/numune-durum", async (
+            int id, NumuneDurumIstegi istek, BaglamCozucu cozucu, LabServisi servis,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("lab.numune", Islem.Degistir);
+
+            var mesaj = await servis.IstemNumuneDurumAsync(id, istek.Durum, istek.Kalite,
+                istek.RetNeden, istek.Aciklama ?? "", baglam, iptal);
+            return Results.Ok(new { id, mesaj, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/lab/istem/{id}/saklama - tüplerin saklama yeri/sıcaklığı.
+        //   Mockup "🧊 Saklama Yeri": çalışılmayı bekleyen tüp nerede duruyor?
+        //   Kayıtsız buzdolabı, tekrar çalışma gerektiğinde numuneyi
+        //   bulunamaz hâle getirir.
+        grup.MapPost("/istem/{id:int}/saklama", async (
+            int id, SaklamaIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("lab.numune", Islem.Degistir);
+
+            var yer = (istek.Yer ?? "").Trim();
+            if (yer.Length == 0)
+                throw GentegreHatasi.Dogrulama("Saklama yeri zorunlu.",
+                    [new("yer", "Saklama yeri boş bırakılamaz.")]);
+
+            var say = await veri.CalistirAsync("""
+                update public.lab_numune
+                   set saklama_yeri = @p1, saklama_sicaklik = @p2,
+                       degistiren = @p3, degistirme_tarihi = now()
+                 where istem_id = @p0 and ret = 0
+                """, [id, yer, istek.Sicaklik, baglam.KullaniciId], iptal);
+
+            return Results.Ok(new { id, say,
+                mesaj = say == 0 ? "Güncellenecek tüp bulunamadı."
+                                 : $"{say} tüp için saklama yeri: {yer}.",
+                izlemeNo = baglam.IzlemeNo });
         });
 
         // GET /api/lab/numune/barkod/{barkod} - barkod okutunca kabul ekranı.

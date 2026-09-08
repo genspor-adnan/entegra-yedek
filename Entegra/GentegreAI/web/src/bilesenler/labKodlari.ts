@@ -39,6 +39,16 @@ export const BOLUM: Record<number, string> = {
   5: 'Seroloji', 6: 'Koagülasyon', 7: 'İdrar', 9: 'Diğer',
 };
 
+/**
+ * `lab_numune.kalite` = ret nedeni kod uzayı (db/433): kabul edilen tüpte
+ * "Uygun", reddedilende neden reddedildiği. Tek liste olması bilinçli -
+ * "hemolizli ama çalışıldı" ile "hemolizli, reddedildi" aynı gözlemdir.
+ */
+export const KALITE: Record<number, string> = {
+  1: 'Uygun', 2: 'Hemolizli', 3: 'Lipemik', 4: 'İkterik', 5: 'Yetersiz miktar',
+  6: 'Pıhtılı', 7: 'Yanlış tüp', 8: 'Etiketsiz', 9: 'Diğer',
+};
+
 /** `lab_numune.durum`. */
 export const NUMUNE_DURUM: Record<number, string> = {
   0: 'Ret', 1: 'Etiketlendi', 2: 'Alındı', 3: 'Kabul', 4: 'Çalışıldı',

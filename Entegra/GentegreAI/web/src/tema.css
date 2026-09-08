@@ -1627,6 +1627,19 @@ input.skt-gecmis {
   display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
 }
 .lab-alanlar .fld .deger.buyuk { font-weight: 700; font-size: 12.5px }
+/* Mockup .is kutucuklari: basilacak TUP ETIKETININ ekrandaki karsiligi.
+   Iki kolon, cunku etiket kisa ve dar - dort tup tek bakista gorunmeli. */
+.lab-etiketler { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 8px 10px }
+@media (max-width: 1450px) { .lab-etiketler { grid-template-columns: 1fr } }
+.lab-etiketler .bos { grid-column: 1 / -1 }
+.lab-etiket {
+  border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz);
+  padding: 5px 7px; font-size: 11px; display: flex; flex-direction: column; gap: 2px;
+}
+.lab-etiket > b { display: flex; align-items: center; gap: 6px; color: var(--vurgu) }
+.lab-etiket.secili { background: var(--secim, #e8f0fb); border-color: var(--vurgu) }
+/* Reddedilen tup etiketi BASILMAZ: kenar cizgisi bunu bir bakista soyler. */
+.lab-etiket.ret { border-color: var(--hata); background: var(--hatazem) }
 /* Mockup .statusbar: ekranin altinda sayim ozeti. */
 .lab-durum-serit {
   display: flex; gap: 14px; flex-wrap: wrap; padding: 5px 10px; font-size: 11px;

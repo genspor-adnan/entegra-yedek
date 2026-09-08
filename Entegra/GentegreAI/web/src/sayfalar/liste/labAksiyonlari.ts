@@ -34,6 +34,26 @@ export async function labAksiyonu(
   //   kart akisi.
   if (kod.endsWith('.yeni') || kod.endsWith('.duzenle') || kod.endsWith('.sil')) return false;
 
+  // BARKOD OKUT kayit SECIMI ISTEMEZ: bankonun giris yolu tupun kendisidir.
+  //   Okutulan barkod hangi isteme aitse o istem acilir; kabul edilmemisse
+  //   ayni yerden kabul edilir - iki ekran arasinda gezinmeye gerek kalmaz.
+  if (kod === 'lab.barkod-okut') {
+    const b2 = await metinSor('Tüp barkodunu okutun ya da yazın:', '', 'Barkod Okut');
+    if (b2 === null || b2.trim() === '') return true;
+    await guvenli(async () => {
+      const n = await api.labNumuneBarkod(b2.trim()) as Record<string, unknown>;
+      const durum = Number(n.durum ?? 0);
+      const bilgi = `${String(n.istemNo ?? '')} · ${String(n.hasta ?? '')}`
+                  + ` · ${Number(n.tetkik ?? 0)} tetkik`;
+      if (durum === 3) { mesaj(`${bilgi}\n\nBu tüp zaten kabul edilmiş.`); return }
+      if (durum === 0) { mesaj(`${bilgi}\n\nBu tüp REDDEDİLMİŞ - yeni numune gerekiyor.`); return }
+      if (!await onay(`${bilgi}\n\nTüp kabul edilsin mi? (TAT şimdi başlar)`)) return;
+      mesaj((await api.labNumuneDurum(Number(n.id ?? 0), 3)).mesaj);
+      b.tazele();
+    });
+    return true;
+  }
+
   const id = Number(satir?.id ?? 0);
   if (!id) { mesaj('Önce bir kayıt seçin.'); return true }
 
@@ -58,6 +78,68 @@ export async function labAksiyonu(
     case 'lab.rapor':
       b.git(`/lab/rapor/${id}`);
       return true;
+
+    // ISTEM DUZEYINDE KABUL/RET: hastanin TUM tupleri. Hangi tupe
+    //   dokunulacagina sunucu karar verir (calisilmis numune atlanir).
+    case 'lab.istem-kabul': {
+      const k = await metinSor(
+        'Numune kalitesi (boş = Uygun):\n'
+        + '1 Uygun · 2 Hemolizli · 3 Lipemik · 4 İkterik · 5 Yetersiz · '
+        + '6 Pıhtılı · 7 Yanlış tüp · 8 Etiketsiz',
+        '', 'Numune Kabul');
+      if (k === null) return true;
+      const kalite = Number(k.trim()) || undefined;
+      await guvenli(async () => {
+        const y = await api.labIstemNumuneDurum(id, 3, { kalite });
+        mesaj(`${y.mesaj} Süre (TAT) şimdi başladı.`);
+        b.tazele();
+      });
+      return true;
+    }
+
+    case 'lab.istem-ret': {
+      const n = await metinSor(
+        'Ret nedeni:\n'
+        + Object.entries(RET_NEDENLERI).map(([k, v]) => `${k} ${v}`).join(' · '),
+        '2', 'Numune Reddi');
+      if (n === null) return true;
+      const retNeden = Number(n.trim());
+      if (!RET_NEDENLERI[String(retNeden)]) {
+        mesaj('Geçerli bir ret nedeni seçin.');
+        return true;
+      }
+      const aciklama = await metinSor('Açıklama (isteğe bağlı):', '', 'Numune Reddi');
+      if (aciklama === null) return true;
+      if (!await onay(`İstemin TÜM tüpleri REDDEDİLECEK `
+                    + `(${RET_NEDENLERI[String(retNeden)]}).\n\n`
+                    + 'Tetkikler "tekrar numune bekliyor" durumuna geçer.')) return true;
+      await guvenli(async () => {
+        mesaj((await api.labIstemNumuneDurum(id, 0, { retNeden, aciklama })).mesaj);
+        b.tazele();
+      });
+      return true;
+    }
+
+    // SAKLAMA YERI: tupler calisilmayi beklerken nerede duruyor. Sicaklik
+    //   istege bagli - dolap adi zaten yeri soyler, sicaklik kaydi ise
+    //   soguk zincir gereken numunede kanittir.
+    case 'lab.saklama': {
+      const yer = await metinSor('Saklama yeri (dolap / raf):', '', 'Saklama Yeri');
+      if (yer === null || yer.trim() === '') return true;
+      const s = await metinSor('Sıcaklık °C (boş geçilebilir):', '', 'Saklama Yeri');
+      if (s === null) return true;
+      const sicaklik = s.trim() === '' ? undefined
+                     : Number(s.trim().replace(',', '.'));
+      if (sicaklik !== undefined && Number.isNaN(sicaklik)) {
+        mesaj('Sıcaklık sayı olmalı.');
+        return true;
+      }
+      await guvenli(async () => {
+        mesaj((await api.labIstemSaklama(id, yer.trim(), sicaklik)).mesaj);
+        b.tazele();
+      });
+      return true;
+    }
 
     // ----------------------------------------------------------- numune ---
     case 'lab.numune-alindi':

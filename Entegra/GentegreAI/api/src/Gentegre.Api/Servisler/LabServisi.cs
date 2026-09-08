@@ -302,6 +302,45 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
         return mesaj;
     }
 
+    /// <summary>
+    /// İSTEMİN TÜM TÜPLERİNE tek işlemde alındı / kabul / ret.
+    ///
+    /// Mockup lab_istem_numune_kabul.html araç çubuğu ("✔ Numune Kabul" /
+    /// "✖ Numune Ret") istem satırının üzerinde durur: banko hastanın
+    /// tüplerini birlikte alır, birlikte kabul eder. Tek tek kabul, dört
+    /// tüplük bir istemde dört ayrı diyalog demekti.
+    ///
+    /// SONUÇLANMIŞ tüpe dokunulmaz: çalışılmış numuneyi geri almak sonucu
+    /// dayanaksız bırakırdı. Ret zaten kapalı numuneyi de atlar.
+    /// </summary>
+    public async Task<string> IstemNumuneDurumAsync(int istemId, short yeniDurum,
+        short? kalite, short? retNeden, string aciklama, IstekBaglami baglam,
+        CancellationToken iptal)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        var numuneler = await baglanti.ListeAsync("""
+            select id, durum from public.lab_numune
+             where istem_id = @p0 and durum < 4 order by id
+            """, null, [istemId],
+            o => new { Id = o.GetInt32(0), Durum = o.GetInt16(1) }, iptal);
+
+        // Halihazirda hedef durumda olan tup ISLENMEZ: kabul zamanini
+        //   yeniden yazmak TAT saatini geri alirdi.
+        var hedef = numuneler.Where(n => n.Durum != yeniDurum && !(yeniDurum == 0 && n.Durum == 0))
+                             .Select(n => n.Id).ToList();
+        if (numuneler.Count == 0)
+            throw GentegreHatasi.IsKurali(
+                "Bu istemde tüp yok - önce \"Barkod Üret\" ile numune planı çıkarın.");
+        if (hedef.Count == 0)
+            return "Tüplerin hepsi zaten bu durumda.";
+
+        foreach (var id in hedef)
+            await NumuneDurumAsync(id, yeniDurum, kalite, retNeden, aciklama, baglam, iptal);
+
+        var ne = yeniDurum switch { 2 => "alındı", 3 => "kabul edildi", _ => "reddedildi" };
+        return $"{hedef.Count} tüp {ne}.";
+    }
+
     // ================================================================== sonuç
 
     public sealed record SonucSonucu(long SonucId, string Bayrak, bool Panik,

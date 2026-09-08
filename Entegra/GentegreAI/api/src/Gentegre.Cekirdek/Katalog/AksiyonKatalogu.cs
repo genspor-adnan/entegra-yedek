@@ -556,10 +556,29 @@ public static class AksiyonKatalogu
                 //   TEK kagida basilir.
                 // ETIKET: istemin TUM tupleri tek sayfada basilir - kan alma
                 //   bankosu tupleri birlikte hazirlar.
+                // BARKOD OKUT (mockup "📷 Barkod Okut"): bankonun asil giris
+                //   yolu. Teknisyen elindeki tupu okutur, istem KENDILIGINDEN
+                //   bulunur - listede ad aramak, ayni isimli iki hastada
+                //   yanlis tupu kabul ettirir.
+                new("lab.barkod-okut", "📷 Barkod Okut", "lab-istem",
+                    Hedef: "araccubugu,palet",
+                    KaynakKodu: "lab.numune", Islem: Islem.Gor, KayitGerekir: false,
+                    Sira: 20),
                 new("lab.etiket", "🏷 Etiket Bas", "lab-istem",
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "lab.numune", Islem: Islem.Gor, KayitGerekir: true,
                     Sira: 25),
+                // KABUL / RET ISTEM DUZEYINDE: bir hastanin dort tupu birlikte
+                //   alinir ve birlikte kabul edilir (mockup araç çubuğu).
+                //   Tup bazli islem Numune Kabul ekraninda kalir.
+                new("lab.istem-kabul", "✔ Numune Kabul", "lab-istem",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.numune", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 27),
+                new("lab.istem-ret", "✖ Numune Ret", "lab-istem",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.numune", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 28),
                 new("lab.rapor", "🖨 Sonuç Raporu", "lab-istem",
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "lab", Islem: Islem.Gor, KayitGerekir: true, Sira: 30),
@@ -567,6 +586,19 @@ public static class AksiyonKatalogu
                     Hedef: "sagtus,palet",
                     KaynakKodu: "lab.genetik", Islem: Islem.Ekle, KayitGerekir: true,
                     Sira: 55),
+                // Numune kabul ekranindakiyle AYNI kod: sevk mantigi tek
+                //   yerde (disLabAksiyonlari) kalir, dugme iki listede durur.
+                new("lab.dis-gonder", "📦 Dış Lab'a Gönder", "lab-istem",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.dislab", Islem: Islem.Ekle, KayitGerekir: true,
+                    Sira: 60),
+                // SAKLAMA YERI: calisilmayi bekleyen tup nerede? Kayitsiz
+                //   buzdolabi, tekrar calisma gerektiginde numuneyi
+                //   bulunamaz hale getirir (mockup "🧊 Saklama Yeri").
+                new("lab.saklama", "🧊 Saklama Yeri", "lab-istem",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.numune", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 65),
             ],
 
             // MIKROBIYOLOJI (436). Kultur bir SUREC: her adim ayri dugme.

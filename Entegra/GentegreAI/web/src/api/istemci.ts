@@ -429,6 +429,21 @@ export const api = {
     gonder<{ id: number; mesaj: string }>(`/api/lab/numune/${id}/durum`,
       { durum, ...(ek ?? {}) }),
 
+  /**
+   * İSTEMİN TÜM TÜPLERİ tek işlemde (mockup araç çubuğu "✔ Numune Kabul" /
+   * "✖ Numune Ret"): hangi tüpün işleneceğine sunucu karar verir - çalışılmış
+   * numuneye dokunulmaz.
+   */
+  labIstemNumuneDurum: (istemId: number, durum: number,
+                        ek?: { kalite?: number; retNeden?: number; aciklama?: string }) =>
+    gonder<{ id: number; mesaj: string }>(`/api/lab/istem/${istemId}/numune-durum`,
+      { durum, ...(ek ?? {}) }),
+
+  /** Tüplerin saklama yeri / sıcaklığı (mockup "🧊 Saklama Yeri"). */
+  labIstemSaklama: (istemId: number, yer: string, sicaklik?: number) =>
+    gonder<{ id: number; say: number; mesaj: string }>(
+      `/api/lab/istem/${istemId}/saklama`, { yer, sicaklik }),
+
   labNumuneBarkod: (barkod: string) =>
     istek<Record<string, unknown>>(
       `/api/lab/numune/barkod/${encodeURIComponent(barkod)}`),

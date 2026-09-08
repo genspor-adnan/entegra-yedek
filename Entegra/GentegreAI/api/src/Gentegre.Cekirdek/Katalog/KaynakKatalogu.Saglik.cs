@@ -991,20 +991,41 @@ public static partial class KaynakKatalogu
         YetkiKodu: "lab",
         Kaynak: "public.lab_istem i "
               + "  join public.taraf h on h.id = i.taraf_id "
+              + "  left join public.taraf_hasta th on th.id = i.taraf_id "
               + "  left join public.belge b on b.id = i.belge_id "
-              + "  left join public.v_personel_lookup p on p.id = i.personel_id",
+              + "  left join public.v_personel_lookup p on p.id = i.personel_id "
+              + "  left join public.taraf dk on dk.id = i.dis_kurum_id",
         SubeKolonu: "i.sube_id",
         VarsayilanSirala: "i.istem_tarihi desc, i.id desc",
+        // KOLON SIRASI = mockup lab_istem_numune_kabul.html grid'i:
+        //   İstem No · Hasta · Yaş/C · Protokol · İsteyen · Öncelik ·
+        //   Bölümler · Tüp · İstem · Numune · Durum.
+        //   Sonuç sayaçları (Test/Sonuçlanan/Panik) bu ekranın işi değil -
+        //   kolon seçiciden açılabilir ama varsayılan gelmez; kabul
+        //   bankosunun sorusu "tüp hazır mı", "sonuç çıktı mı" değil.
         Kolonlar: new KolonTanimi[]
         {
             new("id",           "i.id",           "sayi",  "Id", Varsayilan: false),
             new("istemNo",      "i.istem_no",     "metin", "İstem No", Hizalama: "orta",
                                                   Genislik: 120),
-            new("istemTarihi",  "i.istem_tarihi", "tarih", "İstem Tarihi", Hizalama: "orta",
-                                                  Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
+            new("hastaAdi",     "h.unvan",        "metin", "Hasta", Genislik: 200),
+            // YAS/CINSIYET tek kolonda ("39 K"): iki ayri dar kolon yerine
+            //   mockup'taki gibi tek okunur birim - referans araligi ve tup
+            //   hacmi kararini birlikte etkilerler.
+            new("yasCinsiyet",
+                "trim(case when th.dogum_tarihi is null then '' "
+                + "when age(th.dogum_tarihi) >= interval '2 years' "
+                + "     then extract(year from age(th.dogum_tarihi))::int::text "
+                + "when age(th.dogum_tarihi) >= interval '1 month' "
+                + "     then (extract(year from age(th.dogum_tarihi))::int * 12 "
+                + "           + extract(month from age(th.dogum_tarihi))::int)::text || ' ay' "
+                + "else (current_date - th.dogum_tarihi)::text || ' g' end "
+                + "|| ' ' || case coalesce(th.cinsiyet, 0) "
+                + "               when 1 then 'E' when 2 then 'K' else '' end)",
+                                                  "metin", "Yaş/C", Hizalama: "orta",
+                                                  Genislik: 70, Filtrelenebilir: false),
             new("protokolNo",   "coalesce(b.belge_no, '')", "metin", "Protokol",
                                                   Hizalama: "orta", Genislik: 120),
-            new("hastaAdi",     "h.unvan",        "metin", "Hasta", Genislik: 220),
             new("dosyaNo",      "h.kod",          "metin", "Dosya No", Hizalama: "orta",
                                                   Genislik: 110, Varsayilan: false),
             new("bolumAdi",
@@ -1012,9 +1033,22 @@ public static partial class KaynakKatalogu
                 + "when 4 then 'Patoloji' when 9 then 'Diğer' else 'Biyokimya' end",
                                                   "metin", "Bölüm", Hizalama: "orta",
                                                   Bicim: "rozet", Genislik: 130,
-                                                  Filtrelenebilir: false),
+                                                  Filtrelenebilir: false,
+                                                  Varsayilan: false),
             new("bolum",        "i.bolum",        "kod",   "Bölüm Kodu", Varsayilan: false),
-            new("hekimAdi",     "coalesce(p.ad, '')", "metin", "İsteyen Hekim", Genislik: 180),
+            // ISTEYEN: dis istemde gonderen KURUM, ic istemde hekim. Mockup
+            //   ikisini ayni kolonda gosteriyor ("Deniz Tip Merkezi (dis)").
+            new("hekimAdi",
+                "case when i.dis_kurum_id is not null "
+                + "     then coalesce(dk.unvan, '') || ' (dış)' "
+                + "     else coalesce(p.ad, '') end",
+                                                  "metin", "İsteyen", Genislik: 180,
+                                                  Filtrelenebilir: false),
+            new("oncelikAdi",
+                "case i.oncelik when 2 then 'Öncelikli' when 3 then 'Acil' "
+                + "else 'Normal' end",            "metin", "Öncelik", Hizalama: "orta",
+                                                  Bicim: "rozet", Genislik: 100,
+                                                  Filtrelenebilir: false),
             // Kac test var / kaci sonuclandi: teknisyen listede "bitti mi" gorsun.
             // 433'te lab_istem_test -> lab_istem_satir olarak adlandirildi;
             //   sonuc artik satirda degil lab_sonuc'ta durur (onay/duzeltme
@@ -1023,12 +1057,54 @@ public static partial class KaynakKatalogu
                 "(select count(*) from public.lab_istem_satir t "
                 + " where t.istem_id = i.id and t.durum <> 0)",
                                                   "sayi",  "Test", Hizalama: "sag", Genislik: 70,
-                                                  Filtrelenebilir: false),
+                                                  Filtrelenebilir: false, Varsayilan: false),
             new("sonuclanan",
                 "(select count(*) from public.lab_istem_satir t "
                 + " where t.istem_id = i.id and t.durum in (3, 4, 5))",
                                                   "sayi",  "Sonuçlanan", Hizalama: "sag",
-                                                  Genislik: 100, Filtrelenebilir: false),
+                                                  Genislik: 100, Filtrelenebilir: false,
+                                                  Varsayilan: false),
+            // BOLUMLER (mockup: "Biyokimya · Hematoloji · Mikrobiyoloji"):
+            //   istem basligindaki tek bolum kodu, cok bolumlu istemde
+            //   yaniltici - tup hangi laboratuvara gidecek sorusunun cevabi
+            //   TETKIKLERIN bolumleridir.
+            new("bolumler",
+                "coalesce((select string_agg(distinct case t.bolum "
+                + "               when 2 then 'Hematoloji' when 3 then 'Hormon' "
+                + "               when 4 then 'Mikrobiyoloji' when 5 then 'Seroloji' "
+                + "               when 6 then 'Koagülasyon' when 7 then 'İdrar' "
+                + "               when 9 then 'Diğer' else 'Biyokimya' end, ' · ') "
+                + "            from public.lab_istem_satir s "
+                + "            join public.lab_tetkik t on t.id = s.tetkik_id "
+                + "           where s.istem_id = i.id and s.durum <> 0), '')",
+                                                  "metin", "Bölümler", Genislik: 240,
+                                                  Filtrelenebilir: false),
+            // TUP SAYISI: barkod uretilmemis istem "0" gosterir - kan alma
+            //   bankosu once plani cikarmasi gerektigini listede gorur.
+            new("tupSayisi",
+                "(select count(*) from public.lab_numune n where n.istem_id = i.id)",
+                                                  "sayi",  "Tüp", Hizalama: "orta",
+                                                  Genislik: 60, Filtrelenebilir: false),
+            new("istemTarihi",  "i.istem_tarihi", "tarih", "İstem", Hizalama: "orta",
+                                                  Bicim: "dd.MM.yyyy HH:mm", Genislik: 130),
+            // NUMUNE: ilk tupun alim zamani. Bos ise numune HENUZ ALINMADI -
+            //   mockup'ta bu kolon "—" ise satir "Numune bekliyor"dur.
+            new("numuneZamani",
+                "(select min(n.alim_zamani) from public.lab_numune n "
+                + " where n.istem_id = i.id)",
+                                                  "tarih", "Numune", Hizalama: "orta",
+                                                  Bicim: "dd.MM.yyyy HH:mm", Genislik: 130,
+                                                  Filtrelenebilir: false),
+            // RET: reddedilen tup varsa satir kirmizi okunmali; cip de bunu
+            //   suzer (mockup "Ret" cipi).
+            new("retSayisi",
+                "(select count(*) from public.lab_numune n "
+                + " where n.istem_id = i.id and n.ret = 1)",
+                                                  "sayi",  "Ret", Hizalama: "orta",
+                                                  Genislik: 60, Varsayilan: false),
+            new("disIstem",
+                "case when i.dis_kurum_id is not null then 1 else 0 end",
+                                                  "kod",   "Dış İstem", Varsayilan: false),
             // PANIK: onay kuyrugunda oncelik bu satirda; listede gorunmezse
             //   panik deger sirasini bekler.
             new("panikSayisi",
@@ -1036,12 +1112,10 @@ public static partial class KaynakKatalogu
                 + "  join public.lab_sonuc ls on ls.istem_satir_id = t.id "
                 + " where t.istem_id = i.id and ls.panik = 1 and ls.durum <> 4)",
                                                   "sayi",  "Panik", Hizalama: "sag",
-                                                  Genislik: 80, Filtrelenebilir: false),
-            new("oncelikAdi",
-                "case i.oncelik when 2 then 'Öncelikli' when 3 then 'Acil' "
-                + "else 'Normal' end",            "metin", "Öncelik", Hizalama: "orta",
-                                                  Bicim: "rozet", Genislik: 100,
-                                                  Filtrelenebilir: false),
+                                                  Genislik: 80, Filtrelenebilir: false,
+                                                  Varsayilan: false),
+            new("oncelik",      "i.oncelik",      "kod",   "Öncelik Kodu",
+                                                  Varsayilan: false),
             new("durumAdi",
                 "case i.durum when 2 then 'Numune Alındı' when 3 then 'Çalışılıyor' "
                 + "when 4 then 'Sonuçlandı' when 5 then 'Onaylandı' when 9 then 'İptal' "

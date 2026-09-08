@@ -38,18 +38,27 @@ describe('LabDetayPaneli', () => {
     expect(labDetayVarMi('cari')).toBe(false);
   });
 
+  /** Mockup lab_istem_numune_kabul.html: tüp planı + kabul kolonları. */
+  const istemKaydi = () => ({
+    istemNo: 'LAB-2026/31877', durum: 2, oncelik: 3, hasta: 'Ayşe Yılmaz',
+    yas: '39y', cinsiyet: 'K', kimlik: '1234567****', protokol: '2026/20417',
+    hekim: 'Dr. A. Koç', hazirlik: '8 saat açlık',
+    klinik: 'Boğaz ağrısı', tani: 'J03.9',
+    numuneler: [{ id: 5, barkod: '2603187701', tupTipi: 1, numuneTipi: 1, durum: 3,
+                  alim: '2026-09-03T09:12:00', kabul: '2026-09-03T09:20:00',
+                  alan: 'Hemşire N. Koç', alimYeri: 'Kan alma', kalite: 1 }],
+    satirlar: [{
+      satirId: 9, kod: 'CRP', ad: 'C-Reaktif Protein', durum: 3, bolum: 1,
+      barkod: '2603187701', deger: '24,0', birim: 'mg/L',
+      referansAlt: null, referansUst: 5, referansMetin: '', bayrak: 'H',
+      numuneTipi: 1, tupTipi: 1, alim: '2026-09-03T09:12:00',
+      kabul: '2026-09-03T09:20:00', hedefTat: 120, cihaz: 'Cobas c503',
+    }],
+  });
+
   it('numune listesinde İSTEMİN tetkikleri okunur (barkod değil istemId)', async () => {
     // Bir istemde birden çok tüp olur; panel tüpü değil istemi gösterir.
-    labIstemOku.mockResolvedValue({
-      istemNo: 'LAB-2026/31877', durum: 2, oncelik: 3, hasta: 'Ayşe Yılmaz',
-      klinik: 'Boğaz ağrısı', tani: 'J03.9',
-      numuneler: [{ id: 5, barkod: '2603187701', tupTipi: 1, numuneTipi: 1, durum: 3 }],
-      satirlar: [{
-        satirId: 9, kod: 'CRP', ad: 'C-Reaktif Protein', durum: 3, bolum: 1,
-        barkod: '2603187701', deger: '24,0', birim: 'mg/L',
-        referansAlt: null, referansUst: 5, referansMetin: '', bayrak: 'H',
-      }],
-    });
+    labIstemOku.mockResolvedValue(istemKaydi());
 
     render(<MemoryRouter>
       <LabDetayPaneli kaynak="lab-numune"
@@ -59,11 +68,34 @@ describe('LabDetayPaneli', () => {
     await waitFor(() => expect(labIstemOku).toHaveBeenCalledWith(77));
     expect(await screen.findByText('C-Reaktif Protein')).toBeTruthy();
     // Tüp rengi mockup'taki gibi metinle birlikte: "Sarı jel" - hem tetkik
-    //   satırında hem tüp listesinde (aynı renk, iki yer).
+    //   satırında hem etiket kutucuğunda (aynı renk, iki yer).
     expect(screen.getAllByText('Sarı jel').length).toBe(2);
-    // Tek taraflı referans "≤ 5" olarak yazılır, "0 – 5" değil.
-    expect(screen.getByText('≤ 5')).toBeTruthy();
+    // NUMUNE KABUL KOLONLARI (mockup): numune tipi, hedef TAT ve cihaz.
+    //   Sonuç kolonları bu ekranda YOK - aynı tablo iki soruya cevap veremez.
+    expect(screen.getByText('Serum')).toBeTruthy();
+    expect(screen.getByText('2 s')).toBeTruthy();
+    expect(screen.getByText('Cobas c503')).toBeTruthy();
+    expect(screen.queryByText('≤ 5')).toBeNull();
     expect(screen.getByText('ACİL')).toBeTruthy();
+    // Sağ panel mockup'taki hasta satırı ve hazırlık koşulu.
+    expect(screen.getByText(/Ayşe Yılmaz · 39y K · 1234567\*\*\*\*/)).toBeTruthy();
+    expect(screen.getByText('8 saat açlık')).toBeTruthy();
+    expect(screen.getByText('Hemşire N. Koç')).toBeTruthy();
+  });
+
+  it('sonuç listesinde sonuç kolonları çizilir (referans, bayrak)', async () => {
+    labIstemOku.mockResolvedValue(istemKaydi());
+
+    render(<MemoryRouter>
+      <LabDetayPaneli kaynak="lab-sonuc" satir={{ id: 9, istemId: 77 }} />
+    </MemoryRouter>);
+
+    await waitFor(() => expect(labIstemOku).toHaveBeenCalledWith(77));
+    // Tek taraflı referans "≤ 5" olarak yazılır, "0 – 5" değil.
+    expect(await screen.findByText('≤ 5')).toBeTruthy();
+    expect(screen.getByText('24,0')).toBeTruthy();
+    // Kabul kolonları sonuç ekranında yer tutmaz.
+    expect(screen.queryByText('Cobas c503')).toBeNull();
   });
 
   it('kültür panelinde antibiyogram ve direnç işareti görünür', async () => {

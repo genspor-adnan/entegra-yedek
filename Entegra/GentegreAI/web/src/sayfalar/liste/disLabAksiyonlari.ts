@@ -50,7 +50,10 @@ export async function disLabAksiyonu(
       if (!disLab) return;
 
       // Numunenin bekleyen tetkikleri: istem detayından okunur.
-      const istemId = Number(satir?.istemId ?? 0);
+      // İSTEMLER listesinde satırın kendisi istemdir (mockup araç çubuğunda
+      //   "📦 Dış Lab'a Gönder" orada da var); numune kabul listesinde ise
+      //   satır tüptür ve istem id'si ayrı kolonda gelir.
+      const istemId = Number(satir?.istemId ?? satir?.id ?? 0);
       if (!istemId) { mesaj('İstem bulunamadı.'); return }
       const d = await api.labIstemOku(istemId) as Record<string, unknown>;
       const satirlar = (d.satirlar ?? []) as Record<string, unknown>[];

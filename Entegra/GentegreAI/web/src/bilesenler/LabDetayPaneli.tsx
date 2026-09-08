@@ -4,7 +4,7 @@ import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { tarihSaat } from './bicim';
 import {
-  BAYRAK_OK, BOLUM, ISTEM_DURUM, NUMUNE, NUMUNE_DURUM, SATIR_DURUM,
+  BAYRAK_OK, BOLUM, ISTEM_DURUM, KALITE, NUMUNE, NUMUNE_DURUM, SATIR_DURUM,
   ZIGOSITE, bayrakSinifi, referansMetni, sayi, sirSinifi, tup,
 } from './labKodlari';
 
@@ -52,6 +52,28 @@ const metin = (v: unknown): string => String(v ?? '').trim();
 function kodEki(ad: unknown, kod: unknown): string {
   const a = metin(ad).toLocaleUpperCase('tr'), k = metin(kod).toLocaleUpperCase('tr');
   return k !== '' && !a.includes(k) ? metin(kod) : '';
+}
+
+/** Tüp rengi rozet olarak: renk bilgidir, teknisyen rafta rengi arar. */
+function TupRozeti({ tip }: { tip: unknown }) {
+  const t = tup(tip);
+  return (
+    <span className="rozet gri"
+          style={{ background: t.renk, color: t.yazi ?? '#1f2d3a', border: 'none' }}>
+      {t.kisa}
+    </span>
+  );
+}
+
+/**
+ * Hedef süre dakika olarak tutulur; mockup saat yazıyor ("2 s", "48 s").
+ * 60'ın altını dakika bırakmak bilinçli: 30 dakikalık acil tetkiği "0,5 s"
+ * diye göstermek okunmaz olurdu.
+ */
+function tatMetni(dk: unknown): string {
+  const d = Number(dk ?? 0);
+  if (!d) return '—';
+  return d < 60 ? `${d} dk` : `${Math.round(d / 6) / 10} s`.replace('.', ',');
 }
 
 /** Boş panel de bir bilgidir: "satır seç" demek, boş kutu bırakmaktan iyidir. */
@@ -117,6 +139,33 @@ function IstemDetayi({ veri, secili, kaynak }: {
   // Numune kabul ekranında seçili TÜPÜN satırları öne alınır: banko o tüple
   //   çalışıyor, listedeki diğer tüpler bağlam olarak kalır.
   const seciliBarkod = kaynak === 'lab-numune' ? metin(secili?.barkod) : '';
+  // AYNI TABLO IKI SORUYA BIRDEN CEVAP VEREMEZ: numune kabulde soru "hangi
+  //   tup, ne zaman alindi, ne zaman biter" (mockup
+  //   lab_istem_numune_kabul.html), sonuc ekraninda "deger, referans,
+  //   bayrak". Dokuz kolonu yan yana koymak ikisini de okunmaz yapardi.
+  const sonucGorunumu = kaynak === 'lab-sonuc';
+  const acil = Number(veri.oncelik ?? 1) === 3;
+  // Etiket kartinda tupun hangi bolumlere gittigi yazar (mockup:
+  //   "Hemogram+HbA1c"): teknisyen tupu dogru banka gonderir.
+  // ALAN / ALIM / KALITE tup duzeyinde tutulur ama pratikte bir istemin
+  //   tupleri AYNI kisi tarafindan, AYNI anda alinir; sag panel istemin
+  //   ozetini gosterir. Farkli deger varsa ilk dolu olan yazilir - ayrinti
+  //   soldaki satir tablosunda zaten tup tup duruyor.
+  const ilkDolu = (a: string) => metin(numuneler.find(n => metin(n[a]) !== '')?.[a]);
+  const alimZamani = numuneler.map(n => n.alim).find(Boolean) ?? null;
+  // Numune ALINMADAN alan/yer/kalite YAZILMAZ: tabloda duran varsayilanlari
+  //   ("Kan alma", "Uygun") gostermek, alinmamis tupu alinmis gibi okuturdu.
+  const alan = alimZamani ? ilkDolu('alan') : '';
+  const alimYeri = alimZamani ? ilkDolu('alimYeri') : '';
+  const kaliteli = numuneler.find(n => (n.kabul || n.ret) && Number(n.kalite ?? 0) > 0);
+  const kalite = Number(kaliteli?.kalite ?? 0);
+
+  const tupBolumleri = (barkod: string) => {
+    const ad = satirlar.filter(s => metin(s.barkod) === barkod)
+                       .map(s => BOLUM[Number(s.bolum ?? 0)] ?? '')
+                       .filter(Boolean);
+    return [...new Set(ad)].join(' · ');
+  };
 
   return (
     <div className="lab-ana-yan">
@@ -127,16 +176,27 @@ function IstemDetayi({ veri, secili, kaynak }: {
             <span className="rozet gri">
               {ISTEM_DURUM[Number(veri.durum ?? 1)] ?? ''}
             </span>
-            {Number(veri.oncelik ?? 1) === 3 && <span className="rozet hata">ACİL</span>}
+            {acil && <span className="rozet hata">ACİL</span>}
             <span className="sp">tüp/numune planı tetkik kataloğundan</span>
           </h6>
           <div className="detay-kaydir">
             <table className="detay-tablo">
               <thead>
                 <tr>
-                  <th>Bölüm</th><th>Tetkik</th><th>Tüp / Barkod</th>
-                  <th className="sag">Sonuç</th><th>Birim</th><th>Referans</th>
-                  <th className="orta">Bayrak</th><th className="orta">Ölçüm</th>
+                  <th>Bölüm</th><th>Tetkik</th>
+                  {sonucGorunumu ? (
+                    <>
+                      <th>Tüp / Barkod</th>
+                      <th className="sag">Sonuç</th><th>Birim</th><th>Referans</th>
+                      <th className="orta">Bayrak</th><th className="orta">Ölçüm</th>
+                    </>
+                  ) : (
+                    <>
+                      <th>Numune</th><th>Tüp</th><th className="orta">Barkod</th>
+                      <th className="orta">Alındı</th><th className="orta">Kabul</th>
+                      <th className="orta">Hedef TAT</th><th className="orta">Cihaz</th>
+                    </>
+                  )}
                   <th className="orta">Durum</th>
                 </tr>
               </thead>
@@ -157,37 +217,57 @@ function IstemDetayi({ veri, secili, kaynak }: {
                         {kodEki(s.ad, s.kod) &&
                           <span className="not"> {kodEki(s.ad, s.kod)}</span>}
                       </td>
-                      <td>
-                        {barkod ? (
-                          <>
-                            <span className="rozet gri"
-                                  style={{ background: t.renk, color: t.yazi ?? '#1f2d3a',
-                                           border: 'none' }}>
-                              {t.kisa}
-                            </span>{' '}
-                            <span className="not">{barkod}</span>
-                          </>
-                        ) : <span className="not">tüp planlanmadı</span>}
-                      </td>
-                      <td className="sag">
-                        {metin(s.deger) ? <b>{metin(s.deger)}</b>
-                                        : <span className="not">bekliyor</span>}
-                      </td>
-                      <td>{metin(s.birim)}</td>
-                      <td>{referansMetni(s.referansAlt, s.referansUst, s.referansMetin) || '—'}</td>
-                      <td className="orta">
-                        {bayrak && bayrak !== 'N'
-                          ? <span className={bayrakSinifi(bayrak)}>
-                              {bayrak} {BAYRAK_OK[bayrak] ?? ''}
-                            </span>
-                          : '—'}
-                        {Number(s.deltaUyari ?? 0) === 1 && (
-                          <span className="not" title="Önceki sonuçtan belirgin sapma"> Δ</span>
-                        )}
-                      </td>
-                      <td className="orta not">
-                        {s.olcumZamani ? tarihSaat(s.olcumZamani) : '—'}
-                      </td>
+                      {sonucGorunumu ? (
+                        <>
+                          <td>
+                            {barkod ? (
+                              <>
+                                <span className="rozet gri"
+                                      style={{ background: t.renk, color: t.yazi ?? '#1f2d3a',
+                                               border: 'none' }}>
+                                  {t.kisa}
+                                </span>{' '}
+                                <span className="not">{barkod}</span>
+                              </>
+                            ) : <span className="not">tüp planlanmadı</span>}
+                          </td>
+                          <td className="sag">
+                            {metin(s.deger) ? <b>{metin(s.deger)}</b>
+                                            : <span className="not">bekliyor</span>}
+                          </td>
+                          <td>{metin(s.birim)}</td>
+                          <td>
+                            {referansMetni(s.referansAlt, s.referansUst, s.referansMetin) || '—'}
+                          </td>
+                          <td className="orta">
+                            {bayrak && bayrak !== 'N'
+                              ? <span className={bayrakSinifi(bayrak)}>
+                                  {bayrak} {BAYRAK_OK[bayrak] ?? ''}
+                                </span>
+                              : '—'}
+                            {Number(s.deltaUyari ?? 0) === 1 && (
+                              <span className="not" title="Önceki sonuçtan belirgin sapma"> Δ</span>
+                            )}
+                          </td>
+                          <td className="orta not">
+                            {s.olcumZamani ? tarihSaat(s.olcumZamani) : '—'}
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td>{NUMUNE[Number(s.numuneTipi ?? 9)] ?? '—'}</td>
+                          <td><TupRozeti tip={s.tupTipi} /></td>
+                          {/* Barkod YOKSA tüp planı henüz çıkmamıştır - satır
+                              "Barkod Üret" beklediğini kendisi söylemeli. */}
+                          <td className="orta not">
+                            {barkod || 'tüp planlanmadı'}
+                          </td>
+                          <td className="orta not">{s.alim ? tarihSaat(s.alim) : '—'}</td>
+                          <td className="orta not">{s.kabul ? tarihSaat(s.kabul) : '—'}</td>
+                          <td className="orta">{tatMetni(s.hedefTat)}</td>
+                          <td className="orta not">{metin(s.cihaz) || '—'}</td>
+                        </>
+                      )}
                       <td className="orta">
                         <span className="rozet gri">
                           {SATIR_DURUM[Number(s.durum ?? 1)] ?? ''}
@@ -197,7 +277,7 @@ function IstemDetayi({ veri, secili, kaynak }: {
                   );
                 })}
                 {satirlar.length === 0 && (
-                  <tr><td colSpan={9} className="not">Bu istemde tetkik yok.</td></tr>
+                  <tr><td colSpan={10} className="not">Bu istemde tetkik yok.</td></tr>
                 )}
               </tbody>
             </table>
@@ -207,11 +287,23 @@ function IstemDetayi({ veri, secili, kaynak }: {
 
       <div>
         <div className="kagrup">
-          <h6>Hasta / İstem</h6>
+          <h6>
+            Hasta / İstem
+            {metin(veri.protokol) &&
+              <span className="sp">Protokol {metin(veri.protokol)}</span>}
+          </h6>
           <div className="lab-alanlar">
+            {/* HASTA SATIRI mockup'taki gibi tek satır: ad · yaş/cinsiyet ·
+                maskeli kimlik. Banko tüpü hastayla eşlerken ada güvenemez -
+                aynı isimli iki hasta aynı gün gelir. */}
             <div className="fld" style={{ gridColumn: '1 / -1' }}>
               <label>Hasta</label>
-              <div className="deger buyuk">{metin(veri.hasta) || '—'}</div>
+              <div className="deger buyuk">
+                {metin(veri.hasta) || '—'}
+                {metin(veri.yas) || metin(veri.cinsiyet)
+                  ? ` · ${metin(veri.yas)} ${metin(veri.cinsiyet)}`.trimEnd() : ''}
+                {metin(veri.kimlik) ? ` · ${metin(veri.kimlik)}` : ''}
+              </div>
             </div>
             <div className="fld" style={{ gridColumn: '1 / -1' }}>
               <label>Klinik bilgi / tanı</label>
@@ -220,9 +312,46 @@ function IstemDetayi({ veri, secili, kaynak }: {
                 {metin(veri.tani) ? ` · ${metin(veri.tani)}` : ''}
               </div>
             </div>
+            {/* AÇLIK / HAZIRLIK tetkik kataloğundan (lab_tetkik.hazirlik_notu):
+                koşul sağlanmadıysa sonuç yorumlanamaz, bankonun kan almadan
+                ÖNCE görmesi gerekir. */}
+            <div className="fld" style={{ gridColumn: '1 / -1' }}>
+              <label>Açlık / hazırlık</label>
+              <div className="deger">
+                {metin(veri.hazirlik) || <span className="not">özel hazırlık gerekmiyor</span>}
+              </div>
+            </div>
+            <div className="fld">
+              <label>İsteyen</label>
+              <div className="deger">{metin(veri.hekim) || '—'}</div>
+            </div>
             <div className="fld">
               <label>İstem zamanı</label>
               <div className="deger">{veri.tarih ? tarihSaat(veri.tarih) : '—'}</div>
+            </div>
+            {/* ALAN + YER birlikte (mockup "Hemşire N. Koç · Kan alma 2"):
+                numunenin nerede alındığı kalite tartışmasının ilk sorusu. */}
+            <div className="fld">
+              <label>Numune alan</label>
+              <div className="deger">
+                {alan || <span className="not">—</span>}
+                {alimYeri && <span className="not">· {alimYeri}</span>}
+              </div>
+            </div>
+            <div className="fld">
+              <label>Alım zamanı</label>
+              <div className="deger">{alimZamani ? tarihSaat(alimZamani) : '—'}</div>
+            </div>
+            {/* KALİTE sonucun güvenilirlik kaydıdır: hemolizli tüpten çıkan
+                potasyum, laboratuvarın değil numunenin sonucudur. */}
+            <div className="fld">
+              <label>Numune kalitesi</label>
+              <div className="deger">
+                {kalite ? (kalite === 1
+                            ? <span className="rozet olumlu">Uygun</span>
+                            : <span className="rozet uyari">{KALITE[kalite] ?? ''}</span>)
+                        : <span className="not">—</span>}
+              </div>
             </div>
             <div className="fld">
               <label>Hedef bitiş (TAT)</label>
@@ -233,61 +362,57 @@ function IstemDetayi({ veri, secili, kaynak }: {
           </div>
         </div>
 
+        {/* ETİKETLER (mockup sağ panel): basılacak tüp etiketinin ekrandaki
+            karşılığı - barkod, tüp rengi, hasta ve tüpün gideceği bölümler.
+            Tüplerin alım/kabul saati SOL tabloda satır satır durur; burada
+            tekrar etmek aynı bilgiyi iki yerden okutmak olurdu. */}
+
         {/* ETİKETLER: mockup'taki tüp kutucukları. Tüp rengi metinden önce
             gelir - teknisyen rafta rengi arar. */}
         <div className="kagrup">
           <h6>
-            Tüpler
+            Etiketler
             <span className="sp">{numuneler.length} numune</span>
             {/* Mockup'ta bu kutunun altında "Etiketleri Bas" duruyor: tüp
                 planı burada görünüyor, etiket de buradan basılmalı. */}
             <button className="d"
                     onClick={() => git(`/lab/etiket?istem=${Number(veri.id ?? 0)}`)}>
-              🏷 Etiket
+              🏷 Etiketleri Bas
             </button>
           </h6>
-          <div className="detay-kaydir">
-            <table className="detay-tablo">
-              <thead>
-                <tr>
-                  <th>Barkod</th><th>Tüp</th><th>Numune</th>
-                  <th className="orta">Alım</th><th className="orta">Kabul</th>
-                  <th className="orta">Durum</th>
-                </tr>
-              </thead>
-              <tbody>
-                {numuneler.map(n => {
-                  const t = tup(n.tupTipi);
-                  const barkod = metin(n.barkod);
-                  return (
-                    <tr key={String(n.id)}
-                        className={seciliBarkod && barkod === seciliBarkod ? 'secili' : ''}>
-                      <td>{barkod}</td>
-                      <td>
-                        <span className="rozet gri"
-                              style={{ background: t.renk, color: t.yazi ?? '#1f2d3a',
-                                       border: 'none' }}>
-                          {t.kisa}
-                        </span>
-                      </td>
-                      <td>{NUMUNE[Number(n.numuneTipi ?? 9)] ?? ''}</td>
-                      <td className="orta not">{n.alim ? tarihSaat(n.alim) : '—'}</td>
-                      <td className="orta not">{n.kabul ? tarihSaat(n.kabul) : '—'}</td>
-                      <td className="orta">
-                        {n.ret
-                          ? <span className="rozet hata">Ret</span>
-                          : <span className="rozet gri">
-                              {NUMUNE_DURUM[Number(n.durum ?? 1)] ?? ''}
-                            </span>}
-                      </td>
-                    </tr>
-                  );
-                })}
-                {numuneler.length === 0 && (
-                  <tr><td colSpan={6} className="not">Tüp planlanmadı.</td></tr>
-                )}
-              </tbody>
-            </table>
+          <div className="lab-etiketler">
+            {numuneler.map(n => {
+              const barkod = metin(n.barkod);
+              const bolumler = tupBolumleri(barkod);
+              return (
+                <div className={'lab-etiket'
+                       + (seciliBarkod && barkod === seciliBarkod ? ' secili' : '')
+                       + (n.ret ? ' ret' : '')}
+                     key={String(n.id)}>
+                  <b>
+                    {barkod} <TupRozeti tip={n.tupTipi} />
+                  </b>
+                  <span className="not">
+                    {metin(veri.hasta)}
+                    {metin(veri.yas) ? ` ${metin(veri.yas)}${metin(veri.cinsiyet)}` : ''}
+                    {' · '}{NUMUNE[Number(n.numuneTipi ?? 9)] ?? ''}
+                    {bolumler ? ` · ${bolumler}` : ''}
+                  </span>
+                  <span>
+                    {n.ret
+                      ? <span className="rozet hata">Ret</span>
+                      : <span className="rozet gri">
+                          {NUMUNE_DURUM[Number(n.durum ?? 1)] ?? ''}
+                        </span>}
+                  </span>
+                </div>
+              );
+            })}
+            {numuneler.length === 0 && (
+              <div className="bos">
+                Tüp planlanmadı - araç çubuğundan “🏷 Barkod Üret”.
+              </div>
+            )}
           </div>
           {/* RET NEDENİ görünür kalmalı: numune neden reddedildi sorusunun
               cevabı, yeniden alım kararının kendisidir. */}
@@ -296,6 +421,19 @@ function IstemDetayi({ veri, secili, kaynak }: {
               <b>{metin(n.barkod)} reddedildi:</b> {metin(n.retAciklama) || 'gerekçe yok'}
             </div>
           ))}
+        </div>
+
+        {/* KURALLAR (mockup sağ alt): bankonun ezberlemesi gereken beş kural.
+            Ekranda durması, yeni gelen teknisyenin sorması gereken soruları
+            azaltır - kural değişirse tek yerde değişir. */}
+        <div className="kagrup">
+          <h6>Kurallar</h6>
+          <div className="ic sonuk">
+            Aynı numune tipi/tüp tek barkodda birleşir. Acil istemde etiket
+            kırmızı, cihazda STAT önceliklidir. <b>TAT kabul anında başlar.</b>{' '}
+            Ret'te isteyen hekime bildirim gider ve tetkikler “tekrar numune”
+            durumuna düşer. Dış istemde numune kurye ile gelir (sıcaklık kaydı).
+          </div>
         </div>
       </div>
     </div>
