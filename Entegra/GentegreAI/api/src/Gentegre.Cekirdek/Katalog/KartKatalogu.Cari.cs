@@ -492,8 +492,12 @@ public static partial class KartKatalogu
             //   kodudur - SKRS "KLİNİKLER" listesinden gelir ve Entegrasyon
             //   ekranindaki "SKRS klinik esle" ile bos kodlar toplu doldurulur.
             //   AYRI KOLON YOK: iki yerde tutulan kod zamanla ayrisirdi.
+            // ETIKET SADECE "Kod" (kullanici): SKRS yalnizca HBYS kurulumunun
+            //   isi - ERP'de bolum kodunun e-Nabiz ile ilgisi yok ve parantez
+            //   icindeki aciklama alani hem daraltiyor hem yaniltiyordu.
+            //   Kolonun e-Nabiz'daki rolu YUKARIDAKI yorumda yasiyor.
             new("kod",                "kod",                 "metin", EnFazlaUzunluk: 20,
-                Baslik: "Kod (SKRS klinik kodu)", Grup: "Kimlik"),
+                Baslik: "Kod", Grup: "Kimlik"),
             new("ad",                 "ad",                  "metin", Zorunlu: true,
                 EnFazlaUzunluk: 100, Baslik: "Bölüm", Grup: "Kimlik"),
             // Ust birim (257): secilirse departman digerinin ALTINA gecer.

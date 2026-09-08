@@ -2413,13 +2413,11 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Yönetim', menuAltGrup: 'Modül Ayarları', menuAd: 'Satış Belgeleri', menuSira: 5,
     ic: '🧾', yetkiKodu: 'belge',
   },
-  {
-    // IK ayarlari (kullanici): Departman + Pozisyon kod listeleri duzenlenir.
-    kaynak: 'ik-ayarlar', baslik: 'İK Ayarları', yol: 'Yonetim › Ayarlar › İK',
-    ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Modül Ayarları', menuAd: 'İK', menuSira: 7,
-    ic: '👥', yetkiKodu: 'personel',
-  },
+  // İK AYARLARI EKRANI KALDIRILDI (kullanici: "İK Ayarlarinda bolum ve gorevi
+  //   kaldir"). Ekranin TEK icerigi `taraf.departman` ve `taraf.gorev` kod
+  //   listeleriydi; ikisi de "Yönetim › Bölüm / Görev" ekranindaki GERCEK
+  //   tablolarin (departman, personel_gorev) kopyasiydi. Ayni seyi iki yerde
+  //   tanimlatmak, hangisinin gecerli oldugunu belirsiz birakiyordu.
   {
     // Alis belgesi ayarlari: yalniz Genel - alis faturasini GIB'e biz gondermeyiz.
     kaynak: 'alis-ayarlar', baslik: 'Alış Belgeleri', yol: 'Yonetim › Ayarlar › Alış Belgeleri',
