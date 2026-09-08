@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratuvar — Hasta / İstem Kartı — Mockup (Gentegre AI · Laboratuvar)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto 14px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.mini{padding:2px 7px;font-size:10.5px}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.7}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart kutulari */
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ic.sonuk{color:var(--muted);line-height:1.65}
+  .alanlar{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;padding:10px}
+  .fld.tam{grid-column:1 / -1}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;
+    font-size:11.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.buyuk{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  /* hasta seridi */
+  .hasta{padding:9px 10px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hasta .ad{font-size:14px;font-weight:bold;color:var(--navy);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .hasta .alt{margin-top:3px;color:var(--muted);font-size:11px;display:flex;gap:10px;flex-wrap:wrap}
+  .uyari{display:flex;gap:6px;flex-wrap:wrap;padding:6px 10px;background:#fdf6e3;border-bottom:1px solid #f2ddbf}
+  /* TAT cubugu */
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;flex:1;min-width:80px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.k i{background:linear-gradient(#e06a5e,#c0392b)}
+  .tat{display:flex;align-items:center;gap:8px;padding:2px 0}
+  /* etiket kutucuklari */
+  .etiketler{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px 10px}
+  .et{border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px;
+    display:flex;flex-direction:column;gap:2px}
+  .et b{display:flex;align-items:center;gap:6px;color:var(--navy)}
+  .et .sonuk{color:var(--muted);font-size:10.5px}
+  .et.ret{border-color:#e08b82;background:#fdf3f2}
+  /* serum indeksi */
+  .sir{display:flex;gap:6px;flex-wrap:wrap}
+  .sir span{border:1px solid var(--line);border-radius:3px;padding:1px 6px;font-size:10.5px;background:#f7fafc}
+  .sir span.kotu{border-color:#f3c4bf;background:#fbe9e7;color:#b3261e;font-weight:bold}
+  /* durum varyantlari yan yana */
+  .uclu{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:12px;background:#e9edf2}
+  .kolon{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .kolon > .kb{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;gap:8px;align-items:center}
+  .kolon > .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .genis{max-width:440px}
+  .arac{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--line2);background:#f7fafc;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<!-- ===================================================== ANA KART (420px) -->
+<div class="win genis">
+  <div class="title">🧾 Hasta / İstem Kartı <span class="sp">gridin sağı · 420px</span></div>
+
+  <!-- HASTA: kimlik satiri. Banko tupu hastayla eslerken ada guvenemez;
+       yas/cinsiyet ve MASKELI kimlik ad ile birlikte durur. -->
+  <div class="hasta">
+    <div class="ad">Ayşe Yılmaz <span class="rz">39y K</span> <span class="rz mavi">1234567****</span></div>
+    <div class="alt">
+      <span>Dosya <b>H-004182</b></span>
+      <span>Protokol <b>2026/20417</b></span>
+      <span>Kan grubu <b>A Rh+</b></span>
+    </div>
+  </div>
+  <!-- UYARI BANDI: sonucu ya da numune alimini degistiren her sey. -->
+  <div class="uyari">
+    <span class="rz kir">⚠ Penisilin alerjisi</span>
+    <span class="rz sari">Hipotiroidi · Levotiroksin</span>
+    <span class="rz mor">Gebe · 24 hf</span>
+    <span class="rz">Antikoagülan kullanıyor</span>
+  </div>
+
+  <!-- ISTEM -->
+  <div class="grp"><div class="gb">İstem <span class="sp">LAB-2026/31877</span></div>
+    <div class="alanlar">
+      <div class="fld"><label>Öncelik</label><div class="inp ro"><span class="rz kir">ACİL</span> STAT sırası</div></div>
+      <div class="fld"><label>Durum</label><div class="inp ro"><span class="rz sari">Numune bekliyor</span></div></div>
+      <div class="fld"><label>İsteyen</label><div class="inp ro">Dr. A. Koç · Dahiliye</div></div>
+      <div class="fld"><label>İstem zamanı</label><div class="inp ro">03.09.2026 08:55</div></div>
+      <div class="fld tam"><label>Klinik bilgi / tanı</label>
+        <div class="inp ro">Boğaz ağrısı, ateş · J03.9 Akut tonsillit</div></div>
+      <div class="fld tam"><label>Kaynak</label>
+        <div class="inp ro">Muayene istemi <span class="sonuk">· başvuru 2026/20417 · Merkez Lab</span></div></div>
+    </div>
+  </div>
+
+  <!-- HAZIRLIK: tetkik katalogundan (lab_tetkik.hazirlik_notu). Kosul
+       saglanmadiysa sonuc yorumlanamaz - kan ALINMADAN once gorunmeli. -->
+  <div class="grp"><div class="gb">Açlık / hazırlık <span class="sp">tetkik kataloğundan</span></div>
+    <div class="ic">
+      <div>☑ <b>8 saat açlık</b> <span class="rz ok">sağlandı</span> <span class="sonuk">— Glukoz, Lipid paneli</span></div>
+      <div>☐ <b>Sabah ilacı alınmadan</b> <span class="rz sari">doğrulanmadı</span> <span class="sonuk">— TSH (levotiroksin)</span></div>
+      <div>☑ <b>Antibiyotik başlanmadan</b> <span class="rz ok">sağlandı</span> <span class="sonuk">— Boğaz kültürü</span></div>
+    </div>
+  </div>
+
+  <!-- NUMUNE: kim aldi, nerede, ne zaman + KALITE. Hemolizli tupten cikan
+       potasyum, laboratuvarin degil numunenin sonucudur. -->
+  <div class="grp"><div class="gb">Numune <span class="sp">4 tüp</span></div>
+    <div class="alanlar">
+      <div class="fld"><label>Alan</label><div class="inp combo">Hemşire N. Koç</div></div>
+      <div class="fld"><label>Alım yeri</label><div class="inp combo">Kan alma 2</div></div>
+      <div class="fld"><label>Alım zamanı</label><div class="inp">09:12 <span class="sonuk">· barkod okutunca</span></div></div>
+      <div class="fld"><label>Kabul</label><div class="inp ro">09:20 · Tekniker M. Aras</div></div>
+      <div class="fld"><label>Kalite</label><div class="inp combo">Uygun</div></div>
+      <div class="fld"><label>Saklama</label><div class="inp">Dolap A / Raf 2 · +4 °C</div></div>
+      <div class="fld tam"><label>Serum indeksi</label>
+        <div class="inp ro"><span class="sir">
+          <span>H 0,2</span><span>L 0,1</span><span>I 0,0</span>
+        </span><span class="sonuk">· eşik aşılırsa tetkik otomatik ret</span></div></div>
+    </div>
+  </div>
+
+  <!-- TAT: soz verilen sure. Kabulde baslar; kalan sure cubukta. -->
+  <div class="grp"><div class="gb">Süre (TAT) <span class="sp">kabulde başlar</span></div>
+    <div class="ic">
+      <div class="tat"><span class="sonuk" style="min-width:74px">Biyokimya</span>
+        <span class="bar"><i style="width:38%"></i></span><span class="rz ok">1s 14dk kaldı</span></div>
+      <div class="tat"><span class="sonuk" style="min-width:74px">Hematoloji</span>
+        <span class="bar s"><i style="width:81%"></i></span><span class="rz sari">11 dk kaldı</span></div>
+      <div class="tat"><span class="sonuk" style="min-width:74px">Kültür</span>
+        <span class="bar m"><i style="width:6%"></i></span><span class="rz mavi">48 s hedef</span></div>
+      <div class="sonuk" style="margin-top:4px">Hedef bitiş <b>03.09.2026 11:20</b> · en uzun TAT belirler.</div>
+    </div>
+  </div>
+
+  <!-- ETIKETLER: basilacak tup etiketinin ekrandaki karsiligi. -->
+  <div class="grp"><div class="gb">Etiketler <span class="sp">4 numune</span>
+      <span class="btn mini">🏷 Etiketleri Bas</span></div>
+    <div class="etiketler">
+      <div class="et"><b>2603187701 <span class="rz sari">Sarı jel</span></b>
+        <span class="sonuk">Yılmaz A. 39K · Serum · Biyokimya</span><span><span class="rz mavi">Kabul</span></span></div>
+      <div class="et"><b>2603187702 <span class="rz mor">Mor EDTA</span></b>
+        <span class="sonuk">Yılmaz A. 39K · Tam kan · Hematoloji · Biyokimya</span><span><span class="rz mavi">Kabul</span></span></div>
+      <div class="et"><b>2603187703 <span class="rz">Sürüntü</span></b>
+        <span class="sonuk">Yılmaz A. 39K · Sürüntü · Mikrobiyoloji</span><span><span class="rz">Etiketlendi</span></span></div>
+      <div class="et ret"><b>2603187704 <span class="rz">İdrar kabı</span></b>
+        <span class="sonuk">Yılmaz A. 39K · İdrar · Biyokimya</span><span><span class="rz kir">Ret · yetersiz</span></span></div>
+    </div>
+    <div class="ic sonuk"><b>2603187704 reddedildi:</b> yetersiz miktar — hastadan yeniden istendi (09:41).</div>
+  </div>
+
+  <!-- GECMIS: ayni tetkigin onceki degeri delta kontrolunun dayanagidir. -->
+  <div class="grp"><div class="gb">Son laboratuvar <span class="sp">aynı hasta</span></div>
+    <div class="ic sonuk">
+      12.08.2026 · CRP <b>18 mg/L</b> <span class="rz sari">H ↑</span> ·
+      Kreatinin <b>0,9</b> · TSH <b>4,1</b><br>
+      <span>Delta kontrolü bu değerlerle yapılır; %25 üstü sapma sonucu insana düşürür.</span>
+    </div>
+  </div>
+
+  <div class="grp"><div class="gb">Kurallar</div>
+    <div class="ic sonuk">Aynı numune tipi/tüp tek barkodda birleşir. Acil istemde etiket kırmızı,
+      cihazda STAT önceliklidir. <b>TAT kabul anında başlar.</b> Ret'te isteyen hekime bildirim gider
+      ve tetkikler “tekrar numune” durumuna düşer. Dış istemde numune kurye ile gelir (sıcaklık kaydı).</div>
+  </div>
+
+  <div class="arac">
+    <span class="btn ok">✔ Alındı + Kabul</span>
+    <span class="btn">✖ Ret</span>
+    <span class="btn">🏷 Etiket</span>
+    <span class="btn">🧊 Saklama</span>
+    <span class="btn">🏍️ Dış Lab</span>
+  </div>
+</div>
+
+<!-- ================================================= DURUMLAR (3 varyant) -->
+<div class="win">
+  <div class="title">Kartın üç hâli <span class="sp">aynı kart, farklı aşama — alan sırası değişmez</span></div>
+  <div class="uclu">
+
+    <div class="kolon">
+      <div class="kb">1 · Numune bekliyor <span class="sp">istem açıldı</span></div>
+      <div class="hasta"><div class="ad">Ayşe Yılmaz <span class="rz">39y K</span></div>
+        <div class="alt"><span>Protokol <b>2026/20417</b></span></div></div>
+      <div class="alanlar">
+        <div class="fld tam"><label>Açlık / hazırlık</label><div class="inp">☐ 8 saat açlık <span class="sonuk">doğrulanmadı</span></div></div>
+        <div class="fld"><label>Numune alan</label><div class="inp ro">—</div></div>
+        <div class="fld"><label>Alım zamanı</label><div class="inp ro">—</div></div>
+        <div class="fld"><label>Kalite</label><div class="inp ro">—</div></div>
+        <div class="fld"><label>Hedef bitiş</label><div class="inp ro">—</div></div>
+      </div>
+      <div class="ic sonuk">Alan/kalite <b>boş</b>: tabloda duran varsayılanı göstermek,
+        alınmamış tüpü alınmış gibi okuturdu. TAT saati de henüz işlemiyor.</div>
+    </div>
+
+    <div class="kolon">
+      <div class="kb">2 · Kabul edildi <span class="sp">TAT işliyor</span></div>
+      <div class="hasta"><div class="ad">Mehmet Kaya <span class="rz">58y E</span> <span class="rz kir">ACİL</span></div>
+        <div class="alt"><span>Protokol <b>2026/20390</b></span></div></div>
+      <div class="alanlar">
+        <div class="fld tam"><label>Açlık / hazırlık</label><div class="inp">☑ Özel hazırlık gerekmiyor</div></div>
+        <div class="fld"><label>Numune alan</label><div class="inp ro">Hemşire S. Ak · Acil</div></div>
+        <div class="fld"><label>Alım zamanı</label><div class="inp ro">08:50</div></div>
+        <div class="fld"><label>Kalite</label><div class="inp ro"><span class="rz ok">Uygun</span></div></div>
+        <div class="fld"><label>Hedef bitiş</label><div class="inp ro">09:23</div></div>
+      </div>
+      <div class="ic"><div class="tat"><span class="sonuk" style="min-width:60px">Kardiyak</span>
+        <span class="bar s"><i style="width:72%"></i></span><span class="rz sari">9 dk</span></div></div>
+    </div>
+
+    <div class="kolon">
+      <div class="kb">3 · Ret <span class="sp">yeniden alım</span></div>
+      <div class="hasta"><div class="ad">Can Öz <span class="rz">31y E</span></div>
+        <div class="alt"><span>Protokol <b>2026/20410</b></span></div></div>
+      <div class="alanlar">
+        <div class="fld"><label>Numune alan</label><div class="inp ro">Hemşire N. Koç</div></div>
+        <div class="fld"><label>Alım zamanı</label><div class="inp ro">08:30</div></div>
+        <div class="fld tam"><label>Kalite</label>
+          <div class="inp ro"><span class="rz kir">Hemolizli</span>
+            <span class="sir"><span class="kotu">H 3,8</span><span>L 0,2</span><span>I 0,1</span></span></div></div>
+        <div class="fld tam"><label>Ret</label>
+          <div class="inp ro">08:36 · Tekniker M. Aras <span class="sonuk">· hekime bildirildi</span></div></div>
+      </div>
+      <div class="ic sonuk"><b>Neden görünür kalır:</b> hasta ikinci kez kan verirken aynı hatayla
+        geri gelmesin. Tetkikler “tekrar numune bekliyor”a düştü, TAT saati durdu.</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="not">
+  <b>Veri kaynağı.</b> Hasta satırı <code>taraf</code> + <code>taraf_hasta</code> (ad, doğum tarihi,
+  cinsiyet, kan grubu; kimlik <code>taraf.vkno</code> maskeli). Uyarılar hasta kartının alerji/kronik
+  kayıtlarından. İstem <code>lab_istem</code> (istem_no, oncelik, durum, personel_id, klinik_bilgi,
+  tani_icd, hedef_bitis, dis_kurum_id). Hazırlık <code>lab_tetkik.hazirlik_notu</code> — istemdeki
+  tetkiklerden toplanır, tek tek değil <b>koşul</b> olarak listelenir. Numune alanları
+  <code>lab_numune</code> (alan_id, alim_yeri, alim_zamani, kabul_zamani, kabul_eden_id, kalite,
+  hemoliz_idx / lipemi_idx / ikter_idx, saklama_yeri, saklama_sicaklik, ret, ret_neden).
+  TAT çubuğu <code>lab_tetkik.hedef_tat_dk</code> / <code>acil_tat_dk</code> ile
+  <code>lab_istem.hedef_bitis</code>'ten hesaplanır; <b>saat kabulde başlar</b>.
+  “Son laboratuvar” aynı hastanın önceki <code>lab_sonuc</code> satırlarıdır — delta kontrolünün dayanağı.
+  <br>
+  <b>Kart salt okunurdur.</b> Kabul, ret, etiket, saklama ve dış lab sevki araç çubuğu
+  aksiyonlarıyla yapılır; kurallar sunucuda işler. Kartın işi <b>karar için gereken bilgiyi</b>
+  tek yerde göstermektir: tüpü kim aldı, koşul sağlandı mı, süre ne kadar kaldı.
+</div>
+
+</body>
+</html>
