@@ -21,8 +21,7 @@ public static class VeriHatasi
         "23505" => GentegreHatasi.IsKurali(BenzersizMesaji(h)),
 
         // foreign key violation
-        "23503" => GentegreHatasi.IsKurali(
-            "Baglantili kayit bulunamadi ya da baska kayitlar tarafindan kullaniliyor."),
+        "23503" => GentegreHatasi.IsKurali(BagMesaji(h)),
 
         // check violation
         "23514" => GentegreHatasi.Dogrulama(KuralMesaji(h)),
@@ -82,6 +81,32 @@ public static class VeriHatasi
         //   ne yapilmasi gerektigini soyler.
         ["ck_sube_efatura"]       = "e-Fatura mükellefi şubede VKN ve gönderici etiketi dolu olmalı."
     };
+
+    /// <summary>
+    /// Bilinen FK kisitlari icin kullanicinin ANLAYACAGI ve NE YAPACAGINI
+    /// soyleyen mesaj. Ham metin ("baska kayitlar tarafindan kullaniliyor")
+    /// hangi kaydin engellendigini de cikis yolunu da soylemiyordu: kullanici
+    /// kurum kartindan sozlesmeyi siliyor, Kaydet calismiyor ve sebebi
+    /// goremiyordu (gercek vaka).
+    /// </summary>
+    private static readonly Dictionary<string, string> BagMesajlari = new(StringComparer.Ordinal)
+    {
+        ["belge_basvuru_sozlesme_id_fkey"] =
+            "Bu sözleşme başvurularda kullanılmış, silinemez. Kullanımdan kaldırmak için "
+            + "satırdaki \"Aktif\" işaretini kaldırın - eski başvurular hangi sözleşmeyle "
+            + "açıldığını göstermeye devam eder.",
+        ["belge_basvuru_odeyen_kurum_id_fkey"] =
+            "Bu kurum başvurularda kullanılmış, silinemez. Kullanımdan kaldırmak için "
+            + "kurumu Pasif yapın.",
+        ["kurum_sozlesme_kurum_id_fkey"] =
+            "Kurumun sözleşmeleri var; önce sözleşmeleri kaldırın.",
+    };
+
+    private static string BagMesaji(PostgresException h)
+        => h.ConstraintName is not null && BagMesajlari.TryGetValue(h.ConstraintName, out var m)
+            ? m
+            : "Bağlantılı kayıt bulunamadı ya da bu kayıt başka kayıtlarda kullanıldığı için "
+              + $"silinemiyor{(h.ConstraintName is null ? "" : $" ({h.ConstraintName})")}.";
 
     private static string KuralMesaji(PostgresException h)
         => h.ConstraintName is not null && KuralMesajlari.TryGetValue(h.ConstraintName, out var m)
