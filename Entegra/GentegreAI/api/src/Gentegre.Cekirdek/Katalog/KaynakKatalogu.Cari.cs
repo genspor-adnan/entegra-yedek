@@ -567,10 +567,23 @@ public static partial class KaynakKatalogu
             //   secimi kurumlari 1 Özel / 2 ÖSS / 3 SGK diye suzer. Kurumlar
             //   gridinde gizli (listeTanimlari.gizliKolonlar) - orada turAdi var.
             new("tur",        "k.tur",           "sayi",  "Tür (ham)"),
-            new("sozlesmeNo", "k.sozlesme_no",   "metin", "Sözleşme No", Genislik: 120),
-            new("baslangic",  "k.baslangic",     "tarih", "Başlama"),
-            new("bitis",      "k.bitis",         "tarih", "Bitiş"),
-            new("sozlesmeDurum", "k.durum",      "mantik","Sözleşme Aktif", Hizalama: "orta"),
+            // SOZLESME 1:N (468/478): kurumun tek bir sozlesme no'su yok.
+            //   Listede SAYI ve POLICE TURLERI gorunur, ayrintisi kartta.
+            new("sozlesmeSayisi",
+                "(select count(*) from public.kurum_sozlesme s " +
+                "  where s.kurum_id = t.id and s.durum = 1)",
+                              "sayi", "Sözleşme", Hizalama: "orta", Genislik: 90,
+                              Filtrelenebilir: false),
+            new("policeler",
+                "coalesce((select string_agg(coalesce(d.ad, s.ad), ' · ' order by s.id) " +
+                "            from public.kurum_sozlesme s " +
+                "            left join public.kod_deger d " +
+                "                   on d.deger = s.alt_kurum and d.dil = 0 " +
+                "                  and d.liste_id = (select l.id from public.kod_liste l " +
+                "                                     where l.kod = 'kurum.alt_kurum') " +
+                "           where s.kurum_id = t.id and s.durum = 1), '')",
+                              "metin", "Poliçe / Alt Kurum", Genislik: 220,
+                              Filtrelenebilir: false),
         });
         return c with
         {

@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (242 ad, 71 tanesi birden cok dosyada)
+## Fonksiyonlar (242 ad, 72 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -25,15 +25,15 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_belge_no_anahtar` | `025_fn_belge_no.sql` | — |
 | `fn_belge_no_uret` | `366_numara_onek_yil.sql` | 025_fn_belge_no.sql, 087_numara_kesme_duzeltmesi.sql, 152_numara_sablonu.sql |
 | `fn_belge_rezerve` | `142_siparis_rezervasyon.sql` | — |
-| `fn_belge_satir_dagilim_hesapla` | `476_dagilim_sayac_tazele.sql` | — |
+| `fn_belge_satir_dagilim_hesapla` | `478_pay_kolonlari_dusur.sql` | 476_dagilim_sayac_tazele.sql |
 | `fn_belge_satir_dagilim_tazele` | `476_dagilim_sayac_tazele.sql` | 472_dagilim_sigorta_prim.sql, 474_dagilim_tazele_duzeltme.sql |
 | `fn_belge_satir_dagit` | `470_belge_satir_dagilim.sql` | — |
 | `fn_belge_satir_hesap` | `190_belge_fisle.sql` | — |
 | `fn_belge_satir_kapatma` | `191_kapanma_tazele.sql` | 082_belge_donusum.sql |
-| `fn_belge_satir_kapatma_tazele` | `471_dagilim_kapanma_tahsil.sql` | 082_belge_donusum.sql, 086_belge_donusum_kurallar.sql, 142_siparis_rezervasyon.sql, 289_odeme_paylasimi.sql |
+| `fn_belge_satir_kapatma_tazele` | `478_pay_kolonlari_dusur.sql` | 082_belge_donusum.sql, 086_belge_donusum_kurallar.sql, 142_siparis_rezervasyon.sql, 289_odeme_paylasimi.sql, 471_dagilim_kapanma_tahsil.sql |
 | `fn_belge_satir_paylastir` | `291_katilim_payi.sql` | 289_odeme_paylasimi.sql |
 | `fn_belge_satir_rezerve_kirp` | `142_siparis_rezervasyon.sql` | — |
-| `fn_belge_satir_tahsil_tazele` | `471_dagilim_kapanma_tahsil.sql` | 321_tahsilat_satir_dagitim.sql |
+| `fn_belge_satir_tahsil_tazele` | `478_pay_kolonlari_dusur.sql` | 321_tahsilat_satir_dagitim.sql, 471_dagilim_kapanma_tahsil.sql |
 | `fn_belge_sil` | `217_belge_sil_stok_guard.sql` | 181_belge_sil.sql |
 | `fn_belge_silinebilir` | `226_uts_belge_guard.sql` | 181_belge_sil.sql |
 | `fn_belge_varsayilan_liste` | `468_kurum_sozlesme_1n.sql` | 205_belge_fiyat_listesi.sql, 278_odeyen_kurum_varsayilan_liste.sql, 292_varsayilan_liste_kampanya.sql, 302_kurum_sozlesme_fiyat_listesi.sql |
@@ -316,7 +316,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_kasa_islem_dagitim` | `322_avans_mahsup.sql` | — |
 | `v_kategori_lookup` | `347_sonomed_rad_kategori.sql` | 250_kategori_lookup.sql, 270_kategori_agaci.sql |
 | `v_kullanici_lookup` | `156_ebelge_seri.sql` | — |
-| `v_kurum_lookup` | `250_kategori_lookup.sql` | 249_kurum_sozlesme.sql |
+| `v_kurum_lookup` | `478_pay_kolonlari_dusur.sql` | 249_kurum_sozlesme.sql, 250_kategori_lookup.sql |
 | `v_kurum_sozlesme_lookup` | `468_kurum_sozlesme_1n.sql` | — |
 | `v_lab_antibiyotik_lookup` | `436_lab_mikrobiyoloji.sql` | — |
 | `v_lab_besiyeri_lookup` | `436_lab_mikrobiyoloji.sql` | — |

@@ -123,26 +123,33 @@ public static class FiyatListesiUclari
             var (kampanyaId, _, kod, ad, kampanyaListesi) =
                 await KampanyaCozAsync(baglanti, tarafId, kurumId, iptal);
 
-            // PAYLASIM KURALI (289/291) ayni cevapta: ekran "kurum payi nasil
-            //   hesaplanir" bilgisini kampanyayla BIRLIKTE ogrensin - provizyon
-            //   dugmesi SGK'da oran degil KATILIM PAYI islemeli.
-            short paylasimModu = 1;
+            // ODEME ROTASI ayni cevapta (478): ekran "bu kurumda pay nasil
+            //   bolunur" bilgisini kampanyayla BIRLIKTE ogrensin. Rota
+            //   SOZLESMEDEN cikar (tur + alt kurum); eski `paylasim_modu`
+            //   kolonu dustu - kurumun tek bir pay kurali yok, sozlesmesi var.
+            short rota = 1;
             decimal varsayilanKarsilama = 0;
+            int? sozlesme = null;
             if (kurumId is > 0)
             {
                 await using var pk = baglanti.Komut(
-                    "select paylasim_modu, varsayilan_karsilama " +
-                    "  from public.taraf_kurum where id = @p0", null, kurumId);
+                    "select s.id, public.fn_dagilim_rota(k.tur, s.alt_kurum, 1::smallint), " +
+                    "       s.varsayilan_karsilama " +
+                    "  from public.taraf_kurum k " +
+                    "  left join public.kurum_sozlesme s " +
+                    "         on s.id = public.fn_kurum_sozlesme_sec(k.id) " +
+                    " where k.id = @p0", null, kurumId);
                 await using var po = await pk.ExecuteReaderAsync(iptal);
                 if (await po.ReadAsync(iptal))
                 {
-                    paylasimModu = po.IsDBNull(0) ? (short)1 : po.GetInt16(0);
-                    varsayilanKarsilama = po.IsDBNull(1) ? 0 : po.GetDecimal(1);
+                    sozlesme = po.IsDBNull(0) ? null : po.GetInt32(0);
+                    rota = po.IsDBNull(1) ? (short)1 : po.GetInt16(1);
+                    varsayilanKarsilama = po.IsDBNull(2) ? 0 : po.GetDecimal(2);
                 }
             }
 
             return Results.Ok(new { kampanyaId, kod, ad, fiyatListesiId = kampanyaListesi,
-                                    paylasimModu, varsayilanKarsilama });
+                                    rota, sozlesmeId = sozlesme, varsayilanKarsilama });
         }).WithTags("FiyatListesi").RequireAuthorization();
 
         // --------------------------------------------------- kampanyali fiyat ----

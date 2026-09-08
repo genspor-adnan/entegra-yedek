@@ -150,15 +150,13 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             onClick={seciliSil}>
       🗑
     </button>
-    {/* PROVIZYON UYGULA (289): kurumun karsilama oranini butun satirlara isler.
-        Yalniz odeyen kurumlu basvuruda gorunur. */}
+    {/* DAGILIMI YENILE (478): rota ve fiyatlar SUNUCUDA cozulur - ekran
+        oran sormaz, "yeniden hesapla" der. Yalniz odeyen kurumlu basvuruda. */}
     {paylasim?.acik && (
       <button type="button" className="d ikon" disabled={kilitli}
-              title={paylasim.katkiModu
-                ? 'Katılım payını satırlara uygula (kalanı kuruma)'
-                : 'Provizyon / karşılama oranını satırlara uygula'}
+              title="Ödeme dağılımını sözleşmeye göre yeniden hesapla"
               onClick={() => paylasim.uygula()}>
-        ⚖
+        ↻
       </button>
     )}
     {/* PRIM ROLLERI (324): primi kim hak ediyor - isteyen/uygulayan/
@@ -777,8 +775,7 @@ export interface KalemSekmesiProps {
   basvuruMu?: boolean;
   paylasim?: {
     acik: boolean;
-    /** SGK modu (291): pay ORAN degil sabit KATILIM PAYI ile bolunur. */
-    katkiModu?: boolean;
+    /** Dagilimi SUNUCUDA yeniden hesaplatir (478). */
     uygula(): void;
   };
   /**

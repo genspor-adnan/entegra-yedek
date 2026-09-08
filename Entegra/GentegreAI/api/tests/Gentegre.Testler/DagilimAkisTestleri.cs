@@ -95,7 +95,7 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
             """, [$"{Etiket} {ad}"]);
         _taraflar.Add(id);
         await veri.CalistirAsync(
-            "insert into public.taraf_kurum (id, tur, durum) values (@p0, @p1, 1)",
+            "insert into public.taraf_kurum (id, tur) values (@p0, @p1)",
             [id, tur]);
         return id;
     }

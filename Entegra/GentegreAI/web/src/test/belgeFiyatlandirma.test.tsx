@@ -52,27 +52,26 @@ beforeEach(() => {
   mesajlar.length = 0;
   listele.mockResolvedValue({ satirlar: [] });
   varsayilanListe.mockResolvedValue({ listeId: null });
-  kampanyaOku.mockResolvedValue({ kampanyaId: null, ad: '', kod: '', paylasimModu: 1 });
+  kampanyaOku.mockResolvedValue({ kampanyaId: null, ad: '', kod: '' });
 });
 
 describe('kampanya cozumu', () => {
   it('kampanya adi KOD · AD olarak gosterilir', async () => {
     kampanyaOku.mockResolvedValue(
-      { kampanyaId: 3, kod: 'SGK26', ad: 'SGK Anlaşması', paylasimModu: 2 });
+      { kampanyaId: 3, kod: 'SGK26', ad: 'SGK Anlaşması' });
     const { result } = kur({ odeyenKurumId: 5 });
     await waitFor(() => expect(result.current.kampanyaAdi).toBe('SGK26 · SGK Anlaşması'));
     expect(result.current.kampanyaId).toBe(3);
-    expect(result.current.paylasimModu).toBe(2);
   });
 
   it('kodu olmayan kampanyada yalniz ad yazilir (bos ayrac kalmaz)', async () => {
-    kampanyaOku.mockResolvedValue({ kampanyaId: 3, kod: '', ad: 'Genel', paylasimModu: 1 });
+    kampanyaOku.mockResolvedValue({ kampanyaId: 3, kod: '', ad: 'Genel' });
     const { result } = kur({ odeyenKurumId: 5 });
     await waitFor(() => expect(result.current.kampanyaAdi).toBe('Genel'));
   });
 
   it('kampanya YOKSA ad bos kalir', async () => {
-    kampanyaOku.mockResolvedValue({ kampanyaId: null, kod: 'X', ad: 'Y', paylasimModu: 1 });
+    kampanyaOku.mockResolvedValue({ kampanyaId: null, kod: 'X', ad: 'Y' });
     const { result } = kur({ odeyenKurumId: 5 });
     await waitFor(() => expect(kampanyaOku).toHaveBeenCalled());
     expect(result.current.kampanyaAdi).toBe('');
@@ -80,25 +79,24 @@ describe('kampanya cozumu', () => {
 
   it('kampanyanin KENDI listesi varsa belgenin listesi ONA cekilir', async () => {
     kampanyaOku.mockResolvedValue(
-      { kampanyaId: 3, kod: '', ad: 'K', paylasimModu: 1, fiyatListesiId: 42 });
+      { kampanyaId: 3, kod: '', ad: 'K', fiyatListesiId: 42 });
     const { result } = kur({ odeyenKurumId: 5 });
     await waitFor(() => expect(result.current.fiyatListesiId).toBe(42));
   });
 
-  it('KAYITLI belgede kampanya DEGISMEZ, yalniz pay modu tazelenir', async () => {
+  it('KAYITLI belgede kampanya DEGISMEZ (odeme dagilimi sunucuda, 478)', async () => {
     kampanyaOku.mockResolvedValue(
-      { kampanyaId: 9, kod: 'A', ad: 'B', paylasimModu: 2, fiyatListesiId: 42 });
+      { kampanyaId: 9, kod: 'A', ad: 'B', fiyatListesiId: 42 });
     const { result } = kur({ belgeId: 500, odeyenKurumId: 5 });
-    await waitFor(() => expect(result.current.paylasimModu).toBe(2));
+    await waitFor(() => expect(kampanyaOku).toHaveBeenCalled());
     expect(result.current.kampanyaId).toBeNull();
     expect(result.current.kampanyaAdi).toBe('');
     expect(result.current.fiyatListesiId).toBeNull();
   });
 
-  it('cari ve kurum YOKSA kampanya sorulmaz - varsayilana donulur', async () => {
-    const { result } = kur({ cariId: null, odeyenKurumId: null });
-    await waitFor(() => expect(result.current.paylasimModu).toBe(1));
-    expect(kampanyaOku).not.toHaveBeenCalled();
+  it('cari ve kurum YOKSA kampanya sorulmaz', async () => {
+    kur({ cariId: null, odeyenKurumId: null });
+    await waitFor(() => expect(kampanyaOku).not.toHaveBeenCalled());
   });
 
   it('sunucu hatasinda kampanya TEMIZLENIR (bayat kampanya belgeye yazilmasin)', async () => {

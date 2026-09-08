@@ -421,8 +421,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   //   useBelgeFiyatlandirma), karta dagilinca kural kaciyordu.
   const {
     fiyatListeleri, fiyatListesiId, setFiyatListesiId: setFiyatListesiIdHam,
-    kampanyaId, setKampanyaId, kampanyaAdi, setKampanyaAdi, paylasimModu,
-    kampanyaCoz, satirlariYenidenFiyatla, listeDegisti, provizyonUygula,
+    kampanyaId, setKampanyaId, kampanyaAdi, setKampanyaAdi,
+    kampanyaCoz, satirlariYenidenFiyatla, listeDegisti,
   } = useBelgeFiyatlandirma({
     belgeId, tur, alisMi, cariId: cari?.id ?? null, odeyenKurumId, satirlar, setSatirlar,
   });
@@ -1172,6 +1172,27 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * sonra satirlar o listeyle yeniden fiyatlanir. Kalemsiz belgede yalniz
    * baslik guncellenir - mesaj cikmaz.
    */
+  /**
+   * ÖDEME DAĞILIMINI YENİLE (478). Kural SUNUCUDA: rota sözleşmeden, fiyatlar
+   * SUT/TTB listelerinden çözülür. İstemci yalnız "yeniden hesapla" der -
+   * karşılama oranını burada hesaplamak, aynı formülü iki yerde tutmaktı.
+   */
+  async function dagilimYenile() {
+    if (!kayitliId) {
+      mesaj('Dağılım kayıtlı belgede hesaplanır - önce kaydedin.');
+      return;
+    }
+    try {
+      const y = await api.belgeDagit(kayitliId);
+      // Satirlar YENIDEN OKUNUR: rota 3/5'te satir tutari da kovalardan
+      //   dogar, ekranda eski rakam kalmasin.
+      const okunan = await api.belgeOku(kayitliId);
+      setSonuc(okunan);
+      setSatirlar(yanittanSatirlar(okunan.satirlar ?? [], yerelPara));
+      mesaj(y.mesaj);
+    } catch (h) { mesaj(hataMetni(h)) }
+  }
+
   async function odeyenKurumDegisti(yeni: number | null) {
     setOdeyenKurumId(yeni);
     // Kurum degisti: eski sozlesme ARTIK GECERSIZ. Bos birakilir - tek
@@ -1468,8 +1489,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
             //   "Özel (Ücretli)" de bir KURUMDUR ama hasta kendi oder - pay
             //   paylasimi, provizyon ve kurum payi kolonlari orada anlamsiz.
             paylasim={{ acik: basvuruMu && provizyonVar,
-                        katkiModu: paylasimModu === 2,
-                        uygula: () => void provizyonUygula() }}
+                        uygula: () => void dagilimYenile() }}
             doviz={{
               raporDovizi, setRaporDovizi: yeni => {
                 setRaporDovizi(yeni);

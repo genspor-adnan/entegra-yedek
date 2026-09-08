@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
-import { guvenli, mesaj, metinSor } from '../../bilesenler/mesaj';
-import { hamSayi } from '../../bilesenler/bicim';
+import { guvenli, mesaj } from '../../bilesenler/mesaj';
 import type { SatirDurumu } from '../belgeSatir';
 import { kampanyaFiyatiUygula } from '../belgeKalem';
-import { karsilamaUygula, katilimUygula } from './provizyonPaylari';
 
 /**
  * BELGENIN FIYAT KARARLARI (205/207/274/289/291) TEK YERDE.
@@ -16,7 +14,8 @@ import { karsilamaUygula, katilimUygula } from './provizyonPaylari';
  * fiyatiyla ozel hastaya kesmek demekti.
  *
  * Kart yalniz sonucu (liste kimligi, kampanya adi, pay modu) gosterir ve
- * kullanicinin eylemlerini (`listeDegisti`, `provizyonUygula`) cagirir.
+ * kullanicinin eylemlerini (`listeDegisti`) cagirir. ODEME DAGILIMI
+ * artik SUNUCUDA (470/478): kart `POST /api/belge/{id}/dagit` cagirir.
  */
 
 export interface Secenek { id: number; ad: string }
@@ -48,7 +47,6 @@ export function useBelgeFiyatlandirma(g: FiyatlandirmaGirdisi) {
    * PAY MODU (291): 1 karsilama orani (ozel sigorta) · 2 katilim payi (SGK).
    * Kurumun ozelligidir, belgeye YAZILMAZ - her acilista kurumdan cozulur.
    */
-  const [paylasimModu, setPaylasimModu] = useState(1);
 
   /**
    * Belge YONUNDEKI listeler. Tur/yon degisince yeniden cozulur: alis
@@ -109,7 +107,6 @@ export function useBelgeFiyatlandirma(g: FiyatlandirmaGirdisi) {
       const y = await api.fiyatKampanya({
         tarafId: kampanyaYaz ? cariId : null, kurumId,
       });
-      setPaylasimModu(y.paylasimModu ?? 1);
       if (!kampanyaYaz) return null;
 
       setKampanyaId(y.kampanyaId);
@@ -119,7 +116,7 @@ export function useBelgeFiyatlandirma(g: FiyatlandirmaGirdisi) {
       if (y.fiyatListesiId) { setFiyatListesiId(y.fiyatListesiId); return y.fiyatListesiId }
       return null;
     } catch {
-      if (kampanyaYaz) { setKampanyaId(null); setKampanyaAdi('') } else setPaylasimModu(1);
+      if (kampanyaYaz) { setKampanyaId(null); setKampanyaAdi('') }
       return null;
     }
   }
@@ -129,14 +126,14 @@ export function useBelgeFiyatlandirma(g: FiyatlandirmaGirdisi) {
    * gelir - odemeyi yapan taraf fiyati belirler; yoksa carinin kendi
    * kampanyasi, o da yoksa genel kampanya.
    *
-   * KAYITLI belgede kampanya DEGISMEZ; o durumda yalniz pay modu okunur.
+   * KAYITLI belgede kampanya DEGISMEZ - odeme dagilimi sunucuda (478).
    */
   useEffect(() => {
     const kampanyaYaz = !belgeId;
     if (kampanyaYaz && !cariId && !odeyenKurumId) {
-      setKampanyaId(null); setKampanyaAdi(''); setPaylasimModu(1); return;
+      setKampanyaId(null); setKampanyaAdi(''); return;
     }
-    if (!kampanyaYaz && !odeyenKurumId) { setPaylasimModu(1); return }
+    if (!kampanyaYaz && !odeyenKurumId) return;
     void kampanyaCoz(odeyenKurumId, kampanyaYaz);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [belgeId, cariId, odeyenKurumId]);
@@ -183,47 +180,9 @@ export function useBelgeFiyatlandirma(g: FiyatlandirmaGirdisi) {
     await satirlariYenidenFiyatla(yeni, odeyenKurumId, 'listeden');
   }
 
-  /**
-   * PROVIZYON UYGULA (289): kurumun karsilama oranini butun satirlara isler.
-   * Tutarlar EKRANDA hesaplanir, Kaydet kalicilastirir - liste degisiminde
-   * oldugu gibi. Oran 0 verilirse tamami hastaya yazilir (kendi oder).
-   */
-  async function provizyonUygula() {
-    // KATILIM PAYI MODU (291, SGK): oran sorulmaz. Her satir KENDI katilim
-    //   payiyla bolunur (fiyat listesinden kalemle birlikte gelir); kullanici
-    //   tek tip bir tutar dayatmak isterse kutuya yazar.
-    if (paylasimModu === 2) {
-      const cevapKatki = await metinSor(
-        'Katılım payı (TL) — boş bırakılırsa her satırın kendi katılım payı uygulanır',
-        '', 'Katılım payı');
-      if (cevapKatki === null) return;
-      const elle = cevapKatki.trim() === '' ? null : Math.max(0, hamSayi(cevapKatki));
-
-      // Yeni satirlar ONCE hesaplanir: toplami setSatirlar geri cagriminda
-      //   biriktirmek mesaji "0.00" gosteriyordu (state guncellemesi ertelenir).
-      const { satirlar: yeniler, toplamHasta } = katilimUygula(satirlar, elle);
-      setSatirlar(yeniler);
-      mesaj(`Katılım payı uygulandı: hastadan ${toplamHasta.toFixed(2)} TL, `
-          + 'kalanı kuruma. Kaydet ile kalıcı olur.');
-      return;
-    }
-
-    // Varsayilan olarak KURUMUN sozlesmedeki orani gelir - hekim/kayit
-    //   gorevlisi provizyon farkliysa degistirir.
-    const cevap = await metinSor(
-      'Kurumun karşılama oranı (%) — 0 girilirse tamamı hastaya yazılır',
-      String(satirlar.find(r => hamSayi(r.karsilama ?? '0') > 0)?.karsilama ?? ''),
-      'Karşılama %');
-    if (cevap === null || cevap.trim() === '') return;
-    const oran = Math.min(100, Math.max(0, hamSayi(cevap)));
-
-    setSatirlar(eski => karsilamaUygula(eski, oran).satirlar);
-    mesaj(`Karşılama oranı %${oran} uygulandı. Kaydet ile kalıcı olur.`);
-  }
-
   return {
     fiyatListeleri, fiyatListesiId, setFiyatListesiId,
-    kampanyaId, setKampanyaId, kampanyaAdi, setKampanyaAdi, paylasimModu,
-    kampanyaCoz, satirlariYenidenFiyatla, listeDegisti, provizyonUygula,
+    kampanyaId, setKampanyaId, kampanyaAdi, setKampanyaAdi,
+    kampanyaCoz, satirlariYenidenFiyatla, listeDegisti,
   };
 }

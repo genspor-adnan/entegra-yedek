@@ -124,7 +124,6 @@ public sealed partial class BelgeDeposu
                    s.doviz_cinsi, s.doviz_birim_fiyat, s.doviz_kuru,
                    s.giris_depo_id, s.cikis_depo_id, s.izleme, s.izleme_kodu,
                    s.stok_durum_degis, s.proje_id, s.kalan_miktar, s.belge_id,
-                   s.kurum_tutar, s.hasta_tutar, s.kurum_kapatilan, s.hasta_kapatilan,
                    s.tutar, s.tutar_kdvli, s.birim_fiyat_kdvli,
                    -- DAGILIM KOVALARI (470): donusum artik ince pay koduyla
                    --   calisir - SGK tahakkuku ile sigorta faturasi ayri
@@ -172,23 +171,30 @@ public sealed partial class BelgeDeposu
             decimal? payTutarSecim = null;
             if (pay > 0)
             {
-                // ESKI SATIR (289 oncesi): pay tutarlari hic yazilmamis olabilir
-                //   (kurum 0, hasta 0). Tutar bazli donusum istenince satir o
-                //   anda HASTA PAYI = matrah olarak isaretlenir; 289 sayaclari
-                //   boylece bu satirda da tutar uzerinden calisir.
-                var kurumT = Convert.ToDecimal(ks2["kurum_tutar"] ?? 0m);
-                var hastaT = Convert.ToDecimal(ks2["hasta_tutar"] ?? 0m);
-                if (tutarBazli && pay == 1 && kurumT + hastaT == 0)
+                // DAGILIMI OLMAYAN SATIR (ERP belgesi ya da eski kayit): tutar
+                //   bazli donusum istenince satir o anda HASTA EK KATKISI =
+                //   matrah olarak dagitilir; sayaclar boylece bu satirda da
+                //   tutar uzerinden calisir (478 - eski pay kolonlari dustu).
+                var kovaToplam = Convert.ToDecimal(ks2["dg_sgk"] ?? 0m)
+                               + Convert.ToDecimal(ks2["dg_oss"] ?? 0m)
+                               + Convert.ToDecimal(ks2["dg_hasta_provizyon"] ?? 0m)
+                               + Convert.ToDecimal(ks2["dg_hasta_ek_katki"] ?? 0m);
+                if (tutarBazli && pay is 1 or 4 && kovaToplam == 0)
                 {
                     var matrah = Convert.ToDecimal(ks2["tutar"] ?? 0m);
-                    await using var payKomut = new NpgsqlCommand(
-                        "update public.belge_satir set hasta_tutar = @p1, kurum_tutar = 0, karsilama = 0 where id = @p0",
-                        baglanti, islem);
+                    await using var payKomut = new NpgsqlCommand("""
+                        insert into public.belge_satir_dagilim
+                               (belge_satir_id, rota, hasta_ek_katki, elle)
+                        values (@p0, 1, @p1, 1)
+                        on conflict (belge_satir_id) do update
+                           set hasta_ek_katki = excluded.hasta_ek_katki, elle = 1
+                        """, baglanti, islem);
                     payKomut.Parameters.AddWithValue("p0", satirId);
                     payKomut.Parameters.AddWithValue("p1", matrah);
                     await payKomut.ExecuteNonQueryAsync(iptal);
-                    ks2["hasta_tutar"] = matrah;
-                    ks2["kurum_tutar"] = 0m;
+                    ks2["dg_hasta_ek_katki"] = matrah;
+                    // Hasta payi istendiyse EK KATKI kovasindan gider.
+                    if (pay == 1) pay = 4;
                 }
 
                 // PAY DONUSUMU: sinir miktar degil TUTAR. Ayni pay ikinci kez

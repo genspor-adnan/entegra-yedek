@@ -348,43 +348,10 @@ public sealed partial class BelgeDeposu
         var tutarKdvli = birimFiyatKdvli > 0
             ? BelgeHesap.SatirTutari(adet, birimFiyatKdvli, iskonto, iskonto2) : 0m;
 
-        // ODEME PAYLASIMI (289): odeyen kurum varsa satir tutari KURUM ve HASTA
-        //   payina bolunur. Istemci acikca tutar gonderdiyse ona dokunulmaz
-        //   (sigorta bazen orana degil SABIT TUTARA onay verir); yalniz oran
-        //   verilmisse ya da kurumun varsayilan orani varsa hesaplanir.
-        var karsilama   = JsonOndalik(satir, "karsilama", 0);
-        var kurumTutar  = JsonOndalik(satir, "kurumTutar", -1);
-        var hastaTutar  = JsonOndalik(satir, "hastaTutar", -1);
-        var odeyenKurum = SayiNull(belge, "odeyenKurumId");
-
-        if (kurumTutar < 0 || hastaTutar < 0)
-        {
-            if (odeyenKurum is { } kid && kid > 0)
-            {
-                // KATILIM PAYI (291): SGK modunda paylastirma orana degil
-                //   satirin KATKI TUTARINA gore yapilir - istemci fiyatla
-                //   birlikte gelen katkiyi gonderir.
-                await using var pay = Komut(baglanti, islem,
-                    "select kurum_tutar, hasta_tutar, karsilama " +
-                    "  from public.fn_belge_satir_paylastir(@p0, @p1, @p2, @p3)",
-                    [tutar, karsilama, kid, JsonOndalik(satir, "katkiTutar", 0)]);
-                await using var o = await pay.ExecuteReaderAsync(iptal);
-                if (await o.ReadAsync(iptal))
-                {
-                    if (kurumTutar < 0) kurumTutar = o.GetDecimal(0);
-                    if (hastaTutar < 0) hastaTutar = o.GetDecimal(1);
-                    if (karsilama == 0) karsilama = o.GetDecimal(2);
-                }
-            }
-            else
-            {
-                // Odeyen kurum yok: tamami hastanindir (kendi oder).
-                if (kurumTutar < 0) kurumTutar = 0m;
-                if (hastaTutar < 0) hastaTutar = tutar;
-            }
-        }
-        if (kurumTutar < 0) kurumTutar = 0m;
-        if (hastaTutar < 0) hastaTutar = 0m;
+        // ODEME DAGILIMI ARTIK AYRI TABLODA (470/478): satir yazildiktan
+        //   sonra `DagilimYazAsync` calisir - istemci acik kova gonderdiyse
+        //   elle sabitlenir, aksi halde sozlesmenin listelerinden hesaplanir.
+        //   `belge_satir` uzerindeki kurum/hasta payi kolonlari DUSTU.
 
         var kolonlar = new List<string>
         {
@@ -406,9 +373,8 @@ public sealed partial class BelgeDeposu
             // Kalemi HANGI kampanya kurali fiyatladi (274) - denetim izi.
             //   Kampanya satiri sonradan degisse de belgede kanit kalir.
             "kampanya_satir_id",
-            // ODEME PAYLASIMI (289): tutarin kurum/hasta payi ve hedef satirda
-            //   hangi payi kapattigi.
-            "kurum_tutar", "hasta_tutar", "karsilama", "provizyon_no", "pay",
+            // Hedef satirda hangi kovayi kapattigi (470) + provizyon numarasi.
+            "provizyon_no", "pay",
             "sube_id", "ekleyen"
         };
         var parametreler = new List<object?>
@@ -427,8 +393,7 @@ public sealed partial class BelgeDeposu
             JsonSayiNull(satir, "projeId") ?? SayiNull(belge, "projeId"),
             JsonTarih(satir, "teslimTarihi"),
             JsonSayiNull(satir, "kampanyaSatirId"),
-            kurumTutar, hastaTutar, karsilama, JsonMetin(satir, "provizyonNo"),
-            (short)JsonSayi(satir, "pay", 0),
+            JsonMetin(satir, "provizyonNo"), (short)JsonSayi(satir, "pay", 0),
             (short)baglam.SubeZorunlu(), baglam.KullaniciId
         };
 

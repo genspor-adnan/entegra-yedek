@@ -203,11 +203,19 @@ public sealed partial class BelgeDeposu
                    s.kapatilan_miktar as "kapatilanMiktar", s.kalan_miktar as "kalanMiktar",
                    s.kaynak_tur as "kaynakTur", s.kaynak_id as "kaynakId",
                    s.teslim_tarihi as "teslimTarihi", s.rezerve,
-                   -- Odeme paylasimi (289): kurum/hasta payi ve kapanma sayaclari.
-                   s.kurum_tutar as "kurumTutar", s.hasta_tutar as "hastaTutar",
-                   s.karsilama, s.provizyon_no as "provizyonNo",
-                   s.kurum_kapatilan as "kurumKapatilan",
-                   s.hasta_kapatilan as "hastaKapatilan",
+                   -- KURUM / HASTA PAYI artik DAGILIMDAN turetilir (478):
+                   --   ekranin "Kurum Payı / Hasta Payı" kolonlari kovalarin
+                   --   toplamidir. Ayri kolon tutmak, ayni sayiyi iki yerde
+                   --   guncel tutmak demekti.
+                   coalesce(dg.sgk + dg.oss, 0) as "kurumTutar",
+                   coalesce(dg.hasta_provizyon + dg.hasta_ek_katki, 0) as "hastaTutar",
+                   case when coalesce(s.tutar, 0) > 0
+                        then round(coalesce(dg.sgk + dg.oss, 0) * 100 / s.tutar, 4)
+                        else 0 end as "karsilama",
+                   s.provizyon_no as "provizyonNo",
+                   coalesce(dg.sgk_kapatilan + dg.oss_kapatilan, 0) as "kurumKapatilan",
+                   coalesce(dg.hasta_provizyon_kapatilan
+                          + dg.hasta_ek_katki_kapatilan, 0) as "hastaKapatilan",
                    -- ODEME DAGILIMI (470): bes kova, kapanma ve tahsilat
                    --   sayaclariyla. Kart "+" ile acilan alt satirda bunu
                    --   gosterir; kalanlar SUNUCUDAN gelir, istemci cikarmaz.
@@ -310,14 +318,10 @@ public sealed partial class BelgeDeposu
                 2 => "dg_sgk", 3 => "dg_oss", 4 => "dg_hasta_ek_katki",
                 _ => "dg_hasta_provizyon",
             };
-            var payTutar = k.TryGetValue(kovaAd, out var kv)
-                ? Convert.ToDecimal(kv ?? 0m)
-                : Convert.ToDecimal((pay == 1 ? k["hasta_tutar"] : k["kurum_tutar"]) ?? 0m);
+            var payTutar = k.TryGetValue(kovaAd, out var kv) ? Convert.ToDecimal(kv ?? 0m) : 0m;
             // Kalan pay: kismi donusumde ayni paydan ikinci kez alinmasin.
             var kapanan = k.TryGetValue(kovaAd + "_kapatilan", out var kk)
-                ? Convert.ToDecimal(kk ?? 0m)
-                : Convert.ToDecimal(
-                    (pay == 1 ? k["hasta_kapatilan"] : k["kurum_kapatilan"]) ?? 0m);
+                ? Convert.ToDecimal(kk ?? 0m) : 0m;
             var kalan = payTutar - kapanan;
             if (payTutarSecim is { } secim && secim > 0 && secim < kalan) kalan = secim;
             payKalan = kalan;
@@ -352,7 +356,7 @@ public sealed partial class BelgeDeposu
             //   giriyordu (ayni tutar ikinci kez kuruma faturalanirdi).
             ["kurumTutar"] = pay == 2 ? payKalan : pay == 1 ? 0m : (object?)null,
             ["hastaTutar"] = pay == 1 ? payKalan : pay == 2 ? 0m : (object?)null,
-            ["karsilama"] = pay > 0 ? 0m : (object?)null,
+
             ["tur"] = k["tur"],
             ["stokId"] = k["stok_id"],
             ["hizmetId"] = k["hizmet_id"],
