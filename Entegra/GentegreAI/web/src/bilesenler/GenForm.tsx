@@ -610,6 +610,12 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
       setAlanHatalari(h => ({ ...h, [alanHatasi.alan]: alanHatasi.mesaj }));
       const hedefSekme = sekmeBul(alanHatasi.alan);
       if (hedefSekme) setAktifSekme(hedefSekme);
+      // HATA HER ZAMAN GORUNSUN (484): alan hatasi yalniz alanin yanina
+      //   yaziliyordu; alan bir DETAYA ait olunca (kurum turu ->
+      //   "kurumRolu.tur") ne sekme bulunuyor ne de kutu o anahtari taniyor -
+      //   kullanici Kaydet'e basiyor, hicbir sey olmuyordu. Ust bant sebebi
+      //   her durumda soyler.
+      setHata(alanHatasi.mesaj);
       return;
     }
 

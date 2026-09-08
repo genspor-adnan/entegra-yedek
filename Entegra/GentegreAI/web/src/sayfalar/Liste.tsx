@@ -2348,7 +2348,14 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         // MOCKUP SIRASI (muayene_karti.html): hekimin is akisi - once
         //   anamnez ve muayene, sonra tani, istem, recete/rapor, en sonda
         //   sevk, ucret, gecmis ve dosyalar.
-        sekmeSirasi={tanim.kaynak === 'muayene'
+        // KURUMDA GENEL ONCE (484, kullanici: "genel ve adres sekmelerini yer
+        //   degistir"). Sekme sirasi normalde ALAN SIRASINDAN cikar; kurumda
+        //   Genel grubunun ilk alanlari (ad/soyad/kisi rol kutulari) gizlenince
+        //   grup sirasi kayip Adres one gecmisti. Sira artik ACIKCA yazili -
+        //   ekran duzeni gizlenen bir alana bagli kalmasin.
+        sekmeSirasi={tanim.kaynak === 'kurum'
+          ? ['Genel', 'Adres / Fatura Bilgisi', 'Sözleşmeler']
+          : tanim.kaynak === 'muayene'
           ? ['Anamnez', 'Fizik Muayene', 'Tanı', 'İstem & Sonuçlar', 'e-Reçete',
              'Rapor', 'Sevk', 'İşlem & Ücret', 'Geçmiş', 'Dosyalar']
           : undefined}
