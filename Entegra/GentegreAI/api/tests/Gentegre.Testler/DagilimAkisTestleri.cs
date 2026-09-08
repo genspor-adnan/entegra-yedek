@@ -33,6 +33,16 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
         if (veri is null) return;
         foreach (var b in _belgeler)
         {
+            // Kasa islemi belgeye BAGLI (FK): once tahsilat ve emanet virmani.
+            await veri.CalistirAsync(
+                "delete from public.kasa_islem_dagitim where kasa_islem_id in " +
+                "  (select id from public.kasa_islem where belge_id = @p0 " +
+                "    or kaynak_tur = 473 and kaynak_id in " +
+                "       (select id from public.kasa_islem where belge_id = @p0))", [b]);
+            await veri.CalistirAsync(
+                "delete from public.kasa_islem where kaynak_tur = 473 and kaynak_id in " +
+                "  (select id from public.kasa_islem where belge_id = @p0)", [b]);
+            await veri.CalistirAsync("delete from public.kasa_islem where belge_id = @p0", [b]);
             await veri.CalistirAsync(
                 "delete from public.belge_satir_dagilim where belge_satir_id in " +
                 "  (select id from public.belge_satir where belge_id = @p0)", [b]);
@@ -67,7 +77,7 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
             insert into public.fiyat_listesi (ad, durum, yon, kdv_dahil, katki_tutar,
                                               ek_katki_tipi, ek_katki_deger)
             values (@p0, 1, 2, 0, @p1, @p2, @p3) returning id
-            """, [$"{Etiket} {ad}", katilim, ekTipi, ekDeger]);
+            """, [$"{Etiket} {ad} {Guid.NewGuid():N}"[..40], katilim, ekTipi, ekDeger]);
         _listeler.Add(id);
         await veri.CalistirAsync("""
             insert into public.fiyat_listesi_satir (liste_id, hizmet_id, fiyat, durum,
@@ -359,6 +369,115 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
                 "insert into public.belge_basvuru (id, odeyen_kurum_id) values (@p0, @p1)",
                 [belge2, kurum]));
         Assert.Contains("seçin", hata.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task Kapatilmis_satira_tazeleme_dokunmaz()
+    {
+        if (!_olgu.Baglandi(nameof(DagilimAkisTestleri))) return;
+        var veri = _olgu.Gerekli();
+
+        var hizmet = await HizmetAsync(veri);
+        var tarife = await ListeAsync(veri, "TTB", hizmet, 1000m);
+        var kurum = await KurumAsync(veri, 2, "KAPALI");
+        var soz = await SozlesmeAsync(veri, kurum, 201, tarife, null, null, 80m);
+        var (_, satirId) = await BasvuruAsync(veri, kurum, soz, 201, 1, hizmet, 1000m);
+        await veri.CalistirAsync("select public.fn_belge_satir_dagilim_tazele(@p0)", [satirId]);
+
+        // Satırın parası döndü (tahsil edildi): artık yeniden bölünemez -
+        //   kesilmiş belge ile satır çelişirdi.
+        await veri.CalistirAsync(
+            "update public.belge_satir_dagilim set hasta_provizyon_tahsil = 200 " +
+            " where belge_satir_id = @p0", [satirId]);
+        // Sözleşme değişse bile dokunulmaz.
+        await veri.CalistirAsync(
+            "update public.kurum_sozlesme set varsayilan_karsilama = 50 where id = @p0",
+            [soz]);
+        await veri.CalistirAsync("select public.fn_belge_satir_dagilim_tazele(@p0)", [satirId]);
+
+        var k = await OkuAsync(veri, satirId);
+        Assert.Equal(800m, k!.Oss);          // %50'ye göre 500 DEĞİL
+        Assert.Equal(200m, k.HastaProvizyon);
+    }
+
+    [Fact]
+    public async Task Kova_toplami_satir_tutarini_tutmali()
+    {
+        if (!_olgu.Baglandi(nameof(DagilimAkisTestleri))) return;
+        var veri = _olgu.Gerekli();
+
+        var hizmet = await HizmetAsync(veri);
+        var tarife = await ListeAsync(veri, "TTB", hizmet, 1000m);
+        var kurum = await KurumAsync(veri, 2, "DENGE");
+        var soz = await SozlesmeAsync(veri, kurum, 201, tarife, null, null, 80m);
+        var (_, satirId) = await BasvuruAsync(veri, kurum, soz, 201, 1, hizmet, 1000m);
+
+        // Elle yazılan dağılım tutarı tutmuyorsa DB reddeder: sessizce kaybolan
+        //   bir kuruş, icmalde açıklanamayan fark demektir.
+        var hata = await Assert.ThrowsAnyAsync<Exception>(() =>
+            veri.CalistirAsync("""
+                insert into public.belge_satir_dagilim
+                       (belge_satir_id, rota, oss, hasta_provizyon)
+                values (@p0, 2, 600, 300)
+                """, [satirId]));
+        Assert.Contains("tutmuyor", hata.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task Katilim_payi_tahsilati_SGK_carisine_emanet_yazilir()
+    {
+        if (!_olgu.Baglandi(nameof(DagilimAkisTestleri))) return;
+        var veri = _olgu.Gerekli();
+
+        var hizmet = await HizmetAsync(veri);
+        var sut = await ListeAsync(veri, "SUT", hizmet, 800m, katilim: 100m,
+                                   ekTipi: 1, ekDeger: 500m);
+        var kurum = await KurumAsync(veri, 3, "SGK EMANET");
+        var soz = await SozlesmeAsync(veri, kurum, 0, null, sut, kurum);
+        var (belgeId, satirId) = await BasvuruAsync(veri, kurum, soz, 302, 1, hizmet, 800m);
+        await veri.CalistirAsync("select public.fn_belge_satir_dagilim_tazele(@p0)", [satirId]);
+
+        var hastaId = await veri.TekDegerAsync<int>(
+            "select taraf_id from public.belge where id = @p0", [belgeId]);
+
+        // Hastadan 100 TL katılım payı tahsil edildi (pay 5).
+        var kasaId = await veri.TekDegerAsync<int>("""
+            insert into public.kasa_islem (tur, islem_tarihi, durum, taraf_id, tutar,
+                                           doviz_kuru, yerel_tutar, belge_id, sube_id, ekleyen)
+            values (11, now(), 2, @p0, 100, 1, 100, @p1,
+                    (select min(id) from public.sube), 0) returning id
+            """, [hastaId, belgeId]);
+        await veri.CalistirAsync("""
+            insert into public.kasa_islem_dagitim (kasa_islem_id, belge_satir_id, pay,
+                                                   tutar, ekleyen)
+            values (@p0, @p1, 5, 100, 0)
+            """, [kasaId, satirId]);
+
+        await veri.CalistirAsync("select public.fn_sgk_katilim_emanet_yaz(@p0)", [kasaId]);
+
+        // CİRO DEĞİL EMANET: hasta carisinden SGK carisine tür-49 virman.
+        var virman = await veri.TekAsync("""
+            select v.tur, v.taraf_id, v.karsi_taraf_id, v.tutar
+              from public.kasa_islem v
+             where v.kaynak_tur = 473 and v.kaynak_id = @p0 and v.iptal_islem_id is null
+            """, [kasaId],
+            o => new { Tur = o.GetInt16(0), Hasta = o.GetInt32(1),
+                       Sgk = o.GetInt32(2), Tutar = o.GetDecimal(3) });
+        Assert.NotNull(virman);
+        Assert.Equal((short)49, virman!.Tur);
+        Assert.Equal(hastaId, virman.Hasta);
+        Assert.Equal(kurum, virman.Sgk);
+        Assert.Equal(100m, virman.Tutar);
+
+        // Katılım tahsilatı SATIR SAYACINA da yazılır ama ciroya girmez.
+        await veri.CalistirAsync("select public.fn_belge_satir_tahsil_tazele(@p0)", [satirId]);
+        var katilimTahsil = await veri.TekDegerAsync<decimal>(
+            "select sgk_katilim_tahsil from public.belge_satir_dagilim " +
+            " where belge_satir_id = @p0", [satirId]);
+        Assert.Equal(100m, katilimTahsil);
+
+        // Temizlik ortak DisposeAsync'te: belgeye bağlı kasa kayıtları da
+        //   oradan silinir (FK sırası tek yerde dursun).
     }
 
     [Fact]
