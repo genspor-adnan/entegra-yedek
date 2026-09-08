@@ -642,7 +642,8 @@ procedure TBelgeDonusumDlg.StokEkle;
 Var
   TLFiyat, DovizFiyat:Currency;
   AKur,AAciklama:String;
-  AKDV,i,ReceteID,StkID,UrnTur,PrjID, ID:integer;
+  StokSatiri: Boolean;
+  AKDV,i,ReceteID,StkID,UrnTur,PrjID, ID, KaynakSatirTuru:integer;
   AAdet,AKurDegeri,Miktar,AIsk1,AIsk2,ABrmFiyat, En,Boy,Yuzey,Sayi : extended;
   procedure DegerAta(DovizAlan:String);
     begin
@@ -726,6 +727,15 @@ Begin
   AIsk2:=TabKaynak.FieldByName('Iskonto2').AsFloat;
   AKurDegeri:=TabKaynak.FieldByName('DOVIZKURDEGERI').AsCurrency;
   StkID := TabKaynak.FieldByName('STOKID').AsInteger;
+  // Hizmet ID'si STOKLAR.ID ile cakissa bile hizmet satiri stok izleme
+  // akisina girmemelidir. Kaynak satir turu tek yetkili ayrimdir.
+  // Eski sunucu prosedurlerinde TUR kolonu donmeyebilir; siparis kaynagi
+  // zaten yalniz stok satirlarini getirdigi icin bu durumda stok kabul edilir.
+  if TabKaynak.FindField('TUR') <> nil then
+    KaynakSatirTuru := TabKaynak.FieldByName('TUR').AsInteger
+  else
+    KaynakSatirTuru := 1;
+  StokSatiri := KaynakSatirTuru in [1, 11];
   PrjID := TabKaynak.FieldByName('PROJEID').AsInteger;
   AAciklama := TabKaynak.FieldByName('ACIKLAMA').AsString;
   UrnTur := 1;
@@ -784,7 +794,9 @@ Begin
      end;
 
 
-    TabDetayGiris.FieldByName('TUR').Value := 1; // stok
+    // Kaynak hizmet satiri (TUR=0) stok satiri gibi yazilmasin. Aksi halde
+    // donusum sonrasi fatura wizard'i hizmet icin lot/izleme soruyor.
+    TabDetayGiris.FieldByName('TUR').AsInteger := KaynakSatirTuru;
     TabDetayGiris.FieldByName('URUNID').AsInteger := TabKaynak.FieldByName('STOKID').AsInteger;
     if TabDetayGiris.Owner.Name<>'UretimWizardDlg' then begin
       TabDetayGiris.FieldByName('ADET').AsFloat := AAdet;
@@ -801,7 +813,11 @@ Begin
     TabDetayGiris.FieldByName('YERI').AsInteger := DonusumTuru;
     TabDetayGiris.FieldByName('YERID').AsInteger := TabKaynak.FieldByName('SATIRID').AsInteger;
     TabDetayGiris.FieldByName('PROJEID').AsInteger := PrjID;
-    TabDetayGiris.FieldByName('IZLEME').AsInteger := TabKaynak.FieldByName('IZLEME').AsInteger;
+    if StokSatiri then
+      TabDetayGiris.FieldByName('IZLEME').AsInteger :=
+        TabKaynak.FieldByName('IZLEME').AsInteger
+    else
+      TabDetayGiris.FieldByName('IZLEME').AsInteger := 0;
     TabDetayGiris.FieldByName('ACIKLAMA').Value := AAciklama;
     TabDetayGiris.FieldByName('EKLEYEN').AsInteger := StrToInt(Kullanan);
     TabDetayGiris.FieldByName('POZNO').Value := TabKaynak.FieldByName('POZNO').Value;
@@ -895,7 +911,14 @@ Begin
     // ============================================================
     //   Yalniz stok hareketi yapan hedeflerde: siparisten siparise/teklife
     //   donusumde (hedef SIPARISDETAY) izlem kavrami yoktur.
-    if (TabDetayGiris.FieldByName('IZLEME').AsInteger > 0)
+    // HIZMET/MASRAF SATIRI IZLEM AKISINA GIRMEZ (kullanici: "irsaliyede hizmet
+    //   satiri var, faturaya donusturunce lot soruyor - hizmetin lotu olmaz").
+    //   IZLEME tek basina yeterli kriter DEGIL: hizmetin URUNID'si STOKLAR.ID
+    //   ile cakisabiliyor (irsaliye 114179: hizmet URUNID=1377, ayni id'de
+    //   izlemli bir stok var) ve alan bir sekilde dolu kalirsa lot soruluyor.
+    //   Satir TURU tek yetkili ayrimdir: 1 = stok, 11 = paket/set bileseni.
+    if (TabDetayGiris.FieldByName('TUR').AsInteger in [1, 11])
+       and (TabDetayGiris.FieldByName('IZLEME').AsInteger > 0)
        and (i in [9, 19, 101, 105, 109])
        and (HedefBaslikTur in [10, 11, 12, 14, 15, 16, 119]) then begin
        var LDepoSec: TIzlemeDlg := nil;
@@ -998,7 +1021,9 @@ Begin
        else
          Tablo.ApiCagir('sp_Prog_Izleme_Aktar_Json', LDepoJson);
     end
-    else if (TabDetayGiris.FieldByName('IZLEME').AsInteger > 0)and(i in [10,11,14,15,119] ) then begin
+    // Ayni kural tasima dalinda da: yalniz STOK satiri izlem tasir.
+    else if (TabDetayGiris.FieldByName('TUR').AsInteger in [1, 11])
+       and (TabDetayGiris.FieldByName('IZLEME').AsInteger > 0)and(i in [10,11,14,15,119] ) then begin
        // ============================================================
        // SERI/LOT TASIMA - KANONIK SP  (A4)
        //   dbo.sp_Prog_Izleme_Aktar_Json

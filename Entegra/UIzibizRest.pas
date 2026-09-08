@@ -384,7 +384,8 @@ begin
         finally LJSON.Free; end;
         Result := True;
       end else
-        ASonuc.Mesaj := Format('HTTP %d: %s', [LYanit.StatusCode, ASonuc.YanitJSON]);
+        ASonuc.Mesaj := Format('HTTP %d: %s',
+          [LYanit.StatusCode, Copy(ASonuc.YanitJSON, 1, 700)]);
     except
       on E: Exception do begin
         ASonuc.Mesaj := 'SendInvoice istisnasi: ' + E.Message;

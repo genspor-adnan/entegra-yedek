@@ -2794,6 +2794,7 @@ const
     Ops_ServisHareketlerSekmesi=-30031;
     Ops_Servis_OzellikSekmesi=-30032;
     Ops_Servis_TureDurum=-30033;
+    Ops_Servis_AktifSekmeSecimi=-30034;
  //Döküman Opsiyonlar  32___
     Ops_Dokuman_GoogleWsdl =-31001;
     Ops_Dokuman_GelenKutusu = -31002;

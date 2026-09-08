@@ -283,9 +283,6 @@ type
     MenuUrunEslestir: TMenuItem;
     MenuEslesmeTablosunuAc: TMenuItem;
     MenuKDVIstisna: TMenuItem;
-    Menu_Ihr_Istisna: TMenuItem;
-    Menu_Ihr_Satis: TMenuItem;
-    Menu_Ihr_Iade: TMenuItem;
     MenuTasnifDisinaTasi: TMenuItem;
     MenuSistemeTasi: TMenuItem;
     MenuGelenKutusunaTasi: TMenuItem;
@@ -517,7 +514,7 @@ begin
              else
                 IthalatIhracatMenu.Caption:=Ihracat; }
           end;
-  109   : YeniTus.DropdownMenu:=PopupKonsGiris;
+  10,109 : YeniTus.DropdownMenu:=PopupKonsGiris;
   else
      YeniTus.DropdownMenu:=nil;
   end;
@@ -1678,6 +1675,14 @@ begin
   if ACellViewInfo = nil then Exit;
   if ACellViewInfo.Item <> GridFatViewKOD then Exit;
   if (not FATURA.Active) or FATURA.IsEmpty then Exit;
+  // Koddan urun secme yalniz gelen e-Faturalarda kullanilir.
+  // Hazirlanan/gonderilen satis veya manuel alis belgelerinde bu hucreye
+  // tiklanmasi urun secim akisini tetiklememelidir.
+  if (not FATBASLIK.Active) or FATBASLIK.IsEmpty then Exit;
+  if FATBASLIK.FieldByName('TUR').AsInteger <> 11 then Exit;
+  if not ((FATBASLIK.FieldByName('EFATURADURUM').AsInteger = -1) or
+          (FATBASLIK.FieldByName('EFATURADURUM').AsInteger = -2) or
+          (FATBASLIK.FieldByName('EFATURADURUM').AsInteger = -3)) then Exit;
 
   AHandled := True;
   LFaturaID := FATURA.FieldByName('ID').AsInteger;
@@ -3305,10 +3310,6 @@ end;
 initialization
   Classes.RegisterClass(TFaturalarDlg);
 end.
-
-
-
-
 
 
 

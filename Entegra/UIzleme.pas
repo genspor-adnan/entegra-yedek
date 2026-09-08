@@ -643,6 +643,12 @@ begin
 end;
 
 procedure TIzlemeDlg.EditBarkodKeyUp(Sender: TObject; var Key: Word;  Shift: TShiftState);
+begin
+  //
+
+end;
+(*
+procedure TIzlemeDlg.EditBarkodKeyUp(Sender: TObject; var Key: Word;  Shift: TShiftState);
 var
   OBarkod,SKT,URT, BGun,BAy,BYil, UrunNo, BLot,BSrn,BMik,BChc,Format:string;
   j,SondanSil, isrt:integer;
@@ -790,7 +796,7 @@ begin
       EditBarkod.SelLength  := 200;
 
 end;
-
+*)
 procedure TIzlemeDlg.EkleTusClick(Sender: TObject);
 begin
   TabIzlem.Append;

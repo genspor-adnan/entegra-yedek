@@ -124,6 +124,9 @@ uses Windows, DB, System.JSON, xmldom, XMLIntf, dxSkinsCore,dxSkinLondonLiquidSk
     FOtoBuyutme: Integer;        // ardisik OTOMATIK sayfa buyutme sayaci (zincir freni)
     FDegerListesiKuruluyor: Boolean;  // FiltreDegerListesi re-Load reentrancy guard'i
     FFiltreKontrolKuyrukta: Boolean;  // cxGrid dropdown filtresi kriteri commit ettikten sonra tek tekrar kontrol
+    FFiltreKontrolDeneme: Integer;    // kriterin DevExpress tarafinda gec commit edilmesine karsi kisa retry
+    FFiltreTimer: TTimer;             // kriter commit'ini GERCEK ZAMANDA bekler (UI turu yetmiyor)
+    FSonrakiKuyrukta: Boolean;        // ayni scroll olayi icin birden fazla sayfa sorgusunu engeller
     FSessizBitis: UInt64;        // yukleme sonrasi scroll tetigini yok sayma damgasi (GetTickCount64)
     FSerit: TPanel;              // "kismi liste" uyari seridi (grid'in altinda, lazy olusur)
     FSeritYazi: TLabel;
@@ -136,6 +139,7 @@ uses Windows, DB, System.JSON, xmldom, XMLIntf, dxSkinsCore,dxSkinLondonLiquidSk
     procedure TamModaGec;             // FTamListe=True + kuyrukta TOP'suz requery
     procedure FiltreDurumunuUygula(AGecikmeli: Boolean);
     procedure FiltreKontrolKuyrukla;
+    procedure FiltreTimerTetik(Sender: TObject);
     procedure ScrollDegisti(Sender: TObject);
     procedure FiltreDegisti(Sender: TObject);
     procedure FiltreDegerListesi(Sender: TcxFilterCriteria; AItemIndex: Integer;
@@ -2037,6 +2041,12 @@ begin
           .AddPair('KulId',  TJSONNumber.Create(StrToIntDef(Trim(Kullanan), 0)))
           .AddPair('SubeId', TJSONNumber.Create(SubeID))) as TJSONObject),
     'BelgeId');
+
+  if (Result > 0) and (Tur = KasaTur_SatisFaturasi) and (EFaturaKullanimda > 0) then
+    Veritabani.BasitKomutÇalıştır(FDCnn,
+      'update FATBASLIK set FATURANO=''0'', KOCANNO=0 ' +
+      'where ID=&ID and TUR=&TUR and ltrim(rtrim(coalesce(FATURANO,'''')))<>''0''',
+      ['&ID', '&TUR'], [Result, KasaTur_SatisFaturasi]);
 end;
 
 procedure TTablo.MailSablonYonetimi(ModulID:Integer);
@@ -2181,7 +2191,7 @@ var
   StokDurumDegis,j,ABirim,HedefBaslikTur,UrunID,RehberID,a,UrunTur,IzlemId,DepoId: integer;
   HedefBelgeTarih:TDateTime;
   AAdet:Extended;
-  StokAdi: String;
+  StokAdi, KaynakIzlemeKodu, KaynakIzleme: String;
   ADT: String[5];
   SonucListe : TStringList;
   IzlemDlg : TIzlemeDlg;
@@ -2209,6 +2219,21 @@ begin
     TabNo_DONUSUM_SATINALMATALEP_SIPARIS:StokDurumDegis:=0;
   else
     StokDurumDegis:=1;
+  end;
+
+  UrunTur := -1;
+  KaynakIzlemeKodu := 'IZLEMEKODU';
+  KaynakIzleme := 'IZLEME';
+  if (KaynakDetayTabloAdi <> '') and (kaynaksatirid > 0) then begin
+    TablodanSorguAc(2,'select TUR from '+KaynakDetayTabloAdi+' where ID = '+IntToStr(kaynaksatirid));
+    if not Query2.IsEmpty then
+      UrunTur := Query2.FieldByName('TUR').AsInteger;
+    Query2.Close;
+  end;
+  if not (UrunTur in [1,11]) then begin
+    Izleme := 0;
+    KaynakIzlemeKodu := '''''';
+    KaynakIzleme := '0';
   end;
   //izleme init iİlemleri   8/1/2019 da yeni izlemeye göre
 (*  TablodanSorguAc(2,'select * from '+KaynakDetayTabloAdi+' where ID = '+IntToStr(kaynaksatirid));
@@ -2244,9 +2269,9 @@ begin
          Tablo.Query5.SQL.Add(',EN,BOY,YUZEY,SAYI');
       Tablo.Query5.SQL.Add(') OUTPUT INSERTED.ID INTO @Yeni SELECT '+inttostr(hedefbaslikid)+',REHBERID,TUR,URUNID,ACIKLAMA,'+StringReplace(FloatToStr(adet),',','.',[])+','+StringReplace(FloatToStr(Birim),',','.',[])+','+StringReplace(FloatToStr(Miktar),',','.',[])+',');
       Tablo.Query5.SQL.Add('BIRIMFIYAT,TUTAR=(100.0-isnull(ISKONTO2,0.0))*(100.0-ISKONTO)*'+StringReplace(FloatToStr(adet),',','.',[])+'*BIRIMFIYAT/10000.0,');
-      Tablo.Query5.SQL.Add('ISKONTO,KDV,OTVYUZDE,OTVMIKTAR,MASRAFID,OZELKOD,OZELKOD2,MUHKODU,KASA,'+Kullanan+',KUR,IZLEMEKODU,');
+      Tablo.Query5.SQL.Add('ISKONTO,KDV,OTVYUZDE,OTVMIKTAR,MASRAFID,OZELKOD,OZELKOD2,MUHKODU,KASA,'+Kullanan+',KUR,'+KaynakIzlemeKodu+',');
       Tablo.Query5.SQL.Add('DOVIZ_TUTARI=(100.0-isnull(ISKONTO2,0.0))*(100.0-ISKONTO)*'+StringReplace(FloatToStr(adet),',','.',[])+'*DOVIZ_BIRIMFIYAT/10000.0,');
-      Tablo.Query5.SQL.Add('DOVIZ_KURU,ISKONTO2,IZLEME,MF,'+IntToStr(DonusTuru)+','+IntToStr(kaynaksatirid)+',');
+      Tablo.Query5.SQL.Add('DOVIZ_KURU,ISKONTO2,'+KaynakIzleme+',MF,'+IntToStr(DonusTuru)+','+IntToStr(kaynaksatirid)+',');
       if (DonusTuru = TabNo_DONUSUM_SATIS_SIPARIS_URETIM_URUN) or (DonusTuru = TabNo_DONUSUM_SATIS_SIPARIS_URETIM_SARF) then
         Tablo.Query5.SQL.Add('DOVIZ_BIRIMFIYAT,DOVIZKURDEGERI,'+IntToStr(StokDurumDegis)+',VADE,KAMPANYAID,PROJEID,EKIPMANID=1,SUBEID')
       else
@@ -2267,9 +2292,9 @@ begin
          Tablo.Query5.SQL.Add(',KDVMUHAFIYETI ');
       Tablo.Query5.SQL.Add(') OUTPUT INSERTED.ID INTO @Yeni SELECT '+inttostr(hedefbaslikid)+',REHBERID,TUR,URUNID,ACIKLAMA,'+StringReplace(FloatToStr(adet),',','.',[])+','+StringReplace(FloatToStr(Birim),',','.',[])+','+StringReplace(FloatToStr(Miktar),',','.',[])+',');
       Tablo.Query5.SQL.Add('BIRIMFIYAT,TUTAR=(100.0-isnull(ISKONTO2,0.0))*(100.0-ISKONTO)*'+StringReplace(FloatToStr(adet),',','.',[])+'*BIRIMFIYAT/10000.0,');
-      Tablo.Query5.SQL.Add('ISKONTO,KDV,OTVYUZDE,OTVMIKTAR,MASRAFID,OZELKOD,OZELKOD2,POZNO,MUHKODU,KASA,'+Kullanan+',KUR,IZLEMEKODU,');
+      Tablo.Query5.SQL.Add('ISKONTO,KDV,OTVYUZDE,OTVMIKTAR,MASRAFID,OZELKOD,OZELKOD2,POZNO,MUHKODU,KASA,'+Kullanan+',KUR,'+KaynakIzlemeKodu+',');
       Tablo.Query5.SQL.Add('DOVIZ_TUTARI=(100.0-isnull(ISKONTO2,0.0))*(100.0-ISKONTO)*'+StringReplace(FloatToStr(adet),',','.',[])+'*DOVIZ_BIRIMFIYAT/10000.0,');
-      Tablo.Query5.SQL.Add('DOVIZ_KURU,ISKONTO2,IZLEME,MF,'+IntToStr(DonusTuru)+','+IntToStr(kaynaksatirid)+',');
+      Tablo.Query5.SQL.Add('DOVIZ_KURU,ISKONTO2,'+KaynakIzleme+',MF,'+IntToStr(DonusTuru)+','+IntToStr(kaynaksatirid)+',');
       if (DonusTuru = TabNo_DONUSUM_SATIS_SIPARIS_URETIM_URUN) or (DonusTuru = TabNo_DONUSUM_SATIS_SIPARIS_URETIM_SARF) then
         Tablo.Query5.SQL.Add('DOVIZ_BIRIMFIYAT,DOVIZKURDEGERI,'+IntToStr(StokDurumDegis)+',VADE,KAMPANYAID,PROJEID,EKIPMANID=1,SUBEID')
       else
@@ -3405,14 +3430,21 @@ begin
 end;
 
 function TTablo.KarekodOku(Tip:Smallint; OBarkod:string):string;
-var yer, i : smallint;
-    okunan, format : string;
+var yer, i,Basla,Bitis : smallint;
+    okunan, format,Format2 : string;
 begin
     Tablo.TablodanSorguAc(5,'select BASLANGIC from BARKODAYARLAR where TIP='+ IntToStr(Tip) +' ORDER BY LEN( BASLANGIC) DESC');
     while not Tablo.Query5.eof do begin
        okunan := '';
        Format := Tablo.Query5.FieldByName('BASLANGIC').AsString;
-       yer := pos(Format, OBarkod);
+       (*if pos('(',Format)>0 then begin  //(01) olan barkod da oluyor 01 olarak gelen de
+          Basla := pos('(',Format);
+          Bitis := pos(')',Format);
+          Format2 := Copy(Format, Basla + 1, Bitis - Basla - 1);
+       end;  *)
+       yer := pos(Format, OBarkod);  //önce (01) mı diye
+       if yer=0 then
+          yer := pos(Format2, OBarkod); //sonra 01 mı diye
        if yer > 0 then begin
           i := yer + length(format);
           while OBarkod[i]=' ' do
@@ -3428,6 +3460,34 @@ begin
     end;
     result := okunan;
 end;
+(*function TTablo.KarekodOku(Tip:Smallint; OBarkod:string):string;
+var yer, i,Basla,Bitis : smallint;
+    okunan, format,Format2 : string;
+begin
+    Tablo.TablodanSorguAc(5,'select BASLANGIC from BARKODAYARLAR where TIP='+ IntToStr(Tip) +' ORDER BY LEN( BASLANGIC) DESC');
+    while not Tablo.Query5.eof do begin
+       okunan := '';
+       Format := Tablo.Query5.FieldByName('BASLANGIC').AsString;
+
+       yer := pos(Format, OBarkod);  //önce (01) mı diye
+       if yer=0 then
+          yer := pos(Format2, OBarkod); //sonra 01 mı diye
+       if yer > 0 then begin
+          i := yer + length(format);
+          while OBarkod[i]=' ' do
+            inc(i);
+          while (OBarkod[i] <> ' ')and(OBarkod[i] <> '(')and(i <= length(OBarkod)) do begin
+            okunan := okunan + OBarkod[i];
+            inc(i);
+          end;
+          Tablo.Query5.last;//bir defa olması yeterli     (10) Lot:  ve  (10)  gibi 2 değişik olabiliyor
+       end;
+
+       Tablo.Query5.next;
+    end;
+    result := okunan;
+end;*)
+
 function TTablo.EMailBilgiGetir(RehberID:integer; AliciMailAdr:String = '';BilgiMailAdr:String=''): DMailadresleri; //  tstrings;
 var
   posta  : DMailadresleri;
@@ -12780,7 +12840,7 @@ var
   LQ: TFDQuery;
   LSts: TStringList;
   LTur, LId, LReh: Integer;
-  LNo: string;
+  LNo, LSecimSQL: string;
 begin
   Result := False;
   if ABelgeId <= 0 then Exit;
@@ -12794,8 +12854,16 @@ begin
       LQ.SQL.Text := 'exec dbo.sp_Prog_Donusum_KaynakBelge :Tablo, :Id';
     if AktifVeriMotor = vmPG then
       LQ.SQL.Text := PgSqlCevir(LQ.SQL.Text);
-    LQ.ParamByName('Tablo').AsString := ABelgeTablo;
-    LQ.ParamByName('Id').AsInteger := ABelgeId;
+    // MSSQL'de EXEC icindeki tablo parametresinin tipi metadata'dan
+    // belirlenemeyebilir. Prepare/Open oncesi tipi acikca verilmeli.
+    with LQ.ParamByName('Tablo') do begin
+      DataType := ftString;
+      AsString := ABelgeTablo;
+    end;
+    with LQ.ParamByName('Id') do begin
+      DataType := ftInteger;
+      AsInteger := ABelgeId;
+    end;
     LQ.Open;
 
     if LQ.IsEmpty then Exit;                       // bagli belge yok
@@ -12813,9 +12881,16 @@ begin
       //   secim listesi ayni sorguyu kullanir).
       LSts := TStringList.Create;
       try
+        // TabloGirisDlg sorguyu kendi TFDQuery'si ile yeniden acar ve
+        // parametre degerlerini tasimaz. Liste sorgusunda parametre birakilirsa
+        // FireDAC [TABLO] data type is unknown hatasi verir.
+        LSecimSQL := StringReplace(LQ.SQL.Text, ':Tablo', QuotedStr(ABelgeTablo),
+          [rfReplaceAll, rfIgnoreCase]);
+        LSecimSQL := StringReplace(LSecimSQL, ':Id', IntToStr(ABelgeId),
+          [rfReplaceAll, rfIgnoreCase]);
         if not ListedenBilgiGetir(
              IfThen(SameText(AYon, 'HEDEF'), 'Hedef Belge Seçimi', 'Kaynak Belge Seçimi'),
-             LQ.SQL.Text, LSts,
+             LSecimSQL, LSts,
              [cxEditRepository1Label1, cxEditRepository1Label1, cxEditRepository1Label1,
               cxEditRepository1Label1, cxEditRepository1Label1, cxEditRepository1Label1,
               cxEditRepository1Label1, cxEditRepository1Label1],
@@ -16633,7 +16708,10 @@ begin
   // Siralama: yalniz KULLANICI siraladiysa tam liste gerekir. Kayitli grid ayarindan
   // (AYAR) gelen siralama tum listeleri kalici olarak TOP'suz cekmeye zorluyordu.
   Result := FSiralamaKullanici or
-    (FGrid.DataController.Filter.Active and (not FGrid.DataController.Filter.IsEmpty));
+    // DevExpress coklu secim popup'inda ilk secimde kriter Root'a yazilirken
+    // Active bayragi bir sonraki UI turunda guncellenebiliyor. Active'i sart
+    // kosmak ilk secimi kacirip filtreyi ancak kaldirip yeniden secince uygular.
+    (not FGrid.DataController.Filter.IsEmpty);
 end;
 
 // Tam moda gecis: TOP'suz requery kuyrukta (FYukleniyor korumali -> TopN sayfa sinirini
@@ -16665,17 +16743,41 @@ begin
   FiltreDegisti(nil);   // ayni degerlendirme: gereksinim degistiyse gecis yap
 end;
 
+// Kriter commit kontrolu GERCEK ZAMANLA beklenir (kullanici: "filtrede ilk
+// secim filtrelemiyor, kaldirip tekrar secince calisiyor").
+//
+// NEDEN TIMER: DevExpress coklu-secim popup'i kriteri Root'a UI turu icinde
+// degil, popup kapanis/commit adiminda yaziyor. ForceQueue ile atilan 4 tur
+// ayni mesaj dongusunde tukeniyor ve filtre HALA bos gorunuyordu; kontrol
+// vazgecince ilk secim sessizce atlaniyor, kullanici uncheck/re-select
+// yapinca (kriter artik yazili) ikinci secim calisiyordu.
 procedure TSayfaliListe.FiltreKontrolKuyrukla;
 begin
-  if FFiltreKontrolKuyrukta then Exit;
+  if csDestroying in ComponentState then Exit;
+  if FFiltreTimer = nil then begin
+    FFiltreTimer := TTimer.Create(Self);
+    FFiltreTimer.Enabled := False;
+    FFiltreTimer.Interval := 150;   // commit icin yeterli, kullaniciya gorunmez
+    FFiltreTimer.OnTimer := FiltreTimerTetik;
+  end;
   FFiltreKontrolKuyrukta := True;
-  TThread.ForceQueue(nil,
-    TThreadProcedure(procedure
-    begin
-      if csDestroying in ComponentState then Exit;
-      FFiltreKontrolKuyrukta := False;
-      FiltreDurumunuUygula(True);
-    end));
+  FFiltreTimer.Enabled := False;   // yeni olay geldi: sureyi bastan baslat
+  FFiltreTimer.Enabled := True;
+end;
+
+// Zamanlayici tetigi: kriter yazildi mi diye bakar; yazildiysa (ya da sure
+// doldiysa) durumu uygular. Anonim metot TNotifyEvent'e atanamadigi icin
+// ayri metot.
+procedure TSayfaliListe.FiltreTimerTetik(Sender: TObject);
+begin
+  if csDestroying in ComponentState then Exit;
+  if TamGereksinim or (FFiltreKontrolDeneme >= 6) then begin
+    FFiltreTimer.Enabled := False;
+    FFiltreKontrolKuyrukta := False;
+    FFiltreKontrolDeneme := 0;
+    FiltreDurumunuUygula(True);
+  end else
+    Inc(FFiltreKontrolDeneme);
 end;
 
 // Grid filtre/siralama durumu degisti: gereksinim DOGDUYSA tam listeye gec,
@@ -16718,6 +16820,7 @@ end;
 procedure TSayfaliListe.FiltreDegisti(Sender: TObject);
 begin
   if (Sender <> nil) and Assigned(FEskiFiltre) then FEskiFiltre(Sender);
+  FFiltreKontrolDeneme := 0;
   FiltreDurumunuUygula(False);
 end;
 
@@ -16793,13 +16896,15 @@ end;
 
 procedure TSayfaliListe.SonrakiKuyrukla;
 begin
-  if FYukleniyor then Exit;
+  if FYukleniyor or FSonrakiKuyrukta then Exit;
+  FSonrakiKuyrukta := True;
   // Requery scroll/cizim olayinin ICINDE yapilamaz (dataset yeniden acilir) -> ana kuyruk.
   TThread.ForceQueue(nil,
     TThreadProcedure(procedure
     begin
-      if not (csDestroying in ComponentState) then
-        SonrakiGetir;
+      if csDestroying in ComponentState then Exit;
+      FSonrakiKuyrukta := False;
+      SonrakiGetir;
     end));
 end;
 

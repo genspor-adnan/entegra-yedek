@@ -99,6 +99,8 @@ type
     MenuSecimiTersCevir: TMenuItem;
     N1: TMenuItem;
     ComboProjeFirsatSec: TcxImageComboBox;
+    cxLabel12: TcxLabel;
+    ComboAktifSekmeSecimi: TcxImageComboBox;
     procedure CancelBtnClick(Sender: TObject);
     procedure KaydetTusClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -271,6 +273,7 @@ begin
   CheckGenelSekmesi.Checked := Tablo.GENINI.ReadBoolean(Ops_Servis_GenelSekmesi,True);
   CheckYorumSekmesi.Checked := Tablo.GENINI.ReadBoolean(Ops_Servis_YorumSekmesi,True);
   ComboHareketlerSekmesi.EditValue:= Tablo.GENINI.ReadInteger(Ops_ServisHareketlerSekmesi, 1);
+  ComboAktifSekmeSecimi.EditValue := Tablo.GENINI.ReadInteger(Ops_Servis_AktifSekmeSecimi, 1);
 
   checkBirdenFazlaPers.Checked := Tablo.GENINI.ReadBoolean(Ops_ServisBirdenFazlaSorumluPers,False);
   CheckTureDurum.Checked := Tablo.GENINI.ReadBoolean(Ops_Servis_TureDurum, False);
@@ -319,6 +322,7 @@ begin
   Tablo.GENINI.WriteBoolean(Ops_Servis_GenelSekmesi,CheckGenelSekmesi.Checked);
   Tablo.GENINI.WriteBoolean(Ops_Servis_YorumSekmesi,CheckYorumSekmesi.Checked);
   Tablo.GENINI.WriteInteger(Ops_ServisHareketlerSekmesi, ComboHareketlerSekmesi.EditValue);
+  Tablo.GENINI.WriteInteger(Ops_Servis_AktifSekmeSecimi, ComboAktifSekmeSecimi.EditValue);
 
   Tablo.GENINI.WriteBoolean(Ops_Servis_TureDurum,CheckTureDurum.Checked);
 

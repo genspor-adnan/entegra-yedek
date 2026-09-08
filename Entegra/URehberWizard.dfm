@@ -2490,7 +2490,7 @@ object RehberWizardDlg: TRehberWizardDlg
       'from REHBERBILGI RB INNER JOIN REHBERAYAR RA ON RB.SIRA=RA.SIRA'
       'where RB.YERI= :Yeri  and RB.YER_ID= :Yeri_Id'
       'order by  1')
-    Left = 627
+    Left = 547
     Top = 36
     ParamData = <
       item
@@ -2561,8 +2561,8 @@ object RehberWizardDlg: TRehberWizardDlg
     SQL.Strings = (
       'select  * from REHBER'
       'where ID=:PAR')
-    Left = 263
-    Top = 16
+    Left = 287
+    Top = 24
     ParamData = <
       item
         Name = 'PAR'
@@ -2663,8 +2663,8 @@ object RehberWizardDlg: TRehberWizardDlg
   end
   object PopupIlgili: TPopupMenu
     Images = Tablo.PNGImageList2
-    Left = 129
-    Top = 7
+    Left = 57
+    Top = 65535
     object lgiliKurumdanAyrld1: TMenuItem
       Caption = #304'lgilinin durumunu '#39'Ayr'#305'ld'#305#39' olarak '
       ImageIndex = 10

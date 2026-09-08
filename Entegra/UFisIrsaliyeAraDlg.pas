@@ -156,11 +156,12 @@ end;
 
 procedure TFisIrsaliyeAraDlg.btnIslemiTamamlaClick(Sender: TObject);
 var
- DonusTuru, HedefBaslikTuru, belgetipi, hedefbaslikid, hareketyonu,depoid, faturasatirid: integer;
+  DonusTuru, HedefBaslikTuru, belgetipi, hedefbaslikid, hareketyonu,depoid, faturasatirid: integer;
+  DonusIzleme: Integer;
  donusumayarlari : TBelgeDonusumAyar;
  basliktablosu, detaytablosu, depoalani:string;
  GDepo,CDepo: Integer;
- stokyeterli:boolean;
+ stokyeterli, stokSatiri:boolean;
  miktar : real;
 begin
   if tabDonusumSepet.RecordCount<=0 then Abort;
@@ -172,7 +173,15 @@ begin
       belgetipi:=1;
     DonusTuru:=Tablo.BelgeDonustur_DonusTipiBul(tabDonusumSepet.FieldByName('FATBASTUR').AsInteger,belgetipi );
     donusumayarlari:= Tablo.BelgeDonustur_BilgiAyarlari(DonusTuru, HedefBaslikTuru, basliktablosu, detaytablosu, depoalani);
-    if tabDonusumSepet.FieldByName('TUR').AsInteger=1 then begin
+    stokSatiri := tabDonusumSepet.FieldByName('TUR').AsInteger in [1,11];
+    // Hizmet satiri stok/lot izleme akimina kesinlikle girmemeli. Kaynak kayitta
+    // IZLEME degeri yanlislikla dolu olsa bile donusum hedefine tasinmasin.
+    if stokSatiri then
+      DonusIzleme := tabDonusumSepet.FieldByName('IZLEME').AsInteger
+    else
+      DonusIzleme := 0;
+    stokyeterli:=True;
+    if stokSatiri then begin
        //çıkış türü fatura ise stok kontrol durumuna bakılıyor
       if donusumayarlari.Baslikturu in [KasaTur_SatisIrsaliyesi, KasaTur_SatisFaturasi] then begin
         //19.07.2026 AO: StokVarmi -> StokCikisYeterliMi (tarih-bazli; StokDurumKontrolKurali + mesaj helper icinde)
@@ -186,6 +195,7 @@ begin
       end
       else
         stokyeterli:=True; // alış belgelerinde stok kontrolüne takılmadan işlemin devam etmesi için
+    end;
       if stokyeterli then begin
         Tablo.BelgeDonustur_DetaySatirOlustur(faturasatirid,DonusTuru,
                                                SeciliFatID,
@@ -194,12 +204,12 @@ begin
                                                tabDonusumSepet.FieldByName('ADET').AsFloat,
                                                tabDonusumSepet.FieldByName('BIRIM').AsFloat,
                                                tabDonusumSepet.FieldByName('MIKTAR').AsFloat,
-                                               tabDonusumSepet.FieldByName('IZLEME').AsInteger,
+                                               DonusIzleme,
                                                donusumayarlari.basliktablosu,donusumayarlari.detaytablosu,'FATBASLIK','FATURA');
         //izleme durumunun skt, serino gibi olması durumunda gerekli işlemler yapılmalı
         //eğer uygun miktar cıkısı yapılmamıssa ilgili satır silinmeli
 
-        if tabDonusumSepet.FieldByName('IZLEME').AsInteger > 0 then begin //izlemesi var ise
+        if stokSatiri and (tabDonusumSepet.FieldByName('IZLEME').AsInteger > 0) then begin //izlemesi var ise
           case DonusTuru of
             TabNo_DONUSUM_ALIS_IRS_FAT:; //bu durumda stokdurum bile değişmeyecek..
             TabNo_DONUSUM_SATIS_IRS_FAT:;
@@ -243,7 +253,6 @@ begin
           end;
         end;
       end;
-    end;
      tabDonusumSepet.Next;
   end;
    mnSil.Click;// işlem tamamlandıktan sonra sepet boşaltılır

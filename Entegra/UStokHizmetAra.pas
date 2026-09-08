@@ -117,6 +117,8 @@ type
     DtsKategori: TDataSource;
     TabKategori: TFDQuery;
     TreeListKategori: TcxDBTreeList;
+    // Kategori agaci ile grid arasindaki ayirici: agac kapanabilsin/genisleyebilsin.
+    SplitterKategori: TcxSplitter;
     TreeListKOD: TcxDBTreeListColumn;
     TreeListAD: TcxDBTreeListColumn;
     TreeListID: TcxDBTreeListColumn;
@@ -537,10 +539,16 @@ begin
 end;
 
 procedure TStokHizmetAraDlg.PageControl1Change(Sender: TObject);
+var
+  LStokSekmesi: Boolean;
 begin
     TabKategori.Close;
     if Assigned(PageControl1.ActivePage) then begin
-      if (PageControl1.ActivePage.Name='SheetStok') and PanelDetayliArama.Visible then begin
+      // KATEGORI AGACI ARTIK "Detayli Arama"YA BAGLI DEGIL (kullanici): Stoklar
+      //   sekmesinde HER ZAMAN acilir; agacin genisligi ve kapanmasi soldaki
+      //   splitter'dan (SplitterKategori) yonetilir.
+      LStokSekmesi := PageControl1.ActivePage.Name = 'SheetStok';
+      if LStokSekmesi then begin
          // ROOTKOD = KOD'un son '.' oncesi (ust kategori kodu). CHARINDEX/LEN MSSQL'e ozel;
          // PG'de strpos (ARG SIRASI TERS: haystack,needle) / LENGTH. Alias 'AS' ile portable.
          var LRootKod: string;
@@ -551,9 +559,10 @@ begin
          TabKategori.SQL.Text := ' select '+LRootKod+' AS ROOTKOD, ID,KOD,AD,DURUM from KATEGORI order by KOD';
       end
       else TabKategori.SQL.Text := ' select ID from KATEGORI where 1=2';
-      if (PageControl1.ActivePage.Name='SheetStok') and PanelDetayliArama.Visible then
+      if LStokSekmesi then
         TabKategori.Open;
-      TreeListKategori.Visible := TabKategori.Active and (TabKategori.RecordCount>0);
+      TreeListKategori.Visible  := TabKategori.Active and (TabKategori.RecordCount>0);
+      SplitterKategori.Visible  := TreeListKategori.Visible;
       // Bos kriterde sekmenin VARSAYILAN kapsami gelir (Stok=Son Aranan, Hizmet=Tumu);
       //   eskiden liste bos kalir, kullanici ToolBarAranan butonuna basmak zorundaydi.
       //   Dagitim sekmesi sabit/kucuk liste - o yuklenmeye devam eder.
@@ -787,9 +796,11 @@ end;
 
 procedure TStokHizmetAraDlg.LabelDetayliAramaClick(Sender: TObject);
 begin
-  PanelDetayliArama.Visible := not PanelDetayliArama.visible;
-  if PanelDetayliArama.Visible then
-    PageControl1Change(Sender);
+  // Panel yalnizca acilip kapanir. Eskiden burada PageControl1Change cagriliyordu
+  //   (kategori agacini yuklemek icin); agac artik sekmeyle birlikte hep acik
+  //   oldugundan gereksiz - ustelik o cagri secili kategori filtresini silip
+  //   listeyi "Son Aranan" kapsamina geri donduruyordu.
+  PanelDetayliArama.Visible := not PanelDetayliArama.Visible;
 end;
 
 procedure TStokHizmetAraDlg.LabelOncekiAlimSatimClick(Sender: TObject);
@@ -1151,6 +1162,8 @@ Begin
         begin
           DetayAlanaYazZorla('KOD', Kod);
           DetayAlanaYazZorla('AD',  Ad);
+          if TabStokListe.FindField('URUNNO') <> nil then
+            DetayAlanaYazZorla('URUNNO', TabStokListe.FieldByName('URUNNO').AsString);
         end;
       3..8, 10..18, 20: ;
       100,101: ;
@@ -1533,7 +1546,7 @@ begin
     LabelSonEklenen.Caption := '';
     //GridStokViewColumnAd.Caption := 'Ad';
   end else
-    AramaListesiniEskiHalineCevir := True;
+     AramaListesiniEskiHalineCevir := True;
   // FiyatlariGetir,KalanAdetGetir
   OkunanBarkod := Trim(EditBarkodu.Text);
   if EditBarkodu.Text<>'' then begin
@@ -1554,6 +1567,17 @@ begin
   else if PageControl1.ActivePage = SheetDagitim then
      DagitimAra;
 
+(*  OkunanBarkod := Trim(EditBarkodu.Text);
+  if EditBarkodu.Text<>'' then begin
+     if (pos('01', OkunanBarkod)=1)and(pos('17', OkunanBarkod)=17) then //Karekod 01 ile ba?lay?p 14 karakter stokkodu
+         OkunanBarkod := copy(OkunanBarkod,3,14)
+     else if (pos('(01)', OkunanBarkod)>0) then //Karekod ?r : (10) BL005222511       (01) 8681489704423
+         OkunanBarkod := Tablo.KarekodOku(1, OkunanBarkod)
+     else
+         OkunanBarkod :=  OkunanBarkod;  //yoksa kendisi
+     if pos('0', OkunanBarkod)=1 then  //ba??nda s?f?r varsa atal?m
+          OkunanBarkod := copy(OkunanBarkod, 2, 300);     *)
+  end;
 end;
 
 function TStokHizmetAraDlg.ITSPaketEkle(UrunID: Integer): Boolean;
@@ -1864,7 +1888,15 @@ begin
 end;
 
 procedure TStokHizmetAraDlg.TreeListKategoriClick(Sender: TObject);
+// TEK TIKLAMA = O KATEGORIYI LISTELE (kullanici).
+//   Iki tuzak vardi: (1) bos alana tiklaninca eski kategori tekrar aranıyordu,
+//   (2) sekmenin varsayilan kapsami "Son Aranan" (FAramaKapsami=1) oldugu icin
+//   StokAra kategori dalina HIC girmiyordu - tiklama listeyi degistirmiyordu.
+//   Kapsam burada sifirlanir; TabKategori imleci agacin odakli dugumunde.
 begin
+  if TreeListKategori.FocusedNode = nil then Exit;
+  if not (TabKategori.Active and (TabKategori.RecordCount > 0)) then Exit;
+  AramaKapsamiSifirla;
   ListeAc(2);
 end;
 

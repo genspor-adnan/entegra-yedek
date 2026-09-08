@@ -395,6 +395,33 @@ object OpsiyonServisDlg: TOpsiyonServisDlg
         TabOrder = 9
         OnClick = btnMailSablonClick
       end
+      object cxLabel12: TcxLabel
+        Left = 342
+        Top = 99
+        Caption = 'Aktif Sekme Se'#231'imi'
+      end
+      object ComboAktifSekmeSecimi: TcxImageComboBox
+        Left = 458
+        Top = 97
+        EditValue = 1
+        Properties.ImmediatePost = True
+        Properties.ImmediateUpdateText = True
+        Properties.Items = <
+          item
+            Description = 'Teslim'
+            Value = 1
+          end
+          item
+            Description = 'Ek Alanlar'
+            Value = 2
+          end
+          item
+            Description = #214'zellik'
+            Value = 3
+          end>
+        TabOrder = 10
+        Width = 121
+      end
     end
     object cxTabSheet1: TcxTabSheet
       Caption = 'Durum Ba'#287'lant'#305'lar'#305
@@ -752,4 +779,3 @@ object OpsiyonServisDlg: TOpsiyonServisDlg
     end
   end
 end
-

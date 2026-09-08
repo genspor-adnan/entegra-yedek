@@ -1423,6 +1423,32 @@ function ServisGecmisServislerSqlPG: string; forward;
 
 procedure TServisWizardDlg.FormShow(Sender: TObject);
 var I : smallint;
+
+  procedure SagUstAktifSekmeAyarla;
+  begin
+    case Tablo.GENINI.ReadInteger(Ops_Servis_AktifSekmeSecimi, 1) of
+      2:
+        if EkAlanlarEkr.TabVisible then begin
+          PageControl1.ActivePage := EkAlanlarEkr;
+          Exit;
+        end;
+      3:
+        if SheetOzellik.TabVisible then begin
+          PageControl1.ActivePage := SheetOzellik;
+          Exit;
+        end;
+    end;
+
+    if SheetTeslim.TabVisible then
+      PageControl1.ActivePage := SheetTeslim
+    else if EkAlanlarEkr.TabVisible then
+      PageControl1.ActivePage := EkAlanlarEkr
+    else if SheetOzellik.TabVisible then
+      PageControl1.ActivePage := SheetOzellik
+    else if PageControl1.PageCount > 0 then
+      PageControl1.ActivePageIndex := 0;
+  end;
+
 begin
   EkleDetay := False;
   aktifFrame := TGenelAnaSekmeFrame(UTablo.AnaFrameYoneticisi.AktifFrame.Ornek);
@@ -1539,13 +1565,9 @@ begin
 //     PageControl1.ActivePage := SheetHareketlerUst;
   ServisPageControl.ActivePageIndex := 0;
   ServisPageControlChange(self);
-  // Acilista Teslim sekmesi aktif olsun: AlanOlustur (SERVIS_USER) ek-alan kontrollerini
-  //   EkAlanlarEkr'e kurunca o sekme kendiliginden aktiflesiyordu -> Teslim'e geri al.
-  //   Ek Alan'a tiklaninca PageControl1Change zaten AlanOlustur ile bilgileri yukler.
-  if SheetTeslim.TabVisible then
-    PageControl1.ActivePage := SheetTeslim
-  else
-    PageControl1.ActivePageIndex := 0;
+  // AlanOlustur (SERVIS_USER) ek-alan kontrollerini EkAlanlarEkr'e kurunca
+  // sekme kendiliginden aktiflesebiliyor; acilis sekmesini opsiyondan uygula.
+  SagUstAktifSekmeAyarla;
 
   // Servis hareket satirlari log baseline: yeni (E) -> bos snapshot (tum satirlar ekleme);
   // duzenleme (D) -> mevcut hareket satirlari snapshot'a alinir (Finish'te diff).
@@ -2600,7 +2622,6 @@ begin
 end;
 
 end.
-
 
 
 

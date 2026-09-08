@@ -138,15 +138,15 @@ object FaturaWizardDlg: TFaturaWizardDlg
       ExplicitHeight = 0
       object Panel3: TPanel
         Left = 0
-        Top = 277
+        Top = 285
         Width = 1104
-        Height = 333
+        Height = 325
         Align = alClient
         Caption = 'Panel3'
         TabOrder = 3
         object PanelAlt: TPanel
           Left = 1
-          Top = 167
+          Top = 159
           Width = 1102
           Height = 165
           Align = alBottom
@@ -324,13 +324,13 @@ object FaturaWizardDlg: TFaturaWizardDlg
             Left = 407
             Top = 6
             Width = 300
-            Height = 139
+            Height = 155
             BevelEdges = []
             BevelOuter = bvNone
             TabOrder = 2
             DesignSize = (
               300
-              139)
+              155)
             object cxDBLabel5: TcxDBLabel
               Left = -411
               Top = 82
@@ -508,8 +508,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
               Transparent = True
             end
             object DOVIZ_TUTARI: TcxDBCurrencyEdit
-              Left = 222
-              Top = 99
+              Left = 165
+              Top = 108
               Anchors = [akLeft, akBottom]
               DataBinding.DataField = 'DOVIZ_TUTARI'
               DataBinding.DataSource = DtsFatBaslik
@@ -523,7 +523,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
               Style.Font.Style = []
               Style.IsFontAssigned = True
               TabOrder = 13
-              Visible = False
               Width = 78
             end
           end
@@ -816,7 +815,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
           Left = 1
           Top = 25
           Width = 1102
-          Height = 142
+          Height = 134
           Align = alClient
           PopupMenu = PopupMenuFatura
           TabOrder = 1
@@ -1691,14 +1690,14 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Left = 0
         Top = 105
         Width = 1104
-        Height = 172
+        Height = 180
         Align = alTop
         TabOrder = 7
         Properties.ActivePage = SheetFatBaslik
         Properties.CustomButtons.Buttons = <>
         Properties.Images = Tablo.PNGImageList2
         OnChange = PageUstChange
-        ClientRectBottom = 168
+        ClientRectBottom = 176
         ClientRectLeft = 4
         ClientRectRight = 1100
         ClientRectTop = 27
@@ -1713,7 +1712,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
             Left = 0
             Top = 0
             Width = 1096
-            Height = 141
+            Height = 149
             Align = alClient
             BevelOuter = bvNone
             Color = 11776947
@@ -1727,7 +1726,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
             TabOrder = 0
             DesignSize = (
               1096
-              141)
+              149)
             object LabelSRMMerkezi: TcxLabel
               Left = 505
               Top = 58
@@ -1777,7 +1776,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
               Left = 3
               Top = 3
               Width = 310
-              Height = 139
+              Height = 144
               TabOrder = 0
               object Label22: TcxLabel
                 Left = 2
@@ -1922,7 +1921,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
               end
               object EditButtonSevkAdresi: TcxButtonEdit
                 Left = 108
-                Top = 116
+                Top = 118
                 ParentShowHint = False
                 Properties.Buttons = <
                   item
@@ -1942,7 +1941,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
               end
               object lblSevkAdresi: TcxLabel
                 Left = 3
-                Top = 116
+                Top = 119
                 Cursor = crHandPoint
                 Hint = 'Sevk bilgilerini (plaka, s'#252'r'#252'c'#252', ta'#351#305'y'#305'c'#305') girmek i'#231'in t'#305'klay'#305'n'
                 Caption = 'Sevk Adresi'
@@ -2169,7 +2168,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
             end
             object lbSatici: TcxLabel
               Left = 313
-              Top = 54
+              Top = 62
               Anchors = [akLeft, akBottom]
               Caption = 'Sat'#305'c'#305
               ParentFont = False
@@ -2193,11 +2192,11 @@ object FaturaWizardDlg: TFaturaWizardDlg
               Left = 697
               Top = 2
               Width = 360
-              Height = 139
+              Height = 145
               TabOrder = 23
               DesignSize = (
                 360
-                139)
+                145)
               object Label11: TcxLabel
                 Left = 10
                 Top = 7
@@ -2471,6 +2470,22 @@ object FaturaWizardDlg: TFaturaWizardDlg
               TabOrder = 25
               Width = 110
             end
+            object LabelNavlunSigorta: TcxLabel
+              Left = 313
+              Top = 128
+              Cursor = crHandPoint
+              Caption = 'Navlun ve Sigorta'
+              ParentFont = False
+              Style.Font.Charset = TURKISH_CHARSET
+              Style.Font.Color = clHotLight
+              Style.Font.Height = -11
+              Style.Font.Name = 'Trebuchet MS'
+              Style.Font.Style = [fsUnderline]
+              Style.IsFontAssigned = True
+              Transparent = True
+              Visible = False
+              OnClick = LabelNavlunSigortaClick
+            end
           end
         end
         object SheetGenotip: TcxTabSheet
@@ -2616,7 +2631,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
             Left = 0
             Top = 0
             Width = 1096
-            Height = 141
+            Height = 149
             Align = alClient
             TabOrder = 0
           end
@@ -3676,8 +3691,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
   object PopupMenuYaz: TPopupMenu
     Images = Tablo.PNGImageList2
     OnPopup = PopupMenuYazPopup
-    Left = 357
-    Top = 50
+    Left = 397
+    Top = 34
     object BaskiOnizlemeMenu: TMenuItem
       Caption = 'Bask'#305' '#214'nizleme'
       ImageIndex = 0
@@ -4273,8 +4288,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
       'from REHBERBILGI RB INNER JOIN REHBERAYAR RA ON RB.SIRA=RA.SIRA'
       'where RB.YERI= :Yeri  and RB.YER_ID= :Yeri_Id   '
       'order by  1')
-    Left = 272
-    Top = 257
+    Left = 120
+    Top = 17
     ParamData = <
       item
         Name = 'Yeri'
@@ -4299,8 +4314,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
   object JvDragDrop1: TJvDragDrop
     DropTarget = Owner
     OnDrop = JvDragDrop1Drop
-    Left = 174
-    Top = 14
+    Left = 294
+    Top = 22
   end
   object TabPlan: TFDQuery
     AfterOpen = TabPlanAfterOpen
@@ -4308,8 +4323,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
     SQL.Strings = (
       ''
       'select * from KASA where FATURAID=:FaturaID')
-    Left = 220
-    Top = 243
+    Left = 212
+    Top = 179
     ParamData = <
       item
         Name = 'FaturaID'
@@ -4552,8 +4567,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
       
         'SELECT * from [dbo].[fn_CARIHESAPOZETI] (:PRehID,:PBirim,:FatTut' +
         'ari) ')
-    Left = 336
-    Top = 233
+    Left = 344
+    Top = 177
     ParamData = <
       item
         Name = 'PRehID'

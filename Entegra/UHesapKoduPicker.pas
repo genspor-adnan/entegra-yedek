@@ -74,15 +74,19 @@ begin
      EkleTus.Enabled := not cxDBTreeList1.Selections[0].HasChildren;
   Kod:= TabPlan.FieldByName(''+RefKod+'').AsString;
   MemoKodlar.Clear;
-  for I := 0 to Length(Kod) - 1 do Begin
-    if Copy(Kod,I,1)='.' then begin
-       TempKod:=(Copy(Kod,0,(I-1)));
+  for I := 1 to Length(Kod) do Begin
+    if Kod[I]='.' then begin
+       TempKod:=Copy(Kod,1,I-1);
        J:=I;
        Tablo.Query1.Close;
        Tablo.Query1.SQL.Text := 'Select  '+RefKod+','+RefAd+',isnull(DIGITSAY,0) as DIGITSAY from '+RefTablo+' where '+RefKod+'= :Pkod';
        Tablo.Query1.Params[0].value := TempKod;
        Tablo.Query1.Open;
-       MemoKodlar.Lines.Add(Tablo.Query1.FieldByName(''+RefKod+'').AsString+' - '+Tablo.Query1.FieldS[1].AsString);
+       // Ust hesap karti bulunmayabilir (ornegin 120, sadece 120.01 vardir).
+       // Bos dataset uzerinden alan indekslemek FireDAC'de index hatasi uretebilir.
+       if not Tablo.Query1.IsEmpty then
+         MemoKodlar.Lines.Add(Tablo.Query1.FieldByName(RefKod).AsString+' - '+
+           Tablo.Query1.FieldByName(RefAd).AsString);
     end;
   End;
   if EkleTus.Enabled then begin
@@ -127,6 +131,9 @@ class function THesapKoduPicker.SiradakiKoduGetir(const AKod, ARefTablo,
 // ALog nil olabilir (UI gerekmiyorsa log atilmaz).
 Var  Digit:Integer;
      SonKisim:string;
+     SonKisimSayi: Integer;
+     EnBuyukSonKisim: Integer;
+     SayisalKodBulundu: Boolean;
 
   procedure _Log(const ASatir: string);
   begin
@@ -139,8 +146,14 @@ begin
    Tablo.Query1.SQL.Text := 'Select '+ARefKod+','+ARefAd+',isnull(DIGITSAY,2) as DIGITSAY from '+ARefTablo+' where '+ARefKod+'= :Pkod';
    Tablo.Query1.Params[0].value := AKod;
    Tablo.Query1.Open;
-   _Log(AKod+' - '+Tablo.Query1.Fields[1].AsString);
-   Digit := Tablo.Query1.FieldByName('DIGITSAY').AsInteger;
+    if Tablo.Query1.IsEmpty then begin
+      // Ayni kartin alt kodu secilmisse ust kart sorgusu bos olabilir.
+      // Varsayilan 3 hane, 120.01.001 -> 120.01.002 gibi mevcut formati korur.
+      Digit := 3;
+    end else begin
+      _Log(AKod+' - '+Tablo.Query1.FieldByName(ARefAd).AsString);
+      Digit := Tablo.Query1.FieldByName('DIGITSAY').AsInteger;
+    end;
    Tablo.Query1.Close;
    // ROOTKOD/SONKISIM = son '.' oncesi/sonrasi. CHARINDEX/LEN motor-farkli -> DbBul/DbUzunluk
    //   seam; isnull->COALESCE, alias 'AS' -> tam portable (PgSqlCevir gerekmez).
@@ -148,24 +161,28 @@ begin
    var LCharRA: string := DbBul(LNokta, 'REVERSE('+AAlani+')');   // son '.' konumu (tersten)
    var LSonExpr: string := 'CASE WHEN COALESCE('+DbBul(LNokta, AAlani)+',0)<1 THEN '+AAlani+
      ' ELSE REVERSE(SUBSTRING(REVERSE('+AAlani+'),1,'+LCharRA+'-1)) END';
-   Tablo.Query1.SQL.Text := 'Select '+DbUst(1)
-     + LSonExpr + ' AS SONKISIM,'
-     + 'REVERSE(SUBSTRING(REVERSE('+AAlani+'),'+LCharRA+'+1,'+DbUzunluk(AAlani)+'-('+LCharRA+'-1))) AS ROOTKOD,'
-     + AAlani+' from '+ATablosu+' where '+AAlani+' like '''+AKod+'%'' and '
-     + DbUzunluk('('+LSonExpr+')')+' >= '+IntToStr(Digit)
-     + ' order by '+DbUzunluk(AAlani)+' desc , 1 desc '+DbSinir(1);
+   Tablo.Query1.SQL.Text := 'Select '
+      + LSonExpr + ' AS SONKISIM,'
+      + 'REVERSE(SUBSTRING(REVERSE('+AAlani+'),'+LCharRA+'+1,'+DbUzunluk(AAlani)+'-('+LCharRA+'-1))) AS ROOTKOD,'
+      + AAlani+' from '+ATablosu+' where '+AAlani+' like '''+AKod+'%'' and '
+      + DbUzunluk('('+LSonExpr+')')+' >= '+IntToStr(Digit);
    Tablo.Query1.Open;
-   //yeni kayıt için düzeltme
-   if Tablo.Query1.RecordCount=0 then begin
-     SonKisim := '1';
-   end else begin
-     if Length(Tablo.Query1.FieldByName('SONKISIM').AsString) >= Digit then begin
-     //eski kayıtlar için
-       SonKisim := IntToStr(Tablo.Query1.FieldByName('SONKISIM').AsInteger+1);
-     end Else begin
-       SonKisim := '1';
+   // Alfabetik siralama 062_K1 gibi eski alfanumerik kayitlari onde getirebilir.
+   // Son alt kodu SQL siralamasindan bagimsiz olarak sayisal adaylar arasindan bul.
+   EnBuyukSonKisim := 0;
+   SayisalKodBulundu := False;
+   while not Tablo.Query1.Eof do begin
+     if TryStrToInt(Tablo.Query1.FieldByName('SONKISIM').AsString, SonKisimSayi) and
+        ((not SayisalKodBulundu) or (SonKisimSayi > EnBuyukSonKisim)) then begin
+       EnBuyukSonKisim := SonKisimSayi;
+       SayisalKodBulundu := True;
      end;
+     Tablo.Query1.Next;
    end;
+   if SayisalKodBulundu then
+     SonKisim := IntToStr(EnBuyukSonKisim + 1)
+   else
+     SonKisim := '1';
    case Digit of
      -1: begin
        Result := AKod;

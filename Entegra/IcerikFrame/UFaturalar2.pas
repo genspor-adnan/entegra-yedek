@@ -378,7 +378,7 @@ begin
              else
                 IthalatIhracatMenu.Caption:=Ihracat; }
           end;
-  109   : YeniTus.DropdownMenu:=PopupKonsGiris;
+  10,109 : YeniTus.DropdownMenu:=PopupKonsGiris;
   else
      YeniTus.DropdownMenu:=nil;
   end;

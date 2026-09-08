@@ -498,10 +498,6 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
         Tag = 1
         Caption = 'Stoklar'
         ImageIndex = 12
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Label2: TLabel
           Left = 720
           Top = 107
@@ -572,10 +568,18 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
             Summary.GroupFooterSummaryItems = <>
           end
         end
-        object GridStok: TcxGrid
+        object SplitterKategori: TcxSplitter
           Left = 187
           Top = 0
-          Width = 522
+          Width = 8
+          Height = 476
+          HotZoneClassName = 'TcxMediaPlayer8Style'
+          Control = TreeListKategori
+        end
+        object GridStok: TcxGrid
+          Left = 195
+          Top = 0
+          Width = 514
           Height = 476
           Align = alClient
           TabOrder = 1
@@ -724,10 +728,6 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       object SheetHizmet: TcxTabSheet
         Caption = 'Hizmetler'
         ImageIndex = 19
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object cxDBTreeList1: TcxDBTreeList
           Left = 0
           Top = 0
@@ -955,10 +955,6 @@ object StokHizmetAraDlg: TStokHizmetAraDlg
       object SheetDagitim: TcxTabSheet
         Caption = 'Da'#287#305't'#305'm'
         ImageIndex = 19
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object GridDagitim: TcxGrid
           Left = 0
           Top = 0

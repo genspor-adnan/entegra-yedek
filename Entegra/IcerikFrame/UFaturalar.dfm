@@ -2206,27 +2206,10 @@
       OnClick = AlSat1Click
     end
     object IhracatMenu: TMenuItem
-      Tag = 26
+      Tag = 124
       Caption = #304'hracat'
       ImageIndex = 52
-      object Menu_Ihr_Satis: TMenuItem
-        Tag = 101
-        Caption = 'Sat'#305#351
-        ImageIndex = 19
-        OnClick = AlSat1Click
-      end
-      object Menu_Ihr_Iade: TMenuItem
-        Tag = 102
-        Caption = #304'ade'
-        ImageIndex = 50
-        OnClick = AlSat1Click
-      end
-      object Menu_Ihr_Istisna: TMenuItem
-        Tag = 124
-        Caption = #304'stisna'
-        ImageIndex = 57
-        OnClick = AlSat1Click
-      end
+      OnClick = AlSat1Click
     end
     object IhracKayitliMenu: TMenuItem
       Tag = 9
