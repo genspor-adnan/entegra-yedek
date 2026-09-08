@@ -595,6 +595,11 @@ table.grid tr.flt input {
 .alan { display: grid; grid-template-columns: 84px 1fr; column-gap: 8px; align-items: center }
 .alan .etiket { grid-column: 1; font-size: 11px; color: var(--soluk); text-align: left }
 .alan .zorunlu { color: var(--hata) }
+/* Alanin ALTINA dusen kisa aciklama (483, "SUT listesinde fiyat yok"). Ucuncu
+   grid ogesi varsayilan olarak ETIKET sutununa duser ve 84px'e sikisip on
+   satira sariyordu; deger sutununda kalmali. */
+.alan .ipucu { grid-column: 2; font-size: 10.5px; color: var(--soluk); margin-top: 3px }
+.alan .ipucu.uyari { color: var(--uyari) }
 /* Grid ogesi varsayilan min-width:auto ile KUCULMEZ: date girdileri dogal
    genisliginden dar sutunda sagdan kirpiliyordu (İşten Çıkış, SGK Başlama). */
 .alan input, .alan select, .alan textarea { min-width: 0 }
