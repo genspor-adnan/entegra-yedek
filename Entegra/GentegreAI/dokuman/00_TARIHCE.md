@@ -8256,3 +8256,33 @@ Ambulans**, altında **Konsültasyon isteği** tablosu (Branş/Hekim · Soru ·
 **Zorunlu sapma**: mockup'ta olmayan "Takip" kutusu (kontrol önerisi, vaka
 türü) duruyor - kontrol randevusu ve adli vaka işareti muayenenin çıktısı,
 başka ekranda karşılığı yok.
+
+### Geçmiş sekmesi mockup düzeninde · kurum türüne TSS (kullanıcı)
+
+**Geçmiş** (mockup iki panel): solda **Önceki muayeneler (kurum içi)** -
+Tarih · Hekim · Tanı (tüm ICD kodları) · Özet (hekimin kararı, yoksa şikâyet) ·
+📂 aç / ↺ kopyala; sağda **e-Nabız / dış kurum** kutusu (hasta geçmişi sorgusu
+bağlı olmadığı için neyin eksik olduğu yazılı - boş kutu "veri yok" diye
+okunmasın).
+
+- **`POST /api/muayene/{id}/onceki-kopyala/{kaynakId}`**: kronik hastanın
+  anamnezi ve tanıları önceki muayeneden taşınır. **Boş alan doldurulur,
+  yazılan ezilmez**; aynı ICD atlanır, ana tanı varken gelenler ek tanı olur.
+  Fizik muayene ve vital KOPYALANMAZ - onlar o günün ölçümüdür, geçen
+  muayenenin bulgusunu bugüne yazmak kayıt uydurmaktır. Aynı hasta şartı var:
+  başka hastanın anamnezini taşımak hasta karıştırmanın en sessiz yolu.
+
+**`db/466` - kurum türü**: eski `1 Özel · 2 ÖSS · 3 SGK` yerine
+`1 Özel · 2 ÖSS (Özel Sağlık Sigortası) · 3 TSS (Tamamlayıcı Sağlık Sigortası)
+· 4 SGK`. TSS ile ÖSS aynı şey değil: TSS'de **asıl ödeyici SGK'dır**,
+tamamlayıcı poliçe yalnız farkı üstlenir - provizyon SGK'dan alınır, fark özel
+sigortaya faturalanır.
+
+- Mevcut SGK kayıtları `3 → 4` taşındı (1 kurum sözleşmesi, 2 hasta kurumu);
+  her satırın eski değeri `_yedek_kurum_turu_466` tablosunda. Taşıma yedekten
+  kontrollü - ikinci koşuda yeni TSS kayıtlarına dokunmaz.
+- `taraf_kurum.tur` varsayılanı 3 → **4**: default 3 kalsaydı tür verilmeden
+  açılan sözleşme sessizce TSS olurdu.
+- Ekran: `KURUM_TSS = 3`, `KURUM_SGK = 4`. TSS başvuru akışı SGK ile aynı
+  (provizyon ücretten sonra), başvuru sekmesinde **hem MEDULA hem özel sigorta
+  grubu** açık - farkı üstlenen poliçe orada. Testine ayrı vaka eklendi (461).

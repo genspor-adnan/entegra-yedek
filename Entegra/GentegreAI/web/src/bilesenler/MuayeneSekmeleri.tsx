@@ -441,49 +441,84 @@ export function MuayeneUcretSekmesi({ veri, hata }:
   );
 }
 
-/** GEÇMİŞ: aynı hastanın diğer muayeneleri. */
-export function MuayeneGecmisSekmesi({ veri, hata }:
-  { veri: SekmeVerisi | null; hata: string | null }) {
+/**
+ * GEÇMİŞ (mockup `muayene_karti.html`): solda **Önceki muayeneler (kurum)**
+ * - Tarih · Hekim · Tanı · Özet · aç / kopyala; sağda **e-Nabız / dış kurum**
+ * kutusu.
+ *
+ * <b>"↺ Kopyala" sunucuda:</b> kronik hastanın anamnezi ve tanıları önceki
+ * muayeneden taşınır; boş alan doldurulur, hekimin yazdığı EZİLMEZ. Fizik
+ * muayene ve vital kopyalanmaz - onlar o günün ölçümüdür.
+ */
+export function MuayeneGecmisSekmesi({ veri, hata, muayeneId, tazele }:
+  { veri: SekmeVerisi | null; hata: string | null;
+    muayeneId: number; tazele(): void }) {
   const git = useNavigate();
+
+  const kopyala = (kaynakId: number) => guvenli(async () => {
+    if (!await onay('Önceki muayenenin anamnezi ve tanıları bu muayeneye '
+                  + 'kopyalanacak. Boş alanlar doldurulur, yazdıklarınız '
+                  + 'değişmez. Onaylıyor musunuz?')) return;
+    const y = await api.muayeneOncekiKopyala(muayeneId, kaynakId);
+    mesaj(y.mesaj);
+    tazele();
+  });
+
   return (
     <Kabuk hata={hata} veri={veri}>
-      <div className="kagrup">
-        <h6>
-          Geçmiş muayeneler
-          <span className="not">{veri?.gecmis.length ?? 0} kayıt</span>
-        </h6>
-        {veri && veri.gecmis.length === 0 ? (
-          <p className="not ic">Bu hastanın başka muayenesi yok.</p>
-        ) : (
-          <table className="detay-tablo">
-            <thead>
-              <tr><th className="hiza-orta" style={{ width: 130 }}>Tarih</th>
-                  <th>Bölüm / Hekim</th><th>Şikâyet</th><th>Ana tanı</th>
-                  <th className="hiza-orta">Durum</th><th /></tr>
-            </thead>
-            <tbody>
-              {veri?.gecmis.map(g => (
-                <tr key={sayi(g.id)}>
-                  <td className="hiza-orta">{g.tarih ? tarihSaat(g.tarih) : '—'}</td>
-                  <td>{metin(g.bolum) || '—'}
-                    {metin(g.hekim) && <span className="sonuk"> · {metin(g.hekim)}</span>}
-                  </td>
-                  <td>{metin(g.sikayet) || <span className="sonuk">—</span>}</td>
-                  <td>{metin(g.anaTani) || <span className="sonuk">—</span>}</td>
-                  <td className="hiza-orta">
-                    <span className={`rozet ${sayi(g.durum) === 3 ? 'olumlu' : 'uyari'}`}>
-                      {MUAYENE_DURUM[sayi(g.durum)] ?? ''}
-                    </span>
-                  </td>
-                  <td>
-                    <button type="button" className="d"
-                            onClick={() => git(`/muayene/${sayi(g.id)}`)}>Aç</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+      <div className="muayene-ikili">
+        <div className="mi-sol">
+          <div className="kagrup">
+            <h6>
+              Önceki muayeneler <span className="not">kurum içi</span>
+              <span style={{ marginLeft: 'auto' }} />
+              <span className="not">{veri?.gecmis.length ?? 0} kayıt</span>
+            </h6>
+            {veri && veri.gecmis.length === 0 ? (
+              <p className="not ic">Bu hastanın başka muayenesi yok.</p>
+            ) : (
+              <table className="detay-tablo">
+                <thead>
+                  <tr><th className="hiza-orta" style={{ width: 120 }}>Tarih</th>
+                      <th>Hekim</th><th>Tanı</th><th>Özet</th><th /></tr>
+                </thead>
+                <tbody>
+                  {veri?.gecmis.map(g => (
+                    <tr key={sayi(g.id)}>
+                      <td className="hiza-orta">{g.tarih ? tarihSaat(g.tarih) : '—'}</td>
+                      <td>{metin(g.hekim) || '—'}
+                        {metin(g.bolum) && <span className="sonuk"> · {metin(g.bolum)}</span>}
+                      </td>
+                      <td>{metin(g.tanilar) || <span className="sonuk">—</span>}</td>
+                      <td>{metin(g.ozet) || <span className="sonuk">—</span>}</td>
+                      <td className="hiza-orta" style={{ whiteSpace: 'nowrap' }}>
+                        <button type="button" className="d ikon-dugme" title="Muayeneyi aç"
+                                onClick={() => git(`/muayene/${sayi(g.id)}`)}>📂</button>
+                        <button type="button" className="d ikon-dugme"
+                                title="Anamnez ve tanıları bu muayeneye kopyala"
+                                onClick={() => void kopyala(sayi(g.id))}>↺</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+
+        <div className="mi-sag">
+          <div className="kagrup">
+            <h6>e-Nabız / dış kurum</h6>
+            {/* DIS KURUM GECMISI HENUZ YOK: e-Nabiz sorgu servisi (hasta
+                izniyle anlik gecmis) bagli degil. Bos kutu "veri yok" gibi
+                okunmasin - neyin eksik oldugu yazili. */}
+            <p className="not ic">
+              Hastanın başka kurumlardaki kayıtları e-Nabız <b>hasta geçmişi
+              sorgusu</b> ile gelir; o servis henüz bağlı değil. Kurumun
+              gönderdiği paketler <b>e-Nabız</b> menüsünde izlenir.
+            </p>
+          </div>
+        </div>
       </div>
     </Kabuk>
   );

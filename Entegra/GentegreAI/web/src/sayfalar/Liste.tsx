@@ -2365,8 +2365,11 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
                 ciz: () => <MuayeneUcretSekmesi veri={sekmeVerisi.veri}
                                                 hata={sekmeVerisi.hata} /> },
               { anahtar: 'ozel:gecmis', baslik: 'Geçmiş',
-                ciz: () => <MuayeneGecmisSekmesi veri={sekmeVerisi.veri}
-                                                 hata={sekmeVerisi.hata} /> },
+                ciz: () => (
+                  <MuayeneGecmisSekmesi veri={sekmeVerisi.veri} hata={sekmeVerisi.hata}
+                                        muayeneId={Number(kartId)}
+                                        tazele={() => setKartTazele(t => t + 1)} />
+                ) },
               { anahtar: 'ozel:dosyalar', baslik: 'Dosyalar',
                 ciz: () => <DokumanGalerisi kartAdi="muayene"
                                             kaynakId={Number(kartId)}

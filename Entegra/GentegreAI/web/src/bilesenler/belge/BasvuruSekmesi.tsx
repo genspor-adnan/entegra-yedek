@@ -717,13 +717,15 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
    * ALANLAR KURUM TURUNE GORE (kullanici): eskiden iki provizyon grubu da her
    * zaman ciziliyordu; ÖSS hastasinda MEDULA alanlari, SGK hastasinda police
    * alanlari bos duruyordu.
-   *   SGK (3)  : MEDULA grubu. Hastanin TAMAMLAYICI policesi de olabilir -
+   *   SGK (4)  : MEDULA grubu. Hastanin TAMAMLAYICI policesi de olabilir -
    *              o grup istege bagli acilir (kayitli police varsa acik gelir).
+   *   TSS (3)  : HER IKISI - asil odeyici SGK (MEDULA), farki ustlenen
+   *              tamamlayici police ozel sigorta grubunda; ikisi de acik.
    *   ÖSS (2)  : yalniz ozel sigorta grubu; MEDULA alanlari hic cizilmez.
    */
   const sgkVar = kurumTuru !== 2;
   const [tamamlayici, setTamamlayici] = useState(false);
-  const ossVar = kurumTuru === 2 || tamamlayici
+  const ossVar = kurumTuru === 2 || kurumTuru === 3 || tamamlayici
                  || (bilgi.ossKurumId ?? null) !== null
                  || !!bilgi.ossProvizyonNo || !!bilgi.ossPoliceNo;
 

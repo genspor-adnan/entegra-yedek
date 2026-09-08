@@ -292,6 +292,11 @@ export const api = {
     gonder<{ isaretlendi: boolean }>(
       `/api/liste/${kaynak}/kullanilan/${encodeURIComponent(kod)}`, {}),
 
+  /** Onceki muayeneden anamnez + tanilari kopyalar (bos alan doldurulur). */
+  muayeneOncekiKopyala: (muayeneId: number, kaynakId: number) =>
+    gonder<{ taniEklenen: number; mesaj: string }>(
+      `/api/muayene/${muayeneId}/onceki-kopyala/${kaynakId}`, {}),
+
   /** Kartin raporlari (imza secimi icin). */
   muayeneRaporlari: (muayeneId: number) =>
     istek<{ raporlar: Record<string, unknown>[] }>(`/api/muayene/${muayeneId}/raporlar`),

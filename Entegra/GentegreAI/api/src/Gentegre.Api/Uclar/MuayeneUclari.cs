@@ -357,6 +357,13 @@ public static class MuayeneUclari
                 "select g.id, g.muayene_tarihi as tarih, coalesce(d.ad, '') as bolum, " +
                 "       coalesce(p.ad, '') as hekim, g.durum, " +
                 "       coalesce(nullif(g.sikayet, ''), '') as sikayet, " +
+                // OZET: hekimin KARARI (yoksa sikayet). Mockup "DM kontrolu;
+                //   HbA1c 7,4; doz artirildi" - bir satirda o muayenenin ne
+                //   oldugunu soyleyen metin.
+                "       coalesce(nullif(g.karar, ''), nullif(g.sikayet, ''), '') as ozet, " +
+                // TANILAR: tum ICD kodlari (ana tani once) - "E11.9 · I10".
+                "       coalesce((select string_agg(t2.icd_kod, ' · ' order by t2.tur, t2.sira, t2.id) " +
+                "                   from public.tani t2 where t2.muayene_id = g.id), '') as tanilar, " +
                 "       coalesce((select i.ad from public.tani t " +
                 "                   join public.icd i on i.kod = t.icd_kod " +
                 "                  where t.muayene_id = g.id and t.tur = 1 limit 1), '') as \"anaTani\" " +
@@ -377,6 +384,78 @@ public static class MuayeneUclari
                                     ustMuayeneId = m.UstId, tanilar,
                                     receteler, receteSatirlari, konsultasyonlar,
                                     islemler, gecmis, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/muayene/{id}/onceki-kopyala/{kaynakId}
+        //   Mockup Geçmiş panelindeki "↺ kopyala": kronik hastanın önceki
+        //   muayenesinden anamnez ve tanılar bu muayeneye taşınır.
+        //
+        //   BOŞ ALAN DOLDURULUR, YAZILAN EZİLMEZ: hekim şikâyeti yazdıktan
+        //   sonra kopyalarsa kendi cümlesini kaybetmemeli. Tanılarda aynı ICD
+        //   zaten varsa atlanır; ana tanı varken gelenler EK tanı olur.
+        //
+        //   FİZİK MUAYENE VE VİTAL KOPYALANMAZ: onlar O GÜNÜN ölçümüdür;
+        //   geçen muayenenin bulgusunu bugüne yazmak kayıt uydurmaktır.
+        grup.MapPost("/{id:int}/onceki-kopyala/{kaynakId:int}", async (
+            int id, int kaynakId, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+            if (id == kaynakId)
+                throw GentegreHatasi.Dogrulama("Muayene kendinden kopyalanamaz.");
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            // AYNI HASTA ŞARTI: başka hastanın anamnezini bu karta taşımak
+            //   hasta karıştırmanın en sessiz yoludur.
+            var ayniHasta = await baglanti.TekDegerAsync<int>(
+                "select case when (select taraf_id from public.muayene where id = @p0) " +
+                "          = (select taraf_id from public.muayene where id = @p1) " +
+                "       then 1 else 0 end", islem, [id, kaynakId], iptal);
+            if (ayniHasta != 1)
+                throw GentegreHatasi.IsKurali("Kaynak muayene bu hastaya ait degil.");
+
+            await baglanti.CalistirAsync(
+                "update public.muayene m " +
+                "   set sikayet = case when coalesce(trim(m.sikayet), '') = '' " +
+                "                      then k.sikayet else m.sikayet end, " +
+                "       hikaye = case when coalesce(trim(m.hikaye), '') = '' " +
+                "                     then k.hikaye else m.hikaye end, " +
+                "       ozgecmis_notu = case when coalesce(trim(m.ozgecmis_notu), '') = '' " +
+                "                            then k.ozgecmis_notu else m.ozgecmis_notu end, " +
+                "       soygecmis_notu = case when coalesce(trim(m.soygecmis_notu), '') = '' " +
+                "                             then k.soygecmis_notu else m.soygecmis_notu end, " +
+                "       aliskanlik_notu = case when coalesce(trim(m.aliskanlik_notu), '') = '' " +
+                "                              then k.aliskanlik_notu else m.aliskanlik_notu end, " +
+                "       degistiren = @p2, degistirme_tarihi = now() " +
+                "  from public.muayene k " +
+                " where m.id = @p0 and k.id = @p1",
+                islem, [id, kaynakId, baglam.KullaniciId], iptal);
+
+            var anaVar = await baglanti.TekDegerAsync<int>(
+                "select count(*) from public.tani where muayene_id = @p0 and tur = 1",
+                islem, [id], iptal);
+
+            var taniEklenen = await baglanti.CalistirAsync(
+                "insert into public.tani (muayene_id, icd_kod, tur, kesinlik, kronik, " +
+                "                         not_metni, ekleyen) " +
+                "select @p0, t.icd_kod, " +
+                "       case when @p2 > 0 then 2 else t.tur end, " +
+                "       t.kesinlik, t.kronik, t.not_metni, @p3 " +
+                "  from public.tani t " +
+                " where t.muayene_id = @p1 " +
+                "   and not exists (select 1 from public.tani v " +
+                "                    where v.muayene_id = @p0 and v.icd_kod = t.icd_kod) " +
+                " order by t.tur, t.sira, t.id",
+                islem, [id, kaynakId, anaVar, baglam.KullaniciId], iptal);
+
+            await islem.CommitAsync(iptal);
+            return Results.Ok(new { id, kaynakId, taniEklenen,
+                                    mesaj = $"Onceki muayeneden anamnez kopyalandi"
+                                          + (taniEklenen > 0 ? $", {taniEklenen} tani eklendi." : "."),
+                                    izlemeNo = baglam.IzlemeNo });
         });
 
         // GET /api/muayene/{id}/raporlar - kartın raporları (imza seçimi için)

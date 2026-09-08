@@ -16,10 +16,17 @@
  * uzerinden alinir. Sira kozmetik degil, akisin kendisidir.
  */
 
-/** Kurum tipi - taraf_kurum.tur. */
+/**
+ * Kurum tipi - `taraf_kurum.tur` (466'da TSS eklendi, SGK 3'ten 4'e taşındı).
+ *
+ * TSS ile ÖSS AYNI ŞEY DEĞİL: TSS'de asıl ödeyici SGK'dır, tamamlayıcı poliçe
+ * yalnız farkı üstlenir - provizyon SGK'dan alınır, fark özel sigortaya
+ * faturalanır. ÖSS'de SGK hiç yoktur.
+ */
 export const KURUM_OZEL = 1;
 export const KURUM_OSS = 2;
-export const KURUM_SGK = 3;
+export const KURUM_TSS = 3;
+export const KURUM_SGK = 4;
 
 /**
  * PROVIZYON DURUMU (kod listesi `provizyon.durum`):
@@ -111,10 +118,12 @@ export function basvuruAsamalari(g: AsamaGirdisi): AsamaSonucu {
          : 'Fiş / fatura / tahakkuk kesilmedi.',
   };
 
-  // ÖSS'de provizyon UCRETTEN ONCE, SGK'da SONRA (kullanici).
+  // ÖSS'de provizyon UCRETTEN ONCE, SGK ve TSS'de SONRA (kullanici):
+  //   TSS'de de provizyon SGK'dan alinir, akis SGK ile aynidir.
   const asamalar: Asama[] =
     tur === KURUM_OSS ? [basvuru, provizyon, ucret, tahsilat, fatura]
-  : tur === KURUM_SGK ? [basvuru, ucret, provizyon, tahsilat, fatura]
+  : tur === KURUM_SGK || tur === KURUM_TSS
+      ? [basvuru, ucret, provizyon, tahsilat, fatura]
   : [basvuru, ucret, tahsilat, fatura];
 
   // Provizyonsuz kurumda (Özel) asama hic cizilmez - kullanilmayan asama
