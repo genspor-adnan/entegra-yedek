@@ -26,6 +26,14 @@ public static partial class KartKatalogu
             new("marka",         "marka",           "kod",   KodListesi: "stok.marka",     Baslik: "Marka",     AltGrup: "Tanım / Sınıflandırma"),
             new("model",         "model",           "metin", EnFazlaUzunluk: 60, AltGrup: "Tanım / Sınıflandırma"),
             new("grup",          "grubu",           "kod",   KodListesi: "stok.grubu",     Baslik: "Grup",      AltGrup: "Tanım / Sınıflandırma"),
+            // OZELLIK / ICERIK / KULLANIM (486): kolonlar bastan beri vardi ama
+            //   kartta girisi yoktu - yazilamayan kolon, olmayan kolondur.
+            //   Uc alan da MARKA/MODEL ile ayni aileden: urunu ayirt eden ama
+            //   kategoriye sigmayan nitelikler (aroma, ambalaj, kullanim sekli).
+            //   Stok aktariminda (Excel) dolu geliyorlar ve gidecek yerleri yoktu.
+            new("ozellik",       "ozellik",         "kod",   KodListesi: "stok.ozellik",   Baslik: "Özellik",   AltGrup: "Tanım / Sınıflandırma"),
+            new("icerik",        "icerik",          "kod",   KodListesi: "stok.icerik",    Baslik: "İçerik",    AltGrup: "Tanım / Sınıflandırma"),
+            new("kullanim",      "kullanim",        "kod",   KodListesi: "stok.kullanim",  Baslik: "Kullanım",  AltGrup: "Tanım / Sınıflandırma"),
             new("izleme",        "izleme",          "kod",   KodListesi: "stok.izleme", Baslik: "Izleme",       AltGrup: "Tanım / Sınıflandırma"),
             new("bildirim",      "bildirim",        "kod",   SabitKodlar: BildirimKodlari, Baslik: "Bildirim",  AltGrup: "Tanım / Sınıflandırma"),
             new("urunNo",        "urun_no",         "metin", EnFazlaUzunluk: 60, Baslik: "Urun No",             AltGrup: "Vergi & Ana Birim"),
