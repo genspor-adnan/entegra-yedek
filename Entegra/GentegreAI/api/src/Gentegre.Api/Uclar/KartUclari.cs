@@ -267,8 +267,10 @@ public static class KartUclari
                 .ToDictionary(t => t!, t => depo.KodListesiSecenekleriAsync(t!, iptal));
             // BAGLI alanlarin (Şube -> Banka) ust haritasi: arayuz secenekleri
             //   secili ust'e gore suzsun diye secenek id -> ust id.
+            //   AGAC alanlari (484) da ayni haritayi kullanir: girintili
+            //   cizim icin her secenegin ustunu bilmek gerekiyor.
             var ustGorevleri = tumAlanlar
-                .Where(a => a.BagliAlan is not null && a.KodTablosu is not null)
+                .Where(a => (a.BagliAlan is not null || a.Agac) && a.KodTablosu is not null)
                 .Select(a => a.KodTablosu!).Distinct()
                 .ToDictionary(t => t, t => depo.KodTablosuUstAsync(t, iptal));
             await Task.WhenAll(tabloGorevleri.Values.Concat(listeGorevleri.Values).Concat(ustGorevleri.Values));
@@ -289,7 +291,9 @@ public static class KartUclari
                 a.KodTablosu is { } t && tabloSecenekleri.TryGetValue(t, out var tsec) ? tsec
                 : a.KodListesi is { } l ? listeSecenekleri[l]
                 : null,
-                a.BagliAlan is not null && a.KodTablosu is { } bt
+                // AGAC alani da ust haritasini alir (484): girintili cizim
+                //   her secenegin ustunu bilmeyi gerektiriyor.
+                (a.BagliAlan is not null || a.Agac) && a.KodTablosu is { } bt
                     && ustHaritalari.TryGetValue(bt, out var ust) ? ust : null);
 
             // Yerel para birimi kartla birlikte gider: arayuz "TL disi mi" karari
@@ -372,7 +376,8 @@ public static class KartUclari
             alan.Gizli,
             alan.BagliAlan,
             alan.AramaKaynagi,
-            ustHaritasi);
+            ustHaritasi,
+            alan.Agac);
 
 
     /// <summary>

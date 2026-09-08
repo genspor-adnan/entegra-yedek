@@ -387,6 +387,14 @@ public static partial class KaynakKatalogu
             //   yazabilsin - ad ile kod eslestirmek kirilgan olurdu.
             new("birimKod", "h.birim",   "sayi",  "Birim Kodu", Hizalama: "orta",
                                             Varsayilan: false),
+            // SUT ve HUV KODU (484, kullanici: "hizmet listesine SUT Kodu ve HUV
+            //   Kodu ekle"). IKISI AYRI KODDUR ve bir hizmette ikisi birden
+            //   bulunur: SUT SGK'nin tebligi (SGK faturasi, MEDULA eslemesi),
+            //   HUV ise TTB tarifesi (ozel sigorta faturasi). 483'teki iki
+            //   fiyatin kod tarafindaki karsiligi - biri otekinin yerine
+            //   yazilirsa fatura yanlis tarafa kesilir.
+            new("sutKodu", "h.sut_kodu", "metin", "SUT Kodu",   Genislik: 110),
+            new("huvKodu", "h.huv_kodu", "metin", "HUV Kodu",   Genislik: 110),
             new("muhKodu", "h.muh_kodu", "metin", "Muh. Kodu",  Varsayilan: false),
             new("durum",   "h.durum",    "kod",   "Durum",      Hizalama: "orta")
         });

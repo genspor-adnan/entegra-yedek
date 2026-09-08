@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace Gentegre.Cekirdek.Sozlesme;
 
@@ -60,7 +60,12 @@ public sealed record KartAlanMeta(
     /// <summary>Doluysa alan jenerik arama ekranindan secilir (260).</summary>
     string? AramaKaynagi = null,
     /// <summary>Bagli alanda her secenegin UST degeri: secenek id -> ust id.</summary>
-    IReadOnlyDictionary<string, string>? KodUst = null);
+    IReadOnlyDictionary<string, string>? KodUst = null,
+    /// <summary>
+    /// Secim kaynagi HIYERARSIK (484): arayuz secenekleri agac sirasinda ve
+    /// girintili cizer. Ust baglari <see cref="KodUst"/>ten okunur.
+    /// </summary>
+    bool Agac = false);
 
 public sealed record KartDetayMeta(
     string Ad,

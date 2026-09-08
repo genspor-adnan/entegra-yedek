@@ -201,14 +201,20 @@ public static partial class KartKatalogu
             new("kod",      "kod",      "metin", EnFazlaUzunluk: 40, Baslik: "Kod", Grup: "Kimlik"),
             new("ad",       "ad",       "metin", Zorunlu: true, EnFazlaUzunluk: 200,
                 Baslik: "Hizmet Adı", Grup: "Kimlik"),
+            // KATEGORI ADIN SAGINDA, UST SERITTE (kullanici): hizmetin hangi
+            //   dalda oldugu kartin her sekmesinde gorunsun - Genel sekmesinin
+            //   icine gomulunce, fiyat ya da protokol sekmesindeyken "bu neyin
+            //   tetkiki" sorusu cevapsiz kaliyordu.
+            // AGAC COMBO (kullanici: "kategori combo yerine agac combo olmali"):
+            //   kategori hiyerarsik (269, stokla ORTAK agac) - duz listede
+            //   yalniz yaprak adi cikiyor, "Genel" gibi iki dalda birden gecen
+            //   ad ayirt edilemiyordu.
+            new("kategori", "kategori", "kod",   KodTablosu: "public.kategori",
+                Agac: true, Baslik: "Kategori", Grup: "Kimlik"),
             new("durum",    "durum",    "kod",   SabitKodlar: DurumKodlari,
                 Baslik: "Durum", Grup: "Kimlik"),
             // "Detay" kutusu Kodlar'in SOLUNDA (kullanici) - alt gruplar alan
             //   sirasiyla dizilir, Detay alanlari once tanimlanir.
-            // Kategori STOKLA ORTAK agac (269): kampanya satiri "su kategoriden
-            //   %20" derken hizmetleri de kapsayabilsin.
-            new("kategori", "kategori", "kod",   KodTablosu: "public.kategori",
-                Baslik: "Kategori", Grup: "Genel", AltGrup: "Detay"),
             new("kdv",      "kdv",      "sayi",  Baslik: "KDV %",
                 Grup: "Genel", AltGrup: "Detay"),
             // Hizmet birimi stogunkiyle AYNI listeden (51 Adet, 57 Kg...).
@@ -228,6 +234,15 @@ public static partial class KartKatalogu
             new("yasUst",   "yas_ust",  "sayi", Baslik: "En Büyük Yaş",
                 Grup: "Genel", AltGrup: "Uygulanabilirlik"),
 
+            // SUT / HUV KODU (484). Kolon `sut_kodu` bastan beri vardi ama
+            //   kartta girisi yoktu - yazilamayan kolon, olmayan kolondur.
+            //   Ikisi AYRI kod: SUT SGK'nin tebligi (SGK faturasi, MEDULA),
+            //   HUV ise TTB tarifesi (ozel sigorta faturasi). Hizmette ikisi
+            //   birden bulunur; 483'teki iki fiyatin kod karsiligidir.
+            new("sutKodu",  "sut_kodu",  "metin", EnFazlaUzunluk: 20,
+                Baslik: "SUT Kodu", Grup: "Genel", AltGrup: "Kodlar"),
+            new("huvKodu",  "huv_kodu",  "metin", EnFazlaUzunluk: 20,
+                Baslik: "HUV Kodu", Grup: "Genel", AltGrup: "Kodlar"),
             new("muhKodu",  "muh_kodu",  "metin", EnFazlaUzunluk: 20,
                 Baslik: "Muhasebe Kodu", Grup: "Genel", AltGrup: "Kodlar"),
             new("ozelKod",  "ozel_kod",  "metin", EnFazlaUzunluk: 40,

@@ -229,6 +229,8 @@ const adliBlok = (
           const hastaVergiNoAlan = kaynak === 'hasta' && aktif.baslik === 'Adres / Fatura Bilgisi' && altBaslik === 'Fatura / Vergi Kimligi'
             ? meta.alanlar.find(a => a.ad === 'vkno')
             : undefined;
+          // KURUM TURU seridin bir hucresi (484): Tanımlama kutusuna DEGIL
+          //   kimlik seridine cizilir - kullanici temsilci ile yer degistirdi.
           return (
             <div className="kagrup" key={altBaslik}>
               <h6>{c(altBaslik)}</h6>

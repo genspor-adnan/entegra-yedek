@@ -24,7 +24,9 @@ export interface AlanDogrulamaHatasi {
 export function kartDogrula(
   meta: KartMetaYaniti | null,
   deger: Record<string, Deger>,
-  zorunluAlanlar?: string[]): AlanDogrulamaHatasi | null
+  zorunluAlanlar?: string[],
+  /** 1:1 detaylarin guncel satirlari: detay adi -> satirlar (484). */
+  detaySatirlari?: Record<string, Record<string, unknown>[]>): AlanDogrulamaHatasi | null
 {
   const gecersizEposta = meta?.alanlar.find(a => {
     const v = deger[a.ad];
@@ -39,6 +41,20 @@ export function kartDogrula(
     && String(deger[a.ad] ?? '').trim() === '');
   if (eksikZorunlu)
     return { alan: eksikZorunlu.ad, mesaj: `${eksikZorunlu.baslik} zorunlu.` };
+
+  // 1:1 DETAYIN ZORUNLU ALANI (484, kullanici: "kurum turu zorunlu olsun").
+  //   Sunucu zorunlulugu yalnizca satir GONDERILDIGINDE bakiyordu: kullanici
+  //   alana hic dokunmazsa satir hic olusmuyor, kontrol de calismiyordu -
+  //   kurum turu sessizce DB varsayilanina (SGK) dusuyordu. Kart artik
+  //   kaydetmeden once soruyor.
+  for (const d of meta?.detaylar ?? []) {
+    if (!d.tekSatir) continue;
+    const satir = detaySatirlari?.[d.ad]?.[0] ?? {};
+    const eksik = d.alanlar.find(a =>
+      a.zorunlu && a.yazilabilir && !a.gizli
+      && String(satir[a.ad] ?? '').trim() === '');
+    if (eksik) return { alan: `${d.ad}.${eksik.ad}`, mesaj: `${eksik.baslik} zorunlu.` };
+  }
 
   const gecersizTelefon = meta?.alanlar.find(a => {
     const v = deger[a.ad];

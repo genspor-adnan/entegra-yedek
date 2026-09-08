@@ -46,6 +46,14 @@ interface Props {
   /** ekAlanlar KACINCI alandan once cizilsin (0 = en uste). Dis hekimde 1:
       kullanici kurumu bransin ALTINDA istiyor. */
   ekAlanlarSira?: number;
+
+  /**
+   * CERCEVESIZ (484): kendi `.kagrup` kutusunu ve basligini CIZMEZ, yalnizca
+   * alanlari dondurur. 1:1 uzantinin tek alani, kartin BASKA bir kutusunun
+   * icinde durabilsin diye - kurumda "Kurum Türü" (taraf_kurum.tur) artik
+   * Tanımlama kutusunda, tek alan icin ayri bir sekme/kutu acmadan.
+   */
+  cerceveSiz?: boolean;
 }
 
 /**
@@ -62,7 +70,7 @@ interface Props {
  */
 export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, gruplar,
                            alanSirasi, dislar, ustAlanlar, aramaAc, secilenAdlar,
-                           ekAlanlar, ekAlanlarSira }: Props) {
+                           ekAlanlar, ekAlanlarSira, cerceveSiz }: Props) {
   const satir: Satir = durum.guncel[0] ?? {};
 
   const degis = (ad: string, deger: unknown) => {
@@ -148,7 +156,10 @@ export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, grupla
     const hedef = a.eslesAlan ? tumAlanlar.find(x => x.ad === a.eslesAlan) : undefined;
     return (
       <label key={a.ad} className={`alan tip-${a.tip}${hedef ? ' ikili' : ''}`}>
-        <span className="etiket">{a.baslik}</span>
+        {/* ZORUNLU YILDIZI (484): metadata alani zorunlu diyorsa kutu da
+            soylesin - kurum turu gibi bos birakilinca kaydi durduran alanda
+            kullanici sebebi ancak hata mesajinda ogreniyordu. */}
+        <span className="etiket">{a.baslik}{a.zorunlu && <b className="zorunlu"> *</b>}</span>
         {girdi(a)}
         {hedef && girdi(hedef)}
       </label>
@@ -203,6 +214,9 @@ export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, grupla
   if (ekAlanlar)
     cizimler.splice(Math.min(ekAlanlarSira ?? 0, cizimler.length), 0,
                     <Fragment key="_ek">{ekAlanlar}</Fragment>);
+
+  // Cercevesiz kip: cagiran kendi kutusunun icine koyar (484).
+  if (cerceveSiz) return <>{cizimler}</>;
 
   return (
     <div className="kasira">

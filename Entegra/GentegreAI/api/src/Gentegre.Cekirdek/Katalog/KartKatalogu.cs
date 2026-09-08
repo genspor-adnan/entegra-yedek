@@ -23,6 +23,14 @@ public sealed record KartAlani(
     //   gecerli olmayan alt deger TEMIZLENIR - yoksa "Ziraat + Akbank subesi"
     //   gibi tutarsiz kayit olusur.
     string? BagliAlan = null,
+    // AGAC SECIMI (484, kullanici: "kategori combo yerine agac combo olmali").
+    //   Secim kaynagi HIYERARSIK (kategori: "Radyoloji > BT > Beyin"). Duz
+    //   listede yalniz yaprak adi gorunuyordu; ayni adi tasiyan iki dal
+    //   ("Genel" hem Lab hem Radyoloji altinda) ayirt edilemiyordu.
+    //   Bayrak varsa arayuz secenekleri AGAC SIRASINDA ve GIRINTILI cizer;
+    //   veri yine tek id'dir. Gorunumun/tablonun `ust_id` kolonu olmali -
+    //   `BagliAlan` ile ayni haritadan beslenir.
+    bool Agac = false,
     // JENERIK ARAMA EKRANI (260, kullanici: "hasta secimi jenerik kisi
     //   seciminden ama sadece hastalar; hizmet secimi jenerik stok/hizmet
     //   arama ekranindan, sadece hizmetler"). Doluysa alan combo yerine

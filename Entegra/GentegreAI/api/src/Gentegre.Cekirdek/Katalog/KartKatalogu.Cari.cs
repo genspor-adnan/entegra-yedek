@@ -766,6 +766,21 @@ public static partial class KartKatalogu
             //   cozum sirasi zaten sozlesme > cari > genel (fn_taraf_kampanya),
             //   yani kurumda cari alani hicbir zaman kazanmaz.
             "kampanyaId" => a with { Gizli = true },
+            // CRM ALANLARI KURUMDA GIZLI (484, kullanici: "kurum karti
+            //   tanimlamalardan kaldirilacaklar: ilk temas, sektor, alt
+            //   sektor, bolge"). Bunlar SATIS TAKIBI alanlaridir - kurumun
+            //   "hangi fuarda tanistik", "hangi sektorde" bilgisi anlasmali
+            //   kurum kaydinda karsiligi olmayan sorulardir; bir sigorta
+            //   sirketinin sektoru sorulmaz. Kolonlar DURUYOR ve degerler
+            //   TASINIYOR (Gizli): cari olarak girilmis eski kayitlarin
+            //   verisi kaydetmede silinmesin.
+            "ilkTemas" or "sektor" or "altSektor" or "bolge" => a with { Gizli = true },
+            // TEMSILCI ILE KURUM TURU YER DEGISTIRDI (484, kullanici).
+            //   Kimlik seridinde artik KURUM TURU duruyor: hangi anlasma
+            //   kurallarinin isleyecegini (Ozel / OSS / SGK) o belirler,
+            //   kurumun en temel bilgisidir. Temsilci satis takibi alanidir -
+            //   Tanımlama kutusuna indi.
+            "temsilci" => a with { Grup = null, AltGrup = "Tanımlama" },
             _ => a
         }).ToList();
         alanlar.Add(new KartAlani("kurum", "kurum", "mantik", Baslik: "Kurum", Gizli: true));

@@ -604,7 +604,8 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
   //   gosterilmez; kullanicidan iki alan daha istemek yerine turetiliyor.
   // Kaydetmeden onceki alan kontrolleri TEK YERDE (kartDogrulama): e-posta,
     //   ekrana ozel zorunluluk ve telefon. Ilk hatada ilgili sekmeye atlanir.
-    const alanHatasi = kartDogrula(meta, deger, zorunluAlanlar);
+    const alanHatasi = kartDogrula(meta, deger, zorunluAlanlar,
+      Object.fromEntries(Object.entries(detaylar).map(([ad, d]) => [ad, d.guncel])));
     if (alanHatasi) {
       setAlanHatalari(h => ({ ...h, [alanHatasi.alan]: alanHatasi.mesaj }));
       const hedefSekme = sekmeBul(alanHatasi.alan);
@@ -1000,7 +1001,32 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
                 kimlikAlanlari.findIndex(a => GECERLILIK_ALANLARI.includes(a.ad)))
                 .filter(a => !GECERLILIK_ALANLARI.includes(a.ad)))}
             </div>
-          ) : (
+          ) : kaynak === 'kurum' ? (() => {
+            /* KURUM SERIDI (484, kullanici: "temsilci ile kurum turunu yer
+               degistir"): Kod · Kurum Adi · KURUM TURU · Durum. Kurum turu
+               kurumun en temel bilgisidir - hangi anlasma kurallarinin
+               isleyecegini o belirler (Ozel / OSS / SGK); temsilci ise satis
+               takibi alani, Tanımlama kutusuna indi.
+               Deger `taraf_kurum.tur`da (1:1 uzanti), kartin kendi tablosunda
+               degil - o yuzden renderAlanListesi ile cizilemez; TekKayit
+               cercevesiz kipte seridin bir hucresi olur. */
+            const rol = meta?.detaylar.find(d => d.ad === 'kurumRolu');
+            return (
+              <div className="alan-izgara">
+                {renderAlanListesi(kimlikAlanlari.filter(a => a.ad !== 'durum'))}
+                {rol && (
+                  <TekKayit
+                    meta={rol}
+                    durum={detaylar[rol.ad] ?? bosDetay()}
+                    saltOkunur={salt || rol.saltOkunur}
+                    onDegis={y => setDetaylar(t => ({ ...t, [rol.ad]: y }))}
+                    cerceveSiz
+                  />
+                )}
+                {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'durum'))}
+              </div>
+            );
+          })() : (
             <div className={`alan-izgara${kaynak === 'kisi' ? ' kaid-kisi' : ''}`
                             + (kaynak === 'randevu' ? ' kaid-randevu' : '')
                             + (kaynak === 'prim-plani' ? ' kaid-prim' : '')

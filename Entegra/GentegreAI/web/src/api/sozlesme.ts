@@ -358,6 +358,11 @@ export interface KartAlanMeta {
   aramaKaynagi?: string | null;
   /** Bagli alanda secenek id -> ust id (sube id -> banka id). */
   kodUst?: Record<string, string> | null;
+  /**
+   * Secim kaynagi HIYERARSIK (484, kategori): secenekler AGAC SIRASINDA ve
+   * girintili cizilir. Ust baglari `kodUst`ten okunur; deger yine tek id.
+   */
+  agac?: boolean;
 }
 
 /**

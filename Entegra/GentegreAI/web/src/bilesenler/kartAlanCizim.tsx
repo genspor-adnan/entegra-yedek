@@ -1,6 +1,7 @@
 import { TelefonGirdi } from './TelefonGirdi';
 import { c } from '../dil/ceviri';
 import { telefonAlaniMi, epostaGecerliMi } from './alanBicim';
+import { agacSecenekleri } from './agacSecenek';
 import type { KartAlanMeta, KartMetaYaniti, DovizMetasi } from '../api/sozlesme';
 
 /** Kart alanlarinda tutulan deger tipleri. */
@@ -159,11 +160,17 @@ export function alanCizici(b: AlanCizimBaglami) {
         //   degerinde gorunur - "bagimsiz" kayit demektir (255: departmani
         //   olmayan gorev her departmanda secilebilir). Ust'u dolu olan secenek
         //   yalnizca kendi ustunde cikar (banka -> sube deseni degismedi).
-        const secenekler = Object.entries(a.kodlar)
+        const suzulmus = Object.fromEntries(Object.entries(a.kodlar)
           .filter(([k]) => !a.bagliAlan
                            || a.kodUst?.[k] === undefined
-                           || a.kodUst[k] === ustDegeri)
-          .sort((x, y) => x[1].localeCompare(y[1], 'tr'));
+                           || a.kodUst[k] === ustDegeri));
+        // AGAC COMBO (484, kategori): secenekler duz ada gore degil AGAC
+        //   SIRASINDA ve girintili dizilir - "Radyoloji" altindaki "Genel" ile
+        //   "Laboratuvar" altindaki "Genel" duz listede ayirt edilemiyordu.
+        const secenekler: [string, string][] = a.agac
+          ? agacSecenekleri(suzulmus, a.kodUst).map(s => [s.kod, s.etiket])
+          : Object.entries(suzulmus)
+              .sort((x, y) => x[1].localeCompare(y[1], 'tr'));
         const ustBos = Boolean(a.bagliAlan) && ustDegeri === '';
         return (
           <select

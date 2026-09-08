@@ -2386,8 +2386,21 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         // VITAL BULGULAR SEKMESI YOK (kullanici): olcum anamnez sekmesinin
         //   sag panelinde duzenleniyor - ayni veriyi iki sekmede gostermek
         //   hangisinin gecerli oldugunu belirsiz birakiyordu.
-        gizliDetaylar={tanim.kaynak === 'muayene' ? ['vitaller'] : undefined}
-        detayGrupta={tanim.kaynak === 'muayene'
+        // KURUM TURU AYRI SEKME DEGIL (484, kullanici: "Kurum Türünü
+        //   tanimlamalara tasi"): tek alanlik 1:1 uzanti artik Genel
+        //   sekmesindeki Tanımlama kutusunda ciziliyor - ayni alani iki yerde
+        //   gostermek hangisinin gecerli oldugunu belirsiz birakirdi.
+        gizliDetaylar={tanim.kaynak === 'muayene' ? ['vitaller']
+                     : tanim.kaynak === 'kurum' ? ['kurumRolu'] : undefined}
+        // KURUMDA ADRES AYRI SEKME DEGIL (484, kullanici: "adresler
+        //   sekmesindeki adres gridini adres / fatura bilgisi sekmesinde alta
+        //   al"): fatura unvani, VKN ve adres ayni sorunun parcalari - biri
+        //   ötekini dogrularken sekme degistirmek gerekiyordu. Grid oldugu
+        //   gibi kalir (kurumun birden cok adresi olabilir), yalnizca yeri
+        //   degisir.
+        detayGrupta={tanim.kaynak === 'kurum'
+          ? { adresler: { grup: 'Adres / Fatura Bilgisi' } }
+          : tanim.kaynak === 'muayene'
           ? { bulgular: { grup: 'Fizik Muayene', gizli: ['degerSayi', 'taraf'],
                           etiket: ['sablonAlanId'], sinif: 'bulgu-gridi',
                           // Cerceve, baslik ve "+ Satır"/sil yok (kullanici):
