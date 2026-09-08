@@ -723,9 +723,12 @@ public static partial class KartKatalogu
             new DetayTanimi("ozluk", "public.taraf_hasta", "id", new KartAlani[]
             {
                 new("id",          "id",           "sayi",  Yazilabilir: false),
-                new("cinsiyet",    "cinsiyet",     "kod",   SabitKodlar: CinsiyetKodlari,
-                    Baslik: "Cinsiyet"),
-                new("dogumTarihi", "dogum_tarihi", "tarih", Baslik: "Doğum Tarihi"),
+                // Hasta acilirken bile ZORUNLU: yas/cinsiyet olmadan tetkik
+                //   referansi ve hizmet uygunlugu kararlastirilamaz.
+                new("cinsiyet",    "cinsiyet",     "kod",   Zorunlu: true,
+                    SabitKodlar: CinsiyetKodlari, Baslik: "Cinsiyet"),
+                new("dogumTarihi", "dogum_tarihi", "tarih", Zorunlu: true,
+                    Baslik: "Doğum Tarihi"),
                 // Kurum KIMLIK SERIDINDE cizilir (266) - burada yalniz veri
                 //   tasiyicisi olarak duruyor, ekranda tekrar gosterilmez.
                 new("kurumId",     "kurum_id",     "kod",   KodTablosu: "public.v_kurum_lookup",
@@ -878,9 +881,15 @@ public static partial class KartKatalogu
             ? new DetayTanimi("ozluk", "public.taraf_hasta", "id", new KartAlani[]
             {
                 new("id",          "id",           "sayi",  Yazilabilir: false),
-                new("dogumTarihi", "dogum_tarihi", "tarih", Baslik: "Dogum Tarihi"),
+                // YAS ve CINSIYET ZORUNLU (kullanici): ikisi de sonucun
+                //   yorumunu degistirir - referans araligi yasa/cinsiyete gore
+                //   secilir, kimi hizmet belli cinsiyete yapilmaz. Bos hasta
+                //   kaydi, sonradan yanlis referansla okunan bir sonuc demektir.
+                //   KIMLIKSIZ hastada istisna DB tarafinda (acil kaydi durmasin).
+                new("dogumTarihi", "dogum_tarihi", "tarih", Zorunlu: true, Baslik: "Dogum Tarihi"),
                 new("dogumYeri",   "dogum_yeri",   "metin", EnFazlaUzunluk: 60, Baslik: "Dogum Yeri"),
-                new("cinsiyet",    "cinsiyet",     "kod",   SabitKodlar: CinsiyetKodlari, Baslik: "Cinsiyet"),
+                new("cinsiyet",    "cinsiyet",     "kod",   Zorunlu: true,
+                    SabitKodlar: CinsiyetKodlari, Baslik: "Cinsiyet"),
                 new("uyruk",       "uyruk",        "metin", EnFazlaUzunluk: 60, Baslik: "Uyrugu"),
                 new("kanGrubu",    "kan_grubu",    "kod",   KodListesi: "taraf.kan_grubu", Baslik: "Kan Grubu"),
                 new("meslek",      "meslek",       "kod",   SabitKodlar: HastaMeslekKodlari, Baslik: "Meslek"),

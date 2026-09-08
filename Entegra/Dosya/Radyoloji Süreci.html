@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Radyoloji Süreci — Randevudan Teslime</title>
+<style>
+  :root{
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --line:#cdd6e0; --line2:#e3e9f0;
+    --mavi:#2f6db3; --mavizem:#eef4fc; --yesil:#2e7d46; --yesilzem:#e2f3e8;
+    --mor:#6a3fb5; --morzem:#f1ecfa; --turuncu:#8a6218; --turuncuzem:#fdf6e3;
+    --kirmizi:#b3261e; --kirmizizem:#fbe9e7;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);font-family:"Segoe UI","Trebuchet MS",Arial,sans-serif;
+    font-size:10.5pt;line-height:1.5}
+  h1{font-size:19pt;color:var(--navy);margin:0 0 4px;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  h2{font-size:13.5pt;color:var(--navy);margin:20pt 0 6pt;border-bottom:1px solid var(--line);padding-bottom:3px}
+  h3{font-size:11.5pt;color:var(--mavi);margin:12pt 0 4pt}
+  p{margin:5pt 0}
+  .ust{color:var(--muted);font-size:9.5pt;margin-bottom:14pt}
+  table{border-collapse:collapse;width:100%;margin:6pt 0;font-size:9.5pt}
+  th,td{border:1px solid var(--line);padding:4px 7px;text-align:left;vertical-align:top}
+  th{background:#eef2f7;color:#2c4a6b}
+  code{font-family:Consolas,monospace;font-size:9pt;background:#f2f6fa;
+    border:1px solid var(--line2);border-radius:3px;padding:0 3px}
+  .kutu{border:1px solid var(--line);border-left:4px solid var(--mavi);background:#f8fbff;
+    padding:7px 10px;margin:8pt 0;font-size:10pt}
+  .kutu.uyari{border-left-color:var(--turuncu);background:var(--turuncuzem)}
+  .kutu.kritik{border-left-color:var(--kirmizi);background:var(--kirmizizem)}
+  .sekil{margin:10pt 0 14pt;text-align:center}
+  .sekil svg{max-width:100%}
+  .sekil .baslik{font-size:9.5pt;color:var(--muted);margin-top:3px}
+  .rz{display:inline-block;border-radius:9px;padding:0 7px;font-size:9pt;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e}
+  .rz.mavi{background:var(--mavizem);color:var(--mavi);border-color:#cfe0f5}
+  .rz.yesil{background:var(--yesilzem);color:var(--yesil);border-color:#bfe3cb}
+  .rz.sari{background:var(--turuncuzem);color:var(--turuncu);border-color:#f2ddbf}
+  .rz.kir{background:var(--kirmizizem);color:var(--kirmizi);border-color:#f3c4bf}
+  tr,li,.kutu,.sekil{page-break-inside:avoid}
+  h2,h3{page-break-after:avoid}
+  ul{margin:4pt 0;padding-left:18px} li{margin:2pt 0}
+  @page{size:A4;margin:15mm}
+  text{font-family:"Segoe UI",Arial,sans-serif}
+</style>
+</head>
+<body>
+
+<h1>Radyoloji Süreci — Randevudan Teslime</h1>
+<div class="ust">Gentegre AI · HBYS · BT · MR · USG · Röntgen · Mamografi · DEXA · Anjiyo/Skopi ·
+  Kaynak: <code>db/283</code> çekirdek, <code>284</code> operasyon, <code>285</code> PACS/konsültasyon,
+  <code>310</code> kontrol listesi, <code>311</code> kabul sonrası, <code>318</code> takip listeleri</div>
+
+<p>Radyoloji laboratuvardan üç noktada ayrılır:</p>
+<ul>
+  <li><b>Numune yok, HASTA var.</b> Süreç tüpü değil hastayı taşır — çekim öncesi güvenlik
+      (gebelik, kreatinin, implant) laboratuvarda karşılığı olmayan bir kapıdır.</li>
+  <li><b>Sonuç bir sayı değil, bir METİNDİR.</b> Ölçüm cihazdan otomatik gelmez; radyolog yazar.
+      Bu yüzden "oto-onay" yoktur, <b>ön rapor</b> ve <b>onaylı rapor</b> ayrı aşamalardır.</li>
+  <li><b>İkinci bir sistem vardır: PACS.</b> Görüntü HBYS'de değil PACS'ta durur; ikisini
+      <code>accession_no</code> ve <code>study_uid</code> birbirine bağlar. Bağ kopunca çekim
+      "yapıldı ama görüntüsü yok" hâline düşer — bu yüzden her DICOM olayı iz bırakır.</li>
+</ul>
+
+<h2>1. Ortak omurga</h2>
+
+<div class="sekil">
+<svg viewBox="0 0 700 268" width="700" height="268">
+  <defs>
+    <marker id="ok" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#6b7a8b"/>
+    </marker>
+    <marker id="okk" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#b3261e"/>
+    </marker>
+  </defs>
+
+  <g font-size="10.5">
+    <rect x="4" y="14" width="100" height="44" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="54" y="32" text-anchor="middle" fill="#14315a" font-weight="bold">Randevu</text>
+    <text x="54" y="45" text-anchor="middle" fill="#6b7a8b" font-size="9">CİHAZ takvimi</text>
+
+    <rect x="148" y="14" width="112" height="44" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="204" y="28" text-anchor="middle" fill="#14315a" font-weight="bold">Kayıt / Kabul</text>
+    <text x="204" y="41" text-anchor="middle" fill="#6b7a8b" font-size="9">başvuru + hizmet satırı</text>
+    <text x="204" y="52" text-anchor="middle" fill="#6b7a8b" font-size="9">sözleşme · provizyon</text>
+
+    <rect x="304" y="14" width="112" height="44" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="360" y="28" text-anchor="middle" fill="#14315a" font-weight="bold">İSTEM</text>
+    <text x="360" y="41" text-anchor="middle" fill="#6b7a8b" font-size="9">radyoloji_istem</text>
+    <text x="360" y="52" text-anchor="middle" fill="#6b7a8b" font-size="9">ACC-YYMMDD-nnnn</text>
+
+    <rect x="460" y="14" width="112" height="44" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="516" y="28" text-anchor="middle" fill="#14315a" font-weight="bold">Kontrol listesi</text>
+    <text x="516" y="41" text-anchor="middle" fill="#6b7a8b" font-size="9">gebelik · kreatinin</text>
+    <text x="516" y="52" text-anchor="middle" fill="#6b7a8b" font-size="9">implant · onam</text>
+
+    <rect x="616" y="14" width="80" height="44" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="656" y="32" text-anchor="middle" fill="#14315a" font-weight="bold">MWL</text>
+    <text x="656" y="45" text-anchor="middle" fill="#6b7a8b" font-size="9">cihaza düşer</text>
+
+    <line x1="106" y1="36" x2="144" y2="36" stroke="#6b7a8b" marker-end="url(#ok)"/>
+    <line x1="262" y1="36" x2="300" y2="36" stroke="#6b7a8b" marker-end="url(#ok)"/>
+    <line x1="418" y1="36" x2="456" y2="36" stroke="#6b7a8b" marker-end="url(#ok)"/>
+    <line x1="574" y1="36" x2="612" y2="36" stroke="#6b7a8b" marker-end="url(#ok)"/>
+  </g>
+
+  <path d="M656,60 L656,72 L54,72 L54,84" fill="none" stroke="#6b7a8b" marker-end="url(#ok)"/>
+  <text x="352" y="68" text-anchor="middle" font-size="9" fill="#6b7a8b">hasta çekim odasına alınır</text>
+
+  <g font-size="10.5">
+    <rect x="4" y="86" width="100" height="48" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="54" y="102" text-anchor="middle" fill="#14315a" font-weight="bold">ÇEKİM</text>
+    <text x="54" y="115" text-anchor="middle" fill="#6b7a8b" font-size="9">tekniker · cihaz</text>
+    <text x="54" y="126" text-anchor="middle" fill="#6b7a8b" font-size="9">kontrast · DOZ</text>
+
+    <rect x="148" y="86" width="112" height="48" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="204" y="102" text-anchor="middle" fill="#14315a" font-weight="bold">PACS eşleşme</text>
+    <text x="204" y="115" text-anchor="middle" fill="#6b7a8b" font-size="9">study_uid gelir</text>
+    <text x="204" y="126" text-anchor="middle" fill="#6b7a8b" font-size="9">seri / görüntü sayısı</text>
+
+    <rect x="304" y="86" width="112" height="48" rx="4" fill="#f1ecfa" stroke="#6a3fb5"/>
+    <text x="360" y="102" text-anchor="middle" fill="#14315a" font-weight="bold">RAPORLAMA</text>
+    <text x="360" y="115" text-anchor="middle" fill="#6b7a8b" font-size="9">şablon + makro</text>
+    <text x="360" y="126" text-anchor="middle" fill="#6b7a8b" font-size="9">taslak → ön rapor</text>
+
+    <rect x="460" y="86" width="112" height="48" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="516" y="102" text-anchor="middle" fill="#14315a" font-weight="bold">ONAY</text>
+    <text x="516" y="115" text-anchor="middle" fill="#6b7a8b" font-size="9">uzman imzası</text>
+    <text x="516" y="126" text-anchor="middle" fill="#6b7a8b" font-size="9">rapor durum 3</text>
+
+    <rect x="616" y="86" width="80" height="48" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="656" y="102" text-anchor="middle" fill="#14315a" font-weight="bold">TESLİM</text>
+    <text x="656" y="115" text-anchor="middle" fill="#6b7a8b" font-size="9">rapor / CD</text>
+    <text x="656" y="126" text-anchor="middle" fill="#6b7a8b" font-size="9">kime, ne zaman</text>
+
+    <line x1="106" y1="110" x2="144" y2="110" stroke="#6b7a8b" marker-end="url(#ok)"/>
+    <line x1="262" y1="110" x2="300" y2="110" stroke="#6b7a8b" marker-end="url(#ok)"/>
+    <line x1="418" y1="110" x2="456" y2="110" stroke="#6b7a8b" marker-end="url(#ok)"/>
+    <line x1="574" y1="110" x2="612" y2="110" stroke="#6b7a8b" marker-end="url(#ok)"/>
+  </g>
+
+  <!-- durum seridi -->
+  <g font-size="8.5" fill="#6b7a8b" text-anchor="middle">
+    <text x="54" y="148">durum 2 Çekildi</text>
+    <text x="360" y="148">durum 3 Raporlanıyor / 4 Ön Rapor</text>
+    <text x="516" y="148">durum 5 Onaylandı</text>
+    <text x="656" y="148">durum 6 Teslim</text>
+    <text x="360" y="24" opacity="0">.</text>
+  </g>
+
+  <!-- yan dallar -->
+  <g font-size="9">
+    <rect x="146" y="164" width="116" height="34" rx="4" fill="#fbe9e7" stroke="#b3261e"/>
+    <text x="204" y="178" text-anchor="middle" fill="#b3261e" font-weight="bold">Eşleşmedi / hata</text>
+    <text x="204" y="190" text-anchor="middle" fill="#6b7a8b">pacs_olay 3 · 5</text>
+    <path d="M204,136 L204,160" fill="none" stroke="#b3261e" marker-end="url(#okk)"/>
+
+    <rect x="300" y="164" width="120" height="34" rx="4" fill="#fbe9e7" stroke="#b3261e"/>
+    <text x="360" y="178" text-anchor="middle" fill="#b3261e" font-weight="bold">KRİTİK BULGU</text>
+    <text x="360" y="190" text-anchor="middle" fill="#6b7a8b">bildirim zorunlu</text>
+    <path d="M360,136 L360,160" fill="none" stroke="#b3261e" marker-end="url(#okk)"/>
+
+    <rect x="458" y="164" width="120" height="34" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="518" y="178" text-anchor="middle" fill="#2f6db3" font-weight="bold">İkinci okuma</text>
+    <text x="518" y="190" text-anchor="middle" fill="#6b7a8b">teleradyoloji</text>
+    <path d="M516,136 L516,160" fill="none" stroke="#2f6db3" marker-end="url(#ok)"/>
+
+    <rect x="10" y="164" width="116" height="34" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="68" y="178" text-anchor="middle" fill="#8a6218" font-weight="bold">Çekilemedi</text>
+    <text x="68" y="190" text-anchor="middle" fill="#6b7a8b">hasta gelmedi / uygun değil</text>
+    <path d="M54,136 L54,160" fill="none" stroke="#8a6218" marker-end="url(#ok)"/>
+  </g>
+
+  <!-- ucret -->
+  <g font-size="9">
+    <rect x="500" y="216" width="196" height="30" rx="4" fill="#fff" stroke="#cdd6e0"/>
+    <text x="598" y="235" text-anchor="middle" fill="#14315a">Ücret · dağılım · icmal (belge_satir 1:1)</text>
+    <path d="M360,200 L360,231 L496,231" fill="none" stroke="#6b7a8b" marker-end="url(#ok)"/>
+  </g>
+  <text x="230" y="235" text-anchor="middle" font-size="9" fill="#6b7a8b">
+    İstem ücret satırıyla 1:1 — çekim yapılmadan da iptal edilebilir</text>
+</svg>
+<div class="baslik">Şekil 1 — Radyolojinin omurgası. Laboratuvardan farkı: kontrol listesi kapısı,
+  PACS eşleşmesi ve teslim adımı.</div>
+</div>
+
+<h3>Omurganın adımları</h3>
+<table>
+  <thead><tr><th>Adım</th><th>Ekran</th><th>Kayıt</th><th>Kural</th></tr></thead>
+  <tbody>
+  <tr><td>Randevu</td><td>Randevu Takvimi (cihaz görünümü)</td><td><code>randevu</code></td>
+      <td>Radyolojide randevu <b>hekime değil CİHAZA</b> verilir: kısıtlı kaynak cihazdır.
+          Kontrast/aç karnına gereken tetkikte hazırlık talimatı randevuyla gider.</td></tr>
+  <tr><td>Kayıt / Kabul</td><td>Radyoloji › Kayıt Kabul</td><td><code>belge</code> + <code>belge_basvuru</code></td>
+      <td>Ödeyen kurum ve sözleşme burada belirlenir; hizmet satırı açılır.</td></tr>
+  <tr><td>İstem</td><td>Kabul ekranı / hekim istemi</td><td><code>radyoloji_istem</code></td>
+      <td><b>accession_no</b> otomatik üretilir (<code>ACC-YYMMDD-nnnn</code>) — PACS anahtarı budur.
+          Bir hizmet satırı en fazla bir istem doğurur.</td></tr>
+  <tr><td>Kabul sonrası</td><td>Kayıt Kabul (sağ alt kutu)</td><td><code>mwl_istendi</code>, SMS, hazırlık, CD</td>
+      <td>Niyet kaydedilir: MWL'ye gönder, randevu SMS'i, hazırlık talimatı, CD istendi.</td></tr>
+  <tr><td>Kontrol listesi</td><td>İstem kartı</td><td><code>radyoloji_kontrol</code></td>
+      <td>Modaliteye göre sorular: gebelik, kreatinin/eGFR, metal-implant, alerji, onam.
+          <b>Zorunlu soru cevaplanmadan çekim başlamaz.</b></td></tr>
+  <tr><td>Çekim</td><td>Çalışma listesi</td><td>durum 2 + doz alanları</td>
+      <td>Tekniker, cihaz, kontrast (ml), <b>DLP/CTDI</b> (BT ve skopide dozimetri zorunlu),
+          seri ve görüntü sayısı.</td></tr>
+  <tr><td>Raporlama</td><td>Rapor Yaz</td><td><code>radyoloji_rapor</code> (+bölüm, alan)</td>
+      <td>Şablon + makro ile yazılır; yapılandırılmış alanlar (ölçüm, BI-RADS vb.) ayrı tutulur.</td></tr>
+  <tr><td>Onay</td><td>Rapor Yaz / Önizleme</td><td>rapor durum 3</td>
+      <td>Uzman imzalar. Kritik bulgu varsa <b>bildirim yapılmadan onay kapanmaz</b>.</td></tr>
+  <tr><td>Teslim</td><td>Teslim Listesi</td><td><code>radyoloji_teslim</code></td>
+      <td>Raporu/CD'yi kim, ne zaman, hangi kimlikle aldı; hasta yakınında yakınlık da yazılır.</td></tr>
+  </tbody>
+</table>
+
+<h2 style="page-break-before:always">2. PACS / DICOM bağı</h2>
+<p>HBYS <b>iş emrini</b>, PACS <b>görüntüyü</b> tutar. İkisini tek bir numara bağlar:
+<code>accession_no</code>. Bağ kurulamazsa çekim yapılmış ama sistemde görüntüsüz kalır —
+bu yüzden her olay ham mesajıyla saklanır.</p>
+
+<div class="sekil">
+<svg viewBox="0 0 700 210" width="700" height="210">
+  <defs>
+    <marker id="ok2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#2f6db3"/>
+    </marker>
+    <marker id="ok2k" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#b3261e"/>
+    </marker>
+  </defs>
+
+  <!-- HBYS kutusu -->
+  <rect x="8" y="16" width="200" height="150" rx="6" fill="#f8fbff" stroke="#2f6db3" stroke-dasharray="4 3"/>
+  <text x="108" y="34" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#2f6db3">HBYS</text>
+  <g font-size="9.5">
+    <rect x="26" y="44" width="164" height="30" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="108" y="63" text-anchor="middle" fill="#14315a">İstem · accession_no</text>
+    <rect x="26" y="84" width="164" height="30" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="108" y="103" text-anchor="middle" fill="#14315a">Çalışma listesi (MWL)</text>
+    <rect x="26" y="124" width="164" height="30" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="108" y="143" text-anchor="middle" fill="#14315a">study_uid eşleşti</text>
+  </g>
+
+  <!-- PACS kutusu -->
+  <rect x="492" y="16" width="200" height="150" rx="6" fill="#f6f3fb" stroke="#6a3fb5" stroke-dasharray="4 3"/>
+  <text x="592" y="34" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#6a3fb5">CİHAZ + PACS</text>
+  <g font-size="9.5">
+    <rect x="510" y="44" width="164" height="30" rx="4" fill="#f1ecfa" stroke="#6a3fb5"/>
+    <text x="592" y="63" text-anchor="middle" fill="#14315a">Modalite worklist okur</text>
+    <rect x="510" y="84" width="164" height="30" rx="4" fill="#f1ecfa" stroke="#6a3fb5"/>
+    <text x="592" y="103" text-anchor="middle" fill="#14315a">Çekim → DICOM study</text>
+    <rect x="510" y="124" width="164" height="30" rx="4" fill="#f1ecfa" stroke="#6a3fb5"/>
+    <text x="592" y="143" text-anchor="middle" fill="#14315a">Arşiv (görüntü burada)</text>
+  </g>
+
+  <!-- oklar -->
+  <g font-size="9">
+    <path d="M194,99 L500,59" fill="none" stroke="#2f6db3" marker-end="url(#ok2)"/>
+    <text x="350" y="72" text-anchor="middle" fill="#2f6db3">1 · MWL gönderildi (giden)</text>
+
+    <path d="M504,110 L200,136" fill="none" stroke="#2e7d46" marker-end="url(#ok2)"/>
+    <text x="350" y="132" text-anchor="middle" fill="#2e7d46">2 · study geldi (gelen) — accession ile eşleşir</text>
+  </g>
+
+  <!-- hata dali -->
+  <g font-size="9">
+    <rect x="240" y="168" width="220" height="34" rx="4" fill="#fbe9e7" stroke="#b3261e"/>
+    <text x="350" y="182" text-anchor="middle" fill="#b3261e" font-weight="bold">3 · EŞLEŞMEDİ · 5 · HATA</text>
+    <text x="350" y="194" text-anchor="middle" fill="#6b7a8b">radyoloji_pacs_olay — ham mesajla saklanır</text>
+    <path d="M350,140 L350,164" fill="none" stroke="#b3261e" marker-end="url(#ok2k)"/>
+  </g>
+</svg>
+<div class="baslik">Şekil 2 — DICOM olay izi: MWL gönderimi, dönen study ve eşleşme hatası ayrı ayrı kaydedilir.</div>
+</div>
+
+<div class="kutu uyari">
+  <b>Neden ham mesaj saklanıyor?</b> "Hangi çekim kayboldu, neden eşleşmedi" sorusu ancak
+  gönderilen ve dönen mesajla cevaplanır. Cihaz AE title'ı yanlış, accession elle değiştirilmiş
+  ya da hasta cihazda elle yazılmış olabilir — üçünün izi de farklıdır.
+</div>
+
+<h2 style="page-break-before:always">3. Modaliteye göre farklar</h2>
+<p>Omurga aynı; <b>çekim öncesi kapı</b>, <b>süre</b> ve <b>rapor biçimi</b> modaliteye göre değişir.</p>
+
+<div class="sekil">
+<svg viewBox="0 0 700 250" width="700" height="250">
+  <g font-size="9.5">
+    <!-- basliklar -->
+    <text x="60" y="16" text-anchor="middle" font-weight="bold" fill="#14315a">Modalite</text>
+    <text x="220" y="16" text-anchor="middle" font-weight="bold" fill="#14315a">Çekim öncesi kapı</text>
+    <text x="400" y="16" text-anchor="middle" font-weight="bold" fill="#14315a">Çekim</text>
+    <text x="580" y="16" text-anchor="middle" font-weight="bold" fill="#14315a">Rapor</text>
+    <line x1="8" y1="22" x2="692" y2="22" stroke="#cdd6e0"/>
+
+    <!-- BT -->
+    <rect x="8" y="28" width="104" height="30" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="60" y="47" text-anchor="middle" font-weight="bold" fill="#2f6db3">BT</text>
+    <rect x="128" y="28" width="184" height="30" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="220" y="41" text-anchor="middle" fill="#8a6218">gebelik · kreatinin/eGFR</text>
+    <text x="220" y="52" text-anchor="middle" fill="#6b7a8b">kontrast alerjisi · onam</text>
+    <rect x="326" y="28" width="148" height="30" rx="4" fill="#fff" stroke="#cdd6e0"/>
+    <text x="400" y="41" text-anchor="middle" fill="#14315a">5–15 dk · kontrast</text>
+    <text x="400" y="52" text-anchor="middle" fill="#b3261e">DOZ: DLP / CTDI zorunlu</text>
+    <rect x="488" y="28" width="204" height="30" rx="4" fill="#f1ecfa" stroke="#6a3fb5"/>
+    <text x="590" y="47" text-anchor="middle" fill="#14315a">şablon + ölçüm alanları</text>
+
+    <!-- MR -->
+    <rect x="8" y="64" width="104" height="30" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="60" y="83" text-anchor="middle" font-weight="bold" fill="#2f6db3">MR</text>
+    <rect x="128" y="64" width="184" height="30" rx="4" fill="#fbe9e7" stroke="#b3261e"/>
+    <text x="220" y="77" text-anchor="middle" fill="#b3261e" font-weight="bold">METAL / İMPLANT taraması</text>
+    <text x="220" y="88" text-anchor="middle" fill="#6b7a8b">pil, klips, protez · klostrofobi</text>
+    <rect x="326" y="64" width="148" height="30" rx="4" fill="#fff" stroke="#cdd6e0"/>
+    <text x="400" y="77" text-anchor="middle" fill="#14315a">20–45 dk · sedasyon olabilir</text>
+    <text x="400" y="88" text-anchor="middle" fill="#2e7d46">iyonlaştırıcı ışın YOK</text>
+    <rect x="488" y="64" width="204" height="30" rx="4" fill="#f1ecfa" stroke="#6a3fb5"/>
+    <text x="590" y="83" text-anchor="middle" fill="#14315a">uzun, sekans bazlı</text>
+
+    <!-- USG -->
+    <rect x="8" y="100" width="104" height="30" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="60" y="119" text-anchor="middle" font-weight="bold" fill="#2f6db3">USG · Doppler</text>
+    <rect x="128" y="100" width="184" height="30" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="220" y="119" text-anchor="middle" fill="#8a6218">açlık / dolu mesane</text>
+    <rect x="326" y="100" width="148" height="30" rx="4" fill="#fff" stroke="#cdd6e0"/>
+    <text x="400" y="113" text-anchor="middle" fill="#14315a">RADYOLOG çeker</text>
+    <text x="400" y="124" text-anchor="middle" fill="#6b7a8b">gerçek zamanlı</text>
+    <rect x="488" y="100" width="204" height="30" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="590" y="119" text-anchor="middle" fill="#14315a">çekimle birlikte yazılır</text>
+
+    <!-- Rontgen -->
+    <rect x="8" y="136" width="104" height="30" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="60" y="155" text-anchor="middle" font-weight="bold" fill="#2f6db3">Röntgen · DEXA</text>
+    <rect x="128" y="136" width="184" height="30" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="220" y="155" text-anchor="middle" fill="#8a6218">gebelik sorusu</text>
+    <rect x="326" y="136" width="148" height="30" rx="4" fill="#fff" stroke="#cdd6e0"/>
+    <text x="400" y="155" text-anchor="middle" fill="#14315a">1–5 dk · hazırlık yok</text>
+    <rect x="488" y="136" width="204" height="30" rx="4" fill="#f1ecfa" stroke="#6a3fb5"/>
+    <text x="590" y="149" text-anchor="middle" fill="#14315a">kısa · çoğu makro ile</text>
+    <text x="590" y="160" text-anchor="middle" fill="#6b7a8b">DEXA: T/Z skoru alanı</text>
+
+    <!-- Mamografi -->
+    <rect x="8" y="172" width="104" height="30" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="60" y="191" text-anchor="middle" font-weight="bold" fill="#2f6db3">Mamografi</text>
+    <rect x="128" y="172" width="184" height="30" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="220" y="185" text-anchor="middle" fill="#8a6218">önceki tetkik karşılaştırması</text>
+    <text x="220" y="196" text-anchor="middle" fill="#6b7a8b">tarama mı, tanısal mı</text>
+    <rect x="326" y="172" width="148" height="30" rx="4" fill="#fff" stroke="#cdd6e0"/>
+    <text x="400" y="191" text-anchor="middle" fill="#14315a">10 dk · pozisyonlama</text>
+    <rect x="488" y="172" width="204" height="30" rx="4" fill="#f1ecfa" stroke="#6a3fb5"/>
+    <text x="590" y="185" text-anchor="middle" fill="#14315a">BI-RADS kategorisi</text>
+    <text x="590" y="196" text-anchor="middle" fill="#6b7a8b">çift okuma (taramada)</text>
+
+    <!-- Anjiyo -->
+    <rect x="8" y="208" width="104" height="32" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="60" y="228" text-anchor="middle" font-weight="bold" fill="#2f6db3">Anjiyo · Skopi</text>
+    <rect x="128" y="208" width="184" height="32" rx="4" fill="#fbe9e7" stroke="#b3261e"/>
+    <text x="220" y="221" text-anchor="middle" fill="#b3261e" font-weight="bold">GİRİŞİMSEL onam</text>
+    <text x="220" y="233" text-anchor="middle" fill="#6b7a8b">kanama profili · açlık</text>
+    <rect x="326" y="208" width="148" height="32" rx="4" fill="#fff" stroke="#cdd6e0"/>
+    <text x="400" y="221" text-anchor="middle" fill="#14315a">30–120 dk · ekip</text>
+    <text x="400" y="233" text-anchor="middle" fill="#b3261e">doz + SARF (stent, kateter)</text>
+    <rect x="488" y="208" width="204" height="32" rx="4" fill="#f1ecfa" stroke="#6a3fb5"/>
+    <text x="590" y="221" text-anchor="middle" fill="#14315a">işlem raporu</text>
+    <text x="590" y="233" text-anchor="middle" fill="#6b7a8b">kullanılan malzeme listesi</text>
+  </g>
+</svg>
+<div class="baslik">Şekil 3 — Modalite bazlı farklar: kapı, süre, doz ve rapor biçimi.</div>
+</div>
+
+<div class="kutu kritik">
+  <b>İki güvenlik kapısı asla atlanmaz.</b> MR'da metal/implant taraması (cihaz mıknatıstır,
+  yanlış hasta ölümcül olabilir) ve BT/skopide doz kaydı (hasta dozimetrisi yasal
+  yükümlülüktür). Kontrol listesi bu yüzden bir "form" değil, çekimi açan <b>kapıdır</b>.
+</div>
+
+<h2 style="page-break-before:always">4. Rapor yaşam döngüsü</h2>
+
+<div class="sekil">
+<svg viewBox="0 0 700 216" width="700" height="216">
+  <defs>
+    <marker id="ok3" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#6a3fb5"/>
+    </marker>
+    <marker id="ok3k" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#b3261e"/>
+    </marker>
+  </defs>
+  <g font-size="10">
+    <rect x="8" y="26" width="120" height="44" rx="4" fill="#f1ecfa" stroke="#6a3fb5"/>
+    <text x="68" y="44" text-anchor="middle" font-weight="bold" fill="#14315a">1 · Taslak</text>
+    <text x="68" y="57" text-anchor="middle" font-size="9" fill="#6b7a8b">şablon + makro</text>
+
+    <rect x="176" y="26" width="120" height="44" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="236" y="44" text-anchor="middle" font-weight="bold" fill="#14315a">2 · Ön rapor</text>
+    <text x="236" y="57" text-anchor="middle" font-size="9" fill="#6b7a8b">asistan / acil için</text>
+
+    <rect x="344" y="26" width="120" height="44" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="404" y="44" text-anchor="middle" font-weight="bold" fill="#14315a">3 · Onaylı</text>
+    <text x="404" y="57" text-anchor="middle" font-size="9" fill="#6b7a8b">uzman imzası</text>
+
+    <rect x="512" y="26" width="180" height="44" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="602" y="44" text-anchor="middle" font-weight="bold" fill="#14315a">Teslim / e-Nabız</text>
+    <text x="602" y="57" text-anchor="middle" font-size="9" fill="#6b7a8b">rapor · CD · hekime dönüş</text>
+
+    <line x1="130" y1="48" x2="172" y2="48" stroke="#6a3fb5" marker-end="url(#ok3)"/>
+    <line x1="298" y1="48" x2="340" y2="48" stroke="#6a3fb5" marker-end="url(#ok3)"/>
+    <line x1="466" y1="48" x2="508" y2="48" stroke="#2e7d46" marker-end="url(#ok3)"/>
+  </g>
+
+  <!-- kritik bulgu kapisi -->
+  <g font-size="9">
+    <rect x="330" y="88" width="148" height="42" rx="4" fill="#fbe9e7" stroke="#b3261e"/>
+    <text x="404" y="103" text-anchor="middle" fill="#b3261e" font-weight="bold">KRİTİK BULGU</text>
+    <text x="404" y="115" text-anchor="middle" fill="#6b7a8b">kime, ne zaman, nasıl</text>
+    <text x="404" y="126" text-anchor="middle" fill="#6b7a8b">bildirildi — kanıt kaydı</text>
+    <path d="M404,72 L404,84" fill="none" stroke="#b3261e" marker-end="url(#ok3k)"/>
+    <text x="470" y="80" font-size="8.5" fill="#b3261e">onayın ön koşulu</text>
+  </g>
+
+  <!-- ikinci okuma -->
+  <g font-size="9">
+    <rect x="150" y="88" width="150" height="42" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="225" y="103" text-anchor="middle" fill="#2f6db3" font-weight="bold">İkinci okuma</text>
+    <text x="225" y="115" text-anchor="middle" fill="#6b7a8b">teleradyoloji / konsültasyon</text>
+    <text x="225" y="126" text-anchor="middle" fill="#6b7a8b">radyoloji_konsultasyon</text>
+    <path d="M236,72 L236,84" fill="none" stroke="#2f6db3" marker-end="url(#ok3)"/>
+  </g>
+
+  <!-- duzeltme -->
+  <g font-size="9">
+    <rect x="500" y="88" width="192" height="42" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="596" y="103" text-anchor="middle" fill="#8a6218" font-weight="bold">Düzeltme (addendum)</text>
+    <text x="596" y="115" text-anchor="middle" fill="#6b7a8b">onaylı rapor SİLİNMEZ</text>
+    <text x="596" y="126" text-anchor="middle" fill="#6b7a8b">yeni sürüm eklenir</text>
+    <path d="M596,72 L596,84" fill="none" stroke="#8a6218" marker-end="url(#ok3)"/>
+  </g>
+
+  <text x="350" y="156" text-anchor="middle" font-size="9.5" fill="#6b7a8b">
+    İstem durumu rapora bağlı ilerler: 3 Raporlanıyor → 4 Ön Rapor → 5 Onaylandı → 6 Teslim Edildi</text>
+  <text x="350" y="172" text-anchor="middle" font-size="9.5" fill="#6b7a8b">
+    Rapor gövdesi bölüm bölüm tutulur (bulgular, sonuç, öneri); ölçümler ayrı ALAN kayıtlarıdır</text>
+  <text x="350" y="188" text-anchor="middle" font-size="9.5" fill="#6b7a8b">
+    Ekranlar: Rapor Yaz · Rapor Önizleme · Kritik Bulgu Listesi · Konsültasyon Listesi · Teslim Listesi</text>
+</svg>
+<div class="baslik">Şekil 4 — Rapor: taslaktan teslime, kritik bulgu ve düzeltme dallarıyla.</div>
+</div>
+
+<h3>Ayırt eden noktalar</h3>
+<ul>
+  <li><b>Ön rapor bir aşamadır, taslak değildir.</b> Acilde asistanın yazdığı ön rapor hekimi
+      yönlendirir; uzman onayı sonra gelir ve fark varsa <b>ikisi de kayıtta kalır</b>.</li>
+  <li><b>Kritik bulgu bildirimi onayın ön koşuludur.</b> "Söyledim" iddiası kayıt yoksa
+      savunulamaz — kime, ne zaman, hangi yolla bildirildiği yazılır.</li>
+  <li><b>Onaylı rapor silinmez.</b> Hata varsa düzeltme (addendum) yeni sürüm olarak eklenir;
+      dışarı çıkmış bir raporu geçmişten silmek izi yok eder.</li>
+  <li><b>Yapılandırılmış alanlar</b> serbest metinden ayrı tutulur: BI-RADS, ölçüm, skor —
+      sonradan sorgulanabilsin diye (tarama programları bunu ister).</li>
+</ul>
+
+<h2 style="page-break-before:always">5. Durum kodları</h2>
+<table>
+  <thead><tr><th>Kayıt</th><th>Kodlar</th></tr></thead>
+  <tbody>
+  <tr><td><code>radyoloji_istem.durum</code> (<code>rad.istem_durum</code>)</td>
+      <td><span class="rz kir">0 İptal</span> <span class="rz">1 Bekliyor</span>
+          <span class="rz mavi">2 Çekildi</span> <span class="rz mavi">3 Raporlanıyor</span>
+          <span class="rz sari">4 Ön Rapor</span> <span class="rz yesil">5 Onaylandı</span>
+          <span class="rz yesil">6 Teslim Edildi</span><br>
+          <span style="color:#6b7a8b">Sıra anlamlıdır: worklist bu sırayla akar, geriye dönüş yoktur.</span></td></tr>
+  <tr><td><code>radyoloji_rapor.durum</code></td>
+      <td>1 Taslak · 2 Ön Rapor · <span class="rz yesil">3 Onaylı</span></td></tr>
+  <tr><td><code>rad.modalite</code></td>
+      <td>1 BT · 2 MR · 3 USG · 4 Röntgen · 5 Mamografi · 6 DEXA · 7 Anjiyo · 8 Skopi</td></tr>
+  <tr><td><code>rad.oncelik</code></td>
+      <td>1 Normal · <span class="rz kir">2 Acil</span></td></tr>
+  <tr><td><code>radyoloji_pacs_olay.olay</code></td>
+      <td>1 MWL gönderildi · 2 study geldi · <span class="rz kir">3 eşleşmedi</span> ·
+          4 güncellendi · <span class="rz kir">5 hata</span> — yön: 1 giden · 2 gelen</td></tr>
+  </tbody>
+</table>
+
+<h2>6. Radyoloji ile laboratuvarın karşılaştırması</h2>
+<table>
+  <thead><tr><th>Ölçüt</th><th>Laboratuvar</th><th>Radyoloji</th></tr></thead>
+  <tbody>
+  <tr><td>Süreci taşıyan</td><td>Numune (tüp/barkod)</td><td><b>Hasta</b> (randevu/cihaz)</td></tr>
+  <tr><td>Kaynak kısıdı</td><td>Cihaz kapasitesi</td><td><b>Cihaz + oda + hasta zamanı</b></td></tr>
+  <tr><td>Güvenlik kapısı</td><td>Numune kalitesi (kabulde)</td><td>Kontrol listesi (çekim öncesi): gebelik, kreatinin, implant</td></tr>
+  <tr><td>Sonucu üreten</td><td>Cihaz + kural motoru</td><td><b>Radyolog</b> (metin)</td></tr>
+  <tr><td>Oto-onay</td><td>Var (temiz sonuç)</td><td><b>Yok</b></td></tr>
+  <tr><td>Ara çıktı</td><td>Kültürde ön rapor</td><td>Ön rapor (asistan/acil)</td></tr>
+  <tr><td>İkinci sistem</td><td>Cihaz ara katmanı (ASTM/HL7)</td><td><b>PACS</b> (DICOM/MWL)</td></tr>
+  <tr><td>Zaman ölçüsü</td><td>Dakika – hafta (dala göre)</td><td>Çekim dakikalar, rapor saatler</td></tr>
+  <tr><td>Teslim</td><td>Rapor / e-Nabız</td><td>Rapor + <b>CD/görüntü</b>, imzalı teslim kaydı</td></tr>
+  <tr><td>Yasal iz</td><td>Kalite kontrol, panik bildirimi</td><td><b>Doz kaydı</b>, kritik bulgu bildirimi, teslim kimliği</td></tr>
+  </tbody>
+</table>
+
+<div class="kutu">
+  <b>Ücret tarafı aynıdır.</b> Radyoloji istemi bir <code>belge_satir</code> ile 1:1 bağlıdır:
+  hizmet ücretlendirilir, sözleşme rotası SUT/TTB listelerinden beş kovaya böler
+  (SGK · sigorta · hasta payı · hasta ek katkısı · SGK katılım payı). Çekim yapılmadan
+  istem iptal edilirse satır da düşer; kontrast ve girişimsel sarf malzemesi ayrı satırdır.
+</div>
+
+<div class="kutu uyari">
+  <b>Radyolojinin tek ortak riski:</b> eşleşmemiş study. Çekim yapılmış, hasta gitmiş, görüntü
+  PACS'ta duruyor ama istemle bağı kurulmamıştır. Rapor yazılamaz, ücret kapanmaz, hasta
+  "sonucum çıkmadı" diye döner. Bu yüzden <b>eşleşmeyen study listesi</b> günlük takip edilir.
+</div>
+
+</body>
+</html>

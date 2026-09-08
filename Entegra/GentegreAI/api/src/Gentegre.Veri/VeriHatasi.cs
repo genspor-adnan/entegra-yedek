@@ -71,6 +71,13 @@ public static class VeriHatasi
         ["ck_firsat_olasilik"]    = "Olasılık 0 ile 100 arasında olmalı.",
         ["ck_cek_senet_kur"]      = "Kur sıfırdan büyük olmalı.",
         ["ck_gorev_ilerleme"]     = "İlerleme 0 ile 100 arasında olmalı.",
+        // HASTA KIMLIK ZORUNLULUKLARI (480): ikisi de sonucun yorumunu
+        //   degistirir - referans araligi ve hizmet uygunlugu bunlara bakar.
+        ["ck_taraf_hasta_dogum_zorunlu"]    =
+            "Hastanın doğum tarihi zorunlu (yalnız kimliksiz hastada boş bırakılabilir).",
+        ["ck_taraf_hasta_cinsiyet_zorunlu"] = "Hastanın cinsiyeti seçilmeli (Erkek / Kadın).",
+        ["ck_taraf_hasta_dogum_akilli"]     =
+            "Doğum tarihi geçersiz: gelecek bir tarih ya da 130 yaştan büyük olamaz.",
         // 175'te kaldirildi; eski kurulumda hala olabilir - ham kisit adi yerine
         //   ne yapilmasi gerektigini soyler.
         ["ck_sube_efatura"]       = "e-Fatura mükellefi şubede VKN ve gönderici etiketi dolu olmalı."

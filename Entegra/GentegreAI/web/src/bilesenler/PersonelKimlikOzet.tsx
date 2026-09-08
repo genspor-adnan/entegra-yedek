@@ -145,7 +145,11 @@ export function PersonelKimlikOzet({
             )}
             <div className="adres-satir">
               <label className="alan tip-tarih">
-                <span className="etiket">Doğum Tarihi *</span>
+                {/* ZORUNLULUK KATALOGTAN (480): etiketin yildizi elle
+                    yazilirsa katalog degistiginde ekran yalan soyler. */}
+                <span className="etiket">
+                  Doğum Tarihi{alan('dogumTarihi')?.zorunlu && ' *'}
+                </span>
                 {/* Tarih kutusu biraz DAR (kullanici): icerigi sabit
                     genislikte (gg.aa.yyyy). YAS BURADA GOSTERILMEZ
                     (kullanici) - kimlik seridindeki "Doğum Tarihi / Yaş"
@@ -164,7 +168,9 @@ export function PersonelKimlikOzet({
                 Uyruk. Ikili satirlar - ucuncu alan satiri sikistiriyordu. */}
             <div className="adres-satir">
               <label className="alan tip-kod">
-                <span className="etiket">Cinsiyet</span>
+                <span className="etiket">
+                  Cinsiyet{cinsiyetAlan?.zorunlu && ' *'}
+                </span>
                 <select value={String(satir.cinsiyet ?? '')} disabled={saltOkunur}
                   onChange={e => ozlukDegis({ cinsiyet: e.target.value })}>
                   <option value="">-</option>

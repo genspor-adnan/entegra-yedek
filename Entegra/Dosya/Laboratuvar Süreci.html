@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Laboratuvar Süreci — Randevudan Rapora</title>
+<style>
+  :root{
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --line:#cdd6e0; --line2:#e3e9f0;
+    --mavi:#2f6db3; --mavizem:#eef4fc; --yesil:#2e7d46; --yesilzem:#e2f3e8;
+    --mor:#6a3fb5; --morzem:#f1ecfa; --turuncu:#8a6218; --turuncuzem:#fdf6e3;
+    --kirmizi:#b3261e; --kirmizizem:#fbe9e7;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);font-family:"Segoe UI","Trebuchet MS",Arial,sans-serif;
+    font-size:10.5pt;line-height:1.5}
+  h1{font-size:19pt;color:var(--navy);margin:0 0 4px;border-bottom:2px solid var(--navy);padding-bottom:6px}
+  h2{font-size:13.5pt;color:var(--navy);margin:20pt 0 6pt;border-bottom:1px solid var(--line);padding-bottom:3px}
+  h3{font-size:11.5pt;color:var(--mavi);margin:12pt 0 4pt}
+  p{margin:5pt 0}
+  .ust{color:var(--muted);font-size:9.5pt;margin-bottom:14pt}
+  table{border-collapse:collapse;width:100%;margin:6pt 0;font-size:9.5pt}
+  th,td{border:1px solid var(--line);padding:4px 7px;text-align:left;vertical-align:top}
+  th{background:#eef2f7;color:#2c4a6b}
+  code{font-family:Consolas,monospace;font-size:9pt;background:#f2f6fa;
+    border:1px solid var(--line2);border-radius:3px;padding:0 3px}
+  .kutu{border:1px solid var(--line);border-left:4px solid var(--mavi);background:#f8fbff;
+    padding:7px 10px;margin:8pt 0;font-size:10pt}
+  .kutu.uyari{border-left-color:var(--turuncu);background:var(--turuncuzem)}
+  .kutu.kritik{border-left-color:var(--kirmizi);background:var(--kirmizizem)}
+  .sekil{margin:10pt 0 14pt;text-align:center}
+  .sekil svg{max-width:100%}
+  .sekil .baslik{font-size:9.5pt;color:var(--muted);margin-top:3px}
+  .rz{display:inline-block;border-radius:9px;padding:0 7px;font-size:9pt;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e}
+  .rz.mavi{background:var(--mavizem);color:var(--mavi);border-color:#cfe0f5}
+  .rz.yesil{background:var(--yesilzem);color:var(--yesil);border-color:#bfe3cb}
+  .rz.mor{background:var(--morzem);color:var(--mor);border-color:#ddd0f2}
+  .rz.sari{background:var(--turuncuzem);color:var(--turuncu);border-color:#f2ddbf}
+  .rz.kir{background:var(--kirmizizem);color:var(--kirmizi);border-color:#f3c4bf}
+  .sayfa{page-break-after:always}
+  tr,li,.kutu,.sekil{page-break-inside:avoid}
+  h2,h3{page-break-after:avoid}
+  ul{margin:4pt 0;padding-left:18px} li{margin:2pt 0}
+  @page{size:A4;margin:15mm}
+  text{font-family:"Segoe UI",Arial,sans-serif}
+</style>
+</head>
+<body>
+
+<h1>Laboratuvar Süreci — Randevudan Rapora</h1>
+<div class="ust">Gentegre AI · HBYS · Biyokimya · Mikrobiyoloji · Genetik dalları ayrı ayrı ·
+  Kaynak: <code>db/433</code> lab çekirdeği, <code>436</code> mikrobiyoloji,
+  <code>439</code> genetik, <code>442</code> kalite kontrol</div>
+
+<p>Üç dal <b>aynı omurgayı</b> paylaşır: randevu → başvuru → istem → tüp → <b>kabul</b>.
+Kabulden sonra yollar ayrılır; biri dakikalarla, biri günlerle, biri haftalarla ölçülür.
+Ortak olan üç kural şudur:</p>
+<ul>
+  <li><b>TAT saati kabulde başlar.</b> Numune laboratuvara ulaşmadan süre işlemez — gecikme
+      kan alma birimine yazılmaz.</li>
+  <li><b>Barkod numunenin kimliğidir.</b> Cihaz da, dış laboratuvar da hastayı değil barkodu okur.</li>
+  <li><b>Sonuç iki kapıdan geçer:</b> teknik onay (ölçüm geçerli mi) ve uzman onayı (yayınlanır mı).
+      Temiz sonuç oto-onaya gidebilir; bayraklı sonuç insana düşer.</li>
+</ul>
+
+<h2>1. Ortak omurga</h2>
+
+<div class="sekil">
+<svg viewBox="0 0 700 250" width="700" height="250">
+  <defs>
+    <marker id="ok" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#6b7a8b"/>
+    </marker>
+  </defs>
+  <!-- satir 1 -->
+  <g font-size="10.5">
+    <rect x="4" y="16" width="104" height="42" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="56" y="34" text-anchor="middle" fill="#14315a" font-weight="bold">Randevu</text>
+    <text x="56" y="48" text-anchor="middle" fill="#6b7a8b" font-size="9">randevu</text>
+
+    <rect x="152" y="16" width="104" height="42" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="204" y="30" text-anchor="middle" fill="#14315a" font-weight="bold">Kayıt / Başvuru</text>
+    <text x="204" y="43" text-anchor="middle" fill="#6b7a8b" font-size="9">belge tür 19</text>
+    <text x="204" y="53" text-anchor="middle" fill="#6b7a8b" font-size="9">+ sözleşme, provizyon</text>
+
+    <rect x="300" y="16" width="104" height="42" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="352" y="30" text-anchor="middle" fill="#14315a" font-weight="bold">Muayene</text>
+    <text x="352" y="43" text-anchor="middle" fill="#6b7a8b" font-size="9">İstem sekmesi</text>
+    <text x="352" y="53" text-anchor="middle" fill="#6b7a8b" font-size="9">tetkik seçimi</text>
+
+    <rect x="448" y="16" width="104" height="42" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="500" y="30" text-anchor="middle" fill="#14315a" font-weight="bold">İSTEM</text>
+    <text x="500" y="43" text-anchor="middle" fill="#6b7a8b" font-size="9">lab_istem</text>
+    <text x="500" y="53" text-anchor="middle" fill="#6b7a8b" font-size="9">durum 1 İstendi</text>
+
+    <rect x="596" y="16" width="100" height="42" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="646" y="30" text-anchor="middle" fill="#14315a" font-weight="bold">Tüp planı</text>
+    <text x="646" y="43" text-anchor="middle" fill="#6b7a8b" font-size="9">lab_numune</text>
+    <text x="646" y="53" text-anchor="middle" fill="#6b7a8b" font-size="9">barkod + etiket</text>
+
+    <line x1="110" y1="37" x2="148" y2="37" stroke="#6b7a8b" marker-end="url(#ok)"/>
+    <line x1="258" y1="37" x2="296" y2="37" stroke="#6b7a8b" marker-end="url(#ok)"/>
+    <line x1="406" y1="37" x2="444" y2="37" stroke="#6b7a8b" marker-end="url(#ok)"/>
+    <line x1="554" y1="37" x2="592" y2="37" stroke="#6b7a8b" marker-end="url(#ok)"/>
+  </g>
+
+  <!-- donus oku -->
+  <path d="M646,60 L646,74 L56,74 L56,88" fill="none" stroke="#6b7a8b" marker-end="url(#ok)"/>
+  <text x="350" y="70" text-anchor="middle" font-size="9" fill="#6b7a8b">hasta kan alma bankosuna gelir</text>
+
+  <!-- satir 2 -->
+  <g font-size="10.5">
+    <rect x="4" y="90" width="104" height="46" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="56" y="106" text-anchor="middle" fill="#14315a" font-weight="bold">Numune alma</text>
+    <text x="56" y="119" text-anchor="middle" fill="#6b7a8b" font-size="9">alan, yer, saat</text>
+    <text x="56" y="130" text-anchor="middle" fill="#6b7a8b" font-size="9">durum 2 Alındı</text>
+
+    <rect x="152" y="90" width="104" height="46" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="204" y="106" text-anchor="middle" fill="#14315a" font-weight="bold">KABUL</text>
+    <text x="204" y="119" text-anchor="middle" fill="#6b7a8b" font-size="9">kalite + serum idx</text>
+    <text x="204" y="130" text-anchor="middle" fill="#b3261e" font-size="9">⏱ TAT başlar</text>
+
+    <rect x="300" y="90" width="104" height="46" rx="4" fill="#fff" stroke="#cdd6e0"/>
+    <text x="352" y="112" text-anchor="middle" fill="#14315a" font-weight="bold">DAL AYRIMI</text>
+    <text x="352" y="126" text-anchor="middle" fill="#6b7a8b" font-size="9">tetkiğin bölümü</text>
+
+    <rect x="448" y="90" width="104" height="46" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="500" y="106" text-anchor="middle" fill="#14315a" font-weight="bold">Sonuç</text>
+    <text x="500" y="119" text-anchor="middle" fill="#6b7a8b" font-size="9">lab_sonuc</text>
+    <text x="500" y="130" text-anchor="middle" fill="#6b7a8b" font-size="9">bayrak · panik · delta</text>
+
+    <rect x="596" y="90" width="100" height="46" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="646" y="106" text-anchor="middle" fill="#14315a" font-weight="bold">Onay</text>
+    <text x="646" y="119" text-anchor="middle" fill="#6b7a8b" font-size="9">teknik → uzman</text>
+    <text x="646" y="130" text-anchor="middle" fill="#6b7a8b" font-size="9">durum 3</text>
+
+    <line x1="110" y1="113" x2="148" y2="113" stroke="#6b7a8b" marker-end="url(#ok)"/>
+    <line x1="258" y1="113" x2="296" y2="113" stroke="#6b7a8b" marker-end="url(#ok)"/>
+    <line x1="406" y1="113" x2="444" y2="113" stroke="#6b7a8b" marker-end="url(#ok)"/>
+    <line x1="554" y1="113" x2="592" y2="113" stroke="#6b7a8b" marker-end="url(#ok)"/>
+  </g>
+
+  <!-- ret dali -->
+  <path d="M204,138 L204,160 L120,160" fill="none" stroke="#b3261e" marker-end="url(#ok)"/>
+  <rect x="10" y="146" width="108" height="28" rx="4" fill="#fbe9e7" stroke="#b3261e"/>
+  <text x="64" y="164" text-anchor="middle" fill="#b3261e" font-size="9.5">RET → yeniden alım</text>
+
+  <!-- cikti -->
+  <path d="M646,138 L646,190" fill="none" stroke="#6b7a8b" marker-end="url(#ok)"/>
+  <g font-size="9.5">
+    <rect x="430" y="192" width="122" height="26" rx="4" fill="#fff" stroke="#cdd6e0"/>
+    <text x="491" y="209" text-anchor="middle" fill="#14315a">Rapor / e-Nabız</text>
+    <rect x="566" y="192" width="130" height="26" rx="4" fill="#fff" stroke="#cdd6e0"/>
+    <text x="631" y="209" text-anchor="middle" fill="#14315a">Ücret · dağılım · icmal</text>
+    <path d="M596,205 L558,205" fill="none" stroke="#6b7a8b" marker-end="url(#ok)"/>
+  </g>
+
+  <!-- dal ayrimi oklari -->
+  <g font-size="9">
+    <path d="M352,138 L352,168" fill="none" stroke="#6b7a8b"/>
+    <path d="M232,168 L472,168" fill="none" stroke="#6b7a8b"/>
+    <path d="M232,168 L232,192" fill="none" stroke="#2f6db3" marker-end="url(#ok)"/>
+    <path d="M352,168 L352,192" fill="none" stroke="#8a6218" marker-end="url(#ok)"/>
+    <path d="M472,168 L472,180" fill="none" stroke="#6a3fb5" marker-end="url(#ok)"/>
+    <rect x="176" y="194" width="112" height="24" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="232" y="210" text-anchor="middle" fill="#2f6db3" font-weight="bold">Biyokimya</text>
+    <rect x="296" y="194" width="112" height="24" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="352" y="210" text-anchor="middle" fill="#8a6218" font-weight="bold">Mikrobiyoloji</text>
+    <rect x="416" y="228" width="112" height="22" rx="4" fill="#f1ecfa" stroke="#6a3fb5"/>
+    <text x="472" y="243" text-anchor="middle" fill="#6a3fb5" font-weight="bold">Genetik</text>
+  </g>
+</svg>
+<div class="baslik">Şekil 1 — Üç dalın paylaştığı omurga. Kabule kadar her şey aynı; sonrası ayrışır.</div>
+</div>
+
+<h3>Omurganın adımları</h3>
+<table>
+  <thead><tr><th>Adım</th><th>Ekran</th><th>Kayıt</th><th>Kural</th></tr></thead>
+  <tbody>
+  <tr><td>Randevu</td><td>Randevu Takvimi</td><td><code>randevu</code></td>
+      <td>Aç karnına gelinecek tetkik varsa randevu saati ona göre verilir; tetkik uyum
+          kontrolü randevuda yapılır.</td></tr>
+  <tr><td>Kayıt / Başvuru</td><td>Kayıt Kabul › Başvurular</td><td><code>belge</code> (tür 19) + <code>belge_basvuru</code></td>
+      <td>Ödeyen kurum, <b>sözleşme</b> ve alt kurum burada belirlenir — tetkiğin fiyatı ve
+          ödeme dağılımı buradan çıkar.</td></tr>
+  <tr><td>İstem</td><td>Muayene › İstem · Laboratuvar › İstemler</td><td><code>lab_istem</code> + <code>lab_istem_satir</code></td>
+      <td>Kaynak: muayene · teletıp · banko · dış kurum · check-up. Öncelik ACİL ise cihazda
+          STAT sırası, etiket kırmızı.</td></tr>
+  <tr><td>Tüp planı</td><td>İstemler › Barkod Üret</td><td><code>lab_numune</code></td>
+      <td>Tetkik kataloğundan otomatik: aynı numune tipi/tüp <b>tek barkodda birleşir</b>.</td></tr>
+  <tr><td>Numune alma</td><td>Kan alma bankosu</td><td><code>lab_numune</code> durum 2</td>
+      <td>Kim aldı, nerede, ne zaman — kalite tartışmasının ilk sorusu budur.</td></tr>
+  <tr><td>Kabul</td><td>İstemler / Numune Kabul</td><td>durum 3 + <code>hedef_bitis</code></td>
+      <td>Kalite ve serum indeksi (hemoliz/lipemi/ikter) burada kaydedilir. <b>TAT saati başlar.</b>
+          Uygunsuz tüp reddedilir, tetkikler "tekrar numune"ye düşer.</td></tr>
+  </tbody>
+</table>
+
+<div class="kutu uyari">
+  <b>Dış istem farkı.</b> Numune kurye ile gelir; kabul anında soğuk zincir kaydı ve
+  gönderen kurum bilgisi aranır. İstemin kaynağı "Dış kurum"dur ve faturalama kuruma yapılır.
+</div>
+
+<h2 style="page-break-before:always">2. Biyokimya (ve hematoloji, hormon, seroloji)</h2>
+<p><b>Ölçü: dakika–saat.</b> Süreç cihaz merkezlidir; insan yalnız <i>bayrak takılan</i>
+sonuca dokunur.</p>
+
+<div class="sekil">
+<svg viewBox="0 0 700 210" width="700" height="210">
+  <defs>
+    <marker id="ok2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#2f6db3"/>
+    </marker>
+  </defs>
+  <g font-size="10">
+    <rect x="4" y="30" width="96" height="44" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="52" y="48" text-anchor="middle" font-weight="bold" fill="#14315a">Kabul</text>
+    <text x="52" y="62" text-anchor="middle" font-size="9" fill="#6b7a8b">santrifüj, ayrım</text>
+
+    <rect x="128" y="30" width="104" height="44" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="180" y="44" text-anchor="middle" font-weight="bold" fill="#14315a">Çalışma listesi</text>
+    <text x="180" y="57" text-anchor="middle" font-size="9" fill="#6b7a8b">cihaza barkod</text>
+    <text x="180" y="68" text-anchor="middle" font-size="9" fill="#6b7a8b">cihaz_test_esleme</text>
+
+    <rect x="260" y="30" width="104" height="44" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="312" y="44" text-anchor="middle" font-weight="bold" fill="#14315a">Cihaz ölçer</text>
+    <text x="312" y="57" text-anchor="middle" font-size="9" fill="#6b7a8b">ASTM / HL7 · MLLP</text>
+    <text x="312" y="68" text-anchor="middle" font-size="9" fill="#6b7a8b">cihaz_mesaj</text>
+
+    <rect x="392" y="30" width="120" height="44" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="452" y="44" text-anchor="middle" font-weight="bold" fill="#14315a">Kural motoru</text>
+    <text x="452" y="57" text-anchor="middle" font-size="9" fill="#6b7a8b">referans · bayrak</text>
+    <text x="452" y="68" text-anchor="middle" font-size="9" fill="#6b7a8b">panik · delta</text>
+
+    <rect x="540" y="8" width="156" height="34" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="618" y="22" text-anchor="middle" font-weight="bold" fill="#2e7d46" font-size="10">Temiz → OTO-ONAY</text>
+    <text x="618" y="35" text-anchor="middle" font-size="9" fill="#6b7a8b">rapor anında yayında</text>
+
+    <rect x="540" y="62" width="156" height="46" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="618" y="76" text-anchor="middle" font-weight="bold" fill="#8a6218" font-size="10">Bayraklı → İNSAN</text>
+    <text x="618" y="89" text-anchor="middle" font-size="9" fill="#6b7a8b">teknik onay → uzman onayı</text>
+    <text x="618" y="100" text-anchor="middle" font-size="9" fill="#6b7a8b">Sonuç Onay Kuyruğu</text>
+
+    <line x1="102" y1="52" x2="124" y2="52" stroke="#2f6db3" marker-end="url(#ok2)"/>
+    <line x1="234" y1="52" x2="256" y2="52" stroke="#2f6db3" marker-end="url(#ok2)"/>
+    <line x1="366" y1="52" x2="388" y2="52" stroke="#2f6db3" marker-end="url(#ok2)"/>
+    <path d="M514,45 L528,45 L528,25 L536,25" fill="none" stroke="#2e7d46" marker-end="url(#ok2)"/>
+    <path d="M514,60 L528,60 L528,85 L536,85" fill="none" stroke="#8a6218" marker-end="url(#ok2)"/>
+  </g>
+
+  <!-- panik -->
+  <g font-size="9">
+    <rect x="392" y="94" width="120" height="34" rx="4" fill="#fbe9e7" stroke="#b3261e"/>
+    <text x="452" y="108" text-anchor="middle" fill="#b3261e" font-weight="bold">PANİK DEĞER</text>
+    <text x="452" y="120" text-anchor="middle" fill="#6b7a8b">hekime telefon + teyit</text>
+    <path d="M452,76 L452,90" fill="none" stroke="#b3261e" marker-end="url(#ok2)"/>
+  </g>
+
+  <!-- kalite kontrol -->
+  <g font-size="9">
+    <rect x="260" y="94" width="104" height="34" rx="4" fill="#fff" stroke="#cdd6e0"/>
+    <text x="312" y="108" text-anchor="middle" fill="#14315a">İç Kalite Kontrol</text>
+    <text x="312" y="120" text-anchor="middle" fill="#6b7a8b">Levey-Jennings · Westgard</text>
+    <path d="M312,90 L312,76" fill="none" stroke="#6b7a8b" marker-end="url(#ok2)"/>
+  </g>
+
+  <!-- ret dongusu -->
+  <g font-size="9">
+    <rect x="128" y="94" width="104" height="34" rx="4" fill="#fbe9e7" stroke="#b3261e"/>
+    <text x="180" y="108" text-anchor="middle" fill="#b3261e">Serum indeksi yüksek</text>
+    <text x="180" y="120" text-anchor="middle" fill="#6b7a8b">→ tetkik reddedilir</text>
+    <path d="M180,90 L180,76" fill="none" stroke="#b3261e" marker-end="url(#ok2)"/>
+  </g>
+
+  <text x="350" y="152" text-anchor="middle" font-size="9.5" fill="#6b7a8b">
+    Tipik TAT: rutin 1–2 saat · acil (STAT) 30–60 dakika · kültür dışı her şey aynı gün</text>
+  <text x="350" y="170" text-anchor="middle" font-size="9.5" fill="#6b7a8b">
+    Sonuç ekranı: Laboratuvar › Sonuçlar (onay kuyruğu) · Biyokimya (çalışma listesi)</text>
+</svg>
+<div class="baslik">Şekil 2 — Biyokimya: cihaz merkezli, oto-onaylı akış.</div>
+</div>
+
+<h3>Ayırt eden noktalar</h3>
+<ul>
+  <li><b>Cihaz entegrasyonu iki yönlüdür.</b> LIS cihaza çalışma listesini verir
+      (<code>/api/lab/cihaz/{id}/calisma-listesi/{barkod}</code>), cihaz sonucu
+      <code>cihaz_mesaj</code> olarak döner ve kural motoruna girer.</li>
+  <li><b>Kural motoru sunucudadır:</b> yaşa/cinsiyete göre referans aralığı, bayrak (L/H/LL/HH),
+      panik sınırı ve <b>delta kontrolü</b> (aynı hastanın önceki değerinden % sapma).</li>
+  <li><b>Oto-onay yalnız temiz sonuçta.</b> Panik, delta uyarısı ya da bayrak varsa insan bakar —
+      bayraklı sonucu otomatik onaylamak kural motorunu süse çevirirdi.</li>
+  <li><b>Panik değer bildirimi kayıt altındadır:</b> kime, ne zaman, okundu-teyit edildi mi.</li>
+  <li><b>İç kalite kontrol</b> günlük yürür (<code>442</code>): kontrol serumu Westgard kurallarını
+      ihlal ederse o cihazın o günkü hasta sonuçları şüphelidir.</li>
+</ul>
+
+<div class="sayfa"></div>
+
+<h2>3. Mikrobiyoloji (kültür ve antibiyogram)</h2>
+<p><b>Ölçü: saat–gün.</b> Süreç canlı bir organizmanın büyümesine bağlıdır; takvimi
+laboratuvar değil bakteri belirler. Bu yüzden tek bir "sonuç anı" yoktur —
+<b>ön rapor</b> ve <b>nihai rapor</b> ayrı ayrı çıkar.</p>
+
+<div class="sekil">
+<svg viewBox="0 0 700 260" width="700" height="260">
+  <defs>
+    <marker id="ok3" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#8a6218"/>
+    </marker>
+  </defs>
+  <!-- zaman ekseni -->
+  <line x1="40" y1="196" x2="680" y2="196" stroke="#6b7a8b" stroke-width="1"/>
+  <g font-size="9" fill="#6b7a8b" text-anchor="middle">
+    <line x1="70" y1="192" x2="70" y2="200" stroke="#6b7a8b"/><text x="70" y="212">0 s</text>
+    <line x1="220" y1="192" x2="220" y2="200" stroke="#6b7a8b"/><text x="220" y="212">18–24 s</text>
+    <line x1="380" y1="192" x2="380" y2="200" stroke="#6b7a8b"/><text x="380" y="212">24–48 s</text>
+    <line x1="540" y1="192" x2="540" y2="200" stroke="#6b7a8b"/><text x="540" y="212">48–72 s</text>
+    <line x1="660" y1="192" x2="660" y2="200" stroke="#6b7a8b"/><text x="660" y="212">rapor</text>
+  </g>
+
+  <g font-size="10">
+    <rect x="20" y="24" width="104" height="48" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="72" y="40" text-anchor="middle" font-weight="bold" fill="#14315a">1 · Ekim</text>
+    <text x="72" y="53" text-anchor="middle" font-size="9" fill="#6b7a8b">besiyeri seçimi</text>
+    <text x="72" y="64" text-anchor="middle" font-size="9" fill="#6b7a8b">Gram boyama</text>
+
+    <rect x="168" y="24" width="104" height="48" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="220" y="40" text-anchor="middle" font-weight="bold" fill="#14315a">2 · İnkübasyon</text>
+    <text x="220" y="53" text-anchor="middle" font-size="9" fill="#6b7a8b">aerob / anaerob</text>
+    <text x="220" y="64" text-anchor="middle" font-size="9" fill="#6b7a8b">%5 CO₂</text>
+
+    <rect x="328" y="24" width="104" height="48" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="380" y="40" text-anchor="middle" font-weight="bold" fill="#14315a">3 · Okuma</text>
+    <text x="380" y="53" text-anchor="middle" font-size="9" fill="#6b7a8b">üreme var / yok</text>
+    <text x="380" y="64" text-anchor="middle" font-size="9" fill="#6b7a8b">koloni sayımı</text>
+
+    <rect x="488" y="24" width="104" height="48" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="540" y="40" text-anchor="middle" font-weight="bold" fill="#14315a">4 · İdentifikasyon</text>
+    <text x="540" y="53" text-anchor="middle" font-size="9" fill="#6b7a8b">MALDI-TOF / VITEK</text>
+    <text x="540" y="64" text-anchor="middle" font-size="9" fill="#6b7a8b">izolat kaydı</text>
+
+    <rect x="488" y="96" width="104" height="48" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="540" y="112" text-anchor="middle" font-weight="bold" fill="#14315a">5 · Antibiyogram</text>
+    <text x="540" y="125" text-anchor="middle" font-size="9" fill="#6b7a8b">MİK · S/I/R</text>
+    <text x="540" y="136" text-anchor="middle" font-size="9" fill="#6b7a8b">kademeli bildirim</text>
+
+    <rect x="612" y="60" width="80" height="48" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="652" y="78" text-anchor="middle" font-weight="bold" fill="#2e7d46">7 · Onay</text>
+    <text x="652" y="91" text-anchor="middle" font-size="9" fill="#6b7a8b">nihai rapor</text>
+
+    <line x1="126" y1="48" x2="164" y2="48" stroke="#8a6218" marker-end="url(#ok3)"/>
+    <line x1="274" y1="48" x2="324" y2="48" stroke="#8a6218" marker-end="url(#ok3)"/>
+    <line x1="434" y1="48" x2="484" y2="48" stroke="#8a6218" marker-end="url(#ok3)"/>
+    <path d="M540,74 L540,92" fill="none" stroke="#8a6218" marker-end="url(#ok3)"/>
+    <path d="M594,120 L604,120 L604,86 L608,86" fill="none" stroke="#2e7d46" marker-end="url(#ok3)"/>
+  </g>
+
+  <!-- uremesiz dali -->
+  <g font-size="9">
+    <rect x="328" y="96" width="104" height="40" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="380" y="112" text-anchor="middle" fill="#2e7d46" font-weight="bold">Üreme YOK</text>
+    <text x="380" y="126" text-anchor="middle" fill="#6b7a8b">48–72 s sonra negatif</text>
+    <path d="M380,74 L380,92" fill="none" stroke="#2e7d46" marker-end="url(#ok3)"/>
+    <path d="M434,116 L470,116 L470,150 L600,150 L600,110" fill="none" stroke="#2e7d46" marker-end="url(#ok3)"/>
+  </g>
+
+  <!-- on rapor -->
+  <g font-size="9">
+    <rect x="168" y="96" width="104" height="40" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="220" y="112" text-anchor="middle" fill="#2f6db3" font-weight="bold">ÖN RAPOR (Gram)</text>
+    <text x="220" y="126" text-anchor="middle" fill="#6b7a8b">tedaviyi başlatır</text>
+    <path d="M220,74 L220,92" fill="none" stroke="#2f6db3" marker-end="url(#ok3)"/>
+  </g>
+
+  <!-- kritik bildirim -->
+  <g font-size="9">
+    <rect x="20" y="96" width="104" height="40" rx="4" fill="#fbe9e7" stroke="#b3261e"/>
+    <text x="72" y="112" text-anchor="middle" fill="#b3261e" font-weight="bold">Kan kültürü +</text>
+    <text x="72" y="126" text-anchor="middle" fill="#6b7a8b">acil bildirim + EKK</text>
+  </g>
+
+  <text x="350" y="238" text-anchor="middle" font-size="9.5" fill="#6b7a8b">
+    Durum kodları: 1 ekim · 2 inkübasyon · 3 üreme değerlendirme · 4 identifikasyon ·
+    5 antibiyogram · 6 rapor bekliyor · 7 onaylı</text>
+  <text x="350" y="252" text-anchor="middle" font-size="9.5" fill="#6b7a8b">
+    Ekran: Laboratuvar › Mikrobiyoloji — her adım ayrı düğme, tek "kaydet" yok</text>
+</svg>
+<div class="baslik">Şekil 3 — Mikrobiyoloji: zaman ekseninde çok adımlı, iki raporlu akış.</div>
+</div>
+
+<h3>Ayırt eden noktalar</h3>
+<ul>
+  <li><b>İki rapor vardır.</b> Gram boyama sonucu <b>ön rapor</b> olarak saatler içinde çıkar ve
+      ampirik tedaviyi başlatır; nihai rapor identifikasyon + antibiyogramdan sonra gelir.</li>
+  <li><b>Süreç düğme düğmedir</b> (Okuma Kaydet · İzolat · Antibiyogram · Ön Rapor · Onayla):
+      tek "kaydet" düğmesi hangi aşamada olunduğunu gizlerdi.</li>
+  <li><b>Kademeli bildirim:</b> raporda gösterilmeyen antibiyotikler de kayda girer —
+      uzman "neyin raporlanmadığını" görebilmeli. Alt basamakta duyarlı seçenek yoksa
+      gizlenen ajan açılır.</li>
+  <li><b>Direnç işaretleri</b> (MRSA/VRE/ESBL/Karbapenemaz/AmpC) enfeksiyon kontrol komitesine
+      bildirilir; kan kültürü pozitifliği kritik bildirimdir.</li>
+  <li>Numune uygunsuzsa (kontamine, geç ulaşmış) süreç en başa döner — inkübasyon başlamışsa
+      kültür iptal edilir, yeni numune istenir.</li>
+</ul>
+
+<div class="sayfa"></div>
+
+<h2>4. Genetik</h2>
+<p><b>Ölçü: gün–hafta.</b> Süreç laboratuvar tarafında bir <b>vaka</b> olarak yürür; sonucun
+kendisi bir ölçüm değil, <b>yorumlanmış bir kanaattir</b>. Bu yüzden onam, doğrulama ve
+yeniden değerlendirme akışın parçasıdır.</p>
+
+<div class="sekil">
+<svg viewBox="0 0 700 250" width="700" height="250">
+  <defs>
+    <marker id="ok4" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#6a3fb5"/>
+    </marker>
+  </defs>
+  <g font-size="10">
+    <rect x="4" y="20" width="96" height="46" rx="4" fill="#fbe9e7" stroke="#b3261e"/>
+    <text x="52" y="36" text-anchor="middle" font-weight="bold" fill="#b3261e">0 · ONAM</text>
+    <text x="52" y="49" text-anchor="middle" font-size="9" fill="#6b7a8b">KVKK md. 6</text>
+    <text x="52" y="60" text-anchor="middle" font-size="9" fill="#6b7a8b">tesadüfi bulgu tercihi</text>
+
+    <rect x="118" y="20" width="96" height="46" rx="4" fill="#f1ecfa" stroke="#6a3fb5"/>
+    <text x="166" y="36" text-anchor="middle" font-weight="bold" fill="#14315a">1 · Numune</text>
+    <text x="166" y="49" text-anchor="middle" font-size="9" fill="#6b7a8b">EDTA / doku</text>
+    <text x="166" y="60" text-anchor="middle" font-size="9" fill="#6b7a8b">vaka açılır</text>
+
+    <rect x="232" y="20" width="96" height="46" rx="4" fill="#f1ecfa" stroke="#6a3fb5"/>
+    <text x="280" y="36" text-anchor="middle" font-weight="bold" fill="#14315a">2 · İzolasyon</text>
+    <text x="280" y="49" text-anchor="middle" font-size="9" fill="#6b7a8b">DNA/RNA</text>
+    <text x="280" y="60" text-anchor="middle" font-size="9" fill="#6b7a8b">konsantrasyon</text>
+
+    <rect x="346" y="20" width="96" height="46" rx="4" fill="#f1ecfa" stroke="#6a3fb5"/>
+    <text x="394" y="36" text-anchor="middle" font-weight="bold" fill="#14315a">3 · Run</text>
+    <text x="394" y="49" text-anchor="middle" font-size="9" fill="#6b7a8b">NGS panel / WES</text>
+    <text x="394" y="60" text-anchor="middle" font-size="9" fill="#6b7a8b">kontroller</text>
+
+    <rect x="460" y="20" width="106" height="46" rx="4" fill="#f1ecfa" stroke="#6a3fb5"/>
+    <text x="513" y="36" text-anchor="middle" font-weight="bold" fill="#14315a">4 · Analiz</text>
+    <text x="513" y="49" text-anchor="middle" font-size="9" fill="#6b7a8b">varyant çağırma</text>
+    <text x="513" y="60" text-anchor="middle" font-size="9" fill="#6b7a8b">ACMG sınıflama</text>
+
+    <rect x="584" y="20" width="112" height="46" rx="4" fill="#f1ecfa" stroke="#6a3fb5"/>
+    <text x="640" y="36" text-anchor="middle" font-weight="bold" fill="#14315a">5 · Doğrulama</text>
+    <text x="640" y="49" text-anchor="middle" font-size="9" fill="#6b7a8b">Sanger</text>
+    <text x="640" y="60" text-anchor="middle" font-size="9" fill="#6b7a8b">yalnız raporlanacak</text>
+
+    <line x1="102" y1="43" x2="114" y2="43" stroke="#b3261e" marker-end="url(#ok4)"/>
+    <line x1="216" y1="43" x2="228" y2="43" stroke="#6a3fb5" marker-end="url(#ok4)"/>
+    <line x1="330" y1="43" x2="342" y2="43" stroke="#6a3fb5" marker-end="url(#ok4)"/>
+    <line x1="444" y1="43" x2="456" y2="43" stroke="#6a3fb5" marker-end="url(#ok4)"/>
+    <line x1="568" y1="43" x2="580" y2="43" stroke="#6a3fb5" marker-end="url(#ok4)"/>
+  </g>
+
+  <!-- kalite kapisi -->
+  <g font-size="9">
+    <rect x="346" y="82" width="96" height="38" rx="4" fill="#fdf6e3" stroke="#8a6218"/>
+    <text x="394" y="97" text-anchor="middle" fill="#8a6218" font-weight="bold">Kalite kapısı</text>
+    <text x="394" y="110" text-anchor="middle" fill="#6b7a8b">kapsam · derinlik</text>
+    <path d="M394,68 L394,78" fill="none" stroke="#8a6218" marker-end="url(#ok4)"/>
+    <path d="M346,101 L300,101 L300,70" fill="none" stroke="#b3261e" marker-end="url(#ok4)"/>
+    <text x="316" y="118" font-size="8.5" fill="#b3261e">yetersizse tekrar</text>
+  </g>
+
+  <!-- rapor -->
+  <g font-size="10">
+    <rect x="470" y="140" width="120" height="44" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="530" y="156" text-anchor="middle" font-weight="bold" fill="#2e7d46">6–7 · Rapor + Onay</text>
+    <text x="530" y="169" text-anchor="middle" font-size="9" fill="#6b7a8b">uzman yorumu</text>
+    <text x="530" y="179" text-anchor="middle" font-size="9" fill="#6b7a8b">sınırlılıklar yazılır</text>
+    <path d="M640,68 L640,130 L594,130 L594,150 L586,150" fill="none" stroke="#6a3fb5" marker-end="url(#ok4)"/>
+  </g>
+
+  <!-- aile ve yeniden degerlendirme -->
+  <g font-size="9">
+    <rect x="240" y="140" width="130" height="44" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="305" y="156" text-anchor="middle" fill="#2f6db3" font-weight="bold">Aile çalışması</text>
+    <text x="305" y="169" text-anchor="middle" fill="#6b7a8b">segregasyon: anne/baba</text>
+    <text x="305" y="179" text-anchor="middle" fill="#6b7a8b">de novo mu?</text>
+    <path d="M466,162 L376,162" fill="none" stroke="#2f6db3" marker-end="url(#ok4)"/>
+
+    <rect x="30" y="140" width="180" height="44" rx="4" fill="#f1ecfa" stroke="#6a3fb5"/>
+    <text x="120" y="156" text-anchor="middle" fill="#6a3fb5" font-weight="bold">YENİDEN DEĞERLENDİRME</text>
+    <text x="120" y="169" text-anchor="middle" fill="#6b7a8b">VUS bilgi arttıkça sınıf değiştirir</text>
+    <text x="120" y="179" text-anchor="middle" fill="#6b7a8b">yıllar sonra rapor güncellenir</text>
+    <path d="M236,162 L216,162" fill="none" stroke="#6a3fb5" marker-end="url(#ok4)"/>
+  </g>
+
+  <text x="350" y="212" text-anchor="middle" font-size="9.5" fill="#6b7a8b">
+    Durum kodları: 1 numune · 2 izolasyon · 3 run'da · 4 analiz · 5 doğrulama ·
+    6 rapor bekliyor · 7 onaylı</text>
+  <text x="350" y="228" text-anchor="middle" font-size="9.5" fill="#6b7a8b">
+    Sınıflama (ACMG): 1 benign · 2 olası benign · 3 VUS · 4 olası patojenik · 5 patojenik</text>
+  <text x="350" y="244" text-anchor="middle" font-size="9.5" fill="#6b7a8b">
+    Ekran: Laboratuvar › Genetik — vaka bazlı, tetkik bazlı değil</text>
+</svg>
+<div class="baslik">Şekil 4 — Genetik: onamla başlayan, yeniden değerlendirmeyle hiç bitmeyen akış.</div>
+</div>
+
+<h3>Ayırt eden noktalar</h3>
+<ul>
+  <li><b>Onam raporun ön koşuludur</b> (KVKK md. 6). Onamsız vaka rapora geçemez; hastanın
+      "tesadüfi bulgu istiyorum / istemiyorum" tercihi raporun içeriğini belirler.</li>
+  <li><b>Doğrulama yalnız raporlanacak varyanta yapılır</b> — NGS'te görülen her varyantı
+      Sanger'le doğrulamak ne gerekli ne mümkündür.</li>
+  <li><b>VUS (belirsiz anlamlı varyant) kapanmayan bir kayıttır.</b> Literatür değiştikçe sınıfı
+      değişir; sistem yeniden değerlendirme kuyruğu tutar ve rapor sürümlenir.</li>
+  <li><b>Ham veri saklama süresi</b> vakaya yazılır (tipik 10 yıl) — sonradan yeniden analiz
+      isteneceği için.</li>
+  <li>Sonuç <b>tek satır bir sayı değildir</b>: gen, transkript, HGVS gösterimi, zigosite, VAF,
+      ACMG kanıt kodları ve uzman yorumu birlikte anlam taşır.</li>
+</ul>
+
+<div class="sayfa"></div>
+
+<h2>5. Üç dalın karşılaştırması</h2>
+<table>
+  <thead><tr><th>Ölçüt</th><th>Biyokimya</th><th>Mikrobiyoloji</th><th>Genetik</th></tr></thead>
+  <tbody>
+  <tr><td>Süre (TAT)</td><td>30 dk – 4 saat</td><td>24 – 72 saat (kültüre göre)</td><td>2 – 6 hafta</td></tr>
+  <tr><td>Sonucu üreten</td><td>Cihaz</td><td>Biyolog + cihaz (MALDI/VITEK)</td><td>Dizileyici + biyoinformatik + uzman</td></tr>
+  <tr><td>Kayıt birimi</td><td>Tetkik satırı</td><td>Kültür / izolat</td><td>Vaka / varyant</td></tr>
+  <tr><td>Ara çıktı</td><td>Yok</td><td><b>Ön rapor</b> (Gram)</td><td>Kalite raporu, aile çalışması</td></tr>
+  <tr><td>Oto-onay</td><td>Var (temiz sonuç)</td><td>Yok</td><td>Yok</td></tr>
+  <tr><td>Kritik bildirim</td><td>Panik değer → hekime telefon</td><td>Kan kültürü pozitif · direnç → EKK</td><td>Beklenmedik patojenik bulgu → danışmanlık</td></tr>
+  <tr><td>Tekrar sebebi</td><td>Hemoliz, delta uyumsuzluğu</td><td>Kontaminasyon, üreme yok</td><td>Düşük kapsam, DNA kalitesi</td></tr>
+  <tr><td>Rapor ömrü</td><td>Sabit</td><td>Sabit</td><td><b>Değişebilir</b> (VUS yeniden sınıflanır)</td></tr>
+  <tr><td>Ana ekran</td><td>Biyokimya · Sonuçlar</td><td>Mikrobiyoloji</td><td>Genetik</td></tr>
+  </tbody>
+</table>
+
+<h2>6. Süreç boyunca durum kodları</h2>
+<table>
+  <thead><tr><th>Kayıt</th><th>Kodlar</th></tr></thead>
+  <tbody>
+  <tr><td><code>lab_istem.durum</code></td>
+      <td><span class="rz">1 İstendi</span> <span class="rz mavi">2 Numune Alındı</span>
+          <span class="rz mavi">3 Çalışılıyor</span> <span class="rz yesil">4 Sonuçlandı</span>
+          <span class="rz yesil">5 Onaylandı</span> <span class="rz kir">9 İptal</span></td></tr>
+  <tr><td><code>lab_numune.durum</code></td>
+      <td><span class="rz kir">0 Ret</span> <span class="rz">1 Etiketlendi</span>
+          <span class="rz sari">2 Alındı</span> <span class="rz mavi">3 Kabul</span>
+          <span class="rz yesil">4 Çalışıldı</span></td></tr>
+  <tr><td><code>lab_istem_satir.durum</code></td>
+      <td>1 Bekliyor · 2 Çalışılıyor · 3 Sonuçlandı · 4 Teknik onay · 5 Onaylandı ·
+          <span class="rz sari">6 Tekrar numune</span> · 7 Dış lab · 0 İptal</td></tr>
+  <tr><td><code>lab_kultur.durum</code></td>
+      <td>1 Ekim · 2 İnkübasyon · 3 Üreme değerlendirme · 4 İdentifikasyon ·
+          5 Antibiyogram · 6 Rapor bekliyor · <span class="rz yesil">7 Onaylı</span></td></tr>
+  <tr><td><code>lab_genetik_vaka.durum</code></td>
+      <td>1 Numune · 2 İzolasyon · 3 Run'da · 4 Analiz · 5 Doğrulama ·
+          6 Rapor bekliyor · <span class="rz yesil">7 Onaylı</span></td></tr>
+  </tbody>
+</table>
+
+<h2>7. Sürecin para tarafı</h2>
+<p>Tetkik sipariş edildiği anda ücretlendirme de başlar: istem satırı başvurunun
+ücret satırıdır. Ödeme dağılımı sözleşmeden çıkar ve satır satır saklanır.</p>
+
+<div class="sekil">
+<svg viewBox="0 0 700 128" width="700" height="128">
+  <defs>
+    <marker id="ok5" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#2e7d46"/>
+    </marker>
+  </defs>
+  <g font-size="10">
+    <rect x="8" y="30" width="110" height="42" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="63" y="47" text-anchor="middle" font-weight="bold" fill="#14315a">Tetkik istendi</text>
+    <text x="63" y="60" text-anchor="middle" font-size="9" fill="#6b7a8b">başvuru ücret satırı</text>
+
+    <rect x="150" y="30" width="120" height="42" rx="4" fill="#eef4fc" stroke="#2f6db3"/>
+    <text x="210" y="47" text-anchor="middle" font-weight="bold" fill="#14315a">Sözleşme + rota</text>
+    <text x="210" y="60" text-anchor="middle" font-size="9" fill="#6b7a8b">Özel/ÖSS/TSS/Karma/SGK</text>
+
+    <rect x="302" y="12" width="150" height="26" rx="4" fill="#fff" stroke="#cdd6e0"/>
+    <text x="377" y="29" text-anchor="middle" font-size="9.5" fill="#14315a">SUT listesi → SGK payı</text>
+    <rect x="302" y="44" width="150" height="26" rx="4" fill="#fff" stroke="#cdd6e0"/>
+    <text x="377" y="61" text-anchor="middle" font-size="9.5" fill="#14315a">TTB/HUV → sigorta payı</text>
+    <rect x="302" y="76" width="150" height="26" rx="4" fill="#fff" stroke="#cdd6e0"/>
+    <text x="377" y="93" text-anchor="middle" font-size="9.5" fill="#14315a">hasta payı + ek katkı</text>
+
+    <rect x="484" y="30" width="120" height="42" rx="4" fill="#e2f3e8" stroke="#2e7d46"/>
+    <text x="544" y="47" text-anchor="middle" font-weight="bold" fill="#14315a">Tahsilat / icmal</text>
+    <text x="544" y="60" text-anchor="middle" font-size="9" fill="#6b7a8b">kova bazlı</text>
+
+    <line x1="120" y1="51" x2="146" y2="51" stroke="#2e7d46" marker-end="url(#ok5)"/>
+    <line x1="272" y1="51" x2="298" y2="51" stroke="#2e7d46" marker-end="url(#ok5)"/>
+    <line x1="454" y1="51" x2="480" y2="51" stroke="#2e7d46" marker-end="url(#ok5)"/>
+  </g>
+  <text x="632" y="90" text-anchor="middle" font-size="9" fill="#b3261e">SGK katılım payı</text>
+  <text x="632" y="102" text-anchor="middle" font-size="9" fill="#6b7a8b">ciro dışı · emanet</text>
+  <path d="M604,51 L632,51 L632,80" fill="none" stroke="#b3261e" marker-end="url(#ok5)"/>
+</svg>
+<div class="baslik">Şekil 5 — Tetkik ücreti beş kovaya bölünür; katılım payı ciroya girmez.</div>
+</div>
+
+<div class="kutu">
+  <b>Dış laboratuvara gönderim.</b> Hastanenin çalışmadığı tetkik (genetik panellerin çoğu,
+  bazı hormonlar) kabul edilmiş numuneden sevk edilir: gönderim kaydı açılır, sözleşme TAT'ı
+  izlenir, gelen sonuç aynı istem satırına yazılır. Hasta için değişen bir şey yoktur —
+  rapor yine hastanenin raporudur.
+</div>
+
+<div class="kutu uyari">
+  <b>Üç dalın tek ortak riski:</b> kabul edilmemiş tüp. TAT saati başlamaz, cihaz listesi görmez,
+  kültür ekilmez, vaka açılmaz. Bu yüzden "Numune Bekliyor" çipi İstemler ekranının
+  varsayılan görünümüdür.
+</div>
+
+</body>
+</html>
