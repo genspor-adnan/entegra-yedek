@@ -31,3 +31,5 @@ Entegra/GentegreAI/yedek/
 # PG dokumleri (veri, kod degil): GitHub 100 MB sert sinirina yaklasiyorlar -
 #   db/_yedek altindaki pg14 dokumu 99 MB ve push'ta uyari veriyor.
 Entegra/GentegreAI/db/_yedek/
+*.dsk
+*.~dsk
