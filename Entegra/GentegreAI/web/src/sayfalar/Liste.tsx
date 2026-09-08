@@ -5,6 +5,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { RandevuTakvimi } from '../bilesenler/RandevuTakvimi';
 import { GenForm } from '../bilesenler/GenForm';
+import { kartOzellestirme } from './liste/kartOzellestirme';
 import { MuayeneBaglamSeridi } from '../bilesenler/MuayeneBaglamSeridi';
 import { KaynakArama } from '../bilesenler/KaynakArama';
 import {
@@ -117,6 +118,10 @@ const yerelZamanDamgasi = () => {
 };
 
 export function Liste({ tanim }: { tanim: ListeTanimi }) {
+  // KARTA OZEL YERLESIM tek yerde (sayfalar/liste/kartOzellestirme.ts): sekme
+  //   sirasi, gomulu detaylar, izgara. Buradaki uclu kosullar yuz satir saf
+  //   yapilandirmayi bilesenin ortasina yayiyordu.
+  const kartOzel = kartOzellestirme(tanim.kaynak);
   const git = useNavigate();
   const { id } = useParams();
   const [sorgu] = useSearchParams();
@@ -2338,27 +2343,8 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         //   sablondan acilir, secim kutusu yanlis bir vaat olurdu; deger/taraf
         //   ise mockup'ta yok.
         tazeleAnahtari={kartTazele}
-        // RAPOR GRIDI MOCKUP KOLONLARI: Tür · Alt tür · Başlangıç · Süre ·
-        //   Tanı · Açıklama · İmza · Durum. Rapor no ve bitiş gizli - bitiş
-        //   başlangıç + süreden hesaplanıyor (db/464).
-        detaySecenekleri={tanim.kaynak === 'muayene'
-          ? { raporlar: { gizli: ['raporNo', 'bitis'], sinif: 'rapor-gridi',
-                          sade: true } }
-          : undefined}
-        // MOCKUP SIRASI (muayene_karti.html): hekimin is akisi - once
-        //   anamnez ve muayene, sonra tani, istem, recete/rapor, en sonda
-        //   sevk, ucret, gecmis ve dosyalar.
-        // KURUMDA GENEL ONCE (484, kullanici: "genel ve adres sekmelerini yer
-        //   degistir"). Sekme sirasi normalde ALAN SIRASINDAN cikar; kurumda
-        //   Genel grubunun ilk alanlari (ad/soyad/kisi rol kutulari) gizlenince
-        //   grup sirasi kayip Adres one gecmisti. Sira artik ACIKCA yazili -
-        //   ekran duzeni gizlenen bir alana bagli kalmasin.
-        sekmeSirasi={tanim.kaynak === 'kurum'
-          ? ['Genel', 'Adres / Fatura Bilgisi', 'Sözleşmeler']
-          : tanim.kaynak === 'muayene'
-          ? ['Anamnez', 'Fizik Muayene', 'Tanı', 'İstem & Sonuçlar', 'e-Reçete',
-             'Rapor', 'Sevk', 'İşlem & Ücret', 'Geçmiş', 'Dosyalar']
-          : undefined}
+        detaySecenekleri={kartOzel.detaySecenekleri}
+        sekmeSirasi={kartOzel.sekmeSirasi}
         // MOCKUP EK SEKMELERI (muayene_karti.html): e-Recete · Sevk /
         //   Konsultasyon · Islem & Ucret · Gecmis · Dosyalar. Icerik gercek
         //   kayitlardan gelir (tek uc: /api/muayene/{id}/sekme-verisi);
@@ -2393,69 +2379,10 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         // VITAL BULGULAR SEKMESI YOK (kullanici): olcum anamnez sekmesinin
         //   sag panelinde duzenleniyor - ayni veriyi iki sekmede gostermek
         //   hangisinin gecerli oldugunu belirsiz birakiyordu.
-        // KURUM TURU AYRI SEKME DEGIL (484, kullanici: "Kurum Türünü
-        //   tanimlamalara tasi"): tek alanlik 1:1 uzanti artik Genel
-        //   sekmesindeki Tanımlama kutusunda ciziliyor - ayni alani iki yerde
-        //   gostermek hangisinin gecerli oldugunu belirsiz birakirdi.
-        gizliDetaylar={tanim.kaynak === 'muayene' ? ['vitaller']
-                     : tanim.kaynak === 'kurum' ? ['kurumRolu'] : undefined}
-        // KURUMDA ADRES AYRI SEKME DEGIL (484, kullanici: "adresler
-        //   sekmesindeki adres gridini adres / fatura bilgisi sekmesinde alta
-        //   al"): fatura unvani, VKN ve adres ayni sorunun parcalari - biri
-        //   ötekini dogrularken sekme degistirmek gerekiyordu. Grid oldugu
-        //   gibi kalir (kurumun birden cok adresi olabilir), yalnizca yeri
-        //   degisir.
-        detayGrupta={tanim.kaynak === 'kurum'
-          ? { adresler: { grup: 'Adres / Fatura Bilgisi' } }
-          : tanim.kaynak === 'muayene'
-          ? { bulgular: { grup: 'Fizik Muayene', gizli: ['degerSayi', 'taraf'],
-                          etiket: ['sablonAlanId'], sinif: 'bulgu-gridi',
-                          // Cerceve, baslik ve "+ Satır"/sil yok (kullanici):
-                          //   satirlar SABLONDAN acilir, elle satir eklemek
-                          //   sistem listesini bozar - sablonun isi.
-                          sade: true },
-              // TANI TABLOSU "Tanı / Karar" SEKMESINDE (mockup): ICD · Tür ·
-              //   Kesinlik · Taraf · Kronik · Not. `sira` ve `baslangicTarihi`
-              //   mockup'ta yok - siralama sunucuda, kronik tarihi hastanin
-              //   Kronik Tanilar ekraninda yasar.
-              // Cerceve/baslik/ekle-sil YOK (kullanici): ekleme ve kaldirma
-              //   sekme arac cubugundaki dugmelerden, sunucu ucuyla yapilir.
-              // GenGrid gorunumu + SALT OKUNUR (kullanici): satir ici kutu
-              //   yok, duz metin. Ekleme/kaldirma sekmenin arac cubugundaki
-              //   uclarla yapilir - kural ve silme izi tek yerde.
-              // GRID KIPI (kullanici): satir basinda tek secim kutusu, ust
-              //   satirda duzenle/sil ikonlari, duzenleme MODALDE. Cerceve
-              //   yok. Satir EKLEME kapali - ICD kodu "＋ ICD-10 Ekle"
-              //   ucundan gelir, bos satir yarim kayit olurdu.
-              tanilar: { grup: 'Tanı (ICD-10)', gizli: ['sira', 'baslangicTarihi'],
-                         sinif: 'tani-gridi', ustte: true,
-                         gridKipi: true, ekleGizli: true } }
-          : undefined}
-        // VITAL BULGULAR MOCKUP IZGARASI: son olcum etiket+kutu izgarasinda
-        //   (3 sutun), eski olcumler altta salt gorunum. Grid satirlarinda
-        //   14 sayisal kolon yan yana okunmuyordu.
-        detayIzgara={tanim.kaynak === 'muayene'
-          ? { vitaller: { baslik: 'Vital bulgular', sinif: 'vital-izgara-kip',
-                          // Anamnez panelindeki sira (kullanici): tansiyon,
-                          //   nabiz, SpO2 · ates, solunum, agri · boy-kilo,
-                          //   BKI, bel. Glukoz/GKS ve olcum kimligi Vital
-                          //   Bulgular sekmesinde.
-                          alanSirasi: ['sistolik', 'nabiz', 'spo2',
-                                       'ates', 'solunum', 'agriVas',
-                                       'boyCm', 'bki', 'belCevresiCm'],
-                          yeniDugmesi: true,
-                          not: 'Ölçüm zamanı ve kaynağı kayıtta kalır; '
-                             + 'BKİ o anki boy/kilodan hesaplanır.',
-                          // Gecmis listesi OZET: takip edilen olculer kalir,
-                          //   antropometri ve tek seferlik degerler ust
-                          //   izgarada zaten gorunur.
-                          gecmisGizli: ['boyCm', 'kiloKg', 'bki', 'belCevresiCm',
-                                        'glukozParmak', 'gks', 'olcenId',
-                                        'agriVas'] } }
-          : undefined}
-        seritAlanlari={tanim.kaynak === 'muayene'
-          ? ['bolumId', 'personelId', 'tur', 'ustMuayeneId', 'baslangic', 'bitis']
-          : undefined}
+        gizliDetaylar={kartOzel.gizliDetaylar}
+        detayGrupta={kartOzel.detayGrupta}
+        detayIzgara={kartOzel.detayIzgara}
+        seritAlanlari={kartOzel.seritAlanlari}
         // KIMLIK SERIDI MODALA TASINDI (kullanici): serit kart govdesinde
         //   cizilmez; "Bugun" kutusuna basilinca ayni GenForm alanlariyla
         //   (yani ayni deger/dogrulama/kaydetme yoluyla) pencerede acilir.
