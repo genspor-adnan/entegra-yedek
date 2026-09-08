@@ -200,6 +200,18 @@ function IstemDetayi({ veri, secili, kaynak, kisim }: {
   const alimYeri = alimZamani ? ilkDolu('alimYeri') : '';
   const kaliteli = numuneler.find(n => (n.kabul || n.ret) && Number(n.kalite ?? 0) > 0);
   const kalite = Number(kaliteli?.kalite ?? 0);
+  const saklamaYeri = ilkDolu('saklamaYeri');
+  const sicaklik = numuneler.map(n => n.saklamaSicaklik).find(v => v !== null && v !== undefined);
+  const saklama = saklamaYeri
+    + (sicaklik !== undefined && sicaklik !== null ? ` · ${Number(sicaklik)} °C` : '');
+  // Serum indeksi tupte olculur; istemde tek deger gosterilir - en KOTU olan,
+  //   cunku sonucu o belirler.
+  const enBuyuk = (a: string) =>
+    numuneler.reduce((en, n) => Math.max(en, Number(n[a] ?? 0)), 0);
+  const hemoliz = enBuyuk('hemoliz'), lipemi = enBuyuk('lipemi'), ikter = enBuyuk('ikter');
+  const indeksVar = hemoliz > 0 || lipemi > 0 || ikter > 0;
+  const tatlar = dizi(veri.tatlar);
+  const oncekiler = dizi(veri.oncekiler);
 
   const tupBolumleri = (barkod: string) => {
     const ad = satirlar.filter(s => metin(s.barkod) === barkod)
@@ -334,19 +346,40 @@ function IstemDetayi({ veri, secili, kaynak, kisim }: {
             {metin(veri.protokol) &&
               <span className="sp">Protokol {metin(veri.protokol)}</span>}
           </h6>
-          <div className="lab-alanlar">
-            {/* HASTA SATIRI mockup'taki gibi tek satır: ad · yaş/cinsiyet ·
-                maskeli kimlik. Banko tüpü hastayla eşlerken ada güvenemez -
-                aynı isimli iki hasta aynı gün gelir. */}
-            <div className="fld" style={{ gridColumn: '1 / -1' }}>
-              <label>Hasta</label>
-              <div className="deger buyuk">
-                {metin(veri.hasta) || '—'}
-                {metin(veri.yas) || metin(veri.cinsiyet)
-                  ? ` · ${metin(veri.yas)} ${metin(veri.cinsiyet)}`.trimEnd() : ''}
-                {metin(veri.kimlik) ? ` · ${metin(veri.kimlik)}` : ''}
-              </div>
+          {/* HASTA ŞERİDİ (mockup lab_hasta_istem_karti.html): ad · yaş/
+              cinsiyet · maskeli kimlik, altında dosya/protokol/kan grubu.
+              Banko tüpü hastayla eşlerken ada güvenemez - aynı isimli iki
+              hasta aynı gün gelir. */}
+          <div className="lab-hasta">
+            <div className="ad">
+              {metin(veri.hasta) || '—'}
+              {(metin(veri.yas) || metin(veri.cinsiyet)) && (
+                <span className="rozet gri">
+                  {`${metin(veri.yas)} ${metin(veri.cinsiyet)}`.trim()}
+                </span>
+              )}
+              {metin(veri.kimlik) && <span className="rozet mavi">{metin(veri.kimlik)}</span>}
             </div>
+            <div className="alt">
+              {metin(veri.dosyaNo) && <span>Dosya <b>{metin(veri.dosyaNo)}</b></span>}
+              {metin(veri.protokol) && <span>Protokol <b>{metin(veri.protokol)}</b></span>}
+              {metin(veri.kanGrubu) && <span>Kan grubu <b>{metin(veri.kanGrubu)}</b></span>}
+            </div>
+          </div>
+          {/* UYARI BANDI: numune alımını ya da sonucun yorumunu değiştiren
+              her şey (alerji, kronik tanı). Hasta kartından gelir; bankonun
+              ayrı ekran açması beklenemez. */}
+          {(metin(veri.alerjiler) || metin(veri.kronik)) && (
+            <div className="lab-uyari">
+              {metin(veri.alerjiler) && (
+                <span className={veri.agirAlerji ? 'rozet hata' : 'rozet uyari'}>
+                  ⚠ {metin(veri.alerjiler)}
+                </span>
+              )}
+              {metin(veri.kronik) && <span className="rozet uyari">{metin(veri.kronik)}</span>}
+            </div>
+          )}
+          <div className="lab-alanlar">
             <div className="fld" style={{ gridColumn: '1 / -1' }}>
               <label>Klinik bilgi / tanı</label>
               <div className="deger">
@@ -366,6 +399,15 @@ function IstemDetayi({ veri, secili, kaynak, kisim }: {
             <div className="fld">
               <label>İsteyen</label>
               <div className="deger">{metin(veri.hekim) || '—'}</div>
+            </div>
+            {/* KAYNAK: istem nereden açıldı. Dış istemde gönderen kurum -
+                numunenin nereden geldiği kabul kararını değiştirir. */}
+            <div className="fld" style={{ gridColumn: '1 / -1' }}>
+              <label>Kaynak</label>
+              <div className="deger">
+                {metin(veri.kaynakAd) || '—'}
+                {metin(veri.disKurum) && <span className="not">· {metin(veri.disKurum)}</span>}
+              </div>
             </div>
             <div className="fld">
               <label>İstem zamanı</label>
@@ -396,13 +438,66 @@ function IstemDetayi({ veri, secili, kaynak, kisim }: {
               </div>
             </div>
             <div className="fld">
-              <label>Hedef bitiş (TAT)</label>
+              <label>Saklama</label>
               <div className="deger">
-                {veri.hedefBitis ? tarihSaat(veri.hedefBitis) : '—'}
+                {saklama || <span className="not">—</span>}
+              </div>
+            </div>
+            {/* SERUM İNDEKSİ: sonucun güvenilirlik ölçüsü. Eşiği aşan değer
+                kırmızı - hemolizli tüpten çıkan potasyum numunenin sonucudur,
+                laboratuvarın değil. */}
+            <div className="fld" style={{ gridColumn: '1 / -1' }}>
+              <label>Serum indeksi</label>
+              <div className="deger">
+                {indeksVar ? (
+                  <span className="lab-sir">
+                    {([['H', hemoliz], ['L', lipemi], ['İ', ikter]] as const).map(([h, d]) => (
+                      <span key={h} className={d >= 3 ? 'kotu' : undefined}>{h} {d}</span>
+                    ))}
+                  </span>
+                ) : <span className="not">ölçülmedi</span>}
               </div>
             </div>
           </div>
         </div>
+
+        {/* SÜRE (TAT): söz verilen süre, bölüm bölüm. Yüzde ve kalan dakika
+            SUNUCUDAN gelir - ekran aynı sayıyı ikinci kez türetmez. Saat
+            kabulde başlar; kabul edilmemiş istemde çubuk boştur. */}
+        {tatlar.length > 0 && (
+          <div className="kagrup">
+            <h6>
+              Süre (TAT)
+              <span className="sp">
+                {veri.hedefBitis ? `hedef bitiş ${tarihSaat(veri.hedefBitis)}`
+                                 : 'kabulde başlar'}
+              </span>
+            </h6>
+            <div className="ic">
+              {tatlar.map(t => {
+                const kalan = t.kalanDk === null || t.kalanDk === undefined
+                  ? null : Number(t.kalanDk);
+                const yuzde = Number(t.yuzde ?? 0);
+                const sinif = kalan === null ? 'lab-bar'
+                            : kalan < 0 ? 'lab-bar kritik'
+                            : yuzde >= 75 ? 'lab-bar uyari' : 'lab-bar';
+                return (
+                  <div className="lab-tat" key={String(t.bolum)}>
+                    <span className="ad">{BOLUM[Number(t.bolum ?? 0)] ?? '—'}</span>
+                    <span className={sinif}><i style={{ width: `${yuzde}%` }} /></span>
+                    <span className={kalan === null ? 'rozet gri'
+                                   : kalan < 0 ? 'rozet hata'
+                                   : yuzde >= 75 ? 'rozet uyari' : 'rozet olumlu'}>
+                      {kalan === null ? `${Number(t.hedefDk ?? 0)} dk hedef`
+                       : kalan < 0 ? `${-kalan} dk geçti` : `${kalan} dk kaldı`}
+                    </span>
+                    <span className="not">{Number(t.biten ?? 0)}/{Number(t.toplam ?? 0)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* ETİKETLER (mockup sağ panel): basılacak tüp etiketinin ekrandaki
             karşılığı - barkod, tüp rengi, hasta ve tüpün gideceği bölümler.
@@ -464,6 +559,31 @@ function IstemDetayi({ veri, secili, kaynak, kisim }: {
             </div>
           ))}
         </div>
+
+        {/* SON LABORATUVAR: aynı hastanın önceki ONAYLI sonuçları - delta
+            kontrolünün dayanağı. "Yükselmiş mi" sorusu için ayrı ekran
+            açtırmak, kararı geciktirirdi. */}
+        {oncekiler.length > 0 && (
+          <div className="kagrup">
+            <h6>Son laboratuvar<span className="sp">aynı hasta</span></h6>
+            <div className="ic sonuk lab-onceki">
+              {oncekiler.map((o, i) => {
+                const bayrak = metin(o.bayrak);
+                return (
+                  <span key={i}>
+                    <b>{metin(o.ad)}</b> {metin(o.deger)} {metin(o.birim)}
+                    {bayrak && bayrak !== 'N' && (
+                      <span className={bayrakSinifi(bayrak)}>
+                        {bayrak} {BAYRAK_OK[bayrak] ?? ''}
+                      </span>
+                    )}
+                    <span className="not">{o.zaman ? tarihSaat(o.zaman) : ''}</span>
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* KURALLAR (mockup sağ alt): bankonun ezberlemesi gereken beş kural.
             Ekranda durması, yeni gelen teknisyenin sorması gereken soruları

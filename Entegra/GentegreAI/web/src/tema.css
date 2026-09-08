@@ -1622,6 +1622,34 @@ input.skt-gecmis {
   font-size: 13px; line-height: 1; color: var(--soluk);
 }
 .grid-yan-panel.kapali .yan-katla { height: 60px }
+/* Hasta seridi ve uyari bandi (mockup lab_hasta_istem_karti.html). */
+.lab-hasta { padding: 8px 10px; background: var(--yuz2); border-bottom: 1px solid var(--cizgi2) }
+.lab-hasta .ad {
+  font-size: 13.5px; font-weight: 700; color: var(--vurgu);
+  display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+}
+.lab-hasta .alt { margin-top: 3px; color: var(--soluk); font-size: 11px; display: flex; gap: 10px; flex-wrap: wrap }
+.lab-uyari {
+  display: flex; gap: 6px; flex-wrap: wrap; padding: 6px 10px;
+  background: var(--uyarizem, #fdf6e3); border-bottom: 1px solid var(--cizgi2);
+}
+/* Serum indeksi: esigi asan deger kirmizi - sonucu o belirler. */
+.lab-sir { display: flex; gap: 6px; flex-wrap: wrap }
+.lab-sir span {
+  border: 1px solid var(--cizgi); border-radius: 3px; padding: 1px 6px;
+  font-size: 10.5px; background: var(--yuz2);
+}
+.lab-sir span.kotu { border-color: var(--hatakenar); background: var(--hatazem); color: var(--hata); font-weight: 700 }
+/* TAT cubugu: sozu verilen surenin ne kadari gecti. */
+.lab-tat { display: flex; align-items: center; gap: 8px; padding: 2px 0 }
+.lab-tat .ad { min-width: 78px; color: var(--soluk); font-size: 11px }
+.lab-bar { height: 8px; border-radius: 4px; background: #e7edf4; overflow: hidden; flex: 1; min-width: 60px }
+.lab-bar > i { display: block; height: 100%; background: var(--ok) }
+.lab-bar.uyari > i { background: var(--uyari) }
+.lab-bar.kritik > i { background: var(--hata) }
+.lab-onceki { display: flex; flex-direction: column; gap: 3px }
+.lab-onceki > span { display: flex; align-items: center; gap: 6px; flex-wrap: wrap }
+.lab-onceki .not { margin-left: auto }
 .lab-detay .kagrup { margin-bottom: 10px }
 .lab-detay .kagrup > h6 .sp { margin-left: auto; font-weight: 400; color: var(--soluk) }
 .lab-detay .bos { padding: 14px; text-align: center; color: var(--soluk); font-size: 11.5px }

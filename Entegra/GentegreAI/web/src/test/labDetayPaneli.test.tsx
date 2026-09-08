@@ -44,9 +44,16 @@ describe('LabDetayPaneli', () => {
     yas: '39y', cinsiyet: 'K', kimlik: '1234567****', protokol: '2026/20417',
     hekim: 'Dr. A. Koç', hazirlik: '8 saat açlık',
     klinik: 'Boğaz ağrısı', tani: 'J03.9',
+    kaynakAd: 'Muayene istemi', alerjiler: 'Penisilin', kronik: 'Hipotiroidi',
+    agirAlerji: true, kanGrubu: 'A Rh+', dosyaNo: 'H-004182',
     numuneler: [{ id: 5, barkod: '2603187701', tupTipi: 1, numuneTipi: 1, durum: 3,
                   alim: '2026-09-03T09:12:00', kabul: '2026-09-03T09:20:00',
-                  alan: 'Hemşire N. Koç', alimYeri: 'Kan alma', kalite: 1 }],
+                  alan: 'Hemşire N. Koç', alimYeri: 'Kan alma', kalite: 1,
+                  hemoliz: 4, lipemi: 1, ikter: 0,
+                  saklamaYeri: 'Dolap A / Raf 2', saklamaSicaklik: 4 }],
+    tatlar: [{ bolum: 1, hedefDk: 120, yuzde: 62, kalanDk: 12, biten: 0, toplam: 1 }],
+    oncekiler: [{ ad: 'CRP', deger: '18', birim: 'mg/L', bayrak: 'H',
+                  zaman: '2026-08-12T10:00:00' }],
     satirlar: [{
       satirId: 9, kod: 'CRP', ad: 'C-Reaktif Protein', durum: 3, bolum: 1,
       barkod: '2603187701', deger: '24,0', birim: 'mg/L',
@@ -77,10 +84,23 @@ describe('LabDetayPaneli', () => {
     expect(screen.getByText('Cobas c503')).toBeTruthy();
     expect(screen.queryByText('≤ 5')).toBeNull();
     expect(screen.getByText('ACİL')).toBeTruthy();
-    // Sağ panel mockup'taki hasta satırı ve hazırlık koşulu.
-    expect(screen.getByText(/Ayşe Yılmaz · 39y K · 1234567\*\*\*\*/)).toBeTruthy();
+    // Sağ panel mockup'taki hasta şeridi: ad, yaş/cinsiyet ve MASKELİ kimlik
+    //   ayrı ayrı - kimlik rozeti ada karışmasın.
+    expect(screen.getByText('Ayşe Yılmaz')).toBeTruthy();
+    expect(screen.getByText('39y K')).toBeTruthy();
+    expect(screen.getByText('1234567****')).toBeTruthy();
     expect(screen.getByText('8 saat açlık')).toBeTruthy();
-    expect(screen.getByText('Hemşire N. Koç')).toBeTruthy();
+    expect(screen.getByText(/Hemşire N. Koç/)).toBeTruthy();
+    // Uyarı bandı, kaynak, serum indeksi ve TAT çubuğu (mockup
+    //   lab_hasta_istem_karti.html): hepsi sunucudan gelen değerle çizilir.
+    expect(screen.getByText(/Penisilin/)).toBeTruthy();
+    expect(screen.getByText('Muayene istemi')).toBeTruthy();
+    expect(screen.getByText('H 4')).toBeTruthy();
+    expect(screen.getByText('12 dk kaldı')).toBeTruthy();
+    // "Son laboratuvar" kutusu: onceki ONAYLI deger, delta kontrolunun dayanagi.
+    const oncekiKutu = screen.getByText('Son laboratuvar').closest('.kagrup');
+    expect(oncekiKutu?.textContent).toContain('18');
+    expect(oncekiKutu?.textContent).toContain('mg/L');
   });
 
   it('sonuç listesinde sonuç kolonları çizilir (referans, bayrak)', async () => {

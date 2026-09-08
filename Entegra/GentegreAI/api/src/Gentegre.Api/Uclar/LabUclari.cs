@@ -121,12 +121,33 @@ public static class LabUclari
                                                    ' · ')
                                    from public.lab_istem_satir s2
                                    join public.lab_tetkik t2 on t2.id = s2.tetkik_id
-                                  where s2.istem_id = i.id and s2.durum <> 0), '') as hazirlik
+                                  where s2.istem_id = i.id and s2.durum <> 0), '') as hazirlik,
+                       -- KAYNAK (433): istem nereden acildi. Dis istemde
+                       --   gonderen kurum, ic istemde basvuru numarasi -
+                       --   numunenin nereden geldigi kabul kararini etkiler.
+                       case i.kaynak when 2 then 'Teletıp' when 3 then 'Banko'
+                            when 4 then 'Dış kurum' when 5 then 'Check-up'
+                            else 'Muayene istemi' end as kaynak_ad,
+                       coalesce(dk.unvan, '') as dis_kurum,
+                       -- UYARI BANDI: sonucu ya da numune alimini degistiren
+                       --   her sey hasta kartindan gelir (v_hasta_tibbi_ozet).
+                       coalesce(o.alerjiler, '') as alerjiler,
+                       coalesce(o.kronik_tanilar, '') as kronik,
+                       coalesce(o.agir_alerji, 0) as agir_alerji,
+                       -- Kan grubu KOD tutulur (kod_liste 'taraf.kan_grubu');
+                       --   ekranda adiyla gorunmeli.
+                       coalesce((select d.ad from public.kod_deger d
+                                  join public.kod_liste l on l.id = d.liste_id
+                                 where l.kod = 'taraf.kan_grubu'
+                                   and d.deger = th.kan_grubu), '') as kan_grubu,
+                       coalesce(h.kod, '') as dosya_no
                   from public.lab_istem i
                   join public.taraf h on h.id = i.taraf_id
                   left join public.taraf_hasta th on th.id = i.taraf_id
                   left join public.belge bg on bg.id = i.belge_id
                   left join public.v_personel_lookup p on p.id = i.personel_id
+                  left join public.taraf dk on dk.id = i.dis_kurum_id
+                  left join public.v_hasta_tibbi_ozet o on o.hasta_id = i.taraf_id
                  where i.id = @p0
                 """, [id],
                 o => new { Id = o.GetInt32(0), IstemNo = o.GetString(1),
@@ -138,7 +159,11 @@ public static class LabUclari
                            BelgeId = o.IsDBNull(10) ? (int?)null : o.GetInt32(10),
                            Cinsiyet = o.GetString(11), Yas = o.GetString(12),
                            Kimlik = o.GetString(13), Protokol = o.GetString(14),
-                           Hekim = o.GetString(15), Hazirlik = o.GetString(16) }, iptal)
+                           Hekim = o.GetString(15), Hazirlik = o.GetString(16),
+                           KaynakAd = o.GetString(17), DisKurum = o.GetString(18),
+                           Alerjiler = o.GetString(19), Kronik = o.GetString(20),
+                           AgirAlerji = o.GetInt64(21) > 0, KanGrubu = o.GetString(22),
+                           DosyaNo = o.GetString(23) }, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("İstem bulunamadı.");
 
             // Sonuç ONAYLI satırın kendisinden okunur; bayrak/referans o gün
@@ -220,7 +245,14 @@ public static class LabUclari
                        case coalesce(n.alim_yeri, 1) when 2 then 'Servis'
                             when 3 then 'Ev' when 4 then 'Dış' else 'Kan alma' end
                          as alim_yeri,
-                       coalesce(n.saklama_yeri, '') as saklama_yeri
+                       coalesce(n.saklama_yeri, '') as saklama_yeri,
+                       -- SERUM INDEKSI: sonucun guvenilirlik olcusu. Hemolizli
+                       --   tupten cikan potasyum, laboratuvarin degil numunenin
+                       --   sonucudur - deger ekranda kaliteyle birlikte durur.
+                       coalesce(n.hemoliz_idx, 0)::smallint as hemoliz,
+                       coalesce(n.lipemi_idx, 0)::smallint as lipemi,
+                       coalesce(n.ikter_idx, 0)::smallint as ikter,
+                       n.saklama_sicaklik
                   from public.lab_numune n
                   left join public.v_personel_lookup a on a.id = n.alan_id
                  where n.istem_id = @p0 order by n.id
@@ -234,14 +266,77 @@ public static class LabUclari
                            RetNeden = o.IsDBNull(8) ? (short?)null : o.GetInt16(8),
                            RetAciklama = o.GetString(9), Kalite = o.GetInt16(10),
                            Alan = o.GetString(11), AlimYeri = o.GetString(12),
-                           SaklamaYeri = o.GetString(13) }, iptal);
+                           SaklamaYeri = o.GetString(13), Hemoliz = o.GetInt16(14),
+                           Lipemi = o.GetInt16(15), Ikter = o.GetInt16(16),
+                           SaklamaSicaklik = o.IsDBNull(17) ? (short?)null : o.GetInt16(17) },
+                iptal);
+
+            // TAT: SOZ VERILEN SURE, bolum bolum. Saat KABULDE baslar - numune
+            //   laboratuvara ulasmadan sure isletmek, gecikmeyi kan alma
+            //   birimine yazardi. Yuzde ve kalan dakika SUNUCUDA hesaplanir:
+            //   ekran ayni sayiyi ikinci kez turetmesin.
+            var tatlar = await veri.ListeAsync("""
+                select coalesce(t.bolum, 0) as bolum,
+                       max(case when i.oncelik = 3
+                                then coalesce(nullif(t.acil_tat_dk, 0), t.hedef_tat_dk)
+                                else t.hedef_tat_dk end) as hedef_dk,
+                       min(n.kabul_zamani) as baslangic,
+                       count(*) filter (where s.durum in (3, 4, 5)) as biten,
+                       count(*) as toplam
+                  from public.lab_istem_satir s
+                  join public.lab_istem i on i.id = s.istem_id
+                  left join public.lab_tetkik t on t.id = s.tetkik_id
+                  left join public.lab_numune n on n.id = s.numune_id
+                 where s.istem_id = @p0 and s.durum <> 0
+                 group by coalesce(t.bolum, 0)
+                 order by 1
+                """, [id],
+                o => {
+                    var hedefDk = o.IsDBNull(1) ? 0 : o.GetInt32(1);
+                    var baslangic = o.IsDBNull(2) ? (DateTime?)null : o.GetDateTime(2);
+                    var bitis = baslangic is { } b && hedefDk > 0
+                        ? b.AddMinutes(hedefDk) : (DateTime?)null;
+                    var kalanDk = bitis is { } bt
+                        ? (int)Math.Round((bt - DateTime.Now).TotalMinutes) : (int?)null;
+                    // Yuzde = gecen sure / hedef. Kabul edilmemis istemde 0:
+                    //   cubugun dolmasi icin once saatin baslamasi gerekir.
+                    var yuzde = baslangic is { } b2 && hedefDk > 0
+                        ? Math.Clamp((int)Math.Round(
+                            (DateTime.Now - b2).TotalMinutes / hedefDk * 100), 0, 100)
+                        : 0;
+                    return new { Bolum = o.GetInt16(0), HedefDk = hedefDk,
+                                 Baslangic = baslangic, Bitis = bitis, KalanDk = kalanDk,
+                                 Yuzde = yuzde, Biten = o.GetInt64(3), Toplam = o.GetInt64(4) };
+                }, iptal);
+
+            // SON LABORATUVAR: ayni hastanin ONAYLI onceki sonuclari. Delta
+            //   kontrolunun dayanagi budur; hekim "yukselmis mi" sorusunu
+            //   ayri ekran acmadan cevaplayabilmeli.
+            var oncekiler = await veri.ListeAsync("""
+                select coalesce(t.ad, ls2.ad) as ad, ls.deger_metin, coalesce(ls.birim, ''),
+                       coalesce(ls.bayrak, ''), ls.olcum_zamani
+                  from public.lab_sonuc ls
+                  join public.lab_istem_satir ls2 on ls2.id = ls.istem_satir_id
+                  join public.lab_istem i2 on i2.id = ls2.istem_id
+                  left join public.lab_tetkik t on t.id = ls2.tetkik_id
+                 where i2.taraf_id = @p1 and i2.id <> @p0 and ls.durum = 3
+                 order by ls.olcum_zamani desc nulls last, ls.id desc
+                 limit 6
+                """, [id, basli.HastaId],
+                o => new { Ad = o.GetString(0),
+                           Deger = o.IsDBNull(1) ? "" : o.GetString(1),
+                           Birim = o.GetString(2), Bayrak = o.GetString(3),
+                           Zaman = o.IsDBNull(4) ? (DateTime?)null : o.GetDateTime(4) }, iptal);
 
             return Results.Ok(new { basli.Id, basli.IstemNo, basli.Tarih, basli.Durum,
                                     basli.Oncelik, basli.HastaId, basli.Hasta,
                                     basli.Klinik, basli.Tani, basli.HedefBitis,
                                     basli.BelgeId, basli.Cinsiyet, basli.Yas,
                                     basli.Kimlik, basli.Protokol, basli.Hekim,
-                                    basli.Hazirlik, numuneler, satirlar,
+                                    basli.Hazirlik, basli.KaynakAd, basli.DisKurum,
+                                    basli.Alerjiler, basli.Kronik, basli.AgirAlerji,
+                                    basli.KanGrubu, basli.DosyaNo,
+                                    numuneler, satirlar, tatlar, oncekiler,
                                     izlemeNo = baglam.IzlemeNo });
         });
 
