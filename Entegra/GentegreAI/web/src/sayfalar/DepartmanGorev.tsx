@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useOturum } from '../kimlik/OturumBaglami';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
 import { api } from '../api/istemci';
@@ -18,6 +19,14 @@ import { onay } from '../bilesenler/mesaj';
 type Taraf = 'departman' | 'gorev';
 
 export function DepartmanGorev() {
+  const { kullanici } = useOturum();
+  /**
+   * RANDEVU KOLONU YALNIZ HBYS'DE (kullanici: "bolum listesinde erp modunda
+   * randevu gorunmesin"). "Randevu Bölümü" isareti randevu kartinin bolum
+   * listesini suzer; ERP kurulumunda randevu diye bir ekran yok, kolon her
+   * satirda anlamsiz bir carpi gosteriyordu.
+   */
+  const hbys = (kullanici?.urunModu ?? 1) === 2;
   const [departman, setDepartman] = useState<ListeSatiri | null>(null);
   const [gorev, setGorev] = useState<ListeSatiri | null>(null);
   const [kart, setKart] = useState<{ taraf: Taraf; id: number | 'yeni' } | null>(null);
@@ -76,7 +85,7 @@ export function DepartmanGorev() {
             seritGizli
             boyut={200}
             yenile={yenile}
-            gizliKolonlar={['sira']}
+            gizliKolonlar={hbys ? ['sira'] : ['sira', 'randevuVerilebilir']}
             onSecimDegisti={s => { setDepartman(s); setGorev(null) }}
             onSatirAc={s => setKart({ taraf: 'departman', id: Number(s.id) })}
           />
