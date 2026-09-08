@@ -1,4 +1,4 @@
-import { para4 } from './bicim';
+import { para4, gunMetni, tarihSaat } from './bicim';
 import type { KartAlanMeta } from '../api/sozlesme';
 
 /**
@@ -37,6 +37,16 @@ export function detayHucreMetni(
     // para4: iki haneye EZMEZ - carpan 7,0092'yi 7,01 gostermek yaniltir;
     //   tutarlar zaten iki hanede gelir, fazladan hane basilmaz.
     if (Number.isFinite(s)) return para4.format(s);
+  }
+
+  // TARIH/ZAMAN: ham ISO ("2026-09-07T00:00:00") gridde okunmuyordu -
+  //   "tarih" gun, "zaman" gun + saat gosterir (kayit tarih damgasi
+  //   biciminde). Cozulemeyen deger oldugu gibi kalir.
+  if ((alan.tip === 'tarih' || alan.tip === 'zaman')
+      && d !== null && d !== undefined && d !== '') {
+    const t = new Date(String(d));
+    if (!Number.isNaN(t.getTime()))
+      return alan.tip === 'zaman' ? tarihSaat(d) : gunMetni(String(d));
   }
 
   return String(d ?? '');

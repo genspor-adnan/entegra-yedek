@@ -373,6 +373,74 @@ public static class MuayeneUclari
                                     islemler, gecmis, izlemeNo = baglam.IzlemeNo });
         });
 
+        // GET /api/muayene/{id}/raporlar - kartın raporları (imza seçimi için)
+        grup.MapGet("/{id:int}/raporlar", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var satirlar = await baglanti.ListeAsync(
+                "select r.id, r.tur, r.alt_tur as \"altTur\", r.baslangic, r.bitis, r.gun, " +
+                "       r.icd_kod as \"icdKod\", r.aciklama, r.durum, " +
+                "       r.imza_zamani as \"imzaZamani\" " +
+                "  from public.muayene_rapor r where r.muayene_id = @p0 " +
+                " order by r.id desc",
+                null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            return Results.Ok(new { id, raporlar = satirlar, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/muayene/rapor/{raporId}/imzala
+        //   İMZA RAPORU KİLİTLER: imzalanan metin SGK'ya giden metindir.
+        //   EKSİK RAPOR İMZALANMAZ: tür, başlangıç, gün ve tanı olmadan
+        //   rapor Medula'da reddedilir - hatayı imza anında söylemek, günler
+        //   sonra "rapor geçersiz" yanıtı almaktan iyidir.
+        grup.MapPost("/rapor/{raporId:int}/imzala", async (
+            int raporId, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("muayene", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var r = await baglanti.TekAsync(
+                "select durum, coalesce(tur, 0), baslangic, coalesce(gun, 0), " +
+                "       coalesce(icd_kod, '') " +
+                "  from public.muayene_rapor where id = @p0 for update",
+                islem, [raporId],
+                o => new { Durum = o.GetInt16(0), Tur = o.GetInt16(1),
+                           Baslangic = o.IsDBNull(2) ? (DateTime?)null : o.GetDateTime(2),
+                           Gun = o.GetInt16(3), Icd = o.GetString(4) }, iptal);
+            if (r is null) return Results.NotFound(new { hata = new
+                { kod = "BULUNAMADI", mesaj = "Rapor bulunamadi." } });
+            if (r.Durum != 1)
+                throw GentegreHatasi.IsKurali("Rapor zaten imzalanmis ya da iptal.");
+
+            var eksik = new List<string>();
+            if (r.Tur == 0) eksik.Add("tür");
+            if (r.Baslangic is null) eksik.Add("başlangıç tarihi");
+            if (r.Gun <= 0) eksik.Add("süre (gün)");
+            if (r.Icd.Trim().Length == 0) eksik.Add("tanı (ICD-10)");
+            if (eksik.Count > 0)
+                throw GentegreHatasi.IsKurali(
+                    "Rapor imzalanamaz - eksik: " + string.Join(", ", eksik) + ".");
+
+            await baglanti.CalistirAsync(
+                "update public.muayene_rapor " +
+                "   set durum = 2, imza_zamani = now(), imzalayan = @p1, " +
+                "       degistiren = @p1, degistirme_tarihi = now() " +
+                " where id = @p0", islem, [raporId, baglam.KullaniciId], iptal);
+            await islem.CommitAsync(iptal);
+
+            return Results.Ok(new { raporId, mesaj = "Rapor imzalandi.",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
         // GET /api/muayene/{id}/tanilar - kartın tanı satırları (araç
         //   çubuğundaki "sil" için: hangi satırın kaldırılacağı SUNUCUDAN
         //   gelen listeden seçilir, ekranın elindeki taslaktan değil).

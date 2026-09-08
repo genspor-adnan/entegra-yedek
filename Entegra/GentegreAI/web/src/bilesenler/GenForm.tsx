@@ -133,6 +133,14 @@ interface Props {
                                  alanSirasi?: string[];
                                  /** Gecmis listesinde CIZILMEYECEK alanlar. */
                                  gecmisGizli?: string[] }>;
+  /**
+   * KENDI SEKMESINDE cizilen detaya ekran-ozel secenekler (gizli kolon, grid
+   * kipi, sade cerceve). `detayGrupta` yalnizca bir GRUBA gomulen detaya
+   * uygulanir; rapor gibi kendi sekmesi olan detaylar icin bu kullanilir.
+   */
+  detaySecenekleri?: Record<string, { gizli?: string[]; sinif?: string;
+                                      sade?: boolean; gridKipi?: boolean;
+                                      salt?: boolean; ekleGizli?: boolean }>;
   /** Sekmesi acilmayacak detaylar (ekranda baska yerde ciziliyorsa). */
   gizliDetaylar?: string[];
   /**
@@ -182,7 +190,7 @@ interface Props {
 // ikinci satira tasiriyordu; sekme adi zaten ayirt ediyor.
 
 
-export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, onKaydedildi, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, onKaydedildi, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
@@ -1408,7 +1416,9 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
          *   - prim plani detaylari (kullanici): kod/oran alanlari satir ici
          *     kutularda okunaksizdi.
          */
-        const gridKipi = (kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar')
+        const ayar = detaySecenekleri?.[aktif.detay.ad];
+        const gridKipi = ayar?.gridKipi
+          || (kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar')
           || kaynak === 'prim-plani'
           // DOKUMAN (419, kullanici: "gridleri gengrid readonly yap"): tum
           //   detaylari SALT GORUNUM + grid kipi. Surum, onay, baglanti,
@@ -1424,8 +1434,10 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           durum={detaylar[aktif.detay.ad] ?? bosDetay()}
           // DOKUMAN: en dis cerceve YOK (kullanici) - sekme zaten bir
           //   cercevedir, grid'in kendi baslik seridiyle cift cizgi olusuyordu.
-          kutuSinif={kaynak === 'dokuman' ? 'kutu-cercevesiz' : undefined}
-          saltOkunur={salt || aktif.detay.saltOkunur}
+          kutuSinif={ayar?.sinif ?? (kaynak === 'dokuman' ? 'kutu-cercevesiz' : undefined)}
+          sadeGrid={ayar?.sade}
+          ekleGizli={ayar?.ekleGizli}
+          saltOkunur={salt || aktif.detay.saltOkunur || !!ayar?.salt}
           hatalar={alanHatalari}
           onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
           // Fiyat listesi satirlari SALT GORUNUM + modal duzenleme: satir ici
@@ -1448,7 +1460,8 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           //   fatura kesilirken paranin hangi araçla tahsil edilecegi HENUZ
           //   BELLI DEGIL. Eslestirme zaten bu kriteri o kipte yok sayiyor;
           //   alani ekranda tutmak, uygulanmayan bir ayar uretiyordu.
-          gizliAlanlar={kaynak === 'prim-plani' && Number(deger.primZamani) === 2
+          gizliAlanlar={ayar?.gizli ? new Set(ayar.gizli)
+            : kaynak === 'prim-plani' && Number(deger.primZamani) === 2
             ? new Set(['tahsilatTuru']) : undefined}
           // ARAMA PLANIN ROLUNE BAGLI (383, kullanici): yalnizca O ROLDE ADAY
           //   olan kisiler listelenir. Rolu isaretlenmemis birine yazilan

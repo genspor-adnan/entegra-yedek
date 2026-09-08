@@ -8208,3 +8208,28 @@ demekti. Elle yazılan BKİ korunur; boy/kilo değişirse hesap yenilenir (eski
 Ayrıca (kullanıcı): sekme ikonları kaldırıldı ve sekmeler tek sıra (on sekme
 ikinci satıra taşıyordu; sığmazsa yatay kayar), bağlam şeridinde etiketler
 kutuların üstünde, sütun genişlikleri Hasta %20 dar / Bugün %20 geniş.
+
+### Rapor sekmesi mockup düzeninde (kullanıcı)
+
+Kolonlar mockup'tan: **Tür · Alt tür · Başlangıç · Süre (gün) · Tanı ·
+Açıklama · İmza · Durum**; üstte **✍ e-İmzala**, altta tür açıklaması.
+Rapor no ve bitiş gride çizilmiyor.
+
+- **`db/464`**: `alt_tur` ("İstirahat"in SGK karşılığı iş göremezlik mi refakat
+  mi - tür tek başına Medula'ya yetmiyor), `imza_zamani` + `imzalayan`, ve
+  **bitiş tetiği**: başlangıç + süreden hesaplanır (hekim 10 gün yazıp bitişi
+  yanlış güne koyunca rapor süresi bozuluyordu); elle girilen bitiş korunur,
+  iki tarih varsa gün sayısı tamamlanır.
+- **`POST /api/muayene/rapor/{id}/imzala`**: imza raporu kilitler (SGK'ya giden
+  metin odur). **Eksik rapor imzalanmaz** - tür, başlangıç, süre ve tanı
+  yoksa uç hepsini sayarak reddeder; hatayı imza anında söylemek, günler sonra
+  "rapor geçersiz" yanıtı almaktan iyi. `GET /api/muayene/{id}/raporlar` imza
+  seçimi için.
+- GenForm'a **`detaySecenekleri`**: kendi sekmesinde çizilen detaya ekran-özel
+  seçenek (gizli kolon, sade çerçeve, grid kipi) - `detayGrupta` yalnız bir
+  gruba gömülen detaya uygulanıyordu.
+- Detay gridinde **tarih hücreleri biçimleniyor** (`detayHucreMetni`): ham ISO
+  `2026-09-07T00:00:00` yerine `07.09.2026`; "zaman" tipinde saat de.
+
+Doğrulandı: rapor eklendi (bitiş 07.09 + 10 gün → 16.09), imzalandı (durum 2,
+imzalayan yazıldı), ikinci imza ve eksik rapor imzası reddedildi.

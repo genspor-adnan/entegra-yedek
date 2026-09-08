@@ -30,7 +30,7 @@ export async function muayeneAksiyonu(
       && kod !== 'muayene.sablon' && kod !== 'muayene.ozet'
       && kod !== 'muayene.normal' && kod !== 'muayene.taniOnceki'
       && kod !== 'muayene.taniSik' && kod !== 'muayene.taniAra'
-      && kod !== 'muayene.taniSil'
+      && kod !== 'muayene.taniSil' && kod !== 'muayene.raporImza'
       && kod !== 'muayene.istem' && kod !== 'muayene.istemLab'
       && kod !== 'muayene.istemGoruntuleme') return false;
 
@@ -69,6 +69,31 @@ export async function muayeneAksiyonu(
     await guvenli(async () => {
       const y = await api.muayeneTumuNormal(id);
       mesaj(y.mesaj);
+      b.tazele();
+    });
+    return true;
+  }
+
+  // RAPOR IMZA (mockup rapor arac cubugu "✍ e-Imzala"): hangi raporun
+  //   imzalanacagi SUNUCUDAN gelen listeden secilir; eksik rapor uc
+  //   tarafindan reddedilir (tur/baslangic/gun/tani).
+  if (kod === 'muayene.raporImza') {
+    await guvenli(async () => {
+      const y = await api.muayeneRaporlari(id);
+      const taslak = y.raporlar.filter(r => Number(r.durum ?? 0) === 1);
+      if (taslak.length === 0) { mesaj('İmzalanacak taslak rapor yok.'); return }
+      const secim = taslak.length === 1
+        ? String(taslak[0].id)
+        : await secimSor('Hangi rapor imzalansın?', taslak.map(r => ({
+            kod: String(r.id),
+            ad: `#${String(r.id)} · ${String(r.baslangic ?? '').slice(0, 10)}`
+              + ` · ${String(r.gun ?? 0)} gün · ${String(r.icdKod ?? '')}`,
+          })));
+      if (!secim) return;
+      if (!await onay('Rapor imzalanacak. İmzalanan rapor değiştirilemez. '
+                    + 'Onaylıyor musunuz?')) return;
+      const s = await api.muayeneRaporImzala(Number(secim));
+      mesaj(s.mesaj);
       b.tazele();
     });
     return true;

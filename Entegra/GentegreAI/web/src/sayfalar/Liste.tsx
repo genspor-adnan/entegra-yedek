@@ -2207,6 +2207,25 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
                     </div>
                   </div>
                 )
+                : baslik === 'Rapor' ? (
+                  // MOCKUP RAPOR ARAC CUBUGU: rapor ekleme grid basliginda,
+                  //   imza SUNUCU ucunda (eksik rapor reddedilir).
+                  <>
+                    <div className="muayene-arac">
+                      <button type="button" className="d bir"
+                              onClick={() => void aksiyon('muayene.raporImza',
+                                                          { id: Number(kartId) })}>
+                        ✍ e-İmzala
+                      </button>
+                    </div>
+                    {icerik}
+                    <div className="not ic">
+                      Türler: istirahat · sağlık durumu · ilaç kullanım (SUT) ·
+                      iş göremezlik. Bitiş tarihi başlangıç + süreden hesaplanır;
+                      imzalanan rapor değiştirilemez.
+                    </div>
+                  </>
+                )
                 : baslik.startsWith('Sevk') ? (
                   // Sevk alanlarinin ALTINDA bu muayeneden istenen
                   //   konsultasyonlar (mockup "Sevk / Konsultasyon").
@@ -2312,6 +2331,13 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         //   sablondan acilir, secim kutusu yanlis bir vaat olurdu; deger/taraf
         //   ise mockup'ta yok.
         tazeleAnahtari={kartTazele}
+        // RAPOR GRIDI MOCKUP KOLONLARI: Tür · Alt tür · Başlangıç · Süre ·
+        //   Tanı · Açıklama · İmza · Durum. Rapor no ve bitiş gizli - bitiş
+        //   başlangıç + süreden hesaplanıyor (db/464).
+        detaySecenekleri={tanim.kaynak === 'muayene'
+          ? { raporlar: { gizli: ['raporNo', 'bitis'], sinif: 'rapor-gridi',
+                          sade: true } }
+          : undefined}
         // MOCKUP SIRASI (muayene_karti.html): hekimin is akisi - once
         //   anamnez ve muayene, sonra tani, istem, recete/rapor, en sonda
         //   sevk, ucret, gecmis ve dosyalar.

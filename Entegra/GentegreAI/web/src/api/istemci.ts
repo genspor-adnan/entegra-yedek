@@ -292,6 +292,14 @@ export const api = {
     gonder<{ isaretlendi: boolean }>(
       `/api/liste/${kaynak}/kullanilan/${encodeURIComponent(kod)}`, {}),
 
+  /** Kartin raporlari (imza secimi icin). */
+  muayeneRaporlari: (muayeneId: number) =>
+    istek<{ raporlar: Record<string, unknown>[] }>(`/api/muayene/${muayeneId}/raporlar`),
+
+  /** Raporu imzalar: kilitler; eksik rapor (tur/baslangic/gun/tani) reddedilir. */
+  muayeneRaporImzala: (raporId: number) =>
+    gonder<{ mesaj: string }>(`/api/muayene/rapor/${raporId}/imzala`, {}),
+
   /** Kartin tani satirlari (arac cubugundaki sil icin). */
   muayeneTanilari: (muayeneId: number) =>
     istek<{ tanilar: { id: number; kod: string; ad: string; tur: number }[] }>(

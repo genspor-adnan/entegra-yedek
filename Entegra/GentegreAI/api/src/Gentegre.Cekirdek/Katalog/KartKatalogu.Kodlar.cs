@@ -158,6 +158,11 @@ public static partial class KartKatalogu
         new() { ["1"] = "İstirahat", ["2"] = "Sağlık durumu", ["3"] = "İlaç kullanım",
                 ["4"] = "İş göremezlik" };
 
+    /// <summary>Rapor alt turu (464) - SGK/Medula karsiligi.</summary>
+    private static readonly Dictionary<string, string> RaporAltTuruKodlari =
+        new() { ["0"] = "—", ["1"] = "İş göremezlik", ["2"] = "Refakat",
+                ["3"] = "Doğum öncesi", ["4"] = "Doğum sonrası", ["5"] = "Diğer" };
+
     private static readonly Dictionary<string, string> RaporDurumKodlari =
         new() { ["0"] = "İptal", ["1"] = "Taslak", ["2"] = "Onaylı" };
 

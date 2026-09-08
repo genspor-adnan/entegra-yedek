@@ -445,19 +445,29 @@ public static partial class KartKatalogu
             {
                 new("id", "id", "sayi", Yazilabilir: false),
                 new("tur", "tur", "kod", SabitKodlar: RaporTuruKodlari, Baslik: "Tür"),
+                // ALT TUR (mockup): "Istirahat"in SGK karsiligi is goremezlik
+                //   mi refakat mi - tur tek basina Medula'ya yetmiyor.
+                new("altTur", "alt_tur", "kod", SabitKodlar: RaporAltTuruKodlari,
+                    Baslik: "Alt tür"),
                 new("raporNo", "rapor_no", "metin", EnFazlaUzunluk: 20, Baslik: "Rapor No"),
                 new("baslangic", "baslangic", "tarih", Baslik: "Başlangıç"),
+                // BITIS baslangic + gunden HESAPLANIR (db/464); elle girilen
+                //   deger korunur, o yuzden alan duruyor ama gridde gizli.
                 new("bitis", "bitis", "tarih", Baslik: "Bitiş"),
                 // GUN HEKIMIN YAZDIGIDIR: is gunu/tatil kurali kuruma gore
                 //   degisir, tarih farkindan otomatik uretmek yanlis rapor
                 //   verirdi.
-                new("gun", "gun", "sayi", Baslik: "Gün"),
+                new("gun", "gun", "sayi", Baslik: "Süre (gün)"),
                 new("icdKod", "icd_kod", "kod", KodTablosu: "public.v_icd_lookup",
                     AramaKaynagi: "icd", Baslik: "Tanı (ICD-10)"),
                 new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 500,
                     Baslik: "Açıklama"),
+                // IMZA raporun kilidi: imzalanan rapor degismez (SGK'ya giden
+                //   metin odur). Dugmenin yazdigi alanlar - elle girilmez.
+                new("imzaZamani", "imza_zamani", "zaman", Yazilabilir: false,
+                    Baslik: "İmza"),
                 new("durum", "durum", "kod", SabitKodlar: RaporDurumKodlari,
-                    Baslik: "Durum"),
+                    Yazilabilir: false, Baslik: "Durum"),
             }, SubeKolonu: "sube_id", Sirala: "id desc",
                Baslik: "Rapor", LogTabloId: 966,
                // Yeni satirda hasta muayeneden gelir: rapor hastaya baglidir,
