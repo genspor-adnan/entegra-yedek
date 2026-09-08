@@ -304,8 +304,10 @@ export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik }:
       {icerik}
       <div className="kagrup">
         <h6>
-          Konsültasyonlar
-          <span className="not">{veri?.konsultasyonlar.length ?? 0} istek</span>
+          Konsültasyon isteği
+          <span className="not">
+            kurum içi · {veri?.konsultasyonlar.length ?? 0} istek
+          </span>
         </h6>
         {veri?.ustMuayeneId ? (
           <p className="not ic">
@@ -322,29 +324,45 @@ export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik }:
             yönlendiren <b>yeni bir muayene</b> olarak açılır.
           </p>
         ) : (
+          /* MOCKUP KOLONLARI: Brans / Hekim · Soru · Istem · Yanit · Durum.
+             Soru isteyen hekimin cumlesi, yanit cevaplayanin karari - ikisi de
+             konsultasyon muayenesinde durur. */
           <table className="detay-tablo">
             <thead>
-              <tr><th>Bölüm</th><th>Hekim</th><th className="hiza-orta">Tarih</th>
-                  <th>Ana tanı</th><th className="hiza-orta">Durum</th><th /></tr>
+              <tr><th>Branş / Hekim</th><th>Soru</th>
+                  <th className="hiza-orta">İstem</th><th>Yanıt</th>
+                  <th className="hiza-orta">Durum</th><th /></tr>
             </thead>
             <tbody>
-              {veri?.konsultasyonlar.map(k => (
-                <tr key={sayi(k.id)}>
-                  <td>{metin(k.bolum) || '—'}</td>
-                  <td>{metin(k.hekim) || '—'}</td>
-                  <td className="hiza-orta">{k.tarih ? tarihSaat(k.tarih) : '—'}</td>
-                  <td>{metin(k.anaTani) || <span className="sonuk">—</span>}</td>
-                  <td className="hiza-orta">
-                    <span className={`rozet ${sayi(k.durum) === 3 ? 'olumlu' : 'uyari'}`}>
-                      {MUAYENE_DURUM[sayi(k.durum)] ?? ''}
-                    </span>
-                  </td>
-                  <td>
-                    <button type="button" className="d"
-                            onClick={() => git(`/muayene/${sayi(k.id)}`)}>Aç</button>
-                  </td>
-                </tr>
-              ))}
+              {veri?.konsultasyonlar.map(k => {
+                const yanit = metin(k.yanit);
+                return (
+                  <tr key={sayi(k.id)}>
+                    <td>{metin(k.bolum) || '—'}
+                      {metin(k.hekim) && <span className="sonuk"> · {metin(k.hekim)}</span>}
+                    </td>
+                    <td>{metin(k.soru) || <span className="sonuk">—</span>}</td>
+                    <td className="hiza-orta">{k.tarih ? tarihSaat(k.tarih) : '—'}</td>
+                    <td>
+                      {yanit ? yanit.slice(0, 120) : <span className="sonuk">bekliyor</span>}
+                      {metin(k.anaTani) && (
+                        <span className="rozet olumlu" title="Konsültasyon tanısı">
+                          {metin(k.anaTani)}
+                        </span>
+                      )}
+                    </td>
+                    <td className="hiza-orta">
+                      <span className={`rozet ${sayi(k.durum) === 3 ? 'olumlu' : 'uyari'}`}>
+                        {MUAYENE_DURUM[sayi(k.durum)] ?? ''}
+                      </span>
+                    </td>
+                    <td>
+                      <button type="button" className="d"
+                              onClick={() => git(`/muayene/${sayi(k.id)}`)}>Aç</button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}

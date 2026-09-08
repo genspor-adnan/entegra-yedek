@@ -8233,3 +8233,26 @@ Rapor no ve bitiş gride çizilmiyor.
 
 Doğrulandı: rapor eklendi (bitiş 07.09 + 10 gün → 16.09), imzalandı (durum 2,
 imzalayan yazıldı), ikinci imza ve eksik rapor imzası reddedildi.
+
+### Sevk / Konsültasyon sekmesi mockup düzeninde (kullanıcı)
+
+Mockup alanları: **Karar · Sevk edilen tesis · Klinik · Sevk nedeni / notu ·
+Ambulans**, altında **Konsültasyon isteği** tablosu (Branş/Hekim · Soru ·
+İstem · Yanıt · Durum). Kutu sırası Sevk → Takip → Konsültasyon.
+
+- **`db/465`**: `sevk_notu` (karşı hekimin okuyacağı cümle - `sevk_neden`
+  SKRS kodlu bir alan, cümle oraya yazılınca e-Nabız'a geçersiz değer
+  gidiyordu), `ambulans` + `ambulans_zaman` (hastanın kendi imkânıyla mı
+  gittiği yoksa 112 ile mi taşındığı sevk kâğıdında ve adli olayda sorulan
+  ilk şey), `konsultasyon_soru` (isteyen hekimin cümlesi alt muayenede durur -
+  cevaplayanın şikâyet alanına karışmasın).
+- `sevkNeden` ve `vakaTuru` artık **kod listeli** (ileri tetkik / yatak yok /
+  uzman yok / cihaz yok / hasta talebi · normal / adli / iş kazası / trafik
+  kazası / meslek hastalığı) - ham sayı gösteriliyorlardı.
+- Konsültasyon tablosu mockup kolonlarında: **Soru** isteyen hekimin cümlesi,
+  **Yanıt** cevaplayanın kararı (ikisi de konsültasyon muayenesinde durur -
+  yanıtı ayrı bir yerde aramak gerekmesin), yanıt yoksa "bekliyor".
+
+**Zorunlu sapma**: mockup'ta olmayan "Takip" kutusu (kontrol önerisi, vaka
+türü) duruyor - kontrol randevusu ve adli vaka işareti muayenenin çıktısı,
+başka ekranda karşılığı yok.

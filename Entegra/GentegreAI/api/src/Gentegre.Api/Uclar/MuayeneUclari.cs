@@ -321,6 +321,12 @@ public static class MuayeneUclari
             var konsultasyonlar = await baglanti.ListeAsync(
                 "select k.id, coalesce(d.ad, '') as bolum, coalesce(p.ad, '') as hekim, " +
                 "       k.muayene_tarihi as tarih, k.durum, " +
+                // SORU isteyen hekimin cumlesi, YANIT cevaplayanin karari:
+                //   ikisi de alt muayenede durur (465) - yaniti "sonuc geldi
+                //   mi" diye ayri bir yerde aramak gerekmesin.
+                "       coalesce(k.konsultasyon_soru, '') as soru, " +
+                "       coalesce(nullif(k.karar, ''), '') as yanit, " +
+                "       k.tamamlanma as \"yanitZamani\", " +
                 "       coalesce((select i.ad from public.tani t " +
                 "                   join public.icd i on i.kod = t.icd_kod " +
                 "                  where t.muayene_id = k.id and t.tur = 1 limit 1), '') as \"anaTani\" " +

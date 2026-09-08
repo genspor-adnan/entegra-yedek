@@ -184,6 +184,28 @@ public static partial class KartKatalogu
     };
 
     /// <summary>Muayene sonu yonlendirme (409): sevk / yatis / acil.</summary>
+    /// <summary>SKRS sevk nedeni (465) - kodun kendisi e-Nabiz'a gider.</summary>
+    private static readonly Dictionary<string, string> SevkNedenKodlari = new()
+    {
+        ["0"] = "—", ["1"] = "İleri tetkik / tedavi", ["2"] = "Yatak yok",
+        ["3"] = "Uzman hekim yok", ["4"] = "Cihaz yok / arızalı",
+        ["5"] = "Hasta / yakını talebi", ["9"] = "Diğer",
+    };
+
+    /// <summary>Sevk ulasimi (465).</summary>
+    private static readonly Dictionary<string, string> AmbulansKodlari = new()
+    {
+        ["0"] = "—", ["1"] = "112 çağrıldı", ["2"] = "Kurum ambulansı",
+        ["3"] = "Hasta kendi imkânı",
+    };
+
+    /// <summary>Vaka turu (SKRS): adli/kaza ayrimi bildirim ve fatura kurallarini degistirir.</summary>
+    private static readonly Dictionary<string, string> VakaTuruKodlari = new()
+    {
+        ["0"] = "Normal", ["1"] = "Adli vaka", ["2"] = "İş kazası",
+        ["3"] = "Trafik kazası", ["4"] = "Meslek hastalığı", ["9"] = "Diğer",
+    };
+
     private static readonly Dictionary<string, string> YonlendirmeKodlari = new()
     {
         ["0"] = "Yok", ["1"] = "Kurum İçi Sevk", ["2"] = "Kurum Dışı Sevk",
@@ -325,20 +347,37 @@ public static partial class KartKatalogu
             //   kurali >= 400 karakterde cok satirli kutu cizer).
             new("karar", "karar", "metin", EnFazlaUzunluk: 4000,
                 Baslik: "Değerlendirme / Plan", Grup: "Tanı (ICD-10)"),
+            // Mockup etiketleri: "Karar" · "Sevk edilen tesis" · "Klinik" ·
+            //   "Sevk nedeni / notu" · "Ambulans".
             new("yonlendirme", "yonlendirme", "kod", SabitKodlar: YonlendirmeKodlari,
-                Baslik: "Yönlendirme", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
+                Baslik: "Karar", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
             new("sevkTesisKodu", "sevk_tesis_kodu", "metin", EnFazlaUzunluk: 20,
-                Baslik: "Sevk Tesis Kodu", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
+                Baslik: "Sevk edilen tesis", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
             new("sevkKlinikKod", "sevk_klinik_kod", "metin", EnFazlaUzunluk: 20,
-                Baslik: "Sevk Klinik Kodu", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
-            new("sevkNeden", "sevk_neden", "kod", Baslik: "Sevk Nedeni",
-                Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
+                Baslik: "Klinik", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
+            // SEVK NEDENI KODLU (SKRS): serbest cumle NOT alanina yazilir -
+            //   koda cumle yazilinca e-Nabiz'a gecersiz deger gidiyordu.
+            new("sevkNeden", "sevk_neden", "kod", SabitKodlar: SevkNedenKodlari,
+                Baslik: "Sevk nedeni", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
+            new("sevkNotu", "sevk_notu", "metin", EnFazlaUzunluk: 500,
+                Baslik: "Sevk notu (karşı hekime)", Grup: "Sevk / Konsültasyon",
+                AltGrup: "Sevk"),
+            // AMBULANS sevkin parcasi: hastanin kendi imkaniyla mi gittigi
+            //   yoksa 112 ile mi tasindigi sevk kagidinda sorulan ilk sey.
+            new("ambulans", "ambulans", "kod", SabitKodlar: AmbulansKodlari,
+                Baslik: "Ambulans", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
+            new("ambulansZaman", "ambulans_zaman", "zaman",
+                Baslik: "Ambulans saati", Grup: "Sevk / Konsültasyon", AltGrup: "Sevk"),
             new("kontrolOnerisiGun", "kontrol_onerisi_gun", "sayi",
                 Baslik: "Kontrol (gün)", Grup: "Sevk / Konsültasyon", AltGrup: "Takip"),
             new("kontrolRandevuId", "kontrol_randevu_id", "sayi",
                 Baslik: "Kontrol Randevu Id", Grup: "Sevk / Konsültasyon", AltGrup: "Takip"),
-            new("vakaTuru", "vaka_turu", "kod", Baslik: "Vaka Türü",
+            new("vakaTuru", "vaka_turu", "kod", SabitKodlar: VakaTuruKodlari,
+                Baslik: "Vaka Türü",
                 Grup: "Sevk / Konsültasyon", AltGrup: "Takip"),
+            new("konsultasyonSoru", "konsultasyon_soru", "metin", EnFazlaUzunluk: 500,
+                Baslik: "Konsültasyon sorusu", Grup: "Sevk / Konsültasyon",
+                AltGrup: "Konsültasyon"),
 
             // -------------------------------------------------- gönderim ----
             new("enabizDurum", "enabiz_durum", "kod", Yazilabilir: false,
