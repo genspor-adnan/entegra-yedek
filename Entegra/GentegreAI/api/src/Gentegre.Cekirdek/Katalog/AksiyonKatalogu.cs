@@ -592,7 +592,7 @@ public static class AksiyonKatalogu
                     Sira: 55),
                 // Numune kabul ekranindakiyle AYNI kod: sevk mantigi tek
                 //   yerde (disLabAksiyonlari) kalir, dugme iki listede durur.
-                new("lab.dis-gonder", "🏍 Dış Lab'a Gönder", "lab-istem",
+                new("lab.dis-gonder", "🏍️ Dış Lab'a Gönder", "lab-istem",
                     Hedef: "araccubugu2,sagtus,palet",
                     KaynakKodu: "lab.dislab", Islem: Islem.Ekle, KayitGerekir: true,
                     Sira: 60),
@@ -797,7 +797,7 @@ public static class AksiyonKatalogu
                     Sira: 30),
                 // DIS LABA GONDER: numune kabul bankosundan - tup elde
                 //   iken sevk edilir (mockup: "📦 Dis Lab'a Gonder").
-                new("lab.dis-gonder", "🏍 Dış Lab'a Gönder", "lab-numune",
+                new("lab.dis-gonder", "🏍️ Dış Lab'a Gönder", "lab-numune",
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "lab.dislab", Islem: Islem.Ekle, KayitGerekir: true,
                     Sira: 35),

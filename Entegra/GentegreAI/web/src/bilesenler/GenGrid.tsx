@@ -277,6 +277,17 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   const [secili, setSecili] = useState<Set<string>>(new Set());
   useEffect(() => { setSecili(new Set()) }, [kaynak]);
 
+  // YAN PANEL ACIK/KAPALI, ekran basina hatirlanir: dar ekranda calisan
+  //   kullanici paneli kapatip listeye tam genislik verir, her acilista
+  //   yeniden kapatmak zorunda kalmasin.
+  const yanAnahtar = `gentegre.yanpanel.${kaynak}`;
+  const [yanKapali, setYanKapali] = useState(() => {
+    try { return localStorage.getItem(yanAnahtar) === '1' } catch { return false }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(yanAnahtar, yanKapali ? '1' : '0') } catch { /* yok say */ }
+  }, [yanAnahtar, yanKapali]);
+
   const [filtreAcik, setFiltreAcik] = useState(false);
   const [filtreDeger, setFiltreDeger] = useState<Record<string, string>>({});
   const filtreZamanlayici = useRef<number | undefined>(undefined);
@@ -813,7 +824,8 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
 
         {/* YAN PANEL varsa grid + alt panel SOL kolona girer (mockup
             .ucPanel). Yoksa fazladan kap konmaz - eski duzen aynen kalir. */}
-        <div className={gorunum === 'liste' && yanPanel ? 'grid-yan-duzen' : undefined}>
+        <div className={gorunum === 'liste' && yanPanel
+          ? `grid-yan-duzen${yanKapali ? ' kapali' : ''}` : undefined}>
         <div>
         {gorunum === 'ek' && ekGorunum ? (
           ekGorunum.icerik
@@ -869,7 +881,14 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
         {altPanel}
         </div>
         {gorunum === 'liste' && yanPanel && (
-          <aside className="grid-yan-panel">{yanPanel}</aside>
+          <aside className={`grid-yan-panel${yanKapali ? ' kapali' : ''}`}>
+            <button className="d yan-katla" type="button"
+                    title={yanKapali ? 'Paneli aç' : 'Paneli kapat'}
+                    onClick={() => setYanKapali(k => !k)}>
+              {yanKapali ? '‹' : '›'}
+            </button>
+            {!yanKapali && yanPanel}
+          </aside>
         )}
         </div>
       </div>

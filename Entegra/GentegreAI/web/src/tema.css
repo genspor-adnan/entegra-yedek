@@ -1613,6 +1613,15 @@ input.skt-gecmis {
 @media (max-width: 1350px) { .grid-yan-duzen { grid-template-columns: minmax(0, 1fr) } }
 .grid-yan-panel { position: sticky; top: 6px }
 .grid-yan-panel .lab-detay { margin-top: 0 }
+/* Kapanabilir: kapaliyken kolon ince bir seride iner, liste tam genislige
+   yayilir. Dugme her iki durumda da ayni yerde durur - kullanici paneli
+   nereden geri acacagini aramasin. */
+.grid-yan-duzen.kapali { grid-template-columns: minmax(0, 1fr) 24px }
+.grid-yan-panel .yan-katla {
+  display: block; width: 100%; height: 22px; padding: 0; margin-bottom: 4px;
+  font-size: 13px; line-height: 1; color: var(--soluk);
+}
+.grid-yan-panel.kapali .yan-katla { height: 60px }
 .lab-detay .kagrup { margin-bottom: 10px }
 .lab-detay .kagrup > h6 .sp { margin-left: auto; font-weight: 400; color: var(--soluk) }
 .lab-detay .bos { padding: 14px; text-align: center; color: var(--soluk); font-size: 11.5px }
