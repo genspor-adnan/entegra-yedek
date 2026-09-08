@@ -66,6 +66,14 @@ interface Props {
    */
   altPanel?: React.ReactNode;
   /**
+   * Gridin SAGINA, tam yuksekligi boyunca cizilecek panel - laboratuvar
+   * istem ekraninin hasta karti gibi (mockup .ucPanel: solda tablo, sagda
+   * hasta/etiket kutulari). Grid ve alt panel sol kolonda kalir; yan panel
+   * yapiskan (sticky) durur, liste kaydirilirken hasta bilgisi kaybolmaz.
+   * Dar ekranda tek kolona iner.
+   */
+  yanPanel?: React.ReactNode;
+  /**
    * Ciplerin ALTINA, gridin USTUNE eklenecek serit - lab sonuc onay
    * ekraninin sayac seridi gibi (mockup'ta da tam bu sirada: arama seridi,
    * ozet kutulari, tablo).
@@ -153,7 +161,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                           onTarihAraligi,
                           aramaGorunumGizli, gorunumSecimGizli, aramaGizli,
                           aracCubuguSeritte,
-                          seciliBaslangicId, cipSonu, cipBaslangic, altPanel, ustPanel, ekGorunum,
+                          seciliBaslangicId, cipSonu, cipBaslangic, altPanel, ustPanel, yanPanel, ekGorunum,
                           onCipSecildi, onCipRota, onSecimDegisti, yenile, odaklaSonEklenen,
                           icerikAlani, icerikBaslik }: Props) {
   // Sayfa boyu: cagiran acikca verdiyse o, yoksa Genel Ayarlar'daki
@@ -803,6 +811,10 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
 
         {gorunum === 'liste' && ustPanel}
 
+        {/* YAN PANEL varsa grid + alt panel SOL kolona girer (mockup
+            .ucPanel). Yoksa fazladan kap konmaz - eski duzen aynen kalir. */}
+        <div className={gorunum === 'liste' && yanPanel ? 'grid-yan-duzen' : undefined}>
+        <div>
         {gorunum === 'ek' && ekGorunum ? (
           ekGorunum.icerik
         ) : gorunum !== 'liste' ? (
@@ -855,6 +867,11 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
         )}
 
         {altPanel}
+        </div>
+        {gorunum === 'liste' && yanPanel && (
+          <aside className="grid-yan-panel">{yanPanel}</aside>
+        )}
+        </div>
       </div>
 
       <GridMenu konum={gridMenuKonum} ogeler={menuOgeleri}

@@ -69,7 +69,7 @@ import { mikroAksiyonu } from './liste/mikroAksiyonlari';
 import { genetikAksiyonu } from './liste/genetikAksiyonlari';
 import { kkAksiyonu } from './liste/kkAksiyonlari';
 import { disLabAksiyonu } from './liste/disLabAksiyonlari';
-import { LabDetayPaneli, labDetayVarMi } from '../bilesenler/LabDetayPaneli';
+import { LabDetayPaneli, labDetayVarMi, labYanVarMi } from '../bilesenler/LabDetayPaneli';
 import { EnabizPaketPaneli } from '../bilesenler/EnabizPaketPaneli';
 import { LabOzetSeridi } from '../bilesenler/LabOzetSeridi';
 import { aiBaglamAyarla } from '../bilesenler/aiBaglam';
@@ -1814,8 +1814,15 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       // LABORATUVAR (446): mockup'larda tablo ile secili kaydin ayrintisi
       //   AYNI ekranda durur (tetkik/tup plani, antibiyogram, varyantlar).
       //   Teknisyen listeyi kaybetmeden ayrintiya bakabilmeli.
+      // HASTA KARTI GRIDIN SAGINDA (kullanici: "hasta istem kartini alttan
+      //   gridin sagina al"; mockup lab_istem_numune_kabul.html .ucPanel):
+      //   tetkik tablosu gridin altinda tam genislikte kalir, hasta/etiket/
+      //   kurallar kutulari saga gecer. Iki panel AYNI istegi paylasir.
+      yanPanel={labYanVarMi(tanim.kaynak)
+        ? <LabDetayPaneli kaynak={tanim.kaynak} satir={seciliSatir} kisim="yan" />
+        : undefined}
       altPanel={labDetayVarMi(tanim.kaynak) && seciliSatir
-        ? <LabDetayPaneli kaynak={tanim.kaynak} satir={seciliSatir} />
+        ? <LabDetayPaneli kaynak={tanim.kaynak} satir={seciliSatir} kisim="ana" />
         // e-NABIZ (454): "Eksik Alan" yazan satirin cevabi paketin
         //   alanlarinda. Kart yerine grid alti: kuyrukta calisan kisi
         //   listeyi kaybetmeden hangi alanin bos oldugunu gormeli.

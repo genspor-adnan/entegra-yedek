@@ -42,6 +42,15 @@ export function labDetayVarMi(kaynak: string): boolean {
   return kaynak in KAYNAKLAR;
 }
 
+/**
+ * Gridin SAGINDA hasta karti YALNIZ istem tabanli listelerde vardir.
+ * Kultur/genetik/dis lab panelleri kendi icinde iki sutunlu - 420px'e
+ * sigmaz, gridin altinda tam genislikte kalir.
+ */
+export function labYanVarMi(kaynak: string): boolean {
+  return KAYNAKLAR[kaynak] === 'istem';
+}
+
 const dizi = (v: unknown): Satir[] => (Array.isArray(v) ? v as Satir[] : []);
 const metin = (v: unknown): string => String(v ?? '').trim();
 
@@ -81,9 +90,37 @@ function Bos({ ne }: { ne: string }) {
   return <div className="kagrup"><div className="bos">{ne}</div></div>;
 }
 
-export function LabDetayPaneli({ kaynak, satir }: {
+/**
+ * AYNI KAYDI IKI YERDE ÇİZMEK, iki kez okumak demek değildir: tetkik tablosu
+ * gridin ALTINDA, hasta kartı gridin SAĞINDA durur (mockup .ucPanel) ve iki
+ * bileşen aynı anda kurulur. Uçuşan istek paylaşılır - ikinci panel aynı
+ * isteğin sonucunu bekler, sunucuya ikinci kez gidilmez.
+ */
+const ucusan = new Map<string, Promise<Kayit>>();
+
+function labOku(tur: string, id: number): Promise<Kayit> {
+  const anahtar = `${tur}:${id}`;
+  const bekleyen = ucusan.get(anahtar);
+  if (bekleyen) return bekleyen;
+  const p = (tur === 'istem' ? api.labIstemOku(id)
+           : tur === 'kultur' ? api.labKulturOku(id)
+           : tur === 'genetik' ? api.genetikVakaOku(id)
+           : api.disLabOku(id) as unknown as Promise<Kayit>) as Promise<Kayit>;
+  const izlenen = p.finally(() => { ucusan.delete(anahtar) });
+  ucusan.set(anahtar, izlenen);
+  return izlenen;
+}
+
+/**
+ * `kisim`: panel gridin neresinde çiziliyor.
+ * <b>ana</b> = gridin altı (tetkik/antibiyogram/varyant tabloları),
+ * <b>yan</b> = gridin sağı (hasta kartı, etiketler, kurallar),
+ * <b>tam</b> = ikisi yan yana (eski düzen; istem dışı kayıtlar).
+ */
+export function LabDetayPaneli({ kaynak, satir, kisim = 'tam' }: {
   kaynak: string;
   satir: Satir | null;
+  kisim?: 'tam' | 'ana' | 'yan';
 }) {
   const tur = KAYNAKLAR[kaynak];
   // İstem tabanlı listelerde detay İSTEMİN kendisidir: numune ve sonuç
@@ -101,11 +138,7 @@ export function LabDetayPaneli({ kaynak, satir }: {
     if (!tur || !id) { setVeri(null); return }
     setYukleniyor(true); setHata('');
     try {
-      const y = tur === 'istem' ? await api.labIstemOku(id)
-              : tur === 'kultur' ? await api.labKulturOku(id)
-              : tur === 'genetik' ? await api.genetikVakaOku(id)
-              : await api.disLabOku(id) as unknown as Kayit;
-      setVeri(y as Kayit);
+      setVeri(await labOku(tur, id));
     } catch (h) { setHata(hataMetni(h)); setVeri(null) }
     finally { setYukleniyor(false) }
   }, [tur, id]);
@@ -113,13 +146,20 @@ export function LabDetayPaneli({ kaynak, satir }: {
   useEffect(() => { void yukle() }, [yukle]);
 
   if (!tur) return null;
-  if (!id) return <div className="lab-detay"><Bos ne="Ayrıntı için listeden bir satır seçin." /></div>;
+  // İstem dışı kayıtlarda (kültür, genetik, dış lab) yan kolon YOKTUR:
+  //   o panellerin kendi düzeni iki sütunlu, gridin sağına sığmaz.
+  if (kisim === 'yan' && tur !== 'istem') return null;
+  // Satir secili degilken de kutu cizilir: yan kolon kaybolursa grid
+  //   genisleyip her secimde yeniden daralir - ekran zipliyor gorunurdu.
+  if (!id)
+    return <div className="lab-detay"><Bos ne="Ayrıntı için listeden bir satır seçin." /></div>;
 
   return (
     <div className="lab-detay">
       {hata && <div className="hata-kutusu">{hata}</div>}
       {!veri && yukleniyor && <Bos ne="Yükleniyor…" />}
-      {veri && tur === 'istem' && <IstemDetayi veri={veri} secili={satir} kaynak={kaynak} />}
+      {veri && tur === 'istem' &&
+        <IstemDetayi veri={veri} secili={satir} kaynak={kaynak} kisim={kisim} />}
       {veri && tur === 'kultur' && <KulturDetayi veri={veri} />}
       {veri && tur === 'genetik' && <GenetikDetayi veri={veri} />}
       {veri && tur === 'dis' && <DisDetayi veri={veri} />}
@@ -130,8 +170,9 @@ export function LabDetayPaneli({ kaynak, satir }: {
 /* ------------------------------------------------------------------ istem --
    Mockup lab_istem_numune_kabul.html: solda "LAB-…/… · Tetkikler" tablosu
    (tüp planı otomatik), sağda hasta/klinik bilgisi ve etiketler.        */
-function IstemDetayi({ veri, secili, kaynak }: {
+function IstemDetayi({ veri, secili, kaynak, kisim }: {
   veri: Kayit; secili: Satir | null; kaynak: string;
+  kisim: 'tam' | 'ana' | 'yan';
 }) {
   const git = useNavigate();
   const satirlar = dizi(veri.satirlar);
@@ -167,8 +208,7 @@ function IstemDetayi({ veri, secili, kaynak }: {
     return [...new Set(ad)].join(' · ');
   };
 
-  return (
-    <div className="lab-ana-yan">
+  const sol = (
       <div>
         <div className="kagrup">
           <h6>
@@ -284,7 +324,9 @@ function IstemDetayi({ veri, secili, kaynak }: {
           </div>
         </div>
       </div>
+  );
 
+  const sag = (
       <div>
         <div className="kagrup">
           <h6>
@@ -436,8 +478,11 @@ function IstemDetayi({ veri, secili, kaynak }: {
           </div>
         </div>
       </div>
-    </div>
   );
+
+  if (kisim === 'ana') return sol;
+  if (kisim === 'yan') return sag;
+  return <div className="lab-ana-yan">{sol}{sag}</div>;
 }
 
 /* ---------------------------------------------------------------- kültür --

@@ -1607,6 +1607,12 @@ input.skt-gecmis {
    panel ayni ekranda durur - teknisyen tetkik listesini gormek icin kart
    acmak zorunda kalmamali. */
 .lab-detay { margin-top: 10px }
+/* Grid + yan panel (mockup .ucPanel): solda liste ve tetkik tablosu, sagda
+   hasta karti. Yan panel yapiskan - liste kaydirilirken hasta gorunur kalir. */
+.grid-yan-duzen { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 10px; align-items: start }
+@media (max-width: 1350px) { .grid-yan-duzen { grid-template-columns: minmax(0, 1fr) } }
+.grid-yan-panel { position: sticky; top: 6px }
+.grid-yan-panel .lab-detay { margin-top: 0 }
 .lab-detay .kagrup { margin-bottom: 10px }
 .lab-detay .kagrup > h6 .sp { margin-left: auto; font-weight: 400; color: var(--soluk) }
 .lab-detay .bos { padding: 14px; text-align: center; color: var(--soluk); font-size: 11.5px }
