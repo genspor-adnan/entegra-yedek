@@ -263,7 +263,7 @@ public static class BelgeUclari
                        coalesce(d.ad, '') as alt_kurum_adi,
                        s.fiyat_listesi_id, s.sgk_fiyat_listesi_id, s.sgk_kurum_id,
                        s.varsayilan_karsilama, k.tur,
-                       public.fn_dagilim_rota(k.tur, s.alt_kurum, 1) as rota
+                       public.fn_dagilim_rota(k.tur, s.alt_kurum, 1::smallint) as rota
                   from public.kurum_sozlesme s
                   join public.taraf_kurum k on k.id = s.kurum_id
                   left join public.kod_deger d

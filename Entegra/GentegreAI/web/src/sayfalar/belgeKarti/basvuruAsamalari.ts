@@ -17,16 +17,21 @@
  */
 
 /**
- * Kurum tipi - `taraf_kurum.tur` (466'da TSS eklendi, SGK 3'ten 4'e taşındı).
+ * Kurum tipi - `taraf_kurum.tur` (467'de yine üçe indi).
  *
- * TSS ile ÖSS AYNI ŞEY DEĞİL: TSS'de asıl ödeyici SGK'dır, tamamlayıcı poliçe
- * yalnız farkı üstlenir - provizyon SGK'dan alınır, fark özel sigortaya
- * faturalanır. ÖSS'de SGK hiç yoktur.
+ * TSS ve KARMA ARTIK KURUM TÜRÜ DEĞİL: aynı sigorta şirketiyle ÖSS, TSS ve
+ * Karma poliçe ayrı şartlarla çalışılır, bu yüzden poliçe türü SÖZLEŞMENİN
+ * alt kurumudur (`belge_basvuru.alt_kurum`, 468/469). Türü dörde çıkarmak
+ * aynı şirketi üç kez cari açmayı gerektiriyordu.
  */
 export const KURUM_OZEL = 1;
 export const KURUM_OSS = 2;
-export const KURUM_TSS = 3;
-export const KURUM_SGK = 4;
+export const KURUM_SGK = 3;
+
+/** `kurum.alt_kurum` (468): tur * 100 + kod. */
+export const ALT_OSS = 201;
+export const ALT_TSS = 202;
+export const ALT_KARMA = 203;
 
 /**
  * PROVIZYON DURUMU (kod listesi `provizyon.durum`):
@@ -51,6 +56,8 @@ export interface Asama {
 export interface AsamaGirdisi {
   /** taraf_kurum.tur; secilmemisse Özel akisi cizilir (hasta kendi oder). */
   kurumTuru?: number | null;
+  /** belge_basvuru.alt_kurum (468): police turu / devredilen kurum. */
+  altKurum?: number | null;
   /** Kayitli belge kimligi - 0 ise protokol henuz verilmedi. */
   kayitliId: number;
   /** Ucretlendirme genel toplami (KDV dahil). */
@@ -118,11 +125,15 @@ export function basvuruAsamalari(g: AsamaGirdisi): AsamaSonucu {
          : 'Fiş / fatura / tahakkuk kesilmedi.',
   };
 
-  // ÖSS'de provizyon UCRETTEN ONCE, SGK ve TSS'de SONRA (kullanici):
-  //   TSS'de de provizyon SGK'dan alinir, akis SGK ile aynidir.
+  // ÖSS'de provizyon UCRETTEN ONCE, SGK tarafinda SONRA (kullanici).
+  //   TSS ve KARMA'da da provizyon SGK'dan baslar: alt kurum bunu soyler,
+  //   kurum turu degil (468).
+  const alt = Number(g.altKurum ?? 0);
+  const sgkTarafi = tur === KURUM_SGK || alt === ALT_TSS || alt === ALT_KARMA;
   const asamalar: Asama[] =
-    tur === KURUM_OSS ? [basvuru, provizyon, ucret, tahsilat, fatura]
-  : tur === KURUM_SGK || tur === KURUM_TSS
+    tur === KURUM_OSS && !sgkTarafi
+      ? [basvuru, provizyon, ucret, tahsilat, fatura]
+  : tur === KURUM_OSS || tur === KURUM_SGK
       ? [basvuru, ucret, provizyon, tahsilat, fatura]
   : [basvuru, ucret, tahsilat, fatura];
 

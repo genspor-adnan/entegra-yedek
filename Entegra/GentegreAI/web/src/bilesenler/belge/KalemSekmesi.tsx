@@ -4,6 +4,9 @@ import { para, say4, tarihSaat, hamSayi as sayi } from '../bicim';
 import { iskonatoMetni, satirTutari, type SatirDurumu } from '../../sayfalar/belgeSatir';
 import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
 import { bruta, payBrute } from '../../sayfalar/belgeKarti/kdvModu';
+import {
+  KOVALAR, ROTA_ADI, kovaKullanilir,
+} from '../../sayfalar/belgeKarti/dagilimKovalari';
 import type { BelgeYaniti } from '../../api/sozlesme';
 
 /**
@@ -25,6 +28,12 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
 
   /** Tarih kolonu KOD'un solunda mi (basvuru) yoksa miktarin solunda mi. */
   const tarihSolda = !!basvuruMu && bilgi.siparis;
+
+  // DAGILIM ALT SATIRI (470, kullanici: "ucret satirlarinda + ile acilan alt
+  //   satir olup dagilimi orada gorsem, yoksa 1 satir cok sikisir"). Lot
+  //   detayiyla ayni desen; ikisi birlikte de acilabilir. Varsayilan KAPALI:
+  //   kalem listesi kisa kalsin.
+  const [acikDagilimlar, setAcikDagilimlar] = useState<Set<number>>(new Set());
 
   const yerelPara = doviz?.yerelPara ?? 'TL';
 
@@ -260,6 +269,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         // IZLEM (lot/seri) satirlari VARSAYILAN KAPALI (kullanici): kalem
         //   listesi kisa kalsin, isteyen okla acsin.
         const acik = lotlar.length > 0 && acikLotlar.has(r.anahtar);
+        const dagilimAcik = !!r.dagilim && acikDagilimlar.has(r.anahtar);
         const kolonSayisi = (bilgi.kalem === 'miktar' ? 6 : bilgi.kalem === 'sade' ? 8 : 10)
                           - (aciklamaVar ? 0 : 1)
                           + (dovizKolon && bilgi.kalem !== 'miktar' ? 2 : 0)
@@ -339,6 +349,24 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             {paylasim?.acik && (
               <td className={`hiza-sag${(r.hastaKapatilan ?? 0) > 0 ? ' basari' : ''}`}>
                 {para.format(payGoster(sayi(r.hastaTutar ?? '0')))}
+                {/* DAGILIM: bes kova tek satira sigmaz - "+" ile ALT SATIRDA
+                    acilir (kullanici). Dagilim henuz hesaplanmamis satirda
+                    dugme cizilmez: acilinca bos kutu gostermek yaniltirdi. */}
+                {r.dagilim && (
+                  <button type="button" className="lot-ok dagilim-ok"
+                          title={dagilimAcik ? 'Dağılımı gizle' : 'Ödeme dağılımını göster'}
+                          onClick={e => {
+                            e.stopPropagation();
+                            setAcikDagilimlar(k => {
+                              const y = new Set(k);
+                              if (y.has(r.anahtar)) y.delete(r.anahtar);
+                              else y.add(r.anahtar);
+                              return y;
+                            });
+                          }}>
+                    {dagilimAcik ? '−' : '＋'}
+                  </button>
+                )}
               </td>
             )}
             {bilgi.kalem !== 'miktar' && dovizKolon && (() => {
@@ -351,6 +379,80 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
               );
             })()}
           </tr>
+          {/* DETAY: satirin ODEME DAGILIMI (470). Bes kova, kapatilan ve
+              tahsil edilen sayaclariyla. Kalanlar SUNUCUDAN gelir - ekran
+              cikarma yapmaz, yoksa iki yerde iki sonuc olurdu. */}
+          {dagilimAcik && r.dagilim && (() => {
+            const d = r.dagilim;
+            const kovalar = KOVALAR.filter(k => kovaKullanilir(d.rota, k.kod)
+                                             || Number(d[k.alan]) > 0);
+            const kapatilan = (k: typeof KOVALAR[number]) =>
+              k.kod === 5 ? 0 : Number(
+                (d as unknown as Record<string, number>)[`${k.alan}Kapatilan`] ?? 0);
+            const tahsil = (k: typeof KOVALAR[number]) => Number(
+              (d as unknown as Record<string, number>)[
+                k.kod === 5 ? 'sgkKatilimTahsil' : `${k.alan}Tahsil`] ?? 0);
+            const ciro = Number(d.sgk) + Number(d.oss)
+                       + Number(d.hastaProvizyon) + Number(d.hastaEkKatki);
+            const hastadan = Number(d.hastaProvizyon) + Number(d.hastaEkKatki)
+                           + Number(d.sgkKatilimPayi)
+                           - Number(d.hastaProvizyonTahsil)
+                           - Number(d.hastaEkKatkiTahsil) - Number(d.sgkKatilimTahsil);
+            return (
+              <tr className="lot-detay dagilim-detay">
+                <td />
+                <td colSpan={kolonSayisi - 1}>
+                  <table className="lot-tablo">
+                    <thead>
+                      <tr>
+                        <th>Pay ({ROTA_ADI[d.rota] ?? '—'})</th>
+                        <th className="hiza-sag">Tutar</th>
+                        <th className="hiza-sag">Kapatılan</th>
+                        <th className="hiza-sag">Tahsil</th>
+                        <th className="hiza-sag">Kalan</th>
+                        <th>Provizyon / Not</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {kovalar.map(k => {
+                        const tutarK = Number(d[k.alan] ?? 0);
+                        const kalanK = Math.max(tutarK - kapatilan(k) - tahsil(k), 0);
+                        return (
+                          <tr key={k.kod}>
+                            <td>{k.ad}</td>
+                            <td className="hiza-sag">
+                              {kovaKullanilir(d.rota, k.kod) || tutarK > 0
+                                ? para.format(tutarK) : <span className="sonuk">—</span>}
+                            </td>
+                            <td className="hiza-sag sonuk">
+                              {k.kod === 5 ? '—' : para.format(kapatilan(k))}
+                            </td>
+                            <td className="hiza-sag sonuk">{para.format(tahsil(k))}</td>
+                            <td className="hiza-sag">{para.format(kalanK)}</td>
+                            <td className="sonuk">
+                              {k.kod === 2 && d.sgkProvizyonNo ? d.sgkProvizyonNo
+                               : k.not ?? ''}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td>Ciro</td>
+                        <td className="hiza-sag">{para.format(ciro)}</td>
+                        <td colSpan={2} className="sonuk">Hastadan tahsil edilecek</td>
+                        <td className="hiza-sag">{para.format(Math.max(hastadan, 0))}</td>
+                        <td className="sonuk">
+                          {d.elle === 1 ? 'elle sabitlendi' : ''}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </td>
+              </tr>
+            );
+          })()}
           {/* DETAY: kalemin lot dagilimi. Kalem satirinin bir parcasi -
               ayri kolon basligi yok, kendi mini basligiyla gelir. */}
           {acik && lotlar.length > 0 && (

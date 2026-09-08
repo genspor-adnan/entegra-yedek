@@ -434,6 +434,29 @@ export const api = {
    * "✖ Numune Ret"): hangi tüpün işleneceğine sunucu karar verir - çalışılmış
    * numuneye dokunulmaz.
    */
+  /**
+   * Kurumun YURURLUKTEKI sozlesmeleri (468). Basvuru karti bunlarla secici
+   * cizer; tek sozlesme varsa deger zaten bellidir.
+   */
+  kurumSozlesmeleri: (kurumId: number) =>
+    istek<{ kurumId: number; sozlesmeler: {
+      id: number; ad: string; altKurum: number; altKurumAdi: string;
+      sozlesmeNo: string; durum: number; rota: number; tur: number;
+      fiyatListesiId: number | null; sgkFiyatListesiId: number | null;
+      sgkKurumId: number | null; varsayilanKarsilama: number;
+    }[] }>(`/api/kurum/${kurumId}/sozlesmeler`),
+
+  /**
+   * Satirlarin ODEME DAGILIMINI yeniler (472/474). Istemci KURAL gondermez:
+   * rota sozlesmeden, fiyatlar SUT/TTB listelerinden sunucuda cozulur.
+   */
+  belgeDagit: (belgeId: number, govde?: {
+    sgkProvizyon?: { satirId: number; tutar?: number; provizyonNo?: string }[];
+    ossProvizyon?: number;
+  }) =>
+    gonder<{ id: number; satir: number; mesaj: string }>(
+      `/api/belge/${belgeId}/dagit`, govde ?? {}),
+
   labIstemNumuneDurum: (istemId: number, durum: number,
                         ek?: { kalite?: number; retNeden?: number; aciklama?: string }) =>
     gonder<{ id: number; mesaj: string }>(`/api/lab/istem/${istemId}/numune-durum`,

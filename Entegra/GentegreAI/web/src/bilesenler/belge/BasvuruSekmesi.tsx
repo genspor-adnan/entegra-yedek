@@ -39,6 +39,14 @@ export interface BasvuruBilgi {
    * karsilanir - yoksa "henuz secilmedi" ile "gonderen yok" ayirt edilemezdi.
    */
   kendiIstegi?: number | null;
+  /**
+   * SOZLESME / ALT KURUM / SGK KATKISI (469). Odeme rotasini bunlar belirler:
+   * tek sozlesme varsa sunucu kendisi atar, birden fazlaysa SECILMELIDIR;
+   * OSS'de police turu sozlesmeden gelir, SGK'da devredilen kurum secilir.
+   */
+  sozlesmeId?: number | null;
+  altKurum?: number | null;
+  sgkKullan?: number | null;
   // PROVIZYON (299) - belge_provizyon 1:1. SGK ve ozel sigorta AYNI ANDA
   // olabilir (SGK ana odeyici, tamamlayici police farki ustlenir), o yuzden
   // her odeyicinin kendi durumu/numarasi/orani var.
@@ -392,6 +400,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                                  bolumler, bolumId, setBolumId,
                                  gorevliler, personelId, setPersonelId,
                                  kurumlar, odeyenKurumId, setOdeyenKurumId,
+                                 sozlesmeler, altKurumlar,
                                  aciklama, setAciklama, gonderenModu,
                                  personelAd, onPersonelSec, kurumHatasi,
                                  bolumHatasi, personelHatasi,
@@ -450,6 +459,17 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
   kurumlar?: { id: number; ad: string }[];
   odeyenKurumId?: number | null;
   setOdeyenKurumId?(v: number | null): void;
+  /**
+   * Odeyen kurumun YURURLUKTEKI sozlesmeleri (468). Bir tane varsa secici
+   * pasif gelir (deger zaten belli), birden fazlaysa SECIM ZORUNLU - sunucu
+   * hangi policenin gecerli oldugunu tahmin edemez.
+   */
+  sozlesmeler?: {
+    id: number; ad: string; altKurum: number; altKurumAdi: string;
+    rota: number; tur: number;
+  }[];
+  /** SGK'da devredilen kurum secenekleri (SSK / Bag-Kur / ES / Yesil Kart). */
+  altKurumlar?: { id: number; ad: string }[];
   /** Basvuru notu - belgenin aciklama alani (mockup "Başvuru Notu"). */
   aciklama?: string;
   setAciklama?(v: string): void;
@@ -574,6 +594,65 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
           </select>
           {kurumHatasi && <span className="alan-hata">{kurumHatasi}</span>}
         </label>
+
+        {/* SOZLESME (468): ayni sigorta sirketiyle OSS / TSS / Karma police
+            ayri sartlarla calisilir. TEK sozlesme varsa secici PASIF gelir -
+            karar yok, bilgi var; birden fazlaysa secim ZORUNLU. */}
+        {(sozlesmeler?.length ?? 0) > 0 && (
+          <label className="alan">
+            <span className={`etiket${(sozlesmeler?.length ?? 0) > 1
+                                      ? ' zorunlu-isaret' : ''}`}>Sözleşme</span>
+            <select value={bilgi.sozlesmeId ?? ''}
+                    disabled={kilitli || (sozlesmeler?.length ?? 0) === 1}
+                    onChange={e => degistir({
+                      sozlesmeId: e.target.value ? Number(e.target.value) : null,
+                      // Police turu sozlesmeden gelir: kullanici ayrica
+                      //   secmesin, sunucu tetigi de ayni degeri yazar.
+                      altKurum: sozlesmeler?.find(x => x.id === Number(e.target.value))
+                                  ?.altKurum ?? null,
+                    })}>
+              <option value="">— Seçiniz —</option>
+              {(sozlesmeler ?? []).map(z => (
+                <option key={z.id} value={z.id}>
+                  {z.altKurumAdi || z.ad}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+
+        {/* DEVREDILEN KURUM: yalniz SGK'da sorulur (kullanici: "basvuruda
+            kurum SGK ise alt kurum secmem gerekiyor"). Hasta kaydinda varsa
+            oradan gelir; yoksa sunucu kayda izin vermez. */}
+        {(altKurumlar?.length ?? 0) > 0 && (
+          <label className="alan">
+            <span className="etiket zorunlu-isaret">Devredilen Kurum</span>
+            <select value={bilgi.altKurum ?? ''} disabled={kilitli}
+                    onChange={e => degistir({
+                      altKurum: e.target.value ? Number(e.target.value) : null })}>
+              <option value="">— Seçiniz —</option>
+              {(altKurumlar ?? []).map(a => (
+                <option key={a.id} value={a.id}>{a.ad}</option>
+              ))}
+            </select>
+          </label>
+        )}
+
+        {/* SGK KATKISI yalniz KARMA policede kapatilabilir (kullanici):
+            kapatilinca SGK payi 0 olur ve tum provizyon TTB uzerinden yurur.
+            OSS'de SGK zaten yok, TSS ve saf SGK'da SGK payi anlasmanin
+            kendisidir - orada soru sorulmaz. */}
+        {bilgi.altKurum === 203 && (
+          <label className="alan onay-alan">
+            <span className="etiket">SGK Katkısı</span>
+            <span className="onay-satir">
+              <input type="checkbox" disabled={kilitli}
+                     checked={Number(bilgi.sgkKullan ?? 1) === 1}
+                     onChange={e => degistir({ sgkKullan: e.target.checked ? 1 : 0 })} />
+              <span>SGK katkısı kullanılsın</span>
+            </span>
+          </label>
+        )}
 
 
         <KodSecim etiket="Geliş Şekli" listeKod="basvuru.gelis_sekli"

@@ -706,6 +706,13 @@ table.grid tr.flt input {
   background: var(--mor2); color: var(--mor);
   font-size: 11px; line-height: 1; padding: 0; font-weight: 700;
 }
+/* Dagilim oku "+" (470): pay hucresinin SAGINDA durur, lot okunun aksine
+   satir adinin degil tutarin yaninda - hangi tutarin acilacagi belli olsun. */
+.dagilim-ok {
+  margin-right: 0; margin-left: 6px;
+  border-color: var(--vurgu); background: var(--vurguzem, #eef4fc); color: var(--vurgu);
+}
+.dagilim-detay .lot-tablo tfoot td { font-weight: 700; border-top: 1px solid var(--cizgi) }
 .lot-ok:hover { background: var(--mor); color: #fff }
 
 /* Detay bloku: soldan girintili, sol kenarinda mavi seritle kalem/depo

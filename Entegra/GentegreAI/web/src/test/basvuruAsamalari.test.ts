@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  basvuruAsamalari, KURUM_OZEL, KURUM_OSS, KURUM_SGK, KURUM_TSS,
+  basvuruAsamalari, KURUM_OZEL, KURUM_OSS, KURUM_SGK, ALT_TSS, ALT_KARMA,
   type AsamaGirdisi,
 } from '../sayfalar/belgeKarti/basvuruAsamalari';
 
@@ -38,10 +38,12 @@ describe('asama sirasi odeyen kuruma gore', () => {
       .toEqual(['Başvuru', 'Ücretlendirme', 'Provizyon', 'Tahsilat', 'Belge Kesimi']);
   });
 
-  it('TSS akisi SGK ile ayni: provizyon UCRETTEN SONRA', () => {
-    // TSS'de asil odeyici SGK, tamamlayici police yalniz farki ustlenir -
-    //   provizyon yine SGK'dan alinir (466).
-    expect(adlar({ kurumTuru: KURUM_TSS }))
+  it('TSS/Karma akisi SGK ile ayni: provizyon UCRETTEN SONRA', () => {
+    // TSS ve Karma ARTIK KURUM TURU DEGIL, OSS sozlesmesinin alt kurumu
+    //   (468): asil odeyici SGK oldugu icin akis SGK ile aynidir.
+    expect(adlar({ kurumTuru: KURUM_OSS, altKurum: ALT_TSS }))
+      .toEqual(['Başvuru', 'Ücretlendirme', 'Provizyon', 'Tahsilat', 'Belge Kesimi']);
+    expect(adlar({ kurumTuru: KURUM_OSS, altKurum: ALT_KARMA }))
       .toEqual(['Başvuru', 'Ücretlendirme', 'Provizyon', 'Tahsilat', 'Belge Kesimi']);
   });
 

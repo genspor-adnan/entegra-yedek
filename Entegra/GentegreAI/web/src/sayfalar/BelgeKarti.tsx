@@ -434,6 +434,44 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    */
   const provizyonVar = provizyonVarMi(kurumlar, odeyenKurumId);
 
+  // KURUM SOZLESMELERI (468): odeyen kurum secilince yuklenir. Tek sozlesme
+  //   varsa secici pasif gelir; birden fazlaysa kullanici secer ve sunucu
+  //   secilmeden kaydi kabul etmez.
+  const [sozlesmeler, setSozlesmeler] = useState<{
+    id: number; ad: string; altKurum: number; altKurumAdi: string;
+    rota: number; tur: number;
+  }[]>([]);
+  useEffect(() => {
+    let iptal = false;
+    if (!odeyenKurumId) { setSozlesmeler([]); return }
+    void (async () => {
+      try {
+        const y = await api.kurumSozlesmeleri(odeyenKurumId);
+        if (!iptal) setSozlesmeler(y.sozlesmeler ?? []);
+      } catch { if (!iptal) setSozlesmeler([]) }
+    })();
+    return () => { iptal = true };
+  }, [odeyenKurumId]);
+
+  // SGK'da DEVREDILEN KURUM secenekleri (SSK / Bag-Kur / ES / Yesil Kart).
+  //   Kod listesi tur * 100 + kod uzayinda: SGK'ninkiler 3 ile baslar.
+  const [altKurumlar, setAltKurumlar] = useState<{ id: number; ad: string }[]>([]);
+  const kurumTuruSecili = kurumlar.find(k => k.id === odeyenKurumId)?.tur;
+  useEffect(() => {
+    let iptal = false;
+    if (kurumTuruSecili !== 3) { setAltKurumlar([]); return }
+    void (async () => {
+      try {
+        const y = await api.kodListe("kurum.alt_kurum");
+        if (!iptal)
+          setAltKurumlar((y.degerler ?? [])
+            .filter(d => Math.floor(Number(d.deger) / 100) === 3)
+            .map(d => ({ id: Number(d.deger), ad: String(d.ad) })));
+      } catch { if (!iptal) setAltKurumlar([]) }
+    })();
+    return () => { iptal = true };
+  }, [kurumTuruSecili]);
+
   // Tur SORULMADIGI icin kayitta bos kalmasin: lab/goruntuleme kurumunda
   //   basvuru turu 5 ("Laboratuvar / Görüntüleme") olarak damgalanir.
   useEffect(() => {
@@ -1136,6 +1174,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    */
   async function odeyenKurumDegisti(yeni: number | null) {
     setOdeyenKurumId(yeni);
+    // Kurum degisti: eski sozlesme ARTIK GECERSIZ. Bos birakilir - tek
+    //   sozlesme varsa sunucu tetigi kendisi atar, birden fazlaysa kullanici
+    //   secer (469). Eski degeri tasimak baska kurumun policesini yazardi.
+    setBasvuruBilgi(o => ({ ...o, sozlesmeId: null, altKurum: null, sgkKullan: 1 }));
     if (kilitli) return;
 
     // Kampanya cozulemezse mevcut liste ile devam edilir (kampanyaCoz yutar).
@@ -1530,6 +1572,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
             gorevliler={gorevliler} personelId={personelId} setPersonelId={setPersonelId}
             kurumlar={kurumlar} odeyenKurumId={odeyenKurumId}
             setOdeyenKurumId={v => void odeyenKurumDegisti(v)}
+            sozlesmeler={sozlesmeler} altKurumlar={altKurumlar}
             aciklama={aciklama} setAciklama={setAciklama}
             // LAB / GORUNTULEME kurumu (364): hekim rolu "Gönderen" (1) ise
             //   basvuru turu ve poliklinik odasi sorulmaz, hekim alani

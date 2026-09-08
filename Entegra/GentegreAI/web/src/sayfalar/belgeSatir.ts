@@ -10,6 +10,25 @@
  */
 import { hamSayi, yerelAnMetni } from '../bilesenler/bicim';
 
+/**
+ * Satırın ödeme dağılımı (470). Alan adları API ile birebir; kalanları da
+ * SUNUCU hesaplar - ekran çıkarma yapmaz, yoksa iki yerde iki sonuç olurdu.
+ */
+export interface SatirDagilimi {
+  rota: number;
+  sgk: number; oss: number;
+  hastaProvizyon: number; hastaEkKatki: number; sgkKatilimPayi: number;
+  sgkKapatilan: number; ossKapatilan: number;
+  hastaProvizyonKapatilan: number; hastaEkKatkiKapatilan: number;
+  sgkTahsil: number; ossTahsil: number;
+  hastaProvizyonTahsil: number; hastaEkKatkiTahsil: number;
+  sgkKatilimTahsil: number;
+  sgkListe: number; huvListe: number;
+  sgkProvizyonNo: string;
+  /** 1 ise dağılım elle sabitlendi: fiyat listesi değişse de dokunulmaz. */
+  elle: number;
+}
+
 export interface SatirDurumu {
   anahtar: number;
   /** 1 stok · 2 hizmet · 3 masraf (belge_satir.tur). */
@@ -88,6 +107,12 @@ export interface SatirDurumu {
    * buna gore yapar (hasta = katki, kurum = tutar - katki).
    */
   katkiTutar?: string;
+  /**
+   * ÖDEME DAĞILIMI (470) - SUNUCUDAN gelir, SALT OKUNUR. Beş kova, kapanma
+   * ve tahsilat sayaçlarıyla: ücret gridinde "+" ile açılan alt satır bunu
+   * çizer. İstemci kova hesaplamaz; `POST /api/belge/{id}/dagit` yeniler.
+   */
+  dagilim?: SatirDagilimi;
   /**
    * FIYAT GIRIS MODU (kullanici): kalemin fiyati KDV DAHIL bir listeden mi
    * geldi. Yalniz EKRAN icin - sunucuya GONDERILMEZ (`belgeGovdesi` alanlari
@@ -209,6 +234,26 @@ export function yanittanSatirlar(
     hastaTutar: r.hastaTutar != null ? String(r.hastaTutar) : undefined,
     karsilama: r.karsilama != null ? String(r.karsilama) : undefined,
     katkiTutar: r.katkiTutar != null ? String(r.katkiTutar) : undefined,
+    // DAGILIM (470): sunucudan geldiği gibi taşınır - sayı çevrimi dışında
+    //   hiçbir hesap yapılmaz.
+    dagilim: r.rota != null ? {
+      rota: Number(r.rota ?? 0),
+      sgk: Number(r.sgk ?? 0), oss: Number(r.oss ?? 0),
+      hastaProvizyon: Number(r.hastaProvizyon ?? 0),
+      hastaEkKatki: Number(r.hastaEkKatki ?? 0),
+      sgkKatilimPayi: Number(r.sgkKatilimPayi ?? 0),
+      sgkKapatilan: Number(r.sgkKapatilan ?? 0),
+      ossKapatilan: Number(r.ossKapatilan ?? 0),
+      hastaProvizyonKapatilan: Number(r.hastaProvizyonKapatilan ?? 0),
+      hastaEkKatkiKapatilan: Number(r.hastaEkKatkiKapatilan ?? 0),
+      sgkTahsil: Number(r.sgkTahsil ?? 0), ossTahsil: Number(r.ossTahsil ?? 0),
+      hastaProvizyonTahsil: Number(r.hastaProvizyonTahsil ?? 0),
+      hastaEkKatkiTahsil: Number(r.hastaEkKatkiTahsil ?? 0),
+      sgkKatilimTahsil: Number(r.sgkKatilimTahsil ?? 0),
+      sgkListe: Number(r.sgkListe ?? 0), huvListe: Number(r.huvListe ?? 0),
+      sgkProvizyonNo: String(r.sgkProvizyonNo ?? ''),
+      elle: Number(r.dagilimElle ?? 0),
+    } : undefined,
     birimFiyatKdvli: r.birimFiyatKdvli != null ? String(r.birimFiyatKdvli) : undefined,
     kurumKapatilan: r.kurumKapatilan != null ? Number(r.kurumKapatilan) : undefined,
     hastaKapatilan: r.hastaKapatilan != null ? Number(r.hastaKapatilan) : undefined,
