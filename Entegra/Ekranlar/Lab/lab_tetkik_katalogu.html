@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratuvar — Tetkik Kataloğu — Mockup (Gentegre AI · Laboratuvar)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap;
+    flex:0 0 auto}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold;
+    width:auto;font-size:11.5px}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px;margin-left:auto}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🧬 Tetkik Kataloğu <span class="sp">Laboratuvar › Tanımlar › Tetkikler · 412 tetkik · 38 panel</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Yeni Tetkik</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="btn">🗐 Kopyala</div>
+    <div class="btn pas">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">📦 Panel Tanımla</div>
+    <div class="btn">📊 Referans Aralıkları</div>
+    <div class="btn">🔗 Cihaz Eşleme</div>
+    <div class="btn">🚚 Dış Lab Eşleme</div>
+    <div class="sepv"></div>
+    <div class="btn">⬆ Excel Aktarımı</div>
+    <div class="btn">🏷 SKRS / LOINC Eşle</div>
+    <div class="btn sp">🖨 Katalog Listesi</div>
+  </div>
+
+  <div class="arama">
+    <div class="kutu">🔍 Kod, ad, kısa ad, LOINC ya da SKRS kodu ile ara…</div>
+    <div class="chip on">Aktif</div><div class="chip">Pasif</div><div class="chip">Tümü</div>
+    <div class="sepv"></div>
+    <div class="chip on">Tümü</div><div class="chip">Biyokimya</div><div class="chip">Hematoloji</div>
+    <div class="chip">Mikrobiyoloji</div><div class="chip">Genetik</div><div class="chip">Patoloji</div>
+    <div class="sepv"></div>
+    <div class="chip">⚠ Eşleşmemiş (cihaz yok)</div>
+    <div class="chip">⚠ Referansı yok</div>
+    <div class="chip">🚚 Dışarı gönderilen</div>
+  </div>
+
+  <div class="ucPanel">
+    <!-- SOL: bolum agaci + paneller -->
+    <div>
+      <div class="grp" style="margin:8px"><div class="gb">Bölüm / Çalışma Grubu</div>
+        <ul class="liste">
+          <li class="sel"><span class="ikon">📂</span> Tüm tetkikler <span class="sp">412</span></li>
+          <li><span class="ikon">🧪</span> Biyokimya <span class="sp">186</span></li>
+          <li class="s1"><span class="ikon">▪</span> Rutin <span class="sp">92</span></li>
+          <li class="s1"><span class="ikon">▪</span> Hormon <span class="sp">44</span></li>
+          <li class="s1"><span class="ikon">▪</span> İlaç düzeyi <span class="sp">18</span></li>
+          <li><span class="ikon">🩸</span> Hematoloji <span class="sp">58</span></li>
+          <li><span class="ikon">🦠</span> Mikrobiyoloji <span class="sp">74</span></li>
+          <li class="s1"><span class="ikon">▪</span> Kültür + Antibiyogram <span class="sp">31</span></li>
+          <li class="s1"><span class="ikon">▪</span> Seroloji <span class="sp">28</span></li>
+          <li><span class="ikon">🧬</span> Genetik <span class="sp">63</span></li>
+          <li><span class="ikon">🔬</span> Patoloji <span class="sp">31</span></li>
+        </ul>
+      </div>
+      <div class="grp" style="margin:8px"><div class="gb">Paneller <span class="sp">38</span></div>
+        <ul class="liste">
+          <li><span class="ikon">📦</span> Tam Kan Sayımı <span class="sp">1 tetkik</span></li>
+          <li><span class="ikon">📦</span> Karaciğer Fonksiyon <span class="sp">7</span></li>
+          <li><span class="ikon">📦</span> Tiroid Paneli <span class="sp">3</span></li>
+          <li><span class="ikon">📦</span> Check-up Erkek 40+ <span class="sp">22</span></li>
+          <li><span class="ikon">🧬</span> Herediter Kanser (BRCA) <span class="sp">14 gen</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ORTA: tetkik listesi -->
+    <div>
+      <div class="dg">
+        <table>
+          <thead><tr>
+            <th style="width:26px"></th><th>Kod</th><th>Tetkik Adı</th><th>Kısa Ad</th>
+            <th>Numune</th><th>Tüp</th><th>Birim</th><th class="orta">TAT</th>
+            <th>Yöntem</th><th>Cihaz</th><th class="orta">Oto Onay</th><th class="orta">Durum</th>
+          </tr></thead>
+          <tbody>
+            <tr class="grup"><td colspan="12">🧪 Biyokimya › Rutin</td></tr>
+            <tr class="sel">
+              <td class="orta">🧪</td><td>GLU</td><td>Glukoz</td><td>GLUC3</td>
+              <td>Serum</td><td><span class="rz sari">Sarı kapak</span></td><td>mg/dL</td>
+              <td class="orta">2 sa</td><td>Heksokinaz</td><td>Cobas c503</td>
+              <td class="orta"><span class="rz ok">Açık</span></td><td class="orta"><span class="rz ok">Aktif</span></td>
+            </tr>
+            <tr>
+              <td class="orta">🧪</td><td>URE</td><td>Üre</td><td>UREL</td>
+              <td>Serum</td><td><span class="rz sari">Sarı kapak</span></td><td>mg/dL</td>
+              <td class="orta">2 sa</td><td>Kinetik UV</td><td>Cobas c503</td>
+              <td class="orta"><span class="rz ok">Açık</span></td><td class="orta"><span class="rz ok">Aktif</span></td>
+            </tr>
+            <tr>
+              <td class="orta">🧪</td><td>KRE</td><td>Kreatinin</td><td>CREJ2</td>
+              <td>Serum</td><td><span class="rz sari">Sarı kapak</span></td><td>mg/dL</td>
+              <td class="orta">2 sa</td><td>Enzimatik</td><td>Cobas c503</td>
+              <td class="orta"><span class="rz ok">Açık</span></td><td class="orta"><span class="rz ok">Aktif</span></td>
+            </tr>
+            <tr>
+              <td class="orta">🧪</td><td>TSH</td><td>Tiroid Stimülan Hormon</td><td>TSH</td>
+              <td>Serum</td><td><span class="rz sari">Sarı kapak</span></td><td>µIU/mL</td>
+              <td class="orta">4 sa</td><td>ECLIA</td><td>Cobas e801</td>
+              <td class="orta"><span class="rz pas">Kapalı</span></td><td class="orta"><span class="rz ok">Aktif</span></td>
+            </tr>
+            <tr class="grup"><td colspan="12">🩸 Hematoloji</td></tr>
+            <tr>
+              <td class="orta">🩸</td><td>CBC</td><td>Tam Kan Sayımı</td><td>CBC</td>
+              <td>Tam kan</td><td><span class="rz mor">Mor kapak (EDTA)</span></td><td>—</td>
+              <td class="orta">1 sa</td><td>Empedans + Flow</td><td>XN-1000</td>
+              <td class="orta"><span class="rz ok">Açık</span></td><td class="orta"><span class="rz ok">Aktif</span></td>
+            </tr>
+            <tr class="grup"><td colspan="12">🦠 Mikrobiyoloji › Kültür</td></tr>
+            <tr>
+              <td class="orta">🦠</td><td>IKL</td><td>İdrar Kültürü + Antibiyogram</td><td>UKUL</td>
+              <td>İdrar</td><td><span class="rz">Steril kap</span></td><td>—</td>
+              <td class="orta">48 sa</td><td>Konvansiyonel</td><td><span class="sonuk">elle</span></td>
+              <td class="orta"><span class="rz pas">Kapalı</span></td><td class="orta"><span class="rz ok">Aktif</span></td>
+            </tr>
+            <tr class="grup"><td colspan="12">🧬 Genetik</td></tr>
+            <tr>
+              <td class="orta">🧬</td><td>BRCA</td><td>BRCA1/2 Dizi Analizi</td><td>BRCA12</td>
+              <td>Tam kan</td><td><span class="rz mor">Mor kapak (EDTA)</span></td><td>—</td>
+              <td class="orta">21 gün</td><td>NGS</td><td>MiSeq</td>
+              <td class="orta"><span class="rz pas">Kapalı</span></td><td class="orta"><span class="rz ok">Aktif</span></td>
+            </tr>
+            <tr>
+              <td class="orta">🧬</td><td>FVL</td><td>Faktör V Leiden</td><td>FVL</td>
+              <td>Tam kan</td><td><span class="rz mor">Mor kapak (EDTA)</span></td><td>—</td>
+              <td class="orta">7 gün</td><td>Real-time PCR</td>
+              <td><span class="rz mavi">🚚 Dış lab</span></td>
+              <td class="orta"><span class="rz pas">Kapalı</span></td><td class="orta"><span class="rz ok">Aktif</span></td>
+            </tr>
+            <tr>
+              <td class="orta">🧪</td><td>D25</td><td>25-OH Vitamin D</td><td>VITD</td>
+              <td>Serum</td><td><span class="rz sari">Sarı kapak</span></td><td>ng/mL</td>
+              <td class="orta">6 sa</td><td>ECLIA</td>
+              <td><span class="rz kir">⚠ eşleşmemiş</span></td>
+              <td class="orta"><span class="rz pas">Kapalı</span></td><td class="orta"><span class="rz pas">Pasif</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SAG: secili tetkik ozeti -->
+    <div>
+      <div class="grp" style="margin:8px"><div class="gb">Seçili Tetkik</div>
+        <div class="ic">
+          <div style="font-size:14px;font-weight:bold;color:var(--navy)">Glukoz</div>
+          <div class="sonuk" style="margin:2px 0 8px">GLU · GLUC3 · Biyokimya › Rutin</div>
+          <div class="fld" style="margin-bottom:6px"><label>LOINC / SKRS</label>
+            <div class="inp ro">2345-7 · SKRS 300840</div></div>
+          <div class="fld" style="margin-bottom:6px"><label>Ölçülebilir aralık</label>
+            <div class="inp ro">2 — 750 mg/dL</div></div>
+          <div class="fld"><label>Panik değer</label>
+            <div class="inp ro">&lt; 50 · &gt; 400 mg/dL</div></div>
+        </div>
+      </div>
+      <div class="grp" style="margin:8px"><div class="gb">Referans Aralıkları <span class="sp">4 kural</span></div>
+        <ul class="liste">
+          <li><b>40 — 90</b> <span class="sonuk">0 — 28 gün</span></li>
+          <li><b>60 — 100</b> <span class="sonuk">29 gün — 17 yaş</span></li>
+          <li><b>74 — 106</b> <span class="sonuk">18 yaş ↑ · ♂ ♀</span></li>
+          <li><b>70 — 92</b> <span class="sonuk">gebelik</span></li>
+        </ul>
+      </div>
+      <div class="grp" style="margin:8px"><div class="gb">Nerede Kullanılıyor</div>
+        <ul class="liste">
+          <li>📦 Check-up Erkek 40+</li>
+          <li>📦 Diyabet Takip Paneli</li>
+          <li>📦 Acil Biyokimya</li>
+          <li style="color:var(--muted)">Son 30 günde 1.284 istem</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>412 tetkik · 38 panel</span>
+    <span>⚠ 6 tetkik cihaza eşleşmemiş</span>
+    <span>⚠ 3 tetkiğin referans aralığı yok</span>
+    <span>🚚 12 tetkik dış laboratuvara gidiyor</span>
+    <span class="sp">Katalog son değişiklik: 09.09.2026 01:12 · e2e</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Tetkik kataloğu neyi tanımlar.</b> Bir tetkiğin <b>ne olduğu</b> (kod, ad, LOINC/SKRS),
+  <b>neyle çalışıldığı</b> (numune, tüp, hacim, yöntem, cihaz), <b>ne zaman biteceği</b> (TAT),
+  <b>sonucun nasıl okunacağı</b> (birim, ondalık, referans aralıkları, panik sınırları) ve
+  <b>kimin onaylayacağı</b> (oto onay kuralı). İstem ekranı, sonuç ekranı, cihaz arayüzü ve
+  faturalama hep buradan besleniyor: aynı bilgi dört yerde ayrı ayrı tutulmasın.
+  <br><br>
+  <b>Sol taraf bölüm ağacı, panel değil.</b> Bölüm bir tetkiğin nerede çalışıldığıdır ve tektir;
+  panel ise <b>birlikte istenen</b> tetkik kümesidir ve bir tetkik birden çok panelde geçer.
+  İkisi ayrı listede duruyor — “Tiroid Paneli”ni bölüm sanıp altına tetkik taşımak,
+  tetkiğin gerçek çalışma yerini kaybettirirdi.
+  <br><br>
+  <b>Sağdaki “Nerede Kullanılıyor” silmeden önce okunacak yerdir.</b> Katalogdan tetkik silmek,
+  onu içeren panelleri ve geçmiş sonuçların başlığını sahipsiz bırakır. Bu yüzden kullanılan
+  tetkik <b>silinmez, pasife alınır</b>: yeni istemde çıkmaz, eski sonuçlar okunmaya devam eder.
+  <br><br>
+  <b>Uyarı çipleri iş listesidir.</b> “Cihaza eşleşmemiş” tetkiğin sonucu cihazdan otomatik
+  düşmez, elle girilir; “referansı yok” tetkikte sonuç <code>yüksek/düşük</code> diye
+  işaretlenemez. İkisi de sessiz kalırsa hata ancak hasta raporunda görünür.
+</div>
+
+</body>
+</html>

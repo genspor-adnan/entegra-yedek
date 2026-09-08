@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratuvar — Tetkik Kartı — Mockup (Gentegre AI · Laboratuvar)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap;
+    flex:0 0 auto}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold;
+    width:auto;font-size:11.5px}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart */
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+  /* agac */
+  .agac td.ad{white-space:nowrap}
+  .ok{display:inline-block;width:14px;color:var(--muted);font-size:10px}
+  .s1{padding-left:18px} .s2{padding-left:36px} .s3{padding-left:54px}
+  .ikon{display:inline-block;width:16px;text-align:center;margin-right:3px}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .kol{border:1px solid var(--line2);border-radius:4px;background:#fbfcfe;min-height:140px}
+  .kol .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);background:linear-gradient(#f4f7fb,#e7eef6);display:flex}
+  .kol .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
+  .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
+
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🧬 Tetkik Kartı — Glukoz <span class="sp">GLU · Biyokimya › Rutin · sürüm 41</span></div>
+
+  <div class="toolbar">
+    <div class="btn ok">💾 Kaydet</div>
+    <div class="btn">↩ Vazgeç</div>
+    <div class="sepv"></div>
+    <div class="btn">🗐 Bu tetkikten kopyala</div>
+    <div class="btn">🚫 Pasife Al</div>
+    <div class="sepv"></div>
+    <div class="btn">🧾 İstem Önizleme</div>
+    <div class="btn">📄 Sonuç Formu Önizleme</div>
+    <div class="btn sp">🕓 Değişiklik Geçmişi</div>
+  </div>
+
+  <!-- KIMLIK SERIDI: her sekmede sabit -->
+  <div class="hdr k4">
+    <div class="fld"><label class="req">Kod</label><div class="inp big">GLU</div></div>
+    <div class="fld"><label class="req">Tetkik Adı</label><div class="inp big">Glukoz</div></div>
+    <div class="fld"><label>Kısa Ad</label><div class="inp">GLUC3 <span class="sonuk">· cihaz ve rapor başlığı</span></div></div>
+    <div class="fld"><label>Durum</label><div class="inp combo">Aktif</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on">Genel</div>
+    <div class="sekme">Referans Aralıkları <span class="rz mavi">4</span></div>
+    <div class="sekme">Cihaz Eşleme <span class="rz mavi">2</span></div>
+    <div class="sekme">Besiyeri</div>
+    <div class="sekme">Dış Laboratuvar</div>
+    <div class="sekme">Paneller <span class="rz mavi">3</span></div>
+  </div>
+
+  <div class="ikiPanel">
+    <div>
+      <div class="grp"><div class="gb">Tanım</div>
+        <div class="hdr" style="grid-template-columns:1fr 1fr;border:none;background:none">
+          <div class="fld"><label class="req">Bölüm</label><div class="inp combo">Biyokimya › Rutin</div></div>
+          <div class="fld"><label>Tür</label><div class="inp combo">Sayısal</div></div>
+          <div class="fld"><label>LOINC</label><div class="inp">2345-7</div></div>
+          <div class="fld"><label>SKRS Tetkik Kodu</label><div class="inp">300840</div></div>
+          <div class="fld"><label>Yöntem</label><div class="inp">Heksokinaz</div></div>
+          <div class="fld"><label>Hizmet (ücretlendirme)</label><div class="inp combo">L.B.305 · Glukoz</div></div>
+        </div>
+      </div>
+
+      <div class="grp"><div class="gb">Numune</div>
+        <div class="hdr" style="grid-template-columns:1fr 1fr;border:none;background:none">
+          <div class="fld"><label class="req">Numune Tipi</label><div class="inp combo">Serum</div></div>
+          <div class="fld"><label class="req">Tüp</label><div class="inp combo">🟡 Sarı kapak (jelli)</div></div>
+          <div class="fld"><label>En az hacim</label><div class="inp">0,5 mL</div></div>
+          <div class="fld"><label>Alım yeri</label><div class="inp combo">Kan alma birimi</div></div>
+        </div>
+        <div class="ic" style="padding-top:0">
+          <div class="fld"><label>Hasta hazırlığı</label>
+            <div class="inp" style="min-height:44px;align-items:flex-start">
+              8—12 saat açlık. Kan alımından önce ağır egzersiz ve sigara yok.
+            </div></div>
+          <div class="sonuk" style="margin-top:4px">
+            Bu not istem ekranında ve hasta randevu belgesinde <b>aynen</b> görünür.
+          </div>
+        </div>
+      </div>
+
+      <div class="grp"><div class="gb">Süre (TAT)</div>
+        <div class="hdr" style="grid-template-columns:1fr 1fr;border:none;background:none">
+          <div class="fld"><label>Hedef süre</label><div class="inp">120 dk <span class="sonuk">· 2 saat</span></div></div>
+          <div class="fld"><label>Acil süre</label><div class="inp">30 dk</div></div>
+        </div>
+        <div class="ic" style="padding-top:0">
+          <div class="bar m" style="height:10px"><i style="width:64%"></i></div>
+          <div class="sonuk" style="margin-top:4px">Son 30 gün: ortalama 77 dk · hedefe uyum %94</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="grp"><div class="gb">Sonuç ve Birim</div>
+        <div class="hdr" style="grid-template-columns:1fr 1fr;border:none;background:none">
+          <div class="fld"><label class="req">Birim</label><div class="inp combo">mg/dL</div></div>
+          <div class="fld"><label>Ondalık</label><div class="inp">0</div></div>
+          <div class="fld"><label>Ölçülebilir alt</label><div class="inp">2</div></div>
+          <div class="fld"><label>Ölçülebilir üst</label><div class="inp">750</div></div>
+        </div>
+        <div class="ic" style="padding-top:0">
+          <div class="sonuk">Bu aralığın dışındaki cihaz sonucu <code>&lt;2</code> / <code>&gt;750</code>
+            olarak yazılır; sayı gibi saklanıp ortalamaya karışmaz.</div>
+        </div>
+      </div>
+
+      <div class="grp"><div class="gb">Panik Değer <span class="sp">hekime bildirim doğurur</span></div>
+        <div class="hdr" style="grid-template-columns:1fr 1fr;border:none;background:none">
+          <div class="fld"><label>Panik alt</label><div class="inp">50</div></div>
+          <div class="fld"><label>Panik üst</label><div class="inp">400</div></div>
+        </div>
+        <div class="ic" style="padding-top:0">
+          <div class="sonuk">Panik sonuç onaylanınca <b>bildirim kaydı</b> açılır: kime,
+            ne zaman haber verildiği kayıtta kalır.</div>
+        </div>
+      </div>
+
+      <div class="grp"><div class="gb">Otomatik Onay</div>
+        <div class="hdr" style="grid-template-columns:1fr 1fr;border:none;background:none">
+          <div class="fld"><label>Oto onay</label><div class="inp combo">Açık</div></div>
+          <div class="fld"><label>Varsayılan cihaz</label><div class="inp combo">Cobas c503</div></div>
+          <div class="fld"><label>Delta kontrolü</label><div class="inp">%30</div></div>
+          <div class="fld"><label>Delta penceresi</label><div class="inp">7 gün</div></div>
+        </div>
+        <div class="ic" style="padding-top:0">
+          <div class="sonuk">Sonuç referans içindeyse ve son 7 gündeki değerden %30'dan fazla
+            sapmıyorsa uzman onayı beklemeden çıkar. Panik değer, delta aşımı ve
+            ölçülebilir aralık dışı <b>her zaman</b> uzmana düşer.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFERANS ARALIKLARI: ayri sekmenin icerigi, mockupta acik gosteriliyor -->
+  <div class="grp" style="margin:10px 12px"><div class="gb">Referans Aralıkları
+      <span class="sp">yaş · cinsiyet · gebelik — ilk EŞLEŞEN kural uygulanır</span></div>
+    <div class="dg"><table>
+      <thead><tr>
+        <th style="width:26px"></th><th class="orta">Sıra</th><th>Cinsiyet</th>
+        <th>Yaş aralığı</th><th class="orta">Gebelik</th>
+        <th class="sag">Alt</th><th class="sag">Üst</th>
+        <th class="sag">Panik alt</th><th class="sag">Panik üst</th>
+        <th>Metin (sayısal değilse)</th><th>Kaynak</th><th>Geçerlilik</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="orta">≡</td><td class="orta">1</td><td>Farketmez</td>
+          <td>0 — 28 gün</td><td class="orta">—</td>
+          <td class="sag">40</td><td class="sag">90</td>
+          <td class="sag">30</td><td class="sag">300</td>
+          <td class="sonuk">—</td><td>CLSI</td><td>01.01.2026 →</td></tr>
+        <tr><td class="orta">≡</td><td class="orta">2</td><td>Farketmez</td>
+          <td>29 gün — 17 yaş</td><td class="orta">—</td>
+          <td class="sag">60</td><td class="sag">100</td>
+          <td class="sag">45</td><td class="sag">350</td>
+          <td class="sonuk">—</td><td>CLSI</td><td>01.01.2026 →</td></tr>
+        <tr class="sel"><td class="orta">≡</td><td class="orta">3</td><td>Farketmez</td>
+          <td>18 yaş ↑</td><td class="orta">—</td>
+          <td class="sag">74</td><td class="sag">106</td>
+          <td class="sag">50</td><td class="sag">400</td>
+          <td class="sonuk">—</td><td>Kit prospektüsü</td><td>01.01.2026 →</td></tr>
+        <tr><td class="orta">≡</td><td class="orta">4</td><td>Kadın</td>
+          <td>18 yaş ↑</td><td class="orta"><span class="rz mor">Gebe</span></td>
+          <td class="sag">70</td><td class="sag">92</td>
+          <td class="sag">50</td><td class="sag">400</td>
+          <td class="sonuk">—</td><td>ADA 2025</td><td>01.01.2026 →</td></tr>
+      </tbody>
+    </table></div>
+    <div class="ic">
+      <div class="btn" style="display:inline-flex">＋ Aralık Ekle</div>
+      <span class="sonuk" style="margin-left:10px">
+        Yaş <b>GÜN</b> olarak saklanır: “29 gün — 17 yaş” yazan satır yeni doğanla çocuğu
+        aynı kefeye koymaz. Kurallar sıraya göre denenir, ilk eşleşen kazanır — en dar
+        kural en üstte olmalı.
+      </span>
+    </div>
+  </div>
+
+  <div class="ikiPanel">
+    <div>
+      <div class="grp" style="margin:10px"><div class="gb">Cihaz Eşleme <span class="sp">2 cihaz</span></div>
+        <div class="dg"><table>
+          <thead><tr><th>Cihaz</th><th>Cihaz test kodu</th><th>Cihaz birimi</th>
+            <th class="sag">Çarpan</th><th class="sag">Ofset</th><th class="orta">Durum</th></tr></thead>
+          <tbody>
+            <tr><td>Cobas c503</td><td>GLUC3</td><td>mg/dL</td>
+              <td class="sag">1</td><td class="sag">0</td>
+              <td class="orta"><span class="rz ok">Aktif</span></td></tr>
+            <tr><td>Architect c8000</td><td>GLU</td><td>mmol/L</td>
+              <td class="sag">18,016</td><td class="sag">0</td>
+              <td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          </tbody>
+        </table></div>
+        <div class="ic"><span class="sonuk">Cihaz farklı birimde çalışıyorsa çarpan burada
+          verilir; sonuç <b>kartın birimine</b> çevrilerek saklanır. İki cihazın sonucu aynı
+          kolonda karşılaştırılabilsin diye.</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="grp" style="margin:10px"><div class="gb">Paneller <span class="sp">bu tetkik nerede geçiyor</span></div>
+        <ul class="liste">
+          <li>📦 Check-up Erkek 40+ <span class="sp">22 tetkik</span></li>
+          <li>📦 Diyabet Takip Paneli <span class="sp">6 tetkik</span></li>
+          <li>📦 Acil Biyokimya <span class="sp">9 tetkik</span></li>
+        </ul>
+        <div class="ic"><span class="sonuk">Pasife alınırsa bu panellerden <b>düşmez</b>,
+          yeni istemde seçilemez hâle gelir. Panelden çıkarmak ayrı bir karardır.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Son değişiklik: 09.09.2026 01:12 · e2e</span>
+    <span>Son 30 günde 1.284 istem · 3 panik bildirimi</span>
+    <span class="sp">Kod ve birim değişikliği geçmiş sonuçları ETKİLEMEZ (sonuçta o günkü değer saklanır)</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Kartın omurgası dört soru.</b> Numune nasıl alınır, cihaz ne der, sonuç nasıl okunur,
+  kim onaylar. Sekmeler bu sıraya göre dizildi — hazırlığı bilmeden numune tipi seçilmez,
+  referans aralığı olmadan sonuç yorumlanamaz.
+  <br><br>
+  <b>Referans aralığı tek satır değildir.</b> Aynı tetkiğin yeni doğanda, çocukta, yetişkinde ve
+  gebede farklı aralığı vardır; cinsiyete göre ayrışanı da çoktur. Bu yüzden aralık bir kural
+  <b>listesidir</b> ve yaş <b>gün</b> cinsinden tutulur. Kurallar sırayla denenir, ilk eşleşen
+  uygulanır: en dar kural en üstte olmalı, yoksa “18 yaş ↑” satırı gebeninkini yutar.
+  <br><br>
+  <b>Panik değer referans değildir.</b> Referansın dışı “anormal”, paniğin dışı “hekime şimdi
+  haber ver” demektir. İkisi ayrı kolonlarda duruyor çünkü ikisi ayrı davranış doğurur:
+  biri raporda ok işareti, öteki bildirim kaydı.
+  <br><br>
+  <b>Otomatik onay üç kapıdan geçer.</b> Referans içinde olmak yetmez; delta kontrolü hastanın
+  kendi önceki sonucuyla karşılaştırır (%30 / 7 gün) ve ölçülebilir aralık dışı sonuç asla
+  otomatik çıkmaz. Kapılardan biri kapanırsa sonuç uzmana düşer.
+  <br><br>
+  <b>Çarpan cihaz eşlemesinde, sonuçta değil.</b> mmol/L çalışan cihazın değeri kartın birimine
+  çevrilerek saklanır. Çevrim sonuçta yapılsaydı, cihaz değişince eski sonuçlar okunamaz olurdu.
+  <br><br>
+  <b>Silme yok, pasife alma var.</b> Kullanılan tetkiğin silinmesi panelleri ve geçmiş sonuçların
+  başlığını sahipsiz bırakır. Kod ve birim değişikliği de geçmişi etkilemez: sonuç kaydı o günkü
+  birimi ve değeri kendi içinde taşır.
+</div>
+
+</body>
+</html>
