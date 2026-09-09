@@ -1074,6 +1074,20 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
       </table>
       </div>
 
+      {/* SATIR SAYACI (kullanici: "kategori agacindan filtre yapiyorum kac adet
+          hizmet geldi grid altinda gorulmeli"). Suzgec varken "gosterilen /
+          toplam", yoksa yalniz toplam - liste ekranlarinin alt bilgisiyle ayni
+          okuma. Kucuk detaylarda (birkac satirlik adres/fiyat) gurultu
+          olmasin diye yalniz grid kipinde gosterilir. */}
+      {modalDuzenle && durum.guncel.length > 0 && (
+        <div className="detay-altbilgi">
+          {gorunurler.length === durum.guncel.length
+            ? `${durum.guncel.length.toLocaleString('tr')} satır`
+            : `${gorunurler.length.toLocaleString('tr')} / `
+              + `${durum.guncel.length.toLocaleString('tr')} satır`}
+        </div>
+      )}
+
       {satirlarGrid && (
         <GridMenu konum={menuKonum} ogeler={menuOgeleri}
                   onKapat={() => setMenuKonum(null)} />

@@ -81,10 +81,41 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif,
       if (!el) return;
       const pencere = el.parentElement;            // .kawin
       // Govde disinda kalan sabit seritler (baslik/toolbar/ustSerit/sekme).
-      const disi = pencere ? pencere.offsetHeight - el.offsetHeight : 0;
-      // .kawin max-height'i ile ayni oran; en az 160px govde birakilir.
-      const tavan = Math.max(160, window.innerHeight * 0.88 - disi);
-      if (el.scrollHeight > enYuksek.current) enYuksek.current = el.scrollHeight;
+      // Govde DISINDAKI seritlerin toplami. Pencere yuksekliginden govdeyi
+      //   cikarmak YANLIS olur: govde tavanindan kucukse aradaki BOSLUK da
+      //   "serit" sayilip tavani her olcumde biraz daha kisiyordu.
+      const disi = pencere
+        ? Array.from(pencere.children).reduce(
+            (t, c) => t + (c === el ? 0 : (c as HTMLElement).offsetHeight), 0)
+        : 0;
+      // PENCERENIN GERCEK TAVANI: normalde `max-height: 88vh`, TAM EKRANDA
+      //   ise ekranin tamami eksi 8px kenar (`.kawin.tam` top/bottom: 8px).
+      //   Sabit 88vh kullanmak tam ekranda govdeyi ekranin cok altinda
+      //   birakiyordu: pencerenin alt kismi BOS BEYAZ kaliyor, icerik ise
+      //   kendi icinde kirpiliyordu (kullanici: "maximuma alinca altta beyaz
+      //   bir bolum olusuyor ve kirpiyor").
+      //   Tam ekranda pencerenin KENDI ic yuksekligi olculur (kenarlik
+      //   haric); normalde CSS'teki 88vh tavani gecerlidir.
+      const sinir = pencere?.classList.contains('tam')
+        ? pencere.clientHeight
+        : window.innerHeight * 0.88 - 2;
+      const tavan = Math.max(160, sinir - disi);
+      // DOGAL YUKSEKLIK: govde bir flex sutununda (flex: 1) YAYILDIGI icin
+      //   scrollHeight kutunun kendisini olcuyordu - tam ekranda buyuyen
+      //   govde, pencereye donunce de o yuksekligi "icerik" sanip kilide
+      //   yaziyor ve kart ekranin yarisini kaplamis kaliyordu. Olcum icin
+      //   yayilma bir an kapatilir.
+      const eskiFlex = el.style.flex;
+      const eskiMin = el.style.minHeight;
+      const eskiMax = el.style.maxHeight;
+      el.style.flex = 'none';
+      el.style.minHeight = '0px';
+      el.style.maxHeight = 'none';
+      const dogal = el.offsetHeight;
+      el.style.flex = eskiFlex;
+      el.style.minHeight = eskiMin;
+      el.style.maxHeight = eskiMax;
+      if (dogal > enYuksek.current) enYuksek.current = dogal;
       el.style.minHeight = `${Math.min(enYuksek.current, tavan)}px`;
       el.style.maxHeight = `${tavan}px`;
     };
@@ -120,6 +151,11 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif,
     const yeni = !a;
     try { localStorage.setItem('gentegre.kart.tamekran', yeni ? '1' : '0') } catch { /* yok say */ }
     if (yeni) setKaydirma({ x: 0, y: 0 });
+    // YUKSEKLIK KILIDI SIFIRLANIR: tam ekranda buyuyen govde, pencereye
+    //   donunce de o yuksekligi koruyup ekranin yarisini kaplamis bir kart
+    //   birakiyordu. Kilit "sekme degisince alcalmasin" icin var, kip
+    //   degisiminde degil.
+    enYuksek.current = 0;
     return yeni;
   });
 

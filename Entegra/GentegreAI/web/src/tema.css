@@ -581,6 +581,21 @@ table.grid tr.flt input {
 /* Cok satirli detay gridi (fiyat listesi satirlari): kendi dikey kaydirmasi +
    sabit baslik - modal govdesinde kaybolup alt satirlar erisilemez kaliyordu. */
 .detay-uzun { max-height: 52vh; overflow: auto }
+/* TAM EKRAN pencerede grid de buyur: 52vh'lik tavan, ekrani kaplayan kartin
+   altinda genis bir bosluk birakiyordu (kullanici: "altta beyaz bir bolum").
+   Tavan ekranin tamami DEGIL: baslik + arac cubugu + sekme seridi + grid
+   baslik satiri + alt sayac icin ~300px ayrilir, yoksa satir sayaci ekranin
+   altinda kaliyor. */
+.kawin.tam .detay-uzun { max-height: calc(100vh - 300px) }
+/* Detay gridinin alt bilgisi: "12 / 1.443 satır" - liste ekranindaki
+   sayacin detay karsiligi. */
+.detay-altbilgi {
+  margin: 0 10px 10px; padding-top: 6px; border-top: 1px solid var(--cizgi2);
+  color: var(--soluk); font-size: 11.5px;
+  /* SOLA yaslı: sağ alt köşede yüzen "AI Rehber" düğmesi sayacın üstüne
+     biniyordu. */
+  text-align: left;
+}
 .detay-uzun > .detay-tablo thead th {
   position: sticky; top: 0; z-index: 2;
   background: linear-gradient(var(--serit1), var(--serit2));
