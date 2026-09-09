@@ -97,4 +97,11 @@ public sealed record KolonMeta(
     int? Genislik = null,
     /// <summary>Yalniz GRUP ara toplaminda toplanir, genel toplamda toplanmaz
     /// (ekstrede doviz tutarlari: USD ile TL toplanmaz).</summary>
-    bool SadeceGrupToplami = false);
+    bool SadeceGrupToplami = false,
+    /// <summary>
+    /// Kod kolonunun deger-etiket sozlugu (492): listenin ust seridindeki
+    /// suzgec combosu bunu cizer. Etiketler SUNUCUDA duruyordu (kart metasi ve
+    /// liste SQL'i ayni haritayi kullaniyor); istemcinin ayni listeyi ikinci
+    /// kez yazmasi iki yerin ayrilmasina davetiyeydi.
+    /// </summary>
+    IReadOnlyDictionary<string, string>? Kodlar = null);

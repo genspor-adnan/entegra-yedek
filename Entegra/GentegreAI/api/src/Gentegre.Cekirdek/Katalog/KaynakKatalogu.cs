@@ -23,7 +23,12 @@ public sealed record KolonTanimi(
     bool SadeceGrupToplami = false,
     // Grubun KAPANIS degeri: toplanmaz, grubun SON satirindaki deger alinir
     //   (yuruyen bakiye boyledir - toplami degil son degeri anlamlidir).
-    bool GrupKapanisi = false
+    bool GrupKapanisi = false,
+    // KOD KOLONUNUN SOZLUGU (492): "1 Biyokimya, 2 Hematoloji..." - listenin
+    //   ust seridinde bu kolona gore suzen combo cizilebilsin diye metaya
+    //   konur. Ayni harita kart metasinda da kullanilir; iki yerde
+    //   yazilmamasi icin buraya REFERANS verilir, kopyalanmaz.
+    IReadOnlyDictionary<string, string>? Kodlar = null
 )
 {
     public string AlanAdi => YetkiAlani ?? Ad;

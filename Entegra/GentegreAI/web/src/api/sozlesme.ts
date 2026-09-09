@@ -266,6 +266,8 @@ export interface KolonMeta {
   genislik?: number | null;
   /** Yalniz grup ara toplaminda toplanir (ekstrede doviz tutarlari). */
   sadeceGrupToplami?: boolean;
+  /** Kod kolonunun deger-etiket sozlugu (492) - ust serit suzgec combosu. */
+  kodlar?: Record<string, string> | null;
 }
 
 // ----------------------------------------------------------------- kart ----

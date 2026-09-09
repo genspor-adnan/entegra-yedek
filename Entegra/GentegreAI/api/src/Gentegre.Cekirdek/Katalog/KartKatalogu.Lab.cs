@@ -16,7 +16,11 @@ public static partial class KartKatalogu
 {
     // 360'taki LabBolumKodlari lab ISTEMININ bolumu (5 deger); tetkik
     //   katalogu daha ince kirilim ister (hormon/koagulasyon ayri calisir).
-    private static readonly Dictionary<string, string> LabTetkikBolumKodlari = new()
+    /// <summary>
+    /// Laboratuvar bolumleri. TEK KAYNAK (492): kart metasi da, liste
+    /// seridindeki bolum suzgeci de (KaynakKatalogu.Lab) bu haritayi okur.
+    /// </summary>
+    internal static readonly Dictionary<string, string> LabTetkikBolumKodlari = new()
     {
         ["1"] = "Biyokimya", ["2"] = "Hematoloji", ["3"] = "Hormon",
         ["4"] = "Mikrobiyoloji", ["5"] = "Seroloji", ["6"] = "Koagülasyon",

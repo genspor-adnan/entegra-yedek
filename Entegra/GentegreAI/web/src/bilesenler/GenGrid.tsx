@@ -59,6 +59,17 @@ interface Props {
   /** Cip seridinin SONUNA eklenecek dugmeler (ör. "│ 📄 Ekstre"). */
   cipSonu?: React.ReactNode;
   /**
+   * KOD KOLONUNA GORE SUZEN COMBO (492): ciplerin sagina cizilir, secim
+   * sunucuya filtre olarak gider. Secenekler kolonun KENDI meta sozlugunden
+   * (`kodlar`) gelir - istemci ikinci bir etiket listesi tutmaz.
+   */
+  kodSuzgeci?: { alan: string; etiket: string };
+  /**
+   * Acilista uygulanan gruplama kolonu (492: Tetkik Kataloğu bölüme göre).
+   * Kullanici uc-nokta menusunden degistirebilir; bu yalnizca BASLANGIC.
+   */
+  varsayilanGrup?: string;
+  /**
    * Gridin ALTINA, ayni kaydirma alaninin (.sahne) icine eklenecek panel -
    * randevu takvimi gibi. GenGrid'in DISINA kardes olarak konursa `.sahne`
    * flex:1 oldugu icin sifira kadar eziliyor, cip seridi ve grid kirpiliyordu
@@ -161,7 +172,8 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                           onTarihAraligi,
                           aramaGorunumGizli, gorunumSecimGizli, aramaGizli,
                           aracCubuguSeritte,
-                          seciliBaslangicId, cipSonu, cipBaslangic, altPanel, ustPanel, yanPanel, ekGorunum,
+                          seciliBaslangicId, cipSonu, kodSuzgeci, varsayilanGrup,
+                          cipBaslangic, altPanel, ustPanel, yanPanel, ekGorunum,
                           onCipSecildi, onCipRota, onSecimDegisti, yenile, odaklaSonEklenen,
                           icerikAlani, icerikBaslik }: Props) {
   // Sayfa boyu: cagiran acikca verdiyse o, yoksa Genel Ayarlar'daki
@@ -192,7 +204,9 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
    * onun yerine bu gecer. Gruplanan kolon ayni zamanda ILK SIRALAMA olur -
    * yoksa ayni grubun satirlari listeye dagilir ve baslik defalarca cizilir.
    */
-  const [kullaniciGrup, setKullaniciGrup] = useState<string | null>(null);
+  const [kullaniciGrup, setKullaniciGrup] = useState<string | null>(varsayilanGrup ?? null);
+  /** Kod suzgeci combosunun secimi ('' = tumu). */
+  const [kodSuzgecDeger, setKodSuzgecDeger] = useState('');
   /**
    * SATIR YUKSEKLIGI: sik / normal / genis. Uzun listelerde daha cok satir
    * gormek isteyen ile okunakli aralik isteyen kullanici ayni ekrani paylasiyor;
@@ -209,7 +223,11 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
     try { localStorage.setItem('grid.satirBoyu', v) } catch { /* gizli sekme */ }
   };
   const [sayfa, setSayfa] = useState(1);
-  const [sirala, setSirala] = useState<Siralama[]>([]);
+  // GRUPLANAN KOLON AYNI ZAMANDA ILK SIRALAMA (492): siralanmazsa ayni grubun
+  //   satirlari listeye dagilir ve baslik defalarca cizilir - bolume gore
+  //   grupladiktan sonra "Biyokimya" basligi dort kez gorunuyordu.
+  const [sirala, setSirala] = useState<Siralama[]>(
+    varsayilanGrup ? [{ alan: varsayilanGrup, yon: 'asc' as const }] : []);
   const [arama, setArama] = useState('');
   const [cipIndeks, setCipIndeks] = useState(cipBaslangic ?? 0);
   /**
@@ -361,6 +379,9 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       const filtre = filtreBirlestir([
         sabitFiltre, cipler?.[cipIndeks]?.filtre,
         tarihKosulu(tarihAlani, tarihBas, tarihBit),
+        kodSuzgeci && kodSuzgecDeger !== ''
+          ? { alan: kodSuzgeci.alan, op: 'esit' as const, deger: Number(kodSuzgecDeger) }
+          : undefined,
         aramaFiltresi(), filtreSatiriFiltresi(),
       ]);
 
@@ -379,7 +400,8 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       setYukleniyor(false);
     }
   }, [kaynak, sayfa, sayfaBoyu, sirala, toplam, sabitFiltre, aramaFiltresi, filtreSatiriFiltresi,
-      cipler, cipIndeks, kolonlar.length, aramaGorunumu, tarihAlani, tarihBas, tarihBit]);
+      cipler, cipIndeks, kolonlar.length, aramaGorunumu, tarihAlani, tarihBas, tarihBit,
+      kodSuzgeci, kodSuzgecDeger]);
 
   useEffect(() => { void yukle() }, [yukle]);
   // "yenile"/"odaklaSonEklenen" Liste.tsx'te YASIYOR (kaynak degisince sifirlanmiyor) -
@@ -535,6 +557,9 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
         sabitFiltre, cipler?.[cipIndeks]?.filtre,
         aramaFiltresi(), filtreSatiriFiltresi(),
         tarihKosulu(tarihAlani, tarihBas, tarihBit),
+        kodSuzgeci && kodSuzgecDeger !== ''
+          ? { alan: kodSuzgeci.alan, op: 'esit' as const, deger: Number(kodSuzgecDeger) }
+          : undefined,
       ]);
 
       const gorunum = aramaGorunumu === 'tum' ? undefined : aramaGorunumu;
@@ -816,6 +841,33 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                 </span>
               </>
             )}
+            {/* KOD SUZGECI (492, kullanici: "tümü sağına filtre için Bölüm
+                combosu"): secenekler kolon metasindaki kod sozlugunden gelir,
+                secim SUNUCUDA suzer - sayfali listede istemci ayiklamasi
+                yanlis sonuc verirdi. */}
+            {kodSuzgeci && (() => {
+              // TUM kolonlarda aranir: suzgec kolonu (bolum kodu) gridde
+              //   GORUNMEZ olabilir - gorunen kolon listesinde bulunamazdi.
+              const kodlar = tumKolonlar.find(k => k.ad === kodSuzgeci.alan)?.kodlar;
+              if (!kodlar) return null;
+              return (
+                <>
+                  <span className="durumseg-ayrac" />
+                  <select className="kat-suzgec" value={kodSuzgecDeger}
+                          title={kodSuzgeci.etiket}
+                          onChange={e => { setKodSuzgecDeger(e.target.value); setSayfa(1) }}>
+                    <option value="">{kodSuzgeci.etiket}</option>
+                    {Object.entries(kodlar).map(([k, v]) => (
+                      <option key={k} value={k}>{v}</option>
+                    ))}
+                  </select>
+                  {kodSuzgecDeger !== '' && (
+                    <button type="button" className="kapat" title="Filtreyi kaldır"
+                            onClick={() => { setKodSuzgecDeger(''); setSayfa(1) }}>×</button>
+                  )}
+                </>
+              );
+            })()}
             {cipSonu && <><span className="durumseg-ayrac" />{cipSonu}</>}
           </div>
         )}

@@ -23,6 +23,7 @@ import {
   type EBelgeMesaji, type Kosul, type ListeSatiri, type RandevuBolumDugumu, hataMetni,
 } from '../api/sozlesme';
 import { kampanyaKalemFiyati } from './belgeKalem';
+import { LabTetkikOzeti } from '../bilesenler/lab/LabTetkikOzeti';
 import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { IceriAlModali } from '../bilesenler/IceriAlModali';
@@ -1603,6 +1604,8 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       yol={tanim.yol}
       toplam={tanim.toplam}
       cipler={tanim.cipler}
+      kodSuzgeci={tanim.kodSuzgeci}
+      varsayilanGrup={tanim.varsayilanGrup}
       sabitFiltre={klasorluFiltre(basvuruluFiltre(
         primliFiltre(personelliFiltre(kategoriliFiltre(randevuFiltresi)))))}
       tarihVarsayilan={tanim.tarihVarsayilan}
@@ -1825,7 +1828,12 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       //   gridin sagina al"; mockup lab_istem_numune_kabul.html .ucPanel):
       //   tetkik tablosu gridin altinda tam genislikte kalir, hasta/etiket/
       //   kurallar kutulari saga gecer. Iki panel AYNI istegi paylasir.
-      yanPanel={labYanVarMi(tanim.kaynak)
+      // SECILI TETKIK PANELI (492, mockup lab_tetkik_katalogu sag kolonu):
+      //   katalogda gezerken LOINC/referans/panel/sonuc zamani sorulari karti
+      //   acmadan cevaplansin.
+      yanPanel={tanim.kaynak === 'lab-tetkik'
+        ? <LabTetkikOzeti id={seciliSatir ? Number(seciliSatir.id) : null} />
+        : labYanVarMi(tanim.kaynak)
         ? <LabDetayPaneli kaynak={tanim.kaynak} satir={seciliSatir} kisim="yan" />
         : undefined}
       altPanel={labDetayVarMi(tanim.kaynak) && seciliSatir

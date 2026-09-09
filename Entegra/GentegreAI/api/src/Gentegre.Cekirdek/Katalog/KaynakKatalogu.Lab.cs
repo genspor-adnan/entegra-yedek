@@ -49,7 +49,12 @@ public static partial class KaynakKatalogu
                                  "metin", "Bölüm", Hizalama: "orta", Bicim: "rozet",
                                  Genislik: 130, Filtrelenebilir: false,
                                  Varsayilan: false),
-            new("bolum", "t.bolum", "kod", "Bölüm Kodu", Varsayilan: false),
+            // BOLUM SUZGECI (492, kullanici: "tümü sağına filtre için Bölüm
+            //   combosu"): kolonun kod sozlugu metayla gider, ust serit onu
+            //   cizer. Etiketler kart metasindaki haritanin KENDISI - liste
+            //   ile kart ayni adi soylesin.
+            new("bolum", "t.bolum", "kod", "Bölüm Kodu", Varsayilan: false,
+                Kodlar: KartKatalogu.LabTetkikBolumKodlari),
             new("turAdi",
                 "case t.tur when 2 then 'Metin' when 3 then 'Seçenek' "
                 + "when 4 then 'Kültür' else 'Sayısal' end",

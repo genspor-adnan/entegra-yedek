@@ -58,6 +58,69 @@ public static class LabUclari
     {
         var grup = yol.MapGroup("/api/lab").WithTags("Laboratuvar").RequireAuthorization();
 
+        // ------------------------------------------------ secili tetkik ozeti --
+        // GET /api/lab/tetkik/{id}/ozet - Tetkik Katalogu listesinin SAG
+        //   PANELI (492, mockup lab_tetkik_katalogu.html "Seçili Tetkik").
+        //
+        //   Panel dort soruyu cevaplar: tetkigin kimligi (LOINC/SKRS, olculebilir
+        //   aralik, panik degeri), hangi referans kurallari var, hangi panellerde
+        //   kullaniliyor ve simdi istenirse sonuc ne zaman cikar. Hepsi TEK
+        //   istekte doner - satir secildikce dort ayri cagri yapmak listeyi
+        //   yavaslatirdi.
+        grup.MapGet("/tetkik/{id:int}/ozet", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("lab.tetkik", Islem.Gor);
+
+            var tetkik = await veri.TekAsync("""
+                select t.kod, t.ad, t.kisa_ad as "kisaAd", t.birim, t.loinc,
+                       t.skrs_tetkik_kod as "skrsKod", t.yontem,
+                       t.olculebilir_alt as "olculebilirAlt",
+                       t.olculebilir_ust as "olculebilirUst",
+                       t.panik_alt as "panikAlt", t.panik_ust as "panikUst",
+                       t.hedef_tat_dk as "hedefTatDk", t.acil_tat_dk as "acilTatDk",
+                       case t.bolum when 2 then 'Hematoloji' when 3 then 'Hormon'
+                            when 4 then 'Mikrobiyoloji' when 5 then 'Seroloji'
+                            when 6 then 'Koagülasyon' when 7 then 'İdrar'
+                            when 9 then 'Diğer' else 'Biyokimya' end as "bolumAdi",
+                       public.fn_lab_tetkik_sonuc_zamani(t.id, now()::timestamp, 0::smallint)
+                           as "sonucZamani"
+                  from public.lab_tetkik t where t.id = @p0
+                """, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Tetkik bulunamadı.");
+
+            // REFERANS ARALIKLARI: "kime" metni DB'de uretiliyor (488) - liste
+            //   ile kart ayni cumleyi yazsin.
+            var referanslar = await veri.ListeAsync("""
+                select r.alt, r.ust, r.metin,
+                       public.fn_lab_referans_kime(r.cinsiyet, r.yas_alt_gun,
+                                                   r.yas_ust_gun, r.gebelik) as kime
+                  from public.lab_tetkik_referans r
+                 where r.tetkik_id = @p0
+                 order by r.sira, r.yas_alt_gun
+                """, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            var paneller = await veri.ListeAsync("""
+                select p.id, p.ad
+                  from public.lab_panel_satir s
+                  join public.lab_panel p on p.id = s.panel_id
+                 where s.tetkik_id = @p0
+                 order by p.ad
+                """, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            // SON 30 GUN ISTEM SAYISI: katalogda "bu tetkik gercekten
+            //   kullaniliyor mu" sorusunun cevabi.
+            var istemAdedi = await veri.TekDegerAsync<long>("""
+                select count(*) from public.lab_istem_satir s
+                 where s.tetkik_id = @p0 and s.ekleme_tarihi >= now() - interval '30 days'
+                """, [id], iptal);
+
+            return Results.Ok(new { tetkik, referanslar, paneller, istemAdedi,
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
         // -------------------------------------------------- calisma takvimi ---
         // GET /api/lab/calisma-takvimi - tetkik kartinin "Çalışma Zamanları"
         //   sekmesindeki HAFTALIK TAKVIM ve UC OZET KUTUSU (487).

@@ -69,6 +69,13 @@ export interface ListeTanimi {
    */
   bolumSuzgeci?: boolean;
   /**
+   * Ciplerin sagindaki KOD COMBOSU (492): hangi kolona gore suzecegi ve bos
+   * secenegin yazisi. Secenekler sunucudan (kolon metasindaki `kodlar`).
+   */
+  kodSuzgeci?: { alan: string; etiket: string };
+  /** Acilista uygulanan gruplama kolonu (492: tetkik katalogu -> bolum). */
+  varsayilanGrup?: string;
+  /**
    * Ciplerin sagina ROL combosu koyar: kullanici hesabinin yetki rolu
    * (taraf_kullanici.rol_id). Rol listesi `rol` yetkisi ister - yetkisi
    * olmayan kullanicida combo hic cizilmez, liste calismaya devam eder.
@@ -704,6 +711,11 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
       { ad: 'Pasif',    filtre: { alan: 'durum', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
+    // BOLUM SUZGECI + BOLUME GORE GRUPLAMA (492, mockup lab_tetkik_katalogu):
+    //   katalog bolum bolum okunur - biyokimyaci kendi tetkiklerini arar.
+    //   Gruplama baslangic degeridir; kullanici uc-nokta menusunden degistirir.
+    kodSuzgeci: { alan: 'bolum', etiket: 'Tüm Bölümler' },
+    varsayilanGrup: 'bolumAdi',
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAd: 'Tetkik Kataloğu', menuSira: 56,
     ic: '📚', yetkiKodu: 'lab.tetkik',
