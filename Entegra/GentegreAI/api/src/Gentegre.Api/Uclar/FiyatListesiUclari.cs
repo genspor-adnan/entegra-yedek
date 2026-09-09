@@ -83,6 +83,34 @@ public static class FiyatListesiUclari
         }).WithTags("FiyatListesi").RequireAuthorization();
 
         // ------------------------------------------------------------ fiyat ----
+        // ARAMA EKRANI FIYAT SUTUNU (495, kullanici: "stok/hizmet/ilaç arama
+        //   ekranında fiyatları göreyim"): 25 satirlik arama sonucunun
+        //   fiyatlari TEK istekte cozulur - satir basina ayri cagri arama
+        //   penceresini kullanilamaz hale getirirdi.
+        yol.MapPost("/api/fiyat-listesi/{id:int}/fiyatlar", async (
+            int id, TopluFiyatIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("fiyat_listesi", Islem.Gor);
+
+            var kalemler = (istek.Kalemler ?? []).Take(200).ToList();
+            await using var baglanti = await veri.AcAsync(iptal);
+            var sonuc = new List<object>(kalemler.Count);
+            foreach (var k in kalemler)
+            {
+                if ((k.StokId is null or 0) == (k.HizmetId is null or 0)) continue;
+                var f = await ListeFiyatiAsync(baglanti, id,
+                    k.StokId is 0 ? null : k.StokId, k.HizmetId is 0 ? null : k.HizmetId, iptal);
+                sonuc.Add(new
+                {
+                    stokId = k.StokId, hizmetId = k.HizmetId,
+                    fiyat = f.Fiyat, dovizCinsi = f.DovizCinsi, kdvDahil = f.KdvDahil,
+                });
+            }
+            return Results.Ok(new { listeId = id, satirlar = sonuc });
+        }).WithTags("FiyatListesi").RequireAuthorization();
+
         // Tek kalemin liste fiyati. Liste HENUZ URETILMEMIS olsa da cevap
         //   doner - kural zincirle isletilir (onizleme icin).
         yol.MapGet("/api/fiyat-listesi/{id:int}/fiyat", async (
@@ -493,12 +521,28 @@ public static class FiyatListesiUclari
     /// ihtiyac duyuyor; sorguyu iki yerde tutmak katki zincirini (291) birinde
     /// guncelleyip digerinde unutmaya davetti.
     /// </summary>
+    /// <summary>Toplu fiyat sorgusu (495) - arama ekraninin fiyat sutunu.</summary>
+    public sealed class TopluFiyatIstegi
+    {
+        public List<TopluFiyatKalemi>? Kalemler { get; set; }
+    }
+
+    public sealed class TopluFiyatKalemi
+    {
+        public int? StokId { get; set; }
+        public int? HizmetId { get; set; }
+    }
+
     private static async Task<ListeFiyati> ListeFiyatiAsync(
         Npgsql.NpgsqlConnection baglanti, int listeId, int? stokId, int? hizmetId,
         CancellationToken iptal)
     {
         await using var komut = baglanti.Komut(
-            "select f.fiyat, f.doviz_cinsi, f.kdv_dahil, f.kaynak, " +
+            // ROUND(...,4): turetilmis listede carpan bolunemeyen bir ondalik
+            //   uretebiliyor (900 x 0,8 / 1,10 gibi) ve ham numeric
+            //   System.Decimal'e sigmiyordu ("Numeric value does not fit").
+            //   Para alanlari zaten dort haneyle saklanir.
+            "select round(f.fiyat, 4) as fiyat, f.doviz_cinsi, f.kdv_dahil, f.kaynak, " +
             "       public.fn_fiyat_listesi_katki(@p0, @p1, @p2) as katki " +
             "  from public.fn_fiyat_listesi_fiyat(@p0, @p1, @p2) f",
             null, listeId, stokId, hizmetId);

@@ -19,7 +19,7 @@ const TUR_ADI: Record<string, string> = { stok: 'Stok', hizmet: 'Hizmet', ilac: 
  * irsaliye tek arama penceresiyle girilir.
  */
 export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHizmet, yon,
-                                    eklenen }: {
+                                    eklenen, fiyatListesiId }: {
   /** Ustunde kalem penceresi acikken false olur; true'ya donunce arama
       kutusuna odak GERI GELIR (ardisik girişte fare gerekmesin). */
   etkin: boolean;
@@ -31,6 +31,13 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
    * yoksa "eklendi mi?" diye pencereyi kapatip bakmak gerekiyordu.
    */
   eklenen?: { sayi: number; son: string };
+  /**
+   * BELGENIN FIYAT LISTESI (495, kullanici: "arama ekranında fiyatları
+   * göreyim"): verilirse Fiyat sutunu KART fiyatini degil bu listenin
+   * fiyatini gosterir - kalem penceresinde cikacak rakam neyse listede de o
+   * gorunur. Fiyatlar TEK istekte cozulur (toplu uc).
+   */
+  fiyatListesiId?: number | null;
   /** Yalniz STOK aranir (paket icerigi gibi hizmet kabul etmeyen yerler). */
   yalnizStok?: boolean;
   /** Yalniz HIZMET aranir (260: randevunun konusu bir hizmettir, stok degil). */
@@ -121,11 +128,32 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
 
       setSatirlar(birlesik);
       setSecili(0);
+
+      // LISTE FIYATLARI (495): arama sonucu geldikten sonra tek istekte
+      //   cozulur; liste yoksa kart fiyati gosterilmeye devam eder.
+      if (fiyatListesiId && birlesik.length) {
+        try {
+          const y = await api.fiyatListesiFiyatlar(fiyatListesiId, birlesik
+            .filter(r => r.tip !== 'ilac')
+            .map(r => (r.tip === 'hizmet'
+              ? { hizmetId: Number(r.id) } : { stokId: Number(r.id) })));
+          const anahtar = (t: unknown, id: unknown) => `${t}:${id}`;
+          const harita = new Map(y.satirlar.map(x => [
+            anahtar(x.hizmetId ? 'hizmet' : 'stok', x.hizmetId ?? x.stokId), x]));
+          setSatirlar(birlesik.map(r => {
+            const f = harita.get(anahtar(r.tip, r.id));
+            return f && f.fiyat != null
+              ? { ...r, fiyat: f.fiyat, fiyatDovizi: f.dovizCinsi || r.fiyatDovizi,
+                  listeFiyati: 1 }
+              : r;
+          }));
+        } catch { /* liste fiyati cozulemedi - kart fiyati kalir */ }
+      }
     } catch (h) {
       setHata(hataMetni(h));
       setSatirlar([]);
     } finally { setYukleniyor(false) }
-  }, [yalnizStok, yalnizHizmet, yon, ilacAranir]);
+  }, [yalnizStok, yalnizHizmet, yon, ilacAranir, fiyatListesiId]);
 
   useEffect(() => { void ara(arama, aramaGorunumu) }, [ara, aramaGorunumu]);  // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -273,7 +301,8 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
                     {r.tip !== 'stok' ? <span className="sonuk">—</span>
                       : Number(r.kalan ?? 0).toLocaleString('tr-TR')}
                   </td>
-                  <td className="hiza-sag">
+                  <td className="hiza-sag"
+                      title={r.listeFiyati ? 'Belgenin fiyat listesinden' : 'Kart fiyatı'}>
                     {r.fiyat ? para.format(Number(r.fiyat)) : <span className="sonuk">—</span>}
                   </td>
                   <td className="hiza-orta sonuk">{String(r.fiyatDovizi ?? '') || '—'}</td>

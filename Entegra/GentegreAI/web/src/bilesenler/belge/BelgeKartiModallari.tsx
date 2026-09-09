@@ -50,6 +50,8 @@ export interface BelgeKartiModalProps {
   yerelPara: string;
   tarih: string;
   odeyenKurumId: number | null;
+  /** Belgenin fiyat listesi (495) - arama ekraninin fiyat sutunu icin. */
+  fiyatListesiId?: number | null;
   depo: Kisi | null;
   sonuc: BelgeYaniti | null;
   setSonuc: Ayarla<BelgeYaniti | null>;
@@ -120,7 +122,7 @@ export interface BelgeKartiModalProps {
 export function BelgeKartiModallari(p: BelgeKartiModalProps) {
   const {
     kayitliId, tur, bilgi, basvuruMu, alisMi, irsaliyeMi, siparisMi, stokFisiMi,
-    depoBelgesi, yerelPara, tarih, odeyenKurumId, depo, sonuc, setSonuc,
+    depoBelgesi, yerelPara, tarih, odeyenKurumId, fiyatListesiId, depo, sonuc, setSonuc,
     cari, setCari, cariArama, setCariArama,
     hastaAramaMetni, setHastaAramaMetni, hastaAramaYeni, setHastaAramaYeni,
     hastaKartId, setHastaKartId,
@@ -245,6 +247,9 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
           //   "Alınan" isaretli stoklar listelenir. Transfer/talep gibi
           //   yonsuz belgelerde suzme yok.
           yon={depoBelgesi || stokFisiMi ? undefined : alisMi ? 'alis' : 'satis'}
+          // FIYAT SUTUNU BELGENIN LISTESINDEN (495): aramada gorunen rakam
+          //   ile kalem penceresinde cikan rakam ayni olsun.
+          fiyatListesiId={fiyatListesiId}
           onKapat={() => { setStokArama(false); setAramaEklenen({ sayi: 0, son: '' }) }}
           onSec={sec => void stokSecildi(sec)}
         />

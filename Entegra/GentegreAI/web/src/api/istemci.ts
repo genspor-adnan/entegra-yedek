@@ -1310,6 +1310,15 @@ export const api = {
       `/api/belge/varsayilan-liste?tur=${tur}&tarafId=${tarafId}`
       + (kurumId ? `&kurumId=${kurumId}` : '')),
 
+  /** Arama ekraninin fiyat sutunu (495): coklu kalemin liste fiyati tek istekte. */
+  fiyatListesiFiyatlar: (listeId: number,
+                         kalemler: { stokId?: number; hizmetId?: number }[]) =>
+    gonder<{ listeId: number;
+             satirlar: { stokId?: number | null; hizmetId?: number | null;
+                         fiyat: number | null; dovizCinsi: string;
+                         kdvDahil: number }[] }>(
+      `/api/fiyat-listesi/${listeId}/fiyatlar`, { kalemler }),
+
   /** Tek kalemin liste fiyati - liste henuz uretilmemis olsa da kural isletilir. */
   fiyatListesiFiyat: (listeId: number, kalem: { stokId?: number; hizmetId?: number }) =>
     istek<{ fiyat: number | null; dovizCinsi: string; kdvDahil: number; kaynak: string }>(

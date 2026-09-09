@@ -1661,6 +1661,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           alisMi={alisMi} irsaliyeMi={irsaliyeMi} siparisMi={siparisMi}
           stokFisiMi={stokFisiMi} depoBelgesi={depoBelgesi}
           yerelPara={yerelPara} tarih={tarih} odeyenKurumId={odeyenKurumId}
+          fiyatListesiId={fiyatListesiId}
           depo={depo} sonuc={sonuc} setSonuc={setSonuc}
           cari={cari} setCari={setCari}
           cariArama={cariArama} setCariArama={setCariArama}
