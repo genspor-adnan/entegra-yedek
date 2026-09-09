@@ -27,20 +27,25 @@ public static partial class KaynakKatalogu
         {
             new("id",  "t.id",  "sayi",  "Id", Varsayilan: false),
             new("kod", "t.kod", "metin", "Kod", Genislik: 100),
-            new("ad",  "t.ad",  "metin", "Tetkik", Genislik: 240),
+            new("ad",  "t.ad",  "metin", "Tetkik Adı", Genislik: 240),
+            // KISA AD listede (mockup): cihaz ve rapor basligindaki ad budur -
+            //   iki tetkigin uzun adi benzerken kisa adi ayirir.
+            new("kisaAd", "t.kisa_ad", "metin", "Kısa Ad", Genislik: 110),
             new("bolumAdi",
                 "case t.bolum when 2 then 'Hematoloji' when 3 then 'Hormon' "
                 + "when 4 then 'Mikrobiyoloji' when 5 then 'Seroloji' "
                 + "when 6 then 'Koagülasyon' when 7 then 'İdrar' "
                 + "when 9 then 'Diğer' else 'Biyokimya' end",
                                  "metin", "Bölüm", Hizalama: "orta", Bicim: "rozet",
-                                 Genislik: 130, Filtrelenebilir: false),
+                                 Genislik: 130, Filtrelenebilir: false,
+                                 Varsayilan: false),
             new("bolum", "t.bolum", "kod", "Bölüm Kodu", Varsayilan: false),
             new("turAdi",
                 "case t.tur when 2 then 'Metin' when 3 then 'Seçenek' "
                 + "when 4 then 'Kültür' else 'Sayısal' end",
                                  "metin", "Tür", Hizalama: "orta", Bicim: "rozet",
-                                 Genislik: 100, Filtrelenebilir: false),
+                                 Genislik: 100, Filtrelenebilir: false,
+                                 Varsayilan: false),
             new("tur", "t.tur", "kod", "Tür Kodu", Varsayilan: false),
             new("numuneTipiAdi",
                 "case t.numune_tipi when 2 then 'Plazma' when 3 then 'Tam Kan' "
@@ -56,6 +61,9 @@ public static partial class KaynakKatalogu
                                  "metin", "Tüp", Hizalama: "orta", Bicim: "rozet",
                                  Genislik: 130, Filtrelenebilir: false),
             new("birim", "t.birim", "metin", "Birim", Hizalama: "orta", Genislik: 80),
+            // TAT: sözü verilen süre. Listede görünmezse gecikme fark edilmez.
+            new("hedefTat", "t.hedef_tat_dk", "sayi", "TAT", Hizalama: "sag",
+                                 Genislik: 90),
             // ÇALIŞMA DÜZENİ (486): "sürekli" mi yoksa haftanın belli
             //   günlerinde seri hâlinde mi. TAT tek başına yanıltıcı - 4
             //   saatlik bir tetkik cuma 14:31'de gelirse pazartesi çıkar.
@@ -78,17 +86,23 @@ public static partial class KaynakKatalogu
                                  Siralanabilir: false, Filtrelenebilir: false),
             new("calismaDuzeni", "t.calisma_duzeni", "kod", "Çalışma Düzeni",
                                  Varsayilan: false),
-            // TAT: sözü verilen süre. Listede görünmezse gecikme fark edilmez.
-            new("hedefTat", "t.hedef_tat_dk", "sayi", "TAT (dk)", Hizalama: "sag",
-                                 Genislik: 90),
             new("acilTat", "t.acil_tat_dk", "sayi", "Acil TAT", Hizalama: "sag",
                                  Genislik: 90, Varsayilan: false),
+            // PANIK SINIRLARI ve REFERANS SAYISI varsayilan gorunumde YOK
+            //   (mockup): katalog listesi "bu tetkik nedir, ne zaman ciker"
+            //   sorusunu cevaplar; panik degeri kartin ve sonuc ekraninin isi.
+            //   Kolonlar DURUYOR - "referansi yok" suzgeci onlari okuyor.
             new("panikAlt", "t.panik_alt", "sayi", "Panik Alt", Hizalama: "sag",
-                                 Bicim: "#,##0.##", Genislik: 100),
+                                 Bicim: "#,##0.##", Genislik: 100, Varsayilan: false),
             new("panikUst", "t.panik_ust", "sayi", "Panik Üst", Hizalama: "sag",
-                                 Bicim: "#,##0.##", Genislik: 100),
+                                 Bicim: "#,##0.##", Genislik: 100, Varsayilan: false),
             new("deltaYuzde", "t.delta_yuzde", "sayi", "Delta %", Hizalama: "sag",
                                  Bicim: "#,##0.#", Genislik: 90, Varsayilan: false),
+            // YONTEM ve CIHAZ (mockup): "bu tetkik neyle calisiliyor" sorusu
+            //   katalogun kendi sorusudur - cihazi olmayan tetkik elle girilir.
+            new("yontem", "t.yontem", "metin", "Yöntem", Genislik: 140),
+            new("cihazAdi", "coalesce(c.kod, '')", "metin", "Cihaz",
+                                 Hizalama: "orta", Genislik: 130),
             new("otoOnay", "t.oto_onay", "mantik", "Oto Onay", Hizalama: "orta",
                                  Genislik: 90),
             // Referans satırı OLMAYAN tetkik bayrak üretemez - katalog eksikliği
@@ -97,12 +111,10 @@ public static partial class KaynakKatalogu
                 "(select count(*) from public.lab_tetkik_referans r "
                 + "where r.tetkik_id = t.id)",
                                  "sayi", "Referans", Hizalama: "orta", Genislik: 90,
-                                 Filtrelenebilir: false),
+                                 Filtrelenebilir: false, Varsayilan: false),
             new("hizmetAdi", "coalesce(h.kod || ' · ' || h.ad, '')", "metin", "Hizmet",
                                  Genislik: 220, Varsayilan: false),
             new("hizmetId", "t.hizmet_id", "sayi", "Hizmet Id", Varsayilan: false),
-            new("cihazAdi", "coalesce(c.kod, '')", "metin", "Varsayılan Cihaz",
-                                 Hizalama: "orta", Genislik: 130, Varsayilan: false),
             new("loinc", "t.loinc", "metin", "LOINC", Hizalama: "orta", Genislik: 100,
                                  Varsayilan: false),
             new("durumAdi", "case t.durum when 1 then 'Pasif' else 'Aktif' end",

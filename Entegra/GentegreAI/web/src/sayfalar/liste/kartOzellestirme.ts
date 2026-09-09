@@ -62,6 +62,20 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     sekmeSirasi: ['Genel', 'Referans Aralıkları', 'Çalışma Zamanları',
                   'Cihaz Eşleme', 'Besiyeri Seti (kültür)', 'Dış Laboratuvar',
                   'Paneller'],
+    // REFERANS GRİDİ SALT GÖRÜNÜM (kullanıcı, mockup): on iki kolonun her biri
+    //   satır içi kutu olunca tablo okunmuyordu - hangi kuralın hangi yaşa ait
+    //   olduğu ancak kutuların içine bakılarak anlaşılıyordu. Satırlar düz
+    //   metin, düzenleme MODALDE: kural bir bütün olarak (cinsiyet + yaş +
+    //   gebelik + sınırlar) görülüp değiştirilir.
+    // GRİDLER SALT GÖRÜNÜM (kullanıcı, mockup): satır içi kutu yok, hücreler
+    //   düz metin; ekleme/düzenleme başlıktaki ＋ ✎ 🗑 ile MODALDE yapılır.
+    //   Referansta on iki, cihaz eşlemesinde yedi kolon var - her hücre bir
+    //   kutu olunca tablo okunmuyordu. Kayıt bir BÜTÜN olarak görülüp
+    //   değiştirilir: yarım girilmiş bir referans kuralı yanlış bayrak üretir.
+    detaySecenekleri: {
+      referanslar: { gridKipi: true },
+      cihazlar:    { gridKipi: true },
+    },
   },
 
   // ----------------------------------------------------------- muayene ----
