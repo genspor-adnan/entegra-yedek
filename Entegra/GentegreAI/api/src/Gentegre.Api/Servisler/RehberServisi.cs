@@ -116,7 +116,7 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
                   from public.ai_rehber_konu k
                  -- ERP cekirdegi (fatura, stok, kasa) HBYS kurulumunda da
                  --   vardir; yalniz HBYS-OZEL konu (2) ERP'de gizlenir.
-                 where k.durum = 0 and (k.urun_modu <> 2 or @p2 = 2)
+                 where k.durum = 0 and (k.urun_modu <> 2 or @p2 in (2, 3))
                  order by vurus desc, benzerlik desc, k.sira
                  limit 4
                 """, null, [soru, kelimeler, urunModu], OkuyucuGenisletmeleri.Sozluk, iptal);
@@ -389,7 +389,7 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
         var konular = await baglanti.ListeAsync("""
             select k.kod, k.baslik
               from public.ai_rehber_konu k
-             where k.durum = 0 and (k.urun_modu <> 2 or @p1 = 2)
+             where k.durum = 0 and (k.urun_modu <> 2 or @p1 in (2, 3))
                and (k.ekran_kaynak = @p0 or k.ekran_kaynak = @p2)
              order by k.sira limit 4
             """, null, [kaynak, urunModu, rota], OkuyucuGenisletmeleri.Sozluk, iptal);
@@ -562,7 +562,7 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
                               public.fn_ara_metin(@p0)) as benzerlik
               from public.ai_rehber_ekran e
              where e.durum = 0 and e.menu_gizli = 0
-               and (e.urun_modu <> 2 or @p2 = 2)
+               and (e.urun_modu <> 2 or @p2 in (2, 3))
              order by vurus desc, benzerlik desc, e.baslik
              limit 20
             """, null, [soru, kelimeler, urunModu], OkuyucuGenisletmeleri.Sozluk, iptal);
@@ -592,7 +592,7 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
              --   dogru olani secer, "belge" derse ilk gorunen ekran gelir.
              where (e.rota = @p0 or e.rota = '/' || @p0 or e.kaynak = @p0)
                and e.durum = 0
-               and (e.urun_modu <> 2 or @p1 = 2)
+               and (e.urun_modu <> 2 or @p1 in (2, 3))
              order by e.menu_gizli, e.id
              limit 1
             """, null, [kaynak, urunModu], OkuyucuGenisletmeleri.Sozluk, iptal);

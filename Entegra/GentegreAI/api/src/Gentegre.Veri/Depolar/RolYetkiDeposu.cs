@@ -25,7 +25,14 @@ public sealed class RolYetkiDeposu
 
     public RolYetkiDeposu(VeriKaynagi veri) => _veri = veri;
 
-    public async Task<IReadOnlyList<YetkiSatiri>> ListeleAsync(int rolId, CancellationToken iptal = default)
+    /// <summary>
+    /// Rolun yetki matrisi. <paramref name="subeId"/> AKTIF SUBE (492): urun
+    /// modu subenin profilinden okunur - kurum geneli fallback'i kullanmak,
+    /// kendi profili HBYS olan subede saglik yetkilerini gizler ve o yetkiler
+    /// hic verilemezdi.
+    /// </summary>
+    public async Task<IReadOnlyList<YetkiSatiri>> ListeleAsync(int rolId, int subeId = 0,
+                                                               CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var komut = baglanti.Komut("""
@@ -36,11 +43,14 @@ public sealed class RolYetkiDeposu
               left join public.rol_yetki ry on ry.yetki_id = y.id and ry.rol_id = @p0
              where y.aktif = 1
                -- Urun moduna gore suzme (232): 0 = her iki urun, 1 ERP, 2 HBYS.
-               --   Mod SUBENIN PROFILINDEN (489), referans anahtarindan degil.
-               and (y.urun_modu = 0 or y.urun_modu = public.fn_urun_modu(0))
+               --   Mod AKTIF SUBENIN PROFILINDEN (489/492). Mod 3 ("ikisi")
+               --   her iki urunun yetkilerini de gosterir.
+               and (y.urun_modu = 0
+                    or public.fn_urun_modu(@p1) = 3
+                    or y.urun_modu = public.fn_urun_modu(@p1))
              order by y.sira, y.ad
             """, null,
-            rolId);
+            rolId, subeId);
 
         var sonuc = new List<YetkiSatiri>();
         await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
@@ -54,7 +64,8 @@ public sealed class RolYetkiDeposu
     }
 
     public async Task<IReadOnlyList<YetkiSatiri>> KaydetAsync(int rolId,
-        IReadOnlyList<YetkiGuncelleIstegi> satirlar, YazmaBaglami baglam, CancellationToken iptal = default)
+        IReadOnlyList<YetkiGuncelleIstegi> satirlar, YazmaBaglami baglam, int subeId = 0,
+        CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
@@ -73,6 +84,6 @@ public sealed class RolYetkiDeposu
         }
 
         await islem.CommitAsync(iptal);
-        return await ListeleAsync(rolId, iptal);
+        return await ListeleAsync(rolId, subeId, iptal);
     }
 }

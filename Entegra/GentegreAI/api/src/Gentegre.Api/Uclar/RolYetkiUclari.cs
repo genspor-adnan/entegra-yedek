@@ -21,7 +21,8 @@ public static class RolYetkiUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("rol", Islem.Gor);
-            return Results.Ok(await depo.ListeleAsync(rolId, iptal));
+            // Yetki matrisi AKTIF SUBENIN urun moduna gore suzulur (492).
+            return Results.Ok(await depo.ListeleAsync(rolId, baglam.SubeId ?? 0, iptal));
         });
 
         grup.MapPut("/", async (
@@ -34,7 +35,7 @@ public static class RolYetkiUclari
                 .Select(s => new YetkiGuncelleIstegi(s.YetkiId, s.Gor, s.Ekle, s.Degistir, s.Sil))
                 .ToList();
             var liste = await depo.KaydetAsync(rolId, satirlar,
-                baglam.Yazma, iptal);
+                baglam.Yazma, baglam.SubeId ?? 0, iptal);
             return Results.Ok(liste);
         });
 

@@ -106,8 +106,9 @@ public static partial class KartKatalogu
         new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "SKRS", "ENABIZ", "MEDULA" };
 
     /// <summary>Urun moduna gore gecerli entegrasyon kodlari (342).</summary>
+    /// Mod 3 ("ikisi") saglik kodlarini da icerir (492).
     public static IReadOnlyDictionary<string, string> EntegrasyonKodlariMod(int urunModu)
-        => urunModu == 2
+        => urunModu is 2 or 3
             ? EntegrasyonKodlari
             : EntegrasyonKodlari.Where(k => !SaglikEntegrasyonlari.Contains(k.Key))
                                 .ToDictionary(k => k.Key, k => k.Value);

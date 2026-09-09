@@ -137,7 +137,19 @@ export interface KullaniciOzeti {
 
 /** Urun modlari (215). Ad sol ust marka, mesaj basligi ve menu suzmede kullanilir. */
 export const URUN_GENOTIP = 2;
+/** 3 = "ikisi" (tip merkezi + ticari): HER IKI urunun ekranlari acik. */
+export const URUN_IKISI = 3;
 export const urunAdi = (mod?: number) => (mod === URUN_GENOTIP ? 'GenoTIP AI' : 'Gentegre AI');
+
+/**
+ * Ekranin urun modu kurulumunkiyle uyuyor mu (492).
+ *
+ * TAM ESITLIK YETMEZ: karma kurulumda (mod 3) tam esitlik arayan suzgec hem
+ * ERP'ye hem HBYS'ye ozgu ekranlari birden gizliyordu - kullanici "ikisi"
+ * secmesine ragmen menude ne SKRS ne Uretim kaliyordu.
+ */
+export const modUyar = (ekranModu?: number, kurulumModu?: number) =>
+  !ekranModu || (kurulumModu ?? 1) === URUN_IKISI || ekranModu === (kurulumModu ?? 1);
 
 export interface GirisYaniti {
   accessToken: string;

@@ -8,7 +8,7 @@ import { Bayrak } from '../bilesenler/Bayrak';
 import { cm, ceviriYukle, ceviriDinle } from '../dil/ceviri';
 import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
-import { urunAdi } from '../api/sozlesme';
+import { urunAdi, modUyar } from '../api/sozlesme';
 import { AiRehberPaneli } from '../bilesenler/AiRehberPaneli';
 import { LISTELER } from './Liste';
 
@@ -160,7 +160,7 @@ export function Kabuk() {
   //   altinda TOPLANIR; menuGrup'suz ogeler eskisi gibi duz sirada kalir.
   const yetkiliListeler = LISTELER.filter(l => yetki(l.yetkiKodu) && !l.menuGizli
     // Urun modu suzmesi (215): Kayit Kabul yalniz GenoTIP AI'da.
-    && (!l.urunModu || l.urunModu === (kullanici?.urunModu ?? 1))
+    && (!l.urunModu || modUyar(l.urunModu, kullanici?.urunModu))
     // MODUL suzmesi (359): kurum profilinde kapali modulun menusu cizilmez.
     && modulAcikMi(l, kullanici?.moduller));
   const moduller: MenuOgesi[] =

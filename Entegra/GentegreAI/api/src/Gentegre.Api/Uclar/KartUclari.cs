@@ -401,7 +401,8 @@ public static class KartUclari
         var metin = kod?.ToString() ?? "";
         if (!KartKatalogu.SaglikEntegrasyonlari.Contains(metin)) return;
 
-        if (await depo.UrunModuAsync(iptal) != 2)
+        // Mod 3 ("ikisi") saglik kurulumu sayilir (492).
+        if (await depo.UrunModuAsync(iptal) is not (2 or 3))
             throw GentegreHatasi.IsKurali(
                 $"{metin} hesabı yalnız GenoTIP AI (sağlık) kurulumunda tanımlanır.");
     }

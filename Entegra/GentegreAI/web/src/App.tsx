@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { modulAcikMi } from './sayfalar/listeTanimlari';
+import { modUyar } from './api/sozlesme';
 import { OturumSaglayici, useOturum } from './kimlik/OturumBaglami';
 import { Giris } from './sayfalar/Giris';
 import { Kabuk } from './sayfalar/Kabuk';
@@ -42,7 +43,7 @@ function Yollar() {
   // Yetkisiz kullanici ana sayfaya dusmesin: ilk erisilebilir ekran.
   const ilkErisilebilir = LISTELER.find(l =>
     yetki(l.yetkiKodu) && !l.menuGizli
-    && (!l.urunModu || l.urunModu === (kullanici?.urunModu ?? 1))
+    && (!l.urunModu || modUyar(l.urunModu, kullanici?.urunModu))
     && modulAcikMi(l, kullanici?.moduller));
   const ilkYol = yetki('panel')
     ? '/panel'
@@ -59,7 +60,7 @@ function Yollar() {
         {LISTELER.filter(l => yetki(l.yetkiKodu) && !l.ozelSayfa
           // Urun modu suzmesi (215): moda ozel ekranlar (Kayit Kabul = GenoTIP)
           //   diger urunde rotasiyla birlikte yok olur.
-          && (!l.urunModu || l.urunModu === (kullanici.urunModu ?? 1))
+          && (!l.urunModu || modUyar(l.urunModu, kullanici.urunModu))
           // MODUL suzmesi (359): kapali modulun ROTASI da acilmaz - menude
           //   gizlemek yetmiyor, adres cubuguna yazilinca ekran yine acilirdi.
           && modulAcikMi(l, kullanici.moduller)).flatMap(l => {

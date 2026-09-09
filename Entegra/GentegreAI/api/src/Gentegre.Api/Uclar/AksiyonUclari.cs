@@ -36,6 +36,9 @@ public static class AksiyonUclari
             // URUN MODU (345): saglik entegrasyonlarina ozgu aksiyonlar (SKRS
             //   liste senkronu) ERP kurulumunda gorunmez - calisacagi bir
             //   servis yok, arac cubugunda durmasi gurultu.
+            //   MOD 3 ("ikisi") HER IKI KUMEYI de gosterir (492): tam esitlik
+            //   arayan suzgec, karma kurulumda iki urunun ozel aksiyonlarini
+            //   birden gizliyordu.
             var urunModu = await kartlar.UrunModuAsync(baglam.SubeId ?? 0, iptal);
 
             var sonuc = tanimlar
@@ -44,7 +47,7 @@ public static class AksiyonUclari
                 .Where(a => eBelgeVar
                             || !(a.Grup.Equals("ebelge", StringComparison.OrdinalIgnoreCase)
                                  || a.Grup.Equals("gelen", StringComparison.OrdinalIgnoreCase)))
-                .Where(a => a.UrunModu == 0 || a.UrunModu == urunModu)
+                .Where(a => a.UrunModu == 0 || urunModu == 3 || a.UrunModu == urunModu)
                 .Where(a => AksiyonKatalogu.Yetkili(a, baglam.Yetkiler))
                 .OrderBy(a => a.Sira)
                 .Select(a =>
