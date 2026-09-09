@@ -101,22 +101,51 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif,
    * karti) ekrana degil ACAN KARTIN kutusuna gore konumlanip kirpiliyordu.
    * Portal ile her pencere gercekten ekrana gore ortalanir.
    */
+  /**
+   * TAM EKRAN (kullanici: "kartlari full ekran yapma / geri eski haline
+   * getirme olabilir mi"). Cok sekmeli kartlarda (tetkik, cari, belge) grid ve
+   * takvim 1080px'e sigmiyordu; kullanici pencereyi buyutemedigi icin yatay
+   * kaydirmak zorundaydi.
+   *
+   * Secim OTURUMLUK degil KALICI: her kart acilisinda yeniden buyutmek,
+   * "gecen sefer nasil biraktimsa oyle acilsin" beklentisini kiriyordu.
+   * Tasima kaydirmasi tam ekranda SIFIRLANIR - ekrana oturmus bir pencerenin
+   * kaydirilmis olmasi anlamsiz.
+   */
+  const [tamEkran, setTamEkran] = useState(() => {
+    try { return localStorage.getItem('gentegre.kart.tamekran') === '1' }
+    catch { return false }
+  });
+  const tamEkranDegis = () => setTamEkran(a => {
+    const yeni = !a;
+    try { localStorage.setItem('gentegre.kart.tamekran', yeni ? '1' : '0') } catch { /* yok say */ }
+    if (yeni) setKaydirma({ x: 0, y: 0 });
+    return yeni;
+  });
+
   return createPortal(
     <div className={`kaperde${enUst ? ' enust' : ''}`}
          onMouseDown={e => { if (e.target === e.currentTarget) onKapat?.() }}>
-      <div className={`kawin${dar ? '' : ' genis'}${ekSinif ? ' ' + ekSinif : ''}`}
+      <div className={`kawin${dar ? '' : ' genis'}${tamEkran ? ' tam' : ''}`
+                      + `${ekSinif ? ' ' + ekSinif : ''}`}
            onMouseDown={e => e.stopPropagation()}
-           style={kaydirma.x || kaydirma.y
+           style={!tamEkran && (kaydirma.x || kaydirma.y)
              ? { transform: `translate(${kaydirma.x}px, ${kaydirma.y}px)` } : undefined}>
         {/* Baslik cubugundan tutup FAREYLE TASINIR (kullanici): arkadaki listeyi
             gormek icin pencereyi kenara cekmek gerekiyordu. Cift tik ilk yerine
             dondurur; dugmeler/girdiler surukleme baslatmaz. */}
-        <div className="kabas" style={{ cursor: 'move', userSelect: 'none' }}
-             onMouseDown={surukleBasla}
+        <div className="kabas"
+             style={{ cursor: tamEkran ? 'default' : 'move', userSelect: 'none' }}
+             onMouseDown={tamEkran ? undefined : surukleBasla}
              onDoubleClick={() => setKaydirma({ x: 0, y: 0 })}>
           <span>{baslik}</span>
           {ustBilgi}
           <span className="kapt">Esc ile kapanır</span>
+          {/* Baslik cubugundaki dugme SURUKLEMEYI baslatmasin. */}
+          <button type="button" className="kabas-dugme"
+                  title={tamEkran ? 'Pencereye döndür' : 'Tam ekran'}
+                  onMouseDown={e => e.stopPropagation()}
+                  onClick={tamEkranDegis}>{tamEkran ? '🗗' : '🗖'}</button>
         </div>
         {/* Mockup: Kaydet/Sil/Yazdir/Kapat baslikla idstrip ARASINDA arac cubugu (alt degil). */}
         <div className="katoolbar">{alt}</div>

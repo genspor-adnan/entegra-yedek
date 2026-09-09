@@ -33,7 +33,13 @@ public sealed record AksiyonTanimi(
     /// gorunmesin diye var - pasif gosterip "neden calismiyor" sorusu
     /// urettirmek yerine listeden dusuruluyor.
     /// </summary>
-    int UrunModu = 0);
+    int UrunModu = 0,
+    /// <summary>
+    /// Dugme vurgusu: "onay" yesil · "ret" kirmizi · "bir" birincil. Bos ise
+    /// notr. Kabul/ret gibi KARSIT ciftlerde renk, dugmeyi okumadan hangisinin
+    /// hangisi oldugunu soyler - yanlis dugmeye basmak numuneyi reddeder.
+    /// </summary>
+    string? Bicim = null);
 
 /// <summary>Ekran basina aksiyon listesi.</summary>
 public static class AksiyonKatalogu
@@ -575,14 +581,18 @@ public static class AksiyonKatalogu
                 // KABUL / RET ISTEM DUZEYINDE: bir hastanin dort tupu birlikte
                 //   alinir ve birlikte kabul edilir (mockup araç çubuğu).
                 //   Tup bazli islem Numune Kabul ekraninda kalir.
-                new("lab.istem-kabul", "✔ Numune Kabul", "lab-istem",
+                // AD KISA, RENK AYIRT EDICI (kullanici): "Kabul" yesil,
+                //   "Ret" kirmizi. Ikisi yan yana duran KARSIT eylemdir;
+                //   ayni renkte iki uzun etiket, acele eden bir kullaniciya
+                //   yanlis dugmeye bastirir - ve ret geri alinmaz.
+                new("lab.istem-kabul", "✔ Kabul", "lab-istem",
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "lab.numune", Islem: Islem.Degistir, KayitGerekir: true,
-                    Sira: 27),
-                new("lab.istem-ret", "✖ Numune Ret", "lab-istem",
+                    Sira: 27, Bicim: "onay"),
+                new("lab.istem-ret", "✖ Ret", "lab-istem",
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "lab.numune", Islem: Islem.Degistir, KayitGerekir: true,
-                    Sira: 28),
+                    Sira: 28, Bicim: "ret"),
                 new("lab.rapor", "🖨 Sonuç Raporu", "lab-istem",
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "lab", Islem: Islem.Gor, KayitGerekir: true, Sira: 30),

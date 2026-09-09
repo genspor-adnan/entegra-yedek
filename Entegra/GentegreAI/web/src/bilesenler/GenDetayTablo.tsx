@@ -91,6 +91,14 @@ interface Props {
    */
   gizliAlanlar?: ReadonlySet<string>;
   /**
+   * YALNIZ GRIDDE gizlenen alanlar - modalde DURUR (kullanici: "sutunlari
+   * kaldir ama edite izin ver"). `gizliAlanlar` alani her yerden siler; bu ise
+   * tabloyu sadelestirir, duzenlemeyi kisitlamaz. Referans araliklarinda
+   * "Yaş Alt (gün)" / "Yaş Üst (gün)" boyle: gridde okunur "Kime" sutunu
+   * yeter, gun degerleri duzenlerken gerekir.
+   */
+  gridGizliAlanlar?: ReadonlySet<string>;
+  /**
    * DUZ METIN cizilen alanlar: kutu/combo yerine degerin kendisi. Satirin
    * KIMLIGINI tasiyan ve sunucunun yazdigi alanlar icindir (ör. fizik muayene
    * satirindaki "Sistem" - satirlar sablondan acilir, hekim yalniz normal
@@ -180,7 +188,7 @@ function gunFarki(bas: string, bit: string): number | null {
 
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
                                modalDuzenle, taslakKural, cipler, kutuSinif,
-                               gizliAlanlar, etiketAlanlari, sadeGrid, ekleGizli,
+                               gizliAlanlar, gridGizliAlanlar, etiketAlanlari, sadeGrid, ekleGizli,
                                aramaKaynaklari, aramaEkFiltre,
                                modalAltBilesen }: Props) {
   /**
@@ -343,7 +351,10 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const [aktifCip, setAktifCip] = useState(0);
   /** Uc nokta menusu (satirlar gridi): konum + gizlenen kolonlar (oturumluk). */
   const [menuKonum, setMenuKonum] = useState<{ x: number; y: number } | null>(null);
-  const [gizliKolonlar, setGizliKolonlar] = useState<Set<string>>(new Set());
+  // Uc nokta menusundeki kullanici secimi ile EKRANIN kendi gizlileri ayni
+  //   kumede toplanir: ikisi de yalniz GRIDI etkiler, modal tam kalir.
+  const [gizliKolonlar, setGizliKolonlar] =
+    useState<Set<string>>(() => new Set(gridGizliAlanlar ?? []));
 
   /** Salt gorunum hucresi - kural `detayGorunum.ts`'te (saf, testli). */
   const gorunum = (satir: Record<string, unknown>, a: typeof alanlar[number]) =>

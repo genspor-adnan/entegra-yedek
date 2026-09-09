@@ -79,8 +79,10 @@ export function GenToolbar({ aksiyonlar, calistir, altSecenekler }: CalistirProp
               //   Başvuru" gibi. `kasa.*` eklemeleri (Tahsilat) ikincil islem -
               //   mavi olunca ekranin ana eylemi sanilıyordu (kullanici:
               //   "başvuru listesi tahsilat butonu mavi rengi kaldır").
-              className={`d ${a.kod.endsWith('.yeni') && !a.kod.startsWith('kasa.')
-                              ? 'bir' : ''}`}
+              // VURGU once SUNUCUDAN (a.bicim): kabul/ret gibi karsit ciftte
+              //   renk, dugmeyi okumadan hangisinin hangisi oldugunu soyler.
+              className={`d ${a.bicim ?? (a.kod.endsWith('.yeni')
+                              && !a.kod.startsWith('kasa.') ? 'bir' : '')}`}
               onClick={e => {
                 if (!alt) { calistir(a.kod); return }
                 e.stopPropagation();

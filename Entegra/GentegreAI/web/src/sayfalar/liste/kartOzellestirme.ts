@@ -73,7 +73,11 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     //   kutu olunca tablo okunmuyordu. Kayıt bir BÜTÜN olarak görülüp
     //   değiştirilir: yarım girilmiş bir referans kuralı yanlış bayrak üretir.
     detaySecenekleri: {
-      referanslar: { gridKipi: true },
+      // YAŞ GÜN KOLONLARI GRİDDE YOK, MODALDE VAR (kullanıcı: "yaş alt gün ve
+      //   üst gün sütunlarını kaldır ama edite izin ver"). Okunur "Kime"
+      //   sütunu aynı bilgiyi zaten veriyor ("18 yaş ve üstü · ♀ kadın");
+      //   ham gün değerleri kuralı DÜZENLERKEN gerekli, okurken gürültü.
+      referanslar: { gridKipi: true, gridGizli: ['yasAltGun', 'yasUstGun'] },
       cihazlar:    { gridKipi: true },
     },
   },

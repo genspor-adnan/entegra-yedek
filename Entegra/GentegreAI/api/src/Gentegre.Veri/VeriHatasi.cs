@@ -79,7 +79,20 @@ public static class VeriHatasi
             "Doğum tarihi geçersiz: gelecek bir tarih ya da 130 yaştan büyük olamaz.",
         // 175'te kaldirildi; eski kurulumda hala olabilir - ham kisit adi yerine
         //   ne yapilmasi gerektigini soyler.
-        ["ck_sube_efatura"]       = "e-Fatura mükellefi şubede VKN ve gönderici etiketi dolu olmalı."
+        ["ck_sube_efatura"]       = "e-Fatura mükellefi şubede VKN ve gönderici etiketi dolu olmalı.",
+        // TETKIK CALISMA DUZENI (486): seri duzeninde gun ve saat olmadan
+        //   sonuc zamani hesaplanamaz. Ham kisit adi ekranda "Deger kurala
+        //   uymuyor" diye cikiyor, kullanici NEYI duzeltecegini bilemiyordu -
+        //   kayit sessizce eski degerinde kaliyordu (gercek vaka: "calisma
+        //   zamani degistiriyorum ama listede surekli ayni").
+        ["ck_lab_tetkik_seri_tanimli"] =
+            "Seri düzeninde çalışma günü ve saati zorunlu: en az bir gün seçin "
+            + "ve saat yazın (örn. 09:00,15:00). Tetkik her an çalışılıyorsa "
+            + "düzeni \"Sürekli\" yapın.",
+        ["ck_lab_tetkik_calisma_duzeni"] =
+            "Çalışma düzeni geçersiz (Sürekli · Mesai içi · Belirli günlerde).",
+        ["ck_hizmet_yas_araligi"] =
+            "En küçük yaş, en büyük yaştan büyük olamaz."
     };
 
     /// <summary>

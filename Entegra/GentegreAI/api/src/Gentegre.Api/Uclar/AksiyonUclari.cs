@@ -51,7 +51,7 @@ public static class AksiyonUclari
                 {
                     var (aktif, sebep) = Kosul(a, baglam, kayitId, belge);
                     return new AksiyonYaniti(a.Kod, a.Ad, a.Grup, a.Hedef, a.Kisayol,
-                                             a.KayitGerekir, aktif, sebep);
+                                             a.KayitGerekir, aktif, sebep, a.Bicim);
                 })
                 .ToList();
 

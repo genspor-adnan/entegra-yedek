@@ -170,6 +170,10 @@ input, select { font: inherit; color: inherit }
 .d.teh { color: #fff; background: linear-gradient(#d9534f, #b83b37); border-color: #a3312f; font-weight: 700 }
 /* Mockup (Ekranlar/satis_faturasi.html) arac cubugu: Kaydet YESIL, e-Belge MAVI. */
 .d.onay { color: #fff; background: linear-gradient(#4fae68, #2e7d46); border-color: #2e7d46; font-weight: 700 }
+/* RET / GERI ALINAMAZ eylem (kabul-ret gibi karsit ciftte): kirmizi, dugmeyi
+   okumadan hangisinin hangisi oldugu anlasilsin. */
+.d.ret { color: #fff; background: linear-gradient(#d0605a, #b3261e); border-color: #b3261e; font-weight: 700 }
+.d.ret:hover:not(:disabled) { background: linear-gradient(#d97a74, #b3261e) }
 .d.onay:hover:not(:disabled) { background: linear-gradient(#5cbb75, #2e7d46) }
 .d.teh:hover:not(:disabled) { background: linear-gradient(#e0605c, #c0413d) }
 /* YESIL dugme (kullanici - "＋ Yeni Başvuru"): kaydet (mavi) ve sil (kirmizi)
@@ -416,6 +420,19 @@ table.grid tr.flt input {
 }
 /* Cari/stok gibi cok alanli kartlar icin genis varyant. */
 .kawin.genis { width: min(1080px, 96vw) }
+/* TAM EKRAN (kullanici): cok sekmeli kartta grid ve takvim 1080px'e sigmiyor,
+   kullanici yatay kaydirmak zorunda kaliyordu. Ortalama transform'u kalkar -
+   pencere ekrana OTURUR; koseleri yuvarlak kalir ki modal oldugu belli olsun. */
+.kawin.tam {
+  top: 8px; left: 8px; right: 8px; bottom: 8px;
+  transform: none; width: auto; max-height: none;
+}
+.kabas-dugme {
+  border: 1px solid rgba(255, 255, 255, .35); background: rgba(255, 255, 255, .12);
+  color: #fff; border-radius: var(--r); cursor: pointer; font-size: 12px;
+  line-height: 1; padding: 3px 7px; margin-left: 6px;
+}
+.kabas-dugme:hover { background: rgba(255, 255, 255, .24) }
 .kabas {
   display: flex; align-items: center; gap: 10px; padding: 8px 12px;
   background: linear-gradient(#2b5c95, #1c4374); color: #fff; font-weight: 700; font-size: 13px;

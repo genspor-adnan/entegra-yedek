@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Sozlesme;
+﻿namespace Gentegre.Cekirdek.Sozlesme;
 
 /// <summary>
 /// API §7 - aksiyon katalogu satiri.
@@ -14,7 +14,13 @@ public sealed record AksiyonYaniti(
     string? Kisayol,
     bool KayitGerekir,
     bool Aktif,
-    string? PasifSebep);
+    string? PasifSebep,
+    /// <summary>
+    /// Dugmenin VURGUSU: "onay" (yesil) · "ret" (kirmizi) · "bir" (birincil).
+    /// Renk KARARI sunucudadir - istemcinin kod adina bakip renk uydurmasi,
+    /// ayni aksiyonu iki ekranda iki turlu gostermeye acik kapi birakirdi.
+    /// </summary>
+    string? Bicim = null);
 
 public sealed class AksiyonListesi
 {

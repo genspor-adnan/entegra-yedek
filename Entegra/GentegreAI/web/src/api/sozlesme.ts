@@ -410,6 +410,10 @@ export interface AksiyonYaniti {
   kayitGerekir: boolean;
   aktif: boolean;
   pasifSebep?: string | null;
+  /** Düğme vurgusu: 'onay' yeşil · 'ret' kırmızı · 'bir' birincil. Renk
+      kararı SUNUCUDA - istemcinin kod adına bakıp renk uydurması, aynı
+      aksiyonu iki ekranda iki türlü göstermeye açık kapı bırakırdı. */
+  bicim?: string | null;
 }
 
 export interface AksiyonListesi {

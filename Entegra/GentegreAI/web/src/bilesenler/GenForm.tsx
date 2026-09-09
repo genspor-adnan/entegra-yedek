@@ -140,7 +140,9 @@ interface Props {
    */
   detaySecenekleri?: Record<string, { gizli?: string[]; sinif?: string;
                                       sade?: boolean; gridKipi?: boolean;
-                                      salt?: boolean; ekleGizli?: boolean }>;
+                                      salt?: boolean; ekleGizli?: boolean;
+                                      /** YALNIZ gridde gizli - modalde durur. */
+                                      gridGizli?: string[] }>;
   /** Sekmesi acilmayacak detaylar (ekranda baska yerde ciziliyorsa). */
   gizliDetaylar?: string[];
   /**
@@ -1495,6 +1497,8 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           gizliAlanlar={ayar?.gizli ? new Set(ayar.gizli)
             : kaynak === 'prim-plani' && Number(deger.primZamani) === 2
             ? new Set(['tahsilatTuru']) : undefined}
+          // Tabloyu sadelestirir, DUZENLEMEYI kisitlamaz: modal tam kalir.
+          gridGizliAlanlar={ayar?.gridGizli ? new Set(ayar.gridGizli) : undefined}
           // ARAMA PLANIN ROLUNE BAGLI (383, kullanici): yalnizca O ROLDE ADAY
           //   olan kisiler listelenir. Rolu isaretlenmemis birine yazilan
           //   satir `belge_satir_rol`'de hic gorunmez, hakedis HIC dogmaz ve
