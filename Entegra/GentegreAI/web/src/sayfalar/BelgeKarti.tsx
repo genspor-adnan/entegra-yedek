@@ -1074,6 +1074,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         ? await api.belgeGuncelle(etkinBelgeId, govde)
         : await api.belgeEkle(govde);
       setSonuc(yanit);
+      // SATIR KIMLIKLERI SUNUCUDAN TAZELENIR (kullanici: "750 fiş girdim,
+      //   tahakkuk modalinde 1.049,99 çıktı"): kayittan sonra kartin
+      //   satirlarinda `satirId` yoktu; ikinci kayitta ayni kalem YENI satir
+      //   sayilip ikinci kez yaziliyordu (900 + 900 = 1.800) ve acik tutarlar
+      //   iki kati gorunuyordu. Donusumle baglanan satirlar artik silinip
+      //   yeniden yazilmadigi icin kimligin dogru tasinmasi sart.
+      if (yanit.satirlar?.length) setSatirlar(yanittanSatirlar(yanit.satirlar, yerelPara));
       // Kayit sonrasi kart TEMIZ sayilir (kaydedilmemis degisiklik uyarisi).
       setKalemDegisti(false);
       setImzaTazele(n => n + 1);
