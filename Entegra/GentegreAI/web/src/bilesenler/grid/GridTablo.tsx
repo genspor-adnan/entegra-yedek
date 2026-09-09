@@ -13,6 +13,7 @@ import type { KolonMeta, ListeSatiri, ListeYaniti } from '../../api/sozlesme';
  */
 export function GridTablo(p: GridTabloProps) {
   const {
+    bosEk,
     kolonlar, satirlar, yukleniyor, gruplar, grupKolonu, gorunenToplamlar, satirBoyu,
     toplamSeridiVar, sayfa, sonSayfa, secili, sayfaIdleri, secimiUygula,
     satirSecimiDegistir, hepsiSecili, hepsiRef, satirTiklandi, satirTiklaninca,
@@ -159,7 +160,14 @@ export function GridTablo(p: GridTabloProps) {
       );
     })}
     {!yukleniyor && satirlar.length === 0 && (
-      <tr><td colSpan={kolonlar.length + 1} className="bos">Kayit yok</td></tr>
+      <tr><td colSpan={kolonlar.length + 1} className="bos">
+        Kayıt yok
+        {/* BOS LISTE SEBEBINI SOYLESIN (kullanici: "başvuru kayıtları
+            listelenmedi"): basvuru listesi varsayilan olarak BUGUNU gosterir;
+            o gun kayit yoksa ekran "liste bozuk" gibi duruyordu. Ekran sahibi
+            buraya sebebi ve tek tikla cikis yolunu koyar. */}
+        {bosEk}
+      </td></tr>
     )}
   </tbody>
   {toplamSeridiVar && (
@@ -183,6 +191,8 @@ export function GridTablo(p: GridTabloProps) {
 }
 
 export interface GridTabloProps {
+  /** Bos listede "Kayıt yok"un altina eklenecek aciklama/dugme. */
+  bosEk?: React.ReactNode;
   kolonlar: KolonMeta[];
   satirlar: ListeSatiri[];
   yukleniyor: boolean;

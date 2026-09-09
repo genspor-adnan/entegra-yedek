@@ -78,6 +78,8 @@ interface Props {
    * (.ucPanel) verir.
    */
   solPanel?: React.ReactNode;
+  /** Bos listede gosterilecek ek aciklama/dugme (ör. "Tüm tarihleri göster"). */
+  bosEk?: React.ReactNode;
   /**
    * Acilista uygulanan gruplama kolonu (492: Tetkik Kataloğu bölüme göre).
    * Kullanici uc-nokta menusunden degistirebilir; bu yalnizca BASLANGIC.
@@ -187,7 +189,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                           aramaGorunumGizli, gorunumSecimGizli, aramaGizli,
                           aracCubuguSeritte,
                           seciliBaslangicId, cipSonu, kodSuzgeci, kodSuzgecDeger: kodDisDeger,
-                          onKodSuzgec, varsayilanGrup, solPanel,
+                          onKodSuzgec, varsayilanGrup, solPanel, bosEk,
                           cipBaslangic, altPanel, ustPanel, yanPanel, ekGorunum,
                           onCipSecildi, onCipRota, onSecimDegisti, yenile, odaklaSonEklenen,
                           icerikAlani, icerikBaslik }: Props) {
@@ -921,6 +923,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
           <div className="gridwrap">
             <div className="gridkaydir">
               <GridTablo
+                bosEk={bosEk}
                 kolonlar={dovizsizGizle?.length && !dovizVarMi
                   ? kolonlar.filter(k => !dovizsizGizle.includes(k.ad))
                   : kolonlar}

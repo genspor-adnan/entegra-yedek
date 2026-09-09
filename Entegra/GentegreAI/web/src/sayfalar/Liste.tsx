@@ -1859,6 +1859,20 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       // SECILI TETKIK PANELI (492, mockup lab_tetkik_katalogu sag kolonu):
       //   katalogda gezerken LOINC/referans/panel/sonuc zamani sorulari karti
       //   acmadan cevaplansin.
+      // BOS BASVURU LISTESI (kullanici: "başvuru kayıtları listelenmedi"):
+      //   varsayilan suzgec BUGUN; o gun kayit yoksa liste bos gorunuyor ve
+      //   sebebi yazmiyordu. Sebep + tek tikla tum tarihler.
+      bosEk={tanim.basvuruSuzgeci && bvTarih !== '' ? (
+        <div style={{ marginTop: 6 }}>
+          <span className="sonuk">
+            Seçili tarih aralığında başvuru yok
+            ({TARIH_ON_AYARLAR.find(t => t.deger === bvTarih)?.ad ?? bvTarih}).
+          </span>{' '}
+          <button type="button" className="d" onClick={() => setBvTarih('')}>
+            Tüm tarihleri göster
+          </button>
+        </div>
+      ) : undefined}
       solPanel={tanim.kaynak === 'lab-tetkik'
         ? <LabKatalogAgaci secim={agacSecim} onSecim={setAgacSecim} />
         : undefined}
