@@ -469,6 +469,26 @@ export const api = {
     gonder<{ id: number; say: number; mesaj: string }>(
       `/api/lab/istem/${istemId}/saklama`, { yer, sicaklik }),
 
+  /**
+   * ÇALIŞMA TAKVİMİ ÖNİZLEMESİ (487). Düzen PARAMETRE gider, tetkik id ile
+   * değil: kullanıcı kartta düzeni değiştirirken önizleme kaydetmeden
+   * güncellensin. Saatleri sunucu hesaplar - aynı kural istem ekranında da
+   * çalışıyor, ikinci bir hesap iki farklı saat söylerdi.
+   */
+  labCalismaTakvimi: (d: { duzen: number; gunler: number; saatler: string;
+                           kabulSonDk: number; tatDk: number; acilTatDk: number;
+                           acilBeklemez: number; kabul: string }) =>
+    istek<{ duzen: number;
+            hafta: { saat: string; kabulSon: string;
+                     gunler: { acik: boolean; sonuc?: string | null }[] }[];
+            ozet: { simdiKabul: string; simdi: string | null;
+                    kacirilan: string | null; acil: string | null } }>(
+      '/api/lab/calisma-takvimi?'
+      + `duzen=${d.duzen}&gunler=${d.gunler}`
+      + `&saatler=${encodeURIComponent(d.saatler)}`
+      + `&kabulSonDk=${d.kabulSonDk}&tatDk=${d.tatDk}&acilTatDk=${d.acilTatDk}`
+      + `&acilBeklemez=${d.acilBeklemez}&kabul=${encodeURIComponent(d.kabul)}`),
+
   labNumuneBarkod: (barkod: string) =>
     istek<Record<string, unknown>>(
       `/api/lab/numune/barkod/${encodeURIComponent(barkod)}`),

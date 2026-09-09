@@ -6,6 +6,8 @@ import { GenGrid } from '../bilesenler/GenGrid';
 import { RandevuTakvimi } from '../bilesenler/RandevuTakvimi';
 import { GenForm } from '../bilesenler/GenForm';
 import { kartOzellestirme } from './liste/kartOzellestirme';
+import { LabCalismaTakvimi, type CalismaDuzeni }
+  from '../bilesenler/lab/LabCalismaTakvimi';
 import { MuayeneBaglamSeridi } from '../bilesenler/MuayeneBaglamSeridi';
 import { KaynakArama } from '../bilesenler/KaynakArama';
 import {
@@ -2196,7 +2198,17 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         //   "su istem acildi" der; hekimin ihtiyaci SONUCUN KENDISI.
         //   Sarmalayici o sekmenin ALTINA sonuc panelini koyar - gridi
         //   kaldirmadan, cunku "gorduм" isareti ve aciliyet orada duruyor.
-        sekmeSarmalayici={tanim.kaynak === 'muayene' && kartId !== 'yeni'
+        // ÇALIŞMA TAKVİMİ (487): tetkik kartinin "Çalışma Zamanları"
+        //   sekmesinde, alanlarin ALTINDA haftalik tablo ve uc ozet kutusu.
+        //   Alanlar girdi, takvim SONUC - ikisi ayni sekmede olmali ki
+        //   kullanici "bu ayarla sonuc ne zaman cikar" sorusunu kaydetmeden
+        //   gorebilsin. Hesap sunucuda.
+        sekmeSarmalayici={tanim.kaynak === 'lab-tetkik'
+          ? (baslik, icerik, deger) => (
+              baslik.includes('Çalışma Zamanları')
+                ? <>{icerik}<LabCalismaTakvimi deger={deger as CalismaDuzeni} /></>
+                : icerik)
+          : tanim.kaynak === 'muayene' && kartId !== 'yeni'
           ? (baslik, icerik, _deger, izgaraCiz) => (
               baslik.includes('Anamnez')
                 // MOCKUP IKI PANEL (461): solda sikayet/hikaye/ozgecmis,

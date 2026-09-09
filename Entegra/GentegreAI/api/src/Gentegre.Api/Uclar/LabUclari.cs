@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -57,6 +57,97 @@ public static class LabUclari
     public static void LabUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/lab").WithTags("Laboratuvar").RequireAuthorization();
+
+        // -------------------------------------------------- calisma takvimi ---
+        // GET /api/lab/calisma-takvimi - tetkik kartinin "Çalışma Zamanları"
+        //   sekmesindeki HAFTALIK TAKVIM ve UC OZET KUTUSU (487).
+        //
+        // Duzen PARAMETRE olarak gelir, tetkik id ile degil: kullanici
+        //   ekranda duzeni degistirirken onizleme ANINDA guncellensin -
+        //   kaydetmeden once "bu ayarla sonuc ne zaman cikar" gorulmeli.
+        //   Hesabi yine SUNUCU yapar (fn_lab_calisma_sonuc_zamani): ayni kural
+        //   kayitli tetkik icin de calisiyor, iki ayri hesap iki farkli saat
+        //   soylerdi.
+        grup.MapGet("/calisma-takvimi", async (
+            short? duzen, short? gunler, string? saatler, int? kabulSonDk,
+            int? tatDk, int? acilTatDk, short? acilBeklemez, DateTime? kabul,
+            BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("lab", Islem.Gor);
+
+            var d   = duzen ?? 0;
+            var g   = gunler ?? 0;
+            var sa  = saatler ?? "";
+            var ksd = kabulSonDk ?? 0;
+            var tat = tatDk ?? 0;
+            var atat = acilTatDk ?? 0;
+            var ab  = acilBeklemez ?? 1;
+            var an  = kabul ?? DateTime.Now;
+
+            // Deger NULL olabilir ("tanim eksik, bilmiyorum") - TekDegerAsync
+            //   struct'ta da null donebilsin diye nullable T ile cagrilir.
+            async Task<DateTime?> ZamanAsync(DateTime kabulAn, short acil)
+                => await veri.TekDegerAsync<DateTime?>(
+                    "select public.fn_lab_calisma_sonuc_zamani(" +
+                    "  @p0::smallint, @p1::smallint, @p2, @p3, @p4, @p5, @p6::smallint, " +
+                    "  @p7, @p8::smallint)",
+                    [d, g, sa, ksd, tat, atat, ab, kabulAn, acil], iptal);
+
+            // HAFTALIK TAKVIM: saat satiri x gun sutunu. Her hucre o gun o
+            //   saatte CALISILIR mi, ve kabul son saati kacta biter.
+            var saatListesi = sa.Split(',', StringSplitOptions.RemoveEmptyEntries |
+                                            StringSplitOptions.TrimEntries)
+                                .Where(x => TimeOnly.TryParse(x, out _))
+                                .Select(x => TimeOnly.Parse(x))
+                                .OrderBy(x => x).ToList();
+            // Sürekli / mesai düzeninde seri saati yoktur - takvim çizilmez.
+            var hafta = new List<object>();
+            if (d == 2)
+                foreach (var saat in saatListesi)
+                {
+                    var gunler7 = new List<object>();
+                    for (var i = 0; i < 7; i++)
+                    {
+                        var acikMi = (g & (1 << i)) > 0;
+                        gunler7.Add(new
+                        {
+                            acik = acikMi,
+                            // Sonuç saati o günün serisine göre: çalışma + TAT.
+                            sonuc = acikMi ? saat.AddMinutes(tat).ToString("HH:mm") : null,
+                        });
+                    }
+                    hafta.Add(new
+                    {
+                        saat = saat.ToString("HH:mm"),
+                        kabulSon = saat.AddMinutes(-ksd).ToString("HH:mm"),
+                        gunler = gunler7,
+                    });
+                }
+
+            // ÜÇ ÖZET: mockup'taki kutular. Hepsi AYNI kuraldan geçer.
+            var simdi = await ZamanAsync(an, 0);
+            // "Kabul son saatinden sonra": bir sonraki seriye kalan numune.
+            //   Bir dakika sonrası sorulur - sınırın hangi tarafına düştüğü
+            //   kullanıcının en çok yanıldığı yerdir.
+            var kacan = await ZamanAsync(
+                (simdi is { } ilk && d == 2 ? ilk.AddMinutes(-tat) : an).AddMinutes(-ksd + 1), 0);
+            var acilZaman = await ZamanAsync(an, 1);
+
+            return Results.Ok(new
+            {
+                duzen = d, hafta,
+                ozet = new
+                {
+                    simdiKabul = an,
+                    simdi,
+                    kacirilan = kacan,
+                    acil = acilZaman,
+                },
+                izlemeNo = baglam.IzlemeNo,
+            });
+        });
 
         // ------------------------------------------------------------ istem ---
 

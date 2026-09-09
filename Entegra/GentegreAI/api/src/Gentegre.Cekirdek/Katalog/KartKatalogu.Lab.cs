@@ -174,15 +174,14 @@ public static partial class KartKatalogu
             //   32 Cmt · 64 Paz. Tek kolonda cunku "hangi gunler" tek sorudur;
             //   yedi ayri mantik kolonu ayni soruyu yedi kez sorardi.
             new("calismaGunleri", "calisma_gunleri", "sayi",
-                Baslik: "Çalışma Günleri (1 Pzt · 2 Sal · 4 Çar · 8 Per · 16 Cum · 32 Cmt · 64 Paz)",
-                Grup: "Çalışma Zamanları"),
+                Baslik: "Çalışma Günleri", Grup: "Çalışma Zamanları"),
             new("calismaSaatleri", "calisma_saatleri", "metin", EnFazlaUzunluk: 100,
-                Baslik: "Çalışma Saatleri (09:00,15:00)", Grup: "Çalışma Zamanları"),
+                Baslik: "Çalışma Saatleri", Grup: "Çalışma Zamanları"),
             new("kabulSonDk", "kabul_son_dk", "sayi",
-                Baslik: "Kabul Son Saati (çalışmadan kaç dk önce)",
+                Baslik: "Numune Kabul Son Saati (dk önce)",
                 Grup: "Çalışma Zamanları"),
             new("enAzSeri", "en_az_seri", "sayi",
-                Baslik: "En Az Seri Sayısı (0 = beklemez)", Grup: "Çalışma Zamanları"),
+                Baslik: "En Az Seri Sayısı", Grup: "Çalışma Zamanları"),
             new("tatilCalisir", "tatil_calisir", "mantik",
                 Baslik: "Resmî Tatilde Çalışılır", Grup: "Çalışma Zamanları"),
             new("acilBeklemez", "acil_beklemez", "mantik",
@@ -194,6 +193,15 @@ public static partial class KartKatalogu
             {
                 new("id", "id", "sayi", Yazilabilir: false),
                 new("sira", "sira", "sayi", Baslik: "Sıra"),
+                // KİME (488, kullanici: "referans yas araligi da birimli
+                //   anlasilir olsun"). Gun cinsinden saklanan aralik ekranda
+                //   "6570 — 54750" diye iki sayiydi: sayi dogru, cevap degil.
+                //   Yas + cinsiyet + gebelik TEK metinde - kural bir butundur,
+                //   uc hucre birden okunarak anlasilmamali. SALT OKUNUR:
+                //   turetilmis alan, duzenleme asagidaki alanlardan yapilir.
+                new("kime",
+                    "public.fn_lab_referans_kime(cinsiyet, yas_alt_gun, yas_ust_gun, gebelik)",
+                    "metin", Yazilabilir: false, Baslik: "Kime"),
                 new("cinsiyet", "cinsiyet", "kod", SabitKodlar: LabCinsiyetKodlari,
                     Baslik: "Cinsiyet"),
                 // Yaş GÜN cinsinden: yenidoğan aralıkları gün/hafta ölçeğinde.

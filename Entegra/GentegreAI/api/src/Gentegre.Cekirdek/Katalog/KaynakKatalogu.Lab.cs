@@ -26,6 +26,16 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",  "t.id",  "sayi",  "Id", Varsayilan: false),
+            // IKON SUTUNU (mockup): bolumun simgesi kodun SOLUNDA. Bolum
+            //   kolonu varsayilan gorunumden cikinca satirin hangi dala ait
+            //   oldugu kayboluyordu; simge bir kolon genisligi yer kaplamadan
+            //   ayni bilgiyi verir - goz listeyi dala gore tarayabilir.
+            new("ikon",
+                "case t.bolum when 2 then '🩸' when 3 then '🧪' "
+                + "when 4 then '🦠' when 5 then '🧫' when 6 then '🩸' "
+                + "when 7 then '💧' when 9 then '🔬' else '🧪' end",
+                                 "metin", "", Hizalama: "orta", Genislik: 34,
+                                 Siralanabilir: false, Filtrelenebilir: false),
             new("kod", "t.kod", "metin", "Kod", Genislik: 100),
             new("ad",  "t.ad",  "metin", "Tetkik Adı", Genislik: 240),
             // KISA AD listede (mockup): cihaz ve rapor basligindaki ad budur -
@@ -62,8 +72,20 @@ public static partial class KaynakKatalogu
                                  Genislik: 130, Filtrelenebilir: false),
             new("birim", "t.birim", "metin", "Birim", Hizalama: "orta", Genislik: 80),
             // TAT: sözü verilen süre. Listede görünmezse gecikme fark edilmez.
-            new("hedefTat", "t.hedef_tat_dk", "sayi", "TAT", Hizalama: "sag",
-                                 Genislik: 90),
+            // BIRIMLI GOSTERIM (kullanici): dakika ham hâlde okunmuyordu -
+            //   "30240" bir sayi, "21 gün" bir sozdur. Tam bolunuyorsa gun,
+            //   degilse saat, o da degilse dakika. Ham dakika kolonu GIZLI
+            //   duruyor: siralama ve suzgec onu kullanir (metin siralamasi
+            //   "7 gün"u "48 sa"dan once koyardi).
+            new("hedefTatAdi",
+                "case when coalesce(t.hedef_tat_dk, 0) = 0 then '' "
+                + " when t.hedef_tat_dk % 1440 = 0 then (t.hedef_tat_dk / 1440)::text || ' gün' "
+                + " when t.hedef_tat_dk % 60 = 0 then (t.hedef_tat_dk / 60)::text || ' sa' "
+                + " else t.hedef_tat_dk::text || ' dk' end",
+                                 "metin", "TAT", Hizalama: "sag", Genislik: 90,
+                                 Siralanabilir: false, Filtrelenebilir: false),
+            new("hedefTat", "t.hedef_tat_dk", "sayi", "TAT (dk)", Hizalama: "sag",
+                                 Genislik: 90, Varsayilan: false),
             // ÇALIŞMA DÜZENİ (486): "sürekli" mi yoksa haftanın belli
             //   günlerinde seri hâlinde mi. TAT tek başına yanıltıcı - 4
             //   saatlik bir tetkik cuma 14:31'de gelirse pazartesi çıkar.
@@ -103,8 +125,17 @@ public static partial class KaynakKatalogu
             new("yontem", "t.yontem", "metin", "Yöntem", Genislik: 140),
             new("cihazAdi", "coalesce(c.kod, '')", "metin", "Cihaz",
                                  Hizalama: "orta", Genislik: 130),
-            new("otoOnay", "t.oto_onay", "mantik", "Oto Onay", Hizalama: "orta",
-                                 Genislik: 90),
+            // OTO ONAY ROZET (kullanici): tik isareti "acik mi kapali mi"
+            //   sorusunu yarim cevapliyordu - bos hucre "kapali" mi yoksa
+            //   "girilmemis" mi belli degildi. Ham kolon GIZLI: cip suzgeci
+            //   ("Oto Onay") onu okuyor.
+            new("otoOnayAdi",
+                "case when t.oto_onay = 1 then 'Açık' else 'Kapalı' end",
+                                 "metin", "Oto Onay", Hizalama: "orta",
+                                 Bicim: "rozet", Genislik: 100,
+                                 Siralanabilir: false, Filtrelenebilir: false),
+            new("otoOnay", "t.oto_onay", "mantik", "Oto Onay Kodu", Hizalama: "orta",
+                                 Genislik: 90, Varsayilan: false),
             // Referans satırı OLMAYAN tetkik bayrak üretemez - katalog eksikliği
             //   listede görünmezse sonuç sessizce "normal" çıkar.
             new("referansSayisi",

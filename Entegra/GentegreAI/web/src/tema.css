@@ -2957,3 +2957,18 @@ input.skt-gecmis {
   mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 4l8 8M12 4l-8 8' stroke='black' stroke-width='2.2' stroke-linecap='round'/></svg>") center/contain no-repeat;
 }
 .ara-kutu input[type='search']::-webkit-search-cancel-button:hover { opacity: 1 }
+
+/* ÇALIŞMA GÜNÜ ÇİPLERİ (487, tetkik kartı): bit maskesi ham sayı olarak
+   girilemez - yedi düğme, seçili olan mavi. Rozet biçimini paylaşır ki
+   listedeki gün rozetleriyle aynı görünsün. */
+.gun-cipleri { display: flex; gap: 3px; flex-wrap: wrap; align-items: center }
+.gun-cipleri .rozet {
+  cursor: pointer; border: 1px solid var(--cizgi); background: var(--kartzem);
+  color: var(--soluk); font: inherit; font-size: 11px; padding: 2px 9px;
+}
+.gun-cipleri .rozet:disabled { cursor: default; opacity: .6 }
+/* Secili gun: .rozet.mavi tek sinifla geliyordu, .gun-cipleri .rozet daha
+   ozgul oldugu icin zemini eziyordu - secili gun secilmemisle ayni goruluyordu. */
+.gun-cipleri .rozet.mavi {
+  font-weight: 700; background: #e3ecfa; color: #2f5c9e; border-color: #bcd2ef;
+}

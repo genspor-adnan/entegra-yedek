@@ -101,7 +101,32 @@ export function alanCizici(b: AlanCizimBaglami) {
           value={yerelTutar.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                  + ' ' + doviz.yerelPara}
         />
-      ) : kaynak === 'randevu' && a.ad === 'baslangic' ? (() => {
+      ) : kaynak === 'lab-tetkik' && a.ad === 'calismaGunleri' ? (() => {
+        // ÇALIŞMA GÜNLERİ ÇİP OLARAK (mockup lab_tetkik_karti.html). Değer bir
+        //   BİT MASKESİ (1 Pzt · 2 Sal · 4 Çar ...): kullanıcıdan "21" yazmasını
+        //   beklemek, üç günü seçmesi için ikilik tabanda toplama yaptırmaktı.
+        //   Saklanan değer değişmedi - yalnız girişi insanın okuyabileceği hâle
+        //   geldi; tek kolon olmasının sebebi "hangi günler" tek sorudur.
+        const maske = Number(deger[a.ad] ?? 0) || 0;
+        const gunler = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+        return (
+          <span className="gun-cipleri" key={a.ad}>
+            {gunler.map((g, i) => {
+              const bit = 1 << i;
+              const acik = (maske & bit) > 0;
+              return (
+                <button
+                  key={g} type="button"
+                  className={`rozet${acik ? ' mavi' : ''}`}
+                  disabled={salt || !a.yazilabilir}
+                  title={acik ? `${g} kapat` : `${g} aç`}
+                  onClick={() => alanDegistir(a.ad, String(maske ^ bit))}
+                >{g}</button>
+              );
+            })}
+          </span>
+        );
+      })() : kaynak === 'randevu' && a.ad === 'baslangic' ? (() => {
         // Mockup'ta TARIH ve SAAT ayri iki kutu; tek datetime-local kutusu
         //   kayit kabul masasinda saat girisini yavaslatiyordu. Deger yine
         //   tek alan: "yyyy-aa-ggTss:dd".
