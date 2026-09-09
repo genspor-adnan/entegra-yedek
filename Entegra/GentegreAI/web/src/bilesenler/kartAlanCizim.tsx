@@ -21,6 +21,15 @@ export const EPOSTA_ALANLARI = new Set(['eposta']);
 const GIZLI_METIN = /sifre|parola|token|anahtar|secret/i;
 
 /**
+ * Tetkik kartında YALNIZ "Belirli günlerde (seri)" düzeninde anlamlı alanlar.
+ * Sürekli çalışan tetkikte gün/saat sorulmaz - sorulursa girilir, kaydedilir
+ * ve hesapta yok sayılır; kullanıcı değişikliğin neden işe yaramadığını
+ * anlayamaz (gerçek vaka).
+ */
+const SERI_ALANLARI = new Set(['calismaGunleri', 'calismaSaatleri',
+                               'kabulSonDk', 'enAzSeri']);
+
+/**
  * Alan cizimi - GenForm'un icinden cikarildi.
  *
  * Uc islev (girdi / etiketli alan / alan listesi) ayni baglami paylasiyor:
@@ -101,6 +110,34 @@ export function alanCizici(b: AlanCizimBaglami) {
           value={yerelTutar.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                  + ' ' + doviz.yerelPara}
         />
+      ) : kaynak === 'lab-tetkik' && SERI_ALANLARI.has(a.ad)
+           && Number(deger.calismaDuzeni ?? 0) !== 2 ? (
+        /*
+         * SERİ ALANLARI YALNIZ SERİ DÜZENİNDE (kullanıcı: "CRP'yi değiştirdim
+         * ama listeye yansımadı"). Kullanıcı gün ve saat girmişti ama düzen
+         * "Sürekli" kalmıştı; kayıt gitti, değerler yazıldı, sonuç hesabı ise
+         * onları YOK SAYDI - liste haklı olarak "Sürekli" gösteriyordu.
+         *
+         * Girilebilen ama işe yaramayan alan, sessizce yanlış veri üretir.
+         * Düzen "Belirli günlerde" değilken bu alanlar KAPALI ve sebebi yazılı.
+         */
+        <span className="ikili" key={a.ad}>
+          <input readOnly disabled value=""
+                 placeholder="düzen “Belirli günlerde (seri)” olmalı" />
+        </span>
+      ) : kaynak === 'lab-tetkik' && a.ad === 'kabulSonDk' ? (
+        /*
+         * SON KABUL: dar kutu + "dk önce" (kullanıcı). Sayı iki haneli, kutu
+         * ise satırın yarısını kaplıyordu; birim etikette taşınınca da başlık
+         * iki satıra kırılıyordu. Birim değerin YANINDA durur - okunan şey
+         * "30 dk önce" cümlesidir.
+         */
+        <span className="ikili" key={a.ad}>
+          <input className="yari hiza-sag" value={String(deger[a.ad] ?? '')}
+                 disabled={salt || !a.yazilabilir}
+                 onChange={e => alanDegistir(a.ad, e.target.value)} />
+          <input className="birim" value="dk önce" readOnly tabIndex={-1} />
+        </span>
       ) : kaynak === 'lab-tetkik' && a.ad === 'calismaGunleri' ? (() => {
         // ÇALIŞMA GÜNLERİ ÇİP OLARAK (mockup lab_tetkik_karti.html). Değer bir
         //   BİT MASKESİ (1 Pzt · 2 Sal · 4 Çar ...): kullanıcıdan "21" yazmasını

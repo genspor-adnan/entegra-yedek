@@ -451,9 +451,17 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
     setDeger(d => {
       const yeni = { ...d, [ad]: v };
       meta?.alanlar.forEach(x => { if (x.bagliAlan === ad) yeni[x.ad] = '' });
+      // TETKİK ÇALIŞMA DÜZENİ "SERİ" DEĞİLSE gün/saat TEMİZLENİR: kayıtta
+      //   duran ama hesapta yok sayılan değer, veriyi yalancı yapar - liste
+      //   "Sürekli" derken kartta üç gün seçili görünüyordu (gerçek vaka:
+      //   "CRP'yi değiştirdim ama listeye yansımadı").
+      if (kaynak === 'lab-tetkik' && ad === 'calismaDuzeni' && Number(v) !== 2) {
+        yeni.calismaGunleri = 0;
+        yeni.calismaSaatleri = '';
+      }
       return yeni;
     });
-  }, [meta]);
+  }, [meta, kaynak]);
 
   /**
    * Arama modalindan donen secimi YERINE yazar: alan kartin kendi alaniysa

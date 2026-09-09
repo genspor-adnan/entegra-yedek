@@ -178,8 +178,9 @@ public static partial class KartKatalogu
             new("calismaSaatleri", "calisma_saatleri", "metin", EnFazlaUzunluk: 100,
                 Baslik: "Çalışma Saatleri", Grup: "Çalışma Zamanları"),
             new("kabulSonDk", "kabul_son_dk", "sayi",
-                Baslik: "Numune Kabul Son Saati (dk önce)",
-                Grup: "Çalışma Zamanları"),
+                // Birim ETIKETTE degil DEGERIN YANINDA (kullanici): baslik
+                //   iki satira kiriliyordu, okunan sey "30 dk önce" cumlesidir.
+                Baslik: "Son Kabul", Grup: "Çalışma Zamanları"),
             new("enAzSeri", "en_az_seri", "sayi",
                 Baslik: "En Az Seri Sayısı", Grup: "Çalışma Zamanları"),
             new("tatilCalisir", "tatil_calisir", "mantik",
