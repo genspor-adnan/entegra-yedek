@@ -148,6 +148,21 @@ export function gelisSekliKarari(gonderenVar: boolean): 1 | 3 {
  * onizleme toplami, satir yoksa sunucunun kayitli toplami kullanilir.
  * Eksiye dusmez (fazla tahsilatta 0) - hizli tahsilat tutari bundan gelir.
  */
+/**
+ * ACIK BELGE (495): ucretin faturaya/tahakkuka HENUZ donusmemis kismi.
+ *
+ * Kalan sunucudan okunmaz, ucret toplamindan DUSULUR: kart uzerinde yeni
+ * satir eklendiginde (henuz kaydedilmemisken) serit ANINDA dogru rakami
+ * gostersin - kullanici "daha hiç belge kaydı yok ama 0 yazıyor" dedi.
+ * Donusen tutar sunucudan gelir (KDV dahil, kapatilan kovalar).
+ */
+export function acikBelgeHesapla(
+  satirSayisi: number, onizlemeGenel: number, kayitliGenel: number, donusen: number,
+): number {
+  const genel = satirSayisi > 0 ? onizlemeGenel : kayitliGenel;
+  return Math.max(0, Math.round((genel - donusen) * 100) / 100);
+}
+
 export function acikBorcHesapla(
   satirSayisi: number, onizlemeGenel: number, kayitliGenel: number, tahsilToplam: number,
 ): number {

@@ -31,7 +31,7 @@ import { useBasvuruKaynaklari } from './belgeKarti/useBasvuruKaynaklari';
 import { useParaAkislari, type ParaAkisRef } from './belgeKarti/useParaAkislari';
 import { useBelgeFiyatlandirma } from './belgeKarti/useBelgeFiyatlandirma';
 import {
-  provizyonVarMi, gelisSekliKarari, acikBorcHesapla,
+  provizyonVarMi, gelisSekliKarari, acikBorcHesapla, acikBelgeHesapla,
 } from './belgeKartiKurallari';
 import {
   kampanyaFiyatiUygula, paketIcerigiUygula, sonAnahtar, stokSecimindenKalem,
@@ -882,6 +882,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
       tahsilToplami(tahsilat.tahsilatlar)),
     [satirlar.length, onizleme.genel, sonuc, tahsilat.tahsilatlar]);
 
+  /** ACIK BELGE (495): ucret toplami - faturaya/tahakkuka donusen tutar. */
+  const basvuruAcikBelge = useMemo(() => acikBelgeHesapla(
+      satirlar.length, onizleme.genel, Number(sonuc?.belge.genelToplam ?? 0),
+      Number((sonuc?.belge as { donusenBelgeTutari?: number } | undefined)
+        ?.donusenBelgeTutari ?? 0)),
+    [satirlar.length, onizleme.genel, sonuc]);
+
 
   /**
    * Kalem penceresinden donen satiri yazar (yeni ise ekler).
@@ -1407,8 +1414,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
                        mustehaklik={Number(basvuruBilgi.sgkMustehaklik ?? 0)}
                        protokolNo={belgeNo || String(sonuc?.belge.belgeNo ?? '')}
                        kilitli={kilitli}
-                       acikBelge={sonuc?.belge ? Number(
-                         (sonuc.belge as { acikBelgeTutari?: number }).acikBelgeTutari ?? 0) : null}
+                       acikBelge={basvuruAcikBelge}
                        onAra={metin => { setHastaAramaMetni(metin); setCariArama(true) }}
                        onYeniHasta={() => { setHastaAramaYeni(true); setCariArama(true) }} />
         )}

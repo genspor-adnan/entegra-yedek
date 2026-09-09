@@ -488,8 +488,9 @@ export interface AcikSatir {
   tarafUnvan: string;
   belgeDovizi: string;
   kapanmaDurum: number;
-  /** Faturaya/tahakkuka DONUSMEMIS tutar (495) - basvuru seridinde. */
-  acikBelgeTutari?: number | null;
+  /** Faturaya/tahakkuka DONUSMUS tutar, KDV dahil (495). Serit bunu ucret
+      toplamindan duserek "Açık Belge"yi yazar. */
+  donusenBelgeTutari?: number | null;
 }
 
 // belge.kapanma_durum etiketleri BURADA DEGIL: `sayfalar/belgeSabitleri.ts`

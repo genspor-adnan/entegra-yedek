@@ -134,20 +134,20 @@ public sealed partial class BelgeDeposu
                    eb.gib_durum_kodu as "gibDurumKodu", eb.gib_durum_aciklama as "gibDurumAciklama",
                    eb.servis_durum_adi as "servisDurumAdi",
                    b.kapanma_durum as "kapanmaDurum",
-                   -- ACIK BELGE TUTARI (495, kullanici: "belge kesilmedi rozeti
-                   --   yerine donusmeyen tutar"): kovalarin daha FATURAYA /
-                   --   TAHAKKUKA cevrilmemis kismi. Rozet "kesildi mi" diyordu;
-                   --   kabul memurunun sordugu "ne kadari kaldi".
+                   -- DONUSEN TUTAR (495): satirlarin faturaya/tahakkuka
+                   --   CEVRILMIS kismi, KDV DAHIL - ekrandaki "Açık Belge"
+                   --   bunu ucret toplamindan duser (kullanici: "daha hiç
+                   --   belge kaydı yok ama 0 yazıyor" - kalani sunucudan
+                   --   okumak, KAYDEDILMEMIS satirlari saymiyordu).
                    --   Katilim payi (5) HARIC: ciro disi emanet, belgeye
                    --   donusmez.
-                   coalesce((select sum(greatest(
-                                  (d.sgk - d.sgk_kapatilan)
-                                + (d.oss - d.oss_kapatilan)
-                                + (d.hasta_provizyon - d.hasta_provizyon_kapatilan)
-                                + (d.hasta_ek_katki - d.hasta_ek_katki_kapatilan), 0))
+                   coalesce((select sum((d.sgk_kapatilan + d.oss_kapatilan
+                                       + d.hasta_provizyon_kapatilan
+                                       + d.hasta_ek_katki_kapatilan)
+                                      * (1 + coalesce(bs.kdv, 0) / 100.0))
                               from public.belge_satir bs
                               join public.belge_satir_dagilim d on d.belge_satir_id = bs.id
-                             where bs.belge_id = b.id), 0) as "acikBelgeTutari",
+                             where bs.belge_id = b.id), 0) as "donusenBelgeTutari",
                    b.kaynak_tur as "kaynakTur", b.kaynak_id as "kaynakId",
                    kb.belge_no as "kaynakBelgeNo", kb.belge_tarihi as "kaynakBelgeTarihi",
                    kt.ad as "kaynakTurAdi", b.aciklama,
