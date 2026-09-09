@@ -2376,6 +2376,16 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     menuGrup: 'Yönetim', menuAd: 'Firma Bilgileri', ic: '🏢', yetkiKodu: 'sube',
   },
   {
+    // KURUM PROFILI (489) - Firma Bilgileri'nin sekmesiydi, kullanici menude
+    //   AYRI SATIR istedi: kurulumun kendisini (urun modu, kurum tipi, acik
+    //   moduller, kayit/ucretlendirme) belirledigi icin sube kimliginin ic
+    //   sekmesi olarak durmasi onu gizliyordu. Yetki kodu 'sube' KALDI -
+    //   ekrani goren kitle degismesin.
+    kaynak: 'kurum-profili', baslik: 'Kurum Profili', yol: 'Yonetim › Kurum Profili',
+    ozelSayfa: true,
+    menuGrup: 'Yönetim', menuAd: 'Kurum Profili', ic: '🏥', yetkiKodu: 'sube',
+  },
+  {
     // Firma geneli DAVRANIS ayarlari (public.referans). Liste degil (ozelSayfa).
     kaynak: 'genel-ayarlar', baslik: 'Genel Ayarlar', yol: 'Yonetim › Ayarlar › Genel',
     ozelSayfa: true,

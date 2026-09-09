@@ -30,7 +30,8 @@ const MATRIS_ISARET: Record<number, { sinif: string; im: string }> = {
 };
 
 /**
- * KURUM TIPI & SISTEM AYARLARI - Yönetim › Firma Bilgileri'nin ikinci sekmesi.
+ * KURUM PROFILI & SISTEM AYARLARI - Yönetim › Kurum Profili (489'da Firma
+ * Bilgileri'nin sekmesinden kendi ekranina tasindi).
  *
  * Ekranin duzeni Ekranlar/Ayarlar/kurum_tipi_ayarlari.html mockup'indan BIREBIR
  * alindi; mockup'in CSS'i `.kt-kok` altina kapsullendi (kurum tipi kartlari,

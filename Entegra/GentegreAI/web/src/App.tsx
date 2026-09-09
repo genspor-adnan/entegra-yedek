@@ -13,6 +13,7 @@ import { KayitKabulAyarlar } from './sayfalar/KayitKabulAyarlar';
 import { KatalogAyarlar } from './sayfalar/KatalogAyarlar';
 import { DepartmanGorev } from './sayfalar/DepartmanGorev';
 import { FirmaBilgileri } from './sayfalar/FirmaBilgileri';
+import { KurumProfili } from './sayfalar/KurumProfili';
 import { MesajKatmani } from './bilesenler/MesajKatmani';
 import { GenelAyarlar } from './sayfalar/GenelAyarlar';
 import { Mesajlar } from './sayfalar/Mesajlar';
@@ -102,6 +103,8 @@ function Yollar() {
         {/* Departman + gorev (255): tek ekranda iki grid. */}
         {yetki('personel') && <Route path="/departman" element={<DepartmanGorev />} />}
         {yetki('sube') && <Route path="/sube" element={<FirmaBilgileri />} />}
+        {/* Kurum profili (489): Firma Bilgileri'nin sekmesiydi, kendi ekrani. */}
+        {yetki('sube') && <Route path="/kurum-profili" element={<KurumProfili />} />}
         {yetki('belge') && <Route path="/satis-ayarlar" element={<SatisAyarlar />} />}
         {yetki('belge') && <Route path="/alis-ayarlar" element={<AlisAyarlar />} />}
         {/* ÜTS urun sorgu (223): liste degil, canli sorgu formu. */}
