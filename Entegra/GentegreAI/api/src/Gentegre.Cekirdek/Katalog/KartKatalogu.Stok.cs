@@ -294,7 +294,38 @@ public static partial class KartKatalogu
                     Baslik: "Hasta Hazırlığı"),
                 new("ozelUyari",   "ozel_uyari",     "metin", EnFazlaUzunluk: 200,
                     Baslik: "Özel Uyarı"),
-            }, SubeKolonu: null, LogTabloId: 943, Baslik: "Radyoloji Protokolü", TekSatir: true)
+            }, SubeKolonu: null, LogTabloId: 943, Baslik: "Radyoloji Protokolü", TekSatir: true),
+
+            // PANEL / PAKET ICERIGI (496, kullanici: "tekrarli tetkik
+            //   olmasin"): "OGTT", "Tam Kan Sayimi 18 parametre" ya da bir
+            //   check-up paketi, KATALOGDAKI tetkikleri gosterir. Once her
+            //   panel icin ayri hizmet kaydi aciliyordu - "AST( SGOT )"
+            //   katalogda 40 kez vardi; icerik artik satirdir, kopya degil.
+            new DetayTanimi("icerik", "public.hizmet_paket", "paket_hizmet_id",
+            new KartAlani[]
+            {
+                new("id",             "id",                "sayi", Yazilabilir: false),
+                new("icerikHizmetId", "icerik_hizmet_id",  "kod", Zorunlu: true,
+                    KodTablosu: "public.v_hizmet_lookup", Baslik: "Tetkik"),
+                // Kod ve ad SALT OKUNUR: tetkikin kendi kartindan gelir -
+                //   kopyalanirsa ad degisince bayatlar (stok_paket deseni).
+                new("kod",
+                    "(select z.kod from public.hizmet z where z.id = hizmet_paket.icerik_hizmet_id)",
+                    "metin", Yazilabilir: false, Baslik: "Kod"),
+                new("ad",
+                    "(select z.ad from public.hizmet z where z.id = hizmet_paket.icerik_hizmet_id)",
+                    "metin", Yazilabilir: false, Baslik: "Tetkik Adı"),
+                new("kategoriYolu",
+                    "(select case when u.id is null then k.ad else u.ad || ' > ' || k.ad end " +
+                    "   from public.hizmet z " +
+                    "   join public.kategori k on k.id = z.kategori " +
+                    "   left join public.kategori u on u.id = k.ust_id " +
+                    "  where z.id = hizmet_paket.icerik_hizmet_id)",
+                    "metin", Yazilabilir: false, Baslik: "Kategori"),
+                new("adet",           "adet",              "para", Baslik: "Adet"),
+                new("sira",           "sira",              "sayi", Baslik: "Sıra")
+            }, Sirala: "sira, id", SubeKolonu: null, LogTabloId: 921,
+               Baslik: "Panel İçeriği")
         },
         SilmeEngelleri: new[]
         {

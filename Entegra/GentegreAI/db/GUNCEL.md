@@ -91,7 +91,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_firsat_no_uret` | `121_firsat.sql` | — |
 | `fn_fiyat_listesi_dongu_kontrol` | `201_fiyat_listesi.sql` | — |
 | `fn_fiyat_listesi_ek_katki` | `468_kurum_sozlesme_1n.sql` | — |
-| `fn_fiyat_listesi_fiyat` | `214_yazim_olusma_import.sql` | 202_fn_fiyat_listesi.sql, 209_taban_fiyat_izi.sql, 211_taban_satir_izi.sql, 212_yazim_gecis_kurali.sql |
+| `fn_fiyat_listesi_fiyat` | `495_fiyat_satir_kdv_listeden.sql` | 202_fn_fiyat_listesi.sql, 209_taban_fiyat_izi.sql, 211_taban_satir_izi.sql, 212_yazim_gecis_kurali.sql, 214_yazim_olusma_import.sql |
 | `fn_fiyat_listesi_katki` | `291_katilim_payi.sql` | — |
 | `fn_fiyat_listesi_uret` | `214_yazim_olusma_import.sql` | 202_fn_fiyat_listesi.sql, 209_taban_fiyat_izi.sql, 210_taban_liste_izi.sql, 211_taban_satir_izi.sql |
 | `fn_fiyat_listesi_yon_kontrol` | `204_cari_fiyat_listesi.sql` | — |
@@ -262,7 +262,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (122 ad, 38 tanesi birden cok dosyada)
+## Gorunumler (123 ad, 38 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -320,6 +320,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_hesap_lookup` | `071_kasa_master.sql` | — |
 | `v_hesap_plani_lookup` | `074_muhasebe.sql` | — |
 | `v_hizmet_lookup` | `482_hizmet_cinsiyet_yas.sql` | 071_kasa_master.sql |
+| `v_hizmet_paket_ozet` | `496_hizmet_paket.sql` | — |
 | `v_iade_edilebilir_satir` | `133_iade_irsaliye.sql` | 132_iade_satirlari.sql |
 | `v_icd_lookup` | `409_muayene_v1.sql` | — |
 | `v_is_merkezi_lookup` | `429_uretim_v1.sql` | — |

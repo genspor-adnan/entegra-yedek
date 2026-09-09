@@ -318,6 +318,17 @@ public static partial class KaynakKatalogu
     // Gorev / hatirlatma / takvim (108). Liste katmani kod cozmez: tur, durum ve
     //   oncelik SQL'de metne cevrilir, ham kodlar cip filtreleri icin gizli kalir.
 
+    /// <summary>
+    /// Hizmetin verilen TARIFE GRUBUNDAKI liste fiyati (5 Özel · 6 TTB/HUV ·
+    /// 7 SUT). Fiyat listesi yazili satirdan okunur; ayni grupta birden çok
+    /// liste varsa en eski (kurulusun ana tarifesi) kazanir.
+    /// </summary>
+    private static string TarifeFiyati(int grup) =>
+        "(select round(f.fiyat, 2) from public.fiyat_listesi_satir f" +
+        "   join public.fiyat_listesi l on l.id = f.liste_id" +
+        "  where f.hizmet_id = h.id and f.durum = 1 and l.grup = " + grup +
+        "  order by l.id limit 1)";
+
     // ------------------------------------------------------------- hizmet ----
     private static KaynakTanimi Hizmet() => new(
         Ad: "hizmet",
@@ -395,6 +406,29 @@ public static partial class KaynakKatalogu
             //   yazilirsa fatura yanlis tarafa kesilir.
             new("sutKodu", "h.sut_kodu", "metin", "SUT Kodu",   Genislik: 110),
             new("huvKodu", "h.huv_kodu", "metin", "HUV Kodu",   Genislik: 110),
+            // UC TARIFE FIYATI (499, kullanici: "ozel(ucretli) fiyati, TTB
+            //   (HUV fiyati), SUT Fiyati icin hizmet listesi"). Tetkik
+            //   katalogda BIR kez durur (497); hangi kurum tipinin hangi
+            //   fiyati odedigi sozlesmesindeki listeden cikar. Kolonlar
+            //   listenin GRUBUNA bakar (5 Ozel · 6 TTB/HUV · 7 SUT) - liste
+            //   id'leri kurulumdan kuruluma degisir.
+            new("ozelFiyat", TarifeFiyati(5), "para", "Özel (Ücretli)",
+                Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false,
+                Filtrelenebilir: false, Genislik: 130),
+            new("huvFiyat",  TarifeFiyati(6), "para", "TTB / HUV",
+                Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false,
+                Filtrelenebilir: false, Genislik: 120),
+            new("sutFiyat",  TarifeFiyati(7), "para", "SUT",
+                Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false,
+                Filtrelenebilir: false, Genislik: 110),
+            // PANEL MI: icerigi olan hizmet (496). Panelin kendi satiri da
+            //   satilabilir bir kalemdir - katalogda tetkikten ayirt etmenin
+            //   tek yolu icerik sayisi.
+            new("icerikSayisi",
+                "(select count(*)::int from public.hizmet_paket p" +
+                "  where p.paket_hizmet_id = h.id)",
+                "sayi", "İçerik", Hizalama: "orta", Siralanabilir: false,
+                Filtrelenebilir: false, Genislik: 90),
             new("muhKodu", "h.muh_kodu", "metin", "Muh. Kodu",  Varsayilan: false),
             new("durum",   "h.durum",    "kod",   "Durum",      Hizalama: "orta")
         });

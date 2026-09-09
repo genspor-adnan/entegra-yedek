@@ -48,6 +48,7 @@ public static class VeriHatasi
         ["ux_depo_ad"] = "Bu depo adı zaten kullanılıyor.",
         ["ux_depo_varsayilan"] = "Yalnizca bir depo varsayilan olabilir.",
         ["ux_stok_paket_satir"] = "Bu ürün pakete zaten eklenmiş - satırdaki adedi değiştirin.",
+        ["ux_hizmet_paket_satir"] = "Bu tetkik panele zaten eklenmiş - satırdaki adedi değiştirin.",
         ["ux_firsat_no"] = "Bu fırsat numarası zaten kullanılıyor.",
         ["ux_stok_uts_stok"] = "Bu stokun ÜTS bilgisi zaten var.",
         // Kasa atamasi (197/198): ham index adi kullaniciya bir sey soylemiyordu.
