@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (253 ad, 74 tanesi birden cok dosyada)
+## Fonksiyonlar (253 ad, 77 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -43,7 +43,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ceviri_sozluk` | `194_ceviri.sql` | — |
 | `fn_cihaz_siradakiler` | `432_cihaz_ara_katman.sql` | — |
 | `fn_dagilim_pay_grubu` | `470_belge_satir_dagilim.sql` | — |
-| `fn_dagilim_rota` | `470_belge_satir_dagilim.sql` | — |
+| `fn_dagilim_rota` | `493_kurum_turu_kurumu_oder.sql` | 470_belge_satir_dagilim.sql |
 | `fn_degistirme_tarihi` | `015_sema_log_ebelge.sql` | — |
 | `fn_depo_kural_kontrol` | `093_depo_kurallar.sql` | — |
 | `fn_depo_varsayilan_tek` | `090_depo_varsayilan.sql` | — |
@@ -175,7 +175,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_prim_rol_aday_sayisi` | `362_gonderen_calisma_sekli.sql` | — |
 | `fn_prim_taslak_mi` | `330_prim_tahsilat_turu_durum.sql` | — |
 | `fn_prim_uret` | `339_prim_taslak_uretilmez.sql` | 324_prim_semasi.sql, 326_radyoloji_prim_rol.sql, 328_prim_kapsam_kampanya_deseni.sql, 330_prim_tahsilat_turu_durum.sql, 331_kurum_tahakkuk_prim.sql, 332_prim_zamani.sql |
-| `fn_prim_uret_belge` | `332_prim_zamani.sql` | — |
+| `fn_prim_uret_belge` | `492_prim_dagilim_kovalari.sql` | 332_prim_zamani.sql |
 | `fn_rad_rol_tazele` | `332_prim_zamani.sql` | 326_radyoloji_prim_rol.sql |
 | `fn_radyoloji_accession` | `283_radyoloji_cekirdek.sql` | — |
 | `fn_radyoloji_rapor_no` | `303_radyoloji_rapor_no.sql` | — |
@@ -215,7 +215,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_yas_metni` | `488_lab_yas_metni.sql` | — |
 | `fn_yerel_para` | `111_ekstre_doviz_gruplu.sql` | — |
 | `fn_yetki_surumu_artir` | `020_sema_kimlik.sql` | — |
-| `tg_belge_basvuru_sozlesme` | `485_ozel_kurum_sozlesmesiz.sql` | 469_basvuru_sozlesme.sql |
+| `tg_belge_basvuru_sozlesme` | `494_basvuru_kurumu_oder.sql` | 469_basvuru_sozlesme.sql, 485_ozel_kurum_sozlesmesiz.sql |
 | `tg_belge_satir_dagilim_denge` | `470_belge_satir_dagilim.sql` | — |
 | `tg_belge_satir_rol_dogrula` | `361_prim_rol_isaretleri.sql` | — |
 | `tg_belge_satir_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
@@ -226,7 +226,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_kasa_islem_sil_fis` | `354_kasa_islem_silme_kosullari.sql` | — |
 | `tg_kasa_islem_tahsil_tazele` | `321_tahsilat_satir_dagitim.sql` | — |
 | `tg_kategori_dongu_engel` | `270_kategori_agaci.sql` | — |
-| `tg_kurum_sozlesme_kontrol` | `468_kurum_sozlesme_1n.sql` | — |
+| `tg_kurum_sozlesme_kontrol` | `493_kurum_turu_kurumu_oder.sql` | 468_kurum_sozlesme_1n.sql |
 | `tg_lab_varyant_sinif` | `439_lab_genetik.sql` | — |
 | `tg_mesaj_sohbet_tazele` | `342_mesajlasma.sql` | — |
 | `tg_muayene_durum_istemden` | `418_muayene_istem_bagi.sql` | — |

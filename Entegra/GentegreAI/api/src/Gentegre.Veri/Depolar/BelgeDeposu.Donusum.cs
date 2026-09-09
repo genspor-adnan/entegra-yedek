@@ -139,7 +139,12 @@ public sealed partial class BelgeDeposu
               left join public.belge_satir_dagilim dg on dg.belge_satir_id = s.id
              where s.id = any(@p0)
              order by s.sira
-             for update
+             -- KILIT YALNIZ KAYNAK SATIRDA (`of s`): `for update` tek basina
+             --   PG'de "cannot be applied to the nullable side of an outer
+             --   join" ile patliyordu - dagilim satiri LEFT JOIN'in bos
+             --   olabilen tarafi. Dagilim 1:1 ve yalniz OKUNUYOR; kilitlenmesi
+             --   gereken kaynak satirin kendisi.
+             for update of s
             """, baglanti, islem))
         {
             komut.Parameters.AddWithValue("p0", idler);
