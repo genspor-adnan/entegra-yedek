@@ -128,13 +128,13 @@
   </div>
 
   <div class="sekmeler">
-    <div class="sekme on">Genel</div>
-    <div class="sekme">Referans Aralıkları <span class="rz mavi">4</span></div>
-    <div class="sekme">Çalışma Zamanları <span class="rz mavi">Pzt·Çar·Cum</span></div>
-    <div class="sekme">Cihaz Eşleme <span class="rz mavi">2</span></div>
-    <div class="sekme">Besiyeri</div>
-    <div class="sekme">Dış Laboratuvar</div>
-    <div class="sekme">Paneller <span class="rz mavi">3</span></div>
+    <div class="sekme on" data-sekme="genel">Genel</div>
+    <div class="sekme" data-sekme="referans">Referans Aralıkları <span class="rz mavi">4</span></div>
+    <div class="sekme" data-sekme="calisma">Çalışma Zamanları <span class="rz mavi">Pzt·Çar·Cum</span></div>
+    <div class="sekme" data-sekme="cihaz">Cihaz Eşleme <span class="rz mavi">2</span></div>
+    <div class="sekme" data-sekme="besiyeri">Besiyeri</div>
+    <div class="sekme" data-sekme="dislab">Dış Laboratuvar</div>
+    <div class="sekme" data-sekme="paneller">Paneller <span class="rz mavi">3</span></div>
   </div>
 
   <div class="ikiPanel">
@@ -506,5 +506,46 @@
   birimi ve değeri kendi içinde taşır.
 </div>
 
+
+<script>
+/*
+ * MOCKUP SEKMELERI (kullanici: "sekmeler acilmiyor, iclerini goreyim").
+ *
+ * Bolumler HTML'de sirayla duruyor; ayri ayri id vermek yerine DOM sirasindan
+ * eslenir - mockup'a yeni bir bolum eklenince sira listesine bir anahtar
+ * yazmak yeter. Son kutu (Cihaz Esleme + Paneller) tek `.ikiPanel` icinde
+ * iki sutun: sekmeye gore yalniz ilgili sutun acilir.
+ */
+(function () {
+  var win = document.querySelector('.win');
+  var atla = ['title','toolbar','hdr','sekmeler','statusbar'];
+  var bolum = [].slice.call(win.children).filter(function (e) {
+    return !atla.some(function (c) { return e.classList.contains(c) });
+  });
+  var sira = ['genel','referans','calisma','besiyeri','dislab'];
+  var ikili = bolum[sira.length];               // Cihaz Esleme + Paneller
+
+  function goster(k) {
+    [].forEach.call(document.querySelectorAll('.sekme'), function (s) {
+      s.classList.toggle('on', s.dataset.sekme === k);
+    });
+    bolum.forEach(function (e) { e.hidden = true });
+    if (k === 'cihaz' || k === 'paneller') {
+      ikili.hidden = false;
+      ikili.children[0].hidden = (k !== 'cihaz');
+      ikili.children[1].hidden = (k !== 'paneller');
+    } else {
+      var i = sira.indexOf(k);
+      if (i >= 0) bolum[i].hidden = false;
+    }
+  }
+
+  [].forEach.call(document.querySelectorAll('.sekme'), function (s) {
+    s.style.cursor = 'pointer';
+    s.addEventListener('click', function () { goster(s.dataset.sekme) });
+  });
+  goster('genel');
+})();
+</script>
 </body>
 </html>
