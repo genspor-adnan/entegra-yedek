@@ -1714,10 +1714,19 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
           )}
         </>
       ) : tanim.basvuruSuzgeci ? (
-        // BASVURU (kullanici): "Tumu"nun saginda ayracla tarih araligi,
-        //   Odeyen, Bolum agaci, Doktor. Ayraci serit zaten cipSonu'ndan
-        //   once koyuyor.
+        // BASVURU (kullanici): serit "Sık" dugmesinin hemen saginda TARIH
+        //   ARALIGI ile baslar - listeyi once tarihe gore daraltmak en sik
+        //   yapilan is; combolarin arasinda kaldiginda aranıyordu. Sonra
+        //   Tamamlanma / Tahsilat / Dönüşüm, ardindan Odeyen, Bolum, Doktor.
         <>
+          <select className="kat-suzgec" value={bvTarih} title="Tarih aralığı"
+                  onChange={e => setBvTarih(e.target.value as TarihOnAyar | '')}>
+            <option value="">Tüm Tarihler</option>
+            {TARIH_ON_AYARLAR.map(t => (
+              <option key={t.deger} value={t.deger}>{t.ad}</option>
+            ))}
+          </select>
+          <span className="durumseg-ayrac" />
           <select className="kat-suzgec" value={bvTamamlanma} title="Tamamlanmaya göre süz"
                   onChange={e => setBvTamamlanma(e.target.value as '' | 'tamam' | 'devam')}>
             <option value="">Tamamlanma: Tümü</option>
@@ -1738,14 +1747,6 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
             <option value="0">Açık</option>
             <option value="1">Kısmi</option>
             <option value="2">Kapanan</option>
-          </select>
-          <span className="durumseg-ayrac" />
-          <select className="kat-suzgec" value={bvTarih} title="Tarih aralığı"
-                  onChange={e => setBvTarih(e.target.value as TarihOnAyar | '')}>
-            <option value="">Tüm Tarihler</option>
-            {TARIH_ON_AYARLAR.map(t => (
-              <option key={t.deger} value={t.deger}>{t.ad}</option>
-            ))}
           </select>
           <select className="kat-suzgec" value={bvOdeyen} title="Ödeyen kuruma göre süz"
                   onChange={e => setBvOdeyen(e.target.value ? Number(e.target.value) : '')}>
