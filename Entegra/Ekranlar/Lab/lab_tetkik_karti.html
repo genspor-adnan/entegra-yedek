@@ -130,6 +130,7 @@
   <div class="sekmeler">
     <div class="sekme on">Genel</div>
     <div class="sekme">Referans Aralıkları <span class="rz mavi">4</span></div>
+    <div class="sekme">Çalışma Zamanları <span class="rz mavi">Pzt·Çar·Cum</span></div>
     <div class="sekme">Cihaz Eşleme <span class="rz mavi">2</span></div>
     <div class="sekme">Besiyeri</div>
     <div class="sekme">Dış Laboratuvar</div>
@@ -261,6 +262,181 @@
         aynı kefeye koymaz. Kurallar sıraya göre denenir, ilk eşleşen kazanır — en dar
         kural en üstte olmalı.
       </span>
+    </div>
+  </div>
+
+  <!-- CALISMA ZAMANLARI -->
+  <div class="grp" style="margin:10px 12px"><div class="gb">Çalışma Zamanları
+      <span class="sp">numune ne zaman çalışılır — sonuç saati buradan doğar</span></div>
+
+    <div class="hdr k4" style="border:none;background:none">
+      <div class="fld"><label class="req">Çalışma düzeni</label>
+        <div class="inp combo">Belirli günlerde (seri)</div></div>
+      <div class="fld"><label>Çalışma günleri</label>
+        <div class="inp">
+          <span class="rz mavi">Pzt</span><span class="rz">Sal</span>
+          <span class="rz mavi">Çar</span><span class="rz">Per</span>
+          <span class="rz mavi">Cum</span><span class="rz pas">Cmt</span>
+          <span class="rz pas">Paz</span>
+        </div></div>
+      <div class="fld"><label>Çalışma saatleri</label>
+        <div class="inp">09:00 · 15:00 <span class="sonuk">· günde 2 seri</span></div></div>
+      <div class="fld"><label>Numune kabul son saati</label>
+        <div class="inp">08:30 <span class="sonuk">· ve 14:30</span></div></div>
+    </div>
+
+    <div class="hdr k4" style="border:none;background:none;padding-top:0">
+      <div class="fld"><label>En az seri sayısı</label>
+        <div class="inp">20 numune <span class="sonuk">· dolmazsa yine çalışılır</span></div></div>
+      <div class="fld"><label>Resmî tatilde</label>
+        <div class="inp combo">Çalışılmaz</div></div>
+      <div class="fld"><label>Acil istem</label>
+        <div class="inp combo">Düzeni beklemez — hemen çalışılır</div></div>
+      <div class="fld"><label>Sonuç süresi (TAT)</label>
+        <div class="inp ro">çalışma başlangıcı + 4 sa <span class="sonuk">· Genel sekmesinden</span></div></div>
+    </div>
+
+    <div class="ic" style="padding-top:0">
+      <div class="grp" style="margin:0"><div class="gb">Haftalık takvim
+          <span class="sp">mavi = çalışma · gri = kapalı · ▲ kabul son saati</span></div>
+        <div class="dg"><table>
+          <thead><tr>
+            <th style="width:110px">Saat</th>
+            <th class="orta">Pzt</th><th class="orta">Sal</th><th class="orta">Çar</th>
+            <th class="orta">Per</th><th class="orta">Cum</th>
+            <th class="orta">Cmt</th><th class="orta">Paz</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>08:30 ▲ kabul</td>
+              <td class="orta"><span class="rz sari">son</span></td><td class="orta sonuk">—</td>
+              <td class="orta"><span class="rz sari">son</span></td><td class="orta sonuk">—</td>
+              <td class="orta"><span class="rz sari">son</span></td>
+              <td class="orta sonuk">—</td><td class="orta sonuk">—</td></tr>
+            <tr><td>09:00 çalışma</td>
+              <td class="orta"><span class="rz mavi">1. seri</span></td><td class="orta sonuk">—</td>
+              <td class="orta"><span class="rz mavi">1. seri</span></td><td class="orta sonuk">—</td>
+              <td class="orta"><span class="rz mavi">1. seri</span></td>
+              <td class="orta sonuk">—</td><td class="orta sonuk">—</td></tr>
+            <tr><td>13:00 sonuç</td>
+              <td class="orta"><span class="rz ok">çıkar</span></td><td class="orta sonuk">—</td>
+              <td class="orta"><span class="rz ok">çıkar</span></td><td class="orta sonuk">—</td>
+              <td class="orta"><span class="rz ok">çıkar</span></td>
+              <td class="orta sonuk">—</td><td class="orta sonuk">—</td></tr>
+            <tr><td>14:30 ▲ kabul</td>
+              <td class="orta"><span class="rz sari">son</span></td><td class="orta sonuk">—</td>
+              <td class="orta"><span class="rz sari">son</span></td><td class="orta sonuk">—</td>
+              <td class="orta"><span class="rz sari">son</span></td>
+              <td class="orta sonuk">—</td><td class="orta sonuk">—</td></tr>
+            <tr><td>15:00 çalışma</td>
+              <td class="orta"><span class="rz mavi">2. seri</span></td><td class="orta sonuk">—</td>
+              <td class="orta"><span class="rz mavi">2. seri</span></td><td class="orta sonuk">—</td>
+              <td class="orta"><span class="rz mavi">2. seri</span></td>
+              <td class="orta sonuk">—</td><td class="orta sonuk">—</td></tr>
+            <tr><td>19:00 sonuç</td>
+              <td class="orta"><span class="rz ok">çıkar</span></td><td class="orta sonuk">—</td>
+              <td class="orta"><span class="rz ok">çıkar</span></td><td class="orta sonuk">—</td>
+              <td class="orta"><span class="rz ok">çıkar</span></td>
+              <td class="orta sonuk">—</td><td class="orta sonuk">—</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="ic" style="padding-top:0">
+      <div class="ozet" style="padding:0">
+        <div class="kart"><div class="b">Şimdi istenirse (Sal 10:40)</div>
+          <div class="d">Çar 13:00 <small>· 26 sa sonra</small></div></div>
+        <div class="kart"><div class="b">Kabul son saatinden sonra</div>
+          <div class="d">bir sonraki seri <small>· Sal 14:31 → Çar 09:00 serisi</small></div></div>
+        <div class="kart"><div class="b">Acil istenirse</div>
+          <div class="d">14:40 <small>· düzen beklenmez, +4 sa</small></div></div>
+      </div>
+      <div class="sonuk" style="margin-top:8px">
+        Sonuç saati <b>hesaplanır, elle yazılmaz</b>: numunenin kabul zamanı → bu takvimdeki
+        ilk uygun çalışma → çalışma + TAT. Kabul son saatini bir dakika geçen numune bir
+        sonraki seriye kalır; hastaya söylenen saat de o an değişir.
+      </div>
+    </div>
+  </div>
+
+  <!-- BESIYERI (kultur tetkiklerinde) -->
+  <div class="grp" style="margin:10px 12px"><div class="gb">Besiyeri
+      <span class="sp">yalnız kültür tetkiklerinde — numune hangi besiyerlerine ekilir</span></div>
+    <div class="dg"><table>
+      <thead><tr>
+        <th style="width:26px"></th><th class="orta">Sıra</th><th>Besiyeri</th>
+        <th>Atmosfer</th><th class="orta">Sıcaklık</th><th class="orta">İnkübasyon</th>
+        <th>Okuma zamanları</th><th>Amaç</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="orta">≡</td><td class="orta">1</td><td>Kanlı agar (%5 koyun kanı)</td>
+          <td>Aerop</td><td class="orta">35 °C</td><td class="orta">18—24 sa</td>
+          <td>24. sa</td><td class="sonuk">Genel üreme, hemoliz</td></tr>
+        <tr><td class="orta">≡</td><td class="orta">2</td><td>EMB agar</td>
+          <td>Aerop</td><td class="orta">35 °C</td><td class="orta">18—24 sa</td>
+          <td>24. sa</td><td class="sonuk">Gram negatif ayrım</td></tr>
+        <tr><td class="orta">≡</td><td class="orta">3</td><td>Çikolata agar</td>
+          <td>%5 CO₂</td><td class="orta">35 °C</td><td class="orta">48 sa</td>
+          <td>24. sa · 48. sa</td><td class="sonuk">Zor üreyenler</td></tr>
+      </tbody>
+    </table></div>
+    <div class="ic">
+      <div class="btn" style="display:inline-flex">＋ Besiyeri Ekle</div>
+      <span class="sonuk" style="margin-left:10px">
+        Kültürün TAT'ı besiyerinin <b>en uzun inkübasyonundan</b> doğar: 48 saatlik çikolata
+        agar varsa sonuç 24. saatte “üreme yok” diye kapatılamaz. Okuma zamanları
+        laboratuvarın iş listesine düşer.
+      </span>
+    </div>
+  </div>
+
+  <!-- DIS LABORATUVAR -->
+  <div class="grp" style="margin:10px 12px"><div class="gb">Dış Laboratuvar
+      <span class="sp">bu tetkik dışarıda çalışılıyorsa — gönderim ve taahhüt</span></div>
+
+    <div class="hdr k4" style="border:none;background:none">
+      <div class="fld"><label>Dışarıda çalışılır</label>
+        <div class="inp combo">Hayır — kendi laboratuvarımızda</div></div>
+      <div class="fld"><label>Anlaşmalı laboratuvar</label>
+        <div class="inp combo ro">—</div></div>
+      <div class="fld"><label>Dış lab test kodu</label>
+        <div class="inp ro">—</div></div>
+      <div class="fld"><label>Taahhüt süresi</label>
+        <div class="inp ro">—</div></div>
+    </div>
+
+    <div class="ic" style="padding-top:0">
+      <div class="grp" style="margin:0"><div class="gb">Örnek: dışarıda çalışılan bir tetkik
+          <span class="sp">Faktör V Leiden — bu alanlar dolu olduğunda</span></div>
+        <div class="hdr k4" style="border:none;background:none">
+          <div class="fld"><label>Anlaşmalı laboratuvar</label>
+            <div class="inp">Genoma Genetik Tanı Merkezi</div></div>
+          <div class="fld"><label>Dış lab test kodu</label>
+            <div class="inp">GEN-FVL-01</div></div>
+          <div class="fld"><label>Gönderim günleri</label>
+            <div class="inp">Salı · Cuma <span class="sonuk">· kuryeye 16:00</span></div></div>
+          <div class="fld"><label>Taahhüt süresi</label>
+            <div class="inp">7 iş günü <span class="sonuk">· sözleşmede</span></div></div>
+        </div>
+        <div class="hdr k4" style="border:none;background:none;padding-top:0">
+          <div class="fld"><label>Numune koşulu</label>
+            <div class="inp">2 mL EDTA tam kan · 2—8 °C</div></div>
+          <div class="fld"><label>Taşıma</label>
+            <div class="inp combo">Soğuk zincir · kurye</div></div>
+          <div class="fld"><label>Sonuç geliş yolu</label>
+            <div class="inp combo">HL7 (otomatik)</div></div>
+          <div class="fld"><label>Anlaşma fiyatı</label>
+            <div class="inp">1.250,00 ₺ <span class="sonuk">· maliyet</span></div></div>
+        </div>
+        <div class="ic" style="padding-top:0">
+          <span class="sonuk">
+            Dış laboratuvara giden tetkikte sonuç saati <b>bizim TAT'ımızdan değil</b> gönderim
+            gününden ve taahhüt süresinden doğar: Salı 16:00'dan sonra gelen numune Cuma
+            kuryesine kalır. Katalogdaki
+            <span class="rz mavi">🚚 Dış lab</span> rozeti bunu istem ekranında da gösterir.
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 

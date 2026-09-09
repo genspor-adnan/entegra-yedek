@@ -52,6 +52,18 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     detayGrupta: { adresler: { grup: 'Adres / Fatura Bilgisi' } },
   },
 
+  // ------------------------------------------------------- lab-tetkik ----
+  'lab-tetkik': {
+    // MOCKUP SIRASI (Ekranlar/Lab/lab_tetkik_karti.html): once tetkigin NE
+    //   OLDUGU, sonra sonucun NASIL OKUNACAGI, sonra NE ZAMAN calisildigi,
+    //   en sonda baglantilar (cihaz, besiyeri, dis lab, panel). Sekme sirasi
+    //   normalde alan sirasindan cikiyordu ve Dis Laboratuvar tek alanla
+    //   ikinci siraya gecmisti.
+    sekmeSirasi: ['Genel', 'Referans Aralıkları', 'Çalışma Zamanları',
+                  'Cihaz Eşleme', 'Besiyeri Seti (kültür)', 'Dış Laboratuvar',
+                  'Paneller'],
+  },
+
   // ----------------------------------------------------------- muayene ----
   muayene: {
     // MOCKUP SIRASI (muayene_karti.html): hekimin iş akışı - önce anamnez ve

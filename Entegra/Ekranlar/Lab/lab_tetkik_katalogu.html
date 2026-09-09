@@ -88,7 +88,7 @@
   .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
   .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
   .ucPanel{display:grid;grid-template-columns:280px 1fr 300px}
-  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .ucPanel>div{border-right:1px solid var(--line2);min-width:0} .ucPanel>div:last-child{border-right:none}
   .liste{list-style:none;margin:0;padding:0}
   .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
   .liste li.sel{background:var(--sel)}
@@ -171,66 +171,67 @@
           <thead><tr>
             <th style="width:26px"></th><th>Kod</th><th>Tetkik Adı</th><th>Kısa Ad</th>
             <th>Numune</th><th>Tüp</th><th>Birim</th><th class="orta">TAT</th>
+            <th>Çalışma</th>
             <th>Yöntem</th><th>Cihaz</th><th class="orta">Oto Onay</th><th class="orta">Durum</th>
           </tr></thead>
           <tbody>
-            <tr class="grup"><td colspan="12">🧪 Biyokimya › Rutin</td></tr>
+            <tr class="grup"><td colspan="13">🧪 Biyokimya › Rutin</td></tr>
             <tr class="sel">
               <td class="orta">🧪</td><td>GLU</td><td>Glukoz</td><td>GLUC3</td>
               <td>Serum</td><td><span class="rz sari">Sarı kapak</span></td><td>mg/dL</td>
-              <td class="orta">2 sa</td><td>Heksokinaz</td><td>Cobas c503</td>
+              <td class="orta">2 sa</td><td class="sonuk">Pzt·Çar·Cum 09:00·15:00</td><td>Heksokinaz</td><td>Cobas c503</td>
               <td class="orta"><span class="rz ok">Açık</span></td><td class="orta"><span class="rz ok">Aktif</span></td>
             </tr>
             <tr>
               <td class="orta">🧪</td><td>URE</td><td>Üre</td><td>UREL</td>
               <td>Serum</td><td><span class="rz sari">Sarı kapak</span></td><td>mg/dL</td>
-              <td class="orta">2 sa</td><td>Kinetik UV</td><td>Cobas c503</td>
+              <td class="orta">2 sa</td><td class="sonuk">Sürekli</td><td>Kinetik UV</td><td>Cobas c503</td>
               <td class="orta"><span class="rz ok">Açık</span></td><td class="orta"><span class="rz ok">Aktif</span></td>
             </tr>
             <tr>
               <td class="orta">🧪</td><td>KRE</td><td>Kreatinin</td><td>CREJ2</td>
               <td>Serum</td><td><span class="rz sari">Sarı kapak</span></td><td>mg/dL</td>
-              <td class="orta">2 sa</td><td>Enzimatik</td><td>Cobas c503</td>
+              <td class="orta">2 sa</td><td class="sonuk">Sürekli</td><td>Enzimatik</td><td>Cobas c503</td>
               <td class="orta"><span class="rz ok">Açık</span></td><td class="orta"><span class="rz ok">Aktif</span></td>
             </tr>
             <tr>
               <td class="orta">🧪</td><td>TSH</td><td>Tiroid Stimülan Hormon</td><td>TSH</td>
               <td>Serum</td><td><span class="rz sari">Sarı kapak</span></td><td>µIU/mL</td>
-              <td class="orta">4 sa</td><td>ECLIA</td><td>Cobas e801</td>
+              <td class="orta">4 sa</td><td class="sonuk">Her gün 09:00</td><td>ECLIA</td><td>Cobas e801</td>
               <td class="orta"><span class="rz pas">Kapalı</span></td><td class="orta"><span class="rz ok">Aktif</span></td>
             </tr>
-            <tr class="grup"><td colspan="12">🩸 Hematoloji</td></tr>
+            <tr class="grup"><td colspan="13">🩸 Hematoloji</td></tr>
             <tr>
               <td class="orta">🩸</td><td>CBC</td><td>Tam Kan Sayımı</td><td>CBC</td>
               <td>Tam kan</td><td><span class="rz mor">Mor kapak (EDTA)</span></td><td>—</td>
-              <td class="orta">1 sa</td><td>Empedans + Flow</td><td>XN-1000</td>
+              <td class="orta">1 sa</td><td class="sonuk">Sürekli</td><td>Empedans + Flow</td><td>XN-1000</td>
               <td class="orta"><span class="rz ok">Açık</span></td><td class="orta"><span class="rz ok">Aktif</span></td>
             </tr>
-            <tr class="grup"><td colspan="12">🦠 Mikrobiyoloji › Kültür</td></tr>
+            <tr class="grup"><td colspan="13">🦠 Mikrobiyoloji › Kültür</td></tr>
             <tr>
               <td class="orta">🦠</td><td>IKL</td><td>İdrar Kültürü + Antibiyogram</td><td>UKUL</td>
               <td>İdrar</td><td><span class="rz">Steril kap</span></td><td>—</td>
-              <td class="orta">48 sa</td><td>Konvansiyonel</td><td><span class="sonuk">elle</span></td>
+              <td class="orta">48 sa</td><td class="sonuk">Her gün 08:00</td><td>Konvansiyonel</td><td><span class="sonuk">elle</span></td>
               <td class="orta"><span class="rz pas">Kapalı</span></td><td class="orta"><span class="rz ok">Aktif</span></td>
             </tr>
-            <tr class="grup"><td colspan="12">🧬 Genetik</td></tr>
+            <tr class="grup"><td colspan="13">🧬 Genetik</td></tr>
             <tr>
               <td class="orta">🧬</td><td>BRCA</td><td>BRCA1/2 Dizi Analizi</td><td>BRCA12</td>
               <td>Tam kan</td><td><span class="rz mor">Mor kapak (EDTA)</span></td><td>—</td>
-              <td class="orta">21 gün</td><td>NGS</td><td>MiSeq</td>
+              <td class="orta">21 gün</td><td class="sonuk">Cuma 09:00</td><td>NGS</td><td>MiSeq</td>
               <td class="orta"><span class="rz pas">Kapalı</span></td><td class="orta"><span class="rz ok">Aktif</span></td>
             </tr>
             <tr>
               <td class="orta">🧬</td><td>FVL</td><td>Faktör V Leiden</td><td>FVL</td>
               <td>Tam kan</td><td><span class="rz mor">Mor kapak (EDTA)</span></td><td>—</td>
-              <td class="orta">7 gün</td><td>Real-time PCR</td>
+              <td class="orta">7 gün</td><td class="sonuk">Salı 10:00</td><td>Real-time PCR</td>
               <td><span class="rz mavi">🚚 Dış lab</span></td>
               <td class="orta"><span class="rz pas">Kapalı</span></td><td class="orta"><span class="rz ok">Aktif</span></td>
             </tr>
             <tr>
               <td class="orta">🧪</td><td>D25</td><td>25-OH Vitamin D</td><td>VITD</td>
               <td>Serum</td><td><span class="rz sari">Sarı kapak</span></td><td>ng/mL</td>
-              <td class="orta">6 sa</td><td>ECLIA</td>
+              <td class="orta">6 sa</td><td class="sonuk">Her gün 09:00</td><td>ECLIA</td>
               <td><span class="rz kir">⚠ eşleşmemiş</span></td>
               <td class="orta"><span class="rz pas">Kapalı</span></td><td class="orta"><span class="rz pas">Pasif</span></td>
             </tr>
@@ -261,6 +262,33 @@
           <li><b>70 — 92</b> <span class="sonuk">gebelik</span></li>
         </ul>
       </div>
+      <div class="grp" style="margin:8px"><div class="gb">İstem Sonuç Zamanı
+          <span class="sp">deneme</span></div>
+        <div class="ic">
+          <div class="fld" style="margin-bottom:6px"><label>Numune kabul zamanı</label>
+            <div class="inp">Salı 10:40 <span class="sonuk">· şimdi</span></div></div>
+          <div class="fld" style="margin-bottom:8px"><label>Seçili tetkikler</label>
+            <div class="inp">Glukoz · TSH · Tam Kan Sayımı · BRCA1/2</div></div>
+          <div class="dg"><table>
+            <thead><tr><th>Tetkik</th><th>Çalışma</th><th>Sonuç</th></tr></thead>
+            <tbody>
+              <tr><td>Tam Kan Sayımı</td><td class="sonuk">sürekli</td><td>Sal 11:40</td></tr>
+              <tr><td>Glukoz</td><td class="sonuk">Sal 15:00</td><td>Sal 19:00</td></tr>
+              <tr><td>TSH</td><td class="sonuk">Çar 09:00</td><td>Çar 13:00</td></tr>
+              <tr class="sel"><td><b>BRCA1/2</b></td><td class="sonuk">Cum 09:00</td>
+                <td><b>29 Eyl 17:00</b></td></tr>
+            </tbody>
+          </table></div>
+          <div class="ozet" style="padding:8px 0 0">
+            <div class="kart" style="min-width:0"><div class="b">Tüm sonuçlar hazır</div>
+              <div class="d">29 Eyl 17:00 <small>· 21 gün</small></div></div>
+          </div>
+          <div class="sonuk" style="margin-top:6px">
+            İstemin bitiş saatini <b>en geç biten tetkik</b> belirler. Hastaya “yarın öğlen”
+            demeden önce burası okunur; kısmi sonuç isteniyorsa BRCA ayrı istem olmalı.
+          </div>
+        </div>
+      </div>
       <div class="grp" style="margin:8px"><div class="gb">Nerede Kullanılıyor</div>
         <ul class="liste">
           <li>📦 Check-up Erkek 40+</li>
@@ -277,6 +305,7 @@
     <span>⚠ 6 tetkik cihaza eşleşmemiş</span>
     <span>⚠ 3 tetkiğin referans aralığı yok</span>
     <span>🚚 12 tetkik dış laboratuvara gidiyor</span>
+    <span>🕐 9 tetkik seri (batch) çalışıyor</span>
     <span class="sp">Katalog son değişiklik: 09.09.2026 01:12 · e2e</span>
   </div>
 </div>

@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// LABORATUVAR LİSTELERİ (433/434) — tetkik kataloğu, panel, numune,
@@ -56,6 +56,28 @@ public static partial class KaynakKatalogu
                                  "metin", "Tüp", Hizalama: "orta", Bicim: "rozet",
                                  Genislik: 130, Filtrelenebilir: false),
             new("birim", "t.birim", "metin", "Birim", Hizalama: "orta", Genislik: 80),
+            // ÇALIŞMA DÜZENİ (486): "sürekli" mi yoksa haftanın belli
+            //   günlerinde seri hâlinde mi. TAT tek başına yanıltıcı - 4
+            //   saatlik bir tetkik cuma 14:31'de gelirse pazartesi çıkar.
+            //   Kolon okunur metin: gün maskesi ve saatler tek hücrede.
+            new("calismaOzeti",
+                "case t.calisma_duzeni "
+                + " when 1 then 'Mesai içi' "
+                + " when 2 then "
+                + "   trim(both ' ' from "
+                + "     case when (t.calisma_gunleri &  1) > 0 then 'Pzt·' else '' end || "
+                + "     case when (t.calisma_gunleri &  2) > 0 then 'Sal·' else '' end || "
+                + "     case when (t.calisma_gunleri &  4) > 0 then 'Çar·' else '' end || "
+                + "     case when (t.calisma_gunleri &  8) > 0 then 'Per·' else '' end || "
+                + "     case when (t.calisma_gunleri & 16) > 0 then 'Cum·' else '' end || "
+                + "     case when (t.calisma_gunleri & 32) > 0 then 'Cmt·' else '' end || "
+                + "     case when (t.calisma_gunleri & 64) > 0 then 'Paz·' else '' end) "
+                + "   || ' ' || t.calisma_saatleri "
+                + " else 'Sürekli' end",
+                                 "metin", "Çalışma", Hizalama: "orta", Genislik: 170,
+                                 Siralanabilir: false, Filtrelenebilir: false),
+            new("calismaDuzeni", "t.calisma_duzeni", "kod", "Çalışma Düzeni",
+                                 Varsayilan: false),
             // TAT: sözü verilen süre. Listede görünmezse gecikme fark edilmez.
             new("hedefTat", "t.hedef_tat_dk", "sayi", "TAT (dk)", Hizalama: "sag",
                                  Genislik: 90),
