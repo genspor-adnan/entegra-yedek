@@ -424,9 +424,11 @@ public static partial class KaynakKatalogu
             // PANEL MI: icerigi olan hizmet (496). Panelin kendi satiri da
             //   satilabilir bir kalemdir - katalogda tetkikten ayirt etmenin
             //   tek yolu icerik sayisi.
+            // 0 yerine BOS: katalogun %95'i tekil tetkik; her satirda "0"
+            //   gormek gurultu, dolu hucre ise "bu satir bir paket" demek.
             new("icerikSayisi",
-                "(select count(*)::int from public.hizmet_paket p" +
-                "  where p.paket_hizmet_id = h.id)",
+                "nullif((select count(*)::int from public.hizmet_paket p" +
+                "         where p.paket_hizmet_id = h.id), 0)",
                 "sayi", "İçerik", Hizalama: "orta", Siralanabilir: false,
                 Filtrelenebilir: false, Genislik: 90),
             new("muhKodu", "h.muh_kodu", "metin", "Muh. Kodu",  Varsayilan: false),

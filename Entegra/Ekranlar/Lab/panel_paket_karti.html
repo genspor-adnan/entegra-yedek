@@ -75,6 +75,9 @@
   .akis{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px}
   .akis .bl{border:1px solid var(--line);border-radius:3px;overflow:hidden}
   .akis .bl h4{margin:0;padding:6px 9px;background:var(--head);border-bottom:1px solid var(--line2);font-size:11.5px;color:#3a5573}
+  .ok{display:inline-block;width:14px;text-align:center;color:#2f6db3;font-weight:bold;cursor:pointer;
+    border:1px solid var(--line);border-radius:3px;background:#fff;line-height:13px}
+  .tab{cursor:pointer}
 </style>
 </head>
 <body>
@@ -105,12 +108,57 @@
   </div>
 
   <div class="tabs">
-    <div class="tab">Genel</div>
-    <div class="tab">Fiyatlar <span class="sy">3</span></div>
-    <div class="tab on">Panel İçeriği <span class="sy">62</span></div>
-    <div class="tab">Radyoloji Protokolü</div>
+    <div class="tab" data-s="genel">Genel</div>
+    <div class="tab" data-s="fiyat">Fiyatlar <span class="sy">3</span></div>
+    <div class="tab on" data-s="icerik">Panel İçeriği <span class="sy">62</span></div>
+    <div class="tab" data-s="protokol">Radyoloji Protokolü</div>
   </div>
 
+  <div class="pnl" data-s="genel">
+    <div class="hdr" style="grid-template-columns:repeat(3,1fr)">
+      <div class="fld"><label>Bölüm</label><div class="v">Laboratuvar + Radyoloji</div></div>
+      <div class="fld"><label>KDV</label><div class="v">%10</div></div>
+      <div class="fld"><label>Birim</label><div class="v">Adet</div></div>
+      <div class="fld"><label>Cinsiyet Kısıtı</label><div class="v">Kadın</div></div>
+      <div class="fld"><label>Yaş Aralığı</label><div class="v">40 — 99</div></div>
+      <div class="fld"><label>Muhasebe Kodu</label><div class="v ro">600.10.001</div></div>
+    </div>
+    <div class="kutu">
+      <b style="font-size:12px">Paket davranışı</b>
+      <div class="dg" style="margin-top:6px"><table>
+        <thead><tr><th>Ödeyen</th><th>Belgeye nasıl gider</th><th>Neden</th></tr></thead>
+        <tbody>
+          <tr><td>Özel (Ücretli)</td><td><span class="rz ok">Tek satır</span></td><td class="sonuk">ÖZEL listesinde paketin fiyatı var</td></tr>
+          <tr><td>Kurumu Öder</td><td><span class="rz ok">Tek satır</span></td><td class="sonuk">Sözleşme ÖZEL listesini kullanıyor</td></tr>
+          <tr><td>ÖSS (Özel Yaşam)</td><td><span class="rz ok">Tek satır</span></td><td class="sonuk">TTB/HUV listesinde paketin fiyatı var</td></tr>
+          <tr><td>SGK</td><td><span class="rz sari">Bileşene açılır</span></td><td class="sonuk">Pakette SUT kodu yok — MEDULA tek kod kabul etmiyor</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="bilgi">Bu tablo <b>ayar değil, sonuçtur</b>: fiyat listelerinden ve SUT kodundan türetilir.
+      Paketi SGK'da da tek satır göndermek için pakete <b>SUT kodu</b> girin.</div>
+  </div>
+
+  <div class="pnl" data-s="fiyat" hidden>
+    <div class="dg"><table>
+      <thead><tr><th>Tarife</th><th>Liste</th><th class="sag">Paket Fiyatı</th><th class="sag">İçerik Toplamı</th>
+        <th class="sag">Fark</th><th>KDV</th><th>Geçerlilik</th></tr></thead>
+      <tbody>
+        <tr class="sel"><td>💰 Özel (Ücretli)</td><td>ÖZEL</td><td class="sag"><b>14.500,00</b></td>
+          <td class="sag sonuk">24.680,00</td><td class="sag"><span class="rz ok">−%41</span></td><td>Dahil</td><td class="sonuk">01.01.2026 →</td></tr>
+        <tr><td>🏥 TTB / HUV</td><td>TTB2018</td><td class="sag"><b>5.842,10</b></td>
+          <td class="sag sonuk">5.842,10</td><td class="sag sonuk">—</td><td>Dahil</td><td class="sonuk">01.01.2026 →</td></tr>
+        <tr><td>🩺 SUT (SGK)</td><td>SUT 2026</td><td class="sag sonuk">— <span class="rz sari">satır yok</span></td>
+          <td class="sag">908,44</td><td class="sag sonuk">—</td><td>Hariç</td><td class="sonuk">—</td></tr>
+      </tbody>
+    </table></div>
+    <div class="bilgi"><b>İçerik toplamı bilgi içindir</b> — paket fiyatı otomatik toplanmaz.
+      "🧬 İçerikten Fiyat Öner" toplamı getirir, indirimi kullanıcı yazar.</div>
+    <div class="uyari">SUT tarifesinde paketin satırı yok → SGK başvurusunda paket
+      <b>bileşenlere açılır</b> ve her tetkik kendi SUT bedelinden tahakkuk eder (toplam 908,44).</div>
+  </div>
+
+  <div class="pnl" data-s="icerik">
   <div class="arama">
     <div class="btn primary">＋</div><div class="btn">✎</div><div class="btn danger">🗑</div>
     <div class="sepv"></div>
@@ -140,17 +188,17 @@
           <td class="sag">180,00</td><td class="sag">42,06</td><td class="sag">6,54</td><td class="sonuk">901.011</td><td>20</td>
         </tr>
         <tr>
-          <td class="orta">☐</td><td class="orta">📦</td><td>L.B.258</td><td><b>OGTT ( Oral Glukoz Yükleme Testi )</b> <span class="rz mavi">alt panel · 6</span></td>
+          <td class="orta">☐</td><td class="orta">📦</td><td>L.B.258</td><td><span class="ok" data-ac="ogtt">−</span> <b>OGTT ( Oral Glukoz Yükleme Testi )</b> <span class="rz mavi">alt panel · 6</span></td>
           <td class="sonuk">Laboratuvar &gt; Biyokimya</td><td class="sag">1</td>
           <td class="sag">2.010,00</td><td class="sag">105,14</td><td class="sag">14,49</td><td class="sonuk">903.100</td><td>30</td>
         </tr>
-        <tr class="alt"><td></td><td class="orta sonuk">🧪</td><td class="ic">L.B.258.01</td><td class="sonuk">Glukoz (0 dakika)</td>
+        <tr class="alt" data-alt="ogtt"><td></td><td class="orta sonuk">🧪</td><td class="ic">L.B.258.01</td><td class="sonuk">Glukoz (0 dakika)</td>
           <td class="sonuk">Laboratuvar &gt; Biyokimya</td><td class="sag sonuk">1</td>
           <td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sonuk">901.230</td><td class="sonuk">·</td></tr>
-        <tr class="alt"><td></td><td class="orta sonuk">🧪</td><td class="ic">L.B.312</td><td class="sonuk">Glukoz (60 dakika)</td>
+        <tr class="alt" data-alt="ogtt"><td></td><td class="orta sonuk">🧪</td><td class="ic">L.B.312</td><td class="sonuk">Glukoz (60 dakika)</td>
           <td class="sonuk">Laboratuvar &gt; Biyokimya</td><td class="sag sonuk">1</td>
           <td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sonuk">901.230</td><td class="sonuk">·</td></tr>
-        <tr class="alt"><td></td><td class="orta sonuk">🧪</td><td class="ic2">…</td><td class="sonuk">(4 tetkik daha)</td>
+        <tr class="alt" data-alt="ogtt"><td></td><td class="orta sonuk">🧪</td><td class="ic2">…</td><td class="sonuk">(4 tetkik daha)</td>
           <td class="sonuk">—</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sonuk">—</td><td class="sonuk">·</td></tr>
         <tr>
           <td class="orta">☐</td><td class="orta">🧪</td><td>US.014</td><td>Meme Ultrasonografisi</td>
@@ -170,6 +218,16 @@
     <b>İçerik toplamı</b> — Özel 24.680,00 · TTB/HUV 5.842,10 · SUT 908,44 &nbsp;|&nbsp;
     <b>Paketin kendi fiyatı</b> — Özel <b>14.500,00</b> (%41 indirim) · TTB/HUV 5.842,10 · SUT —
     <span class="rz sari" style="margin-left:8px">SUT'ta paket bedeli yok — SGK'da bileşenlere açılır</span>
+  </div>
+
+  </div>
+
+  <div class="pnl" data-s="protokol" hidden>
+    <div class="kutu sonuk" style="padding:18px 12px">
+      Bu hizmet bir <b>paket</b>; çekim protokolü <b>bileşenin kendi kartındadır</b>
+      (Meme US, Mamografi). Paket kartında protokol tutmak, iki yerde bakım demektir.
+      <div style="margin-top:8px"><span class="btn" style="display:inline-flex">🔎 Bileşen protokollerini göster</span></div>
+    </div>
   </div>
 
   <div class="statusbar">
@@ -266,6 +324,38 @@
         belge kaydında dondurulur.</li>
   </ul>
 </div>
+
+<script>
+// Sekmeler: .tabs icindeki .tab tiklaninca ayni kartin .pnl panelleri degisir
+//   (Ekranlar'daki ortak desen; eslesme data-s anahtariyla).
+document.querySelectorAll('.tabs').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.tab'));
+  var kart=bar.parentElement;
+  var pnls=[].slice.call(kart.querySelectorAll('.pnl'));
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){
+      tabs.forEach(function(x){x.classList.remove('on');});
+      t.classList.add('on'); goster(key(t,i));
+    });
+  });
+  var acik=tabs.findIndex(function(t){return t.classList.contains('on');});
+  if(acik<0) acik=0;
+  if(pnls.length) goster(key(tabs[acik],acik));
+});
+
+// Alt panel satiri katlanir: icindeki tetkikler gizlenir/gosterilir.
+document.querySelectorAll('[data-ac]').forEach(function(dg){
+  dg.addEventListener('click',function(){
+    var acik=dg.textContent.trim()==='−';
+    dg.textContent=acik?'+':'−';
+    document.querySelectorAll('[data-alt="'+dg.dataset.ac+'"]').forEach(function(tr){
+      tr.hidden=acik;
+    });
+  });
+});
+</script>
 
 </body>
 </html>
