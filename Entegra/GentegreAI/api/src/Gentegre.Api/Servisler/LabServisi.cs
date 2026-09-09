@@ -80,9 +80,18 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
         {
             if (s.PanelId is > 0)
             {
+                // PANEL OZYINELI ACILIR (500/501): icerik tek kaynakta
+                //   (`hizmet_paket`) ve panel icinde panel olabiliyor
+                //   (check-up > OGTT > glukozlar). `fn_hizmet_paket_ac`
+                //   YAPRAK tetkikleri dondurur - istem yalniz calisilacak
+                //   tetkikten acilir, ara paneller istem satiri uretmez.
                 var pt = await baglanti.ListeAsync("""
-                    select tetkik_id from public.lab_panel_satir
-                     where panel_id = @p0 order by sira, id
+                    select distinct t.id
+                      from public.lab_panel p
+                      join public.fn_hizmet_paket_ac(p.hizmet_id, 1) a on true
+                      join public.lab_tetkik t on t.hizmet_id = a.hizmet_id
+                     where p.id = @p0 and t.durum = 0
+                     order by t.id
                     """, islem, [s.PanelId.Value], o => o.GetInt32(0), iptal);
                 foreach (var t in pt) tetkikler.Add((t, s.PanelId));
             }

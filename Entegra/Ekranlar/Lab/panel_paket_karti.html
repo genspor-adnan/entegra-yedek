@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel / Paket Kartı — Mockup (Gentegre AI · Katalog)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap;flex:0 0 auto}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .hdr{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted);letter-spacing:.2px}
+  .fld .v{border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;
+    align-items:center;padding:0 8px;font-weight:bold;font-size:12.5px}
+  .fld .v.ro{background:#f6f8fb;font-weight:normal;color:var(--muted)}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .tab{padding:7px 12px;font-size:12px;color:var(--muted);background:#eef2f7;border:1px solid var(--line);
+    border-bottom:none;border-radius:3px 3px 0 0;margin-top:5px;position:relative;top:1px;display:flex;gap:6px;align-items:center}
+  .tab.on{background:#fff;color:var(--ink);font-weight:bold}
+  .tab .sy{background:#e5ecf5;border-radius:9px;padding:0 6px;font-size:10.5px;color:#3a5573}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:220px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .arama select{border:1px solid var(--line);border-radius:3px;height:26px;background:#fff;font:inherit;font-size:11.5px;padding:0 6px}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.alt td{background:#fbfcfe}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .ic{padding-left:26px;position:relative}
+  .ic:before{content:"└";position:absolute;left:12px;color:#9fb0c2}
+  .ic2{padding-left:44px;position:relative}
+  .ic2:before{content:"└";position:absolute;left:30px;color:#9fb0c2}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto 22px;color:#6b7a8b;font-size:11.5px;line-height:1.7}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .not ul{margin:6px 0 0;padding-left:18px}
+  h2.blk{max-width:1400px;margin:26px auto 8px;font-size:13.5px;color:var(--navy)}
+  .kutu{padding:10px 12px}
+  .uyari{margin:8px 12px;padding:7px 9px;border:1px solid #f2ddbf;border-radius:3px;background:#fdf6e3;color:#8a6218;font-size:11.5px}
+  .bilgi{margin:8px 12px;padding:7px 9px;border:1px solid #cfe0f5;border-radius:3px;background:#eef4fc;color:#2f6db3;font-size:11.5px}
+  .akis{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px}
+  .akis .bl{border:1px solid var(--line);border-radius:3px;overflow:hidden}
+  .akis .bl h4{margin:0;padding:6px 9px;background:var(--head);border-bottom:1px solid var(--line2);font-size:11.5px;color:#3a5573}
+</style>
+</head>
+<body>
+
+<!-- ============================================================ 1. KART -->
+<h2 class="blk">1 · Panel / Paket Kartı — içerik tek yerde</h2>
+<div class="win">
+  <div class="title">🧪 Hizmet Kartı — Panel / Paket <span class="sp">Katalog › Hizmet Listesi › Kart</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn danger">🗑 Sil</div>
+    <div class="sepv"></div>
+    <div class="btn">🧬 İçerikten Fiyat Öner</div>
+    <div class="btn">📋 Panelden İstem Şablonu</div>
+    <div class="sp"></div>
+    <div class="btn">✕ Kapat</div>
+  </div>
+
+  <div class="hdr">
+    <div class="fld"><label>Kod</label><div class="v">P.C012</div></div>
+    <div class="fld"><label>Hizmet Adı</label><div class="v">Kadın Check-Up +40</div></div>
+    <div class="fld"><label>Kategori</label><div class="v">Paketler &amp; Paneller</div></div>
+    <div class="fld"><label>Durum</label><div class="v">Aktif</div></div>
+    <div class="fld"><label>SUT Kodu</label><div class="v ro">— (SUT'ta paket kodu yok)</div></div>
+    <div class="fld"><label>HUV Kodu</label><div class="v ro">—</div></div>
+    <div class="fld"><label>Bölüm</label><div class="v">Laboratuvar + Radyoloji</div></div>
+    <div class="fld"><label>Tip</label><div class="v">📦 Paket <span class="rz mor" style="margin-left:6px">62 içerik</span></div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab">Genel</div>
+    <div class="tab">Fiyatlar <span class="sy">3</span></div>
+    <div class="tab on">Panel İçeriği <span class="sy">62</span></div>
+    <div class="tab">Radyoloji Protokolü</div>
+  </div>
+
+  <div class="arama">
+    <div class="btn primary">＋</div><div class="btn">✎</div><div class="btn danger">🗑</div>
+    <div class="sepv"></div>
+    <div class="btn primary">Tümü</div><div class="btn">🧪 Tetkik</div><div class="btn">📦 Alt Panel</div>
+    <div class="kutu" style="flex:1;min-width:220px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px">🔍 İçerikte ara…</div>
+    <select><option>🌳 Tüm Kategoriler</option><option>Laboratuvar &gt; Biyokimya</option><option>Radyoloji &gt; US</option></select>
+    <div class="btn">⋮</div>
+  </div>
+
+  <div class="dg">
+    <table>
+      <thead><tr>
+        <th style="width:26px"></th><th style="width:30px">Tip</th><th>Kod</th><th>Tetkik / Alt Panel</th>
+        <th>Kategori</th><th class="sag">Adet</th>
+        <th class="sag">Özel (Ücretli)</th><th class="sag">TTB / HUV</th><th class="sag">SUT</th>
+        <th>SUT Kodu</th><th>Sıra</th>
+      </tr></thead>
+      <tbody>
+        <tr class="sel">
+          <td class="orta">☑</td><td class="orta">🧪</td><td>L.B.032</td><td>AST ( SGOT )</td>
+          <td class="sonuk">Laboratuvar &gt; Biyokimya</td><td class="sag">1</td>
+          <td class="sag">180,00</td><td class="sag">42,06</td><td class="sag">6,54</td><td class="sonuk">901.010</td><td>10</td>
+        </tr>
+        <tr>
+          <td class="orta">☐</td><td class="orta">🧪</td><td>L.B.268</td><td>ALT ( SGPT )</td>
+          <td class="sonuk">Laboratuvar &gt; Biyokimya</td><td class="sag">1</td>
+          <td class="sag">180,00</td><td class="sag">42,06</td><td class="sag">6,54</td><td class="sonuk">901.011</td><td>20</td>
+        </tr>
+        <tr>
+          <td class="orta">☐</td><td class="orta">📦</td><td>L.B.258</td><td><b>OGTT ( Oral Glukoz Yükleme Testi )</b> <span class="rz mavi">alt panel · 6</span></td>
+          <td class="sonuk">Laboratuvar &gt; Biyokimya</td><td class="sag">1</td>
+          <td class="sag">2.010,00</td><td class="sag">105,14</td><td class="sag">14,49</td><td class="sonuk">903.100</td><td>30</td>
+        </tr>
+        <tr class="alt"><td></td><td class="orta sonuk">🧪</td><td class="ic">L.B.258.01</td><td class="sonuk">Glukoz (0 dakika)</td>
+          <td class="sonuk">Laboratuvar &gt; Biyokimya</td><td class="sag sonuk">1</td>
+          <td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sonuk">901.230</td><td class="sonuk">·</td></tr>
+        <tr class="alt"><td></td><td class="orta sonuk">🧪</td><td class="ic">L.B.312</td><td class="sonuk">Glukoz (60 dakika)</td>
+          <td class="sonuk">Laboratuvar &gt; Biyokimya</td><td class="sag sonuk">1</td>
+          <td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sonuk">901.230</td><td class="sonuk">·</td></tr>
+        <tr class="alt"><td></td><td class="orta sonuk">🧪</td><td class="ic2">…</td><td class="sonuk">(4 tetkik daha)</td>
+          <td class="sonuk">—</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sag sonuk">—</td><td class="sonuk">—</td><td class="sonuk">·</td></tr>
+        <tr>
+          <td class="orta">☐</td><td class="orta">🧪</td><td>US.014</td><td>Meme Ultrasonografisi</td>
+          <td class="sonuk">Radyoloji &gt; US</td><td class="sag">1</td>
+          <td class="sag">1.400,00</td><td class="sag">336,44</td><td class="sag">52,30</td><td class="sonuk">803.470</td><td>40</td>
+        </tr>
+        <tr>
+          <td class="orta">☐</td><td class="orta">🧪</td><td>MM.001</td><td>Mamografi ( Bilateral )</td>
+          <td class="sonuk">Radyoloji &gt; Mammografi</td><td class="sag">1</td>
+          <td class="sag">1.900,00</td><td class="sag">420,55</td><td class="sag">65,38</td><td class="sonuk">803.020</td><td>50</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="bilgi">
+    <b>İçerik toplamı</b> — Özel 24.680,00 · TTB/HUV 5.842,10 · SUT 908,44 &nbsp;|&nbsp;
+    <b>Paketin kendi fiyatı</b> — Özel <b>14.500,00</b> (%41 indirim) · TTB/HUV 5.842,10 · SUT —
+    <span class="rz sari" style="margin-left:8px">SUT'ta paket bedeli yok — SGK'da bileşenlere açılır</span>
+  </div>
+
+  <div class="statusbar">
+    <span>62 satır</span><span>·</span><span>4 alt panel</span><span>·</span>
+    <span>Döngü kontrolü: ✔ temiz</span><span>·</span><span>Derinlik: 2</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Kartın kuralı.</b> Paket/panel <b>satılabilir bir hizmettir</b>; içeriği katalogdaki
+  <b>kanonik</b> tetkikleri gösterir — tetkik ikinci kez açılmaz (<code>hizmet_paket</code>).
+  Alt panel satırı katlanabilir: içindeki tetkikler <i>gri</i> ve fiyatsız gösterilir, çünkü
+  onların bedeli alt panelin fiyatına dâhildir.
+  <ul>
+    <li><b>Adet</b> = çalışma sayısı (OGTT'de glukoz 4 kez), <b>fiyata etki etmez</b>.</li>
+    <li><b>İçerikten Fiyat Öner</b>: içerik toplamını hesaplar, kullanıcı indirimi kendisi yazar. Paket fiyatı ASLA otomatik toplam değildir.</li>
+    <li>Bir hizmet hem paket hem içerik olabilir (OGTT); <b>kendi kendini içeremez ve halka kuramaz</b> (A→B→A) — DB tetiği reddeder.</li>
+  </ul>
+</div>
+
+<!-- ================================================= 2. BELGEYE YANSIMA -->
+<h2 class="blk">2 · Belgeye yansıma — kurum tipi açılımı belirler</h2>
+<div class="win">
+  <div class="title">🧾 Başvuru — Ücretlendirme <span class="sp">Aynı paket, üç ödeyen</span></div>
+  <div class="akis">
+    <div class="bl">
+      <h4>① Özel (Ücretli) · Kurumu Öder · ÖSS (paketi tanıyor) — <b>TEK SATIR</b></h4>
+      <div class="dg"><table>
+        <thead><tr><th>Kod</th><th>Kalem</th><th class="sag">Adet</th><th class="sag">Birim</th><th class="sag">Tutar</th></tr></thead>
+        <tbody>
+          <tr><td>P.C012</td><td>📦 Kadın Check-Up +40</td><td class="sag">1</td><td class="sag">14.500,00</td><td class="sag"><b>14.500,00</b></td></tr>
+        </tbody>
+      </table></div>
+      <div class="bilgi" style="margin:8px">Fatura tek kalem. Hasta dökümü ister → <b>Panel İçeriği</b> yazdırılır, belge satırı bölünmez.</div>
+    </div>
+
+    <div class="bl">
+      <h4>② SGK — SUT'ta paket kodu yok → <b>BİLEŞENE AÇILIR</b></h4>
+      <div class="dg"><table>
+        <thead><tr><th>Kod</th><th>Kalem</th><th>SUT</th><th class="sag">Tutar</th></tr></thead>
+        <tbody>
+          <tr class="sonuk"><td>P.C012</td><td>📦 Kadın Check-Up +40 <span class="rz sari">açıldı</span></td><td>—</td><td class="sag">—</td></tr>
+          <tr><td class="ic">L.B.032</td><td>AST ( SGOT )</td><td class="sonuk">901.010</td><td class="sag">6,54</td></tr>
+          <tr><td class="ic">L.B.268</td><td>ALT ( SGPT )</td><td class="sonuk">901.011</td><td class="sag">6,54</td></tr>
+          <tr><td class="ic">L.B.258</td><td>OGTT <span class="rz mavi">paket kodu var</span></td><td class="sonuk">903.100</td><td class="sag">14,49</td></tr>
+          <tr><td class="ic">US.014</td><td>Meme Ultrasonografisi</td><td class="sonuk">803.470</td><td class="sag">52,30</td></tr>
+          <tr class="sonuk"><td class="ic">…</td><td>(58 satır daha)</td><td>—</td><td class="sag">828,57</td></tr>
+        </tbody>
+      </table></div>
+      <div class="uyari" style="margin:8px">Açılım <b>kaydederken bir kez</b> yapılır; satırlar pakete <code>kaynak_id</code> ile bağlı kalır.
+      OGTT'nin SUT kodu <b>var</b> → o satır <b>açılmaz</b>, tek kalem gider.</div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span><b>Açılım kuralı:</b> ödeyenin tarifesinde paketin satırı VAR mı? (SGK'da ayrıca SUT kodu)</span>
+    <span>·</span><span>Yoksa → içeriğe aç, her satır kendi tarife fiyatından</span>
+    <span>·</span><span>Kova/provizyon hesabı belgede DURAN satıra işler</span>
+  </div>
+</div>
+
+<!-- ====================================================== 3. İSTEM/İŞ -->
+<h2 class="blk">3 · İş tarafı — panel her hâlükârda açılır</h2>
+<div class="win">
+  <div class="title">🔬 Laboratuvar / Radyoloji İstemi <span class="sp">Belge satırı 1 · İstem satırı N</span></div>
+  <div class="dg"><table>
+    <thead><tr><th>İstem</th><th>Tetkik</th><th>Bölüm</th><th>Numune</th><th>Durum</th><th>Kaynak</th></tr></thead>
+    <tbody>
+      <tr><td>#48120-1</td><td>AST ( SGOT )</td><td>Biyokimya</td><td>Serum (SST)</td><td><span class="rz ok">Sonuçlandı</span></td><td class="sonuk">P.C012 · paket</td></tr>
+      <tr><td>#48120-2</td><td>ALT ( SGPT )</td><td>Biyokimya</td><td>Serum (SST)</td><td><span class="rz ok">Sonuçlandı</span></td><td class="sonuk">P.C012 · paket</td></tr>
+      <tr><td>#48120-3</td><td>Glukoz (0 dk)</td><td>Biyokimya</td><td>Gri kapak</td><td><span class="rz mavi">Çalışılıyor</span></td><td class="sonuk">P.C012 › OGTT</td></tr>
+      <tr><td>#48120-4</td><td>Glukoz (60 dk)</td><td>Biyokimya</td><td>Gri kapak</td><td><span class="rz sari">Numune bekleniyor</span></td><td class="sonuk">P.C012 › OGTT</td></tr>
+      <tr><td>#48121-1</td><td>Meme US</td><td>Radyoloji</td><td>—</td><td><span class="rz mavi">Çekimde</span></td><td class="sonuk">P.C012 · paket</td></tr>
+      <tr><td>#48121-2</td><td>Mamografi</td><td>Radyoloji</td><td>—</td><td><span class="rz kir">Çalışılmadı</span></td><td class="sonuk">P.C012 · paket</td></tr>
+    </tbody>
+  </table></div>
+  <div class="uyari">
+    <b>Kısmi çalışılmama fiyatı DEĞİŞTİRMEZ</b> — paket bedeli bütündür. "Çalışılmadı" işareti istem satırında durur;
+    iade isteniyorsa kullanıcı bilinçli olarak <b>paket satırını düzeltir</b>. Paket satırı iptal edilirse bağlı
+    istemlerin hepsi iptal olur; tersi geçerli değil.
+  </div>
+  <div class="statusbar"><span>6 istem · 2 bölüm</span><span>·</span><span>Belgede 1 satır (14.500,00)</span></div>
+</div>
+
+<div class="not">
+  <b>Tek kaynak.</b> İçerik yalnız <code>hizmet_paket</code>'te tutulur. Laboratuvarın panel ekranı
+  (<code>lab_panel</code>) yalnız <b>laboratuvara özgü</b> alanları taşır (bölüm, çalışma sırası, numune);
+  panelin tetkik listesi aynı kaynaktan okunur — iki yerde içerik bakımı, kaçınılmaz olarak ayrışır.
+  <ul>
+    <li><b>Prim / hakediş:</b> gelir paket satırında, pay bileşenlerin <b>bölümüne</b> ağırlıklı dağılır
+        (ağırlık = bileşenin kendi tarife fiyatı) — yoksa check-up'ın tamamı tek bölüme yazılır.</li>
+    <li><b>e-Belge:</b> tek satır giden pakette kalem adı paketin adıdır; açılan pakette her bileşen ayrı kalemdir.</li>
+    <li><b>Değişiklik geçmişi:</b> panel içeriği sonradan değişse bile <b>eski belgeler değişmez</b> — açılım
+        belge kaydında dondurulur.</li>
+  </ul>
+</div>
+
+</body>
+</html>

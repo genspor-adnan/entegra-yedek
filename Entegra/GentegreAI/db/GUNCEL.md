@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (253 ad, 77 tanesi birden cok dosyada)
+## Fonksiyonlar (259 ad, 77 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -106,6 +106,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_hesap_atama_adi` | `197_kasa_atama_tek_alan.sql` | 196_kasa_atama.sql |
 | `fn_hesap_plani_alt_ac` | `076_fn_kasa.sql` | — |
 | `fn_hizmet_modalite_coz` | `460_hizmet_modalite_onarim.sql` | — |
+| `fn_hizmet_paket_ac` | `500_hizmet_paket_dongu.sql` | — |
+| `fn_hizmet_paket_derinlik` | `500_hizmet_paket_dongu.sql` | — |
+| `fn_hizmet_paket_dongu` | `500_hizmet_paket_dongu.sql` | — |
 | `fn_hizmet_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
 | `fn_ilac_alerji_kontrol` | `414_metin_sadelestir.sql` | 413_recete.sql |
 | `fn_ilac_fiyat` | `406_ilac_fiyat.sql` | — |
@@ -220,6 +223,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_belge_satir_rol_dogrula` | `361_prim_rol_isaretleri.sql` | — |
 | `tg_belge_satir_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
 | `tg_departman_dongu_engel` | `257_departman_ustbirim.sql` | — |
+| `tg_hizmet_paket_dongu` | `500_hizmet_paket_dongu.sql` | — |
 | `tg_kasa_dagitim_kontrol` | `471_dagilim_kapanma_tahsil.sql` | 321_tahsilat_satir_dagitim.sql, 323_tahsilat_kdv_dahil.sql |
 | `tg_kasa_dagitim_sil_tazele` | `354_kasa_islem_silme_kosullari.sql` | — |
 | `tg_kasa_dagitim_tazele` | `321_tahsilat_satir_dagitim.sql` | — |
@@ -227,6 +231,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_kasa_islem_tahsil_tazele` | `321_tahsilat_satir_dagitim.sql` | — |
 | `tg_kategori_dongu_engel` | `270_kategori_agaci.sql` | — |
 | `tg_kurum_sozlesme_kontrol` | `493_kurum_turu_kurumu_oder.sql` | 468_kurum_sozlesme_1n.sql |
+| `tg_lab_panel_hizmet` | `501_panel_icerigi_tek_kaynak.sql` | — |
+| `tg_lab_panel_satir_yaz` | `501_panel_icerigi_tek_kaynak.sql` | — |
 | `tg_lab_varyant_sinif` | `439_lab_genetik.sql` | — |
 | `tg_mesaj_sohbet_tazele` | `342_mesajlasma.sql` | — |
 | `tg_muayene_durum_istemden` | `418_muayene_istem_bagi.sql` | — |
@@ -262,12 +268,13 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (123 ad, 38 tanesi birden cok dosyada)
+## Gorunumler (124 ad, 38 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
 | `cari` | `019_sema_cok_sube.sql` | 017_sema_sube_rol.sql |
 | `hasta` | `019_sema_cok_sube.sql` | 017_sema_sube_rol.sql |
+| `lab_panel_satir` | `501_panel_icerigi_tek_kaynak.sql` | — |
 | `musteri` | `019_sema_cok_sube.sql` | 017_sema_sube_rol.sql |
 | `personel` | `019_sema_cok_sube.sql` | 017_sema_sube_rol.sql |
 | `personel_acil_kisi` | `335_hasta_kimlik_tamamlama.sql` | — |

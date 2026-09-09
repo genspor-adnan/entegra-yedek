@@ -163,7 +163,10 @@ public static partial class KaynakKatalogu
     private static KaynakTanimi LabPanel() => new(
         Ad: "lab-panel",
         YetkiKodu: "lab.tetkik",
-        Kaynak: "public.lab_panel p left join public.stok h on h.id = p.hizmet_id",
+        // `hizmet_id` HIZMETE bakar, stoga degil: liste "Hizmet" kolonunda
+        //   ayni id'li bir STOGUN adini gosteriyordu (501 koprusunden sonra
+        //   panellerin hepsinde dolu - hata gorunur hale geldi).
+        Kaynak: "public.lab_panel p left join public.hizmet h on h.id = p.hizmet_id",
         SubeKolonu: null,                     // ana veri - ortak (tetkik gibi)
         VarsayilanSirala: "p.kod asc",
         Kolonlar: new KolonTanimi[]
