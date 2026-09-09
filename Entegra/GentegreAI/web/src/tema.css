@@ -1659,6 +1659,29 @@ input.skt-gecmis {
    yayilir. Dugme her iki durumda da ayni yerde durur - kullanici paneli
    nereden geri acacagini aramasin. */
 .grid-yan-duzen.kapali { grid-template-columns: minmax(0, 1fr) 24px }
+/* UC KOLON (492, mockup lab_tetkik_katalogu .ucPanel): solda bolum agaci ve
+   paneller, ortada liste, sagda secili tetkik. Dar ekranda once SOL kolon
+   duser - gezinme listesi ustteki bolum combosuyla da yapilabilir. */
+.grid-yan-duzen.sollu { grid-template-columns: 240px minmax(0, 1fr) 420px }
+.grid-yan-duzen.sollu.kapali { grid-template-columns: 240px minmax(0, 1fr) 24px }
+@media (max-width: 1500px) {
+  .grid-yan-duzen.sollu { grid-template-columns: minmax(0, 1fr) 420px }
+  .grid-yan-duzen.sollu.kapali { grid-template-columns: minmax(0, 1fr) 24px }
+  .grid-sol-panel { display: none }
+}
+.grid-sol-panel { position: sticky; top: 6px }
+.grid-sol-panel .lab-detay { margin-top: 0 }
+/* Gezinme listesi: tiklanabilir satirlar, sagda sayi. */
+.agac-liste { list-style: none; margin: 0; padding: 4px 0 }
+.agac-liste li {
+  display: flex; align-items: center; gap: 6px; padding: 4px 10px;
+  font-size: 11.5px; cursor: pointer; border-left: 2px solid transparent;
+}
+.agac-liste li:hover { background: var(--yuz2) }
+.agac-liste li.sec { background: var(--sec, #eef4fc); border-left-color: var(--vurgu); font-weight: 600 }
+.agac-liste li.sonuk { cursor: default; color: var(--soluk) }
+.agac-liste li .sp { margin-left: auto; color: var(--soluk); font-weight: 400 }
+.agac-liste li .ikon { width: 16px; text-align: center }
 .grid-yan-panel .yan-katla {
   display: block; width: 100%; height: 22px; padding: 0; margin-bottom: 4px;
   font-size: 13px; line-height: 1; color: var(--soluk);

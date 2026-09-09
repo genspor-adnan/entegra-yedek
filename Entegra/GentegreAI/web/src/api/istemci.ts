@@ -475,6 +475,13 @@ export const api = {
    * güncellensin. Saatleri sunucu hesaplar - aynı kural istem ekranında da
    * çalışıyor, ikinci bir hesap iki farklı saat söylerdi.
    */
+  /** Tetkik Katalogu sol paneli (492): bolum sayimlari + panel uyelikleri. */
+  labTetkikAgaci: () =>
+    istek<{ toplam: number;
+            bolumler: { kod: number; ad: string; ikon: string; adet: number; aktif: number }[];
+            paneller: { id: number; kod: string; ad: string; durum: number;
+                        tetkikIdleri: number[] }[] }>('/api/lab/tetkik/agac'),
+
   /** Tetkik Katalogu sag paneli (492): secili tetkigin ozeti. */
   labTetkikOzeti: (id: number) =>
     istek<{ tetkik: Record<string, unknown>; referanslar: Record<string, unknown>[];

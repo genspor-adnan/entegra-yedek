@@ -65,6 +65,20 @@ interface Props {
    */
   kodSuzgeci?: { alan: string; etiket: string };
   /**
+   * Kod suzgecinin DISARIDAN yonetilen degeri (492). Tetkik katalogunda ayni
+   * secimi hem ustteki combo hem soldaki bolum agaci yapiyor; iki ayri durum
+   * tutulsaydi biri "Hematoloji" digeri "Tümü" derken liste ikisinin
+   * kesisimini gosterirdi.
+   */
+  kodSuzgecDeger?: string;
+  onKodSuzgec?(deger: string): void;
+  /**
+   * Gridin SOLUNA cizilecek gezinme paneli (492: tetkik katalogunda bolum
+   * agaci ve paneller). Yan panelle birlikte mockup'in uc kolonlu duzenini
+   * (.ucPanel) verir.
+   */
+  solPanel?: React.ReactNode;
+  /**
    * Acilista uygulanan gruplama kolonu (492: Tetkik Kataloğu bölüme göre).
    * Kullanici uc-nokta menusunden degistirebilir; bu yalnizca BASLANGIC.
    */
@@ -172,7 +186,8 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                           onTarihAraligi,
                           aramaGorunumGizli, gorunumSecimGizli, aramaGizli,
                           aracCubuguSeritte,
-                          seciliBaslangicId, cipSonu, kodSuzgeci, varsayilanGrup,
+                          seciliBaslangicId, cipSonu, kodSuzgeci, kodSuzgecDeger: kodDisDeger,
+                          onKodSuzgec, varsayilanGrup, solPanel,
                           cipBaslangic, altPanel, ustPanel, yanPanel, ekGorunum,
                           onCipSecildi, onCipRota, onSecimDegisti, yenile, odaklaSonEklenen,
                           icerikAlani, icerikBaslik }: Props) {
@@ -205,8 +220,10 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
    * yoksa ayni grubun satirlari listeye dagilir ve baslik defalarca cizilir.
    */
   const [kullaniciGrup, setKullaniciGrup] = useState<string | null>(varsayilanGrup ?? null);
-  /** Kod suzgeci combosunun secimi ('' = tumu). */
-  const [kodSuzgecDeger, setKodSuzgecDeger] = useState('');
+  /** Kod suzgeci combosunun secimi ('' = tumu). Disaridan verilmisse o gecer. */
+  const [kodIcDeger, setKodIcDeger] = useState('');
+  const kodSuzgecDeger = kodDisDeger ?? kodIcDeger;
+  const setKodSuzgecDeger = (v: string) => (onKodSuzgec ? onKodSuzgec(v) : setKodIcDeger(v));
   /**
    * SATIR YUKSEKLIGI: sik / normal / genis. Uzun listelerde daha cok satir
    * gormek isteyen ile okunakli aralik isteyen kullanici ayni ekrani paylasiyor;
@@ -874,10 +891,15 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
 
         {gorunum === 'liste' && ustPanel}
 
-        {/* YAN PANEL varsa grid + alt panel SOL kolona girer (mockup
-            .ucPanel). Yoksa fazladan kap konmaz - eski duzen aynen kalir. */}
-        <div className={gorunum === 'liste' && yanPanel
-          ? `grid-yan-duzen${yanKapali ? ' kapali' : ''}` : undefined}>
+        {/* YAN PANEL varsa grid + alt panel ORTA kolona girer (mockup
+            .ucPanel); SOL PANEL varsa onun solunda bir kolon daha acilir.
+            Ikisi de yoksa fazladan kap konmaz - eski duzen aynen kalir. */}
+        <div className={gorunum === 'liste' && (yanPanel || solPanel)
+          ? `grid-yan-duzen${solPanel ? ' sollu' : ''}${yanKapali ? ' kapali' : ''}`
+          : undefined}>
+        {gorunum === 'liste' && solPanel && (
+          <aside className="grid-sol-panel">{solPanel}</aside>
+        )}
         <div>
         {gorunum === 'ek' && ekGorunum ? (
           ekGorunum.icerik

@@ -58,6 +58,54 @@ public static class LabUclari
     {
         var grup = yol.MapGroup("/api/lab").WithTags("Laboratuvar").RequireAuthorization();
 
+        // ------------------------------------------------ katalog sol panel ---
+        // GET /api/lab/tetkik/agac - Tetkik Katalogu SOL PANELI (492, mockup
+        //   lab_tetkik_katalogu.html "Bölüm / Çalışma Grubu" + "Paneller").
+        //
+        //   Sayimlar SUNUCUDA: istemci sayfali listeden sayamaz (gordugu 50
+        //   satir tum katalog degil). Panel uyeleri de burada doner - panele
+        //   tiklayinca liste o tetkik kimlikleriyle suzulur; istemci uyelik
+        //   kuralini kendisi kurmaz.
+        grup.MapGet("/tetkik/agac", async (
+            BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("lab.tetkik", Islem.Gor);
+
+            var bolumler = await veri.ListeAsync("""
+                select t.bolum as kod,
+                       case t.bolum when 2 then 'Hematoloji' when 3 then 'Hormon'
+                            when 4 then 'Mikrobiyoloji' when 5 then 'Seroloji'
+                            when 6 then 'Koagülasyon' when 7 then 'İdrar'
+                            when 9 then 'Diğer' else 'Biyokimya' end as ad,
+                       case t.bolum when 2 then '🩸' when 3 then '🧪' when 4 then '🦠'
+                            when 5 then '🧫' when 6 then '🩸' when 7 then '💧'
+                            when 9 then '🔬' else '🧪' end as ikon,
+                       count(*) as adet,
+                       count(*) filter (where t.durum = 0) as aktif
+                  from public.lab_tetkik t
+                 group by t.bolum
+                 order by t.bolum
+                """, [], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            // PANEL UYELERI: panel basina tetkik kimlikleri. Paneller kucuktur
+            //   (onlarca tetkik), tek istekte tasinmasi listeyi yavaslatmaz.
+            var paneller = await veri.ListeAsync("""
+                select p.id, p.kod, p.ad, p.durum,
+                       coalesce(array_agg(s.tetkik_id order by s.sira)
+                                filter (where s.tetkik_id is not null), '{}') as "tetkikIdleri"
+                  from public.lab_panel p
+                  left join public.lab_panel_satir s on s.panel_id = p.id
+                 group by p.id, p.kod, p.ad, p.durum
+                 order by p.ad
+                """, [], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            var toplam = await veri.TekDegerAsync<long>(
+                "select count(*) from public.lab_tetkik", [], iptal);
+
+            return Results.Ok(new { toplam, bolumler, paneller, izlemeNo = baglam.IzlemeNo });
+        });
+
         // ------------------------------------------------ secili tetkik ozeti --
         // GET /api/lab/tetkik/{id}/ozet - Tetkik Katalogu listesinin SAG
         //   PANELI (492, mockup lab_tetkik_katalogu.html "Seçili Tetkik").

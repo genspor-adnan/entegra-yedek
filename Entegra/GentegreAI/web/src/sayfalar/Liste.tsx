@@ -24,6 +24,8 @@ import {
 } from '../api/sozlesme';
 import { kampanyaKalemFiyati } from './belgeKalem';
 import { LabTetkikOzeti } from '../bilesenler/lab/LabTetkikOzeti';
+import { LabKatalogAgaci, BOS_SECIM, type AgacSecim }
+  from '../bilesenler/lab/LabKatalogAgaci';
 import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { IceriAlModali } from '../bilesenler/IceriAlModali';
@@ -495,6 +497,26 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
    * Randevu suzgecleri (251) gride ve takvime AYNI kosulu verir: ust seritte
    * ne seciliyse alttaki takvim de onu gosterir - iki ayri suzgec kafa karistirir.
    */
+  /**
+   * TETKIK KATALOGU SOL PANELI (492): bolum ya da panel secimi. Ikisi de
+   * SUNUCU filtresine cevrilir - panel uyeligi tetkik kimlikleriyle gelir,
+   * istemci uyelik kuralini kendisi kurmaz.
+   */
+  const [agacSecim, setAgacSecim] = useState<AgacSecim>(BOS_SECIM);
+
+  const agacliFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
+    const kosullar: Kosul[] = [];
+    if (temel) kosullar.push(temel);
+    // BOLUM kosulunu GenGrid'in kod suzgeci ekler (ayni deger paylasilir);
+    //   burada tekrar eklemek ayni kosulu iki kez yazardi.
+    if (agacSecim.panelIdleri !== null)
+      // Bos panelde "icinde []" hicbir satir dondurmez - dogru davranis.
+      kosullar.push({ alan: 'id', op: 'icinde', deger: agacSecim.panelIdleri });
+    return kosullar.length === 0 ? undefined
+         : kosullar.length === 1 ? kosullar[0]
+         : { op: 'and', kosullar };
+  }, [agacSecim]);
+
   /** Kategori secimi sabit filtreye AND'lenir - cip ve arama ile birlikte. */
   const kategoriliFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
     if (!kategoriDal || kategoriDal.agac.length === 0) return temel;
@@ -1605,9 +1627,14 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       toplam={tanim.toplam}
       cipler={tanim.cipler}
       kodSuzgeci={tanim.kodSuzgeci}
+      // Combo ve soldaki bolum agaci AYNI degeri paylasir (492).
+      kodSuzgecDeger={tanim.kodSuzgeci ? agacSecim.bolum : undefined}
+      onKodSuzgec={tanim.kodSuzgeci
+        ? (v => setAgacSecim(o => ({ ...o, bolum: v, panelIdleri: null, panelAdi: '' })))
+        : undefined}
       varsayilanGrup={tanim.varsayilanGrup}
-      sabitFiltre={klasorluFiltre(basvuruluFiltre(
-        primliFiltre(personelliFiltre(kategoriliFiltre(randevuFiltresi)))))}
+      sabitFiltre={agacliFiltre(klasorluFiltre(basvuruluFiltre(
+        primliFiltre(personelliFiltre(kategoriliFiltre(randevuFiltresi))))))}
       tarihVarsayilan={tanim.tarihVarsayilan}
       onTarihAraligi={tanim.primSuzgeci ? primAraligiBildir : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}
@@ -1831,6 +1858,9 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       // SECILI TETKIK PANELI (492, mockup lab_tetkik_katalogu sag kolonu):
       //   katalogda gezerken LOINC/referans/panel/sonuc zamani sorulari karti
       //   acmadan cevaplansin.
+      solPanel={tanim.kaynak === 'lab-tetkik'
+        ? <LabKatalogAgaci secim={agacSecim} onSecim={setAgacSecim} />
+        : undefined}
       yanPanel={tanim.kaynak === 'lab-tetkik'
         ? <LabTetkikOzeti id={seciliSatir ? Number(seciliSatir.id) : null} />
         : labYanVarMi(tanim.kaynak)
