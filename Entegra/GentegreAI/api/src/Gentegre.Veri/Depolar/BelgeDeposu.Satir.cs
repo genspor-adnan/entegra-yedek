@@ -388,7 +388,15 @@ public sealed partial class BelgeDeposu
                    --   Belgenin genel_toplam'i kullanilamaz: bir fatura birden
                    --   cok kaynaktan satir toplayabilir, o zaman bu kaynagin
                    --   payindan fazlasini gosterirdi.
-                   sum(round(hs.tutar * (1 + coalesce(hs.kdv, 0) / 100.0), 2)) as tutar,
+                   -- SATIRIN KENDI BRUTU (kullanici: "500 TL fiş girdim,
+                   --   gridde 500,01 göründü; içine girince 500,00"):
+                   --   matrahtan yeniden hesaplamak kurus kaydiriyordu
+                   --   (454,55 x 1,10 = 500,005 -> 500,01). `tutar_kdvli`
+                   --   belgeye YAZILAN brut - kartla ayni rakam. Eski
+                   --   satirlarda bos olabilir, o zaman matrahtan turetilir.
+                   sum(case when coalesce(hs.tutar_kdvli, 0) > 0 then hs.tutar_kdvli
+                            else round(hs.tutar * (1 + coalesce(hs.kdv, 0) / 100.0), 2)
+                       end) as tutar,
                    hb.durum,
                    case hb.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end as "durumAdi"
               from public.belge_satir hs

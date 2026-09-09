@@ -253,7 +253,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [cekTuru, setCekTuru] = useState<number | null>(null);
   /** Kiymet kaydedildikten sonra acilan kasa islemi (ayni kiymete bagli). */
   const [kasaAcilis, setKasaAcilis] = useState<{
-    tur: number; tarafId?: number; tarafUnvan?: string; tutar?: string; cekSenetId?: number;
+    tur: number; tarafId?: number; tarafUnvan?: string; tutar?: string;
+    belgeId?: number; cekSenetId?: number;
   } | null>(null);
 
   /**
@@ -280,6 +281,25 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       setKasaTuru(tur);
     }
   }
+  /**
+   * Liste arac cubugundan acilan TAHSILAT/ODEME kartinin on dolgusu: secili
+   * basvurunun hastasi, belgesi ve ACIK TAHSILAT tutari (genel toplam -
+   * tahsil edilen). Satir secili degilse kart bos acilir.
+   */
+  function tahsilatAcilisi(tur: number) {
+    const s = seciliSatir;
+    if (!s || tanim.kaynak !== 'belge') return { tur };
+    const acik = Math.max(0, Math.round(
+      ((Number(s.genelToplam ?? 0)) - (Number(s.tahsilat ?? 0))) * 100) / 100);
+    return {
+      tur,
+      tarafId: Number(s.tarafId) || undefined,
+      tarafUnvan: String(s.tarafUnvan ?? '') || undefined,
+      belgeId: Number(s.id) || undefined,
+      tutar: acik > 0 ? String(acik) : undefined,
+    };
+  }
+
   // "Ekstre" modu (A secenegi): ayni grid ekstre kaynagina doner. null = liste.
   const [ekstre, setEkstre] = useState<{ id: number; ad: string } | null>(null);
   /** Ekstre gridinde SECILI satir - "Başvuru Aç" bunu kullanir. */
@@ -1974,7 +1994,10 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
 
     {kasaTuru !== null && (
       <KasaIslemKarti
-        acilis={{ tur: kasaTuru }}
+        // SECILI BASVURUNUN ACIK TAHSILATI ONERILIR (kullanici: "tahsilat
+        //   butonuna basınca da açık tahsilat tutarı gelsin"): kart bos
+        //   acilinca memur hastayi ve tutari ikinci kez yaziyordu.
+        acilis={tahsilatAcilisi(kasaTuru)}
         onKapat={() => { setKasaTuru(null); setYenile(t => t + 1) }}
       />
     )}
