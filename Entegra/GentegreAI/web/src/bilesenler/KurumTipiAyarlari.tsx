@@ -46,11 +46,23 @@ export function KurumTipiAyarlari() {
   const [aktif, setAktif] = useState(0);
   const { kullanici, tazele } = useOturum();
   /**
-   * HANGI SUBENIN PROFILI (364): 0 = kurum geneli (varsayilan), N = o sube.
-   * Merkez tip merkezi, yan bina goruntuleme, uzak sube laboratuvar olabilir -
-   * her subenin menusu ve modul paketi kendi profilinden gelir.
+   * HANGI SUBENIN PROFILI (364/489): her zaman BIR SUBE.
+   *
+   * "Kurum geneli (tüm şubeler)" secenegi KALDIRILDI (kullanici): kurum
+   * geneli satiri duzenlenince kendi subesinin ayri satiri olan kullanici
+   * degisikligi ekraninda goremiyordu ("ayarladim ama degismedi"). Artik
+   * her sube kendi profilini ayri ayri set eder; kurum geneli satiri
+   * (sube 0) yalnizca DB'de devralma yedegi olarak durur.
    */
-  const [subeId, setSubeId] = useState(0);
+  const [subeId, setSubeId] = useState(kullanici?.subeId ?? 0);
+
+  // Aktif sube oturumla birlikte gec geliyorsa (ilk cizimde null) ilk
+  //   subeye kilitlenir - combo bos kalmasin.
+  useEffect(() => {
+    if (subeId !== 0) return;
+    const ilk = kullanici?.subeId ?? kullanici?.subeler?.[0]?.id ?? 0;
+    if (ilk !== 0) setSubeId(ilk);
+  }, [kullanici, subeId]);
   const [veri, setVeri] = useState<KurumProfilYaniti | null>(null);
   /** Ekrandaki (henuz kaydedilmemis) profil. */
   const [profil, setProfil] = useState<KurumProfil | null>(null);
@@ -106,9 +118,9 @@ export function KurumTipiAyarlari() {
       //   oturumdan geliyor (359/364), yoksa kullanici degisikligi ancak yeniden
       //   giriste gorurdu.
       const aktifSube = kullanici?.subeId ?? 0;
-      if (subeId === aktifSube || subeId === 0) await tazele();
+      if (subeId === aktifSube) await tazele();
       mesaj('Kurum profili kaydedildi.'
-            + (subeId === 0 && aktifSube !== 0 ? ' (Menü aktif şubenin profiline göre çizilir.)' : ''));
+            + (subeId !== aktifSube ? ' (Menü aktif şubenin profiline göre çizilir.)' : ''));
     } catch (h) { setHata(hataMetni(h)) }
     finally { setKaydediyor(false) }
   };
@@ -123,14 +135,13 @@ export function KurumTipiAyarlari() {
           💾 {kaydediyor ? 'Kaydediliyor…' : 'Kaydet & Uygula'}
         </div>
         <div className="btn" onClick={() => void yukle()}>↩ Kaydedilmişe Dön</div>
-        {/* PROFIL SUBESI (364): kurum geneli + kullanicinin subeleri. Sube
-            secilip kaydedilince o sube kurum genelinden AYRILIR; ayri satiri
-            yoksa degerler kurum genelinden devralinir. */}
+        {/* PROFIL SUBESI (364/489): YALNIZ SUBELER. Sube secilip kaydedilince
+            o sube kendi profiline sahip olur; ilk acilista degerler kurum
+            genelinden devralinmis gorunur. */}
         <span className="sp" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <label htmlFor="kt-sube">Profil:</label>
+          <label htmlFor="kt-sube">Şube:</label>
           <select id="kt-sube" value={subeId}
                   onChange={e => setSubeId(Number(e.target.value))}>
-            <option value={0}>Kurum geneli (tüm şubeler)</option>
             {(kullanici?.subeler ?? []).map(s => (
               <option key={s.id} value={s.id}>{s.ad}</option>
             ))}
@@ -147,23 +158,15 @@ export function KurumTipiAyarlari() {
       {hata && <div className="hata-kutusu" style={{ margin: 8 }}>{hata}</div>}
 
       {/* AKTIF SUBE UYARISI (364, kullanici: "kurum tipi görüntüleme ama lab ve
-          muayene görünüyor"): menu AKTIF SUBENIN profilinden cizilir. Kurum
-          genelini duzenlerken subenin kendi satiri varsa ekran bunu soylemezse
-          "ayarladim ama degismedi" gibi gorunur. */}
-      {subeId === 0 && (kullanici?.subeId ?? 0) !== 0 && (
+          muayene görünüyor"): menu AKTIF SUBENIN profilinden cizilir - baska
+          bir subenin profilini duzenlerken kendi menusu degismez. */}
+      {subeId !== (kullanici?.subeId ?? 0) && (
         <div className="uyari" style={{ margin: '8px 10px' }}>
-          <b>Kurum genelini</b> düzenliyorsunuz. Menünüz <b>aktif şubenizin</b>
-          {' '}({kullanici?.subeler?.find(x => x.id === kullanici?.subeId)?.ad ?? 'şube'})
-          {' '}profiline göre çizilir — o şubenin kendi satırı varsa buradaki tip geçerli olmaz.
+          Başka bir şubenin profilini düzenliyorsunuz; kendi menünüz değişmez.
           <span className="btn" style={{ display: 'inline-flex', marginLeft: 8 }}
                 onClick={() => setSubeId(kullanici?.subeId ?? 0)}>
             ▶ Aktif şubeye geç
           </span>
-        </div>
-      )}
-      {subeId !== 0 && subeId !== (kullanici?.subeId ?? 0) && (
-        <div className="uyari" style={{ margin: '8px 10px' }}>
-          Başka bir şubenin profilini düzenliyorsunuz; kendi menünüz değişmez.
         </div>
       )}
 

@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (245 ad, 72 tanesi birden cok dosyada)
+## Fonksiyonlar (251 ad, 74 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -25,7 +25,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_belge_no_anahtar` | `025_fn_belge_no.sql` | — |
 | `fn_belge_no_uret` | `366_numara_onek_yil.sql` | 025_fn_belge_no.sql, 087_numara_kesme_duzeltmesi.sql, 152_numara_sablonu.sql |
 | `fn_belge_rezerve` | `142_siparis_rezervasyon.sql` | — |
-| `fn_belge_satir_dagilim_hesapla` | `483_dagilim_sut_bedeli_ekrandan.sql` | 476_dagilim_sayac_tazele.sql, 478_pay_kolonlari_dusur.sql, 481_dagilim_kdvli_fiyat.sql |
+| `fn_belge_satir_dagilim_hesapla` | `485_ozel_kurum_sozlesmesiz.sql` | 476_dagilim_sayac_tazele.sql, 478_pay_kolonlari_dusur.sql, 481_dagilim_kdvli_fiyat.sql, 483_dagilim_sut_bedeli_ekrandan.sql |
 | `fn_belge_satir_dagilim_tazele` | `483_dagilim_sut_bedeli_ekrandan.sql` | 472_dagilim_sigorta_prim.sql, 474_dagilim_tazele_duzeltme.sql, 476_dagilim_sayac_tazele.sql |
 | `fn_belge_satir_dagit` | `470_belge_satir_dagilim.sql` | — |
 | `fn_belge_satir_hesap` | `190_belge_fisle.sql` | — |
@@ -135,16 +135,20 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_lab_barkod_kontrol` | `433_lab_v1.sql` | — |
 | `fn_lab_barkod_uret` | `433_lab_v1.sql` | — |
 | `fn_lab_bayrak` | `434_lab_cihaz_esleme.sql` | 433_lab_v1.sql |
+| `fn_lab_calisma_sonuc_zamani` | `487_lab_calisma_takvimi.sql` | — |
 | `fn_lab_cihaz_calisma_listesi` | `434_lab_cihaz_esleme.sql` | — |
 | `fn_lab_cihaz_tetkik` | `434_lab_cihaz_esleme.sql` | — |
 | `fn_lab_dis_gonderim_no` | `445_lab_dis_gonderim.sql` | — |
 | `fn_lab_genetik_ozet` | `439_lab_genetik.sql` | — |
 | `fn_lab_indeks_etki` | `444_lab_serum_indeksi.sql` | — |
+| `fn_lab_istem_sonuc_zamani` | `486_lab_tetkik_calisma_zamani.sql` | — |
 | `fn_lab_kk_gecerli` | `442_lab_kalite_kontrol.sql` | — |
 | `fn_lab_kk_hedef` | `442_lab_kalite_kontrol.sql` | — |
 | `fn_lab_kk_kumulatif` | `442_lab_kalite_kontrol.sql` | — |
 | `fn_lab_kultur_ozet` | `436_lab_mikrobiyoloji.sql` | — |
 | `fn_lab_referans` | `434_lab_cihaz_esleme.sql` | 433_lab_v1.sql |
+| `fn_lab_referans_kime` | `488_lab_yas_metni.sql` | — |
+| `fn_lab_tetkik_sonuc_zamani` | `487_lab_calisma_takvimi.sql` | 486_lab_tetkik_calisma_zamani.sql |
 | `fn_lab_westgard` | `442_lab_kalite_kontrol.sql` | — |
 | `fn_metin_anahtar` | `414_metin_sadelestir.sql` | — |
 | `fn_metin_sadelestir` | `414_metin_sadelestir.sql` | — |
@@ -204,10 +208,12 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_uretim_zaman_hesapla` | `429_uretim_v1.sql` | — |
 | `fn_uretim_zaman_topla` | `429_uretim_v1.sql` | — |
 | `fn_urun_agaci_maliyet` | `429_uretim_v1.sql` | — |
+| `fn_urun_modu` | `489_urun_modu_profilden.sql` | — |
 | `fn_uts_hesap` | `338_entegrasyon_baz_sube.sql` | 223_uts_sema.sql, 227_baz_sube.sql, 337_entegrasyon_uts_ebelge.sql |
+| `fn_yas_metni` | `488_lab_yas_metni.sql` | — |
 | `fn_yerel_para` | `111_ekstre_doviz_gruplu.sql` | — |
 | `fn_yetki_surumu_artir` | `020_sema_kimlik.sql` | — |
-| `tg_belge_basvuru_sozlesme` | `469_basvuru_sozlesme.sql` | — |
+| `tg_belge_basvuru_sozlesme` | `485_ozel_kurum_sozlesmesiz.sql` | 469_basvuru_sozlesme.sql |
 | `tg_belge_satir_dagilim_denge` | `470_belge_satir_dagilim.sql` | — |
 | `tg_belge_satir_rol_dogrula` | `361_prim_rol_isaretleri.sql` | — |
 | `tg_belge_satir_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |

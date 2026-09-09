@@ -283,15 +283,22 @@ public sealed partial class KartDeposu
     }
 
     /// <summary>
-    /// Urun modu (referans genel.urun_modu): 1 Gentegre AI (ERP),
-    /// 2 GenoTIP AI (HBYS). Kart metasi bazi secenekleri moda gore suzuyor
-    /// (or. saglik entegrasyonlari ERP kurulumunda listelenmez).
+    /// Urun modu: 1 Gentegre AI (ERP), 2 GenoTIP AI (HBYS), 3 ikisi. Kart
+    /// metasi bazi secenekleri moda gore suzuyor (or. saglik entegrasyonlari
+    /// ERP kurulumunda listelenmez).
+    ///
+    /// KAYNAK SUBENIN PROFILI (489): mod ekrandan `kurum_profil.urun_modu`ya
+    /// yazilir; eskiden burasi `referans genel.urun_modu`yu okudugu icin
+    /// ekranda HBYS secili olsa bile kurulum ERP gibi davraniyordu.
     /// </summary>
     public async Task<int> UrunModuAsync(CancellationToken iptal = default)
+        => await UrunModuAsync(0, iptal);
+
+    public async Task<int> UrunModuAsync(int subeId, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        // Varsayilan (1 = ERP) AyarDeposu.Varsayilan sozlugunden gelir.
-        return await AyarDeposu.SayiAsync(baglanti, null, "genel.urun_modu", iptal);
+        await using var komut = baglanti.Komut("select public.fn_urun_modu(@p0)", null, subeId);
+        return Convert.ToInt32(await komut.ExecuteScalarAsync(iptal) ?? 1);
     }
 
     /// <summary>

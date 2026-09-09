@@ -78,10 +78,9 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
         // ÜRÜN MODU sunucudan: istemcinin gönderdiği `aktifMod` yalnız ipucu.
         //   HBYS ekranını ERP kurulumunda önermek, olmayan menüyü tarif etmek
         //   olurdu.
-        var modMetin = await baglanti.TekDegerAsync<string>(
-            "select deger from public.referans where anahtar = 'genel.urun_modu'",
-            null, [], iptal);
-        var urunModu = short.TryParse(modMetin, out var m) ? m : (short)1;
+        //   Mod SUBENIN PROFILINDEN gelir (489).
+        var urunModu = (short)await baglanti.TekDegerAsync<short>(
+            "select public.fn_urun_modu(@p0)", null, [baglam.SubeId ?? 0], iptal);
 
         var uyarilar = new List<string>();
         var kontorBakiye = await baglanti.TekDegerAsync<decimal>(

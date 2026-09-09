@@ -282,7 +282,7 @@ public static class KartUclari
             //   SKRS / e-Nabiz / MEDULA secilemez - kullanici secip kaydetse
             //   bile calisacak bir servis yok, listede durmasi gurultu.
             var entegrasyonKodlari = tanim.Ad == "entegrasyon-hesap"
-                ? KartKatalogu.EntegrasyonKodlariMod(await depo.UrunModuAsync(iptal))
+                ? KartKatalogu.EntegrasyonKodlariMod(await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal))
                 : null;
 
             KartAlanMeta MetaOptions(KartAlani a) => a.Ad == "kod" && entegrasyonKodlari is not null

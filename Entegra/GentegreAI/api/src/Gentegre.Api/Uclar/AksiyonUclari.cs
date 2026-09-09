@@ -36,7 +36,7 @@ public static class AksiyonUclari
             // URUN MODU (345): saglik entegrasyonlarina ozgu aksiyonlar (SKRS
             //   liste senkronu) ERP kurulumunda gorunmez - calisacagi bir
             //   servis yok, arac cubugunda durmasi gurultu.
-            var urunModu = await kartlar.UrunModuAsync(iptal);
+            var urunModu = await kartlar.UrunModuAsync(baglam.SubeId ?? 0, iptal);
 
             var sonuc = tanimlar
                 // "gelen" grubu da e-Belgeye baglidir: mukellef olmayan sirkette

@@ -147,6 +147,29 @@ public sealed class KurumProfilDeposu
         });
 
     /// <summary>
+    /// URUN MODU (489): 1 ERP (Gentegre AI) · 2 HBYS (GenoTIP AI) · 3 ikisi.
+    ///
+    /// Kaynak SUBENIN PROFILI, referans anahtari degil (kullanici: "hbys
+    /// moduna gecmiyor"): ekran modu `kurum_profil.urun_modu`ya yaziyordu,
+    /// giris yaniti ise `referans genel.urun_modu`yu okuyordu - iki kaynak
+    /// ayrilinca ekranda HBYS yazip menu ERP kaliyordu. Cozum sirasi DB'de
+    /// (fn_urun_modu): subenin satiri > kurum geneli > referans.
+    /// </summary>
+    public async Task<int> UrunModuAsync(int subeId = 0, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        return await UrunModuAsync(baglanti, subeId, iptal);
+    }
+
+    public static async Task<int> UrunModuAsync(NpgsqlConnection baglanti,
+        int subeId = 0, CancellationToken iptal = default)
+    {
+        await using var komut = baglanti.Komut(
+            "select public.fn_urun_modu(@p0)", null, subeId);
+        return Convert.ToInt32(await komut.ExecuteScalarAsync(iptal) ?? 1);
+    }
+
+    /// <summary>
     /// Bu kurulumda ACIK modullerin kodlari (359). Menu/rota suzmesi bunu
     /// kullanir; cozum sunucuda (profil override'i > tip varsayilani) yapilir ki
     /// istemci ayni kurali ikinci kez yazmasin.

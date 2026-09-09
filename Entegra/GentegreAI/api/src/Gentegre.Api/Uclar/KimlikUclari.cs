@@ -61,12 +61,10 @@ public static class KimlikUclari
                             ?? throw GentegreHatasi.Yetkisiz();
             var subeler = await kullanicilar.SubeleriAsync(baglam.KullaniciId, iptal);
 
-            // Urun modu (215) - giris yanitindaki ile ayni kaynak; /ben acilista
-            //   cagrildigi icin buradan da gelmezse istemci hep ERP sanirdi.
-            var modMetin = await veri.TekDegerAsync<string>(
-                "select deger from public.referans where anahtar = 'genel.urun_modu'",
-                Array.Empty<object?>(), iptal);
-            var urunModu = int.TryParse(modMetin, out var m) ? m : 1;
+            // Urun modu (215/489) - giris yanitindaki ile ayni kaynak: AKTIF
+            //   SUBENIN profili. /ben acilista cagrildigi icin buradan da
+            //   gelmezse istemci hep ERP sanirdi.
+            var urunModu = await kurum.UrunModuAsync(baglam.SubeId ?? 0, iptal);
 
             return Results.Ok(new BenYaniti
             {

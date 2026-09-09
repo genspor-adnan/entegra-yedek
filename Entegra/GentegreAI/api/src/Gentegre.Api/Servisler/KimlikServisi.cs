@@ -135,7 +135,7 @@ public sealed class KimlikServisi
             SonaErme = sonaErme,
             ParolaDegismeli = kullanici.ParolaDegismeli,
             Kullanici = KullaniciOzetiKur(kullanici, subeler, subeId,
-                await AyarAsync("genel.urun_modu", 1, iptal),
+                await UrunModuAsync(subeId, iptal),
                 await AcikModullerAsync(subeId, iptal),
                 await HekimRoluAsync(subeId, iptal))
         };
@@ -282,7 +282,7 @@ public sealed class KimlikServisi
             RefreshSonaErme = refreshBitis,
             ParolaDegismeli = kullanici.ParolaDegismeli,
             Kullanici = KullaniciOzetiKur(kullanici, subeler, subeId,
-                await AyarAsync("genel.urun_modu", 1, iptal),
+                await UrunModuAsync(subeId, iptal),
                 await AcikModullerAsync(subeId, iptal),
                 await HekimRoluAsync(subeId, iptal))
         };
@@ -292,6 +292,17 @@ public sealed class KimlikServisi
     /// Acik moduller (359) - giris yanitinda da doner: menu ilk cizimde dogru
     /// olsun, /ben yanitini beklemek zorunda kalmasin.
     /// </summary>
+    /// <summary>
+    /// AKTIF SUBENIN urun modu (489). Eskiden `referans genel.urun_modu`
+    /// okunuyordu; ekran ise modu subenin profiline yaziyordu - iki kaynak
+    /// ayrilinca giris yaniti ERP diyor, Firma Bilgileri HBYS gosteriyordu.
+    /// </summary>
+    private async Task<int> UrunModuAsync(int? subeId, CancellationToken iptal)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        return await KurumProfilDeposu.UrunModuAsync(baglanti, subeId ?? 0, iptal);
+    }
+
     /// <summary>Aktif subenin basvuru hekim rolu (361/364).</summary>
     private async Task<int> HekimRoluAsync(int? subeId, CancellationToken iptal)
     {

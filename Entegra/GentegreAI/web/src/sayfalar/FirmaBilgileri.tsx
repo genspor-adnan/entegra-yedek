@@ -13,10 +13,12 @@ import { TurAyarlari, type EBelgeTuru } from '../bilesenler/ebelge/TurAyarlari';
 //   subenin deposu oldugu ancak kartin icinde belli oluyor.
 const SEKMELER = [
   { anahtar: 'subeler', baslik: 'Şube Tanımları' },
-  // KURUM TIPI & SISTEM AYARLARI (kullanici): kurulum profili - kurum tipi,
+  // KURUM PROFILI & SISTEM AYARLARI (kullanici): kurulum profili - kurum tipi,
   //   modul matrisi, kayit/ucretlendirme kurallari, entegrasyonlar. Duzen
   //   Ekranlar/Ayarlar/kurum_tipi_ayarlari.html mockup'indan.
-  { anahtar: 'kurumTipi', baslik: 'Kurum Tipi & Sistem Ayarları' },
+  //   Sekme adi "Kurum Tipi" degil "Kurum Profili" (kullanici): ekranda
+  //   secilen yalniz tip degil, subenin tum kurulum profili.
+  { anahtar: 'kurumTipi', baslik: 'Kurum Profili & Sistem Ayarları' },
 ] as const;
 
 /**

@@ -36,9 +36,8 @@ public sealed class RolYetkiDeposu
               left join public.rol_yetki ry on ry.yetki_id = y.id and ry.rol_id = @p0
              where y.aktif = 1
                -- Urun moduna gore suzme (232): 0 = her iki urun, 1 ERP, 2 HBYS.
-               and (y.urun_modu = 0 or y.urun_modu = coalesce((
-                     select nullif(r.deger, '')::int from public.referans r
-                      where r.anahtar = 'genel.urun_modu'), 1))
+               --   Mod SUBENIN PROFILINDEN (489), referans anahtarindan degil.
+               and (y.urun_modu = 0 or y.urun_modu = public.fn_urun_modu(0))
              order by y.sira, y.ad
             """, null,
             rolId);
