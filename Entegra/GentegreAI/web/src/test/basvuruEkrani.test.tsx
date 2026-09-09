@@ -196,9 +196,16 @@ describe('kayitli basvuru karti', () => {
     expect(screen.queryByText('Sigorta')).toBeNull();
   });
 
-  it('ACIK BORC seridi cizilir - ucret/tahsilat farki hasta bandinda', async () => {
+  it('ACIK TAHSILAT seridi cizilir - ucret/tahsilat farki hasta bandinda', async () => {
     ciz({ id: 114349 });
-    await waitFor(() => expect(screen.getByText('Açık Borç')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Açık Tahsilat')).toBeInTheDocument());
+  });
+
+  // 495: "belge kesilmedi" rozeti yerine DONUSMEYEN TUTAR yazar.
+  it('ACIK BELGE hucresi cizilir, kapanma rozeti yoktur', async () => {
+    ciz({ id: 114349 });
+    await waitFor(() => expect(screen.getByText('Açık Belge')).toBeInTheDocument());
+    expect(screen.queryByText('Faturalanmadı')).toBeNull();
   });
 });
 

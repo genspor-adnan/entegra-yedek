@@ -1401,7 +1401,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
                        mustehaklik={Number(basvuruBilgi.sgkMustehaklik ?? 0)}
                        protokolNo={belgeNo || String(sonuc?.belge.belgeNo ?? '')}
                        kilitli={kilitli}
-                       kapanma={KAPANMA_ETIKET[Number(sonuc?.belge.kapanmaDurum ?? 0)]}
+                       acikBelge={sonuc?.belge ? Number(
+                         (sonuc.belge as { acikBelgeTutari?: number }).acikBelgeTutari ?? 0) : null}
                        onAra={metin => { setHastaAramaMetni(metin); setCariArama(true) }}
                        onYeniHasta={() => { setHastaAramaYeni(true); setCariArama(true) }} />
         )}

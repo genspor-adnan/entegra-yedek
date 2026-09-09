@@ -201,7 +201,7 @@ function ZamanAlani({ etiket, deger, onDeger, kilitli }: {
  * henuz yok, uydurma bilgi gostermek yaniltici olurdu. Yerine gercek veriden
  * "son basvuru" uyarisi cizilir.
  */
-export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, kapanma,
+export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, acikBelge,
                               kurumAdi, acikBorc, onAra, onYeniHasta }: {
   tarafId?: number | null;
   /** BELGENIN odeyen kurumu (kullanici): serit hastanin sigortasini degil,
@@ -210,8 +210,13 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, kapanma
   /** Bu BASVURUNUN acik borcu = ucretlendirme genel toplami - tahsilat.
       Verilmezse hastanin genel acik bakiyesi gosterilir. */
   acikBorc?: number;
-  /** Belgenin kapanma rozeti (KAPANMA_ETIKET) - seridin en saginda. */
-  kapanma?: { ad: string; sinif?: string } | null;
+  /**
+   * ACIK BELGE (495, kullanici: "belge kesilmedi rozeti yerine dönüşmeyen
+   * tutarı gösteren Açık Belge"): kovalarin faturaya/tahakkuka daha
+   * cevrilmemis kismi. Rozet "kesildi mi" diyordu; sorulan "ne kadari kaldi".
+   * Sunucudan gelir (belge.acikBelgeTutari) - istemci toplamaz.
+   */
+  acikBelge?: number | null;
   /** Belgenin SGK mustehaklik durumu (299) - sigortanin yanina rozet. */
   mustehaklik?: number | null;
   /** Belge numarasi - mockupta arama satirinin son alani. */
@@ -368,25 +373,30 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, kapanma
       {/* Telefon ve son basvuru seritte YOK (kullanici): hasta zaten secilmis
           durumda - ikisi de arama penceresinde ise yarar, kabul ekraninda yer
           kaplar. Kalan hucreler seride esit araliklarla dagitilir. */}
-      {/* ACIK BORC saga yaslanir (mockup): kabul memuru "tahsilat gerekiyor
+      {/* ACIK TAHSILAT saga yaslanir (mockup): kabul memuru "tahsilat gerekiyor
           mu" sorusunu tek bakista gorsun. Deger BU BASVURUNUN farkidir
           (ucretlendirme genel toplami - tahsilat, kullanici) ve ucret/tahsilat
           girildikce ANINDA degisir; disaridan gelmezse hastanin genel acik
           bakiyesine duser. */}
       <span className="hs sag">
         {/* Isaret hucrenin ADINI da degistirir (kullanici): ucret > tahsilat
-            ise KIRMIZI "Açık Borç", tahsilat > ucret ise YESIL "Alacaklı"
+            ise KIRMIZI "Açık Tahsilat", tahsilat > ucret ise YESIL "Alacaklı"
             (hasta lehine bakiye - iade/mahsup gerekir), esitse notr siyah. */}
-        <span className="k">{borc < 0 ? 'Alacaklı' : 'Açık Borç'}</span>
+        <span className="k">{borc < 0 ? 'Alacaklı' : 'Açık Tahsilat'}</span>
         <span className={`v ${borc > 0 ? 'teh' : borc < 0 ? 'olumlu' : ''}`}>
           {para.format(Math.abs(borc))} ₺
         </span>
       </span>
-      {/* Kapanma ("Faturalanmadı" / "Kısmi" / "Kapandı") rozeti seridin en
-          saginda (kullanici): arac cubugundan buraya alindi - basvurunun
-          parasal durumu acik borcun yaninda okunsun. */}
-      {kapanma && (
-        <span className={`rozet ${kapanma.sinif ?? ''}`}>{kapanma.ad}</span>
+      {/* ACIK BELGE, acik tahsilatin yaninda (kullanici): "belge kesilmedi"
+          rozeti yalniz evet/hayir diyordu - burada KALAN TUTAR yazar, sifirsa
+          belge tamamen kesilmis demektir. */}
+      {acikBelge != null && (
+        <span className="hs sag">
+          <span className="k">Açık Belge</span>
+          <span className={`v ${Number(acikBelge) > 0 ? 'teh' : 'olumlu'}`}>
+            {para.format(Number(acikBelge))} ₺
+          </span>
+        </span>
       )}
     </div>
       ) : null}
