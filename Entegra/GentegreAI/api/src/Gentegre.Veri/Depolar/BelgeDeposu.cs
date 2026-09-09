@@ -729,6 +729,19 @@ public sealed partial class BelgeDeposu
     }
 
     /// <summary>
+    /// Bir belge satirinin BELGEYE YAZILAN brut tutari (KDV dahil), alias
+    /// <c>hs</c> uzerinden. Donusen tutar iki yerde okunuyor (kartin
+    /// "donusenBelgeTutari" seridi ve Donusum sekmesi gridi); matrahtan
+    /// yeniden hesaplamak 500 TL'lik fisi gridde 500,01 gosteriyordu, o yuzden
+    /// ikisi de AYNI ifadeyi kullanir. tutar_kdvli eski satirlarda bos olabilir
+    /// - o zaman matrahtan turetilir.
+    /// </summary>
+    internal const string YazilanBrutSql = """
+        case when coalesce(hs.tutar_kdvli, 0) > 0 then hs.tutar_kdvli
+             else round(hs.tutar * (1 + coalesce(hs.kdv, 0) / 100.0), 2) end
+        """;
+
+    /// <summary>
     /// Silinmemesi gereken belge satirlari: donusmus (kapatilan_miktar) ya da
     /// baska bir kaydin (radyoloji istemi / konsultasyon / UTS bildirimi /
     /// kurum icmali) isaret ettigi satirlar.

@@ -373,7 +373,7 @@ public sealed partial class BelgeDeposu
         int belgeId, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = baglanti.Komut("""
+        await using var komut = baglanti.Komut($$"""
             select hb.id                       as "belgeId",
                    hb.belge_no                 as "belgeNo",
                    hb.belge_tarihi             as "belgeTarihi",
@@ -394,9 +394,7 @@ public sealed partial class BelgeDeposu
                    --   (454,55 x 1,10 = 500,005 -> 500,01). `tutar_kdvli`
                    --   belgeye YAZILAN brut - kartla ayni rakam. Eski
                    --   satirlarda bos olabilir, o zaman matrahtan turetilir.
-                   sum(case when coalesce(hs.tutar_kdvli, 0) > 0 then hs.tutar_kdvli
-                            else round(hs.tutar * (1 + coalesce(hs.kdv, 0) / 100.0), 2)
-                       end) as tutar,
+                   sum({{YazilanBrutSql}}) as tutar,
                    hb.durum,
                    case hb.durum when 1 then 'Taslak' when 2 then 'İptal' else 'Kesin' end as "durumAdi"
               from public.belge_satir hs

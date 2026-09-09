@@ -8,6 +8,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
 import { type AcikSatir, type BelgeYaniti, hataMetni } from '../api/sozlesme';
 import { Modal } from './GenForm';
+import { DONUSUM_PAY_SECENEKLERI }
+  from '../sayfalar/belgeKarti/dagilimKovalari';
 import { para, say4, bugunIso, sayiOku as sayi } from './bicim';
 
 
@@ -187,7 +189,10 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
    */
   const payliFiyat = (s: AcikSatir) => {
     if (pay === 0) return Number(s.birimFiyat ?? 0);
-    const kalan = Number((pay === 1 ? s.hastaKalan : s.kurumKalan) ?? 0);
+    // Kalan ORTAK hesaptan: ince kova haritasi burada da gecerli - elle
+    // yazilan "1 ise hasta, degilse kurum" ayrimi hasta ek katkisini (4)
+    // kurum kovasina dusuruyordu.
+    const kalan = hesapPayKalan(s, pay);
     const miktar = Number(s.miktar ?? 0);
     return miktar > 0 ? kalan / miktar : kalan;
   };
@@ -330,10 +335,8 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
                       veriyordu. */}
                   <select value={pay} onChange={e => setPay(Number(e.target.value))}>
                     <option value={0}>Tümü (paylaşımsız)</option>
-                    <option value={1}>Hasta payı</option>
-                    <option value={4}>Hasta ek katkısı</option>
-                    <option value={3}>Sigorta / anlaşmalı kurum → kuruma faturalanır</option>
-                    <option value={2}>SGK payı → SGK'ya tahakkuk</option>
+                    {DONUSUM_PAY_SECENEKLERI.map(k =>
+                      <option key={k.kod} value={k.kod}>{k.ad}</option>)}
                   </select>
                 </label>
               )}

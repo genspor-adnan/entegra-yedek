@@ -39,6 +39,33 @@ export const KOVALAR: KovaTanimi[] = [
     hedef: 'hasta', ciroDisi: true, not: 'ciro dışı · SGK emaneti' },
 ];
 
+/** Kova kodu -> açık satırdaki KALAN alanı (AcikSatir, 470). */
+export const KOVA_KALAN_ALANI: Record<number,
+  'hastaProvizyonKalan' | 'sgkKalan' | 'ossKalan' | 'hastaEkKatkiKalan'> = {
+  [KOVA_HASTA_PROVIZYON]: 'hastaProvizyonKalan',
+  [KOVA_SGK]: 'sgkKalan',
+  [KOVA_OSS]: 'ossKalan',
+  [KOVA_HASTA_EK_KATKI]: 'hastaEkKatkiKalan',
+};
+
+/**
+ * Dönüşümde kovaların DENENME SIRASI: tahakkuk önce kurum paylarını
+ * (SGK, sigorta), fiş/fatura önce hasta paylarını arar. Katılım payı (5)
+ * listede YOK - ciro dışı emanet, belgeye dönüşmez.
+ */
+export const DONUSUM_KOVA_SIRASI = {
+  kurumOnce: [KOVA_SGK, KOVA_OSS, KOVA_HASTA_PROVIZYON, KOVA_HASTA_EK_KATKI],
+  hastaOnce: [KOVA_HASTA_PROVIZYON, KOVA_HASTA_EK_KATKI, KOVA_OSS, KOVA_SGK],
+};
+
+/** Dönüşüm modalindeki "Dönüştürülecek Pay" seçenekleri (0 = tümü). */
+export const DONUSUM_PAY_SECENEKLERI = [
+  { kod: KOVA_HASTA_PROVIZYON, ad: 'Hasta payı' },
+  { kod: KOVA_HASTA_EK_KATKI, ad: 'Hasta ek katkısı' },
+  { kod: KOVA_OSS, ad: 'Sigorta / anlaşmalı kurum → kuruma faturalanır' },
+  { kod: KOVA_SGK, ad: "SGK payı → SGK'ya tahakkuk" },
+];
+
 /** `fn_dagilim_rota` sonucu: hangi kural işledi. */
 export const ROTA_OZEL = 1;
 export const ROTA_OSS = 2;

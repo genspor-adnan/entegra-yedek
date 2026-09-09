@@ -1,6 +1,9 @@
 import type { AcikSatir, Kosul } from '../api/sozlesme';
 import { onerilenTutar, payKalanDahil, matrahaCevir, kurusTamamla }
   from './belgeDonusumHesap';
+import { TAHAKKUK_TURLERI } from './belgeTuru';
+import { DONUSUM_KOVA_SIRASI, KOVA_HASTA_PROVIZYON }
+  from './belgeKarti/dagilimKovalari';
 
 /**
  * BELGE KARTININ IS KURALLARI - saf fonksiyonlar.
@@ -63,7 +66,7 @@ export function donusumSatirlari(
       // TUTAR OLCUSUNDE de olcu ACIK KALANDIR (kullanici): tahsilat
       //   yapilmadan da fatura/tahakkuk kesilebilir. `onerilenTutar` yalniz
       //   otomatik POS fisinde anlamli - orada tahsilat zaten sinirdir.
-      .map(s => ({ s, dahil: hedefTur === 17 ? payKalanDahil(s, pay)
+      .map(s => ({ s, dahil: TAHAKKUK_TURLERI.has(hedefTur) ? payKalanDahil(s, pay)
                                              : onerilenTutar(s, hedefTur, pay) }))
       // Kurusun altindaki artiklar satir acmaya degmez.
       .filter(x => x.dahil > 0.005)
@@ -105,9 +108,10 @@ export function donusumPayi(acik: AcikSatir[], hedefTur: number): number {
   // INCE KOVALAR (470) sirayla: hangisi aciksa donusum onun uzerinden gider.
   //   Tahakkukta once KURUM kovalari (SGK / sigorta), fis-faturada once
   //   HASTA kovalari denenir - kalani olmayan kova atlanir.
-  const sira = hedefTur === 17 ? [2, 3, 1, 4] : [1, 4, 3, 2];
+  const sira = TAHAKKUK_TURLERI.has(hedefTur)
+    ? DONUSUM_KOVA_SIRASI.kurumOnce : DONUSUM_KOVA_SIRASI.hastaOnce;
   for (const p of sira) if (topla(p) > 0.005) return p;
-  return 1;
+  return KOVA_HASTA_PROVIZYON;
 }
 
 /**

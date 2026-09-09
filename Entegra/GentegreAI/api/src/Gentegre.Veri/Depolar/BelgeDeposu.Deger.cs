@@ -44,7 +44,7 @@ public sealed partial class BelgeDeposu
         await using var baglanti = await _veri.AcAsync(iptal);
 
         IDictionary<string, object?>? belge = null;
-        await using (var komut = new NpgsqlCommand("""
+        await using (var komut = new NpgsqlCommand($$"""
             select b.id, b.tur, b.tipi, b.belge_seri as "belgeSeri", b.belge_no as "belgeNo",
                    b.belge_tarihi as "belgeTarihi", b.taraf_id as "tarafId",
                    b.taraf_unvan as "tarafUnvan", b.taraf_vkno as "tarafVkno",
@@ -145,10 +145,7 @@ public sealed partial class BelgeDeposu
                    --   (matrah) yeniden hesaplamak kurus kaydiriyordu
                    --   (454,55 x 1,10 = 500,005). Iptal edilen (durum 2) hedef
                    --   sayilmaz - kaynak yeniden acilir.
-                   coalesce((select sum(case when coalesce(hs.tutar_kdvli, 0) > 0
-                                             then hs.tutar_kdvli
-                                             else round(hs.tutar
-                                                  * (1 + coalesce(hs.kdv, 0) / 100.0), 2) end)
+                   coalesce((select sum({{YazilanBrutSql}})
                               from public.belge_satir ks
                               join public.belge_satir hs
                                 on hs.kaynak_tur = 30 and hs.kaynak_id = ks.id

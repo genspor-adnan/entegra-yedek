@@ -77,7 +77,7 @@ const ALIS_TURLERI      = new Set([9, 10, 11, 12, 13, 109]);
 const SIPARIS_TURLERI   = new Set([9, 19]);
 const IRSALIYE_TURLERI  = new Set([10, 14, 109, 119]);
 const FATURA_TURLERI    = new Set([11, 12, 15, 16]);
-const TAHAKKUK_TURLERI  = new Set([13, 17]);
+export const TAHAKKUK_TURLERI = new Set([13, 17]);
 const KONSINYE_TURLERI  = new Set([109, 119]);
 const STOK_FISI_TURLERI = new Set([3, 4]);
 

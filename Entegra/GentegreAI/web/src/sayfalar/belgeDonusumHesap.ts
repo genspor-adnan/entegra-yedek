@@ -1,4 +1,6 @@
 import type { AcikSatir } from '../api/sozlesme';
+import { KOVA_KALAN_ALANI, KOVA_SGK } from './belgeKarti/dagilimKovalari';
+import { TAHAKKUK_TURLERI } from './belgeTuru';
 
 /**
  * TUTAR BAZLI DONUSUM HESABI (352) - dönüşüm modali ile otomatik POS fişi
@@ -23,11 +25,8 @@ export function payKalan(s: AcikSatir, pay: number) {
   //   katkisi. Sunucu bu kodlarla calisiyor ("Bu satırın SGK payı zaten
   //   kapatılmış" hatasi, kaba 2 = kurum varsayimindan doguyordu). Kova
   //   alanlari yoksa (eski yanit) kaba kurum/hasta ikilisine duser.
-  const ince = p === 1 ? s.hastaProvizyonKalan
-             : p === 2 ? s.sgkKalan
-             : p === 3 ? s.ossKalan
-             : p === 4 ? s.hastaEkKatkiKalan : undefined;
-  if (ince !== undefined) return Number(ince ?? 0);
+  const alan = KOVA_KALAN_ALANI[p];
+  if (alan && s[alan] !== undefined) return Number(s[alan] ?? 0);
 
   const k = Number((p === 2 ? s.kurumKalan : s.hastaKalan) ?? 0);
   const paylasimsiz = Number(s.kurumTutar ?? 0) + Number(s.hastaTutar ?? 0) === 0;
@@ -39,7 +38,8 @@ export const payKalanDahil = (s: AcikSatir, pay: number) => payKalan(s, pay) * k
 
 /** Tahsil edilmis tutar (KDV dahil): dagitim tabani zaten KDV dahildir (323). */
 export const tahsilDahil = (s: AcikSatir, pay: number) =>
-  Number(((pay || 1) === 2 ? s.kurumTahsilMatrah : s.hastaTahsilMatrah) ?? 0) * kdvCarpan(s);
+  Number(((pay || 1) === KOVA_SGK ? s.kurumTahsilMatrah : s.hastaTahsilMatrah) ?? 0)
+  * kdvCarpan(s);
 
 /**
  * Satira onerilen tutar (KDV dahil): tahakkukta (17) kalanin TAMAMI,
@@ -48,7 +48,7 @@ export const tahsilDahil = (s: AcikSatir, pay: number) =>
  */
 export function onerilenTutar(s: AcikSatir, hedefTur: number, pay: number) {
   const kalan = payKalanDahil(s, pay);
-  if (hedefTur === 17) return kalan;
+  if (TAHAKKUK_TURLERI.has(hedefTur)) return kalan;
   return Math.max(0, Math.min(kalan, tahsilDahil(s, pay)));
 }
 

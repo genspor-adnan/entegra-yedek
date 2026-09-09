@@ -1,8 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import {
   provizyonVarMi, donusumSatirlari, posFisiSecimi, kasaAramaSirasi,
-  gelisSekliKarari, acikBorcHesapla,
+  gelisSekliKarari, acikBorcHesapla, donusumPayi,
 } from '../sayfalar/belgeKartiKurallari';
+import {
+  DONUSUM_KOVA_SIRASI, DONUSUM_PAY_SECENEKLERI, KOVA_KALAN_ALANI,
+  KOVA_KATILIM, KOVA_OSS, KOVA_SGK, KOVA_HASTA_PROVIZYON, KOVA_HASTA_EK_KATKI,
+} from '../sayfalar/belgeKarti/dagilimKovalari';
 import type { AcikSatir } from '../api/sozlesme';
 
 /**
@@ -149,5 +153,38 @@ describe('acikBorcHesapla', () => {
   });
   it('kurus yuvarlar', () => {
     expect(acikBorcHesapla(1, 100.005, 0, 0)).toBe(100.01);
+  });
+});
+
+/**
+ * INCE KOVA KODLARI (470) tek kaynaktan (dagilimKovalari) okunur. Bu kodlar
+ * sunucuyla ortak: kaba "kurum payi = 2" varsayimi "Bu satırın SGK payı zaten
+ * kapatılmış" hatasini veriyordu, o yuzden liste elle yazilmaz.
+ */
+describe('dagilim kovalari - tek kaynak', () => {
+  it('donusum sirasi katilim payini (ciro disi) hic denemez', () => {
+    for (const sira of [DONUSUM_KOVA_SIRASI.kurumOnce, DONUSUM_KOVA_SIRASI.hastaOnce]) {
+      expect(sira).not.toContain(KOVA_KATILIM);
+      expect(new Set(sira).size).toBe(4);
+    }
+  });
+
+  it('modal secenekleri kova kodlarindan uretilir', () => {
+    expect(DONUSUM_PAY_SECENEKLERI.map(s => s.kod))
+      .toEqual([KOVA_HASTA_PROVIZYON, KOVA_HASTA_EK_KATKI, KOVA_OSS, KOVA_SGK]);
+    for (const s of DONUSUM_PAY_SECENEKLERI) expect(KOVA_KALAN_ALANI[s.kod]).toBeTruthy();
+  });
+
+  it('tahakkuk once KURUM kovasini, fis once HASTA kovasini secer', () => {
+    const acik = [satir({ hastaProvizyonKalan: 100, sgkKalan: 400 } as Partial<AcikSatir>)];
+    expect(donusumPayi(acik, 17)).toBe(KOVA_SGK);
+    expect(donusumPayi(acik, 16)).toBe(KOVA_HASTA_PROVIZYON);
+  });
+
+  it('kalani olmayan kova atlanir - "Kurumu Öder" basvurusu', () => {
+    // Hastadan hicbir sey alinmiyor: fis de kurum kovasi uzerinden gider.
+    const acik = [satir({ hastaProvizyonKalan: 0, hastaEkKatkiKalan: 0,
+                          ossKalan: 900, sgkKalan: 0 } as Partial<AcikSatir>)];
+    expect(donusumPayi(acik, 16)).toBe(KOVA_OSS);
   });
 });
