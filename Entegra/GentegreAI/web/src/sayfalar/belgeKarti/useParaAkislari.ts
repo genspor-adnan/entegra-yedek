@@ -226,14 +226,22 @@ export function useParaAkislari(g: ParaAkisGirdisi) {
       // Tutar okunamazsa eski davranisa DUSMEYIZ: fis kesmeyip kullaniciyi
       //   Tahsilat ekranina birakmak, fazla belge kesmekten iyidir.
       if (!(posTutar > 0)) return;
-      const { satirlar: secim, toplamDahil: toplam } = posFisiSecimi(acik, posTutar);
-      if (secim.length === 0) return;
+      const { satirlar: secim, toplamDahil: toplam, pay: posPay } =
+        posFisiSecimi(acik, posTutar);
+      // SESSIZ CIKMA YOK (kullanici): tahsilat dagitilmamis ya da belgelenecek
+      //   tutar kalmamis olabilir - sebebi soylenir, yoksa "fiş oluşmadı" diye
+      //   aranıyordu.
+      if (secim.length === 0) {
+        mesaj('POS tahsilatı için fiş kesilmedi: belgelenecek açık tutar yok '
+              + '(tahsilat başvuruya dağıtılmamış olabilir).');
+        return;
+      }
       if (aksiyon === 2 && !(await onay(
             `POS tahsilatı için ${para.format(toplam)} ₺ tutarında satış fişi kesilsin mi?`)))
         return;
 
       const yeni = await api.belgeDonustur(kayitliId, 16, secim,
-        undefined, false, undefined, 1, false);
+        undefined, false, undefined, posPay, false);
 
       await donusumleriYukle();
       try { setSonuc(await api.belgeOku(kayitliId)) } catch { /* yoksay */ }

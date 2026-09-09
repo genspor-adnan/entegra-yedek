@@ -88,6 +88,21 @@ describe('posFisiSecimi (355)', () => {
   it('dagitilmis tahsilat yoksa bos doner (sessizce cikilir)', () => {
     expect(posFisiSecimi([satir({ hastaTahsilMatrah: 0 })]).satirlar).toEqual([]);
   });
+
+  /**
+   * 495 (kullanici: "2000 TL POS tahsilat girdim, otomatik fiş oluşmadı"):
+   * pay sabit 1 (hasta provizyonu) varsayiliyordu. Ozel/indirimli tarifede
+   * kova HASTA EK KATKISIDIR (4) - secim bos donuyor ve fis sessizce
+   * kesilmiyordu.
+   */
+  it('acik kova HASTA EK KATKISI ise onu secer', () => {
+    const s = satir({ hastaEkKatkiKalan: 1090.91, hastaProvizyonKalan: 0,
+                      hastaTahsilMatrah: 909.09, kdv: 10 });
+    const { satirlar, toplamDahil, pay } = posFisiSecimi([s], 1000);
+    expect(pay).toBe(4);
+    expect(satirlar).toHaveLength(1);
+    expect(toplamDahil).toBeCloseTo(1000, 2);
+  });
 });
 
 describe('kasaAramaSirasi (hesap.atama, 200)', () => {

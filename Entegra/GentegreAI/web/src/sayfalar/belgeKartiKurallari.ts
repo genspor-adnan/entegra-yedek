@@ -84,9 +84,14 @@ export function donusumSatirlari(
  * Toplam, kullaniciya sorulan onay metninde gosterilir.
  */
 export function posFisiSecimi(acik: AcikSatir[], ustSinir?: number):
-    { satirlar: DonusumSatiri[]; toplamDahil: number } {
+    { satirlar: DonusumSatiri[]; toplamDahil: number; pay: number } {
   // POS FISINDE OLCU TAHSILATTIR: cekilen kadar fis kesilir.
-  return sinirliDonusumSecimi(acik, 16, ustSinir, 'tahsilat');
+  // PAY ACIK KOVADAN (kullanici: "2000 TL POS girdim, otomatik fiş
+  //   oluşmadı"): sabit 1 (hasta provizyonu) varsayiliyordu; "Kurumu Öder"
+  //   ya da ozel/indirimli tarifede kova HASTA EK KATKISI (4) oldugu icin
+  //   secim bos donuyor ve fis SESSIZCE kesilmiyordu.
+  const pay = donusumPayi(acik, 16);
+  return { ...sinirliDonusumSecimi(acik, 16, ustSinir, 'tahsilat', pay), pay };
 }
 
 /**
