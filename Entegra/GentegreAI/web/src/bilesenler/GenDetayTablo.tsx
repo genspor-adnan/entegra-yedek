@@ -153,6 +153,13 @@ interface Props {
   /** Baslik seridine suzme cipleri (listelerin Aktif/Pasif cipleri gibi).
       Ilk cip varsayilan seciliyor; suzme yalniz gorunumu daraltir. */
   cipler?: { ad: string; suz: (satir: Record<string, unknown>) => boolean }[];
+  /**
+   * ARAMA KUTUSUNUN SAGINDAKI EK SUZGEC (kullanici: "fiyat listesi karti
+   * satirlarda kategori agac combo"). Cizimi ve suzme kurali CAGIRANIN:
+   * secim durumu orada yasar, grid yalnizca yerini ve suzmeyi uygular.
+   */
+  ekSuzgec?: { cizim: React.ReactNode;
+               suz?: (satir: Record<string, unknown>) => boolean };
 }
 
 // Adresler grid'ine ozel kolon genislikleri (kullanici: "Adres geniş, İl/İlçe aynı
@@ -230,7 +237,7 @@ function YasGirdisi({ gun, yazilabilir, onDegis }: {
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
                                modalDuzenle, taslakKural, cipler, kutuSinif,
                                gizliAlanlar, gridGizliAlanlar, etiketAlanlari, sadeGrid, ekleGizli,
-                               aramaKaynaklari, aramaEkFiltre,
+                               aramaKaynaklari, aramaEkFiltre, ekSuzgec,
                                modalAltBilesen }: Props) {
   /**
    * KAMPANYA SATIRI (268): "Kapsam" TEK kolondur (iskonto_yeri_id) ama
@@ -622,6 +629,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const gorunurler = durum.guncel
     .map((satir, i) => ({ satir, i }))
     .filter(({ satir }) => !cipSuz || cipSuz(satir))
+    .filter(({ satir }) => !ekSuzgec?.suz || ekSuzgec.suz(satir))
     .filter(({ satir }) => !aramaAnahtari
       || alanlar.some(a => gorunum(satir, a).toLocaleLowerCase('tr').includes(aramaAnahtari)));
   const aramaVar = modalDuzenle && (durum.guncel.length > 20 || arama !== '');
@@ -679,6 +687,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                          onChange={e => { setArama(e.target.value); setSecili(null); }} />
                 </span>
               )}
+              {ekSuzgec?.cizim}
               {satirlarGrid && (
                 <button type="button" className="d ikon-dugme" title="Grid menüsü"
                         style={{ marginLeft: 6 }}

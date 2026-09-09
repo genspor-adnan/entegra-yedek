@@ -14,13 +14,27 @@ import { guvenli } from './mesaj';
  */
 type Kategori = { id: number; ad: string; ustId: number | null; tur: number };
 
-export function KategoriSuzgeci({ tur, deger, onDegis }: {
-  /** 1 stok · 2 hizmet (346) - hangi ağaç gösterilecek. */
-  tur: number;
+/** Ağaç başlıkları - iki tür birden istendiğinde optgroup etiketi olur. */
+const TUR_ADI: Record<number, string> = { 1: 'Stok', 2: 'Hizmet' };
+
+export function KategoriSuzgeci({ tur, deger, onDegis, sinirla, baslik }: {
+  /** 1 stok · 2 hizmet (346) - hangi ağaç gösterilecek. Dizi = iki ağaç birden. */
+  tur: number | readonly number[];
   deger: number | null;
   onDegis(id: number | null, altlarDahil: number[]): void;
+  /**
+   * YALNIZ BU KATEGORİLER (ve üstleri) listelensin. Fiyat listesi kartında
+   * (kullanıcı) satırlarda hiç geçmeyen dallar, seçilince boş grid veren
+   * yüzlerce seçenek üretiyordu.
+   */
+  sinirla?: ReadonlySet<number>;
+  /** Boş seçeneğin metni; varsayılan "Tüm Kategoriler". */
+  baslik?: string;
 }) {
   const [kayitlar, setKayitlar] = useState<Kategori[]>([]);
+  const turler = useMemo(() => (Array.isArray(tur) ? [...tur] : [tur as number]), [tur]);
+  // Dizi her cizimde yeni referans: efekt ICERIGE bagli olmali.
+  const turAnahtari = turler.join(',');
 
   useEffect(() => {
     void guvenli(async () => {
@@ -29,29 +43,51 @@ export function KategoriSuzgeci({ tur, deger, onDegis }: {
         id: Number(s.id), ad: String(s.ad ?? ''),
         ustId: s.ustId === null || s.ustId === undefined ? null : Number(s.ustId),
         tur: Number(s.tur ?? 1),
-      })).filter(k => k.tur === tur));
+      })).filter(k => turler.includes(k.tur)));
     });
-  }, [tur]);
+  }, [turAnahtari]);
 
-  /** Ağaç sırası: kök -> altları, girinti derinlikle. */
-  const secenekler = useMemo(() => {
+  /** Ağaç sırası: kök -> altları, girinti derinlikle; tür başına bir grup. */
+  const gruplar = useMemo(() => {
+    // SINIRLA: istenen dallar + ÜSTLERİ - üst olmadan girinti kopar.
+    let gorunur = kayitlar;
+    if (sinirla) {
+      const ustler = new Map(kayitlar.map(k => [k.id, k.ustId]));
+      const tut = new Set<number>();
+      sinirla.forEach(id => {
+        let g: number | null | undefined = id;
+        while (g != null && !tut.has(g)) { tut.add(g); g = ustler.get(g) ?? null }
+      });
+      gorunur = kayitlar.filter(k => tut.has(k.id));
+    }
+
     const cocuk = new Map<number, Kategori[]>();
-    kayitlar.forEach(k => {
+    gorunur.forEach(k => {
       const ust = k.ustId ?? 0;
       cocuk.set(ust, [...(cocuk.get(ust) ?? []), k]);
     });
     cocuk.forEach(liste => liste.sort((a, b) => a.ad.localeCompare(b.ad, 'tr')));
 
-    const sonuc: { id: number; etiket: string }[] = [];
-    const gez = (ustId: number, derinlik: number) => {
+    const gez = (ustId: number, derinlik: number,
+                 sonuc: { id: number; etiket: string }[]) => {
       (cocuk.get(ustId) ?? []).forEach(k => {
         sonuc.push({ id: k.id, etiket: `${'  '.repeat(derinlik)}${derinlik > 0 ? '└ ' : ''}${k.ad}` });
-        gez(k.id, derinlik + 1);
+        gez(k.id, derinlik + 1, sonuc);
       });
     };
-    gez(0, 0);
-    return sonuc;
-  }, [kayitlar]);
+    return turler.map(t => {
+      const sonuc: { id: number; etiket: string }[] = [];
+      // Kok = ust'u olmayan ya da ustu (tur suzmesi yuzunden) listede olmayan dal.
+      const idler = new Set(gorunur.map(k => k.id));
+      gorunur.filter(k => k.tur === t && (k.ustId == null || !idler.has(k.ustId)))
+        .sort((a, b) => a.ad.localeCompare(b.ad, 'tr'))
+        .forEach(k => {
+          sonuc.push({ id: k.id, etiket: k.ad });
+          gez(k.id, 1, sonuc);
+        });
+      return { tur: t, ad: TUR_ADI[t] ?? '', secenekler: sonuc };
+    }).filter(g => g.secenekler.length > 0);
+  }, [kayitlar, sinirla, turAnahtari]);
 
   /** Seçilen dalın kendisi + tüm altları. */
   const altAgac = (id: number): number[] => {
@@ -73,8 +109,16 @@ export function KategoriSuzgeci({ tur, deger, onDegis }: {
               const id = Number(v);
               onDegis(id, altAgac(id));
             }}>
-      <option value="">Tüm Kategoriler</option>
-      {secenekler.map(s => <option key={s.id} value={s.id}>{s.etiket}</option>)}
+      <option value="">{baslik ?? 'Tüm Kategoriler'}</option>
+      {/* Tek ağaçta grup başlığı gürültü; iki ağaç birden çizilirken
+          "Stok" / "Hizmet" ayrımı şart. */}
+      {gruplar.length === 1
+        ? gruplar[0].secenekler.map(s => <option key={s.id} value={s.id}>{s.etiket}</option>)
+        : gruplar.map(g => (
+            <optgroup key={g.tur} label={g.ad}>
+              {g.secenekler.map(s => <option key={s.id} value={s.id}>{s.etiket}</option>)}
+            </optgroup>
+          ))}
     </select>
   );
 }

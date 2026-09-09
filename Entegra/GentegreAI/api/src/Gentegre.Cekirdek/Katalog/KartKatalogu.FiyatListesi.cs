@@ -119,6 +119,17 @@ public static partial class KartKatalogu
                     "        (select h2.kategori from public.hizmet h2 " +
                     "          where h2.id = fiyat_listesi_satir.hizmet_id)))",
                     "metin", Yazilabilir: false, Baslik: "Kategori"),
+                // KATEGORI ID (kullanici: "satirlar sekmesinde arama editi
+                //   saginda kategori agac combo"): combo secimi satirlari
+                //   suzerken YOL METNI degil id gerekir - ayni ad iki agacta
+                //   (Lab > Genel, Radyoloji > Genel) bulunabiliyor. Ekranda
+                //   GIZLI: yalnizca suzgecin karsilastirdigi anahtar.
+                new("kategoriId",
+                    "coalesce((select s4.kategori from public.stok s4 " +
+                    "           where s4.id = fiyat_listesi_satir.stok_id), " +
+                    "         (select h4.kategori from public.hizmet h4 " +
+                    "           where h4.id = fiyat_listesi_satir.hizmet_id))",
+                    "sayi", Yazilabilir: false, Baslik: "Kategori Kodu"),
                 new("kalemKodu",
                     "coalesce((select s3.kod from public.stok s3 " +
                     "           where s3.id = fiyat_listesi_satir.stok_id), " +

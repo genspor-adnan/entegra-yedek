@@ -36,6 +36,7 @@ import { StokHareketSekmesi } from './StokHareketSekmesi';
 import { HizmetListeFiyatlari } from './HizmetListeFiyatlari';
 import { TarafArama } from './TarafArama';
 import { StokAramaPenceresi } from './StokAramaPenceresi';
+import { KategoriSuzgeci } from './KategoriSuzgeci';
 import { RandevuUygunSaatler } from './RandevuUygunSaatler';
 import { RandevuOzetSeridi } from './RandevuOzetSeridi';
 import { RandevuTetkikUyum } from './RandevuTetkikUyum';
@@ -239,6 +240,26 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
   const [surum, setSurum] = useState<string | undefined>();
   const [yetki, setYetki] = useState<KartYetkisi>({ duzenle: false, sil: false, gizliAlanlar: [] });
   const [detaylar, setDetaylar] = useState<Record<string, DetayDurumu>>({});
+  /**
+   * FIYAT LISTESI SATIRLARI - KATEGORI SUZGECI (kullanici: "satirlar
+   * sekmesinde arama editinin sagina kategori agac combo ekle"). Secilen dal
+   * ALT AGACIYLA birlikte suzer; durum burada cunku grid suzgeci cizmez,
+   * yalnizca yerini verir.
+   */
+  const [satirKategori, setSatirKategori] =
+    useState<{ id: number; agac: number[] } | null>(null);
+  // Kart degisince suzgec sifirlanir: onceki listenin dali yeni listede yok.
+  useEffect(() => { setSatirKategori(null) }, [kaynak, id]);
+  /** Combo yalnizca SATIRLARDA GECEN kategorileri (ve ustlerini) listeler. */
+  const satirKategorileri = useMemo(() => {
+    if (kaynak !== 'fiyat-listesi') return undefined;
+    const kume = new Set<number>();
+    (detaylar['satirlar']?.guncel ?? []).forEach(r => {
+      const k = Number(r.kategoriId);
+      if (Number.isFinite(k) && k > 0) kume.add(k);
+    });
+    return kume;
+  }, [kaynak, detaylar]);
 
   const [yukleniyor, setYukleniyor] = useState(true);
   const [kaydediyor, setKaydediyor] = useState(false);
@@ -1502,9 +1523,13 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           //   fatura kesilirken paranin hangi araçla tahsil edilecegi HENUZ
           //   BELLI DEGIL. Eslestirme zaten bu kriteri o kipte yok sayiyor;
           //   alani ekranda tutmak, uygulanmayan bir ayar uretiyordu.
+          // kategoriId SUZGEC ANAHTARI (asagida): gridde de modalde de
+          //   gorunmez - kullaniciya "Kategori" zaten yol metniyle gosteriliyor.
           gizliAlanlar={ayar?.gizli ? new Set(ayar.gizli)
             : kaynak === 'prim-plani' && Number(deger.primZamani) === 2
-            ? new Set(['tahsilatTuru']) : undefined}
+            ? new Set(['tahsilatTuru'])
+            : kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
+            ? new Set(['kategoriId']) : undefined}
           // Tabloyu sadelestirir, DUZENLEMEYI kisitlamaz: modal tam kalir.
           gridGizliAlanlar={ayar?.gridGizli ? new Set(ayar.gridGizli) : undefined}
           // ARAMA PLANIN ROLUNE BAGLI (383, kullanici): yalnizca O ROLDE ADAY
@@ -1528,6 +1553,27 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
             ? [{ ad: 'Tümü', suz: () => true },
                { ad: '📦 Stok', suz: s => s.stokId != null && s.stokId !== '' },
                { ad: '🛠️ Hizmet', suz: s => s.hizmetId != null && s.hizmetId !== '' }]
+            : undefined}
+          // KATEGORI AGAC COMBOSU (kullanici) - arama kutusunun saginda.
+          //   Secenekler SATIRLARDA GECEN dallarla sinirli: 5.000 stok
+          //   kategorisinin tamamini listelemek, cogu secimde bos grid verirdi.
+          ekSuzgec={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
+            ? {
+                cizim: (
+                  <KategoriSuzgeci
+                    tur={[1, 2]}
+                    baslik="🌳 Tüm Kategoriler"
+                    sinirla={satirKategorileri}
+                    deger={satirKategori?.id ?? null}
+                    onDegis={(id, agac) =>
+                      setSatirKategori(id === null ? null : { id, agac })}
+                  />
+                ),
+                suz: satirKategori
+                  ? (s: Record<string, unknown>) =>
+                      satirKategori.agac.includes(Number(s.kategoriId))
+                  : undefined,
+              }
             : undefined}
         />
         );
