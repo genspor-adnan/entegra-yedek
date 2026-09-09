@@ -180,8 +180,25 @@ export function useBelgeFiyatlandirma(g: FiyatlandirmaGirdisi) {
     await satirlariYenidenFiyatla(yeni, odeyenKurumId, 'listeden');
   }
 
+  /**
+   * ODEYEN KURUMUN LISTESI (495, kullanici: "ödeyen kurum seçilince fiyat
+   * listesi otomatik gelsin"): kurumun yururlukteki SOZLESMESINDEKI liste
+   * sunucudan cozulur (fn_belge_varsayilan_liste). Kampanyanin kendi listesi
+   * varsa O oncelikli - kampanya sozlesmenin ustune yazilan anlasmadir.
+   *
+   * KAYITLI belgede de calisir: kurum degistirildiyse tarife de degismistir;
+   * acilista dokunulmaz (belge hangi listeyle kesildiyse onu tasir).
+   */
+  async function kurumListesiCoz(kurumId: number | null): Promise<number | null> {
+    if (!cariId) return null;
+    try {
+      const y = await api.belgeVarsayilanListe(tur, cariId, kurumId);
+      return y.listeId ?? null;
+    } catch { return null }   // liste kurulmamis olabilir - kart fiyati kalir
+  }
+
   return {
-    fiyatListeleri, fiyatListesiId, setFiyatListesiId,
+    fiyatListeleri, fiyatListesiId, setFiyatListesiId, kurumListesiCoz,
     kampanyaId, setKampanyaId, kampanyaAdi, setKampanyaAdi,
     kampanyaCoz, satirlariYenidenFiyatla, listeDegisti,
   };

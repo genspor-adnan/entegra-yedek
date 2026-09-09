@@ -75,9 +75,12 @@ export function MesajKatmani() {
           </>
         ) : (
         <>
+          {/* Onay kutusundaki ikinci dugme "Kapat" (kullanici): "Vazgeç"
+              yapilmis bir isi geri aliyormus izlenimi veriyordu - oysa soru
+              henuz cevaplanmadi, kutu kapaniyor. */}
           {istek.onayMi && (
             <button type="button" className="d kapat-dugmesi"
-                    onClick={() => kapat(false)}>Vazgeç</button>
+                    onClick={() => kapat(false)}>Kapat</button>
           )}
           <button type="button"
                   className={`d ${istek.tehlike ? 'teh' : 'bir'}`}

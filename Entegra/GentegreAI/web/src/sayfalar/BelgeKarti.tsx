@@ -420,7 +420,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   //   hepsi "bu satir kaca yazilacak" sorusunun parcasi (belgeKarti/
   //   useBelgeFiyatlandirma), karta dagilinca kural kaciyordu.
   const {
-    fiyatListeleri, fiyatListesiId, setFiyatListesiId: setFiyatListesiIdHam,
+    fiyatListeleri, fiyatListesiId, setFiyatListesiId: setFiyatListesiIdHam, kurumListesiCoz,
     kampanyaId, setKampanyaId, kampanyaAdi, setKampanyaAdi,
     kampanyaCoz, satirlariYenidenFiyatla, listeDegisti,
   } = useBelgeFiyatlandirma({
@@ -1208,8 +1208,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     setBasvuruBilgi(o => ({ ...o, sozlesmeId: null, altKurum: null, sgkKullan: 1 }));
     if (kilitli) return;
 
-    // Kampanya cozulemezse mevcut liste ile devam edilir (kampanyaCoz yutar).
-    const liste = (await kampanyaCoz(yeni, true)) ?? fiyatListesiId;
+    // Kampanya cozulemezse KURUMUN SOZLESME LISTESI (495), o da yoksa mevcut
+    //   liste ile devam edilir. Kampanya once gelir: sozlesmenin ustune
+    //   yazilan anlasmadir.
+    const kampanyaListesi = await kampanyaCoz(yeni, true);
+    const liste = kampanyaListesi ?? (await kurumListesiCoz(yeni)) ?? fiyatListesiId;
+    // Ekranda da gorunsun: "Fiyat Listesi" kutusu kurumla birlikte degisir -
+    //   ucret eklerken fiyatin nereden geldigi belli olur.
+    if (liste !== fiyatListesiId) setFiyatListesiIdHam(liste);
 
     if (satirlar.some(r => r.stokId || r.hizmetId))
       await satirlariYenidenFiyatla(liste, yeni, 'ödeyen kuruma göre');

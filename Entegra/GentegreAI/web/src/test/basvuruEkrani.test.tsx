@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { BelgeKarti } from '../sayfalar/BelgeKarti';
 import kaynaklar from './veri/basvuruKaynaklari.json';
@@ -34,6 +34,10 @@ const SUBE_GORUNTULEME = {
 const liste = vi.fn();
 const belgeOku = vi.fn();
 const belgeEkle = vi.fn();
+/** Odeyen kurumun sozlesme fiyat listesi (495) - kurum basina ayri liste. */
+const varsayilanListe = vi.fn(
+  (_tur: number, _tarafId: number, kurumId?: number | null) =>
+    Promise.resolve({ listeId: kurumId === 4987 ? 9 : null, ad: '', yon: 2, kdvDahil: 0 }));
 
 vi.mock('../api/istemci', () => ({
   api: {
@@ -53,7 +57,8 @@ vi.mock('../api/istemci', () => ({
     dovizKur: () => Promise.resolve({ kur: 1 }),
     fiyatKampanya: () => Promise.resolve({ kampanyaId: null, ad: '', kod: '', paylasimModu: 1 }),
     fiyatKalem: () => Promise.resolve({}),
-    belgeVarsayilanListe: () => Promise.resolve({ listeId: null }),
+    belgeVarsayilanListe: (tur: number, tarafId: number, kurumId?: number | null) =>
+      varsayilanListe(tur, tarafId, kurumId),
     kodListe: () => Promise.resolve({ degerler: [] }),
     aramaIsaretle: () => Promise.resolve({}),
     belgeAcikSatirlar: () => Promise.resolve({ satirlar: [] }),
@@ -199,6 +204,39 @@ describe('kayitli basvuru karti', () => {
   it('ACIK TAHSILAT seridi cizilir - ucret/tahsilat farki hasta bandinda', async () => {
     ciz({ id: 114349 });
     await waitFor(() => expect(screen.getByText('Açık Tahsilat')).toBeInTheDocument());
+  });
+
+  /**
+   * 495 (kullanici: "ödeyen kurum seçilince fiyat listesi otomatik gelsin"):
+   * kurum secilince SOZLESMESINDEKI liste sunucudan cozulur ve "Fiyat Listesi"
+   * kutusuna yazilir - ucret eklerken fiyatin nereden geldigi ekranda gorunur.
+   */
+  it('odeyen kurum secilince sozlesme fiyat listesi gelir', async () => {
+    ciz({ id: 114349 });
+    await waitFor(() => expect(screen.getByText('Ödeyen Kurum')).toBeInTheDocument());
+
+    // Kurum kutusu Basvuru sekmesinde; secenekler kaynak fixture'undan gelir.
+    const kutular = () => screen.getAllByRole('combobox') as HTMLSelectElement[];
+    await act(async () => { (await sekme('Başvuru')).click() });
+    await waitFor(() => expect(kutular().some(x =>
+      [...x.options].some(o => o.text.includes('Sigorta')))).toBe(true));
+    const kurumKutusu = kutular().find(x =>
+      [...x.options].some(o => o.text.includes('Sigorta')))!;
+    await act(async () => {
+      fireEvent.change(kurumKutusu, { target: { value: '4987' } });
+    });
+
+    await waitFor(() => expect(varsayilanListe)
+      .toHaveBeenCalledWith(19, expect.any(Number), 4987));
+
+    // Ucretlendirme sekmesindeki kutu da o listeyi gosterir.
+    await act(async () => { (await sekme('Ücretlendirme')).click() });
+    await waitFor(() => {
+      const listeKutusu = screen.getAllByRole('combobox')
+        .find(x => [...x.querySelectorAll('option')]
+          .some(o => o.textContent === 'TTB2018'))!;
+      expect((listeKutusu as HTMLSelectElement).value).toBe('9');
+    });
   });
 
   // 495: "belge kesilmedi" rozeti yerine DONUSMEYEN TUTAR yazar.
