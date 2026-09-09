@@ -1117,6 +1117,19 @@ input.skt-gecmis {
 .alan-izgara.ayar-formu .alan input.genis-deger { max-width: 320px }
 /* Secenek metinleri uzun ("Engelle — belgeyi kaydetme") - dar kutu kirpiyordu. */
 .alan-izgara.ayar-formu .alan select { min-width: 320px; max-width: 460px; width: auto }
+
+/* YAŞ GİRDİSİ (sayı + birim): referans aralığında alt ve üst sınır AYNI
+   satırda çizilir. Yukarıdaki genel `min-width: 320px` select kuralı birim
+   seçicisini satırı taşıracak kadar genişletiyordu - burada sabit dar
+   ölçüler verilir; iki uç ve aralarındaki tire tek satıra sığar. */
+.alan-izgara.ayar-formu .alan .yas-girdi,
+.yas-girdi { display: inline-flex; gap: 4px; align-items: center; flex: 0 0 auto }
+.alan-izgara.ayar-formu .alan .yas-girdi input,
+.yas-girdi input { flex: 0 0 66px; width: 66px; min-width: 0; max-width: 66px; text-align: right }
+.alan-izgara.ayar-formu .alan .yas-girdi select,
+.yas-girdi select { flex: 0 0 78px; width: 78px; min-width: 0; max-width: 78px }
+.alan-izgara.ayar-formu .alan .ayrac,
+.ayrac { color: var(--soluk); flex: 0 0 auto }
 .alan-izgara.ayar-formu .alan input[type=checkbox] { max-width: none; width: 15px; height: 15px }
 
 /* ---- Ust seritteki bayrakli dil secimi (zilin sagi) ---- */
@@ -2988,4 +3001,11 @@ input.skt-gecmis {
    ozgul oldugu icin zemini eziyordu - secili gun secilmemisle ayni goruluyordu. */
 .gun-cipleri .rozet.mavi {
   font-weight: 700; background: #e3ecfa; color: #2f5c9e; border-color: #bcd2ef;
+}
+
+/* ALAN YANINDAKI BIRIM ETIKETI (dk önce, mL...): cerceve YOK - kutu gorunumu
+   "buraya da yazilir" izlenimi veriyor ve dar geldiginde metni kirpiyordu. */
+.alan .ikili > .birim-metin {
+  align-self: center; white-space: nowrap; color: var(--soluk);
+  font-size: 11px; padding-left: 2px;
 }

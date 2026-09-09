@@ -207,8 +207,8 @@ public static partial class KartKatalogu
                     Baslik: "Cinsiyet"),
                 // Yaş GÜN cinsinden: yenidoğan aralıkları gün/hafta ölçeğinde.
                 //   Yıl tutulsaydı 0-28 günlük bebek tek kovaya düşerdi.
-                new("yasAltGun", "yas_alt_gun", "sayi", Baslik: "Yaş Alt (gün)"),
-                new("yasUstGun", "yas_ust_gun", "sayi", Baslik: "Yaş Üst (gün)"),
+                new("yasAltGun", "yas_alt_gun", "sayi", Baslik: "Yaş Aralığı"),
+                new("yasUstGun", "yas_ust_gun", "sayi", Baslik: "Yaş Üst"),
                 new("gebelik", "gebelik", "mantik", Baslik: "Gebelik"),
                 new("alt", "alt", "sayi", Baslik: "Alt Sınır"),
                 new("ust", "ust", "sayi", Baslik: "Üst Sınır"),

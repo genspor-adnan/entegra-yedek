@@ -186,6 +186,47 @@ function gunFarki(bas: string, bit: string): number | null {
   return fark > 0 ? fark : null;
 }
 
+/** Birim çarpanları: yıl ve ay ortalama uzunlukta - artık yıl kayması bir
+    referans aralığında anlamsızdır, 18 yaş 6575 gün sayılır. */
+const YAS_BIRIM: Record<string, number> = { gun: 1, ay: 30.4375, yas: 365.25 };
+
+/**
+ * YAŞ SINIRI GİRİŞİ - sayı + birim, saklanan değer GÜN.
+ *
+ * Ölçeğe göre açılır: 31 günden küçükse "gün", iki yıldan küçükse "ay",
+ * sonrası "yaş". Kullanıcı 6570 yazmaz, "18 yaş" seçer.
+ */
+function YasGirdisi({ gun, yazilabilir, onDegis }: {
+  gun: unknown; yazilabilir: boolean; onDegis(gun: number | ''): void;
+}) {
+  const sayi = Number(gun);
+  const dolu = gun !== null && gun !== undefined && gun !== '' && Number.isFinite(sayi);
+  const birim = !dolu ? 'yas' : sayi < 31 ? 'gun' : sayi < 730 ? 'ay' : 'yas';
+  const gosterim = dolu ? String(Math.round(sayi / YAS_BIRIM[birim])) : '';
+
+  const yaz = (metin: string, yeniBirim: string) => {
+    if (metin.trim() === '') { onDegis(''); return }
+    const n = Number(metin.replace(',', '.'));
+    if (!Number.isFinite(n)) return;
+    onDegis(Math.round(n * YAS_BIRIM[yeniBirim]));
+  };
+
+  // KENDI SINIFI: modal formunun genel `select { min-width: 320px }` kurali
+  //   birim seciciyi satiri bogacak kadar genisletiyordu.
+  return (
+    <span className="yas-girdi">
+      <input value={gosterim} disabled={!yazilabilir} placeholder="—"
+             onChange={e => yaz(e.target.value, birim)} />
+      <select value={birim} disabled={!yazilabilir}
+              onChange={e => yaz(gosterim, e.target.value)}>
+        <option value="gun">gün</option>
+        <option value="ay">ay</option>
+        <option value="yas">yaş</option>
+      </select>
+    </span>
+  );
+}
+
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
                                modalDuzenle, taslakKural, cipler, kutuSinif,
                                gizliAlanlar, gridGizliAlanlar, etiketAlanlari, sadeGrid, ekleGizli,
@@ -1045,7 +1086,13 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           <>
           <div className="kagrup">
             <div className="alan-izgara tek-sutun ayar-formu">
-              {alanlar.map(a => (
+              {/* YAŞ ALT ve ÜST TEK SATIRDA (kullanıcı): ikisi bir ARALIĞIN
+                  uçlarıdır - ayrı satırlarda okunduğunda "alt" ile "üst"
+                  arasındaki bağ gözden kaçıyordu. Üst sınır alt sınırın
+                  satırında çizilir, kendi satırını almaz. */}
+              {alanlar
+                .filter(a => !(meta.ad === 'referanslar' && a.ad === 'yasUstGun'))
+                .map(a => (
                 <label className={`alan${a.tip === 'mantik' ? ' ayar-onay' : ''}`} key={a.ad}>
                   {a.tip === 'mantik' ? (
                     <>
@@ -1069,7 +1116,25 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                             sayisi az ve birbirini disliyor - kullanici combo
                             istedi. Anahtarlar kolona yazilan degerin KENDISI;
                             bos = tumu. */}
-                        {a.tip === 'metin' && a.kodlar ? (
+                        {/*
+                          YAŞ SINIRI SAYI + BİRİM (kullanıcı: "gün olarak var,
+                          daha kolay girilebilecek şekle dönüştür"). Saklama
+                          GÜN kalır ve bu doğrudur - yenidoğan aralıkları gün
+                          ölçeğindedir. Ama "18 yaş" için 6570 yazdırmak,
+                          kullanıcıya çarpma yaptırmaktı. Birim seçilir, gün
+                          karşılığı hesaplanır.
+                        */}
+                        {meta.ad === 'referanslar' && a.ad === 'yasAltGun' ? (
+                          <>
+                            <YasGirdisi gun={taslak.yasAltGun}
+                                        yazilabilir={a.yazilabilir}
+                                        onDegis={g => taslakYaz('yasAltGun', g)} />
+                            <span className="ayrac">—</span>
+                            <YasGirdisi gun={taslak.yasUstGun}
+                                        yazilabilir={a.yazilabilir}
+                                        onDegis={g => taslakYaz('yasUstGun', g)} />
+                          </>
+                        ) : a.tip === 'metin' && a.kodlar ? (
                           <select value={String(taslak[a.ad] ?? '')} disabled={!a.yazilabilir}
                                   onChange={e => taslakYaz(a.ad, e.target.value)}>
                             <option value="">Tümü</option>

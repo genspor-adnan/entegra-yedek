@@ -136,7 +136,9 @@ export function alanCizici(b: AlanCizimBaglami) {
           <input className="yari hiza-sag" value={String(deger[a.ad] ?? '')}
                  disabled={salt || !a.yazilabilir}
                  onChange={e => alanDegistir(a.ad, e.target.value)} />
-          <input className="birim" value="dk önce" readOnly tabIndex={-1} />
+          {/* Birim DUZ METIN: cerceveli kutu "buraya da bir sey yazilir mi"
+              izlenimi veriyor, dar geldigi icin de kirpiliyordu. */}
+          <span className="birim-metin">dk önce</span>
         </span>
       ) : kaynak === 'lab-tetkik' && a.ad === 'calismaGunleri' ? (() => {
         // ÇALIŞMA GÜNLERİ ÇİP OLARAK (mockup lab_tetkik_karti.html). Değer bir
