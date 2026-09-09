@@ -720,7 +720,9 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           kaydirma alani - modal govdesi tasip alt satirlar ekranin altinda
           kirpiliyordu (kullanici). Baslik satiri sabit kalir. */}
       <div className={`detay-kaydir${satirlarGrid ? ' detay-uzun' : ''}`}>
-      <table className={`detay-tablo${adresGrid ? ' adres-tablo' : ''}`} style={adresGrid ? { tableLayout: 'fixed' } : undefined}>
+      <table className={`detay-tablo${adresGrid ? ' adres-tablo' : ''}`
+                        + `${modalDuzenle && !saltOkunur ? ' secilebilir-satir' : ''}`}
+             style={adresGrid ? { tableLayout: 'fixed' } : undefined}>
         {adresGrid && (
           <colgroup>
             {alanlar.map(a => <col key={a.ad} style={{ width: ADRES_GENISLIK[a.ad] }} />)}
@@ -750,6 +752,18 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           {gorunurler.map(({ satir, i }) => (
             <tr key={satir.id ?? `yeni-${i}`}
                 className={modalDuzenle && secili === i ? 'secili' : undefined}
+                /* SATIRA TIKLAYINCA SECILSIN (kullanici: "fiyat liste
+                   satırlarda satır tıklanınca işaretlensin"): kutuyu bulup
+                   isaretlemek zorunda kalmadan Duzenle/Sil dugmeleri
+                   calissin. Kutunun kendi hucresi haric - orada onChange
+                   zaten calisiyor, ikisi ust uste gelirse secim geri aliniyor.
+                   Satir ici girdilere (fiyat, katilim) tiklamak da satiri
+                   secer; odagi calmadigi icin yazmaya engel degil. */
+                onClick={e => {
+                  if (!modalDuzenle || saltOkunur) return;
+                  if ((e.target as HTMLElement).closest('input[type="checkbox"]')) return;
+                  setSecili(i);
+                }}
                 onDoubleClick={() => modalDuzenle && !saltOkunur && modalAc(i)}>
               {/* Tek satir secimi: yeni kutu isaretlenince oncekinin isareti kalkar -
                   duzenle/sil tek satira uygulanir. */}

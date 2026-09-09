@@ -1486,9 +1486,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // KAMPANYALAR (268, kullanici: "ayarlara liste ve kart olarak ekle"):
     //   fiyat listesi uzerine isleyen indirim kurallari; kurum sozlesmesinde
     //   secilir.
-    kaynak: 'kampanya', baslik: 'Kampanyalar', yol: 'Yönetim › Kampanyalar',
+    kaynak: 'kampanya', baslik: 'Kampanyalar', yol: 'Stok & Hizmet › Kampanyalar',
     kartYolu: '/kampanya', aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
-    menuGrup: 'Yönetim', menuAd: 'Kampanyalar', ic: '🏷️', yetkiKodu: 'fiyat_listesi',
+    // Menude FIYAT LISTELERININ (27) hemen ardinda (kullanici): kampanya
+    //   fiyat listesi uzerine isleyen bir kural - ikisi yan yana okunur,
+    //   Yonetim altinda ararken bulunmuyordu.
+    menuGrup: 'Stok & Hizmet', menuAd: 'Kampanyalar', ic: '🏷️',
+    yetkiKodu: 'fiyat_listesi', menuSira: 28,
   },
   {
     // DEPARTMANLAR (251): personel departmani ve randevu bolumu AYNI tablo -
