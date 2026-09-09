@@ -761,6 +761,15 @@ public sealed partial class BelgeDeposu
              --   kapatilan_miktar tetigi geri donuyor ve fis "Dönüşüm"
              --   listesinden kayboluyordu. Bagli satir yerinde kalir.
              or (s.kaynak_tur = 30 and coalesce(s.kaynak_id, 0) > 0)
+             -- BASKA SATIRIN KAYNAGI OLAN SATIR (kullanici: "500 fiş kestim,
+             --   açık belge 400'e düşmeliydi"): tutar bazli donusumde
+             --   kapatilan_miktar ARTMAZ (miktar degil TUTAR kapanir), bu
+             --   yuzden kaynak satir "donusmus" sayilmiyor ve basvuru
+             --   kaydedilince silinip yeniden yaziliyordu. Silinince dagilim
+             --   (cascade) ve hedefin kaynak bagi da gidiyor, kapatilan
+             --   sifirlaniyordu.
+             or exists (select 1 from public.belge_satir h
+                         where h.kaynak_tur = 30 and h.kaynak_id = s.id)
            )
         """;
 }

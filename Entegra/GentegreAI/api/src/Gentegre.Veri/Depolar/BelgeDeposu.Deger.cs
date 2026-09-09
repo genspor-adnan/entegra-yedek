@@ -141,13 +141,19 @@ public sealed partial class BelgeDeposu
                    --   okumak, KAYDEDILMEMIS satirlari saymiyordu).
                    --   Katilim payi (5) HARIC: ciro disi emanet, belgeye
                    --   donusmez.
-                   coalesce((select sum((d.sgk_kapatilan + d.oss_kapatilan
-                                       + d.hasta_provizyon_kapatilan
-                                       + d.hasta_ek_katki_kapatilan)
-                                      * (1 + coalesce(bs.kdv, 0) / 100.0))
-                              from public.belge_satir bs
-                              join public.belge_satir_dagilim d on d.belge_satir_id = bs.id
-                             where bs.belge_id = b.id), 0) as "donusenBelgeTutari",
+                   --   TUTAR HEDEF BELGEYE YAZILAN BRUTTUR: kapatilan kovadan
+                   --   (matrah) yeniden hesaplamak kurus kaydiriyordu
+                   --   (454,55 x 1,10 = 500,005). Iptal edilen (durum 2) hedef
+                   --   sayilmaz - kaynak yeniden acilir.
+                   coalesce((select sum(case when coalesce(hs.tutar_kdvli, 0) > 0
+                                             then hs.tutar_kdvli
+                                             else round(hs.tutar
+                                                  * (1 + coalesce(hs.kdv, 0) / 100.0), 2) end)
+                              from public.belge_satir ks
+                              join public.belge_satir hs
+                                on hs.kaynak_tur = 30 and hs.kaynak_id = ks.id
+                              join public.belge hb on hb.id = hs.belge_id and hb.durum <> 2
+                             where ks.belge_id = b.id), 0) as "donusenBelgeTutari",
                    b.kaynak_tur as "kaynakTur", b.kaynak_id as "kaynakId",
                    kb.belge_no as "kaynakBelgeNo", kb.belge_tarihi as "kaynakBelgeTarihi",
                    kt.ad as "kaynakTurAdi", b.aciklama,
