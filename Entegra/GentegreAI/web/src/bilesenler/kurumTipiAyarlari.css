@@ -57,6 +57,25 @@
 .kt-kok .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
 .kt-kok .fld label.req::after{content:" *";color:#c0392b}
 .kt-kok .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+/* KUTU ICINDEKI YAZI TASIYORDU (kullanici: "3 Kayıt & Ücretlendirme / 4 Klinik
+   Ayarlar / 6 Kaynaklar sekmesindeki yazılar taşmış okunmuyor"): `.inp` tek
+   satirlik bir flex satiriydi, uzun aciklama kutunun disina cikip komsu
+   sutunun uzerine biniyordu. Satir sarilir, kutu yukseldigi kadar buyur. */
+.kt-kok .inp{flex-wrap:wrap;align-items:flex-start;line-height:1.35;padding:4px 7px;
+             overflow-wrap:anywhere;min-width:0;
+             /* tema.css'teki genel `.inp{height:23px}` kutuyu TEK SATIRA
+                kilitliyordu - sarilan yazi kutunun altindan tasip bir alttaki
+                etiketin uzerine biniyordu. */
+             height:auto}
+.kt-kok .inp>*{min-width:0}
+/* Izgara hucresi icerigi kadar genisleyip satiri tasirmasin (grid min-width
+   varsayilani auto'dur). */
+.kt-kok .hdr, .kt-kok .fld{min-width:0}
+.kt-kok .ikiPanel>div, .kt-kok .ucPanel>div{min-width:0}
+/* Yarim panele sikisan referans tablosu: hucreler `nowrap` oldugu icin son
+   kolon ("Özel kural") kesiliyor, okumak icin yatay kaydirmak gerekiyordu.
+   Dar panelde satir sarilir. */
+.kt-kok .ikiPanel .dg td{white-space:normal}
 .kt-kok .inp.big{font-weight:bold;font-size:12.5px}
 .kt-kok .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
 .kt-kok .inp.ro{background:#f4f6f9;color:#4d5d6e}

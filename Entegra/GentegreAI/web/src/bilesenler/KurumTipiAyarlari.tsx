@@ -41,7 +41,7 @@ const MATRIS_ISARET: Record<number, { sinif: string; im: string }> = {
  * baglanmadi - kurulum sihirbazinin ekran karsiligi. Baglama sirasinda bu
  * bilesenin ic sekme duzeni degismeyecek.
  */
-const SEKMELER = ['1 · Kurum Tipi', '2 · Modüller', '3 · Kayıt & Ücretlendirme', '4 · Klinik Ayarlar', '5 · Entegrasyonlar', '6 · Kaynaklar (birim/ünit/cihaz)', '7 · Özet & Kurulum'];
+const SEKMELER = ['1 · Profil', '2 · Modüller', '3 · Kayıt & Ücretlendirme', '4 · Klinik Ayarlar', '5 · Entegrasyonlar', '6 · Kaynaklar (birim/ünit/cihaz)', '7 · Özet & Kurulum'];
 
 export function KurumTipiAyarlari() {
   const [aktif, setAktif] = useState(0);
@@ -127,6 +127,11 @@ export function KurumTipiAyarlari() {
   };
 
   const tipAdi = (kod?: string) => veri?.tipler.find(t => t.kod === kod)?.ad ?? '';
+
+  // Ozet kutulari icin canli sayilar (7. sekme).
+  const acikModulSayisi = (veri?.moduller ?? []).filter(m => modulAcik(m.kod)).length;
+  const opsiyonelModulSayisi = (veri?.matris ?? [])
+    .filter(m => m.kurumTipi === profil?.kurumTipi && m.varsayilan === 2).length;
 
   return (
     <div className="kt-kok">
@@ -441,7 +446,15 @@ export function KurumTipiAyarlari() {
 
       <div className="pnl" hidden={aktif !== 6}>
           <div className="ozet">
-            <div className="kart"><div className="b">Kurum tipi</div><div className="d">Muayenehane</div></div><div className="kart"><div className="b">Açık modül</div><div className="d">9 <small>· 3 opsiyonel</small></div></div><div className="kart"><div className="b">Menü öğesi</div><div className="d">24 <small>· gizlenen 41</small></div></div><div className="kart"><div className="b">Zorunlu entegrasyon</div><div className="d">4/5 <small>· SMS eksik</small></div></div><div className="kart"><div className="b">Kurulum adımı</div><div className="d">3 <small>bekliyor</small></div></div>
+            {/* OZET KUTULARI EKRANDAKI SECIMDEN (kullanici: "özet & kurulumda
+                profil yanlış geliyor"): mockup'tan gelen sabit "Muayenehane"
+                yazisi secili tipten bagimsizdi. Profil ve modul sayilari
+                canli okunur; asagidaki kurulum adimlari hala mockup. */}
+            <div className="kart"><div className="b">Profil</div>
+              <div className="d">{tipAdi(profil?.kurumTipi) || '—'}</div></div>
+            <div className="kart"><div className="b">Açık modül</div>
+              <div className="d">{acikModulSayisi}{' '}
+                <small>· {opsiyonelModulSayisi} opsiyonel</small></div></div><div className="kart"><div className="b">Menü öğesi</div><div className="d">24 <small>· gizlenen 41</small></div></div><div className="kart"><div className="b">Zorunlu entegrasyon</div><div className="d">4/5 <small>· SMS eksik</small></div></div><div className="kart"><div className="b">Kurulum adımı</div><div className="d">3 <small>bekliyor</small></div></div>
           </div>
           <div className="dg"><table><thead><tr><th className="orta">#</th><th>Kurulum adımı</th><th className="orta">Durum</th><th>Aksiyon</th></tr></thead>
             <tbody>
