@@ -23,6 +23,11 @@ const TIP_GORSEL: Record<string, { ikon: string; aciklama: string }> = {
   erp:             { ikon: '🏭',  aciklama: 'Üretim · ticaret · stok · satış/alış · muhasebe (HBYS modülleri kapalı)' },
 };
 
+/** Entegrasyon gerekliligi (491): 2 zorunlu · 1 onerilen · 0 opsiyonel. */
+const GEREKLILIK: Record<number, string> = {
+  2: 'zorunlu', 1: 'önerilen', 0: 'opsiyonel',
+};
+
 /** Modul varsayilan rozeti: 1 acik · 2 opsiyonel · 0 bu tipte anlamsiz. */
 const MATRIS_ISARET: Record<number, { sinif: string; im: string }> = {
   1: { sinif: 'm-on',  im: '●' },
@@ -132,6 +137,7 @@ export function KurumTipiAyarlari() {
 
   // Ozet kutulari ve kurulum adimlari (7. sekme) - hepsi sunucudan.
   const kurulum = veri?.kurulum ?? [];
+  const entegrasyonlar = veri?.entegrasyonlar ?? [];
   const tamamAdim = kurulum.filter(a => a.durum === 1).length;
   const bekleyenAdim = kurulum.length - tamamAdim;
 
@@ -197,7 +203,13 @@ export function KurumTipiAyarlari() {
 
         {/* KURUM TIPI KARTLARI - tiklanir; secim `kurum_profil.kurum_tipi`. */}
         <div className="tipler">
-          {(veri?.tipler ?? []).map(t => (
+          {/* ERP KARTI YOK (kullanici): "üretim/ticaret" bir KURUM TIPI degil,
+              urun modudur - altin altindaki "Ürün modu" combosu zaten onu
+              secer. Iki yerde durmasi "hangisi gecerli" sorusunu uretiyordu.
+              Kurulumun tipi zaten 'erp' ise kart gorunur, aksi halde secili
+              tip ekranda hic gozukmezdi. */}
+          {(veri?.tipler ?? []).filter(t => t.kod !== 'erp' || profil?.kurumTipi === 'erp')
+            .map(t => (
             <div key={t.kod}
                  className={`tip${profil?.kurumTipi === t.kod ? ' sec' : ''}`}
                  onClick={() => tipSec(t.kod)}>
@@ -411,22 +423,57 @@ export function KurumTipiAyarlari() {
         </div>
 
       <div className="pnl" hidden={aktif !== 4}>
-          <div className="dg"><table><thead><tr><th>Entegrasyon</th><th>Bu tipte</th><th>Hesap (Entegrasyon ekranı)</th><th className="orta">Durum</th><th>Not</th></tr></thead>
+          {/* ENTEGRASYONLAR CANLI (491, kullanici): mockup'ta 12 sabit satir
+              vardi ve "bağlı / test / gizli" rozetleri gercek hesaplara
+              bakmiyordu. Gereklilik urun modu + acik modullerden, durum
+              entegrasyon_hesap'tan - ikisi de sunucuda
+              (fn_kurum_entegrasyon_durumu). Ilgisiz entegrasyon (ERP'de SKRS,
+              stok kapaliyken ÜTS) hic listelenmez. */}
+          <div className="dg"><table><thead><tr>
+              <th>Entegrasyon</th><th>Bu kurulumda</th><th>Hesap</th>
+              <th className="orta">Durum</th><th>Son sonuç</th><th>Aksiyon</th></tr></thead>
             <tbody>
-              <tr><td>e-Nabız / USS</td><td>zorunlu · 101/103/106 + reçete</td><td>ENABIZ · tesis kodu</td><td className="orta"><span className="rz sari">test</span></td><td>KTS tescili sonrası canlı</td></tr>
-              <tr><td>Medula (provizyon, e-reçete, e-rapor)</td><td>zorunlu (SGK varsa)</td><td>MEDULA</td><td className="orta"><span className="rz ok">bağlı</span></td><td></td></tr>
-              <tr><td>SKRS</td><td>zorunlu</td><td>SKRS</td><td className="orta"><span className="rz ok">1.419 kod</span></td><td>ICD-10, ilaç, klinik listeleri eklenecek</td></tr>
-              <tr><td>e-Fatura / e-Arşiv</td><td>zorunlu</td><td>EFATURA · İzibiz</td><td className="orta"><span className="rz ok">bağlı</span></td><td></td></tr>
-              <tr><td>SMS / e-posta</td><td>önerilen</td><td>SMS · SMTP</td><td className="orta"><span className="rz sari">SMS yok</span></td><td>hatırlatma, panik, portal 2FA</td></tr>
-              <tr><td>KPS</td><td>opsiyonel</td><td>KPS</td><td className="orta">—</td><td></td></tr>
-              <tr><td>ÜTS</td><td>stok modülü açıksa</td><td>UTS</td><td className="orta"><span className="rz ok">bağlı</span></td><td></td></tr>
-              <tr><td>Sanal POS</td><td>ön ödeme/teletıp/taksit</td><td>POS</td><td className="orta">—</td><td>diş taksit, teletıp</td></tr>
-              <tr><td>e-İmza</td><td>rapor/reçete/onam</td><td>EIMZA</td><td className="orta">—</td><td></td></tr>
-              <tr><td>PACS / DICOM</td><td>görüntüleme tiplerinde</td><td>PACS</td><td className="orta"><span className="rz pas">gizli</span></td><td>bu tipte kapalı</td></tr>
-              <tr><td>Lab cihaz ara katmanı</td><td>lab tiplerinde</td><td>LIS</td><td className="orta"><span className="rz pas">gizli</span></td><td></td></tr>
-              <tr><td>USBS / WebRTC</td><td>teletıp açıksa</td><td>WEBRTC · USBS</td><td className="orta"><span className="rz pas">kapalı</span></td><td></td></tr>
+              {entegrasyonlar.map(e => (
+                <tr key={e.kod}>
+                  <td><b>{e.ad}</b> <span className="sonuk">{e.kod}</span></td>
+                  <td>
+                    <span className={`rz ${e.gereklilik === 2 ? 'sari' : ''}`}>
+                      {GEREKLILIK[e.gereklilik] ?? 'opsiyonel'}
+                    </span>{' '}
+                    <span className="sonuk">{e.gerekce}</span>
+                  </td>
+                  <td>{e.hesap || <span className="sonuk">—</span>}</td>
+                  <td className="orta">
+                    <span className={`rz ${e.durum === 2 ? 'ok' : e.durum === 1 ? 'sari' : 'pas'}`}>
+                      {e.durum === 2 ? 'canlı' : e.durum === 1 ? 'test' : 'hesap yok'}
+                    </span>
+                  </td>
+                  {/* SON BAGLANTI SONUCU hesabin kendi denemesinden gelir -
+                      "bağlı" rozeti yeterli degil, servis dun cevap vermemis
+                      olabilir. */}
+                  <td className="sonuk uzun">{e.sonSonuc || '—'}</td>
+                  <td>
+                    <div className="btn" style={{ display: 'inline-flex' }}
+                         onClick={() => git('/genel-ayarlar')}>
+                      ▶ {e.durum === 0 ? 'Hesap tanımla' : 'Hesabı aç'}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {entegrasyonlar.length === 0 && (
+                <tr><td colSpan={6} className="sonuk" style={{ padding: 8 }}>
+                  Bu kurulumda entegrasyon gerekmiyor.
+                </td></tr>
+              )}
             </tbody></table></div>
-          <div className="ic sonuk">Hesaplar mevcut <code>entegrasyon_hesap</code>; bu sekme tipe göre hangilerinin zorunlu/önerilen olduğunu gösterir ve eksikleri kurulum listesine yazar.</div>
+          <div className="ic sonuk">
+            Hesaplar <b>Yönetim › Modül Ayarları › Genel</b> ekranındaki{' '}
+            <code>entegrasyon_hesap</code> kayıtlarıdır; şube hesabı varsa o,
+            yoksa kurum geneli okunur. Zorunlu olup hesabı olmayanlar{' '}
+            <b>Özet &amp; Kurulum</b> listesinde de bekleyen adım olarak görünür.
+            PACS/DICOM, lab cihaz ara katmanı, sanal POS, e-İmza, KPS ve WebRTC
+            için hesap tanımı henüz yok — bağlandıklarında bu listeye eklenecek.
+          </div>
         </div>
 
       <div className="pnl" hidden={aktif !== 5}>

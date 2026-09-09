@@ -76,6 +76,9 @@
    kolon ("Özel kural") kesiliyor, okumak icin yatay kaydirmak gerekiyordu.
    Dar panelde satir sarilir. */
 .kt-kok .ikiPanel .dg td{white-space:normal}
+/* Uzun serbest metin hucresi (entegrasyonun son baglanti sonucu): nowrap
+   olunca tablo ekrandan tasip "Aksiyon" kolonunu goruntu disina itiyordu. */
+.kt-kok .dg td.uzun{white-space:normal;max-width:420px}
 .kt-kok .inp.big{font-weight:bold;font-size:12.5px}
 .kt-kok .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
 .kt-kok .inp.ro{background:#f4f6f9;color:#4d5d6e}

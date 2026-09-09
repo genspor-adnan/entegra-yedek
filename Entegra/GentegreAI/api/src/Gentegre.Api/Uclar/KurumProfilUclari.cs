@@ -30,8 +30,9 @@ public static class KurumProfilUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             var subeId = sube ?? baglam.SubeId ?? 0;
-            var (profil, tipler, moduller, matris, kurulum) = await depo.OkuAsync(subeId, iptal);
-            return Results.Ok(new { profil, tipler, moduller, matris, kurulum,
+            var (profil, tipler, moduller, matris, kurulum, entegrasyonlar) =
+                await depo.OkuAsync(subeId, iptal);
+            return Results.Ok(new { profil, tipler, moduller, matris, kurulum, entegrasyonlar,
                                     izlemeNo = baglam.IzlemeNo });
         });
 
@@ -46,7 +47,7 @@ public static class KurumProfilUclari
             //   otekilerin degerini sifirlamasin.
             // Hedef sube: istekte gelen, yoksa aktif sube (0 = kurum geneli).
             var subeId = istek.SubeId ?? baglam.SubeId ?? 0;
-            var (mevcut, _, _, _, _) = await depo.OkuAsync(subeId, iptal);
+            var (mevcut, _, _, _, _, _) = await depo.OkuAsync(subeId, iptal);
             var yeni = new KurumProfil(
                 istek.UrunModu    ?? mevcut.UrunModu,
                 istek.KurumTipi   ?? mevcut.KurumTipi,

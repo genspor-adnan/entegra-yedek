@@ -776,6 +776,26 @@ export interface KurumKurulumAdimi {
   aksiyon: string;
 }
 
+/**
+ * Entegrasyon satiri (491) - "5 · Entegrasyonlar" sekmesi. Gereklilik ve
+ * durum SUNUCUDAN: ekran hesap tablosunu kendisi yorumlamaz.
+ */
+export interface KurumEntegrasyonDurumu {
+  sira: number;
+  kod: string;
+  ad: string;
+  /** 2 zorunlu · 1 önerilen · 0 opsiyonel. */
+  gereklilik: number;
+  /** Neden gerekli ("SGK'lı hasta kabul ediliyorsa zorunlu"). */
+  gerekce: string;
+  /** 2 canlı hesap · 1 test hesabı · 0 hesap yok. */
+  durum: number;
+  /** Bulunan hesabın adı. */
+  hesap: string;
+  /** Hesabın son bağlantı sonucu (kısaltılmış). */
+  sonSonuc: string;
+}
+
 export interface KurumProfilYaniti {
   profil: KurumProfil;
   tipler: KurumKatalogSatiri[];
@@ -783,4 +803,6 @@ export interface KurumProfilYaniti {
   matris: KurumTipiModul[];
   /** Kurulum adimlarinin canli durumu (490). */
   kurulum: KurumKurulumAdimi[];
+  /** Entegrasyonlarin gerekliligi ve hesap durumu (491). */
+  entegrasyonlar: KurumEntegrasyonDurumu[];
 }
