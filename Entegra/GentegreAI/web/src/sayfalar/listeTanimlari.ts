@@ -1298,7 +1298,11 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // ANLASMALI KURUMLAR (249, kullanici: "cari altina musteri benzeri Kurumlar
     //   menusu liste ve karti olustur"). Kurum da bir cari - hastanin odemesini
     //   ustlenen taraf; sozlesme suresi/turu ve fiyat politikasi kartinda.
-    kaynak: 'kurum', baslik: 'Kurumlar', yol: 'Cari › Kurumlar', kartYolu: '/kurum',
+    // Ad "Anlaşmalı Kurumlar" (kullanici): liste yalniz hastanin odemesini
+    //   ustlenen ya da tarife anlasmasi olan kurumlari tutar - "Kurumlar"
+    //   tek basina her tuzel kisiyi cagristiriyordu.
+    kaynak: 'kurum', baslik: 'Anlaşmalı Kurumlar', yol: 'Cari › Anlaşmalı Kurumlar',
+    kartYolu: '/kurum',
     aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
     ekstre: { kaynak: 'cari-ekstre', alan: 'tarafId', baslik: 'Kurum Ekstresi',
               tarihAlani: 'islemTarihi' },
@@ -1311,7 +1315,7 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     // Ham tur kolonu API'den geliyor (basvuru "Ödeyen Tipi" suzmesi icin) ama
     //   gridde gorunmesin - turAdi zaten var.
     gizliKolonlar: ['tur'],
-    menuGrup: 'Cari', menuAd: 'Kurumlar', ic: '🏛️', yetkiKodu: 'kurum',
+    menuGrup: 'Cari', menuAd: 'Anlaşmalı Kurumlar', ic: '🏛️', yetkiKodu: 'kurum',
   },
   {
     // kisi_listesi.html mockup - kullanici "sade grid olsun, altta sekme yanda bilgi
