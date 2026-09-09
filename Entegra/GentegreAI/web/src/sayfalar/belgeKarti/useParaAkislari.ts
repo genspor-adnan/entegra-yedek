@@ -5,7 +5,7 @@ import { mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import { para, tutarOku } from '../../bilesenler/bicim';
 import { belgeKisaAdi } from '../belgeTuru';
 import {
-  donusumSatirlari, posFisiSecimi, sinirliDonusumSecimi, kasaAramaSirasi,
+  donusumSatirlari, posFisiSecimi, sinirliDonusumSecimi, donusumPayi, kasaAramaSirasi,
   type DonusumOlcusu,
 } from '../belgeKartiKurallari';
 
@@ -139,24 +139,39 @@ export function useParaAkislari(g: ParaAkisGirdisi) {
       //   modal olarak tutar sorsun, o miktar kadar eklesin"): kabul memuru
       //   kismi fis/fatura kesebilsin. Onerilen deger olcunun tamami;
       //   iptal edilirse islem durur. Diger belgelerde eski davranis surer.
-      let gonderilecek = donusumSatirlari(acik, hedefTur, donusumOlcusu);
+      // PAY: hangi kova aciksa (kurum tahakkuku / hasta fisi) - bkz.
+      //   donusumPayi. Sabit hasta payi, "Kurumu Öder" basvurusunda hicbir
+      //   satir secmiyordu.
+      const pay = donusumPayi(acik, hedefTur);
+      let gonderilecek = donusumSatirlari(acik, hedefTur, donusumOlcusu, pay);
       if (basvuruMu && gonderilecek.length > 0) {
-        const tamami = sinirliDonusumSecimi(acik, hedefTur).toplamDahil;
+        // MODALDE ACIK BELGE TUTARI ONERILIR (kullanici) ve girilen rakam
+        //   KDV DAHIL islenir (sinirliDonusumSecimi matraha cevirir).
+        const tamami = sinirliDonusumSecimi(acik, hedefTur, undefined, 'kalan', pay)
+          .toplamDahil;
+        if (tamami < 0.01) {
+          mesaj('Belgeye dönüşecek tutar kalmadı — bu başvurunun ücretleri '
+                + 'zaten belgeye çevrilmiş.');
+          return;
+        }
         const sinir = await tutarSor(`${belgeKisaAdi(hedefTur)} tutarı (₺)`, tamami);
         if (sinir === null) return;
-        gonderilecek = sinirliDonusumSecimi(acik, hedefTur, sinir).satirlar;
+        gonderilecek = sinirliDonusumSecimi(acik, hedefTur, sinir, 'kalan', pay).satirlar;
       }
 
       if (gonderilecek.length === 0) {
-        mesaj(donusumOlcusu === 'tutar'
-          ? 'Dönüştürülecek tutar yok: bu belgede tahsil edilmiş ve henüz belgelenmemiş tutar bulunmuyor.'
-          : 'Dönüştürülecek açık satır yok.');
+        // ACIK TUTAR YOKSA SEBEBI SOYLE (kullanici): "0 ise Belgeye
+        //   dönüşecek tutar kalmadı uyarısı versin".
+        mesaj('Belgeye dönüşecek tutar kalmadı — bu başvurunun ücretleri '
+              + 'zaten belgeye çevrilmiş.');
         return;
       }
 
+      // PAY sunucuya da gider: kurum payinda hedef belgenin CARISI odeyen
+      //   kurumdur (hasta degil).
       const yeni = await api.belgeDonustur(id, hedefTur, gonderilecek,
                                            undefined, false, undefined,
-                                           donusumOlcusu === 'tutar' ? 1 : 0, false);
+                                           pay, false);
       await donusumleriYukle(id);
       try { setSonuc(await api.belgeOku(id)) } catch { /* yoksay */ }
       mesaj(`Belge oluşturuldu: ${String(yeni.belge.belgeNo ?? yeni.belge.id)}`);

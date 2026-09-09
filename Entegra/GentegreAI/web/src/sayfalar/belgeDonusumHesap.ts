@@ -19,6 +19,16 @@ export const kdvCarpan = (s: AcikSatir) => 1 + Number(s.kdv ?? 0) / 100;
  */
 export function payKalan(s: AcikSatir, pay: number) {
   const p = pay || 1;
+  // INCE KOVA (470): 1 hasta provizyon · 2 SGK · 3 sigorta/kurum · 4 hasta ek
+  //   katkisi. Sunucu bu kodlarla calisiyor ("Bu satırın SGK payı zaten
+  //   kapatılmış" hatasi, kaba 2 = kurum varsayimindan doguyordu). Kova
+  //   alanlari yoksa (eski yanit) kaba kurum/hasta ikilisine duser.
+  const ince = p === 1 ? s.hastaProvizyonKalan
+             : p === 2 ? s.sgkKalan
+             : p === 3 ? s.ossKalan
+             : p === 4 ? s.hastaEkKatkiKalan : undefined;
+  if (ince !== undefined) return Number(ince ?? 0);
+
   const k = Number((p === 2 ? s.kurumKalan : s.hastaKalan) ?? 0);
   const paylasimsiz = Number(s.kurumTutar ?? 0) + Number(s.hastaTutar ?? 0) === 0;
   return paylasimsiz ? Number(s.tutarKalan ?? 0) : k;

@@ -473,6 +473,15 @@ export interface AcikSatir {
   hastaTutar?: number;
   kurumKalan?: number;
   hastaKalan?: number;
+  /**
+   * INCE KOVA KALANLARI (470): 1 hasta provizyon · 2 SGK · 3 sigorta/anlasmali
+   * kurum · 4 hasta ek katkisi. Donusum bu kodlarla calisir; ustteki
+   * kurum/hasta ikilisi ozet gorunumdur.
+   */
+  sgkKalan?: number;
+  ossKalan?: number;
+  hastaProvizyonKalan?: number;
+  hastaEkKatkiKalan?: number;
   /** 352: satır matrahı, tahsil edilen matrah ve açık kalan TUTAR (tutar bazlı dönüşüm). */
   tutar?: number;
   hastaTahsilMatrah?: number;

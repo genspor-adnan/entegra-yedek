@@ -1,5 +1,6 @@
 import type { AcikSatir, Kosul } from '../api/sozlesme';
-import { onerilenTutar, matrahaCevir, kurusTamamla } from './belgeDonusumHesap';
+import { onerilenTutar, payKalanDahil, matrahaCevir, kurusTamamla }
+  from './belgeDonusumHesap';
 
 /**
  * BELGE KARTININ IS KURALLARI - saf fonksiyonlar.
@@ -52,7 +53,11 @@ export function donusumSatirlari(
 ): DonusumSatiri[] {
   if (olcu === 'tutar') {
     const secim = acik
-      .map(s => ({ s, dahil: onerilenTutar(s, hedefTur, pay) }))
+      // TUTAR OLCUSUNDE de olcu ACIK KALANDIR (kullanici): tahsilat
+      //   yapilmadan da fatura/tahakkuk kesilebilir. `onerilenTutar` yalniz
+      //   otomatik POS fisinde anlamli - orada tahsilat zaten sinirdir.
+      .map(s => ({ s, dahil: hedefTur === 17 ? payKalanDahil(s, pay)
+                                             : onerilenTutar(s, hedefTur, pay) }))
       // Kurusun altindaki artiklar satir acmaya degmez.
       .filter(x => x.dahil > 0.005)
       .map(x => ({ s: x.s, dahil: x.dahil, matrah: matrahaCevir(x.s, x.dahil) }));
@@ -73,7 +78,24 @@ export function donusumSatirlari(
  */
 export function posFisiSecimi(acik: AcikSatir[], ustSinir?: number):
     { satirlar: DonusumSatiri[]; toplamDahil: number } {
-  return sinirliDonusumSecimi(acik, 16, ustSinir);
+  // POS FISINDE OLCU TAHSILATTIR: cekilen kadar fis kesilir.
+  return sinirliDonusumSecimi(acik, 16, ustSinir, 'tahsilat');
+}
+
+/**
+ * DONUSTURULECEK PAY (kullanici: "butona basinca acik belge tutari gelsin"):
+ * hasta ve kurum kovalarindan HANGISI ACIKSA o. Ikisi de aciksa hedef karar
+ * verir - tahakkuk kuruma, fis/fatura hastaya. Sabit "hasta payi" varsayimi,
+ * tamami kuruma tahakkuk eden anlasmali kurum basvurusunda sifir veriyordu.
+ */
+export function donusumPayi(acik: AcikSatir[], hedefTur: number): number {
+  const topla = (pay: number) => acik.reduce((t, s) => t + payKalanDahil(s, pay), 0);
+  // INCE KOVALAR (470) sirayla: hangisi aciksa donusum onun uzerinden gider.
+  //   Tahakkukta once KURUM kovalari (SGK / sigorta), fis-faturada once
+  //   HASTA kovalari denenir - kalani olmayan kova atlanir.
+  const sira = hedefTur === 17 ? [2, 3, 1, 4] : [1, 4, 3, 2];
+  for (const p of sira) if (topla(p) > 0.005) return p;
+  return 1;
 }
 
 /**
@@ -82,7 +104,9 @@ export function posFisiSecimi(acik: AcikSatir[], ustSinir?: number):
  * Basvuruda "Belge Kes" ve POS sonrasi otomatik fis bunu kullanir.
  */
 export function sinirliDonusumSecimi(acik: AcikSatir[], hedefTur: number,
-                                     ustSinir?: number):
+                                     ustSinir?: number,
+                                     olcu: 'kalan' | 'tahsilat' = 'kalan',
+                                     pay = 1):
     { satirlar: DonusumSatiri[]; toplamDahil: number } {
   // UST SINIR = tetikleyen POS tahsilatinin tutari (kullanici karari).
   //   Sinirsizken satira DAGITILMIS tum tahsilat belgeleniyordu: onceki
@@ -93,7 +117,14 @@ export function sinirliDonusumSecimi(acik: AcikSatir[], hedefTur: number,
   const secim: { s: AcikSatir; dahil: number }[] = [];
   for (const s of acik) {
     if (kalanSinir <= 0.005) break;
-    const dahil = Math.min(onerilenTutar(s, hedefTur, 1), kalanSinir);
+    // OLCU (kullanici): elle "Belge Kes"te ACIK KALAN onerilir - "butona
+    //   basinca acik belge tutari ne ise o gelecek"; tahsilat yapilmamis
+    //   basvuruda tahsilata bakmak sifir veriyor ve dugme hicbir sey
+    //   yapmiyormus gibi gorunuyordu. POS sonrasi otomatik fiste ise olcu
+    //   TAHSILATTIR (cekilen kadar fis). Ust sinir her iki durumda gecerli.
+    const oneri = olcu === 'tahsilat'
+      ? onerilenTutar(s, hedefTur, pay) : payKalanDahil(s, pay);
+    const dahil = Math.min(oneri, kalanSinir);
     if (dahil <= 0.005) continue;
     secim.push({ s, dahil });
     kalanSinir -= dahil;

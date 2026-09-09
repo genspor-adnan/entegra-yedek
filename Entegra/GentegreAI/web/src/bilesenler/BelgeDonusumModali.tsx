@@ -3,7 +3,6 @@ import {
   payKalan as hesapPayKalan,
   payKalanDahil as hesapPayKalanDahil,
   tahsilDahil as hesapTahsilDahil,
-  onerilenTutar as hesapOnerilen,
 } from '../sayfalar/belgeDonusumHesap';
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
@@ -135,7 +134,10 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
    * kalanini asmaz), tahakkukta payin kalani.
    */
   const tutarModOlur = belgeTur === 19 && [15, 16, 17].includes(hedefTur);
-  const [tutarMod, setTutarMod] = useState(false);
+  // BASVURUDA VARSAYILAN TUTAR MODU (kullanici: "butona basinca modal olarak
+  //   ACIK BELGE TUTARI ne ise o gelecek"): kabul memuru adet degil TUTAR
+  //   dusunur - "900 TL'lik muayenenin ne kadarina belge kesiyorum".
+  const [tutarMod, setTutarMod] = useState(tutarModOlur);
   const [tutarlar, setTutarlar] = useState<Record<number, string>>({});
   const [kalaniTahakkuk, setKalaniTahakkuk] = useState(true);
   /**
@@ -149,7 +151,13 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
   const payKalan = (s: AcikSatir) => hesapPayKalan(s, pay);
   const payKalanDahil = (s: AcikSatir) => hesapPayKalanDahil(s, pay);
   const tahsilDahil = (s: AcikSatir) => hesapTahsilDahil(s, pay);
-  const onerilenTutar = (s: AcikSatir, hedef: number) => hesapOnerilen(s, hedef, pay);
+  /**
+   * MODALDE ONERI = SATIRIN ACIK KALANI (KDV dahil, kullanici): kart
+   * seridindeki "Açık Belge" ile ayni rakam gelsin. belgeDonusumHesap.onerilenTutar
+   * (352: fis/faturada TAHSIL EDILEN kadar) otomatik POS fisinde
+   * kullanilmaya devam ediyor - orada tahsilat zaten olcudur.
+   */
+  const onerilenTutar = (s: AcikSatir, _hedef: number) => payKalanDahil(s);
   const tutarModuDegistir = (acik: boolean) => {
     setTutarMod(acik);
     if (acik) setTutarlar(Object.fromEntries(
@@ -157,8 +165,20 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
   };
   useEffect(() => {
     if (!tutarModOlur && tutarMod) setTutarMod(false);
+    if (tutarModOlur && tutarMod) tutarModuDegistir(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tutarModOlur]);
+  }, [tutarModOlur, satirlar, pay, hedefTur]);
+
+  /**
+   * BELGEYE DONUSECEK ACIK TUTAR (KDV dahil): satirlarin kalanlari toplami.
+   * Sifirsa modal is yapamaz - "hepsi kesilmis" durumunu dugmeyi pasif
+   * birakip SOYLEYEREK gosterir (kullanici).
+   */
+  const acikToplam = useMemo(
+    () => satirlar.reduce((t, s) => t + payKalanDahil(s), 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [satirlar, pay]);
+  const donusecekYok = !yukleniyor && satirlar.length > 0 && acikToplam < 0.01;
 
   /**
    * ONIZLEME FIYATI: pay secilince satirin birim fiyati DEGISIR - hedef belge
@@ -240,7 +260,9 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
       onKapat={onKapat}
       alt={
         <>
-          <button className="d bir" disabled={calisiyor || satirlar.length === 0}
+          <button className="d bir"
+                  disabled={calisiyor || satirlar.length === 0 || donusecekYok}
+                  title={donusecekYok ? 'Belgeye dönüşecek tutar kalmadı' : undefined}
                   onClick={() => void donustur()}>
             {calisiyor ? 'Dönüştürülüyor…' : sonuc ? '⇢ Kalanı Dönüştür' : '⇢ Dönüştür'}
           </button>
@@ -267,6 +289,16 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
         </div>
       )}
 
+      {/* BELGEYE DONUSECEK TUTAR KALMADI (kullanici): satirlarin tamami
+          faturaya/fise/tahakkuka cevrilmisse modal bos bir tabloyla
+          acilmasin - sebebi yazsin. */}
+      {donusecekYok && !sonuc && (
+        <div className="uyari">
+          Belgeye dönüşecek tutar kalmadı — bu başvurunun ücretleri zaten
+          belgeye çevrilmiş.
+        </div>
+      )}
+
       {hedefler.length === 0 ? (
         <div className="bilgi-kutusu">Bu belge türü için tanımlı bir dönüşüm hedefi yok.</div>
       ) : (
@@ -289,10 +321,16 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
               {paylasimVar && (
                 <label className="alan">
                   <span className="etiket">Dönüştürülecek Pay</span>
+                  {/* INCE KOVALAR (470): sunucu bu kodlarla calisir - kaba
+                      "kurum payi" (2) SGK kovasi demek ve anlasmali kurum
+                      basvurusunda "SGK payı zaten kapatılmış" hatasi
+                      veriyordu. */}
                   <select value={pay} onChange={e => setPay(Number(e.target.value))}>
                     <option value={0}>Tümü (paylaşımsız)</option>
                     <option value={1}>Hasta payı</option>
-                    <option value={2}>Kurum payı → kuruma faturalanır</option>
+                    <option value={4}>Hasta ek katkısı</option>
+                    <option value={3}>Sigorta / anlaşmalı kurum → kuruma faturalanır</option>
+                    <option value={2}>SGK payı → SGK'ya tahakkuk</option>
                   </select>
                 </label>
               )}
