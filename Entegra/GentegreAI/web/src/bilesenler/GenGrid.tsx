@@ -317,7 +317,15 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   //   yeniden kapatmak zorunda kalmasin.
   const yanAnahtar = `gentegre.yanpanel.${kaynak}`;
   const [yanKapali, setYanKapali] = useState(() => {
-    try { return localStorage.getItem(yanAnahtar) === '1' } catch { return false }
+    try {
+      const kayitli = localStorage.getItem(yanAnahtar);
+      if (kayitli !== null) return kayitli === '1';
+      // UC KOLONLU EKRANDA (sol agac + liste + yan panel) DAR EKRAN:
+      //   ilk acilista yan panel KAPALI baslar - 1440'lik ekranda uc kolon
+      //   listeyi 600px'e dusurup kolonlari kirpiyordu. Kullanici acabilir,
+      //   secimi hatirlanir.
+      return !!solPanel && window.innerWidth < 1600;
+    } catch { return false }
   });
   useEffect(() => {
     try { localStorage.setItem(yanAnahtar, yanKapali ? '1' : '0') } catch { /* yok say */ }

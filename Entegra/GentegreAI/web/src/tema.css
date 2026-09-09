@@ -1662,11 +1662,19 @@ input.skt-gecmis {
 /* UC KOLON (492, mockup lab_tetkik_katalogu .ucPanel): solda bolum agaci ve
    paneller, ortada liste, sagda secili tetkik. Dar ekranda once SOL kolon
    duser - gezinme listesi ustteki bolum combosuyla da yapilabilir. */
-.grid-yan-duzen.sollu { grid-template-columns: 240px minmax(0, 1fr) 420px }
-.grid-yan-duzen.sollu.kapali { grid-template-columns: 240px minmax(0, 1fr) 24px }
-@media (max-width: 1500px) {
-  .grid-yan-duzen.sollu { grid-template-columns: minmax(0, 1fr) 420px }
-  .grid-yan-duzen.sollu.kapali { grid-template-columns: minmax(0, 1fr) 24px }
+.grid-yan-duzen.sollu { grid-template-columns: 215px minmax(0, 1fr) 380px }
+.grid-yan-duzen.sollu.kapali { grid-template-columns: 215px minmax(0, 1fr) 24px }
+/* DAR EKRANDA ONCE SAG PANEL DUSER, SOL KALIR (kullanici: "sol tarafa Bölüm /
+   Çalışma Grubu ve paneller gelmedi" - esik 1500px'ti, 1440'lik ekranda sol
+   kolon hic cizilmiyordu). Sol kolon GEZINME: onsuz katalogda dolasmanin tek
+   yolu ustteki combo kaliyor. Sag panel yalniz secili satirin ayrintisi -
+   kaybi daha ucuz, zaten katlanabilir. */
+@media (max-width: 1400px) {
+  .grid-yan-duzen.sollu { grid-template-columns: 200px minmax(0, 1fr) 380px }
+  .grid-yan-duzen.sollu.kapali { grid-template-columns: 200px minmax(0, 1fr) 24px }
+}
+@media (max-width: 1050px) {
+  .grid-yan-duzen.sollu { grid-template-columns: minmax(0, 1fr) }
   .grid-sol-panel { display: none }
 }
 .grid-sol-panel { position: sticky; top: 6px }
