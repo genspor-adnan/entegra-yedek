@@ -134,7 +134,10 @@ public static partial class KartKatalogu
                     KodListesi: "fiyat_listesi.ek_katki_tipi", Baslik: "Ek Katkı Tipi"),
                 new("ekKatkiDeger","ek_katki_deger","para", Baslik: "Ek Katkı"),
                 new("dovizCinsi","doviz_cinsi","kod", Baslik: "Döviz"),
-                new("kdvDahil",  "kdv_dahil", "kod",  SabitKodlar: KdvDahilKodlari, Baslik: "KDV"),
+                // KDV SUTUNU SATIRDAN KALKTI (kullanici): KDV dahil/haric
+                //   LISTENIN ozelligidir (Genel > Detay > KDV) - satirda
+                //   tekrar sorulunca "hangisi gecerli" belirsizlesiyordu.
+                //   Kolon duruyor ve tum satirlarda liste degerini izliyor.
                 new("birim",     "birim",     "kod",  KodListesi: "stok.ana_birim", Baslik: "Birim"),
                 new("durum",     "durum",     "kod",  SabitKodlar: DurumKodlari, Baslik: "Durum"),
 
