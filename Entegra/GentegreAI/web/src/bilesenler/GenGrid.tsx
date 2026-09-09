@@ -577,7 +577,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
     } catch (h) {
       setHata(hataMetni(h));
     } finally { setYukleniyor(false) }
-  }, [kaynak, baslik, kolonlar, sabitFiltre, cipler, cipIndeks, aramaFiltresi, filtreSatiriFiltresi,
+  }, [kaynak, baslik, kolonlar, sabitFiltre, cipler, cipIndeks, aramaFiltresi, filtreSatiriFiltresi, kodSuzgeci, kodSuzgecDeger,
       sirala, aramaGorunumu, tarihAlani, tarihBas, tarihBit]);
 
   const gorunenToplamlar = useMemo(() => Object.entries(toplamlar ?? {}), [toplamlar]);

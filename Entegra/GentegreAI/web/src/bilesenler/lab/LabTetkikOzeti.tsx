@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 
@@ -54,14 +54,20 @@ export function LabTetkikOzeti({ id }: { id: number | null }) {
   const [veri, setVeri] = useState<Ozet | null>(null);
   const [hata, setHata] = useState('');
 
-  const yukle = useCallback(async () => {
-    if (!id) { setVeri(null); return }
-    try {
-      setVeri(await api.labTetkikOzeti(id));
-      setHata('');
-    } catch (h) { setHata(hataMetni(h)); setVeri(null) }
+  // BAYAT YANIT YAZMASIN: listede satirdan satira hizli gecilince birden fazla
+  //   istek ucusta olur; once baslayan sonra donerse panel artik SECILI OLMAYAN
+  //   tetkigi gosterirdi. Etki temizligi cevabi gecersiz kilar.
+  useEffect(() => {
+    if (!id) { setVeri(null); setHata(''); return }
+    let iptal = false;
+    void (async () => {
+      try {
+        const y = await api.labTetkikOzeti(id);
+        if (!iptal) { setVeri(y); setHata('') }
+      } catch (h) { if (!iptal) { setHata(hataMetni(h)); setVeri(null) } }
+    })();
+    return () => { iptal = true };
   }, [id]);
-  useEffect(() => { void yukle() }, [yukle]);
 
   // Satir secili degilken de kutu cizilir: panel kaybolunca grid genisleyip
   //   her secimde yeniden daralir - ekran zipliyor gorunurdu.

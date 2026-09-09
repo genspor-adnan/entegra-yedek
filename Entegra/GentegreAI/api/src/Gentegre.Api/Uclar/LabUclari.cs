@@ -74,21 +74,42 @@ public static class LabUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("lab.tetkik", Islem.Gor);
 
-            var tetkik = await veri.TekAsync("""
-                select t.kod, t.ad, t.kisa_ad as "kisaAd", t.birim, t.loinc,
-                       t.skrs_tetkik_kod as "skrsKod", t.yontem,
-                       t.olculebilir_alt as "olculebilirAlt",
-                       t.olculebilir_ust as "olculebilirUst",
-                       t.panik_alt as "panikAlt", t.panik_ust as "panikUst",
-                       t.hedef_tat_dk as "hedefTatDk", t.acil_tat_dk as "acilTatDk",
-                       case t.bolum when 2 then 'Hematoloji' when 3 then 'Hormon'
-                            when 4 then 'Mikrobiyoloji' when 5 then 'Seroloji'
-                            when 6 then 'Koagülasyon' when 7 then 'İdrar'
-                            when 9 then 'Diğer' else 'Biyokimya' end as "bolumAdi",
-                       public.fn_lab_tetkik_sonuc_zamani(t.id, now()::timestamp, 0::smallint)
-                           as "sonucZamani"
-                  from public.lab_tetkik t where t.id = @p0
-                """, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+            // ALAN YETKISI KOLONU SORGUDAN CIKARIR, yanittan sonradan silmez
+            //   (API sozlesmesi §3.1): yetkisiz deger ne SQL'e ne log'a duser.
+            //   Ad -> SQL eslemesi SABIT; istekten gelen hicbir metin buraya
+            //   girmez.
+            (string Ad, string Sql)[] alanlar =
+            [
+                ("kod",             "t.kod"),
+                ("ad",              "t.ad"),
+                ("kisaAd",          "t.kisa_ad"),
+                ("birim",           "t.birim"),
+                ("loinc",           "t.loinc"),
+                ("skrsKod",         "t.skrs_tetkik_kod"),
+                ("yontem",          "t.yontem"),
+                ("olculebilirAlt",  "t.olculebilir_alt"),
+                ("olculebilirUst",  "t.olculebilir_ust"),
+                ("panikAlt",        "t.panik_alt"),
+                ("panikUst",        "t.panik_ust"),
+                ("hedefTatDk",      "t.hedef_tat_dk"),
+                ("acilTatDk",       "t.acil_tat_dk"),
+                ("bolumAdi",
+                 "case t.bolum when 2 then 'Hematoloji' when 3 then 'Hormon' "
+                 + "when 4 then 'Mikrobiyoloji' when 5 then 'Seroloji' "
+                 + "when 6 then 'Koagülasyon' when 7 then 'İdrar' "
+                 + "when 9 then 'Diğer' else 'Biyokimya' end"),
+                ("sonucZamani",
+                 "public.fn_lab_tetkik_sonuc_zamani(t.id, now()::timestamp, 0::smallint)"),
+            ];
+            var secilen = alanlar
+                .Where(a => baglam.Yetkiler.AlanOkunur("lab-tetkik", a.Ad)).ToList();
+            // Kimlik alanlari bile gizlenmisse panelde gosterilecek bir sey yok.
+            if (secilen.Count == 0) throw GentegreHatasi.Yasak("Tetkik alanları görüntülenemiyor.");
+
+            var tetkik = await veri.TekAsync(
+                "select " + string.Join(", ", secilen.Select(a => $"{a.Sql} as \"{a.Ad}\""))
+                + " from public.lab_tetkik t where t.id = @p0",
+                [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Tetkik bulunamadı.");
 
             // REFERANS ARALIKLARI: "kime" metni DB'de uretiliyor (488) - liste
