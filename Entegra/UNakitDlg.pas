@@ -141,6 +141,8 @@ type
     { Private declarations }
     procedure Kaydet;
     procedure IslemTarihiChange(Field: TField);
+    function  PosKarsiCariId: Integer;
+    procedure PosKarsiCariEsitle;
   public
     ID, RehberId : Integer;
     Cagiran, Tur : SmallInt;   //Cagiran 1: kasa aksiyon; 2:cari;  3:kasa;  4:banka 5:IK
@@ -243,6 +245,100 @@ end;
 procedure TNakitDlg.IslemTarihiChange(Field: TField);
 begin
   TabKasa.FieldByName('PLANTARIHI').AsDateTime := TabKasa.FieldByName('ISLEMTARIHI').AsDateTime;
+end;
+
+/// Bu kasa hareketine bagli "karsi cari" satirinin ID'si (yoksa 0).
+/// Bag: KASA.YERI = Tabno_Kasa ve KASA.YERID = ana kaydin ID'si.
+/// GERIDONUSID KULLANILMAZ: POS satirlarinda o alani banka ekstre eslestirmesi
+/// (UBankaHesapGiris) zaten kendi baglantisi icin kullaniyor.
+function TNakitDlg.PosKarsiCariId: Integer;
+begin
+  Result := 0;
+  if TabKasa.FieldByName('ID').AsInteger <= 0 then
+    Exit;
+  // DbUst/DbSinir'in parametresi SATIR SAYISI'dir (TOP 1 / limit 1), sorgu no degil.
+  Tablo.TablodanSorguAc(3, 'select ' + DbUst(1) + 'ID from KASA where YERI=' + IntToStr(Tabno_Kasa) +
+    ' and YERID=' + TabKasa.FieldByName('ID').AsString + ' and TUR in (25,125) ' + DbSinir(1));
+  Result := Tablo.Query3.Fields[0].AsInteger;
+end;
+
+/// POS baskasinin adina calisiyorsa (POS.TURU=2 "Baska Cari") ve tahsilat aninda
+/// takip edilecekse (POS.STATUSU=2 "Aninda"), para POS sahibi caride kalir.
+/// O yuzden ayni POS uzerinden POS sahibi cariye ters yonlu bir satir acilir:
+///   25  POS ile Tahsilat  -> 125 POS ile Odeme   (POS sahibi bize borclanir)
+///   125 POS ile Odeme     -> 25  POS ile Tahsilat
+/// Tutar/tarih degisirse karsi satir da guncellenir; POS artik kosulu
+/// saglamiyorsa (baska POS secildi veya TURU/STATUSU degisti) satir silinir.
+/// Ana kayit silindiginde karsi satiri sunucu siler:
+/// sp_Api_KasaHareket_Sil_Json (GenDepoUpdate170).
+procedure TNakitDlg.PosKarsiCariEsitle;
+var
+  AnaID, PosID, KarsiID, KarsiRehberID, KarsiTur: Integer;
+  Tutar, Borc, Alacak: Currency;
+begin
+  if not (Tur in [25, 125]) then
+    Exit;
+
+  AnaID := TabKasa.FieldByName('ID').AsInteger;
+  if AnaID <= 0 then
+    Exit;
+
+  KarsiID := PosKarsiCariId;
+
+  KarsiRehberID := 0;
+  PosID := TabKasa.FieldByName('HESAPID').AsInteger;
+  if (TabKasa.FieldByName('HESAPTURU').AsString = 'P') and (PosID > 0) then
+  begin
+    Tablo.TablodanSorguAc(6, 'select TURU, STATUSU, isnull(REHBERID,0) from POS where ID=' + IntToStr(PosID));
+    if (Tablo.Query6.Fields[0].AsInteger = 2) and (Tablo.Query6.Fields[1].AsInteger = 2) then
+      KarsiRehberID := Tablo.Query6.Fields[2].AsInteger;
+  end;
+
+  // Kosul saglanmiyor: onceden acilmis satir varsa kalmasin.
+  // Karsi cari, tahsilat yapilan cari ile ayni ise kayit anlamsiz olur.
+  if (KarsiRehberID <= 0) or (KarsiRehberID = TabKasa.FieldByName('REHBERID').AsInteger) then
+  begin
+    if KarsiID > 0 then
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from KASA where ID=&kid', ['&kid'], [KarsiID]);
+    Exit;
+  end;
+
+  Tutar := TabKasa.FieldByName(EditTutar.DataBinding.DataField).AsCurrency;
+  if Tur = 25 then
+    KarsiTur := 125
+  else
+    KarsiTur := 25;
+  if KarsiTur = 125 then
+  begin
+    Borc   := Tutar;                 // POS sahibi cari bize borclanir
+    Alacak := 0;
+  end
+  else
+  begin
+    Borc   := 0;
+    Alacak := Tutar;
+  end;
+
+  if KarsiID > 0 then
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'update KASA set REHBERID=&reh, HESAPID=&hes, BORC=&b, ALACAK=&a, DOVIZ_TUTARI=&d,' +
+      ' KUR=&kur, ISLEMTARIHI=&it, PLANTARIHI=&pt where ID=&kid',
+      ['&reh', '&hes', '&b', '&a', '&d', '&kur', '&it', '&pt', '&kid'],
+      [KarsiRehberID, PosID, Float_ToStr(Borc), Float_ToStr(Alacak),
+       Float_ToStr(TabKasa.FieldByName('DOVIZ_TUTARI').AsCurrency),
+       TabKasa.FieldByName('KUR').AsString,
+       FormatDateTime('yyyy-mm-dd hh:nn:ss', TabKasa.FieldByName('ISLEMTARIHI').AsDateTime),
+       FormatDateTime('yyyy-mm-dd hh:nn:ss', TabKasa.FieldByName('PLANTARIHI').AsDateTime),
+       KarsiID])
+  else
+    // Ana satirin kopyasi: kur, doviz kuru, sube, tarihler aynen gelir.
+    // FATURAID/CEKSENETID/GERIDONUSID kopyalanmaz -- karsi satir ayni faturaya
+    // baglanirsa fatura odendi durumu iki kez hesaplanir.
+    Tablo.SQLSatiriKopyala('KASA', AnaID,
+      ['TUR', 'REHBERID', 'BORC', 'ALACAK', 'YERI', 'YERID',
+       'GERIDONUSID', 'FATURAID', 'CEKSENETID', 'KREDIID', 'ACIKLAMA'],
+      [KarsiTur, KarsiRehberID, Borc, Alacak, Tabno_Kasa, AnaID,
+       -1, -1, -1, -1, Copy('POS: ' + LabelAd.Caption + ' ' + EditAciklama.Text, 1, 100)]);
 end;
 
 procedure TNakitDlg.TabKasaBeforeEdit(DataSet: TDataSet);
@@ -908,11 +1004,19 @@ begin
      'V' : s := 'KREDIKARTI';
      'P' : s := 'POS';
      end;
-     if HesapTuru ='-' then
-        ComboKur.EditValue := CariDoviz
-     else begin
-       tablo.TablodanSorguAc(1,'select KUR from '+s+' where ID='+IntToStr(KasaHesapId));
-       ComboKur.EditValue := Tablo.Query1.Fields[0].AsString;
+     // Hesabin kuru YALNIZ yeni/kopya kayitta on deger olur. Mevcut kaydi
+     // acarken kaydin kendi kuru gecerlidir: TL bir tahsilat, kuru '$' tanimli
+     // bir POS'tan yapilmis olabilir. ComboKur KASA.KUR'a bagli ve
+     // ImmediatePost acik oldugundan buradaki atama ekrani degil KAYDI
+     // degistiriyordu -- Tamam'a basildiginda TL kayit '$' olarak yaziliyordu.
+     if (IslemOp <> 'D') or (TabKasa.FieldByName('KUR').AsString = '') then
+     begin
+       if HesapTuru ='-' then
+          ComboKur.EditValue := CariDoviz
+       else begin
+         tablo.TablodanSorguAc(1,'select KUR from '+s+' where ID='+IntToStr(KasaHesapId));
+         ComboKur.EditValue := Tablo.Query1.Fields[0].AsString;
+       end;
      end;
   end;
   ComboKurPropertiesCloseUp(Self);
@@ -968,6 +1072,8 @@ begin
 
    if (IslemOp in ['E','K'])and(TabKasa.Fields[0].AsString<>'') then begin//Yeni veya Kopyalama ise
   //     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from PROJEMALIYET where YER=&Yer and YERID=&KerId ',['&Yer','&KerId'],[Tabno_Kasa, TabKasa.Fields[0].AsInteger]);
+       // POS karsi satiri ana satirdan once: ana satir gidince bagi kurulamaz.
+       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from KASA where YERI=&yer and YERID=&kid and TUR in (25,125) ',['&yer','&kid'],[Tabno_Kasa, TabKasa.Fields[0].AsInteger]);
        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from KASA where ID=&kid ',['&kid'],[TabKasa.Fields[0].AsInteger]);
        FEkleLogland := True;   // iptalde kayit silindi -> kapanis fallback loglamasin
    end else if TabKasa.State in [dsEdit, dsInsert] then begin
@@ -1162,6 +1268,9 @@ begin
    end;
    if (Tur = 35)or(Tur=350) then
       Tablo.KrediKartiKaydet(Tur, ComboKasa.EditValue, TabKasa.Fields[0].AsInteger, TaksitSay.Value, EditKayitTarih.date, TabKasa.FieldByName(EditTutar.DataBinding.DataField).Value, ComboKur.EditValue, EditAciklama.Text);
+
+   // POS baskasinin ise (TURU=2 + STATUSU=2) POS sahibi cariye karsi satir.
+   PosKarsiCariEsitle;
 
    // KASA karti loglama (TEK SEFER, kaydet-kapat noktasinda): edit -> LogIslemleri, yeni/kopya -> LogKayitEkle.
    if LogGun > 0 then begin

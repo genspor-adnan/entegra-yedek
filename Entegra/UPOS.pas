@@ -39,15 +39,10 @@ type
     Label7: TcxLabel;
     Label13: TcxLabel;
     Label14: TcxLabel;
-    Label15: TcxLabel;
     Label16: TcxLabel;
     Label17: TcxLabel;
-    Label18: TcxLabel;
-    Label19: TcxLabel;
     EditAdi: TcxDBTextEdit;
     EditNosu: TcxDBTextEdit;
-    DBEdit18: TcxDBTextEdit;
-    DBEdit19: TcxDBTextEdit;
     cxDBLabel1: TcxDBLabel;
     BEditKod: TcxDBTextEdit;
     CBTuru: TcxDBImageComboBox;
@@ -66,13 +61,6 @@ type
     cxDBDateEdit2: TcxDBDateEdit;
     cxDBDateEdit3: TcxDBDateEdit;
     Label12: TcxLabel;
-    Label8: TcxLabel;
-    Label9: TcxLabel;
-    cxLabel1: TcxLabel;
-    cxDBDateEdit4: TcxDBDateEdit;
-    cxDBCurrencyEdit1: TcxDBCurrencyEdit;
-    cxDBCurrencyEdit2: TcxDBCurrencyEdit;
-    cxDBCurrencyEdit3: TcxDBCurrencyEdit;
     cxLabel2: TcxLabel;
     cxDBImageComboBox1: TcxDBImageComboBox;
     cxDBSpinEdit1: TcxDBSpinEdit;
@@ -87,6 +75,8 @@ type
     cxDBImage1: TcxDBImage;
     cxLabel6: TcxLabel;
     ComboMasrafIsleme: TcxDBImageComboBox;
+    ButtonEditCari: TcxButtonEdit;
+    cxLabel7: TcxLabel;
     procedure KapatTusClick(Sender: TObject);
     procedure EkleTusClick(Sender: TObject);
     procedure SilTusClick(Sender: TObject);
@@ -102,6 +92,8 @@ type
     procedure BEditKMMPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure TabPOSBeforePost(DataSet: TDataSet);
     procedure TabPOSAfterOpen(DataSet: TDataSet);
+    procedure ButtonEditCariPropertiesButtonClick(Sender: TObject;
+      AButtonIndex: Integer);
   private
     { Private declarations }
     FFrameBilgi : TIcerikFrameBilgi;
@@ -189,6 +181,17 @@ begin
      TabPOS.FieldByName('KOMISYONMASRAFMERKEZI').AsString:= MASRAFID;
      //(select M.AD from MASRAFGELIR M where M.ID=P.KOMISYONMASRAFMERKEZI  ) AS KMMADI
      BEditKMM.Text := Tablo.AciklamaGetir('MASRAFGELIR','AD',TabPOS.FieldByName('KOMISYONMASRAFMERKEZI').AsInteger);
+  end;
+end;
+
+procedure TPOS.ButtonEditCariPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
+var ID : integer;
+begin
+  ID := Tablo.RehberAra_IDGetir(0) ;
+  if ID > 0 then begin
+     TabPOS.Edit;
+     TabPOS.FieldByName('REHBERID').AsInteger:= ID;
+     ButtonEditCari.Text := Tablo.AciklamaGetir('REHBER',  'FIRMA', ID );
   end;
 end;
 
@@ -341,6 +344,7 @@ begin
         TabPOS.FieldByName('KMMADI').ProviderFlags := [];
    end;
    BEditKMM.Text := Tablo.AciklamaGetir('MASRAFGELIR','AD',TabPOS.FieldByName('KOMISYONMASRAFMERKEZI').AsInteger);
+   ButtonEditCari.Text := Tablo.AciklamaGetir('REHBER',  'FIRMA', TabPOS.FieldByName('REHBERID').AsInteger );
 end;
 
 procedure TPOS.TabPOSAfterPost(DataSet: TDataSet);
@@ -387,6 +391,8 @@ begin
   EdiBANKATICARIHESAPKODUPropertiesButtonClick(Self,0);
   AlanBoolYaz(TabPos.FieldByName('DURUM'), True);
   TabPos.FieldByName('MASRAFCIKIS').AsInteger:=2;
+  TabPos.FieldByName('TURU').AsInteger:=1;
+  TabPos.FieldByName('STATUSU').AsInteger:=1;
   TabPOS.FieldByName('ALINISTARIHI').AsDateTime:=Tablo.GENINI.BugunTrh;
   TabPOS.FieldByName('KODU').Value := Tablo.KodBulmaSihirbazi(108,'HESAPPLANI','HESAPKODU','HESAPADI', 'POS', 'KODU');
   TabPOS.FieldByName('SUBEID').AsInteger := SubeID;

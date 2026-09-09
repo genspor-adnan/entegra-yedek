@@ -93,7 +93,7 @@ const
   // Saglik/tibbi malzeme etiketlerinde gecen AI'lar. Liste uzatilabilir;
   // tanimsiz bir AI ile karsilasilirsa cozumleme basarisiz olur ve arayuz
   // eski (BARKODAYARLAR) yoluna duser.
-  AITablosu: array[0..21] of TAITanim = (
+  AITablosu: array[0..30] of TAITanim = (
     (AI: '00';  Uzunluk: 18; EnFazla: 18),   // SSCC
     (AI: '01';  Uzunluk: 14; EnFazla: 14),   // GTIN
     (AI: '02';  Uzunluk: 14; EnFazla: 14),   // ic paket GTIN
@@ -115,7 +115,16 @@ const
     (AI: '251'; Uzunluk: 0;  EnFazla: 30),   // kaynak referansi
     (AI: '400'; Uzunluk: 0;  EnFazla: 30),   // siparis no
     (AI: '401'; Uzunluk: 0;  EnFazla: 30),   // sevkiyat no
-    (AI: '90';  Uzunluk: 0;  EnFazla: 30)    // taraflar arasi dahili
+    (AI: '90';  Uzunluk: 0;  EnFazla: 30),   // taraflar arasi dahili
+    (AI: '91';  Uzunluk: 0;  EnFazla: 30),   // 91..99: firma ici dahili alanlar
+    (AI: '92';  Uzunluk: 0;  EnFazla: 30),
+    (AI: '93';  Uzunluk: 0;  EnFazla: 30),
+    (AI: '94';  Uzunluk: 0;  EnFazla: 30),
+    (AI: '95';  Uzunluk: 0;  EnFazla: 30),
+    (AI: '96';  Uzunluk: 0;  EnFazla: 30),
+    (AI: '97';  Uzunluk: 0;  EnFazla: 30),
+    (AI: '98';  Uzunluk: 0;  EnFazla: 30),
+    (AI: '99';  Uzunluk: 0;  EnFazla: 30)
   );
 
 { ---------------------------------------------------------------- yardimcilar }
@@ -300,6 +309,37 @@ begin
     Result := False;
 end;
 
+/// Ayirici yutulmus barkodda degisken alani bitiren ikinci kural.
+/// MicroPort/NUMEN gibi ureticiler lottan sonra firma ici bir alan basiyor:
+///   etikette "(17) 280331 (10) 34220004 (91) 001", okuyucudan
+///   "17280331103422000491001" -- FNC1 gelmiyor, lot 8 hane olmasina ragmen
+///   "3422000491001" olarak yapisik okunuyordu.
+/// AI 91..99 kendini dogrulamadigi icin GucluAI bunu kabul edemez; bolmeyi
+/// yalnizca su dar kalibin hepsi tutunca aciyoruz:
+///   - dahili alan dizinin SONU (arkasindan baska alan gelmiyor),
+///   - AI 91..99 (90 haric: kisa rakam dizilerinde cok daha sik yanlis eslesir),
+///   - dahili alanin degeri 2..4 hane, salt rakam,
+///   - kapanan degisken alan (lot/seri) en az 6 hane ve salt rakam.
+/// Boylece "262900" gibi kisa sayisal lotlar ve "PBL4812230419" gibi
+/// alfanumerik lotlar bolunmez; kalip yalnizca gercek ureticide tutar.
+function DahiliSonAI(const AKuyruk: TArray<TGS1Alan>; const AKapanan: string): Boolean;
+var
+  Tail: string;
+begin
+  Result := False;
+  if Length(AKuyruk) <> 1 then
+    Exit;
+  if (Length(AKuyruk[0].AI) <> 2) or (AKuyruk[0].AI[1] <> '9') or
+     (AKuyruk[0].AI[2] < '1') then
+    Exit;
+  Tail := AKuyruk[0].Deger;
+  if (Length(Tail) < 2) or (Length(Tail) > 4) or not SadeceRakam(Tail) then
+    Exit;
+  if (Length(AKapanan) < 6) or not SadeceRakam(AKapanan) then
+    Exit;
+  Result := True;
+end;
+
 function AIVarMi(const AAlanlar: TArray<TGS1Alan>; const AAI: string): Boolean;
 var
   I: Integer;
@@ -380,7 +420,9 @@ begin
       Continue;
     // Veri sonuna kadar giden aday her zaman gecerli (GS1 varsayilani);
     // erken bolunme ancak kanitli bir AI ile kabul edilir.
-    if (Length(Kuyruk) > 0) and not GucluAI(Kuyruk[0].AI, Kuyruk[0].Deger) then
+    if (Length(Kuyruk) > 0) and
+       not GucluAI(Kuyruk[0].AI, Kuyruk[0].Deger) and
+       not DahiliSonAI(Kuyruk, Deger) then
       Continue;
     // Esitlikte ilk aday kazanir; dongu en uzundan basladigi icin bu, GS1'in
     // "degisken alan veri sonuna kadar surer" varsayilanini korur.

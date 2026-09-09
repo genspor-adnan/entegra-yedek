@@ -423,7 +423,7 @@ implementation
 
 uses UVeriMotor, FetaKurulusSiniflari, FetaClassExtensions, PrjConst,UGirisKutusuEx, UFastRap, URaporAraclari,
      UGenelAnaSekmeFrame, UResim, UOpsDlg, UBarkodYazdir, LocOnFly, UExceldenVeriAl, UUTSDlg,
-     System.JSON;
+     System.JSON, UGS1Barkod;
 {$R *.dfm}
 
 var
@@ -582,6 +582,7 @@ var
   EkAlanlar, Barkod, SubeYetki: string;
   i, TopN: Integer;
   j: TJSONObject;
+  Bilgi: TGS1Bilgi;
 begin
   // @SelectList: ek (ozel) alanlar -> ',[Cap]=Field' (SP'de GROUP BY yok -> group listesi gerekmez)
   EkAlanlar := '';
@@ -602,14 +603,18 @@ begin
   if SubeVarmi then SubeYetki := Tablo.YetkiliSubeleriGetir(27, YetkiTur_Gorme)
   else SubeYetki := '';
 
-  Barkod := '';                                                        // karekod cozumu app tarafinda
+  // Karekod cozumu app tarafinda: parantezli etiket, GS ayirici ve duz EAN
+  // ayni cozumleyiciden gecer (UGS1Barkod). Eski kod '17'nin barkodun 17.
+  // karakterinde oldugunu varsayiyordu; araya (20) varyant gibi bir alan
+  // girdiginde o varsayim bozuluyor ve SP'ye 14 hanelik cop gidiyordu.
+  Barkod := '';
   if Trim(FArama.AraBarkod.Text) <> '' then
   begin
     OkunanBarkod := Trim(FArama.AraBarkod.Text);
-    if (Pos('01', OkunanBarkod) = 1) and (Pos('17', OkunanBarkod) = 17) then
-      OkunanBarkod := Copy(OkunanBarkod, 3, 14)
-    else if Pos('(01)', OkunanBarkod) > 0 then
-      OkunanBarkod := Tablo.KarekodOku(1, OkunanBarkod);
+    if GS1Coz(OkunanBarkod, Bilgi) and (Bilgi.UrunNo <> '') then
+      OkunanBarkod := Bilgi.UrunNo                 // bastaki sifir zaten atilmis
+    else if Pos('0', OkunanBarkod) = 1 then        // AI yok: eski davranis
+      OkunanBarkod := Copy(OkunanBarkod, 2, 300);
     Barkod := OkunanBarkod;
   end;
 

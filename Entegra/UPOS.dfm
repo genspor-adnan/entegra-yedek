@@ -1,7 +1,7 @@
 object POS: TPOS
   Left = 0
   Top = 0
-  Width = 730
+  Width = 977
   Height = 559
   Align = alClient
   Color = clWhite
@@ -10,15 +10,15 @@ object POS: TPOS
   TabOrder = 0
   object Bevel3: TBevel
     Left = 0
-    Top = 221
-    Width = 879
-    Height = 97
+    Top = 247
+    Width = 841
+    Height = 74
   end
   object ToolBar1: TToolBar
     AlignWithMargins = True
     Left = 3
     Top = 3
-    Width = 724
+    Width = 971
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
@@ -45,6 +45,8 @@ object POS: TPOS
     ShowCaptions = True
     TabOrder = 0
     Transparent = True
+    ExplicitWidth = 724
+    ExplicitHeight = 29
     object EkleTus: TToolButton
       Left = 0
       Top = 0
@@ -136,7 +138,7 @@ object POS: TPOS
   end
   object Label4: TcxLabel
     Left = 1
-    Top = 98
+    Top = 168
     Caption = 'T'#252'r'#252
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -148,9 +150,9 @@ object POS: TPOS
     Transparent = True
   end
   object Label5: TcxLabel
-    Left = 192
-    Top = 98
-    Caption = 'Stat'#252's'#252
+    Left = 197
+    Top = 169
+    Caption = 'Aksiyon'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
     Style.Font.Color = clWindowText
@@ -162,7 +164,7 @@ object POS: TPOS
   end
   object Label7: TcxLabel
     Left = 1
-    Top = 121
+    Top = 101
     Caption = 'Nosu'
     FocusControl = EditNosu
     ParentFont = False
@@ -176,7 +178,7 @@ object POS: TPOS
   end
   object Label13: TcxLabel
     Left = 386
-    Top = 234
+    Top = 257
     Caption = 'Hesap Kesim Vadesi'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -189,7 +191,7 @@ object POS: TPOS
   end
   object Label14: TcxLabel
     Left = 386
-    Top = 258
+    Top = 281
     Caption = #214'deme G'#252'n Say'#305's'#305
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -200,22 +202,9 @@ object POS: TPOS
     Style.IsFontAssigned = True
     Transparent = True
   end
-  object Label15: TcxLabel
-    Left = 386
-    Top = 282
-    Caption = 'Y'#305'll'#305'k '#220'creti'
-    ParentFont = False
-    Style.Font.Charset = TURKISH_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -11
-    Style.Font.Name = 'Trebuchet MS'
-    Style.Font.Style = []
-    Style.IsFontAssigned = True
-    Transparent = True
-  end
   object Label16: TcxLabel
-    Left = 386
-    Top = 98
+    Left = 385
+    Top = 85
     Caption = 'Al'#305'n'#305#351' Tarihi'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -227,37 +216,9 @@ object POS: TPOS
     Transparent = True
   end
   object Label17: TcxLabel
-    Left = 386
-    Top = 121
+    Left = 385
+    Top = 110
     Caption = 'Kapan'#305#351' Tarihi'
-    ParentFont = False
-    Style.Font.Charset = TURKISH_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -11
-    Style.Font.Name = 'Trebuchet MS'
-    Style.Font.Style = []
-    Style.IsFontAssigned = True
-    Transparent = True
-  end
-  object Label18: TcxLabel
-    Left = 1
-    Top = 146
-    Caption = #214'zel Kod'
-    FocusControl = DBEdit18
-    ParentFont = False
-    Style.Font.Charset = TURKISH_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -11
-    Style.Font.Name = 'Trebuchet MS'
-    Style.Font.Style = []
-    Style.IsFontAssigned = True
-    Transparent = True
-  end
-  object Label19: TcxLabel
-    Left = 190
-    Top = 146
-    Caption = 'Yetki Kodu'
-    FocusControl = DBEdit19
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
     Style.Font.Color = clWindowText
@@ -277,27 +238,11 @@ object POS: TPOS
   end
   object EditNosu: TcxDBTextEdit
     Left = 93
-    Top = 121
+    Top = 101
     DataBinding.DataField = 'NOSU'
     DataBinding.DataSource = DtsPos
-    TabOrder = 22
+    TabOrder = 20
     Width = 230
-  end
-  object DBEdit18: TcxDBTextEdit
-    Left = 93
-    Top = 146
-    DataBinding.DataField = 'OZELKOD'
-    DataBinding.DataSource = DtsPos
-    TabOrder = 30
-    Width = 96
-  end
-  object DBEdit19: TcxDBTextEdit
-    Left = 252
-    Top = 146
-    DataBinding.DataField = 'YETKIKODU'
-    DataBinding.DataSource = DtsPos
-    TabOrder = 33
-    Width = 71
   end
   object cxDBLabel1: TcxDBLabel
     Left = 219
@@ -317,27 +262,43 @@ object POS: TPOS
   end
   object CBTuru: TcxDBImageComboBox
     Left = 93
-    Top = 97
-    RepositoryItem = Tablo.RepPOSTuru
+    Top = 167
     DataBinding.DataField = 'TURU'
     DataBinding.DataSource = DtsPos
-    Properties.Items = <>
+    Properties.Items = <
+      item
+        Description = 'Kendi'
+        ImageIndex = 0
+        Value = 1
+      end
+      item
+        Description = 'Ba'#351'ka Cari'
+        Value = 2
+      end>
     TabOrder = 14
     Width = 96
   end
   object CBStatusu: TcxDBImageComboBox
     Left = 252
-    Top = 97
-    RepositoryItem = Tablo.RepPOSStatusu
+    Top = 167
     DataBinding.DataField = 'STATUSU'
     DataBinding.DataSource = DtsPos
-    Properties.Items = <>
-    TabOrder = 16
+    Properties.Items = <
+      item
+        Description = 'Yok'
+        ImageIndex = 0
+        Value = 1
+      end
+      item
+        Description = 'An'#305'nda'
+        Value = 2
+      end>
+    TabOrder = 15
     Width = 71
   end
   object Label38: TcxLabel
-    Left = 386
-    Top = 146
+    Left = 383
+    Top = 161
     Caption = 'Banka'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -349,8 +310,8 @@ object POS: TPOS
     Transparent = True
   end
   object EdiBANKATICARIHESAPKODU: TcxButtonEdit
-    Left = 528
-    Top = 146
+    Left = 525
+    Top = 161
     Properties.Buttons = <
       item
         Default = True
@@ -358,56 +319,56 @@ object POS: TPOS
       end>
     Properties.ReadOnly = True
     Properties.OnButtonClick = EdiBANKATICARIHESAPKODUPropertiesButtonClick
-    TabOrder = 24
+    TabOrder = 21
     Width = 84
   end
   object EditTicariHsId: TcxDBTextEdit
-    Left = 768
-    Top = 146
+    Left = 765
+    Top = 161
     TabStop = False
     DataBinding.DataField = 'BANKAHESAPID'
     DataBinding.DataSource = DtsPos
     Enabled = False
     ParentColor = True
     Properties.ReadOnly = True
-    TabOrder = 26
+    TabOrder = 23
     Visible = False
     Width = 34
   end
   object EditHesapAdiTicari: TcxTextEdit
-    Left = 528
-    Top = 195
+    Left = 525
+    Top = 210
     TabStop = False
     Enabled = False
     ParentColor = True
     Properties.ReadOnly = True
-    TabOrder = 36
+    TabOrder = 31
     Width = 239
   end
   object ComboKur: TcxDBComboBox
-    Left = 705
-    Top = 169
+    Left = 702
+    Top = 184
     DataBinding.DataField = 'KUR'
     DataBinding.DataSource = DtsPos
     Enabled = False
     Properties.DropDownListStyle = lsFixedList
     Properties.MaxLength = 0
-    TabOrder = 27
+    TabOrder = 24
     Width = 60
   end
   object EditBanka: TcxTextEdit
-    Left = 612
-    Top = 146
+    Left = 609
+    Top = 161
     TabStop = False
     Enabled = False
     ParentColor = True
     Properties.ReadOnly = True
-    TabOrder = 25
+    TabOrder = 22
     Width = 153
   end
   object cxLabel8: TcxLabel
-    Left = 386
-    Top = 170
+    Left = 383
+    Top = 185
     Caption = #350'ube/Hesap'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -419,18 +380,18 @@ object POS: TPOS
     Transparent = True
   end
   object EditHesap: TcxTextEdit
-    Left = 588
-    Top = 170
+    Left = 585
+    Top = 185
     TabStop = False
     Enabled = False
     ParentColor = True
     Properties.ReadOnly = True
-    TabOrder = 29
+    TabOrder = 26
     Width = 114
   end
   object cxLabel9: TcxLabel
-    Left = 386
-    Top = 195
+    Left = 383
+    Top = 210
     Caption = 'A'#231#305'klama'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -442,42 +403,42 @@ object POS: TPOS
     Transparent = True
   end
   object EditSube: TcxTextEdit
-    Left = 528
-    Top = 170
+    Left = 525
+    Top = 185
     TabStop = False
     Enabled = False
     ParentColor = True
     Properties.ReadOnly = True
-    TabOrder = 28
+    TabOrder = 25
     Width = 59
   end
   object cxDBDateEdit1: TcxDBDateEdit
-    Left = 528
-    Top = 98
+    Left = 527
+    Top = 85
     DataBinding.DataField = 'ALINISTARIHI'
     DataBinding.DataSource = DtsPos
     TabOrder = 10
     Width = 111
   end
   object cxDBDateEdit2: TcxDBDateEdit
-    Left = 528
-    Top = 121
+    Left = 527
+    Top = 110
     DataBinding.DataField = 'KAPANISTARIHI'
     DataBinding.DataSource = DtsPos
-    TabOrder = 18
+    TabOrder = 17
     Width = 111
   end
   object cxDBDateEdit3: TcxDBDateEdit
-    Left = 679
-    Top = 121
+    Left = 678
+    Top = 110
     DataBinding.DataField = 'SKT'
     DataBinding.DataSource = DtsPos
-    TabOrder = 20
+    TabOrder = 19
     Width = 86
   end
   object Label12: TcxLabel
-    Left = 640
-    Top = 121
+    Left = 639
+    Top = 110
     Caption = 'SKT'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -488,83 +449,9 @@ object POS: TPOS
     Style.IsFontAssigned = True
     Transparent = True
   end
-  object Label8: TcxLabel
-    Left = 1
-    Top = 234
-    Caption = 'Genel Limit'
-    ParentFont = False
-    Style.Font.Charset = TURKISH_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -11
-    Style.Font.Name = 'Trebuchet MS'
-    Style.Font.Style = []
-    Style.IsFontAssigned = True
-    Transparent = True
-  end
-  object Label9: TcxLabel
-    Left = 1
-    Top = 257
-    Caption = 'Dahili Limit'
-    ParentFont = False
-    Style.Font.Charset = TURKISH_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -11
-    Style.Font.Name = 'Trebuchet MS'
-    Style.Font.Style = []
-    Style.IsFontAssigned = True
-    Transparent = True
-  end
-  object cxLabel1: TcxLabel
-    Left = 1
-    Top = 282
-    Caption = 'Dahili Limit Vadesi'
-    ParentFont = False
-    Style.Font.Charset = TURKISH_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -11
-    Style.Font.Name = 'Trebuchet MS'
-    Style.Font.Style = []
-    Style.IsFontAssigned = True
-    Transparent = True
-  end
-  object cxDBDateEdit4: TcxDBDateEdit
-    Left = 170
-    Top = 282
-    DataBinding.DataField = 'DAHILI_LIMIT_VADESI'
-    DataBinding.DataSource = DtsPos
-    TabOrder = 47
-    Width = 153
-  end
-  object cxDBCurrencyEdit1: TcxDBCurrencyEdit
-    Left = 170
-    Top = 235
-    DataBinding.DataField = 'GENELLIMIT'
-    DataBinding.DataSource = DtsPos
-    Properties.DisplayFormat = ',0.00;-,0.00'
-    TabOrder = 41
-    Width = 153
-  end
-  object cxDBCurrencyEdit2: TcxDBCurrencyEdit
-    Left = 170
-    Top = 258
-    DataBinding.DataField = 'DAHILILIMIT'
-    DataBinding.DataSource = DtsPos
-    Properties.DisplayFormat = ',0.00;-,0.00'
-    TabOrder = 45
-    Width = 153
-  end
-  object cxDBCurrencyEdit3: TcxDBCurrencyEdit
-    Left = 528
-    Top = 282
-    DataBinding.DataField = 'YILLIK_UCRETI'
-    DataBinding.DataSource = DtsPos
-    Properties.DisplayFormat = ',0.00;-,0.00'
-    TabOrder = 53
-    Width = 153
-  end
   object cxLabel2: TcxLabel
-    Left = 640
-    Top = 98
+    Left = 639
+    Top = 85
     Caption = 'Durum'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -576,8 +463,8 @@ object POS: TPOS
     Transparent = True
   end
   object cxDBImageComboBox1: TcxDBImageComboBox
-    Left = 686
-    Top = 97
+    Left = 685
+    Top = 84
     RepositoryItem = Tablo.RepAktifPasif
     DataBinding.DataField = 'DURUM'
     DataBinding.DataSource = DtsPos
@@ -587,25 +474,25 @@ object POS: TPOS
   end
   object cxDBSpinEdit1: TcxDBSpinEdit
     Left = 528
-    Top = 257
+    Top = 280
     DataBinding.DataField = 'ODEME_GUN_SAYISI'
     DataBinding.DataSource = DtsPos
     Properties.MaxValue = 365.000000000000000000
-    TabOrder = 46
+    TabOrder = 36
     Width = 123
   end
   object cxDBSpinEdit2: TcxDBSpinEdit
     Left = 528
-    Top = 234
+    Top = 257
     DataBinding.DataField = 'HESAP_KESIM_TARIHI'
     DataBinding.DataSource = DtsPos
     Properties.MaxValue = 30.000000000000000000
-    TabOrder = 43
+    TabOrder = 35
     Width = 123
   end
   object cxLabel3: TcxLabel
     Left = 657
-    Top = 234
+    Top = 257
     Caption = 'g'#252'n.'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -618,7 +505,7 @@ object POS: TPOS
   end
   object cxLabel4: TcxLabel
     Left = 657
-    Top = 258
+    Top = 281
     Caption = 'g'#252'n.'
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
@@ -630,13 +517,13 @@ object POS: TPOS
     Transparent = True
   end
   object LblSube: TcxLabel
-    Left = 386
-    Top = 76
+    Left = 385
+    Top = 60
     Caption = #350'ube'
   end
   object ComboSube: TcxDBImageComboBox
-    Left = 528
-    Top = 74
+    Left = 527
+    Top = 58
     RepositoryItem = Tablo.RepSubelerOrtakTumSubeler
     DataBinding.DataField = 'SUBEID'
     DataBinding.DataSource = DtsPos
@@ -649,21 +536,20 @@ object POS: TPOS
   end
   object BEditKMM: TcxButtonEdit
     Left = 180
-    Top = 170
+    Top = 256
     Properties.Buttons = <
       item
         Default = True
         Kind = bkEllipsis
       end>
     Properties.OnButtonClick = BEditKMMPropertiesButtonClick
-    TabOrder = 38
+    TabOrder = 33
     Width = 143
   end
   object cxLabel5: TcxLabel
     Left = 1
-    Top = 170
+    Top = 256
     Caption = 'Komisyon Masraf Merkezi'
-    FocusControl = DBEdit18
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
     Style.Font.Color = clWindowText
@@ -685,9 +571,8 @@ object POS: TPOS
   end
   object cxLabel6: TcxLabel
     Left = 0
-    Top = 195
+    Top = 281
     Caption = 'Masraf '#304#351'leme T'#252'r'#252
-    FocusControl = DBEdit18
     ParentFont = False
     Style.Font.Charset = TURKISH_CHARSET
     Style.Font.Color = clWindowText
@@ -699,7 +584,7 @@ object POS: TPOS
   end
   object ComboMasrafIsleme: TcxDBImageComboBox
     Left = 179
-    Top = 194
+    Top = 280
     DataBinding.DataField = 'MASRAFCIKIS'
     DataBinding.DataSource = DtsPos
     Properties.Items = <
@@ -712,8 +597,33 @@ object POS: TPOS
         Description = 'Banka hesab'#305'na girmeden d'#252#351'sn'
         Value = 2
       end>
-    TabOrder = 39
+    TabOrder = 34
     Width = 144
+  end
+  object ButtonEditCari: TcxButtonEdit
+    Left = 93
+    Top = 196
+    Properties.Buttons = <
+      item
+        Default = True
+        Kind = bkEllipsis
+      end>
+    Properties.OnButtonClick = ButtonEditCariPropertiesButtonClick
+    TabOrder = 43
+    Width = 230
+  end
+  object cxLabel7: TcxLabel
+    Left = 1
+    Top = 196
+    Caption = 'Cari'
+    ParentFont = False
+    Style.Font.Charset = TURKISH_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Trebuchet MS'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
+    Transparent = True
   end
   object TabPOS: TFDQuery
     AutoCalcFields = False
@@ -727,12 +637,12 @@ object POS: TPOS
     SQL.Strings = (
       'select *  from POS P where P.ID= :Par')
     Left = 36
-    Top = 317
+    Top = 344
   end
   object DtsPos: TDataSource
     DataSet = TabPOS
     OnStateChange = DtsPosStateChange
     Left = 65531
-    Top = 324
+    Top = 329
   end
 end

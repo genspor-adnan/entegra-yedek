@@ -641,6 +641,7 @@ object MakbuzWizardDlg: TMakbuzWizardDlg
             #9'K.HESAPTURU='#39'P'#39' '
             #9'and K.ISLEMTARIHI = '#39':TARIH'#39'   '
             #9'and K.BELGENO = '#39':MAKBUZNO'#39
+            #9'and isnull(K.YERI,0) <> 43  -- POS sahibi cariye acilan karsi satir'
             #9'--and K.REHBERID=&RehID'
             ''
             '---Kredi Kart'#305

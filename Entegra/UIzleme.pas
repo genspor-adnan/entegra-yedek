@@ -826,11 +826,10 @@ begin
           BarkodBeklemeBaslat(Bilgi.UrunNo);
 
       btGS1LotSkt:
-        // 2. okutma: lot / SKT geldi ama urun numarasi yok. Hangi urune
-        // yazilacagi ancak onceki okutmadan bilinir.
-        if FBeklenenUrunNo = '' then
-          ShowMessage('Once urun barkodunu okutun, ardindan lot / SKT barkodunu.')
-        else
+        // Lot / SKT geldi, urun numarasi yok. Ekran zaten belirli bir stok
+        // icin acildigindan (StokID) urun bellidir: onceki okutma sart degil.
+        // Urun barkodu stok aramada okutulup ekran oradan acildiginda ayni
+        // barkodu bir kez daha istemek gereksiz tekrardi.
         begin
           BarkodLotSatiriEkle(Bilgi);
           BarkodBeklemeBitir;
