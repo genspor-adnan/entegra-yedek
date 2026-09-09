@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './kurumTipiAyarlari.css';
 import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -46,6 +47,7 @@ const SEKMELER = ['1 · Profil', '2 · Modüller', '3 · Kayıt & Ücretlendirme
 export function KurumTipiAyarlari() {
   const [aktif, setAktif] = useState(0);
   const { kullanici, tazele } = useOturum();
+  const git = useNavigate();
   /**
    * HANGI SUBENIN PROFILI (364/489): her zaman BIR SUBE.
    *
@@ -127,6 +129,11 @@ export function KurumTipiAyarlari() {
   };
 
   const tipAdi = (kod?: string) => veri?.tipler.find(t => t.kod === kod)?.ad ?? '';
+
+  // Ozet kutulari ve kurulum adimlari (7. sekme) - hepsi sunucudan.
+  const kurulum = veri?.kurulum ?? [];
+  const tamamAdim = kurulum.filter(a => a.durum === 1).length;
+  const bekleyenAdim = kurulum.length - tamamAdim;
 
   // Ozet kutulari icin canli sayilar (7. sekme).
   const acikModulSayisi = (veri?.moduller ?? []).filter(m => modulAcik(m.kod)).length;
@@ -445,29 +452,60 @@ export function KurumTipiAyarlari() {
         </div>
 
       <div className="pnl" hidden={aktif !== 6}>
+          {/* OZET VE KURULUM ADIMLARI CANLI (490, kullanici: "profil yanlış
+              geliyor" + "kurulum adımları tablosunu da canlıya bağla"):
+              mockup'tan gelen sabit sekiz satir hangi adimin gercekten tamam
+              oldugunu soylemiyordu. Karar SUNUCUDA (fn_kurum_kurulum_adimlari):
+              her adimin sarti bir sayim/varlik sorgusu, ekran yalniz cizer.
+              Urun modu ve kapali modul disi adimlar hic gelmez. */}
           <div className="ozet">
-            {/* OZET KUTULARI EKRANDAKI SECIMDEN (kullanici: "özet & kurulumda
-                profil yanlış geliyor"): mockup'tan gelen sabit "Muayenehane"
-                yazisi secili tipten bagimsizdi. Profil ve modul sayilari
-                canli okunur; asagidaki kurulum adimlari hala mockup. */}
             <div className="kart"><div className="b">Profil</div>
               <div className="d">{tipAdi(profil?.kurumTipi) || '—'}</div></div>
             <div className="kart"><div className="b">Açık modül</div>
               <div className="d">{acikModulSayisi}{' '}
-                <small>· {opsiyonelModulSayisi} opsiyonel</small></div></div><div className="kart"><div className="b">Menü öğesi</div><div className="d">24 <small>· gizlenen 41</small></div></div><div className="kart"><div className="b">Zorunlu entegrasyon</div><div className="d">4/5 <small>· SMS eksik</small></div></div><div className="kart"><div className="b">Kurulum adımı</div><div className="d">3 <small>bekliyor</small></div></div>
+                <small>· {opsiyonelModulSayisi} opsiyonel</small></div></div>
+            <div className="kart"><div className="b">Kurulum adımı</div>
+              <div className="d">{tamamAdim}/{kurulum.length}{' '}
+                <small>· {bekleyenAdim} bekliyor</small></div></div>
           </div>
-          <div className="dg"><table><thead><tr><th className="orta">#</th><th>Kurulum adımı</th><th className="orta">Durum</th><th>Aksiyon</th></tr></thead>
+          <div className="dg"><table><thead><tr>
+              <th className="orta">#</th><th>Kurulum adımı</th><th>Durum</th>
+              <th className="orta">Sonuç</th><th>Aksiyon</th></tr></thead>
             <tbody>
-              <tr><td className="orta">1</td><td>Firma bilgileri, şube, tesis kodu</td><td className="orta"><span className="rz ok">tamam</span></td><td></td></tr>
-              <tr><td className="orta">2</td><td>Hekim kartları (tescil, ÇKYS, e-imza)</td><td className="orta"><span className="rz ok">tamam</span></td><td></td></tr>
-              <tr><td className="orta">3</td><td>SKRS listeleri (ICD-10, ilaç, klinik) senkronu</td><td className="orta"><span className="rz sari">bekliyor</span></td><td><div className="btn">🔄 Şimdi çalıştır</div></td></tr>
-              <tr><td className="orta">4</td><td>Fiyat listesi + hizmet kataloğu (branş paketi)</td><td className="orta"><span className="rz sari">bekliyor</span></td><td><div className="btn">📥 Dahiliye paketini yükle</div></td></tr>
-              <tr><td className="orta">5</td><td>SMS sağlayıcı hesabı</td><td className="orta"><span className="rz sari">bekliyor</span></td><td><div className="btn">＋ Hesap</div></td></tr>
-              <tr><td className="orta">6</td><td>Muayene şablonu, sık tanı, reçete şablonları</td><td className="orta"><span className="rz ok">tamam</span></td><td></td></tr>
-              <tr><td className="orta">7</td><td>Roller ve kullanıcılar</td><td className="orta"><span className="rz ok">tamam</span></td><td></td></tr>
-              <tr><td className="orta">8</td><td>e-Nabız test gönderimi (101)</td><td className="orta"><span className="rz sari">tescil bekliyor</span></td><td></td></tr>
+              {kurulum.map(a => (
+                <tr key={a.kod}>
+                  <td className="orta">{a.sira}</td>
+                  <td>{a.ad}</td>
+                  <td className="sonuk">{a.bilgi}</td>
+                  <td className="orta">
+                    <span className={`rz ${a.durum === 1 ? 'ok' : 'sari'}`}>
+                      {a.durum === 1 ? 'tamam' : 'bekliyor'}
+                    </span>
+                  </td>
+                  <td>
+                    {/* Bekleyen adimda ekrana GOTUREN dugme: "eksik" demek
+                        yetmez, kullanici nereye gidecegini de bilmeli. */}
+                    {a.durum === 1 ? null : (
+                      <div className="btn" style={{ display: 'inline-flex' }}
+                           onClick={() => git(a.rota)}>▶ {a.aksiyon}</div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {kurulum.length === 0 && (
+                <tr><td colSpan={5} className="sonuk" style={{ padding: 8 }}>
+                  Kurulum adımı yok.
+                </td></tr>
+              )}
             </tbody></table></div>
-          <div style={{padding: '8px 12px', display: 'flex', gap: '6px'}}><div className="btn primary">💾 Profili Kaydet &amp; Menüyü Uygula</div><div className="btn">🧪 Önizle</div><div className="btn">📄 Kurulum raporu (PDF)</div></div>
+          <div style={{padding: '8px 12px', display: 'flex', gap: '6px'}}>
+            <div className={`btn primary${kaydediyor ? ' sonuk' : ''}`}
+                 onClick={() => { if (!kaydediyor) void kaydet() }}>
+              💾 Profili Kaydet &amp; Menüyü Uygula
+            </div>
+            {/* Adimlar baska ekranda tamamlaniyor - donunce listeyi tazele. */}
+            <div className="btn" onClick={() => void yukle()}>🔄 Adımları yenile</div>
+          </div>
           <div className="ic sonuk">Kaydet → <code>kurum_profil</code> + <code>kurum_modul</code> güncellenir; menü (listeTanimlari <code>urunModu/kurumTipi</code> süzmesi), yetki şablonları, kart sekmeleri (KartKatalogu <code>kurumTipi</code>), varsayılan ayarlar (ayar tablosu) tek işlemle uygulanır; değişiklik <code>islem_log</code>'a.</div>
         </div>
     </div>

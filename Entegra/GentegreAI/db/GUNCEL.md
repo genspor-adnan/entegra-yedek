@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (251 ad, 74 tanesi birden cok dosyada)
+## Fonksiyonlar (252 ad, 74 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -127,6 +127,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kullanici_kasa` | `197_kasa_atama_tek_alan.sql` | 196_kasa_atama.sql |
 | `fn_kullanici_yetkileri` | `068_taraf_rol_id_kolonlari.sql` | 020_sema_kimlik.sql |
 | `fn_kurum_kampanya` | `274_belge_kampanya.sql` | 272_kampanya_fiyat.sql |
+| `fn_kurum_kurulum_adimlari` | `490_kurum_kurulum_adimlari.sql` | — |
 | `fn_kurum_modul_acik` | `364_kurum_profil_sube.sql` | 359_kurum_profil.sql |
 | `fn_kurum_profil` | `364_kurum_profil_sube.sql` | — |
 | `fn_kurum_sozlesme_sec` | `468_kurum_sozlesme_1n.sql` | — |

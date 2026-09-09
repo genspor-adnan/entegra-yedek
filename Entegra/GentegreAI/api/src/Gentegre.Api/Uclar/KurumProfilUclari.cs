@@ -5,8 +5,8 @@ using Gentegre.Veri.Depolar;
 namespace Gentegre.Api.Uclar;
 
 /// <summary>
-/// KURUM PROFILI (359) - Yönetim &gt; Firma Bilgileri &gt; Kurum Tipi &amp;
-/// Sistem Ayarlari. Tek satirlik profil + tip/modul kataloglari.
+/// KURUM PROFILI (359) - Yönetim &gt; Kurum Profili. Subenin profili +
+/// tip/modul kataloglari + kurulum adimlarinin canli durumu (490).
 /// </summary>
 public static class KurumProfilUclari
 {
@@ -30,8 +30,9 @@ public static class KurumProfilUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             var subeId = sube ?? baglam.SubeId ?? 0;
-            var (profil, tipler, moduller, matris) = await depo.OkuAsync(subeId, iptal);
-            return Results.Ok(new { profil, tipler, moduller, matris, izlemeNo = baglam.IzlemeNo });
+            var (profil, tipler, moduller, matris, kurulum) = await depo.OkuAsync(subeId, iptal);
+            return Results.Ok(new { profil, tipler, moduller, matris, kurulum,
+                                    izlemeNo = baglam.IzlemeNo });
         });
 
         grup.MapPut("/", async (
@@ -45,7 +46,7 @@ public static class KurumProfilUclari
             //   otekilerin degerini sifirlamasin.
             // Hedef sube: istekte gelen, yoksa aktif sube (0 = kurum geneli).
             var subeId = istek.SubeId ?? baglam.SubeId ?? 0;
-            var (mevcut, _, _, _) = await depo.OkuAsync(subeId, iptal);
+            var (mevcut, _, _, _, _) = await depo.OkuAsync(subeId, iptal);
             var yeni = new KurumProfil(
                 istek.UrunModu    ?? mevcut.UrunModu,
                 istek.KurumTipi   ?? mevcut.KurumTipi,

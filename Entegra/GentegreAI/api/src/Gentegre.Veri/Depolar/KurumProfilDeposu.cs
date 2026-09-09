@@ -11,6 +11,13 @@ public sealed record KurumTipiSatiri(string Kod, string Ad, int Sira);
 public sealed record KurumTipiModul(string KurumTipi, string Modul, int Varsayilan);
 
 /// <summary>
+/// Kurulum adimi (490) - ozet sekmesindeki kontrol listesi satiri.
+/// <c>Durum</c>: 1 tamam · 0 bekliyor. <c>Rota</c> adimi tamamlayacak ekran.
+/// </summary>
+public sealed record KurulumAdimi(int Sira, string Kod, string Ad, int Durum,
+                                  string Bilgi, string Rota, string Aksiyon);
+
+/// <summary>
 /// Kurum profili (359/364). SUBEYE GORE: sube_id = 0 kurum geneli, N o subenin
 /// kendi profili. <c>Devralindi</c> = bu sube icin ayri satir YOK, kurum
 /// genelinden okundu - ekran bunu yazar ve "bu sube icin ayri ayar" onerir.
@@ -36,7 +43,8 @@ public sealed class KurumProfilDeposu
     public KurumProfilDeposu(VeriKaynagi veri) => _veri = veri;
 
     public async Task<(KurumProfil Profil, List<KurumTipiSatiri> Tipler,
-                       List<KurumTipiSatiri> Moduller, List<KurumTipiModul> Matris)>
+                       List<KurumTipiSatiri> Moduller, List<KurumTipiModul> Matris,
+                       List<KurulumAdimi> Kurulum)>
         OkuAsync(int subeId = 0, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
@@ -62,7 +70,19 @@ public sealed class KurumProfilDeposu
             while (await o.ReadAsync(iptal))
                 matris.Add(new(o.GetString(0), o.GetString(1), o.GetInt16(2)));
 
-        return (await ProfilOkuAsync(baglanti, null, subeId, iptal), tipler, moduller, matris);
+        // KURULUM ADIMLARI (490): "tamam mi" sorusunun cevabi DB'de - ekran
+        //   sekiz sabit satir yerine gercek durumu cizer.
+        var kurulum = new List<KurulumAdimi>();
+        await using (var k = baglanti.Komut(
+            "select sira, kod, ad, durum, bilgi, rota, aksiyon "
+            + "  from public.fn_kurum_kurulum_adimlari(@p0) order by sira", null, subeId))
+        await using (var o = await k.ExecuteReaderAsync(iptal))
+            while (await o.ReadAsync(iptal))
+                kurulum.Add(new(o.GetInt16(0), o.GetString(1), o.GetString(2), o.GetInt16(3),
+                                o.GetString(4), o.GetString(5), o.GetString(6)));
+
+        return (await ProfilOkuAsync(baglanti, null, subeId, iptal), tipler, moduller, matris,
+                kurulum);
     }
 
     private static async Task<KurumProfil> ProfilOkuAsync(NpgsqlConnection baglanti,

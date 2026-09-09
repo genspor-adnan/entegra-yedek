@@ -758,9 +758,29 @@ export interface KurumProfil {
   devralindi?: boolean;
 }
 
+/**
+ * Kurulum adimi (490) - "Özet & Kurulum" sekmesindeki kontrol listesi.
+ * Durum ve aciklama SUNUCUDAN gelir; ekran sayim/kontrol yapmaz.
+ */
+export interface KurumKurulumAdimi {
+  sira: number;
+  kod: string;
+  ad: string;
+  /** 1 tamam · 0 bekliyor. */
+  durum: number;
+  /** Kisa gerekce ("6 liste · 3702 hizmet", "tesis kodu (ÇKYS) boş"). */
+  bilgi: string;
+  /** Adimi tamamlayacak ekranin rotasi ("/fiyat-listesi"). */
+  rota: string;
+  /** Dugme yazisi ("Fiyat Listeleri"). */
+  aksiyon: string;
+}
+
 export interface KurumProfilYaniti {
   profil: KurumProfil;
   tipler: KurumKatalogSatiri[];
   moduller: KurumKatalogSatiri[];
   matris: KurumTipiModul[];
+  /** Kurulum adimlarinin canli durumu (490). */
+  kurulum: KurumKurulumAdimi[];
 }
