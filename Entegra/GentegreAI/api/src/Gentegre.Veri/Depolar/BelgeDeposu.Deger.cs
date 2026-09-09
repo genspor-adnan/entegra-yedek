@@ -317,7 +317,11 @@ public sealed partial class BelgeDeposu
         IReadOnlyList<object>? izlemler = null, short pay = 0,
         // TUTAR SECIMI (352): pay donusumunde payin kalaninin TAMAMI yerine
         //   verilen tutar kadar - "tahsil edilen 300 TL'si fis". Kalan kaynakta.
-        decimal? payTutarSecim = null)
+        decimal? payTutarSecim = null,
+        // GIRILEN TUTARIN KDV DAHIL KARSILIGI (kullanici): verilirse hedef
+        //   satirin brut birim fiyati bundan yazilir - matrah brutten
+        //   turetildigi icin girilen rakam belgede birebir cikar.
+        decimal? payBrutSecim = null)
     {
         var birimFiyat = k["birim_fiyat"];
         var dovizBirimFiyat = k["doviz_birim_fiyat"];
@@ -355,7 +359,9 @@ public sealed partial class BelgeDeposu
             var kaynakTutar = Convert.ToDecimal(k["tutar"] ?? 0m);
             var kaynakBrut  = k.TryGetValue("tutar_kdvli", out var tk)
                             ? Convert.ToDecimal(tk ?? 0m) : 0m;
-            if (kaynakBrut > 0 && kaynakTutar > 0 && miktar > 0)
+            if (payBrutSecim is { } brut && brut > 0 && miktar > 0)
+                birimFiyatKdvli = decimal.Round(brut / miktar, 6);
+            else if (kaynakBrut > 0 && kaynakTutar > 0 && miktar > 0)
                 birimFiyatKdvli = decimal.Round(kalan * kaynakBrut / kaynakTutar / miktar, 6);
             // DOVIZ FIYATI DA PAYDAN: kaynaktan aynen kopyalaninca dip toplamin
             //   doviz sutunu KAYNAK fiyatiyla hesaplaniyor, belge.doviz_tutari

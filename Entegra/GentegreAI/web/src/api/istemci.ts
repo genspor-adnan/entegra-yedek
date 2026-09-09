@@ -1248,7 +1248,8 @@ export const api = {
    * 2 yalniz KURUM payi - kurum payinda hedef belgenin carisi odeyen kurum olur.
    */
   belgeDonustur: (id: number, hedefTur: number,
-                  satirlar: { satirId: number; miktar: number; tutar?: number }[],
+                  satirlar: { satirId: number; miktar: number; tutar?: number;
+                              tutarKdvli?: number }[],
                   belgeTarihi?: string, taslak = false, belgeNo?: string,
                   pay = 0, kalaniTahakkuk = false) =>
     gonder<BelgeYaniti>(`/api/belge/${id}/donustur`,

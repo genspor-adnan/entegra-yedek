@@ -597,7 +597,7 @@ public static class BelgeUclari
 
             var secilen = (istek.Satirlar ?? new List<DonusumSatiri>())
                 .Where(s => s.SatirId > 0 && (s.Miktar > 0 || (s.Tutar ?? 0) > 0))
-                .Select(s => (s.SatirId, s.Miktar, s.Tutar))
+                .Select(s => (s.SatirId, s.Miktar, s.Tutar, s.TutarKdvli))
                 .ToList();
 
             var (yeniId, uyarilar) = await depo.DonusturAsync(id, istek.HedefTur, secilen,
@@ -618,7 +618,10 @@ public static class BelgeUclari
                                 && Convert.ToDecimal(s["hastaKalan"] ?? 0m) > 0)
                     .Select(s => (Convert.ToInt32(s["satirId"]),
                                   Convert.ToDecimal(s["kalanMiktar"] ?? 0m),
-                                  (decimal?)Convert.ToDecimal(s["hastaKalan"] ?? 0m)))
+                                  (decimal?)Convert.ToDecimal(s["hastaKalan"] ?? 0m),
+                                  // Kalan TAHAKKUKA giderken brut secimi yok:
+                                  //   hedef zaten "Dahil" belge, matrahtan turer.
+                                  (decimal?)null))
                     .ToList();
                 if (kalanlar.Count > 0)
                 {
@@ -708,6 +711,14 @@ public static class BelgeUclari
         /// hasta payi (1) sayilir; kalan tutar kaynakta acik kalir.
         /// </summary>
         public decimal? Tutar { get; set; }
+
+        /// <summary>
+        /// Ayni secimin KDV DAHIL karsiligi (kullanici: "500 TL fiş girdim ama
+        /// 499,99 kesti"). Verilirse hedef satirin brut fiyati BUNDAN yazilir;
+        /// matrah brutten turetildigi icin girilen rakam birebir tutar.
+        /// Verilmezse eski davranis: brut, kaynagin oranindan turetilir.
+        /// </summary>
+        public decimal? TutarKdvli { get; set; }
     }
 
     /// <summary>Rezervasyon istegi - 142. Ac=false rezervi kaldirir.</summary>

@@ -37,7 +37,7 @@ public sealed partial class BelgeDeposu
         // Tutar (352): doluysa satirdan miktar degil o TUTAR (matrah) kadar
         //   donusturulur - tutar bazli kismi donusum. Miktar hedef satirin
         //   miktaridir (kaynak miktari), birim fiyat tutar/miktar olur.
-        IReadOnlyList<(int SatirId, decimal Miktar, decimal? Tutar)> secilen,
+        IReadOnlyList<(int SatirId, decimal Miktar, decimal? Tutar, decimal? TutarKdvli)> secilen,
         DateTime? belgeTarihi, bool taslak,
         YazmaBaglami baglam, CancellationToken iptal = default,
         string? belgeNo = null,
@@ -156,7 +156,7 @@ public sealed partial class BelgeDeposu
             }
         }
 
-        foreach (var (satirId, miktarSecim, tutarSecim) in secilen)
+        foreach (var (satirId, miktarSecim, tutarSecim, brutSecim) in secilen)
         {
             if (!kaynakSatirlar.TryGetValue(satirId, out var ks2))
                 throw GentegreHatasi.Bulunamadi($"Kaynak satır bulunamadı: {satirId}");
@@ -267,7 +267,11 @@ public sealed partial class BelgeDeposu
             }
 
             satirlar.Add(SatirJson(ks2, miktar, satirId,
-                stokDurumDegis: stokDusecek ? 1 : 0, izlemler, pay, payTutarSecim));
+                stokDurumDegis: stokDusecek ? 1 : 0, izlemler, pay, payTutarSecim,
+                // GIRILEN BRUT (kullanici): hedefin KDV dahil fiyati bundan
+                //   yazilir; matrah brutten turetilir ve "500 girdim 499,99
+                //   kesti" farki kapanir.
+                payBrutSecim: (brutSecim ?? 0) > 0 ? decimal.Round(brutSecim!.Value, 4) : null));
         }
 
         // --------------------------------------------------- 3) hedef baslik ----
@@ -305,7 +309,16 @@ public sealed partial class BelgeDeposu
             //   (kullanici). Kopyalansaydi basvurudan cikan fatura da "Dahil"
             //   dogar ve KDV iki kez sayilirdi.
             //   Tahakkuk turleri: 17 satis, 13 alis.
-            ["kdvDurum"] = hedefTur is 17 or 13 ? "Dahil" : "Hariç",
+            //   BASVURUDAN (19) DOGAN BELGE DE DAHIL (kullanici: "500 TL fiş
+            //   girdim ama 499,99 TL kesti"): hastaya soylenen rakam brut ve
+            //   kurus cinsinden karsiligi olmayabiliyor (500 / 1,10 =
+            //   454,5454...). "Hariç" belgede dip toplam KDV'yi MATRAHTAN
+            //   yeniden hesapliyor ve 454,54 + 45,45 = 499,99 cikiyordu.
+            //   "Dahil" belgede matrah bruttten turetilir, KDV = brut - matrah
+            //   olur ve girilen rakam birebir tutar. Satir yine matrahla
+            //   yazilir - fatura uzerinde KDV ayri satirdir.
+            ["kdvDurum"] = hedefTur is 17 or 13 || Convert.ToInt32(kaynak["tur"]) == 19
+                           ? "Dahil" : "Hariç",
             // FIYAT LISTESI + KAMPANYA + ODEYEN KURUM (274): satirlar zaten
             //   kaynagin fiyatiyla kopyalanir, tutar degismez - tasinan sey
             //   KIMLIK. Kopyalanmazsa basvurudan cikan fatura kurumsuz ve

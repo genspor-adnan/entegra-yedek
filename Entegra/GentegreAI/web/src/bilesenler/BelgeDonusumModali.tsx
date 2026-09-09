@@ -211,7 +211,10 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
           .filter(s => secili[s.satirId] && sayi(tutarlar[s.satirId] ?? '0') > 0)
           // Ekranda KDV DAHIL girilir, sunucu MATRAH ister (pay tutarlari matrah).
           .map(s => ({ satirId: s.satirId, miktar: Number(s.miktar),
-                       tutar: Math.round(sayi(tutarlar[s.satirId]) / kdvCarpan(s) * 10000) / 10000 }))
+                       tutar: Math.round(sayi(tutarlar[s.satirId]) / kdvCarpan(s) * 10000) / 10000,
+                       // GIRILEN BRUT de gider: hedef satirin KDV dahil fiyati
+                       //   bundan yazilir, "500 girdim 499,99 kesildi" olmaz.
+                       tutarKdvli: sayi(tutarlar[s.satirId]) }))
       : satirlar
           .filter(s => secili[s.satirId] && sayi(miktarlar[s.satirId] ?? '0') > 0)
           .map(s => ({ satirId: s.satirId, miktar: sayi(miktarlar[s.satirId]) }));

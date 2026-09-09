@@ -20,7 +20,14 @@ export type DonusumOlcusu = 'adet' | 'tutar';
 export interface DonusumSatiri {
   satirId: number;
   miktar: number;
+  /** API'nin bekledigi MATRAH. */
   tutar?: number;
+  /**
+   * Ayni secimin KDV DAHIL karsiligi (kullanici: "500 TL fiş girdim ama
+   * 499,99 kesti"): hedef satirin brut fiyati bundan yazilir, matrah brutten
+   * turer ve girilen rakam belgede birebir cikar.
+   */
+  tutarKdvli?: number;
 }
 
 /**
@@ -64,7 +71,7 @@ export function donusumSatirlari(
     // Satir bazinda asagi yuvarlanan kuruslar geri konur (hedefi asmadan).
     kurusTamamla(secim, secim.reduce((t, x) => t + x.dahil, 0));
     return secim.map(x => ({ satirId: x.s.satirId, miktar: Number(x.s.miktar),
-                             tutar: x.matrah }));
+                             tutar: x.matrah, tutarKdvli: x.dahil }));
   }
   return acik
     .filter(s => Number(s.kalanMiktar) > 0)
@@ -135,8 +142,8 @@ export function sinirliDonusumSecimi(acik: AcikSatir[], hedefTur: number,
   const hedef = secim.reduce((t, x) => t + x.dahil, 0);
   kurusTamamla(matrahli, hedef);
   return {
-    satirlar: matrahli.map(x => ({ satirId: x.s.satirId, miktar: Number(x.s.miktar),
-                                   tutar: x.matrah })),
+    satirlar: matrahli.map((x, i) => ({ satirId: x.s.satirId, miktar: Number(x.s.miktar),
+                                        tutar: x.matrah, tutarKdvli: secim[i]?.dahil })),
     toplamDahil: hedef,
   };
 }

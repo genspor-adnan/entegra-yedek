@@ -256,7 +256,8 @@ public sealed partial class BelgeDeposu
         belge["belgeSeri"] = belgeSeri;
         belge["id"] = belgeId;
         var (_, yeniUyarilar) = await KaydetIcAsync(baglanti, islem, belge, satirlar,
-                                                    secenekler, baglam, iptal, belgeId);
+                                                    secenekler, baglam, iptal, belgeId,
+                                                    korunanSayisi: korunan.Count);
         uyarilar.AddRange(yeniUyarilar);
 
         await islem.CommitAsync(iptal);
@@ -318,7 +319,13 @@ public sealed partial class BelgeDeposu
         YazmaBaglami baglam,
         CancellationToken iptal,
         int mevcutId = 0,
-        bool cariAtla = false)
+        bool cariAtla = false,
+        // YERINDE KALAN (korunan) SATIR SAYISI: donusumle dogmus ya da baska
+        //   kayitlarin kullandigi satirlar istemci govdesinden ATILIR - belge
+        //   yine de bos degildir. Sayilmazsa "Belgede en az bir satir olmali"
+        //   diyerek fisin kaydini reddediyordu (kullanici: fisi acip
+        //   "Değişiklikleri Kaydet" deyince belge kayboldu).
+        int korunanSayisi = 0)
     {
         var uyarilar = new List<string>();
 
@@ -334,7 +341,7 @@ public sealed partial class BelgeDeposu
         //   acilir (hasta gelir, protokol verilir), hizmetler muayene sirasinda
         //   eklenir. Diger turlerde bos belge anlamsizdir - stok/cari etkisi
         //   olmayan bir kayit numara tuketirdi.
-        if (satirlar.Count == 0 && tur != BelgeTuru.SatisSiparisi)
+        if (satirlar.Count + korunanSayisi == 0 && tur != BelgeTuru.SatisSiparisi)
             throw GentegreHatasi.Dogrulama("Belgede en az bir satir olmali.",
                 new AlanHatasi("satirlar", "Bos birakilamaz."));
 
@@ -747,6 +754,13 @@ public sealed partial class BelgeDeposu
              --   (kullanici: fisi silip basvuruyu kaydettikten sonra).
              or exists (select 1 from public.kasa_islem_dagitim d
                          where d.belge_satir_id = s.id)
+             -- DONUSUMLE DOGMUS SATIR (kullanici: "fişi açıp Değişiklikleri
+             --   Kaydet dedim, belge kayboldu"): hedef satirin kaynak bagi
+             --   (kaynak_tur = 30) istemci govdesinde YOK; satir silinip
+             --   yeniden yazilinca bag kopuyor, kaynak basvurunun
+             --   kapatilan_miktar tetigi geri donuyor ve fis "Dönüşüm"
+             --   listesinden kayboluyordu. Bagli satir yerinde kalir.
+             or (s.kaynak_tur = 30 and coalesce(s.kaynak_id, 0) > 0)
            )
         """;
 }
