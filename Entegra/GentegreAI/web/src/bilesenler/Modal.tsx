@@ -8,7 +8,7 @@ import { createPortal } from 'react-dom';
  * dairesel import olurdu.
  */
 export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif, enUst,
-                       onKapat, children }: {
+                       buyutmeYok, onKapat, children }: {
   baslik: string;
   ustBilgi?: React.ReactNode;
   ustSerit?: React.ReactNode;
@@ -26,6 +26,14 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif,
    * vermiyor" gibi). Bu bayrak perdeyi kalici olarak en uste alir.
    */
   enUst?: boolean;
+  /**
+   * BUYUTME YOK (543, kullanici: "mesaj ekranı max'ta kalmış o yüzden büyük
+   * görünüyormuş" · "mesaj ekranlarında max butonu olmasın"). Tam ekran
+   * tercihi KALICI ve TUM pencereler icin ortak - kart ekraninda bir kez
+   * buyutulunce iki cumlelik onay penceresi de ekrani kapliyordu. Tek soruluk
+   * pencerede buyutmenin bir karsiligi da yok: icerik zaten iki satir.
+   */
+  buyutmeYok?: boolean;
   onKapat?(): void;
   children: React.ReactNode;
 }) {
@@ -143,10 +151,12 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif,
    * Tasima kaydirmasi tam ekranda SIFIRLANIR - ekrana oturmus bir pencerenin
    * kaydirilmis olmasi anlamsiz.
    */
-  const [tamEkran, setTamEkran] = useState(() => {
+  const [tamEkranSecimi, setTamEkran] = useState(() => {
     try { return localStorage.getItem('gentegre.kart.tamekran') === '1' }
     catch { return false }
   });
+  // Kayitli tercih tek soruluk pencereye UYGULANMAZ (543).
+  const tamEkran = tamEkranSecimi && !buyutmeYok;
   const tamEkranDegis = () => setTamEkran(a => {
     const yeni = !a;
     try { localStorage.setItem('gentegre.kart.tamekran', yeni ? '1' : '0') } catch { /* yok say */ }
@@ -178,10 +188,12 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif,
           {ustBilgi}
           <span className="kapt">Esc ile kapanır</span>
           {/* Baslik cubugundaki dugme SURUKLEMEYI baslatmasin. */}
+          {!buyutmeYok && (
           <button type="button" className="kabas-dugme"
                   title={tamEkran ? 'Pencereye döndür' : 'Tam ekran'}
                   onMouseDown={e => e.stopPropagation()}
                   onClick={tamEkranDegis}>{tamEkran ? '🗗' : '🗖'}</button>
+          )}
         </div>
         {/* Mockup: Kaydet/Sil/Yazdir/Kapat baslikla idstrip ARASINDA arac cubugu (alt degil). */}
         <div className="katoolbar">{alt}</div>

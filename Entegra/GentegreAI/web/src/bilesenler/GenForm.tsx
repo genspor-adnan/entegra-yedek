@@ -2113,7 +2113,7 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           Oran CARPAN olarak okunur (0,80 -> fiyatin %80'i) - 518'deki
           `fn_fiyat_katki_uret` ile ayni dil, iki yerde iki anlam olmasin. */}
       {topluKatki && (
-        <Modal baslik={`Katkı — ${seciliSatirlar.size} satır`} dar enUst ekSinif="mesaj-pencere"
+        <Modal baslik={`Katkı — ${seciliSatirlar.size} satır`} dar enUst ekSinif="mesaj-pencere" buyutmeYok
                onKapat={() => setTopluKatki(false)}
                alt={(
                  <>
@@ -2157,7 +2157,7 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
       {/* TOPLU CARPAN PENCERESI (534): tek sayi, secili satirlara yazilir;
           fiyat `ttbFiyatTuret` ile aninda yeniden dogar. */}
       {topluCarpan && (
-        <Modal baslik={`Çarpan — ${seciliSatirlar.size} satır`} dar enUst ekSinif="mesaj-pencere"
+        <Modal baslik={`Çarpan — ${seciliSatirlar.size} satır`} dar enUst ekSinif="mesaj-pencere" buyutmeYok
                onKapat={() => setTopluCarpan(false)}
                alt={(
                  <>

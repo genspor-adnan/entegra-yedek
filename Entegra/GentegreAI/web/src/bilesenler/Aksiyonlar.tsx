@@ -73,7 +73,13 @@ export function GenToolbar({ aksiyonlar, calistir, altSecenekler }: CalistirProp
           <span key={a.kod} className={alt ? 'dugme-menu' : undefined}>
             <button
               disabled={!a.aktif}
-              title={a.aktif ? (a.kisayol ?? a.ad) : (a.pasifSebep ?? '')}
+              // IPUCU AD + KISAYOL (543): ikon-dugmelerde (fiyat listesi "🗑")
+              //   yalniz kisayol gosterilince ipucu "Del" oluyor, dugmenin NE
+              //   YAPTIGI hicbir yerde yazmiyordu.
+              title={a.aktif
+                     ? [a.ipucu || a.ad, a.kisayol && `(${a.kisayol})`]
+                         .filter(Boolean).join(' ')
+                     : (a.pasifSebep ?? '')}
               // Yalniz "Yeni" birincil (dolu mor); Duzenle/Yazdir/... renksiz-transparan kalir.
               // VURGU (mavi) yalniz ekranin BIRINCIL yeni kaydinda: "＋ Yeni
               //   Başvuru" gibi. `kasa.*` eklemeleri (Tahsilat) ikincil islem -

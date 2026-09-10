@@ -444,6 +444,8 @@ export interface AksiyonYaniti {
       kararı SUNUCUDA - istemcinin kod adına bakıp renk uydurması, aynı
       aksiyonu iki ekranda iki türlü göstermeye açık kapı bırakırdı. */
   bicim?: string | null;
+  /** Fare ipucu (543): adi IKON olan dugmelerde ne yaptigini yalniz bu soyler. */
+  ipucu?: string | null;
 }
 
 export interface AksiyonListesi {

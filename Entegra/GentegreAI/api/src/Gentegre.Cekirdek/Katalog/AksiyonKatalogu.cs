@@ -39,7 +39,9 @@ public sealed record AksiyonTanimi(
     /// notr. Kabul/ret gibi KARSIT ciftlerde renk, dugmeyi okumadan hangisinin
     /// hangisi oldugunu soyler - yanlis dugmeye basmak numuneyi reddeder.
     /// </summary>
-    string? Bicim = null);
+    string? Bicim = null,
+    /// <summary>Fare ipucu; bos ise `Ad` kullanilir (543).</summary>
+    string? Ipucu = null);
 
 /// <summary>Ekran basina aksiyon listesi.</summary>
 public static class AksiyonKatalogu
@@ -99,7 +101,17 @@ public static class AksiyonKatalogu
             //   degistirir - gorme/duzeltme yetkisi tek basina yetmemeli.
             ["fiyat-listesi-liste"] =
             [
-                .. Crud("fiyat-listesi", "fiyat", "fiyat_listesi"),
+                // SIL ARAC CUBUGUNDA VE IKON (543, kullanici: "kopyala
+                //   butonu soluna Sil butonu (ikon) ekle.. herhangi bir yerde
+                //   kullanılmamışsa liste ve satırlarını silsin"). Kopyala
+                //   (40) bir liste TUREMESI uretiyor; denemeler biriktikce
+                //   temizlemek icin sag tus menusunu aramak gerekiyordu.
+                //   "Kullanilmamissa" kurali DB'de (543): satirlar cascade
+                //   ile gider, kullanan kayit varsa GK422 nerede kullanildigini
+                //   soyler.
+                .. Crud("fiyat-listesi", "fiyat", "fiyat_listesi",
+                        silHedef: "araccubugu,sagtus,palet", silAdi: "🗑",
+                        silIpucu: "Listeyi ve satırlarını sil"),
                 // KOPYALA (540, kullanici: "Listeyi Üret butonu yerine
                 //   Kopyala ekle; secili tek listeyi adinin basina Kopya
                 //   ekleyerek kopyalasin"). "Listeyi Üret" 539'da anlamini
@@ -1392,7 +1404,8 @@ public static class AksiyonKatalogu
     /// <param name="silSira">Silme sirasi - araya aksiyon giren ekranlarda kayar.</param>
     private static AksiyonTanimi[] Crud(string onEk, string grup, string kaynakKodu,
         string ekleAdi = "＋ Yeni", string? silHedef = "sagtus,palet",
-        bool yazdir = true, int silSira = 30)
+        bool yazdir = true, int silSira = 30, string silAdi = "🗑 Sil",
+        string? silIpucu = null)
     {
         AksiyonTanimi[] dortlu =
         [
@@ -1401,10 +1414,12 @@ public static class AksiyonKatalogu
             new($"{onEk}.duzenle", "✎ Düzenle", grup, Kisayol: "Enter",
                 KaynakKodu: kaynakKodu, Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
             silHedef is null
-                ? new($"{onEk}.sil", "🗑 Sil", grup, Kisayol: "Del",
-                      KaynakKodu: kaynakKodu, Islem: Islem.Sil, KayitGerekir: true, Sira: silSira)
-                : new($"{onEk}.sil", "🗑 Sil", grup, Hedef: silHedef, Kisayol: "Del",
-                      KaynakKodu: kaynakKodu, Islem: Islem.Sil, KayitGerekir: true, Sira: silSira),
+                ? new($"{onEk}.sil", silAdi, grup, Kisayol: "Del",
+                      KaynakKodu: kaynakKodu, Islem: Islem.Sil, KayitGerekir: true, Sira: silSira,
+                      Ipucu: silIpucu)
+                : new($"{onEk}.sil", silAdi, grup, Hedef: silHedef, Kisayol: "Del",
+                      KaynakKodu: kaynakKodu, Islem: Islem.Sil, KayitGerekir: true, Sira: silSira,
+                      Ipucu: silIpucu),
         ];
         return yazdir ? [.. dortlu, Yazdir()] : dortlu;
     }

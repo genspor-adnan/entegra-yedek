@@ -20,7 +20,13 @@ public sealed record AksiyonYaniti(
     /// Renk KARARI sunucudadir - istemcinin kod adina bakip renk uydurmasi,
     /// ayni aksiyonu iki ekranda iki turlu gostermeye acik kapi birakirdi.
     /// </summary>
-    string? Bicim = null);
+    string? Bicim = null,
+    /// <summary>
+    /// IPUCU (543): dugmenin uzerinde bekleyince cikan aciklama. Ad'i IKON
+    /// olan dugmelerde (fiyat listesi "🗑") adin kendisi bir sey anlatmiyor -
+    /// ne yaptigi ancak burada yazili olur.
+    /// </summary>
+    string? Ipucu = null);
 
 public sealed class AksiyonListesi
 {

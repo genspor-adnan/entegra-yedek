@@ -61,6 +61,7 @@ export function MesajKatmani() {
       //   kart olcusu (560px) - bir satirlik uyari icin fazlasiyla genis
       //   duruyordu, goz metni bulmak icin pencerede geziniyordu.
       ekSinif="mesaj-pencere"
+      buyutmeYok
       enUst
       onKapat={() => kapat(false)}
       alt={
