@@ -36,6 +36,16 @@ public static class VeriHatasi
         //   depo kurallari): mesaj kullaniciya gosterilmek uzere yazilmistir.
         "GK422" => GentegreHatasi.IsKurali(h.MessageText),
 
+        // PLPGSQL'in VARSAYILAN hata kodu. Bu semada tetikler ve fonksiyonlar
+        //   kullaniciya gosterilmek uzere TURKCE mesaj firlatiyor (237 yer);
+        //   `using errcode = 'GK422'` etiketi yalnizca bir kismina yazilmis.
+        //   Etiketsizler "Beklenmeyen bir hata olustu" olarak 500 donuyordu -
+        //   kullanici "TSS/Karma sözleşmesinde SGK carisi seçilmeli" gibi
+        //   duzeltebilecegi bir kurali goremiyordu (kullanici raporu).
+        //   Mesaj bos ise bilgi tasimaz, "beklenmeyen" dalinda kalir.
+        "P0001" when !string.IsNullOrWhiteSpace(h.MessageText)
+            => GentegreHatasi.IsKurali(h.MessageText),
+
         _ => null
     };
 

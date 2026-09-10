@@ -240,7 +240,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_kasa_islem_sil_fis` | `354_kasa_islem_silme_kosullari.sql` | — |
 | `tg_kasa_islem_tahsil_tazele` | `321_tahsilat_satir_dagitim.sql` | — |
 | `tg_kategori_dongu_engel` | `270_kategori_agaci.sql` | — |
-| `tg_kurum_sozlesme_kontrol` | `493_kurum_turu_kurumu_oder.sql` | 468_kurum_sozlesme_1n.sql |
+| `tg_kurum_sozlesme_kontrol` | `517_kurum_sozlesme_sgk_carisi.sql` | 468_kurum_sozlesme_1n.sql, 493_kurum_turu_kurumu_oder.sql |
 | `tg_lab_panel_hizmet` | `501_panel_icerigi_tek_kaynak.sql` | — |
 | `tg_lab_panel_satir_yaz` | `501_panel_icerigi_tek_kaynak.sql` | — |
 | `tg_lab_varyant_sinif` | `439_lab_genetik.sql` | — |
