@@ -81,25 +81,12 @@ public static partial class KartKatalogu
             //   Kolonlar DURUYOR - `fn_sls_carpan_manuel` ve turetme zinciri
             //   onlari okuyor; yalniz kart alani kalktı.
 
-            // YON (204): liste alis mi satis mi? Belge turu hangi yondeyse o
-            //   yonun listesi uygulanir. Taban liste AYNI YONDE olmali (DB tetigi).
-            // SGK KATILIM PAYI LISTE BASLIGINDAN KALKTI (532, kullanici):
-            //   deger SATIRDA duruyor ("Katki (hasta)") - liste varsayilani
-            //   olarak ikinci kez sormak, hangisinin gecerli oldugunu
-            //   belirsiz birakiyordu. Kolon DURUYOR (fn_fiyat_listesi_katki
-            //   ve dagilim zinciri okuyor).
-            // EK KATKI FIYAT LISTESINDEN KALKTI (532, kullanici: "fiyat
-            //   listesinden ek katki ve tutar kaldir"). Kolonlar DURUYOR:
-            //   `fn_belge_satir_dagit` ve kapanma/tahsil zinciri onlari
-            //   okuyor - alan kartta gorunmuyor, hesap bozulmuyor. Hastane
-            //   farki artik listede degil, sozlesme/dagilim tarafinda.
-            // GECERLILIK ARALIGI da Detay kutusunun altinda (kullanici): iki
-            //   tarih icin ayri bir kutu fazladan bir kat gorsel gurultuydu.
-            //   Bos birakilirsa sinirsiz; bitis baslangictan once olamaz (DB check).
-            new("baslangic", "baslangic", "tarih", Baslik: "Başlama",
-                Grup: "Kimlik"),
-            new("bitis",     "bitis",     "tarih", Baslik: "Bitiş",
-                Grup: "Kimlik"),
+            // BASLAMA / BITIS KART SERIDINDEN KALKTI (kullanici: "baslangic/
+            //   bitis alanlari da kaldir"): uc tarifenin hicbirinde donem
+            //   sinirlanmiyor (ucu de bos) - her kartta iki bos tarih kutusu
+            //   doldurulmasi gereken bir alan izlenimi veriyordu. Kolonlar
+            //   DURUYOR; donemli liste gerektiginde alanlar geri acilir.
+
             new("kdvDahil", "kdv_dahil", "kod", SabitKodlar: KdvDahilKodlari,
                 Baslik: "KDV", Grup: "Kimlik"),
             // Tek alan kalinca "Fiyatlama" kutusu bos bir baslik oluyordu -
