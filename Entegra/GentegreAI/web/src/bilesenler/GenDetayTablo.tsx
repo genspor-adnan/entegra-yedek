@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Modal } from './Modal';
 import { StokAramaPenceresi } from './StokAramaPenceresi';
 import { TarafArama } from './TarafArama';
@@ -90,6 +90,13 @@ interface Props {
   toplam?: number;
   onSayfa?(yeniSayfa: number): void;
   sayfaYukleniyor?: boolean;
+  /**
+   * SAYFALI DETAYDA SUZGEC SUNUCUDA (526, kullanici: "arama ve filtreler
+   * aktif olan TUM satirlar uzerinden olmali"). Verilirse arama kutusu, cip
+   * ve kategori combosu ISTEMCIDE SUZMEZ - secimi buraya bildirir, satirlari
+   * sunucu doner.
+   */
+  onSuzgec?(suz: { ara: string; cip?: string; kategori?: number }): void;
   /** Kutuya eklenecek ek sinif (yerlesim ince ayari; ör. daha dar ust bosluk). */
   kutuSinif?: string;
   /**
@@ -161,14 +168,18 @@ interface Props {
                  taslak: Record<string, unknown>) => Record<string, unknown> | null;
   /** Baslik seridine suzme cipleri (listelerin Aktif/Pasif cipleri gibi).
       Ilk cip varsayilan seciliyor; suzme yalniz gorunumu daraltir. */
-  cipler?: { ad: string; suz: (satir: Record<string, unknown>) => boolean }[];
+  cipler?: { ad: string; suz: (satir: Record<string, unknown>) => boolean;
+             /** SAYFALI DETAYDA sunucuya gonderilen cip kodu (526). */
+             kod?: string }[];
   /**
    * ARAMA KUTUSUNUN SAGINDAKI EK SUZGEC (kullanici: "fiyat listesi karti
    * satirlarda kategori agac combo"). Cizimi ve suzme kurali CAGIRANIN:
    * secim durumu orada yasar, grid yalnizca yerini ve suzmeyi uygular.
    */
   ekSuzgec?: { cizim: React.ReactNode;
-               suz?: (satir: Record<string, unknown>) => boolean };
+               suz?: (satir: Record<string, unknown>) => boolean;
+               /** SAYFALI DETAYDA sunucuya gonderilen kategori id'si (526). */
+               deger?: number };
 }
 
 // Adresler grid'ine ozel kolon genislikleri (kullanici: "Adres geniş, İl/İlçe aynı
@@ -248,7 +259,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                                gizliAlanlar, gridGizliAlanlar, etiketAlanlari, sadeGrid, ekleGizli,
                                aramaKaynaklari, aramaEkFiltre, ekSuzgec,
                                modalAltBilesen,
-  sayfa, toplam, onSayfa, sayfaYukleniyor,
+  sayfa, toplam, onSayfa, sayfaYukleniyor, onSuzgec,
 }: Props) {
   // SAYFALI DETAY (525): serit yalniz katalog sayfa boyu verdiyse VE toplam
   //   bir sayfaya sigmiyorsa cizilir - iki satirlik adres detayinda "1 / 1"
@@ -416,6 +427,8 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const [arama, setArama] = useState('');
   /** Aktif suzme cipi (cipler verilmisse; 0 = ilk cip). */
   const [aktifCip, setAktifCip] = useState(0);
+  /** Sunucu suzgecinde arama gecikmesi (526) - her tusta istek atilmasin. */
+  const aramaZaman = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** Uc nokta menusu (satirlar gridi): konum + gizlenen kolonlar (oturumluk). */
   const [menuKonum, setMenuKonum] = useState<{ x: number; y: number } | null>(null);
   // Uc nokta menusundeki kullanici secimi ile EKRANIN kendi gizlileri ayni
@@ -645,11 +658,15 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
 
   const aramaAnahtari = arama.trim().toLocaleLowerCase('tr');
   const cipSuz = cipler?.[aktifCip]?.suz;
+  // SUNUCU SUZGECI VARSA ISTEMCI SUZMEZ (526): sunucu zaten suzulmus sayfayi
+  //   dondu; burada bir daha suzmek, gelen satirlarin bir kismini gizleyip
+  //   "arama bir seyi bulamadi" izlenimi verirdi.
+  const sunucuSuzgeci = !!onSuzgec;
   const gorunurler = durum.guncel
     .map((satir, i) => ({ satir, i }))
-    .filter(({ satir }) => !cipSuz || cipSuz(satir))
-    .filter(({ satir }) => !ekSuzgec?.suz || ekSuzgec.suz(satir))
-    .filter(({ satir }) => !aramaAnahtari
+    .filter(({ satir }) => sunucuSuzgeci || !cipSuz || cipSuz(satir))
+    .filter(({ satir }) => sunucuSuzgeci || !ekSuzgec?.suz || ekSuzgec.suz(satir))
+    .filter(({ satir }) => sunucuSuzgeci || !aramaAnahtari
       || alanlar.some(a => gorunum(satir, a).toLocaleLowerCase('tr').includes(aramaAnahtari)));
   const aramaVar = modalDuzenle && (durum.guncel.length > 20 || arama !== '');
 
@@ -694,7 +711,11 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                 <button key={cip.ad} type="button"
                         className={`d ${ci === aktifCip ? 'bir' : ''}`}
                         style={{ marginLeft: ci === 0 ? 10 : 4 }}
-                        onClick={() => { setAktifCip(ci); setSecili(null); }}>
+                        onClick={() => {
+                          setAktifCip(ci); setSecili(null);
+                          onSuzgec?.({ ara: arama, cip: cip.kod,
+                                       kategori: ekSuzgec?.deger });
+                        }}>
                   {cip.ad}
                 </button>
               ))}
@@ -703,7 +724,19 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                 <span className="ara-kutu satir-arasi">
                   <span>🔍</span>
                   <input type="search" value={arama} placeholder="Satırlarda ara…"
-                         onChange={e => { setArama(e.target.value); setSecili(null); }} />
+                         onChange={e => {
+                           setArama(e.target.value); setSecili(null);
+                           // SUNUCU SUZGECI (526): her tusa istek atmamak icin
+                           //   350 ms bekler - liste ekranlarindaki desen.
+                           if (onSuzgec) {
+                             if (aramaZaman.current) clearTimeout(aramaZaman.current);
+                             const metin = e.target.value;
+                             aramaZaman.current = setTimeout(() => onSuzgec({
+                               ara: metin, cip: cipler?.[aktifCip]?.kod,
+                               kategori: ekSuzgec?.deger,
+                             }), 350);
+                           }
+                         }} />
                 </span>
               )}
               {ekSuzgec?.cizim}

@@ -144,6 +144,17 @@ public static partial class KartKatalogu
                     "         (select h3.kod from public.hizmet h3 " +
                     "           where h3.id = fiyat_listesi_satir.hizmet_id), '')",
                     "metin", Yazilabilir: false, Baslik: "Kod"),
+                // KALEM ADI (526): gridde YOK - satirin adini arayuz zaten
+                //   stok/hizmet lookup'indan cizer. Bu alan SUNUCU TARAFI
+                //   ARAMASI icin var: sayfalama gelince "aktif olan tum
+                //   satirlarda ara" istegi SQL'e indi ve aranacak ad
+                //   ifadesinin katalogda durmasi gerekiyor.
+                new("kalemAdi",
+                    "coalesce((select s5.ad from public.stok s5 " +
+                    "           where s5.id = fiyat_listesi_satir.stok_id), " +
+                    "         (select h5.ad from public.hizmet h5 " +
+                    "           where h5.id = fiyat_listesi_satir.hizmet_id), '')",
+                    "metin", Yazilabilir: false, Baslik: "Kalem Adı"),
                 // FIYAT: Özel'de hastanin odedigi, TTB'de provizyona giden,
                 //   SUT'ta kurumdan alinacak tutar (518).
                 new("fiyat",     "fiyat",     "para", Zorunlu: true, Baslik: "Fiyat"),
@@ -186,7 +197,18 @@ public static partial class KartKatalogu
             //   o kadar satiri cizerken kilitleniyordu. Kartla ilk sayfa
             //   gelir, gerisi sayfa seridinden istenir.
             }, Sirala: "id", SubeKolonu: null, LogTabloId: 924, Baslik: "Satırlar",
-               SayfaBoyu: 200)
+               SayfaBoyu: 200,
+               // SUZGECLER SUNUCUDA (526, kullanici: "fiyat listesi
+               //   satirlardaki arama ve filtreler aktif olan TUM satirlar
+               //   uzerinden olmali"): sayfalamadan sonra istemci suzgeci
+               //   yalniz ekrandaki 200 satiri tariyordu.
+               AraAlanlari: new[] { "kalemKodu", "kalemAdi" },
+               KategoriAlani: "kategoriId",
+               Cipler: new Dictionary<string, string>(StringComparer.Ordinal)
+               {
+                   ["stok"]   = "fiyat_listesi_satir.stok_id is not null",
+                   ["hizmet"] = "fiyat_listesi_satir.hizmet_id is not null",
+               })
         },
         SilmeEngelleri: new[]
         {

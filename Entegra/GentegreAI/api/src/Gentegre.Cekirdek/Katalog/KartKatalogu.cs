@@ -100,6 +100,19 @@ public sealed record DetayTanimi(
     //   satiri cizerken kilitleniyordu - deger verilince kartla YALNIZ ILK
     //   SAYFA gelir, gerisi `/api/kart/{kaynak}/{id}/detay/{ad}` ucundan.
     int SayfaBoyu = 0,
+    // ---- Sayfali detayin SUNUCU TARAFI SUZGECLERI (526) ----
+    // Sayfalama gelince ekrandaki arama/cip/kategori yalniz ACIK SAYFAYI
+    //   suzuyordu; kullanici "arama ve filtreler aktif olan TUM satirlar
+    //   uzerinden olmali" dedi. Suzgec bu yuzden SQL'e indi - istekten SQL
+    //   metni GELMEZ, yalniz burada tanimli ifadeler kullanilir.
+    //
+    // Aranacak ALAN ADLARI (kolon ifadeleri katalogdan alinir).
+    IReadOnlyList<string>? AraAlanlari = null,
+    // Kategori suzgecinin bakacagi alan; secilen dal ALT AGACIYLA uygulanir.
+    string? KategoriAlani = null,
+    // Cip kodu -> SQL kosulu ("stok" -> "stok_id is not null"). Kosul
+    //   KATALOGDA yazilidir; istek yalniz kodu secer.
+    IReadOnlyDictionary<string, string>? Cipler = null,
     // YENI SATIR VARSAYILANLARI: istekte gelmeyen alanlara kayit sirasinda
     //   yazilir. Kartin KIMLIGINI belirleyen bayraklar icindir - ornegin dis
     //   hekim kartinda taraf_personel.dis_hekim = 1 (305): kullaniciya

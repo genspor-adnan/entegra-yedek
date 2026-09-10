@@ -269,6 +269,41 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
    * Bu yuzden once soruluyor: sessizce yutmak, kullanicinin girdigi fiyati
    * bir daha goremeyecegi bir kayip olurdu.
    */
+  /** Sayfali detayin ACIK SUZGECI (526) - sayfa degisiminde de korunur. */
+  const detaySuzgec = useRef<Record<string,
+    { ara?: string; cip?: string; kategori?: number }>>({});
+
+  /** Sayfali detayin bir sayfasini SUZGECLE birlikte ceker (525/526). */
+  const detaySayfaCek = async (ad: string, sayfaNo: number) => {
+    if (typeof id !== 'number') return;
+    setDetaySayfaYuk(ad);
+    try {
+      const boyu = meta?.detaylar.find(d => d.ad === ad)?.sayfaBoyu ?? 0;
+      const s = detaySuzgec.current[ad] ?? {};
+      const sayfa = await api.kartDetaySayfasi(kaynak, id, ad, sayfaNo, boyu || 200,
+                                               s.ara, s.kategori, s.cip);
+      setDetaylar(t => ({ ...t, [ad]: bosDetay(sayfa.satirlar as Satir[]) }));
+      setDetaySayfa(t => ({ ...t, [ad]: sayfa.sayfa }));
+      setDetayToplam(t => ({ ...t, [ad]: sayfa.toplam }));
+    } catch (h) {
+      await bilgiMesaji(hataMetni(h));
+    } finally {
+      setDetaySayfaYuk(null);
+    }
+  };
+
+  /**
+   * SUZGEC DEGISTI (526, kullanici: "fiyat listesi satirlardaki arama ve
+   * filtreler AKTIF OLAN TUM SATIRLAR uzerinden olmali"). Suzgec sunucuda
+   * uygulanir ve her zaman ILK SAYFAYA doner - 3. sayfadayken arama yapinca
+   * sonucun 3. sayfasini gostermek bos grid demekti.
+   */
+  const detaySuzgecUygula = async (
+    ad: string, suz: { ara?: string; cip?: string; kategori?: number }) => {
+    detaySuzgec.current[ad] = { ...detaySuzgec.current[ad], ...suz };
+    await detaySayfaCek(ad, 1);
+  };
+
   const detaySayfaDegis = async (ad: string, yeniSayfa: number) => {
     if (typeof id !== 'number' || detaySayfaYuk) return;
     const durum = detaylar[ad];
@@ -281,18 +316,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
         if (!devam) return;
       }
     }
-    setDetaySayfaYuk(ad);
-    try {
-      const boyu = meta?.detaylar.find(d => d.ad === ad)?.sayfaBoyu ?? 0;
-      const sayfa = await api.kartDetaySayfasi(kaynak, id, ad, yeniSayfa, boyu || 200);
-      setDetaylar(t => ({ ...t, [ad]: bosDetay(sayfa.satirlar as Satir[]) }));
-      setDetaySayfa(t => ({ ...t, [ad]: sayfa.sayfa }));
-      setDetayToplam(t => ({ ...t, [ad]: sayfa.toplam }));
-    } catch (h) {
-      await bilgiMesaji(hataMetni(h));
-    } finally {
-      setDetaySayfaYuk(null);
-    }
+    await detaySayfaCek(ad, yeniSayfa);
   };
   /**
    * FIYAT LISTESI SATIRLARI - KATEGORI SUZGECI (kullanici: "satirlar
@@ -1587,6 +1611,10 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           toplam={detayToplam[aktif.detay.ad]}
           sayfaYukleniyor={detaySayfaYuk === aktif.detay.ad}
           onSayfa={n => { void detaySayfaDegis(aktif.detay.ad, n) }}
+          // SUZGEC SUNUCUDA yalniz SAYFALI detayda (526); sayfasiz detaylar
+          //   bugunku istemci suzmesini surdurur.
+          onSuzgec={aktif.detay.sayfaBoyu
+            ? suz => { void detaySuzgecUygula(aktif.detay.ad, suz) } : undefined}
           // PRIM ZAMANI "Faturalamada" ISE TAHSILAT TURU SORULMAZ (kullanici):
           //   fatura kesilirken paranin hangi araçla tahsil edilecegi HENUZ
           //   BELLI DEGIL. Eslestirme zaten bu kriteri o kipte yok sayiyor;
@@ -1604,7 +1632,7 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
             : kaynak === 'prim-plani' && Number(deger.primZamani) === 2
             ? new Set(['tahsilatTuru'])
             : kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
-            ? new Set(['kategoriId', ...tarifeGizli(Number(deger.tarifeTipi) || 0)])
+            ? new Set(['kategoriId', 'kalemAdi', ...tarifeGizli(Number(deger.tarifeTipi) || 0)])
             : undefined}
           // Tabloyu sadelestirir, DUZENLEMEYI kisitlamaz: modal tam kalir.
           gridGizliAlanlar={ayar?.gridGizli ? new Set(ayar.gridGizli) : undefined}
@@ -1626,9 +1654,13 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
             ? fiyatSatirKurali : undefined}
           // Tumu / Stok / Hizmet cipleri (kullanici) - karma listede tek tur gorunur.
           cipler={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
+            // `kod`: SAYFALI DETAYDA sunucuya giden cip anahtari (526) -
+            //   katalogdaki SQL kosuluyla eslesir.
             ? [{ ad: 'Tümü', suz: () => true },
-               { ad: '📦 Stok', suz: s => s.stokId != null && s.stokId !== '' },
-               { ad: '🛠️ Hizmet', suz: s => s.hizmetId != null && s.hizmetId !== '' }]
+               { ad: '📦 Stok', kod: 'stok',
+                 suz: s => s.stokId != null && s.stokId !== '' },
+               { ad: '🛠️ Hizmet', kod: 'hizmet',
+                 suz: s => s.hizmetId != null && s.hizmetId !== '' }]
             : undefined}
           // KATEGORI AGAC COMBOSU (kullanici) - arama kutusunun saginda.
           //   Secenekler SATIRLARDA GECEN dallarla sinirli: 5.000 stok
@@ -1641,10 +1673,16 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
                     baslik="🌳 Tüm Kategoriler"
                     sinirla={satirKategorileri}
                     deger={satirKategori?.id ?? null}
-                    onDegis={(id, agac) =>
-                      setSatirKategori(id === null ? null : { id, agac })}
+                    onDegis={(id, agac) => {
+                      setSatirKategori(id === null ? null : { id, agac });
+                      // SAYFALI DETAYDA SUZGEC SUNUCUDA (526): dal secimi
+                      //   ekrandaki 200 satiri degil listenin TAMAMINI suzer.
+                      if (aktif.detay.sayfaBoyu)
+                        void detaySuzgecUygula(aktif.detay.ad, { kategori: id ?? undefined });
+                    }}
                   />
                 ),
+                deger: satirKategori?.id ?? undefined,
                 suz: satirKategori
                   ? (s: Record<string, unknown>) =>
                       satirKategori.agac.includes(Number(s.kategoriId))

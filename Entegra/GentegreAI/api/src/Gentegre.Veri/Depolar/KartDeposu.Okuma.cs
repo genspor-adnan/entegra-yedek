@@ -77,9 +77,9 @@ public sealed partial class KartDeposu
             //   listesi satiri 14 bine cikinca kart yaniti 4 MB oluyor,
             //   tarayici o kadar satiri cizerken kilitleniyordu.
             sonuc[detay.Ad] = await DetaySayfasiAsync(baglanti, detay, id, 1,
-                                                      detay.SayfaBoyu, iptal);
+                                                      detay.SayfaBoyu, null, iptal);
             if (detay.SayfaBoyu > 0)
-                toplam[detay.Ad] = await DetayAdediAsync(baglanti, detay, id, iptal);
+                toplam[detay.Ad] = await DetayAdediAsync(baglanti, detay, id, null, iptal);
         }
 
         return (sonuc, toplam);
@@ -91,6 +91,19 @@ public sealed partial class KartDeposu
     /// </summary>
     public async Task<List<IDictionary<string, object?>>> DetaySayfasiAsync(
         KartTanimi tanim, string detayAd, long id, int sayfa, int boyut,
+        DetaySuzgeci? suzgec = null, CancellationToken iptal = default)
+    {
+        var detay = (tanim.Detaylar ?? Array.Empty<DetayTanimi>())
+            .FirstOrDefault(d => string.Equals(d.Ad, detayAd, StringComparison.Ordinal))
+            ?? throw new InvalidOperationException($"Bilinmeyen detay: {detayAd}");
+
+        await using var baglanti = await _veri.AcAsync(iptal);
+        return await DetaySayfasiAsync(baglanti, detay, id, sayfa, boyut, suzgec, iptal);
+    }
+
+    /// <summary>Detayin TOPLAM satir sayisi - sayfa seridi icin (525).</summary>
+    public async Task<int> DetayAdediAsync(
+        KartTanimi tanim, string detayAd, long id, DetaySuzgeci? suzgec = null,
         CancellationToken iptal = default)
     {
         var detay = (tanim.Detaylar ?? Array.Empty<DetayTanimi>())
@@ -98,32 +111,21 @@ public sealed partial class KartDeposu
             ?? throw new InvalidOperationException($"Bilinmeyen detay: {detayAd}");
 
         await using var baglanti = await _veri.AcAsync(iptal);
-        return await DetaySayfasiAsync(baglanti, detay, id, sayfa, boyut, iptal);
-    }
-
-    /// <summary>Detayin TOPLAM satir sayisi - sayfa seridi icin (525).</summary>
-    public async Task<int> DetayAdediAsync(
-        KartTanimi tanim, string detayAd, long id, CancellationToken iptal = default)
-    {
-        var detay = (tanim.Detaylar ?? Array.Empty<DetayTanimi>())
-            .FirstOrDefault(d => string.Equals(d.Ad, detayAd, StringComparison.Ordinal))
-            ?? throw new InvalidOperationException($"Bilinmeyen detay: {detayAd}");
-
-        await using var baglanti = await _veri.AcAsync(iptal);
-        return await DetayAdediAsync(baglanti, detay, id, iptal);
+        return await DetayAdediAsync(baglanti, detay, id, suzgec, iptal);
     }
 
     private static async Task<List<IDictionary<string, object?>>> DetaySayfasiAsync(
         NpgsqlConnection baglanti, DetayTanimi detay, long id, int sayfa, int boyut,
-        CancellationToken iptal)
+        DetaySuzgeci? suzgec, CancellationToken iptal)
     {
         var secim = string.Join(", ", detay.Alanlar.Select(a => $"{a.Kolon} as \"{a.Ad}\""));
-        var sql = $"select {secim} from {detay.Tablo} where {detay.UstKolon} = @p0 "
+        var (kosul, par) = SuzgecKosulu(detay, suzgec, id);
+        var sql = $"select {secim} from {detay.Tablo} where {kosul} "
                 + $"order by {detay.Sirala}";
         if (boyut > 0)
             sql += $" limit {boyut} offset {Math.Max(sayfa - 1, 0) * (long)boyut}";
 
-        await using var komut = baglanti.Komut(sql, null, id);
+        await using var komut = baglanti.Komut(sql, null, par);
 
         var satirlar = new List<IDictionary<string, object?>>();
         await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
@@ -138,11 +140,69 @@ public sealed partial class KartDeposu
     }
 
     private static async Task<int> DetayAdediAsync(
-        NpgsqlConnection baglanti, DetayTanimi detay, long id, CancellationToken iptal)
+        NpgsqlConnection baglanti, DetayTanimi detay, long id, DetaySuzgeci? suzgec,
+        CancellationToken iptal)
     {
+        var (kosul, par) = SuzgecKosulu(detay, suzgec, id);
         await using var komut = baglanti.Komut(
-            $"select count(*) from {detay.Tablo} where {detay.UstKolon} = @p0", null, id);
+            $"select count(*) from {detay.Tablo} where {kosul}", null, par);
         return Convert.ToInt32(await komut.ExecuteScalarAsync(iptal) ?? 0);
+    }
+
+    /// <summary>
+    /// SAYFALI DETAYIN SUNUCU TARAFI SUZGECI (526). Istekten SQL METNI GELMEZ:
+    /// aranacak alanlar, kategori alani ve cip kosullari KATALOGDA yazili;
+    /// istek yalniz metni ve secilen anahtarlari verir, hepsi parametre olur.
+    /// </summary>
+    private static (string Kosul, object?[] Par) SuzgecKosulu(
+        DetayTanimi detay, DetaySuzgeci? suzgec, long id)
+    {
+        var par = new List<object?> { id };
+        var kosul = $"{detay.UstKolon} = @p0";
+        if (suzgec is null) return (kosul, par.ToArray());
+
+        // ARAMA: katalogdaki alan ifadelerinde, ILIKE ile.
+        if (!string.IsNullOrWhiteSpace(suzgec.Ara) && detay.AraAlanlari is { Count: > 0 })
+        {
+            var kolonlar = detay.AraAlanlari
+                .Select(ad => detay.Alanlar.FirstOrDefault(a =>
+                    string.Equals(a.Ad, ad, StringComparison.Ordinal))?.Kolon)
+                .Where(k => k is not null).ToList();
+            if (kolonlar.Count > 0)
+            {
+                par.Add($"%{suzgec.Ara.Trim()}%");
+                var p = $"@p{par.Count - 1}";
+                kosul += " and (" + string.Join(" or ",
+                    kolonlar.Select(k => $"({k})::text ilike {p}")) + ")";
+            }
+        }
+
+        // KATEGORI: secilen dal ALT AGACIYLA - ust dal secince altindakiler de
+        //   gelsin (ekrandaki agac combosunun bugunku davranisi).
+        if (suzgec.Kategori is > 0 && detay.KategoriAlani is { } katAd)
+        {
+            var kolon = detay.Alanlar.FirstOrDefault(a =>
+                string.Equals(a.Ad, katAd, StringComparison.Ordinal))?.Kolon;
+            if (kolon is not null)
+            {
+                par.Add(suzgec.Kategori.Value);
+                var p = $"@p{par.Count - 1}";
+                kosul += $" and ({kolon}) in ("
+                       + "with recursive dal as ("
+                       + $"  select k0.id from public.kategori k0 where k0.id = {p}"
+                       + "  union all"
+                       + "  select k1.id from public.kategori k1 join dal on k1.ust_id = dal.id)"
+                       + " select id from dal)";
+            }
+        }
+
+        // CIP: kosul katalogda yazili, istek yalniz kodu secer.
+        if (!string.IsNullOrWhiteSpace(suzgec.Cip)
+            && detay.Cipler is { } cipler
+            && cipler.TryGetValue(suzgec.Cip, out var cipKosulu))
+            kosul += $" and ({cipKosulu})";
+
+        return (kosul, par.ToArray());
     }
 
     /// <summary>

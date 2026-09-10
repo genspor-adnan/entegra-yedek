@@ -1031,9 +1031,16 @@ export const api = {
   kartAlanlari: (kaynak: string) => istek<KartMetaYaniti>(`/api/kart/${kaynak}/alanlar`),
   kartOku: (kaynak: string, id: number) => istek<KartYaniti>(`/api/kart/${kaynak}/${id}`),
   /** SAYFALI DETAY (525): buyuk detayin sonraki sayfasi. */
-  kartDetaySayfasi: (kaynak: string, id: number, ad: string, sayfa: number, boyut: number) =>
-    istek<DetaySayfasi>(
-      `/api/kart/${kaynak}/${id}/detay/${ad}?sayfa=${sayfa}&boyut=${boyut}`),
+  kartDetaySayfasi: (kaynak: string, id: number, ad: string, sayfa: number, boyut: number,
+                     ara?: string, kategori?: number, cip?: string) => {
+    // SUZGEC SUNUCUDA (526): arama/kategori/cip listenin TAMAMINA uygulanir,
+    //   sayfalama da suzulmus sonuc uzerinden isler.
+    const p = new URLSearchParams({ sayfa: String(sayfa), boyut: String(boyut) });
+    if (ara?.trim()) p.set('ara', ara.trim());
+    if (kategori) p.set('kategori', String(kategori));
+    if (cip) p.set('cip', cip);
+    return istek<DetaySayfasi>(`/api/kart/${kaynak}/${id}/detay/${ad}?${p}`);
+  },
   kartEkle: (kaynak: string, govde: KartYazmaIstegi) =>
     gonder<KartYaniti>(`/api/kart/${kaynak}`, govde),
   kartGuncelle: (kaynak: string, id: number, govde: KartYazmaIstegi) =>

@@ -70,6 +70,12 @@ public sealed record KartAlanMeta(
     /// </summary>
     bool Agac = false);
 
+/// <summary>
+/// Sayfali detayin sunucu tarafi suzgeci (526): arama metni, kategori dali ve
+/// cip kodu. Ifadelerin kendisi KATALOGDA - burada yalniz kullanicinin secimi.
+/// </summary>
+public sealed record DetaySuzgeci(string? Ara = null, int? Kategori = null, string? Cip = null);
+
 public sealed record KartDetayMeta(
     string Ad,
     string Baslik,

@@ -249,6 +249,7 @@ public static class KartUclari
         //   kullanici ilerledikce sonrakiler buradan istenir.
         grup.MapGet("/{kaynak}/{id:long}/detay/{ad}", async (
             string kaynak, long id, string ad, int? sayfa, int? boyut,
+            string? ara, int? kategori, string? cip,
             BaglamCozucu cozucu, KartDeposu depo, HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KartBul(kaynak);
@@ -265,8 +266,13 @@ public static class KartUclari
             var b = Math.Clamp(boyut ?? enFazla, 1, enFazla);
             var sf = Math.Max(sayfa ?? 1, 1);
 
-            var satirlar = await depo.DetaySayfasiAsync(tanim, ad, id, sf, b, iptal);
-            var toplam = await depo.DetayAdediAsync(tanim, ad, id, iptal);
+            // SUZGEC SUNUCUDA (526, kullanici: "arama ve filtreler aktif olan
+            //   TUM satirlar uzerinden olmali"): sayfalamadan sonra istemci
+            //   suzgeci yalniz acik sayfayi tariyordu. Toplam da AYNI suzgecle
+            //   sayilir - yoksa serit "3 / 71" derken grid bos kalirdi.
+            var suzgec = new DetaySuzgeci(ara, kategori, cip);
+            var satirlar = await depo.DetaySayfasiAsync(tanim, ad, id, sf, b, suzgec, iptal);
+            var toplam = await depo.DetayAdediAsync(tanim, ad, id, suzgec, iptal);
 
             return Results.Ok(new
             {
