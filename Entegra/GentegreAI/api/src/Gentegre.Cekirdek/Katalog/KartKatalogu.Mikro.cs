@@ -46,6 +46,17 @@ public static partial class KartKatalogu
         ["3"] = "3 · Kısıtlı / geniş spektrum (1 ve 2'de duyarlı yoksa)",
     };
 
+    /// <summary>Besiyerinin ekildigi numune tipleri - lab tetkik kartiyla AYNI kodlar.</summary>
+    private static readonly Dictionary<string, string> BesiyeriNumuneKodlari = new()
+    {
+        ["1"] = "Serum", ["2"] = "Plazma", ["3"] = "Tam Kan", ["4"] = "İdrar",
+        ["5"] = "Gaita", ["6"] = "BOS", ["7"] = "Swab", ["9"] = "Diğer",
+    };
+
+    /// <summary>KK susunun calisilma sikligi (509).</summary>
+    private static readonly Dictionary<string, string> KkPeriyotKodlari = new()
+        { ["1"] = "Her yeni lot", ["2"] = "Haftalık", ["3"] = "Aylık" };
+
     private static readonly Dictionary<string, string> UygulamaKodlari = new()
         { ["1"] = "Oral", ["2"] = "Parenteral", ["3"] = "Oral / parenteral" };
 
@@ -95,6 +106,38 @@ public static partial class KartKatalogu
                 Baslik: "Son Okuma (saat)", Grup: "İnkübasyon"),
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300,
                 Baslik: "Açıklama", Grup: "İnkübasyon"),
+
+            // EKIM HACMI ve SAYIM CARPANI (509): 1 µL kalibre ozeyle sayilan
+            //   koloni x1000 ile CFU/mL'ye cevrilir. Carpan kartta yoksa
+            //   koloni sayimi RAPORLANAMAZ - idrar kulturunde "anlamli ureme"
+            //   karari buna bagli (fn_lab_cfu).
+            new("ekimHacmiUl", "ekim_hacmi_ul", "ondalik",
+                Baslik: "Ekim Hacmi (µL)", Grup: "Sayım"),
+            new("sayimCarpani", "sayim_carpani", "sayi",
+                Baslik: "Sayım Çarpanı", Grup: "Sayım"),
+            // BESIYERI BIR SARFTIR: lot ve miat stoktan okunur; miadi gecmis
+            //   lotla calisilan kultur gecersizdir.
+            new("stokId", "stok_id", "kod", KodTablosu: "public.v_stok_lookup",
+                Baslik: "Stok Kartı", Grup: "Sayım"),
+            new("kkSusu", "kk_susu", "metin", EnFazlaUzunluk: 120,
+                Baslik: "KK Suşu (ATCC)", Grup: "Sayım"),
+            new("kkPeriyot", "kk_periyot", "kod", SabitKodlar: KkPeriyotKodlari,
+                Baslik: "KK Periyodu", Grup: "Sayım"),
+        },
+        Detaylar: new[]
+        {
+            // HANGI NUMUNEDE EKILIR (509): kultur acilirken varsayilan besiyeri
+            //   seti buradan gelir - teknisyen her seferinde elle secmez.
+            new DetayTanimi("numuneler", "public.lab_besiyeri_numune", "besiyeri_id",
+            new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("numuneTipi", "numune_tipi", "kod", Zorunlu: true,
+                    SabitKodlar: BesiyeriNumuneKodlari, Baslik: "Numune"),
+                new("ekimSekli", "ekim_sekli", "metin", EnFazlaUzunluk: 60,
+                    Baslik: "Ekim Şekli"),
+                new("amac", "amac", "metin", EnFazlaUzunluk: 200, Baslik: "Amaç"),
+            }, SubeKolonu: null, Sirala: "numune_tipi", Baslik: "Numune Tipleri"),
         });
 
     private static KartTanimi LabOrganizmaKarti() => new(
@@ -143,6 +186,45 @@ public static partial class KartKatalogu
                 Baslik: "SNOMED", Grup: "Bildirim"),
             new("skrsKod", "skrs_kod", "metin", EnFazlaUzunluk: 20,
                 Baslik: "SKRS Kodu", Grup: "Bildirim"),
+
+            // UREME ESIGI (509): idrar kulturunde 10^5 CFU/mL altindaki ureme
+            //   "anlamli degil" diye raporlanir. Esik KARTTA durur - teknisyenin
+            //   ezberinde degil; besiyerinin sayim carpaniyla birlikte calisir.
+            new("uremeEsigi", "ureme_esigi", "sayi",
+                Baslik: "Anlamlı Üreme Eşiği", Grup: "Bildirim", EslesAlan: "esikBirimi"),
+            new("esikBirimi", "esik_birimi", "metin", EnFazlaUzunluk: 20,
+                Baslik: "Eşik Birimi", Grup: "Bildirim"),
+            new("panelNotu", "panel_notu", "metin", EnFazlaUzunluk: 300,
+                Baslik: "Panel Notu", Grup: "Bildirim"),
+        },
+        Detaylar: new[]
+        {
+            // DOGAL (INTRINSIK) DIRENC (509): bu antibiyotik bu organizmada
+            //   RAPORLANMAZ. Gram negatif izolatta vankomisin sonucu basmak
+            //   yanlis tedaviye yol acar - antibiyogram ekrani bu listeyi
+            //   gorunce o antibiyotigi hic sormaz (fn_lab_antibiyogram_paneli).
+            new DetayTanimi("direnc", "public.lab_organizma_direnc", "organizma_id",
+            new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("antibiyotikId", "antibiyotik_id", "kod", Zorunlu: true,
+                    KodTablosu: "public.v_lab_antibiyotik_lookup", Baslik: "Antibiyotik"),
+                new("sebep", "sebep", "metin", EnFazlaUzunluk: 200, Baslik: "Neden"),
+            }, SubeKolonu: null, Sirala: "id", Baslik: "Doğal Direnç"),
+
+            // ORGANIZMAYA OZEL PANEL: genel basamagi (lab_antibiyotik.basamak)
+            //   ezer. Panel TANIMLIYSA yalniz o panel calisilir.
+            new DetayTanimi("panel", "public.lab_organizma_panel", "organizma_id",
+            new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("sira", "sira", "sayi", Baslik: "Sıra"),
+                new("antibiyotikId", "antibiyotik_id", "kod", Zorunlu: true,
+                    KodTablosu: "public.v_lab_antibiyotik_lookup", Baslik: "Antibiyotik"),
+                new("basamak", "basamak", "kod", SabitKodlar: AntibiyotikBasamakKodlari,
+                    Baslik: "Basamak"),
+                new("notMetni", "not_metni", "metin", EnFazlaUzunluk: 200, Baslik: "Not"),
+            }, SubeKolonu: null, Sirala: "sira, id", Baslik: "Antibiyogram Paneli"),
         });
 
     private static KartTanimi LabAntibiyotikKarti() => new(

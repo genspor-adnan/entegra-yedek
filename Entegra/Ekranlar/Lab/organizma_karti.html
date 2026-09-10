@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mikrobiyoloji — Organizma Kartı — Mockup</title>
+<link rel="stylesheet" href="../Dashboard/_ortak.css">
+<style>
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(#fbfcfe,#e7edf4);border-radius:3px;padding:5px 10px;
+    font-size:11.5px;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .sp{margin-left:auto}
+  .hdr{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .fld .v{border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;
+    padding:0 8px;font-weight:bold;font-size:12.5px}
+  .fld .v.ro{background:#f6f8fb;font-weight:normal;color:var(--muted)}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .tab{padding:7px 12px;font-size:12px;color:var(--muted);background:#eef2f7;border:1px solid var(--line);
+    border-bottom:none;border-radius:3px 3px 0 0;margin-top:5px;position:relative;top:1px;cursor:pointer;display:flex;gap:6px;align-items:center}
+  .tab.on{background:#fff;color:var(--ink);font-weight:bold}
+  .tab{cursor:pointer}
+  .tab .sy{background:#e5ecf5;border-radius:9px;padding:0 6px;font-size:10.5px;color:#3a5573}
+  .ic{padding:10px 12px}
+</style></head><body>
+
+<div class="win">
+  <div class="title">🦠 Organizma Kartı <span class="sp">Laboratuvar › Mikrobiyoloji › Organizmalar</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div><div class="btn danger">🗑 Sil</div>
+    <div class="btn">🧬 SKRS'den doldur</div><div class="btn">📋 Panelden kopyala</div>
+    <div class="sp"></div><div class="btn">✕ Kapat</div>
+  </div>
+
+  <div class="hdr">
+    <div class="fld"><label>Kod</label><div class="v">ECOLI</div></div>
+    <div class="fld"><label>Adı (latin)</label><div class="v"><i>Escherichia coli</i></div></div>
+    <div class="fld"><label>Kısa Ad (rapor)</label><div class="v">E. coli</div></div>
+    <div class="fld"><label>Durum</label><div class="v">Aktif</div></div>
+    <div class="fld"><label>Tür</label><div class="v">Bakteri</div></div>
+    <div class="fld"><label>Gram</label><div class="v">Negatif</div></div>
+    <div class="fld"><label>Morfoloji</label><div class="v">Basil</div></div>
+    <div class="fld"><label>Üreme eşiği</label><div class="v">≥ 10⁵ CFU/mL <span class="rz mavi" style="margin-left:6px">idrar</span></div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab on" data-s="tanim">Tanım</div>
+    <div class="tab" data-s="direnc">Doğal Direnç <span class="sy">4</span></div>
+    <div class="tab" data-s="panel">Antibiyogram Paneli <span class="sy">7</span></div>
+    <div class="tab" data-s="kod">Kodlar &amp; Bildirim</div>
+  </div>
+
+  <div class="pnl" data-s="tanim">
+    <div class="satir" style="padding:10px 12px">
+      <div class="blok"><h4>🧫 Tipik besiyeri &amp; üreme <span class="sp">bilgi amaçlı</span></h4>
+        <table><thead><tr><th>Besiyeri</th><th>Koloni görünümü</th><th>Süre</th></tr></thead><tbody>
+          <tr><td>EMB</td><td class="sonuk">Metalik yeşil parlaklık</td><td>18–24 s</td></tr>
+          <tr><td>Kanlı agar</td><td class="sonuk">Gri, düz, bazen β-hemoliz</td><td>18–24 s</td></tr>
+          <tr><td>MacConkey</td><td class="sonuk">Laktoz (+) pembe</td><td>18–24 s</td></tr>
+        </tbody></table></div>
+      <div class="blok"><h4>ℹ️ Özet <span class="sp">kart kuralı</span></h4><table><tbody><tr><td>Doğal direnç</td><td class="sonuk">4 antibiyotik raporlanmaz</td></tr><tr><td>Panel</td><td class="sonuk">7 antibiyotik · 3 basamak</td></tr><tr><td>Üreme eşiği</td><td class="sonuk">100.000 CFU/mL (idrar)</td></tr><tr><td>Bildirim</td><td class="sonuk">SKRS 1234 · SNOMED 112283007</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="direnc" hidden>
+    <div class="satir" style="padding:10px 12px">
+      <div class="blok"><h4>🚫 Doğal (intrinsik) direnç <span class="sp">raporlanmaz</span></h4>
+        <table><thead><tr><th>Antibiyotik</th><th>Grup</th><th>Neden</th></tr></thead><tbody>
+          <tr><td>Vankomisin</td><td class="sonuk">Glikopeptid</td><td class="sonuk">Gram negatifte etkisiz</td></tr>
+          <tr><td>Klindamisin</td><td class="sonuk">Linkozamid</td><td class="sonuk">Doğal direnç</td></tr>
+          <tr><td>Linezolid</td><td class="sonuk">Oksazolidinon</td><td class="sonuk">Gram pozitife özgü</td></tr>
+          <tr><td>Daptomisin</td><td class="sonuk">Lipopeptid</td><td class="sonuk">Gram pozitife özgü</td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="panel" hidden>
+    <div class="satir" style="padding:10px 12px">
+      <div class="blok"><h4>💊 Antibiyogram paneli <span class="sp">basamak sırasıyla</span></h4>
+        <table><thead><tr><th>Sıra</th><th>Antibiyotik</th><th>Basamak</th><th>Not</th></tr></thead><tbody>
+          <tr><td class="orta">1</td><td>Ampisilin</td><td><span class="rz ok">1 · Rutin</span></td><td class="sonuk">—</td></tr>
+          <tr><td class="orta">2</td><td>Amoksisilin-klavulanat</td><td><span class="rz ok">1 · Rutin</span></td><td class="sonuk">—</td></tr>
+          <tr><td class="orta">3</td><td>Sefuroksim</td><td><span class="rz ok">1 · Rutin</span></td><td class="sonuk">—</td></tr>
+          <tr><td class="orta">4</td><td>Trimetoprim-sülfa</td><td><span class="rz ok">1 · Rutin</span></td><td class="sonuk">—</td></tr>
+          <tr><td class="orta">5</td><td>Nitrofurantoin</td><td><span class="rz mavi">1 · Rutin</span></td><td><span class="rz sari">yalnız idrar</span></td></tr>
+          <tr><td class="orta">6</td><td>Siprofloksasin</td><td><span class="rz sari">2 · Alternatif</span></td><td class="sonuk">—</td></tr>
+          <tr><td class="orta">7</td><td>Meropenem</td><td><span class="rz kir">3 · Kısıtlı</span></td><td class="sonuk">ESBL/karbapenemaz şüphesinde</td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="kod" hidden>
+    <div class="satir" style="padding:10px 12px">
+      <div class="blok"><h4>🏷 Kodlar <span class="sp">bildirim eşlemesi</span></h4>
+        <table><tbody>
+          <tr><td>SKRS kodu</td><td><b>1234</b> <span class="sonuk">— SKRS "MİKROORGANİZMA" listesi</span></td></tr>
+          <tr><td>SNOMED CT</td><td><b>112283007</b> <span class="sonuk">— Escherichia coli (organism)</span></td></tr>
+          <tr><td>Bildirimi zorunlu</td><td><span class="rz">Hayır</span> <span class="sonuk">— Grup A/B listesinde değil</span></td></tr>
+          <tr><td>Durum satırı</td><td><span class="rz">Hayır</span> <span class="sonuk">— "üreme yok" / "normal flora" gibi değil</span></td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<div class="not"><b>Kartın kuralı.</b> Organizma yalnız bir "ad" değil, <b>raporu belirleyen kurallar</b> taşır:
+<ul>
+  <li><b>Doğal direnç</b> raporu KISALTIR: gram negatif bir izolatta vankomisin sonucu basılırsa hatalı tedaviye
+      yol açar. Antibiyogram ekranı bu listeyi görünce o antibiyotiği hiç sormaz.</li>
+  <li><b>Panel</b> hangi antibiyotiklerin hangi basamakta çalışılacağını söyler (rutin → alternatif → kısıtlı);
+      "yalnız üriner" işaretli antibiyotik idrar dışı örnekte önerilmez.</li>
+  <li><b>Üreme eşiği</b> koloni sayımıyla birlikte anlam kazanır: idrar kültüründe 10⁵ altındaki üreme
+      "anlamlı değil" olarak raporlanır - eşik kartta durur, teknisyenin ezberinde değil.</li>
+  <li><b>SKRS + SNOMED</b> ikisi birden tutulur: SKRS e-Nabız bildirimi, SNOMED uluslararası kayıt/araştırma.</li>
+</ul></div>
+
+<script>
+// Sekmeler: .tabs icindeki .tab tiklaninca ayni kartin .pnl panelleri degisir
+//   (Ekranlar'daki ortak desen; eslesme data-s anahtariyla).
+document.querySelectorAll('.tabs').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.tab'));
+  var kart=bar.parentElement;
+  var pnls=[].slice.call(kart.querySelectorAll('.pnl'));
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){
+      tabs.forEach(function(x){x.classList.remove('on');});
+      t.classList.add('on'); goster(key(t,i));
+    });
+  });
+  var acik=tabs.findIndex(function(t){return t.classList.contains('on');});
+  if(acik<0) acik=0;
+  if(pnls.length) goster(key(tabs[acik],acik));
+});
+</script>
+</body></html>

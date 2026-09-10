@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (264 ad, 77 tanesi birden cok dosyada)
+## Fonksiyonlar (266 ad, 77 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -137,10 +137,12 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kurum_sozlesme_sec` | `468_kurum_sozlesme_1n.sql` | — |
 | `fn_lab_acmg_sinif` | `439_lab_genetik.sql` | — |
 | `fn_lab_antibiyogram_bildirim` | `437_lab_kombinasyon_ajani.sql` | 436_lab_mikrobiyoloji.sql |
+| `fn_lab_antibiyogram_paneli` | `509_mikro_organizma_besiyeri.sql` | — |
 | `fn_lab_barkod_kontrol` | `433_lab_v1.sql` | — |
 | `fn_lab_barkod_uret` | `433_lab_v1.sql` | — |
 | `fn_lab_bayrak` | `434_lab_cihaz_esleme.sql` | 433_lab_v1.sql |
 | `fn_lab_calisma_sonuc_zamani` | `487_lab_calisma_takvimi.sql` | — |
+| `fn_lab_cfu` | `509_mikro_organizma_besiyeri.sql` | — |
 | `fn_lab_cihaz_calisma_listesi` | `434_lab_cihaz_esleme.sql` | — |
 | `fn_lab_cihaz_tetkik` | `434_lab_cihaz_esleme.sql` | — |
 | `fn_lab_dis_gonderim_no` | `445_lab_dis_gonderim.sql` | — |

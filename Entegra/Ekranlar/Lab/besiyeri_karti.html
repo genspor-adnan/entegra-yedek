@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mikrobiyoloji — Besiyeri Kartı — Mockup</title>
+<link rel="stylesheet" href="../Dashboard/_ortak.css">
+<style>
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(#fbfcfe,#e7edf4);border-radius:3px;padding:5px 10px;
+    font-size:11.5px;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .sp{margin-left:auto}
+  .hdr{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .fld .v{border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;
+    padding:0 8px;font-weight:bold;font-size:12.5px}
+  .fld .v.ro{background:#f6f8fb;font-weight:normal;color:var(--muted)}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .tab{padding:7px 12px;font-size:12px;color:var(--muted);background:#eef2f7;border:1px solid var(--line);
+    border-bottom:none;border-radius:3px 3px 0 0;margin-top:5px;position:relative;top:1px;display:flex;gap:6px;align-items:center}
+  .tab.on{background:#fff;color:var(--ink);font-weight:bold}
+  .tab{cursor:pointer}
+  .tab .sy{background:#e5ecf5;border-radius:9px;padding:0 6px;font-size:10.5px;color:#3a5573}
+  .ic{padding:10px 12px}
+</style></head><body>
+
+<div class="win">
+  <div class="title">🧫 Besiyeri Kartı <span class="sp">Laboratuvar › Mikrobiyoloji › Besiyerleri</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div><div class="btn danger">🗑 Sil</div>
+    <div class="btn">📦 Stok kartına bağla</div><div class="btn">🧪 KK kaydı gir</div>
+    <div class="sp"></div><div class="btn">✕ Kapat</div>
+  </div>
+
+  <div class="hdr">
+    <div class="fld"><label>Kod</label><div class="v">EMB</div></div>
+    <div class="fld"><label>Besiyeri Adı</label><div class="v">Eosin Methylene Blue Agar</div></div>
+    <div class="fld"><label>Tür</label><div class="v">Ayırt edici / seçici</div></div>
+    <div class="fld"><label>Durum</label><div class="v">Aktif</div></div>
+    <div class="fld"><label>İnkübasyon</label><div class="v">37 °C · Aerobik</div></div>
+    <div class="fld"><label>Okuma planı</label><div class="v">İlk 18 s · Son 48 s</div></div>
+    <div class="fld"><label>Ekim hacmi (öze)</label><div class="v">1 µL <span class="rz mavi" style="margin-left:6px">×1000</span></div></div>
+    <div class="fld"><label>Stok kartı</label><div class="v ro">BSY.EMB — EMB Agar 90 mm (20'li)</div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab on" data-s="tanim">Tanım</div>
+    <div class="tab" data-s="numune">Numune Tipleri <span class="sy">3</span></div>
+    <div class="tab" data-s="kk">Kalite Kontrol <span class="sy">2</span></div>
+    <div class="tab" data-s="lot">Lot / Miat <span class="sy">4</span></div>
+  </div>
+
+  <div class="pnl" data-s="tanim">
+    <div class="satir" style="padding:10px 12px">
+      <div class="blok"><h4>🔎 Okuma kuralı <span class="sp">kültür ekranına yansır</span></h4>
+        <table><tbody>
+          <tr><td>İlk okuma</td><td><b>18. saat</b> <span class="sonuk">— üreme yoksa kültür kapanmaz, inkübasyona döner</span></td></tr>
+          <tr><td>Son okuma</td><td><b>48. saat</b> <span class="sonuk">— üreme yoksa "üreme olmadı" raporlanabilir</span></td></tr>
+          <tr><td>Sayım çarpanı</td><td><b>×1000</b> <span class="sonuk">— 1 µL özeyle sayılan koloni CFU/mL'ye çevrilir</span></td></tr>
+          <tr><td>Atmosfer</td><td><b>Aerobik</b> <span class="sonuk">— CO₂/anaerob kabin gerekmiyor</span></td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="numune" hidden>
+    <div class="satir" style="padding:10px 12px">
+      <div class="blok"><h4>🧪 Kullanıldığı numune tipleri <span class="sp">varsayılan set</span></h4>
+        <table><thead><tr><th>Numune</th><th>Ekim</th><th>Amaç</th></tr></thead><tbody>
+          <tr><td>İdrar</td><td>1 µL kalibre öze</td><td class="sonuk">Koloni sayımı (CFU/mL)</td></tr>
+          <tr><td>Gaita</td><td>Sürme</td><td class="sonuk">Laktoz ayrımı · Salmonella/Shigella ön eleme</td></tr>
+          <tr><td>Yara</td><td>Sürme</td><td class="sonuk">Gram negatif üreme</td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="kk" hidden>
+    <div class="satir" style="padding:10px 12px">
+      <div class="blok"><h4>✅ Kalite kontrol suşları <span class="sp">her lotta</span></h4>
+        <table><thead><tr><th>Suş (ATCC)</th><th>Beklenen</th><th>Periyot</th><th>Son sonuç</th></tr></thead><tbody>
+          <tr><td>E. coli ATCC 25922</td><td class="sonuk">Metalik yeşil, üreme (+)</td><td>Her yeni lot</td><td><span class="rz ok">Uygun · 08.09</span></td></tr>
+          <tr><td>S. aureus ATCC 25923</td><td class="sonuk">Üreme (−) / kısmi baskılanma</td><td>Her yeni lot</td><td><span class="rz ok">Uygun · 08.09</span></td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="lot" hidden>
+    <div class="satir" style="padding:10px 12px">
+      <div class="blok"><h4>📦 Lot / miat <span class="sp">stoktan</span></h4>
+        <table><thead><tr><th>Lot</th><th>Miat</th><th class="sag">Kalan</th><th>Durum</th></tr></thead><tbody>
+          <tr><td>EMB-2609A</td><td>30.11.2026</td><td class="sag">42</td><td><span class="rz ok">Kullanımda</span></td></tr>
+          <tr><td>EMB-2608B</td><td>30.09.2026</td><td class="sag">7</td><td><span class="rz sari">Miat yakın</span></td></tr>
+          <tr><td>EMB-2605C</td><td>31.07.2026</td><td class="sag">0</td><td><span class="rz">Bitti</span></td></tr>
+          <tr><td>EMB-2604A</td><td>30.06.2026</td><td class="sag">3</td><td><span class="rz kir">Miat geçti — kullanma</span></td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<div class="not"><b>Kartın kuralı.</b> Besiyeri hem bir <b>çalışma talimatı</b> hem bir <b>sarf malzemedir</b>:
+<ul>
+  <li><b>Okuma planı</b> kültür ekranını yönetir - 18 saatlik plakayı 48. saatte okumak, negatif raporu
+      güvenilmez yapar. Saatler kartta durur, teknisyenin ezberinde değil.</li>
+  <li><b>Sayım çarpanı</b> ekim hacminden gelir (1 µL öze → ×1000). İdrar kültüründe "anlamlı üreme" kararı
+      buna bağlıdır; organizma kartındaki eşikle birlikte çalışır.</li>
+  <li><b>Stok bağı</b> zorunlu değil ama bağlıysa lot/miat ve kalan adet stoktan okunur - miadı geçmiş lotla
+      çalışılan kültür sonuçları geçersizdir.</li>
+  <li><b>KK suşu</b> her yeni lotta çalışılır; sonucu "uygun" değilse o lot kullanıma kapanır.</li>
+</ul></div>
+<script>
+// Sekmeler: .tabs icindeki .tab tiklaninca ayni kartin .pnl panelleri degisir
+//   (Ekranlar'daki ortak desen; eslesme data-s anahtariyla).
+document.querySelectorAll('.tabs').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.tab'));
+  var kart=bar.parentElement;
+  var pnls=[].slice.call(kart.querySelectorAll('.pnl'));
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){
+      tabs.forEach(function(x){x.classList.remove('on');});
+      t.classList.add('on'); goster(key(t,i));
+    });
+  });
+  var acik=tabs.findIndex(function(t){return t.classList.contains('on');});
+  if(acik<0) acik=0;
+  if(pnls.length) goster(key(tabs[acik],acik));
+});
+</script>
+</body></html>
