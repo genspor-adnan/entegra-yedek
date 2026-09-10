@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (281 ad, 82 tanesi birden cok dosyada)
+## Fonksiyonlar (283 ad, 82 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -160,6 +160,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_lab_kk_hedef` | `442_lab_kalite_kontrol.sql` | — |
 | `fn_lab_kk_kumulatif` | `442_lab_kalite_kontrol.sql` | — |
 | `fn_lab_kultur_ozet` | `436_lab_mikrobiyoloji.sql` | — |
+| `fn_lab_loinc_esle` | `530_lab_loinc_eslesme.sql` | — |
+| `fn_lab_loinc_numune_uyar` | `530_lab_loinc_eslesme.sql` | — |
 | `fn_lab_referans` | `434_lab_cihaz_esleme.sql` | 433_lab_v1.sql |
 | `fn_lab_referans_kime` | `488_lab_yas_metni.sql` | — |
 | `fn_lab_tetkik_bolum` | `529_lab_tetkik_katalogu_skrs.sql` | — |
@@ -290,7 +292,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (131 ad, 39 tanesi birden cok dosyada)
+## Gorunumler (132 ad, 39 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -373,6 +375,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_lab_genetik_run_lookup` | `439_lab_genetik.sql` | — |
 | `v_lab_kk_lj` | `442_lab_kalite_kontrol.sql` | — |
 | `v_lab_kk_lot_lookup` | `442_lab_kalite_kontrol.sql` | — |
+| `v_lab_loinc_oneri` | `530_lab_loinc_eslesme.sql` | — |
 | `v_lab_numune_lookup` | `479_lab_numune_lookup.sql` | — |
 | `v_lab_organizma_lookup` | `436_lab_mikrobiyoloji.sql` | — |
 | `v_lab_panel_lookup` | `433_lab_v1.sql` | — |
