@@ -112,8 +112,11 @@ public static partial class KartKatalogu
             //   satirlik bilgiyi tiklama arkasina koyuyordu. Grup bosalinca
             //   geriye tek sekme (Satirlar) kalir - GenForm tek sekmede serit
             //   cizmez, grid dogrudan govdede acilir.
-            new("subeId", "sube_id", "sayi", Yazilabilir: false, Baslik: "Şube",
-                Grup: "Kimlik"),
+            // SUBE ADIYLA (kullanici: "şube 1 görünüyor, anlamlı olsun"):
+            //   ham id "1" hicbir sey soylemiyordu. Kod tipi + sube tablosu ->
+            //   "Merkez". Yazilamaz: liste hangi subede acildiysa oradadir.
+            new("subeId", "sube_id", "kod", Yazilabilir: false, Baslik: "Şube",
+                KodTablosu: "public.sube", Grup: "Kimlik"),
         },
         Detaylar: new[]
         {

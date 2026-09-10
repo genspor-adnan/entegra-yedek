@@ -303,6 +303,19 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
   /** Acik toplu deger penceresi (534). */
   const [topluCarpan, setTopluCarpan] = useState(false);
   const [topluCarpanDeger, setTopluCarpanDeger] = useState('');
+  /** "Durum Değiştir" acilir menusu (534). */
+  const [durumMenusu, setDurumMenusu] = useState(false);
+
+  /** Secili satirlarin DURUMUNU topluca yazar (534). 1 Aktif · 0 Pasif. */
+  const topluDurum = (yeni: number) => {
+    setDetaylar(t => {
+      const d = t.satirlar ?? bosDetay();
+      const guncel = d.guncel.map((s2, i) =>
+        seciliSatirlar.has(i) ? { ...s2, durum: yeni } : s2);
+      return { ...t, satirlar: { ...d, guncel } };
+    });
+    setDurumMenusu(false);
+  };
 
   /**
    * SAYFALI DETAYDA SAYFA DEGISIMI (525).
@@ -1259,6 +1272,32 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
                     onClick={() => { setTopluCarpanDeger(''); setTopluCarpan(true) }}>
               ✖ Çarpan Gir{seciliSatirlar.size > 0 ? ` (${seciliSatirlar.size})` : ''}
             </button>
+          )}
+          {/* DURUM DEGISTIR (534, kullanici: "ustteki sil sagina 'Durum
+              Değiştir' butonu gir, altina menu gelsin Aktif ve Pasif,
+              secince isaretli satirlari aktif/pasif yapsin"). Fiyat listesi
+              buyuk (14 bin satir): kalemi tek tek acip durum kutusunu
+              cevirmek is degil - kategori kapatmadan da bir grup satir
+              gecici olarak kapatilabilmeli. */}
+          {!yeniMi && kaynak === 'fiyat-listesi' && (
+            <span className="durum-sec">
+              <button type="button" className="d"
+                      disabled={seciliSatirlar.size === 0}
+                      title={seciliSatirlar.size === 0
+                             ? 'Önce satırlardan seçim yapın'
+                             : `Seçili ${seciliSatirlar.size} satırın durumu`}
+                      onClick={() => setDurumMenusu(a => !a)}>
+                ◐ Durum Değiştir{seciliSatirlar.size > 0 ? ` (${seciliSatirlar.size})` : ''} ▾
+              </button>
+              {durumMenusu && (
+                <span className="durum-menu">
+                  <button type="button" className="durum-oge"
+                          onClick={() => topluDurum(1)}>✓ Aktif</button>
+                  <button type="button" className="durum-oge"
+                          onClick={() => topluDurum(0)}>⊘ Pasif</button>
+                </span>
+              )}
+            </span>
           )}
           {/* EKRAN-OZEL EYLEMLER (461): mockup'ta bunlar kartin arac
               cubugunda - hekim listeye donup satir secmeden isini bitirmeli. */}
