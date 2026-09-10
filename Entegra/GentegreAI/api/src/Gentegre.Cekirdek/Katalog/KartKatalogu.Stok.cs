@@ -226,14 +226,6 @@ public static partial class KartKatalogu
             //   ad ayirt edilemiyordu.
             new("kategori", "kategori", "kod",   KodTablosu: "public.kategori",
                 Agac: true, Baslik: "Kategori", Grup: "Kimlik"),
-            // UST HIZMET (521, kullanici: "cekilecek hizmetler icin ust/alt
-            //   hizmet durumu olur"): katalog SKRS'den kurulunca gruplama
-            //   kategori agacindan HIZMETIN KENDI agacina tasindi - SUT'un
-            //   tipleri ("Ameliyat ve Girisimler", "Tahlil Islemleri") kok
-            //   baslik, islemler onlarin alti. Secim yalniz basliklardan yapilir.
-            new("ustId",    "ust_id",   "kod",
-                KodTablosu: "public.v_hizmet_baslik_lookup",
-                Baslik: "Üst Hizmet", Grup: "Kimlik"),
             new("durum",    "durum",    "kod",   SabitKodlar: DurumKodlari,
                 Baslik: "Durum", Grup: "Kimlik"),
             // "Detay" kutusu Kodlar'in SOLUNDA (kullanici) - alt gruplar alan

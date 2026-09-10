@@ -353,12 +353,6 @@ public static partial class KaynakKatalogu
                 "           where k.id = h.kategori), '')",
                                "metin", "Kategori", Filtrelenebilir: false),
             new("kategori", "h.kategori", "sayi", "Kategori Id", Varsayilan: false),
-            // UST HIZMET (521): katalog SKRS'den kurulunca gruplama kategori
-            //   agacindan hizmetin kendi agacina gecti - listede hangi SUT
-            //   tipinin altinda oldugu gorunmezse 10 bin satir duz bir yigin.
-            new("ustAdi",
-                "coalesce((select u.ad from public.hizmet u where u.id = h.ust_id), '')",
-                "metin", "Üst Hizmet", Filtrelenebilir: false),
             // MODALITE: hizmet bir RADYOLOJI tetkiki mi (BT/MR/USG...) - 459
             //   kurali modalitesiz hizmetle radyoloji istemi acilmasini
             //   engelliyor; istem ekranlari listeyi bununla suzer.
