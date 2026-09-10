@@ -406,6 +406,7 @@ public static partial class KaynakKatalogu
             //   yazilirsa fatura yanlis tarafa kesilir.
             new("sutKodu", "h.sut_kodu", "metin", "SUT Kodu",   Genislik: 110),
             new("huvKodu", "h.huv_kodu", "metin", "HUV Kodu",   Genislik: 110),
+            new("loinc",   "h.loinc",    "metin", "LOINC",      Genislik: 110),
             // UC TARIFE FIYATI (499, kullanici: "ozel(ucretli) fiyati, TTB
             //   (HUV fiyati), SUT Fiyati icin hizmet listesi"). Tetkik
             //   katalogda BIR kez durur (497); hangi kurum tipinin hangi

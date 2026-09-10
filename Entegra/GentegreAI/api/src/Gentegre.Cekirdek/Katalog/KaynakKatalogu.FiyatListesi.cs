@@ -35,6 +35,14 @@ public static partial class KaynakKatalogu
             // KDV iki degerli: kod listesi acmak yerine dogrudan metne cevrilir.
             new("kdvDahil", "case when l.kdv_dahil = 1 then 'Dahil' else 'Hariç' end", "metin",
                 "KDV", Hizalama: "orta"),
+            // TARIFE TIPI (518): listenin hangi kuralla calistigi - satir
+            //   sutunlari ve toplu islemler buna gore degisiyor, listede de
+            //   gorunsun.
+            new("tarifeTipiAdi",
+                "case l.tarife_tipi when 1 then 'Özel (Ücretli)' when 2 then 'TTB / HUV' " +
+                "when 3 then 'SUT (SGK)' else '' end",
+                "metin", "Tarife", Hizalama: "orta", Genislik: 120),
+            new("tarifeTipi", "l.tarife_tipi", "kod", "Tarife Kodu", Varsayilan: false),
             new("baslangic", "l.baslangic", "tarih", "Başlama", Hizalama: "orta", Bicim: "dd.MM.yyyy"),
             new("bitis",     "l.bitis",     "tarih", "Bitiş",   Hizalama: "orta", Bicim: "dd.MM.yyyy"),
             // Satir sayisi: listenin URETILIP uretilmedigini tek bakista gosterir.

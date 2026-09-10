@@ -34,6 +34,14 @@ public static partial class KartKatalogu
             //   seridinde her sekmede sabit durur - listeyi tanimlayan uc alan.
             new("ad",   "ad",   "metin", Zorunlu: true, EnFazlaUzunluk: 80,
                 Baslik: "Liste Adı", Grup: "Kimlik"),
+            // TARIFE TIPI (518): listenin HANGI KURALLA calistigini soyler -
+            //   1 Özel (hasta oder, elle girilir) · 2 TTB/HUV (katsayi x carpan)
+            //   · 3 SUT (fiyat SKRS'den, elle degismez). Satir sutunlari ve
+            //   toplu islemler buna gore gorunur. `grup` TICARI siniftir
+            //   (Perakende/Bayi/Toptan) - iki ayri soru, iki ayri kolon.
+            new("tarifeTipi", "tarife_tipi", "kod",
+                KodListesi: "fiyat_listesi.tarife_tipi",
+                Baslik: "Tarife Tipi", Grup: "Kimlik"),
             new("grup", "grup", "kod",   KodListesi: "fiyat_listesi.grup",
                 Baslik: "Grubu", Grup: "Kimlik"),
             new("durum", "durum", "kod", SabitKodlar: DurumKodlari,
@@ -136,10 +144,23 @@ public static partial class KartKatalogu
                     "         (select h3.kod from public.hizmet h3 " +
                     "           where h3.id = fiyat_listesi_satir.hizmet_id), '')",
                     "metin", Yazilabilir: false, Baslik: "Kod"),
+                // FIYAT: Özel'de hastanin odedigi, TTB'de provizyona giden,
+                //   SUT'ta kurumdan alinacak tutar (518).
                 new("fiyat",     "fiyat",     "para", Zorunlu: true, Baslik: "Fiyat"),
+                // KATSAYI x CARPAN = FIYAT (TTB/HUV). Kolonlar zaten vardi
+                //   (turetilmis listenin taban fiyati ve carpani); tarife
+                //   tipinde adlari budur - ayni sayi iki yerde tutulmaz.
+                //   Kolonlar asagida "Taban Fiyat Değeri"/"Çarpan" adiyla
+                //   duruyordu (turetilmis liste izi); tarife tipinde adlari
+                //   KATSAYI ve CARPAN - tek tanim, tek yer.
+                new("tabanFiyat", "taban_fiyat", "para", Baslik: "Katsayı"),
+                new("carpan",     "carpan",      "para", Baslik: "Çarpan"),
                 // KATILIM PAYI (291): SUT bedeliyle AYNI SATIRDA durur - islem
                 //   secilince ikisi birlikte gelsin. 0 ise listenin varsayilani.
-                new("katkiTutar","katki_tutar","para", Baslik: "SGK Katılım"),
+                // KATKI: hastadan alinacak tutar (TTB'de TSS hastasi, SUT'ta
+                //   katilim payi). Toplu uretilir (fn_fiyat_katki_uret), sonra
+                //   elle degisebilir - uretim kilit koymaz.
+                new("katkiTutar","katki_tutar","para", Baslik: "Katkı (hasta)"),
                 // Satirdaki kural LISTEYI EZER (0 = listenin varsayilani).
                 new("ekKatkiTipi", "ek_katki_tipi", "kod",
                     KodListesi: "fiyat_listesi.ek_katki_tipi", Baslik: "Ek Katkı Tipi"),
@@ -157,10 +178,8 @@ public static partial class KartKatalogu
                     Baslik: "Oluşma"),
                 new("tabanListeId", "taban_liste_id", "kod",
                     KodTablosu: "public.v_fiyat_listesi_lookup", Baslik: "Taban Fiyat"),
-                new("carpan",    "carpan",    "para", Baslik: "Çarpan"),
                 new("yuvarlama", "yuvarlama", "kod",  KodListesi: "fiyat_listesi.yuvarlama",
                     Baslik: "Yuvarlama"),
-                new("tabanFiyat","taban_fiyat","para", Yazilabilir: false, Baslik: "Taban Fiyat Değeri"),
             }, Sirala: "id", SubeKolonu: null, LogTabloId: 924, Baslik: "Satırlar")
         },
         SilmeEngelleri: new[]

@@ -193,6 +193,17 @@ interface Props {
 // ikinci satira tasiriyordu; sekme adi zaten ayirt ediyor.
 
 
+/**
+ * FIYAT LISTESI SATIRINDA TARIFE TIPINE GORE GIZLENEN ALANLAR (518).
+ * Tip 0 (genel) hicbir sey gizlemez - eski listeler oldugu gibi calisir.
+ */
+function tarifeGizli(tip: number): string[] {
+  if (tip === 1) return ['tabanFiyat', 'carpan', 'katkiTutar', 'ekKatkiTipi', 'ekKatkiDeger'];
+  if (tip === 2) return [];                       // katsayi · carpan · fiyat · katki
+  if (tip === 3) return ['tabanFiyat', 'carpan']; // fiyat SKRS'den, katsayi yok
+  return [];
+}
+
 export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, onKaydedildi, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
@@ -1525,11 +1536,19 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           //   alani ekranda tutmak, uygulanmayan bir ayar uretiyordu.
           // kategoriId SUZGEC ANAHTARI (asagida): gridde de modalde de
           //   gorunmez - kullaniciya "Kategori" zaten yol metniyle gosteriliyor.
+          // TARIFE TIPINE GORE SUTUN (518, kullanici: "bu listede sutunlar
+          //   tipe gore gorunur/gorunmez olacak"):
+          //     1 Özel : yalniz Fiyat (hasta oder) - katsayi/carpan/katki yok
+          //     2 TTB  : Katsayi x Carpan = Fiyat + Katki (TSS hastasi)
+          //     3 SUT  : Fiyat (SKRS'den, elle degismez) + Katki (hasta)
+          //   Anlamsiz kolonu gostermek, doldurulmasi gereken bir alan
+          //   izlenimi veriyordu.
           gizliAlanlar={ayar?.gizli ? new Set(ayar.gizli)
             : kaynak === 'prim-plani' && Number(deger.primZamani) === 2
             ? new Set(['tahsilatTuru'])
             : kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
-            ? new Set(['kategoriId']) : undefined}
+            ? new Set(['kategoriId', ...tarifeGizli(Number(deger.tarifeTipi) || 0)])
+            : undefined}
           // Tabloyu sadelestirir, DUZENLEMEYI kisitlamaz: modal tam kalir.
           gridGizliAlanlar={ayar?.gridGizli ? new Set(ayar.gridGizli) : undefined}
           // ARAMA PLANIN ROLUNE BAGLI (383, kullanici): yalnizca O ROLDE ADAY

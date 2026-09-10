@@ -280,6 +280,11 @@ public static partial class KartKatalogu
                 Baslik: "SUT Kodu", Grup: "Genel", AltGrup: "Kodlar"),
             new("huvKodu",  "huv_kodu",  "metin", EnFazlaUzunluk: 20,
                 Baslik: "HUV Kodu", Grup: "Genel", AltGrup: "Kodlar"),
+            // LOINC (519): laboratuvar tetkikinin uluslararasi karsiligi.
+            //   `lab_tetkik.loinc` CALISILAN testin kodu; buradaki SATILAN
+            //   kalemin kodu - panelde ikisi ayrisir.
+            new("loinc",    "loinc",     "metin", EnFazlaUzunluk: 12,
+                Baslik: "LOINC", Grup: "Genel", AltGrup: "Kodlar"),
             new("muhKodu",  "muh_kodu",  "metin", EnFazlaUzunluk: 20,
                 Baslik: "Muhasebe Kodu", Grup: "Genel", AltGrup: "Kodlar"),
             new("ozelKod",  "ozel_kod",  "metin", EnFazlaUzunluk: 40,
