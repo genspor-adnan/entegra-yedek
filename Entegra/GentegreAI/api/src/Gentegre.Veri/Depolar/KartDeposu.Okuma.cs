@@ -165,6 +165,11 @@ public sealed partial class KartDeposu
             // Anlasmali kurum (249): hasta policesinde odeyen, kurum sozlesmesi
             //   satirinda kategori secimi.
             "public.v_kurum_lookup", "public.v_kategori_lookup",
+            // HIZMET AGACININ KOKLERI (521): katalog SKRS'den kuruldu ve
+            //   ust/alt kategori yerine hizmetin kendi agaciyla tutuluyor.
+            //   Tam `v_hizmet_lookup` 10 bin satir - ust secimi yalniz
+            //   basliklardan yapilir.
+            "public.v_hizmet_baslik_lookup",
             "public.v_tahsilat_turu_lookup",
             // Departman/bolum (251): personel kartinda tum departmanlar, randevu
             //   kartinda yalniz randevu verilebilen bolumler.

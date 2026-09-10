@@ -241,6 +241,83 @@ public static class EntegrasyonUclari
             return Results.Ok(new { basarili, mesaj });
         });
 
+        // ------------------------------------------------ SKRS ham cekim ----
+        // POST /api/entegrasyon/{id}/skrs-ham?ad=SUT
+        //
+        // Listenin kayitlarini OLDUGU GIBI `skrs_ham`a yazar. Kod listesi
+        //   senkronundan ayri: orada yalniz KODU/ADI/USTKODU aliniyor, SUT'un
+        //   fiyati - islem puani - LOINC birimi sessizce dusuyordu. Burada
+        //   hicbir alan yorumlanmaz; tipli ambar (skrs_sut vb.) ham JSON'dan
+        //   SQL ile uretilir, alan adi degisirse servise tekrar gidilmez.
+        grup.MapPost("/{id:int}/skrs-ham", async (
+            int id, string ad, BaglamCozucu cozucu, VeriKaynagi veri,
+            IHttpClientFactory istemciler, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("entegrasyon", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var hesap = await HesapOkuAsync(baglanti, id, iptal);
+            if (!string.Equals(hesap.Kod, "SKRS", StringComparison.OrdinalIgnoreCase))
+                throw GentegreHatasi.IsKurali("Bu işlem yalnız SKRS hesabında çalışır.");
+            if (string.IsNullOrWhiteSpace(ad))
+                throw GentegreHatasi.Dogrulama("Çekilecek SKRS listesinin adı verilmeli (ad).");
+
+            var katalog = await SkrsKatalogAsync(hesap, istemciler, iptal);
+            var anahtar = Anahtar(ad);
+            // Tam ad bulunamazsa ICEREN tek liste kabul edilir: SKRS adlari
+            //   Turkce ve uzun ("TIBBİ İŞLEM PUAN BİLGİSİ"); birden cok
+            //   eslesirse tahmin edilmez, adaylar kullaniciya donulur.
+            if (!katalog.TryGetValue(anahtar, out var guid))
+            {
+                var adaylar = katalog.Keys
+                    .Where(k => k.Contains(anahtar, StringComparison.Ordinal)).ToList();
+                if (adaylar.Count != 1)
+                    throw GentegreHatasi.IsKurali(
+                        $"'{ad}' SKRS kataloğunda bulunamadı."
+                        + (adaylar.Count > 1 ? $" Adaylar: {string.Join(" · ", adaylar)}." : ""));
+                anahtar = adaylar[0];
+                guid = katalog[anahtar];
+            }
+
+            var (kayitlar, sayfa, kesildi) = await SkrsHamCekAsync(hesap, guid, istemciler, iptal);
+
+            // YARIM CEKIM ESKISINI SILMESIN: servis ortada 500 donmusse eldeki
+            //   ambar korunur, cagri hata olarak raporlanir.
+            if (kesildi && kayitlar.Count == 0)
+                throw GentegreHatasi.IsKurali(
+                    $"'{anahtar}' çekilemedi - servis {sayfa}. sayfada hata döndü.");
+
+            await baglanti.CalistirAsync(
+                "delete from public.skrs_ham where liste = @p0", null, [anahtar], iptal);
+            // TOPLU YAZIM: 15 bin satiri tek tek yazmak cekimin kendisinden
+            //   uzun suruyordu - sayfa basina tek INSERT (dizi acilir).
+            foreach (var oebek in kayitlar.GroupBy(x => x.Sayfa))
+                await baglanti.CalistirAsync("""
+                    insert into public.skrs_ham (liste, sayfa, kayit)
+                    select @p0, @p1, x from jsonb_array_elements(@p2::jsonb) as x
+                    """, null,
+                    [anahtar, oebek.Key,
+                     "[" + string.Join(",", oebek.Select(x => x.Json)) + "]"], iptal);
+
+            var ozet = $"{anahtar}: {kayitlar.Count} kayıt ({sayfa} sayfa)"
+                       + (kesildi ? " - servis hatası nedeniyle YARIM" : "");
+            await SonucYazAsync(baglanti, id, ozet, iptal);
+
+            var alanlar = await baglanti.ListeAsync("""
+                select x.alan, count(*) as adet
+                  from public.skrs_ham h, lateral jsonb_object_keys(h.kayit) as x(alan)
+                 where h.liste = @p0
+                 group by x.alan order by 2 desc, 1
+                """, null, [anahtar], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            return Results.Ok(new
+            {
+                liste = anahtar, adet = kayitlar.Count, sayfa, yarim = kesildi,
+                alanlar, mesaj = ozet, izlemeNo = baglam.IzlemeNo
+            });
+        });
+
         // ------------------------------------------------- SKRS liste senkron
         grup.MapPost("/{id:int}/skrs-senkron", async (
             int id, BaglamCozucu cozucu, VeriKaynagi veri, IHttpClientFactory istemciler,
@@ -600,6 +677,59 @@ public static class EntegrasyonUclari
         }
 
         return liste;
+    }
+
+    /// <summary>
+    /// HAM CEKIM: listenin butun sayfalarini ham JSON metni olarak dondurur.
+    /// Alan adi YORUMLANMAZ (bkz. 520) - tipli ambar SQL tarafinda uretilir.
+    /// Ara sayfada hata olursa dongu KESILIR ama o ana kadar gelenler durur:
+    /// SKRS buyuk listelerde ara sayfada 500 donebiliyor, hepsini atmak
+    /// 14 bin satirlik bir cekimi bir sayfa yuzunden bosa cikariyordu.
+    /// </summary>
+    private static async Task<(List<(string Json, int Sayfa)> Kayitlar, int Sayfa, bool Kesildi)>
+        SkrsHamCekAsync(Hesap hesap, string guid, IHttpClientFactory istemciler,
+                        CancellationToken iptal)
+    {
+        var kayitlar = new List<(string, int)>();
+        var sayfa = 1;
+
+        while (sayfa > 0 && sayfa <= 400)
+        {
+            // YENIDEN DENEME: SKRS buyuk listelerde ara sayfada gecici 500
+            //   donuyor (SUT 16. sayfa). Ilk hatada birakmak 15 bin satirlik
+            //   cekimi yarim biraktigi icin sayfa uc kez denenir.
+            string? govde = null;
+            for (var deneme = 1; deneme <= 3 && govde is null; deneme++)
+            {
+                try
+                {
+                    govde = await SkrsIstekAsync(hesap,
+                        $"GetSkrsObject?skrsCodeSystemGuid={Uri.EscapeDataString(guid)}&page={sayfa}",
+                        istemciler, iptal);
+                }
+                catch
+                {
+                    if (deneme == 3) return (kayitlar, sayfa, true);
+                    await Task.Delay(2000 * deneme, iptal);
+                }
+            }
+
+            using var belge = JsonDocument.Parse(govde);
+            if (!belge.RootElement.TryGetProperty("sonuc", out var sonuc)
+                || sonuc.ValueKind != JsonValueKind.Object) break;
+            if (!sonuc.TryGetProperty("kayit", out var liste)
+                || liste.ValueKind != JsonValueKind.Array) break;
+
+            foreach (var k in liste.EnumerateArray())
+                kayitlar.Add((k.GetRawText(), sayfa));
+
+            var sonraki = sonuc.TryGetProperty("sonrakiSayfa", out var sy)
+                          && sy.ValueKind == JsonValueKind.Number ? sy.GetInt32() : 1;
+            if (sonraki <= 1 || sonraki == sayfa) break;   // 1 = son sayfa
+            sayfa = sonraki;
+        }
+
+        return (kayitlar, sayfa, false);
     }
 
     /// <summary>SKRS REST cagrisi: taban adres + yol, kimlik uc HTTP basliginda.</summary>

@@ -353,6 +353,12 @@ public static partial class KaynakKatalogu
                 "           where k.id = h.kategori), '')",
                                "metin", "Kategori", Filtrelenebilir: false),
             new("kategori", "h.kategori", "sayi", "Kategori Id", Varsayilan: false),
+            // UST HIZMET (521): katalog SKRS'den kurulunca gruplama kategori
+            //   agacindan hizmetin kendi agacina gecti - listede hangi SUT
+            //   tipinin altinda oldugu gorunmezse 10 bin satir duz bir yigin.
+            new("ustAdi",
+                "coalesce((select u.ad from public.hizmet u where u.id = h.ust_id), '')",
+                "metin", "Üst Hizmet", Filtrelenebilir: false),
             // MODALITE: hizmet bir RADYOLOJI tetkiki mi (BT/MR/USG...) - 459
             //   kurali modalitesiz hizmetle radyoloji istemi acilmasini
             //   engelliyor; istem ekranlari listeyi bununla suzer.
@@ -398,13 +404,11 @@ public static partial class KaynakKatalogu
             //   yazabilsin - ad ile kod eslestirmek kirilgan olurdu.
             new("birimKod", "h.birim",   "sayi",  "Birim Kodu", Hizalama: "orta",
                                             Varsayilan: false),
-            // SUT ve HUV KODU (484, kullanici: "hizmet listesine SUT Kodu ve HUV
-            //   Kodu ekle"). IKISI AYRI KODDUR ve bir hizmette ikisi birden
-            //   bulunur: SUT SGK'nin tebligi (SGK faturasi, MEDULA eslemesi),
-            //   HUV ise TTB tarifesi (ozel sigorta faturasi). 483'teki iki
-            //   fiyatin kod tarafindaki karsiligi - biri otekinin yerine
-            //   yazilirsa fatura yanlis tarafa kesilir.
-            new("sutKodu", "h.sut_kodu", "metin", "SUT Kodu",   Genislik: 110),
+            // SUT KODU KOLONU YOK (521): katalog SKRS'den kuruldugundan
+            //   hizmetin KODU zaten SUT kodudur; listede ayri bir sutun ayni
+            //   sayiyi iki kere gosterirdi. HUV kodu ayri kalir - TTB
+            //   tarifesinin kodu SUT kodundan farklidir ve ozel sigorta
+            //   faturasi ona bakar.
             new("huvKodu", "h.huv_kodu", "metin", "HUV Kodu",   Genislik: 110),
             new("loinc",   "h.loinc",    "metin", "LOINC",      Genislik: 110),
             // UC TARIFE FIYATI (499, kullanici: "ozel(ucretli) fiyati, TTB

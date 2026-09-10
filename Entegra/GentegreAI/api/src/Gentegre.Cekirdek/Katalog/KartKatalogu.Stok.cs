@@ -226,6 +226,14 @@ public static partial class KartKatalogu
             //   ad ayirt edilemiyordu.
             new("kategori", "kategori", "kod",   KodTablosu: "public.kategori",
                 Agac: true, Baslik: "Kategori", Grup: "Kimlik"),
+            // UST HIZMET (521, kullanici: "cekilecek hizmetler icin ust/alt
+            //   hizmet durumu olur"): katalog SKRS'den kurulunca gruplama
+            //   kategori agacindan HIZMETIN KENDI agacina tasindi - SUT'un
+            //   tipleri ("Ameliyat ve Girisimler", "Tahlil Islemleri") kok
+            //   baslik, islemler onlarin alti. Secim yalniz basliklardan yapilir.
+            new("ustId",    "ust_id",   "kod",
+                KodTablosu: "public.v_hizmet_baslik_lookup",
+                Baslik: "Üst Hizmet", Grup: "Kimlik"),
             new("durum",    "durum",    "kod",   SabitKodlar: DurumKodlari,
                 Baslik: "Durum", Grup: "Kimlik"),
             // "Detay" kutusu Kodlar'in SOLUNDA (kullanici) - alt gruplar alan
@@ -271,13 +279,11 @@ public static partial class KartKatalogu
             new("radyoloji", "radyoloji", "mantik", Baslik: "Radyoloji Tetkiki",
                 Grup: "Genel", AltGrup: "Detay"),
 
-            // SUT / HUV KODU (484). Kolon `sut_kodu` bastan beri vardi ama
-            //   kartta girisi yoktu - yazilamayan kolon, olmayan kolondur.
-            //   Ikisi AYRI kod: SUT SGK'nin tebligi (SGK faturasi, MEDULA),
-            //   HUV ise TTB tarifesi (ozel sigorta faturasi). Hizmette ikisi
-            //   birden bulunur; 483'teki iki fiyatin kod karsiligidir.
-            new("sutKodu",  "sut_kodu",  "metin", EnFazlaUzunluk: 20,
-                Baslik: "SUT Kodu", Grup: "Genel", AltGrup: "Kodlar"),
+            // SUT KODU AYRI ALAN DEGIL (521): katalog SKRS'den kuruldu ve
+            //   hizmetin KENDI kodu SUT kodudur ("sut kodu bizdeki hizmet
+            //   kodu olabilir, ayrica sut koduna ihtiyac yok"). Ayni degeri
+            //   ikinci bir kolonda tutmak iki kaynak demekti - kolon dustu.
+            //   HUV ayri kalir: TTB tarifesinin kodu SUT kodundan farkli.
             new("huvKodu",  "huv_kodu",  "metin", EnFazlaUzunluk: 20,
                 Baslik: "HUV Kodu", Grup: "Genel", AltGrup: "Kodlar"),
             // LOINC (519): laboratuvar tetkikinin uluslararasi karsiligi.

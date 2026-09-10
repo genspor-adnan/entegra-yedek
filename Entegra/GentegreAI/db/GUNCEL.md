@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (275 ad, 82 tanesi birden cok dosyada)
+## Fonksiyonlar (276 ad, 82 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -198,6 +198,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_sigorta_pay_geri_al` | `472_dagilim_sigorta_prim.sql` | — |
 | `fn_sigorta_ref_no` | `430_sigorta_v1.sql` | — |
 | `fn_siradaki_hasta` | `410_hekim_calisma_listesi.sql` | — |
+| `fn_skrs_ambar_uret` | `521_skrs_katalog_kurulum.sql` | — |
 | `fn_skrs_kod` | `503_skrs_kod_dikisi.sql` | — |
 | `fn_sls_carpan_manuel` | `214_yazim_olusma_import.sql` | 209_taban_fiyat_izi.sql, 212_yazim_gecis_kurali.sql, 213_fiyat_elle_degisim.sql |
 | `fn_slug` | `021_goc_kimlik.sql` | — |
@@ -284,7 +285,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (128 ad, 39 tanesi birden cok dosyada)
+## Gorunumler (130 ad, 39 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -342,6 +343,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_hesap_ekstre` | `111_ekstre_doviz_gruplu.sql` | 077_v_ekstre.sql, 097_ekstre_kaynak_kayit.sql |
 | `v_hesap_lookup` | `071_kasa_master.sql` | — |
 | `v_hesap_plani_lookup` | `074_muhasebe.sql` | — |
+| `v_hizmet_baslik_lookup` | `521_skrs_katalog_kurulum.sql` | — |
 | `v_hizmet_lookup` | `482_hizmet_cinsiyet_yas.sql` | 071_kasa_master.sql |
 | `v_hizmet_paket_eksik` | `502_hizmet_paket_bayragi.sql` | — |
 | `v_hizmet_paket_ozet` | `496_hizmet_paket.sql` | — |
@@ -405,6 +407,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_sgk_katilim_emanet` | `473_katilim_emaneti.sql` | — |
 | `v_sigorta_hesap_lookup` | `430_sigorta_v1.sql` | — |
 | `v_sigorta_saglayici_lookup` | `430_sigorta_v1.sql` | — |
+| `v_skrs_ham_alan` | `520_skrs_katalog_ambari.sql` | — |
 | `v_skrs_klinik_lookup` | `455_skrs_klinik.sql` | — |
 | `v_skrs_sapma` | `503_skrs_kod_dikisi.sql` | — |
 | `v_stok_kullanilabilir` | `142_siparis_rezervasyon.sql` | — |
