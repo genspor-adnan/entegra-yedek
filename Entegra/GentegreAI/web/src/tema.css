@@ -1173,6 +1173,11 @@ input.skt-gecmis {
 .dil-oge .bayrak { display: inline-flex; align-items: center; line-height: 1 }
 
 /* ---------------------------------------------- ana sayfa paneli ---- */
+/* Profil paneliyle genel kutulari ayiran baslik (508). */
+.panel-ayrac {
+  margin: 14px 0 2px; font-size: 11px; letter-spacing: .4px; text-transform: uppercase;
+  color: var(--soluk); font-weight: 700;
+}
 .panel-kutular { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-bottom: 14px }
 /* KPI kutusu tiklanabilir: dugme ama gorunumu kart. */
 .panel-kpi { text-align: left; cursor: pointer; font: inherit }

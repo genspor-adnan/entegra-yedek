@@ -34,6 +34,23 @@ public sealed class PanelDeposu
 
     public PanelDeposu(VeriKaynagi veri) => _veri = veri;
 
+    /// <summary>
+    /// KURUM PROFILINE OZEL panel icerigi (508). Kutu/blok tanimi SQL'de
+    /// (`fn_panel_profil`): yeni profil ya da yeni gosterge, ekran ve API
+    /// kodu degismeden eklenir. Ham JSON doner - katalog deseninde oldugu
+    /// gibi istemci yalnizca cizer.
+    /// </summary>
+    public async Task<System.Text.Json.JsonDocument?> ProfilPaneliAsync(
+        int? subeId, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await using var komut = new NpgsqlCommand(
+            "select public.fn_panel_profil(coalesce(@p0, 0))::text", baglanti);
+        komut.Parameters.AddWithValue("p0", (object?)subeId ?? DBNull.Value);
+        var metin = await komut.ExecuteScalarAsync(iptal) as string;
+        return string.IsNullOrEmpty(metin) ? null : System.Text.Json.JsonDocument.Parse(metin);
+    }
+
     public async Task<PanelYaniti> OkuAsync(int? subeId, long? kullaniciTarafId,
         CancellationToken iptal = default)
     {

@@ -22,8 +22,14 @@ public static class PanelUclari
             //   oldugu icin kullanici kimligi dogrudan sorumlu_id ile eslesir;
             //   sorumlusu BOS gorevler (havuz isi) herkese gorunur.
             var p = await depo.OkuAsync(baglam.SubeId, baglam.KullaniciId, iptal);
+            // KURUM PROFILINE OZEL PANEL (508): lab / goruntuleme / klinik
+            //   kutulari ve bloklari SUNUCUDAN gelir - istemci yalniz cizer.
+            //   Profil taninmiyorsa `kutular` bos doner ve asagidaki genel
+            //   (ERP) duzen gecerli kalir.
+            var profil = await depo.ProfilPaneliAsync(baglam.SubeId, iptal);
             return Results.Ok(new
             {
+                profil,
                 kutular = p.Kutular,
                 sonBelgeler = p.SonBelgeler,
                 kritikStok = p.KritikStok,

@@ -714,7 +714,35 @@ export interface PanelSatiri {
   yol: string;
 }
 
+/** Kurum profiline ozel panel kutusu (508) - icerigi SUNUCU belirler. */
+export interface ProfilKutusu {
+  kod: string; baslik: string; deger: number; alt: string;
+  /** 'normal' | 'uyari' | 'tehlike' | 'olumlu' */
+  vurgu: string;
+  /** 'para' verilirse tutar olarak bicimlenir. */
+  bicim?: string;
+  rota?: string;
+}
+
+/** Kurum profiline ozel panel blogu: baslik + kolonlar + satirlar. */
+export interface ProfilBloku {
+  kod: string; baslik: string; ipucu?: string;
+  kolonlar: string[];
+  /** Kolon basina bicim: 'metin' | 'sayi' | 'para'. */
+  bicimler?: string[];
+  satirlar: string[][];
+}
+
+/** Kurum profili paneli (508): bos `kutular` = genel (ERP) duzen cizilir. */
+export interface PanelProfili {
+  kurumTipi: string; baslik: string;
+  kutular: ProfilKutusu[];
+  bloklar: ProfilBloku[];
+}
+
 export interface PanelYaniti {
+  /** Kurum profiline ozel panel (508); yoksa genel duzen. */
+  profil?: PanelProfili | null;
   kutular: PanelKutusu[];
   sonBelgeler: PanelSatiri[];
   kritikStok: PanelSatiri[];

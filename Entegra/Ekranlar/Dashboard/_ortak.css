@@ -1,0 +1,47 @@
+/* Dashboard mockup'larinin ortak stili - Ekranlar'daki pencere diliyle ayni. */
+:root{
+  --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+  --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+  --sel:#d7e7fb; --head:#f3f6fa; --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+.win{max-width:1440px;margin:0 auto 16px;background:var(--card);border:1px solid var(--line);
+  border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+.title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+  display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+.title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+.selam{padding:12px 14px 4px;font-size:15px;font-weight:bold;color:var(--navy)}
+.selam span{font-weight:normal;font-size:11.5px;color:var(--muted);margin-left:8px}
+.kutular{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;padding:10px 14px}
+.kutu{border:1px solid var(--line);border-radius:4px;background:linear-gradient(#fff,#fbfcfe);padding:9px 11px}
+.kutu .b{font-size:10.5px;color:var(--muted);letter-spacing:.2px}
+.kutu .d{font-size:20px;font-weight:bold;margin:3px 0 1px}
+.kutu .a{font-size:10.5px;color:var(--muted)}
+.kutu.teh .d{color:var(--kirmizi)} .kutu.uy .d{color:var(--uyari)} .kutu.ok .d{color:var(--ok)}
+.satir{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:10px;padding:0 14px 12px}
+.blok{border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#fff}
+.blok h4{margin:0;padding:6px 10px;background:var(--head);border-bottom:1px solid var(--line2);
+  font-size:11.5px;color:#3a5573;display:flex;align-items:center;gap:6px}
+.blok h4 .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:10.5px}
+table{border-collapse:collapse;width:100%}
+th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);text-align:left;
+  padding:5px 8px;font-size:10.5px;color:#3a5573;white-space:nowrap}
+td{border-bottom:1px solid var(--line2);padding:4px 8px;font-size:11.5px;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+.sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+.rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);
+  background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+.rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+.rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+.rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+.rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+.rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+.cubuk{height:7px;border-radius:4px;background:#e7edf4;overflow:hidden;min-width:70px}
+.cubuk i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+.cubuk i.uy{background:linear-gradient(90deg,#e8c169,#c99a2e)}
+.cubuk i.teh{background:linear-gradient(90deg,#e07d72,#c0392b)}
+.not{max-width:1440px;margin:10px auto 20px;color:#6b7a8b;font-size:11.5px;line-height:1.7}
+.not b{color:var(--ink)} .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+.not ul{margin:6px 0 0;padding-left:18px}

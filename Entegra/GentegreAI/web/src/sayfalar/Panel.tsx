@@ -70,6 +70,62 @@ export function Panel() {
         {hata && <div className="hata-kutusu">{hata}</div>}
         {yukleniyor ? <div className="yukleniyor">Yükleniyor…</div> : (
           <>
+            {/* KURUM PROFILINE OZEL PANEL (508, kullanici: "lab da,
+                goruntuleme merkezinde veya tip merkezinde ayri dashboardlar
+                olsun"). Kutu/blok tanimi SUNUCUDAN (`fn_panel_profil`) gelir;
+                burada yalniz cizim var - yeni profil eklemek ekran kodu
+                degistirmez. Profil taninmiyorsa asagidaki genel duzen kalir. */}
+            {(veri?.profil?.kutular?.length ?? 0) > 0 && (
+              <>
+                <div className="panel-kutular">
+                  {veri!.profil!.kutular.map(k => (
+                    <button key={k.kod} type="button" className="kpi panel-kpi"
+                            onClick={() => k.rota && git(k.rota)}
+                            title={k.rota ? 'Listeyi aç' : undefined}>
+                      <div className="k">{k.baslik}</div>
+                      <div className={`v ${k.vurgu}`}>
+                        {k.bicim === 'para' ? `${para.format(Number(k.deger))} ₺`
+                                            : sayi.format(Number(k.deger))}
+                      </div>
+                      <div className="s">{k.alt}</div>
+                    </button>
+                  ))}
+                </div>
+                <div className="panel-sutunlar">
+                  {veri!.profil!.bloklar.map(b => (
+                    <div className="kagrup" key={b.kod}>
+                      <h6>{b.baslik}{b.ipucu && <span className="sonuk"> · {b.ipucu}</span>}</h6>
+                      <table className="detay-tablo">
+                        <thead><tr>{b.kolonlar.map((k, i) => (
+                          <th key={k} className={b.bicimler?.[i] === 'metin' ? '' : 'hiza-sag'}>{k}</th>
+                        ))}</tr></thead>
+                        <tbody>
+                          {b.satirlar.map((sat, si) => (
+                            <tr key={si}>
+                              {sat.map((h, hi) => (
+                                <td key={hi} className={b.bicimler?.[hi] === 'metin' ? '' : 'hiza-sag'}>
+                                  {b.bicimler?.[hi] === 'para' ? para.format(Number(h))
+                                   : b.bicimler?.[hi] === 'sayi' ? sayi.format(Number(h)) : h}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                          {b.satirlar.length === 0 && (
+                            <tr><td className="bos" colSpan={b.kolonlar.length}>Kayıt yok.</td></tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Genel (ERP) kutular profil kutularinin ALTINDA: profil varken
+                gunun isi yukarida, ay ozeti/stok asagida kalir. */}
+            {(veri?.profil?.kutular?.length ?? 0) > 0 && (
+              <h6 className="panel-ayrac">Genel</h6>
+            )}
             <div className="panel-kutular">
               {(veri?.kutular ?? []).map(k => (
                 <button key={k.anahtar} type="button" className="kpi panel-kpi"
