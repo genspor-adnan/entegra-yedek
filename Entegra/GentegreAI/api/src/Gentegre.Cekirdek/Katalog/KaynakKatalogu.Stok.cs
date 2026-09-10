@@ -319,14 +319,18 @@ public static partial class KaynakKatalogu
     //   oncelik SQL'de metne cevrilir, ham kodlar cip filtreleri icin gizli kalir.
 
     /// <summary>
-    /// Hizmetin verilen TARIFE GRUBUNDAKI liste fiyati (5 Özel · 6 TTB/HUV ·
-    /// 7 SUT). Fiyat listesi yazili satirdan okunur; ayni grupta birden çok
+    /// Hizmetin verilen TARIFE TIPINDEKI liste fiyati (1 Özel · 2 TTB/HUV ·
+    /// 3 SUT). Fiyat listesi yazili satirdan okunur; ayni tipte birden çok
     /// liste varsa en eski (kurulusun ana tarifesi) kazanir.
+    ///
+    /// 532: eskiden `fiyat_listesi.grup` (5/6/7) okunuyordu - o kolon
+    /// dustu, tip 518'deki `tarife_tipi` kolonunda. Kolon dusunce hizmet
+    /// listesi 500 veriyordu ("column l.grup does not exist").
     /// </summary>
-    private static string TarifeFiyati(int grup) =>
+    private static string TarifeFiyati(int tarifeTipi) =>
         "(select round(f.fiyat, 2) from public.fiyat_listesi_satir f" +
         "   join public.fiyat_listesi l on l.id = f.liste_id" +
-        "  where f.hizmet_id = h.id and f.durum = 1 and l.grup = " + grup +
+        "  where f.hizmet_id = h.id and f.durum = 1 and l.tarife_tipi = " + tarifeTipi +
         "  order by l.id limit 1)";
 
     // ------------------------------------------------------------- hizmet ----
@@ -411,13 +415,13 @@ public static partial class KaynakKatalogu
             //   fiyati odedigi sozlesmesindeki listeden cikar. Kolonlar
             //   listenin GRUBUNA bakar (5 Ozel · 6 TTB/HUV · 7 SUT) - liste
             //   id'leri kurulumdan kuruluma degisir.
-            new("ozelFiyat", TarifeFiyati(5), "para", "Özel (Ücretli)",
+            new("ozelFiyat", TarifeFiyati(1), "para", "Özel (Ücretli)",
                 Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false,
                 Filtrelenebilir: false, Genislik: 130),
-            new("huvFiyat",  TarifeFiyati(6), "para", "TTB / HUV",
+            new("huvFiyat",  TarifeFiyati(2), "para", "TTB / HUV",
                 Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false,
                 Filtrelenebilir: false, Genislik: 120),
-            new("sutFiyat",  TarifeFiyati(7), "para", "SUT",
+            new("sutFiyat",  TarifeFiyati(3), "para", "SUT",
                 Hizalama: "sag", Bicim: "#,##0.00", Siralanabilir: false,
                 Filtrelenebilir: false, Genislik: 110),
             // PANEL MI: icerigi olan hizmet (496). Panelin kendi satiri da

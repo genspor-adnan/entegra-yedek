@@ -14,12 +14,13 @@ public static partial class KaynakKatalogu
             left join public.fiyat_listesi t on t.id = l.taban_liste_id
             """,
         SubeKolonu: "l.sube_id",
-        VarsayilanSirala: "l.grup, l.ad",
+        // GRUP KOLONU DUSTU (532): tarife tipi (518) ayni soruyu
+        //   soruyordu. Siralama tarife tipine gore - Ozel, TTB, SUT.
+        VarsayilanSirala: "l.tarife_tipi, l.ad",
         Kolonlar: new KolonTanimi[]
         {
             new("id",   "l.id",   "sayi",  "Id", Varsayilan: false),
             new("ad",   "l.ad",   "metin", "Liste Adı", Genislik: 220),
-            new("grup", "l.grup", "kod",   "Grubu", Hizalama: "orta"),
             // Yon: belge karti listeyi buna gore suzer (alis belgesinde satis
             //   listesi cikmamali). Gridde de gorunur - hangi liste ne icin.
             new("yon", "case when l.yon = 1 then 'Alış' else 'Satış' end", "metin",
@@ -27,11 +28,9 @@ public static partial class KaynakKatalogu
             new("yonKodu", "l.yon", "sayi", "Yön Kodu", Varsayilan: false),
             new("varsayilan", "case when l.varsayilan = 1 then '✓' else '' end", "metin",
                 "Varsayılan", Hizalama: "orta"),
-            new("tabanListeAdi", "coalesce(t.ad, '')", "metin", "Taban Liste", Genislik: 180),
-            new("carpan",    "l.carpan",    "para", "Çarpan", Hizalama: "sag", Bicim: "#,##0.0000"),
-            new("yuvarlama", "l.yuvarlama", "kod",  "Yuvarlama", Hizalama: "orta"),
-            new("yuvarlamaBirim", "l.yuvarlama_birim", "para", "Adım",
-                Hizalama: "sag", Bicim: "#,##0.00", Varsayilan: false),
+            // TABAN LISTE / CARPAN / YUVARLAMA KOLONLARI KALKTI (532):
+            //   turetme kurali artik satir duzeyinde (518 tarife tipi) - liste
+            //   basliginda ayni kurali ikinci kez gostermek gurultuydu.
             // KDV iki degerli: kod listesi acmak yerine dogrudan metne cevrilir.
             new("kdvDahil", "case when l.kdv_dahil = 1 then 'Dahil' else 'Hariç' end", "metin",
                 "KDV", Hizalama: "orta"),

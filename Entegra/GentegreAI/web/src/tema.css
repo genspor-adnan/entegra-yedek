@@ -2714,6 +2714,9 @@ input.skt-gecmis {
    ekran genişliğine göre 2-6 sütun arasında zıplayıp mockup düzenini
    bozuyordu - kart her açılışta farklı görünmemeli. */
 .kaid .alan-izgara.kaid-dokuman { grid-template-columns: repeat(4, minmax(0, 1fr)) }
+/* FIYAT LISTESI (532): 1. sira ad · tarife · yon · KDV · durum,
+   2. sira baslama · bitis · aciklama · varsayilan. */
+.kaid .alan-izgara.kaid-fiyat { grid-template-columns: repeat(5, minmax(0, 1fr)) }
 /* Açıklama satırın tamamını kaplar: tek satırlık kutuda uzun metin okunmuyor. */
 .kaid .alan-izgara.kaid-dokuman .alan.tip-metin:last-of-type { grid-column: auto }
 /* GEÇERLİLİK TEK HÜCREDE: başlangıç — bitiş · gözden geçirme. Üç ayrı kutu

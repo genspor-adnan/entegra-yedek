@@ -199,7 +199,8 @@ interface Props {
  * Tip 0 (genel) hicbir sey gizlemez - eski listeler oldugu gibi calisir.
  */
 function tarifeGizli(tip: number): string[] {
-  if (tip === 1) return ['tabanFiyat', 'carpan', 'katkiTutar', 'ekKatkiTipi', 'ekKatkiDeger'];
+  // Ek katki alanlari 532'de fiyat listesinden kalkti - listede yok.
+  if (tip === 1) return ['tabanFiyat', 'carpan', 'katkiTutar'];
   if (tip === 2) return [];                       // katsayi · carpan · fiyat · katki
   if (tip === 3) return ['tabanFiyat', 'carpan']; // fiyat SKRS'den, katsayi yok
   return [];
@@ -1148,7 +1149,13 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
             <div className={`alan-izgara${kaynak === 'kisi' ? ' kaid-kisi' : ''}`
                             + (kaynak === 'randevu' ? ' kaid-randevu' : '')
                             + (kaynak === 'prim-plani' ? ' kaid-prim' : '')
-                            + (kaynak === 'kampanya' ? ' kaid-kampanya' : '')}>
+                            + (kaynak === 'kampanya' ? ' kaid-kampanya' : '')
+                            // FIYAT LISTESI SERIDI BES SUTUN (532, kullanici:
+                            //   "1. sira: ad, tarife, yon, kdv, durum" ·
+                            //   "2. sira: baslama, bitis, aciklama,
+                            //   varsayilan"). Otomatik akista kutular ekran
+                            //   genisligine gore ziplayip bu ayrimi bozuyordu.
+                            + (kaynak === 'fiyat-listesi' ? ' kaid-fiyat' : '')}>
               {renderAlanListesi(kimlikAlanlari)}
             </div>
           )}

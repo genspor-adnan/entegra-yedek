@@ -53,61 +53,59 @@ public static partial class KartKatalogu
             new("tarifeTipi", "tarife_tipi", "kod",
                 KodListesi: "fiyat_listesi.tarife_tipi",
                 Baslik: "Tarife Tipi", Grup: "Kimlik"),
-            new("grup", "grup", "kod",   KodListesi: "fiyat_listesi.grup",
-                Baslik: "Grubu", Grup: "Kimlik"),
+            new("yon", "yon", "kod", SabitKodlar: YonKodlari,
+                Baslik: "Yön", Grup: "Kimlik"),
+            new("kdvDahil", "kdv_dahil", "kod", SabitKodlar: KdvDahilKodlari,
+                Baslik: "KDV", Grup: "Kimlik"),
             new("durum", "durum", "kod", SabitKodlar: DurumKodlari,
                 Baslik: "Durum", Grup: "Kimlik"),
 
-            // ALT GRUP SIRASI = ALAN SIRASI: kutular ekranda alanlarin ilk
-            //   goruldugu sirayla dizilir (Fiyatlama · Detay).
+            // TUM ALANLAR UST SERITTE (532, kullanici: "diger alanlari
+            //   basliga 2. sira olarak tasi"). Liste kartinda alan sayisi
+            //   dorde dustukten sonra ("Genel" sekmesinde yalniz iki kutu
+            //   kaliyordu) ayri bir sekme acmak, tek satirlik bilgiyi iki
+            //   tiklama arkasina koymak oluyordu. Serit dortlu izgara:
+            //   ad / tarife / durum / varsayilan · yon / KDV / baslama /
+            //   bitis · aciklama.
+            //   1. SIRA (kullanici): ad · tarife · yon · KDV · durum
+            //   2. SIRA (kullanici): baslama · bitis · aciklama · varsayilan
 
-            // FIYATLAMA KURALI. Taban liste bos ise liste KOKTUR: fiyatlar
-            //   kalemin kendi kartindan (stok_fiyat / hizmet_fiyat) baslar.
-            new("tabanListeId", "taban_liste_id", "kod",
-                KodTablosu: "public.v_fiyat_listesi_lookup",
-                Baslik: "Taban Liste", Grup: "Genel", AltGrup: "Fiyatlama"),
-            new("carpan", "carpan", "para", Baslik: "Çarpan",
-                Grup: "Genel", AltGrup: "Fiyatlama"),
-            new("yuvarlama", "yuvarlama", "kod", KodListesi: "fiyat_listesi.yuvarlama",
-                Baslik: "Yuvarlama", Grup: "Genel", AltGrup: "Fiyatlama"),
-            // "En Yakin Degere" bir ADIM ister; adimsiz "en yakin" tanimsizdir.
-            new("yuvarlamaBirim", "yuvarlama_birim", "para", Baslik: "Yuvarlama Adımı",
-                Grup: "Genel", AltGrup: "Fiyatlama"),
-            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
-                Baslik: "Açıklama", Grup: "Genel", AltGrup: "Fiyatlama"),
+            // TABAN LISTE / CARPAN / YUVARLAMA LISTE BASLIGINDAN KALKTI
+            //   (532, kullanici: "taban liste, carpan, yuvarlama, yuvarlama
+            //   adimi da kaldir" - "fiyat liste satirda varsa kaldirma").
+            //   Turetilmis liste kurali artik SATIR duzeyinde yasiyor: TTB
+            //   tarifesinde katsayi x carpan satirda hesaplaniyor (518), liste
+            //   basligindaki ayni dort alan ikinci bir kural gibi duruyordu.
+            //   Kolonlar DURUYOR - `fn_sls_carpan_manuel` ve turetme zinciri
+            //   onlari okuyor; yalniz kart alani kalktı.
 
-            // DETAY: listenin NASIL kullanilacagini soyleyen alanlar - fiyatin
-            //   nasil hesaplandigi degil.
-            // VARSAYILAN: carisinde liste tanimlanmamis belgeler bunu kullanir.
-            //   Yon basina TEK varsayilan olabilir (DB tekil indeksi).
-            new("varsayilan", "varsayilan", "mantik",
-                Baslik: "Varsayılan Liste", Grup: "Genel", AltGrup: "Detay"),
             // YON (204): liste alis mi satis mi? Belge turu hangi yondeyse o
             //   yonun listesi uygulanir. Taban liste AYNI YONDE olmali (DB tetigi).
-            new("yon", "yon", "kod", SabitKodlar: YonKodlari,
-                Baslik: "Yön", Grup: "Genel", AltGrup: "Detay"),
-            new("kdvDahil", "kdv_dahil", "kod", SabitKodlar: KdvDahilKodlari,
-                Baslik: "KDV", Grup: "Genel", AltGrup: "Detay"),
-            // KATILIM PAYI (291): listenin varsayilani - satirda
-            //   girilmeyen kalemlerde bu tutar hastadan alinir.
-            new("katkiTutar", "katki_tutar", "para", Baslik: "SGK Katılım Payı",
-                Grup: "Genel", AltGrup: "Detay"),
-            // EK KATKI (468, kullanici: "bunu fiyat listesine koysak daha
-            //   anlasilir olur"): hastane farki. Katilim payi gibi liste
-            //   varsayilani + satir istisnasi - sozlesmede sayi tutulmaz,
-            //   musteri "bu listede ne aliyorum" sorusunu listede goru.
-            new("ekKatkiTipi", "ek_katki_tipi", "kod",
-                KodListesi: "fiyat_listesi.ek_katki_tipi", Baslik: "Ek Katkı",
-                Grup: "Genel", AltGrup: "Detay", EslesAlan: "ekKatkiDeger"),
-            new("ekKatkiDeger", "ek_katki_deger", "para", Baslik: "Ek Katkı Değeri",
-                Grup: "Genel", AltGrup: "Detay"),
+            // SGK KATILIM PAYI LISTE BASLIGINDAN KALKTI (532, kullanici):
+            //   deger SATIRDA duruyor ("Katki (hasta)") - liste varsayilani
+            //   olarak ikinci kez sormak, hangisinin gecerli oldugunu
+            //   belirsiz birakiyordu. Kolon DURUYOR (fn_fiyat_listesi_katki
+            //   ve dagilim zinciri okuyor).
+            // EK KATKI FIYAT LISTESINDEN KALKTI (532, kullanici: "fiyat
+            //   listesinden ek katki ve tutar kaldir"). Kolonlar DURUYOR:
+            //   `fn_belge_satir_dagit` ve kapanma/tahsil zinciri onlari
+            //   okuyor - alan kartta gorunmuyor, hesap bozulmuyor. Hastane
+            //   farki artik listede degil, sozlesme/dagilim tarafinda.
             // GECERLILIK ARALIGI da Detay kutusunun altinda (kullanici): iki
             //   tarih icin ayri bir kutu fazladan bir kat gorsel gurultuydu.
             //   Bos birakilirsa sinirsiz; bitis baslangictan once olamaz (DB check).
             new("baslangic", "baslangic", "tarih", Baslik: "Başlama",
-                Grup: "Genel", AltGrup: "Detay"),
+                Grup: "Kimlik"),
             new("bitis",     "bitis",     "tarih", Baslik: "Bitiş",
-                Grup: "Genel", AltGrup: "Detay"),
+                Grup: "Kimlik"),
+            // Tek alan kalinca "Fiyatlama" kutusu bos bir baslik oluyordu -
+            //   aciklama Detay kutusuna gecti (532).
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
+                Baslik: "Açıklama", Grup: "Kimlik"),
+            // VARSAYILAN: carisinde liste tanimlanmamis belgeler bunu kullanir.
+            //   Yon basina TEK varsayilan olabilir (DB tekil indeksi).
+            new("varsayilan", "varsayilan", "mantik",
+                Baslik: "Varsayılan Liste", Grup: "Kimlik"),
 
             new("subeId", "sube_id", "sayi", Yazilabilir: false, Baslik: "Şube"),
         },
@@ -183,10 +181,7 @@ public static partial class KartKatalogu
                 //   katilim payi). Toplu uretilir (fn_fiyat_katki_uret), sonra
                 //   elle degisebilir - uretim kilit koymaz.
                 new("katkiTutar","katki_tutar","para", Baslik: "Katkı (hasta)"),
-                // Satirdaki kural LISTEYI EZER (0 = listenin varsayilani).
-                new("ekKatkiTipi", "ek_katki_tipi", "kod",
-                    KodListesi: "fiyat_listesi.ek_katki_tipi", Baslik: "Ek Katkı Tipi"),
-                new("ekKatkiDeger","ek_katki_deger","para", Baslik: "Ek Katkı"),
+                // Ek katki sutunlari kalkti (532) - bkz. listenin Detay kutusu.
                 new("dovizCinsi","doviz_cinsi","kod", Baslik: "Döviz"),
                 // KDV SUTUNU SATIRDAN KALKTI (kullanici): KDV dahil/haric
                 //   LISTENIN ozelligidir (Genel > Detay > KDV) - satirda
