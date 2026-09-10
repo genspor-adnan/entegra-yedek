@@ -391,7 +391,7 @@ public static partial class KaynakKatalogu
             new("birim",
                 "(select kd.ad from public.kod_deger kd" +
                 "   join public.kod_liste kl on kl.id = kd.liste_id" +
-                "  where kl.kod = 'stok.ana_birim' and kd.deger = h.birim)",
+                "  where kl.kod = 'hizmet.birim' and kd.deger = h.birim)",
                                             "metin", "Birim",      Hizalama: "orta",
                                             Filtrelenebilir: false, Varsayilan: false),
             // Birim KODU gizli: kalem/arama penceresi satirdan birimi

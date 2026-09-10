@@ -225,8 +225,11 @@ public static partial class KartKatalogu
             //   sirasiyla dizilir, Detay alanlari once tanimlanir.
             new("kdv",      "kdv",      "sayi",  Baslik: "KDV %",
                 Grup: "Genel", AltGrup: "Detay"),
-            // Hizmet birimi stogunkiyle AYNI listeden (51 Adet, 57 Kg...).
-            new("birim",    "birim",    "kod",   KodListesi: "stok.ana_birim",
+            // HIZMET BIRIMI AYRI LISTE (504, kullanici: "hizmette adet disinda
+            //   birim olur mu"): Adet · Seans · Gun · Saat · Dakika. Stogun
+            //   26 degerlik listesi hizmet kartinda "Palet / KWH / m2 / C62"
+            //   gosteriyordu - nitekim bir hizmetin birimi "Kg" olmustu.
+            new("birim",    "birim",    "kod",   KodListesi: "hizmet.birim",
                 Baslik: "Birim", Grup: "Genel", AltGrup: "Detay"),
             // UYGULANABILIRLIK (482, kullanici: "dogum erkek icin olmaz,
             //   prostat sadece erkeklere ve 20 yasindan sonra"). Kural KARTTA
