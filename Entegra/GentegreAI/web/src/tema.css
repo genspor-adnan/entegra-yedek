@@ -1074,6 +1074,9 @@ input.skt-gecmis {
 .kpi .v { font-size: 17px; font-weight: 700; color: var(--yazi2); margin-top: 3px }
 .kpi .v.uyari { color: var(--uyari) }
 .kpi .v.olumlu { color: var(--ok) }
+/* Panel kutusunda "tehlike" vurgusu (508/512): acik tahsilat gibi PARA
+   riski tasiyan kutular mockup'ta kirmizi. */
+.kpi .v.tehlike { color: var(--teh, #b23c3c) }
 .kpi .s { font-size: 10px; color: var(--soluk); margin-top: 2px }
 /* Grid icindeki duzenlenebilir hucre: cerceve yalniz odakta belirir. */
 .hucre-girdi { width: 100%; border: 1px solid transparent; background: transparent; padding: 1px 3px }
@@ -1181,6 +1184,13 @@ input.skt-gecmis {
 .panel-kutular { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-bottom: 14px }
 /* KPI kutusu tiklanabilir: dugme ama gorunumu kart. */
 .panel-kpi { text-align: left; cursor: pointer; font: inherit }
+/* PROFIL KUTULARI TEK SIRADA (mockup: 6 kutu yan yana). Genel kutularin
+   210px'lik tabani 6 kutuyu 1480px'te 5+1 kiriyordu. */
+.panel-kutular.profil { grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)) }
+/* Mockup'taki okuma: kutu etiketi BUYUK HARF ve harf araligi acik - deger
+   one ciksin, etiket fisilti kalsin. */
+.panel-kutular.profil .kpi .k { text-transform: uppercase; letter-spacing: .3px }
+.kagrup h6 .blok-ikon { margin-right: 5px }
 .panel-kpi:hover { border-color: var(--vurgu); box-shadow: var(--golge) }
 .panel-sutunlar { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; align-items: start }
 .panel-sutunlar .kagrup { margin-bottom: 0 }

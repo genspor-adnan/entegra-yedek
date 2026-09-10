@@ -17,6 +17,15 @@ function selam(): string {
 }
 
 /** Kutuya tiklayinca gidilecek liste; yolu olmayan kutu tiklanmaz. */
+/**
+ * Blok ikonlari (512): mockup'taki basliklarla AYNI - ikon bilgi tasimaz ama
+ * alti blogun icinde arananini goz hizli buluyor.
+ */
+const BLOK_IKON: Record<string, string> = {
+  poliklinik: '🩺', kurum: '🏢', birim: '🧪', enabiz: '📤',
+  hekim: '👨‍⚕️', dikkat: '⚠️', bolum: '🔬', modalite: '🖥',
+};
+
 const HIZLI_ERISIM = [
   { ad: '＋ Satış Faturası', yol: '/belge' },
   { ad: '＋ Satış İrsaliyesi', yol: '/satis-irsaliye' },
@@ -62,6 +71,9 @@ export function Panel() {
           <span className="yol">
             {new Date().toLocaleDateString('tr-TR',
               { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            {/* Hangi profilin panelini gorduguu basligin yaninda: ayni kurulumda
+                sube degistirince panel de degisiyor (508). */}
+            {veri?.profil?.baslik && <> · <b>{veri.profil.baslik}</b> paneli</>}
           </span>
         </div>
       </div>
@@ -77,7 +89,7 @@ export function Panel() {
                 degistirmez. Profil taninmiyorsa asagidaki genel duzen kalir. */}
             {(veri?.profil?.kutular?.length ?? 0) > 0 && (
               <>
-                <div className="panel-kutular">
+                <div className="panel-kutular profil">
                   {veri!.profil!.kutular.map(k => (
                     <button key={k.kod} type="button" className="kpi panel-kpi"
                             onClick={() => k.rota && git(k.rota)}
@@ -94,7 +106,10 @@ export function Panel() {
                 <div className="panel-sutunlar">
                   {veri!.profil!.bloklar.map(b => (
                     <div className="kagrup" key={b.kod}>
-                      <h6>{b.baslik}{b.ipucu && <span className="sonuk"> · {b.ipucu}</span>}</h6>
+                      <h6>
+                        {BLOK_IKON[b.kod] && <span className="blok-ikon">{BLOK_IKON[b.kod]}</span>}
+                        {b.baslik}{b.ipucu && <span className="sonuk"> · {b.ipucu}</span>}
+                      </h6>
                       <table className="detay-tablo">
                         <thead><tr>{b.kolonlar.map((k, i) => (
                           <th key={k} className={b.bicimler?.[i] === 'metin' ? '' : 'hiza-sag'}>{k}</th>
@@ -121,11 +136,11 @@ export function Panel() {
               </>
             )}
 
-            {/* Genel (ERP) kutular profil kutularinin ALTINDA: profil varken
-                gunun isi yukarida, ay ozeti/stok asagida kalir. */}
-            {(veri?.profil?.kutular?.length ?? 0) > 0 && (
-              <h6 className="panel-ayrac">Genel</h6>
-            )}
+            {/* PROFIL PANELI VARSA GENEL (ERP) BOLUM CIZILMEZ (kullanici:
+                "mockup'la birebir aynı görünüm olsun"): klinik kullanicisinin
+                ana sayfasinda ay ozeti/stok kutulari ve ERP listeleri isin
+                onune geciyordu. Profil taninmiyorsa asagisi aynen kalir. */}
+            {(veri?.profil?.kutular?.length ?? 0) === 0 && (<>
             <div className="panel-kutular">
               {(veri?.kutular ?? []).map(k => (
                 <button key={k.anahtar} type="button" className="kpi panel-kpi"
@@ -250,6 +265,7 @@ export function Panel() {
                 ))}
               </div>
             </div>
+            </>)}
           </>
         )}
       </div>

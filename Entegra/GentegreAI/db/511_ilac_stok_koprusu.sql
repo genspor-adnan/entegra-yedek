@@ -12,8 +12,10 @@
 --  Yani reçete/uygulama faturaya düşmüyordu.
 --
 --  Köprü BARKOD (GTIN) ile kurulur - ad eşlemesi güvenilmez ("Parol 500 mg
---  20 tablet" ile "PAROL 500MG 20 TB" ayrı yazılır, barkod tektir. Stokta
---  barkod `stok_barkod` tablosunda (bir stokun birden çok barkodu olabilir).
+--  20 tablet" ile "PAROL 500MG 20 TB" ayrı yazılır), barkod tektir. Stokta
+--  barkod `stok_birim.barkod` alanındadır: 144'te barkodlar birime taşındı,
+--  145'te `stok_barkod` tablosu düşürüldü - bir stokun her BİRİMİ (kutu,
+--  koli) kendi barkodunu taşır.
 --
 --  Eşleşmeyen ilaç için stok kartı AÇILIR (fn_ilac_stok_kart_ac): kod =
 --  barkod, ad = ilaç adı, birim = ambalaj. Otomatik açmak yerine kullanıcı
@@ -29,7 +31,7 @@ declare
 begin
     update public.ilac i
        set stok_id = b.stok_id
-      from public.stok_barkod b
+      from public.stok_birim b
      where i.stok_id is null
        and i.barkod <> ''
        and b.barkod = i.barkod;
@@ -79,7 +81,7 @@ begin
     end if;
 
     -- Aynı barkod stokta zaten varsa yeni kart AÇILMAZ, ona bağlanır.
-    select b.stok_id into v_stok from public.stok_barkod b where b.barkod = r.barkod limit 1;
+    select b.stok_id into v_stok from public.stok_birim b where b.barkod = r.barkod limit 1;
     if v_stok is null then
         select id into v_sube from public.sube order by varsayilan desc, id limit 1;
         v_kod := left(coalesce(nullif(r.barkod, ''), 'ILAC.' || r.id), 25);
@@ -93,10 +95,12 @@ begin
                 p_kullanici, p_kullanici)
         returning id into v_stok;
 
-        insert into public.stok_barkod (stok_id, barkod, barkod_tipi, varsayilan, ekleyen)
-        select v_stok, r.barkod, 1, 1, p_kullanici
+        -- Barkod stogun ANA BIRIMINE yazilir (144 deseni): okutulunca bulunsun.
+        insert into public.stok_birim (stok_id, birim, carpan, barkod,
+                                       varsayilan_alis, varsayilan_satis, durum)
+        select v_stok, 51, 1, r.barkod, 1, 1, 1
          where r.barkod <> ''
-           and not exists (select 1 from public.stok_barkod where barkod = r.barkod);
+           and not exists (select 1 from public.stok_birim where barkod = r.barkod);
     end if;
 
     update public.ilac set stok_id = v_stok where id = p_ilac;
