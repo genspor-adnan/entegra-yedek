@@ -12,7 +12,9 @@ import { guvenli } from './mesaj';
  *
  * Süzgeç `icinde` koşuluyla gider: dalın tüm alt id'leri tek sorguda.
  */
-type Kategori = { id: number; ad: string; ustId: number | null; tur: number };
+type Kategori = { id: number; ad: string; ustId: number | null; tur: number;
+                  /** 0 = kurum profilinde kapatildi (527) - agacta gorunmez. */
+                  aktif: number };
 
 /** Ağaç başlıkları - iki tür birden istendiğinde optgroup etiketi olur. */
 const TUR_ADI: Record<number, string> = { 1: 'Stok', 2: 'Hizmet' };
@@ -43,7 +45,15 @@ export function KategoriSuzgeci({ tur, deger, onDegis, sinirla, baslik }: {
         id: Number(s.id), ad: String(s.ad ?? ''),
         ustId: s.ustId === null || s.ustId === undefined ? null : Number(s.ustId),
         tur: Number(s.tur ?? 1),
-      })).filter(k => turler.includes(k.tur)));
+        aktif: Number(s.aktif ?? 1),
+      }))
+        // PASIF KATEGORI AGACA GIRMEZ (531, kullanici: "profilden
+        //   kaldirdigim kategoriler hem kategori agaclarina gelmesin hem de
+        //   listelere aratinca"). Kurum profilinde kapatilan kategori (527)
+        //   o kurumun YAPMADIGI istir; secenek olarak sunmak, secilince bos
+        //   sonuc veren bir suzgec uretir.
+        .filter(k => k.aktif === 1)
+        .filter(k => turler.includes(k.tur)));
     });
   }, [turAnahtari]);
 

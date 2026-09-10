@@ -488,7 +488,13 @@ export function Kabuk() {
             )}
           </span>
           <button className="ib" title="Yardim">?</button>
-          <button className="ib" title="Cikis" onClick={() => void cikisYap()}>⏻</button>
+          {/* ÇIKIŞ AYIRT EDİLİR (kullanıcı): zil/yardım/dil ikonlarıyla aynı
+              görünümdeydi ve başlığı Türkçesizdi ("Cikis"). Yanlışlıkla
+              basıldığında oturum kapanan tek düğme bu - komşularından ayrı
+              dursun: solunda ince ayraç, üzerine gelince kırmızı vurgu. */}
+          <span className="ust-ayrac" aria-hidden="true" />
+          <button className="ib cikis" title="Çıkış — oturumu kapat"
+                  onClick={() => void cikisYap()}>⏻</button>
           <button
             type="button"
             className="avt"

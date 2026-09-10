@@ -113,6 +113,10 @@ public sealed record DetayTanimi(
     // Cip kodu -> SQL kosulu ("stok" -> "stok_id is not null"). Kosul
     //   KATALOGDA yazilidir; istek yalniz kodu secer.
     IReadOnlyDictionary<string, string>? Cipler = null,
+    // KART ACILISINDA uygulanan cip (531): cip secimi sunucuya gidiyordu ama
+    //   kartin ILK sayfasi suzgecsiz geliyordu - fiyat listesi acilinca pasif
+    //   kalemler gorunuyor, kullanici cipe dokununca kayboluyordu.
+    string? VarsayilanCip = null,
     // YENI SATIR VARSAYILANLARI: istekte gelmeyen alanlara kayit sirasinda
     //   yazilir. Kartin KIMLIGINI belirleyen bayraklar icindir - ornegin dis
     //   hekim kartinda taraf_personel.dis_hekim = 1 (305): kullaniciya

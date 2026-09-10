@@ -76,10 +76,13 @@ public sealed partial class KartDeposu
             // SAYFALI DETAY (525): kartla yalniz ilk sayfa gelir. Fiyat
             //   listesi satiri 14 bine cikinca kart yaniti 4 MB oluyor,
             //   tarayici o kadar satiri cizerken kilitleniyordu.
+            // Varsayilan cip kartin ILK sayfasina da uygulanir (531).
+            var ilkSuzgec = detay.VarsayilanCip is null
+                ? null : new DetaySuzgeci(Cip: detay.VarsayilanCip);
             sonuc[detay.Ad] = await DetaySayfasiAsync(baglanti, detay, id, 1,
-                                                      detay.SayfaBoyu, null, iptal);
+                                                      detay.SayfaBoyu, ilkSuzgec, iptal);
             if (detay.SayfaBoyu > 0)
-                toplam[detay.Ad] = await DetayAdediAsync(baglanti, detay, id, null, iptal);
+                toplam[detay.Ad] = await DetayAdediAsync(baglanti, detay, id, ilkSuzgec, iptal);
         }
 
         return (sonuc, toplam);

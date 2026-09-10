@@ -10,6 +10,17 @@
 public static partial class KartKatalogu
 {
     /// <summary>Fiyat listesinin kendisi - kural ve gecerlilik araligi.</summary>
+    /// <summary>
+    /// Fiyat satirinin KALEMI kullanimda mi (531). Kategori kapatilinca
+    /// hizmet/stok pasife duser (527); pasif kalemin fiyat satiri listede
+    /// gorunmez - satir SILINMEZ, yalniz gizlenir.
+    /// </summary>
+    private const string KalemAktif =
+        "(exists (select 1 from public.hizmet h9 "
+        + "        where h9.id = fiyat_listesi_satir.hizmet_id and h9.durum = 1) "
+        + " or exists (select 1 from public.stok s9 "
+        + "        where s9.id = fiyat_listesi_satir.stok_id and s9.durum = 1))";
+
     private static KartTanimi FiyatListesi() => new(
         Ad: "fiyat-listesi",
         YetkiKodu: "fiyat_listesi",
@@ -204,11 +215,21 @@ public static partial class KartKatalogu
                //   yalniz ekrandaki 200 satiri tariyordu.
                AraAlanlari: new[] { "kalemKodu", "kalemAdi" },
                KategoriAlani: "kategoriId",
+               // PASIF KALEM GIZLI (531, kullanici: "kurum profiline girip
+               //   kategorilerden girisimi kaldirdim ama fiyat listelerine
+               //   geliyor"). Kategori kapatilinca altindaki hizmet/stoklar
+               //   pasife duser (527) ama fiyat SATIRI durur - fiyat bilgisi
+               //   kaybolmasin diye silinmiyor. Satir artik LISTELENMIYOR:
+               //   kurumun yapmadigi islemin fiyatini gostermek, o islemi
+               //   satilabilir gibi sunar. "Pasif" cipi onlari geri getirir.
                Cipler: new Dictionary<string, string>(StringComparer.Ordinal)
                {
-                   ["stok"]   = "fiyat_listesi_satir.stok_id is not null",
-                   ["hizmet"] = "fiyat_listesi_satir.hizmet_id is not null",
-               })
+                   ["aktif"]  = KalemAktif,
+                   ["stok"]   = "fiyat_listesi_satir.stok_id is not null and " + KalemAktif,
+                   ["hizmet"] = "fiyat_listesi_satir.hizmet_id is not null and " + KalemAktif,
+                   ["pasif"]  = "not " + KalemAktif,
+               },
+               VarsayilanCip: "aktif")
         },
         SilmeEngelleri: new[]
         {

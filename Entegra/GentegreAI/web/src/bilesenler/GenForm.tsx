@@ -1656,11 +1656,15 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           cipler={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
             // `kod`: SAYFALI DETAYDA sunucuya giden cip anahtari (526) -
             //   katalogdaki SQL kosuluyla eslesir.
-            ? [{ ad: 'Tümü', suz: () => true },
+            // PASIF KALEM GIZLI (531): "Tümü" bile pasif kalemi getirmez -
+            //   kategorisi kapatilan (527) kalem kurumun yapmadigi islemdir.
+            //   Fiyati kaybolmaz, "Pasif" cipiyle gorulur.
+            ? [{ ad: 'Tümü', kod: 'aktif', suz: () => true },
                { ad: '📦 Stok', kod: 'stok',
                  suz: s => s.stokId != null && s.stokId !== '' },
                { ad: '🛠️ Hizmet', kod: 'hizmet',
-                 suz: s => s.hizmetId != null && s.hizmetId !== '' }]
+                 suz: s => s.hizmetId != null && s.hizmetId !== '' },
+               { ad: '🚫 Pasif', kod: 'pasif', suz: () => true }]
             : undefined}
           // KATEGORI AGAC COMBOSU (kullanici) - arama kutusunun saginda.
           //   Secenekler SATIRLARDA GECEN dallarla sinirli: 5.000 stok
