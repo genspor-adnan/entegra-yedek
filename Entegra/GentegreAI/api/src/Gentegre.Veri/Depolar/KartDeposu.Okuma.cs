@@ -367,6 +367,9 @@ public sealed partial class KartDeposu
             "public.v_lab_kk_lot_lookup",
             // Dis laboratuvar (445): tetkik kartinda ve gonderimde secim.
             "public.v_lab_dis_lab_lookup",
+            // Stok/hizmet siniflandirmasi (544): kategori agaci TUR BAZINDA
+            //   ayrildi - stok kartinda hizmet dallari cikiyordu.
+            "public.v_stok_kategori_lookup", "public.v_hizmet_kategori_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)
@@ -390,6 +393,26 @@ public sealed partial class KartDeposu
                 "order by case when id::text = '0' then 0 else 1 end, ad",
                 null, r => (Id: r.GetValue(0)?.ToString() ?? "", Ad: r.GetString(1)), iptal))
             .ToDictionary(x => x.Id, x => x.Ad, StringComparer.Ordinal);
+
+    /// <summary>
+    /// BAGLI KOD LISTESI (544): deger -> UST listedeki deger. Model markaya,
+    /// (ilerde) ilce ile baglanir. `KodTablosuUstAsync`in kod_liste karsiligi -
+    /// ust bagi orada `ust_id` kolonunda, burada `kod_deger.ust_deger`de.
+    /// </summary>
+    public async Task<Dictionary<string, string>> KodListesiUstAsync(
+        string kod, CancellationToken iptal = default)
+        => (await _veri.ListeAsync("""
+                select distinct on (d.deger) d.deger, d.ust_deger
+                  from public.kod_deger d
+                  join public.kod_liste l on l.id = d.liste_id
+                 where l.kod = @p0 and d.dil in (0, -1) and d.ust_deger <> 0
+                 order by d.deger, d.dil desc
+                """,
+                new object?[] { kod },
+                r => (Deger: r.GetInt32(0), Ust: r.GetInt32(1)), iptal))
+            .ToDictionary(x => x.Deger.ToString(CultureInfo.InvariantCulture),
+                          x => x.Ust.ToString(CultureInfo.InvariantCulture),
+                          StringComparer.Ordinal);
 
     /// <summary>Yerel para birimi (ayar genel.yerel_para) - kart metasina eklenir.</summary>
     public async Task<string> YerelParaAsync(CancellationToken iptal = default)

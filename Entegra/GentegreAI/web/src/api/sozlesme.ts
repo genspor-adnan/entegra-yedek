@@ -378,6 +378,9 @@ export interface KartAlanMeta {
   aramaKaynagi?: string | null;
   /** Bagli alanda secenek id -> ust id (sube id -> banka id). */
   kodUst?: Record<string, string> | null;
+  /** Secenekler kod_liste'den geliyorsa listenin kodu (544, "stok.model") -
+      kartta etiket tiklanınca o liste duzenlenir. */
+  kodListesi?: string | null;
   /**
    * Secim kaynagi HIYERARSIK (484, kategori): secenekler AGAC SIRASINDA ve
    * girintili cizilir. Ust baglari `kodUst`ten okunur; deger yine tek id.

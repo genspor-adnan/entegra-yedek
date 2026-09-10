@@ -299,7 +299,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (132 ad, 40 tanesi birden cok dosyada)
+## Gorunumler (134 ad, 40 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -358,6 +358,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_hesap_lookup` | `071_kasa_master.sql` | — |
 | `v_hesap_plani_lookup` | `074_muhasebe.sql` | — |
 | `v_hizmet_baslik_lookup` | `521_skrs_katalog_kurulum.sql` | — |
+| `v_hizmet_kategori_lookup` | `544_stok_kategori_marka_model.sql` | — |
 | `v_hizmet_lookup` | `482_hizmet_cinsiyet_yas.sql` | 071_kasa_master.sql |
 | `v_hizmet_paket_eksik` | `502_hizmet_paket_bayragi.sql` | — |
 | `v_hizmet_paket_ozet` | `496_hizmet_paket.sql` | — |
@@ -425,6 +426,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_skrs_ham_alan` | `520_skrs_katalog_ambari.sql` | — |
 | `v_skrs_klinik_lookup` | `455_skrs_klinik.sql` | — |
 | `v_skrs_sapma` | `503_skrs_kod_dikisi.sql` | — |
+| `v_stok_kategori_lookup` | `544_stok_kategori_marka_model.sql` | — |
 | `v_stok_kullanilabilir` | `142_siparis_rezervasyon.sql` | — |
 | `v_stok_lookup` | `121_firsat.sql` | — |
 | `v_stok_onek_dagilim` | `524_stok_kategorisi.sql` | — |

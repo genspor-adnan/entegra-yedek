@@ -1925,11 +1925,16 @@ export const api = {
   utsBildirimDetay: (id: number) =>
     gonder<UtsSorguYaniti>(`/api/uts/bildirim/${id}/detay-sorgula`, {}),
 
-  kodListe: (kod: string) =>
-    istek<{ kod: string; degerler: { deger: number; ad: string; sira: number; aktif: number }[] }>(
-      `/api/kod-liste/${encodeURIComponent(kod)}`),
-  kodListeEkle: (kod: string, ad: string, sira?: number) =>
-    gonder<{ deger: number }>(`/api/kod-liste/${encodeURIComponent(kod)}`, { ad, sira }),
+  // BAGLI LISTE (544): `ust` verilirse yalniz o ust degerin satirlari -
+  //   "bu markanin modelleri". Bagsiz listelerde parametre gonderilmez.
+  kodListe: (kod: string, ust?: number) =>
+    istek<{ kod: string; degerler: {
+      deger: number; ad: string; sira: number; aktif: number; ustDeger: number }[] }>(
+      `/api/kod-liste/${encodeURIComponent(kod)}`
+      + (ust === undefined ? '' : `?ust=${ust}`)),
+  kodListeEkle: (kod: string, ad: string, sira?: number, ustDeger?: number) =>
+    gonder<{ deger: number }>(`/api/kod-liste/${encodeURIComponent(kod)}`,
+                              { ad, sira, ustDeger }),
   kodListeGuncelle: (kod: string, deger: number, govde: { ad: string; sira?: number; aktif?: number }) =>
     gonder<object>(`/api/kod-liste/${encodeURIComponent(kod)}/${deger}`, govde, 'PUT'),
   kodListeSil: (kod: string, deger: number) =>

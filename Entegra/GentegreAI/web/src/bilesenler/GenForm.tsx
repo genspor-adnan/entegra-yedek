@@ -10,6 +10,7 @@ import { GenDetayTablo, type DetayDurumu, type Satir, bosDetay, detayFarki }
   from './GenDetayTablo';
 import { KademeGridi } from './prim/KademeGridi';
 import { Modal } from './Modal';
+import { KodListesiModali } from './KodListesiModali';
 import { yerelAnMetni, bugunIso, hamSayi, kidemMetni } from './bicim';
 import { PaketSekmesi } from './PaketSekmesi';
 import { KartGrupSekmesi } from './kart/KartGrupSekmesi';
@@ -309,6 +310,15 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
   }, [kaynak]);
 
   const [meta, setMeta] = useState<KartMetaYaniti | null>(null);
+  /**
+   * LISTE DUZENLEME PENCERESI (544): kod_liste'den beslenen alanin etiketine
+   * tiklaninca acilir. Bagli listede (model -> marka) YALNIZ secili ustun
+   * satirlari duzenlenir; yeni satir da ona baglanir - "Bilimplant'in
+   * modelleri" listesi baska hicbir ekrandan girilemiyordu.
+   */
+  const [listeDuzenlenen, setListeDuzenlenen] =
+    useState<{ kod: string; baslik: string; ustDeger?: number } | null>(null);
+
   const [deger, setDeger] = useState<Record<string, Deger>>({});
   const [ilkDeger, setIlkDeger] = useState<Record<string, Deger>>({});
   const [surum, setSurum] = useState<string | undefined>();
@@ -485,6 +495,25 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
   const [kurNotu, setKurNotu] = useState<string | null>(null);
   /** En son kuru cekilen "cins|tarih" - kayitli kartin kuru acilista ezilmesin. */
   const sonKurAnahtari = useRef<string | null>(null);
+
+  /** Duzenlenen kod listesinin seceneklerini kart metasina geri yazar (544). */
+  const listeSecenekleriTazele = useCallback(async (kod: string) => {
+    try {
+      const y = await api.kodListe(kod);
+      const kodlar: Record<string, string> = {};
+      const ust: Record<string, string> = {};
+      for (const d of y.degerler) {
+        if (d.aktif !== 1) continue;
+        kodlar[String(d.deger)] = d.ad;
+        if (d.ustDeger) ust[String(d.deger)] = String(d.ustDeger);
+      }
+      setMeta(m => m && ({
+        ...m,
+        alanlar: m.alanlar.map(a => a.kodListesi === kod
+          ? { ...a, kodlar, kodUst: a.bagliAlan ? ust : a.kodUst } : a),
+      }));
+    } catch { /* liste tazelenemezse eski secenekler kalir */ }
+  }, []);
 
   const yukle = useCallback(async () => {
     setYukleniyor(true);
@@ -1017,6 +1046,18 @@ const LAB_MIKRO_KARTLAR = new Set(['lab-besiyeri', 'lab-organizma', 'lab-antibiy
     secilenAdlar,
     aramaAc: (alanAdi, kaynakAdi, uygula) =>
       setAramaAlani({ alan: alanAdi, kaynak: kaynakAdi, uygula }),
+    listeDuzenle: a => {
+      if (!a.kodListesi) return;
+      // Bagli listede ust SECILMIS olmali: markasiz "model ekle" hangi
+      //   markaya yazilacagi belirsiz bir satir uretirdi.
+      const ust = a.bagliAlan ? Number(deger[a.bagliAlan] ?? 0) : undefined;
+      if (a.bagliAlan && !ust) {
+        bilgiMesaji(`Önce ${meta?.alanlar.find(x => x.ad === a.bagliAlan)?.baslik
+                      ?? a.bagliAlan} seçin.`);
+        return;
+      }
+      setListeDuzenlenen({ kod: a.kodListesi, baslik: a.baslik, ustDeger: ust });
+    },
   });
 
   return (
@@ -2142,6 +2183,23 @@ const LAB_MIKRO_KARTLAR = new Set(['lab-besiyeri', 'lab-organizma', 'lab-antibiy
             aramaYaz(aramaAlani, String(satir.id), String(satir.ad ?? satir.kod ?? ''));
           }}
         />
+      )}
+
+      {/* LISTE DUZENLE (544): kart alaninin etiketinden acilan jenerik
+          kod listesi penceresi. Kapaninca kart metasi tazelenir - yeni
+          eklenen deger combo'da hemen gorunsun. */}
+      {listeDuzenlenen && (
+        <KodListesiModali
+          kod={listeDuzenlenen.kod}
+          baslik={listeDuzenlenen.baslik}
+          ustDeger={listeDuzenlenen.ustDeger}
+          onKapat={() => {
+            const kod = listeDuzenlenen.kod;
+            setListeDuzenlenen(null);
+            // YALNIZ O LISTENIN SECENEKLERI tazelenir; kartin tamamini
+            //   yeniden yuklemek kaydedilmemis degisiklikleri silerdi.
+            void listeSecenekleriTazele(kod);
+          }} />
       )}
 
       {/* KATKI PENCERESI (541): oran x fiyat = hastadan alinacak katki.

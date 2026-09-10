@@ -57,12 +57,20 @@ export interface AlanCizimBaglami {
   secilenAdlar: Record<string, string>;
   /** "…" dugmesi: alan icin arama modalini acar. */
   aramaAc(alanAdi: string, kaynak: string, uygula?: (deger: string) => void): void;
+  /**
+   * LISTE DUZENLE (544): kod_liste'den beslenen alanin ETIKETI tiklanabilir
+   * olur ve jenerik KodListesiModali acilir. Ayar ekranlarindaki desenin
+   * KART karsiligi - "markanın modelleri" hicbir ekrandan girilemiyordu.
+   * Verilmezse etiket duz metin kalir.
+   */
+  listeDuzenle?(alan: KartAlanMeta): void;
 }
 
 export function alanCizici(b: AlanCizimBaglami) {
   const { kaynak, salt, meta, deger, setDeger, alanDegistir,
           alanHatalari, setAlanHatalari, doviz, yerelTutar, kurNotu,
-          bagliTarafAdi, setBagliTarafAdi, secilenAdlar, aramaAc } = b;
+          bagliTarafAdi, setBagliTarafAdi, secilenAdlar, aramaAc,
+          listeDuzenle } = b;
 
     /** Sekme icinde mockup'taki gibi alt-bolumler (or. Genel -> Tanım/Sınıflandırma). */
     const altGruplaVar = (alanlar: KartAlanMeta[]) => {
@@ -317,9 +325,18 @@ export function alanCizici(b: AlanCizimBaglami) {
 
     const renderAlan = (a: KartAlanMeta) => (
       <label key={a.ad} className={`alan tip-${a.tip}`}>
+        {/* Etiket kod_liste alanlarinda TIKLANABILIR (544): listeyi duzenler.
+            Ayar ekranlarinda (AyarAlani, BelgeBaslik) ayni desen. */}
+        {listeDuzenle && a.kodListesi && !salt && a.yazilabilir ? (
+          <span className="etiket etiket-liste" title="Listeyi düzenle"
+                onClick={e => { e.preventDefault(); listeDuzenle(a) }}>
+            {c(a.baslik)}{a.zorunlu && <b className="zorunlu"> *</b>}
+          </span>
+        ) : (
         <span className="etiket">
           {c(a.baslik)}{a.zorunlu && <b className="zorunlu"> *</b>}
         </span>
+        )}
         {renderGirdi(a)}
         {/* Kur kutusunun altinda kurun NEREDEN geldigi (tarih kuru / bulunamadi) -
             otomatik gelen bir sayiyi kullanicinin sorgusuz kabul etmesi beklenmez. */}

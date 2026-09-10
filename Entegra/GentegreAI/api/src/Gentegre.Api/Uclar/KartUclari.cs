@@ -318,10 +318,21 @@ public static class KartUclari
                 .Where(a => (a.BagliAlan is not null || a.Agac) && a.KodTablosu is not null)
                 .Select(a => a.KodTablosu!).Distinct()
                 .ToDictionary(t => t, t => depo.KodTablosuUstAsync(t, iptal));
-            await Task.WhenAll(tabloGorevleri.Values.Concat(listeGorevleri.Values).Concat(ustGorevleri.Values));
+            // BAGLI KOD LISTESI (544): ust bagi yalniz KodTablosu alanlarinda
+            //   cozuluyordu. Model markaya kod_liste uzerinden bagli
+            //   (`kod_deger.ust_deger`) - ayni harita oradan da kurulur, yoksa
+            //   combo suzulmez ve her markanin modelleri bir arada gorunur.
+            var listeUstGorevleri = tumAlanlar
+                .Where(a => a.BagliAlan is not null && a.KodListesi is not null)
+                .Select(a => a.KodListesi!).Distinct()
+                .ToDictionary(l => l, l => depo.KodListesiUstAsync(l, iptal));
+            await Task.WhenAll(tabloGorevleri.Values.Concat(listeGorevleri.Values)
+                .Concat(ustGorevleri.Values).Concat(listeUstGorevleri.Values));
             var tabloSecenekleri = tabloGorevleri.ToDictionary(kv => kv.Key, kv => kv.Value.Result);
             var listeSecenekleri = listeGorevleri.ToDictionary(kv => kv.Key, kv => kv.Value.Result);
             var ustHaritalari = ustGorevleri.ToDictionary(kv => kv.Key, kv => kv.Value.Result);
+            var listeUstHaritalari = listeUstGorevleri
+                .ToDictionary(kv => kv.Key, kv => kv.Value.Result);
 
             // ENTEGRASYON KOD LISTESI URUN MODUNA GORE (342): ERP kurulumunda
             //   SKRS / e-Nabiz / MEDULA secilemez - kullanici secip kaydetse
@@ -339,7 +350,9 @@ public static class KartUclari
                 // AGAC alani da ust haritasini alir (484): girintili cizim
                 //   her secenegin ustunu bilmeyi gerektiriyor.
                 (a.BagliAlan is not null || a.Agac) && a.KodTablosu is { } bt
-                    && ustHaritalari.TryGetValue(bt, out var ust) ? ust : null);
+                    && ustHaritalari.TryGetValue(bt, out var ust) ? ust
+                : a.BagliAlan is not null && a.KodListesi is { } bl
+                    && listeUstHaritalari.TryGetValue(bl, out var lust) ? lust : null);
 
             // Yerel para birimi kartla birlikte gider: arayuz "TL disi mi" karari
             //   icin ayri bir istek yapmasin (kur kutusu bu karara gore acilir).
@@ -423,7 +436,8 @@ public static class KartUclari
             alan.BagliAlan,
             alan.AramaKaynagi,
             ustHaritasi,
-            alan.Agac);
+            alan.Agac,
+            alan.KodListesi);
 
 
     /// <summary>

@@ -3154,3 +3154,8 @@ input.skt-gecmis {
 .lab-tanim-etiket { width: 40%; color: var(--soluk) }
 .lab-tanim-blok .rozet { font-size: 10.5px; padding: 1px 8px }
 .kagrup > h6 .sag-ek { margin-left: auto; font-weight: 400; font-size: 10.5px }
+
+/* LISTE DUZENLENEBILIR ALAN ETIKETI (544): kod_liste'den beslenen kart
+   alaninin etiketi tiklanir - ayar ekranlarindaki desenin kart karsiligi. */
+.alan .etiket-liste { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px }
+.alan .etiket-liste:hover { color: var(--mor) }

@@ -22,18 +22,34 @@ public static partial class KartKatalogu
             // mockup "Genel" sekmesi 3 alt-bolume ayrilir: Tanım / Sınıflandırma · Vergi & Ana Birim · Resim
             //   (Resim - IMAJ→DOSYA - hic acilmadi, alan yok). Ayri Mali/Diger SEKMESI YOK -
             //   mockup'ta da yok, KDV/OTV/Min Stok buraya katlandi (eskiden ayri sekmelerdi).
-            new("kategori",      "kategori",        "kod",   Zorunlu: true, KodTablosu: "public.kategori", Baslik: "Kategori", AltGrup: "Tanım / Sınıflandırma"),
+            // KATEGORI: YALNIZ STOK DALLARI, AGAC COMBO (544, kullanici:
+            //   "sadece stok kategorileri combo ağacı şeklinde gelsin").
+            //   `public.kategori` tablosunun tamami duz liste olarak
+            //   geliyordu: hizmet agacinin SUT basliklari da stok kartinda
+            //   secilebiliyor, hiyerarsi hic gorunmuyordu.
+            new("kategori",      "kategori",        "kod",   Zorunlu: true,
+                KodTablosu: "public.v_stok_kategori_lookup", Agac: true,
+                Baslik: "Kategori", AltGrup: "Tanım / Sınıflandırma"),
             new("marka",         "marka",           "kod",   KodListesi: "stok.marka",     Baslik: "Marka",     AltGrup: "Tanım / Sınıflandırma"),
-            new("model",         "model",           "metin", EnFazlaUzunluk: 60, AltGrup: "Tanım / Sınıflandırma"),
+            // MODEL MARKAYA BAGLI COMBO (544, kullanici: "model de combo
+            //   olmalı ve markaya bağımlı olmalı, yani markanın modelleri").
+            //   Kolon zaten `smallint` (bir KOD) idi, kartta metin kutusu
+            //   duruyordu - yazilan metin kolona hic girmiyordu. Secenekler
+            //   `stok.model` kod listesinden gelir; ust bagi kod listesinde
+            //   yasar (kod_deger.ust_deger = markanin degeri).
+            new("model",         "model",           "kod",
+                KodListesi: "stok.model", BagliAlan: "marka",
+                Baslik: "Model", AltGrup: "Tanım / Sınıflandırma"),
             new("grup",          "grubu",           "kod",   KodListesi: "stok.grubu",     Baslik: "Grup",      AltGrup: "Tanım / Sınıflandırma"),
-            // OZELLIK / ICERIK / KULLANIM (486): kolonlar bastan beri vardi ama
+            // OZELLIK / ICERIK (486): kolonlar bastan beri vardi ama
             //   kartta girisi yoktu - yazilamayan kolon, olmayan kolondur.
             //   Uc alan da MARKA/MODEL ile ayni aileden: urunu ayirt eden ama
-            //   kategoriye sigmayan nitelikler (aroma, ambalaj, kullanim sekli).
+            //   kategoriye sigmayan nitelikler (aroma, ambalaj).
+            //   "Kullanım" ucuncusuydu; 545'te hem karttan hem tablodan
+            //   kalkti - hicbir satirda doldurulmamisti (kullanici).
             //   Stok aktariminda (Excel) dolu geliyorlar ve gidecek yerleri yoktu.
             new("ozellik",       "ozellik",         "kod",   KodListesi: "stok.ozellik",   Baslik: "Özellik",   AltGrup: "Tanım / Sınıflandırma"),
             new("icerik",        "icerik",          "kod",   KodListesi: "stok.icerik",    Baslik: "İçerik",    AltGrup: "Tanım / Sınıflandırma"),
-            new("kullanim",      "kullanim",        "kod",   KodListesi: "stok.kullanim",  Baslik: "Kullanım",  AltGrup: "Tanım / Sınıflandırma"),
             new("izleme",        "izleme",          "kod",   KodListesi: "stok.izleme", Baslik: "Izleme",       AltGrup: "Tanım / Sınıflandırma"),
             new("bildirim",      "bildirim",        "kod",   SabitKodlar: BildirimKodlari, Baslik: "Bildirim",  AltGrup: "Tanım / Sınıflandırma"),
             new("urunNo",        "urun_no",         "metin", EnFazlaUzunluk: 60, Baslik: "Urun No",             AltGrup: "Vergi & Ana Birim"),
@@ -223,7 +239,11 @@ public static partial class KartKatalogu
             //   kategori hiyerarsik (269, stokla ORTAK agac) - duz listede
             //   yalniz yaprak adi cikiyor, "Genel" gibi iki dalda birden gecen
             //   ad ayirt edilemiyordu.
-            new("kategori", "kategori", "kod",   KodTablosu: "public.kategori",
+            //   TUR SUZGECI (544): agac `public.kategori`nin tamamini
+            //   cizerken stok dallari da hizmet kartinda gorunuyordu -
+            //   stok kartindaki hatanin aynadan gorunusu.
+            new("kategori", "kategori", "kod",
+                KodTablosu: "public.v_hizmet_kategori_lookup",
                 Agac: true, Baslik: "Kategori", Grup: "Kimlik"),
             new("durum",    "durum",    "kod",   SabitKodlar: DurumKodlari,
                 Baslik: "Durum", Grup: "Kimlik"),

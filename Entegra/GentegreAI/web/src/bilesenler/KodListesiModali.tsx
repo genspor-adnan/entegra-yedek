@@ -18,9 +18,15 @@ interface TaslakSatir { deger: number | null; ad: string; sira: number; aktif: n
  * + ekle sirasiyla) ve modal kapanir. Kaydetmeden kapatilirsa hicbir sey
  * degismez.
  */
-export function KodListesiModali({ kod, baslik, onKapat }: {
+export function KodListesiModali({ kod, baslik, ustDeger, onKapat }: {
   kod: string;
   baslik: string;
+  /**
+   * BAGLI LISTE (544): verilirse liste yalniz bu ust degerin satirlarini
+   * gosterir ve yeni satir da ona baglanir - stok kartinda "Model" listesi
+   * secili MARKANIN modelleridir. Bagsiz listelerde verilmez.
+   */
+  ustDeger?: number;
   onKapat(): void;
 }) {
   const [ilk, setIlk] = useState<TaslakSatir[]>([]);
@@ -35,14 +41,14 @@ export function KodListesiModali({ kod, baslik, onKapat }: {
 
   const yukle = useCallback(async () => {
     try {
-      const d = (await api.kodListe(kod)).degerler
+      const d = (await api.kodListe(kod, ustDeger)).degerler
         .map(x => ({ deger: x.deger as number | null, ad: x.ad, sira: x.sira, aktif: x.aktif }));
       setIlk(d.map(x => ({ ...x })));
       setSatirlar(d.map(x => ({ ...x })));
       setSilinenler([]);
       setHata(null);
     } catch (h) { setHata(hataMetni(h)) }
-  }, [kod]);
+  }, [kod, ustDeger]);
 
   useEffect(() => { void yukle() }, [yukle]);
 
@@ -81,7 +87,7 @@ export function KodListesiModali({ kod, baslik, onKapat }: {
           await api.kodListeGuncelle(kod, s.deger, { ad: s.ad, sira: s.sira, aktif: s.aktif });
       }
       for (const s of satirlar)
-        if (s.deger === null) await api.kodListeEkle(kod, s.ad, s.sira);
+        if (s.deger === null) await api.kodListeEkle(kod, s.ad, s.sira, ustDeger);
       onKapat();                    // cagiran combo seceneklerini tazeler
     } catch (h) {
       // Kismi yazim olabilir - taze durumla devam edilsin.

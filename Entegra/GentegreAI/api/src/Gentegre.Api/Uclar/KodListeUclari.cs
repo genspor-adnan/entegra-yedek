@@ -16,15 +16,21 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static class KodListeUclari
 {
-    public sealed record DegerIstegi(string Ad, int? Sira, int? Aktif);
+    /// <summary>
+    /// UST DEGER (544): bagli listelerde satirin ust listedeki karsiligi
+    /// (model -> marka). Bagsiz listelerde gonderilmez, 0 kalir.
+    /// </summary>
+    public sealed record DegerIstegi(string Ad, int? Sira, int? Aktif, int? UstDeger);
 
     public static void KodListeUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/kod-liste").WithTags("KodListe").RequireAuthorization();
 
         // ------------------------------------------------------- degerler ----
+        // `ust` verilirse YALNIZ o ust degere bagli satirlar doner (544):
+        //   "Bilimplant markasinin modelleri".
         grup.MapGet("/{kod}", async (
-            string kod, BaglamCozucu cozucu, VeriKaynagi veri,
+            string kod, int? ust, BaglamCozucu cozucu, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
         {
             await cozucu.CozAsync(ctx, iptal);
@@ -35,16 +41,18 @@ public static class KodListeUclari
                 --   sektor...) BOS goruluyordu. Ikisi de kabul edilir; ayni
                 --   deger her ikisinde varsa 0 (uygulama kaydi) kazanir.
                 select * from (
-                  select distinct on (d.deger) d.deger, d.ad, d.sira, d.aktif
+                  select distinct on (d.deger) d.deger, d.ad, d.sira, d.aktif, d.ust_deger
                     from public.kod_deger d
                     join public.kod_liste l on l.id = d.liste_id
                    where l.kod = @p0 and d.dil in (0, -1)
+                     and (@p1::int is null or d.ust_deger = @p1)
                    order by d.deger, d.dil desc
                 ) t
                  order by t.sira, t.deger
-                """, new object?[] { kod },
+                """, new object?[] { kod, ust },
                 r => new { deger = r.GetInt32(0), ad = r.GetString(1),
-                           sira = (int)r.GetInt16(2), aktif = (int)r.GetInt16(3) }, iptal);
+                           sira = (int)r.GetInt16(2), aktif = (int)r.GetInt16(3),
+                           ustDeger = r.GetInt32(4) }, iptal);
             return Results.Ok(new { kod, degerler = liste });
         });
 
@@ -65,17 +73,18 @@ public static class KodListeUclari
             // int alinir: 0 = liste yok. (Nullable tuzagi artik TekDegerAsync
             //   icinde cozuluyor, ama burada 0 yeterli.)
             var yeni = await baglanti.TekDegerAsync<int>("""
-                insert into public.kod_deger (liste_id, deger, ad, sira, aktif, ekleyen)
+                insert into public.kod_deger (liste_id, deger, ad, sira, aktif, ekleyen, ust_deger)
                 select l.id,
                        coalesce((select max(d.deger) from public.kod_deger d
                                   where d.liste_id = l.id), 0) + 1,
                        @p1,
                        coalesce(@p2, coalesce((select max(d.sira) from public.kod_deger d
                                                 where d.liste_id = l.id), 0) + 10),
-                       1, @p3
+                       1, @p3, coalesce(@p4, 0)
                   from public.kod_liste l where l.kod = @p0
                 returning deger
-                """, null, new object?[] { kod, ad, istek!.Sira, baglam.KullaniciId }, iptal);
+                """, null,
+                new object?[] { kod, ad, istek!.Sira, baglam.KullaniciId, istek.UstDeger }, iptal);
             return yeni == 0
                 ? Results.NotFound(new { mesaj = $"Kod listesi yok: {kod}" })
                 : Results.Ok(new { deger = yeni });
@@ -98,10 +107,12 @@ public static class KodListeUclari
             await using var komut = baglanti.Komut("""
                 update public.kod_deger d
                    set ad = @p2, sira = coalesce(@p3, d.sira),
-                       aktif = coalesce(@p4, d.aktif), degistiren = @p5
+                       aktif = coalesce(@p4, d.aktif), degistiren = @p5,
+                       ust_deger = coalesce(@p6, d.ust_deger)
                   from public.kod_liste l
                  where l.id = d.liste_id and l.kod = @p0 and d.deger = @p1 and d.dil in (0, -1)
-                """, null, kod, deger, ad, istek!.Sira, istek.Aktif, baglam.KullaniciId);
+                """, null, kod, deger, ad, istek!.Sira, istek.Aktif, baglam.KullaniciId,
+                istek.UstDeger);
             return await komut.ExecuteNonQueryAsync(iptal) > 0
                 ? Results.Ok(new { })
                 : Results.NotFound(new { mesaj = "Kayıt bulunamadı." });

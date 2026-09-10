@@ -68,7 +68,13 @@ public sealed record KartAlanMeta(
     /// Secim kaynagi HIYERARSIK (484): arayuz secenekleri agac sirasinda ve
     /// girintili cizer. Ust baglari <see cref="KodUst"/>ten okunur.
     /// </summary>
-    bool Agac = false);
+    bool Agac = false,
+    /// <summary>
+    /// SECENEK KAYNAGI kod_liste ise LISTENIN KODU (544, ör. "stok.model").
+    /// Kart alanin etiketini tiklanabilir yapip listeyi oradan yonetir -
+    /// markanin modelleri baska hicbir ekrandan girilemiyordu.
+    /// </summary>
+    string? KodListesi = null);
 
 /// <summary>
 /// Sayfali detayin sunucu tarafi suzgeci (526): arama metni, kategori dali ve
