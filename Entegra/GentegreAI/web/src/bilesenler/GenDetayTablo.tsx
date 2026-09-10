@@ -91,6 +91,14 @@ interface Props {
   onSayfa?(yeniSayfa: number): void;
   sayfaYukleniyor?: boolean;
   /**
+   * SATIR ICI HIZLI GIRIS yapilacak kolonlar. Verilmezse fiyat + katilim
+   * payi (291 varsayilani). Fiyat listesinde TARIFE TIPINE gore degisir
+   * (533): TTB/HUV'da fiyat TURETILMISTIR - yazilabilir kutu koymak,
+   * kullaniciya tutmayacagi bir soz vermek olurdu; girilecek olan katsayi
+   * ve carpandir.
+   */
+  hizliAlanlar?: ReadonlySet<string>;
+  /**
    * SAYFALI DETAYDA SUZGEC SUNUCUDA (526, kullanici: "arama ve filtreler
    * aktif olan TUM satirlar uzerinden olmali"). Verilirse arama kutusu, cip
    * ve kategori combosu ISTEMCIDE SUZMEZ - secimi buraya bildirir, satirlari
@@ -259,7 +267,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                                gizliAlanlar, gridGizliAlanlar, etiketAlanlari, sadeGrid, ekleGizli,
                                aramaKaynaklari, aramaEkFiltre, ekSuzgec,
                                modalAltBilesen,
-  sayfa, toplam, onSayfa, sayfaYukleniyor, onSuzgec,
+  sayfa, toplam, onSayfa, sayfaYukleniyor, onSuzgec, hizliAlanlar,
 }: Props) {
   // SAYFALI DETAY (525): serit yalniz katalog sayfa boyu verdiyse VE toplam
   //   bir sayfaya sigmiyorsa cizilir - iki satirlik adres detayinda "1 / 1"
@@ -672,8 +680,10 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
     });
   };
 
-  /** Satir ici hizli giris yapilan kolonlar: fiyat ve katilim payi (291). */
-  const hizliHucre = (ad: string) => ad === 'fiyat' || ad === 'katkiTutar';
+  /** Satir ici hizli giris yapilan kolonlar: cagiran belirtmediyse fiyat ve
+      katilim payi (291). */
+  const hizliHucre = (ad: string) =>
+    hizliAlanlar ? hizliAlanlar.has(ad) : (ad === 'fiyat' || ad === 'katkiTutar');
 
   const aramaAnahtari = arama.trim().toLocaleLowerCase('tr');
   const cipSuz = cipler?.[aktifCip]?.suz;

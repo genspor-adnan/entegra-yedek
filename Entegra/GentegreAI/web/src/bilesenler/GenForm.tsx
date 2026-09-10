@@ -198,6 +198,20 @@ interface Props {
  * FIYAT LISTESI SATIRINDA TARIFE TIPINE GORE GIZLENEN ALANLAR (518).
  * Tip 0 (genel) hicbir sey gizlemez - eski listeler oldugu gibi calisir.
  */
+/**
+ * SATIR ICI GIRIS YAPILACAK ALANLAR tarife tipine gore (533).
+ *   Özel  : fiyat elle, katki elle
+ *   TTB   : KATSAYI ve CARPAN elle - fiyat carpimdan doğar, yazilamaz
+ *   SUT   : yalniz katki - fiyat SKRS'den kilitli
+ * Fiyat kutusunu TTB/SUT'ta acik birakmak, kullaniciya tutmayacagi bir soz
+ * vermekti: girilen sayi kaydedilirken tetik tarafindan yok sayiliyor.
+ */
+function tarifeHizli(tip: number): Set<string> {
+  if (tip === 2) return new Set(['tabanFiyat', 'carpan', 'katkiTutar']);
+  if (tip === 3) return new Set(['katkiTutar']);
+  return new Set(['fiyat', 'katkiTutar']);
+}
+
 function tarifeGizli(tip: number): string[] {
   // Ek katki alanlari 532'de fiyat listesinden kalkti - listede yok.
   if (tip === 1) return ['tabanFiyat', 'carpan', 'katkiTutar'];
@@ -1618,6 +1632,10 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           toplam={detayToplam[aktif.detay.ad]}
           sayfaYukleniyor={detaySayfaYuk === aktif.detay.ad}
           onSayfa={n => { void detaySayfaDegis(aktif.detay.ad, n) }}
+          // Satir ici giris tarife tipine gore (533): TTB'de katsayi/carpan,
+          //   SUT'ta yalniz katki - fiyat ikisinde de turetilmis degerdir.
+          hizliAlanlar={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
+            ? tarifeHizli(Number(deger.tarifeTipi) || 0) : undefined}
           // SUZGEC SUNUCUDA yalniz SAYFALI detayda (526); sayfasiz detaylar
           //   bugunku istemci suzmesini surdurur.
           onSuzgec={aktif.detay.sayfaBoyu
