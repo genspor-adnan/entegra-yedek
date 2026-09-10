@@ -593,10 +593,29 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
     return m.includes('dahil') ? 'mor' : 'gri';
   };
 
-  const kalemAdi = (satir: Record<string, unknown>) =>
-    satir.stokId != null && satir.stokId !== '' && stokAlani
+  /**
+   * Satirin kalem adi. KOD TEKRARLANMAZ (kullanici: "tetkik adinda kod
+   * tekrarlaniyor, kodda olmasi yeterli"): lookup metni "600370 - TAM
+   * KALINLIKTA DERI GREFTI" bicimindedir (combo'da aranabilsin diye kodla
+   * birlikte), ama gridde AYRI bir "Kod" kolonu zaten var - ayni sayi iki
+   * kez okunuyordu. Satir kendi `kalemAdi` alanini tasiyorsa (526) o
+   * kullanilir; yoksa lookup metninin kod oneki kirpilir.
+   */
+  const kalemAdi = (satir: Record<string, unknown>) => {
+    const dogrudan = satir.kalemAdi;
+    if (typeof dogrudan === 'string' && dogrudan !== '') return dogrudan;
+    const metin = satir.stokId != null && satir.stokId !== '' && stokAlani
       ? gorunum(satir, stokAlani)
       : hizmetAlani ? gorunum(satir, hizmetAlani) : '';
+    const kod = String(satir.kalemKodu ?? '');
+    if (kod === '') return metin;
+    // Lookup ayraci stokta "—", hizmette "-" (v_stok_lookup / v_hizmet_lookup).
+    for (const ayrac of [' — ', ' - ']) {
+      const on = kod + ayrac;
+      if (metin.startsWith(on)) return metin.slice(on.length);
+    }
+    return metin;
+  };
 
   // UC NOKTA MENUSU (satirlar gridi): kolon goster/gizle (oturumluk) + CSV.
   //   Listelerin menusuyle ayni cizim (GridMenu); ogeler grid'e ozgu.
