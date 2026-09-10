@@ -60,6 +60,15 @@ public static partial class KartKatalogu
     private static readonly Dictionary<string, string> UygulamaKodlari = new()
         { ["1"] = "Oral", ["2"] = "Parenteral", ["3"] = "Oral / parenteral" };
 
+    /// <summary>
+    /// UST SERIT (mockup'lardaki idstrip): bu gruptaki alanlar sekme degil,
+    /// kartin her sekmesinde gorunen kimlik seridi olur. Mikrobiyoloji
+    /// kartlarinda kimlik yalnizca ad/kod degildir - besiyerinin okuma plani,
+    /// organizmanin gram'i, antibiyotigin basamagi da "hangi sekmede olursan
+    /// ol gorunmeli" bilgisidir (Ekranlar/Lab/*_karti.html).
+    /// </summary>
+    private const string KIMLIK = "Kimlik";
+
     private static KartTanimi LabBesiyeriKarti() => new(
         Ad: "lab-besiyeri",
         YetkiKodu: "lab.mikro",
@@ -86,43 +95,43 @@ public static partial class KartKatalogu
         {
             new("id", "id", "sayi", Yazilabilir: false),
             new("kod", "kod", "metin", Zorunlu: true, EnFazlaUzunluk: 20,
-                Baslik: "Kod", Grup: "Besiyeri"),
+                Baslik: "Kod", Grup: KIMLIK),
             new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 120,
-                Baslik: "Besiyeri Adı", Grup: "Besiyeri"),
+                Baslik: "Besiyeri Adı", Grup: KIMLIK),
             new("tur", "tur", "kod", SabitKodlar: BesiyeriTurKodlari,
-                Baslik: "Tür", Grup: "Besiyeri"),
+                Baslik: "Tür", Grup: KIMLIK),
             new("durum", "durum", "kod", SabitKodlar: LabKayitDurumKodlari,
-                Baslik: "Durum", Grup: "Besiyeri"),
+                Baslik: "Durum", Grup: KIMLIK),
 
             // OKUMA PLANI buradan kurulur: 24 saatlik plakayı 48. saatte
             //   okumak negatif raporu güvenilmez yapar.
             new("sicaklik", "sicaklik", "sayi", Baslik: "İnkübasyon (°C)",
-                Grup: "İnkübasyon"),
+                Grup: KIMLIK, EslesAlan: "atmosfer"),
             new("atmosfer", "atmosfer", "kod", SabitKodlar: AtmosferKodlari,
-                Baslik: "Atmosfer", Grup: "İnkübasyon"),
+                Baslik: "Atmosfer", Grup: KIMLIK),
             new("ilkOkumaSaat", "ilk_okuma_saat", "sayi",
-                Baslik: "İlk Okuma (saat)", Grup: "İnkübasyon"),
+                Baslik: "İlk Okuma (saat)", Grup: KIMLIK, EslesAlan: "sonOkumaSaat"),
             new("sonOkumaSaat", "son_okuma_saat", "sayi",
-                Baslik: "Son Okuma (saat)", Grup: "İnkübasyon"),
+                Baslik: "Son Okuma (saat)", Grup: KIMLIK),
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300,
-                Baslik: "Açıklama", Grup: "İnkübasyon"),
+                Baslik: "Açıklama", Grup: "Kalite Kontrol"),
 
             // EKIM HACMI ve SAYIM CARPANI (509): 1 µL kalibre ozeyle sayilan
             //   koloni x1000 ile CFU/mL'ye cevrilir. Carpan kartta yoksa
             //   koloni sayimi RAPORLANAMAZ - idrar kulturunde "anlamli ureme"
             //   karari buna bagli (fn_lab_cfu).
             new("ekimHacmiUl", "ekim_hacmi_ul", "ondalik",
-                Baslik: "Ekim Hacmi (µL)", Grup: "Sayım"),
+                Baslik: "Ekim Hacmi (µL)", Grup: KIMLIK, EslesAlan: "sayimCarpani"),
             new("sayimCarpani", "sayim_carpani", "sayi",
-                Baslik: "Sayım Çarpanı", Grup: "Sayım"),
+                Baslik: "Sayım Çarpanı", Grup: KIMLIK),
             // BESIYERI BIR SARFTIR: lot ve miat stoktan okunur; miadi gecmis
             //   lotla calisilan kultur gecersizdir.
             new("stokId", "stok_id", "kod", KodTablosu: "public.v_stok_lookup",
-                Baslik: "Stok Kartı", Grup: "Sayım"),
+                Baslik: "Stok Kartı", Grup: KIMLIK),
             new("kkSusu", "kk_susu", "metin", EnFazlaUzunluk: 120,
-                Baslik: "KK Suşu (ATCC)", Grup: "Sayım"),
+                Baslik: "KK Suşu (ATCC)", Grup: "Kalite Kontrol"),
             new("kkPeriyot", "kk_periyot", "kod", SabitKodlar: KkPeriyotKodlari,
-                Baslik: "KK Periyodu", Grup: "Sayım"),
+                Baslik: "KK Periyodu", Grup: "Kalite Kontrol"),
         },
         Detaylar: new[]
         {
@@ -162,40 +171,40 @@ public static partial class KartKatalogu
         {
             new("id", "id", "sayi", Yazilabilir: false),
             new("kod", "kod", "metin", Zorunlu: true, EnFazlaUzunluk: 20,
-                Baslik: "Kod", Grup: "Organizma"),
+                Baslik: "Kod", Grup: KIMLIK),
             new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 160,
-                Baslik: "Adı (latin)", Grup: "Organizma"),
+                Baslik: "Adı (latin)", Grup: KIMLIK),
             new("kisaAd", "kisa_ad", "metin", EnFazlaUzunluk: 60,
-                Baslik: "Kısa Ad (rapor)", Grup: "Organizma"),
+                Baslik: "Kısa Ad (rapor)", Grup: KIMLIK),
             new("tur", "tur", "kod", SabitKodlar: OrganizmaTurKodlari,
-                Baslik: "Tür", Grup: "Organizma"),
+                Baslik: "Tür", Grup: KIMLIK),
             new("gram", "gram", "kod", SabitKodlar: GramKodlari,
-                Baslik: "Gram", Grup: "Organizma"),
+                Baslik: "Gram", Grup: KIMLIK),
             new("morfoloji", "morfoloji", "kod", SabitKodlar: MorfolojiKodlari,
-                Baslik: "Morfoloji", Grup: "Organizma"),
+                Baslik: "Morfoloji", Grup: KIMLIK),
             new("durum", "durum", "kod", SabitKodlar: LabKayitDurumKodlari,
-                Baslik: "Durum", Grup: "Organizma"),
+                Baslik: "Durum", Grup: KIMLIK),
 
             // "Üreme yok" ve "normal flora" da birer SONUÇTUR: izolat satırı
             //   olmadan kültür kapatılamaz.
             new("sonucSatiri", "sonuc_satiri", "mantik",
-                Baslik: "Durum satırı (üreme yok / flora)", Grup: "Bildirim"),
+                Baslik: "Durum satırı (üreme yok / flora)", Grup: "Kodlar & Bildirim"),
             new("bildirimiZorunlu", "bildirimi_zorunlu", "mantik",
-                Baslik: "Bildirimi zorunlu etken", Grup: "Bildirim"),
+                Baslik: "Bildirimi zorunlu etken", Grup: "Kodlar & Bildirim"),
             new("snomed", "snomed", "metin", EnFazlaUzunluk: 20,
-                Baslik: "SNOMED", Grup: "Bildirim"),
+                Baslik: "SNOMED", Grup: "Kodlar & Bildirim"),
             new("skrsKod", "skrs_kod", "metin", EnFazlaUzunluk: 20,
-                Baslik: "SKRS Kodu", Grup: "Bildirim"),
+                Baslik: "SKRS Kodu", Grup: "Kodlar & Bildirim"),
 
             // UREME ESIGI (509): idrar kulturunde 10^5 CFU/mL altindaki ureme
             //   "anlamli degil" diye raporlanir. Esik KARTTA durur - teknisyenin
             //   ezberinde degil; besiyerinin sayim carpaniyla birlikte calisir.
             new("uremeEsigi", "ureme_esigi", "sayi",
-                Baslik: "Anlamlı Üreme Eşiği", Grup: "Bildirim", EslesAlan: "esikBirimi"),
+                Baslik: "Üreme Eşiği", Grup: KIMLIK, EslesAlan: "esikBirimi"),
             new("esikBirimi", "esik_birimi", "metin", EnFazlaUzunluk: 20,
-                Baslik: "Eşik Birimi", Grup: "Bildirim"),
+                Baslik: "Eşik Birimi", Grup: KIMLIK),
             new("panelNotu", "panel_notu", "metin", EnFazlaUzunluk: 300,
-                Baslik: "Panel Notu", Grup: "Bildirim"),
+                Baslik: "Panel Notu", Grup: "Kodlar & Bildirim"),
         },
         Detaylar: new[]
         {
@@ -248,23 +257,31 @@ public static partial class KartKatalogu
         {
             new("id", "id", "sayi", Yazilabilir: false),
             new("kod", "kod", "metin", Zorunlu: true, EnFazlaUzunluk: 20,
-                Baslik: "Kod", Grup: "Antibiyotik"),
+                Baslik: "Kod", Grup: KIMLIK),
             new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 120,
-                Baslik: "Adı", Grup: "Antibiyotik"),
+                Baslik: "Adı", Grup: KIMLIK),
             new("grup", "grup", "metin", EnFazlaUzunluk: 60,
-                Baslik: "Grup (beta-laktam, kinolon…)", Grup: "Antibiyotik"),
+                Baslik: "Grup", Grup: KIMLIK),
             new("atc", "atc", "metin", EnFazlaUzunluk: 12,
-                Baslik: "ATC", Grup: "Antibiyotik"),
+                Baslik: "ATC", Grup: KIMLIK),
             new("durum", "durum", "kod", SabitKodlar: LabKayitDurumKodlari,
-                Baslik: "Durum", Grup: "Antibiyotik"),
+                Baslik: "Durum", Grup: KIMLIK),
 
             new("basamak", "basamak", "kod", SabitKodlar: AntibiyotikBasamakKodlari,
-                Baslik: "Kademeli Bildirim Basamağı", Grup: "Bildirim"),
+                Baslik: "Basamak", Grup: KIMLIK),
             new("uygulama", "uygulama", "kod", SabitKodlar: UygulamaKodlari,
-                Baslik: "Uygulama Yolu", Grup: "Bildirim"),
+                Baslik: "Uygulama", Grup: KIMLIK),
             // Nitrofurantoin/fosfomisin yalnız idrarda anlamlı: kan izolatında
             //   raporlanması tedaviyi yanlış yönlendirir.
             new("yalnizUriner", "yalniz_uriner", "mantik",
-                Baslik: "Yalnız idrar kültüründe raporla", Grup: "Bildirim"),
+                Baslik: "Yalnız idrar kültüründe raporla",
+                Grup: "Kademeli Bildirim"),
+            // KOMBINASYON AJANI (437): kendi basamaginda raporlanir ama
+            //   "duyarli secenek var" sayimina GIRMEZ - ust basamagi kapatmaz.
+            //   Kolon 437'de eklendi, kartta girisi yoktu: aminoglikozid
+            //   isaretini yalniz goc koyabiliyordu.
+            new("tekBasinaYetersiz", "tek_basina_yetersiz", "mantik",
+                Baslik: "Tek başına yeterli değil (kombinasyon ajanı)",
+                Grup: "Kademeli Bildirim"),
         });
 }

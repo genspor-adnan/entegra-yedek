@@ -53,6 +53,21 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
   },
 
   // ------------------------------------------------------- lab-tetkik ----
+  // MIKROBIYOLOJI KATALOG KARTLARI - mockup sirasi
+  //   (Ekranlar/Lab/besiyeri_karti.html · organizma_karti.html ·
+  //    antibiyotik_karti.html). Sekme sirasi normalde ALAN SIRASINDAN cikiyor;
+  //   ust serit mockup'a gore yeniden duzenlenince (kimlik grubu) kalan
+  //   gruplarin sirasi mockup'takinden ayrildi - sira artik acikca yazili.
+  'lab-besiyeri': {
+    sekmeSirasi: ['Numune Tipleri', 'Kalite Kontrol'],
+  },
+  'lab-organizma': {
+    // Mockup: Tanim - Doğal Direnç - Antibiyogram Paneli - Kodlar & Bildirim.
+    //   Kodlar EN SONDA: kart acilinca once "bu organizma nasil raporlanir"
+    //   sorusu cevaplanmali, bildirim kodu sonra.
+    sekmeSirasi: ['Doğal Direnç', 'Antibiyogram Paneli', 'Kodlar & Bildirim'],
+  },
+
   'lab-tetkik': {
     // MOCKUP SIRASI (Ekranlar/Lab/lab_tetkik_karti.html): once tetkigin NE
     //   OLDUGU, sonra sonucun NASIL OKUNACAGI, sonra NE ZAMAN calisildigi,

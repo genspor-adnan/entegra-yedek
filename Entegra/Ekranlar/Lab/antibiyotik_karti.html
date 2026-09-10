@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mikrobiyoloji — Antibiyotik Kartı — Mockup</title>
+<link rel="stylesheet" href="../Dashboard/_ortak.css">
+<style>
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(#fbfcfe,#e7edf4);border-radius:3px;padding:5px 10px;
+    font-size:11.5px;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .sp{margin-left:auto}
+  .hdr{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .fld{display:flex;flex-direction:column;gap:2px}
+  .fld label{font-size:10.5px;color:var(--muted)}
+  .fld .v{border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;
+    padding:0 8px;font-weight:bold;font-size:12.5px}
+  .fld .v.ro{background:#f6f8fb;font-weight:normal;color:var(--muted)}
+  .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head);border-bottom:1px solid var(--line)}
+  .tab{padding:7px 12px;font-size:12px;color:var(--muted);background:#eef2f7;border:1px solid var(--line);
+    border-bottom:none;border-radius:3px 3px 0 0;margin-top:5px;position:relative;top:1px;cursor:pointer;display:flex;gap:6px;align-items:center}
+  .tab.on{background:#fff;color:var(--ink);font-weight:bold}
+  .tab .sy{background:#e5ecf5;border-radius:9px;padding:0 6px;font-size:10.5px;color:#3a5573}
+  .ic{padding:10px 12px}
+</style></head><body>
+
+<div class="win">
+  <div class="title">💊 Antibiyotik Kartı <span class="sp">Laboratuvar › Mikrobiyoloji › Antibiyotikler</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div><div class="btn danger">🗑 Sil</div>
+    <div class="btn">🧬 SKRS/ATC'den doldur</div><div class="btn">🦠 Panellere ekle</div>
+    <div class="sp"></div><div class="btn">✕ Kapat</div>
+  </div>
+
+  <div class="hdr">
+    <div class="fld"><label>Kod</label><div class="v">AMK</div></div>
+    <div class="fld"><label>Antibiyotik Adı</label><div class="v">Amikasin</div></div>
+    <div class="fld"><label>Grup</label><div class="v">Aminoglikozid</div></div>
+    <div class="fld"><label>Durum</label><div class="v">Aktif</div></div>
+    <div class="fld"><label>Basamak</label><div class="v">2 · Alternatif <span class="rz sari" style="margin-left:6px">kademeli</span></div></div>
+    <div class="fld"><label>Uygulama</label><div class="v">Parenteral</div></div>
+    <div class="fld"><label>ATC kodu</label><div class="v">J01GB06</div></div>
+    <div class="fld"><label>Disk içeriği</label><div class="v ro">30 µg — EUCAST 2026</div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab on" data-s="tanim">Tanım</div>
+    <div class="tab" data-s="bildirim">Kademeli Bildirim</div>
+    <div class="tab" data-s="sinir">Sınır Değerler <span class="sy">3</span></div>
+    <div class="tab" data-s="panel">Kullanıldığı Paneller <span class="sy">5</span></div>
+    <div class="tab" data-s="kod">Kodlar</div>
+  </div>
+
+  <div class="pnl" data-s="tanim">
+    <div class="satir" style="padding:10px 12px">
+      <div class="blok"><h4>⚙️ Raporlama kuralları <span class="sp">kart kuralı</span></h4>
+        <table><tbody>
+          <tr><td>Basamak</td><td><b>2 · Alternatif</b> <span class="sonuk">— 1. basamakta duyarlı seçenek yoksa raporlanır</span></td></tr>
+          <tr><td>Tek başına yeterli değil</td><td><span class="rz sari">Evet</span> <span class="sonuk">— kombinasyon ajanı; üst basamağı KAPATMAZ (437)</span></td></tr>
+          <tr><td>Yalnız üriner</td><td><span class="rz">Hayır</span> <span class="sonuk">— kan/derin doku izolatında da anlamlı</span></td></tr>
+          <tr><td>Uygulama</td><td><b>Parenteral</b> <span class="sonuk">— oral seçeneği yok; ayaktan tedavi önerilmez</span></td></tr>
+        </tbody></table></div>
+      <div class="blok"><h4>ℹ️ Özet <span class="sp">nerede kullanılıyor</span></h4>
+        <table><tbody>
+          <tr><td>Panel</td><td class="sonuk">5 organizma panelinde</td></tr>
+          <tr><td>Doğal direnç</td><td class="sonuk">2 organizmada raporlanmaz</td></tr>
+          <tr><td>Sınır değer</td><td class="sonuk">EUCAST 2026 · 3 satır</td></tr>
+          <tr><td>Son 30 gün</td><td class="sonuk">184 antibiyogram · %12 dirençli</td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="bildirim" hidden>
+    <div class="satir" style="padding:10px 12px">
+      <div class="blok"><h4>🪜 Kademeli bildirimde yeri <span class="sp">akılcı antibiyotik kullanımı</span></h4>
+        <table><thead><tr><th>Basamak</th><th>Örnek ajanlar</th><th>Ne zaman raporlanır</th></tr></thead><tbody>
+          <tr><td><span class="rz ok">1 · Rutin</span></td><td class="sonuk">Ampisilin · SXT · Sefuroksim</td><td class="sonuk">Her zaman</td></tr>
+          <tr><td><span class="rz sari">2 · Alternatif</span></td><td><b>Amikasin</b> · Siprofloksasin · Sefepim</td><td class="sonuk">1. basamakta duyarlı seçenek yoksa</td></tr>
+          <tr><td><span class="rz kir">3 · Kısıtlı</span></td><td class="sonuk">Meropenem · Kolistin · Teikoplanin</td><td class="sonuk">2. basamakta da duyarlı seçenek yoksa</td></tr>
+        </tbody></table></div>
+      <div class="blok"><h4>🔗 Kombinasyon ajanı istisnası <span class="sp">437</span></h4>
+        <table><tbody>
+          <tr><td>Kendi basamağında</td><td><b>Raporlanır</b> <span class="sonuk">— klinisyen kombinasyon kurabilsin</span></td></tr>
+          <tr><td>"Duyarlı seçenek" sayımı</td><td><b>Sayılmaz</b> <span class="sonuk">— üst basamağı kapatmaz</span></td></tr>
+          <tr><td>Kusur örneği</td><td class="sonuk">MRSA bakteriyemisinde gentamisin duyarlı diye vankomisin gizleniyordu</td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="sinir" hidden>
+    <div class="satir" style="padding:10px 12px">
+      <div class="blok"><h4>📏 Sınır değerler (breakpoint) <span class="sp">EUCAST 2026</span></h4>
+        <table><thead><tr><th>Organizma grubu</th><th>Yöntem</th><th>S</th><th>I</th><th>R</th></tr></thead><tbody>
+          <tr><td>Enterobacterales</td><td class="sonuk">Disk 30 µg</td><td class="orta">≥ 18 mm</td><td class="orta">15–17 mm</td><td class="orta">≤ 14 mm</td></tr>
+          <tr><td>Enterobacterales</td><td class="sonuk">MIC</td><td class="orta">≤ 8 mg/L</td><td class="orta">16 mg/L</td><td class="orta">≥ 32 mg/L</td></tr>
+          <tr><td><i>Pseudomonas aeruginosa</i></td><td class="sonuk">MIC</td><td class="orta">≤ 16 mg/L</td><td class="orta">—</td><td class="orta">&gt; 16 mg/L</td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="panel" hidden>
+    <div class="satir" style="padding:10px 12px">
+      <div class="blok"><h4>🦠 Panelde geçtiği organizmalar <span class="sp">antibiyogram paneli</span></h4>
+        <table><thead><tr><th>Organizma</th><th>Sıra</th><th>Basamak</th><th>Not</th></tr></thead><tbody>
+          <tr><td><i>Escherichia coli</i></td><td class="orta">6</td><td><span class="rz sari">2 · Alternatif</span></td><td class="sonuk">—</td></tr>
+          <tr><td><i>Klebsiella pneumoniae</i></td><td class="orta">6</td><td><span class="rz sari">2 · Alternatif</span></td><td class="sonuk">ESBL şüphesinde öncelikli</td></tr>
+          <tr><td><i>Pseudomonas aeruginosa</i></td><td class="orta">4</td><td><span class="rz sari">2 · Alternatif</span></td><td class="sonuk">Kombinasyon</td></tr>
+          <tr><td><i>Proteus mirabilis</i></td><td class="orta">5</td><td><span class="rz sari">2 · Alternatif</span></td><td class="sonuk">—</td></tr>
+          <tr><td><i>Enterobacter cloacae</i></td><td class="orta">5</td><td><span class="rz sari">2 · Alternatif</span></td><td class="sonuk">—</td></tr>
+        </tbody></table></div>
+      <div class="blok"><h4>🚫 Doğal direnç <span class="sp">raporlanmaz</span></h4>
+        <table><thead><tr><th>Organizma</th><th>Neden</th></tr></thead><tbody>
+          <tr><td><i>Streptococcus</i> spp.</td><td class="sonuk">Aminoglikozide düşük düzey doğal direnç</td></tr>
+          <tr><td><i>Stenotrophomonas maltophilia</i></td><td class="sonuk">Doğal direnç</td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+
+  <div class="pnl" data-s="kod" hidden>
+    <div class="satir" style="padding:10px 12px">
+      <div class="blok"><h4>🏷 Kodlar <span class="sp">bildirim eşlemesi</span></h4>
+        <table><tbody>
+          <tr><td>ATC</td><td><b>J01GB06</b> <span class="sonuk">— Amikasin (WHO ATC)</span></td></tr>
+          <tr><td>SKRS kodu</td><td><b>—</b> <span class="sonuk">— SKRS "ANTİBİYOTİK" listesinden doldurulur</span></td></tr>
+          <tr><td>LOINC (antibiyogram)</td><td><b>18860-7</b> <span class="sonuk">— Amikacin [Susceptibility]</span></td></tr>
+          <tr><td>Cihaz kodu</td><td><b>AN30</b> <span class="sonuk">— Vitek 2 / disk okuyucu eşlemesi</span></td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<div class="not"><b>Kartın kuralı.</b> Antibiyotik yalnız bir "ad" değil, <b>raporun neyi göstereceğini</b> belirler:
+<ul>
+  <li><b>Basamak</b> kademeli bildirimin sırasıdır: 1 rutin her zaman basılır, 2 ve 3 ancak alt basamakta
+      duyarlı seçenek yoksa açılır. Hepsini birden basmak klinisyeni gereksiz yere geniş spektruma yöneltir.</li>
+  <li><b>Tek başına yeterli değil</b> bayrağı (437) kombinasyon ajanlarını korur: aminoglikozid kendi
+      basamağında raporlanır ama "duyarlı seçenek var" sayımına girmez - yoksa MRSA bakteriyemisinde
+      gentamisin duyarlı diye vankomisin gizleniyordu.</li>
+  <li><b>Yalnız üriner</b> işaretli ajan (nitrofurantoin, fosfomisin) kan izolatında önerilmez; kan
+      kültüründe raporlanması tedaviyi yanlış yönlendirir.</li>
+  <li><b>Sınır değerler</b> kartta durur, teknisyenin ezberinde değil: disk çapı / MIC eşiği organizma
+      grubuna göre değişir ve yılda bir EUCAST ile güncellenir.</li>
+</ul></div>
+
+<script>
+// Sekmeler: .tabs icindeki .tab tiklaninca ayni kartin .pnl panelleri degisir
+//   (Ekranlar'daki ortak desen; eslesme data-s anahtariyla).
+document.querySelectorAll('.tabs').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.tab'));
+  var kart=bar.parentElement;
+  var pnls=[].slice.call(kart.querySelectorAll('.pnl'));
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){
+      tabs.forEach(function(x){x.classList.remove('on');});
+      t.classList.add('on'); goster(key(t,i));
+    });
+  });
+  var acik=tabs.findIndex(function(t){return t.classList.contains('on');});
+  if(acik<0) acik=0;
+  if(pnls.length) goster(key(tabs[acik],acik));
+});
+</script>
+</body></html>
