@@ -156,6 +156,13 @@ interface Props {
    */
   ekleGizli?: boolean;
   /**
+   * SATIR SILME DUGMESI GIZLI (536, kullanici: "satir ekleme ve silme
+   * simdilik gorunmez olsun, dursun ama gorunmesin"). Yetenek DURUYOR -
+   * yalniz dugme cizilmiyor: fiyat listesi SKRS'den kuruluyor, satiri elle
+   * silmek katalogla listeyi ayirir. Ileride geri acilacak.
+   */
+  silGizli?: boolean;
+  /**
    * Arama pencerelerinin KAYNAKLARINI daraltir (ör. prim planinin rolu
    * "Gönderen" degilse dis hekimler hic listelenmesin). Alanin kendi
    * `aramaKaynagi` degerini EZER; verilmezse o kullanilir.
@@ -277,6 +284,7 @@ function YasGirdisi({ gun, yazilabilir, onDegis }: {
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
                                modalDuzenle, taslakKural, cipler, kutuSinif,
                                gizliAlanlar, gridGizliAlanlar, etiketAlanlari, sadeGrid, ekleGizli,
+                               silGizli,
                                aramaKaynaklari, aramaEkFiltre, ekSuzgec,
                                modalAltBilesen,
   sayfa, toplam, onSayfa, sayfaYukleniyor, onSuzgec, hizliAlanlar, onSecim,
@@ -806,6 +814,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                                  : secililer.size > 1 ? 'Düzenleme tek satırda yapılır'
                                  : 'Seçili satırı düzenle'}
                           onClick={() => secili !== null && modalAc(secili)}>✎</button>
+                  {!silGizli && (
                   <button type="button" className="d teh ikon-dugme"
                           disabled={secililer.size === 0}
                           title={secililer.size === 0 ? 'Önce satır seçin'
@@ -813,6 +822,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                           onClick={() => { satirlariSil([...secililer]); setSecililer(new Set()); }}>
                     🗑{secililer.size > 1 ? ` ${secililer.size}` : ''}
                   </button>
+                  )}
 
                 </>
               )}

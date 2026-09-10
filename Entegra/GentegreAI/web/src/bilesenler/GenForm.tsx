@@ -1729,7 +1729,13 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           //   cercevedir, grid'in kendi baslik seridiyle cift cizgi olusuyordu.
           kutuSinif={ayar?.sinif ?? (kaynak === 'dokuman' ? 'kutu-cercevesiz' : undefined)}
           sadeGrid={ayar?.sade}
-          ekleGizli={ayar?.ekleGizli}
+          // SATIR EKLE/SIL GIZLI (536, kullanici: "satir ekleme ve silme
+          //   simdilik gorunmez olsun, dursun ama gorunmesin"): fiyat listesi
+          //   SKRS katalogundan kuruluyor - satiri elle eklemek/silmek
+          //   listeyle katalogu ayirir. Yetenek duruyor, dugme cizilmiyor.
+          ekleGizli={ayar?.ekleGizli
+            || (kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar')}
+          silGizli={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'}
           saltOkunur={salt || aktif.detay.saltOkunur || !!ayar?.salt}
           hatalar={alanHatalari}
           onDegis={yeni => setDetaylar(t => ({
