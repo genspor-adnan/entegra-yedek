@@ -316,16 +316,25 @@ public static partial class KartKatalogu
             new KartAlani[]
             {
                 new("id",             "id",                "sayi", Yazilabilir: false),
-                new("icerikHizmetId", "icerik_hizmet_id",  "kod", Zorunlu: true,
-                    KodTablosu: "public.v_hizmet_lookup", Baslik: "Tetkik"),
+                // ICERIK YA HIZMET YA STOK (510): BT'de kontrast, kulturde
+                //   besiyeri plakasi da paketin parcasidir. Ikisi birden
+                //   dolmaz (DB check); stok icerik YAPRAKTIR - istem uretmez,
+                //   stoktan duser.
+                new("icerikHizmetId", "icerik_hizmet_id",  "kod",
+                    KodTablosu: "public.v_hizmet_lookup", Baslik: "Tetkik",
+                    EslesAlan: "icerikStokId"),
+                new("icerikStokId",   "icerik_stok_id",    "kod",
+                    KodTablosu: "public.v_stok_lookup", Baslik: "Stok / Sarf"),
                 // Kod ve ad SALT OKUNUR: tetkikin kendi kartindan gelir -
                 //   kopyalanirsa ad degisince bayatlar (stok_paket deseni).
                 new("kod",
-                    "(select z.kod from public.hizmet z where z.id = hizmet_paket.icerik_hizmet_id)",
+                    "coalesce((select z.kod from public.hizmet z where z.id = hizmet_paket.icerik_hizmet_id)," +
+                    "         (select t.kod from public.stok t where t.id = hizmet_paket.icerik_stok_id))",
                     "metin", Yazilabilir: false, Baslik: "Kod"),
                 new("ad",
-                    "(select z.ad from public.hizmet z where z.id = hizmet_paket.icerik_hizmet_id)",
-                    "metin", Yazilabilir: false, Baslik: "Tetkik Adı"),
+                    "coalesce((select z.ad from public.hizmet z where z.id = hizmet_paket.icerik_hizmet_id)," +
+                    "         (select t.ad from public.stok t where t.id = hizmet_paket.icerik_stok_id))",
+                    "metin", Yazilabilir: false, Baslik: "İçerik Adı"),
                 new("kategoriYolu",
                     "(select case when u.id is null then k.ad else u.ad || ' > ' || k.ad end " +
                     "   from public.hizmet z " +

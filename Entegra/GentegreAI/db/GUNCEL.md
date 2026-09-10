@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (266 ad, 77 tanesi birden cok dosyada)
+## Fonksiyonlar (268 ad, 81 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -106,15 +106,17 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_hesap_atama_adi` | `197_kasa_atama_tek_alan.sql` | 196_kasa_atama.sql |
 | `fn_hesap_plani_alt_ac` | `076_fn_kasa.sql` | — |
 | `fn_hizmet_modalite_coz` | `460_hizmet_modalite_onarim.sql` | — |
-| `fn_hizmet_paket_ac` | `500_hizmet_paket_dongu.sql` | — |
-| `fn_hizmet_paket_derinlik` | `500_hizmet_paket_dongu.sql` | — |
-| `fn_hizmet_paket_dongu` | `500_hizmet_paket_dongu.sql` | — |
+| `fn_hizmet_paket_ac` | `510_hizmet_paket_stok_icerigi.sql` | 500_hizmet_paket_dongu.sql |
+| `fn_hizmet_paket_derinlik` | `510_hizmet_paket_stok_icerigi.sql` | 500_hizmet_paket_dongu.sql |
+| `fn_hizmet_paket_dongu` | `510_hizmet_paket_stok_icerigi.sql` | 500_hizmet_paket_dongu.sql |
 | `fn_hizmet_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
 | `fn_ilac_alerji_kontrol` | `414_metin_sadelestir.sql` | 413_recete.sql |
 | `fn_ilac_fiyat` | `406_ilac_fiyat.sql` | — |
 | `fn_ilac_fiyat_golge_tazele` | `406_ilac_fiyat.sql` | — |
 | `fn_ilac_kamu_iskonto` | `407_sgk_ek4a_iskonto.sql` | — |
+| `fn_ilac_stok_esle` | `511_ilac_stok_koprusu.sql` | — |
 | `fn_ilac_stok_fiyati` | `408_ilac_stok_fiyat_matrah.sql` | — |
+| `fn_ilac_stok_kart_ac` | `511_ilac_stok_koprusu.sql` | — |
 | `fn_its_siradakiler` | `428_kuyruk_takili_satir.sql` | 427_its_bildirim.sql |
 | `fn_kalem_kart_fiyati` | `202_fn_fiyat_listesi.sql` | — |
 | `fn_kampanya_fiyat` | `275_kampanya_liste_kalem_turu.sql` | 272_kampanya_fiyat.sql |
@@ -230,7 +232,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_fiyat_satir_birim` | `506_fiyat_satir_birim.sql` | — |
 | `tg_hizmet_paket_bayrak` | `502_hizmet_paket_bayragi.sql` | — |
 | `tg_hizmet_paket_bayrak_kontrol` | `502_hizmet_paket_bayragi.sql` | — |
-| `tg_hizmet_paket_dongu` | `500_hizmet_paket_dongu.sql` | — |
+| `tg_hizmet_paket_dongu` | `510_hizmet_paket_stok_icerigi.sql` | 500_hizmet_paket_dongu.sql |
 | `tg_kasa_dagitim_kontrol` | `471_dagilim_kapanma_tahsil.sql` | 321_tahsilat_satir_dagitim.sql, 323_tahsilat_kdv_dahil.sql |
 | `tg_kasa_dagitim_sil_tazele` | `354_kasa_islem_silme_kosullari.sql` | — |
 | `tg_kasa_dagitim_tazele` | `321_tahsilat_satir_dagitim.sql` | — |
@@ -275,7 +277,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (126 ad, 39 tanesi birden cok dosyada)
+## Gorunumler (127 ad, 39 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -338,6 +340,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_hizmet_paket_ozet` | `496_hizmet_paket.sql` | — |
 | `v_iade_edilebilir_satir` | `133_iade_irsaliye.sql` | 132_iade_satirlari.sql |
 | `v_icd_lookup` | `409_muayene_v1.sql` | — |
+| `v_ilac_stoksuz` | `511_ilac_stok_koprusu.sql` | — |
 | `v_is_merkezi_lookup` | `429_uretim_v1.sql` | — |
 | `v_kampanya_lookup` | `268_kampanya.sql` | — |
 | `v_kasa_islem_dagitim` | `322_avans_mahsup.sql` | — |

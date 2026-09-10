@@ -164,6 +164,40 @@ public static class KatalogUclari
         });
         // POST /api/katalog/recete-turu-guncelle
         //   SKRS e-Reçete listesinden reçete türü + temel ilaç işaretleri.
+        // ------------------------------------------------ ilac <-> stok (511)
+        // Fatura satirinin ekseni IKI: stok ya da hizmet. `ilac` bir KATALOG -
+        //   hastaya verilen ilac stok kartina baglanmadan faturalanamaz.
+        //   Kopru BARKODLA kurulur; ad eslemesi guvenilmez.
+        grup.MapPost("/ilac-stok-esle", async (
+            BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("katalog", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var baglanan = await baglanti.TekDegerAsync<int>(
+                "select public.fn_ilac_stok_esle()", null, [], iptal);
+            var kalan = await baglanti.TekDegerAsync<long>(
+                "select count(*) from public.v_ilac_stoksuz", null, [], iptal);
+            return Results.Ok(new { baglanan, kalan, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // Tek ilactan STOK KARTI acar (23 bin ilacin tamami degil, kurumun
+        //   kullandigi ilac karta doner - kullanici tetikler).
+        grup.MapPost("/ilac/{id:int}/stok-kart", async (
+            int id, int? kategori, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("stok", Islem.Ekle);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var stokId = await baglanti.TekDegerAsync<int>(
+                "select public.fn_ilac_stok_kart_ac(@p0, @p1, @p2)", null,
+                [id, (object?)kategori ?? DBNull.Value, baglam.KullaniciId], iptal);
+            return Results.Ok(new { stokId, izlemeNo = baglam.IzlemeNo });
+        });
+
         grup.MapPost("/recete-turu-guncelle", async (
             BaglamCozucu cozucu, Servisler.TitckIlacGuncelleme titck,
             HttpContext ctx, CancellationToken iptal) =>

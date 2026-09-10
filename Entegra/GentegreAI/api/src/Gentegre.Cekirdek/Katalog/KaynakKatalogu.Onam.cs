@@ -202,8 +202,13 @@ public static partial class KaynakKatalogu
                                                 "metin", "Reçete", Hizalama: "orta",
                                                 Bicim: "rozet", Genislik: 110, Filtrelenebilir: false),
             new("receteTuru",  "i.recete_turu", "kod",   "Reçete Kodu", Varsayilan: false),
-            new("stokAdi",     "coalesce(s.ad, '')", "metin", "Stok Kartı", Genislik: 200,
-                                                Varsayilan: false),
+            // STOK KARTI GORUNUR (511, kullanici: "hastaya fiyat verirken
+            //   hizmet-stok-ilac eslemelerini nasil yapacagiz"): fatura satiri
+            //   ya stok ya hizmettir - stok karti YOKSA o ilac hastaya
+            //   faturalanamaz. Kolon varsayilan gorunur ve bos hucre eksigi
+            //   dogrudan soyler.
+            new("stokAdi",     "coalesce(s.kod || ' · ' || s.ad, '')", "metin",
+                                                "Stok Kartı", Genislik: 220),
             new("stokId",      "coalesce(i.stok_id, 0)", "sayi", "Stok Id", Varsayilan: false),
             // Fiyat golge kolondan okunur (406): arama penceresi ilaci
             //   fiyatiyla gostersin diye - dogruluk kaynagi ilac_fiyat.
