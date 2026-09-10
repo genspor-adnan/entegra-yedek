@@ -55,10 +55,12 @@ public static partial class KartKatalogu
                 Baslik: "Tarife Tipi", Grup: "Kimlik"),
             new("yon", "yon", "kod", SabitKodlar: YonKodlari,
                 Baslik: "Yön", Grup: "Kimlik"),
-            new("kdvDahil", "kdv_dahil", "kod", SabitKodlar: KdvDahilKodlari,
-                Baslik: "KDV", Grup: "Kimlik"),
             new("durum", "durum", "kod", SabitKodlar: DurumKodlari,
                 Baslik: "Durum", Grup: "Kimlik"),
+            // VARSAYILAN: carisinde liste tanimlanmamis belgeler bunu kullanir.
+            //   Yon basina TEK varsayilan olabilir (DB tekil indeksi).
+            new("varsayilan", "varsayilan", "mantik",
+                Baslik: "Varsayılan Liste", Grup: "Kimlik"),
 
             // TUM ALANLAR UST SERITTE (532, kullanici: "diger alanlari
             //   basliga 2. sira olarak tasi"). Liste kartinda alan sayisi
@@ -67,8 +69,8 @@ public static partial class KartKatalogu
             //   tiklama arkasina koymak oluyordu. Serit dortlu izgara:
             //   ad / tarife / durum / varsayilan · yon / KDV / baslama /
             //   bitis · aciklama.
-            //   1. SIRA (kullanici): ad · tarife · yon · KDV · durum
-            //   2. SIRA (kullanici): baslama · bitis · aciklama · varsayilan
+            //   1. SIRA (kullanici): ad · tarife · yon · durum · varsayilan
+            //   2. SIRA (kullanici): baslama · bitis · KDV · aciklama (+ sube)
 
             // TABAN LISTE / CARPAN / YUVARLAMA LISTE BASLIGINDAN KALKTI
             //   (532, kullanici: "taban liste, carpan, yuvarlama, yuvarlama
@@ -98,16 +100,20 @@ public static partial class KartKatalogu
                 Grup: "Kimlik"),
             new("bitis",     "bitis",     "tarih", Baslik: "Bitiş",
                 Grup: "Kimlik"),
+            new("kdvDahil", "kdv_dahil", "kod", SabitKodlar: KdvDahilKodlari,
+                Baslik: "KDV", Grup: "Kimlik"),
             // Tek alan kalinca "Fiyatlama" kutusu bos bir baslik oluyordu -
             //   aciklama Detay kutusuna gecti (532).
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
                 Baslik: "Açıklama", Grup: "Kimlik"),
-            // VARSAYILAN: carisinde liste tanimlanmamis belgeler bunu kullanir.
-            //   Yon basina TEK varsayilan olabilir (DB tekil indeksi).
-            new("varsayilan", "varsayilan", "mantik",
-                Baslik: "Varsayılan Liste", Grup: "Kimlik"),
 
-            new("subeId", "sube_id", "sayi", Yazilabilir: false, Baslik: "Şube"),
+            // SUBE DE SERITTE (532, kullanici: "genel sekmesini ve satirlar
+            //   sekmelerini de kaldir"): tek alan kalinca "Genel" sekmesi bir
+            //   satirlik bilgiyi tiklama arkasina koyuyordu. Grup bosalinca
+            //   geriye tek sekme (Satirlar) kalir - GenForm tek sekmede serit
+            //   cizmez, grid dogrudan govdede acilir.
+            new("subeId", "sube_id", "sayi", Yazilabilir: false, Baslik: "Şube",
+                Grup: "Kimlik"),
         },
         Detaylar: new[]
         {
