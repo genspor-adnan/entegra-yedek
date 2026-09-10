@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (286 ad, 84 tanesi birden cok dosyada)
+## Fonksiyonlar (286 ad, 86 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -94,10 +94,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_fiyat_katsayi_yukle` | `533_ttb_fiyat_turetilmis.sql` | — |
 | `fn_fiyat_liste_turet` | `538_ozel_kat_on.sql` | 536_ozel_fiyat_turet.sql |
 | `fn_fiyat_listesi_dongu_kontrol` | `201_fiyat_listesi.sql` | — |
-| `fn_fiyat_listesi_ek_katki` | `468_kurum_sozlesme_1n.sql` | — |
-| `fn_fiyat_listesi_fiyat` | `495_fiyat_satir_kdv_listeden.sql` | 202_fn_fiyat_listesi.sql, 209_taban_fiyat_izi.sql, 211_taban_satir_izi.sql, 212_yazim_gecis_kurali.sql, 214_yazim_olusma_import.sql |
-| `fn_fiyat_listesi_katki` | `291_katilim_payi.sql` | — |
-| `fn_fiyat_listesi_uret` | `214_yazim_olusma_import.sql` | 202_fn_fiyat_listesi.sql, 209_taban_fiyat_izi.sql, 210_taban_liste_izi.sql, 211_taban_satir_izi.sql |
+| `fn_fiyat_listesi_ek_katki` | `539_turetilmis_liste_sokuldu.sql` | 468_kurum_sozlesme_1n.sql |
+| `fn_fiyat_listesi_fiyat` | `539_turetilmis_liste_sokuldu.sql` | 202_fn_fiyat_listesi.sql, 209_taban_fiyat_izi.sql, 211_taban_satir_izi.sql, 212_yazim_gecis_kurali.sql, 214_yazim_olusma_import.sql, 495_fiyat_satir_kdv_listeden.sql |
+| `fn_fiyat_listesi_katki` | `539_turetilmis_liste_sokuldu.sql` | 291_katilim_payi.sql |
+| `fn_fiyat_listesi_uret` | `539_turetilmis_liste_sokuldu.sql` | 202_fn_fiyat_listesi.sql, 209_taban_fiyat_izi.sql, 210_taban_liste_izi.sql, 211_taban_satir_izi.sql, 214_yazim_olusma_import.sql |
 | `fn_fiyat_listesi_yon_kontrol` | `204_cari_fiyat_listesi.sql` | — |
 | `fn_fiyat_sut_yukle` | `535_sut_fiyat_guncelle.sql` | — |
 | `fn_fiyat_yuvarla` | `202_fn_fiyat_listesi.sql` | — |
@@ -209,7 +209,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_siradaki_hasta` | `410_hekim_calisma_listesi.sql` | — |
 | `fn_skrs_ambar_uret` | `521_skrs_katalog_kurulum.sql` | — |
 | `fn_skrs_kod` | `503_skrs_kod_dikisi.sql` | — |
-| `fn_sls_carpan_manuel` | `214_yazim_olusma_import.sql` | 209_taban_fiyat_izi.sql, 212_yazim_gecis_kurali.sql, 213_fiyat_elle_degisim.sql |
+| `fn_sls_carpan_manuel` | `539_turetilmis_liste_sokuldu.sql` | 209_taban_fiyat_izi.sql, 212_yazim_gecis_kurali.sql, 213_fiyat_elle_degisim.sql, 214_yazim_olusma_import.sql |
 | `fn_slug` | `021_goc_kimlik.sql` | — |
 | `fn_stok_kart_fiyat` | `128_fn_stok_kart_fiyat.sql` | — |
 | `fn_stok_kopyala` | `127_stok_kopyala_fiyat.sql` | 126_fn_stok_kopyala.sql |
@@ -243,7 +243,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_belge_satir_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
 | `tg_departman_dongu_engel` | `257_departman_ustbirim.sql` | — |
 | `tg_fiyat_satir_birim` | `506_fiyat_satir_birim.sql` | — |
-| `tg_fiyat_satir_tarife` | `533_ttb_fiyat_turetilmis.sql` | 518_fiyat_listesi_tarife_tipi.sql |
+| `tg_fiyat_satir_tarife` | `539_turetilmis_liste_sokuldu.sql` | 518_fiyat_listesi_tarife_tipi.sql, 533_ttb_fiyat_turetilmis.sql |
 | `tg_hizmet_paket_bayrak` | `502_hizmet_paket_bayragi.sql` | — |
 | `tg_hizmet_paket_bayrak_kontrol` | `502_hizmet_paket_bayragi.sql` | — |
 | `tg_hizmet_paket_dongu` | `510_hizmet_paket_stok_icerigi.sql` | 500_hizmet_paket_dongu.sql |
@@ -295,7 +295,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (132 ad, 39 tanesi birden cok dosyada)
+## Gorunumler (132 ad, 40 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -338,9 +338,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_firsat_asama_gecmis` | `121_firsat.sql` | — |
 | `v_firsat_liste` | `121_firsat.sql` | — |
 | `v_fiyat_listesi_alis_lookup` | `204_cari_fiyat_listesi.sql` | — |
-| `v_fiyat_listesi_kullanim` | `204_cari_fiyat_listesi.sql` | — |
+| `v_fiyat_listesi_kullanim` | `539_turetilmis_liste_sokuldu.sql` | 204_cari_fiyat_listesi.sql |
 | `v_fiyat_listesi_lookup` | `201_fiyat_listesi.sql` | — |
-| `v_fiyat_listesi_satir` | `507_fiyat_satir_gorunum_kdv_kategori.sql` | 201_fiyat_listesi.sql |
+| `v_fiyat_listesi_satir` | `539_turetilmis_liste_sokuldu.sql` | 201_fiyat_listesi.sql, 507_fiyat_satir_gorunum_kdv_kategori.sql |
 | `v_fiyat_listesi_satis_lookup` | `204_cari_fiyat_listesi.sql` | — |
 | `v_gorev_lookup` | `255_personel_gorev.sql` | — |
 | `v_hakedis_ozet` | `330_prim_tahsilat_turu_durum.sql` | 324_prim_semasi.sql |

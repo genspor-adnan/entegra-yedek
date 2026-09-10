@@ -30,9 +30,6 @@ public static partial class KartKatalogu
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {
             ["durum"] = (short)1,
-            ["carpan"] = 1m,
-            ["yuvarlama"] = (short)0,
-            ["yuvarlamaBirim"] = 1m,
             ["kdvDahil"] = (short)0,
             // Yon SECILMEDEN kalmamali: kart "—" gosterip DB'ye 2 yazardi.
             //   Yeni liste cogunlukla satis listesidir.
@@ -226,14 +223,10 @@ public static partial class KartKatalogu
                    ["pasif"]  = "not " + KalemAktif,
                },
                VarsayilanCip: "aktif")
-        },
-        SilmeEngelleri: new[]
-        {
-            // Baska bir liste bunu TABAN aliyorsa silinemez - zincirin ortasi
-            //   cekilirse turetilen listeler fiyatsiz kalir.
-            new SilmeEngeli("public.fiyat_listesi", "taban_liste_id",
-                "Bu listeyi taban alan {0} liste var; önce onların tabanını değiştirin."),
-        });
+        }
+        // SILME ENGELI YOK (539): tek engel "baska liste bunu taban aliyor"
+        //   kuraliydi; turetilmis liste mekanizmasi kalkinca konusu kalmadi.
+        );
 
     /// <summary>Liste yonu - iki degerli, kod listesi acmaya degmez.</summary>
     private static readonly IReadOnlyDictionary<string, string> YonKodlari =

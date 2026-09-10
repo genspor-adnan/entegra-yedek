@@ -11,7 +11,6 @@ public static partial class KaynakKatalogu
         YetkiKodu: "fiyat_listesi",
         Kaynak: """
             public.fiyat_listesi l
-            left join public.fiyat_listesi t on t.id = l.taban_liste_id
             """,
         SubeKolonu: "l.sube_id",
         // GRUP KOLONU DUSTU (532): tarife tipi (518) ayni soruyu
@@ -89,13 +88,8 @@ public static partial class KaynakKatalogu
             new("yazim",
                 "case v.yazim when 1 then 'Manuel' when 3 then 'İmport' else 'Hesap' end",
                 "metin", "Oluşma", Hizalama: "orta"),
-            new("tabanListeAdi", "v.taban_liste_adi", "metin", "Taban Fiyat", Genislik: 160),
-            new("carpan",    "v.carpan",    "para", "Çarpan", Hizalama: "sag", Bicim: "#,##0.0000"),
-            new("yuvarlama", "v.yuvarlama", "kod",  "Yuvarlama", Hizalama: "orta"),
             new("tabanFiyat", "v.taban_fiyat", "para", "Taban Fiyat Değeri",
                 Hizalama: "sag", Bicim: "#,##0.00", Varsayilan: false),
-            new("uretimTarihi", "v.uretim_tarihi", "tarih", "Üretim",
-                Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm", Varsayilan: false),
             new("stokId",   "v.stok_id",   "sayi", "Stok Id", Varsayilan: false),
             new("hizmetId", "v.hizmet_id", "sayi", "Hizmet Id", Varsayilan: false),
             new("subeId",   "v.sube_id",   "sayi", "Şube", Varsayilan: false),
