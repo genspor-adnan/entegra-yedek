@@ -22,16 +22,18 @@ export async function fiyatListesiAksiyonu(
   b: FiyatListesiBaglam,
 ): Promise<boolean> {
   switch (kod) {
-    case 'fiyat-listesi.uret': {
+    // KOPYALA (540): var olan tarifeden yeni tarife - fiyatlar tasinir,
+    //   sonra topluca zamlanir. Kopya BAGIMSIZDIR: kaynak sonradan degisse
+    //   etkilenmez (turetilmis liste zinciri 539'da sokuldu).
+    case 'fiyat-listesi.kopyala': {
       if (!satir) return true;
       const ad = String(satir.ad ?? satir.id);
-      // ELLE GIRILMIS satirlar korunur: kural yeniden isletilirken kullanicinin
-      //   tek tek duzelttigi fiyatlar silinseydi liste her uretimde bozulurdu.
-      if (!await onay(`"${ad}" listesinin satırları yeniden üretilecek.\n\n`
-                    + 'Kural (taban liste × çarpan → yuvarlama) yeniden işletilir. '
-                    + 'Elle girilmiş (Manuel) satırlar KORUNUR.')) return true;
+      if (!await onay(`"${ad}" listesi satırlarıyla kopyalanacak.
+
+`
+                    + `Yeni listenin adı: "Kopya ${ad}".`)) return true;
       await guvenli(async () => {
-        const y = await api.fiyatListesiUret(Number(satir.id));
+        const y = await api.fiyatListesiKopyala(Number(satir.id));
         mesaj(y.mesaj);
         b.tazele();
       });

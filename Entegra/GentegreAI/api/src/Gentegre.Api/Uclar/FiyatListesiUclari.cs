@@ -17,6 +17,9 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static class FiyatListesiUclari
 {
+    /// <summary>Kopyalama istegi (540): ad verilmezse "Kopya &lt;ad&gt;".</summary>
+    public sealed record KopyaIstegi(string? Ad);
+
     /// <summary>islem_log.tablo_id - KartKatalogu.FiyatListesi ile AYNI kod olmali.</summary>
     private const int LogTabloFiyatListesi = 923;
 
@@ -87,6 +90,52 @@ public static class FiyatListesiUclari
         //   ekranında fiyatları göreyim"): 25 satirlik arama sonucunun
         //   fiyatlari TEK istekte cozulur - satir basina ayri cagri arama
         //   penceresini kullanilamaz hale getirirdi.
+        // ------------------------------------------------------- kopyala ----
+        // POST /api/fiyat-listesi/{id}/kopyala
+        //
+        // "Listeyi Üret" 539'da anlamini yitirdi (taban liste zinciri kalkti);
+        //   gercek ihtiyac var olan tarifeden yeni tarife turetmek: 2027
+        //   listesi, kuruma ozel liste... Fiyatlar tasinir, sonra topluca
+        //   zamlanir. KOPYA BAGIMSIZDIR - kaynak sonradan degisse etkilenmez.
+        yol.MapPost("/api/fiyat-listesi/{id:int}/kopyala", async (
+            int id, KopyaIstegi? istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("fiyat_listesi", Islem.Ekle);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            await using var kontrol = baglanti.Komut(
+                "select ad, coalesce(sube_id, 0) from public.fiyat_listesi where id = @p0",
+                null, id);
+            string ad;
+            int subeId;
+            await using (var o = await kontrol.ExecuteReaderAsync(iptal))
+            {
+                if (!await o.ReadAsync(iptal)) return Results.NotFound();
+                ad = o.GetString(0);
+                subeId = o.GetInt32(1);
+            }
+            if (subeId != 0 && baglam.SubeId is { } aktif && subeId != aktif)
+                throw GentegreHatasi.Yasak("Bu liste başka bir şubeye ait.");
+
+            var yeniId = await baglanti.TekDegerAsync<int>(
+                "select public.fn_fiyat_listesi_kopyala(@p0, @p1, @p2)",
+                null, [id, istek?.Ad, baglam.KullaniciId], iptal);
+
+            var satir = await baglanti.TekDegerAsync<int>(
+                "select count(*) from public.fiyat_listesi_satir where liste_id = @p0",
+                null, [yeniId], iptal);
+
+            return Results.Ok(new
+            {
+                id = yeniId,
+                mesaj = $"\"{ad}\" kopyalandı - {satir:N0} satır.",
+                izlemeNo = baglam.IzlemeNo
+            });
+        });
+
         // ------------------------------------------- SKRS'den SUT tazeleme ----
         // POST /api/fiyat-listesi/{id}/sut-guncelle
         //

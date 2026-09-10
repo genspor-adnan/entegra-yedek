@@ -1129,6 +1129,10 @@ export const api = {
   /** Profili yazar - verilmeyen alanlar mevcut degerini korur. */
   kurumProfilYaz: (govde: Partial<KurumProfil>) =>
     gonder<{ profil: KurumProfil }>('/api/kurum-profil', govde, 'PUT'),
+  /** Fiyat listesini satirlariyla kopyalar (540). */
+  fiyatListesiKopyala: (id: number, ad?: string) =>
+    gonder<{ id: number; mesaj: string }>(
+      `/api/fiyat-listesi/${id}/kopyala`, { ad }),
   /** SUT listesini SKRS ambarindan tazeler (535) - fiyat kilidini yalniz bu
       yol acar. */
   fiyatSutGuncelle: (id: number) =>

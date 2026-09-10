@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (286 ad, 86 tanesi birden cok dosyada)
+## Fonksiyonlar (287 ad, 86 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -97,6 +97,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_fiyat_listesi_ek_katki` | `539_turetilmis_liste_sokuldu.sql` | 468_kurum_sozlesme_1n.sql |
 | `fn_fiyat_listesi_fiyat` | `539_turetilmis_liste_sokuldu.sql` | 202_fn_fiyat_listesi.sql, 209_taban_fiyat_izi.sql, 211_taban_satir_izi.sql, 212_yazim_gecis_kurali.sql, 214_yazim_olusma_import.sql, 495_fiyat_satir_kdv_listeden.sql |
 | `fn_fiyat_listesi_katki` | `539_turetilmis_liste_sokuldu.sql` | 291_katilim_payi.sql |
+| `fn_fiyat_listesi_kopyala` | `540_fiyat_listesi_kopyala.sql` | — |
 | `fn_fiyat_listesi_uret` | `539_turetilmis_liste_sokuldu.sql` | 202_fn_fiyat_listesi.sql, 209_taban_fiyat_izi.sql, 210_taban_liste_izi.sql, 211_taban_satir_izi.sql, 214_yazim_olusma_import.sql |
 | `fn_fiyat_listesi_yon_kontrol` | `204_cari_fiyat_listesi.sql` | — |
 | `fn_fiyat_sut_yukle` | `535_sut_fiyat_guncelle.sql` | — |

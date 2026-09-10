@@ -100,7 +100,12 @@ public static class AksiyonKatalogu
             ["fiyat-listesi-liste"] =
             [
                 .. Crud("fiyat-listesi", "fiyat", "fiyat_listesi"),
-                new("fiyat-listesi.uret", "⟳ Listeyi Üret", "fiyat",
+                // KOPYALA (540, kullanici: "Listeyi Üret butonu yerine
+                //   Kopyala ekle; secili tek listeyi adinin basina Kopya
+                //   ekleyerek kopyalasin"). "Listeyi Üret" 539'da anlamini
+                //   yitirdi - taban liste zinciri kalkinca yalniz kalem
+                //   listesi kuruyordu.
+                new("fiyat-listesi.kopyala", "⧉ Kopyala", "fiyat",
                     Hedef: "araccubugu,sagtus,palet", AksiyonYetkisi: "fiyat_listesi.uret",
                     KayitGerekir: true, Sira: 40),
                 new("fiyat-listesi.satirlar", "Satırları Aç", "fiyat",

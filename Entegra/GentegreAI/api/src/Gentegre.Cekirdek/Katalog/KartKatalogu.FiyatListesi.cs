@@ -78,11 +78,15 @@ public static partial class KartKatalogu
             //   Kolonlar DURUYOR - `fn_sls_carpan_manuel` ve turetme zinciri
             //   onlari okuyor; yalniz kart alani kalktı.
 
-            // BASLAMA / BITIS KART SERIDINDEN KALKTI (kullanici: "baslangic/
-            //   bitis alanlari da kaldir"): uc tarifenin hicbirinde donem
-            //   sinirlanmiyor (ucu de bos) - her kartta iki bos tarih kutusu
-            //   doldurulmasi gereken bir alan izlenimi veriyordu. Kolonlar
-            //   DURUYOR; donemli liste gerektiginde alanlar geri acilir.
+            // BASLAMA / BITIS LISTE BASLIGINDA DURUR (kullanici: "baslama
+            //   bitis fiyat listede dursun"). Bos gorunuyorlar ama alan degil
+            //   SUS DEGIL: `fn_belge_varsayilan_liste`, `fn_cari_fiyat_listesi`
+            //   ve basvuru tetigi "bugun gecerli liste" secimini bu iki
+            //   tarihle yapiyor - donemi gecmis liste belgeye gelmesin diye.
+            new("baslangic", "baslangic", "tarih", Baslik: "Başlama",
+                Grup: "Kimlik"),
+            new("bitis",     "bitis",     "tarih", Baslik: "Bitiş",
+                Grup: "Kimlik"),
 
             new("kdvDahil", "kdv_dahil", "kod", SabitKodlar: KdvDahilKodlari,
                 Baslik: "KDV", Grup: "Kimlik"),
