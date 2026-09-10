@@ -104,7 +104,12 @@ interface Props {
    * carpan girilmeli"). Dugme yalniz `topluIslemler` verilince cikar - hangi
    * alanin toplu yazilabilecegi KARTIN karari, gridin degil.
    */
-  topluIslemler?: { ad: string; alanAdi: string; baslik: string; ipucu?: string }[];
+  /**
+   * SECIM DISARIYA BILDIRILIR (534): toplu islem dugmesi kartin UST arac
+   * cubugunda duruyor (kullanici: "carpan butonu ustteki silin sagina al") -
+   * orasi GenForm'un alani, secim ise gridin. Kume yukari akar.
+   */
+  onSecim?(secililer: ReadonlySet<number>): void;
   /**
    * SAYFALI DETAYDA SUZGEC SUNUCUDA (526, kullanici: "arama ve filtreler
    * aktif olan TUM satirlar uzerinden olmali"). Verilirse arama kutusu, cip
@@ -274,7 +279,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                                gizliAlanlar, gridGizliAlanlar, etiketAlanlari, sadeGrid, ekleGizli,
                                aramaKaynaklari, aramaEkFiltre, ekSuzgec,
                                modalAltBilesen,
-  sayfa, toplam, onSayfa, sayfaYukleniyor, onSuzgec, hizliAlanlar, topluIslemler,
+  sayfa, toplam, onSayfa, sayfaYukleniyor, onSuzgec, hizliAlanlar, onSecim,
 }: Props) {
   // SAYFALI DETAY (525): serit yalniz katalog sayfa boyu verdiyse VE toplam
   //   bir sayfaya sigmiyorsa cizilir - iki satirlik adres detayinda "1 / 1"
@@ -441,28 +446,50 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
    */
   const [secililer, setSecililer] = useState<ReadonlySet<number>>(new Set());
   const secili = secililer.size === 1 ? [...secililer][0] : null;
-  /** Acik toplu islem penceresi (534) ve icine yazilan deger. */
-  const [topluAcik, setTopluAcik] = useState<
-    { ad: string; alanAdi: string; baslik: string; ipucu?: string } | null>(null);
-  const [topluDeger, setTopluDeger] = useState('');
-
-  /** Secili satirlarin TEK alanina ayni degeri yazar (534). */
-  const topluUygula = () => {
-    if (!topluAcik) return;
-    const sayi = Number(topluDeger.replace(',', '.'));
-    if (!Number.isFinite(sayi)) return;
-    const guncel = durum.guncel.map((satir, i) =>
-      secililer.has(i) ? { ...satir, [topluAcik.alanAdi]: sayi } : satir);
-    onDegis({ ...durum, guncel });
-    setTopluAcik(null);
-    setTopluDeger('');
-  };
 
   const secimDegis = (i: number, acik: boolean) => setSecililer(o => {
     const y = new Set(o);
     if (acik) y.add(i); else y.delete(i);
     return y;
   });
+  // Secim her degistiginde disariya bildirilir - ust arac cubugundaki toplu
+  //   islem dugmesi "kac satir" bilgisini oradan alir.
+  useEffect(() => { onSecim?.(secililer) }, [secililer, onSecim]);
+
+  /** Shift ile aralik secmek icin son tiklanan satirin ORIJINAL indeksi. */
+  const capa = useRef<number | null>(null);
+
+  /**
+   * SATIRA TIKLAMA (534, kullanici: "shift ve ctrl ile fazla isaretlenebilsin"):
+   *   duz tik   -> yalniz o satir
+   *   Ctrl/Cmd  -> o satiri ekler/cikarir (capa oraya gecer)
+   *   Shift     -> capadan bu satira kadarki GORUNEN araligi ekler
+   * Aralik GORUNEN sirayla alinir: suzgec/sirali gridde orijinal indeks
+   * araligi almak, ekranda gorunmeyen satirlari da secerdi.
+   */
+  const satirTikla = (i: number, e: { shiftKey: boolean; ctrlKey: boolean; metaKey: boolean }) => {
+    if (e.shiftKey && capa.current !== null) {
+      const sira = gorunurler.map(g => g.i);
+      const a = sira.indexOf(capa.current);
+      const b = sira.indexOf(i);
+      if (a >= 0 && b >= 0) {
+        const [bas, son] = a <= b ? [a, b] : [b, a];
+        setSecililer(o => new Set([...o, ...sira.slice(bas, son + 1)]));
+        return;
+      }
+    }
+    if (e.ctrlKey || e.metaKey) {
+      capa.current = i;
+      setSecililer(o => {
+        const y = new Set(o);
+        if (y.has(i)) y.delete(i); else y.add(i);
+        return y;
+      });
+      return;
+    }
+    capa.current = i;
+    setSecililer(new Set([i]));
+  };
   /** Modalde acik satirin indeksi ("yeni" = eklenecek satir). */
   const [modalSatir, setModalSatir] = useState<number | 'yeni' | null>(null);
   /** Modalde duzenlenen taslak - Tamam'a basilana kadar tabloya yazilmaz. */
@@ -786,17 +813,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                           onClick={() => { satirlariSil([...secililer]); setSecililer(new Set()); }}>
                     🗑{secililer.size > 1 ? ` ${secililer.size}` : ''}
                   </button>
-                  {/* TOPLU ALAN YAZMA (534): silin sagi. Secim yoksa pasif -
-                      "hangi satirlara" sorusu cevapsiz kalmasin. */}
-                  {topluIslemler?.map(t => (
-                    <button key={t.alanAdi} type="button" className="d"
-                            disabled={secililer.size === 0}
-                            title={secililer.size === 0 ? 'Önce satır seçin'
-                                   : `${t.baslik} (${secililer.size} satır)`}
-                            onClick={() => { setTopluAcik(t); setTopluDeger('') }}>
-                      {t.ad}
-                    </button>
-                  ))}
+
                 </>
               )}
               {/* Suzme cipleri (kullanici: Tumu / Stok / Hizmet) - listelerin
@@ -919,7 +936,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                 onClick={e => {
                   if (!modalDuzenle || saltOkunur) return;
                   if ((e.target as HTMLElement).closest('input[type="checkbox"]')) return;
-                  setSecililer(new Set([i]));
+                  satirTikla(i, e);
                 }}
                 onDoubleClick={() => modalDuzenle && !saltOkunur && modalAc(i)}>
               {/* COKLU SECIM (534): kutu isaretlemek oteki secimleri BOZMAZ;
@@ -927,7 +944,15 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
               {modalDuzenle && !saltOkunur && (
                 <td className="hiza-orta">
                   <input type="checkbox" checked={secililer.has(i)}
-                         onChange={e => secimDegis(i, e.target.checked)} />
+                         onChange={e => { capa.current = i; secimDegis(i, e.target.checked) }}
+                         onClick={e => {
+                           // Kutuda SHIFT: capadan buraya kadar isaretle -
+                           //   liste ekranlarindaki alisilmis davranis.
+                           if (e.shiftKey && capa.current !== null) {
+                             e.preventDefault();
+                             satirTikla(i, e);
+                           }
+                         }} />
                 </td>
               )}
               {satirlarGrid && (
@@ -1292,32 +1317,6 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                   onKapat={() => setMenuKonum(null)} />
       )}
 
-      {/* TOPLU DEGER PENCERESI (534): tek sayi, secili satirlara yazilir. */}
-      {topluAcik && (
-        <Modal baslik={`${topluAcik.baslik} — ${secililer.size} satır`} dar enUst
-               onKapat={() => setTopluAcik(null)}
-               alt={(
-                 <>
-                   <button type="button" className="d" onClick={() => setTopluAcik(null)}>
-                     Vazgeç
-                   </button>
-                   <button type="button" className="d bir" onClick={topluUygula}
-                           disabled={topluDeger.trim() === ''}>
-                     {secililer.size} satıra uygula
-                   </button>
-                 </>
-               )}>
-          <div className="toplu-kutu">
-            <label className="alan tip-para">
-              <span className="etiket">{topluAcik.baslik}</span>
-              <input autoFocus inputMode="decimal" value={topluDeger}
-                     onChange={e => setTopluDeger(e.target.value)}
-                     onKeyDown={e => { if (e.key === 'Enter') topluUygula() }} />
-            </label>
-            {topluAcik.ipucu && <div className="ic sonuk">{topluAcik.ipucu}</div>}
-          </div>
-        </Modal>
-      )}
 
       {/* Satir duzenleme modali: alanlar etiketleriyle alt alta. "Tamam" yalniz
           TABLOYA yazar - kayit kartin kendi Kaydet'iyle sunucuya gider. */}

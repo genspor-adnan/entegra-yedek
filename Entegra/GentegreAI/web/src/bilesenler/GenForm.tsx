@@ -297,6 +297,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
   const [detaySayfa, setDetaySayfa] = useState<Record<string, number>>({});
   const [detayToplam, setDetayToplam] = useState<Record<string, number>>({});
   const [detaySayfaYuk, setDetaySayfaYuk] = useState<string | null>(null);
+  /** Satir gridinde secili satirlar (534) - toplu islem dugmesi ust arac
+      cubugunda, secim ise gridde yasiyor. */
+  const [seciliSatirlar, setSeciliSatirlar] = useState<ReadonlySet<number>>(new Set());
+  /** Acik toplu deger penceresi (534). */
+  const [topluCarpan, setTopluCarpan] = useState(false);
+  const [topluCarpanDeger, setTopluCarpanDeger] = useState('');
 
   /**
    * SAYFALI DETAYDA SAYFA DEGISIMI (525).
@@ -1240,6 +1246,20 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           {!yeniMi && yetki.sil && (
             <button className="d teh" onClick={() => void sil()}>Sil</button>
           )}
+          {/* TOPLU CARPAN (534, kullanici: "sil butonu sagina Çarpan Gir
+              butonu ekle, sadece TTB/HUV'da gorunsun" · "carpan butonu
+              ustteki silin sagina al"): donem carpani binlerce satirda ayni -
+              tek tek yazmak is degil. Secim gridde, dugme burada. */}
+          {!yeniMi && kaynak === 'fiyat-listesi' && Number(deger.tarifeTipi) === 2 && (
+            <button type="button" className="d"
+                    disabled={seciliSatirlar.size === 0}
+                    title={seciliSatirlar.size === 0
+                           ? 'Önce satırlardan seçim yapın'
+                           : `Seçili ${seciliSatirlar.size} satıra çarpan yaz`}
+                    onClick={() => { setTopluCarpanDeger(''); setTopluCarpan(true) }}>
+              ✖ Çarpan Gir{seciliSatirlar.size > 0 ? ` (${seciliSatirlar.size})` : ''}
+            </button>
+          )}
           {/* EKRAN-OZEL EYLEMLER (461): mockup'ta bunlar kartin arac
               cubugunda - hekim listeye donup satir secmeden isini bitirmeli. */}
           {!yeniMi && ekAraclar?.(deger)}
@@ -1660,15 +1680,9 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           toplam={detayToplam[aktif.detay.ad]}
           sayfaYukleniyor={detaySayfaYuk === aktif.detay.ad}
           onSayfa={n => { void detaySayfaDegis(aktif.detay.ad, n) }}
-          // TOPLU CARPAN (534, kullanici: "sil butonu saginda Çarpan Gir,
-          //   sadece TTB/HUV'da gorunsun"): donem carpani binlerce satirda
-          //   ayni - tek tek yazmak is degil. Fiyat `ttbFiyatTuret` ile
-          //   aninda yeniden dogar.
-          topluIslemler={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
-            && Number(deger.tarifeTipi) === 2
-            ? [{ ad: '✖ Çarpan Gir', alanAdi: 'carpan', baslik: 'Çarpan',
-                 ipucu: 'Fiyat = katsayı × çarpan olarak yeniden hesaplanır.' }]
-            : undefined}
+          // Secim yukari akar (534): toplu "Çarpan Gir" dugmesi kartin UST
+          //   arac cubugunda, Sil'in saginda duruyor.
+          onSecim={setSeciliSatirlar}
           // Satir ici giris tarife tipine gore (533): TTB'de katsayi/carpan,
           //   SUT'ta yalniz katki - fiyat ikisinde de turetilmis degerdir.
           hizliAlanlar={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
@@ -1981,6 +1995,46 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
             aramaYaz(aramaAlani, String(satir.id), String(satir.ad ?? satir.kod ?? ''));
           }}
         />
+      )}
+
+      {/* TOPLU CARPAN PENCERESI (534): tek sayi, secili satirlara yazilir;
+          fiyat `ttbFiyatTuret` ile aninda yeniden dogar. */}
+      {topluCarpan && (
+        <Modal baslik={`Çarpan — ${seciliSatirlar.size} satır`} dar enUst
+               onKapat={() => setTopluCarpan(false)}
+               alt={(
+                 <>
+                   <button type="button" className="d" onClick={() => setTopluCarpan(false)}>
+                     Vazgeç
+                   </button>
+                   <button type="button" className="d bir"
+                           disabled={topluCarpanDeger.trim() === ''}
+                           onClick={() => {
+                             const sayi = Number(topluCarpanDeger.replace(',', '.'));
+                             if (!Number.isFinite(sayi)) return;
+                             setDetaylar(t => {
+                               const d = t.satirlar ?? bosDetay();
+                               const guncel = d.guncel.map((s2, i) =>
+                                 seciliSatirlar.has(i) ? { ...s2, carpan: sayi } : s2);
+                               return { ...t, satirlar: ttbFiyatTuret({ ...d, guncel }) };
+                             });
+                             setTopluCarpan(false);
+                           }}>
+                     {seciliSatirlar.size} satıra uygula
+                   </button>
+                 </>
+               )}>
+          <div className="toplu-kutu">
+            <label className="alan tip-para">
+              <span className="etiket">Çarpan</span>
+              <input autoFocus inputMode="decimal" value={topluCarpanDeger}
+                     onChange={e => setTopluCarpanDeger(e.target.value)} />
+            </label>
+            <div className="ic sonuk">
+              Fiyat = katsayı × çarpan olarak yeniden hesaplanır.
+            </div>
+          </div>
+        </Modal>
       )}
 
       {kapatmaUyarisi && (
