@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (262 ad, 77 tanesi birden cok dosyada)
+## Fonksiyonlar (263 ad, 77 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -224,6 +224,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_belge_satir_rol_dogrula` | `361_prim_rol_isaretleri.sql` | — |
 | `tg_belge_satir_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
 | `tg_departman_dongu_engel` | `257_departman_ustbirim.sql` | — |
+| `tg_fiyat_satir_birim` | `506_fiyat_satir_birim.sql` | — |
 | `tg_hizmet_paket_bayrak` | `502_hizmet_paket_bayragi.sql` | — |
 | `tg_hizmet_paket_bayrak_kontrol` | `502_hizmet_paket_bayragi.sql` | — |
 | `tg_hizmet_paket_dongu` | `500_hizmet_paket_dongu.sql` | — |
@@ -271,7 +272,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (126 ad, 38 tanesi birden cok dosyada)
+## Gorunumler (126 ad, 39 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -316,7 +317,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_fiyat_listesi_alis_lookup` | `204_cari_fiyat_listesi.sql` | — |
 | `v_fiyat_listesi_kullanim` | `204_cari_fiyat_listesi.sql` | — |
 | `v_fiyat_listesi_lookup` | `201_fiyat_listesi.sql` | — |
-| `v_fiyat_listesi_satir` | `201_fiyat_listesi.sql` | — |
+| `v_fiyat_listesi_satir` | `507_fiyat_satir_gorunum_kdv_kategori.sql` | 201_fiyat_listesi.sql |
 | `v_fiyat_listesi_satis_lookup` | `204_cari_fiyat_listesi.sql` | — |
 | `v_gorev_lookup` | `255_personel_gorev.sql` | — |
 | `v_hakedis_ozet` | `330_prim_tahsilat_turu_durum.sql` | 324_prim_semasi.sql |
@@ -337,7 +338,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_is_merkezi_lookup` | `429_uretim_v1.sql` | — |
 | `v_kampanya_lookup` | `268_kampanya.sql` | — |
 | `v_kasa_islem_dagitim` | `322_avans_mahsup.sql` | — |
-| `v_kategori_lookup` | `347_sonomed_rad_kategori.sql` | 250_kategori_lookup.sql, 270_kategori_agaci.sql |
+| `v_kategori_lookup` | `505_skrs_liste_duzeltme_kategori_tur.sql` | 250_kategori_lookup.sql, 270_kategori_agaci.sql, 347_sonomed_rad_kategori.sql |
 | `v_kullanici_lookup` | `156_ebelge_seri.sql` | — |
 | `v_kurum_lookup` | `478_pay_kolonlari_dusur.sql` | 249_kurum_sozlesme.sql, 250_kategori_lookup.sql |
 | `v_kurum_sozlesme_lookup` | `468_kurum_sozlesme_1n.sql` | — |

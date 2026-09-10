@@ -44,6 +44,12 @@ public static class EntegrasyonUclari
         //   yazimla liste duruyor: "KLİNİKLER". Kodlar `skrs.klinik` listesine
         //   yazilir; bolum kodu eslemesi oradan beslenir.
         ("KLİNİKLER",           "skrs.klinik"),
+        // 505: SKRS katalogunda gercekten duran ve YEREL DEGERI KULLANILMAYAN
+        //   iki liste daha. "REÇETE TÜRÜ" bilerek burada DEGIL: yerel degerleri
+        //   22 binden fazla ilac kaydinda kullaniliyor, SKRS degerleriyle
+        //   ezmek katalogu bozardi - o liste asagidaki ESLEME turuna girer.
+        ("ÇIKIŞ ŞEKLİ",         "cikis.sekli"),
+        ("VAKA TÜRÜ",           "muayene.vaka_turu"),
     };
 
     /// <summary>
@@ -322,6 +328,47 @@ public static class EntegrasyonUclari
                 raporlar.Add(atlanan > 0
                     ? $"{skrsAd}: {yazilan} (atlanan {atlanan})"
                     : $"{skrsAd}: {yazilan}");
+            }
+
+            // ------------------------------------------------- ESLEME PASI --
+            // Degerleri KULLANIMDA olan yerel listeler SKRS degerleriyle
+            //   EZILEMEZ (or. `ilac.recete_turu` 22.757 ilac kaydinda geciyor).
+            //   Bunlar icin yalnizca KOPRU kurulur: `kod_deger.skrs_kod` ada
+            //   gore doldurulur (503). Ad tutmuyorsa bos kalir - tahmin
+            //   yazilmaz, `v_skrs_sapma` neyin eslesmedigini gosterir.
+            var bagli = await baglanti.ListeAsync<(string Kod, string Skrs)>("""
+                select l.kod, l.skrs_liste
+                  from public.kod_liste l
+                 where l.skrs_liste <> ''
+                 order by l.kod
+                """, null, [], o => (o.GetString(0), o.GetString(1)), iptal);
+
+            var yazilanlar = SkrsListeleri.Select(x => x.YerelListe)
+                                          .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            foreach (var (yerel, skrsListe) in bagli)
+            {
+                if (yazilanlar.Contains(yerel)) continue;      // degerleri zaten SKRS
+                var ad = skrsListe.StartsWith("SKRS ", StringComparison.OrdinalIgnoreCase)
+                    ? skrsListe[5..] : skrsListe;
+                if (!katalog.TryGetValue(Anahtar(ad), out var g)) continue;
+
+                List<(string Kod, string Ad, string? Ust)> kodlar;
+                try { kodlar = await SkrsListesiCekAsync(hesap, g, istemciler, iptal); }
+                catch (Exception h) { raporlar.Add($"{ad} (eşleme): {Kisalt(h.Message, 50)}"); continue; }
+
+                var eslesen = 0;
+                foreach (var (kod, kodAdi, _) in kodlar)
+                {
+                    eslesen += await baglanti.CalistirAsync("""
+                        update public.kod_deger d
+                           set skrs_kod = @p2
+                          from public.kod_liste l
+                         where l.id = d.liste_id and l.kod = @p0
+                           and public.fn_ara_metin(d.ad) = public.fn_ara_metin(@p1)
+                           and d.skrs_kod <> @p2
+                        """, null, [yerel, kodAdi, kod], iptal);
+                }
+                raporlar.Add($"{ad} ⇢ {yerel} (eşleme): {eslesen}");
             }
 
             var ozet = toplam > 0

@@ -935,9 +935,20 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                         onChange={e => hucreDegis(i, a.ad, e.target.value)}
                       >
                         <option value="">— kategori —</option>
-                        {Object.entries(a.kodlar ?? {}).map(([k, v]) => (
-                          <option key={k} value={k}>{v}</option>
-                        ))}
+                        {/* KALEM TURUNE GORE SUZ (505, kullanici: "hizmet
+                            kategori sectigimde stok kategorileri geliyor").
+                            Kategori tablosu ortak; turu metadata `kodUst`
+                            tasiyor (v_kategori_lookup.ust_id = tur) ve kalem
+                            turu degerleri de 1 Stok / 2 Hizmet. Tur secilmemis
+                            ("Farketmez") satirda suzme yapilmaz. */}
+                        {Object.entries(a.kodlar ?? {})
+                          .filter(([k]) => !a.bagliAlan
+                            || !Number(satir.kalemTuru)
+                            || a.kodUst?.[k] === undefined
+                            || a.kodUst[k] === String(satir.kalemTuru))
+                          .map(([k, v]) => (
+                            <option key={k} value={k}>{v}</option>
+                          ))}
                       </select>
                     ) : Number(satir.tip) === 3 ? (
                       <span className="ikili"

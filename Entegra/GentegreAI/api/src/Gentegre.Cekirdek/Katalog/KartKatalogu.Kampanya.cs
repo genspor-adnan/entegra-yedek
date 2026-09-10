@@ -56,8 +56,15 @@ public static partial class KartKatalogu
                 // KodTablosu KATEGORI listesini tasir: tip=Kategori hucresi bu
                 //   seceneklerden secer, tip=Ürün'de arama penceresi acilir
                 //   (stok/hizmet binlerce - combo'ya sigmaz).
+                // KATEGORI SECICISI KALEM TURUNE BAGLI (505, kullanici:
+                //   "kampanyada satir tanimlamada hizmet kategori sectigimde
+                //   stok kategorileri geliyor"): kategori tablosu ikisi icin
+                //   ORTAK, ayrimi `kategori.tur` tasiyor. Lookup gorunumu turu
+                //   `ust_id` olarak veriyor ve `kampanya.kalem_turu` degerleri
+                //   de 1 Stok / 2 Hizmet - bagli secim mekanizmasi suzuyor.
                 new("iskontoYeriId", "iskonto_yeri_id", "kod",
-                    KodTablosu: "public.v_kategori_lookup", Baslik: "Kapsam"),
+                    KodTablosu: "public.v_kategori_lookup", BagliAlan: "kalemTuru",
+                    Baslik: "Kapsam"),
                 new("iskontoTipi",   "iskonto_tipi",    "kod",   Zorunlu: true,
                     KodListesi: "kampanya.iskonto_tipi", Baslik: "İskonto Tipi"),
                 new("iskonto",       "iskonto",         "para",  Baslik: "İskonto"),
