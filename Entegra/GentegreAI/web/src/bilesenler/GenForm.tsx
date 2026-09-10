@@ -1660,6 +1660,15 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           toplam={detayToplam[aktif.detay.ad]}
           sayfaYukleniyor={detaySayfaYuk === aktif.detay.ad}
           onSayfa={n => { void detaySayfaDegis(aktif.detay.ad, n) }}
+          // TOPLU CARPAN (534, kullanici: "sil butonu saginda Çarpan Gir,
+          //   sadece TTB/HUV'da gorunsun"): donem carpani binlerce satirda
+          //   ayni - tek tek yazmak is degil. Fiyat `ttbFiyatTuret` ile
+          //   aninda yeniden dogar.
+          topluIslemler={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
+            && Number(deger.tarifeTipi) === 2
+            ? [{ ad: '✖ Çarpan Gir', alanAdi: 'carpan', baslik: 'Çarpan',
+                 ipucu: 'Fiyat = katsayı × çarpan olarak yeniden hesaplanır.' }]
+            : undefined}
           // Satir ici giris tarife tipine gore (533): TTB'de katsayi/carpan,
           //   SUT'ta yalniz katki - fiyat ikisinde de turetilmis degerdir.
           hizliAlanlar={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
