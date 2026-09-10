@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (283 ad, 82 tanesi birden cok dosyada)
+## Fonksiyonlar (284 ad, 83 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -91,6 +91,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_firsat_no_uret` | `121_firsat.sql` | — |
 | `fn_fiyat_carpan` | `518_fiyat_listesi_tarife_tipi.sql` | — |
 | `fn_fiyat_katki_uret` | `518_fiyat_listesi_tarife_tipi.sql` | — |
+| `fn_fiyat_katsayi_yukle` | `533_ttb_fiyat_turetilmis.sql` | — |
 | `fn_fiyat_listesi_dongu_kontrol` | `201_fiyat_listesi.sql` | — |
 | `fn_fiyat_listesi_ek_katki` | `468_kurum_sozlesme_1n.sql` | — |
 | `fn_fiyat_listesi_fiyat` | `495_fiyat_satir_kdv_listeden.sql` | 202_fn_fiyat_listesi.sql, 209_taban_fiyat_izi.sql, 211_taban_satir_izi.sql, 212_yazim_gecis_kurali.sql, 214_yazim_olusma_import.sql |
@@ -240,7 +241,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_belge_satir_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
 | `tg_departman_dongu_engel` | `257_departman_ustbirim.sql` | — |
 | `tg_fiyat_satir_birim` | `506_fiyat_satir_birim.sql` | — |
-| `tg_fiyat_satir_tarife` | `518_fiyat_listesi_tarife_tipi.sql` | — |
+| `tg_fiyat_satir_tarife` | `533_ttb_fiyat_turetilmis.sql` | 518_fiyat_listesi_tarife_tipi.sql |
 | `tg_hizmet_paket_bayrak` | `502_hizmet_paket_bayragi.sql` | — |
 | `tg_hizmet_paket_bayrak_kontrol` | `502_hizmet_paket_bayragi.sql` | — |
 | `tg_hizmet_paket_dongu` | `510_hizmet_paket_stok_icerigi.sql` | 500_hizmet_paket_dongu.sql |
