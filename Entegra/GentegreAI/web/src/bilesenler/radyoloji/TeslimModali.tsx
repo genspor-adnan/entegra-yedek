@@ -71,7 +71,7 @@ export function TeslimModali({ istemId, accessionNo, cdIstendi, onKapat, onTamam
              <>
                <button className="d onay" disabled={kaydediyor}
                        onClick={() => void kaydet()}>✔ Teslim Et</button>
-               <button className="d" onClick={onKapat}>✖ Vazgeç</button>
+               <button className="d" onClick={onKapat}>✖ Kapat</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}

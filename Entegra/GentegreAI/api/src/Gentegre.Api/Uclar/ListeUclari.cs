@@ -110,13 +110,15 @@ public static class ListeUclari
         });
 
         grup.MapGet("/{kaynak}/kolonlar", async (
-            string kaynak, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+            string kaynak, BaglamCozucu cozucu, KurumProfilDeposu profil,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KaynakBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
 
-            var kolonlar = GorunurKolonlar(tanim, baglam)
+            var kolonlar = GorunurKolonlar(tanim, baglam,
+                    await profil.UrunModuAsync(baglam.SubeId ?? 0, iptal))
                 .Select(k => new KolonMeta(k.Ad, k.Baslik, k.Tip, k.Hizalama, k.Bicim,
                                            k.Varsayilan, k.Siralanabilir, k.Filtrelenebilir, k.Genislik,
                                            k.SadeceGrupToplami, k.Kodlar))
@@ -145,8 +147,15 @@ public static class ListeUclari
     /// Alan yetkisi (API §8): yetkisiz kolon yanit govdesinden CIKARILMAZ -
     /// sorguya hic girmez. Boylece deger ne SQL'e ne de log'a dusrer.
     /// </summary>
-    private static List<KolonTanimi> GorunurKolonlar(KaynakTanimi tanim, IstekBaglami baglam)
+    /// <summary>
+    /// Gorunur kolonlar: alan yetkisi + URUN MODU (542). Bu kurulumda anlamsiz
+    /// kolon listeye HIC girmez - ERP'de "Tarife" kolonu her satirda ayni
+    /// degeri gosteren olu bir sutundu.
+    /// </summary>
+    private static List<KolonTanimi> GorunurKolonlar(KaynakTanimi tanim,
+        IstekBaglami baglam, int urunModu = 0)
         => tanim.Kolonlar
-                .Where(k => baglam.Yetkiler.AlanOkunur(tanim.Ad, k.AlanAdi))
+                .Where(k => UrunModlari.Uyar(k.UrunModu, urunModu)
+                            && baglam.Yetkiler.AlanOkunur(tanim.Ad, k.AlanAdi))
                 .ToList();
 }

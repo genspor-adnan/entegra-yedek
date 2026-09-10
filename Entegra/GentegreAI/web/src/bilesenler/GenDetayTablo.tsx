@@ -1337,7 +1337,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           onKapat={() => setModalSatir(null)}
           alt={<>
             <button type="button" className="d kapat-dugmesi"
-                    onClick={() => setModalSatir(null)}>Vazgeç</button>
+                    onClick={() => setModalSatir(null)}>Kapat</button>
             <button type="button" className="d bir" onClick={modalKaydet}>Tamam</button>
           </>}
         >

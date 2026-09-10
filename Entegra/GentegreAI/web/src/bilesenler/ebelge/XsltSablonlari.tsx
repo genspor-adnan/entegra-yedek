@@ -153,7 +153,7 @@ export function XsltSablonlari() {
           dar
           onKapat={() => setForm(null)}
           alt={<>
-            <button className="d kapat-dugmesi" onClick={() => setForm(null)}>Vazgeç</button>
+            <button className="d kapat-dugmesi" onClick={() => setForm(null)}>Kapat</button>
             <button className="d bir" disabled={!form.ad.trim()}
                     onClick={() => { void kaydet() }}>Kaydet</button>
           </>}

@@ -54,7 +54,16 @@ public sealed record KartAlani(
     //   Kullanici "Satış Müdürü" yazinca kayit CHECK ihlaliyle patliyordu; bu bayrak
     //   varsa deger ASCII-slug'a cevrilir, bos birakilmissa adi gecen alandan uretilir
     //   ("Satış Müdürü" -> "satis-muduru") ve benzersiz olana dek -2, -3 eklenir.
-    string? SlugKaynak = null
+    string? SlugKaynak = null,
+    /// <summary>
+    /// URUN MODU SUZGECI (542, kullanici: "erp modunda tarife kolonu ve icerde
+    /// tipi gorunmesin"). 0 tum kurulumlar · 1 yalniz Gentegre AI (ERP) ·
+    /// 2 yalniz GenoTIP AI (HBYS). `AksiyonTanimi.UrunModu` ile AYNI dil.
+    /// Saglik kurulumuna ozgu kavramlar (SUT / TTB-HUV tarifesi) ERP'de ekranda
+    /// HIC gorunmesin diye var: bos combo gostermek "bunu ne yapacagim"
+    /// sorusu uretiyor.
+    /// </summary>
+    int UrunModu = 0
 )
 {
     /// <summary>Etiket verilmediyse camelCase addan uretilir: faturaUnvan -> "Fatura Unvan".</summary>

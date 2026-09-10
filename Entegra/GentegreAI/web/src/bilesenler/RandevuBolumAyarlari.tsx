@@ -151,7 +151,7 @@ export function RandevuBolumAyarlari({ genel }: {
                 {departmanlar.map(d => <option key={d.id} value={d.id}>{d.ad}</option>)}
               </select>
               <button type="button" className="d" style={{ marginLeft: 6 }}
-                      onClick={() => setBolumEkle(false)}>Vazgeç</button>
+                      onClick={() => setBolumEkle(false)}>Kapat</button>
             </div>
           )}
 

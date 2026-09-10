@@ -79,7 +79,7 @@ export function HesapSecModali({ tur, baslik, doviz, onSec, onKapat }: {
 
   return (
     <Modal baslik={baslik} dar onKapat={onKapat}
-           alt={<button className="d kapat-dugmesi" onClick={onKapat}>✖ Vazgeç</button>}>
+           alt={<button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>}>
       <>
         {hata && <div className="hata-kutusu">{hata}</div>}
         <div className="kagrup">

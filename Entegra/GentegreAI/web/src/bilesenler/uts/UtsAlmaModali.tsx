@@ -47,7 +47,7 @@ export function UtsAlmaModali({ envanterId, urunNo, kurumUnvan, askiAdet, seriNo
           {gonderiyor ? 'Gönderiliyor…' : '📥 ÜTS’ye Bildir'}
         </button>
         <button className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
-                onClick={onKapat}>Vazgeç</button>
+                onClick={onKapat}>Kapat</button>
       </>}>
       <div className="alan-izgara tek-sutun" style={{ padding: 10 }}>
         <div>

@@ -36,11 +36,15 @@ public static partial class KaynakKatalogu
             // TARIFE TIPI (518): listenin hangi kuralla calistigi - satir
             //   sutunlari ve toplu islemler buna gore degisiyor, listede de
             //   gorunsun.
+            //   YALNIZ HBYS (542): ERP kurulumunda her liste "Özel" - kolon
+            //   her satirda ayni degeri gosteren olu bir sutundu.
             new("tarifeTipiAdi",
                 "case l.tarife_tipi when 1 then 'Özel (Ücretli)' when 2 then 'TTB / HUV' " +
                 "when 3 then 'SUT (SGK)' else '' end",
-                "metin", "Tarife", Hizalama: "orta", Genislik: 120),
-            new("tarifeTipi", "l.tarife_tipi", "kod", "Tarife Kodu", Varsayilan: false),
+                "metin", "Tarife", Hizalama: "orta", Genislik: 120,
+                UrunModu: UrunModlari.Hbys),
+            new("tarifeTipi", "l.tarife_tipi", "kod", "Tarife Kodu", Varsayilan: false,
+                UrunModu: UrunModlari.Hbys),
             new("baslangic", "l.baslangic", "tarih", "Başlama", Hizalama: "orta", Bicim: "dd.MM.yyyy"),
             new("bitis",     "l.bitis",     "tarih", "Bitiş",   Hizalama: "orta", Bicim: "dd.MM.yyyy"),
             // Satir sayisi: listenin URETILIP uretilmedigini tek bakista gosterir.

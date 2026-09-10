@@ -83,7 +83,7 @@ public static class KartUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
 
-            var (okunabilir, gizli) = Alanlar(tanim, baglam);
+            var (okunabilir, gizli) = Alanlar(tanim, baglam, await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal));
 
             var kart = await depo.OkuAsync(tanim, id, okunabilir, baglam.Kapsam, iptal)
                        ?? throw GentegreHatasi.Bulunamadi();
@@ -157,7 +157,7 @@ public static class KartUclari
                     .GetRequiredService<ILoggerFactory>().CreateLogger("Lab")
                     .LogError(h, "Lab istem {Id}: panik bildirimi konamadi.", yeniId); }
 
-            var (okunabilir, _) = Alanlar(tanim, baglam);
+            var (okunabilir, _) = Alanlar(tanim, baglam, await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal));
             var kart = await depo.OkuAsync(tanim, yeniId, okunabilir, null, iptal);
             var govde = new Dictionary<string, object?>(kart!.Value.Kart, StringComparer.Ordinal)
             {
@@ -186,7 +186,7 @@ public static class KartUclari
                 throw GentegreHatasi.Dogrulama("Guncellemede surum zorunludur.",
                     new AlanHatasi("surum", "Kart okunurken donen surum geri gonderilmeli."));
 
-            var (okunabilir, _) = Alanlar(tanim, baglam);
+            var (okunabilir, _) = Alanlar(tanim, baglam, await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal));
             var degerler = Degerler(tanim, istek.Kart, baglam, yeni: false);
 
             await depo.GuncelleAsync(tanim, id, istek.Surum!, degerler, istek.Detaylar,
@@ -288,7 +288,8 @@ public static class KartUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
 
-            var (okunabilir, gizli) = Alanlar(tanim, baglam);
+            var urunModu = await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal);
+            var (okunabilir, gizli) = Alanlar(tanim, baglam, urunModu);
 
             // KodTablosu (kendi tablosu) + KodListesi (kod_liste/kod_deger) alanlarinin
             //   TAM secenek listesi - kodAd yalniz kartta KULLANILAN tek degeri cozer.
@@ -326,7 +327,7 @@ public static class KartUclari
             //   SKRS / e-Nabiz / MEDULA secilemez - kullanici secip kaydetse
             //   bile calisacak bir servis yok, listede durmasi gurultu.
             var entegrasyonKodlari = tanim.Ad == "entegrasyon-hesap"
-                ? KartKatalogu.EntegrasyonKodlariMod(await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal))
+                ? KartKatalogu.EntegrasyonKodlariMod(urunModu)
                 : null;
 
             KartAlanMeta MetaOptions(KartAlani a) => a.Ad == "kod" && entegrasyonKodlari is not null
@@ -457,13 +458,19 @@ public static class KartUclari
 
     /// <summary>Alan yetkisi: gizli alan gövdeye hiç girmez, adi bilgi olarak doner (§3.1).</summary>
     private static (List<KartAlani> Okunabilir, List<string> Gizli) Alanlar(
-        KartTanimi tanim, IstekBaglami baglam)
+        KartTanimi tanim, IstekBaglami baglam, int urunModu = 0)
     {
         var okunabilir = new List<KartAlani>();
         var gizli = new List<string>();
 
         foreach (var alan in tanim.Alanlar)
         {
+            // URUN MODU (542): bu kurulumda anlamsiz alan karta HIC girmez -
+            //   yetkisiz alan gibi. ERP kurulumunda SUT/TTB tarifesi diye bir
+            //   kavram yok; combo'yu gostermek "bunu ne yapacagim" sorusu
+            //   uretiyordu. Deger yine DB'de (yeni liste "Özel" acilir).
+            if (!UrunModlari.Uyar(alan.UrunModu, urunModu)) continue;
+
             if (baglam.Yetkiler.AlanOkunur(tanim.Ad, alan.Ad)) okunabilir.Add(alan);
             else gizli.Add(alan.Ad);
         }

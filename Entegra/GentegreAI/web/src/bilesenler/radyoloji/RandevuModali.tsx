@@ -91,7 +91,7 @@ export function RandevuModali({ istemId, accessionNo, tetkikAdi, modalite, sureD
                <button className="d onay" disabled={kaydediyor} onClick={() => void kaydet()}>
                  {kaydediyor ? '⏳ Veriliyor…' : '📅 Randevuyu Ver'}
                </button>
-               <button className="d" onClick={onKapat}>✖ Vazgeç</button>
+               <button className="d" onClick={onKapat}>✖ Kapat</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}

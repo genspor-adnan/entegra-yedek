@@ -66,6 +66,11 @@ public static class VeriHatasi
         ["ux_hesap_personel_kasa"] = "Bu personelin zaten bir kasası var; bir personel tek kasaya atanabilir.",
         // Fiyat listesi (204): yon basina TEK varsayilan.
         ["ux_fiyat_listesi_varsayilan"] = "Bu yönde zaten bir varsayılan liste var; önce onun \"Varsayılan\" işaretini kaldırın.",
+        // 541: tekillik ad TEK BASINA degil, DONEMLE birlikte. Ayni ad farkli
+        //   donemde mesru; catisan sey ad + baslama + bitis uclusu.
+        ["ux_fiyat_listesi_ad_donem"] =
+            "Bu adda ve aynı başlama/bitiş tarihli bir fiyat listesi zaten var; "
+            + "adı ya da dönemi değiştirin.",
         ["ux_fiyat_listesi_ad"] = "Bu adda bir fiyat listesi zaten var."
     };
 

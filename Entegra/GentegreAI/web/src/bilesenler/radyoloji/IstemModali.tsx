@@ -403,7 +403,7 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                      💵 Tahsilat Al ve Kabul Et
                    </button>
                  )}
-                 <button className="d" onClick={onKapat}>✖ Vazgeç</button>
+                 <button className="d" onClick={onKapat}>✖ Kapat</button>
                </>
              )
            }>

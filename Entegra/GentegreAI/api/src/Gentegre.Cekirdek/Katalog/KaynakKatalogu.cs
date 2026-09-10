@@ -28,7 +28,16 @@ public sealed record KolonTanimi(
     //   ust seridinde bu kolona gore suzen combo cizilebilsin diye metaya
     //   konur. Ayni harita kart metasinda da kullanilir; iki yerde
     //   yazilmamasi icin buraya REFERANS verilir, kopyalanmaz.
-    IReadOnlyDictionary<string, string>? Kodlar = null
+    IReadOnlyDictionary<string, string>? Kodlar = null,
+    /// <summary>
+    /// URUN MODU SUZGECI (542, kullanici: "erp modunda tarife kolonu ve icerde
+    /// tipi gorunmesin"). 0 tum kurulumlar · 1 yalniz Gentegre AI (ERP) ·
+    /// 2 yalniz GenoTIP AI (HBYS). `AksiyonTanimi.UrunModu` ile AYNI dil.
+    /// Saglik kurulumuna ozgu kavramlar (SUT / TTB-HUV tarifesi) ERP'de ekranda
+    /// HIC gorunmesin diye var: bos combo gostermek "bunu ne yapacagim"
+    /// sorusu uretiyor.
+    /// </summary>
+    int UrunModu = 0
 )
 {
     public string AlanAdi => YetkiAlani ?? Ad;

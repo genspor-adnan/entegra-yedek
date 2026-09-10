@@ -3116,3 +3116,9 @@ input.skt-gecmis {
   background: var(--yuz); border: 0; color: var(--yazi); cursor: pointer;
 }
 .durum-oge:hover { background: var(--mor2) }
+
+/* TEK SORULUK PENCERE (543, kullanici: "gelen mesajlar çok geniş"):
+   uyari/onay ve toplu deger sorusu bir KART degil, tek cumle ya da tek
+   kutu - `dar` bile (560px) fazla genisti, goz metni aramak zorunda
+   kaliyordu. */
+.kawin.mesaj-pencere { width: min(400px, 92vw) }

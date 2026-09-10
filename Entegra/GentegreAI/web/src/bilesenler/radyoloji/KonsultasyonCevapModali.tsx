@@ -49,7 +49,7 @@ export function KonsultasyonCevapModali({ istemId, konsultasyonId, accessionNo,
                <button className="d onay" disabled={kaydediyor} onClick={() => void kaydet()}>
                  {kaydediyor ? '⏳ Kaydediliyor…' : '✔ Cevabı Kaydet'}
                </button>
-               <button className="d" onClick={onKapat}>✖ Vazgeç</button>
+               <button className="d" onClick={onKapat}>✖ Kapat</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}

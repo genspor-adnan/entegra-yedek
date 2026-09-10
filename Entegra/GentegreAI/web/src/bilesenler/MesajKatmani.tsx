@@ -57,6 +57,10 @@ export function MesajKatmani() {
     <Modal
       baslik={`${urunAdi(kullanici?.urunModu)} Mesajı`}
       dar
+      // DAHA DA DAR (543, kullanici: "gelen mesajlar çok geniş"): `dar`
+      //   kart olcusu (560px) - bir satirlik uyari icin fazlasiyla genis
+      //   duruyordu, goz metni bulmak icin pencerede geziniyordu.
+      ekSinif="mesaj-pencere"
       enUst
       onKapat={() => kapat(false)}
       alt={

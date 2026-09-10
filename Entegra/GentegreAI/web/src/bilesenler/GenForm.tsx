@@ -209,7 +209,7 @@ interface Props {
 function tarifeHizli(tip: number): Set<string> {
   if (tip === 2) return new Set(['tabanFiyat', 'carpan', 'katkiTutar']);
   if (tip === 3) return new Set(['katkiTutar']);
-  return new Set(['fiyat', 'katkiTutar']);
+  return new Set(['fiyat']);   // Özel: yalniz fiyat
 }
 
 /**
@@ -236,10 +236,14 @@ function ttbFiyatTuret(durum: DetayDurumu): DetayDurumu {
 
 function tarifeGizli(tip: number): string[] {
   // Ek katki alanlari 532'de fiyat listesinden kalkti - listede yok.
-  if (tip === 1) return ['tabanFiyat', 'carpan', 'katkiTutar'];
   if (tip === 2) return [];                       // katsayi · carpan · fiyat · katki
   if (tip === 3) return ['tabanFiyat', 'carpan']; // fiyat SKRS'den, katsayi yok
-  return [];
+  // OZEL (1) VE TARIFESI BILINMEYEN (542): yalniz Fiyat. ERP kurulumunda
+  //   tarife alani karta HIC gelmiyor (`UrunModu`) - deger okunamayinca eski
+  //   kod `0` sayip TUM sutunlari aciyordu: kullanici Özel listede katsayi,
+  //   carpan ve katki sutunlarini goruyordu (kullanici: "sadece fiyat olması
+  //   gerekir"). ERP'de DB de 1 yaziyor, ekran da 1 varsayar.
+  return ['tabanFiyat', 'carpan', 'katkiTutar'];
 }
 
 export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, onKaydedildi, yerTutucuSekmeler,
@@ -305,6 +309,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
   const [topluCarpanDeger, setTopluCarpanDeger] = useState('');
   /** "Durum Değiştir" acilir menusu (534). */
   const [durumMenusu, setDurumMenusu] = useState(false);
+  /** Toplu "Katkı Gir" penceresi (541). */
+  const [topluKatki, setTopluKatki] = useState(false);
+  const [topluKatkiOran, setTopluKatkiOran] = useState('');
   /** SKRS tazeleme surerken dugme kilitli (535). */
   const [skrsCalisiyor, setSkrsCalisiyor] = useState(false);
 
@@ -1304,6 +1311,24 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
               ✖ Çarpan Gir{seciliSatirlar.size > 0 ? ` (${seciliSatirlar.size})` : ''}
             </button>
           )}
+          {/* KATKI GIR (541, kullanici: "TTB ve SUT turlerinde durum degis
+              butonu soluna Katkı Gir ekle; gelen modalde girilen orani fiyat
+              ile carpip hasta katkiyi guncelle"). Hastadan alinacak tutar
+              tarifeye gore fiyatin sabit bir orani oluyor (TSS hastasinda
+              TTB'nin, SGK'da SUT'un) - 14 bin satirda tek tek yazilmaz.
+              Ozel tarifede YOK: orada hastanin odedigi zaten fiyatin
+              kendisidir, ayrica bir katki alinmaz. */}
+          {!yeniMi && kaynak === 'fiyat-listesi'
+            && [2, 3].includes(Number(deger.tarifeTipi)) && (
+            <button type="button" className="d"
+                    disabled={seciliSatirlar.size === 0}
+                    title={seciliSatirlar.size === 0
+                           ? 'Önce satırlardan seçim yapın'
+                           : `Seçili ${seciliSatirlar.size} satıra katkı yaz`}
+                    onClick={() => { setTopluKatkiOran(''); setTopluKatki(true) }}>
+              ◈ Katkı Gir{seciliSatirlar.size > 0 ? ` (${seciliSatirlar.size})` : ''}
+            </button>
+          )}
           {/* DURUM DEGISTIR (534, kullanici: "ustteki sil sagina 'Durum
               Değiştir' butonu gir, altina menu gelsin Aktif ve Pasif,
               secince isaretli satirlari aktif/pasif yapsin"). Fiyat listesi
@@ -1773,7 +1798,7 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           // Satir ici giris tarife tipine gore (533): TTB'de katsayi/carpan,
           //   SUT'ta yalniz katki - fiyat ikisinde de turetilmis degerdir.
           hizliAlanlar={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
-            ? tarifeHizli(Number(deger.tarifeTipi) || 0) : undefined}
+            ? tarifeHizli(Number(deger.tarifeTipi) || 1) : undefined}
           // SUZGEC SUNUCUDA yalniz SAYFALI detayda (526); sayfasiz detaylar
           //   bugunku istemci suzmesini surdurur.
           onSuzgec={aktif.detay.sayfaBoyu
@@ -1795,7 +1820,7 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
             : kaynak === 'prim-plani' && Number(deger.primZamani) === 2
             ? new Set(['tahsilatTuru'])
             : kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
-            ? new Set(['kategoriId', 'kalemAdi', ...tarifeGizli(Number(deger.tarifeTipi) || 0)])
+            ? new Set(['kategoriId', 'kalemAdi', ...tarifeGizli(Number(deger.tarifeTipi) || 1)])
             : undefined}
           // Tabloyu sadelestirir, DUZENLEMEYI kisitlamaz: modal tam kalir.
           gridGizliAlanlar={ayar?.gridGizli ? new Set(ayar.gridGizli) : undefined}
@@ -2084,15 +2109,60 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
         />
       )}
 
+      {/* KATKI PENCERESI (541): oran x fiyat = hastadan alinacak katki.
+          Oran CARPAN olarak okunur (0,80 -> fiyatin %80'i) - 518'deki
+          `fn_fiyat_katki_uret` ile ayni dil, iki yerde iki anlam olmasin. */}
+      {topluKatki && (
+        <Modal baslik={`Katkı — ${seciliSatirlar.size} satır`} dar enUst ekSinif="mesaj-pencere"
+               onKapat={() => setTopluKatki(false)}
+               alt={(
+                 <>
+                   <button type="button" className="d" onClick={() => setTopluKatki(false)}>
+                     Kapat
+                   </button>
+                   <button type="button" className="d bir"
+                           disabled={topluKatkiOran.trim() === ''}
+                           onClick={() => {
+                             const oran = Number(topluKatkiOran.replace(',', '.'));
+                             if (!Number.isFinite(oran)) return;
+                             setDetaylar(t => {
+                               const d = t.satirlar ?? bosDetay();
+                               const guncel = d.guncel.map((s2, i) => seciliSatirlar.has(i)
+                                 ? { ...s2,
+                                     katkiTutar: Math.round(
+                                       Number(s2.fiyat ?? 0) * oran * 100) / 100 }
+                                 : s2);
+                               return { ...t, satirlar: { ...d, guncel } };
+                             });
+                             setTopluKatki(false);
+                           }}>
+                     {seciliSatirlar.size} satıra uygula
+                   </button>
+                 </>
+               )}>
+          <div className="toplu-kutu">
+            <label className="alan tip-para">
+              <span className="etiket">Fiyatın Oranını Girin</span>
+              <input autoFocus inputMode="decimal" value={topluKatkiOran}
+                     onChange={e => setTopluKatkiOran(e.target.value)} />
+            </label>
+            <div className="ic sonuk">
+              Hasta katkısı = fiyat × oran. Örnek: <b>0,80</b> girilirse
+              fiyatın %80'i katkı olarak yazılır.
+            </div>
+          </div>
+        </Modal>
+      )}
+
       {/* TOPLU CARPAN PENCERESI (534): tek sayi, secili satirlara yazilir;
           fiyat `ttbFiyatTuret` ile aninda yeniden dogar. */}
       {topluCarpan && (
-        <Modal baslik={`Çarpan — ${seciliSatirlar.size} satır`} dar enUst
+        <Modal baslik={`Çarpan — ${seciliSatirlar.size} satır`} dar enUst ekSinif="mesaj-pencere"
                onKapat={() => setTopluCarpan(false)}
                alt={(
                  <>
                    <button type="button" className="d" onClick={() => setTopluCarpan(false)}>
-                     Vazgeç
+                     Kapat
                    </button>
                    <button type="button" className="d bir"
                            disabled={topluCarpanDeger.trim() === ''}

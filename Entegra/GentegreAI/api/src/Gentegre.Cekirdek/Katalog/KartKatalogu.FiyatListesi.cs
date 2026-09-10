@@ -47,9 +47,16 @@ public static partial class KartKatalogu
             //   · 3 SUT (fiyat SKRS'den, elle degismez). Satir sutunlari ve
             //   toplu islemler buna gore gorunur. `grup` TICARI siniftir
             //   (Perakende/Bayi/Toptan) - iki ayri soru, iki ayri kolon.
+            //   YALNIZ HBYS (542, kullanici: "erp modunda tarife kolonu ve
+            //   icerde tipi gorunmesin ama arka planda alanda hep 1 yalniz
+            //   ozel fiyat olsun ve combo gorunmesin"). SUT/TTB-HUV bir SAGLIK
+            //   kavrami; ERP kurulumunda her liste "Özel (Ücretli)" oluyor ve
+            //   combo tek secenekli bir sorudan ibaret kaliyordu. Deger DB'de
+            //   yaziliyor: `tg_fiyat_listesi_tarife_modu` (542) ERP'de 1 yazar.
             new("tarifeTipi", "tarife_tipi", "kod",
                 KodListesi: "fiyat_listesi.tarife_tipi",
-                Baslik: "Tarife Tipi", Grup: "Kimlik"),
+                Baslik: "Tarife Tipi", Grup: "Kimlik",
+                UrunModu: UrunModlari.Hbys),
             new("yon", "yon", "kod", SabitKodlar: YonKodlari,
                 Baslik: "Yön", Grup: "Kimlik"),
             new("durum", "durum", "kod", SabitKodlar: DurumKodlari,
@@ -83,10 +90,17 @@ public static partial class KartKatalogu
             //   SUS DEGIL: `fn_belge_varsayilan_liste`, `fn_cari_fiyat_listesi`
             //   ve basvuru tetigi "bugun gecerli liste" secimini bu iki
             //   tarihle yapiyor - donemi gecmis liste belgeye gelmesin diye.
-            new("baslangic", "baslangic", "tarih", Baslik: "Başlama",
-                Grup: "Kimlik"),
-            new("bitis",     "bitis",     "tarih", Baslik: "Bitiş",
-                Grup: "Kimlik"),
+            //   ZORUNLU (541, kullanici: "başlama-bitiş alanları zorunlu
+            //   olsun" · "isim ve başlama bitiş tarihleri aynı ise kaydet
+            //   izni verilmez"). Donem bos kalinca liste HER tarihte gecerli
+            //   sayiliyordu; tekillik de ada dayandigi icin yeni yilin
+            //   listesini acmak adin icine yil yazmayi zorunlu kiliyordu.
+            //   Artik tekillik ad + baslama + bitis uclusunde: ayni ad
+            //   farkli donemde serbest (DB: ux_fiyat_listesi_ad_donem).
+            new("baslangic", "baslangic", "tarih", Zorunlu: true,
+                Baslik: "Başlama", Grup: "Kimlik"),
+            new("bitis",     "bitis",     "tarih", Zorunlu: true,
+                Baslik: "Bitiş", Grup: "Kimlik"),
 
             new("kdvDahil", "kdv_dahil", "kod", SabitKodlar: KdvDahilKodlari,
                 Baslik: "KDV", Grup: "Kimlik"),
