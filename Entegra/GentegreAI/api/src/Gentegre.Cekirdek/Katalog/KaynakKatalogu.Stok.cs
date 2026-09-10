@@ -427,7 +427,9 @@ public static partial class KaynakKatalogu
             // PANEL / PAKET bayragi (502): icerigi henuz girilmemis panel de
             //   burada gorunur - yalniz icerik sayisina bakmak onu siradan
             //   tetkikten ayirt edemiyordu.
-            new("paket", "h.paket", "mantik", "Panel/Paket", Hizalama: "orta",
+            new("paket", "h.paket", "mantik", "Paket/Panel", Hizalama: "orta",
+                Genislik: 90, Varsayilan: false),
+            new("radyoloji", "h.radyoloji", "mantik", "Radyoloji", Hizalama: "orta",
                 Genislik: 90, Varsayilan: false),
             // 0 yerine BOS: katalogun %95'i tekil tetkik; her satirda "0"
             //   gormek gurultu, dolu hucre ise "bu satir bir paket" demek.

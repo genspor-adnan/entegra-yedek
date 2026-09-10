@@ -252,7 +252,14 @@ public static partial class KartKatalogu
             //   davranisi `hizmet_paket` satirlari belirler: icerigi girilmemis
             //   panel bayraksiz kalsaydi siradan hizmet gibi davranip belgeye
             //   tek satir gider ve HIC ISTEM DOGURMAZDI.
-            new("paket",    "paket",    "mantik", Baslik: "Panel / Paket",
+            new("paket",    "paket",    "mantik", Baslik: "Paket / Panel",
+                Grup: "Genel", AltGrup: "Detay"),
+            // RADYOLOJI TETKIKI (514, kullanici: "paket gibi bayrak yap"):
+            //   isaretlenince "Radyoloji Protokolü" sekmesi acilir. Sekme
+            //   onceden HER hizmette duruyordu - laboratuvar tetkikinin
+            //   kartinda cekim protokolu istemek anlamsizdi. Modalite girilince
+            //   ya da protokol yazilinca bayrak kendiliginden kalkar (DB).
+            new("radyoloji", "radyoloji", "mantik", Baslik: "Radyoloji Tetkiki",
                 Grup: "Genel", AltGrup: "Detay"),
 
             // SUT / HUV KODU (484). Kolon `sut_kodu` bastan beri vardi ama
@@ -305,7 +312,8 @@ public static partial class KartKatalogu
                     Baslik: "Hasta Hazırlığı"),
                 new("ozelUyari",   "ozel_uyari",     "metin", EnFazlaUzunluk: 200,
                     Baslik: "Özel Uyarı"),
-            }, SubeKolonu: null, LogTabloId: 943, Baslik: "Radyoloji Protokolü", TekSatir: true),
+            }, SubeKolonu: null, LogTabloId: 943, Baslik: "Radyoloji Protokolü",
+               TekSatir: true, KosulAlani: "radyoloji"),
 
             // PANEL / PAKET ICERIGI (496, kullanici: "tekrarli tetkik
             //   olmasin"): "OGTT", "Tam Kan Sayimi 18 parametre" ya da bir
@@ -345,7 +353,7 @@ public static partial class KartKatalogu
                 new("adet",           "adet",              "para", Baslik: "Adet"),
                 new("sira",           "sira",              "sayi", Baslik: "Sıra")
             }, Sirala: "sira, id", SubeKolonu: null, LogTabloId: 921,
-               Baslik: "Panel İçeriği", KosulAlani: "paket")
+               Baslik: "Paket / Panel", KosulAlani: "paket")
         },
         SilmeEngelleri: new[]
         {
