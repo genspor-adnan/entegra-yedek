@@ -212,6 +212,28 @@ function tarifeHizli(tip: number): Set<string> {
   return new Set(['fiyat', 'katkiTutar']);
 }
 
+/**
+ * TTB/HUV SATIRINDA FIYAT ANINDA DOGSUN (533, kullanici: "katsayi carpan
+ * degisince fiyat aninda degissin"). Kural DB tetiginde de var (kaydeden kim
+ * olursa olsun ayni sonuc); burasi EKRANIN aynasi - kullanici katsayiyi
+ * yazarken fiyati gormek zorunda, kaydedip beklememeli.
+ * Yuvarlama DB'de listenin kuralina gore yapilir; ekranda iki hane yeter -
+ * kayittan sonra gelen deger son sozdur.
+ */
+function ttbFiyatTuret(durum: DetayDurumu): DetayDurumu {
+  let degisti = false;
+  const guncel = durum.guncel.map(s => {
+    const katsayi = Number(s.tabanFiyat ?? 0);
+    const carpan = Number(s.carpan ?? 0);
+    if (!(katsayi > 0 && carpan > 0)) return s;
+    const yeni = Math.round(katsayi * carpan * 100) / 100;
+    if (Number(s.fiyat ?? 0) === yeni) return s;
+    degisti = true;
+    return { ...s, fiyat: yeni };
+  });
+  return degisti ? { ...durum, guncel } : durum;
+}
+
 function tarifeGizli(tip: number): string[] {
   // Ek katki alanlari 532'de fiyat listesinden kalkti - listede yok.
   if (tip === 1) return ['tabanFiyat', 'carpan', 'katkiTutar'];
@@ -1609,7 +1631,13 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           ekleGizli={ayar?.ekleGizli}
           saltOkunur={salt || aktif.detay.saltOkunur || !!ayar?.salt}
           hatalar={alanHatalari}
-          onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
+          onDegis={yeni => setDetaylar(t => ({
+            ...t,
+            [aktif.detay.ad]:
+              kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
+                && Number(deger.tarifeTipi) === 2
+                ? ttbFiyatTuret(yeni) : yeni,
+          }))}
           // Fiyat listesi satirlari SALT GORUNUM + modal duzenleme: satir ici
           //   kipte her satir stok (5.000+) ve hizmet (3.700+) lookup'unu ayri
           //   <select> olarak cizer - 1.438 satirlik listede ~12 MILYON DOM
