@@ -45,6 +45,14 @@ export function Giris() {
     return () => { iptal = true };
   }, []);
   const baslik = urunAdi(urunModu);
+  /* Marka seridi: sembol + urun adi (kabuktaki ust seritle AYNI gorunum).
+     BASE_URL: uygulama alt yolda yayinda (/genotipai) - mutlak "/..." 404 verir. */
+  const marka = (
+    <div className="giris-marka">
+      <img src={`${import.meta.env.BASE_URL}gentegre-sembol.svg`} alt="" />
+      <h1>{baslik}</h1>
+    </div>
+  );
 
   const PAROLA_KURALI = 'En az 8 karakter; küçük harf, BÜYÜK harf, rakam ve '
                       + 'harf/rakam dışı bir karakter (ör. .!?*-_) içermeli.';
@@ -104,7 +112,7 @@ export function Giris() {
     return (
       <div className="giris-sayfa">
         <form className="giris-kart" onSubmit={ilkParola}>
-          <h1>{baslik}</h1>
+          {marka}
           <p className="alt-baslik">İlk giriş — parolanızı belirleyin</p>
           <label>
             Kullanıcı (sicil no)
@@ -143,7 +151,7 @@ export function Giris() {
   return (
     <div className="giris-sayfa">
       <form className="giris-kart" onSubmit={gonder}>
-        <h1>{baslik}</h1>
+        {marka}
         <p className="alt-baslik">
           {subeler === null ? 'Kullanici adi ve parola' : 'Calisacaginiz subeyi secin'}
         </p>

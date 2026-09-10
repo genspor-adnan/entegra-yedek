@@ -932,6 +932,11 @@ input.skt-gecmis {
   box-shadow: 0 20px 55px rgba(20, 40, 70, .3); display: flex; flex-direction: column; gap: 12px;
 }
 .giris-kart h1 { margin: 0; font-size: 19px; font-weight: 700; color: var(--yazi2) }
+/* GIRIS MARKASI (kullanici: "login de logo da gelsin"): sembol + urun adi,
+   kabugun ust seridiyle ayni okuma. Sembol yuklenemezse (alt bos) yalnizca
+   ad kalir - kutu kaymaz. */
+.giris-marka { display: flex; align-items: center; gap: 10px }
+.giris-marka img { width: 34px; height: 34px; flex: none }
 .giris-kart .alt-baslik { margin: 0; color: var(--soluk); font-size: 12px }
 .giris-kart label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--soluk) }
 .giris-kart input, .giris-kart select {
