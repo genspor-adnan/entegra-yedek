@@ -193,6 +193,13 @@ public static partial class KartKatalogu
     /// kod listeleri tanimli degil - bos bir secim kutusu gostermek yerine
     /// listeler geldiginde eklenir.
     /// </summary>
+    /// <summary>Radyoloji cekim suresi (515) - randevu slot uzunlugu.</summary>
+    private static readonly Dictionary<string, string> RadSureKodlari = new()
+    {
+        ["5"] = "5 dk", ["10"] = "10 dk", ["15"] = "15 dk", ["20"] = "20 dk",
+        ["30"] = "30 dk", ["45"] = "45 dk", ["60"] = "60 dk", ["90"] = "90 dk",
+    };
+
     private static KartTanimi Hizmet() => new(
         Ad: "hizmet",
         YetkiKodu: "hizmet",
@@ -252,8 +259,10 @@ public static partial class KartKatalogu
             //   davranisi `hizmet_paket` satirlari belirler: icerigi girilmemis
             //   panel bayraksiz kalsaydi siradan hizmet gibi davranip belgeye
             //   tek satir gider ve HIC ISTEM DOGURMAZDI.
+            // Iki bayrak AYNI SATIRDA (kullanici): ikisi de "bu hizmet ne
+            //   turden" sorusunu yanitliyor, alt alta iki kutu bosluk yiyordu.
             new("paket",    "paket",    "mantik", Baslik: "Paket / Panel",
-                Grup: "Genel", AltGrup: "Detay"),
+                Grup: "Genel", AltGrup: "Detay", EslesAlan: "radyoloji"),
             // RADYOLOJI TETKIKI (514, kullanici: "paket gibi bayrak yap"):
             //   isaretlenince "Radyoloji Protokolü" sekmesi acilir. Sekme
             //   onceden HER hizmette duruyordu - laboratuvar tetkikinin
@@ -303,15 +312,33 @@ public static partial class KartKatalogu
                 new("id",          "id",             "sayi", Yazilabilir: false),
                 new("modalite",    "modalite",       "kod", KodListesi: "rad.modalite",
                     Baslik: "Modalite"),
-                new("sureDk",      "sure_dk",        "sayi", Baslik: "Süre (dk)"),
+                // SURE COMBO (515, kullanici: "griddeki alanlari combo yap"):
+                //   randevu slotu bu sureden cikiyor - serbest metinde "20 dk"
+                //   ile "20" ayni sey degildi.
+                new("sureDk",      "sure_dk",        "kod", SabitKodlar: RadSureKodlari,
+                    Baslik: "Süre (dk)"),
                 new("kontrast",    "kontrast",       "kod", KodListesi: "rad.kontrast",
                     Baslik: "Kontrast"),
+                // KOD + METIN BIRLIKTE (515): secim koddan yapilir, metin
+                //   kolonu kodun metniyle DB tetigiyle dolar - istem ekrani ve
+                //   hasta ciktisi eskisi gibi METNI okumaya devam eder.
+                //   "Özel" secilirse metin elle yazilir.
+                new("seriKodu",    "seri_kodu",      "kod", KodListesi: "rad.seri",
+                    Baslik: "Seri / Sekans"),
                 new("seriTarifi",  "seri_tarifi",    "metin", EnFazlaUzunluk: 400,
-                    Baslik: "Seri / Sekans Tarifi"),
-                new("hazirlikMetni", "hazirlik_metni", "metin", EnFazlaUzunluk: 400,
+                    Baslik: "Seri Tarifi (metin)"),
+                // Combo KISA ADLI listeden (516): `rad.hazirlik`in `ad`i
+                //   hastaya verilen METNIN TAMAMI, combo'da uc satirlik
+                //   paragraf goruunuyordu. Degerler ayni; tetik metni yine
+                //   uzun listeden dolduruyor.
+                new("hazirlikKodu", "hazirlik_kodu", "kod", KodListesi: "rad.hazirlik_secim",
                     Baslik: "Hasta Hazırlığı"),
-                new("ozelUyari",   "ozel_uyari",     "metin", EnFazlaUzunluk: 200,
-                    Baslik: "Özel Uyarı"),
+                new("hazirlikMetni", "hazirlik_metni", "metin", EnFazlaUzunluk: 600,
+                    Baslik: "Hazırlık Metni"),
+                new("uyariKodu",   "uyari_kodu",     "kod", KodListesi: "rad.uyari",
+                    Baslik: "Personel Uyarısı"),
+                new("ozelUyari",   "ozel_uyari",     "metin", EnFazlaUzunluk: 400,
+                    Baslik: "Uyarı Metni"),
             }, SubeKolonu: null, LogTabloId: 943, Baslik: "Radyoloji Protokolü",
                TekSatir: true, KosulAlani: "radyoloji"),
 
