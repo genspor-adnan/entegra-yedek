@@ -76,6 +76,8 @@ export function KurumTipiAyarlari() {
   const [profil, setProfil] = useState<KurumProfil | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   const [kaydediyor, setKaydediyor] = useState(false);
+  /** Kategori yazilirken o satirin kutucugu kilitlenir (527). */
+  const [kategoriYazan, setKategoriYazan] = useState<number | null>(null);
 
   const yukle = useCallback(async () => {
     try {
@@ -113,6 +115,38 @@ export function KurumTipiAyarlari() {
    * kullaniciyi sasirtirdi.
    */
   const tipSec = (kod: string) => degistir({ kurumTipi: kod, moduller: {} });
+
+
+  /**
+   * KATEGORI ACIK/KAPALI (527). Yalniz kategori yazilir; altindaki hizmet ve
+   * stoklarin durumunu DB tetigi yayar - kural iki yerde tekrarlanmasin.
+   */
+  const kategoriDegis = async (id: number, acik: boolean) => {
+    setKategoriYazan(id);
+    try {
+      await api.kurumKategoriYaz(id, acik ? 1 : 0);
+      await yukle();
+    } catch (h) {
+      setHata(hataMetni(h));
+    } finally {
+      setKategoriYazan(null);
+    }
+  };
+
+  /** Secili kurum tipinin onerdigi kategori setini uygular (527). */
+  const kategoriOnerisiUygula = async () => {
+    setKategoriYazan(-1);
+    try {
+      const s2 = await api.kurumKategoriUygula();
+      await yukle();
+      setHata(null);
+      await mesaj(s2.mesaj);
+    } catch (h) {
+      setHata(hataMetni(h));
+    } finally {
+      setKategoriYazan(null);
+    }
+  };
 
   const kaydet = async () => {
     if (!profil) return;
@@ -374,6 +408,48 @@ export function KurumTipiAyarlari() {
             Rozet tipin varsayılanını gösterir; kutucuk bu kurulumun seçimidir.
             Varsayılandan ayrılan modüller <b>özel</b> işaretiyle durur.
             <b> Kaydet &amp; Uygula</b> ile yazılır.
+          </div>
+        </div>
+
+        {/* HIZMET / STOK KATEGORILERI (527, kullanici: "profile gore kimler
+            neyi kullanacak - gorüntuleme merkezi sadece radyoloji kullanir,
+            laboratuvar sadece tahlil islemleri gibi").
+            Kategori kapaninca ALTINDAKI HIZMET/STOKLAR da pasif olur
+            (kullanici: "ikisi de pasif olsun veya aktif") - yayilimi DB
+            tetigi yapar. Elle kapatilan kayit geri acilmaz. */}
+        <div className="grp">
+          <div className="hdr k4">Hizmet / Stok Kategorileri</div>
+          <div className="ic sonuk">
+            Kurumun hangi işleri yaptığı. Kapatılan kategorinin
+            <b> altındaki hizmet ve stoklar da pasif</b> olur; yeniden açınca
+            geri gelirler (elle kapattıklarınız kapalı kalır). Rozet seçili
+            kurum tipinin <b>önerisidir</b> - bağlayıcı değil.
+          </div>
+          <div className="ktkutu">
+            {(veri?.kategoriler ?? []).map(k => (
+              <label key={k.id} className={`ktsatir${k.aktif ? ' on' : ''}`}>
+                <input type="checkbox" checked={k.aktif === 1}
+                       disabled={kategoriYazan === k.id}
+                       onChange={e => { void kategoriDegis(k.id, e.target.checked) }} />
+                <span className="ktad">{k.ad}</span>
+                <span className="ktetiket">{k.tur === 1 ? 'stok' : 'hizmet'}</span>
+                <span className="ktadet">{k.adet.toLocaleString('tr')}</span>
+                {k.onerilen === 1
+                  ? <span className="rozet olumlu">önerilen</span>
+                  : <span className="rozet">bu tipte gerekmez</span>}
+              </label>
+            ))}
+          </div>
+          <div className="ktarac">
+            <button type="button" className="d"
+                    disabled={kategoriYazan !== null}
+                    onClick={() => { void kategoriOnerisiUygula() }}>
+              ↺ Tipin önerisini uygula
+            </button>
+            <span className="ic sonuk">
+              Seçili tipin ({profil?.kurumTipi}) önerdiği kategorileri açar,
+              ötekileri kapatır.
+            </span>
           </div>
         </div>
       </div>

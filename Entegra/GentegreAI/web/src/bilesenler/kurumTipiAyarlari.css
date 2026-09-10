@@ -159,3 +159,26 @@
   border-radius: 3px; padding: 7px 10px; font-size: 11.5px;
 }
 .kt-kok .uyari .btn { padding: 3px 9px; font-size: 11px }
+
+/* ---------------------------------------------------------- kategoriler --
+   KURUM PROFILINE GORE KATEGORI (527): kurumun hangi isleri yaptigi.
+   Modul kutucuklariyla ayni okuma - once ad, sonra tipin onerisi. */
+.ktkutu { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px }
+.ktsatir {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px; border-radius: 5px; cursor: pointer;
+  border: 1px solid transparent;
+}
+.ktsatir:hover { background: var(--serit1) }
+.ktsatir.on { background: var(--serit1); border-color: var(--cizgi2) }
+.ktad { flex: 1; min-width: 0 }
+.ktetiket {
+  font-size: 10.5px; color: var(--soluk); text-transform: uppercase;
+  letter-spacing: .3px;
+}
+/* Adet: kapatmanin neyi etkileyecegini soyler. */
+.ktadet {
+  font-variant-numeric: tabular-nums; color: var(--soluk); font-size: 11.5px;
+  min-width: 54px; text-align: right;
+}
+.ktarac { display: flex; align-items: center; gap: 10px; padding: 0 10px 10px }

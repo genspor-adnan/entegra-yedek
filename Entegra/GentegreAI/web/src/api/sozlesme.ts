@@ -866,6 +866,19 @@ export interface KurumEntegrasyonDurumu {
   sonSonuc: string;
 }
 
+/**
+ * Kurum profilinde acilip kapanan hizmet/stok kategorisi (527).
+ * `aktif` kurulumun bugunku durumu, `onerilen` secili tipin varsayilani.
+ */
+export interface KurumKategoriSatiri {
+  id: number; kod: string; ad: string;
+  /** 1 stok · 2 hizmet. */
+  tur: number;
+  aktif: number; onerilen: number;
+  /** Kategoriye bagli hizmet ya da stok adedi - kapatmanin etkisi. */
+  adet: number;
+}
+
 export interface KurumProfilYaniti {
   profil: KurumProfil;
   tipler: KurumKatalogSatiri[];
@@ -875,4 +888,6 @@ export interface KurumProfilYaniti {
   kurulum: KurumKurulumAdimi[];
   /** Entegrasyonlarin gerekliligi ve hesap durumu (491). */
   entegrasyonlar: KurumEntegrasyonDurumu[];
+  /** Hizmet/stok kategorileri ve tipin onerisi (527). */
+  kategoriler: KurumKategoriSatiri[];
 }

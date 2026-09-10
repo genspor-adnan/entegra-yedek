@@ -1129,6 +1129,14 @@ export const api = {
   /** Profili yazar - verilmeyen alanlar mevcut degerini korur. */
   kurumProfilYaz: (govde: Partial<KurumProfil>) =>
     gonder<{ profil: KurumProfil }>('/api/kurum-profil', govde, 'PUT'),
+  /** Kategori acik/kapali (527) - hizmet/stok durumunu DB tetigi yayar. */
+  kurumKategoriYaz: (id: number, aktif: number) =>
+    gonder<{ id: number; aktif: number }>('/api/kurum-profil/kategori',
+                                          { id, aktif }, 'PUT'),
+  /** Secili kurum tipinin onerdigi kategori setini uygular (527). */
+  kurumKategoriUygula: () =>
+    gonder<{ kurumTipi: string; degisen: number; mesaj: string }>(
+      '/api/kurum-profil/kategori-uygula', {}),
 
   belgeOku: (id: number) => istek<BelgeYaniti>(`/api/belge/${id}`),
   belgeEkle: (govde: unknown) => gonder<BelgeYaniti>('/api/belge', govde),

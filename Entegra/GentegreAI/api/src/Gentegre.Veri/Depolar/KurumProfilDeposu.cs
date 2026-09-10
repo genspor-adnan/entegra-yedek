@@ -11,6 +11,14 @@ public sealed record KurumTipiSatiri(string Kod, string Ad, int Sira);
 public sealed record KurumTipiModul(string KurumTipi, string Modul, int Varsayilan);
 
 /// <summary>
+/// Kurum profilinde acilip kapanan HIZMET/STOK KATEGORISI (527). `Aktif`
+/// kurulumun bugunku durumu, `Onerilen` secili tipin varsayilani; ekran
+/// ikisini birlikte gosterir ("tipe gore olmasi gereken" ile "su anki").
+/// </summary>
+public sealed record KurumKategoriSatiri(int Id, string Kod, string Ad, int Tur,
+                                         int Aktif, int Onerilen, int Adet);
+
+/// <summary>
 /// Kurulum adimi (490) - ozet sekmesindeki kontrol listesi satiri.
 /// <c>Durum</c>: 1 tamam · 0 bekliyor. <c>Rota</c> adimi tamamlayacak ekran.
 /// </summary>
@@ -54,7 +62,8 @@ public sealed class KurumProfilDeposu
     public async Task<(KurumProfil Profil, List<KurumTipiSatiri> Tipler,
                        List<KurumTipiSatiri> Moduller, List<KurumTipiModul> Matris,
                        List<KurulumAdimi> Kurulum,
-                       List<EntegrasyonDurumu> Entegrasyonlar)>
+                       List<EntegrasyonDurumu> Entegrasyonlar,
+                       List<KurumKategoriSatiri> Kategoriler)>
         OkuAsync(int subeId = 0, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
@@ -103,8 +112,33 @@ public sealed class KurumProfilDeposu
                                        o.GetInt16(3), o.GetString(4), o.GetInt16(5),
                                        o.GetString(6), o.GetString(7)));
 
-        return (await ProfilOkuAsync(baglanti, null, subeId, iptal), tipler, moduller, matris,
-                kurulum, entegrasyonlar);
+        var profil = await ProfilOkuAsync(baglanti, null, subeId, iptal);
+
+        // KATEGORILER (527, kullanici: "profile gore kimler neyi kullanacak").
+        //   `onerilen` SECILI TIPIN varsayilani, `aktif` kurulumun bugunku
+        //   durumu - ekran ikisini birlikte gosterir; adet, kapatmanin neyi
+        //   etkileyecegini soyler.
+        var kategoriler = new List<KurumKategoriSatiri>();
+        await using (var k = baglanti.Komut("""
+            select k.id, k.kod, k.ad, k.tur, k.aktif,
+                   coalesce(t.varsayilan, 0) as onerilen,
+                   case when k.tur = 1
+                        then (select count(*) from public.stok s where s.kategori = k.id)
+                        else (select count(*) from public.hizmet h where h.kategori = k.id)
+                   end as adet
+              from public.kategori k
+              left join public.kurum_tipi_kategori t
+                     on t.kategori_kod = k.kod and t.kurum_tipi = @p0
+             where k.ust_id is null
+             order by k.tur, k.ad
+            """, null, profil.KurumTipi))
+        await using (var o = await k.ExecuteReaderAsync(iptal))
+            while (await o.ReadAsync(iptal))
+                kategoriler.Add(new(o.GetInt32(0), o.GetString(1), o.GetString(2),
+                                    o.GetInt16(3), o.GetInt16(4), Convert.ToInt32(o.GetValue(5)),
+                                    Convert.ToInt32(o.GetValue(6))));
+
+        return (profil, tipler, moduller, matris, kurulum, entegrasyonlar, kategoriler);
     }
 
     private static async Task<KurumProfil> ProfilOkuAsync(NpgsqlConnection baglanti,
