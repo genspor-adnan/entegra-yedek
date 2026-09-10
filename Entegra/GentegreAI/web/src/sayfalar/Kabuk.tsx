@@ -493,8 +493,22 @@ export function Kabuk() {
               basıldığında oturum kapanan tek düğme bu - komşularından ayrı
               dursun: solunda ince ayraç, üzerine gelince kırmızı vurgu. */}
           <span className="ust-ayrac" aria-hidden="true" />
-          <button className="ib cikis" title="Çıkış — oturumu kapat"
-                  onClick={() => void cikisYap()}>⏻</button>
+          {/* ÇIKIŞ YAZILI DÜĞME (kullanıcı: "çıkış düğmesi küçük kare, kapat
+              butonu lazım"): ⏻ (U+23FB) sistem fontlarında yok, tarayıcı boş
+              kutu çiziyordu - simge bilinmeyince düğmenin ne yaptığı da
+              bilinmiyor. İkon artık SVG (font'a bağlı değil) ve yanında
+              "Çıkış" yazısı var. */}
+          <button type="button" className="cikis-dugme" title="Oturumu kapat"
+                  onClick={() => void cikisYap()}>
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"
+                 fill="none" stroke="currentColor" strokeWidth="2"
+                 strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Çıkış
+          </button>
           <button
             type="button"
             className="avt"
