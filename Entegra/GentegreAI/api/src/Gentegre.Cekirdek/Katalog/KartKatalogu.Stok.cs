@@ -243,6 +243,14 @@ public static partial class KartKatalogu
                 Grup: "Genel", AltGrup: "Detay"),
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 80,
                 Baslik: "Açıklama", Grup: "Genel", AltGrup: "Detay"),
+            // PANEL / PAKET (502, kullanici: "hizmet.paket ekle stok gibi"):
+            //   stoktaki `paket` bayraginin (124) karsiligi - isaretlenince
+            //   kartta "Panel Icerigi" sekmesi acilir. Bayrak NIYETI soyler,
+            //   davranisi `hizmet_paket` satirlari belirler: icerigi girilmemis
+            //   panel bayraksiz kalsaydi siradan hizmet gibi davranip belgeye
+            //   tek satir gider ve HIC ISTEM DOGURMAZDI.
+            new("paket",    "paket",    "mantik", Baslik: "Panel / Paket",
+                Grup: "Genel", AltGrup: "Detay"),
 
             // SUT / HUV KODU (484). Kolon `sut_kodu` bastan beri vardi ama
             //   kartta girisi yoktu - yazilamayan kolon, olmayan kolondur.
@@ -325,7 +333,7 @@ public static partial class KartKatalogu
                 new("adet",           "adet",              "para", Baslik: "Adet"),
                 new("sira",           "sira",              "sayi", Baslik: "Sıra")
             }, Sirala: "sira, id", SubeKolonu: null, LogTabloId: 921,
-               Baslik: "Panel İçeriği")
+               Baslik: "Panel İçeriği", KosulAlani: "paket")
         },
         SilmeEngelleri: new[]
         {

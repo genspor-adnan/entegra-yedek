@@ -195,6 +195,12 @@ export const api = {
       headers: oturum.refresh ? { 'X-Refresh-Token': oturum.refresh } : {},
     }),
 
+  /**
+   * MARKA (502): giris ekrani hangi urunun kapisi - oturum ACILMADAN sorulur.
+   * Kurulusun urun modu (1 Gentegre AI / 2 GenoTIP AI) sunucudan gelir.
+   */
+  marka: () => istek<{ urunModu: number }>('/api/kimlik/marka'),
+
   /** Ilk giris: otomatik acilan hesabin parolasini kisi kendisi tanimlar. */
   ilkParola: (kod: string, tcknSon4: string, yeniParola: string) =>
     gonder<{ mesaj: string }>('/api/kimlik/ilk-parola', { kod, tcknSon4, yeniParola }),

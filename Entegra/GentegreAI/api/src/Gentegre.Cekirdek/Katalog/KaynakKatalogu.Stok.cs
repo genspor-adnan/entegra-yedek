@@ -424,6 +424,11 @@ public static partial class KaynakKatalogu
             // PANEL MI: icerigi olan hizmet (496). Panelin kendi satiri da
             //   satilabilir bir kalemdir - katalogda tetkikten ayirt etmenin
             //   tek yolu icerik sayisi.
+            // PANEL / PAKET bayragi (502): icerigi henuz girilmemis panel de
+            //   burada gorunur - yalniz icerik sayisina bakmak onu siradan
+            //   tetkikten ayirt edemiyordu.
+            new("paket", "h.paket", "mantik", "Panel/Paket", Hizalama: "orta",
+                Genislik: 90, Varsayilan: false),
             // 0 yerine BOS: katalogun %95'i tekil tetkik; her satirda "0"
             //   gormek gurultu, dolu hucre ise "bu satir bir paket" demek.
             new("icerikSayisi",

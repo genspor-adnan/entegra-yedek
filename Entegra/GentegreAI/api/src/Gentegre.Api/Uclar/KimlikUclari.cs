@@ -95,6 +95,19 @@ public static class KimlikUclari
             });
         }).RequireAuthorization();
 
+        // MARKA (anonim, 502): giris ekrani hangi urunun kapisi oldugunu
+        //   OTURUM ACILMADAN bilmeli - "Gentegre" yazan sabit baslik, HBYS
+        //   kurulumunda (GenoTIP AI) yanlis urun adi gosteriyordu. Mod
+        //   kurulusun profilinden gelir (fn_urun_modu, 489); veritabanina
+        //   ulasilamazsa istemci kendi yolundan (BASE_URL) tahmin eder.
+        grup.MapGet("/marka", [AllowAnonymous] async (
+            VeriKaynagi veri, CancellationToken iptal) =>
+        {
+            var mod = await veri.TekDegerAsync<int>(
+                "select public.fn_urun_modu(0)::int", [], iptal);
+            return Results.Ok(new { urunModu = mod });
+        });
+
         // ILK PAROLA (anonim): otomatik acilan hesap sahibinin kendi parolasini
         //   belirlemesi. Kimlik kaniti TCKN son 4 (bkz. KimlikServisi).
         grup.MapPost("/ilk-parola", async (

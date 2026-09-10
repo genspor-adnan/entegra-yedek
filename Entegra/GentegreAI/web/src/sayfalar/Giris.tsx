@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
-import { ApiHatasi, type SubeOzeti, hataMetni } from '../api/sozlesme';
+import { ApiHatasi, type SubeOzeti, hataMetni, urunAdi, URUN_GENOTIP } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
 
 /**
@@ -24,6 +24,27 @@ export function Giris() {
   const [yeni1, setYeni1] = useState('');
   const [yeni2, setYeni2] = useState('');
   const [bilgi, setBilgi] = useState<string | null>(null);
+  /**
+   * URUN ADI (502, kullanici: "login de Gentegre yazıyor, moda göre GenoTIP AI
+   * veya Gentegre AI yazmalı"). Baslik sabitti; HBYS kurulumunda yanlis urunun
+   * adini gosteriyordu. Mod sunucudan (anonim `/api/kimlik/marka`) gelir;
+   * cevap gelene kadar ya da sunucuya ulasilamazsa KURULUM YOLUNDAN tahmin
+   * edilir - "/genotipai/" altinda calisan kopya GenoTIP'tir.
+   */
+  const yoldanMod = import.meta.env.BASE_URL.includes('genotip')
+    ? URUN_GENOTIP : undefined;
+  const [urunModu, setUrunModu] = useState<number | undefined>(yoldanMod);
+  useEffect(() => {
+    let iptal = false;
+    void (async () => {
+      try {
+        const y = await api.marka();
+        if (!iptal && y.urunModu > 0) setUrunModu(y.urunModu);
+      } catch { /* sunucu/veritabani yoksa yoldan gelen tahmin kalir */ }
+    })();
+    return () => { iptal = true };
+  }, []);
+  const baslik = urunAdi(urunModu);
 
   const PAROLA_KURALI = 'En az 8 karakter; küçük harf, BÜYÜK harf, rakam ve '
                       + 'harf/rakam dışı bir karakter (ör. .!?*-_) içermeli.';
@@ -83,7 +104,7 @@ export function Giris() {
     return (
       <div className="giris-sayfa">
         <form className="giris-kart" onSubmit={ilkParola}>
-          <h1>Gentegre</h1>
+          <h1>{baslik}</h1>
           <p className="alt-baslik">İlk giriş — parolanızı belirleyin</p>
           <label>
             Kullanıcı (sicil no)
@@ -122,7 +143,7 @@ export function Giris() {
   return (
     <div className="giris-sayfa">
       <form className="giris-kart" onSubmit={gonder}>
-        <h1>Gentegre</h1>
+        <h1>{baslik}</h1>
         <p className="alt-baslik">
           {subeler === null ? 'Kullanici adi ve parola' : 'Calisacaginiz subeyi secin'}
         </p>
