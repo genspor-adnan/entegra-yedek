@@ -5,6 +5,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { RandevuTakvimi } from '../bilesenler/RandevuTakvimi';
 import { GenForm } from '../bilesenler/GenForm';
+import { LabMikroOzet, labMikroOzetiVar } from '../bilesenler/LabMikroOzet';
 import { kartOzellestirme } from './liste/kartOzellestirme';
 import { LabCalismaTakvimi, type CalismaDuzeni }
   from '../bilesenler/lab/LabCalismaTakvimi';
@@ -2437,7 +2438,16 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         //   Konsultasyon · Islem & Ucret · Gecmis · Dosyalar. Icerik gercek
         //   kayitlardan gelir (tek uc: /api/muayene/{id}/sekme-verisi);
         //   yazma islemleri kendi ekranlarinda kalir.
-        ekSekmeler={tanim.kaynak === 'muayene' && kartId !== 'yeni' && kartId !== null
+        // MIKRO KATALOG KARTLARININ "Tanım" SEKMESI (mockup
+        //   Ekranlar/Lab/besiyeri_karti.html · organizma_karti.html ·
+        //   antibiyotik_karti.html): uc mockup'ta da ILK sekme okunur bir
+        //   ozettir. Icerik kartin KENDI degerlerinden gelir - ikinci istek
+        //   yok, kural yok.
+        ekSekmeler={labMikroOzetiVar(tanim.kaynak)
+            && kartId !== 'yeni' && kartId !== null
+          ? [{ anahtar: 'ozel:tanim', baslik: 'Tanım',
+               ciz: baglam => <LabMikroOzet kaynak={tanim.kaynak} baglam={baglam} /> }]
+          : tanim.kaynak === 'muayene' && kartId !== 'yeni' && kartId !== null
           ? [
               { anahtar: 'ozel:recete', baslik: 'e-Reçete',
                 ciz: () => (

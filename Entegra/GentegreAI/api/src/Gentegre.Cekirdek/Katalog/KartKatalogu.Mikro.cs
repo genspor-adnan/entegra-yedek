@@ -109,8 +109,13 @@ public static partial class KartKatalogu
                 Grup: KIMLIK, EslesAlan: "atmosfer"),
             new("atmosfer", "atmosfer", "kod", SabitKodlar: AtmosferKodlari,
                 Baslik: "Atmosfer", Grup: KIMLIK),
+            // IKILI ALANIN ETIKETI IKISINI BIRDEN ANLATIR (mockup "Okuma
+            //   planı: İlk 18 s · Son 48 s"): serit ikili alanda yalniz ILK
+            //   alanin basligini yaziyor, "İlk Okuma (saat)" etiketi altinda
+            //   iki kutu gorununce ikincisinin ne oldugu belirsiz kaliyordu.
             new("ilkOkumaSaat", "ilk_okuma_saat", "sayi",
-                Baslik: "İlk Okuma (saat)", Grup: KIMLIK, EslesAlan: "sonOkumaSaat"),
+                Baslik: "Okuma Planı (ilk · son saat)", Grup: KIMLIK,
+                EslesAlan: "sonOkumaSaat"),
             new("sonOkumaSaat", "son_okuma_saat", "sayi",
                 Baslik: "Son Okuma (saat)", Grup: KIMLIK),
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300,
@@ -283,5 +288,40 @@ public static partial class KartKatalogu
             new("tekBasinaYetersiz", "tek_basina_yetersiz", "mantik",
                 Baslik: "Tek başına yeterli değil (kombinasyon ajanı)",
                 Grup: "Kademeli Bildirim"),
+        },
+        Detaylar: new[]
+        {
+            // NEREDE KULLANILIYOR (mockup Ekranlar/Lab/antibiyotik_karti.html
+            //   "Kullanıldığı Paneller" · "Doğal Direnç"): ayni iki tablonun
+            //   ORGANIZMA tarafindan okunusu. Antibiyotik kartinda kart iki
+            //   onay kutusundan ibaretti; mockup'ta bes sekme var ve ikisi
+            //   tam olarak bunlar - "bu ajan hangi panellerde, hangi
+            //   organizmada hic raporlanmaz" sorusu antibiyotige bakarken
+            //   soruluyor.
+            // SALT OKUNUR: panel satirinin sahibi ORGANIZMA kartidir (sira,
+            //   basamak, not oradaki baglamla anlamli). Iki yerden yazilan bir
+            //   satir, hangisinin dogru oldugunu belirsiz birakirdi.
+            new DetayTanimi("paneller", "public.lab_organizma_panel", "antibiyotik_id",
+            new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("organizmaId", "organizma_id", "kod", Yazilabilir: false,
+                    KodTablosu: "public.v_lab_organizma_lookup", Baslik: "Organizma"),
+                new("sira", "sira", "sayi", Yazilabilir: false, Baslik: "Sıra"),
+                new("basamak", "basamak", "kod", Yazilabilir: false,
+                    SabitKodlar: AntibiyotikBasamakKodlari, Baslik: "Basamak"),
+                new("notMetni", "not_metni", "metin", Yazilabilir: false, Baslik: "Not"),
+            }, SubeKolonu: null, Sirala: "organizma_id", SaltOkunur: true,
+               Baslik: "Kullanıldığı Paneller"),
+
+            new DetayTanimi("direnc", "public.lab_organizma_direnc", "antibiyotik_id",
+            new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("organizmaId", "organizma_id", "kod", Yazilabilir: false,
+                    KodTablosu: "public.v_lab_organizma_lookup", Baslik: "Organizma"),
+                new("sebep", "sebep", "metin", Yazilabilir: false, Baslik: "Neden"),
+            }, SubeKolonu: null, Sirala: "organizma_id", SaltOkunur: true,
+               Baslik: "Doğal Direnç"),
         });
 }

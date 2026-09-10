@@ -58,14 +58,31 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
   //    antibiyotik_karti.html). Sekme sirasi normalde ALAN SIRASINDAN cikiyor;
   //   ust serit mockup'a gore yeniden duzenlenince (kimlik grubu) kalan
   //   gruplarin sirasi mockup'takinden ayrildi - sira artik acikca yazili.
+  //   "Tanım" HER UCUNDE ILK SEKME (mockup): kart acilinca once kartin ne
+  //   soyledigi okunur, detay gridleri sonra gelir.
   'lab-besiyeri': {
-    sekmeSirasi: ['Numune Tipleri', 'Kalite Kontrol'],
+    sekmeSirasi: ['Tanım', 'Numune Tipleri', 'Kalite Kontrol'],
   },
   'lab-organizma': {
     // Mockup: Tanim - Doğal Direnç - Antibiyogram Paneli - Kodlar & Bildirim.
     //   Kodlar EN SONDA: kart acilinca once "bu organizma nasil raporlanir"
     //   sorusu cevaplanmali, bildirim kodu sonra.
-    sekmeSirasi: ['Doğal Direnç', 'Antibiyogram Paneli', 'Kodlar & Bildirim'],
+    sekmeSirasi: ['Tanım', 'Doğal Direnç', 'Antibiyogram Paneli',
+                  'Kodlar & Bildirim'],
+  },
+  // Mockup: Tanım · Kademeli Bildirim · Sınır Değerler · Kullanıldığı
+  //   Paneller · Kodlar. "Sınır Değerler" (EUCAST breakpoint) tablosu henuz
+  //   veri modelinde YOK - o sekme acilmiyor; kalan dordu mockup sirasinda.
+  'lab-antibiyotik': {
+    sekmeSirasi: ['Tanım', 'Kademeli Bildirim', 'Kullanıldığı Paneller',
+                  'Doğal Direnç'],
+    // TERS ILISKI GRIDLERI SALT GORUNUM (mockup: duz metin tablo). Satirin
+    //   sahibi ORGANIZMA karti; burada satir ici kutu gostermek, buradan da
+    //   yazilabilirmis izlenimi veriyordu.
+    detaySecenekleri: {
+      paneller: { gridKipi: true },
+      direnc:   { gridKipi: true },
+    },
   },
 
   'lab-tetkik': {

@@ -3126,3 +3126,31 @@ input.skt-gecmis {
 /* Mesaj govdesi cerceveisiz ve dar (543): pencere iki cumleye gore boy alsin. */
 .kawin.mesaj-pencere .kagov { padding: 12px 14px }
 .mesaj-govde { font-size: 12px }
+
+/* MIKROBIYOLOJI KATALOG KARTLARI (mockup Ekranlar/Lab/*_karti.html) --------
+   Serit mockup'taki `.hdr` gibi DORT SUTUN: sekiz alan 4x2 duzenli bir
+   izgara olur. Otomatik akista (140 px'lik sutunlar) alanlar yedi sutuna
+   yayilip sekizinciyi tek basina alt satirda birakiyordu. */
+.kaid .alan-izgara.kaid-labmikro { grid-template-columns: repeat(4, minmax(0, 1fr)) }
+@media (max-width: 900px) {
+  .kaid .alan-izgara.kaid-labmikro { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+}
+@media (max-width: 560px) {
+  .kaid .alan-izgara.kaid-labmikro { grid-template-columns: 1fr }
+}
+
+/* "Tanım" ozeti: mockup'taki `.satir` - iki blok yan yana, dar ekranda alt
+   alta. Bloklar kartin ORTAK `.kagrup` cercevesi; yeni bir gorunum yok. */
+.lab-tanim-satir {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  gap: 10px; align-items: start;
+}
+/* Ad `lab-ozet` DEGIL: o sinif lab liste seritlerinin kutu dizisi (flex row) -
+   ayni adi kullanan blok basligi genisleyemiyordu. */
+.lab-tanim-blok { margin: 0 }
+.lab-tanim-blok > .detay-tablo { margin: 0; width: 100% }
+/* Etiket sutunu mockup'taki gibi dar ve sabit - deger sutunu hep ayni yerde
+   baslasin, iki blok yan yana dururken satirlar birbirini tutsun. */
+.lab-tanim-etiket { width: 40%; color: var(--soluk) }
+.lab-tanim-blok .rozet { font-size: 10.5px; padding: 1px 8px }
+.kagrup > h6 .sag-ek { margin-left: auto; font-weight: 400; font-size: 10.5px }

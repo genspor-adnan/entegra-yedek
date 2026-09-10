@@ -153,7 +153,16 @@ interface Props {
    * sekmeleri). Cerceve yalnizca sekmeyi acar; iceriginin verisini ve
    * kurallarini ekran (ve sunucu uclari) tasir. Yeni kayitta acilmaz.
    */
-  ekSekmeler?: { anahtar: string; baslik: string; ciz(): React.ReactNode }[];
+  ekSekmeler?: {
+    anahtar: string; baslik: string;
+    /**
+     * Sekmeyi cizer. BAGLAM (kartin o anki degerleri, metasi ve detay satir
+     * adetleri) ekranin elinde YOK - kart GenForm'un icinde yasiyor. Mikro
+     * katalog kartlarinin "Tanım" ozeti bunlarin uzerine kurulu; baglamsiz
+     * cizen eski sekmeler (muayene) parametreyi yok sayar.
+     */
+    ciz(baglam: EkSekmeBaglami): React.ReactNode;
+  }[];
   /** Sekme sirasi (basliklara gore) - mockup sirasi. */
   sekmeSirasi?: string[];
   /** Bu EKRANDA acilmayacak sekmeler (ör. Aday kartinda "Fatura Bilgileri").
@@ -244,6 +253,18 @@ function tarifeGizli(tip: number): string[] {
   //   carpan ve katki sutunlarini goruyordu (kullanici: "sadece fiyat olması
   //   gerekir"). ERP'de DB de 1 yaziyor, ekran da 1 varsayar.
   return ['tabanFiyat', 'carpan', 'katkiTutar'];
+}
+
+/**
+ * EK SEKMEYE VERILEN KART BAGLAMI: sekmeyi EKRAN tanimliyor ama kartin
+ * degerleri GenForm'un icinde yasiyor. Ozet sekmeleri (mikro katalog
+ * kartlarinin "Tanım"i) ikinci bir istek atmadan buradan beslenir.
+ */
+export interface EkSekmeBaglami {
+  deger: Record<string, Deger>;
+  meta: KartMetaYaniti | null;
+  /** Detay sekmesindeki satir adedi (ör. panelde kac antibiyotik var). */
+  detaySayisi(ad: string): number;
 }
 
 export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, onKaydedildi, yerTutucuSekmeler,
@@ -723,6 +744,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
 
   /** Dokuman seridinde TEK HUCREDE toplanan gecerlilik alanlari (mockup). */
 const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
+
+/** Mikrobiyoloji katalog kartlari - serit duzeni mockup'la ayni (dort sutun). */
+const LAB_MIKRO_KARTLAR = new Set(['lab-besiyeri', 'lab-organizma', 'lab-antibiyotik']);
 
 /** Mockup'taki gibi sekmeli kart: Kimlik disindaki her alan grubu + her detay tablosu ayri sekme. */
   const sekmeler = useMemo<SekmeTanimi[]>(
@@ -1248,7 +1272,15 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
                             //   "2. sira: baslama, bitis, aciklama,
                             //   varsayilan"). Otomatik akista kutular ekran
                             //   genisligine gore ziplayip bu ayrimi bozuyordu.
-                            + (kaynak === 'fiyat-listesi' ? ' kaid-fiyat' : '')}>
+                            + (kaynak === 'fiyat-listesi' ? ' kaid-fiyat' : '')
+                            // MIKROBIYOLOJI KATALOG KARTLARI DORT SUTUN
+                            //   (Ekranlar/Lab/*_karti.html `.hdr`): mockup'ta
+                            //   serit 4x2 duzenli bir izgara. Otomatik akista
+                            //   sekiz alan 1080 px'de yedi sutuna yayilip
+                            //   sekizinciyi tek basina ikinci satira
+                            //   birakiyordu - ayni aileden gelmeyen bir kart
+                            //   gibi duruyordu.
+                            + (LAB_MIKRO_KARTLAR.has(kaynak) ? ' kaid-labmikro' : '')}>
               {renderAlanListesi(kimlikAlanlari)}
             </div>
           )}
@@ -1949,7 +1981,10 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
 
       {/* EKRANA OZEL EK SEKME (mockup muayene karti): icerigi ekran cizer. */}
       {aktif?.tur === 'ozel'
-        && ekSekmeler?.find(e => e.anahtar === aktif.anahtar)?.ciz()}
+        && ekSekmeler?.find(e => e.anahtar === aktif.anahtar)?.ciz({
+             deger, meta,
+             detaySayisi: ad => detaylar[ad]?.guncel.length ?? 0,
+           })}
 
       {aktif?.tur === 'ozel' && kaynak === 'rol' && aktif.anahtar === 'ozel:yetkiler' && (
         <RolYetkiMatrisi rolId={id as number} saltOkunur={salt} />
