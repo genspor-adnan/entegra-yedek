@@ -202,10 +202,15 @@ public static partial class KartKatalogu
                 // Satirin NEREDEN geldigi (214): Manuel / Hesap / İmport.
                 new("yazim",     "yazim",     "kod",  KodListesi: "fiyat_listesi.yazim",
                     Baslik: "Oluşma"),
-                new("tabanListeId", "taban_liste_id", "kod",
-                    KodTablosu: "public.v_fiyat_listesi_lookup", Baslik: "Taban Fiyat"),
-                new("yuvarlama", "yuvarlama", "kod",  KodListesi: "fiyat_listesi.yuvarlama",
-                    Baslik: "Yuvarlama"),
+                // TABAN LISTE / YUVARLAMA SUTUNLARI KALKTI (539, kullanici:
+                //   "taban fiyat ve yuvarlama alanlari kullaniliyor mu?" ->
+                //   "evet kaldir"). 28.328 satirin HICBIRINDE dolu degil:
+                //   turetilmis liste zinciri bu kurulumda kullanilmiyor -
+                //   SUT fiyati SKRS'den, TTB katsayi x carpan, Ozel uretim
+                //   fonksiyonuyla geliyor (536). Kolonlar DURUYOR;
+                //   `fn_fiyat_listesi_fiyat` ve `fn_sls_carpan_manuel` onlari
+                //   okumaya devam ediyor - turetilmis liste kuran kurulumda
+                //   sutunlar geri acilir.
             // SAYFALI (525, kullanici: "fiyat listesinde satirlar cok fazla
             //   oldugu icin yavas, paging yapsan"): SKRS'den kurulan SUT
             //   listesi 14.117 satir - kart yaniti 4,4 MB'a cikiyor, tarayici
