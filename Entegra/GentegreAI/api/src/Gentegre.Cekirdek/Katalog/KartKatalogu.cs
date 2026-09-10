@@ -95,6 +95,11 @@ public sealed record DetayTanimi(
     //   satir zaten yazilamaz. Ekranda "+ Satır" dugmesi ilk satirdan sonra
     //   gizlenir - kullaniciya yazilamayacak satir teklif etmeyelim.
     bool TekSatir = false,
+    // SAYFALI DETAY (525): 0 = tek seferde. Fiyat listesi satiri gibi on
+    //   binlik detaylarda kart yaniti megabaytlara cikiyor ve tarayici 14 bin
+    //   satiri cizerken kilitleniyordu - deger verilince kartla YALNIZ ILK
+    //   SAYFA gelir, gerisi `/api/kart/{kaynak}/{id}/detay/{ad}` ucundan.
+    int SayfaBoyu = 0,
     // YENI SATIR VARSAYILANLARI: istekte gelmeyen alanlara kayit sirasinda
     //   yazilir. Kartin KIMLIGINI belirleyen bayraklar icindir - ornegin dis
     //   hekim kartinda taraf_personel.dis_hekim = 1 (305): kullaniciya

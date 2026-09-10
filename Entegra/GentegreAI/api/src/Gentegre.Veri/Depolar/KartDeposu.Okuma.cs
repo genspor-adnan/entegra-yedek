@@ -61,35 +61,88 @@ public sealed partial class KartDeposu
         return (kart, surum);
     }
 
-    public async Task<Dictionary<string, List<IDictionary<string, object?>>>> DetaylarAsync(
+    public async Task<(Dictionary<string, List<IDictionary<string, object?>>> Satirlar,
+                       Dictionary<string, int> Toplam)> DetaylarAsync(
         KartTanimi tanim, long id, CancellationToken iptal = default)
     {
         var sonuc = new Dictionary<string, List<IDictionary<string, object?>>>(StringComparer.Ordinal);
-        if (tanim.Detaylar is not { Count: > 0 }) return sonuc;
+        var toplam = new Dictionary<string, int>(StringComparer.Ordinal);
+        if (tanim.Detaylar is not { Count: > 0 }) return (sonuc, toplam);
 
         await using var baglanti = await _veri.AcAsync(iptal);
 
         foreach (var detay in tanim.Detaylar)
         {
-            var secim = string.Join(", ", detay.Alanlar.Select(a => $"{a.Kolon} as \"{a.Ad}\""));
-            var sql = $"select {secim} from {detay.Tablo} where {detay.UstKolon} = @p0 order by {detay.Sirala}";
-
-            await using var komut = baglanti.Komut(sql, null,
-                id);
-
-            var satirlar = new List<IDictionary<string, object?>>();
-            await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
-            while (await okuyucu.ReadAsync(iptal))
-            {
-                var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
-                for (var i = 0; i < okuyucu.FieldCount; i++)
-                    satir[okuyucu.GetName(i)] = okuyucu.IsDBNull(i) ? null : okuyucu.GetValue(i);
-                satirlar.Add(satir);
-            }
-            sonuc[detay.Ad] = satirlar;
+            // SAYFALI DETAY (525): kartla yalniz ilk sayfa gelir. Fiyat
+            //   listesi satiri 14 bine cikinca kart yaniti 4 MB oluyor,
+            //   tarayici o kadar satiri cizerken kilitleniyordu.
+            sonuc[detay.Ad] = await DetaySayfasiAsync(baglanti, detay, id, 1,
+                                                      detay.SayfaBoyu, iptal);
+            if (detay.SayfaBoyu > 0)
+                toplam[detay.Ad] = await DetayAdediAsync(baglanti, detay, id, iptal);
         }
 
-        return sonuc;
+        return (sonuc, toplam);
+    }
+
+    /// <summary>
+    /// Tek detayin BIR SAYFASI (525). <paramref name="boyut"/> 0 ise sinir
+    /// yok - sayfasiz detaylarin bugunku davranisi budur.
+    /// </summary>
+    public async Task<List<IDictionary<string, object?>>> DetaySayfasiAsync(
+        KartTanimi tanim, string detayAd, long id, int sayfa, int boyut,
+        CancellationToken iptal = default)
+    {
+        var detay = (tanim.Detaylar ?? Array.Empty<DetayTanimi>())
+            .FirstOrDefault(d => string.Equals(d.Ad, detayAd, StringComparison.Ordinal))
+            ?? throw new InvalidOperationException($"Bilinmeyen detay: {detayAd}");
+
+        await using var baglanti = await _veri.AcAsync(iptal);
+        return await DetaySayfasiAsync(baglanti, detay, id, sayfa, boyut, iptal);
+    }
+
+    /// <summary>Detayin TOPLAM satir sayisi - sayfa seridi icin (525).</summary>
+    public async Task<int> DetayAdediAsync(
+        KartTanimi tanim, string detayAd, long id, CancellationToken iptal = default)
+    {
+        var detay = (tanim.Detaylar ?? Array.Empty<DetayTanimi>())
+            .FirstOrDefault(d => string.Equals(d.Ad, detayAd, StringComparison.Ordinal))
+            ?? throw new InvalidOperationException($"Bilinmeyen detay: {detayAd}");
+
+        await using var baglanti = await _veri.AcAsync(iptal);
+        return await DetayAdediAsync(baglanti, detay, id, iptal);
+    }
+
+    private static async Task<List<IDictionary<string, object?>>> DetaySayfasiAsync(
+        NpgsqlConnection baglanti, DetayTanimi detay, long id, int sayfa, int boyut,
+        CancellationToken iptal)
+    {
+        var secim = string.Join(", ", detay.Alanlar.Select(a => $"{a.Kolon} as \"{a.Ad}\""));
+        var sql = $"select {secim} from {detay.Tablo} where {detay.UstKolon} = @p0 "
+                + $"order by {detay.Sirala}";
+        if (boyut > 0)
+            sql += $" limit {boyut} offset {Math.Max(sayfa - 1, 0) * (long)boyut}";
+
+        await using var komut = baglanti.Komut(sql, null, id);
+
+        var satirlar = new List<IDictionary<string, object?>>();
+        await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
+        while (await okuyucu.ReadAsync(iptal))
+        {
+            var satir = new Dictionary<string, object?>(StringComparer.Ordinal);
+            for (var i = 0; i < okuyucu.FieldCount; i++)
+                satir[okuyucu.GetName(i)] = okuyucu.IsDBNull(i) ? null : okuyucu.GetValue(i);
+            satirlar.Add(satir);
+        }
+        return satirlar;
+    }
+
+    private static async Task<int> DetayAdediAsync(
+        NpgsqlConnection baglanti, DetayTanimi detay, long id, CancellationToken iptal)
+    {
+        await using var komut = baglanti.Komut(
+            $"select count(*) from {detay.Tablo} where {detay.UstKolon} = @p0", null, id);
+        return Convert.ToInt32(await komut.ExecuteScalarAsync(iptal) ?? 0);
     }
 
     /// <summary>

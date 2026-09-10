@@ -7,6 +7,9 @@ public sealed class KartYaniti
 {
     public IDictionary<string, object?> Kart { get; set; } = new Dictionary<string, object?>();
     public IDictionary<string, List<IDictionary<string, object?>>>? Detaylar { get; set; }
+    /// <summary>Sayfali detaylarda TOPLAM satir sayisi (525) - arayuz sayfa
+    /// seridini buna gore cizer. Sayfasiz detaylar burada YER ALMAZ.</summary>
+    public IDictionary<string, int>? DetayToplam { get; set; }
     public IDictionary<string, IDictionary<string, string>>? KodAd { get; set; }
     public KartYetkisi Yetki { get; set; } = new();
     public string IzlemeNo { get; set; } = "";
@@ -76,7 +79,14 @@ public sealed record KartDetayMeta(
     /// (ör. stok "Paket" sekmesi paket=1 iken).</summary>
     string? KosulAlani = null,
     /// <summary>1:1 detay - en fazla tek satir (249).</summary>
-    bool TekSatir = false);
+    bool TekSatir = false,
+    /// <summary>
+    /// SAYFA BOYU (525). 0 ise detay tek seferde gelir - kucuk detaylarda
+    /// dogru olan budur. Buyuk detaylarda (fiyat listesi satiri: 14 bin)
+    /// kart yaniti 4 MB'a cikiyor ve ekran donuyordu; deger verilince kartla
+    /// yalniz ILK SAYFA gelir, gerisi `/detay/{ad}` ucundan istenir.
+    /// </summary>
+    int SayfaBoyu = 0);
 
 public sealed class KartMetaYaniti
 {

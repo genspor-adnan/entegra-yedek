@@ -180,7 +180,13 @@ public static partial class KartKatalogu
                     KodTablosu: "public.v_fiyat_listesi_lookup", Baslik: "Taban Fiyat"),
                 new("yuvarlama", "yuvarlama", "kod",  KodListesi: "fiyat_listesi.yuvarlama",
                     Baslik: "Yuvarlama"),
-            }, Sirala: "id", SubeKolonu: null, LogTabloId: 924, Baslik: "Satırlar")
+            // SAYFALI (525, kullanici: "fiyat listesinde satirlar cok fazla
+            //   oldugu icin yavas, paging yapsan"): SKRS'den kurulan SUT
+            //   listesi 14.117 satir - kart yaniti 4,4 MB'a cikiyor, tarayici
+            //   o kadar satiri cizerken kilitleniyordu. Kartla ilk sayfa
+            //   gelir, gerisi sayfa seridinden istenir.
+            }, Sirala: "id", SubeKolonu: null, LogTabloId: 924, Baslik: "Satırlar",
+               SayfaBoyu: 200)
         },
         SilmeEngelleri: new[]
         {

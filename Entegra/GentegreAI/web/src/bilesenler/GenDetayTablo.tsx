@@ -81,6 +81,15 @@ interface Props {
   saltOkunur: boolean;
   hatalar: Record<string, string>;
   onDegis(yeni: DetayDurumu): void;
+  /**
+   * SAYFALI DETAY (525). `toplam` sunucudaki tum satir sayisi, `durum` ise
+   * yalniz ACIK SAYFAYI tasir. Serit ancak ikisi de verilince cizilir -
+   * sayfasiz detaylarda hicbir sey degismez.
+   */
+  sayfa?: number;
+  toplam?: number;
+  onSayfa?(yeniSayfa: number): void;
+  sayfaYukleniyor?: boolean;
   /** Kutuya eklenecek ek sinif (yerlesim ince ayari; ör. daha dar ust bosluk). */
   kutuSinif?: string;
   /**
@@ -238,7 +247,17 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                                modalDuzenle, taslakKural, cipler, kutuSinif,
                                gizliAlanlar, gridGizliAlanlar, etiketAlanlari, sadeGrid, ekleGizli,
                                aramaKaynaklari, aramaEkFiltre, ekSuzgec,
-                               modalAltBilesen }: Props) {
+                               modalAltBilesen,
+  sayfa, toplam, onSayfa, sayfaYukleniyor,
+}: Props) {
+  // SAYFALI DETAY (525): serit yalniz katalog sayfa boyu verdiyse VE toplam
+  //   bir sayfaya sigmiyorsa cizilir - iki satirlik adres detayinda "1 / 1"
+  //   gostermek gurultu olurdu.
+  const sayfaBoyu = meta.sayfaBoyu ?? 0;
+  const sayfaNo = sayfa ?? 1;
+  const sonSayfa = sayfaBoyu > 0
+    ? Math.max(1, Math.ceil((toplam ?? 0) / sayfaBoyu)) : 1;
+  const sayfali = sayfaBoyu > 0 && sonSayfa > 1;
   /**
    * KAMPANYA SATIRI (268): "Kapsam" TEK kolondur (iskonto_yeri_id) ama
    * anlami satirin TIPINE gore degisir - Liste'de 0, Kategori'de kategori id,
@@ -1106,10 +1125,27 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           olmasin diye yalniz grid kipinde gosterilir. */}
       {modalDuzenle && durum.guncel.length > 0 && (
         <div className="detay-altbilgi">
-          {gorunurler.length === durum.guncel.length
-            ? `${durum.guncel.length.toLocaleString('tr')} satır`
-            : `${gorunurler.length.toLocaleString('tr')} / `
-              + `${durum.guncel.length.toLocaleString('tr')} satır`}
+          {/* SAYFALI DETAYDA SAYAC TOPLAMI GOSTERIR (525): ekranda 200 satir
+              duruyor olsa da kullanicinin bilmek istedigi listenin buyuklugu. */}
+          {sayfali
+            ? `${durum.guncel.length.toLocaleString('tr')} / `
+              + `${(toplam ?? 0).toLocaleString('tr')} satır`
+            : gorunurler.length === durum.guncel.length
+              ? `${durum.guncel.length.toLocaleString('tr')} satır`
+              : `${gorunurler.length.toLocaleString('tr')} / `
+                + `${durum.guncel.length.toLocaleString('tr')} satır`}
+
+          {sayfali && (
+            <span className="detay-sayfa">
+              <button type="button" className="dugme kucuk"
+                      disabled={sayfaNo <= 1 || sayfaYukleniyor}
+                      onClick={() => onSayfa?.(sayfaNo - 1)}>‹ Önceki</button>
+              <span className="detay-sayfa-no">{sayfaNo} / {sonSayfa}</span>
+              <button type="button" className="dugme kucuk"
+                      disabled={sayfaNo >= sonSayfa || sayfaYukleniyor}
+                      onClick={() => onSayfa?.(sayfaNo + 1)}>Sonraki ›</button>
+            </span>
+          )}
         </div>
       )}
 

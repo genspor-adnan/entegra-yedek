@@ -149,7 +149,6 @@ public static partial class KartKatalogu
             new DetayTanimi("uts", "public.stok_uts", "stok_id", new KartAlani[]
             {
                 new("id",            "id",             "sayi",  Yazilabilir: false),
-                new("sutKodu",       "sut_kodu",       "metin", EnFazlaUzunluk: 50,  Baslik: "SUT Kodu"),
                 new("bransKodu",     "brans_kodu",     "metin", EnFazlaUzunluk: 100, Baslik: "Branş Kodu"),
                 new("utsRef",        "uts_ref",        "metin", EnFazlaUzunluk: 100, Baslik: "ÜTS REF (Katalog No)"),
                 new("ftn",           "ftn",            "metin", EnFazlaUzunluk: 100, Baslik: "FTN"),

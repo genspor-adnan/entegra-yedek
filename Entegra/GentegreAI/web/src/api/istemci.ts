@@ -2,6 +2,7 @@ import {
   ApiHatasi,
   type BenYaniti, type GirisYaniti, type HataGovdesi,
   type AksiyonListesi, type KartMetaYaniti, type KartYaniti, type KartYazmaIstegi, type KolonMeta,
+  type DetaySayfasi,
   type ListeIstegi, type ListeYaniti, type BelgeYaniti,
   type KisiKaydi, type KisiIstegi, type YerlerYaniti,
   type KasaIslemTuru, type KasaIslemYaniti, type KasaIslemYazmaIstegi, type FisOzeti,
@@ -1029,6 +1030,10 @@ export const api = {
   // --------------------------------------------------------------- kart ----
   kartAlanlari: (kaynak: string) => istek<KartMetaYaniti>(`/api/kart/${kaynak}/alanlar`),
   kartOku: (kaynak: string, id: number) => istek<KartYaniti>(`/api/kart/${kaynak}/${id}`),
+  /** SAYFALI DETAY (525): buyuk detayin sonraki sayfasi. */
+  kartDetaySayfasi: (kaynak: string, id: number, ad: string, sayfa: number, boyut: number) =>
+    istek<DetaySayfasi>(
+      `/api/kart/${kaynak}/${id}/detay/${ad}?sayfa=${sayfa}&boyut=${boyut}`),
   kartEkle: (kaynak: string, govde: KartYazmaIstegi) =>
     gonder<KartYaniti>(`/api/kart/${kaynak}`, govde),
   kartGuncelle: (kaynak: string, id: number, govde: KartYazmaIstegi) =>

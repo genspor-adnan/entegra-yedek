@@ -285,7 +285,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 
-## Gorunumler (130 ad, 39 tanesi birden cok dosyada)
+## Gorunumler (131 ad, 39 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -412,6 +412,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_skrs_sapma` | `503_skrs_kod_dikisi.sql` | — |
 | `v_stok_kullanilabilir` | `142_siparis_rezervasyon.sql` | — |
 | `v_stok_lookup` | `121_firsat.sql` | — |
+| `v_stok_onek_dagilim` | `524_stok_kategorisi.sql` | — |
 | `v_sube_baz_lookup` | `227_baz_sube.sql` | — |
 | `v_tahsilat_turu_lookup` | `330_prim_tahsilat_turu_durum.sql` | — |
 | `v_taraf_avans` | `322_avans_mahsup.sql` | — |

@@ -96,10 +96,13 @@ public static class KartUclari
                 ["surum"] = kart.Surum
             };
 
+            var detay = await depo.DetaylarAsync(tanim, id, iptal);
+
             return Results.Ok(new KartYaniti
             {
                 Kart = govde,
-                Detaylar = await depo.DetaylarAsync(tanim, id, iptal),
+                Detaylar = detay.Satirlar,
+                DetayToplam = detay.Toplam.Count > 0 ? detay.Toplam : null,
                 KodAd = await depo.KodAdAsync(tanim, kart.Kart, iptal),
                 Yetki = new KartYetkisi
                 {
@@ -164,7 +167,7 @@ public static class KartUclari
             return Results.Created($"/api/kart/{tanim.Ad}/{yeniId}", new KartYaniti
             {
                 Kart = govde,
-                Detaylar = await depo.DetaylarAsync(tanim, yeniId, iptal),
+                Detaylar = (await depo.DetaylarAsync(tanim, yeniId, iptal)).Satirlar,
                 IzlemeNo = baglam.IzlemeNo
             });
         });
@@ -214,7 +217,7 @@ public static class KartUclari
             return Results.Ok(new KartYaniti
             {
                 Kart = govde,
-                Detaylar = await depo.DetaylarAsync(tanim, id, iptal),
+                Detaylar = (await depo.DetaylarAsync(tanim, id, iptal)).Satirlar,
                 IzlemeNo = baglam.IzlemeNo
             });
         });
@@ -237,6 +240,41 @@ public static class KartUclari
         });
 
         // GET /api/kart/{kaynak}/alanlar - form metasi (liste tarafindaki /kolonlar karsiligi)
+        // ------------------------------------------------ detay sayfasi ----
+        // GET /api/kart/{kaynak}/{id}/detay/{ad}?sayfa=2&boyut=200
+        //
+        // SAYFALI DETAY (525): kart yaniti buyuk detaylarda megabaytlara
+        //   cikiyordu (fiyat listesi satiri 14.117 kayit -> 4,4 MB) ve ekran
+        //   o kadar satiri cizerken kilitleniyordu. Kartla ilk sayfa gelir,
+        //   kullanici ilerledikce sonrakiler buradan istenir.
+        grup.MapGet("/{kaynak}/{id:long}/detay/{ad}", async (
+            string kaynak, long id, string ad, int? sayfa, int? boyut,
+            BaglamCozucu cozucu, KartDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var tanim = KartBul(kaynak);
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
+
+            var detay = (tanim.Detaylar ?? Array.Empty<DetayTanimi>())
+                .FirstOrDefault(d => string.Equals(d.Ad, ad, StringComparison.Ordinal))
+                ?? throw GentegreHatasi.Bulunamadi($"Bilinmeyen detay: {ad}");
+
+            // Boyut ISTEKTEN gelse de katalogun sinirini asamaz: sayfalama
+            //   burada bir gorunum tercihi degil, korunma.
+            var enFazla = detay.SayfaBoyu > 0 ? detay.SayfaBoyu : 500;
+            var b = Math.Clamp(boyut ?? enFazla, 1, enFazla);
+            var sf = Math.Max(sayfa ?? 1, 1);
+
+            var satirlar = await depo.DetaySayfasiAsync(tanim, ad, id, sf, b, iptal);
+            var toplam = await depo.DetayAdediAsync(tanim, ad, id, iptal);
+
+            return Results.Ok(new
+            {
+                satirlar, toplam, sayfa = sf, boyut = b,
+                izlemeNo = baglam.IzlemeNo
+            });
+        });
+
         grup.MapGet("/{kaynak}/alanlar", async (
             string kaynak, BaglamCozucu cozucu, KartDeposu depo, HttpContext ctx, CancellationToken iptal) =>
         {
@@ -326,7 +364,8 @@ public static class KartUclari
                 Alanlar = okunabilir.Select(MetaOptions).ToList(),
                 Detaylar = (tanim.Detaylar ?? Array.Empty<DetayTanimi>())
                     .Select(d => new KartDetayMeta(d.Ad, d.Etiket, d.SaltOkunur,
-                        d.Alanlar.Select(MetaOptions).ToList(), d.KosulAlani, d.TekSatir))
+                        d.Alanlar.Select(MetaOptions).ToList(), d.KosulAlani, d.TekSatir,
+                                       d.SayfaBoyu))
                     .ToList(),
                 Yetki = new KartYetkisi
                 {

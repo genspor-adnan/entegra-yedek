@@ -595,7 +595,13 @@ table.grid tr.flt input {
   /* SOLA yaslı: sağ alt köşede yüzen "AI Rehber" düğmesi sayacın üstüne
      biniyordu. */
   text-align: left;
+  /* Sayfa seridi (525) sagda: sayac solda kalsin, ikisi tek satirda. */
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
 }
+/* SAYFALI DETAY SERIDI (525): fiyat listesi gibi on binlik detaylarda
+   "‹ Önceki  3 / 71  Sonraki ›". Sayfasiz detaylarda hic cizilmez. */
+.detay-sayfa { display: inline-flex; align-items: center; gap: 6px }
+.detay-sayfa-no { color: var(--metin); font-variant-numeric: tabular-nums }
 .detay-uzun > .detay-tablo thead th {
   position: sticky; top: 0; z-index: 2;
   background: linear-gradient(var(--serit1), var(--serit2));

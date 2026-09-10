@@ -288,6 +288,12 @@ export interface KartYetkisi { duzenle: boolean; sil: boolean; gizliAlanlar: str
 export interface KartYaniti {
   kart: Record<string, unknown> & { id?: number; surum?: string };
   detaylar?: Record<string, Record<string, unknown>[]>;
+  /**
+   * SAYFALI detaylarda TOPLAM satir sayisi (525). Kartla yalniz ilk sayfa
+   * gelir; serit bu sayiya gore cizilir, sonraki sayfalar `kartDetaySayfasi`
+   * ile istenir. Sayfasiz detaylar burada YER ALMAZ.
+   */
+  detayToplam?: Record<string, number>;
   kodAd?: Record<string, Record<string, string>>;
   yetki: KartYetkisi;
   izlemeNo: string;
@@ -399,6 +405,16 @@ export interface KartDetayMeta {
   kosulAlani?: string | null;
   /** 1:1 detay (249): en fazla tek satir - ikinci satir DB'de zaten yazilamaz. */
   tekSatir?: boolean;
+  /** Sayfa boyu (525); 0/bos ise detay tek seferde gelir. */
+  sayfaBoyu?: number;
+}
+
+/** Sayfali detayin bir sayfasi (525). */
+export interface DetaySayfasi {
+  satirlar: Record<string, unknown>[];
+  toplam: number;
+  sayfa: number;
+  boyut: number;
 }
 
 export interface KartMetaYaniti {

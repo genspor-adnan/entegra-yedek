@@ -6,7 +6,8 @@ import { useOturum } from '../kimlik/OturumBaglami';
 import {
   ApiHatasi, hataAyristir, urunAdi,
   type KartMetaYaniti, type KartYetkisi, hataMetni } from '../api/sozlesme';
-import { GenDetayTablo, type DetayDurumu, bosDetay, detayFarki } from './GenDetayTablo';
+import { GenDetayTablo, type DetayDurumu, type Satir, bosDetay, detayFarki }
+  from './GenDetayTablo';
 import { KademeGridi } from './prim/KademeGridi';
 import { Modal } from './Modal';
 import { yerelAnMetni, bugunIso, hamSayi, kidemMetni } from './bicim';
@@ -252,6 +253,48 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
   const [yetki, setYetki] = useState<KartYetkisi>({ duzenle: false, sil: false, gizliAlanlar: [] });
   const [detaylar, setDetaylar] = useState<Record<string, DetayDurumu>>({});
   /**
+   * SAYFALI DETAY (525, kullanici: "fiyat listesinde satirlar cok fazla
+   * oldugu icin yavas, paging yapsan"). Kartla yalniz ilk sayfa geliyor;
+   * burada acik sayfa, sunucudaki toplam ve istek bayragi tutulur.
+   */
+  const [detaySayfa, setDetaySayfa] = useState<Record<string, number>>({});
+  const [detayToplam, setDetayToplam] = useState<Record<string, number>>({});
+  const [detaySayfaYuk, setDetaySayfaYuk] = useState<string | null>(null);
+
+  /**
+   * SAYFALI DETAYDA SAYFA DEGISIMI (525).
+   *
+   * Sayfa degisince o detayin `ilk`/`guncel` dizileri YENI SAYFAYLA
+   * DEGISIR - yani ekranda kaydedilmemis satir degisikligi varsa kaybolur.
+   * Bu yuzden once soruluyor: sessizce yutmak, kullanicinin girdigi fiyati
+   * bir daha goremeyecegi bir kayip olurdu.
+   */
+  const detaySayfaDegis = async (ad: string, yeniSayfa: number) => {
+    if (typeof id !== 'number' || detaySayfaYuk) return;
+    const durum = detaylar[ad];
+    if (durum) {
+      const fark = detayFarki(durum);
+      if (fark.eklenen || fark.degisen || fark.silinen) {
+        const devam = await onaySor(
+          'Bu sayfada kaydedilmemiş satır değişiklikleri var. '
+          + 'Sayfa değiştirilirse bu değişiklikler kaybolur. Devam edilsin mi?');
+        if (!devam) return;
+      }
+    }
+    setDetaySayfaYuk(ad);
+    try {
+      const boyu = meta?.detaylar.find(d => d.ad === ad)?.sayfaBoyu ?? 0;
+      const sayfa = await api.kartDetaySayfasi(kaynak, id, ad, yeniSayfa, boyu || 200);
+      setDetaylar(t => ({ ...t, [ad]: bosDetay(sayfa.satirlar as Satir[]) }));
+      setDetaySayfa(t => ({ ...t, [ad]: sayfa.sayfa }));
+      setDetayToplam(t => ({ ...t, [ad]: sayfa.toplam }));
+    } catch (h) {
+      await bilgiMesaji(hataMetni(h));
+    } finally {
+      setDetaySayfaYuk(null);
+    }
+  };
+  /**
    * FIYAT LISTESI SATIRLARI - KATEGORI SUZGECI (kullanici: "satirlar
    * sekmesinde arama editinin sagina kategori agac combo ekle"). Secilen dal
    * ALT AGACIYLA birlikte suzer; durum burada cunku grid suzgeci cizmez,
@@ -414,6 +457,9 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
           bosDetaylar[d.ad] = bosDetay(k.detaylar?.[d.ad] ?? []);
         });
         setDetaylar(bosDetaylar);
+        // Sayfali detaylar ilk sayfadan baslar; toplam sunucudan gelir (525).
+        setDetaySayfa({});
+        setDetayToplam(k.detayToplam ?? {});
       }
     } catch (h) {
       setHata(hataMetni(h));
@@ -1103,7 +1149,12 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
               {/* IKON YOK (kullanici): on sekmeli kartta ikonlar seridi
                   ikinci satira tasiriyordu; sekme adi zaten ayirt ediyor. */}
               {c(s.baslik)}
-              {s.tur === 'detay' && <span className="b">{(detaylar[s.detay.ad] ?? bosDetay()).guncel.length}</span>}
+              {/* SAYFALI DETAYDA ROZET TOPLAMI GOSTERIR (525): ekranda 200
+                  satir duruyor olsa da sekmenin sordugu "kac tane var". */}
+              {s.tur === 'detay' && <span className="b">{
+                (detayToplam[s.detay.ad]
+                  ?? (detaylar[s.detay.ad] ?? bosDetay()).guncel.length).toLocaleString('tr')
+              }</span>}
             </div>
           ))}
         </div>
@@ -1530,6 +1581,12 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
           //   kutular yerine modal duzenleme daha okunakli (kullanici).
           modalDuzenle={gridKipi}
           ikonlu={gridKipi}
+          // SAYFALI DETAY (525): serit yalniz katalog sayfa boyu verdiginde
+          //   cizilir; sayfasiz detaylarda bu proplarin hicbir etkisi yok.
+          sayfa={detaySayfa[aktif.detay.ad] ?? 1}
+          toplam={detayToplam[aktif.detay.ad]}
+          sayfaYukleniyor={detaySayfaYuk === aktif.detay.ad}
+          onSayfa={n => { void detaySayfaDegis(aktif.detay.ad, n) }}
           // PRIM ZAMANI "Faturalamada" ISE TAHSILAT TURU SORULMAZ (kullanici):
           //   fatura kesilirken paranin hangi araçla tahsil edilecegi HENUZ
           //   BELLI DEGIL. Eslestirme zaten bu kriteri o kipte yok sayiyor;
