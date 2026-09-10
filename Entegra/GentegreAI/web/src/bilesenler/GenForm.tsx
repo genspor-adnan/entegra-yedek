@@ -305,6 +305,37 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
   const [topluCarpanDeger, setTopluCarpanDeger] = useState('');
   /** "Durum Değiştir" acilir menusu (534). */
   const [durumMenusu, setDurumMenusu] = useState(false);
+  /** SKRS tazeleme surerken dugme kilitli (535). */
+  const [skrsCalisiyor, setSkrsCalisiyor] = useState(false);
+
+  /**
+   * SUT LISTESINI SKRS AMBARINDAN TAZELE (535). Kaydedilmemis satir
+   * degisikligi varsa once sorulur: tazeleme sunucuda yapiliyor ve kart
+   * yeniden okunuyor - ekrandaki duzenleme kaybolurdu.
+   */
+  const skrsGuncelle = async () => {
+    if (typeof id !== 'number') return;
+    const durum = detaylar.satirlar;
+    if (durum) {
+      const fark = detayFarki(durum);
+      if (fark.eklenen || fark.degisen || fark.silinen) {
+        const devam = await onaySor(
+          'Kaydedilmemiş satır değişiklikleri var. SKRS güncellemesi kartı '
+          + 'yeniden okur ve bu değişiklikler kaybolur. Devam edilsin mi?');
+        if (!devam) return;
+      }
+    }
+    setSkrsCalisiyor(true);
+    try {
+      const s2 = await api.fiyatSutGuncelle(id);
+      await bilgiMesaji(s2.mesaj);
+      await yukle();
+    } catch (h) {
+      await bilgiMesaji(hataMetni(h));
+    } finally {
+      setSkrsCalisiyor(false);
+    }
+  };
 
   /** Secili satirlarin DURUMUNU topluca yazar (534). 1 Aktif · 0 Pasif. */
   const topluDurum = (yeni: number) => {
@@ -1298,6 +1329,17 @@ const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
                 </span>
               )}
             </span>
+          )}
+          {/* SKRS'DEN GUNCELLE (535, kullanici: "SUT fiyat tipi icin durum
+              degis saginda 'SKRS'den Güncelle' ekle, basinca SKRS'den
+              guncellesin"): SUT fiyati elle degismez (518/533) - tek mesru
+              yazma yolu bu. Ambardan okur (520), servise gitmez. */}
+          {!yeniMi && kaynak === 'fiyat-listesi' && Number(deger.tarifeTipi) === 3 && (
+            <button type="button" className="d" disabled={skrsCalisiyor}
+                    title="SUT fiyatlarını SKRS ambarından tazele"
+                    onClick={() => { void skrsGuncelle() }}>
+              {skrsCalisiyor ? '⏳ Güncelleniyor…' : '⭳ SKRS’den Güncelle'}
+            </button>
           )}
           {/* EKRAN-OZEL EYLEMLER (461): mockup'ta bunlar kartin arac
               cubugunda - hekim listeye donup satir secmeden isini bitirmeli. */}

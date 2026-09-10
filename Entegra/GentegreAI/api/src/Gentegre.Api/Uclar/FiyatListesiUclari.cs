@@ -87,6 +87,65 @@ public static class FiyatListesiUclari
         //   ekranında fiyatları göreyim"): 25 satirlik arama sonucunun
         //   fiyatlari TEK istekte cozulur - satir basina ayri cagri arama
         //   penceresini kullanilamaz hale getirirdi.
+        // ------------------------------------------- SKRS'den SUT tazeleme ----
+        // POST /api/fiyat-listesi/{id}/sut-guncelle
+        //
+        // SUT fiyati elle degismez (518/533 kilidi) - tek mesru yazma yolu
+        //   budur. Fonksiyon SERVISE GITMEZ, `skrs_sut` ambarini okur (520):
+        //   servis cagrisi yavas ve kesilebilir, ambar doluyken liste
+        //   saniyeler icinde tazelenir.
+        yol.MapPost("/api/fiyat-listesi/{id:int}/sut-guncelle", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("fiyat_listesi", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            // Liste SUT tarifesinde mi: baska tarifenin fiyatini SKRS ile
+            //   ezmek, elle girilmis Ozel fiyatlari sessizce silerdi.
+            await using var kontrol = baglanti.Komut(
+                "select ad, tarife_tipi, coalesce(sube_id, 0) "
+                + "  from public.fiyat_listesi where id = @p0", null, id);
+            string ad;
+            int tip, subeId;
+            await using (var o = await kontrol.ExecuteReaderAsync(iptal))
+            {
+                if (!await o.ReadAsync(iptal)) return Results.NotFound();
+                ad = o.GetString(0);
+                tip = o.GetInt16(1);
+                subeId = o.GetInt32(2);
+            }
+            if (tip != 3)
+                throw GentegreHatasi.IsKurali(
+                    "SKRS güncellemesi yalnız SUT tarifesindeki listede yapılır.");
+            if (subeId != 0 && baglam.SubeId is { } aktif && subeId != aktif)
+                throw GentegreHatasi.Yasak("Bu liste başka bir şubeye ait.");
+
+            await using var komut = baglanti.Komut(
+                "select guncellenen, eslesmeyen, ambar from public.fn_fiyat_sut_yukle(@p0)",
+                null, id);
+            int guncellenen = 0, eslesmeyen = 0, ambar = 0;
+            await using (var o = await komut.ExecuteReaderAsync(iptal))
+                if (await o.ReadAsync(iptal))
+                {
+                    guncellenen = o.GetInt32(0);
+                    eslesmeyen = o.GetInt32(1);
+                    ambar = o.GetInt32(2);
+                }
+
+            return Results.Ok(new
+            {
+                liste = ad, guncellenen, eslesmeyen, ambar,
+                mesaj = guncellenen == 0
+                    ? $"Fiyatlar zaten güncel ({ambar:N0} SKRS kaydı tarandı)."
+                    : $"{guncellenen:N0} satırın fiyatı SKRS'den güncellendi."
+                      + (eslesmeyen > 0 ? $" {eslesmeyen:N0} satırın SKRS karşılığı yok." : ""),
+                izlemeNo = baglam.IzlemeNo
+            });
+        });
+
         yol.MapPost("/api/fiyat-listesi/{id:int}/fiyatlar", async (
             int id, TopluFiyatIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>

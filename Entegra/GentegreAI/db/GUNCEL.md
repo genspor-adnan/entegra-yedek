@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (284 ad, 83 tanesi birden cok dosyada)
+## Fonksiyonlar (285 ad, 83 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -98,6 +98,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_fiyat_listesi_katki` | `291_katilim_payi.sql` | — |
 | `fn_fiyat_listesi_uret` | `214_yazim_olusma_import.sql` | 202_fn_fiyat_listesi.sql, 209_taban_fiyat_izi.sql, 210_taban_liste_izi.sql, 211_taban_satir_izi.sql |
 | `fn_fiyat_listesi_yon_kontrol` | `204_cari_fiyat_listesi.sql` | — |
+| `fn_fiyat_sut_yukle` | `535_sut_fiyat_guncelle.sql` | — |
 | `fn_fiyat_yuvarla` | `202_fn_fiyat_listesi.sql` | — |
 | `fn_fiyat_zam` | `518_fiyat_listesi_tarife_tipi.sql` | — |
 | `fn_gelen_belge_kaydet` | `187_gelen_belge.sql` | — |

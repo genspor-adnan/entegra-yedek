@@ -1129,6 +1129,12 @@ export const api = {
   /** Profili yazar - verilmeyen alanlar mevcut degerini korur. */
   kurumProfilYaz: (govde: Partial<KurumProfil>) =>
     gonder<{ profil: KurumProfil }>('/api/kurum-profil', govde, 'PUT'),
+  /** SUT listesini SKRS ambarindan tazeler (535) - fiyat kilidini yalniz bu
+      yol acar. */
+  fiyatSutGuncelle: (id: number) =>
+    gonder<{ liste: string; guncellenen: number; eslesmeyen: number;
+             ambar: number; mesaj: string }>(
+      `/api/fiyat-listesi/${id}/sut-guncelle`, {}),
   /** Kategori acik/kapali (527) - hizmet/stok durumunu DB tetigi yayar. */
   kurumKategoriYaz: (id: number, aktif: number) =>
     gonder<{ id: number; aktif: number }>('/api/kurum-profil/kategori',
