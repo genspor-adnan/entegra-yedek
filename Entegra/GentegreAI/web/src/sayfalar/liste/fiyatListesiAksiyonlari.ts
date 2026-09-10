@@ -29,7 +29,6 @@ export async function fiyatListesiAksiyonu(
       if (!satir) return true;
       const ad = String(satir.ad ?? satir.id);
       if (!await onay(`"${ad}" listesi satırlarıyla kopyalanacak.
-
 `
                     + `Yeni listenin adı: "Kopya ${ad}".`)) return true;
       await guvenli(async () => {

@@ -3122,3 +3122,7 @@ input.skt-gecmis {
    kutu - `dar` bile (560px) fazla genisti, goz metni aramak zorunda
    kaliyordu. */
 .kawin.mesaj-pencere { width: min(400px, 92vw) }
+
+/* Mesaj govdesi cerceveisiz ve dar (543): pencere iki cumleye gore boy alsin. */
+.kawin.mesaj-pencere .kagov { padding: 12px 14px }
+.mesaj-govde { font-size: 12px }

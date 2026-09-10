@@ -97,13 +97,17 @@ export function MesajKatmani() {
       }
     >
       {/* Satir sonlari korunur: sunucudan gelen cok satirli aciklamalar
-          (or. "Gönderilemedi (HTTP 400): ...") okunakli kalsin. */}
-      <div className="kagrup">
-        <div style={{ padding: '10px 12px', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+          (or. "Gönderilemedi (HTTP 400): ...") okunakli kalsin.
+          CERCEVESIZ (543, kullanici: "mesaj ekranı alta doğru çok uzamış"):
+          metin bir KART bolumu degil - `.kagrup` kutusu pencerenin icine
+          ikinci bir cerceve ve ikinci bir kenar boslugu koyuyor, iki
+          cumlelik uyari 192 piksele cikiyordu. */}
+      <div className="mesaj-govde">
+        <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.45 }}>
           {istek.metin}
         </div>
         {istek.girdiMi && (
-          <div className="alan-izgara tek-sutun ayar-formu" style={{ padding: '0 12px 12px' }}>
+          <div className="alan-izgara tek-sutun ayar-formu" style={{ paddingTop: 10 }}>
             <label className="alan">
               {istek.girdiEtiket && <span className="etiket">{istek.girdiEtiket}</span>}
               <span className="ikili">
