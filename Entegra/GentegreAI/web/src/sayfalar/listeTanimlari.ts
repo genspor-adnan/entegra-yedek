@@ -1942,6 +1942,16 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   satirlari yeniden yazar; MANUEL girilen satirlar korunur.
     kaynak: 'fiyat-listesi', baslik: 'Fiyat Listeleri', yol: 'Yönetim › Fiyat Listeleri',
     kartYolu: '/fiyat-listesi', aksiyonEkrani: 'fiyat-listesi-liste', cipler: DURUM_CIPLERI,
+    // KOLON SIRASI (kullanici): Liste Adı · Tarife · Başlama · Bitiş · Yön ·
+    //   KDV · Durum · Satır · Varsayılan.
+    //
+    //   Sirayi EKRAN soyluyor cunku kolon tercihi tarayicida saklaniyor ve
+    //   SAKLANAN LISTE her seyi belirliyor: katalogda sonradan eklenen bir
+    //   kolon (Tarife, 518'de geldi) eski tercihte olmadigi icin hic
+    //   gorunmuyordu. `kolonSirasi`nda adi gecen kolon, tercih ne derse desin
+    //   en solda ve bu sirada cizilir.
+    kolonSirasi: ['ad', 'tarifeTipiAdi', 'baslangic', 'bitis', 'yon',
+                  'kdvDahil', 'durumAdi', 'satirSayisi', 'varsayilan'],
     // Menude STOK & HIZMET grubunda, KATEGORILER'in (25) hemen ardinda
     //   (kullanici): fiyat listesi de stok/hizmetin tanim ekrani - Yonetim
     //   altinda ararken bulunmuyordu.
