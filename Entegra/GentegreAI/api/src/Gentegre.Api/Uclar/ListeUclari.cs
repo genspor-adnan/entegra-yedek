@@ -16,13 +16,19 @@ public static class ListeUclari
         // POST /api/liste/{kaynak}
         grup.MapPost("/{kaynak}", async (
             string kaynak, ListeIstegi istek, BaglamCozucu cozucu, ListeDeposu depo,
-            HttpContext ctx, CancellationToken iptal) =>
+            KurumProfilDeposu profil, HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KaynakBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Gor);
 
-            var kolonlar = GorunurKolonlar(tanim, baglam);
+            // URUN MODU BURADA DA COZULUR: kolon metasi (asagidaki /kolonlar)
+            //   cozuyordu ama VERI sorgusu cozmuyordu. Sonuc: meta kolonu vaat
+            //   ediyor, satirlarda o alan HIC gelmiyordu - HBYS kolonlari
+            //   (fiyat listesinde "Tarife") gridde bos bir sutun olarak
+            //   duruyordu. Iki ucun ayni kolon kumesini gormesi sart.
+            var kolonlar = GorunurKolonlar(tanim, baglam,
+                    await profil.UrunModuAsync(baglam.SubeId ?? 0, iptal));
             if (kolonlar.Count == 0) throw GentegreHatasi.Yasak("Bu listede gorebileceginiz kolon yok.");
 
             var yanit = await depo.SorgulaAsync(tanim, istek ?? new ListeIstegi(), kolonlar,
