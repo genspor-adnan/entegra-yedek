@@ -16,7 +16,9 @@ import { GridTablo } from './grid/GridTablo';
 import {
   aramaKosulu, filtreSatiriKosulu, tarihKosulu, filtreBirlestir,
 } from './gridSorgu';
-import { GridMenu, gridMenuOgeleri, type SatirBoyu } from './grid/GridMenu';
+import { GridMenu, gridMenuOgeleri } from './grid/GridMenu';
+import { useGridTercihleri } from './grid/useGridTercihleri';
+import { useTarihAraligi } from './grid/useTarihAraligi';
 import { useKolonTercihi } from './grid/kolonTercihi';
 
 interface Props {
@@ -226,21 +228,10 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   const [kodIcDeger, setKodIcDeger] = useState('');
   const kodSuzgecDeger = kodDisDeger ?? kodIcDeger;
   const setKodSuzgecDeger = (v: string) => (onKodSuzgec ? onKodSuzgec(v) : setKodIcDeger(v));
-  /**
-   * SATIR YUKSEKLIGI: sik / normal / genis. Uzun listelerde daha cok satir
-   * gormek isteyen ile okunakli aralik isteyen kullanici ayni ekrani paylasiyor;
-   * secim tarayicida saklanir (kaynak farketmeksizin tek tercih).
-   */
-  const [satirBoyu, setSatirBoyu] = useState<SatirBoyu>(() => {
-    try {
-      const v = localStorage.getItem('grid.satirBoyu');
-      return v === 'sik' || v === 'genis' ? v : 'normal';
-    } catch { return 'normal' }
-  });
-  const satirBoyuSec = (v: SatirBoyu) => {
-    setSatirBoyu(v);
-    try { localStorage.setItem('grid.satirBoyu', v) } catch { /* gizli sekme */ }
-  };
+  // Tarayicida saklanan tercihler (satir yuksekligi + yan panel) kendi
+  //   kancasinda: grid/useGridTercihleri.
+  const { satirBoyu, satirBoyuSec, yanKapali, setYanKapali } =
+    useGridTercihleri(kaynak, !!solPanel);
   const [sayfa, setSayfa] = useState(1);
   // GRUPLANAN KOLON AYNI ZAMANDA ILK SIRALAMA (492): siralanmazsa ayni grubun
   //   satirlari listeye dagilir ve baslik defalarca cizilir - bolume gore
@@ -265,26 +256,10 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       'yilbasindanBugune': 1 Ocak - bugun. Ust sinir SUNUCUDA gun sonuna kadar
       kapsanir (SorguUretici 'arasinda' + 1 gun), yani bugun 23:59'daki hareket
       de listeye girer. */
-  // YEREL gun (toISOString UTC'ye kayar, gece yarisi tuzagi).
-  const gunMetni = (t: Date) =>
-    `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
-  const [tarihBas, setTarihBas] = useState(() => {
-    const t = new Date();
-    if (tarihVarsayilan === 'yilbasindanBugune') return `${t.getFullYear()}-01-01`;
-    // 'buAy' (kullanici, hakedis satirlari): bulunulan ayin 1'i.
-    if (tarihVarsayilan === 'buAy') return gunMetni(new Date(t.getFullYear(), t.getMonth(), 1));
-    return '';
-  });
-  const [tarihBit, setTarihBit] = useState(() => {
-    const t = new Date();
-    if (tarihVarsayilan === 'yilbasindanBugune') return gunMetni(t);
-    // Ayin SONU: gelecek ayin 0. gunu = bu ayin son gunu (28/29/30/31 dert degil).
-    if (tarihVarsayilan === 'buAy') return gunMetni(new Date(t.getFullYear(), t.getMonth() + 1, 0));
-    return '';
-  });
-  // Acilistaki varsayilan da bildirilir - suzgec ilk yuklemede dogru araligi
-  //   gorsun (efekt ilk render'da da calisir).
-  useEffect(() => { onTarihAraligi?.(tarihBas, tarihBit) }, [tarihBas, tarihBit, onTarihAraligi]);
+  // Tarih araligi (hazir secenek + disari bildirim) kendi kancasinda.
+  const { bas: tarihBas, setBas: setTarihBas,
+          bit: tarihBit, setBit: setTarihBit } =
+    useTarihAraligi(tarihVarsayilan, onTarihAraligi);
   // "Tum Liste / Son Aranan / Sik Aranan" (eski KULLANICI_ARAMA) - sunucuya `gorunum`
   //   olarak gider, kart acilis/ekleme sikligina gore filtreler+siralar.
   const [aramaGorunumu, setAramaGorunumu] = useState<'tum' | 'son' | 'sik'>('tum');
@@ -313,25 +288,6 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   // Ilk sutun: onay kutusu (coklu secim, su an icin sadece yuklu sayfa) + "3 nokta" grid menusu.
   const [secili, setSecili] = useState<Set<string>>(new Set());
   useEffect(() => { setSecili(new Set()) }, [kaynak]);
-
-  // YAN PANEL ACIK/KAPALI, ekran basina hatirlanir: dar ekranda calisan
-  //   kullanici paneli kapatip listeye tam genislik verir, her acilista
-  //   yeniden kapatmak zorunda kalmasin.
-  const yanAnahtar = `gentegre.yanpanel.${kaynak}`;
-  const [yanKapali, setYanKapali] = useState(() => {
-    try {
-      const kayitli = localStorage.getItem(yanAnahtar);
-      if (kayitli !== null) return kayitli === '1';
-      // UC KOLONLU EKRANDA (sol agac + liste + yan panel) DAR EKRAN:
-      //   ilk acilista yan panel KAPALI baslar - 1440'lik ekranda uc kolon
-      //   listeyi 600px'e dusurup kolonlari kirpiyordu. Kullanici acabilir,
-      //   secimi hatirlanir.
-      return !!solPanel && window.innerWidth < 1600;
-    } catch { return false }
-  });
-  useEffect(() => {
-    try { localStorage.setItem(yanAnahtar, yanKapali ? '1' : '0') } catch { /* yok say */ }
-  }, [yanAnahtar, yanKapali]);
 
   const [filtreAcik, setFiltreAcik] = useState(false);
   const [filtreDeger, setFiltreDeger] = useState<Record<string, string>>({});
