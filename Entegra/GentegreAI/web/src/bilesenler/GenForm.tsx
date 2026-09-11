@@ -12,6 +12,10 @@ import { KademeGridi } from './prim/KademeGridi';
 import { Modal } from './Modal';
 import { KodListesiModali } from './KodListesiModali';
 import { yerelAnMetni, bugunIso, hamSayi, kidemMetni } from './bicim';
+import { tarifeHizli, ttbFiyatTuret, tarifeGizli, fiyatSatirKurali }
+  from './kart/tarifeKurallari';
+import { useUnvanOneki } from './kart/useUnvanOneki';
+import { KartKimlikSeridi } from './kart/KartKimlikSeridi';
 import { PaketSekmesi } from './PaketSekmesi';
 import { KartGrupSekmesi } from './kart/KartGrupSekmesi';
 import { alanCizici, type Deger } from './kartAlanCizim';
@@ -209,54 +213,6 @@ interface Props {
  * Tip 0 (genel) hicbir sey gizlemez - eski listeler oldugu gibi calisir.
  */
 /**
- * SATIR ICI GIRIS YAPILACAK ALANLAR tarife tipine gore (533).
- *   Özel  : fiyat elle, katki elle
- *   TTB   : KATSAYI ve CARPAN elle - fiyat carpimdan doğar, yazilamaz
- *   SUT   : yalniz katki - fiyat SKRS'den kilitli
- * Fiyat kutusunu TTB/SUT'ta acik birakmak, kullaniciya tutmayacagi bir soz
- * vermekti: girilen sayi kaydedilirken tetik tarafindan yok sayiliyor.
- */
-function tarifeHizli(tip: number): Set<string> {
-  if (tip === 2) return new Set(['tabanFiyat', 'carpan', 'katkiTutar']);
-  if (tip === 3) return new Set(['katkiTutar']);
-  return new Set(['fiyat']);   // Özel: yalniz fiyat
-}
-
-/**
- * TTB/HUV SATIRINDA FIYAT ANINDA DOGSUN (533, kullanici: "katsayi carpan
- * degisince fiyat aninda degissin"). Kural DB tetiginde de var (kaydeden kim
- * olursa olsun ayni sonuc); burasi EKRANIN aynasi - kullanici katsayiyi
- * yazarken fiyati gormek zorunda, kaydedip beklememeli.
- * Yuvarlama DB'de listenin kuralina gore yapilir; ekranda iki hane yeter -
- * kayittan sonra gelen deger son sozdur.
- */
-function ttbFiyatTuret(durum: DetayDurumu): DetayDurumu {
-  let degisti = false;
-  const guncel = durum.guncel.map(s => {
-    const katsayi = Number(s.tabanFiyat ?? 0);
-    const carpan = Number(s.carpan ?? 0);
-    if (!(katsayi > 0 && carpan > 0)) return s;
-    const yeni = Math.round(katsayi * carpan * 100) / 100;
-    if (Number(s.fiyat ?? 0) === yeni) return s;
-    degisti = true;
-    return { ...s, fiyat: yeni };
-  });
-  return degisti ? { ...durum, guncel } : durum;
-}
-
-function tarifeGizli(tip: number): string[] {
-  // Ek katki alanlari 532'de fiyat listesinden kalkti - listede yok.
-  if (tip === 2) return [];                       // katsayi · carpan · fiyat · katki
-  if (tip === 3) return ['tabanFiyat', 'carpan']; // fiyat SKRS'den, katsayi yok
-  // OZEL (1) VE TARIFESI BILINMEYEN (542): yalniz Fiyat. ERP kurulumunda
-  //   tarife alani karta HIC gelmiyor (`UrunModu`) - deger okunamayinca eski
-  //   kod `0` sayip TUM sutunlari aciyordu: kullanici Özel listede katsayi,
-  //   carpan ve katki sutunlarini goruyordu (kullanici: "sadece fiyat olması
-  //   gerekir"). ERP'de DB de 1 yaziyor, ekran da 1 varsayar.
-  return ['tabanFiyat', 'carpan', 'katkiTutar'];
-}
-
-/**
  * EK SEKMEYE VERILEN KART BAGLAMI: sekmeyi EKRAN tanimliyor ama kartin
  * degerleri GenForm'un icinde yasiyor. Ozet sekmeleri (mikro katalog
  * kartlarinin "Tanım"i) ikinci bir istek atmadan buradan beslenir.
@@ -285,29 +241,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
    * kaydederken ad/soyadin onune eklenir. Boylece hekim her yerde (arama,
    * liste, rapor ciktisi) unvaniyla gorunur.
    */
-  const [unvanOnek, setUnvanOnek] = useState('');
-  const [unvanSecenek, setUnvanSecenek] = useState<string[]>([]);
-  /**
-   * Karttan okunan HAM unvan ("Op.Dr. Kerem ATALAY"). Onek ayristirmasi ayri
-   * bir etkide yapilir: kod listesi ASENKRON geliyor, kart okunurken
-   * secenekler henuz bos oluyor ve combo bos kaliyordu.
-   */
-  const [unvanHam, setUnvanHam] = useState('');
-  useEffect(() => {
-    if (kaynak !== 'dis-hekim' || !unvanHam || unvanSecenek.length === 0) return;
-    setUnvanOnek(unvanSecenek.find(o => unvanHam.startsWith(o + ' ')) ?? '');
-  }, [kaynak, unvanHam, unvanSecenek]);
-  useEffect(() => {
-    if (kaynak !== 'dis-hekim') return;
-    let iptal = false;
-    void (async () => {
-      try {
-        const y = await api.kodListe('hekim.unvan');
-        if (!iptal) setUnvanSecenek(y.degerler.filter(d => d.aktif === 1).map(d => d.ad));
-      } catch { /* liste yoksa combo bos kalir - kayit engellenmez */ }
-    })();
-    return () => { iptal = true };
-  }, [kaynak]);
+  const unvanOneki = useUnvanOneki(kaynak);
 
   const [meta, setMeta] = useState<KartMetaYaniti | null>(null);
   /**
@@ -590,7 +524,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
           const d = k.kart[a.ad];
           gelen[a.ad] = a.tip === 'mantik' ? Number(d) === 1 : (d === null || d === undefined ? '' : String(d));
         });
-        if (kaynak === 'dis-hekim') setUnvanHam(String(k.kart.unvan ?? '').trim());
+        if (kaynak === 'dis-hekim') unvanOneki.setHam(String(k.kart.unvan ?? '').trim());
         // SECILI kodun adi listede yoksa EKLE: kod tablolari yalniz AKTIF
         //   satirlari gonderir; kayitta pasiflesmis bir deger (or. pasif
         //   personel temsilci olarak duruyorsa) comboda bos gorunur ve kayit
@@ -771,11 +705,8 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
     [gruplar, seritAlanlari],
   );
 
-  /** Dokuman seridinde TEK HUCREDE toplanan gecerlilik alanlari (mockup). */
-const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
-
+  
 /** Mikrobiyoloji katalog kartlari - serit duzeni mockup'la ayni (dort sutun). */
-const LAB_MIKRO_KARTLAR = new Set(['lab-besiyeri', 'lab-organizma', 'lab-antibiyotik']);
 
 /** Mockup'taki gibi sekmeli kart: Kimlik disindaki her alan grubu + her detay tablosu ayri sekme. */
   const sekmeler = useMemo<SekmeTanimi[]>(
@@ -911,8 +842,8 @@ const LAB_MIKRO_KARTLAR = new Set(['lab-besiyeri', 'lab-organizma', 'lab-antibiy
         const ad = String(deger.ad ?? '').trim();
         const soyad = String(deger.soyad ?? '').trim();
         // Hekim unvani (306) adin ONUNE gelir: "Prof.Dr. Halil GÜNEŞ".
-        const unvan = [unvanOnek, ad, soyad].filter(Boolean).join(' ');
-        if (unvan) govde.kart.unvan = unvan;
+        const unvanMetni = [unvanOneki.onek, ad, soyad].filter(Boolean).join(' ');
+        if (unvanMetni) govde.kart.unvan = unvanMetni;
       }
       // ADAY HASTA (266): DOSYA NO = CEP NUMARASI (kullanici). Kullanicidan
       //   ayrica dosya no istemek yerine turetiliyor; elle girilmis kod varsa
@@ -963,60 +894,6 @@ const LAB_MIKRO_KARTLAR = new Set(['lab-besiyeri', 'lab-organizma', 'lab-antibiy
           : `${h.hata.kod}: ${h.message}`);
       }
     }
-  }
-
-  /**
-   * FIYAT LISTESI SATIR MODALI EKRAN KURALI (kullanici):
-   *  - Carpan degisince fiyat = taban fiyat x carpan (yuvarlama satirdan,
-   *    bossa basligin kuralindan) ve Yazim MANUEL olur - uretim artik ezmez.
-   *  - Yazim HESAP'a cevrilince fiyat basligin kuralindan yeniden hesaplanir,
-   *    carpan basligin carpanina doner.
-   * Ayni kural DB tetiginde son otorite olarak da durur; buradaki kopya
-   * kullanicinin sonucu KAYDETMEDEN gormesi ve fiyat/yazim'in istekle
-   * birlikte gidip ISLEM LOGUNA yazilmasi icindir.
-   */
-  function fiyatSatirKurali(alan: string, v: unknown, taslak: Record<string, unknown>) {
-    const yuvarla = (tutar: number, yonHam: unknown, adimHam: unknown) => {
-      const yon = Number(yonHam ?? 0);
-      const adim = hamSayi(adimHam) || 1;
-      if (!yon || adim <= 0) return tutar;
-      if (yon === 1) return Math.ceil(tutar / adim) * adim;
-      if (yon === 2) return Math.floor(tutar / adim) * adim;
-      if (yon === 3) return Math.round(tutar / adim) * adim;
-      return tutar;
-    };
-    // Fiyat 4, carpan 6 hane (kolon numeric(18,6) - 7,0092 gibi degerler).
-    const metin = (s: number, hane = 4) => {
-      const k = 10 ** hane;
-      return String(Math.round(s * k) / k);
-    };
-    const taban = hamSayi(taslak.tabanFiyat);
-
-    if (alan === 'carpan') {
-      const carpan = hamSayi(v);
-      if (carpan <= 0 || taban <= 0) return { yazim: '1' };
-      const bos = (d: unknown) => d === '' || d === null || d === undefined;
-      const yon  = bos(taslak.yuvarlama)      ? deger.yuvarlama      : taslak.yuvarlama;
-      const adim = bos(taslak.yuvarlamaBirim) ? deger.yuvarlamaBirim : taslak.yuvarlamaBirim;
-      return { fiyat: metin(yuvarla(taban * carpan, yon, adim)), yazim: '1' };
-    }
-    // FIYAT elle degisti: satir Manuel olur; zincirli satirda carpan fiyattan
-    //   GERIYE hesaplanir (taban degismez). Koksuz/manuel listede carpan
-    //   anlamsiz - dokunulmaz.
-    if (alan === 'fiyat') {
-      const f = hamSayi(v);
-      if (taslak.tabanListeId && taban > 0 && f > 0)
-        return { yazim: '1', carpan: metin(f / taban, 6) };
-      return { yazim: '1' };
-    }
-    if (alan === 'yazim' && String(v) === '2' && taban > 0) {
-      const carpan = hamSayi(deger.carpan) || 1;
-      return {
-        fiyat: metin(yuvarla(taban * carpan, deger.yuvarlama, deger.yuvarlamaBirim)),
-        carpan: metin(carpan, 6),
-      };
-    }
-    return null;
   }
 
   if (yukleniyor)
@@ -1141,194 +1018,17 @@ const LAB_MIKRO_KARTLAR = new Set(['lab-besiyeri', 'lab-organizma', 'lab-antibiy
             alerji/kronik/aktif ilac hekimin yazarken gormesi gereken bilgi -
             ayri sekmede durursa bakilmaz. */}
         {ustBaglam?.(deger)}
-        {kimlikAlanlari.length > 0 && (() => {
-        const kimlikSeridi = (
-        <div className="kaid">
-          {/* AVATAR (305, kullanici: "ad soyadin soluna avatar ekle"): ad ve
-              soyadin bas harfleri. Kisi kartlarinda kimin karti oldugunu tek
-              bakista gosterir - hasta seridindeki desenle ayni. */}
-          {kaynak === 'dis-hekim' && (() => {
-            const bas = [String(deger.ad ?? ''), String(deger.soyad ?? '')]
-              .map(x => x.trim()[0] ?? '').join('').toLocaleUpperCase('tr');
-            return <span className="kart-avatar">{bas || '—'}</span>;
-          })()}
-          {/* Kisi'ye ozel: Kisi Kodu dar, Unvan genis (kullanici: "kod edit yariya dussun,
-              onu unvana ekle") - idstrip'in 4 sabit alani (Kod/Unvan/Departman/Gorev). */}
-          {/* Personelde ROL kimlik seridinde, DEPARTMANIN SAGINDA (kullanici);
-              serit 5 sutunlu akar. Diger kartlarda serit eskisi gibi. */}
-          {/* YENI kayitta da gecerli: Görev ZORUNLU ama serit yalniz mevcut
-              kartta cizilince alan hic gorunmuyordu ("Görev zorunlu" hatasi
-              alinip duzeltilemiyordu). */}
-          {/* ADAY HASTA (266): kimlik seridinde Durum yerine KURUM - durum arac
-              cubugunda rozet. Kurum taraf_hasta detayinda oldugu icin serit
-              alanlarindan degil, detay durumundan besleniyor. */}
-          {kaynak === 'hasta-aday' ? (() => {
-            const ozluk = meta?.detaylar.find(d => d.ad === 'ozluk');
-            const kurumAlan = ozluk?.alanlar.find(a => a.ad === 'kurumId');
-            const satir = detaylar[ozluk?.ad ?? '']?.guncel[0] ?? {};
-            return (
-              <div className="alan-izgara"
-                   style={{ gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' }}>
-                {renderAlanListesi(kimlikAlanlari)}
-                {kurumAlan && ozluk && (
-                  <label className="alan tip-kod">
-                    <span className="etiket">{kurumAlan.baslik}</span>
-                    <select value={String(satir.kurumId ?? '')} disabled={salt}
-                            onChange={e => setDetaylar(t => {
-                              const d = t[ozluk.ad] ?? { ilk: [], guncel: [] };
-                              const yeni = { ...(d.guncel[0] ?? {}), kurumId: e.target.value };
-                              return { ...t, [ozluk.ad]: { ...d, guncel: [yeni, ...d.guncel.slice(1)] } };
-                            })}>
-                      <option value="">—</option>
-                      {kurumAlan.kodlar && Object.entries(kurumAlan.kodlar)
-                        .map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                    </select>
-                  </label>
-                )}
-              </div>
-            );
-          })() : kaynak === 'dis-hekim' ? (
-            /* DIS HEKIM (305/306) serit duzeni: avatar · Ünvan · Ad · Soyad ·
-               Kod · Temsilci · Durum. Departman/gorev YOK - dis hekim bizim
-               kadromuzda degil; Temsilci ise BIZIM personelimiz (bu hekimle
-               ilgilenen kisi). */
-            /* Ünvan ve Kod YARIM sutun (kullanici): kisa degerler - "Prof.Dr."
-               ve "DR-0042" tam sutunda bos yer birakiyordu. Ad/Soyad ve
-               Temsilci tam sutun kalir. */
-            <div className="alan-izgara"
-                 style={{ gridTemplateColumns: '0.5fr 1fr 1fr 0.5fr 1fr 0.5fr' }}>
-              <label className="alan tip-kod">
-                <span className="etiket">Ünvan</span>
-                <select value={unvanOnek} disabled={salt}
-                        onChange={e => setUnvanOnek(e.target.value)}>
-                  <option value="">—</option>
-                  {unvanSecenek.map(o => <option key={o} value={o}>{o}</option>)}
-                </select>
-              </label>
-              {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'ad'))}
-              {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'soyad'))}
-              {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'kod'))}
-              {renderAlanListesi((meta?.alanlar ?? []).filter(a => a.ad === 'temsilci'))}
-              {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'durum'))}
-            </div>
-          ) : personelGibiKart ? (
-            <div className="alan-izgara"
-                 style={{ gridTemplateColumns: 'repeat(5, minmax(0, 1fr))' }}>
-              {/* HASTADA "Dosya No" EDITI HIC YOK (kullanici): numara
-                  OTOMATIK verilir - yeni kayitta da sorulmaz. Kayitli kartta
-                  numara basliktan okunur; duzenlenecek bir alan degil,
-                  seritte yer kapliyordu. */}
-              {renderAlanListesi(kimlikAlanlari.filter(a =>
-                ['kod', 'ad', 'soyad', 'departman'].includes(a.ad)
-                && !(kaynak === 'hasta' && a.ad === 'kod')))}
-              {/* GOREV seritte YALNIZ PERSONELDE (kullanici: "hasta kartında en
-                  üstte görev kaldır"): hastanin gorevi yoktur - alan katalogda
-                  zaten GIZLI, buraya ACIKCA cizildigi icin o gizlemeyi
-                  atliyordu. Personelde serit'in 5. alani odur (rol ile yer
-                  degistirdi; Rol combosu Kimlik Bilgileri kutusunda). */}
-              {kaynak !== 'hasta' && renderAlanListesi(
-                (meta?.alanlar ?? []).filter(a => a.ad === 'gorevId'))}
-              {/* DURUM: personelde seritte YOK (baslikta rozet), HASTADA VAR ve
-                  TC No'nun SAGINDA (kullanici) - hasta durumu dort degerli
-                  (Aktif/Pasif/Aday/Vefat), rozet tek basina yetmiyor. */}
-              {/* DURUM burada DEGIL, seridin EN SAGINDA (kullanici) - once
-                  kimlik alanlari okunur, durum kartin ozeti olarak sona kalir. */}
-              {renderAlanListesi(kimlikAlanlari.filter(a =>
-                !['kod', 'ad', 'soyad', 'departman', 'durum'].includes(a.ad)))}
-              {/* DOGUM TARIHI / YAS - TC No'nun saginda, SALT OKUNUR
-                  (kullanici): uc bilgi tek hucrede "14.03.1979 ♂ E 47 y".
-                  Kaynak ozluk detayi; duzenlemesi Kimlik Bilgileri kutusunda -
-                  ayni alani iki yerde yazdirmak ikisini ayirmaya calismak
-                  demekti. */}
-              {kaynak === 'hasta' && (
-                <label className="alan tip-metin">
-                  <span className="etiket">Doğum Tarihi / Yaş</span>
-                  <input readOnly tabIndex={-1} value={dogumYasMetni}
-                         title="Doğum bilgileri Kimlik Bilgileri kutusundan girilir" />
-                </label>
-              )}
-              {/* DURUM yalniz HASTADA seritte (dort degerli: Aktif/Pasif/Aday/
-                  Vefat); personelde baslikta rozet. */}
-              {kaynak === 'hasta'
-                && renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'durum'))}
-            </div>
-          ) : kaynak === 'dokuman' ? (
-            /* DOKUMAN SERIDI (mockup dokuman_karti.html): DORT SUTUN sabit -
-               otomatik akista alanlar ekran genisligine gore 2-6 sutun
-               arasinda ziplayip mockup duzenini bozuyordu.
-               GECERLILIK TEK HUCREDE: mockupta "28.08.2026 — 01.09.2027 ·
-               gozden gecirme 12 ay" tek satir; uc ayri kutu ucte bir satir
-               kaplayip ilgisiz alanlari birbirinden ayiriyordu. */
-            <div className="alan-izgara kaid-dokuman">
-              {/* GECERLILIK HUCRESI KENDI YERINDE kalir (mockup 3. satirin
-                  BASI): alanlari filtreleyip hucreyi sona eklemek, Gecerlilik'i
-                  Aciklama'nin arkasina atiyordu. Once ondan ONCEKI alanlar,
-                  sonra hucre, sonra kalanlar cizilir. */}
-              {renderAlanListesi(kimlikAlanlari.slice(
-                0, kimlikAlanlari.findIndex(a => GECERLILIK_ALANLARI.includes(a.ad))))}
-              <label className="alan tip-metin gecerlilik-hucre">
-                <span className="etiket">Geçerlilik</span>
-                <span className="gecerlilik-kutu">
-                  {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'gecerliBas'))}
-                  <span className="ayrac">—</span>
-                  {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'gecerliBit'))}
-                </span>
-              </label>
-              {renderAlanListesi(kimlikAlanlari.slice(
-                kimlikAlanlari.findIndex(a => GECERLILIK_ALANLARI.includes(a.ad)))
-                .filter(a => !GECERLILIK_ALANLARI.includes(a.ad)))}
-            </div>
-          ) : kaynak === 'kurum' ? (() => {
-            /* KURUM SERIDI (484, kullanici: "temsilci ile kurum turunu yer
-               degistir"): Kod · Kurum Adi · KURUM TURU · Durum. Kurum turu
-               kurumun en temel bilgisidir - hangi anlasma kurallarinin
-               isleyecegini o belirler (Ozel / OSS / SGK); temsilci ise satis
-               takibi alani, Tanımlama kutusuna indi.
-               Deger `taraf_kurum.tur`da (1:1 uzanti), kartin kendi tablosunda
-               degil - o yuzden renderAlanListesi ile cizilemez; TekKayit
-               cercevesiz kipte seridin bir hucresi olur. */
-            const rol = meta?.detaylar.find(d => d.ad === 'kurumRolu');
-            return (
-              <div className="alan-izgara">
-                {renderAlanListesi(kimlikAlanlari.filter(a => a.ad !== 'durum'))}
-                {rol && (
-                  <TekKayit
-                    meta={rol}
-                    durum={detaylar[rol.ad] ?? bosDetay()}
-                    saltOkunur={salt || rol.saltOkunur}
-                    onDegis={y => setDetaylar(t => ({ ...t, [rol.ad]: y }))}
-                    cerceveSiz
-                  />
-                )}
-                {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'durum'))}
-              </div>
-            );
-          })() : (
-            <div className={`alan-izgara${kaynak === 'kisi' ? ' kaid-kisi' : ''}`
-                            + (kaynak === 'randevu' ? ' kaid-randevu' : '')
-                            + (kaynak === 'prim-plani' ? ' kaid-prim' : '')
-                            + (kaynak === 'kampanya' ? ' kaid-kampanya' : '')
-                            // FIYAT LISTESI SERIDI BES SUTUN (532, kullanici:
-                            //   "1. sira: ad, tarife, yon, kdv, durum" ·
-                            //   "2. sira: baslama, bitis, aciklama,
-                            //   varsayilan"). Otomatik akista kutular ekran
-                            //   genisligine gore ziplayip bu ayrimi bozuyordu.
-                            + (kaynak === 'fiyat-listesi' ? ' kaid-fiyat' : '')
-                            // MIKROBIYOLOJI KATALOG KARTLARI DORT SUTUN
-                            //   (Ekranlar/Lab/*_karti.html `.hdr`): mockup'ta
-                            //   serit 4x2 duzenli bir izgara. Otomatik akista
-                            //   sekiz alan 1080 px'de yedi sutuna yayilip
-                            //   sekizinciyi tek basina ikinci satira
-                            //   birakiyordu - ayni aileden gelmeyen bir kart
-                            //   gibi duruyordu.
-                            + (LAB_MIKRO_KARTLAR.has(kaynak) ? ' kaid-labmikro' : '')}>
-              {renderAlanListesi(kimlikAlanlari)}
-            </div>
-          )}
-        </div>
-        );
-        return seritSarmalayici ? seritSarmalayici(kimlikSeridi, deger) : kimlikSeridi;
-        })()}
+        {kimlikAlanlari.length > 0 && (
+          <KartKimlikSeridi
+            kaynak={kaynak} deger={deger} meta={meta} salt={salt}
+            detaylar={detaylar} setDetaylar={setDetaylar}
+            kimlikAlanlari={kimlikAlanlari}
+            renderAlanListesi={renderAlanListesi}
+            seritSarmalayici={seritSarmalayici}
+            personelGibiKart={personelGibiKart} dogumYasMetni={dogumYasMetni}
+            unvanOneki={unvanOneki}
+          />
+        )}
         {/* RADYOLOJI ISTEMI (310): akis seridi + ozet KIMLIK SERIDININ ALTINDA,
             sekmelerin USTUNDE - hangi sekmede olursan ol "istem nerede"
             gorunmeli (mockup radyoloji_istem_karti.html). Yeni kayitta yok. */}
@@ -1912,7 +1612,8 @@ const LAB_MIKRO_KARTLAR = new Set(['lab-besiyeri', 'lab-organizma', 'lab-antibiy
             ? { alan: 'rol', op: 'esit' as const, deger: Number(deger.rol) || 1 }
             : undefined}
           taslakKural={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
-            ? fiyatSatirKurali : undefined}
+            ? ((alan, v, taslak) => fiyatSatirKurali(alan, v, taslak, deger))
+            : undefined}
           // Tumu / Stok / Hizmet cipleri (kullanici) - karma listede tek tur gorunur.
           cipler={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
             // `kod`: SAYFALI DETAYDA sunucuya giden cip anahtari (526) -

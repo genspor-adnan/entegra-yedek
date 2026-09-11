@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import type { SevkiyatBilgisi, TeklifBilgisi }
+  from '../../sayfalar/belgeKarti/useSevkiyatBilgisi';
 import { GenLookup } from '../GenLookup';
 import { api } from '../../api/istemci';
 import { KodListesiModali } from '../KodListesiModali';
@@ -45,12 +47,11 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     aktifSekme, setAktifSekme, alanHatalari, bilgi, sonuc, kilitli, baslikKilitli, belgeAdi,
     belgeNo, setBelgeNo, tarih, setTarih, tarihEnGec, tarihEnErken, vadeGun, setVadeGun,
     basvuruMu,
-    cari, satici, depo, setDepo, girisDepo, setGirisDepo, teslimEden, teslimAlan, fisTipi,
+    cari, satici, depo, setDepo, girisDepo, setGirisDepo, sevkiyat, fisTipi,
     setFisTipi, satirlar, donusumler, setCariArama, setSaticiArama, setPersonelArama,
     kapanmaAlani, bagliSiparisAlani, alisMi, irsaliyeMi, faturaMi, siparisMi, konsinyeMi,
     tahakkukMu, depoBelgesi, stokFisiMi, fisCikisMi, transferMi, talepMi, disNumarali,
-    eBelgeYok, teklifDurum, setTeklifDurum, revizeNo, setRevizeNo,
-    teklifKonusu, setTeklifKonusu, teklifTeslim, setTeklifTeslim, provizyonVar,
+    eBelgeYok, teklif, provizyonVar,
     numaraElle,
   } = p;
 
@@ -172,10 +173,10 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
                  readOnly />
           {/* Revize, NUMARASI OLAN teklife yazilir (kullanici): numara yokken
               revize kavrami yok - kaydedilince edit acilir. */}
-          <input value={revizeNo} maxLength={20} placeholder="Revize"
+          <input value={teklif.revizeNo} maxLength={20} placeholder="Revize"
                  style={{ flex: '0 0 76px' }}
                  disabled={kilitli || !String(sonuc?.belge.belgeNo ?? '')}
-                 onChange={e => setRevizeNo(e.target.value)} />
+                 onChange={e => teklif.setRevizeNo(e.target.value)} />
         </span>
       ) : (
         <input className="one-cikan"
@@ -192,8 +193,8 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     {teklifMi && (
       <label className="alan">
         <span className="etiket">Durumu</span>
-        <select value={teklifDurum} disabled={kilitli}
-                onChange={e => setTeklifDurum(e.target.value)}>
+        <select value={teklif.durum} disabled={kilitli}
+                onChange={e => teklif.setDurum(e.target.value)}>
           {Object.entries(TEKLIF_DURUMLARI).map(([k, v]) =>
             <option key={k} value={k}>{v}</option>)}
         </select>
@@ -235,7 +236,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       <TarafAlani
         etiket="Teslim Eden"
         zorunlu
-        deger={teslimEden?.ad}
+        deger={sevkiyat.teslimEden?.ad}
         kilitli={baslikKilitli}
         ipucu="Personel ara"
         onAc={() => setPersonelArama('eden')}
@@ -286,10 +287,10 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
          duzenlenir (AyarAlani listeKod deseni). Gecerlilik Suresi = vade. */
       <>
         <KodListeAlani etiket="Teklif Konusu" listeKod="belge.teklif_konusu"
-                       deger={teklifKonusu} onDeger={setTeklifKonusu}
+                       deger={teklif.konu} onDeger={teklif.setKonu}
                        kilitli={kilitli} yazilabilir />
         <KodListeAlani etiket="Teslim Şekli" listeKod="belge.teslim_sekli"
-                       deger={teklifTeslim} onDeger={setTeklifTeslim}
+                       deger={teklif.teslim} onDeger={teklif.setTeslim}
                        kilitli={kilitli} />
       </>
     ) : !tahakkukMu ? (
@@ -310,7 +311,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
       <TarafAlani
         etiket={talepMi ? 'Talep Eden' : 'Teslim Alan'}
         zorunlu
-        deger={teslimAlan?.ad}
+        deger={sevkiyat.teslimAlan?.ad}
         kilitli={baslikKilitli}
         ipucu="Personel ara"
         onAc={() => setPersonelArama('alan')}
@@ -371,7 +372,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
               //   yanlisti, irsaliyeyi de gizliyordu.
               && !((bilgi.depoBelgesi || bilgi.stokFisi) && x.anahtar === 'fatura')
               // Teklifte Siparis sekmesi yalniz KABUL (3) durumunda (kullanici).
-              && !(teklifMi && x.anahtar === 'fatura' && teklifDurum !== '3')
+              && !(teklifMi && x.anahtar === 'fatura' && teklif.durum !== '3')
               // PROVIZYON yalniz ÖSS/SGK odeyen kurumda (kullanici): ozel
               //   kurumda ya da hasta kendi oderken alinacak provizyon yok,
               //   sekme bos duruyordu.
@@ -424,17 +425,9 @@ export interface BelgeBaslikProps {
    * kalmaz.
    */
   numaraElle?: boolean;
-  /** Teklif durumu (218) - yalniz teklifte cizilir (Hazirlaniyor/Sunuldu/...). */
-  teklifDurum: string;
-  setTeklifDurum(v: string): void;
-  /** Teklif revize no (220) - Teklif No hucresinin sag yarisi, serbest metin. */
-  revizeNo: string;
-  setRevizeNo(v: string): void;
-  /** Teklif konusu / teslim sekli (222) - kod listesi destekli combolar. */
-  teklifKonusu: string;
-  setTeklifKonusu(v: string): void;
-  teklifTeslim: string;
-  setTeklifTeslim(v: string): void;
+  /** Teklif basligi DEMET halinde (218/220/222): durum, revize no, konu,
+      teslim sekli - sekiz ayri prop yerine tek nesne. */
+  teklif: TeklifBilgisi;
   vadeGun: string;
   setVadeGun(v: string): void;
   /** Basvuru (249): vade yerine odeyen kurum combosu cizilir. */
@@ -450,8 +443,8 @@ export interface BelgeBaslikProps {
   setDepo(v: Secim | null): void;
   girisDepo: Secim | null;
   setGirisDepo(v: Secim | null): void;
-  teslimEden: Secim | null;
-  teslimAlan: Secim | null;
+  /** Sevkiyat alanlari demeti - baslikta yalniz teslim eden/alan okunur. */
+  sevkiyat: SevkiyatBilgisi;
   fisTipi: number;
   setFisTipi(v: number): void;
   /** Fatura tipi (130) - yalniz faturada gorunur. */

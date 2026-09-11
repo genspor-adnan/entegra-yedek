@@ -1,61 +1,30 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { c, cm } from '../dil/ceviri';
-import { guvenli, mesaj, metinSor, onay } from '../bilesenler/mesaj';
+import { guvenli, mesaj, onay } from '../bilesenler/mesaj';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { RandevuTakvimi } from '../bilesenler/RandevuTakvimi';
 import { GenForm } from '../bilesenler/GenForm';
-import { LabMikroOzet, labMikroOzetiVar } from '../bilesenler/LabMikroOzet';
 import { kartOzellestirme } from './liste/kartOzellestirme';
-import { LabCalismaTakvimi, type CalismaDuzeni }
-  from '../bilesenler/lab/LabCalismaTakvimi';
-import { MuayeneBaglamSeridi } from '../bilesenler/MuayeneBaglamSeridi';
 import { KaynakArama } from '../bilesenler/KaynakArama';
-import {
-  useMuayeneSekmeVerisi, MuayeneReceteSekmesi, MuayeneKonsultasyonSekmesi,
-  MuayeneUcretSekmesi, MuayeneGecmisSekmesi,
-} from '../bilesenler/MuayeneSekmeleri';
-import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
-import { MuayeneDurumSeridi } from '../bilesenler/MuayeneDurumSeridi';
+import { useMuayeneSekmeVerisi } from '../bilesenler/MuayeneSekmeleri';
 import { MuayeneOzetSeridi } from '../bilesenler/MuayeneOzetSeridi';
-import { MuayeneSonucOzeti } from '../bilesenler/MuayeneSonucOzeti';
-import { MuayeneIstemSonuc } from '../bilesenler/MuayeneIstemSonuc';
 import {
-  type EBelgeMesaji, type Kosul, type ListeSatiri, type RandevuBolumDugumu, hataMetni,
+  type EBelgeMesaji, type Kosul, type ListeSatiri, hataMetni,
 } from '../api/sozlesme';
-import { kampanyaKalemFiyati } from './belgeKalem';
 import { LabTetkikOzeti } from '../bilesenler/lab/LabTetkikOzeti';
 import { LabKatalogAgaci, BOS_SECIM, type AgacSecim }
   from '../bilesenler/lab/LabKatalogAgaci';
 import { api } from '../api/istemci';
 import { BelgeDonusumModali } from '../bilesenler/BelgeDonusumModali';
 import { IceriAlModali } from '../bilesenler/IceriAlModali';
-import { IstemModali } from '../bilesenler/radyoloji/IstemModali';
-import { TeslimModali } from '../bilesenler/radyoloji/TeslimModali';
-import { RandevuModali } from '../bilesenler/radyoloji/RandevuModali';
 import { RandevuBekleyenPanel, type BekleyenIstem }
   from '../bilesenler/radyoloji/RandevuBekleyenPanel';
-import { KritikBildirimModali } from '../bilesenler/radyoloji/KritikBildirimModali';
-import { KonsultasyonCevapModali }
-  from '../bilesenler/radyoloji/KonsultasyonCevapModali';
-import { CihazKapatmaModali } from '../bilesenler/radyoloji/CihazKapatmaModali';
-import { SarfOnayModali } from '../bilesenler/radyoloji/SarfOnayModali';
-import { TarafArama } from '../bilesenler/TarafArama';
 import { KategoriSuzgeci } from '../bilesenler/KategoriSuzgeci';
-import { BolumSuzgeci } from '../bilesenler/BolumSuzgeci';
-import { TARIH_ON_AYARLAR, tarihAraligi, type TarihOnAyar }
-  from './liste/tarihAralik';
-import { useOturum } from '../kimlik/OturumBaglami';
+import { TARIH_ON_AYARLAR } from './liste/tarihAralik';
 import { KategoriAgacPaneli } from '../bilesenler/KategoriAgacPaneli';
-import { UtsAlmaModali } from '../bilesenler/uts/UtsAlmaModali';
-import { UtsKullanimModali } from '../bilesenler/uts/UtsBildirimModallari';
-import { UtsGenelBildirimModali, type UtsBildirimTuru }
-  from '../bilesenler/uts/UtsGenelBildirimModali';
-import { UtsBelgeSonucModali } from '../bilesenler/uts/UtsBelgeSonucModali';
 import { KalemRolModali } from '../bilesenler/prim/KalemRolModali';
 import { DonemKapatModali } from '../bilesenler/prim/DonemKapatModali';
-import { UtsHazirlaSonucModali } from '../bilesenler/uts/UtsHazirlaSonucModali';
-import type { UtsBelgeBildirimYaniti, UtsHazirlaYaniti } from '../api/istemci';
 import { ebelgeCiktisi } from './ebelgeIslem';
 import { gelenBelgeAksiyonu } from './gelenBelgeIslem';
 import { utsAksiyonu } from './liste/utsAksiyonlari';
@@ -83,6 +52,23 @@ import { aiBaglamAyarla } from '../bilesenler/aiBaglam';
 import { DokumanKlasorPaneli, type KlasorSecimi } from '../bilesenler/DokumanKlasorPaneli';
 import { fiyatListesiAksiyonu } from './liste/fiyatListesiAksiyonlari';
 import { ebelgeAksiyonu } from './liste/ebelgeAksiyonlari';
+import { ListeKarti } from './liste/ListeKarti';
+import { useRandevuEkrani } from './liste/useRandevuEkrani';
+import { useRadyolojiModallari } from './liste/useRadyolojiModallari';
+import { RadyolojiModallari } from './liste/RadyolojiModallari';
+import { useUtsModallari } from './liste/useUtsModallari';
+import { UtsModallari } from './liste/UtsModallari';
+import { useBasvuruSuzgeci } from './liste/useBasvuruSuzgeci';
+import { usePrimSuzgeci } from './liste/usePrimSuzgeci';
+import { usePersonelSuzgeci } from './liste/usePersonelSuzgeci';
+import { BasvuruSeridi } from './liste/BasvuruSeridi';
+import { PrimSeridi } from './liste/PrimSeridi';
+import { PersonelSeridi } from './liste/PersonelSeridi';
+import { belgeAksiyonu, ebelgeTopluAksiyonu } from './liste/belgeAksiyonlari';
+import { icmalAksiyonu } from './liste/icmalAksiyonlari';
+import { radyolojiAksiyonu } from './liste/radyolojiAksiyonlari';
+import { hakedisAksiyonu } from './liste/hakedisAksiyonlari';
+import { randevuAksiyonu } from './liste/randevuAksiyonlari';
 import { Modal } from '../bilesenler/Modal';
 import { BelgeKarti } from './BelgeKarti';
 import { KasaIslemKarti } from './KasaIslemKarti';
@@ -92,13 +78,6 @@ import { DONUSUM_MENUSU, KASA_ARAC_MENUSU, LISTELER, type ListeTanimi }
 // Tanimlar ayri dosyada (listeTanimlari); disaridan alisilmis yol bozulmasin
 //   diye buradan da disa aktarilir (App.tsx / Kabuk.tsx LISTELER'i buradan alir).
 export { LISTELER };
-
-/** Muayene durum kodlari (kart metasindaki SabitKodlar ile ayni) - baslik
-    rozeti icin. Kod->ad cevrimi tek satirlik, ek istek gerektirmesin. */
-const MUAYENE_DURUM: Record<string, string> = {
-  '1': 'Açık', '2': 'Sonuç Bekliyor', '3': 'Tamamlandı',
-  '4': 'Ek Not Eklendi', '0': 'İptal',
-};
 
 /** Kirilma yolu ("Satis › Satış Faturaları") parca parca cevrilir: ayrac
     korunur, her parca menu sozlugunden gecer. */
@@ -113,16 +92,6 @@ export type { ListeTanimi };
  * sunucudan geldigi icin ekran basina kod yazmaya gerek yok — yeni bir liste
  * eklemek katalogda kaynak tanimlamak + burada bir satir demek.
  */
-/**
- * Yerel saat damgasi (yyyy-MM-ddTHH:mm). Date.toISOString() UTC verir;
- * TR'de kaydedilen saat 3 saat geriye duser.
- */
-const yerelZamanDamgasi = () => {
-  const d = new Date();
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-    .toISOString().slice(0, 16);
-};
-
 export function Liste({ tanim }: { tanim: ListeTanimi }) {
   // KARTA OZEL YERLESIM tek yerde (sayfalar/liste/kartOzellestirme.ts): sekme
   //   sirasi, gomulu detaylar, izgara. Buradaki uclu kosullar yuz satir saf
@@ -153,41 +122,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [kategoriDal, setKategoriDal] = useState<{ id: number; agac: number[] } | null>(null);
   /** Sol kategori AGAC paneli acik mi (kullanici: "acilir kapanir olsun"). */
   const [kategoriPaneli, setKategoriPaneli] = useState(false);
-  /**
-   * RADYOLOJI ISTEM ACMA (304): listeden acilinca once HASTA secilir
-   * (istem hastaya aittir), sonra tetkik modali gelir.
-   */
-  const [istemHastaArama, setIstemHastaArama] = useState(false);
-  const [istemModali, setIstemModali] = useState<
-    { hastaId: number; hastaAdi: string; disIstem: boolean;
-      /** Randevudan kabul (317): istem randevuya bağlanır, tetkik ön seçili gelir. */
-      randevuId?: number; hizmetId?: number } | null>(null);
-  /** Sonuc teslimi (304) - film/CD/rapor kime verildi. */
-  /** Radyoloji: secili isteme randevu verme (316). */
-  const [randevuModali, setRandevuModali] = useState<
-    { istemId: number; accessionNo: string; tetkikAdi: string;
-      modalite: number; sureDk: number } | null>(null);
-  /**
-   * Takvimin yan panelinde (316) seçili bekleyen istem: takvimde boş saate
-   * tıklanınca yeni randevu formu yerine BU isteme randevu verilir.
-   */
-  const [bekleyenSecili, setBekleyenSecili] = useState<BekleyenIstem | null>(null);
-  const [teslimModali, setTeslimModali] = useState<
-    { istemId: number; accessionNo: string; cdIstendi?: boolean } | null>(null);
-  /** Kritik bulgu bildirimi (318) - takip listesinden acilir. */
-  const [kritikModali, setKritikModali] = useState<
-    { istemId: number; accessionNo: string; hasta: string; tetkik: string;
-      bulgu: string; bildirilenAd: string } | null>(null);
-  /** Cekim sonrasi sarf onayi (320) - protokol malzemesi onerilir. */
-  const [sarfModali, setSarfModali] = useState<
-    { istemId: number; accessionNo: string; tetkikAdi: string } | null>(null);
-  /** Takvimden cihaz kapatma (318): isaretli aralik + cihaz. */
-  const [kapatmaModali, setKapatmaModali] = useState<
-    { cihazId: number; cihazAdi: string; baslangic: string; bitis: string } | null>(null);
-  /** Konsultasyon cevabi (318). */
-  const [konsultasyonModali, setKonsultasyonModali] = useState<
-    { istemId: number; konsultasyonId: number; accessionNo: string; hasta: string;
-      tetkik: string; soru: string; gorus: string } | null>(null);
+  // RADYOLOJI EKRAN MODALLARI (istem · randevu · teslim · kritik bulgu · sarf ·
+  //   cihaz kapatma · konsultasyon) tek kancada; cizimi RadyolojiModallari yapar.
+  const radyolojiModal = useRadyolojiModallari();
   // Yeni kart EKLENINCE (duzenlemede degil) grid "Son Aranan"a gecsin - kullanici
   //   az once ekledigi kaydi listede otomatik en ustte gorsun.
   const [odaklaSonEklenen, setOdaklaSonEklenen] = useState(0);
@@ -199,15 +136,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     { tarafId?: number; kisi?: string } | null>(null);
   /** Excel'den iceri alma modali (207) - fiyat listesi; null iken kapali. */
   const [iceriAl, setIceriAl] = useState<{ listeId: number; ad: string } | null>(null);
-  // ÜTS alma bildirimi (223): askidaki envanter satirindan modal.
-  const [utsAlma, setUtsAlma] = useState<{ envanterId: number; urunNo: string;
-    kurumUnvan: string; askiAdet: number; seriNo: string } | null>(null);
-  const [utsKullanim, setUtsKullanim] = useState(false);
-  const [utsGenel, setUtsGenel] = useState<UtsBildirimTuru | null>(null);
-  // Verme hazirlama raporu (atlananlar gridi + CSV).
-  const [utsHazirla, setUtsHazirla] = useState<UtsHazirlaYaniti | null>(null);
-  // Belge koprusu sonucu (226): satir satir verme/alma raporu.
-  const [utsBelgeSonuc, setUtsBelgeSonuc] = useState<UtsBelgeBildirimYaniti | null>(null);
+  // ÜTS EKRAN MODALLARI (223/226) tek kancada; cizimi UtsModallari yapar.
+  const utsModal = useUtsModallari();
   // Donusum modali (F8): siparis/irsaliye satirlarindan yeni belge uretir.
   /** Mesaj gecmisi penceresi (178) - null iken kapali. */
   const [eBelgeMesajlari, setEBelgeMesajlari] =
@@ -351,173 +281,24 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     if (urlDegeri && suzgecsizCip !== null) setCipIndeks(suzgecsizCip);
   }, [urlDegeri, suzgecsizCip]);
 
-  // RANDEVU TAKVIMI (243) ayarlari: takvim saat araligi/calisma gunleri
-  //   Randevu Ayarlari ekranindan (referans) gelir.
-  const [randevuAyarlari, setRandevuAyarlari] = useState<{
-    baslangicSaat?: string; bitisSaat?: string; slotDk?: number; calismaGunleri?: number[];
-  }>({});
-  // RANDEVU (251, kullanici: "bu bölüm ve hekimler randevu listesi üst tarafta
-  //   tarih sağında listelenip filtrelensin"): tek uctan hem bolum hem hekim
-  //   listesi gelir (Randevu Ayarlari > Bölümler ile ayni kaynak).
-  const [randevuAgaci, setRandevuAgaci] = useState<RandevuBolumDugumu[]>([]);
-  const [bolumSuzgec, setBolumSuzgec] = useState<number | ''>('');
-  /**
-   * PERSONEL SERIT SUZGECLERI (kullanici: "aktif/pasif/durum saginda Bolum
-   * agac combo ve Rol combo"). Randevununkinden AYRI durum: o ekranda secim
-   * takvimi de suruyor, buradaki yalniz gridi suzer.
-   */
-  const [personelBolum, setPersonelBolum] = useState<{ id: number; agac: number[] } | null>(null);
-  const [personelRol, setPersonelRol] = useState<number | ''>('');
-  const [roller, setRoller] = useState<{ id: number; ad: string }[]>([]);
-  const { yetki } = useOturum();
-  // Rol listesi `rol` yetkisi ister; yetkisi olmayanda combo hic cizilmez -
-  //   403 alip bos combo gostermektense sormuyoruz.
-  const rolSuzgeciVar = !!tanim.rolSuzgeci && yetki('rol');
-  useEffect(() => {
-    if (!rolSuzgeciVar) { setRoller([]); return }
-    void guvenli(async () => {
-      const y = await api.liste('rol', { sayfa: 1, boyut: 500 });
-      setRoller((y.satirlar ?? [])
-        .filter(r => Number(r.aktif ?? 1) === 1)
-        .map(r => ({ id: Number(r.id), ad: String(r.ad ?? '') })));
-    });
-  }, [rolSuzgeciVar]);
-  // Liste degisince secimler sifirlanir: yeni kaynakta o alanlar yok.
-  useEffect(() => { setPersonelBolum(null); setPersonelRol('') }, [tanim.kaynak]);
+  // RANDEVU EKRANI (243/251/316): bolum-hekim suzgeci, takvim ayarlari, cihaz
+  //   sutunlari ve bekleyen isteme randevu verme kendi kancasinda.
+  const randevuEkran = useRandevuEkrani(
+    tanim.kaynak, sabitFiltre, () => setYenile(t => t + 1));
+  // PERSONEL (bolum agaci + rol) SERIT SUZGECI kendi kancasinda: durum,
+  //   rol listesi ve filtre uretimi orada.
+  const personelSuzgec = usePersonelSuzgeci(
+    tanim.bolumSuzgeci, tanim.rolSuzgeci, tanim.kaynak);
+  const rolSuzgeciVar = personelSuzgec.rolSuzgeciVar;
 
-  /**
-   * HAKEDIS SATIRLARI SERIT SUZGECLERI (kullanici: "tarihin sagina Prim Rolu
-   * combo ve onun da sagina Kisi filtre"). Kisi listesi SECILI ROLE gore
-   * daralir - "Raporlayan" secildiginde raporlamayan kisiyi listelemek,
-   * secilince bos grid vermekten baska ise yaramaz.
-   */
-  const [primRol, setPrimRol] = useState<number | ''>('');
-  const [primKisi, setPrimKisi] = useState<number | ''>('');
-  const [primRolleri, setPrimRolleri] = useState<{ id: number; ad: string; adet: number }[]>([]);
-  const [primKisiler, setPrimKisiler] = useState<{ id: number; ad: string; adet: number }[]>([]);
-  /** Griddeki tarih araligi (GenGrid bildirir) - secenekler buna gore uretilir. */
-  const [primAralik, setPrimAralik] = useState<{ bas: string; bit: string }>({ bas: '', bit: '' });
-  const primAraligiBildir = useCallback((bas: string, bit: string) => {
-    setPrimAralik(o => (o.bas === bas && o.bit === bit ? o : { bas, bit }));
-  }, []);
-  // Secenekler ARALIKTAKI SATIRLARDAN gelir (kullanici: "tum kisiler ve tum
-  //   roller listesine o tarihler arasinda olanlar gelsin") - rol/aday
-  //   tanimlarindan degil. Boylece combo'da secilince bos grid veren secenek
-  //   olmaz. Kisi listesi ayrica secili role gore daralir.
-  useEffect(() => {
-    if (!tanim.primSuzgeci) return;
-    void guvenli(async () => {
-      const y = await api.hakedisSuzgecSecenekleri(
-        primAralik.bas || undefined, primAralik.bit || undefined,
-        primRol === '' ? undefined : primRol);
-      setPrimRolleri(y.roller ?? []);
-      setPrimKisiler(y.kisiler ?? []);
-    });
-  }, [tanim.primSuzgeci, primAralik.bas, primAralik.bit, primRol]);
-  // Aralik/rol degisince secim listede kalmayabilir: filtre sessizce bos grid
-  //   verirdi - secimi birakmak yerine temizliyoruz.
-  useEffect(() => {
-    if (primKisi !== '' && primKisiler.length > 0 && !primKisiler.some(k => k.id === primKisi))
-      setPrimKisi('');
-  }, [primKisiler, primKisi]);
-  useEffect(() => {
-    if (primRol !== '' && primRolleri.length > 0 && !primRolleri.some(r => r.id === primRol))
-      setPrimRol('');
-  }, [primRolleri, primRol]);
-  useEffect(() => { setPrimRol(''); setPrimKisi('') }, [tanim.kaynak]);
+  // HAKEDIS SATIRLARI (prim rolu + kisi) SERIT SUZGECI kendi kancasinda.
+  const primSuzgec = usePrimSuzgeci(tanim.primSuzgeci, tanim.kaynak);
 
-  /**
-   * BASVURU SERIT SUZGECLERI (kullanici): hazir tarih araligi, Odeyen kurum,
-   * Bolum agaci ve Doktor. Dordu de sunucuda suzer ve sabit filtreye AND'lenir.
-   *
-   * Tarih HAZIR ARALIK olarak secilir (Bugun / Son 3 gun / Bu yil...): kabul
-   * ekraninda iki tarih kutusu doldurmak yerine tek tiklama.
-   */
-  // Acilista BUGUN (kullanici): kabul ekraninda gunun basvurulari beklenir,
-  //   tum gecmis bir arada anlamsizdi.
-  const [bvTarih, setBvTarih] = useState<TarihOnAyar | ''>('bugun');
-  const [bvOdeyen, setBvOdeyen] = useState<number | ''>('');
-  const [bvBolum, setBvBolum] = useState<{ id: number; agac: number[] } | null>(null);
-  const [bvDoktor, setBvDoktor] = useState<number | ''>('');
-  // CIPLERIN YERINE UC COMBO (kullanici): Tamamlanma, Tahsilat, Donusum.
-  //   Donusum'un secenekleri eski ciplerin ta kendisi (kapanma_durum).
-  const [bvTamamlanma, setBvTamamlanma] = useState<'' | 'tamam' | 'devam'>('');
-  const [bvTahsilat, setBvTahsilat] = useState<'' | '0' | '1' | '2'>('');
-  const [bvDonusum, setBvDonusum] = useState<'' | '0' | '1' | '2'>('');
-  const [bvKurumlar, setBvKurumlar] = useState<{ id: number; ad: string; adet: number }[]>([]);
-  const [bvBolumler, setBvBolumler] = useState<{ id: number; ad: string; adet: number }[]>([]);
-  const [bvDoktorlar, setBvDoktorlar] = useState<{ id: number; ad: string; adet: number }[]>([]);
-  // Secenekler ARALIKTAKI BASVURULARDAN gelir (kullanici: "bu filtrelere o
-  //   tarih araligindaki yer alan item'lar gelsin") - tanim tablolarindan
-  //   degil. Tarih secimi degisince listeler yenilenir.
-  useEffect(() => {
-    if (!tanim.basvuruSuzgeci) return;
-    const aralik = bvTarih === '' ? undefined : tarihAraligi(bvTarih);
-    void guvenli(async () => {
-      const y = await api.basvuruSuzgecSecenekleri(aralik?.bas, aralik?.bit);
-      setBvKurumlar(y.odeyenler ?? []);
-      setBvBolumler(y.bolumler ?? []);
-      setBvDoktorlar(y.doktorlar ?? []);
-    });
-  }, [tanim.basvuruSuzgeci, bvTarih]);
-  // Aralik degisince listede kalmayan secim temizlenir: filtre sessizce bos
-  //   liste verirdi.
-  useEffect(() => {
-    if (bvOdeyen !== '' && bvKurumlar.length > 0 && !bvKurumlar.some(k => k.id === bvOdeyen))
-      setBvOdeyen('');
-  }, [bvKurumlar, bvOdeyen]);
-  useEffect(() => {
-    if (bvDoktor !== '' && bvDoktorlar.length > 0 && !bvDoktorlar.some(d => d.id === bvDoktor))
-      setBvDoktor('');
-  }, [bvDoktorlar, bvDoktor]);
-  useEffect(() => {
-    setBvTarih('bugun'); setBvOdeyen(''); setBvBolum(null); setBvDoktor('');
-    setBvTamamlanma(''); setBvTahsilat(''); setBvDonusum('');
-  }, [tanim.kaynak]);
-  /** Takvimde fareyle secilen aralik (251): "＋ Yeni" bunu karta tasir. */
+  // BASVURU SERIT SUZGECLERI (tarih araligi + tamamlanma/tahsilat/donusum +
+  //   odeyen/bolum/doktor) kendi kancasinda.
+  const basvuruSuzgec = useBasvuruSuzgeci(tanim.basvuruSuzgeci, tanim.kaynak);
   /** Belge olusturmada sube: oturumun calisma subesi. */
   const oturumSubeId = Number(localStorage.getItem('gentegre.sube')) || undefined;
-  const [takvimAralik, setTakvimAralik] =
-    useState<{ baslangic: string; sureDk: number; hekimId?: number;
-               cihazId?: number } | null>(null);
-  /**
-   * RADYOLOJI CIHAZLARI (316): takvimin "Cihaz" gorunumunun sutunlari.
-   * Radyoloji kurulu degilse liste bos doner, buton da cikmaz.
-   */
-  const [cihazSecenekleri, setCihazSecenekleri] =
-    useState<{ id: number; ad: string }[]>([]);
-  const [hekimSuzgec, setHekimSuzgec] = useState<number | ''>('');
-  useEffect(() => {
-    if (tanim.kaynak !== 'randevu') return;
-    let iptal = false;
-    api.randevuBolumleri()
-      .then(y => { if (!iptal) setRandevuAgaci(y) })
-      .catch(() => { /* bolum listesi okunamazsa suzgecler bos kalir */ });
-    return () => { iptal = true };
-  }, [tanim.kaynak]);
-
-  useEffect(() => {
-    if (tanim.kaynak !== 'randevu') return;
-    let iptal = false;
-    api.ayarlar().then(liste => {
-      if (iptal) return;
-      const bul = (a: string) => liste.find(x => x.anahtar === a)?.deger ?? '';
-      const gunler = bul('randevu.calisma_gunleri')
-        .split(',').map(x => Number(x.trim())).filter(x => x >= 1 && x <= 7);
-      setRandevuAyarlari({
-        baslangicSaat: bul('randevu.baslangic_saat') || undefined,
-        bitisSaat: bul('randevu.bitis_saat') || undefined,
-        slotDk: Number(bul('randevu.slot_dk')) || undefined,
-        calismaGunleri: gunler.length ? gunler : undefined,
-      });
-    }).catch(() => { /* ayar okunamazsa takvim varsayilanla calisir */ });
-    return () => { iptal = true };
-  }, [tanim.kaynak]);
-
-  /**
-   * Randevu suzgecleri (251) gride ve takvime AYNI kosulu verir: ust seritte
-   * ne seciliyse alttaki takvim de onu gosterir - iki ayri suzgec kafa karistirir.
-   */
   /**
    * TETKIK KATALOGU SOL PANELI (492): bolum ya da panel secimi. Ikisi de
    * SUNUCU filtresine cevrilir - panel uyeligi tetkik kimlikleriyle gelir,
@@ -547,33 +328,6 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     };
     return temel ? { op: 'and', kosullar: [temel, kosul] } : kosul;
   }, [kategoriDal, tanim.kategoriSuzgecAlani]);
-
-  /** Bolum/rol secimleri de sabit filtreye AND'lenir (cip ve arama ile birlikte). */
-  const personelliFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
-    if (!tanim.bolumSuzgeci && !tanim.rolSuzgeci) return temel;   // bkz. basvuruluFiltre
-    const kosullar: Kosul[] = [];
-    if (temel) kosullar.push(temel);
-    // Bolum: secilen dal + TUM ALT BIRIMLERI.
-    if (personelBolum && personelBolum.agac.length > 0)
-      kosullar.push({ alan: 'departmanId', op: 'icinde', deger: personelBolum.agac });
-    if (personelRol !== '')
-      kosullar.push({ alan: 'rolId', op: 'esit', deger: personelRol });
-    return kosullar.length === 0 ? undefined
-         : kosullar.length === 1 ? kosullar[0]
-         : { op: 'and', kosullar };
-  }, [tanim.bolumSuzgeci, tanim.rolSuzgeci, personelBolum, personelRol]);
-
-  /** Prim rolu / kisi secimi de sabit filtreye AND'lenir. */
-  const primliFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
-    if (!tanim.primSuzgeci) return temel;          // bkz. basvuruluFiltre
-    const kosullar: Kosul[] = [];
-    if (temel) kosullar.push(temel);
-    if (primRol !== '') kosullar.push({ alan: 'rol', op: 'esit', deger: primRol });
-    if (primKisi !== '') kosullar.push({ alan: 'tarafId', op: 'esit', deger: primKisi });
-    return kosullar.length === 0 ? undefined
-         : kosullar.length === 1 ? kosullar[0]
-         : { op: 'and', kosullar };
-  }, [tanim.primSuzgeci, primRol, primKisi]);
 
   /**
    * DOKUMAN SOL PANELI (419): secilen klasor listeye SABIT FILTRE olarak gecer.
@@ -615,141 +369,6 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     return temel ? { op: 'and', kosullar: [temel, kosul] } : kosul;
   }, [tanim.kaynak, klasorSecim]);
 
-  /** Basvuru suzgecleri: tarih araligi + odeyen + bolum agaci + doktor. */
-  const basvuruluFiltre = useCallback((temel: Kosul | undefined): Kosul | undefined => {
-    // SUZGEC KAPALI EKRANDA HIC KOSUL EKLENMEZ: durumlar Liste bileseninde
-    //   yasadigi icin baska bir listeye gecildiginde de doluydu ve tarih
-    //   varsayilani 'bugun' oldugu icin KOSUL HEP VARDI - hasta listesi
-    //   "Bilinmeyen alan: belgeTarihi" ile 400 donuyordu.
-    if (!tanim.basvuruSuzgeci) return temel;
-    const kosullar: Kosul[] = [];
-    if (temel) kosullar.push(temel);
-    if (bvTarih !== '') {
-      const { bas, bit } = tarihAraligi(bvTarih);
-      kosullar.push({ alan: 'belgeTarihi', op: 'arasinda', deger: [bas, bit] });
-    }
-    if (bvOdeyen !== '') kosullar.push({ alan: 'odeyenKurumId', op: 'esit', deger: bvOdeyen });
-    // Bolum: secilen dal + TUM ALT BIRIMLERI (agac combosu).
-    if (bvBolum && bvBolum.agac.length > 0)
-      kosullar.push({ alan: 'bolumId', op: 'icinde', deger: bvBolum.agac });
-    if (bvDoktor !== '') kosullar.push({ alan: 'doktorId', op: 'esit', deger: bvDoktor });
-    // Tamamlanma: %100 tamamlandi ya da altindaki her sey "devam ediyor".
-    if (bvTamamlanma === 'tamam')
-      kosullar.push({ alan: 'tamamlanma', op: 'esit', deger: 100 });
-    if (bvTamamlanma === 'devam')
-      kosullar.push({ alan: 'tamamlanma', op: 'kucuk', deger: 100 });
-    if (bvTahsilat !== '')
-      kosullar.push({ alan: 'tahsilatDurum', op: 'esit', deger: Number(bvTahsilat) });
-    if (bvDonusum !== '')
-      kosullar.push({ alan: 'kapanmaDurum', op: 'esit', deger: Number(bvDonusum) });
-    return kosullar.length === 0 ? undefined
-         : kosullar.length === 1 ? kosullar[0]
-         : { op: 'and', kosullar };
-  }, [tanim.basvuruSuzgeci, bvTarih, bvOdeyen, bvBolum, bvDoktor,
-      bvTamamlanma, bvTahsilat, bvDonusum]);
-
-  const randevuFiltresi = useMemo<Kosul | undefined>(() => {
-    if (tanim.kaynak !== 'randevu') return sabitFiltre;
-    const kosullar: Kosul[] = [];
-    if (sabitFiltre) kosullar.push(sabitFiltre);
-    if (bolumSuzgec !== '') kosullar.push({ alan: 'bolum', op: 'esit', deger: bolumSuzgec });
-    if (hekimSuzgec !== '') kosullar.push({ alan: 'hekimId', op: 'esit', deger: hekimSuzgec });
-    return kosullar.length === 0 ? undefined
-         : kosullar.length === 1 ? kosullar[0]
-         : { op: 'and', kosullar };
-  }, [tanim.kaynak, sabitFiltre, bolumSuzgec, hekimSuzgec]);
-
-  /**
-   * BEKLEYEN İSTEME RANDEVU (316): panelden sürükle-bırak ve "seç + boş saate
-   * tıkla" yollarının ortak ucu. Süre istemin çekim protokolünden (314) gelir;
-   * çakışma/kapasite/cihaz kapatma kuralları veritabanı tetiğindedir - buradan
-   * tekrar kontrol edilmez, hata mesajı olduğu gibi gösterilir.
-   */
-  const bekleyeneRandevuVer = async (
-    istem: BekleyenIstem, baslangic: string, cihazId?: number,
-  ) => {
-    if (!cihazId) {
-      mesaj('Randevu cihaza verilir - takvimde bir cihaz sütunu seçin.');
-      return;
-    }
-    const ok = await guvenli(() => api.radyolojiRandevuVer(istem.id, {
-      cihazId, baslangic,
-      sureDk: istem.sureDk > 0 ? istem.sureDk : undefined,
-    }));
-    if (!ok) return;
-    mesaj(`Randevu verildi: ${istem.hasta} · ${baslangic.slice(11)} `
-          + `(${istem.accessionNo})`);
-    setBekleyenSecili(null);
-    setYenile(t => t + 1);
-  };
-
-  /**
-   * Takvimin kullanacagi ayar: HEKIM -> BÖLÜM -> Genel Ayarlar sirasiyla
-   * miras alinir (251). Hekim ogle arasini degistirdiyse takvim o hekim
-   * secildiginde onu gostermeli - yoksa bolum duzeni sanilir.
-   */
-  const takvimAyarlari = useMemo(() => {
-    const bolumDugum = bolumSuzgec === '' ? undefined
-      : randevuAgaci.find(d => d.departmanId === bolumSuzgec);
-    const hekimAyar = hekimSuzgec === ''
-      ? undefined
-      : (bolumDugum ?? randevuAgaci.find(d => d.hekimler.some(h => h.hekimId === hekimSuzgec)))
-          ?.hekimler.find(h => h.hekimId === hekimSuzgec);
-    const oncelikli = (...adaylar: (string | number | null | undefined)[]) =>
-      adaylar.find(v => v !== '' && v !== null && v !== undefined);
-    const gunler = String(oncelikli(hekimAyar?.calismaGunleri, bolumDugum?.ayar.calismaGunleri) ?? '')
-      .split(',').map(x => Number(x.trim())).filter(x => x >= 1 && x <= 7);
-    return {
-      ...randevuAyarlari,
-      baslangicSaat: oncelikli(hekimAyar?.baslangicSaat, bolumDugum?.ayar.baslangicSaat) as string
-                     ?? randevuAyarlari.baslangicSaat,
-      bitisSaat: oncelikli(hekimAyar?.bitisSaat, bolumDugum?.ayar.bitisSaat) as string
-                 ?? randevuAyarlari.bitisSaat,
-      slotDk: (oncelikli(hekimAyar?.slotDk, bolumDugum?.ayar.slotDk) as number)
-              ?? randevuAyarlari.slotDk,
-      calismaGunleri: gunler.length ? gunler : randevuAyarlari.calismaGunleri,
-    };
-  }, [randevuAgaci, randevuAyarlari, bolumSuzgec, hekimSuzgec]);
-
-  /** Bolum secilince hekim listesi o bolume daralir. */
-  const hekimSecenekleri = useMemo(() => {
-    const dugumler = bolumSuzgec === ''
-      ? randevuAgaci
-      : randevuAgaci.filter(d => d.departmanId === bolumSuzgec);
-    // Hekimin BOLUMU de tasinir: takvimde bir hekim sutununda saat secilince
-    //   kartta bolum de dolu gelsin (kullanici: "dr bolumu belli, kartta
-    //   bolumu doldursun").
-    return dugumler.flatMap(d =>
-      d.hekimler.map(h => ({ id: h.hekimId ?? 0, ad: h.ad, bolum: d.departmanId })));
-  }, [randevuAgaci, bolumSuzgec]);
-
-  // Cihaz listesi randevu ekraninda bir kez cekilir; yetki/veri yoksa sessiz
-  //   gecilir - poliklinik kurulumunda cihaz olmamasi hata degildir.
-  useEffect(() => {
-    if (tanim.kaynak !== 'randevu') return;
-    let iptal = false;
-    void (async () => {
-      try {
-        const y = await api.liste('radyoloji-cihaz', {
-          sayfa: 1, boyut: 50,
-          filtre: { op: 'and', kosullar: [
-            { alan: 'durum', op: 'esit', deger: 1 },
-            { alan: 'randevuVerilir', op: 'esit', deger: 1 },
-          ] },
-        });
-        if (!iptal)
-          setCihazSecenekleri(y.satirlar.map(r => ({
-            id: Number(r.id), ad: String(r.ad ?? r.kod ?? ''),
-          })));
-      } catch { /* radyoloji yok ya da yetki yok - cihaz gorunumu cikmaz */ }
-    })();
-    return () => { iptal = true };
-  }, [tanim.kaynak]);
-
-  /** Hekimin bolumu (takvim sutunundan gelen hekim icin). */
-  const hekimBolumu = (hekim?: number) =>
-    hekim ? hekimSecenekleri.find(h => h.id === hekim)?.bolum : undefined;
-
   /**
    * AKSIYON YONLENDIRME - grid arac cubugu ve sag tus menusu buraya duser.
    *
@@ -771,32 +390,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     const kartaGit = (kayitId: unknown) => git(`${tanim.kartYolu}/${kayitId}`);
 
     try {
-      // TOPLU ISLEM (183): birden fazla satir seciliyken Hazırla/Gönder tek
-      //   istekte calisir. Sonuc satir satir raporlanir - bir belgenin hatasi
-      //   digerlerini durdurmaz.
-      if (secililer && secililer.length > 1
-          && (kod === 'ebelge.hazirla' || kod === 'ebelge.gonder')) {
-        const islem = kod === 'ebelge.hazirla' ? 'hazirla' : 'gonder';
-        const ad = islem === 'hazirla' ? 'hazırlanacak' : 'GÖNDERİLECEK';
-        if (!await onay(`${secililer.length} belge ${ad}.\n\n`
-                      + (islem === 'gonder'
-                         ? 'Gönderilen belge geri alınamaz. Onaylıyor musunuz?'
-                         : 'Her belgeye seri ve e-Belge numarası verilir. Onaylıyor musunuz?'),
-                        islem === 'gonder')) return;
-        await guvenli(async () => {
-          const y = await api.belgeEBelgeToplu(secililer.map(x => Number(x.id)), islem);
-          const olan = y.sonuclar.filter(r => r.basarili).length;
-          const olmayan = y.sonuclar.filter(r => !r.basarili);
-          mesaj(`${olan} belge tamam, ${olmayan.length} hata.`
-              + (olmayan.length
-                 ? '\n\n' + olmayan.slice(0, 10)
-                     .map(r => `#${r.belgeId}: ${r.mesaj}`).join('\n')
-                   + (olmayan.length > 10 ? `\n… ve ${olmayan.length - 10} tane daha` : '')
-                 : ''));
-          setYenile(t => t + 1);
-        });
-        return;
-      }
+      // TOPLU e-BELGE (183): coklu secimde Hazırla/Gönder tek istekte calisir.
+      //   Gelen kutusu ve e-Belge ciktilari ayni "ebelge.*" kodlarini
+      //   kullaniyor - toplu secim onlardan ONCE yakalanmali.
+      if (await ebelgeTopluAksiyonu(kod, secililer,
+                                    { tazele: () => setYenile(t => t + 1) })) return;
 
       // e-BELGE CIKTILARI (Ön İzle / PDF / HTML / XML / Mesaj Geçmişi) ayri
       //   modulde (180 refaktor): hepsi tek belge id'si alip cikti uretiyor,
@@ -810,24 +408,14 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       if (satir && await ebelgeCiktisi(kod, satir, setEBelgeMesajlari,
                                        () => setYenile(t => t + 1))) return;
 
-      // DONUSUM ALT MENUSU: "belge.donustur.15" gibi kodlarda hedef tur
-      //   kodun icinde gelir ve karta KILITLI gecer.
-      if (kod.startsWith('belge.donustur.') && satir) {
-        setDonusum({
-          belgeId: Number(satir.id),
-          belgeTur: Number(satir.tur),
-          hedef: Number(kod.slice('belge.donustur.'.length)),
-        });
-        return;
-      }
-
       // KONU BAZLI AKSIYONLAR ayri dosyalarda (refactor): `aksiyon()` 950
       //   satira ve 44 case'e ulasmisti. Her modul "ele aldim mi" doner;
       //   ele aldiysa burada isimiz biter. e-Belge ve gelen belge zaten
       //   ayriydi (ebelgeIslem / gelenBelgeIslem) - ayni desen surduruldu.
       if (await utsAksiyonu(kod, satir, secililer, {
         tazele: () => setYenile(t => t + 1),
-        setUtsHazirla, setUtsKullanim, setUtsGenel, setUtsAlma,
+        setUtsHazirla: utsModal.setHazirla, setUtsKullanim: utsModal.setKullanim,
+        setUtsGenel: utsModal.setGenel, setUtsAlma: utsModal.setAlma,
       })) return;
 
       if (await zamanliIsAksiyonu(kod, satir, {
@@ -919,614 +507,59 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
       if (await ebelgeAksiyonu(kod, satir, { tazele: () => setYenile(t => t + 1) })) return;
 
-      switch (kod) {
-        // Grup basina bir giris: kart tur seridini o grubun turleriyle acar.
-        case 'belge.yeni': setYeniBelgeTuru(tanim.yeniBelgeTuru ?? 15); return;
-        case 'belge.ac':
-          if (satir) setAcikBelgeId(Number(satir.id));
-          return;
-        // e-BELGE HAZIRLA (163): numara/seri verir ve kuyruga alir. Sonuc
-        //   mesaji sunucudan gelir (hangi tur, hangi numara) - istemci karar
-        //   uretmez, yalniz gosterir.
-        // MUHASEBE FISI (190): belgenin fis satirlarini acar. Fis kartı ayri
-        //   bir ekran degil - "Fiş Satırları" listesi fisId ile filtrelenir.
-        case 'belge.fis-gor': {
-          if (!satir) return;
-          const fisId = Number(satir.fisId ?? 0);
-          if (!fisId) { mesaj('Belgenin muhasebe fişi yok.'); return }
-          git(`/muhasebe-fis-satir?fisId=${fisId}`);
-          return;
-        }
-        // DONUSUM ZINCIRI (F8): kaynak ve hedef belge ayni modal kartta acilir.
-        case 'belge.kaynak-ac':
-        case 'belge.hedef-ac': {
-          if (!satir) return;
-          const hedef = Number(kod === 'belge.kaynak-ac' ? satir.kaynakId : satir.hedefId) || 0;
-          if (!hedef) {
-            mesaj(kod === 'belge.kaynak-ac'
-              ? 'Bu belge bir dönüşümden gelmiyor.'
-              : 'Bu belgeden üretilmiş bir belge yok.');
-            return;
-          }
-          setAcikBelgeId(hedef);
-          return;
-        }
-        // BELGE SIL (181): izi olmayan belgede mumkun; kesin/izli belgede
-        //   aksiyon zaten pasif ve sebebi title'da. Sunucu son sozu soyler.
-        case 'belge.sil': {
-          if (!satir) return;
-          const no = String(satir.belgeNo ?? satir.id);
-          if (!await onay(`"${no}" silinecek.
+      if (await belgeAksiyonu(kod, satir, secililer, {
+        tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
+        kartaGit,
+        setAcikBelgeId, setYeniBelgeTuru, setDonusum,
+        setUtsBelgeSonuc: utsModal.setBelgeSonuc,
+        varsayilanBelgeTuru: tanim.yeniBelgeTuru,
+      })) return;
 
-Bu işlem geri alınamaz. `
-                        + 'Onaylıyor musunuz?', true)) return;
-          await guvenli(async () => {
-            const y = await api.belgeSil(Number(satir.id));
-            mesaj(y.mesaj || 'Belge silindi.');
-            setYenile(t => t + 1);
-          });
-          return;
-        }
-        // CARI MUKELLEFIYET SORGUSU (183): entegratore sorar, bayragi isler.
-        //   Gelen unvan/adres YALNIZ GOSTERILIR - musterinin kendi kaydi
-        //   entegratorun yazimiyla ezilmemeli.
-        case 'cari.ebelge-mukellef': {
-          if (!satir) return;
-          await guvenli(async () => {
-            const y = await api.cariEBelgeMukellef(Number(satir.id));
-            const satirlar = [
-              String(y.kayitli.unvan || satir.unvan || ''),
-              '',
-              'GİB kaydı: ' + (y.mukellef
-                ? 'e-Fatura MÜKELLEFİ' : 'kayıtlı değil (e-Arşiv kesilir)') + ' — ' + y.durum,
-            ];
-            if (y.degisti) satirlar.push('Cari kartındaki bayrak güncellendi.');
-            // GIB'den gelen unvan/adres YALNIZ GOSTERILIR: musterinin kendi
-            //   kaydi entegratorun yazimiyla ezilmemeli.
-            if (y.gelen.unvan) {
-              satirlar.push('', 'GİB’deki bilgiler:', y.gelen.unvan);
-              if (y.gelen.vergiDairesi) satirlar.push(y.gelen.vergiDairesi);
-              if (y.gelen.il) satirlar.push(`${y.gelen.adres} ${y.gelen.ilce} / ${y.gelen.il}`);
-            }
-            mesaj(satirlar.join('\n'));
-            setYenile(t => t + 1);
-          });
-          return;
-        }
-        case 'belge.donustur':
-          if (!satir) return;
-          // Teklif (18) yalniz KABUL (3) durumundayken donusur - sunucu da
-          //   ayni kurali dogrular, burasi erken/anlasilir uyari.
-          if (Number(satir.tur) === 18 && Number(satir.teklifDurum ?? 1) !== 3) {
-            mesaj('Teklif yalnız KABUL durumundayken siparişe dönüştürülebilir.');
-            return;
-          }
-          setDonusum({ belgeId: Number(satir.id), belgeTur: Number(satir.tur) });
-          return;
-        // Secili hesabin ekstresi - ayni ekran, hesapId sorgu parametresiyle.
-        case 'hesap.ekstre':
-          if (satir) git(`/hesap-ekstre?hesapId=${satir.id}`);
-          return;
-        // ADAY -> MÜŞTERİ (122): kayit TASINMAZ, yalniz rol bayragi degisir.
-        //   Boylece firsat/gorev/adres/ilgili kisi gecmisi ayni kayitta kalir;
-        //   yeni bir cari acilsaydi butun bu baglar kirilirdi.
-        case 'aday.donustur': {
-          if (!satir) return;
-          const ad = String(satir.unvan ?? satir.ad ?? satir.id);
-          if (!await onay(`"${ad}" müşteriye dönüştürülsün mü?
-
-` +
-                       "Kayıt Müşteri Listesi'ne geçer; fırsat, görev ve adres geçmişi aynı kalır.")) return;
-          void guvenli(async () => {
-            const k = await api.kartOku('cari', Number(satir.id));
-            await api.kartGuncelle('cari', Number(satir.id),
-              { surum: k.kart.surum as string | undefined,
-                kart: { musteri: true, aday: false } });
-            setYenile(y => y + 1);
-          });
-          return;
-        }
-        // STOK KARTI KOPYALA (126): kopya olusur ve HEMEN acilir - kullanici
-        //   zaten degistirmek icin kopyaliyor, listeye donup aramasi gereksiz.
-        case 'stok.kopyala': {
-          if (!satir) return;
-          const ad = String(satir.ad ?? satir.kod ?? satir.id);
-          if (!await onay(`"${ad}" kartı kopyalanacak.\n\n`
-                     + 'Kod sonuna "_K1", ad sonuna " kopya" eklenir; paket ise içeriği de kopyalanır.\n'
-                     + 'Fiyat ve barkod kopyalanmaz.')) return;
-          const yeniId = await api.stokKopyala(Number(satir.id));
-          setYenile(t => t + 1);
-          kartaGit(yeniId);
-          return;
-        }
-        // FIYAT LISTESI URETIMI (202): kurali yeniden isletip satirlari yazar.
-        //   Onay ISTENIR - binlerce satiri degistirir ve taban fiyat degistiyse
-        //   liste fiyatlari toptan degisir.
-        // ÜTS (223): senkron + alma + iptal + yeniden gonder + detay.
-        case 'belge.uts-bildir': {
-          // COKLU SECIM desteklenir (230): isaretli belgeler sirayla bildirilir.
-          const hedefler = (secililer && secililer.length > 0 ? secililer
-                            : satir ? [satir] : []);
-          if (hedefler.length === 0) return;
-          const adlar = hedefler.length === 1
-            ? `"${String(hedefler[0].belgeNo ?? hedefler[0].id)}" belgesinin`
-            : `${hedefler.length} belgenin`;
-          if (!await onay(`${adlar} seri/lot satırları ÜTS'ye bildirilecek.
-
-Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor musunuz?`)) return;
-          await guvenli(async () => {
-            let son: Awaited<ReturnType<typeof api.utsBelgedenBildir>> | null = null;
-            const ozet: string[] = [];
-            for (const h of hedefler) {
-              son = await api.utsBelgedenBildir(Number(h.id));
-              ozet.push(son.mesaj);
-            }
-            if (hedefler.length === 1 && son) setUtsBelgeSonuc(son);
-            else mesaj(ozet.join('\n'));
-            setYenile(t => t + 1);
-          });
-          return;
-        }
-      }
-
-      // RANDEVU durum akisi (243) ve BASVURUYA DONUSUM (265). Durum
-      //   dugmeleri simdiye kadar bagli DEGILDI - tiklaninca hicbir sey
-      //   olmuyordu.
       // KURUM ICMALI (289): SGK payi donem sonu TEK faturaya doner.
-      if (kod === 'icmal.yeni') {
-        await guvenli(async () => {
-          // Soru METINDE, kutu BOS: ikinci parametre varsayilan DEGERDIR -
-          //   soruyu oraya yazmak kutuyu hazir doldurup aramayi bozuyordu.
-          const kurumAd = await metinSor(
-            'İcmal hangi kuruma kesilecek? (ör. SGK)', '', 'Kurum kodu ya da adı');
-          if (!kurumAd) return;
-          // Kurum kaynaginda ad kolonu 'unvan' ('kurumAdi' icmal kaynaginin
-          //   kolonu) - yanlis alan sunucuda "Bilinmeyen alan" hatasi veriyordu.
-          // KOD YA DA AD: soru ikisini de kabul ediyor ("SGK" ya da "Sosyal
-          //   Güvenlik Kurumu") - yalniz unvana bakinca kodla arayan kullanici
-          //   "Kurum bulunamadı" aliyordu.
-          const k = await api.liste('kurum', {
-            sayfa: 1, boyut: 5,
-            filtre: { op: 'or', kosullar: [
-              { alan: 'unvan', op: 'icerir', deger: kurumAd },
-              { alan: 'kod',   op: 'icerir', deger: kurumAd },
-            ] },
-          });
-          if (k.satirlar.length === 0) { mesaj('Kurum bulunamadı.'); return }
-          const kurumId = Number(k.satirlar[0].id);
-          const kurumUnvan = String(k.satirlar[0].unvan ?? kurumAd);
+      if (await icmalAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        setAcikBelgeId,
+      })) return;
 
-          // Donem = icinde bulunulan AY. toISOString UTC'ye cevirdigi icin
-          //   yerel gece yarisi bir onceki gune kayiyordu (1 Agustos ->
-          //   "07-31"): ayin ilk gunu onceki aya dusup satirlari kacirirdi.
-          const bugun = new Date();
-          const gun = (t: Date) => `${t.getFullYear()}-`
-            + `${String(t.getMonth() + 1).padStart(2, '0')}-`
-            + `${String(t.getDate()).padStart(2, '0')}`;
-          const bas = gun(new Date(bugun.getFullYear(), bugun.getMonth(), 1));
-          const bit = gun(new Date(bugun.getFullYear(), bugun.getMonth() + 1, 0));
+      if (await radyolojiAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
+        setIstemHastaArama: radyolojiModal.setHastaArama,
+        setSarfModali: radyolojiModal.setSarf,
+        setRandevuModali: radyolojiModal.setRandevu,
+        setTeslimModali: radyolojiModal.setTeslim,
+        setKritikModali: radyolojiModal.setKritik,
+        setKonsultasyonModali: radyolojiModal.setKonsultasyon,
+      })) return;
 
-          // ONIZLEME: kullanici neyi faturaladigini gormeden icmal acmasin.
-          const on = await api.icmalOnizleme(kurumId, bas, bit);
-          if (on.satirlar.length === 0) {
-            mesaj(`${kurumUnvan} için bu dönemde açık kurum payı yok.`);
-            return;
-          }
-          if (!(await onay(
-                `${kurumUnvan} · ${bas} – ${bit}: `
-                + `${on.satirlar.length} satır, toplam ${on.toplam.toFixed(2)}. `
-                + 'İcmal oluşturulsun mu?'))) return;
+      // PRIM (324): hakedis satiri TAHSILATTAN dogar, elle eklenmez.
+      if (await hakedisAksiyonu(kod, satir, secililer, {
+        tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
+        setDonemModali, setRolModali, setAcikBelgeId,
+      })) return;
 
-          const y = await api.icmalOlustur({ kurumId, donemBas: bas, donemBit: bit });
-          setYenile(t => t + 1);
-          mesaj(`İcmal oluşturuldu: ${y.satir} satır. "Faturala" ile tek fatura kesilir.`);
-        });
-        return;
-      }
-
-      if (kod === 'icmal.faturala') {
-        if (!satir) return;
-        if (Number(satir.durum) !== 1) { mesaj('Yalnız hazırlanan icmal faturalanabilir.'); return }
-        if (!(await onay(`${satir.kurumAdi} icmali faturalansın mı? `
-              + `Toplam ${Number(satir.toplam ?? 0).toFixed(2)} tutarında TEK fatura kesilir `
-              + 've satırların kurum payı kapanır.'))) return;
-        await guvenli(async () => {
-          const y = await api.icmalFaturala(Number(satir.id));
-          setYenile(t => t + 1);
-          mesaj(`Fatura kesildi (${y.satir} kalem).`);
-          setAcikBelgeId(y.belgeId);
-        });
-        return;
-      }
-
-      if (kod === 'icmal.belge') {
-        if (!satir?.belgeId) { mesaj('Bu icmal henüz faturalanmamış.'); return }
-        setAcikBelgeId(Number(satir.belgeId));
-        return;
-      }
-
-      // SARF DUSUMU (320): cekim tamamlaninca protokoldeki malzeme onerilir.
-      //   Ayri aksiyon olarak da cagrilabilir - cekim sirasinda atlanmis ya da
-      //   sonradan duzeltilmesi gereken dusum icin.
-      if (kod === 'radyoloji.sarf') {
-        if (!satir) return;
-        setSarfModali({
-          istemId: Number(satir.istemId ?? satir.id),
-          accessionNo: String(satir.accessionNo ?? ''),
-          tetkikAdi: String(satir.tetkikAdi ?? satir.tetkik ?? ''),
-        });
-        return;
-      }
-
-      // RANDEVU VER (316): istem cihaza baglanir - kayit public.randevu'ya
-      //   gider, kaynagi cihazdir. Sure tetkikin protokolunden gelir.
-      if (kod === 'radyoloji.randevu') {
-        if (!satir) return;
-        setRandevuModali({
-          istemId: Number(satir.id),
-          accessionNo: String(satir.accessionNo ?? ''),
-          tetkikAdi: String(satir.tetkikAdi ?? ''),
-          modalite: Number(satir.modalite ?? 0),
-          sureDk: Number(satir.protokolSure ?? 0),
-        });
-        return;
-      }
-
-      // RADYOLOJI (283): worklist durum akisi. "Cekildi" teknisyenin islemi -
-      //   cekim zamani da yazilir, cunku bekleme suresi (kalite gostergesi)
-      //   oradan hesaplanir. Iptal onay ister: cekilmis istem iptal edilirse
-      //   goruntu ortada kalir.
-      if (kod === 'radyoloji.cekildi' || kod === 'radyoloji.iptal') {
-        if (!satir) return;
-        const iptalMi = kod === 'radyoloji.iptal';
-        if (iptalMi && !(await onay(
-              `${String(satir.accessionNo ?? '')} istemi iptal edilsin mi? `
-              + 'Çekim yapıldıysa görüntü ve rapor kaydı yerinde kalır.'))) return;
-        await guvenli(async () => {
-          const mevcut = await api.kartOku('radyoloji-istem', Number(satir.id));
-          await api.kartGuncelle('radyoloji-istem', Number(satir.id), {
-            surum: mevcut.kart.surum,
-            kart: iptalMi
-              ? { durum: 0 }
-              // ÇEKIM ZAMANI YEREL saat: toISOString UTC verir, TR'de kayit
-              //   3 saat GERIYE dusuyordu - bekleme suresi (istem->cekim)
-              //   kalite gostergesi buradan hesaplaniyor, negatif bile cikabilir.
-              : { durum: 2, cekimTarihi: yerelZamanDamgasi() },
-          });
-          setYenile(t => t + 1);
-          mesaj(iptalMi ? 'İstem iptal edildi.' : 'İstem "Çekildi" olarak işaretlendi.');
-          // SARF DUSUMU (320): cekim tamamlandi - protokolde malzeme tanimliysa
-          //   onay penceresi acilir. Iptalde acilmaz; sarf ayari kapaliysa ya da
-          //   liste bossa modal kendi kendini "tanimli degil" diye anlatir.
-          if (!iptalMi) {
-            try {
-              const sarf = await api.radyolojiSarf(Number(satir.id));
-              if (sarf.aktif && (sarf.satirlar ?? []).length > 0)
-                setSarfModali({
-                  istemId: Number(satir.id),
-                  accessionNo: String(satir.accessionNo ?? ''),
-                  tetkikAdi: String(satir.tetkikAdi ?? satir.tetkik ?? ''),
-                });
-            } catch { /* sarf okunamazsa cekim isaretlemesi yine gecerli */ }
-          }
-        });
-        return;
-      }
-
-      // YENI ISTEM (304): generic kart TEK tetkik acardi; istem ekrani coklu
-      //   tetkik secer, klinik bilgiyi hepsine gecer ve basvuruya ucret
-      //   satirlarini ekler. Listeden acildiginda DIS istem varsayilir -
-      //   hastanin kendi hekimi yoksa disaridan gelmistir; ic istem basvuru
-      //   kartindan acilir.
-      if (kod === 'radyoloji.yeni') {
-        setIstemHastaArama(true);
-        return;
-      }
-
-      // KRITIK BULGU TAKIBI (318): bildirim ve kapatma AYRI islemdir -
-      //   kapatma "karsi taraf teyit etti" demektir, bildirim yoksa kapatilacak
-      //   bir sey de yoktur (sunucu da reddeder).
-      if (kod === 'radyoloji.kritik-bildir') {
-        if (!satir) return;
-        setKritikModali({
-          istemId: Number(satir.istemId ?? satir.id),
-          accessionNo: String(satir.accessionNo ?? ''),
-          hasta: String(satir.hasta ?? ''),
-          tetkik: String(satir.tetkik ?? ''),
-          bulgu: String(satir.bulgu ?? ''),
-          bildirilenAd: String(satir.bildirilen ?? ''),
-        });
-        return;
-      }
-
-      if (kod === 'radyoloji.kritik-kapat') {
-        if (!satir) return;
-        if (!await onay('Kritik bulgu takibi kapatılsın mı? Kapatma, bildirimin '
-                        + 'yapıldığı ve karşı tarafın teyit ettiği anlamına gelir.'))
-          return;
-        await guvenli(async () => {
-          await api.radyolojiKritikKapat(Number(satir.istemId ?? satir.id));
-          mesaj('Kritik bulgu takibi kapatıldı.');
-          setYenile(t => t + 1);
-        });
-        return;
-      }
-
-      // KONSULTASYON CEVABI (318): cevabi cogunlukla BASKA biri yazar - istek
-      //   rapor ekranindan, cevap bu listeden gelir.
-      if (kod === 'radyoloji.konsultasyon-cevap') {
-        if (!satir) return;
-        setKonsultasyonModali({
-          istemId: Number(satir.istemId),
-          konsultasyonId: Number(satir.id),
-          accessionNo: String(satir.accessionNo ?? ''),
-          hasta: String(satir.hasta ?? ''),
-          tetkik: String(satir.tetkik ?? ''),
-          soru: String(satir.gerekce ?? ''),
-          gorus: String(satir.gorus ?? ''),
-        });
-        return;
-      }
-
-      // ------------------------------------------------------- PRIM (324) --
-      // Hakedis satiri TAHSILATTAN dogar, elle eklenmez: buradaki aksiyonlar
-      //   satirin kaynagina gitmek ve donemi kapatmak icindir.
-      if (kod === 'hakedis.donem-kapat') {
-        setDonemModali(satir
-          ? { tarafId: Number(satir.tarafId) || undefined,
-              kisi: String(satir.kisi ?? '') }
-          : {});
-        return;
-      }
-
-      // ONAY (330): satiri kilitler. Toplu secim varsa hepsi islenir.
-      if (kod === 'hakedis.onayla' || kod === 'hakedis.onay-kaldir') {
-        const geriAl = kod === 'hakedis.onay-kaldir';
-        const idler = (secililer && secililer.length > 0 ? secililer
-                       : satir ? [satir] : []).map(x => Number(x.id));
-        if (idler.length === 0) return;
-        if (!await onay(geriAl
-          ? `${idler.length} prim satırının onayı kaldırılacak. Onaylıyor musunuz?`
-          : `${idler.length} prim satırı ONAYLANACAK. Onaylanan satır kilitlenir: `
-            + 'rol ya da belge türü sonradan değişse bile prim yeniden hesaplanmaz.'))
-          return;
-        await guvenli(async () => {
-          const y = await api.primOnayla({ satirlar: idler, geriAl });
-          mesaj(geriAl
-            ? `${y.satirSayisi} satırın onayı kaldırıldı.`
-            : `${y.satirSayisi} satır onaylandı (kilitlendi).`);
-          setYenile(t => t + 1);
-        });
-        return;
-      }
-
-      if (kod === 'hakedis.roller') {
-        if (!satir) return;
-        const sid = Number(satir.belgeSatirId ?? 0);
-        if (!sid) { mesaj('Satırın kalem bağı yok.'); return }
-        setRolModali({ satirId: sid, ad: String(satir.kalem ?? '') });
-        return;
-      }
-
-      // Belgenin AYRI ROTASI YOK: kart modal olarak bu listenin ustunde acilir
-      //   (donusum zincirindeki "kaynak/hedef belgeyi ac" ile ayni desen).
-      if (kod === 'hakedis.kalem') {
-        if (!satir) return;
-        const bid = Number(satir.belgeId ?? 0);
-        if (!bid) { mesaj('Satırın belge bağı yok.'); return }
-        setAcikBelgeId(bid);
-        return;
-      }
-
-      // Baslikta "Satirlari Gor": ayni donemin satirlarina hakedis
-      //   filtresiyle gecilir.
-      if (kod === 'hakedis.satirlar') {
-        if (!satir) return;
-        git(`/hakedis-satir?hakedisId=${Number(satir.id)}`);
-        return;
-      }
-
-      // Takip listelerinde satirin kimligi ISTEM'dir: istemi ac.
-      if (kod === 'radyoloji.istem-ac') {
-        if (!satir) return;
-        git(`/radyoloji/${Number(satir.istemId ?? satir.id)}`);
-        return;
-      }
-
-      if (kod === 'radyoloji.teslim') {
-        if (!satir) return;
-        setTeslimModali({ istemId: Number(satir.istemId ?? satir.id),
-                          accessionNo: String(satir.accessionNo ?? ''),
-                          cdIstendi: Number(satir.cdIstendi) === 1 });
-        return;
-      }
-
-      // Rapor yazma AYRI EKRAN (283): bolumler sablondan uretilir, onay iki
-      //   asamalidir - generic karta sigmaz.
-      if (kod === 'radyoloji.rapor') {
-        if (!satir) return;
-        git(`/radyoloji/rapor/${Number(satir.id)}`);
-        return;
-      }
-
-      /**
-       * RADYOLOJI RANDEVUSUNDA "GELDI" = KABUL (317).
-       *
-       * Hasta cogunlukla kuruma GELMEDEN randevu alir: o an ne basvuru ne
-       * odeme ne istem vardir - yalniz plan. Geldigi an kabul edilmeli:
-       * basvuru acilir, ucret/tahsilat alinir, ISTEM dogar; cihazin calisma
-       * listesine (MWL) dusecek kayit da budur. Bu yuzden cihazli randevuda
-       * "Geldi" durumu tek basina yazmak yerine kabul ekranini acar.
-       */
-      const radyolojiKabulu = (s: ListeSatiri) => {
-        setIstemModali({
-          hastaId: Number(s.hastaId), hastaAdi: String(s.hasta ?? ''),
-          // Isteyen hekim disaridan olabilir - kabul ekraninin tam hali acilir.
-          disIstem: true,
-          randevuId: Number(s.id),
-          hizmetId: Number(s.hizmetId) || undefined,
-        });
-      };
-
-      if (kod === 'randevu.geldi' && satir && Number(satir.cihazId) > 0
-          && !satir.belgeId) {
-        if (!Number(satir.hastaId)) { mesaj('Randevuda hasta yok.'); return }
-        radyolojiKabulu(satir);
-        return;
-      }
-
-      if (kod === 'randevu.geldi' || kod === 'randevu.gelmedi' || kod === 'randevu.iptal') {
-        if (!satir) return;
-        const yeniDurum = kod === 'randevu.geldi' ? 2 : kod === 'randevu.gelmedi' ? 3 : 4;
-        await guvenli(async () => {
-          const mevcut = await api.kartOku('randevu', Number(satir.id));
-          await api.kartGuncelle('randevu', Number(satir.id),
-                                 { surum: mevcut.kart.surum, kart: { durum: yeniDurum } });
-          setYenile(t => t + 1);
-        });
-        return;
-      }
-
-      if (kod === 'randevu.basvuru') {
-        if (!satir) return;
-        // CIHAZLI (radyoloji) randevu: duz basvuru yerine kabul ekrani (317) -
-        //   basvuru orada da acilir, ustune ISTEM ve accession uretilir.
-        if (Number(satir.cihazId) > 0 && !satir.belgeId) {
-          if (!Number(satir.hastaId)) { mesaj('Randevuda hasta yok.'); return }
-          radyolojiKabulu(satir);
-          return;
-        }
-        await guvenli(async () => {
-          const hastaId = Number(satir.hastaId) || 0;
-          const hizmetId = Number(satir.hizmetId) || 0;
-          if (!hastaId) { mesaj('Randevuda hasta yok.'); return }
-          // Basvuru en az bir kalemle acilir (sunucu bos belgeyi reddediyor):
-          //   randevunun hizmeti yoksa once o secilmeli.
-          if (!Number(satir.hizmetId)) {
-            mesaj('Randevuda hizmet seçili değil — başvuru kalemi oluşturulamıyor. '
-                + 'Randevu kartından "Hizmet / İşlem" seçip tekrar deneyin.');
-            git(`/randevu/${Number(satir.id)}`);
-            return;
-          }
-          if (satir.belgeId) {
-            // Zaten donusmus: yeni belge acmak yerine mevcut basvuruyu ac -
-            //   ayni randevudan iki basvuru cikmasin.
-            setAcikBelgeId(Number(satir.belgeId));
-            return;
-          }
-          // HASTANIN KURUMU (266) basvurunun ODEYENI olur ve FIYATI belirler
-          //   (274): hasta basvurusu her zaman kurum + kampanya uzerinden.
-          //   Kart okunamazsa donusum yine yapilir - kurumsuz, hasta kendi oder.
-          let hastaKart: { surum?: string; durum?: unknown } | null = null;
-          let odeyenKurumId: number | null = null;
-          try {
-            const hk = await api.kartOku('hasta', hastaId);
-            hastaKart = hk.kart;
-            // Kurum kartin KENDI alani degil "ozluk" detayindadir (taraf_hasta,
-            //   266): kart kokunden okunursa hep bos gelir - basvuru odeyensiz
-            //   ve kampanyasiz aciliyordu.
-            odeyenKurumId = Number(hk.detaylar?.ozluk?.[0]?.kurumId) || null;
-          } catch { /* hasta okunamazsa kurumsuz devam */ }
-
-          // FIYAT: liste BAZ, kampanya INDIRIM (274). Baz liste belge kartinin
-          //   kuralindan gelir (205: carinin listesi > varsayilan satis);
-          //   kampanyanin kendi listesi varsa uc onu kullanir. Fiyat cikmazsa
-          //   hizmet kartindaki fiyata dusulur.
-          // Odeyen kurumun kendi listesi hastaninkini ezer (278).
-          const varsayilanListe = await api.belgeVarsayilanListe(19, hastaId, odeyenKurumId);
-          let fiyatListesiId = varsayilanListe.listeId ?? null;
-          // KAMPANYANIN KENDI LISTESI bazi belirler (kurum sozlesmesi "TTB2018
-          //   uzerinden %40" der): varsayilan satis listesi acikca gonderilirse
-          //   uc onu baz alir ve kampanyanin listesi devre disi kalirdi. Belge
-          //   karti da acilista ayni sirayi izliyor (BelgeKarti kampanya cozumu).
-          try {
-            const kmp = await api.fiyatKampanya({ tarafId: hastaId, kurumId: odeyenKurumId });
-            if (kmp.fiyatListesiId) fiyatListesiId = kmp.fiyatListesiId;
-          } catch { /* kampanya cozulemezse varsayilan liste kalir */ }
-          const h = await api.liste('hizmet', {
-            sayfa: 1, boyut: 1,
-            filtre: { alan: 'id', op: 'esit', deger: hizmetId },
-          });
-          const kdv = Number(h.satirlar[0]?.kdv) || 0;
-          let birimFiyat = Number(h.satirlar[0]?.fiyat) || 0;
-          let iskonto = 0;
-          let kampanyaId: number | null = null;
-          let kampanyaSatirId: number | null = null;
-          try {
-            const f = await api.fiyatKalem({ hizmetId },
-              { tarafId: hastaId, kurumId: odeyenKurumId, listeId: fiyatListesiId });
-            kampanyaId = f.kampanyaId;
-            if (f.listeId) fiyatListesiId = f.listeId;
-            // Yuzde/tutar karari BELGE KARTIYLA AYNI yerden (belgeKalem.ts):
-            //   iki yerde yazilirsa donusumdeki fatura kartta gorunenden
-            //   farkli fiyatlanir.
-            const y = kampanyaKalemFiyati(f);
-            if (y) {
-              birimFiyat = y.birimFiyat;
-              iskonto = y.iskonto ?? 0;
-              kampanyaSatirId = y.kampanyaSatirId ?? null;
-            }
-          } catch { /* fiyat cozulemezse hizmet kartindaki fiyat kalir */ }
-
-          const y = await api.belgeEkle({
-            belge: {
-              // Basvuru = SATIS SIPARISI (279): ayri tur yok.
-              tur: 19,
-              tarafId: hastaId,
-              odeyenKurumId,
-              kampanyaId,
-              // Basvuru BUGUNUN tarihiyle acilir: hasta simdi geldi. Randevu
-              //   ileri tarihliyse sunucu "belge tarihi ileri tarihli olamaz"
-              //   diyordu; randevunun kendi tarihi aciklamada duruyor.
-              // YEREL an (kullanici): toISOString UTC verdigi icin belge
-              //   saati TR'de 3 saat geriye kayiyordu; basvuru saatinin
-              //   dogru olmasi kayit kabul icin sart.
-              belgeTarihi: yerelZamanDamgasi(),
-              subeId: oturumSubeId,
-              fiyatListesiId,
-              aciklama: `Randevu #${satir.id}`
-                        + (satir.bolumAdi ? ` · ${String(satir.bolumAdi)}` : ''),
-            },
-            // tur = 2 (hizmet): sunucu tur ile urun bagini karsilastiriyor
-            //   (1 stok / 2 hizmet / 3 masraf).
-            satirlar: [{ sira: 1, tur: 2, hizmetId, adet: 1, birimFiyat, kdv,
-                         iskonto, kampanyaSatirId }],
-          });
-          const belgeId = Number((y as { belge?: { id?: number } }).belge?.id) || 0;
-          // ADAY hasta (266) basvuruya donusunce AKTIF olur: randevu sirasinda
-          //   hizli acilmis kayit, hasta gelince gercek hastaya doner.
-          try {
-            if (hastaKart && Number(hastaKart.durum) === 2) {
-              await api.kartGuncelle('hasta', hastaId,
-                                     { surum: hastaKart.surum, kart: { durum: 1 } });
-            }
-          } catch { /* durum guncellenemezse donusum yine de tamamlanir */ }
-          // Randevu artik basvuruya bagli ve "Geldi" - hasta muayeneye alindi.
-          //   Kart guncellemesi SURUM ister (iyimser kilit): once oku.
-          const mevcut = await api.kartOku('randevu', Number(satir.id));
-          await api.kartGuncelle('randevu', Number(satir.id),
-                                 { surum: mevcut.kart.surum, kart: { belgeId, durum: 2 } });
-          setYenile(t => t + 1);
-          // Basvuru kartI MODAL acilir (belge kartinin rotasi yok, her listede
-          //   bu bilesenle aciliyor).
-          if (belgeId) setAcikBelgeId(belgeId);
-        });
-        return;
-      }
+      // RANDEVU durum akisi (243) ve BASVURUYA DONUSUM (265 - 317).
+      if (await randevuAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
+        setIstemModali: radyolojiModal.setIstem, setAcikBelgeId, oturumSubeId,
+      })) return;
 
       if (kod.endsWith('.yeni') && tanim.kartYolu) {
         // RANDEVU (251): takvimde fareyle isaretlenen aralik varsa saat ve sure
         //   karta tasinir - kullanici "yukaridan asagi isaretleyip Yeni'ye
         //   basinca" formda o araligi gormek istiyor.
         // Cihaz sutunundan secildiyse bolum/hekim TASINMAZ - kaynak cihazdir (316).
-        const arBolum = takvimAralik?.cihazId
+        const arBolum = randevuEkran.aralik?.cihazId
           ? undefined
-          : hekimBolumu(takvimAralik?.hekimId) ?? (bolumSuzgec || undefined);
-        const ek = tanim.kaynak === 'randevu' && takvimAralik
-          ? `?baslangic=${encodeURIComponent(takvimAralik.baslangic)}`
-            + `&sure=${takvimAralik.sureDk}`
-            + (takvimAralik.hekimId ? `&hekim=${takvimAralik.hekimId}` : '')
-            + (takvimAralik.cihazId ? `&cihaz=${takvimAralik.cihazId}` : '')
+          : randevuEkran.hekimBolumu(randevuEkran.aralik?.hekimId) ?? (randevuEkran.bolum || undefined);
+        const ek = tanim.kaynak === 'randevu' && randevuEkran.aralik
+          ? `?baslangic=${encodeURIComponent(randevuEkran.aralik.baslangic)}`
+            + `&sure=${randevuEkran.aralik.sureDk}`
+            + (randevuEkran.aralik.hekimId ? `&hekim=${randevuEkran.aralik.hekimId}` : '')
+            + (randevuEkran.aralik.cihazId ? `&cihaz=${randevuEkran.aralik.cihazId}` : '')
             + (arBolum ? `&bolum=${arBolum}` : '')
           : '';
         git(`${tanim.kartYolu}/yeni${ek}`);
@@ -1654,10 +687,10 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         ? (v => setAgacSecim(o => ({ ...o, bolum: v, panelIdleri: null, panelAdi: '' })))
         : undefined}
       varsayilanGrup={tanim.varsayilanGrup}
-      sabitFiltre={agacliFiltre(klasorluFiltre(basvuruluFiltre(
-        primliFiltre(personelliFiltre(kategoriliFiltre(randevuFiltresi))))))}
+      sabitFiltre={agacliFiltre(klasorluFiltre(basvuruSuzgec.filtre(
+        primSuzgec.filtre(personelSuzgec.filtre(kategoriliFiltre(randevuEkran.filtre))))))}
       tarihVarsayilan={tanim.tarihVarsayilan}
-      onTarihAraligi={tanim.primSuzgeci ? primAraligiBildir : undefined}
+      onTarihAraligi={tanim.primSuzgeci ? primSuzgec.araligiBildir : undefined}
       aksiyonEkrani={tanim.aksiyonEkrani}
       ebelgeMenusu={tanim.ebelgeMenusu}
       // KLASOR KOLONU YALNIZ "TUMU"DE (kullanici): belli bir klasor
@@ -1716,135 +749,30 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         // Bolum/hekim suzgeci TARIH ARALIGININ SAGINDA (kullanici) - grid ve
         //   altindaki takvim ayni secimi kullanir.
         <>
-          <select value={bolumSuzgec} title="Bölüm"
-                  onChange={e => { setBolumSuzgec(e.target.value ? Number(e.target.value) : '');
-                                   setHekimSuzgec('') }}>
+          <select value={randevuEkran.bolum} title="Bölüm"
+                  onChange={e => { randevuEkran.setBolum(e.target.value ? Number(e.target.value) : '');
+                                   randevuEkran.setHekim('') }}>
             <option value="">Tüm Bölümler</option>
-            {randevuAgaci.map(d => (
+            {randevuEkran.agac.map(d => (
               <option key={d.departmanId} value={d.departmanId}>{d.ad}</option>
             ))}
           </select>
-          <select value={hekimSuzgec} title="Hekim"
-                  onChange={e => setHekimSuzgec(e.target.value ? Number(e.target.value) : '')}>
+          <select value={randevuEkran.hekim} title="Hekim"
+                  onChange={e => randevuEkran.setHekim(e.target.value ? Number(e.target.value) : '')}>
             <option value="">Tüm Hekimler</option>
-            {hekimSecenekleri.map(h => <option key={h.id} value={h.id}>{h.ad}</option>)}
+            {randevuEkran.hekimSecenekleri.map(h => <option key={h.id} value={h.id}>{h.ad}</option>)}
           </select>
-          {(bolumSuzgec !== '' || hekimSuzgec !== '') && (
+          {(randevuEkran.bolum !== '' || randevuEkran.hekim !== '') && (
             <button type="button" className="kapat" title="Bölüm/hekim filtresini kaldır"
-                    onClick={() => { setBolumSuzgec(''); setHekimSuzgec('') }}>×</button>
+                    onClick={() => { randevuEkran.setBolum(''); randevuEkran.setHekim('') }}>×</button>
           )}
         </>
       ) : tanim.basvuruSuzgeci ? (
-        // BASVURU (kullanici): serit "Sık" dugmesinin hemen saginda TARIH
-        //   ARALIGI ile baslar - listeyi once tarihe gore daraltmak en sik
-        //   yapilan is; combolarin arasinda kaldiginda aranıyordu. Sonra
-        //   Tamamlanma / Tahsilat / Dönüşüm, ardindan Odeyen, Bolum, Doktor.
-        <>
-          <select className="kat-suzgec" value={bvTarih} title="Tarih aralığı"
-                  onChange={e => setBvTarih(e.target.value as TarihOnAyar | '')}>
-            <option value="">Tüm Tarihler</option>
-            {TARIH_ON_AYARLAR.map(t => (
-              <option key={t.deger} value={t.deger}>{t.ad}</option>
-            ))}
-          </select>
-          <span className="durumseg-ayrac" />
-          <select className="kat-suzgec" value={bvTamamlanma} title="Tamamlanmaya göre süz"
-                  onChange={e => setBvTamamlanma(e.target.value as '' | 'tamam' | 'devam')}>
-            <option value="">Tamamlanma: Tümü</option>
-            <option value="tamam">Tamamlandı (%100)</option>
-            <option value="devam">Devam Ediyor</option>
-          </select>
-          <select className="kat-suzgec" value={bvTahsilat} title="Tahsilat durumuna göre süz"
-                  onChange={e => setBvTahsilat(e.target.value as '' | '0' | '1' | '2')}>
-            <option value="">Tahsilat: Tümü</option>
-            <option value="2">Tahsil Edildi</option>
-            <option value="1">Kısmi Tahsilat</option>
-            <option value="0">Tahsilat Yok</option>
-          </select>
-          {/* Eski cipler: belgenin fis/faturaya DONUSUM durumu. */}
-          <select className="kat-suzgec" value={bvDonusum} title="Dönüşüm durumuna göre süz"
-                  onChange={e => setBvDonusum(e.target.value as '' | '0' | '1' | '2')}>
-            <option value="">Dönüşüm: Tümü</option>
-            <option value="0">Açık</option>
-            <option value="1">Kısmi</option>
-            <option value="2">Kapanan</option>
-          </select>
-          <select className="kat-suzgec" value={bvOdeyen} title="Ödeyen kuruma göre süz"
-                  onChange={e => setBvOdeyen(e.target.value ? Number(e.target.value) : '')}>
-            <option value="">Tüm Kurumlar</option>
-            {bvKurumlar.map(k => (
-              <option key={k.id} value={k.id}>{k.ad} ({k.adet})</option>
-            ))}
-          </select>
-          <BolumSuzgeci
-            deger={bvBolum?.id ?? null}
-            izinliIdler={bvBolumler.map(x => x.id)}
-            onDegis={(id, agac) => setBvBolum(id === null ? null : { id, agac })}
-          />
-          <select className="kat-suzgec" value={bvDoktor} title="Doktora göre süz"
-                  onChange={e => setBvDoktor(e.target.value ? Number(e.target.value) : '')}>
-            <option value="">Tüm Doktorlar</option>
-            {bvDoktorlar.map(d => (
-              <option key={d.id} value={d.id}>{d.ad} ({d.adet})</option>
-            ))}
-          </select>
-          {(bvTarih !== 'bugun' || bvOdeyen !== '' || bvBolum !== null || bvDoktor !== ''
-            || bvTamamlanma !== '' || bvTahsilat !== '' || bvDonusum !== '') && (
-            <button type="button" className="kapat" title="Başvuru filtrelerini kaldır (tarih bugüne döner)"
-                    onClick={() => { setBvTarih('bugun'); setBvOdeyen('');
-                                     setBvBolum(null); setBvDoktor('');
-                                     setBvTamamlanma(''); setBvTahsilat('');
-                                     setBvDonusum('') }}>×</button>
-          )}
-        </>
+        <BasvuruSeridi s={basvuruSuzgec} />
       ) : tanim.primSuzgeci ? (
-        // HAKEDIS SATIRLARI (kullanici): tarih araliginin SAGINDA once Prim
-        //   Rolu, onun saginda Kisi. Suzme sunucuda; kisi listesi secili role
-        //   gore daralir.
-        <>
-          <select className="kat-suzgec" value={primRol} title="Prim rolüne göre süz"
-                  onChange={e => setPrimRol(e.target.value ? Number(e.target.value) : '')}>
-            <option value="">Tüm Prim Rolleri</option>
-            {primRolleri.map(r => (
-              <option key={r.id} value={r.id}>{r.ad} ({r.adet})</option>
-            ))}
-          </select>
-          <select className="kat-suzgec" value={primKisi} title="Kişiye göre süz"
-                  onChange={e => setPrimKisi(e.target.value ? Number(e.target.value) : '')}>
-            <option value="">Tüm Kişiler</option>
-            {primKisiler.map(k => (
-              <option key={k.id} value={k.id}>{k.ad} ({k.adet})</option>
-            ))}
-          </select>
-          {(primRol !== '' || primKisi !== '') && (
-            <button type="button" className="kapat" title="Prim rolü/kişi filtresini kaldır"
-                    onClick={() => { setPrimRol(''); setPrimKisi('') }}>×</button>
-          )}
-        </>
+        <PrimSeridi s={primSuzgec} />
       ) : (tanim.bolumSuzgeci || rolSuzgeciVar) ? (
-        // PERSONEL (kullanici): ciplerin SAGINDA bolum agac combosu + rol
-        //   combosu. Ikisi de sunucuda suzer - istemci listeyi kendi
-        //   sirasindan ayiklamaz, sayfali listede yanlis olurdu.
-        <>
-          {tanim.bolumSuzgeci && (
-            <BolumSuzgeci
-              deger={personelBolum?.id ?? null}
-              onDegis={(id, agac) => setPersonelBolum(id === null ? null : { id, agac })}
-            />
-          )}
-          {rolSuzgeciVar && (
-            <select className="kat-suzgec" value={personelRol}
-                    title="Kullanıcı rolüne göre süz"
-                    onChange={e => setPersonelRol(e.target.value ? Number(e.target.value) : '')}>
-              <option value="">Tüm Roller</option>
-              {roller.map(r => <option key={r.id} value={r.id}>{r.ad}</option>)}
-            </select>
-          )}
-          {(personelBolum !== null || personelRol !== '') && (
-            <button type="button" className="kapat" title="Bölüm/rol filtresini kaldır"
-                    onClick={() => { setPersonelBolum(null); setPersonelRol('') }}>×</button>
-          )}
-        </>
+        <PersonelSeridi s={personelSuzgec} bolumSuzgeci={tanim.bolumSuzgeci} />
       ) : tanim.ekstre && (
         <button
           disabled={!seciliSatir}
@@ -1883,13 +811,14 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       // BOS BASVURU LISTESI (kullanici: "başvuru kayıtları listelenmedi"):
       //   varsayilan suzgec BUGUN; o gun kayit yoksa liste bos gorunuyor ve
       //   sebebi yazmiyordu. Sebep + tek tikla tum tarihler.
-      bosEk={tanim.basvuruSuzgeci && bvTarih !== '' ? (
+      bosEk={tanim.basvuruSuzgeci && basvuruSuzgec.tarih !== '' ? (
         <div style={{ marginTop: 6 }}>
           <span className="sonuk">
             Seçili tarih aralığında başvuru yok
-            ({TARIH_ON_AYARLAR.find(t => t.deger === bvTarih)?.ad ?? bvTarih}).
+            ({TARIH_ON_AYARLAR.find(t => t.deger === basvuruSuzgec.tarih)?.ad
+              ?? basvuruSuzgec.tarih}).
           </span>{' '}
-          <button type="button" className="d" onClick={() => setBvTarih('')}>
+          <button type="button" className="d" onClick={() => basvuruSuzgec.setTarih('')}>
             Tüm tarihleri göster
           </button>
         </div>
@@ -1915,42 +844,42 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         ad: 'Takvim', ik: '📅',
         icerik: (
           <RandevuTakvimi
-            ayarlar={takvimAyarlari}
-            bolum={bolumSuzgec === '' ? undefined : bolumSuzgec}
-            hekimId={hekimSuzgec === '' ? undefined : hekimSuzgec}
+            ayarlar={randevuEkran.takvimAyarlari}
+            bolum={randevuEkran.bolum === '' ? undefined : randevuEkran.bolum}
+            hekimId={randevuEkran.hekim === '' ? undefined : randevuEkran.hekim}
             yenile={yenile}
             // Hekim gorunumunde sutunun hekimi de karta gecer (251).
-            hekimler={hekimSecenekleri}
+            hekimler={randevuEkran.hekimSecenekleri}
             // CIHAZ gorunumu (316): radyolojide randevu cihaza verilir.
-            cihazlar={cihazSecenekleri}
+            cihazlar={randevuEkran.cihazlar}
             // RANDEVU BEKLEYEN ISTEMLER (316): panel yalniz radyoloji cihazi
             //   tanimliysa cizilir - poliklinik kurulumunda hic gorunmez.
-            yanPanel={cihazSecenekleri.length > 0 ? (
+            yanPanel={randevuEkran.cihazlar.length > 0 ? (
               <RandevuBekleyenPanel
-                secili={bekleyenSecili}
-                onSecim={setBekleyenSecili}
+                secili={randevuEkran.bekleyenSecili}
+                onSecim={randevuEkran.setBekleyenSecili}
                 yenile={yenile}
-                onRandevuModali={i => setRandevuModali({
+                onRandevuModali={i => radyolojiModal.setRandevu({
                   istemId: i.id, accessionNo: i.accessionNo,
                   tetkikAdi: i.tetkik, modalite: i.modalite, sureDk: i.sureDk,
                 })}
               />
             ) : undefined}
-            onKapatmaIste={(cihazId, bas, bit) => setKapatmaModali({
+            onKapatmaIste={(cihazId, bas, bit) => radyolojiModal.setKapatma({
               cihazId, baslangic: bas, bitis: bit,
-              cihazAdi: cihazSecenekleri.find(c => c.id === cihazId)?.ad ?? '',
+              cihazAdi: randevuEkran.cihazlar.find(c => c.id === cihazId)?.ad ?? '',
             })}
             onBirak={(veri, bas, cih) => {
               // Yuk istemin kendisi (panel JSON yazar) - secili satira bakmayiz.
-              try { void bekleyeneRandevuVer(JSON.parse(veri) as BekleyenIstem, bas, cih) }
+              try { void randevuEkran.bekleyeneRandevuVer(JSON.parse(veri) as BekleyenIstem, bas, cih) }
               catch { /* taninmayan surukleme yuku - yok say */ }
             }}
             onYeni={(bas, hek, cih) => {
               // Panelde istem SECILIYSE bos saate tiklamak yeni randevu formu
               //   degil, o isteme randevu demektir (dokunmatik/erisilebilir yol).
-              if (bekleyenSecili) { void bekleyeneRandevuVer(bekleyenSecili, bas, cih); return }
+              if (randevuEkran.bekleyenSecili) { void randevuEkran.bekleyeneRandevuVer(randevuEkran.bekleyenSecili, bas, cih); return }
               // Cihaz sutunundan aciliyorsa bolum/hekim ARANMAZ - kaynak cihaz.
-              const bol = cih ? undefined : (hekimBolumu(hek) ?? (bolumSuzgec || undefined));
+              const bol = cih ? undefined : (randevuEkran.hekimBolumu(hek) ?? (randevuEkran.bolum || undefined));
               git(`/randevu/yeni?baslangic=${encodeURIComponent(bas)}`
                   + (hek ? `&hekim=${hek}` : '')
                   + (cih ? `&cihaz=${cih}` : '')
@@ -1958,7 +887,7 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
             }}
             onAc={id => git(`/randevu/${id}`)}
             onAralik={(bas, sure, hek, cih) =>
-              setTakvimAralik(bas
+              randevuEkran.setAralik(bas
                 ? { baslangic: bas, sureDk: sure, hekimId: hek, cihazId: cih } : null)}
           />
         ),
@@ -2070,18 +999,6 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         onAlindi={() => setYenile(t => t + 1)}
       />
     )}
-    {/* RADYOLOJI ISTEM (304): once hasta, sonra tetkikler. Listeden acilan
-        istem DIS istemdir - ic istem basvuru kartindan acilir. */}
-    <TarafArama
-      acik={istemHastaArama}
-      kaynaklar={['hasta']}
-      yerTutucu="Hastayı isim/tel ile ara…"
-      onKapat={() => setIstemHastaArama(false)}
-      onSec={sec => {
-        setIstemHastaArama(false);
-        setIstemModali({ hastaId: sec.id, hastaAdi: sec.unvan, disIstem: true });
-      }}
-    />
     {rolModali && (
       <KalemRolModali
         belgeSatirId={rolModali.satirId}
@@ -2098,131 +1015,8 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
         onTamam={() => setYenile(x => x + 1)}
       />
     )}
-    {istemModali && (
-      <IstemModali
-        acik
-        hastaId={istemModali.hastaId}
-        hastaAdi={istemModali.hastaAdi}
-        disIstem={istemModali.disIstem}
-        randevuId={istemModali.randevuId ?? null}
-        onSeciliHizmetId={istemModali.hizmetId ?? null}
-        onKapat={() => setIstemModali(null)}
-        onTamam={(_a, sonuc) => {
-          // RANDEVUDAN KABUL (317): acilan basvuru randevuya baglanir, randevu
-          //   "Geldi"ye cekilir - takvim, basvuru ve istem ayni olayi gosterir.
-          const rid = istemModali.randevuId;
-          if (rid && sonuc?.belgeId) {
-            void guvenli(async () => {
-              const mevcut = await api.kartOku('randevu', rid);
-              await api.kartGuncelle('randevu', rid, {
-                surum: mevcut.kart.surum,
-                kart: { belgeId: sonuc.belgeId, durum: 2 },
-              });
-            });
-          }
-          setYenile(t => t + 1);
-        }}
-      />
-    )}
-    {sarfModali && (
-      <SarfOnayModali
-        istemId={sarfModali.istemId}
-        accessionNo={sarfModali.accessionNo}
-        tetkikAdi={sarfModali.tetkikAdi}
-        onKapat={() => setSarfModali(null)}
-        onTamam={() => setYenile(t => t + 1)}
-      />
-    )}
-
-    {kapatmaModali && (
-      <CihazKapatmaModali
-        cihazId={kapatmaModali.cihazId}
-        cihazAdi={kapatmaModali.cihazAdi}
-        baslangic={kapatmaModali.baslangic}
-        bitis={kapatmaModali.bitis}
-        onKapat={() => setKapatmaModali(null)}
-        onTamam={() => setYenile(t => t + 1)}
-      />
-    )}
-
-    {kritikModali && (
-      <KritikBildirimModali
-        istemId={kritikModali.istemId}
-        accessionNo={kritikModali.accessionNo}
-        hasta={kritikModali.hasta}
-        tetkik={kritikModali.tetkik}
-        bulgu={kritikModali.bulgu}
-        bildirilenAd={kritikModali.bildirilenAd}
-        onKapat={() => setKritikModali(null)}
-        onTamam={() => setYenile(t => t + 1)}
-      />
-    )}
-
-    {konsultasyonModali && (
-      <KonsultasyonCevapModali
-        istemId={konsultasyonModali.istemId}
-        konsultasyonId={konsultasyonModali.konsultasyonId}
-        accessionNo={konsultasyonModali.accessionNo}
-        hasta={konsultasyonModali.hasta}
-        tetkik={konsultasyonModali.tetkik}
-        soru={konsultasyonModali.soru}
-        mevcutGorus={konsultasyonModali.gorus}
-        onKapat={() => setKonsultasyonModali(null)}
-        onTamam={() => setYenile(t => t + 1)}
-      />
-    )}
-
-    {randevuModali && (
-      <RandevuModali
-        istemId={randevuModali.istemId}
-        accessionNo={randevuModali.accessionNo}
-        tetkikAdi={randevuModali.tetkikAdi}
-        modalite={randevuModali.modalite}
-        sureDk={randevuModali.sureDk}
-        onKapat={() => setRandevuModali(null)}
-        onTamam={() => setYenile(t => t + 1)}
-      />
-    )}
-
-    {teslimModali && (
-      <TeslimModali
-        istemId={teslimModali.istemId}
-        accessionNo={teslimModali.accessionNo}
-        cdIstendi={teslimModali.cdIstendi}
-        onKapat={() => setTeslimModali(null)}
-        onTamam={() => setYenile(t => t + 1)}
-      />
-    )}
-    {utsBelgeSonuc && (
-      <UtsBelgeSonucModali sonuc={utsBelgeSonuc} onKapat={() => setUtsBelgeSonuc(null)} />
-    )}
-    {utsHazirla && (
-      <UtsHazirlaSonucModali sonuc={utsHazirla} onKapat={() => setUtsHazirla(null)} />
-    )}
-    {utsGenel && (
-      <UtsGenelBildirimModali
-        tur={utsGenel}
-        onKapat={() => setUtsGenel(null)}
-        onTamam={m => { setUtsGenel(null); mesaj(m); setYenile(t => t + 1) }}
-      />
-    )}
-    {utsKullanim && (
-      <UtsKullanimModali
-        onKapat={() => setUtsKullanim(false)}
-        onTamam={m => { setUtsKullanim(false); mesaj(m); setYenile(t => t + 1) }}
-      />
-    )}
-    {utsAlma && (
-      <UtsAlmaModali
-        envanterId={utsAlma.envanterId}
-        urunNo={utsAlma.urunNo}
-        kurumUnvan={utsAlma.kurumUnvan}
-        askiAdet={utsAlma.askiAdet}
-        seriNo={utsAlma.seriNo}
-        onKapat={() => setUtsAlma(null)}
-        onTamam={m => { setUtsAlma(null); mesaj(m); setYenile(t => t + 1) }}
-      />
-    )}
+    <RadyolojiModallari m={radyolojiModal} tazele={() => setYenile(t => t + 1)} />
+    <UtsModallari m={utsModal} tazele={() => setYenile(t => t + 1)} />
     {donusum && (
       <BelgeDonusumModali
         belgeId={donusum.belgeId}
@@ -2267,281 +1061,17 @@ Satışta VERME, alışta askıdakilerle eşleşip ALMA yapılır. Onaylıyor mu
       />
     )}
 
-    {kartId !== null && tanim.kartYolu && !tanim.ozelKart && (
-      <GenForm
-        kaynak={tanim.kaynak}
-        id={kartId}
-        // MUAYENE > ISTEM & SONUCLAR (443): katalogdan gelen bag gridi
-        //   "su istem acildi" der; hekimin ihtiyaci SONUCUN KENDISI.
-        //   Sarmalayici o sekmenin ALTINA sonuc panelini koyar - gridi
-        //   kaldirmadan, cunku "gorduм" isareti ve aciliyet orada duruyor.
-        // ÇALIŞMA TAKVİMİ (487): tetkik kartinin "Çalışma Zamanları"
-        //   sekmesinde, alanlarin ALTINDA haftalik tablo ve uc ozet kutusu.
-        //   Alanlar girdi, takvim SONUC - ikisi ayni sekmede olmali ki
-        //   kullanici "bu ayarla sonuc ne zaman cikar" sorusunu kaydetmeden
-        //   gorebilsin. Hesap sunucuda.
-        sekmeSarmalayici={tanim.kaynak === 'lab-tetkik'
-          ? (baslik, icerik, deger) => (
-              baslik.includes('Çalışma Zamanları')
-                ? <>{icerik}<LabCalismaTakvimi deger={deger as CalismaDuzeni} /></>
-                : icerik)
-          : tanim.kaynak === 'muayene' && kartId !== 'yeni'
-          ? (baslik, icerik, _deger, izgaraCiz) => (
-              baslik.includes('Anamnez')
-                // MOCKUP IKI PANEL (461): solda sikayet/hikaye/ozgecmis,
-                //   sagda SON vital olcumu. Hekim sikayeti yazarken
-                //   tansiyonu ayni ekranda gormeli - vital ayri sekmede
-                //   kalirsa bakilmadan yazilir.
-                ? (
-                  <div className="muayene-ikili">
-                    <div className="mi-sol">{icerik}</div>
-                    <div className="mi-sag">
-                      {/* VITAL IZGARASI DUZENLENEBILIR (kullanici): okunur
-                          panel yerine muayenenin SON olcumu - hekim sikayeti
-                          yazarken tansiyonu ayni ekranda girer. Sira mockup:
-                          tansiyon/nabiz/SpO2 · ates/solunum/agri ·
-                          boy-kilo/BKI/bel. */}
-                      {izgaraCiz?.('vitaller')}
-                      {/* Mockup'ta vitalin ALTINDA "Bugunku sonuclar": hekim
-                          anamnezi yazarken bugun ne ciktigini yaninda ister. */}
-                      <MuayeneSonucOzeti muayeneId={Number(kartId)} />
-                    </div>
-                  </div>
-                )
-                : baslik === 'Rapor' ? (
-                  // MOCKUP RAPOR ARAC CUBUGU: rapor ekleme grid basliginda,
-                  //   imza SUNUCU ucunda (eksik rapor reddedilir).
-                  <>
-                    <div className="muayene-arac">
-                      <button type="button" className="d bir"
-                              onClick={() => void aksiyon('muayene.raporImza',
-                                                          { id: Number(kartId) })}>
-                        ✍ e-İmzala
-                      </button>
-                    </div>
-                    {icerik}
-                    <div className="not ic">
-                      Türler: istirahat · sağlık durumu · ilaç kullanım (SUT) ·
-                      iş göremezlik. Bitiş tarihi başlangıç + süreden hesaplanır;
-                      imzalanan rapor değiştirilemez.
-                    </div>
-                  </>
-                )
-                : baslik.startsWith('Sevk') ? (
-                  // Sevk alanlarinin ALTINDA bu muayeneden istenen
-                  //   konsultasyonlar (mockup "Sevk / Konsultasyon").
-                  <MuayeneKonsultasyonSekmesi veri={sekmeVerisi.veri}
-                                              hata={sekmeVerisi.hata}
-                                              icerik={icerik} />
-                )
-                : (
-                  <>
-                    {/* FIZIK MUAYENE ARAC CUBUGU (mockup): sablon uygula ve
-                        "tumu normal" - ikisi de SUNUCU ucuna gider, satirlari
-                        istemci degistirmez. */}
-                    {baslik.startsWith('Tanı') && (
-                      <div className="muayene-arac">
-                        {/* Tek mavi dugme (kullanici): ICD kodu/adi SORULUR,
-                            katalog aramasi ve ekleme sunucuda. */}
-                        <button type="button" className="d bir"
-                                onClick={() => setIcdAramaAcik(true)}>
-                          ＋ ICD-10 Ekle
-                        </button>
-                        {/* Kaldir/duzenle GRID BASLIGINDA (ikonlu kip):
-                            secili satira uygulanir. */}
-                        {/* Sık / son / önceki listeleri ARAMA PENCERESINDE
-                            (kullanıcı): tek yerde, aramayla aynı akışta. */}
-                      </div>
-                    )}
-                    {baslik === 'Fizik Muayene' && (
-                      <div className="muayene-arac">
-                        <button type="button" className="d"
-                                onClick={() => void aksiyon('muayene.sablon',
-                                                            { id: Number(kartId) })}>
-                          📋 Şablon Uygula
-                        </button>
-                        <button type="button" className="d"
-                                onClick={() => void aksiyon('muayene.normal',
-                                                            { id: Number(kartId) })}>
-                          ☑ Tümü normal işaretle
-                        </button>
-                      </div>
-                    )}
-                    {/* ISTEM & SONUCLAR (mockup): BAG GRIDI CIZILMEZ - hedef
-                        tablo/id teknik alanlar, hekime bir sey soylemiyor;
-                        "gordum" isareti panelde dugme. Sekme mockup'taki
-                        gibi arac cubugu + tek istem tablosu + ayrintilar. */}
-                    {baslik.includes('Sonuç') ? (
-                      <>
-                        <div className="muayene-arac">
-                          <button type="button" className="d"
-                                  onClick={() => void aksiyon('muayene.istemLab',
-                                                              { id: Number(kartId) })}>
-                            ＋ Laboratuvar
-                          </button>
-                          <button type="button" className="d"
-                                  onClick={() => void aksiyon('muayene.istemGoruntuleme',
-                                                              { id: Number(kartId) })}>
-                            ＋ Görüntüleme
-                          </button>
-                        </div>
-                        <MuayeneIstemSonuc muayeneId={Number(kartId)} />
-                      </>
-                    ) : icerik}
-                  </>
-                )
-            )
-          : undefined}
-        // MUAYENE BAGLAM SERIDI (461, mockup muayene_karti.html): hasta,
-        //   alerji/kronik, aktif ilac ve bugunun notu her sekmenin ustunde
-        //   durur - hekim ilac yazarken alerjiyi ayri sekmede aramamali.
-        // DURUM BASLIKTA ROZET (kullanici): alan izgarasinda kutu tutmak
-        //   yerine kartin ustunde - hasta/protokol/tarih bilgisi zaten
-        //   baglam seridinde, izgara yalnizca YAZILAN alanlara kaliyor.
-        baslikEk={tanim.kaynak === 'muayene'
-          ? (d) => {
-              const kod = String(d.durum ?? '');
-              const ad = MUAYENE_DURUM[kod] ?? '';
-              if (!ad) return null;
-              const sinif = kod === '3' ? 'olumlu' : kod === '0' ? 'gri'
-                          : kod === '2' ? 'uyari' : 'mavi';
-              return <span className={`rozet ${sinif}`}>{ad}</span>;
-            }
-          : undefined}
-        // UYARI BANDI BAGLAM SERIDININ ALTINDA (kullanici): "ana tani
-        //   girilmedi", "panik sonuc", "alerji kaydi var" hekim yazmaya
-        //   baslamadan gorulmeli - kartin en altinda fark edilmiyordu.
-        ustBaglam={tanim.kaynak === 'muayene' && kartId !== 'yeni'
-          ? () => (
-            <>
-              <MuayeneBaglamSeridi muayeneId={Number(kartId)}
-                                   onBugun={() => setMuayeneBilgiAcik(true)} />
-              <MuayeneDurumSeridi muayeneId={Number(kartId)} />
-            </>
-          )
-          : undefined}
-        // PENCEREDEKI ALAN SIRASI (kullanici): once hekimin sectikleri
-        //   (bolum, hekim, tur, isteyen muayene), EN ALTTA sistemin yazdigi
-        //   baslama/bitis damgalari. `seritAlanlari` hem listeyi hem SIRAYI
-        //   belirler; katalogdaki tanim sirasi degismedi.
-        // FIZIK MUAYENE TEK SEKME (mockup muayene_karti.html): "Bulgular"
-        //   detayi ayri sekme degil, "Muayene" sekmesinde sablon alanlarinin
-        //   ALTINDA - hekim sablonu secip ayni ekranda dolduruyor.
-        //   Mockup tablosu UC KOLON (kullanici): Sistem (etiket) · Normal
-        //   (kutu) · Bulgu (metin). Sistem satirin kimligidir - satirlar
-        //   sablondan acilir, secim kutusu yanlis bir vaat olurdu; deger/taraf
-        //   ise mockup'ta yok.
-        tazeleAnahtari={kartTazele}
-        detaySecenekleri={kartOzel.detaySecenekleri}
-        sekmeSirasi={kartOzel.sekmeSirasi}
-        // MOCKUP EK SEKMELERI (muayene_karti.html): e-Recete · Sevk /
-        //   Konsultasyon · Islem & Ucret · Gecmis · Dosyalar. Icerik gercek
-        //   kayitlardan gelir (tek uc: /api/muayene/{id}/sekme-verisi);
-        //   yazma islemleri kendi ekranlarinda kalir.
-        // MIKRO KATALOG KARTLARININ "Tanım" SEKMESI (mockup
-        //   Ekranlar/Lab/besiyeri_karti.html · organizma_karti.html ·
-        //   antibiyotik_karti.html): uc mockup'ta da ILK sekme okunur bir
-        //   ozettir. Icerik kartin KENDI degerlerinden gelir - ikinci istek
-        //   yok, kural yok.
-        ekSekmeler={labMikroOzetiVar(tanim.kaynak)
-            && kartId !== 'yeni' && kartId !== null
-          ? [{ anahtar: 'ozel:tanim', baslik: 'Tanım',
-               ciz: baglam => <LabMikroOzet kaynak={tanim.kaynak} baglam={baglam} /> }]
-          : tanim.kaynak === 'muayene' && kartId !== 'yeni' && kartId !== null
-          ? [
-              { anahtar: 'ozel:recete', baslik: 'e-Reçete',
-                ciz: () => (
-                  <MuayeneReceteSekmesi
-                    veri={sekmeVerisi.veri} hata={sekmeVerisi.hata}
-                    muayeneId={Number(kartId)}
-                    // Recetenin tanisi muayenenin ANA + ek tanilaridir; ayri
-                    //   sorulacak bir sey degil (mockup da okunur gosteriyor).
-                    tanilar={sekmeVerisi.veri?.tanilar ?? ''}
-                    tazele={() => setKartTazele(t => t + 1)} />
-                ) },
-              { anahtar: 'ozel:ucret', baslik: 'İşlem & Ücret',
-                ciz: () => <MuayeneUcretSekmesi veri={sekmeVerisi.veri}
-                                                hata={sekmeVerisi.hata} /> },
-              { anahtar: 'ozel:gecmis', baslik: 'Geçmiş',
-                ciz: () => (
-                  <MuayeneGecmisSekmesi veri={sekmeVerisi.veri} hata={sekmeVerisi.hata}
-                                        muayeneId={Number(kartId)}
-                                        tazele={() => setKartTazele(t => t + 1)} />
-                ) },
-              { anahtar: 'ozel:dosyalar', baslik: 'Dosyalar',
-                ciz: () => <DokumanGalerisi kartAdi="muayene"
-                                            kaynakId={Number(kartId)}
-                                            saltOkunur={false} /> },
-            ]
-          : undefined}
-        // VITAL BULGULAR SEKMESI YOK (kullanici): olcum anamnez sekmesinin
-        //   sag panelinde duzenleniyor - ayni veriyi iki sekmede gostermek
-        //   hangisinin gecerli oldugunu belirsiz birakiyordu.
-        gizliDetaylar={kartOzel.gizliDetaylar}
-        detayGrupta={kartOzel.detayGrupta}
-        detayIzgara={kartOzel.detayIzgara}
-        seritAlanlari={kartOzel.seritAlanlari}
-        // KIMLIK SERIDI MODALA TASINDI (kullanici): serit kart govdesinde
-        //   cizilmez; "Bugun" kutusuna basilinca ayni GenForm alanlariyla
-        //   (yani ayni deger/dogrulama/kaydetme yoluyla) pencerede acilir.
-        seritSarmalayici={tanim.kaynak === 'muayene' && kartId !== 'yeni'
-          ? (serit) => (muayeneBilgiAcik ? (
-              <Modal baslik="Muayene bilgileri" dar enUst
-                     onKapat={() => setMuayeneBilgiAcik(false)}
-                     alt={<button type="button" className="d"
-                                  onClick={() => setMuayeneBilgiAcik(false)}>Kapat</button>}>
-                <div className="muayene-bilgi">{serit}</div>
-              </Modal>
-            ) : null)
-          : undefined}
-
-        // MUAYENE EYLEMLERI KARTTA (461): ayni aksiyon kodlari listedekiyle
-        //   BIREBIR ayni isleyiciye gider - kural ve yetki tek yerde kalir.
-        ekAraclar={tanim.kaynak === 'muayene' && kartId !== 'yeni'
-          ? (d) => {
-              const satir = { id: Number(kartId), hastaAdi: String(d.tarafAdi ?? '') };
-              const dugme = (kod: string, ad: string, sinif = 'd') => (
-                <button key={kod} type="button" className={sinif}
-                        onClick={() => void aksiyon(kod, satir)}>{ad}</button>
-              );
-              return (
-                <>
-                  {dugme('muayene.al', '▶ Muayeneye Al')}
-                  {dugme('muayene.istem', '🧪 İstem Aç')}
-                  {dugme('muayene.sablon', '📋 Şablon Uygula')}
-                  {dugme('muayene.tamamla', '✓ Tamamla')}
-                </>
-              );
-            }
-          : undefined}
-        baslik={tanim.kartBaslik ?? tanim.baslik.replace(/ler$|lar$/, '')}
-        yerTutucuSekmeler={tanim.yerTutucuSekmeler}
-        gizliAlanlar={tanim.gizliKartAlanlari}
-        gizliSekmeler={tanim.gizliKartSekmeleri}
-        zorunluAlanlar={tanim.zorunluKartAlanlari}
-        resimYerTutucu={tanim.resimYerTutucu}
-        // Takvimden gelen saat/sure (251): URL parametreleri kart varsayilani
-        //   olur - kart acilinca alanlar dolu gelir.
-        yeniKayitVarsayilanlari={tanim.kaynak === 'randevu' && sorgu.get('baslangic')
-          ? {
-              ...tanim.yeniKayitVarsayilanlari,
-              baslangic: sorgu.get('baslangic')!,
-              ...(sorgu.get('sure') ? { sureDk: Number(sorgu.get('sure')) } : {}),
-              ...(sorgu.get('hekim') ? { hekimId: Number(sorgu.get('hekim')) } : {}),
-              ...(sorgu.get('bolum') ? { bolum: Number(sorgu.get('bolum')) } : {}),
-              ...(sorgu.get('cihaz') ? { cihazId: Number(sorgu.get('cihaz')) } : {}),
-            }
-          : tanim.yeniKayitVarsayilanlari}
-        onKapat={() => git(tanim.kartYolu!)}
-        onKaydedildi={yeniId => {
-          setYenile(t => t + 1);
-          if (kartId === 'yeni') {
-            setOdaklaSonEklenen(t => t + 1);
-            git(`${tanim.kartYolu}/${yeniId}`, { replace: true });
-          }
-        }}
-      />
-    )}
+    {/* KART (modal GenForm): muayene/lab tetkik ozel yerlesimi dahil,
+        kendi dosyasinda (liste/ListeKarti). */}
+    <ListeKarti
+      tanim={tanim} kartId={kartId} kartOzel={kartOzel} sekmeVerisi={sekmeVerisi}
+      aksiyon={aksiyon}
+      muayeneBilgiAcik={muayeneBilgiAcik} setMuayeneBilgiAcik={setMuayeneBilgiAcik}
+      setIcdAramaAcik={setIcdAramaAcik}
+      kartTazele={kartTazele} setKartTazele={setKartTazele}
+      sorgu={sorgu} git={git} setYenile={setYenile}
+      setOdaklaSonEklenen={setOdaklaSonEklenen}
+    />
     </>
   );
 }

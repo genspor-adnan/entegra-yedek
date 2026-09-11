@@ -28,6 +28,8 @@ import { useBelgeTahsilat, tahsilToplami } from './belgeTahsilat';
 import { kartImzasi } from './belgeImza';
 import { yanittanBaslik, yanittanBasvuruBilgi } from './belgeKarti/belgeOkuma';
 import { useBasvuruKaynaklari } from './belgeKarti/useBasvuruKaynaklari';
+import { useSevkiyatBilgisi, useTeklifBilgisi }
+  from './belgeKarti/useSevkiyatBilgisi';
 import { useParaAkislari, type ParaAkisRef } from './belgeKarti/useParaAkislari';
 import { useBelgeFiyatlandirma } from './belgeKarti/useBelgeFiyatlandirma';
 import {
@@ -202,16 +204,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * satir satir listeden okunarak.
    */
   /** Teklif durumu (218): 1 Hazirlaniyor / 2 Sunuldu / 3 Kabul / 4 Red / 5 Iptal. */
-  const [teklifDurum, setTeklifDurum] = useState('1');
-  const [revizeNo, setRevizeNo] = useState('');
-  const [teklifKonusu, setTeklifKonusu] = useState('');
-  const [teklifTeslim, setTeklifTeslim] = useState('');
+  // TEKLIF BASLIGI (218) demet halinde: durum, revize no, konu, teslim.
+  const teklif = useTeklifBilgisi();
   const [depo, setDepo] = useState<{ id: number; ad: string } | null>(null);
   /** Yalniz transferde (20): malin GIDECEGI depo. Tekil belgelerde kullanilmaz. */
   const [girisDepo, setGirisDepo] = useState<{ id: number; ad: string } | null>(null);
   /** Transferde sorumluluk devri: teslim EDEN (asagida, irsaliyeyle ortak) ve
       teslim ALAN personel - transferde ikisi de zorunlu. */
-  const [teslimAlan, setTeslimAlan] = useState<{ id: number; ad: string } | null>(null);
   /** Stok fisinde (3/4) fisin SEBEBI - belge.tipi. 0 = secilmedi. */
   const [fisTipi, setFisTipi] = useState(0);
   /** Hangi personel alani araniyor - ayni TarafArama iki alani da besler. */
@@ -221,13 +220,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   //   belgedeki deger bunu ezer; kullanici istedigiyle degistirebilir.
   const [satici, setSatici] = useState<{ id: number; ad: string } | null>(
     kullanici ? { id: kullanici.id, ad: kullanici.ad } : null);
-  const [teslimSekli, setTeslimSekli] = useState(0);
-  const [sevkTarihi, setSevkTarihi] = useState('');
-  const [soforTckn, setSoforTckn] = useState('');
-  const [tasiyici, setTasiyici] = useState<{ id: number; ad: string } | null>(null);
-  const [aracPlaka, setAracPlaka] = useState('');
-  const [soforAd, setSoforAd] = useState('');
-  const [teslimEden, setTeslimEden] = useState<{ id: number; ad: string } | null>(null);
+  // IRSALIYE / SEVKIYAT alanlari (tasiyici · arac · sofor · teslim) demet
+  //   halinde: Taşıyıcı sekmesine tek prop olarak gecer.
+  const sevkiyat = useSevkiyatBilgisi();
   /* TASLAK kutusu arac cubugundan KALKTI (kullanici): kart kaydedince belge
      kesindir. Sunucu tarafi (durum 1) duruyor - gocten gelen eski taslaklar
      ve liste cipleri icin gerekli, ama kart artik hep KESIN yazar. */
@@ -508,15 +503,16 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
       // Talepte teslim eden YOK (mal henuz cikmadi) ve teslim deposu opsiyonel:
       //   talep eden kendi eline de alabilir.
       ? (!depo ? 'istenen depo'
-        : !teslimAlan ? 'talep eden'
+        : !sevkiyat.teslimAlan ? 'talep eden'
         : girisDepo && depo.id === girisDepo.id ? 'farklı teslim deposu'
         : null)
       : (!depo ? 'çıkış deposu'
         : !girisDepo ? 'giriş deposu'
-        : !teslimEden ? 'teslim eden'
-        : !teslimAlan ? 'teslim alan'
+        : !sevkiyat.teslimEden ? 'teslim eden'
+        : !sevkiyat.teslimAlan ? 'teslim alan'
         : depo.id === girisDepo.id ? 'farklı giriş/çıkış deposu'
-        : teslimEden.id === teslimAlan.id ? 'farklı teslim eden/alan'
+        : sevkiyat.teslimEden.id === sevkiyat.teslimAlan.id
+          ? 'farklı teslim eden/alan'
         : null);
 
   /** Kutunun izin verdigi araligin iki ucu - her render'da "simdi"ye gore. */
@@ -742,21 +738,21 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         setBasvuruBilgi(yanittanBasvuruBilgi(y.belge));
         setKampanyaId(d.kampanyaId);
         setKampanyaAdi(d.kampanyaAdi);
-        setTeklifDurum(d.teklifDurum);
-        setRevizeNo(d.revizeNo);
-        setTeklifKonusu(d.teklifKonusu);
-        setTeklifTeslim(d.teklifTeslim);
+        teklif.setDurum(d.teklifDurum);
+        teklif.setRevizeNo(d.revizeNo);
+        teklif.setKonu(d.teklifKonusu);
+        teklif.setTeslim(d.teklifTeslim);
         setDepo(d.depo);
         setGirisDepo(d.girisDepo);
         setSatici(d.satici);
-        setTeslimEden(d.teslimEden);
-        setTeslimAlan(d.teslimAlan);
-        setTeslimSekli(d.teslimSekli);
+        sevkiyat.setTeslimEden(d.teslimEden);
+        sevkiyat.setTeslimAlan(d.teslimAlan);
+        sevkiyat.setTeslimSekli(d.teslimSekli);
         setSenaryo(d.senaryo);
-        setSevkTarihi(d.sevkTarihi);
-        setSoforTckn(d.soforTckn);
-        setAracPlaka(d.aracPlaka);
-        setSoforAd(d.soforAd);
+        sevkiyat.setSevkTarihi(d.sevkTarihi);
+        sevkiyat.setSoforTckn(d.soforTckn);
+        sevkiyat.setAracPlaka(d.aracPlaka);
+        sevkiyat.setSoforAd(d.soforAd);
         setFisTipi(d.fisTipi);
         setFaturaTipi(d.faturaTipi);
         setRaporDovizi(d.raporDovizi);
@@ -1035,12 +1031,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
       //   eski belgenin hangi anlasmayla kesildigi sabit kalir.
       kampanyaId,
       // Teklif durumu yalniz teklifte anlamli - baska turde gonderilmez.
-      ...(teklifMi ? { teklifDurum: Number(teklifDurum) || 1, revizeNo,
-                       teklifKonusu, teklifTeslim } : {}),
+      ...(teklifMi ? { teklifDurum: Number(teklif.durum) || 1,
+                       revizeNo: teklif.revizeNo, teklifKonusu: teklif.konu,
+                       teklifTeslim: teklif.teslim } : {}),
       aciklama,
       raporDovizi, ekstreDovizi, belgeKuru, yerelPara,
-      senaryo, satici, depo, girisDepo, teslimEden, teslimAlan, tasiyici,
-      aracPlaka, soforAd, soforTckn, sevkTarihi, teslimSekli, fisTipi, satirlar,
+      senaryo, satici, depo, girisDepo,
+      teslimEden: sevkiyat.teslimEden, teslimAlan: sevkiyat.teslimAlan,
+      tasiyici: sevkiyat.tasiyici, aracPlaka: sevkiyat.aracPlaka,
+      soforAd: sevkiyat.soforAd, soforTckn: sevkiyat.soforTckn,
+      sevkTarihi: sevkiyat.sevkTarihi, teslimSekli: sevkiyat.teslimSekli,
+      fisTipi, satirlar,
       subeId: kullanici?.subeId ?? undefined,
       alisMi, irsaliyeMi, faturaMi, depoBelgesi, stokFisiMi, fisCikisMi, transferMi,
       talepMi, disNumarali, basvuruMu, tahakkukMu,
@@ -1463,13 +1464,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           basvuruMu={basvuruMu}
           provizyonVar={provizyonVar}
           numaraElle={protokolElle}
-          teklifDurum={teklifDurum} setTeklifDurum={setTeklifDurum}
-          revizeNo={revizeNo} setRevizeNo={setRevizeNo}
-          teklifKonusu={teklifKonusu} setTeklifKonusu={setTeklifKonusu}
-          teklifTeslim={teklifTeslim} setTeklifTeslim={setTeklifTeslim}
+          teklif={teklif}
           cari={cari} satici={satici}
           depo={depo} setDepo={setDepo} girisDepo={girisDepo} setGirisDepo={setGirisDepo}
-          teslimEden={teslimEden} teslimAlan={teslimAlan}
+          sevkiyat={sevkiyat}
           fisTipi={fisTipi} setFisTipi={setFisTipi}
           faturaTipi={faturaTipi} setFaturaTipi={setFaturaTipi}
           satirlar={satirlar} donusumler={donusumler}
@@ -1537,13 +1535,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         {aktifSekme === 'tasiyici' && (
           <TasiyiciSekmesi
             kilitli={kilitli}
-            tasiyici={tasiyici} setTasiyici={setTasiyici}
-            teslimEden={teslimEden} setTeslimEden={setTeslimEden}
-            aracPlaka={aracPlaka} setAracPlaka={setAracPlaka}
-            soforAd={soforAd} setSoforAd={setSoforAd}
-            soforTckn={soforTckn} setSoforTckn={setSoforTckn}
-            sevkTarihi={sevkTarihi} setSevkTarihi={setSevkTarihi}
-            teslimSekli={teslimSekli} setTeslimSekli={setTeslimSekli}
+            sevkiyat={sevkiyat}
             belge={sonuc?.belge}
           />
         )}
@@ -1559,7 +1551,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         {aktifSekme === 'fatura' && (
           <FaturalamaSekmesi
             donusumler={donusumler} kayitliId={kayitliId} setDonusum={setDonusum}
-            teklifMi={teklifMi} teklifDurum={teklifDurum}
+            teklifMi={teklifMi} teklifDurum={teklif.durum}
             donusumAc={donusumAc} donusumSil={donusumSil}
             hizliDonustur={t => void hizliDonustur(t)}
             olcu={donusumOlcusu} setOlcu={setDonusumOlcusu}
@@ -1683,7 +1675,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           hastaKartId={hastaKartId} setHastaKartId={setHastaKartId}
           saticiArama={saticiArama} setSaticiArama={setSaticiArama} setSatici={setSatici}
           personelArama={personelArama} setPersonelArama={setPersonelArama}
-          setTeslimEden={setTeslimEden} setTeslimAlan={setTeslimAlan}
+          setTeslimEden={sevkiyat.setTeslimEden}
+          setTeslimAlan={sevkiyat.setTeslimAlan}
           satirlar={satirlar} setSatirlar={setSatirlar}
           stokArama={stokArama} setStokArama={setStokArama}
           aramaEklenen={aramaEklenen} setAramaEklenen={setAramaEklenen}

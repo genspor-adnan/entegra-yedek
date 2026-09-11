@@ -2,6 +2,8 @@ import { useRef, useState } from 'react';
 import { TarafSecici } from '../TarafArama';
 import { TESLIM_SEKLI, SENARYO_SECENEK, eBelgeTipi } from '../../sayfalar/belgeSabitleri';
 import type { BelgeYaniti } from '../../api/sozlesme';
+import type { SevkiyatBilgisi }
+  from '../../sayfalar/belgeKarti/useSevkiyatBilgisi';
 import { para } from '../bicim';
 
 /**
@@ -11,24 +13,19 @@ import { para } from '../bicim';
  * sekmeleri kartin kendi durumuna daha sikca bagli oldugu icin kartta kaldi.
  */
 
-export function TasiyiciSekmesi({
-  kilitli, tasiyici, setTasiyici, teslimEden, setTeslimEden,
-  aracPlaka, setAracPlaka, soforAd, setSoforAd, soforTckn, setSoforTckn,
-  sevkTarihi, setSevkTarihi, teslimSekli, setTeslimSekli, belge,
-}: {
+export function TasiyiciSekmesi({ kilitli, sevkiyat, belge }: {
   kilitli: boolean;
-  tasiyici: { id: number; ad: string } | null;
-  setTasiyici(v: { id: number; ad: string } | null): void;
-  teslimEden: { id: number; ad: string } | null;
-  setTeslimEden(v: { id: number; ad: string } | null): void;
-  aracPlaka: string; setAracPlaka(v: string): void;
-  soforAd: string; setSoforAd(v: string): void;
-  soforTckn: string; setSoforTckn(v: string): void;
-  sevkTarihi: string; setSevkTarihi(v: string): void;
-  teslimSekli: number; setTeslimSekli(v: number): void;
+  /** Sevkiyat alanlari DEMET halinde gelir (belgeKarti/useSevkiyatBilgisi):
+      on dort ayri prop yerine tek nesne - yeni alan tek yerde eklenir. */
+  sevkiyat: SevkiyatBilgisi;
   /** Kayitli belge - sevk adresi ve e-Belge durum alanlari buradan okunur. */
   belge?: BelgeYaniti['belge'];
 }) {
+  const {
+    tasiyici, setTasiyici, teslimEden, setTeslimEden,
+    aracPlaka, setAracPlaka, soforAd, setSoforAd, soforTckn, setSoforTckn,
+    sevkTarihi, setSevkTarihi, teslimSekli, setTeslimSekli,
+  } = sevkiyat;
   return (
   <div className="kagrup">
     <h6>Taşıyıcı Bilgileri</h6>
