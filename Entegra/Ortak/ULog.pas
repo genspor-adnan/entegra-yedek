@@ -2790,19 +2790,36 @@ begin
       //    henuz silinmediginden alt tablonun filtresi dogru cozer.
       // SILME sirasi SILSIRA'dan okunur (yoksa SIRA). Tetik bagimliligi olan tablolarda
       //   silme sirasi ekleme sirasindan FARKLI olabilir (bkz. GenDepoUpdate125).
+      // VERISATIRI: bu oturumda o tablo icin YAKALANMIS satir var mi (KAYITID dolu).
+      //   0 ise tabloya HIC DOKUNULMAZ (asagida atlanir) - bkz. dongudeki aciklama.
       if SnapshotSilSiraVarMi then
         LPlanQ.SQL.Text :=
           'SELECT DISTINCT COALESCE(SILSIRA,SIRA) SIRA, TABLOADI, FILTRE, ' +
-          'MAX(CAST(COALESCE(TAMSIL,0) AS int)) OVER (PARTITION BY TABLOADI) TAMSIL FROM ' + LSnap +
+          'MAX(CAST(COALESCE(TAMSIL,0) AS int)) OVER (PARTITION BY TABLOADI) TAMSIL, ' +
+          'MAX(CASE WHEN KAYITID IS NULL THEN 0 ELSE 1 END) OVER (PARTITION BY TABLOADI) VERISATIRI FROM ' + LSnap +
           ' WHERE OTURUMID=:O ORDER BY 1 DESC'
       else
         LPlanQ.SQL.Text :=
-          'SELECT DISTINCT SIRA, TABLOADI, FILTRE, 0 TAMSIL FROM ' + LSnap +
+          'SELECT DISTINCT SIRA, TABLOADI, FILTRE, 0 TAMSIL, ' +
+          'MAX(CASE WHEN KAYITID IS NULL THEN 0 ELSE 1 END) OVER (PARTITION BY TABLOADI) VERISATIRI FROM ' + LSnap +
           ' WHERE OTURUMID=:O ORDER BY SIRA DESC';
       LPlanQ.ParamByName('O').AsString := AOturum;
       LPlanQ.Open;
       while not LPlanQ.Eof do
       begin
+        // KORUMA: o tablo icin snapshot'ta hic VERI satiri yoksa tabloya dokunma.
+        //   Silme kosulu "ID NOT IN (snapshot ID'leri)" seklinde kurulur; snapshot
+        //   bos oldugunda NOT IN de bos kalir ve kosul TUM satirlar icin dogru olur
+        //   -> filtredeki her sey silinirdi. Gerceklesen kayip: bir siparis kartinin
+        //   Vazgec'i, kart acilmadan once listeden eklenmis GOREVYORUM satirlarini
+        //   (yorum + ekli dokuman) sildi; snapshot'ta o tablonun satiri yoktu.
+        //   Bedeli: bos bir tabloya oturum icinde eklenen satirlar geri alinmaz.
+        //   Var olan veriyi silmektense eklenen satiri birakmak tercih edilir.
+        if LPlanQ.FieldByName('VERISATIRI').AsInteger = 0 then
+        begin
+          LPlanQ.Next;
+          Continue;
+        end;
         // YALNIZ EKLENEN satirlari sil (snapshot'ta OLMAYAN ID'ler). Mevcut satirlar
         // SILINMEZ -> dis FK (KULLANICI, FATBASLIK...) korunur; onlar asagida UPDATE ile gelir.
         if TabloIdKolonuVarMi(LPlanQ.FieldByName('TABLOADI').AsString) and

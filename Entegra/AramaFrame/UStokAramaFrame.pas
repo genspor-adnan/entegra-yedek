@@ -1,11 +1,11 @@
 ﻿unit UStokAramaFrame;
   		
 { Bu kod Sablon Duzenleyici tarafindan uretildi }		
-{ Tarih :  07/12/2010 10:46:01 }
+{ Tarih :   07/12/2010 10:46:01 }
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows,   Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ComCtrls, StdCtrls, UGentegreFrameYonetimi, Menus, UFrameYoneticisi,
   dxSkinsCore, cxGraphics, cxCheckBox, cxMaskEdit, cxDropDownEdit,Utablo,
   cxControls, cxContainer, cxEdit, cxTextEdit, dxSkinLondonLiquidSky,DateUtils,PrjConst,

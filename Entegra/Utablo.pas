@@ -11683,7 +11683,11 @@ begin
       labelFileName.Caption := '';
       MemoChat.Lines.Text := '';
       Tabloyenile(TabYorum,[Tabno, ID]);
-      MemoChat.SetFocus;
+      // Visible degil CanFocus (bkz. GridYorumBtnDosyaGonder). Burasi finally:
+      // odak verilemeyen bir durumda atilan EInvalidOperation, yorum kaydedilmis
+      // olmasina ragmen cagiran tarafa hata olarak gidiyordu.
+      if MemoChat.CanFocus then
+         MemoChat.SetFocus;
     end;
   end;
 end;
@@ -11701,7 +11705,11 @@ begin
     labelFileName.Hint := '';
     labelFileName.Caption := '';
   end;
-  if BtnMesajGonder.Visible then
+  // Visible tek basina yetmez: SetFocus denetimin VE butun ust denetimlerinin
+  // hem Enabled hem Showing olmasini ister. Yorum/Medya paneli kapaliyken ya da
+  // ust sekme gorunmuyorken "Cannot focus a disabled or invisible window"
+  // (EInvalidOperation) aliniyordu. CanFocus tam bu zinciri sorar.
+  if Assigned(BtnMesajGonder) and BtnMesajGonder.CanFocus then
      BtnMesajGonder.SetFocus;
 end;
 
@@ -11719,7 +11727,8 @@ begin
       labelFileName.Hint := DosyaAdi;
    end;
 
-   if BtnMesajGonder.Visible then
+   // Visible degil CanFocus: bkz. GridYorumBtnDosyaGonder.
+   if Assigned(BtnMesajGonder) and BtnMesajGonder.CanFocus then
       BtnMesajGonder.SetFocus;
 
  { if Tablo.ScannerSihirbazBaslat(Tur, TurId, Boyut) then begin
@@ -16831,7 +16840,8 @@ begin
   //   oynatir. Bu KULLANICI scroll'u DEGILDIR; sona yakin bir konuma dusuldugunde
   //   ScrollDegisti "sonraki sayfa" istiyor ve liste kullanici hic kaydirmadan
   //   buyuyordu (sayfa boyu 300 iken 600 kayit). Kisa sure tetigi yok say.
-  FSessizBitis := GetTickCount64 + 500;
+  FSessizBitis := GetTickCount64 + 2000;
+  FSonrakiKuyrukta := False;
   SeritGuncelle;   // "kismi liste" uyari seridi (dip toplamlar kismi olabilir)
   if (not FAktif) or FTamListe then Exit;
   // Yeni arama KISMI geldi ama siralama/filtre hala aktif -> kismi liste yaniltir,
@@ -16935,7 +16945,8 @@ begin
     //   yukleme bittikten SONRA (paint sirasinda) gelir ve "son satira gelindi" sanilip
     //   yeni sayfa istenir -> sonsuz zincir (izlemede 34 ardisik sorgu). Yukleme anini
     //   damgaliyoruz; ScrollDegisti kisa sessiz pencere icindeki olaylari yok sayar.
-    FSessizBitis := GetTickCount64 + 500;
+    FSessizBitis := GetTickCount64 + 2000;
+    FSonrakiKuyrukta := False;
   end;
   SeritGuncelle;   // yeni sayfa geldi -> serit metni/gorunurlugu tazelensin
 end;

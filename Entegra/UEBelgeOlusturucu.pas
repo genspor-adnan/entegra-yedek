@@ -5342,6 +5342,17 @@ begin
   Result.AddPair('taxScheme', LScheme);
 end;
 
+function KaynakRefJSONOlustur(const ARef: TEBelgeKaynakRef;
+  const AVarsayilanTarih: TDateTime): TJSONObject;
+begin
+  Result := TJSONObject.Create;
+  Result.AddPair('id', ARef.BelgeNo);
+  if ARef.Tarih > 0 then
+    Result.AddPair('issueDate', FormatDateTime('yyyy-mm-dd', ARef.Tarih))
+  else
+    Result.AddPair('issueDate', FormatDateTime('yyyy-mm-dd', AVarsayilanTarih));
+end;
+
 function _IzibizJSONOlustur(const ABaslik: TEBelgeBaslik;
   const ASatirlar: TEBelgeSatirlar;
   const AGondericiTaraf: TEBelgeTaraf): string;
@@ -5500,34 +5511,32 @@ begin
       LContent.AddPair('orderReference', LOrderRef);
     end;
 
-    if (not LIsIrsaliye) and (Length(ABaslik.SiparisReferanslari) > 0) then begin
-      // Izibiz DTO'sunda birden fazla siparis OrderReference dizisidir.
-      // additionalReferences'a konulursa XML'de SIPARIS tipli
-      // AdditionalDocumentReference uretilir.
+    if (not LIsIrsaliye) and (Length(ABaslik.SiparisReferanslari) = 1) then begin
+      // Tek siparis Izibiz DTO'sunda orderReference nesnesidir; orderReferences dizisi
+      // tek kayitta UBL'e tasinmiyor.
+      LContent.AddPair('orderReference',
+        KaynakRefJSONOlustur(ABaslik.SiparisReferanslari[0], ABaslik.Tarih));
+    end else if (not LIsIrsaliye) and (Length(ABaslik.SiparisReferanslari) > 1) then begin
+      // Coklu siparis icin Izibiz'in dizi alani kullanilir. AdditionalReferences'a
+      // konulursa XML'de SIPARIS tipli AdditionalDocumentReference uretilir.
       var LOrderRefs: TJSONArray := TJSONArray.Create;
       for LRefIndex := 0 to High(ABaslik.SiparisReferanslari) do begin
-        var LOrderRefItem: TJSONObject := TJSONObject.Create;
-        LOrderRefItem.AddPair('id', ABaslik.SiparisReferanslari[LRefIndex].BelgeNo);
-        if ABaslik.SiparisReferanslari[LRefIndex].Tarih > 0 then
-          LOrderRefItem.AddPair('issueDate',
-            FormatDateTime('yyyy-mm-dd', ABaslik.SiparisReferanslari[LRefIndex].Tarih));
-        LOrderRefs.AddElement(LOrderRefItem);
+        LOrderRefs.AddElement(KaynakRefJSONOlustur(
+          ABaslik.SiparisReferanslari[LRefIndex], ABaslik.Tarih));
       end;
       LContent.AddPair('orderReferences', LOrderRefs);
     end;
 
-    if (not LIsIrsaliye) and (Length(ABaslik.IrsaliyeReferanslari) > 0) then begin
+    if (not LIsIrsaliye) and (Length(ABaslik.IrsaliyeReferanslari) = 1) then begin
+      // Tek irsaliye de tekil nesne olmali; tekil alan altinda dizi Izibiz'de
+      // DespatchDocumentReference uretmiyor.
+      LContent.AddPair('despatchDocumentReference',
+        KaynakRefJSONOlustur(ABaslik.IrsaliyeReferanslari[0], ABaslik.Tarih));
+    end else if (not LIsIrsaliye) and (Length(ABaslik.IrsaliyeReferanslari) > 1) then begin
       var LDespatchRefs: TJSONArray := TJSONArray.Create;
       for LRefIndex := 0 to High(ABaslik.IrsaliyeReferanslari) do begin
-        var LDespatchRef: TJSONObject := TJSONObject.Create;
-        LDespatchRef.AddPair('id', ABaslik.IrsaliyeReferanslari[LRefIndex].BelgeNo);
-        if ABaslik.IrsaliyeReferanslari[LRefIndex].Tarih > 0 then
-          LDespatchRef.AddPair('issueDate',
-            FormatDateTime('yyyy-mm-dd', ABaslik.IrsaliyeReferanslari[LRefIndex].Tarih))
-        else
-          LDespatchRef.AddPair('issueDate',
-            FormatDateTime('yyyy-mm-dd', ABaslik.Tarih));
-        LDespatchRefs.AddElement(LDespatchRef);
+        LDespatchRefs.AddElement(KaynakRefJSONOlustur(
+          ABaslik.IrsaliyeReferanslari[LRefIndex], ABaslik.Tarih));
       end;
       LContent.AddPair('despatchDocumentReference', LDespatchRefs);
     end;

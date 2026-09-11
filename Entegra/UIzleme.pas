@@ -124,6 +124,9 @@ type
     FBeklemeZamani  : TDateTime;
     FEskiBaslik     : string;
     function  RafOmruSor: Boolean;
+    procedure RafOmruOku;
+    function  RafOmruBirimAdi: string;
+    function  RafOmruEkle(const ATarih: TDateTime; AAdet: Integer): TDateTime;
     function  BarkodUrunUyuyor(const AUrunNo: string): Boolean;
     function  BarkodMevcutSatiraEkle(const ABilgi: TGS1Bilgi): Boolean;
     function  BarkodLotSatiriEkle(const ABilgi: TGS1Bilgi): Boolean;
@@ -139,6 +142,7 @@ type
   public
     { Public  declarations }
     StokID,IzlemTur,IslemTur,IslemTip,BaslikID,SatirID, KaynakBaslikID, KaynakSatirID, RehberId,GirDepo,CikDepo,RafOmruSure:Integer;
+    RafOmruBirim : Integer;   // GENINI -2707: 1=Gun 2=Ay 3=Yil 4=Saat 5=Dakika
     GerekliMiktar,KALAN : real;
     UretimNo : string;
     IslemOp:char;
@@ -282,8 +286,7 @@ begin
      //TcxCurrencyEditProperties(GridFatIzlemViewDURUM).DecimalPlaces := OndalikDijitSayMik;
      Tablo.OndalikKisimAyarla(GridFatIzlemViewDURUM, OndalikDijitSayMik);
   Caption := Caption + ' : ' +Tablo.AciklamaGetir('STOKLAR','KOD+'' ''+STOKADI',StokID)+' '+Caption;
-  RafOmruSure := StrToIntDef(Tablo.AciklamaGetir('STOKLAR','RAFOMRU_SURE', StokID), 0);
-  EditRafOmru.Caption := IntToStr(RafOmruSure) + ' Yıl';
+  RafOmruOku;
   BarkoddanMiktarGetir;
 
 end;
@@ -620,9 +623,45 @@ begin
       ' ELSE '+VarToStr(Adet)+' END  WHERE IZLEMID = '+TabIzlem.FieldByName('UPDID').AsString,[],[]);
 end;
 
+/// RAFOMRU_BIRIM kodunun stok kartindaki adi (GENINI -2707: Gun/Ay/Yil/Saat/Dakika).
+function TIzlemeDlg.RafOmruBirimAdi: string;
+begin
+  Tablo.TablodanSorguAc(1, 'select ANAHTAR from GENINI where BOLUM=' +
+    IntToStr(Ops_StokKart_ZamanBirimi) + ' and DIL=-1 and DEGER=' + IntToStr(RafOmruBirim));
+  Result := Tablo.Query1.Fields[0].AsString;
+  if Result = '' then
+     Result := 'Yıl';
+end;
+
+/// Raf omru stok kartina aittir: RAFOMRU_SURE (sayi) + RAFOMRU_BIRIM (kod).
+/// Eskiden yalniz SURE okunup her deger YIL sayiliyordu; karta "180 Gun"
+/// girilmis bir stokta SKT-URT farki 180 YIL cikiyordu.
+procedure TIzlemeDlg.RafOmruOku;
+begin
+  RafOmruSure  := StrToIntDef(Tablo.AciklamaGetir('STOKLAR', 'RAFOMRU_SURE',  StokID), 0);
+  RafOmruBirim := StrToIntDef(Tablo.AciklamaGetir('STOKLAR', 'RAFOMRU_BIRIM', StokID), 0);
+  if RafOmruBirim = 0 then
+     RafOmruBirim := 3;                       // kartta tanimsiz -> Yil (eski davranis)
+  EditRafOmru.Caption := IntToStr(RafOmruSure) + ' ' + RafOmruBirimAdi;
+end;
+
+/// Tarihe raf omru kadar ekler (AAdet negatifse cikarir), karttaki birime gore.
+function TIzlemeDlg.RafOmruEkle(const ATarih: TDateTime; AAdet: Integer): TDateTime;
+begin
+  case RafOmruBirim of
+    1: Result := IncDay(ATarih, AAdet);
+    2: Result := IncMonth(ATarih, AAdet);
+    4: Result := IncHour(ATarih, AAdet);
+    5: Result := IncMinute(ATarih, AAdet);
+  else
+    Result := IncYear(ATarih, AAdet);         // 3 = Yil
+  end;
+end;
+
 function TIzlemeDlg.RafOmruSor: Boolean;
 var RafOmru : Variant;
-    Yil : Integer;
+    Sure : Integer;
+    Birim : string;
 begin
    // Raf omru stok kartina aittir, izleme satirina degil. Grid'de yarim kalmis
    // bos bir satir varsa odak degisince post edilmeye calisilir ve BeforePost
@@ -633,17 +672,20 @@ begin
       (TabIzlem.FieldByName('LOTNO').AsString = '') then
       TabIzlem.Cancel;
 
+   RafOmruOku;                                                        // karttaki birimi tazele
+   Birim := RafOmruBirimAdi;
    RafOmru := Tablo.AciklamaGetir('STOKLAR','RAFOMRU_SURE', StokID);   // mevcut degeri on-doldur
    Result := TGirisKutusuEx.BilgiAlEx('Raf Ömrü',
-               TGirdiDenetimleri.Create.Edit('Raf Ömrü Kaç Yıl?',@RafOmru)) = mrOk;
+               TGirdiDenetimleri.Create.Edit('Raf Ömrü Kaç ' + Birim + '?',@RafOmru)) = mrOk;
    if not Result then
         Exit;
-   Yil := StrToIntDef(Trim(VarToStr(RafOmru)),0);
-   RafOmruSure := Yil;   // ekrandan alinan degeri degiskene de yaz (BeforePost SKT/URT hesabinda kullanilir)
-   // RAFOMRU_SURE = girilen yil, RAFOMRU_BIRIM = 3 (sabit)
-   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update STOKLAR set RAFOMRU_SURE='+IntToStr(Yil)+
-      ', RAFOMRU_BIRIM=3 where ID='+IntToStr(StokID),[],[]);
-   EditRafOmru.Caption := IntToStr(Yil)+' Yıl';
+   Sure := StrToIntDef(Trim(VarToStr(RafOmru)),0);
+   RafOmruSure := Sure;   // ekrandan alinan degeri degiskene de yaz (BeforePost SKT/URT hesabinda kullanilir)
+   // BIRIM stok kartindan gelir, buradan DEGISTIRILMEZ: kartta "Gun" secilmisken
+   // sabit 3 (Yil) yazmak degeri sessizce 365 kat buyutuyordu.
+   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update STOKLAR set RAFOMRU_SURE='+IntToStr(Sure)+
+      ', RAFOMRU_BIRIM='+IntToStr(RafOmruBirim)+' where ID='+IntToStr(StokID),[],[]);
+   EditRafOmru.Caption := IntToStr(Sure)+' '+Birim;
 end;
 
 procedure TIzlemeDlg.EditRafOmruClick(Sender: TObject);
@@ -1418,9 +1460,10 @@ begin
       Abort;
    end;
 
-   // Raf omru (yil): miktar (KALAN) girilmis satirda SKT<->URT'yi esitle. Kural: SKT ile URT'den
+   // Raf omru: miktar (KALAN) girilmis satirda SKT<->URT'yi esitle. Kural: SKT ile URT'den
    //   BUYUK (gec) olani baz al -> SKT>=URT ise URT:=SKT-rafomru, degilse SKT:=URT+rafomru.
-   //   Pascal/IncYear kullanir (SQL yok) -> hem MSSQL hem PG'de aynen calisir.
+   //   Fark stok kartindaki BIRIME gore hesaplanir (RafOmruEkle: gun/ay/yil/saat/dakika).
+   //   Pascal tarih islevleri kullanir (SQL yok) -> hem MSSQL hem PG'de aynen calisir.
    if TabIzlem.FieldByName('KALAN').AsFloat <> 0 then begin
       Skt := TabIzlem.FieldByName('SKT').AsDateTime;
       Urt := TabIzlem.FieldByName('URT').AsDateTime;
@@ -1432,9 +1475,9 @@ begin
             Abort;
          end;
          if Skt >= Urt then
-            TabIzlem.FieldByName('URT').AsDateTime := IncYear(Skt, -RafOmruSure)   // SKT baz -> URT
+            TabIzlem.FieldByName('URT').AsDateTime := RafOmruEkle(Skt, -RafOmruSure)   // SKT baz -> URT
          else
-            TabIzlem.FieldByName('SKT').AsDateTime := IncYear(Urt,  RafOmruSure);  // URT baz -> SKT
+            TabIzlem.FieldByName('SKT').AsDateTime := RafOmruEkle(Urt,  RafOmruSure);  // URT baz -> SKT
       end;
    end;
 

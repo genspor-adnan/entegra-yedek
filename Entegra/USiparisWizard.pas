@@ -249,6 +249,12 @@ type
     GridFaturaViewSATICIADI: TcxGridDBColumn;
     TabYorum: TFDQuery;
     DtsYorum: TDataSource;
+    // Satir (SIPARISDETAY) yorumlari icin AYRI dataset. Once ikisi de TabYorum'u
+    // paylasiyordu; TabSiparisDetayAfterScroll her satir degisiminde TabYorum'u
+    // detay yorumlarina cevirdiginden BASLIK yorum karti bosaliyordu -- listeden
+    // eklenen yorum/medya kartta hic gorunmuyordu.
+    TabYorumDetay: TFDQuery;
+    DtsYorumDetay: TDataSource;
     Panel4: TPanel;
     MemoChat: TcxRichEdit;
     BtnMesajGonder: TcxButton;
@@ -272,6 +278,13 @@ type
     YorumAtacMenu: TOfficePopupMenu;
     MenuKlasordenEkle: TMenuItem;
     MenuTarayacidanEkle: TMenuItem;
+    // Satir (SIPARISDETAY) panelinin atac menusu. Once satir atacı da
+    // YorumAtacMenu'yu kullaniyordu; o menunun ogeleri sabit olarak BASLIK
+    // kontrollerini dolduruyor, secilen dosyanin adi satir labelinda hic
+    // gorunmuyor ve gonderilen yoruma dokuman baglanmiyordu.
+    YorumAtacDetayMenu: TOfficePopupMenu;
+    MenuKlasordenEkleDetay: TMenuItem;
+    MenuTarayicidanEkleDetay: TMenuItem;
     BtnDosyaGonder: TcxButton;
     EditOZELKOD: TcxDBTextEdit;
     ComboOZELKOD: TcxDBComboBox;
@@ -663,6 +676,8 @@ type
     procedure cxLabel16Click(Sender: TObject);
     procedure cxLabel19Click(Sender: TObject);
     procedure MenuItem7Click(Sender: TObject);
+    procedure MenuTarayicidanEkleDetayClick(Sender: TObject);
+    procedure YorumlariYenile;
     procedure MemoFatAdresKeyUp(Sender: TObject; var Key: Word;
       Shift: TShiftState);
   private
@@ -746,16 +761,16 @@ begin
    ULog.OturumYakala(FOturumID);   // LAZY: dokuman silme -> yakala
 if (not TabYorum.IsEmpty)and((TamYetkili)or(Kullanan = TabYorum.FieldByName('EKLEYEN').AsString)) then begin
     Tablo.DokumanSil(True,TabYorum.FieldByName('DOKUMANID').AsInteger,1,-1);
-    Tabloyenile(TabYorum,[TabloNo,TabSiparis.FieldByName('ID').AsInteger]);
+    YorumlariYenile;
   end;
 end;
 
 procedure TSiparisWizardDlg.DokumanEkrEnterPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
 begin
-   if not FYorumSayfaAcildi then begin
-      Tabloyenile(TabYorum,[TabloNo, TabSiparis.FieldByName('ID').AsInteger]);
-      FYorumSayfaAcildi := True;
-   end;
+   // Her giriste yenilenir: baska bir panelden ya da liste ekranindan eklenmis
+   // yorum bu sayfaya donuldugunde gorunsun.
+   FYorumSayfaAcildi := True;
+   YorumlariYenile;
 end;
 
 procedure TSiparisWizardDlg.DokumanFormunuA1Click(Sender: TObject);
@@ -839,7 +854,8 @@ end;
 procedure TSiparisWizardDlg.YorumDzenle1Click(Sender: TObject);
 begin
   ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya duzenleme -> yakala
-  Tablo.GridYorumYorumuDuzenle(GridYorumDBCardView1, Tabno_Siparisdetay);
+  // Baslik yorum karti: TabloNo (SIPARIS), SIPARISDETAY degil.
+  Tablo.GridYorumYorumuDuzenle(GridYorumDBCardView1, TabloNo);
 end;
 
 procedure TSiparisWizardDlg.BirSatrAdetiKadarSatrlaraBolMenuClick(Sender: TObject);
@@ -952,14 +968,14 @@ procedure TSiparisWizardDlg.GridYorumDBCardView1CellDblClick(
   Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
   AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
-    Tablo.GridYorumCellDblClick(Sender,ACellViewInfo,AButton,AShift,AHandled, Tabno_Siparisdetay);
+    Tablo.GridYorumCellDblClick(Sender,ACellViewInfo,AButton,AShift,AHandled, TabloNo);
 end;
 
 procedure TSiparisWizardDlg.GridYorumDetayViewCellDblClick(
   Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
   AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
-  Tablo.GridYorumCellDblClick(Sender,ACellViewInfo,AButton,AShift,AHandled, Tabno_SIPARISDETAY);
+  Tablo.GridYorumCellDblClick(Sender,ACellViewInfo,AButton,AShift,AHandled, TabloNo);
 end;
 
 procedure TSiparisWizardDlg.GsterSeiliSatr1Click(Sender: TObject);
@@ -1943,12 +1959,14 @@ end;
 
 procedure TSiparisWizardDlg.MenuItem4Click(Sender: TObject);
 begin
-  Tablo.GridYorumYorumuDuzenle(GridYorumDetayView, TabNo_SIPARISDETAY);
+  Tablo.GridYorumYorumuDuzenle(GridYorumDetayView, TabloNo);
+  YorumlariYenile;
 end;
 
 procedure TSiparisWizardDlg.MenuItem5Click(Sender: TObject);
 begin
-    Tablo.GridYorumuSil(TabNo_SIPARISDETAY, TabSiparisDetay.FieldByName('ID').AsInteger, TabYorum);
+    Tablo.GridYorumuSil(TabloNo, TabSiparis.FieldByName('ID').AsInteger, TabYorumDetay);
+    YorumlariYenile;
 end;
 
 procedure TSiparisWizardDlg.MenuDokGosterClick(Sender: TObject);
@@ -1964,21 +1982,48 @@ end;
 
 procedure TSiparisWizardDlg.MenuDokFormuAcClick(Sender: TObject);
 begin
-  Tablo.DokumanSihirbazBaslat( 'D', 0, TabYorum.FieldByName('DOKUMANID').AsInteger,Tablo.GENINI.ReadInteger(Ops_OpsiyonServis_VarsayilanKlasor,-2),0,TabNo_GOREVYORUM,TabYorum.FieldByName('ID').AsInteger, TabSiparisDetay.FieldByName('ID').AsInteger)
+  // Son parametre REHBERID; once TabSiparisDetay.ID geciliyordu (satir ID'si cari sanildi).
+  Tablo.DokumanSihirbazBaslat( 'D', 0, TabYorumDetay.FieldByName('DOKUMANID').AsInteger,Tablo.GENINI.ReadInteger(Ops_OpsiyonServis_VarsayilanKlasor,-2),0,TabNo_GOREVYORUM,TabYorumDetay.FieldByName('ID').AsInteger, TabSiparis.FieldByName('REHBERID').AsInteger)
 end;
 
 procedure TSiparisWizardDlg.MenuDokSilClick(Sender: TObject);
 begin
    ULog.OturumYakala(FOturumID);   // LAZY: dokuman silme -> yakala
-  if (not TabYorum.IsEmpty)and((TamYetkili)or(Kullanan = TabYorum.FieldByName('EKLEYEN').AsString)) then begin
-    Tablo.DokumanSil(True,TabYorum.FieldByName('DOKUMANID').AsInteger,1,-1);
-    Tabloyenile(TabYorum,[TabNo_SIPARISDETAY, TabSiparisDetay.FieldByName('ID').AsInteger]);
+  if (not TabYorumDetay.IsEmpty)and((TamYetkili)or(Kullanan = TabYorumDetay.FieldByName('EKLEYEN').AsString)) then begin
+    Tablo.DokumanSil(True,TabYorumDetay.FieldByName('DOKUMANID').AsInteger,1,-1);
+    YorumlariYenile;
   end;
+end;
+
+/// Satir yorumu: klasorden dosya sec (YorumAtacDetayMenu > Klasorden).
+/// Kartin IKI yorum paneli de ayni kovayi gosterir: TUR=TabloNo (SIPARIS) +
+/// GOREVID=SIPARIS.ID. Liste ekrani (UFaturalar) da bu kovayi kullanir; boylece
+/// listeden eklenen kartta, karttan eklenen listede gorunur.
+/// Iki ayri dataset kullanilir cunku iki grid ayni anda ekranda olabiliyor.
+procedure TSiparisWizardDlg.YorumlariYenile;
+var
+  LId: Integer;
+begin
+  if not TabSiparis.Active then
+    Exit;
+  LId := TabSiparis.FieldByName('ID').AsInteger;
+  if LId <= 0 then
+    Exit;
+  Tabloyenile(TabYorum,      [TabloNo, LId]);
+  Tabloyenile(TabYorumDetay, [TabloNo, LId]);
 end;
 
 procedure TSiparisWizardDlg.MenuItem7Click(Sender: TObject);
 begin
+   ULog.OturumYakala(FOturumID);   // LAZY: klasorden dosya ekleme -> yakala
  Tablo.GridYorumBtnDosyaGonder(labelDetayFileName, BtnMesajGonderDetay);
+end;
+
+/// Satir yorumu: tarayicidan dosya al (YorumAtacDetayMenu > Tarayicidan).
+procedure TSiparisWizardDlg.MenuTarayicidanEkleDetayClick(Sender: TObject);
+begin
+   ULog.OturumYakala(FOturumID);   // LAZY: tarayicidan dosya ekleme -> yakala
+   Tablo.GridDokumanTara(labelDetayFileName, BtnMesajGonderDetay);
 end;
 
 procedure TSiparisWizardDlg.MenuKlasordenEkleClick(Sender: TObject);
@@ -2051,7 +2096,7 @@ end;
 
 procedure TSiparisWizardDlg.PopupYorumDetayMenuPopup(Sender: TObject);
 begin
-    MenuDokgoster.Visible := TabYorum.FieldByName('DOKUMANID').AsString<>'';
+    MenuDokgoster.Visible := TabYorumDetay.FieldByName('DOKUMANID').AsString<>'';
     MenuDokFormuAc.Visible := MenuDokgoster.Visible;
     MenuDokSil.Visible := MenuDokgoster.Visible;
 end;
@@ -2067,6 +2112,7 @@ procedure TSiparisWizardDlg.PopupYorumuSilClick(Sender: TObject);
 begin
    ULog.OturumYakala(FOturumID);   // LAZY: yorum silme -> yakala
    Tablo.GridYorumuSil(TabloNo, TabSiparis .FieldByName('ID').AsInteger, TabYorum);
+   YorumlariYenile;
 end;
 
 procedure TSiparisWizardDlg.SatirEkleClick(Sender: TObject);
@@ -2277,6 +2323,9 @@ end;
 procedure TSiparisWizardDlg.TabSiparisDetayAfterOpen(DataSet: TDataSet);
 begin
   cbStokDepo.Enabled := TabSiparisDetay.IsEmpty;
+  // Satirlar sayfasindaki yorum karti da dolsun: kullanici Yorum/Medya sayfasina
+  // hic ugramayabilir, o zaman panel bos kaliyordu.
+  YorumlariYenile;
 end;
 
 procedure TSiparisWizardDlg.TabSiparisDetayAfterPost(DataSet: TDataSet);
@@ -2293,15 +2342,9 @@ procedure TSiparisWizardDlg.TabSiparisDetayAfterScroll(DataSet: TDataSet);
 begin
    if FSkipDetailAfterScroll then
       Exit;
-   if not FYorumSayfaAcildi then
-      Exit;
-
-   if TabSiparisDetay.Active then begin
-      if not TabSiparisDetay.IsEmpty then
-         Tabloyenile(TabYorum, [TabNo_SIPARISDETAY, TabSiparisDetay.FieldByName('ID').AsInteger])
-      else
-         TabYorum.Close;
-   end;
+   // Yorumlar artik satira degil SIPARIS'e bagli (TUR=91) -> satir degisiminde
+   // yeniden okumaya gerek yok. Yukleme YorumlariYenile'de, sayfa/dataset
+   // acilisinda yapilir.
 end;
 
 procedure TSiparisWizardDlg.TabSiparisDetayBeforeOpen(DataSet: TDataSet);
@@ -2969,11 +3012,16 @@ procedure TSiparisWizardDlg.BtnMesajGonderClick(Sender: TObject);
 begin
    ULog.OturumYakala(FOturumID);   // LAZY: yorum-medya mesaj/dosya ekleme -> yakala
   Tablo.GridYorumBtnMesajGonder(MemoChat, labelFileName, TabloNo, TabSiparis.FieldByName('ID').AsInteger, TabSiparis.FieldByName('REHBERID').AsInteger,TabYorum);
+  YorumlariYenile;
 end;
 
 procedure TSiparisWizardDlg.BtnMesajGonderDetayClick(Sender: TObject);
 begin
-  Tablo.GridYorumBtnMesajGonder(MemoDetayChat, labelDetayFileName, TabNo_SIPARISDETAY, TabSiparisDetay.FieldByName('ID').AsInteger, TabSiparis.FieldByName('REHBERID').AsInteger,TabYorum);
+  // Satirlar sayfasindaki panel de BASLIK kovasina yazar: TUR=TabloNo (SIPARIS) +
+  // GOREVID=SIPARIS.ID. Liste ekrani (UFaturalar) da ayni kovayi kullandigi icin
+  // hangi panelden eklenirse eklensin iki yonde de gorunur.
+  Tablo.GridYorumBtnMesajGonder(MemoDetayChat, labelDetayFileName, TabloNo, TabSiparis.FieldByName('ID').AsInteger, TabSiparis.FieldByName('REHBERID').AsInteger,TabYorumDetay);
+  YorumlariYenile;
 end;
 
 procedure TSiparisWizardDlg.btnSevkAdresiPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);

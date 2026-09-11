@@ -1227,6 +1227,7 @@ end;
 procedure TbankaHesapGirisdlg.SatirEkle;
 var
   Mesaj: string;
+  SonTarih: TDateTime;
 begin
   if not DogrulaGiris(Mesaj) then begin
     Application.MessageBox(PChar(Mesaj), PChar(DBos_alan), MB_ICONINFORMATION + MB_OK);
@@ -1271,9 +1272,12 @@ begin
   end;
 
   FDuzenlemeKipinde := False;   // F8 sonrası edit modundan çık
+  // Tarih son girilen satirdan devam eder. TemizleUstPanel (ekran ilk acilisi
+  // icin) bugune cekiyor; F8 ile arka arkaya ayni gunun hareketleri girildigi
+  // icin her satirda tarihi yeniden yazdirmak yerine son degeri geri koyuyoruz.
+  SonTarih := cxDateEdit1.Date;
   TemizleUstPanel;
-  // Sonraki giriş için pratik: Tarih ve sabit alanları koru, fokus Tür'e
-  cxDateEdit1.Date := Tablo.GENINI.BugunTrhSaat;
+  cxDateEdit1.Date := SonTarih;
   cbTur.SetFocus;
 end;
 

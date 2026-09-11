@@ -793,7 +793,6 @@ object SiparisWizardDlg: TSiparisWizardDlg
           end
         end
         object PageUst: TcxPageControl
-          Properties.Images = Tablo.PNGImageList2
           Left = 1
           Top = 36
           Width = 1278
@@ -802,6 +801,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
           TabOrder = 1
           Properties.ActivePage = TabSheetGenelBilgiler
           Properties.CustomButtons.Buttons = <>
+          Properties.Images = Tablo.PNGImageList2
           OnChange = PageUstChange
           ClientRectBottom = 178
           ClientRectLeft = 4
@@ -1674,15 +1674,15 @@ object SiparisWizardDlg: TSiparisWizardDlg
         end
       end
       object PageControlAlt: TcxPageControl
-        Properties.Images = Tablo.PNGImageList2
         Left = 0
         Top = 450
         Width = 1280
         Height = 166
         Align = alBottom
         TabOrder = 6
-        Properties.ActivePage = cxTabSheet1
+        Properties.ActivePage = cxTabSheet2
         Properties.CustomButtons.Buttons = <>
+        Properties.Images = Tablo.PNGImageList2
         ClientRectBottom = 162
         ClientRectLeft = 4
         ClientRectRight = 1276
@@ -2237,7 +2237,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
               Width = 61
               Height = 39
               Align = alRight
-              DropDownMenu = YorumAtacMenu
+              DropDownMenu = YorumAtacDetayMenu
               Kind = cxbkDropDown
               OptionsImage.ImageIndex = 38
               OptionsImage.Images = Tablo.cxImageList1
@@ -2256,7 +2256,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
               Navigator.Buttons.CustomButtons = <>
               ScrollbarAnnotations.CustomAnnotations = <>
               OnCellDblClick = GridYorumDetayViewCellDblClick
-              DataController.DataSource = DtsYorum
+              DataController.DataSource = DtsYorumDetay
               DataController.Summary.DefaultGroupSummaryItems = <>
               DataController.Summary.FooterSummaryItems = <>
               DataController.Summary.SummaryGroups = <>
@@ -2782,78 +2782,78 @@ object SiparisWizardDlg: TSiparisWizardDlg
         ImageIndex = 34
         object N52: TMenuItem
           Caption = '% 0'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N53: TMenuItem
           Tag = 5
           Caption = '% 5'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N102: TMenuItem
           Tag = 10
           Caption = '% 10'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N152: TMenuItem
           Tag = 15
           Caption = '% 15'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N202: TMenuItem
           Tag = 20
           Caption = '% 20'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N252: TMenuItem
           Tag = 25
           Caption = '% 25'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N302: TMenuItem
           Tag = 30
           Caption = '% 30'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N402: TMenuItem
           Tag = 40
           Caption = '% 40'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N502: TMenuItem
           Tag = 50
           Caption = '% 50'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N1001: TMenuItem
           Tag = 100
           Caption = '% 100'
-          ImageIndex = 34
           Hint = #304'skonto1'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object zel3: TMenuItem
           Tag = -1
           Caption = #214'zel'
-          ImageIndex = 15
           Hint = #304'skonto1'
+          ImageIndex = 15
           OnClick = N52Click
         end
       end
@@ -2862,78 +2862,78 @@ object SiparisWizardDlg: TSiparisWizardDlg
         ImageIndex = 34
         object N01: TMenuItem
           Caption = '% 0'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N51: TMenuItem
           Tag = 5
           Caption = '% 5'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N101: TMenuItem
           Tag = 10
           Caption = '% 10'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N151: TMenuItem
           Tag = 15
           Caption = '% 15'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N201: TMenuItem
           Tag = 20
           Caption = '% 20'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N251: TMenuItem
           Tag = 25
           Caption = '% 25'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N301: TMenuItem
           Tag = 30
           Caption = '% 30'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N401: TMenuItem
           Tag = 40
           Caption = '% 40'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N501: TMenuItem
           Tag = 50
           Caption = '% 50'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object N1002: TMenuItem
           Tag = 100
           Caption = '% 100'
-          ImageIndex = 34
           Hint = #304'skonto2'
+          ImageIndex = 34
           OnClick = N52Click
         end
         object zel1: TMenuItem
           Tag = -1
           Caption = #214'zel'
-          ImageIndex = 15
           Hint = #304'skonto2'
+          ImageIndex = 15
           OnClick = N52Click
         end
       end
@@ -3547,8 +3547,8 @@ object SiparisWizardDlg: TSiparisWizardDlg
   object JvDragDrop1: TJvDragDrop
     DropTarget = Owner
     OnDrop = JvDragDrop1Drop
-    Left = 43
-    Top = 161
+    Left = 67
+    Top = 145
   end
   object dtsTOPLAMLAR: TDataSource
     DataSet = TOPLAMLAR
@@ -3765,11 +3765,51 @@ object SiparisWizardDlg: TSiparisWizardDlg
     Left = 587
     Top = 428
   end
+  object TabYorumDetay: TFDQuery
+    Connection = Tablo.FDCnn
+    SQL.Strings = (
+      'select GY.ID,GY.GOREVID,  GY.EKLEMETARIHI, GY.EKLEYEN,'
+      'TARIH=CONVERT(varchar(20),GY.EKLEMETARIHI,113),'
+      'YAZAN=R.FIRMA,'
+      'GY.YORUM,'
+      
+        'ATAC=reverse(left(reverse(D.AD),charindex('#39'.'#39',reverse(D.AD)))),D' +
+        'OKUMANID=D.ID,DOKUMANAD=D.AD'
+      'from'#9
+      #9'GOREVYORUM GY '
+      #9'left outer join DOKUMAN D on D.MODUL=210 and D.MODULID=GY.ID '
+      #9'left outer join REHBER R on R.ID=GY.EKLEYEN '
+      'where '
+      ' GY.TUR=:PYer'
+      'and GOREVID=:PYerId '
+      'order by 2 DESC')
+    Left = 665
+    Top = 353
+    ParamData = <
+      item
+        Name = 'PYer'
+        DataType = ftWord
+        Precision = 3
+        Size = 1
+        Value = Null
+      end
+      item
+        Name = 'PYerId'
+        DataType = ftInteger
+        Precision = 10
+        Size = 4
+        Value = Null
+      end>
+  end
+  object DtsYorumDetay: TDataSource
+    DataSet = TabYorumDetay
+    Left = 675
+    Top = 428
+  end
   object PopupYorumlar: TPopupMenu
     Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
-    Left = 96
-    Top = 16
+    Left = 128
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
       ImageIndex = 7
@@ -3844,6 +3884,39 @@ object SiparisWizardDlg: TSiparisWizardDlg
       Caption = 'Taray'#305'c'#305'dan'
       ImageIndex = 16
       OnClick = MenuTarayacidanEkleClick
+    end
+  end
+  object YorumAtacDetayMenu: TOfficePopupMenu
+    Images = Tablo.PNGImageList2
+    OwnerDraw = True
+    OfficeDesign = True
+    Appearance.Gradient1Start = 15722724
+    Appearance.Gradient1End = 14599608
+    Appearance.Gradient2Start = 14203563
+    Appearance.Gradient2End = 15722724
+    Appearance.MarginX = 4
+    Appearance.MarginY = 2
+    Appearance.SeparatorLeading = 6
+    Appearance.GutterWidth = 26
+    Appearance.SeparatorBackgroundColor = 15656925
+    Appearance.SeparatorLineColor = 12961221
+    Appearance.GutterColor = 15658729
+    Appearance.ItemBackgroundColor = 16448250
+    Appearance.ItemSelectedColor = 15128011
+    Appearance.FontColor = 7214336
+    Appearance.FontDisabledColor = 14599640
+    Style = msDefault
+    Left = 520
+    Top = 364
+    object MenuKlasordenEkleDetay: TMenuItem
+      Caption = 'Klas'#246'rden'
+      ImageIndex = 0
+      OnClick = MenuItem7Click
+    end
+    object MenuTarayicidanEkleDetay: TMenuItem
+      Caption = 'Taray'#305'c'#305'dan'
+      ImageIndex = 16
+      OnClick = MenuTarayicidanEkleDetayClick
     end
   end
   object ADOQuery1: TFDQuery
