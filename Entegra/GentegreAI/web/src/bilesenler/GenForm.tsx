@@ -15,9 +15,9 @@ import { ttbFiyatTuret } from './kart/tarifeKurallari';
 import { useUnvanOneki } from './kart/useUnvanOneki';
 import { KartKimlikSeridi } from './kart/KartKimlikSeridi';
 import { KartDetaySekmesi } from './kart/KartDetaySekmesi';
+import { KartGrupSarmalayici } from './kart/KartGrupSarmalayici';
 import { kartGovdesiKur } from './kart/kartGovdesi';
 import { PaketSekmesi } from './PaketSekmesi';
-import { KartGrupSekmesi } from './kart/KartGrupSekmesi';
 import { alanCizici, type Deger } from './kartAlanCizim';
 import { kartDogrula } from './kartDogrulama';
 import { guvenli, mesaj as bilgiMesaji, onay as onaySor } from './mesaj';
@@ -42,9 +42,6 @@ import { StokHareketSekmesi } from './StokHareketSekmesi';
 import { HizmetListeFiyatlari } from './HizmetListeFiyatlari';
 import { TarafArama } from './TarafArama';
 import { StokAramaPenceresi } from './StokAramaPenceresi';
-import { RandevuUygunSaatler } from './RandevuUygunSaatler';
-import { RandevuOzetSeridi } from './RandevuOzetSeridi';
-import { RandevuTetkikUyum } from './RandevuTetkikUyum';
 import { OncekiBasvurular } from './belge/BasvuruSekmesi';
 import { BelgeKarti } from '../sayfalar/BelgeKarti';
 
@@ -1314,107 +1311,20 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
         </div>
       )}
 
-      {aktif?.tur === 'grup' && meta && (() => {
-        const govde = (
-        <KartGrupSekmesi
+      {aktif?.tur === 'grup' && meta && (
+        <KartGrupSarmalayici
           aktif={aktif} kaynak={kaynak} id={id} yeniMi={yeniMi} meta={meta}
           salt={salt} personelGibiKart={personelGibiKart}
-          deger={deger} setDeger={setDeger}
+          deger={deger} setDeger={setDeger} alanDegistir={alanDegistir}
           detaylar={detaylar} setDetaylar={setDetaylar}
           alanHatalari={alanHatalari} gizliSekmeler={gizliSekmeler}
           resimYerTutucu={resimYerTutucu} gruplar={gruplar}
           altGruplaVar={altGruplaVar} renderAlanListesi={renderAlanListesi}
-          aramaAc={(alan, kaynak, uygula) => setAramaAlani({ alan, kaynak, uygula })}
-          secilenAdlar={secilenAdlar}
+          setAramaAlani={setAramaAlani} secilenAdlar={secilenAdlar}
+          detayGrupta={detayGrupta} detayIzgara={detayIzgara}
+          sekmeSarmalayici={sekmeSarmalayici}
         />
-        );
-        const tam = kaynak === 'randevu' ? (
-          <>
-            {govde}
-            {/* TETKİK-CİHAZ uyumu ve protokol süresi (317): hasta gelmeden
-                randevu alındığı için yanlış cihaz ancak hasta geldiğinde fark
-                edilirdi. Engelleme veritabanı tetiğinde, bu erken uyarı. */}
-            <RandevuTetkikUyum
-              hizmetId={Number(deger.hizmetId) || null}
-              cihazId={Number(deger.cihazId) || null}
-              sureDk={Number(deger.sureDk) || 0}
-              onSure={dk => alanDegistir('sureDk', String(dk))}
-            />
-            {/* UYGUN SAATLER (mockup): secili hekim + tarih icin o gunun
-                slotlari; bos saate tiklamak kartin baslangicini tasir. */}
-            <RandevuUygunSaatler
-              hekimId={Number(deger.hekimId) || null}
-              hekimAdi={meta.alanlar.find(a => a.ad === 'hekimId')
-                            ?.kodlar?.[String(deger.hekimId ?? '')]}
-              bolum={Number(deger.bolum) || null}
-              tarih={String(deger.baslangic ?? '').slice(0, 10)}
-              sureDk={Number(deger.sureDk) || 0}
-              seciliSaat={String(deger.baslangic ?? '').slice(11, 16)}
-              hariçId={yeniMi ? null : Number(id)}
-              onSec={saat => alanDegistir(
-                'baslangic', `${String(deger.baslangic ?? '').slice(0, 10)}T${saat}`)}
-            />
-            {/* Ozet serit EN ALTTA (mockup .ozet): hasta no, son randevu,
-                acik bakiye, olusturma. */}
-            <RandevuOzetSeridi
-              hastaId={Number(deger.hastaId) || null}
-              hariçId={yeniMi ? null : Number(id)}
-              olusturan={String(deger.eklemeTarihi ?? '')}
-            />
-          </>
-        ) : govde;
-        // GRUBA GOMULU DETAY (mockup "Fizik Muayene"): sablon alanlarinin
-        //   ALTINDA sistem/normal/bulgu tablosu - ayri sekme degil.
-        const gomulu = (meta?.detaylar ?? [])
-          .filter(d => detayGrupta?.[d.ad]?.grup === aktif.baslik);
-        const tablolar = gomulu.map(d => (
-              <GenDetayTablo
-                key={d.ad}
-                meta={d}
-                durum={detaylar[d.ad] ?? bosDetay()}
-                saltOkunur={salt || d.saltOkunur || !!detayGrupta?.[d.ad]?.salt}
-                modalDuzenle={detayGrupta?.[d.ad]?.gridKipi}
-                ikonlu={detayGrupta?.[d.ad]?.gridKipi}
-                hatalar={alanHatalari}
-                kutuSinif={detayGrupta?.[d.ad]?.sinif}
-                sadeGrid={detayGrupta?.[d.ad]?.sade}
-                ekleGizli={detayGrupta?.[d.ad]?.ekleGizli}
-                gizliAlanlar={detayGrupta?.[d.ad]?.gizli
-                  ? new Set(detayGrupta[d.ad].gizli) : undefined}
-                etiketAlanlari={detayGrupta?.[d.ad]?.etiket
-                  ? new Set(detayGrupta[d.ad].etiket) : undefined}
-                onDegis={yeni => setDetaylar(t => ({ ...t, [d.ad]: yeni }))}
-              />
-        ));
-        // USTTE: tanida tablo ONCE gelir (mockup) - hekim once ICD girer,
-        //   sevk/takip alanlari karari yazarken doldurulur.
-        const ustte = gomulu.some(d => detayGrupta?.[d.ad]?.ustte);
-        const tumu = gomulu.length === 0 ? tam
-          : ustte ? <>{tablolar}{tam}</> : <>{tam}{tablolar}</>;
-        // IZGARA CIZICI: ekran bir DETAYI (or. vitaller) istedigi yere
-        //   etiket+kutu izgarasi olarak koyabilsin - anamnez sekmesinin sag
-        //   paneli boyle: hekim sikayeti yazarken vitali AYNI ekranda girer.
-        const izgaraCiz = (detayAd: string) => {
-          const d = (meta?.detaylar ?? []).find(x => x.ad === detayAd);
-          if (!d) return null;
-          const ayar = detayIzgara?.[detayAd] ?? {};
-          return (
-            <div className={ayar.sinif}>
-              <TekKayit
-                meta={d}
-                durum={detaylar[d.ad] ?? bosDetay()}
-                saltOkunur={salt || d.saltOkunur}
-                onDegis={yeni => setDetaylar(t => ({ ...t, [d.ad]: yeni }))}
-                baslik={ayar.baslik ?? d.baslik}
-                alanSirasi={ayar.alanSirasi}
-                not={ayar.not}
-              />
-            </div>
-          );
-        };
-        return sekmeSarmalayici
-          ? sekmeSarmalayici(aktif.baslik, tumu, deger, izgaraCiz) : tumu;
-      })()}
+      )}
 
       {/* Stok > ÜTS: stok_uts 1:1 uzanti (119) - grid degil TEK kayit formu.
           Bir stokun bir ÜTS kaydi olur; "satir ekle" yanlis bir vaat olurdu. */}

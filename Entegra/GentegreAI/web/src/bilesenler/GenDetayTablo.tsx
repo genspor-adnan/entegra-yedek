@@ -281,6 +281,32 @@ function YasGirdisi({ gun, yazilabilir, onDegis }: {
   );
 }
 
+/**
+ * URUN SECIM KUTUSU: okunur ad + arama dugmesi.
+ *
+ * Kampanya (268) ve prim (328) satirlarinda AYNI kutu iki kez yazilmisti; stok
+ * ve hizmet binlerce oldugu icin combo degil jenerik arama penceresi aciliyor.
+ * `saltOkunur` kutuya tiklamayi da kapatir - kilitli kartta pencere acilmasin.
+ */
+function UrunAramaKutusu({ deger, yerTutucu, kilitli, saltOkunur, onAc }: {
+  deger: string; yerTutucu: string;
+  kilitli: boolean; saltOkunur: boolean; onAc(): void;
+}) {
+  return (
+    <span className="ikili" style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+      <input readOnly
+             style={{ flex: '1 1 auto', minWidth: 150 }}
+             value={deger}
+             placeholder={yerTutucu}
+             disabled={kilitli}
+             onClick={() => !saltOkunur && onAc()} />
+      <button type="button" className="d mini" title="Ürün ara"
+              disabled={kilitli}
+              onClick={onAc}>…</button>
+    </span>
+  );
+}
+
 export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonlu,
                                modalDuzenle, taslakKural, cipler, kutuSinif,
                                gizliAlanlar, gridGizliAlanlar, etiketAlanlari, sadeGrid, ekleGizli,
@@ -1066,20 +1092,15 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                           ))}
                       </select>
                     ) : Number(satir.tip) === 3 ? (
-                      <span className="ikili"
-                            style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                        <input readOnly
-                               style={{ flex: '1 1 auto', minWidth: 150 }}
-                               value={String(satir.iskontoYeriAdi
-                                             ?? urunAdlari[String(satir[a.ad] ?? '')]
-                                             ?? satir[a.ad] ?? '')}
-                               placeholder="— ürün —"
-                               disabled={saltOkunur || !a.yazilabilir}
-                               onClick={() => !saltOkunur && setUrunAramaSatiri(i)} />
-                        <button type="button" className="d mini" title="Ürün ara"
-                                disabled={saltOkunur || !a.yazilabilir}
-                                onClick={() => setUrunAramaSatiri(i)}>…</button>
-                      </span>
+                      <UrunAramaKutusu
+                        deger={String(satir.iskontoYeriAdi
+                                      ?? urunAdlari[String(satir[a.ad] ?? '')]
+                                      ?? satir[a.ad] ?? '')}
+                        yerTutucu="— ürün —"
+                        kilitli={saltOkunur || !a.yazilabilir}
+                        saltOkunur={saltOkunur}
+                        onAc={() => setUrunAramaSatiri(i)}
+                      />
                     ) : (
                       // Liste satirinda hedef yok: kolon 0 kalir.
                       <input readOnly value="tüm liste" disabled />
@@ -1138,19 +1159,14 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                       </select>
                     ) : Number(satir.tip) === 3 ? (
                       // URUN: stok/hizmet binlerce - jenerik arama penceresi.
-                      <span className="ikili"
-                            style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                        <input readOnly
-                               style={{ flex: '1 1 auto', minWidth: 150 }}
-                               value={urunAdlari[String(satir.hedefId ?? '')]
-                                      ?? String(satir.hedefId ?? '')}
-                               placeholder="— ürün seç —"
-                               disabled={saltOkunur || !a.yazilabilir}
-                               onClick={() => !saltOkunur && setUrunAramaSatiri(i)} />
-                        <button type="button" className="d mini" title="Ürün ara"
-                                disabled={saltOkunur || !a.yazilabilir}
-                                onClick={() => setUrunAramaSatiri(i)}>…</button>
-                      </span>
+                      <UrunAramaKutusu
+                        deger={urunAdlari[String(satir.hedefId ?? '')]
+                               ?? String(satir.hedefId ?? '')}
+                        yerTutucu="— ürün seç —"
+                        kilitli={saltOkunur || !a.yazilabilir}
+                        saltOkunur={saltOkunur}
+                        onAc={() => setUrunAramaSatiri(i)}
+                      />
                     ) : (
                       // LISTE: kapsam yok - satir tum kalemlerde gecerli.
                       <input readOnly value="tüm liste" disabled />
