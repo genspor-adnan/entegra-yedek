@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
-import { tarihSaat } from '../bilesenler/bicim';
+import { tarihSaat, gunNokta, yasMetni } from '../bilesenler/bicim';
 
 /**
  * RADYOLOJI RAPOR CIKTISI (mockup: Ekranlar/radyoloji_rapor_onizleme.html).
@@ -19,22 +19,7 @@ import { tarihSaat } from '../bilesenler/bicim';
 
 type Satir = Record<string, unknown>;
 
-const gun = (v: unknown): string => {
-  const m = String(v ?? '').slice(0, 10);
-  return /^\d{4}-\d{2}-\d{2}$/.test(m) ? m.split('-').reverse().join('.') : '';
-};
-
 /** Dogum tarihinden yas - kartlardaki hesapla ayni kural. */
-const yas = (dogum: unknown): string => {
-  const m = String(dogum ?? '').slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(m)) return '';
-  const d = new Date(m), b = new Date();
-  let y = b.getFullYear() - d.getFullYear();
-  const ay = b.getMonth() - d.getMonth();
-  if (ay < 0 || (ay === 0 && b.getDate() < d.getDate())) y--;
-  return String(y);
-};
-
 const CINSIYET: Record<number, string> = { 1: 'Erkek', 2: 'Kadın' };
 
 /** Modaliteye gore rapor basligi (mockup "Manyetik Rezonans İnceleme Raporu"). */
@@ -129,7 +114,7 @@ export function RadyolojiRaporCikti() {
           <div>
             <span className="et">Doğum T. / Yaş</span>
             <span className="dg">
-              {[gun(r.dogumTarihi), yas(r.dogumTarihi), CINSIYET[Number(r.cinsiyet ?? 0)]]
+              {[gunNokta(r.dogumTarihi), yasMetni(r.dogumTarihi), CINSIYET[Number(r.cinsiyet ?? 0)]]
                 .filter(Boolean).join(' · ') || '—'}
             </span>
           </div>

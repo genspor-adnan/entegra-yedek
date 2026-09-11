@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AyarSekmeSeridi } from '../bilesenler/AyarSekmeSeridi';
 import { onay } from '../bilesenler/mesaj';
 import { api } from '../api/istemci';
 import { type ListeSatiri, hataMetni } from '../api/sozlesme';
@@ -56,15 +57,7 @@ export function StokAyarlar() {
         </div>
       </div>
 
-      <div className="katab">
-        {SEKMELER.map(s => (
-          <div key={s.anahtar}
-               className={`kat${s.anahtar === aktif ? ' on' : ''}`}
-               onClick={() => setAktif(s.anahtar)}>
-            {s.baslik}
-          </div>
-        ))}
-      </div>
+      <AyarSekmeSeridi sekmeler={SEKMELER} aktif={aktif} onSec={a => setAktif(a as typeof aktif)} />
 
       {(hata || ayarHatasi) && <div className="hata-kutusu">{hata ?? ayarHatasi}</div>}
       {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}

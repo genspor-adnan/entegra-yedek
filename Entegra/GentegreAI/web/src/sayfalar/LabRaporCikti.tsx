@@ -2,7 +2,7 @@ import { Fragment, useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
-import { tarihSaat } from '../bilesenler/bicim';
+import { tarihSaat, gunNokta, yasMetni } from '../bilesenler/bicim';
 import { BOLUM, ZIGOSITE } from '../bilesenler/labKodlari';
 
 /**
@@ -23,21 +23,6 @@ import { BOLUM, ZIGOSITE } from '../bilesenler/labKodlari';
  */
 
 type Satir = Record<string, unknown>;
-
-const gun = (v: unknown): string => {
-  const m = String(v ?? '').slice(0, 10);
-  return /^\d{4}-\d{2}-\d{2}$/.test(m) ? m.split('-').reverse().join('.') : '';
-};
-
-const yas = (dogum: unknown): string => {
-  const m = String(dogum ?? '').slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(m)) return '';
-  const d = new Date(m), b = new Date();
-  let y = b.getFullYear() - d.getFullYear();
-  const ay = b.getMonth() - d.getMonth();
-  if (ay < 0 || (ay === 0 && b.getDate() < d.getDate())) y--;
-  return String(y);
-};
 
 const CINSIYET: Record<number, string> = { 1: 'Erkek', 2: 'Kadın' };
 
@@ -178,7 +163,7 @@ export function LabRaporCikti() {
           <div>
             <span className="et">Doğum T. / Yaş</span>
             <span className="dg">
-              {[gun(i.dogumTarihi), yas(i.dogumTarihi), CINSIYET[Number(i.cinsiyet ?? 0)]]
+              {[gunNokta(i.dogumTarihi), yasMetni(i.dogumTarihi), CINSIYET[Number(i.cinsiyet ?? 0)]]
                 .filter(Boolean).join(' · ') || '—'}
             </span>
           </div>
@@ -448,7 +433,7 @@ export function LabRaporCikti() {
                   <tr><td className="et">Onam</td>
                       <td>
                         {String(v.onamSurum ?? '') || 'Kayıtlı değil'}
-                        {v.onamTarihi ? ` · ${gun(v.onamTarihi)}` : ''}
+                        {v.onamTarihi ? ` · ${gunNokta(v.onamTarihi)}` : ''}
                         {Number(v.tesadufiBulgu ?? 0) === 2
                           ? ' · tesadüfi bulgu: istemiyor'
                           : Number(v.tesadufiBulgu ?? 0) === 1
@@ -522,7 +507,7 @@ export function LabRaporCikti() {
                   bölgede "varyant yok" demek, bakılamayanı temiz saymaktır. */}
               <div className="alt-baslik" style={{ marginTop: 10 }}>Yöntem ve kalite</div>
               <p className="not">
-                DNA izolasyonu{v.izolasyonTarihi ? ` (${gun(v.izolasyonTarihi)})` : ''}
+                DNA izolasyonu{v.izolasyonTarihi ? ` (${gunNokta(v.izolasyonTarihi)})` : ''}
                 {v.dnaKonsantrasyon
                   ? ` · ${sayiMetni(v.dnaKonsantrasyon)} ng/µL · A260/280 ${sayiMetni(v.dnaSaflik, 3)}`
                   : ''}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AyarSekmeSeridi } from '../bilesenler/AyarSekmeSeridi';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
 
 const SEKMELER = [
@@ -28,15 +29,7 @@ export function KasaAyarlar() {
         </div>
       </div>
 
-      <div className="katab">
-        {SEKMELER.map(s => (
-          <div key={s.anahtar}
-               className={`kat${s.anahtar === aktif ? ' on' : ''}`}
-               onClick={() => setAktif(s.anahtar)}>
-            {s.baslik}
-          </div>
-        ))}
-      </div>
+      <AyarSekmeSeridi sekmeler={SEKMELER} aktif={aktif} onSec={a => setAktif(a as typeof aktif)} />
 
       {hata && <div className="hata-kutusu">{hata}</div>}
       {bilgi && <div className="bilgi-kutusu">{bilgi}</div>}

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { gunNokta, yasMetni } from '../bilesenler/bicim';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
@@ -39,24 +40,9 @@ const kisaAd = (tam: string): string => {
   return `${duzelt(soyad)} ${ad.toLocaleUpperCase('tr')}`;
 };
 
-const gun = (v: unknown): string => {
-  const m = String(v ?? '').slice(0, 10);
-  return /^\d{4}-\d{2}-\d{2}$/.test(m) ? m.split('-').reverse().join('.') : '';
-};
-
 const gunAy = (v: unknown): string => {
   const m = String(v ?? '').slice(0, 10);
   return /^\d{4}-\d{2}-\d{2}$/.test(m) ? `${m.slice(8, 10)}.${m.slice(5, 7)}` : '';
-};
-
-const yas = (dogum: unknown): string => {
-  const m = String(dogum ?? '').slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(m)) return '';
-  const d = new Date(m), b = new Date();
-  let y = b.getFullYear() - d.getFullYear();
-  const ay = b.getMonth() - d.getMonth();
-  if (ay < 0 || (ay === 0 && b.getDate() < d.getDate())) y--;
-  return String(y);
 };
 
 /** Code 128 desenini SVG çubuklarına çevirir. */
@@ -161,9 +147,9 @@ export function LabEtiket() {
                 <div className="et-hasta">
                   {kisaAd(String(e.hasta ?? ''))}
                   {' · '}
-                  {[yas(e.dogumTarihi), CINSIYET[Number(e.cinsiyet ?? 0)] ?? '']
+                  {[yasMetni(e.dogumTarihi), CINSIYET[Number(e.cinsiyet ?? 0)] ?? '']
                     .filter(Boolean).join('')}
-                  {gun(e.dogumTarihi) ? ` · ${gun(e.dogumTarihi)}` : ''}
+                  {gunNokta(e.dogumTarihi) ? ` · ${gunNokta(e.dogumTarihi)}` : ''}
                 </div>
                 <div className="et-alt">
                   {String(e.istemNo ?? '')}

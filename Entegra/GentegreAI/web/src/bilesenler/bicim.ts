@@ -289,3 +289,24 @@ export const tutarMetni = (ham: string | number | undefined | null): string => {
   const n = Number(String(ham).replace(',', '.'));
   return Number.isFinite(n) ? n.toFixed(2).replace('.', ',') : '';
 };
+
+/**
+ * ISO tarihini gun.ay.yil olarak yazar ("2026-09-11" -> "11.09.2026").
+ * Cikti ekranlarinda (etiket, lab raporu, radyoloji raporu) ayni ayri
+ * kopyalanmisti - tek yerde.
+ */
+export const gunNokta = (v: unknown): string => {
+  const m = String(v ?? '').slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(m) ? m.split('-').reverse().join('.') : '';
+};
+
+/** Dogum tarihinden YAS (tam yil). Gecersiz tarihte bos doner. */
+export const yasMetni = (dogum: unknown): string => {
+  const m = String(dogum ?? '').slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(m)) return '';
+  const d = new Date(m), b = new Date();
+  let y = b.getFullYear() - d.getFullYear();
+  const ay = b.getMonth() - d.getMonth();
+  if (ay < 0 || (ay === 0 && b.getDate() < d.getDate())) y--;
+  return String(y);
+};
