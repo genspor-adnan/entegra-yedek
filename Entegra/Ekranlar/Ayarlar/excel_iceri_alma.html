@@ -10,7 +10,7 @@
     --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
     --sel:#d7e7fb; --selbd:#98c2ee; --head:#f3f6fa; --head2:#e8eef5;
     --btnfrom:#fbfcfe; --btnto:#e7edf4; --req:#b23b3b; --ok:#2e7d46;
-    --uyari:#a9791a; --grpbg:#fbfcfd;
+    --uyari:#a9791a; --grpbg:#fbfcfd; --yz:#4b4fbf;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);
@@ -24,17 +24,26 @@
   .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
   .tabs{display:flex;gap:2px;padding:0 8px;background:var(--head2);border-bottom:1px solid var(--line);flex-wrap:wrap}
   .tab{padding:7px 13px;font-size:12px;background:#e9eef4;border:1px solid var(--line);border-bottom:none;
-    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);position:relative;top:1px}
-  .tab.active{background:#fff;color:var(--navy);font-weight:bold}
+    border-radius:4px 4px 0 0;margin-top:5px;color:var(--muted);position:relative;top:1px;cursor:pointer;
+    user-select:none}
+  .tab:hover{background:#f2f6fa;color:var(--navy)}
+  .tab.active{background:#fff;color:var(--navy);font-weight:bold;cursor:default}
   .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);
     align-items:center;flex-wrap:wrap}
+  .toolbar.alt{border-bottom:none;border-top:1px solid var(--line)}
   .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
-    border-radius:3px;padding:5px 10px;font-size:11.5px;display:flex;gap:5px;align-items:center}
+    border-radius:3px;padding:5px 10px;font-size:11.5px;display:flex;gap:5px;align-items:center;
+    cursor:pointer;user-select:none}
+  .btn:hover{border-color:#9db4cc}
   .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
-  .btn.pasif{opacity:.45}
+  .btn.yz{border-color:#4b4fbf;background:linear-gradient(#6f73d6,#4b4fbf);color:#fff;font-weight:bold}
+  .btn.pasif{opacity:.45;cursor:not-allowed}
   .sepv{width:1px;background:var(--line);margin:2px 3px;align-self:stretch}
-  .adimlar{display:flex;gap:0;padding:9px 12px;background:#f7fafc;border-bottom:1px solid var(--line2)}
-  .adim{display:flex;align-items:center;gap:7px;padding:0 14px 0 0;color:var(--muted)}
+  .ara{margin-left:auto;border:1px solid var(--line);border-radius:3px;background:#fff;height:24px;
+    padding:0 8px;font-size:11.5px;color:var(--muted);display:flex;align-items:center;min-width:190px}
+  .adimlar{display:flex;gap:0;padding:9px 12px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .adim{display:flex;align-items:center;gap:7px;padding:0 14px 0 0;color:var(--muted);cursor:pointer;user-select:none}
+  .adim:hover{color:var(--navy)}
   .adim .no{width:20px;height:20px;border-radius:50%;background:#dfe6ee;color:#5b6b7c;
     display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold}
   .adim.on{color:var(--navy);font-weight:bold}
@@ -59,263 +68,460 @@
     text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
   td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px}
   tr:hover td{background:#f2f7fd}
+  tr.sel td{background:var(--sel)}
   .orta{text-align:center} .sag{text-align:right} .sonuk{color:var(--muted)}
   .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line)}
   .rz.ok{background:#e2f3e8;color:var(--ok);border-color:#bfe3cb}
   .rz.uy{background:#fdf6e3;color:var(--uyari);border-color:#eeddb4}
   .rz.hata{background:#fdecec;color:#b23b3b;border-color:#f1c9c9}
-  .rz.yz{background:#eef0ff;color:#4b4fbf;border-color:#d4d7f7}
+  .rz.yz{background:#eef0ff;color:var(--yz);border-color:#d4d7f7}
   .rz.kod{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.gri{background:#f0f2f4;color:#7b8794;border-color:#dfe4e9}
   .not{background:#fbfcfd;border:1px solid var(--line2);border-left:3px solid var(--accent);
     padding:8px 10px;font-size:11.5px;color:#41566c;border-radius:0 3px 3px 0;margin-bottom:10px}
   .not.uy{border-left-color:var(--uyari)}
   .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
     font-size:11px;color:var(--muted)}
   .yzkutu{border:1px solid #d4d7f7;background:#f7f8ff;border-radius:4px;padding:9px 11px;margin-bottom:10px}
-  .yzkutu .bas{display:flex;align-items:center;gap:6px;color:#4b4fbf;font-weight:bold;margin-bottom:5px}
+  .yzkutu .bas{display:flex;align-items:center;gap:6px;color:var(--yz);font-weight:bold;margin-bottom:5px}
   .yzkutu ul{margin:4px 0 0 16px;padding:0;color:#41566c}
   .yzkutu li{margin:2px 0}
   .kolonesle{display:grid;grid-template-columns:1.1fr 28px 1.2fr 90px 1fr;gap:8px;align-items:center;
     padding:5px 0;border-bottom:1px solid var(--line2)}
   .kolonesle:last-child{border-bottom:none}
   .ok2{text-align:center;color:#9fb0c2}
+  .gizli{display:none}
+  .ipucu{font-size:11px;color:var(--muted);text-align:center;margin:-6px auto 14px;max-width:1180px}
 </style>
 </head>
 <body>
 
-<!-- ============================================================ 1. ADIM: DOSYA -->
+<div class="ipucu">Mockup — sekmelere ve adım başlıklarına <b>tıklanabilir</b>.</div>
+
 <div class="win">
   <div class="title"><span class="dot"></span> Excel'den İçeri Alma
-    <span class="sp">Ayarlar › Veri Aktarımı › İçeri Alma Sihirbazı — MOCKUP</span></div>
+    <span class="sp" id="ustbilgi">Ayarlar › Veri Aktarımı › İçeri Alma Sihirbazı — MOCKUP</span></div>
 
   <div class="tabs">
-    <div class="tab active">Sihirbaz</div>
-    <div class="tab">Şablonlar</div>
-    <div class="tab">Geçmiş Yüklemeler</div>
-    <div class="tab">Eşleme Kuralları</div>
+    <div class="tab active" data-sekme="sihirbaz">Sihirbaz</div>
+    <div class="tab" data-sekme="sablonlar">Şablonlar</div>
+    <div class="tab" data-sekme="gecmis">Geçmiş Yüklemeler</div>
+    <div class="tab" data-sekme="kurallar">Eşleme Kuralları</div>
   </div>
 
-  <div class="adimlar">
-    <div class="adim on"><span class="no">1</span> Dosya &amp; Hedef</div><span class="ok">›</span>
-    <div class="adim"><span class="no">2</span> Kolon Eşleme</div><span class="ok">›</span>
-    <div class="adim"><span class="no">3</span> Ön İzleme &amp; Doğrulama</div><span class="ok">›</span>
-    <div class="adim"><span class="no">4</span> Aktarım</div>
-  </div>
+  <!-- ==================================================== SEKME: SIHIRBAZ -->
+  <div class="sekme" data-sekme="sihirbaz">
 
-  <div class="govde">
-    <div class="not">
-      <b>Tek sihirbaz, çok hedef.</b> Cari, stok, hizmet, fiyat listesi, alış/satış faturası ve
-      kasa hareketi aynı ekrandan alınır. Hedefi seçmek yalnızca <i>hangi alanlar var</i> sorusunu
-      belirler; adımlar ve kurallar her hedefte aynıdır.
+    <div class="adimlar">
+      <div class="adim on" data-adim="1"><span class="no">1</span> Dosya &amp; Hedef</div><span class="ok">›</span>
+      <div class="adim" data-adim="2"><span class="no">2</span> Kolon Eşleme</div><span class="ok">›</span>
+      <div class="adim" data-adim="3"><span class="no">3</span> Ön İzleme &amp; Doğrulama</div><span class="ok">›</span>
+      <div class="adim" data-adim="4"><span class="no">4</span> Aktarım</div>
     </div>
 
-    <div class="kagrup">
-      <h6>Kaynak Dosya</h6>
-      <div class="ic">
-        <div class="birak">
-          <b>📄 Dosyayı buraya bırakın</b>
-          .xlsx · .xls · .csv · Google E-Tablo bağlantısı — en çok 50 MB / 100.000 satır
-          <div style="margin-top:8px"><span class="btn" style="display:inline-flex">Dosya Seç…</span></div>
+    <!-- ---------------------------------------------------------- ADIM 1 -->
+    <div class="adimic" data-adim="1">
+      <div class="govde">
+        <div class="not">
+          <b>Tek sihirbaz, çok hedef.</b> Cari, stok, hizmet, fiyat listesi, alış/satış faturası ve
+          kasa hareketi aynı ekrandan alınır. Hedefi seçmek yalnızca <i>hangi alanlar var</i> sorusunu
+          belirler; adımlar ve kurallar her hedefte aynıdır.
         </div>
-        <div style="margin-top:10px" class="satir">
-          <div class="fld"><label>Seçilen dosya</label>
-            <div class="inp">musteri_listesi_2026.xlsx <span class="sonuk" style="margin-left:auto">1.248 satır · 14 kolon</span></div></div>
-          <div class="fld"><label>Sayfa</label><div class="inp sec">Sayfa1 (1.248 satır)</div></div>
-          <div class="fld"><label>Başlık satırı</label><div class="inp sec">1. satır</div></div>
+
+        <div class="kagrup">
+          <h6>Kaynak Dosya</h6>
+          <div class="ic">
+            <div class="birak">
+              <b>📄 Dosyayı buraya bırakın</b>
+              .xlsx · .xls · .csv · Google E-Tablo bağlantısı — en çok 50 MB / 100.000 satır
+              <div style="margin-top:8px"><span class="btn" style="display:inline-flex">Dosya Seç…</span></div>
+            </div>
+            <div style="margin-top:10px" class="satir">
+              <div class="fld"><label>Seçilen dosya</label>
+                <div class="inp">musteri_listesi_2026.xlsx
+                  <span class="sonuk" style="margin-left:auto">1.248 satır · 14 kolon</span></div></div>
+              <div class="fld"><label>Sayfa</label><div class="inp sec">Sayfa1 (1.248 satır)</div></div>
+              <div class="fld"><label>Başlık satırı</label><div class="inp sec">1. satır</div></div>
+            </div>
+          </div>
         </div>
+
+        <div class="kagrup">
+          <h6>Hedef</h6>
+          <div class="ic">
+            <div class="satir">
+              <div class="fld"><label class="req">Ne aktarılıyor</label>
+                <div class="inp sec">Cari (müşteri / tedarikçi)</div></div>
+              <div class="fld"><label>Çakışma kuralı</label>
+                <div class="inp sec">Vergi no eşleşirse GÜNCELLE, yoksa EKLE</div></div>
+              <div class="fld"><label>Şube</label><div class="inp sec">Merkez</div></div>
+            </div>
+            <div style="margin-top:8px" class="satir">
+              <div class="fld"><label>Hedef seçenekleri</label>
+                <div class="inp sec">Cari · Stok · Hizmet · İlaç · Fiyat Listesi · Alış Faturası · Satış Faturası · Kasa Hareketi</div></div>
+              <div class="fld"><label>Sayı biçimi</label><div class="inp sec">Türkçe (1.234,56)</div></div>
+              <div class="fld"><label>Tarih biçimi</label><div class="inp sec">Otomatik algıla (gg.aa.yyyy)</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar alt">
+        <span class="btn">↓ Boş Şablon İndir</span>
+        <span class="btn">↓ Dolu Örnek İndir</span>
+        <div class="sepv"></div>
+        <span class="sonuk">Şablon zorunlu değildir — kendi Excel'inizi olduğu gibi yükleyebilirsiniz.</span>
+        <span class="btn primary ileri" style="margin-left:auto">İleri: Kolon Eşleme ›</span>
       </div>
     </div>
 
-    <div class="kagrup">
-      <h6>Hedef</h6>
-      <div class="ic">
-        <div class="satir">
-          <div class="fld"><label class="req">Ne aktarılıyor</label><div class="inp sec">Cari (müşteri / tedarikçi)</div></div>
-          <div class="fld"><label>Çakışma kuralı</label><div class="inp sec">Vergi no eşleşirse GÜNCELLE, yoksa EKLE</div></div>
-          <div class="fld"><label>Şube</label><div class="inp sec">Merkez</div></div>
+    <!-- ---------------------------------------------------------- ADIM 2 -->
+    <div class="adimic gizli" data-adim="2">
+      <div class="govde">
+        <div class="yzkutu">
+          <div class="bas">✨ Yapay zekâ eşlemeyi önerdi <span class="rz yz">14 kolonun 12'si eşleşti</span></div>
+          Kolon başlıkları ve <b>ilk 20 satırın içeriği</b> okundu. Öneriler kabul edilmeden hiçbir şey yazılmaz;
+          her satırı elle değiştirebilirsiniz.
+          <ul>
+            <li>"VD" kolonu <b>Vergi Dairesi</b> olarak eşlendi — değerler il adlarıyla birlikte geliyor.</li>
+            <li>"Telefon 2" kolonu <b>Cep Telefonu</b> sayıldı: %94'ü 05 ile başlıyor.</li>
+            <li>"Bakiye" kolonu <b>eşlenmedi</b> — cari açılış bakiyesi belge olarak girilmeli, kartta alanı yok.</li>
+          </ul>
         </div>
-        <div style="margin-top:8px" class="satir">
-          <div class="fld"><label>Hedef seçenekleri</label>
-            <div class="inp sec">Cari · Stok · Hizmet · İlaç · Fiyat Listesi · Alış Faturası · Satış Faturası · Kasa Hareketi</div></div>
-          <div class="fld"><label>Sayı biçimi</label><div class="inp sec">Türkçe (1.234,56)</div></div>
-          <div class="fld"><label>Tarih biçimi</label><div class="inp sec">Otomatik algıla (gg.aa.yyyy)</div></div>
+
+        <div class="kagrup">
+          <h6>Eşleme — Excel kolonu → Gentegre alanı</h6>
+          <div class="ic">
+            <div class="kolonesle" style="font-weight:bold;color:#3a5573">
+              <div>Excel kolonu</div><div></div><div>Gentegre alanı</div><div class="orta">Güven</div><div>Örnek değer</div>
+            </div>
+            <div class="kolonesle">
+              <div>Ünvan</div><div class="ok2">→</div><div class="inp sec">Unvan</div>
+              <div class="orta"><span class="rz ok">%99</span></div><div class="sonuk">ACME Medikal Ltd. Şti.</div>
+            </div>
+            <div class="kolonesle">
+              <div>VKN/TCKN</div><div class="ok2">→</div><div class="inp sec">Vergi No / TCKN</div>
+              <div class="orta"><span class="rz ok">%98</span></div><div class="sonuk">4560123456</div>
+            </div>
+            <div class="kolonesle">
+              <div>VD</div><div class="ok2">→</div><div class="inp sec">Vergi Dairesi</div>
+              <div class="orta"><span class="rz uy">%76</span></div><div class="sonuk">Ankara / Çankaya VD</div>
+            </div>
+            <div class="kolonesle">
+              <div>Telefon 2</div><div class="ok2">→</div><div class="inp sec">Cep Telefonu</div>
+              <div class="orta"><span class="rz uy">%81</span></div><div class="sonuk">0532 418 77 20</div>
+            </div>
+            <div class="kolonesle">
+              <div>Bakiye</div><div class="ok2">→</div><div class="inp sec sonuk">— aktarma —</div>
+              <div class="orta"><span class="rz hata">eşlenmedi</span></div><div class="sonuk">12.480,50</div>
+            </div>
+          </div>
         </div>
+
+        <div class="not uy">
+          <b>Eşleme kaydedilir.</b> "Bu eşlemeyi <i>ACME cari listesi</i> adıyla sakla" derseniz, aynı
+          düzendeki dosya bir dahaki sefere adım 2'yi atlar. Kurala dokunmadıkça sonuç da değişmez.
+          (Kayıtlı kurallar <b>Eşleme Kuralları</b> sekmesinde.)
+        </div>
+      </div>
+
+      <div class="toolbar alt">
+        <span class="btn geri">‹ Geri</span>
+        <span class="btn">✨ Yeniden Öner</span>
+        <span class="btn">💾 Eşlemeyi Sakla</span>
+        <span class="btn primary ileri" style="margin-left:auto">İleri: Ön İzleme ›</span>
+      </div>
+    </div>
+
+    <!-- ---------------------------------------------------------- ADIM 3 -->
+    <div class="adimic gizli" data-adim="3">
+      <div class="toolbar">
+        <span class="btn">Tümü (1.248)</span>
+        <span class="btn primary">⚠ Sorunlu (37)</span>
+        <span class="btn">✎ Değişecek (214)</span>
+        <span class="btn">＋ Yeni (997)</span>
+        <div class="sepv"></div>
+        <span class="btn yz">✨ Sorunları YZ ile Onar</span>
+        <span class="ara">🔍 Satır ara…</span>
+      </div>
+
+      <div class="govde">
+        <div class="yzkutu">
+          <div class="bas">✨ Yapay zekâ 37 sorunun 29'u için düzeltme öneriyor</div>
+          Öneriler <b>satır satır onaylanır</b>; toplu kabul de edilebilir. Kabul edilmeyen satır aktarılmaz,
+          dosyadaki hâliyle "atlananlar" raporuna düşer.
+          <ul>
+            <li>18 satırda vergi no 9 haneli — başa 0 eklenmesi öneriliyor (VKN 10 hane).</li>
+            <li>7 satırda il/ilçe ters yazılmış ("Çankaya / Ankara") — yer değiştirmesi öneriliyor.</li>
+            <li>4 satırda unvan boş ama "Yetkili" dolu — unvan olarak yetkili adı öneriliyor.</li>
+            <li>8 satır <b>onarılamıyor</b>: aynı vergi no dosyada iki kez, hangisi doğru belli değil.</li>
+          </ul>
+        </div>
+
+        <table>
+          <thead>
+            <tr><th style="width:52px">Satır</th><th>Unvan</th><th>Vergi No</th><th>İl / İlçe</th>
+                <th>Durum</th><th>Not</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="orta">14</td><td>ACME Medikal Ltd. Şti.</td><td>4560123456</td>
+                <td>Ankara / Çankaya</td><td><span class="rz ok">Yeni</span></td><td class="sonuk">—</td></tr>
+            <tr><td class="orta">27</td><td>Beta Sağlık A.Ş.</td>
+                <td>456012345 <span class="rz yz">→ 0456012345</span></td>
+                <td>İstanbul / Kadıköy</td><td><span class="rz uy">Onarıldı</span></td>
+                <td class="sonuk">VKN 10 haneye tamamlandı (YZ önerisi)</td></tr>
+            <tr><td class="orta">31</td><td>Gama Tıbbi Cihaz</td><td>7890123456</td>
+                <td>Çankaya <span class="rz yz">↔</span> Ankara</td><td><span class="rz uy">Onarıldı</span></td>
+                <td class="sonuk">İl/ilçe yer değiştirdi (YZ önerisi)</td></tr>
+            <tr><td class="orta">48</td><td>Delta Lab Malzeme</td><td>4560123456</td>
+                <td>İzmir / Bornova</td><td><span class="rz hata">Çakışma</span></td>
+                <td class="sonuk">Aynı vergi no 14. satırda da var — hangisi?</td></tr>
+            <tr><td class="orta">52</td><td class="sonuk">(boş)</td><td>1234567890</td>
+                <td>Bursa / Nilüfer</td><td><span class="rz hata">Eksik</span></td>
+                <td class="sonuk">Unvan zorunlu</td></tr>
+          </tbody>
+        </table>
+
+        <div class="not" style="margin-top:10px">
+          <b>Kural: yazma yok, önce göster.</b> Bu adıma kadar veritabanına hiçbir şey yazılmadı.
+          Aktarım tek işlemde (transaction) çalışır: ya hepsi yazılır ya hiçbiri.
+        </div>
+      </div>
+
+      <div class="toolbar alt">
+        <span class="btn geri">‹ Geri</span>
+        <span class="btn">↓ Sorunluları Excel'e Aktar</span>
+        <div class="sepv"></div>
+        <span class="sonuk">Aktarılacak: 1.240 satır · Atlanacak: 8</span>
+        <span class="btn primary ileri" style="margin-left:auto">Aktarımı Başlat ›</span>
+      </div>
+    </div>
+
+    <!-- ---------------------------------------------------------- ADIM 4 -->
+    <div class="adimic gizli" data-adim="4">
+      <div class="govde">
+        <div class="kagrup">
+          <h6>Özet</h6>
+          <div class="ic">
+            <table>
+              <tbody>
+                <tr><td style="width:220px">Eklenen cari</td><td><b>997</b></td><td class="sonuk">yeni kart</td></tr>
+                <tr><td>Güncellenen cari</td><td><b>243</b></td><td class="sonuk">vergi no eşleşti</td></tr>
+                <tr><td>Atlanan satır</td><td><b>8</b></td><td class="sonuk">çakışma / eksik zorunlu alan</td></tr>
+                <tr><td>YZ önerisiyle onarılan</td><td><b>29</b></td><td class="sonuk">kullanıcı onayıyla</td></tr>
+                <tr><td>Süre</td><td><b>11,4 sn</b></td><td class="sonuk">1.248 satır</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="not">
+          <b>İzi kalır.</b> Yükleme kaydı (dosya adı, kullanıcı, zaman, eşleme, satır sonuçları)
+          <i>Geçmiş Yüklemeler</i>'de durur; her yazılan kart İşlem Günlüğü'nde bu yükleme numarasıyla
+          işaretlenir. Yanlış aktarım <b>tek düğmeyle geri alınabilir</b> — geri alma yalnız bu yüklemenin
+          dokunduğu kayıtları etkiler ve sonradan elle değiştirilen kayıtları atlar.
+        </div>
+      </div>
+      <div class="toolbar alt">
+        <span class="btn geri">‹ Geri</span>
+        <span class="btn">↓ Sonuç Raporu (Excel)</span>
+        <span class="btn">↩ Bu Yüklemeyi Geri Al</span>
+        <span class="btn primary" style="margin-left:auto">Kapat</span>
       </div>
     </div>
   </div>
 
-  <div class="toolbar">
-    <span class="btn">↓ Boş Şablon İndir</span>
-    <span class="btn">↓ Dolu Örnek İndir</span>
-    <div class="sepv"></div>
-    <span class="sonuk">Şablon zorunlu değildir — kendi Excel'inizi olduğu gibi yükleyebilirsiniz.</span>
-    <span class="btn primary" style="margin-left:auto">İleri: Kolon Eşleme ›</span>
-  </div>
-  <div class="statusbar"><span>Adım 1 / 4</span><span>Dosya okundu · 1.248 satır</span></div>
-</div>
-
-<!-- ====================================================== 2. ADIM: KOLON ESLEME -->
-<div class="win">
-  <div class="title"><span class="dot"></span> Kolon Eşleme
-    <span class="sp">Adım 2 / 4 — yapay zekâ önerisiyle</span></div>
-
-  <div class="govde">
-    <div class="yzkutu">
-      <div class="bas">✨ Yapay zekâ eşlemeyi önerdi <span class="rz yz">14 kolonun 12'si eşleşti</span></div>
-      Kolon başlıkları ve <b>ilk 20 satırın içeriği</b> okundu. Öneriler kabul edilmeden hiçbir şey yazılmaz;
-      her satırı elle değiştirebilirsiniz.
-      <ul>
-        <li>"VD" kolonu <b>Vergi Dairesi</b> olarak eşlendi — değerler il adlarıyla birlikte geliyor.</li>
-        <li>"Telefon 2" kolonu <b>Cep Telefonu</b> sayıldı: %94'ü 05 ile başlıyor.</li>
-        <li>"Bakiye" kolonu <b>eşlenmedi</b> — cari açılış bakiyesi belge olarak girilmeli, kartta alanı yok.</li>
-      </ul>
+  <!-- =================================================== SEKME: SABLONLAR -->
+  <div class="sekme gizli" data-sekme="sablonlar">
+    <div class="toolbar">
+      <span class="btn">↓ Boş Şablon</span>
+      <span class="btn">↓ Dolu Örnek</span>
+      <div class="sepv"></div>
+      <span class="btn">👁 Alanları Gör</span>
+      <span class="ara">🔍 Şablon ara…</span>
     </div>
 
-    <div class="kagrup">
-      <h6>Eşleme — Excel kolonu → Gentegre alanı</h6>
-      <div class="ic">
-        <div class="kolonesle" style="font-weight:bold;color:#3a5573">
-          <div>Excel kolonu</div><div></div><div>Gentegre alanı</div><div class="orta">Güven</div><div>Örnek değer</div>
-        </div>
-        <div class="kolonesle">
-          <div>Ünvan</div><div class="ok2">→</div><div class="inp sec">Unvan</div>
-          <div class="orta"><span class="rz ok">%99</span></div><div class="sonuk">ACME Medikal Ltd. Şti.</div>
-        </div>
-        <div class="kolonesle">
-          <div>VKN/TCKN</div><div class="ok2">→</div><div class="inp sec">Vergi No / TCKN</div>
-          <div class="orta"><span class="rz ok">%98</span></div><div class="sonuk">4560123456</div>
-        </div>
-        <div class="kolonesle">
-          <div>VD</div><div class="ok2">→</div><div class="inp sec">Vergi Dairesi</div>
-          <div class="orta"><span class="rz uy">%76</span></div><div class="sonuk">Ankara / Çankaya VD</div>
-        </div>
-        <div class="kolonesle">
-          <div>Telefon 2</div><div class="ok2">→</div><div class="inp sec">Cep Telefonu</div>
-          <div class="orta"><span class="rz uy">%81</span></div><div class="sonuk">0532 418 77 20</div>
-        </div>
-        <div class="kolonesle">
-          <div>Bakiye</div><div class="ok2">→</div><div class="inp sec sonuk">— aktarma —</div>
-          <div class="orta"><span class="rz hata">eşlenmedi</span></div><div class="sonuk">12.480,50</div>
-        </div>
+    <div class="govde">
+      <div class="not">
+        Şablon <b>zorunlu değildir</b> — sihirbaz kendi dosyanızı da okur. Şablon yalnız "hangi alanlar
+        var, hangisi zorunlu" sorusunu kolaylaştırır. Zorunlu alanlar sunucudaki kart tanımından gelir;
+        şablon onunla aynı yerden üretilir, elle güncellenmez.
       </div>
+
+      <table>
+        <thead>
+          <tr><th>Şablon</th><th>Alan sayısı</th><th>Zorunlu alanlar</th><th>Çakışma anahtarı</th><th>Not</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>Cari</b></td><td class="orta">28</td>
+              <td>Unvan</td><td><span class="rz kod">Vergi No / TCKN</span></td>
+              <td class="sonuk">Adres ve ilgili kişi ayrı sayfada</td></tr>
+          <tr><td><b>Stok</b></td><td class="orta">24</td>
+              <td>Kod, Ad, Birim</td><td><span class="rz kod">Kod</span> · <span class="rz kod">Barkod</span></td>
+              <td class="sonuk">Barkod ikinci sayfada, çok barkod desteklenir</td></tr>
+          <tr><td><b>Hizmet</b></td><td class="orta">19</td>
+              <td>Kod, Ad</td><td><span class="rz kod">Kod</span></td>
+              <td class="sonuk">Kategori boşsa ağaçtaki başlıktan türetilir</td></tr>
+          <tr><td><b>İlaç</b></td><td class="orta">12</td>
+              <td>Barkod, Ad</td><td><span class="rz kod">Barkod</span></td>
+              <td class="sonuk">TİTCK listesi ayrıca otomatik güncellenir</td></tr>
+          <tr><td><b>Fiyat Listesi Satırı</b></td><td class="orta">9</td>
+              <td>Liste, Kalem, Fiyat</td><td><span class="rz kod">Liste + Kalem</span></td>
+              <td class="sonuk">Tarife tipi SUT/TTB ise fiyat kilitli — katkı girilir</td></tr>
+          <tr><td><b>Alış Faturası</b></td><td class="orta">22</td>
+              <td>Belge No, Tarih, Cari, Kalem</td><td><span class="rz kod">Cari + Belge No</span></td>
+              <td class="sonuk">Başlık ve kalem iki sayfa; kalem sayfası belge no ile bağlanır</td></tr>
+          <tr><td><b>Satış Faturası</b></td><td class="orta">22</td>
+              <td>Tarih, Cari, Kalem</td><td><span class="rz kod">Seri + Numara</span></td>
+              <td class="sonuk">e-Belge gönderimi aktarımdan sonra, ayrı adım</td></tr>
+          <tr><td><b>Kasa Hareketi</b></td><td class="orta">11</td>
+              <td>Tarih, Hesap, Tutar</td><td><span class="rz kod">Makbuz No</span></td>
+              <td class="sonuk">Tahsilat/ödeme ayrımı tür kolonundan</td></tr>
+        </tbody>
+      </table>
     </div>
-
-    <div class="not uy">
-      <b>Eşleme kaydedilir.</b> "Bu eşlemeyi <i>ACME cari listesi</i> adıyla sakla" derseniz, aynı
-      düzendeki dosya bir dahaki sefere adım 2'yi atlar. Kurala dokunmadıkça sonuç da değişmez.
-    </div>
+    <div class="statusbar"><span>8 şablon</span><span>Alanlar sunucudaki kart tanımından üretilir</span></div>
   </div>
 
-  <div class="toolbar">
-    <span class="btn">‹ Geri</span>
-    <span class="btn">✨ Yeniden Öner</span>
-    <span class="btn">💾 Eşlemeyi Sakla</span>
-    <span class="btn primary" style="margin-left:auto">İleri: Ön İzleme ›</span>
-  </div>
-  <div class="statusbar"><span>Adım 2 / 4</span><span>12 eşleşti · 1 eşlenmedi · 1 yok sayıldı</span></div>
-</div>
-
-<!-- ================================================ 3. ADIM: ONIZLEME / DOGRULAMA -->
-<div class="win">
-  <div class="title"><span class="dot"></span> Ön İzleme &amp; Doğrulama
-    <span class="sp">Adım 3 / 4 — hiçbir şey yazılmadı</span></div>
-
-  <div class="toolbar">
-    <span class="btn">Tümü (1.248)</span>
-    <span class="btn primary">⚠ Sorunlu (37)</span>
-    <span class="btn">✎ Değişecek (214)</span>
-    <span class="btn">＋ Yeni (997)</span>
-    <div class="sepv"></div>
-    <span class="btn">✨ Sorunları YZ ile Onar</span>
-    <span class="ara" style="margin-left:auto">🔍 Satır ara…</span>
-  </div>
-
-  <div class="govde" style="padding-top:10px">
-    <div class="yzkutu">
-      <div class="bas">✨ Yapay zekâ 37 sorunun 29'u için düzeltme öneriyor</div>
-      Öneriler <b>satır satır onaylanır</b>; toplu kabul de edilebilir. Kabul edilmeyen satır aktarılmaz,
-      dosyadaki hâliyle "atlananlar" raporuna düşer.
-      <ul>
-        <li>18 satırda vergi no 9 haneli — başa 0 eklenmesi öneriliyor (VKN 10 hane).</li>
-        <li>7 satırda il/ilçe ters yazılmış ("Çankaya / Ankara") — yer değiştirmesi öneriliyor.</li>
-        <li>4 satırda unvan boş ama "Yetkili" dolu — unvan olarak yetkili adı öneriliyor.</li>
-        <li>8 satır <b>onarılamıyor</b>: aynı vergi no dosyada iki kez, hangisi doğru belli değil.</li>
-      </ul>
+  <!-- ===================================================== SEKME: GECMIS -->
+  <div class="sekme gizli" data-sekme="gecmis">
+    <div class="toolbar">
+      <span class="btn">👁 Ayrıntı</span>
+      <span class="btn">↓ Sonuç Raporu</span>
+      <div class="sepv"></div>
+      <span class="btn">↩ Geri Al</span>
+      <span class="btn pasif">🗑 Kaydı Sil</span>
+      <span class="ara">🔍 Dosya / kullanıcı ara…</span>
     </div>
 
     <table>
       <thead>
-        <tr><th style="width:52px">Satır</th><th>Unvan</th><th>Vergi No</th><th>İl / İlçe</th>
-            <th>Durum</th><th>Not</th></tr>
+        <tr><th>Yükleme</th><th>Tarih</th><th>Kullanıcı</th><th>Hedef</th><th>Dosya</th>
+            <th class="sag">Eklenen</th><th class="sag">Güncellenen</th><th class="sag">Atlanan</th><th>Durum</th></tr>
       </thead>
       <tbody>
-        <tr><td class="orta">14</td><td>ACME Medikal Ltd. Şti.</td><td>4560123456</td>
-            <td>Ankara / Çankaya</td><td><span class="rz ok">Yeni</span></td><td class="sonuk">—</td></tr>
-        <tr><td class="orta">27</td><td>Beta Sağlık A.Ş.</td>
-            <td>456012345 <span class="rz yz">→ 0456012345</span></td>
-            <td>İstanbul / Kadıköy</td><td><span class="rz uy">Onarıldı</span></td>
-            <td class="sonuk">VKN 10 haneye tamamlandı (YZ önerisi)</td></tr>
-        <tr><td class="orta">31</td><td>Gama Tıbbi Cihaz</td><td>7890123456</td>
-            <td>Çankaya <span class="rz yz">↔</span> Ankara</td><td><span class="rz uy">Onarıldı</span></td>
-            <td class="sonuk">İl/ilçe yer değiştirdi (YZ önerisi)</td></tr>
-        <tr><td class="orta">48</td><td>Delta Lab Malzeme</td><td>4560123456</td>
-            <td>İzmir / Bornova</td><td><span class="rz hata">Çakışma</span></td>
-            <td class="sonuk">Aynı vergi no 14. satırda da var — hangisi?</td></tr>
-        <tr><td class="orta">52</td><td class="sonuk">(boş)</td><td>1234567890</td>
-            <td>Bursa / Nilüfer</td><td><span class="rz hata">Eksik</span></td>
-            <td class="sonuk">Unvan zorunlu</td></tr>
+        <tr class="sel"><td>#2026-000143</td><td>11.09.2026 14:22</td><td>admin</td><td>Cari</td>
+            <td class="sonuk">musteri_listesi_2026.xlsx</td>
+            <td class="sag">997</td><td class="sag">243</td><td class="sag">8</td>
+            <td><span class="rz ok">Tamam</span></td></tr>
+        <tr><td>#2026-000142</td><td>10.09.2026 17:05</td><td>admin</td><td>Fiyat Listesi Satırı</td>
+            <td class="sonuk">ozel_tarife_eylul.xlsx</td>
+            <td class="sag">1.412</td><td class="sag">0</td><td class="sag">3</td>
+            <td><span class="rz ok">Tamam</span></td></tr>
+        <tr><td>#2026-000141</td><td>10.09.2026 11:48</td><td>e.kaya</td><td>Stok</td>
+            <td class="sonuk">depo_sayim.csv</td>
+            <td class="sag">0</td><td class="sag">0</td><td class="sag">0</td>
+            <td><span class="rz gri">Geri alındı</span></td></tr>
+        <tr><td>#2026-000140</td><td>09.09.2026 09:12</td><td>admin</td><td>Satış Faturası</td>
+            <td class="sonuk">agustos_satis.xlsx</td>
+            <td class="sag">318</td><td class="sag">0</td><td class="sag">27</td>
+            <td><span class="rz uy">Kısmi</span></td></tr>
       </tbody>
     </table>
 
-    <div class="not" style="margin-top:10px">
-      <b>Kural: yazma yok, önce göster.</b> Bu adıma kadar veritabanına hiçbir şey yazılmadı.
-      Aktarım tek işlemde (transaction) çalışır: ya hepsi yazılır ya hiçbiri.
-    </div>
-  </div>
-
-  <div class="toolbar">
-    <span class="btn">‹ Geri</span>
-    <span class="btn">↓ Sorunluları Excel'e Aktar</span>
-    <div class="sepv"></div>
-    <span class="sonuk">Aktarılacak: 1.240 satır · Atlanacak: 8</span>
-    <span class="btn primary" style="margin-left:auto">Aktarımı Başlat ›</span>
-  </div>
-  <div class="statusbar"><span>Adım 3 / 4</span><span>Doğrulama bitti</span></div>
-</div>
-
-<!-- ======================================================== 4. ADIM: SONUC -->
-<div class="win">
-  <div class="title"><span class="dot"></span> Aktarım Sonucu
-    <span class="sp">Adım 4 / 4</span></div>
-  <div class="govde">
-    <div class="kagrup">
-      <h6>Özet</h6>
-      <div class="ic">
-        <table>
-          <tbody>
-            <tr><td style="width:220px">Eklenen cari</td><td><b>997</b></td><td class="sonuk">yeni kart</td></tr>
-            <tr><td>Güncellenen cari</td><td><b>243</b></td><td class="sonuk">vergi no eşleşti</td></tr>
-            <tr><td>Atlanan satır</td><td><b>8</b></td><td class="sonuk">çakışma / eksik zorunlu alan</td></tr>
-            <tr><td>YZ önerisiyle onarılan</td><td><b>29</b></td><td class="sonuk">kullanıcı onayıyla</td></tr>
-            <tr><td>Süre</td><td><b>11,4 sn</b></td><td class="sonuk">1.248 satır</td></tr>
-          </tbody>
-        </table>
+    <div class="govde">
+      <div class="not uy">
+        <b>Geri alma neyi yapar:</b> yalnız o yüklemenin <i>eklediği</i> kayıtları siler ve
+        <i>güncellediği</i> alanları eski değerine döndürür. Yüklemeden sonra elle değiştirilmiş kayda
+        <b>dokunmaz</b> — listede "atlandı" olarak gösterilir. Belgesi kesilmiş, fişlenmiş ya da
+        e-Belge'si gönderilmiş kayıt geri alınamaz.
       </div>
     </div>
-    <div class="not">
-      <b>İzi kalır.</b> Yükleme kaydı (dosya adı, kullanıcı, zaman, eşleme, satır sonuçları)
-      <i>Geçmiş Yüklemeler</i>'de durur; her yazılan kart İşlem Günlüğü'nde bu yükleme numarasıyla
-      işaretlenir. Yanlış aktarım <b>tek düğmeyle geri alınabilir</b> — geri alma yalnız bu yüklemenin
-      dokunduğu kayıtları etkiler ve sonradan elle değiştirilen kayıtları atlar.
+    <div class="statusbar"><span>Son 30 gün: 14 yükleme</span><span>Seçili: #2026-000143</span></div>
+  </div>
+
+  <!-- ==================================================== SEKME: KURALLAR -->
+  <div class="sekme gizli" data-sekme="kurallar">
+    <div class="toolbar">
+      <span class="btn primary">＋ Yeni Kural</span>
+      <span class="btn">✎ Düzenle</span>
+      <span class="btn">⧉ Kopyala</span>
+      <span class="btn">🗑 Sil</span>
+      <div class="sepv"></div>
+      <span class="btn">▶ Bir Dosyada Dene</span>
+      <span class="ara">🔍 Kural ara…</span>
     </div>
+
+    <table>
+      <thead>
+        <tr><th>Kural</th><th>Hedef</th><th>Eşleşme koşulu</th><th>Kolon eşleme</th>
+            <th>Son kullanım</th><th>Durum</th></tr>
+      </thead>
+      <tbody>
+        <tr class="sel"><td><b>ACME cari listesi</b></td><td>Cari</td>
+            <td class="sonuk">Başlıklar: Ünvan · VKN/TCKN · VD</td><td class="orta">12 alan</td>
+            <td class="sonuk">11.09.2026</td><td><span class="rz ok">Aktif</span></td></tr>
+        <tr><td><b>Tedarikçi fiyat listesi (Medikal A.Ş.)</b></td><td>Fiyat Listesi Satırı</td>
+            <td class="sonuk">Dosya adı "medikal_*" ile başlıyor</td><td class="orta">6 alan</td>
+            <td class="sonuk">10.09.2026</td><td><span class="rz ok">Aktif</span></td></tr>
+        <tr><td><b>Depo sayım (el terminali)</b></td><td>Stok</td>
+            <td class="sonuk">Başlıklar: BARKOD · MIKTAR</td><td class="orta">3 alan</td>
+            <td class="sonuk">10.09.2026</td><td><span class="rz ok">Aktif</span></td></tr>
+        <tr><td><b>Eski program cari aktarımı</b></td><td>Cari</td>
+            <td class="sonuk">Başlıklar: CARIKOD · CARIUNVAN</td><td class="orta">9 alan</td>
+            <td class="sonuk">02.06.2026</td><td><span class="rz gri">Pasif</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="govde">
+      <div class="yzkutu">
+        <div class="bas">✨ Kural nasıl doğar</div>
+        Sihirbazda yapay zekânın önerdiği eşlemeyi <b>kabul edip "Sakla"</b> dediğinizde bu listeye bir
+        satır düşer. Bir dahaki aynı düzendeki dosyada sihirbaz kuralı tanır ve <b>adım 2 atlanır</b>;
+        YZ yeniden çağrılmaz. Dosya düzeni değişirse kural tutmaz, sihirbaz yine önerir.
+      </div>
+      <div class="not">
+        <b>Kural sonucu değiştirmez, sadece emeği azaltır.</b> Doğrulama ve çakışma kuralları her
+        durumda sunucuda çalışır - kayıtlı kural yanlış eşleme taşısa bile hatalı satır yine adım 3'te
+        görünür ve yazılmaz.
+      </div>
+    </div>
+    <div class="statusbar"><span>4 kural (3 aktif)</span><span>Seçili: ACME cari listesi</span></div>
   </div>
-  <div class="toolbar">
-    <span class="btn">↓ Sonuç Raporu (Excel)</span>
-    <span class="btn">↩ Bu Yüklemeyi Geri Al</span>
-    <span class="btn primary" style="margin-left:auto">Kapat</span>
-  </div>
-  <div class="statusbar"><span>Yükleme #2026-000143</span><span>admin · 11.09.2026 14:22</span></div>
+
+  <div class="statusbar" id="durum"><span>Adım 1 / 4</span><span>Dosya okundu · 1.248 satır</span></div>
 </div>
+
+<script>
+  /* Mockup etkileşimi: sekme ve adım geçişi. Görsel akışı denemek için -
+     iş kuralı yok, veri yok. */
+  var kok = document.querySelector('.win');
+
+  function sekmeAc(ad) {
+    kok.querySelectorAll('.tab').forEach(function (t) {
+      t.classList.toggle('active', t.dataset.sekme === ad);
+    });
+    kok.querySelectorAll('.sekme').forEach(function (s) {
+      s.classList.toggle('gizli', s.dataset.sekme !== ad);
+    });
+    var durum = document.getElementById('durum');
+    durum.style.display = (ad === 'sihirbaz') ? '' : 'none';
+  }
+
+  function adimAc(no) {
+    kok.querySelectorAll('.adim').forEach(function (a) {
+      var n = Number(a.dataset.adim);
+      a.classList.toggle('on', n === no);
+      a.classList.toggle('bitti', n < no);
+    });
+    kok.querySelectorAll('.adimic').forEach(function (g) {
+      g.classList.toggle('gizli', Number(g.dataset.adim) !== no);
+    });
+    document.getElementById('durum').firstElementChild.textContent = 'Adım ' + no + ' / 4';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  kok.querySelectorAll('.tab').forEach(function (t) {
+    t.addEventListener('click', function () { sekmeAc(t.dataset.sekme); });
+  });
+  kok.querySelectorAll('.adim').forEach(function (a) {
+    a.addEventListener('click', function () { adimAc(Number(a.dataset.adim)); });
+  });
+  kok.addEventListener('click', function (o) {
+    var simdiki = Number(kok.querySelector('.adim.on').dataset.adim);
+    if (o.target.closest('.ileri')) adimAc(Math.min(4, simdiki + 1));
+    if (o.target.closest('.geri'))  adimAc(Math.max(1, simdiki - 1));
+  });
+</script>
 
 </body>
 </html>
