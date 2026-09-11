@@ -1,7 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
+import { useIstemSecimi } from './useIstemSecimi';
+import { useIsteyenHekim } from './useIsteyenHekim';
+import type { Gecmis, Hekim, Tetkik } from './istemTipleri';
 import { TarafArama } from '../TarafArama';
 import { mesaj } from '../mesaj';
 import { para } from '../bicim';
@@ -20,24 +23,6 @@ import { KasaIslemKarti } from '../../sayfalar/KasaIslemKarti';
  * PACS ve raporlama accession bazlidir.
  */
 
-interface Tetkik { id: number; kod: string; ad: string; modalite: number;
-                   modaliteAdi: string; kdv: number;
-                   /** Tetkikin protokol hazirligi, yoksa modalite varsayilani (311). */
-                   hazirlik?: string;
-                   /** Cekim protokolunden (314): personele uyari ve varsayilan kontrast. */
-                   ozelUyari?: string; varsayilanKontrast?: number; sureDk?: number }
-interface Hekim { id: number; ad: string; bolumAdi: string }
-interface Gecmis { hizmetId: number; tetkikAdi: string; tarih: string }
-
-/** Secili tetkik: listedeki tetkik + isteme ozel secimler. */
-interface Secim { tetkik: Tetkik; oncelik: number; kontrast: number }
-
-/**
- * Kalem fiyati (mockup radyoloji_kayit_kabul: Liste / Indirim / Tutar).
- * Sunucudaki kuralin AYNISI (liste -> kampanya) - kabul masasi tutari
- * kaydetmeden once gormeli, hastaya soylenen rakam faturayla tutmali.
- */
-interface KalemFiyati { liste: number; tutar: number; kdv: number }
 
 const ONCELIK = [
   { deger: 1, ad: 'Normal' },
@@ -77,19 +62,10 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
 }) {
   const [tetkikler, setTetkikler] = useState<Tetkik[]>([]);
   const [hekimler, setHekimler] = useState<Hekim[]>([]);
-  /** Kayitli dis hekim secildiyse id; "listede yok" ise serbest metin. */
-  const [disHekimId, setDisHekimId] = useState<number | null>(null);
-  const [disHekimSecim, setDisHekimSecim] = useState('');
-  const [hekimArama, setHekimArama] = useState(false);
+  // ISTEYEN HEKIM / KURUM (kayitli dis hekim · serbest metin · isteyen kurum)
+  //   kendi kancasinda: useIsteyenHekim.
+  const isteyen = useIsteyenHekim();
   const [gecmis, setGecmis] = useState<Gecmis[]>([]);
-  const [ara, setAra] = useState('');
-  const [secili, setSecili] = useState<Secim[]>([]);
-  const [istekHekimId, setIstekHekimId] = useState<number | null>(null);
-  const [disHekimAd, setDisHekimAd] = useState('');
-  const [istekKurumId, setIstekKurumId] = useState<number | null>(null);
-  /** Secili kurumun ADI - kutuda id degil ad gorunur. */
-  const [istekKurumAd, setIstekKurumAd] = useState('');
-  const [kurumArama, setKurumArama] = useState(false);
   const [onTani, setOnTani] = useState('');
   const [klinikBilgi, setKlinikBilgi] = useState('');
   const [ucretEkle, setUcretEkle] = useState(true);
@@ -105,7 +81,6 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
   const [odeyenKurumAd, setOdeyenKurumAd] = useState('');
   const [odeyenArama, setOdeyenArama] = useState(false);
   const [policeNo, setPoliceNo] = useState('');
-  const [fiyatlar, setFiyatlar] = useState<Record<number, KalemFiyati>>({});
   /** Kabul sonrasi ozet: protokol no ve tutarlar (mockup ozet seridi). */
   const [sonuc, setSonuc] = useState<{ belgeId: number; belgeNo: string;
     genelToplam: number; kurumTutar: number; hastaTutar: number } | null>(null);
@@ -142,6 +117,12 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
   const [sms, setSms] = useState(true);
   const [hazirlik, setHazirlik] = useState(true);
   const [cd, setCd] = useState(false);
+  // TETKIK SECIMI + FIYATI kendi kancasinda: arama, secili liste, modalite
+  //   agaci, ozet hesaplari ve fiyat cozumleme orada.
+  const { ara, setAra, secili, fiyatlar,
+          toplam, uyarilar, talimatlar, agac, ekle, cikar, degistir } =
+    useIstemSecimi({ acik, hastaId, odeyenKurumId, tetkikler, onSeciliHizmetId });
+
   const [kaydediyor, setKaydediyor] = useState(false);
   const [hata, setHata] = useState('');
 
@@ -155,23 +136,6 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
   }, [hastaId]);
 
   useEffect(() => { if (acik) void yukle() }, [acik, yukle]);
-
-  /**
-   * RANDEVUNUN TETKIKI (317) acilista secili gelir: hasta o tetkik icin gun
-   * almisti, kabul masasinin listeden yeniden bulmasi hem yavas hem hataya
-   * acik. Tetkikler yuklendikten sonra bir kez uygulanir - kullanici sonra
-   * cikarabilir ya da yenisini ekleyebilir.
-   */
-  const onSecimUygulandi = useRef(false);
-  useEffect(() => { if (!acik) onSecimUygulandi.current = false }, [acik]);
-  useEffect(() => {
-    if (!acik || !onSeciliHizmetId || onSecimUygulandi.current) return;
-    const t = tetkikler.find(x => x.id === onSeciliHizmetId);
-    if (!t) return;
-    onSecimUygulandi.current = true;
-    setSecili(s => (s.some(x => x.tetkik.id === t.id) ? s
-      : [...s, { tetkik: t, oncelik: 1, kontrast: t.varsayilanKontrast ?? 0 }]));
-  }, [acik, onSeciliHizmetId, tetkikler]);
 
   // HASTANIN AKTIF POLICESI (248): kabul masasi police numarasini elle
   //   yazmasin - hasta kartinda duruyorsa oradan gelir, gerekirse duzeltilir.
@@ -188,105 +152,6 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
       } catch { /* police yoksa alanlar bos kalir - kabul yine yapilir */ }
     })();
   }, [acik, kabulMu, hastaId]);
-
-  // FIYAT: secili tetkikler / odeyen kurum degistikce yeniden cozulur.
-  //   Kurum degisince kampanya ve sozlesme listesi de degisir (302) -
-  //   ekrandaki tutar kaydedilecek tutarla ayni kalmali.
-  useEffect(() => {
-    if (!acik) return;
-    let birak = false;
-    void (async () => {
-      // BAZ LISTE: kampanya -> SOZLESME -> cari -> varsayilan sirasi (302)
-      //   yalniz bu ucta cozuluyor; kalem fiyatina listeyi VERMEZSEK kurum
-      //   sozlesmesindeki liste devreye girmez ve ekran 0 gosterirdi.
-      let listeId: number | null = null;
-      try {
-        listeId = (await api.belgeVarsayilanListe(19, hastaId, odeyenKurumId)).listeId;
-      } catch { /* liste cozulemezse kalem kendi kuralina duser */ }
-      const yeni: Record<number, KalemFiyati> = {};
-      for (const sec of secili) {
-        try {
-          const f = await api.fiyatKalem({ hizmetId: sec.tetkik.id },
-                                         { tarafId: hastaId, kurumId: odeyenKurumId,
-                                           listeId });
-          yeni[sec.tetkik.id] = {
-            liste: Number(f.bazFiyat ?? 0),
-            tutar: Number(f.fiyat ?? f.bazFiyat ?? 0),
-            kdv: Number(sec.tetkik.kdv ?? 0),
-          };
-        } catch { /* fiyat cozulemezse satir 0 gorunur, kabul engellenmez */ }
-      }
-      if (!birak) setFiyatlar(yeni);
-    })();
-    return () => { birak = true };
-  }, [acik, secili, odeyenKurumId, hastaId]);
-
-  /** Mockup'taki tutar kutusu: liste, indirim, KDV, genel toplam. */
-  const toplam = useMemo(() => {
-    let liste = 0, net = 0, kdv = 0;
-    secili.forEach(sec => {
-      const f = fiyatlar[sec.tetkik.id];
-      if (!f) return;
-      liste += f.liste;
-      net += f.tutar;
-      kdv += (f.tutar * f.kdv) / 100;
-    });
-    return { liste, net, kdv, indirim: liste - net, genel: net + kdv };
-  }, [secili, fiyatlar]);
-
-  /** Protokoldeki PERSONEL uyarilari (314) - hastaya degil, kabul masasina. */
-  const uyarilar = useMemo(() => {
-    const gorulen = new Set<string>();
-    const liste: { baslik: string; metin: string }[] = [];
-    secili.forEach(sec => {
-      const metin = (sec.tetkik.ozelUyari ?? '').trim();
-      if (!metin || gorulen.has(metin)) return;
-      gorulen.add(metin);
-      liste.push({ baslik: sec.tetkik.kod, metin });
-    });
-    return liste;
-  }, [secili]);
-
-  /** Secili tetkiklerin hazirlik talimatlari - AYNI metin tekrar edilmez. */
-  const talimatlar = useMemo(() => {
-    const gorulen = new Set<string>();
-    const liste: { baslik: string; metin: string }[] = [];
-    secili.forEach(sec => {
-      const metin = (sec.tetkik.hazirlik ?? '').trim();
-      if (!metin || gorulen.has(metin)) return;
-      gorulen.add(metin);
-      liste.push({ baslik: sec.tetkik.modaliteAdi || sec.tetkik.ad, metin });
-    });
-    return liste;
-  }, [secili]);
-
-  /** Modaliteye gore gruplu, aramayla suzulmus tetkik agaci. */
-  const agac = useMemo(() => {
-    const k = ara.trim().toLocaleLowerCase('tr');
-    const suz = k
-      ? tetkikler.filter(t => t.ad.toLocaleLowerCase('tr').includes(k)
-                           || t.kod.toLocaleLowerCase('tr').includes(k))
-      : tetkikler;
-    const gruplar = new Map<string, Tetkik[]>();
-    suz.forEach(t => {
-      const g = t.modaliteAdi || 'Diğer';
-      if (!gruplar.has(g)) gruplar.set(g, []);
-      gruplar.get(g)!.push(t);
-    });
-    return [...gruplar.entries()];
-  }, [tetkikler, ara]);
-
-  const ekle = (t: Tetkik) => {
-    if (secili.some(s => s.tetkik.id === t.id)) return;
-    // KONTRAST varsayilani cekim protokolunden (314) gelir: "kontrastli mi"
-    //   sorusunun dogru cevabi tetkikin protokolunde yazilidir, kabul masasi
-    //   her seferinde secmesin.
-    setSecili(x => [...x, { tetkik: t, oncelik: 1,
-                            kontrast: Number(t.varsayilanKontrast ?? 0) }]);
-  };
-  const cikar = (id: number) => setSecili(x => x.filter(s => s.tetkik.id !== id));
-  const degistir = (id: number, y: Partial<Secim>) =>
-    setSecili(x => x.map(s => (s.tetkik.id === id ? { ...s, ...y } : s)));
 
   /** Son 12 ayda ayni tetkik cekilmis mi (mockup mukerrer tetkik uyarisi). */
   const mukerrer = secili
@@ -307,9 +172,9 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
         // DIS istemde de istekHekimId dolabilir: kayitli dis hekim secildiyse
         //   kayit ona baglanir (kart "gonderdigi tetkik" sayaci bundan besleniyor),
         //   secilmediyse serbest metin yazilir.
-        istekHekimId: disIstem ? disHekimId : istekHekimId,
-        disHekimAd: disIstem && !disHekimId ? disHekimAd : '',
-        istekKurumId: disIstem ? istekKurumId : null,
+        istekHekimId: disIstem ? isteyen.disHekimId : isteyen.istekHekimId,
+        disHekimAd: disIstem && !isteyen.disHekimId ? isteyen.disHekimAd : '',
+        istekKurumId: disIstem ? isteyen.istekKurumId : null,
         onTani, klinikBilgi,
         oncelik: 1,
         // Basvuru ACILIYORSA ucret de yazilir: kabul masasinin urettigi
@@ -530,15 +395,15 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                   <label className="alan genis-2">
                     <span className="etiket">İsteyen Hekim (dış)</span>
                     <span className="ikili">
-                      <input value={disHekimSecim} readOnly
+                      <input value={isteyen.disHekimSecim} readOnly
                              placeholder="Kayıtlı hekim seç…"
-                             onClick={() => setHekimArama(true)} />
+                             onClick={() => isteyen.setHekimArama(true)} />
                       <button type="button" className="d mini"
                               title="Dış hekim ara"
-                              onClick={() => setHekimArama(true)}>…</button>
-                      {disHekimId != null && (
+                              onClick={() => isteyen.setHekimArama(true)}>…</button>
+                      {isteyen.disHekimId != null && (
                         <button type="button" className="d mini" title="Seçimi kaldır"
-                                onClick={() => { setDisHekimId(null); setDisHekimSecim('') }}>
+                                onClick={isteyen.hekimBirak}>
                           ✕
                         </button>
                       )}
@@ -546,11 +411,11 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                   </label>
                   {/* Kayitli hekim SECILMEDIYSE serbest metin - bir kerelik
                       gelen, kaydedilmeye degmeyen hekim icin. */}
-                  {!disHekimId && (
+                  {!isteyen.disHekimId && (
                     <label className="alan">
                       <span className="etiket">Hekim Adı (kayıtsız)</span>
-                      <input value={disHekimAd} placeholder="örn. Op. Dr. Kerem ATALAY"
-                             onChange={e => setDisHekimAd(e.target.value)} />
+                      <input value={isteyen.disHekimAd} placeholder="örn. Op. Dr. Kerem ATALAY"
+                             onChange={e => isteyen.setDisHekimAd(e.target.value)} />
                     </label>
                   )}
                   {/* ISTEYEN KURUM da JENERIK ARAMA (kullanici): combo yalniz
@@ -560,14 +425,14 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                   <label className="alan genis-2">
                     <span className="etiket">İsteyen Kurum</span>
                     <span className="ikili">
-                      <input value={istekKurumAd} readOnly
+                      <input value={isteyen.istekKurumAd} readOnly
                              placeholder="Kurum seç…"
-                             onClick={() => setKurumArama(true)} />
+                             onClick={() => isteyen.setKurumArama(true)} />
                       <button type="button" className="d mini" title="Kurum ara"
-                              onClick={() => setKurumArama(true)}>…</button>
-                      {istekKurumId != null && (
+                              onClick={() => isteyen.setKurumArama(true)}>…</button>
+                      {isteyen.istekKurumId != null && (
                         <button type="button" className="d mini" title="Seçimi kaldır"
-                                onClick={() => { setIstekKurumId(null); setIstekKurumAd('') }}>
+                                onClick={isteyen.kurumBirak}>
                           ✕
                         </button>
                       )}
@@ -577,8 +442,8 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
               ) : (
                 <label className="alan genis-2">
                   <span className="etiket">İsteyen Hekim</span>
-                  <select value={istekHekimId ?? ''}
-                          onChange={e => setIstekHekimId(
+                  <select value={isteyen.istekHekimId ?? ''}
+                          onChange={e => isteyen.setIstekHekimId(
                             e.target.value ? Number(e.target.value) : null)}>
                     <option value="">— Seçiniz —</option>
                     {hekimler.map(h => (
@@ -804,29 +669,20 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
       {/* Dis hekim arama - jenerik taraf arama ekrani, kaynak 'dis-hekim'.
           enUst: bu modalin uzerinde acilmali. */}
       <TarafArama
-        acik={hekimArama}
+        acik={isteyen.hekimArama}
         kaynaklar={['dis-hekim']}
         yerTutucu="Dış hekimi ad / kurum ile ara…"
-        onKapat={() => setHekimArama(false)}
-        onSec={sec => {
-          setDisHekimId(sec.id);
-          setDisHekimSecim(sec.unvan);
-          setDisHekimAd('');
-          setHekimArama(false);
-        }}
+        onKapat={() => isteyen.setHekimArama(false)}
+        onSec={sec => isteyen.hekimSec(sec.id, sec.unvan)}
       />
 
       {/* Isteyen kurum - jenerik cari aramasi (hekim aramasiyla ayni desen). */}
       <TarafArama
-        acik={kurumArama}
+        acik={isteyen.kurumArama}
         kaynaklar={['cari']}
         yerTutucu="Kurum / cari ara…"
-        onKapat={() => setKurumArama(false)}
-        onSec={sec => {
-          setIstekKurumId(sec.id);
-          setIstekKurumAd(sec.unvan);
-          setKurumArama(false);
-        }}
+        onKapat={() => isteyen.setKurumArama(false)}
+        onSec={sec => isteyen.kurumSec(sec.id, sec.unvan)}
       />
     </Modal>
   );

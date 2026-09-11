@@ -12,6 +12,8 @@ import { Modal } from '../bilesenler/GenForm';
 import { para, yerelAnMetni, bugunIso, sayiOku as sayi, tutarMetni, hamSayi } from '../bilesenler/bicim';
 import { DOVIZ_KODLARI, YEREL_PARA_VARSAYILAN } from './belgeSabitleri';
 import { kasaDogrula, kasaGovdesi, kasaTurBilgisi, type KasaGirdisi } from './kasaKaydet';
+import { useKiymetBilgisi, usePlanGerceklestirme,
+         type CariSecimi, type HesapSecimi } from './kasa/useKiymetBilgisi';
 import { TahsilatDagitimi, type DagitimSecimi } from '../bilesenler/TahsilatDagitimi';
 import { mesaj , metinSor } from '../bilesenler/mesaj';
 
@@ -47,8 +49,7 @@ const GRUP_ADI: Record<string, string> = {
  * yaziyordu (gercek vaka).
  */
 
-interface HesapSecimi { id: number; ad: string; doviz: string }
-interface CariSecimi { id: number; unvan: string }
+
 
 /**
  * Kasa islem karti — tahsilat / odeme (F2) + virman / doviz / plan (F3).
@@ -126,16 +127,8 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
 
   // Cek / senet (23/24/33/34): kiymetin kendisi. Vade ZORUNLU - portfoyun ve
   //   vade raporunun tasiyicisi odur; digerleri kiymetin uzerindeki bilgiler.
-  const [csVade, setCsVade] = useState('');
-  const [csSeriNo, setCsSeriNo] = useState('');
-  const [csKesideci, setCsKesideci] = useState('');
-  const [csBanka, setCsBanka] = useState('');
-  const [csSube, setCsSube] = useState('');
-
-  // Plan gerceklestirme paneli
-  const [gHesap, setGHesap] = useState<HesapSecimi | null>(null);
-  const [gTutar, setGTutar] = useState('');
-  const [gTarih, setGTarih] = useState(bugunIso);
+  const kiymet = useKiymetBilgisi();
+  const gercek = usePlanGerceklestirme(bugunIso);
 
   const [sonuc, setSonuc] = useState<KasaIslemYaniti | null>(null);
   const [calisiyor, setCalisiyor] = useState(false);
@@ -235,7 +228,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
       doviz: String(i.karsiDovizCinsi || 'TL'),
     } : null);
     setProje(i.projeId ? { id: Number(i.projeId), ad: String(i.projeAdi ?? '') } : null);
-    setGTutar(Number(i.kalanTutar) ? tutarMetni(i.kalanTutar as string) : '');
+    gercek.setTutar(Number(i.kalanTutar) ? tutarMetni(i.kalanTutar as string) : '');
   }, []);
 
   // Mevcut kaydi ac
@@ -268,7 +261,8 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     tur, grup, tarih, planTarihi, cari, karsiCari, hesap, karsiHesap,
     tutar, doviz: anaDoviz, ekstreDovizi, kur, karsiTutar, masrafTutar,
     kalem, proje, aciklama,
-    csVade, csSeriNo, csKesideci, csBanka, csSube,
+    csVade: kiymet.vade, csSeriNo: kiymet.seriNo, csKesideci: kiymet.kesideci,
+    csBanka: kiymet.banka, csSube: kiymet.sube,
     mevcutKiymet, belgeBagi, cariZorunlu: secili?.cariZorunlu,
   });
 
@@ -330,11 +324,15 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
 
   /** Plandan tahsilat/odeme uretir; plan kaydi DEGISMEZ, yeni islem acilir. */
   async function gerceklestir() {
-    if (!kayitId || !gHesap) { setAlanHatalari({ gHesapId: 'Hesap seçilmeli.' }); return }
+    if (!kayitId || !gercek.hesap) {
+      setAlanHatalari({ gHesapId: 'Hesap seçilmeli.' });
+      return;
+    }
     setHata(null);
     setCalisiyor(true);
     try {
-      const y = await api.kasaGerceklestir(kayitId, gHesap.id, sayi(gTutar) || undefined, gTarih);
+      const y = await api.kasaGerceklestir(kayitId, gercek.hesap.id,
+                                           sayi(gercek.tutar) || undefined, gercek.tarih);
       if (modalMi) yaniti(y); else git(`/kasa-islem/${y.islem.id}`);
     } catch (h) { hataYaz(h) } finally { setCalisiyor(false) }
   }
@@ -566,31 +564,31 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                 <>
                   <label className="alan">
                     <span className="etiket zorunlu-isaret">Vade</span>
-                    <input type="date" value={csVade} disabled={kilitli}
-                           onChange={e => setCsVade(e.target.value)} />
+                    <input type="date" value={kiymet.vade} disabled={kilitli}
+                           onChange={e => kiymet.setVade(e.target.value)} />
                     {alanHatalari['cekSenet.vade'] && (
                       <span className="alan-hata">{alanHatalari['cekSenet.vade']}</span>
                     )}
                   </label>
                   <label className="alan">
                     <span className="etiket">{senetMi ? 'Senet No' : 'Çek No'}</span>
-                    <input value={csSeriNo} maxLength={30} disabled={kilitli}
-                           onChange={e => setCsSeriNo(e.target.value)} />
+                    <input value={kiymet.seriNo} maxLength={30} disabled={kilitli}
+                           onChange={e => kiymet.setSeriNo(e.target.value)} />
                   </label>
                   <label className="alan">
                     <span className="etiket">Keşideci</span>
-                    <input value={csKesideci} maxLength={150} disabled={kilitli}
+                    <input value={kiymet.kesideci} maxLength={150} disabled={kilitli}
                            placeholder={cari?.unvan ?? ''}
-                           onChange={e => setCsKesideci(e.target.value)} />
+                           onChange={e => kiymet.setKesideci(e.target.value)} />
                   </label>
                   {!senetMi && (
                     <label className="alan">
                       <span className="etiket">Banka / Şube</span>
                       <span className="ikili">
-                        <input value={csBanka} maxLength={60} disabled={kilitli}
-                               placeholder="Banka" onChange={e => setCsBanka(e.target.value)} />
-                        <input value={csSube} maxLength={60} disabled={kilitli}
-                               placeholder="Şube" onChange={e => setCsSube(e.target.value)} />
+                        <input value={kiymet.banka} maxLength={60} disabled={kilitli}
+                               placeholder="Banka" onChange={e => kiymet.setBanka(e.target.value)} />
+                        <input value={kiymet.sube} maxLength={60} disabled={kilitli}
+                               placeholder="Şube" onChange={e => kiymet.setSube(e.target.value)} />
                       </span>
                     </label>
                   )}
@@ -687,20 +685,21 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                   zorunlu
                   alanlar={LOOKUP_HESAP}
                   sabitFiltre={HESAP_AKTIF}
-                  deger={gHesap?.ad}
+                  deger={gercek.hesap?.ad}
                   hata={alanHatalari.gHesapId}
-                  onSec={s => setGHesap(s ? {
+                  onSec={s => gercek.setHesap(s ? {
                     id: Number(s.id), ad: String(s.ad ?? ''), doviz: String(s.dovizCinsi ?? 'TL'),
                   } : null)}
                 />
                 <label className="alan">
                   <span className="etiket">Tutar (boş = kalanın tamamı)</span>
-                  <input className="hiza-sag" value={gTutar}
-                         onChange={e => setGTutar(e.target.value)} />
+                  <input className="hiza-sag" value={gercek.tutar}
+                         onChange={e => gercek.setTutar(e.target.value)} />
                 </label>
                 <label className="alan">
                   <span className="etiket">Tarih</span>
-                  <input type="date" value={gTarih} onChange={e => setGTarih(e.target.value)} />
+                  <input type="date" value={gercek.tarih}
+                         onChange={e => gercek.setTarih(e.target.value)} />
                 </label>
                 <label className="alan">
                   <span className="etiket">&nbsp;</span>
