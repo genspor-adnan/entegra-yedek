@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { mesaj, secimSor } from '../bilesenler/mesaj';
-import { type BelgeYaniti, type KasaIslemTuru, URUN_GENOTIP, hataMetni, hataAyristir } from '../api/sozlesme';
+import { type BelgeYaniti, type KasaIslemTuru, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { belgeTuruBilgisi, belgeKisaAdi, GIRILEBILIR_TURLER, VARSAYILAN_TUR }
   from './belgeTuru';
@@ -10,7 +10,8 @@ import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { para, yerelAnMetni, hamSayi } from '../bilesenler/bicim';
 import { type SatirDurumu, satirTutari, yanittanSatirlar } from './belgeSatir';
-import { belgeDogrula, belgeGovdesi, doluSatirlar, type BelgeGirdisi } from './belgeKaydet';
+import { type BelgeGirdisi } from './belgeKaydet';
+import { belgeKaydetmeKur } from './belgeKarti/useBelgeKaydetme';
 import {
   YEREL_PARA_VARSAYILAN, GERIYE_GUN_VARSAYILAN, KAPANMA_ETIKET,
 } from './belgeSabitleri';
@@ -888,18 +889,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * ucret ekleme oncesi). Otomatik kayit BELGEYI BOSALTAMAZ: ekranda kalem
    * yokken sunucuda varsa PUT hic gonderilmez.
    */
-  async function kes(kapatilsin = true, otomatik = false): Promise<number> {
-    setHata(null);
-    setAlanHatalari({});
-    // `sonuc` BURADA SIFIRLANMAZ (kullanici: "ödeyen kurum dolu olmalı diyor
-    //   ama her taraf donmuş"): `duzenlenebilir` hesabi `!!sonuc`a bagli -
-    //   dogrulama hatasi verdiginde sonuc null kalinca KART KILITLENIYOR ve
-    //   kullanici hatayi duzeltemiyordu. Basarili kayitta zaten yeni yanit
-    //   yaziliyor (setSonuc(yanit)).
-
-    // Kart durumu tek nesnede: dogrulama ve istek govdesi SAF fonksiyonlarda
-    //   (belgeKaydet.ts) - ekran yalniz sonucu gosterir.
-    const girdi: BelgeGirdisi = {
+  /**
+   * Kart durumu tek nesnede: dogrulama ve istek govdesi SAF fonksiyonlarda
+   * (belgeKaydet.ts) - ekran yalniz sonucu gosterir.
+   */
+  const girdiKur = (): BelgeGirdisi => (
+    {
       tur, cari, tarih, tarihEnGec, tarihEnErken, geriGun, seri, belgeNo, vadeGun, faturaTipi,
       // Basvuruda vade yerine odeyen kurum gonderilir (249); bolum ve hekim
       //   de basvuruya ozgu (296) - hepsi belge_basvuru uzantisina yazilir.
@@ -927,65 +922,20 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
       talepMi, disNumarali, basvuruMu, tahakkukMu,
       // Zorunluluk kurallari yalniz duzenlenebilir kartta (bkz. belgeDogrula).
       kilitli,
-    };
-    const hatalar = belgeDogrula(girdi);
-    if (hatalar) {
-      if (hatalar.genel) setHata(hatalar.genel);
-      else setAlanHatalari(hatalar);
-      return 0;
     }
-    const dolu = doluSatirlar(satirlar);
-    // OTOMATIK KAYIT SATIR SILMEZ (kullanici: basvuru 114413 iki kez
-    //   "satirAdedi: 0" ile guncellendi): kart bir sebeple kalemsiz kalirsa
-    //   tahsilat/POS oncesi yapilan kayit sunucudaki ucretleri de siliyordu.
-    //   Kullanici Kaydet'e basarsa istegi gecerlidir - yalniz kartin KENDI
-    //   kaydi engellenir.
-    if (otomatik && dolu.length === 0 && (sonuc?.satirlar?.length ?? 0) > 0)
-      return etkinBelgeId ?? 0;
-    setKaydediyor(true);
-    try {
-      const govde = belgeGovdesi(girdi, dolu, taslak);
+  );
 
-      // DUZENLEME (135): kayitli belge PUT ile yeniden yazilir - numara korunur,
-      //   eski stok/cari etkisi sunucuda geri alinip yenisi uygulanir.
-      // IKINCI kayit UPDATE olmali: basvuru kartta acik kaldigi icin ayni
-      //   dugmeye tekrar basiliyor - etkinBelgeId olmasa her basis yeni belge
-      //   uretirdi.
-      const yanit = duzenlenebilir && etkinBelgeId
-        ? await api.belgeGuncelle(etkinBelgeId, govde)
-        : await api.belgeEkle(govde);
-      setSonuc(yanit);
-      // SATIR KIMLIKLERI SUNUCUDAN TAZELENIR (kullanici: "750 fiş girdim,
-      //   tahakkuk modalinde 1.049,99 çıktı"): kayittan sonra kartin
-      //   satirlarinda `satirId` yoktu; ikinci kayitta ayni kalem YENI satir
-      //   sayilip ikinci kez yaziliyordu (900 + 900 = 1.800) ve acik tutarlar
-      //   iki kati gorunuyordu. Donusumle baglanan satirlar artik silinip
-      //   yeniden yazilmadigi icin kimligin dogru tasinmasi sart.
-      if (yanit.satirlar?.length) setSatirlar(yanittanSatirlar(yanit.satirlar, yerelPara));
-      // Kayit sonrasi kart TEMIZ sayilir (kaydedilmemis degisiklik uyarisi).
-      setKalemDegisti(false);
-      imzayiTemizle();
-      onKaydedildi?.();
-      // GENEL KURAL (kullanici): Kaydet'e basilinca form KAPANIR. Belgeye sonradan
-      //   yapilacak isler (e-Belge gonderimi, donusum) listeden belge yeniden
-      //   acilarak surdurulur - kart acik birakmak "kaydettim mi?" belirsizligi
-      //   yaratiyordu. Tek istisna "kaydet ve devam et" (kapatilsin=false).
-      const yeniId = Number(yanit.belge.id ?? 0);
-      // BASVURU akisi (300): ilk kayit KAPATMAZ - protokol verilir, kart acik
-      //   kalir; ucretlendirme ve provizyon girildikten sonra ayni dugmeyle
-      //   kaydedilip kapatilir. Diger turlerde genel kural surer.
-      if (basvuruMu && !etkinBelgeId && yeniId) { setAcilanId(yeniId); return yeniId }
-      if (kapatilsin) void kapat(true);
-      return yeniId;
-    } catch (h) {
-      const c = hataAyristir(h);
-      setAlanHatalari(c.alanlar);
-      setHata(c.mesaj);
-    } finally {
-      setKaydediyor(false);
-    }
-    return 0;
-  }
+  // KAYDETME AKISI (dogrula -> yaz -> satirlari tazele -> kapat) kendi
+  //   dosyasinda: belgeKarti/useBelgeKaydetme.
+  const kes = belgeKaydetmeKur({
+    girdiKur, satirlar, setSatirlar, taslak, yerelPara,
+    etkinBelgeId: etkinBelgeId ?? null, duzenlenebilir, basvuruMu,
+    sonuc, setSonuc, setHata, setAlanHatalari, setKaydediyor,
+    setKalemDegisti, setAcilanId,
+    // Ikisi de ASAGIDA tanimli - cagri aninda cozulsun diye sarmalandi.
+    imzayiTemizle: () => imzayiTemizle(),
+    onKaydedildi, kapat: (zorla?: boolean) => void kapat(zorla),
+  });
 
   /**
    * UCRET EKLEMENIN ILK KAPISI (kullanici: "ücret ekleyeceği zaman kayıt
