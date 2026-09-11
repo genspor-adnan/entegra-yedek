@@ -49,24 +49,6 @@ export function stokSecimindenKalem(
   };
 }
 
-/**
- * LISTE FIYATINI satira isler (205). Fiyat yoksa/0 ise satir AYNEN doner -
- * cagiran kimlik karsilastirmasiyla (sonuc === satir) "bulunamadi" sayabilir.
- * dovizFiyat da yazilir: kaydetme hatti yerel fiyati dovizden turetir, eski
- * doviz fiyati kalirsa Kaydet yeni fiyati sessizce geri alir.
- */
-export function listeFiyatiUygula(
-  satir: SatirDurumu, f: { fiyat?: number | null; dovizCinsi?: string | null },
-): SatirDurumu {
-  // `== null` hem null hem undefined'i yakalar: uc, satiri olmayan kalemde
-  //   fiyat alanini hic gondermeyebilir - `undefined <= 0` false oldugundan
-  //   eski kosul kacar ve String(undefined) fiyat kutusuna "undefined" yazardi.
-  if (f.fiyat == null || f.fiyat <= 0) return satir;
-  const metin = String(f.fiyat);
-  return { ...satir, birimFiyat: metin, dovizFiyat: metin,
-           fiyatDovizi: f.dovizCinsi || satir.fiyatDovizi };
-}
-
 /** /api/fiyat/kalem cevabi (274) - liste fiyati + kampanya kurali. */
 export interface KalemFiyati {
   fiyat?: number | null;

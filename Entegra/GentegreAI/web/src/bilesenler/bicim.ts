@@ -272,14 +272,6 @@ export const sayiOkuNull = (metin: unknown): number | null => {
 export const hamSayi = (deger: unknown) =>
   Number(String(deger ?? '').replace(',', '.')) || 0;
 
-/** `hamSayi`nin bos/gecersiz degeri 0 yerine null dondurugu surumu. */
-export const hamSayiNull = (deger: unknown): number | null => {
-  const metin = String(deger ?? '').trim();
-  if (metin === '') return null;
-  const n = Number(metin.replace(',', '.'));
-  return Number.isFinite(n) ? n : null;
-};
-
 /**
  * Ham/JSON tutari EKRAN bicimine cevirir ("1234.5600" -> "1234,56").
  * `sayiOku`nun tersi: ikisi bir arada gidip gelen deger bozulmasin.

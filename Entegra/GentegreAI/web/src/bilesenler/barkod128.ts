@@ -97,8 +97,3 @@ export function code128Desen(metin: string): string {
   // Sondaki 2 modüllük bitiş çubuğu standardın parçası ("11").
   return kodlar.map(k => DESEN[k]).join('') + '11';
 }
-
-/** Modül genişliği · toplam modül sayısı = barkod genişliği (px). */
-export function code128Genislik(metin: string, modul = 2): number {
-  return code128Desen(metin).length * modul;
-}
