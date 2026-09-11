@@ -15,6 +15,7 @@ import { ttbFiyatTuret } from './kart/tarifeKurallari';
 import { useUnvanOneki } from './kart/useUnvanOneki';
 import { KartKimlikSeridi } from './kart/KartKimlikSeridi';
 import { KartDetaySekmesi } from './kart/KartDetaySekmesi';
+import { kartGovdesiKur } from './kart/kartGovdesi';
 import { PaketSekmesi } from './PaketSekmesi';
 import { KartGrupSekmesi } from './kart/KartGrupSekmesi';
 import { alanCizici, type Deger } from './kartAlanCizim';
@@ -44,8 +45,6 @@ import { StokAramaPenceresi } from './StokAramaPenceresi';
 import { RandevuUygunSaatler } from './RandevuUygunSaatler';
 import { RandevuOzetSeridi } from './RandevuOzetSeridi';
 import { RandevuTetkikUyum } from './RandevuTetkikUyum';
-import { telefonAlaniMi } from './alanBicim';
-import { telefonBicimle } from './bicim';
 import { OncekiBasvurular } from './belge/BasvuruSekmesi';
 import { BelgeKarti } from '../sayfalar/BelgeKarti';
 
@@ -813,43 +812,12 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
     setCakisma(null);
     setBilgi(null);
     try {
-      // Telefon TEK BICIMDE saklanir: kullanici gruplu da yazsa gruplamadan da
-      //   yazsa DB'ye "+90 532 418 77 20" gider. Aksi halde ayni numara iki
-      //   farkli metinle durup arama/mukerrer kontrolu kaciriyordu.
-      const kartGovdesi = degisenAlanlar();
-      Object.keys(kartGovdesi).forEach(ad => {
-        if (telefonAlaniMi(ad) && typeof kartGovdesi[ad] === 'string' && kartGovdesi[ad])
-          kartGovdesi[ad] = telefonBicimle(kartGovdesi[ad]);
+      // Govde kurma KURALI saf fonksiyonda (kart/kartGovdesi): telefon
+      //   tekillestirme, unvan birlestirme ve aday hastanin dosya no turetimi.
+      const govde = kartGovdesiKur({
+        kaynak, meta, deger, degisenAlanlar: degisenAlanlar(), detaylar, surum,
+        personelGibiKart, unvanOneki: unvanOneki.onek, detayAlanlari,
       });
-
-      const govde = {
-        surum,
-        kart: kartGovdesi,
-        detaylar: Object.fromEntries(
-          Object.entries(detaylar)
-            .map(([ad, durum]) => [ad, detayFarki(durum, detayAlanlari(meta, ad))])
-            .filter(([, fark]) => {
-              const f = fark as ReturnType<typeof detayFarki>;
-              return (f.eklenen?.length ?? 0) + (f.degisen?.length ?? 0) + (f.silinen?.length ?? 0) > 0;
-            })),
-      };
-
-      // Personel'de "unvan" hic gosterilmiyor/duzenlenmiyor (kullanici: ad/soyad kullanilsin)
-      // - DB'de NOT NULL oldugu icin Kaydet'te ad+soyad'dan burada birlestirilip eklenir.
-      if (personelGibiKart || kaynak === 'hasta-aday') {
-        const ad = String(deger.ad ?? '').trim();
-        const soyad = String(deger.soyad ?? '').trim();
-        // Hekim unvani (306) adin ONUNE gelir: "Prof.Dr. Halil GÜNEŞ".
-        const unvanMetni = [unvanOneki.onek, ad, soyad].filter(Boolean).join(' ');
-        if (unvanMetni) govde.kart.unvan = unvanMetni;
-      }
-      // ADAY HASTA (266): DOSYA NO = CEP NUMARASI (kullanici). Kullanicidan
-      //   ayrica dosya no istemek yerine turetiliyor; elle girilmis kod varsa
-      //   ona dokunulmaz.
-      if (kaynak === 'hasta-aday' && !String(deger.kod ?? '').trim()) {
-        const cep = String(deger.cepTel ?? '').trim();
-        if (cep) govde.kart.kod = cep;
-      }
 
       const yanit = yeniMi
         ? await api.kartEkle(kaynak, govde)

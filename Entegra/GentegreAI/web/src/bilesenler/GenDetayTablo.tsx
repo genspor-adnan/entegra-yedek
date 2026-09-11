@@ -4,7 +4,7 @@ import { StokAramaPenceresi } from './StokAramaPenceresi';
 import { TarafArama } from './TarafArama';
 import { tarafSecimEngeli } from './tarafSecimEngeli';
 import { detayHucreMetni } from './detayGorunum';
-import { api } from '../api/istemci';
+import { useUrunAdlari, useKategoriSecenekleri } from './grid/useUrunAdlari';
 import { GridMenu, type MenuOgesi } from './grid/GridMenu';
 import { dosyaIndirUrl } from './indir';
 import type { DetayFarki, KartAlanMeta, KartDetayMeta } from '../api/sozlesme';
@@ -327,96 +327,19 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
    * id -> ad sozlugunde tutulur; secim aninda satira yazilan `iskontoYeriAdi`
    * onceliklidir (yeni secim hemen gorunur).
    */
-  const [urunAdlari, setUrunAdlari] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    if (!kampanyaSatiri) return;
-    // Adi bilinmeyen URUN satirlari: stok ve hizmet ayri kaynaklardan gelir.
-    const eksik = durum.guncel
-      .filter(r => Number(r.tip) === 3 && r.iskontoYeriId && !r.iskontoYeriAdi
-                   && !urunAdlari[String(r.iskontoYeriId)])
-      .map(r => ({ id: Number(r.iskontoYeriId), hizmet: Number(r.kalemTuru) === 2 }));
-    if (eksik.length === 0) return;
-
-    let iptal = false;
-    void (async () => {
-      const yeni: Record<string, string> = {};
-      for (const kaynak of ['stok', 'hizmet'] as const) {
-        const idler = eksik.filter(e => (kaynak === 'hizmet') === e.hizmet).map(e => e.id);
-        if (idler.length === 0) continue;
-        try {
-          const y = await api.liste(kaynak, {
-            sayfa: 1, boyut: idler.length,
-            filtre: { op: 'or', kosullar: idler.map(id => ({ alan: 'id', op: 'esit', deger: id })) },
-          });
-          y.satirlar.forEach(r => {
-            yeni[String(r.id)] = `${String(r.kod ?? '')} ${String(r.ad ?? '')}`.trim();
-          });
-        } catch { /* ad cozulemezse id gorunur - satir yine calisir */ }
-      }
-      if (!iptal && Object.keys(yeni).length) setUrunAdlari(m => ({ ...m, ...yeni }));
-    })();
-    return () => { iptal = true };
-  // urunAdlari bilerek bagimlilikta degil: sozluk buyudukce dongu olurdu.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kampanyaSatiri, durum.guncel]);
-
-  // PRIM (328): URUN kapsamli satirda kalemin ADI - hucrede id okunmaz.
-  useEffect(() => {
-    if (!primSatiri) return;
-    const eksik = durum.guncel
-      .filter(r => Number(r.tip) === 3 && Number(r.hedefId) > 0
-                   && !urunAdlari[String(r.hedefId)])
-      .map(r => ({ id: Number(r.hedefId), hizmet: Number(r.kalemTuru) !== 1 }));
-    if (eksik.length === 0) return;
-
-    let iptal = false;
-    void (async () => {
-      const yeni: Record<string, string> = {};
-      for (const kaynak of ['stok', 'hizmet'] as const) {
-        const idler = eksik.filter(e => (kaynak === 'hizmet') === e.hizmet).map(e => e.id);
-        if (idler.length === 0) continue;
-        try {
-          const y = await api.liste(kaynak, {
-            sayfa: 1, boyut: idler.length,
-            filtre: { op: 'or', kosullar: idler.map(id => ({ alan: 'id', op: 'esit', deger: id })) },
-          });
-          y.satirlar.forEach(r => {
-            yeni[String(r.id)] = `${String(r.kod ?? '')} ${String(r.ad ?? '')}`.trim();
-          });
-        } catch { /* ad cozulemezse id gorunur */ }
-      }
-      if (!iptal && Object.keys(yeni).length) setUrunAdlari(m => ({ ...m, ...yeni }));
-    })();
-    return () => { iptal = true };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [primSatiri, durum.guncel]);
-
-  /**
-   * KATEGORI SECENEKLERI (328, kullanici: "kategori combo hizmet/stok
-   * secimine gore"). Kategori tablosu stok ve hizmet icin ORTAK; hangisinde
-   * kullanildigi ancak SAYIMLA anlasilir - kategori LISTESI bu iki sayimi
-   * zaten donduruyor, o yuzden kod tablosu yerine liste ucundan cekilir.
-   */
-  const [kategoriler, setKategoriler] = useState<
-    { id: number; ad: string; stok: number; hizmet: number }[]>([]);
-
-  useEffect(() => {
-    if (!primSatiri) return;
-    let iptal = false;
-    void (async () => {
-      try {
-        const y = await api.liste('kategori', { sayfa: 1, boyut: 500 });
-        if (!iptal) setKategoriler(y.satirlar.map(r => ({
-          id: Number(r.id),
-          // Kod + ad: kampanyadaki kategori combosuyla ayni okunus ("K1 - Genel").
-          ad: `${String(r.kod ?? '')} ${String(r.ad ?? '')}`.trim(),
-          stok: Number(r.stokSayisi ?? 0), hizmet: Number(r.hizmetSayisi ?? 0),
-        })));
-      } catch { /* liste alinamazsa kategori combosu bos kalir */ }
-    })();
-    return () => { iptal = true };
-  }, [primSatiri]);
+  // URUN ADLARI (kampanya 268 / prim 328) ve KATEGORI secenekleri kendi
+  //   kancalarinda: grid/useUrunAdlari. Iki ekranin ad cozumu satir basina
+  //   farkli alan okuyor ama AYNI isi yapiyordu - tek yerde toplandi.
+  const { adlar: kampanyaAdlari } = useUrunAdlari(
+    !!kampanyaSatiri, durum.guncel,
+    r => (Number(r.tip) === 3 && r.iskontoYeriId && !r.iskontoYeriAdi
+      ? { id: Number(r.iskontoYeriId), hizmet: Number(r.kalemTuru) === 2 } : null));
+  const { adlar: primAdlari, ekle: primAdiEkle } = useUrunAdlari(
+    !!primSatiri, durum.guncel,
+    r => (Number(r.tip) === 3 && Number(r.hedefId) > 0
+      ? { id: Number(r.hedefId), hizmet: Number(r.kalemTuru) !== 1 } : null));
+  const urunAdlari = { ...kampanyaAdlari, ...primAdlari };
+  const kategoriler = useKategoriSecenekleri(!!primSatiri);
 
   /**
    * KAMPANYA (268, kullanici): "İskonto Tipi yüzde ise başlıkta İskonto %,
@@ -1502,10 +1425,8 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
               hedefId: String(secilen.id),
               kalemTuru: String(secilen.tip) === 'hizmet' ? '2' : '1',
             });
-            setUrunAdlari(m => ({
-              ...m,
-              [String(secilen.id)]: `${String(secilen.kod ?? '')} ${String(secilen.ad ?? '')}`.trim(),
-            }));
+            primAdiEkle(Number(secilen.id),
+              `${String(secilen.kod ?? '')} ${String(secilen.ad ?? '')}`.trim());
             setUrunAramaSatiri(null);
           }}
         />
