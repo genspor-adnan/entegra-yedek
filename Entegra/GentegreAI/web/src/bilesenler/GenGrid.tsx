@@ -1,24 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { c as cev } from '../dil/ceviri';
 import { mesaj } from './mesaj';
-import { api } from '../api/istemci';
 import { ayarSayi } from '../api/ayarlar';
-import { type AksiyonYaniti, type KolonMeta, type Kosul, type ListeSatiri, type ListeYaniti,
-         type Siralama, hataMetni } from '../api/sozlesme';
-import { bicimle, bugunIso } from './bicim';
-import { csvMetni, CSV_TIPI } from './csv';
-import { dosyaIndir, dosyaAdiTemiz } from './indir';
+import { type AksiyonYaniti, type Kosul, type ListeSatiri } from '../api/sozlesme';
+import { bicimle } from './bicim';
 import { GenKomutPaleti, GenSagTus, GenToolbar, hedefte, useAksiyonlar,
          type AltSecenek } from './Aksiyonlar';
 import { Modal } from './Modal';
 import { LogTablosu, GORUNUMLER } from './gridHucre';
 import { GridTablo } from './grid/GridTablo';
 import {
-  aramaKosulu, filtreSatiriKosulu, tarihKosulu, filtreBirlestir,
-} from './gridSorgu';
+  filtreSatiriKosulu, } from './gridSorgu';
 import { GridMenu, gridMenuOgeleri } from './grid/GridMenu';
 import { useGridTercihleri } from './grid/useGridTercihleri';
 import { useTarihAraligi } from './grid/useTarihAraligi';
+import { useGridSecimi } from './grid/useGridSecimi';
+import { useListeVerisi } from './grid/useListeVerisi';
 import { useKolonTercihi } from './grid/kolonTercihi';
 
 interface Props {
@@ -201,22 +198,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   const sayfaBoyu = boyut ?? ayarBoyut;
   useEffect(() => { void ayarSayi('liste.sayfa_boyu', 50).then(setAyarBoyut) }, []);
 
-  const [satirlar, setSatirlar] = useState<ListeSatiri[]>([]);
-  const [toplamKayit, setToplamKayit] = useState(0);
 
-  /**
-   * Ekranda doviz hareketi var mi (kur 1'den farkli tek satir yeter). Yoksa
-   * `dovizsizGizle` kolonlari cizilmez - yerel karsilik kolonu, ana tutarin
-   * birebir kopyasi olurdu.
-   */
-  const dovizVarMi = useMemo(
-    () => satirlar.some(s => Number(s.dovizKuru ?? 1) !== 1),
-    [satirlar]);
-  const [toplamlar, setToplamlar] = useState<Record<string, unknown> | undefined>();
-  /** Gruplu liste (ekstre): para birimi basina ozet - sunucudan, TUM kume icin. */
-  const [gruplar, setGruplar] = useState<ListeYaniti['gruplar']>();
-  /** Satirlarin hangi kolona gore obeklendigi (sunucudan; yoksa gruplama yok). */
-  const [grupKolonu, setGrupKolonu] = useState<string | null>(null);
   /**
    * KULLANICI GRUPLAMASI (uc nokta > Gruplama). Sunucudan gelen `grupKolonu`
    * kaynagin KENDI gruplamasidir (ör. ekstrede para birimi); kullanici secince
@@ -232,13 +214,6 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   //   kancasinda: grid/useGridTercihleri.
   const { satirBoyu, satirBoyuSec, yanKapali, setYanKapali } =
     useGridTercihleri(kaynak, !!solPanel);
-  const [sayfa, setSayfa] = useState(1);
-  // GRUPLANAN KOLON AYNI ZAMANDA ILK SIRALAMA (492): siralanmazsa ayni grubun
-  //   satirlari listeye dagilir ve baslik defalarca cizilir - bolume gore
-  //   grupladiktan sonra "Biyokimya" basligi dort kez gorunuyordu.
-  const [sirala, setSirala] = useState<Siralama[]>(
-    varsayilanGrup ? [{ alan: varsayilanGrup, yon: 'asc' as const }] : []);
-  const [arama, setArama] = useState('');
   const [cipIndeks, setCipIndeks] = useState(cipBaslangic ?? 0);
   /**
    * DISARIDAN GELEN CIP degisince ic state de gecmeli.
@@ -260,22 +235,50 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   const { bas: tarihBas, setBas: setTarihBas,
           bit: tarihBit, setBit: setTarihBit } =
     useTarihAraligi(tarihVarsayilan, onTarihAraligi);
-  // "Tum Liste / Son Aranan / Sik Aranan" (eski KULLANICI_ARAMA) - sunucuya `gorunum`
-  //   olarak gider, kart acilis/ekleme sikligina gore filtreler+siralar.
-  const [aramaGorunumu, setAramaGorunumu] = useState<'tum' | 'son' | 'sik'>('tum');
   // Mockup: Liste/Grup/Analiz gorunum secimi. Grup/Analiz backend'de HENUZ YOK -
   //   grid yerine "yakinda" yer tutucu gosterilir (aksiyon stub'lariyla ayni durustluk).
   const [gorunum, setGorunum] = useState<'liste' | 'grup' | 'analiz' | 'ek'>('liste');
-  const [yukleniyor, setYukleniyor] = useState(false);
-  const [hata, setHata] = useState<string | null>(null);
-
   // Kolon gorunurlugu/sirasi ve tercihin saklanmasi grid/kolonTercihi.ts'te.
+  //   Kolon tercihi hatasi AYRI durumda: liste verisi kancasi kolonlara
+  //   ihtiyac duyuyor, kolon kancasi da hata yazacak bir yer istiyor - ikisi
+  //   ayni state'i paylasirsa dairesel bagimlilik olurdu. Ekranda ikisi de
+  //   ayni kutuda gosterilir.
+  const [kolonHatasi, setKolonHatasi] = useState<string | null>(null);
   const { kolonlar, tumKolonlar, kolonTasi, kolonDegistir, kolonlariSifirla } =
-    useKolonTercihi({ kaynak, gizliKolonlar, kolonBasliklari, kolonSirasi, setHata });
+    useKolonTercihi({ kaynak, gizliKolonlar, kolonBasliklari, kolonSirasi,
+                      setHata: setKolonHatasi });
 
-  const [sureMs, setSureMs] = useState(0);
+  const [filtreAcik, setFiltreAcik] = useState(false);
+  const [filtreDeger, setFiltreDeger] = useState<Record<string, string>>({});
+  const filtreZamanlayici = useRef<number | undefined>(undefined);
+  const [gridMenuKonum, setGridMenuKonum] = useState<{ x: number; y: number } | null>(null);
 
-  const [seciliSatir, setSeciliSatir] = useState<ListeSatiri | null>(null);
+  // Kosul kurma SAF fonksiyonlarda (gridSorgu): listeleme ve disa aktarma ayni
+  //   mantigi kullansin diye tek yerde.
+  const filtreSatiriFiltresi = useCallback(
+    () => filtreSatiriKosulu(filtreDeger, kolonlar), [filtreDeger, kolonlar]);
+
+  // LISTE VERISI (yukleme · sayfalama · siralama · arama · CSV) kendi
+  //   kancasinda: grid/useListeVerisi.
+  const { satirlar, toplamKayit, toplamlar, gruplar, grupKolonu,
+          sayfa, setSayfa, sirala, setSirala, siralamaDegistir, siraIsareti,
+          arama, setArama, aramaDegisti, aramaGorunumu, setAramaGorunumu,
+          yukleniyor, hata, sureMs,
+          yukle, csvIndir, sonSayfa } =
+    useListeVerisi({
+      kaynak, baslik, kolonlar, sabitFiltre, toplam, sayfaBoyu, cipler, cipIndeks,
+      kodSuzgeci, kodSuzgecDeger, tarihAlani, tarihBas, tarihBit, varsayilanGrup,
+      yenile, odaklaSonEklenen, filtreSatiriFiltresi,
+    });
+
+  /**
+   * Ekranda doviz hareketi var mi (kur 1'den farkli tek satir yeter). Yoksa
+   * `dovizsizGizle` kolonlari cizilmez - yerel karsilik kolonu, ana tutarin
+   * birebir kopyasi olurdu.
+   */
+  const dovizVarMi = useMemo(
+    () => satirlar.some(s => Number(s.dovizKuru ?? 1) !== 1),
+    [satirlar]);
   const [sagTusKonumu, setSagTusKonumu] = useState<{ x: number; y: number } | null>(null);
   // "İçerik" penceresi (ör. islem-log > bilgi JSON'u) - satira cift-tik ya da ust
   //   cubuktaki "İçerik" dugmesi ayni pencereyi acar.
@@ -286,13 +289,12 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   };
 
   // Ilk sutun: onay kutusu (coklu secim, su an icin sadece yuklu sayfa) + "3 nokta" grid menusu.
-  const [secili, setSecili] = useState<Set<string>>(new Set());
-  useEffect(() => { setSecili(new Set()) }, [kaynak]);
-
-  const [filtreAcik, setFiltreAcik] = useState(false);
-  const [filtreDeger, setFiltreDeger] = useState<Record<string, string>>({});
-  const filtreZamanlayici = useRef<number | undefined>(undefined);
-  const [gridMenuKonum, setGridMenuKonum] = useState<{ x: number; y: number } | null>(null);
+  // SATIR SECIMI (onay kutulari · tek satir hedefi · Ctrl/Shift kurallari)
+  //   kendi kancasinda: grid/useGridSecimi.
+  const { secili, secimiUygula, seciliSatir, setSeciliSatir,
+          satirSecimiDegistir, satirTiklandi, sayfaIdleri,
+          hepsiSecili, hepsiRef } =
+    useGridSecimi({ satirlar, kaynak, sayfa, seciliBaslangicId, onSecimDegisti });
 
   // Aksiyonlar secili kayda gore yeniden cozulur: "belge zaten gonderilmis" gibi
   //   kosullar sunucuda degerlendirilir, istemci kural yazmaz.
@@ -345,75 +347,6 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   const ebelgeMukellef = useMemo(
     () => aksiyonlar.some(a => ebelgeGrubu(a) || a.grup === 'gelen'), [aksiyonlar]);
   const [ebelgeSecim, setEbelgeSecim] = useState('');
-  const aramaZamanlayici = useRef<number | undefined>(undefined);
-
-  // Kosul kurma SAF fonksiyonlarda (gridSorgu): listeleme ve disa aktarma ayni
-  //   mantigi kullansin diye tek yerde.
-  const aramaFiltresi = useCallback(
-    () => aramaKosulu(arama, kolonlar), [arama, kolonlar]);
-  const filtreSatiriFiltresi = useCallback(
-    () => filtreSatiriKosulu(filtreDeger, kolonlar), [filtreDeger, kolonlar]);
-
-  const yukle = useCallback(async () => {
-    if (kolonlar.length === 0) return;
-    setYukleniyor(true);
-    setHata(null);
-    try {
-      const filtre = filtreBirlestir([
-        sabitFiltre, cipler?.[cipIndeks]?.filtre,
-        tarihKosulu(tarihAlani, tarihBas, tarihBit),
-        kodSuzgeci && kodSuzgecDeger !== ''
-          ? { alan: kodSuzgeci.alan, op: 'esit' as const, deger: Number(kodSuzgecDeger) }
-          : undefined,
-        aramaFiltresi(), filtreSatiriFiltresi(),
-      ]);
-
-      const gorunum = aramaGorunumu === 'tum' ? undefined : aramaGorunumu;
-      const yanit = await api.liste(kaynak, { sayfa, boyut: sayfaBoyu, sirala, filtre, toplam, gorunum });
-      setSatirlar(yanit.satirlar);
-      setToplamKayit(yanit.toplamKayit);
-      setToplamlar(yanit.toplamlar);
-      setGruplar(yanit.gruplar);
-      setGrupKolonu(yanit.grupKolonu ?? null);
-      setSureMs(yanit.sureMs);
-    } catch (h) {
-      setHata(hataMetni(h, true));
-      setSatirlar([]);
-    } finally {
-      setYukleniyor(false);
-    }
-  }, [kaynak, sayfa, sayfaBoyu, sirala, toplam, sabitFiltre, aramaFiltresi, filtreSatiriFiltresi,
-      cipler, cipIndeks, kolonlar.length, aramaGorunumu, tarihAlani, tarihBas, tarihBit,
-      kodSuzgeci, kodSuzgecDeger]);
-
-  useEffect(() => { void yukle() }, [yukle]);
-  // "yenile"/"odaklaSonEklenen" Liste.tsx'te YASIYOR (kaynak degisince sifirlanmiyor) -
-  //   GenGrid kaynak degisince "key" ile yeniden kurulunca bu prop'lar eski sayimla
-  //   gelir. "Onceki deger" ref'iyle karsilastirip GERCEK degisimde tetikliyoruz -
-  //   ilk mount'ta ref zaten ayni degerle baslar, calismaz. Basit bir "ilk calisti mi"
-  //   bool bayragi StrictMode'da KIRILIR (efektler dev'de cift calisir, ikinci calismada
-  //   bayrak zaten false olur ve yanlislikla tetiklenir) - deger karsilastirmasi
-  //   tekrar calismaya karsi dogal olarak baglisiktir (idempotent).
-  const yenileOnceki = useRef(yenile);
-  useEffect(() => {
-    if (yenileOnceki.current === yenile) return;
-    yenileOnceki.current = yenile;
-    if (yenile !== undefined) void yukle();
-  }, [yenile]);
-  const odaklaOnceki = useRef(odaklaSonEklenen);
-  useEffect(() => {
-    if (odaklaOnceki.current === odaklaSonEklenen) return;
-    odaklaOnceki.current = odaklaSonEklenen;
-    if (odaklaSonEklenen === undefined) return;
-    setSayfa(1);
-    setAramaGorunumu('son');
-  }, [odaklaSonEklenen]);
-
-  // Arama yazarken her tusa istek atilmaz (Delphi tarafindaki debounce deseni).
-  const aramaDegisti = (deger: string) => {
-    window.clearTimeout(aramaZamanlayici.current);
-    aramaZamanlayici.current = window.setTimeout(() => { setSayfa(1); setArama(deger) }, 350);
-  };
 
   const filtreSatiriDegisti = (alan: string, deger: string) => {
     window.clearTimeout(filtreZamanlayici.current);
@@ -421,97 +354,6 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       setSayfa(1);
       setFiltreDeger(f => ({ ...f, [alan]: deger }));
     }, 350);
-  };
-
-  const sayfaIdleri = () => satirlar.map((s, i) => String(s.id ?? i));
-
-  /**
-   * Onay kutusu ve tek-satir secimi (seciliSatir - aksiyon/duzenle hedefi) AYNI
-   * durumu paylasir: TEK kutu isaretliyken o satir hedef olur (Duzenle/aksiyon
-   * kombo acilir), sifir ya da birden fazlasinda hedef belirsizdir (null).
-   */
-  const secimiUygula = (yeni: Set<string>) => {
-    setSecili(yeni);
-    if (yeni.size === 1) {
-      const tekId = [...yeni][0];
-      const idx = satirlar.findIndex((s, i) => String(s.id ?? i) === tekId);
-      setSeciliSatir(idx >= 0 ? satirlar[idx] : null);
-    } else {
-      setSeciliSatir(null);
-    }
-  };
-
-  const satirSecimiDegistir = (id: string, index: number) => {
-    const yeni = new Set(secili);
-    yeni.has(id) ? yeni.delete(id) : yeni.add(id);
-    secimiUygula(yeni);
-    ankorRef.current = index;
-  };
-
-  /**
-   * SAYFA DEGISINCE SECIM TEMIZLENIR (cip degisimiyle ayni gerekce):
-   * isaretli satirlar artik ekranda degildir; secim kalinca sayac gorunenle
-   * uyusmuyor ve toplu aksiyon EKRANDA OLMAYAN satiri isliyordu.
-   */
-  const oncekiSayfaRef = useRef(sayfa);
-  useEffect(() => {
-    if (oncekiSayfaRef.current === sayfa) return;
-    oncekiSayfaRef.current = sayfa;
-    secimiUygula(new Set());
-  // secimiUygula her render'da yeniden kuruluyor - bagimliliga girerse
-  //   effect her render calisir ve secimi aninda siler.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sayfa]);
-
-  /**
-   * GENEL KURAL — UYGULAMADAKI TUM GRIDLERDE AYNI (kullanici karari):
-   *   duz tik      : YALNIZ o satir secili kalir, onceki isaretler kalkar
-   *   Ctrl/Cmd+tik : o satiri secime ekler / cikarir
-   *   Shift+tik    : son "ankor" satirdan buraya kadar araligi secer
-   * (Explorer / Excel davranisi.) Onay kutusu tek satiri ekler-cikarir ve satir
-   * tiklamasini tetiklemez.
-   *
-   * ISTISNA: secimin kendisi "islem hedefi isaretleme" olan ekranlar - ör. belge
-   * DONUSUM modali - duz tikta digerlerini KALDIRMAZ; orada coklu isaret asildir.
-   */
-  const ankorRef = useRef<number | null>(null);
-  const satirTiklandi = (e: React.MouseEvent, id: string, index: number) => {
-    if (e.shiftKey && ankorRef.current !== null) {
-      const bas = Math.min(ankorRef.current, index);
-      const son = Math.max(ankorRef.current, index);
-      const yeni = new Set(secili);
-      for (let k = bas; k <= son; k++) yeni.add(String(satirlar[k].id ?? k));
-      secimiUygula(yeni);
-      return;
-    }
-    if (e.ctrlKey || e.metaKey) {
-      const yeni = new Set(secili);
-      yeni.has(id) ? yeni.delete(id) : yeni.add(id);
-      secimiUygula(yeni);
-      ankorRef.current = index;
-      return;
-    }
-    secimiUygula(new Set([id]));
-    ankorRef.current = index;
-  };
-  const hepsiSecili = satirlar.length > 0 && sayfaIdleri().every(id => secili.has(id));
-  const bazisiSecili = !hepsiSecili && sayfaIdleri().some(id => secili.has(id));
-
-  const siralamaDegistir = (kolon: KolonMeta) => {
-    if (!kolon.siralanabilir) return;
-    setSirala(onceki => {
-      const mevcut = onceki.find(s => s.alan === kolon.ad);
-      if (!mevcut) return [{ alan: kolon.ad, yon: 'asc' }];
-      if (mevcut.yon === 'asc') return [{ alan: kolon.ad, yon: 'desc' }];
-      return [];
-    });
-    setSayfa(1);
-  };
-
-  const sonSayfa = Math.max(1, Math.ceil(toplamKayit / sayfaBoyu));
-  const siraIsareti = (ad: string) => {
-    const s = sirala.find(x => x.alan === ad);
-    return s ? (s.yon === 'asc' ? ' ↑' : ' ↓') : '';
   };
 
   const satirSinifi = (satir: ListeSatiri) => {
@@ -532,37 +374,6 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
    * onlar. Sunucu sayfa boyutunu 500'le siniladigi icin sayfa sayfa cekilir
    * (ust sinir 10.000 satir - daha buyugu tarayicida donma demek).
    */
-  const csvIndir = useCallback(async () => {
-    setYukleniyor(true);
-    try {
-      // Listeleme ile AYNI kosullar (gridSorgu): disa aktarilan ne gorunuyorsa odur.
-      const filtre = filtreBirlestir([
-        sabitFiltre, cipler?.[cipIndeks]?.filtre,
-        aramaFiltresi(), filtreSatiriFiltresi(),
-        tarihKosulu(tarihAlani, tarihBas, tarihBit),
-        kodSuzgeci && kodSuzgecDeger !== ''
-          ? { alan: kodSuzgeci.alan, op: 'esit' as const, deger: Number(kodSuzgecDeger) }
-          : undefined,
-      ]);
-
-      const gorunum = aramaGorunumu === 'tum' ? undefined : aramaGorunumu;
-      const tumu: ListeSatiri[] = [];
-      for (let sf = 1; sf <= 20; sf++) {
-        const y = await api.liste(kaynak, { sayfa: sf, boyut: 500, sirala, filtre, gorunum });
-        tumu.push(...y.satirlar);
-        if (tumu.length >= y.toplamKayit || y.satirlar.length === 0) break;
-      }
-
-      const metin = csvMetni(
-        kolonlar.map(k => cev(k.baslik)),
-        tumu.map(r => kolonlar.map(k => bicimle(r[k.ad], k))));
-      dosyaIndir(metin, `${dosyaAdiTemiz(baslik ?? kaynak)}-${bugunIso()}.csv`, CSV_TIPI);
-    } catch (h) {
-      setHata(hataMetni(h));
-    } finally { setYukleniyor(false) }
-  }, [kaynak, baslik, kolonlar, sabitFiltre, cipler, cipIndeks, aramaFiltresi, filtreSatiriFiltresi, kodSuzgeci, kodSuzgecDeger,
-      sirala, aramaGorunumu, tarihAlani, tarihBas, tarihBit]);
-
   const gorunenToplamlar = useMemo(() => Object.entries(toplamlar ?? {}), [toplamlar]);
   // Alt toplam seridi yalniz GORUNEN bir kolonun toplami varsa cizilir. Gruplu
   //   ekstrede para birimine bagli kolonlar genel toplama girmez; o kolonlardan
@@ -570,21 +381,6 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
   const toplamSeridiVar = useMemo(
     () => gorunenToplamlar.some(([ad]) => kolonlar.some(k => k.ad === ad)),
     [gorunenToplamlar, kolonlar]);
-
-  // Ekstreden listeye donunce ayni satir secili gelsin (seciliBaslangicId).
-  const ilkSecimUygulandi = useRef(false);
-  useEffect(() => {
-    if (ilkSecimUygulandi.current || !seciliBaslangicId || satirlar.length === 0) return;
-    const bulunan = satirlar.find(r => Number(r.id) === seciliBaslangicId);
-    if (bulunan) { setSeciliSatir(bulunan); setSecili(new Set([String(seciliBaslangicId)])) }
-    ilkSecimUygulandi.current = true;
-  }, [satirlar, seciliBaslangicId]);
-
-  // Secim degisince disariya bildir (ör. "Ekstre" dugmesinin aktifligi).
-  useEffect(() => { onSecimDegisti?.(seciliSatir) }, [seciliSatir, onSecimDegisti]);
-
-  const hepsiRef = useRef<HTMLInputElement | null>(null);
-  useEffect(() => { if (hepsiRef.current) hepsiRef.current.indeterminate = bazisiSecili }, [bazisiSecili]);
 
   const filtreVar = arama.trim() !== '' || Object.values(filtreDeger).some(v => v.trim() !== '');
 
@@ -713,7 +509,9 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       )}
 
       <div className="sahne">
-        {hata && <div className="hata-kutusu">{hata}</div>}
+        {(hata ?? kolonHatasi) && (
+          <div className="hata-kutusu">{hata ?? kolonHatasi}</div>
+        )}
 
         {/* Serit, CIP OLMASA DA cizilir: basvuru listesinde cipler yerini
             combolara birakti (kullanici) ve kosul yalniz ciplere baksaydi
