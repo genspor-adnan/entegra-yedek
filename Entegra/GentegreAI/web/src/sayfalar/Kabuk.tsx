@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { sonMenuEkle, sonMenuGorunen } from './menuSonKullanilan';
+import { sonMenuGorunen } from './menuSonKullanilan';
+import { useMenuTercihleri, useKullaniciAyari } from './kabuk/useMenuTercihleri';
 import { modulAcikMi } from './listeTanimlari';
 import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
   from '../bilesenler/tema';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Bayrak } from '../bilesenler/Bayrak';
 import { cm, ceviriYukle, ceviriDinle } from '../dil/ceviri';
-import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { urunAdi, modUyar } from '../api/sozlesme';
 import { AiRehberPaneli } from '../bilesenler/AiRehberPaneli';
@@ -225,70 +225,10 @@ export function Kabuk() {
    * localStorage artik yalniz CEVRIMDISI KOPYA: sunucuya ulasilamazsa menu
    * yine dolu acilir, ilk yazmada sunucu tekrar dogruyu ogrenir.
    */
-  const favoriAnahtar = `favoriler.${kullanici?.id ?? 0}`;
-  const [favoriler, setFavoriler] = useState<string[]>([]);
-  const yerelFavori = (anahtar: string): string[] => {
-    try { return JSON.parse(localStorage.getItem(anahtar) ?? '[]') as string[] }
-    catch { return [] }
-  };
-  useEffect(() => {
-    if (!kullanici?.id) return;
-    let iptal = false;
-    void (async () => {
-      const yerel = yerelFavori(favoriAnahtar);
-      let liste = yerel;
-      try {
-        const tercihler = await api.tercihler();
-        const ham = tercihler.favoriler;
-        if (ham === undefined) {
-          // Sunucuda HIC kayit yok: tarayicidaki eski liste bir kez tasinir.
-          //   (Bos liste "[]" olarak yazilmis olabilir - o zaman kullanici
-          //   favorilerini bilerek bosaltmistir, geri getirilmez.)
-          if (yerel.length > 0)
-            await api.tercihYaz('favoriler', JSON.stringify(yerel)).catch(() => {});
-        } else {
-          liste = JSON.parse(ham) as string[];
-          try { localStorage.setItem(favoriAnahtar, ham) } catch { /* dolu/kapali depo */ }
-        }
-      } catch { /* sunucuya ulasilamadi - yerel kopya ile devam */ }
-      if (!iptal) setFavoriler(Array.isArray(liste) ? liste : []);
-    })();
-    return () => { iptal = true };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kullanici?.id, favoriAnahtar]);
-  const favoriToggle = (yol: string) => setFavoriler(t => {
-    const y = t.includes(yol) ? t.filter(x => x !== yol) : [...t, yol];
-    const metin = JSON.stringify(y);
-    try { localStorage.setItem(favoriAnahtar, metin) } catch { /* dolu/kapali depo */ }
-    // Yazma sessizce denenir: ag koparsa yildiz yine de degisir, yerel kopya
-    //   dogru kalir; sonraki basarili yazmada sunucu ile esitlenir.
-    void api.tercihYaz('favoriler', metin).catch(() => {});
-    return y;
-  });
-  /**
-   * EN SON KULLANILANLAR (kullanici: "Favori'den sonra 'En Son' ekle, son 10
-   * secilmis menu listelensin").
-   *
-   * Favoriler kullanicinin BILEREK isaretledikleri; bu liste ise kendiliginden
-   * birikir - gunun isi hep ayni birkac ekranda geciyor ama hangileri oldugu
-   * onceden bilinmiyor. Yol EN BASA yazilir, ayni yol ikinci kez secilince
-   * yukari tasinir (kopya birikmez), liste ONDA kirpilir.
-   *
-   * Favoride ZATEN olan oge burada TEKRARLANMAZ: iki liste ust uste durdugu
-   * icin ayni satiri iki kez gostermek menuyu uzatmaktan baska ise yaramaz.
-   */
-  const sonAnahtar = `sonMenuler.${kullanici?.id ?? 0}`;
-  const [sonMenuler, setSonMenuler] = useState<string[]>([]);
-  useEffect(() => {
-    try { setSonMenuler(JSON.parse(localStorage.getItem(sonAnahtar) ?? '[]') as string[]) }
-    catch { setSonMenuler([]) }
-  }, [sonAnahtar]);
-  const sonKaydet = (yol: string) => setSonMenuler(o => {
-    const y = sonMenuEkle(o, yol) as string[];
-    if (y === o) return o;                       // degismediyse yazma
-    try { localStorage.setItem(sonAnahtar, JSON.stringify(y)) } catch { /* dolu/kapali depo */ }
-    return y;
-  });
+  // MENU TERCIHLERI (favoriler sunucuda + en son kullanilanlar yerelde)
+  //   kendi kancasinda: kabuk/useMenuTercihleri.
+  const { favoriler, favoriToggle, sonMenuler, sonKaydet } =
+    useMenuTercihleri(kullanici?.id);
 
   /**
    * KAYIT NOKTASI ROTA DEGISIMI (menu tiklamasi DEGIL): ayni ekrana favoriden,
@@ -320,13 +260,10 @@ export function Kabuk() {
   // Acik/kapali durumu kullanici ELLE degistirmedikce, aktif alt-ogeyi iceren grup
   //   otomatik acik gelir (dogrudan /tedarikci gibi bir URL'e gelindiginde de gorunsun).
   const [acikGruplar, setAcikGruplar] = useState<Record<string, boolean>>({});
-  const [kullaniciAyariAcik, setKullaniciAyariAcik] = useState(false);
-  const [eskiSifre, setEskiSifre] = useState('');
-  const [sifre1, setSifre1] = useState('');
-  const [sifre2, setSifre2] = useState('');
-  const [seciliDil, setSeciliDil] = useState(0);
-  const [ayarMesaji, setAyarMesaji] = useState('');
-  const [ayarKaydediliyor, setAyarKaydediliyor] = useState(false);
+  // KULLANICI AYARLARI PENCERESI (sifre + dil) kendi kancasinda.
+  const ayar = useKullaniciAyari({
+    mevcutDil: kullanici?.dil ?? 0, dilDegistir, cikisYap,
+  });
   /** Bayrak dugmesinin acilir listesi. */
   const [dilMenusu, setDilMenusu] = useState(false);
   const [tema, setTema] = useState<Tema>(() => temaOku());
@@ -359,48 +296,11 @@ export function Kabuk() {
   const paletiAc = () =>
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }));
 
-  const ayarKapat = () => {
-    setKullaniciAyariAcik(false);
-    setAyarMesaji('');
-    setEskiSifre('');
-    setSifre1('');
-    setSifre2('');
-  };
-
-  const ayarTamam = async () => {
-    setAyarMesaji('');
-    if (sifre1 || sifre2 || eskiSifre) {
-      if (!eskiSifre) { setAyarMesaji('Mevcut şifre gerekli.'); return }
-      if (sifre1.length < 8) { setAyarMesaji('Şifre en az 8 karakter olmalı.'); return }
-      if (sifre1 !== sifre2) { setAyarMesaji('Şifreler aynı değil.'); return }
-    }
-
-    setAyarKaydediliyor(true);
-    try {
-      if (seciliDil !== (kullanici?.dil ?? 0)) await dilDegistir(seciliDil);
-      if (sifre1 || sifre2 || eskiSifre) {
-        await api.parolaDegistir(eskiSifre, sifre1);
-        ayarKapat();
-        await cikisYap();
-        return;
-      }
-      ayarKapat();
-    } catch (e) {
-      setAyarMesaji(e instanceof Error ? e.message : 'Kullanıcı ayarları kaydedilemedi.');
-    } finally {
-      setAyarKaydediliyor(false);
-    }
-  };
-
   /** Bayraktan dil degistir - Kullanici Ayarlari'ndaki kutuyla ayni ucu cagirir. */
   async function dilSec(dil: number) {
     if (dil === (kullanici?.dil ?? 0)) return;
     try { await dilDegistir(dil) } catch { /* oturum katmani hatayi gosterir */ }
   }
-
-  useEffect(() => {
-    if (kullaniciAyariAcik) setSeciliDil(kullanici?.dil ?? 0);
-  }, [kullaniciAyariAcik, kullanici?.dil]);
 
   useEffect(() => {
     if (!dilMenusu) return;
@@ -409,12 +309,6 @@ export function Kabuk() {
     return () => document.removeEventListener('mousedown', kapat);
   }, [dilMenusu]);
 
-  useEffect(() => {
-    if (!kullaniciAyariAcik) return;
-    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') ayarKapat() };
-    window.addEventListener('keydown', esc);
-    return () => window.removeEventListener('keydown', esc);
-  }, [kullaniciAyariAcik]);
 
   return (
     <div className={`kabuk${menuKapali ? ' menu-kapali' : ''}`}>
@@ -512,7 +406,7 @@ export function Kabuk() {
             type="button"
             className="avt"
             title={`Kullanıcı Ayarları — ${kullanici?.ad ?? ''}`}
-            onClick={() => setKullaniciAyariAcik(true)}
+            onClick={() => ayar.setAcik(true)}
           >
             {basHarfler}
           </button>
@@ -682,8 +576,9 @@ export function Kabuk() {
         <main className="ana" key={ceviriSurumu}><Outlet /></main>
       </div>
 
-      {kullaniciAyariAcik && (
-        <div className="kaperde" onMouseDown={e => { if (e.target === e.currentTarget) ayarKapat() }}>
+      {ayar.acik && (
+        <div className="kaperde"
+             onMouseDown={e => { if (e.target === e.currentTarget) ayar.kapat() }}>
           <div className="kawin kullanici-ayarlari" role="dialog" aria-label="Kullanıcı Ayarları">
             <div className="kabas">
               <span>👤 Kullanıcı Ayarları</span>
@@ -707,8 +602,9 @@ export function Kabuk() {
                   <label>Dil</label>
                   {/* Bayrakli secim (kullanici): "Türkçe/English/Deutsch" yerine
                       ust cubuktaki bayrakla AYNI gorsel dil. */}
-                  <select value={seciliDil} onChange={e => setSeciliDil(Number(e.target.value))}
-                          disabled={ayarKaydediliyor}>
+                  <select value={ayar.seciliDil}
+                          onChange={e => ayar.setSeciliDil(Number(e.target.value))}
+                          disabled={ayar.kaydediliyor}>
                     {DILLER.map(d => (
                       <option key={d.deger} value={d.deger}>{d.ad}</option>
                     ))}
@@ -730,35 +626,37 @@ export function Kabuk() {
                   <label>Mevcut Şifre</label>
                   <input
                     type="password"
-                    value={eskiSifre}
-                    onChange={e => setEskiSifre(e.target.value)}
-                    disabled={ayarKaydediliyor}
+                    value={ayar.eskiSifre}
+                    onChange={e => ayar.setEskiSifre(e.target.value)}
+                    disabled={ayar.kaydediliyor}
                     autoComplete="current-password"
                   />
                   <label>Yeni Şifre</label>
                   <div className="kaara">
                     <input
                       type="password"
-                      value={sifre1}
-                      onChange={e => setSifre1(e.target.value)}
-                      disabled={ayarKaydediliyor}
+                      value={ayar.sifre1}
+                      onChange={e => ayar.setSifre1(e.target.value)}
+                      disabled={ayar.kaydediliyor}
                       autoComplete="new-password"
                     />
-                    {sifre1 && sifre1 === sifre2 && <span className="kaok">✓</span>}
+                    {ayar.sifre1 && ayar.sifre1 === ayar.sifre2
+                      && <span className="kaok">✓</span>}
                   </div>
                   <label>Yeni Şifre (Tekrar)</label>
                   <div className="kaara">
                     <input
                       type="password"
-                      value={sifre2}
-                      onChange={e => setSifre2(e.target.value)}
-                      disabled={ayarKaydediliyor}
+                      value={ayar.sifre2}
+                      onChange={e => ayar.setSifre2(e.target.value)}
+                      disabled={ayar.kaydediliyor}
                       autoComplete="new-password"
                     />
-                    {sifre2 && sifre1 === sifre2 && <span className="kaok">✓</span>}
+                    {ayar.sifre2 && ayar.sifre1 === ayar.sifre2
+                      && <span className="kaok">✓</span>}
                   </div>
                 </div>
-                {ayarMesaji && <div className="kauyari">{ayarMesaji}</div>}
+                {ayar.mesaj && <div className="kauyari">{ayar.mesaj}</div>}
                 <div className="kanot">Şifre boş bırakılırsa değiştirilmez. Şifre değişirse oturum kapanır; yeni şifreyle tekrar girilir.</div>
               </div>
             </div>
@@ -766,11 +664,11 @@ export function Kabuk() {
             {/* STANDART ALT SERIT (kullanici): modallarin ortak deseni -
                 solda Iptal (d kapat-dugmesi), sagda birincil Kaydet (d bir). */}
             <div className="kaalt">
-              <button className="d kapat-dugmesi" onClick={ayarKapat}
-                      disabled={ayarKaydediliyor}>İptal</button>
-              <button className="d bir" onClick={() => void ayarTamam()}
-                      disabled={ayarKaydediliyor}>
-                {ayarKaydediliyor ? 'Kaydediliyor…' : 'Kaydet'}
+              <button className="d kapat-dugmesi" onClick={ayar.kapat}
+                      disabled={ayar.kaydediliyor}>İptal</button>
+              <button className="d bir" onClick={() => void ayar.tamam()}
+                      disabled={ayar.kaydediliyor}>
+                {ayar.kaydediliyor ? 'Kaydediliyor…' : 'Kaydet'}
               </button>
             </div>
           </div>

@@ -33,15 +33,14 @@ import { useSevkiyatBilgisi, useTeklifBilgisi }
 import { useBelgeDonusumleri } from './belgeKarti/useBelgeDonusumleri';
 import { useKurumSecenekleri } from './belgeKarti/useKurumSecenekleri';
 import { useBelgeAramalari } from './belgeKarti/useBelgeAramalari';
+import { stokSeciminiCoz } from './belgeKarti/stokSecimi';
 import { useKartKirliligi } from './belgeKarti/useKartKirliligi';
 import { useParaAkislari, type ParaAkisRef } from './belgeKarti/useParaAkislari';
 import { useBelgeFiyatlandirma } from './belgeKarti/useBelgeFiyatlandirma';
 import {
   provizyonVarMi, gelisSekliKarari, acikBorcHesapla, acikBelgeHesapla,
 } from './belgeKartiKurallari';
-import {
-  kampanyaFiyatiUygula, paketIcerigiUygula, sonAnahtar, stokSecimindenKalem,
-} from './belgeKalem';
+import { paketIcerigiUygula } from './belgeKalem';
 import { BelgeKartiModallari } from '../bilesenler/belge/BelgeKartiModallari';
 import { BasvuruAsamaSeridi } from '../bilesenler/belge/BasvuruAsamaSeridi';
 
@@ -802,31 +801,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * acilista kopyalar (useState), sonradan gonderilen fiyat guncellemesi ona
    * ULASMAZ - once fiyat, sonra pencere.
    */
+  // Secilen stok/hizmeti kaleme cevirme (fiyat listesi + kampanya + sozlesme
+  //   cozumu) saf yardimcida: belgeKarti/stokSecimi.
   async function stokSecildi(sec: Record<string, unknown>) {
-    // Secim "Son / Sik Aranan" sayacina islensin - listede oldugu gibi.
-    void api.aramaIsaretle(sec.tip === 'hizmet' ? 'hizmet' : 'stok', Number(sec.id));
-    let yeni = stokSecimindenKalem(sec, sonAnahtar(satirlar) + 1, yerelPara);
-
-    // FIYAT LISTESI ONCELIKLI (205/207): belgenin listesi varsa fiyat ORADAN
-    //   gelir; kartin kendi fiyati yalniz listede kalem yoksa kalir.
-    // SOZLESMELI BASVURUDA LISTE OLMASA DA SORULUR (483): uc yalniz fiyati
-    //   degil ROTAYI da doner - TSS'de kalemin bir de SGK (SUT) bedeli var ve
-    //   sozlesmenin tarife listesi bos olsa bile o bedel sorulmali.
-    if (fiyatListesiId || kampanyaId || basvuruBilgi.sozlesmeId) {
-      try {
-        // Fiyat LISTE + KAMPANYA (274): baz listeden, indirim kampanyadan.
-        //   Kampanya yoksa uc liste fiyatini doner.
-        const f = await api.fiyatKalem(
-          sec.tip === 'hizmet' ? { hizmetId: Number(sec.id) } : { stokId: Number(sec.id) },
-          { tarafId: cari?.id ?? null, kurumId: odeyenKurumId, listeId: fiyatListesiId,
-            // SOZLESME (483): rota ve SUT listesi ondan cikar - TSS'de kalemin
-            //   bir de SGK bedeli vardir ve pencere onu sorar.
-            sozlesmeId: basvuruBilgi.sozlesmeId ?? null,
-            sgkKullan: basvuruBilgi.sgkKullan ?? null });
-        yeni = kampanyaFiyatiUygula(yeni, f);
-      } catch { /* liste fiyati alinamazsa kart fiyati kalir */ }
-    }
-    setKalem(yeni);
+    setKalem(await stokSeciminiCoz(sec, {
+      satirlar, yerelPara, tarafId: cari?.id ?? null, odeyenKurumId,
+      fiyatListesiId, kampanyaId, basvuruBilgi,
+    }));
   }
 
   const kalemKaydet = (satir: SatirDurumu) => {
