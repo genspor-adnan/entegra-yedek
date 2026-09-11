@@ -1,4 +1,5 @@
 import { api } from '../../api/istemci';
+import { type AksiyonBaglami, sayiOku } from './aksiyonOrtak';
 import { guvenli, mesaj, metinSor, onay, secimSor } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
 
@@ -12,23 +13,14 @@ import type { ListeSatiri } from '../../api/sozlesme';
  * antibiyotiğin raporda görüneceğini söyler; kararı ekran vermez, yoksa
  * rapor ile ekran ayrışır.
  */
-export interface MikroBaglam {
-  tazele(): void;
-  git(yol: string): void;
-}
+export type MikroBaglam = AksiyonBaglami;
 
 /** "12,5" -> 12.5. Türkçe klavyede ondalık ayırıcı virgüldür. */
-function sayi(metin: string | null | undefined): number | undefined {
-  if (!metin || metin.trim() === '') return undefined;
-  const d = Number(metin.trim().replace(',', '.'));
-  return Number.isFinite(d) ? d : undefined;
-}
-
 /** "≥32" / ">= 32" / "<=0,25" -> { isaret, deger } */
 function micCoz(ham: string): { mic?: number; micIsaret: string } {
   const t = ham.trim().replace('≥', '>=').replace('≤', '<=');
   const m = /^(>=|<=)?\s*(.+)$/.exec(t);
-  return { mic: sayi(m?.[2]), micIsaret: m?.[1] ?? '' };
+  return { mic: sayiOku(m?.[2]), micIsaret: m?.[1] ?? '' };
 }
 
 export async function mikroAksiyonu(
@@ -70,7 +62,7 @@ export async function mikroAksiyonu(
 
       await guvenli(async () => {
         const y = await api.labKulturOkuma(id, {
-          saat: sayi(saatMetni), uremeVar: uremeSecim === 'var', bulgu,
+          saat: sayiOku(saatMetni), uremeVar: uremeSecim === 'var', bulgu,
         });
         mesaj(y.mesaj);
         b.tazele();
@@ -106,7 +98,7 @@ export async function mikroAksiyonu(
       await guvenli(async () => {
         const y = await api.labKulturIzolat(id, {
           organizmaId: Number(secim),
-          koloniSayisi: sayi(koloni),
+          koloniSayisi: sayiOku(koloni),
           esbl: Number(esbl),
         });
         mesaj(y.mesaj);
@@ -160,7 +152,7 @@ export async function mikroAksiyonu(
           standart: 'EUCAST', standartSurum: surum,
           satirlar: [{
             antibiyotikId: Number(abSecim), mic, micIsaret,
-            zonMm: sayi(zon), yorum, kaynak: micMetni.trim() === '' ? 2 : 1,
+            zonMm: sayiOku(zon), yorum, kaynak: micMetni.trim() === '' ? 2 : 1,
           }],
         });
         mesaj(y.mesaj);

@@ -1,4 +1,5 @@
 import { api } from '../../api/istemci';
+import { type AksiyonBaglami, sayiOku } from './aksiyonOrtak';
 import { guvenli, mesaj, metinSor, onay, secimSor } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
 
@@ -13,16 +14,7 @@ import type { ListeSatiri } from '../../api/sozlesme';
  * orada türetilir (fn_lab_acmg_sinif). İki yerde hesaplansaydı rapor ile
  * ekran ayrışır ve hangisinin doğru olduğu belirsiz kalırdı.
  */
-export interface GenetikBaglam {
-  tazele(): void;
-  git(yol: string): void;
-}
-
-function sayi(metin: string | null | undefined): number | undefined {
-  if (!metin || metin.trim() === '') return undefined;
-  const d = Number(metin.trim().replace(',', '.'));
-  return Number.isFinite(d) ? d : undefined;
-}
+export type GenetikBaglam = AksiyonBaglami;
 
 export async function genetikAksiyonu(
   kod: string,
@@ -69,7 +61,7 @@ export async function genetikAksiyonu(
       await guvenli(async () => {
         const y = await api.genetikOnam(id, {
           surum: surum.trim(), tesadufiBulgu: Number(tercih),
-          veriSaklamaYil: sayi(saklama),
+          veriSaklamaYil: sayiOku(saklama),
         });
         mesaj(y.mesaj);
         b.tazele();
@@ -82,7 +74,7 @@ export async function genetikAksiyonu(
       if (konsan === null) return true;
       const saflik = await metinSor('A260/280 saflık oranı:', '1,85', 'DNA İzolasyon');
       if (saflik === null) return true;
-      const k = sayi(konsan); const s = sayi(saflik);
+      const k = sayiOku(konsan); const s = sayiOku(saflik);
       if (k === undefined || s === undefined) {
         mesaj('Konsantrasyon ve saflık sayı olmalı.');
         return true;
@@ -144,8 +136,8 @@ export async function genetikAksiyonu(
 
       await guvenli(async () => {
         const y = await api.genetikKalite(id, {
-          kapsamaYuzde: sayi(kapsama), ortDerinlik: sayi(derinlik),
-          kontaminasyon: sayi(kontaminasyon), cinsiyetDogrulama: Number(cinsiyet),
+          kapsamaYuzde: sayiOku(kapsama), ortDerinlik: sayiOku(derinlik),
+          kontaminasyon: sayiOku(kontaminasyon), cinsiyetDogrulama: Number(cinsiyet),
         });
         mesaj(y.mesaj);
         b.tazele();

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { altAgac as altAgacHesapla } from './kategoriAgaci';
 import { api } from '../api/istemci';
 import { guvenli } from './mesaj';
 
@@ -52,15 +53,8 @@ export function KategoriAgacPaneli({ tur, secili, onSec, sayacAlani }: {
     return harita;
   }, [kayitlar]);
 
-  const altAgac = useCallback((id: number) => {
-    const sonuc = [id];
-    const kuyruk = [id];
-    while (kuyruk.length) {
-      const ust = kuyruk.shift()!;
-      kayitlar.filter(k => k.ustId === ust).forEach(k => { sonuc.push(k.id); kuyruk.push(k.id) });
-    }
-    return sonuc;
-  }, [kayitlar]);
+  const altAgac = useCallback(
+    (id: number) => altAgacHesapla(id, kayitlar), [kayitlar]);
 
   const dal = (k: Kategori & { sayi: number }, derinlik: number): React.ReactNode => {
     const altlar = cocuklar.get(k.id) ?? [];

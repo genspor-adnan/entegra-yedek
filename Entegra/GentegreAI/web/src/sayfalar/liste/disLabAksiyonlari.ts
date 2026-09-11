@@ -1,4 +1,5 @@
 import { api } from '../../api/istemci';
+import { type AksiyonBaglami, sayiOku } from './aksiyonOrtak';
 import { guvenli, mesaj, metinSor, onay, secimSor } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
 
@@ -14,16 +15,7 @@ import type { ListeSatiri } from '../../api/sozlesme';
  * ve kalite kontrolünü biz doğrulamadık; sunucu bunu zorluyor, buradaki
  * mesaj yalnız sebebini söylüyor.
  */
-export interface DisLabBaglam {
-  tazele(): void;
-  git(yol: string): void;
-}
-
-function sayi(metin: string | null | undefined): number | undefined {
-  if (!metin || metin.trim() === '') return undefined;
-  const d = Number(metin.trim().replace(',', '.'));
-  return Number.isFinite(d) ? d : undefined;
-}
+export type DisLabBaglam = AksiyonBaglami;
 
 export async function disLabAksiyonu(
   kod: string,
@@ -186,7 +178,7 @@ export async function disLabAksiyonu(
       const tutar = await metinSor('Tutar (boş geçilebilir):', '', 'Fatura Eşleştir');
       if (tutar === null) return true;
       await guvenli(async () => {
-        mesaj((await api.disLabFatura(id, Number(belgeNo), sayi(tutar))).mesaj);
+        mesaj((await api.disLabFatura(id, Number(belgeNo), sayiOku(tutar))).mesaj);
         b.tazele();
       });
       return true;

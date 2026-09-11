@@ -1,4 +1,5 @@
 import { api } from '../../api/istemci';
+import { type AksiyonBaglami, sayiOku } from './aksiyonOrtak';
 import { guvenli, mesaj, metinSor, secimSor } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
 
@@ -14,16 +15,7 @@ import type { ListeSatiri } from '../../api/sozlesme';
  * geçirildiği de burada sorulur - "kontrol tutmadı" demek, o aralıktaki
  * hasta sonuçlarının şüpheli olduğunu söylemektir.
  */
-export interface KkBaglam {
-  tazele(): void;
-  git(yol: string): void;
-}
-
-function sayi(metin: string | null | undefined): number | undefined {
-  if (!metin || metin.trim() === '') return undefined;
-  const d = Number(metin.trim().replace(',', '.'));
-  return Number.isFinite(d) ? d : undefined;
-}
+export type KkBaglam = AksiyonBaglami;
 
 export async function kkAksiyonu(
   kod: string,
@@ -62,7 +54,7 @@ export async function kkAksiyonu(
 
       const deger = await metinSor('Ölçülen değer:', '', 'KK Ölçümü');
       if (deger === null) return;
-      const d = sayi(deger);
+      const d = sayiOku(deger);
       if (d === undefined) { mesaj('Değer sayı olmalı.'); return }
 
       const y = await api.kkOlcum({
@@ -111,8 +103,8 @@ export async function kkAksiyonu(
       await guvenli(async () => {
         const y = await api.kkAksiyon(id, {
           aksiyon: aksiyon.trim(),
-          gozdenGecirilen: sayi(gozden) ?? 0,
-          duzeltilen: sayi(duzeltilen) ?? 0,
+          gozdenGecirilen: sayiOku(gozden) ?? 0,
+          duzeltilen: sayiOku(duzeltilen) ?? 0,
           olay: Number(olay) || undefined,
         });
         mesaj(y.mesaj);

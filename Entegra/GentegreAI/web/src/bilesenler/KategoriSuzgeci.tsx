@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { altAgac as altAgacHesapla } from './kategoriAgaci';
 import { api } from '../api/istemci';
 import { guvenli } from './mesaj';
 
@@ -99,16 +100,6 @@ export function KategoriSuzgeci({ tur, deger, onDegis, sinirla, baslik }: {
     }).filter(g => g.secenekler.length > 0);
   }, [kayitlar, sinirla, turAnahtari]);
 
-  /** Seçilen dalın kendisi + tüm altları. */
-  const altAgac = (id: number): number[] => {
-    const sonuc = [id];
-    const kuyruk = [id];
-    while (kuyruk.length) {
-      const ust = kuyruk.shift()!;
-      kayitlar.filter(k => k.ustId === ust).forEach(k => { sonuc.push(k.id); kuyruk.push(k.id) });
-    }
-    return sonuc;
-  };
 
   return (
     <select className="kat-suzgec" value={deger === null ? '' : String(deger)}
@@ -117,7 +108,7 @@ export function KategoriSuzgeci({ tur, deger, onDegis, sinirla, baslik }: {
               const v = e.target.value;
               if (v === '') { onDegis(null, []); return }
               const id = Number(v);
-              onDegis(id, altAgac(id));
+              onDegis(id, altAgacHesapla(id, kayitlar));
             }}>
       <option value="">{baslik ?? 'Tüm Kategoriler'}</option>
       {/* Tek ağaçta grup başlığı gürültü; iki ağaç birden çizilirken

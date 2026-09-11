@@ -1,4 +1,5 @@
 import { api } from '../../api/istemci';
+import { type AksiyonBaglami } from './aksiyonOrtak';
 import { guvenli, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
 
@@ -13,10 +14,7 @@ import type { ListeSatiri } from '../../api/sozlesme';
  * <b>Onaylı sonuç güncellenmez.</b> "Düzelt" eski satırı iptal edip yenisini
  * açar; neden zorunludur çünkü rapor "düzeltilmiş" damgası taşıyacak.
  */
-export interface LabBaglam {
-  tazele(): void;
-  git(yol: string): void;
-}
+export type LabBaglam = AksiyonBaglami;
 
 /** Ret nedenleri = numune KALİTE kod uzayı (db/433, 434'te belgelendi). */
 const RET_NEDENLERI: Record<string, string> = {
