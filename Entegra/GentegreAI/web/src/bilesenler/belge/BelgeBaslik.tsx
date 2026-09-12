@@ -5,7 +5,7 @@ import { GenLookup } from '../GenLookup';
 import { api } from '../../api/istemci';
 import { KodListesiModali } from '../KodListesiModali';
 import { yerelAnMetni } from '../bicim';
-import { TarafAlani } from '../../sayfalar/BelgeKarti';
+import { TarafAlani } from './TarafAlani';
 import {
   LOOKUP_DEPO, GIRIS_FIS_TIPLERI, CIKIS_FIS_TIPLERI, SEKMELER, TEKLIF_DURUMLARI,
 } from '../../sayfalar/belgeSabitleri';
