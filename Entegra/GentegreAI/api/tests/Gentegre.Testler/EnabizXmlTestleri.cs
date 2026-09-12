@@ -28,11 +28,15 @@ public class EnabizXmlTestleri : IClassFixture<VeritabaniOlgusu>
             veri,
             new SahteFabrika(),
             Microsoft.Extensions.Logging.Abstractions.NullLogger<EnabizGonderimi>.Instance,
-            // 625: gonderim, 101 gidince ISLEM paketini uretiyor - govde
-            //   testinde uretim yolu calismaz ama kurucu bagimliligi gercek.
-            new Gentegre.Api.Servisler.EnabizPaketUretici(veri,
+            // Gonderim, 101 gidince ISLEM paketini uretmesi icin tetikleyiciye
+            //   bagli - govde testinde o yol calismaz ama kurucu bagimliligi
+            //   gercek.
+            new Gentegre.Api.Servisler.EnabizTetikleyici(veri,
+                new Gentegre.Api.Servisler.EnabizPaketUretici(veri,
+                    Microsoft.Extensions.Logging.Abstractions
+                             .NullLogger<Gentegre.Api.Servisler.EnabizPaketUretici>.Instance),
                 Microsoft.Extensions.Logging.Abstractions
-                         .NullLogger<Gentegre.Api.Servisler.EnabizPaketUretici>.Instance))!;
+                         .NullLogger<Gentegre.Api.Servisler.EnabizTetikleyici>.Instance))!;
         var yontem = typeof(EnabizGonderimi).GetMethod("XmlUretAsync",
             BindingFlags.NonPublic | BindingFlags.Instance)!;
         var gorev = (Task<string>)yontem.Invoke(servis, [paketId, CancellationToken.None])!;

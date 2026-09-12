@@ -28,16 +28,16 @@ public sealed class EnabizGonderimi
     private readonly VeriKaynagi _veri;
     private readonly IHttpClientFactory _http;
     private readonly ILogger<EnabizGonderimi> _gunluk;
-    private readonly EnabizPaketUretici _uretici;
+    private readonly EnabizTetikleyici _tetik;
 
     public EnabizGonderimi(VeriKaynagi veri, IHttpClientFactory http,
                            ILogger<EnabizGonderimi> gunluk,
-                           EnabizPaketUretici uretici)
+                           EnabizTetikleyici tetik)
     {
         _veri = veri;
         _http = http;
         _gunluk = gunluk;
-        _uretici = uretici;
+        _tetik = tetik;
     }
 
     public sealed record Sonuc(int Alinan, int Gonderilen, int Hatali, string Aciklama);
@@ -706,7 +706,7 @@ public sealed class EnabizGonderimi
             // SESSIZ: uretim gonderimi DUSURMEZ. 101 USS'ye ulasmistir;
             //   102 uretilemezse bu, basarili gonderimi basarisiz
             //   gostermek icin sebep degil.
-            await IslemPaketiUretAsync(p.Id, kullaniciId ?? 0, iptal);
+            await _tetik.PaketGonderildiAsync(p.Id, kullaniciId ?? 0, iptal);
 
     }
 
@@ -732,35 +732,6 @@ public sealed class EnabizGonderimi
                  where id = @p0
                 """, [p.Id, kod, mesaj, sinif, xml, geriDon], iptal);
 
-    }
-
-    /// <summary>
-    /// Gonderilen paket 101 ise, ayni basvurunun ISLEM (102) paketini uretir.
-    ///
-    /// Kalem yoksa uretici zaten paket acmaz. "Ayni icerik -> ayni paket"
-    /// kurali mukerrer satir dogurmaz: kalem eklendikce icerik degisir ve
-    /// yeni paket uretilir.
-    /// </summary>
-    private async Task IslemPaketiUretAsync(long paketId, int kullaniciId,
-                                            CancellationToken iptal)
-    {
-        try
-        {
-            var kaynak = await _veri.TekDegerAsync<int>("""
-                select coalesce(p.kaynak_id, 0)
-                  from public.enabiz_paket p
-                  join public.enabiz_paket_turu t on t.id = p.paket_turu_id
-                 where p.id = @p0 and t.uss_paket_kodu = '101' and p.kaynak_tur = 1
-                """, [paketId], iptal);
-            if (kaynak == 0) return;
-
-            await _uretici.UretAsync("HASTA_ISLEM", kaynak, kullaniciId, iptal);
-        }
-        catch (Exception h)
-        {
-            _gunluk.LogError(h, "e-Nabiz islem paketi uretilemedi (101 paket {Id})",
-                             paketId);
-        }
     }
 
     private static string Kirp(string metin, int en)

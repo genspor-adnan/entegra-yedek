@@ -32,7 +32,9 @@ public static class BelgeUclari
             var (id, uyarilar) = await depo.KaydetAsync(belge, satirlar, istek.Secenekler,
                 baglam.Yazma, iptal);
 
-            await Enabiz101UretAsync(ctx, id, baglam.KullaniciId, iptal);
+            await ctx.RequestServices
+                     .GetRequiredService<Servisler.EnabizTetikleyici>()
+                     .BasvuruKaydedildiAsync(id, baglam.KullaniciId, iptal);
 
             var kayit = await depo.OkuAsync(id, iptal)
                         ?? throw GentegreHatasi.Bulunamadi();
@@ -46,68 +48,6 @@ public static class BelgeUclari
                 IzlemeNo = baglam.IzlemeNo
             });
         });
-
-        // ----------------------------------------------- e-Nabiz 101 ----
-        // BASVURU KAYDEDILINCE 101 URETILIR (602).
-        //
-        // Kilavuz acik: "Bu paket, hasta KAYDI YAPILDIGINDA ... gonderilecektir."
-        //   Paket bugune kadar yalniz MUAYENEYE ALINIRKEN uretiliyordu; gerekce
-        //   "kayit kabulde hekim/klinik henuz kesin degil" idi. Gerekce
-        //   gecersiz: 101'in 18 zorunlu alani arasinda HEKIM YOK, KLINIK_KODU
-        //   ise basvurunun kendi bolumunden gelir ve kayit sirasinda seciliyor.
-        //   Muayeneye alinmayan basvuru (kayit yaptirip gitmis hasta) USS'ye
-        //   hic bildirilmiyordu.
-        //
-        // Muayeneye alma tetigi YERINDE KALIR: orada paket yeniden uretilir,
-        //   "ayni icerik -> ayni paket" kurali mukerrer satir acmaz; kayitta
-        //   eksik kalan alan (henuz girilmemis bolum gibi) o an tamamlanir.
-        //
-        // SESSIZ: paket uretimi belge kaydini DUSURMEZ - e-Nabiz ikincil bir
-        //   is, hasta kaydi birincil. Hata yalnizca gunluge yazilir.
-        static async Task Enabiz101UretAsync(HttpContext ctx, int belgeId,
-                                             int kullaniciId, CancellationToken iptal)
-        {
-            try
-            {
-                var uretici = ctx.RequestServices
-                                 .GetService<Servisler.EnabizPaketUretici>();
-                if (uretici is null) return;
-
-                // YALNIZ BASVURU (tur 19): oteki belge turlerinin USS karsiligi yok.
-                var veri = ctx.RequestServices.GetRequiredService<VeriKaynagi>();
-                var basvuruMu = await veri.TekDegerAsync<int>(
-                    "select count(*) from public.belge b " +
-                    " join public.belge_basvuru bb on bb.id = b.id " +
-                    " where b.id = @p0 and b.tur = 19", [belgeId], iptal);
-                if (basvuruMu == 0) return;
-
-                await uretici.UretAsync("HASTA_KABUL", belgeId, kullaniciId, iptal);
-
-                // 102 ISLEM PAKETI: 101 GITTIKTEN SONRA (623).
-                //
-                // Kilavuz 102'nin ilk zorunlu alani SYSTakipNo'dur - yani
-                //   islem bildirimi, hasta kaydinin USS'de olmasina baglidir.
-                //   Takip numarasi yoksa paket uretmek, kuyruga dogusundan
-                //   olu bir satir birakmak olurdu: gonderilse "E1004
-                //   SYSTakipNo bos olamaz" ile geri donerdi.
-                //
-                // Numara geldikten sonraki ilk kaydette paket dogar; kalem
-                //   eklendikce icerik degisir ve yeni paket uretilir (ayni
-                //   icerik -> ayni paket kurali mukerrer satir acmaz).
-                var takipVar = await veri.TekDegerAsync<int>(
-                    "select count(*) from public.belge_basvuru bb " +
-                    " where bb.id = @p0 and coalesce(bb.sys_takip_no, '') <> ''",
-                    [belgeId], iptal);
-                if (takipVar > 0)
-                    await uretici.UretAsync("HASTA_ISLEM", belgeId, kullaniciId, iptal);
-            }
-            catch (Exception h)
-            {
-                ctx.RequestServices.GetRequiredService<ILoggerFactory>()
-                   .CreateLogger("enabiz").LogError(h,
-                       "e-Nabiz 101 paketi uretilemedi (basvuru {Id})", belgeId);
-            }
-        }
 
         // ------------------------------------------- basvuru suzgecleri ----
         // GET /api/belge/basvuru-suzgec?bas=&bit=
@@ -240,7 +180,9 @@ public static class BelgeUclari
             // GUNCELLEMEDE DE (602): basvurunun bolumu/kurumu sonradan
             //   girilmis olabilir - paket o an tamamlanir. "Ayni icerik ->
             //   ayni paket" kurali mukerrer satir acmaz.
-            await Enabiz101UretAsync(ctx, belgeId, baglam.KullaniciId, iptal);
+            await ctx.RequestServices
+                     .GetRequiredService<Servisler.EnabizTetikleyici>()
+                     .BasvuruKaydedildiAsync(belgeId, baglam.KullaniciId, iptal);
 
             var kayit = await depo.OkuAsync(belgeId, iptal) ?? throw GentegreHatasi.Bulunamadi();
             return Results.Ok(new BelgeYaniti

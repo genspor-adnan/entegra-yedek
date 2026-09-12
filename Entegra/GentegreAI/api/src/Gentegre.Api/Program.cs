@@ -47,6 +47,7 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.TitckIlacGuncelleme>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.SgkIlacListesi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.IlacKartFiyat>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizPaketUretici>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizTetikleyici>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizGonderimi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.ItsServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Uclar.ItsServisiKisayol>();
