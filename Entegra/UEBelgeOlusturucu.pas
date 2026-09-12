@@ -5538,7 +5538,7 @@ begin
         LDespatchRefs.AddElement(KaynakRefJSONOlustur(
           ABaslik.IrsaliyeReferanslari[LRefIndex], ABaslik.Tarih));
       end;
-      LContent.AddPair('despatchDocumentReference', LDespatchRefs);
+      LContent.AddPair('despatchDocumentReferences', LDespatchRefs);
     end;
 
     if SGKFaturasiMi(ABaslik) then begin

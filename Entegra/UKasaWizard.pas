@@ -763,6 +763,7 @@ begin
    FaturaId := -1;
    KullanilanMenu := 1;
    OdemeTalimati := False;
+   TabOdemeTakvimi.CachedUpdates := True;
    SecIslem := 0;
    cxFormatController.UseDelphiDateTimeFormats := True;
    KasaWizardDlg.RehberId := -1;
@@ -2150,10 +2151,18 @@ var     j : SmallInt;
           HesapTuru:string;
         begin
                //11: Giren m??teri faturas? ;;; 101 : Giren sabit gider faturas?
-           if SecIslem in [11,12, 71] then begin //101
-              Tur := 71; BORC :=0; ALACAK:= TUTAR;
+           if SecIslem in [11,12, 71, 72] then begin //101
+              if SecIslem = 72 then
+                 Tur := 72
+              else
+                 Tur := 71;
+              BORC :=0; ALACAK:= TUTAR;
            end else begin
-              Tur := 61; BORC := TUTAR; ALACAK := 0;
+              if SecIslem = 62 then
+                 Tur := 62
+              else
+                 Tur := 61;
+              BORC := TUTAR; ALACAK := 0;
            end;
            if LabelPlanBankaHesapIdGon.Caption='' then
               HId := 0 else HId := StrToInt(LabelPlanBankaHesapIdGon.Caption);
@@ -2166,9 +2175,12 @@ var     j : SmallInt;
            PlanID:=Tablo.PlanKaydet(Tur, KasaTarihi.Date, PTarih, RehberId, ACIKLAMA, HId,MHId, KUR, BORC, ALACAK, 0, FaturaId, MasrafGelir, Uyarigun, Uyar,HesapTuru,0,0);
         end;
   begin
+     if not CheckTaksit.Checked then
+        YenilebtnClick(Self);
+
      //eskiyi silelim
      if ID > 0  then
-        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from KASA where ID=&id and TUR in (61, 71)',['&id'],[ID]);
+        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from KASA where ID=&id and TUR in (61,62,71,72)',['&id'],[ID]);
 
      TabOdemeTakvimi.First;
      while not TabOdemeTakvimi.Eof do begin
@@ -2328,7 +2340,7 @@ var     j : SmallInt;
                         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update SENETLER set DURUM=2 where ID=' +CekSenetKrediQuery.FieldByName('ID').AsString,[],[])
                    end;
                  end;
-         61,71,88,161 : case ComboPlanSecim.ItemIndex of
+         61,62,71,72,88,161 : case ComboPlanSecim.ItemIndex of
                       0 : PlanKaydet; //   E?er ?nce SecIslem := 11 veya 15 ise ve vadeli ?deme oluyor
                       1 : PlanSenetKaydet;
                      end;

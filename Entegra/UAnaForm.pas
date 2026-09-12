@@ -2149,12 +2149,12 @@ begin
     21,22,23,25,26,28,29,31,32,33,35,36,38,39,88,98,91,95,125,130..149,350:Tablo.MakbuzSihirbazBaslat('D', Tur, Cagiran, ID, RehberId, Tarih, BelgeNo,Kilit) ;
     -99:Result:= Tablo.TeklifSihirbazBaslat('D',80,0,ID,RehberId,0);
     101:Result:=Tablo.SatinalmaSihirbazBaslat2('D',Tur,0,ID,RehberId);
-    61,71,72:
+    61,62,71,72:
       begin
         Tablo.Query1.Close;
         Tablo.Query1.SQL.Text := 'Select * from KASA where ID = ' + IntToStr(ID);
         Tablo.Query1.Open;
-        if Tur = 61 then
+        if Tur in [61,62] then
           s := 'BORC'
         else
           s := 'ALACAK';
@@ -2227,7 +2227,6 @@ initialization
   dllYukle;
 
 end.
-
 
 
 
