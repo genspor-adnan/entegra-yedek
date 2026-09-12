@@ -126,7 +126,9 @@ public class EnabizTestleri : IClassFixture<VeritabaniOlgusu>
         //   bildirdi ("Acil" bölümünün kodu 102, KLİNİKLER'de 102 = ADLI
         //   TIP). 619 kodları düzeltti; listede bulunmayan bir kod artık
         //   pakete hiç yazılmaz - yanlış klinik, boş klinikten kötüdür.
-        var kaynak = Kaynak("Gentegre.Api", "Servisler", "EnabizPaketUretici.cs");
+        // Sorgular ayri dosyada (EnabizPaketUretici.Sorgular.cs): uretici
+        //   yalniz secer ve calistirir.
+        var kaynak = Kaynak("Gentegre.Api", "Servisler", "EnabizPaketUretici.Sorgular.cs");
         Assert.Contains("d.kod ~ '^[0-9]+$'", kaynak, StringComparison.Ordinal);
         Assert.Contains("fn_skrs_kod('klinik.kod'", kaynak, StringComparison.Ordinal);
         Assert.DoesNotContain("skrs_klinik_kod", kaynak, StringComparison.Ordinal);

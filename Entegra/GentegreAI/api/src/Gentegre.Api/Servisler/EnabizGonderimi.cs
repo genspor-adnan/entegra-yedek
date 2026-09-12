@@ -118,107 +118,13 @@ public sealed class EnabizGonderimi
             if (basarili)
             {
                 gonderilen++;
-                await _veri.CalistirAsync("""
-                    update public.enabiz_paket
-                       set durum = 3, uss_paket_id = @p1, ham_xml = @p2,
-                           -- SYS TAKIP NUMARASI (605): 101'in yanitinda doner ve
-                           --   basvurunun USS'deki kimligidir. Sonraki paketler
-                           --   (103 muayene, 106 cikis) ve 301 SILME onu tasimak
-                           --   ZORUNDA - yazilmazsa o paketler uretilemez.
-                           --   Bos cevapta eski deger korunur: ikinci bir
-                           --   gonderim takip numarasini silmesin.
-                           sys_takip_no = case when @p1 <> '' then @p1
-                                               else sys_takip_no end,
-                           hata_kodu = '', hata_mesaj = '', hata_sinifi = 0
-                     where id = @p0
-                    """, [p.Id, kod, xml], iptal);
-
-                // TAKIP NUMARASI BASVURUYA DA YAZILIR (608). Kilavuz: "alinan
-                //   SYSTakipNo degeri ilgili BASVURUYLA ILISKILI olarak HBYS
-                //   sisteminde tutulmalidir." Numara paketin degil basvurunun
-                //   ozelligi: basvuru USS'de onunla yasar, sonraki paketler
-                //   (103/106/301) onu tasir. Pakettekini de birakiyoruz - o,
-                //   "bu gonderim hangi numarayi dondurdu" izidir.
-                //
-                //   YALNIZ 101 ve BASVURU KAYNAKLI pakette: muayene kaynakli
-                //   paketin kaynak_id'si basvuru degil MUAYENE kimligidir,
-                //   oraya yazmak baska bir basvurunun numarasini bozardi.
-                if (kod.Length > 0)
-                    await _veri.CalistirAsync("""
-                        update public.belge_basvuru bb
-                           set sys_takip_no = @p1
-                          from public.enabiz_paket p
-                          join public.enabiz_paket_turu t on t.id = p.paket_turu_id
-                         where p.id = @p0 and p.kaynak_tur = 1
-                           and p.kaynak_id = bb.id and t.uss_paket_kodu = '101'
-                        """, [p.Id, kod], iptal);
-
-                // SILME GITTIYSE KAYIT ARTIK USS'DE YOK (620).
-                //
-                // 301 basariyla gonderildiginde iki iz geride kaliyordu:
-                //   basvuru silinmis kaydin takip numarasini tasimayi
-                //   surduruyor, kaynak 101 paketi de "gonderildi" gorunuyordu.
-                //   Ikisi de yanlis: numara USS'de karsiligi olmayan bir
-                //   kimlik, sonraki 103/106 paketleri onunla gitse reddedilir;
-                //   "gonderildi" ise iptal edilmis bir paket icin yanlis durum.
-                //
-                // Kaynak paket 5'e (iptal) cekilir - iptalin USS'ye ULASTIGI
-                //   an burasidir; iptal ucu bilerek beklemisti.
-                await _veri.CalistirAsync("""
-                    update public.belge_basvuru bb
-                       set sys_takip_no = ''
-                      from public.enabiz_paket p
-                      join public.enabiz_paket_turu t on t.id = p.paket_turu_id
-                     where p.id = @p0 and t.uss_paket_kodu = '301'
-                       and p.kaynak_tur = 1 and p.kaynak_id = bb.id
-                    """, [p.Id], iptal);
-
-                await _veri.CalistirAsync("""
-                    update public.enabiz_paket k
-                       set durum = 5, degistirme_tarihi = now()
-                      from public.enabiz_paket s
-                      join public.enabiz_paket_turu st on st.id = s.paket_turu_id
-                      join public.enabiz_paket_turu kt on kt.uss_paket_kodu = '101'
-                     where s.id = @p0 and st.uss_paket_kodu = '301'
-                       and k.paket_turu_id = kt.id
-                       and k.kaynak_tur = s.kaynak_tur and k.kaynak_id = s.kaynak_id
-                       and k.durum = 3
-                    """, [p.Id], iptal);
-
-                // 101 GIDINCE ISLEM PAKETI HEMEN DOGAR (623).
-                //
-                // 102'nin ilk zorunlu alani SYSTakipNo; numara da tam BURADA,
-                //   101'in yanitinda geliyor. Uretim belgenin bir sonraki
-                //   KAYDEDILMESINE birakilmisti ve pratikte hic olmuyordu:
-                //   kullanici kalemi girip kaydediyor (numara henuz yok),
-                //   101'i gonderiyor (numara geliyor) ve bir daha kaydetmek
-                //   icin sebebi kalmiyor - islem bildirimi dogmuyordu.
-                //
-                // SESSIZ: uretim gonderimi DUSURMEZ. 101 USS'ye ulasmistir;
-                //   102 uretilemezse bu, basarili gonderimi basarisiz
-                //   gostermek icin sebep degil.
-                await IslemPaketiUretAsync(p.Id, kullaniciId ?? 0, iptal);
-
+                await BasariIsleAsync(p, kod, xml, kullaniciId, iptal);
                 await GunlugeYazAsync();
             }
             else
             {
                 hatali++;
-                // HATA SINIFI: servis hatasi (5xx / zaman asimi) tekrarlanir,
-                //   veri hatasi tekrarlanmaz - ayni veriyi bes kez gondermek
-                //   ayni cevabi bes kez almaktir.
-                var sinif = (short)(httpKod is 0 or >= 500 ? 2 : httpKod is 401 or 403 ? 3 : 1);
-                var geriDon = sinif == 2 ? Math.Min(60, (int)Math.Pow(3, p.Durum + 1)) : 0;
-                await _veri.CalistirAsync("""
-                    update public.enabiz_paket
-                       set durum = 4, hata_kodu = @p1, hata_mesaj = @p2, hata_sinifi = @p3,
-                           ham_xml = @p4,
-                           planlanan = case when @p3 = 2
-                                            then now() + (@p5 || ' minutes')::interval
-                                            else planlanan end
-                     where id = @p0
-                    """, [p.Id, kod, mesaj, sinif, xml, geriDon], iptal);
-
+                await HataIsleAsync(p, kod, mesaj, xml, httpKod, iptal);
                 await GunlugeYazAsync();
             }
         }
@@ -707,6 +613,125 @@ public sealed class EnabizGonderimi
             return esles.Success ? Kirp(esles.Groups[1].Value, 64) : "";
         }
         catch { return ""; }
+    }
+
+    /// <summary>
+    /// BASARILI gönderimin kayda geçmesi.
+    ///
+    /// Dört iş, hepsi USS "aldım" dedikten sonra: paketi gönderildi işaretle,
+    /// takip numarasını başvuruya yaz, silme paketiyse izleri temizle, 101 ise
+    /// işlem paketini doğur. `CalistirAsync` içinde tek gövdedeydi ve gönderim
+    /// döngüsünü okunmaz yapıyordu.
+    /// </summary>
+    private async Task BasariIsleAsync(PaketOzet p, string kod, string xml,
+                                       int? kullaniciId, CancellationToken iptal)
+    {
+
+            await _veri.CalistirAsync("""
+                update public.enabiz_paket
+                   set durum = 3, uss_paket_id = @p1, ham_xml = @p2,
+                       -- SYS TAKIP NUMARASI (605): 101'in yanitinda doner ve
+                       --   basvurunun USS'deki kimligidir. Sonraki paketler
+                       --   (103 muayene, 106 cikis) ve 301 SILME onu tasimak
+                       --   ZORUNDA - yazilmazsa o paketler uretilemez.
+                       --   Bos cevapta eski deger korunur: ikinci bir
+                       --   gonderim takip numarasini silmesin.
+                       sys_takip_no = case when @p1 <> '' then @p1
+                                           else sys_takip_no end,
+                       hata_kodu = '', hata_mesaj = '', hata_sinifi = 0
+                 where id = @p0
+                """, [p.Id, kod, xml], iptal);
+
+            // TAKIP NUMARASI BASVURUYA DA YAZILIR (608). Kilavuz: "alinan
+            //   SYSTakipNo degeri ilgili BASVURUYLA ILISKILI olarak HBYS
+            //   sisteminde tutulmalidir." Numara paketin degil basvurunun
+            //   ozelligi: basvuru USS'de onunla yasar, sonraki paketler
+            //   (103/106/301) onu tasir. Pakettekini de birakiyoruz - o,
+            //   "bu gonderim hangi numarayi dondurdu" izidir.
+            //
+            //   YALNIZ 101 ve BASVURU KAYNAKLI pakette: muayene kaynakli
+            //   paketin kaynak_id'si basvuru degil MUAYENE kimligidir,
+            //   oraya yazmak baska bir basvurunun numarasini bozardi.
+            if (kod.Length > 0)
+                await _veri.CalistirAsync("""
+                    update public.belge_basvuru bb
+                       set sys_takip_no = @p1
+                      from public.enabiz_paket p
+                      join public.enabiz_paket_turu t on t.id = p.paket_turu_id
+                     where p.id = @p0 and p.kaynak_tur = 1
+                       and p.kaynak_id = bb.id and t.uss_paket_kodu = '101'
+                    """, [p.Id, kod], iptal);
+
+            // SILME GITTIYSE KAYIT ARTIK USS'DE YOK (620).
+            //
+            // 301 basariyla gonderildiginde iki iz geride kaliyordu:
+            //   basvuru silinmis kaydin takip numarasini tasimayi
+            //   surduruyor, kaynak 101 paketi de "gonderildi" gorunuyordu.
+            //   Ikisi de yanlis: numara USS'de karsiligi olmayan bir
+            //   kimlik, sonraki 103/106 paketleri onunla gitse reddedilir;
+            //   "gonderildi" ise iptal edilmis bir paket icin yanlis durum.
+            //
+            // Kaynak paket 5'e (iptal) cekilir - iptalin USS'ye ULASTIGI
+            //   an burasidir; iptal ucu bilerek beklemisti.
+            await _veri.CalistirAsync("""
+                update public.belge_basvuru bb
+                   set sys_takip_no = ''
+                  from public.enabiz_paket p
+                  join public.enabiz_paket_turu t on t.id = p.paket_turu_id
+                 where p.id = @p0 and t.uss_paket_kodu = '301'
+                   and p.kaynak_tur = 1 and p.kaynak_id = bb.id
+                """, [p.Id], iptal);
+
+            await _veri.CalistirAsync("""
+                update public.enabiz_paket k
+                   set durum = 5, degistirme_tarihi = now()
+                  from public.enabiz_paket s
+                  join public.enabiz_paket_turu st on st.id = s.paket_turu_id
+                  join public.enabiz_paket_turu kt on kt.uss_paket_kodu = '101'
+                 where s.id = @p0 and st.uss_paket_kodu = '301'
+                   and k.paket_turu_id = kt.id
+                   and k.kaynak_tur = s.kaynak_tur and k.kaynak_id = s.kaynak_id
+                   and k.durum = 3
+                """, [p.Id], iptal);
+
+            // 101 GIDINCE ISLEM PAKETI HEMEN DOGAR (623).
+            //
+            // 102'nin ilk zorunlu alani SYSTakipNo; numara da tam BURADA,
+            //   101'in yanitinda geliyor. Uretim belgenin bir sonraki
+            //   KAYDEDILMESINE birakilmisti ve pratikte hic olmuyordu:
+            //   kullanici kalemi girip kaydediyor (numara henuz yok),
+            //   101'i gonderiyor (numara geliyor) ve bir daha kaydetmek
+            //   icin sebebi kalmiyor - islem bildirimi dogmuyordu.
+            //
+            // SESSIZ: uretim gonderimi DUSURMEZ. 101 USS'ye ulasmistir;
+            //   102 uretilemezse bu, basarili gonderimi basarisiz
+            //   gostermek icin sebep degil.
+            await IslemPaketiUretAsync(p.Id, kullaniciId ?? 0, iptal);
+
+    }
+
+    /// <summary>
+    /// BAŞARISIZ gönderimin kayda geçmesi: durum, hata sınıfı ve geri çekilme.
+    /// </summary>
+    private async Task HataIsleAsync(PaketOzet p, string kod, string mesaj, string xml,
+                                     int httpKod, CancellationToken iptal)
+    {
+
+            // HATA SINIFI: servis hatasi (5xx / zaman asimi) tekrarlanir,
+            //   veri hatasi tekrarlanmaz - ayni veriyi bes kez gondermek
+            //   ayni cevabi bes kez almaktir.
+            var sinif = (short)(httpKod is 0 or >= 500 ? 2 : httpKod is 401 or 403 ? 3 : 1);
+            var geriDon = sinif == 2 ? Math.Min(60, (int)Math.Pow(3, p.Durum + 1)) : 0;
+            await _veri.CalistirAsync("""
+                update public.enabiz_paket
+                   set durum = 4, hata_kodu = @p1, hata_mesaj = @p2, hata_sinifi = @p3,
+                       ham_xml = @p4,
+                       planlanan = case when @p3 = 2
+                                        then now() + (@p5 || ' minutes')::interval
+                                        else planlanan end
+                 where id = @p0
+                """, [p.Id, kod, mesaj, sinif, xml, geriDon], iptal);
+
     }
 
     /// <summary>
