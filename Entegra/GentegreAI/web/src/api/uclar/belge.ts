@@ -27,6 +27,21 @@ export const belgeUclari = {
     gonder<{ liste: string; guncellenen: number; eslesmeyen: number;
              ambar: number; mesaj: string }>(
       `/api/fiyat-listesi/${id}/sut-guncelle`, {}),
+  /**
+   * TOPLU SATIR DEGERI (kullanici: "modalde seçili / kategoriye / tüm
+   * listeye uygula"). Kapsam sunucuda cozulur - grid 200'erlik sayfalarla
+   * geldigi icin "tüm liste" istemcide yapilamaz.
+   */
+  fiyatTopluDeger: (id: number, govde: {
+    islem: 'carpan' | 'katki' | 'fiyat-yuzde';
+    deger: number;
+    kapsam: 'secili' | 'kategori' | 'tumu';
+    satirIdler?: number[];
+    kategoriId?: number;
+    yon?: 'artir' | 'azalt';
+  }) =>
+    gonder<{ liste: string; etkilenen: number; mesaj: string }>(
+      `/api/fiyat-listesi/${id}/toplu-deger`, govde),
   /** Kategori acik/kapali (527) - hizmet/stok durumunu DB tetigi yayar. */
   kurumKategoriYaz: (id: number, aktif: number) =>
     gonder<{ id: number; aktif: number }>('/api/kurum-profil/kategori',

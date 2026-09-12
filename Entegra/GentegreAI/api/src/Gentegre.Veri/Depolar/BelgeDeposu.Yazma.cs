@@ -83,6 +83,10 @@ public sealed partial class BelgeDeposu
         //   fazlaysa secilmeden kayit kabul edilmez.
         ["sozlesmeId"] = "sozlesme_id", ["altKurum"] = "alt_kurum",
         ["sgkKullan"] = "sgk_kullan",
+        // EMEKLI (590): SGK katilim payi emekliden alinmaz - maasindan
+        //   kesiliyor. Basvurunun kendi bilgisi: ayni hasta bir basvuruda
+        //   emekli, oncekinde calisan olabilir.
+        ["emekli"] = "emekli",
         // Basvuru sekmesi (298): kayit kabulun doldurdugu alanlar.
         ["basvuruTuru"] = "basvuru_turu", ["gelisSekli"] = "gelis_sekli",
         ["gelisNedeni"] = "gelis_nedeni", ["oda"] = "oda", ["siraNo"] = "sira_no",
@@ -474,9 +478,14 @@ public sealed partial class BelgeDeposu
             //   kovalari yine rota kurali boler, istemci hesap yapmaz.
             var sgkListe = Kova("sgkListe");
             var huvListe = Kova("huvListe");
+            // KATKI (KATILIM PAYI) EKRANDAN (586): ucret penceresindeki "Katkı
+            //   Fiyatı" kutusu BIRIM basina tutar gonderir; miktar ve iskonto
+            //   sunucuda islenir. TTB/SUT tarifesinde iskontonun tabani budur -
+            //   kurumun odedigi SUT/tarife bedeli indirimden etkilenmez.
+            var katki = Kova("katkiTutar");
             await using var tazele = Komut(baglanti, islem,
-                "select public.fn_belge_satir_dagilim_tazele(@p0, null, null, @p1, @p2)",
-                [satirId, sgkListe, huvListe]);
+                "select public.fn_belge_satir_dagilim_tazele(@p0, null, null, @p1, @p2, @p3)",
+                [satirId, sgkListe, huvListe, katki]);
             await tazele.ExecuteNonQueryAsync(iptal);
             return;
         }

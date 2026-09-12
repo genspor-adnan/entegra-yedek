@@ -87,12 +87,19 @@ export const dahilTutar = (s: AcikSatir, matrah: number) =>
  * birebir tutar, asla gecmez.
  */
 export function kurusTamamla(
-  secim: { s: AcikSatir; matrah: number }[], hedefDahil: number,
+  secim: { s: AcikSatir; matrah: number; pay?: number }[], hedefDahil: number,
 ): void {
   let toplam = secim.reduce((t, x) => t + dahilTutar(x.s, x.matrah), 0);
   for (const x of secim) {
+    // SATIRIN KOVA KALANI ASILAMAZ (kullanici: "POS girdim ama fiş oluşmadı").
+    //   Kurus tamamlama yalniz TOPLAM hedefe bakiyordu; uc kurusluk eksigi tek
+    //   satira yukleyince o satirin payi 181,82'den 181,83'e cikiyor ve sunucu
+    //   dogru olani yapip belgeyi reddediyordu ("Seçilen tutar payın kalanını
+    //   aşıyor"). Fis hic kesilmiyor, kullanici sebebini goremiyordu.
+    const kovaKalani = x.pay !== undefined ? payKalan(x.s, x.pay) : Infinity;
     while (hedefDahil - toplam >= 0.005) {
       const yeniMatrah = Math.round((x.matrah + 0.01) * 100) / 100;
+      if (yeniMatrah > kovaKalani + 0.0001) break;      // kova kalanini asma
       const artis = dahilTutar(x.s, yeniMatrah) - dahilTutar(x.s, x.matrah);
       if (toplam + artis > hedefDahil + 0.005) break;   // hedefi asma
       x.matrah = yeniMatrah;

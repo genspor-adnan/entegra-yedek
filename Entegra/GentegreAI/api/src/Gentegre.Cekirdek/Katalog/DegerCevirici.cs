@@ -124,11 +124,20 @@ public static class DegerCevirici
             _ => s
         };
 
-    /// <summary>Kart alani uzunluk kontrolu - kart yazimi ve detay yaziminda ortak.</summary>
+    /// <summary>
+    /// Kart alani uzunluk + BICIM kontrolu - kart yazimi ve detay yaziminda ortak.
+    /// Bicim kurali alanin `Dogrulama` bayragindan gelir (bugun: "tckn").
+    /// </summary>
     public static void UzunlukKontrol(KartAlani alan, object? deger, string alanYolu)
     {
         if (alan.EnFazlaUzunluk is { } sinir && deger is string s && s.Length > sinir)
             throw GentegreHatasi.Dogrulama($"{alan.Ad}: en fazla {sinir} karakter.",
                 new AlanHatasi(alanYolu, $"En fazla {sinir} karakter."));
+
+        // BICIM: yanlis TCKN sessizce durur ve aylar sonra "provizyon
+        //   alinamiyor" olarak geri doner - girişte soylemek en ucuzu.
+        if (KimlikDogrulama.Hata(alan.Dogrulama, deger) is { } mesaj)
+            throw GentegreHatasi.Dogrulama($"{alan.Etiket}: {mesaj}",
+                new AlanHatasi(alanYolu, mesaj));
     }
 }

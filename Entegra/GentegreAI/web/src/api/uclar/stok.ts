@@ -57,19 +57,31 @@ export const stokUclari = {
   },
 
   /** Belge acilirken gelecek fiyat listesi (205): turun yonune gore cari listesi > varsayilan. */
-  belgeVarsayilanListe: (tur: number, tarafId: number, kurumId?: number | null) =>
+  belgeVarsayilanListe: (tur: number, tarafId: number, kurumId?: number | null,
+                        sozlesmeId?: number | null) =>
     istek<{ listeId: number | null; ad: string; yon: number; kdvDahil: number }>(
       `/api/belge/varsayilan-liste?tur=${tur}&tarafId=${tarafId}`
-      + (kurumId ? `&kurumId=${kurumId}` : '')),
+      + (kurumId ? `&kurumId=${kurumId}` : '')
+      // SECILI POLICE (588): kurumun birden fazla sozlesmesi varsa tarife
+      //   ancak policeden cikar - gecirilmezse liste carinin listesine duser
+      //   ve ÖSS hastasi hastanenin ÖZEL fiyatiyla ucretlendirilir.
+      + (sozlesmeId ? `&sozlesmeId=${sozlesmeId}` : '')),
 
   /** Arama ekraninin fiyat sutunu (495): coklu kalemin liste fiyati tek istekte. */
   fiyatListesiFiyatlar: (listeId: number,
-                         kalemler: { stokId?: number; hizmetId?: number }[]) =>
+                         kalemler: { stokId?: number; hizmetId?: number }[],
+                         /** SUT bedeli icin sozlesme (602) - verilmezse sgkFiyat null. */
+                         sgk?: { sozlesmeId?: number | null; kurumId?: number | null;
+                                 sgkKullan?: number | null }) =>
     gonder<{ listeId: number;
              satirlar: { stokId?: number | null; hizmetId?: number | null;
                          fiyat: number | null; dovizCinsi: string;
-                         kdvDahil: number }[] }>(
-      `/api/fiyat-listesi/${listeId}/fiyatlar`, { kalemler }),
+                         kdvDahil: number;
+                         /** Hastanin odeyecegi katki (602) - TTB/SUT tarifesinde. */
+                         katki?: number | null;
+                         /** SGK'nin odedigi SUT bedeli (602) - rota SGK payi tasimiyorsa null. */
+                         sgkFiyat?: number | null }[] }>(
+      `/api/fiyat-listesi/${listeId}/fiyatlar`, { kalemler, ...(sgk ?? {}) }),
 
   /** Tek kalemin liste fiyati - liste henuz uretilmemis olsa da kural isletilir. */
   fiyatListesiFiyat: (listeId: number, kalem: { stokId?: number; hizmetId?: number }) =>

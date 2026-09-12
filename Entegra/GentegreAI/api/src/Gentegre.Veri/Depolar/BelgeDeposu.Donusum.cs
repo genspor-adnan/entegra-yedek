@@ -82,6 +82,12 @@ public sealed partial class BelgeDeposu
                    ok.vd as odeyen_vd,
                    b.proje_id, b.sube_id, b.vade_gun, b.giris_depo_id, b.cikis_depo_id,
                    b.satici_id, bb.bolum_id, bb.personel_id,
+                   -- SOZLESME / ALT KURUM / SGK KATKISI da tasinir: odeyen
+                   --   kurum kopyalanip POLICE kopyalanmayinca hedef belgenin
+                   --   basvuru satiri "hangi sozlesme" sorusuna cevapsiz
+                   --   kaliyor ve tetik donusumu reddediyordu ("Kurumun 3
+                   --   sözleşmesi var - hangisinin geçerli olduğunu seçin").
+                   bb.sozlesme_id, bb.alt_kurum, bb.sgk_kullan,
                    b.ozel_kod, b.aciklama, b.belge_no, kt.ad as tur_adi
               from public.belge b
               left join public.belge_basvuru bb on bb.id = b.id
@@ -223,7 +229,7 @@ public sealed partial class BelgeDeposu
                     {
                         2 => "Bu satırın SGK payı zaten kapatılmış.",
                         3 => "Bu satırın sigorta payı zaten kapatılmış.",
-                        4 => "Bu satırın hasta ek katkısı zaten kapatılmış.",
+                        4 => "Bu satırın hasta katkısı zaten kapatılmış.",
                         _ => "Bu satırın hasta payı zaten kapatılmış.",
                     });
 
@@ -327,6 +333,12 @@ public sealed partial class BelgeDeposu
             ["fiyatListesiId"] = kaynak["fiyat_listesi_id"],
             ["kampanyaId"] = kaynak["kampanya_id"],
             ["odeyenKurumId"] = kaynak["odeyen_kurum_id"],
+            // Odeme rotasini belirleyen ucluyu de tasi (469): police, devredilen
+            //   kurum ve SGK katkisi. Kurumu tasiyip policeyi birakmak, hedefte
+            //   rota kurulamamasi demek.
+            ["sozlesmeId"] = kaynak["sozlesme_id"],
+            ["altKurum"] = kaynak["alt_kurum"],
+            ["sgkKullan"] = kaynak["sgk_kullan"],
             ["projeId"] = kaynak["proje_id"],
             ["vadeGun"] = kaynak["vade_gun"],
             ["girisDepoId"] = kaynak["giris_depo_id"],

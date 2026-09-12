@@ -5,6 +5,7 @@ import { TarafArama } from './TarafArama';
 import { tarafSecimEngeli } from './tarafSecimEngeli';
 import { detayHucreMetni } from './detayGorunum';
 import { useUrunAdlari, useKategoriSecenekleri } from './grid/useUrunAdlari';
+import { KategoriSuzgeci } from './KategoriSuzgeci';
 import { GridMenu, type MenuOgesi } from './grid/GridMenu';
 import { dosyaIndirUrl } from './indir';
 import type { DetayFarki, KartAlanMeta, KartDetayMeta } from '../api/sozlesme';
@@ -126,6 +127,16 @@ interface Props {
    * durumda kullaniciya sorulmasi, uygulanmayan bir ayar uretir.
    */
   gizliAlanlar?: ReadonlySet<string>;
+  /**
+   * DIS SUZGEC (587): alan adi -> `kodUst` degeri. Bagli combo normalde AYNI
+   * SATIRDAKI bir alandan suzuluyor (`bagliAlan`); burada suzen deger satirda
+   * DEGIL kartin baska bir yerinde durur - anlasmali kurum kartinda sozlesme
+   * satirinin fiyat listesi, kartin KURUM TURUNE gore daralir.
+   *
+   * Ust haritasinda YER ALMAYAN secenek her zaman gorunur (bagimsiz kayit) -
+   * bagli combolardaki kuralin aynisi.
+   */
+  ustSuzgec?: Record<string, string>;
   /**
    * YALNIZ GRIDDE gizlenen alanlar - modalde DURUR (kullanici: "sutunlari
    * kaldir ama edite izin ver"). `gizliAlanlar` alani her yerden siler; bu ise
@@ -313,11 +324,24 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                                silGizli,
                                aramaKaynaklari, aramaEkFiltre, ekSuzgec,
                                modalAltBilesen,
-  sayfa, toplam, onSayfa, sayfaYukleniyor, onSuzgec, hizliAlanlar, onSecim,
+  sayfa, toplam, onSayfa, sayfaYukleniyor, onSuzgec, hizliAlanlar, onSecim, ustSuzgec,
 }: Props) {
   // SAYFALI DETAY (525): serit yalniz katalog sayfa boyu verdiyse VE toplam
   //   bir sayfaya sigmiyorsa cizilir - iki satirlik adres detayinda "1 / 1"
   //   gostermek gurultu olurdu.
+  /**
+   * Alanin secenekleri - dis suzgec (587) uygulanmis. Suzgec yoksa ya da alanin
+   * ust haritasi yoksa kodlar oldugu gibi doner.
+   */
+  const alanKodlari = (a: { ad: string; kodlar?: Record<string, string> | null;
+                            kodUst?: Record<string, string> | null }) => {
+    const ust = ustSuzgec?.[a.ad];
+    const kodlar = a.kodlar ?? {};
+    if (!ust || !a.kodUst) return Object.entries(kodlar);
+    return Object.entries(kodlar)
+      .filter(([k]) => a.kodUst?.[k] === undefined || a.kodUst[k] === ust);
+  };
+
   const sayfaBoyu = meta.sayfaBoyu ?? 0;
   const sayfaNo = sayfa ?? 1;
   const sonSayfa = sayfaBoyu > 0
@@ -393,6 +417,13 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const adresGrid = meta.ad === 'adresler';
   const acilKisiGrid = meta.ad === 'acilKisiler';
   const ilAdIdHarita = new Map((yerler?.iller ?? []).map(i => [i.ad, i.id]));
+
+  /**
+   * SATIR MODALINDAN acilan urun arama penceresi (prim kapsami).
+   * Grid kipindeki `urunAramaSatiri` SATIR INDEKSI tasiyor; modalda henuz
+   * tabloda olmayan bir taslak duzenleniyor - ayri bayrak gerekiyor.
+   */
+  const [modalUrunArama, setModalUrunArama] = useState(false);
 
   /** Secili satir (modalDuzenle kipinde): ustteki ✎ / 🗑 buna uygulanir. */
   /**
@@ -611,13 +642,22 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
    */
   const satirlarGrid = !!modalDuzenle && meta.ad === 'satirlar'
                        && !primSatiri && !kampanyaSatiri;
+  /**
+   * HUV KODU KOLONU (kullanici: "ttb/huv tarife ise kodun sağında HUV Kodu").
+   * Ayri bir bayrak GEREKMEZ: alan oteki tarifelerde zaten gizleniyor
+   * (tarifeKurallari.tarifeGizli), yani gorunur alanlar arasinda olmasi
+   * "bu liste TTB/HUV" demektir.
+   */
+  const huvKolonu = satirlarGrid && alanlar.some(a => a.ad === 'huvKodu');
   const stokAlani   = alanlar.find(a => a.ad === 'stokId');
   const hizmetAlani = alanlar.find(a => a.ad === 'hizmetId');
   const tumGridAlanlari = satirlarGrid
     ? alanlar.filter(a => a.ad !== 'stokId' && a.ad !== 'hizmetId'
-                          // Kategori ve Kod, Tip'in hemen saginda ELLE cizilir
-                          //   (kullanici) - listenin sonunda tekrar cikmasin.
-                          && a.ad !== 'kategoriYolu' && a.ad !== 'kalemKodu')
+                          // Kategori, Kod ve HUV Kodu, Tip'in hemen saginda
+                          //   ELLE cizilir (kullanici) - listenin sonunda
+                          //   tekrar cikmasin.
+                          && a.ad !== 'kategoriYolu' && a.ad !== 'kalemKodu'
+                          && a.ad !== 'huvKodu')
     : alanlar;
   const gridAlanlari = tumGridAlanlari.filter(a => !gizliKolonlar.has(a.ad));
   /** Rozet cizilecek kolonlar (satirlar gridi): KDV ve Durum. */
@@ -665,7 +705,8 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
     const govde = gorunurler.map(({ satir }) => [
       ...(satirlarGrid
         ? [satir.stokId != null && satir.stokId !== '' ? 'Stok' : 'Hizmet',
-           String(satir.kategoriYolu ?? ''), String(satir.kalemKodu ?? ''), kalemAdi(satir)]
+           String(satir.kategoriYolu ?? ''), String(satir.kalemKodu ?? ''),
+           ...(huvKolonu ? [String(satir.huvKodu ?? '')] : []), kalemAdi(satir)]
         : []),
       ...gridAlanlari.map(a => gorunum(satir, a).replace(/;/g, ',')),
     ].join(';')).join('\n');
@@ -872,7 +913,14 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                     asil okunan "Adı" ve fiyat, bunlar destek bilgisi. */}
                 <th style={{ width: '9%' }}>Kategori</th>
                 <th style={{ width: '6%' }}>Kod</th>
-                <th>Adı</th>
+                {/* HUV KODU yalniz TTB/HUV tarifesinde gelir: oteki tarifelerde
+                    alan gizli oldugu icin `huvKolonu` false olur. */}
+                {huvKolonu && <th style={{ width: '7%' }}>HUV Kodu</th>}
+                {/* ADI: eskiden genisligi YOKTU - otomatik yerlesimde artan
+                    alanin tamamini o yutuyordu (~%28) ve fiyat/katki kolonlari
+                    sikisiyordu. Kullanici: "adı kısmı genişliği %40 azalt".
+                    Tasan ad uc noktayla kisalir, tamami title'da durur. */}
+                <th style={{ width: '17%' }}>Adı</th>
               </>
             )}
             {gridAlanlari.map(a => (
@@ -929,7 +977,18 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                                whiteSpace: 'nowrap' }}>
                     {String(satir.kalemKodu ?? '')}
                   </td>
-                  <td>{kalemAdi(satir)}</td>
+                  {huvKolonu && (
+                    <td className="sonuk" title={String(satir.huvKodu ?? '')}
+                        style={{ maxWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis',
+                                 whiteSpace: 'nowrap' }}>
+                      {String(satir.huvKodu ?? '')}
+                    </td>
+                  )}
+                  <td title={kalemAdi(satir)}
+                      style={{ maxWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis',
+                               whiteSpace: 'nowrap' }}>
+                    {kalemAdi(satir)}
+                  </td>
                 </>
               )}
               {modalDuzenle && gridAlanlari.map(a => (
@@ -1142,23 +1201,31 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                     </select>
                   ) : primSatiri && a.ad === 'hedefId' ? (
                     Number(satir.tip) === 2 ? (
-                      // KATEGORI: kalem turune gore suzulur - stok secilmisse
-                      //   stokta, hizmet secilmisse hizmette kullanilan
-                      //   kategoriler ("Farketmez"te hepsi).
-                      <select
-                        value={String(satir.hedefId ?? '')}
-                        disabled={saltOkunur || !a.yazilabilir}
-                        onChange={e => hucreDegis(i, 'hedefId', e.target.value)}
-                      >
-                        <option value="">— kategori —</option>
-                        {kategoriler
+                      // KATEGORI = AGAC COMBO (kullanici: "kategori secildiginde
+                      //   kapsam combo agac"). Kategoriler artik iki seviyeli
+                      //   (553-556: "Radyoloji > BT", "Tıbbi Malzeme > Ortez");
+                      //   duz listede yalniz yaprak adi gorunuyor ve ayni adi
+                      //   tasiyan iki dal ayirt edilemiyordu.
+                      //   Agac KALEM TURUNE gore: Stok -> stok agaci (tur 1),
+                      //   Hizmet -> hizmet agaci (tur 2), Farketmez -> ikisi.
+                      //   `sinirla`: o tarafta GERCEKTEN kullanilan dallar -
+                      //   secilince bos kapsam ureten secenek sunulmasin.
+                      <KategoriSuzgeci
+                        tur={Number(satir.kalemTuru) === 1 ? [1]
+                             : Number(satir.kalemTuru) === 2 ? [2] : [1, 2]}
+                        baslik="— kategori —"
+                        sinirla={new Set(kategoriler
                           .filter(k => (Number(satir.kalemTuru) === 1 ? k.stok > 0
                                         : Number(satir.kalemTuru) === 2 ? k.hizmet > 0
-                                        : true))
-                          .map(k => <option key={k.id} value={k.id}>{k.ad}</option>)}
-                      </select>
+                                        : k.stok > 0 || k.hizmet > 0))
+                          .map(k => k.id))}
+                        deger={Number(satir.hedefId) || null}
+                        onDegis={id => hucreDegis(i, 'hedefId', id === null ? '' : String(id))}
+                      />
                     ) : Number(satir.tip) === 3 ? (
                       // URUN: stok/hizmet binlerce - jenerik arama penceresi.
+                      //   TEK urun secilir: secim yapilinca pencere kapanir ve
+                      //   satirin kapsami o kalemdir (kullanici).
                       <UrunAramaKutusu
                         deger={urunAdlari[String(satir.hedefId ?? '')]
                                ?? String(satir.hedefId ?? '')}
@@ -1178,7 +1245,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                       onChange={e => hucreDegis(i, a.ad, e.target.value)}
                     >
                       <option value="">—</option>
-                      {Object.entries(a.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                      {alanKodlari(a).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                     </select>
                   ) : a.tip === 'zaman' ? (
                     // Zaman alani (randevu baslangici) ham "2026-09-01T10:00:00"
@@ -1222,7 +1289,8 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
             </tr>
           ))}
           {gorunurler.length === 0 && (
-            <tr><td colSpan={gridAlanlari.length + (satirlarGrid ? 2 : 0) + 1} className="bos">
+            <tr><td colSpan={gridAlanlari.length + (satirlarGrid ? 2 : 0)
+                             + (huvKolonu ? 1 : 0) + 1} className="bos">
               {durum.guncel.length === 0 ? 'Satır yok' : 'Eşleşen satır yok'}
             </td></tr>
           )}
@@ -1331,6 +1399,61 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                                         yazilabilir={a.yazilabilir}
                                         onDegis={g => taslakYaz('yasUstGun', g)} />
                           </>
+                        ) : primSatiri && a.ad === 'hedefId' ? (
+                          // KAPSAM (kullanici: "kategori secilince agac combo,
+                          //   urun secilince jenerik urun ekrani"). Grid kipinde
+                          //   bu kural zaten vardi; prim satirlari MODALDAN
+                          //   duzenlendigi icin (KartDetaySekmesi.gridKipi)
+                          //   kullanici onu hic gormuyordu - modalda `hedefId`
+                          //   duz kategori combosu olarak ciziliyor, "Ürün"
+                          //   secilse bile kategori listesi geliyordu.
+                          Number(taslak.tip) === 2 ? (
+                            <KategoriSuzgeci
+                              tur={Number(taslak.kalemTuru) === 1 ? [1]
+                                   : Number(taslak.kalemTuru) === 2 ? [2] : [1, 2]}
+                              baslik="— kategori —"
+                              sinirla={new Set(kategoriler
+                                .filter(k => (Number(taslak.kalemTuru) === 1 ? k.stok > 0
+                                              : Number(taslak.kalemTuru) === 2 ? k.hizmet > 0
+                                              : k.stok > 0 || k.hizmet > 0))
+                                .map(k => k.id))}
+                              deger={Number(taslak.hedefId) || null}
+                              onDegis={id => taslakYaz('hedefId', id === null ? '' : String(id))}
+                            />
+                          ) : Number(taslak.tip) === 3 ? (
+                            <UrunAramaKutusu
+                              deger={urunAdlari[String(taslak.hedefId ?? '')]
+                                     ?? String(taslak.hedefId ?? '')}
+                              yerTutucu="— ürün seç —"
+                              kilitli={!a.yazilabilir}
+                              saltOkunur={false}
+                              onAc={() => setModalUrunArama(true)}
+                            />
+                          ) : (
+                            <input readOnly disabled value="tüm liste" />
+                          )
+                        ) : primSatiri && (a.ad === 'tip' || a.ad === 'kalemTuru') && a.kodlar ? (
+                          // TIP ya da KALEM TURU degisince KAPSAM temizlenir:
+                          //   "Kategori"den "Ürün"e gecerken eski kategori id'si
+                          //   kalirsa satir yanlis kalemlere prim yazar.
+                          //   Kapsamli tipe gecerken kalem turu de belirlenir -
+                          //   "Farketmez" kalirsa ne kategori agaci ne urun
+                          //   aramasi suzulebilir.
+                          <select value={String(taslak[a.ad] ?? '')} disabled={!a.yazilabilir}
+                                  onChange={e => {
+                                    const v = e.target.value;
+                                    taslakYaz(a.ad, v);
+                                    taslakYaz('hedefId', '');
+                                    if (a.ad === 'tip' && Number(v) !== 1
+                                        && !Number(taslak.kalemTuru)) taslakYaz('kalemTuru', '2');
+                                  }}>
+                            <option value="">—</option>
+                            {Object.entries(a.kodlar)
+                              .filter(([k]) => a.ad !== 'kalemTuru'
+                                               || (Number(taslak.tip) || 1) === 1
+                                               || Number(k) !== 0)
+                              .map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                          </select>
                         ) : a.tip === 'metin' && a.kodlar ? (
                           <select value={String(taslak[a.ad] ?? '')} disabled={!a.yazilabilir}
                                   onChange={e => taslakYaz(a.ad, e.target.value)}>
@@ -1347,7 +1470,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                           <select value={String(taslak[a.ad] ?? '')} disabled={!a.yazilabilir}
                                   onChange={e => taslakYaz(a.ad, e.target.value)}>
                             <option value="">—</option>
-                            {Object.entries(a.kodlar).map(([k, v]) => (
+                            {alanKodlari(a).map(([k, v]) => (
                               <option key={k} value={k}>{v}</option>
                             ))}
                           </select>
@@ -1373,6 +1496,24 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
               : null)}
           </>
         </Modal>
+      )}
+
+      {/* PRIM KAPSAMI - MODALDAN URUN SECIMI. Tek urun secilir, secimde
+          pencere kapanir ve satirin kapsami o kalem olur. */}
+      {modalUrunArama && primSatiri && (
+        <StokAramaPenceresi
+          etkin
+          yalnizStok={Number(taslak.kalemTuru) === 1}
+          yalnizHizmet={Number(taslak.kalemTuru) === 2}
+          onKapat={() => setModalUrunArama(false)}
+          onSec={secilen => {
+            taslakYaz('hedefId', String(secilen.id));
+            taslakYaz('kalemTuru', String(secilen.tip) === 'hizmet' ? '2' : '1');
+            primAdiEkle(Number(secilen.id),
+              `${String(secilen.kod ?? '')} ${String(secilen.ad ?? '')}`.trim());
+            setModalUrunArama(false);
+          }}
+        />
       )}
 
       {/* TARAF ARAMASIYLA EKLEME (375, kullanici alternatif 2): pencere secimde

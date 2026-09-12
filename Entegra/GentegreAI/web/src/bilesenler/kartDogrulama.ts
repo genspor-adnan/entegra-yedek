@@ -1,4 +1,5 @@
-import { epostaGecerliMi, telefonAlaniMi, telefonGecerliMi } from './alanBicim';
+import { epostaGecerliMi, telefonAlaniMi, telefonGecerliMi, bicimHatasi }
+  from './alanBicim';
 import { EPOSTA_ALANLARI, type Deger } from './kartAlanCizim';
 import type { KartMetaYaniti } from '../api/sozlesme';
 
@@ -28,6 +29,16 @@ export function kartDogrula(
   /** 1:1 detaylarin guncel satirlari: detay adi -> satirlar (484). */
   detaySatirlari?: Record<string, Record<string, unknown>[]>): AlanDogrulamaHatasi | null
 {
+  // BICIM KURALI OLAN ALANLAR (TCKN): kural alanin METASINDAN gelir, ekran
+  //   alan adi bilmez. Hasta kartinda TC No ile anne/baba TC numaralari bu
+  //   kurala bagli (KartKatalogu). Bos deger gecerli - zorunluluk ayri karar.
+  const gecersizBicim = meta?.alanlar.find(a =>
+    a.dogrulama ? bicimHatasi(a.dogrulama, String(deger[a.ad] ?? '')) !== null : false);
+  if (gecersizBicim)
+    return { alan: gecersizBicim.ad,
+             mesaj: bicimHatasi(gecersizBicim.dogrulama, String(deger[gecersizBicim.ad] ?? ''))
+                    ?? 'Geçersiz değer.' };
+
   const gecersizEposta = meta?.alanlar.find(a => {
     const v = deger[a.ad];
     return EPOSTA_ALANLARI.has(a.ad) && typeof v === 'string' && v !== '' && !epostaGecerliMi(v);

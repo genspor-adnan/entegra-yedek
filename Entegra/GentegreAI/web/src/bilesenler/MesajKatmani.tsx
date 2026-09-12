@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Modal } from './Modal';
 import { mesajDinleyiciAta, type MesajIstegi } from './mesaj';
 import { urunAdi } from '../api/sozlesme';
@@ -15,6 +15,8 @@ import { useOturum } from '../kimlik/OturumBaglami';
  * arkaya diyalog kapatmak zorunda kalmasin.
  */
 export function MesajKatmani() {
+  /** Girdi kutusu - "×" temizledikten sonra imlec icinde kalsin. */
+  const girdiKutusu = useRef<HTMLInputElement | null>(null);
   const { kullanici } = useOturum();
   const [istek, setIstek] = useState<MesajIstegi | null>(null);
   const [girdi, setGirdi] = useState('');
@@ -113,9 +115,20 @@ export function MesajKatmani() {
               {istek.girdiEtiket && <span className="etiket">{istek.girdiEtiket}</span>}
               <span className="ikili">
                 <input className="genis-deger" autoFocus
+                       ref={girdiKutusu}
                        value={girdi}
                        onChange={e => setGirdi(e.target.value)}
                        onKeyDown={e => { if (e.key === 'Enter') kapat(true) }} />
+                {/* TEMIZLE (kullanici: "tutar sorma modalinde edite clear ×
+                    ekle"): kutu onerilen tutarla DOLU acilir; baska bir rakam
+                    yazmak icin once elle silmek gerekiyordu. × kutuyu bosaltir
+                    ve imleci icine birakir - kullanici dogrudan yazar. */}
+                {girdi !== '' && (
+                  <button type="button" className="d mini" title="Temizle"
+                          onClick={() => { setGirdi(''); girdiKutusu.current?.focus() }}>
+                    ×
+                  </button>
+                )}
               </span>
             </label>
           </div>

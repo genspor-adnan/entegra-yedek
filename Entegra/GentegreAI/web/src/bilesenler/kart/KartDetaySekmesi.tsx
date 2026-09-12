@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { GenDetayTablo, type DetayDurumu, bosDetay } from '../GenDetayTablo';
 import { KademeGridi } from '../prim/KademeGridi';
 import { KategoriSuzgeci } from '../KategoriSuzgeci';
-import { tarifeHizli, ttbFiyatTuret, tarifeGizli, fiyatSatirKurali }
+import { tarifeHizli, ttbFiyatTuret, tarifeGizli, fiyatSatirKurali, kurumTarifeTipi }
   from './tarifeKurallari';
 import type { Deger } from '../kartAlanCizim';
 import type { SekmeTanimi } from '../kartSekmeleri';
@@ -28,8 +28,8 @@ export interface KartDetaySekmesiOzellikleri {
                                       salt?: boolean; ekleGizli?: boolean;
                                       /** YALNIZ gridde gizli - modalde durur. */
                                       gridGizli?: string[] }>;
-  satirKategori: { id: number; agac: number[] } | null;
-  setSatirKategori(v: { id: number; agac: number[] } | null): void;
+  satirKategori: { id: number; agac: number[]; ad: string } | null;
+  setSatirKategori(v: { id: number; agac: number[]; ad: string } | null): void;
   satirKategorileri?: Set<number>;
   setSeciliSatirlar(v: ReadonlySet<number>): void;
   /** Ekran sekmenin altina kendi panelini ekleyebilir (muayene sonuclari). */
@@ -126,6 +126,22 @@ export function KartDetaySekmesi({
           //   SUT'ta yalniz katki - fiyat ikisinde de turetilmis degerdir.
           hizliAlanlar={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
             ? tarifeHizli(Number(deger.tarifeTipi) || 1) : undefined}
+          // FIYAT LISTESI KURUM TURUNE GORE (587, kullanici): sozlesme
+          //   satirinin listesi, kartin basligindaki KURUM TURUNE uyan
+          //   tarifeyle sinirlanir - SGK sozlesmesine Özel tarifesi secmek
+          //   sessiz yanlis fiyatlandirmadir. Kurum turu ayri bir 1:1 detayda
+          //   (`kurumRolu`) durdugu icin satirdan degil BURADAN gecer.
+          ustSuzgec={kaynak === 'kurum' && aktif.detay.ad === 'sozlesmeler'
+            ? (() => {
+                const tur = Number(detaylar.kurumRolu?.guncel[0]?.tur ?? 0);
+                const tarife = kurumTarifeTipi(tur);
+                // SUT LISTESI HER ZAMAN SUT TARIFESI (3, kullanici): kurum
+                //   turunden bagimsiz - alanin tanimi zaten "SGK'nin odedigi
+                //   bedel". Fiyat listesi ise kurum turune gore daralir.
+                return { ...(tarife ? { fiyatListesiId: String(tarife) } : {}),
+                         sgkFiyatListesiId: '3' };
+              })()
+            : undefined}
           // SUZGEC SUNUCUDA yalniz SAYFALI detayda (526); sayfasiz detaylar
           //   bugunku istemci suzmesini surdurur.
           onSuzgec={aktif.detay.sayfaBoyu
@@ -193,8 +209,8 @@ export function KartDetaySekmesi({
                     baslik="🌳 Tüm Kategoriler"
                     sinirla={satirKategorileri}
                     deger={satirKategori?.id ?? null}
-                    onDegis={(id, agac) => {
-                      setSatirKategori(id === null ? null : { id, agac });
+                    onDegis={(id, agac, ad) => {
+                      setSatirKategori(id === null ? null : { id, agac, ad });
                       // SAYFALI DETAYDA SUZGEC SUNUCUDA (526): dal secimi
                       //   ekrandaki 200 satiri degil listenin TAMAMINI suzer.
                       if (aktif.detay.sayfaBoyu)

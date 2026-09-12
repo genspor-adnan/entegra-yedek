@@ -188,10 +188,27 @@ public static partial class KaynakKatalogu
         YetkiKodu: "katalog",
         Kaynak: "public.ilac i left join public.stok s on s.id = i.stok_id",
         VarsayilanSirala: "i.ad asc",
+        // KULLANIM PUANI (552): ilacin kullanimi STOK KARTI uzerinden sayilir -
+        //   belge satiri ilaca degil, onun stok kartina baglanir. Stok karti
+        //   henuz uretilmemis ilacin puani yoktur, listenin sonunda kalir.
+        KullanimJoin:
+            " left join public.kalem_kullanim ik"
+            + "   on ik.tur = 1 and ik.kayit_id = i.stok_id and ik.bolum_id = {bolum}"
+            + " left join public.kalem_kullanim ig"
+            + "   on ig.tur = 1 and ig.kayit_id = i.stok_id and ig.bolum_id = 0",
+        KullanimSirala:
+            "(coalesce(public.fn_hizmet_puan(ik.puan, ik.son_tarih), 0)"
+            + " + 0.25 * coalesce(public.fn_hizmet_puan(ig.puan, ig.son_tarih), 0)) desc,"
+            + " i.ad asc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",          "i.id",          "sayi",  "Id", Varsayilan: false),
             new("barkod",      "i.barkod",      "metin", "Barkod", Genislik: 140),
+            // KISA AD STOK KARTINDAN (552): ilac TITCK katalogu, karti yok -
+            //   kisa ad o ilac icin uretilen stok kartinda yazilir. Ayni urunun
+            //   iki kisa adi olmasin diye ayri kolon ACILMADI.
+            new("kisaAd",      "coalesce(s.kisa_ad, '')", "metin", "Kısa Ad",
+                                                Genislik: 150),
             new("ad",          "i.ad",          "metin", "İlaç", Genislik: 340),
             new("etkenMadde",  "i.etken_madde", "metin", "Etken Madde", Genislik: 240),
             new("atcKod",      "i.atc_kod",     "metin", "ATC", Hizalama: "orta", Genislik: 100),
@@ -210,6 +227,23 @@ public static partial class KaynakKatalogu
             new("stokAdi",     "coalesce(s.kod || ' · ' || s.ad, '')", "metin",
                                                 "Stok Kartı", Genislik: 220),
             new("stokId",      "coalesce(i.stok_id, 0)", "sayi", "Stok Id", Varsayilan: false),
+            // KATEGORI (kullanici: stok/hizmet arama ekraninda Kod'un solunda
+            //   Kategori): ilacin kendi kategorisi yok - BAGLI STOK KARTININ
+            //   kategorisi gosterilir, arama penceresinde uc kaynak ayni
+            //   kolonu doldursun. Yol biciminde ("Üst > Alt"), stok/hizmetle
+            //   ayni ifade.
+            new("kategoriAdi",
+                "coalesce((select case when u.id is null then k.ad " +
+                "                      else u.ad || ' > ' || k.ad end " +
+                "            from public.kategori k " +
+                "            left join public.kategori u on u.id = k.ust_id " +
+                "           where k.id = s.kategori), '')",
+                               "metin", "Kategori", Genislik: 180,
+                               Filtrelenebilir: false),
+            // Kategori SUZGECI id uzerinden calisir (arama penceresindeki agac
+            //   combo, dal + alt dallari "icinde" kosuluyla gonderir).
+            new("kategoriId",  "coalesce(s.kategori, 0)", "sayi", "Kategori Id",
+                               Varsayilan: false),
             // Fiyat golge kolondan okunur (406): arama penceresi ilaci
             //   fiyatiyla gostersin diye - dogruluk kaynagi ilac_fiyat.
             new("fiyat",       "coalesce(i.guncel_perakende, 0)", "para", "Fiyat",

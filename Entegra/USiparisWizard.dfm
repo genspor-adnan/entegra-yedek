@@ -3547,8 +3547,8 @@ object SiparisWizardDlg: TSiparisWizardDlg
   object JvDragDrop1: TJvDragDrop
     DropTarget = Owner
     OnDrop = JvDragDrop1Drop
-    Left = 67
-    Top = 145
+    Left = 35
+    Top = 33
   end
   object dtsTOPLAMLAR: TDataSource
     DataSet = TOPLAMLAR
@@ -3809,7 +3809,8 @@ object SiparisWizardDlg: TSiparisWizardDlg
   object PopupYorumlar: TPopupMenu
     Images = Tablo.PNGImageList2
     OnPopup = PopupYorumlarPopup
-    Left = 128
+    Left = 184
+    Top = 32
     object YorumDzenle1: TMenuItem
       Caption = 'Yorum D'#252'zenle'
       ImageIndex = 7

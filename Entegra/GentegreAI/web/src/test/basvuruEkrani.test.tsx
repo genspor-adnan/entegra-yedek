@@ -166,12 +166,19 @@ describe('yeni basvuru karti', () => {
     expect(liste).toHaveBeenCalledWith('departman', expect.anything());
   });
 
-  it('gonderen adaylari GONDEREN rolu (1) ile sorulur - kurum tipi kurali', async () => {
+  /**
+   * 578: hekim listesi artik PRIM ROLUNDEN bagimsiz. Kaynak `basvuru-hekim`
+   * gorunumudur ve kurum profiline gore DIS hekimleri ya da randevu
+   * verilebilir personeli dondurur - karar SUNUCUDA. Ekranin sordugu tek
+   * kosul "aktif" (ve bolum secilmisse bolum).
+   */
+  it('hekim adaylari basvuru-hekim kaynagindan, prim rolu sorulmadan gelir', async () => {
     ciz();
-    await waitFor(() => expect(liste).toHaveBeenCalledWith('prim-rol-aday', expect.anything()));
-    const istek = liste.mock.calls.find(c => c[0] === 'prim-rol-aday')![1] as
-      { filtre: { kosullar: unknown[] } };
-    expect(istek.filtre.kosullar).toContainEqual({ alan: 'rol', op: 'esit', deger: 1 });
+    await waitFor(() => expect(liste).toHaveBeenCalledWith('basvuru-hekim', expect.anything()));
+    const istek = liste.mock.calls.find(c => c[0] === 'basvuru-hekim')![1] as
+      { filtre: { kosullar: { alan: string }[] } };
+    expect(istek.filtre.kosullar).toContainEqual({ alan: 'durum', op: 'esit', deger: 1 });
+    expect(istek.filtre.kosullar.some(k => k.alan === 'rol')).toBe(false);
   });
 
   it('protokol numara sablonu sorulur (358) - numarayi kim verir', async () => {
@@ -429,12 +436,12 @@ describe('tahsilat arac cubugu duzeni', () => {
       .toEqual(['🏦 Banka', '🧾 Çek', '📜 Senet']);
   });
 
-  it('KENDI ODEYENDE (Özel) Kurum Tahakkuku dugmesi CIZILMEZ', async () => {
+  it('KENDI ODEYENDE (Özel) Kuruma Tahakkuk dugmesi CIZILMEZ', async () => {
     // Fixture belgenin odeyeni "Özel (Ücretli)" (tur 1) - kurum payi hep 0.
     ciz({ id: 114349 });
     await waitFor(() => expect(belgeOku).toHaveBeenCalled());
     const c = await araclar();
-    expect(c.textContent).not.toContain('Kurum Tahakkuku');
+    expect(c.textContent).not.toContain('Kuruma Tahakkuk');
   });
 });
 

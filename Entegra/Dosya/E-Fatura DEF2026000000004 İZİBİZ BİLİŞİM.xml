@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+<cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+<cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+<cbc:ProfileID>TEMELFATURA</cbc:ProfileID>
+<cbc:ID>DEF2026000000004</cbc:ID>
+<cbc:CopyIndicator>false</cbc:CopyIndicator>
+<cbc:UUID>5C215453-FEA4-4E70-9C18-7791989EF550</cbc:UUID>
+<cbc:IssueDate>2026-09-11</cbc:IssueDate>
+<cbc:IssueTime>11:35:30</cbc:IssueTime>
+<cbc:InvoiceTypeCode>SATIS</cbc:InvoiceTypeCode>
+<cbc:Note>104159 nolu belgeden</cbc:Note>
+<cbc:Note>Yalnız BeşBinBeşYüz Türk Lirası</cbc:Note>
+<cbc:Note>İRSALİYE YERİNE GEÇER.</cbc:Note>
+<cbc:Note>EFATURANOTU</cbc:Note>
+<cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+<cbc:LineCountNumeric>1</cbc:LineCountNumeric>
+<cac:OrderReference>
+<cbc:ID>101280</cbc:ID>
+<cbc:IssueDate>2026-09-11</cbc:IssueDate>
+</cac:OrderReference>
+<cac:DespatchDocumentReference>
+<cbc:ID>104159</cbc:ID>
+<cbc:IssueDate>2026-09-11</cbc:IssueDate>
+</cac:DespatchDocumentReference>
+<cac:AccountingSupplierParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="TCKN">12345678901</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>Proimtech Sağlık Ürünleri A.Ş.</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>aaaaaa</cbc:StreetName>
+<cbc:CitySubdivisionName>üsküdar</cbc:CitySubdivisionName>
+<cbc:CityName>İSTANBUL</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>çankaya</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>Proimtech Sağlık Ürünleri A.Ş.</cbc:RegistrationName></cac:PartyLegalEntity>
+<cac:Person>
+<cbc:FirstName>Proimtech Sağlık Ürünleri</cbc:FirstName>
+<cbc:FamilyName>A.Ş.</cbc:FamilyName>
+</cac:Person>
+</cac:Party>
+</cac:AccountingSupplierParty>
+<cac:AccountingCustomerParty>
+<cac:Party>
+<cac:PartyIdentification><cbc:ID schemeID="VKN">4840847211</cbc:ID></cac:PartyIdentification>
+<cac:PartyName><cbc:Name>İZİBİZ BİLİŞİM TEKNOLOJİLERİ A.Ş.</cbc:Name></cac:PartyName>
+<cac:PostalAddress>
+<cbc:StreetName>YILDIZ TEKNİK ÜNİVERSİTESİ TEKN. GELİŞTİRME BÖLG. NO:C-1 BLOK</cbc:StreetName>
+<cbc:CitySubdivisionName>MALTEPE</cbc:CitySubdivisionName>
+<cbc:CityName>İSTANBUL</cbc:CityName>
+<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>
+</cac:PostalAddress>
+<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>KÜÇÜKYALI</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>
+<cac:PartyLegalEntity><cbc:RegistrationName>İZİBİZ BİLİŞİM TEKNOLOJİLERİ A.Ş.</cbc:RegistrationName></cac:PartyLegalEntity>
+</cac:Party>
+</cac:AccountingCustomerParty>
+<cac:TaxTotal>
+<cbc:TaxAmount currencyID="TRY">500.00</cbc:TaxAmount>
+<cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">5000.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">500.00</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+</cac:TaxTotal>
+<cac:LegalMonetaryTotal>
+<cbc:LineExtensionAmount currencyID="TRY">5000.00</cbc:LineExtensionAmount>
+<cbc:TaxExclusiveAmount currencyID="TRY">5000.00</cbc:TaxExclusiveAmount>
+<cbc:TaxInclusiveAmount currencyID="TRY">5500.00</cbc:TaxInclusiveAmount>
+<cbc:PayableAmount currencyID="TRY">5500.00</cbc:PayableAmount>
+</cac:LegalMonetaryTotal>
+<cac:InvoiceLine>
+<cbc:ID>1</cbc:ID>
+<cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+<cbc:LineExtensionAmount currencyID="TRY">5000.00</cbc:LineExtensionAmount>
+<cac:TaxTotal><cbc:TaxAmount currencyID="TRY">500.00</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="TRY">5000.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="TRY">500.00</cbc:TaxAmount><cbc:Percent>10</cbc:Percent><cac:TaxCategory><cac:TaxScheme><cbc:Name>KDV</cbc:Name><cbc:TaxTypeCode>0015</cbc:TaxTypeCode></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>
+<cac:Item>
+<cbc:Name>FUAR,TANITIM ORGANİZASYON</cbc:Name>
+<cac:BuyersItemIdentification><cbc:ID>770.40.021</cbc:ID></cac:BuyersItemIdentification>
+<cac:SellersItemIdentification><cbc:ID>770.40.021</cbc:ID></cac:SellersItemIdentification>
+<cac:ManufacturersItemIdentification><cbc:ID>770.40.021</cbc:ID></cac:ManufacturersItemIdentification>
+</cac:Item>
+<cac:Price><cbc:PriceAmount currencyID="TRY">5000.00</cbc:PriceAmount></cac:Price>
+</cac:InvoiceLine>
+</Invoice>

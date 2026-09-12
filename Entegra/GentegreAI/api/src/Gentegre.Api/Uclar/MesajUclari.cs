@@ -357,7 +357,13 @@ public static class MesajUclari
                        coalesce(t.telefon, '') as telefon, coalesce(t.cep_tel, '') as cep,
                        coalesce(t.eposta, '') as eposta,
                        coalesce(s2.ad, '') as sube,
-                       coalesce(kd.ad, '') as departman,
+                       -- BOLUM ADI DEPARTMAN TABLOSUNDAN (576): eskiden
+                       --   `personel.departman` KOD LISTESINDEN cozulmeye
+                       --   calisiliyordu - departman 255'te tabloya tasindigi
+                       --   icin kod listesinde karsiligi yok, kunye hep bos
+                       --   geliyordu.
+                       coalesce((select dp.ad from public.departman dp
+                                  where dp.id = t.departman), '') as departman,
                        -- BAGLI CARI (mockup kunyesinde "Cari" satiri + "Cari
                        --   Kartini Ac"): kisi bir cariye bagliysa gosterilir.
                        t.bag_id as "cariId",
@@ -367,8 +373,6 @@ public static class MesajUclari
                   join public.taraf t on t.id = v.karsi_id
                   left join public.taraf_personel p on p.id = t.id
                   left join public.sube s2 on s2.id = p.sube_id
-                  left join public.kod_liste kl on kl.kod = 'personel.departman'
-                  left join public.kod_deger kd on kd.liste_id = kl.id and kd.deger = p.departman
                  where v.id = @p0 and v.kullanici_id = @p1 and v.tip = 1
                 """, null, [sohbetId, baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
 

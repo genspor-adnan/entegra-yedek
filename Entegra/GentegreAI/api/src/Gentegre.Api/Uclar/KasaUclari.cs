@@ -65,24 +65,31 @@ public static class KasaUclari
         decimal yazilan = 0;
         await using var tx = await baglanti.BeginTransactionAsync(iptal);
 
-        foreach (var sa in acik)
+        // FIFO SIRASI (470) KOVA ONCELIKLI (kullanici: hastadan alinan 500 TL'nin
+        //   300'u kurumun ÖSS kovasina yazilmisti): once HASTANIN odedigi
+        //   kovalar - provizyon payi, ek katki, sonra SGK katilim payi
+        //   (emanet); kurum kovalari (sigorta, SGK) en sonda, cunku onlar
+        //   tahakkuk/faturayla kapanir, kasadan degil.
+        //
+        //   DIS DONGU KOVA, IC DONGU SATIR: eskiden tersiydi ve ILK SATIRIN
+        //   hasta kovasi dolunca ayni satirin KURUM kovasina geciyordu -
+        //   sonraki satirlarin hasta payi acik dururken hastanin verdigi para
+        //   kurumun borcuna sayiliyordu.
+        var kovaAlani = new (short Pay, string Alan)[]
+        {
+            (1, "hastaProvizyonKalan"), (4, "hastaEkKatkiKalan"),
+            (5, "sgkKatilimKalan"), (3, "ossKalan"), (2, "sgkKalan"),
+        };
+
+        foreach (var (pay, alan) in kovaAlani)
         {
             if (kalanTutar <= 0) break;
-            var satirId = Convert.ToInt32(sa["satirId"]);
-
-            // FIFO SIRASI (470): once HASTANIN odedigi kovalar - provizyon
-            //   payi, ek katki, sonra SGK katilim payi (emanet). Kurum
-            //   kovalari (sigorta, SGK) en sonda: onlar tahakkuk/faturayla
-            //   kapanir, kasadan degil. Yanlis sira, hastanin verdigi parayi
-            //   kurumun borcuna sayardi.
-            foreach (var (pay, payKalan) in new[]
-                     { ((short)1, Convert.ToDecimal(sa["hastaProvizyonKalan"])),
-                       ((short)4, Convert.ToDecimal(sa["hastaEkKatkiKalan"])),
-                       ((short)5, Convert.ToDecimal(sa["sgkKatilimKalan"])),
-                       ((short)3, Convert.ToDecimal(sa["ossKalan"])),
-                       ((short)2, Convert.ToDecimal(sa["sgkKalan"])) })
+            foreach (var sa in acik)
             {
-                if (kalanTutar <= 0 || payKalan <= 0) continue;
+                if (kalanTutar <= 0) break;
+                var satirId = Convert.ToInt32(sa["satirId"]);
+                var payKalan = Convert.ToDecimal(sa[alan]);
+                if (payKalan <= 0) continue;
                 var tutar = Math.Round(Math.Min(payKalan, kalanTutar), 2);
                 if (tutar <= 0) continue;
 
@@ -368,19 +375,23 @@ public static class KasaUclari
                      order by t.sira, t.satir_id
                     """, null, [belgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
+                // DIS DONGU KOVA, IC DONGU SATIR (kullanici: hastadan alinan
+                //   500 TL'nin 300'u kurumun ÖSS kovasina yaziliyordu).
+                //   Eskiden tersiydi: ILK SATIRIN hasta kovasi dolunca ayni
+                //   satirin KURUM kovasina geciliyor, sonraki satirlarin hasta
+                //   payi acik dururken hastanin verdigi para kurumun borcuna
+                //   sayiliyordu. Kurum kovalari icmal/faturayla kapanir; kasadan
+                //   ancak HEPSININ hasta payi bittikten sonra dokunulur.
                 var kalanTutar = tutar;
-                foreach (var sa in acik)
+                foreach (var pay in new short[] { 1, 4, 5, 3, 2 })
                 {
                     if (kalanTutar <= 0) break;
-                    var satirId = Convert.ToInt32(sa["satirId"]);
-                    foreach (var (pay, kalan) in new[]
-                             { ((short)1, Convert.ToDecimal(sa["p1"])),
-                               ((short)4, Convert.ToDecimal(sa["p4"])),
-                               ((short)5, Convert.ToDecimal(sa["p5"])),
-                               ((short)3, Convert.ToDecimal(sa["p3"])),
-                               ((short)2, Convert.ToDecimal(sa["p2"])) })
+                    foreach (var sa in acik)
                     {
-                        if (kalanTutar <= 0 || kalan <= 0) continue;
+                        if (kalanTutar <= 0) break;
+                        var satirId = Convert.ToInt32(sa["satirId"]);
+                        var kalan = Convert.ToDecimal(sa[$"p{pay}"]);
+                        if (kalan <= 0) continue;
                         var pay_tutar = Math.Min(kalan, kalanTutar);
                         yazilacak.Add((satirId, pay, Math.Round(pay_tutar, 2)));
                         kalanTutar -= pay_tutar;

@@ -130,15 +130,17 @@ export function useBasvuruKaynaklari(
     let iptal = false;
     void (async () => {
       try {
-        // ROL AKTIF SUBEDEN gelir (364): merkez tip merkezi olup yan bina
-        //   goruntuleme merkezi olabilir - her subenin profili kendi rolunu
-        //   verir (kullanici.hekimRolu, sunucuda fn_basvuru_hekim_rolu).
+        // KAYNAK KURUM PROFILINE GORE, PRIM ROLU ARANMADAN (578, kullanici:
+        //   "prim alsa da almasa da… profil laboratuvar ve/veya görüntüleme
+        //   merkezi ise dış doktorlar, değilse randevu verilebilir personel").
+        //   Karar SUNUCUDA (`v_basvuru_hekim`); ekran yalnizca bolume gore
+        //   suzer. Eskiden liste `prim-rol-aday`dan geliyordu ve prim rolu
+        //   isaretlenmemis hekim basvuruda hic gorunmuyordu.
         const kosullar = [
-          { alan: 'rol', op: 'esit' as const, deger: hekimRolu ?? 4 },
           { alan: 'durum', op: 'esit' as const, deger: 1 },
           ...(bolumId ? [{ alan: 'bolumId', op: 'esit' as const, deger: bolumId }] : []),
         ];
-        const y = await api.liste('prim-rol-aday', {
+        const y = await api.liste('basvuru-hekim', {
           sayfa: 1, boyut: 500, sirala: [{ alan: 'ad', yon: 'asc' }],
           filtre: { op: 'and' as const, kosullar },
         });

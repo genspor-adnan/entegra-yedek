@@ -315,7 +315,8 @@ public static class KartUclari
             //   AGAC alanlari (484) da ayni haritayi kullanir: girintili
             //   cizim icin her secenegin ustunu bilmek gerekiyor.
             var ustGorevleri = tumAlanlar
-                .Where(a => (a.BagliAlan is not null || a.Agac) && a.KodTablosu is not null)
+                .Where(a => (a.BagliAlan is not null || a.Agac || a.UstBilgisi)
+                            && a.KodTablosu is not null)
                 .Select(a => a.KodTablosu!).Distinct()
                 .ToDictionary(t => t, t => depo.KodTablosuUstAsync(t, iptal));
             // BAGLI KOD LISTESI (544): ust bagi yalniz KodTablosu alanlarinda
@@ -349,7 +350,9 @@ public static class KartUclari
                 : null,
                 // AGAC alani da ust haritasini alir (484): girintili cizim
                 //   her secenegin ustunu bilmeyi gerektiriyor.
-                (a.BagliAlan is not null || a.Agac) && a.KodTablosu is { } bt
+                // UST BILGISI (587) de ayni haritayi alir: secenekler sunucuda
+                //   suzulmez, ekran kartin baska bir yerindeki degere gore suzer.
+                (a.BagliAlan is not null || a.Agac || a.UstBilgisi) && a.KodTablosu is { } bt
                     && ustHaritalari.TryGetValue(bt, out var ust) ? ust
                 : a.BagliAlan is not null && a.KodListesi is { } bl
                     && listeUstHaritalari.TryGetValue(bl, out var lust) ? lust : null);
@@ -437,7 +440,8 @@ public static class KartUclari
             alan.AramaKaynagi,
             ustHaritasi,
             alan.Agac,
-            alan.KodListesi);
+            alan.KodListesi,
+            alan.Dogrulama);
 
 
     /// <summary>

@@ -285,8 +285,13 @@ public sealed partial class KartDeposu
             // Departman/bolum (251): personel kartinda tum departmanlar, randevu
             //   kartinda yalniz randevu verilebilen bolumler.
             "public.v_departman_lookup", "public.v_randevu_bolum_lookup",
+            // BOLUM AGACI (577): ust_id tasiyan gorunum - duz lookup agac cizemez.
+            "public.v_departman_agac_lookup",
             // Personel gorevi (255) - departmana bagli combo.
             "public.v_gorev_lookup",
+            // GOREV AGACI (570/571): ust_id GERCEK ust gorevi tasir;
+            //   v_gorev_lookup ise departmani gosterir - iki ayri soru.
+            "public.v_gorev_agac_lookup",
             // Randevu verilebilir personel (252) - randevu kartindaki hekim.
             "public.v_hekim_lookup",
             // Kampanya (268) - kurum sozlesmesinde secilir.
@@ -329,6 +334,9 @@ public sealed partial class KartDeposu
             "public.v_fiyat_listesi_lookup",
             // Yon bazli: cari kartinda satis alani alis listesini gostermemeli (204).
             "public.v_fiyat_listesi_satis_lookup", "public.v_fiyat_listesi_alis_lookup",
+            // Satis listeleri TARIFE TIPIYLE (587): anlasmali kurum sozlesmesinde
+            //   combo kurumun turune uymayan tarifeyi gostermesin.
+            "public.v_fiyat_listesi_tarife_lookup",
             // Muayene v1 (409/411): ICD-10 tani secici, muayene sablonu ve
             //   sablon alani. Beyaz listeye eklemeden kart HIC ACILMAZ
             //   ("Bilinmeyen kod tablosu" -> 500) - 358 ve 375'teki ayni tuzak.

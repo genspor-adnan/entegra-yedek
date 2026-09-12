@@ -56,6 +56,28 @@ public static class ZamanliIsler
             return s.Aciklama;
         },
 
+        // KULLANILMAYAN HIZMETLERI PASIFE AL (550/551). Kurulumdan itibaren
+        //   `hizmet.oto_pasif_gun` dolmadan HICBIR SEY yapmaz - fonksiyon bunu
+        //   kendisi kontrol eder ve sebebini doner. Kapali kalem birisi onu
+        //   bilerek secince kendiliginden geri acilir.
+        ["hizmet.oto_pasif"] = async (servisler, iptal) =>
+        {
+            var veri = servisler.GetRequiredService<VeriKaynagi>();
+            await using var baglanti = await veri.AcAsync(iptal);
+            // Hizmet ve STOK ayri fonksiyonlar: stokta bakiye/belge gecmisi
+            //   emniyetleri var (552). Ilac katalogu dis kaynakli - dokunulmaz.
+            var sonuclar = new List<string>();
+            foreach (var fn in new[] { "fn_hizmet_kullanilmayan_pasife",
+                                       "fn_stok_kullanilmayan_pasife" })
+            {
+                await using var komut = baglanti.Komut(
+                    $"select pasife_alinan, aciklama from public.{fn}()", null);
+                await using var o = await komut.ExecuteReaderAsync(iptal);
+                if (await o.ReadAsync(iptal)) sonuclar.Add(o.GetString(1));
+            }
+            return sonuclar.Count > 0 ? string.Join(" ", sonuclar) : "Sonuc okunamadi.";
+        },
+
         // CIHAZ KLASOR TARAMA (432): klasore dosya birakan cihazlar. MLLP
         //   dinleyicisi surekli acik oldugu icin ise ihtiyaci yok; klasor
         //   izleme ise yoklamayla yurur.

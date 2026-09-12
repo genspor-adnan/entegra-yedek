@@ -292,6 +292,46 @@ public static partial class KaynakKatalogu
         });
 
     /// <summary>
+    /// <summary>
+    /// BASVURUDA SECILEBILECEK HEKIMLER (578).
+    ///
+    /// Kaynak KURUM PROFILINE gore degisir ve PRIM ROLU ARANMAZ:
+    ///   lab / goruntuleme / goruntuleme_lab -> DIS hekimler,
+    ///   otekiler                            -> randevu verilebilir personel.
+    /// Karar gorunumde (`v_basvuru_hekim`); katalog yalniz kolonlari acar.
+    /// Eskiden liste `prim-rol-aday`dan geliyordu - prim, hekimin kim oldugu
+    /// degil UCRETLENDIRME sorusudur; prim rolu isaretlenmemis hekim
+    /// basvuruda secilemez olmustu.
+    /// </summary>
+    private static KaynakTanimi BasvuruHekim() => new(
+        Ad: "basvuru-hekim",
+        YetkiKodu: "belge",
+        Kaynak: "public.v_basvuru_hekim h",
+        VarsayilanSirala: "h.ad asc",
+        SubeKolonu: null,
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",      "h.id",       "sayi",  "Id", Varsayilan: false),
+            new("ad",      "h.ad",       "metin", "Hekim"),
+            // UNVAN = AD (583): jenerik taraf arama penceresi satirin adini
+            //   `unvan` kolonundan okur ve metni `kod`/`unvan`/`telefonHam`
+            //   uzerinde arar - hekim de ayni pencereden secilebilsin diye
+            //   ucu de acilir. Ayri SQL degil, ayni ifadenin ikinci adi.
+            new("unvan",   "h.ad",       "metin", "Hekim", Varsayilan: false),
+            new("kod",     "h.kod",      "metin", "Kod", Varsayilan: false),
+            new("telefonHam", "h.telefon_ham", "metin", "Telefon (ham)",
+                Varsayilan: false),
+            new("bolumId", "h.bolum_id", "sayi",  "Bölüm Id", Varsayilan: false),
+            new("bolumAdi","h.bolum_adi","metin", "Bölüm", Genislik: 180),
+            // BUGUNKU BASVURU (kullanici): hekimin O GUN kac hasta aldigi.
+            //   Kayit kabul memuru yuku buna bakarak dengeler - combo'da
+            //   gorunmeyen tek bilgi buydu.
+            new("bugunBasvuru", "h.bugun_basvuru", "sayi", "Bugünkü Başvuru",
+                Hizalama: "sag", Filtrelenebilir: false),
+            new("disMi",   "h.dis_mi",   "mantik","Dış Hekim", Hizalama: "orta"),
+            new("durum",   "h.durum",    "kod",   "Durum", Hizalama: "orta"),
+        });
+
     /// DIS DOKTOR LISTESI (305): goruntuleme merkezine hasta GONDEREN kurum
     /// disi hekimler. Personel listesiyle ayni tabloyu okur, ayirt eden
     /// taraf_personel.dis_hekim = 1.
@@ -329,7 +369,13 @@ public static partial class KaynakKatalogu
                 "coalesce(nullif(btrim(t.unvan), ''), "
                 + "btrim(coalesce(t.ad, '') || ' ' || coalesce(t.soyad, '')))",
                                         "metin", "Ad Soyad", Genislik: 220),
-            new("bransAdi", "coalesce(kd.ad, '')", "metin", "Branş", Genislik: 200),
+            // BRANS ARTIK GOREV AGACINDAN (577): kart `taraf.gorev_id`
+            //   yaziyor, kod listesi degil. Eski kolon (po.brans) veri
+            //   olarak duruyor - MEDULA gonderimi henuz onu okuyor.
+            new("bransAdi",
+                "coalesce((select g.ad from public.personel_gorev g where g.id = t.gorev_id), "
+                + "coalesce(kd.ad, ''))",
+                "metin", "Branş", Genislik: 200),
             // BOLUM (367): basvuruda once bolum secilirse arama O BOLUMDEKI
             //   hekimlerle sinirlanir - kolon olmadan filtre "Bilinmeyen alan"
             //   ile 400 doner. Listede gizli, yalniz suzme icin.
@@ -524,11 +570,29 @@ public static partial class KaynakKatalogu
         Ad: "personel-gorev",
         YetkiKodu: "personel",
         Kaynak: "public.personel_gorev g",
-        VarsayilanSirala: "g.ad asc",
+        // AGAC SIRASI (570, bolumdeki desenin aynisi): once ust gorevin adi
+        //   (koklerde kendi adi), sonra kendi adi - alt gorev ustunun altinda.
+        VarsayilanSirala: "coalesce((select u.ad from public.personel_gorev u " +
+                          "           where u.id = g.ust_id), g.ad) asc, " +
+                          "g.ust_id nulls first, g.ad asc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",           "g.id",           "sayi",  "Id", Varsayilan: false),
-            new("ad",           "g.ad",           "metin", "Görev"),
+            // SKRS BRANS KODU (559/560): gorev listesi SKRS "Personel Branş
+            //   Kodu" listesinden kuruluyor; kod eslemesi yerine kodun
+            //   KENDISI tabloda duruyor.
+            new("kod",          "g.kod",          "metin", "Kod", Genislik: 90),
+            // Alt gorev adi GIRINTILI - agac oldugu listede tek bakista gorunsun
+            //   (grid agac kipinde bu onek kirpilir, girintiyi cizim verir).
+            new("ad",           "case when g.ust_id is null then g.ad " +
+                                "     else '— ' || g.ad end",
+                                "metin", "Görev"),
+            // UST GOREV (570) - bos ise kok baslik.
+            new("ustAdi",       "coalesce((select u.ad from public.personel_gorev u " +
+                                "           where u.id = g.ust_id), '')",
+                                "metin", "Üst Görev", Filtrelenebilir: false),
+            new("ustId",        "g.ust_id",       "sayi",  "Üst Görev Id",
+                Varsayilan: false),
             // Bagimsiz gorevde (0) bos gorunur - "her departmanda gecerli".
             new("departmanAdi", "coalesce((select dp.ad from public.departman dp " +
                                 "           where dp.id = g.departman_id), '')",

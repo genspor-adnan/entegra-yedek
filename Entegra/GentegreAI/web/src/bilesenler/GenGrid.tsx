@@ -9,6 +9,7 @@ import { GenKomutPaleti, GenSagTus, GenToolbar, hedefte, useAksiyonlar,
 import { Modal } from './Modal';
 import { LogTablosu, GORUNUMLER } from './gridHucre';
 import { GridTablo } from './grid/GridTablo';
+import { agacDiz } from './grid/agacDizim';
 import {
   filtreSatiriKosulu, } from './gridSorgu';
 import { GridMenu, gridMenuOgeleri } from './grid/GridMenu';
@@ -31,6 +32,13 @@ interface Props {
   onSatirAc?(satir: ListeSatiri): void;
   /** Aksiyon katalogu ekrani ("cari-liste"); verilirse arac cubugu + sag tus + palet gelir. */
   aksiyonEkrani?: string;
+  /**
+   * AGAC KIPI (kullanici: "+ gibi alt dallar acilir yap"). Deger, ust kaydi
+   * gosteren ALAN ADI ("ustbirimId"). Verilirse satirlar agac sirasinda
+   * dizilir, cocugu olan satirda +/- dugmesi cikar ve kapali dalin altlari
+   * gizlenir. Sunucu tarafi degismez - agac yalniz GORUNUM.
+   */
+  agacAlani?: string;
   /** e-Belge menusu kutusunun BASLIGI ("E-Fatura" / "E-İrsaliye"); verilmezse
       kutu cizilmez (yalniz satis faturasi ve satis irsaliyesi listeleri). */
   ebelgeMenusu?: string;
@@ -191,7 +199,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                           onKodSuzgec, varsayilanGrup, solPanel, bosEk,
                           cipBaslangic, altPanel, ustPanel, yanPanel, ekGorunum,
                           onCipSecildi, onCipRota, onSecimDegisti, yenile, odaklaSonEklenen,
-                          icerikAlani, icerikBaslik }: Props) {
+                          icerikAlani, icerikBaslik, agacAlani }: Props) {
   // Sayfa boyu: cagiran acikca verdiyse o, yoksa Genel Ayarlar'daki
   //   `liste.sayfa_boyu` (varsayilan 50). Ayar gelene kadar 50 ile calisir.
   const [ayarBoyut, setAyarBoyut] = useState(50);
@@ -270,6 +278,26 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       kodSuzgeci, kodSuzgecDeger, tarihAlani, tarihBas, tarihBit, varsayilanGrup,
       yenile, odaklaSonEklenen, filtreSatiriFiltresi,
     });
+
+  /**
+   * AGAC KIPI DURUMU (kullanici: "+ gibi alt dallar acilir yap").
+   *
+   * Kapali dugumler EKRANDA tutulur - sunucuya gitmez ve sayfa degisince
+   * sifirlanmaz; kullanici bir dali kapattiysa listede gezinirken kapali
+   * kalmali. Varsayilan ACIK: liste ilk acilista tam gorunsun, kullanici
+   * daraltmak isterse kendisi kapatsin.
+   */
+  const [kapaliDallar, setKapaliDallar] = useState<ReadonlySet<string>>(new Set());
+  const agacDegistir = useCallback((id: string) => {
+    setKapaliDallar(k => {
+      const y = new Set(k);
+      if (!y.delete(id)) y.add(id);
+      return y;
+    });
+  }, []);
+  const agacSatirlari = useMemo(
+    () => (agacAlani ? agacDiz(satirlar, agacAlani, kapaliDallar) : satirlar),
+    [agacAlani, satirlar, kapaliDallar]);
 
   /**
    * Ekranda doviz hareketi var mi (kur 1'den farkli tek satir yeter). Yoksa
@@ -677,11 +705,13 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
           <div className="gridwrap">
             <div className="gridkaydir">
               <GridTablo
+                agacAlani={agacAlani}
+                agacDegistir={agacDegistir}
                 bosEk={bosEk}
                 kolonlar={dovizsizGizle?.length && !dovizVarMi
                   ? kolonlar.filter(k => !dovizsizGizle.includes(k.ad))
                   : kolonlar}
-                satirlar={satirlar} yukleniyor={yukleniyor}
+                satirlar={agacSatirlari} yukleniyor={yukleniyor}
                 gruplar={gruplar} grupKolonu={kullaniciGrup ?? grupKolonu}
                 satirBoyu={satirBoyu}
                 gorunenToplamlar={gorunenToplamlar} toplamSeridiVar={toplamSeridiVar}

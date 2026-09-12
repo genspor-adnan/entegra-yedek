@@ -164,6 +164,14 @@ public static partial class KartKatalogu
                     "         (select h3.kod from public.hizmet h3 " +
                     "           where h3.id = fiyat_listesi_satir.hizmet_id), '')",
                     "metin", Yazilabilir: false, Baslik: "Kod"),
+                // HUV KODU (kullanici: "ttb/huv tarife ise kodun sağında HUV
+                //   Kodu"): TTB tarifesinin kodu SUT kodundan FARKLIDIR ve
+                //   ozel sigorta faturasi ona bakar. Kalemin kartindan turer,
+                //   yazilamaz; yalniz HIZMETTE var (stokun HUV kodu yok).
+                new("huvKodu",
+                    "coalesce((select h6.huv_kodu from public.hizmet h6 " +
+                    "           where h6.id = fiyat_listesi_satir.hizmet_id), '')",
+                    "metin", Yazilabilir: false, Baslik: "HUV Kodu"),
                 // KALEM ADI (526): gridde YOK - satirin adini arayuz zaten
                 //   stok/hizmet lookup'indan cizer. Bu alan SUNUCU TARAFI
                 //   ARAMASI icin var: sayfalama gelince "aktif olan tum

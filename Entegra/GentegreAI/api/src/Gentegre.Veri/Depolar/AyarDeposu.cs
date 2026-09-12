@@ -56,6 +56,12 @@ public sealed class AyarDeposu
         // KAYIT KABUL (355): basvuruda POS tahsilati alininca ne olacak -
         //   0 aksiyon yok, 1 otomatik satis fisi kesilsin, 2 kullaniciya sorulsun.
         "basvuru.pos_aksiyon",
+        // SUT MUAYENE KATILIM PAYI (590): SGK adina alinan sabit tutar.
+        //   Tutar da, hangi kalemde dogacagi da AYARDIR (592, kullanici: "SGK
+        //   katilim payi tutarini da opsiyona gir, belki baska zaman
+        //   degisebilir… yanina da tahakkuk edecek SUT fiyat kodlari editini
+        //   koy"). Kod listesi bosken eski davranis surer (muayene kategorisi).
+        "basvuru.sgk_katilim_payi", "basvuru.sgk_katilim_kodlari",
         // Radyoloji sarf dusumu (320): stok modulunu kullanmayan kurumda
         //   kapatilabilir; depo secimi sarf cikis fisinin kaynagidir.
         "radyoloji.sarf_aktif", "radyoloji.sarf_depo",
@@ -105,6 +111,8 @@ public sealed class AyarDeposu
         ["uts.uretim_url"] = 250,
         ["uts.test_url"] = 250,
         ["earsiv.sabit_notlar"] = 1000,
+        // SUT kodlari virgulle ayrilir: "520030,520031,520040".
+        ["basvuru.sgk_katilim_kodlari"] = 400,
         ["eirsaliye.gib_alias"] = 120,
         ["eirsaliye.uretim_url"] = 250,
         ["eirsaliye.test_url"] = 250,
@@ -126,6 +134,7 @@ public sealed class AyarDeposu
         // POS tahsilatinda varsayilan AKSIYON YOK: kurulumu yapilmamis bir
         //   sistemde kendiliginden fis kesmek yanlis olurdu.
         ["basvuru.pos_aksiyon"] = 0,
+        ["basvuru.sgk_katilim_payi"] = 100,
         ["guvenlik.jwt_dakika"] = 30,
         ["guvenlik.refresh_gun"] = 30,
         ["guvenlik.parola_min_uzunluk"] = 8,

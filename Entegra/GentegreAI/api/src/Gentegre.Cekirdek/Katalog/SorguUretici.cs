@@ -154,8 +154,18 @@ public sealed class SorguUretici
     private static bool KullaniciGorunumu(ListeIstegi istek, int? kullaniciId)
         => istek.Gorunum is "son" or "sik" && kullaniciId is not null;
 
+    /// <summary>Kullanim puani gorunumu bu kaynakta tanimli mi (550).</summary>
+    private bool KullanimGorunumu(ListeIstegi istek)
+        => istek.Gorunum == "kullanim" && _kaynak.KullanimJoin is not null;
+
     private string KaynakIfadesi(ListeIstegi istek, int? kullaniciId)
     {
+        // KULLANIM GORUNUMU: sayac tablosu LEFT JOIN - hic kullanilmamis kalem
+        //   listeden DUSMEZ, en sona duser ("digerleri cok geride kalsin").
+        if (KullanimGorunumu(istek))
+            return _kaynak.Kaynak + _kaynak.KullanimJoin!.Replace(
+                "{bolum}", Ekle(istek.Bolum ?? 0));
+
         if (!KullaniciGorunumu(istek, kullaniciId)) return _kaynak.Kaynak;
 
         var idKolon = _kaynak.Kolon("id")?.Sql
@@ -305,6 +315,7 @@ public sealed class SorguUretici
     // ----------------------------------------------------------------- sirala ----
     private string Sirala(ListeIstegi istek, bool kullaniciGorunumuAktif)
     {
+        if (KullanimGorunumu(istek)) return _kaynak.KullanimSirala!;
         if (kullaniciGorunumuAktif && istek.Gorunum == "son") return "ka.son_tarih desc";
         if (kullaniciGorunumuAktif && istek.Gorunum == "sik") return "ka.say desc, ka.son_tarih desc";
 

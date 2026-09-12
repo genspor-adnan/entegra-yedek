@@ -11,7 +11,6 @@ import { GenDetayTablo, type DetayDurumu, type Satir, bosDetay, detayFarki }
 import { Modal } from './Modal';
 import { KodListesiModali } from './KodListesiModali';
 import { yerelAnMetni, bugunIso, hamSayi, kidemMetni } from './bicim';
-import { ttbFiyatTuret } from './kart/tarifeKurallari';
 import { useUnvanOneki } from './kart/useUnvanOneki';
 import { KartKimlikSeridi } from './kart/KartKimlikSeridi';
 import { KartDetaySekmesi } from './kart/KartDetaySekmesi';
@@ -271,6 +270,10 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
   /** Toplu "Katkı Gir" penceresi (541). */
   const [topluKatki, setTopluKatki] = useState(false);
   const [topluKatkiOran, setTopluKatkiOran] = useState('');
+  /** Toplu "Fiyat Güncelle" penceresi (kullanici, Özel tarife). */
+  const [fiyatGuncelle, setFiyatGuncelle] = useState(false);
+  const [fiyatYonu, setFiyatYonu] = useState<'artir' | 'azalt'>('artir');
+  const [fiyatYuzde, setFiyatYuzde] = useState('');
   /** SKRS tazeleme surerken dugme kilitli (535). */
   const [skrsCalisiyor, setSkrsCalisiyor] = useState(false);
 
@@ -378,7 +381,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
    * yalnizca yerini verir.
    */
   const [satirKategori, setSatirKategori] =
-    useState<{ id: number; agac: number[] } | null>(null);
+    useState<{ id: number; agac: number[]; ad: string } | null>(null);
   // Kart degisince suzgec sifirlanir: onceki listenin dali yeni listede yok.
   useEffect(() => { setSatirKategori(null) }, [kaynak, id]);
   /** Combo yalnizca SATIRLARDA GECEN kategorileri (ve ustlerini) listeler. */
@@ -391,6 +394,121 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
     });
     return kume;
   }, [kaynak, detaylar]);
+
+  /** Toplu uygulama sunucuya giderken dugmeler kilitli. */
+  const [topluCalisiyor, setTopluCalisiyor] = useState(false);
+
+  /**
+   * TOPLU SATIR DEGERI - SUNUCUDA (kullanici: "modalde 3 buton: seçili
+   * satıra uygula · <kategori> uygula · tüm listeye uygula").
+   *
+   * NEDEN SUNUCUDA: satir gridi 200'erlik sayfalarla geliyor (526). Kategori
+   * ve "tüm liste" kapsamlari ekranda YUKLU OLMAYAN satirlari da kapsiyor -
+   * istemcide yapilsaydi 14 bin satirlik listede yalnizca gorunen sayfa
+   * degisir, kullanici "uygulandi" mesajini gorup eksik listeyle devam
+   * ederdi. Seçili kapsam da ayni yoldan gider: uc dugmenin biri kaydedilmis,
+   * ikisi kaydedilmemis degisiklik uretseydi "Kaydet" belirsizlesirdi.
+   */
+  const topluUygula = async (
+    islem: 'carpan' | 'katki' | 'fiyat-yuzde',
+    deger: number,
+    kapsam: 'secili' | 'kategori' | 'tumu',
+    yon?: 'artir' | 'azalt',
+  ): Promise<boolean> => {
+    if (typeof id !== 'number' || !Number.isFinite(deger) || deger <= 0) return false;
+    const durum = detaylar['satirlar'];
+    // Sunucuda yazip kartI yeniden okuyoruz: ekrandaki kaydedilmemis
+    //   duzenleme kaybolur - once sorulur (SKRS tazelemesiyle ayni kural).
+    if (durum) {
+      const fark = detayFarki(durum);
+      if (fark.eklenen || fark.degisen || fark.silinen) {
+        const devam = await onaySor(
+          'Kaydedilmemiş satır değişiklikleri var. Toplu uygulama satırları '
+          + 'sunucuda günceller ve bu değişiklikler kaybolur. Devam edilsin mi?');
+        if (!devam) return false;
+      }
+    }
+    if (kapsam === 'tumu') {
+      const devam = await onaySor(
+        `Listenin TAMAMINA uygulanacak (${(detayToplam['satirlar']
+          ?? durum?.guncel.length ?? 0).toLocaleString('tr')} satır). Devam edilsin mi?`);
+      if (!devam) return false;
+    }
+    const satirIdler = kapsam === 'secili'
+      ? [...seciliSatirlar].map(i => Number(durum?.guncel[i]?.id)).filter(x => x > 0)
+      : undefined;
+    if (kapsam === 'secili' && !satirIdler?.length) {
+      await bilgiMesaji('Seçili satırların henüz kaydedilmemiş olanları toplu '
+                        + 'uygulamaya giremez - önce Kaydet.');
+      return false;
+    }
+    setTopluCalisiyor(true);
+    try {
+      const s2 = await api.fiyatTopluDeger(id, {
+        islem, deger, kapsam, satirIdler,
+        kategoriId: kapsam === 'kategori' ? satirKategori?.id : undefined, yon,
+      });
+      await bilgiMesaji(s2.mesaj);
+      setSeciliSatirlar(new Set());
+      await detaySayfaCek('satirlar', detaySayfa['satirlar'] ?? 1);
+      return true;
+    } catch (h) {
+      await bilgiMesaji(hataMetni(h));
+      return false;
+    } finally {
+      setTopluCalisiyor(false);
+    }
+  };
+
+  /**
+   * TOPLU PENCERELERIN ARAC CUBUGU: uc kapsam dugmesi sola, Kapat saga
+   * (kullanici). Hangi dugmeye basildiysa kapsam odur - pencerede ayrica
+   * "kapsam" secmek gerekmiyor.
+   */
+  const topluButonlar = (gecerli: boolean,
+                         calistir: (kapsam: 'secili' | 'kategori' | 'tumu') => void,
+                         kapat: () => void) => {
+    // DEGER BOSKEN DUGMELER PASIF DEGIL (kullanici: "butonlar da pasif
+    //   geliyor"): pencere acildiginda kutu zaten bos oluyordu ve UC dugme
+    //   birden gri geliyor, ekran bozuk gorunuyordu. Eksik deger tiklanınca
+    //   SOYLENIR - kapsam dugmesi yalniz KENDI on kosulu yoksa kilitlenir
+    //   (satir secilmemis / kategori secilmemis).
+    const dogrula = (kapsam: 'secili' | 'kategori' | 'tumu') => {
+      if (!gecerli) { void bilgiMesaji('Önce geçerli bir değer girin.'); return }
+      if (kapsam === 'secili' && seciliSatirlar.size === 0) {
+        void bilgiMesaji('Önce satırlar sekmesinden satır seçin.'); return;
+      }
+      if (kapsam === 'kategori' && !satirKategori) {
+        void bilgiMesaji('Önce satırlar sekmesindeki kategori combosundan bir dal seçin.');
+        return;
+      }
+      calistir(kapsam);
+    };
+    return (
+    <>
+      <button type="button" className="d bir"
+              disabled={topluCalisiyor}
+              title={seciliSatirlar.size === 0 ? 'Gridde satır seçilmedi' : undefined}
+              onClick={() => dogrula('secili')}>
+        {seciliSatirlar.size} satıra uygula
+      </button>
+      <button type="button" className="d"
+              disabled={topluCalisiyor}
+              title={satirKategori
+                     ? `"${satirKategori.ad}" ve alt kategorilerindeki tüm satırlar`
+                     : 'Satırlar sekmesinde kategori seçin'}
+              onClick={() => dogrula('kategori')}>
+        {satirKategori ? `${satirKategori.ad} uygula` : 'Kategoriye uygula'}
+      </button>
+      <button type="button" className="d" disabled={topluCalisiyor}
+              title="Listedeki bütün satırlar (ekranda görünmeyenler dâhil)"
+              onClick={() => dogrula('tumu')}>
+        Tüm listeye uygula
+      </button>
+      <button type="button" className="d kapat-dugmesi" onClick={kapat}>Kapat</button>
+    </>
+    );
+  };
 
   const [yukleniyor, setYukleniyor] = useState(true);
   const [kaydediyor, setKaydediyor] = useState(false);
@@ -1033,6 +1151,23 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
           {!yeniMi && yetki.sil && (
             <button className="d teh" onClick={() => void sil()}>Sil</button>
           )}
+          {/* FIYAT GUNCELLE (kullanici: "özel fiyat tipinde Sil butonu
+              sağına Fiyat Güncelle; modalde Artır/Azalt combosu ve yüzde
+              editi"). Yalniz OZEL tarifede: TTB fiyati katsayi x carpan'dan,
+              SUT fiyati SKRS ambarindan dogar - orada fiyata elle yuzde
+              uygulamak bir sonraki turetmede geri alinirdi. Secili satirlara
+              calisir, oteki toplu dugmelerle ayni kural. */}
+          {!yeniMi && kaynak === 'fiyat-listesi' && Number(deger.tarifeTipi) === 1 && (
+            <button type="button" className="d"
+                    disabled={seciliSatirlar.size === 0}
+                    title={seciliSatirlar.size === 0
+                           ? 'Önce satırlardan seçim yapın'
+                           : `Seçili ${seciliSatirlar.size} satırın fiyatını yüzdeyle güncelle`}
+                    onClick={() => { setFiyatYuzde(''); setFiyatYonu('artir');
+                                     setFiyatGuncelle(true) }}>
+              ↕ Fiyat Güncelle{seciliSatirlar.size > 0 ? ` (${seciliSatirlar.size})` : ''}
+            </button>
+          )}
           {/* TOPLU CARPAN (534, kullanici: "sil butonu sagina Çarpan Gir
               butonu ekle, sadece TTB/HUV'da gorunsun" · "carpan butonu
               ustteki silin sagina al"): donem carpani binlerce satirda ayni -
@@ -1631,33 +1766,17 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
           Oran CARPAN olarak okunur (0,80 -> fiyatin %80'i) - 518'deki
           `fn_fiyat_katki_uret` ile ayni dil, iki yerde iki anlam olmasin. */}
       {topluKatki && (
-        <Modal baslik={`Katkı — ${seciliSatirlar.size} satır`} dar enUst ekSinif="mesaj-pencere" buyutmeYok
+        <Modal baslik={`Katkı — ${seciliSatirlar.size} satır`} dar enUst ekSinif="mesaj-pencere toplu-pencere" buyutmeYok
                onKapat={() => setTopluKatki(false)}
-               alt={(
-                 <>
-                   <button type="button" className="d" onClick={() => setTopluKatki(false)}>
-                     Kapat
-                   </button>
-                   <button type="button" className="d bir"
-                           disabled={topluKatkiOran.trim() === ''}
-                           onClick={() => {
-                             const oran = Number(topluKatkiOran.replace(',', '.'));
-                             if (!Number.isFinite(oran)) return;
-                             setDetaylar(t => {
-                               const d = t.satirlar ?? bosDetay();
-                               const guncel = d.guncel.map((s2, i) => seciliSatirlar.has(i)
-                                 ? { ...s2,
-                                     katkiTutar: Math.round(
-                                       Number(s2.fiyat ?? 0) * oran * 100) / 100 }
-                                 : s2);
-                               return { ...t, satirlar: { ...d, guncel } };
-                             });
-                             setTopluKatki(false);
-                           }}>
-                     {seciliSatirlar.size} satıra uygula
-                   </button>
-                 </>
-               )}>
+               alt={topluButonlar(
+                 Number.isFinite(Number(topluKatkiOran.replace(',', '.')))
+                 && topluKatkiOran.trim() !== '',
+                 kapsam => {
+                   const oran = Number(topluKatkiOran.replace(',', '.'));
+                   void topluUygula('katki', oran, kapsam)
+                     .then(oldu => { if (oldu) setTopluKatki(false) });
+                 },
+                 () => setTopluKatki(false))}>
           <div className="toplu-kutu">
             <label className="alan tip-para">
               <span className="etiket">Fiyatın Oranını Girin</span>
@@ -1672,33 +1791,60 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
         </Modal>
       )}
 
-      {/* TOPLU CARPAN PENCERESI (534): tek sayi, secili satirlara yazilir;
-          fiyat `ttbFiyatTuret` ile aninda yeniden dogar. */}
+      {/* FIYAT GUNCELLE PENCERESI (kullanici): yon (artir/azalt) + yuzde.
+          Fiyat = fiyat x (1 ± yuzde/100), kurusa yuvarlanir. Katki/carpan
+          ELLENMEZ: Ozel tarifede katki kullanilmiyor, carpan ise TTB'nin. */}
+      {fiyatGuncelle && (() => {
+        const yuzde = Number(fiyatYuzde.replace(',', '.'));
+        const gecerli = fiyatYuzde.trim() !== '' && Number.isFinite(yuzde) && yuzde > 0;
+        return (
+        <Modal baslik={`Fiyat Güncelle — ${seciliSatirlar.size} satır`} dar enUst
+               ekSinif="mesaj-pencere toplu-pencere" buyutmeYok
+               onKapat={() => setFiyatGuncelle(false)}
+               alt={topluButonlar(gecerli, kapsam => {
+                 void topluUygula('fiyat-yuzde', yuzde, kapsam, fiyatYonu)
+                   .then(oldu => { if (oldu) setFiyatGuncelle(false) });
+               }, () => setFiyatGuncelle(false))}>
+          <div className="toplu-kutu">
+            <label className="alan">
+              <span className="etiket">İşlem</span>
+              <select value={fiyatYonu}
+                      onChange={e => setFiyatYonu(e.target.value as 'artir' | 'azalt')}>
+                <option value="artir">Artır</option>
+                <option value="azalt">Azalt</option>
+              </select>
+            </label>
+            <label className="alan tip-para">
+              <span className="etiket">% giriniz</span>
+              <input autoFocus inputMode="decimal" value={fiyatYuzde}
+                     onChange={e => setFiyatYuzde(e.target.value)} />
+            </label>
+            <div className="ic sonuk">
+              Yeni fiyat = fiyat {fiyatYonu === 'azalt' ? '−' : '+'} %{fiyatYuzde || '…'}.
+              Örnek: 100,00 fiyat <b>10</b> ile{' '}
+              <b>{fiyatYonu === 'azalt' ? '90,00' : '110,00'}</b> olur.
+              Kuruşa yuvarlanır; kaydedene kadar sunucuya yazılmaz.
+            </div>
+          </div>
+        </Modal>
+        );
+      })()}
+
+      {/* TOPLU CARPAN PENCERESI (534): tek sayi, secilen kapsamdaki
+          satirlara yazilir; fiyat = katsayi x carpan olarak SUNUCUDA
+          yeniden dogar (uc de ayni kurali isletir). */}
       {topluCarpan && (
-        <Modal baslik={`Çarpan — ${seciliSatirlar.size} satır`} dar enUst ekSinif="mesaj-pencere" buyutmeYok
+        <Modal baslik={`Çarpan — ${seciliSatirlar.size} satır`} dar enUst ekSinif="mesaj-pencere toplu-pencere" buyutmeYok
                onKapat={() => setTopluCarpan(false)}
-               alt={(
-                 <>
-                   <button type="button" className="d" onClick={() => setTopluCarpan(false)}>
-                     Kapat
-                   </button>
-                   <button type="button" className="d bir"
-                           disabled={topluCarpanDeger.trim() === ''}
-                           onClick={() => {
-                             const sayi = Number(topluCarpanDeger.replace(',', '.'));
-                             if (!Number.isFinite(sayi)) return;
-                             setDetaylar(t => {
-                               const d = t.satirlar ?? bosDetay();
-                               const guncel = d.guncel.map((s2, i) =>
-                                 seciliSatirlar.has(i) ? { ...s2, carpan: sayi } : s2);
-                               return { ...t, satirlar: ttbFiyatTuret({ ...d, guncel }) };
-                             });
-                             setTopluCarpan(false);
-                           }}>
-                     {seciliSatirlar.size} satıra uygula
-                   </button>
-                 </>
-               )}>
+               alt={topluButonlar(
+                 Number.isFinite(Number(topluCarpanDeger.replace(',', '.')))
+                 && topluCarpanDeger.trim() !== '',
+                 kapsam => {
+                   const sayi = Number(topluCarpanDeger.replace(',', '.'));
+                   void topluUygula('carpan', sayi, kapsam)
+                     .then(oldu => { if (oldu) setTopluCarpan(false) });
+                 },
+                 () => setTopluCarpan(false))}>
           <div className="toplu-kutu">
             <label className="alan tip-para">
               <span className="etiket">Çarpan</span>

@@ -18,7 +18,15 @@ import { kampanyaFiyatiUygula } from '../belgeKalem';
  * artik SUNUCUDA (470/478): kart `POST /api/belge/{id}/dagit` cagirir.
  */
 
-export interface Secenek { id: number; ad: string }
+export interface Secenek {
+  id: number; ad: string;
+  /**
+   * TARIFE TIPI (586): 1 Özel · 2 TTB/HUV · 3 SUT. Ücret penceresi buna göre
+   * davranır - TTB/SUT'ta satırın hastaya bakan yüzü KATKI PAYIDIR, iskonto
+   * da onun üzerinden işler (kullanıcı).
+   */
+  tarifeTipi?: number;
+}
 
 export interface FiyatlandirmaGirdisi {
   /** Kayitli belge kimligi - 0/undefined ise YENI belge (kampanya yazilir). */
@@ -27,12 +35,22 @@ export interface FiyatlandirmaGirdisi {
   alisMi: boolean;
   cariId: number | null;
   odeyenKurumId: number | null;
+  /** Basvuruda secili police (588) - kurumun tarifesi ondan cozulur. */
+  sozlesmeId?: number | null;
+  /**
+   * Basvurudaki "SGK kullanilsin" isareti (597). Rotayi belirledigi icin
+   * SATIR YENIDEN FIYATLANIRKEN de gecmeli (601): gecmezse sunucu rotayi
+   * varsayilanla cozer, donen cevapta `sgkGerekli` false gelir ve
+   * `kampanyaFiyatiUygula` satirdaki SUT bedelini SILER.
+   */
+  sgkKullan?: number | null;
   satirlar: SatirDurumu[];
   setSatirlar(s: SatirDurumu[] | ((o: SatirDurumu[]) => SatirDurumu[])): void;
 }
 
 export function useBelgeFiyatlandirma(g: FiyatlandirmaGirdisi) {
-  const { belgeId, tur, alisMi, cariId, odeyenKurumId, satirlar, setSatirlar } = g;
+  const { belgeId, tur, alisMi, cariId, odeyenKurumId, sozlesmeId, sgkKullan,
+          satirlar, setSatirlar } = g;
 
   const [fiyatListeleri, setFiyatListeleri] = useState<Secenek[]>([]);
   /**
@@ -68,7 +86,10 @@ export function useBelgeFiyatlandirma(g: FiyatlandirmaGirdisi) {
           ] },
         });
         if (iptal) return;
-        setFiyatListeleri(y.satirlar.map(r => ({ id: Number(r.id), ad: String(r.ad ?? '') })));
+        setFiyatListeleri(y.satirlar.map(r => ({
+          id: Number(r.id), ad: String(r.ad ?? ''),
+          tarifeTipi: r.tarifeTipi != null ? Number(r.tarifeTipi) : undefined,
+        })));
       } catch { if (!iptal) setFiyatListeleri([]) }
     })();
     return () => { iptal = true };
@@ -76,17 +97,25 @@ export function useBelgeFiyatlandirma(g: FiyatlandirmaGirdisi) {
 
   // Acilista / cari degisince belgenin listesi cariden cozulur. KAYITLI
   //   belgede DOKUNULMAZ: belge hangi listeyle kesildiyse onu tasir.
+  //
+  //
+  // KAYITLI BELGEDE ACILISTA COZMEK DENENDI VE GERI ALINDI (602): "kurum SGK
+  //   secili ama ozel fiyat geliyor" sikayetinin kaynagi bu degildi - sozlesme
+  //   kaydinda SUT listesi bostu (601). Kurum/police degisince liste zaten
+  //   tazeleniyor (`kurumListesiCoz`). Acilista yeniden cozmek ise karti
+  //   kullanici hic dokunmadan "degismis" gosteriyor ve Kapat'ta gereksiz
+  //   "kaydetmediniz" sorusu cikiyordu (basvuruKapat testi).
   useEffect(() => {
     if (belgeId || !cariId) return;
     let iptal = false;
     void (async () => {
       try {
-        const y = await api.belgeVarsayilanListe(tur, cariId, odeyenKurumId);
+        const y = await api.belgeVarsayilanListe(tur, cariId, odeyenKurumId, sozlesmeId);
         if (!iptal) setFiyatListesiId(y.listeId ?? null);
       } catch { /* liste kurulmamis olabilir - fiyatlar kart fiyatindan gelir */ }
     })();
     return () => { iptal = true };
-  }, [belgeId, tur, cariId, odeyenKurumId]);
+  }, [belgeId, tur, cariId, odeyenKurumId, sozlesmeId]);
 
   /**
    * KAMPANYAYI COZ ve baslik alanlarina isle (274/291). Uc yerden cagrilir
@@ -162,7 +191,11 @@ export function useBelgeFiyatlandirma(g: FiyatlandirmaGirdisi) {
         if (!r.stokId && !r.hizmetId) return r;
         const f = await api.fiyatKalem(
           r.stokId ? { stokId: r.stokId } : { hizmetId: r.hizmetId! },
-          { tarafId: cariId, kurumId, listeId });
+          // SOZLESME VE SGK ISARETI BURADA DA GECER (601): satir eklerken
+          //   (stokSecimi) geciyordu, toplu yeniden fiyatlamada gecmiyordu -
+          //   liste degistirince satirlarin SUT bedeli sessizce siliniyordu.
+          { tarafId: cariId, kurumId, listeId,
+            sozlesmeId: sozlesmeId ?? null, sgkKullan: sgkKullan ?? null });
         const y = kampanyaFiyatiUygula(r, f);
         if (y === r) bulunamayan++; else degisen++;
         return y;
@@ -189,16 +222,25 @@ export function useBelgeFiyatlandirma(g: FiyatlandirmaGirdisi) {
    * KAYITLI belgede de calisir: kurum degistirildiyse tarife de degismistir;
    * acilista dokunulmaz (belge hangi listeyle kesildiyse onu tasir).
    */
-  async function kurumListesiCoz(kurumId: number | null): Promise<number | null> {
+  async function kurumListesiCoz(kurumId: number | null,
+                                 police?: number | null): Promise<number | null> {
     if (!cariId) return null;
     try {
-      const y = await api.belgeVarsayilanListe(tur, cariId, kurumId);
+      const y = await api.belgeVarsayilanListe(tur, cariId, kurumId,
+                                               police !== undefined ? police : sozlesmeId);
       return y.listeId ?? null;
     } catch { return null }   // liste kurulmamis olabilir - kart fiyati kalir
   }
 
+  /**
+   * SECILI LISTENIN TARIFE TIPI (586) - 1 Özel · 2 TTB/HUV · 3 SUT.
+   * Ücret penceresi bunu sorar: TTB/SUT'ta "Katkı Fiyatı" kutusu açılır ve
+   * iskonto katkı üzerinden işler.
+   */
+  const tarifeTipi = fiyatListeleri.find(l => l.id === fiyatListesiId)?.tarifeTipi ?? 0;
+
   return {
-    fiyatListeleri, fiyatListesiId, setFiyatListesiId, kurumListesiCoz,
+    fiyatListeleri, fiyatListesiId, setFiyatListesiId, kurumListesiCoz, tarifeTipi,
     kampanyaId, setKampanyaId, kampanyaAdi, setKampanyaAdi,
     kampanyaCoz, satirlariYenidenFiyatla, listeDegisti,
   };

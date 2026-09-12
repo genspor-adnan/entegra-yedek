@@ -354,17 +354,24 @@ public static partial class KartKatalogu
                 new("id",                 "id",                  "sayi",  Yazilabilir: false),
                 new("dogumTarihi",        "dogum_tarihi",        "tarih", Zorunlu: true, Baslik: "Doğum Tarihi"),
                 new("dogumYeri",          "dogum_yeri",          "metin", EnFazlaUzunluk: 60, Baslik: "Doğum Yeri"),
-                new("cinsiyet",           "cinsiyet",            "kod",   SabitKodlar: CinsiyetKodlari, Baslik: "Cinsiyet"),
+                // Cinsiyet/medeni hal/uyruk KOD LISTESINDEN (609): listelerin
+                //   icerigi SKRS'den birebir cekildi, kodda elle yazilmis
+                //   kisaltilmis kopya tutmuyoruz. Elle yazilan liste iki
+                //   secenekti (Erkek/Kadin); SKRS'de dort - "belirtilmedi"
+                //   ve "belirsiz" de gecerli kayit degerleri.
+                new("cinsiyet",           "cinsiyet",            "kod",   KodListesi: "hasta.cinsiyet", Baslik: "Cinsiyet"),
                 new("iseGirisTarihi",     "ise_giris_tarihi",    "tarih", Zorunlu: true, Baslik: "İşe Giriş Tarihi"),
                 new("istenCikisTarihi",   "isten_cikis_tarihi",  "tarih", Baslik: "İşten Çıkış Tarihi"),
                 new("calismaSekli",       "calisma_sekli",       "kod",   SabitKodlar: CalismaSekliKodlari, Baslik: "Çalışma Şekli"),
-                // Uyruk (ulke) - TekOzluk.tsx'te TekAdres'teki Ulke ile AYNI mekanizma
-                //   (yerlerHook.useYerler, serbest SabitKodlar DEGIL - ulke.ad metin olarak
-                //   yazilir), varsayilan TC (yerlerHook.VARSAYILAN_ULKE).
-                new("uyruk",              "uyruk",               "metin", EnFazlaUzunluk: 60, Baslik: "Uyruğu"),
+                // Uyruk artik SKRS ULKE KODLARI'ndan secilir (614/615): alan
+                //   metin degil kod, degeri MERNIS kodudur ve e-Nabiz'a
+                //   ceviri olmadan gider. Serbest metinken "TC", "TR",
+                //   "Türkiye" hepsi ayni seyi yaziyordu ve hicbiri USS'nin
+                //   kabul ettigi kod degildi.
+                new("uyruk",              "uyruk",               "kod",   KodTablosu: "public.v_skrs_ulke_lookup", Baslik: "Uyruğu"),
                 new("vardiyaTuru",        "vardiya_turu",        "kod",   SabitKodlar: VardiyaTuruKodlari, Baslik: "Vardiya Türü"),
                 new("sgkBaslamaTarihi",   "sgk_baslama_tarihi",  "tarih", Baslik: "SGK Başlama Tarihi"),
-                new("medeniHal",          "medeni_hal",          "kod",   SabitKodlar: MedeniHalKodlari, Baslik: "Medeni Hal"),
+                new("medeniHal",          "medeni_hal",          "kod",   KodListesi: "hasta.medeni_hal", Baslik: "Medeni Hal"),
                 // taraf.kan_grubu ile AYNI kod_liste (hasta hazirligi icin bosti, 8 standart
                 //   kan grubuyla dolduruldu, 049) - ileride Hasta karti da bunu kullanacak.
                 new("kanGrubu",           "kan_grubu",           "kod",   KodListesi: "taraf.kan_grubu", Baslik: "Kan Grubu"),
@@ -372,7 +379,7 @@ public static partial class KartKatalogu
                 new("denemeSuresi",       "deneme_suresi",       "kod",   SabitKodlar: DenemeSuresiKodlari, Baslik: "Deneme Süresi"),
                 // ik_karti.html mockup uyum turu (054): SGK Sicil No/Meslek Kodu/Yonetici.
                 new("sgkSicilNo",         "sgk_sicil_no",        "metin", EnFazlaUzunluk: 30, Baslik: "SGK Sicil No"),
-                new("meslekKodu",         "meslek_kodu",         "metin", EnFazlaUzunluk: 60, Baslik: "Meslek Kodu"),
+                new("meslekKodu",         "meslek_kodu",         "kod",   KodTablosu: "public.v_skrs_meslek_lookup", Baslik: "Meslek Kodu"),
                 new("yoneticiId",         "yonetici_taraf_id",   "kod",   KodTablosu: "public.v_personel_lookup", Baslik: "Yönetici")
             }, Baslik: "Özlük"),
             // ik_karti.html mockup "İzinler" sekmesi (IZIN 1:N) - GERCEK COKLU-SATIR grid,
@@ -488,15 +495,22 @@ public static partial class KartKatalogu
             // Kod bos birakilabilir (254): 41 eski departmanda kod yok, zorunlu
             //   yapmak hepsini elle kodlamayi gerektirirdi.
             //
-            // e-NABIZ (455): bu kod ayni zamanda USS paketlerindeki KLINIK
-            //   kodudur - SKRS "KLİNİKLER" listesinden gelir ve Entegrasyon
-            //   ekranindaki "SKRS klinik esle" ile bos kodlar toplu doldurulur.
-            //   AYRI KOLON YOK: iki yerde tutulan kod zamanla ayrisirdi.
-            // ETIKET SADECE "Kod" (kullanici): SKRS yalnizca HBYS kurulumunun
-            //   isi - ERP'de bolum kodunun e-Nabiz ile ilgisi yok ve parantez
-            //   icindeki aciklama alani hem daraltiyor hem yaniltiyordu.
-            //   Kolonun e-Nabiz'daki rolu YUKARIDAKI yorumda yasiyor.
-            new("kod",                "kod",                 "metin", EnFazlaUzunluk: 20,
+            // e-NABIZ (455/619): bu kod AYNI ZAMANDA USS paketlerindeki
+            //   KLINIK kodudur ve SKRS "KLİNİKLER" listesinden gelir.
+            //   AYRI KOLON YOK (kullanici): bir kod iki yerde tutulmaz.
+            //
+            //   619'a kadar buradaki degerler yanlis listeden - SKRS
+            //   PERSONEL BRANS - geliyordu ve her e-Nabiz paketi yanlis
+            //   klinigi bildiriyordu ("Acil" bolumunun kodu 102,
+            //   KLINIKLER'de 102 = ADLI TIP). Goc kodlari duzeltti;
+            //   karsiligi bulunamayan 52 bolumun kodu BOSALDI ve buradan
+            //   secilmeyi bekliyor.
+            //
+            //   Alan LOOKUP: serbest metinken SKRS'de olmayan bir sayi
+            //   yazmak mumkundu ve o sayi pakete yanlis klinik olarak
+            //   giderdi. Liste v_skrs_klinik_lookup (615).
+            new("kod",                "kod",                 "kod",
+                KodTablosu: "public.v_skrs_klinik_lookup",
                 Baslik: "Kod", Grup: "Kimlik"),
             new("ad",                 "ad",                  "metin", Zorunlu: true,
                 EnFazlaUzunluk: 100, Baslik: "Bölüm", Grup: "Kimlik"),
@@ -532,8 +546,16 @@ public static partial class KartKatalogu
         Alanlar: new KartAlani[]
         {
             new("id",          "id",           "sayi",  Yazilabilir: false),
+            // SKRS BRANS KODU (559/560) - kod eslemesi yerine kodun kendisi.
+            //   Bos birakilabilir: kuruma ozel gorevin SKRS karsiligi olmayabilir.
+            new("kod",         "kod",          "metin", EnFazlaUzunluk: 20,
+                Baslik: "SKRS Kodu", Grup: "Kimlik"),
             new("ad",          "ad",           "metin", Zorunlu: true, EnFazlaUzunluk: 100,
                 Baslik: "Görev", Grup: "Kimlik"),
+            // UST GOREV (570): agac dugumu. `departmanId` ile KARISTIRILMAMALI -
+            //   o "gorev hangi bolumde gecerli" sorusudur, bu ise listedeki yeri.
+            new("ustId",       "ust_id",       "kod",   KodTablosu: "public.v_gorev_agac_lookup",
+                Agac: true, Baslik: "Üst Görev", Grup: "Kimlik"),
             // Bos birakilirsa (0) bagimsiz gorev - her departmanda listelenir.
             new("departmanId", "departman_id", "kod",   KodTablosu: "public.v_departman_lookup",
                 Baslik: "Bölüm", Grup: "Kimlik"),
@@ -596,6 +618,13 @@ public static partial class KartKatalogu
             //   sunucu numara vermez, ad soyad yeter.
             new("kod",      "kod",      "metin", EnFazlaUzunluk: 20,
                 Baslik: "Kod", Grup: "Kimlik"),
+            // BOLUM AGAC COMBOSU, KODUN SAGINDA (577, kullanici). Alan ZATEN
+            //   VARDI (309: kurum secilince dolan duz combo) - yeri ve
+            //   cizimi degisti: IC HEKIMLE AYNI alan (`taraf.departman`),
+            //   ayni agac. Goruntuleme/lab merkezinde basvurunun bolumu
+            //   buradan cozulur, dis hekim ic hekimden farkli davranmaz.
+            new("departman","departman","kod",   KodTablosu: "public.v_departman_agac_lookup",
+                Agac: true, Baslik: "Bölüm", Grup: "Kimlik"),
             new("durum",    "durum",    "kod",   SabitKodlar: DurumKodlari,
                 Baslik: "Durum", Grup: "Kimlik"),
             // TEMSILCI = BIZIM personelimiz (kullanici): bu hekimle ilgilenen,
@@ -606,8 +635,6 @@ public static partial class KartKatalogu
             //   hekimin hastayi HANGI BOLUME gonderdigi. Basvuruda hekim
             //   secilince Bölüm alani bundan doldurulur - memur ayni bilgiyi
             //   ikinci kez secmesin. Bos birakilabilir (o zaman bolum elle).
-            new("departman", "departman", "kod", KodTablosu: "public.v_departman_lookup",
-                Baslik: "Bölüm", Grup: "Kimlik"),
             new("cepTel",   "cep_tel",  "metin", EnFazlaUzunluk: 30, Baslik: "Cep"),
             new("telefon",  "telefon",  "metin", EnFazlaUzunluk: 30, Baslik: "Telefon"),
             new("eposta",   "eposta",   "metin", EnFazlaUzunluk: 200, Baslik: "E-posta"),
@@ -619,6 +646,15 @@ public static partial class KartKatalogu
             //   KodTablosu secili kaydin ADINI cozmek icin durur.
             //   Grup "Hekim Bilgisi": sekme olarak DEGIL, Genel sekmesindeki
             //   Hekim Bilgisi kutusunun icinde cizilir (KartGrupSekmesi).
+            // BRANS = JENERIK GOREV AGACI (577): eskiden `taraf_personel.brans`
+            //   + `hekim.brans` KOD LISTESI idi; ayni bilgi ic hekimde
+            //   `taraf.gorev_id` + `personel_gorev` TABLOSU olarak duruyordu.
+            //   Tek kaynak: gorev agaci ("Hekim Branşları" dali).
+            //   YERI "Hekim Bilgisi" KUTUSUNUN EN USTU (kullanici): baslikta
+            //   BOLUM durur, brans hekimin mesleki bilgisidir - tescil no ve
+            //   calistigi kurumla ayni kutuya aittir.
+            new("gorevId",  "gorev_id", "kod",   KodTablosu: "public.v_gorev_agac_lookup",
+                Agac: true, Baslik: "Branş", Grup: "Hekim Bilgisi"),
             new("kurumId",  "bag_id",   "kod",   KodTablosu: "public.v_cari_lookup",
                 AramaKaynagi: "cari", Baslik: "Kurum", Grup: "Hekim Bilgisi"),
             // TC No YOK (kullanici): dis hekimin kimlik numarasini biz tutmuyoruz -
@@ -635,7 +671,10 @@ public static partial class KartKatalogu
             new DetayTanimi("hekim", "public.taraf_personel", "id", new KartAlani[]
             {
                 new("id",       "id",        "sayi", Yazilabilir: false),
-                new("brans",    "brans",     "kod", KodListesi: "hekim.brans",
+                // BRANS ALANI BASLIGA TASINDI (577) - burada birakmak ayni
+                //   bilgiyi iki yerden sordurur. Kolon duruyor (MEDULA
+                //   gonderimi okuyor), yazan tek yer artik kartin basligi.
+                new("bransEski","brans",     "kod", KodListesi: "hekim.brans", Gizli: true,
                     Baslik: "Branş"),
                 new("tescilNo", "tescil_no", "metin", EnFazlaUzunluk: 30,
                     Baslik: "Diploma / Tescil No"),
@@ -730,7 +769,7 @@ public static partial class KartKatalogu
                 // Hasta acilirken bile ZORUNLU: yas/cinsiyet olmadan tetkik
                 //   referansi ve hizmet uygunlugu kararlastirilamaz.
                 new("cinsiyet",    "cinsiyet",     "kod",   Zorunlu: true,
-                    SabitKodlar: CinsiyetKodlari, Baslik: "Cinsiyet"),
+                    KodListesi: "hasta.cinsiyet", Baslik: "Cinsiyet"),
                 new("dogumTarihi", "dogum_tarihi", "tarih", Zorunlu: true,
                     Baslik: "Doğum Tarihi"),
                 // Kurum KIMLIK SERIDINDE cizilir (266) - burada yalniz veri
@@ -837,20 +876,36 @@ public static partial class KartKatalogu
             new("baslangic",  "baslangic",   "tarih", Baslik: "Başlama"),
             new("bitis",      "bitis",       "tarih", Baslik: "Bitiş"),
             new("durum",      "durum",       "mantik", Baslik: "Aktif"),
-            // TARIFE listesi: hastanenin fiyati (TTB/HUV ya da kuruma ozel).
+            // HASTANENIN FIYATI: kuruma uygulanan tarife (TTB/HUV ya da ozel).
+            //   Adi "Fiyat Listesi" (587, kullanici) - kartin her yerinde ayni
+            //   sey "fiyat listesi" diye geciyor, tek yerde "tarife" demek
+            //   ikinci bir kavram varmis gibi duruyordu.
+            //   Lookup TARIFE TIPINI tasir (`ust_id`); ekran kurum turune
+            //   uymayan listeleri gizler - SGK sozlesmesine Özel tarifesi
+            //   secilmesi sessiz yanlis fiyatlandirmadir.
             new("fiyatListesiId", "fiyat_listesi_id", "kod",
-                KodTablosu: "public.v_fiyat_listesi_satis_lookup", Baslik: "Tarife Listesi"),
+                KodTablosu: "public.v_fiyat_listesi_tarife_lookup",
+                UstBilgisi: true, Baslik: "Fiyat Listesi"),
+            // KAMPANYA FIYAT LISTESININ SAGINDA (kullanici): ikisi de "bu kuruma
+            //   hangi fiyat uygulanir" sorusunun parcasi - liste taban, kampanya
+            //   onun uzerindeki indirim. SUT listesi ve SGK carisi ayri bir
+            //   konudur, arkaya duser.
+            new("kampanyaId", "kampanya_id", "kod",
+                KodTablosu: "public.v_kampanya_lookup", Baslik: "Kampanya"),
             // SUT listesi: SGK bedeli + katilim payi + EK KATKI kurali. Ek
             //   katki artik listede (kullanici: "fiyat listesine koysak daha
             //   anlasilir olur") - sozlesmede sayi tutulmaz.
+            //   Combo YALNIZ SUT tarifeli listeleri gosterir (kullanici): bu alan
+            //   SGK'nin odedigi bedeli tasir, oraya Özel ya da TTB listesi
+            //   secmek sessiz yanlis provizyon demektir. Suzme ekranda,
+            //   lookup'in tarife tipi (`ust_id`) uzerinden.
             new("sgkFiyatListesiId", "sgk_fiyat_listesi_id", "kod",
-                KodTablosu: "public.v_fiyat_listesi_satis_lookup", Baslik: "SUT Listesi"),
+                KodTablosu: "public.v_fiyat_listesi_tarife_lookup",
+                UstBilgisi: true, Baslik: "SUT Listesi"),
             // SGK payinin faturalanacagi cari: TSS/Karma'da odeyen kurumdan
             //   FARKLIDIR (sigorta sirketi ile SGK ayri kayitlardir).
             new("sgkKurumId", "sgk_kurum_id", "kod",
                 KodTablosu: "public.v_kurum_lookup", Baslik: "SGK Carisi"),
-            new("kampanyaId", "kampanya_id", "kod",
-                KodTablosu: "public.v_kampanya_lookup", Baslik: "Kampanya"),
             new("faturalamaModu", "faturalama_modu", "kod",
                 KodListesi: "kurum.faturalama_modu", Baslik: "Faturalama"),
             new("varsayilanKarsilama", "varsayilan_karsilama", "para",
@@ -889,7 +944,14 @@ public static partial class KartKatalogu
             //   reddeder. Kart tarafinda zorunluluk kalkti ki otomatik modda
             //   kullanici gereksiz yere numara uydurmasin.
             "kod" => a with { Baslik = "Dosya No", Zorunlu = false },
-            "vkno" => a with { Baslik = "TC No", Grup = "Kimlik", AltGrup = null },
+            // TCKN DOGRULAMASI (kullanici: "hasta bilgide tckn kontrolü yap"):
+            //   hastanin kimlik numarasi MEDULA provizyonuna, e-Nabiz
+            //   gonderimine ve e-Belge alici bilgisine gidiyor. Bos
+            //   birakilabilir (kimligi belirsiz hasta) ama YAZILDIYSA
+            //   tutarli olmali.
+            "vkno" => a with { Baslik = "TC No", Grup = "Kimlik", AltGrup = null,
+                               EnFazlaUzunluk = 11,
+                               Dogrulama = KimlikDogrulama.TcknTuru },
             // Hastada zorunluluklar GEVSEK: gorev/e-posta personel alanlaridir,
             //   hasta kaydi acilirken istenmez (kayit kabul hizli olmali).
             "cepTel" => a with { Baslik = "Telefon", Zorunlu = false },
@@ -929,10 +991,20 @@ public static partial class KartKatalogu
                 new("dogumTarihi", "dogum_tarihi", "tarih", Zorunlu: true, Baslik: "Dogum Tarihi"),
                 new("dogumYeri",   "dogum_yeri",   "metin", EnFazlaUzunluk: 60, Baslik: "Dogum Yeri"),
                 new("cinsiyet",    "cinsiyet",     "kod",   Zorunlu: true,
-                    SabitKodlar: CinsiyetKodlari, Baslik: "Cinsiyet"),
-                new("uyruk",       "uyruk",        "metin", EnFazlaUzunluk: 60, Baslik: "Uyrugu"),
+                    KodListesi: "hasta.cinsiyet", Baslik: "Cinsiyet"),
+                new("uyruk",       "uyruk",        "kod",   KodTablosu: "public.v_skrs_ulke_lookup",
+                    Baslik: "Uyruğu"),
                 new("kanGrubu",    "kan_grubu",    "kod",   KodListesi: "taraf.kan_grubu", Baslik: "Kan Grubu"),
-                new("meslek",      "meslek",       "kod",   SabitKodlar: HastaMeslekKodlari, Baslik: "Meslek"),
+                // Meslek listesi elle yazilmis yedi satirdi (Ev Hanimi, Isci,
+                //   Memur...); SKRS'nin MESLEKLER listesinde 5461 kayit var.
+                //   Liste buyuk oldugu icin acilir kutu degil arama lookup'i.
+                new("meslek",      "meslek",       "kod",   KodTablosu: "public.v_skrs_meslek_lookup",
+                    Baslik: "Meslek"),
+                // Hasta kayit tipi (610): USS 101'in zorunlu alani. Kart
+                //   acilisinda VATANDAS_KAYIT gelir, yabanci/kimliksiz
+                //   hastada degistirilir.
+                new("hastaTipi",   "hasta_tipi",   "kod",   KodListesi: "hasta.tipi",
+                    Baslik: "Kayıt Tipi"),
                 // Odeyen kurum (266) hastanin kendisinde: cok policeli izleme
                 //   ayri sekmede (taraf_hasta_kurum), burada tek alan yeter.
                 new("kurumId",     "kurum_id",     "kod",   KodTablosu: "public.v_kurum_lookup",
@@ -947,9 +1019,9 @@ public static partial class KartKatalogu
                 new("anaAdi",      "ana_adi",      "metin", EnFazlaUzunluk: 60, Baslik: "Ana Adı"),
                 new("babaAdi",     "baba_adi",     "metin", EnFazlaUzunluk: 60, Baslik: "Baba Adı"),
                 new("anneTckn",    "anne_tckn",    "metin", EnFazlaUzunluk: 11,
-                    Baslik: "Anne T.C. No"),
+                    Baslik: "Anne T.C. No", Dogrulama: KimlikDogrulama.TcknTuru),
                 new("babaTckn",    "baba_tckn",    "metin", EnFazlaUzunluk: 11,
-                    Baslik: "Baba T.C. No"),
+                    Baslik: "Baba T.C. No", Dogrulama: KimlikDogrulama.TcknTuru),
                 // Kimligi belirsiz hasta: TCKN olmadan kayit acilir.
                 new("kimliksiz",   "kimliksiz",    "mantik", Baslik: "Kimliksiz Hasta"),
                 new("yabanciHastaTuru", "yabanci_hasta_turu", "kod",

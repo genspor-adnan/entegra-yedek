@@ -180,7 +180,11 @@ describe('satirlari yeniden fiyatlama', () => {
     await waitFor(() => expect(result.current.fiyatListesiId).toBe(3));
     await act(async () => { await result.current.listeDegisti(8) });
     expect(result.current.fiyatListesiId).toBe(8);
-    expect(kalemFiyati).toHaveBeenCalledWith({ hizmetId: 900 },
-                                             { tarafId: 7, kurumId: 5, listeId: 8 });
+    // SOZLESME VE SGK ISARETI DE GECER (601): gecmezse sunucu rotayi
+    //   varsayilanla cozer, `sgkGerekli` false doner ve yeniden fiyatlama
+    //   satirlarin SUT bedelini siler.
+    expect(kalemFiyati).toHaveBeenCalledWith(
+      { hizmetId: 900 },
+      { tarafId: 7, kurumId: 5, listeId: 8, sozlesmeId: null, sgkKullan: null });
   });
 });

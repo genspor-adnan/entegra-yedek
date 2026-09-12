@@ -61,6 +61,16 @@ public sealed record KaynakTanimi(
     //   gorebiliyor (173), tek kolonla anlatilamiyor. Doluysa SubeKolonu yerine
     //   bu kullanilir.
     string? SubeKosulu = null,
+    /// <summary>
+    /// KULLANIM PUANI SIRALAMASI (550) - `Gorunum = "kullanim"`.
+    ///
+    /// Katalog 10 bin kalemlik; kurumun gercekte yaptigi is bunun kucuk bir alt
+    /// kumesi. Kullanim sayaci (`kalem_kullanim`) bunu KENDILIGINDEN ogrenir;
+    /// liste yalnizca ona gore siralar. Join ifadesindeki `{bolum}` yer tutucusu
+    /// PARAMETREYLE doldurulur - istekten SQL metni gelmez.
+    /// </summary>
+    string? KullanimJoin = null,
+    string? KullanimSirala = null,
     string? SabitKosul = null,     // "t.musteri = 1 or t.tedarikci = 1"
     string VarsayilanSirala = "id desc",
     string? KapsamKolonu = null,   // kullanici_kapsam (tur=1) suzmesi icin taraf id kolonu
@@ -105,6 +115,7 @@ public static partial class KaynakKatalogu
         Ekle(Personel());
         Ekle(Hasta());
         Ekle(DisHekim());
+        Ekle(BasvuruHekim());
         Ekle(Kurum());
         Ekle(Departman());
         Ekle(Kampanya());
@@ -258,6 +269,26 @@ public static partial class KaynakKatalogu
         Ekle(StokFisi(4));
     }
 
-    private static void Ekle(KaynakTanimi k) => Kaynaklar[k.Ad] = k;
+    /// <summary>
+    /// Kaynagi kataloga yazar; once KOLON ADI TEKRARINI yakalar.
+    ///
+    /// Ayni ada sahip iki kolon (or. bir alan sonradan ikinci kez eklenince)
+    /// listeyi SUZULENE KADAR bozmuyor: `Kolon(ad)` dizini ilk suzme/siralama
+    /// isteginde kuruluyor ve orada "An item with the same key has already been
+    /// added" ile 500 donuyordu - liste acilisi calistigi icin hata kaynaktan
+    /// cok uzakta goruluyor. Burada acilista, kaynagin adiyla birlikte patlar.
+    /// </summary>
+    private static void Ekle(KaynakTanimi k)
+    {
+        var tekrar = k.Kolonlar.GroupBy(x => x.Ad, StringComparer.Ordinal)
+                               .Where(g => g.Count() > 1)
+                               .Select(g => g.Key)
+                               .ToArray();
+        if (tekrar.Length > 0)
+            throw new InvalidOperationException(
+                $"Kaynak '{k.Ad}': tekrarlanan kolon adi: {string.Join(", ", tekrar)}");
+
+        Kaynaklar[k.Ad] = k;
+    }
 
 }

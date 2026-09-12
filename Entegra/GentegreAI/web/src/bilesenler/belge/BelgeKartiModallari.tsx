@@ -49,9 +49,21 @@ export interface BelgeKartiModalProps {
   depoBelgesi: boolean;
   yerelPara: string;
   tarih: string;
-  odeyenKurumId: number | null;
+  /** Ödeyen kurum - kart tarafında çözülür; modallar artık okumuyor (586:
+      "Ek Katkı" kutusu kalktı, payları sunucu bölüyor). */
+  odeyenKurumId?: number | null;
   /** Belgenin fiyat listesi (495) - arama ekraninin fiyat sutunu icin. */
   fiyatListesiId?: number | null;
+  /** SUT bedeli icin sozlesme (602) - arama ekraninin SUT sutunu icin. */
+  sgkBaglami?: { sozlesmeId?: number | null; kurumId?: number | null;
+                 sgkKullan?: number | null };
+  /** Belgenin fiyat listesinin tarife tipi (586): 1 Özel · 2 TTB/HUV · 3 SUT. */
+  tarifeTipi?: number;
+  /** Ödeme rotası (595) - Katkı Fiyatı kutusu yalnız TSS/SGK'da sorulur. */
+  rota?: number;
+  /** BASVURUNUN BOLUMU (550): hizmet aramasi o poliklinigin kullanim
+      puanina gore siralansin. Basvuru disi belgelerde null. */
+  bolumId?: number | null;
   depo: Kisi | null;
   sonuc: BelgeYaniti | null;
   setSonuc: Ayarla<BelgeYaniti | null>;
@@ -96,6 +108,17 @@ export interface BelgeKartiModalProps {
   tahsilatTutariSor(baslik: string): Promise<number>;
   /** POS tahsilati sonrasi ayarli aksiyon (355) - otomatik fis / sor. */
   posSonrasi?(tur: number): Promise<void>;
+  /**
+   * HIZLI TAHSILAT - KARTIN SARMALANMIS SURUMU (kullanici: "tahsilat yaptığım
+   * halde açık tahsilat 500 görünüyor").
+   *
+   * Kart, `tahsilat.hizliTahsilat`i sarmalayip ardina kurum tahakkukunu ve
+   * SATIR TAZELEMESINI ekliyor; burada kanca DOGRUDAN cagrilinca o adimlar
+   * atlaniyor ve serit/dipnot tahsilattan once ki rakamda kaliyordu.
+   * Verilmezse eski davranis (dogrudan kanca).
+   */
+  hizliTahsilat?(tur: number, hesapId: number, tutar: number,
+                 hesapAdi: string): Promise<void>;
   hesapSecim: 'B' | 'P' | null;
   setHesapSecim: Ayarla<'B' | 'P' | null>;
 
@@ -122,7 +145,8 @@ export interface BelgeKartiModalProps {
 export function BelgeKartiModallari(p: BelgeKartiModalProps) {
   const {
     kayitliId, tur, bilgi, basvuruMu, alisMi, irsaliyeMi, siparisMi, stokFisiMi,
-    depoBelgesi, yerelPara, tarih, odeyenKurumId, fiyatListesiId, depo, sonuc, setSonuc,
+    depoBelgesi, yerelPara, tarih, fiyatListesiId, sgkBaglami, tarifeTipi, rota, bolumId,
+    depo, sonuc, setSonuc,
     cari, setCari, cariArama, setCariArama,
     hastaAramaMetni, setHastaAramaMetni, hastaAramaYeni, setHastaAramaYeni,
     hastaKartId, setHastaKartId,
@@ -130,7 +154,7 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
     personelArama, setPersonelArama, setTeslimEden, setTeslimAlan,
     satirlar, setSatirlar, stokArama, setStokArama, aramaEklenen, setAramaEklenen,
     stokSecildi, kalem, setKalem, kalemKaydet, iadeArama, setIadeArama,
-    tahsilat, tahsilatTutariSor, posSonrasi, hesapSecim, setHesapSecim,
+    tahsilat, tahsilatTutariSor, posSonrasi, hizliTahsilat, hesapSecim, setHesapSecim,
     donusum, setDonusum, donusumPay, setDonusumPay,
     acilanDonusum, setAcilanDonusum, donusumleriYukle,
     terminAcik, setTerminAcik, rolModali, setRolModali,
@@ -250,6 +274,12 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
           // FIYAT SUTUNU BELGENIN LISTESINDEN (495): aramada gorunen rakam
           //   ile kalem penceresinde cikan rakam ayni olsun.
           fiyatListesiId={fiyatListesiId}
+          // SUT SUTUNU (602): SGK'nin odedigi bedel de aramada gorunsun -
+          //   "Fiyat" belgenin listesinden gelir, TSS'de o TTB tarifesidir.
+          sgkBaglami={sgkBaglami}
+          // KULLANIM SIRASI (550): basvuruda hizmetler bu poliklinigin
+          //   gecmisine gore siralanir.
+          bolumId={bolumId}
           onKapat={() => { setStokArama(false); setAramaEklenen({ sayi: 0, son: '' }) }}
           onSec={sec => void stokSecildi(sec)}
         />
@@ -261,7 +291,12 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
           satir={kalem}
           transferMi={bilgi.kalem === 'miktar'}
           siparisMi={siparisMi}
-          paylasimli={basvuruMu && !!odeyenKurumId}
+          // TARIFE TIPI (586): 1 Özel · 2 TTB/HUV · 3 SUT - pencere Katkı
+          //   Fiyatı kutusunu ve iskontonun tabanını buna göre belirler.
+          tarifeTipi={tarifeTipi}
+          // ROTA (595): ÖSS ve Karma'da hasta ek katkısı YOKTUR - kutu
+          //   yalnız TSS/SGK'da sorulur.
+          rota={rota}
           // Basvuruda fiyat HER ZAMAN KDV dahil girilir (kullanici).
           basvuruMu={basvuruMu}
           anaBirimKod={kalem?.birim ?? 0}
@@ -299,12 +334,12 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
             setHesapSecim(null);
             const tutar = await tahsilatTutariSor(hesapSecim === 'B' ? 'Banka' : 'POS');
             if (!(tutar > 0)) return;
-            await tahsilat.hizliTahsilat(t, h.id, tutar, h.ad);
-            // POS SONRASI OTOMATIK FIS (355) HIZLI AKISTA DA (kullanici):
-            //   kural yalniz kasa KARTI kapanirken isliyordu; POS dugmesiyle
-            //   tahsil edilince fis hic kesilmiyordu - ayni ayar iki yolda
-            //   farkli davraniyordu.
-            await posSonrasi?.(t);
+            // POS SONRASI OTOMATIK FIS (355), kurum tahakkuku ve satir
+            //   tazelemesi SARMALAYICIDA (kartin `hizliTahsilat`i). Burada
+            //   ayrica `posSonrasi` cagirmak, sarmalayici verildiginde fisi
+            //   IKI KEZ kesme riski demekti.
+            if (hizliTahsilat) await hizliTahsilat(t, h.id, tutar, h.ad);
+            else { await tahsilat.hizliTahsilat(t, h.id, tutar, h.ad); await posSonrasi?.(t) }
           })()}
         />
       )}

@@ -51,14 +51,16 @@ export function ttbFiyatTuret(durum: DetayDurumu): DetayDurumu {
 
 export function tarifeGizli(tip: number): string[] {
   // Ek katki alanlari 532'de fiyat listesinden kalkti - listede yok.
-  if (tip === 2) return [];                       // katsayi · carpan · fiyat · katki
-  if (tip === 3) return ['tabanFiyat', 'carpan']; // fiyat SKRS'den, katsayi yok
+  // HUV KODU yalniz TTB/HUV tarifesinde anlamli (kullanici): SUT listesinde
+  //   kalemin kodu zaten SUT kodudur, Özel'de tarife kodu diye bir sey yok.
+  if (tip === 2) return [];                       // katsayi · carpan · fiyat · katki · huv
+  if (tip === 3) return ['tabanFiyat', 'carpan', 'huvKodu'];  // fiyat SKRS'den
   // OZEL (1) VE TARIFESI BILINMEYEN (542): yalniz Fiyat. ERP kurulumunda
   //   tarife alani karta HIC gelmiyor (`UrunModu`) - deger okunamayinca eski
   //   kod `0` sayip TUM sutunlari aciyordu: kullanici Özel listede katsayi,
   //   carpan ve katki sutunlarini goruyordu (kullanici: "sadece fiyat olması
   //   gerekir"). ERP'de DB de 1 yaziyor, ekran da 1 varsayar.
-  return ['tabanFiyat', 'carpan', 'katkiTutar'];
+  return ['tabanFiyat', 'carpan', 'katkiTutar', 'huvKodu'];
 }
 
 /**
@@ -117,4 +119,29 @@ export function fiyatSatirKurali(
     };
   }
   return null;
+}
+
+
+/**
+ * KURUM TÜRÜNÜN TARİFESİ (587, kullanıcı: "combo içine başlıktaki kurum türü
+ * ne ise ona uygun fiyat listeleri gelsin").
+ *
+ *   1 Özel (Ücretli)  -> Özel tarife (1): hasta kendi öder, liste hastanenin
+ *                        kendi fiyatıdır.
+ *   2 ÖSS             -> TTB/HUV (2): özel sigorta hastanenin TTB tarifesi
+ *                        üzerinden anlaşır.
+ *   3 SGK             -> TTB/HUV (2): SUT bedeli AYRI alanda (SUT Listesi);
+ *                        buradaki liste hastanenin tarifesidir.
+ *   4 Kurumu Öder     -> Özel (1): firma anlaşması, hastanenin kendi fiyatı.
+ *
+ * Eşleme çok-a-bir olduğu için lookup görünümü (`v_fiyat_listesi_tarife_lookup`)
+ * listeyi TARİFE TİPİYLE işaretler, kurum türünden tarifeye çeviri burada
+ * durur - liste satırı tek üst taşıyabilir.
+ *
+ * 0 döner: kurum türü seçilmemiş - süzme yapılmaz, tüm satış listeleri gelir.
+ */
+export function kurumTarifeTipi(kurumTuru: number): number {
+  if (kurumTuru === 2 || kurumTuru === 3) return 2;
+  if (kurumTuru === 1 || kurumTuru === 4) return 1;
+  return 0;
 }

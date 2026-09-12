@@ -11,6 +11,13 @@ public sealed class ListeIstegi
     public List<string>? Toplam { get; set; }
     public string? Gorunum { get; set; }
 
+    /// <summary>
+    /// KULLANIM GORUNUMUNUN BOLUMU (550). `Gorunum = "kullanim"` iken hangi
+    /// poliklinigin gecmisine gore siralanacagi. Bos/0 = yalniz kurum geneli.
+    /// Baska gorunumlerde YOK SAYILIR.
+    /// </summary>
+    public int? Bolum { get; set; }
+
     /// <summary>Sozlesme geregi ust sinir 500.</summary>
     public const int EnBuyukBoyut = 500;
 }

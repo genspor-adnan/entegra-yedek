@@ -551,6 +551,15 @@ public static partial class KaynakKatalogu
                                               Genislik: 70),
             new("turAdi",    "t.ad",          "metin", "Paket Türü", Genislik: 190),
             new("turKod",    "t.kod",         "metin", "Tür Kodu", Varsayilan: false),
+            // PROTOKOL NO hastanin SOLUNDA (kullanici): kuyrukta bir satiri
+            //   hastanenin kendi numarasiyla aramak, hasta adiyla aramaktan
+            //   daha sik. Numara paketin KAYNAK BELGESINDEN okunur - paket
+            //   kendi numarasini (paket_no) zaten tasiyor, o baska sey.
+            new("protokolNo",
+                "coalesce((select b.belge_no from public.belge b "
+                + "where b.id = p.kaynak_id and p.kaynak_tur = 1), '')",
+                                              "metin", "Protokol No",
+                                              Hizalama: "orta", Genislik: 150),
             new("hastaAdi",  "coalesce(h.unvan, '')", "metin", "Hasta", Genislik: 200),
             new("hekimAdi",  "coalesce(k.ad, '')", "metin", "Hekim", Genislik: 170,
                                               Varsayilan: false),

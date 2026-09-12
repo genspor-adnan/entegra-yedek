@@ -1,6 +1,6 @@
 import { TelefonGirdi } from './TelefonGirdi';
 import { c } from '../dil/ceviri';
-import { telefonAlaniMi, epostaGecerliMi } from './alanBicim';
+import { telefonAlaniMi, epostaGecerliMi, bicimHatasi } from './alanBicim';
 import { agacSecenekleri } from './agacSecenek';
 import type { KartAlanMeta, KartMetaYaniti, DovizMetasi } from '../api/sozlesme';
 
@@ -309,8 +309,28 @@ export function alanCizici(b: AlanCizimBaglami) {
                                    : String(deger[a.ad] ?? '')}
           maxLength={a.enFazlaUzunluk ?? undefined}
           disabled={salt || !a.yazilabilir}
-          onChange={e => setDeger(d => ({ ...d, [a.ad]: e.target.value }))}
+          // BICIM KURALI ANINDA (TCKN): yanlis numarayi kaydetmeye kadar
+          //   saklamak, kullaniciyi kart kapandiktan sonra geri getiriyordu.
+          //   Kural alanin metasindan geliyor - ekran alan adi bilmiyor.
+          onChange={e => {
+            const v = e.target.value;
+            setDeger(d => ({ ...d, [a.ad]: v }));
+            if (a.dogrulama) setAlanHatalari(h => {
+              const hata = bicimHatasi(a.dogrulama, v);
+              if (!hata) { const { [a.ad]: _cikar, ...kalan } = h; return kalan }
+              // Yazarken ARA DURUMDA kirmizi yanip sonmesin: tam uzunluga
+              //   gelmeden hata gosterilmez.
+              return v.trim().length >= 11 ? { ...h, [a.ad]: hata } : h;
+            });
+          }}
           onBlur={e => {
+            if (a.dogrulama) {
+              const hata = bicimHatasi(a.dogrulama, e.target.value);
+              setAlanHatalari(h => {
+                if (!hata) { const { [a.ad]: _cikar, ...kalan } = h; return kalan }
+                return { ...h, [a.ad]: hata };
+              });
+            }
             if (EPOSTA_ALANLARI.has(a.ad)) {
               const gecerli = epostaGecerliMi(e.target.value);
               setAlanHatalari(h => {

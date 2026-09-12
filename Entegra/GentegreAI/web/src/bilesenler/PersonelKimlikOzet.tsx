@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { DetayDurumu, Satir } from './GenDetayTablo';
 import type { KartAlanMeta, KartDetayMeta } from '../api/sozlesme';
-import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
+import { useYerler, VARSAYILAN_UYRUK } from './yerlerHook';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { TekOzluk } from './TekOzluk';
@@ -250,9 +250,11 @@ export function PersonelKimlikOzet({
                 {kartAdi !== 'hasta' && (
                   <label className="alan tip-kod" style={{ flex: '0 1 50%' }}>
                     <span className="etiket">Uyruk</span>
-                    <select value={String(satir.uyruk ?? VARSAYILAN_ULKE)} disabled={saltOkunur}
+                    {/* Değer SKRS MERNİS kodu (614/617) - ülke adı değil. */}
+                    <select value={String(satir.uyruk ?? VARSAYILAN_UYRUK)} disabled={saltOkunur}
                       onChange={e => ozlukDegis({ uyruk: e.target.value })}>
-                      {(yerler?.ulkeler ?? []).map(y => <option key={y.id} value={y.ad}>{y.ad}</option>)}
+                      {(yerler?.ulkeler ?? []).filter(y => y.skrsKod != null)
+                        .map(y => <option key={y.id} value={String(y.skrsKod)}>{y.ad}</option>)}
                     </select>
                   </label>
                 )}

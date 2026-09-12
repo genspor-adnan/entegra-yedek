@@ -7,7 +7,7 @@ import type { BasvuruBilgi } from '../BasvuruSekmesi';
 
 export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
                                   kurumTuru, belgeId, tarafId, hekimId,
-                                  onTazele }: {
+                                  onTazele, kaydet }: {
   bilgi: BasvuruBilgi;
   degistir(y: Partial<BasvuruBilgi>): void;
   kilitli: boolean;
@@ -18,6 +18,16 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
   hekimId?: number | null;
   /** Provizyon paylari belge satirlarina yazar - kart yeniden okunmali. */
   onTazele?(): void;
+  /**
+   * BELGEYI KAYDEDIP KIMLIGINI DONER (kullanici: "provizyon al butonuna
+   * basınca kaydedilmemiş ücret satırlarını kaydetsin").
+   *
+   * Provizyon SUNUCUDAKI satirlar uzerinden hesaplanir: gride girilmis ama
+   * gonderilmemis ucretler sorguya hic girmiyordu - kurum payi eksik
+   * cikiyordu ve kullanici sebebini goremiyordu. Kayitli ve degismemis
+   * belgede hicbir sey yapmaz, kimligi doner; dogrulama duserse 0 doner.
+   */
+  kaydet?(): Promise<number>;
   /** Odeyen kurumun turu (taraf_kurum.tur): 1 Özel / 2 ÖSS / 3 SGK. */
   kurumTuru?: number;
   /** Belgenin odeyen kurumu - SGK bloÄunda bilgi olarak gosterilir. */
@@ -58,11 +68,14 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
    * okunmali, yoksa ekranda eski paylar durur.
    */
   const provizyonAl = async () => {
-    if (!belgeId) { mesaj('Önce başvuruyu kaydedin.'); return }
     if (!Number(bilgi.ossKurumId ?? 0)) { mesaj('Önce sigorta şirketini seçin.'); return }
+    // ONCE KAYDET: bekleyen ucret satirlari sunucuya yazilsin - provizyon
+    //   onlar uzerinden hesaplanir.
+    const id = kaydet ? await kaydet() : (belgeId ?? 0);
+    if (!id) { if (!kaydet) mesaj('Önce başvuruyu kaydedin.'); return }
     setSigortaMesgul(true);
     await guvenli(async () => {
-      const y = await api.sigortaProvizyon({ belgeId });
+      const y = await api.sigortaProvizyon({ belgeId: id });
       mesaj(y.mesaj);
       onTazele?.();
     });

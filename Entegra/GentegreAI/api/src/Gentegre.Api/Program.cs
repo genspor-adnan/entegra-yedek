@@ -244,6 +244,7 @@ uygulama.ReferansUclariniEkle();
 uygulama.BelgeUclariniEkle();
 uygulama.KasaUclariniEkle();
 uygulama.FiyatListesiUclariniEkle();
+uygulama.IceriAlmaUclariniEkle();
 uygulama.AksiyonUclariniEkle();
 uygulama.KodListeUclariniEkle();
 uygulama.UtsUclariniEkle();

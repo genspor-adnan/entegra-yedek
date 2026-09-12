@@ -8,7 +8,7 @@ import { PersonelKimlikOzet } from '../PersonelKimlikOzet';
 import { KartResimKutusu } from '../KartResimKutusu';
 import { RolKullanicilari } from '../RolKullanicilari';
 import { TEK_SUTUN_KARTLAR } from '../kartSekmeleri';
-import { VARSAYILAN_ULKE } from '../yerlerHook';
+import { VARSAYILAN_UYRUK } from '../yerlerHook';
 import type { KartAlanMeta, KartMetaYaniti } from '../../api/sozlesme';
 import type { Deger } from '../kartAlanCizim';
 
@@ -108,7 +108,12 @@ if (personelIletisimSekmesi) {
                  Bilgisi" grubunun alanlari buraya cizilir. */
               ekAlanlar={renderAlanListesi(
                 gruplar.find(([ad]) => ad === 'Hekim Bilgisi')?.[1] ?? [])}
-              ekAlanlarSira={1}
+              /* EN USTE (kullanici: "hekim bilgisi bölümünde üstte Branş"):
+                 grubun ilk alani Branş, hemen altinda Kurum; detayin kendi
+                 alanlari (tescil no, calisma sekli) onlarin altinda kalir.
+                 Eskiden 1'di - brans o zaman detayin ILK alaniydi, kurum
+                 onun altina girsin diye. */
+              ekAlanlarSira={0}
             />
             </div>
           ) : null;
@@ -367,7 +372,7 @@ const adliBlok = (
                       ilIlceAyniSatir
                       baslikGizli
                       uyruk={String((detaylar[ozlukDetay.ad]?.guncel[0] ?? {}).uyruk
-                                    ?? VARSAYILAN_ULKE)}
+                                    ?? VARSAYILAN_UYRUK)}
                       onUyrukDegis={v => setDetaylar(t => {
                         const d = t[ozlukDetay.ad] ?? bosDetay();
                         const ilk = { ...(d.guncel[0] ?? {}), uyruk: v };

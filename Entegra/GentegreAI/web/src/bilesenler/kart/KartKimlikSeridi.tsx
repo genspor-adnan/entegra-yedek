@@ -87,14 +87,17 @@ export function KartKimlikSeridi({
             );
           })() : kaynak === 'dis-hekim' ? (
             /* DIS HEKIM (305/306) serit duzeni: avatar · Ünvan · Ad · Soyad ·
-               Kod · Temsilci · Durum. Departman/gorev YOK - dis hekim bizim
-               kadromuzda degil; Temsilci ise BIZIM personelimiz (bu hekimle
-               ilgilenen kisi). */
+               Kod · Bölüm · Temsilci · Durum. Temsilci BIZIM personelimiz (bu
+               hekimle ilgilenen kisi), dis hekimin kendi kurumundan biri degil.
+               BOLUM KODUN SAGINDA (577, kullanici): serit SABIT alan listesi -
+               alani katalogda tanimlamak yetmiyordu, burada acikca cizilmeyen
+               Kimlik alani hic gorunmuyor. Goruntuleme/lab merkezinde
+               basvurunun bolumu bu alandan cozulur. */
             /* Ünvan ve Kod YARIM sutun (kullanici): kisa degerler - "Prof.Dr."
-               ve "DR-0042" tam sutunda bos yer birakiyordu. Ad/Soyad ve
+               ve "DR-0042" tam sutunda bos yer birakiyordu. Ad/Soyad, Bölüm ve
                Temsilci tam sutun kalir. */
             <div className="alan-izgara"
-                 style={{ gridTemplateColumns: '0.5fr 1fr 1fr 0.5fr 1fr 0.5fr' }}>
+                 style={{ gridTemplateColumns: '0.5fr 1fr 1fr 0.5fr 1fr 1fr 0.5fr' }}>
               <label className="alan tip-kod">
                 <span className="etiket">Ünvan</span>
                 <select value={unvanOneki.onek} disabled={salt}
@@ -106,6 +109,7 @@ export function KartKimlikSeridi({
               {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'ad'))}
               {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'soyad'))}
               {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'kod'))}
+              {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'departman'))}
               {renderAlanListesi((meta?.alanlar ?? []).filter(a => a.ad === 'temsilci'))}
               {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'durum'))}
             </div>

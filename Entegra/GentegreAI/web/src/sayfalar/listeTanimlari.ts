@@ -312,8 +312,10 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     //   (odeyen kurum, poliklinik, hekim) - kullanici.
     //   TAMAMLANMA rozeti PROTOKOL NO'NUN SAGINDA (kullanici): once belgenin
     //   kimligi (tarih, protokol), hemen ardindan "nerede kaldi" rozeti.
+    //   SOZLESME kurumun HEMEN SAGINDA (kullanici): ayni sigortayla ÖSS /
+    //   TSS / Karma police ayri sartlarla calisir, odeme rotasini o belirler.
     kolonSirasi: ['belgeTarihi', 'belgeNo', 'tamamlanma', 'tarafUnvan',
-                  'odeyenKurumAdi', 'poliklinik', 'doktor',
+                  'odeyenKurumAdi', 'sozlesmeAdi', 'poliklinik', 'doktor',
                   'genelToplam', 'tahsilat'],
     // TAHSILAT da toplanir (kullanici): "ne kadari geldi" sorusu genel
     //   toplamin yaninda okunsun - ikisinin farki gunun acik borcudur.
@@ -1336,10 +1338,14 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kartYolu: '/dis-hekim', kartBaslik: 'Dış Doktor',
     aksiyonEkrani: 'dis-hekim-liste', cipler: DURUM_CIPLERI,
     // Tescil no ve e-posta KARTTA kalir, listede yer kaplamasin (kullanici).
-    gizliKolonlar: ['brans', 'telefonHam', 'tescilNo', 'eposta'],
+    //   BRANS DA listede YOK (kullanici): bolum zaten var, hekimin dali
+    //   kartta okunur - iki benzer kolon yan yana satiri uzatiyordu.
+    gizliKolonlar: ['brans', 'bransAdi', 'telefonHam', 'tescilNo', 'eposta'],
     // Kolon sirasi TAM verilir: temsilci DURUM'un solunda olsun istendi ve
     //   kaydedilmis kolon tercihi olan kullanicida yeni kolon hic gorunmezdi.
-    kolonSirasi: ['unvan', 'bransAdi', 'kurum', 'cepTel',
+    //   Bölüm AD SOYADIN SAGINDA (kullanici): hekimi once hangi bolume
+    //   gonderdigiyle ariyoruz, brans ondan sonra gelir.
+    kolonSirasi: ['unvan', 'departmanAdi', 'kurum', 'cepTel',
                   'istemSayisi', 'sonIstem', 'temsilci', 'durum'],
     // GONDERIM GECMISI sekmesi katalog detayi DEGIL (kullanici: "frame kaldir,
     //   readonly gengrid yap"): sekme yer tutucu olarak acilir, icini
@@ -1906,7 +1912,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kaynak: 'stok', baslik: 'Stoklar', yol: 'Stok › Stok Karti', kartYolu: '/stok',
     aksiyonEkrani: 'stok-liste', cipler: DURUM_CIPLERI,
     // Kategori KOD'un SOLUNDA (kullanici) - hizmet listesiyle ayni duzen.
-    kolonSirasi: ['kategori', 'kod', 'ad', 'kalan', 'anaBirim', 'durum'],
+    // Kisa Ad, Ad'in SOLUNDA (552 - hizmet listesiyle ayni duzen).
+    kolonSirasi: ['kategori', 'kod', 'kisaAd', 'ad', 'kalan', 'anaBirim', 'durum'],
     // Ciplerin sagina STOK kategori agaci (1 = stok, 346).
     kategoriSuzgeci: 1,
     kategoriSuzgecAlani: 'kategoriId',
@@ -1932,7 +1939,8 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
     kategoriSuzgeci: 2,
     // Kategori KOD'un SOLUNDA (kullanici): listede once "hangi grup", sonra
     //   kod ve ad okunuyor.
-    kolonSirasi: ['kategoriAdi', 'kod', 'ad', 'durum'],
+    // Kisa Ad, Ad'in SOLUNDA (549, kullanici).
+    kolonSirasi: ['kategoriAdi', 'kod', 'kisaAd', 'ad', 'durum'],
     menuGrup: 'Stok & Hizmet', menuAd: 'Hizmet Listesi', ic: '🛠️', yetkiKodu: 'hizmet',
     menuSira: 20,
   },
@@ -2390,9 +2398,13 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   {
     // Rol'un durum kolonu "durum" degil "aktif" - DURUM_CIPLERI (alan:'durum') buraya
     //   UYMAZ, kullanilmadi (yoksa "Bilinmeyen alan: durum" 400 verirdi).
-    kaynak: 'rol', baslik: 'Roller', yol: 'Yonetim › Roller ve Yetkiler', kartYolu: '/rol',
+    kaynak: 'rol', baslik: 'Roller', yol: 'IK › Roller ve Yetkiler', kartYolu: '/rol',
     aksiyonEkrani: 'rol-liste',
-    menuGrup: 'Yönetim', menuAd: 'Roller', ic: '🛡️', yetkiKodu: 'rol',
+    // ROLLER IK ALTINDA, PERSONELDEN SONRA (kullanici). Rol bir YETKI kaydi
+    //   olsa da gunluk kullanimda personelin ozelligi gibi okunuyor: "kim ne
+    //   yapabilir" sorusu personel listesinin hemen yanindan cevaplaniyor.
+    //   menuSira 15: Personel Listesi (10) ile Prim grubunun (20+) arasi.
+    menuGrup: 'İK', menuAd: 'Roller', ic: '🛡️', yetkiKodu: 'rol', menuSira: 15,
   },
   {
     // FIRMA / SUBE BILGILERI - mockup: Ekranlar/firma_bilgileri.html.
@@ -2458,6 +2470,15 @@ export const LISTELER: (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: s
   //   listeleriydi; ikisi de "Yönetim › Bölüm / Görev" ekranindaki GERCEK
   //   tablolarin (departman, personel_gorev) kopyasiydi. Ayni seyi iki yerde
   //   tanimlatmak, hangisinin gecerli oldugunu belirsiz birakiyordu.
+  {
+    // EXCEL'DEN ICERI ALMA (548) - dort adimli sihirbaz, liste degil.
+    //   Menude "Modül Ayarları"nin altinda degil, kendi basligi altinda:
+    //   ayar degil VERI ISI - cari/stok/hizmet kartlarini yaziyor.
+    kaynak: 'iceri-alma', rota: 'iceri-alma', baslik: "Excel'den İçeri Alma",
+    yol: 'Yonetim › Veri Aktarımı › İçeri Alma', ozelSayfa: true,
+    menuGrup: 'Yönetim', menuAltGrup: 'Veri Aktarımı', menuAd: "Excel'den İçeri Alma",
+    menuSira: 1, ic: '⬆', yetkiKodu: 'ayar',
+  },
   {
     // Alis belgesi ayarlari: yalniz Genel - alis faturasini GIB'e biz gondermeyiz.
     kaynak: 'alis-ayarlar', baslik: 'Alış Belgeleri', yol: 'Yonetim › Ayarlar › Alış Belgeleri',

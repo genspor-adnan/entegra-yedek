@@ -41,3 +41,36 @@ export function telefonGecerliMi(deger: string): boolean {
   }
   return rakam.length >= 6 && rakam.length <= 15;
 }
+
+/**
+ * T.C. KİMLİK NUMARASI (NVİ algoritması) - sunucudaki `KimlikDogrulama` ile
+ * AYNI kural. İki yerde durmasının sebebi: sunucu kuralın sahibi (istek
+ * doğrudan API'ye de gelebilir), ekran ise kullanıcıyı kaydetmeye kadar
+ * bekletmemek için aynı kontrolü anında yapar.
+ *
+ * BOŞ DEĞER GEÇERLİ: zorunluluk ayrı bir karardır (kimliği belirsiz hasta
+ * TCKN'siz açılır).
+ */
+export function tcknGecerliMi(deger: string): boolean {
+  const s = (deger ?? '').trim();
+  if (s.length === 0) return true;
+  if (!/^[1-9][0-9]{10}$/.test(s)) return false;
+
+  const h = [...s].map(Number);
+  const tek = h[0] + h[2] + h[4] + h[6] + h[8];
+  const cift = h[1] + h[3] + h[5] + h[7];
+  const onuncu = (((tek * 7) - cift) % 10 + 10) % 10;
+  if (onuncu !== h[9]) return false;
+
+  const ilkOn = h.slice(0, 10).reduce((t, x) => t + x, 0);
+  return ilkOn % 10 === h[10];
+}
+
+/** Alanın biçim kuralı - geçersizse mesaj, geçerliyse null. */
+export function bicimHatasi(dogrulama: string | null | undefined,
+                            deger: string): string | null {
+  if (dogrulama !== 'tckn') return null;
+  return tcknGecerliMi(deger)
+    ? null
+    : 'T.C. kimlik numarası geçersiz - 11 hane olmalı ve doğrulama hanesi tutmalı.';
+}

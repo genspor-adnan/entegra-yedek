@@ -6,6 +6,7 @@ import { bruta, payBrute } from '../../sayfalar/belgeKarti/kdvModu';
 import {
   KOVALAR, ROTA_ADI, kovaKullanilir,
 } from '../../sayfalar/belgeKarti/dagilimKovalari';
+import { SAF_SGK_ROTA } from '../../sayfalar/belgeKartiKurallari';
 import type { BelgeYaniti } from '../../api/sozlesme';
 
 /**
@@ -22,7 +23,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
     kilitli, bilgi, onizleme, sonuc, transferBaslikEksigi,
     depoBelgesi, stokFisiMi, talepMi,
     setStokArama, setKalem, seciliSil, satirTikla, sonTiklanan, secimDegis, doviz,
-    fiyatListesi, paylasim, basvuruMu, depoSecimi, onRoller,
+    fiyatListesi, paylasim, basvuruMu, depoSecimi, onRoller, dagilimOnizleme,
   } = p;
 
   /** Tarih kolonu KOD'un solunda mi (basvuru) yoksa miktarin solunda mi. */
@@ -67,6 +68,33 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
   /** Hicbir satirda aciklama yoksa kolon HIC cizilmez (kullanici) - bos bir
    *  sutun gridi daraltiyordu. */
   const aciklamaVar = satirlar.some(x => String(x.aciklama ?? '').trim() !== '');
+
+  /**
+   * SAF SGK: grid de fiyat penceresiyle AYNI dizilir (602, kullanici: "gridi de
+   * aynı yap"). O rotada satirin iki bedeli vardir ve kolonlar sunu okutur:
+   *
+   *     Hasta Katkısı 1.500,00 | SUT 85,73 | Tutar 1.585,73 | Hasta Payı 1.600,00
+   *
+   * "Birim Fiyat" kolonu HASTA KATKISINI gosterir (iskonto ona isler), SUT ise
+   * kendi kolonunda durur - toplam gozle dogrulanabilsin.
+   */
+  const safSgk = Number(paylasim?.rota ?? 0) === SAF_SGK_ROTA;
+  /**
+   * KURUM PAYI KOLONU. 601'de saf SGK'da KAPATILMISTI: o sirada birim fiyat
+   * SUT'u gosterdigi icin kolon tutarin kopyasiydi. 602'de birim fiyat hasta
+   * katkisina gecince SUT hicbir kolonda gorunmez oldu - kolon geri acildi,
+   * basligi saf SGK'da "SUT". Oteki rotalarda eskisi gibi "Kurum Payı".
+   */
+  const kurumPayiKolonu = !!paylasim?.acik;
+  /**
+   * TUTAR KOLONU SAF SGK'DA CIZILMEZ (602, kullanici: "tutar sütunu da
+   * kaldır"). O rotada tutar iki komsu kolonun TOPLAMIDIR
+   * (Hasta Katkısı + SUT); ucuncu kolon ayni sayiyi tekrar yaziyordu.
+   * Dip toplam ve kovalar degismedi - yalniz gorunum sadelesti.
+   */
+  const tutarKolonu = bilgi.kalem !== 'miktar' && !safSgk;
+  const kurumPayiBasligi = safSgk ? 'SUT' : 'Kurum Payı';
+  const fiyatBasligi = safSgk ? 'Hasta Katkısı' : 'Birim Fiyat';
 
   /**
    * DOVIZ CERCEVESI (kullanici): dovizli islem YOKSA "Rapor Dövizi / Sipariş
@@ -170,9 +198,11 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                 : 'Prim rollerini düzenle (isteyen / uygulayan / raporlayan)'}
               onClick={() => {
                 const anahtar = [...seciliSatirlar][0];
-                const satir = satirlar.find(x => x.anahtar === anahtar);
-                if (!satir?.satirId) { onRoller(0, ''); return }
-                onRoller(satir.satirId, satir.stokAdi);
+                const sira = satirlar.findIndex(x => x.anahtar === anahtar);
+                const satir = satirlar[sira];
+                // Kaydedilmemis satirda da cagrilir: kart kaydeder ve
+                //   pencereyi kendisi acar (satirId 0 = "kimligi yok").
+                onRoller(satir?.satirId ?? 0, satir?.stokAdi ?? '', sira);
               }}>
         👥
       </button>
@@ -216,15 +246,29 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         {/* Basvuruda deger KDV DAHILDIR ama baslikta yazmiyor (kullanici):
             kayit kabulde fiyat zaten hep KDV dahil konusuluyor - her satirda
             hatirlatmak yer kapliyordu. */}
+        {/* Saf SGK'da baslik "Hasta Katkısı" - para birimi eki YOK (602,
+            kullanici): kolon zaten yerel parada, ek yalniz basligi uzatiyordu.
+            Oteki rotalarda "Birim Fiyat (TL)" eskisi gibi. */}
         {bilgi.kalem !== 'miktar' && (
-          <th className="hiza-sag" style={{ width: 99 }}>Birim Fiyat ({yerelPara})</th>
+          <th className="hiza-sag" style={{ width: 99 }}>
+            {fiyatBasligi}{safSgk ? '' : ` (${yerelPara})`}</th>
         )}
-        {bilgi.kalem !== 'miktar' && (
+        {/* SAF SGK'DA SUT, TUTARDAN ONCE (602, kullanici: "tutar ile SUT yer
+            değiştir"): satirin iki bedeli once yan yana okunur, tutar da
+            ikisinin toplami olarak ARKALARINDAN gelir -
+            Hasta Katkısı + SUT = Tutar. */}
+        {safSgk && kurumPayiKolonu && (
+          <th className="hiza-sag" style={{ width: 110 }}>{kurumPayiBasligi}</th>
+        )}
+        {tutarKolonu && (
           <th className="hiza-sag" style={{ width: 108 }}>Tutar ({yerelPara})</th>
         )}
         {/* PAYLASIM (289): kurum ve hasta payi - yalniz odeyen kurumlu
-            basvuruda. Provizyon degisince tutarlar burada okunur. */}
-        {paylasim?.acik && <th className="hiza-sag" style={{ width: 110 }}>Kurum Payı</th>}
+            basvuruda. Provizyon degisince tutarlar burada okunur. Saf SGK'da
+            kurum kolonu ("SUT") YUKARIDA, tutarin solunda cizildi. */}
+        {!safSgk && kurumPayiKolonu && (
+          <th className="hiza-sag" style={{ width: 110 }}>{kurumPayiBasligi}</th>
+        )}
         {paylasim?.acik && <th className="hiza-sag" style={{ width: 110 }}>Hasta Payı</th>}
         {/* Doviz kolonlari: satir kendi dovizinde girildiyse ya da rapor dovizi
             secildiyse cizilir; hepsi yerel ve rapor yoksa GIZLI. */}
@@ -245,6 +289,14 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         const adet = sayi(r.adet);
         const fiyat = sayi(r.birimFiyat);
         const tutar = satirTutari(adet, fiyat, r.iskonto, r.iskonto2);
+        // DAGILIM: KAYITLI satirda sunucunun yazdigi kovalar, KAYDEDILMEMIS
+        //   satirda ONIZLEME (594, kullanici: "kaydetmeden ücret satırının
+        //   sağ tarafındaki + detay butonu gelmiyor, oysa ben eklediğimde
+        //   hemen detay ne diye görmek istiyorum"). Ikisi de sunucudaki AYNI
+        //   fonksiyondan gelir - onizlemede gorulen rakam kaydedince degismez.
+        //   TUTAR ve PAY kolonlari da bundan okunur (602) - kolonlarin ustunde
+        //   kullanildigi icin burada, en basta cozulur.
+        const dagilimi = r.dagilim ?? dagilimOnizleme?.[r.anahtar];
         // BASVURUDA FIYAT KDV DAHIL GORUNUR (kullanici: "hbys'de fiyatlar hep
         //   kdv dahil veriliyor, ücretlemede o görülmek isteniyor"). Saklanan
         //   deger MATRAHTIR - satir matematigi, dip toplam ve e-Belge onun
@@ -253,12 +305,76 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         //   SAKLANAN brut varsa O kullanilir (371) - turetmek kurus kaydiriyor;
         //   eski satirda kolon bos, o zaman matrahtan uretilir.
         const brutFiyat = sayi(r.birimFiyatKdvli) || bruta(fiyat, r.kdv);
-        const gosterFiyat = basvuruMu ? brutFiyat : fiyat;
+        /**
+         * SAF SGK'DA FIYAT KOLONU HASTA KATKISIDIR (602) - fiyat penceresiyle
+         * ayni. Satirin SUT bedeli kendi kolonunda ("SUT") durur; burada
+         * hastanin odedigi katki gorunur, cunku iskonto ona isler ve kullanici
+         * indirimi bu kolonda takip eder. Katki MATRAH saklanir, basvuruda
+         * kolonlar brut gosterilir.
+         */
+        const katkiMatrah = sayi(r.katkiTutar ?? '0');
+        const gosterFiyat = safSgk
+          ? (basvuruMu ? bruta(katkiMatrah, r.kdv) : katkiMatrah)
+          : (basvuruMu ? brutFiyat : fiyat);
+        /**
+         * SATIR TUTARI DAGILIMDAN (602, kullanici: "br fiyat 85,73 doğru,
+         * tutara iskonto uygulanmış - yanlış").
+         *
+         * `satirTutari` iskontoyu BIRIM FIYATA uygular; SGK/TSS'de birim fiyat
+         * SUT bedelidir ve SUT iskontolanmaz - indirim yalniz hasta katkisina
+         * isler (fn_dagilim_coz). Satirin gercek tutarini sunucu zaten
+         * hesapliyor (`fn_belge_satir_dagit`: SGK payi + ek katki); dagilim
+         * varken EKRAN DA ONU gostermeli, yoksa grid ile kayit farkli rakam
+         * soyler. Dagilim yoksa (ozel is, dagilimsiz belge) eski hesap kalir.
+         */
+        //   Tutar KOVALARIN TOPLAMIDIR - SGK katilim payi HARIC: o, SGK adina
+        //   alinan ciro disi emanettir, satirin tutarina girmez
+        //   (fn_belge_satir_dagit her rotada boyle yaziyor).
+        const dagilimTutari = dagilimi
+          ? sayi(String(dagilimi.sgk ?? 0)) + sayi(String(dagilimi.oss ?? 0))
+          + sayi(String(dagilimi.hastaProvizyon ?? 0))
+          + sayi(String(dagilimi.hastaEkKatki ?? 0))
+          : 0;
+        const matrahTutar = dagilimi && dagilimTutari > 0 ? dagilimTutari : tutar;
         const gosterTutar = basvuruMu
-          ? satirTutari(adet, brutFiyat, r.iskonto, r.iskonto2) : tutar;
+          ? (dagilimi && dagilimTutari > 0
+              ? bruta(dagilimTutari, r.kdv)
+              : satirTutari(adet, brutFiyat, r.iskonto, r.iskonto2))
+          : matrahTutar;
         /** Matrah pay -> gosterim birimi (basvuruda brut, digerinde aynen). */
         const payGoster = (deger: number) =>
-          basvuruMu ? payBrute(deger, tutar, gosterTutar) : deger;
+          basvuruMu ? payBrute(deger, matrahTutar, gosterTutar) : deger;
+        /**
+         * PAYLAR DAGILIMDAN (602, kullanici: "hasta payı hala 0 - yanlış").
+         *
+         * `r.kurumTutar`/`r.hastaTutar` sunucunun KAYITLI satira yazdigi
+         * alanlardir; yeni eklenen satirda bos olduklari icin kolon 0
+         * gosteriyordu - oysa "＋" detayi ayni satirda dolu rakam veriyordu
+         * (o `dagilimi`den okuyor). Tek kaynak: dagilim.
+         *
+         * KATILIM PAYI HASTAYA DAHIL: hastanin kasada odeyecegi tutar budur
+         * (ciro disi emanet olmasi TAHSILATI degil MUHASEBEYI ilgilendirir).
+         * Acik tahsilat seridi de boyle topluyor (acikTahsilatTaraflara).
+         */
+        const kurumPayi = dagilimi
+          ? sayi(String(dagilimi.sgk ?? 0)) + sayi(String(dagilimi.oss ?? 0))
+          : sayi(r.kurumTutar ?? '0');
+        /**
+         * KATILIM PAYI BRUTLESTIRILMEZ (602, kullanici: "hasta payı 1610 gelmiş,
+         * 1600 olmalı") - 593 kurali: SABIT EMANET TUTARIDIR, matrah degildir.
+         * Oteki paylar matrahtir ve basvuruda KDV'li gosterilir; katilim payi
+         * ayni islemden gecerse %10 KDV'de 100 TL 110 olup toplami 10 TL
+         * sisiriyordu. Acik tahsilat seridi de boyle ayiriyor
+         * (belgeKartiKurallari: `topla` fonksiyonunun `ham` parametresi).
+         *
+         * Dagilim yoksa `r.hastaTutar` tek sayidir, ayrilamaz - orada eski
+         * davranis surer (kayitli satirda dagilim her zaman vardir).
+         */
+        const hastaPayiMatrah = dagilimi
+          ? sayi(String(dagilimi.hastaProvizyon ?? 0))
+          + sayi(String(dagilimi.hastaEkKatki ?? 0))
+          : sayi(r.hastaTutar ?? '0');
+        const katilimPayi = dagilimi ? sayi(String(dagilimi.sgkKatilimPayi ?? 0)) : 0;
         const secili = seciliSatirlar.has(r.anahtar);
         // Izlemli kalemin lotlari ALTINDA acilir (master-detail):
         //   hangi lottan kac adet oldugu kalemi acmadan gorunsun.
@@ -266,12 +382,17 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         // IZLEM (lot/seri) satirlari VARSAYILAN KAPALI (kullanici): kalem
         //   listesi kisa kalsin, isteyen okla acsin.
         const acik = lotlar.length > 0 && acikLotlar.has(r.anahtar);
-        const dagilimAcik = !!r.dagilim && acikDagilimlar.has(r.anahtar);
+        const onizlemeDagilimi = !r.dagilim && !!dagilimi;
+        const dagilimAcik = !!dagilimi && acikDagilimlar.has(r.anahtar);
         const kolonSayisi = (bilgi.kalem === 'miktar' ? 6 : bilgi.kalem === 'sade' ? 8 : 10)
+                          // Tutar kolonu saf SGK'da yok (602).
+                          - (bilgi.kalem !== 'miktar' && !tutarKolonu ? 1 : 0)
                           - (aciklamaVar ? 0 : 1)
                           + (dovizKolon && bilgi.kalem !== 'miktar' ? 2 : 0)
                           + (bilgi.siparis ? 1 : 0)    // teslim tarihi (140)
-                          + (paylasim?.acik ? 2 : 0);  // kurum/hasta payi (289)
+                          // Hasta payi + (saf SGK degilse) kurum payi (289/601).
+                          + (paylasim?.acik ? 1 : 0)
+                          + (kurumPayiKolonu ? 1 : 0);
         return (
           <Fragment key={r.anahtar}>
           <tr className={secili ? 'secili' : ''}
@@ -327,7 +448,14 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
             {bilgi.kalem === 'tam' && <td className="hiza-sag">{iskonatoMetni(r)}</td>}
             {bilgi.kalem === 'tam' && <td className="hiza-sag">%{r.kdv}</td>}
             {bilgi.kalem !== 'miktar' && <td className="hiza-sag">{para.format(gosterFiyat)}</td>}
-            {bilgi.kalem !== 'miktar' && (
+            {/* SUT, TUTARIN SOLUNDA (602) - basliklarla ayni sira:
+                Hasta Katkısı + SUT = Tutar. */}
+            {safSgk && kurumPayiKolonu && (
+              <td className={`hiza-sag${(r.kurumKapatilan ?? 0) > 0 ? ' basari' : ''}`}>
+                {para.format(payGoster(kurumPayi))}
+              </td>
+            )}
+            {tutarKolonu && (
               <td className="hiza-sag"><b>{para.format(gosterTutar)}</b></td>
             )}
             {/* Pay hucreleri (289): kapanan pay YESIL - hangi payin
@@ -338,18 +466,18 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                 tutmuyordu. Brute cevrilirken satirin KENDI tutar orani
                 kullanilir (tutar -> gosterTutar), boylece kurus artigi paylar
                 arasinda kaymaz. */}
-            {paylasim?.acik && (
+            {!safSgk && kurumPayiKolonu && (
               <td className={`hiza-sag${(r.kurumKapatilan ?? 0) > 0 ? ' basari' : ''}`}>
-                {para.format(payGoster(sayi(r.kurumTutar ?? '0')))}
+                {para.format(payGoster(kurumPayi))}
               </td>
             )}
             {paylasim?.acik && (
               <td className={`hiza-sag${(r.hastaKapatilan ?? 0) > 0 ? ' basari' : ''}`}>
-                {para.format(payGoster(sayi(r.hastaTutar ?? '0')))}
+                {para.format(payGoster(hastaPayiMatrah) + katilimPayi)}
                 {/* DAGILIM: bes kova tek satira sigmaz - "+" ile ALT SATIRDA
                     acilir (kullanici). Dagilim henuz hesaplanmamis satirda
                     dugme cizilmez: acilinca bos kutu gostermek yaniltirdi. */}
-                {r.dagilim && (
+                {dagilimi && (
                   <button type="button" className="lot-ok dagilim-ok"
                           title={dagilimAcik ? 'Dağılımı gizle' : 'Ödeme dağılımını göster'}
                           onClick={e => {
@@ -379,22 +507,53 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
           {/* DETAY: satirin ODEME DAGILIMI (470). Bes kova, kapatilan ve
               tahsil edilen sayaclariyla. Kalanlar SUNUCUDAN gelir - ekran
               cikarma yapmaz, yoksa iki yerde iki sonuc olurdu. */}
-          {dagilimAcik && r.dagilim && (() => {
-            const d = r.dagilim;
+          {dagilimAcik && dagilimi && (() => {
+            const d = dagilimi;
+            // HANGI KOVA CIZILIR (kullanici: "TSS'de + ile açılan detayda hasta
+            //   payı ve hasta ek katkısı satırları olmasın"): rotanin
+            //   UREBILECEGI kovalar + degeri olan her kova. Rotada dogabilen
+            //   ama BU SATIRDA SIFIR kalan kova da cizilmez - TSS'de hastane
+            //   farki yoksa "Hasta ek katkısı 0,00" satiri bos yer kapliyordu.
+            //   Hareketi olan (kapatilan/tahsil) kova her zaman gorunur:
+            //   tutari sifirlanmis olsa da parasi gecmistir.
+            const kovaDeger = (k: typeof KOVALAR[number]) =>
+              Number(d[k.alan] ?? 0)
+              + Number((d as unknown as Record<string, number>)[
+                  k.kod === 5 ? 'sgkKatilimTahsil' : `${k.alan}Tahsil`] ?? 0)
+              + (k.kod === 5 ? 0 : Number((d as unknown as Record<string, number>)[
+                  `${k.alan}Kapatilan`] ?? 0));
             const kovalar = KOVALAR.filter(k => kovaKullanilir(d.rota, k.kod)
-                                             || Number(d[k.alan]) > 0);
+                                             && kovaDeger(k) > 0);
+            /**
+             * KOVALAR KDV DAHIL GOSTERILIR (kullanici: "sgk ve sigorta kdv
+             * dahil olmalı").
+             *
+             * Kovalar ve KAPATILAN sayaclari MATRAH tutulur (kurum icmali ve
+             * hakedis matrah uzerinden calisir); tahsil sayaclari BRUT'tur.
+             * Ekranda okunan rakam faturadaki/kasadaki tutar olmali - 909,09
+             * yerine 1.000,00. SGK KATILIM PAYI istisna: sabit tutardir,
+             * vergi disi emanettir - oldugu gibi yazilir.
+             */
+            const kdvCarpani = 1 + (Number(r.kdv) || 0) / 100;
+            const brut = (kod: number, deger: number) =>
+              Math.round((kod === 5 ? deger : deger * kdvCarpani) * 100) / 100;
             const kapatilan = (k: typeof KOVALAR[number]) =>
-              k.kod === 5 ? 0 : Number(
-                (d as unknown as Record<string, number>)[`${k.alan}Kapatilan`] ?? 0);
+              k.kod === 5 ? 0 : brut(k.kod, Number(
+                (d as unknown as Record<string, number>)[`${k.alan}Kapatilan`] ?? 0));
             const tahsil = (k: typeof KOVALAR[number]) => Number(
               (d as unknown as Record<string, number>)[
                 k.kod === 5 ? 'sgkKatilimTahsil' : `${k.alan}Tahsil`] ?? 0);
-            const ciro = Number(d.sgk) + Number(d.oss)
-                       + Number(d.hastaProvizyon) + Number(d.hastaEkKatki);
-            const hastadan = Number(d.hastaProvizyon) + Number(d.hastaEkKatki)
-                           + Number(d.sgkKatilimPayi)
-                           - Number(d.hastaProvizyonTahsil)
-                           - Number(d.hastaEkKatkiTahsil) - Number(d.sgkKatilimTahsil);
+            // Ciro ve "hastadan tahsil edilecek" de ayni dilde (KDV dahil);
+            //   katilim payi brutlestirilmez.
+            const kdvC = 1 + (Number(r.kdv) || 0) / 100;
+            const ciro = Math.round((Number(d.sgk) + Number(d.oss)
+                       + Number(d.hastaProvizyon) + Number(d.hastaEkKatki))
+                       * kdvC * 100) / 100;
+            const hastadan = Math.round(
+              ((Number(d.hastaProvizyon) + Number(d.hastaEkKatki)) * kdvC
+               + Number(d.sgkKatilimPayi)
+               - Number(d.hastaProvizyonTahsil)
+               - Number(d.hastaEkKatkiTahsil) - Number(d.sgkKatilimTahsil)) * 100) / 100;
             return (
               <tr className="lot-detay dagilim-detay">
                 <td />
@@ -402,7 +561,12 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                   <table className="lot-tablo">
                     <thead>
                       <tr>
-                        <th>Pay ({ROTA_ADI[d.rota] ?? '—'})</th>
+                        <th>Pay ({ROTA_ADI[d.rota] ?? '—'})
+                          {/* Kaydedilmemis satirda rakam ONIZLEMEDIR (594):
+                              kural aynidir ama satir henuz kayitli degil. */}
+                          {onizlemeDagilimi && (
+                            <span className="ipucu"> · önizleme</span>)}
+                        </th>
                         <th className="hiza-sag">Tutar</th>
                         <th className="hiza-sag">Kapatılan</th>
                         <th className="hiza-sag">Tahsil</th>
@@ -412,7 +576,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                     </thead>
                     <tbody>
                       {kovalar.map(k => {
-                        const tutarK = Number(d[k.alan] ?? 0);
+                        const tutarK = brut(k.kod, Number(d[k.alan] ?? 0));
                         const kalanK = Math.max(tutarK - kapatilan(k) - tahsil(k), 0);
                         return (
                           <tr key={k.kod}>
@@ -730,6 +894,11 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
 }
 
 export interface KalemSekmesiProps {
+  /**
+   * KAYDEDILMEMIS satirlarin dagilim onizlemesi (594) - satir anahtari -> kovalar.
+   * Kayitli satirin kendi `dagilim`i onceliklidir.
+   */
+  dagilimOnizleme?: Record<string, import('../../sayfalar/belgeSatir').SatirDagilimi>;
   satirlar: SatirDurumu[];
   seciliSatirlar: Set<number>;
   setSeciliSatirlar(v: Set<number>): void;
@@ -759,7 +928,13 @@ export interface KalemSekmesiProps {
    * cizilmez - prim yetkisi olmayan kullanicida ya da prim kullanilmayan
    * kurulumda gereksiz. satirId 0 gelirse kalem henuz KAYITLI degildir.
    */
-  onRoller?(satirId: number, kalemAdi: string): void;
+  /**
+   * PRIM ROLLERI. `sira` satirin GRIDDEKI sirasidir (0 tabanli): kalem henuz
+   * kaydedilmemisse kart once kaydeder, sonra AYNI SIRADAKI satirin sunucudan
+   * gelen kimligiyle pencereyi acar (kullanici: "ekleme yapıp rolleri görme
+   * butonuna basarsam ücret satırlarını önce kaydetsin sonra orayı açsın").
+   */
+  onRoller?(satirId: number, kalemAdi: string, sira: number): void;
   /**
    * ODEME PAYLASIMI (289): basvuruda odeyen kurum varsa satirin KURUM ve HASTA
    * payi kolon olarak gorunur. Verilmezse kolonlar hic cizilmez - normal
@@ -774,6 +949,17 @@ export interface KalemSekmesiProps {
   basvuruMu?: boolean;
   paylasim?: {
     acik: boolean;
+    /**
+     * Basvurunun odeme rotasi (601). SAF SGK'da "Kurum Payı" kolonu CIZILMEZ:
+     * o rotada satirin tutari zaten SGK'nin odedigi SUT bedelidir (birim fiyat
+     * = SUT), yani kolon birim fiyatin/tutarin kopyasi oluyordu. Kullanici
+     * (SGK hastalari icin): "birim fiyat tutar hasta payı olsun ama kurum
+     * payını gösterme sütun olarak."
+     *
+     * TSS/Karma/ÖSS'de kolon DURUR - orada kurumun odedigi tutar satirin
+     * tutarindan gercekten farklidir.
+     */
+    rota?: number | null;
     /** Dagilimi SUNUCUDA yeniden hesaplatir (478). */
     uygula(): void;
   };

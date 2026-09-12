@@ -142,6 +142,34 @@ public static partial class KaynakKatalogu
                 "                           where bb.id = b.id)), '')",
                                                       "metin", "Ödeyen Kurum", Genislik: 180,
                                                       Varsayilan: false, Siralanabilir: false),
+            // SOZLESME ADI - KURUMUN SAGINDA (kullanici: "başvurularda kurum
+            //   sağına Sözleşme ekle… listede"). Ayni sigortayla ÖSS / TSS /
+            //   Karma police AYRI SARTLARLA calisir ve odeme rotasini o
+            //   belirler; listede yalniz kurum adi durunca iki basvurunun
+            //   neden farkli dagildigi gorunmuyordu. Ad yoksa police turu
+            //   (alt kurum) yazilir - sozlesme adsiz kurulmus olabilir.
+            new("sozlesmeAdi",
+                // KOD DEGERI LISTESINDEN BAGLANIR (602): eskiden once
+                //   `kod_deger` deger uzerinden baglaniyor, liste kosulu
+                //   ise ONDAN SONRAKI join'de duruyordu - yani `kd`yi hic
+                //   daraltmiyordu. Ayni sayi baska bir listede de varsa alt
+                //   sorgu IKI SATIR donup listeyi 500 ile dusuruyordu
+                //   ("more than one row returned by a subquery"): 301 ve 302
+                //   hem `kurum.alt_kurum` hem `hekim.brans` listesinde var ve
+                //   SGK sozlesmelerinin alt kurum kodlari tam da bunlar.
+                //   Dogru sira: once LISTE, sonra o listenin degeri.
+                "coalesce((select coalesce(nullif(sz.ad, ''), kd.ad, '') " +
+                "            from public.belge_basvuru bb " +
+                "            join public.kurum_sozlesme sz on sz.id = bb.sozlesme_id " +
+                "            left join public.kod_liste kl " +
+                "                   on kl.kod = 'kurum.alt_kurum' " +
+                "            left join public.kod_deger kd " +
+                "                   on kd.liste_id = kl.id " +
+                "                  and kd.deger = sz.alt_kurum and kd.dil = 0 " +
+                "           where bb.id = b.id), '')",
+                                                      "metin", "Sözleşme", Genislik: 160,
+                                                      Varsayilan: false, Siralanabilir: false,
+                                                      Filtrelenebilir: false),
             // ONCE BELGENIN KENDI ALANI (296, belge_basvuru), yoksa randevudan:
             //   randevusuz acilan basvuruda bilgi artik belgede duruyor; eski
             //   kayitlarda ve randevudan donusenlerde randevu yedegi kalir.
@@ -281,6 +309,52 @@ public static partial class KaynakKatalogu
                                                       "para", "Tahsilat", Hizalama: "sag",
                                                       Genislik: 120, Varsayilan: false,
                                                       Siralanabilir: false, Filtrelenebilir: false),
+            // ODEME PAYLARI (kullanici: "hasta / ÖSS / SUT toplamları - istatistik
+            //   alırken kolay olur mu"). Fiziksel kolon ACILMADI: uc rakam da
+            //   `belge_satir_dagilim` kovalarinin toplamidir - belgede kopyasini
+            //   tutmak, her satir/dagilim/provizyon/tahsilat degisiminde tetikle
+            //   senkron tutulacak TURETILMIS veri demek; bir yol kacarsa
+            //   istatistik sessizce yanlis cikar. Liste burada TOPLAR: grid,
+            //   suzgec, CSV ve analiz sekmesi aynI rakami kullanir.
+            //
+            //   KDV DAHIL: kovalar matrahtir, listedeki Genel Toplam ise brut -
+            //   yan yana okunan iki rakam ayni dilde olsun (serit de boyle, 589).
+            //   Uc kolon ayni desende: satirin kovasi x (1 + kdv/100).
+            new("hastaPayi",
+                // Kurus artigi temizlenir: matrahi brutlestirmek 200,002 gibi
+                //   sayilar uretiyor (0,0909... x 11) - listede iki hane yazar.
+                // SGK KATILIM PAYI KDV'SIZ EKLENIR (593, kullanici: "açık
+                //   tahsilatta 850 olması gerekirken 860 yazıyor, SGK katılıma
+                //   KDV mi ekliyor?"): ciro disi EMANET, ayardaki sabit tutar -
+                //   uzerine KDV binmez, kovada oldugu gibi durur.
+                "coalesce(round((select sum((dg.hasta_provizyon + dg.hasta_ek_katki) " +
+                "                     * (1 + coalesce(bs.kdv, 0) / 100.0) " +
+                "                   + dg.sgk_katilim_payi) " +
+                "            from public.belge_satir bs " +
+                "            join public.belge_satir_dagilim dg on dg.belge_satir_id = bs.id " +
+                "           where bs.belge_id = b.id), 2), 0)",
+                                                      "para", "Hasta Payı", Hizalama: "sag",
+                                                      Bicim: "#,##0.00", Genislik: 120,
+                                                      Varsayilan: false, Siralanabilir: false,
+                                                      Filtrelenebilir: false),
+            new("ossPayi",
+                "coalesce(round((select sum(dg.oss * (1 + coalesce(bs.kdv, 0) / 100.0)) " +
+                "            from public.belge_satir bs " +
+                "            join public.belge_satir_dagilim dg on dg.belge_satir_id = bs.id " +
+                "           where bs.belge_id = b.id), 2), 0)",
+                                                      "para", "Sigorta (ÖSS/TSS)", Hizalama: "sag",
+                                                      Bicim: "#,##0.00", Genislik: 130,
+                                                      Varsayilan: false, Siralanabilir: false,
+                                                      Filtrelenebilir: false),
+            new("sgkPayi",
+                "coalesce(round((select sum(dg.sgk * (1 + coalesce(bs.kdv, 0) / 100.0)) " +
+                "            from public.belge_satir bs " +
+                "            join public.belge_satir_dagilim dg on dg.belge_satir_id = bs.id " +
+                "           where bs.belge_id = b.id), 2), 0)",
+                                                      "para", "SGK (SUT)", Hizalama: "sag",
+                                                      Bicim: "#,##0.00", Genislik: 120,
+                                                      Varsayilan: false, Siralanabilir: false,
+                                                      Filtrelenebilir: false),
             new("tarafVkno",     "b.taraf_vkno",     "metin", "VKN/TCKN",    Genislik: 120, Varsayilan: false),
             new("matrah",        "b.matrah",         "para",  "Matrah",      Hizalama: "sag",
                                                                 Bicim: "#,##0.00", Genislik: 120),

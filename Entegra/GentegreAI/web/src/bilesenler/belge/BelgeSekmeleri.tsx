@@ -188,7 +188,7 @@ export function EBelgeSekmesi({
   );
 }
 
-export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
+export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi, kurumPayliMi,
                                     teklifDurum, donusumAc, donusumSil,
                                     hizliDonustur, olcu = 'adet', setOlcu }: {
   donusumler: Record<string, unknown>[];
@@ -197,6 +197,13 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
   setDonusum(v: number | null): void;
   /** Teklifte sekme "Sipariş"tir ve tek hedef siparis (216). */
   teklifMi?: boolean;
+  /**
+   * ODEYEN KURUM PAY ALIYOR MU (ÖSS/SGK). Özel (ücretli) başvuruda kurumun
+   * payı hep sıfırdır - "Kurum Tahakkuk" düğmesi orada her zaman boş sonuç
+   * verir ve "neden çalışmıyor" sorusu doğurur (kullanıcı). Verilmezse düğme
+   * ÇİZİLİR: ERP belgelerinde tahakkuk tek taraflıdır.
+   */
+  kurumPayliMi?: boolean;
   /** Teklif YALNIZ Kabul (3) durumundayken donusur (kullanici) - sunucu da
       ayni kurali dogrular. */
   teklifDurum?: string;
@@ -209,7 +216,7 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
    * listeye ekler - tahsilat sekmesindeki hizli akisin aynisi.
    * hedefTur: 16 Fiş · 15 Fatura · 17 Tahakkuk.
    */
-  hizliDonustur?(hedefTur: number): void;
+  hizliDonustur?(hedefTur: number, taraf?: 'hasta' | 'kurum'): void;
   /** Donusum olcusu: 'adet' kalan MIKTAR, 'tutar' tahsil edilen/kalan TUTAR. */
   olcu?: 'adet' | 'tutar';
   setOlcu?(v: 'adet' | 'tutar'): void;
@@ -265,9 +272,20 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
           <button type="button" className="d bir" disabled={donusumKapali}
                   title={`Tüm açık satırları ${olcu === 'adet' ? 'kalan miktarla' : 'tahsil edilen tutarla'} FATURAYA çevirir`}
                   onClick={() => hizliDonustur?.(15)}>📄 Fatura</button>
+          {kurumPayliMi !== false && (
           <button type="button" className="d bir" disabled={donusumKapali}
-                  title="Tüm açık satırları TAHAKKUKA çevirir (kalanın tamamı)"
-                  onClick={() => hizliDonustur?.(17)}>📑 Tahakkuk</button>
+                  title="Kurum payını TAHAKKUKA çevirir (kalanın tamamı) - alacak kurum carisine yazılır"
+                  onClick={() => hizliDonustur?.(17, 'kurum')}>📑 Kurum Tahakkuk</button>
+          )}
+          {/* HASTA TAHAKKUKU (kullanici: "tahakkukları ikiye ayıralım: Kurum
+              Tahakkuku ve Hasta Tahakkuku"): hastanin payi da pesin tahsil
+              edilmeden belgelenebilir - sonra tahsilat yapilir. Dugme hangi
+              tarafi belgeledigini soyler; pay ZORLANIR, "hangi kova aciksa"
+              tahminine birakilmaz. */}
+          <button type="button" className="d bir" disabled={donusumKapali}
+                  title="Hasta payını TAHAKKUKA çevirir (kalanın tamamı) - alacak hasta carisine yazılır"
+                  onClick={() => hizliDonustur?.(17, 'hasta')}>
+            📑 Hasta Tahakkuk</button>
         </>
       )}
 

@@ -1,0 +1,457 @@
+-- =====================================================================
+--  617_ulke_skrs_kod.sql
+--  ÜLKE TABLOSU SKRS MERNİS KODUNU TAŞISIN.
+--
+--  Adres ve uyruk kutuları `public.ulke` listesinden besleniyor, e-Nabız
+--  ise MERNİS kodu istiyor (609/614). İki liste arasında çeviri
+--  yapmak yerine ülke satırının kendisi SKRS kodunu taşır; kutu ne
+--  seçilirse pakete giden kod odur.
+--
+--  Eşleme AD ÜZERİNDEN ve KESİN: sözcük kümeleri birebir aynı olan
+--  ülkeler ("CUMHURİYETİ", "DEVLETİ", "VE" gibi ekler atılır).
+--  Kalanı BOŞ kalır - benzeyen bir ülkeyi tahminle seçmek, hastanın
+--  uyruğunu yanlış bildirmek demektir.
+-- =====================================================================
+
+
+update public.ulke u
+   set skrs_kod = v.kod
+  from (values
+         (101, 9892),  -- ALMANYA
+         (115, 9862),  -- BAYLÖRUSYAN (SSC)
+         (138, 9876),  -- ÇEKOSLOVAKYA
+         (142, 9878),  -- DEMOKRATİK YEMEN
+         (291, 9995),  -- SIRBİSTAN VE KARADAĞ
+         (296, 9983),  -- SOVYET SOS.CUM.BİR.
+         (316, 9982),  -- UKRAYNA SOV. SOS. CUM.
+         (326, 9500),  -- YUGOSLAVYA
+         (327, 9989),  -- YUKARI VOLTA
+         (329, 9996)  -- ZAİRE
+       ) as v(id, kod)
+ where u.id = v.id and u.skrs_kod is null;
+
+-- Aynı SKRS koduna düşen ikinci yerel satırlar (kod düşük ID'ye verildi):
+--   100   AFGANİSTAN                                 = 394
+--   102   AMERİKA BİRLEŞİK DEV.                      = 516
+--   104   ANGOLA                                     = 397
+--   105   ANTİGUA VE BARBUDA                         = 105
+--   106   ARJANTİN                                   = 398
+--   107   ARNAVUTLUK                                 = 395
+--   108   AVUSTRALYA                                 = 108
+--   109   AVUSTURYA                                  = 399
+--   110   AZERBAYCAN                                 = 374
+--   112   BAHREYN                                    = 401
+--   113   BANGLADEŞ                                  = 402
+--   114   BARBADOS                                   = 114
+--   116   BELARUS                                    = 375
+--   117   BELÇİKA                                    = 403
+--   118   BELİZE                                     = 118
+--   119   BENİN                                      = 404
+--   120   BİLİNMEYEN                                 = 120
+--   125   BOSNA-HERSEK                               = 376
+--   126   BOTSVANA                                   = 407
+--   128   BRUNEİ DARÜSSELAM                          = 128
+--   129   BULGARİSTAN                                = 409
+--   130   BURKİNA FASO                               = 130
+--   131   BURMA                                      = 131
+--   132   BURUNDİ                                    = 410
+--   133   BUTAN                                      = 405
+--   134   CEZAYİR                                    = 396
+--   135   CİBUTİ                                     = 423
+--   136   ÇAD                                        = 413
+--   137   ÇEK CUMHURİYETİ                            = 137
+--   139   ÇİN HALK CUMHURIYETİ                       = 139
+--   140   ÇİN TAYVAN                                 = 140
+--   141   DANİMARKA                                  = 422
+--   143   DEMOKRATİK ALMANYA                         = ALMANYA
+--   144   DİĞER                                      = 144
+--   145   DOMİNİK CUMHURIYETİ                        = 145
+--   146   DOMİNİKA                                   = 146
+--   147   EKVATOR                                    = 424
+--   148   EKVATOR GİNESİ                             = 427
+--   149   EL SALVADOR                                = 426
+--   150   ENDONEZYA                                  = 444
+--   151   ERİTRE                                     = 377
+--   152   ERMENİSTAN                                 = 378
+--   153   ESTONYA                                    = 379
+--   155   FAS                                        = 469
+--   156   FİLİPİNLER                                 = 483
+--   157   FİLİSTİN                                   = 372
+--   158   FİNLANDİYA                                 = 430
+--   160   FİLDİŞİ SAHİLİ                             = 450
+--   161   FRANSA                                     = 431
+--   162   GABON                                      = 432
+--   163   GAMBİYA                                    = 359
+--   164   GANA                                       = 434
+--   165   GİNE                                       = 437
+--   167   GRENADA                                    = 167
+--   168   GUATEMALA                                  = 436
+--   170   GÜNEY AFRİKA                               = 497
+--   171   GÜNEY KIBRIS RUM YÖNETİMİ                  = 171
+--   173   GÜNEY SUDAN CUMHURİYETİ                    = 173
+--   174   GÜRCİSTAN                                  = 380
+--   175   HAİTİ                                      = 440
+--   176   HİNDİSTAN                                  = 443
+--   177   HIRVATİSTAN                                = 370
+--   178   HOLLANDA                                   = 472
+--   179   HONDURAS                                   = 441
+--   180   IRAK                                       = 446
+--   181   İRLANDA                                    = 447
+--   182   İSPANYA                                    = 498
+--   183   İSRAİL                                     = 448
+--   184   İSVEÇ                                      = 503
+--   186   İTALYA                                     = 449
+--   187   İZLANDA                                    = 442
+--   188   İRAN                                       = 445
+--   189   JAMAİKA                                    = 189
+--   190   JAPONYA                                    = 190
+--   191   KAMBOÇYA                                   = 421
+--   192   KAMERUN                                    = 514
+--   193   KANADA                                     = 193
+--   194   KARADAĞ                                    = 194
+--   195   KATAR                                      = 486
+--   196   KAZAKİSTAN                                 = 381
+--   197   KENYA                                      = 452
+--   201   KOLOMBİYA                                  = 415
+--   203   KONGO                                      = 341
+--   205   KOSOVA                                     = 336
+--   206   KOSTA RİKA                                 = 418
+--   207   KUDÜS                                      = 207
+--   208   KUVEYT                                     = 453
+--   211   KÜBA                                       = 419
+--   214   LETONYA                                    = 383
+--   215   LİBERYA                                    = 457
+--   216   LİBYA                                      = 458
+--   218   LİTVANYA                                   = 384
+--   219   LÜBNAN                                     = 455
+--   221   MACARİSTAN                                 = 221
+--   222   MADAGASKAR                                 = 461
+--   224   MALAVİ                                     = 462
+--   226   MALEZYA                                    = 226
+--   227   MALİ                                       = 464
+--   228   MALTA                                      = 465
+--   230   MEKSİKA                                    = 468
+--   233   MOĞOLİSTAN                                 = 233
+--   234   MOLDOVA                                    = 388
+--   236   MORİTANYA                                  = 466
+--   238   MOZAMBİK                                   = 470
+--   240   NAMİBYA                                    = 389
+--   241   NAURU                                      = 363
+--   243   NİJER                                      = 474
+--   245   NİKARAGUA                                  = 473
+--   246   NORVEÇ                                     = 476
+--   248   ÖZBEKİSTAN                                 = 393
+--   249   PAKİSTAN                                   = 478
+--   251   PANAMA                                     = 479
+--   253   PARAGUAY                                   = 481
+--   254   PERU                                       = 482
+--   255   POLONYA                                    = 484
+--   256   PORTEKİZ                                   = 485
+--   257   ROMANYA                                    = 257
+--   279   RUSYA FEDERASYONU                          = 279
+--   281   SAİNT LUCİA                                = 281
+--   284   SAN MARİNO                                 = 365
+--   285   SAO TOME VE PRİNCİPE                       = 490
+--   286   SENEGAL                                    = 492
+--   288   SİERRA LEONE                               = 494
+--   289   SİNGAPUR                                   = 495
+--   290   SIRBİSTAN                                  = 335
+--   293   SLOVENYA                                   = 391
+--   294   SOLOMON ADALARI                            = 294
+--   298   SUDAN                                      = 500
+--   299   SURİNAM                                    = 501
+--   301   SUUDİ ARABİSTAN                            = 491
+--   302   SVAZİLAND                                  = 502
+--   303   ŞİLİ                                       = 414
+--   304   TACİKİSTAN                                 = 392
+--   305   TANZANYA                                   = 515
+--   306   TAYLAND                                    = 506
+--   308   TOGO                                       = 507
+--   310   TUNUS                                      = 509
+--   313   TÜRKMENİSTAN                               = 313
+--   314   UGANDA                                     = 511
+--   315   UKRAYNA                                    = 315
+--   321   VATİKAN                                    = 321
+--   324   YEMEN                                      = DEMOKRATİK YEMEN
+--   325   YENİ ZELANDA                               = 325
+--   328   YUNANİSTAN                                 = 435
+--   330   ZAMBİYA                                    = 522
+--   331   ZİMBABVE                                   = 523
+--   332   LEFKOŞA                                    = 332
+--   333   KIRIM                                      = 333
+--   334   DOĞU TİMOR DEMOKRATİK CUMHURİYETİ          = 334
+--   335   SIRBİSTAN CUMHURİYETİ                      = 335
+--   336   KOSOVA CUMHURİYETİ                         = 336
+--   337   RUSYA FED. / BAŞKURDİSTAN CUMHURİYETİ      = 337
+--   338   KORE DEMOKRATİK HALK CUMHURİYETİ           = 338
+--   339   RUSYA FED. / ALTAY CUMHURİYETİ             = 339
+--   340   RUSYA FED. / ADIGE CUMHURİYETİ             = 340
+--   341   KONGO CUMHURİYETİ                          = 341
+--   342   RUSYA FED. / BURYAT CUMHURİYETİ            = 342
+--   343   RUSYA FED. / İNGUŞETYA CUMHURİYETİ         = 343
+--   344   RUSYA FED. / KABARDİN-BALKARYA CUMHURİYETİ = 344
+--   345   RUSYA FED. / KALMIKYA CUMHURİYETİ          = 345
+--   346   RUSYA FED. / KARAÇAY-ÇERKES CUMHURİYETİ    = 346
+--   347   RUSYA FED. / KARELYA CUMHURİYETİ           = 347
+--   348   RUSYA FED. / KOMİ CUMHURİYETİ              = 348
+--   349   RUSYA FED. / MARİ EL CUMHURİYETİ           = 349
+--   350   RUSYA FED. / MORDOVYA CUMHURİYETİ          = 350
+--   351   RUSYA FED. / SAHA CUMHURİYETİ (YAKUTİSTAN) = 351
+--   352   RUSYA FED. / KUZEY OSETYA-ALANYA CUMHURİYETİ = 352
+--   353   RUSYA FED. / TATARİSTAN CUMHURİYETİ        = 353
+--   354   RUSYA FED. / TIVA CUMHURİYETİ              = 354
+--   355   RUSYA FED. / UDMURT CUMHURİYETİ            = 355
+--   356   RUSYA FED. / HAKASYA CUMHURİYETİ           = 356
+--   357   RUSYA FED. / ÇUVAŞİSTAN CUMHURİYETİ        = 357
+--   358   ANDORRA PRENSLİĞİ                          = 358
+--   359   GAMBİYA CUMHURİYETİ                        = 359
+--   360   KİRİBATİ CUMHURİYETİ                       = 360
+--   361   MONAKO PRENSLİĞİ                           = 361
+--   362   MYANMAR BİRLİĞİ CUMHURİYETİ                = 362
+--   363   NAURU CUMHURİYETİ                          = 363
+--   364   PALAU CUMHURİYETİ                          = 364
+--   365   SAN MARİNO CUMHURİYETİ                     = 365
+--   366   SAİNT KİTTS VE NEVİS FEDERASYONU           = 366
+--   367   TONGA KRALLIĞI                             = 367
+--   368   TUVALU                                     = 368
+--   369   KORE CUMHURİYETİ                           = 338
+--   370   HIRVATİSTAN CUMHURİYETİ                    = 370
+--   371   RUSYA FED. / ÇEÇENİSTAN CUMHURİYETİ        = 371
+--   372   FİLİSTİN DEVLETİ                           = 372
+--   373   RUSYA FED. / DAĞISTAN CUMHURİYETİ          = 373
+--   374   AZERBAYCAN CUMHURİYETİ                     = 374
+--   375   BELARUS CUMHURİYETİ                        = 375
+--   376   BOSNA HERSEK                               = 376
+--   377   ERİTRE DEVLETİ                             = 377
+--   378   ERMENİSTAN CUMHURİYETİ                     = 378
+--   379   ESTONYA CUMHURİYETİ                        = 379
+--   380   GÜRCİSTAN CUMHURİYETİ                      = 380
+--   381   KAZAKİSTAN CUMHURİYETİ                     = 381
+--   382   KIRGIZ CUMHURİYETİ                         = 382
+--   383   LETONYA CUMHURİYETİ                        = 383
+--   384   LİTVANYA CUMHURİYETİ                       = 384
+--   385   KUZEY MAKEDONYA CUMHURİYETİ                = 385
+--   386   MARŞAL ADALARI CUMHURİYETİ                 = 386
+--   387   MİKRONEZYA FEDERE DEVLETLERİ               = 387
+--   388   MOLDOVA CUMHURİYETİ                        = 388
+--   389   NAMİBYA CUMHURİYETİ                        = 389
+--   390   SLOVAK CUMHURİYETİ                         = 390
+--   391   SLOVENYA CUMHURİYETİ                       = 391
+--   392   TACİKİSTAN CUMHURİYETİ                     = 392
+--   393   ÖZBEKİSTAN CUMHURİYETİ                     = 393
+--   394   AFGANİSTAN İSLAM CUMHURİYETİ               = 394
+--   395   ARNAVUTLUK CUMHURİYETİ                     = 395
+--   396   CEZAYİR DEMOKRATİK HALK CUMHURİYETİ        = 396
+--   397   ANGOLA CUMHURİYETİ                         = 397
+--   398   ARJANTİN CUMHURİYETİ                       = 398
+--   399   AVUSTURYA CUMHURİYETİ                      = 399
+--   400   BAHAMALAR                                  = 400
+--   401   BAHREYN KRALLIĞI                           = 401
+--   402   BANGLADEŞ HALK CUMHURİYETİ                 = 402
+--   403   BELÇİKA KRALLIĞI                           = 403
+--   404   BENİN CUMHURİYETİ                          = 404
+--   405   BUTAN KRALLIĞI                             = 405
+--   406   BOLİVYA ÇOKULUSLU DEVLETİ                  = 406
+--   407   BOTSVANA CUMHURİYETİ                       = 407
+--   408   BREZİLYA FEDERATİF CUMHURİYETİ             = 408
+--   409   BULGARİSTAN CUMHURİYETİ                    = 409
+--   410   BURUNDİ CUMHURİYETİ                        = 410
+--   411   CABO VERDE CUMHURİYETİ                     = 411
+--   412   ORTA AFRİKA CUMHURİYETİ                    = 412
+--   413   ÇAD CUMHURİYETİ                            = 413
+--   414   ŞİLİ CUMHURİYETİ                           = 414
+--   415   KOLOMBİYA CUMHURİYETİ                      = 415
+--   416   KOMORLAR BİRLİĞİ                           = 416
+--   417   KONGO DEMOKRATİK CUMHURİYETİ               = 341
+--   418   KOSTA RİKA CUMHURİYETİ                     = 418
+--   419   KÜBA CUMHURİYETİ                           = 419
+--   420   KUZEY KIBRIS TÜRK CUMHURİYETİ              = 420
+--   421   KAMBOÇYA KRALLIĞI                          = 421
+--   422   DANİMARKA KRALLIĞI                         = 422
+--   423   CİBUTİ CUMHURİYETİ                         = 423
+--   424   EKVATOR CUMHURİYETİ                        = 424
+--   425   MISIR ARAP CUMHURİYETİ                     = 425
+--   426   EL SALVADOR CUMHURİYETİ                    = 426
+--   427   EKVATOR GİNESİ CUMHURİYETİ                 = 427
+--   428   ETİYOPYA FEDERAL DEMOKRATİK CUMHURİYETİ    = 428
+--   429   FİJİ CUMHURİYETİ                           = 429
+--   430   FİNLANDİYA CUMHURİYETİ                     = 430
+--   431   FRANSA CUMHURİYETİ                         = 431
+--   432   GABON CUMHURİYETİ                          = 432
+--   433   ALMANYA FEDERAL CUMHURİYETİ                = 433
+--   434   GANA CUMHURİYETİ                           = 434
+--   435   YUNANİSTAN CUMHURİYETİ                     = 435
+--   436   GUATEMALA CUMHURİYETİ                      = 436
+--   437   GİNE CUMHURİYETİ                           = 437
+--   438   GİNE-BİSSAU CUMHURİYETİ                    = 438
+--   439   GUYANA KOOPERATİF CUMHURİYETİ              = 439
+--   440   HAİTİ CUMHURİYETİ                          = 440
+--   441   HONDURAS CUMHURİYETİ                       = 441
+--   442   İZLANDA CUMHURİYETİ                        = 442
+--   443   HİNDİSTAN CUMHURİYETİ                      = 443
+--   444   ENDONEZYA CUMHURİYETİ                      = 444
+--   445   İRAN İSLAM CUMHURİYETİ                     = 445
+--   446   IRAK CUMHURİYETİ                           = 446
+--   447   İRLANDA CUMHURİYETİ                        = 447
+--   448   İSRAİL DEVLETİ                             = 448
+--   449   İTALYA CUMHURİYETİ                         = 449
+--   450   FİLDİŞİ SAHİLİ CUMHURİYETİ                 = 450
+--   451   ÜRDÜN HAŞİMİ KRALLIĞI                      = 451
+--   452   KENYA CUMHURİYETİ                          = 452
+--   453   KUVEYT DEVLETİ                             = 453
+--   454   LAOS DEMOKRATİK HALK CUMHURİYETİ           = 454
+--   455   LÜBNAN CUMHURİYETİ                         = 455
+--   456   LESOTHO KRALLIĞI                           = 456
+--   457   LİBERYA CUMHURİYETİ                        = 457
+--   458   LİBYA DEVLETİ                              = 458
+--   459   LİHTENŞTAYN PRENSLİĞİ                      = 459
+--   460   LÜKSEMBURG BÜYÜK DÜKALIĞI                  = 460
+--   461   MADAGASKAR CUMHURİYETİ                     = 461
+--   462   MALAVİ CUMHURİYETİ                         = 462
+--   463   MALDİVLER CUMHURİYETİ                      = 463
+--   464   MALİ CUMHURİYETİ                           = 464
+--   465   MALTA CUMHURİYETİ                          = 465
+--   466   MORİTANYA İSLAM CUMHURİYETİ                = 466
+--   467   MAURİTİUS CUMHURİYETİ                      = 467
+--   468   BİRLEŞİK MEKSİKA DEVLETLERİ                = 468
+--   469   FAS KRALLIĞI                               = 469
+--   470   MOZAMBİK CUMHURİYETİ                       = 470
+--   471   NEPAL FEDERAL DEMOKRATİK CUMHURİYETİ       = 471
+--   472   HOLLANDA KRALLIĞI                          = 472
+--   473   NİKARAGUA CUMHURİYETİ                      = 473
+--   474   NİJER CUMHURİYETİ                          = 474
+--   475   NİJERYA FEDERAL CUMHURİYETİ                = 475
+--   476   NORVEÇ KRALLIĞI                            = 476
+--   477   UMMAN SULTANLIĞI                           = 477
+--   478   PAKİSTAN İSLAM CUMHURİYETİ                 = 478
+--   479   PANAMA CUMHURİYETİ                         = 479
+--   480   PAPUA YENİ GİNE BAĞIMSIZ DEVLETİ           = 480
+--   481   PARAGUAY CUMHURİYETİ                       = 481
+--   482   PERU CUMHURİYETİ                           = 482
+--   483   FİLİPİNLER CUMHURİYETİ                     = 483
+--   484   POLONYA CUMHURİYETİ                        = 484
+--   485   PORTEKİZ CUMHURİYETİ                       = 485
+--   486   KATAR DEVLETİ                              = 486
+--   487   RUANDA CUMHURİYETİ                         = 487
+--   488   SAİNT VİNCENT VE GRENADİNLER               = 488
+--   489   SAMOA BAĞIMSIZ DEVLETİ                     = 489
+--   490   SAO TOME VE PRİNCİPE DEMOKRATİK CUMHURİYETİ = 490
+--   491   SUUDİ ARABİSTAN KRALLIĞI                   = 491
+--   492   SENEGAL CUMHURİYETİ                        = 492
+--   493   SEYŞELLER CUMHURİYETİ                      = 493
+--   494   SİERRA LEONE CUMHURİYETİ                   = 494
+--   495   SİNGAPUR CUMHURİYETİ                       = 495
+--   496   SOMALİ FEDERAL CUMHURİYETİ                 = 496
+--   497   GÜNEY AFRİKA CUMHURİYETİ                   = 497
+--   498   İSPANYA KRALLIĞI                           = 498
+--   499   SRİ LANKA DEMOKRATİK SOSYALİST CUMHURİYETİ = 499
+--   500   SUDAN CUMHURİYETİ                          = 500
+--   501   SURİNAM CUMHURİYETİ                        = 501
+--   502   SVAZİLAND KRALLIĞI                         = 502
+--   503   İSVEÇ KRALLIĞI                             = 503
+--   504   İSVİÇRE KONFEDERASYONU                     = 504
+--   505   SURİYE ARAP CUMHURİYETİ                    = 505
+--   506   TAYLAND KRALLIĞI                           = 506
+--   507   TOGO CUMHURİYETİ                           = 507
+--   508   TRİNİDAD VE TOBAGO CUMHURİYETİ             = 508
+--   509   TUNUS CUMHURİYETİ                          = 509
+--   510   TÜRKİYE CUMHURİYETİ                        = 510
+--   511   UGANDA CUMHURİYETİ                         = 511
+--   512   BİRLEŞİK ARAP EMİRLİKLERİ                  = 512
+--   513   BÜYÜK BRİTANYA VE KUZEY İRLANDA BİRLEŞİK KRALLIĞI = 513
+--   514   KAMERUN CUMHURİYETİ                        = 514
+--   515   TANZANYA BİRLEŞİK CUMHURİYETİ              = 515
+--   516   AMERİKA BİRLEŞİK DEVLETLERİ                = 516
+--   517   URUGUAY DOĞU CUMHURİYETİ                   = 517
+--   518   VANUATU CUMHURİYETİ                        = 518
+--   519   BOLİVARCI VENEZUELA CUMHURİYETİ            = 519
+--   520   VİETNAM SOSYALİST CUMHURİYETİ              = 520
+--   521   YEMEN CUMHURİYETİ                          = DEMOKRATİK YEMEN
+--   522   ZAMBİYA CUMHURİYETİ                        = 522
+--   523   ZİMBABVE CUMHURİYETİ                       = 523
+--   524   VATANSIZ                                   = 524
+
+-- SKRS karşılığı bulunamayan ülkeler (76):
+--   103   ANDORRA
+--   111   BAHAMA ADALARI
+--   121   BİRLEŞİK ARAP EMİR.
+--   122   BİRLEŞİK KRALLIK
+--   123   BİSSAN (RUANDA)
+--   124   BOLİVYA
+--   127   BREZİLYA
+--   154   ETYOPYA
+--   159   FİJİ ADALARI
+--   166   GİNE-BİSAU
+--   169   GUYANA
+--   172   GÜNEY KORE
+--   185   İSVİÇRE
+--   198   KEYP VERD ADALARI
+--   199   KIRGIZİSTAN
+--   200   KİRİBATİ ADALARI
+--   202   KOMOR ADALARI
+--   204   KONGO DEM.CUMH.
+--   209   KUZEY KIBRIS TÜRK CUM.
+--   210   KUZEY KORE
+--   212   LAOS DEM CUM.
+--   213   LESOTO
+--   217   LİHTENŞTAYN
+--   220   LÜKSEMBURG
+--   223   MAKEDONYA
+--   225   MALDİV ADALARI
+--   229   MARSHALL ADALARI
+--   231   MİKRONEZYA
+--   232   MISIR
+--   235   MONAKO
+--   237   MORİTUS
+--   239   MYANMAR
+--   242   NEPAL
+--   244   NİJERYA
+--   247   ORTA AFRİKA CUM.
+--   250   PALAU ADALARI
+--   252   PAPUA YENİ GİNE
+--   258   RUSYA FED. / ADİGE CUM.
+--   259   RUSYA FED. / ALTAY CUM.
+--   260   RUSYA FED. / BOŞKORTOSTAN CUM.
+--   261   RUSYA FED. / BURYATYA CUM.
+--   262   RUSYA FED. / ÇEÇEN CUM.
+--   263   RUSYA FED. / ÇUVAŞ CUM.
+--   264   RUSYA FED. / DAĞISTAN CUM.
+--   265   RUSYA FED. / HAKASYA CUM.
+--   266   RUSYA FED. / İNGUŞETYA CUM.
+--   267   RUSYA FED. / KABARTAY-BALKAR CUM.
+--   268   RUSYA FED. / KALMİKYA CUM.
+--   269   RUSYA FED. / KARAÇAY-ÇERKEZ CUM.
+--   270   RUSYA FED. / KARELYA CUM.
+--   271   RUSYA FED. / KOMİ CUM.
+--   272   RUSYA FED. / KUZEY OSETYA CUM.
+--   273   RUSYA FED. / MARİ EL CUM.
+--   274   RUSYA FED. / MORDOVYA CUM.
+--   275   RUSYA FED. / SAHA CUM. (YAKUTİSTAN)
+--   276   RUSYA FED. / TATARİSTAN CUM.
+--   277   RUSYA FED. / TUVA CUM.
+--   278   RUSYA FED. / UDMURT CUM.
+--   280   SAİNT KİTTS VE NEVİS ADALARI
+--   282   SAİNT VİNCENT VE GRANADİNLER
+--   283   SAMOA
+--   287   SEYŞEL ADALARI
+--   292   SLOVAKYA CUMHURİYETİ
+--   295   SOMALİ
+--   297   SRİ LANKA
+--   300   SURİYE
+--   307   TİRİNİDAD VE TOBAGO
+--   309   TONGA ADALARI
+--   311   TUVALU ADALARI
+--   312   TC
+--   317   UMMAN
+--   318   URUGUAY
+--   319   ÜRDÜN
+--   320   VANUATU ADALARI
+--   322   VENEZUELA
+--   323   VİETNAM
+
+do $$
+begin
+    raise notice '617 tamam: % ulkede SKRS kodu, % bos',
+        (select count(*) from public.ulke where skrs_kod is not null),
+        (select count(*) from public.ulke where skrs_kod is null);
+end $$;

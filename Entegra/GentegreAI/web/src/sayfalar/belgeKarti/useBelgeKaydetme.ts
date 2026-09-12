@@ -1,4 +1,5 @@
 import { api } from '../../api/istemci';
+import { mesaj } from '../../bilesenler/mesaj';
 import { hataAyristir, type BelgeYaniti } from '../../api/sozlesme';
 import { belgeDogrula, belgeGovdesi, doluSatirlar, type BelgeGirdisi } from '../belgeKaydet';
 import { yanittanSatirlar, type SatirDurumu } from '../belgeSatir';
@@ -20,6 +21,8 @@ export interface BelgeKaydetmeBaglami {
   setHata(v: string | null): void;
   setAlanHatalari(v: Record<string, string>): void;
   setKaydediyor(v: boolean): void;
+  /** Gridde KAYDEDILMEMIS satir degisikligi var mi (ekleme ya da SILME). */
+  kalemDegisti: boolean;
   setKalemDegisti(v: boolean): void;
   /** Ilk basvuru kaydinda protokol alinir; kart acik kalir. */
   setAcilanId(id: number): void;
@@ -61,7 +64,15 @@ export function belgeKaydetmeKur(b: BelgeKaydetmeBaglami) {
     //   tahsilat/POS oncesi yapilan kayit sunucudaki ucretleri de siliyordu.
     //   Kullanici Kaydet'e basarsa istegi gecerlidir - yalniz kartin KENDI
     //   kaydi engellenir.
-    if (otomatik && dolu.length === 0 && (b.sonuc?.satirlar?.length ?? 0) > 0)
+    //
+    // AMA KULLANICI SILDIYSE GECERLIDIR (kullanici: "ücretlerde 2 muayene
+    //   vardı onları sildim… ücrete gelip ＋'ya basınca 2 satır ve tahakkuk
+    //   oluştu, hemen bir şey seçmeden"): gridi BOSALTAN kullanicinin
+    //   kendisiydi (`kalemDegisti`), kayit atlaninca silme sunucuya hic
+    //   gitmiyor ve ardindan gelen tazeleme satirlari geri getiriyordu -
+    //   silinmis satirlar kendiliginden dirilmis gibi gorunuyordu.
+    if (otomatik && dolu.length === 0 && !b.kalemDegisti
+        && (b.sonuc?.satirlar?.length ?? 0) > 0)
       return b.etkinBelgeId ?? 0;
 
     b.setKaydediyor(true);
@@ -99,6 +110,12 @@ export function belgeKaydetmeKur(b: BelgeKaydetmeBaglami) {
       const c = hataAyristir(h);
       b.setAlanHatalari(c.alanlar);
       b.setHata(c.mesaj);
+      // KAYIT DUSTUYSE MESAJ DA CIKAR (kullanici: "değişiklik kaydet
+      //   basıyorum ama kaydetmiyor"): sunucunun is kurali uyarisi
+      //   ("Kurumun 3 sözleşmesi var - hangisinin geçerli olduğunu seçin")
+      //   yalniz ilgili alanin altinda kirmizi yaziydi ve kullanici BASKA
+      //   SEKMEDEYSE hic gormuyordu - dugme calismamis gibi duruyordu.
+      if (c.mesaj) mesaj(c.mesaj);
     } finally {
       b.setKaydediyor(false);
     }

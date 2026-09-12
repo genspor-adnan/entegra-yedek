@@ -24,6 +24,9 @@ interface TarafSatiri {
   brans: string;
   kurum: string;
   istemSayisi: string;
+  /** BASVURU HEKIMI duzeni (583): bolum ve hekimin BUGUNKU basvuru sayisi. */
+  bolumAdi: string;
+  bugunBasvuru: string;
   /** Son/Sik siralama anahtarlari - sunucudan gelir, ekranda gorunmez. */
   aramaSonTarih?: unknown;
   aramaSay?: unknown;
@@ -34,6 +37,7 @@ const tipEtiketi = (kaynak: string, s: ListeSatiri): string => {
   if (kaynak === 'personel') return 'Personel';
   if (kaynak === 'hasta') return 'Hasta';
   if (kaynak === 'dis-hekim') return 'Dış Hekim';
+  if (kaynak === 'basvuru-hekim') return Number(s.disMi) === 1 ? 'Dış Hekim' : 'Hekim';
   const musteri = Number(s.musteri) === 1;
   const tedarikci = Number(s.tedarikci) === 1;
   if (musteri && tedarikci) return 'Müşteri/Tedarikçi';
@@ -69,6 +73,8 @@ const satiraCevir = (kaynak: string, s: ListeSatiri): TarafSatiri => ({
   brans: String(s.bransAdi ?? ''),
   kurum: String(s.kurum ?? ''),
   istemSayisi: s.istemSayisi != null ? String(s.istemSayisi) : '',
+  bolumAdi: String(s.bolumAdi ?? s.departmanAdi ?? ''),
+  bugunBasvuru: s.bugunBasvuru != null ? String(s.bugunBasvuru) : '',
   // Son/Sik gorunumunun siralama anahtarlari (sunucu doner) - listede
   //   gosterilmez, yalniz birlesik siralamada kullanilir.
   aramaSonTarih: s.aramaSonTarih,
@@ -158,6 +164,14 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
    * hekimiydi" sorusu bu kolonlarla cevaplanir.
    */
   const disHekimDuzeni = kaynaklar.length === 1 && kaynaklar[0] === 'dis-hekim';
+  /**
+   * BASVURU HEKIMI DUZENI (583, kullanici: "başvuruda hekim listesi combo
+   * değil, modal dr ve bölümün olduğu arama ekranı olsun, bir sütunda bugün
+   * kaç başvuru olduğu bilgisi de olsun"): Hekim · Bölüm · Bugünkü Başvuru.
+   * Combo yuzlerce hekimde okunmuyordu; gunluk yuk hicbir yerde gorunmuyordu.
+   * Kaynak profile gore ic hekim ya da dis hekim dondurur (578) - ekran ayni.
+   */
+  const hekimDuzeni = kaynaklar.length === 1 && kaynaklar[0] === 'basvuru-hekim';
 
   /** Kutuda yazan metin (aninda) - `arama` bunun gecikmeli (debounce) hali. */
   const [metin, setMetin] = useState('');
@@ -368,9 +382,13 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
       <div className="perde" onClick={onKapat} style={{ zIndex: 400 }} />
       <div className="lookup-pencere taraf-arama" onKeyDown={tus} style={{ width: 'min(880px, 92vw)', zIndex: 401 }}>
         {/* Ust arac cubugu (cari-liste ile ayni desen): Yeni/Duzenle sadece tek-kaynakli
-            aramada (kaynaklar.length===1) - kullanici hangi TIP olusturulacagini secemez. */}
+            aramada (kaynaklar.length===1) - kullanici hangi TIP olusturulacagini secemez.
+            HEKIM ARAMASINDA IKISI DE YOK (kullanici): `basvuru-hekim` bir KART
+            DEGIL, profile gore ic/dis hekimi birlestiren salt okunur kaynak
+            (578) - acilacak bir "basvuru hekimi karti" yok. Kayit kabul zaten
+            hekim tanimlamaz; hekim Personel / Dis Doktor ekranindan acilir. */}
         <div className="lookup-cubuk">
-          {kaynaklar.length === 1 && (
+          {kaynaklar.length === 1 && !hekimDuzeni && (
             <>
               <button type="button" className="d"
                 onClick={() => setKartAcik({ kaynak: yeniKaynak ?? kaynaklar[0], id: 'yeni' })}>
@@ -437,6 +455,12 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
                     <th style={{ width: 104 }}>İl</th>
                     <th style={{ width: 96 }}>Son Başvuru</th>
                   </>
+                ) : hekimDuzeni ? (
+                  <>
+                    <th className="genis">Hekim</th>
+                    <th style={{ width: 230 }}>Bölüm</th>
+                    <th style={{ width: 130 }} className="hiza-sag">Bugünkü Başvuru</th>
+                  </>
                 ) : disHekimDuzeni ? (
                   <>
                     <th className="genis">Ad Soyad</th>
@@ -487,6 +511,12 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
                       <td>{satir.il}</td>
                       <td>{satir.sonBasvuru || <span className="sonuk">—</span>}</td>
                     </>
+                  ) : hekimDuzeni ? (
+                    <>
+                      <td>{satir.unvan}</td>
+                      <td>{satir.bolumAdi || <span className="sonuk">—</span>}</td>
+                      <td className="hiza-sag">{satir.bugunBasvuru || '0'}</td>
+                    </>
                   ) : disHekimDuzeni ? (
                     <>
                       <td>{satir.unvan}</td>
@@ -510,7 +540,8 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
               {/* Genel duzende kolon sayisi 7: isaret · Tip · Kod · Unvan ·
                   Bağlı Kurum · Bölüm · Görev. */}
               {!yukleniyor && satirlar.length === 0 && (
-                <tr><td colSpan={hastaDuzeni ? 9 : disHekimDuzeni ? 6 : 7} className="bos">Kayıt yok</td></tr>
+                <tr><td colSpan={hastaDuzeni ? 9 : disHekimDuzeni ? 6 : hekimDuzeni ? 4 : 7}
+                        className="bos">Kayıt yok</td></tr>
               )}
             </tbody>
           </table>

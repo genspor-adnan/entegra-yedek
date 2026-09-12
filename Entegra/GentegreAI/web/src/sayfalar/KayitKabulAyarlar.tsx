@@ -92,6 +92,25 @@ export function KayitKabulAyarlar() {
                          { deger: '2', ad: 'Fatura/Fiş kesilmesin mi sorusu sorulsun' },
                        ]}
                        ayarlar={ayarlar} onYaz={yaz} />
+
+          </div>
+
+          {/* SGK KATILIM PAYI - TUTAR ve KODLAR YAN YANA (kullanici: "yanına da
+              tahakkuk edecek SUT fiyat kodları editini koy… bu opsiyonu SGK
+              Katılım Payı (TL)'nin sağ tarafına taşı"). Ikisi TEK KARARIN iki
+              parcasi: ne kadar alinacagi ve hangi kalemde alinacagi - alt alta
+              dizilince ilgisiz iki ayar gibi okunuyordu. Aciklamalar "?"
+              ikonunda (db/593), alt paragrafta degil.
+
+              Kodlar kutusu GENIS: virgullu kod listesi dar kutuda okunmuyor. */}
+          <div className="alan-izgara ayar-formu katilim-payi-satiri">
+            <AyarAlani anahtar="basvuru.sgk_katilim_payi"
+                       etiket="SGK Katılım Payı (TL)"
+                       ayarlar={ayarlar} onYaz={yaz} />
+            <AyarAlani anahtar="basvuru.sgk_katilim_kodlari"
+                       etiket="Katılım Payı Alınacak SUT Kodları"
+                       tip="metin" genis
+                       ayarlar={ayarlar} onYaz={yaz} />
           </div>
         </div>
         {/* PROTOKOL NO da numaralandirma tablosunda (358). */}

@@ -120,6 +120,29 @@ export const labUclari = {
     gonder<{ id: number; satir: number; mesaj: string }>(
       `/api/belge/${belgeId}/dagit`, govde ?? {}),
 
+  /**
+   * KAYDEDILMEMIS satirlarin dagilim ONIZLEMESI (594, kullanici: "kaydetmeden
+   * ucret satirinin sagindaki + detay butonu gelmiyor, oysa ben ekledigimde
+   * hemen detay ne diye gormek istiyorum").
+   *
+   * Sunucu hicbir sey yazmaz ve KAYITLI satirla ayni fonksiyonu calistirir
+   * (`fn_dagilim_coz`) - onizlemede gorulen rakam kaydedince degismez.
+   * Satirlar `anahtar` ile eslesir: satirin henuz id'si yoktur.
+   */
+  belgeDagilimOnizleme: (govde: {
+    odeyenKurumId: number; sozlesmeId?: number | null; altKurum?: number | null;
+    sgkKullan?: number | null; emekli?: number | null;
+    satirlar: { anahtar: string; stokId?: number | null; hizmetId?: number | null;
+                miktar: number; tutar: number; kdv: number;
+                iskonto?: number; iskonto2?: number;
+                sgkListe?: number | null; katkiTutar?: number | null }[];
+  }) =>
+    gonder<{ satirlar: { anahtar: string; rota: number; tutar: number;
+                         sgk: number; oss: number; hastaProvizyon: number;
+                         hastaEkKatki: number; sgkKatilimPayi: number;
+                         sgkListe: number; huvListe: number }[] }>(
+      '/api/belge/dagilim-onizleme', govde),
+
   labIstemNumuneDurum: (istemId: number, durum: number,
                         ek?: { kalite?: number; retNeden?: number; aciklama?: string }) =>
     gonder<{ id: number; mesaj: string }>(`/api/lab/istem/${istemId}/numune-durum`,

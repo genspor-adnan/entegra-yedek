@@ -9,6 +9,7 @@ import { KasaIslemKarti } from './sayfalar/KasaIslemKarti';
 import { Liste, LISTELER } from './sayfalar/Liste';
 import { StokAyarlar } from './sayfalar/StokAyarlar';
 import { KasaAyarlar } from './sayfalar/KasaAyarlar';
+import { IceriAlma } from './sayfalar/IceriAlma';
 import { RandevuAyarlar } from './sayfalar/RandevuAyarlar';
 import { KayitKabulAyarlar } from './sayfalar/KayitKabulAyarlar';
 import { KatalogAyarlar } from './sayfalar/KatalogAyarlar';
@@ -100,6 +101,8 @@ function Yollar() {
         {/* Kategoriler iki bolmeli ozel ekran (345) - duz liste degil. */}
         {yetki('stok') && <Route path="/kategori" element={<Kategoriler />} />}
         {yetki('kasa_islem') && <Route path="/kasa-ayarlar" element={<KasaAyarlar />} />}
+        {/* Excel'den iceri alma sihirbazi (548) - liste degil, dort adimli ekran. */}
+        {yetki('ayar') && <Route path="/iceri-alma" element={<IceriAlma />} />}
         {yetki('randevu') && <Route path="/randevu-ayarlar" element={<RandevuAyarlar />} />}
         {/* Departman + gorev (255): tek ekranda iki grid. */}
         {yetki('personel') && <Route path="/departman" element={<DepartmanGorev />} />}

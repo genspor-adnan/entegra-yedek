@@ -79,6 +79,9 @@ export function DepartmanGorev() {
           <GenGrid
             kaynak="departman"
             baslik="Bölümler"
+            // AGAC (562): bolumler ust basliklar altinda toplandi; alt dallar
+            //   +/- ile acilip kapanir. Hiyerarsi `ustbirimId` alaninda.
+            agacAlani="ustbirimId"
             // gomulu: gridin kendi baslik/yol satiri cizilmez - baslik zaten
             //   ustteki ikon seridinde (＋ ✎ 🗑).
             gomulu
@@ -96,6 +99,8 @@ export function DepartmanGorev() {
           <GenGrid
             kaynak="personel-gorev"
             baslik="Görevler"
+            // AGAC (570): gorevler de bolum gibi baslik altinda toplandi.
+            agacAlani="ustId"
             gomulu
             seritGizli
             boyut={200}

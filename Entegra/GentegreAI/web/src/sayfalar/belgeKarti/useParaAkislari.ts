@@ -4,8 +4,10 @@ import { hataMetni, type BelgeYaniti } from '../../api/sozlesme';
 import { mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import { para, tutarOku } from '../../bilesenler/bicim';
 import { belgeKisaAdi } from '../belgeTuru';
+import { KOVA_SGK, KOVA_OSS } from './dagilimKovalari';
 import {
-  donusumSatirlari, posFisiSecimi, sinirliDonusumSecimi, donusumPayi, kasaAramaSirasi,
+  donusumSatirlari, posFisiSecimi, sinirliDonusumSecimi, donusumPayi, tarafPayi,
+  kasaAramaSirasi,
   type DonusumOlcusu,
 } from '../belgeKartiKurallari';
 
@@ -43,6 +45,8 @@ export interface ParaAkisGirdisi {
   setPosAksiyon(v: number): void;
   /** Belgenin acik borcu (ucretlendirme - tahsilat). */
   acikBorc: number;
+  /** Satirlari SUNUCUDAN tazeler (kovalarin sayaclari degisince sart). */
+  satirlariTazele(id?: number): Promise<void>;
   kullaniciId: number | null;
   yerelPara: string;
   setHata(m: string | null): void;
@@ -120,8 +124,8 @@ export function useParaAkislari(g: ParaAkisGirdisi) {
    * Cevrilecek bir sey yoksa (kapanmis belge, tahsilat yok) kullaniciya
    * sebebi soylenir - sessizce durmasin.
    */
-  const hizliDonustur = async (hedefTur: number) => {
-    const { ref, basvuruMu, donusumOlcusu, setHata, setSonuc, donusumleriYukle } = gRef.current;
+  const hizliDonustur = async (hedefTur: number, taraf?: 'hasta' | 'kurum') => {
+    const { ref, basvuruMu, donusumOlcusu, setHata, donusumleriYukle } = gRef.current;
     // ONCE KAYDET (kullanici: "fiş butonuna bastım, ücret ve tahsilat
     //   satırlarını henüz kayıtlı olmadığı için göremedi"): acik satirlar
     //   SUNUCUDAN okunuyor - ekrandaki kalemler yazilmadan donusum bos kalir.
@@ -142,7 +146,18 @@ export function useParaAkislari(g: ParaAkisGirdisi) {
       // PAY: hangi kova aciksa (kurum tahakkuku / hasta fisi) - bkz.
       //   donusumPayi. Sabit hasta payi, "Kurumu Öder" basvurusunda hicbir
       //   satir secmiyordu.
-      const pay = donusumPayi(acik, hedefTur);
+      // TARAF SECILEBILIR (kullanici: "tahakkukları ikiye ayıralım: Kurum
+      //   Tahakkuku ve Hasta Tahakkuku"): dugme hangi tarafi belgeleyecegini
+      //   soyler. Kova NUMARASI degil TARAF gecer - "hasta" özel iste ek katki
+      //   (4), ÖSS/SGK'da provizyon (1) kovasidir; sabit numara özel hastada
+      //   bos sonuc veriyordu. Kalani olmayan tarafta asagida sebep soylenir.
+      const pay = taraf ? tarafPayi(acik, taraf) : donusumPayi(acik, hedefTur);
+      if (taraf && pay === 0) {
+        mesaj(taraf === 'hasta'
+          ? 'Hastanın belgelenecek payı kalmadı.'
+          : 'Kurumun belgelenecek payı kalmadı.');
+        return;
+      }
       let gonderilecek = donusumSatirlari(acik, hedefTur, donusumOlcusu, pay);
       if (basvuruMu && gonderilecek.length > 0) {
         // MODALDE ACIK BELGE TUTARI ONERILIR (kullanici) ve girilen rakam
@@ -173,8 +188,45 @@ export function useParaAkislari(g: ParaAkisGirdisi) {
                                            undefined, false, undefined,
                                            pay, false);
       await donusumleriYukle(id);
-      try { setSonuc(await api.belgeOku(id)) } catch { /* yoksay */ }
+      // SATIRLAR DA TAZELENIR (kullanici: "satış tahakkuku ekledim ama açık
+      //   belge değişmedi"): kovalarin KAPATILAN sayaci sunucuda doldu; kart
+      //   yalniz basligi okursa serit eski rakamda kalir.
+      await gRef.current.satirlariTazele(id);
       mesaj(`Belge oluşturuldu: ${String(yeni.belge.belgeNo ?? yeni.belge.id)}`);
+    } catch (h) { const m = hataMetni(h); setHata(m); mesaj(m) }
+  };
+
+  /**
+   * KURUM PAYI TAHSIL EDILMEZ, TAHAKKUK EDILIR (kullanici: "nakit, POS, banka,
+   * çek, senet her zaman hastadan alacağımız tahsilatlar içindir… kaydettiğim
+   * zaman eğer yoksa kurum tahakkuku ilk satıra gelecek").
+   *
+   * Hastadan tahsilat alinir alinmaz kurumun payi icin Satış Tahakkuku (17)
+   * kesilir - yoksa. "Yoksa" kontrolu ayrica yapilmaz: `donusumPayi` yalnizca
+   * KALANI olan kovayi secer, tamami tahakkuk edilmisse kalan 0'dir ve islem
+   * sessizce atlanir. Boylece 100 nakit + 100 POS gibi parcali tahsilatta
+   * tahakkuk BIR KEZ dogar, kurum payi hep 800 kalir.
+   *
+   * SESSIZ: akisi bolmemek icin kullaniciya "belge olusturuldu" denmez -
+   * tahakkuk listede zaten gorunur. Hata olursa soylenir.
+   */
+  const kurumTahakkukuOtomatik = async (belgeId: number) => {
+    const { basvuruMu, setHata, donusumleriYukle } = gRef.current;
+    if (!basvuruMu || !belgeId) return;
+    try {
+      const acik = await api.belgeAcikSatirlar(belgeId);
+      const pay = donusumPayi(acik, 17);
+      // Kurum kovasi degilse (hasta kovasi dondu) tahakkuk edilecek kurum payi
+      //   yok demektir - ozel hastada da buradan sessizce cikilir.
+      if (pay !== KOVA_SGK && pay !== KOVA_OSS) return;
+      const satirlar = donusumSatirlari(acik, 17, 'tutar', pay);
+      if (satirlar.length === 0) return;
+      await api.belgeDonustur(belgeId, 17, satirlar, undefined, false, undefined,
+                              pay, false);
+      await donusumleriYukle(belgeId);
+      // SATIRLARI DA TAZELE: kovalarin KAPATILAN sayaci sunucuda doldu; kart
+      //   yalniz basligi okursa serit kurum payini hala ACIK gosterir.
+      await gRef.current.satirlariTazele(belgeId);
     } catch (h) { const m = hataMetni(h); setHata(m); mesaj(m) }
   };
 
@@ -193,6 +245,10 @@ export function useParaAkislari(g: ParaAkisGirdisi) {
   const posSonrasi = async (tur: number) => {
     const { basvuruMu, kayitliId, posAksiyon, setPosAksiyon,
             setHata, setSonuc, donusumleriYukle } = gRef.current;
+    // KASA PENCERESI HANGI TURDE KAPANIRSA KAPANSIN kurum payi tahakkuk edilir
+    //   (kullanici): nakit, POS, banka, cek, senet - hepsi HASTADAN alinir;
+    //   kurumun payi ayni anda kuruma kesilen belgeye doner.
+    if (basvuruMu && kayitliId) await kurumTahakkukuOtomatik(kayitliId);
     if (tur !== 25 || !basvuruMu || !kayitliId) return;
     // AYAR OKUNAMAMISSA SESSIZCE VAZGECME (kullanici: "POS girdim ama fiş
     //   oluşmadı"): 355 ayari kart acilirken bir kez cekiliyor; o istek
@@ -279,8 +335,11 @@ export function useParaAkislari(g: ParaAkisGirdisi) {
       if (!h) { mesaj('Aktif kasa hesabı bulunamadı - Kasa tanımlarından bir kasa açın.'); return }
       await ref.current.hizliTahsilat(alisMi ? 31 : 21, Number(h.id), tutar,
                                       String(h.ad ?? ''));
+      // Hastadan tahsilat alindi: kurum payi varsa TAHAKKUK edilir (yoksa).
+      await kurumTahakkukuOtomatik(gRef.current.kayitliId);
     } catch (e) { setHata(hataMetni(e)) }
   };
 
-  return { hizliTutar, tutarSor, tahsilatTutariSor, hizliDonustur, posSonrasi, hizliNakit };
+  return { hizliTutar, tutarSor, tahsilatTutariSor, hizliDonustur, posSonrasi, hizliNakit,
+           kurumTahakkukuOtomatik };
 }

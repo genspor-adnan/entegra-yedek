@@ -74,8 +74,13 @@ public class SutBedeliTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifetime
         decimal fiyat, bool bos = false)
     {
         var id = await veri.TekDegerAsync<int>("""
-            insert into public.fiyat_listesi (ad, durum, yon, kdv_dahil)
-            values (@p0, 1, 2, 0) returning id
+            insert into public.fiyat_listesi (ad, durum, yon, kdv_dahil,
+                                              baslangic, bitis)
+            values (@p0, 1, 2, 0,
+                    -- DONEM ZORUNLU (541): liste kaydi tarihsiz acilamaz.
+                    make_date(extract(year from current_date)::int, 1, 1),
+                    make_date(extract(year from current_date)::int, 12, 31))
+            returning id
             """, [$"{Etiket} {ad} {Guid.NewGuid():N}"[..40]]);
         _listeler.Add(id);
         if (!bos)

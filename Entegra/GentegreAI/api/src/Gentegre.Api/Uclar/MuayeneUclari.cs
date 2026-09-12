@@ -1305,13 +1305,75 @@ public static class MuayeneUclari
         });
 
         // POST /api/enabiz/paket/{id}/iptal
+        //
+        // IKI AYRI IPTAL (602). Paketin GONDERILIP GONDERILMEDIGINE gore:
+        //
+        //  · HENUZ GITMEDIYSE (durum 0 bekleyen / 1 eksik / 4 hatali) is
+        //    yereldir: paket durum 5'e cekilir, USS'nin haberi olmaz.
+        //
+        //  · GONDERILDIYSE (durum 3) yerel isaret YETMEZ - veri USS'de durur.
+        //    Kilavuzun karsiligi ayri bir PAKETTIR: 301 Hasta Kayit Silme,
+        //    govdesinde 101'in dondurdugu SYSTakipNo ile
+        //    (dokuman/09_ENABIZ_USS_SEMASI.md). Burada o paket URETILIR ve
+        //    kuyruga girer; gonderim isi onu yollayinca USS kaydi silinir.
+        //    Kaynak paket, silme paketi BASARIYLA gidene kadar durum 3'te
+        //    kalir - "iptal edildi" demek, iptalin USS'ye ulastigini bilmeden
+        //    yanlis olurdu.
         grup.MapPost("/paket/{id:long}/iptal", async (
             long id, BaglamCozucu cozucu, VeriKaynagi veri,
+            Servisler.EnabizPaketUretici uretici,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("entegrasyon", Islem.Degistir);
 
+            var p = await veri.TekAsync("""
+                select p.durum, p.kaynak_id, coalesce(p.sys_takip_no, ''),
+                       coalesce(t.uss_paket_kodu, '')
+                  from public.enabiz_paket p
+                  join public.enabiz_paket_turu t on t.id = p.paket_turu_id
+                 where p.id = @p0
+                """, [id],
+                o => new { Durum = o.GetInt16(0), Kaynak = o.GetInt32(1),
+                           Takip = o.GetString(2), Kod = o.GetString(3) }, iptal);
+            if (p is null) return Results.NotFound();
+
+            // --- GONDERILMIS PAKET: USS'ye SILME paketi gonderilir ---
+            if (p.Durum == 3)
+            {
+                if (p.Kod != "101")
+                    throw GentegreHatasi.IsKurali(
+                        "Gonderilmis paketlerden yalniz hasta kaydi (101) geri "
+                        + "alinabilir; digerleri icin kaynagi duzeltip yeniden gonderin.");
+                if (p.Takip.Length == 0)
+                    throw GentegreHatasi.IsKurali(
+                        "Paketin SYS takip numarasi yok - USS'de hangi kaydin "
+                        + "silinecegi bilinemez. Once gonderim yanitini tazeleyin.");
+
+                var silme = await uretici.UretAsync("HASTA_KABUL_SIL", p.Kaynak,
+                                                    baglam.KullaniciId, iptal);
+                if (silme is null)
+                    throw GentegreHatasi.IsKurali("Silme paketi uretilemedi.");
+
+                // Silme paketi kaynagin takip numarasini TASIR: govde ondan
+                //   uretiliyor (EnabizGonderimi.XmlUretAsync, 605).
+                await veri.CalistirAsync("""
+                    update public.enabiz_paket set sys_takip_no = @p1
+                     where id = @p0 and sys_takip_no = ''
+                    """, [silme.PaketId, p.Takip], iptal);
+
+                return Results.Ok(new
+                {
+                    id,
+                    silmePaketId = silme.PaketId,
+                    silmePaketNo = silme.PaketNo,
+                    mesaj = "Silme paketi (301) kuyruga alindi. USS kaydi, paket "
+                          + "gonderildikten sonra silinir.",
+                    izlemeNo = baglam.IzlemeNo
+                });
+            }
+
+            // --- HENUZ GITMEMIS PAKET: yerel iptal yeter ---
             var etkilenen = await veri.CalistirAsync("""
                 update public.enabiz_paket set durum = 5, degistiren = @p1,
                        degistirme_tarihi = now()
@@ -1320,7 +1382,7 @@ public static class MuayeneUclari
 
             if (etkilenen == 0)
                 throw GentegreHatasi.IsKurali(
-                    "Yalniz bekleyen, eksik ya da hatali paket iptal edilebilir.");
+                    "Bu durumdaki paket iptal edilemez.");
 
             return Results.Ok(new { id, mesaj = "Paket iptal edildi.",
                                     izlemeNo = baglam.IzlemeNo });

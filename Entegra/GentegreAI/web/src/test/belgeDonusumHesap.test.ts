@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   kdvCarpan, payKalan, payKalanDahil, tahsilDahil, onerilenTutar, matrahaCevir,
+  kurusTamamla,
 } from '../sayfalar/belgeDonusumHesap';
 import type { AcikSatir } from '../api/sozlesme';
 
@@ -88,5 +89,35 @@ describe('pay hesabi', () => {
   it('tahsil edilen tutar KDV DAHIL karsiligiyla okunur (dagitim tabani)', () => {
     expect(tahsilDahil(satir({ hastaTahsilMatrah: 100 }), 1)).toBeCloseTo(110, 4);
     expect(tahsilDahil(satir({ kurumTahsilMatrah: 200 }), 2)).toBeCloseTo(220, 4);
+  });
+});
+
+describe('kurus tamamlama - kova kalanini asmaz', () => {
+  it('POS fisi satirin PAY KALANINI asmaz (kullanici: "pos girdim ama fiş oluşmadı")', () => {
+    // Iki kalem: hasta paylari 181,82 ve 90,91 matrah (%10 -> 200 ve 100 brut).
+    //   300 TL POS cekildi; asagi yuvarlama 181,81 + 90,90 = 299,98 verir ve
+    //   eksik 2 kurus tamamlanir. Tamamlama TOPLAMA baktigi icin ikisini de
+    //   ilk satira yukluyor, matrah 181,83'e cikiyor ve kova kalani 181,82
+    //   asiliyordu - sunucu belgeyi REDDEDIYOR, fis hic kesilmiyordu.
+    const a = satir({ satirId: 1, hastaTutar: 200, hastaKalan: 181.82, tutar: 200 });
+    const b = satir({ satirId: 2, hastaTutar: 100, hastaKalan: 90.91, tutar: 100 });
+    const secim = [
+      { s: a, matrah: matrahaCevir(a, 200), pay: 1 },
+      { s: b, matrah: matrahaCevir(b, 100), pay: 1 },
+    ];
+    kurusTamamla(secim, 300);
+    expect(secim[0].matrah).toBeLessThanOrEqual(181.82);
+    expect(secim[1].matrah).toBeLessThanOrEqual(90.91);
+    // Eksik yine kapanir: 181,82 + 90,91 = 272,73 matrah -> 300,00 brut.
+    expect(secim[0].matrah + secim[1].matrah).toBeCloseTo(272.73, 2);
+  });
+
+  it('pay verilmezse kova siniri uygulanmaz - hedefi asmama kurali surer', () => {
+    // 500 / 1,1 = 454,5454 -> 454,54 (dahil 499,99). Bir kurus eklemek
+    //   500,01 yapardi; hedef asilmasin diye eklenmez - eski davranis.
+    const a = satir({ hastaKalan: 1000, tutar: 1000 });
+    const secim = [{ s: a, matrah: matrahaCevir(a, 500) }];
+    kurusTamamla(secim, 500);
+    expect(secim[0].matrah).toBe(454.54);
   });
 });

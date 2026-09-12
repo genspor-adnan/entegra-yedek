@@ -1,8 +1,10 @@
 import type { AcikSatir, Kosul } from '../api/sozlesme';
+import type { SatirDagilimi } from './belgeSatir';
 import { onerilenTutar, payKalanDahil, matrahaCevir, kurusTamamla }
   from './belgeDonusumHesap';
 import { TAHAKKUK_TURLERI } from './belgeTuru';
-import { DONUSUM_KOVA_SIRASI, KOVA_HASTA_PROVIZYON }
+import { DONUSUM_KOVA_SIRASI, KOVA_HASTA_PROVIZYON, KOVA_HASTA_EK_KATKI,
+         KOVA_SGK, KOVA_OSS }
   from './belgeKarti/dagilimKovalari';
 
 /**
@@ -115,6 +117,28 @@ export function donusumPayi(acik: AcikSatir[], hedefTur: number): number {
 }
 
 /**
+ * TARAFIN ACIK KOVASI (kullanici: "hasta tahakkukunu da özel hasta tipinde
+ * olabilir").
+ *
+ * "Hasta" ve "kurum" TEK KOVA DEGIL: özel (ücretli) işte hastanın payı EK
+ * KATKI kovasinda (4), ÖSS/SGK'da PROVIZYON kovasinda (1) durur; kurum tarafi
+ * da SGK (2) ya da sigorta (3) olabilir. Dugmeye sabit bir kova numarasi
+ * baglamak, özel hastada "Hasta Tahakkuk"u bos sonuc verir hale getiriyordu.
+ * Burada tarafin kovalari SIRAYLA denenir, KALANI olan ilki secilir.
+ *
+ * Kalan hicbir kovada yoksa 0 doner - cagiran "belgelenecek tutar kalmadi"
+ * der; yanlis kovaya yazmaktansa sebebi soylemek dogru.
+ */
+export function tarafPayi(acik: AcikSatir[], taraf: 'hasta' | 'kurum'): number {
+  const sira = taraf === 'hasta'
+    ? [KOVA_HASTA_PROVIZYON, KOVA_HASTA_EK_KATKI]
+    : [KOVA_SGK, KOVA_OSS];
+  for (const p of sira)
+    if (acik.reduce((t, s) => t + payKalanDahil(s, p), 0) > 0.005) return p;
+  return 0;
+}
+
+/**
  * TUTAR SINIRLI donusum secimi: satirlara sirayla dagitir, sinir dolunca
  * durur. Sinir verilmezse her satirin onerilen tutarinin tamami alinir.
  * Basvuruda "Belge Kes" ve POS sonrasi otomatik fis bunu kullanir.
@@ -147,7 +171,9 @@ export function sinirliDonusumSecimi(acik: AcikSatir[], hedefTur: number,
   }
   // Satir bazinda asagi yuvarlanan kuruslar toplamda gorunur bir eksik yapar
   //   (kullanici: POS 75.000 -> fis 74.999,99); hedefi asmadan geri konur.
-  const matrahli = secim.map(x => ({ s: x.s, matrah: matrahaCevir(x.s, x.dahil) }));
+  // PAY da tasinir: kurus tamamlama o kovanin kalanini asmamali (bkz.
+  //   `kurusTamamla`) - asarsa sunucu belgeyi hic olusturmuyor.
+  const matrahli = secim.map(x => ({ s: x.s, matrah: matrahaCevir(x.s, x.dahil), pay }));
   const hedef = secim.reduce((t, x) => t + x.dahil, 0);
   kurusTamamla(matrahli, hedef);
   return {
@@ -215,4 +241,159 @@ export function acikBorcHesapla(
 ): number {
   const genel = satirSayisi > 0 ? onizlemeGenel : kayitliGenel;
   return Math.round((genel - tahsilToplam) * 100) / 100;
+}
+
+
+/**
+ * PAYLASIMLI BASVURUDA ACIK TUTARLARIN TARAFA GORE AYRIMI (kullanıcı: "kurum
+ * tipi TTB (sigorta) veya SUT (SGK) olursa Açık Tahsilat iki satır olur -
+ * hastadan tahsilat ve kurumdan tahsilat; aynısı Açık Belge için de").
+ *
+ * Özel (ücretli) işte tek muhatap vardır - hasta. Sigorta/SGK anlaşmasında ise
+ * aynı başvurunun bir kısmı hastadan, bir kısmı kurumdan tahsil edilir ve
+ * faturası da ayrı kesilir. Tek rakam gösterip "300 TL açık" demek, memura
+ * kimden isteyeceğini söylemiyordu.
+ *
+ * Kaynak SUNUCUNUN dağıtım kovalarıdır (470/492) - istemci yalnız toplar:
+ *     hasta  = hasta provizyonu + hasta ek katkısı + SGK katılım payı
+ *     kurum  = SGK + özel sigorta (ÖSS/TSS)
+ * Açık tahsilat tahsil sayaçlarından, açık belge kapatma (faturalama)
+ * sayaçlarından düşülür.
+ */
+/**
+ * ÖDEME ROTASI - sunucudaki `fn_dagilim_rota`nın AYNASI (595).
+ *
+ *   1 Özel · 2 ÖSS · 3 TSS · 4 Karma · 5 SGK
+ *
+ * Kovaları yine SUNUCU böler; bu kopya yalnız EKRANIN neyi SORACAĞINA karar
+ * verir - emekli işareti (SGK'nın ödediği rotalarda) ve "Katkı Fiyatı" kutusu
+ * (yalnız ek katkı kovası olan TSS/SGK'da). Tek yerde durur: iki ekran aynı
+ * soruyu iki farklı kuralla sormasın.
+ */
+export function dagilimRotasi(
+  kurumTuru: number | null | undefined,
+  altKurum: number | null | undefined,
+  sgkKullan: number | null | undefined,
+): number {
+  const t = Number(kurumTuru ?? 1);
+  if (t === 3) return 5;                       // SGK
+  if (t !== 2) return 1;                       // Özel / kurumu öder
+  // TSS ve KARMA: hasta SGK'yı kullanmak istemezse iş ÖSS gibi yürür (597,
+  //   kullanıcı: "hasta SGK kullanılmasın deme hakkına sahip").
+  const alt = Number(altKurum ?? 201);
+  const sgkVar = Number(sgkKullan ?? 1) === 1;
+  if (alt === 202) return sgkVar ? 3 : 2;      // TSS (tamamlayıcı)
+  if (alt === 203) return sgkVar ? 4 : 2;      // Karma
+  return 2;                                    // ÖSS
+}
+
+/** Hastanın ek katkı payı DOĞAN rotalar (595): yalnız TSS ve SGK. */
+export const EK_KATKILI_ROTALAR = [3, 5];
+
+/**
+ * SAF SGK rotası (601). Bu rotada satırın TEK bir bedeli vardır: tarife = SUT
+ * (fn_belge_varsayilan_liste saf SGK'da SUT listesini seçer, fn_belge_satir_dagit
+ * da tutarı SUT + ek katkı olarak yazar). Bu yüzden ücret penceresinde ayrı bir
+ * "SGK (SUT) Bedeli" kutusu gösterilmez - kullanıcı (SGK hastası için): "SGK
+ * (SUT) Bedeli zaten birim fiyatta var, bir daha yazmaya gerek yok."
+ *
+ * TSS (3) ve Karma (4) bunun DIŞINDADIR: orada tarife bedeli ile SUT bedeli
+ * gerçekten iki ayrı fiyattır (SGK SUT'u öder, sigorta aradaki farkı) ve kutu
+ * gösterilmeye devam eder.
+ */
+export const SAF_SGK_ROTA = 5;
+
+export interface TarafAcik { hasta: number; kurum: number }
+
+/** Serit satiri: dagitim kovalari + satirin KDV orani. */
+export interface AcikSatirGirdisi { dagilim?: SatirDagilimi; kdv?: number | string }
+
+/**
+ * KOVALAR MATRAHTIR, SERIT KDV DAHIL GOSTERIR (kullanici: "kdv dahil olsun").
+ *
+ * Dagitim kovalari KDV haric tutulur - kurum icmali ve hakedis matrah uzerinden
+ * calisir. Kabul memurunun tahsil ettigi ve faturada gordugu rakam ise KDV'li
+ * tutardir; serit matrahi yazinca 1.000 TL'lik islemde "181,82 + 727,27 = 909"
+ * cikiyor ve toplam, gridin Genel Toplam'iyla tutmuyordu.
+ *
+ * BIRIMLER KARISIKTIR, dikkat: kovalar ve KAPATILAN (faturalanan) sayaclari
+ * MATRAH, TAHSIL sayaclari ise BRUT'tur - kasaya giren para KDV'li girer.
+ * Bu yuzden brutlestirme yalniz matrah kisma uygulanir; brut sayac oldugu gibi
+ * dusulur. (Ikisini birlikte carpinca 100 TL tahsilat 110 sayiliyor ve
+ * "200'den 100 aldim, kalan 90" gibi bir kalan cikiyordu.)
+ *
+ * UCUNCU BIR BIRIM DAHA VAR (593, kullanici: "açık tahsilatta 850 olması
+ * gerekirken 860 yazıyor, SGK katılıma KDV mi ekliyor?"): SGK KATILIM PAYI
+ * ciro disi bir EMANETTIR - hastadan ayarda yazan SABIT tutar (100 TL) alinir,
+ * uzerine KDV binmez. Kovada da o haliyle durur; brutlestirilirse 110 olur ve
+ * hastadan istenen tutar 10 TL fazla cikar. `ham` bu kovalar icindir.
+ */
+const topla = (ler: readonly AcikSatirGirdisi[],
+               matrah: (d: SatirDagilimi) => number,
+               brut: (d: SatirDagilimi) => number = () => 0,
+               ham: (d: SatirDagilimi) => number = () => 0): number =>
+  // YUVARLAMA SATIR SATIR: once brutlestir, sonra kurusa yuvarla, sonra topla.
+  //   Toplayip sonunda yuvarlamak 181,82 + 90,91 + 181,82 gibi uc satirda
+  //   "500,01" uretiyordu (her birinin x1,1 artigi birikiyor); belgenin kendi
+  //   toplami ise satir satir yuvarlanmis 500,00.
+  Math.round(ler.reduce((t, s) => t + (s.dagilim
+    ? Math.round(matrah(s.dagilim) * (1 + (Number(s.kdv) || 0) / 100) * 100) / 100
+      + ham(s.dagilim) - brut(s.dagilim)
+    : 0), 0) * 100) / 100;
+
+/** Açık TAHSİLAT - taraf başına (tahsil edilmemiş kısım). */
+export function acikTahsilatTaraflara(
+  satirlar: readonly AcikSatirGirdisi[],
+): TarafAcik {
+  return {
+    // KATILIM PAYI KDV'SIZ EKLENIR (593): sabit emanet tutari, matrah degil.
+    hasta: topla(satirlar,
+      d => d.hastaProvizyon + d.hastaEkKatki,
+      d => d.hastaProvizyonTahsil + d.hastaEkKatkiTahsil + d.sgkKatilimTahsil,
+      d => d.sgkKatilimPayi),
+    // KURUM PAYI BELGELENINCE ACIK TAHSILATTAN DUSER (kullanici: "kurum
+    //   tahakkuku atınca hem kurum tahsilat sıfırlansın hem kurum belge
+    //   sıfırlansın"): tahakkuk kesildigi anda alacak KURUM CARISINE gecer,
+    //   takibi orada (cari ekstresi / kurum icmali) surer. Basvuru seridinde
+    //   durmasi, hala buradan tahsil edilecekmis izlenimi veriyordu.
+    //   HASTA TARAFI BOYLE DEGIL: fis/fatura kesilse de para hastadan bu
+    //   ekranda alinir - orada yalniz TAHSILAT dusulur.
+    kurum: topla(satirlar,
+      d => d.sgk + d.oss - d.sgkKapatilan - d.ossKapatilan,
+      d => d.sgkTahsil + d.ossTahsil),
+  };
+}
+
+/** Açık BELGE - taraf başına (henüz faturaya/tahakkuka dönüşmemiş kısım). */
+export function acikBelgeTaraflara(
+  satirlar: readonly AcikSatirGirdisi[],
+): TarafAcik {
+  return {
+    // SGK KATILIM PAYI belgeye girmez (ciro dışı emanet, 473): açık belgede
+    //   sayılmaz, açık tahsilatta sayılır - hastadan yine de alınır.
+    //
+    // HER PARÇA AYRI BRÜTLEŞTİRİLİR (602, kullanıcı: "başvuru 85 açık belge
+    //   500.01 oldu"). Kapatılan da matrahtır ama FARKI brütleştirmek kuruş
+    //   kaydırıyordu: pay 1.363,64 · kapatılan 909,09 · KDV %10 iken
+    //       (1363,64 − 909,09) × 1,1 = 500,005 → 500,01
+    //   oysa iki tutarın kendi brütleri 1.500,00 ve 1.000,00 - açık tam
+    //   500,00. Fark, iki YUVARLANMIŞ matrahın arasındaki artığın tekrar
+    //   çarpılmasından doğuyor; her parçayı kendi brütüne çevirip çıkarmak
+    //   belgenin ve tahsilatın gerçekten gördüğü rakamları kullanır.
+    hasta: topla(satirlar, d => d.hastaProvizyon + d.hastaEkKatki)
+         - topla(satirlar, d => d.hastaProvizyonKapatilan + d.hastaEkKatkiKapatilan),
+    kurum: topla(satirlar, d => d.sgk + d.oss)
+         - topla(satirlar, d => d.sgkKapatilan + d.ossKapatilan),
+  };
+}
+
+/**
+ * Serit iki satira BOLUNUR MU: ödeyen kurum ÖSS (2) ya da SGK (3) ise evet.
+ * Özel (1) ve "Kurumu Öder" (4) tek muhataplıdır.
+ */
+export function paylasimliKurum(
+  kurumlar: readonly { id: number; tur: number }[], kurumId: number | null,
+): boolean {
+  const t = Number(kurumlar.find(k => k.id === kurumId)?.tur ?? 0);
+  return t === 2 || t === 3;
 }

@@ -67,6 +67,17 @@ public sealed partial class BelgeDeposu
                    --   girilebilsin diye BELGEDE tutulur, randevudan okunmaz.
                    bb.bolum_id as "bolumId", coalesce(bl.ad, '') as "bolumAdi",
                    bb.personel_id as "personelId", coalesce(hk.unvan, '') as "personelAdi",
+                   -- SOZLESME / ALT KURUM / SGK KATKISI (469) GERI DE OKUNUR:
+                   --   yaziliyorlardi ama yanitta hic donmuyorlardi. Kart
+                   --   acilinca "Sözleşme" combosu bos geliyor, kullanici
+                   --   secip kaydediyor, kart tazelenince yine bosaliyor ve
+                   --   BIR SONRAKI kayitta bos gittigi icin sunucu "Kurumun 3
+                   --   sözleşmesi var - hangisinin geçerli olduğunu seçin"
+                   --   diye reddediyordu (kullanici: "sözleşme kaydolmuyor").
+                   bb.sozlesme_id as "sozlesmeId",
+                   coalesce(bb.alt_kurum, 0) as "altKurum",
+                   coalesce(bb.sgk_kullan, 1) as "sgkKullan",
+                   coalesce(bb.emekli, 0) as "emekli",
                    -- Basvuru sekmesi alanlari (298).
                    bb.basvuru_turu as "basvuruTuru", bb.gelis_sekli as "gelisSekli",
                    bb.gelis_nedeni as "gelisNedeni", bb.oda, bb.sira_no as "siraNo",
@@ -104,6 +115,10 @@ public sealed partial class BelgeDeposu
                    bp.aciklama as "provizyonAciklama",
                    b.vade_gun as "vadeGun",
                    -- Basvuruda (249) vade yerine odeyen kurum gosterilir.
+                   -- SYS TAKIP NO (608): basvurunun e-Nabiz kimligi. Hasta
+                   --   seridinde ad altinda gosterilir - memur hastanin USS'de
+                   --   kayitli olup olmadigini kart acilir acilmaz gorsun.
+                   coalesce(bb.sys_takip_no, '') as "sysTakipNo",
                    bb.odeyen_kurum_id as "odeyenKurumId",
                    coalesce(ok.unvan, '') as "odeyenKurumAdi",
                    -- SEVKIYAT ayri tabloda (177): kaydi olmayan belgede gorunum
@@ -224,8 +239,38 @@ public sealed partial class BelgeDeposu
                    --   ekranin "Kurum Payı / Hasta Payı" kolonlari kovalarin
                    --   toplamidir. Ayri kolon tutmak, ayni sayiyi iki yerde
                    --   guncel tutmak demekti.
+                   -- HASTA KATKISI BIRIM BASINA (602): satirda AYRI KOLON YOK -
+                   --   katki yalniz kovada (dg.hasta_ek_katki) yasiyor ve orada
+                   --   TOPLAM + ISKONTOLU duruyor. Ekran ise birim ister (grid
+                   --   kolonu ve fiyat penceresinin ust kutusu): kaydedilmemis
+                   --   satirda fiyat ucundan geliyordu, KAYITLI satirda hicbir
+                   --   yerden gelmiyor ve kolon bosaliyordu.
+                   --   Ters cevrim: katki = kova / miktar / iskonto_carpani.
+                   --   %100 iskontoda carpan 0 olur - orada birim anlamsizdir,
+                   --   0 doner (sifira bolme de olmaz).
+                   --   YALNIZ TSS (3) ve SGK (5): baska rotalarda bu kova
+                   --   "katki" degildir - ÖZEL iste (rota 1) satirin TUM
+                   --   tutarini tasir, oradan birim katki turetmek satirin
+                   --   fiyatini katki diye geri verirdi.
+                   case when coalesce(dg.rota, 0) in (3, 5)
+                             and coalesce(s.miktar, 0) > 0
+                             and (1 - coalesce(s.iskonto, 0) / 100.0)
+                               * (1 - coalesce(s.iskonto2, 0) / 100.0) > 0
+                        then round(coalesce(dg.hasta_ek_katki, 0) / s.miktar
+                                   / ((1 - coalesce(s.iskonto, 0) / 100.0)
+                                    * (1 - coalesce(s.iskonto2, 0) / 100.0)), 4)
+                        else 0 end as "katkiTutar",
                    coalesce(dg.sgk + dg.oss, 0) as "kurumTutar",
-                   coalesce(dg.hasta_provizyon + dg.hasta_ek_katki, 0) as "hastaTutar",
+                   -- KATILIM PAYI DA HASTANIN (602, kullanici: "hasta payı hala
+                   --   0 - yanlış"): hastanin kasada odeyecegi tutar budur.
+                   --   Katilim payinin CIRO DISI emanet olmasi muhasebeyi
+                   --   ilgilendirir, hastanin ne odeyecegini degil - acik
+                   --   tahsilat seridi de boyle topluyor
+                   --   (acikTahsilatTaraflara). Kolon bunu saymayinca gridin
+                   --   "Hasta Payı"si seritten ve "＋" detayindan farkli rakam
+                   --   gosteriyordu.
+                   coalesce(dg.hasta_provizyon + dg.hasta_ek_katki
+                          + dg.sgk_katilim_payi, 0) as "hastaTutar",
                    case when coalesce(s.tutar, 0) > 0
                         then round(coalesce(dg.sgk + dg.oss, 0) * 100 / s.tutar, 4)
                         else 0 end as "karsilama",

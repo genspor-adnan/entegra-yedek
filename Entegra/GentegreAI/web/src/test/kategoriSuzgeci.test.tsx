@@ -54,6 +54,8 @@ describe('KategoriSuzgeci - agac combo', () => {
     const onDegis = kur();
     await waitFor(() => expect(screen.getByRole('option', { name: /Radyoloji/ })).toBeTruthy());
     fireEvent.change(document.querySelector('select')!, { target: { value: '3' } });
-    expect(onDegis).toHaveBeenCalledWith(3, [3, 4, 5]);
+    // Ucuncu arguman secilen dalin ADI: fiyat listesi toplu pencerelerinde
+    //   dugme etiketi oluyor ("Radyoloji uygula").
+    expect(onDegis).toHaveBeenCalledWith(3, [3, 4, 5], 'Radyoloji');
   });
 });

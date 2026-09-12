@@ -8,9 +8,10 @@ import {
 import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
 import { baslangicBrutMetni, moduCevir } from '../../sayfalar/belgeKarti/kdvModu';
 import { IzlemPenceresi } from './IzlemPenceresi';
+import { EK_KATKILI_ROTALAR, SAF_SGK_ROTA } from '../../sayfalar/belgeKartiKurallari';
 
-export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparisMi, paylasimli,
-                         basvuruMu,
+export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparisMi,
+                         basvuruMu, tarifeTipi = 0, rota = 0,
                          anaBirimKod = 0, anaBirimAdi = '',
                          girisIzlemi, cikisIzlemi, cikisDepoId, belgeTarihi,
                          onKapat, onKaydet }: {
@@ -30,13 +31,27 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   /** Siparis: satira TESLIM TARIHI (termin) sorulur (140). */
   siparisMi: boolean;
   /**
-   * ODEME PAYLASIMI (289): odeyen kurumlu basvuruda satirin kurum/hasta payi
-   * sorulur. EK KATKI (istisnai hizmet farki, ilave ucret) kutusu isaretlenince
-   * tutarin TAMAMI hastaya yazilir - o satir kurum icmaline hic girmez.
+   * ODEME PAYLASIMI (289) bayragi KALDIRILDI (586): pencerede ona bagli tek sey
+   * "Ek Katkı" kutusuydu, o da kalkti - hastanin payi artik Katkı Fiyatı
+   * kutusundan FIYAT olarak giriliyor ve kovalari sunucu boluyor.
    */
-  paylasimli?: boolean;
   /** Basvuru (kayit kabul): fiyat HER ZAMAN KDV dahil girilir. */
   basvuruMu?: boolean;
+  /**
+   * BELGENIN FIYAT LISTESININ TARIFE TIPI (586): 1 Özel · 2 TTB/HUV · 3 SUT.
+   *
+   * Özel tarifede satirin TEK fiyati vardir; TTB/SUT'ta ise fiyat KURUMUN
+   * odedigi bedeldir, hastanin cebinden cikan tutar KATKI PAYIDIR. Pencere
+   * buna gore hem "Katkı Fiyatı" kutusunu acar hem de iskontonun hangi tabana
+   * islediğini soyler (kullanici: "iskonto yapılırsa özelde tek olan fiyat
+   * üzerinden, ttb ve sut ta ise katkı üzerinden olur").
+   */
+  tarifeTipi?: number;
+  /**
+   * ÖDEME ROTASI (595) - 1 Özel · 2 ÖSS · 3 TSS · 4 Karma · 5 SGK.
+   * "Katkı Fiyatı" kutusu yalnız EK KATKI KOVASI OLAN rotalarda sorulur.
+   */
+  rota?: number;
   /** Stok kartinin ANA BIRIMI (143) - ambalaj listesinin ilk ogesi, carpan 1. */
   anaBirimKod?: number;
   anaBirimAdi?: string;
@@ -85,11 +100,27 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
     return (basvuruMu || Number(satir.kdvDahil ?? 0) === 1)
       ? moduCevir(ham, satir.kdv, true) : ham;
   });
+  /**
+   * KATKI KUTUSU METNI (591) - SUT bedeli kutusuyla AYNI DESEN. Kullanici:
+   * "hasta katkı 750 KDV dahildi, sen tekrar KDV eklemişsin". Kutu Dahil
+   * modunda BRUT gosterir, satira yazilan her zaman MATRAHTIR (kovalar KDV
+   * haric tutulur). Onceden kutu ham degeri gosteriyor, satira da onu
+   * yaziyordu - KDV dahil listeden gelen 750 TL katki kovaya matrah girip
+   * ekranda 825 TL olarak okunuyordu.
+   */
+  const [katkiMetni, setKatkiMetni] = useState(() => {
+    const ham = String(satir.katkiTutar ?? '');
+    if (ham === '') return '';
+    return (basvuruMu || Number(satir.kdvDahil ?? 0) === 1)
+      ? moduCevir(ham, satir.kdv, true) : ham;
+  });
   const [hata, setHata] = useState<string | null>(null);
   /** Lot penceresi acik mi - miktar/fiyat girildikten SONRA acilir. */
   const [izlemAcik, setIzlemAcik] = useState(false);
   /** Kur kutusu kullanici tarafindan degistirildi mi - degistiyse ustune yazma. */
   const kurElle = useRef(false);
+  /** Kalem gride YAZILDI mi - ikinci "Tamam" (Enter + tik) satiri cogaltmasin. */
+  const kaydedildi = useRef(false);
 
   const degis = (alan: keyof SatirDurumu, deger: string | number) =>
     setR(x => ({ ...x, [alan]: deger }));
@@ -125,7 +156,10 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
 
   /** Enter = Tamam: adet/fiyat yazip Enter'a basinca satir gride eklenir. */
   const tus = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') { e.preventDefault(); kaydet() }
+    // Basili tutulan Enter'in TEKRARI kaydetme sayilmaz (594): ilk tus kalemi
+    //   kaydedip pencereyi kapatiyor, tekrarlar arkadaki arama penceresine
+    //   dusup ikinci bir kalem ekliyordu.
+    if (e.key === 'Enter' && !e.repeat) { e.preventDefault(); kaydet() }
   };
 
   const dovizli = r.fiyatDovizi !== yerelPara && r.fiyatDovizi !== '';
@@ -155,11 +189,84 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
     ? Math.round(dovizFiyat * kur * 100) / 100
     : (hamSayi(r.birimFiyat));
   const tutar = satirTutari(adet, fiyat, r.iskonto, r.iskonto2);
+  /**
+   * ONIZLEME KDV MODUNU IZLER (kullanici: "tutar (önizleme) için kdv durumuna
+   * bak, dahilse burayı da dahil, hariçse hariç yap").
+   *
+   * Satirda saklanan `birimFiyat` HER ZAMAN matrahtir; onizleme ise kullanicinin
+   * KUTUYA YAZDIGI sayiyla ayni dilde konusmali - "100 TL dahil" yazip altta
+   * 83,33 gormek, fiyati yanlis girdim sanisi veriyordu.
+   */
+  const kdvCarpani = 1 + (Number(r.kdv) || 0) / 100;
+  const onizlemeTutar = kdvDahil ? tutar * kdvCarpani : tutar;
+  /**
+   * KATKI (HASTA EK KATKISI) KUTUSU (586) - yalniz TTB/HUV ve SUT tarifesinde
+   * ve kalemin katkisi VARSA. Özel tarifede boyle bir ayrim yok: tek fiyat
+   * zaten hastanindir.
+   *
+   * ROTA DA SORULUR (595, kullanici: "ÖSS, Karma'da katkı ve ek katkı payı
+   * yok"): hasta ek katkısı yalnız TSS (3) ve SGK (5) rotasında doğar -
+   * ÖSS ve Karma'da hastanin payi KARSILAMA ORANINDAN cikar. Kutu oralarda da
+   * aciliyor, kullanici hicbir yere yazilmayan bir rakam giriyordu.
+   * Satirin kendi rotasi (kayitli satirda sunucudan gelir) onceliklidir.
+   */
+  const etkinRota = Number(r.rota ?? 0) || Number(rota ?? 0);
+  const katkiliTarife = [2, 3].includes(Number(tarifeTipi))
+                     && EK_KATKILI_ROTALAR.includes(etkinRota);
+  /**
+   * SGK HASTASINDA SUT KUTUSU YOK (601, kullanici: "SGK (SUT) Bedeli zaten
+   * birim fiyatta var bir daha yazmaya gerek yok"). Saf SGK'da tarife = SUT
+   * oldugu icin ustteki "Birim Fiyat" ile bu kutu AYNI sayiyi soruyordu.
+   * Bedel kaydederken birim fiyattan turetilir (bkz. `kaydet`).
+   */
+  const sutKutusu = !!r.sgkGerekli && etkinRota !== SAF_SGK_ROTA;
+  /**
+   * SGK'DA FIYAT VE KATKI SALT OKUNUR (602, kullanici: "SGK'da birim fiyat ve
+   * katkı değişmez. İskonto uygulanabilir ama o da sadece katkıya uygulanır.
+   * SUT fiyatı hiçbir şekilde değişmez").
+   *
+   * Saf SGK'da birim fiyat SUT bedelidir - SGK'nin mevzuatla belirlenmis
+   * odemesi. Hastanenin onu degistirmesi diye bir sey yoktur; katki da
+   * listeden gelen tanimli tutardir. Degistirilebilir birakmak, kaydedince
+   * sunucunun listeden okudugu rakama geri donen bir kutu demekti.
+   *
+   * ISKONTO KUTUSU ACIK KALIR: indirim mesrudur, yalniz KATKIYA isler
+   * (fn_dagilim_coz - SUT carpani koşulsuz miktardir).
+   */
+  const sgkKilitli = etkinRota === SAF_SGK_ROTA;
+  const katkiVar = katkiliTarife && hamSayi(r.katkiTutar ?? '0') > 0;
+  /** Iskontolu katki - sunucudaki kural (586) ile ayni: birim x adet x iskonto. */
+  const katkiTutari = satirTutari(adet, hamSayi(r.katkiTutar ?? '0'),
+                                  r.iskonto, r.iskonto2);
+
+  /**
+   * ISKONTO SONRASI BIRIM FIYAT - ONIZLEME (602, kullanici: "fiyat ekranında
+   * en alta önizlemeye iskonto sonrası birim fiyatı getir").
+   *
+   * Ust kutu iskontoSUZ birimi gosterir (özel iste oldugu gibi); iskonto ancak
+   * Tutar'a bakilinca anlasiliyor ve adet 1'den buyukse orada da goze
+   * carpmiyordu. Taban, UST KUTUDA YAZAN sayidir: saf SGK'da hasta katkisi,
+   * oteki rotalarda birim fiyat - SUT iskontolanmaz (fn_dagilim_coz), onu
+   * iskontolu gostermek yanlis olurdu.
+   *
+   * Hesap `satirTutari` ile yapilir (adet 1): satir tutarindaki yuvarlama
+   * kuralinin AYNISI - kendi carpanini yazmak kurus farki uretirdi.
+   */
+  const iskontoTabani = sgkKilitli ? hamSayi(r.katkiTutar ?? '0') : fiyat;
+  const iskontoluBirim = satirTutari(1, iskontoTabani, r.iskonto, r.iskonto2);
+  const onizlemeBirim = kdvDahil ? iskontoluBirim * kdvCarpani : iskontoluBirim;
+  /** Iskonto gercekten var mi - yoksa satir ust kutunun kopyasi olurdu. */
+  const iskontoluMu = Math.abs(iskontoTabani - iskontoluBirim) > 0.004;
 
   /** Izlemli stokta lot adimi: giriste DAGITIM, cikista SECIM (db/114). */
   const izlemGerekli = (girisIzlemi || cikisIzlemi) && r.satirTur === 1 && r.izleme > 0;
 
   function kaydet() {
+    // TEK SEFER (kullanici: "tamam deyince ücret satırına 2 tane muayene
+    //   ekledi"): Enter ile dugme tiklamasi ust uste gelebiliyor (Enter
+    //   odaktaki dugmeyi de tetikler) ve ayni kalem IKI KEZ gride giriyordu.
+    //   Pencere zaten kaydettikten sonra kapaniyor; ikinci cagri yok sayilir.
+    if (kaydedildi.current) return;
     if (!r.stokId && !r.hizmetId) { setHata('Stok ya da hizmet seçilmeli.'); return }
     if (adet <= 0) { setHata('Miktar sıfırdan büyük olmalı.'); return }
     if (dovizli && kur <= 0) { setHata('Kur sıfırdan büyük olmalı.'); return }
@@ -167,7 +274,10 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
     //   listeden cozulemedi. Bos birakilirsa pay sessizce sifir kalir ve
     //   tutarin tamami sigortaya/hastaya yuklenir - sessiz para hatasi.
     //   "SGK bu hizmeti odemiyor" da gecerli bir cevaptir: 0 yazilir.
-    if (r.sgkGerekli && String(r.sgkListe ?? '').trim() === '') {
+    //   SAF SGK BUNUN DISINDA (601): orada kutu hic cizilmiyor, bedel birim
+    //   fiyattan turetiliyor - sorulmayan bir alani zorunlu tutmak kalemin
+    //   kaydedilmesini imkansiz kilardi.
+    if (sutKutusu && String(r.sgkListe ?? '').trim() === '') {
       setHata('SGK (SUT) bedeli girilmeli. SGK bu hizmeti ödemiyorsa 0 yazın.');
       return;
     }
@@ -176,7 +286,15 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
     if (izlemGerekli) { setHata(null); setIzlemAcik(true); return }
     // Belgeye YEREL fiyat gider; doviz/kur bilgisi satirda saklanir ki kalem
     //   tekrar acildiginda ayni degerlerle gelsin.
-    onKaydet({ ...r, birimFiyat: String(fiyat) });
+    kaydedildi.current = true;
+    // SAF SGK'DA SUT ELLE GONDERILMEZ (602, kullanici: "SUT fiyatı hiçbir
+    //   şekilde değişmez"): bedel her zaman SOZLESMENIN SUT listesinden okunur
+    //   (fn_dagilim_coz). Elle deger gecmek `sgk_liste_elle` bayragini takar ve
+    //   satiri listeden tazelenemez hale getirirdi - SUT guncellenince eski
+    //   rakam satirda donardi. Alan temizlenir ki onceki denemelerden kalmis
+    //   bir deger de bayragi tetiklemesin.
+    const sgk = etkinRota === SAF_SGK_ROTA ? { sgkListe: '' } : {};
+    onKaydet({ ...r, birimFiyat: String(fiyat), ...sgk });
   }
 
   return (
@@ -248,14 +366,32 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                 TRANSFERDE hic sorulmaz: mal satilmiyor, depo degistiriyor. */}
             {!transferMi && (
             <label className="alan">
-              <span className="etiket">Birim Fiyat</span>
+              {/* SGK'DA UST KUTU HASTA KATKISI (602, kullanici: "sgk için fiyat
+                  ekranına da artık birim fiyat yerine katılım payı gelsin,
+                  altında sut fiyatı görünsün ve iskonto yine birim fiyat
+                  üzerinden olsun - özel gibi sistem değişmesin").
+
+                  Saf SGK'da satirin iki bedeli vardir ve HASTANIN odedigi
+                  katkidir; iskonto da yalniz ona isler (fn_dagilim_coz). Ust
+                  kutuda SUT durunca "iskonto birim fiyata uygulanir" kurali
+                  ekranda yalan soyluyordu - SUT degismiyor, asagidaki katki
+                  degisiyordu. Kutular yer degistirdi: ustte katki, altinda
+                  SUT. Ozel/TSS/ÖSS'de hicbir sey degismez. */}
+              <span className="etiket">{sgkKilitli ? 'Hasta Katkısı' : 'Birim Fiyat'}</span>
               <span className="ikili">
                 {/* DAHIL modunda kutuda BRUT deger durur; satira yazilan
                     her zaman MATRAHTIR (satir matematigi, dip toplam ve
                     e-Belge matrah uzerinden yurur). */}
                 <input className="hiza-sag"
-                       value={kdvDahil ? brutMetni : (dovizli ? r.dovizFiyat : r.birimFiyat)}
+                       value={sgkKilitli
+                         ? (kdvDahil ? katkiMetni : String(r.katkiTutar ?? ''))
+                         : (kdvDahil ? brutMetni : (dovizli ? r.dovizFiyat : r.birimFiyat))}
                        onKeyDown={tus}
+                       readOnly={sgkKilitli}
+                       title={sgkKilitli
+                         ? 'Hastanın ödeyeceği katkı - SUT listesinden gelir, '
+                           + 'değiştirilemez. İskonto bu tutara işler.'
+                         : undefined}
                        onChange={e => {
                          const alan = dovizli ? 'dovizFiyat' : 'birimFiyat';
                          if (!kdvDahil) {
@@ -303,6 +439,71 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
             </label>
             )}
 
+            {/* SUT BEDELI - SGK'DA KATKININ ALTINDA (602, kullanici: "altında
+                sut fiyatı görünsün"). SALT OKUNUR: SGK'nin mevzuatla belirlenmis
+                odemesidir, iskonto da islemez - burada yalnizca GORUNUR, cunku
+                satirin tutari bu bedel + hasta katkisidir ve kullanici toplami
+                nereden geldigini okuyabilmeli. Duzenlenebilir SUT kutusu
+                TSS/Karma'da (asagida, `sutKutusu`) durmaya devam eder - orada
+                bedel gercekten ekrandan gelebilir. */}
+            {sgkKilitli && !transferMi && (
+              <label className="alan">
+                <span className="etiket">SUT Bedeli</span>
+                <span className="ikili">
+                  <input className="hiza-sag" readOnly tabIndex={-1}
+                         value={kdvDahil ? brutMetni : r.birimFiyat}
+                         title={r.sgkListeBulundu === false
+                           ? 'SUT listesinde bu kalem yok - SGK payı doğmaz'
+                           : "SGK'nın ödediği bedel - sözleşmenin SUT listesinden"} />
+                  <input className="birim" value={r.fiyatDovizi || yerelPara}
+                         readOnly tabIndex={-1} />
+                </span>
+                {r.sgkListeBulundu === false && (
+                  <span className="ipucu uyari">
+                    SUT listesinde fiyat bulunamadı - bu kalem için SGK payı doğmaz.
+                  </span>
+                )}
+              </label>
+            )}
+
+            {/* KATKI FIYATI (586, kullanici: "kurum ödeme fiyat tipi ttb/huv veya
+                sut ise ve hasta katkı payı varsa Birim Fiyat, Döviz altına aynı
+                genişliklerde Katkı Fiyatı ve Döviz ekle"). Birim fiyat KURUMUN
+                odedigi tarife bedeli; bu kutu HASTANIN odedigi katilim payidir.
+                Birim basina girilir - miktar ve iskonto sunucuda islenir. */}
+            {/* SGK'DA BU KUTU CIZILMEZ (602): katki artik EN USTTE, "Hasta
+                Katkısı" basligiyla duruyor - ikinci kez sormak ayni sayiyi iki
+                kutuda gostermek olurdu. TSS/HUV'da eski yerinde kalir. */}
+            {katkiVar && !sgkKilitli && !transferMi && (
+              <label className="alan">
+                <span className="etiket">Hasta Katkısı</span>
+                <span className="ikili">
+                  <input className="hiza-sag" onKeyDown={tus}
+                         value={kdvDahil ? katkiMetni : String(r.katkiTutar ?? '')}
+                         readOnly={sgkKilitli}
+                         title={sgkKilitli
+                           ? 'SGK hastasında hasta katkısı listeden gelir - değiştirilemez'
+                           : 'Hastadan alınacak katkı - hastaneye kalır (birim başına)'}
+                         onChange={e => {
+                           const v = e.target.value;
+                           if (kdvDahil) setKatkiMetni(v);
+                           setR(x => ({ ...x,
+                             katkiTutar: kdvDahil ? moduCevir(v, x.kdv, false) : v }));
+                         }} />
+                  {/* Doviz kutusu ana fiyatla AYNI GENISLIKTE ve ayni cinste:
+                      katki tarife fiyatiyla ayni para biriminde tanimlanir. */}
+                  <input className="birim" value={r.fiyatDovizi || yerelPara}
+                         readOnly tabIndex={-1} />
+                </span>
+                <span className="alan-notu">
+                  {adet.toLocaleString('tr-TR')} × katkı
+                  {hamSayi(r.iskonto) > 0 || hamSayi(r.iskonto2) > 0 ? ' − iskonto' : ''}
+                  {' = '}{para.format(kdvDahil ? katkiTutari * kdvCarpani : katkiTutari)}
+                  {' · kalanı kurum öder'}
+                </span>
+              </label>
+            )}
+
             {!transferMi && dovizli && (
               <label className="alan">
                 <span className="etiket">Yerel Para</span>
@@ -317,7 +518,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                 (TSS/Karma/SGK). Ustteki fiyat SIGORTANIN/hastanin odedigi
                 tarife bedelidir; bu ise SGK'nin odedigidir. Ikisi ayri
                 fiyattir ve satirda birlikte yasar. */}
-            {r.sgkGerekli && !transferMi && (
+            {sutKutusu && !transferMi && (
               <label className="alan">
                 <span className="etiket">SGK (SUT) Bedeli</span>
                 <span className="ikili">
@@ -389,6 +590,12 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                           if (yeniDahil) setSutMetni(sut);
                           setR(x => ({ ...x,
                             sgkListe: moduCevir(sut, x.kdv, !yeniDahil) }));
+                          // KATKI kutusu da ayni kurala uyar (591): kutudaki
+                          //   SAYI degismez, anlami degisir.
+                          const ktk = String(r.katkiTutar ?? '');
+                          if (yeniDahil) setKatkiMetni(ktk);
+                          setR(x => ({ ...x,
+                            katkiTutar: moduCevir(ktk, x.kdv, !yeniDahil) }));
                           setR(x => ({ ...x, kdvDahil: yeniDahil ? 1 : 0,
                                        [alan]: moduCevir(yazili, x.kdv, !yeniDahil),
                                        birimFiyatKdvli: yeniDahil
@@ -405,7 +612,12 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                 uygulanir (sunucudaki BelgeHesap.SatirTutari ile ayni sira). */}
             {!transferMi && !vergisiz && (
             <label className="alan">
-              <span className="etiket">İskonto %</span>
+              {/* ISKONTO TABANI (586): Özel'de satirin tek fiyati, TTB/SUT'ta
+                  hastanin katki payi. Kurumun odedigi SUT/tarife bedeli
+                  indirimden ETKILENMEZ - hastaneyle hasta arasindaki anlasma
+                  SGK'nin odemesini kisamaz. Hesap sunucuda. */}
+              <span className="etiket">
+                İskonto %{katkiVar ? ' (katkı üzerinden)' : ''}</span>
               <span className="ikili">
                 <input className="hiza-sag" value={r.iskonto} onKeyDown={tus}
                        title="1. iskonto"
@@ -417,25 +629,11 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
             </label>
             )}
 
-            {/* EK KATKI (289): istisnai hizmet farki / ilave ucret. Isaretliyse
-                tutarin tamami HASTA payidir; kurum icmaline girmez ve kuruma
-                faturalanmaz. Isaret kaldirilinca satir yeniden kurumun
-                karsilama oranindan paylastirilir (bos birakilir, sunucu hesaplar). */}
-            {paylasimli && !transferMi && (
-              <label className="alan">
-                <span className="etiket">Ek Katkı</span>
-                <span className="deger-serit">
-                  <input type="checkbox"
-                         checked={hamSayi(r.hastaTutar ?? '0') > 0
-                                  && hamSayi(r.kurumTutar ?? '0') === 0}
-                         onChange={e => setR(x => e.target.checked
-                           ? { ...x, kurumTutar: '0', hastaTutar: String(tutar), karsilama: '0' }
-                           : { ...x, kurumTutar: undefined, hastaTutar: undefined,
-                               karsilama: undefined })} />
-                  <span>Tamamı hastadan tahsil edilir (kuruma faturalanmaz)</span>
-                </span>
-              </label>
-            )}
+            {/* EK KATKI KUTUSU KALDIRILDI (586, kullanici). "Tamamı hastadan
+                tahsil edilir" isareti satirin kovalarini ELLE sabitliyordu;
+                aynı soruya artık Katkı Fiyatı cevap veriyor - hastanin payi
+                tutar degil FIYAT olarak giriliyor, kalanini kurum odiyor.
+                Kovalar her zaman sunucudaki rota kuralindan cikar (586). */}
 
             {/* Duz metin "Seri / Lot" alani kaldirildi (kullanici): izlemli
                 stokta lot dagitimi kendi ekraninda yapiliyor, izlemsiz stokta
@@ -461,10 +659,24 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                      onChange={e => degis('aciklama', e.target.value)} />
             </label>
 
+            {/* ISKONTO SONRASI BIRIM (602): yalniz iskonto VARSA cizilir -
+                iskontosuz satirda ust kutudaki sayinin aynisi olurdu. */}
+            {!transferMi && iskontoluMu && (
+            <label className="alan">
+              <span className="etiket">
+                {sgkKilitli ? 'İskontolu hasta katkısı' : 'İskontolu birim fiyat'}
+                {' '}(önizleme, KDV {kdvDahil ? 'dahil' : 'hariç'})</span>
+              <input className="hiza-sag onizleme"
+                     value={para.format(onizlemeBirim)} readOnly />
+            </label>
+            )}
+
             {!transferMi && (
             <label className="alan">
-              <span className="etiket">Tutar (önizleme)</span>
-              <input className="hiza-sag onizleme" value={para.format(tutar)} readOnly />
+              <span className="etiket">
+                Tutar (önizleme, KDV {kdvDahil ? 'dahil' : 'hariç'})</span>
+              <input className="hiza-sag onizleme"
+                     value={para.format(onizlemeTutar)} readOnly />
             </label>
             )}
 

@@ -9,7 +9,8 @@ import type { BelgeYaniti } from '../../api/sozlesme';
  */
 export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsilatAc,
                                   secili, setSecili, tahsilatAcKart, tahsilatSil,
-                                  onYenile, kurumTahakkukAc, kurumKalan, basvuruMu,
+                                  onYenile, kurumTahakkukAc, kurumKalan, kurumBelgeleri,
+                                  basvuruMu,
                                   hizliNakit, hesapSecAc, acikBorc }: {
   /** Basvuru kartinda arac cubugu SADE: "＋" (tam ekran) cizilmez. */
   basvuruMu?: boolean;
@@ -48,6 +49,19 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
   kurumTahakkukAc?(): void;
   /** Henuz belgelesmemis kurum payi - dugme yalniz bu > 0 iken etkin. */
   kurumKalan?: number;
+  /**
+   * KURUM TAHAKKUKLARI (kullanici: "kaydettiğim zaman eğer yoksa kurum
+   * tahakkuk ilk satıra gelecek (yani 800), altına da 200 nakit gelecek").
+   *
+   * Tahakkuk bir KASA ISLEMI DEGIL, kuruma kesilen belgedir - listeye SALT
+   * OKUNUR satir olarak, tahsilatlarin USTUNE gelir: memur "800'ü kuruma
+   * yazdım, 200'ü hastadan aldım" tablosunu tek yerde gorur. Secilemez ve
+   * silinemez; duzeltmesi Belgeye Dönüşüm sekmesindedir.
+   */
+  kurumBelgeleri?: { id: number; belgeNo: string; tarih: string;
+                     turAdi: string; cari: string; tutar: number;
+                     /** Hastaya mi kesildi (ikon 👤) yoksa kuruma mi (🏛️). */
+                     hastaMi?: boolean }[];
 }) {
 /* SECIM: faturalama gridiyle AYNI desen - duz tik tek satir secer, Ctrl/Cmd
    ekler-cikarir, Shift aralik secer; basliktaki kutu tumunu secer. */
@@ -80,9 +94,20 @@ const satirTikla = (e: React.MouseEvent, sira: number, id: number) => {
   if (e.ctrlKey || e.metaKey) { cevir(id); return }
   setSecili(secili.length === 1 && secili[0] === id ? [] : [id]);
 };
+/**
+ * DIP TOPLAM HASTA PAYI UZERINDEN (kullanici: "nakit, POS, banka, çek, senet
+ * her zaman hastadan alacağımız tahsilatlar içindir").
+ *
+ * "Kalan" belgenin genel toplamindan hesaplanınca paylasimli basvuruda kurumun
+ * payi da hastadan beklenen para gibi gorunuyordu: 1.000 TL'lik iste hastadan
+ * 200 alinacakken dipnot "Kalan 1.000" yaziyordu. `acikBorc` kart tarafinda
+ * zaten HASTA PAYINI tasir (paylasimli degilse belgenin tamami).
+ */
 const genel = Number(sonuc?.belge.genelToplam ?? 0);
 const tahsil = tahsilatlar.reduce((t, k) => t + (Number(k.yerelTutar ?? k.tutar ?? 0) || 0), 0);
-const kalan = Math.round((genel - tahsil) * 100) / 100;
+const kalan = acikBorc != null
+  ? Math.round(acikBorc * 100) / 100
+  : Math.round((genel - tahsil) * 100) / 100;
 return (
   <div className="kagrup">
     {/* AVANS MAHSUBU (322): hasta once para yatirip ucret satiri sonra
@@ -164,9 +189,15 @@ return (
                 title={!kayitliId ? 'Önce belgeyi kaydedin'
                        : !(kurumKalan && kurumKalan > 0)
                        ? 'Belgelenmemiş kurum payı yok'
-                       : 'Kurum payını Satış Tahakkukuna dönüştür (tahsilat değil)'}
+                       : 'Kurumdan alınacak payı belgeler: kuruma Satış Tahakkuku '
+                         + 'kesilir. Para kurumdan gelince normal tahsilat işlenir.'}
                 onClick={kurumTahakkukAc}>
-          🏥 Kurum Tahakkuku
+          {/* "TAHSILAT" DEGIL "TAHAKKUK" (kullanici: "kurumun ödeyeceği ve
+              kuruma yapacağım faturalama karşılığı olarak değil mi"): kurum
+              payi iki asamalidir - once kuruma BELGE kesilir (alacak dogar),
+              para geldiginde normal tahsilat islenir ve prim O ZAMAN dogar.
+              Dugmeye "tahsilat" demek, para alinmis izlenimi verirdi. */}
+          🏥 Kuruma Tahakkuk
         </button>
       )}
       <span className="ayrac" />
@@ -210,6 +241,26 @@ return (
         </tr>
       </thead>
       <tbody>
+        {/* KURUM TAHAKKUKLARI EN USTTE (kullanici): tahsilattan once okunur -
+            "kurumun payi belgelendi mi" sorusu listenin basinda cevaplanir. */}
+        {(kurumBelgeleri ?? []).map(kb => (
+          <tr key={`kb-${kb.id}`} className="kurum-belge" style={{ userSelect: 'none' }}>
+            <td className="check">
+              {/* IKON BELGENIN TARAFINA GORE (kullanici tahakkuku ikiye ayirdi):
+                  hastaya kesilen 👤, kuruma kesilen 🏛️. Ikisi de TAHSILAT
+                  DEGIL - alacagin belgelenmesidir. */}
+              <span className="sonuk"
+                    title={kb.hastaMi ? 'Hastaya kesilen belge - tahsilat değildir'
+                                      : 'Kuruma kesilen belge - tahsilat değildir'}>
+                {kb.hastaMi ? '👤' : '🏛️'}</span>
+            </td>
+            <td>{tarihSaat(kb.tarih)}</td>
+            <td>{kb.belgeNo}</td>
+            <td>{kb.turAdi}</td>
+            <td>{kb.cari || <span className="sonuk">—</span>}</td>
+            <td className="hiza-sag">{para.format(kb.tutar)}</td>
+          </tr>
+        ))}
         {tahsilatlar.map((k, i) => {
           const kid = Number(k.id ?? 0);
           return (
@@ -238,7 +289,7 @@ return (
           </tr>
           );
         })}
-        {tahsilatlar.length === 0 && (
+        {tahsilatlar.length === 0 && (kurumBelgeleri ?? []).length === 0 && (
           <tr><td colSpan={6} className="bos">
             {kayitliId > 0
               ? `Bu belgeye bağlı ${alisMi ? 'ödeme' : 'tahsilat'} yok.`

@@ -1,6 +1,6 @@
 import type { DetayDurumu, Satir } from './GenDetayTablo';
 import type { KartDetayMeta } from '../api/sozlesme';
-import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
+import { useYerler, VARSAYILAN_ULKE, VARSAYILAN_UYRUK } from './yerlerHook';
 
 interface Props {
   meta: KartDetayMeta;
@@ -136,9 +136,15 @@ export function TekAdres({
           {onUyrukDegis && (
             <label className="alan tip-kod">
               <span className="etiket">Uyruk</span>
-              <select value={String(uyruk ?? VARSAYILAN_ULKE)} disabled={saltOkunur}
+              {/* UYRUK = SKRS MERNİS KODU (614/617), ülke adı değil.
+                  e-Nabız uyrukta ISO harf kodunu ("TR") reddediyor,
+                  MERNİS kodunu (9980) istiyor; alan da artık sayı.
+                  Kodu olmayan ülke listede çıkmaz - seçilse pakete
+                  yazılamazdı. */}
+              <select value={String(uyruk ?? VARSAYILAN_UYRUK)} disabled={saltOkunur}
                 onChange={e => onUyrukDegis(e.target.value)}>
-                {(yerler?.ulkeler ?? []).map(y => <option key={y.id} value={y.ad}>{y.ad}</option>)}
+                {(yerler?.ulkeler ?? []).filter(y => y.skrsKod != null)
+                  .map(y => <option key={y.id} value={String(y.skrsKod)}>{y.ad}</option>)}
               </select>
             </label>
           )}

@@ -83,10 +83,17 @@ public class BildirimKuyruguTestleri : IClassFixture<VeritabaniOlgusu>
 
             var yeniDurum = await veri.TekDegerAsync<short>(
                 "select durum from public.bildirim where id = @p0", [id]);
-            var planlanan = await veri.TekDegerAsync<DateTime>(
-                "select planlanan from public.bildirim where id = @p0", [id]);
+            // KARSILASTIRMA DB'DE (602): `planlanan` timestamp without time zone
+            //   ve DB'nin kendi `now()`u ile yaziliyor (BildirimDeposu). Onu C#
+            //   `DateTime.Now` ile olcmek, sunucu ile veritabani ayri saat
+            //   diliminde oldugunda yaniltir - dev kurulumunda DB UTC, makine
+            //   UTC+3; test 3 saat geride gorup "ileri atilmamis" diyordu.
+            //   Uretimde boyle bir karsilastirma YOK: kuyruk da `planlanan <=
+            //   now()` ile, yani tamamen DB tarafinda suzuluyor.
+            var ileriAtildi = await veri.TekDegerAsync<bool>(
+                "select planlanan > now() from public.bildirim where id = @p0", [id]);
             Assert.Equal((short)BildirimDurumu.Kuyrukta, yeniDurum);
-            Assert.True(planlanan > DateTime.Now, "Yeniden deneme ileri atılmalı.");
+            Assert.True(ileriAtildi, "Yeniden deneme ileri atılmalı.");
 
             // Deneme günlüğüne satır düştü mü.
             var log = await depo.LogAsync(id!.Value);

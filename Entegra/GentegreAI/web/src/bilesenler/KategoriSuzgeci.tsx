@@ -24,7 +24,9 @@ export function KategoriSuzgeci({ tur, deger, onDegis, sinirla, baslik }: {
   /** 1 stok · 2 hizmet (346) - hangi ağaç gösterilecek. Dizi = iki ağaç birden. */
   tur: number | readonly number[];
   deger: number | null;
-  onDegis(id: number | null, altlarDahil: number[]): void;
+  /** `ad`: secilen dalin adi - cagiran dugme etiketinde gosteriyor
+      (fiyat listesi: "Tahlil uygula"). Bos secimde ''. */
+  onDegis(id: number | null, altlarDahil: number[], ad: string): void;
   /**
    * YALNIZ BU KATEGORİLER (ve üstleri) listelensin. Fiyat listesi kartında
    * (kullanıcı) satırlarda hiç geçmeyen dallar, seçilince boş grid veren
@@ -106,9 +108,10 @@ export function KategoriSuzgeci({ tur, deger, onDegis, sinirla, baslik }: {
             title="Kategoriye göre süz (alt kategoriler dâhil)"
             onChange={e => {
               const v = e.target.value;
-              if (v === '') { onDegis(null, []); return }
+              if (v === '') { onDegis(null, [], ''); return }
               const id = Number(v);
-              onDegis(id, altAgacHesapla(id, kayitlar));
+              onDegis(id, altAgacHesapla(id, kayitlar),
+                      kayitlar.find(k => k.id === id)?.ad ?? '');
             }}>
       <option value="">{baslik ?? 'Tüm Kategoriler'}</option>
       {/* Tek ağaçta grup başlığı gürültü; iki ağaç birden çizilirken

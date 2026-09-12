@@ -31,6 +31,13 @@ public sealed record KartAlani(
     //   veri yine tek id'dir. Gorunumun/tablonun `ust_id` kolonu olmali -
     //   `BagliAlan` ile ayni haritadan beslenir.
     bool Agac = false,
+    // UST BILGISI (587): secenek -> ust haritasi metaya konur ama secenekler
+    //   SUNUCUDA suzulmez. Suzen deger AYNI SATIRDA olmadiginda gerekir:
+    //   anlasmali kurum kartinda sozlesme satirinin fiyat listesi, kartin
+    //   BASKA bir yerindeki (1:1 detay) kurum turune gore daralir. `BagliAlan`
+    //   satir icindeki alani gosterir; bu bayrak yalnizca haritayi acar,
+    //   suzmeyi ekran yapar.
+    bool UstBilgisi = false,
     // JENERIK ARAMA EKRANI (260, kullanici: "hasta secimi jenerik kisi
     //   seciminden ama sadece hastalar; hizmet secimi jenerik stok/hizmet
     //   arama ekranindan, sadece hizmetler"). Doluysa alan combo yerine
@@ -63,7 +70,15 @@ public sealed record KartAlani(
     /// HIC gorunmesin diye var: bos combo gostermek "bunu ne yapacagim"
     /// sorusu uretiyor.
     /// </summary>
-    int UrunModu = 0
+    int UrunModu = 0,
+    /// <summary>
+    /// ALAN DOGRULAMASI (bicim kurali). Bugun tek deger: "tckn" - T.C. kimlik
+    /// numarasi NVI algoritmasiyla dogrulanir (KimlikDogrulama). Kural
+    /// KATALOGDA durur ki sunucu ve ekran AYNI sozlesmeyi okusun: metada
+    /// gelen `dogrulama` alanini arayuz de kontrol eder, kaydetmeyi beklemez.
+    /// Zorunluluktan AYRI: bos deger gecerlidir (kimligi belirsiz hasta).
+    /// </summary>
+    string? Dogrulama = null
 )
 {
     /// <summary>Etiket verilmediyse camelCase addan uretilir: faturaUnvan -> "Fatura Unvan".</summary>

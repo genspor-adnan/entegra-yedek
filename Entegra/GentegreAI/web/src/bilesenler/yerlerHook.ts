@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import type { YerlerYaniti } from '../api/sozlesme';
 
-export const VARSAYILAN_ULKE = 'TC'; // public.ulke.ad (045_ulke_tc_kisa.sql - kullanici: "ülke kısa TC olsun")
+export const VARSAYILAN_ULKE = 'TC';
+// Uyruk artık SKRS MERNİS kodu (614): ülke ADI değil. 9980 = TÜRKİYE
+// CUMHURİYETİ - e-Nabız'ın kabul ettiği tek Türkiye kodu; "TR" ISO
+// kodu USS tarafından reddediliyor.
+export const VARSAYILAN_UYRUK = '9980'; // public.ulke.ad (045_ulke_tc_kisa.sql - kullanici: "ülke kısa TC olsun")
 
 // Statik referans veri (81 il + 970 ilce + 232 ulke) - degismiyor, tek sefer cekilip modul
 // seviyesinde onbelleklenir (Adresler her acilista tekrar istek atmasin).

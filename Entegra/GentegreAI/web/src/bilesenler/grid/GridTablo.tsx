@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 import { c } from '../../dil/ceviri';
 import { bicimle } from '../bicim';
 import { durumRozeti, ikonHucre, rozetHucre, yuzdeRozeti } from '../gridHucre';
+import { agacAdi } from './agacDizim';
 import type { KolonMeta, ListeSatiri, ListeYaniti } from '../../api/sozlesme';
 
 /**
@@ -19,6 +20,7 @@ export function GridTablo(p: GridTabloProps) {
     satirSecimiDegistir, hepsiSecili, hepsiRef, satirTiklandi, satirTiklaninca,
     satirSinifi, setSeciliSatir, setSagTusKonumu, siraIsareti, siralamaDegistir,
     filtreAcik, filtreSatiriDegisti, gridMenuKonum, setGridMenuKonum, aksiyonEkrani,
+    agacAlani, agacDegistir,
   } = p;
   return (
 <table className={`grid boy-${satirBoyu ?? 'normal'}`}>
@@ -129,18 +131,39 @@ export function GridTablo(p: GridTabloProps) {
               onChange={() => satirSecimiDegistir(id, i)}
             />
           </td>
-          {kolonlar.map(k => (
+          {kolonlar.map((k, ki) => {
+            // AGAC SUTUNU: ilk kolon girintiyi ve +/- dugmesini tasir.
+            //   Dugme ayri bir sutun DEGIL - kolon duzeni her listede ayni
+            //   kalsin, agac yalniz bu hucrenin icinde yasasin.
+            const agacHucresi = !!agacAlani && ki === 0;
+            const derinlik = Number(satir.__derinlik ?? 0);
+            return (
             <td key={k.ad} className={`hiza-${k.hizalama}`}
               style={k.genislik ? {
                 maxWidth: k.genislik, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
               } : undefined}
               title={k.genislik ? String(satir[k.ad] ?? '') : undefined}
             >
-              {ikonHucre(satir[k.ad], k) ?? yuzdeRozeti(satir[k.ad], k)
-                ?? rozetHucre(satir[k.ad], k)
-                ?? durumRozeti(satir[k.ad], k) ?? bicimle(satir[k.ad], k)}
+              {agacHucresi ? (
+                <span className="agac-hucre"
+                      style={{ paddingLeft: derinlik * 16 }}>
+                  {satir.__cocukVar ? (
+                    <button type="button" className="agac-dugme"
+                            title={satir.__acik ? 'Kapat' : 'Aç'}
+                            onClick={e => { e.stopPropagation(); agacDegistir?.(id) }}>
+                      {satir.__acik ? '−' : '+'}
+                    </button>
+                  ) : <span className="agac-bosluk" />}
+                  {agacAdi(satir[k.ad])}
+                </span>
+              ) : (
+                ikonHucre(satir[k.ad], k) ?? yuzdeRozeti(satir[k.ad], k)
+                  ?? rozetHucre(satir[k.ad], k)
+                  ?? durumRozeti(satir[k.ad], k) ?? bicimle(satir[k.ad], k)
+              )}
             </td>
-          ))}
+            );
+          })}
         </tr>
         {grupBitiyor && ozet && (
           <tr className="grup-toplam">
@@ -230,4 +253,11 @@ export interface GridTabloProps {
   setGridMenuKonum(k: { x: number; y: number } | null): void;
   /** Aksiyon ekrani tanimliysa sag tus menusu acilir. */
   aksiyonEkrani?: string;
+  /**
+   * AGAC KIPI: doluysa ilk kolon girintili cizilir ve cocugu olan satirda
+   * +/- dugmesi cikar. Deger, hiyerarsiyi tasiyan ALAN ADIDIR (bolumde
+   * "ustbirimId") - tablo onu okumaz, yalniz kipin acik oldugunu bilir.
+   */
+  agacAlani?: string;
+  agacDegistir?(id: string): void;
 }

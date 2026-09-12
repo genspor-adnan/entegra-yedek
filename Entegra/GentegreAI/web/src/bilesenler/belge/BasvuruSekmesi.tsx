@@ -1,5 +1,6 @@
 import { TarafSecici } from '../TarafArama';
 import { KodSecim, KodSegment, MetinAlani } from './basvuru/alanlar';
+import { dagilimRotasi } from '../../sayfalar/belgeKartiKurallari';
 
 /**
  * BASVURU / PROVIZYON / ONCEKI BASVURULAR sekmeleri (298).
@@ -20,6 +21,11 @@ import { KodSecim, KodSegment, MetinAlani } from './basvuru/alanlar';
  */
 export interface BasvuruBilgi {
   [alan: string]: string | number | null | undefined;
+  /**
+   * USS SYS TAKIP NO (608) - SALT OKUNUR. 101 gonderiminde doner, basvurunun
+   * e-Nabiz kimligidir; hasta seridinde ad altinda gosterilir.
+   */
+  sysTakipNo?: string;
   basvuruTuru?: number | null;
   gelisSekli?: number | null;
   gelisNedeni?: number | null;
@@ -43,6 +49,15 @@ export interface BasvuruBilgi {
   sozlesmeId?: number | null;
   altKurum?: number | null;
   sgkKullan?: number | null;
+  /**
+   * EMEKLI (590, kullanici: "sgk katılım sadece sut muayene eklenirse eklenir;
+   * eğer hasta emekliyse eklenmez. Başvuruya Emekli check'i gelmeli").
+   *
+   * Emeklinin muayene katilim payi MAASINDAN kesilir; kurumda ikinci kez
+   * tahsil edilmez. Basvurunun kendi bilgisidir - ayni hasta bir basvuruda
+   * emekli, oncekinde calisan olabilir ve belge o gunun durumunu tasimali.
+   */
+  emekli?: number | null;
   // PROVIZYON (299) - belge_provizyon 1:1. SGK ve ozel sigorta AYNI ANDA
   // olabilir (SGK ana odeyici, tamamlayici police farki ustlenir), o yuzden
   // her odeyicinin kendi durumu/numarasi/orani var.
@@ -85,7 +100,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                                  tarih, setTarih, tarihEnGec, tarihEnErken, tarihHatasi,
                                  bolumler, bolumId, setBolumId,
                                  gorevliler, personelId, setPersonelId,
-                                 kurumlar, odeyenKurumId, setOdeyenKurumId,
+                                 kurumlar, kurumTuru, odeyenKurumId, setOdeyenKurumId,
                                  sozlesmeler, altKurumlar,
                                  aciklama, setAciklama, gonderenModu,
                                  personelAd, onPersonelSec, kurumHatasi,
@@ -143,6 +158,12 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
   setPersonelId?(v: number | null): void;
   /** Anlasmali kurumlar - bos ise hasta kendi oder. */
   kurumlar?: { id: number; ad: string }[];
+  /**
+   * ODEYEN KURUMUN TURU (591): 1 Özel · 2 Sigorta · 3 SGK. Emekli kutusunun
+   * gorunurlugu buna bagli - alt kurum tek basina yetmiyor (SGK'da alt kurum
+   * DEVREDILEN KURUM'dur, police turu degildir).
+   */
+  kurumTuru?: number | null;
   odeyenKurumId?: number | null;
   setOdeyenKurumId?(v: number | null): void;
   /**
@@ -160,9 +181,14 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
   aciklama?: string;
   setAciklama?(v: string): void;
 }) {
-  // Hekim listesi bolume gore SUZULUR; bolum bosken hepsi gelir.
-  const hekimler = (gorevliler ?? [])
-    .filter(g => !bolumId || (g.bolumId ?? null) === bolumId);
+  /**
+   * SGK ODEYEN MI (591) - emekli kutusunun kapisi. Sunucudaki
+   * `fn_dagilim_rota` ile AYNI mantik: SGK kurumu (tür 3) her zaman, sigortada
+   * yalniz TSS (202) ve SGK katkisi ACIK karma (203). Saf ÖSS'de ve özel
+   * hastada SGK katilim payi kavrami yoktur.
+   */
+  const sgkOdeyen = [3, 4, 5].includes(
+    dagilimRotasi(kurumTuru, bilgi.altKurum, bilgi.sgkKullan));
 
   return (
     <div className="kagrup">
@@ -236,24 +262,28 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
           </label>
           </div>
         ) : (
-        <label className="alan">
-          <span className="etiket zorunlu-isaret">Hekim / Personel</span>
-          <select value={personelId ?? ''} disabled={kilitli}
-                  onChange={e => {
-                    const y = e.target.value ? Number(e.target.value) : null;
-                    setPersonelId?.(y);
-                    // PERSONELDEN BOLUME (kullanici): once doktor secilirse
-                    //   bolum onun bolumune gecer.
-                    const g = (gorevliler ?? []).find(x => x.id === y);
-                    if (g?.bolumId) setBolumId?.(g.bolumId);
-                  }}>
-            <option value="">— Seçiniz —</option>
-            {hekimler.map(g => (
-              <option key={g.id} value={g.id}>{g.ad}</option>
-            ))}
-          </select>
-          {personelHatasi && <span className="alan-hata">{personelHatasi}</span>}
-        </label>
+        /* HEKIM DE ARAMA EKRANINDAN (583, kullanici: "başvuruda hekim
+           listesi combo değil, modal dr ve bölümün olduğu arama ekranı olsun,
+           bir sütunda bugün kaç başvuru olduğu bilgisi de olsun"): yuzlerce
+           hekimde combo okunmuyordu ve hekimin O GUN kac hasta aldigi hicbir
+           yerde gorunmuyordu - memur yuku dengeleyemiyordu. Pencere
+           Hekim · Bölüm · Bugünkü Başvuru kolonlariyla acilir. */
+        <TarafSecici etiket="Hekim / Personel" kaynaklar={['basvuru-hekim']}
+                     deger={personelAd}
+                     kilitli={kilitli}
+                     zorunlu hata={personelHatasi}
+                     /* Bolum SECILIYSE arama o bolumle sinirlanir, bosken
+                        hepsi gelir (297). Hekim once secilirse bolum ondan
+                        dolar - iki yon de calisir (BelgeKarti). */
+                     ekFiltre={bolumId
+                       ? { op: 'and', kosullar: [
+                           { alan: 'durum', op: 'esit', deger: 1 },
+                           { alan: 'bolumId', op: 'esit', deger: bolumId }] }
+                       : { alan: 'durum', op: 'esit', deger: 1 }}
+                     yerTutucu={bolumId ? 'Bu bölümün hekimlerinde ara…'
+                                        : 'Hekim ara…'}
+                     onSec={sec => onPersonelSec?.(sec.id, sec.unvan)}
+                     onTemizle={() => onPersonelSec?.(0, '')} />
         )}
         <label className="alan">
           <span className="etiket zorunlu-isaret">Başvuru Tarihi / Saati</span>
@@ -324,11 +354,40 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
           </label>
         )}
 
-        {/* SGK KATKISI yalniz KARMA policede kapatilabilir (kullanici):
-            kapatilinca SGK payi 0 olur ve tum provizyon TTB uzerinden yurur.
-            OSS'de SGK zaten yok, TSS ve saf SGK'da SGK payi anlasmanin
-            kendisidir - orada soru sorulmaz. */}
-        {bilgi.altKurum === 203 && (
+        {/* SGK KATKISI - TSS ve KARMA policede kapatilabilir (597, kullanici:
+            "hasta SGK kullanılmasın deme hakkına sahip… TSS'de SGK
+            kullanılmasın check'i ekle"). Isaret kalkinca rota ÖSS'ye duser:
+            SGK payi dogmaz, tarife bedeli sigorta/hasta arasinda bolunur.
+            ÖSS'de SGK zaten yok; saf SGK hastasinda karsiligi odeyen kurumu
+            Özel secmektir - orada soru sorulmaz.
+
+            Karar POLICENIN degil BASVURUNUN bilgisidir: ayni hasta ertesi
+            hafta SGK'yi kullanmak isteyebilir, policesi degismez - bu yuzden
+            alt kurum listesi ikiye bolunmedi. */}
+        {/* EMEKLI - YALNIZ SGK'NIN ODEDIGI ROTALARDA (591, kullanici:
+            "ödeyen kurum SGK ise emekli check'i çıkacak; ÖSS'de - alt kurum
+            ÖSS ise - çıkmayacak, TSS ve karmada çıkacak; özel fiyatta da hiç
+            çıkmayacak").
+
+            Kural sunucudaki `fn_dagilim_rota` ile AYNI: SGK kurumu (tür 3),
+            sigortada TSS (202) ve SGK katkısı açık karma (203). Saf ÖSS'de ve
+            özel hastada SGK katılım payı kavramı yoktur - 590'daki
+            `altKurum >= 202` kontrolü SGK'nın DEVREDİLEN KURUM kodlarını
+            (alt kurum listesi) da yakalıyor, tür Özel iken bile kutu
+            çizilebiliyordu. */}
+        {sgkOdeyen && (
+          <label className="alan onay-alan">
+            <span className="etiket">Emekli</span>
+            <span className="onay-satir">
+              <input type="checkbox" disabled={kilitli}
+                     checked={Number(bilgi.emekli ?? 0) === 1}
+                     onChange={e => degistir({ emekli: e.target.checked ? 1 : 0 })} />
+              <span>Emekli - SGK katılım payı alınmaz</span>
+            </span>
+          </label>
+        )}
+
+        {[202, 203].includes(Number(bilgi.altKurum ?? 0)) && (
           <label className="alan onay-alan">
             <span className="etiket">SGK Katkısı</span>
             <span className="onay-satir">

@@ -212,6 +212,8 @@ export interface ListeIstegi {
   grup?: string[];
   toplam?: string[];
   gorunum?: string;
+  /** gorunum = 'kullanim' iken hangi poliklinigin gecmisi (550). */
+  bolum?: number;
 }
 
 export type ListeSatiri = Record<string, unknown>;
@@ -386,6 +388,11 @@ export interface KartAlanMeta {
    * girintili cizilir. Ust baglari `kodUst`ten okunur; deger yine tek id.
    */
   agac?: boolean;
+  /**
+   * ALAN BICIM KURALI (bugun 'tckn'). Sunucu kuralin sahibi; ekran AYNI
+   * kurali anlik uygular ki kullanici kaydetmeyi beklemesin.
+   */
+  dogrulama?: string | null;
 }
 
 /**
@@ -532,7 +539,9 @@ export interface AcikSatir {
 export interface YerlerYaniti {
   iller: { id: number; ad: string }[];
   ilceler: { id: number; ilId: number; ad: string }[];
-  ulkeler: { id: number; ad: string }[];
+  /** `skrsKod` = SKRS MERNIS kodu (617). Adres ülke ADINI saklar,
+   *  uyruk ise bu KODU - e-Nabız uyrukta MERNİS kodu istiyor. */
+  ulkeler: { id: number; ad: string; skrsKod: number | null }[];
 }
 
 // ----------------------------------------------------------------- kasa ----

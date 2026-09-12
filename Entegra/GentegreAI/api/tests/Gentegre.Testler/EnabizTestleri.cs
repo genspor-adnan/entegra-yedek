@@ -116,15 +116,20 @@ public class EnabizTestleri : IClassFixture<VeritabaniOlgusu>
     }
 
     [Fact]
-    public void Klinik_kodu_BOLUM_KODUNDAN_da_okunur()
+    public void Klinik_kodu_BOLUM_KODUNDAN_okunur_ama_LISTEDE_ARANIR()
     {
-        // Ayrı kolon yok (kullanıcı): SKRS klinik kodu bölümün kendi kod
-        //   alanında durur. Üretici elle eşlemeyi ÖNCE dener (istisna), yoksa
-        //   bölüm kodunu okur - kod sayısal değilse kurumun kendi kodlamasıdır
-        //   ve USS'ye gönderilmez.
+        // Ayrı kolon yok (kullanıcı): SKRS klinik kodu bölümün kendi `kod`
+        //   alanında durur.
+        //
+        // Tek şart: kod SKRS KLİNİKLER listesinde ARANIR. Kolonda bir süre
+        //   PERSONEL BRANŞ kodları durdu ve her paket yanlış kliniği
+        //   bildirdi ("Acil" bölümünün kodu 102, KLİNİKLER'de 102 = ADLI
+        //   TIP). 619 kodları düzeltti; listede bulunmayan bir kod artık
+        //   pakete hiç yazılmaz - yanlış klinik, boş klinikten kötüdür.
         var kaynak = Kaynak("Gentegre.Api", "Servisler", "EnabizPaketUretici.cs");
-        Assert.Contains("from public.departman d", kaynak, StringComparison.Ordinal);
         Assert.Contains("d.kod ~ '^[0-9]+$'", kaynak, StringComparison.Ordinal);
+        Assert.Contains("fn_skrs_kod('klinik.kod'", kaynak, StringComparison.Ordinal);
+        Assert.DoesNotContain("skrs_klinik_kod", kaynak, StringComparison.Ordinal);
     }
 
     [Fact]

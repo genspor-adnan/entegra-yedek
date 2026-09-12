@@ -180,13 +180,19 @@ describe('stok arama (141)', () => {
 });
 
 describe('kalem penceresi', () => {
-  it('PAY alanlari yalniz odeyen kurumlu basvuruda gorunur', () => {
+  // 586: "Ek Katkı" kutusu (ve onu acan `paylasimli` bayragi) kalkti. Pencere
+  //   artik TARIFE TIPINI soruyor - TTB/SUT'ta Katkı Fiyatı kutusu acilir ve
+  //   iskonto katki uzerinden isler.
+  it('tarife tipi pencereye AYNEN gecer (Katkı Fiyatı kutusunun kosulu)', () => {
+    ciz({ kalem: bosSatir(1), basvuruMu: true, tarifeTipi: 3 });
+    expect(cizilen.kalem.tarifeTipi).toBe(3);
+    ciz({ kalem: bosSatir(1), basvuruMu: true, tarifeTipi: 1 });
+    expect(cizilen.kalem.tarifeTipi).toBe(1);
+  });
+
+  it('eski PAYLASIMLI bayragi ARTIK GONDERILMEZ', () => {
     ciz({ kalem: bosSatir(1), basvuruMu: true, odeyenKurumId: 5 });
-    expect(cizilen.kalem.paylasimli).toBe(true);
-    ciz({ kalem: bosSatir(1), basvuruMu: true, odeyenKurumId: null });
-    expect(cizilen.kalem.paylasimli).toBe(false);
-    ciz({ kalem: bosSatir(1), basvuruMu: false, odeyenKurumId: 5 });
-    expect(cizilen.kalem.paylasimli).toBe(false);
+    expect(cizilen.kalem.paylasimli).toBeUndefined();
   });
 
   it('kaydedince arama penceresi acikken sayac artar', () => {

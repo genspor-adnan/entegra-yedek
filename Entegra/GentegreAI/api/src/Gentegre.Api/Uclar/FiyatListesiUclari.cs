@@ -30,6 +30,21 @@ public static class FiyatListesiUclari
     public sealed record UretimSonucu(int Eklenen, int Guncellenen, int Korunan,
                                       int Fiyatsiz, string Mesaj);
 
+    /// <summary>
+    /// TOPLU SATIR DEGERI (kullanici: "modalde seçili satıra / kategoriye /
+    /// tüm listeye uygula"). Kapsam SUNUCUDA cozulur: satir gridi 200'erlik
+    /// sayfalarla geliyor, "tüm listeye" istemcide yalnizca yuklu sayfayi
+    /// degistirirdi - 14 bin satirlik listede sessiz bir yalan olurdu.
+    /// </summary>
+    /// <param name="Islem">carpan · katki · fiyat-yuzde</param>
+    /// <param name="Deger">carpan sayisi · katki orani · yuzde (mutlak deger)</param>
+    /// <param name="Kapsam">secili · kategori · tumu</param>
+    /// <param name="SatirIdler">Kapsam "secili" iken satir id'leri.</param>
+    /// <param name="KategoriId">Kapsam "kategori" iken dal (alt agac dahil).</param>
+    /// <param name="Yon">fiyat-yuzde: artir · azalt</param>
+    public sealed record TopluDegerIstegi(string Islem, decimal Deger, string Kapsam,
+                                          int[]? SatirIdler, int? KategoriId, string? Yon);
+
     public static void FiyatListesiUclariniEkle(this IEndpointRouteBuilder yol)
     {
         // ------------------------------------------------------------ uret ----
@@ -195,6 +210,150 @@ public static class FiyatListesiUclari
             });
         });
 
+        // --------------------------------------------------- toplu deger ----
+        // POST /api/fiyat-listesi/{id}/toplu-deger
+        //
+        // Carpan / Katki / Fiyat Güncelle pencerelerinin "uygula" dugmeleri.
+        //   Kapsam ucu SUNUCUDA: satir gridi 200'erlik sayfalarla geliyor;
+        //   "kategoriye" ya da "tüm listeye" uygula istemcide yalnizca yuklu
+        //   sayfayi degistirirdi.
+        // TARIFE KURALI BURADA DA ISLER (ekran gizlemesine guvenilmez):
+        //   carpan yalniz TTB'de, katki TTB/SUT'ta, yuzde yalniz Özel'de.
+        //   SUT fiyatinin tek mesru yazma yolu SKRS tazelemesidir (518/533).
+        yol.MapPost("/api/fiyat-listesi/{id:int}/toplu-deger", async (
+            int id, TopluDegerIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("fiyat_listesi", Islem.Degistir);
+
+            var islem = (istek.Islem ?? "").Trim().ToLowerInvariant();
+            var kapsam = (istek.Kapsam ?? "").Trim().ToLowerInvariant();
+            if (islem is not ("carpan" or "katki" or "fiyat-yuzde"))
+                throw GentegreHatasi.Dogrulama("Bilinmeyen toplu işlem.");
+            if (kapsam is not ("secili" or "kategori" or "tumu"))
+                throw GentegreHatasi.Dogrulama("Bilinmeyen kapsam.");
+            if (istek.Deger <= 0)
+                throw GentegreHatasi.Dogrulama("Değer sıfırdan büyük olmalı.");
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            await using var kontrol = baglanti.Komut(
+                "select ad, tarife_tipi, coalesce(sube_id, 0) "
+                + "  from public.fiyat_listesi where id = @p0", null, id);
+            string listeAdi;
+            int tip, subeId;
+            await using (var o = await kontrol.ExecuteReaderAsync(iptal))
+            {
+                if (!await o.ReadAsync(iptal)) return Results.NotFound();
+                listeAdi = o.GetString(0);
+                tip = o.GetInt16(1);
+                subeId = o.GetInt32(2);
+            }
+            if (subeId != 0 && baglam.SubeId is { } aktif && subeId != aktif)
+                throw GentegreHatasi.Yasak("Bu liste başka bir şubeye ait.");
+
+            if (islem == "carpan" && tip != 2)
+                throw GentegreHatasi.IsKurali("Çarpan yalnız TTB/HUV tarifesinde yazılır.");
+            if (islem == "katki" && tip is not (2 or 3))
+                throw GentegreHatasi.IsKurali("Katkı yalnız TTB/HUV ve SUT tarifesinde yazılır.");
+            if (islem == "fiyat-yuzde" && tip != 1)
+                throw GentegreHatasi.IsKurali(
+                    "Yüzdeyle fiyat güncelleme yalnız Özel tarifede yapılır. "
+                    + "TTB fiyatı katsayı × çarpandan, SUT fiyatı SKRS'den doğar.");
+
+            // ATAMA: istemcideki kuralin AYNISI (tarifeKurallari.ts) - iki
+            //   yerde iki sonuc cikmasin. Yuvarlama iki hane.
+            var atama = islem switch
+            {
+                // Katsayi ya da carpan yoksa fiyat DOKUNULMAZ: 0 fiyat yazmak
+                //   satiri sessizce bedelsiz yapardi (ttbFiyatTuret ile ayni).
+                "carpan" => "carpan = @p1, "
+                          + "fiyat = case when coalesce(taban_fiyat, 0) > 0 "
+                          + "             then round(coalesce(taban_fiyat, 0) * @p1, 2) "
+                          + "             else fiyat end",
+                "katki" => "katki_tutar = round(coalesce(fiyat, 0) * @p1, 2)",
+                // Eksiye dusmesin: %120 azalt negatif fiyat uretirdi.
+                _ => "fiyat = greatest(0, round(coalesce(fiyat, 0) * @p1, 2))",
+            };
+            // Yuzde katsayiya cevrilir; yon istemciden gelir ama DEGER hep pozitif.
+            var deger = islem == "fiyat-yuzde"
+                ? 1 + (string.Equals(istek.Yon, "azalt", StringComparison.OrdinalIgnoreCase)
+                       ? -istek.Deger : istek.Deger) / 100m
+                : istek.Deger;
+            if (islem == "fiyat-yuzde" && deger < 0) deger = 0m;
+
+            int etkilenen;
+            if (kapsam == "kategori")
+            {
+                if (istek.KategoriId is not > 0)
+                    throw GentegreHatasi.Dogrulama("Kategori seçilmedi.");
+                // Dal ALT AGACIYLA birlikte: "Tahlil" secen kullanici
+                //   altindaki Biyokimya/Hormon satirlarini da kastediyor.
+                await using var komut = baglanti.Komut(
+                    "with recursive dal as ("
+                    + "    select @p2::integer as id "
+                    + "    union all "
+                    + "    select k.id from public.kategori k join dal d on k.ust_id = d.id) "
+                    + "update public.fiyat_listesi_satir s set " + atama
+                    + " where s.liste_id = @p0 "
+                    + "   and coalesce("
+                    + "        (select h.kategori from public.hizmet h where h.id = s.hizmet_id), "
+                    + "        (select t.kategori from public.stok   t where t.id = s.stok_id)) "
+                    + "       in (select id from dal)",
+                    null, id, deger, istek.KategoriId.Value);
+                etkilenen = await komut.ExecuteNonQueryAsync(iptal);
+            }
+            else if (kapsam == "secili")
+            {
+                var idler = (istek.SatirIdler ?? []).Where(x => x > 0).Distinct().ToArray();
+                if (idler.Length == 0)
+                    throw GentegreHatasi.Dogrulama("Seçili satır yok.");
+                await using var komut = baglanti.Komut(
+                    "update public.fiyat_listesi_satir s set " + atama
+                    + " where s.liste_id = @p0 and s.id = any(@p2)",
+                    null, id, deger, idler);
+                etkilenen = await komut.ExecuteNonQueryAsync(iptal);
+            }
+            else
+            {
+                await using var komut = baglanti.Komut(
+                    "update public.fiyat_listesi_satir s set " + atama
+                    + " where s.liste_id = @p0", null, id, deger);
+                etkilenen = await komut.ExecuteNonQueryAsync(iptal);
+            }
+
+            var isAdi = islem switch
+            {
+                "carpan" => $"çarpan {istek.Deger:0.####}",
+                "katki" => $"katkı oranı {istek.Deger:0.####}",
+                _ => $"fiyat %{istek.Deger:0.##} "
+                     + (string.Equals(istek.Yon, "azalt", StringComparison.OrdinalIgnoreCase)
+                        ? "azaltma" : "artırma"),
+            };
+            var kapsamAdi = kapsam switch
+            {
+                "secili" => "seçili satırlar",
+                "kategori" => "seçili kategori",
+                _ => "listenin tamamı",
+            };
+            var mesaj = etkilenen == 0
+                ? $"Değişen satır yok ({kapsamAdi})."
+                : $"{etkilenen:N0} satıra uygulandı - {isAdi} · {kapsamAdi}.";
+
+            // TOPLU FIYAT DEGISIMI LOGLANIR: tek satirlik duzeltmeden farkli
+            //   olarak binlerce satiri birden degistiriyor - "bu listeye ne
+            //   oldu" sorusu sonradan cevaplanabilmeli.
+            await log.YazAsync(baglanti, null!, LogIslemi.Degistir, LogTabloFiyatListesi, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new Dictionary<string, string> { ["toplu"] = mesaj }, iptal: iptal);
+
+            return Results.Ok(new
+            {
+                liste = listeAdi, etkilenen, mesaj, izlemeNo = baglam.IzlemeNo
+            });
+        }).WithTags("FiyatListesi").RequireAuthorization();
+
         yol.MapPost("/api/fiyat-listesi/{id:int}/fiyatlar", async (
             int id, TopluFiyatIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
@@ -208,12 +367,28 @@ public static class FiyatListesiUclari
             foreach (var k in kalemler)
             {
                 if ((k.StokId is null or 0) == (k.HizmetId is null or 0)) continue;
-                var f = await ListeFiyatiAsync(baglanti, id,
-                    k.StokId is 0 ? null : k.StokId, k.HizmetId is 0 ? null : k.HizmetId, iptal);
+                var stok = k.StokId is 0 ? null : k.StokId;
+                var hizmet = k.HizmetId is 0 ? null : k.HizmetId;
+                var f = await ListeFiyatiAsync(baglanti, id, stok, hizmet, iptal);
+                // SUT BEDELI (602): sozlesme verildiyse cozulur. Ayni yardimci
+                //   (`SutBedeliAsync`) kalem ucunun kullandigidir - listede
+                //   gorulen rakam, kalem secilince cikanla ayni olsun.
+                var sut = (istek.SozlesmeId is > 0 || istek.KurumId is > 0)
+                    ? await SutBedeliAsync(baglanti, istek.SozlesmeId, istek.KurumId,
+                                           istek.SgkKullan, stok, hizmet, iptal)
+                    : SutBedeli.Yok;
                 sonuc.Add(new
                 {
                     stokId = k.StokId, hizmetId = k.HizmetId,
                     fiyat = f.Fiyat, dovizCinsi = f.DovizCinsi, kdvDahil = f.KdvDahil,
+                    // SGK'nin odedigi bedel - rota SGK payi tasimiyorsa null.
+                    sgkFiyat = sut.SgkGerekli ? sut.SgkFiyat : null,
+                    // KATKI DA DONER (602, kullanici: "stok hizmet arama
+                    //   listesinde Katkı fiyatı da göster"): TTB/SUT tarifesinde
+                    //   hastanin odeyecegi tutar budur ve secim YAPILMADAN
+                    //   gorunmeli. `ListeFiyatiAsync` zaten cozuyordu, tekil uc
+                    //   de donuyordu - yalniz toplu uc birakmisti.
+                    katki = f.Katki,
                 });
             }
             return Results.Ok(new { listeId = id, satirlar = sonuc });
@@ -395,8 +570,12 @@ public static class FiyatListesiUclari
         // ------------------------------------------- belgenin varsayilan listesi ----
         // Belge acilirken hangi liste gelecek: belge TURUNUN yonune gore
         //   carinin listesi, yoksa o yonun varsayilani.
+        // SOZLESME (588): basvuruda police SECILIYSE tarife ONDAN cikar -
+        //   kurumun birden fazla policesi varsa (ÖSS + TSS + Karma) kurum
+        //   basina secim yapilamiyor, secili police ise kesin bilgidir.
         yol.MapGet("/api/belge/varsayilan-liste", async (
-            int tur, int tarafId, int? kurumId, BaglamCozucu cozucu, VeriKaynagi veri,
+            int tur, int tarafId, int? kurumId, int? sozlesmeId,
+            BaglamCozucu cozucu, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -406,8 +585,9 @@ public static class FiyatListesiUclari
             await using var komut = baglanti.Komut("""
                 select l.id, l.ad, l.yon, l.kdv_dahil
                   from public.fiyat_listesi l
-                 where l.id = public.fn_belge_varsayilan_liste(@p0, @p1, current_date, @p2)
-                """, null, tur, tarafId, kurumId is 0 ? null : kurumId);
+                 where l.id = public.fn_belge_varsayilan_liste(@p0, @p1, current_date, @p2, @p3)
+                """, null, tur, tarafId, kurumId is 0 ? null : kurumId,
+                     sozlesmeId is 0 ? null : sozlesmeId);
 
             await using var o = await komut.ExecuteReaderAsync(iptal);
             if (!await o.ReadAsync(iptal))
@@ -633,6 +813,16 @@ public static class FiyatListesiUclari
     public sealed class TopluFiyatIstegi
     {
         public List<TopluFiyatKalemi>? Kalemler { get; set; }
+        /// <summary>
+        /// SUT BEDELI ICIN SOZLESME (602, kullanici: "stok hizmet arama
+        /// listesinde Katkı ve sut fiyatı da göster"). Verilirse her satirin
+        /// SGK bedeli de cozulur - arama listesindeki "Fiyat" BELGENIN
+        /// listesinden gelir ve TSS'de o TTB tarifesidir, SUT hic gorunmezdi.
+        /// Verilmezse SUT kolonu bos doner, eski davranis surer.
+        /// </summary>
+        public int? SozlesmeId { get; set; }
+        public int? KurumId { get; set; }
+        public short? SgkKullan { get; set; }
     }
 
     public sealed class TopluFiyatKalemi

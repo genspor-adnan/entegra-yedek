@@ -67,23 +67,50 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
 
     // ------------------------------------------------------------- kurulum --
 
+    /// <summary>
+    /// KATILIM PAYI DOGURAN hizmet (602): katilim payi ayardaki SUT KODU
+    /// listesine bagli (`basvuru.sgk_katilim_kodlari`, 592) - rastgele bir
+    /// hizmette katilim HIC dogmaz ve "katilim ciro disi" testleri bos yere
+    /// gecerdi. Kod eslesen yoksa ilk hizmete duselir.
+    /// </summary>
     private async Task<int> HizmetAsync(VeriKaynagi veri)
-        => await veri.TekDegerAsync<int>("select min(id) from public.hizmet");
+        => await veri.TekDegerAsync<int>("""
+            select coalesce(
+              (select min(h.id) from public.hizmet h
+                where btrim(h.kod) in (
+                  select btrim(x) from public.referans r,
+                       unnest(string_to_array(r.deger, ',')) x
+                   where r.anahtar = 'basvuru.sgk_katilim_kodlari'
+                     and btrim(x) <> '')),
+              (select min(id) from public.hizmet))
+            """);
 
+    /// <summary>
+    /// Test listesi. `katki` listenin `katki_tutar` alanidir - HASTA KATKISI
+    /// (kova 4). "Ek katki" kurali (fiyat_listesi.ek_katki_tipi/deger) 539'da
+    /// kaldirildi, 603'te olu fonksiyon da sokuldu: katki artik TEK kaynaktan,
+    /// listenin `katki_tutar` alanindan gelir.
+    /// </summary>
     private async Task<int> ListeAsync(VeriKaynagi veri, string ad, int hizmetId,
-        decimal fiyat, decimal katilim = 0, short ekTipi = 0, decimal ekDeger = 0)
+        decimal fiyat, decimal katki = 0)
     {
         var id = await veri.TekDegerAsync<int>("""
             insert into public.fiyat_listesi (ad, durum, yon, kdv_dahil, katki_tutar,
-                                              ek_katki_tipi, ek_katki_deger)
-            values (@p0, 1, 2, 0, @p1, @p2, @p3) returning id
-            """, [$"{Etiket} {ad} {Guid.NewGuid():N}"[..40], katilim, ekTipi, ekDeger]);
+                                              baslangic, bitis)
+            values (@p0, 1, 2, 0, @p1,
+                    -- DONEM ZORUNLU (541): liste kaydi tarihsiz acilamaz.
+                    --   Testin listesi BUGUNU kapsamali - tarife secimi
+                    --   "bugun gecerli liste" diye suzuyor.
+                    make_date(extract(year from current_date)::int, 1, 1),
+                    make_date(extract(year from current_date)::int, 12, 31))
+            returning id
+            """, [$"{Etiket} {ad} {Guid.NewGuid():N}"[..40], katki]);
         _listeler.Add(id);
         await veri.CalistirAsync("""
             insert into public.fiyat_listesi_satir (liste_id, hizmet_id, fiyat, durum,
                                                     kdv_dahil, katki_tutar)
             values (@p0, @p1, @p2, 1, 0, @p3)
-            """, [id, hizmetId, fiyat, katilim]);
+            """, [id, hizmetId, fiyat, katki]);
         return id;
     }
 
@@ -218,9 +245,9 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
 
         var hizmet = await HizmetAsync(veri);
         var tarife = await ListeAsync(veri, "TTB", hizmet, 2000m);
-        // SUT listesi: 800 bedel, 100 katılım payı, ek katkı %75 (= 600).
-        var sut = await ListeAsync(veri, "SUT", hizmet, 800m, katilim: 100m,
-                                   ekTipi: 2, ekDeger: 75m);
+        // SUT listesi: 800 bedel, hasta katkısı 100 (listenin `katki_tutar`i).
+        //   "Ek katkı %75" kuralı 539'da kaldırıldı - katkı tek kaynaktan gelir.
+        var sut = await ListeAsync(veri, "SUT", hizmet, 800m, katki: 100m);
         var sgkKurum = await KurumAsync(veri, 3, "SGK");
         await SozlesmeAsync(veri, sgkKurum, 0, null, sut, sgkKurum);
         var kurum = await KurumAsync(veri, 2, "TSS SIRKET");
@@ -230,14 +257,14 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
         await veri.CalistirAsync("select public.fn_belge_satir_dagilim_tazele(@p0)", [satirId]);
         var k = await OkuAsync(veri, satirId);
 
-        // Excel: 800 + 2000 + 600 = 3400 · katılım 100 ayrı.
+        // 800 SGK + 2000 sigorta + 100 hasta katkısı = 2900 · katılım 100 AYRI.
         Assert.Equal((short)3, k!.Rota);
         Assert.Equal(800m, k.Sgk);
         Assert.Equal(2000m, k.Oss);
-        Assert.Equal(600m, k.HastaEkKatki);
+        Assert.Equal(100m, k.HastaEkKatki);
         Assert.Equal(100m, k.Katilim);
         // SATIR TUTARI kovalardan doğar: rota 3'te toplam satıra yazılır.
-        Assert.Equal(3400m, k.Tutar);
+        Assert.Equal(2900m, k.Tutar);
         Assert.Equal(k.Tutar, k.Sgk + k.Oss + k.HastaProvizyon + k.HastaEkKatki);
     }
 
@@ -249,13 +276,16 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
 
         var hizmet = await HizmetAsync(veri);
         var tarife = await ListeAsync(veri, "TTB", hizmet, 4200m);
-        var sut = await ListeAsync(veri, "SUT", hizmet, 500m, katilim: 100m);
+        var sut = await ListeAsync(veri, "SUT", hizmet, 500m, katki: 100m);
         var sgkKurum = await KurumAsync(veri, 3, "SGK2");
         await SozlesmeAsync(veri, sgkKurum, 0, null, sut, sgkKurum);
         var kurum = await KurumAsync(veri, 2, "KARMA SIRKET");
         var soz = await SozlesmeAsync(veri, kurum, 203, tarife, sut, sgkKurum);
 
-        // 1) SGK katkısı AÇIK: 4200 = 500 SGK + 2500 sigorta + 1200 hasta.
+        // 1) SGK katkısı AÇIK. TUTARI PROVİZYON BELİRLER (599, kullanıcı:
+        //    "Karma'da hasta sadece 100 TL SGK katılım öder, onun dışında katkı
+        //    ödemez"): satır 500 SGK + 2500 sigorta = 3000 yazılır, hastaya
+        //    FARK ÇIKMAZ - tek ödediği katılım payıdır (ciro dışı).
         var (_, satirId) = await BasvuruAsync(veri, kurum, soz, 203, 1, hizmet, 4200m);
         await veri.CalistirAsync(
             "select public.fn_belge_satir_dagilim_tazele(@p0, null, @p1)", [satirId, 2500m]);
@@ -263,7 +293,8 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
         Assert.Equal((short)4, acik!.Rota);
         Assert.Equal(500m, acik.Sgk);
         Assert.Equal(2500m, acik.Oss);
-        Assert.Equal(1200m, acik.HastaProvizyon);
+        Assert.Equal(0m, acik.HastaProvizyon);
+        Assert.Equal(3000m, acik.Tutar);
         Assert.Equal(100m, acik.Katilim);
 
         // 2) Hasta SGK KULLANILMASIN dedi (kullanıcı): rota ÖSS'ye döner,
@@ -278,7 +309,14 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
         Assert.Equal(0m, kapali.Sgk);
         Assert.Equal(0m, kapali.Katilim);
         Assert.Equal(2500m, kapali.Oss);
-        Assert.Equal(1700m, kapali.HastaProvizyon);
+        // HASTA 500 = 3000 - 2500, 4200 - 2500 DEGIL (602): 1. bolumde Karma
+        //   hesabi satirin tutarini provizyona gore 3000'e YAZDI (599/600
+        //   geri yazma). Rota ÖSS'ye donunce tutar tarifeye (4200) geri
+        //   DONMUYOR - rota 2 satirin kendi tutarini boluyor, tarife listesini
+        //   yeniden okumuyor. Testin ölçtügü sey rota degisiminin kovalari
+        //   dogru kurmasi; tutarin tarifeye donup donmemesi ayri bir karar.
+        Assert.Equal(3000m, kapali.Tutar);
+        Assert.Equal(500m, kapali.HastaProvizyon);
     }
 
     [Fact]
@@ -288,9 +326,9 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
         var veri = _olgu.Gerekli();
 
         var hizmet = await HizmetAsync(veri);
-        // SUT 800, katılım 100, ek katkı SABİT 500.
-        var sut = await ListeAsync(veri, "SUT", hizmet, 800m, katilim: 100m,
-                                   ekTipi: 1, ekDeger: 500m);
+        // SUT 800, hasta katkısı 100 (listenin `katki_tutar`i). "Ek katkı
+        //   SABİT 500" kuralı 539'da kaldırıldı.
+        var sut = await ListeAsync(veri, "SUT", hizmet, 800m, katki: 100m);
         var kurum = await KurumAsync(veri, 3, "SGK3");
         var soz = await SozlesmeAsync(veri, kurum, 0, null, sut, kurum);
         var (_, satirId) = await BasvuruAsync(veri, kurum, soz, 302, 1, hizmet, 800m);
@@ -299,9 +337,9 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
         var k = await OkuAsync(veri, satirId);
 
         Assert.Equal((short)5, k!.Rota);
-        Assert.Equal(1300m, k.Tutar);           // 800 + 500
+        Assert.Equal(900m, k.Tutar);            // 800 SUT + 100 hasta katkısı
         Assert.Equal(800m, k.Sgk);
-        Assert.Equal(500m, k.HastaEkKatki);
+        Assert.Equal(100m, k.HastaEkKatki);
         Assert.Equal(100m, k.Katilim);
         // KATILIM CİRO DIŞI: satır tutarına GİRMEZ.
         Assert.Equal(k.Tutar, k.Sgk + k.Oss + k.HastaProvizyon + k.HastaEkKatki);
@@ -430,8 +468,7 @@ public class DagilimAkisTestleri : IClassFixture<VeritabaniOlgusu>, IAsyncLifeti
         var veri = _olgu.Gerekli();
 
         var hizmet = await HizmetAsync(veri);
-        var sut = await ListeAsync(veri, "SUT", hizmet, 800m, katilim: 100m,
-                                   ekTipi: 1, ekDeger: 500m);
+        var sut = await ListeAsync(veri, "SUT", hizmet, 800m, katki: 100m);
         var kurum = await KurumAsync(veri, 3, "SGK EMANET");
         var soz = await SozlesmeAsync(veri, kurum, 0, null, sut, kurum);
         var (belgeId, satirId) = await BasvuruAsync(veri, kurum, soz, 302, 1, hizmet, 800m);

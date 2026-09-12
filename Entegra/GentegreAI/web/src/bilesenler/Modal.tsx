@@ -8,7 +8,7 @@ import { createPortal } from 'react-dom';
  * dairesel import olurdu.
  */
 export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif, enUst,
-                       buyutmeYok, onKapat, children }: {
+                       buyutmeYok, olcumYok, onKapat, children }: {
   baslik: string;
   ustBilgi?: React.ReactNode;
   ustSerit?: React.ReactNode;
@@ -34,6 +34,17 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif,
    * pencerede buyutmenin bir karsiligi da yok: icerik zaten iki satir.
    */
   buyutmeYok?: boolean;
+  /**
+   * YUKSEKLIK OLCUMU YOK (kullanici: "her harf girildikçe ekran beyaz olup
+   * tekrar eski haline geliyor, göz kırpması gibi").
+   *
+   * Kilit SEKMELI KARTLAR icin var: sekme degisince pencere alcalmasin diye
+   * govde bir an dogal yukseklige acilip olculuyor. Arama penceresinde sekme
+   * yok, ama liste HER TUSTA yeniden ciziliyor - her cizimde govdenin
+   * `minHeight: 0`a dusup geri alinmasi pencereyi kirpistiriyordu. Burada
+   * yukseklik zaten CSS'ten geliyor (`.kawin` 88vh + `.kagov` flex).
+   */
+  olcumYok?: boolean;
   onKapat?(): void;
   children: React.ReactNode;
 }) {
@@ -86,7 +97,7 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif,
   useLayoutEffect(() => {
     const uygula = () => {
       const el = govdeRef.current;
-      if (!el) return;
+      if (!el || olcumYok) return;
       const pencere = el.parentElement;            // .kawin
       // Govde disinda kalan sabit seritler (baslik/toolbar/ustSerit/sekme).
       // Govde DISINDAKI seritlerin toplami. Pencere yuksekliginden govdeyi
@@ -116,16 +127,41 @@ export function Modal({ baslik, ustBilgi, ustSerit, sekmeBar, alt, dar, ekSinif,
       const eskiFlex = el.style.flex;
       const eskiMin = el.style.minHeight;
       const eskiMax = el.style.maxHeight;
-      el.style.flex = 'none';
-      el.style.minHeight = '0px';
-      el.style.maxHeight = 'none';
-      const dogal = el.offsetHeight;
-      el.style.flex = eskiFlex;
-      el.style.minHeight = eskiMin;
-      el.style.maxHeight = eskiMax;
-      if (dogal > enYuksek.current) enYuksek.current = dogal;
-      el.style.minHeight = `${Math.min(enYuksek.current, tavan)}px`;
-      el.style.maxHeight = `${tavan}px`;
+      // KAYDIRMA KONUMU OLCUMDE KAYBOLUYORDU (kullanici: "aşağı scroll
+      //   ediyorum, hemen tekrar yukarı çıkıyor"). Olcum icin tavan bir an
+      //   kaldirilinca govde tasmiyor ve tarayici `scrollTop`u 0'a dusuruyor;
+      //   tavan geri konunca eski konum geri GELMIYOR. Bu olcum HER RENDER'da
+      //   calisiyor - arama penceresinde fare bir satira girince (secili satir
+      //   degisir) liste basa zipliyordu. Konum olcumden once saklanir, sonra
+      //   geri yazilir.
+      const eskiKaydirma = el.scrollTop;
+      // OLCUM YALNIZ ICERIK BUYUMUS OLABILIYORSA (kullanici: "arama yaparken
+      //   ekran minik kapanıp açılıyor"). Kilit yalnizca BUYUR; icerik
+      //   kilidin altinda kaldigi surece dogal yuksekligi bilmeye gerek yok.
+      //   `scrollHeight` kutudan tasan icerigi gosterir ve kutu icerikten
+      //   buyukken kutunun kendi yuksekligini verir - yani kilidi ASMIYORSA
+      //   icerik de asmamistir. Asmadiginda olcume hic girilmez: her tusa
+      //   basista govdeyi bir an `minHeight: 0`a dusurup geri almak
+      //   pencerenin kapanip acildigi izlenimini veriyordu (arama listesi her
+      //   harfte yeniden ciziliyor).
+      const kilitli = enYuksek.current > 0;
+      if (!kilitli || el.scrollHeight > enYuksek.current) {
+        el.style.flex = 'none';
+        el.style.minHeight = '0px';
+        el.style.maxHeight = 'none';
+        const dogal = el.offsetHeight;
+        el.style.flex = eskiFlex;
+        el.style.minHeight = eskiMin;
+        el.style.maxHeight = eskiMax;
+        if (dogal > enYuksek.current) enYuksek.current = dogal;
+      }
+      // STIL YALNIZ DEGISTIYSE YAZILIR: ayni degeri yeniden atamak da yerlesimi
+      //   yeniden hesaplatiyor.
+      const yeniMin = `${Math.min(enYuksek.current, tavan)}px`;
+      const yeniMax = `${tavan}px`;
+      if (el.style.minHeight !== yeniMin) el.style.minHeight = yeniMin;
+      if (el.style.maxHeight !== yeniMax) el.style.maxHeight = yeniMax;
+      if (el.scrollTop !== eskiKaydirma) el.scrollTop = eskiKaydirma;
     };
     uygula();
     // Pencere boyutu degisince tavan da degisir (kilit ekrana sigmali).

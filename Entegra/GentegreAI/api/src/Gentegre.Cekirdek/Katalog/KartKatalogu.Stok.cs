@@ -16,6 +16,10 @@ public static partial class KartKatalogu
         {
             new("id",            "id",              "sayi",  Yazilabilir: false),
             new("kod",           "kod",             "metin", Zorunlu: true, EnFazlaUzunluk: 30, Baslik: "Stok Kodu", Grup: "Kimlik"),
+            // KISA AD (552): istege bagli, aramada oncelikli. Ilacin kisa adi
+            //   da buradan gelir (ilac karti yok, stok karti var).
+            new("kisaAd",        "kisa_ad",         "metin", EnFazlaUzunluk: 60,
+                Baslik: "Kısa Ad", Grup: "Kimlik"),
             new("ad",            "ad",              "metin", Zorunlu: true, EnFazlaUzunluk: 200, Baslik: "Stok Adi", Grup: "Kimlik"),
             // mockup idstrip: Stok Kodu / Stok Adi / Tur / Durum - Tur (STOKLAR.TIPI) daha once hic acilmamisti.
             new("tipi",          "tipi",            "kod",   Zorunlu: true, KodListesi: "stok.tipi", Baslik: "Tur", Grup: "Kimlik"),
@@ -229,6 +233,10 @@ public static partial class KartKatalogu
             // STANDART BASLIK SERIDI (kullanici): Kod / Ad / Durum kartin ust
             //   seridinde her sekmede sabit durur (fiyat listesi kartiyla ayni).
             new("kod",      "kod",      "metin", EnFazlaUzunluk: 40, Baslik: "Kod", Grup: "Kimlik"),
+            // KISA AD (549): resmi adin yaninda, gunluk kullanilan ad.
+            //   Zorunlu DEGIL - bos birakilirsa arama yalniz resmi ada bakar.
+            new("kisaAd",   "kisa_ad",  "metin", EnFazlaUzunluk: 60,
+                Baslik: "Kısa Ad", Grup: "Kimlik"),
             new("ad",       "ad",       "metin", Zorunlu: true, EnFazlaUzunluk: 200,
                 Baslik: "Hizmet Adı", Grup: "Kimlik"),
             // KATEGORI ADIN SAGINDA, UST SERITTE (kullanici): hizmetin hangi

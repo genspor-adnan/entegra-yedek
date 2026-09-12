@@ -21,12 +21,26 @@ public static partial class KaynakKatalogu
     private static KaynakTanimi Stok() => new(
         Ad: "stok",
         YetkiKodu: "stok",
+        // KULLANIM PUANI (552): hizmetteki (550) ile ayni - bolumun kendi
+        //   gecmisi tam, kurum geneli ceyrek agirlikla. Kalem turu 1 = stok.
+        KullanimJoin:
+            " left join public.kalem_kullanim sk"
+            + "   on sk.tur = 1 and sk.kayit_id = s.id and sk.bolum_id = {bolum}"
+            + " left join public.kalem_kullanim sg"
+            + "   on sg.tur = 1 and sg.kayit_id = s.id and sg.bolum_id = 0",
+        KullanimSirala:
+            "(coalesce(public.fn_hizmet_puan(sk.puan, sk.son_tarih), 0)"
+            + " + 0.25 * coalesce(public.fn_hizmet_puan(sg.puan, sg.son_tarih), 0)) desc,"
+            + " s.ad asc",
         Kaynak: "public.stok s",
         VarsayilanSirala: "s.ad asc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",        "s.id",        "sayi",  "Id",       Varsayilan: false),
             new("kod",       "s.kod",       "metin", "Kod"),
+            // KISA AD (552, hizmetteki 549 ile ayni): gunluk dilde kullanilan
+            //   ad, resmi adin SOLUNDA. Aramada da taranir.
+            new("kisaAd",    "s.kisa_ad",   "metin", "Kısa Ad", Genislik: 160),
             new("ad",        "s.ad",        "metin", "Stok Adi"),
             // Kategori ve birim ADIYLA gosterilir: kolonlar "kod" tipindeydi ve
             //   listede kod ad'a cevrilmedigi icin ekranda ham id goruluyordu.
@@ -339,10 +353,35 @@ public static partial class KaynakKatalogu
         YetkiKodu: "hizmet",
         Kaynak: "public.hizmet h",
         VarsayilanSirala: "h.ad asc",
+        // KULLANIM PUANI (550, kullanici: "sistem polikliniğe göre seçilen
+        //   işleri zamanla puanlayarak öne çıkarmalı, diğerleri çok geride
+        //   kalmalı"). Iki kova toplanir: BOLUMUN kendi gecmisi (tam agirlik)
+        //   ve KURUM GENELI (ceyrek agirlik) - yeni acilan poliklinik bos
+        //   listeyle baslamasin, kurumda zaten cok istenen tetkikler onde
+        //   gelsin. Puan okunurken sonumlenir (fn_hizmet_puan).
+        KullanimJoin:
+            // TABLO 552'DE GENELLESTI: hizmet_kullanim -> kalem_kullanim
+            //   (tur 1 stok · 2 hizmet). Eski ad kaldiginda liste ucu
+            //   "relation public.hizmet_kullanim does not exist" ile 500
+            //   veriyordu - arama penceresi bu yuzden aciliyordu ve bosta
+            //   kaliyordu.
+            " left join public.kalem_kullanim hk"
+            + "   on hk.tur = 2 and hk.kayit_id = h.id and hk.bolum_id = {bolum}"
+            + " left join public.kalem_kullanim hg"
+            + "   on hg.tur = 2 and hg.kayit_id = h.id and hg.bolum_id = 0",
+        KullanimSirala:
+            "(coalesce(public.fn_hizmet_puan(hk.puan, hk.son_tarih), 0)"
+            + " + 0.25 * coalesce(public.fn_hizmet_puan(hg.puan, hg.son_tarih), 0)) desc,"
+            + " h.ad asc",
         Kolonlar: new KolonTanimi[]
         {
             new("id",      "h.id",       "sayi",  "Id",         Varsayilan: false),
             new("kod",     "h.kod",      "metin", "Kod"),
+            // KISA AD (549, kullanici: "ad'in soluna Kisa Ad ekle, aramada
+            //   oncelik ona olsun"): katalog SKRS'den kuruldugu icin `ad`
+            //   resmi ve uzun; gunluk dilde kullanilan ad bu kolondur.
+            //   Resmi adin YERINE GECMEZ - fatura/rapor/e-Nabiz yine `ad`.
+            new("kisaAd",  "h.kisa_ad",  "metin", "Kısa Ad",    Genislik: 160),
             new("ad",      "h.ad",       "metin", "Hizmet Adi"),
             // Eski `grubu` kolonu hic kullanilmamis (hepsi 0) - yerine 269'da
             //   eklenen kategori gosteriliyor.

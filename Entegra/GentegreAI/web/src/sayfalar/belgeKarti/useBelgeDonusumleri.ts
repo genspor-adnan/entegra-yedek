@@ -51,7 +51,10 @@ export function useBelgeDonusumleri({ kayitliId, aktifSekme, setHata, setSonuc }
   }, [kayitliId]);
 
   useEffect(() => {
-    if (!kayitliId || aktifSekme !== 'fatura') return;
+    // TAHSILAT SEKMESI DE OKUR (kullanici): kurum tahakkuku tahsilat listesinin
+    //   ilk satiri olarak gosteriliyor - liste yalniz "fatura" sekmesinde
+    //   cekilirse orada bos kaliyordu.
+    if (!kayitliId || (aktifSekme !== 'fatura' && aktifSekme !== 'tahsilat')) return;
     void yukle();
   }, [kayitliId, aktifSekme, yukle]);
 

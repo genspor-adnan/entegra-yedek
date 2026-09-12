@@ -33,7 +33,7 @@ export const KOVALAR: KovaTanimi[] = [
   { kod: KOVA_OSS, alan: 'oss', ad: 'Sigorta', hedef: 'kurum' },
   { kod: KOVA_HASTA_PROVIZYON, alan: 'hastaProvizyon', ad: 'Hasta payı',
     hedef: 'hasta' },
-  { kod: KOVA_HASTA_EK_KATKI, alan: 'hastaEkKatki', ad: 'Hasta ek katkısı',
+  { kod: KOVA_HASTA_EK_KATKI, alan: 'hastaEkKatki', ad: 'Hasta katkısı',
     hedef: 'hasta' },
   { kod: KOVA_KATILIM, alan: 'sgkKatilimPayi', ad: 'SGK katılım payı',
     hedef: 'hasta', ciroDisi: true, not: 'ciro dışı · SGK emaneti' },
@@ -61,7 +61,7 @@ export const DONUSUM_KOVA_SIRASI = {
 /** Dönüşüm modalindeki "Dönüştürülecek Pay" seçenekleri (0 = tümü). */
 export const DONUSUM_PAY_SECENEKLERI = [
   { kod: KOVA_HASTA_PROVIZYON, ad: 'Hasta payı' },
-  { kod: KOVA_HASTA_EK_KATKI, ad: 'Hasta ek katkısı' },
+  { kod: KOVA_HASTA_EK_KATKI, ad: 'Hasta katkısı' },
   { kod: KOVA_OSS, ad: 'Sigorta / anlaşmalı kurum → kuruma faturalanır' },
   { kod: KOVA_SGK, ad: "SGK payı → SGK'ya tahakkuk" },
 ];
@@ -84,7 +84,13 @@ export function kovaKullanilir(rota: number, kod: number): boolean {
     return rota === ROTA_TSS || rota === ROTA_KARMA || rota === ROTA_SGK;
   if (kod === KOVA_OSS)
     return rota === ROTA_OSS || rota === ROTA_TSS || rota === ROTA_KARMA;
-  if (kod === KOVA_HASTA_PROVIZYON)
-    return rota === ROTA_OSS || rota === ROTA_KARMA;
-  return true;   // ek katkı her rotada olabilir
+  // HASTA PAYI YALNIZ ÖSS'DE (599, kullanıcı: "TSS'de + ile açılan detayda
+  //   hasta payı satırı olmasın"): TSS ve Karma'da tutarı provizyon belirler,
+  //   sigortanın onaylamadığı fark hastaya GEÇMEZ - kova her zaman 0 kalıyor
+  //   ve satır boşuna yer kaplıyordu.
+  if (kod === KOVA_HASTA_PROVIZYON) return rota === ROTA_OSS;
+  // EK KATKI (hastane farkı): Özel, TSS ve SGK. ÖSS/Karma'da yoktur (595).
+  if (kod === KOVA_HASTA_EK_KATKI)
+    return rota === ROTA_OZEL || rota === ROTA_TSS || rota === ROTA_SGK;
+  return true;
 }

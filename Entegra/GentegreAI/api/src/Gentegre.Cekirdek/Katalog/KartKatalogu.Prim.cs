@@ -101,10 +101,15 @@ public static partial class KartKatalogu
                     // KAPSAM = KAMPANYA SATIRIYLA AYNI UCLU (328): tip +
                     //   kalem turu + kapsam. Ayni ekran iki yerde tanidik olsun
                     //   diye ayni kod listeleri kullanilir.
-                    new("tip",       "tip",       "kod", Zorunlu: true,
-                        KodListesi: "kampanya.satir_tip", Baslik: "Tipi"),
+                    // SIRA (kullanici: "Tipi ve stok/hizmet yer degistir"):
+                    //   once KALEM TURU, sonra TIP. Okuma sirasi "neyin primi"
+                    //   (stok mu hizmet mi) -> "hangi kapsamda" (liste/kategori/
+                    //   urun) seklinde ilerliyor; kart ve grid ayni sirayi
+                    //   alanlarin tanimindan alir.
                     new("kalemTuru", "kalem_turu", "kod",
                         KodListesi: "kampanya.kalem_turu", Baslik: "Stok / Hizmet"),
+                    new("tip",       "tip",       "kod", Zorunlu: true,
+                        KodListesi: "kampanya.satir_tip", Baslik: "Tipi"),
                     // Liste satirinda bos; kategoride kategori id, urunde
                     //   stok/hizmet id. KodTablosu KATEGORI listesini tasir -
                     //   urun secimi arama penceresinden yapilir (binlerce kayit

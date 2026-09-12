@@ -74,7 +74,13 @@ public sealed record KartAlanMeta(
     /// Kart alanin etiketini tiklanabilir yapip listeyi oradan yonetir -
     /// markanin modelleri baska hicbir ekrandan girilemiyordu.
     /// </summary>
-    string? KodListesi = null);
+    string? KodListesi = null,
+    /// <summary>
+    /// ALAN BICIM KURALI (bugun "tckn"): arayuz ayni kurali ANLIK uygular,
+    /// kullanici kaydetmeyi beklemesin. Sunucu kuralin sahibi olmaya devam
+    /// eder - ekranin kontrolu kolaylik, gecerlilik degil.
+    /// </summary>
+    string? Dogrulama = null);
 
 /// <summary>
 /// Sayfali detayin sunucu tarafi suzgeci (526): arama metni, kategori dali ve

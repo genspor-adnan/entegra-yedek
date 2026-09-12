@@ -13,7 +13,8 @@ import { MUSTEHAKLIK } from './alanlar';
  * "son basvuru" uyarisi cizilir.
  */
 export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, acikBelge,
-                              kurumAdi, acikBorc, onAra, onYeniHasta }: {
+                              sysTakipNo, paylasimli,
+                              kurumAdi, acikBorc, taraflar, onAra, onYeniHasta }: {
   tarafId?: number | null;
   /** BELGENIN odeyen kurumu (kullanici): serit hastanin sigortasini degil,
       bu basvuruyu odeyecek kurumu gosterir - ikisi farkli olabilir. */
@@ -28,10 +29,32 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, acikBel
    * Sunucudan gelir (belge.acikBelgeTutari) - istemci toplamaz.
    */
   acikBelge?: number | null;
+  /**
+   * PAYLASIMLI KURUMDA (ÖSS/SGK) tutarlar TARAFA GORE ikiye ayrilir
+   * (kullanici): hastadan ve kurumdan. Verilmezse tek satirlik eski gorunum
+   * kalir - özel (ücretli) iste tek muhatap vardir.
+   */
+  taraflar?: {
+    tahsilat: { hasta: number; kurum: number };
+    belge: { hasta: number; kurum: number };
+  } | null;
   /** Belgenin SGK mustehaklik durumu (299) - sigortanin yanina rozet. */
   mustehaklik?: number | null;
   /** Belge numarasi - mockupta arama satirinin son alani. */
   protokolNo?: string;
+  /**
+   * USS SYS TAKIP NO (608): 101 gonderiminde doner, basvurunun e-Nabiz
+   * kimligidir. Hasta ADININ ALTINDA gosterilir - memur basvurunun USS'ye
+   * islenip islenmedigini kart acilir acilmaz gorsun. Bos ise satir cizilmez:
+   * "henuz gonderilmedi" bilgisini bos bir etiketle degil, YOKLUGUYLA verir.
+   */
+  sysTakipNo?: string;
+  /**
+   * ÖDEYEN KURUM PAYLASIMLI MI (ÖSS / SGK). Serit hucresi buna gore degisir:
+   * ozel iste hastanin tek kimligi DOSYA NO'dur; ÖSS/SGK'da basvurunun bir de
+   * USS kimligi (SYS Takip No) vardir ve memur ikisini birlikte gorur.
+   */
+  paylasimli?: boolean;
   kilitli?: boolean;
   /** Arama penceresini acar; kutulara yazilan metin ON-DOLGU olarak gecer. */
   onAra?(metin: string): void;
@@ -155,9 +178,24 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, acikBel
         <span className="k">Hasta</span>
         <span className="v">{ad || '—'}</span>
       </span>
+      {/* KIMLIK HUCRESI ODEYENE GORE (608, kullanici): ozel iste hastanin
+          serit karsiligi DOSYA NO'dur; ÖSS/SGK'da basvurunun bir de USS
+          kimligi vardir (SYS Takip No) ve ikisi birlikte okunur. T.C. serit
+          disina alindi: hasta zaten secilmis durumda, numara arama satirinda
+          ve kimlik sekmesinde duruyor - bantta yer kapliyordu. */}
       <span className="hs">
-        <span className="k">T.C. / Dosya No</span>
-        <span className="v">{String(h?.vkno ?? '—')} · {String(h?.kod ?? '—')}</span>
+        <span className="k">
+          {paylasimli ? 'Dosya No / SYS Takip No' : 'Dosya No'}
+        </span>
+        {/* TEK SATIR, "/" ile (kullanici): "1111/Gönderilmedi". Alt alta
+            yazmak seridi uzatiyordu; iki numara ayni kimligin iki yuzu. */}
+        <span className="v" title={paylasimli
+          ? 'Dosya No / e-Nabız SYS Takip No (başvurunun USS kimliği)'
+          : undefined}>
+          {paylasimli
+            ? `${String(h?.kod ?? '—')}/${sysTakipNo || 'Gönderilmedi'}`
+            : String(h?.kod ?? '—')}
+        </span>
       </span>
       <span className="hs">
         <span className="k">Doğum / Cinsiyet</span>
@@ -189,6 +227,26 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, acikBel
           (ucretlendirme genel toplami - tahsilat, kullanici) ve ucret/tahsilat
           girildikce ANINDA degisir; disaridan gelmezse hastanin genel acik
           bakiyesine duser. */}
+      {taraflar ? (
+        /* PAYLASIMLI KURUM (kullanici): "hastadan" ve "kurumdan" ayri satir -
+           memur kimden ne isteyecegini tek bakista gorsun. Ikon satirin
+           SOLUNDA: kisi / kurum. */
+        <span className="hs sag ikili-taraf">
+          <span className="k">Açık Tahsilat</span>
+          <span className="taraf-satir">
+            <span className="ikon" title="Hastadan">👤</span>
+            <span className={`v ${taraflar.tahsilat.hasta > 0 ? 'teh' : 'olumlu'}`}>
+              {para.format(taraflar.tahsilat.hasta)} ₺
+            </span>
+          </span>
+          <span className="taraf-satir">
+            <span className="ikon" title="Kurumdan">🏛️</span>
+            <span className={`v ${taraflar.tahsilat.kurum > 0 ? 'teh' : 'olumlu'}`}>
+              {para.format(taraflar.tahsilat.kurum)} ₺
+            </span>
+          </span>
+        </span>
+      ) : (
       <span className="hs sag">
         {/* Isaret hucrenin ADINI da degistirir (kullanici): ucret > tahsilat
             ise KIRMIZI "Açık Tahsilat", tahsilat > ucret ise YESIL "Alacaklı"
@@ -198,10 +256,27 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, acikBel
           {para.format(Math.abs(borc))} ₺
         </span>
       </span>
+      )}
       {/* ACIK BELGE, acik tahsilatin yaninda (kullanici): "belge kesilmedi"
           rozeti yalniz evet/hayir diyordu - burada KALAN TUTAR yazar, sifirsa
           belge tamamen kesilmis demektir. */}
-      {acikBelge != null && (
+      {taraflar ? (
+        <span className="hs sag ikili-taraf">
+          <span className="k">Açık Belge</span>
+          <span className="taraf-satir">
+            <span className="ikon" title="Hastaya kesilecek">👤</span>
+            <span className={`v ${taraflar.belge.hasta > 0 ? 'teh' : 'olumlu'}`}>
+              {para.format(taraflar.belge.hasta)} ₺
+            </span>
+          </span>
+          <span className="taraf-satir">
+            <span className="ikon" title="Kuruma kesilecek">🏛️</span>
+            <span className={`v ${taraflar.belge.kurum > 0 ? 'teh' : 'olumlu'}`}>
+              {para.format(taraflar.belge.kurum)} ₺
+            </span>
+          </span>
+        </span>
+      ) : acikBelge != null && (
         <span className="hs sag">
           <span className="k">Açık Belge</span>
           <span className={`v ${Number(acikBelge) > 0 ? 'teh' : 'olumlu'}`}>

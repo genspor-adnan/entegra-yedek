@@ -69,6 +69,10 @@ function eskiBaslik(b: Belge, yerelPara: string) {
 /** Kartin ESKI basvuru/provizyon cevrimi - degistirilmeden korunuyor. */
 function eskiBasvuru(b: Belge) {
   return {
+    // SYS TAKIP NO (608): sunucudan gelen yeni alan - basvurunun e-Nabiz
+    //   kimligi. Referans cevrim de tasimali, yoksa test "eski kodla ayni
+    //   degil" der ve eklenen her mesru alan burayi kirar.
+    sysTakipNo: String(b.sysTakipNo ?? ''),
     basvuruTuru: b.basvuruTuru != null ? Number(b.basvuruTuru) : null,
     gelisSekli: b.gelisSekli != null ? Number(b.gelisSekli) : null,
     gelisNedeni: b.gelisNedeni != null ? Number(b.gelisNedeni) : null,
@@ -77,6 +81,17 @@ function eskiBasvuru(b: Belge) {
     refakatci: String(b.refakatci ?? ''),
     ambulansHastaNo: String(b.ambulansHastaNo ?? ''),
     ambulansBileklikNo: String(b.ambulansBileklikNo ?? ''),
+    // SOZLESME / ALT KURUM / SGK KATKISI: referans kopya BILEREK guncellendi
+    //   (kullanici: "sözleşme kaydolmuyor"). Alanlar yaziliyordu ama yanitta
+    //   donmuyor, dolayisiyla cevrimde de yoktu; kart her acilista secimi
+    //   kaybediyordu. Fixture bu alanlari tasimadigi icin degerler bos gelir -
+    //   okuma kurali ayrica asagida test edilir.
+    sozlesmeId: b.sozlesmeId != null ? Number(b.sozlesmeId) : null,
+    altKurum: b.altKurum != null ? Number(b.altKurum) : null,
+    sgkKullan: b.sgkKullan != null ? Number(b.sgkKullan) : 1,
+    // EMEKLI (590): referans kopya BILEREK guncellendi - SGK katilim payi
+    //   muafiyeti basvurunun bilgisidir ve karta geri okunmali.
+    emekli: b.emekli != null ? Number(b.emekli) : 0,
     // 370'te EKLENEN alan: "Kendi İsteği" isareti. Referans kopya BILEREK
     //   guncellendi - bu dosyanin isi "cevrim degismedi mi" degil, "cevrim
     //   YANLISLIKLA degismedi mi". Yeni bir alan eklendiginde buraya da
@@ -167,6 +182,20 @@ describe('gercek yanitin kart icin onemli kurallari', () => {
     expect(p.ossDurum).toBe(0);
     expect(p.sgkTakipNo).toBe('');
     expect(p.sgkProvizyonTarihi).toBeNull();
+  });
+
+  it('SOZLESME / ALT KURUM / SGK KATKISI geri okunur', () => {
+    // Kayitli basvuruda police secimi karta DONMELI: donmezse combo bos gelir,
+    //   bir sonraki kayitta bos gider ve sunucu "Kurumun N sözleşmesi var -
+    //   hangisinin geçerli olduğunu seçin" ile reddeder.
+    const x = yanittanBasvuruBilgi({ ...b, sozlesmeId: 2, altKurum: 201, sgkKullan: 0 });
+    expect(x.sozlesmeId).toBe(2);
+    expect(x.altKurum).toBe(201);
+    expect(x.sgkKullan).toBe(0);
+    // Alan hic gelmezse: police bos, SGK katkisi VARSAYILAN 1.
+    const y = yanittanBasvuruBilgi(b);
+    expect(y.sozlesmeId).toBeNull();
+    expect(y.sgkKullan).toBe(1);
   });
 
   it('doviz TL gelir - yerel paraya DUSMEZ (alan dolu)', () => {

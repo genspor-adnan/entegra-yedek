@@ -100,13 +100,19 @@ public class DagilimTestleri : IClassFixture<VeritabaniOlgusu>
         if (!_olgu.Baglandi(nameof(DagilimTestleri))) return;
         var veri = _olgu.Gerekli();
 
-        // Excel: TTB 4200, SGK 500, sigorta 2500 → hastaya 1200, katılım 100.
+        // TTB 4200, SGK 500, sigorta provizyonu 2500.
+        //
+        // TUTARI PROVIZYON BELIRLER (599, kullanici: "Karma'da hasta sadece
+        //   100 TL SGK katılım öder, onun dışında katkı ödemez"): satir
+        //   500 + 2500 = 3000 yazilir. Tarife 4200 olsa da ARADAKI FARK
+        //   HASTAYA GECMEZ - hastanin tek odedigi katilim payidir (ciro disi,
+        //   tutara girmez). Eskiden fark hasta provizyonuna (1200) yaziliyordu.
         var d = await DagitAsync(veri, 4, 0m, sgkListe: 500m, huvListe: 4200m,
                                  sgkKatilim: 100m, ossProv: 2500m);
-        Assert.Equal(4200m, d!.Tutar);
+        Assert.Equal(3000m, d!.Tutar);
         Assert.Equal(500m, d.Sgk);
         Assert.Equal(2500m, d.Oss);
-        Assert.Equal(1200m, d.HastaProvizyon);
+        Assert.Equal(0m, d.HastaProvizyon);
         Assert.Equal(100m, d.Katilim);
         Assert.Equal(d.Tutar, d.Sgk + d.Oss + d.HastaProvizyon + d.HastaEkKatki);
     }

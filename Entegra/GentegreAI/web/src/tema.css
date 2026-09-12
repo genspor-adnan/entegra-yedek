@@ -98,6 +98,21 @@ input, select { font: inherit; color: inherit }
 }
 .ara-kutu.dar { max-width: 225px }
 .ara-kutu.genis { max-width: 320px }
+/* Stok/hizmet arama penceresi (kullanici: "arama butonu %50 daha genislet"):
+   kalem adlari uzun ("BIRINCI BASAMAKTAN SEVK HALINDE POLIKLINIK MUAYENESI");
+   yazilan metnin basi 260px kutuda kayip gidiyordu. */
+/* GENISLIK ACIKCA VERILIR: `.ara-kutu` flex-grow tasimiyor, serit icinde
+   ICERIGI kadar yer kapliyor - yalniz `max-width` buyutmek hicbir sey
+   degistirmiyordu (kullanici: "arama butonu aynı duruyor genişlememiş"). */
+.ara-kutu.cok-genis { width: min(370px, 100%); max-width: 370px; flex: 0 0 auto }
+
+/* HASTA SERIDINDE TARAF AYRIMI: paylasimli kurumda (ÖSS/SGK) acik tahsilat ve
+   acik belge iki satir - ikon solda (kisi / kurum), tutar saginda. */
+.hs.ikili-taraf .taraf-satir {
+  display: flex; align-items: center; gap: 6px; justify-content: flex-end;
+}
+.hs.ikili-taraf .taraf-satir .ikon { font-size: 12px; line-height: 1; opacity: .75 }
+.hs.ikili-taraf .taraf-satir .v { font-size: 12.5px }
 /* Panel basliginin altinda duran arama (rol kullanicilari). */
 .ara-kutu.alt-bosluk { margin-bottom: 8px }
 /* Detay tablo baslik seridinde METIN AKISI icinde durur. */
@@ -411,6 +426,13 @@ table.grid tr.flt input {
   font-size: 12.5px; font-weight: 600;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+/* SERIT ALT NOTU (608): degerin altinda kucuk, sonuk ikinci satir -
+   e-Nabiz takip numarasi gibi "varsa iyi" bilgiler icin. Etiket/deger
+   hiyerarsisini bozmaz: deger kalin ve ustte kalir. */
+.hasta-serit .hs .alt-not {
+  font-size: 10.5px; color: var(--sonuk, #6b7a8d); font-weight: 400;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 /* Acik borc seridin SAG ucunda (mockup). */
 .hasta-serit .hs.sag { text-align: right }
 .hasta-serit .hs .v .rozet { margin-left: 6px }
@@ -431,6 +453,17 @@ table.grid tr.flt input {
 }
 /* Cari/stok gibi cok alanli kartlar icin genis varyant. */
 .kawin.genis { width: min(1080px, 96vw) }
+/* STOK / HIZMET ARAMA PENCERESI: govde SABIT yukseklikte - arama sonucunun
+   satir sayisi her tusta degistigi icin pencere buyuyup kuculuyor ve
+   kirpisiyordu (kullanici: "göz kırpması gibi"). Liste kendi icinde kayar. */
+/* `height` DEGIL `min-height`: govde `flex: 1` oldugu icin yukseklik ana
+   eksende flex algoritmasina gecer ve `height` yok sayilir - taban ancak
+   `min-height` ile tutulur. Sonuc bosaldiginda ("eşleşme yok") pencere
+   836px'ten 259px'e dusup bir sonraki harfte geri aciliyordu; kullanicinin
+   gordugu goz kirpmasi buydu. */
+.kawin.stok-arama .kagov { flex: 0 0 min(620px, 74vh) }
+/* Arama surerken kucuk not - listeyi ORTMEZ (bkz. `.yukleniyor` perdesi). */
+.arama-bekliyor { font-size: 11.5px; color: var(--soluk); white-space: nowrap }
 /* TAM EKRAN (kullanici): cok sekmeli kartta grid ve takvim 1080px'e sigmiyor,
    kullanici yatay kaydirmak zorunda kaliyordu. Ortalama transform'u kalkar -
    pencere ekrana OTURUR; koseleri yuvarlak kalir ki modal oldugu belli olsun. */
@@ -749,6 +782,13 @@ table.grid tr.flt input {
 /* Ayar kartlari (tek sutun, ör. Depo): onay kutulari sola yapismasin, ustteki
    editlerin basladigi hizada dursun - 84px etiket kolonu + 8px bosluk. */
 .alan-izgara.ayar-formu .alan.tip-mantik { padding-left: 92px }
+/* SGK katilim payi satiri (kullanici): TUTAR solda dar, SUT KODLARI sagda
+   genis - ikisi tek kararin iki parcasi, yan yana okunur. Dar ekranda alt
+   alta duser. */
+.alan-izgara.katilim-payi-satiri { grid-template-columns: minmax(240px, 1fr) minmax(320px, 2fr) }
+@media (max-width: 900px) {
+  .alan-izgara.katilim-payi-satiri { grid-template-columns: 1fr }
+}
 .alan-hata { color: var(--hata); font-size: 11px }
 /* LOT DETAYI (master-detail): izlemli urunun / deponun altinda lotlari.
    Ok BELIRGIN olmali - kullanici acilir satiri fark etmiyordu: kutulu, mavi,
@@ -3123,6 +3163,12 @@ input.skt-gecmis {
    kaliyordu. */
 .kawin.mesaj-pencere { width: min(400px, 92vw) }
 
+/* TOPLU DEGER PENCERELERI (Çarpan · Katkı · Fiyat Güncelle): arac cubugunda
+   UC kapsam dugmesi + Kapat var ve 400 px'e sigmiyorlardi (kullanici:
+   "butonlar sigmiyor %20 genislet"). Mesaj penceresinin kendisi DAR kalir -
+   tek cumlelik uyarilar icin dogru olan oydu; yalniz bu ucu genisler. */
+.kawin.mesaj-pencere.toplu-pencere { width: min(480px, 94vw) }
+
 /* Mesaj govdesi cerceveisiz ve dar (543): pencere iki cumleye gore boy alsin. */
 .kawin.mesaj-pencere .kagov { padding: 12px 14px }
 .mesaj-govde { font-size: 12px }
@@ -3159,3 +3205,15 @@ input.skt-gecmis {
    alaninin etiketi tiklanir - ayar ekranlarindaki desenin kart karsiligi. */
 .alan .etiket-liste { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px }
 .alan .etiket-liste:hover { color: var(--mor) }
+
+/* GRID AGACI (kullanici: "+ gibi alt dallar acilir yap"). Dugme AYRI SUTUN
+   DEGIL, ilk hucrenin icinde: kolon duzeni her listede ayni kalsin. */
+.agac-hucre { display: inline-flex; align-items: center; gap: 5px; min-width: 0 }
+.agac-dugme {
+  width: 15px; height: 15px; line-height: 13px; flex: none;
+  border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz2);
+  color: var(--yazi); font-size: 12px; font-weight: 700; cursor: pointer; padding: 0;
+}
+.agac-dugme:hover { border-color: var(--mor); color: var(--mor) }
+/* Cocugu olmayan satir da ayni hizada bassin - metinler kaymasin. */
+.agac-bosluk { width: 15px; flex: none }

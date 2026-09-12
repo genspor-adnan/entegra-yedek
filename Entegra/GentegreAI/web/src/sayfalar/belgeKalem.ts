@@ -170,7 +170,13 @@ export function kampanyaFiyatiUygula(satir: SatirDurumu, f: KalemFiyati): SatirD
     kampanyaSatirId: y.kampanyaSatirId ?? satir.kampanyaSatirId,
     // Katilim payi fiyatla BIRLIKTE gelir (291): SGK modunda sunucu bundan
     //   paylastirir, oran modunda alan yok sayilir.
-    katkiTutar: f.katki != null && f.katki > 0 ? String(f.katki) : satir.katkiTutar,
+    //
+    // KDV DAHIL LISTEDE KATKI DA BRUTTUR (591, kullanici: "hasta katkı 750
+    //   KDV dahildi, sen tekrar KDV eklemişsin"): birim fiyat matraha
+    //   cevriliyordu, katki cevrilmiyordu - 750 TL dahil katki satira matrah
+    //   yazilip %10 KDV eklenince 825 TL oluyordu.
+    katkiTutar: f.katki != null && f.katki > 0
+      ? String(matraha(f.katki, kdvOrani)) : satir.katkiTutar,
   };
 }
 

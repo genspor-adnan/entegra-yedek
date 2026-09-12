@@ -8286,3 +8286,148 @@ sigortaya faturalanır.
 - Ekran: `KURUM_TSS = 3`, `KURUM_SGK = 4`. TSS başvuru akışı SGK ile aynı
   (provizyon ücretten sonra), başvuru sekmesinde **hem MEDULA hem özel sigorta
   grubu** açık - farkı üstlenen poliçe orada. Testine ayrı vaka eklendi (461).
+
+---
+
+## 12.09.2026 — SGK ücretlendirmesi: SUT fiyatı değişmez (`db/601-604`)
+
+SGK hastasında ücret satırı **özel** fiyatla açılıyordu. Kök sebep sözleşmede:
+SGK sözleşmesinin SUT listesi bağı yoktu, `fn_belge_varsayilan_liste` de saf
+SGK için bir dal taşımıyordu.
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K— | **SGK'da birim fiyat ve katkı DEĞİŞMEZ** (kullanıcı) | SUT bedeli devletin ilan ettiği fiyattır; iskonto uygulanabilir ama **yalnız katkıya** |
+| K— | SUT listesi sözleşmede **zorunlu** (`tg_kurum_sozlesme_kontrol`) | Listesi olmayan SGK sözleşmesi, sessizce özel fiyata düşen bir sözleşmedir |
+
+- **`db/601`** SUT listesini SGK sözleşmesine bağladı, `fn_belge_varsayilan_liste`
+  içine "saf SGK → SUT listesi" dalını ekledi.
+- **`db/602`** SUT çarpanını koşulsuz `p_miktar` yaptı. Eski kod katkı listeden
+  geldiğinde iskontolu çarpanı açık bırakıyor, **iskonto SUT bedelini
+  düşürüyordu** - tebliğ fiyatını iskontolamak.
+- **`db/603`** ölü `fn_fiyat_listesi_ek_katki` kaldırıldı (539'dan beri 0
+  dönüyordu). **`db/604`** `fiyat_listesi.aciklama` varsayılanı - 46 test bu
+  yüzden düşüyordu.
+
+Ekranda: SGK'da birim fiyat ve katkı **salt okunur**, grid ve fiyat penceresi
+SUT bedelini ayrı sütunda gösteriyor, iskonto sonrası birim fiyat önizlemede.
+Hasta payı hatası da düzeldi - **katılım payı brütleştirilmez** (593: sabit
+emanet, ciro dışı), matrah farkı da parça parça brütleştirilip çıkarılıyor.
+
+---
+
+## 12-13.09.2026 — Kod listeleri SKRS'nin kendisi oldu (`db/605-624`)
+
+e-Nabız'a canlı paket göndermek için başlanan iş, **bütün HBYS kod
+listelerinin SKRS'ye uydurulmasıyla** sonuçlandı.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K— | **Kod listelerinin İÇERİĞİ SKRS'dir** - çeviri katmanı yok | `enabiz_kod_esleme` üzerinden çevirmek iki hataya açıktı: eşlenmemiş değer sessizce boş gidiyor, elle yazılan ad SKRS'deki addan ayrışıyordu (çıkış şekli 1 yerelde "Şifa ile", SKRS'de "TEDAVİ ÖNERİLERİYLE ÇIKIŞ") |
+| K— | Eşlemesi olmayan alan **boş gider, uydurulmaz** | Yanlış kod boş koddan kötüdür: biri reddedilir, öteki sessizce yanlış veri olur. Gerçek vaka: koşulsuz `limit 1` erkek hastaya "15-49 KADIN HASTALAR" yazmıştı |
+| K— | `departman.kod` = SKRS **KLİNİKLER** kodu, ayrı kolon yok (kullanıcı) | Bir kod iki yerde tutulmaz |
+
+### SKRS servisi
+
+Kod listeleri **mevcut e-Nabız kimliğiyle** çekiliyor, ayrı yetki gerekmedi:
+
+```
+GET https://skrs.saglik.gov.tr/api/SkrsService/GetSkrsObject
+    ?skrsCodeSystemGuid={guid}&page={n}
+Başlıklar: KullaniciAdi, Sifre, UygulamaKodu (KTS kodu)
+```
+
+**`db/609`** 17 listeyi (6.426 kod değeri) yükledi: cinsiyet, medeni hal, kan
+grubu, çıkış şekli, vaka türü, yabancı hasta türü, klinikler (240), personel
+branş (106), ülke (236), hasta kayıt tipi, sosyal güvence, triaj, yatış
+aciliyeti, sevk nedeni, **meslek (5.461)**, reçete türü. Kart kataloğundaki
+elle yazılmış listeler de bunlara bağlandı - `CinsiyetKodlari` 2 satırdı
+(SKRS'de 4), `HastaMeslekKodlari` 7 satırdı (SKRS'de 5.461).
+
+**`db/610/613/618`** okumayı tek yere indirdi: `fn_skrs_kod` / `fn_skrs_ad` /
+`fn_skrs_hedef_ad` / `fn_skrs_guid`. `codeSystemGuid` artık liste kaydından
+geliyor, SQL'e gömülü sabitten değil - üreticideki çıkış şekli GUID'i
+SKRS'dekiyle uyuşmuyordu, öyle yakalandı. *(618: `fn_skrs_kod` 503'te `text`,
+610'da `varchar` imzasıyla iki kez tanımlanmıştı; hangisinin çalışacağı
+çözücünün keyfineydi ve davranışları farklıydı.)*
+
+**`db/614/615/617`**: uyruk ve meslek serbest metinden kod alanına döndü, büyük
+listeler için lookup görünümleri, `ulke.skrs_kod` dolduruldu.
+
+### Branş / klinik karışıklığı (`db/611/616/619/622`)
+
+`departman.kod` içindeki değerler SKRS'nin **KLİNİKLER** değil **PERSONEL BRANŞ**
+listesinden geliyordu. Aynı sayı iki listede başka şey: "Acil" bölümünün kodu
+102, KLİNİKLER'de 102 = **ADLI TIP**. Yani her paket yanlış kliniği
+bildiriyordu. 619 kodları düzeltti, karşılığı bulunamayanları **boşalttı**
+(eski değerler `_yedek_departman_kod_619`), 622 yazım farkı yüzünden
+eşleşmeyen 23'ünü daha kodladı. Kalan 29'un 25'i klinik değil (Arşiv,
+Güvenlik, grup başlıkları); 4'ünün kodunu başka bölüm kullanıyor.
+
+### USS'nin şema kuralları - deneyerek çıkarıldı
+
+Kılavuz yetmedi; kuralları **canlı servis** öğretti (hepsi
+`dokuman/09_ENABIZ_USS_SEMASI.md`):
+
+- **SKRS kodlu eleman ya geçerli kodla gelir ya HİÇ GELMEZ.** Kodsuz yazılırsa
+  `E1011 ... Guid degeri gecerli degil`, guid'li ama kodsuz yazılırsa `E1008
+  Code '' ... tanimlama bulunmuyor`, hiç yazılmazsa **kabul**.
+- **"Zorunlu değil" ≠ "olmayabilir".** Kılavuzda "Hayır" işaretli alanlar
+  eksik olunca `E1016`. Alan **boş gidebilir, eksik gidemez**.
+- **Grup opsiyonel, ama açıldıysa içi tam olmalı.** `ISLEM_HEKIM_BILGISI`
+  açılınca `PUAN_HAKEDIS_ZAMANI` de istendi; hiç açılmayan `GEN_ISLEM_BILGISI`
+  sorulmadı.
+- **UYRUK MERNİS kodu ister**, ISO harf kodunu değil: `TR` → `E1008`,
+  `9980` → kabul.
+- **`E2033` hata değil**, "bu kayıt zaten bende"dir - mevcut SYSTakipNo'yu
+  cevabın **metninde** verir.
+- **HASTA_TIPI** SKRS'nin klinik "HASTA TİPİ"si değil **GP_HASTA_TIPI**'dir
+  (vatandaş / yabancı / vatansız / yenidoğan / kimliksiz) ve hasta kartından
+  kesin türetilir (`db/610`).
+
+### Canlı gönderim
+
+**101 → 102 → 301 zinciri canlıda çalıştı** (`test_mi = 0`, tesis 500154):
+hasta kaydı gönderildi, işlem bildirimi gönderildi, kayıt 301 ile silindi.
+
+**`db/623`** 102 paketini kurdu - hizmet / ilaç / malzeme bildirimi. Kalem
+başına bir `ISLEM_BILGISI`; `ISLEM_KODU` hizmette SUT kodu, ilaçta barkod,
+malzemede stok kodu; `HASTA_TUTARI` / `KURUM_TUTARI` dağılımdan (kılavuz
+ikisini özel ve üniversite hastanelerinden istiyor). Paket **101 gittikten
+sonra** doğar - ilk zorunlu alanı SYSTakipNo'dur.
+
+Tekrarlı grup için gövde yazıcısı değişti: yol `ISLEM_BILGISI[n]/...` indeksi
+taşır, indeks XML'e yazılmaz. Yazıcı ara düğümleri adına göre birleştirdiği
+için, indeks olmasa bütün kalemler tek grubun içine yığılır ve USS tek işlem
+görürdü. `db/624` alan yolunu 200 karaktere genişletti.
+
+### Yol boyunca çıkan kendi hatalarımız
+
+- **`uss_kod` 20 karakterdi** (`db/620`): başarılı gönderimde oraya SYS takip
+  numarası yazılıyor ve o **21 karakter** olabiliyor. Paket USS'ye gitti, kayıt
+  oluştu, ama günlük satırı `22001` ile düştü ve **istek 400 verdi**: paket
+  "gönderiliyor"da asılı kaldı, numara kaydedilmedi. Sıra tersine çevrildi -
+  **önce paket sonucu yazılır, günlük sonra ve hatası yutularak**. Günlük bir
+  izdir; izi tutamamak olmuş bir gönderimi olmamış saymaz. (Kaybolan numarayı
+  ikinci gönderimde `E2033` geri verdi.)
+- **Üretim zamanı ve SYS takip numarası içerik parmak izine giriyordu**: her
+  kaydette yeni paket doğuyordu. İkincisi kendini besleyen bir döngüydü - 101
+  gidiyor, numara başvuruya yazılıyor, kart kaydedilince paket artık numarayı
+  taşıyor, "içerik değişti" sayılıp ikinci 101 açılıyor. İkisi de hash dışında:
+  parmak izi **hastanın verisini** tanımlamalı.
+- **301 sonrası temizlik yoktu**: silme gidince başvurunun takip numarası ve
+  kaynak 101'in "gönderildi" durumu kalıyordu. Numara USS'de karşılığı olmayan
+  bir kimlik; sonraki 103/106 paketleri onunla reddedilirdi.
+- **102, kaydetme anında üretiliyordu** ve o an takip numarası henüz yok -
+  pratikte hiç doğmuyordu. Artık 101'in başarı dalında üretiliyor.
+
+**`db/612`** vaka türü boş kalamaz (USS zorunlu); geliş nedeni seçilmemişse
+SKRS'nin kendi kodu olan **NORMAL**'e düşer.
+
+### Kalanlar
+
+- 29 departmanın klinik kodu yok (25'i klinik değil, 4'ü kod çakışması)
+- `enabiz.gonder` zamanlı işi **pasif** - gönderim elle
+- Göçler **601-624 yalnız docker'da**, bulut ekspert'e uygulanmadı

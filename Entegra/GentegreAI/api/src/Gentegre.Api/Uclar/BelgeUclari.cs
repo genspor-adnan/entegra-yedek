@@ -32,6 +32,8 @@ public static class BelgeUclari
             var (id, uyarilar) = await depo.KaydetAsync(belge, satirlar, istek.Secenekler,
                 baglam.Yazma, iptal);
 
+            await Enabiz101UretAsync(ctx, id, baglam.KullaniciId, iptal);
+
             var kayit = await depo.OkuAsync(id, iptal)
                         ?? throw GentegreHatasi.Bulunamadi();
 
@@ -44,6 +46,68 @@ public static class BelgeUclari
                 IzlemeNo = baglam.IzlemeNo
             });
         });
+
+        // ----------------------------------------------- e-Nabiz 101 ----
+        // BASVURU KAYDEDILINCE 101 URETILIR (602).
+        //
+        // Kilavuz acik: "Bu paket, hasta KAYDI YAPILDIGINDA ... gonderilecektir."
+        //   Paket bugune kadar yalniz MUAYENEYE ALINIRKEN uretiliyordu; gerekce
+        //   "kayit kabulde hekim/klinik henuz kesin degil" idi. Gerekce
+        //   gecersiz: 101'in 18 zorunlu alani arasinda HEKIM YOK, KLINIK_KODU
+        //   ise basvurunun kendi bolumunden gelir ve kayit sirasinda seciliyor.
+        //   Muayeneye alinmayan basvuru (kayit yaptirip gitmis hasta) USS'ye
+        //   hic bildirilmiyordu.
+        //
+        // Muayeneye alma tetigi YERINDE KALIR: orada paket yeniden uretilir,
+        //   "ayni icerik -> ayni paket" kurali mukerrer satir acmaz; kayitta
+        //   eksik kalan alan (henuz girilmemis bolum gibi) o an tamamlanir.
+        //
+        // SESSIZ: paket uretimi belge kaydini DUSURMEZ - e-Nabiz ikincil bir
+        //   is, hasta kaydi birincil. Hata yalnizca gunluge yazilir.
+        static async Task Enabiz101UretAsync(HttpContext ctx, int belgeId,
+                                             int kullaniciId, CancellationToken iptal)
+        {
+            try
+            {
+                var uretici = ctx.RequestServices
+                                 .GetService<Servisler.EnabizPaketUretici>();
+                if (uretici is null) return;
+
+                // YALNIZ BASVURU (tur 19): oteki belge turlerinin USS karsiligi yok.
+                var veri = ctx.RequestServices.GetRequiredService<VeriKaynagi>();
+                var basvuruMu = await veri.TekDegerAsync<int>(
+                    "select count(*) from public.belge b " +
+                    " join public.belge_basvuru bb on bb.id = b.id " +
+                    " where b.id = @p0 and b.tur = 19", [belgeId], iptal);
+                if (basvuruMu == 0) return;
+
+                await uretici.UretAsync("HASTA_KABUL", belgeId, kullaniciId, iptal);
+
+                // 102 ISLEM PAKETI: 101 GITTIKTEN SONRA (623).
+                //
+                // Kilavuz 102'nin ilk zorunlu alani SYSTakipNo'dur - yani
+                //   islem bildirimi, hasta kaydinin USS'de olmasina baglidir.
+                //   Takip numarasi yoksa paket uretmek, kuyruga dogusundan
+                //   olu bir satir birakmak olurdu: gonderilse "E1004
+                //   SYSTakipNo bos olamaz" ile geri donerdi.
+                //
+                // Numara geldikten sonraki ilk kaydette paket dogar; kalem
+                //   eklendikce icerik degisir ve yeni paket uretilir (ayni
+                //   icerik -> ayni paket kurali mukerrer satir acmaz).
+                var takipVar = await veri.TekDegerAsync<int>(
+                    "select count(*) from public.belge_basvuru bb " +
+                    " where bb.id = @p0 and coalesce(bb.sys_takip_no, '') <> ''",
+                    [belgeId], iptal);
+                if (takipVar > 0)
+                    await uretici.UretAsync("HASTA_ISLEM", belgeId, kullaniciId, iptal);
+            }
+            catch (Exception h)
+            {
+                ctx.RequestServices.GetRequiredService<ILoggerFactory>()
+                   .CreateLogger("enabiz").LogError(h,
+                       "e-Nabiz 101 paketi uretilemedi (basvuru {Id})", belgeId);
+            }
+        }
 
         // ------------------------------------------- basvuru suzgecleri ----
         // GET /api/belge/basvuru-suzgec?bas=&bit=
@@ -173,6 +237,11 @@ public static class BelgeUclari
                 istek.Secenekler, baglam.Yazma,
                 iptal);
 
+            // GUNCELLEMEDE DE (602): basvurunun bolumu/kurumu sonradan
+            //   girilmis olabilir - paket o an tamamlanir. "Ayni icerik ->
+            //   ayni paket" kurali mukerrer satir acmaz.
+            await Enabiz101UretAsync(ctx, belgeId, baglam.KullaniciId, iptal);
+
             var kayit = await depo.OkuAsync(belgeId, iptal) ?? throw GentegreHatasi.Bulunamadi();
             return Results.Ok(new BelgeYaniti
             {
@@ -232,7 +301,10 @@ public static class BelgeUclari
             {
                 prov.TryGetValue(satirId, out var p);
                 await veri.CalistirAsync(
-                    "select public.fn_belge_satir_dagilim_tazele(@p0, @p1, @p2, @p3, @p4)",
+                    // Katki (6. parametre) BURADA GECILMEZ: provizyon
+                    //   tazelemesi hasta katilim payini degistirmez - elle
+                    //   girilmisse bayragiyla korunur (586).
+                    "select public.fn_belge_satir_dagilim_tazele(@p0, @p1, @p2, @p3, @p4, null)",
                     [satirId, p?.Tutar, istek?.OssProvizyon,
                      p?.SgkListe, p?.HuvListe], iptal);
                 if (p?.ProvizyonNo is { Length: > 0 } no)
@@ -250,6 +322,66 @@ public static class BelgeUclari
             return Results.Ok(new { id, satir = satirlar.Count,
                 mesaj = $"{satirlar.Count} satırın ödeme dağılımı yenilendi.",
                 izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/belge/dagilim-onizleme - KAYDEDILMEMIS satirin dagilimi.
+        //
+        // Kullanici: "kaydetmeden ucret satirinin sagindaki + detay butonu
+        //   gelmiyor, oysa ben ekledigimde hemen detay ne diye gormek
+        //   istiyorum." Kovalar `belge_satir_dagilim`de yasiyor ve ancak
+        //   kayitla doguyordu; gride yeni eklenen satirda dagilim yoktu.
+        //
+        // HESAP AYNI YERDE (594): uc, saf `fn_dagilim_coz`u cagiran
+        //   `fn_dagilim_onizle`ye gider - kayitli satirin gectigi fonksiyonun
+        //   ta kendisi. Bu yuzden onizlemede gorulen rakam, kaydedince
+        //   degismez. Hicbir sey YAZILMAZ.
+        grup.MapPost("/dagilim-onizleme", async (
+            DagilimOnizlemeIstegi? istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Gor);
+
+            var satirlar = istek?.Satirlar ?? [];
+            if (satirlar.Count == 0)
+                return Results.Ok(new { satirlar = Array.Empty<object>(), izlemeNo = baglam.IzlemeNo });
+
+            var sonuc = new List<object>(satirlar.Count);
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            foreach (var r in satirlar)
+            {
+                await using var komut = baglanti.Komut("""
+                    select rota, tutar, sgk, oss, hasta_provizyon, hasta_ek_katki,
+                           sgk_katilim_payi, sgk_liste, huv_liste
+                      from public.fn_dagilim_onizle(@p0, @p1, @p2, @p3, @p4, @p5, @p6,
+                                                    @p7, @p8, @p9, @p10, @p11, @p12, @p13)
+                    """, null,
+                    istek!.OdeyenKurumId, istek.SozlesmeId is 0 ? null : istek.SozlesmeId,
+                    istek.AltKurum, (short)(istek.SgkKullan ?? 1), (short)(istek.Emekli ?? 0),
+                    r.StokId is 0 ? null : r.StokId, r.HizmetId is 0 ? null : r.HizmetId,
+                    r.Miktar, r.Tutar, (short)r.Kdv, r.Iskonto ?? 0m, r.Iskonto2 ?? 0m,
+                    r.SgkListe, r.KatkiTutar);
+
+                await using var o = await komut.ExecuteReaderAsync(iptal);
+                if (!await o.ReadAsync(iptal)) continue;
+
+                sonuc.Add(new
+                {
+                    anahtar = r.Anahtar,
+                    rota = (int)o.GetInt16(0),
+                    tutar = o.GetDecimal(1),
+                    sgk = o.GetDecimal(2),
+                    oss = o.GetDecimal(3),
+                    hastaProvizyon = o.GetDecimal(4),
+                    hastaEkKatki = o.GetDecimal(5),
+                    sgkKatilimPayi = o.GetDecimal(6),
+                    sgkListe = o.GetDecimal(7),
+                    huvListe = o.GetDecimal(8),
+                });
+            }
+
+            return Results.Ok(new { satirlar = sonuc, izlemeNo = baglam.IzlemeNo });
         });
 
         // GET /api/kurum/{id}/sozlesmeler - basvuru kartinin sozlesme secicisi.
@@ -750,6 +882,39 @@ public static class BelgeUclari
         public decimal? HuvListe { get; set; }
     }
 
+    /// <summary>
+    /// Kaydedilmemiş satırların dağılım önizlemesi (594). İstemci KURAL
+    /// göndermez: başvurunun kimliği (ödeyen kurum / sözleşme / alt kurum /
+    /// emekli) ve satırın sayıları gider, kovaları sunucu hesaplar.
+    /// </summary>
+    public sealed class DagilimOnizlemeIstegi
+    {
+        public int OdeyenKurumId { get; set; }
+        public int? SozlesmeId { get; set; }
+        public int? AltKurum { get; set; }
+        public int? SgkKullan { get; set; }
+        public int? Emekli { get; set; }
+        public List<DagilimOnizlemeSatiri> Satirlar { get; set; } = [];
+    }
+
+    public sealed class DagilimOnizlemeSatiri
+    {
+        /// <summary>Gridin satır anahtarı - yanıt bununla eşleşir (satır henüz ID'siz).</summary>
+        public string Anahtar { get; set; } = "";
+        public int? StokId { get; set; }
+        public int? HizmetId { get; set; }
+        public decimal Miktar { get; set; }
+        /// <summary>Satır tutarı - MATRAH (kovalar KDV hariç tutulur).</summary>
+        public decimal Tutar { get; set; }
+        public int Kdv { get; set; }
+        public decimal? Iskonto { get; set; }
+        public decimal? Iskonto2 { get; set; }
+        /// <summary>Ekrandan girilen SUT bedeli (matrah); yoksa listeden okunur.</summary>
+        public decimal? SgkListe { get; set; }
+        /// <summary>Ekrandan girilen katkı - BİRİM başına, matrah.</summary>
+        public decimal? KatkiTutar { get; set; }
+    }
+
     public sealed class RezerveIstegi
     {
         public bool Ac { get; set; } = true;
@@ -847,7 +1012,10 @@ public static class BelgeUclari
         //   belge_basvuru tablosuna yazilir (ana belgede kolonlari yok).
         "teslimAlanId" or "fiyatListesiId" or "teklifDurum" or "odeyenKurumId" or
         // SOZLESME / ALT KURUM / SGK KATKISI (469): odeme rotasinin girdileri.
-        "sozlesmeId" or "altKurum" or "sgkKullan" or
+        // EMEKLI (590) da buraya ait: 0/1 isaret, SGK katilim payini sifirlar.
+        //   Listeye eklenmeyince kart "Bilinmeyen belge alani: emekli" ile
+        //   422 doner ve BASVURU HIC KAYDEDILEMEZDI.
+        "sozlesmeId" or "altKurum" or "sgkKullan" or "emekli" or
         // Basvuru sekmesi (298) - kod/sayi alanlari.
         "kampanyaId" or "bolumId" or "personelId" or "basvuruTuru" or "gelisSekli"
         or "gelisNedeni" or "oda"
