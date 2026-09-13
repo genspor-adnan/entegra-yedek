@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { mesaj, secimSor } from '../bilesenler/mesaj';
-import { type BelgeYaniti, type KasaIslemTuru, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
+import { type BelgeYaniti, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { belgeTuruBilgisi, belgeKisaAdi, GIRILEBILIR_TURLER, VARSAYILAN_TUR,
          TAHAKKUK_TURLERI }
@@ -10,13 +10,14 @@ import { belgeTuruBilgisi, belgeKisaAdi, GIRILEBILIR_TURLER, VARSAYILAN_TUR,
 import { DokumanGalerisi } from '../bilesenler/DokumanGalerisi';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { para, yerelAnMetni, hamSayi } from '../bilesenler/bicim';
-import { type SatirDurumu, type SatirDagilimi, satirTutari, yanittanSatirlar }
+import { type SatirDurumu, satirTutari, yanittanSatirlar }
   from './belgeSatir';
 import { type BelgeGirdisi } from './belgeKaydet';
 import { belgeKaydetmeKur } from './belgeKarti/useBelgeKaydetme';
-import {
-  YEREL_PARA_VARSAYILAN, GERIYE_GUN_VARSAYILAN, KAPANMA_ETIKET,
-} from './belgeSabitleri';
+import { useBasvuruAlanlari, usePersonelAdi } from './belgeKarti/useBasvuruAlanlari';
+import { useBelgeAyarlari } from './belgeKarti/useBelgeAyarlari';
+import { useDagilimOnizleme } from './belgeKarti/useDagilimOnizleme';
+import { YEREL_PARA_VARSAYILAN, KAPANMA_ETIKET } from './belgeSabitleri';
 import {
   TasiyiciSekmesi, EBelgeSekmesi, FaturalamaSekmesi,
 } from '../bilesenler/belge/BelgeSekmeleri';
@@ -75,28 +76,18 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   const [sorgu] = useSearchParams();
   const { yetki, kullanici } = useOturum();
 
+  // SUNUCUDAN GELEN AYARLAR kendi kancasinda: tur adlari, tarih penceresi,
+  //   yerel para ve POS aksiyonu acilista bir kez okunur, bir daha degismez.
+  //   Kartin state'leri arasinda dagilmislardi; ortak yanlari SUNUCUNUN
+  //   soyledigi, kullanicinin kart uzerinde degistirmedigi degerler olmalari.
+  const { turAdi, geriGun, yerelPara, posAksiyon, setPosAksiyon } = useBelgeAyarlari();
+
   const [tur, setTur] = useState<number>(() => {
     const istenen = acilisTuru ?? Number(sorgu.get('tur'));
     return GIRILEBILIR_TURLER.includes(istenen as typeof GIRILEBILIR_TURLER[number])
       ? istenen : VARSAYILAN_TUR;
   });
-  const [turler, setTurler] = useState<KasaIslemTuru[]>([]);
 
-  // Tarih penceresi ayardan gelir; ulasilamazsa varsayilan (7) ile devam edilir -
-  //   sunucu zaten ayni kurali uyguluyor, buradaki sinir sadece erken uyari.
-  useEffect(() => {
-    void api.ayarlar()
-      .then(a => {
-        const s = a.find(x => x.anahtar === 'belge.geri_gun_siniri')?.deger;
-        if (s !== undefined && s !== '' && Number.isFinite(Number(s))) setGeriGun(Number(s));
-        const p = a.find(x => x.anahtar === 'genel.yerel_para')?.deger;
-        if (p) setYerelPara(p);
-        // POS aksiyonu (355): 0 yok / 1 otomatik fis / 2 sor.
-        const pa = a.find(x => x.anahtar === 'basvuru.pos_aksiyon')?.deger;
-        if (pa !== undefined && pa !== '') setPosAksiyon(Number(pa) || 0);
-      })
-      .catch(() => { /* varsayilan kalir */ });
-  }, []);
 
   /**
    * HIZLI TAHSILAT (kullanici): banka/POS hesabi secim modali. Nakit modal
@@ -104,7 +95,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    */
   const [hesapSecim, setHesapSecim] = useState<'B' | 'P' | null>(null);
   /** POS tahsilatindan sonraki aksiyon (355 ayari): 0 yok / 1 otomatik / 2 sor. */
-  const [posAksiyon, setPosAksiyon] = useState(0);
   /**
    * PROTOKOL NO ELLE MI (358): karar numaralandirma tablosunda
    * (numara_sablonu tur 19, `elle_girilir`) - ayri bir ayar yok. Elle ise kayit
@@ -117,9 +107,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   const [tarih, setTarih] = useState(() => yerelAnMetni(new Date()));
   const [seri, setSeri] = useState('WEB');
   /** Ayardan gelen geriye donuk gun siniri (0 = sinir yok). */
-  const [geriGun, setGeriGun] = useState(GERIYE_GUN_VARSAYILAN);
   /** Ayardan gelen yerel (defter) para birimi. */
-  const [yerelPara, setYerelPara] = useState(YEREL_PARA_VARSAYILAN);
   /**
    * RAPOR / EKSTRE DOVIZI (134): belge hangi para biriminde duzenlendi ve cari
    * hesaba hangi dovizde islenecek. Kur rapor dovizinden yerel paraya cevrimdir.
@@ -132,25 +120,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   const [vadeGun, setVadeGun] = useState('30');
   /** Belge aciklamasi - basvuruda "Başvuru Notu" alani (300, mockup). */
   const [aciklama, setAciklama] = useState('');
-  // BASVURU (249): vade yerine "Ödeyen Kurum" - hizmeti kim odeyecek
-  //   (anlasmali kurum / sigorta / SGK). Bos = hasta kendi oder.
-  const [odeyenKurumId, setOdeyenKurumId] = useState<number | null>(null);
-  /**
-   * BASVURU BASLIGI (296/297): basvurulan BOLUM ve karsilayan PERSONEL.
-   * Personel HEKIM OLMAK ZORUNDA DEGIL (kullanici): diyetisyen,
-   * fizyoterapist, teknisyen de basvuru karsilar - kisit "randevu verilebilir
-   * personel" + secili bolum. Ikisi de belge_basvuru uzantisinda saklanir.
-   */
-  const [bolumId, setBolumId] = useState<number | null>(null);
-  const [personelId, setPersonelId] = useState<number | null>(null);
-  /** Secili hekim/gonderen ADI: arama ekranindan gelen kisi combo listesinde
-      olmayabilir (or. isareti kaldirilmis dis hekim), ad ayrica tutulur. */
-  const [personelAd, setPersonelAd] = useState('');
-  /**
-   * BASVURU SEKMESI (298) alanlari TEK NESNEDE: on kadar alan icin ayri ayri
-   * state tutmak karti sisiriyordu; hepsi belge_basvuru uzantisina gider.
-   */
-  const [basvuruBilgi, setBasvuruBilgi] = useState<BasvuruBilgi>({});
   /**
    * YURURLUKTEKI KAMPANYA (274). Fiyat listesiyle YARISMAZ: liste BAZ fiyati,
    * kampanya INDIRIMI verir. Baslikta rozet olarak gorunur ve belgeye YAZILIR -
@@ -269,14 +238,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
 
   const ekleyebilir = yetki('belge', 'ekle');
 
-  // Tur adlari katalogtan gelir (istemcide ikinci bir liste tutulmaz).
-  useEffect(() => {
-    void (async () => {
-      try { setTurler(await api.kasaIslemTurleri()) } catch { /* ad yoksa kod gosterilir */ }
-    })();
-  }, []);
 
-  const turAdi = (kod: number) => turler.find(t => t.kod === kod)?.ad ?? `Belge (${kod})`;
   const seciliTurAdi = turAdi(tur);
   /**
    * BASVURUDA (300, kullanici: "en basta basvuru acilacak, islemler
@@ -335,6 +297,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    */
   const basvuruMu = tur === 19 && kullanici?.urunModu === URUN_GENOTIP;
 
+  // BASVURU ALANLARI KENDI KANCASINDA: odeyen kurum, bolum, personel ve
+  //   basvuru sekmesi alanlari HBYS'ye ozgudur - ERP belgesinde hic
+  //   kullanilmazlar. Kart yalniz deger ve setter alir; hangi alanin ne zaman
+  //   dolacagi belge turune ve kullanici akisina bagli oldugu icin KARTTA
+  //   kalir.
+  const {
+    odeyenKurumId, setOdeyenKurumId, bolumId, setBolumId,
+    personelId, setPersonelId, personelAd, setPersonelAd,
+    basvuruBilgi, setBasvuruBilgi,
+  } = useBasvuruAlanlari({ basvuruMu, gonderenModu });
+
   /**
    * ILK SEKME (kullanici): YENI basvuruda "Başvuru" - once hasta, bolum,
    * gonderen ve odeyen kurum girilir. KAYITLI basvuruda "Ücretlendirme":
@@ -355,6 +328,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   //   sablonunun yuklenmesi ayri dosyada: hepsi ayni desendeki bes effect'ti.
   const { kurumlar, bolumler, depolar, gorevliler, protokolElle } =
     useBasvuruKaynaklari(basvuruMu, bolumId, kullanici?.hekimRolu);
+
+  usePersonelAdi(personelId, gorevliler, setPersonelAd);
 
   // Fiyat listesi · kampanya · pay modu · provizyon uygulamasi ayri dosyada:
   //   hepsi "bu satir kaca yazilacak" sorusunun parcasi (belgeKarti/
@@ -390,13 +365,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   //   kendi kancasinda: ikisi de yalniz kurum degisince cekiliyor.
   const { sozlesmeler, altKurumlar } = useKurumSecenekleri(
     odeyenKurumId, kurumlar.find(k => k.id === odeyenKurumId)?.tur);
-
-  // Tur SORULMADIGI icin kayitta bos kalmasin: lab/goruntuleme kurumunda
-  //   basvuru turu 5 ("Laboratuvar / Görüntüleme") olarak damgalanir.
-  useEffect(() => {
-    if (!basvuruMu || !gonderenModu) return;
-    setBasvuruBilgi(o => (Number(o.basvuruTuru ?? 0) === 5 ? o : { ...o, basvuruTuru: 5 }));
-  }, [basvuruMu, gonderenModu]);
 
 
   /**
@@ -627,21 +595,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     void bolumuHekimdenDoldur(id);
   };
 
-  // Secili kisinin adi: liste yuklendiginde ya da belge acildiginda cozulur.
-  useEffect(() => {
-    if (!personelId) { setPersonelAd(''); return }
-    const g = gorevliler.find(x => x.id === personelId);
-    if (g) { setPersonelAd(g.ad); return }
-    void (async () => {
-      try {
-        const y = await api.liste('basvuru-hekim', {
-          sayfa: 1, boyut: 1,
-          filtre: { op: 'and', kosullar: [{ alan: 'id', op: 'esit', deger: personelId }] },
-        });
-        setPersonelAd(String(y.satirlar[0]?.ad ?? ''));
-      } catch { /* ad okunamazsa kutu bos gorunur, kimlik korunur */ }
-    })();
-  }, [personelId, gorevliler]);
 
   /**
    * VARSAYILAN ODEYEN KURUM (kullanici: "default kurum seçili varsa o gelir"):
@@ -818,85 +771,14 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * IMZA ile tetiklenir: satirin sayilari degismedikce sunucuya gidilmez,
    * yoksa her tusa basista istek yagardi.
    */
-  const [dagilimOnizleme, setDagilimOnizleme] =
-    useState<Record<string, SatirDagilimi>>({});
+  // DAGILIM ONIZLEMESI kendi kancasinda: kaydedilmemis satirlarin kova
+  //   dagilimi sunucudan sorulur ve serit/`+` dugmesi onu gosterir. Kart
+  //   yalniz sonucu kullanir - sorgunun ne zaman tekrarlanacagi (imza) ve
+  //   nasil susturulacagi (debounce) kancanin isi.
+  const { dagilimOnizleme, seritSatirlari } = useDagilimOnizleme({
+    basvuruMu, odeyenKurumId, satirlar, basvuruBilgi,
+  });
 
-  const onizlemeGirdisi = useMemo(() => {
-    if (!basvuruMu || !odeyenKurumId) return null;
-    const eksik = satirlar.filter(r => !r.dagilim && (r.stokId || r.hizmetId)
-                                    && hamSayi(r.adet) > 0);
-    if (eksik.length === 0) return null;
-    return eksik.map(r => ({
-      // ANAHTAR METIN GIDER (602): gridin anahtari SAYI (belgeSatir.ts), ucun
-      //   sozlesmesi ise METIN (DagilimOnizlemeSatiri.Anahtar). Sayi olarak
-      //   gonderilince System.Text.Json bunu string alana baglayamiyor ve
-      //   istek 400 donuyordu; hata asagidaki sessiz catch'te yutuldugu icin
-      //   ekranda hicbir belirti yoktu - "+" dagilim dugmesi hic cizilmiyor,
-      //   acik tahsilat/acik belge seridi de guncellenmiyordu. tsc yakalamadi
-      //   cunku govde `JSON.parse` (any) uzerinden geciyor.
-      anahtar: String(r.anahtar),
-      stokId: r.stokId ?? null, hizmetId: r.hizmetId ?? null,
-      miktar: hamSayi(r.adet),
-      // Kovalar MATRAH tutar - grid tutari da matrahtan hesaplanir.
-      tutar: satirTutari(hamSayi(r.adet), hamSayi(r.birimFiyat), r.iskonto, r.iskonto2),
-      kdv: Number(r.kdv) || 0,
-      iskonto: hamSayi(r.iskonto), iskonto2: hamSayi(r.iskonto2),
-      sgkListe: r.sgkListe ? hamSayi(r.sgkListe) : null,
-      katkiTutar: r.katkiTutar ? hamSayi(r.katkiTutar) : null,
-    }));
-  }, [basvuruMu, odeyenKurumId, satirlar]);
-
-  const onizlemeImzasi = onizlemeGirdisi ? JSON.stringify(onizlemeGirdisi) : '';
-  const basvuruImzasi = [odeyenKurumId, basvuruBilgi.sozlesmeId, basvuruBilgi.altKurum,
-                         basvuruBilgi.sgkKullan, basvuruBilgi.emekli].join('|');
-
-  useEffect(() => {
-    if (!onizlemeImzasi || !odeyenKurumId) { setDagilimOnizleme({}); return }
-    let iptal = false;
-    const zamanlayici = setTimeout(() => {
-      void (async () => {
-        try {
-          const y = await api.belgeDagilimOnizleme({
-            odeyenKurumId,
-            sozlesmeId: basvuruBilgi.sozlesmeId, altKurum: basvuruBilgi.altKurum,
-            sgkKullan: basvuruBilgi.sgkKullan, emekli: basvuruBilgi.emekli,
-            satirlar: JSON.parse(onizlemeImzasi),
-          });
-          if (iptal) return;
-          const harita: Record<string, SatirDagilimi> = {};
-          for (const x of y.satirlar ?? [])
-            harita[x.anahtar] = {
-              rota: Number(x.rota ?? 0),
-              sgk: Number(x.sgk ?? 0), oss: Number(x.oss ?? 0),
-              hastaProvizyon: Number(x.hastaProvizyon ?? 0),
-              hastaEkKatki: Number(x.hastaEkKatki ?? 0),
-              sgkKatilimPayi: Number(x.sgkKatilimPayi ?? 0),
-              sgkKapatilan: 0, ossKapatilan: 0,
-              hastaProvizyonKapatilan: 0, hastaEkKatkiKapatilan: 0,
-              sgkTahsil: 0, ossTahsil: 0,
-              hastaProvizyonTahsil: 0, hastaEkKatkiTahsil: 0, sgkKatilimTahsil: 0,
-              sgkListe: Number(x.sgkListe ?? 0), huvListe: Number(x.huvListe ?? 0),
-              sgkProvizyonNo: '', elle: 0, sgkListeElle: 0, huvListeElle: 0,
-            } as SatirDagilimi;
-          setDagilimOnizleme(harita);
-        } catch (h) {
-          // Onizleme KULLANICIYA hata gostermez - kayitta gercek hesap yapilir,
-          //   yarim bir istek ucret girisini kesmemeli. Ama tamamen izsiz de
-          //   kalmamali (602): anahtar tipi uyusmazligi bu blokta aylarca
-          //   yutuldu, "+" dugmesi ve acik serit sessizce bos kaldi.
-          console.warn('[dagilim-onizleme] alinamadi:', h);
-        }
-      })();
-    }, 250);
-    return () => { iptal = true; clearTimeout(zamanlayici) };
-  }, [onizlemeImzasi, basvuruImzasi, odeyenKurumId, basvuruBilgi.sozlesmeId,
-      basvuruBilgi.altKurum, basvuruBilgi.sgkKullan, basvuruBilgi.emekli]);
-
-  /** Serit hesabi icin satirlar: kayitsiz satira ONIZLEME kovalari takilir. */
-  const seritSatirlari = useMemo(() => satirlar.map(r => (
-    r.dagilim || !dagilimOnizleme[r.anahtar]
-      ? r : { ...r, dagilim: dagilimOnizleme[r.anahtar] })),
-    [satirlar, dagilimOnizleme]);
 
   const seritTaraflari = useMemo(() => {
     if (!basvuruMu || !paylasimliKurum(kurumlar, odeyenKurumId)) return null;
