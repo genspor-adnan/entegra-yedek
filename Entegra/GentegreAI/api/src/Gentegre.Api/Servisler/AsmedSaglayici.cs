@@ -145,6 +145,16 @@ public sealed class AsmedSaglayici(VeriKaynagi veri, IHttpClientFactory http,
 
         using var yanit = await istemci.SendAsync(istek, iptal);
         var metin = await yanit.Content.ReadAsStringAsync(iptal);
+
+        // GOVDESIZ HATA: API ag gecidi (IBM API Connect) arka servise
+        //   ulasamayinca sebebi YALNIZ DURUM SATIRINDA yaziyor
+        //   ("HTTP/1.1 500 URL Open error"), govde bos geliyor. Metni
+        //   almazsak kullaniciya "Servis hatasi (500): " diye bos bir
+        //   mesaj giderdi - hatanin bizde mi karsida mi oldugu anlasilmazdi.
+        if (metin.Length == 0 && !yanit.IsSuccessStatusCode
+            && yanit.ReasonPhrase is { Length: > 0 } sebep)
+            metin = JsonSerializer.Serialize(new { message = sebep }, Json);
+
         if (!yanit.IsSuccessStatusCode)
             _gunluk.LogWarning("Sigorta {Uc} {Durum}: {Yanit}", uc,
                                (int)yanit.StatusCode, Kirp(metin, 300));
@@ -183,8 +193,10 @@ public sealed class AsmedSaglayici(VeriKaynagi veri, IHttpClientFactory http,
 
         var (durum, yanit, _) = await CagirAsync(hesap, "checkPolicy", govde, iptal);
         if (durum is < 200 or > 299)
+            // Basarili: false - "poliçe geçersiz" DEGIL, "sorgulanamadi".
             return new PoliceSonucu(false, istek.PoliceNo, "", 0, 0, "", "", "",
-                                    [Hata(yanit, durum)], yanit);
+                                    [Hata(yanit, durum)], yanit, govde,
+                                    Basarili: false);
 
         var kok = JsonNode.Parse(yanit)?.AsObject();
         var police = kok?["policy"]?.AsObject();
@@ -210,7 +222,8 @@ public sealed class AsmedSaglayici(VeriKaynagi veri, IHttpClientFactory http,
             MusteriNo: kok?["customerNumber"]?.ToString() ?? "",
             AgKodu: kok?["networkCode"]?.ToString() ?? "",
             Notlar: notlar,
-            HamYanit: yanit);
+            HamYanit: yanit,
+            HamIstek: govde);
     }
 
     // ================================================================= provizyon

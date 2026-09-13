@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../../../api/istemci';
 import { guvenli, mesaj } from '../../mesaj';
 import { tarihSaat } from '../../bicim';
 import { KodSecim, MetinAlani, ZamanAlani, MUSTEHAKLIK } from './alanlar';
 import type { BasvuruBilgi } from '../BasvuruSekmesi';
+import type { KurumSozlesmesi } from '../../../sayfalar/belgeKarti/useKurumSecenekleri';
 
 export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
                                   kurumTuru, belgeId, tarafId, hekimId,
+                                  odeyenKurumId, sozlesme, belgeTarihi,
                                   onTazele, kaydet }: {
   bilgi: BasvuruBilgi;
   degistir(y: Partial<BasvuruBilgi>): void;
@@ -34,6 +36,12 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
   kurumAdi?: string;
   /** Anlasmali kurumlar: ozel sigorta sirketi buradan secilir (tur 2). */
   kurumlar?: { id: number; ad: string; tur?: number }[];
+  /** Belgenin odeyen kurumu - OSS'de sigorta sirketi varsayilani odur. */
+  odeyenKurumId?: number | null;
+  /** Basvuruda secili sozlesme - karsilama orani ondan gelir. */
+  sozlesme?: KurumSozlesmesi;
+  /** Belge tarihi (datetime-local) - provizyon/takip tarihi varsayilani. */
+  belgeTarihi?: string;
 }) {
   const m = MUSTEHAKLIK[Number(bilgi.sgkMustehaklik ?? 0)] ?? MUSTEHAKLIK[0];
   const [sigortaMesgul, setSigortaMesgul] = useState(false);
@@ -97,6 +105,65 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
   const ossVar = kurumTuru === 2 || kurumTuru === 3 || tamamlayici
                  || (bilgi.ossKurumId ?? null) !== null
                  || !!bilgi.ossProvizyonNo || !!bilgi.ossPoliceNo;
+
+  /**
+   * SEKMEYE GIRINCE VARSAYILANLAR DOLU GELIR (kullanici: "provizyon
+   * sekmesine girince ilk default alanlar dolu gelsin.. durum tarih vb").
+   *
+   * Kayit kabul her basvuruda ayni dort-bes alani elle dolduruyordu; hepsi
+   * de zaten BELLI: durum "Alınmadı" (provizyon henuz istenmedi), tarih
+   * basvurunun tarihi, takip turu ayaktan, sigorta sirketi odeyen kurum,
+   * karsilama orani sozlesmenin varsayilani.
+   *
+   * YALNIZ BOS ALAN DOLDURULUR - kayitli bir basvuru acildiginda icindeki
+   * degerler ustune yazilmaz, `??` ile degil ACIK bosluk kontroluyle:
+   * sgkDurum 0 ("Alınmadı") gecerli bir degerdir, `??` onu bos sayip her
+   * acilista yeniden yazardi (kart surekli "kirli" gorunurdu).
+   *
+   * DURUM "ONAYLANDI" YAPILMAZ: provizyon alinmadan onayli gostermek
+   * faturalamaya yanlis bilgi verirdi - 302 numarali alan degil, kararin
+   * kendisi.
+   */
+  const bosMu = (v: unknown) => v === null || v === undefined || v === '';
+  useEffect(() => {
+    if (kilitli) return;
+    const y: Partial<BasvuruBilgi> = {};
+    const zaman = (belgeTarihi ?? '').slice(0, 16)
+               || new Date().toISOString().slice(0, 16);
+
+    // SGK ALANLARI YALNIZ SGK ODEYICISINDE (tur 3). MEDULA grubu ozel ve
+    //   "kurumu oder" basvurularinda da ciziliyor ama orada provizyon
+    //   kavrami yok - oraya varsayilan yazmak belgeyi bos yere degistirir.
+    if (sgkVar && kurumTuru === 3) {
+      if (bosMu(bilgi.sgkDurum))          y.sgkDurum = 0;          // Alınmadı
+      if (bosMu(bilgi.sgkProvizyonTipi))  y.sgkProvizyonTipi = 1;  // Normal
+      if (bosMu(bilgi.sgkTakipTuru))      y.sgkTakipTuru = 1;      // Ayaktan
+      if (bosMu(bilgi.sgkProvizyonTarihi)) y.sgkProvizyonTarihi = zaman;
+      if (bosMu(bilgi.sgkTakipTarihi))    y.sgkTakipTarihi = zaman;
+    }
+    // OZEL SIGORTA GRUBU KULLANIMDAYSA: odeyen zaten sigorta sirketi,
+    //   kullanici tamamlayici provizyonu ACTI ya da kayitli police/provizyon
+    //   var. SGK hastasinda grup gorunur olsa da bos birakilir.
+    const ossKullanimda = kurumTuru === 2 || tamamlayici
+                       || (bilgi.ossKurumId ?? null) !== null
+                       || !!bilgi.ossProvizyonNo || !!bilgi.ossPoliceNo;
+    if (ossKullanimda) {
+      if (bosMu(bilgi.ossDurum))          y.ossDurum = 0;
+      if (bosMu(bilgi.ossProvizyonTarihi)) y.ossProvizyonTarihi = zaman;
+      // Sigorta sirketi BURADA atanmaz: odeyen kurum ÖSS ise `BelgeKarti`
+      //   zaten ossKurumId'yi odeyenden dolduruyor - sekme acilmadan once,
+      //   her sekmede. Ayni kurali ikinci kez yazmak iki yerin zamanla
+      //   ayrismasi demekti.
+      if (bosMu(bilgi.ossKarsilama) && Number(sozlesme?.varsayilanKarsilama ?? 0) > 0)
+        y.ossKarsilama = String(sozlesme!.varsayilanKarsilama);
+    }
+    if (Object.keys(y).length > 0) degistir(y);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kilitli, sgkVar, tamamlayici, kurumTuru, odeyenKurumId, belgeTarihi,
+      sozlesme?.id, bilgi.sgkDurum, bilgi.sgkProvizyonTipi, bilgi.sgkTakipTuru,
+      bilgi.sgkProvizyonTarihi, bilgi.sgkTakipTarihi, bilgi.ossDurum,
+      bilgi.ossProvizyonTarihi, bilgi.ossKurumId, bilgi.ossKarsilama,
+      bilgi.ossProvizyonNo, bilgi.ossPoliceNo]);
 
   return (
     <>
@@ -218,17 +285,40 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
               sorgusu ve provizyon buradan alinir. Hesabi olmayan kurumda uc
               "hesap tanimli degil" der ve alanlar ELLE doldurulmaya devam
               eder - eski davranis bozulmuyor.
-              Kaydedilmemis basvuruda dugmeler pasif: servise gonderilecek
-              kalemler henuz veritabaninda yok. */}
-          <button type="button" className="d bir sag" disabled={sigortaMesgul || !belgeId}
-                  title={belgeId ? 'Provizyon al / güncelle (sigorta servisi)'
-                                 : 'Önce başvuruyu kaydedin.'}
+
+              IKI DUGMENIN SARTI AYNI DEGIL:
+
+              PROVIZYON AL kayitli belge ISTER - kalemler sunucudaki
+              `belge_satir`'dan okunur ve satir kimligi (`hospitalRowNumber`)
+              satirin id'sidir. Ama kaydi KENDISI yaptirir: `kaydet` tam bunun
+              icin eklenmisti ("provizyon al butonuna basınca kaydedilmemiş
+              ücret satırlarını kaydetsin"). Dugmeyi `!belgeId` ile kapatmak o
+              yolu olu koda cevirmisti - ilk kayit hic yapilamadigi icin
+              kaydedilmemis basvuruda dugme sonsuza kadar pasifti.
+
+              POLICE SORGULA belgeyi HIC kullanmaz: uc hastayi, sigorta
+              sirketini, hekimi ve poliçe numarasini alir; sonuc belgeye degil
+              HASTAYA (`sigorta_police`) yazilir. Kayit sartini ona da koymak
+              ilgisiz bir engeldi.
+
+              POLIÇE NO ICIN PASIFLESTIRILMEZ, MESAJ VERILIR: bos alan yuzunden
+              sonmus bir dugme sebebini soylemiyor - kullanici "basilabilir
+              degil" deyip kaliyor. Tiklayinca "Poliçe numarası girilmeli."
+              diyen dugme neyi eksik biraktigini gosterir. Pasiflik yalniz
+              GERCEKTEN yapilacak bir sey olmadiginda: hasta ya da sigorta
+              sirketi secili degilse. */}
+          <button type="button" className="d bir sag"
+                  disabled={sigortaMesgul || (!belgeId && !kaydet)}
+                  title={belgeId || kaydet
+                         ? 'Provizyon al / güncelle (sigorta servisi)'
+                         : 'Önce başvuruyu kaydedin.'}
                   onClick={provizyonAl}>
             🧾 Provizyon Al
           </button>
-          <button type="button" className="d bir sag" disabled={sigortaMesgul || !belgeId}
-                  title={belgeId ? 'Poliçe bu kurumda geçerli mi (checkPolicy)'
-                                 : 'Önce başvuruyu kaydedin.'}
+          <button type="button" className="d bir sag"
+                  disabled={sigortaMesgul || !tarafId}
+                  title={!tarafId ? 'Önce hasta seçin.'
+                         : 'Poliçe bu kurumda geçerli mi (checkPolicy)'}
                   onClick={policeSorgula}>
             🔎 Poliçe Sorgula
           </button>

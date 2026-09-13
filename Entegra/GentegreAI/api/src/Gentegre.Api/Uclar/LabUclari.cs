@@ -18,8 +18,13 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static partial class LabUclari
 {
+    /// <param name="BelgeId">
+    /// Başvurulu istem (hasta burada). Dış kurum numunesinde BOŞ - o zaman
+    /// <paramref name="DisKurumId"/> ve <paramref name="HastaId"/> zorunlu (637).
+    /// </param>
     public sealed record IstemIstegi(int BelgeId, LabServisi.IstemSatiriIstegi[]? Satirlar,
-                                     short? Oncelik, string? KlinikBilgi, string? TaniIcd);
+                                     short? Oncelik, string? KlinikBilgi, string? TaniIcd,
+                                     int? HastaId = null, int? DisKurumId = null);
 
     public sealed record NumuneDurumIstegi(short Durum, short? Kalite, short? RetNeden,
                                            string? Aciklama);
@@ -283,9 +288,14 @@ public static partial class LabUclari
 
         // ------------------------------------------------------------ istem ---
 
-        // POST /api/lab/istem - başvurudan istem açar, tüp planını ve barkodları
-        //   üretir. Panel satırı tetkiklerine açılır; aynı tüpteki tetkikler TEK
-        //   barkoda bağlanır (hastadan gereksiz tüp alınmaz).
+        // POST /api/lab/istem - istem açar, tüp planını ve barkodları üretir.
+        //   Panel satırı tetkiklerine açılır; aynı tüpteki tetkikler TEK barkoda
+        //   bağlanır (hastadan gereksiz tüp alınmaz).
+        //
+        //   IKI YOL (637): `belgeId` ile BAŞVURUDAN, ya da `disKurumId` +
+        //   `hastaId` ile DIŞ KURUM NUMUNESİNDEN. İkincisinde hasta burada
+        //   değildir - başvuru, ücretlendirme ve e-Nabız yoktur; fatura
+        //   gönderen kuruma kesilir.
         grup.MapPost("/istem", async (
             IstemIstegi istek, BaglamCozucu cozucu, LabServisi servis,
             VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
@@ -295,7 +305,8 @@ public static partial class LabUclari
 
             var id = await servis.IstemAcAsync(
                 istek.BelgeId, istek.Satirlar ?? [], istek.Oncelik ?? 1,
-                istek.KlinikBilgi ?? "", istek.TaniIcd ?? "", baglam, iptal);
+                istek.KlinikBilgi ?? "", istek.TaniIcd ?? "", baglam, iptal,
+                istek.HastaId, istek.DisKurumId);
 
             var ozet = await IstemOzetAsync(veri, id, iptal);
             return Results.Ok(new { id, ozet.IstemNo, ozet.Barkodlar, ozet.TetkikSayisi,
@@ -414,11 +425,17 @@ public static partial class LabUclari
                        --   olculur.
                        case when i.oncelik = 3 then coalesce(t.acil_tat_dk, t.hedef_tat_dk)
                             else t.hedef_tat_dk end as hedef_tat,
-                       coalesce(c.kod, c.ad, '') as cihaz
+                       coalesce(c.kod, c.ad, '') as cihaz,
+                       -- PANEL: satir hangi panelden dogdu. Hemogram 23,
+                       --   tam idrar 21 satir uretiyor - ekran onlari tek
+                       --   baslik altinda toplasin diye adi da tasinir.
+                       coalesce(s.panel_id, 0) as panel_id,
+                       coalesce(lp.ad, '') as panel_ad
                   from public.lab_istem_satir s
                   join public.lab_istem i on i.id = s.istem_id
                   left join public.lab_numune n on n.id = s.numune_id
                   left join public.lab_tetkik t on t.id = s.tetkik_id
+                  left join public.lab_panel lp on lp.id = s.panel_id
                   left join public.cihaz c
                          on c.id = coalesce(s.cihaz_id, t.varsayilan_cihaz_id)
                   left join lateral (
@@ -453,7 +470,8 @@ public static partial class LabUclari
                     Alim = o.IsDBNull(22) ? (DateTime?)null : o.GetDateTime(22),
                     Kabul = o.IsDBNull(23) ? (DateTime?)null : o.GetDateTime(23),
                     HedefTat = o.IsDBNull(24) ? (int?)null : o.GetInt32(24),
-                    Cihaz = o.GetString(25) }, iptal);
+                    Cihaz = o.GetString(25),
+                    PanelId = o.GetInt32(26), PanelAd = o.GetString(27) }, iptal);
 
             // NUMUNEYI ALAN ve KALITE mockup'ta sag panelde: "Hemsire N. Koc ·
             //   Kan alma 2", "Uygun / hemoliz…". Kabul edilmis tup icin bu iki
@@ -734,7 +752,17 @@ public static partial class LabUclari
             var asama = istek?.Asama ?? 2;
             baglam.YetkiIste(asama == 1 ? "lab.sonuc" : "lab.onay", Islem.Degistir);
 
-            var mesaj = await servis.OnaylaAsync(id, asama, baglam, iptal);
+            var (mesaj, istemId) = await servis.OnaylaAsync(id, asama, baglam, iptal);
+
+            // e-NABIZ 105 (632): YAYIN onayinda (asama 2) paket uretilir.
+            //   Teknik onayda degil - o sonucu henuz yayinlamiyor, hastanin
+            //   dosyasina yazilmayan bir sonucu USS'ye bildirmek olurdu.
+            //   Uretim sessizdir: paket uretilemezse onay dusmez.
+            if (asama == 2)
+                await ctx.RequestServices
+                         .GetRequiredService<Servisler.EnabizTetikleyici>()
+                         .LabSonucOnaylandiAsync(istemId, baglam.KullaniciId, iptal);
+
             return Results.Ok(new { id, asama, mesaj, izlemeNo = baglam.IzlemeNo });
         });
 

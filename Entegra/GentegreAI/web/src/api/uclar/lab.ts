@@ -23,7 +23,16 @@ export const labUclari = {
 
   // ------------------------------------------------------------------- LAB
   /** Basvurudan istem acar; tup planini ve barkodlari sunucu uretir (433). */
-  labIstemAc: (govde: { belgeId: number;
+  /**
+   * ISTEM ACAR - IKI YOL (637):
+   *   * `belgeId` : BASVURUDAN (hasta burada). Ucretlendirme, provizyon ve
+   *     e-Nabiz o basvuru uzerinden yurur.
+   *   * `disKurumId` + `hastaId` : DIS KURUM NUMUNESI - numune gelir, hasta
+   *     gelmez. Basvuru yoktur; fatura gonderen kuruma kesilir ve istem
+   *     e-Nabiz'a bildirilmez (USS'de baglanacagi bir hasta kabulu yok).
+   */
+  labIstemAc: (govde: { belgeId?: number;
+                        hastaId?: number; disKurumId?: number;
                         satirlar: { tetkikId?: number; panelId?: number }[];
                         oncelik?: number; klinikBilgi?: string; taniIcd?: string }) =>
     gonder<{ id: number; istemNo: string; barkodlar: string[];

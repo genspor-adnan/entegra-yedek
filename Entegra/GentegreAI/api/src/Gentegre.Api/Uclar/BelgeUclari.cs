@@ -36,6 +36,15 @@ public static class BelgeUclari
                      .GetRequiredService<Servisler.EnabizTetikleyici>()
                      .BasvuruKaydedildiAsync(id, baglam.KullaniciId, iptal);
 
+            // UCRETLENDIRILMIS TETKIK ICIN ISTEM ACILIR (kullanici): tetkik
+            //   ucret satiri olarak giriliyor, istem ayri bir adimdi ve
+            //   atlanınca tetkik laboratuvara hic dusmuyordu - hastadan para
+            //   alinmis, tup istenmemis oluyordu. Zaten istemi olan tetkik
+            //   ikinci kez istenmez.
+            await ctx.RequestServices
+                     .GetRequiredService<Servisler.LabServisi>()
+                     .BasvurudanIstemTamamlaAsync(id, baglam, iptal);
+
             var kayit = await depo.OkuAsync(id, iptal)
                         ?? throw GentegreHatasi.Bulunamadi();
 
@@ -183,6 +192,11 @@ public static class BelgeUclari
             await ctx.RequestServices
                      .GetRequiredService<Servisler.EnabizTetikleyici>()
                      .BasvuruKaydedildiAsync(belgeId, baglam.KullaniciId, iptal);
+
+            // Guncellemede de: sonradan eklenen tetkik icin istem acilir.
+            await ctx.RequestServices
+                     .GetRequiredService<Servisler.LabServisi>()
+                     .BasvurudanIstemTamamlaAsync(belgeId, baglam, iptal);
 
             var kayit = await depo.OkuAsync(belgeId, iptal) ?? throw GentegreHatasi.Bulunamadi();
             return Results.Ok(new BelgeYaniti

@@ -651,6 +651,17 @@ table.grid tr.flt input {
   background: linear-gradient(var(--serit1), var(--serit2));
 }
 .detay-kaydir > .detay-tablo { width: 100%; min-width: max-content; margin: 0 }
+
+/* PANEL BASLIGI (lab istem detayi): hemogram 23, tam idrar 21 satir
+   uretiyor - panel tek satira katlanir, "+" ile acilir. Baslik satiri
+   veri satiri DEGIL, bu yuzden hafif zeminli ve tam genislikte. */
+.detay-tablo tr.panel-basligi > td {
+  background: var(--zemin2, #f5f7fa); font-size: 11.5px;
+  border-top: 1px solid var(--cizgi2);
+}
+.detay-tablo tr.panel-basligi .d.mini {
+  min-width: 20px; padding: 0 5px; line-height: 17px; font-weight: 700;
+}
 /* Mockup (.row > .col > .grp): birden fazla alt-basликlı kutu AYNI SATIRDA yan yana. */
 .kasira { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 12px }
 .kasira .kagrup { flex: 1; min-width: 0; margin-bottom: 0 }
@@ -1475,6 +1486,28 @@ input.skt-gecmis {
 
 /* Kimlik seridindeki durum rozeti kutuyu kaplamasin - mockup'ta kucuk chip. */
 .kaid .alan > .rozet { align-self: flex-start }
+
+/* LAB ISTEM SERIDI (kullanici: "oncelik ve durum yari genislige dusur").
+   Serit bir GRID: `auto-fit minmax(140px, 1fr)` hepsini esit boler, iki
+   KISA kod kutusu (Normal/Acil, Istendi/Sonuclandi) hasta adiyla ayni yeri
+   kapliyordu. Grid ogesine `max-width` vermek yalniz bosluk birakir - track
+   yine ayni genislikte kalir; bu yuzden SUTUN SABLONU ezilir.
+   Sira alan sirasiyla ayni: Hasta · Kaynak · Oncelik · Bolum · Istem
+   Tarihi · Durum. Alan eklenirse burasi da guncellenmeli - fazla sutun
+   `auto-fit`e duser, eksik sutun son alani tasar.
+   Kural KART KOKUNE baglidir (`kart-lab-istem`): `alan-durum` her kartta
+   var, kapsamsiz yazmak hepsini daraltirdi. */
+.kart-lab-istem .kaid .alan-izgara {
+  grid-template-columns: 1.6fr 1fr .6fr 1fr 1.2fr .6fr;
+}
+/* YENI HASTA SERIDINDE UCLU HUCRE: dogum · cinsiyet · durum yan yana,
+   iki sutun genisliginde. Tek tek kucultmek yerine gruplanmalarinin
+   sebebi grid: sutun sayisi sabit, dorduncu alan alt satira duserdi. */
+.kaid .alan.serit-uclu {
+  grid-column: span 2; flex-direction: row; align-items: flex-end; gap: 8px;
+}
+.kaid .alan.serit-uclu > .alan { flex: 1 1 0; min-width: 0 }
+.kaid .alan.serit-uclu input, .kaid .alan.serit-uclu select { min-width: 0 }
 
 /* Randevu kartinin ALT OZET seridi (mockup .ozet): kucuk gri bilgi satiri. */
 .randevu-ozet {
@@ -2652,6 +2685,25 @@ input.skt-gecmis {
 .rozet.asama-sari    { background: #fdf6e3; color: #9a7407; border: 1px solid #eeddb4 }
 .rozet.asama-mavi    { background: #eaf1fa; color: #2f6db3; border: 1px solid #c6d8ef }
 .rozet.asama-yesil   { background: #e9f4ed; color: #2e7d46; border: 1px solid #c2e0cd }
+
+/* TAMAMLANMA CIZGISI (liste "%") - kartin ustundeki asama seridiyle AYNI
+   dili konusur: ince bir yol, dolu kismi asamanin rengi. Rozet yerine
+   cizgi (kullanici); renkler `yuzdeRozeti`nin esikleriyle ayni. */
+.yuzde-cizgi { display: flex; align-items: center; gap: 6px; min-width: 62px }
+.yuzde-cizgi .yol {
+  flex: 1; min-width: 26px; height: 3px; border-radius: 2px;
+  background: var(--cizgi2); overflow: hidden;
+}
+.yuzde-cizgi .dolu { display: block; height: 100%; border-radius: 2px }
+.yuzde-cizgi .deger { font-size: 10.5px; color: var(--soluk); white-space: nowrap }
+.yuzde-cizgi.asama-kirmizi .dolu { background: #c2413b }
+.yuzde-cizgi.asama-turuncu .dolu { background: #d9822b }
+.yuzde-cizgi.asama-sari    .dolu { background: #dca71a }
+.yuzde-cizgi.asama-mavi    .dolu { background: #2f6db3 }
+.yuzde-cizgi.asama-yesil   .dolu { background: #2e7d46 }
+/* Tamamlanan basvuruda yuzde de rengini alir - "%100" gri kalinca bitmis
+   is bitmemis gibi duruyordu. */
+.yuzde-cizgi.asama-yesil .deger { color: #2e7d46; font-weight: 600 }
 
 /* GONDEREN + "Kendi İsteği" (370): isaret alanin ALTINDA durur - gonderen
    zorunlu oldugu icin "hekim yok" cevabi da gorunur bir secim olmali. */

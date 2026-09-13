@@ -120,3 +120,40 @@ describe('baslangicBrutMetni - kalem penceresi acilis fiyati', () => {
     expect(baslangicBrutMetni({ birimFiyat: '', kdv: 10 }, true)).toBe('');
   });
 });
+
+/**
+ * KURUS GERI GELMEZ (kullanici: "fiyat ekranina 500 girdim, onizlemede
+ * 500,01 gorundu; kaydedince gridde de 500,01").
+ *
+ * Dahil modunda yazilan sayi BRUTTUR. Matraha cevrilip satir tutari
+ * yuvarlaninca (%10'da 500 -> 454,5455 -> 454,55) ters yone gitmek kurusu
+ * geri getirmiyor: 454,55 x 1,10 = 500,005 -> 500,01. Onizleme, kalem
+ * gridi ve dip toplam artik brutu TABAN alir; sunucu da ayni kurali izler
+ * (dip toplamda KDV = brut tutar - matrah tutar).
+ *
+ * 1000 TL bu hatayi GIZLIYORDU (909,09 x 1,10 = 999,999 -> 1000,00) - hatayi
+ * gorunur kilan tutari da birlikte tutmak, duzeltmenin geri alinmasini
+ * zorlastirir.
+ */
+describe('brut <-> matrah cevriminde kurus kaymasi', () => {
+  const satirTutariniYuvarla = (n: number) => Math.round(n * 100) / 100;
+
+  it('%10 KDV, 500 TL brut: satir tutarini carpmak 500,01 verir - brut taban 500,00', () => {
+    // ESKI YOL: once SATIR TUTARI yuvarlanir (2 hane), sonra KDV orani
+    //   uygulanir. Kurus tam burada kayboluyor.
+    const satirMatrah = satirTutariniYuvarla(matraha(500, 10));   // 454,55
+    expect(satirTutariniYuvarla(satirMatrah * 1.1)).toBeCloseTo(500.01, 2);
+    // YENI YOL: brut fiyat taban, yuvarlama ONA uygulanir.
+    expect(satirTutariniYuvarla(bruta(matraha(500, 10), 10))).toBeCloseTo(500, 2);
+  });
+
+  it('1000 TL ayni oranda dogru cikiyordu - hata her tutarda gorunmuyor', () => {
+    const satirMatrah = satirTutariniYuvarla(matraha(1000, 10));  // 909,09
+    expect(satirTutariniYuvarla(satirMatrah * 1.1)).toBeCloseTo(1000, 2);
+    expect(satirTutariniYuvarla(bruta(matraha(1000, 10), 10))).toBeCloseTo(1000, 2);
+  });
+
+  it('%20 KDV, 500 TL brut de brut tabanla birebir doner', () => {
+    expect(satirTutariniYuvarla(bruta(matraha(500, 20), 20))).toBeCloseTo(500, 2);
+  });
+});

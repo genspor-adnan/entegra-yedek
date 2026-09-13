@@ -378,6 +378,13 @@ public sealed partial class KartDeposu
             // Stok/hizmet siniflandirmasi (544): kategori agaci TUR BAZINDA
             //   ayrildi - stok kartinda hizmet dallari cikiyordu.
             "public.v_stok_kategori_lookup", "public.v_hizmet_kategori_lookup",
+            // SKRS lookup'lari (615): uyruk (236 ulke), meslek (5.461) ve
+            //   klinik (240) acilir kutuya sigmayacak kadar buyuk, arama
+            //   lookup'i olarak baglanir. Beyaz listeye ALINMAMIS olmalari
+            //   hasta kartini hic acilmaz yapmisti: "Bilinmeyen kod tablosu:
+            //   public.v_skrs_ulke_lookup" (izleme 01M2D4RV39D9BF8BQG4Q3M2Z5C).
+            "public.v_skrs_ulke_lookup", "public.v_skrs_meslek_lookup",
+            "public.v_skrs_klinik_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

@@ -60,6 +60,13 @@ export const ROZET_SINIFI: Record<string, string> = {
   //   ayrilmali, cunku USS'deki kaydi geri alir.
   '101': 'mavi', '102': 'sari', '103': 'eflatun', '106': 'zeytin',
   '301': 'hata',
+  // LAB ISTEM KAYNAGI (433): numunenin nereden geldigi kabul kararini
+  //   degistirir. DIS KURUM ayri renkte - kurye ile gelir, sicaklik kaydi
+  //   ister ve faturasi gonderen kuruma kesilir; oteki dordu ic akistir.
+  //   "Dış kurum" satirda KURUM ADIYLA birlikte yazildigi icin
+  //   ("Dış kurum · REFLAB") tam esitlikle bulunamaz - deseni asagida.
+  'Muayene': 'bilgi', 'Teletıp': 'bilgi', 'Banko': 'gri',
+  'Check-up': 'eflatun',
   'Alınan': 'ok', 'Verilen': 'uyari',
   'Portföyde': 'bilgi', 'Ciro Edildi': 'uyari', 'Tahsilde': 'bilgi',
   'Teminatta': 'bilgi', 'Tahsil Edildi': 'ok', 'Ödendi': 'ok',
@@ -152,21 +159,37 @@ export const ROZET_SINIFI: Record<string, string> = {
  * olsun") - basvuru listesindeki "%" kolonu, kartin ustundeki asama seridiyle
  * AYNI renkleri kullanir:
  *
- *   Başvuru kırmızı · Provizyon turuncu · Ücretlendirme sarı ·
+ *   Başvuru kırmızı · Ücretlendirme sarı · Provizyon turuncu ·
  *   Tahsilat mavi · Belge Kesimi yeşil
  *
  * Yuzde hangi asamaya kadar gelindigini soyler; esikler iki asama kurgusunu da
  * karsilar - provizyonsuz akista 4 asama (25/50/75/100), provizyonlu akista 5
  * (20/40/60/80/100). Boylece ayni renk listede ve kartta ayni anlama gelir.
+ *
+ * ESIKLER SIRAYA BAGLI: provizyon ucretlendirmenin SAGINA alininca (kullanici)
+ * provizyonlu akista 2. asama Ücretlendirme (%40, sari), 3. asama Provizyon
+ * (%60, turuncu) oldu - eskiden tersiydi ve rozet karttakinden BASKA renk
+ * gosteriyordu. Tek esik dizisi iki akisi da karsilamali:
+ *   %20 %25 kirmizi · %40 %50 sari · %60 turuncu · %75 %80 mavi · %100 yesil
  */
 export function yuzdeRozeti(deger: unknown, kolon: KolonMeta) {
   if (kolon.ad !== 'tamamlanma' || kolon.bicim !== 'yuzde') return null;
   if (deger === null || deger === undefined || deger === '') return null;
   const p = Number(deger);
   if (!Number.isFinite(p)) return null;
-  const renk = p >= 100 ? 'yesil' : p >= 70 ? 'mavi' : p >= 45 ? 'sari'
-             : p >= 33 ? 'turuncu' : 'kirmizi';
-  return <span className={`rozet asama-${renk}`}>%{sayi.format(p)}</span>;
+  const renk = p >= 100 ? 'yesil' : p >= 70 ? 'mavi' : p >= 55 ? 'turuncu'
+             : p >= 33 ? 'sari' : 'kirmizi';
+  // CIZGI, ROZET DEGIL (kullanici): kartin ustundeki asama seridi de bir
+  //   CIZGIDIR - listede rozet, kartta cizgi gormek ayni bilgiyi iki ayri
+  //   sey gibi gosteriyordu. Dolu kisim ne kadar ilerlendigini, rengi
+  //   NEREDE olundugunu soyler; yuzde yaninda kucuk yazar cunku cizgi tek
+  //   basina "%73 mu %80 mi" sorusunu cevaplamaz.
+  return (
+    <span className={`yuzde-cizgi asama-${renk}`} title={`%${sayi.format(p)}`}>
+      <span className="yol"><span className="dolu" style={{ width: `${Math.min(100, Math.max(0, p))}%` }} /></span>
+      <span className="deger">%{sayi.format(p)}</span>
+    </span>
+  );
 }
 
 /**
@@ -213,6 +236,7 @@ const ROZET_DESENI: { desen: RegExp; sinif: string }[] = [
   { desen: /^Alerji/i, sinif: 'uyari' },
   { desen: /^Tanı girilmedi/i, sinif: 'uyari' },
   { desen: /^Sonuç geldi/i, sinif: 'olumlu' },
+  { desen: /^Dış kurum/i, sinif: 'uyari' },
   { desen: /^Online$/i, sinif: 'mavi' },
   { desen: /gün var$/i, sinif: 'gri' },
   { desen: /sa sonra$/i, sinif: 'gri' },

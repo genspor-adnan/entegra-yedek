@@ -336,10 +336,23 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
           + sayi(String(dagilimi.hastaEkKatki ?? 0))
           : 0;
         const matrahTutar = dagilimi && dagilimTutari > 0 ? dagilimTutari : tutar;
+        // SATIRIN BRUTU: KDV ORANIYLA DEGIL, SATIRIN KENDI ORANIYLA
+        //   (kullanici: "500 girdim, 500,01 göründü").
+        //
+        //   `bruta(dagilimTutari)` matrahi KDV oraniyla yeniden carpiyordu:
+        //   454,55 x 1,10 = 500,005 -> 500,01. Oysa satirin brutu KULLANICININ
+        //   YAZDIGI sayidir (`birimFiyatKdvli`), matrah ondan turetildi -
+        //   ters yone gidince kurus geri gelmiyor.
+        //
+        //   Sunucu da ayni kurali kullanir: dip toplamda KDV "brut tutar -
+        //   matrah tutar"dir, orandan hesaplanmaz (`BelgeDeposu.Yazma`).
+        //   Dagilim kovalari matrah oldugu icin brute `payBrute` ile
+        //   olceklenir - paylarda zaten oyle yapiliyordu.
+        const satirBrut = satirTutari(adet, brutFiyat, r.iskonto, r.iskonto2);
         const gosterTutar = basvuruMu
           ? (dagilimi && dagilimTutari > 0
-              ? bruta(dagilimTutari, r.kdv)
-              : satirTutari(adet, brutFiyat, r.iskonto, r.iskonto2))
+              ? payBrute(dagilimTutari, tutar, satirBrut)
+              : satirBrut)
           : matrahTutar;
         /** Matrah pay -> gosterim birimi (basvuruda brut, digerinde aynen). */
         const payGoster = (deger: number) =>

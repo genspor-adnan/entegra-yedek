@@ -37,6 +37,8 @@ public sealed partial class EnabizPaketUretici
     public const short KaynakBasvuru = 1;
     public const short KaynakMuayene = 2;
     public const short KaynakRecete = 3;
+    /// <summary>105 Laboratuvar Sonuc paketinin kaynagi: `lab_istem.id`.</summary>
+    public const short KaynakLabIstem = 4;
 
     public sealed record Sonuc(long PaketId, string PaketNo, short Durum, int AlanSayisi,
                                IReadOnlyList<string> Eksikler);
@@ -115,11 +117,25 @@ public sealed partial class EnabizPaketUretici
         //   sayilip IKINCI bir 101 aciliyor (gercek vaka: paket 366, tek
         //   farki doldurulmus SYSTakipNo). Hicbir klinik veri degismeden
         //   USS'ye guncelleme gonderirdi.
+        //
+        // SILME PAKETINDE ISTISNA (301/302): orada takip numarasi hastanin
+        //   verisi degil ISIN KENDISIDIR - silinecek USS kaydinin kimligi.
+        //   Disarida birakilinca silme paketinin govdesinde HASHLENECEK
+        //   hicbir sey kalmiyor (iki alani var: uretim zamani + takip no) ve
+        //   hash her seferinde BOS METNIN ozeti cikiyordu. Sonuc: bir
+        //   basvurunun ikinci silme istegi hic uretilemiyordu - ekran "silme
+        //   paketi kuyruga alindi" derken gerceklesen sey, aylar once
+        //   gonderilmis BASKA bir kaydin silme paketinin geri donmesiydi
+        //   (gercek vaka: 465 iptal edilemiyordu, dedup 464'u buluyordu -
+        //   oysa 464 baska bir SYSTakipNo'yu silmisti).
+        var silmeMi = SilmePaketi(paketKodu);
         var hash = Hash(alanlar
             .Where(a => a.Kaynak != "(uretim zamani)"
-                     && a.Kaynak != "belge_basvuru.sys_takip_no")
+                     && (silmeMi || a.Kaynak != "belge_basvuru.sys_takip_no"))
             .Select(a => $"{a.Alan}={a.Deger}|{a.SkrsKod}"));
-        var kaynakTur = MuayeneKaynakli(paketKodu) ? KaynakMuayene : KaynakBasvuru;
+        var kaynakTur = LabKaynakli(paketKodu) ? KaynakLabIstem
+                      : MuayeneKaynakli(paketKodu) ? KaynakMuayene
+                      : KaynakBasvuru;
 
         // AYNI ICERIK -> AYNI PAKET. Kaynak yeniden kaydedilince yeni satir
         //   acilmaz; icerik degistiyse yeni paket (guncelleme) acilir.
@@ -156,9 +172,44 @@ public sealed partial class EnabizPaketUretici
             [tur.Id, kaynakTur, kaynakId, baglam.BelgeId, baglam.HastaId, baglam.HekimId,
              baglam.SubeId, baglam.OlayTarihi, tur.Sure, durum, hash, kullaniciId], iptal);
 
+        // YENI PAKET ESKISININ YERINE GECER (kullanici: "protokol 2026-000000130
+        //   icin neden kuyrukta iki 101 var").
+        //
+        // Icerik degisince yeni paket dogar - dogrusu budur. Ama eskisi
+        //   KUYRUKTA kaliyordu: ayni basvuru icin iki bekleyen 101, USS'ye
+        //   ayni olayin iki kez gitmesi demek. Ikincisi "E2033 ... daha once
+        //   alinmis bir SYSTakipNo bulunmaktadir" ile geri doner; kuyruk
+        //   kendi kendine mukerrer is uretmis olur.
+        //   GERCEK VAKA: hekim kartina TCKN girilince 101'in icerigi degisti
+        //   (HEKIM_KIMLIK_NUMARASI bostan doldu) ve 751 ile 776 yan yana
+        //   bekledi.
+        //
+        // Ayni kural "kaynaktan yeniden uret" ucunda ZATEN vardi, ama elle
+        //   yazilmisti ve kaydetmeyle dogan pakete islemiyordu. Kural
+        //   ureticiye tasindi: yer bir tane.
+        //
+        // YALNIZ GONDERILMEMIS OLANLAR (0 eksik alan · 1 bekliyor · 4 hatali).
+        //   Gonderilmis (3) ve USS'de silinmis (6) paket TARIHTIR - onlari
+        //   iptal etmek, USS'de duran kaydin izini silmek olurdu.
+        await baglanti.CalistirAsync("""
+            update public.enabiz_paket
+               set durum = 5, degistiren = @p4, degistirme_tarihi = now()
+             where paket_turu_id = @p0 and kaynak_tur = @p1 and kaynak_id = @p2
+               and islem = 1 and id <> @p3 and durum in (0, 1, 4)
+            """, islem,
+            [tur.Id, kaynakTur, kaynakId, paketId, kullaniciId], iptal);
+
         // Paket no INSERT SONRASI: yil + sira, kullanicinin kuyruk ekraninda
         //   arayabilecegi tek kimlik.
-        var paketNo = $"PK-{DateTime.Today:yyyy}-{paketId:000000}";
+        // PAKET NO AYARDAN (634): `numara_sablonu` tur 904 satiri varsa on ek
+        //   ve hane oradan gelir. Sablon yoksa bugunku bicim surer -
+        //   "PK-2026-000776" - ve numara PAKET KIMLIGINDEN turer, ayri bir
+        //   sayac tutmaz: kimlik zaten benzersiz ve artan.
+        var sablonNo = await baglanti.TekDegerAsync<string>(
+            "select public.fn_numara_kimlik_uret(904, @p0, 'enabiz_paket', "
+            + "'paket_no', current_date)", islem, [baglam.SubeId], iptal);
+        var paketNo = string.IsNullOrEmpty(sablonNo)
+            ? $"PK-{DateTime.Today:yyyy}-{paketId:000000}" : sablonNo;
         await baglanti.CalistirAsync(
             "update public.enabiz_paket set paket_no = @p1 where id = @p0",
             islem, [paketId, paketNo], iptal);
@@ -210,9 +261,34 @@ public sealed partial class EnabizPaketUretici
     private static bool MuayeneKaynakli(string paketKodu)
         => paketKodu is "MUAYENE" or "HASTA_CIKIS";
 
+    /// <summary>
+    /// USS'de bir kaydi SILEN paket (301 hasta kabul · 302 hizmet). Icerigi
+    /// hedef kaydin takip numarasidir; ureten paketlerden bu yonuyle ayrilir.
+    /// </summary>
+    private static bool SilmePaketi(string paketKodu)
+        => paketKodu is "HASTA_KABUL_SIL" or "HASTA_ISLEM_SIL";
+
+    /// <summary>
+    /// 105 LABORATUVAR SONUC - kaynagi ISTEMDIR, basvuru degil (632).
+    /// Bir basvuruda birden cok istem olabilir; her istem kendi sonuclariyla
+    /// ayri bildirilir. Kaynagi basvuru yapmak, ikinci istemi "ayni icerik"
+    /// sanip hic uretmemek olurdu.
+    /// </summary>
+    private static bool LabKaynakli(string paketKodu)
+        => paketKodu is "LAB_SONUC";
+
     private static async Task<PaketBaglami?> BaglamAlAsync(NpgsqlConnection baglanti,
         NpgsqlTransaction islem, string paketKodu, int kaynakId, CancellationToken iptal)
-        => MuayeneKaynakli(paketKodu)
+        => LabKaynakli(paketKodu)
+            ? await baglanti.TekAsync("""
+                -- OLAY ZAMANI NUMUNE ALIMI: sure siniri ondan isliyor
+                --   (rehber: numune alindiktan sonra 10 dakika). Sonuc
+                --   zamani olsaydi paket dogdugu anda zaten gecikmis olurdu.
+                select i.belge_id, i.taraf_id, i.personel_id, i.sube_id,
+                       coalesce(i.numune_tarihi, i.istem_tarihi)
+                  from public.lab_istem i where i.id = @p0
+                """, islem, [kaynakId], Oku, iptal)
+        : MuayeneKaynakli(paketKodu)
             ? await baglanti.TekAsync("""
                 select m.belge_id, m.taraf_id, m.personel_id, m.sube_id,
                        coalesce(m.baslangic, m.muayene_tarihi)

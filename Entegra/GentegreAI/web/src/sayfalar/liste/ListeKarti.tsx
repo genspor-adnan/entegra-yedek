@@ -197,6 +197,17 @@ export function ListeKarti({
                           : kod === '2' ? 'uyari' : 'mavi';
               return <span className={`rozet ${sinif}`}>{ad}</span>;
             }
+          // LAB ISTEM NUMARASI BASLIKTA (kullanici: "kaydedince otomatik
+          //   olsun, duzenle diye girince baslikta gorsun"). Numara artik
+          //   yazilamiyor - tetikle uretiliyor (641) - ve kimlik seridindeki
+          //   yerini Kaynak aldi. Yazilamayan bir numaraya alan izgarasinda
+          //   kutu tutmak yerine basligda rozet: yeni kayitta hic cikmaz,
+          //   kaydedilince gorunur.
+          : tanim.kaynak === 'lab-istem'
+          ? (d) => {
+              const no = String(d.istemNo ?? '');
+              return no ? <span className="rozet mavi">{no}</span> : null;
+            }
           : undefined}
         // UYARI BANDI BAGLAM SERIDININ ALTINDA (kullanici): "ana tani
         //   girilmedi", "panik sonuc", "alerji kaydi var" hekim yazmaya

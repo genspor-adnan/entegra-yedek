@@ -1,3 +1,4 @@
+import { Fragment, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { tarihSaat } from '../../bicim';
 import {
@@ -16,6 +17,44 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
 }) {
   const git = useNavigate();
   const satirlar = dizi(veri.satirlar);
+  /**
+   * PANELLER VARSAYILAN KAPALI (kullanici: "panel varsa + ile acilir kapanir
+   * yap, default kapali olsun").
+   *
+   * Hemogram 23, tam idrar 21 satir uretiyor. Ikisi birden istenen bir
+   * istemde tablo 44 satir aciliyor ve panel DISI tetkikler (CRP, TSH…)
+   * gorunmez oluyordu - oysa bankonun once onlari gormesi gerekiyor.
+   * Panel TEK SATIRA katlanir; acmak isteyen "+" ile acar.
+   *
+   * Durum PANEL KIMLIGIYLE tutulur, satir sirasiyla degil: baska bir istem
+   * secilince ayni panel acik kalsin - kullanici her satirda yeniden
+   * acmasin.
+   */
+  const [acikPaneller, setAcikPaneller] = useState<Set<number>>(new Set());
+  const panelAc = (id: number) => setAcikPaneller(o => {
+    const y = new Set(o);
+    if (y.has(id)) y.delete(id); else y.add(id);
+    return y;
+  });
+
+  /**
+   * SATIRLARI PANELE GORE DIZ - sunucunun sirasi KORUNUR.
+   *
+   * Panelleri basa toplamak, istemin girildigi sirayi bozardi; grup satirin
+   * ILK gorundugu yerde acilir, oteki satirlari oraya toplanir.
+   */
+  type Grup = { panelId: number; ad: string; satirlar: Satir[] };
+  const gruplar: Grup[] = [];
+  const grupDizini = new Map<number, number>();
+  for (const s of satirlar) {
+    const pid = Number(s.panelId ?? 0);
+    if (pid === 0) { gruplar.push({ panelId: 0, ad: '', satirlar: [s] }); continue }
+    const yer = grupDizini.get(pid);
+    if (yer === undefined) {
+      grupDizini.set(pid, gruplar.length);
+      gruplar.push({ panelId: pid, ad: metin(s.panelAd), satirlar: [s] });
+    } else gruplar[yer].satirlar.push(s);
+  }
   const numuneler = dizi(veri.numuneler);
   // Numune kabul ekranında seçili TÜPÜN satırları öne alınır: banko o tüple
   //   çalışıyor, listedeki diğer tüpler bağlam olarak kalır.
@@ -60,40 +99,14 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
     return [...new Set(ad)].join(' · ');
   };
 
-  const sol = (
-      <div>
-        <div className="kagrup">
-          <h6>
-            {metin(veri.istemNo)} · Tetkikler
-            <span className="rozet gri">
-              {ISTEM_DURUM[Number(veri.durum ?? 1)] ?? ''}
-            </span>
-            {acil && <span className="rozet hata">ACİL</span>}
-            <span className="sp">tüp/numune planı tetkik kataloğundan</span>
-          </h6>
-          <div className="detay-kaydir">
-            <table className="detay-tablo">
-              <thead>
-                <tr>
-                  <th>Bölüm</th><th>Tetkik</th>
-                  {sonucGorunumu ? (
-                    <>
-                      <th>Tüp / Barkod</th>
-                      <th className="sag">Sonuç</th><th>Birim</th><th>Referans</th>
-                      <th className="orta">Bayrak</th><th className="orta">Ölçüm</th>
-                    </>
-                  ) : (
-                    <>
-                      <th>Numune</th><th>Tüp</th><th className="orta">Barkod</th>
-                      <th className="orta">Alındı</th><th className="orta">Kabul</th>
-                      <th className="orta">Hedef TAT</th><th className="orta">Cihaz</th>
-                    </>
-                  )}
-                  <th className="orta">Durum</th>
-                </tr>
-              </thead>
-              <tbody>
-                {satirlar.map(s => {
+  /**
+   * TEK SATIRIN CIZIMI - panel icinde de disinda da AYNI.
+   *
+   * Gruplama eklenince satir cizimi iki yerde tekrar edecekti (panel
+   * icerigi ve panelsiz tetkik); ayni hucre kurallarinin iki kopyasi
+   * zamanla ayrisirdi.
+   */
+  const satirCiz = (s: Satir) => {
                   const barkod = metin(s.barkod);
                   const n = numuneler.find(x => metin(x.barkod) === barkod);
                   const t = tup(n?.tupTipi);
@@ -167,7 +180,74 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
                       </td>
                     </tr>
                   );
-                })}
+  };
+  const sol = (
+      <div>
+        <div className="kagrup">
+          <h6>
+            {metin(veri.istemNo)} · Tetkikler
+            <span className="rozet gri">
+              {ISTEM_DURUM[Number(veri.durum ?? 1)] ?? ''}
+            </span>
+            {acil && <span className="rozet hata">ACİL</span>}
+            <span className="sp">tüp/numune planı tetkik kataloğundan</span>
+          </h6>
+          <div className="detay-kaydir">
+            <table className="detay-tablo">
+              <thead>
+                <tr>
+                  <th>Bölüm</th><th>Tetkik</th>
+                  {sonucGorunumu ? (
+                    <>
+                      <th>Tüp / Barkod</th>
+                      <th className="sag">Sonuç</th><th>Birim</th><th>Referans</th>
+                      <th className="orta">Bayrak</th><th className="orta">Ölçüm</th>
+                    </>
+                  ) : (
+                    <>
+                      <th>Numune</th><th>Tüp</th><th className="orta">Barkod</th>
+                      <th className="orta">Alındı</th><th className="orta">Kabul</th>
+                      <th className="orta">Hedef TAT</th><th className="orta">Cihaz</th>
+                    </>
+                  )}
+                  <th className="orta">Durum</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* PANEL BASLIGI SATIRIN YERINDE: once butun basliklar,
+                    sonra butun satirlar diye cizmek istemin sirasini
+                    bozardi - grup kendi yerinde acilir. */}
+                {gruplar.map(g => (
+                  <Fragment key={g.panelId === 0
+                    ? `t${String(g.satirlar[0]?.satirId)}` : `p${g.panelId}`}>
+                    {g.panelId !== 0 && (
+                      <tr className="panel-basligi">
+                        <td colSpan={sonucGorunumu ? 9 : 10}>
+                          <button type="button" className="d mini"
+                                  onClick={() => panelAc(g.panelId)}
+                                  title={acikPaneller.has(g.panelId)
+                                         ? 'Paneli kapat' : 'Paneli aç'}>
+                            {acikPaneller.has(g.panelId) ? '−' : '+'}
+                          </button>{' '}
+                          <b>{g.ad || 'Panel'}</b>
+                          <span className="not"> · {g.satirlar.length} parametre</span>
+                          {/* KAC TANESI BITTI: panel KAPALIYKEN de ilerleme
+                              gorunsun - acmadan "hepsi cikti mi" sorusunun
+                              cevabi. */}
+                          {g.satirlar.some(x => Number(x.durum ?? 1) >= 5) && (
+                            <span className="not">
+                              {' · '}
+                              {g.satirlar.filter(x => Number(x.durum ?? 1) >= 5).length}
+                              {' sonuçlandı'}
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    )}
+                    {(g.panelId === 0 || acikPaneller.has(g.panelId))
+                      && g.satirlar.map(s => satirCiz(s))}
+                  </Fragment>
+                ))}
                 {satirlar.length === 0 && (
                   <tr><td colSpan={10} className="not">Bu istemde tetkik yok.</td></tr>
                 )}

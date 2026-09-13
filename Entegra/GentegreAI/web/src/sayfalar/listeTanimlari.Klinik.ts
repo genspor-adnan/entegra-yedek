@@ -109,11 +109,13 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   menusunden de kaybolurdu - gerektiginde kullanici acar.
     //   Sira: once belgenin kimligi (no, tarih, hasta), sonra basvuru bilgisi
     //   (odeyen kurum, poliklinik, hekim) - kullanici.
-    //   TAMAMLANMA rozeti PROTOKOL NO'NUN SAGINDA (kullanici): once belgenin
-    //   kimligi (tarih, protokol), hemen ardindan "nerede kaldi" rozeti.
+    //   TAMAMLANMA CIZGISI PROTOKOL NO'NUN SOLUNDA (kullanici; onceki karar
+    //   sagindaydi, degisti): rozet cizgiye donunce gozun once tarayacagi
+    //   sey "nerede kaldi" oldu - protokol numarasi aranan degil, bulunan
+    //   satirda okunan bir bilgi.
     //   SOZLESME kurumun HEMEN SAGINDA (kullanici): ayni sigortayla ÖSS /
     //   TSS / Karma police ayri sartlarla calisir, odeme rotasini o belirler.
-    kolonSirasi: ['belgeTarihi', 'belgeNo', 'tamamlanma', 'tarafUnvan',
+    kolonSirasi: ['belgeTarihi', 'tamamlanma', 'belgeNo', 'tarafUnvan',
                   'odeyenKurumAdi', 'sozlesmeAdi', 'poliklinik', 'doktor',
                   'genelToplam', 'tahsilat'],
     // TAHSILAT da toplanir (kullanici): "ne kadari geldi" sorusu genel

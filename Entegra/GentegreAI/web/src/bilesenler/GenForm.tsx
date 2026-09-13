@@ -217,6 +217,12 @@ export interface EkSekmeBaglami {
   detaySayisi(ad: string): number;
 }
 
+/**
+ * Jenerik arama penceresi acilabilen TARAF kaynaklari. `hasta` ve `cari`
+ * kendi dallarinda: onlarin ek kurallari var (aday karti, durum suzgeci).
+ */
+const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
+
 export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, onKaydedildi, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
@@ -1022,7 +1028,10 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
     <Modal
       baslik={`${baslik ?? kaynak} ${yeniMi ? '— Yeni' : `#${id}`}`}
       dar={TEK_SUTUN_KARTLAR.has(kaynak)}
-        ekSinif={kaynak === 'randevu' ? 'kart-orta' : undefined}
+        // Kart KAYNAK ADINI sinif olarak tasir (`kart-lab-istem`): ekrana
+        //   ozel duzen kurallari CSS'te o kartla sinirli kalsin - alan adi
+        //   sinifi tek basina her kartin "durum" alanini etkilerdi.
+        ekSinif={`kart-${kaynak}${kaynak === 'randevu' ? ' kart-orta' : ''}`}
       ustBilgi={
         <>
           {/* Personel durumu BASLIKTA rozet (kullanici): aktif yesil, isten
@@ -1101,6 +1110,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
         {ustBaglam?.(deger)}
         {kimlikAlanlari.length > 0 && (
           <KartKimlikSeridi
+            yeniMi={yeniMi}
             kaynak={kaynak} deger={deger} meta={meta} salt={salt}
             detaylar={detaylar} setDetaylar={setDetaylar}
             kimlikAlanlari={kimlikAlanlari}
@@ -1728,6 +1738,26 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
           acik
           kaynaklar={['cari']}
           yerTutucu="Kurum / cari ara…"
+          onKapat={() => setAramaAlani(null)}
+          onSec={secilen => {
+            aramaYaz(aramaAlani, String(secilen.id), secilen.unvan);
+          }}
+        />
+      )}
+      {/* TARAF TABANLI OTEKI KAYNAKLAR (637): kurum, dis hekim, personel…
+          Her yeni kaynak icin ayri bir dal yazmak, ucuncusunde kopyala-
+          yapistir olurdu; `TarafArama` zaten kaynak adini aliyor. Kaynak
+          adi VIRGULLU olabilir - lab isteminde "İsteyen Hekim" hem dis
+          doktoru hem ic personeli arar (`dis-hekim,personel`): karttan
+          acilan istem genelde dis numunedir ama ic istem de girilebiliyor.
+          Yukaridaki hasta/cari dallari KENDI kurallarini tasidiklari icin
+          (aday karti, pasif/vefat suzgeci) burada tekrarlanmaz. */}
+      {aramaAlani && TARAF_ARAMA_KAYNAKLARI.some(
+          k => aramaAlani.kaynak.split(',').includes(k)) && (
+        <TarafArama
+          acik
+          kaynaklar={aramaAlani.kaynak.split(',').map(x => x.trim()).filter(Boolean)}
+          yerTutucu="Ara…"
           onKapat={() => setAramaAlani(null)}
           onSec={secilen => {
             aramaYaz(aramaAlani, String(secilen.id), secilen.unvan);

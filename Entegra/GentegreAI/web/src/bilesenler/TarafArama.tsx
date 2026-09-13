@@ -60,7 +60,14 @@ const satiraCevir = (kaynak: string, s: ListeSatiri): TarafSatiri => ({
   id: Number(s.id),
   tip: tipEtiketi(kaynak, s),
   kod: String(s.kod ?? ''),
-  unvan: String(s.unvan ?? ''),
+  // UNVAN YOKSA AD (kullanici: lab isteminde tetkik aramasi bos adlarla
+  //   aciliyordu). Pencere taraf kaynaklari icin yazildi ve satiri hep
+  //   `unvan`dan cizdi; ama `aramaKaynagi` taraf OLMAYAN listeleri de
+  //   gosteriyor - stok, hizmet, tetkik. Onlarin adi `ad` / `kisaAd`
+  //   kolonunda; unvan hic yok, yani pencere bos satirlar cizerdi.
+  //   Uretim (dort yer), radyoloji ve randevu kartlari da ayni yoldan
+  //   geciyor - duzeltme tek yerde.
+  unvan: String(s.unvan ?? s.ad ?? s.kisaAd ?? ''),
   bagliKurum: String(s.bagliCari ?? ''),
   gorevRol: String(s.gorev ?? ''),
   bolum: String(s.departmanAdi ?? ''),
@@ -221,9 +228,25 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
         : filtre;
       // gorunum: Son/Sik Aranan sunucuda kullanici_arama ile suzulur+siralanir.
       const gorunumParam = gorunumSecimi === 'tum' ? undefined : gorunumSecimi;
-      const yanitlar = await Promise.all(
+      // BIR KAYNAK DUSERSE OTEKILER GOSTERILIR (kullanici: "isteyen hekim
+      //   aramada hata"). `Promise.all` ile tek bir 400/403 butun pencereyi
+      //   bos birakiyordu - iki kaynakli aramada (dis hekim + personel) ya da
+      //   kullanicinin yalniz birine yetkisi olan bir listede arama hic
+      //   calismiyor gibi gorunuyordu. Hangi kaynagin dustugu de yazilir:
+      //   "hicbir sey bulunamadi" ile "o liste okunamadi" ayri seylerdir.
+      const sonuclar = await Promise.allSettled(
         kaynaklar.map(k => api.liste(k, { sayfa: 1, boyut: 20, filtre: tamFiltre,
                                           gorunum: gorunumParam })));
+      const dusenler = kaynaklar.filter((_, i) => sonuclar[i].status === 'rejected');
+      if (dusenler.length === kaynaklar.length) {
+        // Hepsi dustuyse gercek hata gosterilir - sessiz bos liste yaniltir.
+        throw (sonuclar[0] as PromiseRejectedResult).reason;
+      }
+      setHata(dusenler.length
+        ? `${dusenler.join(', ')} listesi okunamadı - kalan sonuçlar gösteriliyor.`
+        : '');
+      const yanitlar = sonuclar.map(r =>
+        r.status === 'fulfilled' ? r.value : { satirlar: [] as ListeSatiri[] });
       // Kaynaklar (musteri / kisi / hasta) AYRI isteklerle gelir; Son/Sik
       //   gorunumunde birlesik listenin sirasi sunucunun anahtarlariyla
       //   yeniden kurulur - yoksa liste kaynak kaynak dizilir ve "en son

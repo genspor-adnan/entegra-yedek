@@ -97,6 +97,41 @@ public sealed class EnabizTetikleyici
         }
     }
 
+    /// <summary>
+    /// LABORATUVAR SONUCU ONAYLANDI: 105 doğar (632).
+    ///
+    /// Tetik SONUÇ onayındadır, istem açılışında değil: e-Nabız'a giden şey
+    /// sonucun kendisidir ve onaylanmamış sonuç hastanın dosyasına da
+    /// yazılmaz. Bir istemde birden çok tetkik olur - her onayda paket
+    /// yeniden üretilir, "aynı içerik → aynı paket" mükerrer satır açmaz;
+    /// yeni sonuç eklenince içerik değişip güncelleme paketi doğar.
+    ///
+    /// TAKİP NUMARASI YOKSA ÜRETİLMEZ: 102'deki ile aynı kural - ilk zorunlu
+    /// alan SYSTakipNo'dur, numara gelmeden üretilen paket kuyruğa doğuştan
+    /// ölü düşer.
+    /// </summary>
+    public async Task LabSonucOnaylandiAsync(int istemId, int kullaniciId,
+                                             CancellationToken iptal)
+    {
+        try
+        {
+            var belgeId = await _veri.TekDegerAsync<int>(
+                "select coalesce(i.belge_id, 0) from public.lab_istem i "
+                + " where i.id = @p0", [istemId], iptal);
+            // Belgesiz istem (dış kurum numunesi) USS'ye bağlanamaz: hangi
+            //   başvurunun sonucu olduğu bilinmiyor.
+            if (belgeId == 0) return;
+            if (!await TakipNumarasiVarAsync(belgeId, iptal)) return;
+
+            await _uretici.UretAsync("LAB_SONUC", istemId, kullaniciId, iptal);
+        }
+        catch (Exception h)
+        {
+            _gunluk.LogError(h, "e-Nabiz lab sonuc paketi uretilemedi (istem {Id})",
+                             istemId);
+        }
+    }
+
     private async Task<bool> TakipNumarasiVarAsync(int belgeId, CancellationToken iptal)
         => await _veri.TekDegerAsync<int>(
                "select count(*) from public.belge_basvuru bb " +

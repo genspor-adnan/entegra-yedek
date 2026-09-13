@@ -20,6 +20,13 @@ public static partial class KartKatalogu
             ["bolum"] = (short)1,           // Biyokimya
             ["durum"] = (short)1,           // İstendi
             ["istemTarihi"] = "@simdi",
+            // KAYNAK VARSAYILANI DIŞ KURUM (kullanici). Başvurudan doğan
+            //   istem KART ÜZERİNDEN açılmaz - o yol uçta (başvuru
+            //   kaydedilince kendiliğinden). Karttan "Yeni" diyen kişi
+            //   pratikte dışarıdan gelen numuneyi giriyor; varsayılanı
+            //   "muayene istemi" bırakmak her seferinde düzeltilecek bir
+            //   değer demekti.
+            ["kaynak"] = (short)4,          // Dış kurum
         },
         Alanlar: new KartAlani[]
         {
@@ -31,26 +38,77 @@ public static partial class KartKatalogu
             new("tarafId", "taraf_id", "kod", Zorunlu: true,
                 KodTablosu: "public.v_hasta_lookup", AramaKaynagi: "hasta",
                 Baslik: "Hasta", Grup: "Kimlik"),
-            new("istemNo", "istem_no", "metin", EnFazlaUzunluk: 30,
-                Baslik: "İstem No", Grup: "Kimlik"),
+            // ISTEM NO YAZILAMAZ, SERITTE DE DURMAZ (kullanici: "Istem No
+            //   editi kaldir, kaydedince otomatik olsun; duzenle diye girince
+            //   baslikta gorsun" + "istem no yerine Kaynak olsun").
+            //
+            //   Numara kaydederken TETIKLE uretilir (641), numaralandirma
+            //   ayarindaki (tur 901) on ek ve haneye gore. Elle yazilan
+            //   numara sayacla cakisirdi.
+            //
+            //   Kartin KIMLIK SERIDINDE yerini KAYNAK aldi: numara zaten
+            //   kart basliginda rozet olarak duruyor (ListeKarti.baslikEk) -
+            //   ayni bilgiyi iki yerde tutmak, seritte gercekten karar
+            //   degistiren bir alana (numune nereden geldi) yer birakmiyordu.
+            new("kaynak", "kaynak", "kod", SabitKodlar: LabKaynakKodlari,
+                Baslik: "Kaynak", Grup: "Kimlik"),
             new("oncelik", "oncelik", "kod", SabitKodlar: LabOncelikKodlari,
                 Baslik: "Öncelik", Grup: "Kimlik"),
+            // BOLUM ONCELIGIN SAGINDA, SERITTE (kullanici). Tetkikin hangi
+            //   banka gidecegi kabul masasinin ilk sorusu; sekme icinde
+            //   kalinca her bakista bir tiklama gerekiyordu.
+            new("bolum", "bolum", "kod", SabitKodlar: LabBolumKodlari,
+                Baslik: "Bölüm", Grup: "Kimlik"),
+            // ISTEM TARIHI SERITTE, DURUMUN SOLUNDA ve SAATLI (kullanici).
+            //   Tip "zaman": laboratuvarda gun yetmez - TAT saat basinda
+            //   olculuyor ve "sabah mi aksam mi istendi", numunenin beklemis
+            //   olup olmadigini soyleyen ilk bilgi.
+            new("istemTarihi", "istem_tarihi", "zaman", Zorunlu: true,
+                Baslik: "İstem Tarihi", Grup: "Kimlik"),
             new("durum", "durum", "kod", SabitKodlar: LabDurumKodlari,
                 Baslik: "Durum", Grup: "Kimlik"),
 
-            // ISTEM: kim, ne zaman, nereden istedi.
-            new("istemTarihi", "istem_tarihi", "tarih", Zorunlu: true,
-                Baslik: "İstem Tarihi", Grup: "İstem", AltGrup: "İstem"),
-            new("bolum", "bolum", "kod", SabitKodlar: LabBolumKodlari,
-                Baslik: "Bölüm", Grup: "İstem", AltGrup: "İstem"),
-            new("personelId", "personel_id", "kod", KodTablosu: "public.v_personel_lookup",
-                Baslik: "İsteyen Hekim", Grup: "İstem", AltGrup: "İstem"),
-            // KAYNAK (433): muayene / teletip / banko / dis kurum / check-up.
-            //   Numunenin nereden geldigi kabul kararini degistirir.
-            new("kaynak", "kaynak", "kod", SabitKodlar: LabKaynakKodlari,
-                Baslik: "Kaynak", Grup: "İstem", AltGrup: "İstem"),
+            // ISTEM: ne zaman, KIMDEN geldi, kim istedi (kullanici sirasi:
+            //   "Istem tarihi altina sirayla Dis Kurum, Isteyen Hekim").
+            //   Kart varsayilani dis kurum numunesi oldugu icin once gonderen
+            //   kurum soruluyor - hekim de o kurumun hekimi.
+            //   KAYNAK, BOLUM ve ISTEM TARIHI kimlik seridine tasindi
+            //   (yukari bakin).
+            // IKISI DE JENERIK ARAMA PENCERESIYLE (kullanici): combo binlerce
+            //   kayitta kullanilmaz hale geliyor ve dis numunede aranan sey
+            //   ANLASMALI KURUM ile DIS DOKTORDUR.
             new("disKurumId", "dis_kurum_id", "kod", KodTablosu: "public.v_kurum_lookup",
+                AramaKaynagi: "kurum",
                 Baslik: "Dış Kurum", Grup: "İstem", AltGrup: "İstem"),
+            // BASVURUNUN KURUMU - YAZILAMAZ (kullanici: "kaynak Dis Kurum
+            //   degilse label sadece Kurum olacak ve karsisinda basvurudaki
+            //   kurum gelecek").
+            //
+            //   Ic istemde odeyen kurum BASVURUDA belirlenir; istemde ikinci
+            //   bir kopyasini tutmak iki kaynak demekti - basvurunun kurumu
+            //   degisince istemdeki eski deger kalirdi. Bu yuzden kolon
+            //   degil, basvurudan COZULEN alan.
+            //
+            //   Ekran ikisinden yalniz BIRINI cizer: kaynak "Dis kurum" (4)
+            //   ise secilebilir "Dış Kurum", degilse salt okunur "Kurum"
+            //   (kartAlanCizim'deki lab-istem kurali).
+            new("kurumAdi",
+                "(select coalesce(t.unvan, '') from public.belge_basvuru bb "
+                + "  join public.taraf t on t.id = bb.odeyen_kurum_id "
+                + " where bb.id = lab_istem.belge_id)",
+                "metin", Yazilabilir: false,
+                Baslik: "Kurum", Grup: "İstem", AltGrup: "İstem"),
+            // ISTEYEN HEKIM: once DIS DOKTOR, sonra ic personel. Karttan
+            //   acilan istem genelde dis numunedir (kaynak varsayilani da o)
+            //   ama ic istem de girilebiliyor - yalniz dis hekimi aratmak o
+            //   yolu kapatirdi.
+            new("personelId", "personel_id", "kod", KodTablosu: "public.v_personel_lookup",
+                AramaKaynagi: "dis-hekim,personel",
+                Baslik: "İsteyen Hekim", Grup: "İstem", AltGrup: "İstem"),
+            // Numara salt okunur, tetikten geliyor (641).
+            new("istemNo", "istem_no", "metin", EnFazlaUzunluk: 30,
+                Yazilabilir: false, Baslik: "İstem No",
+                Grup: "İstem", AltGrup: "İstem"),
             new("belgeId", "belge_id", "sayi",
                 Baslik: "Başvuru (Protokol Id)", Grup: "İstem", AltGrup: "İstem"),
 
@@ -96,12 +154,29 @@ public static partial class KartKatalogu
             {
                 new("id", "id", "sayi", Yazilabilir: false),
                 new("sira", "sira", "sayi", Baslik: "Sıra"),
+                // TETKIK KENDI LISTESINDEN SECILIR (kullanici: "tetkik
+                //   ekleme arama yanlis, hizmet yerine baska sey ariyor").
+                //
+                //   Grid basligindaki arama dugmesi detaydaki ILK
+                //   `aramaKaynagi` tanimli kod alanina yazar
+                //   (`GenDetayTablo`: `alanlar.find(a => a.tip === 'kod' &&
+                //   a.aramaKaynagi)`). O alan `stokId` idi: tetkik eklemek
+                //   icin arama acinca HIZMET listesi geliyor ve secilen kayit
+                //   `lab_istem_satir.stok_id` kolonuna yaziliyordu - o
+                //   kolonun yabanci anahtari bile yok, 45 satirin hicbirinde
+                //   dolu degil. Yani eklenen tetkik hicbir yere baglanmiyordu.
+                //
+                //   `stokId` alani KALDIRILDI, arama TETKIGE baglandi.
+                //   Pencere (`TarafArama`) satirlari `unvan` alanindan
+                //   ciziyordu; tetkik/hizmet/stok kaynaklarinda o kolon YOK -
+                //   pencere bos adlarla acilirdi. Cizim `ad`a duser hale
+                //   getirildi (ayni tuzak uretim, radyoloji ve randevu
+                //   kartlarinda da vardi).
                 new("tetkikId", "tetkik_id", "kod",
-                    KodTablosu: "public.v_lab_tetkik_lookup", Baslik: "Tetkik"),
+                    KodTablosu: "public.v_lab_tetkik_lookup",
+                    AramaKaynagi: "lab-tetkik", Baslik: "Tetkik"),
                 new("panelId", "panel_id", "kod",
                     KodTablosu: "public.v_lab_panel_lookup", Baslik: "Panel"),
-                new("stokId", "stok_id", "kod", KodTablosu: "public.v_hizmet_lookup",
-                    AramaKaynagi: "hizmet", Baslik: "Hizmet"),
                 new("kod", "kod", "metin", EnFazlaUzunluk: 30, Baslik: "Kod"),
                 new("ad", "ad", "metin", EnFazlaUzunluk: 200, Baslik: "Test Adı"),
                 new("durum", "durum", "kod", SabitKodlar: LabSatirDurumKodlari,

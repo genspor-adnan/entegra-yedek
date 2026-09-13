@@ -154,6 +154,13 @@ export const SEKMELER: {
   //   sonra ucret.
   { anahtar: 'basvuru',  baslik: 'Başvuru', basvuru: true },
   { anahtar: 'kalem',    baslik: 'Kalemler' },
+  // PROVIZYON, ÜCRETLENDIRME'NIN HEMEN SAGINDA (kullanici; onceki karar "en
+  //   sonda" idi, degisti). Provizyon gunluk akisin disinda bir ek degil,
+  //   ucretin devami: hangi kalemin ne kadarini kurum odeyecek sorusunun
+  //   cevabi ve istek de o kalemler uzerinden gidiyor (hospitalRowNumber =
+  //   belge_satir.id). Yorum/Doküman'in arkasina atilinca kalemleri girip
+  //   provizyona gecmek serittte bastan sona yolculuk oluyordu.
+  { anahtar: 'provizyon', baslik: 'Provizyon', basvuru: true },
   { anahtar: 'tasiyici', baslik: 'Taşıyıcı / Sevkiyat', irsaliye: true },
   { anahtar: 'ebelge',   baslik: 'e-Belge' },
   // TAHSILAT, Faturalama'nin SOLUNDA (kullanici): siparis once tahsil edilir
@@ -165,9 +172,7 @@ export const SEKMELER: {
   { anahtar: 'imza',     baslik: 'İmza / Teslim', irsaliye: true },
   // "Yorum / Medya" -> "Resim / Doküman" (kullanici, 218).
   { anahtar: 'yorum',    baslik: 'Resim / Doküman' },
-  // Provizyon ve gecmis EN SONDA (kullanici): biri kurum onayi, digeri
-  //   hastanin oykusu - gunluk kabul akisinin disinda kalirlar.
-  { anahtar: 'provizyon', baslik: 'Provizyon',         basvuru: true },
+  // Gecmis EN SONDA: hastanin oykusu, gunluk kabul akisinin disinda.
   { anahtar: 'gecmis',    baslik: 'Önceki Başvurular', basvuru: true },
 ];
 

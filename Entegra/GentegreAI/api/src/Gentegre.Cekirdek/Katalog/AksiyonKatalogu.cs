@@ -567,6 +567,11 @@ public static class AksiyonKatalogu
             ["lab-istem-liste"] =
             [
                 .. Crud("lab-istem", "lab-istem", "lab"),
+                // DIS NUMUNE ICIN AYRI DUGME YOK (kullanici: "dis numune
+                //   kabul butona gerek kalmadi, yeni istem den girebiliyoruz").
+                //   Istem kartinin kaynak varsayilani "Dis kurum"; gonderen
+                //   kurum ve dis doktor arama penceresiyle seciliyor. Ayni isi
+                //   yapan ikinci bir pencere, iki ayri dogrulama yolu demekti.
                 new("lab.numune-plani", "🏷 Barkod Üret", "lab-istem",
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "lab.numune", Islem: Islem.Ekle, KayitGerekir: true,

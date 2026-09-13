@@ -100,6 +100,14 @@ public static partial class KartKatalogu
         NumaraKarti("numara-hasta", "public.v_numara_turu_kimlik", "Numara Türü");
     private static KartTanimi NumaraBasvuru() =>
         NumaraKarti("numara-basvuru", "public.v_numara_turu_kimlik", "Numara Türü");
+
+    /// <summary>
+    /// HASTA BELGELERI (634) - dosya, protokol, muayene, laboratuvar,
+    /// radyoloji ve e-Nabiz numaralari ayni karttan duzenlenir; tur secim
+    /// kutusu altisini da listeler.
+    /// </summary>
+    private static KartTanimi NumaraHastaBelge() =>
+        NumaraKarti("numara-hasta-belge", "public.v_numara_turu_kimlik", "Numara Türü");
     private static KartTanimi NumaraSatis() =>
         NumaraKarti("numara-satis", "public.v_numara_turu_satis", "Satış Belgesi Türü");
     private static KartTanimi NumaraAlis() =>

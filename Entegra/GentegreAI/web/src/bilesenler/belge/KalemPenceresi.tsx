@@ -6,7 +6,7 @@ import {
   type SatirDurumu, satirTutari, adetKaydir, KDV_ORANLARI,
 } from '../../sayfalar/belgeSatir';
 import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
-import { baslangicBrutMetni, moduCevir } from '../../sayfalar/belgeKarti/kdvModu';
+import { baslangicBrutMetni, bruta, moduCevir } from '../../sayfalar/belgeKarti/kdvModu';
 import { IzlemPenceresi } from './IzlemPenceresi';
 import { EK_KATKILI_ROTALAR, SAF_SGK_ROTA } from '../../sayfalar/belgeKartiKurallari';
 
@@ -197,8 +197,22 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    * KUTUYA YAZDIGI sayiyla ayni dilde konusmali - "100 TL dahil" yazip altta
    * 83,33 gormek, fiyati yanlis girdim sanisi veriyordu.
    */
-  const kdvCarpani = 1 + (Number(r.kdv) || 0) / 100;
-  const onizlemeTutar = kdvDahil ? tutar * kdvCarpani : tutar;
+  /**
+   * BRUT, MATRAHI CARPARAK DEGIL KULLANICININ YAZDIGI SAYIDAN (kullanici:
+   * "fiyat ekranina 500 girdim, altta onizlemede 500,01 gorundu").
+   *
+   * Dahil modunda kutuya yazilan BRUTTUR; satira matrah olarak cevrilip
+   * saklanir. Onizleme ise ters yone gidiyordu: 500 / 1,10 = 454,5455,
+   * satir tutari 454,55'e yuvarlaniyor, x 1,10 = 500,005 -> 500,01. Kurus
+   * bir kez yuvarlandiktan sonra geri gelmiyor.
+   *
+   * Dogrusu brut fiyati TABAN almak; satir tutari yuvarlamasi ona uygulanir.
+   * Sunucu da ayni kurali izler - dip toplamda KDV "brut tutar - matrah
+   * tutar"dir, orandan hesaplanmaz (`BelgeDeposu.Yazma`).
+   */
+  const brutFiyat = kdvDahil ? (hamSayi(brutMetni) || bruta(fiyat, r.kdv)) : fiyat;
+  const onizlemeTutar = kdvDahil
+    ? satirTutari(adet, brutFiyat, r.iskonto, r.iskonto2) : tutar;
   /**
    * KATKI (HASTA EK KATKISI) KUTUSU (586) - yalniz TTB/HUV ve SUT tarifesinde
    * ve kalemin katkisi VARSA. Özel tarifede boyle bir ayrim yok: tek fiyat
@@ -254,7 +268,11 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    */
   const iskontoTabani = sgkKilitli ? hamSayi(r.katkiTutar ?? '0') : fiyat;
   const iskontoluBirim = satirTutari(1, iskontoTabani, r.iskonto, r.iskonto2);
-  const onizlemeBirim = kdvDahil ? iskontoluBirim * kdvCarpani : iskontoluBirim;
+  // Iskontolu birim de brut tabandan (yukaridaki ayni gerekce).
+  const onizlemeBirim = kdvDahil
+    ? satirTutari(1, sgkKilitli ? bruta(iskontoTabani, r.kdv) : brutFiyat,
+                  r.iskonto, r.iskonto2)
+    : iskontoluBirim;
   /** Iskonto gercekten var mi - yoksa satir ust kutunun kopyasi olurdu. */
   const iskontoluMu = Math.abs(iskontoTabani - iskontoluBirim) > 0.004;
 
@@ -498,7 +516,10 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                 <span className="alan-notu">
                   {adet.toLocaleString('tr-TR')} × katkı
                   {hamSayi(r.iskonto) > 0 || hamSayi(r.iskonto2) > 0 ? ' − iskonto' : ''}
-                  {' = '}{para.format(kdvDahil ? katkiTutari * kdvCarpani : katkiTutari)}
+                  {' = '}{para.format(kdvDahil
+                      ? satirTutari(adet, bruta(hamSayi(r.katkiTutar ?? '0'), r.kdv),
+                                    r.iskonto, r.iskonto2)
+                      : katkiTutari)}
                   {' · kalanı kurum öder'}
                 </span>
               </label>

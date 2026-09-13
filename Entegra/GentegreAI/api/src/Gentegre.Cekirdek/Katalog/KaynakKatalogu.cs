@@ -236,6 +236,7 @@ public static partial class KaynakKatalogu
         Ekle(ZamanliIs());
         Ekle(NumaraHasta());
         Ekle(NumaraBasvuru());
+        Ekle(NumaraHastaBelge());
         Ekle(NumaraSatis());
         Ekle(NumaraAlis());
         Ekle(NumaraTahsilat());

@@ -820,7 +820,9 @@ public static class MuayeneUclari
                     insert into public.radyoloji_istem
                            (sube_id, belge_id, hasta_id, hizmet_id, modalite, durum, oncelik,
                             istek_hekim_id, on_tani, klinik_bilgi, aciklama, accession_no)
-                    values (@p0, @p1, @p2, @p3, @p8, 1, @p4, @p5, @p6, @p7, @p7, '')
+                    values (@p0, @p1, @p2, @p3, @p8, 1, @p4, @p5, @p6, @p7, @p7,
+                            public.fn_numara_kimlik_uret(903, @p0, 'radyoloji_istem',
+                                                         'accession_no', current_date))
                     returning id
                     """, islem,
                     [m.SubeId, m.BelgeId, m.HastaId, istek.HizmetId,
@@ -1010,10 +1012,16 @@ public static class MuayeneUclari
             if (b is null) return Results.NotFound(new { hata = new
                 { kod = "BULUNAMADI", mesaj = "Basvuru bulunamadi." } });
 
+            // MUAYENE NO AYARDAN (634): `numara_sablonu` tur 902 satiri varsa
+            //   numara verilir, yoksa BOS kalir - bugunku davranis. Kolon
+            //   bastan beri vardi ama hic doldurulmuyordu; numarasi olmayan
+            //   bir alana kendiliginden numara basmak, kurumun istemedigi bir
+            //   kimligi kayitlara yazmak olurdu.
             var muayeneId = b.MuayeneId ?? await baglanti.TekDegerAsync<int>("""
                 insert into public.muayene (belge_id, taraf_id, sube_id, bolum_id, personel_id,
-                                            muayene_tarihi, tur, durum, ekleyen)
-                values (@p0, @p1, @p2, @p3, @p4, now(), 1, 1, @p5)
+                                            muayene_tarihi, tur, durum, ekleyen, muayene_no)
+                values (@p0, @p1, @p2, @p3, @p4, now(), 1, 1, @p5,
+                        public.fn_numara_kimlik_uret(902, @p2, 'muayene', 'muayene_no', current_date))
                 returning id
                 """, islem, [belgeId, b.TarafId, b.SubeId, b.BolumId, b.PersonelId,
                              baglam.KullaniciId], iptal);

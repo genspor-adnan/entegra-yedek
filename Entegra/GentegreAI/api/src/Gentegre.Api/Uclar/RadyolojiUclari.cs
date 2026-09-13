@@ -371,10 +371,16 @@ public static partial class RadyolojiUclari
                              istek_hekim_id, istek_kurum_id, dis_hekim_ad, on_tani, klinik_bilgi,
                              kontrast, ekleyen,
                              mwl_istendi, sms_istendi, hazirlik_verildi, cd_istendi,
-                             randevu_id)
+                             randevu_id, accession_no)
                         values (@p0, @p1, @p2, @p3, @p4, 1, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12,
                                 coalesce(@p13, 1), coalesce(@p14, 1),
-                                coalesce(@p15, 1), coalesce(@p16, 0), @p17)
+                                coalesce(@p15, 1), coalesce(@p16, 0), @p17,
+                                -- ACCESSION NO AYARDAN (634): tur 903 sablonu
+                                --   varsa numara verilir, yoksa BOS kalir
+                                --   (bugunku davranis). DICOM/MWL tarafinda
+                                --   istemi taniyan numara budur.
+                                public.fn_numara_kimlik_uret(903, @p0, 'radyoloji_istem',
+                                                             'accession_no', current_date))
                         returning id
                         """, islem,
                         [baglam.SubeId, belgeId, istek.HastaId, t.HizmetId, modalite,

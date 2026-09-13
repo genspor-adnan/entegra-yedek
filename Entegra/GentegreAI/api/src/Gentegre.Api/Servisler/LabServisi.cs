@@ -23,20 +23,82 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
 
     public sealed record IstemSatiriIstegi(int? TetkikId, int? PanelId);
 
+    /// <summary>İstemin kim/kime/nerede üçlüsü - başvurudan ya da dıştan.</summary>
+    private sealed record IstemKaynagi(int HastaId, int HekimId, int SubeId);
+
+    /// <summary>
+    /// DIŞ KURUM NUMUNESİ İÇİN KAYNAK (637).
+    ///
+    /// Gönderen kurum ve hasta ZORUNLU, ikisi de doğrulanır:
+    ///   * Kurum yoksa fatura kime kesilecek, sonuç kime teslim edilecek
+    ///     belirsiz kalır - `ck_lab_istem_kaynak_baglanti` de bunu istiyor.
+    ///   * Hasta yoksa sonuç hiçbir dosyaya yazılamaz. "İsimsiz tüp" kabul
+    ///     etmek, sonucu sisteme girip kimseye bağlamamak olurdu.
+    ///
+    /// HEKİM YOK: isteyen hekim dış kurumdadır, bizim personel listemizde
+    /// değil. `personel_id` boş bırakılır - yerine bir kullanıcı yazmak,
+    /// istemi yapmayan birini isteyen göstermek olurdu.
+    ///
+    /// ŞUBE oturumdan gelir: numuneyi kabul eden laboratuvar hangisiyse.
+    /// </summary>
+    private async Task<IstemKaynagi> DisKaynakAsync(
+        NpgsqlConnection baglanti, NpgsqlTransaction islem,
+        int? hastaId, int? disKurumId, IstekBaglami baglam, CancellationToken iptal)
+    {
+        if (disKurumId is not > 0)
+            throw GentegreHatasi.Dogrulama(
+                "Başvurusuz istemde numuneyi gönderen kurum seçilmeli.",
+                [new("disKurumId", "Dış kurum seçin ya da hastanın başvurusundan istem açın.")]);
+        if (hastaId is not > 0)
+            throw GentegreHatasi.Dogrulama(
+                "Numunenin hastası seçilmeli - sonuç bir kişinin sonucudur.",
+                [new("hastaId", "Hasta seçin; kayıtlı değilse önce hasta kartı açın.")]);
+
+        var hastaVar = await baglanti.TekDegerAsync<int>(
+            "select count(*) from public.taraf_hasta where id = @p0",
+            islem, [hastaId.Value], iptal);
+        if (hastaVar == 0)
+            throw GentegreHatasi.Bulunamadi("Hasta bulunamadı.");
+
+        var kurumVar = await baglanti.TekDegerAsync<int>(
+            "select count(*) from public.taraf_kurum where id = @p0",
+            islem, [disKurumId.Value], iptal);
+        if (kurumVar == 0)
+            throw GentegreHatasi.Bulunamadi("Dış kurum bulunamadı.");
+
+        return new IstemKaynagi(hastaId.Value, 0, baglam.SubeId ?? 0);
+    }
+
     public sealed record SonucIstegi(int IstemSatirId, string Deger, string? Birim,
                                      string? Yorum, decimal? Dilusyon);
 
     // ================================================================== istem
 
     /// <summary>
-    /// Başvurudan istem açar; panel satırları tetkiklerine açılır.
+    /// İstem açar; panel satırları tetkiklerine açılır.
     ///
     /// NUMUNE PLANI OTOMATİK: aynı tüp tipindeki tetkikler TEK barkoda bağlanır.
     /// Her tetkiğe ayrı tüp, hastadan gereksiz kan almak demekti.
+    ///
+    /// <para><b>İKİ GİRİŞ YOLU (637):</b> istem ya bir BAŞVURUYA ya bir DIŞ
+    /// KURUMA bağlıdır.</para>
+    ///
+    /// <para><b>Başvurulu</b> (<paramref name="belgeId"/> dolu): hasta burada.
+    /// Hasta, hekim ve şube başvurudan okunur; ücretlendirme, provizyon ve
+    /// e-Nabız hep o başvuru üzerinden yürür.</para>
+    ///
+    /// <para><b>Dış kurum numunesi</b> (<paramref name="disKurumId"/> dolu):
+    /// NUMUNE gelir, hasta gelmez. Başvuru açmak yapay olurdu - hasta kabul
+    /// edilmedi, muayenesi yok, e-Nabız'a "hasta kabul" bildirmek yanlış olur
+    /// ve fatura hastaya değil gönderen kuruma kesilir. Hasta kimliği yine
+    /// ZORUNLU: sonuç bir kişinin sonucudur, kimsesiz bir tüp hiçbir dosyaya
+    /// yazılamaz.</para>
     /// </summary>
-    public async Task<int> IstemAcAsync(int belgeId, IReadOnlyList<IstemSatiriIstegi> satirlar,
+    public async Task<int> IstemAcAsync(int? belgeId, IReadOnlyList<IstemSatiriIstegi> satirlar,
                                         short oncelik, string klinikBilgi, string taniIcd,
-                                        IstekBaglami baglam, CancellationToken iptal)
+                                        IstekBaglami baglam, CancellationToken iptal,
+                                        int? hastaId = null, int? disKurumId = null,
+                                        short? kaynakKodu = null)
     {
         if (satirlar.Count == 0)
             throw GentegreHatasi.IsKurali("En az bir tetkik ya da panel seçilmeli.");
@@ -44,33 +106,53 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
         await using var baglanti = await _veri.AcAsync(iptal);
         await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-        var b = await baglanti.TekAsync("""
-            select b.taraf_id, coalesce(bb.personel_id, 0), b.sube_id
-              from public.belge b
-              left join public.belge_basvuru bb on bb.id = b.id
-             where b.id = @p0
-            """, islem, [belgeId],
-            o => new { HastaId = o.GetInt32(0), HekimId = o.GetInt32(1),
-                       SubeId = o.GetInt32(2) }, iptal)
-            ?? throw GentegreHatasi.Bulunamadi("Başvuru bulunamadı.");
+        // KAYNAK (433): 1 muayene istemi · 3 banko · 4 dış kurum · 5 check-up.
+        //
+        // BELGELİ İSTEMİN KAYNAĞINI ÇAĞIRAN SÖYLER (kullanici: "lab istemi
+        //   kaynak muayene olmus, banko olmali degil mi"). Hepsini "muayene
+        //   istemi" saymak yanlıştı: kayıt kabulde ücretlendirilip açılan
+        //   istemi hekim istememiştir - hasta daha muayeneye girmemiş
+        //   olabilir. Kaynak kabul kararını değiştiriyor (banko numunesi
+        //   hemen alınır, muayene istemi hekimin yazdığı sıraya girer), o
+        //   yüzden doğru yazılmalı.
+        var disMi = belgeId is not > 0;
+        short kaynak = disMi ? (short)4 : (kaynakKodu ?? 1);
 
-        var istemNo = await baglanti.TekDegerAsync<string>("""
-            select 'LAB-' || to_char(current_date, 'YYYY') || '/' ||
-                   public.fn_numara_sirada(
-                       'lab_istem.istem_no|Y' || to_char(current_date, 'YYYY'),
-                       'lab_istem', 'istem_no',
-                       'yil ' || to_char(current_date, 'YYYY'), 5, 1)
-            """, islem, [], iptal) ?? "";
+        var b = disMi
+            ? await DisKaynakAsync(baglanti, islem, hastaId, disKurumId, baglam, iptal)
+            : await baglanti.TekAsync("""
+                select b.taraf_id, coalesce(bb.personel_id, 0), b.sube_id
+                  from public.belge b
+                  left join public.belge_basvuru bb on bb.id = b.id
+                 where b.id = @p0
+                """, islem, [belgeId!.Value],
+                o => new IstemKaynagi(o.GetInt32(0), o.GetInt32(1), o.GetInt32(2)), iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Başvuru bulunamadı.");
+
+        // ISTEM NUMARASI TETIKTEN (641): burada uretilmiyor artik. Kart
+        //   uzerinden acilan istem bu yoldan gecmiyor ve numarasiz
+        //   kaliyordu; numarayi TABLONUN tetigine tasimak, hangi yoldan
+        //   yazilirsa yazilsin ayni sayaci kullandiriyor. Yanitta donen
+        //   numara kayittan okunur (`IstemOzetAsync`).
 
         var istemId = await baglanti.TekDegerAsync<int>("""
             insert into public.lab_istem
                    (belge_id, taraf_id, sube_id, istem_no, istem_tarihi, bolum,
                     personel_id, durum, oncelik, kaynak, klinik_bilgi, tani_icd, ekleyen)
-            values (@p0, @p1, @p2, @p3, now(), 1, @p4, 1, @p5, 1, @p6, @p7, @p8)
+            values (@p0, @p1, @p2, '', now(), 1, @p3, 1, @p4, @p8, @p5, @p6, @p7)
             returning id
             """, islem,
-            [belgeId, b.HastaId, b.SubeId, istemNo, b.HekimId == 0 ? null : b.HekimId,
-             oncelik, klinikBilgi, taniIcd, baglam.KullaniciId], iptal);
+            [belgeId is > 0 ? belgeId : null, b.HastaId, b.SubeId,
+             b.HekimId == 0 ? null : b.HekimId,
+             oncelik, klinikBilgi, taniIcd, baglam.KullaniciId, kaynak], iptal);
+
+        // DIS KURUM AYRI YAZILIR: kolonu insert listesine koymak, basvurulu
+        //   istemde de null tasimak demekti - tek satirlik update okumayi
+        //   kolaylastiriyor ve "yalniz dis istemde dolu" kurali goz onunde.
+        if (disMi)
+            await baglanti.CalistirAsync(
+                "update public.lab_istem set dis_kurum_id = @p1 where id = @p0",
+                islem, [istemId, disKurumId!.Value], iptal);
 
         // Panel -> tetkik acilimi. Ayni tetkik iki panelden gelirse BIR KEZ
         //   istenir: hastadan iki kez para alinmasi ve iki kez calisilmasi
@@ -78,7 +160,14 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
         var tetkikler = new List<(int TetkikId, int? PanelId)>();
         foreach (var s in satirlar)
         {
-            if (s.PanelId is > 0)
+            // TETKİK VERİLDİYSE PANEL AÇILMAZ (638): satır hem tetkiği hem
+            //   geldiği paneli taşıyabiliyor (`panel_id` yalnız köken bilgisi -
+            //   rapor "hangi panelden" diye gösteriyor). Panel dalı önce
+            //   bakarsa içerik ikinci kez açılır ve süzgeçten geçmiş tetkikler
+            //   geri gelirdi.
+            if (s.TetkikId is > 0)
+                tetkikler.Add((s.TetkikId.Value, s.PanelId));
+            else if (s.PanelId is > 0)
             {
                 // PANEL OZYINELI ACILIR (500/501): icerik tek kaynakta
                 //   (`hizmet_paket`) ve panel icinde panel olabiliyor
@@ -95,8 +184,6 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
                     """, islem, [s.PanelId.Value], o => o.GetInt32(0), iptal);
                 foreach (var t in pt) tetkikler.Add((t, s.PanelId));
             }
-            else if (s.TetkikId is > 0)
-                tetkikler.Add((s.TetkikId.Value, null));
         }
 
         var tekil = tetkikler.GroupBy(x => x.TetkikId).Select(g => g.First()).ToList();
@@ -144,6 +231,94 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
 
         await islem.CommitAsync(iptal);
         return istemId;
+    }
+
+    /// <summary>
+    /// BAŞVURU KAYDEDİLDİ: ücretlendirilmiş tetkikler için istem AÇILIR
+    /// (kullanici: "kaydet yapildiginda tahliller varsa ve istem
+    /// acilmadiysa istem ac").
+    ///
+    /// Kayıt kabul tetkiki ÜCRET SATIRI olarak giriyor; istem ayrı bir adım
+    /// olarak kalıyordu ve atlanınca tetkik laboratuvara hiç düşmüyordu -
+    /// hastadan para alınmış, tüp istenmemiş oluyordu.
+    ///
+    /// <para><b>YALNIZ İSTEMİ AÇILMAMIŞ TETKİKLER:</b> başvuru her
+    /// kaydedildiğinde çalışır; zaten istemi olan tetkik ikinci kez
+    /// istenmez - hastadan iki kez tüp alınması ve iki kez çalışılması
+    /// olmasın. Yeni tetkik eklenirse yalnız o tetkik için istem açılır.</para>
+    ///
+    /// <para><b>SESSİZDİR:</b> istem açılamazsa başvuru kaydı DÜŞMEZ - hasta
+    /// kaydı birincil iştir, laboratuvar istemi onun sonucu. Hata günlüğe
+    /// yazılır.</para>
+    /// </summary>
+    public async Task<int> BasvurudanIstemTamamlaAsync(int belgeId, IstekBaglami baglam,
+                                                       CancellationToken iptal)
+    {
+        try
+        {
+            // ÜCRET SATIRI İKİ TÜRLÜ LABORATUVAR İŞİ OLABİLİR (638):
+            //   * TEK TETKİK - hizmetin `lab_tetkik` karşılığı var (CRP, TSH…)
+            //   * PANEL      - hizmetin `lab_panel` karşılığı var. Hemogram
+            //     SUT'ta TEK kalemdir ama laboratuvar lökosit/hemoglobin/
+            //     trombositi ayrı sonuç verir; panel `hizmet_paket` içeriğine
+            //     açılır ve üçü aynı tüpe bağlanır.
+            //   Paneli atlayıp yalnız tetkiğe bakmak, hemogram gibi
+            //   faturalanan her paketi görmezden gelmek olurdu.
+            //
+            // "ZATEN İSTEMİ VAR MI" SORUSU YAPRAK TETKİK ÜZERİNDEN: panel de
+            //   sonunda tetkiklere açılıyor, o yüzden iki tür aynı ölçüyle
+            //   karşılaştırılır - panel bir kez istenmişse ikinci kez istenmez.
+            var acilacak = await _veri.ListeAsync("""
+                with kalem as (
+                    select distinct bs.hizmet_id
+                      from public.belge_satir bs
+                     where bs.belge_id = @p0 and bs.hizmet_id is not null
+                ),
+                -- Yaprak tetkikler: dogrudan bagli olan + panel icerigi.
+                aday as (
+                    select t.id as tetkik_id, null::integer as panel_id
+                      from kalem k
+                      join public.lab_tetkik t
+                        on t.hizmet_id = k.hizmet_id and t.durum = 0
+                    union all
+                    select t.id, p.id
+                      from kalem k
+                      join public.lab_panel p
+                        on p.hizmet_id = k.hizmet_id and p.durum = 0
+                      join public.fn_hizmet_paket_ac(p.hizmet_id, 1) a on true
+                      join public.lab_tetkik t
+                        on t.hizmet_id = a.hizmet_id and t.durum = 0
+                )
+                select distinct a.tetkik_id, a.panel_id
+                  from aday a
+                 where not exists (
+                         select 1 from public.lab_istem i
+                           join public.lab_istem_satir s on s.istem_id = i.id
+                          where i.belge_id = @p0 and s.tetkik_id = a.tetkik_id)
+                 order by a.tetkik_id
+                """, [belgeId],
+                o => new IstemSatiriIstegi(o.GetInt32(0),
+                                           o.IsDBNull(1) ? null : o.GetInt32(1)),
+                iptal);
+
+            if (acilacak.Count == 0) return 0;
+
+            // SATIRLAR TETKİK OLARAK GİDER, PANEL OLARAK DEĞİL: panel burada
+            //   zaten açıldı. `IstemAcAsync`'e panel verseydik içeriği ikinci
+            //   kez açılır, "istemi var mı" süzgecinden geçmiş tetkikler geri
+            //   gelirdi. `panel_id` yalnız satırın hangi panelden doğduğunu
+            //   söylemek için taşınıyor - rapor onu gösteriyor.
+            // BAŞVURUDAN AÇILAN İSTEM "BANKO" (3): kayıt kabul ücretlendirdi,
+            //   hekim istemedi. "Muayene istemi" (1) yalnız hekimin muayene
+            //   sırasında açtığı istemdir (`MuayeneUclari`).
+            return await IstemAcAsync(belgeId, acilacak, 1, "", "", baglam, iptal,
+                                      kaynakKodu: 3);
+        }
+        catch (Exception h)
+        {
+            _gunluk.LogError(h, "Basvurudan lab istemi acilamadi (belge {Id})", belgeId);
+            return 0;
+        }
     }
 
     /// <summary>
@@ -524,8 +699,13 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
     /// Onay: 1 teknik (teknisyen), 2 uzman. Uzman onayı sonucu YAYINLAR.
     /// Onaylı sonuç bir daha değişmez - düzeltme ayrı bir işlemdir.
     /// </summary>
-    public async Task<string> OnaylaAsync(long sonucId, short asama, IstekBaglami baglam,
-                                          CancellationToken iptal)
+    /// <param name="istemId">
+    /// Onaylanan sonucun istemi - cagirana DONER cunku e-Nabiz 105 paketi
+    /// istem basina uretilir (632) ve ucun ayni sorguyu ikinci kez yazmasi
+    /// gerekmesin.
+    /// </param>
+    public async Task<(string Mesaj, int IstemId)> OnaylaAsync(
+        long sonucId, short asama, IstekBaglami baglam, CancellationToken iptal)
     {
         var alan = asama == 1 ? "teknik_onay" : "onay";
         var yeniDurum = asama == 1 ? 2 : 3;
@@ -556,7 +736,8 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
             """, null, [sonucId], iptal);
         await IstemDurumTazeleAsync(baglanti, null, istemId, iptal);
 
-        return asama == 1 ? "Teknik onay verildi." : "Sonuç onaylandı ve yayınlandı.";
+        return (asama == 1 ? "Teknik onay verildi." : "Sonuç onaylandı ve yayınlandı.",
+                istemId);
     }
 
     /// <summary>

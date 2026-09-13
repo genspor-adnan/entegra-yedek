@@ -28,9 +28,12 @@ describe('asama sirasi odeyen kuruma gore', () => {
       .toEqual(['Başvuru', 'Ücretlendirme', 'Tahsilat', 'Belge Kesimi']);
   });
 
-  it('ÖSS: provizyon UCRETLENDIRMEDEN ONCE (police kapsami once bilinmeli)', () => {
+  // PROVIZYON HER ZAMAN UCRETLENDIRMEDEN SONRA (kullanici). Eskiden ÖSS'de
+  //   ucretin ONUNDEYDI; istek kalemler uzerinden gittigi icin o sira
+  //   yapilamayacak bir akisi oneriyordu.
+  it('ÖSS: provizyon UCRETLENDIRMEDEN SONRA', () => {
     expect(adlar({ kurumTuru: KURUM_OSS }))
-      .toEqual(['Başvuru', 'Provizyon', 'Ücretlendirme', 'Tahsilat', 'Belge Kesimi']);
+      .toEqual(['Başvuru', 'Ücretlendirme', 'Provizyon', 'Tahsilat', 'Belge Kesimi']);
   });
 
   it('SGK: provizyon UCRETLENDIRMEDEN SONRA (takip girilen hizmetler uzerinden)', () => {
@@ -38,13 +41,13 @@ describe('asama sirasi odeyen kuruma gore', () => {
       .toEqual(['Başvuru', 'Ücretlendirme', 'Provizyon', 'Tahsilat', 'Belge Kesimi']);
   });
 
-  it('TSS/Karma akisi SGK ile ayni: provizyon UCRETTEN SONRA', () => {
+  it('ALT KURUM (TSS/Karma) SIRAYI DEGISTIRMEZ - hepsi ayni akis', () => {
     // TSS ve Karma ARTIK KURUM TURU DEGIL, OSS sozlesmesinin alt kurumu
-    //   (468): asil odeyici SGK oldugu icin akis SGK ile aynidir.
-    expect(adlar({ kurumTuru: KURUM_OSS, altKurum: ALT_TSS }))
-      .toEqual(['Başvuru', 'Ücretlendirme', 'Provizyon', 'Tahsilat', 'Belge Kesimi']);
-    expect(adlar({ kurumTuru: KURUM_OSS, altKurum: ALT_KARMA }))
-      .toEqual(['Başvuru', 'Ücretlendirme', 'Provizyon', 'Tahsilat', 'Belge Kesimi']);
+    //   (468). Sira artik alt kuruma da bakmiyor; bu test onun sessizce
+    //   geri gelmedigini bekler.
+    for (const alt of [undefined, ALT_TSS, ALT_KARMA])
+      expect(adlar({ kurumTuru: KURUM_OSS, altKurum: alt }))
+        .toEqual(['Başvuru', 'Ücretlendirme', 'Provizyon', 'Tahsilat', 'Belge Kesimi']);
   });
 
   it('kurum SECILMEMISSE ozel akisi cizilir', () => {
@@ -53,9 +56,12 @@ describe('asama sirasi odeyen kuruma gore', () => {
   });
 
   it('her asama kendi rengini tasir', () => {
+    // Renk ASAMANIN kimligidir, seritteki yerinin degil: provizyon nerede
+    //   cizilirse cizilsin turuncudur. Sira degisince renk dizisi de
+    //   degisti - kirmizi · sari · turuncu · mavi · yesil.
     const renkler = basvuruAsamalari(g({ kurumTuru: KURUM_OSS }))
       .asamalar.map(a => a.renk);
-    expect(renkler).toEqual(['kirmizi', 'turuncu', 'sari', 'mavi', 'yesil']);
+    expect(renkler).toEqual(['kirmizi', 'sari', 'turuncu', 'mavi', 'yesil']);
   });
 });
 

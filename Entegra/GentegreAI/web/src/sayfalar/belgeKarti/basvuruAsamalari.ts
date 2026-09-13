@@ -6,14 +6,15 @@
  * Yapilmayan asama GRI, yapilan kendi rengiyle dolar; hepsi dolunca (%100)
  * basvuru tamamlanmistir.
  *
- * SIRA ODEYEN KURUMA GORE DEGISIR (kullanici) - provizyonun yeri farkli:
- *   Özel (1)  Başvuru · Ücretlendirme · Tahsilat · Faturalama
- *   ÖSS  (2)  Başvuru · PROVIZYON · Ücretlendirme · Tahsilat · Faturalama
- *   SGK  (3)  Başvuru · Ücretlendirme · PROVIZYON · Tahsilat · Faturalama
+ * SIRA ODEYEN KURUMA GORE DEGISIR - ama yalniz provizyonun VAR OLUP
+ * OLMADIGI konusunda:
+ *   Özel (1)      Başvuru · Ücretlendirme · Tahsilat · Faturalama
+ *   ÖSS/SGK (2,3) Başvuru · Ücretlendirme · PROVIZYON · Tahsilat · Faturalama
  *
- * Ozel sigortada provizyon ONCE alinir (police kapsami belli olmadan islem
- * fiyatlanmaz); SGK'da once hizmet girilir, takip/provizyon o hizmetler
- * uzerinden alinir. Sira kozmetik degil, akisin kendisidir.
+ * Hasta kendi oderken alinacak provizyon yoktur, asama hic cizilmez. Kurum
+ * oderken provizyon ucretlendirmeden SONRA gelir: istek kalemler uzerinden
+ * gidiyor (her satirin kimligi `hospitalRowNumber`), kalem girilmeden
+ * provizyon istenemiyor.
  */
 
 /**
@@ -125,17 +126,21 @@ export function basvuruAsamalari(g: AsamaGirdisi): AsamaSonucu {
          : 'Fiş / fatura / tahakkuk kesilmedi.',
   };
 
-  // ÖSS'de provizyon UCRETTEN ONCE, SGK tarafinda SONRA (kullanici).
-  //   TSS ve KARMA'da da provizyon SGK'dan baslar: alt kurum bunu soyler,
-  //   kurum turu degil (468).
-  const alt = Number(g.altKurum ?? 0);
-  const sgkTarafi = tur === KURUM_SGK || alt === ALT_TSS || alt === ALT_KARMA;
+  // PROVIZYON HER ZAMAN UCRETLENDIRMEDEN SONRA (kullanici; onceki karar
+  //   ÖSS'de provizyonu ucretin ONUNE koyuyordu, degisti).
+  //
+  //   Gerekce: provizyon istegi KALEMLER uzerinden gidiyor - gonderilen her
+  //   satirin kimligi `hospitalRowNumber` (= belge_satir.id) ve sirketin
+  //   dondugu tutar kirilimi o satirlara oturuyor. Kalem girilmeden provizyon
+  //   istenemiyor zaten ("Başvuruda ücretlendirilmiş kalem yok"). Seridi
+  //   ÖSS'de tersine dizmek, yapilamayacak bir sirayi oneriyordu.
+  //
+  //   Böylece provizyonlu her kurum ayni sirayi izler; sekme seridi de
+  //   (`belgeSabitleri.SEKMELER`) ayni: Ücretlendirme · Provizyon.
   const asamalar: Asama[] =
-    tur === KURUM_OSS && !sgkTarafi
-      ? [basvuru, provizyon, ucret, tahsilat, fatura]
-  : tur === KURUM_OSS || tur === KURUM_SGK
+    tur === KURUM_OSS || tur === KURUM_SGK
       ? [basvuru, ucret, provizyon, tahsilat, fatura]
-  : [basvuru, ucret, tahsilat, fatura];
+      : [basvuru, ucret, tahsilat, fatura];
 
   // Provizyonsuz kurumda (Özel) asama hic cizilmez - kullanilmayan asama
   //   yuzdeyi de bozmamali; bu yuzden yuzde CIZILEN asamalardan hesaplanir.

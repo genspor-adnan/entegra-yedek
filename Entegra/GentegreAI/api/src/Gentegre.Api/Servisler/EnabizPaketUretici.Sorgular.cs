@@ -23,6 +23,31 @@ public sealed partial class EnabizPaketUretici
     private static string AlanSorgusu(string paketKodu)
         => paketKodu switch
         {
+            // 105 LABORATUVAR SONUC - ILK SURUM, SEMA HENUZ BILINMIYOR (632).
+            //
+            // Rehber paket ADINI veriyor, eleman adlarini vermiyor. 102, 103
+            //   ve 106'nin zorunlu alanlari da kilavuzdan degil USS'nin hata
+            //   mesajlarindan cikmisti: paket gonderilir, servis eksik
+            //   elemanlari ADIYLA sayar, sema o yanittan yazilir.
+            //
+            // Bu yuzden simdilik yalniz SYSTakipNo var. SONUC GRUBU ACILMIYOR:
+            //   "acilan grubun ici tam olmali" kurali geregi, adlarini
+            //   bilmeden yarim bir grup gondermek olmayan bir tetkiki
+            //   bildirmek olurdu. Tetkikler `lab_istem_satir`'da hazir
+            //   bekliyor (kod, ad, sonuc, birim, referans, isaret,
+            //   sonuc_tarihi) - eleman adlari ogrenilince tekrarli grup
+            //   olarak buraya eklenecek.
+            //
+            // KAYNAK `lab_istem.id`; takip numarasi istemin BELGESINDEN gelir.
+            "LAB_SONUC" => """
+                select 'HASTA_TAKIP_BILGISI/SYSTakipNo',
+                       coalesce(bb.sys_takip_no, ''),
+                       'belge_basvuru.sys_takip_no', '', '', ''
+                  from public.lab_istem i
+                  join public.belge_basvuru bb on bb.id = i.belge_id
+                 where i.id = @p0
+                """,
+
             // 301 HASTA KAYIT SILME - 101'in USS'deki karsiligini siler (602).
             //   Tek alani, 101'in yanitinda donen SYSTakipNo'dur; ayni
             //   basvurunun gonderilmis paketinden okunur. Alan olarak da

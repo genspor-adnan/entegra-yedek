@@ -316,6 +316,19 @@ public static class EnabizUclari
                 if (silme is null)
                     throw GentegreHatasi.IsKurali("Silme paketi uretilemedi.");
 
+                // URETICI MEVCUDU DA DONDURUR (ayni icerik -> ayni paket).
+                //   Donen paket ZATEN GONDERILMISSE kuyruga hicbir sey
+                //   girmedi; "kuyruga alindi" demek kullaniciyi bekleyen bir
+                //   is oldugu sanisina birakirdi.
+                if (silme.Durum is 3 or 6)
+                    return Results.Ok(new
+                    {
+                        id, silmePaketId = silme.PaketId, silmePaketNo = silme.PaketNo,
+                        mesaj = $"Bu kayit icin silme paketi ({(p.Kod == "102" ? "302" : "301")}) "
+                              + $"zaten gonderilmis ({silme.PaketNo}). Yeni bir istek uretilmedi.",
+                        izlemeNo = baglam.IzlemeNo
+                    });
+
                 // Silme paketi kaynagin takip numarasini TASIR: govde ondan
                 //   uretiliyor (EnabizGonderimi.XmlUretAsync, 605).
                 await veri.CalistirAsync("""

@@ -77,10 +77,24 @@ public sealed record PoliceIstegi(
     string KimlikNo, short KimlikTipi, string PoliceNo, DateTime Tarih,
     HekimBilgisi Hekim);
 
+/// <param name="HamIstek">
+/// GONDERILEN govde. Provizyon sonucunda vardi, police sonucunda yoktu -
+/// gunluge de `null` geciliyordu: basarisiz bir police sorgusunda elimizde
+/// yalniz yanit kaliyor, "biz ne gonderdik" sorusu cevapsiz kaliyordu.
+/// Hatanin bizde mi karsida mi oldugunu ayirt etmenin tek yolu bu.
+/// </param>
+/// <param name="Basarili">
+/// SORGU YAPILABILDI MI - `Gecerli` ile ayni sey DEGIL. "Sirket poliçenin
+/// geçersiz olduğunu söyledi" ile "sirkete ulasamadik" ayri seylerdir; ikisini
+/// tek bayrakta toplamak ag hatasini "poliçe geçersiz" diye raporluyordu.
+/// Poliçe kaydi bir BEYANDIR (ihtilafta "o gun poliçe geçerliydi/degildi"
+/// kaniti) - ulasilamayan servis icin boyle bir beyanda bulunamayiz.
+/// </param>
 public sealed record PoliceSonucu(
     bool Gecerli, string PoliceNo, string PoliceAdi, short PoliceTipi,
     short PoliceTuru, string KartNo, string MusteriNo, string AgKodu,
-    IReadOnlyList<string> Notlar, string HamYanit);
+    IReadOnlyList<string> Notlar, string HamYanit, string HamIstek = "",
+    bool Basarili = true);
 
 // ------------------------------------------------------------- provizyon ---
 

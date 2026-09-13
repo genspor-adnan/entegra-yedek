@@ -5,6 +5,10 @@ import { api } from '../../api/istemci';
 export interface KurumSozlesmesi {
   id: number; ad: string; altKurum: number; altKurumAdi: string;
   rota: number; tur: number;
+  /** Sozlesme numarasi ve varsayilan karsilama orani (468) - provizyon
+   *  sekmesinin baslangic degerleri bunlardan gelir. */
+  sozlesmeNo?: string;
+  varsayilanKarsilama?: number;
 }
 
 /**

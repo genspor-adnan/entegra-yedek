@@ -192,6 +192,21 @@ public static partial class KaynakKatalogu
             new("disIstem",
                 "case when i.dis_kurum_id is not null then 1 else 0 end",
                                                   "kod",   "Dış İstem", Varsayilan: false),
+            // KAYNAK LISTENIN SONUNDA, ROZET (kullanici). Istemin nereden
+            //   geldigi kabul kararini degistirir (dis numune kurye ile
+            //   gelir, check-up randevuludur) ama satirin basinda degil
+            //   SONUNDA: once "kimin, hangi tetkik, ne durumda" okunur.
+            //   Dis istemde kurum ADI da yazilir - "Dış kurum" tek basina
+            //   hangi kurum sorusunu cevapsiz birakiyordu.
+            new("kaynakAd",
+                "case i.kaynak when 1 then 'Muayene' when 2 then 'Teletıp' "
+                + "             when 3 then 'Banko' when 4 then 'Dış kurum' "
+                + "             when 5 then 'Check-up' else '' end "
+                + "|| case when i.dis_kurum_id is not null "
+                + "        then ' · ' || coalesce(dk.unvan, '') else '' end",
+                                                  "metin", "Kaynak",
+                                                  Hizalama: "orta", Bicim: "rozet",
+                                                  Genislik: 150),
             // PANIK: onay kuyrugunda oncelik bu satirda; listede gorunmezse
             //   panik deger sirasini bekler.
             new("panikSayisi",

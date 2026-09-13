@@ -744,7 +744,12 @@ public sealed partial class BelgeDeposu
     /// <summary>
     /// Silinmemesi gereken belge satirlari: donusmus (kapatilan_miktar) ya da
     /// baska bir kaydin (radyoloji istemi / konsultasyon / UTS bildirimi /
-    /// kurum icmali) isaret ettigi satirlar.
+    /// kurum icmali / sigorta provizyonu) isaret ettigi satirlar.
+    ///
+    /// <para><b>belge_satir'a NO ACTION ile bagli HER tablo burada olmali.</b>
+    /// Eksik kalan tablo kartin bir daha KAYDEDILEMEMESI demek (23503) - hata
+    /// kaydetme aninda ve alakasiz bir mesajla cikiyor. `KorunanSatirTestleri`
+    /// bu listeyi `pg_constraint` ile karsilastirir.</para>
     /// </summary>
     private const string KorunanSatirSql = """
         select s.id from public.belge_satir s
@@ -759,6 +764,15 @@ public sealed partial class BelgeDeposu
                          where u.belge_satir_id = s.id)
              or exists (select 1 from public.kurum_icmal_satir i
                          where i.belge_satir_id = s.id)
+             -- PROVIZYONA GIRMIS SATIR (kullanici: basvuru kaydet ->
+             --   "sigorta_provizyon_satir_belge_satir_id_fkey"): sirkete
+             --   gonderilen satirin kimligi hospitalRowNumber olarak
+             --   provizyonda DURUYOR - yanittaki tutar kirilimi bizim
+             --   satirimiza o numarayla baglaniyor. Satir silinip yeniden
+             --   yazilsa yeni id alir ve kirilim hicbir satira oturmaz;
+             --   veritabani da zaten birakmiyor (NO ACTION).
+             or exists (select 1 from public.sigorta_provizyon_satir sp
+                         where sp.belge_satir_id = s.id)
              -- TAHSILAT DAGITIMI OLAN SATIR: kasa_islem_dagitim satira
              --   CASCADE ile bagli; satir silinip yeniden yazilinca dagitim
              --   (ve ona bagli hakedis_satir) sessizce yok oluyordu. Basvuru

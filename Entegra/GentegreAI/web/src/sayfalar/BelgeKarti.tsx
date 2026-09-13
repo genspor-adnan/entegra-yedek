@@ -28,6 +28,7 @@ import {
 } from '../bilesenler/belge/BasvuruSekmesi';
 import { BelgeAracCubugu } from '../bilesenler/belge/BelgeAracCubugu';
 import { BelgeBaslik } from '../bilesenler/belge/BelgeBaslik';
+import { bruta } from './belgeKarti/kdvModu';
 import { useBelgeTahsilat, tahsilToplami } from './belgeTahsilat';
 import { kartImzasi } from './belgeImza';
 import { yanittanBaslik, yanittanBasvuruBilgi } from './belgeKarti/belgeOkuma';
@@ -727,18 +728,28 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
 
   /** Yalniz ONIZLEME: gercek tutar sunucudan gelir. */
   const onizleme = useMemo(() => {
-    let matrah = 0, kdv = 0;
+    let matrah = 0, brut = 0;
     satirlar.forEach(s => {
       const adet = hamSayi(s.adet);
       const fiyat = hamSayi(s.birimFiyat);
       // Stok fisi vergisizdir (asagida satir da 0 ile gonderilir).
-      const oran = stokFisiMi ? 0 : hamSayi(s.kdv);
       const tutar = stokFisiMi ? adet * fiyat
                                : satirTutari(adet, fiyat, s.iskonto, s.iskonto2);
       matrah += tutar;
-      kdv += tutar * oran / 100;
+      // KDV MATRAHI ORANLA CARPARAK DEGIL, BRUT - MATRAH (kullanici: "500
+      //   girdim, onizlemede 500,01 gorundu"). Satirin brutu kullanicinin
+      //   yazdigi sayidir (`birimFiyatKdvli`); matrah ondan turetildi ve bir
+      //   kez yuvarlandi - ters yone gitmek kurusu geri getirmiyor
+      //   (454,55 x 1,10 = 500,005 -> 500,01).
+      //   Sunucu da boyle hesaplar: dip toplamda KDV "brut tutar - matrah
+      //   tutar"dir (`BelgeDeposu.Yazma`); onizleme ile kayit ayni rakami
+      //   soylemeli.
+      const brutFiyat = stokFisiMi ? fiyat
+                      : (hamSayi(s.birimFiyatKdvli) || bruta(fiyat, s.kdv));
+      brut += stokFisiMi ? adet * fiyat
+                         : satirTutari(adet, brutFiyat, s.iskonto, s.iskonto2);
     });
-    return { matrah, kdv, genel: matrah + kdv };
+    return { matrah, kdv: brut - matrah, genel: brut };
   }, [satirlar, stokFisiMi]);
 
   /**
@@ -1664,6 +1675,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
             belgeId={kayitliId || undefined}
             tarafId={cari?.id}
             hekimId={personelId}
+            // Provizyon sekmesinin baslangic degerleri bunlardan uretilir:
+            //   sigorta sirketi odeyen kurumdan, karsilama orani
+            //   sozlesmeden, provizyon/takip tarihi belge tarihinden.
+            odeyenKurumId={odeyenKurumId}
+            sozlesme={sozlesmeler.find(z => z.id === basvuruBilgi.sozlesmeId)}
+            belgeTarihi={tarih}
             // Provizyon paylari belge SATIRLARINA yazildi: kart yeniden
             //   okunmazsa ekranda eski kurum/hasta payi kalir.
             // BEKLEYEN UCRET SATIRLARI ONCE KAYDEDILIR (kullanici): provizyon

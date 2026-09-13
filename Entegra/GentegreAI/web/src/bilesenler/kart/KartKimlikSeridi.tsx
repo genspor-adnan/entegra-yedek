@@ -25,6 +25,8 @@ export interface KartKimlikSeridiOzellikleri {
   seritSarmalayici?(serit: ReactNode, deger: Record<string, Deger>): ReactNode;
   personelGibiKart: boolean;
   dogumYasMetni: string;
+  /** Kayit YENI mi - seritte dogum/cinsiyet girisi yalniz o zaman acilir. */
+  yeniMi: boolean;
   unvanOneki: ReturnType<typeof useUnvanOneki>;
 }
 
@@ -38,7 +40,7 @@ export interface KartKimlikSeridiOzellikleri {
  */
 export function KartKimlikSeridi({
   kaynak, deger, meta, salt, detaylar, setDetaylar, kimlikAlanlari, renderAlanListesi,
-  seritSarmalayici, personelGibiKart, dogumYasMetni, unvanOneki,
+  seritSarmalayici, personelGibiKart, dogumYasMetni, yeniMi, unvanOneki,
 }: KartKimlikSeridiOzellikleri) {
         const kimlikSeridi = (
         <div className="kaid">
@@ -142,16 +144,75 @@ export function KartKimlikSeridi({
                   Kaynak ozluk detayi; duzenlemesi Kimlik Bilgileri kutusunda -
                   ayni alani iki yerde yazdirmak ikisini ayirmaya calismak
                   demekti. */}
-              {kaynak === 'hasta' && (
+              {/* YENI KAYITTA GIRILEBILIR, KAYITLI KARTTA OZET (kullanici).
+                  Yeni hastada akis yukaridan asagi: ad · soyad · TC · DOGUM ·
+                  CINSIYET · telefon. Ikisi de aday kayitta bile zorunlu (yas
+                  ve cinsiyet olmadan tetkik referansi secilemez), o yuzden
+                  once soruluyor - kullanicinin "Kimlik Bilgileri" kutusuna
+                  inip geri donmesi gerekmesin.
+                  ALAN AYNI ALANDIR: ikisi de ozluk detayina yazar, asagidaki
+                  kutuda girilen deger seritte, seritte girilen asagida
+                  gorunur - iki ayri state tutmak ikisini ayirmaya calismak
+                  demekti.
+                  Kayit edildikten sonra serit OZETE doner: "14.03.1979 ♂ E
+                  47 y" uc bilgiyi tek hucrede verir ve duzenlemesi Kimlik
+                  Bilgileri kutusundadir. */}
+              {kaynak === 'hasta' && !yeniMi && (
                 <label className="alan tip-metin">
                   <span className="etiket">Doğum Tarihi / Yaş</span>
                   <input readOnly tabIndex={-1} value={dogumYasMetni}
                          title="Doğum bilgileri Kimlik Bilgileri kutusundan girilir" />
                 </label>
               )}
+              {kaynak === 'hasta' && yeniMi && (() => {
+                const ozluk = meta?.detaylar.find(d => d.ad === 'ozluk');
+                if (!ozluk) return null;
+                const satir = detaylar[ozluk.ad]?.guncel[0] ?? {};
+                const alan = (ad: string) => ozluk.alanlar.find(a => a.ad === ad);
+                const ozlukYaz = (degisiklik: Record<string, unknown>) =>
+                  setDetaylar(t => {
+                    const d = t[ozluk.ad] ?? { ilk: [], guncel: [] };
+                    const yeniSatir = { ...(d.guncel[0] ?? {}), ...degisiklik };
+                    return { ...t, [ozluk.ad]:
+                      { ...d, guncel: [yeniSatir, ...d.guncel.slice(1)] } };
+                  });
+                const cinsiyetAlan = alan('cinsiyet');
+                // UCU BIR ARADA, IKI SUTUN GENISLIGINDE (kullanici: "%50
+                //   kucult, tek satira sigsin"). Grid'de hucreleri TEK TEK
+                //   kucultmek satir tasmasini cozmez - sutun sayisi sabit ve
+                //   dorduncu alan alt satira duser. Ucu tek hucreye alinip
+                //   icinde yan yana dizilince serit tek satirda kaliyor:
+                //   ad · soyad · TC · [dogum|cinsiyet|durum].
+                return (
+                  <div className="alan serit-uclu">
+                    <label className="alan tip-tarih">
+                      <span className="etiket">
+                        Doğum{alan('dogumTarihi')?.zorunlu && ' *'}
+                      </span>
+                      <input type="date" disabled={salt}
+                             value={String(satir.dogumTarihi ?? '').slice(0, 10)}
+                             onChange={e => ozlukYaz({ dogumTarihi: e.target.value })} />
+                    </label>
+                    <label className="alan tip-kod">
+                      <span className="etiket">
+                        Cinsiyet{cinsiyetAlan?.zorunlu && ' *'}
+                      </span>
+                      <select value={String(satir.cinsiyet ?? '')} disabled={salt}
+                              onChange={e => ozlukYaz({ cinsiyet: e.target.value })}>
+                        <option value="">-</option>
+                        {cinsiyetAlan?.kodlar && Object.entries(cinsiyetAlan.kodlar)
+                          .map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                      </select>
+                    </label>
+                    {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'durum'))}
+                  </div>
+                );
+              })()}
               {/* DURUM yalniz HASTADA seritte (dort degerli: Aktif/Pasif/Aday/
                   Vefat); personelde baslikta rozet. */}
-              {kaynak === 'hasta'
+              {/* Yeni kayitta durum YUKARIDAKI UCLUNUN icinde - burada
+                  tekrar cizilirse ayni alan iki kutuda gorunur. */}
+              {kaynak === 'hasta' && !yeniMi
                 && renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'durum'))}
             </div>
           ) : kaynak === 'dokuman' ? (

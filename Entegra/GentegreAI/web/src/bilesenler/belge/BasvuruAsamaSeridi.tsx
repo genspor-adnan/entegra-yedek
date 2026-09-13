@@ -9,9 +9,11 @@ import { basvuruAsamalari, type AsamaGirdisi } from '../../sayfalar/belgeKarti/b
  * hepsini tek satirda gosterir - yapilmayan asama GRI, yapilan KENDI RENGIYLE
  * dolar, %100 olunca basvuru tamamlanmistir.
  *
- * Renkler asamanin kimligidir (kullanici): Başvuru kirmizi · Provizyon
- * turuncu · Ücretlendirme sari · Tahsilat mavi · Faturalama yesil. Sira ODEYEN
- * KURUMA gore degisir - hesap `basvuruAsamalari`da (saf, testli).
+ * Renkler asamanin kimligidir (kullanici), seritteki yerinin degil: Başvuru
+ * kirmizi · Provizyon turuncu · Ücretlendirme sari · Tahsilat mavi ·
+ * Faturalama yesil. Sira Başvuru · Ücretlendirme · Provizyon · Tahsilat ·
+ * Belge Kesimi; provizyon yalniz kurum odeyen basvuruda cizilir - hesap
+ * `basvuruAsamalari`da (saf, testli).
  */
 export function BasvuruAsamaSeridi(g: AsamaGirdisi) {
   const { asamalar, yuzde, tamamlandi } = basvuruAsamalari(g);

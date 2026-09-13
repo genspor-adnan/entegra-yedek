@@ -195,12 +195,56 @@ public static partial class KaynakKatalogu
               join public.v_numara_turu_kimlik t on t.id = n.tur
               left join public.sube s on s.id = n.sube_id
             """,
-        VarsayilanSirala: "t.ad asc, n.baslama_tarihi desc",
+        // SIRA GORUNUMDEN (634): hasta belgeleri gridi alfabetik degil,
+        //   HASTANIN IZLEDIGI YOLA gore dizilir - dosya > protokol >
+        //   muayene > lab > radyoloji > e-Nabiz. Tek turlu gridlerde
+        //   (hasta/basvuru) fark etmez, cok turlude eder.
+        VarsayilanSirala: "t.sira asc, n.baslama_tarihi desc",
         SabitKosul: $"n.tur in ({turSuzgeci})",
         Kolonlar: NumaraKolonlari());
 
     private static KaynakTanimi NumaraHasta()   => NumaraKimlik("numara-hasta", "900");
     private static KaynakTanimi NumaraBasvuru() => NumaraKimlik("numara-basvuru", "19");
+
+    /// <summary>
+    /// HASTA BELGELERI (634/635/636, kullanici): hastanin butun numaralari
+    /// TEK GRIDDE - dosya, protokol, muayene, recete, laboratuvar,
+    /// radyoloji, e-Nabiz. Her biri icin ayri grid acmak ayni tablonun yedi
+    /// kopyasi olurdu.
+    ///
+    /// <para>KAYNAK TABLO DEGIL GORUNUM (636): `numara_sablonu`'ndan
+    /// okusaydi yalniz AYARLANMIS turler cizilirdi ve kullanici otekilerin
+    /// var oldugunu goremezdi - ayari olmayan tur `id = 0` satiri olarak
+    /// gelir, ekran ona tiklaninca "yeni" kartini turu secili acar.</para>
+    /// </summary>
+    private static KaynakTanimi NumaraHastaBelge() => new(
+        Ad: "numara-hasta-belge",
+        YetkiKodu: "numara_sablonu",
+        Kaynak: """
+            public.v_numara_hasta_belge n
+              left join public.sube s on s.id = n.sube_id
+            """,
+        VarsayilanSirala: "n.sira asc, n.baslama_tarihi desc",
+        Kolonlar:
+        [
+            new("id",            "n.id",              "sayi",  "Id", Varsayilan: false),
+            new("tur",           "n.tur",             "sayi",  "Tur Kodu", Varsayilan: false),
+            new("turAdi",        "n.tur_adi",         "metin", "Tür", Genislik: 200),
+            new("baslamaTarihi", "n.baslama_tarihi",  "tarih", "Başlama", Hizalama: "orta"),
+            new("onEk",          "n.on_ek",           "metin", "Ön Ek",
+                                                      Hizalama: "orta", Genislik: 90),
+            new("baslamaNo",     "n.baslama_no",      "metin", "Başlama No",
+                                                      Hizalama: "orta", Genislik: 120),
+            new("hane",          "n.hane",            "sayi",  "Hane",
+                                                      Hizalama: "orta", Varsayilan: false),
+            new("subeAdi",       "s.ad",              "metin", "Şube", Varsayilan: false),
+            new("elleGirilir",   "n.elle_girilir",    "mantik", "Elle Girilir",
+                                                      Hizalama: "orta", Genislik: 110),
+            // AYARSIZ TUR "Pasif" DEGIL AYARSIZDIR: durum 0 gelir ve rozet
+            //   kirmizi "Pasif" yazardi - yanlis bilgi. Ayrim `id`de: 0 ise
+            //   satirin bir sablonu yok.
+            new("durum",         "n.durum",           "kod",   "Durum", Hizalama: "orta")
+        ]);
 
     private static KaynakTanimi NumaraSatis()    => NumaraKaynagi("numara-satis", NumaraSatisTurleri);
     private static KaynakTanimi NumaraAlis()     => NumaraKaynagi("numara-alis", NumaraAlisTurleri);

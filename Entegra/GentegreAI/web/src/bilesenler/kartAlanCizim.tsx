@@ -343,8 +343,13 @@ export function alanCizici(b: AlanCizimBaglami) {
       )
     );
 
+    // HUCRE ALAN ADINI DA TASIR (`alan-oncelik`, `alan-durum`): ekrana ozel
+    //   genislik/duzen kurali CSS'ten verilebilsin diye. Katalogda alan
+    //   basina genislik yok ve bir tane eklemek her karti ilgilendiren yeni
+    //   bir kavram acardi; sinif, kart kokundeki `kart-<kaynak>` ile
+    //   birlesince o ekranla sinirli kaliyor.
     const renderAlan = (a: KartAlanMeta) => (
-      <label key={a.ad} className={`alan tip-${a.tip}`}>
+      <label key={a.ad} className={`alan tip-${a.tip} alan-${a.ad}`}>
         {/* Etiket kod_liste alanlarinda TIKLANABILIR (544): listeyi duzenler.
             Ayar ekranlarinda (AyarAlani, BelgeBaslik) ayni desen. */}
         {listeDuzenle && a.kodListesi && !salt && a.yazilabilir ? (
@@ -380,8 +385,17 @@ export function alanCizici(b: AlanCizimBaglami) {
          kendiliginden gelir. */
       const yerelMi = !doviz
         || String(deger[doviz.cinsAlani] ?? doviz.yerelPara) === doviz.yerelPara;
+      /* LAB ISTEMINDE KURUM ALANI KAYNAGA GORE (kullanici): kaynak
+         "Dis kurum" (4) ise numuneyi GONDEREN kurum secilir; oteki
+         kaynaklarda kurum BASVURUDA belirlenmistir ve yalniz okunur
+         ("Kurum"). Ikisini birden cizmek, biri hep bos duran iki kutu
+         demekti - hangisinin gecerli oldugu de belirsiz kalirdi. */
+      const disKaynak = Number(deger.kaynak ?? 0) === 4;
       return alanlar
         .filter(a => !eslesenler.has(a.ad))
+        .filter(a => !(kaynak === 'lab-istem'
+                       && ((a.ad === 'disKurumId' && !disKaynak)
+                           || (a.ad === 'kurumAdi' && disKaynak))))
         .filter(a => !(yerelMi && doviz
                        && (a.ad === doviz.kurAlani || a.ad === doviz.yerelAlani)))
         .map(a => {
@@ -402,7 +416,7 @@ export function alanCizici(b: AlanCizimBaglami) {
               </div>
             );
           return (
-            <label key={a.ad} className={`alan tip-${a.tip}`}>
+            <label key={a.ad} className={`alan tip-${a.tip} alan-${a.ad}`}>
               <span className="etiket">
                 {c(a.baslik)}{a.zorunlu && <b className="zorunlu"> *</b>}
               </span>

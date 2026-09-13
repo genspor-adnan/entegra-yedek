@@ -4,12 +4,14 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (310 ad, 95 tanesi birden cok dosyada)
+## Fonksiyonlar (312 ad, 95 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
 | `fn_ad_soyad_ayir` | `166_ebelge_json.sql` | — |
 | `fn_ara_metin` | `027_arama_normalize.sql` | — |
+| `fn_baslik_harf` | `630_baslik_harf.sql` | — |
+| `fn_baslik_kelime` | `630_baslik_harf.sql` | — |
 | `fn_basvuru_hekim_dis_mi` | `578_basvuru_hekim_kaynagi.sql` | — |
 | `fn_basvuru_hekim_rolu` | `364_kurum_profil_sube.sql` | 361_prim_rol_isaretleri.sql |
 | `fn_basvuru_yapan_rolu` | `584_basvuru_yapan_primi.sql` | — |
@@ -224,10 +226,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_sigorta_pay_geri_al` | `472_dagilim_sigorta_prim.sql` | — |
 | `fn_sigorta_ref_no` | `430_sigorta_v1.sql` | — |
 | `fn_siradaki_hasta` | `410_hekim_calisma_listesi.sql` | — |
-| `fn_skrs_ad` | `618_fn_skrs_kod_tek_imza.sql` | 610_skrs_cozucu.sql |
+| `fn_skrs_ad` | `630_baslik_harf.sql` | 610_skrs_cozucu.sql, 618_fn_skrs_kod_tek_imza.sql |
 | `fn_skrs_ambar_uret` | `521_skrs_katalog_kurulum.sql` | — |
 | `fn_skrs_guid` | `618_fn_skrs_kod_tek_imza.sql` | 610_skrs_cozucu.sql |
-| `fn_skrs_hedef_ad` | `618_fn_skrs_kod_tek_imza.sql` | 613_skrs_hedef_ad.sql |
+| `fn_skrs_hedef_ad` | `630_baslik_harf.sql` | 613_skrs_hedef_ad.sql, 618_fn_skrs_kod_tek_imza.sql |
 | `fn_skrs_kod` | `618_fn_skrs_kod_tek_imza.sql` | 503_skrs_kod_dikisi.sql, 610_skrs_cozucu.sql |
 | `fn_sls_carpan_manuel` | `539_turetilmis_liste_sokuldu.sql` | 209_taban_fiyat_izi.sql, 212_yazim_gecis_kurali.sql, 213_fiyat_elle_degisim.sql, 214_yazim_olusma_import.sql |
 | `fn_slug` | `021_goc_kimlik.sql` | — |

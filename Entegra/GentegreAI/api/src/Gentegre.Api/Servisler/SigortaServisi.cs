@@ -105,9 +105,20 @@ public sealed class SigortaServisi(
             throw GentegreHatasi.IsKurali($"Poliçe sorgusu başarısız: {h.Message}");
         }
 
-        await LogYazAsync(b.Hesap, "checkPolicy", "police", null, 0, 0, sonuc.Gecerli,
+        await LogYazAsync(b.Hesap, "checkPolicy", "police", null, 0, 0, sonuc.Basarili,
                           sonuc.Gecerli ? "" : string.Join(" · ", sonuc.Notlar),
-                          null, sonuc.HamYanit, baglam, iptal);
+                          sonuc.HamIstek, sonuc.HamYanit, baglam, iptal);
+
+        // SORGULANAMADI ≠ GEÇERSİZ. Servise ulaşılamadıysa poliçe hakkında
+        //   HİÇBİR ŞEY öğrenmedik; bunu "geçerli değil" diye kaydetmek yanlış
+        //   bir beyan olurdu (aşağıdaki kayıt ihtilafta kanıt sayılıyor) ve
+        //   ekranda "Poliçe geçerli görünmüyor" diye çıkıyordu - oysa sebep
+        //   ağ geçidiydi. Çağıran gerçek sebebi görsün.
+        if (!sonuc.Basarili)
+            throw GentegreHatasi.IsKurali(
+                "Poliçe sorgulanamadı: "
+                + (sonuc.Notlar.Count > 0 ? string.Join(" · ", sonuc.Notlar)
+                                          : "servis yanıt vermedi."));
 
         // Poliçe KAYIT olarak saklanır (önbellek değil): "o gün poliçe
         //   geçerliydi" beyanı ihtilafta kanıttır, sonradan sorgu aynı yanıtı
@@ -198,7 +209,9 @@ public sealed class SigortaServisi(
                                             hasta.Cinsiyet, hasta.KimlikNo,
                                             hasta.KimlikTipi, police?.KartNo ?? "",
                                             police?.MusteriNo ?? ""),
-            PoliceNo: police?.PoliceNo ?? "",
+            // Sorgudan gelen numara yoksa EKRANDAKI kullanilir - yoksa alan
+            //   bos giderdi ve sirket "poliçe null olamaz" ile reddederdi.
+            PoliceNo: police?.PoliceNo is { Length: > 0 } pn ? pn : belge.EkranPoliceNo,
             PoliceAdi: police?.PoliceAdi ?? "",
             PoliceTipi: police?.PoliceTipi ?? 0,
             PoliceTuru: police?.PoliceTuru ?? 0,
@@ -531,13 +544,22 @@ public sealed class SigortaServisi(
 
     // ================================================================== okuma
 
+    /// <param name="EkranPoliceNo">
+    /// Provizyon sekmesine ELLE girilen poliçe numarası. Poliçe sorgusu
+    /// yapılmamış ya da yapılamamışsa (servis kapalı) `sigorta_police` kaydı
+    /// yoktur; numarayı bilen tek yer ekrandır ve şirket poliçe numarasız
+    /// provizyon kabul etmiyor. Sorgu yapılmışsa onun döndürdüğü numara
+    /// yeğlenir - şirketin kendi yazımıdır.
+    /// </param>
     private sealed record BelgeOzeti(int Id, int TarafId, int? KurumId, int? PersonelId,
-                                     DateTime Tarih, string Sikayet, string Ozgecmis);
+                                     DateTime Tarih, string Sikayet, string Ozgecmis,
+                                     string EkranPoliceNo);
 
     private async Task<BelgeOzeti> BelgeOkuAsync(int belgeId, CancellationToken iptal)
         => await _veri.TekAsync("""
             select b.id, b.taraf_id, bp.oss_kurum_id, ba.personel_id, b.belge_tarihi,
-                   coalesce(m.hikaye, ''), coalesce(m.bulgu_ozet, '')
+                   coalesce(m.hikaye, ''), coalesce(m.bulgu_ozet, ''),
+                   coalesce(bp.oss_police_no, '')
               from public.belge b
               left join public.belge_basvuru ba on ba.id = b.id
               left join public.belge_provizyon bp on bp.id = b.id
@@ -547,7 +569,8 @@ public sealed class SigortaServisi(
             o => new BelgeOzeti(o.GetInt32(0), o.GetInt32(1),
                                 o.IsDBNull(2) ? null : o.GetInt32(2),
                                 o.IsDBNull(3) ? null : o.GetInt32(3),
-                                o.GetDateTime(4), o.GetString(5), o.GetString(6)), iptal)
+                                o.GetDateTime(4), o.GetString(5), o.GetString(6),
+                                o.GetString(7)), iptal)
            ?? throw GentegreHatasi.Bulunamadi("Başvuru bulunamadı.");
 
     private sealed record HastaOzeti(string Ad, string Soyad, DateOnly? DogumTarihi,

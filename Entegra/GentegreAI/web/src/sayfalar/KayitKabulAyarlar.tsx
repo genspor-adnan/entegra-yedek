@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { AyarSekmeSeridi } from '../bilesenler/AyarSekmeSeridi';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
-import { NumaraGridi } from '../bilesenler/NumaralamaSekmesi';
 
 const SEKMELER = [
   { anahtar: 'genel',   baslik: 'Genel' },
@@ -55,13 +54,15 @@ export function KayitKabulAyarlar() {
 
       {!yukleniyor && aktif === 'hasta' && (
         <>
-          {/* DOSYA NO numaralandirma tablosunda (358, kullanici): on ek, hane,
-              baslangic ve "elle mi yazilacak" karari ayni satirda durur -
-              ayri bir "otomatik uretilsin" ayari yok. */}
-          <NumaraGridi kaynak="numara-hasta" baslik="Dosya No Numaralandırma" />
+          {/* NUMARALANDIRMA GRIDI BURADAN KALDIRILDI (kullanici): hasta
+              belgelerinin butun numaralari 634'te TEK GRIDDE toplandi -
+              Genel Ayarlar › Numaralama › Hasta Belgeleri. Ayni tabloyu iki
+              ekrandan duzenlemek, hangisinin gecerli oldugu sorusunu
+              doguruyordu. Aciklama burada KALIYOR: kural hastayi kaydeden
+              memuru ilgilendiriyor, ayari nerede degistirecegini de soyler. */}
           <div className="not">
             Hasta dosya numarası <b>her zaman otomatik</b> verilir (396): hasta
-            kartında yazılacak bir alan yoktur, bu yüzden buradaki
+            kartında yazılacak bir alan yoktur, bu yüzden numaralandırmadaki
             <b> Numarayı kullanıcı elle yazsın</b> işareti hastada dikkate
             alınmaz. Numara, kayıt sırasında <b>Ön Ek + Başlama No</b> düzenine
             göre sıradan verilir (örn. <b>H-</b> ve <b>00000100</b> →
@@ -70,6 +71,8 @@ export function KayitKabulAyarlar() {
             {' '}Ön ekte <b>YYYY</b> yılın tamamını, <b>YY</b> son iki hanesini yazar
             (<b>YYYY-</b> + <b>000005</b> → <b>2026-000005</b>); yıl yer tutucusu
             varsa sayaç da yıl başında <b>1’den</b> başlar.
+            {' '}Düzeni değiştirmek için: <b>Genel Ayarlar › Numaralama ›
+            Hasta Belgeleri</b>.
           </div>
         </>
       )}
@@ -113,14 +116,15 @@ export function KayitKabulAyarlar() {
                        ayarlar={ayarlar} onYaz={yaz} />
           </div>
         </div>
-        {/* PROTOKOL NO da numaralandirma tablosunda (358). */}
-        <NumaraGridi kaynak="numara-basvuru" baslik="Protokol No Numaralandırma" />
+        {/* PROTOKOL NO gridi de 634'te Hasta Belgeleri'ne tasindi. */}
         <div className="not">
           Protokol numarası kaydederken <b>Ön Ek + Başlama No</b> düzenine göre
           verilir. Ön ekte <b>YYYY</b> / <b>YY</b> yazarsanız yıl otomatik geçer
           (<b>YYYY-</b> → <b>2026-000005</b>) ve sayaç her yıl 1’den başlar. <b>Numarayı kullanıcı elle yazsın</b> işaretlenirse kayıt kabul
           memuru protokol numarasını başvuru kartında yazabilir; boş bırakılırsa
           numara yine sistemce verilir — başvuru numarasız kalmaz.
+          {' '}Düzeni değiştirmek için: <b>Genel Ayarlar › Numaralama ›
+          Hasta Belgeleri</b>.
         </div>
         </>
       )}

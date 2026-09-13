@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { TarafSecici } from '../TarafArama';
 import { KodSecim, KodSegment, MetinAlani } from './basvuru/alanlar';
 import { dagilimRotasi } from '../../sayfalar/belgeKartiKurallari';
@@ -190,6 +191,39 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
   const sgkOdeyen = [3, 4, 5].includes(
     dagilimRotasi(kurumTuru, bilgi.altKurum, bilgi.sgkKullan));
 
+  /**
+   * TEK SOZLESME KENDILIGINDEN SECILIR (kullanici: "tek sözleşme var,
+   * otomatik onun gelmesi gerekir; şu an seçim yapamıyorum").
+   *
+   * Secici tek sozlesmede PASIF - karar yok, bilgi var. Ama deger BOSSA pasif
+   * kutu "— Seçiniz —" gosteriyordu: kullanici hem secemiyor hem de sozlesme
+   * secilmemis saniyor. Sunucu tarafi dogruydu (`tg_belge_basvuru_sozlesme`
+   * tek sozlesmeyi kendisi atar), yalnizca KAYIT ANINDA - ekran kaydetmeden
+   * once onu goremiyordu.
+   *
+   * Burada ayrica KURUM DEGISINCE eskisi temizlenir: onceki kurumun
+   * sozlesmesi formda kalirsa tetik "Seçilen sözleşme bu ödeyen kuruma ait
+   * değil" ile kaydi reddederdi.
+   */
+  const sozlesmeListesi = sozlesmeler ?? [];
+  useEffect(() => {
+    if (kilitli || sozlesmeListesi.length === 0) return;
+    const gecerli = bilgi.sozlesmeId != null
+                 && sozlesmeListesi.some(z => z.id === bilgi.sozlesmeId);
+    if (gecerli) return;
+    const tek = sozlesmeListesi.length === 1 ? sozlesmeListesi[0] : null;
+    if (tek == null && bilgi.sozlesmeId == null) return;   // secim bekleniyor
+    degistir({
+      sozlesmeId: tek?.id ?? null,
+      // Police turu sozlesmeden gelir (OSS); elle secimde de ayni deger
+      //   yaziliyor - iki yol ayni sonucu vermeli.
+      altKurum: tek?.altKurum ?? null,
+    });
+    // `degistir` her cizimde yeni referans olabilir; bagimlilik listesi
+    //   DEGERLERE bakar, sonsuz donguye girmesin.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kilitli, bilgi.sozlesmeId, sozlesmeListesi.map(z => z.id).join(',')]);
+
   return (
     <div className="kagrup">
       <h6>Başvuru Bilgileri</h6>
@@ -314,12 +348,12 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
         {/* SOZLESME (468): ayni sigorta sirketiyle OSS / TSS / Karma police
             ayri sartlarla calisilir. TEK sozlesme varsa secici PASIF gelir -
             karar yok, bilgi var; birden fazlaysa secim ZORUNLU. */}
-        {(sozlesmeler?.length ?? 0) > 0 && (
+        {sozlesmeListesi.length > 0 && (
           <label className="alan">
-            <span className={`etiket${(sozlesmeler?.length ?? 0) > 1
+            <span className={`etiket${sozlesmeListesi.length > 1
                                       ? ' zorunlu-isaret' : ''}`}>Sözleşme</span>
             <select value={bilgi.sozlesmeId ?? ''}
-                    disabled={kilitli || (sozlesmeler?.length ?? 0) === 1}
+                    disabled={kilitli || sozlesmeListesi.length === 1}
                     onChange={e => degistir({
                       sozlesmeId: e.target.value ? Number(e.target.value) : null,
                       // Police turu sozlesmeden gelir: kullanici ayrica

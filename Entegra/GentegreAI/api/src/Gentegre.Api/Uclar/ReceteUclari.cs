@@ -97,10 +97,16 @@ public static class ReceteUclari
                  order by r.id desc limit 1
                 """, islem, [muayeneId], iptal);
 
+            // RECETE NO AYARDAN (635): `numara_sablonu` tur 905 satiri varsa
+            //   numara verilir, yoksa BOS kalir - bugunku davranis. MEDULA
+            //   recete numarasi AYRI: o disaridan gelir, bu kurumun kendi
+            //   takip numarasi.
             receteId ??= await baglanti.TekDegerAsync<int>("""
                 insert into public.recete (muayene_id, hasta_id, hekim_id, tur, durum,
-                                           sube_id, ekleyen)
-                values (@p0, @p1, @p2, 0, 1, @p3, @p4)
+                                           sube_id, ekleyen, recete_no)
+                values (@p0, @p1, @p2, 0, 1, @p3, @p4,
+                        public.fn_numara_kimlik_uret(905, @p3, 'recete', 'recete_no',
+                                                     current_date))
                 returning id
                 """, islem, [muayeneId, m.HastaId, m.HekimId, m.SubeId, baglam.KullaniciId],
                 iptal);
@@ -201,8 +207,12 @@ public static class ReceteUclari
             if (hedefId == 0)
                 hedefId = await baglanti.TekDegerAsync<int>(
                     "insert into public.recete (muayene_id, hasta_id, hekim_id, " +
-                    "                           sube_id, ekleyen) " +
-                    "values (@p0, @p1, @p2, @p3, @p4) returning id",
+                    "                           sube_id, ekleyen, recete_no) " +
+                    // 635: numara sablondan; sablon yoksa bos kalir.
+                    "values (@p0, @p1, @p2, @p3, @p4, " +
+                    "        public.fn_numara_kimlik_uret(905, @p3, 'recete', " +
+                    "                                     'recete_no', current_date)) " +
+                    "returning id",
                     islem, [muayeneId, m.HastaId, m.HekimId, m.SubeId,
                             baglam.KullaniciId], iptal);
 
