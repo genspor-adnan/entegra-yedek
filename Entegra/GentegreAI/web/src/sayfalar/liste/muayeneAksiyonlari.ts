@@ -17,6 +17,15 @@ import type { ListeSatiri } from '../../api/sozlesme';
  */
 export interface MuayeneBaglam {
   tazele(): void;
+  /**
+   * Acik karti kapatir (listeden cagrildiysa verilmez).
+   *
+   * TAMAMLANAN MUAYENENIN KARTI ACIK KALMAMALI: kayit kilitlendi, alanlar
+   * artik salt okunur ve hekimin o ekranda yapacagi bir sey yok. Acik
+   * birakmak, kapali bir kaydin uzerinde calisiliyormus izlenimi verir -
+   * hekim yazmaya devam eder ve degisiklik kaydedilemez.
+   */
+  kartKapat?(): void;
 }
 
 export async function muayeneAksiyonu(
@@ -278,6 +287,10 @@ export async function muayeneAksiyonu(
     const y = await api.muayeneTamamla(id);
     mesaj(y.uyari ? `${y.mesaj}\n\n⚠ ${y.uyari}` : y.mesaj);
     b.tazele();
+    // Kapatma YALNIZ BASARIDA: sunucu eksik alan yuzunden reddederse
+    //   (ana tani / sikayet / karar) kart acik kalmali - hekim eksigi
+    //   ayni ekranda tamamlasin diye. `guvenli` hatada buraya hic gelmez.
+    b.kartKapat?.();
   });
   return true;
 }

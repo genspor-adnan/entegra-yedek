@@ -379,6 +379,12 @@ public static partial class KartKatalogu
             //   kurali >= 400 karakterde cok satirli kutu cizer).
             new("karar", "karar", "metin", EnFazlaUzunluk: 4000,
                 Baslik: "Değerlendirme / Plan", Grup: "Tanı (ICD-10)"),
+            // CIKIS SEKLI (627): hastanin muayene sonundaki durumu - USS 106'nin
+            //   ZORUNLU alani. Varsayilani "iyilesderek cikis"; sevk, olum,
+            //   tedaviyi reddetme gibi haller burada secilir. Liste SKRS'nin
+            //   kendisi (609), ayri bir esleme yok.
+            new("cikisSekli", "cikis_sekli", "kod", KodListesi: "cikis.sekli",
+                Baslik: "Çıkış Şekli", Grup: "Tanı (ICD-10)"),
             // Mockup etiketleri: "Karar" · "Sevk edilen tesis" · "Klinik" ·
             //   "Sevk nedeni / notu" · "Ambulans".
             new("yonlendirme", "yonlendirme", "kod", SabitKodlar: YonlendirmeKodlari,

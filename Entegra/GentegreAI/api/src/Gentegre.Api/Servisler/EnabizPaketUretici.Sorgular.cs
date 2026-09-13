@@ -582,27 +582,41 @@ public sealed partial class EnabizPaketUretici
                 """,
 
             // 106 HASTA CIKIS - USS adlari (605).
+            // 106 HASTA CIKIS - USS adlari (605/627).
+            //
+            // KAYNAK MUAYENEDIR, BELGE DEGIL: paket muayene tamamlanirken
+            //   uretilir ve `@p0` muayenenin kimligidir. Sorgu dogrudan
+            //   `belge.id = @p0` ariyordu; muayene kimligiyle belge
+            //   bulunamayinca alan listesi BOS donuyor ve paket hic
+            //   uretilmiyordu - hata da vermiyordu, cunku bos alan listesi
+            //   "uretilecek bir sey yok" demek. 103 gonderilirken 106'nin
+            //   kuyrukta hic gorunmemesinin sebebi buydu.
             "HASTA_CIKIS" => """
                 select 'HASTA_TAKIP_BILGISI/SYSTakipNo',
                        coalesce((select bb.sys_takip_no from public.belge_basvuru bb
-                                  where bb.id = b.id), ''),
+                                  where bb.id = m.belge_id), ''),
                        'belge_basvuru.sys_takip_no', '', '', ''
-                  from public.belge b where b.id = @p0
+                  from public.muayene m where m.id = @p0
+                -- CIKIS ZAMANI = MUAYENENIN TAMAMLANMASI: hastanin cikisi
+                --   muayenenin bittigi andir. Belgenin degistirme damgasi
+                --   degil - o, baska bir kaydetmeyle de ilerler.
                 union all select 'HASTA_CIKIS_BILGILERI/CIKIS_ZAMANI',
-                       coalesce(to_char(b.degistirme_tarihi, 'YYYYMMDDHH24MI'),
-                                to_char(b.belge_tarihi, 'YYYYMMDDHH24MI'), ''),
-                       'belge.degistirme_tarihi', '', '', ''
-                  from public.belge b where b.id = @p0
-                -- CIKIS SEKLI: basvurunun GELIS seklinden okunuyordu - baska
-                --   bir alan, baska bir liste; ustelik gomulu GUID SKRS'deki
-                --   "CIKIS SEKLI" listesinin GUID'i bile degildi. Cikis sekli
-                --   icin yerelde HENUZ kaynak kolon yok (yatis/taburcu modulu
-                --   gelince dolacak), o yuzden alan BOS gider: yanlis kod,
-                --   bos koddan kotudur.
+                       coalesce(to_char(coalesce(m.tamamlanma, m.bitis),
+                                        'YYYYMMDDHH24MI'), ''),
+                       'muayene.tamamlanma', '', '', ''
+                  from public.muayene m where m.id = @p0
+                -- CIKIS SEKLI MUAYENENIN ALANI (627): USS'de ZORUNLU, bos
+                --   birakilinca "E1014 ... eksik elemanlar var: CIKIS_SEKLI"
+                --   ile paket reddediliyor (canli deneme, paket 652). Kodlu
+                --   alan oldugu icin kodsuz da yazilamaz - deger uretmek
+                --   zorunlu. Varsayilani 7 (iyilesderek cikis), sevk/olum
+                --   gibi haller hekimin secimi.
                 union all select 'HASTA_CIKIS_BILGILERI/CIKIS_SEKLI',
-                       '', '(kaynak yok - taburcu modulu)', 'SKRS Cikis Sekli',
-                       '', public.fn_skrs_guid('cikis.sekli')
-                  from public.belge_basvuru bb where bb.id = @p0
+                       public.fn_skrs_ad('cikis.sekli', m.cikis_sekli),
+                       'muayene.cikis_sekli', 'SKRS Cikis Sekli',
+                       public.fn_skrs_kod('cikis.sekli', m.cikis_sekli),
+                       public.fn_skrs_guid('cikis.sekli')
+                  from public.muayene m where m.id = @p0
                 """,
 
             _ => "",

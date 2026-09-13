@@ -483,6 +483,9 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         // Muayene aksiyonlari kaydi SUNUCUDA degistirir: liste kadar ACIK
         //   KART da tazelenmeli.
         tazele: () => { setYenile(t => t + 1); setKartTazele(t => t + 1) },
+        // Kart aciksa tamamlamadan sonra kapanir; listeden cagrildiysa
+        //   (kartId null) yapacak bir sey yok.
+        kartKapat: () => { if (kartId !== null && tanim.kartYolu) git(tanim.kartYolu) },
       }, ek)) return;
 
       if (await ilacAksiyonu(kod, satir, {

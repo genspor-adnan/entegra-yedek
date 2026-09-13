@@ -65,17 +65,30 @@ public static partial class KaynakKatalogu
             new("id",        "p.id",          "sayi",  "Id", Varsayilan: false),
             new("paketNo",   "p.paket_no",    "metin", "Paket No", Hizalama: "orta",
                                               Genislik: 150),
+            // USS KODU ROZET (kullanici): 101/102/103/301 kuyrukta en hizli
+            //   taranan alan - hangi paket turunun biriktigini renkli rozet
+            //   bir bakista soyluyor, duz metin satir satir okutuyordu.
             new("ussPaket",  "t.uss_paket_kodu", "metin", "USS", Hizalama: "orta",
-                                              Genislik: 70),
+                                              Bicim: "rozet", Genislik: 70),
             new("turAdi",    "t.ad",          "metin", "Paket Türü", Genislik: 190),
             new("turKod",    "t.kod",         "metin", "Tür Kodu", Varsayilan: false),
             // PROTOKOL NO hastanin SOLUNDA (kullanici): kuyrukta bir satiri
             //   hastanenin kendi numarasiyla aramak, hasta adiyla aramaktan
             //   daha sik. Numara paketin KAYNAK BELGESINDEN okunur - paket
             //   kendi numarasini (paket_no) zaten tasiyor, o baska sey.
+            // PROTOKOL NO IKI KAYNAKTAN: paket dogrudan BASVURUDAN (kaynak_tur 1)
+            //   ya da MUAYENEDEN (2) dogar. Muayene kaynaklilarda kaynak_id
+            //   muayenenin kendisidir, protokol numarasi ise muayenenin bagli
+            //   oldugu belgede. Tek dala bakmak 103/106 satirlarini bos
+            //   birakiyordu - oysa kuyrukta bir satiri numarasiyla aramak en
+            //   sik yapilan is.
             new("protokolNo",
-                "coalesce((select b.belge_no from public.belge b "
-                + "where b.id = p.kaynak_id and p.kaynak_tur = 1), '')",
+                "coalesce("
+                + "(select b.belge_no from public.belge b "
+                + "  where p.kaynak_tur = 1 and b.id = p.kaynak_id), "
+                + "(select b.belge_no from public.muayene m "
+                + "  join public.belge b on b.id = m.belge_id "
+                + "  where p.kaynak_tur = 2 and m.id = p.kaynak_id), '')",
                                               "metin", "Protokol No",
                                               Hizalama: "orta", Genislik: 150),
             new("hastaAdi",  "coalesce(h.unvan, '')", "metin", "Hasta", Genislik: 200),

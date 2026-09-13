@@ -157,7 +157,14 @@ public static class MuayeneUclari
                        (select count(*) from public.tani t
                          where t.muayene_id = m.id and t.tur = 1),
                        (select count(*) from public.muayene_istem s
-                         where s.muayene_id = m.id and s.sonuc_durum in (0, 1))
+                         where s.muayene_id = m.id and s.sonuc_durum in (0, 1)),
+                       -- e-NABIZ 103/106'NIN ZORUNLU ALANLARI (628):
+                       --   baslangic zamani, cikis sekli ve basvurunun
+                       --   SYS takip numarasi.
+                       (m.baslangic is not null),
+                       coalesce(public.fn_skrs_kod('cikis.sekli', m.cikis_sekli), ''),
+                       coalesce((select bb.sys_takip_no from public.belge_basvuru bb
+                                  where bb.id = m.belge_id), '')
                   from public.muayene m where m.id = @p0 for update
                 """, islem, [id], o => new
                 {
@@ -165,6 +172,8 @@ public static class MuayeneUclari
                     BelgeId = o.IsDBNull(1) ? (int?)null : o.GetInt32(1),
                     Sikayet = o.GetString(2), Karar = o.GetString(3),
                     AnaTani = o.GetInt64(4), BekleyenIstem = o.GetInt64(5),
+                    Baslatildi = o.GetBoolean(6), CikisKodu = o.GetString(7),
+                    Takip = o.GetString(8),
                 }, iptal);
 
             if (m is null) return Results.NotFound(new { hata = new
@@ -179,6 +188,23 @@ public static class MuayeneUclari
             if (m.AnaTani == 0) eksikler.Add(new("tanilar", "Ana tani zorunlu."));
             if (m.Sikayet.Length == 0) eksikler.Add(new("sikayet", "Sikayet zorunlu."));
             if (m.Karar.Length == 0) eksikler.Add(new("karar", "Degerlendirme / plan zorunlu."));
+
+            // e-NABIZ'IN ZORUNLU ALANLARI DA BURADA DURDURUR (628).
+            //
+            // 103 ve 106 muayene tamamlanirken uretilir; USS o paketleri
+            //   eksik alanla REDDEDIYOR ve hata hekime SAATLER SONRA, kuyruk
+            //   ekraninda donuyordu - o sirada muayene kilitli ve duzeltmek
+            //   icin geri acmak gerekiyor. Kontrol tamamlama anina alindi:
+            //     · MUAYENE_BASLANGIC_TARIHI (103) -> muayeneye alinmis olmali
+            //     · CIKIS_SEKLI (106)              -> SKRS listesinde gecerli kod
+            //   Gercek vaka: CIKIS_SEKLI bos gonderildi, "E1014 ... eksik
+            //   elemanlar var: CIKIS_SEKLI" (paket 652).
+            if (!m.Baslatildi)
+                eksikler.Add(new("baslangic",
+                    "Muayene baslatilmamis - 'Muayeneye Al' ile baslangic zamani yazilmali."));
+            if (m.CikisKodu.Length == 0)
+                eksikler.Add(new("cikisSekli",
+                    "Cikis sekli secilmeli (e-Nabiz cikis bildiriminin zorunlu alani)."));
             if (eksikler.Count > 0)
                 throw GentegreHatasi.Dogrulama(
                     "Muayene tamamlanamaz: " + string.Join(" ", eksikler.Select(x => x.Mesaj)),
@@ -214,11 +240,24 @@ public static class MuayeneUclari
                        "e-Nabiz paketi uretilemedi (muayene {Id})", id);
             }
 
-            // Bekleyen istem varsa hekim bunu BILMELI: sonuc gelmeden kapanan
-            //   muayenede tetkik sahipsiz kalir. Engel degil, uyari.
-            var uyari = m.BekleyenIstem > 0
-                ? $"{m.BekleyenIstem} istem hala sonuc bekliyor."
-                : null;
+            // UYARILAR: ENGEL DEGIL, cunku ikisi de HEKIMIN ELINDE DEGIL.
+            //
+            // · Bekleyen istem: sonuc gelmeden kapanan muayenede tetkik
+            //   sahipsiz kalir - ama sonucu bekletmek hekimin isi degil.
+            // · SYS takip numarasi: 103/106 paketleri onu TASIMAK ZORUNDA
+            //   (USS "E1004 SYSTakipNo bos olamaz" der) ve numara hasta
+            //   kaydinin (101) USS'ye GONDERILMESIYLE gelir. Gonderim ayri
+            //   bir is; muayeneyi kilitlemek, klinik kaydi e-Nabiz kuyruguna
+            //   bagimli yapardi. Paketler uretilir, numara gelince
+            //   gonderilir - hekim yalnizca BILIR.
+            var uyarilar = new List<string>();
+            if (m.BekleyenIstem > 0)
+                uyarilar.Add($"{m.BekleyenIstem} istem hala sonuc bekliyor.");
+            if (m.Takip.Length == 0)
+                uyarilar.Add("Hasta kaydi (101) henuz e-Nabiz'a gonderilmemis - "
+                           + "muayene ve cikis paketleri takip numarasi gelene kadar "
+                           + "kuyrukta bekler.");
+            var uyari = uyarilar.Count > 0 ? string.Join(" ", uyarilar) : null;
             return Results.Ok(new { id, m.BelgeId, uyari, paketler,
                                     mesaj = "Muayene tamamlandi.",
                                     izlemeNo = baglam.IzlemeNo });

@@ -68,9 +68,19 @@ public sealed partial class EnabizPaketUretici
         var alanlar = await AlanlariCozAsync(baglanti, islem, paketKodu, kaynakId, iptal);
         if (alanlar.Count == 0) return null;
 
+        // ZORUNLU ALAN KONTROLU INDEKS-DUYARSIZ (626).
+        //
+        // Tekrarli gruplarda uretilen yol indeks tasir
+        //   ("TANI_BILGISI[1]/ICD10"), zorunlu listesindeki yol tasimaz
+        //   ("TANI_BILGISI/ICD10"). Tam yol esitligiyle karsilastirinca DOLU
+        //   bir alan EKSIK sayiliyordu: 103 paketi butun alanlari gecerliyken
+        //   "Eksik Alan" durumunda kuyruga dusuyor ve GONDERILEMIYORDU
+        //   (gercek vaka, paket 627). 102'de ayni sorun zorunlu listesi bos
+        //   birakilarak gecistirilmisti - dogrusu karsilastirmayi duzeltmek.
         var zorunlu = JsonSerializer.Deserialize<string[]>(tur.Zorunlu) ?? [];
         var eksikler = zorunlu
-            .Where(z => !alanlar.Any(a => a.Alan == z && a.Deger.Trim().Length > 0))
+            .Where(z => !alanlar.Any(a => IndeksSiz(a.Alan) == z
+                                       && a.Deger.Trim().Length > 0))
             .ToList();
 
         var baglam = await BaglamAlAsync(baglanti, islem, paketKodu, kaynakId, iptal);
@@ -253,6 +263,17 @@ public sealed partial class EnabizPaketUretici
                                     o.FieldCount > 5 && !o.IsDBNull(5) ? o.GetString(5) : ""),
                 iptal);
     }
+
+    /// <summary>
+    /// Yoldan tekrar indeksini atar: "ISLEM_BILGISI[3]/ADET" -> "ISLEM_BILGISI/ADET".
+    ///
+    /// İndeks üretim sırasında gruplar birbirine karışmasın diye var ve
+    /// gövdeye yazılmaz; şema yolunda da yoktur. Zorunluluk şemanın
+    /// sorusudur, o yüzden karşılaştırma indekssiz yapılır.
+    /// </summary>
+    private static string IndeksSiz(string yol)
+        => yol.IndexOf('[') < 0 ? yol : System.Text.RegularExpressions.Regex
+               .Replace(yol, @"\[[^\]]*\]", "");
 
     /// <summary>İçerik parmak izi - aynı içerik ikinci kez paket açmasın.</summary>
     private static string Hash(IEnumerable<string> parcalar)
