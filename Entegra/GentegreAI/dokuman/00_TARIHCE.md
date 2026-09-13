@@ -8426,8 +8426,132 @@ görürdü. `db/624` alan yolunu 200 karaktere genişletti.
 **`db/612`** vaka türü boş kalamaz (USS zorunlu); geliş nedeni seçilmemişse
 SKRS'nin kendi kodu olan **NORMAL**'e düşer.
 
+### O günün sonunda kalanlar
+
+- 29 departmanın klinik kodu yok (ertesi gün 622 ile 23'ü daha kodlandı)
+- `enabiz.gonder` zamanlı işi **pasif** - gönderim elle
+- Göçler yalnız docker'da, bulut ekspert'e uygulanmadı
+
+---
+
+## 13.09.2026 — Muayene ve çıkış da e-Nabız'da: 103, 106, 302 (`db/625-628`)
+
+Bir gün önce 101/102/301 canlıda çalışıyordu; bugün **muayene (103)**, **çıkış
+(106)** ve **hizmet silme (302)** eklendi. Altı paket türüyle hastanın USS'deki
+yolculuğu baştan sona bildiriliyor ve **gönderdiğimiz her şeyin geri alma yolu
+var**.
+
+### USS'nin iki kuralı daha çıktı
+
+Kılavuz yetmiyor, kuralları servis öğretiyor (tam liste
+`dokuman/09_ENABIZ_USS_SEMASI.md`):
+
+- **`CIKIS_SEKLI` zorunlu.** "Yatış/taburcu modülü gelince" diye bekletiliyordu;
+  USS `E1014 ... eksik elemanlar var: CIKIS_SEKLI` ile reddetti. Ayakta
+  muayenenin de bir çıkışı var - hasta ya evine gider ya sevk edilir - ve karar
+  **hekimindir**. Alan muayeneye eklendi (`db/627`), varsayılan 7 (İYİLEŞEREK
+  ÇIKIŞ/TABURCU), kartta SKRS listesinden seçiliyor.
+- **Tekrarlı grupta indeks, zorunluluk kontrolünü bozmamalı** (`db/626`).
+  Üretilen yol indeks taşıyor (`TANI_BILGISI[1]/ICD10`), şemadaki yol taşımıyor;
+  tam yol eşitliğiyle karşılaştırınca **dolu alan eksik sayılıyor** ve paket
+  gönderilemiyordu. 102'de aynı tuzak zorunlu listesi boş bırakılarak
+  geçiştirilmişti - doğrusu karşılaştırmayı düzeltmekti.
+
+### 103 Muayene
+
+Üç veri setinden (muayene, reçete, rapor) yalnız **MUAYENE_BILGILERI**
+gönderiliyor: reçete ve rapor setlerinin içeriğini üretmiyoruz ve *açılan
+grubun içi tam olmalı* - boş bir reçete seti göndermek, olmayan bir reçeteyi
+bildirmek olurdu. `TANI_BILGISI` tekrarlı, `[n]` indeksiyle.
+
+**`db/625`**: tanı türü listesi de SKRS'den. Kodda elle yazılıydı ve dördüncü
+değeri ayrışıyordu - bizde `4 = Sevk Tanısı`, SKRS'de `4 = AYIRICI TANI`; 103
+bu alanı SKRS kodu olarak istiyor, sevk tanısı seçilen her muayene yanlış
+bildirilirdi.
+
+### 106 Çıkış — sessizce hiç üretilmiyordu
+
+Sorgu **belge kimliği** bekliyor, tamamlama ise **muayene kimliği** geçiyordu.
+Muayene kimliğiyle belge bulunamayınca alan listesi boş dönüyor, üretici de
+"üretilecek bir şey yok" deyip `null` veriyordu. Hata da vermiyordu - boş liste
+meşru bir sonuç. 103 gönderilirken 106'nın kuyrukta hiç görünmemesinin sebebi
+buydu. Çıkış zamanı da belgenin değiştirme damgasından okunuyordu; hastanın
+çıkışı **muayenenin tamamlandığı andır**.
+
+### 302 Hizmet Silme (`db/628`)
+
+101'i 301 ile geri alabiliyorduk ama 102 ile gönderilen hizmet/ilaç/malzeme
+kayıtlarını geri alacak yol yoktu. Eşleşme hazırdı: `ISLEM_REFERANS_NUMARASI`
+bizde `belge_satir.id`.
+
+- Referanslar **belgeden değil gönderilmiş paketten** okunuyor: kalem bu arada
+  silinmiş olabilir, ama USS'de duran kayıt yine de temizlenmeli.
+- İptal artık paket türüne göre karşılığını seçiyor: `101 → 301`, `102 → 302`;
+  103/106 için USS'de silme paketi yok (kaynağı düzeltip yeniden gönderilir).
+- Silme ulaşınca kaynak paket iptal işaretleniyor. **302'de başvurunun takip
+  numarası TEMİZLENMEZ** - hasta kaydı USS'de duruyor, silinen yalnız işlemler;
+  numarayı silmek sonraki 103/106'yı göndermez yapardı.
+
+**104 Fatura gönderilmiyor**: kılavuz "BU VERİ PAKETİNİ ÖZEL VE ÜNİVERSİTE
+HASTANELERİNİN GÖNDERMESİNE GEREK YOKTUR" diyor (102'de tam tersi yazıyor -
+tutarları *özel ve üniversite* hastaneleri gönderecek).
+
+### Tamamlama doğrulaması (628)
+
+103/106'nın zorunlu alanları artık **tamamlama anında** durduruyor: başlangıç
+zamanı ve çıkış şekli. Eksik alanla üretilen paket USS'den saatler sonra,
+kuyruk ekranında reddediliyordu - o sırada muayene kilitli ve düzeltmek için
+geri açmak gerekiyor.
+
+**SYS takip numarası engel DEĞİL, uyarı**: o da zorunlu alan ama hekimin elinde
+değil - numara 101'in gönderilmesiyle gelir ve gönderim ayrı bir iş. Muayeneyi
+kilitlemek klinik kaydı e-Nabız kuyruğuna bağımlı yapardı.
+
+### Web: beyaz ekran ve döngüsel import
+
+`listeTanimlari.ts` sekiz konu dosyasına bölününce uygulama **boş ekranla**
+açıldı. Sebep döngüsel import: parçalar ortak sabiti ana dosyadan alıyordu, ana
+dosya da parçaları. `tsc -b`, `vite build` ve 503 testin üçü de temiz geçti -
+hepsi modül grafiğini *kurar*, **değerlendirme sırasını denemez**. Ortak üçlü
+kendi modülüne alındı (`listeTanimlari.Ortak.ts`).
+
+Yeni test (`donguselImport`) modül grafiğini statik tarıyor. Projede **zaten
+sekiz döngü** olduğunu ortaya çıkardı - hepsi bileşen-bileşen, hiçbiri yükleme
+anında değer okumuyor (React referansları çağrı anında çözülür), o yüzden
+patlamıyorlar. Bilinen liste olarak kayda geçti; yenisi eklenirse test kırılır.
+
+### Refaktör
+
+Dosyalar konu dosyalarına bölündü - kod değişmedi, yalnız yer değiştirdi.
+Doğrulama her seferinde **sayımla**: uç sayısı, tanım sayısı, dizi girdisi.
+
+| dosya | önce | sonra |
+|---|---|---|
+| `LabUclari` | 2102 | 807 |
+| `RadyolojiUclari` | 1955 | 624 |
+| `listeTanimlari.ts` | 2525 | 262 |
+| `KartKatalogu.Saglik` | 1447 | 665 |
+| `KaynakKatalogu.Saglik` | 1182 | 358 |
+| `KartKatalogu.Cari` | 1139 | 444 |
+| `MuayeneUclari` | 1418 | 1087 |
+| `EnabizPaketUretici` | 841 | 261 |
+| `BelgeKarti.tsx` | 1906 | 1745 |
+
+`BelgeKarti`'da şişkinlik JSX'te değil durum yönetimindeydi (45 `useState`); üç
+küme kancalara ayrıldı - satır sayısına göre değil, *"bu state'ler neden aynı
+anda değişiyor"* sorusuna göre. `EnabizTetikleyici` de "hangi paket ne zaman
+doğar" kuralını tek yere topladı; kural iki dosyaya dağılmıştı ve 102'nin hiç
+doğmaması tam bu yüzden gözden kaçmıştı.
+
+`AksiyonKatalogu` (1440) bölünmedi: tek bir sözlük başlatıcısı, bölmek girdileri
+parçalayıp birleştirme mantığı kurmayı gerektiriyor - mekanik taşımanın aksine
+gerçek bir yapı değişikliği (kullanıcı vazgeçti).
+
 ### Kalanlar
 
-- 29 departmanın klinik kodu yok (25'i klinik değil, 4'ü kod çakışması)
+- Kuyrukta iki paket bekliyor (101 ve 102 - başvuru tarihi değişince yeniden
+  doğdular)
 - `enabiz.gonder` zamanlı işi **pasif** - gönderim elle
-- Göçler **601-624 yalnız docker'da**, bulut ekspert'e uygulanmadı
+- Göçler **601-628 yalnız docker'da**, bulut ekspert'e uygulanmadı
+- 29 departmanın klinik kodu boş (25'i klinik değil - arşiv, güvenlik, grup
+  başlıkları; 4'ünün kodunu başka bölüm kullanıyor)

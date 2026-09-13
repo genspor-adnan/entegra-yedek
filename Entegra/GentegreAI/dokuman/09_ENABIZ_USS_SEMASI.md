@@ -52,6 +52,11 @@ söyler: 100 serisi kayıt, 300 serisi silme, 400 serisi sorgulama.
    `ISLEM_HEKIM_BILGISI` açılınca `PUAN_HAKEDIS_ZAMANI` de istendi;
    hiç açılmayan `GEN_ISLEM_BILGISI` sorulmadı.
 
+9. **Tekrarlı grupta indeks yalnız ÜRETİMİN kimliğidir.** Gövdeye
+   yazılmaz, şema yolunda yoktur - dolayısıyla zorunluluk kontrolü de
+   indekse takılmamalı: `TANI_BILGISI[1]/ICD10` ile `TANI_BILGISI/ICD10`
+   aynı alandır (626).
+
 İş hatası HTTP 200 ile döner — başarı `sonucKodu` ile anlaşılır (`S…` başarı,
 `E…` hata), HTTP durumuyla değil.
 
@@ -144,6 +149,50 @@ Tekrarlı grup üretimde `ISLEM_BILGISI[n]/...` indeksiyle ayrılır; indeks
 gövdeye **yazılmaz** (`EnabizGonderimi.XmlUretAsync`). Yazıcı ara düğümleri
 adına göre birleştirdiği için, indeks olmasa bütün kalemler tek grubun içine
 yığılırdı.
+
+## 103 — Muayene
+
+Üç veri seti: `MUAYENE_BILGILERI`, `HASTA_RECETE_BILGILERI`,
+`HASTA_RAPOR_BILGILERI`. Üçü de opsiyonel; yalnız `SYSTakipNo` zorunlu.
+**Reçete ve rapor setleri YAZILMIYOR** - içeriklerini üretmiyoruz ve açılan
+grubun içi tam olmalı.
+
+`TANI_BILGISI` tekrarlı grup: her tanı biri, `TANI_TURU` (SKRS) + `ICD10`.
+Epikriz açıklaması `muayene.sikayet`'ten gelir.
+
+Paket muayene TAMAMLANIRKEN üretilir; tamamlama doğrulaması 103/106'nın
+zorunlu alanlarını orada kontrol eder (başlangıç zamanı, çıkış şekli).
+
+## 106 — Hasta Çıkış
+
+| USS alanı | Kaynak |
+|---|---|
+| `SYSTakipNo` | başvurunun takip numarası |
+| `CIKIS_ZAMANI` | `muayene.tamamlanma` — hastanın çıkışı muayenenin bittiği andır |
+| `CIKIS_SEKLI` | `muayene.cikis_sekli` (SKRS), **zorunlu** |
+
+`CIKIS_SEKLI` boş gönderilince `E1014 ... eksik elemanlar var: CIKIS_SEKLI`.
+Varsayılan 7 (İYİLEŞEREK ÇIKIŞ/TABURCU); sevk, ölüm, tedaviyi reddetme
+hekimin seçimi.
+
+## 302 — Hizmet Silme (102'nin iptali)
+
+```xml
+<recordData>
+  <SilinecekHizmetBilgisi>
+    <SilinecekHizmet><ISLEM_REFERANS_NUMARASI value="1785" /></SilinecekHizmet>
+  </SilinecekHizmetBilgisi>
+  <HASTA_TAKIP_BILGISI><SYSTakipNo value="…" /></HASTA_TAKIP_BILGISI>
+</recordData>
+```
+
+Sıra kılavuzdaki gibi: **önce** `SilinecekHizmetBilgisi`, **sonra**
+`HASTA_TAKIP_BILGISI` (101/102'nin tersine). Referanslar gönderilmiş 102
+paketinden okunur - kalem silinmiş olsa bile USS'deki kayıt temizlenmeli.
+
+**Silme karşılıkları:** `101 → 301`, `102 → 302`. 103 ve 106 için USS'de silme
+paketi YOK; kaynağı düzeltip yeniden göndermek gerekir. **104 (Fatura)
+gönderilmiyor** - kılavuz özel ve üniversite hastanelerinden istemiyor.
 
 ## 301 — Hasta Kayıt Silme (101'in iptali)
 
@@ -260,6 +309,8 @@ gömülü sabitten değil.
   Aynı kliniğin ikinci servisi gerekiyorsa bölümler birleştirilmeli.
 - SKRS karşılığı bulunamayan 76 yerel ülke satırı (617) uyruk kutusunda
   çıkmıyor.
+- **Altı paket türü de canlıda çalıştı**: 101 · 102 · 103 · 106 · 301 · 302.
+  Gönderdiğimiz her şeyin geri alma yolu var.
 - **102 işlem bildirimi canlıda çalıştı** (13.09.2026): paket 480 `S0000`.
   Yol boyunca USS üç turda şemayı öğretti - eksik `[n]` indeksi (tek gruba
   yığılma), beş "zorunlu değil" ama eksik olamayan alan, ve açılan hekim
