@@ -682,13 +682,22 @@ public sealed class EnabizGonderimi
                    and p.kaynak_tur = 1 and p.kaynak_id = bb.id
                 """, [p.Id], iptal);
 
+            // KAYNAK PAKET IPTAL ISARETLENIR - her silmenin kendi hedefi:
+            //   301 -> 101 (hasta kaydi), 302 -> 102 (hizmetler).
+            //
+            // 302'de basvurunun TAKIP NUMARASI TEMIZLENMEZ: hasta kaydi
+            //   USS'de duruyor, silinen yalnizca islemler. Numarayi silmek
+            //   sonraki 103/106 paketlerini gondermez yapardi.
             await _veri.CalistirAsync("""
                 update public.enabiz_paket k
                    set durum = 5, degistirme_tarihi = now()
                   from public.enabiz_paket s
                   join public.enabiz_paket_turu st on st.id = s.paket_turu_id
-                  join public.enabiz_paket_turu kt on kt.uss_paket_kodu = '101'
-                 where s.id = @p0 and st.uss_paket_kodu = '301'
+                  join public.enabiz_paket_turu kt
+                    on kt.uss_paket_kodu = case st.uss_paket_kodu
+                                                when '301' then '101'
+                                                when '302' then '102' end
+                 where s.id = @p0 and st.uss_paket_kodu in ('301', '302')
                    and k.paket_turu_id = kt.id
                    and k.kaynak_tur = s.kaynak_tur and k.kaynak_id = s.kaynak_id
                    and k.durum = 3

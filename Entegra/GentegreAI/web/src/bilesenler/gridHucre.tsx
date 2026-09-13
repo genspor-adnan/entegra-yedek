@@ -58,7 +58,7 @@ export const ROZET_SINIFI: Record<string, string> = {
   //   islem islenir (turkuaz), muayene yazilir (eflatun), hasta cikar
   //   (zeytin). 300 serisi SILME oldugu icin KIRMIZI: oteki dortten gozle
   //   ayrilmali, cunku USS'deki kaydi geri alir.
-  '101': 'mavi', '102': 'turkuaz', '103': 'eflatun', '106': 'zeytin',
+  '101': 'mavi', '102': 'sari', '103': 'eflatun', '106': 'zeytin',
   '301': 'hata',
   'Alınan': 'ok', 'Verilen': 'uyari',
   'Portföyde': 'bilgi', 'Ciro Edildi': 'uyari', 'Tahsilde': 'bilgi',

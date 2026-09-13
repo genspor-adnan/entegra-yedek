@@ -37,6 +37,44 @@ public sealed partial class EnabizPaketUretici
                   from public.belge b where b.id = @p0
                 """,
 
+            // 302 HIZMET SILME - 102 ile bildirilen islemleri geri alir (628).
+            //
+            // Kaynak BASVURUDUR: silinecek islemler, o basvurunun USS'ye
+            //   GONDERILMIS 102 paketlerinde ne bildirdiysek onlardir.
+            //   Referanslar paketin kendi alanlarindan okunur - belgeden
+            //   yeniden uretmek yanlis olurdu: kalem bu arada silinmis
+            //   olabilir ve USS'de duran kayit yine de temizlenmeli.
+            //
+            // SEMA SIRASI (prod:302): once SilinecekHizmetBilgisi, SONRA
+            //   HASTA_TAKIP_BILGISI. 101/102'nin tersine - kilavuz boyle
+            //   yaziyor, sira baglayici oldugu icin aynen uyulur.
+            "HASTA_ISLEM_SIL" => """
+                select k.uss_alan, k.deger, k.kaynak,
+                       k.skrs_liste, k.skrs_kod, k.skrs_sistem
+                  from (
+                  select 'SilinecekHizmetBilgisi/SilinecekHizmet[' || x.ix
+                             || ']/ISLEM_REFERANS_NUMARASI',
+                         x.referans, 'gonderilmis 102 paketi', '', '', '', x.ix
+                    from (
+                      select distinct on (a.deger) a.deger as referans,
+                             dense_rank() over (order by a.deger) as ix
+                        from public.enabiz_paket p
+                        join public.enabiz_paket_turu t on t.id = p.paket_turu_id
+                        join public.enabiz_paket_alan a on a.paket_id = p.id
+                       where p.kaynak_tur = 1 and p.kaynak_id = @p0
+                         and t.uss_paket_kodu = '102' and p.durum = 3
+                         and a.uss_alan like '%ISLEM_REFERANS_NUMARASI'
+                         and coalesce(a.deger, '') <> ''
+                    ) x
+                  union all
+                  select 'HASTA_TAKIP_BILGISI/SYSTakipNo',
+                         coalesce(bb.sys_takip_no, ''),
+                         'belge_basvuru.sys_takip_no', '', '', '', 9999
+                    from public.belge_basvuru bb where bb.id = @p0
+                  order by 7
+                ) as k(uss_alan, deger, kaynak, skrs_liste, skrs_kod, skrs_sistem, sira)
+                """,
+
             // 102 HASTA ISLEM - hizmet / ilac / malzeme bildirimi (623).
             //
             // Kilavuz: "Bu paket hasta dosyasina hizmet, ilac, malzeme, vaka

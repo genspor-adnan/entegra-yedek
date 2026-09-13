@@ -290,16 +290,28 @@ public static class EnabizUclari
             // --- GONDERILMIS PAKET: USS'ye SILME paketi gonderilir ---
             if (p.Durum == 3)
             {
-                if (p.Kod != "101")
+                // HER PAKETIN KENDI SILME KARSILIGI (628):
+                //   101 hasta kaydi -> 301 Hasta Kayit Silme
+                //   102 islem        -> 302 Hizmet Silme
+                // Otekiler (103 muayene, 106 cikis) icin USS'de silme paketi
+                //   YOK - onlar kaynagi duzeltip yeniden gonderilerek
+                //   guncellenir.
+                var silmeKodu = p.Kod switch
+                {
+                    "101" => "HASTA_KABUL_SIL",
+                    "102" => "HASTA_ISLEM_SIL",
+                    _ => "",
+                };
+                if (silmeKodu.Length == 0)
                     throw GentegreHatasi.IsKurali(
-                        "Gonderilmis paketlerden yalniz hasta kaydi (101) geri "
-                        + "alinabilir; digerleri icin kaynagi duzeltip yeniden gonderin.");
+                        $"Gonderilmis {p.Kod} paketinin USS'de silme karsiligi yok; "
+                        + "kaynagi duzeltip yeniden gonderin.");
                 if (p.Takip.Length == 0)
                     throw GentegreHatasi.IsKurali(
                         "Paketin SYS takip numarasi yok - USS'de hangi kaydin "
                         + "silinecegi bilinemez. Once gonderim yanitini tazeleyin.");
 
-                var silme = await uretici.UretAsync("HASTA_KABUL_SIL", p.Kaynak,
+                var silme = await uretici.UretAsync(silmeKodu, p.Kaynak,
                                                     baglam.KullaniciId, iptal);
                 if (silme is null)
                     throw GentegreHatasi.IsKurali("Silme paketi uretilemedi.");
@@ -316,8 +328,8 @@ public static class EnabizUclari
                     id,
                     silmePaketId = silme.PaketId,
                     silmePaketNo = silme.PaketNo,
-                    mesaj = "Silme paketi (301) kuyruga alindi. USS kaydi, paket "
-                          + "gonderildikten sonra silinir.",
+                    mesaj = $"Silme paketi ({(p.Kod == "102" ? "302" : "301")}) kuyruga "
+                          + "alindi. USS kaydi, paket gonderildikten sonra silinir.",
                     izlemeNo = baglam.IzlemeNo
                 });
             }
