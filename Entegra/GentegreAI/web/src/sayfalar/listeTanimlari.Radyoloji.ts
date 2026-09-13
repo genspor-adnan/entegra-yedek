@@ -1,4 +1,4 @@
-import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari';
+import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
 
 /**
  * Radyoloji: çalışma listesi, şablonlar, protokoller, cihazlar.

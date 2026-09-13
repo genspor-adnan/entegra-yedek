@@ -1,4 +1,4 @@
-import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari';
+import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
 
 /**
  * İK, doküman ve yönetim listeleri.

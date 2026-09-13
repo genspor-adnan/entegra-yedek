@@ -1,4 +1,4 @@
-import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari';
+import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
 
 /**
  * Satış, alış, kasa ve banka listeleri.

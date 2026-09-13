@@ -149,12 +149,6 @@ public static partial class KartKatalogu
         ["bulguOzet"] = "Muayene Bulguları", ["karar"] = "Değerlendirme / Plan"
     };
 
-    /// <summary>Tani turu (409): muayene basina TEK ana tani (db kisiti).</summary>
-    private static readonly Dictionary<string, string> TaniTuruKodlari = new()
-    {
-        ["1"] = "Ana Tanı", ["2"] = "Ek Tanı", ["3"] = "Ön Tanı", ["4"] = "Sevk Tanısı"
-    };
-
     private static readonly Dictionary<string, string> TaniKesinlikKodlari = new()
     {
         ["1"] = "Kesin", ["2"] = "Ön", ["3"] = "Şüpheli", ["4"] = "Dışlandı"
@@ -485,7 +479,11 @@ public static partial class KartKatalogu
                 //   ICD adi guncellenirse kayit da guncel kalir. Yazilamaz.
                 new("taniAd", "(select x.ad from public.icd x where x.kod = tani.icd_kod)",
                     "metin", Yazilabilir: false, Baslik: "Tanı"),
-                new("tur", "tur", "kod", SabitKodlar: TaniTuruKodlari, Baslik: "Tür"),
+                // TANI TURU SKRS LISTESINDEN (625): elle yazilmis listenin dorduncu
+                //   degeri "Sevk Tanisi" idi, SKRS'de 4 = "AYIRICI TANI". e-Nabiz
+                //   103 bu alani SKRS kodu olarak ister; ayrisan bir deger sevk
+                //   tanisi secilen her muayeneyi yanlis bildirirdi.
+                new("tur", "tur", "kod", KodListesi: "tani.turu", Baslik: "Tür"),
                 new("kesinlik", "kesinlik", "kod", SabitKodlar: TaniKesinlikKodlari,
                     Baslik: "Kesinlik"),
                 new("taraf", "taraf", "kod", SabitKodlar: TarafKodlari, Baslik: "Taraf"),

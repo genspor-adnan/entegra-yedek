@@ -1,4 +1,4 @@
-import { type ListeGirdisi } from './listeTanimlari';
+import { type ListeGirdisi } from './listeTanimlari.Ortak';
 
 /**
  * Laboratuvar: istem, numune, sonuç, mikrobiyoloji, genetik, kalite kontrol.

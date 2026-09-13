@@ -1,4 +1,4 @@
-import { type ListeGirdisi } from './listeTanimlari';
+import { type ListeGirdisi } from './listeTanimlari.Ortak';
 
 /**
  * e-Nabız: paket kuyruğu ve gönderim listeleri.

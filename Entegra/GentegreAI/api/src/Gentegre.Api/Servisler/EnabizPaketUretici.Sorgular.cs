@@ -511,11 +511,29 @@ public sealed partial class EnabizPaketUretici
             //   tasir: 101'in yanitinda donen numara, basvurunun USS'deki
             //   kimligidir. O olmadan muayene hangi basvuruya baglanacagini
             //   bilemez - bu yuzden ZORUNLU ilk alan.
+            // 103 MUAYENE - kilavuz semasi (prod:103, 625).
+            //
+            // Uc veri seti var: MUAYENE_BILGILERI, HASTA_RECETE_BILGILERI ve
+            //   HASTA_RAPOR_BILGILERI. Ucu de OPSIYONEL; yalniz SYSTakipNo
+            //   zorunlu. Recete ve rapor setleri YAZILMAZ - iceriklerini
+            //   uretmiyoruz ve 101/102'de ogrenildigi gibi ACILAN GRUBUN ICI
+            //   TAM OLMALI: bos bir recete seti gondermek, olmayan bir receteyi
+            //   bildirmek olurdu.
+            //
+            // TANI_BILGISI TEKRARLI: her tani bir grup, `[n]` indeksiyle
+            //   ayrilir (indeks govdeye yazilmaz). Grup kilavuzda ZORUNLU -
+            //   tanisi olmayan muayene paketi zaten uretilmemeli.
             "MUAYENE" => """
                 select 'HASTA_TAKIP_BILGISI/SYSTakipNo',
                        coalesce((select bb.sys_takip_no from public.belge_basvuru bb
                                   where bb.id = m.belge_id), ''),
                        'belge_basvuru.sys_takip_no', '', '', ''
+                  from public.muayene m where m.id = @p0
+                -- Sema sirasi: CHECK_UP, SIGARA, PAKET ZAMANI, BASLANGIC, BITIS.
+                --   Ilk ikisi SKRS kodlu ve karsiligimiz yok - KODSUZ YAZILMAZ
+                --   (611), o yuzden hic uretilmiyorlar.
+                union all select 'MUAYENE_BILGILERI/PAKETE_AIT_ISLEM_ZAMANI',
+                       to_char(now(), 'YYYYMMDDHH24MI'), '(uretim zamani)', '', '', ''
                   from public.muayene m where m.id = @p0
                 union all select 'MUAYENE_BILGILERI/MUAYENE_BASLANGIC_TARIHI',
                        coalesce(to_char(m.baslangic, 'YYYYMMDDHH24MI'), ''),
@@ -526,18 +544,41 @@ public sealed partial class EnabizPaketUretici
                                         'YYYYMMDDHH24MI'), ''),
                        'muayene.bitis', '', '', ''
                   from public.muayene m where m.id = @p0
-                -- TANI: ana tani TANI_TURU kodlu, ICD10 kendi kod sisteminde.
-                union all select 'MUAYENE_BILGILERI/TANI_BILGISI/ICD10',
-                       coalesce((select t.icd_kod from public.tani t
-                                  where t.muayene_id = m.id and t.tur = 1 limit 1), ''),
-                       'tani (tur=1)', 'ICD-10',
-                       coalesce((select t.icd_kod from public.tani t
-                                  where t.muayene_id = m.id and t.tur = 1 limit 1), ''),
-                       'c3eaabad-8c4c-56ee-e043-14031b0a5530'
+                -- EPIKRIZ: baslik + aciklama. Grup acildigi icin IKISI DE
+                --   yazilir; aciklama hekimin sikayet/oykü metnidir.
+                union all select 'MUAYENE_BILGILERI/EPIKRIZ_BILGISI/EPIKRIZ_BILGISI_BASLIK',
+                       'Muayene', '(sabit baslik)', '', '', ''
                   from public.muayene m where m.id = @p0
                 union all select 'MUAYENE_BILGILERI/EPIKRIZ_BILGISI/EPIKRIZ_BILGISI_ACIKLAMA',
                        left(coalesce(m.sikayet, ''), 400), 'muayene.sikayet', '', '', ''
                   from public.muayene m where m.id = @p0
+                union all
+                select k2.uss_alan, k2.deger, k2.kaynak,
+                       k2.skrs_liste, k2.skrs_kod, k2.skrs_sistem
+                  from (
+                  with tanilar as (
+                    select t.icd_kod, t.tur,
+                           row_number() over (order by t.sira, t.id) as ix
+                      from public.tani t
+                     where t.muayene_id = @p0 and coalesce(t.icd_kod, '') <> ''
+                  )
+                  select 'MUAYENE_BILGILERI/TANI_BILGISI[' || t.ix || ']/' || a.alan,
+                         a.deger, a.kaynak, a.skrs_liste, a.skrs_kod, a.skrs_sistem,
+                         t.ix * 10 + a.sira
+                    from tanilar t
+                    cross join lateral (values
+                      ('TANI_TURU',
+                       public.fn_skrs_ad('tani.turu', t.tur),
+                       'tani.tur', 'SKRS Tani Turu',
+                       public.fn_skrs_kod('tani.turu', t.tur),
+                       public.fn_skrs_guid('tani.turu'), 1),
+                      -- ICD10 kendi kod sisteminde: kodun KENDISI hem deger
+                      --   hem koddur, ayri bir esleme tablosu yok.
+                      ('ICD10', t.icd_kod, 'tani.icd_kod', 'ICD-10',
+                       t.icd_kod, 'c3eaabad-8c4c-56ee-e043-14031b0a5530', 2)
+                    ) as a(alan, deger, kaynak, skrs_liste, skrs_kod, skrs_sistem, sira)
+                  order by 7
+                ) as k2(uss_alan, deger, kaynak, skrs_liste, skrs_kod, skrs_sistem, sira)
                 """,
 
             // 106 HASTA CIKIS - USS adlari (605).
