@@ -53,6 +53,13 @@ export function durumRozeti(deger: unknown, kolon: KolonMeta) {
  * gorunuyordu - gozle fark edilmesi zor, testle kolay.
  */
 export const ROZET_SINIFI: Record<string, string> = {
+  // e-NABIZ PAKET KODLARI: kuyrukta hangi paketin biriktigi bir bakista
+  //   gorunsun. Renk keyfi degil, HAYAT DONGUSU sirasi - kayit acilir (mavi),
+  //   islem islenir (turkuaz), muayene yazilir (eflatun), hasta cikar
+  //   (zeytin). 300 serisi SILME oldugu icin KIRMIZI: oteki dortten gozle
+  //   ayrilmali, cunku USS'deki kaydi geri alir.
+  '101': 'mavi', '102': 'turkuaz', '103': 'eflatun', '106': 'zeytin',
+  '301': 'hata',
   'Alınan': 'ok', 'Verilen': 'uyari',
   'Portföyde': 'bilgi', 'Ciro Edildi': 'uyari', 'Tahsilde': 'bilgi',
   'Teminatta': 'bilgi', 'Tahsil Edildi': 'ok', 'Ödendi': 'ok',
