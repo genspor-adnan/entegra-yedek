@@ -80,4 +80,60 @@ public sealed class OturumDeposu
     public Task KullanildiAsync(long id, CancellationToken iptal = default)
         => _veri.CalistirAsync("update public.oturum set son_kullanim = now()::timestamp where id = @p0",
             new object?[] { id }, iptal);
+
+    /// <summary>
+    /// Kullanicinin ACIK oturumlari (Kullanici Ayarlari > Guvenlik). Refresh
+    /// ozeti DISARI CIKMAZ - istemciye yalnizca tanima bilgisi (cihaz, IP,
+    /// zaman) ve kapatmak icin id gider.
+    ///
+    /// AILE BASINA TEK SATIR: her yenilemede yeni oturum satiri acildigi icin
+    /// (rotation) ham liste ayni tarayiciyi onlarca kez gosterirdi; kullanici
+    /// "cihaz" bekler, token gecmisi degil - ailenin EN SON satiri alinir.
+    /// </summary>
+    public Task<List<AcikOturum>> AcikListeAsync(int kullaniciId,
+        CancellationToken iptal = default)
+        => _veri.ListeAsync("""
+            select distinct on (o.aile_id)
+                   o.id, o.ip, o.istemci, o.olusma_tarihi,
+                   coalesce(o.son_kullanim, o.olusma_tarihi) as son_kullanim,
+                   o.bitis_tarihi, coalesce(s.ad, '') as sube_adi
+              from public.oturum o
+              left join public.sube s on s.id = o.sube_id
+             where o.kullanici_id = @p0
+               and o.iptal_tarihi is null
+               and o.bitis_tarihi > now()::timestamp
+             order by o.aile_id, o.olusma_tarihi desc
+            """, new object?[] { kullaniciId },
+            o => new AcikOturum(o.GetInt64(0), o.Metin("ip"), o.Metin("istemci"),
+                o.GetDateTime(3), o.GetDateTime(4), o.GetDateTime(5), o.Metin("sube_adi")),
+            iptal);
+
+    /// <summary>
+    /// Kullanicinin KENDI oturumunu kapatmasi. Sahiplik SQL'in icinde
+    /// (`kullanici_id = @p0`): id tahmin eden biri baskasinin oturumunu
+    /// kapatamaz. Ayni AILEnin tum satirlari kapanir - yalniz son satiri
+    /// kapatmak, elindeki eski refresh ile yenilemeye devam etmesine izin verirdi.
+    /// Kapatilan satir sayisini doner (0 = bulunamadi / zaten kapali).
+    /// </summary>
+    public Task<int> KendiOturumunuKapatAsync(int kullaniciId, long oturumId,
+        CancellationToken iptal = default)
+        => _veri.TekDegerAsync<int>("""
+            with hedef as (
+                select aile_id from public.oturum
+                 where id = @p1 and kullanici_id = @p0
+            ), kapanan as (
+                update public.oturum o
+                   set iptal_tarihi = now()::timestamp, iptal_nedeni = 'kullanici'
+                  from hedef h
+                 where o.aile_id = h.aile_id
+                   and o.kullanici_id = @p0
+                   and o.iptal_tarihi is null
+                returning 1
+            )
+            select count(*)::int from kapanan
+            """, new object?[] { kullaniciId, oturumId }, iptal);
 }
+
+/// <summary>Kullanici Ayarlari > Guvenlik: acik oturum satiri.</summary>
+public sealed record AcikOturum(long Id, string Ip, string Istemci,
+    DateTime OlusmaTarihi, DateTime SonKullanim, DateTime BitisTarihi, string SubeAdi);

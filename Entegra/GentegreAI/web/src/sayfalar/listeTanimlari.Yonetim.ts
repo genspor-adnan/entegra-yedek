@@ -183,6 +183,24 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Yönetim', menuAd: 'İşlem Günlüğü', ic: '📋', yetkiKodu: 'islem_log',
   },
   {
+    // GIRIS KAYITLARI (674, kullanici: "login bilgileri de log da tutulsun").
+    //   Kayit zaten tutuluyordu (giris_denemesi); bu ekran onu OKUNUR yapar.
+    //   Basarisiz denemeler de listelenir - ayni koda arka arkaya gelen
+    //   "parola hatali" satirlari deneme-yanilma, ayni IP'den farkli kodlar
+    //   tarama demektir; yalniz basarililari gostermek bakilmasi gereken tek
+    //   seyi gizlerdi.
+    kaynak: 'giris-log', baslik: 'Giriş Kayıtları',
+    yol: 'Yönetim › Giriş Kayıtları',
+    tarihAlani: 'tarih',
+    cipler: [
+      { ad: 'Tümü' },
+      { ad: 'Başarılı',  filtre: { alan: 'basarili', op: 'esit', deger: 1 } },
+      { ad: 'Başarısız', filtre: { alan: 'basarili', op: 'esit', deger: 0 } },
+    ],
+    gizliKolonlar: ['kullaniciId'],
+    menuGrup: 'Yönetim', menuAd: 'Giriş Kayıtları', ic: '🔑', yetkiKodu: 'islem_log',
+  },
+  {
     // ONAM METINLERI (398, Faz 0): metin + surum. Teletip, genetik, girisimsel
     //   islem ve KVKK aydinlatmasi ayni tablodan beslenir - her modul kendi
     //   onam kopyasini yazmasin diye ortak platformda.

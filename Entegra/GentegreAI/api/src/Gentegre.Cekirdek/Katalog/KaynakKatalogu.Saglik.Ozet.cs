@@ -89,7 +89,7 @@ public static partial class KaynakKatalogu
             new("hastaAdi",     "h.unvan",        "metin", "Hasta", Genislik: 220),
             new("dosyaNo",      "h.kod",          "metin", "Dosya No", Hizalama: "orta",
                                                   Genislik: 110),
-            new("tcNo",         "coalesce(h.vkno, '')", "metin", "T.C. No", Hizalama: "orta",
+            new("tcNo",         "coalesce(h.vkno, '')", "metin", "Kimlik No", Hizalama: "orta",
                                                   Genislik: 110, Varsayilan: false),
             // AGIR ALERJI ayri kolon: listede "1 alerji" ile "anafilaksi"
             //   arasindaki fark, hekimin ilk bakisi icin belirleyici.

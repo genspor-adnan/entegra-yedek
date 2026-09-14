@@ -735,6 +735,24 @@ type
     function ToplamGetir(Bolum:Smallint;TLDoviz:String):Real;
     procedure FaturaTutarHesapla(TabloAc:Boolean);
     procedure FirmaBilgileri;
+    /// <summary>
+    /// Fatura baslik/adres bilgilerini KIMDEN dolduracagini secip uygular.
+    ///
+    /// Siparisten dogan irsaliye/faturada FATBASLIK.ANAKAYITID, faturanin
+    /// kesilecegi ASIL cariyi tasir (siparisi acan sube/bayi degil) - baslik
+    /// o cariden gelmeli. Ama YALNIZ BIR KEZ: kullanici basligi elle
+    /// duzelttiyse ustune yazilmaz, cunku bu ekran onu duzeltmek icin de
+    /// aciliyor.
+    ///
+    /// "Elle duzeltilmis mi" olcusu: BASLIK bos ya da VARSAYILAN carinin
+    /// fatura basligiyla ayni ise dokunulmamis sayilir.
+    ///
+    /// AAnaKayitOnceligi=False (cari ELLE secildiginde, LabelKodClick):
+    /// kullanicinin sectigi cari kazanir - ANAKAYITID'e bakilmaz. Aksi halde
+    /// cari degistirildigi halde baslik eski caride kalirdi.
+    /// </summary>
+    procedure FaturaBasligiUygula(AVarsayilanCariID: Integer;
+      AAnaKayitOnceligi: Boolean = True);
     procedure KaydetIptalButonlariAyarla;
     procedure DetayTablosuAc;
     procedure TekSatirKampanyaDuzenle(TabFaturaID:integer);
@@ -2629,7 +2647,9 @@ begin
            i:=SubeId //geliş belgelerinde bağlık firma gürünmeli
         else
            i:=RehberId;
-        Tablo.FaturaBaslik(TabFatbaslik,i);
+        // ANAKAYITID varsa baslik ORADAKI cariden gelir (bir kez) - ayrinti
+        //   FaturaBasligiUygula'da.
+        FaturaBasligiUygula(i);
         if ComboRaporDovizi.EditValue = null then
            TabFatbaslik.FieldByName('RAPORDOVIZ').AsString := CariDoviz;
         if TabFatbaslik.FieldByName('BASLIK').AsString = '' then
@@ -3310,7 +3330,10 @@ begin
           end;
           FirmaBilgileri;
           if Tur in [14, 15, 16, 119] then begin
-            Tablo.FaturaBaslik(TabFatbaslik,RehberId);
+            // CARI ELLE SECILDI: kullanicinin sectigi cari kazanir, ANAKAYITID'e
+            //   bakilmaz - yoksa cari degistirildigi halde baslik eski caride
+            //   kalirdi. Ayni fonksiyon, oncelik kapali.
+            FaturaBasligiUygula(RehberId, False);
           end;
     end;
   end;
@@ -4152,6 +4175,47 @@ begin
 
   if TabloAc then
      TabloYenile(TabFatbaslik, [TabFatbaslik.Fields[0].AsInteger]);
+end;
+
+procedure TFaturaWizardDlg.FaturaBasligiUygula(AVarsayilanCariID: Integer;
+  AAnaKayitOnceligi: Boolean);
+var
+  LAnaKayitID: Integer;
+  LMevcutBaslik, LVarsayilanBaslik: string;
+  LKaynakCariID: Integer;
+begin
+  LKaynakCariID := AVarsayilanCariID;
+
+  if AAnaKayitOnceligi and (TabFatbaslik.FindField('ANAKAYITID') <> nil) then
+  begin
+    LAnaKayitID := TabFatbaslik.FieldByName('ANAKAYITID').AsInteger;
+    if LAnaKayitID > 0 then
+    begin
+      LMevcutBaslik := Trim(TabFatbaslik.FieldByName('BASLIK').AsString);
+      LVarsayilanBaslik := '';
+      if AVarsayilanCariID > 0 then
+      begin
+        // Varsayilan carinin fatura basligi: REHBERAYAR'da VARSAYILAN=10
+        //   isaretli bilgi, yoksa carinin FIRMA adi.
+        // TOP/LIMIT motor yardimcilariyla: duz "top 1" PG'de derlenmez.
+        Tablo.TablodanSorguAc(1,
+          'select isnull(nullif((select ' + DbUst(1) + 'BILGI from REHBERBILGI RB (nolock) ' +
+          'inner join REHBERAYAR RA (nolock) on RA.YERI=2 and RA.SIRA=RB.SIRA and RA.YERI=RB.YERI ' +
+          'where RB.YER_ID=' + IntToStr(AVarsayilanCariID) + ' and RA.VARSAYILAN=10 ' + DbSinir(1) + '), ''''), FIRMA) BASLIK ' +
+          'from REHBER where ID=' + IntToStr(AVarsayilanCariID));
+        if not Tablo.Query1.IsEmpty then
+          LVarsayilanBaslik := Trim(Tablo.Query1.FieldByName('BASLIK').AsString);
+      end;
+
+      if (LMevcutBaslik = '') or SameText(LMevcutBaslik, LVarsayilanBaslik) then
+        LKaynakCariID := LAnaKayitID
+      else
+        // Baslik ELLE duzeltilmis: hicbir seye dokunma.
+         Exit;
+    end;
+  end;
+
+  Tablo.FaturaBaslik(TabFatbaslik, LKaynakCariID);
 end;
 
 procedure TFaturaWizardDlg.FirmaBilgileri;

@@ -20,7 +20,11 @@ public static class KurumProfilUclari
         int? SubeYapisi, int? HekimSayisi, int? UniteSayisi, string? Dil, string? ParaBirimi,
         Dictionary<string, int>? Moduller,
         /// <summary>Hangi subenin profili (364). Verilmezse AKTIF sube; 0 = kurum geneli.</summary>
-        int? SubeId);
+        int? SubeId,
+        /// <summary>Kimlik no bicimi (679): otomatik | tc | serbest | desen.</summary>
+        string? KimlikBicimi = null,
+        string? KimlikDeseni = null,
+        string? KimlikAciklama = null);
 
     public static void KurumProfilUclariniEkle(this IEndpointRouteBuilder yol)
     {
@@ -111,7 +115,11 @@ public static class KurumProfilUclari
                 istek.Dil         ?? mevcut.Dil,
                 istek.ParaBirimi  ?? mevcut.ParaBirimi,
                 istek.Moduller    ?? mevcut.Moduller,
-                subeId);
+                subeId,
+                Devralindi: false,
+                KimlikBicimi: istek.KimlikBicimi ?? mevcut.KimlikBicimi,
+                KimlikDeseni: istek.KimlikDeseni ?? mevcut.KimlikDeseni,
+                KimlikAciklama: istek.KimlikAciklama ?? mevcut.KimlikAciklama);
 
             var sonuc = await depo.YazAsync(yeni, baglam.Yazma, iptal);
             return Results.Ok(new { profil = sonuc, izlemeNo = baglam.IzlemeNo });

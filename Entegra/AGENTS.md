@@ -6,7 +6,7 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 | Product | What it is | Stack | Lives in |
 |---|---|---|---|
-| **Gentegre / Entegra** | the shipping desktop ERP | Delphi VCL + MS SQL Server (PostgreSQL port in progress) | this folder |
+| **Gentegre / Entegra** | the shipping desktop ERP | Delphi VCL + MS SQL Server | this folder |
 | **Gentegre AI** | the new web product — runs in **ERP** and **HBYS** (hospital information system) mode | .NET 10 API + React web, PostgreSQL only | `GentegreAI/` |
 
 They share the repository and the domain rules, **not code**. An unqualified "the app" / "program" means the Delphi one; the web one is called "web" or "AI". Don't port a fix from one to the other unless asked — the same rule is expressed differently in each.
@@ -82,34 +82,37 @@ These are documented in detail in the companion docs — read them before non-tr
 Key patterns to honor without re-deriving:
 
 - **Central data module:** `Utablo.pas` (`TDataModule`) owns the `FDConnection`, all shared `FDQuery` instances, the `cxEditRepository1`, style repositories, and image lists. New queries/styles/icons typically go here, not in individual forms.
-- **Ad-hoc SQL goes through `Veritabani` (`Ortak/FetaKurulusSiniflari.pas`) — do not hand-roll `TFDQuery` blocks.** Use `Veritabani.VeriVarMi(cnn, sql, ['&p'], [v])` for existence checks, `Veritabani.BasitKomutÇalıştır(cnn, sql, ['&p'], [v])` for `ExecSQL` (add `True` to return the first column), `Veritabani.SorguBaslat(...)` when you need the dataset, or `Tablo.TablodanSorguAc(n, sql)` for the shared `QueryN`. Parameters are `&ad` tokens substituted by `InitSql`. A create/try/finally/free block for a one-line query is a code-review smell; these helpers also route through `PgSqlCevir`, so hand-rolled queries silently skip the PG dialect conversion. Reach for a raw `TFDQuery` only for blob streaming (`CreateBlobStream` / `LoadFromStream`) or long-lived datasets.
+- **Ad-hoc SQL goes through `Veritabani` (`Ortak/FetaKurulusSiniflari.pas`) — do not hand-roll `TFDQuery` blocks.** Use `Veritabani.VeriVarMi(cnn, sql, ['&p'], [v])` for existence checks, `Veritabani.BasitKomutÇalıştır(cnn, sql, ['&p'], [v])` for `ExecSQL` (add `True` to return the first column), `Veritabani.SorguBaslat(...)` when you need the dataset, or `Tablo.TablodanSorguAc(n, sql)` for the shared `QueryN`. Parameters are `&ad` tokens substituted by `InitSql`. A create/try/finally/free block for a one-line query is a code-review smell. Reach for a raw `TFDQuery` only for blob streaming (`CreateBlobStream` / `LoadFromStream`) or long-lived datasets.
 - **Frame factory:** `UFrameYoneticisi` / `UGentegreFrameYonetimi` instantiate frames dynamically. Tab structure is data-driven via `entegra_sekmeconfig.xml` (with `SekmeConfig.xml` / `*.backup*.xml` variants present).
 - **Event bus:** Cross-module notification goes through `Ortak/UMultiCastEvent.pas`, not direct form references.
 - **Wizards:** Multi-step business flows use the `JvWizard`-based pattern (`UFaturaWizard`, `UStokWizard`, `UProjeWizard`...).
 - **ADO → FireDAC:** Legacy code uses `TADOQuery`/`TADOConnection`; new/modernized code uses `TFDQuery`/`TFDConnection`. The Python helpers in the parent folder (`convert_dfm.py`, `fix_dfm.py`, `fix_binary_dfm.py`) exist to assist this conversion on `.dfm` form files.
-- **Server-side list SPs:** grid/list screens increasingly call `sp_Prog_<Modül>_Liste_Json2` (MSSQL, `GenUpdate/`) / `fn_prog_<modül>_liste_json2` (PG, `pg/schema/`) instead of embedding SQL in the DFM. `KULLANICI_ARAMA.MODUL` must be the real MODULID (not the tab number) — collisions silently cross-wire saved searches between lists. Two paging rules these SPs must honor: `TopN = 0` means **no TOP/LIMIT** (guard with `CASE WHEN @TopN > 0` / `LIMIT ALL`; an unconditional `TOP (@TopN)` turns "Tümünü Yükle" into `TOP (0)` = empty grid), and **customers all run SQL Server Express** — a list query that needs a large memory grant (unconditional `DISTINCT` over wide rows, detail joins that are only needed for an optional filter) will sit in `RESOURCE_SEMAPHORE` forever and freeze the screen. Make the detail join and its `DISTINCT` conditional on the filter that needs them.
+- **Server-side list SPs:** grid/list screens increasingly call `sp_Prog_<Modül>_Liste_Json2` (`GenUpdate/`) instead of embedding SQL in the DFM. `KULLANICI_ARAMA.MODUL` must be the real MODULID (not the tab number) — collisions silently cross-wire saved searches between lists. Two paging rules these SPs must honor: `TopN = 0` means **no TOP** (guard with `CASE WHEN @TopN > 0`; an unconditional `TOP (@TopN)` turns "Tümünü Yükle" into `TOP (0)` = empty grid), and **customers all run SQL Server Express** — a list query that needs a large memory grant (unconditional `DISTINCT` over wide rows, detail joins that are only needed for an optional filter) will sit in `RESOURCE_SEMAPHORE` forever and freeze the screen. Make the detail join and its `DISTINCT` conditional on the filter that needs them.
 - **ISLEMLOG audit logging:** Card/detail changes are audited into `GENDEPO.ISLEMLOG` via the central helpers in `Ortak/ULog.pas` (`LogKartEkle` / `LogKartDegisti` / `LogKartSil`, lower-level `LogKayitEkle` / `LogDiffKaydet` / `LogDetaylariSil`). Non-obvious rules: the **insert** log is written once when the form/wizard closes (guarded by an `FEkleLogland` flag), *not* in `AfterPost` (that produces duplicates); **delete** logging must run *before* the SQL `DELETE`; on wizard finish, `Cancel` the card dataset if it isn't `Modified` instead of posting (AutoEdit otherwise logs an empty "change"). Follow the existing pattern in an already-logged module when adding logging to a new one.
 
-## PostgreSQL migration (dual-engine discipline)
+## PostgreSQL port — dropped (Delphi is MSSQL-only)
 
-An in-progress effort ports the app from SQL Server to PostgreSQL. It is **isolated** to the `pg/` folder and the `pg-migration` branch; customer/release builds ship from stable `backup/…` branches and nothing in `pg/` reaches production. See `postgres-gecis-maliyeti.md` (cost/inventory) and `pg/README.md` (workspace + golden rules). This shapes how *all* new code is written today:
+**As of 14.09.2026 the PostgreSQL port of the Delphi app is abandoned** (user
+decision: *"delphi için PG artık kullanılmayacak"*). The desktop ERP targets
+**MS SQL Server only**.
 
-- **Every change must work on both engines.** MSSQL always keeps working (dual-capable code); a customer can stay on or revert to MSSQL at any time. There is no big-bang cutover.
-- **Prefer Pascal over SQL** for engine-divergent logic (e.g. `IncYear` instead of `DATEADD`), and portable ANSI (`AS`, `CAST`) in the SQL you do write. For genuine dialect gaps use the central `PgSqlCevir` (getdate/isnull) plus the per-call **seam helper** pattern (top/date) rather than duplicating queries.
-- **Known dialect traps:** MSSQL `bit` maps to PG `smallint` (not `boolean`) — otherwise `= 1`/`= 0` comparisons break en masse. `TOP 1 <col>` static ports become `MAX(CAST(col AS int))` on bit columns. Static `DECLARE`/`SET @var` in DFM SQL is inlined via `PgDeclareCevir`. Large/gnarly queries are *not* hand-rewritten to be portable — keep an MSSQL-original TVF and a PG-native TVF, call once from the app, and compare.
-- **No test suite → differential testing is the safety net:** run the same input on both engines and compare tables with `pg/tools/db_diff.ps1` (seed a PG copy from MSSQL with `pg/tools/seed_from_mssql.ps1`). PG string columns are deterministic (case-sensitive) collation in the pilot; `GLogins`/license-hash gate is disabled in the PG pilot and will be redesigned for real cutover.
+What this means for new work:
 
-### PG dev environment (local)
+- **Write plain T-SQL.** `TOP`, `ISNULL`, `CONVERT`, `DATEADD`, `bit` are all
+  fine — no portability contortions, no dual-engine review.
+- **One file per DB change:** `Update_SQL_<N>.sql`. **Do not write
+  `Update_PG_<N>.sql`** and do not add `#pg`-tagged commands.
+- **No new work in `pg/`** or on PG-specific helpers.
+- **Existing PG plumbing stays in place.** `PgSqlCevir`, `PgDeclareCevir` and
+  the seam helpers (`DbUst`, `DbSinir`, `DbConv`, `DbTarihEkle`…) are still
+  called all over the code and produce correct MSSQL output — leaving them is
+  safer than ripping them out. Keep using them where they already are; just
+  don't reach for them in new code for portability reasons.
+- The `pg/` folder, `postgres-gecis-maliyeti.md` and `pg/README.md` are kept as
+  historical record. `pg/schema/` functions are not deployed anywhere.
 
-Docker Postgres 14 (`gentegre-pg`, `localhost:5433`, db `gentegre`, `postgres`/`FETAGEN`) plus Adminer on `localhost:8080`. The app's dev target is this local container, not the cloud host (`HETZNER_PG_KURULUM.md` covers the cloud/"ekspert" instance).
-
-```powershell
-Get-Content pg\schema\NN_x.sql | docker exec -i -e PGPASSWORD=FETAGEN gentegre-pg psql -U postgres -d gentegre
-powershell -File pg\tools\seed_from_mssql.ps1 -Table DEPOLAR      # MSSQL -> PG same data
-powershell -File pg\tools\db_diff.ps1 -Table DEPOLAR -Keys DEPOADI # compare engines
-```
-
-`pg/schema/` is numbered, apply-in-order SQL (`NN_fn_*.sql`) — ported functions/TVFs live here, one file per object. `pg/tools/` also has `schema_port*.ps1`, `seed_bulk.ps1`, `fix_pk_names.ps1`, and `resync_sequences.sql` (run after any MSSQL→PG seed, otherwise inserts fail with `duplicate key pk_…` because sequences lag the table max).
+This applies to the **Delphi app only**. `GentegreAI/` (the web product) is
+**PostgreSQL-only** and unaffected — see its section below.
 
 ## Gentegre AI (separate web product, same repo)
 
@@ -130,7 +133,7 @@ powershell -ExecutionPolicy Bypass -File GentegreAI\db\kur.ps1   # create DB + a
 powershell -ExecutionPolicy Bypass -File GentegreAI\yayin\yayinla.ps1   # deploy to 46.36.201.170/ai
 ```
 
-Dev DB is docker **`gentegre-pg18`** (port 5434, db `gentegre_ai`, ICU `tr-TR`) — a different container from the Delphi PG pilot (`gentegre-pg`, 5433, `gentegre`). Dev login `admin` / `Gentegre!2026`.
+Dev DB is docker **`gentegre-pg18`** (port 5434, db `gentegre_ai`, ICU `tr-TR`). Dev login `admin` / `Gentegre!2026`.
 
 **Tests (web product only — the Delphi app still has none).** `api/tests/Gentegre.Testler` is an xUnit project (~26 classes, mostly HBYS: lab, mikrobiyoloji, e-Nabız, ilaç/karekod, dağıtım, kalite kontrol). Two things about it are easy to get wrong:
 
@@ -145,7 +148,7 @@ Non-obvious rules that shape most changes here:
 - **Money math lives in one place.** Line totals follow the Delphi formula exactly (`BelgeHesap.cs`: round `adet*fiyat` **first**, discounts after, two discounts multiplicative, banker's rounding) and document totals always come from `fn_belge_diptoplam`. Never recompute a total in the client or in a second server path.
 - **Optimistic concurrency uses PG `xmin`** as the `surum` stamp (no version column); a mismatched update returns 409 plus the current row.
 - **Audit rules are ported from Delphi `ULog.pas`** — delete log written *before* the DELETE with the full row, change log field-by-field with no row when nothing changed, values written culture-invariantly.
-- **`mantik` (boolean) columns are `smallint`**, as in the Delphi PG port.
+- **`mantik` (boolean) columns are `smallint`** (carried over from the Delphi schema).
 - Design language: `web/src/tema.css` is derived from the HTML mockups in `Ekranlar/` — match a mockup rather than inventing layout.
 
 ## Database schema changes
@@ -153,11 +156,11 @@ Non-obvious rules that shape most changes here:
 DB objects are **not** migrated by the build. `GenUpdate/` holds:
 
 - `GenDepoKur1..9.sql` + `sql_ayaradi_doldur.sql` — one-time GENDEPO install.
-- `Update_SQL_<N>.sql` / `Update_PG_<N>.sql` — incremental updates, **current naming** (N currently up to 186; files numbered up to 169 use the older `GenDepoUpdateN.sql` name — do not add new ones with that name). One logical change = one number, with the MSSQL and PostgreSQL variants sharing it: `Update_SQL_170.sql` + `Update_PG_170.sql`. The PG file must carry `#pg` in its header comment or the update service will run it against MSSQL.
+- `Update_SQL_<N>.sql` — incremental updates, **current naming** (N currently up to 188; files numbered up to 169 use the older `GenDepoUpdateN.sql` name — do not add new ones with that name). One logical change = one numbered file. (`Update_PG_<N>.sql` files exist from the abandoned PG port; do not add new ones.)
 - **Every DB change — schema, stored procedure, trigger, or a one-off data repair — goes into a NEW numbered file**, never by editing an already-shipped one and never as an ad-hoc script run only on one machine. Assume the script will be run on a customer database: make it idempotent, back up rows before touching them, report what it will change, and restrict a data repair to rows that are *provably* wrong — never blanket-overwrite a column that a customer may have configured deliberately.
 - `sp_Prog_*.sql` / `sp_Grnt_*.sql` / `tbl_*.sql` — deployable stored-procedure and table definitions.
 
-Customers receive updates through `UVersiyonGuncelle.pas`, which pulls command rows from the GenUpdate web service and runs those newer than `GENINI` section `Ops_GenelOpsiyon_VersiyonNo`. Each command is engine-tagged: `#pg` / `#PG` anywhere in its `ACIKLAMA` marks it a **PostgreSQL** command; untagged means MSSQL. Only commands matching the active engine run — the others are skipped (and logged) while the version number still advances, so a PG-only change must be tagged or it will execute against MSSQL. Mind the batch order inside a script: inserts that copy data must precede the `DROP` of their source.
+Customers receive updates through `UVersiyonGuncelle.pas`, which pulls command rows from the GenUpdate web service and runs those newer than `GENINI` section `Ops_GenelOpsiyon_VersiyonNo`. (The engine tag left from the PG port still works: `#pg` / `#PG` in a command's `ACIKLAMA` marks it PostgreSQL-only and it is skipped on MSSQL. New commands are untagged.) Mind the batch order inside a script: inserts that copy data must precede the `DROP` of their source.
 
 Deploying Turkish-containing SQL with `sqlcmd` requires `-f 65001` (a UTF-8 BOM alone is not enough), and `sqlcmd -u` mangles Turkish when *reading* definitions back — verify with `NCHAR` literals instead.
 
@@ -175,4 +178,4 @@ Deploying Turkish-containing SQL with `sqlcmd` requires `-f 65001` (a UTF-8 BOM 
 - `.pas` and `.dfm` files come as a pair — keep component names/types in sync between them. DFMs may be text or binary; the binary form is rare but possible.
 - `Utablo.dfm` is multi-megabyte (the central data module). Read specific offsets, do not dump the whole file.
 - Default code-page assumptions in legacy units are Windows-1254 (Turkish). Modern files are UTF-8; PowerShell helpers write UTF-8 explicitly.
-- Commits are frequent whole-tree checkpoints, not curated changesets — messages like `LAZY snapshot: …`, `WIP restore point: …`, or `Backup snapshot`. Dated `backup/YYYYMMDD` branches (e.g. `backup/20260622`) are periodic safety copies, as are `master`, `remote-snapshot`, and `local-full-backup`. Development currently happens on the `pg-migration` branch (see the PostgreSQL section); **customer/release builds ship from stable `backup/…` branches, never from `pg-migration`**. Confirm with the user before switching branches.
+- Commits are frequent whole-tree checkpoints, not curated changesets — messages like `LAZY snapshot: …`, `WIP restore point: …`, or `Backup snapshot`. Dated `backup/YYYYMMDD` branches (e.g. `backup/20260622`) are periodic safety copies, as are `master`, `remote-snapshot`, and `local-full-backup`. Development currently happens on the `pg-migration` branch (the name is a leftover — the PG port is dropped, see above); **customer/release builds ship from stable `backup/…` branches, never from `pg-migration`**. Confirm with the user before switching branches.

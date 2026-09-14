@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// Islem log listesi ve ham id -> ad cozumleme ifadeleri.
@@ -46,12 +46,12 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",         "l.id",                          "sayi",  "Id",        Varsayilan: false),
-            // Sunucu UTC yazar; gosterim kaymasi genel.saat_farki ayarindan
-            //   (varsayilan +3, Genel Ayarlar > Genel'den degistirilir).
-            new("tarih",
-                "(l.tarih + make_interval(hours => coalesce((select nullif(r.deger, '')::int " +
-                "from public.referans r where r.anahtar = 'genel.saat_farki'), 3)))",
-                                                             "tarih", "Tarih",     Hizalama: "orta", Bicim: "dd.MM.yyyy HH:mm"),
+            // 667: kolon artik timestamptz - ELLE SAAT KAYMASI KALKTI. Eskiden
+            //   SQL'de `genel.saat_farki` kadar saat ekleniyordu; simdi deger bir
+            //   AN ve istemci onu SUBENIN saat diliminde gosteriyor. Kayma
+            //   birakilsaydi saat iki kez kaydirilirdi.
+            new("tarih", "l.tarih", "tarih", "Tarih", Hizalama: "orta",
+                                                      Bicim: "dd.MM.yyyy HH:mm"),
             new("islemTipi",  IslemAdiIfade("l.islem_tipi"),   "metin", "İşlem",     Hizalama: "orta",
                                                                             Bicim: "rozet"),
             // Cip filtreleri ham kodla calisir (metin case'i degil).

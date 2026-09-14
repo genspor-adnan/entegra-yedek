@@ -44,7 +44,16 @@ public sealed record KurumProfil(
     int SubeYapisi, int HekimSayisi, int UniteSayisi, string Dil, string ParaBirimi,
     IReadOnlyDictionary<string, int> Moduller,
     int SubeId = 0,
-    bool Devralindi = false);
+    bool Devralindi = false,
+    /// <summary>
+    /// KIMLIK NO BICIMI (679): otomatik | tc | serbest | desen. "otomatik"
+    /// subenin ulkesine bakar - TR'de T.C. algoritmasi, disinda serbest.
+    /// </summary>
+    string KimlikBicimi = "otomatik",
+    /// <summary>`desen` biciminde uygulanan duzenli ifade.</summary>
+    string KimlikDeseni = "",
+    /// <summary>Alanin yaninda yazan aciklama ("6-12 hane pasaport no" gibi).</summary>
+    string KimlikAciklama = "");
 
 /// <summary>
 /// KURUM PROFILI (359) - Firma Bilgileri › Kurum Tipi &amp; Sistem Ayarlari.
@@ -150,7 +159,8 @@ public sealed class KurumProfilDeposu
         await using var komut = baglanti.Komut("""
             select urun_modu, kurum_tipi, alt_tip, basamak, tesis_kodu,
                    sube_yapisi, hekim_sayisi, unite_sayisi, dil, para_birimi,
-                   moduller::text, sube_id
+                   moduller::text, sube_id,
+                   kimlik_bicimi, kimlik_deseni, kimlik_aciklama
               from public.fn_kurum_profil(@p0)
             """, islem, subeId);
         await using var o = await komut.ExecuteReaderAsync(iptal);
@@ -172,7 +182,9 @@ public sealed class KurumProfilDeposu
             o.GetString(9), sozluk, subeId,
             // Istenen sube ile OKUNAN satirin subesi farkliysa deger kurum
             //   genelinden devralinmistir.
-            Devralindi: okunanSube != subeId);
+            Devralindi: okunanSube != subeId,
+            KimlikBicimi: o.GetString(12), KimlikDeseni: o.GetString(13),
+            KimlikAciklama: o.GetString(14));
     }
 
     /// <summary>
@@ -194,9 +206,10 @@ public sealed class KurumProfilDeposu
                 insert into public.kurum_profil
                        (sube_id, urun_modu, kurum_tipi, alt_tip, basamak, tesis_kodu,
                         sube_yapisi, hekim_sayisi, unite_sayisi, dil, para_birimi,
-                        moduller, ekleyen, degistiren, degistirme_tarihi)
+                        moduller, kimlik_bicimi, kimlik_deseni, kimlik_aciklama,
+                        ekleyen, degistiren, degistirme_tarihi)
                 values (@p12, @p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9,
-                        @p10::jsonb, @p11, @p11, now()::timestamp)
+                        @p10::jsonb, @p13, @p14, @p15, @p11, @p11, now()::timestamp)
                 on conflict (sube_id) do update
                    set urun_modu = excluded.urun_modu,
                        kurum_tipi = excluded.kurum_tipi,
@@ -209,13 +222,27 @@ public sealed class KurumProfilDeposu
                        dil = excluded.dil,
                        para_birimi = excluded.para_birimi,
                        moduller = excluded.moduller,
+                       kimlik_bicimi = excluded.kimlik_bicimi,
+                       kimlik_deseni = excluded.kimlik_deseni,
+                       kimlik_aciklama = excluded.kimlik_aciklama,
                        degistiren = excluded.degistiren,
                        degistirme_tarihi = now()::timestamp
                 """, islem,
                 (short)yeni.UrunModu, yeni.KurumTipi, yeni.AltTip, yeni.Basamak, yeni.TesisKodu,
                 (short)yeni.SubeYapisi, (short)yeni.HekimSayisi, (short)yeni.UniteSayisi,
-                yeni.Dil, yeni.ParaBirimi, moduller, baglam.KullaniciId, (short)yeni.SubeId))
+                yeni.Dil, yeni.ParaBirimi, moduller, baglam.KullaniciId, (short)yeni.SubeId,
+                // Bilinmeyen bicim yazilmasin: kural kontrolu DB'de de var
+                //   (ck_kurum_profil_kimlik) ama hata mesaji burada anlasilir.
+                yeni.KimlikBicimi is "otomatik" or "tc" or "serbest" or "desen"
+                    ? yeni.KimlikBicimi
+                    : throw GentegreHatasi.Dogrulama(
+                        "Kimlik biçimi geçersiz.",
+                        new AlanHatasi("kimlikBicimi", "otomatik / tc / serbest / desen")),
+                yeni.KimlikDeseni ?? "", yeni.KimlikAciklama ?? ""))
                 await komut.ExecuteNonQueryAsync(iptal);
+
+            // Ayar degisti: onbellek dussun, bir dakika beklemeden gecerli olsun.
+            KimlikKuraliDeposu.Unut();
 
             var sonuc = await ProfilOkuAsync(baglanti, islem, yeni.SubeId, iptal);
             await islem.CommitAsync(iptal);

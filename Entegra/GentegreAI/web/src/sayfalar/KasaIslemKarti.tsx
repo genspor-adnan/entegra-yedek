@@ -133,6 +133,8 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const [sonuc, setSonuc] = useState<KasaIslemYaniti | null>(null);
   const [calisiyor, setCalisiyor] = useState(false);
   const [hata, setHata] = useState<string | null>(null);
+  /** Acilan kayit IADE mi (eksi tutarli) - dogrulama kurali buna gore. */
+  const [iadeMi, setIadeMi] = useState(false);
   const [alanHatalari, setAlanHatalari] = useState<Record<string, string>>({});
 
   const secili = useMemo(() => turler.find(t => t.kod === tur), [turler, tur]);
@@ -211,6 +213,8 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     //   cevrilmezse kayit yeniden kaydedilince sayiOku noktayi binlik sanip
     //   tutari 100 katina cikariyordu.
     setTutar(tutarMetni(i.tutar as string));
+    // IADE MI: kaydin tutari eksiyse bu bir iade/para ustu satiridir (660).
+    setIadeMi(Number(i.tutar ?? 0) < 0);
     setKur(String(i.dovizKuru ?? 1));
     setDoviz(String(i.dovizCinsi ?? YEREL_PARA_VARSAYILAN) || YEREL_PARA_VARSAYILAN);
     setEkstreDovizi(String(i.ekstreDovizi ?? '') ||
@@ -264,6 +268,11 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     csVade: kiymet.vade, csSeriNo: kiymet.seriNo, csKesideci: kiymet.kesideci,
     csBanka: kiymet.banka, csSube: kiymet.sube,
     mevcutKiymet, belgeBagi, cariZorunlu: secili?.cariZorunlu,
+    // IADE KAYDI (660): eksi tutarli islem - kart onu duzeltmek icin
+    //   acildiginda "Sıfırdan büyük olmalı" kurali kaydi kilitliyordu.
+    //   Olcu KAYDIN kendisi, kutuya yazilan deger degil: kullanici artiya
+    //   cevirip iadeyi tahsilata dondurmesin.
+    iadeMi,
   });
 
   async function kaydet(taslak: boolean, plan = planMi) {

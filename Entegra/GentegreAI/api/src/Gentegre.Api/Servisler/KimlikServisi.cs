@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek;
+﻿using Gentegre.Cekirdek;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
@@ -61,7 +61,9 @@ public sealed class KimlikServisi
             throw GentegreHatasi.Yetkisiz("Bu kullanici pasif durumda.");
         }
 
-        if (kullanici.KilitBitis is { } kilit && kilit > Saat.Simdi)
+        // 667: kilit bitisi veritabanindan UTC AN olarak gelir - duvar saatiyle
+        //   karsilastirmak hesabi 3 saat erken/gec acardi.
+        if (kullanici.KilitBitis is { } kilit && kilit > Saat.An)
         {
             await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, false, "kilitli", iptal);
             throw GentegreHatasi.Yetkisiz(
@@ -87,7 +89,7 @@ public sealed class KimlikServisi
         }
 
         await _kullanicilar.GirisBasariliAsync(kullanici.TarafId, ip, iptal);
-        await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, true, "", iptal);
+        await _gunluk.GirisDenemesiAsync(kod, kullanici.TarafId, ip, istemci, true, "giris", iptal);
 
         var subeler = await _kullanicilar.SubeleriAsync(kullanici.TarafId, iptal);
         var subeId = SubeSec(istek.SubeId, subeler);
@@ -158,7 +160,7 @@ public sealed class KimlikServisi
             throw GentegreHatasi.Yetkisiz("Oturum guvenlik nedeniyle sonlandirildi, yeniden giris yapin.");
         }
 
-        if (oturum.BitisTarihi <= Saat.Simdi)
+        if (oturum.BitisTarihi <= Saat.An)
             throw GentegreHatasi.Yetkisiz("Oturum suresi doldu.");
 
         var kullanici = await _kullanicilar.IdIleBulAsync(oturum.KullaniciId, iptal);
@@ -203,6 +205,43 @@ public sealed class KimlikServisi
 
         // Parola degisince acik oturumlar kapanir.
         await _oturumlar.KullaniciOturumlariniKapatAsync(kullaniciId, "parola_degisti", iptal);
+    }
+
+    /// <summary>
+    /// VARSAYILAN ILK PAROLA (kullanici: "ilk giris sifreleri default personel
+    /// kartin ID si olsun.. ama ilk giriste degistirmeye zorlasin").
+    ///
+    /// Personel kartinin ID'si parola olur ve <c>parola_degismeli = 1</c>
+    /// yazilir: kisi giris yapar yapmaz kendi parolasini belirlemek zorunda
+    /// kalir. ID gizli bir sey degildir - bu yuzden PAROLA DEGIL, tek kullanimlik
+    /// bir kapidir; zorunlu degisiklik olmadan kullanilamaz.
+    /// </summary>
+    public static string VarsayilanParola(int tarafId) => tarafId.ToString();
+
+    /// <summary>
+    /// PERSONEL HESAPLARINI HAZIRLA: hesabi olmayan aktif personele hesap acar,
+    /// PAROLASIZ hesaplara varsayilan parolayi (kart id'si) yazar.
+    ///
+    /// Dolu parolaya DOKUNMAZ - kisinin belirledigi parolayi varsayilana
+    /// cevirmek hesabi herkese acardi. <paramref name="tarafId"/> verilirse
+    /// yalniz o kisi icin calisir (kart kaydinda).
+    ///
+    /// <paramref name="sifirla"/> = true DOLU PAROLALARI DA varsayilana ceker
+    /// (kullanici istegi: eski kayitlari toplu acmak). ADMIN disaridadir.
+    /// </summary>
+    public async Task<(int Acilan, int ParolaAtanan)> PersonelHesaplariHazirlaAsync(
+        int? tarafId = null, bool sifirla = false, CancellationToken iptal = default)
+    {
+        var acilan = await _kullanicilar.OtomatikHesapAcAsync(tarafId, iptal);
+        var parolasiz = await _kullanicilar.VarsayilanParolaHedefleriAsync(
+            tarafId, sifirla, iptal);
+        foreach (var id in parolasiz)
+        {
+            var hash = BCrypt.Net.BCrypt.HashPassword(VarsayilanParola(id), workFactor: 12);
+            // degismeli: TRUE - ilk giriste parola degistirme ekrani zorunlu.
+            await _kullanicilar.ParolaAtaAsync(id, hash, degismeli: true, iptal);
+        }
+        return (acilan, parolasiz.Count);
     }
 
     /// <summary>
@@ -269,7 +308,8 @@ public sealed class KimlikServisi
             subeId, subeler.Select(s => s.Id), dakika);
 
         var (refresh, hash) = JwtUretici.RefreshUret();
-        var refreshBitis = Saat.Simdi.AddDays(gun);
+        // Veritabanina yazilacak: AN (UTC), duvar saati degil (667).
+        var refreshBitis = Saat.An.AddDays(gun);
 
         await _oturumlar.AcAsync(kullanici.TarafId, hash, refreshBitis, aileId, oncekiId,
             subeId, ip, istemci, iptal);
@@ -328,7 +368,9 @@ public sealed class KimlikServisi
         Ad = kullanici.Ad,
         RolId = kullanici.RolId,
         RolAdi = kullanici.RolAdi,
+        EkRolAdlari = kullanici.EkRolAdlari,
         Dil = kullanici.Dil,
+        ParolaDegismeli = kullanici.ParolaDegismeli,
         YetkiSurumu = kullanici.YetkiSurumu,
         SubeId = subeId,
         SubeYazma = subeId is null || subeler.FirstOrDefault(s => s.Id == subeId)?.Yazma != false,

@@ -38,6 +38,12 @@ export interface FiyatlandirmaGirdisi {
   /** Basvuruda secili police (588) - kurumun tarifesi ondan cozulur. */
   sozlesmeId?: number | null;
   /**
+   * Basvuru karti mi: fiyat listesi combosu BELGE UCUNDAN doldurulur - kayit
+   * kabul gorevlisinde `fiyat_listesi` gor yetkisi yok ve kaynak listesi bos
+   * donuyordu.
+   */
+  basvuruMu?: boolean;
+  /**
    * Basvurudaki "SGK kullanilsin" isareti (597). Rotayi belirledigi icin
    * SATIR YENIDEN FIYATLANIRKEN de gecmeli (601): gecmezse sunucu rotayi
    * varsayilanla cozer, donen cevapta `sgkGerekli` false gelir ve
@@ -50,7 +56,7 @@ export interface FiyatlandirmaGirdisi {
 
 export function useBelgeFiyatlandirma(g: FiyatlandirmaGirdisi) {
   const { belgeId, tur, alisMi, cariId, odeyenKurumId, sozlesmeId, sgkKullan,
-          satirlar, setSatirlar } = g;
+          basvuruMu, satirlar, setSatirlar } = g;
 
   const [fiyatListeleri, setFiyatListeleri] = useState<Secenek[]>([]);
   /**
@@ -74,6 +80,20 @@ export function useBelgeFiyatlandirma(g: FiyatlandirmaGirdisi) {
     let iptal = false;
     void (async () => {
       try {
+        // BASVURUDA LISTE COMBOSU BELGE UCUNDAN (kullanici: banko rolunde
+        //   combolar bostu): `/api/liste/fiyat-listesi` `fiyat_listesi` gor
+        //   yetkisi istiyor - kayit kabul gorevlisinde o yetki yok ve liste
+        //   secilemeyince basvuru kesilemiyordu. Liste SECMEK belgenin adimi,
+        //   listeyi YONETMEK ayri is. ERP belgelerinde eski kaynak kalir:
+        //   orada yon suzmesi ve kart yetkisi anlamlidir.
+        if (basvuruMu) {
+          const k = await api.basvuruKaynaklari();
+          if (iptal) return;
+          setFiyatListeleri(k.fiyatListeleri
+            .filter(l => l.yon === (alisMi ? 1 : 2))
+            .map(l => ({ id: l.id, ad: l.ad, tarifeTipi: l.tarifeTipi })));
+          return;
+        }
         // YON SUZMESI SART: alis belgesinde satis listesi secilememeli -
         //   satis fiyatiyla mal girisi yapmak maliyeti bozar.
         const y = await api.liste('fiyat-listesi', {
@@ -93,7 +113,7 @@ export function useBelgeFiyatlandirma(g: FiyatlandirmaGirdisi) {
       } catch { if (!iptal) setFiyatListeleri([]) }
     })();
     return () => { iptal = true };
-  }, [alisMi]);
+  }, [alisMi, basvuruMu]);
 
   // Acilista / cari degisince belgenin listesi cariden cozulur. KAYITLI
   //   belgede DOKUNULMAZ: belge hangi listeyle kesildiyse onu tasir.

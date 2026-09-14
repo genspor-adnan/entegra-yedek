@@ -191,7 +191,17 @@ public sealed class DisKurumBasvurusu(
             yazilan as (
                 insert into public.belge_satir
                        (belge_id, sira, tur, hizmet_id, aciklama, miktar, adet, birim,
-                        birim_fiyat, kdv, tutar, tutar_kdvli, sube_id, ekleyen)
+                        birim_fiyat, kdv, tutar, tutar_kdvli,
+                        -- KART YOLUYLA YAZILAN SATIRLA AYNI ALANLAR (kullanici:
+                        --   "lab istemden yapilan kayitta sorunlar var"): burada
+                        --   yalniz matrah yaziliyordu; brut birim fiyat, doviz
+                        --   kopyasi ve islem tarihi bos kaliyordu. Sonuc: kalem
+                        --   penceresi fiyati 0 okuyor, gridde tarih "—"
+                        --   goruniyordu - ayni satir iki yoldan iki turlu
+                        --   doguyordu.
+                        birim_fiyat_kdvli, doviz_cinsi, doviz_birim_fiyat,
+                        doviz_tutari, doviz_kuru, teslim_tarihi,
+                        sube_id, ekleyen)
                 select @p2,
                        coalesce((select max(bs.sira) from public.belge_satir bs
                                   where bs.belge_id = @p2), 0)
@@ -203,7 +213,16 @@ public sealed class DisKurumBasvurusu(
                        round(y.brut / (1 + y.kdv / 100.0), 6),
                        y.kdv,
                        round(y.brut / (1 + y.kdv / 100.0), 2),
-                       y.brut, @p3, @p4
+                       y.brut,
+                       -- Brut birim fiyat: kullanicinin gordugu ve listede
+                       --   yazan sayi (ck_belge_satir_kdvli_tutarli ile uyumlu).
+                       round(y.brut, 4),
+                       -- Yerel para: satir dovizli degil ama kolonlar BOS
+                       --   kalmamali - 0 doviz fiyati "fiyat yok" gibi okunuyor.
+                       'TL', round(y.brut / (1 + y.kdv / 100.0), 6),
+                       round(y.brut / (1 + y.kdv / 100.0), 2), 1,
+                       now(),
+                       @p3, @p4
                   from yeni y
                 returning 1)
             select count(*)::int from yazilan

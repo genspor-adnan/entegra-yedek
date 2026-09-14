@@ -75,7 +75,12 @@ export function baslangicBrutMetni(
 ): string {
   const dahil = !!basvuruMu || Number(satir.kdvDahil ?? 0) === 1;
   if (!dahil) return '';
-  const ham = satir.fiyatDovizi ? satir.dovizFiyat : satir.birimFiyat;
+  // DOVIZ FIYATI ANCAK VARSA: satirin para birimi her zaman dolu ('TL' de bir
+  //   deger) - yalniz ona bakmak, doviz fiyati 0 kayitli eski satirlarda
+  //   kutuyu SIFIR aciyordu (kullanici: "birim fiyat bos geldi"). Fiyat
+  //   sifirsa yerel birim fiyat esastir.
+  const doviz = Number(String(satir.dovizFiyat ?? '').replace(',', '.'));
+  const ham = satir.fiyatDovizi && doviz > 0 ? satir.dovizFiyat : satir.birimFiyat;
   return moduCevir(String(ham ?? ''), satir.kdv, true);
 }
 

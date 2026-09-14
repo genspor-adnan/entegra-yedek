@@ -7,10 +7,14 @@ namespace Gentegre.Api.Uclar;
 /// <summary>Rol kartı "Yetki Matrisi" sekmesi (kullanici: rol/yetki yonetim ekrani).</summary>
 public static class RolYetkiUclari
 {
-    public sealed record YetkiSatiriIstegi(int YetkiId, bool Gor, bool Ekle, bool Degistir, bool Sil);
+    public sealed record YetkiSatiriIstegi(int YetkiId, bool Gor, bool Ekle, bool Degistir, bool Sil,
+        /// <summary>Sayisal sinir (661) - yalniz `deger_alir` yetkilerde islenir.</summary>
+        string Deger = "");
     public sealed record YetkiKaydetIstegi(IReadOnlyList<YetkiSatiriIstegi> Satirlar);
     public sealed record SubeKaydetIstegi(
         IReadOnlyList<KullaniciSubeDeposu.SubeIstegi> Satirlar);
+    /// <summary>Kartin EK rolleri (665) - ana rol bu listede DEGILDIR.</summary>
+    public sealed record EkRollerIstegi(IReadOnlyList<int>? RolIdleri);
 
     public static void RolYetkiUclariniEkle(this IEndpointRouteBuilder yol)
     {
@@ -32,7 +36,7 @@ public static class RolYetkiUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("rol", Islem.Degistir);
             var satirlar = istek.Satirlar
-                .Select(s => new YetkiGuncelleIstegi(s.YetkiId, s.Gor, s.Ekle, s.Degistir, s.Sil))
+                .Select(s => new YetkiGuncelleIstegi(s.YetkiId, s.Gor, s.Ekle, s.Degistir, s.Sil, s.Deger))
                 .ToList();
             var liste = await depo.KaydetAsync(rolId, satirlar,
                 baglam.Yazma, baglam.SubeId ?? 0, iptal);
@@ -40,8 +44,9 @@ public static class RolYetkiUclari
         });
 
         // Rol > Kullanicilar sekmesi (kullanici: "rollerin icine kullanici
-        //   ekleyebileyim"). Bir kullanici TEK role bagli - ekleme = rolunu
-        //   bu role cevirme, cikarma = varsayilan sistem roluna geri tasima.
+        //   ekleyebileyim"). COK ROLLU (665): ekleme kisinin ana rolunu EZMEZ -
+        //   yer tutucu roldeyse ana rol olur, degilse EK rol eklenir; cikarma
+        //   ek rolu siler, ana rol cikariliyorsa ek rollerden biri ana olur.
         var kul = yol.MapGroup("/api/kart/rol/{rolId:int}/kullanicilar")
                      .WithTags("Kart").RequireAuthorization();
 
@@ -86,6 +91,25 @@ public static class RolYetkiUclari
             {
                 kullaniciVar = d.KullaniciVar, rolId = d.RolId, rolAdi = d.RolAdi,
                 roller = d.Roller.Select(r => new { id = r.Id, ad = r.Ad }),
+                ekRolIdleri = d.EkRolIdleri,
+            });
+        });
+
+        // EK ROLLER (665): kartta cok secimli liste - tek istekte tamami yazilir.
+        //   Tek tek ekle/cikar ucu, yarim kalan bir duzenlemede kisiyi istenmeyen
+        //   rol kumesiyle birakirdi.
+        kartRol.MapPut("/ek", async (int kartId, EkRollerIstegi istek, BaglamCozucu cozucu,
+            RolKullaniciDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("rol", Islem.Degistir);
+            await depo.KartEkRollerKaydetAsync(kartId, istek.RolIdleri ?? [], baglam.Yazma, iptal);
+            var d = await depo.KartRolOkuAsync(kartId, iptal);
+            return Results.Ok(new
+            {
+                kullaniciVar = d.KullaniciVar, rolId = d.RolId, rolAdi = d.RolAdi,
+                roller = d.Roller.Select(r => new { id = r.Id, ad = r.Ad }),
+                ekRolIdleri = d.EkRolIdleri,
             });
         });
 
@@ -100,6 +124,7 @@ public static class RolYetkiUclari
             {
                 kullaniciVar = d.KullaniciVar, rolId = d.RolId, rolAdi = d.RolAdi,
                 roller = d.Roller.Select(r => new { id = r.Id, ad = r.Ad }),
+                ekRolIdleri = d.EkRolIdleri,
             });
         });
 

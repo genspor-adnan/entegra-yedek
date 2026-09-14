@@ -1654,8 +1654,8 @@ object StokListeDlg: TStokListeDlg
   end
   object DtsStoklar: TDataSource
     DataSet = STOKLAR
-    Left = 169
-    Top = 59
+    Left = 121
+    Top = 43
   end
   object STOKLAR: TFDQuery
     BeforeOpen = STOKLARBeforeOpen
@@ -1707,8 +1707,8 @@ object StokListeDlg: TStokListeDlg
         '.NOTLAR, StokModel.ANAHTAR ,S.SUBEID'
       ''
       '')
-    Left = 36
-    Top = 66
+    Left = 92
+    Top = 130
   end
   object STOKFIYAT: TFDQuery
     AutoCalcFields = False

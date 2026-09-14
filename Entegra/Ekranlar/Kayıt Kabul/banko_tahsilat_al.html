@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tahsilat Al — Mockup (Gentegre AI · Kayıt Kabul)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .sel b{font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .ozet.k5{grid-template-columns:repeat(5,1fr)}
+  .ozet.k4{grid-template-columns:repeat(4,1fr)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:18px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .ana{display:grid;grid-template-columns:1fr 360px;gap:0}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.iptal td{color:#9aa7b4;text-decoration:line-through}
+  tr.sel td{background:var(--sel)}
+  tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .sayim td{padding:3px 8px}
+  .sayim input{width:56px;border:1px solid var(--line);border-radius:2px;height:22px;
+    text-align:right;padding:0 5px;font-size:11.5px;font-family:inherit}
+  .fark{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:12px}
+  .fark b{font-size:14px}
+  .sat{display:flex;justify-content:space-between;padding:4px 10px;font-size:11.5px;
+    border-bottom:1px solid #eef2f6;gap:10px}
+  .sat.buyuk{font-size:13px;background:#f7fafc;font-weight:bold}
+  .uyari-sat{display:flex;gap:8px;align-items:flex-start;padding:6px 10px;
+    border-bottom:1px solid #eef2f6;font-size:11.5px}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;
+    padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"\25BE";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;
+    background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .hdr.k2{grid-template-columns:repeat(2,1fr)}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">💵 Tahsilat Al — Vezne 1 · Elif KARACA
+    <span class="sp">Gentegre AI · Kayıt Kabul · Merkez · 14.09.2026 16:47 · Vardiya #2</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>✔</span> Tahsil Et ve Makbuz Bas</div>
+    <div class="btn"><span>💾</span> Kaydet (makbuz basma)</div>
+    <div class="btn"><span>✖</span> Vazgeç</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🧩</span> Ödemeyi Böl</div>
+    <div class="btn"><span>🏦</span> Emanete Al</div>
+    <div class="btn"><span>↩</span> İade</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🔍</span> Hasta / Protokol Ara (F3)</div>
+  </div>
+
+  <!-- HASTA SERIDI: kimden tahsil ediyorum, hangi basvuru, kim odeyecek. -->
+  <div class="serit">
+    <div class="sel">👤 <b>Neslihan ARSLAN</b> · 12.03.1978 · Kimlik No 1234*****90</div>
+    <div class="sel">🧾 Protokol: <b>P-000220</b> · 14.09.2026 16:22</div>
+    <div class="sel">🏥 Başvuru: <b>Kardiyoloji · Dr. S. TUNÇ</b></div>
+    <div class="sel">💼 Ödeyen: <b>Kendisi (ücretli)</b> ▾</div>
+    <span class="rz sari">Açık borç 1.450,00 ₺</span>
+    <span class="sp"></span>
+    <span class="sonuk">Hasta bakiyesi: 0,00 ₺ · Emanet: 0,00 ₺</span>
+  </div>
+
+  <div class="ozet k5">
+    <div class="kutu">
+      <div class="bas">Hizmet Toplamı</div>
+      <div class="deg">1.450,00 ₺</div>
+      <div class="alt">3 kalem · KDV dahil</div>
+    </div>
+    <div class="kutu">
+      <div class="bas">Kurum Payı</div>
+      <div class="deg">0,00 ₺</div>
+      <div class="alt">ücretli hasta · tahakkuk yok</div>
+    </div>
+    <div class="kutu uy">
+      <div class="bas">Hastanın Borcu</div>
+      <div class="deg">1.450,00 ₺</div>
+      <div class="alt">indirim sonrası</div>
+    </div>
+    <div class="kutu iyi">
+      <div class="bas">Tahsil Edilecek</div>
+      <div class="deg">1.450,00 ₺</div>
+      <div class="alt">nakit 450 + kart 1.000</div>
+    </div>
+    <div class="kutu">
+      <div class="bas">Kalan</div>
+      <div class="deg">0,00 ₺</div>
+      <div class="alt">tam tahsilat</div>
+    </div>
+  </div>
+
+  <div class="ana" style="grid-template-columns:1fr 340px">
+    <div>
+      <div class="sekmeler">
+        <div class="sekme on" data-s="hizmet">Hizmetler <span class="rz">3</span></div>
+        <div class="sekme" data-s="odeme">Ödeme <span class="rz mavi">2 satır</span></div>
+        <div class="sekme" data-s="hesap">Hasta Hesabı</div>
+        <div class="sekme" data-s="makbuz">Makbuz Önizleme</div>
+      </div>
+
+      <!-- ============ SEKME: HIZMETLER ============ -->
+      <div class="pnl" data-s="hizmet">
+        <div class="grp">
+          <h4>Tahsil Edilecek Hizmetler
+            <span class="mini">belge satırları · tahsilat satıra dağıtılır</span></h4>
+          <div class="dg">
+            <table>
+              <thead><tr>
+                <th class="orta" style="width:34px">✔</th>
+                <th style="width:96px">Kod</th>
+                <th>Hizmet</th>
+                <th style="width:120px">Bölüm</th>
+                <th class="orta" style="width:50px">Ad.</th>
+                <th class="sag" style="width:96px">Br. Fiyat</th>
+                <th class="sag" style="width:80px">İnd.</th>
+                <th class="sag" style="width:100px">Tutar</th>
+                <th class="sag" style="width:100px">Tahsil</th>
+              </tr></thead>
+              <tbody>
+                <tr class="sel"><td class="orta">☑</td><td class="sonuk">520030</td>
+                  <td>Kardiyoloji uzman muayenesi</td><td class="sonuk">Kardiyoloji</td>
+                  <td class="orta">1</td><td class="sag">900,00</td><td class="sag">—</td>
+                  <td class="sag"><b>900,00</b></td><td class="sag">900,00</td></tr>
+                <tr class="sel"><td class="orta">☑</td><td class="sonuk">803340</td>
+                  <td>EKG (elektrokardiyografi)</td><td class="sonuk">Kardiyoloji</td>
+                  <td class="orta">1</td><td class="sag">260,00</td><td class="sag">—</td>
+                  <td class="sag"><b>260,00</b></td><td class="sag">260,00</td></tr>
+                <tr class="sel"><td class="orta">☑</td><td class="sonuk">801740</td>
+                  <td>Batın USG</td><td class="sonuk">Radyoloji</td>
+                  <td class="orta">1</td><td class="sag">320,00</td><td class="sag">10%</td>
+                  <td class="sag"><b>288,00</b></td><td class="sag">290,00</td></tr>
+                <tr class="toplam"><td colspan="7">TOPLAM</td>
+                  <td class="sag">1.448,00</td><td class="sag">1.450,00</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="fark">
+            <span class="sonuk">Kalemi işaretlemeden kısmi tahsilat yapılabilir — tutar tek tek
+              yazılır, artan <b>en eski kalemden</b> kapatılır.</span>
+            <span class="rz mavi">Yuvarlama +2,00 ₺ → 320 Diğer Gelir</span>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>İndirim ve Kampanya <span class="mini">yetki gerektirir</span></h4>
+          <div class="hdr k4">
+            <div class="fld"><label>İndirim türü</label><div class="inp combo">Kalem bazlı yüzde</div></div>
+            <div class="fld"><label>Oran / tutar</label><div class="inp">10 %</div></div>
+            <div class="fld"><label class="req">Gerekçe</label><div class="inp combo">Personel yakını</div></div>
+            <div class="fld"><label>Onaylayan</label><div class="inp ro">Otomatik (limit içi · %10 / 500 ₺)</div></div>
+          </div>
+          <div style="padding:0 12px 10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            <div class="btn">🏷 Daha Yüksek İskonto Talep Et</div>
+            <span class="sonuk">limit aşılırsa talep yetkiliye düşer →
+              <code>iskonto_onay.html</code></span>
+          </div>
+          <div class="fark">
+            <span class="sonuk">İndirim <b>hizmet satırına</b> yazılır, tahsilata değil. Tahsilatta
+              indirim vermek, hizmet gelirini olduğundan yüksek gösterirdi.</span>
+            <span class="rz ok">Limit içi · onay gerekmiyor</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ SEKME: ODEME ============ -->
+      <div class="pnl" data-s="odeme" hidden>
+        <div class="grp">
+          <h4>Ödeme Satırları <span class="mini">bölünmüş ödeme · tek makbuz, çok kasa_islem</span></h4>
+          <div class="dg">
+            <table>
+              <thead><tr>
+                <th style="width:150px">Tür</th>
+                <th style="width:180px">Hesap / Cihaz</th>
+                <th>Ayrıntı</th>
+                <th class="sag" style="width:110px">Tutar</th>
+                <th class="orta" style="width:70px">Sil</th>
+              </tr></thead>
+              <tbody>
+                <tr><td>💵 Nakit <span class="rz pas">21</span></td>
+                  <td class="sonuk">100.01.003 VEZNE 1</td>
+                  <td>Alınan 500,00 · para üstü 50,00</td>
+                  <td class="sag"><b>450,00</b></td>
+                  <td class="orta sonuk">✖</td></tr>
+                <tr><td>💳 Kredi Kartı <span class="rz pas">25</span></td>
+                  <td class="sonuk">Garanti 8871 · VEZNE 1</td>
+                  <td>Tek çekim · son 4 hane 4417 · onay 118322</td>
+                  <td class="sag"><b>1.000,00</b></td>
+                  <td class="orta sonuk">✖</td></tr>
+                <tr class="toplam"><td colspan="3">ÖDEME TOPLAMI</td>
+                  <td class="sag">1.450,00</td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="padding:8px 10px;display:flex;gap:6px;flex-wrap:wrap;background:#f7fafc;
+                      border-top:1px solid var(--line2)">
+            <div class="btn">💵 Nakit</div>
+            <div class="btn">💳 Kredi Kartı</div>
+            <div class="btn">🏦 Havale / EFT</div>
+            <div class="btn">🧾 Çek</div>
+            <div class="btn">🎟 Kupon</div>
+            <div class="btn">🏦 Emanetten Düş</div>
+            <div class="sp"></div>
+            <span class="rz ok">Borç kapandı · kalan 0,00 ₺</span>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Nakit Detayı <span class="mini">para üstü hesabı</span></h4>
+          <div class="hdr k4">
+            <div class="fld"><label>Tahsil edilecek</label><div class="inp ro big">450,00</div></div>
+            <div class="fld"><label>Alınan</label><div class="inp big">500,00</div></div>
+            <div class="fld"><label>Para üstü</label><div class="inp ro big" style="color:#2e7d46">50,00</div></div>
+            <div class="fld"><label>Kasaya giren</label><div class="inp ro big">450,00</div></div>
+          </div>
+          <div class="fark">
+            <span class="sonuk">Kasaya <b>net</b> tutar yazılır; alınan/para üstü yalnız ekranda kalır —
+              kasa_islem satırı 450,00 ₺'dir.</span>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Kredi Kartı Detayı <span class="mini">taksit = tahsilat tutarını değiştirmez</span></h4>
+          <div class="hdr k4">
+            <div class="fld"><label>Cihaz</label><div class="inp combo">Garanti 8871 · VEZNE 1</div></div>
+            <div class="fld"><label>Taksit</label><div class="inp combo">Tek çekim</div></div>
+            <div class="fld"><label>Onay kodu</label><div class="inp">118322</div></div>
+            <div class="fld"><label>Kart son 4 hane</label><div class="inp">4417</div></div>
+          </div>
+          <div class="fark">
+            <span class="sonuk">Komisyon ve vade farkı <b>banka</b> tarafında oluşur; hastadan tahsil
+              edilen tutar değişmez. Gün sonunda POS toplamıyla karşılaştırılır.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ SEKME: HASTA HESABI ============ -->
+      <div class="pnl" data-s="hesap" hidden>
+        <div class="grp">
+          <h4>Hasta Hesap Hareketi <span class="mini">tüm başvurular · cari ekstre</span></h4>
+          <div class="dg">
+            <table>
+              <thead><tr><th style="width:92px">Tarih</th><th style="width:130px">Belge</th>
+                <th>Açıklama</th><th style="width:120px">Protokol</th>
+                <th class="sag" style="width:100px">Borç</th>
+                <th class="sag" style="width:100px">Alacak</th>
+                <th class="sag" style="width:110px">Bakiye</th></tr></thead>
+              <tbody>
+                <tr><td>14.09.2026</td><td class="sonuk">HZM-2026-009912</td>
+                  <td>Kardiyoloji muayene + EKG + USG</td><td class="sonuk">P-000220</td>
+                  <td class="sag">1.448,00</td><td class="sag">—</td>
+                  <td class="sag"><b>1.448,00</b></td></tr>
+                <tr><td>02.06.2026</td><td class="sonuk">MKB-2026-002140</td>
+                  <td>Dahiliye muayene tahsilatı</td><td class="sonuk">P-000088</td>
+                  <td class="sag">—</td><td class="sag">690,00</td>
+                  <td class="sag">0,00</td></tr>
+                <tr><td>02.06.2026</td><td class="sonuk">HZM-2026-004013</td>
+                  <td>Dahiliye uzman muayenesi</td><td class="sonuk">P-000088</td>
+                  <td class="sag">690,00</td><td class="sag">—</td>
+                  <td class="sag">690,00</td></tr>
+                <tr class="toplam"><td colspan="4">BAKİYE</td>
+                  <td class="sag">2.138,00</td><td class="sag">690,00</td>
+                  <td class="sag">1.448,00</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Emanet / Avans <span class="mini">hizmet bağlanmadan alınan para</span></h4>
+          <div class="dg">
+            <table>
+              <thead><tr><th style="width:92px">Tarih</th><th>Açıklama</th>
+                <th class="sag" style="width:110px">Alınan</th>
+                <th class="sag" style="width:110px">Kullanılan</th>
+                <th class="sag" style="width:110px">Kalan</th></tr></thead>
+              <tbody>
+                <tr><td colspan="5" class="sonuk" style="text-align:center">Emanet kaydı yok</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="fark">
+            <span class="sonuk">Emanet, hizmet belirsizken (yatış depozitosu, paket ön ödemesi) alınır;
+              hizmet kesilince otomatik mahsup edilir. Gelir <b>emanet alındığında değil</b>,
+              hizmet verildiğinde yazılır.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ SEKME: MAKBUZ ONIZLEME ============ -->
+      <div class="pnl" data-s="makbuz" hidden>
+        <div class="grp">
+          <h4>Makbuz Önizleme <span class="mini">MKB-2026-004190 · seri VZN1</span></h4>
+          <div style="background:#fff;padding:18px 22px;margin:0;border-top:1px solid var(--line2)">
+            <div style="max-width:520px;margin:0 auto;border:1px solid var(--line);padding:16px 18px">
+              <div style="text-align:center;border-bottom:1px dashed var(--line);padding-bottom:8px">
+                <div style="font-size:14px;font-weight:bold;color:var(--navy)">ÖZEL BİLİM TIP MERKEZİ</div>
+                <div class="sonuk" style="font-size:11px">Merkez Şube · VD Kadıköy · VKN 1234567890</div>
+                <div style="font-size:12.5px;font-weight:bold;margin-top:6px">TAHSİLAT MAKBUZU</div>
+              </div>
+              <div class="sat"><span>Makbuz No</span><b>MKB-2026-004190</b></div>
+              <div class="sat"><span>Tarih / Saat</span><b>14.09.2026 · 16:47</b></div>
+              <div class="sat"><span>Hasta</span><b>Neslihan ARSLAN</b></div>
+              <div class="sat"><span>Protokol</span><b>P-000220</b></div>
+              <div class="sat"><span>Açıklama</span><b>Muayene + EKG + USG</b></div>
+              <div style="border-top:1px dashed var(--line);margin-top:6px"></div>
+              <div class="sat"><span>Nakit</span><b>450,00 ₺</b></div>
+              <div class="sat"><span>Kredi Kartı (Garanti ****4417)</span><b>1.000,00 ₺</b></div>
+              <div class="sat buyuk"><span>TOPLAM</span><b>1.450,00 ₺</b></div>
+              <div class="sonuk" style="margin-top:10px;font-size:10.5px;line-height:1.5">
+                Yalnız gösterilen hizmetler için geçerlidir. İade ve iptal, makbuzun ibrazı
+                ve tahsilatı yapan vezne üzerinden yapılır.
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:16px;font-size:11px">
+                <span>Tahsil eden<br><b>Elif KARACA</b></span>
+                <span style="text-align:right">İmza</span>
+              </div>
+            </div>
+          </div>
+          <div class="fark">
+            <span class="sonuk">Bölünmüş ödeme <b>tek makbuz</b> üretir — hasta iki ayrı belge taşımaz;
+              kasa tarafında iki ayrı <code>kasa_islem</code> satırıdır.</span>
+            <span class="rz mavi">Numara kesinleşmede tüketilir</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAG: ozet ve kaydet -->
+    <div style="border-left:1px solid var(--line2);background:#fbfcfe">
+      <div class="grp" style="margin:12px 12px 8px">
+        <h4>Tahsilat Özeti</h4>
+        <div class="sat"><span>Hizmet toplamı</span><b>1.448,00 ₺</b></div>
+        <div class="sat"><span>İndirim</span><b>−32,00 ₺</b></div>
+        <div class="sat"><span>Kurum payı</span><b>0,00 ₺</b></div>
+        <div class="sat"><span>Yuvarlama</span><b>+2,00 ₺</b></div>
+        <div class="sat buyuk"><span>Tahsil edilecek</span><b>1.450,00 ₺</b></div>
+        <div class="sat"><span>Nakit</span><b>450,00 ₺</b></div>
+        <div class="sat"><span>Kredi kartı</span><b>1.000,00 ₺</b></div>
+        <div class="sat buyuk" style="background:#f1f8f3"><span>Kalan</span>
+          <b style="color:#2e7d46">0,00 ₺</b></div>
+      </div>
+
+      <div class="grp" style="margin:8px 12px">
+        <h4>Makbuz <span class="mini">seri VZN1</span></h4>
+        <div style="padding:8px 10px;display:grid;gap:7px">
+          <div class="fld"><label>Makbuz no</label><div class="inp ro">MKB-2026-004190 (kesinleşmede)</div></div>
+          <div class="fld"><label>Açıklama</label><div class="inp">Muayene + EKG + USG</div></div>
+          <div class="fld"><label>Yazıcı</label><div class="inp combo">Vezne 1 · Termal 80mm</div></div>
+        </div>
+        <div class="sat"><span>Kopya</span><b>2 (hasta + vezne)</b></div>
+        <div style="padding:8px 10px;display:flex;gap:6px;flex-wrap:wrap">
+          <div class="btn primary">✔ Tahsil Et ve Bas</div>
+          <div class="btn">👁 Önizle</div>
+        </div>
+      </div>
+
+      <div class="grp" style="margin:8px 12px 12px">
+        <h4>Uyarılar <span class="mini">2</span></h4>
+        <div class="uyari-sat">
+          <span class="rz mavi">Bilgi</span>
+          <span>Hastanın <b>1.448,00 ₺</b> eski bakiyesi yok; bu tahsilat yalnız bu protokolü kapatır.</span>
+        </div>
+        <div class="uyari-sat">
+          <span class="rz sari">Dikkat</span>
+          <span>Yuvarlama +2,00 ₺ — hastadan tahsil edilen tutar hizmet toplamından fazla.
+            Gelir farkı <code>320</code> hesabına yazılır.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Vezne 1 · Elif KARACA</span><span>·</span>
+    <span>Vardiya #2 açık</span><span>·</span>
+    <span>Bu vardiyada 57 tahsilat</span><span>·</span>
+    <span>F3 hasta ara · F4 ödeme türü · F9 tahsil et</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> paranın alındığı yer. Vardiya takibi ve kasa teslimi ayrı ekrandır
+  (<code>banko_gun_sonu_kasa_teslimi.html</code>); burada tek soru vardır:
+  “bu hasta, bu hizmetler için ne ödüyor”.
+  <ul>
+    <li><b>Kasa ve vardiya sorulmaz:</b> kasa
+        <code>fn_kullanici_kasa(kullanıcı, aktif şube)</code> ile çözülür; açık oturum
+        yoksa ilk tahsilatta <b>sessizce açılır</b> (devir = kasanın o anki nakit
+        bakiyesi). “Vardiya aç” düğmesi yoktur — basmak unutulur, tahsilat oturumsuz
+        kalırdı. Soru yalnız kullanıcının kasası yoksa ya da birden fazla kasaya
+        yetkiliyse çıkar. Bkz. <code>banko_kasa_sureci.html</code></li>
+    <li><b>Tahsilat satıra dağılır, belgeye değil:</b> alınan para hizmet satırlarına
+        pay edilir (<code>fn_belge_satir_tahsil_tazele</code>). Yalnız belge toplamına
+        yazsaydık, “hangi tetkik ödendi” sorusu — prim, iade ve kurum ayrıştırması —
+        cevapsız kalırdı.</li>
+    <li><b>Bölünmüş ödeme tek makbuz, çok kasa satırı:</b> nakit + kart tek işlemdir;
+        hasta tek belge alır, kasada tür 21 ve tür 25 iki ayrı
+        <code>kasa_islem</code> satırı doğar. Gün sonu türe göre ayrıştığı için
+        tek satırda toplamak sayımı imkânsız kılardı.</li>
+    <li><b>Nakitte net yazılır:</b> alınan ve para üstü ekranda kalır, kasaya giren
+        yalnız net tutardır.</li>
+    <li><b>Taksit tahsilatı değiştirmez:</b> komisyon/vade farkı banka tarafındadır.
+        Hastadan tahsil edilen tutar POS gün sonunda kasa kaydıyla karşılaştırılır.</li>
+    <li><b>İndirim hizmet satırına yazılır:</b> tahsilatta indirim vermek hizmet
+        gelirini olduğundan yüksek, tahsilatı eksik gösterirdi. İndirim gerekçesi
+        zorunludur, limit üstü amir onayı ister.</li>
+    <li><b>Emanet gelir değildir:</b> hizmet bağlanmadan alınan para (depozito, paket
+        ön ödemesi) emanette durur; gelir hizmet verilince yazılır.</li>
+    <li><b>Makbuz numarası kesinleşmede tüketilir</b> (<code>fn_kasa_islem_no_uret</code>);
+        iptal edilse bile numara geri verilmez — <i>iptal satırı silinmez</i>.</li>
+    <li><b>Kurumlu hastada vezne yalnız katılım payını görür:</b> tahakkuk eden kurum
+        tutarı bu ekranda tahsil edilmez, dönem sonu faturalanır.</li>
+  </ul>
+</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');});
+  if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

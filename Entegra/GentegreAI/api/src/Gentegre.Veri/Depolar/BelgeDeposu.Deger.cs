@@ -123,6 +123,12 @@ public sealed partial class BelgeDeposu
                    --   gonderen kurumdur; hasta ayri alanda durur ve hasta
                    --   seridi bunu okur - yoksa serit bos aciliyordu.
                    bb.hasta_id as "hastaId",
+                   -- HASTA ADI (kullanici: "yine orada hasta adi yanlis, kurum
+                   --   adi gelmis"): kalem penceresinin serit basligi belgenin
+                   --   CARISINI yaziyordu - dis kurum numunesinde cari gonderen
+                   --   KURUMDUR. Ad sunucudan gelir ki ekran ikinci bir istek
+                   --   atmasin; hasta_id bossa belgenin tarafi hastadir.
+                   coalesce(hs.unvan, '') as "hastaUnvan",
                    bb.odeyen_kurum_id as "odeyenKurumId",
                    coalesce(ok.unvan, '') as "odeyenKurumAdi",
                    -- SEVKIYAT ayri tabloda (177): kaydi olmayan belgede gorunum
@@ -193,6 +199,7 @@ public sealed partial class BelgeDeposu
               left join public.departman bl on bl.id = bb.bolum_id
               left join public.taraf     hk on hk.id = bb.personel_id
               left join public.taraf ok on ok.id = bb.odeyen_kurum_id
+              left join public.taraf hs on hs.id = bb.hasta_id
               join public.v_belge_sevkiyat sv on sv.belge_id = b.id
               left join public.taraf td on td.id = sv.teslim_eden_id
               left join public.taraf ta on ta.id = sv.teslim_alan_id
@@ -223,6 +230,10 @@ public sealed partial class BelgeDeposu
                    s.birim_fiyat as "birimFiyat",
                    s.birim_fiyat_kdvli as "birimFiyatKdvli",
                    s.iskonto, s.iskonto2, s.kdv,
+                   -- ONAYLI ISKONTO KILIDI (662): satirda kilit ikonu cizilsin
+                   --   ve duzenleme once burada engellensin - tetige kadar
+                   --   gitmek kullaniciya hatayi kaydetme aninda gosterirdi.
+                   coalesce(s.iskonto_kilit, 0) as "iskontoKilit",
                    s.otv_yuzde as "otvYuzde", s.otv_miktar as "otvMiktar", s.tutar,
                    s.doviz_cinsi as "dovizCinsi", s.doviz_birim_fiyat as "dovizBirimFiyat",
                    s.doviz_tutari as "dovizTutari", s.doviz_kuru as "dovizKuru",

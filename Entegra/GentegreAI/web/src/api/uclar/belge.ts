@@ -52,6 +52,22 @@ export const belgeUclari = {
       '/api/kurum-profil/kategori-uygula', {}),
 
   belgeOku: (id: number) => istek<BelgeYaniti>(`/api/belge/${id}`),
+
+  /**
+   * BASVURU COMBOLARININ KAYNAGI: odeyen kurumlar, bolumler, depolar.
+   *
+   * Eskiden ucu de KART KAYNAGINDAN (`/api/liste/kurum` vb.) cekiliyordu ve
+   * her biri kendi kaynak yetkisini istiyordu - banko rolunde "kurum" gor
+   * yetkisi olmadigi icin combo SESSIZCE bos kaliyordu. Combo doldurmak kart
+   * yetkisi degildir: basvuru acabilen kisi odeyen kurumu secebilmeli.
+   */
+  basvuruKaynaklari: () => istek<{
+    kurumlar: { id: number; ad: string; tur: number }[];
+    bolumler: { id: number; ad: string }[];
+    depolar: { id: number; ad: string }[];
+    /** Aktif fiyat listeleri - `yon` 1 alis, 2 satis. */
+    fiyatListeleri: { id: number; ad: string; yon: number; tarifeTipi: number }[];
+  }>('/api/belge/basvuru-kaynaklari'),
   belgeEkle: (govde: unknown) => gonder<BelgeYaniti>('/api/belge', govde),
 
   /** Donusturulmeyi bekleyen satirlar (siparis/irsaliye kalanlari). */

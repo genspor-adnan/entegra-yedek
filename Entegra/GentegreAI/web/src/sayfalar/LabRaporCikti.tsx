@@ -167,7 +167,7 @@ export function LabRaporCikti() {
                 .filter(Boolean).join(' · ') || '—'}
             </span>
           </div>
-          <div><span className="et">T.C. No</span>
+          <div><span className="et">Kimlik No</span>
                <span className="dg">{String(i.hastaTc ?? '—')}</span></div>
           <div><span className="et">İsteyen Hekim</span>
                <span className="dg">{String(i.isteyenHekim ?? '') || '—'}</span></div>

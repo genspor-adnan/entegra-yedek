@@ -1,4 +1,5 @@
 /** Eposta/telefon alanlari icin ortak dogrulama + bicimlendirme (GenForm + IlgiliKisiler). */
+import { yerelTurkiye } from './subeAyari';
 
 export const EPOSTA_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -29,6 +30,14 @@ export const telefonAlaniMi = (ad: string) => /telefon|ceptel|gsm|faks/i.test(ad
 export function telefonGecerliMi(deger: string): boolean {
   const metin = (deger ?? '').trim();
   if (!metin) return true;
+
+  // TR DISI SUBE (666): telefon bicimi ulkeden ulkeye degisir; Turkiye
+  //   kurallarini (10 hane, 2-5 ile baslar) Berlin subesine uygulamak her
+  //   Alman numarasini "hatali" gosterirdi. Yalniz makul uzunluk aranir.
+  if (!yerelTurkiye()) {
+    const r = metin.replace(/\D/g, '');
+    return r.length >= 6 && r.length <= 15;
+  }
 
   const rakam = metin.replace(/\D/g, '');
   if (!rakam) return false;
@@ -66,11 +75,39 @@ export function tcknGecerliMi(deger: string): boolean {
   return ilkOn % 10 === h[10];
 }
 
-/** Alanın biçim kuralı - geçersizse mesaj, geçerliyse null. */
+/**
+ * Alanın biçim kuralı - geçersizse mesaj, geçerliyse null.
+ *
+ * KURAL SUNUCUDAN ÇÖZÜLMÜŞ GELİR (679): kart metasındaki `dogrulama` değeri
+ * kurum profilindeki kimlik biçimine göre 'tckn', boş (serbest) ya da
+ * 'desen:<düzenli ifade>' olur. Ekran kuralı KENDİ seçmez - seçseydi
+ * sunucunun reddettiği bir numarayı kabul edebilir (ya da tersi) olurdu.
+ */
 export function bicimHatasi(dogrulama: string | null | undefined,
                             deger: string): string | null {
+  if (!dogrulama) return null;
+
+  // ÖZEL DESEN: yurt dışı kurulumunda pasaport / yerel kimlik biçimi.
+  if (dogrulama.startsWith('desen:')) {
+    const metin = (deger ?? '').trim();
+    if (metin.length === 0) return null;         // boş = zorunluluk ayrı karar
+    try {
+      return new RegExp(dogrulama.slice(6)).test(metin)
+        ? null
+        : 'Kimlik numarası beklenen biçimde değil.';
+    } catch {
+      // Desen bozuksa KAYIT ENGELLENMEZ: ayarı yanlış yazan yönetici yüzünden
+      //   kayıt kabulün durması, kontrolün çalışmamasından kötüdür.
+      return null;
+    }
+  }
+
   if (dogrulama !== 'tckn') return null;
+  // TR DISI SUBEDE TCKN KONTROLU YOK (666): T.C. kimlik numarasi Turkiye'ye
+  //   ozgudur - Alman hastanin numarasi bu algoritmayi saglamaz ve kayit HIC
+  //   acilamazdi. Sunucuda da ayni kapi var (DegerCevirici).
+  if (!yerelTurkiye()) return null;
   return tcknGecerliMi(deger)
     ? null
-    : 'T.C. kimlik numarası geçersiz - 11 hane olmalı ve doğrulama hanesi tutmalı.';
+    : 'Kimlik numarası geçersiz - 11 hane olmalı ve doğrulama hanesi tutmalı.';
 }

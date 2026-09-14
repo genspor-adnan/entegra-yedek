@@ -142,16 +142,18 @@ export function GenelAyarlar() {
                     { deger: '2', ad: 'GenoTIP AI (HBYS)' },
                   ],
                 })}
-                {alan('genel.yerel_para', 'Yerel para birimi', { listeKod: 'genel.doviz' })}
                 {alan('genel.varsayilan_doviz', 'Döviz', { listeKod: 'genel.doviz' })}
-                {/* Loglar sunucuda UTC tutulur; listede bu kayma eklenir. */}
-                {alan('genel.saat_farki', 'Saat farkı (UTC+)', {
-                  tip: 'secenek',
-                  secenekler: Array.from({ length: 27 }, (_, i) => ({
-                    deger: String(i - 12),
-                    ad: `UTC${i - 12 >= 0 ? '+' : ''}${i - 12}`,
-                  })),
-                })}
+                {/* YEREL PARA BIRIMI ve SAAT FARKI BURADAN KALDIRILDI (666/667).
+                    Ikisi de artik SUBENIN ayari: Yönetim > Firma Bilgileri >
+                    Adres > Yerel Ayarlar. Kurum geneline koymak, yurt disinda
+                    subesi olan kurumda "hangisini yazayim" ikilemi yaratiyordu.
+                    Saat farki ayrica ARTIK GEREKSIZ: zaman damgalari timestamptz
+                    (667), gosterim subenin saat diliminde yapiliyor - elle
+                    girilen bir kayma yaz saatinde yilda iki kez yanlis olurdu. */}
+                <div className="kanot">
+                  Yerel para birimi ve saat dilimi <b>şube ayarıdır</b>:
+                  Yönetim › Firma Bilgileri › Yerel Ayarlar.
+                </div>
               </div>
             </div>
 

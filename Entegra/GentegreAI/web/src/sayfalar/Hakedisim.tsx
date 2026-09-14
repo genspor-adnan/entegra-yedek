@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
-import { para } from '../bilesenler/bicim';
+import { paraYaz } from '../bilesenler/bicim';
 
 /** Para bicimi + simge: `para` bir Intl bicimlendiricisidir. */
-const tl = (v: unknown) => `${para.format(Number(v ?? 0))} ₺`;
+const tl = (v: unknown) => `${paraYaz(Number(v ?? 0))}`;
 
 /**
  * HAKEDİŞLERİM — hekimin KENDİ prim dökümü.

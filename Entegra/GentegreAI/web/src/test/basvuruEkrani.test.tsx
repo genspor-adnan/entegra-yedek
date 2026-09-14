@@ -32,6 +32,13 @@ const SUBE_GORUNTULEME = {
 };
 
 const liste = vi.fn();
+/**
+ * BASVURU COMBOLARI TEK UCTAN (kullanici: banko rolunde odeyen kurum listesi
+ * gelmiyordu): kurum/bolum/depo artik kart kaynagindan degil
+ * `/api/belge/basvuru-kaynaklari`dan gelir - combo doldurmak kart yetkisi
+ * degil, `belge` gor yetkisidir. Fixture AYNI veriyi kullanir.
+ */
+const basvuruKaynaklari = vi.fn();
 const belgeOku = vi.fn();
 const belgeEkle = vi.fn();
 /** Odeyen kurumun sozlesme fiyat listesi (495) - kurum basina ayri liste. */
@@ -42,6 +49,7 @@ const varsayilanListe = vi.fn(
 vi.mock('../api/istemci', () => ({
   api: {
     liste: (kaynak: string, istek: unknown) => liste(kaynak, istek),
+    basvuruKaynaklari: () => basvuruKaynaklari(),
     belgeOku: (id: number) => belgeOku(id),
     // GERCEK sunucu bicimleri: ayarlar duz dizi, turler dizi olarak doner.
     ayarlar: () => Promise.resolve([
@@ -63,13 +71,15 @@ vi.mock('../api/istemci', () => ({
     aramaIsaretle: () => Promise.resolve({}),
     belgeAcikSatirlar: () => Promise.resolve({ satirlar: [] }),
     belgeEkle: (govde: unknown) => belgeEkle(govde),
+    // Iskonto onay talepleri (662) - ucret sekmesi rozeti icin okunur.
+    iskontoTalepleri: () => Promise.resolve([]),
   },
 }));
 
 vi.mock('../kimlik/OturumBaglami', () => ({
   useOturum: () => ({
     kullanici: SUBE_GORUNTULEME, aksiyonlar: [], kaynaklar: [], yukleniyor: false,
-    yetki: () => true, aksiyonVar: () => true,
+    yetki: () => true, aksiyonVar: () => true, aksiyonDegeri: () => 100,
   }),
 }));
 
@@ -84,6 +94,20 @@ beforeEach(() => {
   // Kaynak adina gore GERCEK sunucu satirlari; tanimsiz kaynak bos doner.
   liste.mockImplementation((kaynak: string) =>
     Promise.resolve({ satirlar: kayitlar[kaynak] ?? [] }));
+  basvuruKaynaklari.mockImplementation(() => Promise.resolve({
+    kurumlar: (kayitlar.kurum ?? []).map(k => ({
+      id: Number(k.id), ad: String(k.unvan ?? ''), tur: Number(k.tur ?? 0) })),
+    bolumler: (kayitlar.departman ?? []).map(b => ({
+      id: Number(b.id), ad: String(b.ad ?? '') })),
+    depolar: (kayitlar.depo ?? []).map(d => ({
+      id: Number(d.id), ad: String(d.ad ?? '') })),
+    // Fiyat listesi combosu da bu uctan (banko rolunde `fiyat_listesi` gor
+    //   yetkisi yok): fixture'daki AYNI kayitlar.
+    fiyatListeleri: (kayitlar['fiyat-listesi'] ?? []).map(l => ({
+      id: Number(l.id), ad: String(l.ad ?? ''),
+      yon: Number(l.yonKodu ?? l.yon ?? 2),
+      tarifeTipi: Number(l.tarifeTipi ?? 0) })),
+  }));
   belgeOku.mockResolvedValue({
     belge: (yanitlar as Record<string, Record<string, unknown>>)['114349'],
     satirlar: [], dipToplam: [], izlemeNo: '',
@@ -162,8 +186,7 @@ describe('yeni basvuru karti', () => {
     (await sekme('Başvuru')).click();
     // Odeyen kurum ZORUNLU alan - listesi bos kalirsa kayit yapilamaz.
     await waitFor(() => expect(screen.getByText('Özel (Ücretli)')).toBeInTheDocument());
-    expect(liste).toHaveBeenCalledWith('kurum', expect.anything());
-    expect(liste).toHaveBeenCalledWith('departman', expect.anything());
+    expect(basvuruKaynaklari).toHaveBeenCalled();
   });
 
   /**
@@ -329,8 +352,8 @@ describe('ucret eklemenin ilk kapisi', () => {
 
   it('ODEYEN KURUM secilemiyorsa da kapi kapali kalir', async () => {
     // Kurum listesi bos donerse zorunlu alan doldurulamaz.
-    liste.mockImplementation((kaynak: string) =>
-      Promise.resolve({ satirlar: kaynak === 'kurum' ? [] : (kayitlar[kaynak] ?? []) }));
+    basvuruKaynaklari.mockResolvedValue({ kurumlar: [], bolumler: [], depolar: [],
+                                          fiyatListeleri: [] });
     ciz();
     await ucretEkle();
     await waitFor(() =>

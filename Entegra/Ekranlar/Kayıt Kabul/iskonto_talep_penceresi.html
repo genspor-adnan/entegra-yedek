@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İskonto Uygula / Onaya Gönder — Mockup (Gentegre AI · Kayıt Kabul)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px}
+  .perde{min-height:100vh;padding:26px 14px 14px;
+    background:
+      repeating-linear-gradient(180deg,rgba(255,255,255,.5) 0 26px,rgba(236,241,247,.5) 26px 52px),
+      linear-gradient(rgba(20,40,70,.45),rgba(20,40,70,.52));
+    background-blend-mode:overlay}
+  .perde-bilgi{max-width:940px;margin:0 auto 10px;color:#dfe9f5;font-size:11px;opacity:.92}
+  .perde-bilgi code{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);
+    border-radius:3px;padding:0 4px}
+  .win{max-width:940px;margin:0 auto;background:var(--card);border:1px solid #0f2c50;
+    border-radius:4px;box-shadow:0 18px 50px rgba(8,20,40,.45);overflow:hidden}
+  .win+.win{margin-top:18px}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .title .kapat{margin-left:10px;opacity:.9;font-weight:normal}
+  .title.bekle{background:linear-gradient(#8a6a24,#6b5018)}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.buyuk{padding:7px 16px;font-size:12px}
+  .btn.pas{opacity:.42}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .sel b{font-weight:bold}
+  .bant{display:flex;gap:8px;align-items:flex-start;padding:8px 12px;font-size:11.5px;
+    border-bottom:1px solid var(--line2)}
+  .bant.kir{background:#fbe9e7;color:#8c2119;border-bottom-color:#f3c4bf}
+  .bant.sari{background:#fdf6e3;color:#6f4f12;border-bottom-color:#f2ddbf}
+  .bant.iyi{background:#e9f5ed;color:#1f5f35;border-bottom-color:#bfe3cb}
+  .bant b{font-weight:bold}
+  .ana{display:grid;grid-template-columns:1fr 300px}
+  .ana>div:last-child{border-left:1px solid var(--line2);background:#fbfcfe}
+  .grp{margin:10px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.kilit td{background:#f6f8fa;color:#7a8795}
+  tr.sel td{background:var(--sel)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  input.sy{width:60px;border:1px solid var(--line);border-radius:2px;height:22px;
+    text-align:right;padding:0 5px;font-size:11.5px;font-family:inherit;background:#fffef7}
+  input.sy:disabled{background:#f1f3f6;color:#a3aeb9}
+  .fark{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:12px;gap:10px;flex-wrap:wrap}
+  .fark b{font-size:13.5px}
+  .sat{display:flex;justify-content:space-between;padding:4px 10px;font-size:11.5px;
+    border-bottom:1px solid #eef2f6;gap:10px}
+  .sat b{text-align:right}
+  .sat.buyuk{font-size:13px;background:#f7fafc;font-weight:bold}
+  .sat.iyi b{color:var(--ok)}
+  .sat.uy b{color:var(--uyari)}
+  .sat.teh b{color:var(--kirmizi)}
+  .cubuk{height:8px;border:1px solid var(--line);border-radius:5px;background:#eef2f6;
+    margin:6px 10px;overflow:hidden;position:relative}
+  .cubuk i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .cubuk.asim i{background:linear-gradient(#e06a5e,#c0392b)}
+  .cubuk .isaret{position:absolute;top:-3px;bottom:-3px;width:2px;background:#14315a}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;
+    padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"\25BE";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;
+    background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .hdr.k2{grid-template-columns:repeat(2,1fr)}
+  .zaman .z{display:flex;gap:8px;padding:4px 10px;font-size:11.5px;border-bottom:1px solid #eef2f6}
+  .zaman .z i{font-style:normal;color:var(--muted);width:44px;flex:none}
+  .altbar{display:flex;gap:6px;align-items:center;padding:9px 12px;background:var(--head);
+    border-top:1px solid var(--line);flex-wrap:wrap}
+  .altbar .karar{display:flex;align-items:center;gap:8px;font-size:12px}
+  .altbar .karar b{font-size:15px;color:var(--navy)}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:#eef2f7;
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .basl{max-width:940px;margin:20px auto 8px;color:#dfe9f5;font-size:12px;font-weight:bold}
+  .not{max-width:940px;margin:14px auto 0;color:#e6edf6;font-size:11px;line-height:1.65}
+  .not b{color:#fff}
+  .not i{color:#cfe0f5}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:3px 0}
+  .not code{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);
+    border-radius:3px;padding:0 4px}
+  @media(max-width:860px){.ana{grid-template-columns:1fr}
+    .ana>div:last-child{border-left:none;border-top:1px solid var(--line2)}
+    .hdr,.hdr.k4{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="perde">
+<div class="perde-bilgi">▸ Banko tahsilat ekranındaki (<code>banko_tahsilat_al.html</code>) “İndirim ve Kampanya” bölümünden açılır.</div>
+
+<div class="win">
+  <div class="title">✂ İskonto Uygula — <span>P-000220</span>
+    <span class="sp">Vezne 1 · Elif KARACA · 17:03</span>
+    <span class="kapat">✕</span>
+  </div>
+
+  <div class="serit">
+    <div class="sel">👤 <b>Neslihan ARSLAN</b> · Kimlik No 1234*****90</div>
+    <div class="sel">🧾 Kardiyoloji · Dr. S. TUNÇ</div>
+    <div class="sel">💳 <b>Ücretli</b> · kurumsuz</div>
+    <div class="sel">💰 Tahsil edilecek <b>2.386,00 ₺</b></div>
+  </div>
+
+  <div class="ana">
+    <!-- SOL: kalemler -->
+    <div>
+      <div class="grp">
+        <h4>İskonto Uygula
+          <span class="mini">tümüne: oran <input class="sy" value="20" style="width:48px">% · [Uygula] · [Temizle]</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr>
+              <th style="width:24px" class="orta"><input type="checkbox" checked></th>
+              <th>Hizmet</th><th class="sag">Tutar</th>
+              <th class="orta">İsk %</th><th class="sag">İsk ₺</th>
+              <th class="sag">Net</th><th>Not</th>
+            </tr></thead>
+            <tbody>
+              <tr class="sel">
+                <td class="orta"><input type="checkbox" checked></td>
+                <td>Kardiyoloji muayene</td><td class="sag">800,00</td>
+                <td class="orta"><input class="sy" value="20"></td><td class="sag">160,00</td>
+                <td class="sag">640,00</td><td class="sonuk">—</td>
+              </tr>
+              <tr>
+                <td class="orta"><input type="checkbox" checked></td>
+                <td>EKG</td><td class="sag">450,00</td>
+                <td class="orta"><input class="sy" value="20"></td><td class="sag">90,00</td>
+                <td class="sag">360,00</td><td class="sonuk">—</td>
+              </tr>
+              <tr class="kilit">
+                <td class="orta"><input type="checkbox" disabled></td>
+                <td>Efor testi</td><td class="sag">1.100,00</td>
+                <td class="orta"><input class="sy" value="0" disabled></td><td class="sag">0,00</td>
+                <td class="sag">1.100,00</td>
+                <td><span class="rz pas">🔒 kurum anlaşmalı fiyat</span></td>
+              </tr>
+              <tr class="kilit">
+                <td class="orta"><input type="checkbox" disabled></td>
+                <td>SGK katkı payı</td><td class="sag">36,00</td>
+                <td class="orta"><input class="sy" value="0" disabled></td><td class="sag">0,00</td>
+                <td class="sag">36,00</td>
+                <td><span class="rz pas">🔒 yasal · indirilemez</span></td>
+              </tr>
+              <tr class="toplam">
+                <td></td><td>TOPLAM</td><td class="sag">2.386,00</td>
+                <td class="orta">%10,5</td><td class="sag">250,00</td>
+                <td class="sag">2.136,00</td><td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="fark">
+          <span class="sonuk">İndirilebilir tutar <b>1.250,00 ₺</b> · kilitli <b>1.136,00 ₺</b></span>
+          <span>İndirim <b>250,00 ₺</b> <span class="sonuk">· indirilebilirin %20'si · toplamın %10,5'i</span></span>
+        </div>
+      </div>
+
+      <div class="grp">
+        <h4>Gerekçe <span class="mini">onaya gidecekse zorunlu</span></h4>
+        <div class="hdr k4">
+          <div class="fld"><label class="req">Kategori</label><div class="inp combo">Personel yakını</div></div>
+          <div class="fld"><label class="req">İlgili personel</label><div class="inp combo">Ayten ARSLAN · Hemşire</div></div>
+          <div class="fld"><label class="req">Yakınlık</label><div class="inp combo">Anne</div></div>
+          <div class="fld"><label>Belge</label>
+            <div class="inp">Nüfus kayıt örneği.pdf <span class="rz ok" style="margin-left:auto">📎 ekle</span></div></div>
+        </div>
+        <div class="hdr" style="grid-template-columns:1fr">
+          <div class="fld"><label>Açıklama <span class="sonuk">— yetkili bunu okuyacak</span></label>
+            <div class="inp" style="height:auto;min-height:40px;align-items:flex-start">
+              Hasta, hemşiremiz Ayten Hanımın annesi. Efor testi kurum anlaşmalı olduğu için
+              yalnız muayene ve EKG'ye indirim istiyorum.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAG: limit -->
+    <div>
+      <div class="grp">
+        <h4>Yetkiniz</h4>
+        <div class="sat"><span>Rol</span><b>Vezne görevlisi</b></div>
+        <div class="sat"><span>Oran limiti</span><b>%10</b></div>
+        <div class="sat"><span>Tutar limiti</span><b>500,00 ₺ / belge</b></div>
+        <div class="sat"><span>Günlük kalan</span><b>1.850,00 ₺</b></div>
+        <div class="sonuk" style="padding:2px 10px 0;font-size:10.5px">Oran kullanımı — %20 / %10</div>
+        <div class="cubuk asim"><i style="width:100%"></i><div class="isaret" style="left:50%"></div></div>
+        <div class="sonuk" style="padding:0 10px 6px;font-size:10.5px">Tutar kullanımı — 250 ₺ / 500 ₺</div>
+        <div class="cubuk"><i style="width:50%"></i></div>
+        <div class="sat teh"><span>Sonuç</span><b>⚠ Onay gerekir</b></div>
+      </div>
+
+      <div class="grp">
+        <h4>Onaya Kim Bakar?</h4>
+        <div class="sat"><span>1. sıra</span><b>Dr. Osman AKAR · Başhekim Yrd.</b></div>
+        <div class="sat"><span>Durumu</span><span class="rz ok">çevrimiçi</span></div>
+        <div class="sat"><span>Ort. yanıt</span><b>2 dk 10 sn</b></div>
+        <div class="sat"><span>Yedek</span><b>Başhekim · 5 dk sonra</b></div>
+      </div>
+
+      <div class="grp">
+        <h4>Hastanın İskonto Geçmişi</h4>
+        <div class="sat"><span>Son 12 ay</span><b>2 talep · 380,00 ₺</b></div>
+        <div class="sat"><span>Reddedilen</span><b>yok</b></div>
+        <div class="sat"><span>Bu personel yakını</span><b>4 kez · 1.240,00 ₺</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="altbar">
+    <div class="karar">Tahsil edilecek: <b>2.136,00 ₺</b> <span class="sonuk">· indirim 250,00 ₺</span></div>
+    <div class="sp"></div>
+    <div class="btn buyuk">Vazgeç</div>
+    <div class="btn buyuk"><span>💳</span> İndirimsiz Tahsil Et</div>
+    <div class="btn ok buyuk pas"><span>✔</span> Uygula</div>
+    <div class="btn primary buyuk"><span>⬆</span> Onaya Gönder · F9</div>
+  </div>
+
+  <div class="statusbar">
+    <span>Elif KARACA · Vezne 1 · Merkez</span><span>·</span>
+    <span>“Uygula” limit içinde etkindir — burada limit aşıldı</span><span>·</span>
+    <span>Bugün 6 indirim · 4'ü limit içi (onaya düşmedi)</span>
+  </div>
+</div>
+
+<!-- ============ IKINCI DURUM: onay beklerken ============ -->
+<div class="basl">▾ Aynı pencere, “Onaya Gönder” sonrası — banko kilitlenmez</div>
+
+<div class="win">
+  <div class="title bekle">⏳ İskonto Onay Bekliyor — <span>TLP-2026-000318</span>
+    <span class="rz sari" style="margin-left:6px">Gönderildi 17:04 · 01:42</span>
+    <span class="sp">Dr. Osman AKAR · Başhekim Yrd.</span>
+    <span class="kapat">✕</span>
+  </div>
+
+  <div class="bant sari">
+    <span>⏳</span>
+    <div><b>Talep yetkiliye iletildi.</b> Hastayı bekletmeyin: indirimsiz tahsil edebilirsiniz,
+      onay sonra gelirse indirim satıra yazılır ve <b>fark iade edilir</b> — makbuz iptal edilmez.</div>
+  </div>
+
+  <div class="ana">
+    <div>
+      <div class="grp">
+        <h4>Gönderilen Talep</h4>
+        <div class="hdr k4">
+          <div class="fld"><label>İstenen indirim</label><div class="inp ro big">250,00 ₺ · %20</div></div>
+          <div class="fld"><label>Tahsil edilecek (onaylanırsa)</label><div class="inp ro big">2.136,00 ₺</div></div>
+          <div class="fld"><label>Gerekçe</label><div class="inp ro">Personel yakını · Anne</div></div>
+          <div class="fld"><label>Belge</label><div class="inp ro">Nüfus kayıt örneği <span class="rz ok" style="margin-left:auto">ekli</span></div></div>
+        </div>
+        <div class="zaman">
+          <div class="z"><i>17:03</i><span>İskonto girildi · %20</span></div>
+          <div class="z"><i>17:04</i><span>Limit aşımı · onaya gönderildi</span></div>
+          <div class="z"><i>17:04</i><span>Dr. Osman AKAR pencereyi açtı <span class="rz mavi">görüldü</span></span></div>
+          <div class="z"><i>—</i><span class="sonuk">Karar bekleniyor…</span></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="grp">
+        <h4>Hastaya Ne Denir?</h4>
+        <div class="sat sonuk" style="display:block;line-height:1.5;border-bottom:none">
+          “İndirim talebiniz yetkiliye iletildi. Dilerseniz şimdi tam tutarı ödeyin,
+          onay çıkarsa farkı iade edelim.”</div>
+      </div>
+      <div class="grp">
+        <h4>Bekleme</h4>
+        <div class="sat"><span>Geçen süre</span><b>01:42</b></div>
+        <div class="sat"><span>Ortalama</span><b>2 dk 10 sn</b></div>
+        <div class="sat uy"><span>5 dk sonra</span><b>yedek onaycıya düşer</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="altbar">
+    <div class="karar"><span class="rz sari">onay bekliyor</span></div>
+    <div class="sp"></div>
+    <div class="btn danger buyuk"><span>✖</span> Talebi Geri Çek</div>
+    <div class="btn buyuk"><span>🔔</span> Hatırlat</div>
+    <div class="btn buyuk"><span>💳</span> İndirimsiz Tahsil Et</div>
+    <div class="btn primary buyuk pas"><span>✔</span> Onaylandı · Tahsil Et</div>
+  </div>
+
+  <div class="statusbar">
+    <span>Pencere kapatılabilir — sonuç bildirim olarak düşer</span><span>·</span>
+    <span>Karar geldiğinde tahsilat ekranı kendini günceller</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Pencere:</b> banko/vezne görevlisinin tahsilat sırasında açtığı iskonto penceresi.
+  İki durumu vardır: <i>girdi</i> (üstte) ve <i>onay bekliyor</i> (altta). Yetkilinin
+  karar penceresi ayrıdır: <code>iskonto_onay_penceresi.html</code>.
+  <ul>
+    <li><b>Limit içi indirim onaya düşmez:</b> %10 / 500 ₺'ye kadar “Uygula” doğrudan çalışır,
+        denetim izine “otomatik” yazılır. Her indirimi onaya göndermek kuyruğu anlamsızlaştırır,
+        gerçek istisnayı gürültüde kaybederdi.</li>
+    <li><b>“Uygula” ve “Onaya Gönder” aynı anda etkin değildir:</b> limit durumu hangisinin
+        çalıştığını belirler — görevli hangi yolda olduğunu tahmin etmez.</li>
+    <li><b>Hem oran hem tutar çubuğu gösterilir:</b> %5 küçük görünür ama 40.000 ₺'lik pakette
+        2.000 ₺'dir. Tek ölçüt yanıltır; hangisinin aştığı çubuktan okunur.</li>
+    <li><b>Kilitli kalem satırda kalır:</b> SGK katkı payı ve kurum anlaşmalı fiyat indirilemez,
+        ama görünür — “%20 yazdım neden %10,5 çıktı” sorusu pencerede cevaplanır.</li>
+    <li><b>Kalem kalem oran girilebilir</b> — tümüne aynı oranı uygulamak zorunlu değil.</li>
+    <li><b>Gerekçe onaya gidecekse zorunludur,</b> limit içi indirimde değil. Zorunlu alan
+        gereksiz yere talep edilirse görevli rastgele kategori seçer, veri çöpe döner.</li>
+    <li><b>Bekleme ekranı bankoyu kilitlemez:</b> “İndirimsiz Tahsil Et” meşru çıkıştır.
+        Yetkili toplantıdayken vezneyi durdurmak hastayı kapıda tutardı.</li>
+    <li><b>Talep geri çekilebilir</b> (hasta vazgeçti, yanlış hasta) — yetkilinin kuyruğunda
+        ölü talep bırakmaz.</li>
+    <li><b>İndirim hizmet satırına yazılır, tahsilata değil</b> — gelir düşer, tahsilat eksik
+        görünmez.</li>
+  </ul>
+</div>
+</div>
+</body>
+</html>

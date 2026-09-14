@@ -36,7 +36,7 @@ public static partial class KaynakKatalogu
             new("hastaAdi",      "h.unvan",          "metin", "Hasta", Genislik: 220),
             new("dosyaNo",       "h.kod",            "metin", "Dosya No", Hizalama: "orta",
                                                      Genislik: 110, Varsayilan: false),
-            new("tcNo",          "coalesce(h.vkno, '')", "metin", "T.C. No", Hizalama: "orta",
+            new("tcNo",          "coalesce(h.vkno, '')", "metin", "Kimlik No", Hizalama: "orta",
                                                      Genislik: 110, Varsayilan: false),
             new("bolumAdi",      "coalesce(d.ad, '')", "metin", "Bölüm", Genislik: 150),
             new("hekimAdi",      "coalesce(p.ad, '')", "metin", "Hekim", Genislik: 180),
@@ -207,7 +207,7 @@ public static partial class KaynakKatalogu
             new("hastaAdi",    "h.unvan",           "metin", "Hasta", Genislik: 220),
             new("dosyaNo",     "h.kod",             "metin", "Dosya No", Hizalama: "orta",
                                                     Genislik: 110, Varsayilan: false),
-            new("tcNo",        "coalesce(h.vkno, '')", "metin", "T.C. No", Hizalama: "orta",
+            new("tcNo",        "coalesce(h.vkno, '')", "metin", "Kimlik No", Hizalama: "orta",
                                                     Genislik: 110, Varsayilan: false),
             // BOLUM HEKIMDEN ONCE (kullanici): calisma listesinde once hangi
             //   bolume, sonra hangi hekime bakiliyor - siralama okuma sirasi.

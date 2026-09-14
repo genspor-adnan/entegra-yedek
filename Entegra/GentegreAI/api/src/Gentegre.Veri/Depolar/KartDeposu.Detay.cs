@@ -30,7 +30,8 @@ public sealed partial class KartDeposu
 
             foreach (var satir in fark.Eklenen ?? new List<Dictionary<string, JsonElement>>())
             {
-                var degerler = DetayDegerleri(detay, satir, yeni: true);
+                var degerler = DetayDegerleri(detay, satir, yeni: true, baglam.KimlikKurali,
+                                              baglam.ZamanDilimi);
                 var kolonlar = new List<string> { detay.UstKolon, "ekleyen" };
                 var parametreler = new List<object?> { ustId, baglam.KullaniciId };
 
@@ -91,7 +92,8 @@ public sealed partial class KartDeposu
                     throw GentegreHatasi.Dogrulama($"{ad}: degisen satirda id yok.",
                         new AlanHatasi(ad, "Degisen detay satiri id tasimali."));
 
-                var degerler = DetayDegerleri(detay, satir, yeni: false);
+                var degerler = DetayDegerleri(detay, satir, yeni: false, baglam.KimlikKurali,
+                                              baglam.ZamanDilimi);
                 if (degerler.Count == 0) continue;
 
                 var atamalar = new List<string>();
@@ -172,7 +174,10 @@ public sealed partial class KartDeposu
             iptal: iptal);
 
     private static Dictionary<string, object?> DetayDegerleri(DetayTanimi detay,
-        Dictionary<string, JsonElement> gelen, bool yeni)
+        Dictionary<string, JsonElement> gelen, bool yeni,
+        Gentegre.Cekirdek.Katalog.KimlikKurali? kimlikKurali = null,
+        // 666/667: "zaman" alanlari SUBENIN diliminde yorumlanip UTC'ye cevrilir.
+        string? zamanDilimi = null)
     {
         var sonuc = new Dictionary<string, object?>(StringComparer.Ordinal);
 
@@ -186,8 +191,9 @@ public sealed partial class KartDeposu
 
             if (!alan.Yazilabilir) continue;
 
-            var cevrilmis = DegerCevirici.Cevir(deger, alan.Tip, $"{detay.Ad}.{ad}", ad);
-            DegerCevirici.UzunlukKontrol(alan, cevrilmis, $"{detay.Ad}.{ad}");
+            var cevrilmis = DegerCevirici.Cevir(deger, alan.Tip, $"{detay.Ad}.{ad}", ad, zamanDilimi);
+            DegerCevirici.UzunlukKontrol(alan, cevrilmis, $"{detay.Ad}.{ad}",
+                true, kimlikKurali);
             sonuc[ad] = cevrilmis;
         }
 

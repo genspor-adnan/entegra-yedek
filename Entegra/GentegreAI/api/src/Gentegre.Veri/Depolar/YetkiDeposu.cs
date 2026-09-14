@@ -17,27 +17,29 @@ public sealed class YetkiDeposu
             o => new YetkiKaydi(
                 o.Metin("yetki_kod"),
                 (short)o.Sayi("tur"),
-                o.Bayrak("gor"), o.Bayrak("ekle"), o.Bayrak("degistir"), o.Bayrak("sil")),
+                o.Bayrak("gor"), o.Bayrak("ekle"), o.Bayrak("degistir"), o.Bayrak("sil"),
+                o.Metin("deger")),
             iptal);
 
-    /// <summary>Alan yetkileri: satir YOKSA alan serbest, izin 0 = gizle.</summary>
+    /// <summary>
+    /// Alan yetkileri: satir YOKSA alan serbest, izin 0 = gizle. Cok rolde
+    /// (665) kisitlamayi tasimayan tek bir rol bile alani serbest birakir -
+    /// birlesim fonksiyonda cozulur.
+    /// </summary>
     public Task<List<AlanYetkisi>> AlanYetkileriAsync(int kullaniciId, CancellationToken iptal = default)
-        => _veri.ListeAsync("""
-            select ay.kaynak, ay.alan, ay.izin
-              from public.taraf_kullanici k
-              join public.rol_alan_yetki ay on ay.rol_id = k.rol_id
-             where k.id = @p0
-            """, new object?[] { kullaniciId },
+        => _veri.ListeAsync("select * from public.fn_kullanici_alan_yetkileri(@p0)",
+            new object?[] { kullaniciId },
             o => new AlanYetkisi(o.Metin("kaynak"), o.Metin("alan"), (short)o.Sayi("izin")),
             iptal);
 
-    /// <summary>JWT'deki yetkiSurumu ile karsilastirilir; eskiyse yetki yeniden cozulur.</summary>
+    /// <summary>
+    /// Onbellek damgasi: kullanicinin ROL KUMESININ (ana + ek) parmak izi (665).
+    /// Rol eklenip cikinca ya da rollerden birinin yetkisi degisince deger
+    /// degisir; YetkiCozucu esitlikle karsilastirir.
+    /// </summary>
     public Task<long> YetkiSurumuAsync(int kullaniciId, CancellationToken iptal = default)
-        => _veri.TekDegerAsync<long>("""
-            select r.yetki_surumu from public.taraf_kullanici k
-              join public.rol r on r.id = k.rol_id
-             where k.id = @p0
-            """, new object?[] { kullaniciId }, iptal);
+        => _veri.TekDegerAsync<long>("select public.fn_kullanici_yetki_surumu(@p0)",
+            new object?[] { kullaniciId }, iptal);
 }
 
 

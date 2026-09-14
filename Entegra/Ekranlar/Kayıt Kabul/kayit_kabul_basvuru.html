@@ -151,7 +151,7 @@
        "Yeni Hasta Kaydı" hasta kimlik ekranini acar. -->
   <div class="arama">
     <div class="fld" style="width:150px">
-      <label>T.C. Kimlik No</label>
+      <label>Kimlik No</label>
       <div class="inp">12345678901</div>
     </div>
     <div class="fld" style="width:120px">
@@ -394,11 +394,12 @@
 
       <!-- ============================== TAHSILAT ============================== -->
       <div class="pane" data-p="tahsilat">
-        <div class="ozet">
+        <div class="ozet" style="grid-template-columns:repeat(5,1fr)">
           <div class="k"><div class="t">Hasta Payı</div><div class="v">42,00 ₺</div></div>
-          <div class="k tahsil"><div class="t">Tahsil Edilen</div><div class="v">0,00 ₺</div></div>
-          <div class="k borc"><div class="t">Kalan</div><div class="v">42,00 ₺</div></div>
-          <div class="k"><div class="t">Önceki Açık Borç</div><div class="v">0,00 ₺</div></div>
+          <div class="k tahsil"><div class="t">Tahsil Edilen</div><div class="v">92,00 ₺</div></div>
+          <div class="k borc"><div class="t">İade Edilen</div><div class="v">−50,00 ₺</div></div>
+          <div class="k tahsil"><div class="t">Net Tahsilat</div><div class="v">42,00 ₺</div></div>
+          <div class="k"><div class="t">Kalan</div><div class="v">0,00 ₺</div></div>
         </div>
 
         <div class="grp">
@@ -415,7 +416,7 @@
                 </span>
               </div>
 
-              <label class="req">Tutar</label>      <div class="inp">42,00</div>
+              <label class="req">Tutar</label>      <div class="inp">0,00</div>
               <label>Para Birimi</label>            <div class="inp combo">TL</div>
 
               <label>Kasa / POS</label>             <div class="inp combo">Poliklinik Vezne 1</div>
@@ -455,17 +456,134 @@
                       <th>Kasa / POS</th><th>Tahsil Eden</th><th>Durum</th><th class="r">Tutar</th></tr>
                 </thead>
                 <tbody>
-                  <tr class="s-ipt"><td class="c">—</td><td colspan="6">Bu başvuru için henüz tahsilat yapılmadı.</td>
-                      <td class="r">0,00</td></tr>
+                  <tr class="sel"><td class="c">1</td><td>14.09.2026 09:12</td>
+                      <td>MKB-2026-004190</td><td>💵 Nakit</td>
+                      <td>Poliklinik Vezne 1</td><td>A. YILDIZ</td>
+                      <td style="color:var(--ok)">Tahsil</td><td class="r">92,00</td></tr>
+                  <tr class="s-ipt"><td class="c">2</td><td>14.09.2026 09:18</td>
+                      <td>IAD-2026-000117 <span style="font-size:10px">← MKB-…4190</span></td>
+                      <td>💵 Nakit</td>
+                      <td>Poliklinik Vezne 1</td><td>A. YILDIZ</td>
+                      <td style="color:var(--req)">Kısmi iade</td><td class="r">−50,00</td></tr>
                 </tbody>
                 <tfoot>
-                  <tr><td colspan="7">Tahsil edilen / Kalan</td><td class="r">0,00 / 42,00</td></tr>
+                  <tr><td colspan="7">Tahsil edilen / İade / Net / Kalan</td>
+                      <td class="r">92,00 / −50,00 / 42,00 / 0,00</td></tr>
                 </tfoot>
               </table>
             </div>
             <div class="hint">
               Katılım payı tahsil edilmeden hasta <b>muayeneye gönderilebilir</b> (kontrol listesinde
               uyarı kalır); fatura kesilirken kalan bakiye hastaya <b>borç</b> yazılır.
+              İade satırı listeden <b>silinmez</b>, eksi tutarla durur — makbuz numarası
+              tüketilmiştir ve iadenin kendisi denetlenecek bir işlemdir.
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ IADE / IPTAL ============
+             Iade, bagimsiz bir kasa cikisi DEGIL; her zaman bir tahsilata baglanir.
+             Makbuzsuz para vermek "kasadan odeme"dir, iade degildir. -->
+        <div class="grp">
+          <h4>İade / İptal <span class="tag">KASA</span></h4>
+          <div class="body">
+            <div class="grid4">
+              <label class="req">İade edilecek tahsilat</label>
+              <div class="inp combo" style="grid-column:2 / -1">
+                MKB-2026-004190 · 14.09.2026 09:12 · 💵 Nakit · 92,00 ₺ · A. YILDIZ
+              </div>
+
+              <label class="req">İşlem</label>
+              <div class="full" style="grid-column:2 / -1">
+                <span class="seg">
+                  <span class="s">İptal <small>(aynı vardiya · POS void)</small></span>
+                  <span class="s on">İade <small>(kısmi olabilir)</small></span>
+                </span>
+                <span style="font-size:10.5px;color:var(--muted);margin-left:10px">
+                  Aynı vardiyadaki karttan tahsilat <b>iptal</b> edilir (bankaya hiç gitmez);
+                  sonraki gün <b>iade</b> olur ve ayrı bir POS hareketi doğar.
+                </span>
+              </div>
+
+              <label class="req">İade tutarı</label>   <div class="inp">50,00</div>
+              <label>İade edilebilir</label>           <div class="inp ro">en çok 92,00 ₺</div>
+
+              <label>İade aracı</label>
+              <div class="inp ro">💵 Nakit — <b>tahsilat aracıyla aynı</b></div>
+              <label>Kasa</label>                      <div class="inp ro">Poliklinik Vezne 1 · açık vardiya</div>
+
+              <label class="req">Gerekçe</label>       <div class="inp combo">Fazla tahsilat</div>
+              <label>İade makbuzu</label>              <div class="inp ro">IAD-2026-000117 (kaydetmede atanacak)</div>
+
+              <label>Hizmet satırı</label>
+              <div class="full" style="grid-column:2 / -1;display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+                <span style="font-size:11.5px">☐ İlgili hizmet satırını da iptal et</span>
+                <span style="font-size:10.5px;color:var(--muted)">
+                  Hizmet <b>verilmişse</b> işaretlenmez — para iadesi hizmeti geri almaz.
+                  İşaretlenmezse hasta borcu yeniden doğar ve iade anlamsız kalır.
+                </span>
+              </div>
+
+              <label class="full" style="text-align:left;color:var(--muted)">Açıklama</label>
+              <textarea class="inp full">Katılım payı 42,00 ₺ yerine sehven 92,00 ₺ tahsil edildi; fark hastaya nakit iade edildi.</textarea>
+            </div>
+
+            <div class="gridtb" style="padding-top:10px">
+              <span class="btn ok">↩ İadeyi Kaydet</span>
+              <span class="btn">🖨️ İade Makbuzu</span>
+              <span class="btn">✖ Vazgeç</span>
+              <span style="margin-left:auto;font-size:10.5px;color:var(--muted)">
+                Onay gerekmiyor: <b>kendi vardiyasındaki</b> tahsilatın iadesi.
+                Başka vardiya / başka gün / başka vezne → <b>amir onayı</b>.
+              </span>
+            </div>
+
+            <div class="hint">
+              <b>Kurallar.</b>
+              <br>· <b>İade, tahsilata bağlanır.</b> Makbuzsuz para vermek iade değil
+              <i>kasadan ödemedir</i> ve ayrı fiş ister.
+              <br>· <b>İade aracı = tahsilat aracı.</b> Karttan alınan karta, nakit alınan nakit
+              iade edilir. Karttan alıp nakit iade etmek veznede olmayan parayı çıkarır ve
+              en bilinen suistimal yoludur; istisnası amir onayına bağlıdır.
+              <br>· <b>Kasada nakit yoksa nakit iade edilemez</b> — vardiya başında kasa boştur;
+              ekran bakiyeyi kontrol eder, yetmiyorsa iadeyi merkez kasaya yönlendirir.
+              <br>· <b>Prim geri alınır.</b> Tahsilat prim doğurmuşsa iade primi düşürür;
+              hekim hakedişi iade tarihine göre düzeltilir.
+              <br>· <b>İndirimli tahsilatta iade oranlıdır</b> — liste fiyatından iade,
+              kuruma indirim tutarı kadar zarar yazdırırdı.
+              <br>· <b>Tahsilat silinmez.</b> İade ters kayıttır; orijinal makbuz ve numarası
+              yerinde kalır.
+            </div>
+          </div>
+        </div>
+
+        <div class="grp">
+          <h4>Bu Başvurunun İadeleri</h4>
+          <div class="body">
+            <div class="dg">
+              <table>
+                <thead>
+                  <tr><th style="width:30px" class="c">#</th><th>Tarih / Saat</th><th>İade Makbuzu</th>
+                      <th>Referans Tahsilat</th><th>Araç</th><th>Gerekçe</th>
+                      <th>İade Eden</th><th>Onay</th><th class="r">Tutar</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td class="c">1</td><td>14.09.2026 09:18</td>
+                      <td>IAD-2026-000117</td><td>MKB-2026-004190</td>
+                      <td>💵 Nakit</td><td>Fazla tahsilat</td>
+                      <td>A. YILDIZ</td><td style="color:var(--muted)">Gerekmedi</td>
+                      <td class="r">−50,00</td></tr>
+                </tbody>
+                <tfoot>
+                  <tr><td colspan="8">Toplam iade</td><td class="r">−50,00</td></tr>
+                </tfoot>
+              </table>
+            </div>
+            <div class="hint">
+              Gerekçe kodları: <b>Fazla tahsilat</b> · <b>Yanlış tahsilat</b> (başka hasta/kasa) ·
+              <b>Hizmet verilmedi</b> (hizmet satırı da iptal edilir) · <b>Hasta vazgeçti</b> ·
+              <b>Şikâyet telafisi</b> (yetkili onayı ister) · <b>Kurum karşıladı</b>
+              (provizyon sonradan onaylandı — hastadan alınan katılım payı geri verilir).
             </div>
           </div>
         </div>

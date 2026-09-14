@@ -78,7 +78,7 @@ export function TasiyiciSekmesi({ kilitli, sevkiyat, belge }: {
                onChange={e => setSoforAd(e.target.value)} />
       </label>
       <label className="alan">
-        <span className="etiket">Şoför TC</span>
+        <span className="etiket">Şoför Kimlik No</span>
         <input value={soforTckn} maxLength={11} disabled={kilitli}
                placeholder="11 hane"
                onChange={e => setSoforTckn(e.target.value.replace(/\D/g, ''))} />

@@ -104,7 +104,7 @@ public static class IceriAlma
         A("belgeTarihi","Belge Tarihi",  "tarih", zorunlu: true),
         // CARI: uc yoldan biri yeterli - kod, vergi no ya da unvan.
         A("cariKodu",   "Cari Kodu",     "metin"),
-        A("cariVkno",   "Cari VKN/TCKN", "metin"),
+        A("cariVkno",   "Cari Vergi/Kimlik No", "metin"),
         A("cariUnvan",  "Cari Unvan",    "metin"),
         A("aciklama",   "Belge Açıklaması", "metin"),
         // KALEM: stok ya da hizmet kodu; tek "Kod" sutunu da kabul edilir.
@@ -165,6 +165,10 @@ public static class IceriAlma
             ["VKN"] = [("vkno", 98)], ["TCKN"] = [("vkno", 95)],
             ["VKN/TCKN"] = [("vkno", 98)], ["VERGİ NO"] = [("vkno", 98)],
             ["VERGİ NUMARASI"] = [("vkno", 96)], ["TC KİMLİK NO"] = [("vkno", 92)],
+            // Basliklar MUSTERININ dosyasindan gelir: "TCKN"/"TC KİMLİK NO"
+            //   yazan eski dosyalar calismaya devam eder, arayuzdeki yeni ad
+            //   ("Kimlik No") da taninir.
+            ["KİMLİK NO"] = [("vkno", 92)], ["KIMLIK NO"] = [("vkno", 92)],
             ["VD"] = [("vd", 88)], ["VERGİ DAİRESİ"] = [("vd", 98)],
             ["CARİ KOD"] = [("kod", 95)], ["CARİKOD"] = [("kod", 92)],
             ["MÜŞTERİ KODU"] = [("kod", 92)], ["STOK KODU"] = [("kod", 98)],

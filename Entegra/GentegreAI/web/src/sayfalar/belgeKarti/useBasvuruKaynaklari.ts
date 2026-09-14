@@ -61,57 +61,30 @@ export function useBasvuruKaynaklari(
     })();
   }, [basvuruMu]);
 
-  // BASVURU (249): odeyen kurum combosu - yalniz anlasmali kurumlar
-  //   (taraf.kurum = 1), tum cariler degil.
+  /**
+   * ODEYEN KURUM / BOLUM / DEPO TEK ISTEKTE (kullanici: "banko görevlisi
+   * olarak girdim… ödeyen kurum listesi gelmedi combo").
+   *
+   * Uc liste KART KAYNAKLARINDAN cekiliyordu (`/api/liste/kurum`,
+   * `departman`, `depo`) ve her biri KENDI kaynak yetkisini istiyordu. Banko
+   * rolunde o yetkiler yok; istek 403 donuyor, catch bloklari hatayi yutup
+   * combo'yu bos birakiyordu - gorevli basvuruyu acamiyor, sebebini de
+   * goremiyordu. Artik tek uc (`/api/belge/basvuru-kaynaklari`) ve yetkisi
+   * BELGE GOR: basvuru acabilen kisi odeyen kurumu secebilmeli.
+   */
   useEffect(() => {
     if (!basvuruMu || kurumlar.length > 0) return;
     void (async () => {
       try {
-        const y = await api.liste('kurum', {
-          sayfa: 1, boyut: 500, sirala: [{ alan: 'unvan', yon: 'asc' }],
-          filtre: { op: 'and', kosullar: [{ alan: 'durum', op: 'esit', deger: 1 }] },
-        });
-        setKurumlar(y.satirlar.map(r => ({
-          id: Number(r.id), ad: String(r.unvan ?? ''), tur: Number(r.tur ?? 0) })));
-      } catch { /* kurum listesi okunamazsa combo bos kalir, kayit engellenmez */ }
+        const y = await api.basvuruKaynaklari();
+        setKurumlar(y.kurumlar.map(k => ({ id: k.id, ad: k.ad, tur: k.tur })));
+        // Alt birim onekini ("— Dahiliye") combo'da gostermeyiz: agac
+        //   gorunumu Bölüm/Görev ekranina ait.
+        setBolumler(y.bolumler.map(b => ({ id: b.id, ad: b.ad.replace(/^—\s*/, '') })));
+        setDepolar(y.depolar);
+      } catch { /* kaynaklar okunamazsa combolar bos kalir, kayit engellenmez */ }
     })();
   }, [basvuruMu, kurumlar.length]);
-
-  // BASVURU (296): randevu verilebilen BOLUMLER - basvurunun yapildigi
-  //   poliklinik/klinik. Randevu ekraniyla ayni kume.
-  useEffect(() => {
-    if (!basvuruMu || bolumler.length > 0) return;
-    void (async () => {
-      try {
-        const y = await api.liste('departman', {
-          sayfa: 1, boyut: 300, sirala: [{ alan: 'ad', yon: 'asc' }],
-          filtre: { op: 'and', kosullar: [
-            { alan: 'durum', op: 'esit', deger: 1 },
-            { alan: 'randevuVerilebilir', op: 'esit', deger: 1 },
-          ] },
-        });
-        // Departman kaynagi alt birimleri "— Dahiliye" gibi GIRINTILI dondurur
-        //   (257, Bölüm/Görev ekranindaki agac gorunumu icin). Combo'da agac
-        //   yok - onek kirpilir, yoksa her bolum tire ile basliyormus gibi durur.
-        setBolumler(y.satirlar.map(r => ({
-          id: Number(r.id), ad: String(r.ad ?? '').replace(/^—\s*/, '') })));
-      } catch { /* bolum listesi okunamazsa combo bos kalir, kayit engellenmez */ }
-    })();
-  }, [basvuruMu, bolumler.length]);
-
-  // Basvuruda depo combosu (296) icin aktif depolar.
-  useEffect(() => {
-    if (!basvuruMu || depolar.length > 0) return;
-    void (async () => {
-      try {
-        const y = await api.liste('depo', {
-          sayfa: 1, boyut: 200, sirala: [{ alan: 'ad', yon: 'asc' }],
-          filtre: { alan: 'durum', op: 'esit', deger: 1 },
-        });
-        setDepolar(y.satirlar.map(r => ({ id: Number(r.id), ad: String(r.ad ?? '') })));
-      } catch { /* depo listesi okunamazsa combo bos kalir */ }
-    })();
-  }, [basvuruMu, depolar.length]);
 
   /**
    * BASVURUDA SORULAN HEKIM (361): liste PRIM ROL ISARETINDEN gelir ve hangi

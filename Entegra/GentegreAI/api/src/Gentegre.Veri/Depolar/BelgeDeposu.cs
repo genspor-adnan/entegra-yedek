@@ -180,7 +180,12 @@ public sealed partial class BelgeDeposu
         if (kapanma > 0 && !siparisMi)
             throw GentegreHatasi.IsKurali(
                 "Bu belgeden fatura turetilmis; once turetilen belgeyi iptal edin.");
-        if (duzenlemeGun > 0 && Saat.Bugun > belgeTarihi.Date.AddDays(duzenlemeGun))
+        // 667: belge tarihi veritabanindan UTC AN olarak gelir; "kac gun once"
+        //   sorusu KURULUS gunune gore sorulur (gece 01:00'deki bir belge UTC'de
+        //   onceki gune duser).
+        if (duzenlemeGun > 0 &&
+            Saat.BugunDilim(baglam.ZamanDilimi) >
+                Saat.Yerel(belgeTarihi, baglam.ZamanDilimi).Date.AddDays(duzenlemeGun))
             throw GentegreHatasi.IsKurali(
                 $"Belge tarihinden {duzenlemeGun} gun gecti; kayit kilitlendi.");
 
@@ -389,7 +394,7 @@ public sealed partial class BelgeDeposu
         //   gecmise donuk degistirilirse kapanmis gunun raporu tutmaz; ileri tarih
         //   ise e-Belge'de GIB tarafindan zaten reddedilir.
         //   Saat de tasinir: ayni gun icindeki hareket sirasi (stok dokumu) buna gore.
-        await BelgeTarihiKontrolAsync(baglanti, islem, belge, iptal);
+        await BelgeTarihiKontrolAsync(baglanti, islem, belge, iptal, baglam.ZamanDilimi);
 
         // ---------------------------------------------- 1) taraf bilgisini DONDUR ----
         // Belge, kartin O ANDAKI halini tasir: kart sonradan degisse de belge degismez.
@@ -652,7 +657,8 @@ public sealed partial class BelgeDeposu
     /// </summary>
     private static async Task BelgeTarihiKontrolAsync(
         NpgsqlConnection baglanti, NpgsqlTransaction islem,
-        IDictionary<string, object?> belge, CancellationToken iptal)
+        IDictionary<string, object?> belge, CancellationToken iptal,
+        string? zamanDilimi = null)
     {
         if (!belge.TryGetValue("belgeTarihi", out var ham) || ham is null) return;
         if (ham is not DateTime tarih)
@@ -662,9 +668,10 @@ public sealed partial class BelgeDeposu
                 return;
         }
 
-        // Kurulus saat dilimi (Saat.Simdi): konteyner UTC calisirken kullanicinin
-        //   yerel saatini "ileri tarihli" saymasin.
-        var simdi = Saat.Simdi;
+        // SUBENIN saati (666): konteyner UTC calisirken kullanicinin yerel
+        //   saatini "ileri tarihli" saymasin - ve cok ulkeli kurumda "yerel"
+        //   kurulusun degil, BELGENIN KESILDIGI subenin saatidir.
+        var simdi = Saat.SimdiDilim(zamanDilimi);
         // Ayni dakikadaki saat farki (istemci saati birkac saniye ileri olabilir)
         //   hata sayilmasin diye 5 dakikalik pay birakilir.
         if (tarih > simdi.AddMinutes(5))

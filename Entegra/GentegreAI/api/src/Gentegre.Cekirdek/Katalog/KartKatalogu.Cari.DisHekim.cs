@@ -184,7 +184,7 @@ public static partial class KartKatalogu
             new("durum",    "durum",    "kod",   SabitKodlar: HastaDurumKodlari,
                 Baslik: "Durum", Gizli: true),
             new("eposta",   "eposta",   "metin", EnFazlaUzunluk: 200, Baslik: "E-posta"),
-            new("vkno",     "vkno",     "metin", EnFazlaUzunluk: 20, Baslik: "TC No"),
+            new("vkno",     "vkno",     "metin", EnFazlaUzunluk: 20, Baslik: "Kimlik No"),
             // Dosya no (kod) CEP NUMARASINDAN uretilir - ekranda gosterilmez.
             new("kod",      "kod",      "metin", EnFazlaUzunluk: 20, Gizli: true),
             new("unvan",    "unvan",    "metin", EnFazlaUzunluk: 120, Gizli: true),

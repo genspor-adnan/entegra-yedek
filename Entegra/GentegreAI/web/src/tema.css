@@ -310,6 +310,15 @@ table.grid tfoot td {
 .hiza-sag { text-align: right }
 .hiza-orta { text-align: center }
 /* ilk sutun: onay kutusu + sutun sonunda "3 nokta" grid menusu */
+/* YOGUNLUK (669 · Kullanici Ayarlari > Gorunum): satir yuksekligi kisiye
+   gore. Yalniz DOLGU degisir - yazi boyu ve kolon genisligi ayni kalir, yoksa
+   "sikisik" secen kullanicinin tablosu yeniden akip kolonlari kayardi.
+   Varsayilan (attribute yok) = normal. */
+:root[data-yogunluk="sikisik"] table.grid td { padding-top: 1px; padding-bottom: 1px }
+:root[data-yogunluk="sikisik"] table.grid th { padding-top: 3px; padding-bottom: 3px }
+:root[data-yogunluk="ferah"] table.grid td { padding-top: 8px; padding-bottom: 8px }
+:root[data-yogunluk="ferah"] table.grid th { padding-top: 8px; padding-bottom: 8px }
+
 table.grid th.cbk, table.grid td.cbk { width: 34px; padding: 4px; text-align: center; white-space: nowrap }
 .grid-cb { width: 14px; height: 14px; accent-color: var(--mor); cursor: pointer; vertical-align: middle }
 .icerik-dugmesi:not(:disabled) {
@@ -384,6 +393,18 @@ table.grid tr.flt input {
 .rozet-sec.ok { background-color: var(--okzem); color: var(--ok) }
 .rozet-sec.hata { background-color: var(--hatazem); color: var(--hata) }
 .rozet-sec:disabled { cursor: default; opacity: .8 }
+
+/* COK ROLLU KULLANICI (665): personel kartinda "Ek roller" isaret listesi.
+   Rol sayisi kurumdan kuruma degisir - liste KAYDIRILIR, kart uzamaz. */
+.secim-listesi {
+  display: flex; flex-direction: column; gap: 2px;
+  max-height: 168px; overflow-y: auto;
+  border: 1px solid var(--cizgi); border-radius: 6px;
+  padding: 6px 8px; background: var(--yuz);
+}
+.secim-satiri { display: flex; align-items: center; gap: 7px; font-size: 13px; cursor: pointer }
+.secim-satiri input { margin: 0 }
+.secim-satiri:hover { color: var(--vurgu) }
 
 /* --------------------------------------------------------- kart modali ---- */
 /* Mockup'ta kart MODAL acilir: .kaperde (perde) + .kawin (ortali pencere). */
@@ -484,8 +505,60 @@ table.grid tr.flt input {
 }
 .kabas .kapt { margin-left: auto; font-weight: 400; font-size: 10.5px; opacity: .8 }
 .kagov { padding: 14px; overflow: auto; flex: 1; min-height: 0; background: var(--yuz) }
-.kullanici-ayarlari { width: min(560px, 94vw) }
-.kullanici-ayarlari .kagov { max-height: min(620px, 74vh) }
+/* KULLANICI AYARLARI (669): dort sekme geldi, pencere genisledi. Sekme
+   degisince yukseklik ziplamasin diye govde SABIT yukseklikte kaydirilir -
+   kisa "Gorunum" sekmesinden uzun "Guvenlik"e gecerken pencere buyuyup
+   kuculuyordu. */
+.kullanici-ayarlari { width: min(720px, 96vw) }
+/* `flex: none` SART: .kagov tabani `flex: 1; min-height: 0` tasiyor ve kisa
+   sekmede yuksekligi buzusturuyordu - pencere Bildirimler'e gecince kuculup
+   Guvenlik'e donunce buyuyordu. */
+.kullanici-ayarlari .kagov { height: min(560px, 68vh); max-height: none; flex: none }
+.ka-sekmeler {
+  display: flex; gap: 2px; padding: 8px 12px 0; background: var(--yuz2);
+  border-bottom: 1px solid var(--cizgi); flex-wrap: wrap;
+}
+.ka-sekme {
+  border: 1px solid var(--cizgi); border-bottom: none; border-radius: 4px 4px 0 0;
+  padding: 6px 14px; font-size: 12px; background: var(--yuz3, var(--yuz2));
+  color: var(--soluk); cursor: pointer;
+}
+.ka-sekme:hover { color: var(--yazi) }
+.ka-sekme.on {
+  background: var(--yuz); color: var(--vurgu); font-weight: 700;
+  position: relative; top: 1px;
+}
+/* Sekmeye gore degisen aciklama: hangi ayarin ne zaman gecerli oldugu farkli
+   (tema aninda, dil Kaydet ile) - kullanici tahmin etmesin. */
+.kaalt-durum {
+  padding: 7px 12px; border-top: 1px solid var(--cizgi); background: var(--yuz);
+  color: var(--soluk); font-size: 11.5px;
+}
+.ka-secenekler { display: flex; gap: 8px; flex-wrap: wrap; padding: 10px }
+.ka-sec {
+  border: 1px solid var(--cizgi); border-radius: 5px; background: var(--yuz);
+  color: var(--yazi); padding: 9px 14px; font-size: 12px; min-width: 96px;
+  text-align: center; cursor: pointer;
+}
+.ka-sec:hover { border-color: var(--vurgu) }
+.ka-sec.on {
+  border-color: var(--vurgu); color: var(--vurgu); font-weight: 700;
+  box-shadow: inset 0 0 0 1px var(--vurgu);
+}
+.ka-sec .ikon { display: block; font-size: 17px; margin-bottom: 3px }
+.ka-liste { padding: 4px 10px 10px }
+.ka-satir {
+  display: flex; justify-content: space-between; gap: 12px; padding: 6px 0;
+  font-size: 12.5px; align-items: center;
+}
+.ka-satir + .ka-satir { border-top: 1px solid var(--cizgi2, var(--cizgi)) }
+.ka-satir > span { color: var(--soluk) }
+.ka-satir > b { text-align: right; display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end }
+.ka-dugmeler { display: flex; justify-content: flex-end; padding: 0 10px 10px }
+/* Telefon ulke kodu (kullanici: "+90 ayri olsun"): dar ve SABIT genislik -
+   numara alani kodun uzunluguna gore kaymasin (+7 ile +994 ayni yeri kaplar). */
+.kasat select.ka-ulke { flex: none; width: 96px }
+.kullanici-ayarlari table.grid { width: calc(100% - 20px); margin: 0 10px 4px }
 .kullanici-ayarlari .kagrup > h6 span {
   margin-left: 4px; text-transform: none; letter-spacing: 0; color: var(--soluk); font-weight: 400;
 }
@@ -1217,6 +1290,14 @@ input.skt-gecmis {
 .alan-izgara.ayar-formu .alan input.genis-deger { max-width: 320px }
 /* Secenek metinleri uzun ("Engelle — belgeyi kaydetme") - dar kutu kirpiyordu. */
 .alan-izgara.ayar-formu .alan select { min-width: 320px; max-width: 460px; width: auto }
+
+/* PARA SORMA penceresi (tutar + birim): ustteki kural TUM combolara 320px
+   taban genislik veriyor - tutarin yanindaki birim combosu devlesip tutar
+   kutusunu ezik birakiyordu, genislikler tam TERS goruyordu. Yalniz `.ikili`
+   icindeki birim combosu dar tutulur; neden combosu (uzun metinli, `.ikili`
+   disinda) genis kalmaya devam eder. */
+.alan-izgara.para-sor .alan .ikili input { flex: 1; min-width: 0; max-width: none }
+.alan-izgara.para-sor .alan .ikili select { flex: none; min-width: 0; width: 78px }
 
 /* YAŞ GİRDİSİ (sayı + birim): referans aralığında alt ve üst sınır AYNI
    satırda çizilir. Yukarıdaki genel `min-width: 320px` select kuralı birim
@@ -3291,3 +3372,238 @@ td.hucre-panik input { border-color: var(--hata); color: var(--hata); font-weigh
 /* Sonuc girisi penceresi: panik satirin deger hucresi kirmizi. */
 .hucre-ekli-td { white-space: nowrap }
 .detay-tablo tr.panik td { background: var(--hatazem) }
+
+/* ---------------------------------------------------------------- zil ----
+   Onay bekleyen isler paneli (662). Dil menusuyle ayni desen: sarmalayici
+   goreli, panel altinda mutlak. */
+.zil-sar { position: relative; display: inline-flex }
+.zil-rozet {
+  position: absolute; top: 2px; right: 2px; min-width: 15px; height: 15px;
+  padding: 0 3px; border-radius: 8px; background: var(--hata); color: #fff;
+  font-size: 10px; line-height: 15px; text-align: center; font-weight: 700;
+}
+.zil-panel {
+  position: absolute; top: 100%; right: 0; z-index: 60; width: 360px;
+  max-height: 70vh; overflow-y: auto; background: var(--yuz);
+  border: 1px solid var(--kenar); border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .18);
+}
+.zil-baslik {
+  padding: 8px 10px; font-weight: 700; font-size: 12.5px;
+  border-bottom: 1px solid var(--kenar2); background: var(--yuz2);
+}
+.zil-bos { padding: 14px 10px; color: var(--soluk); font-size: 12px; text-align: center }
+.zil-satir { padding: 8px 10px; border-bottom: 1px solid var(--kenar2) }
+.zil-satir:last-child { border-bottom: 0 }
+.zil-ust { display: flex; gap: 6px; align-items: center; font-size: 12.5px }
+.zil-ust .sp { margin-left: auto }
+.zil-orta { font-size: 11.5px; color: var(--soluk); margin-top: 2px }
+.zil-gerekce { font-size: 11.5px; margin-top: 3px; font-style: italic }
+.zil-dugmeler { display: flex; gap: 6px; margin-top: 6px }
+
+/* ------------------------------------------------- iskonto onay penceresi --
+   Yetkili karari belgeyi acmadan verir (663): hasta seridi, ucretler, talep. */
+.isk-onay { display: grid; gap: 10px; padding: 2px }
+.isk-hasta {
+  display: flex; gap: 8px; align-items: center;
+  padding-bottom: 6px; border-bottom: 1px solid var(--kenar2);
+}
+.isk-hasta .sp { margin-left: auto }
+.isk-ad { font-size: 14px }
+.isk-cins {
+  display: inline-flex; gap: 3px; align-items: center; font-weight: 700;
+  font-size: 12px; padding: 1px 7px; border-radius: 10px;
+}
+.isk-cins.cins-e { background: #e3efff; color: #14528c }
+.isk-cins.cins-k { background: #ffe6f1; color: #8c1454 }
+.isk-cins.cins-y { background: var(--yuz2); color: var(--soluk) }
+.isk-yas {
+  font-size: 11.5px; color: var(--soluk); border: 1px solid var(--kenar);
+  border-radius: 9px; padding: 0 7px;
+}
+.isk-alt-serit {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  font-size: 11.5px; color: var(--soluk); margin-top: -4px;
+}
+.isk-kutu { border: 1px solid var(--kenar2); border-radius: 5px; overflow: hidden }
+.isk-baslik {
+  background: var(--yuz2); padding: 4px 9px; font-size: 11px; font-weight: 700;
+  color: var(--soluk); text-transform: uppercase; letter-spacing: .3px;
+}
+.isk-kalemler { padding: 7px 9px; font-size: 12px; line-height: 1.7 }
+.isk-toplam {
+  display: flex; justify-content: space-between; padding: 5px 9px;
+  border-top: 1px solid var(--kenar2); background: var(--yuz2); font-size: 13px;
+}
+.isk-satir {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 4px 9px; font-size: 12px; border-bottom: 1px solid var(--kenar2);
+}
+.isk-satir:last-child { border-bottom: 0 }
+.isk-satir > span { color: var(--soluk) }
+.isk-satir > b { text-align: right }
+
+/* Kalem penceresinde MIKTAR ve BIRIM FIYAT one cikar (kullanici): satirin
+   tutarini bu ikisi belirler, goz once onlara gitmeli. */
+.alan .ikili input.one-cikan { font-size: 14px; font-weight: 700 }
+
+/* Kalem penceresinin ust seridi: hasta · odeyen · fiyat listesi (mockup
+   ucret_satiri_fiyat_iskonto.html). Kart basligi pencerenin altinda kalir. */
+.kalem-serit {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  padding: 7px 10px; margin: -2px -2px 8px;
+  background: var(--yuz2); border-bottom: 1px solid var(--kenar2);
+  font-size: 11.5px; color: var(--soluk);
+}
+/* Her bilgi kendi kutusunda (mockup `.sel`): bitisik duz metinde kurum adi ile
+   liste adi tek cumle gibi okunuyordu. */
+.kalem-serit > span {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border: 1px solid var(--kenar); border-radius: 3px;
+  background: var(--yuz); white-space: nowrap;
+}
+.kalem-serit b { color: var(--yazi); font-size: 12.5px; font-weight: 700 }
+
+/* ------------------------------------------------- kalem penceresi formu --
+   Olculer mockup'tan: Ekranlar/Kayıt Kabul/ucret_satiri_fiyat_iskonto.html
+   (.hdr 150px + 1fr, sayi kutulari 110px, birim kutulari 40-80px).
+   Sayilar ESNEK kutuda pencere genisligince uzuyor ve alt alta hizalanmiyordu;
+   sabit genislik + sola yaslama ile Miktar / Birim Fiyat / İskonto ayni
+   kolonda ust uste gelir. */
+.alan-izgara.kalem-formu .alan { grid-template-columns: 122px 1fr }
+.alan-izgara.kalem-formu .alan .ikili { justify-content: flex-start }
+/* Sayi kutulari sabit: 110px (mockup). `.birim`li kutular kendi kuralini korur. */
+.alan-izgara.kalem-formu .alan .ikili > input:not(.birim):not(.kur) {
+  flex: none; width: 138px;
+}
+/* Birim / para birimi kutulari (TL, %, Adet) - dar ve ortali. */
+.alan-izgara.kalem-formu .alan .ikili > select.birim,
+.alan-izgara.kalem-formu .alan .ikili > input.birim { flex: none; width: 56px }
+/* Sag kutunun ADI ("İskonto" / "Oran" / "Birim Fiyat") sabit yer tutar ki
+   mod degisince yanindaki kutu SAGA SOLA OYNAMASIN. */
+.alan-izgara.kalem-formu .alan .birim-metin { min-width: 76px }
+.alan-izgara.kalem-formu .alan .birim-metin:last-child { min-width: 32px }
+/* Onizleme kutulari (İskontolu Birim Fiyat / Tutar) - mockup'ta 140px. */
+.alan-izgara.kalem-formu .alan input.onizleme { width: 138px }
+/* KILITLI KUTULAR GORUNSUN (mockup `.inp.ro`): birim fiyat, para birimi,
+   hazir orandaki iskonto tutari ve onizlemeler salt gorunumdur - duzenlenebilir
+   kutuyla ayni gorununce kullanici tiklayip yazmayi deniyordu. */
+.alan-izgara.kalem-formu .alan input[readonly],
+.alan-izgara.kalem-formu .alan select:disabled,
+.alan-izgara.kalem-formu .alan input:disabled {
+  background: var(--yuz2); color: var(--soluk); cursor: default;
+}
+.alan-izgara.kalem-formu .alan input.onizleme {
+  background: var(--yuz2); font-weight: 700; color: var(--yazi);
+}
+/* Birim listesi ICERIGE gore genisler ("Adet", "Kutu", "Kutu (12 Adet)"):
+   sabit 56px uzun birim adlarini kirpiyordu. */
+.alan-izgara.kalem-formu .alan .ikili > select.birim { width: auto; min-width: 56px }
+/* Girilen alanlarla HESAPLANAN alanlar arasindaki sinir (mockup'ta ayri kutu).
+   Etiket sutununda durur, deger sutununa ince bir cizgi cekilir. */
+.alan-izgara.kalem-formu .alan-ayrac {
+  display: grid; grid-template-columns: 122px 1fr; align-items: center;
+  margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--kenar2);
+  font-size: 10.5px; font-weight: 700; letter-spacing: .3px;
+  color: var(--soluk); text-transform: uppercase;
+}
+/* Tarih kutusu ISKONTO COMBOSU genisliginde (kullanici): tek basina satir
+   boyu uzayinca oteki alanlarla ayni kolonda durmuyordu. */
+.alan-izgara.kalem-formu .alan input[type="datetime-local"] { width: 138px }
+/* NOT: iskonto DEGER kutusuna ayri bir genislik verilmiyor - ustteki genel
+   kural (138px) gecerli. Etiket sutunu 122px'e cekilince satir sigdi, daraltma
+   gereksiz kaldi. */
+/* Aciklama kutusu ISKONTO DEGER KUTUSUYLA ayni yerde biter (kullanici):
+   satir boyu uzayinca form sag kenari tirtikli gorunuyordu.
+   Olcum: iskonto deger kutusunun sag kenariyla ayni piksel (362). */
+.alan-izgara.kalem-formu .alan > input:not(.birim):not(.onizleme):not([type="datetime-local"]) {
+  width: 362px;
+}
+
+/* ------------------------------------------------ iskonto talep penceresi --
+   Mockup: Ekranlar/Kayıt Kabul/iskonto_talep_penceresi.html */
+.isk-talep { display: grid; gap: 8px }
+.isk-talep .kagrup > h6 { display: flex; align-items: center; gap: 8px }
+.isk-ozet {
+  display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 6px 10px; margin: 0 10px 10px;
+  background: var(--yuz2); border: 1px solid var(--kenar2); border-radius: 4px;
+  font-size: 11.5px;
+}
+.isk-sat {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 4px 10px; font-size: 12px; border-bottom: 1px solid var(--kenar2);
+}
+.isk-sat:last-child { border-bottom: 0 }
+.isk-sat > span { color: var(--soluk) }
+.isk-sat.ok  b { color: var(--olumlu) }
+.isk-sat.teh b { color: var(--hata) }
+/* Kilitli kalem satiri: gorunur ama secilemez. */
+.detay-tablo tr.pasif td { opacity: .55 }
+
+/* ===========================================================================
+   İSKONTO ONAY EKRANI (666) — mockup Ekranlar/Kayıt Kabul/iskonto_onay.html.
+   Kuyruk + karar + limit + analiz tek ekranda; sekmeler mockup'ın .sekmeler
+   şeridi, karar paneli sağda sabit sütun.
+   ========================================================================= */
+.isk-sekmeler {
+  display: flex; gap: 2px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--cizgi); margin-bottom: 10px;
+}
+.isk-sekme {
+  border: 1px solid var(--cizgi); border-bottom: 0;
+  border-radius: 4px 4px 0 0; padding: 6px 12px; font-size: 12px;
+  background: var(--yuz2); color: var(--soluk); cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+}
+/* Etkin sekme govdeyle BIRLESIR: alt cizgisi kalkar - hangi panelin acik
+   oldugu rozetten degil, serit butunlugunden okunur. */
+.isk-sekme.on {
+  background: var(--yuz); color: var(--yazi); font-weight: 700;
+  margin-bottom: -1px; padding-bottom: 7px;
+}
+.isk-sekme .rozet { padding: 0 7px }
+
+/* Sayac kutusunun ALT SATIRI (mockup .kutu .alt): rakamin altinda kucuk
+   aciklama - "11" tek basina anlamsiz, "4'u kismi onay" bilgi. */
+.pano-kutu-alt { font-size: 10.5px; color: var(--soluk); line-height: 1.3 }
+
+/* Kuyrukta HASTA BEKLETEN satir: kirmizi kenar + hafif zemin. */
+.detay-tablo.isk-kuyruk tbody tr.acil td { background: var(--hatazem) }
+.detay-tablo.isk-kuyruk tbody tr.acil td:first-child { box-shadow: inset 3px 0 0 var(--hata) }
+.detay-tablo.isk-kuyruk tbody tr { cursor: default }
+.detay-tablo tr.genel td {
+  font-weight: 700; border-top: 2px solid var(--cizgi); background: var(--yuz2);
+}
+
+/* Talep detayi: solda kalemler/gerekce, sagda karar paneli (mockup .ana). */
+.isk-detay { display: grid; grid-template-columns: 1fr 380px; gap: 10px; align-items: start }
+@media (max-width: 1100px) { .isk-detay { grid-template-columns: 1fr } }
+.isk-detay-serit {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px;
+}
+.isk-detay-serit .kutu {
+  border: 1px solid var(--kenar2); border-radius: 3px; background: var(--yuz);
+  padding: 4px 9px; font-size: 12px;
+}
+.isk-karar > .kagrup { background: var(--grupzem) }
+.isk-karar-dugmeler { display: flex; gap: 6px; flex-wrap: wrap; padding: 8px 10px }
+.isk-gerekce {
+  padding: 9px 11px; font-size: 12px; line-height: 1.6; color: var(--yazi);
+}
+/* "Talep edilen indirim" TEK ESNEK SUTUN: sabit genislikler toplami masayi
+   doldurunca daralip basligi kelime kelime sariyordu. */
+.detay-tablo.isk-kuyruk th:nth-child(5),
+.detay-tablo.isk-kuyruk td:nth-child(5) { min-width: 250px }
+/* ACIL basvuru turu combo'da da KIRMIZI (kullanici: tur segmentten combo'ya
+   dondu): "acil mi degil mi" seride bakan kisinin ilk gordugu seydi. */
+select.acil {
+  border-color: #c0392b; color: #b3261e; font-weight: 700;
+  background: var(--hatazem);
+}
+/* Kalem sekmesi baslik seridindeki AYRAC: dugme kumeleri (satir duzenleme /
+   satirin ekleri) arasinda ince cizgi - arac cubugundaki ayracla ayni. */
+.kagrup > h6 .ayrac {
+  width: 1px; min-height: 18px; margin: 0 4px; background: var(--cizgi);
+  display: inline-block; vertical-align: middle;
+}

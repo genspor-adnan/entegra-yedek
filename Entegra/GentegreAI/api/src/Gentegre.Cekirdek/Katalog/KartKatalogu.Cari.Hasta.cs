@@ -25,7 +25,7 @@ public static partial class KartKatalogu
             //   gonderimine ve e-Belge alici bilgisine gidiyor. Bos
             //   birakilabilir (kimligi belirsiz hasta) ama YAZILDIYSA
             //   tutarli olmali.
-            "vkno" => a with { Baslik = "TC No", Grup = "Kimlik", AltGrup = null,
+            "vkno" => a with { Baslik = "Kimlik No", Grup = "Kimlik", AltGrup = null,
                                EnFazlaUzunluk = 11,
                                Dogrulama = KimlikDogrulama.TcknTuru },
             // Hastada zorunluluklar GEVSEK: gorev/e-posta personel alanlaridir,
@@ -95,9 +95,9 @@ public static partial class KartKatalogu
                 new("anaAdi",      "ana_adi",      "metin", EnFazlaUzunluk: 60, Baslik: "Ana Adı"),
                 new("babaAdi",     "baba_adi",     "metin", EnFazlaUzunluk: 60, Baslik: "Baba Adı"),
                 new("anneTckn",    "anne_tckn",    "metin", EnFazlaUzunluk: 11,
-                    Baslik: "Anne T.C. No", Dogrulama: KimlikDogrulama.TcknTuru),
+                    Baslik: "Anne Kimlik No", Dogrulama: KimlikDogrulama.TcknTuru),
                 new("babaTckn",    "baba_tckn",    "metin", EnFazlaUzunluk: 11,
-                    Baslik: "Baba T.C. No", Dogrulama: KimlikDogrulama.TcknTuru),
+                    Baslik: "Baba Kimlik No", Dogrulama: KimlikDogrulama.TcknTuru),
                 // Kimligi belirsiz hasta: TCKN olmadan kayit acilir.
                 new("kimliksiz",   "kimliksiz",    "mantik", Baslik: "Kimliksiz Hasta"),
                 new("yabanciHastaTuru", "yabanci_hasta_turu", "kod",
@@ -152,8 +152,8 @@ public static partial class KartKatalogu
         return p with
         {
             Ad = "hasta",
-            // Ayrı hasta yetkisi seed edilmediği için personel yetkisiyle yönetilir.
-            YetkiKodu = "personel",
+            // Hastanin KENDI yetkisi (684) - personel yetkisinden ayrildi.
+            YetkiKodu = "hasta",
             LogTabloId = 71,
             SabitKosul = "grup = 101",
             YeniKayitVarsayilanlari = new Dictionary<string, object?>
@@ -204,10 +204,15 @@ public static partial class KartKatalogu
             new("ad",        "ad",         "metin", Zorunlu: true, EnFazlaUzunluk: 100, Baslik: "Ad",  Grup: "Kimlik"),
             new("ustRolId",  "ust_rol_id", "kod",   KodTablosu: "public.rol", Baslik: "Üst Rol", Grup: "Kimlik"),
             new("aktif",     "aktif",      "kod",   SabitKodlar: DurumKodlari, Baslik: "Aktif", Grup: "Kimlik"),
-            // Sistem rolleri (Yonetici/Salt okuyucu) - kod/ad degistirilemez/silinemez
-            //   hale getirmek ayri bir is (SilmeEngeli + Yazilabilir kontrolu); simdilik
-            //   sadece salt-okunur GORUNUR, kullanici "sistem" rolu oldugunu bilsin.
+            // Sistem rolu (Yonetici / Salt okuyucu / Iskonto Onaylayanlar): programin
+            //   davranisi bu role bagli. Koruma 664'teki TETIKTE - silme, kod degisikligi
+            //   ve pasiflestirme veritabaninda reddedilir (kart, liste, API, betik ayni
+            //   cevabi alsin). Burada yalniz salt-okunur GORUNUR.
             new("sistem",    "sistem",     "mantik", Yazilabilir: false, Baslik: "Sistem Rolü"),
+            // Amac: "bu rol ne ise yariyor" sorusunun ekrandaki cevabi (664). Metin
+            //   veritabaninda durur - yeni sistem rolu eklemek derleme gerektirmesin.
+            new("amac",      "amac",       "metin",  Yazilabilir: false, EnFazlaUzunluk: 200,
+                Baslik: "Amaç", Grup: "Kimlik"),
             new("eklemeTarihi", "ekleme_tarihi", "tarih", Yazilabilir: false)
         });
 

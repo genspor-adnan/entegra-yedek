@@ -39,6 +39,14 @@ export interface KasaGirdisi {
   belgeBagi?: number;
   /** Turun cari zorunlulugu: 1 zorunlu · 0 serbest · -1 yasak (katalogdan). */
   cariZorunlu?: number;
+  /**
+   * IADE KAYDI (660): tutari EKSI olan islem. Iade tahsilat sekmesinden
+   * girilir; kart onu DUZELTMEK icin acildiginda tutar eksi gelir ve
+   * "Sıfırdan büyük olmalı" kurali kaydi kilitliyordu - eksi kayit hic
+   * kaydedilemiyordu. Yeni kayitta eksi tutar hala yasak: iade kendi
+   * akisindan girilir.
+   */
+  iadeMi?: boolean;
 }
 
 /** Turun sekil kurallari - hem dogrulama hem govde ayni yerden okusun. */
@@ -66,7 +74,10 @@ export function kasaDogrula(g: KasaGirdisi, plan: boolean): Record<string, strin
   if (cekSenetMi && !g.mevcutKiymet && !g.csVade) hatalar['cekSenet.vade'] = 'Vade zorunlu.';
   if (karsiHesapli && !g.karsiHesap) hatalar.karsiHesapId = 'Karşı hesap seçilmeli.';
   if (cariVirman && !g.karsiCari) hatalar.karsiTarafId = 'Karşı cari seçilmeli.';
-  if (sayi(g.tutar) <= 0) hatalar.tutar = 'Sıfırdan büyük olmalı.';
+  // IADEDE tutar EKSI olmali, tahsilatta ARTI; sifir ikisinde de anlamsiz.
+  if (g.iadeMi) {
+    if (sayi(g.tutar) >= 0) hatalar.tutar = 'İade tutarı eksi olmalı.';
+  } else if (sayi(g.tutar) <= 0) hatalar.tutar = 'Sıfırdan büyük olmalı.';
   if (donusum && sayi(g.karsiTutar) <= 0) hatalar.karsiTutar = 'Sıfırdan büyük olmalı.';
   if (g.cariZorunlu === 1 && !g.cari) hatalar.tarafId = 'Cari zorunlu.';
   if (plan && !g.planTarihi) hatalar.planTarihi = 'Vade zorunlu.';

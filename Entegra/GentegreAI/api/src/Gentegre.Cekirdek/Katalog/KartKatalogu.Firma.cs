@@ -22,6 +22,55 @@
 /// </summary>
 public static partial class KartKatalogu
 {
+    /// <summary>
+    /// SUBENIN YEREL AYARLARI (666) - kod listeleri veritabaninda degil BURADA:
+    /// ulke/para/saat listesi kurumun yonettigi bir tanim degil, dunyanin sabiti.
+    /// Liste kisa tutuldu; gerekince buraya satir eklenir.
+    /// </summary>
+    private static readonly Dictionary<string, string> UlkeKodlari = new()
+    {
+        ["TR"] = "TR · Türkiye",   ["DE"] = "DE · Almanya",
+        ["GB"] = "GB · Birleşik Krallık", ["NL"] = "NL · Hollanda",
+        ["BE"] = "BE · Belçika",   ["AT"] = "AT · Avusturya",
+        ["CH"] = "CH · İsviçre",   ["FR"] = "FR · Fransa",
+        ["RU"] = "RU · Rusya",     ["UA"] = "UA · Ukrayna",
+        ["AZ"] = "AZ · Azerbaycan",["IQ"] = "IQ · Irak",
+        ["SY"] = "SY · Suriye",    ["SA"] = "SA · S. Arabistan",
+        ["US"] = "US · ABD",     ["AF"] = "AF · Afganistan",
+    };
+
+    /// <summary>ISO 4217. 'TL' KOD DEGILDIR (bicimlendirici tanimaz) - 'TRY'.</summary>
+    private static readonly Dictionary<string, string> ParaBirimleri = new()
+    {
+        ["TRY"] = "₺ TRY · Türk Lirası", ["EUR"] = "€ EUR · Euro",
+        ["USD"] = "$ USD · ABD Doları",  ["GBP"] = "£ GBP · Sterlin",
+        ["AZN"] = "₼ AZN · Manat",       ["RUB"] = "₽ RUB · Ruble",
+        ["CHF"] = "CHF · İsviçre Frangı",["SAR"] = "SAR · Riyal",
+        ["AFN"] = "؋ AFN · Afgan Afganisi",
+    };
+
+    /// <summary>
+    /// IANA adlari - SABIT SAAT FARKI DEGIL. "+03:00" yazmak yaz saati
+    /// uygulayan ulkelerde yilda iki kez yanlis olurdu.
+    /// </summary>
+    private static readonly Dictionary<string, string> ZamanDilimleri = new()
+    {
+        ["Europe/Istanbul"]  = "İstanbul (UTC+3)",
+        ["Europe/Berlin"]    = "Berlin / Viyana (UTC+1, yaz +2)",
+        ["Europe/Amsterdam"] = "Amsterdam / Brüksel (UTC+1, yaz +2)",
+        ["Europe/London"]    = "Londra (UTC+0, yaz +1)",
+        ["Europe/Paris"]     = "Paris (UTC+1, yaz +2)",
+        ["Europe/Zurich"]    = "Zürih (UTC+1, yaz +2)",
+        ["Europe/Moscow"]    = "Moskova (UTC+3)",
+        ["Europe/Kyiv"]      = "Kiev (UTC+2, yaz +3)",
+        ["Asia/Baku"]        = "Bakü (UTC+4)",
+        ["Asia/Baghdad"]     = "Bağdat (UTC+3)",
+        ["Asia/Damascus"]    = "Şam (UTC+3)",
+        ["Asia/Riyadh"]      = "Riyad (UTC+3)",
+        ["America/New_York"] = "New York (UTC-5, yaz -4)",
+        ["Asia/Kabul"]       = "Kâbil (UTC+4:30)",
+    };
+
     private static KartTanimi Sube() => new(
         Ad: "sube",
         YetkiKodu: "sube",
@@ -32,6 +81,10 @@ public static partial class KartKatalogu
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {
             ["aktif"] = (short)1, ["varsayilan"] = (short)0, ["ulke"] = "Türkiye",
+            // Yeni sube TURKIYE varsayilir (666): yanlis tahminde bulunup yurt
+            //   disi saymak, TCKN kontrolunu sessizce kapatirdi.
+            ["ulkeKod"] = "TR", ["telefonKodu"] = "+90",
+            ["zamanDilimi"] = "Europe/Istanbul", ["paraBirimi"] = "TRY",
             ["efaturaMukellef"] = (short)0, ["earsivMukellef"] = (short)0,
             ["eirsaliyeMukellef"] = (short)0,
             // Yeni sube MERKEZIN mali ayarlarini kullanir (192) - ayri VKN
@@ -54,7 +107,7 @@ public static partial class KartKatalogu
             // VKN ZORUNLU (mockup'ta kirmizi cerceve): e-Belge, tahakkuk ve resmi
             //   yazismalarin tamami buna bagli.
             new("vkno",  "vkno",  "metin", Zorunlu: true, EnFazlaUzunluk: 11,
-                Baslik: "VKN / TCKN", Grup: "Kimlik", AltGrup: "Firma Kimliği"),
+                Baslik: "Vergi / Kimlik No", Grup: "Kimlik", AltGrup: "Firma Kimliği"),
             new("vd",    "vd",    "metin", EnFazlaUzunluk: 60,
                 Baslik: "Vergi Dairesi", Grup: "Kimlik", AltGrup: "Firma Kimliği"),
             // Ticaret sicil ve Mersis mockup'ta KIMLIK kutusunda (e-Belge sekmesinde
@@ -94,6 +147,22 @@ public static partial class KartKatalogu
                 Baslik: "İl", Grup: "Adres", AltGrup: "Merkez Adresi"),
             new("ulke",       "ulke",       "metin", EnFazlaUzunluk: 60,
                 Baslik: "Ülke", Grup: "Adres", AltGrup: "Merkez Adresi"),
+
+            // ------------------------------------------------- Yerel Ayarlar (666)
+            // Subenin ulkesi, telefon kodu, saati ve parasi. Berlin subesi avro
+            //   tahsil eder, Almanya saatiyle calisir ve orada T.C. kimlik
+            //   numarasi yoktur - bu dort alan olmadan istemci her subeyi
+            //   Turkiye sanardi.
+            // ULKE KODU yalnizca bir etiket DEGIL: TR disinda TCKN ve Turkiye
+            //   telefon bicimi kontrolu KAPANIR (DegerCevirici / kartDogrulama).
+            new("ulkeKod",    "ulke_kod",   "kod", SabitKodlar: UlkeKodlari,
+                Baslik: "Ülke Kodu", Grup: "Adres", AltGrup: "Yerel Ayarlar"),
+            new("telefonKodu","telefon_kodu","metin", EnFazlaUzunluk: 6,
+                Baslik: "Telefon Ülke Kodu", Grup: "Adres", AltGrup: "Yerel Ayarlar"),
+            new("zamanDilimi","zaman_dilimi","kod", SabitKodlar: ZamanDilimleri,
+                Baslik: "Saat Dilimi", Grup: "Adres", AltGrup: "Yerel Ayarlar"),
+            new("paraBirimi", "para_birimi","kod", SabitKodlar: ParaBirimleri,
+                Baslik: "Para Birimi", Grup: "Adres", AltGrup: "Yerel Ayarlar"),
             new("postaKodu",  "posta_kodu", "metin", EnFazlaUzunluk: 10,
                 Baslik: "Posta Kodu", Grup: "Adres", AltGrup: "Merkez Adresi"),
 

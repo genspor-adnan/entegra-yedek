@@ -69,6 +69,79 @@ public static class BelgeUclari
         //
         // Bolum/doktor ada cozen kolonlarla AYNI kuralla okunur: once belgenin
         // kendi basvuru satiri, yoksa belgeye bagli randevu.
+        // ---------------------------------------------- basvuru combolari
+        // BASVURU EKRANININ SECENEK LISTELERI TEK UCTAN (kullanici: "banko
+        //   gorevlisi olarak girdim... odeyen kurum listesi gelmedi combo").
+        //
+        // Ekran bu listeleri KART KAYNAKLARINDAN cekiyordu (/api/liste/kurum,
+        //   departman, depo) ve her biri KENDI kaynak yetkisini istiyor. Banko
+        //   rolunde "kurum" / "depo" gor yetkisi yok - liste 403 donuyor, kart
+        //   da hatayi yutup combo'yu BOS birakiyordu: gorevli basvuruyu
+        //   acamiyor, sebebini de goremiyordu.
+        //
+        // COMBO DOLDURMAK KART YETKISI DEGILDIR: basvuru acabilen kisi odeyen
+        //   kurumu secebilmeli. Uc yalniz KIMLIK + AD dondurur (kartin ic
+        //   bilgisi degil) ve `belge` gor yetkisiyle calisir.
+        grup.MapGet("/basvuru-kaynaklari", async (
+            BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("belge", Islem.Gor);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            // ODEYEN KURUMLAR: anlasmali kurumlar (taraf.kurum = 1), tum
+            //   cariler degil. `tur` ekranda rotayi belirler (Özel/SGK/ÖSS).
+            var kurumlar = await baglanti.ListeAsync("""
+                select t.id, t.unvan as ad, coalesce(k.tur, 0) as tur
+                  from public.taraf t
+                  left join public.taraf_kurum k on k.id = t.id
+                 where t.kurum = 1 and t.durum = 1
+                 order by t.unvan
+                """, null, [],
+                o => new { id = o.GetInt32(0), ad = o.GetString(1), tur = o.GetInt32(2) },
+                iptal);
+
+            // BOLUMLER: randevu verilebilen birimler - randevu ekraniyla ayni
+            //   kume. Alt birim onekini ("— Dahiliye") ekran kirpiyordu;
+            //   burada ham ad doner.
+            var bolumler = await baglanti.ListeAsync("""
+                select d.id, d.ad
+                  from public.departman d
+                 where d.durum = 1 and d.randevu_verilebilir = 1
+                 order by d.ad
+                """, null, [],
+                o => new { id = o.GetInt32(0), ad = o.GetString(1) }, iptal);
+
+            // DEPOLAR: aktif depolar, AKTIF SUBENIN - baska subenin deposuna
+            //   cikis yapilamaz (sube 0 = tum subeler icin ortak depo).
+            var depolar = await baglanti.ListeAsync("""
+                select d.id, d.ad
+                  from public.depo d
+                 where d.durum = 1
+                   and (@p0 = 0 or coalesce(d.sube_id, 0) in (0, @p0))
+                 order by d.ad
+                """, null, [baglam.SubeId ?? 0],
+                o => new { id = o.GetInt32(0), ad = o.GetString(1) }, iptal);
+
+            // FIYAT LISTELERI: belgenin YONUNDEKI aktif listeler. Bu combo da
+            //   `fiyat_listesi` gor yetkisi istiyordu - banko rolunde liste
+            //   bostu ve basvuru kesilemiyordu. Liste SECMEK belgenin adimi;
+            //   listeyi YONETMEK ayri yetkidir.
+            var fiyatListeleri = await baglanti.ListeAsync("""
+                select f.id, f.ad, f.yon, coalesce(f.tarife_tipi, 0) as tarife_tipi
+                  from public.fiyat_listesi f
+                 where f.durum = 1
+                 order by f.ad
+                """, null, [],
+                o => new { id = o.GetInt32(0), ad = o.GetString(1),
+                           yon = (int)o.GetInt16(2), tarifeTipi = (int)o.GetInt16(3) }, iptal);
+
+            return Results.Ok(new { kurumlar, bolumler, depolar, fiyatListeleri,
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
         grup.MapGet("/basvuru-suzgec", async (
             DateTime? bas, DateTime? bit, BaglamCozucu cozucu, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
@@ -341,12 +414,16 @@ public static class BelgeUclari
         });
 
         // GET /api/kurum/{id}/sozlesmeler - basvuru kartinin sozlesme secicisi.
+        //   YETKI `belge` GOR (kullanici: banko rolunde odeyen kurum/sozlesme
+        //   combolari bostu): sozlesme secmek basvurunun bir adimi, cari
+        //   kartini yonetmek degil. `cari` gor istemek, banko gorevlisine
+        //   musteri kartlarini acmak pahasina calisan bir ekran demekti.
         yol.MapGet("/api/kurum/{id:int}/sozlesmeler", async (
             int id, DateOnly? tarih, BaglamCozucu cozucu, VeriKaynagi veri,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("cari", Islem.Gor);
+            baglam.YetkiIste("belge", Islem.Gor);
 
             var gun = tarih ?? DateOnly.FromDateTime(DateTime.Now);
             var satirlar = await veri.ListeAsync("""
@@ -972,6 +1049,12 @@ public static class BelgeUclari
         //   Listeye eklenmeyince kart "Bilinmeyen belge alani: emekli" ile
         //   422 doner ve BASVURU HIC KAYDEDILEMEZDI.
         "sozlesmeId" or "altKurum" or "sgkKullan" or "emekli" or
+        // HASTA (658): basvurunun CARISI odeyen olabilir (dis kurum numunesi -
+        //   fatura kuruma kesilir), hasta ayri kolonda durur. Yazma haritasi
+        //   (BelgeDeposu.Yazma: hastaId -> hasta_id) ve okuma zaten vardi;
+        //   yalniz BU listeye eklenmemisti ve kart "Bilinmeyen belge alani:
+        //   hastaId" ile 422 alip ucret satiri EKLEYEMIYORDU.
+        "hastaId" or
         // Basvuru sekmesi (298) - kod/sayi alanlari.
         "kampanyaId" or "bolumId" or "personelId" or "basvuruTuru" or "gelisSekli"
         or "gelisNedeni" or "oda"

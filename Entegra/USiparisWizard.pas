@@ -185,7 +185,7 @@ type
     EditFaturaSaat: TcxDBTimeEdit;
     cxDBLabel1: TcxDBLabel;
     BaslikPaneli: TPanel;
-    Label22: TcxLabel;
+    LabelBaslik: TcxLabel;
     Label24: TcxLabel;
     Label2: TcxLabel;
     Label25: TcxLabel;
@@ -594,6 +594,7 @@ type
       ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
       AShift: TShiftState; var AHandled: Boolean);
     procedure TabSiparisDetayCalcFields(DataSet: TDataSet);
+    procedure LabelBaslikClick(Sender: TObject);
     procedure LabelKodClick(Sender: TObject);
     procedure GridFaturaViewCanFocusRecord(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; var AAllow: Boolean);
     procedure SiparisEkrPage(Sender: TObject);
@@ -1911,6 +1912,24 @@ begin
    Tablo.RehberSihirbazBaslat(0,TabSiparis.FieldByName('REHBERID').AsInteger,-100, -100, False);
 end;
 
+procedure TSiparisWizardDlg.LabelBaslikClick(Sender: TObject);
+var
+  Id: Integer;
+begin
+  Id := Tablo.RehberAra_IDGetir(-1);
+  if Id <= 0 then
+    Exit;
+
+  if TabSiparis.State = dsBrowse then
+    TabSiparis.Edit;
+
+  Tablo.FaturaBaslik(TabSiparis, Id);
+  if TabSiparis.FindField('ANAKAYITID') <> nil then
+    TabSiparis.FieldByName('ANAKAYITID').AsInteger := Id;
+
+  AdresDegisti := False;
+end;
+
 procedure TSiparisWizardDlg.LabelKodClick(Sender: TObject);
 var Id : Integer;
 begin
@@ -2191,6 +2210,8 @@ begin
 end;
 
 procedure TSiparisWizardDlg.TabSiparisAfterPost(DataSet: TDataSet);
+var
+  AnaKayitVar: Boolean;
 begin
    SiparisIdsi := TabSiparis.Fields[0].AsInteger;
    DetayTus.Enabled := True;
@@ -2206,7 +2227,12 @@ begin
 
     if AdresDegisti then begin
        AdresDegisti := False;
-       if Application.MessageBox(PChar(Adresdegistikartguncelle),PChar(Uyari),MB_YESNO)=mrYes then begin
+       AnaKayitVar := False;
+       if TabSiparis.FindField('ANAKAYITID') <> nil then
+          AnaKayitVar := TabSiparis.FieldByName('ANAKAYITID').AsInteger > 0;
+
+       if (not AnaKayitVar) and
+          (Application.MessageBox(PChar(Adresdegistikartguncelle),PChar(Uyari),MB_YESNO)=mrYes) then begin
           Tablo.RehberBilgiGuncelle(TabSiparis.FieldByName('REHBERID').AsInteger,1,2,MemoFatAdres.Text);
           Tablo.RehberBilgiGuncelle(TabSiparis.FieldByName('REHBERID').AsInteger,1,6,EditILCE.Text);
           Tablo.RehberBilgiGuncelle(TabSiparis.FieldByName('REHBERID').AsInteger,1,8,EditIL.Text);

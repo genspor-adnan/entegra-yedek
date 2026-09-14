@@ -11,10 +11,12 @@ import { KalemRolModali } from '../prim/KalemRolModali';
 import { IadeSatirPenceresi } from './IadeSatirPenceresi';
 import { BelgeTahsilatModallari } from './BelgeTahsilatModallari';
 import { HesapSecModali } from './HesapSecModali';
+import { IskontoTalepModali } from './IskontoTalepModali';
 import type { BelgeTuruBilgisi } from '../../sayfalar/belgeTuru';
 import type { SatirDurumu } from '../../sayfalar/belgeSatir';
 import { iadeSatirlari, sonAnahtar } from '../../sayfalar/belgeKalem';
-import type { useBelgeTahsilat } from '../../sayfalar/belgeTahsilat';
+import type { useBelgeTahsilat, HizliTahsilatEki } from '../../sayfalar/belgeTahsilat';
+import type { ParaSecimi } from '../mesaj';
 import { BelgeKarti } from '../../sayfalar/BelgeKarti';
 
 type Ayarla<T> = Dispatch<SetStateAction<T>>;
@@ -106,6 +108,22 @@ export interface BelgeKartiModalProps {
   /* ---- tahsilat ---- */
   tahsilat: ReturnType<typeof useBelgeTahsilat>;
   tahsilatTutariSor(baslik: string): Promise<number>;
+  /** Banka/POS hesabi IADE icin mi secildi (tutar eksi, neden sorulur). */
+  hesapSecimIade?: boolean;
+  setHesapSecimIade?: Ayarla<boolean>;
+  /** Hesap secimi ACILMADAN ONCE sorulmus tutar / para birimi / kur. */
+  hesapSecimPara?: ParaSecimi | null;
+  setHesapSecimPara?: Ayarla<ParaSecimi | null>;
+  /** Sorulmus iadeyi yazar (eksi tutar + neden acikalamasi + para ustu). */
+  /** Kalem penceresinin ust seridi: hasta · odeyen · fiyat listesi (basvuru). */
+  kalemSeridi?: { hasta?: string; odeyen?: string; liste?: string };
+  /** Acik iskonto talep penceresinin satir anahtarlari (null = kapali). */
+  iskontoTalebi?: number[] | null;
+  setIskontoTalebi?: Ayarla<number[] | null>;
+  /** Rolun iskonto tavani (%) - pencere hangi dugmeyi acacagini bundan bilir. */
+  iskontoTavani?: number;
+  iadeYaz?(tur: number, hesapId: number, hesapAdi: string,
+           s: ParaSecimi): Promise<void>;
   /** POS tahsilati sonrasi ayarli aksiyon (355) - otomatik fis / sor. */
   posSonrasi?(tur: number): Promise<void>;
   /**
@@ -118,7 +136,7 @@ export interface BelgeKartiModalProps {
    * Verilmezse eski davranis (dogrudan kanca).
    */
   hizliTahsilat?(tur: number, hesapId: number, tutar: number,
-                 hesapAdi: string): Promise<void>;
+                 hesapAdi: string, ek?: HizliTahsilatEki): Promise<void>;
   hesapSecim: 'B' | 'P' | null;
   setHesapSecim: Ayarla<'B' | 'P' | null>;
 
@@ -154,7 +172,10 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
     personelArama, setPersonelArama, setTeslimEden, setTeslimAlan,
     satirlar, setSatirlar, stokArama, setStokArama, aramaEklenen, setAramaEklenen,
     stokSecildi, kalem, setKalem, kalemKaydet, iadeArama, setIadeArama,
-    tahsilat, tahsilatTutariSor, posSonrasi, hizliTahsilat, hesapSecim, setHesapSecim,
+    tahsilat, tahsilatTutariSor, posSonrasi, hizliTahsilat,
+    hesapSecim, setHesapSecim, hesapSecimIade, setHesapSecimIade,
+    hesapSecimPara, setHesapSecimPara, iadeYaz, kalemSeridi,
+    iskontoTalebi, setIskontoTalebi, iskontoTavani = 0,
     donusum, setDonusum, donusumPay, setDonusumPay,
     acilanDonusum, setAcilanDonusum, donusumleriYukle,
     terminAcik, setTerminAcik, rolModali, setRolModali,
@@ -299,6 +320,8 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
           rota={rota}
           // Basvuruda fiyat HER ZAMAN KDV dahil girilir (kullanici).
           basvuruMu={basvuruMu}
+          // UST SERIT: kim icin, kim odeyecek, hangi tarife (yalniz basvuru).
+          ustSerit={basvuruMu ? kalemSeridi : undefined}
           anaBirimKod={kalem?.birim ?? 0}
           anaBirimAdi={kalem?.birimAdi ?? ''}
           vergisiz={bilgi.kalem === 'sade' && stokFisiMi}
@@ -325,22 +348,63 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
         <HesapSecModali
           tur={hesapSecim}
           baslik={hesapSecim === 'B' ? 'Banka Hesabı Seç' : 'POS Hesabı Seç'}
-          // Yerel para birimi (kullanici): dovizli hesap hizli tahsilatta
-          //   secilirse islem dovizi tutmaz.
-          doviz={yerelPara}
-          onKapat={() => setHesapSecim(null)}
+          // ISLEMIN PARA BIRIMINDEKI hesaplar: tutar penceresi hesap
+          //   seciminden ONCE acilir, secilen birim listeyi suzer. Hesap once
+          //   secilseydi kullanici dovizi degistirdiginde secim gecersiz
+          //   kalir, sunucu "hesabin para birimi farkli" derdi.
+          doviz={hesapSecimPara?.doviz || yerelPara}
+          onKapat={() => { setHesapSecim(null); setHesapSecimIade?.(false);
+                           setHesapSecimPara?.(null) }}
           onSec={h => void (async () => {
             const t = hesapSecim === 'B' ? (alisMi ? 32 : 22) : (alisMi ? 35 : 25);
+            const ad = hesapSecim === 'B' ? 'Banka' : 'POS';
+            const iadeMi = !!hesapSecimIade;
+            const secilen = hesapSecimPara ?? null;
             setHesapSecim(null);
-            const tutar = await tahsilatTutariSor(hesapSecim === 'B' ? 'Banka' : 'POS');
+            setHesapSecimIade?.(false);
+            setHesapSecimPara?.(null);
+            // IADE: tutar EKSI, neden aciklamaya yazilir, para ustu ayri satir.
+            if (iadeMi) { if (secilen) await iadeYaz?.(t, h.id, h.ad, secilen); return }
+            // Tutar ONCEDEN soruldu (para birimiyle birlikte). Onceden
+            //   sorulmadiysa - eski akis, or. testlerde - burada sorulur.
+            const s = secilen;
+            const tutar = s ? s.tutar : await tahsilatTutariSor(ad);
             if (!(tutar > 0)) return;
             // POS SONRASI OTOMATIK FIS (355), kurum tahakkuku ve satir
             //   tazelemesi SARMALAYICIDA (kartin `hizliTahsilat`i). Burada
             //   ayrica `posSonrasi` cagirmak, sarmalayici verildiginde fisi
             //   IKI KEZ kesme riski demekti.
-            if (hizliTahsilat) await hizliTahsilat(t, h.id, tutar, h.ad);
-            else { await tahsilat.hizliTahsilat(t, h.id, tutar, h.ad); await posSonrasi?.(t) }
+            const ek = s ? { dovizCinsi: s.doviz, dovizKuru: s.kur } : undefined;
+            if (hizliTahsilat) await hizliTahsilat(t, h.id, tutar, h.ad, ek);
+            else { await tahsilat.hizliTahsilat(t, h.id, tutar, h.ad, ek);
+                   await posSonrasi?.(t) }
           })()}
+        />
+      )}
+
+      {/* ISKONTO TALEP PENCERESI (mockup: iskonto_talep_penceresi.html):
+          kalemler + oran + gerekce + yetki tek ekranda. Limit ici "Uygula"
+          satirlara dogrudan yazar, asan "Onaya Gönder" talep acar. */}
+      {iskontoTalebi && (
+        <IskontoTalepModali
+          satirlar={satirlar.filter(x => iskontoTalebi.includes(x.anahtar))}
+          tavan={iskontoTavani}
+          hasta={cari?.unvan}
+          onKapat={() => setIskontoTalebi?.(null)}
+          onSonuc={async se => {
+            if (se.onaya) {
+              await api.iskontoTalepAc(kayitliId, se.oran, se.gerekce,
+                se.kalemler.map(k => ({ satirId: k.satirId, oran: k.oran })));
+              return;
+            }
+            // LIMIT ICI: onaya dusmez, oran satirlara DOGRUDAN yazilir.
+            //   Satir listesi ekranda tutuldugu icin yazma da burada; kart
+            //   kaydedince sunucuya gider. Oran KALEM BAZLI (664) - her satira
+            //   kendi yuzdesi, toplu oran zaten kalemlere dagitilmis gelir.
+            const oranlar = new Map(se.kalemler.map(k => [k.anahtar, k.oran]));
+            setSatirlar(liste => liste.map(x => oranlar.has(x.anahtar)
+              ? { ...x, iskonto: String(oranlar.get(x.anahtar)), iskonto2: '0' } : x));
+          }}
         />
       )}
 

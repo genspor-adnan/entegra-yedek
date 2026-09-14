@@ -39,6 +39,7 @@ vi.mock('../api/istemci', () => ({
     aramaIsaretle: () => Promise.resolve({}),
     belgeAcikSatirlar: () => Promise.resolve({ satirlar: [] }),
     belgeEkle: () => Promise.resolve({ belge: { id: 1 }, satirlar: [], dipToplam: [] }),
+    iskontoTalepleri: () => Promise.resolve([]),
   },
 }));
 
@@ -60,7 +61,7 @@ vi.mock('../kimlik/OturumBaglami', () => ({
       urunModu: 2, moduller: ['kayit_kabul'], hekimRolu: 1,
     },
     aksiyonlar: [], kaynaklar: [], yukleniyor: false,
-    yetki: () => true, aksiyonVar: () => true,
+    yetki: () => true, aksiyonVar: () => true, aksiyonDegeri: () => 100,
   }),
 }));
 

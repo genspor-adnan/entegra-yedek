@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kasa Teslim Tutanağı — Mockup (Gentegre AI · Kayıt Kabul)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .sel b{font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .ozet.k5{grid-template-columns:repeat(5,1fr)}
+  .ozet.k4{grid-template-columns:repeat(4,1fr)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:18px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .ana{display:grid;grid-template-columns:1fr 360px;gap:0}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.iptal td{color:#9aa7b4;text-decoration:line-through}
+  tr.sel td{background:var(--sel)}
+  tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .sayim td{padding:3px 8px}
+  .sayim input{width:56px;border:1px solid var(--line);border-radius:2px;height:22px;
+    text-align:right;padding:0 5px;font-size:11.5px;font-family:inherit}
+  .fark{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:12px}
+  .fark b{font-size:14px}
+  .sat{display:flex;justify-content:space-between;padding:4px 10px;font-size:11.5px;
+    border-bottom:1px solid #eef2f6;gap:10px}
+  .sat.buyuk{font-size:13px;background:#f7fafc;font-weight:bold}
+  .uyari-sat{display:flex;gap:8px;align-items:flex-start;padding:6px 10px;
+    border-bottom:1px solid #eef2f6;font-size:11.5px}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;
+    padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"\25BE";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;
+    background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .hdr.k2{grid-template-columns:repeat(2,1fr)}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* A4 tutanak sayfasi */
+  .kagit{background:#fff;border:1px solid var(--line);margin:14px auto;padding:26px 30px;
+    width:794px;max-width:100%;box-shadow:0 2px 10px rgba(20,40,70,.10)}
+  .kagit h1{font-size:15px;text-align:center;margin:0 0 2px;color:var(--navy);letter-spacing:.4px}
+  .kagit h2{font-size:12px;text-align:center;margin:0 0 14px;color:var(--muted);font-weight:normal}
+  .kurum{display:flex;align-items:flex-start;gap:12px;border-bottom:2px solid var(--navy);
+    padding-bottom:8px;margin-bottom:14px}
+  .kurum .logo{width:44px;height:44px;border:1px solid var(--line);border-radius:4px;
+    display:flex;align-items:center;justify-content:center;font-size:20px;background:#f7fafc}
+  .kurum .ad{font-size:13.5px;font-weight:bold;color:var(--navy)}
+  .kurum .alt{font-size:10.5px;color:var(--muted);line-height:1.5}
+  .kurum .no{margin-left:auto;text-align:right;font-size:11px}
+  .kurum .no b{display:block;font-size:13px;color:var(--navy)}
+  .blok{border:1px solid var(--line2);border-radius:3px;margin:10px 0}
+  .blok .bb{background:#f4f7fb;padding:5px 9px;font-size:11px;font-weight:bold;color:#2c4a6b;
+    border-bottom:1px solid var(--line2)}
+  .ikili{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikili>div{padding:0}
+  .ikili>div:first-child{border-right:1px solid var(--line2)}
+  .metin{padding:10px 12px;font-size:12px;line-height:1.7}
+  .imzalar{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:26px}
+  .imza{border-top:1px solid var(--ink);padding-top:6px;font-size:11.5px;min-height:86px}
+  .imza b{display:block;font-size:12px}
+  .imza .bos{height:44px}
+  .dipnot{margin-top:18px;padding-top:8px;border-top:1px solid var(--line2);
+    font-size:10px;color:var(--muted);line-height:1.6}
+  @media print{
+    body{background:#fff;padding:0}
+    .win,.not,.toolbar,.sekmeler,.statusbar{display:none!important}
+    .kagit{border:none;box-shadow:none;margin:0;width:auto;padding:0}
+    .pnl[hidden]{display:block!important}
+  }
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🧾 Kasa Teslim Tutanağı — KVR-2026-004412
+    <span class="sp">Gentegre AI · Kayıt Kabul / Muhasebe · 14.09.2026 · VEZNE 1 → MERKEZ KASA</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Yazdır</div>
+    <div class="btn"><span>📄</span> PDF</div>
+    <div class="btn"><span>✉</span> Muhasebeye Gönder</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>✍</span> E-İmza ile İmzala</div>
+    <div class="btn pas" title="Tutanak imzalandıktan sonra değiştirilemez">✏ Düzelt</div>
+    <div class="sp"></div>
+    <span class="rz sari">Taslak · imza bekliyor</span>
+  </div>
+
+  <div class="serit">
+    <div class="sel">🏦 Teslim eden kasa: <b>100.01.003 · VEZNE 1</b></div>
+    <div class="sel">📥 Devralan: <b>100.01.001 · MERKEZ KASA</b></div>
+    <div class="sel">🕗 Vardiya: <b>#2 · 08:02 – 16:41</b></div>
+    <div class="sel">🔗 Virman fişi: <b>KVR-2026-004412</b> (tür 40)</div>
+    <span class="sp"></span>
+    <span class="sonuk">Oturum #4188 · kasa_oturum</span>
+  </div>
+
+  <div>
+    <div class="sekmeler">
+      <div class="sekme on" data-s="tutanak">Tutanak</div>
+      <div class="sekme" data-s="kupur">Ek-1 · Kupür Sayımı</div>
+      <div class="sekme" data-s="dokum">Ek-2 · Vardiya Dökümü</div>
+      <div class="sekme" data-s="imza">İmza Durumu</div>
+    </div>
+
+    <!-- ============ SEKME: TUTANAK ============ -->
+    <div class="pnl" data-s="tutanak">
+      <div class="kagit">
+        <div class="kurum">
+          <div class="logo">🏥</div>
+          <div>
+            <div class="ad">ÖZEL BİLİM TIP MERKEZİ</div>
+            <div class="alt">Merkez Şube · Kadıköy / İstanbul<br>
+              VD Kadıköy · VKN 1234567890 · Tel 0216 000 00 00</div>
+          </div>
+          <div class="no">
+            <span class="sonuk">Tutanak No</span>
+            <b>KVR-2026-004412</b>
+            <span class="sonuk">14.09.2026 · 16:58</span>
+          </div>
+        </div>
+
+        <h1>KASA TESLİM TUTANAĞI</h1>
+        <h2>Vezne vardiya kapanışı — nakit teslimi</h2>
+
+        <div class="blok">
+          <div class="bb">1 · VARDİYA BİLGİLERİ</div>
+          <table>
+            <tbody>
+              <tr><td style="width:210px" class="sonuk">Teslim eden (vezne)</td>
+                <td><b>Elif KARACA</b> · Sicil 1042 · Kayıt Kabul</td></tr>
+              <tr><td class="sonuk">Kasa</td>
+                <td><b>100.01.003 — VEZNE 1 KASASI</b></td></tr>
+              <tr><td class="sonuk">Vardiya</td>
+                <td>14.09.2026 · <b>#2</b> · 08:02 – 16:41 (8 sa 39 dk)</td></tr>
+              <tr><td class="sonuk">Teslim alan</td>
+                <td><b>Osman AKAR</b> · Sicil 0311 · Muhasebe</td></tr>
+              <tr><td class="sonuk">Devralan kasa</td>
+                <td><b>100.01.001 — MERKEZ KASA</b></td></tr>
+              <tr><td class="sonuk">İşlem sayısı</td>
+                <td>57 tahsilat · 4 iade · 2 iptal · 1 kasadan ödeme</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="blok">
+          <div class="bb">2 · NAKİT HESABI <span class="sonuk" style="font-weight:normal">— yalnız nakit; kart, havale ve çek kasada durmaz</span></div>
+          <table>
+            <tbody>
+              <tr><td style="width:60%">Devir (vardiya açılışında kasada bulunan)</td>
+                <td class="sag" style="width:20%">1.250,00</td><td style="width:20%"></td></tr>
+              <tr><td>Nakit tahsilat (tür 21)</td>
+                <td class="sag">30.950,00</td><td></td></tr>
+              <tr><td>Nakit iade (−)</td>
+                <td class="sag">−750,00</td><td></td></tr>
+              <tr><td>Kasadan ödeme (tür 31/35) (−)</td>
+                <td class="sag">−320,00</td><td></td></tr>
+              <tr class="toplam"><td><b>A · KASADA OLMASI GEREKEN</b></td>
+                <td class="sag"><b>31.130,00</b></td><td></td></tr>
+              <tr><td>Sayılan nakit (Ek-1 kupür sayımı)</td>
+                <td class="sag">31.080,00</td><td></td></tr>
+              <tr class="toplam"><td><b>B · SAYIM FARKI (sayılan − olması gereken)</b></td>
+                <td class="sag" style="color:#b3261e"><b>−50,00</b></td>
+                <td><span class="rz kir">Noksan</span></td></tr>
+              <tr><td>Fark fişi (197.01 Sayım ve Tesellüm Noksanı)</td>
+                <td class="sag">ODE-2026-000413</td>
+                <td><span class="rz ok">Onaylı · O. AKAR</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="blok">
+          <div class="bb">3 · TESLİM EDİLEN TUTAR</div>
+          <table>
+            <tbody>
+              <tr><td style="width:60%">Sayılan nakit</td>
+                <td class="sag" style="width:20%">31.080,00</td><td style="width:20%"></td></tr>
+              <tr><td>Kasada bırakılan — ertesi vardiyanın devri</td>
+                <td class="sag">−1.000,00</td><td></td></tr>
+              <tr class="toplam"><td><b>TESLİM EDİLEN (virman tutarı)</b></td>
+                <td class="sag"><b>30.080,00 ₺</b></td>
+                <td><span class="rz mavi">tür 40 · KVR-2026-004412</span></td></tr>
+            </tbody>
+          </table>
+          <div class="metin sonuk" style="padding:8px 12px;font-size:11px">
+            Yazıyla: <b>otuzbinseksen Türk Lirası</b>
+          </div>
+        </div>
+
+        <div class="blok">
+          <div class="bb">4 · NAKİT DIŞI TAHSİLAT (bilgi — teslime dahil değildir)</div>
+          <table>
+            <thead><tr><th>Tür</th><th class="orta">Adet</th><th class="sag">Net tutar</th>
+              <th>Nereye gider</th><th>Durum</th></tr></thead>
+            <tbody>
+              <tr><td>Kredi Kartı / POS</td><td class="orta">19</td><td class="sag">40.660,00</td>
+                <td>Banka · POS virmanı (tür 44)</td>
+                <td><span class="rz ok">Gün sonu eşleşti</span></td></tr>
+              <tr><td>Havale / EFT</td><td class="orta">5</td><td class="sag">11.200,00</td>
+                <td>Banka · doğrudan</td>
+                <td><span class="rz sari">2 hareket ekstrede bekliyor</span></td></tr>
+              <tr><td>Çek</td><td class="orta">1</td><td class="sag">2.250,00</td>
+                <td>Portföy · çek teslim listesi</td>
+                <td><span class="rz mor">Ayrı tutanakla teslim</span></td></tr>
+              <tr class="toplam"><td>TOPLAM</td><td class="orta">25</td>
+                <td class="sag">54.110,00</td><td colspan="2"></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="metin">
+          Yukarıda dökümü verilen <b>30.080,00 ₺</b> tutarındaki nakit, 14.09.2026 tarihli
+          <b>#2</b> numaralı vardiyaya ait olmak üzere VEZNE 1 kasasından sayılarak teslim
+          edilmiş, MERKEZ KASA'ya aynı tutarda virman kaydı ile alınmıştır. Sayımda tespit
+          edilen <b>50,00 ₺ noksan</b> için ODE-2026-000413 numaralı fark fişi düzenlenmiş
+          ve amir onayı alınmıştır. İşbu tutanak iki nüsha düzenlenmiş, taraflarca
+          imzalanmıştır.
+        </div>
+
+        <div class="imzalar">
+          <div class="imza">
+            <div class="bos"></div>
+            TESLİM EDEN<br>
+            <b>Elif KARACA</b>
+            <span class="sonuk">Vezne 1 · Sicil 1042</span>
+          </div>
+          <div class="imza">
+            <div class="bos"></div>
+            TESLİM ALAN<br>
+            <b>Osman AKAR</b>
+            <span class="sonuk">Muhasebe · Sicil 0311</span>
+          </div>
+        </div>
+
+        <div class="dipnot">
+          Bu tutanak <code>kasa_oturum #4188</code> kaydından üretilmiştir ve
+          <code>kasa_islem</code> KVR-2026-004412 numaralı virman fişine bağlıdır.
+          İmzalandıktan sonra değiştirilemez; düzeltme yalnız yeni bir fark fişi ve
+          yeni tutanakla yapılır. Ek-1 kupür sayımı ve Ek-2 vardiya dökümü tutanağın
+          ayrılmaz parçasıdır.
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SEKME: KUPUR SAYIMI ============ -->
+    <div class="pnl" data-s="kupur" hidden>
+      <div class="kagit">
+        <div class="kurum">
+          <div class="logo">🧮</div>
+          <div>
+            <div class="ad">EK-1 · KUPÜR SAYIM ÇİZELGESİ</div>
+            <div class="alt">KVR-2026-004412 · VEZNE 1 · 14.09.2026 vardiya #2</div>
+          </div>
+          <div class="no"><span class="sonuk">Sayım saati</span><b>16:45</b>
+            <span class="sonuk">Sayan: E. KARACA</span></div>
+        </div>
+
+        <div class="ikili">
+          <div>
+            <div class="blok" style="margin:0 8px 0 0">
+              <div class="bb">BANKNOT</div>
+              <table>
+                <thead><tr><th>Kupür</th><th class="orta">Adet</th><th class="sag">Tutar</th></tr></thead>
+                <tbody>
+                  <tr><td>200 ₺</td><td class="orta">84</td><td class="sag">16.800,00</td></tr>
+                  <tr><td>100 ₺</td><td class="orta">96</td><td class="sag">9.600,00</td></tr>
+                  <tr><td>50 ₺</td><td class="orta">62</td><td class="sag">3.100,00</td></tr>
+                  <tr><td>20 ₺</td><td class="orta">71</td><td class="sag">1.420,00</td></tr>
+                  <tr><td>10 ₺</td><td class="orta">14</td><td class="sag">140,00</td></tr>
+                  <tr><td>5 ₺</td><td class="orta">0</td><td class="sag">—</td></tr>
+                  <tr class="toplam"><td>BANKNOT</td><td class="orta">327</td>
+                    <td class="sag">31.060,00</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <div class="blok" style="margin:0 0 0 8px">
+              <div class="bb">MADENİ PARA</div>
+              <table>
+                <thead><tr><th>Kupür</th><th class="orta">Adet</th><th class="sag">Tutar</th></tr></thead>
+                <tbody>
+                  <tr><td>5 ₺</td><td class="orta">2</td><td class="sag">10,00</td></tr>
+                  <tr><td>1 ₺</td><td class="orta">8</td><td class="sag">8,00</td></tr>
+                  <tr><td>50 kr</td><td class="orta">4</td><td class="sag">2,00</td></tr>
+                  <tr><td>25 kr</td><td class="orta">0</td><td class="sag">—</td></tr>
+                  <tr><td>10 kr</td><td class="orta">0</td><td class="sag">—</td></tr>
+                  <tr><td>5 kr</td><td class="orta">0</td><td class="sag">—</td></tr>
+                  <tr class="toplam"><td>MADENİ</td><td class="orta">14</td>
+                    <td class="sag">20,00</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="blok">
+          <div class="bb">SAYIM SONUCU</div>
+          <table>
+            <tbody>
+              <tr><td style="width:60%">Banknot</td><td class="sag" style="width:20%">31.060,00</td><td style="width:20%"></td></tr>
+              <tr><td>Madeni para</td><td class="sag">20,00</td><td></td></tr>
+              <tr class="toplam"><td><b>SAYILAN TOPLAM</b></td><td class="sag"><b>31.080,00</b></td><td></td></tr>
+              <tr><td>Kasada olması gereken</td><td class="sag">31.130,00</td><td></td></tr>
+              <tr class="toplam"><td><b>FARK</b></td>
+                <td class="sag" style="color:#b3261e"><b>−50,00</b></td>
+                <td><span class="rz kir">Noksan</span></td></tr>
+            </tbody>
+          </table>
+          <div class="metin">
+            <b>Fark açıklaması (vezne beyanı):</b> “14:36'daki rapor ücreti iadesinde
+            hastaya 50 ₺ fazla verildi; hasta telefonla bilgilendirildi, ertesi gün
+            iade edecek.”<br>
+            <span class="sonuk">Amir değerlendirmesi: kabul edildi, 197.01'e fiş yazıldı.
+              Hasta iadesi gerçekleşirse 397.01'e ters kayıt yapılacak.</span>
+          </div>
+        </div>
+
+        <div class="imzalar">
+          <div class="imza"><div class="bos"></div>SAYIMI YAPAN<br><b>Elif KARACA</b>
+            <span class="sonuk">Vezne 1</span></div>
+          <div class="imza"><div class="bos"></div>SAYIMA TANIK<br><b>Osman AKAR</b>
+            <span class="sonuk">Muhasebe</span></div>
+        </div>
+
+        <div class="dipnot">
+          Kupür sayımı yalnız <b>nakdi</b> kapsar. Kredi kartı slipleri, havale dekontları
+          ve çekler bu çizelgeye girmez; çek teslimi ayrı tutanakla yapılır.
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SEKME: VARDIYA DOKUMU ============ -->
+    <div class="pnl" data-s="dokum" hidden>
+      <div class="kagit">
+        <div class="kurum">
+          <div class="logo">📊</div>
+          <div>
+            <div class="ad">EK-2 · VARDİYA DÖKÜMÜ</div>
+            <div class="alt">KVR-2026-004412 · VEZNE 1 · 14.09.2026 vardiya #2 · 08:02 – 16:41</div>
+          </div>
+          <div class="no"><span class="sonuk">İşlem</span><b>64</b>
+            <span class="sonuk">57 tahsilat · 4 iade · 2 iptal · 1 ödeme</span></div>
+        </div>
+
+        <div class="blok">
+          <div class="bb">ÖDEME TÜRÜNE GÖRE</div>
+          <table>
+            <thead><tr><th>Tür</th><th class="orta">Adet</th>
+              <th class="sag">Tahsilat</th><th class="sag">İade</th>
+              <th class="sag">Net</th><th class="orta">Sayıma girer</th></tr></thead>
+            <tbody>
+              <tr><td>Nakit (21)</td><td class="orta">31</td><td class="sag">30.950,00</td>
+                <td class="sag">−750,00</td><td class="sag"><b>30.200,00</b></td>
+                <td class="orta"><span class="rz ok">Evet</span></td></tr>
+              <tr><td>Kredi Kartı (25)</td><td class="orta">19</td><td class="sag">41.860,00</td>
+                <td class="sag">−1.200,00</td><td class="sag"><b>40.660,00</b></td>
+                <td class="orta"><span class="rz pas">Hayır</span></td></tr>
+              <tr><td>Havale / EFT (22)</td><td class="orta">5</td><td class="sag">11.200,00</td>
+                <td class="sag">—</td><td class="sag"><b>11.200,00</b></td>
+                <td class="orta"><span class="rz pas">Hayır</span></td></tr>
+              <tr><td>Çek (23)</td><td class="orta">1</td><td class="sag">2.250,00</td>
+                <td class="sag">—</td><td class="sag"><b>2.250,00</b></td>
+                <td class="orta"><span class="rz pas">Hayır</span></td></tr>
+              <tr><td>Kupon (26)</td><td class="orta">1</td><td class="sag">—</td>
+                <td class="sag">—</td><td class="sag"><b>—</b></td>
+                <td class="orta"><span class="rz pas">Hayır</span></td></tr>
+              <tr class="toplam"><td>TOPLAM</td><td class="orta">57</td>
+                <td class="sag">86.260,00</td><td class="sag">−1.950,00</td>
+                <td class="sag">84.310,00</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="blok">
+          <div class="bb">İPTAL EDİLEN İŞLEMLER <span class="sonuk" style="font-weight:normal">— makbuz numarası tüketilmiştir, kayıt silinmez</span></div>
+          <table>
+            <thead><tr><th style="width:60px">Saat</th><th style="width:150px">Makbuz</th>
+              <th style="width:160px">Hasta</th><th class="sag" style="width:100px">Tutar</th>
+              <th>Gerekçe</th><th style="width:150px">Ters kayıt</th></tr></thead>
+            <tbody>
+              <tr class="iptal"><td>15:57</td><td>MKB-2026-004187</td><td>M. DEMİR</td>
+                <td class="sag">900,00</td><td>Yanlış kasa seçildi</td><td>ACL-000914</td></tr>
+              <tr class="iptal"><td>10:14</td><td>MKB-2026-004162</td><td>T. ERGÜN</td>
+                <td class="sag">640,00</td><td>Hizmet iptal edildi (hasta ayrıldı)</td><td>ACL-000911</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="blok">
+          <div class="bb">KASADAN ÖDEMELER</div>
+          <table>
+            <thead><tr><th style="width:60px">Saat</th><th style="width:150px">Fiş</th>
+              <th>Açıklama</th><th style="width:170px">Hesap</th>
+              <th class="sag" style="width:100px">Tutar</th><th style="width:140px">Onay</th></tr></thead>
+            <tbody>
+              <tr><td>11:22</td><td class="sonuk">ODE-2026-000412</td>
+                <td>Kırtasiye alımı</td><td class="sonuk">770.10 Büro Gideri</td>
+                <td class="sag">320,00</td><td class="sonuk">O. AKAR</td></tr>
+              <tr><td>16:52</td><td class="sonuk">ODE-2026-000413</td>
+                <td>Sayım noksanı (fark fişi)</td><td class="sonuk">197.01 Sayım Noksanı</td>
+                <td class="sag">50,00</td><td class="sonuk">O. AKAR</td></tr>
+              <tr class="toplam"><td colspan="4">TOPLAM</td><td class="sag">370,00</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="blok">
+          <div class="bb">DEVREDİLEN İŞLER <span class="sonuk" style="font-weight:normal">— sonraki vardiyanın göreceği açık kalemler</span></div>
+          <table>
+            <tbody>
+              <tr><td style="width:60%">Tahsil edilmemiş başvuru</td>
+                <td class="sag" style="width:20%">9 adet</td>
+                <td class="sag" style="width:20%">6.940,00</td></tr>
+              <tr><td>Banka ekstresinde eşleşmemiş havale</td>
+                <td class="sag">2 adet</td><td class="sag">6.900,00</td></tr>
+              <tr><td>Portföye alınan çek</td>
+                <td class="sag">1 adet</td><td class="sag">2.250,00</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="dipnot">
+          Vardiya dökümü <code>kasa_islem</code> kayıtlarından üretilir ve tutanakla
+          birlikte saklanır. İptal edilen işlemler dökümde <b>görünür</b> — makbuz
+          numarası tüketilmiştir, kaybolması sayım denetimini imkânsız kılar.
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SEKME: IMZA DURUMU ============ -->
+    <div class="pnl" data-s="imza" hidden>
+      <div class="grp">
+        <h4>İmza Durumu <span class="mini">iki imza tamamlanmadan tutanak kesinleşmez</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:170px">Rol</th><th style="width:190px">Kişi</th>
+              <th style="width:150px">Yöntem</th><th style="width:150px">Zaman</th>
+              <th>Durum</th></tr></thead>
+            <tbody>
+              <tr><td>Teslim eden</td><td>Elif KARACA · Sicil 1042</td>
+                <td>E-imza (nitelikli)</td><td>14.09.2026 16:58</td>
+                <td><span class="rz ok">İmzalandı</span></td></tr>
+              <tr><td>Teslim alan</td><td>Osman AKAR · Sicil 0311</td>
+                <td>E-imza (nitelikli)</td><td class="sonuk">—</td>
+                <td><span class="rz sari">Bekliyor</span></td></tr>
+              <tr><td>Amir onayı (fark)</td><td>Osman AKAR · Sicil 0311</td>
+                <td>Uygulama onayı</td><td>14.09.2026 16:53</td>
+                <td><span class="rz ok">Onaylandı</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="fark">
+          <span class="sonuk">İkinci imza atılınca virman fişi <b>kesinleşir</b>
+            (<code>fn_kasa_islem_kesinlestir</code>) ve vardiya kapanır; sonrasında bu
+            vardiyaya işlem yazılamaz.</span>
+          <span class="rz sari">1 imza eksik</span>
+        </div>
+      </div>
+
+      <div class="grp">
+        <h4>Tutanak Geçmişi <span class="mini">değişmezlik izi</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:150px">Zaman</th><th style="width:170px">Kullanıcı</th>
+              <th style="width:170px">Olay</th><th>Ayrıntı</th></tr></thead>
+            <tbody>
+              <tr><td>16:58</td><td>Elif KARACA</td><td><span class="rz ok">İmzalandı</span></td>
+                <td>Teslim eden imzası · SHA-256 a91f…3c07</td></tr>
+              <tr><td>16:56</td><td>Elif KARACA</td><td><span class="rz mavi">Tutanak üretildi</span></td>
+                <td>Oturum #4188 · virman KVR-2026-004412 · 30.080,00 ₺</td></tr>
+              <tr><td>16:53</td><td>Osman AKAR</td><td><span class="rz mor">Fark onayı</span></td>
+                <td>−50,00 ₺ noksan onaylandı · ODE-2026-000413</td></tr>
+              <tr><td>16:45</td><td>Elif KARACA</td><td><span class="rz sari">Sayım girildi</span></td>
+                <td>Kupür sayımı 31.080,00 ₺</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>KVR-2026-004412</span><span>·</span>
+    <span>VEZNE 1 → MERKEZ KASA</span><span>·</span>
+    <span>30.080,00 ₺</span><span>·</span>
+    <span>1 / 2 imza · taslak</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Belge:</b> vardiya kapanışında üretilen, iki imzayla saklanan kasa teslim
+  tutanağı. Ekranda sekmeli, yazdırıldığında tutanak + iki ek olarak çıkar.
+  <ul>
+    <li><b>Tutanak veriden üretilir, elle doldurulmaz:</b> kaynağı
+        <code>kasa_oturum</code> kaydı ve ona bağlı <code>kasa_islem</code>
+        satırlarıdır. Elle yazılan tutanak kasa kaydıyla ayrışır.</li>
+    <li><b>Yalnız nakit teslim edilir:</b> kart, havale ve çek tutanakta
+        <i>bilgi</i> bölümündedir — teslim tutarına girmez. Çek fiziken elden
+        geçtiği için ayrı tutanakla teslim edilir.</li>
+    <li><b>Fark tutanakta görünür:</b> gizlenmez, fark fişi numarası ve amir onayı
+        tutanağın içindedir. Farkı sessizce eşitlemek belgeyi denetim dışı bırakırdı.</li>
+    <li><b>Kasada bırakılan tutar ertesi vardiyanın devridir</b> ve tutanakta açıkça
+        yazar; devir zinciri buradan izlenir.</li>
+    <li><b>İki imza şarttır:</b> ikinci imza atılınca virman fişi kesinleşir ve
+        vardiya kapanır. Tek imzalı tutanak taslaktır, kasa hâlâ açıktır.</li>
+    <li><b>İmzadan sonra değiştirilemez:</b> düzeltme yeni fark fişi ve yeni tutanakla
+        yapılır. Tutanak geçmişi (üretim, onay, imza) değişmezlik izidir.</li>
+    <li><b>İptal edilen işlemler dökümde kalır:</b> makbuz numarası tüketilmiştir;
+        kaybolması sayım denetimini imkânsız kılar.</li>
+  </ul>
+</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');});
+  if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

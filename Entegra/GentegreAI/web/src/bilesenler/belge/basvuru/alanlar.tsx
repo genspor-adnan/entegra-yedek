@@ -9,9 +9,15 @@ import { api } from '../../../api/istemci';
  * bicim degisikligi de tek yerde oluyor.
  */
 /** Kod listesi combosu - deger kod_deger.deger, gosterim ad. */
-export function KodSecim({ etiket, listeKod, deger, onDeger, kilitli, zorunlu }: {
+export function KodSecim({ etiket, listeKod, deger, onDeger, kilitli, zorunlu, vurgu }: {
   etiket: string; listeKod: string; deger?: number | null;
   onDeger(v: number | null): void; kilitli?: boolean; zorunlu?: boolean;
+  /**
+   * Bu deger SECILIYSE combo kirmizi cizilir (or. Acil). Segment'ten combo'ya
+   * dondugunde (kullanici: "başvuru türünü combo ya dönüştür") acil vurgusu
+   * kaybolmasin - "acil mi degil mi" listede goze carpan seydi.
+   */
+  vurgu?: number;
 }) {
   const [secenekler, setSecenekler] = useState<{ deger: number; ad: string }[]>([]);
   useEffect(() => {
@@ -28,7 +34,8 @@ export function KodSecim({ etiket, listeKod, deger, onDeger, kilitli, zorunlu }:
   return (
     <label className="alan">
       <span className={`etiket${zorunlu ? ' zorunlu-isaret' : ''}`}>{etiket}</span>
-      <select value={deger ?? ''} disabled={kilitli}
+      <select className={vurgu != null && Number(deger ?? 0) === vurgu ? 'acil' : undefined}
+              value={deger ?? ''} disabled={kilitli}
               onChange={e => onDeger(e.target.value ? Number(e.target.value) : null)}>
         <option value="">— Seçiniz —</option>
         {secenekler.map(x => <option key={x.deger} value={x.deger}>{x.ad}</option>)}

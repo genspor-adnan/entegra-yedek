@@ -52,6 +52,6 @@ public static class KimlikDogrulama
         var metin = deger?.ToString();
         return TcknGecerli(metin)
             ? null
-            : "T.C. kimlik numarası geçersiz - 11 hane olmalı ve doğrulama hanesi tutmalı.";
+            : "Kimlik numarası geçersiz - 11 hane olmalı ve doğrulama hanesi tutmalı.";
     }
 }

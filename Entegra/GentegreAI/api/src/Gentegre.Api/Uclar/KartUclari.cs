@@ -136,8 +136,11 @@ public static class KartUclari
 
             // PERSONELE OTOMATIK KULLANICI HESABI (kullanici): parolasi BOS,
             //   rolu "Rol Atanmamış"; kisi ilk giriste kendi parolasini belirler.
+            //   Parola VARSAYILAN olarak kart id'sidir (674) ve ilk giriste
+            //   degistirilmesi zorunludur.
             if (tanim.Ad == "personel")
-                await kullanicilar.OtomatikHesapAcAsync((int)yeniId, iptal);
+                await ctx.RequestServices.GetRequiredService<Servisler.KimlikServisi>()
+                         .PersonelHesaplariHazirlaAsync((int)yeniId, iptal: iptal);
 
             // RANDEVU HATIRLATMASI (399): kayit aninda kuyruga konur, isci
             //   zamani gelince gonderir. HATIRLATMA KAYDI DUSURMEZ - telefon
@@ -387,7 +390,8 @@ public static class KartUclari
             DovizMetasi? dovizMeta = null;
             if (tanim.Doviz is { } dk)
                 dovizMeta = new DovizMetasi(dk.CinsAlani, dk.KurAlani, dk.TutarAlani, dk.YerelAlani,
-                    dk.TarihAlani, await depo.YerelParaAsync(iptal));
+                    // 666: yerel para AKTIF SUBEDEN (genel.yerel_para kaldirildi).
+                    dk.TarihAlani, await depo.YerelParaAsync(baglam.SubeId, iptal));
 
             return Results.Ok(new KartMetaYaniti
             {
@@ -466,7 +470,14 @@ public static class KartUclari
             ustHaritasi,
             alan.Agac,
             alan.KodListesi,
-            alan.Dogrulama);
+            // BICIM KURALI SUNUCUDAN COZULMUS GIDER (679): katalogda "tckn"
+            //   yazan alan, kurum profili "serbest" ise ekrana kuralsiz,
+            //   "desen" ise deseniyle birlikte gider. Ekranin kurali kendi
+            //   basina secmesi, sunucunun reddettigi bir numarayi kabul
+            //   etmesine (ya da tersine) yol acardi.
+            alan.Dogrulama == KimlikDogrulama.TcknTuru
+                ? baglam.KimlikKurali.IstemciKurali
+                : alan.Dogrulama);
 
 
     /// <summary>
@@ -547,8 +558,10 @@ public static class KartUclari
             if (!baglam.Yetkiler.AlanYazilir(tanim.Ad, alan.Ad))
                 throw GentegreHatasi.Yasak($"{ad} alanini degistirme yetkiniz yok.");
 
-            var cevrilmis = DegerCevirici.Cevir(deger, alan.Tip, ad, ad);
-            DegerCevirici.UzunlukKontrol(alan, cevrilmis, ad);
+            var cevrilmis = DegerCevirici.Cevir(deger, alan.Tip, ad, ad, baglam.ZamanDilimi);
+            // Kimlik bicimi KURUM PROFILINDEN (679): kural "otomatik" ise
+            //   subenin ulkesine gore sunucuda cozulmustur.
+            DegerCevirici.UzunlukKontrol(alan, cevrilmis, ad, true, baglam.KimlikKurali);
             sonuc[ad] = cevrilmis;
         }
 

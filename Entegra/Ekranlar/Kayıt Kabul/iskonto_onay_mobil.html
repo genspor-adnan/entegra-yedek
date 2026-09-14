@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İskonto Onayı — Cep (Mockup · Gentegre AI)</title>
+<style>
+  :root{
+    --bg:#1d2b3c; --card:#ffffff; --line:#d7dee6; --line2:#eaeff4;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Segoe UI",-apple-system,"Trebuchet MS",sans-serif;font-size:14px;
+    padding:22px 14px}
+  .serit{display:flex;gap:26px;justify-content:center;align-items:flex-start;flex-wrap:wrap;
+    max-width:1320px;margin:0 auto}
+  .adim{width:330px;flex:none}
+  .adim h3{margin:0 0 8px;color:#dce7f3;font-size:12.5px;font-weight:600;letter-spacing:.2px}
+  .adim h3 b{color:#fff}
+  .adim .altyazi{color:#9db3cb;font-size:11px;line-height:1.5;margin:8px 2px 0}
+
+  /* ---------------------------------------------------------- telefon ---- */
+  .tel{background:#0d1620;border:9px solid #0d1620;border-radius:34px;
+    box-shadow:0 16px 40px rgba(0,0,0,.45);overflow:hidden}
+  .ekran{background:#eef2f6;border-radius:26px;overflow:hidden;
+    display:flex;flex-direction:column;height:642px;position:relative}
+  .durum{background:#14315a;color:#fff;font-size:10.5px;display:flex;align-items:center;
+    gap:6px;padding:6px 14px 5px}
+  .durum .sp{margin-left:auto;letter-spacing:1px}
+  .baslik{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:11px 14px;
+    display:flex;align-items:center;gap:9px}
+  .baslik .geri{font-size:17px;opacity:.9}
+  .baslik .ad{font-weight:600;font-size:15px}
+  .baslik .alt{font-size:10.5px;opacity:.82;margin-top:1px}
+  .baslik .sp{margin-left:auto;text-align:right}
+  .govde{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+  .altcubuk{border-top:1px solid var(--line);background:#fff;padding:10px 12px 12px;
+    display:flex;flex-direction:column;gap:8px}
+
+  /* ------------------------------------------------------------ kutu ---- */
+  .kutu{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .kutu .bas{padding:8px 12px;font-size:11px;color:var(--muted);text-transform:uppercase;
+    letter-spacing:.4px;border-bottom:1px solid var(--line2);background:#f8fafc}
+  .kutu .ic{padding:11px 12px}
+  .sat{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:13px}
+  .sat+.sat{border-top:1px solid var(--line2)}
+  .sat span{color:var(--muted)}
+  .sat b{text-align:right;font-weight:600}
+  .sat.buyuk b{font-size:17px;color:var(--navy)}
+  .sat.iyi b{color:var(--ok)}
+  .sat.teh b{color:var(--kirmizi)}
+
+  .hasta{display:flex;gap:11px;align-items:center}
+  .avatar{width:42px;height:42px;border-radius:50%;background:#dfeaf7;color:#2f6db3;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex:none}
+  .hasta .ad{font-weight:600;font-size:15px}
+  .hasta .alt{color:var(--muted);font-size:11.5px;margin-top:2px}
+
+  .tutar{text-align:center;padding:4px 0 2px}
+  .tutar .ist{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .tutar .buyuk{font-size:31px;font-weight:700;color:var(--navy);line-height:1.15;margin-top:2px}
+  .tutar .kucuk{font-size:12px;color:var(--muted);margin-top:3px}
+
+  .uyari{display:flex;gap:9px;align-items:flex-start;padding:10px 12px;border-radius:12px;
+    font-size:12.5px;line-height:1.45}
+  .uyari.kir{background:#fbe9e7;color:#8c2119;border:1px solid #f3c4bf}
+  .uyari.sari{background:#fdf6e3;color:#6f4f12;border:1px solid #f2ddbf}
+  .uyari.iyi{background:#e9f5ed;color:#1f5f35;border:1px solid #bfe3cb}
+  .uyari b{font-weight:700}
+
+  .rz{display:inline-block;border-radius:10px;padding:2px 9px;font-size:11px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+
+  /* --------------------------------------------------------- dugmeler ---- */
+  .dg{border:1px solid var(--line);background:#fff;border-radius:12px;padding:13px 14px;
+    font-size:15px;font-weight:600;text-align:center;color:var(--ink);
+    display:flex;align-items:center;justify-content:center;gap:8px}
+  .dg.ana{background:linear-gradient(#5cb87a,#3f9a5e);border-color:#3f9a5e;color:#fff;
+    font-size:16px;padding:15px 14px;box-shadow:0 2px 0 #2f7a49}
+  .dg.red{background:#fff;border-color:#e2b3ad;color:#b3261e}
+  .dg.ikili{flex:1}
+  .dgsatir{display:flex;gap:8px}
+  .dg.sonuk{color:var(--muted);border-style:dashed}
+
+  .oranlar{display:flex;gap:7px}
+  .oran{flex:1;border:1px solid var(--line);border-radius:11px;padding:11px 0;text-align:center;
+    font-size:15px;font-weight:600;background:#fff}
+  .oran.secili{background:#2f6db3;border-color:#2f6db3;color:#fff}
+  .oran small{display:block;font-size:10px;font-weight:400;opacity:.75;margin-top:1px}
+
+  /* ------------------------------------------------------ liste satiri ---- */
+  .talep{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 12px;
+    display:flex;flex-direction:column;gap:7px}
+  .talep.acil{border-color:#f0b9b3;box-shadow:0 0 0 2px #fbe9e7}
+  .talep .ust{display:flex;align-items:center;gap:8px}
+  .talep .ad{font-weight:600;font-size:14.5px}
+  .talep .sp{margin-left:auto}
+  .talep .orta{display:flex;align-items:baseline;gap:8px}
+  .talep .tut{font-size:19px;font-weight:700;color:var(--navy)}
+  .talep .ayr{color:var(--muted);font-size:12px}
+  .talep .gerekce{color:var(--muted);font-size:12px;font-style:italic}
+  .talep .kucukler{display:flex;gap:7px}
+  .talep .kucuk{flex:1;border:1px solid var(--line);border-radius:9px;padding:8px 0;
+    text-align:center;font-size:13px;font-weight:600}
+  .talep .kucuk.ev{background:#e9f5ed;border-color:#bfe3cb;color:#1f5f35}
+  .talep .kucuk.ha{background:#fff;border-color:#e2b3ad;color:#b3261e}
+
+  /* ------------------------------------------------------- bildirimler ---- */
+  .kilit{background:linear-gradient(160deg,#2b4a72,#132b49);height:642px;
+    display:flex;flex-direction:column;align-items:center;padding:34px 12px 12px;gap:14px}
+  .saat{color:#fff;text-align:center}
+  .saat .ss{font-size:52px;font-weight:200;line-height:1}
+  .saat .tr{font-size:12.5px;opacity:.82;margin-top:2px}
+  .bildirim{width:100%;background:rgba(255,255,255,.93);border-radius:15px;padding:11px 13px;
+    backdrop-filter:blur(6px)}
+  .bildirim .ust{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted)}
+  .bildirim .ust .sp{margin-left:auto}
+  .bildirim .ana{font-weight:600;font-size:13.5px;margin-top:5px}
+  .bildirim .met{font-size:12.5px;color:#3c4b5a;margin-top:2px;line-height:1.4}
+  .bildirim .dgler{display:flex;gap:7px;margin-top:9px;border-top:1px solid #dde4ec;padding-top:8px}
+  .bildirim .b{flex:1;text-align:center;font-size:12.5px;font-weight:600;color:var(--accent)}
+  .bildirim .b.kir{color:var(--kirmizi)}
+
+  /* ------------------------------------------------------------- not ---- */
+  .not{max-width:1320px;margin:26px auto 0;color:#dbe6f2;font-size:12px;line-height:1.7}
+  .not h4{margin:0 0 6px;color:#fff;font-size:13.5px}
+  .not b{color:#fff}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:4px 0}
+  .not code{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);
+    border-radius:4px;padding:0 4px}
+  @media(max-width:760px){body{padding:14px 8px}.adim{width:100%;max-width:340px}}
+</style>
+</head>
+<body>
+
+<div class="serit">
+
+  <!-- ================================================== 1) BILDIRIM ==== -->
+  <div class="adim">
+    <h3>1 · <b>Bildirim</b> — telefon kilitliyken</h3>
+    <div class="tel">
+      <div class="ekran">
+        <div class="kilit">
+          <div class="saat">
+            <div class="ss">17:04</div>
+            <div class="tr">Perşembe, 17 Eylül</div>
+          </div>
+
+          <div class="bildirim">
+            <div class="ust"><span>🏷</span><span>Gentegre</span><span class="sp">şimdi</span></div>
+            <div class="ana">İskonto onayı bekliyor · 250,00 ₺</div>
+            <div class="met">Neslihan ARSLAN · Kardiyoloji<br>
+              Elif KARACA (Vezne 1) %20 istiyor · personel yakını<br>
+              <b>Hasta bankoda bekliyor</b></div>
+            <div class="dgler">
+              <div class="b">Onayla</div>
+              <div class="b">Aç</div>
+              <div class="b kir">Reddet</div>
+            </div>
+          </div>
+
+          <div class="bildirim" style="opacity:.62">
+            <div class="ust"><span>🏷</span><span>Gentegre</span><span class="sp">16:48</span></div>
+            <div class="ana">İskonto onayı bekliyor · 90,00 ₺</div>
+            <div class="met">Murat DEMİR · Dahiliye · %15 · öğrenci</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="altyazi">Bildirimden <b>Onayla</b> doğrudan çalışır — tutar, kim istedi ve
+      hastanın beklediği bildirimde yazdığı için karar bilgisiz verilmez. Şüphe varsa
+      <b>Aç</b>.</div>
+  </div>
+
+  <!-- ================================================== 2) LISTE ======= -->
+  <div class="adim">
+    <h3>2 · <b>Bekleyenler</b> — uygulama açılışı</h3>
+    <div class="tel">
+      <div class="ekran">
+        <div class="durum">17:05 <span class="sp">▮▮▮ ▲ ▰</span></div>
+        <div class="baslik">
+          <div>
+            <div class="ad">İskonto Onayları</div>
+            <div class="alt">Dr. Osman AKAR · Başhekim Yrd.</div>
+          </div>
+          <div class="sp">
+            <div class="rz kir">3 bekliyor</div>
+          </div>
+        </div>
+
+        <div class="govde">
+          <div class="talep acil">
+            <div class="ust">
+              <span class="ad">Neslihan ARSLAN</span>
+              <span class="sp rz kir">01:42 bekliyor</span>
+            </div>
+            <div class="orta">
+              <span class="tut">250,00 ₺</span>
+              <span class="ayr">%20 · 1.250,00 ₺ üzerinden</span>
+            </div>
+            <div class="gerekce">“Personel yakını (anne) — Ayten ARSLAN, hemşire”</div>
+            <div class="kucukler">
+              <div class="kucuk ev">✔ Onayla</div>
+              <div class="kucuk">Aç</div>
+              <div class="kucuk ha">✖ Reddet</div>
+            </div>
+          </div>
+
+          <div class="talep">
+            <div class="ust">
+              <span class="ad">Murat DEMİR</span>
+              <span class="sp rz sari">17 dk</span>
+            </div>
+            <div class="orta">
+              <span class="tut">90,00 ₺</span>
+              <span class="ayr">%15 · 600,00 ₺ üzerinden</span>
+            </div>
+            <div class="gerekce">“Öğrenci indirimi — belge ekli”</div>
+            <div class="kucukler">
+              <div class="kucuk ev">✔ Onayla</div>
+              <div class="kucuk">Aç</div>
+              <div class="kucuk ha">✖ Reddet</div>
+            </div>
+          </div>
+
+          <div class="talep">
+            <div class="ust">
+              <span class="ad">Havva YILDIZ</span>
+              <span class="sp rz">dün 18:20</span>
+            </div>
+            <div class="orta">
+              <span class="tut">1.400,00 ₺</span>
+              <span class="ayr">%35 · 4.000,00 ₺ üzerinden</span>
+            </div>
+            <div class="uyari kir" style="padding:7px 9px">
+              <span>⚠</span><div>Sizin tavanınız <b>%25</b> — bu talep ancak
+                <b>Başhekim</b> onayıyla geçer.</div>
+            </div>
+            <div class="kucukler">
+              <div class="kucuk">Aç</div>
+              <div class="kucuk">⬆ Yönlendir</div>
+              <div class="kucuk ha">✖ Reddet</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="altcubuk">
+          <div class="sat" style="padding:0">
+            <span>Bugün onayladığınız</span><b>8.640,00 ₺ · 11 talep</b>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="altyazi">Hasta bekleten talep listenin başında ve kırmızı çerçeveli.
+      Tavanı aşan talepte <b>Onayla yoktur</b> — basılamayacak bir düğme göstermek,
+      yetkiliye karar verdiğini sandırırdı.</div>
+  </div>
+
+  <!-- ================================================== 3) KARAR ======= -->
+  <div class="adim">
+    <h3>3 · <b>Karar</b> — talebi açınca</h3>
+    <div class="tel">
+      <div class="ekran">
+        <div class="durum">17:05 <span class="sp">▮▮▮ ▲ ▰</span></div>
+        <div class="baslik">
+          <span class="geri">‹</span>
+          <div>
+            <div class="ad">TLP-2026-000318</div>
+            <div class="alt">1 / 3 · hasta bekliyor 01:42</div>
+          </div>
+        </div>
+
+        <div class="govde">
+          <div class="kutu">
+            <div class="ic">
+              <div class="hasta">
+                <div class="avatar">NA</div>
+                <div>
+                  <div class="ad">Neslihan ARSLAN</div>
+                  <div class="alt">58y · Kardiyoloji · Dr. S. TUNÇ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="kutu">
+            <div class="ic">
+              <div class="tutar">
+                <div class="ist">İstenen iskonto</div>
+                <div class="buyuk">250,00 ₺</div>
+                <div class="kucuk">%20 · indirilebilir tutar 1.250,00 ₺</div>
+              </div>
+            </div>
+            <div class="ic" style="border-top:1px solid var(--line2)">
+              <div class="sat"><span>Hizmet toplamı</span><b>2.386,00 ₺</b></div>
+              <div class="sat"><span>İndirilemeyen</span><b>1.136,00 ₺ 🔒</b></div>
+              <div class="sat"><span>Tahsil edilecek</span><b>2.136,00 ₺</b></div>
+            </div>
+          </div>
+
+          <div class="uyari kir">
+            <span>⚠</span>
+            <div><b>Veznenin tavanı aşıldı</b> (%10 / 500 ₺) — onay sizde.
+              Sizin tavanınız <b>%25 · 2.500 ₺</b>.</div>
+          </div>
+
+          <div class="kutu">
+            <div class="bas">Gerekçe</div>
+            <div class="ic">
+              <div style="font-size:13px;line-height:1.5">
+                <b>Personel yakını</b> · Anne<br>
+                Ayten ARSLAN — Hemşire, sicil 2210
+              </div>
+              <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+                <span class="rz ok">📎 Nüfus kaydı</span>
+                <span class="rz mavi">bu yakın: 4 kez · 1.240 ₺</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="kutu">
+            <div class="bas">Ne kadarını onaylıyorsunuz?</div>
+            <div class="ic">
+              <div class="oranlar">
+                <div class="oran">%5<small>62,50 ₺</small></div>
+                <div class="oran">%10<small>125 ₺</small></div>
+                <div class="oran">%15<small>187,50 ₺</small></div>
+                <div class="oran secili">%20<small>tamamı</small></div>
+              </div>
+              <div class="sat" style="margin-top:9px"><span>Hekim hakedişi</span>
+                <b style="color:var(--uyari)">−75,00 ₺</b></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="altcubuk">
+          <div class="dg ana">✔ 250,00 ₺ Onayla</div>
+          <div class="dgsatir">
+            <div class="dg ikili">⬆ Yönlendir</div>
+            <div class="dg ikili red">✖ Reddet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="altyazi">Tek ekran, kaydırmasız karar: kim, ne kadar, neden, neye mal
+      oluyor. Kısmi onay <b>hazır oranlarla</b> verilir — cepte klavye açtırmak, onayı
+      masaya erteletir.</div>
+  </div>
+
+  <!-- ================================================== 4) RED ========= -->
+  <div class="adim">
+    <h3>4 · <b>Red</b> — gerekçe zorunlu</h3>
+    <div class="tel">
+      <div class="ekran">
+        <div class="durum">17:06 <span class="sp">▮▮▮ ▲ ▰</span></div>
+        <div class="baslik">
+          <span class="geri">‹</span>
+          <div>
+            <div class="ad">Reddet</div>
+            <div class="alt">TLP-2026-000318 · 250,00 ₺</div>
+          </div>
+        </div>
+
+        <div class="govde">
+          <div class="uyari sari">
+            <span>💬</span>
+            <div>Seçtiğiniz gerekçe <b>bankoya aynen gider</b> ve hastaya söylenir.</div>
+          </div>
+
+          <div class="kutu">
+            <div class="bas">Sebep</div>
+            <div class="ic" style="display:flex;flex-direction:column;gap:7px">
+              <div class="dg" style="justify-content:flex-start;font-weight:500;font-size:14px">
+                Kurum anlaşmalı fiyat — indirim yapılamaz</div>
+              <div class="dg" style="justify-content:flex-start;font-weight:500;font-size:14px;
+                   background:#2f6db3;border-color:#2f6db3;color:#fff">
+                ✓ Bu ay bu yakına verilen indirim sınırı doldu</div>
+              <div class="dg" style="justify-content:flex-start;font-weight:500;font-size:14px">
+                Belge yetersiz — yakınlık doğrulanamadı</div>
+              <div class="dg sonuk" style="justify-content:flex-start;font-weight:500;font-size:14px">
+                ✎ Kendim yazacağım…</div>
+            </div>
+          </div>
+
+          <div class="kutu">
+            <div class="bas">Bankoya not (isteğe bağlı)</div>
+            <div class="ic" style="color:var(--muted);font-size:13px;min-height:52px">
+              Hastaya kampanyalı paketi anlatabilirsiniz.
+            </div>
+          </div>
+        </div>
+
+        <div class="altcubuk">
+          <div class="dg ana" style="background:linear-gradient(#e06a5e,#c0392b);
+               border-color:#c0392b;box-shadow:0 2px 0 #97291d">✖ Reddet ve Gönder</div>
+          <div class="dg">Vazgeç</div>
+        </div>
+      </div>
+    </div>
+    <div class="altyazi">Red, serbest metin yazmaya bırakılmadı: hazır sebepler hem
+      cepte hızlı hem de <b>analiz edilebilir</b> — “şikâyet telafisi” kaleminin
+      büyümesi indirim değil hizmet sorununu gösterir.</div>
+  </div>
+
+</div>
+
+<div class="not">
+  <h4>Cep uygulaması — neden bu kadar az şey var?</h4>
+  Masaüstündeki onay konsolu (<code>iskonto_onay.html</code>) “yönetme” ekranıdır:
+  kuyruk, analiz, yetki limitleri. Cepteki ekran <b>tek bir işi</b> yapar — yetkili
+  ameliyathanede, toplantıda ya da yoldayken hastayı bankoda bekletmesin. Masaüstünün
+  küçültülmüşü değildir; aynı kararın yalnız karar verdiren kısmıdır.
+  <ul>
+    <li><b>Bildirimden onay gerçek bir yol:</b> tutar, isteyen ve hastanın beklediği
+        bildirimin içinde yazar. Her onay için uygulamayı açtırmak, 250 ₺'lik kararı
+        10 dakikaya yayardı.</li>
+    <li><b>Tavanı aşan talepte “Onayla” hiç görünmez</b> — yalnız <i>Yönlendir</i> ve
+        <i>Reddet</i>. Basılınca hata veren düğme, yetkiliye karar verdiğini sandırır;
+        hasta bu arada beklemeye devam eder.</li>
+    <li><b>Kısmi onay hazır oranlarla:</b> %5/%10/%15/tam, her birinin altında ₺
+        karşılığı. Cepte sayı klavyesi açmak “bunu masada yaparım” dedirtir ve kuyruk
+        büyür.</li>
+    <li><b>Kilitli kalemler tutar olarak görünür</b> (“İndirilemeyen 1.136 ₺ 🔒”) —
+        kalem kalem liste cepte okunmaz, ama “%20 istendi neden %10,5 çıktı” sorusu
+        yine de cevaplanmalıdır.</li>
+    <li><b>Hekim hakediş etkisi tek satır:</b> karar anında görünmeyen indirim, ay
+        sonunda hekimle sorun olur.</li>
+    <li><b>Red gerekçesi hazır listeden:</b> hem cepte hızlı, hem bankonun hastaya
+        okuyacağı cümle belirsiz kalmıyor, hem de sebepler sayılabiliyor.</li>
+    <li><b>İlk karar veren bitirir:</b> talep sonuçlanınca diğer yetkililerin
+        listesinden ve bildiriminden düşer (durum 0 → 1/2). Aynı anda basılırsa
+        ikincisi “zaten sonuçlandı” uyarısı alır — sessizce üzerine yazılmaz.</li>
+    <li><b>Yetki cepte de aynı yerden gelir:</b> kim onaylayabiliyorsa
+        (<code>basvuru.iskonto</code> + tavanı, İskonto Onaylayanlar rolü) cepte de
+        odur. Mobil için ikinci bir yetki listesi açmak, bir gün birinde açık
+        öbüründe kapalı kalırdı.</li>
+  </ul>
+</div>
+
+</body>
+</html>

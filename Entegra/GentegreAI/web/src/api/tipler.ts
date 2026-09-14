@@ -12,6 +12,8 @@ export interface KullaniciSubeSatiri {
 export interface KartRolBilgisi {
   kullaniciVar: boolean; rolId: number; rolAdi: string;
   roller: { id: number; ad: string }[];
+  /** EK roller (665) - ana rol (`rolId`) bu listede DEGILDIR. */
+  ekRolIdleri: number[];
 }
 
 /** Rol > Kullanicilar sekmesi satiri. */
@@ -19,6 +21,8 @@ export interface RolKullanicisi {
   id: number; kod: string; unvan: string; eposta: string;
   departman: string; gorev: string; telefon: string; sube: string;
   aktif: boolean; sonGiris?: string | null; rolAdi: string;
+  /** Bu rol kisinin ANA rolu mu (665); false = ek gorev olarak tasiyor. */
+  ana?: boolean;
 }
 
 /** ÜTS cevap zarflari (223). */

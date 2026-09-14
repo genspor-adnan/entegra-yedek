@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import { sonMenuEkle } from '../menuSonKullanilan';
+import { gorunumYukle } from '../../bilesenler/gorunum';
+import { bildirimYukle } from '../../bilesenler/bildirimTercihi';
 
 /**
  * SOL MENUNUN KULLANICI TERCIHLERI: favoriler ve en son kullanilanlar.
@@ -36,6 +38,10 @@ export function useMenuTercihleri(kullaniciId: number | undefined) {
       let liste = yerel;
       try {
         const tercihler = await api.tercihler();
+        // GORUNUM ve BILDIRIM tercihleri (669) AYNI cevaptan okunur - ayri
+        //   istek acmak her acilista bir tur daha maliyet olurdu.
+        void gorunumYukle(tercihler);
+        void bildirimYukle(tercihler);
         const ham = tercihler.favoriler;
         if (ham === undefined) {
           // Sunucuda HIC kayit yok: tarayicidaki eski liste bir kez tasinir.

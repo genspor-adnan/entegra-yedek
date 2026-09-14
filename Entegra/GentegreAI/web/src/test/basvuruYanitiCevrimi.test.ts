@@ -76,6 +76,9 @@ function eskiBasvuru(b: Belge) {
     //   tutuluyor. Referans cevrim de tasiyor - yoksa test "kayma" diye
     //   bildirir; oysa bu bilincli bir davranis degisikligi.
     hastaId: b.hastaId != null ? Number(b.hastaId) : null,
+    // HASTA ADI: kalem penceresinin serit basligi icin sunucudan gelir -
+    //   dis kurum basvurusunda cari GONDEREN KURUMDUR, hasta ayri alandadir.
+    hastaUnvan: String(b.hastaUnvan ?? ''),
     sysTakipNo: String(b.sysTakipNo ?? ''),
     basvuruTuru: b.basvuruTuru != null ? Number(b.basvuruTuru) : null,
     gelisSekli: b.gelisSekli != null ? Number(b.gelisSekli) : null,

@@ -78,6 +78,52 @@ export const IRSALIYE_TIPLERI: { deger: number; ad: string }[] = [
 /** Belge dovizi secenekleri (kart komboları). */
 export const DOVIZ_KODLARI = ['TL', 'USD', 'EUR', 'GBP'];
 
+/**
+ * IADE / IPTAL NEDENLERI (kullanici: tahsilat sekmesinde iade tutarinin
+ * altinda combo). Serbest metin DEGIL kod: "fazla tahsilat" ile "fazla
+ * alindi" ayni sey ama rapor ikisini ayri sayardi; ayrica bazi nedenler
+ * (hizmet verilmedi) hizmet satirini da ilgilendirir.
+ *
+ * Kod aciklamaya yazilir - ayri bir kolon eklemeden neden kasa ekstresinde
+ * ve denetim izinde okunur.
+ */
+export const IADE_NEDENLERI: { kod: string; ad: string }[] = [
+  { kod: 'fazla',   ad: 'Fazla tahsilat' },
+  { kod: 'yanlis',  ad: 'Yanlış tahsilat (başka hasta / kasa)' },
+  { kod: 'hizmet',  ad: 'Hizmet verilmedi' },
+  { kod: 'vazgec',  ad: 'Hasta vazgeçti' },
+  { kod: 'sikayet', ad: 'Şikâyet telafisi' },
+  { kod: 'kurum',   ad: 'Kurum karşıladı (provizyon sonradan onaylandı)' },
+  // PARA USTU de bir iadedir (kullanici): 100 USD alinip 10'u geri verilir.
+  //   Ayri bir dugme ve ayri bir akis yerine BURADA duruyor - kasadan cikan
+  //   para her iki durumda da ayni satiri yaziyor, yalniz sebebi farkli.
+  { kod: 'ustu',    ad: 'Para üstü' },
+  { kod: 'diger',   ad: 'Diğer' },
+];
+
+/**
+ * ISKONTO GEREKCELERI (mockup: iskonto_talep_penceresi.html). Serbest metin
+ * DEGIL kod: "personel yakini" ile "personelin annesi" ayni sey ama rapor
+ * ikisini ayri sayardi. Aciklama ayrica yazilir - kategori NIYE, aciklama
+ * AYRINTIDIR.
+ */
+export const ISKONTO_GEREKCELERI: { kod: string; ad: string }[] = [
+  { kod: 'personel',  ad: 'Personel yakını' },
+  { kod: 'sosyal',    ad: 'Sosyal endikasyon' },
+  { kod: 'sikayet',   ad: 'Şikâyet telafisi' },
+  { kod: 'kampanya',  ad: 'Kampanya / paket' },
+  { kod: 'anlasma',   ad: 'Kurum anlaşması' },
+  { kod: 'yuvarlama', ad: 'Yuvarlama' },
+  { kod: 'diger',     ad: 'Diğer' },
+];
+
+export const iskontoGerekceAdi = (kod: string) =>
+  ISKONTO_GEREKCELERI.find(x => x.kod === kod)?.ad ?? kod;
+
+/** Iade neden kodunun okunur adi - aciklamaya bu yazilir. */
+export const iadeNedenAdi = (kod: string) =>
+  IADE_NEDENLERI.find(x => x.kod === kod)?.ad ?? kod;
+
 /** Senaryo comboSU - SENARYO_ADI ile ayni kodlar, GIB profil sirasinda. */
 export const SENARYO_SECENEK = [
   { deger: 1, ad: 'Temel Fatura' },

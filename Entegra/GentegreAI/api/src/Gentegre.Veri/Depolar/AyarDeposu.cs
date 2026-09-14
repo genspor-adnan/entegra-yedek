@@ -32,7 +32,6 @@ public sealed class AyarDeposu
     /// <summary>Ekranda gosterilen/yazilabilen ayarlar.</summary>
     public static readonly IReadOnlyList<string> BeyazListe = new[]
     {
-        "genel.yerel_para",
         // Urun modu (215): 1 Gentegre AI (ERP), 2 GenoTIP AI (HBYS). Ad, menu
         //   (Kayit Kabul yalniz HBYS) ve mesaj basliklari buna gore degisir;
         //   giris yanitiyla istemciye tasinir.
@@ -98,7 +97,6 @@ public sealed class AyarDeposu
     /// <summary>Metin (sayi olmayan) ayarlar - uzunluk disinda bicim serbest.</summary>
     private static readonly Dictionary<string, int> MetinAyar = new()
     {
-        ["genel.yerel_para"] = 5,        // ISO kodu: TL, USD, EUR...
         ["genel.varsayilan_doviz"] = 5,
         ["belge.satis.varsayilan_seri"] = 10,
         ["belge.alis.varsayilan_seri"] = 10,
@@ -307,7 +305,7 @@ public sealed class AyarDeposu
     }
 
     /// <summary>
-    /// Metin ayari okur (or. genel.yerel_para = "TL"). Sayisal olanin aksine
+    /// Metin ayari okur (or. genel.varsayilan_doviz = "USD"). Sayisal olanin aksine
     /// onbelleklenmez: metin ayarlar tek tek ve seyrek okunuyor, buna karsilik
     /// yanlis onbellekten donen para birimi butun tutarlari bozardi.
     /// </summary>

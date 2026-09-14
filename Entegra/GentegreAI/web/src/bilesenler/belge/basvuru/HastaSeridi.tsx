@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../../api/istemci';
-import { para } from '../../bicim';
+import { paraYaz } from '../../bicim';
 import { MUSTEHAKLIK } from './alanlar';
 
 /**
@@ -142,7 +142,7 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, acikBel
       {!protokolNo && (
       <div className="hasta-arama">
         <label className="alan">
-          <span className="etiket">T.C. Kimlik No</span>
+          <span className="etiket">Kimlik No</span>
           <input value={tc} disabled={kilitli} onKeyDown={enter}
                  onChange={e => setTc(e.target.value)} />
         </label>
@@ -236,13 +236,13 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, acikBel
           <span className="taraf-satir">
             <span className="ikon" title="Hastadan">👤</span>
             <span className={`v ${taraflar.tahsilat.hasta > 0 ? 'teh' : 'olumlu'}`}>
-              {para.format(taraflar.tahsilat.hasta)} ₺
+              {paraYaz(taraflar.tahsilat.hasta)}
             </span>
           </span>
           <span className="taraf-satir">
             <span className="ikon" title="Kurumdan">🏛️</span>
             <span className={`v ${taraflar.tahsilat.kurum > 0 ? 'teh' : 'olumlu'}`}>
-              {para.format(taraflar.tahsilat.kurum)} ₺
+              {paraYaz(taraflar.tahsilat.kurum)}
             </span>
           </span>
         </span>
@@ -253,7 +253,7 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, acikBel
             (hasta lehine bakiye - iade/mahsup gerekir), esitse notr siyah. */}
         <span className="k">{borc < 0 ? 'Alacaklı' : 'Açık Tahsilat'}</span>
         <span className={`v ${borc > 0 ? 'teh' : borc < 0 ? 'olumlu' : ''}`}>
-          {para.format(Math.abs(borc))} ₺
+          {paraYaz(Math.abs(borc))}
         </span>
       </span>
       )}
@@ -266,13 +266,13 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, acikBel
           <span className="taraf-satir">
             <span className="ikon" title="Hastaya kesilecek">👤</span>
             <span className={`v ${taraflar.belge.hasta > 0 ? 'teh' : 'olumlu'}`}>
-              {para.format(taraflar.belge.hasta)} ₺
+              {paraYaz(taraflar.belge.hasta)}
             </span>
           </span>
           <span className="taraf-satir">
             <span className="ikon" title="Kuruma kesilecek">🏛️</span>
             <span className={`v ${taraflar.belge.kurum > 0 ? 'teh' : 'olumlu'}`}>
-              {para.format(taraflar.belge.kurum)} ₺
+              {paraYaz(taraflar.belge.kurum)}
             </span>
           </span>
         </span>
@@ -280,7 +280,7 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, acikBel
         <span className="hs sag">
           <span className="k">Açık Belge</span>
           <span className={`v ${Number(acikBelge) > 0 ? 'teh' : 'olumlu'}`}>
-            {para.format(Number(acikBelge))} ₺
+            {paraYaz(Number(acikBelge))}
           </span>
         </span>
       )}

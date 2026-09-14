@@ -326,6 +326,34 @@ export function KurumTipiAyarlari() {
               </select>
             </div>
           </div>
+          {/* KIMLIK NO BICIMI (679, kullanici: "kimlik biçimini kurum
+              profiline ayar olarak ekle"). Etiket 671'de genellesti
+              ("Kimlik No") ama dogrulama T.C. algoritmasiydi: yurt disinda
+              gercek numarayi reddedip kaydi imkansiz kilardi, topluca
+              kapatmak ise Turkiye'de yanlis TCKN'yi sessizce gecirirdi. */}
+          <div className="fld">
+            <label>Kimlik no biçimi</label>
+            <select className="inp" value={profil?.kimlikBicimi ?? 'otomatik'}
+                    onChange={e => degistir({ kimlikBicimi: e.target.value })}>
+              <option value="otomatik">Otomatik — şubenin ülkesine göre</option>
+              <option value="tc">T.C. Kimlik No (11 hane + kontrol hanesi)</option>
+              <option value="serbest">Serbest — biçim kontrolü yok</option>
+              <option value="desen">Özel desen (düzenli ifade)</option>
+            </select>
+          </div>
+          {profil?.kimlikBicimi === 'desen' && (
+            <div className="fld">
+              <label>Desen / açıklama</label>
+              <div className="ikili-sayi">
+                <input className="inp" placeholder="^[A-Z0-9]{6,12}$"
+                       value={profil?.kimlikDeseni ?? ''}
+                       onChange={e => degistir({ kimlikDeseni: e.target.value })} />
+                <input className="inp" placeholder="6-12 hane pasaport no"
+                       value={profil?.kimlikAciklama ?? ''}
+                       onChange={e => degistir({ kimlikAciklama: e.target.value })} />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Secili tipin varsayilan paketi - matristen uretilir. */}
@@ -466,7 +494,7 @@ export function KurumTipiAyarlari() {
             <div className="fld"><label>Belge üretimi</label><div className="inp combo">Tahsil edilen kadar fiş, kalanı tahakkuk (352) <span className="sonuk">· her işlem fatura · dönem faturası</span></div></div>
             <div className="fld"><label>e-Belge</label><div className="inp combo">e-Arşiv (hasta) · e-Fatura (kurum) · entegratör: İzibiz</div></div>
             <div className="fld"><label>Numara şablonları</label><div className="inp">Protokol: {'{'}yıl{'}'}/{'{'}sıra{'}'} · Hasta no: H{'{'}sıra:6{'}'} · Plan: TP-{'{'}yıl{'}'}/{'{'}sıra{'}'}</div></div>
-            <div className="fld"><label>Hasta kimlik doğrulama</label><div className="inp combo">KPS (opsiyonel) · TCKN zorunlu · yabancı: pasaport</div></div>
+            <div className="fld"><label>Hasta kimlik doğrulama</label><div className="inp combo">KPS (opsiyonel) · kimlik no zorunlu · yabancı: pasaport</div></div>
             <div className="fld"><label>KVKK</label><div className="inp">☑ Hasta kayıtları özel nitelikli · ☑ erişim günlüğü · saklama: 10 yıl (sağlık) · 15 yıl (personel sağlık)</div></div>
           </div>
         </div>

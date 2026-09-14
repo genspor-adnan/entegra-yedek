@@ -40,7 +40,7 @@ vi.mock('../kimlik/OturumBaglami', () => ({
                  subeler: [{ id: 1, ad: 'Merkez', varsayilan: true, yazma: true }],
                  urunModu: 2, moduller: [], hekimRolu: 1 },
     aksiyonlar: [], kaynaklar: [], yukleniyor: false,
-    yetki: () => true, aksiyonVar: () => true,
+    yetki: () => true, aksiyonVar: () => true, aksiyonDegeri: () => 100,
   }),
 }));
 

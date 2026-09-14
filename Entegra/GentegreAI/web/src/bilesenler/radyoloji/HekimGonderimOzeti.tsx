@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
-import { para } from '../bicim';
+import { paraYaz } from '../bicim';
 
 /**
  * DIS HEKIM GONDERIM OZETI (305) - hekim kartinin "Gönderim Geçmişi"
@@ -51,7 +51,7 @@ export function HekimGonderimOzeti({ hekimId }: { hekimId: number }) {
         <div className="k"><b>{ozet.buAy}</b><span>Bu ay</span></div>
         <div className="k"><b>{ozet.raporlanan}</b><span>Raporlanan</span></div>
         <div className="k"><b>{ozet.bekleyen}</b><span>Bekleyen</span></div>
-        <div className="k"><b>{para.format(Number(ozet.tutar ?? 0))} ₺</b><span>Toplam tutar</span></div>
+        <div className="k"><b>{paraYaz(Number(ozet.tutar ?? 0))}</b><span>Toplam tutar</span></div>
         <div className="k"><b>{gun(ozet.sonGonderim)}</b><span>Son gönderim</span></div>
       </div>
 

@@ -579,7 +579,9 @@ return (
     {/* Rol kartinda kullanicilar Genel sekmesinde, alanlarin altinda
         (kullanici: "kullanicilari genel sekmesine al, kullanici sekmesini
         kaldir"). Yeni rolde henuz id yok - once kaydedilmeli. */}
-    {kaynak === 'rol' && !yeniMi && aktif.baslik === 'Genel' && (
+    {/* Sekme adi "Kullanıcılar" (kullanici) - eskiden "Genel"di; kosul da
+        yeni adla eslesmeli, yoksa grid hic cizilmez. */}
+    {kaynak === 'rol' && !yeniMi && aktif.baslik === 'Kullanıcılar' && (
       /* Sube listesi ROLDE DEGIL (kullanici: "rolden kaldir tekrar") -
          personel kartinda, fotografin altinda. */
       <RolKullanicilari rolId={id as number} saltOkunur={salt} />

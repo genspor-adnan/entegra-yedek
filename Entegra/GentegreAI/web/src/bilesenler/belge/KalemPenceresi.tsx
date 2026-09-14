@@ -9,9 +9,14 @@ import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
 import { baslangicBrutMetni, bruta, moduCevir } from '../../sayfalar/belgeKarti/kdvModu';
 import { IzlemPenceresi } from './IzlemPenceresi';
 import { EK_KATKILI_ROTALAR, SAF_SGK_ROTA } from '../../sayfalar/belgeKartiKurallari';
+import { useOturum } from '../../kimlik/OturumBaglami';
+
+/** İskonto combosunun hazır oranları; sonuncusu serbest giriş (661). */
+/** İskonto combosunun hazır oranları: %5'ten %50'ye beşer beşer (kullanıcı). */
+const ISKONTO_ORANLARI = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
 
 export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparisMi,
-                         basvuruMu, tarifeTipi = 0, rota = 0,
+                         basvuruMu, ustSerit, tarifeTipi = 0, rota = 0,
                          anaBirimKod = 0, anaBirimAdi = '',
                          girisIzlemi, cikisIzlemi, cikisDepoId, belgeTarihi,
                          onKapat, onKaydet }: {
@@ -35,6 +40,13 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    * "Ek Katkı" kutusuydu, o da kalkti - hastanin payi artik Katkı Fiyatı
    * kutusundan FIYAT olarak giriliyor ve kovalari sunucu boluyor.
    */
+  /**
+   * UST SERIT (kullanici): kim icin, kim odeyecek, hangi tarife. Kalem
+   * penceresi kartin USTUNDE acilir ve altindaki baslik gorunmez olur -
+   * memur "bu fiyat hangi listeden, kime" sorusunu pencereyi kapatmadan
+   * cevaplayabilmeli. Verilmezse serit cizilmez (ERP belgeleri).
+   */
+  ustSerit?: { hasta?: string; odeyen?: string; liste?: string };
   /** Basvuru (kayit kabul): fiyat HER ZAMAN KDV dahil girilir. */
   basvuruMu?: boolean;
   /**
@@ -121,6 +133,16 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   const kurElle = useRef(false);
   /** Kalem gride YAZILDI mi - ikinci "Tamam" (Enter + tik) satiri cogaltmasin. */
   const kaydedildi = useRef(false);
+
+  const { aksiyonDegeri } = useOturum();
+  /**
+   * ISKONTO TAVANI (661): rolun `basvuru.iskonto` yetkisindeki sayisal sinir.
+   * 0 = iskonto YAPAMAZ (yetki yok ya da deger girilmemis) - varsayilan budur.
+   * Eksik degeri "sinirsiz" saymak, degeri girilmemis her rolu serbest
+   * birakirdi.
+   */
+  const iskontoTavani = basvuruMu ? aksiyonDegeri('basvuru.iskonto') : 100;
+  const iskontoYapilir = iskontoTavani > 0;
 
   const degis = (alan: keyof SatirDurumu, deger: string | number) =>
     setR(x => ({ ...x, [alan]: deger }));
@@ -248,6 +270,29 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    * (fn_dagilim_coz - SUT carpani koşulsuz miktardir).
    */
   const sgkKilitli = etkinRota === SAF_SGK_ROTA;
+  /**
+   * BIRIM FIYAT KILIDI (661, kullanici: "öss ve sgk tiplerinde birim fiyat hep
+   * kapalı olmalı, özel tipte yetkiye bağlı olmalı").
+   *
+   * KURUM ROTALARINDA (ÖSS 2 · TSS 3 · Karma 4 · SGK 5) fiyat sozlesmeden ya
+   * da SUT'tan gelir - orada yetki SORULMAZ, kutu herkese kapalidir. Yetkiyle
+   * acilabilir birakmak, sozlesme fiyatinin uzerine yazilabilecegi anlamina
+   * gelirdi; kaydedince sunucunun listeden okudugu rakama geri donerdi.
+   *
+   * ARTIK OZEL ROTADA DA KAPALI (kullanici: "en üstteki birim fiyat veya
+   * katkı neyse tüm roller için readonly olsun"). Yetkiyle acilabilen bir
+   * kutu da TUTULMADI - `basvuru.fiyat` yetkisi 661'den kaldirildi.
+   * ERP belgelerinde (basvuru degil) kutu eskisi gibi acik.
+   *
+   * ERP belgelerinde (basvuru degil) eski davranis aynen surer.
+   */
+  const kurumRotasi = etkinRota > 0 && etkinRota !== 1;
+  // BASVURUDA UST KUTU TUM ROLLERE KAPALI (kullanici): birim fiyat / hasta
+  //   katkisi listeden gelir, ekrandan degistirilmez. Indirim yapilacaksa
+  //   ISKONTO satirindan yapilir - orada kim ne kadar indirdigi oran olarak
+  //   kayda geciyor ve onaya tabi (661/662); fiyatin uzerine yazmak ayni
+  //   indirimi izsiz birakirdi. ERP belgelerinde kutu eskisi gibi acik.
+  const fiyatKilitli = sgkKilitli || basvuruMu;
   const katkiVar = katkiliTarife && hamSayi(r.katkiTutar ?? '0') > 0;
   /** Iskontolu katki - sunucudaki kural (586) ile ayni: birim x adet x iskonto. */
   const katkiTutari = satirTutari(adet, hamSayi(r.katkiTutar ?? '0'),
@@ -276,6 +321,121 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   /** Iskonto gercekten var mi - yoksa satir ust kutunun kopyasi olurdu. */
   const iskontoluMu = Math.abs(iskontoTabani - iskontoluBirim) > 0.004;
 
+  /* ---------------------------------------------------------------- iskonto --
+   * TEK ISKONTO, IKI YAZILISI (661, kullanici: "iskonto2'yi buradan kaldır").
+   *
+   * Sol combo ORAN, sag kutu TUTAR - ikisi de AYNI alani (`iskonto`) yazar,
+   * biri yuzdeyle biri lirayla. Hangisine dokunulduysa oteki onun karsiligini
+   * gosterir; iki ayri indirim degildir.
+   *
+   * Ikinci iskonto slotu (`iskonto2`) bu pencerede KULLANILMIYOR: tutari oraya
+   * yazmak, ekranda gorunmeyen ikinci bir indirim birakiyordu - satir baska
+   * yerden acildiginda nereden geldigi anlasilmayan bir yuzde. Kullanici
+   * burada iskontoya dokunursa ikinci slot SIFIRLANIR; gorunmeyen indirim
+   * toplami sessizce dusurmesin.
+   */
+  const oranSayi = hamSayi(r.iskonto);
+
+  /**
+   * SAG KUTUNUN ANLAMI COMBODAN GELIR (kullanici):
+   *   hazir oran   -> SALT GORUNUM iskonto TUTARI (200 TL'nin %10'u = 20)
+   *   "Özel İskonto" -> ORAN girilir (%)
+   *   "Birim Fiyat"  -> hedef BIRIM FIYAT girilir; fark orana cevrilir
+   *
+   * Ucu de AYNI alani (`iskonto`) yazar - satirda saklanan tek sey yuzdedir.
+   * Hazir oranda kutu READONLY: oran zaten combodan secildi, ayni sayiyi iki
+   * yerden degistirilebilir birakmak "hangisi kazanir" sorusu uretirdi.
+   */
+  const [sagMod, setSagMod] = useState<'tutar' | 'oran' | 'fiyat'>(
+    oranSayi > 0 && !ISKONTO_ORANLARI.includes(oranSayi) ? 'oran' : 'tutar');
+  /**
+   * YAZILMAKTA OLAN HAM METIN (kullanici: "combodan birim fiyat sectim ama
+   * giremedim").
+   *
+   * Kutu kontrollu ve degeri MODELDEN turetiliyordu: her tusta sayiya
+   * cevrilip `para.format` ile geri yaziliyordu. "1" yazinca kutu aninda
+   * "1,00" oluyor, imlec kayiyor ve ikinci rakam yazilamiyordu; virgul de
+   * yutuluyordu.
+   *
+   * Cozum: odak KUTUDAYKEN kullanicinin yazdigi metin gosterilir (model yine
+   * her tusta guncellenir - onizleme canli kalir), odak cikinca null'a doner
+   * ve bicimlenmis hali gorunur.
+   */
+  const [sagMetin, setSagMetin] = useState<string | null>(null);
+  const oranSecimi = sagMod === 'oran' ? 'ozel'
+    : sagMod === 'fiyat' ? 'fiyat'
+    : (oranSayi > 0 ? String(oranSayi) : '');
+
+  /**
+   * EKRANDA GOSTERILEN TABAN (kullanici: "iskonto miktari sag tarafa kdv
+   * dahil gelsin"). Ust kutu DAHIL modunda brut gosterir; sagdaki tutar
+   * matrahtan hesaplanirsa iki sayi ayni satirda farkli tabana bakar ve
+   * "200'un %10'u neden 16,67" sorusunu dogururdu.
+   *
+   * ORAN DEGISMEZ: yuzde olcek-bagimsizdir, brut ya da matrah - ayni oran.
+   * Degisen yalniz GOSTERILEN ve GIRILEN sayidir; satira yine yuzde yazilir.
+   */
+  const gosterimTabani = kdvDahil
+    ? (sgkKilitli ? bruta(iskontoTabani, r.kdv) : brutFiyat)
+    : iskontoTabani;
+  /** Oranin TUTAR karsiligi - gosterim tabanindan. */
+  const tutarIskontosu = gosterimTabani * Math.min(oranSayi, 100) / 100;
+  /** Oranin HEDEF BIRIM FIYAT karsiligi (iskonto sonrasi birim). */
+  const hedefFiyat = gosterimTabani - tutarIskontosu;
+
+  /** Iskonto tabaninin ADI - ust kutudaki etiketin aynisi. */
+  const tabanAdi = sgkKilitli ? 'Katkı' : 'Birim Fiyat';
+
+  /** Sag kutuda gorunen deger - moda gore. */
+  const sagDeger = sagMod === 'oran'
+    ? (oranSayi > 0 ? String(r.iskonto) : '')
+    : sagMod === 'fiyat'
+    ? (gosterimTabani > 0 ? para.format(hedefFiyat) : '')
+    : (tutarIskontosu > 0.004 ? para.format(tutarIskontosu) : '');
+
+  const sagEtiket = sagMod === 'oran' ? '%' : yerelPara;
+  // HAZIR ORAN secilince sagdaki kutu o oranin PARA KARSILIGIDIR (salt
+  //   okunur), girilen bir iskonto degil - basligi "İskonto" demek kutuyu
+  //   doldurulacak bir alan gibi gosteriyordu (kullanici: "rename Karşılığı").
+  const sagBaslik = sagMod === 'oran' ? 'Oran'
+    : sagMod === 'fiyat' ? tabanAdi : 'Karşılığı';
+
+  /** Iskonto yazilirken gorunmeyen 2. slot her zaman sifirlanir. */
+  const iskontoYaz = (oran: number | string) =>
+    setR(x => ({ ...x, iskonto: String(oran), iskonto2: '0' }));
+
+  /** Oran tavani asmasin - her yoldan gelen deger buradan gecer. */
+  const oranKirp = (oran: number) =>
+    Math.max(0, Math.min(oran, iskontoTavani, 100));
+
+  /** Sag kutuya yazildi: moda gore orana cevrilir. */
+  const sagYaz = (metin: string) => {
+    const sayi = hamSayi(metin);
+    if (sagMod === 'oran') {
+      iskontoYaz(metin === '' ? '' : oranKirp(sayi));
+      return;
+    }
+    // Hazir oranda kutu salt gorunum - buraya hic gelinmez.
+    if (sagMod !== 'fiyat' || !(gosterimTabani > 0)) return;
+    // HEDEF BIRIM FIYAT -> ORAN. Kullanici EKRANDAKI (KDV dahil) fiyati yazar;
+    //   oran ayni tabana gore hesaplandigi icin matrah/brut farki onemsiz.
+    //   Girilen fiyat asil fiyattan buyukse iskonto 0'dir (bu kutudan ZAM
+    //   yapilamaz - fiyati yukseltmek fiyat listesinin isidir); tavan gecerli.
+    if (!(sayi > 0)) { iskontoYaz(0); return }
+    const oran = (1 - Math.min(sayi, gosterimTabani) / gosterimTabani) * 100;
+    iskontoYaz(oranKirp(Math.round(oran * 1e4) / 1e4));
+  };
+
+  /** Combo secimi: hazir oran, "Özel İskonto" ya da "Birim Fiyat" kutusu. */
+  const oranSec = (v: string) => {
+    // Mod degisince yazilmakta olan ham metin DUSER: eski modun sayisi
+    //   (or. %10) yeni modda (birim fiyat) baska sey demektir.
+    setSagMetin(null);
+    if (v === 'ozel')  { setSagMod('oran');  return }
+    if (v === 'fiyat') { setSagMod('fiyat'); return }
+    setSagMod('tutar');
+    iskontoYaz(v === '' ? 0 : v);
+  };
   /** Izlemli stokta lot adimi: giriste DAGITIM, cikista SECIM (db/114). */
   const izlemGerekli = (girisIzlemi || cikisIzlemi) && r.satirTur === 1 && r.izleme > 0;
 
@@ -328,34 +488,67 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
       }
     >
       <>
+        {/* UST SERIT (mockup: Ekranlar/Kayıt Kabul/ucret_satiri_fiyat_iskonto.html):
+            hasta · ödeyen · fiyat listesi. Kart basligi pencerenin ALTINDA
+            kaldigi icin bu üç bilgi burada tekrarlanir - "bu fiyat hangi
+            listeden, kime" sorusu pencere kapatilmadan cevaplanmali. */}
+        {ustSerit && (ustSerit.hasta || ustSerit.odeyen || ustSerit.liste) && (
+          <div className="kalem-serit">
+            {/* Her bilgi KENDI KUTUSUNDA (mockup `.sel` deseni): duz metinde
+                "Özel (Ücretli)" ile "Özel (Ücretli) 2026" yan yana akip tek
+                cumle gibi okunuyordu - kurum mu liste mi ayirt edilemiyordu.
+                Kutu + on ek ikisini ayirir. */}
+            {ustSerit.hasta && <span>👤 <b>{ustSerit.hasta}</b></span>}
+            {/* ETIKETSIZ (kullanici): ikon zaten hangi bilgi oldugunu
+                soyluyor - "Ödeyen:" / "Liste:" on ekleri seridi uzatiyordu.
+                Ne oldugu ipucunda (title) duruyor. */}
+            {ustSerit.odeyen && (
+              <span title="Ödeyen kurum">🏛 <b>{ustSerit.odeyen}</b></span>
+            )}
+            {ustSerit.liste && (
+              <span title="Fiyat listesi">📋 <b>{ustSerit.liste}</b></span>
+            )}
+          </div>
+        )}
         {hata && <div className="hata-kutusu">{hata}</div>}
         {/* Cerceve kalir, BASLIK yok: pencere basligi zaten stok/hizmet adi. */}
         <div className="kagrup">
           {/* Alanlar ALT ALTA ve giris sirasinda: Miktar > Birim Fiyat > KDV >
               Iskonto. Stok/hizmet adi PENCERE BASLIGINDA yaziyor - burada
               tekrarlamak yer kaplamaktan baska ise yaramiyordu. */}
-          <div className="alan-izgara tek-sutun">
+          {/* `kalem-formu`: olculer mockup'tan (Ekranlar/Kayıt Kabul/
+              ucret_satiri_fiyat_iskonto.html) - etiket sutunu 150px, sayi
+              kutulari SABIT genislikte ve sola yasli. Sayilar esnek kutuda
+              pencere genisligince uzayinca goz hangi sayinin ne oldugunu
+              hizalamadan bulamiyordu. */}
+          <div className="alan-izgara tek-sutun kalem-formu">
             <label className="alan">
               <span className="etiket">Miktar</span>
               <span className="ikili">
                 {/* Eksi isareti elle de yazilamaz. Yukari/asagi ok = +1 / -1. */}
-                <input autoFocus className="hiza-sag" value={r.adet}
+                <input autoFocus className="hiza-sag one-cikan" value={r.adet}
                        onKeyDown={e => {
                          if (e.key === 'ArrowUp') { e.preventDefault(); degis('adet', adetKaydir(r.adet, +1)) }
                          else if (e.key === 'ArrowDown') { e.preventDefault(); degis('adet', adetKaydir(r.adet, -1)) }
                          else tus(e);
                        }}
                        onChange={e => degis('adet', e.target.value.replace(/-/g, ''))} />
-                {/* Fare ile hizli artir/azalt - klavyeden yazmak da serbest. */}
-                <button type="button" className="mini" title="Azalt"
-                        onClick={() => degis('adet', adetKaydir(r.adet, -1))}>−</button>
-                <button type="button" className="mini" title="Artır"
-                        onClick={() => degis('adet', adetKaydir(r.adet, +1))}>+</button>
+                {/* Fare ile hizli artir/azalt - klavyeden yazmak da serbest.
+                    OK IKONLARI (mockup): yukari/asagi, klavyedeki ArrowUp /
+                    ArrowDown ile ayni sey. "+ −" isaretleri sayiya EKLENEN bir
+                    deger gibi okunuyordu. */}
+                <button type="button" className="mini" title="Artır (↑)"
+                        onClick={() => degis('adet', adetKaydir(r.adet, +1))}>▲</button>
+                <button type="button" className="mini" title="Azalt (↓)"
+                        onClick={() => degis('adet', adetKaydir(r.adet, -1))}>▼</button>
                 {/* AMBALAJ BIRIMI (143): stogun tanimli birimleri. Secilen birim
                     yalnizca GIRIS bicimidir - stok her zaman ANA BIRIMDE hareket
-                    eder, carpim asagida gosterilir. Tek birim varsa (ambalaj
-                    tanimlanmamis) liste cizilmez. */}
-                {birimler.length > 1 && (
+                    eder, carpim asagida gosterilir.
+                    TEK BIRIMDE DE KUTU CIZILIR (kullanici, mockup): eskiden
+                    liste hic cizilmiyordu ve "1" neyin biri belli olmuyordu -
+                    miktarin birimi her zaman goz onunde olmali. Secenek yoksa
+                    kutu SALT GORUNUMDUR. */}
+                {birimler.length > 1 ? (
                   <select className="birim" value={String(r.birim ?? 0)}
                           title="Giriş birimi"
                           onChange={e => {
@@ -367,6 +560,10 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                       <option key={b.birim} value={b.birim}>{b.ad}</option>
                     ))}
                   </select>
+                ) : (
+                  <input className="birim" readOnly tabIndex={-1}
+                         title="Giriş birimi"
+                         value={birimler[0]?.ad || anaBirimAdi || 'Adet'} />
                 )}
               </span>
               {/* Ana birim karsiligi: "2 Kutu = 24 Adet". Kullanici ne kadar mal
@@ -400,15 +597,30 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                 {/* DAHIL modunda kutuda BRUT deger durur; satira yazilan
                     her zaman MATRAHTIR (satir matematigi, dip toplam ve
                     e-Belge matrah uzerinden yurur). */}
-                <input className="hiza-sag"
-                       value={sgkKilitli
-                         ? (kdvDahil ? katkiMetni : String(r.katkiTutar ?? ''))
-                         : (kdvDahil ? brutMetni : (dovizli ? r.dovizFiyat : r.birimFiyat))}
+                <input className="hiza-sag one-cikan"
+                       /* KILITLIYKEN BICIMLI GOSTER: kutu duzenlenemiyorsa
+                          icindeki sayi ham metin olarak durmamali - ekranda
+                          "2000" yaziyordu, yanindaki Tutar ise "2.000,00".
+                          Ayni ekranda ayni para iki turlu yazilinca goz
+                          bunlari ayni sayi saymiyor. Duzenlenebilirken HAM
+                          kalir: bicimlemek yazarken imleci kaydirir. */
+                       value={(() => {
+                         const ham = sgkKilitli
+                           ? (kdvDahil ? katkiMetni : String(r.katkiTutar ?? ''))
+                           : (kdvDahil ? brutMetni : (dovizli ? r.dovizFiyat : r.birimFiyat));
+                         return fiyatKilitli && hamSayi(ham) > 0
+                           ? para.format(hamSayi(ham)) : ham;
+                       })()}
                        onKeyDown={tus}
-                       readOnly={sgkKilitli}
+                       readOnly={fiyatKilitli}
                        title={sgkKilitli
                          ? 'Hastanın ödeyeceği katkı - SUT listesinden gelir, '
                            + 'değiştirilemez. İskonto bu tutara işler.'
+                         : basvuruMu && kurumRotasi
+                         ? 'Kurum tarifesi - fiyat sözleşmeden gelir, değiştirilemez.'
+                         : basvuruMu
+                         ? 'Fiyat listeden gelir, değiştirilemez - indirim için '
+                           + 'aşağıdaki İskonto satırını kullanın.'
                          : undefined}
                        onChange={e => {
                          const alan = dovizli ? 'dovizFiyat' : 'birimFiyat';
@@ -425,10 +637,20 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                          setR(x => ({ ...x, birimFiyatKdvli: e.target.value,
                                       [alan]: moduCevir(e.target.value, x.kdv, false) }));
                        }} />
-                {/* Para birimi SECILEBILIR (kullanici): stok kartindan gelen doviz
-                    degistirilebilmeli - ayni urun bir belgede USD, otekinde TL
-                    fiyatlanabiliyor. Yerel paraya donunce kur 1'e cekilir. */}
+                {/* Para birimi ERP belgesinde SECILEBILIR (kullanici): stok
+                    kartindan gelen doviz degistirilebilmeli - ayni urun bir
+                    belgede USD, otekinde TL fiyatlanabiliyor. Yerel paraya
+                    donunce kur 1'e cekilir.
+
+                    BASVURUDA KILITLI (kullanici: "Birim Fiyat para birimi de
+                    değişemez): fiyatin kendisi zaten listeden gelip
+                    degistirilemiyor - para birimini acik birakmak, kilitli
+                    fiyati baska bir birimde yeniden yorumlamak olurdu. */}
                 <select className="birim" value={r.fiyatDovizi || yerelPara}
+                        disabled={fiyatKilitli}
+                        title={fiyatKilitli
+                          ? 'Başvuruda fiyat listeden gelir - para birimi değiştirilemez.'
+                          : undefined}
                         onChange={e => {
                           const yeniCins = e.target.value;
                           kurElle.current = false;
@@ -448,6 +670,18 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                   {[yerelPara, ...DOVIZ_KODLARI.filter(k => k !== yerelPara)]
                     .map(k => <option key={k} value={k}>{k}</option>)}
                 </select>
+                {/* KILIDIN SEBEBI, PARA BIRIMININ SAGINDA (kullanici: "tl
+                    hemen birim fiyat saginda"): rozet araya girince TL kutusu
+                    fiyattan uzaklasiyordu - birim, ait oldugu sayiya yapisik
+                    durmali. KILIDIN SEBEBI YAZAR (mockup'ta `🔒 listeden gelir`): gri
+                    kutu "neden yazamiyorum" sorusunu dogurur; cevap ekranda
+                    olmali, ipucunu gormek icin fareyi bekletmeye gerek kalmasin. */}
+                {fiyatKilitli && (
+                  <span className="rozet gri" style={{ whiteSpace: 'nowrap' }}>
+                    🔒 {sgkKilitli ? 'SUT listesinden'
+                        : kurumRotasi ? 'sözleşmeden' : 'listeden gelir'}
+                  </span>
+                )}
                 {dovizli && (
                   <input className="hiza-sag kur" value={r.kur} onKeyDown={tus}
                          title="Günlük kur — değiştirilebilir"
@@ -570,9 +804,98 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
               </label>
             )}
 
-            {/* Iskonto ve KDV HER TURDE girilir - irsaliyede de matrah/KDV
-                hesaplanir (dip toplam ondan cikar), yalniz gridde gosterilmez. */}
+            {/* ISKONTO, KDV'DEN ONCE (kullanici: "kdv ve iskonto satirlari
+                yer degissin"): kayit kabulde fiyat girildikten sonraki ilk
+                soru indirimdir; KDV zaten listeden gelen sabit oran, elle
+                dokunulan bir alan degil. */}
             {!transferMi && !vergisiz && (
+            <label className="alan">
+              {/* ISKONTO TABANI (586): Özel'de satirin tek fiyati, TTB/SUT'ta
+                  hastanin katki payi. Kurumun odedigi SUT/tarife bedeli
+                  indirimden ETKILENMEZ - hastaneyle hasta arasindaki anlasma
+                  SGK'nin odemesini kisamaz. Hesap sunucuda. */}
+              <span className="etiket">
+                İskonto{katkiVar ? ' (katkı üzerinden)' : ''}</span>
+              <span className="ikili">
+                {/* SOL: ORAN COMBOSU - %0'dan %50'ye birer birer (kullanici).
+                    Tavanin USTUNDEKI oranlar listeye HIC girmez: secilemeyen
+                    secenek gostermek, kullaniciyi sunucudan red yemeye
+                    gonderirdi.
+
+                    Son iki secenek sag kutunun ANLAMINI degistirir:
+                      hazir oran     -> sagda SALT GORUNUM tutar karsiligi
+                      "Özel İskonto" -> sagda serbest yuzde
+                      "Birim Fiyat"  -> sagda hedef birim fiyat / katki */}
+                <select className="birim" style={{ width: 138 }}
+                        value={oranSecimi} disabled={!iskontoYapilir}
+                        title={iskontoYapilir
+                          ? `İskonto oranı (en çok %${iskontoTavani})`
+                          : 'İskonto yetkiniz yok (Yetkiler › Başvuru › '
+                            + 'Başvuruda iskonto)'}
+                        onChange={e => oranSec(e.target.value)}>
+                  <option value="">%0</option>
+                  {ISKONTO_ORANLARI.filter(o => o <= iskontoTavani)
+                    .map(o => <option key={o} value={String(o)}>%{o}</option>)}
+                  <option value="ozel">Özel İskonto…</option>
+                  {/* "Birim Fiyat…" -> "Fiyat Gir…" (kullanici): combo bir
+                      EYLEM listesi - oteki secenekler oran veriyor, bu secenek
+                      kutuyu fiyat girisine ceviriyor. Alan adini tekrarlamak
+                      ne yapacagini soylemiyordu. */}
+                  <option value="fiyat">
+                    {sgkKilitli ? 'Katkı Gir…' : 'Fiyat Gir…'}
+                  </option>
+                </select>
+                {/* SAG: TEK KUTU, anlami moda gore (kullanici). Ucu de ayni
+                    alani yazar - satirda saklanan tek sey YUZDEDIR:
+                      tutar  -> tutar / taban
+                      oran   -> dogrudan
+                      fiyat  -> (1 - hedef / asil) x 100
+                    Ayri bir "tutar iskontosu" kolonu acmak, ayni tutarin iki
+                    formulle hesaplandigi ikinci bir yol demekti. */}
+                {/* ETIKET UST KUTUYU IZLER (kullanici: "üstte birim fiyatsa
+                    birim fiyat, katkı ise katkı yazar"): saf SGK'da iskonto
+                    birim fiyata degil HASTA KATKISINA isler (fn_dagilim_coz),
+                    ust kutuda da "Hasta Katkısı" yazar. */}
+                <span className="birim-metin">{sagBaslik}</span>
+                <input className="hiza-sag iskonto-deger" value={sagMetin ?? sagDeger}
+                       onKeyDown={tus} disabled={!iskontoYapilir}
+                       /* HAZIR ORANDA SALT GORUNUM: oran combodan secildi,
+                          buradaki sayi onun TUTAR karsiligi. Ayni orani iki
+                          yerden degistirilebilir birakmak "hangisi kazanir"
+                          sorusu uretirdi. */
+                       readOnly={sagMod === 'tutar'}
+                       placeholder={sagMod === 'oran' ? 'oran'
+                                  : sagMod === 'fiyat'
+                                  ? tabanAdi.toLocaleLowerCase('tr') : ''}
+                       title={sagMod === 'oran'
+                         ? `Serbest iskonto oranı (en çok %${iskontoTavani})`
+                         : sagMod === 'fiyat'
+                         ? `İskonto sonrası ${tabanAdi.toLocaleLowerCase('tr')}`
+                           + ` - asıl değere (${para.format(iskontoTabani)}) göre`
+                           + ' oran hesaplanır'
+                         : `Seçilen oranın tutar karşılığı (${para
+                             .format(gosterimTabani)} × %${oranSayi})`
+                           + (kdvDahil ? ' - KDV dahil' : '')}
+                       onFocus={e => { if (sagMod !== 'tutar') setSagMetin(e.target.value) }}
+                       onBlur={() => setSagMetin(null)}
+                       onChange={e => { setSagMetin(e.target.value); sagYaz(e.target.value) }} />
+                <span className="birim-metin">{sagEtiket}</span>
+              </span>
+              {!iskontoYapilir && (
+                <span className="ipucu">
+                  İskonto yetkiniz yok - Yetkiler › Başvuru › “Başvuruda iskonto”.
+                </span>
+              )}
+            </label>
+            )}
+
+            {/* KDV SATIRI BASVURUDA CIZILMEZ (kullanici): oran hizmet
+                kartindan gelir, mod da zaten DAHIL'e kilitli (basvuruda fiyat
+                her zaman KDV dahil girilir) - ekranda degistirilemeyen iki
+                kutu duruyordu. Matrah/KDV hesabi AYNEN surer, yalniz gorunmez;
+                ERP belgelerinde (fatura, irsaliye) satir eskisi gibi acik,
+                orada oran ve mod gercekten secilir. */}
+            {!transferMi && !vergisiz && !basvuruMu && (
             <label className="alan">
               <span className="etiket">KDV %</span>
               {/* ORAN ve GIRIS MODU yan yana, ESIT GENISLIKTE (kullanici):
@@ -629,27 +952,6 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
             </label>
             )}
 
-            {/* Iki kademeli iskonto: ikincisi birincinin ARDINDAN carpimsal
-                uygulanir (sunucudaki BelgeHesap.SatirTutari ile ayni sira). */}
-            {!transferMi && !vergisiz && (
-            <label className="alan">
-              {/* ISKONTO TABANI (586): Özel'de satirin tek fiyati, TTB/SUT'ta
-                  hastanin katki payi. Kurumun odedigi SUT/tarife bedeli
-                  indirimden ETKILENMEZ - hastaneyle hasta arasindaki anlasma
-                  SGK'nin odemesini kisamaz. Hesap sunucuda. */}
-              <span className="etiket">
-                İskonto %{katkiVar ? ' (katkı üzerinden)' : ''}</span>
-              <span className="ikili">
-                <input className="hiza-sag" value={r.iskonto} onKeyDown={tus}
-                       title="1. iskonto"
-                       onChange={e => degis('iskonto', e.target.value)} />
-                <input className="hiza-sag" value={r.iskonto2} onKeyDown={tus}
-                       title="2. iskonto (birincinin ardindan uygulanir)"
-                       onChange={e => degis('iskonto2', e.target.value)} />
-              </span>
-            </label>
-            )}
-
             {/* EK KATKI KUTUSU KALDIRILDI (586, kullanici). "Tamamı hastadan
                 tahsil edilir" isareti satirin kovalarini ELLE sabitliyordu;
                 aynı soruya artık Katkı Fiyatı cevap veriyor - hastanin payi
@@ -680,22 +982,40 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                      onChange={e => degis('aciklama', e.target.value)} />
             </label>
 
+            {/* ONIZLEME BOLUMU (mockup'ta ayri bir `.grp` kutusu): girilen
+                alanlarla HESAPLANAN alanlar arasinda gorsel bir sinir olmali -
+                duz liste icinde salt gorunum kutular girilebilir sanilliyordu. */}
+            {!transferMi && (
+              <div className="alan-ayrac">Önizleme</div>
+            )}
+
             {/* ISKONTO SONRASI BIRIM (602): yalniz iskonto VARSA cizilir -
                 iskontosuz satirda ust kutudaki sayinin aynisi olurdu. */}
             {!transferMi && iskontoluMu && (
             <label className="alan">
+              {/* "(önizleme, KDV dahil)" eki KALKTI (kullanici): kutu zaten
+                  salt gorunum ve basvuruda KDV her zaman dahil - her satirda
+                  tekrarlanan parantez etiketi uzatiyordu. */}
               <span className="etiket">
-                {sgkKilitli ? 'İskontolu hasta katkısı' : 'İskontolu birim fiyat'}
-                {' '}(önizleme, KDV {kdvDahil ? 'dahil' : 'hariç'})</span>
+                İskontolu {sgkKilitli ? 'Hasta Katkısı' : 'Birim Fiyat'}</span>
               <input className="hiza-sag onizleme"
                      value={para.format(onizlemeBirim)} readOnly />
+              {/* NE UYGULANDIGI YAZAR (661): kutudaki sayi sonuctur, hangi
+                  oran ve hangi tutarin dusuldugu gorunmuyordu - "100 TL
+                  yazdim, dogru mu indi" sorusu ancak hesap makinesiyle
+                  cevaplaniyordu. */}
+              <span className="ipucu">
+                {para.format(gosterimTabani)} − %{oranSayi}
+                {tutarIskontosu > 0.004 && <> ({para.format(tutarIskontosu)} {yerelPara})</>}
+                {' = '}<b>{para.format(onizlemeBirim)} {yerelPara}</b>
+              </span>
             </label>
             )}
 
             {!transferMi && (
             <label className="alan">
               <span className="etiket">
-                Tutar (önizleme, KDV {kdvDahil ? 'dahil' : 'hariç'})</span>
+                Tutar</span>
               <input className="hiza-sag onizleme"
                      value={para.format(onizlemeTutar)} readOnly />
             </label>

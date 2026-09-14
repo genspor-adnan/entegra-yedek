@@ -239,6 +239,13 @@ export function sekmeleriKur(secenek: {
     s.push({ tur: 'ozel', anahtar: 'ozel:yetkiler', baslik: 'Yetki Matrisi' });
     // Kullanicilar AYRI SEKME DEGIL (kullanici): Genel sekmesinde, alanlarin
     //   altinda gomulu grid - bkz. KartGrupSekmesi.
+    //
+    // SEKMENIN ADI DA "Kullanıcılar" (kullanici: "rol karti Genel sekme adi
+    //   rename Kullanıcılar"): sekmede duran tek gercek icerik o grid; rolun
+    //   kimlik alanlari zaten sekmenin USTUNDE, baslik seridinde duruyor -
+    //   "Genel" adi sekmede ne oldugunu soylemiyordu.
+    const genelSekme = s.find(x => x.tur === 'grup' && x.baslik === 'Genel');
+    if (genelSekme) genelSekme.baslik = 'Kullanıcılar';
   }
   // Personel'e ozel: Resim/Doküman galerisi (057_dokuman.sql, generic DokumanGalerisi -
   // Kişi/Cari/Stok'ta da aynı bileşen kullanılabilir). Yeni kayıtta henüz id yok.

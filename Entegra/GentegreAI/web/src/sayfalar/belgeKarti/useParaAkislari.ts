@@ -1,9 +1,11 @@
 import { useRef } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni, type BelgeYaniti } from '../../api/sozlesme';
-import { mesaj, metinSor, onay } from '../../bilesenler/mesaj';
+import { mesaj, metinSor, onay, paraSor, type ParaSecimi } from '../../bilesenler/mesaj';
 import { para, tutarOku } from '../../bilesenler/bicim';
 import { belgeKisaAdi } from '../belgeTuru';
+import { DOVIZ_KODLARI, IADE_NEDENLERI, iadeNedenAdi } from '../belgeSabitleri';
+import type { HizliTahsilatEki } from '../belgeTahsilat';
 import { KOVA_SGK, KOVA_OSS } from './dagilimKovalari';
 import {
   donusumSatirlari, posFisiSecimi, sinirliDonusumSecimi, donusumPayi, tarafPayi,
@@ -31,7 +33,8 @@ export interface ParaAkisRef {
   /** Kayit sart: kaydedilmemis belge / bekleyen kalem varsa kaydeder. */
   kayitSart(): Promise<boolean>;
   /** Hizli tahsilat (kasa karti acmadan) - tahsilat kancasindan gelir. */
-  hizliTahsilat(tur: number, hesapId: number, tutar: number, hesapAdi: string): Promise<void>;
+  hizliTahsilat(tur: number, hesapId: number, tutar: number, hesapAdi: string,
+                ek?: HizliTahsilatEki): Promise<void>;
 }
 
 export interface ParaAkisGirdisi {
@@ -98,18 +101,103 @@ export function useParaAkislari(g: ParaAkisGirdisi) {
    * edilmisti, tutar 0 cikiyor ve islem sessizce duruyordu). Iptal edilirse
    * 0 doner ve satir eklenmez.
    */
-  const tahsilatTutariSor = async (baslik: string) => {
+  const tahsilatTutariSor = async (baslik: string) =>
+    (await tahsilatParasiSor(baslik))?.tutar ?? 0;
+
+  /** O tarihin kurunu getirir (tahsilat yonu: satis kuru). */
+  const kurGetir = async (doviz: string) => {
+    const bugun = new Date().toISOString().slice(0, 10);
+    try { return (await api.dovizKur(doviz, bugun, gRef.current.alisMi ? 2 : 1)).kur }
+    catch { return null }
+  };
+
+  /**
+   * TAHSILAT TUTARI + PARA BIRIMI (kullanici: "tutar sağına combo para birimi
+   * ekle"). Duz metin kutusu yalniz sayi aliyordu; dovizli kasada "100"un ne
+   * oldugu belirsizdi. Doviz secilirse kur ve YEREL KARSILIK ayni pencerede
+   * gorunur - kasaya yazilan tutar odur.
+   *
+   * Iptalde null doner.
+   */
+  const tahsilatParasiSor = async (baslik: string): Promise<ParaSecimi | null> => {
     const kalan = hizliTutar();
+    const yerel = gRef.current.yerelPara || 'TL';
     // BASVURUDA HER ZAMAN SORULUR (kullanici): kismi tahsilat alinabilsin.
-    if (kalan > 0 && gRef.current.basvuruMu)
-      return await tutarSor(`${baslik} tutarı (₺)`, kalan) ?? 0;
-    if (kalan > 0) return kalan;
-    const metin = await metinSor(
-      `${baslik}: bu belgede açık borç yok. Tahsilat tutarını yazın (₺)`, '');
-    // Kullanici "50.000,00", "50000" ya da "50.000,00 ₺" yazabilir.
-    const t = metin === null ? 0 : tutarOku(metin);
-    if (metin !== null && !(t > 0)) mesaj('Tutar sıfırdan büyük olmalı.');
-    return t;
+    // Acik borc yoksa da sorulur - fazla/pesin tahsilat girilebilsin.
+    const s = await paraSor(
+      kalan > 0 ? `${baslik} tutarı`
+                : `${baslik}: bu belgede açık borç yok. Tahsilat tutarını yazın`,
+      {
+        varsayilan: kalan > 0 ? para.format(kalan) : '',
+        doviz: yerel, yerelPara: yerel, dovizler: DOVIZ_KODLARI,
+        // ACIK BORCTAN FAZLASI SERBEST degil: kalan varken ust sinir odur.
+        ...(kalan > 0 ? { enCok: kalan } : {}),
+        kurGetir,
+      });
+    if (!s) return null;
+    if (!(s.tutar > 0)) { mesaj('Tutar sıfırdan büyük olmalı.'); return null }
+    return s;
+  };
+
+  /**
+   * IADE / IPTAL (kullanici: "↩ İade / İptal butonu... tutar için modal
+   * gelsin, hemen altına İade/İptal Nedeni combo olarak gelsin, tutar −
+   * olarak işlensin").
+   *
+   * Iade AYNI TURDE ters isaretli satirdir - ayri bir islem turu acmak yerine
+   * boyle yapilir; kasa ekstresi, belgenin tahsil toplami ve vardiya ozeti
+   * kendiliginden dogru cikar. Neden KOD olarak sorulur ve aciklamaya yazilir.
+   *
+   * Kasa/hesap: nakitte kullanicinin kasasi, banka/POS'ta secim penceresi
+   * (cagiran `hesapSecAc` ile acar) - tahsilatin aynisi.
+   */
+  const iadeParasiSor = async (baslik: string) => {
+    const yerel = gRef.current.yerelPara || 'TL';
+    return paraSor(`${baslik} iadesi / iptali`, {
+      doviz: yerel, yerelPara: yerel, dovizler: DOVIZ_KODLARI,
+      eksiMi: true, nedenler: IADE_NEDENLERI, nedenEtiket: 'İade / İptal Nedeni',
+      kurGetir,
+    });
+  };
+
+  /** Sorulmus iadeyi YAZAR (hesap secimi cagirana ait). */
+  const iadeYaz = async (tur: number, hesapId: number, hesapAdi: string,
+                         s: ParaSecimi) => {
+    const { ref, setHata } = gRef.current;
+    try {
+      // PARA USTU de buradan gecer: nedeni "Para üstü" olan bir iadedir
+      //   (100 USD alinip 10'u geri verilir). Ayri dugme/akis yok - kasadan
+      //   cikan para her iki durumda da ayni satiri yazar, yalniz sebebi
+      //   farkli; para birimi de bu pencereden secilir.
+      await ref.current.hizliTahsilat(tur, hesapId, s.tutar, hesapAdi, {
+        dovizCinsi: s.doviz, dovizKuru: s.kur, eksiMi: true,
+        aciklama: `İade / İptal — ${iadeNedenAdi(s.neden ?? '')}`,
+      });
+    } catch (e) { setHata(hataMetni(e)) }
+  };
+
+  const iadeAkisi = async (tur: number, hesapId: number, hesapAdi: string,
+                           baslik: string) => {
+    const s = await iadeParasiSor(baslik);
+    if (!s) return;
+    await iadeYaz(tur, hesapId, hesapAdi, s);
+  };
+
+  /** Nakit iade: kasa kullanicinin atamasindan bulunur (hizli nakitle ayni). */
+  const nakitIadesi = async () => {
+    const { ref, alisMi, kullaniciId, yerelPara, setHata } = gRef.current;
+    if (!await ref.current.kayitSart()) return;
+    try {
+      let h: Record<string, unknown> | null = null;
+      for (const filtre of kasaAramaSirasi(kullaniciId, yerelPara)) {
+        const y = await api.liste('hesap', {
+          sayfa: 1, boyut: 1, sirala: [{ alan: 'kod', yon: 'asc' }], filtre,
+        });
+        if (y.satirlar[0]) { h = y.satirlar[0]; break }
+      }
+      if (!h) { mesaj('Aktif kasa hesabı bulunamadı - Kasa tanımlarından bir kasa açın.'); return }
+      await iadeAkisi(alisMi ? 31 : 21, Number(h.id), String(h.ad ?? ''), 'Nakit');
+    } catch (e) { setHata(hataMetni(e)) }
   };
 
   /**
@@ -322,24 +410,33 @@ export function useParaAkislari(g: ParaAkisGirdisi) {
     //   kaydeder, kullanici once yesil dugmeye gitmek zorunda kalmasin.
     if (!await ref.current.kayitSart()) return;
     try {
-      const tutar = await tahsilatTutariSor('Nakit');
-      if (!(tutar > 0)) return;
+      const s = await tahsilatParasiSor('Nakit');
+      if (!s) return;
+      const tutar = s.tutar;
       // Kasa secim SIRASI kural dosyasinda (atama > ana kasa > herhangi biri).
+      //   DOVIZ SECILDIYSE o dovizin kasasi aranir: TL kasaya USD tahsilat
+      //   yazilamaz, sunucu reddeder.
       let h: Record<string, unknown> | null = null;
-      for (const filtre of kasaAramaSirasi(kullaniciId, yerelPara)) {
+      for (const filtre of kasaAramaSirasi(kullaniciId, s.doviz || yerelPara)) {
         const y = await api.liste('hesap', {
           sayfa: 1, boyut: 1, sirala: [{ alan: 'kod', yon: 'asc' }], filtre,
         });
         if (y.satirlar[0]) { h = y.satirlar[0]; break }
       }
-      if (!h) { mesaj('Aktif kasa hesabı bulunamadı - Kasa tanımlarından bir kasa açın.'); return }
+      if (!h) {
+        mesaj(`Aktif ${s.doviz} kasa hesabı bulunamadı - Kasa tanımlarından bir kasa açın.`);
+        return;
+      }
       await ref.current.hizliTahsilat(alisMi ? 31 : 21, Number(h.id), tutar,
-                                      String(h.ad ?? ''));
+                                      String(h.ad ?? ''),
+                                      { dovizCinsi: s.doviz, dovizKuru: s.kur });
       // Hastadan tahsilat alindi: kurum payi varsa TAHAKKUK edilir (yoksa).
       await kurumTahakkukuOtomatik(gRef.current.kayitliId);
     } catch (e) { setHata(hataMetni(e)) }
   };
 
-  return { hizliTutar, tutarSor, tahsilatTutariSor, hizliDonustur, posSonrasi, hizliNakit,
+  return { hizliTutar, tutarSor, tahsilatTutariSor, tahsilatParasiSor,
+           hizliDonustur, posSonrasi, hizliNakit,
+           iadeAkisi, iadeParasiSor, iadeYaz, nakitIadesi,
            kurumTahakkukuOtomatik };
 }

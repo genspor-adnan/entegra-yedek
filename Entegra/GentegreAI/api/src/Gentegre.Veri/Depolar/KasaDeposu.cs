@@ -64,7 +64,7 @@ public sealed partial class KasaDeposu
         //   yapilmasi gerektigini soyleyen dogrulama hatasi doner.
         islem["subeId"] = baglam.SubeZorunlu();
 
-        IleriTarihKontrol(islem);
+        IleriTarihKontrol(islem, baglam.ZamanDilimi);
 
         await TarafSnapshotAsync(baglanti, tx, islem, iptal);
         await DovizDoldurAsync(baglanti, tx, islem, secenekler, uyarilar, iptal);
@@ -141,12 +141,16 @@ public sealed partial class KasaDeposu
     ///
     /// PLAN tarihi bunun DISINDA: plan zaten gelecege yazilir.
     /// </summary>
-    private static void IleriTarihKontrol(IDictionary<string, object?> islem)
+    private static void IleriTarihKontrol(IDictionary<string, object?> islem,
+                                          string? zamanDilimi = null)
     {
         if (islem.TryGetValue("islemTarihi", out var ham) && ham is DateTime t)
         {
             // Dakika toleransi: istemcinin saati birkac saniye ileri olabilir.
-            if (t > Saat.Simdi.AddMinutes(1))
+            // 666: "ileri tarihli mi" sorusu SUBENIN saatinde sorulur - Berlin
+            //   subesinde 23:00'te girilen islem, Istanbul saatiyle "yarin"
+            //   gorunup reddedilirdi.
+            if (t > Saat.SimdiDilim(zamanDilimi).AddMinutes(1))
                 throw GentegreHatasi.Dogrulama(
                     "İleri tarihli işlem kaydedilemez.",
                     new AlanHatasi("islemTarihi", "Bugünden ileri olamaz."));
@@ -164,7 +168,7 @@ public sealed partial class KasaDeposu
     /// Ayar Yönetim > Ayarlar > Kasa Ayarlari ekranindan degistirilir.
     /// </summary>
     private static async Task DuzeltmeSiniriKontrolAsync(NpgsqlConnection baglanti,
-        NpgsqlTransaction tx, int id, CancellationToken iptal)
+        NpgsqlTransaction tx, int id, CancellationToken iptal, string? zamanDilimi = null)
     {
         var gun = await AyarDeposu.SayiAsync(baglanti, tx, "kasa.duzenleme_gun", iptal);
         if (gun < 0) return;                                   // sinirsiz
@@ -178,7 +182,8 @@ public sealed partial class KasaDeposu
             id);
         if (await komut.ExecuteScalarAsync(iptal) is not DateTime tarih) return;
 
-        if (Saat.Bugun > tarih.Date.AddDays(gun))
+        // 666/667: tarih UTC AN; gun karsilastirmasi SUBENIN gununde yapilir.
+        if (Saat.BugunDilim(zamanDilimi) > Saat.Yerel(tarih, zamanDilimi).Date.AddDays(gun))
             throw GentegreHatasi.IsKurali(
                 $"İşlem tarihinden {gun} gün geçti; kayıt kilitlendi - İptal edip yeniden girin.");
     }
@@ -223,7 +228,7 @@ public sealed partial class KasaDeposu
         //   yevmiye sirasi bozulmasin. Kapanmis donem motorda reddedilir.
         if (durum >= KasaDurum.Gerceklesti)
         {
-            await DuzeltmeSiniriKontrolAsync(baglanti, tx, id, iptal);
+            await DuzeltmeSiniriKontrolAsync(baglanti, tx, id, iptal, baglam.ZamanDilimi);
             await MotorAsync(baglanti, tx, "select public.fn_kasa_islem_duzelt_hazirla(@p0)",
                              new object?[] { id }, iptal);
             uyarilar.Add("Gerçekleşmiş işlem düzeltildi: muhasebe fişi yeniden yazıldı.");
@@ -234,7 +239,7 @@ public sealed partial class KasaDeposu
         islem.Remove("durum");
         islem.Remove("islemNo");
 
-        IleriTarihKontrol(islem);
+        IleriTarihKontrol(islem, baglam.ZamanDilimi);
 
         await BaslikGuncelleAsync(baglanti, tx, id, islem, baglam, iptal);
 

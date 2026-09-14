@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>[#ERP-292] e-fatura İrsaliye ve Sipariş numarası xml de bulunmuyor</title>
+    <meta http-equiv="Content-Type" Content="application/vnd.ms-word; charset=UTF-8">
+        <style type="text/css">
+
+.tableBorder, .grid
+{
+    background-color: #fff;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tableBorder td, .grid td
+{
+    vertical-align: top;
+    padding: 2px;
+    border: 1px solid #ccc;
+}
+
+.noPadding
+{
+    padding: 0 !important;
+}
+
+h3 .subText
+{
+    font-size: 60%;
+    font-weight: normal;
+}
+
+.tabLabel
+{
+    font-weight: bold;
+    border: 1px solid #ccc;
+    border-bottom:none;
+    padding: 2px;
+    display: inline;
+}
+
+td.blank
+{
+    padding: 0;
+    margin: 0;
+}
+
+.blank td
+{
+    border: none;
+}
+
+#descriptionArea
+{
+    margin: 0;
+    padding: 2px;
+    border: 1px solid #ccc;
+}
+
+hr
+{
+    border-top:1px solid #aaa;
+}
+
+hr.fullcontent
+{
+  height: 15px;
+  padding: 10px 0;
+  background: #fff url('https://gentegre.atlassian.net/images/icons/hr.gif') no-repeat scroll center;
+}
+
+</style>
+
+</head>
+<body>
+
+<table class="tableBorder" cellpadding="0" cellspacing="0" border="0" width="100%">
+    <tr>
+        <td bgcolor="#f0f0f0" width="100%" colspan="2" valign="top">
+                            <h3 class="formtitle">
+                        [ERP-292]&nbsp;<a href="https://gentegre.atlassian.net/browse/ERP-292">e-fatura İrsaliye ve Sipariş numarası xml de bulunmuyor</a>
+            <span class="subText">
+               Oluşturulan: 24/Ağu/26                   &nbsp;Güncellendi: 14/Eyl/26
+
+                                            </span>
+            </h3>
+        </td>
+    </tr>
+    <tr>
+        <td width="20%"><b>Durum:</b></td>
+        <td width="80%">HATA VAR</td>
+    </tr>
+    <tr>
+        <td width="20%"><b>Proje:</b></td>
+        <td width="80%"><a href="https://gentegre.atlassian.net/secure/BrowseProject.jspa?id=10001">Gentegre ERP</a></td>
+    </tr>
+
+        <tr>
+            <td><b>Bileşenler:</b></td>
+            <td>
+                            Yok
+                </td>
+    </tr>
+    
+
+        <tr>
+            <td><b>Etkilenen sürümler:</b></td>
+            <td>
+                            Yok
+                </td>
+    </tr>
+    
+
+        <tr>
+            <td><b>Düzeltme sürümleri:</b></td>
+            <td>
+                            Yok
+                </td>
+    </tr>
+    
+    
+    </table>
+
+<br />
+<table class="grid" cellpadding="0" cellspacing="0" border="0" width="100%">
+    <tr>
+        <td bgcolor="#f0f0f0" valign="top" width="20%">
+            <b>Tür:</b>
+        </td>
+        <td bgcolor="#ffffff" valign="top"  width="30%" >
+            Hata
+        </td>
+
+                    <td bgcolor="#f0f0f0">
+                <b>Öncelik:</b>
+            </td>
+            <td bgcolor="#ffffff" valign="top" nowrap>
+                Medium
+            </td>
+            </tr>
+    <tr>
+                        <td bgcolor="#f0f0f0" valign="top" width="20%">
+                <b>Raporlayan:</b>
+            </td>
+            <td bgcolor="#ffffff" valign="top"  width="30%" >
+                                        
+                
+        
+            <a class="user-hover" rel="712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                id="word_reporter_712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                href="https://gentegre.atlassian.net/secure/ViewProfile.jspa?accountId=712020%3A0b752c1b-52ef-495a-86fa-058ded07f07a">
+                    Irmak Semiz
+                </a>
+
+                            </td>
+        
+                    <td bgcolor="#f0f0f0" width="20%">
+                <b>Atanan Kişi:</b>
+            </td>
+            <td bgcolor="#ffffff" valign="top" nowrap  width="30%" >
+                                        
+                
+        
+            <a class="user-hover" rel="5e9056e884dec20b817cf97a"
+                id="word_assignee_5e9056e884dec20b817cf97a"
+                href="https://gentegre.atlassian.net/secure/ViewProfile.jspa?accountId=5e9056e884dec20b817cf97a">
+                    Adnan Odabaşı
+                </a>
+
+                            </td>
+            </tr>
+    	<tr>
+		<td bgcolor="#f0f0f0" width="20%">
+			<b>Çözüm:</b>
+		</td>
+		<td bgcolor="#ffffff" valign="top" width="30%" nowrap>
+            				Çözülmemiş
+                    </td>
+                    <td bgcolor="#f0f0f0" width="20%">
+                <b>Oylar:</b>
+            </td>
+            <td bgcolor="#ffffff" valign="top" width="30%" nowrap>
+                0
+            </td>
+        
+    </tr>
+    
+        <tr>
+        <td bgcolor="#f0f0f0" width="20%">
+            <b>Etiketler:</b>
+        </td>
+        <td id="labels-13242-value" class="value" bgcolor="#ffffff" valign="top" colspan="3" nowrap>
+                            Yok
+                    </td>
+    </tr>
+    
+    	<tr>
+        		<td bgcolor="#f0f0f0" width="20%"><b>Kalan Süre Tahmini:</b></td>
+        <td bgcolor="#ffffff" valign="top" nowrap width="80%" colspan="3">
+                            Belirtilmemiş
+            		</td>
+    </tr>
+    <tr>
+                <td bgcolor="#f0f0f0" width="20%"><b>Harcanan Süre:</b></td>
+		<td bgcolor="#ffffff" valign="top" nowrap width="80%" colspan="3">
+                            Belirtilmemiş
+            		</td>
+	</tr>
+    <tr>
+                <td bgcolor="#f0f0f0" width="20%"><b>Orijinal tahmin:</b></td>
+		<td bgcolor="#ffffff" valign="top" nowrap width="80%" colspan="3">
+                            Belirtilmemiş
+            		</td>
+    </tr>
+    
+    </table>
+
+
+
+    <br />
+
+    	<table class="grid" cellpadding="0" cellspacing="0" border="0" width="100%">
+            
+
+                <tr>
+            <td bgcolor="#f0f0f0" width=20% valign=top>
+                <b>Ekler:</b>
+            </td>
+            <td bgcolor="#ffffff" valign="top">
+                                    <img src="https://gentegre.atlassian.net/images/icons/attach/image.gif" height="16" width="16" border="0" alt="PNG Dosyası">
+                    image-20260824-114526.png &nbsp;&nbsp;&nbsp;
+                                    <img src="https://gentegre.atlassian.net/images/icons/attach/image.gif" height="16" width="16" border="0" alt="PNG Dosyası">
+                    image-20260907-064107.png &nbsp;&nbsp;&nbsp;
+                            </td>
+        </tr>
+        
+    
+
+
+    
+                        <tr>
+                <td bgcolor="#f0f0f0" width="20%" valign="top"><b>Rank:</b></td>
+                <td id="customfield_10019-13242-value" class="value" bgcolor="#ffffff" width="80%">      0|i001ge:
+  </td>
+            </tr>
+                                <tr>
+                <td bgcolor="#f0f0f0" width="20%" valign="top"><b>Modül:</b></td>
+                <td id="customfield_10039-13242-value" class="value" bgcolor="#ffffff" width="80%">    Alış/Satış
+</td>
+            </tr>
+            </table>
+
+    <br/>
+
+    <table cellpadding="2" cellspacing="0" border="0" width="100%" align="center">
+    <tr>
+        <td bgcolor="#bbbbbb" width="1%" nowrap align="center">
+            &nbsp;<font color="#ffffff"><b>Açıklama</b></font>&nbsp;
+        </td>
+        <td>&nbsp;</td>
+    </tr>
+    </table>
+
+    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+    <tr>
+        <td id="descriptionArea">
+            
+
+<p>Sipariş--İrsaliye den dönüşmüş fatura da sipariş ve irsaliye ile ilgili xml de bilgileri gözükmüyor. Efaturada örnek xml de aşağıdaki elementler bulunuyor.</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<pre class="code-html"><span class="code-tag">&lt;cac:OrderReference&gt;</span>
+    <span class="code-tag">&lt;cbc:ID&gt;</span>Y_K5618_02_0518<span class="code-tag">&lt;/cbc:ID&gt;</span>
+    <span class="code-tag">&lt;cbc:IssueDate&gt;</span>2026-06-05<span class="code-tag">&lt;/cbc:IssueDate&gt;</span>
+  <span class="code-tag">&lt;/cac:OrderReference&gt;</span>
+
+  <span class="code-tag">&lt;cac:DespatchDocumentReference&gt;</span>
+    <span class="code-tag">&lt;cbc:ID&gt;</span>IDI2026000000696<span class="code-tag">&lt;/cbc:ID&gt;</span>
+    <span class="code-tag">&lt;cbc:IssueDate&gt;</span>2026-06-05<span class="code-tag">&lt;/cbc:IssueDate&gt;</span>
+  <span class="code-tag">&lt;/cac:DespatchDocumentReference&gt;</span></pre>
+</div></div>
+
+<p>Siparişler için e-faturada bu iki fn den geldiğini hatırlıyorum. SELECT <span class="error">&#91;dbo&#93;</span>.fn_Fat_SiparisTarihler(ID),<span class="error">&#91;dbo&#93;</span>.fn_Fat_SiparisNolar(ID) FROM FATBASLIK WHERE ID = 1612</p>
+
+<p><span class="image-wrap" style=""><img src="https://gentegre.atlassian.net/rest/api/3/attachment/content/12977" alt="image-20260824-114526.png" width="742" style="border: 0px solid black" /></span></p>
+            <br/>
+        </td>
+    </tr>
+    </table>
+
+    <br/>
+
+    <table cellpadding="2" cellspacing="0" border="0" width="100%" align="center">
+    <tr>
+        <td bgcolor="#bbbbbb" width="1%" nowrap align="center">
+            &nbsp;<font color="#ffffff"><b>Yorumlar</b></font>&nbsp;
+        </td>
+        <td>&nbsp;</td>
+    </tr>
+    </table>
+
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" class="grid" style="margin: 0;">
+                <tr id="comment-header-11134"><td bgcolor="#f0f0f0">
+              tarafından eklenen yorum
+                                                    
+                
+        
+            <a class="user-hover" rel="712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                id="word_commented_712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                href="https://gentegre.atlassian.net/secure/ViewProfile.jspa?accountId=712020%3A0b752c1b-52ef-495a-86fa-058ded07f07a">
+                    Irmak Semiz
+                </a>
+
+                                        <font size="-2">
+            [
+                <font color="#336699">25/Ağu/26</font>
+
+                            ]
+            </font>
+
+        </td></tr>
+        <tr id="comment-body-11134"><td bgcolor="#ffffff">
+            <p>OrderReference nasıl oluşturuluyor? Cevaba göre test sonucu bildirilecek.</p>
+        </td></tr>
+                <tr id="comment-header-11303"><td bgcolor="#f0f0f0">
+              tarafından eklenen yorum
+                                                    
+                
+        
+            <a class="user-hover" rel="712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                id="word_commented_712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                href="https://gentegre.atlassian.net/secure/ViewProfile.jspa?accountId=712020%3A0b752c1b-52ef-495a-86fa-058ded07f07a">
+                    Irmak Semiz
+                </a>
+
+                                        <font size="-2">
+            [
+                <font color="#336699">01/Eyl/26</font>
+
+                            ]
+            </font>
+
+        </td></tr>
+        <tr id="comment-body-11303"><td bgcolor="#ffffff">
+            <p>Birden fazla siparişten dönüşmüş faturada tek sipariş numarasını getiriyor. Örnek xml çıktısı aşağıdaki gibi olmalıdır.</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<pre class="code-html">  <span class="code-tag">&lt;cac:OrderReference&gt;</span>
+    <span class="code-tag">&lt;cbc:ID&gt;</span>4100251580<span class="code-tag">&lt;/cbc:ID&gt;</span>
+    <span class="code-tag">&lt;cbc:IssueDate&gt;</span>2026-05-23<span class="code-tag">&lt;/cbc:IssueDate&gt;</span>
+  <span class="code-tag">&lt;/cac:OrderReference&gt;</span>
+  <span class="code-tag">&lt;cac:OrderReference&gt;</span>
+    <span class="code-tag">&lt;cbc:ID&gt;</span>4100254366<span class="code-tag">&lt;/cbc:ID&gt;</span>
+    <span class="code-tag">&lt;cbc:IssueDate&gt;</span>2026-06-26<span class="code-tag">&lt;/cbc:IssueDate&gt;</span>
+  <span class="code-tag">&lt;/cac:OrderReference&gt;</span>
+  <span class="code-tag">&lt;cac:OrderReference&gt;</span>
+    <span class="code-tag">&lt;cbc:ID&gt;</span>4100255020<span class="code-tag">&lt;/cbc:ID&gt;</span>
+    <span class="code-tag">&lt;cbc:IssueDate&gt;</span>2026-07-02<span class="code-tag">&lt;/cbc:IssueDate&gt;</span>
+  <span class="code-tag">&lt;/cac:OrderReference&gt;</span>
+  <span class="code-tag">&lt;cac:OrderReference&gt;</span>
+    <span class="code-tag">&lt;cbc:ID&gt;</span>4100256107<span class="code-tag">&lt;/cbc:ID&gt;</span>
+    <span class="code-tag">&lt;cbc:IssueDate&gt;</span>2026-07-11<span class="code-tag">&lt;/cbc:IssueDate&gt;</span>
+  <span class="code-tag">&lt;/cac:OrderReference&gt;</span></pre>
+</div></div>
+        </td></tr>
+                <tr id="comment-header-11304"><td bgcolor="#f0f0f0">
+              tarafından eklenen yorum
+                                                    
+                
+        
+            <a class="user-hover" rel="712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                id="word_commented_712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                href="https://gentegre.atlassian.net/secure/ViewProfile.jspa?accountId=712020%3A0b752c1b-52ef-495a-86fa-058ded07f07a">
+                    Irmak Semiz
+                </a>
+
+                                        <font size="-2">
+            [
+                <font color="#336699">01/Eyl/26</font>
+
+                            ]
+            </font>
+
+        </td></tr>
+        <tr id="comment-body-11304"><td bgcolor="#ffffff">
+            <p>Birden fazla irsaliyeden dönüşmüş faturada tek irsaliye numarasını getiriyor. Örnek xml çıktısı aşağıdaki gibi olmalıdır.</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<pre class="code-html"><span class="code-tag">&lt;cac:DespatchDocumentReference&gt;</span>
+	<span class="code-tag">&lt;cbc:ID&gt;</span>100<span class="code-tag">&lt;/cbc:ID&gt;</span>
+	<span class="code-tag">&lt;cbc:IssueDate&gt;</span>2026-09-01<span class="code-tag">&lt;/cbc:IssueDate&gt;</span>
+<span class="code-tag">&lt;/cac:DespatchDocumentReference&gt;</span>
+<span class="code-tag">&lt;cac:DespatchDocumentReference&gt;</span>
+	<span class="code-tag">&lt;cbc:ID&gt;</span>200<span class="code-tag">&lt;/cbc:ID&gt;</span>
+	<span class="code-tag">&lt;cbc:IssueDate&gt;</span>2026-09-01<span class="code-tag">&lt;/cbc:IssueDate&gt;</span>
+<span class="code-tag">&lt;/cac:DespatchDocumentReference&gt;</span>
+<span class="code-tag">&lt;cac:DespatchDocumentReference&gt;</span>
+	<span class="code-tag">&lt;cbc:ID&gt;</span>300<span class="code-tag">&lt;/cbc:ID&gt;</span>
+	<span class="code-tag">&lt;cbc:IssueDate&gt;</span>2026-09-01<span class="code-tag">&lt;/cbc:IssueDate&gt;</span>
+<span class="code-tag">&lt;/cac:DespatchDocumentReference&gt;</span></pre>
+</div></div>
+        </td></tr>
+                <tr id="comment-header-11337"><td bgcolor="#f0f0f0">
+              tarafından eklenen yorum
+                                                    
+                
+        
+            <a class="user-hover" rel="712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                id="word_commented_712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                href="https://gentegre.atlassian.net/secure/ViewProfile.jspa?accountId=712020%3A0b752c1b-52ef-495a-86fa-058ded07f07a">
+                    Irmak Semiz
+                </a>
+
+                                        <font size="-2">
+            [
+                <font color="#336699">01/Eyl/26</font>
+
+                            ]
+            </font>
+
+        </td></tr>
+        <tr id="comment-body-11337"><td bgcolor="#ffffff">
+            <p>26-8-31-1 versiyonunda test edildi, test sonuçları aşağıdaki gibidir.</p>
+
+<p><b>Problem Tanımı:</b></p>
+
+<ol>
+	<li><b>İki Farklı Siparişten Faturaya Dönüştürme:</b> Faturaya birden fazla siparişten satır çekildiğinde XML başlığındaki (<tt>Invoice</tt>) <tt>cac:OrderReference</tt> alanında yalnızca tek bir sipariş numarası yer almaktadır.</li>
+	<li><b>İki Farklı İrsaliyeden Faturaya Dönüştürme:</b>
+	<ul>
+		<li>Faturaya birden fazla irsaliyeden satır eklendiğinde başlık seviyesindeki <tt>cac:DespatchDocumentReference</tt> alanı hiç oluşmamaktadır.</li>
+		<li>Ayrıca bu irsaliyeler de arka planda farklı siparişlerden oluşmuş olmasına rağmen <tt>cac:OrderReference</tt> alanına yine tek bir sipariş numarası yazılmaktadır.</li>
+	</ul>
+	</li>
+</ol>
+
+
+<h3><a name="BeklenenDavran%C4%B1%C5%9FveUBLTRStandartlar%C4%B1naG%C3%B6re%C3%87%C3%B6z%C3%BCm"></a>Beklenen Davranış ve UBL-TR Standartlarına Göre Çözüm</h3>
+
+<ul>
+	<li><b>Üst Bilgi Seviyesinde Çoklu İrsaliye/Sipariş Referansı :</b> Fatura belgesi birden fazla irsaliyeden/sipariştej dönüştürülmüşse, XML başlığı altına dönüştürülen her bir irsaliye/sipariş için ayrı bir <tt>cac:DespatchDocumentReference</tt> ve <tt>cac:OrderReference</tt> tag'i eklenmelidir.</li>
+</ul>
+
+        </td></tr>
+                <tr id="comment-header-11652"><td bgcolor="#f0f0f0">
+              tarafından eklenen yorum
+                                                    
+                
+        
+            <a class="user-hover" rel="712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                id="word_commented_712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                href="https://gentegre.atlassian.net/secure/ViewProfile.jspa?accountId=712020%3A0b752c1b-52ef-495a-86fa-058ded07f07a">
+                    Irmak Semiz
+                </a>
+
+                                        <font size="-2">
+            [
+                <font color="#336699">07/Eyl/26</font>
+
+                            ]
+            </font>
+
+        </td></tr>
+        <tr id="comment-body-11652"><td bgcolor="#ffffff">
+            <ol>
+	<li>Fatura bir siparişten oluşturuldu.İzibiz'e sipariş numarası yansımadı.Fatura'da 1 sipariş no olabilirmiş bu yüzden json da aşağıdaki gibi değişiklik yapılmalıdır.<br/>
+"orderReference": {<br/>
+    "id": "SIP2026EMR",<br/>
+    "issueDate": "2026-09-04"<br/>
+},</li>
+	<li>İrsaliye birden fazla siparişten oluşabilirmiş. Fatura ve irsaliye göre ayrı düzenleme yapılmasını rica ederiz.</li>
+</ol>
+
+
+<p><span class="image-wrap" style=""><img src="https://gentegre.atlassian.net/rest/api/3/attachment/content/13632" alt="image-20260907-064107.png" width="1024" style="border: 0px solid black" /></span></p>
+        </td></tr>
+                <tr id="comment-header-11685"><td bgcolor="#f0f0f0">
+              tarafından eklenen yorum
+                                                    
+                
+        
+            <a class="user-hover" rel="712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                id="word_commented_712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                href="https://gentegre.atlassian.net/secure/ViewProfile.jspa?accountId=712020%3A0b752c1b-52ef-495a-86fa-058ded07f07a">
+                    Irmak Semiz
+                </a>
+
+                                        <font size="-2">
+            [
+                <font color="#336699">07/Eyl/26</font>
+
+                            ]
+            </font>
+
+        </td></tr>
+        <tr id="comment-body-11685"><td bgcolor="#ffffff">
+            <ol>
+	<li>İrsaliye bir siparişten oluşturuldu. İrsaliye XML'nde OrderReferance elementi bulunmuyor, JSON'da OrderReferance bulunmuyor. Hem XML de hemde JSON da siparişten dönüşmüş ise bulunmalı.</li>
+</ol>
+
+        </td></tr>
+                <tr id="comment-header-11850"><td bgcolor="#f0f0f0">
+              tarafından eklenen yorum
+                                                    
+                
+        
+            <a class="user-hover" rel="712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                id="word_commented_712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                href="https://gentegre.atlassian.net/secure/ViewProfile.jspa?accountId=712020%3A0b752c1b-52ef-495a-86fa-058ded07f07a">
+                    Irmak Semiz
+                </a>
+
+                                        <font size="-2">
+            [
+                <font color="#336699">11/Eyl/26</font>
+
+                            ]
+            </font>
+
+        </td></tr>
+        <tr id="comment-body-11850"><td bgcolor="#ffffff">
+            <p>26-9-8-1 versiyonunda test edildi.</p>
+
+<ol>
+	<li>Tek siparişten fatura oluşturuldu. İzibiz test portalına yansıdı.</li>
+	<li>İki siparişten bir fatura oluşturulduğunda tek bir sipariş numarasını göstermeliyiz ya da efatura aktif ise tek siparişten dönüştürmeliyiz bunu konuşup karar verilmeli.</li>
+	<li>Tek siparişten irsaliye oluşturuldu xml ve json a sipariş bilgileri gelmedi.</li>
+</ol>
+
+        </td></tr>
+                <tr id="comment-header-11883"><td bgcolor="#f0f0f0">
+              tarafından eklenen yorum
+                                                    
+                
+        
+            <a class="user-hover" rel="712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                id="word_commented_712020:0b752c1b-52ef-495a-86fa-058ded07f07a"
+                href="https://gentegre.atlassian.net/secure/ViewProfile.jspa?accountId=712020%3A0b752c1b-52ef-495a-86fa-058ded07f07a">
+                    Irmak Semiz
+                </a>
+
+                                        <font size="-2">
+            [
+                <font color="#336699">14/Eyl/26</font>
+
+                            ]
+            </font>
+
+        </td></tr>
+        <tr id="comment-body-11883"><td bgcolor="#ffffff">
+            <p>26-9-11-1 versiyonunda bir önceki maddeler devam ediyor.</p>
+        </td></tr>
+            </table>
+Adnan Odabaşı tarafından Jira 1001.0.0-SNAPSHOT#100294-rev:19d371820e3bb9e7fc4d479a70e17a263d3d0b98 kullanılarak şu saatte oluşturuldu: Mon Sep 14 10:22:53 UTC 2026.
+
+</body>
+</html>

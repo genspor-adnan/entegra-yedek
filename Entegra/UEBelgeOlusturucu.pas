@@ -1527,54 +1527,64 @@ procedure KaynakBelgeReferanslariDoldur(AFatBasID: Integer;
 var
   LSQL: string;
 begin
+  if ABaslik.Tur <> EBelgeTuruEIrsaliye then begin
+    KaynakRefEkle(ABaslik.IrsaliyeReferanslari, ABaslik.IrsaliyeNo,
+      ABaslik.IrsaliyeTarih);
+
+    LSQL :=
+      'select distinct FB.FATURANO as BELGENO, FB.FATURATARIH as BELGETARIH, FB.ID as BELGEID ' +
+      'from FATURA F ' +
+      'inner join FATURA IF2 on IF2.ID=F.YERID ' +
+      'inner join FATBASLIK FB on FB.ID=IF2.FATBASID ' +
+      'where F.FATBASID=' + IntToStr(AFatBasID) +
+      ' and F.YERI in (408,411)' +
+      ' and COALESCE(FB.FATURANO,'''')<>'''' ' +
+      'order by FB.FATURATARIH, BELGEID';
+    Tablo.TablodanSorguAc(3, LSQL);
+    while not Tablo.Query3.Eof do begin
+      KaynakRefEkle(ABaslik.IrsaliyeReferanslari,
+        AlanStr(Tablo.Query3, 'BELGENO'), AlanTarih(Tablo.Query3, 'BELGETARIH'));
+      Tablo.Query3.Next;
+    end;
+    Tablo.Query3.Close;
+
+    if (Trim(ABaslik.IrsaliyeNo) = '') and (Length(ABaslik.IrsaliyeReferanslari) > 0) then begin
+      ABaslik.IrsaliyeNo := ABaslik.IrsaliyeReferanslari[0].BelgeNo;
+      ABaslik.IrsaliyeTarih := ABaslik.IrsaliyeReferanslari[0].Tarih;
+    end;
+  end;
+
   if ABaslik.Tur = EBelgeTuruEIrsaliye then
-    Exit;
-
-  KaynakRefEkle(ABaslik.IrsaliyeReferanslari, ABaslik.IrsaliyeNo,
-    ABaslik.IrsaliyeTarih);
-
-  LSQL :=
-    'select distinct FB.FATURANO as BELGENO, FB.FATURATARIH as BELGETARIH, FB.ID as BELGEID ' +
-    'from FATURA F ' +
-    'inner join FATURA IF2 on IF2.ID=F.YERID ' +
-    'inner join FATBASLIK FB on FB.ID=IF2.FATBASID ' +
-    'where F.FATBASID=' + IntToStr(AFatBasID) +
-    ' and F.YERI in (408,411)' +
-    ' and COALESCE(FB.FATURANO,'''')<>'''' ' +
-    'order by FB.FATURATARIH, BELGEID';
-  Tablo.TablodanSorguAc(3, LSQL);
-  while not Tablo.Query3.Eof do begin
-    KaynakRefEkle(ABaslik.IrsaliyeReferanslari,
-      AlanStr(Tablo.Query3, 'BELGENO'), AlanTarih(Tablo.Query3, 'BELGETARIH'));
-    Tablo.Query3.Next;
-  end;
-  Tablo.Query3.Close;
-
-  if (Trim(ABaslik.IrsaliyeNo) = '') and (Length(ABaslik.IrsaliyeReferanslari) > 0) then begin
-    ABaslik.IrsaliyeNo := ABaslik.IrsaliyeReferanslari[0].BelgeNo;
-    ABaslik.IrsaliyeTarih := ABaslik.IrsaliyeReferanslari[0].Tarih;
-  end;
-
-  LSQL :=
-    'select distinct X.SIPARISNO, X.SIPARISTARIH, X.ID as SIPARISID from (' +
-    'select S.SIPARISNO, S.SIPARISTARIH, S.ID ' +
-    'from FATURA F ' +
-    'inner join SIPARISDETAY SD on SD.ID=F.YERID ' +
-    'inner join SIPARIS S on S.ID=SD.SIPARISID ' +
-    'where F.FATBASID=' + IntToStr(AFatBasID) +
-    ' and F.YERI in (406,407,409,410,473)' +
-    ' and COALESCE(S.SIPARISNO,'''')<>'''' ' +
-    'union all ' +
-    'select S.SIPARISNO, S.SIPARISTARIH, S.ID ' +
-    'from FATURA F ' +
-    'inner join FATURA IF2 on IF2.ID=F.YERID ' +
-    'inner join SIPARISDETAY SD on SD.ID=IF2.YERID ' +
-    'inner join SIPARIS S on S.ID=SD.SIPARISID ' +
-    'where F.FATBASID=' + IntToStr(AFatBasID) +
-    ' and F.YERI in (408,411)' +
-    ' and IF2.YERI in (406,409)' +
-    ' and COALESCE(S.SIPARISNO,'''')<>'''' ' +
-    ') X order by X.SIPARISTARIH, SIPARISID';
+    LSQL :=
+      'select distinct S.SIPARISNO, S.SIPARISTARIH, S.ID as SIPARISID ' +
+      'from FATURA F ' +
+      'inner join SIPARISDETAY SD on SD.ID=F.YERID ' +
+      'inner join SIPARIS S on S.ID=SD.SIPARISID ' +
+      'where F.FATBASID=' + IntToStr(AFatBasID) +
+      ' and F.YERI in (406,409)' +
+      ' and COALESCE(S.SIPARISNO,'''')<>'''' ' +
+      'order by S.SIPARISTARIH, S.ID'
+  else
+    LSQL :=
+      'select distinct X.SIPARISNO, X.SIPARISTARIH, X.ID as SIPARISID from (' +
+      'select S.SIPARISNO, S.SIPARISTARIH, S.ID ' +
+      'from FATURA F ' +
+      'inner join SIPARISDETAY SD on SD.ID=F.YERID ' +
+      'inner join SIPARIS S on S.ID=SD.SIPARISID ' +
+      'where F.FATBASID=' + IntToStr(AFatBasID) +
+      ' and F.YERI in (406,407,409,410,473)' +
+      ' and COALESCE(S.SIPARISNO,'''')<>'''' ' +
+      'union all ' +
+      'select S.SIPARISNO, S.SIPARISTARIH, S.ID ' +
+      'from FATURA F ' +
+      'inner join FATURA IF2 on IF2.ID=F.YERID ' +
+      'inner join SIPARISDETAY SD on SD.ID=IF2.YERID ' +
+      'inner join SIPARIS S on S.ID=SD.SIPARISID ' +
+      'where F.FATBASID=' + IntToStr(AFatBasID) +
+      ' and F.YERI in (408,411)' +
+      ' and IF2.YERI in (406,409)' +
+      ' and COALESCE(S.SIPARISNO,'''')<>'''' ' +
+      ') X order by X.SIPARISTARIH, SIPARISID';
   Tablo.TablodanSorguAc(3, LSQL);
   while not Tablo.Query3.Eof do begin
     KaynakRefEkle(ABaslik.SiparisReferanslari,
@@ -2623,30 +2633,36 @@ begin
       LXML.AppendLine('</cac:InvoicePeriod>');
     end;
 
-    if (ABaslik.Tur <> EBelgeTuruEIrsaliye) then begin
-      if Length(ABaslik.SiparisReferanslari) > 0 then begin
-        // Siparisler OrderReference'tir. AdditionalDocumentReference burada
-        // kullanilmaz; o alan XSLT gibi ek belgeler icindir.
-        for J := 0 to High(ABaslik.SiparisReferanslari) do begin
-          LXML.AppendLine('<cac:OrderReference>');
-          LXML.AppendLine('<cbc:ID>' +
-            XMLEscape(ABaslik.SiparisReferanslari[J].BelgeNo) + '</cbc:ID>');
-          if ABaslik.SiparisReferanslari[J].Tarih > 0 then
-            LXML.AppendLine('<cbc:IssueDate>' + FormatDateTime('yyyy-mm-dd',
-              ABaslik.SiparisReferanslari[J].Tarih) + '</cbc:IssueDate>');
-          LXML.AppendLine('</cac:OrderReference>');
-        end;
-      end else if Trim(ABaslik.SiparisNo) <> '' then begin
+    if Length(ABaslik.SiparisReferanslari) > 0 then begin
+      // Siparisler OrderReference'tir. AdditionalDocumentReference burada
+      // kullanilmaz; o alan XSLT gibi ek belgeler icindir.
+      //
+      // KARDINALITE BELGEYE gore: UBL'de Invoice.OrderReference 0..1,
+      // DespatchAdvice.OrderReference 0..n'dir. Faturada hepsini yazmak
+      // sema disi XML uretiyordu - orada yalniz ILKI gider (JSON tarafinda
+      // da fatura tekil nesne alir, irsaliye dizi).
+      var LSonSiparis: Integer := 0;
+      if ABaslik.Tur = EBelgeTuruEIrsaliye then
+        LSonSiparis := High(ABaslik.SiparisReferanslari);
+      for J := 0 to LSonSiparis do begin
         LXML.AppendLine('<cac:OrderReference>');
-        LXML.AppendLine('<cbc:ID>' + XMLEscape(ABaslik.SiparisNo) + '</cbc:ID>');
-        if ABaslik.SiparisTarih > 0 then
+        LXML.AppendLine('<cbc:ID>' +
+          XMLEscape(ABaslik.SiparisReferanslari[J].BelgeNo) + '</cbc:ID>');
+        if ABaslik.SiparisReferanslari[J].Tarih > 0 then
           LXML.AppendLine('<cbc:IssueDate>' + FormatDateTime('yyyy-mm-dd',
-            ABaslik.SiparisTarih) + '</cbc:IssueDate>')
-        else
-          LXML.AppendLine('<cbc:IssueDate>' + FormatDateTime('yyyy-mm-dd',
-            ABaslik.Tarih) + '</cbc:IssueDate>');
+            ABaslik.SiparisReferanslari[J].Tarih) + '</cbc:IssueDate>');
         LXML.AppendLine('</cac:OrderReference>');
       end;
+    end else if Trim(ABaslik.SiparisNo) <> '' then begin
+      LXML.AppendLine('<cac:OrderReference>');
+      LXML.AppendLine('<cbc:ID>' + XMLEscape(ABaslik.SiparisNo) + '</cbc:ID>');
+      if ABaslik.SiparisTarih > 0 then
+        LXML.AppendLine('<cbc:IssueDate>' + FormatDateTime('yyyy-mm-dd',
+          ABaslik.SiparisTarih) + '</cbc:IssueDate>')
+      else
+        LXML.AppendLine('<cbc:IssueDate>' + FormatDateTime('yyyy-mm-dd',
+          ABaslik.Tarih) + '</cbc:IssueDate>');
+      LXML.AppendLine('</cac:OrderReference>');
     end;
 
     // Iade (Tipi=2) referansi: e-FATURA -> cac:BillingReference (DespatchAdvice'ta GECERSIZ).
@@ -5595,34 +5611,58 @@ begin
       end;
     end;
 
-    if (not LIsIrsaliye) and
-      (Length(ABaslik.SiparisReferanslari) = 0) and
-      (Trim(ABaslik.SiparisNo) <> '') then begin
-      var LOrderRef: TJSONObject := TJSONObject.Create;
-      LOrderRef.AddPair('id', ABaslik.SiparisNo);
+    // ---------------------------------------------------------- SIPARIS REF --
+    // SEKIL BELGE TURUNE gore degisir (Izibiz DTO):
+    //   e-Fatura   -> "orderReference"  TEKIL NESNE  { id, issueDate }
+    //   e-Irsaliye -> "orderReferences" DIZI         [ { id, issueDate } ]
+    //                 tek siparis olsa BILE dizi.
+    //
+    // Eskiden ayrim SAYIYA gore yapiliyordu (1 taneyse nesne, coksa dizi).
+    // Izibiz irsaliyede tekil alani, faturada da diziyi OKUMUYOR: tek
+    // siparisli irsaliyede referans sessizce dusuyor, coklu siparisli
+    // faturada da hic gitmiyordu.
+    var LOrderRefler: TArray<TJSONObject>;
+    SetLength(LOrderRefler, 0);
+    if Length(ABaslik.SiparisReferanslari) > 0 then begin
+      SetLength(LOrderRefler, Length(ABaslik.SiparisReferanslari));
+      for LRefIndex := 0 to High(ABaslik.SiparisReferanslari) do
+        LOrderRefler[LRefIndex] := KaynakRefJSONOlustur(
+          ABaslik.SiparisReferanslari[LRefIndex], ABaslik.Tarih);
+    end else if Trim(ABaslik.SiparisNo) <> '' then begin
+      // Acik referans yoksa baslikta elle yazilan siparis numarasi.
+      SetLength(LOrderRefler, 1);
+      LOrderRefler[0] := TJSONObject.Create;
+      LOrderRefler[0].AddPair('id', ABaslik.SiparisNo);
       if ABaslik.SiparisTarih > 0 then
-        LOrderRef.AddPair('issueDate',
+        LOrderRefler[0].AddPair('issueDate',
           FormatDateTime('yyyy-mm-dd', ABaslik.SiparisTarih))
       else
-        LOrderRef.AddPair('issueDate',
+        LOrderRefler[0].AddPair('issueDate',
           FormatDateTime('yyyy-mm-dd', ABaslik.Tarih));
-      LContent.AddPair('orderReference', LOrderRef);
     end;
 
-    if (not LIsIrsaliye) and (Length(ABaslik.SiparisReferanslari) = 1) then begin
-      // Tek siparis Izibiz DTO'sunda orderReference nesnesidir; orderReferences dizisi
-      // tek kayitta UBL'e tasinmiyor.
-      LContent.AddPair('orderReference',
-        KaynakRefJSONOlustur(ABaslik.SiparisReferanslari[0], ABaslik.Tarih));
-    end else if (not LIsIrsaliye) and (Length(ABaslik.SiparisReferanslari) > 1) then begin
-      // Coklu siparis icin Izibiz'in dizi alani kullanilir. AdditionalReferences'a
-      // konulursa XML'de SIPARIS tipli AdditionalDocumentReference uretilir.
-      var LOrderRefs: TJSONArray := TJSONArray.Create;
-      for LRefIndex := 0 to High(ABaslik.SiparisReferanslari) do begin
-        LOrderRefs.AddElement(KaynakRefJSONOlustur(
-          ABaslik.SiparisReferanslari[LRefIndex], ABaslik.Tarih));
+    if Length(LOrderRefler) > 0 then begin
+      if LIsIrsaliye then begin
+        var LOrderRefs: TJSONArray := TJSONArray.Create;
+        for LRefIndex := 0 to High(LOrderRefler) do
+          LOrderRefs.AddElement(LOrderRefler[LRefIndex]);
+        LContent.AddPair('orderReferences', LOrderRefs);
+      end
+      else begin
+        LContent.AddPair('orderReference', LOrderRefler[0]);
+        // UBL'de Invoice.OrderReference 0..1'dir - faturaya ikinci bir siparis
+        // referansi SIGMAZ. Fazlasi sessizce dusurulmez, SIPARIS tipli
+        // AdditionalDocumentReference olarak gider: coklu siparisten kesilen
+        // faturada hangi siparislerin kapandigi belgede kalsin.
+        for LRefIndex := 1 to High(LOrderRefler) do begin
+          if LAddRefs = nil then
+            LAddRefs := TJSONArray.Create;
+          LOrderRefler[LRefIndex].AddPair('documentType', 'SIPARIS');
+          LAddRefs.AddElement(LOrderRefler[LRefIndex]);
+        end;
+        if (LAddRefs <> nil) and (LContent.GetValue('additionalReferences') = nil) then
+          LContent.AddPair('additionalReferences', LAddRefs);
       end;
-      LContent.AddPair('orderReferences', LOrderRefs);
     end;
 
     if (not LIsIrsaliye) and (Length(ABaslik.IrsaliyeReferanslari) = 1) then begin
@@ -6012,14 +6052,19 @@ begin
         LStage.AddPair('driverPerson', LDriver);
       end;
       if (Trim(LTasiyici.Unvan) <> '') or (Trim(LTasiyici.VergiNo) <> '') then begin
-        LStage.AddPair('carrierParty', CarrierPartyJSONOlustur(LTasiyici));
+        var LCarrierArr: TJSONArray := TJSONArray.Create;
+        LCarrierArr.AddElement(CarrierPartyJSONOlustur(LTasiyici));
+        LStage.AddPair('carrierParty', LCarrierArr);
       end;
       LStages.AddElement(LStage);
       LShipment.AddPair('shipmentStages', LStages);
 
       var LDelivery: TJSONObject := TJSONObject.Create;
-      if (Trim(LTasiyici.Unvan) <> '') or (Trim(LTasiyici.VergiNo) <> '') then
-        LDelivery.AddPair('carrierParty', CarrierPartyJSONOlustur(LTasiyici));
+      if (Trim(LTasiyici.Unvan) <> '') or (Trim(LTasiyici.VergiNo) <> '') then begin
+        var LDeliveryCarrierArr: TJSONArray := TJSONArray.Create;
+        LDeliveryCarrierArr.AddElement(CarrierPartyJSONOlustur(LTasiyici));
+        LDelivery.AddPair('carrierParty', LDeliveryCarrierArr);
+      end;
       var LDelAdr: TJSONObject := TJSONObject.Create;
       LDelAdr.AddPair('country', 'TR');
       if Trim(ABaslik.Il) <> '' then LDelAdr.AddPair('city', ABaslik.Il);

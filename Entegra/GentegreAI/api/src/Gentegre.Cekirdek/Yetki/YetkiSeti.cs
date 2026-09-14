@@ -10,7 +10,13 @@ public sealed record YetkiKaydi(
     bool Gor,
     bool Ekle,
     bool Degistir,
-    bool Sil);
+    bool Sil,
+    /// <summary>
+    /// Yetkinin sayisal siniri (yetki.deger_alir = 1 olanlarda, 661).
+    /// Ornek: 'basvuru.iskonto' -> izin verilen en yuksek iskonto yuzdesi.
+    /// Bos = sinir tanimlanmamis (yetki yok sayilir).
+    /// </summary>
+    string Deger = "");
 
 /// <summary>Alan bazli yetki: 0 gizle, 1 oku, 2 oku + yaz. Satir YOKSA alan serbest.</summary>
 public sealed record AlanYetkisi(string Kaynak, string Alan, short Izin);
@@ -54,6 +60,18 @@ public sealed class YetkiSeti
     /// <summary>Aksiyon yetkisi (tur = 1): 'ebelge.gonder' gibi.</summary>
     public bool AksiyonVar(string aksiyonKodu)
         => _yetkiler.TryGetValue(aksiyonKodu, out var y) && y.Gor;
+
+    /// <summary>
+    /// Aksiyonun SAYISAL SINIRI (661): 'basvuru.iskonto' icin iskonto tavani.
+    /// Yetki yoksa ya da deger bos/gecersizse 0 - "sinirsiz" DEGIL, "yapamaz".
+    /// Sinirin yoklugu izin anlamina gelseydi, deger girilmemis her rol
+    /// sinirsiz iskonto yapardi.
+    /// </summary>
+    public decimal AksiyonDegeri(string aksiyonKodu)
+        => _yetkiler.TryGetValue(aksiyonKodu, out var y) && y.Gor
+           && decimal.TryParse(y.Deger, System.Globalization.NumberStyles.Any,
+                               System.Globalization.CultureInfo.InvariantCulture, out var d)
+           ? d : 0m;
 
     /// <summary>Alan okunabilir mi (izin 1 ya da 2, ya da hic kayit yok = serbest).</summary>
     public bool AlanOkunur(string kaynak, string alan)

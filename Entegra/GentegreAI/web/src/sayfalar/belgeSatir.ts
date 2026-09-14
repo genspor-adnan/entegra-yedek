@@ -54,6 +54,8 @@ export interface SatirDurumu {
   iskonto: string;
   /** 2. iskonto yuzdesi - birinciden SONRA, carpimsal uygulanir (BelgeHesap). */
   iskonto2: string;
+  /** ONAYLI ISKONTO (662): 1 ise iskonto/birim fiyat kilitli - gridde 🔒. */
+  iskontoKilit?: boolean;
   kdv: string;
   /** Satir aciklamasi (belge_satir.aciklama) - gridde stok adinin saginda. */
   aciklama: string;
@@ -304,10 +306,15 @@ export function yanittanSatirlar(
     // SATIR BAZLI DOVIZ (kullanici): kalem kendi para biriminde girilmis
     //   olabilir - kayitli satirdan geri yuklenir, yoksa yerel sayilir.
     fiyatDovizi: String(r.dovizCinsi ?? '') || yerelPara,
-    dovizFiyat: String(r.dovizBirimFiyat ?? r.birimFiyat ?? 0),
+    // "??" DEGIL "||" (kullanici: "3990'da birim fiyat bos geldi"): eski
+    //   satirlarda `dovizBirimFiyat` SIFIR kayitli ve nullish operatoru sifiri
+    //   gecerli sayip yedege dusmuyordu - kalem penceresi fiyati 0 okuyordu.
+    //   Sifir doviz fiyati diye bir sey yok; yerel fiyat esastir.
+    dovizFiyat: String(r.dovizBirimFiyat || r.birimFiyat || 0),
     kur: String(r.dovizKuru ?? 1),
     iskonto: String(r.iskonto ?? 0),
     iskonto2: String(r.iskonto2 ?? 0),
+    iskontoKilit: Number(r.iskontoKilit ?? 0) === 1,
     kdv: String(r.kdv ?? 0),
     // Kayitli kalemin lot dagilimi (db/114) - kalem yeniden acilinca kullanici
     //   hangi lottan kac adet girdigini gormeli.

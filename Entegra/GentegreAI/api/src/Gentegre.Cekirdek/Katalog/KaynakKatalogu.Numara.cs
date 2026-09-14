@@ -117,7 +117,7 @@ public static partial class KaynakKatalogu
             new("kod",      "s.kod",      "metin", "Kod", Genislik: 80),
             new("ad",       "s.ad",       "metin", "Şube", Genislik: 160),
             new("unvan",    "s.unvan",    "metin", "Resmî Unvan", Genislik: 260),
-            new("vkno",     "s.vkno",     "metin", "VKN / TCKN", Hizalama: "orta"),
+            new("vkno",     "s.vkno",     "metin", "Vergi / Kimlik No", Hizalama: "orta"),
             new("vd",       "s.vd",       "metin", "Vergi Dairesi", Varsayilan: false),
             new("il",       "s.il",       "metin", "İl", Hizalama: "orta"),
             new("efaturaAlias", "s.efatura_alias", "metin", "Gönderici Etiketi", Varsayilan: false),

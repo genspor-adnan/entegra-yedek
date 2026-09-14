@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { api, oturum } from '../api/istemci';
 import type { BenYaniti, KaynakYetkisi, KullaniciOzeti } from '../api/sozlesme';
+import { subeAyariniKur } from '../bilesenler/subeAyari';
 
 interface OturumDurumu {
   kullanici: KullaniciOzeti | null;
@@ -20,6 +21,11 @@ interface OturumDurumu {
   /** Kaynak yetkisi: yetki('cari','ekle'). Sunucu da ayrica dogrular - bu yalniz arayuz icin. */
   yetki(kaynak: string, islem?: 'gor' | 'ekle' | 'degistir' | 'sil'): boolean;
   aksiyonVar(kod: string): boolean;
+  /**
+   * Aksiyonun SAYISAL SINIRI (661): 'basvuru.iskonto' -> iskonto tavani.
+   * Yetki yoksa ya da sinir tanimli degilse 0 - "sinirsiz" DEGIL, "yapamaz".
+   */
+  aksiyonDegeri(kod: string): number;
 }
 
 const Baglam = createContext<OturumDurumu | null>(null);
@@ -35,6 +41,15 @@ export function OturumSaglayici({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => { void benYukle() }, [benYukle]);
+
+  /* AKTIF SUBENIN YEREL AYARLARI (666): ulke / telefon kodu / saat dilimi /
+     para birimi. Bicimlendirici ve dogrulama React agacinin DISINDA saf
+     fonksiyon olarak calisiyor - deger modul degiskenine yazilir, oradan
+     okunur. Sube degisince (ya da /ben tazelenince) guncellenir. */
+  useEffect(() => {
+    const k = ben?.kullanici;
+    subeAyariniKur(k?.subeler.find(s => s.id === k?.subeId) ?? k?.subeler[0]);
+  }, [ben]);
 
   const deger = useMemo<OturumDurumu>(() => ({
     kullanici: ben?.kullanici ?? null,
@@ -70,6 +85,8 @@ export function OturumSaglayici({ children }: { children: ReactNode }) {
     },
 
     aksiyonVar(kod) { return ben?.aksiyonlar.includes(kod) ?? false },
+
+    aksiyonDegeri(kod) { return ben?.aksiyonDegerleri?.[kod] ?? 0 },
   }), [ben, yukleniyor]);
 
   return <Baglam.Provider value={deger}>{children}</Baglam.Provider>;

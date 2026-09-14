@@ -1,3 +1,4 @@
+import { subeAyari } from '../../bilesenler/subeAyari';
 import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import { type KasaIslemTuru } from '../../api/sozlesme';
@@ -21,7 +22,7 @@ export function useBelgeAyarlari() {
   /** Geriye dönük kaç gün belge girilebilir (`belge.geri_gun_siniri`). */
   const [geriGun, setGeriGun] = useState(GERIYE_GUN_VARSAYILAN);
 
-  /** Kurumun para birimi (`genel.yerel_para`). */
+  /** Yerel para birimi - SUBENIN ayari (666; `genel.yerel_para` kaldirildi). */
   const [yerelPara, setYerelPara] = useState(YEREL_PARA_VARSAYILAN);
 
   /**
@@ -37,7 +38,10 @@ export function useBelgeAyarlari() {
       .then(a => {
         const s = a.find(x => x.anahtar === 'belge.geri_gun_siniri')?.deger;
         if (s !== undefined && s !== '' && Number.isFinite(Number(s))) setGeriGun(Number(s));
-        const p = a.find(x => x.anahtar === 'genel.yerel_para')?.deger;
+        // 666: kurum geneli ayar kalkti; birim aktif subeden gelir. ISO 'TRY'
+        //   uygulamanin doviz listesindeki 'TL' koduna cevrilir (db/106).
+        const iso = subeAyari().paraBirimi;
+        const p = iso && iso.toUpperCase() !== 'TRY' ? iso.toUpperCase() : 'TL';
         if (p) setYerelPara(p);
         const pa = a.find(x => x.anahtar === 'basvuru.pos_aksiyon')?.deger;
         if (pa !== undefined && pa !== '') setPosAksiyon(Number(pa) || 0);

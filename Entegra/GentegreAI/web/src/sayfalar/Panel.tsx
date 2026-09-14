@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { type PanelYaniti, hataMetni } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
-import { para } from '../bilesenler/bicim';
+import { para, paraYaz } from '../bilesenler/bicim';
 
 const sayi = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 });
 
@@ -61,7 +61,7 @@ export function Panel() {
   }, []);
 
   const kutuDeger = (deger: number, birim: string) =>
-    birim === '₺' ? `${para.format(deger)} ₺` : `${sayi.format(deger)} ${birim}`;
+    birim === '₺' ? `${paraYaz(deger)}` : `${sayi.format(deger)} ${birim}`;
 
   return (
     <>
@@ -96,7 +96,7 @@ export function Panel() {
                             title={k.rota ? 'Listeyi aç' : undefined}>
                       <div className="k">{k.baslik}</div>
                       <div className={`v ${k.vurgu}`}>
-                        {k.bicim === 'para' ? `${para.format(Number(k.deger))} ₺`
+                        {k.bicim === 'para' ? `${paraYaz(Number(k.deger))}`
                                             : sayi.format(Number(k.deger))}
                       </div>
                       <div className="s">{k.alt}</div>

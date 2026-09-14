@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AvansMahsup } from '../AvansMahsup';
-import { para, tarihSaat } from '../bicim';
+import { para, tarihSaat, paraYaz } from '../bicim';
 import type { BelgeYaniti } from '../../api/sozlesme';
 
 /**
@@ -11,7 +11,8 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
                                   secili, setSecili, tahsilatAcKart, tahsilatSil,
                                   onYenile, kurumTahakkukAc, kurumKalan, kurumBelgeleri,
                                   basvuruMu,
-                                  hizliNakit, hesapSecAc, acikBorc }: {
+                                  hizliNakit, hesapSecAc, acikBorc,
+                                  iadeAc, yerelPara = 'TL' }: {
   /** Basvuru kartinda arac cubugu SADE: "＋" (tam ekran) cizilmez. */
   basvuruMu?: boolean;
   sonuc: BelgeYaniti | null;
@@ -36,7 +37,15 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
    * Nakitte varsayilan kasa, banka/POS'ta modal aramadan secilen hesap.
    */
   hizliNakit?(): void;
-  hesapSecAc?(tur: 'B' | 'P'): void;
+  /** Banka/POS hesabi secim penceresi; `iade` true ise satir EKSI yazilir. */
+  hesapSecAc?(tur: 'B' | 'P', iade?: boolean): void;
+  /**
+   * IADE / IPTAL: secilen araca gore iade satiri ekler (tutar penceresinde
+   * neden combosu da sorulur). Verilmezse dugme cizilmez.
+   */
+  iadeAc?(arac: 'nakit' | 'pos' | 'banka' | 'cek' | 'senet'): void;
+  /** Yerel para kodu - "dövizli tahsilat var mı" bunun disindakilerle olculur. */
+  yerelPara?: string;
   /** Gridde tutar hucresine tiklaninca cagrilir (satir ici duzenleme). */
   /** Belgenin ACIK BORCU - yeni tahsilat satiri bu tutarla acilir. */
   acikBorc?: number;
@@ -77,12 +86,18 @@ const capa = useRef<number | null>(null);   // son tiklanan satirin sirasi
  * ayni desen).
  */
 const [aracMenu, setAracMenu] = useState(false);
+/** IADE arac menusu - "⋯" ile ayni desen, ayri acilir. */
+const [iadeMenu, setIadeMenu] = useState(false);
 useEffect(() => {
-  if (!aracMenu) return;
-  const kapat = () => setAracMenu(false);
+  if (!aracMenu && !iadeMenu) return;
+  const kapat = () => { setAracMenu(false); setIadeMenu(false) };
   window.addEventListener('click', kapat);
   return () => window.removeEventListener('click', kapat);
-}, [aracMenu]);
+}, [aracMenu, iadeMenu]);
+/* PARA USTU dugmesi yalniz dovizli tahsilat varken: yerel parada alinan tutar
+   zaten net yazilir, "ustu" diye ayri bir satira gerek yok. */
+const dovizliTahsilatVar = tahsilatlar.some(
+  k => String(k.dovizCinsi ?? yerelPara) !== yerelPara);
 const satirTikla = (e: React.MouseEvent, sira: number, id: number) => {
   if (!id) return;
   if (e.shiftKey && capa.current != null) {
@@ -140,7 +155,7 @@ return (
           oldugu gibi. */}
       <button className="d bir"
               title={`Varsayılan kasaya nakit ${alisMi ? 'ödeme' : 'tahsilat'} satırı ekler`
-                + (acikBorc && acikBorc > 0 ? ` (${para.format(acikBorc)} ₺)` : '')
+                + (acikBorc && acikBorc > 0 ? ` (${paraYaz(acikBorc)})` : '')
                 + (kayitliId ? '' : ' — belge önce kaydedilir')}
               onClick={() => hizliNakit?.()}>
         💵 Nakit
@@ -178,6 +193,35 @@ return (
           </div>
         )}
       </span>
+      {/* IADE / IPTAL (kullanici: "3 nokta buton sağına ↩ İade / İptal
+          butonu ekle, basınca alta doğru menü gelsin Nakit/Pos/Banka/Çek/
+          Senet"). Arac menusu tahsilattaki ile AYNI: para hangi araçla
+          alindiysa o araçla geri verilir - karttan alinip nakit iade etmek
+          veznede olmayan parayi cikarir ve en bilinen suistimal yoludur.
+          Secimden sonra tutar penceresi acilir; tutar EKSI islenir. */}
+      {iadeAc && (
+        <span className="dugme-menu">
+          <button className="d" title="Seçilen araçla iade / iptal satırı ekler"
+                  disabled={!kayitliId}
+                  onClick={e => { e.stopPropagation(); setIadeMenu(v => !v) }}>
+            ↩ İade / İptal
+          </button>
+          {iadeMenu && (
+            <div className="dugme-menu-liste">
+              <button type="button" className="mi"
+                      onClick={() => { setIadeMenu(false); iadeAc('nakit') }}>💵 Nakit</button>
+              <button type="button" className="mi"
+                      onClick={() => { setIadeMenu(false); iadeAc('pos') }}>💳 POS</button>
+              <button type="button" className="mi"
+                      onClick={() => { setIadeMenu(false); iadeAc('banka') }}>🏦 Banka</button>
+              <button type="button" className="mi"
+                      onClick={() => { setIadeMenu(false); iadeAc('cek') }}>🧾 Çek</button>
+              <button type="button" className="mi"
+                      onClick={() => { setIadeMenu(false); iadeAc('senet') }}>📜 Senet</button>
+            </div>
+          )}
+        </span>
+      )}
       {/* KURUM TAHAKKUKU (331): tahsilat ARACI DEGIL - "tahsil edildi"
           saymaz; bu yuzden tahsilat araclarinin SONUNDA, Senet'in saginda
           durur (kullanici). Kurum payi
@@ -237,7 +281,16 @@ return (
           <th style={{ width: 120 }}>Makbuz No</th>
           <th style={{ width: 180 }}>Tür</th>
           <th>Kasa / Banka</th>
-          <th className="hiza-sag" style={{ width: 130 }}>Tutar</th>
+          {/* DOVIZ SUTUNU yalniz dovizli tahsilat varsa (kullanici: "döviz
+              tahsilat olursa tutar soluna alınan döviz de gelsin"): "Tutar"
+              kolonu YEREL KARSILIKTIR, hastanin verdigi 100 USD orada hic
+              gorunmuyordu. Yerel parada bu sutun bos yer harcar - cizilmez. */}
+          {dovizliTahsilatVar && (
+            <th className="hiza-sag" style={{ width: 120 }}
+                title="Alınan döviz tutarı ve para birimi">Alınan Döviz</th>
+          )}
+          <th className="hiza-sag" style={{ width: 130 }}
+              title={`Yerel karşılık (${yerelPara})`}>Tutar</th>
         </tr>
       </thead>
       <tbody>
@@ -258,6 +311,7 @@ return (
             <td>{kb.belgeNo}</td>
             <td>{kb.turAdi}</td>
             <td>{kb.cari || <span className="sonuk">—</span>}</td>
+            {dovizliTahsilatVar && <td className="hiza-sag sonuk">—</td>}
             <td className="hiza-sag">{para.format(kb.tutar)}</td>
           </tr>
         ))}
@@ -283,6 +337,17 @@ return (
                 Enter kaydediyor). Iki ayri duzenleme yolu -hucre ici ve
                 modal- ayni alani farkli kurallarla yaziyordu; girilen satir
                 yanlissa ✎ ile tahsilat ekrani acilir. */}
+            {dovizliTahsilatVar && (() => {
+              const dvz = String(k.dovizCinsi ?? yerelPara) || yerelPara;
+              return (
+                <td className="hiza-sag">
+                  {dvz === yerelPara
+                    ? <span className="sonuk">—</span>
+                    : <>{para.format(Number(k.tutar ?? 0))}{' '}
+                        <span className="sonuk">{dvz}</span></>}
+                </td>
+              );
+            })()}
             <td className="hiza-sag">
               {para.format(Number(k.yerelTutar ?? k.tutar ?? 0))}
             </td>
@@ -290,7 +355,7 @@ return (
           );
         })}
         {tahsilatlar.length === 0 && (kurumBelgeleri ?? []).length === 0 && (
-          <tr><td colSpan={6} className="bos">
+          <tr><td colSpan={dovizliTahsilatVar ? 7 : 6} className="bos">
             {kayitliId > 0
               ? `Bu belgeye bağlı ${alisMi ? 'ödeme' : 'tahsilat'} yok.`
               : 'Önce belgeyi kaydedin.'}
@@ -299,7 +364,7 @@ return (
       </tbody>
       <tfoot>
         <tr className="genel">
-          <td colSpan={5} className="hiza-sag">
+          <td colSpan={dovizliTahsilatVar ? 6 : 5} className="hiza-sag">
             {alisMi ? 'Ödenen / Kalan' : 'Tahsil Edilen / Kalan'}
           </td>
           <td className="hiza-sag">

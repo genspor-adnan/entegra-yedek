@@ -19,6 +19,19 @@ import { type ListeSatiri, hataMetni } from '../api/sozlesme';
 /** Cek/senet ile tahsilat-odeme turleri (23/24 alinan, 33/34 verilen). */
 const CEK_SENET_TURLERI = [23, 24, 33, 34];
 
+/**
+ * Hizli tahsilat satirinin PARA ayrintilari: doviz, kur, aciklama ve
+ * iade/para ustu isareti. Varsayilan TL ve arti tutardir - eski cagrilar
+ * bu nesneyi vermeden calismaya devam eder.
+ */
+export interface HizliTahsilatEki {
+  dovizCinsi?: string;
+  dovizKuru?: number;
+  aciklama?: string;
+  /** Iade / para ustu: tutar EKSI beklenir ve dagitim yazilmaz. */
+  eksiMi?: boolean;
+}
+
 export interface TahsilatAcilisi {
   tur: number;
   tarafId?: number;
@@ -78,13 +91,20 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
   // hesapAdi imzada KALIR (cagiran veriyor) ama aciklamada kullanilmaz:
   //   aciklama artik belgenin cinsinden kuruluyor.
   const hizliTahsilat = async (tur: number, hesapId: number, tutar: number,
-                               _hesapAdi = '') => {
+                               _hesapAdi = '', ek: HizliTahsilatEki = {}) => {
     // Hata SESSIZ KALMASIN (kullanici: "seçtim ama satıra eklenmedi"): hizli
     //   akista kart acilmadigi icin sekmedeki hata kutusu gorunmuyordu -
     //   uyarilar pencereyle verilir.
     if (!kayitliId) { mesaj('Önce belgeyi kaydedin.'); return }
     if (!hesapId) { mesaj('Kasa / hesap seçilmeli.'); return }
-    if (!(tutar > 0)) { mesaj('Tahsilat tutarı sıfırdan büyük olmalı.'); return }
+    // IADE / PARA USTU EKSI YAZILIR (kullanici: "tutar - olarak işlensin"):
+    //   ayri bir islem turu acmak yerine ayni turde ters isaretli satir -
+    //   kasa ekstresi ve gun sonu toplami kendiliginden dogru cikar.
+    if (ek.eksiMi ? !(tutar < 0) : !(tutar > 0)) {
+      mesaj(ek.eksiMi ? 'İade tutarı sıfırdan büyük olmalı.'
+                      : 'Tahsilat tutarı sıfırdan büyük olmalı.');
+      return;
+    }
     setHata(null);
     try {
       const y = await api.kasaEkle({
@@ -94,12 +114,12 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
           tarafId: cari?.id ?? null,
           hesapId,
           tutar,
-          dovizCinsi: 'TL',
-          dovizKuru: 1,
+          dovizCinsi: ek.dovizCinsi ?? 'TL',
+          dovizKuru: ek.dovizKuru ?? 1,
           // Aciklama BELGEDEN gelir (kullanici): "Hızlı tahsilat" tahsilatin
           //   nasil girildigini anlatiyordu, NE OLDUGUNU degil - ekstrede ve
           //   kasa listesinde okunan sey belgenin cinsi.
-          aciklama: `${belgeAdi} Tahsilatı`,
+          aciklama: ek.aciklama ?? `${belgeAdi} Tahsilatı`,
         },
         secenekler: { taslak: false, plan: false, kurKontrolu: true, belgeId: kayitliId },
       });
@@ -111,7 +131,13 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
       //   sessizce hic kesilmezdi. Kasa KARTI bunu zaten yaziyor (321), hizli
       //   akista atlaniyordu.
       // Otomatik = satir sirasina gore once hasta payi, sonra kurum payi.
-      const yeniId = Number(y.islem?.id ?? 0);
+      // IADE / PARA USTU ISTEMCIDEN DAGITILMAZ: dagitimi SUNUCU yazar
+      //   (660, `tg_kasa_islem_iade_dagit`) - eksi islem gerceklesince
+      //   belgenin tahsil edilmis satir/paylarina, tahsilattaki sirayla
+      //   (once hasta payi) eksi dagitim satirlari dusulur. Boylece iade
+      //   hangi yoldan girilirse girilsin satira yansir; istemci unutsa
+      //   satir "tahsil edildi" gorunmeye devam ederdi.
+      const yeniId = ek.eksiMi ? 0 : Number(y.islem?.id ?? 0);
       if (yeniId) {
         try { await api.kasaDagitimYaz(yeniId, { belgeId: kayitliId, otomatik: true }) }
         // Dagitim basarisiz olursa TAHSILAT DURUR: para kasada, belgeye bagli.
@@ -150,6 +176,11 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
       try {
         const y = await api.liste('kasa-islem', {
           sayfa: 1, boyut: 50,
+          // ESKIDEN YENIYE (kullanici): tahsilat listesi bir hikaye - once
+          //   alinan, sonra iade edilen. Sunucunun varsayilan sirasi (id
+          //   tersi) iadeyi ait oldugu tahsilatin USTUNE koyuyordu. Ikincil
+          //   olcut id: ayni gun girilen iki islem giris sirasini korur.
+          sirala: [{ alan: 'islemTarihi', yon: 'asc' }, { alan: 'id', yon: 'asc' }],
           // Iptal edilen islem (durum 3) ve onun TERS kaydi listeye girmez -
           //   ikisi de iptalIslemId tasir, toplami sisirmesinler.
           filtre: { op: 'and', kosullar: [

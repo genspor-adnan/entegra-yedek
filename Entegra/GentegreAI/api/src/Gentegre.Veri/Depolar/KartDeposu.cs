@@ -9,7 +9,27 @@ using Npgsql;
 namespace Gentegre.Veri.Depolar;
 
 /// <summary>Kart yazma islemi icin cagirandan gelen baglam (kim, hangi sube, hangi IP).</summary>
-public sealed record YazmaBaglami(int KullaniciId, int? SubeId, string Ip)
+public sealed record YazmaBaglami(int KullaniciId, int? SubeId, string Ip,
+    /// <summary>
+    /// AKTIF SUBENIN ULKESI (666), ISO 3166 iki harf. Dogrulama kurallari buna
+    /// bakar: TR disinda T.C. kimlik numarasi ve Turkiye telefon bicimi
+    /// KONTROL EDILMEZ - Alman hastanin 11 haneli TCKN'si olmaz, kontrolu acik
+    /// birakmak kaydi imkansiz kilardi. Varsayilan TR: bilgi gelmezse
+    /// kontrolun ACIK kalmasi, sessizce kapanmasindan iyidir.
+    /// </summary>
+    string UlkeKod = "TR",
+    /// <summary>
+    /// KIMLIK NO BICIMI (679) - kurum profilinden cozulmus kural. Yazma
+    /// yolunda alan dogrulamasi buna bakar; gelmezse kontrol ACIK kalir.
+    /// </summary>
+    Gentegre.Cekirdek.Katalog.KimlikKurali? KimlikKurali = null,
+    /// <summary>
+    /// AKTIF SUBENIN SAAT DILIMI (666/667), IANA adi. Kullanicinin yazdigi
+    /// duvar saati bu dilimde yorumlanip UTC ana cevrilir; "ileri tarihli mi",
+    /// "kac gun gecti" sorulari da bu dilimin GUNUNDE cevaplanir. Bos ise
+    /// kurulus dilimi kullanilir.
+    /// </summary>
+    string ZamanDilimi = "")
 {
     /// <summary>
     /// SUBE ZORUNLU olan kayitlar (belge, kasa islemi, cek/senet...) icin sube
@@ -60,7 +80,9 @@ public sealed partial class KartDeposu
                 // "@simdi" DINAMIK varsayilan (151): sabit bir tarih yazilamaz,
                 //   isaret kayit aninda kurulus saatiyle cozulur. Kart da ayni
                 //   isareti anlar ve formu o anla acar.
-                degerler[ad] = deger as string == "@simdi" ? Saat.Simdi : deger;
+                // 667: kayda yazilan "simdi" bir ANDIR (UTC); duvar saati
+                //   yazmak sunucunun saat dilimine gore kayardi.
+                degerler[ad] = deger as string == "@simdi" ? Saat.An : deger;
 
         // Kayit AKTIF SUBEYE yazilir. "subeId" yazilabilir olan kartlarda
         //   (Personel: "Çalıştığı Şube") kullanici deger yollamis olabilir - o zaman

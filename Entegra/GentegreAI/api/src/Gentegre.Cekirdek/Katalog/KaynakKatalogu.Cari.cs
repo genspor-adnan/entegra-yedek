@@ -60,9 +60,9 @@ public static partial class KaynakKatalogu
             new("faturaUnvan",  "t.fatura_unvan",  "metin", "Fatura Unvani", Varsayilan: false),
             // TCKN listede MASKELI (kullanici): ilk 3 + son 2 acik. 10 haneli
             //   VKN dokunulmadan kalir; ham deger gizli kolonda (arama icin).
-            new("vkno",         TarafKatalog.TcknMaske, "metin", "VKN/TCKN",
+            new("vkno",         TarafKatalog.TcknMaske, "metin", "Vergi/Kimlik No",
                 Filtrelenebilir: false),
-            new("vknoHam",      "t.vkno",          "metin", "VKN/TCKN (ham)", Varsayilan: false),
+            new("vknoHam",      "t.vkno",          "metin", "Vergi/Kimlik No (ham)", Varsayilan: false),
             // Telefonla arama (266): yalniz RAKAMLAR - ekranda gosterilmez.
             new("telefonHam",   TarafKatalog.TelefonHam, "metin", "Telefon (ham)",
                 Varsayilan: false),
@@ -271,9 +271,9 @@ public static partial class KaynakKatalogu
                 Varsayilan: false),
             new("iseGirisTarihi", "po.ise_giris_tarihi", "tarih", "İşe Giriş",
                 Hizalama: "orta"),
-            new("vkno",         TarafKatalog.TcknMaske, "metin", "TCKN",
+            new("vkno",         TarafKatalog.TcknMaske, "metin", "Kimlik No",
                 Filtrelenebilir: false),
-            new("vknoHam",      "t.vkno",          "metin", "TCKN (ham)", Varsayilan: false),
+            new("vknoHam",      "t.vkno",          "metin", "Kimlik No (ham)", Varsayilan: false),
             new("cepTel",       "t.cep_tel",       "metin", "Cep"),
             // Randevu/basvuru hekim secimi (296): "randevu verilebilir" personel
             //   = doktor. Bolume gore suzme t.departman ile yapilir.
@@ -753,8 +753,12 @@ public static partial class KaynakKatalogu
         return p with
         {
             Ad = "hasta",
-            // Ayrı hasta yetkisi seed edilmediği için aynı personel yetki yüzeyi kullanılır.
-            YetkiKodu = "personel",
+            // HASTANIN KENDI YETKISI (684, kullanici: "yetki matrisine girdim
+            //   kayit kabul altinda personel var, neden"): hasta listesi
+            //   `personel` yetkisine bagliydi ve matriste Kayit Kabul basligi
+            //   altinda "Personel" olarak goruluyordu. Iki ayri istir:
+            //   hastayi kayit kabul gorevlisi gorur, personel kartini IK.
+            YetkiKodu = "hasta",
             SabitKosul = "t.grup = 101",
             // Hasta ozluk (1:1) ve VARSAYILAN adres (1:n'den tek satir - lateral,
             //   yoksa cok adresli hastada satir cogalirdi).
@@ -786,7 +790,11 @@ public static partial class KaynakKatalogu
             new("kod",        "r.kod",          "metin", "Kod"),
             new("ad",         "r.ad",           "metin", "Ad"),
             new("aktif",      "r.aktif",        "mantik","Aktif",    Hizalama: "orta"),
-            new("sistem",     "r.sistem",       "mantik","Sistem",   Hizalama: "orta", Varsayilan: false)
+            // Sistem rolu = programin davranisi ona bagli (664): silinemez, kodu
+            //   degismez. Listede GORUNUR dursun - kullanici neyi silemedigini
+            //   silmeyi deneyince degil, listeye bakinca anlasin.
+            new("sistem",     "r.sistem",       "mantik","Sistem",   Hizalama: "orta"),
+            new("amac",       "r.amac",         "metin", "Amaç")
         });
 
     // --------------------------------------------------------------- stok ----

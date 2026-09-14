@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { sonMenuGorunen } from './menuSonKullanilan';
 import { useMenuTercihleri, useKullaniciAyari } from './kabuk/useMenuTercihleri';
+import { DILLER } from '../bilesenler/diller';
+import { KullaniciAyarlari } from '../bilesenler/KullaniciAyarlari';
 import { modulAcikMi } from './listeTanimlari';
 import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
   from '../bilesenler/tema';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { ZilPaneli } from '../bilesenler/ZilPaneli';
 import { Bayrak } from '../bilesenler/Bayrak';
 import { c, cm, ceviriYukle, ceviriDinle } from '../dil/ceviri';
 import { useOturum } from '../kimlik/OturumBaglami';
@@ -141,14 +144,6 @@ const GRUP_IKON_CEV: Record<string, string> = {
   'Administration': '🛞', 'Verwaltung': '🛞',
 };
 
-/** Arayuz dilleri - db/081: taraf_kullanici.dil (0 TR / 1 EN / 2 DE).
-    Bayrak SVG cizilir (<Bayrak dil=…/>): Windows'ta bayrak EMOJISI yok, emoji
-    kullanildiginda kullanici "TR"/"GB"/"DE" harflerini goruyordu. */
-const DILLER = [
-  { deger: 0, ad: 'Türkçe' },
-  { deger: 1, ad: 'English' },
-  { deger: 2, ad: 'Deutsch' },
-] as const;
 
 export function Kabuk() {
   const { kullanici, cikisYap, subeDegistir, dilDegistir, yetki } = useOturum();
@@ -360,7 +355,9 @@ export function Kabuk() {
             {TEMA_IKON[tema]}
           </button>
 
-          <button className="ib" title={c('Bildirimler')}>🔔</button>
+          {/* ZIL (662): onay bekleyen isler - simdilik iskonto onaylari.
+              Dugme vardi ama hicbir sey yapmiyordu. */}
+          <ZilPaneli c={c} />
 
           {/* Dil secimi: zilin saginda bayrak. Kullanici Ayarlari icindeki dil
               kutusuyla AYNI degeri yazar (taraf_kullanici.dil) - burasi kisayol. */}
@@ -576,104 +573,11 @@ export function Kabuk() {
         <main className="ana" key={ceviriSurumu}><Outlet /></main>
       </div>
 
-      {ayar.acik && (
-        <div className="kaperde"
-             onMouseDown={e => { if (e.target === e.currentTarget) ayar.kapat() }}>
-          <div className="kawin kullanici-ayarlari" role="dialog" aria-label="Kullanıcı Ayarları">
-            <div className="kabas">
-              <span>👤 Kullanıcı Ayarları</span>
-              <span className="kapt">Ortak\UKullaniciDuzenle · KULLANICI</span>
-            </div>
-
-            <div className="kagov">
-              <div className="kagrup">
-                <h6>Kimlik <span>kendi hesabınızda salt okunur</span></h6>
-                <div className="kasat">
-                  <label>Kullanıcı Adı</label>
-                  <div className="kaara">
-                    <input value={kullanici?.ad ?? ''} disabled />
-                    <button className="kabtn" disabled title="Rehberden seç">⋯</button>
-                    <span className="karoz">ID {kullanici?.id ?? '-'}</span>
-                  </div>
-                  <label>Kullanıcı Kodu</label><input value={kullanici?.kod ?? ''} disabled />
-                  <label>Rol</label><input value={kullanici?.rolAdi ?? ''} disabled />
-                  <label>Kullanıcı Durumu</label><input value="Aktif" disabled />
-                  <label>Çalışılan Şube</label><input value={aktifSube?.ad ?? '-'} disabled />
-                  <label>Dil</label>
-                  {/* Bayrakli secim (kullanici): "Türkçe/English/Deutsch" yerine
-                      ust cubuktaki bayrakla AYNI gorsel dil. */}
-                  <select value={ayar.seciliDil}
-                          onChange={e => ayar.setSeciliDil(Number(e.target.value))}
-                          disabled={ayar.kaydediliyor}>
-                    {DILLER.map(d => (
-                      <option key={d.deger} value={d.deger}>{d.ad}</option>
-                    ))}
-                  </select>
-                  <label>Tema</label>
-                  <select value={tema}
-                          onChange={e => { const y = e.target.value as Tema;
-                                           setTema(y); temaUygula(y) }}>
-                    {(['sistem', 'gunduz', 'gece'] as Tema[]).map(t => (
-                      <option key={t} value={t}>{TEMA_IKON[t]}  {TEMA_ADI[t]}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="kagrup">
-                <h6>Şifre</h6>
-                <div className="kasat">
-                  <label>Mevcut Şifre</label>
-                  <input
-                    type="password"
-                    value={ayar.eskiSifre}
-                    onChange={e => ayar.setEskiSifre(e.target.value)}
-                    disabled={ayar.kaydediliyor}
-                    autoComplete="current-password"
-                  />
-                  <label>Yeni Şifre</label>
-                  <div className="kaara">
-                    <input
-                      type="password"
-                      value={ayar.sifre1}
-                      onChange={e => ayar.setSifre1(e.target.value)}
-                      disabled={ayar.kaydediliyor}
-                      autoComplete="new-password"
-                    />
-                    {ayar.sifre1 && ayar.sifre1 === ayar.sifre2
-                      && <span className="kaok">✓</span>}
-                  </div>
-                  <label>Yeni Şifre (Tekrar)</label>
-                  <div className="kaara">
-                    <input
-                      type="password"
-                      value={ayar.sifre2}
-                      onChange={e => ayar.setSifre2(e.target.value)}
-                      disabled={ayar.kaydediliyor}
-                      autoComplete="new-password"
-                    />
-                    {ayar.sifre2 && ayar.sifre1 === ayar.sifre2
-                      && <span className="kaok">✓</span>}
-                  </div>
-                </div>
-                {ayar.mesaj && <div className="kauyari">{ayar.mesaj}</div>}
-                <div className="kanot">Şifre boş bırakılırsa değiştirilmez. Şifre değişirse oturum kapanır; yeni şifreyle tekrar girilir.</div>
-              </div>
-            </div>
-
-            {/* STANDART ALT SERIT (kullanici): modallarin ortak deseni -
-                solda Iptal (d kapat-dugmesi), sagda birincil Kaydet (d bir). */}
-            <div className="kaalt">
-              <button className="d kapat-dugmesi" onClick={ayar.kapat}
-                      disabled={ayar.kaydediliyor}>İptal</button>
-              <button className="d bir" onClick={() => void ayar.tamam()}
-                      disabled={ayar.kaydediliyor}>
-                {ayar.kaydediliyor ? 'Kaydediliyor…' : 'Kaydet'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* KULLANICI AYARLARI (669): dort sekmeli pencere ayri bilesende
+          (bilesenler/KullaniciAyarlari.tsx). Kabuk'ta gomulu dururken
+          Hesabim/Gorunum/Guvenlik/Bildirim sekmeleri kabugu 200 satir daha
+          buyutecekti; pencerenin kendi verisi de var (hesap, oturumlar). */}
+      <KullaniciAyarlari ayar={ayar} tema={tema} setTema={setTema} c={c} />
 
       {/* AI REHBER (447): sag altta, her ekranda. Yol gosterir; kayit
           degistirmez. Yetkisi olmayana hic cizilmez. */}

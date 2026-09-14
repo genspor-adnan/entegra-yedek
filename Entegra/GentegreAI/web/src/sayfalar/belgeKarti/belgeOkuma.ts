@@ -39,6 +39,9 @@ export function yanittanBasvuruBilgi(b: Belge): BasvuruBilgi {
     //   (kullanici: "hasta bilgi bandinda hasta bilgileri gelmedi") - alan
     //   sunucudan geliyordu, kart okumuyordu.
     hastaId: kimlik(b.hastaId),
+    // HASTA ADI sunucudan gelir (kalem serit basligi): dis kurum
+    //   numunesinde belgenin carisi gonderen KURUMDUR, hasta ayri alandadir.
+    hastaUnvan: metin(b.hastaUnvan),
     sysTakipNo: metin(b.sysTakipNo),
     basvuruTuru: kimlik(b.basvuruTuru),
     gelisSekli: kimlik(b.gelisSekli),

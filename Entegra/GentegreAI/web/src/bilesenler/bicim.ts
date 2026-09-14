@@ -1,4 +1,5 @@
 import type { KolonMeta } from '../api/sozlesme';
+import { paraSimgesi, subeAyari } from './subeAyari';
 
 /**
  * TEK BICIM KAYNAGI: tutar / miktar bicimleri butun ekranlarda ayni olmali.
@@ -12,6 +13,17 @@ export const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, m
 /** Kur / carpan kolonlari - dort hane (7,0092'nin 7,01 gorunmemesi icin). */
 export const para4 = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
 export const say4 = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 4 });
+
+/**
+ * TUTAR + PARA BIRIMI SIMGESI (666). Simge AKTIF SUBEDEN gelir: Berlin
+ * subesinde avro tahsil edilir, ekranda "₺" yazmasi yanlis tutar okutur.
+ *
+ * Onceden her ekran `{para.format(x)} ₺` yaziyordu (16 dosya, 39 yer); simge
+ * sabit oldugu icin sube degistirmek hicbir seyi degistirmiyordu.
+ */
+export function paraYaz(deger: number | null | undefined): string {
+  return `${para.format(Number(deger ?? 0))} ${paraSimgesi()}`;
+}
 export const sayi = new Intl.NumberFormat('tr-TR');
 
 /**
@@ -178,8 +190,40 @@ export function kidemMetni(tarihStr: string, bitisStr?: string | null): string |
  * "2026-08-25T14:05:00" -> "25.08.2026". METINDEN keser, `new Date` ile
  * cevirmez: saat dilimi kaymasi gunu bir gun oteye atabiliyordu.
  */
-export const gunMetni = (t?: string | null) =>
-  (t ? t.slice(0, 10).split('-').reverse().join('.') : '—');
+export const gunMetni = (t?: string | null) => {
+  if (!t) return '—';
+  // 667: sunucu artik AN gonderiyor ("...Z" / "+03:00"). Ham metni kesmek UTC
+  //   gunu gosterirdi - gece 02:00'de acilan belge "bir onceki gun" gorunurdu.
+  const p = anParcala(t);
+  return p ? `${p.gun}.${p.ay}.${p.yil}` : t.slice(0, 10).split('-').reverse().join('.');
+};
+
+/**
+ * ZAMAN DILIMLI metni (2026-09-14T20:29:59Z) SUBENIN saat diliminde parcalara
+ * ayirir (666 + 667). Dilim bilgisi YOKSA null doner: o deger bir an degil,
+ * gun ya da eski bicimli bir metindir - cagiran onu oldugu gibi gosterir.
+ *
+ * Neden Intl: yaz saati gecisini takvim bilir; "+03:00 ekle" demek Berlin
+ * subesinde yilda iki kez yanlis olurdu.
+ */
+const bicimOnbellek = new Map<string, Intl.DateTimeFormat>();
+function anParcala(ham: string) {
+  if (!/(Z|[+-]\d{2}:?\d{2})$/.test(ham)) return null;
+  const t = new Date(ham);
+  if (Number.isNaN(t.getTime())) return null;
+
+  const dilim = subeAyari().zamanDilimi;
+  let b = bicimOnbellek.get(dilim);
+  if (!b) {
+    b = new Intl.DateTimeFormat('tr-TR', {
+      timeZone: dilim, year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: false,
+    });
+    bicimOnbellek.set(dilim, b);
+  }
+  const p = Object.fromEntries(b.formatToParts(t).map(x => [x.type, x.value]));
+  return { gun: p.day, ay: p.month, yil: p.year, saat: p.hour, dakika: p.minute };
+}
 
 /**
  * "2026-08-23T14:05:00" -> "23.08.2026 14:05" (saat yoksa/00:00 ise yalniz
@@ -188,6 +232,16 @@ export const gunMetni = (t?: string | null) =>
 export function tarihSaat(ham: unknown): string {
   const metin = String(ham ?? '');
   if (!metin) return '';
+
+  // ZAMAN DILIMLI deger (667): subenin saatinde gosterilir.
+  const p = anParcala(metin);
+  if (p) {
+    const saat = `${p.saat}:${p.dakika}`;
+    return saat !== '00:00' ? `${p.gun}.${p.ay}.${p.yil} ${saat}` : `${p.gun}.${p.ay}.${p.yil}`;
+  }
+
+  // Dilimsiz (gun ya da eski bicim): metin oldugu gibi okunur - Date'e
+  //   cevirmek tarayicinin saat dilimine gore kaydirirdi.
   const gun = metin.slice(0, 10).split('-').reverse().join('.');
   const saat = metin.slice(11, 16);
   return saat && saat !== '00:00' ? `${gun} ${saat}` : gun;

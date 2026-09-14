@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ücret Satırı — Fiyat ve İskonto — Mockup (Gentegre AI · Kayıt Kabul)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .sel b{font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .ozet.k5{grid-template-columns:repeat(5,1fr)}
+  .ozet.k4{grid-template-columns:repeat(4,1fr)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:18px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .ana{display:grid;grid-template-columns:1fr 360px;gap:0}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.iptal td{color:#9aa7b4;text-decoration:line-through}
+  tr.sel td{background:var(--sel)}
+  tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .sayim td{padding:3px 8px}
+  .sayim input{width:56px;border:1px solid var(--line);border-radius:2px;height:22px;
+    text-align:right;padding:0 5px;font-size:11.5px;font-family:inherit}
+  .fark{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:12px}
+  .fark b{font-size:14px}
+  .sat{display:flex;justify-content:space-between;padding:4px 10px;font-size:11.5px;
+    border-bottom:1px solid #eef2f6;gap:10px}
+  .sat.buyuk{font-size:13px;background:#f7fafc;font-weight:bold}
+  .uyari-sat{display:flex;gap:8px;align-items:flex-start;padding:6px 10px;
+    border-bottom:1px solid #eef2f6;font-size:11.5px}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;
+    padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"\25BE";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;
+    background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .hdr.k2{grid-template-columns:repeat(2,1fr)}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* Fiyat giris ekrani: alan izgarasi etiket + kutu satirlari */
+  .hdr { grid-template-columns: 150px 1fr; gap: 8px 12px; align-items: start }
+  .ipucu { font-size: 11px; color: var(--muted); margin-top: 4px; display: block }
+  .birim-etk {
+    font-size: 11px; color: var(--muted); white-space: nowrap;
+    align-self: center; min-width: 72px;
+  }
+  .inp.big { font-size: 14px; font-weight: 700 }
+</style>
+</head>
+<body>
+
+<div class="win" style="max-width:720px">
+  <div class="title">💰 Ücret Satırı — Kardiyoloji Uzman Muayenesi
+    <span class="sp">Gentegre AI · Kayıt Kabul · başvuru P-000220</span></div>
+
+  <div class="serit">
+    <div class="sel">👤 <b>Neslihan ARSLAN</b></div>
+    <div class="sel">🏛 Ödeyen: <b>Kendisi (Ücretli)</b></div>
+    <div class="sel">📋 Liste: <b>Özel Tarife 2026</b></div>
+    <span class="sp"></span>
+    <span class="sonuk">Satır 1 / 3</span>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="oran">Hazır Oran</div>
+    <div class="sekme" data-s="ozel">Özel İskonto</div>
+    <div class="sekme" data-s="fiyat">Birim Fiyat</div>
+    <div class="sekme" data-s="sgk">SGK (Hasta Katkısı)</div>
+    <div class="sekme" data-s="yetkisiz">Yetkisiz</div>
+  </div>
+
+  <!-- ============ 1) HAZIR ORAN ============ -->
+  <div class="pnl" data-s="oran">
+    <div class="grp">
+      <h4>Alanlar <span class="mini">giriş sırasında: Miktar → Birim Fiyat → İskonto</span></h4>
+      <div class="hdr" style="grid-template-columns:150px 1fr">
+        <div class="sonuk" style="align-self:center">Miktar</div>
+        <div style="display:flex;gap:5px;align-items:center">
+          <div class="inp big" style="width:110px;justify-content:flex-end">1</div>
+          <div class="btn" style="padding:3px 7px">▲</div>
+          <div class="btn" style="padding:3px 7px">▼</div>
+          <div class="inp ro" style="width:80px">Adet</div>
+        </div>
+
+        <div class="sonuk" style="align-self:center">Birim Fiyat</div>
+        <div style="display:flex;gap:5px;align-items:center">
+          <div class="inp ro big" style="width:110px;justify-content:flex-end">200,00</div>
+          <div class="inp ro" style="width:56px;justify-content:center">TL</div>
+          <span class="rz pas">🔒 listeden gelir</span>
+        </div>
+
+        <div class="sonuk" style="align-self:center">İskonto</div>
+        <div>
+          <div style="display:flex;gap:5px;align-items:center">
+            <div class="inp combo" style="width:118px">%10</div>
+            <span class="birim-etk">İskonto</span>
+            <div class="inp ro" style="width:110px;justify-content:flex-end">20,00</div>
+            <div class="inp ro" style="width:40px;justify-content:center">TL</div>
+          </div>
+          <div class="ipucu">200,00 − %10 (20,00 TL) = <b>180,00 TL</b></div>
+        </div>
+
+        <div class="sonuk" style="align-self:center">Açıklama</div>
+        <div class="inp">Satır açıklaması</div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <h4>Önizleme <span class="mini">salt görünüm</span></h4>
+      <div class="hdr" style="grid-template-columns:150px 1fr">
+        <div class="sonuk" style="align-self:center">İskontolu Birim Fiyat</div>
+        <div class="inp ro" style="width:140px;justify-content:flex-end">180,00</div>
+        <div class="sonuk" style="align-self:center">Tutar</div>
+        <div class="inp ro" style="width:140px;justify-content:flex-end">180,00</div>
+      </div>
+    </div>
+    <div class="fark">
+      <span class="sonuk">Hazır oranda sağdaki kutu <b>salt görünüm</b>: oran zaten
+        combodan seçildi. Aynı oranı iki yerden değiştirilebilir bırakmak
+        “hangisi kazanır” sorusu üretirdi.</span>
+    </div>
+  </div>
+
+  <!-- ============ 2) ÖZEL İSKONTO ============ -->
+  <div class="pnl" data-s="ozel" hidden>
+    <div class="grp">
+      <h4>İskonto — Özel Oran <span class="mini">combo: “Özel İskonto…”</span></h4>
+      <div class="hdr" style="grid-template-columns:150px 1fr">
+        <div class="sonuk" style="align-self:center">Birim Fiyat</div>
+        <div style="display:flex;gap:5px;align-items:center">
+          <div class="inp ro big" style="width:110px;justify-content:flex-end">200,00</div>
+          <div class="inp ro" style="width:56px;justify-content:center">TL</div>
+        </div>
+        <div class="sonuk" style="align-self:center">İskonto</div>
+        <div>
+          <div style="display:flex;gap:5px;align-items:center">
+            <div class="inp combo" style="width:118px">Özel İskonto…</div>
+            <span class="birim-etk">Oran</span>
+            <div class="inp" style="width:110px;justify-content:flex-end">12,5</div>
+            <div class="inp ro" style="width:40px;justify-content:center">%</div>
+          </div>
+          <div class="ipucu">200,00 − %12,5 (25,00 TL) = <b>175,00 TL</b></div>
+        </div>
+      </div>
+    </div>
+    <div class="fark">
+      <span class="sonuk">Serbest oran <b>tavanla</b> sınırlı: rolün
+        <code>basvuru.iskonto</code> yetkisindeki Sınır değeri. Tavanın üstü
+        yazılırsa kırpılır.</span>
+      <span class="rz mavi">Tavan %25</span>
+    </div>
+  </div>
+
+  <!-- ============ 3) BIRIM FIYAT ============ -->
+  <div class="pnl" data-s="fiyat" hidden>
+    <div class="grp">
+      <h4>İskonto — Birim Fiyattan <span class="mini">combo: “Birim Fiyat…”</span></h4>
+      <div class="hdr" style="grid-template-columns:150px 1fr">
+        <div class="sonuk" style="align-self:center">Birim Fiyat</div>
+        <div style="display:flex;gap:5px;align-items:center">
+          <div class="inp ro big" style="width:110px;justify-content:flex-end">200,00</div>
+          <div class="inp ro" style="width:56px;justify-content:center">TL</div>
+          <span class="sonuk">asıl fiyat</span>
+        </div>
+        <div class="sonuk" style="align-self:center">İskonto</div>
+        <div>
+          <div style="display:flex;gap:5px;align-items:center">
+            <div class="inp combo" style="width:118px">Birim Fiyat…</div>
+            <span class="birim-etk">Birim Fiyat</span>
+            <div class="inp" style="width:110px;justify-content:flex-end">170,00</div>
+            <div class="inp ro" style="width:40px;justify-content:center">TL</div>
+          </div>
+          <div class="ipucu">200,00 − %15 (30,00 TL) = <b>170,00 TL</b></div>
+        </div>
+      </div>
+    </div>
+    <div class="fark">
+      <span class="sonuk">Hastaya söylenen fiyat yazılır, sistem <b>oranı hesaplar</b>:
+        <code>(1 − 170 / 200) × 100 = %15</code>. Satırda saklanan yine YÜZDEDİR.</span>
+      <span class="rz kir">Zam yapılamaz</span>
+    </div>
+  </div>
+
+  <!-- ============ 4) SGK ============ -->
+  <div class="pnl" data-s="sgk" hidden>
+    <div class="grp">
+      <h4>Saf SGK <span class="mini">rota 5 · iskonto SUT'a değil KATKIYA işler</span></h4>
+      <div class="hdr" style="grid-template-columns:150px 1fr">
+        <div class="sonuk" style="align-self:center">Hasta Katkısı</div>
+        <div style="display:flex;gap:5px;align-items:center">
+          <div class="inp ro big" style="width:110px;justify-content:flex-end">42,00</div>
+          <div class="inp ro" style="width:56px;justify-content:center">TL</div>
+          <span class="rz pas">🔒 SUT listesinden</span>
+        </div>
+        <div class="sonuk" style="align-self:center">SGK (SUT) Bedeli</div>
+        <div class="inp ro" style="width:140px;justify-content:flex-end">168,00</div>
+        <div class="sonuk" style="align-self:center">İskonto</div>
+        <div>
+          <div style="display:flex;gap:5px;align-items:center">
+            <div class="inp combo" style="width:118px">%10</div>
+            <span class="birim-etk">İskonto</span>
+            <div class="inp ro" style="width:110px;justify-content:flex-end">4,20</div>
+            <div class="inp ro" style="width:40px;justify-content:center">TL</div>
+          </div>
+          <div class="ipucu">42,00 − %10 (4,20 TL) = <b>37,80 TL</b></div>
+        </div>
+      </div>
+    </div>
+    <div class="grp">
+      <h4>Önizleme</h4>
+      <div class="hdr" style="grid-template-columns:150px 1fr">
+        <div class="sonuk" style="align-self:center">İskontolu Hasta Katkısı</div>
+        <div class="inp ro" style="width:140px;justify-content:flex-end">37,80</div>
+      </div>
+    </div>
+    <div class="fark">
+      <span class="sonuk">Etiketler ÜST KUTUYU izler: burada “Katkı”, ötekinde
+        “Birim Fiyat”. SUT bedeli indirimden <b>etkilenmez</b> — hastaneyle hasta
+        arasındaki anlaşma SGK'nın ödemesini kısamaz.</span>
+    </div>
+  </div>
+
+  <!-- ============ 5) YETKISIZ ============ -->
+  <div class="pnl" data-s="yetkisiz" hidden>
+    <div class="grp">
+      <h4>İskonto Yetkisi Yok <span class="mini">tavan 0 / yetki satırı yok</span></h4>
+      <div class="hdr" style="grid-template-columns:150px 1fr">
+        <div class="sonuk" style="align-self:center">Birim Fiyat</div>
+        <div style="display:flex;gap:5px;align-items:center">
+          <div class="inp ro big" style="width:110px;justify-content:flex-end">200,00</div>
+          <div class="inp ro" style="width:56px;justify-content:center">TL</div>
+        </div>
+        <div class="sonuk" style="align-self:center">İskonto</div>
+        <div>
+          <div style="display:flex;gap:5px;align-items:center;opacity:.45">
+            <div class="inp combo" style="width:118px">%0</div>
+            <span class="birim-etk">İskonto</span>
+            <div class="inp ro" style="width:110px"></div>
+            <div class="inp ro" style="width:40px;justify-content:center">TL</div>
+          </div>
+          <div class="ipucu">İskonto yetkiniz yok — Yetkiler › Başvuru ›
+            “Başvuruda iskonto”.</div>
+        </div>
+      </div>
+    </div>
+    <div class="fark">
+      <span class="sonuk">Yetkisi olmayan iskonto <b>isteyebilir</b>: ücret
+        sekmesindeki <b>%</b> düğmesi talep açar, yetkili zilden onaylar.
+        Onaylanan oran satıra işlenir ve satır kilitlenir 🔒.</span>
+      <span class="rz mavi">iskonto_onay.html</span>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Başvuru P-000220</span><span>·</span>
+    <span>Özel Tarife 2026</span><span>·</span>
+    <span>KDV %20 dahil</span><span>·</span>
+    <span>Tavan %25</span>
+  </div>
+</div>
+
+<div class="not" style="max-width:720px">
+  <b>Ekran:</b> başvuruda ücret satırının fiyat/iskonto penceresi. Sekmeler aynı
+  ekranın <b>farklı hâlleridir</b> (iskonto giriş yolu ve rota), ayrı ekranlar değil.
+  <ul>
+    <li><b>Birim fiyat ve para birimi TÜM ROLLERE kapalı:</b> fiyat listeden
+        gelir. İndirim yapılacaksa İskonto satırından yapılır — orada kim ne kadar
+        indirdi <b>oran olarak kayda geçer</b> ve onaya tabidir. Fiyatın üstüne
+        yazmak aynı indirimi izsiz bırakırdı.</li>
+    <li><b>KDV satırı çizilmez:</b> oran hizmet kartından gelir, mod başvuruda her
+        zaman “dahil”. Ekranda değiştirilemeyen iki kutu tutmak yer harcıyordu;
+        matrah/KDV hesabı arkada aynen sürer. ERP belgelerinde satır durur.</li>
+    <li><b>Tek iskonto, üç giriş yolu:</b> hazır oran (%5…%50, beşer) · Özel
+        İskonto (serbest %) · Birim Fiyat (hedef fiyat). Üçü de aynı alanı yazar —
+        satırda saklanan tek şey <b>yüzdedir</b>. İkinci bir “tutar iskontosu”
+        kolonu açmak, aynı tutarın iki formülle hesaplandığı ikinci bir yol
+        demekti.</li>
+    <li><b>Gösterilen tutar KDV dahildir</b> — üst kutu brüt gösterirken sağdaki
+        indirimi matrahtan hesaplamak, aynı satırda iki farklı tabana bakmak
+        olurdu (“200'ün %10'u neden 16,67”). Oran ölçek-bağımsız olduğu için
+        satıra yazılan değer değişmez.</li>
+    <li><b>Hazır oranda sağdaki kutu salt görünüm;</b> Özel İskonto ve Birim Fiyat
+        modlarında girilebilir. Yazarken ham metin korunur — kutu her tuşta
+        biçimlenirse imleç kayar ve ikinci rakam yazılamaz.</li>
+    <li><b>Tavan yetkiden:</b> <code>basvuru.iskonto</code> yetkisinin Sınır
+        değeri. Tavanın üstündeki oranlar comboya <b>hiç girmez</b>; serbest
+        girişte kırpılır. Tavan yoksa iskonto yapılamaz, ama <b>istenebilir</b>.</li>
+    <li><b>Miktar ve Birim Fiyat koyu/büyük:</b> satırın tutarını bu ikisi
+        belirler, göz önce onlara gitmeli.</li>
+    <li><b>Saf SGK'da taban katkıdır:</b> etiketler üst kutuyu izler, SUT bedeli
+        indirimden etkilenmez.</li>
+  </ul>
+</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');});
+  if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

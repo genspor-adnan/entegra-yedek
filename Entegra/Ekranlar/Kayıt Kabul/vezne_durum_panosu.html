@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vezne Durum Panosu — Mockup (Gentegre AI · Kayıt Kabul)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .sel b{font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .ozet.k5{grid-template-columns:repeat(5,1fr)}
+  .ozet.k4{grid-template-columns:repeat(4,1fr)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:18px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .ana{display:grid;grid-template-columns:1fr 360px;gap:0}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.iptal td{color:#9aa7b4;text-decoration:line-through}
+  tr.sel td{background:var(--sel)}
+  tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .sayim td{padding:3px 8px}
+  .sayim input{width:56px;border:1px solid var(--line);border-radius:2px;height:22px;
+    text-align:right;padding:0 5px;font-size:11.5px;font-family:inherit}
+  .fark{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:12px}
+  .fark b{font-size:14px}
+  .sat{display:flex;justify-content:space-between;padding:4px 10px;font-size:11.5px;
+    border-bottom:1px solid #eef2f6;gap:10px}
+  .sat.buyuk{font-size:13px;background:#f7fafc;font-weight:bold}
+  .uyari-sat{display:flex;gap:8px;align-items:flex-start;padding:6px 10px;
+    border-bottom:1px solid #eef2f6;font-size:11.5px}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;
+    padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"\25BE";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;
+    background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .hdr.k2{grid-template-columns:repeat(2,1fr)}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🏦 Vezne Durum Panosu — Merkez
+    <span class="sp">Gentegre AI · Kayıt Kabul / Muhasebe · 14.09.2026 16:52 · amir görünümü</span></div>
+
+  <div class="toolbar">
+    <div class="btn"><span>🔄</span> Yenile</div>
+    <div class="btn"><span>✔</span> Farkı Onayla</div>
+    <div class="btn"><span>📥</span> Teslim Al</div>
+    <div class="btn"><span>🔒</span> Vardiyayı Zorla Kapat</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🖨</span> Tutanak</div>
+    <div class="btn"><span>📊</span> Gün Dökümü</div>
+    <div class="sp"></div>
+    <div class="btn"><span>⬇</span> Excel</div>
+  </div>
+
+  <!-- FILTRE SERIDI: sube ve tarih; sube suzmesi sunucu tarafinda da uygulanir. -->
+  <div class="serit">
+    <div class="sel">🏢 Şube: <b>Merkez</b> ▾</div>
+    <div class="sel">📅 Tarih: <b>14.09.2026</b></div>
+    <div class="sel">🕗 Vardiya: <b>Tümü</b> ▾</div>
+    <div class="sel">👤 Vezne: <b>Tümü</b> ▾</div>
+    <span class="rz kir">2 vardiya teslim edilmedi</span>
+    <span class="rz sari">1 fark onay bekliyor</span>
+    <span class="sp"></span>
+    <span class="sonuk">Canlı · 30 sn'de bir yenilenir</span>
+  </div>
+
+  <div class="ozet">
+    <div class="kutu">
+      <div class="bas">Açık Vardiya</div>
+      <div class="deg">3</div>
+      <div class="alt">4 veznenin 3'ü çalışıyor</div>
+    </div>
+    <div class="kutu iyi">
+      <div class="bas">Bugün Tahsil Edilen</div>
+      <div class="deg">186.420,00 ₺</div>
+      <div class="alt">tüm vezneler · net</div>
+    </div>
+    <div class="kutu uy">
+      <div class="bas">Veznede Bekleyen Nakit</div>
+      <div class="deg">72.310,00 ₺</div>
+      <div class="alt">teslim edilmemiş</div>
+    </div>
+    <div class="kutu teh">
+      <div class="bas">Bekleyen Fark</div>
+      <div class="deg">−50,00 ₺</div>
+      <div class="alt">1 vardiya · onay bekliyor</div>
+    </div>
+    <div class="kutu">
+      <div class="bas">Bugün Teslim Alınan</div>
+      <div class="deg">38.390,00 ₺</div>
+      <div class="alt">2 virman · merkez kasaya</div>
+    </div>
+    <div class="kutu uy">
+      <div class="bas">Açık Borç (bugün)</div>
+      <div class="deg">14.280,00 ₺</div>
+      <div class="alt">22 başvuru</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sekmeler">
+      <div class="sekme on" data-s="acik">Açık Vardiyalar <span class="rz">3</span></div>
+      <div class="sekme" data-s="teslim">Teslim Bekleyen <span class="rz kir">2</span></div>
+      <div class="sekme" data-s="fark">Farklar &amp; Onay <span class="rz sari">1</span></div>
+      <div class="sekme" data-s="tur">Şube Gün Özeti</div>
+      <div class="sekme" data-s="bakiye">Kasa Bakiyeleri</div>
+      <div class="sekme" data-s="denetim">Denetim İzi</div>
+    </div>
+
+    <!-- ============ SEKME: ACIK VARDIYALAR ============ -->
+    <div class="pnl" data-s="acik">
+      <div class="grp">
+        <h4>Açık Vardiyalar <span class="mini">kasa_oturum · durum 0 · canlı</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr>
+              <th style="width:150px">Kasa</th>
+              <th style="width:150px">Vezne</th>
+              <th class="orta" style="width:60px">Vardiya</th>
+              <th style="width:110px">Açılış</th>
+              <th class="sag" style="width:96px">Devir</th>
+              <th class="orta" style="width:60px">İşlem</th>
+              <th class="sag" style="width:110px">Nakit net</th>
+              <th class="sag" style="width:110px">Kart / Havale</th>
+              <th class="sag" style="width:120px">Kasada olması gereken</th>
+              <th style="width:150px">Durum</th>
+            </tr></thead>
+            <tbody>
+              <tr class="sel"><td>VEZNE 1 <span class="sonuk">100.01.003</span></td>
+                <td>Elif KARACA</td><td class="orta">#2</td><td>08:02</td>
+                <td class="sag">1.250,00</td><td class="orta">57</td>
+                <td class="sag">30.200,00</td><td class="sag">51.860,00</td>
+                <td class="sag"><b>31.450,00</b></td>
+                <td><span class="rz kir">Sayım farkı −50,00</span></td></tr>
+              <tr><td>VEZNE 2 <span class="sonuk">100.01.004</span></td>
+                <td>Serkan BULUT</td><td class="orta">#1</td><td>08:00</td>
+                <td class="sag">1.000,00</td><td class="orta">41</td>
+                <td class="sag">22.480,00</td><td class="sag">28.900,00</td>
+                <td class="sag"><b>23.480,00</b></td>
+                <td><span class="rz ok">Normal</span></td></tr>
+              <tr><td>VEZNE 3 <span class="sonuk">100.01.005</span></td>
+                <td>Derya ÇAM</td><td class="orta">#1</td><td>12:30</td>
+                <td class="sag">1.000,00</td><td class="orta">18</td>
+                <td class="sag">16.380,00</td><td class="sag">9.720,00</td>
+                <td class="sag"><b>17.380,00</b></td>
+                <td><span class="rz ok">Normal</span></td></tr>
+              <tr class="toplam"><td colspan="6">TOPLAM (açık)</td>
+                <td class="sag">69.060,00</td><td class="sag">90.480,00</td>
+                <td class="sag">72.310,00</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="fark">
+          <span class="sonuk">Amir bütün vezneleri görür; <b>banko yalnız kendi kasasını</b> görür.
+            Şube süzmesi sunucu tarafında da uygulanır — başka şubenin kasası hiç dönmez.</span>
+          <span class="rz mavi">Seçili kasa: VEZNE 1</span>
+        </div>
+      </div>
+
+      <div class="grp">
+        <h4>Kapalı / Teslim Edilmiş Vardiyalar <span class="mini">bugün</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:150px">Kasa</th><th style="width:150px">Vezne</th>
+              <th class="orta" style="width:60px">Vardiya</th><th style="width:130px">Saat</th>
+              <th class="sag" style="width:110px">Sayılan</th>
+              <th class="sag" style="width:90px">Fark</th>
+              <th class="sag" style="width:110px">Virman</th>
+              <th style="width:150px">Tutanak</th>
+              <th>Teslim alan</th></tr></thead>
+            <tbody>
+              <tr><td>VEZNE 1</td><td>Murat ŞEN</td><td class="orta">#1</td>
+                <td>07:55 – 15:40</td><td class="sag">19.640,00</td>
+                <td class="sag">—</td><td class="sag">18.390,00</td>
+                <td><span class="rz ok">KVR-004410 · imzalı</span></td>
+                <td class="sonuk">Muhasebe · O. AKAR</td></tr>
+              <tr><td>VEZNE 4</td><td>Hakan UZ</td><td class="orta">#1</td>
+                <td>08:10 – 16:05</td><td class="sag">21.000,00</td>
+                <td class="sag">—</td><td class="sag">20.000,00</td>
+                <td><span class="rz ok">KVR-004411 · imzalı</span></td>
+                <td class="sonuk">Muhasebe · O. AKAR</td></tr>
+              <tr class="toplam"><td colspan="6">TESLİM ALINAN</td>
+                <td class="sag">38.390,00</td><td></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SEKME: TESLIM BEKLEYEN ============ -->
+    <div class="pnl" data-s="teslim" hidden>
+      <div class="grp">
+        <h4>Teslim Bekleyen Vardiyalar <span class="mini">kapanmış ya da gecikmiş · para hâlâ veznede</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:92px">Tarih</th><th style="width:150px">Kasa</th>
+              <th style="width:150px">Vezne</th><th class="orta" style="width:60px">Vardiya</th>
+              <th style="width:100px">Son işlem</th>
+              <th class="sag" style="width:110px">Teslim edilecek</th>
+              <th style="width:160px">Engel</th>
+              <th>Gecikme</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td>14.09.2026</td><td>VEZNE 1</td><td>Elif KARACA</td>
+                <td class="orta">#2</td><td>16:41</td>
+                <td class="sag"><b>30.400,00</b></td>
+                <td><span class="rz kir">Fark fişi + POS farkı</span></td>
+                <td class="sonuk">—</td></tr>
+              <tr><td>13.09.2026</td><td>VEZNE 3</td><td>Derya ÇAM</td>
+                <td class="orta">#2</td><td>19:12</td>
+                <td class="sag"><b>12.860,00</b></td>
+                <td><span class="rz sari">Teslim alan yok (mesai dışı)</span></td>
+                <td><span class="rz kir">21 saat · gecikti</span></td></tr>
+              <tr class="toplam"><td colspan="5">TOPLAM BEKLEYEN</td>
+                <td class="sag">43.260,00</td><td></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="fark">
+          <span class="sonuk">Gece veznede kalan nakit <b>risktir</b>. Mesai dışı kapanan vardiya için
+            devralan kasa “Gece Kasası” olarak tanımlanır; tutanak ertesi sabah imzalanır.</span>
+          <span class="rz kir">1 vardiya 12 saati aştı</span>
+        </div>
+      </div>
+
+      <div class="grp">
+        <h4>Teslim Al <span class="mini">seçili: VEZNE 3 · 13.09 #2</span></h4>
+        <div class="hdr k4">
+          <div class="fld"><label>Teslim eden</label><div class="inp ro">Derya ÇAM · VEZNE 3</div></div>
+          <div class="fld"><label class="req">Teslim alan</label><div class="inp combo">Muhasebe · O. AKAR</div></div>
+          <div class="fld"><label class="req">Devralan kasa</label><div class="inp combo">MERKEZ KASA · 100.01.001</div></div>
+          <div class="fld"><label>Virman tutarı</label><div class="inp ro big">12.860,00 ₺</div></div>
+        </div>
+        <div style="padding:8px 12px;display:flex;gap:6px;flex-wrap:wrap">
+          <div class="btn ok">📥 Teslim Al ve İmzala</div>
+          <div class="btn">🖨 Tutanak Bas</div>
+          <div class="btn danger">↩ Vezneye İade Et</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SEKME: FARKLAR & ONAY ============ -->
+    <div class="pnl" data-s="fark" hidden>
+      <div class="grp">
+        <h4>Onay Bekleyen Sayım Farkları <span class="mini">amir onayı olmadan teslim edilemez</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:92px">Tarih</th><th style="width:140px">Kasa / Vezne</th>
+              <th class="sag" style="width:110px">Olması gereken</th>
+              <th class="sag" style="width:100px">Sayılan</th>
+              <th class="sag" style="width:90px">Fark</th>
+              <th>Açıklama</th>
+              <th style="width:150px">Fark hesabı</th>
+              <th style="width:130px">Durum</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td>14.09.2026</td><td>VEZNE 1 · E. KARACA</td>
+                <td class="sag">31.450,00</td><td class="sag">31.400,00</td>
+                <td class="sag" style="color:#b3261e"><b>−50,00</b></td>
+                <td>14:36 iadesinde 50 ₺ fazla verildi — hasta bilgilendirildi.</td>
+                <td class="sonuk">197.01 Sayım Noksanı</td>
+                <td><span class="rz sari">Onay bekliyor</span></td></tr>
+              <tr><td>13.09.2026</td><td>VEZNE 1 · M. ŞEN</td>
+                <td class="sag">21.840,00</td><td class="sag">21.960,00</td>
+                <td class="sag" style="color:#2e7d46"><b>+120,00</b></td>
+                <td>Para üstü verilmemiş — hasta ulaşılamadı.</td>
+                <td class="sonuk">397.01 Sayım Fazlası</td>
+                <td><span class="rz ok">Onaylandı · fiş yazıldı</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="padding:8px 12px;display:flex;gap:6px;flex-wrap:wrap">
+          <div class="btn ok">✔ Onayla ve Fark Fişini Yaz</div>
+          <div class="btn">🔍 İşlemleri Karşılaştır</div>
+          <div class="btn danger">✖ Reddet · yeniden say</div>
+        </div>
+        <div class="fark">
+          <span class="sonuk">Onay, farkı <b>kapatmaz</b> — muhasebeleştirir. Fiş yazılmadan kasa
+            bakiyesi sayımla tutmaz, sonraki vardiya yanlış devirle açılır.</span>
+        </div>
+      </div>
+
+      <div class="grp">
+        <h4>Fark Eğilimi <span class="mini">son 30 gün · vezne bazında</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:170px">Vezne</th>
+              <th class="orta" style="width:80px">Vardiya</th>
+              <th class="orta" style="width:80px">Farklı</th>
+              <th class="sag" style="width:110px">Toplam noksan</th>
+              <th class="sag" style="width:110px">Toplam fazla</th>
+              <th class="sag" style="width:110px">Net</th>
+              <th>Değerlendirme</th></tr></thead>
+            <tbody>
+              <tr><td>Elif KARACA</td><td class="orta">22</td><td class="orta">3</td>
+                <td class="sag">−180,00</td><td class="sag">+120,00</td>
+                <td class="sag">−60,00</td>
+                <td><span class="rz ok">Olağan</span></td></tr>
+              <tr><td>Serkan BULUT</td><td class="orta">21</td><td class="orta">1</td>
+                <td class="sag">−20,00</td><td class="sag">—</td>
+                <td class="sag">−20,00</td>
+                <td><span class="rz ok">Olağan</span></td></tr>
+              <tr><td>Derya ÇAM</td><td class="orta">19</td><td class="orta">7</td>
+                <td class="sag">−1.340,00</td><td class="sag">+90,00</td>
+                <td class="sag" style="color:#b3261e">−1.250,00</td>
+                <td><span class="rz kir">İnceleme önerilir</span></td></tr>
+              <tr><td>Hakan UZ</td><td class="orta">20</td><td class="orta">0</td>
+                <td class="sag">—</td><td class="sag">—</td>
+                <td class="sag">0,00</td>
+                <td><span class="rz ok">Olağan</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="fark">
+          <span class="sonuk">Tek tek küçük farklar normaldir; <b>tekrar</b> anlamlıdır. Eğilim, tek
+            vardiyaya bakarak görülemeyecek olanı gösterir.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SEKME: SUBE GUN OZETI ============ -->
+    <div class="pnl" data-s="tur" hidden>
+      <div class="grp">
+        <h4>Ödeme Türüne Göre — Şube Toplamı <span class="mini">14.09.2026 · 4 vezne</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr><th>Tür</th><th class="orta">Adet</th>
+              <th class="sag">VEZNE 1</th><th class="sag">VEZNE 2</th>
+              <th class="sag">VEZNE 3</th><th class="sag">VEZNE 4</th>
+              <th class="sag">TOPLAM</th><th>Nereye gider</th></tr></thead>
+            <tbody>
+              <tr><td>💵 Nakit</td><td class="orta">104</td>
+                <td class="sag">30.200,00</td><td class="sag">22.480,00</td>
+                <td class="sag">16.380,00</td><td class="sag">20.000,00</td>
+                <td class="sag"><b>89.060,00</b></td>
+                <td><span class="rz mavi">Merkez kasa (virman)</span></td></tr>
+              <tr><td>💳 Kredi Kartı</td><td class="orta">58</td>
+                <td class="sag">40.660,00</td><td class="sag">21.400,00</td>
+                <td class="sag">7.220,00</td><td class="sag">9.860,00</td>
+                <td class="sag"><b>79.140,00</b></td>
+                <td><span class="rz mavi">Banka (POS virmanı · tür 44)</span></td></tr>
+              <tr><td>🏦 Havale / EFT</td><td class="orta">12</td>
+                <td class="sag">11.200,00</td><td class="sag">7.500,00</td>
+                <td class="sag">2.500,00</td><td class="sag">—</td>
+                <td class="sag"><b>21.200,00</b></td>
+                <td><span class="rz mavi">Banka (doğrudan)</span></td></tr>
+              <tr><td>🧾 Çek</td><td class="orta">1</td>
+                <td class="sag">2.250,00</td><td class="sag">—</td>
+                <td class="sag">—</td><td class="sag">—</td>
+                <td class="sag"><b>2.250,00</b></td>
+                <td><span class="rz mor">Portföy</span></td></tr>
+              <tr><td>🎟 Kupon</td><td class="orta">4</td>
+                <td class="sag">—</td><td class="sag">—</td>
+                <td class="sag">—</td><td class="sag">—</td>
+                <td class="sag"><b>—</b></td>
+                <td class="sonuk">nakit akışı yok</td></tr>
+              <tr class="toplam"><td>TOPLAM</td><td class="orta">179</td>
+                <td class="sag">84.310,00</td><td class="sag">51.380,00</td>
+                <td class="sag">26.100,00</td><td class="sag">29.860,00</td>
+                <td class="sag">191.650,00</td><td></td></tr>
+              <tr><td class="sonuk">İade / iptal</td><td class="orta">9</td>
+                <td class="sag">−1.950,00</td><td class="sag">−1.120,00</td>
+                <td class="sag">−860,00</td><td class="sag">−1.300,00</td>
+                <td class="sag">−5.230,00</td><td></td></tr>
+              <tr class="toplam"><td>NET</td><td class="orta">170</td>
+                <td class="sag">82.360,00</td><td class="sag">50.260,00</td>
+                <td class="sag">25.240,00</td><td class="sag">28.560,00</td>
+                <td class="sag">186.420,00</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grp">
+        <h4>Bölüme Göre Gelir <span class="mini">tahsil edilen · hizmet satırından</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr><th>Bölüm</th><th class="orta">Başvuru</th>
+              <th class="sag">Hizmet toplamı</th><th class="sag">Tahsil</th>
+              <th class="sag">Açık</th><th class="sag">Kurum tahakkuku</th></tr></thead>
+            <tbody>
+              <tr><td>Kardiyoloji</td><td class="orta">38</td><td class="sag">46.200,00</td>
+                <td class="sag">42.100,00</td><td class="sag">4.100,00</td><td class="sag">18.400,00</td></tr>
+              <tr><td>Dahiliye</td><td class="orta">52</td><td class="sag">38.900,00</td>
+                <td class="sag">36.600,00</td><td class="sag">2.300,00</td><td class="sag">22.100,00</td></tr>
+              <tr><td>Radyoloji</td><td class="orta">44</td><td class="sag">51.400,00</td>
+                <td class="sag">48.980,00</td><td class="sag">2.420,00</td><td class="sag">12.900,00</td></tr>
+              <tr><td>Laboratuvar</td><td class="orta">61</td><td class="sag">33.800,00</td>
+                <td class="sag">31.340,00</td><td class="sag">2.460,00</td><td class="sag">8.700,00</td></tr>
+              <tr><td>Fizik Tedavi</td><td class="orta">17</td><td class="sag">30.400,00</td>
+                <td class="sag">27.400,00</td><td class="sag">3.000,00</td><td class="sag">—</td></tr>
+              <tr class="toplam"><td>TOPLAM</td><td class="orta">212</td>
+                <td class="sag">200.700,00</td><td class="sag">186.420,00</td>
+                <td class="sag">14.280,00</td><td class="sag">62.100,00</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SEKME: KASA BAKIYELERI ============ -->
+    <div class="pnl" data-s="bakiye" hidden>
+      <div class="grp">
+        <h4>Kasa Bakiyeleri <span class="mini">hesap · tür K · şube Merkez</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:130px">Hesap</th><th style="width:170px">Kasa</th>
+              <th style="width:170px">Şu an sorumlu</th>
+              <th class="sag" style="width:120px">Defter bakiyesi</th>
+              <th class="sag" style="width:120px">Son sayım</th>
+              <th style="width:110px">Sayım zamanı</th>
+              <th class="sag" style="width:100px">Sapma</th>
+              <th>Durum</th></tr></thead>
+            <tbody>
+              <tr><td class="sonuk">100.01.001</td><td>MERKEZ KASA</td>
+                <td><span class="rz mavi">★ Ana Kasa</span> <span class="sonuk">Muhasebe</span></td>
+                <td class="sag">148.920,00</td><td class="sag">148.920,00</td>
+                <td class="sonuk">14.09 16:05</td><td class="sag">—</td>
+                <td><span class="rz ok">Uyumlu</span></td></tr>
+              <tr class="sel"><td class="sonuk">100.01.003</td><td>VEZNE 1 KASASI</td>
+                <td>Elif KARACA <span class="rz mavi">oturum #2</span></td>
+                <td class="sag">31.450,00</td><td class="sag">31.400,00</td>
+                <td class="sonuk">14.09 16:45</td>
+                <td class="sag" style="color:#b3261e">−50,00</td>
+                <td><span class="rz kir">Fark fişi bekliyor</span></td></tr>
+              <tr><td class="sonuk">100.01.004</td><td>VEZNE 2 KASASI</td>
+                <td>Serkan BULUT <span class="rz mavi">oturum #1</span></td>
+                <td class="sag">23.480,00</td><td class="sag">—</td>
+                <td class="sonuk">—</td><td class="sag">—</td>
+                <td><span class="rz sari">Henüz sayılmadı</span></td></tr>
+              <tr><td class="sonuk">100.01.005</td><td>VEZNE 3 KASASI</td>
+                <td>Derya ÇAM <span class="rz mavi">oturum #1</span></td>
+                <td class="sag">30.240,00</td><td class="sag">—</td>
+                <td class="sonuk">—</td><td class="sag">—</td>
+                <td><span class="rz kir">Dünkü teslim bekliyor</span></td></tr>
+              <tr><td class="sonuk">100.01.006</td><td>VEZNE 4 KASASI</td>
+                <td><span class="rz pas">Açık oturum yok</span>
+                  <span class="sonuk">son: Hakan UZ</span></td>
+                <td class="sag">1.000,00</td><td class="sag">1.000,00</td>
+                <td class="sonuk">14.09 16:05</td><td class="sag">—</td>
+                <td><span class="rz ok">Teslim edildi · devir</span></td></tr>
+              <tr><td class="sonuk">100.01.009</td><td>GECE KASASI</td>
+                <td><span class="rz pas">Açık oturum yok</span></td>
+                <td class="sag">0,00</td><td class="sag">0,00</td>
+                <td class="sonuk">13.09 08:10</td><td class="sag">—</td>
+                <td><span class="rz ok">Uyumlu</span></td></tr>
+              <tr class="toplam"><td colspan="3">TOPLAM NAKİT</td>
+                <td class="sag">235.090,00</td><td class="sag">181.320,00</td>
+                <td colspan="3"></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="fark">
+          <span class="sonuk">Kasa <b>fiziksel bankodur</b>, kişiye bağlı değildir —
+            “şu an sorumlu” sütunu <b>açık oturumdan</b> gelir
+            (<code>kasa_oturum.vezne_id</code>), <code>hesap</code> kaydından değil.
+            Açık oturumu olmayan kasa sahipsizdir: içindeki tutar devirdir.
+            Bir şubede tek <b>Ana Kasa</b> (<code>atama = -1</code>) kuralı
+            veritabanında benzersiz indeksle durur, ekranda değil.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SEKME: DENETIM IZI ============ -->
+    <div class="pnl" data-s="denetim" hidden>
+      <div class="grp">
+        <h4>Denetim İzi <span class="mini">islem_log · kasa ve vardiya olayları</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:110px">Zaman</th><th style="width:150px">Kullanıcı</th>
+              <th style="width:150px">Olay</th><th style="width:140px">Kayıt</th>
+              <th>Ayrıntı</th></tr></thead>
+            <tbody>
+              <tr><td>16:45</td><td>Elif KARACA</td><td><span class="rz sari">Sayım girildi</span></td>
+                <td class="sonuk">oturum #4188</td>
+                <td>Sayılan 31.400,00 · olması gereken 31.450,00 · fark −50,00</td></tr>
+              <tr><td>16:41</td><td>Elif KARACA</td><td><span class="rz ok">Tahsilat</span></td>
+                <td class="sonuk">MKB-2026-004189</td>
+                <td>1.860,00 ₺ · kredi kartı · P-000221</td></tr>
+              <tr><td>15:57</td><td>Elif KARACA</td><td><span class="rz kir">İptal</span></td>
+                <td class="sonuk">MKB-2026-004187</td>
+                <td>900,00 ₺ nakit iptal · gerekçe “yanlış kasa” · ters kayıt ACL-000914</td></tr>
+              <tr><td>15:40</td><td>Murat ŞEN</td><td><span class="rz mavi">Vardiya kapandı</span></td>
+                <td class="sonuk">oturum #4187</td>
+                <td>VEZNE 1 · #1 · sayılan 19.640,00 · fark yok</td></tr>
+              <tr><td>15:42</td><td>O. AKAR</td><td><span class="rz ok">Teslim alındı</span></td>
+                <td class="sonuk">KVR-004410</td>
+                <td>18.390,00 ₺ virman · VEZNE 1 → MERKEZ KASA · tutanak imzalandı</td></tr>
+              <tr><td>13.09 21:30</td><td>Derya ÇAM</td><td><span class="rz sari">Vardiya kapandı</span></td>
+                <td class="sonuk">oturum #4180</td>
+                <td>Teslim alan bulunamadı (mesai dışı) · nakit veznede kaldı</td></tr>
+              <tr><td>13.09 18:02</td><td>O. AKAR</td><td><span class="rz mor">Fark onayı</span></td>
+                <td class="sonuk">oturum #4176</td>
+                <td>+120,00 ₺ fazla onaylandı · 397.01'e fiş yazıldı</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="fark">
+          <span class="sonuk">Kasa olayları <b>silinmez</b>: iptal ters kayıt üretir, sayım ve onay
+            kullanıcı/zaman damgasıyla kalır. Denetim izi olmadan sayım farkı tartışması
+            çözülemez.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Merkez · 4 vezne</span><span>·</span>
+    <span>3 açık vardiya</span><span>·</span>
+    <span>Veznede 72.310,00 ₺ nakit</span><span>·</span>
+    <span>1 fark onayı, 2 teslim bekliyor</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> amirin/muhasebenin bütün vezneleri tek yerden gördüğü pano.
+  Banko kendi ekranında yalnız kendi kasasını görür
+  (<code>banko_gun_sonu_kasa_teslimi.html</code>); burası “şubede para nerede,
+  kim teslim etmedi, hangi fark onay bekliyor” sorularını cevaplar.
+  <ul>
+    <li><b>Yetki ekrana göre değil, veriye göre:</b> şube süzmesi sunucu tarafında
+        uygulanır — başka şubenin kasası hiç dönmez. Vezne rolündeki kullanıcı bu
+        ekranı açsa bile yalnız kendi satırını görür.</li>
+    <li><b>“Veznede bekleyen nakit” ana göstergedir:</b> tahsil edilen tutar değil,
+        <i>henüz merkeze gelmemiş</i> tutar risktir. Gece veznede kalan para ayrıca
+        işaretlenir.</li>
+    <li><b>Fark onayı farkı kapatmaz, muhasebeleştirir:</b> onay ile birlikte fark fişi
+        yazılır (noksan <code>197</code>, fazla <code>397</code>). Onaysız teslim
+        yapılamaz.</li>
+    <li><b>Tek fark değil, eğilim bakılır:</b> küçük farklar olağandır, <b>tekrar</b>
+        anlamlıdır. 30 günlük vezne kırılımı tek vardiyada görünmeyeni gösterir.</li>
+    <li><b>“Zorla kapat” ayrı bir yetkidir</b> ve denetim izine ayrı olay olarak düşer:
+        vezne unuttuysa amir kapatır, ama bunun izi kalır.</li>
+    <li><b>Nakit dışı türler kasada aranmaz:</b> kart bankaya, havale doğrudan bankaya,
+        çek portföye gider. Pano bunları “nereye gider” sütunuyla ayırır; tek toplamda
+        göstermek veznede olmayan parayı aratırdı.</li>
+    <li><b>Denetim izi silinmez:</b> iptal ters kayıt üretir; sayım, onay ve teslim
+        kullanıcı + zaman damgasıyla kalır.</li>
+  </ul>
+</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');});
+  if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

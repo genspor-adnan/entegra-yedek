@@ -159,7 +159,7 @@ public sealed record SilmeEngeli(string Tablo, string Kolon, string Aciklama);
 /// <summary>
 /// DOVIZ KURALI — karttaki para birimi / kur / tutar ucgeni.
 ///
-/// Yerel para (ayar <c>genel.yerel_para</c>) disinda bir birim secilirse kur
+/// Yerel para (SUBENIN <c>para_birimi</c> ayari, 666) disinda bir birim secilirse kur
 /// islem tarihinin kurundan OTOMATIK gelir ve yerel karsilik hesaplanir.
 /// Kullanici kuru elle degistirebilir (banka/anlasma kuru); yerel tutar HER
 /// ZAMAN sunucuda tutar x kur olarak yeniden hesaplanir - arayuzden gelen

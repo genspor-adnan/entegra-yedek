@@ -26,6 +26,8 @@ var baglantiDizesi = kurucu.Configuration.GetConnectionString("Gentegre")
 // ------------------------------------------------------------------ servisler ----
 kurucu.Services.AddSingleton(new VeriKaynagi(baglantiDizesi));
 kurucu.Services.AddScoped<KullaniciDeposu>();
+// Kimlik no bicimi (679) - kurum profilinden, sube basina 60 sn onbellekli.
+kurucu.Services.AddScoped<KimlikKuraliDeposu>();
 kurucu.Services.AddScoped<OturumDeposu>();
 // Singleton: YetkiCozucu (singleton) tuketiyor, kendisi stateless (VeriKaynagi'yi sarar,
 //   her cagride kendi baglantisini acar) - paylasilan mutable durumu yok.
@@ -65,6 +67,7 @@ kurucu.Services.AddScoped<AyarDeposu>();
 kurucu.Services.AddScoped<KurumProfilDeposu>();
 kurucu.Services.AddScoped<PanelDeposu>();
 kurucu.Services.AddScoped<RolYetkiDeposu>();
+kurucu.Services.AddScoped<IskontoTalepDeposu>();
 kurucu.Services.AddScoped<RolKullaniciDeposu>();
 kurucu.Services.AddScoped<KullaniciSubeDeposu>();
 kurucu.Services.AddScoped<YetkiSenkronu>();
@@ -237,6 +240,7 @@ uygulama.ZamanliIsUclariniEkle();
 uygulama.KurumProfilUclariniEkle();
 uygulama.PanelUclariniEkle();
 uygulama.RolYetkiUclariniEkle();
+uygulama.IskontoOnayUclariniEkle();
 uygulama.DokumanUclariniEkle();
 uygulama.DokumanYonetimUclariniEkle();
 uygulama.GelenBelgeUclariniEkle();

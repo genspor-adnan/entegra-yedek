@@ -61,7 +61,7 @@ public static class AksiyonKatalogu
             ["kisi-liste"] = Crud("kisi", "kisi", "cari"),
             ["rol-liste"] = Crud("rol", "rol", "rol", yazdir: false),
             ["personel-liste"] = Crud("personel", "personel", "personel"),
-            ["hasta-liste"] = Crud("hasta", "hasta", "personel"),
+            ["hasta-liste"] = Crud("hasta", "hasta", "hasta"),
             // Dis doktor (305): personel yetkisiyle, kendi kart adiyla.
             ["dis-hekim-liste"] = Crud("dis-hekim", "dis-hekim", "personel"),
 

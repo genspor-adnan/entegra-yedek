@@ -32,12 +32,18 @@ import { LabKkGrafik } from './sayfalar/LabKkGrafik';
 import { LabEtiket } from './sayfalar/LabEtiket';
 import { SatisAyarlar, AlisAyarlar } from './sayfalar/BelgeAyarlar';
 import { Panel } from './sayfalar/Panel';
+import { ParolaZorunlu } from './sayfalar/ParolaZorunlu';
+import { IskontoOnaylari } from './sayfalar/IskontoOnaylari';
 
 function Yollar() {
   const { kullanici, yukleniyor, yetki } = useOturum();
 
   if (yukleniyor) return <div className="tam-ekran-bilgi">Yukleniyor…</div>;
   if (!kullanici) return <Giris />;
+  // ZORUNLU PAROLA DEGISIMI (667): varsayilan parolayla (kart id) giren kisi
+  //   once kendi parolasini belirler - bayrak dusene kadar HICBIR rota
+  //   cizilmez, yoksa "sonra degistiririm" diyen kullanici o parolayla kalirdi.
+  if (kullanici.parolaDegismeli) return <ParolaZorunlu />;
 
   // Acilis ekrani artik PANEL (bkz. asagidaki "*" rotasi); eskiden yetkisi olan
   //   ILK liste aciliyordu ve kullanici nerede oldugunu anlamiyordu.
@@ -121,6 +127,11 @@ function Yollar() {
             gruplu dokum. Yetki `prim.kendi`; butun kisileri goren ekran
             Prim modulunde ve `prim` yetkisinde. */}
         {yetki('prim.kendi') && <Route path="/hakedisim" element={<Hakedisim />} />}
+
+        {/* ISKONTO ONAY EKRANI (666): zilin buyugu - kuyruk, karar, limit,
+            analiz. 'belge' gor yetkisi yeter; KARAR yetkisi ayri (aksiyon
+            basvuru.iskonto) ve ekran icinde olculur. */}
+        {yetki('iskonto_onay') && <Route path="/iskonto-onay" element={<IskontoOnaylari />} />}
         {/* Radyoloji raporu: generic kart degil - bolumler sablondan uretilir,
             onay iki asamali ve onaydan sonra rapor kilitlenir (283/284). */}
         {yetki('radyoloji') && <Route path="/radyoloji/rapor/:istemId" element={<RadyolojiRapor />} />}

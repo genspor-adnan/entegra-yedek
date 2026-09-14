@@ -4,6 +4,7 @@ import { mesaj } from './mesaj';
 import { ayarSayi } from '../api/ayarlar';
 import { type AksiyonYaniti, type Kosul, type ListeSatiri } from '../api/sozlesme';
 import { bicimle } from './bicim';
+import { gorunumOku } from './gorunum';
 import { GenKomutPaleti, GenSagTus, GenToolbar, hedefte, useAksiyonlar,
          type AltSecenek } from './Aksiyonlar';
 import { Modal } from './Modal';
@@ -214,7 +215,10 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                           icerikAlani, icerikBaslik, agacAlani }: Props) {
   // Sayfa boyu: cagiran acikca verdiyse o, yoksa Genel Ayarlar'daki
   //   `liste.sayfa_boyu` (varsayilan 50). Ayar gelene kadar 50 ile calisir.
-  const [ayarBoyut, setAyarBoyut] = useState(50);
+  // ACILIS SAYFA BOYU kullanicinin tercihinden gelir (669 · Kullanici
+  //   Ayarlari > Gorunum). Tek bir listede gecici olarak degistirmek tercihi
+  //   BOZMAZ - burasi yalnizca baslangic degeri.
+  const [ayarBoyut, setAyarBoyut] = useState(() => gorunumOku().listeSatir);
   const sayfaBoyu = boyut ?? ayarBoyut;
   useEffect(() => { void ayarSayi('liste.sayfa_boyu', 50).then(setAyarBoyut) }, []);
 

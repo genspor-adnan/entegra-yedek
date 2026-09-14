@@ -15,7 +15,16 @@ public sealed class TercihDeposu
 
     /// <summary>Yazilabilen tercih anahtarlari - baskasi 400 ile reddedilir.</summary>
     public static readonly IReadOnlySet<string> Anahtarlar =
-        new HashSet<string>(StringComparer.Ordinal) { "favoriler", "sonMenuler" };
+        new HashSet<string>(StringComparer.Ordinal)
+        {
+            "favoriler", "sonMenuler",
+            // Kullanici Ayarlari (669). HESAPTA saklanirlar, tarayicida degil:
+            //   kisi hangi cihazdan girerse girsin ayni duzeni bulur. TEMA
+            //   bilerek DISARIDA - o cihaza aittir (poliklinikte gunduz,
+            //   evde gece) ve localStorage'da kalir.
+            "gorunum",   // {yogunluk, listeSatir, acilisEkrani}
+            "bildirim",  // {olaylar:{<kod>:{zil,masaustu}}, sessiz:{...}}
+        };
 
     /// <summary>Bir degerin ust siniri: favori listesi birkac yuz bayttir.</summary>
     public const int EnFazlaUzunluk = 8000;

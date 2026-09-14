@@ -159,7 +159,7 @@
       <tr><th style="width:40px">#</th><th style="width:190px">Adım</th><th>Ne olur</th></tr>
       <tr><td>1</td><td><b>Tetik</b></td><td>Olay tablolarındaki durum geçişi (başvuru kapandı, reçete imzalandı, rapor onaylandı) paket üretimini çağırır; <code>enabiz_paket_turu.tetik_olay</code> eşleşir ve tür aktifse paket açılır. Aynı kaynak için içerik hash'i aynıysa yeni paket üretilmez.</td></tr>
       <tr><td>2</td><td><b>Alan çözümleme</b></td><td>Her USS alanı kaynak kolondan okunur; SKRS listeli alanlar için yerel kod → SKRS kodu (<code>kod_deger.skrs_kod</code> ya da <code>enabiz_kod_esleme</code>). Sonuç <code>enabiz_paket_alan</code>'a satır satır yazılır.</td></tr>
-      <tr><td>3</td><td><b>Doğrulama</b></td><td>Paket türünün zorunlu alan listesi + SKRS liste üyeliği + format (TCKN 11 hane, tarih). Eksik varsa durum <b>eksik alan</b>, kuyruğa girmez; sorun paket kartında kaynağa link ile gösterilir.</td></tr>
+      <tr><td>3</td><td><b>Doğrulama</b></td><td>Paket türünün zorunlu alan listesi + SKRS liste üyeliği + format (Kimlik No 11 hane, tarih). Eksik varsa durum <b>eksik alan</b>, kuyruğa girmez; sorun paket kartında kaynağa link ile gösterilir.</td></tr>
       <tr><td>4</td><td><b>Gönderim</b></td><td>Zamanlayıcı (15 dk) bekleyenleri alır; XML üretir, USS'ye kimlikle gönderir; yanıt <code>enabiz_gonderim</code>'e, özet <code>enabiz_paket</code>'e. Başarılıysa USS paket kimliği saklanır.</td></tr>
       <tr><td>5</td><td><b>Hata yönetimi</b></td><td>Servis hatası (zaman aşımı, 5xx) → otomatik 5 tekrar. Veri hatası (kod pasif, alan boş) → kullanıcıya mesaj (Mesajlar modülü), düzeltince "kaynaktan yeniden üret". Yetki hatası → entegrasyon hesabı uyarısı.</td></tr>
       <tr><td>6</td><td><b>Güncelleme / silme</b></td><td>Kaynak kayıt düzeltilirse (tanı değişti) güncelleme paketi, iptal edilirse silme paketi — ilk paketin USS kimliğiyle. Onaylı gönderim (elle).</td></tr>
@@ -183,7 +183,7 @@
     <table>
       <tr><th style="width:120px">USS paket</th><th style="width:230px">Veri setleri</th><th>Zorunlu elemanlar (özet)</th><th style="width:200px">Bizde eksik alan</th></tr>
       <tr><td><b>101 Hasta Kayıt</b></td><td>Gönderim Paketi Genel + Hasta Kabul + Vatandaş / Yabancı / Vatansız (+ Hasta Özlük seçimli)</td>
-        <td>Kurum, Protokol No (kurum-yıl-sıra), İşlem Zamanı, Hekim Kimlik No (TCKN), Muayene Yapılan Klinik; Kabul Zamanı, Kabul Şekli, Vaka Türü; Hasta Kimlik No (yabancı: pasaport, ad, soyad, doğum, cinsiyet, uyruk, yabancı hasta türü). Koşullu: Sevk Tanısı/Tarihi/Geldiği Klinik (sevkli), Adli Vaka Geliş Şekli (adli). Seçimli: Ambulans, SGK Takip No.</td>
+        <td>Kurum, Protokol No (kurum-yıl-sıra), İşlem Zamanı, Hekim Kimlik No (Kimlik No), Muayene Yapılan Klinik; Kabul Zamanı, Kabul Şekli, Vaka Türü; Hasta Kimlik No (yabancı: pasaport, ad, soyad, doğum, cinsiyet, uyruk, yabancı hasta türü). Koşullu: Sevk Tanısı/Tarihi/Geldiği Klinik (sevkli), Adli Vaka Geliş Şekli (adli). Seçimli: Ambulans, SGK Takip No.</td>
         <td><code>belge_basvuru.vaka_turu</code>, <code>adli_gelis_sekli</code>, <code>sevk_tanisi</code>, <code>sevk_tarihi</code>, <code>sevk_klinik_kod</code>; protokol no USS formatı</td></tr>
       <tr><td><b>103 Muayene Bilgisi</b></td><td>Genel + Muayene (+ izlem/bildirim VS'leri)</td>
         <td>Muayene Başlangıç/Bitiş Zamanı, Muayene Türü (SKRS), Ana Tanı (ICD-10), Müdahale (SUT, 1+). Seçimli: Ek Tanı, Tetkik (SUT) + Tetkik İstenen Kurum, Rapor Türü/Tarihi/Detayı/Geçerlilik, Ağırlık/Boy/Tansiyon/Ateş/Nabız, Hikâye/Şikâyet/Bulgu, Meslek.</td>
@@ -281,7 +281,7 @@
   <div class="tb"><code>taraf / taraf_hasta</code> <span class="rz sari">mevcut + kolon</span> <span class="sp">hasta kimliği</span></div>
   <table>
     <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
-    <tr><td class="k">taraf.vkno</td><td class="t">varchar</td><td><b>mevcut</b> — TCKN (USS HastaKimlikNo); yabancı için taraf_hasta.pasaport_no + yabanci_hasta_turu</td></tr><tr><td class="k">taraf_hasta.cinsiyet / dogum_tarihi / uyruk</td><td class="t"></td><td><b>mevcut</b> — SKRS kodlu</td></tr><tr><td class="k">taraf_hasta.enabiz_izin</td><td class="t">smallint</td><td>yeni — hasta e-Nabız paylaşım izni (okuma için), izin tarihi ile</td></tr><tr><td class="k">taraf_hasta.enabiz_izin_tarihi</td><td class="t">timestamp</td><td>yeni</td></tr>
+    <tr><td class="k">taraf.vkno</td><td class="t">varchar</td><td><b>mevcut</b> — Kimlik No (USS HastaKimlikNo); yabancı için taraf_hasta.pasaport_no + yabanci_hasta_turu</td></tr><tr><td class="k">taraf_hasta.cinsiyet / dogum_tarihi / uyruk</td><td class="t"></td><td><b>mevcut</b> — SKRS kodlu</td></tr><tr><td class="k">taraf_hasta.enabiz_izin</td><td class="t">smallint</td><td>yeni — hasta e-Nabız paylaşım izni (okuma için), izin tarihi ile</td></tr><tr><td class="k">taraf_hasta.enabiz_izin_tarihi</td><td class="t">timestamp</td><td>yeni</td></tr>
   </table>
 </div><h3>Henüz olmayan klinik tablolar (Muayene paketinin kaynağı)</h3>
 <div class="tablo">

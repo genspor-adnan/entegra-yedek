@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banko / Kasa Takibi — Süreç ve Tablolar — Mockup (Gentegre AI · Kayıt Kabul)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .sel b{font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .ozet.k5{grid-template-columns:repeat(5,1fr)}
+  .ozet.k4{grid-template-columns:repeat(4,1fr)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:18px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .ana{display:grid;grid-template-columns:1fr 360px;gap:0}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.iptal td{color:#9aa7b4;text-decoration:line-through}
+  tr.sel td{background:var(--sel)}
+  tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .sayim td{padding:3px 8px}
+  .sayim input{width:56px;border:1px solid var(--line);border-radius:2px;height:22px;
+    text-align:right;padding:0 5px;font-size:11.5px;font-family:inherit}
+  .fark{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:12px}
+  .fark b{font-size:14px}
+  .sat{display:flex;justify-content:space-between;padding:4px 10px;font-size:11.5px;
+    border-bottom:1px solid #eef2f6;gap:10px}
+  .sat.buyuk{font-size:13px;background:#f7fafc;font-weight:bold}
+  .uyari-sat{display:flex;gap:8px;align-items:flex-start;padding:6px 10px;
+    border-bottom:1px solid #eef2f6;font-size:11.5px}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;
+    padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"\25BE";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;
+    background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .hdr.k2{grid-template-columns:repeat(2,1fr)}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* surec / tasarim notu duzeni */
+  .win{max-width:1080px}
+  .icerik{padding:6px 18px 22px;font-size:13px;line-height:1.65}
+  h2{font-size:15px;color:#1c4374;border-bottom:1px solid var(--line2);padding-bottom:5px;margin:22px 0 10px}
+  h3{font-size:13.5px;color:#2c4a6b;margin:16px 0 6px}
+  code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:1px 4px;font-size:12px}
+  .icerik table{border-collapse:collapse;width:100%;margin:8px 0 14px}
+  .icerik th{background:linear-gradient(#f4f7fb,#e7eef6);border:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:12px;color:#3a5573}
+  .icerik td{border:1px solid var(--line2);padding:6px 8px;font-size:12.5px;
+    vertical-align:top;white-space:normal}
+  .dogrukutu{border:1px solid var(--line2);background:#fbfcfd;border-radius:4px;padding:10px 12px;margin:10px 0}
+  .uyari{border:1px solid #f2ddbf;background:#fdf9f1;border-radius:4px;padding:9px 11px;margin:10px 0;color:var(--uyari)}
+  .tamam{border:1px solid #bfe3cb;background:#f1f8f3;border-radius:4px;padding:9px 11px;margin:10px 0;color:#245c37}
+  .akis{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+  .akis .a{border:1px solid var(--line);background:#fff;border-radius:14px;padding:4px 12px;font-size:12px}
+  .akis .a.v{background:#eef4fc;border-color:#cfe0f5;color:#2f6db3;font-weight:bold}
+  .akis .ok2{color:var(--muted)}
+  ul{margin:6px 0 12px 18px;padding:0}
+  li{margin:3px 0}
+  .kucuk{font-size:11.5px;color:var(--muted)}
+  .durumlar{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:12px}
+  .tablo{border:1px solid var(--line2);border-radius:4px;margin:12px 0;overflow:hidden}
+  .tablo .tb{background:linear-gradient(#f4f7fb,#e7eef6);padding:6px 10px;font-weight:bold;
+    color:#1c4374;display:flex;gap:10px;align-items:center;font-size:13px}
+  .tablo .tb .rz{font-weight:normal}
+  .tablo .tb .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:11.5px}
+  .tablo table{margin:0}
+  .tablo td.k{font-family:Consolas,monospace;font-size:12px;white-space:nowrap}
+  .tablo td.t{font-family:Consolas,monospace;font-size:11.5px;color:#4d5d6e;white-space:nowrap}
+  .tablo tr.pk td.k{font-weight:bold}
+  .tablo .alt{padding:6px 10px;font-size:11.5px;color:var(--muted);
+    border-top:1px solid var(--line2);background:#fbfcfd}
+  .karar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+  .karar>div{border:1px solid var(--line2);border-radius:4px;padding:10px 12px;background:#fbfcfd}
+  .karar>div.sec{border-color:#bfe3cb;background:#f1f8f3}
+  .karar h4{margin:0 0 6px;font-size:12.5px;color:#2c4a6b}
+  .karar.tek{grid-template-columns:1fr}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🏦 Banko / Kasa Takibi — Süreç, Veri Modeli, Alanlar
+    <span class="sp">Gentegre AI · tasarım notu · 14.09.2026 · mevcut kasa_islem altyapısı üzerine</span></div>
+  <div class="icerik">
+
+    <div class="dogrukutu">
+      <b>Kapsam.</b> Vezne bankosunda paranın alınması, vardiya boyunca takibi,
+      vardiya sonunda nakdin sayılıp merkez kasaya teslim edilmesi ve amirin bütün
+      vezneleri izlemesi. Muhasebe tarafı (<code>kasa_islem</code>, <code>mali_hareket</code>,
+      hesap planı, çek portföyü) <b>zaten vardır</b>; bu not onun üstüne <b>yalnız vardiya
+      oturumu</b> kavramını ekler.
+      <br><span class="kucuk">Mockuplar: <code>banko_tahsilat_al.html</code> ·
+      <code>banko_gun_sonu_kasa_teslimi.html</code> · <code>vezne_durum_panosu.html</code> ·
+      <code>kasa_teslim_tutanagi.html</code> · <code>iskonto_onay.html</code> ·
+      <code>ucret_satiri_fiyat_iskonto.html</code>.
+      Bağlı: <code>kayit_kabul_basvuru.html</code> ·
+      <code>../Muhasebe/</code> · <code>../Prim/</code></span>
+    </div>
+
+    <h2>1. Akış</h2>
+    <div class="akis">
+      <span class="a">Vezne giriş yapar</span><span class="ok2">→</span>
+      <span class="a v">İlk tahsilatta oturum <b>otomatik</b> açılır (devir = kasa nakit bakiyesi)</span><span class="ok2">→</span>
+      <span class="a">Tahsilat · iade · iptal · kasadan ödeme</span><span class="ok2">→</span>
+      <span class="a">Vardiya sonu: POS gün sonu elle girilir</span><span class="ok2">→</span>
+      <span class="a v">Nakit kupür sayımı</span><span class="ok2">→</span>
+      <span class="a">Fark varsa: açıklama + amir onayı + <b>fark fişi</b></span><span class="ok2">→</span>
+      <span class="a v">Teslim = virman (tür 40) · tutanak</span><span class="ok2">→</span>
+      <span class="a">İki imza → oturum kapanır</span><span class="ok2">→</span>
+      <span class="a">Kalan tutar sonraki oturumun <b>devri</b></span>
+    </div>
+
+    <div class="tamam">
+      <b>Kullanıcı hiçbir şey seçmez.</b> "Vardiya aç" düğmesi yoktur — banko basmayı
+      unutur, tahsilat oturumsuz kalırdı. Kasa da sorulmaz:
+      <code>fn_kullanici_kasa(kullanıcı, aktif şube)</code> çözer. Soru yalnız iki
+      durumda çıkar: kullanıcının kasası yoksa (şubenin Ana Kasası önerilir) ya da
+      birden fazla kasaya yetkiliyse (amir başka veznenin yerine bakıyor).
+    </div>
+
+    <h2>2. Kasa kimin — <span class="kucuk">karar</span></h2>
+    <div class="karar">
+      <div>
+        <h4>A · Kasa = kişi</h4>
+        <code>hesap.atama = personel</code><br>
+        Her veznedarın kendi kasa hesabı olur, çekmecesini yanında taşır.
+        Sorumluluk kasa kaydındadır.
+        <br><br><span class="kucuk">Hastanede gerçekçi değil: çekmece bankoda kalır,
+        sabah/akşam farklı kişi oturur. Kişi başına kasa açmak, aynı fiziksel
+        çekmeceyi iki hesaba bölerdi.</span>
+      </div>
+      <div class="sec">
+        <h4>B · Kasa = fiziksel banko <span class="rz ok">seçilen</span></h4>
+        <code>hesap.atama = 0</code> (boş) · sorumlu <code>kasa_oturum.vezne_id</code><br>
+        "VEZNE 1 KASASI" bir <b>çekmecedir</b>; başında kim oturuyorsa oturumu o açar,
+        sayımı o yapar, teslimi o imzalar.
+        <br><br><span class="kucuk">Vardiya değişiminde para el değiştirmez, sorumluluk
+        el değiştirir: bir oturum kapanır, bir sonraki aynı kasada yeni kişiyle açılır.</span>
+      </div>
+    </div>
+    <div class="dogrukutu">
+      <b>Vezne ayrı bir tanım değildir.</b> Yeni tablo, yeni kart, yeni ekran yok —
+      "vezne", <code>hesap</code> tablosunda <b>tür K</b> bir kasa kaydıdır.
+      <code>hesap.atama</code> alanı B modelinde boş (0) bırakılır; alan duruyor,
+      çünkü A modelini isteyen kurum (tek kişilik muayenehane, eczane) aynı şemayla
+      çalışabilsin. Şema ikisini de destekler, <b>fark tek satırlık veri farkıdır</b>.
+    </div>
+
+    <h2>3. Durumlar</h2>
+    <div class="durumlar">
+      <b>kasa_oturum.durum:</b>
+      <span class="rz mavi">0 Açık</span> →
+      <span class="rz sari">1 Sayıldı</span> →
+      <span class="rz mor">2 Teslim edildi</span> →
+      <span class="rz ok">3 Kapandı</span> ·
+      <span class="rz pas">9 Zorla kapatıldı (amir)</span>
+    </div>
+    <table>
+      <thead><tr><th style="width:130px">Durum</th><th style="width:230px">Ne demek</th>
+        <th>İzin verilen</th></tr></thead>
+      <tbody>
+        <tr><td><span class="rz mavi">0 Açık</span></td>
+          <td>Vezne çalışıyor, para alıyor.</td>
+          <td>Tahsilat, iade, iptal, kasadan ödeme yazılır. Sayım girilebilir (durum 1'e geçer).</td></tr>
+        <tr><td><span class="rz sari">1 Sayıldı</span></td>
+          <td>Kupür sayımı girildi, fark hesaplandı.</td>
+          <td>Sayım düzeltilebilir. <b>Yeni tahsilat da yazılabilir</b> — yazılırsa sayım
+            geçersizleşir, durum 0'a döner (hasta kapıda beklerken vezne kapanmaz).</td></tr>
+        <tr><td><span class="rz mor">2 Teslim edildi</span></td>
+          <td>Virman yazıldı, tutanak üretildi, tek imza var.</td>
+          <td><b>Yeni işlem yazılamaz.</b> Sadece ikinci imza beklenir. İmza gelmezse
+            amir tutanağı iptal eder, oturum 1'e döner.</td></tr>
+        <tr><td><span class="rz ok">3 Kapandı</span></td>
+          <td>İki imza tamam, virman kesinleşti.</td>
+          <td>Hiçbir değişiklik yok. Düzeltme yalnız yeni fark fişi ile.</td></tr>
+        <tr><td><span class="rz pas">9 Zorla kapatıldı</span></td>
+          <td>Vezne kapatmayı unuttu, amir kapattı.</td>
+          <td>Ayrı yetki ister, denetim izine ayrı olay düşer. Sayım yoksa fark
+            hesaplanamaz — kasa bakiyesi "sayılmamış" kalır.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>4. Tablolar ve alanlar</h2>
+
+    <h3>Vardiya oturumu</h3>
+    <div class="tablo">
+      <div class="tb"><code>kasa_oturum</code> <span class="rz ok">yeni</span>
+        <span class="sp">kasa × vardiya — "kim, hangi çekmecede, ne zamandan beri"</span></div>
+      <table>
+        <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr>
+        <tr><td class="k">hesap_id</td><td class="t">int</td><td>→ hesap (tür K) — fiziksel kasa/çekmece</td></tr>
+        <tr><td class="k">sube_id</td><td class="t">int</td><td>yazma anında damgalanır; süzme sunucu tarafında</td></tr>
+        <tr><td class="k">tarih</td><td class="t">date</td><td>vardiyanın ait olduğu iş günü (gece yarısını aşan vardiyada açılış günü)</td></tr>
+        <tr><td class="k">sira</td><td class="t">smallint</td><td>o gün o kasanın kaçıncı vardiyası (#1, #2) — ekranda gösterilen numara</td></tr>
+        <tr><td class="k">vezne_id</td><td class="t">int</td><td><b>sorumlu kişi</b> → taraf (personel). B modelinin çekirdeği: sorumluluk burada, kasada değil</td></tr>
+        <tr><td class="k">acilis_ts</td><td class="t">timestamp</td><td>ilk tahsilat anı (oturum otomatik açılır)</td></tr>
+        <tr><td class="k">devir_tutar</td><td class="t">numeric(19,4)</td><td>açılışta kasada bulunan nakit = önceki oturumun bıraktığı; zincir kırıksa kasanın o anki nakit bakiyesi</td></tr>
+        <tr><td class="k">durum</td><td class="t">smallint</td><td>0 açık · 1 sayıldı · 2 teslim · 3 kapandı · 9 zorla kapatıldı</td></tr>
+        <tr><td class="k">sayilan_nakit</td><td class="t">numeric(19,4)</td><td>kupür sayımı toplamı (Ek-1)</td></tr>
+        <tr><td class="k">olmasi_gereken</td><td class="t">numeric(19,4)</td><td>sayım anında dondurulur — sonradan işlem eklenirse fark geçmişi bozulmasın</td></tr>
+        <tr><td class="k">fark</td><td class="t">numeric(19,4)</td><td>sayılan − olması gereken (− noksan, + fazla)</td></tr>
+        <tr><td class="k">fark_aciklama</td><td class="t">varchar(400)</td><td>fark ≠ 0 ise <b>zorunlu</b></td></tr>
+        <tr><td class="k">fark_islem_id</td><td class="t">int</td><td>→ kasa_islem — 197/397'ye yazılan fark fişi</td></tr>
+        <tr><td class="k">onay_id / onay_ts</td><td class="t">int / timestamp</td><td>amir onayı; fark ≠ 0 ise teslim için şart</td></tr>
+        <tr><td class="k">birakilan_tutar</td><td class="t">numeric(19,4)</td><td>kasada bırakılan = sonraki oturumun devri</td></tr>
+        <tr><td class="k">teslim_islem_id</td><td class="t">int</td><td>→ kasa_islem — virman fişi (tür 40)</td></tr>
+        <tr><td class="k">teslim_alan_id</td><td class="t">int</td><td>→ taraf (muhasebe)</td></tr>
+        <tr><td class="k">tutanak_no</td><td class="t">varchar(24)</td><td>KVR-yyyy-nnnnnn</td></tr>
+        <tr><td class="k">imza_vezne_ts / imza_alan_ts</td><td class="t">timestamp</td><td>iki imza; ikincisi gelince durum 3</td></tr>
+        <tr><td class="k">kapanis_ts / kapatan_id</td><td class="t">timestamp / int</td><td>zorla kapatmada kapatan ≠ vezne_id</td></tr>
+        <tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+        <tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
+      </table>
+      <div class="alt">
+        <code>unique (hesap_id) where durum &lt; 2</code> — bir kasada aynı anda tek açık oturum ·
+        <code>index (sube_id, tarih, durum)</code> pano için ·
+        <code>index (vezne_id, tarih)</code> kişi bazlı fark eğilimi için
+      </div>
+    </div>
+
+    <div class="tablo">
+      <div class="tb"><code>kasa_oturum_sayim</code> <span class="rz ok">yeni</span>
+        <span class="sp">kupür × adet — Ek-1 çizelgesi</span></div>
+      <table>
+        <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr>
+        <tr><td class="k">oturum_id</td><td class="t">int</td><td>→ kasa_oturum</td></tr>
+        <tr><td class="k">kupur</td><td class="t">numeric(9,2)</td><td>200 · 100 · 50 · 20 · 10 · 5 · 1 · 0,50 · 0,25 …</td></tr>
+        <tr><td class="k">adet</td><td class="t">int</td><td></td></tr>
+        <tr><td class="k">tutar</td><td class="t">numeric(19,4)</td><td>kupur × adet (hesaplı, saklanır — geçmiş sayım yeniden hesaplanmasın)</td></tr>
+      </table>
+      <div class="alt">
+        <code>unique (oturum_id, kupur)</code>. Yalnız <b>nakit</b>; kart slipleri,
+        dekontlar ve çekler bu tabloya girmez.
+      </div>
+    </div>
+
+    <div class="tablo">
+      <div class="tb"><code>kasa_pos_gunsonu</code> <span class="rz ok">yeni</span>
+        <span class="sp">POS cihaz toplamının elle girişi ve karşılaştırması</span></div>
+      <table>
+        <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr>
+        <tr><td class="k">oturum_id</td><td class="t">int</td><td>→ kasa_oturum</td></tr>
+        <tr><td class="k">pos_hesap_id</td><td class="t">int</td><td>→ hesap (tür P) — cihaz</td></tr>
+        <tr><td class="k">cihaz_tutar</td><td class="t">numeric(19,4)</td><td>vezne cihazın gün sonu fişinden okur ve <b>yazar</b></td></tr>
+        <tr><td class="k">kasa_tutar</td><td class="t">numeric(19,4)</td><td>tür 25 net toplamı (hesaplı)</td></tr>
+        <tr><td class="k">fark</td><td class="t">numeric(19,4)</td><td>cihaz − kasa</td></tr>
+        <tr><td class="k">fark_aciklama</td><td class="t">varchar(300)</td><td>fark ≠ 0 ise zorunlu</td></tr>
+        <tr><td class="k">slip_adet</td><td class="t">int</td><td>opsiyonel — adet uyuşmazlığı tutar uyuşsa bile sorun işaretidir</td></tr>
+      </table>
+      <div class="alt">
+        Cihazdan otomatik veri <b>gelmiyor</b>. "Eşleşti" rozetini veri olmadan basmak,
+        yapılmamış bir kontrolü yapılmış göstermek olurdu.
+      </div>
+    </div>
+
+    <h3>Mevcut tabloya eklenen</h3>
+    <div class="tablo">
+      <div class="tb"><code>kasa_islem</code> <span class="rz sari">mevcut + kolon</span>
+        <span class="sp">her mali işlem hangi vardiyaya düştü</span></div>
+      <table>
+        <tr><td class="k">oturum_id</td><td class="t">int</td>
+          <td><b>yeni</b> — → kasa_oturum. Kasa hesabı olan her işlemde dolu; kasa
+            dışı işlemlerde (banka–banka virmanı) boş</td></tr>
+      </table>
+      <div class="alt">
+        <code>index (oturum_id, tur)</code> — vardiya özeti tek indeks taramasıyla çıkar.
+        Tür kodları değişmez: 21 nakit · 22 havale · 23 çek · 25 POS · 26 kupon ·
+        31/35 ödeme · 40 kasa virmanı · 44 POS→banka.
+      </div>
+    </div>
+
+    <h2>5. Hesaplama — tek yer</h2>
+    <div class="dogrukutu">
+      <code>fn_kasa_oturum_ozet(oturum_id)</code> tek kaynaktır: ekran, tutanak ve
+      teslim <b>aynı</b> fonksiyonu çağırır. İkinci bir yolda toplam hesaplamak,
+      tutanakla ekranın ayrışmasına yol açardı — Delphi'deki para matematiği kuralının
+      aynısı.
+    </div>
+    <table>
+      <thead><tr><th style="width:230px">Alan</th><th>Formül</th></tr></thead>
+      <tbody>
+        <tr><td><b>Kasada olması gereken</b></td>
+          <td><code>devir_tutar + Σ(tür 21 giriş) − Σ(tür 21 iade) − Σ(tür 31/35 nakit ödeme)</code>
+            — yalnız nakit</td></tr>
+        <tr><td>Sayılan</td><td><code>Σ kasa_oturum_sayim.tutar</code></td></tr>
+        <tr><td>Fark</td><td><code>sayılan − olması gereken</code></td></tr>
+        <tr><td>Teslim edilecek (virman)</td>
+          <td><code>sayılan − birakilan_tutar</code> — <b>sayılan</b> üzerinden, olması
+            gereken üzerinden değil: kasadan fiilen çıkan para neyse o teslim edilir,
+            fark ayrı fişle muhasebeleşir</td></tr>
+        <tr><td>Nakit dışı (bilgi)</td>
+          <td>tür 22 / 23 / 25 net toplamları — teslime <b>girmez</b></td></tr>
+        <tr><td>Açık borç</td>
+          <td><code>belge genel toplam − tahsilat</code> (kurum tahakkuku hariç) —
+            kasa sorumluluğu değil, devredilen iş</td></tr>
+      </tbody>
+    </table>
+
+    <h2>6. Kurallar ve tetikler</h2>
+    <table>
+      <thead><tr><th style="width:250px">Kural</th><th>Neden</th></tr></thead>
+      <tbody>
+        <tr><td><b>Oturum otomatik açılır</b><br><span class="kucuk">tahsilat yazılırken açık oturum yoksa</span></td>
+          <td>"Vardiya aç" düğmesi unutulur, tahsilat oturumsuz kalır. Devir, kasanın
+            o anki nakit bakiyesidir — zincir kırıksa bile doğru başlar.</td></tr>
+        <tr><td><b>Kapalı oturuma yazılmaz</b><br><span class="kucuk">tg_kasa_islem_oturum_kapali: durum ≥ 2 → red</span></td>
+          <td>Teslim tutanağı ile kasa kaydı ayrışır. Yeni tahsilat yeni oturuma düşer.</td></tr>
+        <tr><td><b>Sayımdan sonra işlem sayımı geçersiz kılar</b><br><span class="kucuk">durum 1 → 0</span></td>
+          <td>Hasta kapıdayken vezne kapanmaz. Ama eski sayımla teslim edilirse fark
+            yanlış çıkardı.</td></tr>
+        <tr><td><b>Fark ≠ 0 → açıklama + onay + fiş</b><br><span class="kucuk">üçü de olmadan teslim edilemez</span></td>
+          <td>Yalnız açıklama yazmak kasa bakiyesini sayımla tutturmaz; sonraki oturum
+            yanlış devirle açılır. Noksan <code>197</code>, fazla <code>397</code>.</td></tr>
+        <tr><td><b>POS farkı teslimi engeller</b></td>
+          <td>Kart parası kasada durmaz ama <i>kayıt</i> tutmalıdır; fark, eksik
+            girilmiş ya da iki kez girilmiş tahsilatın en sık belirtisidir.</td></tr>
+        <tr><td><b>Havale/ekstre eşleşmesi teslimi engellemez</b></td>
+          <td>Para bankada, veznede değil. Vezneyi banka ekstresini beklemekle
+            tutmak, kasayı gereksiz açık bırakırdı.</td></tr>
+        <tr><td><b>İptal silinmez, ters kayıt üretir</b><br><span class="kucuk">mevcut fn_kasa_islem_iptal</span></td>
+          <td>Makbuz numarası tüketilmiştir; kaybolması sayım denetimini imkânsız kılar.</td></tr>
+        <tr><td><b>Teslim = virman (tür 40)</b></td>
+          <td>Para bir kasadan diğerine geçer; ayrı bir "teslim" kaydı icat etmek,
+            aynı hareketi iki yerde tutmak olurdu.</td></tr>
+        <tr><td><b>İkinci imza kesinleştirir</b><br><span class="kucuk">fn_kasa_islem_kesinlestir</span></td>
+          <td>Tek imzalı tutanak taslaktır, kasa hâlâ açıktır.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>7. Yetki</h2>
+    <table>
+      <thead><tr><th style="width:150px">Rol</th><th style="width:300px">Görür</th><th>Yapar</th></tr></thead>
+      <tbody>
+        <tr><td><b>Vezne</b></td>
+          <td>Yalnız kendi açık oturumunu ve o kasanın geçmişini</td>
+          <td>Tahsilat, iade, iptal (gerekçeli), sayım, teslim talebi, tutanak imzası</td></tr>
+        <tr><td><b>Amir / Muhasebe</b></td>
+          <td>Şubedeki bütün kasalar, bütün oturumlar, fark eğilimi, denetim izi</td>
+          <td>Teslim alma, fark onayı, zorla kapatma (ayrı yetki), tutanak imzası</td></tr>
+        <tr><td><b>Diğer</b></td>
+          <td>Hiçbir kasa satırı</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <div class="uyari">
+      Süzme <b>sunucu tarafındadır</b>: başka şubenin ya da başka kasanın satırı hiç
+      dönmez. Vezne rolündeki kullanıcı panoyu açsa bile yalnız kendi satırını görür —
+      istemcide gizleme yok.
+    </div>
+
+    <h2>8. Yapılacaklar</h2>
+    <table>
+      <thead><tr><th style="width:170px">Adım</th><th style="width:210px">Dosya</th><th>İçerik</th></tr></thead>
+      <tbody>
+        <tr><td>Şema</td><td><code>db/660_kasa_oturum.sql</code></td>
+          <td>3 yeni tablo, <code>kasa_islem.oturum_id</code>, indeksler, yorumlar</td></tr>
+        <tr><td>Hesap + kurallar</td><td><code>db/661_kasa_oturum_fn.sql</code></td>
+          <td><code>fn_kasa_oturum_ac</code> · <code>fn_kasa_oturum_ozet</code> ·
+            <code>fn_kasa_oturum_say</code> · <code>fn_kasa_oturum_teslim</code> ·
+            <code>tg_kasa_islem_oturum_kapali</code></td></tr>
+        <tr><td>Katalog</td><td><code>KaynakKatalogu.Kasa.cs</code></td>
+          <td>Pano listesi, oturum listesi, sayım detayı; alanlar beyaz listeden</td></tr>
+        <tr><td>Aksiyon</td><td><code>AksiyonKatalogu.cs</code></td>
+          <td><code>kasa.say</code> · <code>kasa.teslim</code> · <code>kasa.onay</code> ·
+            <code>kasa.zorlaKapat</code> — yetki ve durum koşullarıyla</td></tr>
+        <tr><td>Uçlar</td><td><code>KasaUclari.cs</code></td>
+          <td>Oturum özeti, sayım yazma, teslim, onay, tutanak</td></tr>
+        <tr><td>Web</td><td><code>sayfalar/BankoVardiyasi.tsx</code> · <code>VezneDurumPanosu.tsx</code></td>
+          <td>Mockuplara birebir; metin ve kolonlar sunucudan</td></tr>
+        <tr><td>Test</td><td><code>KasaOturumTestleri.cs</code></td>
+          <td>Otomatik açılış · kapalı oturuma yazma reddi · fark fişsiz teslim reddi ·
+            devir zinciri · sayım sonrası işlem</td></tr>
+      </tbody>
+    </table>
+
+    <h2>9. Açık sorular</h2>
+    <ul>
+      <li><b>Gece yarısını aşan vardiya</b> hangi güne yazılır? Öneri: <b>açılış günü</b>
+        (<code>tarih</code> alanı) — vardiya tek parça kalır, gün raporu ise
+        <code>islem_tarihi</code>'ne bakar.</li>
+      <li><b>Gece kasası</b> ayrı bir <code>hesap</code> mı olsun? Mesai dışı kapanan
+        vardiyada devralan kasa olarak öneriliyor; kurum istemezse nakit veznede kalır
+        ve panoda "gecikti" işaretlenir.</li>
+      <li><b>Çek teslimi</b> ayrı tutanak — bu nota dahil değil; portföy tarafında
+        zaten var.</li>
+      <li><b>Kasa sayımı vardiya dışında</b> (habersiz denetim sayımı) isteniyor mu?
+        Aynı <code>kasa_oturum_sayim</code> yapısı, oturuma bağlı olmayan bir
+        "denetim sayımı" kaydıyla çözülür.</li>
+    </ul>
+
+  </div>
+  <div class="statusbar">
+    <span>3 yeni tablo · 1 yeni kolon</span><span>·</span>
+    <span>5 fonksiyon · 1 tetik</span><span>·</span>
+    <span>4 mockup</span><span>·</span>
+    <span>Kasa modeli: B (fiziksel banko)</span>
+  </div>
+</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');});
+  if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

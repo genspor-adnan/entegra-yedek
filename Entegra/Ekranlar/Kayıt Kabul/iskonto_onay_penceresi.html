@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İskonto Onay Penceresi — Mockup (Gentegre AI · Kayıt Kabul)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px}
+  /* pencere bir ust ekranin uzerinde acilir: perde + soluk arka plan */
+  .perde{min-height:100vh;padding:26px 14px 14px;
+    background:
+      repeating-linear-gradient(180deg,rgba(255,255,255,.5) 0 26px,rgba(236,241,247,.5) 26px 52px),
+      linear-gradient(rgba(20,40,70,.45),rgba(20,40,70,.52));
+    background-blend-mode:overlay}
+  .perde-bilgi{max-width:980px;margin:0 auto 10px;color:#dfe9f5;font-size:11px;opacity:.92}
+  .perde-bilgi code{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);
+    border-radius:3px;padding:0 4px}
+  .win{max-width:980px;margin:0 auto;background:var(--card);border:1px solid #0f2c50;
+    border-radius:4px;box-shadow:0 18px 50px rgba(8,20,40,.45);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .title .kapat{margin-left:10px;opacity:.9;font-weight:normal}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.buyuk{padding:7px 16px;font-size:12px}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .sel b{font-weight:bold}
+  .bant{display:flex;gap:8px;align-items:flex-start;padding:8px 12px;font-size:11.5px;
+    border-bottom:1px solid var(--line2)}
+  .bant.kir{background:#fbe9e7;color:#8c2119;border-bottom-color:#f3c4bf}
+  .bant.sari{background:#fdf6e3;color:#6f4f12;border-bottom-color:#f2ddbf}
+  .bant b{font-weight:bold}
+  .ana{display:grid;grid-template-columns:1fr 320px}
+  .ana>div:last-child{border-left:1px solid var(--line2);background:#fbfcfe}
+  .grp{margin:10px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  tr.kilit td{background:#f6f8fa;color:#7a8795}
+  tr.sel td{background:var(--sel)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  input.sy{width:62px;border:1px solid var(--line);border-radius:2px;height:22px;
+    text-align:right;padding:0 5px;font-size:11.5px;font-family:inherit;background:#fffef7}
+  .fark{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:12px;gap:10px;flex-wrap:wrap}
+  .fark b{font-size:13.5px}
+  .sat{display:flex;justify-content:space-between;padding:4px 10px;font-size:11.5px;
+    border-bottom:1px solid #eef2f6;gap:10px}
+  .sat b{text-align:right}
+  .sat.buyuk{font-size:13px;background:#f7fafc;font-weight:bold}
+  .sat.iyi b{color:var(--ok)}
+  .sat.uy b{color:var(--uyari)}
+  .sat.teh b{color:var(--kirmizi)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;
+    padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"\25BE";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;
+    background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .hdr.k2{grid-template-columns:repeat(2,1fr)}
+  .zaman .z{display:flex;gap:8px;padding:4px 10px;font-size:11.5px;border-bottom:1px solid #eef2f6}
+  .zaman .z i{font-style:normal;color:var(--muted);width:44px;flex:none}
+  .altbar{display:flex;gap:6px;align-items:flex-end;padding:9px 12px;background:var(--head);
+    border-top:1px solid var(--line);flex-wrap:wrap}
+  .altbar .karar{display:flex;align-items:center;gap:8px;font-size:12px;padding-bottom:4px}
+  .altbar .karar b{font-size:15px;color:var(--navy)}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:#eef2f7;
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:980px;margin:14px auto 0;color:#e6edf6;font-size:11px;line-height:1.65}
+  .not b{color:#fff}
+  .not i{color:#cfe0f5}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:3px 0}
+  .not code{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);
+    border-radius:3px;padding:0 4px}
+  @media(max-width:860px){.ana{grid-template-columns:1fr}
+    .ana>div:last-child{border-left:none;border-top:1px solid var(--line2)}
+    .hdr,.hdr.k4{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="perde">
+<div class="perde-bilgi">▸ Arka planda <b>İskonto Onayı</b> konsolu (<code>iskonto_onay.html</code>) veya bildirim listesi durur — pencere onun üzerine açılır.</div>
+
+<div class="win">
+  <div class="title">🏷 İskonto Onayı — <span>TLP-2026-000318</span>
+    <span class="rz kir" style="margin-left:6px">Hasta bankoda bekliyor · 01:42</span>
+    <span class="sp">Kuyrukta 1 / 3 · ‹ Önceki · Sonraki ›</span>
+    <span class="kapat">✕</span>
+  </div>
+
+  <!-- kim, kim icin, ne zaman istedi -->
+  <div class="serit">
+    <div class="sel">👤 <b>Neslihan ARSLAN</b> · Kimlik No 1234*****90 · 58y K</div>
+    <div class="sel">🧾 <b>P-000220</b> · Kardiyoloji · Dr. S. TUNÇ</div>
+    <div class="sel">👩 İsteyen: <b>Elif KARACA</b> · Vezne 1 · 17:04</div>
+    <div class="sel">💳 <b>Ücretli</b> · kurumsuz</div>
+  </div>
+
+  <div class="bant kir">
+    <span>⚠</span>
+    <div><b>Limit aşımı:</b> istenen iskonto <b>%20 · 250,00 ₺</b>, veznenin yetkisi
+      <b>%10 · en çok 500 ₺</b>. Oran tavanı aşıldığı için talep size düştü.
+      <span class="rz kir">oran aşıldı</span>
+      <span class="rz pas">tutar tavanı içinde</span></div>
+  </div>
+
+  <div class="ana">
+    <!-- SOL: kalem kalem karar -->
+    <div>
+      <div class="grp">
+        <h4>Hizmet Kalemleri <span class="mini">onay oranı kalem bazında düşürülebilir</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr>
+              <th>Hizmet</th><th class="sag">Tutar</th>
+              <th class="orta">İstenen %</th><th class="sag">İstenen ₺</th>
+              <th class="orta">Onaylanan %</th><th class="sag">Onaylanan ₺</th>
+              <th class="sag">Net</th><th class="orta">Durum</th>
+            </tr></thead>
+            <tbody>
+              <tr class="sel">
+                <td>Kardiyoloji muayene</td><td class="sag">800,00</td>
+                <td class="orta">20</td><td class="sag">160,00</td>
+                <td class="orta"><input class="sy" value="20"></td><td class="sag">160,00</td>
+                <td class="sag">640,00</td><td class="orta"><span class="rz ok">tam onay</span></td>
+              </tr>
+              <tr>
+                <td>EKG</td><td class="sag">450,00</td>
+                <td class="orta">20</td><td class="sag">90,00</td>
+                <td class="orta"><input class="sy" value="10"></td><td class="sag">45,00</td>
+                <td class="sag">405,00</td><td class="orta"><span class="rz sari">düşürüldü</span></td>
+              </tr>
+              <tr class="kilit">
+                <td>Efor testi <span class="rz pas">kurum anlaşmalı</span></td><td class="sag">1.100,00</td>
+                <td class="orta">—</td><td class="sag">—</td>
+                <td class="orta">—</td><td class="sag">0,00</td>
+                <td class="sag">1.100,00</td><td class="orta"><span class="rz pas">🔒 indirilemez</span></td>
+              </tr>
+              <tr class="kilit">
+                <td>SGK katkı payı</td><td class="sag">36,00</td>
+                <td class="orta">—</td><td class="sag">—</td>
+                <td class="orta">—</td><td class="sag">0,00</td>
+                <td class="sag">36,00</td><td class="orta"><span class="rz pas">🔒 yasal</span></td>
+              </tr>
+              <tr class="toplam">
+                <td>TOPLAM</td><td class="sag">2.386,00</td>
+                <td class="orta">—</td><td class="sag">250,00</td>
+                <td class="orta">—</td><td class="sag">205,00</td>
+                <td class="sag">2.181,00</td><td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="fark">
+          <span class="sonuk">İstenen 250,00 ₺ · verilecek <b>205,00 ₺</b> · <b>45,00 ₺</b> düşürüldü</span>
+          <span>Efektif iskonto <b>%8,6</b> <span class="sonuk">(indirilebilir tutarın %16,4'ü)</span></span>
+        </div>
+      </div>
+
+      <div class="grp">
+        <h4>Gerekçe <span class="mini">banko girdi · değiştirilemez</span></h4>
+        <div class="hdr k4">
+          <div class="fld"><label>Kategori</label><div class="inp ro">Personel yakını</div></div>
+          <div class="fld"><label>İlgili personel</label><div class="inp ro">Ayten ARSLAN · Hemşire · 2210</div></div>
+          <div class="fld"><label>Yakınlık</label><div class="inp ro">Anne</div></div>
+          <div class="fld"><label>Belge</label>
+            <div class="inp ro">Nüfus kayıt örneği <span class="rz ok" style="margin-left:auto">ekli · gör</span></div></div>
+        </div>
+        <div class="hdr" style="grid-template-columns:1fr">
+          <div class="fld"><label>Banko açıklaması</label>
+            <div class="inp ro" style="height:auto;min-height:40px;align-items:flex-start">
+              Hasta, hemşiremiz Ayten Hanımın annesi. Efor testi kurum anlaşmalı olduğu için
+              yalnız muayene ve EKG'ye indirim istiyorum.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAG: karar verdiren baglam -->
+    <div>
+      <div class="grp">
+        <h4>Yetkiniz</h4>
+        <div class="sat"><span>Rol</span><b>Başhekim Yrd.</b></div>
+        <div class="sat"><span>Limit</span><b>%25 · en çok 2.500 ₺</b></div>
+        <div class="sat"><span>Günlük kalan</span><b>6.360,00 ₺</b></div>
+        <div class="sat iyi"><span>Bu karar</span><b>205,00 ₺ · limit içinde</b></div>
+      </div>
+
+      <div class="grp">
+        <h4>Etki <span class="mini">onaylanana göre</span></h4>
+        <div class="sat"><span>Hizmet geliri</span><b>2.386,00 → 2.181,00 ₺</b></div>
+        <div class="sat uy"><span>Hekim hakedişi</span><b>−61,50 ₺ · Dr. S. TUNÇ</b></div>
+        <div class="sat"><span>Maliyet altı kalem</span><b>yok</b></div>
+        <div class="sat"><span>Hastanın 12 aylık iskontosu</span><b>2 talep · 380,00 ₺</b></div>
+        <div class="sat"><span>Bu personel yakını</span><b>4 kez · 1.240,00 ₺</b></div>
+      </div>
+
+      <div class="grp">
+        <h4>Talep Akışı</h4>
+        <div class="zaman">
+          <div class="z"><i>17:04</i><span>Elif KARACA talep oluşturdu · %20</span></div>
+          <div class="z"><i>17:04</i><span>Limit aşımı · Başhekim Yrd. kuyruğuna düştü</span></div>
+          <div class="z"><i>17:05</i><span>Belge eklendi · nüfus kayıt örneği</span></div>
+          <div class="z"><i>—</i><span class="sonuk">Karar bekleniyor</span></div>
+        </div>
+      </div>
+
+      <div class="grp">
+        <h4>Banko Ne Yapabilir?</h4>
+        <div class="sat"><span>İndirimsiz tahsil</span><span class="rz mavi">açık</span></div>
+        <div class="sat"><span>Tahsilat yapıldı mı?</span><b>Hayır</b></div>
+        <div class="sat sonuk" style="display:block;line-height:1.5;border-bottom:none">
+          Tahsilat onaydan önce yapılırsa indirim sonradan satıra yazılır, fark iade edilir —
+          makbuz iptal edilmez.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KARAR SATIRI -->
+  <div class="altbar">
+    <div class="karar">Onaylanan: <b>205,00 ₺</b> <span class="sonuk">· %8,6</span></div>
+    <div class="sepv"></div>
+    <div class="fld" style="flex:1;min-width:230px">
+      <label class="req">Karar notu <span class="sonuk">— banko bunu hastaya okuyacak</span></label>
+      <div class="inp">Muayene tam, EKG kısmi onaylandı. Efor testi kurum anlaşmalı.</div>
+    </div>
+    <div class="sp"></div>
+    <div class="btn danger buyuk"><span>✖</span> Reddet</div>
+    <div class="btn buyuk"><span>⬆</span> Üst Amire Yönlendir</div>
+    <div class="btn primary buyuk"><span>✂</span> Kısmi Onayla</div>
+    <div class="btn ok buyuk"><span>✔</span> Onayla · F9</div>
+  </div>
+
+  <div class="statusbar">
+    <span>Dr. Osman AKAR · Başhekim Yrd.</span><span>·</span>
+    <span>Bugün 8.640,00 ₺ onaylandı · 2 red</span><span>·</span>
+    <span>Karar ISLEMLOG'a yazılır · silinmez, iptal edilir</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Pencere:</b> yetkiliye düşen <i>tek</i> iskonto talebinin karar penceresi. Bildirimden
+  veya <code>iskonto_onay.html</code> kuyruğundan çift tıkla açılır; konsolun aksine tek işi
+  vardır — bu talebe şimdi karar vermek.
+  <ul>
+    <li><b>Kısmi onay birinci sınıf butondur:</b> yetkili oranı kalem bazında düşürerek
+        onaylar. Onay/red ikilisi gerçek kararı temsil etmez.</li>
+    <li><b>Kilitli kalem görünür kalır, gizlenmez:</b> SGK katkı payı (yasal) ve kurum
+        anlaşmalı fiyat (sözleşme) indirilemez. Satırı saklamak "neden %20 istendi de %8,6
+        çıktı" sorusunu cevapsız bırakırdı.</li>
+    <li><b>Hem oran hem tutar tavanı gösterilir:</b> hangisinin aşıldığı rozetle ayrılır —
+        talep bazen sadece tutardan, bazen sadece orandan düşer.</li>
+    <li><b>Hekim hakediş etkisi karar anında görünür.</b> Ay sonunda öğrenilen indirim
+        hekimle sorun olur.</li>
+    <li><b>Karar notu okunur metindir:</b> banko onu hastaya söyleyecek. Red gerekçesi
+        "uygun görülmedi" olamaz.</li>
+    <li><b>Banko kilitlenmez:</b> pencere açıkken vezne indirimsiz tahsil edebilir; onay
+        sonra gelirse fark iade edilir, makbuz numarası boşa çıkmaz.</li>
+    <li><b>Kuyruk gezinmesi başlıktadır</b> (1/3, ‹ ›) — yetkili pencereyi kapatmadan sıradakine
+        geçer; hasta bekleten talep kırmızı sayaçla öne çıkar.</li>
+    <li><b>Karar geri alınmaz, iptal edilir:</b> onaylanan iskonto satıra yazılmıştır;
+        düzeltme yeni kayıttır — denetim izi silinmez.</li>
+  </ul>
+</div>
+</div>
+</body>
+</html>

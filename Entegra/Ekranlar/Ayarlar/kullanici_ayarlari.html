@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kullanıcı Ayarları — Mockup (Gentegre AI · Ayarlar)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px}
+
+  /* ------------------------------------------- arka plan: uygulama serit ---- */
+  .ustserit{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:9px;font-size:12px}
+  .ustserit .logo{font-weight:bold;font-size:13px}
+  .ustserit .sp{margin-left:auto;display:flex;align-items:center;gap:7px}
+  .ustserit .ib{width:26px;height:26px;border-radius:4px;background:rgba(255,255,255,.12);
+    display:flex;align-items:center;justify-content:center;font-size:12px}
+  .ustserit .avt{width:28px;height:28px;border-radius:50%;background:#fff;color:#1c4374;
+    display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:11.5px;
+    box-shadow:0 0 0 2px #7fb2e8;cursor:pointer}
+  .okisaret{position:relative;max-width:1060px;margin:0 auto;height:22px}
+  .okisaret span{position:absolute;right:16px;top:0;color:#9db3cb;font-size:11px}
+
+  .perde{min-height:100vh;padding:0 0 22px;
+    background:linear-gradient(180deg,rgba(20,40,70,.35),rgba(20,40,70,.5))}
+  .perdeic{padding:18px 14px 0}
+
+  /* ------------------------------------------------------------ modal ---- */
+  .win{max-width:1060px;margin:0 auto;background:var(--card);border:1px solid #0f2c50;
+    border-radius:5px;box-shadow:0 18px 50px rgba(8,20,40,.45);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:8px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .title .kapat{margin-left:10px;font-weight:normal;opacity:.9;cursor:pointer}
+
+  /* kimlik basligi */
+  .kimlik{display:flex;gap:14px;align-items:center;padding:14px 16px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .buyukavt{width:64px;height:64px;border-radius:50%;background:#dfeaf7;color:#2f6db3;
+    display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:22px;
+    flex:none;position:relative;border:1px solid #c4dbf3}
+  .buyukavt .kalem{position:absolute;right:-2px;bottom:-2px;width:22px;height:22px;
+    border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;
+    align-items:center;justify-content:center;font-size:11px}
+  .kimlik .ad{font-size:16px;font-weight:bold;color:var(--navy)}
+  .kimlik .alt{color:var(--muted);font-size:11.5px;margin-top:3px}
+  .kimlik .rozetler{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
+  .kimlik .sag{margin-left:auto;text-align:right;font-size:11px;color:var(--muted);line-height:1.7}
+
+  /* sekmeler */
+  .sekmeler{display:flex;gap:2px;padding:7px 12px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;
+    padding:6px 14px;font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer;
+    user-select:none}
+  .sekme:hover{background:#f1f5fa}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+
+  .govde{min-height:462px}
+  .ikili{display:grid;grid-template-columns:1fr 1fr}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--muted)}
+  .ic{padding:10px 12px;background:#fff}
+
+  .alanlar{display:grid;grid-template-columns:130px 1fr;gap:8px 10px;align-items:center}
+  .alanlar label{font-size:11.5px;color:var(--muted)}
+  .alanlar label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    padding:4px 8px;font-size:12px;display:flex;align-items:center;gap:6px}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.combo::after{content:"\25BE";margin-left:auto;color:var(--muted)}
+  .inp .sagrz{margin-left:auto}
+
+  .sat{display:flex;justify-content:space-between;gap:10px;padding:6px 0;font-size:12px;
+    align-items:center}
+  .sat+.sat{border-top:1px solid var(--line2)}
+  .sat span.et{color:var(--muted)}
+  .sat b{font-weight:bold}
+  .not{font-size:11px;color:var(--muted);line-height:1.55;padding:8px 12px;background:#f8fafc;
+    border-top:1px solid var(--line2)}
+  .not b{color:var(--ink)}
+
+  .rz{display:inline-block;border-radius:10px;padding:2px 9px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 11px;font-size:11.5px;cursor:default;
+    display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.kucuk{padding:3px 8px;font-size:11px}
+  .btn.pas{opacity:.45}
+
+  /* Tiklanabilir secim kutulari (tema/dil/yogunluk) - mockup'ta da calisir. */
+  .secenekler{display:flex;gap:7px;flex-wrap:wrap}
+  .sec{border:1px solid var(--line);border-radius:4px;background:#fff;padding:8px 12px;
+    font-size:11.5px;text-align:center;min-width:92px;cursor:pointer;user-select:none}
+  .sec:hover{border-color:#9dbde2}
+  .sec.on{border-color:#2f6db3;background:#eef4fc;color:var(--navy);font-weight:bold;
+    box-shadow:inset 0 0 0 1px #2f6db3}
+  .sec .ikon{display:block;font-size:17px;margin-bottom:3px}
+
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:6px 8px;
+    font-size:11.5px}
+  .orta{text-align:center}
+  .sag{text-align:right}
+  .sonuk{color:var(--muted)}
+  tr.bu td{background:#f2f8f4}
+  /* Bildirim matrisindeki kutucuklar tiklanabilir; kilitli olan degil. */
+  .kut{cursor:pointer;user-select:none;font-size:13px;color:var(--accent)}
+  .kut.kilit{cursor:not-allowed;color:var(--muted);opacity:.7}
+
+  .guc{height:6px;border-radius:4px;background:#e7edf4;overflow:hidden;margin-top:5px}
+  .guc i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e);width:72%}
+
+  .uyari{display:flex;gap:8px;align-items:flex-start;padding:9px 12px;font-size:11.5px;
+    line-height:1.5;border-radius:4px;margin:0 12px 12px}
+  .uyari.sari{background:#fdf6e3;color:#6f4f12;border:1px solid #f2ddbf}
+  .uyari.mavi{background:#eef4fc;color:#1f4a7a;border:1px solid #cfe0f5}
+
+  .kaalt{display:flex;gap:8px;align-items:center;padding:10px 12px;background:var(--head);
+    border-top:1px solid var(--line)}
+  .kaalt .durum{font-size:11px;color:var(--muted)}
+  .kaalt .sp{margin-left:auto}
+
+  .aciklama{max-width:1060px;margin:18px auto 0;color:#e2ebf5;font-size:11px;line-height:1.7;
+    padding:0 14px}
+  .aciklama h4{margin:0 0 6px;color:#fff;font-size:13px}
+  .aciklama b{color:#fff}
+  .aciklama ul{margin:6px 0 0 18px;padding:0}
+  .aciklama li{margin:4px 0}
+  .aciklama code{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);
+    border-radius:3px;padding:0 4px}
+  @media(max-width:820px){.ikili{grid-template-columns:1fr}
+    .alanlar{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="perde">
+
+  <!-- Uygulamanin ust seridi: modal AVATARDAN acilir -->
+  <div class="ustserit">
+    <span class="logo">Gentegre AI</span>
+    <span class="rz mavi" style="border-color:#4d8fd6;background:rgba(255,255,255,.14);color:#fff">
+      Merkez ▾</span>
+    <span class="sp">
+      <span class="ib">🌗</span>
+      <span class="ib">🔔<span style="color:#ffd7d2">³</span></span>
+      <span class="ib">🇹🇷</span>
+      <span class="ib">?</span>
+      <span class="ib" style="color:#ffc9c2">⎋</span>
+      <span class="avt" id="avatar" title="Kullanıcı Ayarları">OA</span>
+    </span>
+  </div>
+  <div class="okisaret"><span>↑ Kullanıcı Ayarları buradan açılır</span></div>
+
+  <div class="perdeic">
+  <div class="win" id="pencere">
+    <div class="title">👤 Kullanıcı Ayarları
+      <span class="sp">Değişiklikler yalnız kendi hesabınızı etkiler</span>
+      <span class="kapat" id="kapat">✕</span>
+    </div>
+
+    <!-- ---------------------------------------------------- KIMLIK BASI -->
+    <div class="kimlik">
+      <div class="buyukavt">OA<span class="kalem">✎</span></div>
+      <div>
+        <div class="ad">Dr. Osman AKAR</div>
+        <div class="alt">osman.akar@ornekhastane.com · Kullanıcı kodu <b>oakar</b> · ID 4901</div>
+        <div class="rozetler">
+          <span class="rz mavi">Ana rol: Başhekim Yrd.</span>
+          <span class="rz mor">+ İskonto Onaylayanlar</span>
+          <span class="rz ok">Aktif</span>
+          <span class="rz">Merkez · Ankara Şube</span>
+        </div>
+      </div>
+      <div class="sag">
+        Son giriş: <b>Bugün 08:42</b> · Chrome / Windows<br>
+        Şifre değişimi: 62 gün önce<br>
+        <span class="rz sari">2 adımlı doğrulama kapalı</span>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------------------- SEKMELER -->
+    <div class="sekmeler">
+      <div class="sekme on" data-s="hesap">Hesabım</div>
+      <div class="sekme" data-s="gorunum">Görünüm</div>
+      <div class="sekme" data-s="guvenlik">Güvenlik</div>
+      <div class="sekme" data-s="bildirim">Bildirimler
+        <span class="rz mavi" style="margin-left:4px">3 açık</span></div>
+    </div>
+
+    <div class="govde">
+
+      <!-- ==================================================== HESABIM ==== -->
+      <div class="pnl" data-s="hesap">
+        <div class="ikili">
+          <div>
+            <div class="grp">
+              <h4>İletişim <span class="mini">bunları siz değiştirirsiniz</span></h4>
+              <div class="ic">
+                <div class="alanlar">
+                  <label>Ad Soyad</label><div class="inp ro">Osman AKAR
+                    <span class="rz pas sagrz">personel kartından</span></div>
+                  <label>Kullanıcı kodu</label><div class="inp ro">oakar</div>
+                  <label class="req">E-posta</label><div class="inp">osman.akar@ornekhastane.com
+                    <span class="rz ok sagrz">doğrulandı</span></div>
+                  <label>Cep telefonu</label><div class="inp">0532 •••• 41 88
+                    <span class="rz sari sagrz">doğrula</span></div>
+                  <label>Görünen ad</label><div class="inp">Dr. Osman AKAR</div>
+                  <label>Profil fotoğrafı</label>
+                  <div><span class="btn kucuk">📷 Yükle</span>
+                       <span class="btn kucuk">Kaldır</span>
+                       <span class="sonuk" style="margin-left:6px">baş harfler kullanılır</span></div>
+                </div>
+              </div>
+              <div class="not">Ad, sicil ve görev bilgisi <b>personel kartında</b> durur —
+                buradan değişmez. Kendi kartını düzenleyebilen kişi kendi görevini de
+                değiştirebilirdi.</div>
+            </div>
+
+            <div class="grp">
+              <h4>Rollerim <span class="mini">salt okunur</span></h4>
+              <div class="ic">
+                <div class="sat"><span class="et">Ana rol</span><b>Başhekim Yrd.</b></div>
+                <div class="sat"><span class="et">Ek rol</span>
+                  <b>İskonto Onaylayanlar <span class="rz mor">sistem rolü</span></b></div>
+                <div class="sat"><span class="et">İskonto tavanı</span>
+                  <b>%25 · en çok 2.500 ₺</b></div>
+                <div class="sat"><span class="et">Şubeler</span>
+                  <b>Merkez <span class="rz ok">varsayılan</span> · Ankara Şube</b></div>
+                <div class="sat"><span class="et"></span>
+                  <span class="btn kucuk">🛡 Yetkilerimi gör</span></div>
+              </div>
+              <div class="not">Yetki ana rol ile ek rollerin <b>birleşimidir</b>; sayısal
+                sınırlarda en yüksek değer geçerlidir. Rol değişimi yöneticinin işidir —
+                burada yalnız <b>görünür</b>, çünkü “neden bu ekranı açamıyorum” sorusu
+                çoğu zaman burada cevaplanır.</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="grp">
+              <h4>Çalışma Tercihleri</h4>
+              <div class="ic">
+                <div class="alanlar">
+                  <label>Açılış şubesi</label><div class="inp combo">Merkez</div>
+                  <label>Açılış ekranı</label><div class="inp combo">Ana Sayfa (Panel)</div>
+                  <label>Liste satır sayısı</label><div class="inp combo">50 kayıt / sayfa</div>
+                  <label>Tarih biçimi</label><div class="inp combo">gg.aa.yyyy</div>
+                  <label>Sayı ayıracı</label><div class="inp combo">1.234,56</div>
+                  <label>Oturum süresi</label><div class="inp ro">8 saat
+                    <span class="rz pas sagrz">kurum ayarı</span></div>
+                </div>
+              </div>
+              <div class="not">Açılış şubesi <b>yetkili olduğunuz</b> şubeler arasından
+                seçilir; kurumun oturum süresi gibi kuralları kişi değiştiremez —
+                gri gösterilir, gizlenmez.</div>
+            </div>
+
+            <div class="grp">
+              <h4>Kısayollar</h4>
+              <div class="ic">
+                <div class="sat"><span class="et">Hızlı arama</span><b>Ctrl + K</b></div>
+                <div class="sat"><span class="et">Yeni belge</span><b>Ctrl + N</b></div>
+                <div class="sat"><span class="et">Kaydet</span><b>Ctrl + S</b></div>
+                <div class="sat"><span class="et">Onay kuyruğu</span><b>Ctrl + Shift + O</b></div>
+                <div class="sat"><span class="et">Klavye kısayolları</span>
+                  <span class="btn kucuk">Tümünü gör</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="uyari mavi">
+          <span>ℹ</span>
+          <div>Buradaki ayarlar <b>yalnız sizin hesabınız</b> içindir. Kurumun tamamını
+            ilgilendiren ayarlar (kurum tipi, modüller, e-Belge, fiyat listeleri)
+            <b>Yönetim › Ayarlar</b> altındadır ve ayrı yetki ister.</div>
+        </div>
+      </div>
+
+      <!-- ==================================================== GÖRÜNÜM ==== -->
+      <div class="pnl" data-s="gorunum" hidden>
+        <div class="ikili">
+          <div>
+            <div class="grp">
+              <h4>Tema <span class="mini">bu cihazda saklanır</span></h4>
+              <div class="ic">
+                <div class="secenekler" data-tek>
+                  <div class="sec"><span class="ikon">🖥</span>Sistem</div>
+                  <div class="sec on"><span class="ikon">☀</span>Gündüz</div>
+                  <div class="sec"><span class="ikon">🌙</span>Gece</div>
+                </div>
+              </div>
+              <div class="not">Tema hesapta değil <b>tarayıcıda</b> durur: aynı kişi
+                poliklinikteki bilgisayarda gündüz, evde gece kullanabilir.</div>
+            </div>
+
+            <div class="grp">
+              <h4>Dil</h4>
+              <div class="ic">
+                <div class="secenekler" data-tek>
+                  <div class="sec on"><span class="ikon">🇹🇷</span>Türkçe</div>
+                  <div class="sec"><span class="ikon">🇬🇧</span>English</div>
+                  <div class="sec"><span class="ikon">🇩🇪</span>Deutsch</div>
+                  <div class="sec"><span class="ikon">🇸🇦</span>العربية</div>
+                </div>
+              </div>
+              <div class="not">Dil <b>hesapta</b> saklanır (üst şeritteki bayrak aynı değeri
+                yazar) — kişi hangi cihazdan girerse girsin kendi dilini bulur.</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="grp">
+              <h4>Yoğunluk ve Yazı</h4>
+              <div class="ic">
+                <div class="secenekler" data-tek style="margin-bottom:10px">
+                  <div class="sec"><span class="ikon">≡</span>Sıkışık</div>
+                  <div class="sec on"><span class="ikon">☰</span>Normal</div>
+                  <div class="sec"><span class="ikon">☷</span>Ferah</div>
+                </div>
+                <div class="alanlar">
+                  <label>Yazı boyu</label><div class="inp combo">Normal (%100)</div>
+                  <label>Grid çizgileri</label><div class="inp combo">İnce</div>
+                  <label>Durum renkleri</label><div class="inp combo">Yazı rengi</div>
+                </div>
+              </div>
+              <div class="not">“Sıkışık” 16 satır yerine 24 satır gösterir — veznede ekran
+                küçük, listede satır sayısı kararı hızlandırır.</div>
+            </div>
+
+            <div class="grp">
+              <h4>Önizleme</h4>
+              <div class="ic" style="padding:0">
+                <table>
+                  <thead><tr><th>Belge No</th><th>Cari</th><th class="sag">Tutar</th>
+                    <th class="orta">Durum</th></tr></thead>
+                  <tbody>
+                    <tr><td>FT-2026-000118</td><td>Neslihan ARSLAN</td>
+                        <td class="sag">2.386,00</td>
+                        <td class="orta"><span class="rz ok">Tahsil</span></td></tr>
+                    <tr><td>FT-2026-000117</td><td>Murat DEMİR</td>
+                        <td class="sag">640,00</td>
+                        <td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="not">Ayarın etkisi <b>gerçek bir grid üzerinde</b> görünür —
+                kaydedip listeye dönüp beğenmeyip geri gelmek gerekmesin.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =================================================== GÜVENLİK ==== -->
+      <div class="pnl" data-s="guvenlik" hidden>
+        <div class="ikili">
+          <div>
+            <div class="grp">
+              <h4>Şifre Değiştir</h4>
+              <div class="ic">
+                <div class="alanlar">
+                  <label class="req">Mevcut şifre</label><div class="inp">••••••••••</div>
+                  <label class="req">Yeni şifre</label><div class="inp">••••••••••••
+                    <span class="rz ok sagrz">güçlü</span></div>
+                  <label class="req">Yeni şifre (tekrar)</label><div class="inp">••••••••••••
+                    <span class="rz ok sagrz">✓</span></div>
+                </div>
+                <div class="guc"><i></i></div>
+                <div class="sonuk" style="margin-top:7px;line-height:1.6">
+                  ✔ En az 10 karakter &nbsp; ✔ Büyük/küçük harf &nbsp; ✔ Rakam<br>
+                  ✔ Son 5 şifreden farklı &nbsp; ✔ Ad-soyad ve doğum yılı içermiyor</div>
+              </div>
+              <div class="not">Şifre değişince <b>bu oturum dışındaki tüm oturumlar
+                kapanır</b>. Şifreyi değiştirmenin sebebi çoğu zaman “başkası biliyor
+                olabilir”dir; eski oturumun açık kalması değişikliği anlamsız kılardı.</div>
+            </div>
+
+            <div class="grp">
+              <h4>2 Adımlı Doğrulama
+                <span class="mini"><span class="rz sari">kapalı</span></span></h4>
+              <div class="ic">
+                <div class="sat"><span class="et">SMS ile kod</span>
+                  <span><span class="rz pas">kapalı</span>
+                    <span class="btn kucuk">Aç</span></span></div>
+                <div class="sat"><span class="et">Doğrulayıcı uygulama</span>
+                  <span><span class="rz pas">kapalı</span>
+                    <span class="btn kucuk">Kur</span></span></div>
+                <div class="sat"><span class="et">Yedek kodlar</span><span class="sonuk">—</span></div>
+              </div>
+              <div class="not">İskonto onayı, kasa ve e-Belge yetkisi olan hesaplarda kurum
+                2 adımlı doğrulamayı <b>zorunlu</b> kılabilir; o zaman bu bölüm
+                kapatılamaz.</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="grp">
+              <h4>Açık Oturumlar <span class="mini">3 cihaz</span></h4>
+              <div class="ic" style="padding:0">
+                <table>
+                  <thead><tr><th>Cihaz</th><th>Yer / IP</th><th>Son işlem</th><th></th></tr></thead>
+                  <tbody>
+                    <tr class="bu">
+                      <td>Chrome · Windows <span class="rz ok">bu cihaz</span></td>
+                      <td>Ankara · 78.180.••.••</td><td>şimdi</td>
+                      <td class="sag sonuk">—</td>
+                    </tr>
+                    <tr>
+                      <td>Gentegre Mobil · Android</td>
+                      <td>Ankara · mobil veri</td><td>17 dk önce</td>
+                      <td class="sag"><span class="btn kucuk">Kapat</span></td>
+                    </tr>
+                    <tr>
+                      <td>Chrome · Windows</td>
+                      <td>Poliklinik · 10.0.•.42</td><td>dün 19:20</td>
+                      <td class="sag"><span class="btn kucuk">Kapat</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="not">Tanımadığınız bir satır görürseniz önce <b>oturumu
+                kapatın</b>, sonra şifrenizi değiştirin.</div>
+            </div>
+
+            <div class="grp">
+              <h4>Son Hareketler</h4>
+              <div class="ic" style="padding:0">
+                <table>
+                  <thead><tr><th>Zaman</th><th>İşlem</th><th>Yer</th></tr></thead>
+                  <tbody>
+                    <tr><td>Bugün 08:42</td><td>Giriş <span class="rz ok">başarılı</span></td>
+                        <td>Ankara</td></tr>
+                    <tr><td>Dün 19:20</td><td>Giriş <span class="rz ok">başarılı</span></td>
+                        <td>Poliklinik</td></tr>
+                    <tr><td>Dün 19:18</td><td>Giriş <span class="rz kir">hatalı şifre</span></td>
+                        <td>Poliklinik</td></tr>
+                    <tr><td>12.09 14:05</td><td>Şifre değişikliği</td><td>Ankara</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="not">Hatalı giriş denemeleri de yazılır — başarılı girişleri
+                görmek, birinin <b>denediğini</b> göstermez.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================= BİLDİRİMLER ==== -->
+      <div class="pnl" data-s="bildirim" hidden>
+        <div class="grp">
+          <h4>Neyi nereden alayım?
+            <span class="mini">yalnız yetkiniz olan olaylar listelenir</span></h4>
+          <div class="ic" style="padding:0">
+            <table>
+              <thead>
+                <tr>
+                  <th>Olay</th>
+                  <th class="orta">🔔 Zil</th>
+                  <th class="orta">📱 Mobil</th>
+                  <th class="orta">✉ E-posta</th>
+                  <th class="orta">💬 SMS</th>
+                  <th>Not</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="bu">
+                  <td><b>İskonto onayı bekliyor</b></td>
+                  <td class="orta"><span class="kut">☑</span></td>
+                  <td class="orta"><span class="kut">☑</span></td>
+                  <td class="orta"><span class="kut">☐</span></td>
+                  <td class="orta"><span class="kut">☐</span></td>
+                  <td class="sonuk">İskonto Onaylayanlar rolündesiniz ·
+                    <span class="rz mor">sistem rolü</span></td>
+                </tr>
+                <tr>
+                  <td>Hasta bankoda bekliyor (2 dk+)</td>
+                  <td class="orta"><span class="kut">☑</span></td>
+                  <td class="orta"><span class="kut">☑</span></td>
+                  <td class="orta"><span class="kut">☐</span></td>
+                  <td class="orta"><span class="kut">☑</span></td>
+                  <td class="sonuk">acil · SMS önerilir</td>
+                </tr>
+                <tr>
+                  <td>Bana mesaj geldi</td>
+                  <td class="orta"><span class="kut">☑</span></td>
+                  <td class="orta"><span class="kut">☑</span></td>
+                  <td class="orta"><span class="kut">☐</span></td>
+                  <td class="orta"><span class="kut">☐</span></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>Kritik lab sonucu (panik değer)</td>
+                  <td class="orta"><span class="kut kilit" title="Kapatılamaz">☑</span></td>
+                  <td class="orta"><span class="kut kilit" title="Kapatılamaz">☑</span></td>
+                  <td class="orta"><span class="kut kilit" title="Kapatılamaz">☑</span></td>
+                  <td class="orta"><span class="kut kilit" title="Kapatılamaz">☑</span></td>
+                  <td class="sonuk"><span class="rz kir">kapatılamaz</span> · hasta güvenliği</td>
+                </tr>
+                <tr>
+                  <td>Randevu iptali / değişikliği</td>
+                  <td class="orta"><span class="kut">☑</span></td>
+                  <td class="orta"><span class="kut">☐</span></td>
+                  <td class="orta"><span class="kut">☑</span></td>
+                  <td class="orta"><span class="kut">☐</span></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>e-Fatura reddedildi</td>
+                  <td class="orta"><span class="kut">☑</span></td>
+                  <td class="orta"><span class="kut">☐</span></td>
+                  <td class="orta"><span class="kut">☑</span></td>
+                  <td class="orta"><span class="kut">☐</span></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>Günlük özet raporu</td>
+                  <td class="orta"><span class="kut">☐</span></td>
+                  <td class="orta"><span class="kut">☐</span></td>
+                  <td class="orta"><span class="kut">☑</span></td>
+                  <td class="orta"><span class="kut">☐</span></td>
+                  <td class="sonuk">her gün 18:30</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="not">Liste <b>yetkinize göre</b> kurulur: e-Fatura yetkisi olmayan
+            kişide o satır hiç yoktur. Kapatılamayan tek satır panik değerdir —
+            bildirimi kapatmak, klinik bir riski kişisel tercihe çevirirdi.</div>
+        </div>
+
+        <div class="ikili">
+          <div class="grp">
+            <h4>Sessiz Saatler</h4>
+            <div class="ic">
+              <div class="alanlar">
+                <label>Sessiz saat</label><div class="inp">20:00 — 08:00</div>
+                <label>Hafta sonu</label><div class="inp combo">Tüm gün sessiz</div>
+                <label>İstisna</label><div class="inp ro">Panik değer · hasta bekliyor
+                  <span class="rz kir sagrz">her zaman çalar</span></div>
+              </div>
+            </div>
+            <div class="not">Sessiz saatte bildirim <b>silinmez</b>, ertelenir — sabah
+              zilde birikmiş olarak durur.</div>
+          </div>
+
+          <div class="grp">
+            <h4>Mobil Cihaz</h4>
+            <div class="ic">
+              <div class="sat"><span class="et">Kayıtlı cihaz</span><b>Android · SM-A546</b></div>
+              <div class="sat"><span class="et">Son bildirim</span><b>17:04 · iskonto onayı</b></div>
+              <div class="sat"><span class="et">Test</span>
+                <span class="btn kucuk">🔔 Deneme bildirimi gönder</span></div>
+              <div class="sat"><span class="et">Kaldır</span>
+                <span class="btn kucuk">Bu cihazı çıkar</span></div>
+            </div>
+            <div class="not">Deneme bildirimi düğmesi bilerek var: “bildirim gelmiyor”
+              şikâyetinin yarısı telefonun kendi izin ayarındadır, kurulumda test
+              edilebilmeli.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="kaalt">
+      <span class="durum" id="altdurum">Kaydedilmemiş 2 değişiklik · dil ve açılış ekranı</span>
+      <span class="sp"></span>
+      <span class="btn">İptal</span>
+      <span class="btn primary">Kaydet</span>
+    </div>
+  </div>
+  </div>
+
+  <div class="aciklama">
+    <h4>Kullanıcı Ayarları — tasarım notları</h4>
+    Üst şeritteki <b>avatardan</b> açılan modal; sekmeler bu mockup'ta çalışır
+    (avatara basınca pencere yeniden açılır). Bugünkü ekran (<code>Kabuk.tsx</code>)
+    kimlik + dil/tema + şifre taşıyor; buradaki tasarım onu dört sekmeye ayırır ve
+    eksik olan üç şeyi ekler: roller, açık oturumlar, bildirim tercihleri.
+    <ul>
+      <li><b>Kişisel ayar ≠ kurum ayarı.</b> Bu pencere yalnız kendi hesabını değiştirir;
+          kurumun ayarları <code>Yönetim › Ayarlar</code> altında ve ayrı yetkide kalır.
+          İkisini tek yere koymak, “yanlışlıkla herkesi etkileyen” değişikliğin klasik
+          kaynağıdır.</li>
+      <li><b>Kimlik salt okunur, sebebi yazılı.</b> Ad/görev personel kartından gelir —
+          kendi kartını düzenleyebilen kişi kendi görevini de değiştirebilirdi. Gri
+          alanın yanında <i>nereden geldiği</i> yazar, yoksa kullanıcı destek arar.</li>
+      <li><b>Roller görünür ama düzenlenemez</b> (665): ana rol + ek roller + iskonto
+          tavanı + şubeler. “Neden bu ekranı açamıyorum / neden onay bana düşmüyor”
+          sorusu en çok burada sorulur; cevabı yetki matrisine girmeden okunabilmeli.
+          Değiştirmek yöneticinin işidir.</li>
+      <li><b>Tema cihazda, dil hesapta.</b> Aynı kişi klinikteki bilgisayarda gündüz,
+          evde gece çalışır; ama dili her cihazda ayrı seçmek istemez.</li>
+      <li><b>Şifre değişimi diğer oturumları kapatır</b> ve bu, düğmenin yanında yazar.
+          Sebep genelde “başkası biliyor olabilir”dir.</li>
+      <li><b>Açık oturumlar listesi kişinin kendi denetimidir:</b> tanımadığı cihazı
+          yöneticiyi beklemeden kapatabilir. Hatalı giriş denemeleri de görünür —
+          yalnız başarılı girişleri göstermek, denemeyi gizlerdi.</li>
+      <li><b>Bildirim matrisi yetkiden türetilir:</b> kişinin yetkisi olmayan olay satırı
+          hiç çizilmez. “İskonto onayı” satırının notu rolü söyler — bildirimin neden
+          geldiği ayarların içinde açıklanır.</li>
+      <li><b>Bir satır kapatılamaz</b> (panik değer). Klinik riski kişisel tercihe
+          çevirmemek için; kapalı gösterip sessizce göndermek yerine <i>kapatılamaz</i>
+          demek dürüst olan.</li>
+      <li><b>Sessiz saat erteler, silmez.</b> Kaçırılan onay talebi sabah zilde durur;
+          aksi halde gece gelen talep hiç görülmemiş olurdu.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+// SEKMELER: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl degisir.
+//   Eslesme data-s anahtariyla; diger mockup'lardaki desenle ayni.
+document.querySelectorAll('.sekmeler').forEach(function (bar) {
+  var tabs = [].slice.call(bar.querySelectorAll('.sekme'));
+  var scope = bar.parentElement;
+  var pnls = [].slice.call(scope.querySelectorAll('.pnl'));
+  function key(el, i) { return el.dataset.s || String(i) }
+  function goster(k) { pnls.forEach(function (p, j) { p.hidden = (key(p, j) !== k) }) }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () {
+      tabs.forEach(function (x) { x.classList.remove('on') });
+      t.classList.add('on');
+      goster(key(t, i));
+      var d = document.getElementById('altdurum');
+      if (d) d.textContent = ALT[key(t, i)] || '';
+    });
+  });
+});
+
+// Alt seritteki durum metni sekmeye gore degisir - hangi ayarin ne zaman
+//   gecerli oldugu (aninda mi, Kaydet ile mi) sekmeden sekmeye farkli.
+var ALT = {
+  hesap: 'Kaydedilmemiş 2 değişiklik · dil ve açılış ekranı',
+  gorunum: 'Tema anında uygulanır, kaydet gerekmez',
+  guvenlik: "Güvenlik değişiklikleri ISLEMLOG'a yazılır",
+  bildirim: 'Değişiklikler hemen geçerli olur'
+};
+
+// Tek secimli kutu gruplari (tema / dil / yogunluk).
+document.querySelectorAll('.secenekler[data-tek]').forEach(function (grup) {
+  grup.querySelectorAll('.sec').forEach(function (s) {
+    s.addEventListener('click', function () {
+      grup.querySelectorAll('.sec').forEach(function (x) { x.classList.remove('on') });
+      s.classList.add('on');
+    });
+  });
+});
+
+// Bildirim matrisi kutucuklari; 'kilit' olanlar degismez (panik deger).
+document.querySelectorAll('.kut').forEach(function (k) {
+  k.addEventListener('click', function () {
+    if (k.classList.contains('kilit')) return;
+    k.textContent = k.textContent.trim() === '☑' ? '☐' : '☑';
+  });
+});
+
+// Pencereyi kapat / avatardan tekrar ac.
+var pencere = document.getElementById('pencere');
+document.getElementById('kapat').addEventListener('click', function () {
+  pencere.style.display = 'none';
+});
+document.getElementById('avatar').addEventListener('click', function () {
+  pencere.style.display = '';
+});
+</script>
+
+</body>
+</html>

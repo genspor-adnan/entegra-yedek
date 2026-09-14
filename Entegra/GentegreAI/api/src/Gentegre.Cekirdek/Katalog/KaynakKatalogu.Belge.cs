@@ -256,16 +256,30 @@ public static partial class KaynakKatalogu
             // HASTA (658): dis kurum numunesinde CARI gonderen kurumdur,
             //   hasta ayri alanda durur - "basvuruda hasta adi yok"
             //   (kullanici). Normal basvuruda ayni kisiyi gosterir.
+            //   HASTA_ID BOSSA BELGENIN TARAFI (kullanici: "basvuru listesinde
+            //   4056 ID ad soyad gorunmuyor"): normal basvuruda hasta zaten
+            //   belgenin tarafidir ve `belge_basvuru.hasta_id` yalniz DIS KURUM
+            //   akisinda ayri doldurulur - bos kalan 8 eski satirda kolon bos
+            //   goruniyordu. Yedek kaynak HASTA OLAN tarafla sinirli: dis kurum
+            //   numunesinde cari GONDEREN KURUMDUR, onun adini "hasta" diye
+            //   yazmak yanlis bilgi olurdu.
             new("hastaAdi",
-                "(select coalesce(nullif(trim(h.unvan), ''), " +
-                "         trim(h.ad || ' ' || h.soyad)) " +
-                "   from public.belge_basvuru bb " +
-                "   join public.taraf h on h.id = bb.hasta_id " +
-                "  where bb.id = b.id)",
+                "coalesce((select coalesce(nullif(trim(h.unvan), ''), " +
+                "                  trim(h.ad || ' ' || h.soyad)) " +
+                "            from public.belge_basvuru bb " +
+                "            join public.taraf h on h.id = bb.hasta_id " +
+                "           where bb.id = b.id), " +
+                "         (select coalesce(nullif(trim(t2.unvan), ''), " +
+                "                  trim(t2.ad || ' ' || t2.soyad)) " +
+                "            from public.taraf t2 " +
+                "           where t2.id = b.taraf_id " +
+                "             and (t2.hasta = 1 or t2.grup = 101)))",
                                                       "metin", "Hasta", Genislik: 200,
                                                       Siralanabilir: false),
             new("hastaId",
-                "(select bb.hasta_id from public.belge_basvuru bb where bb.id = b.id)",
+                "coalesce((select bb.hasta_id from public.belge_basvuru bb where bb.id = b.id), " +
+                "         (select t3.id from public.taraf t3 where t3.id = b.taraf_id " +
+                "            and (t3.hasta = 1 or t3.grup = 101)))",
                                                       "sayi", "Hasta Id",
                                                       Varsayilan: false, Siralanabilir: false),
             new("odeyenKurumId",
@@ -370,7 +384,7 @@ public static partial class KaynakKatalogu
                                                       Bicim: "#,##0.00", Genislik: 120,
                                                       Varsayilan: false, Siralanabilir: false,
                                                       Filtrelenebilir: false),
-            new("tarafVkno",     "b.taraf_vkno",     "metin", "VKN/TCKN",    Genislik: 120, Varsayilan: false),
+            new("tarafVkno",     "b.taraf_vkno",     "metin", "Vergi/Kimlik No",    Genislik: 120, Varsayilan: false),
             new("matrah",        "b.matrah",         "para",  "Matrah",      Hizalama: "sag",
                                                                 Bicim: "#,##0.00", Genislik: 120),
             new("kdvTutari",     "b.kdv_tutari",     "para",  "KDV",         Hizalama: "sag",
@@ -684,7 +698,7 @@ public static partial class KaynakKatalogu
             // Gonderici carimiz degilse taraf bos kalir - JSON'dan gelen unvan gosterilir.
             new("gondericiUnvan",  "coalesce(nullif(t.unvan, ''), e.gonderici_unvan)",
                                                           "metin", "Gönderici", Genislik: 260),
-            new("gondericiVkno",   "e.gonderici_vkno",    "metin", "VKN/TCKN", Hizalama: "orta", Genislik: 115),
+            new("gondericiVkno",   "e.gonderici_vkno",    "metin", "Vergi/Kimlik No", Hizalama: "orta", Genislik: 115),
             new("tutar",           "e.tutar",             "para",  "Tutar",    Hizalama: "sag",
                                                            Bicim: "#,##0.00", Genislik: 125),
             new("vergiTutar",      "e.vergi_tutar",       "para",  "KDV",      Hizalama: "sag",

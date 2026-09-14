@@ -42,7 +42,7 @@ public sealed class GunlukDeposu
                 """,
                 new object?[]
                 {
-                    Kirp(kod, 30), kullaniciId, Kirp(ip, 45), Kirp(istemci, 200),
+                    Kirp(kod, 120), kullaniciId, Kirp(ip, 45), Kirp(istemci, 200),
                     (short)(basarili ? 1 : 0), Kirp(sebep, 40)
                 }, iptal);
         }

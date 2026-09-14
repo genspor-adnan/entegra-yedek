@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
-import { mesaj, secimSor } from '../bilesenler/mesaj';
-import { type BelgeYaniti, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
+import { mesaj, secimSor, type ParaSecimi } from '../bilesenler/mesaj';
+import { type BelgeYaniti, type IskontoTalebi, URUN_GENOTIP, hataMetni } from '../api/sozlesme';
 import { Modal } from '../bilesenler/Modal';
 import { belgeTuruBilgisi, belgeKisaAdi, GIRILEBILIR_TURLER, VARSAYILAN_TUR,
          TAHAKKUK_TURLERI }
@@ -75,7 +75,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
                             tarafUnvan: onDolguUnvan, onKapat, onKaydedildi }: Props = {}) {
   const git = useNavigate();
   const [sorgu] = useSearchParams();
-  const { yetki, kullanici } = useOturum();
+  const { yetki, kullanici, aksiyonDegeri } = useOturum();
 
   // SUNUCUDAN GELEN AYARLAR kendi kancasinda: tur adlari, tarih penceresi,
   //   yerel para ve POS aksiyonu acilista bir kez okunur, bir daha degismez.
@@ -95,6 +95,24 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * ACMAZ - varsayilan kasayla dogrudan satir eklenir.
    */
   const [hesapSecim, setHesapSecim] = useState<'B' | 'P' | null>(null);
+  /**
+   * ISKONTO TALEPLERI (662): ucret sekmesindeki durum rozeti. Talep acilinca
+   * ve kart her acildiginda tazelenir - karar zilden verildigi icin banko
+   * ekranindaki rozet ancak tazelemeyle guncellenir.
+   */
+  const [iskontoTalepleri, setIskontoTalepleri] = useState<IskontoTalebi[]>([]);
+
+  /** Acilan hesap secimi IADE icin mi (tutar eksi ve neden sorulacak). */
+  const [hesapSecimIade, setHesapSecimIade] = useState(false);
+  /**
+   * SECIMDEN ONCE SORULAN TUTAR (banka / POS). Para birimi tutarla birlikte
+   * secildigi icin hesap ONDAN SONRA aranir - TL kasaya USD tahsilat
+   * yazilamaz, sunucu reddeder; once hesap secilseydi kullanici dovizi
+   * degistirdiginde secim gecersiz kalirdi.
+   */
+  const [hesapSecimPara, setHesapSecimPara] = useState<ParaSecimi | null>(null);
+  /** Acik iskonto talep penceresi (mockup: iskonto_talep_penceresi.html). */
+  const [iskontoTalebi, setIskontoTalebi] = useState<number[] | null>(null);
   /** POS tahsilatindan sonraki aksiyon (355 ayari): 0 yok / 1 otomatik / 2 sor. */
   /**
    * PROTOKOL NO ELLE MI (358): karar numaralandirma tablosunda
@@ -341,7 +359,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     kampanyaId, setKampanyaId, kampanyaAdi, setKampanyaAdi,
     kampanyaCoz, satirlariYenidenFiyatla, listeDegisti,
   } = useBelgeFiyatlandirma({
-    belgeId, tur, alisMi, cariId: cari?.id ?? null, odeyenKurumId,
+    belgeId, tur, alisMi, cariId: cari?.id ?? null, odeyenKurumId, basvuruMu,
     // SECILI POLICE (588): kurumun birden fazla sozlesmesi varsa tarife
     //   ancak policeden cozulur - yoksa liste carinin listesine duser ve
     //   ÖSS hastasi hastanenin ÖZEL fiyatiyla ucretlendirilir.
@@ -634,6 +652,45 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
       ? o : { ...o, gelisSekli: gelisSekliKarari(false) }));
   }, [basvuruMu, personelId]);
 
+  /* ISKONTO TALEPLERI (662): basvuru kartinda ucret sekmesi rozeti icin.
+     Karar ZILDEN verildigi icin banko ekrani ancak kart yeniden acilinca
+     ya da yeni talepte guncellenir; BEKLEYEN talep varsa 60 sn'de bir
+     yoklanir (kullanici). Yoklama YALNIZ BEKLERKEN calisir: karar dusunce
+     zamanlayici durur - sonuclanmis bir belgeyi sonsuza kadar sormak,
+     acik kalan her basvuru karti icin bos istek uretirdi.
+
+     Karar gelince SATIRLAR DA tazelenir: onay orani satirlara SUNUCUDA
+     islenir (fn_iskonto_talep_karar), ekrandaki eski oran ve kilitsiz
+     satirlar yanlis gosterirdi. */
+  useEffect(() => {
+    if (!basvuruMu || !belgeId) { setIskontoTalepleri([]); return }
+    let durduruldu = false;
+    let bekleyenVar = false;
+
+    const oku = async (ilk: boolean) => {
+      try {
+        const liste = await api.iskontoTalepleri(belgeId);
+        if (durduruldu) return;
+        const simdiBekleyen = liste.some(t => t.durum === 0);
+        // BEKLEYENDEN SONUCLANMIS'A gecis: satirlar sunucuda degisti.
+        if (!ilk && bekleyenVar && !simdiBekleyen) {
+          try { setSonuc(await api.belgeOku(belgeId)) } catch { /* yoksay */ }
+          await paraRef.current.satirlariTazele(belgeId);
+        }
+        bekleyenVar = simdiBekleyen;
+        setIskontoTalepleri(liste);
+      } catch { if (ilk) setIskontoTalepleri([]) }
+    };
+
+    void oku(true);
+    const z = window.setInterval(() => {
+      // Zamanlayici hep doner ama bekleyen yoksa istek ATILMAZ: tek bir
+      //   kosul, iki ayri efekt kurmaktan basit.
+      if (bekleyenVar) void oku(false);
+    }, 60000);
+    return () => { durduruldu = true; window.clearInterval(z) };
+  }, [basvuruMu, belgeId]);
+
   // Mevcut belgeyi ac: baslik + satirlar + dip toplam sunucudan gelir.
   useEffect(() => {
     if (!belgeId) return;
@@ -917,6 +974,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   /** Secili satirlari siler - grid salt gorunum oldugu icin satir ici silme yok. */
   const seciliSil = () => {
     if (seciliSatirlar.size === 0) return;
+    // ONAYLI (KILITLI) SATIR SILINMEZ (681): dugme zaten kapali ama silme
+    //   baska yollardan da cagrilabiliyor (kisayol, toplu secim) - sunucu
+    //   reddedince kart kaydedilemez duruma duserdi.
+    if (satirlar.some(x => x.iskontoKilit && seciliSatirlar.has(x.anahtar))) {
+      void mesaj('İskontosu onaylanmış satır silinemez - önce iskonto onayını kaldırın.');
+      return;
+    }
     // Paket satiri silinince ICERIGI de gider - yoksa sahipsiz icerik
     //   satirlari belgede kalirdi.
     setSatirlar(s => s.filter(x =>
@@ -971,7 +1035,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * burada tek yerde durur - yenisi eklenince liste buyur, cagri yerleri degil.
    */
   const saltOkunurlariAt = (b: BasvuruBilgi): BasvuruBilgi => {
-    const { sysTakipNo: _atilan, ...kalan } = b;
+    // `hastaUnvan` de sunucudan OKUNUR (kalem serit basligi icin): geri
+    //   gonderilince "Bilinmeyen belge alani: hastaUnvan" ile kayit dusuyordu.
+    //   Yazma beyaz listesine eklemek yanlis olurdu - hasta ADI belgede degil,
+    //   hastanin kartinda durur.
+    const { sysTakipNo: _atilan, hastaUnvan: _atilan2, ...kalan } = b;
     return kalan;
   };
 
@@ -1065,7 +1133,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * olsun.
    */
   // Para akislari (hizli donusum / POS sonrasi fis / tutar sorma / nakit).
-  const { hizliTutar, tahsilatTutariSor, hizliDonustur, posSonrasi, hizliNakit,
+  const { hizliTutar, tahsilatTutariSor, tahsilatParasiSor, hizliDonustur,
+          posSonrasi, hizliNakit, iadeParasiSor, iadeYaz, nakitIadesi,
           kurumTahakkukuOtomatik } =
     useParaAkislari({
       ref: akisRef, basvuruMu, alisMi, kayitliId, donusumOlcusu: donusumler.olcu,
@@ -1501,6 +1570,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
                   })();
                 }
               : undefined}
+            /* ISKONTO ONAYI (662): oran + gerekce sorulur, secili satirlar
+               icin talep acilir. Satirlar ONCE KAYDEDILIR - talep satir
+               kimligine baglanir, kaydedilmemis satirin kimligi yoktur. */
+            /* ISKONTO PENCERESI: kalemler, oran, gerekce ve yetki tek
+               ekranda. Satirlar ONCE KAYDEDILIR - talep satir kimligine
+               baglanir, kaydedilmemis satirin kimligi yoktur. */
+            onIskontoOnay={anahtarlar => void (async () => {
+              if (!await kayitSart()) return;
+              setIskontoTalebi(anahtarlar);
+            })()}
+            iskontoTalepleri={iskontoTalepleri}
             satirTikla={satirTikla} sonTiklanan={sonTiklanan} secimDegis={secimDegis}
             fiyatListesi={{ listeler: fiyatListeleri, seciliId: fiyatListesiId,
                             sec: v => void listeDegisti(v), kampanyaAdi }}
@@ -1590,10 +1670,40 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
                              await paraRef.current.satirlariTazele();
                            }}
                            hizliNakit={() => void hizliNakit()}
-                           hesapSecAc={t => void (async () => {
-                             if (await kayitSart()) setHesapSecim(t);
+                           hesapSecAc={(t, iade) => void (async () => {
+                             if (!await kayitSart()) return;
+                             const ad = t === 'B' ? 'Banka' : 'POS';
+                             const s = iade ? await iadeParasiSor(ad)
+                                            : await tahsilatParasiSor(ad);
+                             if (!s) return;
+                             setHesapSecimIade(!!iade);
+                             setHesapSecimPara(s);
+                             setHesapSecim(t);
                            })()}
                            acikBorc={hizliTutar()}
+                           yerelPara={yerelPara}
+                           /* IADE / IPTAL: arac neyse iade de o araçla -
+                              karttan alinip nakit iade etmek veznede olmayan
+                              parayi cikarir. Cek/senet iadesi kiymetin GERI
+                              VERILMESIDIR: ters yondeki cek/senet turu acilir
+                              (alinan 23/24 -> verilen 33/34). */
+                           iadeAc={arac => {
+                             if (arac === 'nakit') { void nakitIadesi(); return }
+                             if (arac === 'pos' || arac === 'banka') {
+                               const t = arac === 'banka' ? 'B' : 'P';
+                               void (async () => {
+                                 if (!await kayitSart()) return;
+                                 const s = await iadeParasiSor(t === 'B' ? 'Banka' : 'POS');
+                                 if (!s) return;
+                                 setHesapSecimIade(true);
+                                 setHesapSecimPara(s);
+                                 setHesapSecim(t);
+                               })();
+                               return;
+                             }
+                             const cek = arac === 'cek';
+                             void tahsilatAc(alisMi ? (cek ? 23 : 24) : (cek ? 33 : 34));
+                           }}
                            // KURUM BELGELERI listenin BASINDA (kullanici):
                            //   kuruma kesilen tahakkuk/fatura tahsilat degildir
                            //   ama ayni tabloda okunur - "800 kuruma yazildi,
@@ -1751,6 +1861,22 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           tahsilat={tahsilat} tahsilatTutariSor={tahsilatTutariSor}
           posSonrasi={posSonrasi}
           hesapSecim={hesapSecim} setHesapSecim={setHesapSecim}
+          hesapSecimIade={hesapSecimIade} setHesapSecimIade={setHesapSecimIade}
+          hesapSecimPara={hesapSecimPara} setHesapSecimPara={setHesapSecimPara}
+          /* Kalem penceresinin ust seridi: kart basligi pencerenin ALTINDA
+             kalir, bu uc bilgi orada da okunabilmeli. */
+          iskontoTalebi={iskontoTalebi}
+          setIskontoTalebi={setIskontoTalebi}
+          iskontoTavani={aksiyonDegeri('basvuru.iskonto')}
+          kalemSeridi={{
+            // HASTA ADI, CARI DEGIL (kullanici: "hasta adi yanlis, kurum adi
+            //   gelmis"): dis kurum numunesinde belgenin carisi GONDEREN
+            //   KURUMDUR - hasta ayri alanda durur (hasta seridiyle ayni kural).
+            hasta: String(basvuruBilgi.hastaUnvan ?? '') || cari?.unvan || '',
+            odeyen: kurumlar.find(k => k.id === odeyenKurumId)?.ad ?? '',
+            liste: fiyatListeleri.find(l => l.id === fiyatListesiId)?.ad ?? '',
+          }}
+          iadeYaz={iadeYaz}
           donusum={donusumler.hedefTur} setDonusum={donusumler.setHedefTur}
           donusumPay={donusumler.pay} setDonusumPay={donusumler.setPay}
           acilanDonusum={donusumler.acilan} setAcilanDonusum={donusumler.setAcilan}

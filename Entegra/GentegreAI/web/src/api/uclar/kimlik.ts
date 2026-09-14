@@ -39,4 +39,44 @@ export const kimlikUclari = {
   dilDegistir: (dil: number) =>
     gonder<void>('/api/kimlik/dil', { dil }),
 
+  // ------------------------------------- KULLANICI AYARLARI (669) ----
+  // Hepsi KISININ KENDI hesabi; kullanici kimligi token'dan gelir,
+  //   istemci "kim oldugunu" gondermez.
+
+  /** Hesabim sekmesi: iletisim, roller, son giris, parola yasi. */
+  hesabim: () => istek<HesapBilgisi>('/api/kimlik/hesabim'),
+
+  iletisimKaydet: (eposta: string, cepTel: string) =>
+    gonder<void>('/api/kimlik/iletisim', { eposta, cepTel }, 'PUT'),
+
+  /** Acik oturumlar (cihazlar). `buCihaz` IP + tarayici esinden gelir. */
+  oturumlar: () => istek<AcikOturum[]>('/api/kimlik/oturumlar'),
+
+  /** Secilen oturumu kapatir - ayni ailenin tum refresh kayitlari kapanir. */
+  oturumKapat: (oturumId: number) =>
+    gonder<{ kapanan: number }>(`/api/kimlik/oturumlar/${oturumId}/kapat`, {}),
+
+  /** Son 10 giris denemesi - BASARISIZLAR DAHIL. */
+  girisGecmisi: () => istek<GirisDenemesi[]>('/api/kimlik/giris-gecmisi'),
 };
+
+/** Kullanici Ayarlari > Hesabim (669). */
+export interface HesapBilgisi {
+  unvan: string; gorev: string;
+  eposta: string; cepTel: string;
+  parolaTarihi?: string | null; sonGiris?: string | null; sonGirisIp: string;
+  hataliGiris: number; totpAktif: boolean;
+  anaRol: string; ekRoller: string[];
+}
+
+/** Kullanici Ayarlari > Guvenlik (669): acik oturum satiri. */
+export interface AcikOturum {
+  id: number; ip: string; istemci: string;
+  olusma: string; sonKullanim: string; bitis: string;
+  sube: string; buCihaz: boolean;
+}
+
+/** Kullanici Ayarlari > Guvenlik (669): giris denemesi. */
+export interface GirisDenemesi {
+  tarih: string; basarili: boolean; sebep: string; ip: string; istemci: string;
+}

@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// Kasa islemlerinin para matematigi TEK YERDE. Yuvarlama bicimi
@@ -32,6 +32,17 @@ public static class KasaHesap
         foreach (var (b, a) in bacaklar) { borc += b; alacak += a; }
         return BelgeHesap.Yuvarla(borc, 2) == BelgeHesap.Yuvarla(alacak, 2);
     }
+
+    /// <summary>
+    /// ISO 4217 kodunu (sube ayarindaki 'TRY', 666) uygulamanin doviz
+    /// listesindeki koda cevirir. Liste tarihsel olarak 'TL' tasiyor (db/106);
+    /// listeyi degistirmek her cek, kasa hareketi ve belgedeki kayitli kodu
+    /// bozardi - cevrim TEK YERDE, sinirda yapilir.
+    /// </summary>
+    public static string ParaKoduYerellestir(string? iso)
+        => string.IsNullOrWhiteSpace(iso) ? YerelDoviz
+         : iso.Equals("TRY", StringComparison.OrdinalIgnoreCase) ? YerelDoviz
+         : iso.ToUpperInvariant();
 
     /// <summary>Yerel para birimi kodu - uygulama genelinde 'TL' (TRY degil).</summary>
     public const string YerelDoviz = "TL";

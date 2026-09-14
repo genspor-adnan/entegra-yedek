@@ -1018,9 +1018,10 @@ object SiparisWizardDlg: TSiparisWizardDlg
                 Color = 11776947
                 ParentBackground = False
                 TabOrder = 0
-                object Label22: TcxLabel
+                object LabelBaslik: TcxLabel
                   Left = 1
                   Top = 3
+                  Cursor = crHandPoint
                   Caption = 'Ba'#351'l'#305'k'
                   ParentFont = False
                   Style.Font.Charset = TURKISH_CHARSET
@@ -1029,6 +1030,7 @@ object SiparisWizardDlg: TSiparisWizardDlg
                   Style.Font.Name = 'Trebuchet MS'
                   Style.Font.Style = []
                   Style.IsFontAssigned = True
+                  OnClick = LabelBaslikClick
                   Transparent = True
                 end
                 object Label24: TcxLabel

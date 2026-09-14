@@ -7,7 +7,7 @@ import { useIsteyenHekim } from './useIsteyenHekim';
 import type { Gecmis, Hekim, Tetkik } from './istemTipleri';
 import { TarafArama } from '../TarafArama';
 import { mesaj } from '../mesaj';
-import { para } from '../bicim';
+import { para, paraYaz } from '../bicim';
 import { KasaIslemKarti } from '../../sayfalar/KasaIslemKarti';
 
 /**
@@ -245,7 +245,7 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                  {/* Kabul bitti: kayit uretildi, kalan is TAHSILAT. */}
                  {hastaTahsil > 0 && (
                    <button className="d onay" onClick={() => setTahsilatAcik(true)}>
-                     💵 Tahsilat Al ({para.format(hastaTahsil)} ₺)
+                     💵 Tahsilat Al ({paraYaz(hastaTahsil)})
                    </button>
                  )}
                  <button className="d" onClick={onKapat}>Kapat</button>
@@ -580,13 +580,13 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
 
                 <div className="kabul-tutar">
                   <div className="tut"><span>Liste tutarı</span>
-                    <span>{para.format(toplam.liste)} ₺</span></div>
+                    <span>{paraYaz(toplam.liste)}</span></div>
                   <div className="tut"><span>İndirim</span>
-                    <span className="ind">−{para.format(toplam.indirim)} ₺</span></div>
+                    <span className="ind">−{paraYaz(toplam.indirim)}</span></div>
                   <div className="tut"><span>KDV</span>
-                    <span>{para.format(toplam.kdv)} ₺</span></div>
+                    <span>{paraYaz(toplam.kdv)}</span></div>
                   <div className="tut buyuk"><span>Genel Toplam</span>
-                    <span>{para.format(toplam.genel)} ₺</span></div>
+                    <span>{paraYaz(toplam.genel)}</span></div>
                 </div>
 
                 {/* KAYIT SONRASI ozet: protokol ve pay bolusumu SUNUCUDAN gelir -
@@ -594,11 +594,11 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                 {sonuc && (
                   <div className="kabul-sonuc">
                     <span>Protokol: <b>{sonuc.belgeNo || '—'}</b></span>
-                    <span>Genel toplam: <b>{para.format(sonuc.genelToplam)} ₺</b></span>
-                    <span>Kurumdan: <b>{para.format(
-                      Math.round((sonuc.genelToplam - hastaTahsil) * 100) / 100)} ₺</b></span>
+                    <span>Genel toplam: <b>{paraYaz(sonuc.genelToplam)}</b></span>
+                    <span>Kurumdan: <b>{paraYaz(
+                      Math.round((sonuc.genelToplam - hastaTahsil) * 100) / 100)}</b></span>
                     {/* KDV DAHIL: kasada tahsil edilecek olan bu tutardir. */}
-                    <span>Hastadan: <b>{para.format(hastaTahsil)} ₺</b>
+                    <span>Hastadan: <b>{paraYaz(hastaTahsil)}</b>
                       {hastaTahsil <= 0 && ' · kurum tamamını karşılıyor'}</span>
                   </div>
                 )}

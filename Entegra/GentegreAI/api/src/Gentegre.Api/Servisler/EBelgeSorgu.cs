@@ -103,7 +103,7 @@ public sealed class EBelgeSorgu(VeriKaynagi veri, IHttpClientFactory istemciUret
     {
         var temiz = new string((vkno ?? "").Where(char.IsDigit).ToArray());
         if (temiz.Length is not (10 or 11))
-            throw GentegreHatasi.Dogrulama("VKN 10, TCKN 11 hane olmalı.");
+            throw GentegreHatasi.Dogrulama("VKN 10, kimlik no 11 hane olmalı.");
 
         await using var baglanti = await veri.AcAsync(iptal);
         var hesap = await EBelgeIstemcisi.HesapAsync(baglanti, subeId, "sorgulama", iptal);

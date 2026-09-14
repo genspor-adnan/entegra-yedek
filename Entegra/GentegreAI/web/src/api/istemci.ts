@@ -18,6 +18,7 @@ import { yapayZekaUclari } from './uclar/yapayZeka';
 import { mesajUclari } from './uclar/mesaj';
 import { ayarUclari } from './uclar/ayar';
 import { kasaUclari } from './uclar/kasa';
+import { iskontoUclari } from './uclar/iskonto';
 import { iceriAlmaUclari } from './uclar/iceriAlma';
 
 export { oturum } from './cekirdek';
@@ -42,5 +43,6 @@ export const api = {
   ...mesajUclari,
   ...ayarUclari,
   ...kasaUclari,
+  ...iskontoUclari,
   ...iceriAlmaUclari,
 };

@@ -64,7 +64,7 @@ public static partial class KartKatalogu
             //   Alias alanlari (E-Fatura XSLT, E-Irsaliye XSLT, E-Arsiv XSLT, Alias/e-Posta)
             //   backend'de kolon karsiligi yok (taraf tablosunda yok) - eklenmedi.
             new("faturaUnvan", "fatura_unvan", "metin", EnFazlaUzunluk: 200, Baslik: "Fatura Unvani", Grup: "Adres / Fatura Bilgisi", AltGrup: "Fatura / Vergi Kimligi"),
-            new("vkno",        "vkno",         "metin", EnFazlaUzunluk: 20,  Baslik: "VKN / TCKN",     Grup: "Adres / Fatura Bilgisi", AltGrup: "Fatura / Vergi Kimligi"),
+            new("vkno",        "vkno",         "metin", EnFazlaUzunluk: 20,  Baslik: "Vergi / Kimlik No",     Grup: "Adres / Fatura Bilgisi", AltGrup: "Fatura / Vergi Kimligi"),
             new("vd",          "vd",           "metin", EnFazlaUzunluk: 60,  Baslik: "Vergi Dairesi",  Grup: "Adres / Fatura Bilgisi", AltGrup: "Fatura / Vergi Kimligi"),
             // ÜTS verme bildiriminde KUN buradan okunur (225).
             new("utsKurumNo",  "uts_kurum_no", "metin", EnFazlaUzunluk: 30,  Baslik: "ÜTS Kurum No",   Grup: "Adres / Fatura Bilgisi", AltGrup: "Fatura / Vergi Kimligi"),
@@ -278,7 +278,7 @@ public static partial class KartKatalogu
             new("gorevId",   "gorev_id",   "kod",   Zorunlu: true,
                 KodTablosu: "public.v_gorev_lookup", BagliAlan: "departman",
                 Baslik: "Görev"),
-            new("vkno",      "vkno",       "metin", Zorunlu: true, EnFazlaUzunluk: 20, Baslik: "T.C. Kimlik No"),
+            new("vkno",      "vkno",       "metin", Zorunlu: true, EnFazlaUzunluk: 20, Baslik: "Kimlik No"),
             // ik_karti.html mockup'ta İletişim AYRI SEKME (Genel'e gomulu AltGrup DEGIL) -
             //   Grup:"İletişim" bu yuzden AltGrup degil.
             new("telefon",   "telefon",    "metin", EnFazlaUzunluk: 30,  Baslik: "Ev Telefonu",         Grup: "İletişim"),

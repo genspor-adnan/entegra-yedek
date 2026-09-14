@@ -13,7 +13,13 @@ namespace Gentegre.Cekirdek.Katalog;
 /// </summary>
 public static class DegerCevirici
 {
-    public static object? Cevir(object? deger, string tip, string alanAdi, string alanBasligi)
+    /// <param name="zamanDilimi">
+    /// AKTIF SUBENIN saat dilimi (666). "zaman" alanlarinda kullanicinin
+    /// yazdigi duvar saati bu dilimde yorumlanip UTC ana cevrilir; bos ise
+    /// kurulus dilimi kullanilir. "tarih" alanlari GUNDUR, cevrilmez.
+    /// </param>
+    public static object? Cevir(object? deger, string tip, string alanAdi, string alanBasligi,
+                                string? zamanDilimi = null)
     {
         if (deger is null) return null;
 
@@ -54,7 +60,7 @@ public static class DegerCevirici
         return deger switch
         {
             bool b when tip == "mantik" => (short)(b ? 1 : 0),
-            string s => MetinCevir(s, tip, alanAdi, alanBasligi),
+            string s => MetinCevir(s, tip, alanAdi, alanBasligi, zamanDilimi),
             _ => deger
         };
     }
@@ -72,15 +78,30 @@ public static class DegerCevirici
                   new AlanHatasi(alanAdi, "Sayisal deger olmali."));
     }
 
-    private static object? MetinCevir(string s, string tip, string alanAdi, string alanBasligi)
+    private static object? MetinCevir(string s, string tip, string alanAdi, string alanBasligi,
+                                      string? zamanDilimi = null)
         => tip switch
         {
             // "zaman" = tarih + SAAT (datetime-local). Cozumleme "tarih" ile
             //   aynidir - fark yalnizca EKRANDA: hangi girdi kutusu cizilecegi.
-            "tarih" or "zaman" => string.IsNullOrWhiteSpace(s)
+            // "tarih"  -> GUN (dogum tarihi, vade, donem basi). Gun bir andir
+            //             DEGIL; saat dilimine cevirmek tarihi bir gun
+            //             kaydirirdi (00:00 Istanbul = onceki gun 21:00 UTC).
+            // "zaman"   -> AN (islem saati, kabul saati). 667'den beri kolon
+            //             timestamptz; kullanicinin yazdigi DUVAR SAATI kurulus
+            //             dilimine gore UTC ana cevrilir, yoksa girilen 14:30
+            //             ekranda 17:30 goruntusu verirdi.
+            "tarih" => string.IsNullOrWhiteSpace(s)
+                       ? null
+                       : DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.None, out var g)
+                         ? g
+                         : throw GentegreHatasi.Dogrulama($"{alanBasligi}: tarih cozulemedi ({s}).",
+                               new AlanHatasi(alanAdi, "Gecersiz tarih.")),
+
+            "zaman" => string.IsNullOrWhiteSpace(s)
                        ? null
                        : DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.None, out var t)
-                         ? t
+                         ? Saat.UtcYap(t, zamanDilimi)
                          : throw GentegreHatasi.Dogrulama($"{alanBasligi}: tarih cozulemedi ({s}).",
                                new AlanHatasi(alanAdi, "Gecersiz tarih.")),
 
@@ -128,7 +149,9 @@ public static class DegerCevirici
     /// Kart alani uzunluk + BICIM kontrolu - kart yazimi ve detay yaziminda ortak.
     /// Bicim kurali alanin `Dogrulama` bayragindan gelir (bugun: "tckn").
     /// </summary>
-    public static void UzunlukKontrol(KartAlani alan, object? deger, string alanYolu)
+    public static void UzunlukKontrol(KartAlani alan, object? deger, string alanYolu,
+                                      bool kimlikKontrolu = true,
+                                      KimlikKurali? kimlikKurali = null)
     {
         if (alan.EnFazlaUzunluk is { } sinir && deger is string s && s.Length > sinir)
             throw GentegreHatasi.Dogrulama($"{alan.Ad}: en fazla {sinir} karakter.",
@@ -136,7 +159,15 @@ public static class DegerCevirici
 
         // BICIM: yanlis TCKN sessizce durur ve aylar sonra "provizyon
         //   alinamiyor" olarak geri doner - girişte soylemek en ucuzu.
-        if (KimlikDogrulama.Hata(alan.Dogrulama, deger) is { } mesaj)
+        //
+        // TR DISI SUBEDE KONTROL YOK (666): T.C. kimlik numarasi Turkiye'ye
+        //   ozgudur; Berlin subesinde acilan hastanin numarasi bu algoritmayi
+        //   saglamaz ve kayit HIC acilamazdi.
+        // BICIM KURUM PROFILINDEN (679): TR kurulumunda T.C. algoritmasi,
+        //   yurt disinda serbest ya da kuruma ozel desen. Kural gelmediyse
+        //   varsayilan ACIK kalir - sessizce kapanmasi kotudur.
+        if (kimlikKontrolu && alan.Dogrulama == KimlikDogrulama.TcknTuru
+            && (kimlikKurali ?? KimlikKurali.Varsayilan).Hata(deger?.ToString()) is { } mesaj)
             throw GentegreHatasi.Dogrulama($"{alan.Etiket}: {mesaj}",
                 new AlanHatasi(alanYolu, mesaj));
     }

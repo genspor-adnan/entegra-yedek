@@ -429,11 +429,24 @@ public sealed partial class KartDeposu
                           x => x.Ust.ToString(CultureInfo.InvariantCulture),
                           StringComparer.Ordinal);
 
-    /// <summary>Yerel para birimi (ayar genel.yerel_para) - kart metasina eklenir.</summary>
-    public async Task<string> YerelParaAsync(CancellationToken iptal = default)
+    /// <summary>
+    /// YEREL PARA BIRIMI ARTIK SUBENIN AYARI (666): `sube.para_birimi`.
+    /// Genel Ayarlar'daki `genel.yerel_para` KALDIRILDI - yurt disinda subesi
+    /// olan kurumda tek bir "kurum parasi" yoktu; Berlin subesi avro tahsil eder.
+    ///
+    /// Sube verilmezse varsayilan sube, o da yoksa 'TL' kullanilir. Donen deger
+    /// uygulamanin doviz listesi kodudur (TRY -> TL, bkz. ParaKoduYerellestir).
+    /// </summary>
+    public async Task<string> YerelParaAsync(int? subeId = null,
+                                             CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        return await AyarDeposu.MetinAsync(baglanti, null, "genel.yerel_para", "TL", iptal);
+        var iso = await baglanti.TekDegerAsync<string>(
+            "select para_birimi from public.sube " +
+            " where (@p0::int is null or id = @p0) and aktif = 1 " +
+            " order by case when id = @p0 then 0 else 1 end, varsayilan desc, id limit 1",
+            null, new object?[] { subeId }, iptal);
+        return Gentegre.Cekirdek.Katalog.KasaHesap.ParaKoduYerellestir(iso);
     }
 
     /// <summary>
@@ -486,7 +499,11 @@ public sealed partial class KartDeposu
             => degerler.TryGetValue(ad, out var v) && v is not null ? v
              : mevcut is not null && mevcut.TryGetValue(ad, out var m) ? m : null;
 
-        var yerelPara = await AyarDeposu.MetinAsync(baglanti, islem, "genel.yerel_para", "TL", iptal);
+        // 666: yerel para SUBEDEN okunur (genel.yerel_para ayari kaldirildi).
+        var yerelIso = await baglanti.TekDegerAsync<string>(
+            "select para_birimi from public.sube where aktif = 1 " +
+            " order by varsayilan desc, id limit 1", islem, null, iptal);
+        var yerelPara = Gentegre.Cekirdek.Katalog.KasaHesap.ParaKoduYerellestir(yerelIso);
         var cins = Al(d.CinsAlani)?.ToString() ?? "";
         var kur = Ondalik(Al(d.KurAlani));
 

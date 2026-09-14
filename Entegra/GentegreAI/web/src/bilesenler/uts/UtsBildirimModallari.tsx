@@ -140,7 +140,7 @@ export function UtsKullanimModali({ onKapat, onTamam }: {
         {/* Hasta alanları İLK SÜRÜMDE ELLE - HBYS hasta kartı entegrasyonu
             sonraki iş (plan notu). */}
         <label className="alan">
-          <span className="etiket">Hasta TCKN</span>
+          <span className="etiket">Hasta Kimlik No</span>
           <input value={hastaTckn} maxLength={11} disabled={gonderiyor}
                  onChange={e => setHastaTckn(e.target.value)} />
         </label>

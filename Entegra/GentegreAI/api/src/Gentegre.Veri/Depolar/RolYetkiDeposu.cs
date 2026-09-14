@@ -8,9 +8,14 @@ namespace Gentegre.Veri.Depolar;
 /// eski Delphi MODULID'i - ekranda agac kurmak icin (prefix hiyerarsisi).
 /// </summary>
 public sealed record YetkiSatiri(int YetkiId, string Kod, string Ad, string Grup,
-    short Tur, string EskiModulId, bool Gor, bool Ekle, bool Degistir, bool Sil);
+    short Tur, string EskiModulId, bool Gor, bool Ekle, bool Degistir, bool Sil,
+    /// <summary>Yetki bir SAYISAL SINIR tasiyor mu (yetki.deger_alir, 661).</summary>
+    bool DegerAlir = false,
+    /// <summary>Sinirin kendisi - 'basvuru.iskonto' icin iskonto tavani (%).</summary>
+    string Deger = "");
 
-public sealed record YetkiGuncelleIstegi(int YetkiId, bool Gor, bool Ekle, bool Degistir, bool Sil);
+public sealed record YetkiGuncelleIstegi(int YetkiId, bool Gor, bool Ekle, bool Degistir, bool Sil,
+    string Deger = "");
 
 /// <summary>
 /// Rol > Yetki matrisi (kullanici: "role verdigimiz yetki dogrultusunda menuleri Gorme/
@@ -38,7 +43,8 @@ public sealed class RolYetkiDeposu
         await using var komut = baglanti.Komut("""
             select y.id, y.kod, y.ad, y.grup, y.tur,
                    coalesce(y.eski_modul_id::text, ''),
-                   coalesce(ry.gor, 0), coalesce(ry.ekle, 0), coalesce(ry.degistir, 0), coalesce(ry.sil, 0)
+                   coalesce(ry.gor, 0), coalesce(ry.ekle, 0), coalesce(ry.degistir, 0), coalesce(ry.sil, 0),
+                   coalesce(y.deger_alir, 0), coalesce(ry.deger, '')
               from public.yetki y
               left join public.rol_yetki ry on ry.yetki_id = y.id and ry.rol_id = @p0
              where y.aktif = 1
@@ -48,6 +54,12 @@ public sealed class RolYetkiDeposu
                and (y.urun_modu = 0
                     or public.fn_urun_modu(@p1) = 3
                     or y.urun_modu = public.fn_urun_modu(@p1))
+               -- KURUM PROFILI (359/675): kapali modulun yetkisi matriste HIC
+               --   gorunmez - o modulun ekrani zaten cizilmiyor, yetkisini
+               --   vermek isaretlense de karsiligi olmayan bir kutuydu.
+               --   Modulsuz yetkiler (birden cok modulde gecen `belge`,
+               --   `cari`, `stok`...) her kurulumda gorunur.
+               and (y.modul = '' or public.fn_kurum_modul_acik(y.modul, @p1))
              order by y.sira, y.ad
             """, null,
             rolId, subeId);
@@ -59,7 +71,8 @@ public sealed class RolYetkiDeposu
                 okuyucu.GetInt32(0), okuyucu.GetString(1), okuyucu.GetString(2), okuyucu.GetString(3),
                 okuyucu.GetInt16(4), okuyucu.GetString(5),
                 okuyucu.GetInt16(6) == 1, okuyucu.GetInt16(7) == 1,
-                okuyucu.GetInt16(8) == 1, okuyucu.GetInt16(9) == 1));
+                okuyucu.GetInt16(8) == 1, okuyucu.GetInt16(9) == 1,
+                okuyucu.GetInt16(10) == 1, okuyucu.GetString(11)));
         return sonuc;
     }
 
@@ -73,13 +86,18 @@ public sealed class RolYetkiDeposu
         foreach (var s in satirlar)
         {
             await using var komut = baglanti.Komut("""
-                insert into public.rol_yetki (rol_id, yetki_id, gor, ekle, degistir, sil, ekleyen)
-                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+                insert into public.rol_yetki (rol_id, yetki_id, gor, ekle, degistir, sil, deger, ekleyen)
+                values (@p0, @p1, @p2, @p3, @p4, @p5, @p7, @p6)
                 on conflict (rol_id, yetki_id) do update set
                     gor = excluded.gor, ekle = excluded.ekle, degistir = excluded.degistir, sil = excluded.sil,
+                    -- DEGER yalniz `deger_alir` yetkilerde anlamli; otekilerde
+                    --   bos yazmak eski bir degeri silmek olurdu, dokunulmaz.
+                    deger = case when exists (select 1 from public.yetki y
+                                               where y.id = excluded.yetki_id and y.deger_alir = 1)
+                                 then excluded.deger else public.rol_yetki.deger end,
                     degistiren = @p6
                 """, islem,
-                rolId, s.YetkiId, (short)(s.Gor ? 1 : 0), (short)(s.Ekle ? 1 : 0), (short)(s.Degistir ? 1 : 0), (short)(s.Sil ? 1 : 0), baglam.KullaniciId);
+                rolId, s.YetkiId, (short)(s.Gor ? 1 : 0), (short)(s.Ekle ? 1 : 0), (short)(s.Degistir ? 1 : 0), (short)(s.Sil ? 1 : 0), baglam.KullaniciId, s.Deger ?? "");
             await komut.ExecuteNonQueryAsync(iptal);
         }
 

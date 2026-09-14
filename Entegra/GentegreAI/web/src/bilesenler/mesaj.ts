@@ -36,9 +36,46 @@ export interface MesajIstegi {
    */
   secenekler?: { kod: string; ad: string; sinif?: string }[];
   varsayilanKod?: string;
+  /**
+   * PARA ISTEGI (tutar + para birimi): duz metin kutusu tutari soruyor ama
+   * PARA BIRIMINI soramiyordu - dovizli tahsilatta kullanici "100" yaziyor,
+   * sistem 100 TL saniyordu. Burada tutarin SAGINDA birim combosu, doviz
+   * secilince kur ve yerel karsilik satiri cizilir.
+   */
+  paraMi?: boolean;
+  para?: ParaIstegi;
   cozum(sonuc: boolean): void;
   cozumMetin?(deger: string | null): void;
   cozumSecim?(kod: string): void;
+  cozumPara?(sonuc: ParaSecimi | null): void;
+}
+
+/** `paraSor` penceresinin sekil ayarlari. */
+export interface ParaIstegi {
+  varsayilan?: string;
+  doviz?: string;
+  /** Yerel para kodu - doviz buna cevrilir (varsayilan "TL"). */
+  yerelPara?: string;
+  dovizler?: string[];
+  /** Girilebilecek en yuksek tutar (mutlak deger); asilirsa uyarilir. */
+  enCok?: number;
+  /** IADE/PARA USTU: tutar eksi isaretle islenir ve ekranda "−" gosterilir. */
+  eksiMi?: boolean;
+  /** Verilirse tutarin ALTINDA zorunlu bir neden combosu cizilir. */
+  nedenler?: { kod: string; ad: string }[];
+  nedenEtiket?: string;
+  /** Doviz secilince kuru getirir; yoksa kullanici elle yazar. */
+  kurGetir?(doviz: string): Promise<number | null>;
+}
+
+/** `paraSor` sonucu. Tutarlar `eksiMi` istendiginde EKSI doner. */
+export interface ParaSecimi {
+  tutar: number;
+  doviz: string;
+  kur: number;
+  /** tutar × kur - kasa islemine yazilan yerel karsilik. */
+  yerelTutar: number;
+  neden?: string;
 }
 
 type Dinleyici = (istek: MesajIstegi) => void;
@@ -90,6 +127,25 @@ export function listeSor(metin: string, secenekler: { kod: string; ad: string }[
       girdiVarsayilan: varsayilan || secenekler[0]?.kod || '',
       girdiEtiket: etiket, girdiSecenekleri: secenekler,
       cozum: () => {}, cozumMetin: cozum,
+    });
+  });
+}
+
+/**
+ * TUTAR + PARA BIRIMI SORMA PENCERESI. Iptalde null doner.
+ *
+ * Metin kutusu yerine bunun kullanildigi yerler: hizli tahsilat, iade/iptal
+ * ve iade (para ustu dahil - o da bir iade nedenidir). Tutarin yanina birim
+ * koymak sart - dovizli kasada "100" ne
+ * demek belirsizdi; ayrica iade neden KODUYLA sorulur, serbest metinle degil
+ * (rapor "fazla tahsilat" ile "fazla alindi"yi ayni sayamiyordu).
+ */
+export function paraSor(metin: string, se: ParaIstegi = {}): Promise<ParaSecimi | null> {
+  if (!dinleyici) return Promise.resolve(null);
+  return new Promise<ParaSecimi | null>(cozum => {
+    dinleyici!({
+      metin, onayMi: true, paraMi: true, para: se,
+      cozum: () => {}, cozumPara: cozum,
     });
   });
 }

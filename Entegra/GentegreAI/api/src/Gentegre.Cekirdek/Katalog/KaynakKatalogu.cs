@@ -146,6 +146,7 @@ public static partial class KaynakKatalogu
         Ekle(MaliHareket());
         Ekle(EBelge());
         Ekle(IslemLog());
+        Ekle(GirisLog());
         // ÜTS (223): bildirim gecmisi + askidaki urunler.
         Ekle(UtsBildirim());
         Ekle(UtsEnvanter());

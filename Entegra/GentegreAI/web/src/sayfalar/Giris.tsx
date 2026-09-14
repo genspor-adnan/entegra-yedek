@@ -119,7 +119,7 @@ export function Giris() {
             <input value={kod} onChange={e => setKod(e.target.value)} autoFocus />
           </label>
           <label>
-            T.C. Kimlik No — son 4 hane
+            Kimlik No — son 4 hane
             <input value={tcknSon4} maxLength={4} inputMode="numeric"
                    onChange={e => setTcknSon4(e.target.value.replace(/\D/g, ''))} />
           </label>

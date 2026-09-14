@@ -7,7 +7,7 @@ import {
   KOVALAR, ROTA_ADI, kovaKullanilir,
 } from '../../sayfalar/belgeKarti/dagilimKovalari';
 import { SAF_SGK_ROTA } from '../../sayfalar/belgeKartiKurallari';
-import type { BelgeYaniti } from '../../api/sozlesme';
+import type { BelgeYaniti, IskontoTalebi } from '../../api/sozlesme';
 
 /**
  * KALEMLER SEKMESI - satir gridi (izlemli kalemlerde lot master-detail) ve
@@ -23,7 +23,8 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
     kilitli, bilgi, onizleme, sonuc, transferBaslikEksigi,
     depoBelgesi, stokFisiMi, talepMi,
     setStokArama, setKalem, seciliSil, satirTikla, sonTiklanan, secimDegis, doviz,
-    fiyatListesi, paylasim, basvuruMu, depoSecimi, onRoller, dagilimOnizleme,
+    fiyatListesi, paylasim, basvuruMu, depoSecimi, onRoller, onIskontoOnay,
+    iskontoTalepleri, dagilimOnizleme,
   } = p;
 
   /** Tarih kolonu KOD'un solunda mi (basvuru) yoksa miktarin solunda mi. */
@@ -34,6 +35,11 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
   //   detayiyla ayni desen; ikisi birlikte de acilabilir. Varsayilan KAPALI:
   //   kalem listesi kisa kalsin.
   const [acikDagilimlar, setAcikDagilimlar] = useState<Set<number>>(new Set());
+
+  /* SON TALEP (662): liste sunucudan yeniden eskiye gelir, ilki en gunceli.
+     Belgede birden cok talep olabilir - baslikta okunan SONUNCUSUDUR, cunku
+     onaylanan oran satirda zaten duruyor. */
+  const sonTalep = iskontoTalepleri?.[0];
 
   const yerelPara = doviz?.yerelPara ?? 'TL';
 
@@ -97,6 +103,15 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
   const fiyatBasligi = safSgk ? 'Hasta Katkısı' : 'Birim Fiyat';
 
   /**
+   * SECIMDE ONAYLI (KILITLI) SATIR VAR MI (681, kullanici: "kilitlenmiş
+   * satırların silme/değişme yapılamaması lazım").
+   *
+   * Sunucu zaten reddediyor; dugmeyi kapatmak kullaniciyi hata almaya
+   * gondermemek icindir - satirdaki 🔒 neden kapali oldugunu soyler.
+   */
+  const kilitliSecili = satirlar.some(x => x.iskontoKilit && seciliSatirlar.has(x.anahtar));
+
+  /**
    * DOVIZ CERCEVESI (kullanici): dovizli islem YOKSA "Rapor Dövizi / Sipariş
    * Dövizi" kutusu HIC cizilmez - basvuru/HBYS gibi tamamen yerel akislarda
    * bos yer kapliyordu. Bir kalemde doviz fiyat girilince (ya da rapor dovizi
@@ -158,8 +173,10 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
       ＋
     </button>
     <button type="button" className="d ikon"
-            disabled={kilitli || seciliSatirlar.size !== 1}
+            disabled={kilitli || kilitliSecili || seciliSatirlar.size !== 1}
             title={kilitli ? 'Kesin belge satırı düzenlenemez.'
+                  : kilitliSecili ? 'İskontosu onaylanmış satır değiştirilemez - '
+                                  + 'değişiklik için yeni bir iskonto onayı alın.'
                   : seciliSatirlar.size === 0 ? 'Önce bir satır seçin'
                   : seciliSatirlar.size > 1 ? 'Tek satır seçin' : 'Seçili satırı düzenle'}
             onClick={() => {
@@ -170,22 +187,19 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
       ✎
     </button>
     <button type="button" className="d teh ikon"
-            disabled={kilitli || seciliSatirlar.size === 0}
+            disabled={kilitli || kilitliSecili || seciliSatirlar.size === 0}
             title={kilitli ? 'Kesin belgeden satır silinemez.'
+                  : kilitliSecili ? 'İskontosu onaylanmış satır silinemez - '
+                                  + 'önce iskonto onayını kaldırın.'
                   : seciliSatirlar.size === 0 ? 'Önce satır seçin'
                   : `Seçili ${seciliSatirlar.size} satırı sil`}
             onClick={seciliSil}>
       🗑
     </button>
-    {/* DAGILIMI YENILE (478): rota ve fiyatlar SUNUCUDA cozulur - ekran
-        oran sormaz, "yeniden hesapla" der. Yalniz odeyen kurumlu basvuruda. */}
-    {paylasim?.acik && (
-      <button type="button" className="d ikon" disabled={kilitli}
-              title="Ödeme dağılımını sözleşmeye göre yeniden hesapla"
-              onClick={() => paylasim.uygula()}>
-        ↻
-      </button>
-    )}
+    {/* AYRAC (kullanici): SATIR duzenleme dugmeleri (ekle/duzenle/sil) ile
+        SATIRIN EKLERI (prim rolleri, dagilim, iskonto onayi) ayri isler -
+        yan yana dizilince hepsi tek kume gibi okunuyordu. */}
+    {onRoller && <span className="ayrac" />}
     {/* PRIM ROLLERI (324): primi kim hak ediyor - isteyen/uygulayan/
         raporlayan. Kalem KAYITLI olmali: rol satirin kimligine baglanir.
         Kilitli belgede de acilir (salt gorunum degil - rol duzeltmesi
@@ -206,6 +220,54 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
               }}>
         👥
       </button>
+    )}
+    {/* DAGILIMI YENILE (478): rota ve fiyatlar SUNUCUDA cozulur - ekran
+        oran sormaz, "yeniden hesapla" der. Yalniz odeyen kurumlu basvuruda. */}
+    {paylasim?.acik && (
+      <button type="button" className="d ikon" disabled={kilitli}
+              title="Ödeme dağılımını sözleşmeye göre yeniden hesapla"
+              onClick={() => paylasim.uygula()}>
+        ↻
+      </button>
+    )}
+    {/* ISKONTO ONAYI (662, kullanici: "işaretli işlemler için onay istesin").
+        Talep ACMAK yetki istemez - yetki gereken sey indirimi VERMEKtir;
+        banko istemeyi bilir, verecek olan yetkilidir. Yalniz basvuruda:
+        ERP belgesinde iskonto zaten satirda serbest. */}
+    {basvuruMu && onIskontoOnay && (
+      <button type="button" className="d ikon"
+              disabled={kilitli || seciliSatirlar.size === 0}
+              title={kilitli ? 'Kesin belgede iskonto onayı istenemez.'
+                    : seciliSatirlar.size === 0
+                    ? 'Önce iskonto istenecek satırları işaretleyin'
+                    : `Seçili ${seciliSatirlar.size} satır için iskonto onayı iste`}
+              onClick={() => onIskontoOnay([...seciliSatirlar])}>
+        ✅
+      </button>
+    )}
+    {/* DURUM ROZETI: son talebin akibeti. Bekleyende sari, onayda yesil
+        (verilen oranla - istenen degil), rette kirmizi ve gerekce ipucunda:
+        banko hastaya onu soyleyecek. */}
+    {basvuruMu && sonTalep && (
+      <span className={`rozet ${sonTalep.durum === 1 ? 'olumlu'
+                       : sonTalep.durum === 2 ? 'hata' : 'uyari'}`}
+            style={{ marginLeft: 6 }}
+            title={sonTalep.durum === 0
+              ? `İstenen %${sonTalep.oran} · ${sonTalep.satirSayisi} satır · `
+                + `isteyen ${sonTalep.isteyen}
+“${sonTalep.gerekce}”`
+              : sonTalep.durum === 1
+              ? `Onaylayan ${sonTalep.onaylayan} · istenen %${sonTalep.oran}`
+                + (sonTalep.kararNotu ? `
+“${sonTalep.kararNotu}”` : '')
+              : `Reddeden ${sonTalep.onaylayan}
+“${sonTalep.kararNotu}”`}>
+        {/* Rozet ikonu MENUDEKIYLE AYNI (kullanici): ekranda ayni isin iki
+            farkli sembolu olmasin. */}
+        {sonTalep.durum === 0 ? `✅ İskonto onayı bekliyor (%${sonTalep.oran})`
+         : sonTalep.durum === 1 ? `✅ İskonto onaylandı %${sonTalep.onaylananOran}`
+         : '✅ İskonto reddedildi'}
+      </span>
     )}
   </h6>
 
@@ -410,7 +472,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
           <Fragment key={r.anahtar}>
           <tr className={secili ? 'secili' : ''}
               onClick={e => satirTikla(sira, e)}
-              onDoubleClick={() => !kilitli && setKalem(r)}>
+              onDoubleClick={() => !kilitli && !r.iskontoKilit && setKalem(r)}>
             <td className="hiza-orta">
               {/* Onay kutusu TEK satiri ekler/cikarir - satir tiklamasi
                   (duz tik = yalniz o satir) tetiklenmesin. */}
@@ -445,6 +507,13 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                         }}>
                   {acik ? '▾' : '▸'}
                 </button>
+              )}
+              {/* ONAYLI ISKONTO KILIDI (662): satirin iskontosu onaylandi,
+                  degistirilemez - ikon satirda dursun ki kullanici duzenlemeye
+                  girip hata almadan once gorsun. */}
+              {r.iskontoKilit && (
+                <span title="İskontosu onaylanmış satır - değiştirilemez ve silinemez"
+                      style={{ marginRight: 4 }}>🔒</span>
               )}
               {r.stokAdi || <span className="sonuk">(stok seçilmedi)</span>}
             </td>
@@ -948,6 +1017,18 @@ export interface KalemSekmesiProps {
    * butonuna basarsam ücret satırlarını önce kaydetsin sonra orayı açsın").
    */
   onRoller?(satirId: number, kalemAdi: string, sira: number): void;
+  /**
+   * ISKONTO ONAYI (662): isaretli satirlar icin onay talebi acar. Satir
+   * ANAHTARLARI gelir (kimlik degil) - satir henuz kaydedilmemis olabilir,
+   * kart once kaydeder sonra kimlikleri cozer.
+   */
+  onIskontoOnay?(anahtarlar: number[]): void;
+  /**
+   * Belgenin ISKONTO TALEPLERI (662) - en yenisi baslikta rozet olur.
+   * Banko talebi gonderdikten sonra "ne oldu" sorusunu burada okur; sonucu
+   * yalniz zilde birakmak, isteyeni haberden tamamen dislardi.
+   */
+  iskontoTalepleri?: IskontoTalebi[];
   /**
    * ODEME PAYLASIMI (289): basvuruda odeyen kurum varsa satirin KURUM ve HASTA
    * payi kolon olarak gorunur. Verilmezse kolonlar hic cizilmez - normal

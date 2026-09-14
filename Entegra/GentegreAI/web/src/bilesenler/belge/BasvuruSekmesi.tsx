@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { TarafSecici } from '../TarafArama';
-import { KodSecim, KodSegment, MetinAlani } from './basvuru/alanlar';
+import { KodSecim, MetinAlani } from './basvuru/alanlar';
 import { dagilimRotasi } from '../../sayfalar/belgeKartiKurallari';
 
 /**
@@ -447,14 +447,16 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                   deger={bilgi.gelisNedeni} kilitli={kilitli}
                   onDeger={v => degistir({ gelisNedeni: v })} />
 
-        {/* Basvuru turu SEGMENT (mockup): etiketten sonra TAM SATIR - besinci
-            secenek ("Laboratuvar / Görüntüleme") iki sutuna sigmiyordu.
+        {/* Basvuru turu COMBO (kullanici: "başvuru türünü combo ya dönüştür").
+            Onceden segmentti (yan yana dugmeler); tur listesi kurumdan kuruma
+            uzuyor ve dugme seridi satiri tasiriyordu. Acil vurgusu combo'da da
+            duruyor (secilince kirmizi).
             LAB / GORUNTULEME kurumunda HIC SORULMAZ (kullanici): tur zaten
             "Laboratuvar / Görüntüleme"dir, kayitta 5 olarak yazilir. */}
         {!gonderenModu && (
-          <KodSegment etiket="Başvuru Türü" listeKod="basvuru.tur" zorunlu vurgu={2}
-                      deger={bilgi.basvuruTuru} kilitli={kilitli}
-                      onDeger={v => degistir({ basvuruTuru: v })} />
+          <KodSecim etiket="Başvuru Türü" listeKod="basvuru.tur" zorunlu vurgu={2}
+                    deger={bilgi.basvuruTuru} kilitli={kilitli}
+                    onDeger={v => degistir({ basvuruTuru: v })} />
         )}
 
         {/* Poliklinik odasi lab/goruntulemede YOK (kullanici): numune alma /

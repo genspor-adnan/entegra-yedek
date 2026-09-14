@@ -10,11 +10,18 @@ export interface Secim { id: number; ad: string }
  * uretilir - ikisi de SAF fonksiyon, ekran durumuna dokunmaz.
  */
 /**
- * Provizyonun SUNUCU/SERVIS tarafindan yazilan alanlari (299): sorgu zamanlari
- * istekten gelmez - govdede gorunurlerse "Bilinmeyen belge alani" ile reddedilir.
+ * SUNUCUDAN OKUNAN, GERI GONDERILMEYEN basvuru alanlari.
+ *
+ * Kart bu alanlari sunucudan alip ekranda gosterir (provizyon sorgusunun
+ * zamani, hastanin adi, e-Nabiz takip numarasi) ama hicbiri belgenin YAZILIR
+ * alani degil: govdede gorunurlerse sunucu "Bilinmeyen belge alani" ile
+ * kaydi reddeder (kullanici: "Bilinmeyen belge alani: hastaUnvan").
+ *
+ * Liste TEK YERDE: her yeni okunur alan burada buyusun, cagri yerlerinde
+ * degil - ayni hata uc kez ayri alanla yasandi.
  */
 const PROVIZYON_SALT_OKUNUR = new Set(
-  ['sgkMustehaklikZaman', 'ossKurumAdi']);
+  ['sgkMustehaklikZaman', 'ossKurumAdi', 'hastaUnvan', 'sysTakipNo']);
 
 /**
  * SAYISAL / TARIH alanlar: ekranda BOS iken '' tutulur ama sunucuya bos metin

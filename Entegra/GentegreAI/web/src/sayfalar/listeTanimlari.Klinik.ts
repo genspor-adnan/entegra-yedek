@@ -63,7 +63,13 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
               tarihAlani: 'islemTarihi',
               kolonBasliklari: { belgeNo: 'Protokol No' } },
     // Kayit Kabul YALNIZ GenoTIP AI'da (kullanici, 215) - diger moduller ortak.
-    menuGrup: 'Kayıt Kabul', menuAd: 'Hasta Listesi', ic: '🏥', yetkiKodu: 'personel',
+    // HASTA LISTESI BASVURULARDAN ONCE (kullanici): kayit kabulde is once
+    //   hastayi bulmakla baslar - basvuru ondan sonra acilir.
+    // HASTANIN KENDI YETKISI (684): liste `personel` yetkisine bagliydi -
+    //   banko gorevlisine hasta listesi vermek icin personel ozluk kayitlarini
+    //   da acmak gerekiyordu, matriste de "Kayit Kabul > Personel" gorunuyordu.
+    menuGrup: 'Kayıt Kabul', menuAd: 'Hasta Listesi', ic: '🏥', yetkiKodu: 'hasta',
+    menuSira: 10,
     urunModu: 2,
   },
   {
@@ -144,6 +150,22 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     urunModu: 2,
     menuGrup: 'Kayıt Kabul', menuAd: 'Başvurular', ic: '📝', yetkiKodu: 'belge',
     menuSira: 30,
+  },
+  {
+    // ISKONTO ONAYI (666): bankonun limitini asan iskonto taleplerinin
+    //   yetkiliye dustugu kuyruk. Liste DEGIL (ozelSayfa) - sayac, kuyruk,
+    //   karar paneli ve analiz sekmelerinden olusur. Zil ayni isi TEK talep
+    //   icin yapar; burasi kuyrugun kendisidir.
+    kaynak: 'iskonto-onay', rota: 'iskonto-onay', ozelSayfa: true,
+    baslik: 'İskonto Onayı', yol: 'Kayıt Kabul › İskonto Onayı',
+    urunModu: 2,
+    // KENDI YETKISI (685, kullanici: "kayit kabul altina sirayla hasta
+    //   listesi, basvurular ve iskonto onayi gelmeli"): ekran `belge`
+    //   yetkisine bagliydi, matriste basvurularla TEK satira dusuyordu.
+    //   Onay kuyrugunu gormek belge gormekten ayri bir istir - kararin
+    //   TAVANI ayrica `basvuru.iskonto` aksiyonundan gelir.
+    menuGrup: 'Kayıt Kabul', menuAd: 'İskonto Onayı', ic: '✅',
+    yetkiKodu: 'iskonto_onay', menuSira: 35,
   },
   // RADYOLOJI grubu ana menude KAYIT KABUL ile CRM ARASINDA (kullanici):
   //   grup sirasi bu dizideki ILK gorulme sirasindan gelir.

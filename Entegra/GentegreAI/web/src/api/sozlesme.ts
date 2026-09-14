@@ -111,12 +111,28 @@ export function hataAyristir(h: unknown): HataCozumu {
 }
 
 // --------------------------------------------------------------- kimlik ----
-export interface SubeOzeti { id: number; ad: string; varsayilan: boolean; yazma: boolean }
+export interface SubeOzeti {
+  id: number; ad: string; varsayilan: boolean; yazma: boolean;
+  /** ISO 3166 iki harf (666). TR disinda TCKN/telefon bicim kontrolu YAPILMAZ. */
+  ulkeKod: string;
+  /** Telefon kutusunun acilis kodu ('+90'). */
+  telefonKodu: string;
+  /** IANA adi ('Europe/Istanbul') - sabit saat farki DEGIL. */
+  zamanDilimi: string;
+  /** ISO 4217 ('TRY') - belgenin kendi dovizi ayridir. */
+  paraBirimi: string;
+}
 
 export interface KullaniciOzeti {
   id: number; kod: string; ad: string;
   rolId: number; rolAdi: string;
   dil: number;
+  /**
+   * ZORUNLU PAROLA DEGISIMI (674): varsayilan parolayla (personel kart id'si)
+   * giren kisi once kendi parolasini belirler. /ben de tasir - yalniz giris
+   * yanitinda olsaydi sayfayi yenileyen kullanici zorunlulugu atlardi.
+   */
+  parolaDegismeli?: boolean;
   yetkiSurumu: number;
   subeId?: number | null;
   subeYazma: boolean;
@@ -168,6 +184,14 @@ export interface KaynakYetkisi {
 export interface BenYaniti {
   kullanici: KullaniciOzeti;
   aksiyonlar: string[];
+  /**
+   * SAYISAL SINIRI OLAN aksiyonlar (661): kod -> sinir. Ornek
+   * `{ 'basvuru.iskonto': 20 }` = bu rol en cok %20 iskonto yapabilir.
+   * Yalniz siniri TANIMLI olanlar gelir; sinir isteyen bir aksiyon burada
+   * yoksa "yapamaz" demektir - eksik deger "sinirsiz" sayilsaydi, degeri
+   * girilmemis her rol sinirsiz iskonto yapardi.
+   */
+  aksiyonDegerleri?: Record<string, number>;
   kaynaklar: KaynakYetkisi[];
 }
 
@@ -329,11 +353,52 @@ export interface YetkiSatiri {
   ekle: boolean;
   degistir: boolean;
   sil: boolean;
+  /** Yetki SAYISAL bir sınır taşıyor mu (661) - taşıyorsa satırda kutu çizilir. */
+  degerAlir?: boolean;
+  /** Sınırın kendisi: `basvuru.iskonto` için iskonto tavanı (%). Boş = yok. */
+  deger?: string;
 }
 
 /** Yetki YAZMA istegi = satirin salt-gosterim alanlari cikarilmis hali. */
 export type YetkiSatiriIstegi =
-  Omit<YetkiSatiri, 'kod' | 'ad' | 'grup' | 'tur' | 'eskiModulId'>;
+  Omit<YetkiSatiri, 'kod' | 'ad' | 'grup' | 'tur' | 'eskiModulId' | 'degerAlir'>;
+
+/** Iskonto onay talebi (662) - ucret sekmesi rozeti ve zil satiri. */
+export interface IskontoTalebi {
+  id: number;
+  belgeId: number;
+  /** Talep edilen oran. */
+  oran: number;
+  /** Kismi onayda talepten kucuk olabilir; ret ve bekleyende 0. */
+  onaylananOran: number;
+  gerekce: string;
+  /** 0 bekliyor · 1 onaylandi · 2 reddedildi · 3 geri cekildi. */
+  durum: number;
+  isteyen: string;
+  istekTs: string;
+  onaylayan: string;
+  onayTs: string | null;
+  kararNotu: string;
+  satirSayisi: number;
+  tutar: number;
+  hasta: string;
+  belgeNo: string;
+  /** Onay penceresinin hasta seridi (663): 1 erkek · 2 kadin · 0 bilinmiyor. */
+  cinsiyet: number;
+  yas: number;
+  kurum: string;
+  doktor: string;
+  /** Talebe giren hizmetler; `oran` KALEM BAZLI istenen yuzde (664). */
+  kalemler: { ad: string; tutar: number; oran: number }[];
+}
+
+/** Iskonto yetki tavani olan rol - onay ekraninin limit sekmesi (666). */
+export interface IskontoLimiti {
+  rolId: number;
+  rolAd: string;
+  tavan: number;
+  kullaniciSayisi: number;
+}
 
 export interface DokumanSatiri {
   id: number;
@@ -833,6 +898,15 @@ export interface KurumProfil {
   paraBirimi: string;
   /** Modul OVERRIDE'lari: {"lab": 1, "teletip": 0} - yoksa tipin varsayilani. */
   moduller: Record<string, number>;
+  /**
+   * KIMLIK NO BICIMI (679): `otomatik` subenin ulkesine bakar (TR'de T.C.
+   * algoritmasi, disinda serbest), `tc` her zaman T.C., `serbest` bicim
+   * kontrolu yok, `desen` asagidaki duzenli ifadeyi uygular.
+   */
+  kimlikBicimi?: string;
+  kimlikDeseni?: string;
+  /** Alan hatasinda kullaniciya yazilan aciklama ("6-12 hane pasaport no"). */
+  kimlikAciklama?: string;
   /** Profilin subesi (364): 0 = kurum geneli, N = o sube. */
   subeId?: number;
   /**

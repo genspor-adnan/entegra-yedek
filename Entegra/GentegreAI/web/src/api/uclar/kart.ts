@@ -52,6 +52,10 @@ export const kartUclari = {
     istek<KartRolBilgisi>(`/api/kart/kullanici/${kartId}/rol`),
   kartRolDegistir: (kartId: number, rolId: number) =>
     istek<KartRolBilgisi>(`/api/kart/kullanici/${kartId}/rol/${rolId}`, { method: 'PUT' }),
+  /** EK rollerin TAMAMI tek istekte yazilir (665) - yarim kalan duzenleme olmaz. */
+  kartEkRoller: (kartId: number, rolIdleri: number[]) =>
+    istek<KartRolBilgisi>(`/api/kart/kullanici/${kartId}/rol/ek`,
+      { method: 'PUT', body: JSON.stringify({ rolIdleri }) }),
   kartSubeleri: (kartId: number) =>
     istek<KullaniciSubeSatiri[]>(`/api/kart/kullanici/${kartId}/subeler`),
   kartSubeKaydet: (kartId: number, satirlar: Omit<KullaniciSubeSatiri, 'subeAdi'>[]) =>

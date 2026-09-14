@@ -104,16 +104,16 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
         <thead>
           <tr>
             <th style={{ width: 34 }}></th>
-            <th>Kullanıcı</th><th>Bölüm</th><th>Görev</th><th>Telefon</th>
+            <th>Kullanıcı</th><th>Rolü</th><th>Bölüm</th><th>Görev</th><th>Telefon</th>
             <th>E-posta</th><th>Şube</th>
             <th style={{ textAlign: 'center' }}>Durum</th>
             <th>Son Giriş</th>
           </tr>
         </thead>
         <tbody>
-          {!uyeler && <tr><td colSpan={9}>Yükleniyor…</td></tr>}
+          {!uyeler && <tr><td colSpan={10}>Yükleniyor…</td></tr>}
           {uyeler?.length === 0 && (
-            <tr><td colSpan={9} className="bos">Bu rolde kullanıcı yok.</td></tr>
+            <tr><td colSpan={10} className="bos">Bu rolde kullanıcı yok.</td></tr>
           )}
           {uyeler?.map(k => (
             /* Tek tik SATIRI ISARETLER, cift tik kullanici kartini acar. */
@@ -125,6 +125,14 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
                 <input type="checkbox" checked={secili === k.id} readOnly />
               </td>
               <td>{k.unvan || '—'}</td>
+              {/* COK ROL (665): kisi bu role ANA rolüyle mi bagli, yoksa ek
+                  gorev olarak mi tasiyor? Ek rolluyse ASIL rolu yazilir -
+                  "burada ne isi var" sorusu satirda cevaplanir. */}
+              <td>{k.ana === false
+                    ? <span className="rozet gri" title={`Asıl rolü: ${k.rolAdi}`}>
+                        ek · {k.rolAdi}
+                      </span>
+                    : <span className="rozet ok">ana rol</span>}</td>
               <td>{k.departman}</td>
               <td>{k.gorev}</td>
               <td>{k.telefon}</td>
