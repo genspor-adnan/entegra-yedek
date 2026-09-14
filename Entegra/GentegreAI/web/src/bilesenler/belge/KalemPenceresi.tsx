@@ -7,6 +7,14 @@ import {
 } from '../../sayfalar/belgeSatir';
 import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
 import { baslangicBrutMetni, bruta, moduCevir } from '../../sayfalar/belgeKarti/kdvModu';
+// FIYAT / ISKONTO MATEMATIGI SAF MODULDE (refaktor): uc kutu ayni alani yazar
+//   ve ayni tabana bakmak zorunda - kural bilesenin icinde dururken uc ayri
+//   hata oradan cikti. Hesap degismedi, yeri degisti; testi kalemFiyat.test.ts.
+import {
+  type FiyatGirdisi, brutBirimFiyat, fiyattanOran, gosterimTabani as tabanCoz,
+  hedefBirimFiyat, iskontoKarsiligi, iskontoTabani as tabanIskonto,
+  iskontoluBirim as iskontoluBirimCoz, iskontoVarMi, oranKirp as oranKirpCoz,
+} from '../../sayfalar/belgeKarti/kalemFiyat';
 import { IzlemPenceresi } from './IzlemPenceresi';
 import { EK_KATKILI_ROTALAR, SAF_SGK_ROTA } from '../../sayfalar/belgeKartiKurallari';
 import { useOturum } from '../../kimlik/OturumBaglami';
@@ -232,7 +240,13 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    * Sunucu da ayni kurali izler - dip toplamda KDV "brut tutar - matrah
    * tutar"dir, orandan hesaplanmaz (`BelgeDeposu.Yazma`).
    */
-  const brutFiyat = kdvDahil ? (hamSayi(brutMetni) || bruta(fiyat, r.kdv)) : fiyat;
+  /** Hesap girdisi - saf fonksiyonlarin hepsi bunu alir. */
+  const fg = (): FiyatGirdisi => ({
+    fiyat, brutMetni, kdv: r.kdv, kdvDahil, sgkKilitli,
+    katkiTutar: r.katkiTutar, iskonto: String(r.iskonto ?? '0'),
+    iskonto2: String(r.iskonto2 ?? '0'),
+  });
+  const brutFiyat = brutBirimFiyat(fg());
   const onizlemeTutar = kdvDahil
     ? satirTutari(adet, brutFiyat, r.iskonto, r.iskonto2) : tutar;
   /**
@@ -311,15 +325,11 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    * Hesap `satirTutari` ile yapilir (adet 1): satir tutarindaki yuvarlama
    * kuralinin AYNISI - kendi carpanini yazmak kurus farki uretirdi.
    */
-  const iskontoTabani = sgkKilitli ? hamSayi(r.katkiTutar ?? '0') : fiyat;
-  const iskontoluBirim = satirTutari(1, iskontoTabani, r.iskonto, r.iskonto2);
+  const iskontoTabani = tabanIskonto(fg());
   // Iskontolu birim de brut tabandan (yukaridaki ayni gerekce).
-  const onizlemeBirim = kdvDahil
-    ? satirTutari(1, sgkKilitli ? bruta(iskontoTabani, r.kdv) : brutFiyat,
-                  r.iskonto, r.iskonto2)
-    : iskontoluBirim;
+  const onizlemeBirim = iskontoluBirimCoz(fg());
   /** Iskonto gercekten var mi - yoksa satir ust kutunun kopyasi olurdu. */
-  const iskontoluMu = Math.abs(iskontoTabani - iskontoluBirim) > 0.004;
+  const iskontoluMu = iskontoVarMi(fg());
 
   /* ---------------------------------------------------------------- iskonto --
    * TEK ISKONTO, IKI YAZILISI (661, kullanici: "iskonto2'yi buradan kaldır").
@@ -375,13 +385,11 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    * ORAN DEGISMEZ: yuzde olcek-bagimsizdir, brut ya da matrah - ayni oran.
    * Degisen yalniz GOSTERILEN ve GIRILEN sayidir; satira yine yuzde yazilir.
    */
-  const gosterimTabani = kdvDahil
-    ? (sgkKilitli ? bruta(iskontoTabani, r.kdv) : brutFiyat)
-    : iskontoTabani;
+  const gosterimTabani = tabanCoz(fg());
   /** Oranin TUTAR karsiligi - gosterim tabanindan. */
-  const tutarIskontosu = gosterimTabani * Math.min(oranSayi, 100) / 100;
+  const tutarIskontosu = iskontoKarsiligi(fg());
   /** Oranin HEDEF BIRIM FIYAT karsiligi (iskonto sonrasi birim). */
-  const hedefFiyat = gosterimTabani - tutarIskontosu;
+  const hedefFiyat = hedefBirimFiyat(fg());
 
   /** Iskonto tabaninin ADI - ust kutudaki etiketin aynisi. */
   const tabanAdi = sgkKilitli ? 'Katkı' : 'Birim Fiyat';
@@ -405,8 +413,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
     setR(x => ({ ...x, iskonto: String(oran), iskonto2: '0' }));
 
   /** Oran tavani asmasin - her yoldan gelen deger buradan gecer. */
-  const oranKirp = (oran: number) =>
-    Math.max(0, Math.min(oran, iskontoTavani, 100));
+  const oranKirp = (oran: number) => oranKirpCoz(oran, iskontoTavani);
 
   /** Sag kutuya yazildi: moda gore orana cevrilir. */
   const sagYaz = (metin: string) => {
@@ -422,8 +429,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
     //   Girilen fiyat asil fiyattan buyukse iskonto 0'dir (bu kutudan ZAM
     //   yapilamaz - fiyati yukseltmek fiyat listesinin isidir); tavan gecerli.
     if (!(sayi > 0)) { iskontoYaz(0); return }
-    const oran = (1 - Math.min(sayi, gosterimTabani) / gosterimTabani) * 100;
-    iskontoYaz(oranKirp(Math.round(oran * 1e4) / 1e4));
+    iskontoYaz(oranKirp(fiyattanOran(fg(), sayi)));
   };
 
   /** Combo secimi: hazir oran, "Özel İskonto" ya da "Birim Fiyat" kutusu. */
