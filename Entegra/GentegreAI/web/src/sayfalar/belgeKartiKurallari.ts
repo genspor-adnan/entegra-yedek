@@ -1,5 +1,7 @@
 import type { AcikSatir, Kosul } from '../api/sozlesme';
-import type { SatirDagilimi } from './belgeSatir';
+import { satirTutari, type SatirDagilimi } from './belgeSatir';
+import { hamSayi } from '../bilesenler/bicim';
+import { bruta } from './belgeKarti/kdvModu';
 import { onerilenTutar, payKalanDahil, matrahaCevir, kurusTamamla }
   from './belgeDonusumHesap';
 import { TAHAKKUK_TURLERI } from './belgeTuru';
@@ -234,6 +236,41 @@ export function acikBelgeHesapla(
 ): number {
   const genel = satirSayisi > 0 ? onizlemeGenel : kayitliGenel;
   return Math.max(0, Math.round((genel - donusen) * 100) / 100);
+}
+
+/**
+ * BELGE ÖNİZLEME TOPLAMI (matrah / KDV / genel) - kart kaydedilmeden önce
+ * seritte ve dip toplamda okunan rakam. Gerçek tutar sunucudan gelir; bu
+ * yalnız "şu an ekranda ne var" sorusunun cevabıdır.
+ *
+ * KDV MATRAHI ORANLA ÇARPARAK DEĞİL, BRÜT − MATRAH (kullanıcı: "500 girdim,
+ * önizlemede 500,01 göründü"). Satırın brütü kullanıcının yazdığı sayıdır
+ * (`birimFiyatKdvli`); matrah ondan türetilip bir kez yuvarlandı - ters yöne
+ * gitmek kuruşu geri getirmiyor (454,55 × 1,10 = 500,005 → 500,01).
+ * Sunucu da böyle hesaplar (`BelgeDeposu.Yazma`): önizleme ile kayıt aynı
+ * rakamı söylemeli.
+ *
+ * STOK FİŞİ VERGİSİZDİR: satır da sunucuya 0 KDV ile gider.
+ */
+export function belgeOnizlemesi(
+  satirlar: readonly {
+    adet: string; birimFiyat: string; iskonto: string; iskonto2: string;
+    kdv: string; birimFiyatKdvli?: string;
+  }[],
+  stokFisiMi: boolean,
+): { matrah: number; kdv: number; genel: number } {
+  let matrah = 0, brut = 0;
+  for (const s of satirlar) {
+    const adet = hamSayi(s.adet);
+    const fiyat = hamSayi(s.birimFiyat);
+    matrah += stokFisiMi ? adet * fiyat
+                         : satirTutari(adet, fiyat, s.iskonto, s.iskonto2);
+    const brutFiyat = stokFisiMi ? fiyat
+                    : (hamSayi(s.birimFiyatKdvli) || bruta(fiyat, s.kdv));
+    brut += stokFisiMi ? adet * fiyat
+                       : satirTutari(adet, brutFiyat, s.iskonto, s.iskonto2);
+  }
+  return { matrah, kdv: brut - matrah, genel: brut };
 }
 
 export function acikBorcHesapla(
