@@ -432,6 +432,23 @@ var
   OkunanBarkod:String;
 { TStokListeDlg }
 
+function SeriLotRafOmruEkle(const ATarih: TDateTime; ASure, ABirim: Integer): TDateTime;
+begin
+  case ABirim of
+    1: Result := IncDay(ATarih, ASure);
+    2: Result := IncMonth(ATarih, ASure);
+    4: Result := IncHour(ATarih, ASure);
+    5: Result := IncMinute(ATarih, ASure);
+  else
+    Result := IncYear(ATarih, ASure);
+  end;
+end;
+
+function SeriLotTarihDegisti(const AEski, AYeni: Variant): Boolean;
+begin
+  Result := SecondsBetween(VarToDateTime(AEski), VarToDateTime(AYeni)) > 0;
+end;
+
 procedure TStokListeDlg.AraTusClick(Sender: TObject);
 var
   Grup, durumu, s: String[100];
@@ -1562,20 +1579,39 @@ begin
 end;
 
 procedure TStokListeDlg.SeriLotDuzenleClick(Sender: TObject);
-var URT, SKT, Lot, Seri: Variant;
+var
+  EskiURT, EskiSKT, URT, SKT, Lot: Variant;
+  RafOmruSure, RafOmruBirim: Integer;
 begin
+   if TabSeriLotDurum.IsEmpty then
+      Exit;
+
+   EskiURT := TabSeriLotDurum.FieldByName('URT').AsDateTime;
+   EskiSKT := TabSeriLotDurum.FieldByName('SKT').AsDateTime;
    URT := TabSeriLotDurum.FieldByName('URT').AsDateTime;
    SKT := TabSeriLotDurum.FieldByName('SKT').AsDateTime;
    Lot := TabSeriLotDurum.FieldByName('LOTNO').AsString;
-   Seri:= TabSeriLotDurum.FieldByName('SERINO').AsString;
 
-   if TGirisKutusuEx.BilgiAlEx(jvIzlem,TGirdiDenetimleri.Create.Edit('Seri No:',@Seri).Edit('Lot No:',@Lot)
-         .DateTimePicker('Üretim Tarihi',@URT).DateTimePicker('SKT',@SKT)) <> mrOk then
+   if TGirisKutusuEx.BilgiAlEx(jvIzlem,TGirdiDenetimleri.Create.Edit('Lot No:',@Lot)
+         .DateTimePicker('ÜRT',@URT).DateTimePicker('SKT',@SKT)) <> mrOk then
         Abort;
 
-   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update STOKSERILOT set SERINO=&SNO, LOTNO=&LNO, URT=&URT, SKT=&SKT '+
-      'Where ID='+TabSeriLotDurum.FieldByName('SERILOTID').AsString+' ',['&SNO', '&LNO', '&URT', '&SKT'],
-       [VarToStr(Seri),VarToStr(Lot),formatDateTime('yyyy-mm-dd hh:nn', URT),formatDateTime('yyyy-mm-dd hh:nn', SKT)]);
+   RafOmruSure := StrToIntDef(Tablo.AciklamaGetir('STOKLAR', 'RAFOMRU_SURE', STOKLAR.FieldByName('ID').AsInteger), 0);
+   RafOmruBirim := StrToIntDef(Tablo.AciklamaGetir('STOKLAR', 'RAFOMRU_BIRIM', STOKLAR.FieldByName('ID').AsInteger), 0);
+   if RafOmruBirim = 0 then
+      RafOmruBirim := 3;
+
+   if (RafOmruSure <> 0) and SeriLotTarihDegisti(EskiURT, URT) and
+      (not SeriLotTarihDegisti(EskiSKT, SKT)) then
+      SKT := SeriLotRafOmruEkle(VarToDateTime(URT), RafOmruSure, RafOmruBirim)
+   else if (RafOmruSure <> 0) and SeriLotTarihDegisti(EskiSKT, SKT) and
+      (not SeriLotTarihDegisti(EskiURT, URT)) then
+      URT := SeriLotRafOmruEkle(VarToDateTime(SKT), -RafOmruSure, RafOmruBirim);
+
+   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update STOKSERILOT set LOTNO=&LNO, URT=&URT, SKT=&SKT '+
+      'Where ID=&ID ',['&LNO', '&URT', '&SKT', '&ID'],
+       [VarToStr(Lot), formatDateTime('yyyy-mm-dd hh:nn', URT), formatDateTime('yyyy-mm-dd hh:nn', SKT),
+        TabSeriLotDurum.FieldByName('SERILOTID').AsInteger]);
    TabloYenile(TabSeriLotDurum,[STOKLAR.FieldByName('ID').AsInteger, tabStokDurum.FieldByName('DEPOID').AsInteger]);
 end;
 

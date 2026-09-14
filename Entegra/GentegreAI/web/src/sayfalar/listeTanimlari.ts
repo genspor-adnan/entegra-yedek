@@ -105,6 +105,15 @@ export const MENU_GRUP_MODUL: Record<string, string> = {
   'Alış':          'erp_satis',
   'İletişim & AI': 'mesaj',
   'Üretim':        'uretim',
+  // e-Nabiz ekranlari MUAYENE modulune yazilmisti (kopyala-yapistir):
+  //   kurum profilinden "e-Nabız" kapatilinca menude kalmaya devam
+  //   ediyordu (kullanici). Grup varsayilani da eklendi - bu gruba
+  //   ileride eklenen liste `modul` yazmayi unutsa bile dogru module
+  //   baglanir.
+  'e-Nabız':       'enabiz',
+  'Laboratuvar':   'lab',
+  'Muayene':       'muayene',
+  'Doküman':       'dokuman',
 };
 
 /**

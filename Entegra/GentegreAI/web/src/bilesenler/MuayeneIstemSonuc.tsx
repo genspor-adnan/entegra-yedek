@@ -34,7 +34,9 @@ const BAYRAK: Record<string, string> = {
 };
 
 const ISTEM_DURUM: Record<number, string> = {
-  1: 'İstendi', 2: 'Numune alındı', 3: 'Çalışılıyor', 4: 'Kısmi sonuç',
+  // 4 = HER satir sonuclandi (onay bekliyor); bir kismi sonuclanmissa
+  //   istem hala "Calisiliyor". Sunucu da ayni esikle yaziyor.
+  1: 'İstendi', 2: 'Numune alındı', 3: 'Çalışılıyor', 4: 'Sonuçlandı',
   5: 'Onaylandı', 9: 'İptal',
 };
 

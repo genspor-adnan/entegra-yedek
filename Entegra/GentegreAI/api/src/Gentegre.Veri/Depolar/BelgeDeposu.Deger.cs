@@ -119,6 +119,10 @@ public sealed partial class BelgeDeposu
                    --   seridinde ad altinda gosterilir - memur hastanin USS'de
                    --   kayitli olup olmadigini kart acilir acilmaz gorsun.
                    coalesce(bb.sys_takip_no, '') as "sysTakipNo",
+                   -- HASTA (658): dis kurum numunesinde belgenin CARISI
+                   --   gonderen kurumdur; hasta ayri alanda durur ve hasta
+                   --   seridi bunu okur - yoksa serit bos aciliyordu.
+                   bb.hasta_id as "hastaId",
                    bb.odeyen_kurum_id as "odeyenKurumId",
                    coalesce(ok.unvan, '') as "odeyenKurumAdi",
                    -- SEVKIYAT ayri tabloda (177): kaydi olmayan belgede gorunum

@@ -72,6 +72,10 @@ function eskiBasvuru(b: Belge) {
     // SYS TAKIP NO (608): sunucudan gelen yeni alan - basvurunun e-Nabiz
     //   kimligi. Referans cevrim de tasimali, yoksa test "eski kodla ayni
     //   degil" der ve eklenen her mesru alan burayi kirar.
+    // 658'de EKLENEN alan: dis kurum basvurusunda hasta cariden ayri
+    //   tutuluyor. Referans cevrim de tasiyor - yoksa test "kayma" diye
+    //   bildirir; oysa bu bilincli bir davranis degisikligi.
+    hastaId: b.hastaId != null ? Number(b.hastaId) : null,
     sysTakipNo: String(b.sysTakipNo ?? ''),
     basvuruTuru: b.basvuruTuru != null ? Number(b.basvuruTuru) : null,
     gelisSekli: b.gelisSekli != null ? Number(b.gelisSekli) : null,

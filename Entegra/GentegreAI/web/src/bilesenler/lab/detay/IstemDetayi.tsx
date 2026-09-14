@@ -157,6 +157,28 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
                           <td className="orta not">
                             {s.olcumZamani ? tarihSaat(s.olcumZamani) : '—'}
                           </td>
+                          {/* GIRISIN KAYNAGI (kullanici: "sonucu elle
+                              degistirdigim / girdigim bilgisi nerede"):
+                              cihazdan mi elle mi, kim girdi, kacinci
+                              duzeltme. Duzeltme nedeni ipucunda. */}
+                          <td className="orta not"
+                              title={[metin(s.giren), metin(s.duzeltmeNeden)]
+                                     .filter(Boolean).join(' · ')}>
+                            {metin(s.girisTuru) === 'Elle'
+                              ? <span title={`Elle girildi${metin(s.giren)
+                                              ? ` · ${metin(s.giren)}` : ''}`}>
+                                  ✍ {metin(s.giren)}
+                                </span>
+                              : metin(s.girisTuru) === 'Cihaz'
+                                ? <>🖧 {metin(s.cihaz) || 'Cihaz'}</>
+                                : '—'}
+                            {Number(s.tekrarNo ?? 0) > 0 && (
+                              <span className="rozet uyari" style={{ marginLeft: 4 }}
+                                    title="Düzeltilmiş sonuç">
+                                {Number(s.tekrarNo)}. düzeltme
+                              </span>
+                            )}
+                          </td>
                         </>
                       ) : (
                         <>
@@ -202,6 +224,7 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
                       <th>Tüp / Barkod</th>
                       <th className="sag">Sonuç</th><th>Birim</th><th>Referans</th>
                       <th className="orta">Bayrak</th><th className="orta">Ölçüm</th>
+                      <th className="orta">Giriş</th>
                     </>
                   ) : (
                     <>
@@ -222,7 +245,7 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
                     ? `t${String(g.satirlar[0]?.satirId)}` : `p${g.panelId}`}>
                     {g.panelId !== 0 && (
                       <tr className="panel-basligi">
-                        <td colSpan={sonucGorunumu ? 9 : 10}>
+                        <td colSpan={10}>
                           <button type="button" className="d mini"
                                   onClick={() => panelAc(g.panelId)}
                                   title={acikPaneller.has(g.panelId)

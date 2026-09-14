@@ -398,6 +398,15 @@ export function alanCizici(b: AlanCizimBaglami) {
                            || (a.ad === 'kurumAdi' && disKaynak))))
         .filter(a => !(yerelMi && doviz
                        && (a.ad === doviz.kurAlani || a.ad === doviz.yerelAlani)))
+        /* ISTEYEN HEKIM YALNIZ DIS ISTEMDE DEGISTIRILEBILIR (kullanici):
+           ic istemde hekim BASVURUDAN gelir - istemde degistirmek, ayni
+           basvurunun iki farkli hekimi gosteren iki kaydi demekti ve
+           hangisinin gecerli oldugu belirsiz kalirdi. Dis numunede boyle bir
+           basvuru yok, hekimi gonderen kurum bildiriyor.
+           Kurum tarafi zaten ayrik: dis istemde secilebilir "Dış Kurum",
+           otekinde salt okunur "Kurum" (yukaridaki suzgec). */
+        .map(a => (kaynak === 'lab-istem' && a.ad === 'personelId' && !disKaynak
+                   ? { ...a, yazilabilir: false } : a))
         .map(a => {
           const hedef = a.eslesAlan ? alanlar.find(x => x.ad === a.eslesAlan) : undefined;
           if (!hedef) return renderAlan(a);

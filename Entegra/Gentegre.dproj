@@ -143,13 +143,13 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <VerInfo_MajorVer>26</VerInfo_MajorVer>
-        <VerInfo_MinorVer>9</VerInfo_MinorVer>
+        <VerInfo_MinorVer>11</VerInfo_MinorVer>
         <DCC_UNSAFE_CODE>false</DCC_UNSAFE_CODE>
         <DCC_UNSAFE_CAST>false</DCC_UNSAFE_CAST>
         <DCC_UNSAFE_TYPE>false</DCC_UNSAFE_TYPE>
         <DCC_DebugDCUs>true</DCC_DebugDCUs>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=Gen Yazılım;FileVersion=26.9.9.1;InternalName=Gen Yazılım;LegalCopyright=Feta Bilgisayar Ltd.;LegalTrademarks=Gentegre GenYazılım;OriginalFilename=Gentegre.Exe;ProductVersion=2.0.0.0;Comments=;LastCompiledTime=2023/02/04 17:02:47;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Gen Yazılım;FileVersion=26.11.9.1;InternalName=Gen Yazılım;LegalCopyright=Feta Bilgisayar Ltd.;LegalTrademarks=Gentegre GenYazılım;OriginalFilename=Gentegre.Exe;ProductVersion=2.0.0.0;Comments=;LastCompiledTime=2023/02/04 17:02:47;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
         <BT_BuildType>Debug</BT_BuildType>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>

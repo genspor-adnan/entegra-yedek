@@ -26,7 +26,7 @@ export const ENABIZ_LISTELERI: ListeGirdisi[] = [
       { ad: 'Hatalı',      filtre: { alan: 'durum', op: 'esit', deger: 4 } },
       { ad: 'Tümü' },
     ],
-    urunModu: 2, modul: 'muayene',
+    urunModu: 2, modul: 'enabiz',
     // Bayrak emojisi Windows'ta "TR" harfleri olarak cizilir (dil secicide de
     //   ayni sorun yasanmisti) - gonderim kuyruguna anlamli ikon.
     menuGrup: 'e-Nabız', menuAd: 'Gönderim Kuyruğu', ic: '📤',
@@ -38,7 +38,7 @@ export const ENABIZ_LISTELERI: ListeGirdisi[] = [
     //   gonderebildik, neden gonderemedik" sorusunu cevaplar.
     kaynak: 'enabiz-pano', rota: 'enabiz-pano', ozelSayfa: true,
     baslik: 'e-Nabız Veri Kalitesi', yol: 'e-Nabız › Veri Kalitesi',
-    urunModu: 2, modul: 'muayene',
+    urunModu: 2, modul: 'enabiz',
     menuGrup: 'e-Nabız', menuAd: 'Veri Kalitesi', ic: '📊',
     yetkiKodu: 'entegrasyon', menuSira: 5,
   },
@@ -54,7 +54,7 @@ export const ENABIZ_LISTELERI: ListeGirdisi[] = [
       { ad: 'Pasif', filtre: { alan: 'aktif', op: 'esit', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    urunModu: 2, modul: 'muayene',
+    urunModu: 2, modul: 'enabiz',
     menuGrup: 'e-Nabız', menuAd: 'Kod Eşleme', ic: '🔗',
     yetkiKodu: 'entegrasyon', menuSira: 20,
   },

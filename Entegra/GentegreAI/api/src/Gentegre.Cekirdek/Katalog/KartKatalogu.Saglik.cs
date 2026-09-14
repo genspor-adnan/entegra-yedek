@@ -273,7 +273,12 @@ public static partial class KartKatalogu
     /// <summary>Test sonucunun degerlendirmesi - sonuc formunda rozet olur.</summary>
     private static readonly Dictionary<string, string> LabIsaretKodlari = new()
     {
-        ["0"] = "Normal", ["1"] = "Düşük", ["2"] = "Yüksek", ["3"] = "Panik"
+        // OK ISARETI ETIKETTE (kullanici: "dusuk / yuksek durumunda saginda
+        //   ok ikonu da olsun"): grid hucresi tek kelime; yon okunmadan
+        //   anlasilmiyordu. Panikte yon degil ACILIYET onemli - uyari
+        //   isareti tasir.
+        ["0"] = "Normal", ["1"] = "Düşük ↓", ["2"] = "Yüksek ↑",
+        ["3"] = "Panik ⚠"
     };
 
     /// <summary>

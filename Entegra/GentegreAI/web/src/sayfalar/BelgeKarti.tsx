@@ -1401,7 +1401,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
             dogru hastada oldugunu surekli gorsun. Tamamlanma seridinin de
             ustunde (kullanici): once KIM, sonra ne eksik. */}
         {basvuruMu && (
-          <HastaSeridi tarafId={cari?.id}
+          // HASTA SERIDI CARIDEN DEGIL HASTA ALANINDAN (658, kullanici:
+          //   "hasta bilgi bandinda hasta bilgileri gelmedi"): dis kurum
+          //   numunesinde belgenin carisi GONDEREN KURUMDUR; serit cariyi
+          //   hasta sanip bos aciliyordu. Normal basvuruda ikisi ayni kisi.
+          <HastaSeridi tarafId={Number(basvuruBilgi.hastaId ?? 0) || cari?.id}
                        kurumAdi={kurumlar.find(k => k.id === odeyenKurumId)?.ad}
                        acikBorc={basvuruAcikBorc}
                        mustehaklik={Number(basvuruBilgi.sgkMustehaklik ?? 0)}

@@ -19,6 +19,12 @@ public static partial class KartKatalogu
         {
             ["bolum"] = (short)1,           // Biyokimya
             ["durum"] = (short)1,           // İstendi
+            // ONCELIK NORMAL (kullanici). Kolonun DB varsayilani zaten 1 ama
+            //   kart YENI kayitta kutuyu bos aciyordu ("—"): kullanici her
+            //   istemde secmek zorunda kaliyor, unutulursa kayit sirasinda
+            //   sessizce 1 yaziliyordu - ekranda gorunen ile kaydedilen
+            //   ayriydi.
+            ["oncelik"] = (short)1,         // Normal
             ["istemTarihi"] = "@simdi",
             // KAYNAK VARSAYILANI DIŞ KURUM (kullanici). Başvurudan doğan
             //   istem KART ÜZERİNDEN açılmaz - o yol uçta (başvuru
@@ -124,9 +130,15 @@ public static partial class KartKatalogu
 
             // Numune ve sonuc zamanlari AYRI: "ne zaman alindi / ne zaman cikti"
             //   laboratuvarin temel performans sorusudur.
-            new("numuneTarihi", "numune_tarihi", "tarih",
+            //
+            // SAATLI (kullanici: "surec sekmesinde de zamanlarin yaninda saat
+            //   olsun"). Gun cozunurlugu bu soruyu cevaplamiyor: TAT numune
+            //   KABULUNDE baslar ve dakikayla olculur; gecikmenin numune
+            //   alimda mi calismada mi oldugu ancak saatle gorulur. Kolonlar
+            //   zaten `timestamp` - eksik olan ekrandi.
+            new("numuneTarihi", "numune_tarihi", "zaman",
                 Baslik: "Numune Alma", Grup: "Süreç", AltGrup: "Zaman"),
-            new("sonucTarihi", "sonuc_tarihi", "tarih",
+            new("sonucTarihi", "sonuc_tarihi", "zaman",
                 Baslik: "Sonuç", Grup: "Süreç", AltGrup: "Zaman"),
             // HEDEF BITIS = sozu verilen sure (TAT). Saat KABULDE baslar;
             //   sunucu kabul aninda yazar, elle degistirilebilir.
@@ -172,31 +184,55 @@ public static partial class KartKatalogu
                 //   pencere bos adlarla acilirdi. Cizim `ad`a duser hale
                 //   getirildi (ayni tuzak uretim, radyoloji ve randevu
                 //   kartlarinda da vardi).
+                //   ARAMA JENERIK HIZMET PENCERESI (kullanici: "tetkik
+                //   ekleme icin arama ekranina jenerik hizmet arama
+                //   gelmelidir"): kabul masasi SUT kodunu/adini biliyor,
+                //   laboratuvarin ic tetkik kodunu degil - ustelik kategori
+                //   agaciyla aranan pencere oteki ekranlarda da bu.
+                //   Secilen hizmetin laboratuvar karsiligi (panel ya da tek
+                //   tetkik) `/api/lab/hizmet/{id}/tetkik` ile cozulur.
                 new("tetkikId", "tetkik_id", "kod",
                     KodTablosu: "public.v_lab_tetkik_lookup",
-                    AramaKaynagi: "lab-tetkik", Baslik: "Tetkik"),
+                    AramaKaynagi: "hizmet", Baslik: "Tetkik"),
                 new("panelId", "panel_id", "kod",
                     KodTablosu: "public.v_lab_panel_lookup", Baslik: "Panel"),
                 new("kod", "kod", "metin", EnFazlaUzunluk: 30, Baslik: "Kod"),
                 new("ad", "ad", "metin", EnFazlaUzunluk: 200, Baslik: "Test Adı"),
                 new("durum", "durum", "kod", SabitKodlar: LabSatirDurumKodlari,
                     Baslik: "Durum"),
-                new("sonuc", "sonuc", "metin", EnFazlaUzunluk: 100, Baslik: "Sonuç"),
-                new("birim", "birim", "metin", EnFazlaUzunluk: 20, Baslik: "Birim"),
+                // SONUC ALANLARI KART KAYDIYLA YAZILMAZ (Yazilabilir: false).
+                //   Asil sonuc `lab_sonuc`ta: referans, bayrak, panik ve delta
+                //   orada hesaplanir, onay ve duzeltme gecmisi orada durur.
+                //   Bu kolonlar AYNADIR - sunucu sonuc yazarken doldurur.
+                //   Satir duzenleme modalinden elle yazilabildigi surece
+                //   kural motorunu atlayan "sonuc"lar olusuyordu: deger
+                //   satirda gorunuyor ama lab_sonuc kaydi yok, bayrak yok,
+                //   onay kuyruguna girmiyor, e-Nabiz'a gitmiyor.
+                //   Gridde SONUC hucresi yine yazilabilir - o hucre `POST
+                //   /api/lab/sonuc` ucuna gider (GenDetayTablo.hucreYaz).
+                new("sonuc", "sonuc", "metin", EnFazlaUzunluk: 100, Baslik: "Sonuç",
+                    Yazilabilir: false),
+                new("birim", "birim", "metin", EnFazlaUzunluk: 20, Baslik: "Birim",
+                    Yazilabilir: false),
                 new("referans", "referans", "metin", EnFazlaUzunluk: 60,
-                    Baslik: "Referans Aralığı"),
+                    Baslik: "Referans Aralığı", Yazilabilir: false),
                 new("isaret", "isaret", "kod", SabitKodlar: LabIsaretKodlari,
-                    Baslik: "Değerlendirme"),
+                    Baslik: "Değerlendirme", Yazilabilir: false),
                 new("cihazId", "cihaz_id", "kod", KodTablosu: "public.v_cihaz_lookup",
                     Baslik: "Cihaz"),
+                // GIRISIN KAYNAGI (kullanici: "sonucu elle degistirdigim /
+                //   girdigim bilgisi nerede"): sonuc yazilirken damgalanir -
+                //   "Elle · <kullanici>" ya da cihaz kodu. "Cihaz (metin)"
+                //   basligi ne tasidigini soylemiyordu.
                 new("cihaz", "cihaz", "metin", EnFazlaUzunluk: 60,
-                    Baslik: "Cihaz (metin)"),
+                    Baslik: "Giriş", Yazilabilir: false),
                 // NUMUNE BAGI (433): satir hangi tupten calisilacak. Tup plani
                 //   "Barkod Üret" ile cikar; burada gorunur olmasi, "bu tetkik
                 //   hangi tupte" sorusunu kart icinde cevaplar.
                 new("numuneId", "numune_id", "kod", KodTablosu: "public.v_lab_numune_lookup",
                     Baslik: "Numune / Barkod"),
-                new("sonucTarihi", "sonuc_tarihi", "tarih", Baslik: "Sonuç Zamanı"),
+                new("sonucTarihi", "sonuc_tarihi", "tarih", Baslik: "Sonuç Zamanı",
+                    Yazilabilir: false),
                 new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama")
             }, SubeKolonu: null, Sirala: "sira, id", Baslik: "Tetkikler",
                LogTabloId: 962),

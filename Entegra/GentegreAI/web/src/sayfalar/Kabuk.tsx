@@ -6,7 +6,7 @@ import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
   from '../bilesenler/tema';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Bayrak } from '../bilesenler/Bayrak';
-import { cm, ceviriYukle, ceviriDinle } from '../dil/ceviri';
+import { c, cm, ceviriYukle, ceviriDinle } from '../dil/ceviri';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { urunAdi, modUyar } from '../api/sozlesme';
 import { AiRehberPaneli } from '../bilesenler/AiRehberPaneli';
@@ -249,7 +249,7 @@ export function Kabuk() {
   /** "liste" rozetinin yerine yildiz: bos = ekle, dolu = cikar. */
   const yildiz = (yol: string) => (
     <button type="button" className="rz"
-            title={favoriler.includes(yol) ? 'Favorilerden çıkar' : 'Favorilere ekle'}
+            title={c(favoriler.includes(yol) ? 'Favorilerden çıkar' : 'Favorilere ekle')}
             style={{ border: 0, background: 'transparent', cursor: 'pointer',
                      padding: 0, fontSize: 13, lineHeight: 1 }}
             onClick={e => { e.preventDefault(); e.stopPropagation(); favoriToggle(yol) }}>
@@ -320,7 +320,7 @@ export function Kabuk() {
           ☰
         </button>
         <div className="marka marka-bag" role="link" tabIndex={0}
-             title="Ana sayfa"
+             title={c('Ana sayfa')}
              onClick={() => git('/panel')}
              onKeyDown={e => { if (e.key === 'Enter') git('/panel') }}>
           {/* BASE_URL: uygulama alt yolda yayinda olabilir (/ai). Mutlak "/..." yazmak
@@ -332,20 +332,20 @@ export function Kabuk() {
           {urunAdi(kullanici?.urunModu)}
         </div>
 
-        <button className="ust-ara" onClick={paletiAc} title="Komut paleti">
+        <button className="ust-ara" onClick={paletiAc} title={c('Komut paleti')}>
           <span>🔍</span>
-          <span>Ara ya da komut yaz…</span>
+          <span>{c('Ara ya da komut yaz…')}</span>
           <kbd>Ctrl K</kbd>
         </button>
 
         <div className="ustsag">
-          {kullanici?.subeYazma === false && <span className="rozet uyari">salt okuma</span>}
+          {kullanici?.subeYazma === false && <span className="rozet uyari">{c('salt okuma')}</span>}
 
           {(kullanici?.subeler.length ?? 0) > 1 && (
             <select
               value={kullanici?.subeId ?? ''}
               onChange={e => void subeDegistir(Number(e.target.value))}
-              title="Calisilan sube"
+              title={c('Çalışılan şube')}
             >
               {kullanici?.subeler.map(s => (
                 <option key={s.id} value={s.id}>{s.ad}{s.yazma ? '' : ' (salt okuma)'}</option>
@@ -355,17 +355,17 @@ export function Kabuk() {
 
           {/* GECE / GUNDUZ: uc durumlu - Sistem, Gündüz, Gece. Secim tarayicida
               saklanir (ayni hesap iki cihazda farkli olabilir). */}
-          <button className="ib" title={`Tema — ${TEMA_ADI[tema]} (değiştirmek için tıklayın)`}
+          <button className="ib" title={`${c('Tema')} — ${c(TEMA_ADI[tema])}`}
                   onClick={() => { const y = temaSonraki(tema); setTema(y); temaUygula(y) }}>
             {TEMA_IKON[tema]}
           </button>
 
-          <button className="ib" title="Bildirimler">🔔</button>
+          <button className="ib" title={c('Bildirimler')}>🔔</button>
 
           {/* Dil secimi: zilin saginda bayrak. Kullanici Ayarlari icindeki dil
               kutusuyla AYNI degeri yazar (taraf_kullanici.dil) - burasi kisayol. */}
           <span className="dil-sec" onMouseDown={e => e.stopPropagation()}>
-            <button type="button" className="ib" title={`Dil — ${DILLER[kullanici?.dil ?? 0]?.ad ?? ''}`}
+            <button type="button" className="ib" title={`${c('Dil')} — ${DILLER[kullanici?.dil ?? 0]?.ad ?? ''}`}
                     onClick={() => setDilMenusu(a => !a)}>
               <Bayrak dil={kullanici?.dil ?? 0} boy={18} />
             </button>
@@ -381,7 +381,7 @@ export function Kabuk() {
               </span>
             )}
           </span>
-          <button className="ib" title="Yardim">?</button>
+          <button className="ib" title={c('Yardım')}>?</button>
           {/* ÇIKIŞ AYIRT EDİLİR (kullanıcı): zil/yardım/dil ikonlarıyla aynı
               görünümdeydi ve başlığı Türkçesizdi ("Cikis"). Yanlışlıkla
               basıldığında oturum kapanan tek düğme bu - komşularından ayrı
@@ -392,7 +392,7 @@ export function Kabuk() {
               "bu sefer de büyük oldu, ikon haline getir"). Çizim artık inline
               SVG - fonta bağlı değil, komşu ikonlarla aynı 30px kutuda.
               Kırmızı kalır: üst şeritteki tek yıkıcı düğme bu. */}
-          <button type="button" className="ib cikis" title="Oturumu kapat"
+          <button type="button" className="ib cikis" title={c('Oturumu kapat')}
                   onClick={() => void cikisYap()}>
             <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"
                  fill="none" stroke="currentColor" strokeWidth="2"

@@ -45,6 +45,12 @@ export interface ListeTanimi {
    */
   tarihVarsayilan?: 'yilbasindanBugune' | 'buAy';
   /**
+   * Tarih araligi kutulari yerine HAZIR ARALIK COMBOSU (Bugun / Dun / Son 3
+   * Gun ...) - basvuru seridindekinin aynisi. Gunluk calisilan ekranlarda
+   * iki tarih kutusu doldurmak yerine tek secim (kullanici).
+   */
+  tarihCombo?: boolean;
+  /**
    * Ciplerin sagina PRIM ROLU + KISI combolari koyar (kullanici, hakedis
    * satirlari). Kisi listesi secili role gore daralir.
    */

@@ -572,6 +572,15 @@ public static class AksiyonKatalogu
                 //   Istem kartinin kaynak varsayilani "Dis kurum"; gonderen
                 //   kurum ve dis doktor arama penceresiyle seciliyor. Ayni isi
                 //   yapan ikinci bir pencere, iki ayri dogrulama yolu demekti.
+                // SONUC ELLE GIRISI (433, kullanici: "lab istem sonuclarini
+                //   elle girmek istiyorum"). Uc ve kural motoru vardi,
+                //   EKRANI yoktu. Istemin butun tetkikleri tek pencerede -
+                //   hemogram 23 parametre, her biri icin ayri pencere
+                //   teknisyeni 23 kez tiklatirdi.
+                new("lab.sonuc-gir", "🧪 Sonuç Gir", "lab-istem",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.sonuc", Islem: Islem.Ekle, KayitGerekir: true,
+                    Sira: 4),
                 new("lab.numune-plani", "🏷 Barkod Üret", "lab-istem",
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "lab.numune", Islem: Islem.Ekle, KayitGerekir: true,

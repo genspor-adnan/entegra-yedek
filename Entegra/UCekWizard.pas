@@ -332,6 +332,14 @@ begin
   end;
 end;
 
+function CekSenetResimYeri(ACekSenet: Integer): Integer;
+begin
+  if ACekSenet >= Sbt_Senet_Gelen then
+    Result := 25   // UResim: senet resmi
+  else
+    Result := 21;  // UResim: cek resmi
+end;
+
 function TCekWizardDlg.EkranAdiAl: string;
 begin
   if CekSenetTur = 121 then
@@ -726,7 +734,7 @@ begin
   CekID := Tablo.Query1.Fields[0].AsInteger;
 
   TabloYenile(TabCekler, [CekID]);
-  Yeri := 21;
+  Yeri := CekSenetResimYeri(CekSenetTur);
   ComboDURUM.EditValue := Tur;
   DateTARIH.Date:= MakbuzTarih;
   SeriNoTus.Visible := (SeriNoKontrol)and(CekSenetTur = Sbt_Cek_Giden);
@@ -789,7 +797,7 @@ begin
   YaziciYaz.PopupMenu := TGenelAnaSekmeFrame(aktifFrame).pmDokumAyarlar;
   PopupMenuYaz.Images := TGenelAnaSekmeFrame(aktifFrame).ImageList1;
   WizardKontrol.SelectFirstPage;
-  Yeri := 21;
+  Yeri := CekSenetResimYeri(CekSenetTur);
   Logo.Visible := CekSenetTur < Sbt_Senet_Gelen;
   LabelODEMEYERI.Visible:= CekSenetTur< Sbt_Senet_Gelen;
   EditODEMEYERI.Visible := CekSenetTur< Sbt_Senet_Gelen;
@@ -957,7 +965,14 @@ end;
 
 procedure TCekWizardDlg.ResimTusClick(Sender: TObject);
 begin
-   Tablo.ResimSihirbazBaslat(Tabno_Cekler, TabCekler.Fields[0].AsInteger);
+   if TabCekler.State in [dsInsert, dsEdit] then
+      TabCekler.Post;
+   if (not TabCekler.Active) or TabCekler.FieldByName('ID').IsNull or
+      (TabCekler.FieldByName('ID').AsInteger <= 0) then
+      Exit;
+
+   Tablo.ResimSihirbazBaslat(CekSenetResimYeri(TabCekler.FieldByName('CEKSENET').AsInteger),
+      TabCekler.FieldByName('ID').AsInteger);
 end;
 
 procedure TCekWizardDlg.TarihceEkrEnterPage(Sender: TObject; const FromPage: TJvWizardCustomPage);

@@ -1,6 +1,6 @@
 import { api } from '../../api/istemci';
 import { type AksiyonBaglami } from './aksiyonOrtak';
-import { guvenli, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
+import { guvenli, listeSor, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
 
 /**
@@ -14,13 +14,32 @@ import type { ListeSatiri } from '../../api/sozlesme';
  * <b>Onaylı sonuç güncellenmez.</b> "Düzelt" eski satırı iptal edip yenisini
  * açar; neden zorunludur çünkü rapor "düzeltilmiş" damgası taşıyacak.
  */
-export type LabBaglam = AksiyonBaglami;
+export type LabBaglam = AksiyonBaglami & {
+  /** SONUC GIRIS penceresini acar (433) - istemin butun tetkikleri icin. */
+  sonucGir?(istemId: number): void;
+};
 
 /** Ret nedenleri = numune KALİTE kod uzayı (db/433, 434'te belgelendi). */
 const RET_NEDENLERI: Record<string, string> = {
   '2': 'Hemolizli', '3': 'Lipemik', '4': 'İkterik', '5': 'Yetersiz miktar',
   '6': 'Pıhtılı', '7': 'Yanlış tüp', '8': 'Etiketsiz', '9': 'Diğer',
 };
+
+/**
+ * KABULDE KALITE listesi = 1 Uygun + ret kod uzayi (9 Diger haric;
+ * "diger" bir kabul gerekcesi degil). Kabul edilen ama kusurlu tup
+ * (hafif lipemik) isaretlenir - sonuc yorumlanirken rapora duser.
+ */
+const KALITELER: { kod: string; ad: string }[] = [
+  { kod: '1', ad: '1 - Uygun' },
+  ...Object.entries(RET_NEDENLERI)
+    .filter(([k]) => k !== '9')
+    .map(([kod, ad]) => ({ kod, ad: `${kod} - ${ad}` })),
+];
+
+/** Ret penceresinin combo secenekleri - varsayilan 2 Hemolizli. */
+const RET_SECENEKLERI = Object.entries(RET_NEDENLERI)
+  .map(([kod, ad]) => ({ kod, ad: `${kod} - ${ad}` }));
 
 export async function labAksiyonu(
   kod: string,
@@ -55,6 +74,9 @@ export async function labAksiyonu(
   const id = Number(satir?.id ?? 0);
   if (!id) { mesaj('Önce bir kayıt seçin.'); return true }
 
+  // SONUC GIRISI: pencere acilir, yazma ve kural motoru orada.
+  if (kod === 'lab.sonuc-gir') { b.sonucGir?.(id); return true }
+
   switch (kod) {
     // ------------------------------------------------------------ istem ---
     case 'lab.numune-plani':
@@ -80,13 +102,12 @@ export async function labAksiyonu(
     // ISTEM DUZEYINDE KABUL/RET: hastanin TUM tupleri. Hangi tupe
     //   dokunulacagina sunucu karar verir (calisilmis numune atlanir).
     case 'lab.istem-kabul': {
-      const k = await metinSor(
-        'Numune kalitesi (boş = Uygun):\n'
-        + '1 Uygun · 2 Hemolizli · 3 Lipemik · 4 İkterik · 5 Yetersiz · '
-        + '6 Pıhtılı · 7 Yanlış tüp · 8 Etiketsiz',
-        '', 'Numune Kabul');
+      // Kod listesi METINDE degil COMBODA (kullanici: "kabul/ret
+      //   butonlarinda mesajda girisler combo olsun, 1 default gelsin").
+      //   Kabul edilen tupun olagan hali "Uygun" - Enter'la gecilir.
+      const k = await listeSor('Numune kalitesi:', KALITELER, '1', 'Kalite');
       if (k === null) return true;
-      const kalite = Number(k.trim()) || undefined;
+      const kalite = Number(k) || undefined;
       await guvenli(async () => {
         const y = await api.labIstemNumuneDurum(id, 3, { kalite });
         mesaj(`${y.mesaj} Süre (TAT) şimdi başladı.`);
@@ -96,12 +117,9 @@ export async function labAksiyonu(
     }
 
     case 'lab.istem-ret': {
-      const n = await metinSor(
-        'Ret nedeni:\n'
-        + Object.entries(RET_NEDENLERI).map(([k, v]) => `${k} ${v}`).join(' · '),
-        '2', 'Numune Reddi');
+      const n = await listeSor('Ret nedeni:', RET_SECENEKLERI, '2', 'Ret Nedeni');
       if (n === null) return true;
-      const retNeden = Number(n.trim());
+      const retNeden = Number(n);
       if (!RET_NEDENLERI[String(retNeden)]) {
         mesaj('Geçerli bir ret nedeni seçin.');
         return true;
@@ -150,13 +168,12 @@ export async function labAksiyonu(
     case 'lab.numune-kabul': {
       // Kalite sorulur ama ZORUNLU degil: uygun tup icin ek soru, kabul
       //   akisini yavaslatirdi. Bos gecilirse "Uygun" kalir.
-      const k = await metinSor(
-        'Numune kalitesi (boş = Uygun):\n'
-        + '1 Uygun · 2 Hemolizli · 3 Lipemik · 4 İkterik · 5 Yetersiz · '
-        + '6 Pıhtılı · 7 Yanlış tüp · 8 Etiketsiz',
-        '', 'Numune Kabul');
+      // Kod listesi METINDE degil COMBODA (kullanici: "kabul/ret
+      //   butonlarinda mesajda girisler combo olsun, 1 default gelsin").
+      //   Kabul edilen tupun olagan hali "Uygun" - Enter'la gecilir.
+      const k = await listeSor('Numune kalitesi:', KALITELER, '1', 'Kalite');
       if (k === null) return true;
-      const kalite = Number(k.trim()) || undefined;
+      const kalite = Number(k) || undefined;
       await guvenli(async () => {
         const y = await api.labNumuneDurum(id, 3, { kalite });
         mesaj(`${y.mesaj} Süre (TAT) şimdi başladı.`);
@@ -166,12 +183,9 @@ export async function labAksiyonu(
     }
 
     case 'lab.numune-ret': {
-      const n = await metinSor(
-        'Ret nedeni:\n'
-        + Object.entries(RET_NEDENLERI).map(([k, v]) => `${k} ${v}`).join(' · '),
-        '2', 'Numune Reddi');
+      const n = await listeSor('Ret nedeni:', RET_SECENEKLERI, '2', 'Ret Nedeni');
       if (n === null) return true;
-      const retNeden = Number(n.trim());
+      const retNeden = Number(n);
       if (!RET_NEDENLERI[String(retNeden)]) {
         mesaj('Geçerli bir ret nedeni seçin.');
         return true;

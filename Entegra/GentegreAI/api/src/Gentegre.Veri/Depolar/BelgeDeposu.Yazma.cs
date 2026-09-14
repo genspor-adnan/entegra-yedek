@@ -76,6 +76,10 @@ public sealed partial class BelgeDeposu
     private static readonly Dictionary<string, string> BasvuruKolonlari = new(StringComparer.Ordinal)
     {
         ["bolumId"] = "bolum_id", ["personelId"] = "personel_id",
+        // HASTA (658): normal basvuruda belgenin carisiyle AYNI kisi, dis
+        //   kurum numunesinde FARKLI - cari gonderen kurumdur. Hasta seridi
+        //   ve listedeki "Hasta" kolonu bu alandan okur.
+        ["hastaId"] = "hasta_id",
         // Odeyen kurum (289) da basvuruya ozgu - 296 ile buraya tasindi.
         ["odeyenKurumId"] = "odeyen_kurum_id",
         // SOZLESME / ALT KURUM / SGK KATKISI (469): odeme rotasini bunlar

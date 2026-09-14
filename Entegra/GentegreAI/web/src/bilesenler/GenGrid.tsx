@@ -10,6 +10,8 @@ import { Modal } from './Modal';
 import { LogTablosu, GORUNUMLER } from './gridHucre';
 import { GridTablo } from './grid/GridTablo';
 import { agacDiz } from './grid/agacDizim';
+import { TARIH_ON_AYARLAR, tarihAraligi, type TarihOnAyar }
+  from '../sayfalar/liste/tarihAralik';
 import {
   filtreSatiriKosulu, } from './gridSorgu';
 import { GridMenu, gridMenuOgeleri } from './grid/GridMenu';
@@ -57,6 +59,16 @@ interface Props {
   tarihAlani?: string;
   /** Acilista dolu gelen tarih araligi (ör. ekstre: 1 Ocak - bugun). */
   tarihVarsayilan?: 'yilbasindanBugune' | 'buAy';
+  /**
+   * TARIH ARALIGI YERINE HAZIR COMBO (kullanici: "istemler listesi tarih
+   * araligi yerine basvurudaki bugun/dun gibi tarih filtre combosu
+   * gelsin"). Iki tarih kutusu doldurmak, gunluk calisilan ekranda her
+   * seferinde dort tiklama demekti; combo tek tiklama.
+   * Ayni on ayarlar basvuru seridindekiler (`tarihAralik.ts`).
+   */
+  tarihCombo?: boolean;
+  /** Combo kipinin acilis secimi ('' = tum tarihler). */
+  tarihComboVarsayilan?: TarihOnAyar | '';
   /** Tarih araligi degisince haber verir: serit suzgecleri (hakedis satirlari
       Prim Rolu / Kisi) seceneklerini ARALIGA gore yeniler. */
   onTarihAraligi?: (bas: string, bit: string) => void;
@@ -191,7 +203,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                           aksiyonEkrani, ebelgeMenusu, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
                           dovizsizGizle,
                           gizliKolonlar, kolonBasliklari, kolonSirasi, altSecenekler,
-                          tarihAlani, tarihVarsayilan,
+                          tarihAlani, tarihVarsayilan, tarihCombo, tarihComboVarsayilan,
                           onTarihAraligi,
                           aramaGorunumGizli, gorunumSecimGizli, aramaGizli,
                           aracCubuguSeritte,
@@ -240,9 +252,22 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       kapsanir (SorguUretici 'arasinda' + 1 gun), yani bugun 23:59'daki hareket
       de listeye girer. */
   // Tarih araligi (hazir secenek + disari bildirim) kendi kancasinda.
+  /** Combo kipinde secili on ayar; aralik kutulari bundan turetilir. */
+  const [tarihOn, setTarihOn] = useState<TarihOnAyar | ''>(
+    tarihCombo ? (tarihComboVarsayilan ?? 'bugun') : '');
+  /* Combo kipinin ACILIS araligi: state baslangicinda kurulamaz - aralik
+     `useTarihAraligi` icinde yasiyor. Bir kez uygulanir. */
+  const tarihIlkKurulum = useRef(false);
   const { bas: tarihBas, setBas: setTarihBas,
           bit: tarihBit, setBit: setTarihBit } =
     useTarihAraligi(tarihVarsayilan, onTarihAraligi);
+
+  useEffect(() => {
+    if (!tarihCombo || tarihIlkKurulum.current || tarihOn === '') return;
+    tarihIlkKurulum.current = true;
+    const a = tarihAraligi(tarihOn);
+    setTarihBas(a.bas); setTarihBit(a.bit);
+  }, [tarihCombo, tarihOn, setTarihBas, setTarihBit]);
   // Mockup: Liste/Grup/Analiz gorunum secimi. Grup/Analiz backend'de HENUZ YOK -
   //   grid yerine "yakinda" yer tutucu gosterilir (aksiyon stub'lariyla ayni durustluk).
   const [gorunum, setGorunum] = useState<'liste' | 'grup' | 'analiz' | 'ek'>('liste');
@@ -634,7 +659,25 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                 ))}
               </select>
             )}
-            {tarihAlani && (
+            {tarihAlani && tarihCombo && (
+              <>
+                <span className="durumseg-ayrac" />
+                <select className="kat-suzgec" value={tarihOn}
+                        title="Tarih aralığı"
+                        onChange={e => {
+                          const v = e.target.value as TarihOnAyar | '';
+                          setTarihOn(v);
+                          const a = v === '' ? { bas: '', bit: '' } : tarihAraligi(v);
+                          setTarihBas(a.bas); setTarihBit(a.bit); setSayfa(1);
+                        }}>
+                  <option value="">Tüm tarihler</option>
+                  {TARIH_ON_AYARLAR.map(t => (
+                    <option key={t.deger} value={t.deger}>{t.ad}</option>
+                  ))}
+                </select>
+              </>
+            )}
+            {tarihAlani && !tarihCombo && (
               <>
                 <span className="durumseg-ayrac" />
                 <span className="tarih-araligi">

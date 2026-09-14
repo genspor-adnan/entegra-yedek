@@ -655,6 +655,13 @@ table.grid tr.flt input {
 /* PANEL BASLIGI (lab istem detayi): hemogram 23, tam idrar 21 satir
    uretiyor - panel tek satira katlanir, "+" ile acilir. Baslik satiri
    veri satiri DEGIL, bu yuzden hafif zeminli ve tam genislikte. */
+tr.panel-basligi > td {
+  background: var(--zemin2, #f5f7fa); font-size: 11.5px;
+  border-top: 1px solid var(--cizgi2);
+}
+tr.panel-basligi .d.mini {
+  min-width: 20px; padding: 0 5px; line-height: 17px; font-weight: 700;
+}
 .detay-tablo tr.panel-basligi > td {
   background: var(--zemin2, #f5f7fa); font-size: 11.5px;
   border-top: 1px solid var(--cizgi2);
@@ -3273,3 +3280,14 @@ input.skt-gecmis {
 .agac-dugme:hover { border-color: var(--mor); color: var(--mor) }
 /* Cocugu olmayan satir da ayni hizada bassin - metinler kaymasin. */
 .agac-bosluk { width: 15px; flex: none }
+
+/* HUCRE ICI ISARET (lab sonucu): deger kutusu + yon oku yan yana.
+   Ok kutunun SAGINDA durur; ayri kolona bakmadan yon gorunsun. */
+.hucre-ekli { display: inline-flex; align-items: center; gap: 4px; }
+.rozet.hucre-ok { padding: 0 5px; font-weight: 700; line-height: 18px; }
+/* PANIK DEGER: hucre kirmizi zeminli, kutu da kirmizi cerceveli. */
+td.hucre-panik { background: var(--hatazem) }
+td.hucre-panik input { border-color: var(--hata); color: var(--hata); font-weight: 700 }
+/* Sonuc girisi penceresi: panik satirin deger hucresi kirmizi. */
+.hucre-ekli-td { white-space: nowrap }
+.detay-tablo tr.panik td { background: var(--hatazem) }

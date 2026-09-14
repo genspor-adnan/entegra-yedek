@@ -113,6 +113,18 @@ export function MesajKatmani() {
           <div className="alan-izgara tek-sutun ayar-formu" style={{ paddingTop: 10 }}>
             <label className="alan">
               {istek.girdiEtiket && <span className="etiket">{istek.girdiEtiket}</span>}
+              {/* SECENEKLI GIRDI: kutu yerine acilir liste (kullanici).
+                  Kod ezberletmek yerine ad gosterilir; donen deger koddur. */}
+              {istek.girdiSecenekleri ? (
+                <select className="genis-deger" autoFocus
+                        value={girdi}
+                        onChange={e => setGirdi(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') kapat(true) }}>
+                  {istek.girdiSecenekleri.map(x => (
+                    <option key={x.kod} value={x.kod}>{x.ad}</option>
+                  ))}
+                </select>
+              ) : (
               <span className="ikili">
                 <input className="genis-deger" autoFocus
                        ref={girdiKutusu}
@@ -130,6 +142,7 @@ export function MesajKatmani() {
                   </button>
                 )}
               </span>
+              )}
             </label>
           </div>
         )}

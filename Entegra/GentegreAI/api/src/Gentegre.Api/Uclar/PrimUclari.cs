@@ -340,6 +340,105 @@ public static class PrimUclari
             return Results.Ok(new { satirSayisi = sayac, geriAl = istek.GeriAl });
         });
 
+        // -------------------------------------------- kendi hakedişim ---
+        // GET /api/prim/hakedisim?bas=&bit=
+        //
+        // HEKİMİN KENDİ EKRANI (mockup Ekranlar/Muayene/hekim_hakedislerim):
+        // dönem özeti, kaynak kırılımı, satır listesi ve ödeme geçmişi.
+        //
+        // SÜZGECİ SUNUCU KOYAR: `taraf_id` istekten DEĞİL oturumdan gelir -
+        // istemciye bırakılsa parametreyi değiştiren herkes başkasının
+        // primini okurdu. `prim.kendi` yetkisi yalnız bunu açar; bütün
+        // kişileri gören ekran `prim` yetkisindedir (muhasebe).
+        //
+        // TAHSİL EDİLEN / BEKLEYEN AYRI: prim planı "hakediş anı =
+        // tahsilatta" ise faturalanmış ama tahsil edilmemiş tutar henüz hak
+        // edilmiş değildir (`kaynak_tur` 1 tahsilat · 2 faturalama). Tek
+        // toplam göstermek hekime olmayan parayı vaat ederdi.
+        grup.MapGet("/hakedisim", async (
+            DateTime? bas, DateTime? bit,
+            BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("prim.kendi", Islem.Gor);
+
+            var baslangic = bas?.Date ?? new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            var bitis = bit?.Date ?? baslangic.AddMonths(1).AddDays(-1);
+            var kisi = baglam.KullaniciId;
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var satirlar = await baglanti.ListeAsync("""
+                select hs.id, hs.tarih, coalesce(hs.hasta, '') as hasta,
+                       coalesce(hs.kalem, '') as kalem,
+                       hs.kaynak_tur as "kaynakTur", hs.kaynak_adi as "kaynakAdi",
+                       hs.pay, hs.pay_adi as "payAdi",
+                       hs.taban, hs.oran_tipi as "oranTipi", hs.deger,
+                       hs.tutar, hs.durum, hs.durum_adi as "durumAdi",
+                       hs.rol, hs.rol_adi as "rolAdi",
+                       hs.belge_id as "belgeId", hs.belge_tur_adi as "belgeTurAdi",
+                       coalesce(b.belge_no, '') as "belgeNo"
+                  from public.v_hakedis_satir hs
+                  left join public.belge b on b.id = hs.belge_id
+                 where hs.taraf_id = @p0 and hs.tarih between @p1 and @p2
+                 order by hs.tarih, hs.id
+                """, null, [kisi, baslangic, bitis],
+                OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            // ÖZET satırlardan TÜRETİLMEZ, ayrı sorguyla alınır: liste
+            //   sayfalanabilir, özet dönemin tamamını söylemeli.
+            var ozet = await baglanti.TekAsync("""
+                select coalesce(sum(tutar), 0) as toplam,
+                       coalesce(sum(tutar) filter (where kaynak_tur = 1), 0) as tahsil,
+                       coalesce(sum(tutar) filter (where kaynak_tur = 2), 0) as bekleyen,
+                       count(*) as satir,
+                       count(distinct belge_id) as belge,
+                       coalesce(sum(taban), 0) as taban
+                  from public.v_hakedis_satir
+                 where taraf_id = @p0 and tarih between @p1 and @p2
+                """, null, [kisi, baslangic, bitis],
+                o => new { Toplam = o.GetDecimal(0), Tahsil = o.GetDecimal(1),
+                           Bekleyen = o.GetDecimal(2), Satir = o.GetInt64(3),
+                           Belge = o.GetInt64(4), Taban = o.GetDecimal(5) }, iptal);
+
+            // KAYNAK KIRILIMI: hekimin ikinci sorusu "bu para nereden geldi"
+            //   - muayeneden mi, girişimden mi, istediği tetkikten mi.
+            var kirilim = await baglanti.ListeAsync("""
+                select coalesce(rol_adi, 'Diğer') as "ad",
+                       count(*) as "satir", coalesce(sum(tutar), 0) as "tutar"
+                  from public.v_hakedis_satir
+                 where taraf_id = @p0 and tarih between @p1 and @p2
+                 group by rol_adi order by 3 desc
+                """, null, [kisi, baslangic, bitis],
+                OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            // ÖDEME GEÇMİŞİ: kapanmış dönemler (hakedis başlığı).
+            var gecmis = await baglanti.ListeAsync("""
+                select h.id, h.donem_baslangic as "donemBaslangic",
+                       h.donem_bitis as "donemBitis", h.durum, h.toplam,
+                       coalesce(h.aciklama, '') as "aciklama"
+                  from public.hakedis h
+                 where h.taraf_id = @p0
+                 order by h.donem_baslangic desc limit 6
+                """, null, [kisi],
+                OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            return Results.Ok(new
+            {
+                kisiId = kisi,
+                donem = new { baslangic, bitis },
+                ozet = new
+                {
+                    toplam = ozet?.Toplam ?? 0m, tahsil = ozet?.Tahsil ?? 0m,
+                    bekleyen = ozet?.Bekleyen ?? 0m, taban = ozet?.Taban ?? 0m,
+                    satir = ozet?.Satir ?? 0, belge = ozet?.Belge ?? 0,
+                },
+                kirilim, satirlar, gecmis,
+                izlemeNo = baglam.IzlemeNo,
+            });
+        });
+
         // ------------------------------------------------ açık hakedişler ---
         // Dönem kapatma ekranı için: kişi bazında açık (dondurulmamış) tutar.
         grup.MapGet("/acik", async (

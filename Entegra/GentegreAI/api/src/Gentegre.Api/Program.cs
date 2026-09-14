@@ -43,6 +43,7 @@ kurucu.Services.AddHttpClient("bildirim");
 kurucu.Services.AddHostedService<Gentegre.Api.Servisler.BildirimIscisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.RandevuHatirlatmasi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.PanikDegerBildirimi>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.DisKurumBasvurusu>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.TitckIlacGuncelleme>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.SgkIlacListesi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.IlacKartFiyat>();

@@ -56,6 +56,7 @@ import { ListeKarti } from './liste/ListeKarti';
 import { useRandevuEkrani } from './liste/useRandevuEkrani';
 import { useRadyolojiModallari } from './liste/useRadyolojiModallari';
 import { RadyolojiModallari } from './liste/RadyolojiModallari';
+import { SonucGirisModali } from '../bilesenler/lab/SonucGirisModali';
 import { useUtsModallari } from './liste/useUtsModallari';
 import { UtsModallari } from './liste/UtsModallari';
 import { useBasvuruSuzgeci } from './liste/useBasvuruSuzgeci';
@@ -125,6 +126,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   // RADYOLOJI EKRAN MODALLARI (istem · randevu · teslim · kritik bulgu · sarf ·
   //   cihaz kapatma · konsultasyon) tek kancada; cizimi RadyolojiModallari yapar.
   const radyolojiModal = useRadyolojiModallari();
+  /** SONUC GIRIS penceresi (433) - secili istemin tetkikleri. */
+  const [sonucGirisi, setSonucGirisi] = useState<number | null>(null);
   // Yeni kart EKLENINCE (duzenlemede degil) grid "Son Aranan"a gecsin - kullanici
   //   az once ekledigi kaydi listede otomatik en ustte gorsun.
   const [odaklaSonEklenen, setOdaklaSonEklenen] = useState(0);
@@ -443,6 +446,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       if (await labAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
         git: yol => git(yol),
+        sonucGir: istemId => setSonucGirisi(istemId),
       })) return;
 
       if (await mikroAksiyonu(kod, satir, {
@@ -724,6 +728,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       }}
       onAksiyon={(kod, satir, secililer) => { void aksiyon(kod, satir, secililer) }}
       tarihAlani={tanim.tarihAlani}
+      tarihCombo={tanim.tarihCombo}
       // Ekstreden donunce ayni hesap secili kalsin.
       seciliBaslangicId={sonSeciliId}
       cipBaslangic={cipIndeks}
@@ -1019,6 +1024,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       />
     )}
     <RadyolojiModallari m={radyolojiModal} tazele={() => setYenile(t => t + 1)} />
+    {sonucGirisi !== null && (
+      <SonucGirisModali
+        istemId={sonucGirisi}
+        onKapat={() => setSonucGirisi(null)}
+        onKaydedildi={() => setYenile(t => t + 1)}
+      />
+    )}
     <UtsModallari m={utsModal} tazele={() => setYenile(t => t + 1)} />
     {donusum && (
       <BelgeDonusumModali

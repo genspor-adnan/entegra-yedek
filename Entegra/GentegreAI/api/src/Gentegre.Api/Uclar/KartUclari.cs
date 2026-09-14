@@ -118,13 +118,14 @@ public static class KartUclari
         grup.MapPost("/{kaynak}", async (
             string kaynak, KartYazmaIstegi istek, BaglamCozucu cozucu, KartDeposu depo, KullaniciAramaDeposu arama,
             KullaniciDeposu kullanicilar, Servisler.RandevuHatirlatmasi hatirlatma,
-            Servisler.PanikDegerBildirimi panik,
+            Servisler.PanikDegerBildirimi panik, Servisler.DisKurumBasvurusu disKurum,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KartBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste(tanim.YetkiKodu, Islem.Ekle);
 
+            var uyarilar = new List<string>();
             var degerler = Degerler(tanim, istek.Kart, baglam, yeni: true);
             await EntegrasyonModKuraliAsync(tanim, degerler, depo, iptal);
             var yeniId = await depo.EkleAsync(tanim, degerler, istek.Detaylar,
@@ -157,6 +158,17 @@ public static class KartUclari
                     .GetRequiredService<ILoggerFactory>().CreateLogger("Lab")
                     .LogError(h, "Lab istem {Id}: panik bildirimi konamadi.", yeniId); }
 
+            // DIS KURUM NUMUNESI UCRETLENDIRILIR (kullanici): gonderen kuruma
+            //   basvuru acilir, tetkikler ucret satiri olur. SESSIZ: duserse
+            //   istem kaydi durur - numune kabul edildi, muhasebe adimi
+            //   sonradan elle tamamlanabilir.
+            if (tanim.Ad == "lab-istem")
+                try { var u = await disKurum.TazeleAsync(yeniId, baglam, iptal);
+                      if (u is not null) uyarilar.Add(u); }
+                catch (Exception h) { ctx.RequestServices
+                    .GetRequiredService<ILoggerFactory>().CreateLogger("Lab")
+                    .LogError(h, "Lab istem {Id}: dis kurum basvurusu acilamadi.", yeniId); }
+
             var (okunabilir, _) = Alanlar(tanim, baglam, await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal));
             var kart = await depo.OkuAsync(tanim, yeniId, okunabilir, null, iptal);
             var govde = new Dictionary<string, object?>(kart!.Value.Kart, StringComparer.Ordinal)
@@ -168,6 +180,7 @@ public static class KartUclari
             {
                 Kart = govde,
                 Detaylar = (await depo.DetaylarAsync(tanim, yeniId, iptal)).Satirlar,
+                Uyarilar = uyarilar.Count > 0 ? uyarilar : null,
                 IzlemeNo = baglam.IzlemeNo
             });
         });
@@ -176,6 +189,7 @@ public static class KartUclari
         grup.MapPut("/{kaynak}/{id:long}", async (
             string kaynak, long id, KartYazmaIstegi istek, BaglamCozucu cozucu, KartDeposu depo,
             Servisler.RandevuHatirlatmasi hatirlatma, Servisler.PanikDegerBildirimi panik,
+            Servisler.DisKurumBasvurusu disKurum,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KartBul(kaynak);
@@ -186,6 +200,7 @@ public static class KartUclari
                 throw GentegreHatasi.Dogrulama("Guncellemede surum zorunludur.",
                     new AlanHatasi("surum", "Kart okunurken donen surum geri gonderilmeli."));
 
+            var uyarilar = new List<string>();
             var (okunabilir, _) = Alanlar(tanim, baglam, await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal));
             var degerler = Degerler(tanim, istek.Kart, baglam, yeni: false);
 
@@ -207,6 +222,15 @@ public static class KartUclari
                     .GetRequiredService<ILoggerFactory>().CreateLogger("Lab")
                     .LogError(h, "Lab istem {Id}: panik bildirimi konamadi.", id); }
 
+            // Sonradan tetkik EKLENIRSE ayni basvuruya girer; durum
+            //   "Sonuclandi" ise basvuru tahakkuka cevrilip kapanir.
+            if (tanim.Ad == "lab-istem")
+                try { var u = await disKurum.TazeleAsync(id, baglam, iptal);
+                      if (u is not null) uyarilar.Add(u); }
+                catch (Exception h) { ctx.RequestServices
+                    .GetRequiredService<ILoggerFactory>().CreateLogger("Lab")
+                    .LogError(h, "Lab istem {Id}: dis kurum ucretlendirmesi yapilamadi.", id); }
+
             var kart = await depo.OkuAsync(tanim, id, okunabilir, baglam.Kapsam, iptal)
                        ?? throw GentegreHatasi.Bulunamadi();
             var govde = new Dictionary<string, object?>(kart.Kart, StringComparer.Ordinal)
@@ -218,6 +242,7 @@ public static class KartUclari
             {
                 Kart = govde,
                 Detaylar = (await depo.DetaylarAsync(tanim, id, iptal)).Satirlar,
+                Uyarilar = uyarilar.Count > 0 ? uyarilar : null,
                 IzlemeNo = baglam.IzlemeNo
             });
         });

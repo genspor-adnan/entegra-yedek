@@ -638,6 +638,35 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
         var otoOnay = otoOnaySerbest && s.OtoOnay == 1 && bayrak == "N"
                       && !panik && !deltaUyari && kkGecerli && indeksDurum == 0;
 
+        // ÖNCEKİ AKTİF SONUÇ: aynı satıra ikinci kez yazmak iki CANLI sonuç
+        //   bırakıyordu (aynı tetkikte 30 ve 130 yan yana durdu; ekran son
+        //   yazılanı gösteriyor, onay kuyruğu ötekini de taşıyordu).
+        //   ONAYLANMAMIŞ önceki sonuç düzeltme değil TEKRAR GİRİŞTİR:
+        //   iptal edilir, izi `duzeltme_neden`de kalır. ONAYLI sonucun
+        //   üzerine elle yazılamaz - düzeltme ayrı işlemdir (neden
+        //   zorunlu, oto-onay kapalı, eski satır damgalı).
+        var oncekiSonuc = await baglanti.TekAsync("""
+            select id, durum from public.lab_sonuc
+             where istem_satir_id = @p0 and durum <> 4
+             order by id desc limit 1
+            """, islem, [s.Id],
+            o => new { Id = o.GetInt64(0), Durum = o.GetInt16(1) }, iptal);
+
+        if (oncekiSonuc is not null)
+        {
+            if (oncekiSonuc.Durum >= 3)
+                throw GentegreHatasi.IsKurali(
+                    "Bu tetkikte onaylı sonuç var - değiştirmek için düzeltme yapın "
+                    + "(neden zorunlu, eski sonuç iptal edilip yenisi açılır).");
+
+            await baglanti.CalistirAsync("""
+                update public.lab_sonuc
+                   set durum = 4, duzeltme_neden = 'Yeniden girildi (onaysızdı)',
+                       degistiren = @p1, degistirme_tarihi = now()
+                 where id = @p0
+                """, islem, [oncekiSonuc.Id, baglam.KullaniciId], iptal);
+        }
+
         var sonucId = await baglanti.TekDegerAsync<long>("""
             insert into public.lab_sonuc
                    (istem_satir_id, numune_id, tetkik_id, deger_sayisal, deger_metin,
@@ -668,12 +697,46 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
 
         // Satır durumu: oto-onayda 5 (onaylı), indeks RET'inde 6 (tekrar
         //   numune bekliyor), diğerinde 3 (sonuçlandı, onay bekliyor).
+        //
+        // SATIRIN sonuc/birim/referans/isaret KOLONLARI AYNADIR: asıl sonuç
+        //   lab_sonuc'ta (onay ve düzeltme geçmişi tek satıra sığmıyor), ama
+        //   istem kartının "Tetkikler" gridi, raporlar ve eski ekranlar bu
+        //   kolonlardan okuyor. Yazmayınca kullanıcı sonucu girdiği hâlde
+        //   kartta BOŞ görüyordu - iki depo arasında sessiz bir ayrışma.
+        //   Ayna TEK YÖNLÜ: kaynak daima lab_sonuc, buraya yalnız kopyalanır.
         await baglanti.CalistirAsync("""
             update public.lab_istem_satir
                set durum = case when @p2 = 2 then 6
-                                when @p1 = 1 then 5 else 3 end
+                                when @p1 = 1 then 5 else 3 end,
+                   sonuc = @p3, birim = @p4, referans = @p5, isaret = @p6,
+                   -- GİRİŞİN KAYNAĞI GÖRÜNÜR OLSUN (kullanıcı: "sonucu elle
+                   --   değiştirdiğim / girdiğim bilgisi nerede"): cihaz
+                   --   bağlantısı yoksa kolon "Elle giriş" der; kim ve ne
+                   --   zaman bilgisi lab_sonuc.ekleyen/olcum_zamani'nda durur.
+                   -- CASTLER ZORUNLU: cihazId NULL gelince Npgsql
+                   --   parametrenin tipini bildiremiyor ("could not determine
+                   --   data type of parameter") ve sonuc yazimi patliyordu.
+                   cihaz = case
+                             -- ELLE GIRIS IKONLA (kullanici: "elle yerine
+                             --   ikon ciksin"): kalem isareti + giren kisi.
+                             --   "Elle · Ad" dar kolonda kisi adini kirpiyordu.
+                             when @p7::int is null then coalesce(
+                                    (select '✍ ' || k.ad
+                                       from public.v_kullanici_lookup k
+                                      where k.id = @p8::int), '✍')
+                             else coalesce(
+                                    (select coalesce(c.kod, c.ad)
+                                       from public.cihaz c where c.id = @p7::int),
+                                    'Cihaz') end,
+                   sonuc_tarihi = now()
              where id = @p0
-            """, islem, [s.Id, (short)(otoOnay ? 1 : 0), indeksDurum], iptal);
+            """, islem,
+            [s.Id, (short)(otoOnay ? 1 : 0), indeksDurum,
+             istek.Deger,
+             string.IsNullOrWhiteSpace(istek.Birim) ? s.Birim : istek.Birim,
+             AralikMetni(r?.Alt, r?.Ust, r?.Metin ?? ""),
+             IsaretKodu(bayrak, panik),
+             cihazId, baglam.KullaniciId], iptal);
 
         await IstemDurumTazeleAsync(baglanti, islem, s.IstemId, iptal);
         await islem.CommitAsync(iptal);
@@ -955,9 +1018,40 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
             """, [mesajId, hata], iptal);
 
     /// <summary>
-    /// İstem durumu satırlardan TÜRETİLİR: hepsi onaylıysa tamamlandı, bir
-    /// kısmı onaylıysa kısmi sonuç. İki yerde ayrı ayrı tutmak, listede
-    /// "tamamlandı" görünüp içinde bekleyen tetkik olması demekti.
+    /// Ayna kolonu için referans metni: "0,5 - 1,2" / serbest metin.
+    /// Sayısal aralık yoksa tetkik zaten metin referansla çalışıyordur.
+    /// </summary>
+    private static string AralikMetni(decimal? alt, decimal? ust, string metin)
+        => alt is null && ust is null
+            ? metin
+            : alt is not null && ust is not null
+                ? $"{alt:0.####} - {ust:0.####}"
+                : alt is not null ? $"> {alt:0.####}" : $"< {ust:0.####}";
+
+    /// <summary>
+    /// Bayrak (N/L/H/LL/HH) -> satırın `isaret` kodu (0 Normal, 1 Düşük,
+    /// 2 Yüksek, 3 Panik). Panik HER İKİ YÖNDE de 3'tür: kartta "düşük"
+    /// görünen kritik değer, bakan kişiye aciliyetini söylemezdi.
+    /// </summary>
+    private static short IsaretKodu(string bayrak, bool panik)
+        => panik ? (short)3
+           : bayrak.StartsWith('L') ? (short)1
+           : bayrak.StartsWith('H') ? (short)2 : (short)0;
+
+    /// <summary>
+    /// İstem durumu satırlardan TÜRETİLİR. İki yerde ayrı ayrı tutmak,
+    /// listede "tamamlandı" görünüp içinde bekleyen tetkik olması demekti.
+    ///
+    /// <para>Eşik (kullanıcı: "bütün sonuçlar dolunca sonuçlandı durumuna
+    /// geçer"): 4 SONUÇLANDI yalnız HER satır sonuçlandığında verilir -
+    /// bir kısmı sonuçlanmışken istem "Çalışılıyor"dur. Önceki kural ilk
+    /// onaylı satırda 4'e geçiyordu: 23 parametrelik hemogramın biri
+    /// onaylanınca istem "Sonuçlandı" görünüyor, kalan 22 tetkik
+    /// listede kimsenin dikkatini çekmiyordu.</para>
+    ///
+    /// <para>Sonuçlanmış sayılanlar: 3 sonuçlandı, 4 teknik onay, 5 onaylı.
+    /// 6 (tekrar numune bekliyor) ve 7 (dış laboratuvarda) SAYILMAZ -
+    /// ikisinde de o tetkiğin sonucu hâlâ yok.</para>
     /// </summary>
     private static async Task IstemDurumTazeleAsync(NpgsqlConnection baglanti,
         NpgsqlTransaction? islem, int istemId, CancellationToken iptal)
@@ -966,16 +1060,30 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
                set durum = case
                      when k.toplam = 0 then i.durum
                      when k.onayli = k.toplam then 5
-                     when k.onayli > 0 then 4
+                     when k.sonuclu = k.toplam then 4
                      when k.sonuclu > 0 then 3
                      else i.durum end,
-                   sonuc_tarihi = case when k.onayli = k.toplam then now()
+                   -- Sonuc tarihi TUM satirlar sonuclaninca damgalanir;
+                   --   TAT olcumu "son tetkik bitti" anini ister.
+                   sonuc_tarihi = case when k.sonuclu = k.toplam then now()
                                        else i.sonuc_tarihi end
               from (select count(*) as toplam,
                            count(*) filter (where durum = 5) as onayli,
-                           count(*) filter (where durum in (3, 4)) as sonuclu
+                           count(*) filter (where durum in (3, 4, 5)) as sonuclu
                       from public.lab_istem_satir where istem_id = @p0
                         and durum <> 0) k
              where i.id = @p0
+               -- DEGISMEYECEKSE YAZMA: her sonuc yaziminda lab_istem satirini
+               --   guncellemek xmin'i (essamanlilik damgasi) degistiriyor;
+               --   acik duran istem karti sonrasinda 409 "kayit degisti"
+               --   aliyordu. Ustelik her yazim olu satir uretiyordu.
+               and (i.durum is distinct from case
+                        when k.toplam = 0 then i.durum
+                        when k.onayli = k.toplam then 5
+                        when k.sonuclu = k.toplam then 4
+                        when k.sonuclu > 0 then 3
+                        else i.durum end
+                    or (k.toplam > 0 and k.sonuclu = k.toplam
+                        and i.sonuc_tarihi is null))
             """, islem, [istemId], iptal);
 }

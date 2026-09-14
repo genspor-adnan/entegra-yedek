@@ -19,11 +19,10 @@ object StokListeDlg: TStokListeDlg
     Left = 3
     Top = 3
     Width = 968
-    Height = 29
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
-    ButtonWidth = 40
+    ButtonWidth = 105
     Caption = 'AletCubugu'
     Color = clTeal
     DockSite = True
@@ -47,32 +46,32 @@ object StokListeDlg: TStokListeDlg
     TabOrder = 0
     Transparent = True
     object YeniTus: TToolButton
-      AutoSize = True
       Left = 0
       Top = 0
+      AutoSize = True
       Caption = 'Yeni'
       ImageIndex = 7
       OnClick = YeniTusClick
     end
     object SilTus: TToolButton
-      AutoSize = True
-      Left = 105
+      Left = 60
       Top = 0
+      AutoSize = True
       Caption = 'Sil'
       ImageIndex = 8
       OnClick = SilTusClick
     end
     object DegisTus: TToolButton
-      AutoSize = True
-      Left = 210
+      Left = 109
       Top = 0
+      AutoSize = True
       Caption = 'D'#252'zenle'
       ImageIndex = 9
       Style = tbsTextButton
       OnClick = DegisTusClick
     end
     object ToolButton1: TToolButton
-      Left = 315
+      Left = 187
       Top = 0
       Width = 8
       Caption = 'ToolButton1'
@@ -80,9 +79,9 @@ object StokListeDlg: TStokListeDlg
       Style = tbsSeparator
     end
     object AraTus: TToolButton
-      AutoSize = True
-      Left = 323
+      Left = 195
       Top = 0
+      AutoSize = True
       Caption = 'AraTus'
       Enabled = False
       ImageIndex = 21
@@ -90,23 +89,23 @@ object StokListeDlg: TStokListeDlg
       OnClick = AraTusClick
     end
     object YaziciYaz: TToolButton
-      AutoSize = True
-      Left = 428
+      Left = 267
       Top = 0
+      AutoSize = True
       Caption = 'Yazd'#305'r'
       DropdownMenu = PopupMenuYaz
       ImageIndex = 16
     end
     object BtnBarkodYazdir: TToolButton
-      AutoSize = True
-      Left = 533
+      Left = 338
       Top = 0
+      AutoSize = True
       Caption = 'Barkod Yazd'#305'r'
       ImageIndex = 58
       OnClick = BtnBarkodYazdirClick
     end
     object ToolButton2: TToolButton
-      Left = 638
+      Left = 447
       Top = 0
       Width = 8
       Caption = 'ToolButton2'
@@ -114,9 +113,9 @@ object StokListeDlg: TStokListeDlg
       Style = tbsSeparator
     end
     object ButtonUTS: TToolButton
-      AutoSize = True
-      Left = 646
+      Left = 455
       Top = 0
+      AutoSize = True
       Caption = #220'TS'
       ImageIndex = 59
       OnClick = ButtonUTSClick
@@ -124,17 +123,15 @@ object StokListeDlg: TStokListeDlg
   end
   object GridStok: TcxGrid
     Left = 0
-    Top = 32
+    Top = 35
     Width = 974
-    Height = 139
+    Height = 136
     Align = alClient
     PopupMenu = PmStok
     TabOrder = 3
     LookAndFeel.Kind = lfOffice11
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
-    ExplicitTop = 35
-    ExplicitHeight = 136
     object GridStokView: TcxGridDBTableView
       OnDblClick = DegisTusClick
       Navigator.Buttons.CustomButtons = <>
@@ -392,7 +389,6 @@ object StokListeDlg: TStokListeDlg
     HotZoneClassName = 'TcxMediaPlayer8Style'
     AlignSplitter = salBottom
     Control = Panel1
-    ExplicitWidth = 8
   end
   object Panel1: TPanel
     Left = 0
@@ -402,7 +398,6 @@ object StokListeDlg: TStokListeDlg
     Align = alBottom
     TabOrder = 1
     object PageControl1: TcxPageControl
-      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 1
       Width = 787
@@ -411,6 +406,7 @@ object StokListeDlg: TStokListeDlg
       TabOrder = 0
       Properties.ActivePage = tshFiyatlar
       Properties.CustomButtons.Buttons = <>
+      Properties.Images = Tablo.PNGImageList2
       Properties.MultiLine = True
       OnPageChanging = PageControl1PageChanging
       ClientRectBottom = 328
@@ -569,10 +565,6 @@ object StokListeDlg: TStokListeDlg
       object tshStokDurum: TcxTabSheet
         Caption = 'Stok Durum'
         ImageIndex = 12
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Panel8: TPanel
           Left = 0
           Top = 0
@@ -747,10 +739,6 @@ object StokListeDlg: TStokListeDlg
             object cxTabSheet1: TcxTabSheet
               Caption = 'Da'#287#305'l'#305'm'
               ImageIndex = 19
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object cxGrid2: TcxGrid
                 Left = 0
                 Top = 0
@@ -803,10 +791,6 @@ object StokListeDlg: TStokListeDlg
             object TabSheetSeriLot: TcxTabSheet
               Caption = 'Seri / Lot'
               ImageIndex = 19
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object GridSeriLot: TcxGrid
                 Left = 0
                 Top = 27
@@ -834,6 +818,7 @@ object StokListeDlg: TStokListeDlg
                   DataController.Summary.SummaryGroups = <>
                   OptionsCustomize.ColumnsQuickCustomization = True
                   OptionsData.Deleting = False
+                  OptionsData.Editing = False
                   OptionsData.Inserting = False
                   OptionsSelection.HideFocusRectOnExit = False
                   OptionsSelection.UnselectFocusedRecordOnExit = False
@@ -931,10 +916,6 @@ object StokListeDlg: TStokListeDlg
       object tshHareketler: TcxTabSheet
         Caption = 'Hareketler'
         ImageIndex = 32
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object GridHareket: TcxGrid
           Left = 0
           Top = 0
@@ -1189,10 +1170,6 @@ object StokListeDlg: TStokListeDlg
           object cxTabSheet4: TcxTabSheet
             Caption = 'Seri / Lot'
             ImageIndex = 19
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object GridSeriLotHareket: TcxGrid
               Left = 0
               Top = 0
@@ -1262,12 +1239,8 @@ object StokListeDlg: TStokListeDlg
       end
       object TshEsDegerUrun: TcxTabSheet
         Caption = 'E'#351'de'#287'er '#220'r'#252'n'
-        TabVisible = False
         ImageIndex = 12
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
+        TabVisible = False
         object ToolBar3: TToolBar
           AlignWithMargins = True
           Left = 3
@@ -1379,10 +1352,6 @@ object StokListeDlg: TStokListeDlg
       object TabYorumMedya: TcxTabSheet
         Caption = 'Yorum / Medya'
         ImageIndex = 38
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object Panel4: TPanel
           Left = 0
           Top = 260
@@ -1443,7 +1412,6 @@ object StokListeDlg: TStokListeDlg
           Properties.Alignment.Horz = taRightJustify
           Transparent = True
           Visible = False
-          ExplicitTop = 239
           AnchorX = 779
         end
         object GridYorum: TcxGrid
@@ -1686,7 +1654,7 @@ object StokListeDlg: TStokListeDlg
   end
   object DtsStoklar: TDataSource
     DataSet = STOKLAR
-    Left = 137
+    Left = 169
     Top = 59
   end
   object STOKLAR: TFDQuery
@@ -1740,7 +1708,7 @@ object StokListeDlg: TStokListeDlg
       ''
       '')
     Left = 36
-    Top = 58
+    Top = 66
   end
   object STOKFIYAT: TFDQuery
     AutoCalcFields = False
@@ -2042,7 +2010,7 @@ object StokListeDlg: TStokListeDlg
   object PmStok: TPopupMenu
     Images = Tablo.PNGImageList2
     OnPopup = PmStokPopup
-    Left = 183
+    Left = 143
     Top = 127
     object StokInfoMenu: TMenuItem
       Caption = 'info'

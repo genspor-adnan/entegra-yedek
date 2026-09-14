@@ -376,6 +376,19 @@ public static partial class KaynakKatalogu
         Kolonlar: new KolonTanimi[]
         {
             new("id",      "h.id",       "sayi",  "Id",         Varsayilan: false),
+            // LABORATUVAR KARSILIGI VAR MI: hizmet bir tetkige ya da panele
+            //   bagli mi (638-640). Lab istem kartinda tetkik JENERIK HIZMET
+            //   penceresinden seciliyor; suzgec olmadan 10 binlik SUT listesi
+            //   aciliyor ve secilen hizmetin cogunun laboratuvar karsiligi
+            //   YOK - kullanici ancak sectikten sonra "karsiligi tanimli
+            //   degil" hatasini goruyordu. Kolon gizli, yalniz suzmek icin.
+            new("labVarMi",
+                "case when exists (select 1 from public.lab_tetkik t "
+                + "                 where t.hizmet_id = h.id and t.durum = 0) "
+                + "        or exists (select 1 from public.lab_panel p "
+                + "                    where p.hizmet_id = h.id and p.durum = 0) "
+                + "      then 1 else 0 end",
+                                     "sayi",  "Lab",        Varsayilan: false),
             new("kod",     "h.kod",      "metin", "Kod"),
             // KISA AD (549, kullanici: "ad'in soluna Kisa Ad ekle, aramada
             //   oncelik ona olsun"): katalog SKRS'den kuruldugu icin `ad`

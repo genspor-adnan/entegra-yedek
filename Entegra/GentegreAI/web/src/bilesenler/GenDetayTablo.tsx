@@ -1,5 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Modal } from './Modal';
+import { api } from '../api/istemci';
+import { hataMetni } from '../api/sozlesme';
+import { mesaj } from './mesaj';
 import { StokAramaPenceresi } from './StokAramaPenceresi';
 import { TarafArama } from './TarafArama';
 import { tarafSecimEngeli } from './tarafSecimEngeli';
@@ -24,6 +27,9 @@ export interface DetayDurumu {
   guncel: Satir[];     // ekranda duzenlenmis hali
   silinen: number[];   // kaldirilan mevcut satirlarin id'leri
 }
+
+/** Sag hizali, ondalikli klavye acan alan tipleri. */
+const SAYISAL_TIPLER = new Set(['sayi', 'ondalik', 'para', 'yuzde']);
 
 export const bosDetay = (satirlar: Satir[] = []): DetayDurumu => ({
   ilk: satirlar.map(s => ({ ...s })),
@@ -99,6 +105,33 @@ interface Props {
    * ve carpandir.
    */
   hizliAlanlar?: ReadonlySet<string>;
+  /**
+   * HUCRE SUNUCUYA YAZILIR (kullanici: "tetkikler sekmesinde sonuc kolonu
+   * girise izin vermiyor" · "modalsiz de girmem lazim"). Verilince hizli
+   * hucre degerini KARTIN TASLAGINA degil, dogrudan kendi ucuna yazar ve
+   * donen yamayi satira isler.
+   *
+   * Lab sonucunda sart: deger `lab_sonuc`a yazilmali ki referans, bayrak,
+   * panik ve delta kurallari calissin. Kart taslagina yazmak, sonucu
+   * kural motorunu atlayarak eski `lab_istem_satir.sonuc` kolonuna
+   * dusururdu - bayraksiz, onaysiz, e-Nabiz'a gitmeyen bir "sonuc".
+   *
+   * Yama HEM `guncel` HEM `ilk` satirina islenir: sunucu zaten yazdi,
+   * kart bunu "kaydedilmemis degisiklik" saymamali.
+   */
+  hucreYaz?(satir: Satir, alan: string, deger: string):
+    Promise<Record<string, unknown> | void>;
+  /**
+   * HUCRENIN SAGINA EK ISARET (kullanici: "dusuk / yuksek durumunda
+   * saginda ok ikonu da olsun"). Degerin YANINDA durur - ayri kolona
+   * bakmadan, sayiyi okurken yonu de gorunsun.
+   */
+  hucreEki?(satir: Satir, alan: string): ReactNode;
+  /**
+   * HUCRE SINIFI (kullanici: "panikte hucre kirmizi olsun"). Panik deger
+   * kacirilmamali: rozet ve ok kucuk, HUCRENIN KENDISI isaretlenir.
+   */
+  hucreSinifi?(satir: Satir, alan: string): string | undefined;
   /**
    * SECILI SATIRLARA TEK DEGER YAZAN toplu islemler (534, kullanici: "sil
    * butonu saginda Çarpan Gir" · "isaretlilere ekrandan modal olarak alinmis
@@ -324,7 +357,8 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                                silGizli,
                                aramaKaynaklari, aramaEkFiltre, ekSuzgec,
                                modalAltBilesen,
-  sayfa, toplam, onSayfa, sayfaYukleniyor, onSuzgec, hizliAlanlar, onSecim, ustSuzgec,
+  sayfa, toplam, onSayfa, sayfaYukleniyor, onSuzgec, hizliAlanlar, hucreYaz,
+  hucreEki, hucreSinifi, onSecim, ustSuzgec,
 }: Props) {
   // SAYFALI DETAY (525): serit yalniz katalog sayfa boyu verdiyse VE toplam
   //   bir sayfaya sigmiyorsa cizilir - iki satirlik adres detayinda "1 / 1"
@@ -370,6 +404,28 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const primSatiri = meta.ad === 'satirlar'
                      && meta.alanlar.some(a => a.ad === 'hedefId')
                      && meta.alanlar.some(a => a.ad === 'oranTipi');
+
+  /**
+   * LAB ISTEM SATIRLARI - PANEL KATLAMA (kullanici: "eklenmis tetkik panel
+   * ise + ile detay acabilme olsun, default kapali").
+   *
+   * Hemogram 23, tam idrar 21 satir uretiyor; ikisi birden istenen bir
+   * istemde grid 44 satir aciliyor ve panel DISI tetkikler (CRP, TSH…)
+   * gorunmez oluyor. Panel TEK BASLIK satirina katlanir.
+   *
+   * Detay kimligi OTEKI DETAYLARLA AYNI DESENDE (primSatiri gibi): `meta.ad`
+   * + ayirt edici alan. Bilesen hangi KARTTAN acildigini bilmiyor.
+   */
+  const labSatiri = meta.ad === 'satirlar'
+                    && meta.alanlar.some(a => a.ad === 'tetkikId')
+                    && meta.alanlar.some(a => a.ad === 'panelId');
+  /** Acik panel kimlikleri - varsayilan BOS, yani hepsi kapali. */
+  const [acikPaneller, setAcikPaneller] = useState<Set<number>>(new Set());
+  const panelAcKapa = (id: number) => setAcikPaneller(o => {
+    const y = new Set(o);
+    if (y.has(id)) y.delete(id); else y.add(id);
+    return y;
+  });
 
   /**
    * KAYITLI urun satirinda ad (268): sunucu yalniz id tasir, kart acilinca
@@ -425,6 +481,20 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
    */
   const [modalUrunArama, setModalUrunArama] = useState(false);
 
+  /**
+   * HUCRE DUZENLEME KIPI (kullanici: "edit butonu saginda sonuc elle girme
+   * ikonu... basinca sonuc kolonu edit sekline gelsin, tekrar basinca
+   * kapansin; kart acilisinda edit modda olmasin").
+   *
+   * KAPALI ACILIR: kart okumak icin de aciliyor ve her satirda acik kutu,
+   * yanlislikla yazmayi davet ediyordu - sonuc yazmak `lab_sonuc`a kayit
+   * dusuren, geri alinmasi duzeltme gerektiren bir istir.
+   */
+  const [hucreKipi, setHucreKipi] = useState(false);
+  /** Sunucuya yazilan hucre ("satirIndeks-alan"): kutu o sirada kilitli. */
+  const [yazilanHucre, setYazilanHucre] = useState('');
+  /** Yazim HATA verirse kutu eski degerine donsun diye anahtar sayaci. */
+  const [hucreSurum, setHucreSurum] = useState(0);
   /** Secili satir (modalDuzenle kipinde): ustteki ✎ / 🗑 buna uygulanir. */
   /**
    * SECILI SATIRLAR (534, kullanici: "tumunu isaretle sec" · "check ekle").
@@ -640,8 +710,16 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
    * onlari DISARIDA birakir - yoksa prim satiri gridine ait olmayan dort
    * kolon eklenirdi.
    */
+  /* BELGE KALEM DUZENI yalniz BELGE satirlarinda (kullanici: lab isteminde
+     "kategori kod adi bos, onlar ne ise yariyor"). Kosul detayin ADINA
+     bakiyordu ve `satirlar` adini prim, kampanya ve LAB ISTEM detaylari da
+     tasiyor: lab istemine Tip / Kategori / Kod / HUV Kodu / Adi kolonlari
+     ekleniyordu. O kolonlar `stokId` ve `hizmetId` alanlarindan besleniyor -
+     lab satirinda ikisi de yok, hepsi bos cikiyordu.
+     Lab isteminin kendi kolonlari (Tetkik, Panel, Kod, Test Adi, Sonuc,
+     Birim, Referans…) katalogda zaten tanimli. */
   const satirlarGrid = !!modalDuzenle && meta.ad === 'satirlar'
-                       && !primSatiri && !kampanyaSatiri;
+                       && !primSatiri && !kampanyaSatiri && !labSatiri;
   /**
    * HUV KODU KOLONU (kullanici: "ttb/huv tarife ise kodun sağında HUV Kodu").
    * Ayri bir bayrak GEREKMEZ: alan oteki tarifelerde zaten gizleniyor
@@ -756,6 +834,32 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
   const hizliHucre = (ad: string) =>
     hizliAlanlar ? hizliAlanlar.has(ad) : (ad === 'fiyat' || ad === 'katkiTutar');
 
+  /**
+   * Hucre yazimi: `hucreYaz` verilmisse SUNUCUYA, yoksa kart taslagina.
+   * Hata halinde kutu eski degerine donmeli - `hucreSurum` anahtara
+   * girdigi icin artirmak kutuyu yeniden kurar.
+   */
+  const hizliHucreIsle = async (satirIndeks: number, metin: string, alan: string) => {
+    if (!hucreYaz) { fiyatHucreIsle(satirIndeks, metin, alan); return }
+    const eski = durum.guncel[satirIndeks];
+    const deger = metin.trim();
+    if (deger === '' || String(eski[alan] ?? '') === deger) return;
+    setYazilanHucre(`${satirIndeks}-${alan}`);
+    try {
+      const yama = (await hucreYaz(eski, alan, deger)) ?? {};
+      const uygula = (r: Satir) => ({ ...r, [alan]: deger, ...yama });
+      onDegis({
+        ...durum,
+        ilk: durum.ilk.map(r => (r.id === eski.id ? uygula(r) : r)),
+        guncel: durum.guncel.map((r, x) => (x === satirIndeks ? uygula(r) : r)),
+      });
+    } catch (h) {
+      mesaj(hataMetni(h));
+      setHucreSurum(n => n + 1);
+    }
+    setYazilanHucre('');
+  };
+
   const aramaAnahtari = arama.trim().toLocaleLowerCase('tr');
   const cipSuz = cipler?.[aktifCip]?.suz;
   // SUNUCU SUZGECI VARSA ISTEMCI SUZMEZ (526): sunucu zaten suzulmus sayfayi
@@ -768,6 +872,20 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
     .filter(({ satir }) => sunucuSuzgeci || !ekSuzgec?.suz || ekSuzgec.suz(satir))
     .filter(({ satir }) => sunucuSuzgeci || !aramaAnahtari
       || alanlar.some(a => gorunum(satir, a).toLocaleLowerCase('tr').includes(aramaAnahtari)));
+  /* PANEL GRUPLARI (lab istem satirlari): her panelin KAC satiri var ve
+     grubun ILK gorunur satiri hangisi. Baslik o satirin yerine cizilir -
+     panelleri basa toplamak istemin sirasini bozardi. */
+  const panelAdlari = alanlar.find(a => a.ad === 'panelId')?.kodlar ?? {};
+  const panelSayisi = new Map<number, number>();
+  const panelIlkSatir = new Map<number, number>();
+  if (labSatiri)
+    gorunurler.forEach(({ satir, i }) => {
+      const p = Number(satir.panelId ?? 0);
+      if (!p) return;
+      panelSayisi.set(p, (panelSayisi.get(p) ?? 0) + 1);
+      if (!panelIlkSatir.has(p)) panelIlkSatir.set(p, i);
+    });
+
   const aramaVar = modalDuzenle && (durum.guncel.length > 20 || arama !== '');
 
   return (
@@ -813,8 +931,20 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                     🗑{secililer.size > 1 ? ` ${secililer.size}` : ''}
                   </button>
                   )}
-
                 </>
+              )}
+              {/* SONUC ELLE GIRME: yalniz sunucuya yazan hucresi olan
+                  gridde (lab istem satirlari). Acikken kolon kutuya
+                  doner, kapaliyken duz metin. */}
+              {hucreYaz && (
+                <button type="button"
+                        className={`d ikon-dugme${hucreKipi ? ' bir' : ''}`}
+                        title={hucreKipi ? 'Sonuç girişini kapat'
+                                         : 'Sonuçları elle gir'}
+                        // IKON, "Giris" sutunundaki ELLE GIRIS damgasiyla
+                        //   AYNI (kullanici): ✍ kalemle yazan el. Ayri ikon
+                        //   kullanmak, ayni isi iki isaretle anlatmakti.
+                        onClick={() => setHucreKipi(a => !a)}>✍</button>
               )}
               {/* Suzme cipleri (kullanici: Tumu / Stok / Hizmet) - listelerin
                   durum cipleriyle ayni gorunum, yalniz gorunumu daraltir. */}
@@ -930,7 +1060,31 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           </tr>
         </thead>
         <tbody>
-          {gorunurler.map(({ satir, i }) => (
+          {gorunurler.map(({ satir, i }) => {
+            /* PANEL KATLAMA: grubun ILK satirinin YERINDE "+" tasiyan baslik
+               cizilir - panelleri basa toplamak istemin sirasini bozardi.
+               Baslik satiri veri satiri DEGIL: secim, silme ve satir
+               tiklamasi ona islemez. Grup kapaliyken satirlar hic cizilmez. */
+            const panelId = labSatiri ? Number(satir.panelId ?? 0) : 0;
+            const acikMi = !panelId || acikPaneller.has(panelId);
+            const baslik = panelId && panelIlkSatir.get(panelId) === i ? (
+              <tr className="panel-basligi">
+                <td colSpan={60}>
+                  <button type="button" className="d mini"
+                          onClick={() => panelAcKapa(panelId)}
+                          title={acikPaneller.has(panelId) ? 'Paneli kapat' : 'Paneli aç'}>
+                    {acikPaneller.has(panelId) ? '−' : '+'}
+                  </button>{' '}
+                  <b>{panelAdlari[String(panelId)] ?? 'Panel'}</b>
+                  <span className="not"> · {panelSayisi.get(panelId)} parametre</span>
+                </td>
+              </tr>
+            ) : null;
+            if (!baslik && !acikMi) return null;
+            return (
+              <Fragment key={satir.id ?? `yeni-${i}`}>
+              {baslik}
+              {acikMi && (
             <tr key={satir.id ?? `yeni-${i}`}
                 className={modalDuzenle && secili === i ? 'secili' : undefined}
                 /* SATIRA TIKLAYINCA SECILSIN (kullanici: "fiyat liste
@@ -992,17 +1146,36 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                 </>
               )}
               {modalDuzenle && gridAlanlari.map(a => (
-                <td key={a.ad} className={a.tip === 'mantik' ? 'hiza-orta' : undefined}>
-                  {satirlarGrid && hizliHucre(a.ad) && !saltOkunur && a.yazilabilir ? (
+                <td key={a.ad}
+                    className={[a.tip === 'mantik' ? 'hiza-orta' : '',
+                                hucreSinifi?.(satir, a.ad) ?? '']
+                               .filter(Boolean).join(' ') || undefined}>
+                  {/* SUNUCUYA YAZAN HUCRE katalogun `yazilabilir`
+                      bayragina BAKMAZ: lab sonuc alanlari kart kaydiyla
+                      yazilmasin diye salt-okunur isaretli, ama hucre zaten
+                      karta degil kendi ucuna yaziyor. */}
+                  {(satirlarGrid || hucreYaz || hizliAlanlar)
+                   && hizliHucre(a.ad) && !saltOkunur
+                   && (a.yazilabilir || !!hucreYaz)
+                   // Sunucuya yazan hucre YALNIZ kip acikken kutu olur.
+                   && (!hucreYaz || hucreKipi) ? (
+                    <span className="hucre-ekli">
                     <input
                       // Disaridan (modal/kural) fiyat degisince kutu tazelensin;
                       //   kullanici yazarken prop degismedigi icin remount olmaz.
-                      key={`${satir.id ?? i}-${a.ad}-${String(satir[a.ad] ?? '')}`}
+                      key={`${satir.id ?? i}-${a.ad}-${String(satir[a.ad] ?? '')}`
+                           + `-${hucreSurum}`}
                       defaultValue={String(satir[a.ad] ?? '')}
                       data-fiyat-satir={i}
                       data-fiyat-alan={a.ad}
-                      inputMode="decimal"
-                      style={{ width: 90, textAlign: 'right' }}
+                      disabled={yazilanHucre === `${i}-${a.ad}`}
+                      // Sayisal alanda sag hizali dar kutu; METIN alaninda
+                      //   (lab sonucu) genis ve soldan hizali - "negatif",
+                      //   "sari, berrak" gibi degerler sigmali.
+                      inputMode={SAYISAL_TIPLER.has(a.tip) ? 'decimal' : undefined}
+                      style={SAYISAL_TIPLER.has(a.tip)
+                             ? { width: 90, textAlign: 'right' }
+                             : { width: 140 }}
                       // Cift tik SATIR MODALINI acmasin; odaklaninca tumu
                       //   secilsin - hizli giriste dogrudan yazilir.
                       onDoubleClick={e => e.stopPropagation()}
@@ -1014,13 +1187,28 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                         const sirada = gorunurler.findIndex(g => g.i === i);
                         const hedef = gorunurler[e.key === 'ArrowUp' ? sirada - 1 : sirada + 1]?.i;
                         if (hedef !== undefined)
-                          requestAnimationFrame(() =>
-                            document.querySelector<HTMLInputElement>(
+                          requestAnimationFrame(() => {
+                            const k = document.querySelector<HTMLInputElement>(
                               `input[data-fiyat-satir="${hedef}"]`
-                              + `[data-fiyat-alan="${a.ad}"]`)?.select());
+                              + `[data-fiyat-alan="${a.ad}"]`);
+                            if (!k) return;
+                            k.select();
+                            // Odak goruntu alaninin altina cikmasin
+                            //   (kullanici): uzun gridde yazdigini
+                            //   gormeden giriyordu.
+                            k.scrollIntoView({ block: 'nearest' });
+                          });
                       }}
-                      onBlur={e => fiyatHucreIsle(i, e.target.value, a.ad)}
+                      onBlur={e => { void hizliHucreIsle(i, e.target.value, a.ad) }}
                     />
+                    {hucreEki?.(satir, a.ad)}
+                    </span>
+                  ) : hucreYaz && hizliHucre(a.ad) ? (
+                    // Kip kapali: deger duz metin, yon oku yine yaninda.
+                    <span className="hucre-ekli">
+                      {gorunum(satir, a) || '—'}
+                      {hucreEki?.(satir, a.ad)}
+                    </span>
                   ) : rozetHucresi(a.ad) ? (
                     // KDV ve DURUM ROZET (kullanici): iki degerli/az degerli
                     //   kolonlar duz metinde satir arasinda kayboluyordu.
@@ -1287,7 +1475,10 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                 </td>
               )}
             </tr>
-          ))}
+              )}
+              </Fragment>
+            );
+          })}
           {gorunurler.length === 0 && (
             <tr><td colSpan={gridAlanlari.length + (satirlarGrid ? 2 : 0)
                              + (huvKolonu ? 1 : 0) + 1} className="bos">
@@ -1520,7 +1711,46 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           KAPANMAZ - "dr" arayip Enter, sonra baska ad arayip Enter... Kapatmayi
           kullanici yapar. Zaten ekli olan ya da kod listesinde bulunmayan kisi
           ALINMAZ ve sebebi pencerede yazar. */}
-      {tarafAlani && tarafAramaAcik && (
+      {/* ARAMA KAYNAGI 'hizmet' ISE JENERIK HIZMET PENCERESI (kullanici:
+          "tetkik ekleme icin arama ekranina jenerik hizmet arama
+          gelmelidir"). `TarafArama` taraf listeleri icin yazildi; hizmet
+          kategori agaciyla aranir ve oteki ekranlarda da bu pencere
+          kullaniliyor.
+          SECILEN HIZMET LABORATUVAR KARSILIGINA COZULUR: hemogram gibi bir
+          SUT kalemi bir PANELDIR (23 parametre) - satira panel kimligi,
+          tek tetkikte tetkik kimligi yazilir. Ekran bunu kendisi bilemez,
+          sunucu soyler (`/api/lab/hizmet/{id}/tetkik`). */}
+      {tarafAlani?.aramaKaynagi === 'hizmet' && tarafAramaAcik && (
+        <StokAramaPenceresi
+          etkin
+          yalnizHizmet
+          // YALNIZ LABORATUVAR HIZMETLERI (kullanici: "tetkik eklemede
+          //   aramada sadece lab gelsin"). Suzgecsiz pencere 10 binlik SUT
+          //   listesini aciyordu; secilenlerin cogunun laboratuvar
+          //   karsiligi yok ve kullanici bunu ancak sectikten SONRA,
+          //   hatayla ogreniyordu.
+          hizmetEkFiltre={{ alan: 'labVarMi', op: 'esit', deger: 1 }}
+          onKapat={() => setTarafAramaAcik(false)}
+          onSec={secilen => {
+            void (async () => {
+              try {
+                const y = await api.labHizmetTetkik(Number(secilen.id));
+                const satir: Satir = {};
+                alanlar.forEach(a => { satir[a.ad] = a.tip === 'mantik' ? 0 : '' });
+                if (y.tetkikId) satir.tetkikId = String(y.tetkikId);
+                if (y.panelId) satir.panelId = String(y.panelId);
+                // Kod/ad satirda da tutulur: kaydetmeden once hucreler bos
+                //   gorunmesin (kayit sonrasi kaynagindan gelir).
+                satir.kod = y.kod;
+                satir.ad = y.ad;
+                onDegis({ ...durum, guncel: [...durum.guncel, satir] });
+                setTarafAramaAcik(false);
+              } catch (h) { mesaj(hataMetni(h)) }
+            })();
+          }}
+        />
+      )}
+      {tarafAlani && tarafAlani.aramaKaynagi !== 'hizmet' && tarafAramaAcik && (
         <TarafArama
           acik
           cokluSecim

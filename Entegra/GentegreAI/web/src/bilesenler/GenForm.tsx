@@ -849,6 +849,27 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
     if (ilkSekmeAnahtari) setAktifSekme(ilkSekmeAnahtari);
   }, [kayitAnahtari, ilkSekmeAnahtari]);
 
+  /**
+   * LAB ISTEMI CALISILIYOR ISE "Tetkikler" ACIK GELIR (kullanici: "istem
+   * karti, eger durum calisiliyor ise aktif sekme tetkikler olsun").
+   * O asamada kartta yapilacak tek is sonuc girmektir; Kimlik sekmesiyle
+   * acilmak teknisyene her seferinde bir tiklama fazladan yaptiriyordu.
+   *
+   * Karar KAYIT BASINA BIR KEZ: kullanici baska sekmeye gecince geri
+   * ziplamasin. `durum` kayit yuklenince dolar - bos iken karar verilmez.
+   */
+  const acilisKarari = useRef('');
+  useEffect(() => {
+    if (yeniMi || kaynak !== 'lab-istem') return;
+    if (acilisKarari.current === kayitAnahtari) return;
+    const durum = Number(deger.durum ?? 0);
+    if (!durum) return;
+    acilisKarari.current = kayitAnahtari;
+    if (durum !== 3) return;
+    const hedef = detaySekmeAnahtari('satirlar');
+    if (sekmeler.some(x => x.anahtar === hedef)) setAktifSekme(hedef);
+  }, [kaynak, kayitAnahtari, yeniMi, deger.durum, sekmeler]);
+
   /** Hangi alan hangi sekmede — hata gelince o sekmeye atlamak icin. Kimlik her zaman gorunur, atlamaya gerek yok. */
   const sekmeBul = useCallback((alanAdi: string): string | null => {
     if (alanAdi.includes('.')) {
@@ -925,6 +946,32 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
       //   her durumda soyler.
       setHata(alanHatasi.mesaj);
       return;
+    }
+
+    // LAB İSTEMİ "Sonuçlandı" / "Onaylandı" (kullanıcı: "kullanıcı sonuçlandı
+    //   yaparsa sonuç girilmemiş tetkik varsa uyar ama yine de izin ver").
+    //   Durum normalde satırlardan TÜRETİLİR; elle işaretleme o türetmeyi
+    //   ezer - eksik tetkik varsa istem listede bitmiş görünür ve kimse
+    //   dönüp bakmaz. ENGEL DEĞİL UYARI: dış laboratuvara giden, iptal
+    //   edilemeyen ya da hastanın vazgeçtiği tetkik yüzünden istemi kapatmak
+    //   meşru bir karardır; kararı veren bilerek versin.
+    if (kaynak === 'lab-istem'
+        && (Number(deger.durum) === 4 || Number(deger.durum) === 5)) {
+      const eksikler = (detaylar.satirlar?.guncel ?? [])
+        .filter(r => Number(r.durum ?? 0) !== 0
+                     && String(r.sonuc ?? '').trim() === '');
+      if (eksikler.length > 0) {
+        const adlar = eksikler.slice(0, 5)
+          .map(r => String(r.kod || r.ad || '?')).join(', ');
+        const devam = await onaySor(
+          `${eksikler.length} tetkikte sonuç girilmemiş: ${adlar}`
+          + (eksikler.length > 5 ? ' …' : '')
+          + `
+
+İstem yine de "${Number(deger.durum) === 5 ? 'Onaylandı' : 'Sonuçlandı'}"`
+          + ' olarak kaydedilsin mi?');
+        if (!devam) return;
+      }
     }
 
     setKaydediyor(true);

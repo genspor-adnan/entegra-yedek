@@ -21,7 +21,10 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     // 433'e kadar aksiyonlar 'cari-liste'den geliyordu (kopyala-yapistir
     //   kalintisi): listede lab isine ait tek dugme yoktu.
     aksiyonEkrani: 'lab-istem-liste',
-    tarihAlani: 'istemTarihi',
+    // GUNLUK EKRAN: iki tarih kutusu yerine hazir aralik combosu
+    //   (kullanici) - acilista BUGUN. Banko gunun istemleriyle calisir;
+    //   tum gecmisi birlikte gostermek listeyi kullanilamaz yapiyordu.
+    tarihAlani: 'istemTarihi', tarihCombo: true,
     // CIPLER = mockup lab_istem_numune_kabul.html arama seridi: bankonun
     //   sorusu "hangi tup bekliyor", "hangisi reddedildi". Sonuc asamalari
     //   (Calisiliyor / Sonuclandi / Onaylandi) Sonuclar ekraninin isi;

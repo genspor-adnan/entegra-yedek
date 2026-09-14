@@ -253,6 +253,21 @@ public static partial class KaynakKatalogu
             //   kolon degil - yalniz suzme icin (gizliKolonlar'da da tutulur).
             //   Ada cozen kolonlarla AYNI kaynaklardan okunur: once belgenin
             //   kendi basvuru satiri, yoksa belgeye bagli randevu.
+            // HASTA (658): dis kurum numunesinde CARI gonderen kurumdur,
+            //   hasta ayri alanda durur - "basvuruda hasta adi yok"
+            //   (kullanici). Normal basvuruda ayni kisiyi gosterir.
+            new("hastaAdi",
+                "(select coalesce(nullif(trim(h.unvan), ''), " +
+                "         trim(h.ad || ' ' || h.soyad)) " +
+                "   from public.belge_basvuru bb " +
+                "   join public.taraf h on h.id = bb.hasta_id " +
+                "  where bb.id = b.id)",
+                                                      "metin", "Hasta", Genislik: 200,
+                                                      Siralanabilir: false),
+            new("hastaId",
+                "(select bb.hasta_id from public.belge_basvuru bb where bb.id = b.id)",
+                                                      "sayi", "Hasta Id",
+                                                      Varsayilan: false, Siralanabilir: false),
             new("odeyenKurumId",
                 "(select bb.odeyen_kurum_id from public.belge_basvuru bb " +
                 "  where bb.id = b.id)",

@@ -27,6 +27,12 @@ export interface BasvuruBilgi {
    * e-Nabiz kimligidir; hasta seridinde ad altinda gosterilir.
    */
   sysTakipNo?: string;
+  /**
+   * BASVURUNUN HASTASI (658). Normal basvuruda belgenin carisiyle AYNI
+   * kisi; DIS KURUM numunesinde cari gonderen kurumdur ve hasta yalniz
+   * burada durur - hasta seridi ve listedeki "Hasta" kolonu bunu okur.
+   */
+  hastaId?: number | null;
   basvuruTuru?: number | null;
   gelisSekli?: number | null;
   gelisNedeni?: number | null;

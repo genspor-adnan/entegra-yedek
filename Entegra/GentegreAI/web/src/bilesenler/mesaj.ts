@@ -22,6 +22,13 @@ export interface MesajIstegi {
   girdiVarsayilan?: string;
   girdiEtiket?: string;
   /**
+   * GIRDI BIR LISTEDEN SECILIYORSA (kullanici: "kabul/ret butonlarinda
+   * mesajda girisler combo olsun"). Kutu yerine acilir liste cizilir;
+   * donen deger secilen KODDUR. Kod listesini metne yazip kullanicidan
+   * numara istemek, ezberi olmayan herkese metni okutuyordu.
+   */
+  girdiSecenekleri?: { kod: string; ad: string }[];
+  /**
    * UC (ya da daha cok) SECENEKLI soru - "Kaydet / İptal / Geri Dön"
    * (kullanici). Verilirse Tamam/Vazgeç yerine bu dugmeler cizilir ve secilen
    * kod `cozumSecim`e gider; pencere Escape ile kapatilirsa ILK dugme degil,
@@ -59,6 +66,29 @@ export function metinSor(metin: string, varsayilan = '', etiket = ''): Promise<s
     dinleyici!({
       metin, onayMi: true, girdiMi: true,
       girdiVarsayilan: varsayilan, girdiEtiket: etiket,
+      cozum: () => {}, cozumMetin: cozum,
+    });
+  });
+}
+
+/**
+ * ACILIR LISTEDEN SECTIRME. Iptalde null doner; varsayilan secili gelir.
+ *
+ *     const k = await listeSor('Numune kalitesi:', KALITELER, '1', 'Kalite');
+ */
+export function listeSor(metin: string, secenekler: { kod: string; ad: string }[],
+                         varsayilan = '', etiket = ''): Promise<string | null> {
+  if (!dinleyici) {
+    const c = prompt(`${metin}
+`
+      + secenekler.map(x => `${x.kod} ${x.ad}`).join(' · '), varsayilan);
+    return Promise.resolve(c);
+  }
+  return new Promise<string | null>(cozum => {
+    dinleyici!({
+      metin, onayMi: true, girdiMi: true,
+      girdiVarsayilan: varsayilan || secenekler[0]?.kod || '',
+      girdiEtiket: etiket, girdiSecenekleri: secenekler,
       cozum: () => {}, cozumMetin: cozum,
     });
   });

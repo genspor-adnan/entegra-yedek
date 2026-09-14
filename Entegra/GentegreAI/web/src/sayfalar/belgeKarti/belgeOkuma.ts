@@ -34,6 +34,11 @@ const kisi = (id: unknown, ad: unknown) =>
  */
 export function yanittanBasvuruBilgi(b: Belge): BasvuruBilgi {
   return {
+    // HASTA (658): dis kurum numunesinde belgenin CARISI gonderen kurumdur,
+    //   hasta ayri alanda durur. Yanittan OKUNMAZSA hasta seridi bos acilir
+    //   (kullanici: "hasta bilgi bandinda hasta bilgileri gelmedi") - alan
+    //   sunucudan geliyordu, kart okumuyordu.
+    hastaId: kimlik(b.hastaId),
     sysTakipNo: metin(b.sysTakipNo),
     basvuruTuru: kimlik(b.basvuruTuru),
     gelisSekli: kimlik(b.gelisSekli),

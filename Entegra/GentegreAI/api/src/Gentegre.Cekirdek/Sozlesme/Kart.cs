@@ -12,6 +12,12 @@ public sealed class KartYaniti
     public IDictionary<string, int>? DetayToplam { get; set; }
     public IDictionary<string, IDictionary<string, string>>? KodAd { get; set; }
     public KartYetkisi Yetki { get; set; } = new();
+    /// <summary>
+    /// Kayit YAZILDIKTAN SONRA calisan is akislarinin soyledigi seyler
+    /// (or. dis kurum numunesinin ucretlendirilmesi). Kaydi DUSURMEZ -
+    /// bu yuzden hata degil uyaridir; ekran seritte gosterir.
+    /// </summary>
+    public List<string>? Uyarilar { get; set; }
     public string IzlemeNo { get; set; } = "";
 }
 

@@ -31,7 +31,8 @@ function kisaAdSirasi(satir: Record<string, unknown>, aranan: string): number {
 }
 
 export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHizmet, yon,
-                                    eklenen, fiyatListesiId, sgkBaglami, bolumId }: {
+                                    eklenen, fiyatListesiId, sgkBaglami, bolumId,
+                                    hizmetEkFiltre }: {
   /** Ustunde kalem penceresi acikken false olur; true'ya donunce arama
       kutusuna odak GERI GELIR (ardisik girişte fare gerekmesin). */
   etkin: boolean;
@@ -69,6 +70,12 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
   yalnizStok?: boolean;
   /** Yalniz HIZMET aranir (260: randevunun konusu bir hizmettir, stok degil). */
   yalnizHizmet?: boolean;
+  /**
+   * HIZMET aramasina eklenen sabit kosul - or. lab isteminde yalniz
+   * laboratuvar karsiligi OLAN hizmetler (`labVarMi = 1`). Suzgec cagirandan
+   * gelir: pencere hangi ekrandan acildigini bilmemeli.
+   */
+  hizmetEkFiltre?: Kosul;
   /**
    * BELGENIN YONU (141): 'satis' ise yalniz `satilan`, 'alis' ise yalniz
    * `alinan` isaretli stoklar listelenir - kendi urettigimiz mamul alis
@@ -166,7 +173,8 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
       const yonKosulu = yon
         ? { alan: yon === 'alis' ? 'alinan' : 'satilan', op: 'esit' as const, deger: 1 }
         : null;
-      const filtre = veIle(hizmetFiltresi, kategoriKosulu('kategori'));
+      const filtre = veIle(veIle(hizmetFiltresi, kategoriKosulu('kategori')),
+                           hizmetEkFiltre);
       const stokFiltresi = veIle(
         yonKosulu
           ? (metinFiltresi ? { op: 'and' as const, kosullar: [metinFiltresi, yonKosulu] }

@@ -447,6 +447,11 @@ begin
   end;
 end;
 
+function PlakaNoTemizle(const ADeger: string): string;
+begin
+  Result := UpperCase(StringReplace(Trim(ADeger), ' ', '', [rfReplaceAll]));
+end;
+
 function TRIBANGecerliMi(const ADeger: string): Boolean;
 var
   LIban, LKontrol: string;
@@ -1079,7 +1084,7 @@ begin
       Result.TasiyiciUnvan := Trim(JSONNesneStr(LObj, 'tasiyici'));
     Result.TasiyiciVknTckn := StringReplace(
       Trim(JSONNesneStr(LObj, 'tasiyiciVknTckn')), ' ', '', [rfReplaceAll]);
-    Result.Plaka := Trim(JSONNesneStr(LObj, 'plaka'));
+    Result.Plaka := PlakaNoTemizle(JSONNesneStr(LObj, 'plaka'));
     Result.SoforID := StrToIntDef(JSONNesneStr(LObj, 'soforId'), 0);
     Result.SoforAdi := Trim(JSONNesneStr(LObj, 'soforAdi'));
     if Result.SoforAdi = '' then
@@ -1087,7 +1092,7 @@ begin
     Result.SoforSoyadi := Trim(JSONNesneStr(LObj, 'soforSoyadi'));
     Result.SoforTckn := StringReplace(
       Trim(JSONNesneStr(LObj, 'soforTckn')), ' ', '', [rfReplaceAll]);
-    Result.DorsePlaka := Trim(JSONNesneStr(LObj, 'dorsePlaka'));
+    Result.DorsePlaka := PlakaNoTemizle(JSONNesneStr(LObj, 'dorsePlaka'));
   finally
     LObj.Free;
   end;
@@ -1816,6 +1821,63 @@ begin
     end;
     LXML.AppendLine('</cac:Party>');
     LXML.AppendLine('</cac:' + ARol + '>');
+    Result := LXML.ToString;
+  finally
+    LXML.Free;
+  end;
+end;
+
+function CarrierPartyXML(const ATaraf: TEBelgeTaraf): string;
+var
+  LXML: TStringBuilder;
+begin
+  Result := '';
+  if (Trim(ATaraf.Unvan) = '') and (Trim(ATaraf.VergiNo) = '') then
+    Exit;
+
+  LXML := TStringBuilder.Create;
+  try
+    LXML.AppendLine('<cac:CarrierParty>');
+    if Trim(ATaraf.VergiNo) <> '' then
+      LXML.AppendLine('<cac:PartyIdentification><cbc:ID schemeID="' +
+        KimlikSemasi(ATaraf.VergiNo) + '">' + XMLEscape(VergiNoTemizle(ATaraf.VergiNo)) +
+        '</cbc:ID></cac:PartyIdentification>');
+    if Trim(ATaraf.Unvan) <> '' then
+      LXML.AppendLine('<cac:PartyName><cbc:Name>' + XMLEscape(ATaraf.Unvan) +
+        '</cbc:Name></cac:PartyName>');
+    LXML.AppendLine('<cac:PostalAddress>');
+    if Trim(ATaraf.Adres) <> '' then
+      LXML.AppendLine('<cbc:StreetName>' + XMLEscape(ATaraf.Adres) +
+        '</cbc:StreetName>');
+    if Trim(ATaraf.Ilce) <> '' then
+      LXML.AppendLine('<cbc:CitySubdivisionName>' + XMLEscape(ATaraf.Ilce) +
+        '</cbc:CitySubdivisionName>');
+    if Trim(ATaraf.Il) <> '' then
+      LXML.AppendLine('<cbc:CityName>' + XMLEscape(ATaraf.Il) + '</cbc:CityName>');
+    if Trim(ATaraf.PostaKodu) <> '' then
+      LXML.AppendLine('<cbc:PostalZone>' + XMLEscape(ATaraf.PostaKodu) +
+        '</cbc:PostalZone>');
+    if Trim(ATaraf.Ulke) = '' then
+      LXML.AppendLine('<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>')
+    else
+      LXML.AppendLine('<cac:Country><cbc:Name>' + XMLEscape(ATaraf.Ulke) +
+        '</cbc:Name></cac:Country>');
+    LXML.AppendLine('</cac:PostalAddress>');
+    LXML.AppendLine('<cac:PartyTaxScheme><cac:TaxScheme><cbc:Name>' +
+      XMLEscape(ATaraf.VergiDairesi) +
+      '</cbc:Name></cac:TaxScheme></cac:PartyTaxScheme>');
+    LXML.AppendLine('<cac:Contact>');
+    if Trim(ATaraf.Telefon) <> '' then
+      LXML.AppendLine('<cbc:Telephone>' + XMLEscape(ATaraf.Telefon) +
+        '</cbc:Telephone>');
+    if Trim(ATaraf.Faks) <> '' then
+      LXML.AppendLine('<cbc:Telefax>' + XMLEscape(ATaraf.Faks) +
+        '</cbc:Telefax>');
+    if Trim(ATaraf.EPosta) <> '' then
+      LXML.AppendLine('<cbc:ElectronicMail>' + XMLEscape(ATaraf.EPosta) +
+        '</cbc:ElectronicMail>');
+    LXML.AppendLine('</cac:Contact>');
+    LXML.AppendLine('</cac:CarrierParty>');
     Result := LXML.ToString;
   finally
     LXML.Free;
@@ -2732,6 +2794,7 @@ begin
       LXML.AppendLine('<cbc:PostalZone>34000</cbc:PostalZone>');
       LXML.AppendLine('<cac:Country><cbc:Name>Turkiye</cbc:Name></cac:Country>');
       LXML.AppendLine('</cac:DeliveryAddress>');
+      LXML.Append(CarrierPartyXML(LTasiyici));
       LXML.AppendLine('<cac:Despatch>');
       LXML.AppendLine('<cbc:ActualDespatchDate>' + FormatDateTime('yyyy-mm-dd',
         ABaslik.Tarih) + '</cbc:ActualDespatchDate>');
@@ -5154,6 +5217,41 @@ begin
   Result.AddPair('address', LAdr);
 end;
 
+function CarrierPartyJSONOlustur(const ATaraf: TEBelgeTaraf): TJSONObject;
+var
+  LAdr: TJSONObject;
+begin
+  Result := nil;
+  if (Trim(ATaraf.Unvan) = '') and (Trim(ATaraf.VergiNo) = '') then
+    Exit;
+
+  Result := TJSONObject.Create;
+  if Trim(ATaraf.Unvan) <> '' then
+    Result.AddPair('name', ATaraf.Unvan);
+  if Trim(ATaraf.VergiNo) <> '' then begin
+    Result.AddPair('identifier', VergiNoTemizle(ATaraf.VergiNo));
+    Result.AddPair('schemeId', KimlikSemasi(ATaraf.VergiNo));
+  end;
+  if Trim(ATaraf.VergiDairesi) <> '' then
+    Result.AddPair('taxOffice', ATaraf.VergiDairesi);
+
+  LAdr := TJSONObject.Create;
+  LAdr.AddPair('country', IfThen(Trim(ATaraf.Ulke) = '', 'TR', ATaraf.Ulke));
+  if Trim(ATaraf.Il) <> '' then
+    LAdr.AddPair('city', ATaraf.Il);
+  if Trim(ATaraf.Ilce) <> '' then
+    LAdr.AddPair('subCity', ATaraf.Ilce);
+  if Trim(ATaraf.Adres) <> '' then
+    LAdr.AddPair('streetName', ATaraf.Adres);
+  if Trim(ATaraf.PostaKodu) <> '' then
+    LAdr.AddPair('postalCode', ATaraf.PostaKodu);
+  if Trim(ATaraf.EPosta) <> '' then
+    LAdr.AddPair('email', ATaraf.EPosta);
+  if Trim(ATaraf.Telefon) <> '' then
+    LAdr.AddPair('telephone', ATaraf.Telefon);
+  Result.AddPair('address', LAdr);
+end;
+
 function KamuPaymentMeansOlustur(const AHesap: TEBelgeOdemeHesabi): TJSONArray;
 var
   LMeans, LAccount, LBranch, LBank: TJSONObject;
@@ -5914,19 +6012,14 @@ begin
         LStage.AddPair('driverPerson', LDriver);
       end;
       if (Trim(LTasiyici.Unvan) <> '') or (Trim(LTasiyici.VergiNo) <> '') then begin
-        var LCarrier: TJSONObject := TJSONObject.Create;
-        if Trim(LTasiyici.Unvan) <> '' then
-          LCarrier.AddPair('name', LTasiyici.Unvan);
-        if Trim(LTasiyici.VergiNo) <> '' then begin
-          LCarrier.AddPair('identifier', VergiNoTemizle(LTasiyici.VergiNo));
-          LCarrier.AddPair('schemeId', KimlikSemasi(LTasiyici.VergiNo));
-        end;
-        LStage.AddPair('carrierParty', LCarrier);
+        LStage.AddPair('carrierParty', CarrierPartyJSONOlustur(LTasiyici));
       end;
       LStages.AddElement(LStage);
       LShipment.AddPair('shipmentStages', LStages);
 
       var LDelivery: TJSONObject := TJSONObject.Create;
+      if (Trim(LTasiyici.Unvan) <> '') or (Trim(LTasiyici.VergiNo) <> '') then
+        LDelivery.AddPair('carrierParty', CarrierPartyJSONOlustur(LTasiyici));
       var LDelAdr: TJSONObject := TJSONObject.Create;
       LDelAdr.AddPair('country', 'TR');
       if Trim(ABaslik.Il) <> '' then LDelAdr.AddPair('city', ABaslik.Il);

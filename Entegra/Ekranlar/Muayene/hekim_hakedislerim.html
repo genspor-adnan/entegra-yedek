@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hakedişlerim — Hekim Ekranı — Mockup (Gentegre AI · Muayene)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .sel{border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .sel b{font-weight:bold}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;
+    background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+
+  /* ozet seridi */
+  .ozet{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:19px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.vurgu .deg{color:var(--ok)}
+  .kutu.bekle .deg{color:var(--uyari)}
+
+  .ana{display:grid;grid-template-columns:1fr 320px;gap:0}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg)}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  tr.toplam td{background:#eef4fb;font-weight:bold;border-top:1px solid var(--line)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .yan .sat{display:flex;justify-content:space-between;padding:4px 10px;font-size:11.5px;
+    border-bottom:1px solid #eef2f6}
+  .yan .sat b{font-weight:bold}
+  .yan .sat.buyuk{font-size:13px;background:#f7fafc}
+  .cizgi{height:10px;background:#eef2f6;border-radius:5px;overflow:hidden;margin:4px 10px 8px}
+  .cizgi i{display:block;height:100%;background:linear-gradient(90deg,#4d8fd6,#2f6db3)}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">💰 Hakedişlerim — Dr. Doruk KAVAK
+    <span class="sp">Gentegre AI · Muayene · Merkez</span></div>
+
+  <div class="toolbar">
+    <div class="btn"><span>📅</span> Dönem</div>
+    <div class="btn"><span>🖨</span> Dökümü Yazdır</div>
+    <div class="btn"><span>📤</span> Excel</div>
+    <div class="sepv"></div>
+    <div class="btn pas" title="Hakedişi laboratuvar/muhasebe kapatır">✔ Onayla</div>
+    <div class="sp"></div>
+    <div class="btn"><span>❓</span> Prim Kuralım</div>
+  </div>
+
+  <!-- DONEM ve SUZGECLER: hekim kendi ekranında yalnız kendi dönemini
+       seçer; kişi seçici YOK - başka hekimin hakedişi bu ekranda hiç
+       sorgulanmaz (yetki `prim.kendi`). -->
+  <div class="arama">
+    <div class="sel">📅 Dönem: <b>01.09.2026 – 30.09.2026</b> ▾</div>
+    <div class="sel">🏥 Şube: <b>Merkez</b> ▾</div>
+    <span class="chip on">Tümü</span>
+    <span class="chip">Muayene</span>
+    <span class="chip">Girişim</span>
+    <span class="chip">Laboratuvar</span>
+    <span class="chip">Radyoloji</span>
+    <span class="sp"></span>
+    <span class="rz sari">Dönem açık · hakediş kesinleşmedi</span>
+  </div>
+
+  <!-- OZET: hekimin ilk sorusu "bu ay ne kadar" ve "ne kadarı kesinleşti".
+       TAHSIL EDILMEMIS tutar ayrı gösterilir: prim planı tahsilata bağlıysa
+       o para henüz hak edilmiş değildir - tek toplam göstermek yanıltır. -->
+  <div class="ozet">
+    <div class="kutu">
+      <div class="bas">Dönem Hakedişi</div>
+      <div class="deg">48.260,75 ₺</div>
+      <div class="alt">312 işlem · 186 hasta</div>
+    </div>
+    <div class="kutu vurgu">
+      <div class="bas">Tahsil Edilen</div>
+      <div class="deg">39.115,00 ₺</div>
+      <div class="alt">%81 · ödemeye hazır</div>
+    </div>
+    <div class="kutu bekle">
+      <div class="bas">Tahsilat Bekleyen</div>
+      <div class="deg">9.145,75 ₺</div>
+      <div class="alt">44 işlem · kurum tahakkuku</div>
+    </div>
+    <div class="kutu">
+      <div class="bas">Ortalama İşlem Primi</div>
+      <div class="deg">154,68 ₺</div>
+      <div class="alt">geçen dönem 141,20 ₺</div>
+    </div>
+    <div class="kutu">
+      <div class="bas">Önceki Dönem Ödenen</div>
+      <div class="deg">44.980,00 ₺</div>
+      <div class="alt">08/2026 · 05.09.2026'da ödendi</div>
+    </div>
+  </div>
+
+  <div class="ana">
+    <!-- SOL: satır satır hakediş -->
+    <div>
+      <div class="grp">
+        <h4>Hakediş Satırları <span class="mini">v_hakedis_satir · dönem 09/2026</span></h4>
+        <div class="dg">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:78px">Tarih</th>
+                <th style="width:150px">Hasta</th>
+                <th style="width:120px">Protokol</th>
+                <th>İşlem</th>
+                <th style="width:90px">Kaynak</th>
+                <th style="width:86px">Pay</th>
+                <th class="sag" style="width:96px">Taban</th>
+                <th class="orta" style="width:64px">Oran</th>
+                <th class="sag" style="width:96px">Hakediş</th>
+                <th class="orta" style="width:118px">Durum</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="grup"><td colspan="10">MUAYENE — 96 işlem · 14.400,00 ₺</td></tr>
+              <tr>
+                <td>02.09</td><td>A. ÖZTÜRK</td><td class="sonuk">P-000188</td>
+                <td>Normal Poliklinik Muayenesi</td>
+                <td><span class="rz mavi">Tahsilat</span></td>
+                <td><span class="rz">Hasta payı</span></td>
+                <td class="sag">1.500,00</td><td class="orta">%10</td>
+                <td class="sag"><b>150,00</b></td>
+                <td class="orta"><span class="rz ok">Tahsil edildi</span></td>
+              </tr>
+              <tr>
+                <td>02.09</td><td>C. YILMAZ</td><td class="sonuk">P-000191</td>
+                <td>Kontrol Muayenesi</td>
+                <td><span class="rz mavi">Tahsilat</span></td>
+                <td><span class="rz">Hasta payı</span></td>
+                <td class="sag">900,00</td><td class="orta">%10</td>
+                <td class="sag"><b>90,00</b></td>
+                <td class="orta"><span class="rz ok">Tahsil edildi</span></td>
+              </tr>
+              <tr>
+                <td>03.09</td><td>M. DEMİR</td><td class="sonuk">P-000203</td>
+                <td>Normal Poliklinik Muayenesi</td>
+                <td><span class="rz mor">Faturalama</span></td>
+                <td><span class="rz">Kurum payı</span></td>
+                <td class="sag">1.500,00</td><td class="orta">%10</td>
+                <td class="sag"><b>150,00</b></td>
+                <td class="orta"><span class="rz sari">Tahsilat bekliyor</span></td>
+              </tr>
+
+              <tr class="grup"><td colspan="10">GİRİŞİM / İŞLEM — 38 işlem · 22.310,75 ₺</td></tr>
+              <tr>
+                <td>05.09</td><td>E. SORER</td><td class="sonuk">P-000217</td>
+                <td>Apse veya Hematom Drenajı, Yüzeyel</td>
+                <td><span class="rz mavi">Tahsilat</span></td>
+                <td><span class="rz">Hasta payı</span></td>
+                <td class="sag">10.807,50</td><td class="orta">%15</td>
+                <td class="sag"><b>1.621,13</b></td>
+                <td class="orta"><span class="rz ok">Tahsil edildi</span></td>
+              </tr>
+              <tr>
+                <td>08.09</td><td>S. AKGÜN</td><td class="sonuk">P-000225</td>
+                <td>Kist Ponksiyonu</td>
+                <td><span class="rz mor">Faturalama</span></td>
+                <td><span class="rz">Kurum payı</span></td>
+                <td class="sag">14.410,00</td><td class="orta">%15</td>
+                <td class="sag"><b>2.161,50</b></td>
+                <td class="orta"><span class="rz sari">Tahsilat bekliyor</span></td>
+              </tr>
+
+              <tr class="grup"><td colspan="10">LABORATUVAR (isteyen hekim) — 152 tetkik · 8.980,00 ₺</td></tr>
+              <tr>
+                <td>09.09</td><td>A. ÖZTÜRK</td><td class="sonuk">L-000005</td>
+                <td>Hemogram (23 parametre)</td>
+                <td><span class="rz mavi">Tahsilat</span></td>
+                <td><span class="rz">Hasta payı</span></td>
+                <td class="sag">263,00</td><td class="orta">%5</td>
+                <td class="sag"><b>13,15</b></td>
+                <td class="orta"><span class="rz ok">Tahsil edildi</span></td>
+              </tr>
+              <tr>
+                <td>09.09</td><td class="sonuk">— dış kurum</td><td class="sonuk">L-000004</td>
+                <td>Tam İdrar Tahlili</td>
+                <td><span class="rz mor">Faturalama</span></td>
+                <td><span class="rz">Kurum payı</span></td>
+                <td class="sag">197,20</td><td class="orta">%5</td>
+                <td class="sag"><b>9,86</b></td>
+                <td class="orta"><span class="rz sari">Tahsilat bekliyor</span></td>
+              </tr>
+
+              <tr class="grup"><td colspan="10">RADYOLOJİ (isteyen hekim) — 26 tetkik · 2.570,00 ₺</td></tr>
+              <tr>
+                <td>11.09</td><td>M. DEMİR</td><td class="sonuk">R-000042</td>
+                <td>BT, Vertebra Torakal</td>
+                <td><span class="rz mavi">Tahsilat</span></td>
+                <td><span class="rz">Hasta payı</span></td>
+                <td class="sag">12.248,50</td><td class="orta">%5</td>
+                <td class="sag"><b>612,43</b></td>
+                <td class="orta"><span class="rz ok">Tahsil edildi</span></td>
+              </tr>
+
+              <tr class="toplam">
+                <td colspan="6">DÖNEM TOPLAMI — 312 işlem</td>
+                <td class="sag">418.740,20</td><td></td>
+                <td class="sag">48.260,75</td><td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ITIRAZ: hekim tutarı yanlış buluyorsa ekrandan söyleyebilmeli;
+           yoksa muhasebeye telefon eder ve iz kalmaz. -->
+      <div class="grp">
+        <h4>Satır İtirazı <span class="mini">seçili satır · iz bırakır</span></h4>
+        <div style="padding:9px 10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <div class="sel" style="flex:1;min-width:260px;color:var(--muted)">
+            Not: “08.09 · Kist Ponksiyonu — oran %15 değil %20 olmalıydı (sözleşme ek-3)”
+          </div>
+          <div class="btn">📨 İtiraz Gönder</div>
+          <span class="rz pas">Son itiraz: 03.09 · yanıtlandı</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAG: dönem özeti, plan, ödeme geçmişi -->
+    <div class="yan" style="border-left:1px solid var(--line2);background:#fbfcfe">
+      <div class="grp" style="margin:12px 12px 8px">
+        <h4>Dönem Özeti</h4>
+        <div class="sat"><span>Muayene</span><b>14.400,00 ₺</b></div>
+        <div class="sat"><span>Girişim / işlem</span><b>22.310,75 ₺</b></div>
+        <div class="sat"><span>Laboratuvar</span><b>8.980,00 ₺</b></div>
+        <div class="sat"><span>Radyoloji</span><b>2.570,00 ₺</b></div>
+        <div class="sat buyuk"><span>Toplam</span><b>48.260,75 ₺</b></div>
+        <div class="cizgi"><i style="width:81%"></i></div>
+        <div class="sat sonuk"><span>Tahsil edilen oranı</span><b>%81</b></div>
+      </div>
+
+      <div class="grp" style="margin:8px 12px">
+        <h4>Prim Kuralım <span class="mini">PRM-HEK-02</span></h4>
+        <div class="sat"><span>Muayene</span><b>%10</b></div>
+        <div class="sat"><span>Girişim</span><b>%15</b></div>
+        <div class="sat"><span>Lab / Radyoloji isteği</span><b>%5</b></div>
+        <div class="sat"><span>Taban</span><b>Matrah (KDV hariç)</b></div>
+        <div class="sat"><span>Hakediş anı</span><b>Tahsilatta</b></div>
+        <div class="sat sonuk"><span>Kademe</span><b>40.000 ₺ üstü +%2</b></div>
+      </div>
+
+      <div class="grp" style="margin:8px 12px 12px">
+        <h4>Ödeme Geçmişi</h4>
+        <div class="sat"><span>08/2026</span><b>44.980,00 ₺</b></div>
+        <div class="sat sonuk"><span></span><span class="rz ok">Ödendi · 05.09.2026</span></div>
+        <div class="sat"><span>07/2026</span><b>41.320,50 ₺</b></div>
+        <div class="sat sonuk"><span></span><span class="rz ok">Ödendi · 05.08.2026</span></div>
+        <div class="sat"><span>06/2026</span><b>38.115,25 ₺</b></div>
+        <div class="sat sonuk"><span></span><span class="rz ok">Ödendi · 05.07.2026</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>312 satır</span><span>·</span>
+    <span>Dönem 01–30.09.2026</span><span>·</span>
+    <span>Yalnız kendi hakedişiniz görüntülenir</span><span>·</span>
+    <span>Son güncelleme: 14.09.2026 09:12</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> hekimin KENDİ hakedişini gördüğü ekran. Prim modülündeki
+  <code>hakedis_listesi.html</code> / <code>hakedis_karti.html</code> yönetici
+  bakışıdır (bütün hekimler, onay ve ödeme); bu ekran tek kişiliktir ve
+  yazma yetkisi yoktur — hekim hakedişini <b>okur</b>, gerekiyorsa
+  <b>itiraz</b> eder.
+  <ul>
+    <li><b>Veri kaynağı:</b> <code>v_hakedis_satir</code> (kişi, rol, tarih,
+        kaynak, pay, taban, oran, tutar), dönem başlığı <code>hakedis</code>,
+        oranlar <code>prim_plani</code> / <code>prim_plani_kademe</code>.</li>
+    <li><b>Yetki:</b> ekran <code>prim.kendi</code> ile açılır ve sunucu
+        <code>taraf_id = oturumun personeli</code> koşulunu EKLER — süzgeç
+        istemciden gelmez, başka hekimin satırı hiç dönmez. Kişi seçici
+        bilerek yok.</li>
+    <li><b>Tahsil edilen / bekleyen ayrı:</b> prim planı "hakediş anı =
+        tahsilatta" ise faturalanmış ama tahsil edilmemiş tutar henüz hak
+        edilmiş değildir. Tek toplam göstermek hekime olmayan parayı
+        vaat ederdi; iki kutu ve satır durumu bunu ayırır
+        (<code>kaynak_adi</code>: Faturalama / Tahsilat).</li>
+    <li><b>Hasta adı kısaltılır</b> (“A. ÖZTÜRK”): hekim kendi hastasını
+        zaten tanır, hakediş dökümü ise yazdırılıp masada kalan bir kâğıttır.
+        Dış kurum numunesinde hasta yerine “dış kurum” yazar — orada muhatap
+        kurumdur.</li>
+    <li><b>Dönem kapanmadan kesinleşmez:</b> üstteki rozet ("Dönem açık")
+        tutarın değişebileceğini söyler; iptal/iade ve geç tahsilat satırı
+        etkiler. Onay düğmesi hekimde PASİFtir — kapatma muhasebenin işidir.</li>
+    <li><b>İtiraz iz bırakır:</b> tutar tartışması telefonla değil kayıt
+        üzerinden yürüsün; satır + not muhasebeye düşer, yanıtı aynı yerde
+        görünür.</li>
+  </ul>
+</div>
+
+</body>
+</html>

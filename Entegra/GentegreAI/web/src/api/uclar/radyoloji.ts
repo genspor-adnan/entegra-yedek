@@ -160,6 +160,27 @@ export const radyolojiUclari = {
       `/api/prim/hakedis-suzgec${q ? `?${q}` : ''}`);
   },
 
+  /**
+   * HEKIMIN KENDI HAKEDISI (mockup hekim_hakedislerim). Kisi PARAMETRE
+   * DEGIL: sunucu oturumdan alir - istemciye birakilsa parametreyi
+   * degistiren herkes baskasinin primini okurdu.
+   */
+  hakedisim: (bas?: string, bit?: string) => {
+    const p = new URLSearchParams();
+    if (bas) p.set('bas', bas);
+    if (bit) p.set('bit', bit);
+    const q = p.toString();
+    return istek<{
+      kisiId: number;
+      donem: { baslangic: string; bitis: string };
+      ozet: { toplam: number; tahsil: number; bekleyen: number; taban: number;
+              satir: number; belge: number };
+      kirilim: { ad: string; satir: number; tutar: number }[];
+      satirlar: Record<string, unknown>[];
+      gecmis: Record<string, unknown>[];
+    }>(`/api/prim/hakedisim${q ? `?${q}` : ''}`);
+  },
+
   /** Kalemin prim rolleri + o kalemden dogmus primler (324). */
   primKalemRolleri: (belgeSatirId: number) =>
     istek<{ satirlar: Record<string, unknown>[]; primler: Record<string, unknown>[] }>(

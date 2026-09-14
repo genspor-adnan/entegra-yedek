@@ -6,6 +6,8 @@ import { tarifeHizli, ttbFiyatTuret, tarifeGizli, fiyatSatirKurali, kurumTarifeT
   from './tarifeKurallari';
 import type { Deger } from '../kartAlanCizim';
 import type { SekmeTanimi } from '../kartSekmeleri';
+import { api } from '../../api/istemci';
+import { mesaj } from '../mesaj';
 
 /** Sekme icin detay sayfalama/suzme cagrilari - kart govdesinden gelir. */
 export interface KartDetaySekmesiOzellikleri {
@@ -73,6 +75,9 @@ export function KartDetaySekmesi({
           //   ekranlarindaki grid ile ayni davranis.
           || kaynak === 'dokuman'
           || aktif.detay.alanlar.some(a => a.tip === 'kod' && a.aramaKaynagi);
+        /* LAB ISTEMI "Tetkikler" gridi: sonuc satir ici girilir. */
+        const labSonucGridi = kaynak === 'lab-istem' && aktif.detay.ad === 'satirlar'
+                              && !salt && !aktif.detay.saltOkunur;
         const grid = (
         <GenDetayTablo
           meta={aktif.detay}
@@ -125,7 +130,81 @@ export function KartDetaySekmesi({
           // Satir ici giris tarife tipine gore (533): TTB'de katsayi/carpan,
           //   SUT'ta yalniz katki - fiyat ikisinde de turetilmis degerdir.
           hizliAlanlar={kaynak === 'fiyat-listesi' && aktif.detay.ad === 'satirlar'
-            ? tarifeHizli(Number(deger.tarifeTipi) || 1) : undefined}
+            ? tarifeHizli(Number(deger.tarifeTipi) || 1)
+            : labSonucGridi ? new Set(['sonuc']) : undefined}
+          // LAB SONUCU SATIR ICINDE (kullanici: "tetkikler sekmesinde sonuc
+          //   kolonu girise izin vermiyor" · "modalsiz de girmem lazim").
+          //   Grid, tetkik aramasi tanimli oldugu icin SALT GORUNUM kipine
+          //   dusuyordu; sonuc kolonu artik satir ici yaziliyor.
+          //   Deger KARTIN TASLAGINA DEGIL, `POST /api/lab/sonuc`a gider:
+          //   referans, bayrak, panik ve delta sunucuda hesaplanmali.
+          // DEGERIN SAGINDA YON OKU (kullanici): dusuk ↓, yuksek ↑,
+          //   panik ⚠. Ayri "Degerlendirme" kolonuna bakmadan, sayiyi
+          //   okurken yonu de gorunur.
+          hucreEki={labSonucGridi
+            ? (satir, alan) => {
+                if (alan !== 'sonuc') return null;
+                const i = Number(satir.isaret ?? 0);
+                const delta = Number(satir.deltaUyari ?? 0) === 1;
+                if (!i && !delta) return null;
+                return (
+                  <>
+                    {!!i && (
+                      <span className={`rozet ${i === 3 ? 'hata' : 'uyari'} hucre-ok`}
+                            title={i === 3 ? 'Panik değer' : i === 1 ? 'Düşük' : 'Yüksek'}>
+                        {i === 3 ? '⚠' : i === 1 ? '↓' : '↑'}
+                      </span>
+                    )}
+                    {/* DELTA: onceki sonucla arada buyuk fark var. Kolonu
+                        yok, mesaj da vermiyoruz - isaret kalir. */}
+                    {delta && (
+                      <span className="rozet uyari hucre-ok"
+                            title="Delta uyarısı: önceki sonuçla arada büyük fark var">
+                        Δ
+                      </span>
+                    )}
+                  </>
+                );
+              }
+            : undefined}
+          // PANIKTE HUCRE KIRMIZI (kullanici): rozet kucuk kaliyor, panik
+          //   deger hekime bildirilmek zorunda - hucrenin kendisi isaretli.
+          hucreSinifi={labSonucGridi
+            ? (satir, alan) => (alan === 'sonuc' && Number(satir.isaret) === 3
+                                ? 'hucre-panik' : undefined)
+            : undefined}
+          hucreYaz={labSonucGridi
+            ? async (satir, _alan, girilen) => {
+                const satirId = Number(satir.id ?? 0);
+                if (!satirId)
+                  throw new Error('Önce istemi kaydedin - sonuç kayıtlı satıra yazılır.');
+                const y = await api.labSonucYaz({
+                  istemSatirId: satirId, deger: girilen,
+                  birim: String(satir.birim ?? '') || undefined,
+                });
+                // BASARILI YAZIMDA MESAJ YOK (kullanici: "panik ve yuksek
+                //   mesajlari da gelmesin, zaten isaretlerle gosteriyor").
+                //   Satir satir girerken her degerden sonra pencere acilmasi
+                //   akisi kesiyordu; sonucun durumu hucrede duruyor: ok,
+                //   kirmizi panik hucresi, Degerlendirme kolonu.
+                //   TEK ISTISNA DELTA (kullanici: "delta uyarisi gelsin
+                //   sadece"): onceki sonucla celisen deger, bayrak normal
+                //   olsa bile teknisyenin DURUP bakmasini gerektirir -
+                //   numune karisikligi ya da cihaz kaymasi olabilir.
+                //   Satirda ayrica "Δ" isareti kalir.
+                //   Hata halinde mesaj yine cikar (GenDetayTablo yakalar).
+                if (y.deltaUyari) mesaj(y.mesaj);
+                return {
+                  // `isaret` sunucudaki ayna kolonuyla ayni kod: 0 normal,
+                  //   1 dusuk, 2 yuksek, 3 panik.
+                  isaret: y.panik ? 3
+                          : y.bayrak.startsWith('L') ? 1
+                          : y.bayrak.startsWith('H') ? 2 : 0,
+                  durum: 3,
+                  deltaUyari: y.deltaUyari ? 1 : 0,
+                };
+              }
+            : undefined}
           // FIYAT LISTESI KURUM TURUNE GORE (587, kullanici): sozlesme
           //   satirinin listesi, kartin basligindaki KURUM TURUNE uyan
           //   tarifeyle sinirlanir - SGK sozlesmesine Özel tarifesi secmek

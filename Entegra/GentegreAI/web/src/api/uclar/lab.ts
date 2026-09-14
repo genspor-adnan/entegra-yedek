@@ -169,6 +169,15 @@ export const labUclari = {
    * çalışıyor, ikinci bir hesap iki farklı saat söylerdi.
    */
   /** Tetkik Katalogu sol paneli (492): bolum sayimlari + panel uyelikleri. */
+  /**
+   * HIZMETIN laboratuvar karsiligi (panel ya da tek tetkik). Istem kartinda
+   * tetkik jenerik HIZMET aramasiyla seciliyor - kabul masasi SUT kodunu
+   * biliyor, laboratuvarin ic tetkik kodunu degil.
+   */
+  labHizmetTetkik: (hizmetId: number) =>
+    istek<{ panelId: number | null; tetkikId: number | null;
+            kod: string; ad: string }>(`/api/lab/hizmet/${hizmetId}/tetkik`),
+
   labTetkikAgaci: () =>
     istek<{ toplam: number;
             bolumler: { kod: number; ad: string; ikon: string; adet: number; aktif: number }[];

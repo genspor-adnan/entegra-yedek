@@ -115,7 +115,11 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   satirda okunan bir bilgi.
     //   SOZLESME kurumun HEMEN SAGINDA (kullanici): ayni sigortayla ÖSS /
     //   TSS / Karma police ayri sartlarla calisir, odeme rotasini o belirler.
-    kolonSirasi: ['belgeTarihi', 'tamamlanma', 'belgeNo', 'tarafUnvan',
+    //   HASTA kolonu CARI DEGIL (658, kullanici: "basvuru 3990 da hasta adi
+    //   yok"): dis kurum numunesinde cari GONDEREN KURUMDUR, hasta ayri
+    //   alanda durur. "Cari" kolonu listede kalir ama hasta kendi
+    //   kolonundan okunur - ikisi ayni sey degil.
+    kolonSirasi: ['belgeTarihi', 'tamamlanma', 'belgeNo', 'hastaAdi',
                   'odeyenKurumAdi', 'sozlesmeAdi', 'poliklinik', 'doktor',
                   'genelToplam', 'tahsilat'],
     // TAHSILAT da toplanir (kullanici): "ne kadari geldi" sorusu genel
@@ -136,8 +140,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   zaten odemeyi ustlenen kurumdan baskasi yazilmiyor.
     //   "Cari" ise burada HASTA (kullanici): kayit kabulde belgenin tarafi
     //   her zaman hastadir, "Cari" ERP dilidir.
-    kolonBasliklari: { belgeNo: 'Protokol No', odeyenKurumAdi: 'Kurum',
-                       tarafUnvan: 'Hasta' },
+    kolonBasliklari: { belgeNo: 'Protokol No', odeyenKurumAdi: 'Kurum' },
     urunModu: 2,
     menuGrup: 'Kayıt Kabul', menuAd: 'Başvurular', ic: '📝', yetkiKodu: 'belge',
     menuSira: 30,
@@ -283,6 +286,19 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'muayene',
     menuSira: 30, menuGrup: 'Muayene', menuAd: 'Reçeteler', ic: '💊', yetkiKodu: 'muayene',
+  },
+  {
+    // HAKEDISLERIM (mockup Ekranlar/Muayene/hekim_hakedislerim.html):
+    //   hekimin KENDI prim dokumu. Liste degil ozel sayfa - ozet kutulari,
+    //   kaynak kirilimi ve gruplu dokum bir grid'e sigmaz.
+    //   Yetki `prim.kendi`: sunucu satirlari oturumun kisisine suzer.
+    //   Butun kisileri goren ekran Prim modulunde ve `prim` yetkisinde -
+    //   herkesin primini birbirine gostermemek icin ayri yetki.
+    kaynak: 'hakedisim', rota: 'hakedisim', ozelSayfa: true,
+    baslik: 'Hakedişlerim', yol: 'Muayene › Hakedişlerim',
+    urunModu: 2, modul: 'muayene',
+    menuSira: 70, menuGrup: 'Muayene', menuAd: 'Hakedişlerim', ic: '💰',
+    yetkiKodu: 'prim.kendi',
   },
   {
     // TIBBI OZET (420) - hasta basina tek satir: alerji / kronik / ilac.

@@ -71,6 +71,49 @@ public static partial class LabUclari
         //   satir tum katalog degil). Panel uyeleri de burada doner - panele
         //   tiklayinca liste o tetkik kimlikleriyle suzulur; istemci uyelik
         //   kuralini kendisi kurmaz.
+        // GET /api/lab/hizmet/{id}/tetkik - HIZMETIN laboratuvar karsiligi.
+        //
+        //   Istem kartinda tetkik JENERIK HIZMET ARAMASIYLA seciliyor
+        //   (kullanici): kabul masasi SUT kodunu/adini biliyor, laboratuvarin
+        //   ic tetkik kodunu degil. Secilen hizmet bir PANEL olabilir
+        //   (hemogram 23 parametre) ya da tek tetkik; ekran hangisi oldugunu
+        //   bilmeden satiri yazamaz.
+        //
+        //   PANEL ONCELIKLI: ayni hizmete hem panel hem tetkik baglanmis
+        //   olsaydi (kurulum hatasi) tek tetkik yazmak panelin oteki
+        //   parametrelerini sessizce dusururdu.
+        grup.MapGet("/hizmet/{id:int}/tetkik", async (
+            int id, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("lab", Islem.Gor);
+
+            var bulunan = await veri.TekAsync("""
+                select p.id as panel_id, null::integer as tetkik_id, p.kod, p.ad
+                  from public.lab_panel p
+                 where p.hizmet_id = @p0 and p.durum = 0
+                union all
+                select null, t.id, t.kod, t.ad
+                  from public.lab_tetkik t
+                 where t.hizmet_id = @p0 and t.durum = 0
+                 order by 1 nulls last
+                 limit 1
+                """, [id],
+                o => new { PanelId = o.IsDBNull(0) ? (int?)null : o.GetInt32(0),
+                           TetkikId = o.IsDBNull(1) ? (int?)null : o.GetInt32(1),
+                           Kod = o.GetString(2), Ad = o.GetString(3) }, iptal);
+
+            if (bulunan is null)
+                throw GentegreHatasi.IsKurali(
+                    "Bu hizmetin laboratuvar karşılığı tanımlı değil - tetkik "
+                    + "kartındaki \"Hizmet (fiyat/fatura)\" alanını doldurun.");
+
+            return Results.Ok(new { bulunan.PanelId, bulunan.TetkikId,
+                                    bulunan.Kod, bulunan.Ad,
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
         grup.MapGet("/tetkik/agac", async (
             BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
@@ -405,7 +448,15 @@ public static partial class LabUclari
             var satirlar = await veri.ListeAsync("""
                 select s.id, s.kod, s.ad, s.durum, n.barkod, n.durum as numune_durum,
                        ls.id as sonuc_id, ls.deger_metin, ls.birim, ls.bayrak,
-                       ls.referans_alt, ls.referans_ust, ls.referans_metin, ls.panik,
+                       -- REFERANS: sonuc varsa O GUN damgalanan aralik
+                       --   (sonradan referans degisse rapor aynen kalir),
+                       --   yoksa tetkigin YURURLUKTEKI araligi. Sonucsuz
+                       --   satirda bos gostermek, teknisyeni degeri
+                       --   neyle kiyaslayacagini bilmeden birakirdi.
+                       coalesce(ls.referans_alt, ref.alt) as referans_alt,
+                       coalesce(ls.referans_ust, ref.ust) as referans_ust,
+                       coalesce(nullif(ls.referans_metin, ''), ref.metin, '')
+                           as referans_metin, ls.panik,
                        ls.delta_uyari, ls.durum as sonuc_durum, ls.olcum_zamani,
                        ls.onay_zamani, ls.yorum,
                        -- BOLUM ekranin gruplama olcusu (mockup: "Biyokimya /
@@ -426,6 +477,18 @@ public static partial class LabUclari
                        case when i.oncelik = 3 then coalesce(t.acil_tat_dk, t.hedef_tat_dk)
                             else t.hedef_tat_dk end as hedef_tat,
                        coalesce(c.kod, c.ad, '') as cihaz,
+                       -- SONUCU KIM/NASIL GIRDI (kullanici: "sonucu elle
+                       --   degistirdigim / girdigim bilgisi nerede"):
+                       --   cihaz_id bos ise ELLE girilmistir. Giren kisi ve
+                       --   olcum zamani sonucun kendi satirinda duruyor;
+                       --   ekranda gostermeyince "bu deger nereden geldi"
+                       --   sorusunun cevabi yalniz veritabaninda kaliyordu.
+                       case when ls.id is null then ''
+                            when ls.cihaz_id is null then 'Elle'
+                            else 'Cihaz' end as giris_turu,
+                       coalesce(gk.ad, '') as giren,
+                       coalesce(ls.duzeltme_neden, '') as duzeltme_neden,
+                       coalesce(ls.tekrar_no, 0) as tekrar_no,
                        -- PANEL: satir hangi panelden dogdu. Hemogram 23,
                        --   tam idrar 21 satir uretiyor - ekran onlari tek
                        --   baslik altinda toplasin diye adi da tasinir.
@@ -442,6 +505,14 @@ public static partial class LabUclari
                         select * from public.lab_sonuc x
                          where x.istem_satir_id = s.id and x.durum <> 4
                          order by x.id desc limit 1) ls on true
+                  -- SONUCU GIREN kisi: `ls` lateral'inden SONRA baglanir,
+                  --   once yazilirsa "ls does not exist" verir.
+                  left join public.v_kullanici_lookup gk on gk.id = ls.ekleyen
+                  -- Referans HASTAYA gore secilir (yas/cinsiyet bandi);
+                  --   642 hemogram ve tam idrar icin cocuk bantlarini da
+                  --   tasiyor, fn EN DAR araligi doner.
+                  left join lateral public.fn_lab_referans(
+                        s.tetkik_id, i.taraf_id, current_date) ref on true
                  where s.istem_id = @p0 and s.durum <> 0
                  order by s.sira, s.id
                 """, [id],
@@ -471,7 +542,9 @@ public static partial class LabUclari
                     Kabul = o.IsDBNull(23) ? (DateTime?)null : o.GetDateTime(23),
                     HedefTat = o.IsDBNull(24) ? (int?)null : o.GetInt32(24),
                     Cihaz = o.GetString(25),
-                    PanelId = o.GetInt32(26), PanelAd = o.GetString(27) }, iptal);
+                    GirisTuru = o.GetString(26), Giren = o.GetString(27),
+                    DuzeltmeNeden = o.GetString(28), TekrarNo = o.GetInt16(29),
+                    PanelId = o.GetInt32(30), PanelAd = o.GetString(31) }, iptal);
 
             // NUMUNEYI ALAN ve KALITE mockup'ta sag panelde: "Hemsire N. Koc ·
             //   Kan alma 2", "Uygun / hemoliz…". Kabul edilmis tup icin bu iki
