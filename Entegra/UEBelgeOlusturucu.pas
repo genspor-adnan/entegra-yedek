@@ -5665,18 +5665,21 @@ begin
       end;
     end;
 
-    if (not LIsIrsaliye) and (Length(ABaslik.IrsaliyeReferanslari) = 1) then begin
-      // Tek irsaliye de tekil nesne olmali; tekil alan altinda dizi Izibiz'de
-      // DespatchDocumentReference uretmiyor.
-      LContent.AddPair('despatchDocumentReference',
-        KaynakRefJSONOlustur(ABaslik.IrsaliyeReferanslari[0], ABaslik.Tarih));
-    end else if (not LIsIrsaliye) and (Length(ABaslik.IrsaliyeReferanslari) > 1) then begin
+    // Faturanin irsaliye referanslari: izibiz UBLDocument.despatchDocumentReference
+    //   java.util.ArrayList<DespatchDocumentReference> - HER ZAMAN DIZI, tek
+    //   irsaliyede de. Tekil nesne gonderilince 400 REQUEST_NOT_PARSED_PROPERLY
+    //   ("Cannot deserialize value of type java.util.ArrayList<...
+    //   DespatchDocumentReference> from Object value", 15.09.2026 test gonderimi).
+    //   Coklu irsaliye eskiden 'despatchDocumentReferences' (cogul) anahtariyla
+    //   gidiyordu; o anahtar izibiz'de yok, sessizce dusuyordu - iade dalindaki
+    //   (asagida) tekil anahtar + dizi bicimi zaten dogru olan bicim.
+    if (not LIsIrsaliye) and (Length(ABaslik.IrsaliyeReferanslari) > 0) then begin
       var LDespatchRefs: TJSONArray := TJSONArray.Create;
       for LRefIndex := 0 to High(ABaslik.IrsaliyeReferanslari) do begin
         LDespatchRefs.AddElement(KaynakRefJSONOlustur(
           ABaslik.IrsaliyeReferanslari[LRefIndex], ABaslik.Tarih));
       end;
-      LContent.AddPair('despatchDocumentReferences', LDespatchRefs);
+      LContent.AddPair('despatchDocumentReference', LDespatchRefs);
     end;
 
     if SGKFaturasiMi(ABaslik) then begin

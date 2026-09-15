@@ -3249,13 +3249,28 @@ function TTablo.BelgeDonustur(DonusTuru, KaynakBaslikId: integer; HedefBasID:int
 // Belge donusumunun TEK giris noktasi. Isin tamami sunucuda
 //   (sp_Prog_BelgeDonusum_Uygula_Json2); burada yalnizca arayuz isi kalir.
 //   Eski Pascal uygulamasi 08.08.2026'da kaldirildi - asagiya bak.
-  procedure EIrsaliyeTaslakNoDuzelt(AFatBaslikID: Integer);
+  // E-BELGE TASLAK NUMARASI: sunucu hedef belgeye kocandan numara verir; oysa
+  //   e-Irsaliye/e-Fatura numarasini GONDERIMDE entegrator uretir. Kocan
+  //   numarasi kalirsa belge "numarali" gorunur, gonderimde ikinci bir numara
+  //   dogar (kullanici: "e-fatura kullanimda ise satis irsaliyesinden olusan
+  //   faturada faturano 0 yazsin"). Elden acilan belge ile ayni kural
+  //   (BelgeDonustur_BaslikOlusur / BelgeKopyala): FATURANO='0', KOCANNO=0.
+  //   Hangi kural uygulanacagi hedefin TURunden okunur - donusum turunu
+  //   ayristirmak yerine (irsaliye->fatura, siparis->fatura, konsinye->fatura
+  //   hepsi ayni yere cikar).
+  procedure EBelgeTaslakNoDuzelt(AFatBaslikID: Integer);
+  var
+    LTur: Integer;
   begin
-    if (AFatBaslikID > 0) and EIrsaliyeKullanimda then
+    if AFatBaslikID <= 0 then Exit;
+    LTur := StrToIntDef(VarToStr(Veritabani.BasitKomutÇalıştır(FDCnn,
+      'select TUR from FATBASLIK where ID=&ID', ['&ID'], [AFatBaslikID], True)), 0);
+    if ((LTur = KasaTur_SatisIrsaliyesi) and EIrsaliyeKullanimda) or
+       ((LTur = KasaTur_SatisFaturasi) and (EFaturaKullanimda > 0)) then
       Veritabani.BasitKomutÇalıştır(FDCnn,
         'update FATBASLIK set FATURANO=''0'', KOCANNO=0 ' +
         'where ID=&ID and TUR=&TUR and ltrim(rtrim(coalesce(FATURANO,'''')))<>''0''',
-        ['&ID', '&TUR'], [AFatBaslikID, KasaTur_SatisIrsaliyesi]);
+        ['&ID', '&TUR'], [AFatBaslikID, LTur]);
   end;
 
   // Sunucunun bu rotayi isleyip islemedigi rota matrisinden okunur.
@@ -3296,7 +3311,7 @@ begin
 
     if LId > 0 then
     begin
-      EIrsaliyeTaslakNoDuzelt(LId);
+      EBelgeTaslakNoDuzelt(LId);
       Result := LId;
       Exit;
     end;
@@ -3310,7 +3325,7 @@ begin
         LId := BelgeDonusumUygula(DonusTuru, KaynakBaslikId, HedefBasID, True, False, LSonuc);
         if LId > 0 then
         begin
-          EIrsaliyeTaslakNoDuzelt(LId);
+          EBelgeTaslakNoDuzelt(LId);
           Result := LId;
           Exit;
         end;
@@ -3346,7 +3361,7 @@ begin
                                 LSonuc, LSatirlar);
       if LId > 0 then
       begin
-        EIrsaliyeTaslakNoDuzelt(LId);
+        EBelgeTaslakNoDuzelt(LId);
         Result := LId;
         Exit;
       end;
