@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Döküm Baskı Önizleme — Mockup (Gentegre AI · Dökümler)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .sonuk{color:var(--muted)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+
+  /* --- ana yerlesim: sol ayar paneli + kagit alani --- */
+  .ana{display:grid;grid-template-columns:300px minmax(0,1fr);gap:0}
+  .yan{border-right:1px solid var(--line2);background:#fbfcfe}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .sat{display:flex;justify-content:space-between;align-items:center;padding:5px 10px;font-size:11.5px;
+    border-bottom:1px solid #eef2f6;gap:8px;background:#fff}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:22px;
+    padding:2px 7px;font-size:11px;display:inline-flex;align-items:center;gap:6px;min-width:110px}
+  .inp.combo::after{content:"\25BE";margin-left:auto;color:var(--muted)}
+  .inp.dar{min-width:60px;justify-content:flex-end}
+  .kutucuk{width:12px;height:12px;border:1px solid var(--line);border-radius:2px;display:inline-block;
+    vertical-align:middle;background:#fff;text-align:center;line-height:10px;font-size:10px}
+  .kutucuk.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .radyo{display:inline-block;width:11px;height:11px;border:1px solid var(--line);border-radius:50%;
+    vertical-align:middle;background:#fff;margin-right:4px}
+  .radyo.on{border:3px solid var(--accent)}
+  .uyari-sat{display:flex;gap:8px;align-items:flex-start;padding:6px 10px;
+    border-bottom:1px solid #eef2f6;font-size:11px;background:#fff}
+  .sayfalar{display:flex;gap:4px;padding:6px 10px;background:var(--head);border-bottom:1px solid var(--line);
+    align-items:center;font-size:11px}
+  .sayfalar .kucuk{width:26px;height:36px;border:1px solid var(--line);background:#fff;border-radius:2px;
+    display:flex;align-items:flex-end;justify-content:center;font-size:9px;color:var(--muted)}
+  .sayfalar .kucuk.on{border-color:var(--accent);background:var(--sel)}
+
+  /* --- A4 kagit --- */
+  .kagit-alani{background:#dfe4ea;padding:16px;overflow:auto;max-height:1200px}
+  .kagit{background:#fff;margin:0 auto 16px;padding:34px 38px 30px;width:794px;max-width:100%;min-height:1123px;
+    box-shadow:0 2px 10px rgba(20,40,70,.18);position:relative;font-size:10.5px;color:#000}
+  .kagit.yatay{width:1123px;min-height:794px}
+  .kurum{display:flex;align-items:flex-start;gap:12px;border-bottom:2px solid var(--navy);
+    padding-bottom:8px;margin-bottom:10px}
+  .kurum .logo{width:42px;height:42px;border:1px solid var(--line);border-radius:4px;
+    display:flex;align-items:center;justify-content:center;font-size:20px;background:#f7fafc}
+  .kurum .ad{font-size:13px;font-weight:bold;color:var(--navy)}
+  .kurum .alt{font-size:9.5px;color:#444;line-height:1.5}
+  .kurum .no{margin-left:auto;text-align:right;font-size:9.5px;color:#444;line-height:1.5}
+  .kurum .no b{display:block;font-size:12px;color:var(--navy)}
+  .kagit h1{font-size:14px;text-align:center;margin:6px 0 2px;color:var(--navy);letter-spacing:.3px}
+  .kagit h2{font-size:10.5px;text-align:center;margin:0 0 10px;color:#444;font-weight:normal}
+  .param{display:grid;grid-template-columns:repeat(4,1fr);gap:4px 14px;border:1px solid #cfd6de;border-radius:3px;
+    padding:6px 10px;margin-bottom:10px;font-size:9.5px;background:#f8fafc}
+  .param span{color:#666}
+  .param b{display:block;font-size:10.5px;color:#000}
+  .kagit table{border-collapse:collapse;width:100%;table-layout:fixed}
+  .kagit th{background:#e9eef4;border:1px solid #b9c3cf;padding:4px 6px;font-size:9.5px;text-align:left;
+    color:#1f2d3a;white-space:nowrap}
+  .kagit td{border:1px solid #d5dce4;padding:3px 6px;font-size:9.8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kagit tr.g1 td{background:#dde6f0;font-weight:bold}
+  .kagit tr.g2 td{background:#eef2f7;font-weight:bold;padding-left:14px}
+  .kagit tr.ara td{background:#f4f6f9;font-weight:bold;font-style:italic}
+  .kagit tr.toplam td{background:#dde6f0;font-weight:bold;border-top:2px solid var(--navy)}
+  .kagit tr.zebra td{background:#fbfcfd}
+  .altbilgi{position:absolute;left:38px;right:38px;bottom:16px;border-top:1px solid #b9c3cf;padding-top:4px;
+    display:flex;justify-content:space-between;font-size:8.5px;color:#555}
+  .ustbilgi{position:absolute;left:38px;right:38px;top:12px;display:flex;justify-content:space-between;
+    font-size:8.5px;color:#777}
+  .damga{position:absolute;right:38px;top:34px;border:1.5px solid #b3261e;color:#b3261e;border-radius:3px;
+    padding:2px 8px;font-size:9px;font-weight:bold;letter-spacing:.5px;transform:rotate(-6deg);opacity:.75}
+  .gosterge{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0 12px}
+  .gosterge div{border:1px solid #cfd6de;border-radius:3px;padding:6px 8px;background:#f8fafc}
+  .gosterge span{font-size:9px;color:#666;display:block}
+  .gosterge b{font-size:14px;color:var(--navy)}
+  .gosterge i{font-style:normal;font-size:9px;color:#2e7d46;margin-left:4px}
+  .bolum-bas{font-size:11px;font-weight:bold;color:var(--navy);border-bottom:1px solid #b9c3cf;margin:12px 0 6px;padding-bottom:2px}
+  .ikili{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .cubuk{height:7px;background:#e7edf4;border-radius:3px;overflow:hidden}
+  .cubuk i{display:block;height:100%;background:#2f6db3}
+  .cubuk i.gri{background:#b7c4d3}
+  .seri{display:flex;align-items:center;gap:6px;font-size:9.5px;margin:3px 0}
+  .seri span:first-child{width:32px}
+  .seri b{width:38px;text-align:right}
+  .seri .sonuk{width:38px;text-align:right}
+  .imzalar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;margin-top:22px}
+  .imza{border-top:1px solid #000;padding-top:4px;font-size:9.5px;min-height:52px}
+  .imza b{display:block;font-size:10px}
+  .sayfa-kes{border-top:2px dashed #9aa7b4;margin:6px auto 12px;width:794px;max-width:100%;text-align:center;
+    font-size:10px;color:#6b7a8b;position:relative;top:-8px}
+  .sayfa-kes span{background:#dfe4ea;padding:0 8px}
+
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+
+  @media print{
+    @page{size:A4 portrait;margin:12mm 10mm}
+    body{background:#fff;padding:0}
+    .title,.toolbar,.serit,.yan,.sayfalar,.statusbar,.not,.sayfa-kes{display:none!important}
+    .win{border:none;box-shadow:none;max-width:none}
+    .ana{display:block}
+    .kagit-alani{background:#fff;padding:0;max-height:none;overflow:visible}
+    .kagit{box-shadow:none;margin:0;width:auto;min-height:0;padding:0;page-break-after:always}
+    .kagit:last-child{page-break-after:auto}
+    .altbilgi,.ustbilgi{position:fixed}
+    thead{display:table-header-group}
+    tr{page-break-inside:avoid}
+    tr.g1{page-break-before:auto}
+  }
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🖨 Baskı Önizleme — Kurum bazlı hekim cirosu
+    <span class="sp">Gentegre AI · Yönetim › Ayarlar › Dökümler · 15.09.2026 · Sistem Yöneticisi · Şube: Merkez</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🖨</span> Yazdır</div>
+    <div class="btn"><span>📄</span> PDF Kaydet</div>
+    <div class="btn"><span>✉</span> E-posta</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>⬇</span> Excel</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>◀</span></div>
+    <div class="inp dar" style="min-width:80px;justify-content:center">1 / 3</div>
+    <div class="btn"><span>▶</span></div>
+    <div class="btn"><span>🔍</span> %100 ▾</div>
+    <div class="sp"></div>
+    <div class="btn"><span>💾</span> Baskı ayarını dökümle kaydet</div>
+    <div class="btn"><span>✕</span> Kapat</div>
+  </div>
+
+  <div class="serit">
+    <div class="sel">📄 Döküm: <b>Kurum bazlı hekim cirosu</b> · v3</div>
+    <div class="sel">📅 <b>01.09.2026 – 15.09.2026</b></div>
+    <div class="sel">🩺 <b>Dr. Güneş, Dr. Kavak</b></div>
+    <span class="rz ok">37 kayıt · 3 sayfa</span>
+    <span class="rz mavi">A4 dikey</span>
+    <span class="sp"></span>
+    <span class="sonuk">Önizleme sunucudan gelen <b>aynı veriyle</b> çizilir; kâğıt = ekrandaki HTML, tarayıcı yazdırır.</span>
+  </div>
+
+  <div class="ana">
+    <!-- ============================== SOL: BASKI AYARLARI ============================== -->
+    <div class="yan">
+      <div class="grp">
+        <h4>Sayfa</h4>
+        <div class="sat"><span>Kâğıt</span><div class="inp combo">A4</div></div>
+        <div class="sat"><span>Yön</span><span><span class="radyo on"></span>Dikey &nbsp; <span class="radyo"></span>Yatay</span></div>
+        <div class="sat"><span>Kenar boşluğu</span><div class="inp combo">Normal (12 / 10 mm)</div></div>
+        <div class="sat"><span>Ölçek</span><span><span class="radyo on"></span>Sığdır (genişlik) &nbsp; <span class="radyo"></span>%100</span></div>
+        <div class="uyari-sat"><span class="rz sari">Öneri</span><span>8'den fazla kolon ya da çapraz tabloda 6+ sütun → <b>Yatay</b> otomatik önerilir.</span></div>
+      </div>
+
+      <div class="grp">
+        <h4>Başlık &amp; Altbilgi</h4>
+        <div class="sat"><span><span class="kutucuk on">✓</span> Kurum başlığı (logo · ad · adres)</span><span class="rz">kurum profili</span></div>
+        <div class="sat"><span><span class="kutucuk on">✓</span> Döküm adı + parametre kutusu</span></div>
+        <div class="sat"><span><span class="kutucuk on">✓</span> Tablo başlığı her sayfada</span></div>
+        <div class="sat"><span><span class="kutucuk on">✓</span> Sayfa no · üretim zamanı · kullanıcı</span></div>
+        <div class="sat"><span><span class="kutucuk"></span> "GİZLİ" damgası</span></div>
+        <div class="sat"><span><span class="kutucuk"></span> İmza alanı</span><div class="inp combo" style="min-width:90px">Hazırlayan · Onaylayan</div></div>
+        <div class="sat"><span>Serbest not (dipnot)</span><div class="inp" style="min-width:90px;color:#9aa">…</div></div>
+      </div>
+
+      <div class="grp">
+        <h4>İçerik</h4>
+        <div class="sat"><span><span class="kutucuk on">✓</span> Özet göstergeler</span><span class="sonuk">1. sayfa üstü</span></div>
+        <div class="sat"><span><span class="kutucuk on">✓</span> Gruplu kayıt listesi</span><span class="sonuk">37 satır</span></div>
+        <div class="sat"><span><span class="kutucuk on">✓</span> Grup ara toplamları</span></div>
+        <div class="sat"><span><span class="kutucuk"></span> Her grup 1 yeni sayfada</span></div>
+        <div class="sat"><span><span class="kutucuk on">✓</span> Çapraz tablo + grafikler</span><span class="sonuk">son sayfa</span></div>
+        <div class="sat"><span><span class="kutucuk"></span> Yalnız özet (kayıt listesi yok)</span></div>
+        <div class="sat"><span>Satır tavanı</span><div class="inp dar">2.000</div></div>
+        <div class="uyari-sat"><span class="rz mavi">Kolon</span><span>Basılacak kolonlar ve genişlik <b>Tasarla</b>'daki sırayla gelir; burada yalnız gizle/göster.</span></div>
+        <div class="sat" style="flex-wrap:wrap;gap:4px">
+          <span class="rz ok">Tarih</span><span class="rz ok">Protokol</span><span class="rz ok">Hasta</span><span class="rz ok">Kurum</span>
+          <span class="rz ok">Doktor</span><span class="rz ok">Genel toplam</span><span class="rz ok">Tahsilat</span><span class="rz ok">Açık</span>
+          <span class="rz" style="opacity:.5">Bölüm</span>
+        </div>
+      </div>
+
+      <div class="grp">
+        <h4>Biçim</h4>
+        <div class="sat"><span>Yazı boyu</span><div class="inp combo" style="min-width:80px">Normal 10pt</div></div>
+        <div class="sat"><span><span class="kutucuk on">✓</span> Zebra satır</span></div>
+        <div class="sat"><span><span class="kutucuk on">✓</span> Grafikler siyah-beyaz uyumlu</span></div>
+        <div class="sat"><span>Para biçimi</span><span class="sonuk">1.234,56 · şube yerel para</span></div>
+        <div class="sat"><span>Dil</span><div class="inp combo" style="min-width:70px">TR</div></div>
+      </div>
+    </div>
+
+    <!-- ============================== SAG: KAGIT ONIZLEME ============================== -->
+    <div>
+      <div class="sayfalar">
+        <div class="kucuk on">1</div><div class="kucuk">2</div><div class="kucuk">3</div>
+        <span class="sonuk" style="margin-left:8px">1: özet + liste başı · 2: liste devamı · 3: istatistik</span>
+      </div>
+      <div class="kagit-alani">
+
+        <!-- SAYFA 1 -->
+        <div class="kagit">
+          <div class="ustbilgi"><span>Kurum bazlı hekim cirosu · v3</span><span>01.09.2026 – 15.09.2026</span></div>
+          <div class="kurum">
+            <div class="logo">🏥</div>
+            <div><div class="ad">Örnek Sağlık Merkezi A.Ş.</div>
+              <div class="alt">Atatürk Cad. No:12 Kadıköy / İstanbul · 0216 000 00 00 · info@ornek.com.tr<br>Şube: Merkez · Mersis 0123456789012345</div></div>
+            <div class="no"><b>DÖKÜM</b>Üretim: 15.09.2026 09:12<br>Hazırlayan: admin<br>No: DK-2026-000418</div>
+          </div>
+          <h1>KURUM BAZLI HEKİM CİROSU</h1>
+          <h2>Başvurular · Kardiyoloji · SGK + Anadolu Sigorta · genel toplam ≥ 500 TL · iptaller hariç</h2>
+          <div class="param">
+            <div><span>Tarih aralığı</span><b>01.09.2026 – 15.09.2026</b></div>
+            <div><span>Ödeyen kurum</span><b>SGK, Anadolu Sigorta A.Ş.</b></div>
+            <div><span>Doktorlar</span><b>Dr. B. Güneş, Dr. D. Kavak</b></div>
+            <div><span>Bölüm · Durum</span><b>Kardiyoloji · iptal hariç</b></div>
+          </div>
+
+          <div class="gosterge">
+            <div><span>Başvuru</span><b>37</b></div>
+            <div><span>Genel toplam</span><b>32.660,00</b><i>TL</i></div>
+            <div><span>Tahsilat</span><b>24.090,00</b><i>%74</i></div>
+            <div><span>Açık tutar</span><b>8.570,00</b></div>
+          </div>
+
+          <table>
+            <colgroup><col style="width:62px"><col style="width:66px"><col><col style="width:118px"><col style="width:96px"><col style="width:72px"><col style="width:72px"><col style="width:72px"></colgroup>
+            <thead><tr><th>Tarih</th><th>Protokol</th><th>Hasta</th><th>Ödeyen kurum</th><th>Doktor</th><th class="sag">Genel toplam</th><th class="sag">Tahsilat</th><th class="sag">Açık</th></tr></thead>
+            <tbody>
+              <tr class="g1"><td colspan="5">Sosyal Güvenlik Kurumu — 21 başvuru</td><td class="sag">18.640,00</td><td class="sag">12.110,00</td><td class="sag">6.530,00</td></tr>
+              <tr class="g2"><td colspan="5">Dr. Barış Güneş — 14 başvuru</td><td class="sag">12.900,00</td><td class="sag">8.400,00</td><td class="sag">4.500,00</td></tr>
+              <tr><td>15.09.2026</td><td>P-000133</td><td>Sami UZUN</td><td>SGK</td><td>Dr. B. Güneş</td><td class="sag">1.818,18</td><td class="sag">0,00</td><td class="sag">1.818,18</td></tr>
+              <tr class="zebra"><td>14.09.2026</td><td>P-000131</td><td>Eray YAZICI</td><td>SGK</td><td>Dr. B. Güneş</td><td class="sag">1.997,20</td><td class="sag">200,00</td><td class="sag">1.797,20</td></tr>
+              <tr><td>12.09.2026</td><td>P-000119</td><td>Ayşe ÖZTÜRK</td><td>SGK</td><td>Dr. B. Güneş</td><td class="sag">920,00</td><td class="sag">920,00</td><td class="sag">0,00</td></tr>
+              <tr class="zebra"><td>11.09.2026</td><td>P-000114</td><td>Mehmet KAYA</td><td>SGK</td><td>Dr. B. Güneş</td><td class="sag">640,00</td><td class="sag">640,00</td><td class="sag">0,00</td></tr>
+              <tr><td>10.09.2026</td><td>P-000108</td><td>Zeynep ARSLAN</td><td>SGK</td><td>Dr. B. Güneş</td><td class="sag">1.150,00</td><td class="sag">1.150,00</td><td class="sag">0,00</td></tr>
+              <tr class="zebra"><td>09.09.2026</td><td>P-000101</td><td>Hasan DEMİR</td><td>SGK</td><td>Dr. B. Güneş</td><td class="sag">2.100,00</td><td class="sag">1.200,00</td><td class="sag">900,00</td></tr>
+              <tr><td>08.09.2026</td><td>P-000097</td><td>Fatma ÇELİK</td><td>SGK</td><td>Dr. B. Güneş</td><td class="sag">780,00</td><td class="sag">780,00</td><td class="sag">0,00</td></tr>
+              <tr class="zebra"><td>05.09.2026</td><td>P-000088</td><td>Ali YILMAZ</td><td>SGK</td><td>Dr. B. Güneş</td><td class="sag">1.320,00</td><td class="sag">1.320,00</td><td class="sag">0,00</td></tr>
+              <tr><td colspan="8" class="orta sonuk">… 6 satır daha</td></tr>
+              <tr class="ara"><td colspan="5">Dr. Barış Güneş ara toplam (14)</td><td class="sag">12.900,00</td><td class="sag">8.400,00</td><td class="sag">4.500,00</td></tr>
+              <tr class="g2"><td colspan="5">Dr. Doruk Kavak — 7 başvuru</td><td class="sag">5.740,00</td><td class="sag">3.710,00</td><td class="sag">2.030,00</td></tr>
+              <tr><td>15.09.2026</td><td>P-000134</td><td>Nur AKSOY</td><td>SGK</td><td>Dr. D. Kavak</td><td class="sag">960,00</td><td class="sag">960,00</td><td class="sag">0,00</td></tr>
+              <tr class="zebra"><td>13.09.2026</td><td>P-000126</td><td>Kemal ÖZ</td><td>SGK</td><td>Dr. D. Kavak</td><td class="sag">1.480,00</td><td class="sag">500,00</td><td class="sag">980,00</td></tr>
+              <tr><td>12.09.2026</td><td>P-000120</td><td>Selin KURT</td><td>SGK</td><td>Dr. D. Kavak</td><td class="sag">700,00</td><td class="sag">700,00</td><td class="sag">0,00</td></tr>
+              <tr class="zebra"><td>11.09.2026</td><td>P-000113</td><td>Burak ŞAHİN</td><td>SGK</td><td>Dr. D. Kavak</td><td class="sag">1.250,00</td><td class="sag">1.250,00</td><td class="sag">0,00</td></tr>
+              <tr><td>09.09.2026</td><td>P-000102</td><td>Elif AYDIN</td><td>SGK</td><td>Dr. D. Kavak</td><td class="sag">560,00</td><td class="sag">0,00</td><td class="sag">560,00</td></tr>
+              <tr class="zebra"><td>06.09.2026</td><td>P-000091</td><td>Murat KOÇ</td><td>SGK</td><td>Dr. D. Kavak</td><td class="sag">790,00</td><td class="sag">300,00</td><td class="sag">490,00</td></tr>
+              <tr><td>03.09.2026</td><td>P-000079</td><td>Gül POLAT</td><td>SGK</td><td>Dr. D. Kavak</td><td class="sag">0,00</td><td class="sag">0,00</td><td class="sag">0,00</td></tr>
+              <tr class="ara"><td colspan="5">Dr. Doruk Kavak ara toplam (7)</td><td class="sag">5.740,00</td><td class="sag">3.710,00</td><td class="sag">2.030,00</td></tr>
+              <tr class="ara"><td colspan="5">Sosyal Güvenlik Kurumu ara toplam (21)</td><td class="sag">18.640,00</td><td class="sag">12.110,00</td><td class="sag">6.530,00</td></tr>
+              <tr class="g1"><td colspan="5">Anadolu Sigorta A.Ş. — 16 başvuru</td><td class="sag">14.020,00</td><td class="sag">11.980,00</td><td class="sag">2.040,00</td></tr>
+              <tr class="g2"><td colspan="5">Dr. Barış Güneş — 10 başvuru</td><td class="sag">8.400,00</td><td class="sag">7.600,00</td><td class="sag">800,00</td></tr>
+              <tr><td>15.09.2026</td><td>P-000135</td><td>Deniz ERDEM</td><td>Anadolu Sigorta</td><td>Dr. B. Güneş</td><td class="sag">1.100,00</td><td class="sag">1.100,00</td><td class="sag">0,00</td></tr>
+              <tr class="zebra"><td>14.09.2026</td><td>P-000130</td><td>Cem YILDIZ</td><td>Anadolu Sigorta</td><td>Dr. B. Güneş</td><td class="sag">860,00</td><td class="sag">860,00</td><td class="sag">0,00</td></tr>
+              <tr><td>13.09.2026</td><td>P-000125</td><td>İpek TAŞ</td><td>Anadolu Sigorta</td><td>Dr. B. Güneş</td><td class="sag">1.420,00</td><td class="sag">620,00</td><td class="sag">800,00</td></tr>
+              <tr class="zebra"><td>12.09.2026</td><td>P-000121</td><td>Onur BAL</td><td>Anadolu Sigorta</td><td>Dr. B. Güneş</td><td class="sag">730,00</td><td class="sag">730,00</td><td class="sag">0,00</td></tr>
+              <tr><td>10.09.2026</td><td>P-000109</td><td>Seda ACAR</td><td>Anadolu Sigorta</td><td>Dr. B. Güneş</td><td class="sag">990,00</td><td class="sag">990,00</td><td class="sag">0,00</td></tr>
+              <tr><td colspan="8" class="orta sonuk">… devamı 2. sayfada (tablo başlığı tekrar eder)</td></tr>
+            </tbody>
+          </table>
+
+          <div class="altbilgi"><span>Gentegre AI · Örnek Sağlık Merkezi A.Ş.</span><span>Üretim 15.09.2026 09:12 · admin · DK-2026-000418</span><span>Sayfa 1 / 3</span></div>
+        </div>
+
+        <div class="sayfa-kes"><span>— sayfa 2: liste devamı, aynı tablo başlığı tekrar eder, SGK ara toplamı + Anadolu Sigorta grubu + GENEL TOPLAM —</span></div>
+
+        <!-- SAYFA 3 -->
+        <div class="kagit" style="min-height:900px">
+          <div class="ustbilgi"><span>Kurum bazlı hekim cirosu · v3</span><span>01.09.2026 – 15.09.2026</span></div>
+          <div class="damga">GİZLİ · YÖNETİM</div>
+          <div class="kurum" style="border-bottom-width:1px">
+            <div><div class="ad">Örnek Sağlık Merkezi A.Ş.</div><div class="alt">Kurum bazlı hekim cirosu · İstatistik</div></div>
+          </div>
+
+          <div class="bolum-bas">Ödeyen kurum × Ay — başvuru sayısı · kıyas: 2025 aynı dönem</div>
+          <table>
+            <colgroup><col style="width:150px"><col><col><col><col><col style="width:64px"><col style="width:48px"><col style="width:74px"><col style="width:58px"></colgroup>
+            <thead><tr><th>Ödeyen kurum</th><th class="sag">Haz</th><th class="sag">Tem</th><th class="sag">Ağu</th><th class="sag">Eyl*</th><th class="sag">Toplam</th><th class="sag">Pay</th><th class="sag">2025</th><th class="sag">Δ</th></tr></thead>
+            <tbody>
+              <tr><td>Sosyal Güvenlik Kurumu</td><td class="sag">184</td><td class="sag">201</td><td class="sag">176</td><td class="sag">96</td><td class="sag"><b>657</b></td><td class="sag">%54</td><td class="sag">598</td><td class="sag">+9,9%</td></tr>
+              <tr class="zebra"><td>Anadolu Sigorta A.Ş.</td><td class="sag">62</td><td class="sag">71</td><td class="sag">80</td><td class="sag">41</td><td class="sag"><b>254</b></td><td class="sag">%21</td><td class="sag">190</td><td class="sag">+33,7%</td></tr>
+              <tr><td>Ücretli (hasta öder)</td><td class="sag">58</td><td class="sag">49</td><td class="sag">61</td><td class="sag">33</td><td class="sag"><b>201</b></td><td class="sag">%17</td><td class="sag">240</td><td class="sag">−16,3%</td></tr>
+              <tr class="zebra"><td>Diğer kurumlar (5)</td><td class="sag">27</td><td class="sag">31</td><td class="sag">24</td><td class="sag">15</td><td class="sag"><b>97</b></td><td class="sag">%8</td><td class="sag">88</td><td class="sag">+10,2%</td></tr>
+              <tr class="toplam"><td>TOPLAM</td><td class="sag">331</td><td class="sag">352</td><td class="sag">341</td><td class="sag">185</td><td class="sag">1.209</td><td class="sag">%100</td><td class="sag">1.116</td><td class="sag">+8,3%</td></tr>
+            </tbody>
+          </table>
+          <div style="font-size:8.5px;color:#666;margin-top:3px">* Eylül tamamlanmadı (15 gün). Küçük hücreler (&lt;5) gizlilik eşiği gereği "&lt;5" olarak basılır.</div>
+
+          <div class="ikili" style="margin-top:14px">
+            <div>
+              <div class="bolum-bas">Aylık başvuru — 2026 (koyu) / 2025 (gri)</div>
+              <div class="seri"><span>Haz</span><div class="cubuk" style="flex:1"><i style="width:94%"></i></div><b>331</b><span class="sonuk">305</span></div>
+              <div class="seri"><span></span><div class="cubuk" style="flex:1"><i class="gri" style="width:87%"></i></div><b></b><span class="sonuk"></span></div>
+              <div class="seri"><span>Tem</span><div class="cubuk" style="flex:1"><i style="width:100%"></i></div><b>352</b><span class="sonuk">318</span></div>
+              <div class="seri"><span></span><div class="cubuk" style="flex:1"><i class="gri" style="width:90%"></i></div><b></b><span class="sonuk"></span></div>
+              <div class="seri"><span>Ağu</span><div class="cubuk" style="flex:1"><i style="width:97%"></i></div><b>341</b><span class="sonuk">296</span></div>
+              <div class="seri"><span></span><div class="cubuk" style="flex:1"><i class="gri" style="width:84%"></i></div><b></b><span class="sonuk"></span></div>
+              <div class="seri"><span>Eyl*</span><div class="cubuk" style="flex:1"><i style="width:53%"></i></div><b>185</b><span class="sonuk">197</span></div>
+              <div class="seri"><span></span><div class="cubuk" style="flex:1"><i class="gri" style="width:56%"></i></div><b></b><span class="sonuk"></span></div>
+            </div>
+            <div>
+              <div class="bolum-bas">Doktor bazında — ciro ve tahsilat oranı</div>
+              <table>
+                <thead><tr><th>Doktor</th><th class="sag">Başvuru</th><th class="sag">Ciro</th><th class="sag">Ort. fiş</th><th class="sag">Tahsilat %</th></tr></thead>
+                <tbody>
+                  <tr><td>Dr. Barış Güneş</td><td class="sag">24</td><td class="sag">21.300,00</td><td class="sag">887,50</td><td class="sag">%71</td></tr>
+                  <tr class="zebra"><td>Dr. Doruk Kavak</td><td class="sag">13</td><td class="sag">11.360,00</td><td class="sag">873,85</td><td class="sag">%78</td></tr>
+                  <tr class="toplam"><td>TOPLAM</td><td class="sag">37</td><td class="sag">32.660,00</td><td class="sag">882,70</td><td class="sag">%74</td></tr>
+                </tbody>
+              </table>
+              <div class="bolum-bas" style="margin-top:14px">Açıklama</div>
+              <div style="font-size:9.5px;line-height:1.55">Anadolu Sigorta başvuruları geçen yıla göre %33,7 arttı; ücretli hasta %16,3 azaldı.
+                SGK'da açık tutar payı %35 — provizyonsuz 6 başvuru. <span class="sonuk">(✨ AI yorumu; sayılar sunucudan.)</span></div>
+            </div>
+          </div>
+
+          <div class="imzalar">
+            <div class="imza"><b>Hazırlayan</b>admin · 15.09.2026</div>
+            <div class="imza"><b>Kontrol</b>Muhasebe</div>
+            <div class="imza"><b>Onaylayan</b>Başhekim</div>
+          </div>
+
+          <div class="altbilgi"><span>Gentegre AI · Örnek Sağlık Merkezi A.Ş.</span><span>Üretim 15.09.2026 09:12 · admin · DK-2026-000418</span><span>Sayfa 3 / 3</span></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Kurum bazlı hekim cirosu · v3</span><span>·</span>
+    <span>A4 dikey · 3 sayfa · 37 kayıt</span><span>·</span>
+    <span>Baskı ayarı: dökümle kaydedildi (v3)</span><span>·</span>
+    <span>Son baskı: 01.09.2026 08:00 (zamanlı gönderim)</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> dökümün kâğıt hâli. Sol panel baskı ayarları (sayfa · başlık/altbilgi · içerik · biçim), sağ alan A4 sayfalar.
+  Tarayıcı yazdırır (<code>window.print()</code> + <code>@media print</code>) — LabRaporCikti ile aynı yol; PDF = tarayıcının
+  "PDF olarak kaydet"i. Sunucu tarafı PDF yalnız <b>zamanlı gönderim</b>de (işçi headless tarayıcıyla aynı HTML'i basar).
+  <ul>
+    <li><b>Aynı veri, ikinci sorgu yok:</b> önizleme, ekranın aldığı <code>ListeYaniti</code> / <code>OzetYaniti</code>'nı çizer;
+        satır tavanı (2.000) aşılırsa "yalnız özet" ya da Excel'e yönlendirir.</li>
+    <li><b>Kâğıt yapısı:</b> kurum başlığı (kurum profili: logo · ad · adres · Mersis) → döküm adı + tanım cümlesi →
+        <b>parametre kutusu</b> (hangi koşullarla üretildi — kâğıt kendini açıklar) → özet göstergeler → gruplu liste
+        (grup başlığı, ara toplam, genel toplam) → istatistik sayfası (çapraz tablo, seri, doktor özeti, AI açıklaması)
+        → imza alanı (isteğe bağlı).</li>
+    <li><b>Her sayfada:</b> üstte döküm adı + dönem, altta kurum · üretim zamanı · kullanıcı · döküm no · "Sayfa n / N".
+        Tablo başlığı <code>thead</code> ile her sayfada tekrar eder; satır ortadan bölünmez (<code>page-break-inside:avoid</code>);
+        "her grup yeni sayfada" seçeneği grup satırına <code>page-break-before</code> koyar.</li>
+    <li><b>Yön otomatik önerisi:</b> 8+ kolon ya da 6+ çapraz sütun → yatay. Ölçek "sığdır" kolon genişliklerini
+        Tasarla'daki oranla A4 genişliğine dağıtır; %100'de taşan kolonlar ikinci tabloya düşer.</li>
+    <li><b>Baskı ayarı dökümle saklanır</b> (<code>dokum_tanimi.tanim.baski</code>): yön, başlık/altbilgi seçimleri, damga,
+        imza, dipnot, gizli kolonlar. Zamanlı gönderim aynı ayarla basar.</li>
+    <li><b>Gizlilik:</b> damga isteğe bağlı; istatistik sayfasında hasta kimliği yok; küçük hücre "&lt;5". Kâğıda basılan
+        her döküm <code>dokum_arsiv</code>'e (kim, ne zaman, hangi parametre, kaç satır) yazılır — Excel de aynı.</li>
+    <li><b>Siyah-beyaz:</b> grup/ara toplam satırları ton farkıyla (renksiz yazıcıda da okunur); grafikler çubuk,
+        koyu/gri iki seri. Yazı 10pt, para <code>1.234,56</code>, dil şubeden.</li>
+  </ul>
+</div>
+
+</body>
+</html>

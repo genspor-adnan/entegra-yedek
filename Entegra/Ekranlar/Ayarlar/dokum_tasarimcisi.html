@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Döküm &amp; İstatistik Tasarımcısı — Mockup (Gentegre AI · Yönetim › Ayarlar)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe; --ai:#5b3fb5;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.ai{border-color:#5b3fb5;background:linear-gradient(#8a6fd8,#5b3fb5);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .serit .sel b{font-weight:bold}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ana{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:0}
+  .ana.k2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%;table-layout:fixed}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap;vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
+  td.sar{white-space:normal}
+  tr.grup td{background:#eef4fb;font-weight:bold;color:#2c4a6b}
+  tr.toplam td{background:#f7f9fc;font-weight:bold;border-top:2px solid var(--line)}
+  tr.sel td{background:var(--sel)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;
+    padding:3px 7px;font-size:11.5px;display:inline-flex;align-items:center;gap:6px;min-width:110px}
+  .inp.combo::after{content:"\25BE";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.tam{display:flex;width:100%}
+  .cip{display:inline-block;border:1px solid #bcd2ef;background:#e3ecfa;color:#2f5c9e;border-radius:3px;
+    padding:0 6px;font-size:11px;margin:1px 2px}
+  .cip i{font-style:normal;opacity:.6;margin-left:4px}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .hdr{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 14px;padding:10px 12px;
+    background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k3{grid-template-columns:repeat(3,1fr)}
+  .sat{display:flex;justify-content:space-between;padding:4px 10px;font-size:11.5px;
+    border-bottom:1px solid #eef2f6;gap:10px}
+  .sat.buyuk{font-size:13px;background:#f7fafc;font-weight:bold}
+  .uyari-sat{display:flex;gap:8px;align-items:flex-start;padding:6px 10px;
+    border-bottom:1px solid #eef2f6;font-size:11.5px}
+  .fark{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:12px;gap:10px}
+  .link{color:var(--accent);text-decoration:none}
+  .havuz{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;background:#fff}
+  .havuz .cip{cursor:grab}
+  .kolon{display:flex;align-items:center;gap:8px;padding:5px 10px;border-bottom:1px solid #eef2f6;
+    background:#fff;font-size:11.5px}
+  .kolon .tut{color:#9aa7b4;cursor:grab}
+  .kolon .ad{flex:1}
+  .kolon .gen{width:52px;text-align:right;color:var(--muted)}
+  .kutucuk{width:12px;height:12px;border:1px solid var(--line);border-radius:2px;display:inline-block;
+    vertical-align:middle;background:#fff;text-align:center;line-height:10px;font-size:10px}
+  .kutucuk.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  /* AI sohbet */
+  .sohbet{padding:10px 12px;background:#fff;display:flex;flex-direction:column;gap:8px}
+  .balon{max-width:78%;padding:7px 10px;border-radius:8px;font-size:11.5px;line-height:1.5}
+  .balon.ben{align-self:flex-end;background:#e3ecfa;border:1px solid #bcd2ef}
+  .balon.ai{align-self:flex-start;background:#f3effc;border:1px solid #ddd0f2}
+  .balon .k{font-size:10.5px;color:var(--muted);margin-bottom:3px}
+  .taslak{border:1px solid #ddd0f2;border-radius:4px;background:#fff;margin-top:6px;overflow:hidden}
+  .taslak .b{background:#f3effc;padding:4px 8px;font-size:11px;color:var(--ai);font-weight:bold}
+  .taslak .sat{padding:3px 8px}
+  .yaz{display:flex;gap:6px;padding:8px 12px;border-top:1px solid var(--line2);background:#fbfcfe}
+  .yaz .inp{flex:1}
+  .cubuk{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden}
+  .cubuk i{display:block;height:100%;background:var(--accent)}
+  .menu{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 12px;background:#fff}
+  .menu .kol{border:1px solid var(--line2);border-radius:4px;overflow:hidden}
+  .menu .kol .bas{background:#f3f6fa;padding:5px 9px;font-size:11px;color:#3a5573;font-weight:bold;
+    border-bottom:1px solid var(--line2)}
+  .menu .oge{padding:4px 9px 4px 22px;font-size:11.5px;border-bottom:1px solid #f1f4f8}
+  .menu .oge.grup{padding-left:9px;font-weight:bold;color:#2c4a6b;background:#fbfcfe}
+  .menu .oge.on{background:var(--sel);font-weight:bold}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📊 Dökümler &amp; İstatistikler — Tasarımcı
+    <span class="sp">Gentegre AI · Yönetim › Ayarlar › Dökümler · 15.09.2026 · Sistem Yöneticisi · Şube: Merkez</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>＋</span> Yeni Döküm</div>
+    <div class="btn ok"><span>💾</span> Kaydet</div>
+    <div class="btn"><span>▶</span> Çalıştır</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>⬇</span> Excel</div>
+    <div class="btn"><span>🖨</span> PDF</div>
+    <div class="btn"><span>⏰</span> Zamanla</div>
+    <div class="btn"><span>🔗</span> Paylaş</div>
+    <div class="sp"></div>
+    <div class="btn ai"><span>✨</span> AI ile tasarla</div>
+    <div class="btn"><span>📋</span> Kopyala</div>
+    <div class="btn"><span>🗑</span> Sil</div>
+  </div>
+
+  <!-- SERIT: acik dokumun kimligi + parametreleri -->
+  <div class="serit">
+    <div class="sel">📄 Döküm: <b>Kurum bazlı hekim cirosu</b> ▾</div>
+    <div class="sel">📅 <b>01.09.2026 – 15.09.2026</b></div>
+    <div class="sel">🏛 Kurum: <b>SGK, Anadolu Sigorta</b> <span class="rz mavi">2</span></div>
+    <div class="sel">🩺 Doktor: <b>Dr. Güneş, Dr. Kavak</b> <span class="rz mavi">2</span></div>
+    <span class="rz ok">Kayıtlı · v3</span>
+    <span class="rz sari">2 parametre çalıştırırken sorulur</span>
+    <span class="sp"></span>
+    <span class="sonuk">Kaynak: <b>Başvurular</b> · 3 koşul · 8 kolon · Kurum › Doktor gruplu</span>
+  </div>
+
+  <div>
+    <div class="sekmeler">
+      <div class="sekme" data-s="liste">Dökümlerim <span class="rz">18</span></div>
+      <div class="sekme on" data-s="tasarla">Tasarla</div>
+      <div class="sekme" data-s="istatistik">📈 İstatistik</div>
+      <div class="sekme" data-s="onizle">Önizleme</div>
+      <div class="sekme" data-s="ai">✨ AI Asistan</div>
+      <div class="sekme" data-s="zaman">Zamanlama &amp; Paylaşım</div>
+      <div class="sekme" data-s="menu">Menüde Yeri</div>
+    </div>
+
+    <!-- ================================================ DOKUMLERIM ======== -->
+    <div class="pnl" data-s="liste" hidden>
+      <div class="grp">
+        <h4>Kayıtlı Dökümler <span class="mini">benim · rolümle paylaşılan · kurum geneli</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr>
+              <th style="width:300px">Döküm</th><th style="width:110px">Kaynak</th>
+              <th>Koşullar</th><th style="width:150px">Çıktı</th>
+              <th style="width:120px">Zamanlama</th><th style="width:110px">Paylaşım</th>
+              <th style="width:120px">Son çalıştırma</th><th style="width:90px">Sahibi</th>
+            </tr></thead>
+            <tbody>
+              <tr class="sel"><td><b>Kurum bazlı hekim cirosu</b></td><td>Başvurular</td>
+                <td class="sar"><span class="cip">Tarih<i>?</i></span><span class="cip">Kurum ∈ 2</span><span class="cip">Doktor<i>?</i></span></td>
+                <td>Özet · Kurum › Doktor</td><td><span class="rz ok">Ayın 1'i · 08:00</span></td>
+                <td><span class="rz mavi">Yönetim rolü</span></td><td class="sonuk">15.09 09:12</td><td>admin</td></tr>
+              <tr><td><b>Günlük kasa dökümü</b></td><td>Tahsilatlar</td>
+                <td class="sar"><span class="cip">Tarih = bugün</span><span class="cip">Şube = aktif</span><span class="cip">Tür ∈ Nakit, POS</span></td>
+                <td>Liste + toplam</td><td><span class="rz ok">Her gün · 18:30</span></td>
+                <td><span class="rz mavi">Banko rolü</span></td><td class="sonuk">14.09 18:30</td><td>admin</td></tr>
+              <tr><td><b>SGK provizyonsuz başvurular</b></td><td>Başvurular</td>
+                <td class="sar"><span class="cip">Kurum = SGK</span><span class="cip">Provizyon = yok</span><span class="cip">Tarih<i>?</i></span></td>
+                <td>Liste</td><td><span class="rz pas">—</span></td>
+                <td><span class="rz">Bana özel</span></td><td class="sonuk">13.09</td><td>Elif K.</td></tr>
+              <tr><td><b>Bekleyen lab sonuçları · 24 saat+</b></td><td>Lab istemleri</td>
+                <td class="sar"><span class="cip">Durum = sonuç bekliyor</span><span class="cip">Yaş &gt; 24 sa</span></td>
+                <td>Liste</td><td><span class="rz ok">Her sabah 07:00</span></td>
+                <td><span class="rz mavi">Laboratuvar rolü</span></td><td class="sonuk">15.09 07:00</td><td>admin</td></tr>
+              <tr><td><b>İskonto verilen başvurular</b></td><td>Ücret satırları</td>
+                <td class="sar"><span class="cip">İskonto &gt; 0</span><span class="cip">Tarih<i>?</i></span><span class="cip">İsteyen<i>?</i></span></td>
+                <td>Özet · Gerekçe</td><td><span class="rz pas">—</span></td>
+                <td><span class="rz mavi">İskonto Onaylayanlar</span></td><td class="sonuk">14.09</td><td>admin</td></tr>
+              <tr><td><b>Randevuya gelmeyenler</b></td><td>Randevular</td>
+                <td class="sar"><span class="cip">Durum = gelmedi</span><span class="cip">Tarih = geçen hafta</span><span class="cip">Bölüm<i>?</i></span></td>
+                <td>Liste + grafik</td><td><span class="rz ok">Pazartesi 08:00</span></td>
+                <td><span class="rz mavi">Randevu rolü</span></td><td class="sonuk">15.09 08:00</td><td>admin</td></tr>
+              <tr><td><b>Aylık başvuru sayısı · bölüm × ay</b> <span class="rz mor">istatistik</span></td><td>Başvurular</td>
+                <td class="sar"><span class="cip">Tarih = bu yıl</span><span class="cip">Şube<i>?</i></span></td>
+                <td>Çapraz tablo · adet</td><td><span class="rz ok">Ayın 1'i · 07:30</span></td>
+                <td><span class="rz mavi">Yönetim rolü</span></td><td class="sonuk">01.09 07:30</td><td>admin</td></tr>
+              <tr><td><b>Doktor başına ortalama ücret &amp; hasta sayısı</b> <span class="rz mor">istatistik</span></td><td>Başvurular</td>
+                <td class="sar"><span class="cip">Tarih<i>?</i></span><span class="cip">Bölüm<i>?</i></span></td>
+                <td>Özet · ort · medyan</td><td><span class="rz pas">—</span></td>
+                <td><span class="rz mavi">Yönetim rolü</span></td><td class="sonuk">14.09</td><td>admin</td></tr>
+              <tr><td><b>Hasta yaş / cinsiyet dağılımı</b> <span class="rz mor">istatistik</span></td><td>Hastalar</td>
+                <td class="sar"><span class="cip">İlk başvuru = bu yıl</span></td>
+                <td>Dağılım · histogram</td><td><span class="rz pas">—</span></td>
+                <td><span class="rz">Bana özel</span></td><td class="sonuk">10.09</td><td>Dr. Güneş</td></tr>
+              <tr><td><b>Randevu doluluk &amp; gelmeme oranı</b> <span class="rz mor">istatistik</span></td><td>Randevular</td>
+                <td class="sar"><span class="cip">Tarih<i>?</i></span><span class="cip">Doktor<i>?</i></span></td>
+                <td>Zaman serisi · %</td><td><span class="rz ok">Pazartesi 08:00</span></td>
+                <td><span class="rz mavi">Randevu rolü</span></td><td class="sonuk">15.09 08:00</td><td>admin</td></tr>
+              <tr><td><b>Hekim hakediş özeti</b> <span class="rz mor">AI ile</span></td><td>Prim satırları</td>
+                <td class="sar"><span class="cip">Dönem<i>?</i></span><span class="cip">Doktor<i>?</i></span></td>
+                <td>Özet · Doktor</td><td><span class="rz pas">—</span></td>
+                <td><span class="rz">Bana özel</span></td><td class="sonuk">12.09</td><td>Dr. Güneş</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="fark">
+          <span class="sonuk"><i>?</i> işaretli koşul <b>parametredir</b>: değeri kaydedilmez, döküm her çalıştırıldığında sorulur. Bir kez tasarla, her ay farklı tarih aralığıyla çalıştır.</span>
+          <span class="rz">18 döküm · 7 zamanlı · 5 istatistik</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================== TASARLA ========= -->
+    <div class="pnl" data-s="tasarla">
+      <div class="hdr">
+        <div class="fld"><label>Döküm adı</label><div class="inp tam">Kurum bazlı hekim cirosu</div></div>
+        <div class="fld"><label>Veri kaynağı</label><div class="inp tam combo">Başvurular</div></div>
+        <div class="fld"><label>Çıktı biçimi</label><div class="inp tam combo">Özet + İstatistik</div><span class="sonuk" style="font-size:10.5px">Liste · Özet · Çapraz tablo · Zaman serisi</span></div>
+        <div class="fld"><label>Görünürlük</label><div class="inp tam combo">Yönetim rolüyle paylaş</div></div>
+      </div>
+
+      <div class="ana">
+        <div>
+          <!-- KOSULLAR -->
+          <div class="grp">
+            <h4>Koşullar <span class="mini">hepsi sağlanmalı (VE) · <a class="link" href="#">VEYA grubu ekle</a></span></h4>
+            <div class="dg">
+              <table>
+                <thead><tr>
+                  <th style="width:36px"></th><th style="width:170px">Alan</th>
+                  <th style="width:130px">Operatör</th><th>Değer</th>
+                  <th style="width:150px">Çalıştırırken sor</th><th style="width:36px"></th>
+                </tr></thead>
+                <tbody>
+                  <tr>
+                    <td class="orta"><span class="rz mavi">1</span></td>
+                    <td><div class="inp tam combo">Belge tarihi</div></td>
+                    <td><div class="inp tam combo">arasında</div></td>
+                    <td><div class="inp">01.09.2026</div> <span class="sonuk">–</span> <div class="inp">15.09.2026</div>
+                        <span class="rz pas">bugün · bu ay · geçen ay · bu yıl</span></td>
+                    <td><span class="kutucuk on">✓</span> <span class="sonuk">"Tarih aralığı"</span></td>
+                    <td class="orta sonuk">✕</td>
+                  </tr>
+                  <tr>
+                    <td class="orta"><span class="rz mavi">2</span></td>
+                    <td><div class="inp tam combo">Ödeyen kurum</div></td>
+                    <td><div class="inp tam combo">şunlardan biri</div></td>
+                    <td><span class="cip">Sosyal Güvenlik Kurumu <i>✕</i></span><span class="cip">Anadolu Sigorta A.Ş. <i>✕</i></span>
+                        <span class="rz">+ ekle</span></td>
+                    <td><span class="kutucuk"></span> <span class="sonuk">sabit</span></td>
+                    <td class="orta sonuk">✕</td>
+                  </tr>
+                  <tr>
+                    <td class="orta"><span class="rz mavi">3</span></td>
+                    <td><div class="inp tam combo">Doktor</div></td>
+                    <td><div class="inp tam combo">şunlardan biri</div></td>
+                    <td><span class="cip">Dr. Barış Güneş <i>✕</i></span><span class="cip">Dr. Doruk Kavak <i>✕</i></span>
+                        <span class="rz">+ ekle</span></td>
+                    <td><span class="kutucuk on">✓</span> <span class="sonuk">"Doktorlar"</span></td>
+                    <td class="orta sonuk">✕</td>
+                  </tr>
+                  <tr>
+                    <td class="orta"><span class="rz mavi">4</span></td>
+                    <td><div class="inp tam combo">Bölüm</div></td>
+                    <td><div class="inp tam combo">eşit</div></td>
+                    <td><div class="inp combo" style="min-width:200px">Kardiyoloji</div></td>
+                    <td><span class="kutucuk"></span> <span class="sonuk">sabit</span></td>
+                    <td class="orta sonuk">✕</td>
+                  </tr>
+                  <tr>
+                    <td class="orta"><span class="rz mavi">5</span></td>
+                    <td><div class="inp tam combo">Genel toplam</div></td>
+                    <td><div class="inp tam combo">büyük eşit</div></td>
+                    <td><div class="inp" style="min-width:90px;justify-content:flex-end">500,00</div> <span class="sonuk">TL</span></td>
+                    <td><span class="kutucuk"></span> <span class="sonuk">sabit</span></td>
+                    <td class="orta sonuk">✕</td>
+                  </tr>
+                  <tr>
+                    <td class="orta"><span class="rz mavi">6</span></td>
+                    <td><div class="inp tam combo">Durum</div></td>
+                    <td><div class="inp tam combo">değil</div></td>
+                    <td><span class="cip">İptal <i>✕</i></span></td>
+                    <td><span class="kutucuk"></span> <span class="sonuk">sabit</span></td>
+                    <td class="orta sonuk">✕</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="fark">
+              <div class="btn"><span>＋</span> Koşul ekle</div>
+              <span class="sonuk">Alan listesi <b>kaynak kataloğundan</b> gelir; operatörler alanın türüne göre (tarih: arasında/son N gün · metin: içerir/eşit · liste: şunlardan biri · sayı: ≥ ≤ arasında). Yetkin olmayan alan listede hiç görünmez.</span>
+            </div>
+          </div>
+
+          <!-- KOLONLAR + GRUPLAMA -->
+          <div class="ana k2" style="margin:0">
+            <div class="grp" style="margin-right:6px">
+              <h4>Kolonlar <span class="mini">sürükle · sırala · toplam işaretle</span></h4>
+              <div class="kolon"><span class="tut">⋮⋮</span><span class="ad">Belge tarihi</span><span class="gen">100</span><span class="kutucuk"></span></div>
+              <div class="kolon"><span class="tut">⋮⋮</span><span class="ad">Protokol no</span><span class="gen">110</span><span class="kutucuk"></span></div>
+              <div class="kolon"><span class="tut">⋮⋮</span><span class="ad">Hasta</span><span class="gen">180</span><span class="kutucuk"></span></div>
+              <div class="kolon"><span class="tut">⋮⋮</span><span class="ad">Ödeyen kurum <span class="rz mor">grup 1</span></span><span class="gen">160</span><span class="kutucuk"></span></div>
+              <div class="kolon"><span class="tut">⋮⋮</span><span class="ad">Doktor <span class="rz mor">grup 2</span></span><span class="gen">150</span><span class="kutucuk"></span></div>
+              <div class="kolon"><span class="tut">⋮⋮</span><span class="ad">Genel toplam</span><span class="gen">110</span><span class="kutucuk on">Σ</span></div>
+              <div class="kolon"><span class="tut">⋮⋮</span><span class="ad">Tahsilat</span><span class="gen">110</span><span class="kutucuk on">Σ</span></div>
+              <div class="kolon"><span class="tut">⋮⋮</span><span class="ad">Açık tutar <span class="rz">hesaplanan</span></span><span class="gen">110</span><span class="kutucuk on">Σ</span></div>
+              <div class="fark" style="flex-direction:column;align-items:stretch;gap:6px">
+                <span class="sonuk">Eklenebilir alanlar — tıkla ekle:</span>
+                <div class="havuz" style="padding:0">
+                  <span class="cip">Bölüm</span><span class="cip">Sözleşme</span><span class="cip">Başvuru türü</span>
+                  <span class="cip">Geliş şekli</span><span class="cip">İsteyen banko</span><span class="cip">Kimlik no</span>
+                  <span class="cip">Tamamlanma %</span><span class="cip">İskonto</span><span class="cip">SGK payı</span>
+                  <span class="cip">Hasta payı</span><span class="cip">Fatura no</span><span class="cip">Şube</span>
+                </div>
+              </div>
+            </div>
+            <div class="grp" style="margin-left:6px">
+              <h4>Gruplama · Sıralama · Toplam</h4>
+              <div class="hdr k3" style="padding:8px 10px">
+                <div class="fld"><label>Grup 1</label><div class="inp tam combo">Ödeyen kurum</div></div>
+                <div class="fld"><label>Grup 2</label><div class="inp tam combo">Doktor</div></div>
+                <div class="fld"><label>Grup 3</label><div class="inp tam combo ro">—</div></div>
+                <div class="fld"><label>Sırala</label><div class="inp tam combo">Belge tarihi ↓</div></div>
+                <div class="fld"><label>Grup toplamı</label><div class="inp tam combo">Her grupta</div></div>
+                <div class="fld"><label>Dip toplam</label><div class="inp tam combo">Göster</div></div>
+              </div>
+              <div class="sat"><span>Grup satırında</span><span class="rz">adet · Σ genel toplam · Σ tahsilat · % pay</span></div>
+              <div class="sat"><span>Satır limiti</span><span>ilk 5.000 · fazlası Excel'e</span></div>
+              <div class="sat"><span>Boş grup</span><span>gizle</span></div>
+              <div class="uyari-sat" style="border-top:1px solid #eef2f6">
+                <span class="rz mavi">Grafik</span>
+                <span>Özet çıktısında grup 1'e göre çubuk grafik de üretilir (Önizleme'de).</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SAG: tanim ozeti + ne uretiyor -->
+        <div style="border-left:1px solid var(--line2);background:#fbfcfe">
+          <div class="grp" style="margin:12px 12px 8px">
+            <h4>Tanım Özeti <span class="mini">okunabilir cümle</span></h4>
+            <div class="uyari-sat" style="border-bottom:0">
+              <span>📄</span>
+              <span><b>Başvurular</b>'dan, <b>belge tarihi</b> seçilen aralıkta, <b>ödeyen kurum</b> SGK ya da Anadolu Sigorta,
+                <b>doktor</b> seçilenlerden biri, <b>bölüm</b> Kardiyoloji, <b>genel toplam</b> ≥ 500 TL ve <b>durum</b> iptal değil olan
+                kayıtları; <b>kurum › doktor</b> gruplu, tarih azalan; genel toplam / tahsilat / açık tutar toplamlı.</span>
+            </div>
+          </div>
+          <div class="grp" style="margin:8px 12px">
+            <h4>Altyapı <span class="mini">yeni SQL yok</span></h4>
+            <div class="sat"><span>Kaynak</span><span class="rz mavi">liste motoru · belge</span></div>
+            <div class="sat"><span>Koşul → süzgeç</span><span class="rz">filtre JSON (op: arasinda/in/…)</span></div>
+            <div class="sat"><span>Yetki</span><span class="rz ok">belge · gör</span></div>
+            <div class="sat"><span>Şube süzmesi</span><span class="rz ok">sunucuda</span></div>
+            <div class="sat"><span>Saklama</span><span class="rz">dokum_tanimi (jsonb)</span></div>
+            <div class="uyari-sat" style="border-top:1px solid #eef2f6">
+              <span class="rz sari">Kural</span>
+              <span>Döküm, liste ekranlarının süzgeç/sıralama sözleşmesini <b>aynen</b> kullanır. Kolon ve alanlar beyaz listeden gelir; metin hiçbir yerde SQL'e ulaşmaz.</span>
+            </div>
+          </div>
+          <div class="grp" style="margin:8px 12px 12px">
+            <h4>Sürüm Geçmişi</h4>
+            <div class="uyari-sat"><span class="rz mavi">v3</span><span>Bölüm koşulu eklendi · 15.09 · admin</span></div>
+            <div class="uyari-sat"><span class="rz mavi">v2</span><span>Doktor parametre yapıldı · 10.09 · admin</span></div>
+            <div class="uyari-sat"><span class="rz mavi">v1</span><span>✨ AI taslağından oluşturuldu · 05.09 · admin</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================ ISTATISTIK ======== -->
+    <div class="pnl" data-s="istatistik" hidden>
+      <div class="hdr">
+        <div class="fld"><label>İstatistik türü</label><div class="inp tam combo">Çapraz tablo (satır × sütun)</div>
+          <span class="sonuk" style="font-size:10.5px">Sayım · Dağılım · Zaman serisi · Çapraz tablo · Dönem kıyası</span></div>
+        <div class="fld"><label>Satır boyutu</label><div class="inp tam combo">Ödeyen kurum</div></div>
+        <div class="fld"><label>Sütun boyutu</label><div class="inp tam combo">Ay (belge tarihi)</div></div>
+        <div class="fld"><label>Kıyas dönemi</label><div class="inp tam combo">Önceki yıl aynı dönem</div></div>
+      </div>
+
+      <div class="ana">
+        <div>
+          <div class="grp">
+            <h4>Ölçüler <span class="mini">her hücrede hesaplanan</span></h4>
+            <div class="dg">
+              <table>
+                <thead><tr>
+                  <th style="width:36px"></th><th style="width:200px">Ölçü</th><th style="width:170px">Alan</th>
+                  <th style="width:120px">Fonksiyon</th><th>Gösterim</th><th style="width:36px"></th>
+                </tr></thead>
+                <tbody>
+                  <tr><td class="orta"><span class="kutucuk on">✓</span></td><td><b>Başvuru sayısı</b></td>
+                    <td><div class="inp tam combo ro">— (kayıt)</div></td><td><div class="inp tam combo">adet</div></td>
+                    <td><span class="rz mavi">sayı</span> <span class="rz">satır %</span></td><td class="orta sonuk">✕</td></tr>
+                  <tr><td class="orta"><span class="kutucuk on">✓</span></td><td><b>Ciro</b></td>
+                    <td><div class="inp tam combo">Genel toplam</div></td><td><div class="inp tam combo">toplam</div></td>
+                    <td><span class="rz mavi">TL</span> <span class="rz">kıyas Δ%</span></td><td class="orta sonuk">✕</td></tr>
+                  <tr><td class="orta"><span class="kutucuk on">✓</span></td><td><b>Ortalama fiş</b></td>
+                    <td><div class="inp tam combo">Genel toplam</div></td><td><div class="inp tam combo">ortalama</div></td>
+                    <td><span class="rz mavi">TL</span></td><td class="orta sonuk">✕</td></tr>
+                  <tr><td class="orta"><span class="kutucuk on">✓</span></td><td><b>Tekil hasta</b></td>
+                    <td><div class="inp tam combo">Hasta</div></td><td><div class="inp tam combo">tekil sayı</div></td>
+                    <td><span class="rz mavi">sayı</span></td><td class="orta sonuk">✕</td></tr>
+                  <tr><td class="orta"><span class="kutucuk"></span></td><td>Medyan bekleme</td>
+                    <td><div class="inp tam combo">Kayıt → muayene (dk)</div></td><td><div class="inp tam combo">medyan</div></td>
+                    <td><span class="rz mavi">dk</span> <span class="rz sari">p90 da göster</span></td><td class="orta sonuk">✕</td></tr>
+                  <tr><td class="orta"><span class="kutucuk"></span></td><td>Tahsilat oranı</td>
+                    <td><div class="inp tam combo">Tahsilat ÷ Genel toplam</div></td><td><div class="inp tam combo">oran</div></td>
+                    <td><span class="rz mavi">%</span></td><td class="orta sonuk">✕</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="fark">
+              <div class="btn"><span>＋</span> Ölçü ekle</div>
+              <span class="sonuk">Fonksiyonlar: <b>adet · tekil sayı · toplam · ortalama · medyan · min · max · p90 · oran · satır/sütun %</b>. Hepsi sunucuda, liste motorunun gruplama katmanında hesaplanır; istemci hiçbir sayıyı yeniden toplamaz.</span>
+            </div>
+          </div>
+
+          <div class="grp">
+            <h4>Çapraz Tablo Önizlemesi <span class="mini">ödeyen kurum × ay · 2026 · ölçü: başvuru sayısı / ciro</span></h4>
+            <div class="dg">
+              <table>
+                <thead><tr>
+                  <th style="width:190px">Ödeyen kurum</th>
+                  <th class="sag">Haz</th><th class="sag">Tem</th><th class="sag">Ağu</th><th class="sag">Eyl</th>
+                  <th class="sag" style="width:90px">Toplam</th><th class="sag" style="width:80px">Pay</th>
+                  <th class="sag" style="width:110px">2025 aynı dönem</th><th class="sag" style="width:70px">Δ</th>
+                </tr></thead>
+                <tbody>
+                  <tr><td>Sosyal Güvenlik Kurumu</td><td class="sag">184</td><td class="sag">201</td><td class="sag">176</td><td class="sag">96 <span class="sonuk">*</span></td>
+                    <td class="sag"><b>657</b></td><td class="sag">%54</td><td class="sag sonuk">598</td><td class="sag"><span class="rz ok">+9,9%</span></td></tr>
+                  <tr><td>Anadolu Sigorta A.Ş.</td><td class="sag">62</td><td class="sag">71</td><td class="sag">80</td><td class="sag">41 <span class="sonuk">*</span></td>
+                    <td class="sag"><b>254</b></td><td class="sag">%21</td><td class="sag sonuk">190</td><td class="sag"><span class="rz ok">+33,7%</span></td></tr>
+                  <tr><td>Ücretli (hasta öder)</td><td class="sag">58</td><td class="sag">49</td><td class="sag">61</td><td class="sag">33 <span class="sonuk">*</span></td>
+                    <td class="sag"><b>201</b></td><td class="sag">%17</td><td class="sag sonuk">240</td><td class="sag"><span class="rz kir">−16,3%</span></td></tr>
+                  <tr><td>Diğer kurumlar (5)</td><td class="sag">27</td><td class="sag">31</td><td class="sag">24</td><td class="sag">15 <span class="sonuk">*</span></td>
+                    <td class="sag"><b>97</b></td><td class="sag">%8</td><td class="sag sonuk">88</td><td class="sag"><span class="rz ok">+10,2%</span></td></tr>
+                  <tr class="toplam"><td>TOPLAM · başvuru</td><td class="sag">331</td><td class="sag">352</td><td class="sag">341</td><td class="sag">185</td>
+                    <td class="sag">1.209</td><td class="sag">%100</td><td class="sag">1.116</td><td class="sag">+8,3%</td></tr>
+                  <tr class="toplam"><td>Ciro (bin TL)</td><td class="sag">402</td><td class="sag">438</td><td class="sag">419</td><td class="sag">221</td>
+                    <td class="sag">1.480</td><td class="sag"></td><td class="sag">1.302</td><td class="sag">+13,7%</td></tr>
+                  <tr class="toplam"><td>Ortalama fiş (TL)</td><td class="sag">1.214</td><td class="sag">1.244</td><td class="sag">1.229</td><td class="sag">1.195</td>
+                    <td class="sag">1.224</td><td class="sag"></td><td class="sag">1.167</td><td class="sag">+4,9%</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="fark">
+              <span class="sonuk">* Eylül tamamlanmadı (15 gün). Hücreye tıklayınca o kesişimin <b>kayıt listesi</b> açılır (drill-down); satır/sütun boyutunu sürükleyerek yer değiştirebilirsin.</span>
+              <span><span class="rz">⇄ Satır↔Sütun</span> <span class="rz">⬇ Excel (pivot)</span></span>
+            </div>
+          </div>
+
+          <div class="ana k2" style="margin:0 0 6px">
+            <div class="grp" style="margin-right:6px">
+              <h4>Zaman Serisi <span class="mini">aylık başvuru · 2026 vs 2025</span></h4>
+              <div style="padding:10px 12px;background:#fff">
+                <div class="sat" style="border:0"><span style="width:40px">Haz</span><div class="cubuk" style="flex:1"><i style="width:94%"></i></div><b style="width:60px;text-align:right">331</b><span class="sonuk" style="width:60px;text-align:right">305</span></div>
+                <div class="sat" style="border:0"><span style="width:40px">Tem</span><div class="cubuk" style="flex:1"><i style="width:100%"></i></div><b style="width:60px;text-align:right">352</b><span class="sonuk" style="width:60px;text-align:right">318</span></div>
+                <div class="sat" style="border:0"><span style="width:40px">Ağu</span><div class="cubuk" style="flex:1"><i style="width:97%"></i></div><b style="width:60px;text-align:right">341</b><span class="sonuk" style="width:60px;text-align:right">296</span></div>
+                <div class="sat" style="border:0"><span style="width:40px">Eyl*</span><div class="cubuk" style="flex:1"><i style="width:53%;background:#8fb4de"></i></div><b style="width:60px;text-align:right">185</b><span class="sonuk" style="width:60px;text-align:right">197</span></div>
+                <div class="sat" style="border:0;justify-content:flex-end"><span class="sonuk">koyu = 2026 · gri sayı = 2025 · çizgi/çubuk/alan seçilebilir</span></div>
+              </div>
+            </div>
+            <div class="grp" style="margin-left:6px">
+              <h4>Dağılım <span class="mini">hasta yaş grubu · bu yıl · tekil hasta</span></h4>
+              <div style="padding:10px 12px;background:#fff">
+                <div class="sat" style="border:0"><span style="width:60px">0–17</span><div class="cubuk" style="flex:1"><i style="width:22%"></i></div><b style="width:60px;text-align:right">%11</b></div>
+                <div class="sat" style="border:0"><span style="width:60px">18–34</span><div class="cubuk" style="flex:1"><i style="width:46%"></i></div><b style="width:60px;text-align:right">%23</b></div>
+                <div class="sat" style="border:0"><span style="width:60px">35–49</span><div class="cubuk" style="flex:1"><i style="width:58%"></i></div><b style="width:60px;text-align:right">%29</b></div>
+                <div class="sat" style="border:0"><span style="width:60px">50–64</span><div class="cubuk" style="flex:1"><i style="width:48%"></i></div><b style="width:60px;text-align:right">%24</b></div>
+                <div class="sat" style="border:0"><span style="width:60px">65+</span><div class="cubuk" style="flex:1"><i style="width:26%"></i></div><b style="width:60px;text-align:right">%13</b></div>
+                <div class="sat" style="border:0;justify-content:flex-end"><span class="sonuk">aralık genişliği ayarlanır · cinsiyet ile çapraz yapılabilir</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="border-left:1px solid var(--line2);background:#fbfcfe">
+          <div class="grp" style="margin:12px 12px 8px">
+            <h4>Özet Göstergeler <span class="mini">seçili dönem</span></h4>
+            <div class="sat buyuk"><span>Başvuru</span><b>1.209 <span class="rz ok">+8,3%</span></b></div>
+            <div class="sat buyuk"><span>Ciro</span><b>1.480 bin TL <span class="rz ok">+13,7%</span></b></div>
+            <div class="sat"><span>Ortalama fiş</span><span>1.224 TL</span></div>
+            <div class="sat"><span>Tekil hasta</span><span>842</span></div>
+            <div class="sat"><span>Hasta başına başvuru</span><span>1,44</span></div>
+            <div class="sat"><span>Medyan bekleme</span><span>23 dk <span class="sonuk">(p90 58)</span></span></div>
+            <div class="sat"><span>Tahsilat oranı</span><span>%74</span></div>
+            <div class="uyari-sat" style="border-top:1px solid #eef2f6">
+              <span class="rz mavi">Kıyas</span>
+              <span>Δ, "önceki yıl aynı dönem" ile. Seçenekler: önceki dönem · önceki yıl · hedef (kurum profilinden).</span>
+            </div>
+          </div>
+          <div class="grp" style="margin:8px 12px">
+            <h4>Boyut Kataloğu <span class="mini">satır/sütun olabilir</span></h4>
+            <div class="havuz">
+              <span class="cip">Ödeyen kurum</span><span class="cip">Doktor</span><span class="cip">Bölüm</span><span class="cip">Şube</span>
+              <span class="cip">Başvuru türü</span><span class="cip">Geliş şekli</span><span class="cip">Cinsiyet</span><span class="cip">Yaş grubu</span>
+              <span class="cip">İl / ilçe</span><span class="cip">Gün · hafta · ay · çeyrek · yıl</span><span class="cip">Haftanın günü</span>
+              <span class="cip">Saat dilimi</span><span class="cip">Tanı (ICD)</span><span class="cip">Hizmet grubu</span><span class="cip">Banko</span>
+            </div>
+            <div class="uyari-sat" style="border-top:1px solid #eef2f6">
+              <span class="rz sari">Kural</span>
+              <span>Boyut = kataloğun <b>gruplanabilir</b> işaretli alanı. Tarih alanı otomatik gün/hafta/ay/çeyrek/yıl üretir; sayı alanı "yaş grubu" gibi aralığa kesilir.</span>
+            </div>
+          </div>
+          <div class="grp" style="margin:8px 12px 12px">
+            <h4>Gizlilik Eşiği</h4>
+            <div class="sat"><span>Küçük hücre</span><span>&lt; 5 kayıt ise <b>"&lt;5"</b> göster</span></div>
+            <div class="sat"><span>Hasta kimliği</span><span class="rz kir">istatistikte hiç yok</span></div>
+            <div class="uyari-sat" style="border-top:1px solid #eef2f6">
+              <span>İstatistik <b>toplam</b> gösterir, kişi göstermez; drill-down yalnız kayıt yetkisi olana açılır.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================= ONIZLEME ========= -->
+    <div class="pnl" data-s="onizle" hidden>
+      <div class="serit">
+        <div class="sel">📅 Tarih aralığı: <b>01.09.2026 – 15.09.2026</b></div>
+        <div class="sel">🩺 Doktorlar: <b>Dr. Güneş, Dr. Kavak</b> ▾</div>
+        <div class="btn primary"><span>▶</span> Çalıştır</div>
+        <span class="rz ok">37 kayıt · 0,4 sn</span>
+        <span class="sp"></span>
+        <div class="btn"><span>⬇</span> Excel</div>
+        <div class="btn"><span>🖨</span> PDF</div>
+      </div>
+      <div class="grp">
+        <h4>Kurum bazlı hekim cirosu <span class="mini">Kardiyoloji · SGK + Anadolu Sigorta · ≥ 500 TL · iptaller hariç</span></h4>
+        <div class="dg">
+          <table>
+            <thead><tr>
+              <th style="width:100px">Tarih</th><th style="width:110px">Protokol</th><th>Hasta</th>
+              <th style="width:160px">Ödeyen kurum</th><th style="width:150px">Doktor</th>
+              <th class="sag" style="width:110px">Genel toplam</th><th class="sag" style="width:110px">Tahsilat</th>
+              <th class="sag" style="width:110px">Açık</th>
+            </tr></thead>
+            <tbody>
+              <tr class="grup"><td colspan="5">▾ Sosyal Güvenlik Kurumu <span class="rz">21 başvuru · %57</span></td>
+                <td class="sag">18.640,00</td><td class="sag">12.110,00</td><td class="sag">6.530,00</td></tr>
+              <tr class="grup"><td colspan="5" style="padding-left:24px">▾ Dr. Barış Güneş <span class="rz">14</span></td>
+                <td class="sag">12.900,00</td><td class="sag">8.400,00</td><td class="sag">4.500,00</td></tr>
+              <tr><td>15.09.2026</td><td class="sonuk">P-000133</td><td>Sami UZUN</td><td>Sosyal Güvenlik Kurumu</td><td>Dr. Barış Güneş</td>
+                <td class="sag">1.818,18</td><td class="sag">0,00</td><td class="sag">1.818,18</td></tr>
+              <tr><td>14.09.2026</td><td class="sonuk">P-000131</td><td>Eray YAZICI</td><td>Sosyal Güvenlik Kurumu</td><td>Dr. Barış Güneş</td>
+                <td class="sag">1.997,20</td><td class="sag">200,00</td><td class="sag">1.797,20</td></tr>
+              <tr><td>12.09.2026</td><td class="sonuk">P-000119</td><td>Ayşe ÖZTÜRK</td><td>Sosyal Güvenlik Kurumu</td><td>Dr. Barış Güneş</td>
+                <td class="sag">920,00</td><td class="sag">920,00</td><td class="sag">0,00</td></tr>
+              <tr><td colspan="8" class="sonuk orta">… 11 satır daha</td></tr>
+              <tr class="grup"><td colspan="5" style="padding-left:24px">▸ Dr. Doruk Kavak <span class="rz">7</span></td>
+                <td class="sag">5.740,00</td><td class="sag">3.710,00</td><td class="sag">2.030,00</td></tr>
+              <tr class="grup"><td colspan="5">▸ Anadolu Sigorta A.Ş. <span class="rz">16 başvuru · %43</span></td>
+                <td class="sag">14.020,00</td><td class="sag">11.980,00</td><td class="sag">2.040,00</td></tr>
+              <tr class="toplam"><td colspan="5">TOPLAM · 37 başvuru</td>
+                <td class="sag">32.660,00</td><td class="sag">24.090,00</td><td class="sag">8.570,00</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="fark">
+          <span class="sonuk">Grup satırına tıklayınca daralır/açılır; hasta satırına çift tık <b>başvuruyu kartında</b> açar — döküm ölü bir tablo değil, işe giriş kapısıdır.</span>
+          <span class="rz">ilk 5.000 satır</span>
+        </div>
+      </div>
+      <div class="ana k2" style="margin:0 0 6px">
+        <div class="grp" style="margin-right:6px">
+          <h4>Grup 1'e göre <span class="mini">genel toplam</span></h4>
+          <div style="padding:10px 12px;background:#fff">
+            <div class="sat" style="border:0"><span style="width:180px">Sosyal Güvenlik Kurumu</span><div class="cubuk" style="flex:1"><i style="width:57%"></i></div><b style="width:90px;text-align:right">18.640</b></div>
+            <div class="sat" style="border:0"><span style="width:180px">Anadolu Sigorta A.Ş.</span><div class="cubuk" style="flex:1"><i style="width:43%"></i></div><b style="width:90px;text-align:right">14.020</b></div>
+          </div>
+        </div>
+        <div class="grp" style="margin-left:6px">
+          <h4>Grup 2'ye göre <span class="mini">doktor · tahsilat oranı</span></h4>
+          <div style="padding:10px 12px;background:#fff">
+            <div class="sat" style="border:0"><span style="width:180px">Dr. Barış Güneş</span><div class="cubuk" style="flex:1"><i style="width:71%"></i></div><b style="width:90px;text-align:right">%71</b></div>
+            <div class="sat" style="border:0"><span style="width:180px">Dr. Doruk Kavak</span><div class="cubuk" style="flex:1"><i style="width:78%"></i></div><b style="width:90px;text-align:right">%78</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================ AI ASISTAN ======== -->
+    <div class="pnl" data-s="ai" hidden>
+      <div class="ana">
+        <div>
+          <div class="grp">
+            <h4>✨ AI ile Döküm Tasarla <span class="mini">doğal dil → koşul · kolon · gruplama taslağı</span></h4>
+            <div class="sohbet">
+              <div class="balon ben"><div class="k">Sen · 09:14</div>
+                Geçen ay Dr. Güneş ve Dr. Kavak'ın SGK ve Anadolu Sigortalı kardiyoloji hastalarını kuruma göre topla, açık tutarları da görsün.</div>
+              <div class="balon ai"><div class="k">✨ Rehber · 09:14</div>
+                Anladım. <b>Başvurular</b> kaynağından bir <b>özet döküm</b> öneriyorum. Tarih ve doktoru <b>parametre</b> yaptım — bir dahaki ay aynı dökümü yeniden tasarlamadan çalıştırırsın.
+                <div class="taslak">
+                  <div class="b">Taslak · 6 koşul · 8 kolon · Kurum › Doktor gruplu</div>
+                  <div class="sat"><span>Belge tarihi</span><b>geçen ay <span class="rz sari">parametre</span></b></div>
+                  <div class="sat"><span>Ödeyen kurum</span><b>SGK, Anadolu Sigorta A.Ş.</b></div>
+                  <div class="sat"><span>Doktor</span><b>Dr. Güneş, Dr. Kavak <span class="rz sari">parametre</span></b></div>
+                  <div class="sat"><span>Bölüm</span><b>Kardiyoloji</b></div>
+                  <div class="sat"><span>Durum</span><b>iptal değil <span class="rz pas">varsayılan ekledim</span></b></div>
+                  <div class="sat"><span>Kolonlar</span><b>tarih · protokol · hasta · kurum · doktor · Σ genel toplam · Σ tahsilat · Σ açık</b></div>
+                  <div class="fark">
+                    <span class="sonuk">"Açık tutar" hesaplanan alan: genel toplam − tahsilat.</span>
+                    <span><span class="btn ok" style="display:inline-flex">✔ Tasarıma uygula</span> <span class="btn" style="display:inline-flex">Düzenle</span></span>
+                  </div>
+                </div></div>
+              <div class="balon ben"><div class="k">Sen · 09:15</div>
+                500 TL altını çıkar, bir de tahsilat oranını yüzde olarak ekle.</div>
+              <div class="balon ai"><div class="k">✨ Rehber · 09:15</div>
+                Eklendi: <b>genel toplam ≥ 500</b> koşulu ve <b>tahsilat oranı</b> (tahsilat ÷ genel toplam) hesaplanan kolonu — grup satırında ortalama olarak görünecek.
+                <span class="rz mavi">Önizleme'de 37 kayıt</span>
+                <div class="taslak" style="margin-top:6px">
+                  <div class="sat"><span>+ Koşul 5</span><b>Genel toplam ≥ 500,00</b></div>
+                  <div class="sat"><span>+ Kolon</span><b>Tahsilat oranı % <span class="rz">hesaplanan</span></b></div>
+                  <div class="fark"><span class="sonuk">Taslak v2 — Tasarla sekmesine işlendi, kaydetmedim.</span>
+                    <span class="btn ok" style="display:inline-flex">✔ Uygula</span></div>
+                </div></div>
+              <div class="balon ben"><div class="k">Sen · 09:16</div>
+                Bunu her ayın 1'inde muhasebeye gönder.</div>
+              <div class="balon ai"><div class="k">✨ Rehber · 09:16</div>
+                Zamanlama taslağı hazır: <b>her ayın 1'i 08:00</b>, alıcı <b>muhasebe@…</b> (Muhasebe rolündeki 2 kişi), biçim <b>Excel + PDF</b>, tarih parametresi <b>"geçen ay"</b> olarak sabitlenir.
+                Onaylarsan Zamanlama sekmesine yazarım — <b>gönderimi ben başlatmam</b>, işçi zamanı gelince gönderir.
+                <div style="margin-top:6px"><span class="btn ok" style="display:inline-flex">✔ Zamanlamayı yaz</span></div></div>
+            </div>
+            <div class="yaz">
+              <div class="inp">Döküm tarif et… ör. "bu hafta gelmeyen randevuları bölüme göre say"</div>
+              <div class="btn ai"><span>✨</span> Gönder</div>
+              <div class="btn"><span>🎤</span></div>
+            </div>
+          </div>
+        </div>
+        <div style="border-left:1px solid var(--line2);background:#fbfcfe">
+          <div class="grp" style="margin:12px 12px 8px">
+            <h4>AI Ne Yapar · Ne Yapmaz</h4>
+            <div class="uyari-sat"><span class="rz ok">Yapar</span><span>Cümleyi <b>koşul / kolon / gruplama</b> taslağına çevirir; alanları kaynak kataloğundan seçer.</span></div>
+            <div class="uyari-sat"><span class="rz ok">Yapar</span><span>Belirsizlikte sorar ("geçen ay" = takvim ayı mı, son 30 gün mü).</span></div>
+            <div class="uyari-sat"><span class="rz ok">Yapar</span><span>İstatistik kurar: "kuruma göre aylık" = satır kurum, sütun ay, ölçü adet + ciro, kıyas önceki yıl.</span></div>
+            <div class="uyari-sat"><span class="rz ok">Yapar</span><span>Sonucu yorumlar: "SGK'da açık tutar %35 — provizyonsuz 6 başvuru var."</span></div>
+            <div class="uyari-sat"><span class="rz kir">Yapmaz</span><span><b>SQL yazmaz.</b> Ürettiği şey liste motorunun süzgeç JSON'udur; aynı beyaz liste, aynı parametre bağlama.</span></div>
+            <div class="uyari-sat"><span class="rz kir">Yapmaz</span><span>Yetkin olmayan alanı/kaynağı göremez — katalog sana ne dönüyorsa ona da o dönüyor.</span></div>
+            <div class="uyari-sat"><span class="rz kir">Yapmaz</span><span>Kaydetmez, göndermez, silmez. Her şey <b>senin onayınla</b>, düğmeyle.</span></div>
+          </div>
+          <div class="grp" style="margin:8px 12px">
+            <h4>Kontör <span class="mini">bu kurumun bakiyesi</span></h4>
+            <div class="sat buyuk"><span>Kalan</span><b>1.240</b></div>
+            <div class="sat"><span>Bu döküm için harcanan</span><span>3 istek · 9 kontör</span></div>
+            <div class="sat"><span>Bu ay</span><span>412 kontör</span></div>
+            <div class="uyari-sat" style="border-top:1px solid #eef2f6">
+              <span class="rz sari">Not</span>
+              <span>Model anahtarı sunucuda, kontör kurumun veritabanında. Bakiye 0 iken sekme çalışmaz, tasarımcı elle kullanılmaya devam eder.</span>
+            </div>
+          </div>
+          <div class="grp" style="margin:8px 12px 12px">
+            <h4>Örnek Cümleler</h4>
+            <div class="sat"><span class="sonuk">"aylık başvuru sayısını bölüme göre, geçen yılla kıyasla"</span></div>
+            <div class="sat"><span class="sonuk">"doktor başına ortalama fiş ve tekil hasta, bu çeyrek"</span></div>
+            <div class="sat"><span class="sonuk">"bugün kasaya giren nakit ve POS'u banko bazında"</span></div>
+            <div class="sat"><span class="sonuk">"24 saattir sonucu girilmemiş lab istemleri"</span></div>
+            <div class="sat"><span class="sonuk">"iskonto verilen başvurular, gerekçeye göre, bu ay"</span></div>
+            <div class="sat"><span class="sonuk">"randevusuna gelmeyen hastalar, geçen hafta, bölüme göre"</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ ZAMANLAMA & PAYLASIM == -->
+    <div class="pnl" data-s="zaman" hidden>
+      <div class="ana k2">
+        <div class="grp" style="margin-right:6px">
+          <h4>Zamanlama <span class="mini">işçi gönderir · sonuç arşivlenir</span></h4>
+          <div class="hdr" style="grid-template-columns:repeat(2,1fr)">
+            <div class="fld"><label>Sıklık</label><div class="inp tam combo">Her ay</div></div>
+            <div class="fld"><label>Gün · saat</label><div class="inp tam">Ayın 1'i · 08:00</div></div>
+            <div class="fld"><label>Tarih parametresi</label><div class="inp tam combo">Geçen ay (takvim)</div></div>
+            <div class="fld"><label>Doktor parametresi</label><div class="inp tam combo">Tümü</div></div>
+            <div class="fld"><label>Biçim</label><div class="inp tam combo">Excel + PDF</div></div>
+            <div class="fld"><label>Boş sonuçta</label><div class="inp tam combo">Gönderme, not düş</div></div>
+          </div>
+          <div class="sat"><span>Alıcılar</span><span><span class="cip">Muhasebe rolü (2)</span><span class="cip">muhasebe@ornek.com</span></span></div>
+          <div class="sat"><span>Kanal</span><span><span class="rz ok">E-posta</span> <span class="rz pas">Zil</span> <span class="rz pas">WhatsApp</span></span></div>
+          <div class="sat"><span>Son gönderim</span><span>01.09.2026 08:00 · 2 alıcı · <span class="rz ok">iletildi</span></span></div>
+          <div class="sat"><span>Sonraki</span><span>01.10.2026 08:00</span></div>
+          <div class="fark"><span class="sonuk">Gönderilen her dosya <b>arşivde</b> kalır (tarih, parametreler, satır sayısı) — "geçen ay ne göndermiştik" sorusunun cevabı.</span><a class="link" href="#">Arşiv →</a></div>
+        </div>
+        <div class="grp" style="margin-left:6px">
+          <h4>Paylaşım <span class="mini">kim görür · kim düzenler</span></h4>
+          <div class="sat"><span>Sahibi</span><b>admin</b></div>
+          <div class="sat"><span>Görüntüleyen</span><span><span class="cip">Yönetim rolü</span><span class="cip">Muhasebe rolü</span> <span class="rz">+ rol</span></span></div>
+          <div class="sat"><span>Düzenleyen</span><span><span class="cip">admin</span> <span class="rz">+ kişi</span></span></div>
+          <div class="sat"><span>Veri yetkisi</span><span class="rz sari">görene göre süzülür</span></div>
+          <div class="uyari-sat" style="border-top:1px solid #eef2f6">
+            <span class="rz sari">Kural</span>
+            <span>Döküm paylaşımı <b>veri yetkisi vermez</b>: dökümü gören kişi, kendi yetkisinin izin verdiği satırları görür (şube, kaynak). Muhasebe rolü hasta kimliğini göremiyorsa kolon ona boş gelir.</span>
+          </div>
+          <div class="sat"><span>Bağlantı</span><span class="anahtar" style="font-family:Consolas,monospace;font-size:10.5px">/dokum/kurum-hekim-cirosu?tarih=gecen-ay</span></div>
+          <div class="sat"><span>Liste ekranında göster</span><span><span class="kutucuk on">✓</span> Başvurular › Dökümler ▾ menüsünde</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== MENUDE YERI ========= -->
+    <div class="pnl" data-s="menu" hidden>
+      <div class="grp">
+        <h4>Dökümlerin Menüde Yeri <span class="mini">tasarımcı tek yerde · çalıştırma verinin yanında</span></h4>
+        <div class="menu">
+          <div class="kol">
+            <div class="bas">Yönetim › Ayarlar — TASARIMCI (tek yer)</div>
+            <div class="oge grup">⚙ Yönetim</div>
+            <div class="oge">Ayarlar Dizini</div>
+            <div class="oge on">📊 Dökümler <span class="rz mavi">bu ekran</span></div>
+            <div class="oge" style="padding-left:34px">Dökümlerim · Tasarla · Önizleme · AI · Zamanlama</div>
+            <div class="oge">Kurum Profili</div>
+            <div class="oge">İşlem Günlüğü · Giriş Kayıtları</div>
+          </div>
+          <div class="kol">
+            <div class="bas">Liste ekranları — ÇALIŞTIRMA (verinin yanında)</div>
+            <div class="oge grup">🏥 Kayıt Kabul › Başvurular</div>
+            <div class="oge">araç çubuğu: … <b>📊 Dökümler ▾</b></div>
+            <div class="oge" style="padding-left:34px">Kurum bazlı hekim cirosu · SGK provizyonsuz · <span class="sonuk">+ yeni döküm (bu listeden)</span></div>
+            <div class="oge grup">🧾 Kasa › Kasa İşlemleri</div>
+            <div class="oge">araç çubuğu: … <b>📊 Dökümler ▾</b></div>
+            <div class="oge" style="padding-left:34px">Günlük kasa dökümü · Banko teslim tutanağı</div>
+            <div class="oge grup">💉 Laboratuvar › İstemler</div>
+            <div class="oge" style="padding-left:34px">Bekleyen sonuçlar 24 sa+</div>
+          </div>
+        </div>
+        <div class="fark">
+          <span class="sonuk"><b>Neden iki yer:</b> tasarlamak yönetici işi, tek ekran; çalıştırmak ise günlük iş — kullanıcı zaten o listedeyken süzgeci elle kurmak yerine hazır dökümü seçer. "+ yeni döküm (bu listeden)" o anki süzgeci taslak olarak tasarımcıya taşır.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Döküm: Kurum bazlı hekim cirosu · v3</span><span>·</span>
+    <span>Kaynak: Başvurular · 6 koşul · 8 kolon · 4 ölçü</span><span>·</span>
+    <span>Son çalıştırma 15.09 09:12 · 37 kayıt</span><span>·</span>
+    <span>Kontör 1.240</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> koşul verilerek (tarih aralığı, kurumlar, doktorlar, bölüm, tutar…) tasarlanan, kaydedilip
+  tekrar çalıştırılan ve zamanlanabilen <b>döküm tasarımcısı</b>. Yönetim › Ayarlar altında tek ekran; her liste
+  ekranının araç çubuğundaki "Dökümler ▾" o kaynağın kayıtlı dökümlerini çalıştırır.
+  <ul>
+    <li><b>Yeni SQL yok:</b> döküm, liste ekranlarının süzgeç/sıralama/sayfalama sözleşmesini aynen kullanır
+        (<code>api.liste(kaynak, {filtre, sirala})</code>). Alanlar kaynak kataloğundan gelir, değerler
+        parametre bağlanır; kullanıcı metni hiçbir yerde SQL'e ulaşmaz. Tanım <code>dokum_tanimi</code>
+        tablosunda jsonb olarak durur.</li>
+    <li><b>Parametre</b> (<i>?</i>): koşulun değeri kaydedilmez, çalıştırırken sorulur. "Tarih aralığı" ve
+        "Doktor" tipik parametreler — bir kez tasarla, her ay farklı aralıkla çalıştır. Zamanlamada parametre
+        kurala bağlanır ("geçen ay").</li>
+    <li><b>Yetki iki katmanlı:</b> dökümü <i>görmek</i> paylaşımdan gelir, <i>veriyi görmek</i> kişinin kendi
+        yetkisinden. Paylaşım veri yetkisi vermez; şube süzmesi sunucuda kalır.</li>
+    <li><b>AI asistan</b> (proje içindeki Rehber) doğal dili taslağa çevirir: koşul, kolon, gruplama, hesaplanan
+        alan, zamanlama. Belirsizlikte sorar, sonucu yorumlar. <b>SQL yazmaz, kaydetmez, göndermez</b> — ürettiği
+        şey aynı süzgeç JSON'u, her adım düğmeyle onaylanır. Kontör kurumun veritabanında; bakiye 0 iken sekme
+        kapanır, tasarımcı elle çalışmaya devam eder.</li>
+    <li><b>İstatistik</b> ayrı sekme: satır × sütun boyutu, ölçü listesi (adet · tekil · toplam · ortalama ·
+        medyan · p90 · oran · %), kıyas dönemi (önceki dönem / önceki yıl / hedef). Çapraz tablo, zaman serisi,
+        dağılım (histogram) aynı tanımdan üretilir; hücreye tıklayınca kayıt listesi (drill-down). Küçük hücre
+        gizlilik eşiği (&lt;5), hasta kimliği istatistikte hiç yok. Hesap sunucuda, gruplama katmanında.</li>
+    <li><b>Hesaplanan alan</b> yalnız katalogdaki iki alanın basit aritmetiği (açık = genel toplam − tahsilat,
+        oran = tahsilat ÷ toplam) — serbest formül yok; olsaydı yine SQL'e kapı olurdu.</li>
+    <li><b>Döküm ölü tablo değil:</b> önizlemede grup satırı daralır/açılır, hasta satırına çift tık başvuruyu
+        kartında açar — liste ekranlarıyla aynı davranış.</li>
+    <li><b>Çıktı biçimleri:</b> Liste (düz, dip toplamlı) · Özet (grup toplamlı + çubuk grafik) · Excel/PDF;
+        zamanlı gönderimlerin dosyası arşivde kalır.</li>
+    <li><b>Sürüm:</b> her kayıt yeni sürüm (v1 → v3); zamanlı gönderim hangi sürümle çalıştıysa arşivde o yazar.</li>
+  </ul>
+</div>
+
+<script>
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');});
+  if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>

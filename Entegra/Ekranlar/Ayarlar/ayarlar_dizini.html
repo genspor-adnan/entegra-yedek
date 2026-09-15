@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ayarlar Dizini — Mockup (Gentegre AI · Yönetim)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .serit .sel b{font-weight:bold}
+  .ara{border:1px solid var(--line);border-radius:14px;background:#fff;min-height:26px;
+    display:flex;align-items:center;padding:0 10px;gap:6px;min-width:360px}
+  .ara input{border:0;outline:0;font:inherit;flex:1;background:transparent}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;
+    font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .rz{margin-left:5px}
+  .ozet{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .kutu{background:#fff;padding:9px 12px}
+  .kutu .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .kutu .deg{font-size:18px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kutu .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .kutu.iyi .deg{color:var(--ok)}
+  .kutu.uy .deg{color:var(--uyari)}
+  .kutu.teh .deg{color:var(--kirmizi)}
+  .ana{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:0}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%;table-layout:fixed}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap;vertical-align:top;overflow:hidden;text-overflow:ellipsis}
+  td.sar{white-space:normal}
+  td .anahtar{white-space:normal;word-break:break-all}
+  tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  tr.sel td{background:var(--sel)}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;
+    padding:3px 7px;font-size:11.5px;display:inline-flex;align-items:center;gap:6px;min-width:120px}
+  .inp.combo::after{content:"\25BE";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.dar{min-width:70px;justify-content:flex-end}
+  .anahtar{font-family:Consolas,"Courier New",monospace;font-size:10.5px;color:#6b7a8b;
+    background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .sat{display:flex;justify-content:space-between;padding:4px 10px;font-size:11.5px;
+    border-bottom:1px solid #eef2f6;gap:10px}
+  .sat.buyuk{font-size:13px;background:#f7fafc;font-weight:bold}
+  .link{color:var(--accent);text-decoration:none}
+  .kart-link{display:flex;justify-content:space-between;align-items:center;gap:8px;
+    padding:6px 10px;border-bottom:1px solid #eef2f6;font-size:11.5px;background:#fff}
+  .kart-link:last-child{border-bottom:0}
+  .kart-link .adi{font-weight:bold;color:#2c4a6b}
+  .kart-link .git{color:var(--accent);white-space:nowrap}
+  .fark{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;
+    background:#f7fafc;border-top:1px solid var(--line2);font-size:12px;gap:10px}
+  .uyari-sat{display:flex;gap:8px;align-items:flex-start;padding:6px 10px;
+    border-bottom:1px solid #eef2f6;font-size:11.5px}
+  .menu{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 12px;background:#fff}
+  .menu .kol{border:1px solid var(--line2);border-radius:4px;overflow:hidden}
+  .menu .kol .bas{background:#f3f6fa;padding:5px 9px;font-size:11px;color:#3a5573;font-weight:bold;
+    border-bottom:1px solid var(--line2)}
+  .menu .oge{padding:4px 9px 4px 22px;font-size:11.5px;border-bottom:1px solid #f1f4f8}
+  .menu .oge.grup{padding-left:9px;font-weight:bold;color:#2c4a6b;background:#fbfcfe}
+  .menu .oge.on{background:var(--sel);font-weight:bold}
+  .menu .oge.ayar{color:var(--navy)}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">⚙ Ayarlar — Modül Dizini
+    <span class="sp">Gentegre AI · Yönetim · 15.09.2026 · Sistem Yöneticisi · Şube: Merkez</span></div>
+
+  <div class="toolbar">
+    <div class="btn ok"><span>💾</span> Kaydet</div>
+    <div class="btn"><span>↩</span> Kaydedilmişe Dön</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🏥</span> Kurum Profili</div>
+    <div class="btn"><span>🛡</span> Yetki Matrisi</div>
+    <div class="btn"><span>📋</span> Denetim İzi</div>
+    <div class="sp"></div>
+    <div class="btn"><span>⬇</span> Ayarları Dışa Aktar</div>
+    <div class="btn pas"><span>⬆</span> İçeri Al</div>
+  </div>
+
+  <!-- SERIT: arama + sube + kapsam. Arama BUTUN modullerde arar - kullanici
+       "slot" yazinca hangi sekmede oldugunu bilmesi gerekmez. -->
+  <div class="serit">
+    <div class="ara">🔍 <input id="ara" placeholder="Ayar ara… ör. slot, hatırlatma, protokol, KDV, kimlik"></div>
+    <div class="sel">🏢 Kapsam: <b>Merkez şubesi</b> ▾</div>
+    <span class="rz mavi">3 ayar şubeye özel</span>
+    <span class="rz sari">2 ayar varsayılanda</span>
+    <span class="sp"></span>
+    <span class="sonuk">Değer TEK yerde durur (<code>referans</code> / <code>kurum_profil</code>); modül ekranları buraya bağlanır</span>
+  </div>
+
+  <div class="ozet">
+    <div class="kutu">
+      <div class="bas">Ayar Sayısı</div>
+      <div class="deg">64</div>
+      <div class="alt">11 modül · 9 kurum profili alanı</div>
+    </div>
+    <div class="kutu iyi">
+      <div class="bas">Tanımlı</div>
+      <div class="deg">59</div>
+      <div class="alt">kurulumda değer verilmiş</div>
+    </div>
+    <div class="kutu uy">
+      <div class="bas">Varsayılanda</div>
+      <div class="deg">5</div>
+      <div class="alt">hiç dokunulmamış · gözden geçirilmeli</div>
+    </div>
+    <div class="kutu">
+      <div class="bas">Şubeye Özel</div>
+      <div class="deg">3</div>
+      <div class="alt">Merkez kurum genelinden ayrılmış</div>
+    </div>
+    <div class="kutu teh">
+      <div class="bas">Son 7 Gün Değişen</div>
+      <div class="deg">4</div>
+      <div class="alt">kimlik biçimi · iskonto tavanı · 2 şablon</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sekmeler">
+      <div class="sekme on" data-s="genel">Genel</div>
+      <div class="sekme" data-s="kayit">Kayıt Kabul</div>
+      <div class="sekme" data-s="randevu">Randevu <span class="rz sari">1</span></div>
+      <div class="sekme" data-s="muayene">Muayene</div>
+      <div class="sekme" data-s="lab">Laboratuvar</div>
+      <div class="sekme" data-s="rad">Radyoloji</div>
+      <div class="sekme" data-s="stok">Stok &amp; Hizmet</div>
+      <div class="sekme" data-s="kasa">Kasa &amp; Banka</div>
+      <div class="sekme" data-s="bildirim">Bildirimler</div>
+      <div class="sekme" data-s="guvenlik">Güvenlik</div>
+      <div class="sekme" data-s="menu">Menüde Yeri</div>
+    </div>
+
+    <!-- ================================================= GENEL ============ -->
+    <div class="pnl" data-s="genel">
+      <div class="ana">
+        <div>
+          <div class="grp">
+            <h4>Kurum Geneli <span class="mini">kurum_profil · her şubede aynı, şube ayrılabilir</span></h4>
+            <div class="dg">
+              <table>
+                <thead><tr>
+                  <th style="width:230px">Ayar</th><th style="width:220px">Değer</th>
+                  <th style="width:120px">Kapsam</th><th>Açıklama</th>
+                  <th style="width:190px">Anahtar</th><th style="width:130px">Son değişiklik</th>
+                </tr></thead>
+                <tbody>
+                  <tr data-k="ürün modu hbys erp"><td>Ürün modu</td>
+                    <td><div class="inp combo">HBYS (GenoTIP AI)</div></td>
+                    <td><span class="rz">Kurum geneli</span></td>
+                    <td class="sar sonuk">Menü, ekran adları ve yetki matrisi buna göre çizilir</td>
+                    <td><span class="anahtar">kurum_profil.urun_modu</span></td>
+                    <td class="sonuk">14.09 · admin</td></tr>
+                  <tr data-k="kurum tipi tıp merkezi"><td>Kurum tipi</td>
+                    <td><div class="inp combo">Tıp Merkezi</div></td>
+                    <td><span class="rz">Kurum geneli</span></td>
+                    <td class="sar sonuk">Varsayılan modül paketi ve kayıt kuralları tipten gelir</td>
+                    <td><span class="anahtar">kurum_profil.kurum_tipi</span></td>
+                    <td class="sonuk">01.09 · admin</td></tr>
+                  <tr data-k="kimlik no biçimi tckn desen"><td>Kimlik no biçimi</td>
+                    <td><div class="inp combo">Otomatik — şubenin ülkesine göre</div></td>
+                    <td><span class="rz mavi">Merkez ≠ genel</span></td>
+                    <td class="sar sonuk">TR şubede T.C. algoritması, yurt dışında serbest / özel desen. Sunucu ve ekran aynı kuralı kullanır</td>
+                    <td><span class="anahtar">kurum_profil.kimlik_bicimi</span></td>
+                    <td class="sonuk">15.09 · admin</td></tr>
+                  <tr data-k="dil para birimi"><td>Dil / para birimi</td>
+                    <td><div class="inp combo dar" style="min-width:90px">Türkçe</div> <div class="inp combo dar">TL</div></td>
+                    <td><span class="rz">Kurum geneli</span></td>
+                    <td class="sar sonuk">Rapor dövizi belge bazında ayrıca seçilebilir</td>
+                    <td><span class="anahtar">kurum_profil.dil · para_birimi</span></td>
+                    <td class="sonuk">01.09 · admin</td></tr>
+                  <tr data-k="saat dilimi zaman"><td>Saat dilimi</td>
+                    <td><div class="inp combo">Europe/Istanbul</div></td>
+                    <td><span class="rz mavi">Şubeden</span></td>
+                    <td class="sar sonuk">Sunucu ANI (UTC) yazar, ekran şubenin saatinde gösterir — elle saat kaydırma yok</td>
+                    <td><span class="anahtar">sube.saat_dilimi</span></td>
+                    <td class="sonuk">14.09 · admin</td></tr>
+                  <tr data-k="açık modüller"><td>Açık modüller</td>
+                    <td><span class="rz ok">12 açık</span> <span class="rz pas">3 kapalı</span></td>
+                    <td><span class="rz">Kurum geneli</span></td>
+                    <td class="sar sonuk">Kapalı modülün ekranı, rotası ve yetkisi hiç çizilmez</td>
+                    <td><span class="anahtar">kurum_profil.moduller</span></td>
+                    <td class="sonuk">10.09 · admin</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="fark">
+              <span class="sonuk">Bu satırlar <b>Kurum Profili</b> ekranının aynısıdır — burada düzenlemek oradakini de değiştirir, iki ayrı kayıt yoktur.</span>
+              <a class="link" href="#">Kurum Profili'nde aç →</a>
+            </div>
+          </div>
+
+          <div class="grp">
+            <h4>Genel Ayarlar <span class="mini">referans · genel.*</span></h4>
+            <div class="dg">
+              <table>
+                <thead><tr>
+                  <th style="width:230px">Ayar</th><th style="width:220px">Değer</th>
+                  <th style="width:120px">Kapsam</th><th>Açıklama</th>
+                  <th style="width:190px">Anahtar</th><th style="width:130px">Son değişiklik</th>
+                </tr></thead>
+                <tbody>
+                  <tr data-k="belge geri gün sınırı tarih"><td>Geriye dönük belge günü</td>
+                    <td><div class="inp dar">7</div> <span class="sonuk">gün</span></td>
+                    <td><span class="rz">Kurum geneli</span></td>
+                    <td class="sar sonuk">Belge tarihi bugünden en fazla bu kadar geri olabilir</td>
+                    <td><span class="anahtar">belge.geri_gun_siniri</span></td>
+                    <td class="sonuk">—</td></tr>
+                  <tr data-k="numara şablon protokol"><td>Numara şablonları</td>
+                    <td><span class="rz">Protokol: {yıl}/{sıra}</span> <span class="rz">Hasta: H{sıra:6}</span></td>
+                    <td><span class="rz">Kurum geneli</span></td>
+                    <td class="sar sonuk">Kaynak bazlı — şablon kartında düzenlenir</td>
+                    <td><span class="anahtar">numara_sablonu</span></td>
+                    <td class="sonuk">—</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SAG: denetim izi + kural kutusu -->
+        <div style="border-left:1px solid var(--line2);background:#fbfcfe">
+          <div class="grp" style="margin:12px 12px 8px">
+            <h4>Son Değişiklikler <span class="mini">islem_log · ayar olayları</span></h4>
+            <div class="uyari-sat"><span class="rz mavi">15.09 09:41</span>
+              <span><b>Kimlik no biçimi</b> otomatik → <i>otomatik</i> (test sonrası geri alındı) · admin</span></div>
+            <div class="uyari-sat"><span class="rz mavi">14.09 22:20</span>
+              <span><b>İskonto tavanı</b> Banko rolü %0 → %10 · admin</span></div>
+            <div class="uyari-sat"><span class="rz mavi">14.09 18:05</span>
+              <span><b>Randevu hatırlatma şablonu</b> metin güncellendi · Elif KARACA</span></div>
+            <div class="uyari-sat"><span class="rz mavi">14.09 13:02</span>
+              <span><b>Yeni rol</b> Banko (bnk1) · admin</span></div>
+            <div class="fark"><span class="sonuk">Her ayar değişikliği kim / ne zaman / eski → yeni ile loglanır.</span>
+              <a class="link" href="#">Tümü →</a></div>
+          </div>
+
+          <div class="grp" style="margin:8px 12px">
+            <h4>Ayar Nerede Durur</h4>
+            <div class="sat"><span>Kurulum / politika</span><b>Kurum Profili</b></div>
+            <div class="sat"><span>Modülün günlük kuralı</span><b>Modül sekmesi (burası)</b></div>
+            <div class="sat"><span>Kaynağın özelliği</span><b>Kaynağın kartı</b></div>
+            <div class="sat"><span>Kişiye bağlı hak / limit</span><b>Yetki Matrisi</b></div>
+            <div class="uyari-sat" style="border-top:1px solid #eef2f6">
+              <span class="rz sari">Kural</span>
+              <span>Aynı ayar iki yerde <b>görünebilir</b>, iki yerde <b>saklanamaz</b>. Bu ekran bir dizindir: değeri kaynağından okur, kaynağına yazar.</span>
+            </div>
+          </div>
+
+          <div class="grp" style="margin:8px 12px 12px">
+            <h4>Varsayılanda Kalanlar <span class="mini">gözden geçir</span></h4>
+            <div class="sat"><span>Randevu › online randevu</span><span class="rz sari">kapalı (vars.)</span></div>
+            <div class="sat"><span>Bildirim › SMS hesabı</span><span class="rz kir">tanımsız</span></div>
+            <div class="sat"><span>Güvenlik › tek oturum</span><span class="rz sari">açık (vars.)</span></div>
+            <div class="sat"><span>Lab › numune barkod şablonu</span><span class="rz sari">vars.</span></div>
+            <div class="sat"><span>Kasa › makbuz yazıcı</span><span class="rz sari">vars.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== KAYIT KABUL ========= -->
+    <div class="pnl" data-s="kayit" hidden>
+      <div class="ana">
+        <div>
+          <div class="grp">
+            <h4>Kurum Geneli <span class="mini">referans · basvuru.*</span></h4>
+            <div class="dg">
+              <table>
+                <thead><tr>
+                  <th style="width:230px">Ayar</th><th style="width:220px">Değer</th>
+                  <th style="width:120px">Kapsam</th><th>Açıklama</th>
+                  <th style="width:190px">Anahtar</th><th style="width:130px">Son değişiklik</th>
+                </tr></thead>
+                <tbody>
+                  <tr data-k="pos sonrası fiş aksiyon"><td>POS sonrası aksiyon</td>
+                    <td><div class="inp combo">Otomatik fiş kes</div></td>
+                    <td><span class="rz mavi">Merkez ≠ genel</span></td>
+                    <td class="sar sonuk">POS tahsilatı geçince fiş/tahakkuk otomatik kesilsin mi</td>
+                    <td><span class="anahtar">basvuru.pos_aksiyon</span></td>
+                    <td class="sonuk">12.09 · admin</td></tr>
+                  <tr data-k="ücret ekleme kayıt protokol"><td>Ücret eklerken kaydet</td>
+                    <td><div class="inp combo">Her ＋'da kaydet</div></td>
+                    <td><span class="rz">Kurum geneli</span></td>
+                    <td class="sar sonuk">Protokol numarası ücretten önce verilir; kaydedilmemiş kalem kalmaz</td>
+                    <td><span class="anahtar">basvuru.ucret_kayit</span></td>
+                    <td class="sonuk">—</td></tr>
+                  <tr data-k="iskonto onay kilit"><td>Onaylı iskonto satırı</td>
+                    <td><div class="inp ro">Kilitli — değiştirilemez, silinemez</div></td>
+                    <td><span class="rz pas">Sabit kural</span></td>
+                    <td class="sar sonuk">Ayar değil, tetik (iskonto_kilit). Bilgi için listelenir</td>
+                    <td><span class="anahtar">tg_belge_satir_kilit_*</span></td>
+                    <td class="sonuk">14.09 · sistem</td></tr>
+                  <tr data-k="hasta kimlik doğrulama kps"><td>Hasta kimlik doğrulama</td>
+                    <td><div class="inp combo">KPS (opsiyonel)</div></td>
+                    <td><span class="rz">Kurum geneli</span></td>
+                    <td class="sar sonuk">Kimlik <b>biçimi</b> Genel'de; burası doğrulama servisi</td>
+                    <td><span class="anahtar">basvuru.kps</span></td>
+                    <td class="sonuk">—</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="grp">
+            <h4>Kaynak Bazlı <span class="mini">değeri kartında durur — buradan gidilir</span></h4>
+            <div class="kart-link"><span><span class="adi">Anlaşmalı kurumlar</span> <span class="sonuk">· 7 kurum · sözleşme, fiyat listesi, karşılama oranı</span></span><span class="git">Cari › Anlaşmalı Kurumlar →</span></div>
+            <div class="kart-link"><span><span class="adi">Fiyat listeleri</span> <span class="sonuk">· 6 aktif · Özel 2026 varsayılan</span></span><span class="git">Stok &amp; Hizmet › Fiyat Listeleri →</span></div>
+            <div class="kart-link"><span><span class="adi">Başvuru türleri</span> <span class="sonuk">· kod listesi basvuru.tur · 6 değer</span></span><span class="git">Katalog › Kod Listeleri →</span></div>
+          </div>
+        </div>
+        <div style="border-left:1px solid var(--line2);background:#fbfcfe">
+          <div class="grp" style="margin:12px">
+            <h4>İlgili Yetkiler <span class="mini">ayar değil — rol matrisi</span></h4>
+            <div class="sat"><span>İskonto tavanı (%)</span><span class="rz mavi">basvuru.iskonto</span></div>
+            <div class="sat"><span>Banko</span><b>%10</b></div>
+            <div class="sat"><span>İskonto Onaylayanlar</span><b>%100</b></div>
+            <div class="sat"><span>Yönetici</span><b>%100</b></div>
+            <div class="fark"><span class="sonuk">Kişiye bağlı hak burada <b>gösterilir</b>, orada <b>düzenlenir</b>.</span>
+              <a class="link" href="#">Yetki Matrisi →</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================ RANDEVU =========== -->
+    <div class="pnl" data-s="randevu" hidden>
+      <div class="ana">
+        <div>
+          <div class="grp">
+            <h4>Kurum Geneli <span class="mini">referans · randevu.* — şube kendi değerini verebilir</span></h4>
+            <div class="dg">
+              <table>
+                <thead><tr>
+                  <th style="width:230px">Ayar</th><th style="width:220px">Değer</th>
+                  <th style="width:120px">Kapsam</th><th>Açıklama</th>
+                  <th style="width:190px">Anahtar</th><th style="width:130px">Son değişiklik</th>
+                </tr></thead>
+                <tbody>
+                  <tr data-k="slot süresi dakika randevu"><td>Varsayılan slot süresi</td>
+                    <td><div class="inp dar">15</div> <span class="sonuk">dk</span></td>
+                    <td><span class="rz">Kurum geneli</span></td>
+                    <td class="sar sonuk">Hekim / cihaz kartında farklı bir değer varsa <b>o kazanır</b> (çözüm sırası sunucuda)</td>
+                    <td><span class="anahtar">randevu.slot_dk</span></td>
+                    <td class="sonuk">01.09 · admin</td></tr>
+                  <tr data-k="ileri gün randevu ufuk"><td>Kaç gün ileriye randevu</td>
+                    <td><div class="inp dar">90</div> <span class="sonuk">gün</span></td>
+                    <td><span class="rz">Kurum geneli</span></td>
+                    <td class="sar sonuk">Bu ufuktan sonrası takvimde kapalı görünür</td>
+                    <td><span class="anahtar">randevu.ufuk_gun</span></td>
+                    <td class="sonuk">—</td></tr>
+                  <tr class="sel" data-k="online randevu internet"><td>Online randevu</td>
+                    <td><div class="inp combo">Kapalı</div></td>
+                    <td><span class="rz sari">Varsayılanda</span></td>
+                    <td class="sar sonuk">Açılınca hangi bölümlerin dışa açık olduğu bölüm kartından işaretlenir</td>
+                    <td><span class="anahtar">randevu.online</span></td>
+                    <td class="sonuk">hiç değişmedi</td></tr>
+                  <tr data-k="gecikme iptal randevu kaç dakika"><td>Gecikme toleransı</td>
+                    <td><div class="inp dar">20</div> <span class="sonuk">dk</span></td>
+                    <td><span class="rz">Kurum geneli</span></td>
+                    <td class="sar sonuk">Bu süreyi geçen hasta "gelmedi" sayılır, sıra ötekine geçer</td>
+                    <td><span class="anahtar">randevu.gecikme_dk</span></td>
+                    <td class="sonuk">—</td></tr>
+                  <tr data-k="hatırlatma sms saat önce"><td>Hatırlatma zamanı</td>
+                    <td><div class="inp dar">24</div> <span class="sonuk">saat önce</span> <span class="rz ok">SMS</span></td>
+                    <td><span class="rz mavi">Merkez ≠ genel</span></td>
+                    <td class="sar sonuk">Kayıt anında kuyruğa konur, işçi zamanı gelince gönderir. Şablon Bildirimler sekmesinde</td>
+                    <td><span class="anahtar">randevu.hatirlatma_saat</span></td>
+                    <td class="sonuk">14.09 · Elif KARACA</td></tr>
+                  <tr data-k="çakışma çift randevu"><td>Aynı saate ikinci randevu</td>
+                    <td><div class="inp combo">Uyar, izin ver</div></td>
+                    <td><span class="rz">Kurum geneli</span></td>
+                    <td class="sar sonuk">"Engelle" seçilirse randevusuz hasta (walk-in) yine açılabilir</td>
+                    <td><span class="anahtar">randevu.cakisma</span></td>
+                    <td class="sonuk">—</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="fark">
+              <span class="sonuk">Şubeye özel değer vermek için satırı seçip <b>"Bu şube için ayır"</b> — kurum geneli satır korunur, Merkez kendi değerini taşır.</span>
+              <div class="btn"><span>🏢</span> Bu şube için ayır</div>
+            </div>
+          </div>
+
+          <div class="grp">
+            <h4>Kaynak Bazlı <span class="mini">her kaynağın kendi kartında — buradan gidilir, burada saklanmaz</span></h4>
+            <div class="kart-link"><span><span class="adi">Bölümler</span> <span class="sonuk">· 25 bölümün 12'si randevuya açık · <code>departman.randevu_verilebilir</code></span></span><span class="git">Yönetim › Bölüm / Görev →</span></div>
+            <div class="kart-link"><span><span class="adi">Hekim mesaileri</span> <span class="sonuk">· 14 hekim · çalışma günü, saat, kendi slot süresi, izin</span></span><span class="git">İK › Personel Listesi →</span></div>
+            <div class="kart-link"><span><span class="adi">Cihazlar</span> <span class="sonuk">· 3 cihaz · mesai, slot, bakım/kapatma takvimi</span></span><span class="git">Radyoloji › Cihazlar →</span></div>
+            <div class="kart-link"><span><span class="adi">Tatil takvimi</span> <span class="sonuk">· resmî + kurumun kapalı günleri</span></span><span class="git">Takvim →</span></div>
+            <div class="fark">
+              <span class="sonuk"><b>Neden burada değil:</b> her hekimin mesaisi farklı. Merkezde tutulsa kartla ikizlenir; üçüncü ay ikisi farklı iki cevap verir.</span>
+            </div>
+          </div>
+        </div>
+        <div style="border-left:1px solid var(--line2);background:#fbfcfe">
+          <div class="grp" style="margin:12px 12px 8px">
+            <h4>Çözüm Sırası <span class="mini">slot süresi örneği</span></h4>
+            <div class="sat"><span>1 · Cihaz kartı</span><span class="sonuk">MR-1: 30 dk</span></div>
+            <div class="sat"><span>2 · Hekim kartı</span><span class="sonuk">Dr. Güneş: 20 dk</span></div>
+            <div class="sat"><span>3 · Bölüm kartı</span><span class="sonuk">Kardiyoloji: —</span></div>
+            <div class="sat"><span>4 · Şube (Merkez)</span><span class="sonuk">—</span></div>
+            <div class="sat buyuk"><span>5 · Kurum geneli</span><b>15 dk</b></div>
+            <div class="uyari-sat" style="border-top:1px solid #eef2f6">
+              <span class="rz mavi">Sunucu</span>
+              <span>Sıra tek yerde (<code>fn_randevu_slot</code>). Ekran "hangisi kazanır" kuralını bilmez, sonucu gösterir.</span>
+            </div>
+          </div>
+          <div class="grp" style="margin:8px 12px">
+            <h4>İlgili Yetkiler <span class="mini">rol matrisi</span></h4>
+            <div class="sat"><span>Randevu görme / verme</span><span class="rz mavi">randevu</span></div>
+            <div class="sat"><span>Bu ekranı düzenleme</span><span class="rz mavi">randevu · değiştir</span></div>
+            <div class="uyari-sat" style="border-top:1px solid #eef2f6">
+              <span class="rz sari">Öneri</span>
+              <span>Ayarı yalnız sorumluya bırakmak için ayrı aksiyon: <code>randevu.ayar</code>. Bugün randevu görebilen herkes bu sekmeyi açabiliyor.</span>
+            </div>
+          </div>
+          <div class="grp" style="margin:8px 12px 12px">
+            <h4>Son Değişiklikler</h4>
+            <div class="uyari-sat"><span class="rz mavi">14.09</span><span>Hatırlatma 12 → 24 saat · Elif KARACA</span></div>
+            <div class="uyari-sat"><span class="rz mavi">01.09</span><span>Slot 20 → 15 dk · admin</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================ MUAYENE =========== -->
+    <div class="pnl" data-s="muayene" hidden>
+      <div class="grp">
+        <h4>Kurum Geneli <span class="mini">referans · muayene.*</span></h4>
+        <div class="dg"><table>
+          <thead><tr><th style="width:230px">Ayar</th><th style="width:220px">Değer</th><th style="width:120px">Kapsam</th><th>Açıklama</th><th style="width:190px">Anahtar</th></tr></thead>
+          <tbody>
+            <tr data-k="muayene ücreti açılınca"><td>Ücretlendirme anı</td><td><div class="inp combo">Muayene açılınca</div></td><td><span class="rz">Kurum geneli</span></td><td class="sar sonuk">Muayene ücreti kartla birlikte, işlemler anında</td><td><span class="anahtar">muayene.ucret_ani</span></td></tr>
+            <tr data-k="kontrol muayene gün ücretsiz"><td>Kontrol muayenesi</td><td><div class="inp dar">15</div> <span class="sonuk">gün içinde ücretsiz</span></td><td><span class="rz">Kurum geneli</span></td><td class="sar sonuk">Kural gereği; talep açılmaz, denetim izine "otomatik" düşer</td><td><span class="anahtar">muayene.kontrol_gun</span></td></tr>
+            <tr data-k="reçete e-reçete"><td>e-Reçete</td><td><div class="inp combo">Açık — Medula</div></td><td><span class="rz">Kurum geneli</span></td><td class="sar sonuk">Hekim sertifikası personel kartında</td><td><span class="anahtar">muayene.erecete</span></td></tr>
+          </tbody></table></div>
+      </div>
+      <div class="grp">
+        <h4>Kaynak Bazlı</h4>
+        <div class="kart-link"><span><span class="adi">Klinik kataloglar</span> <span class="sonuk">· ICD, ilaç, muayene şablonları</span></span><span class="git">Muayene › Klinik Kataloglar →</span></div>
+        <div class="kart-link"><span><span class="adi">Onam metinleri</span> <span class="sonuk">· 6 metin, sürümlü</span></span><span class="git">Yönetim › Onam Metinleri →</span></div>
+      </div>
+    </div>
+
+    <!-- ============================================== LABORATUVAR ========= -->
+    <div class="pnl" data-s="lab" hidden>
+      <div class="grp">
+        <h4>Kurum Geneli <span class="mini">referans · lab.*</span></h4>
+        <div class="dg"><table>
+          <thead><tr><th style="width:230px">Ayar</th><th style="width:220px">Değer</th><th style="width:120px">Kapsam</th><th>Açıklama</th><th style="width:190px">Anahtar</th></tr></thead>
+          <tbody>
+            <tr data-k="numune barkod şablon"><td>Numune barkod şablonu</td><td><div class="inp combo">Varsayılan (kod-tarih-sıra)</div></td><td><span class="rz sari">Varsayılanda</span></td><td class="sar sonuk">Yazıcı Kasa &amp; Banka › cihazlar değil, buradan</td><td><span class="anahtar">lab.barkod_sablon</span></td></tr>
+            <tr data-k="sonuç onay iki aşama"><td>Sonuç onayı</td><td><div class="inp combo">İki aşamalı (tekniker → uzman)</div></td><td><span class="rz">Kurum geneli</span></td><td class="sar sonuk">Kritik değer varsa uzman onayı atlanamaz</td><td><span class="anahtar">lab.onay_asama</span></td></tr>
+            <tr data-k="kritik değer bildirim"><td>Kritik değer bildirimi</td><td><div class="inp combo">Hekime SMS + zil</div></td><td><span class="rz">Kurum geneli</span></td><td class="sar sonuk">Bildirim şablonu Bildirimler sekmesinde</td><td><span class="anahtar">lab.kritik_bildirim</span></td></tr>
+          </tbody></table></div>
+      </div>
+      <div class="grp">
+        <h4>Kaynak Bazlı</h4>
+        <div class="kart-link"><span><span class="adi">Tetkik kataloğu</span> <span class="sonuk">· referans aralıkları, birim, panel</span></span><span class="git">Laboratuvar › Tetkik Kataloğu →</span></div>
+        <div class="kart-link"><span><span class="adi">Cihazlar</span> <span class="sonuk">· LIS eşleme, mesaj işleme</span></span><span class="git">Laboratuvar › Cihazlar →</span></div>
+        <div class="kart-link"><span><span class="adi">Dış laboratuvarlar</span> <span class="sonuk">· gönderim şablonları</span></span><span class="git">Laboratuvar › Dış Laboratuvar →</span></div>
+      </div>
+    </div>
+
+    <!-- ================================================ RADYOLOJI ========= -->
+    <div class="pnl" data-s="rad" hidden>
+      <div class="grp">
+        <h4>Kurum Geneli <span class="mini">referans · radyoloji.*</span></h4>
+        <div class="dg"><table>
+          <thead><tr><th style="width:230px">Ayar</th><th style="width:220px">Değer</th><th style="width:120px">Kapsam</th><th>Açıklama</th><th style="width:190px">Anahtar</th></tr></thead>
+          <tbody>
+            <tr data-k="rapor teslim süre hedef"><td>Rapor hedef süresi</td><td><div class="inp dar">24</div> <span class="sonuk">saat</span></td><td><span class="rz">Kurum geneli</span></td><td class="sar sonuk">Pano "geciken rapor" sayacı bunu ölçer</td><td><span class="anahtar">radyoloji.rapor_saat</span></td></tr>
+            <tr data-k="pacs bağlantı"><td>PACS bağlantısı</td><td><span class="rz ok">Bağlı · Orthanc</span></td><td><span class="rz">Kurum geneli</span></td><td class="sar sonuk">Hesap Entegrasyonlar'da; burada yalnız durum</td><td><span class="anahtar">entegrasyon.pacs</span></td></tr>
+          </tbody></table></div>
+      </div>
+      <div class="grp">
+        <h4>Kaynak Bazlı</h4>
+        <div class="kart-link"><span><span class="adi">Cihazlar</span> <span class="sonuk">· 3 cihaz · mesai, slot, MWL, bakım takvimi</span></span><span class="git">Radyoloji › Cihazlar →</span></div>
+        <div class="kart-link"><span><span class="adi">Çekim protokolleri</span> <span class="sonuk">· modaliteye göre</span></span><span class="git">Radyoloji › Çekim Protokolleri →</span></div>
+        <div class="kart-link"><span><span class="adi">Rapor şablonları</span></span><span class="git">Radyoloji › Rapor Şablonları →</span></div>
+      </div>
+    </div>
+
+    <!-- ============================================ STOK & HIZMET ========= -->
+    <div class="pnl" data-s="stok" hidden>
+      <div class="grp">
+        <h4>Kurum Geneli <span class="mini">referans · stok.*</span></h4>
+        <div class="dg"><table>
+          <thead><tr><th style="width:230px">Ayar</th><th style="width:220px">Değer</th><th style="width:120px">Kapsam</th><th>Açıklama</th><th style="width:190px">Anahtar</th></tr></thead>
+          <tbody>
+            <tr data-k="varsayılan depo"><td>Varsayılan depo</td><td><div class="inp combo">Anadepo</div></td><td><span class="rz mavi">Şubeden</span></td><td class="sar sonuk">Başvuruda depo combosunun ilk değeri</td><td><span class="anahtar">stok.varsayilan_depo</span></td></tr>
+            <tr data-k="kdv dahil fiyat listesi"><td>Fiyat listesi KDV</td><td><div class="inp combo">Dahil</div></td><td><span class="rz">Kurum geneli</span></td><td class="sar sonuk">Liste bazında ayrıca seçilebilir; bu, yeni listenin varsayılanı</td><td><span class="anahtar">stok.liste_kdv_dahil</span></td></tr>
+            <tr data-k="üts bildirim otomatik"><td>ÜTS bildirimi</td><td><div class="inp combo">Faturada otomatik</div></td><td><span class="rz">Kurum geneli</span></td><td class="sar sonuk">Verme bildirimi fatura kesilince kuyruğa düşer</td><td><span class="anahtar">uts.otomatik</span></td></tr>
+          </tbody></table></div>
+      </div>
+      <div class="grp">
+        <h4>Kaynak Bazlı</h4>
+        <div class="kart-link"><span><span class="adi">Fiyat listeleri</span> <span class="sonuk">· 6 aktif · geçerlilik, çarpan, yuvarlama</span></span><span class="git">Stok &amp; Hizmet › Fiyat Listeleri →</span></div>
+        <div class="kart-link"><span><span class="adi">Kategoriler</span> <span class="sonuk">· kurum tipine göre açık/kapalı</span></span><span class="git">Stok &amp; Hizmet › Kategoriler →</span></div>
+        <div class="kart-link"><span><span class="adi">Depolar</span></span><span class="git">Stok Ayarları › Depolar →</span></div>
+      </div>
+    </div>
+
+    <!-- ============================================== KASA & BANKA ======== -->
+    <div class="pnl" data-s="kasa" hidden>
+      <div class="grp">
+        <h4>Kurum Geneli <span class="mini">referans · kasa.*</span></h4>
+        <div class="dg"><table>
+          <thead><tr><th style="width:230px">Ayar</th><th style="width:220px">Değer</th><th style="width:120px">Kapsam</th><th>Açıklama</th><th style="width:190px">Anahtar</th></tr></thead>
+          <tbody>
+            <tr data-k="gün sonu kasa teslim"><td>Gün sonu kasa teslimi</td><td><div class="inp combo">Zorunlu — tutanakla</div></td><td><span class="rz">Kurum geneli</span></td><td class="sar sonuk">Teslim edilmeyen kasada ertesi gün tahsilat açılmaz</td><td><span class="anahtar">kasa.gun_sonu</span></td></tr>
+            <tr data-k="makbuz yazıcı"><td>Makbuz yazıcısı</td><td><div class="inp combo">Varsayılan yazıcı</div></td><td><span class="rz sari">Varsayılanda</span></td><td class="sar sonuk">Banko başına yazıcı kasa kartında</td><td><span class="anahtar">kasa.makbuz_yazici</span></td></tr>
+            <tr data-k="iade nedeni zorunlu"><td>İade / iptal nedeni</td><td><div class="inp combo">Zorunlu</div></td><td><span class="rz">Kurum geneli</span></td><td class="sar sonuk">Neden listesi kod listesinden (Para üstü dahil)</td><td><span class="anahtar">kasa.iade_neden</span></td></tr>
+          </tbody></table></div>
+      </div>
+      <div class="grp">
+        <h4>Kaynak Bazlı</h4>
+        <div class="kart-link"><span><span class="adi">Kasa / banka / POS hesapları</span> <span class="sonuk">· hesap türü, para birimi, banko eşlemesi</span></span><span class="git">Kasa › Kasa Hesapları →</span></div>
+        <div class="kart-link"><span><span class="adi">İşlem türleri</span> <span class="sonuk">· yön, cari zorunluluğu, fiş şablonu</span></span><span class="git">Muhasebe › İşlem Türleri →</span></div>
+      </div>
+    </div>
+
+    <!-- ============================================== BILDIRIMLER ========= -->
+    <div class="pnl" data-s="bildirim" hidden>
+      <div class="grp">
+        <h4>Kanallar ve Şablonlar <span class="mini">bildirim_sablon · kanal başına hesap</span></h4>
+        <div class="dg"><table>
+          <thead><tr><th style="width:230px">Ayar</th><th style="width:220px">Değer</th><th style="width:120px">Kapsam</th><th>Açıklama</th><th style="width:190px">Anahtar</th></tr></thead>
+          <tbody>
+            <tr data-k="sms hesabı sağlayıcı"><td>SMS hesabı</td><td><span class="rz kir">Tanımsız</span></td><td><span class="rz">Kurum geneli</span></td><td class="sar sonuk">Randevu hatırlatması ve kritik değer bildirimi bu hesaba bağlı — tanımlanmadan kuyruk birikir</td><td><span class="anahtar">entegrasyon.sms</span></td></tr>
+            <tr data-k="e-posta smtp"><td>E-posta</td><td><span class="rz ok">SMTP · bağlı</span></td><td><span class="rz">Kurum geneli</span></td><td class="sar sonuk">Sonuç raporu ve fatura gönderimi</td><td><span class="anahtar">entegrasyon.eposta</span></td></tr>
+            <tr data-k="masaüstü bildirim zil"><td>Masaüstü bildirimi</td><td><div class="inp combo">Kullanıcı tercihi</div></td><td><span class="rz mor">Kişi bazlı</span></td><td class="sar sonuk">Her kullanıcı Ayarlar › Bildirimler'den kendi açar; sessiz saat de orada</td><td><span class="anahtar">kullanici_tercih.bildirim</span></td></tr>
+          </tbody></table></div>
+      </div>
+      <div class="grp">
+        <h4>Kaynak Bazlı</h4>
+        <div class="kart-link"><span><span class="adi">Bildirim şablonları</span> <span class="sonuk">· 9 şablon · randevu, sonuç, iskonto onayı, kritik değer</span></span><span class="git">Yönetim › Bildirim Şablonları →</span></div>
+      </div>
+    </div>
+
+    <!-- ================================================ GUVENLIK ========== -->
+    <div class="pnl" data-s="guvenlik" hidden>
+      <div class="grp">
+        <h4>Kurum Geneli <span class="mini">referans · guvenlik.*</span></h4>
+        <div class="dg"><table>
+          <thead><tr><th style="width:230px">Ayar</th><th style="width:220px">Değer</th><th style="width:120px">Kapsam</th><th>Açıklama</th><th style="width:190px">Anahtar</th></tr></thead>
+          <tbody>
+            <tr data-k="parola uzunluk kural"><td>Parola en az</td><td><div class="inp dar">8</div> <span class="sonuk">karakter · büyük/küçük/rakam/işaret</span></td><td><span class="rz">Kurum geneli</span></td><td class="sar sonuk">İlk giriş parolası (kart ID) bu kurala tabi değil — değişimi zorunlu</td><td><span class="anahtar">guvenlik.parola_min_uzunluk</span></td></tr>
+            <tr data-k="parola geçerlilik gün"><td>Parola geçerliliği</td><td><div class="inp dar">0</div> <span class="sonuk">gün (0 = süresiz)</span></td><td><span class="rz">Kurum geneli</span></td><td class="sar sonuk"></td><td><span class="anahtar">guvenlik.parola_gecerlilik_gun</span></td></tr>
+            <tr data-k="hatalı giriş kilit"><td>Hatalı giriş kilidi</td><td><div class="inp dar">5</div> <span class="sonuk">deneme → </span><div class="inp dar">15</div> <span class="sonuk">dk</span></td><td><span class="rz">Kurum geneli</span></td><td class="sar sonuk">Denemeler Giriş Kayıtları'nda görünür</td><td><span class="anahtar">guvenlik.hatali_giris_siniri</span></td></tr>
+            <tr data-k="tek oturum"><td>Tek oturum</td><td><div class="inp combo">Açık</div></td><td><span class="rz sari">Varsayılanda</span></td><td class="sar sonuk">Yeni giriş aynı kullanıcının eski oturumlarını kapatır. İki sekmede iki personel için gizli pencere gerekir</td><td><span class="anahtar">guvenlik.tek_oturum</span></td></tr>
+            <tr data-k="jwt oturum süresi dakika"><td>Oturum süresi</td><td><div class="inp dar">480</div> <span class="sonuk">dk · yenileme 30 gün</span></td><td><span class="rz">Kurum geneli</span></td><td class="sar sonuk"></td><td><span class="anahtar">guvenlik.jwt_dakika</span></td></tr>
+          </tbody></table></div>
+      </div>
+      <div class="grp">
+        <h4>Kaynak Bazlı</h4>
+        <div class="kart-link"><span><span class="adi">Roller ve yetki matrisi</span> <span class="sonuk">· 6 rol · ana menüye göre</span></span><span class="git">İK › Roller →</span></div>
+        <div class="kart-link"><span><span class="adi">Giriş kayıtları</span> <span class="sonuk">· başarılı / başarısız denemeler</span></span><span class="git">Yönetim › Giriş Kayıtları →</span></div>
+      </div>
+    </div>
+
+    <!-- ============================================== MENUDE YERI ========= -->
+    <div class="pnl" data-s="menu" hidden>
+      <div class="grp">
+        <h4>Ayarların Menüde Yeri <span class="mini">tek kaynak, iki görünüm</span></h4>
+        <div class="menu">
+          <div class="kol">
+            <div class="bas">Sol menü — modülün kendi grubunda, EN ALTTA</div>
+            <div class="oge grup">📅 Randevu</div>
+            <div class="oge">Randevular</div>
+            <div class="oge">Randevu Ayarları <span class="sonuk">(eski yer — listelerin arasına karışıyordu)</span></div>
+            <div class="oge on ayar">⚙ Ayarlar <span class="rz mavi">yeni</span></div>
+            <div class="oge grup">🏥 Kayıt Kabul</div>
+            <div class="oge">Hasta Listesi</div>
+            <div class="oge">Başvurular</div>
+            <div class="oge">İskonto Onayı</div>
+            <div class="oge ayar">⚙ Ayarlar</div>
+            <div class="oge grup">💉 Laboratuvar</div>
+            <div class="oge">İstemler · Sonuçlar · …</div>
+            <div class="oge ayar">⚙ Ayarlar</div>
+          </div>
+          <div class="kol">
+            <div class="bas">Yönetim — DİZİN (aynı rotalara kısayol, ikinci ekran değil)</div>
+            <div class="oge grup">⚙ Yönetim</div>
+            <div class="oge on ayar">Ayarlar Dizini <span class="rz mavi">bu ekran</span></div>
+            <div class="oge" style="padding-left:34px">Genel · Kayıt Kabul · Randevu · Muayene · Lab · Radyoloji · Stok · Kasa · Bildirimler · Güvenlik</div>
+            <div class="oge">Kurum Profili</div>
+            <div class="oge">Bölüm / Görev</div>
+            <div class="oge">İşlem Günlüğü · Giriş Kayıtları</div>
+            <div class="oge">Onam Metinleri · Bildirim Şablonları</div>
+            <div class="oge grup">🧑‍🤝‍🧑 İK</div>
+            <div class="oge">Roller <span class="sonuk">· yetki matrisi</span></div>
+          </div>
+        </div>
+        <div class="fark">
+          <span class="sonuk">Modül grubundaki <b>⚙ Ayarlar</b> ile buradaki <b>Randevu</b> sekmesi AYNI ekranı açar (<code>/ayarlar?sekme=randevu</code>). Menüde "Ayarlar" yazar, ekranın başlığında "Randevu Ayarları" — grup adı zaten söylüyor, Ctrl+K araması tam adı taşır.</span>
+        </div>
+      </div>
+      <div class="grp">
+        <h4>Ayrım Kuralı <span class="mini">bir ayar nereye gider</span></h4>
+        <div class="dg"><table>
+          <thead><tr><th style="width:230px">Tür</th><th style="width:220px">Yer</th><th>Örnek</th><th style="width:220px">Neden</th></tr></thead>
+          <tbody>
+            <tr><td>Kurulum / politika</td><td><b>Kurum Profili</b></td><td class="sar">ürün modu, kurum tipi, kimlik biçimi, açık modüller, para birimi</td><td class="sar sonuk">Kurumu bağlar, birden çok modülü etkiler, nadiren değişir</td></tr>
+            <tr><td>Modülün günlük kuralı</td><td><b>Modül sekmesi</b> (⚙ Ayarlar)</td><td class="sar">slot süresi, hatırlatma saati, POS sonrası aksiyon, gün sonu kasa</td><td class="sar sonuk">Kararı veren kişi o ekranda çalışıyor</td></tr>
+            <tr><td>Kaynağın özelliği</td><td><b>Kaynağın kartı</b></td><td class="sar">hekim mesaisi, cihaz bakım takvimi, bölümün randevuya açıklığı, fiyat listesi geçerliliği</td><td class="sar sonuk">Her kaynakta farklı; merkezde tutulsa kartla ikizlenir</td></tr>
+            <tr><td>Kişiye bağlı hak / limit</td><td><b>Yetki Matrisi</b></td><td class="sar">iskonto tavanı, onay yetkisi, ekran görme</td><td class="sar sonuk">Ayar değil hak — kuruma değil role bağlı</td></tr>
+            <tr><td>Kişinin kendi tercihi</td><td><b>Kullanıcı Ayarları</b> (sağ üst)</td><td class="sar">masaüstü bildirimi, sessiz saat, dil, tema</td><td class="sar sonuk">Kimseyi bağlamaz; hesabın altında</td></tr>
+          </tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>64 ayar · 11 modül</span><span>·</span>
+    <span>3 şubeye özel · 5 varsayılanda</span><span>·</span>
+    <span>Son değişiklik 15.09 09:41 · admin</span><span>·</span>
+    <span>Kaydedilmemiş değişiklik yok</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> tüm modüllerin ayarlarının tek dizinde döküldüğü, sekmelerle gezilen ayar merkezi.
+  Yönetim'de "Ayarlar Dizini" olarak açılır; her modülün grubundaki <b>⚙ Ayarlar</b> maddesi de
+  aynı ekranı ilgili sekmesiyle açar. Ekran bir <b>dizindir</b>: değeri kaynağından okur, kaynağına yazar.
+  <ul>
+    <li><b>Tek kaynak, iki görünüm:</b> kurum geneli ayar <code>referans</code>'ta, kurulum ayarı
+        <code>kurum_profil</code>'de durur. Burada görünen Kurum Profili satırları oradakinin aynısıdır —
+        ikinci bir tablo yok. (Bugün <code>urun_modu</code>'nda iki kaynak ayrışmıştı: ekran HBYS yazıp
+        menü ERP kalıyordu; çözüm tek çözüm sırası oldu — <code>fn_urun_modu</code>.)</li>
+    <li><b>Kapsam sütunu</b> her satırda: Kurum geneli · Şubeden · Merkez ≠ genel · Varsayılanda · Kişi bazlı.
+        "Bu şube için ayır" kurum geneli satırı korur, şube kendi değerini taşır (<code>kurum_profil.sube_id</code> deseni).</li>
+    <li><b>Kaynak bazlı ayarlar burada saklanmaz:</b> hekim mesaisi personel kartında, cihaz takvimi cihaz
+        kartında, bölümün randevuya açıklığı bölüm kartında. Dizin oraya <i>bağlantı</i> verir, veriyi taşımaz —
+        aksi halde üçüncü ay iki farklı cevap.</li>
+    <li><b>Çözüm sırası sunucuda:</b> hem kurumda hem kaynakta anlamlı olan değerde (slot süresi) hangisinin
+        kazandığını tek bir SQL fonksiyonu bilir; ekran sonucu gösterir, kuralı bilmez.</li>
+    <li><b>Yetkiler ayar değildir:</b> iskonto tavanı gibi kişiye bağlı limitler burada <i>gösterilir</i>,
+        rol matrisinde <i>düzenlenir</i>. Ayarla karıştırmak "bu kurumda %20" ile "bu rolde %20"yi aynı
+        şey sanmaya götürür.</li>
+    <li><b>Arama bütün sekmelerde arar:</b> "slot" yazan kişi hangi modülün ayarı olduğunu bilmek zorunda değil.</li>
+    <li><b>Her değişiklik loglanır</b> (kim / ne zaman / eski → yeni); sağ panelde son değişiklikler,
+        "Varsayılanda kalanlar" kutusu ise hiç dokunulmamış ayarları gözden geçirmeye çağırır.</li>
+    <li><b>Anahtar sütunu</b> destek için: kullanıcı ekranda gördüğü adı söyler, geliştirici <code>referans</code>
+        anahtarını görür — iki dil arasında çeviri gerekmez.</li>
+  </ul>
+</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');});
+  if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+// Arama: BUTUN sekmelerde satir suzer; eslesme olan sekmeye rozet koyar.
+(function(){
+  var kutu=document.getElementById('ara'); if(!kutu) return;
+  var satirlar=[].slice.call(document.querySelectorAll('tr[data-k]'));
+  kutu.addEventListener('input',function(){
+    var q=kutu.value.trim().toLocaleLowerCase('tr');
+    satirlar.forEach(function(tr){
+      var metin=(tr.dataset.k+' '+tr.textContent).toLocaleLowerCase('tr');
+      tr.style.display=(!q||metin.indexOf(q)>=0)?'':'none';
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

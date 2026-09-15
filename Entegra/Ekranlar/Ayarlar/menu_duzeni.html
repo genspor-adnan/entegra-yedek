@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menü Düzeni — Mockup (Gentegre AI · Ayarlar)</title>
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--line:#cdd6e0;--line2:#e3e9f0;--ink:#1f2d3a;--muted:#6b7a8b;--navy:#14315a;--accent:#2f6db3;
+    --sel:#d7e7fb;--head:#f3f6fa;--btnfrom:#fbfcfe;--btnto:#e7edf4;--grpbg:#fbfcfe}
+  *{box-sizing:border-box}[hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:10px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit .sel{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:26px;display:flex;align-items:center;padding:0 8px;gap:6px}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .rz{display:inline-block;border-radius:9px;padding:0 7px;font-size:10px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap;margin-left:6px;vertical-align:middle}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}.rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}.rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .sonuk{color:var(--muted)}
+  .grp{margin:12px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--accent)}
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;vertical-align:top}
+  .fark{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:#f7fafc;border-top:1px solid var(--line2);font-size:11.5px;gap:10px}
+  /* menu agaci - kolonlu */
+  .kolonlar{column-width:250px;column-gap:14px;padding:12px}
+  .ag{break-inside:avoid;border:1px solid var(--line2);border-radius:4px;background:#fff;margin:0 0 10px;overflow:hidden}
+  .gb{background:linear-gradient(#f6f9fc,#e9eff6);padding:6px 9px;font-weight:bold;color:var(--navy);font-size:12px;border-bottom:1px solid var(--line2);display:flex;align-items:center}
+  .gb .say{margin-left:auto;font-weight:normal;font-size:10.5px;color:var(--muted)}
+  .ab{padding:4px 9px 3px;font-size:10.5px;color:#4d5d6e;background:#fbfcfe;border-top:1px solid #f1f4f8;font-weight:bold}
+  .og{padding:3px 9px 3px 12px;font-size:11.5px;border-top:1px solid #f4f6f9;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .og.alt{padding-left:24px}
+  .ic{width:18px;display:inline-block;margin-right:4px;text-align:center}
+  .ozet{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 12px 0}
+  .ozet div{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:8px 10px}
+  .ozet span{display:block;font-size:10.5px;color:var(--muted)}
+  .ozet b{font-size:16px;color:var(--navy)}
+  .ozet i{font-style:normal;font-size:10.5px;color:#2e7d46;margin-left:4px}
+  /* kabuk onizleme */
+  .kabuk{display:grid;grid-template-columns:230px 1fr;min-height:420px;margin:12px;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .kabuk .yan{background:#1f3a5f;color:#dce6f2;padding:8px 0;font-size:11.5px}
+  .kabuk .yan .g{padding:6px 12px;display:flex;align-items:center;gap:6px;cursor:default}
+  .kabuk .yan .g.on{background:#2b5c95;color:#fff;font-weight:bold}
+  .kabuk .yan .o{padding:4px 12px 4px 34px;color:#c7d5e6}
+  .kabuk .yan .o.on{background:#3d6ea8;color:#fff;border-left:3px solid #9cc4f2;padding-left:31px}
+  .kabuk .yan .o.ayar{color:#9fb3c9;font-style:italic}
+  .kabuk .ust{background:#fff;border-bottom:1px solid var(--line);padding:6px 10px;display:flex;gap:8px;align-items:center;font-size:11.5px}
+  .kabuk .ust .ara{border:1px solid var(--line);border-radius:3px;padding:3px 8px;flex:1;max-width:320px;color:#9aa;background:#fbfcfe}
+  .kabuk .ust .roz{position:relative}
+  .kabuk .ust .roz i{position:absolute;top:-6px;right:-8px;background:#b3261e;color:#fff;border-radius:8px;font-size:9px;padding:0 4px;font-style:normal}
+  .kabuk .icerik{background:#f7fafc;padding:14px;color:var(--muted)}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)} .not ul{margin:6px 0 0 18px;padding:0} .not li{margin:2px 0}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+</style></head><body>
+<div class="win">
+  <div class="title">🧭 Menü Düzeni — Yeniden Tasarım
+    <span class="sp">Gentegre AI · Yönetim › Ayarlar · 15.09.2026 · mevcut ağaç `listeTanimlari.*.ts` + `Kabuk.tsx GRUP_SIRA`</span></div>
+  <div class="toolbar">
+    <div class="btn primary"><span>💾</span> Düzeni Uygula</div>
+    <div class="btn"><span>↺</span> Varsayılana Dön</div>
+    <div class="btn"><span>⬇</span> Dışa Aktar (JSON)</div>
+    <span class="sp"></span>
+    <span class="rz mor">HBYS</span><span class="rz sari">ERP</span><span class="rz ok">yeni</span><span class="rz mavi">taşındı</span>
+  </div>
+  <div class="serit">
+    <div class="sel">Ürün modu: <b>HBYS</b> ▾</div>
+    <div class="sel">Modüller: <b>muayene · lab · enabiz · uretim(kapalı)</b></div>
+    <span class="rz kir">Şimdi: 18 ana grup · 149 öğe</span>
+    <span class="rz ok">Öneri HBYS: 13 ana grup · 129 öğe</span>
+    <span class="rz ok">Öneri ERP: 10 ana grup · 84 öğe</span>
+  </div>
+  <div>
+    <div class="sekmeler">
+      <div class="sekme" data-s="simdi">Şimdiki Menü</div>
+      <div class="sekme on" data-s="hbys">Önerilen · HBYS</div>
+      <div class="sekme" data-s="erp">Önerilen · ERP</div>
+      <div class="sekme" data-s="kabuk">Kabuk Önizleme</div>
+      <div class="sekme" data-s="tasinan">Menüden Çıkanlar &amp; Taşınanlar</div>
+      <div class="sekme" data-s="kural">Kurallar &amp; Uygulama</div>
+    </div>
+
+    <div class="pnl" data-s="simdi" hidden>
+      <div class="ozet">
+        <div><span>Ana grup</span><b>18</b></div><div><span>Öğe</span><b>149</b></div>
+        <div><span>Tek/iki öğeli grup</span><b>4</b><i>İletişim, Randevu, e-Nabız, Üretim</i></div>
+        <div><span>Ayarların dağıldığı yer</span><b>7</b><i>grup altı + Yönetim</i></div>
+      </div>
+      <div class="kolonlar"><div class="ag"><div class="gb"><span class="ic">💬</span>İletişim &amp; AI<span class="say">2</span></div>
+<div class="og"><span class="ic">💬</span>Mesajlar</div>
+<div class="og"><span class="ic">✨</span>Yapay Zeka</div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">📅</span>Randevu<span class="say">2</span></div>
+<div class="og"><span class="ic">📅</span>Randevular<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">⚙️</span>Randevu Ayarları<span class="rz mor">HBYS</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🚑</span>Kayıt Kabul<span class="say">3</span></div>
+<div class="og"><span class="ic">🏥</span>Hasta Listesi<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">📝</span>Başvurular<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">✅</span>İskonto Onayı<span class="rz mor">HBYS</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🩺</span>Muayene<span class="say">14</span></div>
+<div class="og"><span class="ic">🩺</span>Muayeneler<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">📋</span>Çalışma Listesi<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">💊</span>Reçeteler<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">📖</span>Tıbbi Özet<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">🩹</span>Kronik Tanılar<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">🏥</span>Geçmiş Olaylar<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">⚠️</span>Alerjiler<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">🧾</span>Kullanılan İlaçlar<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">💰</span>Hakedişlerim<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">📕</span>İlaç Kataloğu<span class="rz mor">HBYS</span></div>
+<div class="ab"><span class="ic">▸</span>Muayene Ayarları</div>
+<div class="og alt"><span class="ic">📋</span>Muayene Şablonları<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">⌨️</span>Metin Makroları<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">🩺</span>ICD-10 Tanı<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">📚</span>Klinik Kataloglar<span class="rz mor">HBYS</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🧪</span>Laboratuvar<span class="say">25</span></div>
+<div class="og"><span class="ic">💉</span>İstemler<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">🩸</span>Numune Kabul<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">📊</span>Sonuçlar<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">📚</span>Tetkik Kataloğu<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">🧬</span>Paneller<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">🏍️</span>Dış Lab Gönderimleri<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">🏥</span>Dış Laboratuvarlar<span class="rz mor">HBYS</span></div>
+<div class="ab"><span class="ic">▸</span>Biyokimya</div>
+<div class="og alt"><span class="ic">🩸</span>Serum İndeksi<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">📉</span>Kalite Kontrol<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">🧴</span>Kontrol Lotları<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">⚙️</span>Westgard Kuralları<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">🌍</span>Dış Kalite<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">🔌</span>Cihazlar<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">🔌</span>Cihaz Eşleme<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">📡</span>Cihaz Mesajları<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">🔧</span>Cihaz Olayları<span class="rz mor">HBYS</span></div>
+<div class="ab"><span class="ic">▸</span>Mikrobiyoloji</div>
+<div class="og alt"><span class="ic">🦠</span>Kültür Çalışma Listesi<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">🧫</span>Organizmalar<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">💊</span>Antibiyotikler<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">🧪</span>Besiyerleri<span class="rz mor">HBYS</span></div>
+<div class="ab"><span class="ic">▸</span>Genetik</div>
+<div class="og alt"><span class="ic">🧬</span>Vakalar<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">🔬</span>Varyantlar<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">📚</span>Dizileme Runları<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">🧬</span>Genler<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">🗂️</span>Panel Kataloğu<span class="rz mor">HBYS</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">☢️</span>Radyoloji<span class="say">8</span></div>
+<div class="og"><span class="ic">🖥️</span>Çalışma Listesi<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">📊</span>Pano<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">🚨</span>Kritik Bulgular<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">🧑‍⚕️</span>Konsültasyonlar<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">📦</span>Sonuç Teslim<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">📄</span>Rapor Şablonları<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">⚙️</span>Çekim Protokolleri<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">🖥️</span>Cihazlar<span class="rz mor">HBYS</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">💓</span>e-Nabız<span class="say">3</span></div>
+<div class="og"><span class="ic">📊</span>Veri Kalitesi<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">📤</span>Gönderim Kuyruğu<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">🔗</span>Kod Eşleme<span class="rz mor">HBYS</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🤝</span>Cari<span class="say">10</span></div>
+<div class="og"><span class="ic">🏛️</span>Anlaşmalı Kurumlar<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">👥</span>Müşteri Listesi<span class="rz sari">ERP</span></div>
+<div class="og"><span class="ic">🚚</span>Tedarikçi Listesi</div>
+<div class="og"><span class="ic">🧾</span>Kurum İcmalleri<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">🧑</span>Kişi Listesi</div>
+<div class="og"><span class="ic">🩺</span>Dış Doktorlar<span class="rz mor">HBYS</span></div>
+<div class="ab"><span class="ic">▸</span>Sigorta</div>
+<div class="og alt"><span class="ic">🛡️</span>Provizyonlar<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">🔌</span>Kurum Hesapları<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">🔤</span>Kod Eşleme<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">🧾</span>İstek Günlüğü<span class="rz mor">HBYS</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">📈</span>CRM<span class="say">4</span></div>
+<div class="og"><span class="ic">🌱</span>Aday Müşteriler</div>
+<div class="og"><span class="ic">🎯</span>Satış Fırsatları</div>
+<div class="og"><span class="ic">📁</span>Projeler</div>
+<div class="og"><span class="ic">✅</span>Görevler</div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">📦</span>Stok &amp; Hizmet<span class="say">13</span></div>
+<div class="og"><span class="ic">📦</span>Stok Listesi</div>
+<div class="og"><span class="ic">🛠️</span>Hizmet Listesi</div>
+<div class="og"><span class="ic">🌳</span>Kategoriler</div>
+<div class="og"><span class="ic">🏷️</span>Fiyat Listeleri</div>
+<div class="og"><span class="ic">🏷️</span>Kampanyalar</div>
+<div class="og"><span class="ic">📥</span>Stoktan Talep</div>
+<div class="og"><span class="ic">🔄</span>Stok Transfer</div>
+<div class="og"><span class="ic">📗</span>Giriş Fişi</div>
+<div class="og"><span class="ic">📕</span>Çıkış Fişi</div>
+<div class="ab"><span class="ic">▸</span>İTS</div>
+<div class="og alt"><span class="ic">💊</span>Bildirimler<span class="rz mor">HBYS</span></div>
+<div class="ab"><span class="ic">▸</span>ÜTS</div>
+<div class="og alt"><span class="ic">🪝</span>Gelen / Askıdakiler</div>
+<div class="og alt"><span class="ic">📡</span>Bildirimler</div>
+<div class="og alt"><span class="ic">🔍</span>Ürün Sorgu</div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🏭</span>Üretim<span class="say">3</span></div>
+<div class="og"><span class="ic">🌳</span>Ürün Ağaçları</div>
+<div class="og"><span class="ic">🏭</span>Üretim Emirleri</div>
+<div class="og"><span class="ic">⚙️</span>İş Merkezleri</div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">⚖️</span>Muhasebe<span class="say">5</span></div>
+<div class="og"><span class="ic">📒</span>Hesap Planı</div>
+<div class="og"><span class="ic">📕</span>Muhasebe Fişleri</div>
+<div class="og"><span class="ic">📗</span>Fiş Satırları</div>
+<div class="og"><span class="ic">🏷️</span>Masraf Merkezleri</div>
+<div class="og"><span class="ic">⚙️</span>İşlem Türleri</div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🛍️</span>Satış<span class="say">9</span></div>
+<div class="og"><span class="ic">📄</span>Satış Teklifleri<span class="rz sari">ERP</span></div>
+<div class="og"><span class="ic">📋</span>Satış Siparişleri<span class="rz sari">ERP</span></div>
+<div class="og"><span class="ic">🚚</span>Satış İrsaliyeleri</div>
+<div class="og"><span class="ic">🧾</span>Satış Faturaları</div>
+<div class="og"><span class="ic">🧾</span>Satış Fişleri</div>
+<div class="og"><span class="ic">📑</span>Tahakkuklar</div>
+<div class="og"><span class="ic">📦</span>Satış Konsinyeler<span class="rz mor">HBYS</span></div>
+<div class="og"><span class="ic">📑</span>Açık Satırlar</div>
+<div class="og"><span class="ic">📨</span>e-Belge</div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🛒</span>Alış<span class="say">7</span></div>
+<div class="og"><span class="ic">📥</span>Gelen Kutusu</div>
+<div class="og"><span class="ic">📋</span>Alış Siparişleri</div>
+<div class="og"><span class="ic">🚛</span>Alış İrsaliyeleri</div>
+<div class="og"><span class="ic">🧾</span>Alış Faturaları</div>
+<div class="og"><span class="ic">🧾</span>Alış Fişleri</div>
+<div class="og"><span class="ic">📑</span>Tahakkuklar</div>
+<div class="og"><span class="ic">📦</span>Alış Konsinyeler</div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">💵</span>Kasa<span class="say">7</span></div>
+<div class="og"><span class="ic">🧾</span>Kasa İşlemleri</div>
+<div class="og"><span class="ic">📅</span>Vade / Planlar</div>
+<div class="og"><span class="ic">💰</span>Kasa Hareketleri</div>
+<div class="og"><span class="ic">💵</span>Kasa Hesapları</div>
+<div class="og"><span class="ic">📈</span>Hesap Ekstresi</div>
+<div class="og"><span class="ic">🧮</span>Cari Ekstre</div>
+<div class="og"><span class="ic">🧾</span>Masraf Listesi</div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🏦</span>Banka<span class="say">7</span></div>
+<div class="og"><span class="ic">🏦</span>Banka Hesapları</div>
+<div class="og"><span class="ic">🏛️</span>Krediler</div>
+<div class="og"><span class="ic">💳</span>POS</div>
+<div class="og"><span class="ic">💳</span>Kredi Kartı</div>
+<div class="og"><span class="ic">🏛️</span>Banka Tanımları</div>
+<div class="og"><span class="ic">📃</span>Çek Listesi</div>
+<div class="og"><span class="ic">🧾</span>Senet Listesi</div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">👥</span>İK<span class="say">5</span></div>
+<div class="og"><span class="ic">🧑‍🤝‍🧑</span>Personel Listesi</div>
+<div class="og"><span class="ic">🛡️</span>Roller</div>
+<div class="ab"><span class="ic">▸</span>Prim</div>
+<div class="og alt"><span class="ic">🎯</span>Prim Planları<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">🧾</span>Hakediş Satırları<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">💰</span>Hakedişler<span class="rz mor">HBYS</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">📁</span>Doküman<span class="say">4</span></div>
+<div class="og"><span class="ic">🗄️</span>Dokümanlar</div>
+<div class="og"><span class="ic">✅</span>Onay Kuyruğu</div>
+<div class="ab"><span class="ic">⚙️</span>Ayarlar</div>
+<div class="og alt"><span class="ic">🏷️</span>Kategoriler</div>
+<div class="og alt"><span class="ic">🗂️</span>Klasörler</div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🧭</span>Yönetim<span class="say">18</span></div>
+<div class="og"><span class="ic">🏢</span>Firma Bilgileri</div>
+<div class="og"><span class="ic">🏥</span>Kurum Profili</div>
+<div class="og"><span class="ic">🏢</span>Bölüm / Görev</div>
+<div class="og"><span class="ic">📋</span>İşlem Günlüğü</div>
+<div class="og"><span class="ic">🔑</span>Giriş Kayıtları</div>
+<div class="og"><span class="ic">🏷️</span>Fiyat Listesi Satırları</div>
+<div class="ab"><span class="ic">▸</span>Modül Ayarları</div>
+<div class="og alt"><span class="ic">⚙️</span>Genel</div>
+<div class="og alt"><span class="ic">🩺</span>Kayıt Kabul<span class="rz mor">HBYS</span></div>
+<div class="og alt"><span class="ic">📦</span>Stok Ayarları</div>
+<div class="og alt"><span class="ic">💵</span>Kasa</div>
+<div class="og alt"><span class="ic">🧾</span>Satış Belgeleri</div>
+<div class="og alt"><span class="ic">📥</span>Alış Belgeleri</div>
+<div class="ab"><span class="ic">▸</span>Veri Aktarımı</div>
+<div class="og alt"><span class="ic">⬆</span>İçeri Alma</div>
+<div class="ab"><span class="ic">▸</span>Ortak Platform</div>
+<div class="og alt"><span class="ic">📜</span>Onam Metinleri</div>
+<div class="og alt"><span class="ic">✍️</span>Onam Kayıtları</div>
+<div class="og alt"><span class="ic">💬</span>Bildirim Şablonları</div>
+<div class="og alt"><span class="ic">📨</span>Bildirim Kuyruğu</div>
+<div class="og alt"><span class="ic">⏱️</span>Zamanlanmış İşler</div>
+</div></div>
+      <div class="fark"><span class="sonuk">Belirgin sorunlar: 18 grup (ekrana sığmıyor, kaydırma); Cari altında Sigorta, Yönetim altında Fiyat Listesi Satırları; Kasa/Banka ayrı; ayarlar 7 yerde; Mesajlar/AI ana grup; Muayene altında hasta-bağımlı 5 liste; iki ayrı "Kod Eşleme".</span></div>
+    </div>
+
+    <div class="pnl" data-s="hbys">
+      <div class="ozet">
+        <div><span>Ana grup</span><b>13</b><i>18 → 13</i></div>
+        <div><span>Öğe</span><b>129</b><i>sekmeye inen 9</i></div>
+        <div><span>Yeni öğe</span><b>19</b><i>Dökümler ×11, Ayarlar Dizini…</i></div>
+        <div><span>Taşınan</span><b>46</b></div>
+      </div>
+      <div class="kolonlar"><div class="ag"><div class="gb"><span class="ic">🏠</span>Pano<span class="say">3</span></div>
+<div class="og"><span class="ic">🏠</span>Günün Özeti</div>
+<div class="og"><span class="ic">📌</span>Bekleyen İşlerim<span class="rz ok">yeni</span></div>
+<div class="og"><span class="ic">📊</span>Dökümlerim<span class="rz ok">yeni</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">📅</span>Randevu<span class="say">5</span></div>
+<div class="og"><span class="ic">📅</span>Randevular</div>
+<div class="og"><span class="ic">🗓️</span>Ajanda (hekim/gün)<span class="rz ok">yeni</span></div>
+<div class="og"><span class="ic">⏳</span>Bekleme Listesi<span class="rz ok">yeni</span></div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+<div class="og"><span class="ic">⚙️</span>Ayarlar</div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🚑</span>Kayıt Kabul<span class="say">8</span></div>
+<div class="og"><span class="ic">🏥</span>Hastalar</div>
+<div class="og"><span class="ic">📝</span>Başvurular</div>
+<div class="og"><span class="ic">✅</span>İskonto Onayı</div>
+<div class="og"><span class="ic">🛡️</span>Provizyonlar<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">💵</span>Vezne (Tahsilat)<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">🧾</span>Kasa Teslim<span class="rz ok">yeni</span></div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+<div class="og"><span class="ic">⚙️</span>Ayarlar<span class="rz mavi">taşındı</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🩺</span>Muayene<span class="say">10</span></div>
+<div class="og"><span class="ic">📋</span>Çalışma Listesi</div>
+<div class="og"><span class="ic">🩺</span>Muayeneler</div>
+<div class="og"><span class="ic">💊</span>Reçeteler</div>
+<div class="og"><span class="ic">💰</span>Hakedişlerim</div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+<div class="ab"><span class="ic">⚙️</span>Ayarlar</div>
+<div class="og alt"><span class="ic">📋</span>Muayene Şablonları</div>
+<div class="og alt"><span class="ic">⌨️</span>Metin Makroları</div>
+<div class="og alt"><span class="ic">🩺</span>ICD-10 Tanı</div>
+<div class="og alt"><span class="ic">📕</span>İlaç Kataloğu<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">📚</span>Klinik Kataloglar</div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🧪</span>Laboratuvar<span class="say">26</span></div>
+<div class="og"><span class="ic">💉</span>İstemler</div>
+<div class="og"><span class="ic">🩸</span>Numune Kabul</div>
+<div class="og"><span class="ic">📊</span>Sonuçlar</div>
+<div class="og"><span class="ic">🏍️</span>Dış Lab Gönderimleri</div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+<div class="ab"><span class="ic">▸</span>Biyokimya</div>
+<div class="og alt"><span class="ic">📉</span>Kalite Kontrol</div>
+<div class="og alt"><span class="ic">🧴</span>Kontrol Lotları</div>
+<div class="og alt"><span class="ic">🌍</span>Dış Kalite</div>
+<div class="og alt"><span class="ic">🔌</span>Cihazlar</div>
+<div class="og alt"><span class="ic">📡</span>Cihaz Mesajları</div>
+<div class="og alt"><span class="ic">🔧</span>Cihaz Olayları</div>
+<div class="ab"><span class="ic">▸</span>Mikrobiyoloji</div>
+<div class="og alt"><span class="ic">🦠</span>Kültür Çalışma Listesi</div>
+<div class="ab"><span class="ic">▸</span>Genetik</div>
+<div class="og alt"><span class="ic">🧬</span>Vakalar</div>
+<div class="og alt"><span class="ic">🔬</span>Varyantlar</div>
+<div class="og alt"><span class="ic">📚</span>Dizileme Runları</div>
+<div class="ab"><span class="ic">⚙️</span>Ayarlar</div>
+<div class="og alt"><span class="ic">📚</span>Tetkik Kataloğu<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🧬</span>Paneller<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🩸</span>Serum İndeksi<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">⚙️</span>Westgard Kuralları<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🔌</span>Cihaz Eşleme<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🧫</span>Organizmalar<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">💊</span>Antibiyotikler<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🧪</span>Besiyerleri<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🧬</span>Genler<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🗂️</span>Genetik Panel Kataloğu<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🏥</span>Dış Laboratuvarlar<span class="rz mavi">taşındı</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">☢️</span>Radyoloji<span class="say">9</span></div>
+<div class="og"><span class="ic">🖥️</span>Çalışma Listesi</div>
+<div class="og"><span class="ic">📊</span>Pano</div>
+<div class="og"><span class="ic">🚨</span>Kritik Bulgular</div>
+<div class="og"><span class="ic">🧑‍⚕️</span>Konsültasyonlar</div>
+<div class="og"><span class="ic">📦</span>Sonuç Teslim</div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+<div class="ab"><span class="ic">⚙️</span>Ayarlar</div>
+<div class="og alt"><span class="ic">📄</span>Rapor Şablonları<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">⚙️</span>Çekim Protokolleri<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🖥️</span>Cihazlar<span class="rz mavi">taşındı</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🏛️</span>Kurumlar &amp; Sigorta<span class="say">8</span></div>
+<div class="og"><span class="ic">🏛️</span>Anlaşmalı Kurumlar<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">🧾</span>Kurum İcmalleri<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">🔌</span>Kurum Hesapları<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">🧾</span>İstek Günlüğü<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">🩺</span>Dış Doktorlar<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+<div class="ab"><span class="ic">⚙️</span>Ayarlar</div>
+<div class="og alt"><span class="ic">🔤</span>Kod Eşleme (SUT/Kurum)<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🏷️</span>Fiyat Listeleri<span class="rz mavi">taşındı</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">💓</span>e-Nabız<span class="say">3</span></div>
+<div class="og"><span class="ic">📊</span>Veri Kalitesi</div>
+<div class="og"><span class="ic">📤</span>Gönderim Kuyruğu</div>
+<div class="ab"><span class="ic">⚙️</span>Ayarlar</div>
+<div class="og alt"><span class="ic">🔗</span>Kod Eşleme<span class="rz mavi">taşındı</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">💰</span>Finans<span class="say">14</span></div>
+<div class="og"><span class="ic">🧾</span>Kasa İşlemleri</div>
+<div class="og"><span class="ic">💵</span>Kasa Hesapları</div>
+<div class="og"><span class="ic">🏦</span>Banka Hesapları</div>
+<div class="og"><span class="ic">💳</span>POS · Kredi Kartı<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">📃</span>Çek / Senet<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">📅</span>Vade / Planlar</div>
+<div class="og"><span class="ic">🧾</span>Masraflar</div>
+<div class="og"><span class="ic">🧮</span>Cari Ekstre</div>
+<div class="og"><span class="ic">📈</span>Hesap Ekstresi</div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+<div class="ab"><span class="ic">⚙️</span>Ayarlar</div>
+<div class="og alt"><span class="ic">⚙️</span>Kasa Ayarları<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🏛️</span>Banka Tanımları<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🏛️</span>Krediler<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">⚙️</span>İşlem Türleri<span class="rz mavi">taşındı</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">📦</span>Stok &amp; Hizmet<span class="say">15</span></div>
+<div class="og"><span class="ic">📦</span>Stoklar</div>
+<div class="og"><span class="ic">🛠️</span>Hizmetler</div>
+<div class="og"><span class="ic">📥</span>Stoktan Talep</div>
+<div class="og"><span class="ic">🔄</span>Stok Transfer</div>
+<div class="og"><span class="ic">📗</span>Giriş / Çıkış Fişi<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">🧾</span>Alış Faturaları<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+<div class="ab"><span class="ic">▸</span>İTS / ÜTS</div>
+<div class="og alt"><span class="ic">💊</span>İTS Bildirimleri</div>
+<div class="og alt"><span class="ic">🪝</span>ÜTS Gelen / Askıdakiler</div>
+<div class="og alt"><span class="ic">📡</span>ÜTS Bildirimleri</div>
+<div class="og alt"><span class="ic">🔍</span>ÜTS Ürün Sorgu</div>
+<div class="ab"><span class="ic">⚙️</span>Ayarlar</div>
+<div class="og alt"><span class="ic">🌳</span>Kategoriler<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🏷️</span>Kampanyalar<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">⚙️</span>Stok Ayarları<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🚚</span>Tedarikçiler<span class="rz mavi">taşındı</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">⚖️</span>Muhasebe<span class="say">5</span></div>
+<div class="og"><span class="ic">📕</span>Muhasebe Fişleri</div>
+<div class="og"><span class="ic">📨</span>e-Belge<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+<div class="ab"><span class="ic">⚙️</span>Ayarlar</div>
+<div class="og alt"><span class="ic">📒</span>Hesap Planı<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🏷️</span>Masraf Merkezleri<span class="rz mavi">taşındı</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">👥</span>İK &amp; Prim<span class="say">5</span></div>
+<div class="og"><span class="ic">🧑‍🤝‍🧑</span>Personel</div>
+<div class="og"><span class="ic">🏢</span>Bölüm / Görev<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">💰</span>Hakedişler</div>
+<div class="og"><span class="ic">🎯</span>Prim Planları</div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🧭</span>Yönetim<span class="say">18</span></div>
+<div class="og"><span class="ic">🗂️</span>Ayarlar Dizini<span class="rz ok">yeni</span></div>
+<div class="og"><span class="ic">📊</span>Dökümler &amp; İstatistik<span class="rz ok">yeni</span></div>
+<div class="og"><span class="ic">🏥</span>Kurum Profili</div>
+<div class="og"><span class="ic">🏢</span>Firma / Şubeler</div>
+<div class="ab"><span class="ic">▸</span>Güvenlik</div>
+<div class="og alt"><span class="ic">🛡️</span>Roller<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">👤</span>Kullanıcılar<span class="rz ok">yeni</span></div>
+<div class="og alt"><span class="ic">🔑</span>Giriş Kayıtları</div>
+<div class="og alt"><span class="ic">📋</span>İşlem Günlüğü</div>
+<div class="ab"><span class="ic">▸</span>Platform</div>
+<div class="og alt"><span class="ic">💬</span>Bildirim Şablonları</div>
+<div class="og alt"><span class="ic">📨</span>Bildirim Kuyruğu</div>
+<div class="og alt"><span class="ic">⏱️</span>Zamanlanmış İşler</div>
+<div class="og alt"><span class="ic">📜</span>Onam Metinleri</div>
+<div class="og alt"><span class="ic">✍️</span>Onam Kayıtları</div>
+<div class="ab"><span class="ic">▸</span>Doküman</div>
+<div class="og alt"><span class="ic">🗄️</span>Dokümanlar<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">✅</span>Onay Kuyruğu<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🗂️</span>Kategoriler · Klasörler<span class="rz mavi">taşındı</span></div>
+<div class="ab"><span class="ic">▸</span>Veri</div>
+<div class="og alt"><span class="ic">⬆</span>İçeri Alma</div>
+<div class="og alt"><span class="ic">⬇</span>Dışarı Aktarma<span class="rz ok">yeni</span></div>
+</div></div>
+      <div class="fark"><span class="sonuk">Sıra hasta akışı: Randevu → Kayıt Kabul → Muayene → Lab → Radyoloji → Kurumlar → e-Nabız; sonra para, malzeme, muhasebe, İK; Yönetim en sonda. Her grupta son iki öğe 📊 Dökümler · ⚙ Ayarlar.</span></div>
+    </div>
+
+    <div class="pnl" data-s="erp" hidden>
+      <div class="ozet">
+        <div><span>Ana grup</span><b>10</b><i>18 → 10</i></div>
+        <div><span>Öğe</span><b>84</b></div>
+        <div><span>Birleşen</span><b>3</b><i>Cari+CRM · Kasa+Banka · Doküman→Yönetim</i></div>
+        <div><span>Klinik grup</span><b>0</b><i>urunModu=1 süzer</i></div>
+      </div>
+      <div class="kolonlar"><div class="ag"><div class="gb"><span class="ic">🏠</span>Pano<span class="say">3</span></div>
+<div class="og"><span class="ic">🏠</span>Günün Özeti</div>
+<div class="og"><span class="ic">📌</span>Bekleyen İşlerim<span class="rz ok">yeni</span></div>
+<div class="og"><span class="ic">📊</span>Dökümlerim<span class="rz ok">yeni</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🤝</span>Cari &amp; CRM<span class="say">9</span></div>
+<div class="og"><span class="ic">👥</span>Müşteriler</div>
+<div class="og"><span class="ic">🚚</span>Tedarikçiler</div>
+<div class="og"><span class="ic">🧑</span>Kişiler</div>
+<div class="og"><span class="ic">🌱</span>Aday Müşteriler<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">🎯</span>Satış Fırsatları<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">📁</span>Projeler<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">✅</span>Görevler<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">🧮</span>Cari Ekstre<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🛍️</span>Satış<span class="say">11</span></div>
+<div class="og"><span class="ic">📄</span>Teklifler</div>
+<div class="og"><span class="ic">📋</span>Siparişler</div>
+<div class="og"><span class="ic">🚚</span>İrsaliyeler</div>
+<div class="og"><span class="ic">🧾</span>Faturalar</div>
+<div class="og"><span class="ic">🧾</span>Fişler</div>
+<div class="og"><span class="ic">📑</span>Tahakkuklar</div>
+<div class="og"><span class="ic">📑</span>Açık Satırlar</div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+<div class="ab"><span class="ic">⚙️</span>Ayarlar</div>
+<div class="og alt"><span class="ic">⚙️</span>Satış Belgeleri<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🏷️</span>Fiyat Listeleri<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🏷️</span>Kampanyalar<span class="rz mavi">taşındı</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🛒</span>Alış<span class="say">9</span></div>
+<div class="og"><span class="ic">📥</span>Gelen Kutusu</div>
+<div class="og"><span class="ic">📋</span>Siparişler</div>
+<div class="og"><span class="ic">🚛</span>İrsaliyeler</div>
+<div class="og"><span class="ic">🧾</span>Faturalar</div>
+<div class="og"><span class="ic">🧾</span>Fişler</div>
+<div class="og"><span class="ic">📑</span>Tahakkuklar</div>
+<div class="og"><span class="ic">📦</span>Konsinyeler</div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+<div class="ab"><span class="ic">⚙️</span>Ayarlar</div>
+<div class="og alt"><span class="ic">⚙️</span>Alış Belgeleri<span class="rz mavi">taşındı</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">📦</span>Stok &amp; Hizmet<span class="say">11</span></div>
+<div class="og"><span class="ic">📦</span>Stoklar</div>
+<div class="og"><span class="ic">🛠️</span>Hizmetler</div>
+<div class="og"><span class="ic">📥</span>Stoktan Talep</div>
+<div class="og"><span class="ic">🔄</span>Stok Transfer</div>
+<div class="og"><span class="ic">📗</span>Giriş / Çıkış Fişi<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+<div class="ab"><span class="ic">▸</span>ÜTS</div>
+<div class="og alt"><span class="ic">🪝</span>Gelen / Askıdakiler</div>
+<div class="og alt"><span class="ic">📡</span>Bildirimler</div>
+<div class="og alt"><span class="ic">🔍</span>Ürün Sorgu</div>
+<div class="ab"><span class="ic">⚙️</span>Ayarlar</div>
+<div class="og alt"><span class="ic">🌳</span>Kategoriler<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">⚙️</span>Stok Ayarları<span class="rz mavi">taşındı</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🏭</span>Üretim<span class="say">4</span></div>
+<div class="og"><span class="ic">🏭</span>Üretim Emirleri</div>
+<div class="og"><span class="ic">🌳</span>Ürün Ağaçları</div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+<div class="ab"><span class="ic">⚙️</span>Ayarlar</div>
+<div class="og alt"><span class="ic">⚙️</span>İş Merkezleri<span class="rz mavi">taşındı</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">💰</span>Finans<span class="say">13</span></div>
+<div class="og"><span class="ic">🧾</span>Kasa İşlemleri</div>
+<div class="og"><span class="ic">💵</span>Kasa Hesapları</div>
+<div class="og"><span class="ic">🏦</span>Banka Hesapları</div>
+<div class="og"><span class="ic">💳</span>POS · Kredi Kartı<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">📃</span>Çek / Senet<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">📅</span>Vade / Planlar</div>
+<div class="og"><span class="ic">🧾</span>Masraflar</div>
+<div class="og"><span class="ic">📈</span>Hesap Ekstresi</div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+<div class="ab"><span class="ic">⚙️</span>Ayarlar</div>
+<div class="og alt"><span class="ic">⚙️</span>Kasa Ayarları<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🏛️</span>Banka Tanımları<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🏛️</span>Krediler<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">⚙️</span>İşlem Türleri<span class="rz mavi">taşındı</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">⚖️</span>Muhasebe<span class="say">5</span></div>
+<div class="og"><span class="ic">📕</span>Muhasebe Fişleri</div>
+<div class="og"><span class="ic">📨</span>e-Belge<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+<div class="ab"><span class="ic">⚙️</span>Ayarlar</div>
+<div class="og alt"><span class="ic">📒</span>Hesap Planı<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🏷️</span>Masraf Merkezleri<span class="rz mavi">taşındı</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">👥</span>İK<span class="say">3</span></div>
+<div class="og"><span class="ic">🧑‍🤝‍🧑</span>Personel</div>
+<div class="og"><span class="ic">🏢</span>Bölüm / Görev<span class="rz mavi">taşındı</span></div>
+<div class="og"><span class="ic">📊</span>Dökümler<span class="rz ok">yeni</span></div>
+</div>
+<div class="ag"><div class="gb"><span class="ic">🧭</span>Yönetim<span class="say">16</span></div>
+<div class="og"><span class="ic">🗂️</span>Ayarlar Dizini<span class="rz ok">yeni</span></div>
+<div class="og"><span class="ic">📊</span>Dökümler &amp; İstatistik<span class="rz ok">yeni</span></div>
+<div class="og"><span class="ic">🏢</span>Firma / Şubeler</div>
+<div class="og"><span class="ic">🏥</span>Kurum Profili</div>
+<div class="ab"><span class="ic">▸</span>Güvenlik</div>
+<div class="og alt"><span class="ic">🛡️</span>Roller<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">👤</span>Kullanıcılar<span class="rz ok">yeni</span></div>
+<div class="og alt"><span class="ic">🔑</span>Giriş Kayıtları</div>
+<div class="og alt"><span class="ic">📋</span>İşlem Günlüğü</div>
+<div class="ab"><span class="ic">▸</span>Platform</div>
+<div class="og alt"><span class="ic">💬</span>Bildirim Şablonları</div>
+<div class="og alt"><span class="ic">📨</span>Bildirim Kuyruğu</div>
+<div class="og alt"><span class="ic">⏱️</span>Zamanlanmış İşler</div>
+<div class="ab"><span class="ic">▸</span>Doküman</div>
+<div class="og alt"><span class="ic">🗄️</span>Dokümanlar<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">✅</span>Onay Kuyruğu<span class="rz mavi">taşındı</span></div>
+<div class="og alt"><span class="ic">🗂️</span>Kategoriler · Klasörler<span class="rz mavi">taşındı</span></div>
+<div class="ab"><span class="ic">▸</span>Veri</div>
+<div class="og alt"><span class="ic">⬆</span>İçeri Alma</div>
+<div class="og alt"><span class="ic">⬇</span>Dışarı Aktarma<span class="rz ok">yeni</span></div>
+</div></div>
+      <div class="fark"><span class="sonuk">Sıra ticari akış: Cari → Satış → Alış → Stok → Üretim → Finans → Muhasebe → İK → Yönetim. Grup adı öğede tekrar etmez ("Satış › Faturalar").</span></div>
+    </div>
+
+    <div class="pnl" data-s="kabuk" hidden>
+      <div class="kabuk">
+  <div class="yan"><div class="g"><span>🏠</span>Pano<span style="margin-left:auto;opacity:.6">▸</span></div><div class="g"><span>📅</span>Randevu<span style="margin-left:auto;opacity:.6">▸</span></div><div class="g on"><span>🚑</span>Kayıt Kabul<span style="margin-left:auto;opacity:.6">▾</span></div><div class="o">🏥 Hastalar</div><div class="o on">📝 Başvurular</div><div class="o">✅ İskonto Onayı</div><div class="o">🛡️ Provizyonlar</div><div class="o">💵 Vezne (Tahsilat)</div><div class="o">🧾 Kasa Teslim</div><div class="o">📊 Dökümler</div><div class="o ayar">⚙️ Ayarlar</div><div class="g"><span>🩺</span>Muayene<span style="margin-left:auto;opacity:.6">▸</span></div><div class="g"><span>🧪</span>Laboratuvar<span style="margin-left:auto;opacity:.6">▸</span></div><div class="g"><span>☢️</span>Radyoloji<span style="margin-left:auto;opacity:.6">▸</span></div><div class="g"><span>🏛️</span>Kurumlar &amp; Sigorta<span style="margin-left:auto;opacity:.6">▸</span></div><div class="g"><span>💓</span>e-Nabız<span style="margin-left:auto;opacity:.6">▸</span></div><div class="g"><span>💰</span>Finans<span style="margin-left:auto;opacity:.6">▸</span></div><div class="g"><span>📦</span>Stok &amp; Hizmet<span style="margin-left:auto;opacity:.6">▸</span></div><div class="g"><span>⚖️</span>Muhasebe<span style="margin-left:auto;opacity:.6">▸</span></div><div class="g"><span>👥</span>İK &amp; Prim<span style="margin-left:auto;opacity:.6">▸</span></div><div class="g"><span>🧭</span>Yönetim<span style="margin-left:auto;opacity:.6">▸</span></div></div>
+  <div>
+    <div class="ust"><b style="color:var(--navy)">Gentegre AI</b><span class="sonuk">HBYS</span>
+      <div class="ara">🔍 Ekran ya da kayıt ara… &nbsp;<span class="rz">Ctrl+K</span></div>
+      <span class="sp"></span>
+      <span class="roz">💬<i>3</i></span><span class="roz">🔔<i>7</i></span><span>✨ AI</span>
+      <span class="rz mavi">Şube: Merkez ▾</span><span class="rz">admin ▾</span></div>
+    <div class="icerik">Kayıt Kabul › Başvurular — liste ekranı burada. Araç çubuğunun sonunda <b>📊 Dökümler ▾</b> ve <b>⚙</b> (grubun ayarı).<br><br>
+      <span class="sonuk">Üst çubuk: 💬 mesaj rozeti, 🔔 bildirim, ✨ AI paneli, Ctrl+K hızlı arama (ekran adı + kayıt: "Ayşe Öztürk", "P-000133"), şube seçici. "İletişim &amp; AI" ana grubu bu yüzden kalktı.</span></div>
+  </div>
+</div>
+      <div class="fark" style="margin:0 12px 12px"><span class="sonuk">Sol menü tek açık grup (akordeon, bugünkü davranış); alt gruplar grup içinde başlık olarak. Ayarlar öğesi soluk-italik: iş değil, tanım.</span></div>
+    </div>
+
+    <div class="pnl" data-s="tasinan" hidden>
+      <div class="grp"><h4>Menüden çıkan / yer değiştiren <span class="mini">rota ve yetki kodu değişmez</span></h4>
+        <div class="dg"><table><thead><tr><th>Öğe</th><th>Eski yer</th><th>Yeni yer</th><th>Neden</th></tr></thead><tbody><tr><td>Mesajlar · Yapay Zeka</td><td>İletişim &amp; AI (ana grup)</td><td>Üst çubuk: 💬 rozetli · ✨ AI paneli</td><td>Her ekranda lazım; menü grubu değil, araç. Bir ana grup eksilir.</td></tr><tr><td>Tıbbi Özet · Kronik Tanılar · Geçmiş Olaylar · Alerjiler · Kullanılan İlaçlar</td><td>Muayene</td><td>Hasta kartı sekmeleri (+ muayene ekranı yan panel)</td><td>Hastasız anlamı yok; menüden açılınca &quot;hangi hasta?&quot; sorusu doğuyor.</td></tr><tr><td>Fiş Satırları</td><td>Muhasebe</td><td>Muhasebe fişi kartı › Satırlar sekmesi + Dökümler</td><td>Satır listesi bağımsız ekran değil; döküm motoru aynı işi görür.</td></tr><tr><td>Hakediş Satırları</td><td>İK › Prim</td><td>Hakediş kartı › Satırlar + Dökümler</td><td>Aynı sebep.</td></tr><tr><td>Fiyat Listesi Satırları</td><td>Yönetim</td><td>Fiyat listesi kartı › Satırlar</td><td>Yönetim altında hiç aranmazdı.</td></tr><tr><td>Kasa Hareketleri</td><td>Kasa</td><td>Kasa hesabı kartı › Hareketler + Hesap Ekstresi</td><td>Ekstreyle çakışıyordu.</td></tr><tr><td>Satış Konsinyeler</td><td>Satış</td><td>Satış › Siparişler cipi &quot;Konsinye&quot;</td><td>Ayrı liste yerine cip; HBYS&#x27;te zaten nadir.</td></tr><tr><td>Sigorta › Kod Eşleme · e-Nabız › Kod Eşleme</td><td>iki ayrı yerde aynı ad</td><td>Her modülün kendi Ayarlar&#x27;ında</td><td>İki &quot;Kod Eşleme&quot; karışıyordu; modülün ayarı modülün altında (kural).</td></tr><tr><td>Doküman (ana grup)</td><td>Doküman</td><td>Yönetim › Doküman alt grubu + kart Yorum/Medya sekmeleri</td><td>Günlük iş değil; ana grup sayısı düşer.</td></tr><tr><td>CRM (ana grup)</td><td>CRM</td><td>ERP: Cari &amp; CRM birleşik · HBYS: yok</td><td>HBYS&#x27;te CRM kullanılmıyor; ERP&#x27;de cari ile aynı kişiler.</td></tr><tr><td>Kasa + Banka (iki ana grup)</td><td>Kasa · Banka</td><td>Finans (tek grup)</td><td>İkisi de para; kullanıcı &quot;tahsilat nerede&quot; diye iki gruba bakıyordu.</td></tr><tr><td>Yönetim › Modül Ayarları</td><td>Yönetim</td><td>Her modülün kendi ⚙ Ayarlar öğesi + Yönetim › Ayarlar Dizini</td><td>Ayar iki yerde görünür: modülde (iş yapan bulur) ve dizinde (yönetici tarar). Tek kaynak.</td></tr><tr><td>Roller</td><td>İK</td><td>Yönetim › Güvenlik</td><td>Rol = yetki, İK değil.</td></tr><tr><td>Anlaşmalı Kurumlar · Kurum İcmalleri · Dış Doktorlar · Sigorta</td><td>Cari</td><td>HBYS: Kurumlar &amp; Sigorta ana grubu</td><td>HBYS&#x27;te &quot;Cari&quot; kelimesi yabancı; ödeyen kurum akışı tek yerde.</td></tr><tr><td>Tedarikçi Listesi (HBYS)</td><td>Cari</td><td>Stok &amp; Hizmet › Ayarlar</td><td>HBYS&#x27;te tedarikçi yalnız alış için var.</td></tr><tr><td>Alış (HBYS ana grup)</td><td>Alış</td><td>Stok &amp; Hizmet › Alış Faturaları</td><td>HBYS&#x27;te alış = ilaç/sarf girişi; ayrı ana grup fazla.</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <div class="pnl" data-s="kural" hidden>
+      <div class="grp"><h4>Kurallar</h4>
+        <div class="dg"><table><thead><tr><th>Kural</th><th>Açıklama</th></tr></thead><tbody><tr><td>Ana grup tavanı</td><td>HBYS 13, ERP 10 (şimdi 18). Grup = bir iş akışı ya da bir rol; &quot;dosya&quot; değil.</td></tr><tr><td>Grup içi sıra</td><td>Günlük iş önce (liste/çalışma listesi), sonra tanımlar, en altta 📊 Dökümler ve ⚙ Ayarlar. Aynı desen her grupta.</td></tr><tr><td>Ayarlar iki yerde, tek kaynak</td><td>Modülün ayarı modülün altında ⚙ Ayarlar; Yönetim › Ayarlar Dizini hepsini sekmeli tarar. İkisi aynı ekrana gider (`/ayarlar?sekme=…`).</td></tr><tr><td>Dökümler iki yerde</td><td>Her grupta 📊 Dökümler (o kaynağın kayıtlı dökümleri, çalıştırma); Yönetim › Dökümler &amp; İstatistik (tasarımcı).</td></tr><tr><td>Alt grup tavanı</td><td>Grup başına en çok 4 alt grup, alt grup başına en çok 10 öğe. Aşan öğe ya sekmeye iner ya dökümdür.</td></tr><tr><td>Kayıt-bağımlı ekran menüde olmaz</td><td>&quot;Hangi hasta / hangi fiş?&quot; sorusunu doğuran liste kartın sekmesidir (Tıbbi Özet, Fiş Satırları…).</td></tr><tr><td>Ad kısa, grup adı tekrar etmez</td><td>&quot;Satış › Satış Faturaları&quot; → &quot;Satış › Faturalar&quot;. Başlık çubuğu tam yolu gösterir.</td></tr><tr><td>Ürün modu ve modül süzer, sıra değişmez</td><td>HBYS/ERP ve kurum profili modülleri öğeyi gizler; kalan öğelerin sırası sabit. Yetkisiz öğe hiç çizilmez (bugünkü kural).</td></tr><tr><td>Üst çubuk</td><td>Sol menü dışında: 💬 Mesajlar (rozet), 🔔 Bildirimler, ✨ AI paneli, 🔍 Hızlı arama (Ctrl+K: ekran + kayıt), şube seçici, kullanıcı.</td></tr><tr><td>Uygulama</td><td>`GRUP_SIRA` + `menuGrup/menuAltGrup/menuSira` değerleri güncellenir; rota ve yetki kodları değişmez. Sekmeye inen listeler `listeTanimlari`nda kalır, `menuGrup` boşalır (rota yaşar, menüde çizilmez).</td></tr></tbody></table></div>
+      </div>
+      <div class="grp"><h4>Kod tarafı <span class="mini">yalnız tanım değişir</span></h4>
+        <div class="dg"><table><thead><tr><th>Dosya</th><th>Değişiklik</th></tr></thead><tbody>
+          <tr><td><code>sayfalar/Kabuk.tsx</code></td><td><code>GRUP_SIRA</code> yeni sıra (HBYS/ERP tek liste, süzme modla); <code>GRUP_IKON</code> yeni gruplar (Pano 🏠, Kurumlar &amp; Sigorta 🏛️, Finans 💰, İK &amp; Prim 👥); <code>ALTGRUP_IKON</code> Ayarlar ⚙️, Güvenlik 🛡️, Platform 🧩, Doküman 📁, Veri ⬆; üst çubuğa 💬 🔔 ✨ Ctrl+K.</td></tr>
+          <tr><td><code>listeTanimlari.*.ts</code></td><td><code>menuGrup / menuAltGrup / menuSira / menuAd</code> güncellenir; sekmeye inen 9 liste için <code>menuGrup</code> kaldırılır (rota yaşar). Her grubun ⚙ Ayarlar öğesi <code>/ayarlar?sekme=&lt;grup&gt;</code>, 📊 Dökümler <code>/dokumler?kaynak=…</code>.</td></tr>
+          <tr><td><code>db/NNN_menu_yeniden.sql</code></td><td>Yetki matrisi grupları menüden türediği için (682) yeniden üretim; <code>ceviri</code> tablosuna yeni grup adları (EN). Rol/yetki kodu değişmez.</td></tr>
+          <tr><td><code>bilesenler/RolYetkiMatrisi.tsx</code></td><td><code>GRUP_ADI</code>/<code>EK_GRUP</code> yeni adlar. Sunucu <code>grup</code> zaten menüden geliyor.</td></tr>
+          <tr><td>Kartlar</td><td>Hasta kartı: Tıbbi Özet · Kronik · Geçmiş · Alerji · İlaçlar sekmeleri (varsa aynen); Muhasebe fişi / Hakediş / Fiyat listesi / Kasa hesabı kartlarına Satırlar-Hareketler sekmesi.</td></tr>
+          <tr><td>Testler</td><td><code>kabukMenu.test.tsx</code>: grup sayısı tavanı, her grupta Dökümler+Ayarlar son iki öğe, modla süzme, yetkisiz öğe çizilmez.</td></tr>
+        </tbody></table></div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>Şimdi 18 grup / 149 öğe</span><span>·</span><span>HBYS 13 / 129</span><span>·</span><span>ERP 10 / 84</span><span>·</span><span>Rota ve yetki kodları sabit</span></div>
+</div>
+
+<div class="not">
+  <b>Ekran:</b> projenin bugünkü sol menüsü (18 ana grup, 149 öğe; <code>listeTanimlari.*.ts</code> + <code>Kabuk.tsx</code>'den çıkarıldı) ve önerilen düzen.
+  <ul>
+    <li><b>Ana grup 18 → HBYS 13 / ERP 10:</b> Mesajlar/AI üst çubuğa; Kasa+Banka = Finans; CRM Cari'ye (ERP) ya da yok (HBYS); Doküman Yönetim'e; HBYS'te Cari yerine "Kurumlar &amp; Sigorta"; HBYS'te Alış Stok'un içine.</li>
+    <li><b>Her grup aynı desen:</b> iş listeleri → tanımlar → 📊 Dökümler → ⚙ Ayarlar. Ayarlar hem modülde hem Yönetim › Ayarlar Dizini'nde (tek ekran, iki giriş).</li>
+    <li><b>Kayıt-bağımlı listeler menüden iner</b> (9 öğe): hasta kartı ve fiş/hakediş/fiyat listesi kartlarının sekmesi olur; rota silinmez.</li>
+    <li><b>Ürün modu / modül / yetki yalnız süzer,</b> sırayı değiştirmez — bugünkü kural korunur.</li>
+    <li><b>Uygulama tanım değişikliği:</b> <code>GRUP_SIRA</code>, <code>menuGrup/menuAltGrup/menuSira</code>, ikon haritaları, çeviri, yetki matrisi grup yeniden üretimi (682 deseni). Rota/yetki kodu değişmediği için kayıtlı roller bozulmaz.</li>
+  </ul>
+</div>
+
+<script>
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});});
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');});if(on<0)on=0;if(pnls.length)goster(key(tabs[on],on));
+});
+</script>
+</body></html>
