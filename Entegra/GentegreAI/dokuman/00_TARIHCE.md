@@ -8558,6 +8558,169 @@ gerçek bir yapı değişikliği (kullanıcı vazgeçti).
 
 ---
 
+## 13.09.2026 — SKRS adları, hasta belge numaraları ve lab panelleri (`db/629-649`)
+
+> Geriye dönük yazıldı (16.09): bu tur o gün tarihçeye işlenmemişti.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K— | Kod listelerinin görünen adları **başlık harfine** çevrildi (`db/630`) | SKRS listeleri TAMAMEN BÜYÜK geliyor ("TEDAVİ ÖNERİLERİYLE ÇIKIŞ"); ekranda bağırıyor ve uzun adlar kolona sığmıyordu. Kod değişmedi, yalnız görünen ad |
+| K— | Provizyon durumu **iki dizi** olarak ayrıldı (`db/631`) | `sigorta_provizyon.durum` (adapterin kanonik dili) ile `belge_provizyon.oss_durum` (ekran kod listesi) aynı kolona yazılıyordu: başarısız provizyon ekranda "Onaylandı" görünüyordu |
+| K— | Hasta belge numaraları **tek gridde** (`db/634-636`) | Muayene No, Reçete No ve kardeşleri ayrı ayrı ayarlanıyordu; ayarsız türler de listede görünür, "numara neden artmıyor" sorusu kaybolur |
+| K— | Lab istem numarası **kaydederken** üretilir (`db/633`, `db/641`) | Kartta elle yazılan numara iki kullanıcının aynı numarayı almasına açıktı. Ayar opsiyonda, üretim tetiklemede |
+| K— | Panel = tetkik + parametre listesi, **hizmete bağlı** (`db/638-640`) | Hemogram 23, tam idrar 21 parametre. Panel bir hizmettir: ücret ve e-Nabız tarafı hizmet üzerinden yürür |
+| K— | Referans aralığı **cinsiyetsiz hastada da bulunur** (`db/642-644`) | Cinsiyeti bilinmeyen (yeni doğan, kimliksiz acil) hastada aralık hiç gelmiyordu; sonuç "normal mi" sorusunu cevapsız bırakıyordu |
+
+### Yapılanlar
+
+- **`db/629`** Anadolu Sigorta / ASMED test hesabı iskeleti.
+- **`db/632`** e-Nabız **105 Laboratuvar Sonuç Kayıt**: şema yine servisten
+  öğrenildi (rehber paket adını veriyor, eleman adlarını vermiyor) — paket ilk
+  hâlinde yalnız SYSTakipNo taşıyor, USS'nin hata mesajı eksik alanın adını
+  söyleyince büyüyecek. Bu projede üçüncü kez aynı yol.
+- **`db/645-648`** geçmişe dönük onarımlar: sonucu olan satırların ayna
+  kolonları, istem durumunun yeni eşikle yeniden türetilmesi, bir satırda
+  birden çok canlı sonucun temizlenmesi, "Giriş" damgasının doldurulması.
+- **`db/649`** "Elle · <kişi>" damgası ikona döndü (kullanıcı isteği).
+
+---
+
+## 14.09.2026 — TTB/HUV tarifesi, prim ve dış kurum numunesi (`db/650-659`)
+
+> Geriye dönük yazıldı (16.09).
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K— | TTB/HUV eşleşmesi **SUT kodu** üzerinden (`db/650`) | 521'den beri `hizmet.kod` zaten SUT kodudur; ayrı bir SUT kolonu açmak aynı kodu iki yerde tutmak olurdu |
+| K— | Katsayı **HUV2023 öncelikli**, yoksa TTB (kullanıcı) | 1073 SUT kodunda iki tarife de var ve katsayıları farklı (701540: TTB 70, HUV 90); HUV güncel tarife |
+| K— | Hizmet adları da **başlık harfi** (`db/651-653`) | 630'un devamı. Tireli/eğik çizgili bileşikte kısaltma kaçıyordu; birimler ve "Ve/Veya" için ayrı düzeltme gerekti |
+| K— | Numune gelişi **başvuru değildir** (`db/637`) | Hasta burada değil: başvuru açmak e-Nabız'a yanlış "hasta kabul" bildirmek ve faturayı yanlış tarafa kesmek demekti. Fatura **gönderen kuruma** gider |
+| K— | Hekim kendi hakedişini görür: ayrı `prim.kendi` yetkisi (`db/659`) | `prim` yetkisi herkesin primini açar — muhasebenin yetkisi. Süzgeci **sunucu** koyar (taraf_id = oturum), istemciden gelmez. Yalnız görme: kendi primini onaylayan kişi kendi işini denetlemiş olurdu |
+
+### Yapılanlar
+
+- **`db/654-655`** TTB/HUV yeniden kurulumu: HUV kodu düzeltildi, fiyat listesi
+  yeniden üretildi, katsayı TTB satırından alınır oldu.
+- **`db/656-657`** menü ve kabuk çevirisi (kullanıcı: "ingilizceye çevirdim ama
+  bir çok menü türkçe kaldı").
+- **`db/658`** dış kurum başvurusunda hasta kayboluyordu — düzeltildi.
+- Ekran tarafı: laboratuvar sonuç girişi, prim/hakediş ekranları, dış kurum
+  başvurusu.
+
+---
+
+## 14-15.09.2026 — İskonto onayı, roller, şube saati ve yetki matrisi (`db/660-685`)
+
+> Geriye dönük yazıldı (16.09). `670-672` numaraları **kullanılmadı** — boşluk
+> bilinçli, atlanan bir betik yok.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K— | İskonto **talep → onay → kilit** akışı (`db/662`, kullanıcı) | Kayıt kabul oranı kendi başına uygulayamaz. Onaylanınca oran satırlara yazılır ve **satırlar kilitlenir** (`db/681`): onaylanmış tutar sonradan değişmemeli |
+| K— | Oran **satırda** (`db/673`, kullanıcı: "kalem bazlı oran da aç") | Kalemler eşit değil: muayeneye %20, tetkike hiç verilmeyebilir. Başlıktaki oran artık en yüksek kalem oranı — yetki tavanı onun üzerinden bakılır |
+| K— | "İskonto Onaylayanlar" **sistem rolüdür** (`db/663-664`) | Programın davranışı bu role bağlı: silinirse zil kimseye gitmez ve iskonto onayı sessizce sahipsiz kalır. `rol.sistem = 1` silmeyi, kod değişimini ve pasifleştirmeyi kapatır |
+| K— | **Çok rollülük**: ana rol + ek roller (`db/665`) | Onay rolüne alınan hekim hekimliğini kaybediyordu. Tek seçim, yetkiyi tek tek kopyalamaya ya da "her şeyi açık" süper role zorluyordu |
+| K— | Ülke / para birimi / saat farkı **şubede** (`db/666`) | Berlin şubesi avro tahsil eder, Almanya saatiyle çalışır, orada T.C. kimlik numarası yoktur. Kurum geneline koymak ikinci şubeyi açanı "hangisini yazayım"da bırakırdı |
+| K— | Zaman damgaları **`timestamptz`** (`db/667-669`) | Veritabanı UTC, kod `now()::timestamp` yazıyordu: Türkiye'de 23:27'de yapılan giriş ekranda 20:27 görünüyordu. Zaman dilimsiz damga ANI değil METNİ saklar |
+| K— | Yetki matrisi **menüden** yeniden kuruldu (`db/675-677`, `db/682-685`) | `yetki` tablosundaki 855 satır Delphi göçünün çöpüydü: web'de karşılığı yok, her istekte taşınıyor, her rolde 855 anlamsız `rol_yetki` satırı tutuyordu. Matris artık menünün kendisi |
+| K— | "TCKN" değil **"Kimlik No"**; biçim kurum profilinde (`db/678-679`) | Etiket Türkiye'ye özel. Doğrulamayı topluca kapatmak Türkiye'de yanlış TCKN'yi sessizce geçirirdi — kural **profil ayarı** oldu |
+
+### Yapılanlar
+
+- **`db/660`** iade satırı tahsilata yansımıyordu: iade eksi tutarlı bir kasa
+  işlemi, dağıtım tetiği ise "dağıtılan tutar sıfırdan büyük olmalı" diyerek
+  eksi satırı reddediyordu. Satır bazında tahsilat bu yüzden hiç değişmiyordu.
+- **`db/661`** başvuruda iskonto yetkisi (fiyat yetkisi sonradan kaldırıldı;
+  dosya adı ilk hâlinden kalma).
+- **`db/674`** giriş kayıtları ekrana açıldı — kayıt zaten tutuluyordu ama
+  hiçbir ekrandan okunamıyordu: *tutulup bakılmayan kayıt, tutulmamış kayıtla
+  aynı şeydir*. `kod` 30 → 120 (esnek giriş: ad soyad / e-posta ile).
+- **`db/680`** lab isteminden açılan ücret satırlarının onarımı.
+- Web tarafında beş refaktör: belge kartından dört parça, kalem penceresinin
+  fiyat matematiği saf modüle, iskonto onay ekranı sekmelere, kayıt kapısı
+  kendi kancasına, ERP sekmeleri ayrı bileşene.
+
+---
+
+## 15.09.2026 — Dökümler & istatistik, kullanıcı ayarları (`db/686-690`)
+
+> Geriye dönük yazıldı (16.09).
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K— | Döküm tanımında **SQL yoktur** (`db/686`) | Tanım jsonb; sorguyu liste motorunun kendisi (`SorguUretici`) üretir — alanlar katalogdan, değerler parametreden. "Sorgu" kolonu yok ve olmayacak |
+| K— | Standart dökümler **üretilmez, süzülür** (`db/688`) | Menüyle aynı kural: tek katalog, ürün modu + modül + kaynak yetkisi süzer. Modül kapanınca döküm kendiliğinden kaybolur, tablo değişmez |
+| K— | Her menü grubunun sonunda **Dökümler** (`db/689-690`) | Boş açılan bir "Dökümler" öğesi kullanıcıya yanlış söz verir; altı grup boştu, kapsam genişletildi. Süzgeç kaynaktan değil **menü grubundan**: `belge` kaynağı üç grupta birden geçiyor, "Aylık alış özeti" Kayıt Kabul'ün dökümleri arasında görünüyordu |
+| K— | Parola **son n parolayla aynı olamaz** (`db/687`, kullanıcı: "en az 8 karakter ve son 3 şifreden farklı") | Düz metin hiçbir yerde tutulmaz; karşılaştırma yalnız BCrypt hash doğrulamasıyla. n referanstan okunur |
+
+Ekran tarafı: dökümler & istatistik ekranı, baskı önizleme, kullanıcı ayarları
+mockup'a eşitlendi (profil fotoğrafı, güvenlik sekmesi, parola geçmişi).
+
+---
+
+## 15.09.2026 — Göz (oftalmoloji) modülü (`db/691-694`, `db/701-704`)
+
+> Geriye dönük yazıldı (16.09). Aynı modülün kart araç çubuğu, şema ve dikte
+> turu için aşağıdaki `705` bölümüne bakın.
+
+Kaynak tasarım `Ekranlar/Goz/goz_sureci.html` ve yanındaki altı mockup.
+**`db/691`** çekirdek şemayı kurdu: ünite akışı (`goz_ziyaret_istasyon`),
+detaylı muayene (`goz_muayene` + OD/OS ölçüm tabloları — görme, refraksiyon,
+tonometri, ön segment, fundus, motilite, ek test), görüntüleme/tanısal test,
+işlemler (enjeksiyon · lazer · ameliyat), gözlük ve kontakt lens reçeteleri,
+kronik hastalık takibi, göz cihazları.
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K— | Ölçüm **göz bazlı satır** (OD/OS), kolon değil | Hekim iki gözü karşılaştırarak okur; tek satırda birleştirmek bu karşılaştırmayı bozar. Yeni bulgu alanı için kolon değil SATIR açılır |
+| K— | Her ölçüm satırında **kaynak** (hekim · tekniker · cihaz · hasta beyanı) | Cihaz ölçümü hekim onaylayana kadar ÖN VERİDİR |
+| K— | Göz ekran yetkileri **kaynak yetkisi** (tur 0) olmalı (`db/692`) | 691 onları aksiyon (tur 1) açmıştı: menüde yalnız "Ünite Akışı" görünüyor, ötekiler hem menüden hem ROTADAN düşüyordu — kabuk ve rota süzgeci kaynak yetkisine bakar. *Aynı tuzağa 705'te bir kez daha düşüldü* |
+| K— | Kart combo'ları **beyaz listeli görünümlerden** (`db/693`) | İstek metni asla SQL'e girmez; cihaz, tetkik, protokol ve hastanın açık takip planı için dört lookup |
+| K— | Detay tablolarında **denetim kolonları zorunlu** (`db/694`) | 691 "ölçüm satırı, denetim gerekmez" demişti; platformun kart detay yazıcısı HER satıra `ekleyen` yazar — tek kart için esnetilecek bir sözleşme değil |
+| K— | Kimlik üreteçleri tabloyla **eşitlenir** (`db/701`; yatan için `db/697`) | Demo/göç satırları kimliği açıkça vererek yazıldı; `generated by default as identity` üreteci böyle bir yazımda ilerlemez — uygulamadan açılan ilk kayıt "duplicate key" alır |
+
+Sonraki tur (`db/702-704`) ünite panosunu ve cihaz bağlantısını tamamladı:
+
+- **`db/702`** "Sıradakini çağır" için çağrı zamanı ve çağıran — "çağrıldı da mı
+  gelmedi, kimse mi çağırmadı" ayrımı olmadan pano darboğazı yanlış yere
+  koyuyordu.
+- **`db/703`** cihazdan gelen ölçümün **kaynak mesajı**: "bu 19,5 mmHg nereden
+  geldi" sorusunun cevabı ve mükerrer yazıma karşı benzersizlik.
+- **`db/704`** görüntüleme ölçümü 703'te atlanmıştı: mesaj ikinci kez
+  işlendiğinde aynı OCT çekiminde "RNFL 78,4" iki kez görünüyordu.
+
+Ekran tarafı: ünite panosu (sayaç kutuları, sürükle-bırak kanban, oda/cihaz ve
+hekim yükü tabloları, dilatasyon geri sayımı), muayene kartı ölçüm matrisleri,
+hasta göz özeti, cihaz mesajı ayrıştırıcısı (`GozCihazServisi`).
+
+---
+
+## 15.09.2026 — Yatan hasta (klinik yatış) modülü (`db/695-700`)
+
+> Geriye dönük yazıldı (16.09).
+
+Kaynak tasarım `Ekranlar/Yatan/yatis_sureci.html` ve yanındaki dokuz mockup.
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K— | **Yatış kendi kaydıdır** (`yatis`), muayenenin ya da başvurunun alanı değil | Yatış günlerce sürer, birden çok hekim ve klinik görür; bir muayenenin alanı olsaydı nakil, devir ve gün sayısı o kaydın içine sıkışırdı |
+| K— | Doz satırları **önceden üretilir** (`db/698`) | "Günde 2×1 IV" bir TALİMAT, 08:00 dozu bir OLAY. Satırlar uygulama anında üretilseydi **atlanmış doz hiç var olmazdı**: eMAR yalnız verilenleri gösterir, verilmeyeni kimse görmez |
+| K— | Erken uyarı skoru (NEWS) **veritabanında** (`db/699`) | İzlem satırı üç yoldan yazılıyor (yatış kartı, hemşire izlem ekranı, ileride monitör aktarımı). Kural ekranda dursaydı biri skoru boş bırakır, "eşiği aşan hasta" listesi sessizce eksik kalırdı |
+| K— | Yatak/refakat ücreti **tahakkuk kaydıdır**, fatura satırı değil (`db/700`) | Ücret gün gün doğar, fatura çıkışta kesilir. Doğrudan belge satırı yazmak açık belgeyi her gece büyütmek ve fatura kesildikten sonra doğan günü sahipsiz bırakmak demekti |
+
+Ekran tarafı: yatak panosu, yatış kabulü (dört adım), nakil, taburcu + epikriz,
+eMAR çizelgesi ve doz uygulaması, hemşire izlem + vital eğrisi, yatan hasta
+icmali. Arka plan işleri: doz üretimi (5 dakikada bir) ve gece yatak ücreti
+tahakkuku (01:10).
+
+---
+
 ## 15.09.2026 — Göz muayenesi: kart araç çubuğu, şema çizimi ve dikte (`db/705`)
 
 Göz modülü (691) ekranları ve yatan hasta (695) tamamlandıktan sonra kalan üç
