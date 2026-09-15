@@ -23,18 +23,17 @@ import {
 import { KalemSekmesi, TahsilatSekmesi } from '../bilesenler/belge/KalemSekmesi';
 import {
   BasvuruSekmesi, ProvizyonSekmesi, OncekiBasvurular, HastaSeridi,
-  type BasvuruBilgi,
 } from '../bilesenler/belge/BasvuruSekmesi';
 import { BelgeAracCubugu } from '../bilesenler/belge/BelgeAracCubugu';
 import { BelgeBaslik } from '../bilesenler/belge/BelgeBaslik';
 import { useBelgeTahsilat, tahsilToplami } from './belgeTahsilat';
 import { kartImzasi } from './belgeImza';
-import { yanittanBaslik, yanittanBasvuruBilgi } from './belgeKarti/belgeOkuma';
 import { useBasvuruKaynaklari } from './belgeKarti/useBasvuruKaynaklari';
 import { useSevkiyatBilgisi, useTeklifBilgisi }
   from './belgeKarti/useSevkiyatBilgisi';
 import { useBelgeDonusumleri } from './belgeKarti/useBelgeDonusumleri';
 import { useKurumSecenekleri } from './belgeKarti/useKurumSecenekleri';
+import { yanittanBaslik, yanittanBasvuruBilgi } from './belgeKarti/belgeOkuma';
 import { useBelgeAramalari } from './belgeKarti/useBelgeAramalari';
 import { useKartKirliligi } from './belgeKarti/useKartKirliligi';
 import { useParaAkislari, type ParaAkisRef } from './belgeKarti/useParaAkislari';
@@ -43,6 +42,7 @@ import { useIskontoTalepleri } from './belgeKarti/useIskontoTalepleri';
 import { useBasvuruVarsayilanlari } from './belgeKarti/useBasvuruVarsayilanlari';
 import { useSatirSecimi } from './belgeKarti/useSatirSecimi';
 import { useKalemAkisi } from './belgeKarti/useKalemAkisi';
+import { useKayitKapisi } from './belgeKarti/useKayitKapisi';
 import {
   provizyonVarMi, gelisSekliKarari, acikBorcHesapla, acikBelgeHesapla, belgeOnizlemesi,
   acikTahsilatTaraflara, acikBelgeTaraflara, paylasimliKurum,
@@ -864,34 +864,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * Kart durumu tek nesnede: dogrulama ve istek govdesi SAF fonksiyonlarda
    * (belgeKaydet.ts) - ekran yalniz sonucu gosterir.
    */
-  /**
-   * Kaydetmeye giden basvuru alanlarindan SALT OKUNURLARI cikarir (608).
-   * Sunucudan gelip karta yazilan ama geri gonderilmemesi gereken alanlar
-   * burada tek yerde durur - yenisi eklenince liste buyur, cagri yerleri degil.
-   */
-  const saltOkunurlariAt = (b: BasvuruBilgi): BasvuruBilgi => {
-    // `hastaUnvan` de sunucudan OKUNUR (kalem serit basligi icin): geri
-    //   gonderilince "Bilinmeyen belge alani: hastaUnvan" ile kayit dusuyordu.
-    //   Yazma beyaz listesine eklemek yanlis olurdu - hasta ADI belgede degil,
-    //   hastanin kartinda durur.
-    const { sysTakipNo: _atilan, hastaUnvan: _atilan2, ...kalan } = b;
-    return kalan;
-  };
-
   const girdiKur = (): BelgeGirdisi => (
     {
       tur, cari, tarih, tarihEnGec, tarihEnErken, geriGun, seri, belgeNo, vadeGun, faturaTipi,
       // Basvuruda vade yerine odeyen kurum gonderilir (249); bolum ve hekim
       //   de basvuruya ozgu (296) - hepsi belge_basvuru uzantisina yazilir.
       ...(basvuruMu
-        ? { odeyenKurumId, bolumId, personelId,
-            // SALT OKUNUR ALANLAR GOVDEYE GIRMEZ (608): `sysTakipNo` sunucudan
-            //   OKUNUR (basvurunun USS kimligi), karttan yazilmaz - yazma
-            //   beyaz listesinde olmadigi icin kaydetmeyi "Bilinmeyen belge
-            //   alani: sysTakipNo" ile dusuruyordu. Listeye eklemek de yanlis
-            //   olurdu: USS takip numarasi kullanicinin degistirebilecegi bir
-            //   deger degil, gonderim yanitinin sonucudur.
-            basvuruAlanlari: saltOkunurlariAt(basvuruBilgi) }
+        // SALT OKUNUR ALANLARI (sysTakipNo, hastaUnvan) GOVDE KURAN SAF
+        //   FONKSIYON eler (belgeKaydet: PROVIZYON_SALT_OKUNUR) - kartin ikinci
+        //   bir suzgeci vardi, liste iki yerde buyuyordu. Kural tek yerde:
+        //   "Bilinmeyen belge alani: …" hatasi uc kez ayni sekilde yasandi.
+        ? { odeyenKurumId, bolumId, personelId, basvuruAlanlari: basvuruBilgi }
         : {}),
       fiyatListesiId,
       // Kampanya belgeye YAZILIR (274): kurum sonradan kampanya degistirse
@@ -943,17 +926,6 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * ACILMAZ ve kart Başvuru sekmesine doner: eksik alanlar orada, memur kirmizi
    * yaziyi gordugu yerde duzeltsin.
    */
-  const ucretEklemeAc = async (ac: boolean) => {
-    if (!ac || !basvuruMu) { arama.setStok(ac); return }
-    // HER ＋'DE KAYIT (kullanici: "ücretlendirme eklemek için ＋'ya
-    //   bastığımda başvuruyu kaydet"): eskiden yalniz KAYDEDILMEMIS belgede
-    //   kaydediyordu; kayitli belgede gride girilmis ama gonderilmemis
-    //   satirlar ekranda kaliyor ve kart tazelenince kayboluyordu.
-    //   `kayitSart` kayitli ve TEMIZ belgede hicbir sey yapmaz.
-    if (!await kayitSart()) return;
-    arama.setStok(true);
-  };
-
   /**
    * BELGEYI KAYDETTIRIR, kaydedilene kadar isleme izin vermez.
    *
@@ -1017,53 +989,17 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * kaydedildigi anda belgelenir, `donusumPayi` kalani olmayan kovayi
    * atladigi icin ikinci kayitta tekrar kesilmez.
    */
-  const kes = async (kapatilsin = true, otomatik = false): Promise<number> => {
-    // DEGISIKLIK YOKSA TAHAKKUK DA YOK (kullanici: "＋'ya basınca 2 satır ve
-    //   tahakkuk oluştu, hemen bir şey seçmeden"): kayit atlandiginda
-    //   `kesHam` yine de belgenin id'sini donduruyor ve asagidaki blok
-    //   "kaydedildi" sanip kurum tahakkuku kesiyordu. Tahakkuk KAYIT
-    //   olayina baglidir - kayit olmadiysa olmaz.
-    const degisiklikVardi = !kayitliId || kalemDegisti || kirli;
-    const id = await kesHam(kapatilsin, otomatik);
-    if (id && basvuruMu && degisiklikVardi) {
-      await kurumTahakkukuOtomatik(id);
-      // TAHAKKUK SONRASI SATIRLAR HER ZAMAN YENIDEN OKUNUR: kovalarin
-      //   KAPATILAN sayaci sunucuda dolar - okumazsak kurum payi hala acik
-      //   gorunur ("satış tahakkuk geldi ama açık tahsilat ve belge de 400
-      //   görünüyor"). Kart kapaniyorsa da zararsiz: state kisa sure sonra
-      //   sokuluyor.
-      await paraRef.current.satirlariTazele(id);
-    }
-    return id;
-  };
+  /* KAYIT KAPISI kendi kancasinda (useKayitKapisi): ucret/tahsilat oncesi
+     kendi kendine kaydetme, kayit GERCEKLESTIYSE kurum tahakkuku ve eksik
+     alanda kullaniciya sebebi soyleme. */
+  const { kes, kayitSart, ucretEklemeAc } = useKayitKapisi({
+    kesHam, kayitliId, kalemDegisti, kirliMi: () => kirli, basvuruMu,
+    kurumTahakkukuOtomatik,
+    satirlariTazele: id => paraRef.current.satirlariTazele(id),
+    onEksikAlan: () => { if (basvuruMu) setAktifSekme('basvuru') },
+    aramaAc: ac => arama.setStok(ac),
+  });
   akisRef.current.kes = kes;
-
-  const kayitSart = async (): Promise<boolean> => {
-    // KAYDEDILMEMIS KALEM DE KAYDEDILIR (kullanici: "114413 ücretler
-    //   kaybolmuş ama tahsilat duruyor"): basvuru ilk ＋'de kaydedilip
-    //   protokol aliyor, sonra ucret satirlari gride giriliyor. Nakit/POS'a
-    //   basildiginda burasi "zaten kayitli" deyip DONUYORDU; tahsilat yazilip
-    //   kart sunucudan tazelenince o satirlar (hic gonderilmedikleri icin)
-    //   ekrandan siliniyordu - para duruyor, ucret yok.
-    // KART KIRLIYSE DE KAYDEDILIR (kullanici: "ücret ＋'ya basıyorum ama
-    //   başvuruyu kaydetmiyor"): `kalemDegisti` yalniz GRID satirlarini
-    //   izliyordu - bolum, hekim, odeyen kurum gibi BASLIK degisiklikleri
-    //   kaydedilmeden ucret ekleniyor, kart sunucudan tazelenince o
-    //   degisiklikler geri aliniyordu. `kirli` kartin tamaminin imzasidir.
-    if (kayitliId && !kalemDegisti && !kirli) return true;
-    const id = await kes(false, true);
-    if (!id) {
-      // NEDEN OLMADIGI SOYLENIR (kullanici: "ücret ＋'ya basıyorum ama
-      //   başvuruyu kaydetmiyor"): kayit sessizce dusuyordu - uyari yalniz
-      //   alanin altinda kirmizi yaziydi ve kullanici ＋'nin calismadigini
-      //   sanIyordu. Kart zaten eksik alanin oldugu sekmeye doner; mesaj
-      //   "kaydedilemedi" oldugunu soyler.
-      if (basvuruMu) setAktifSekme('basvuru');
-      mesaj('Kaydedilemedi - kırmızı işaretli zorunlu alanları tamamlayın.');
-      return false;
-    }
-    return true;
-  };
   akisRef.current.kayitSart = kayitSart;
 
   /**
