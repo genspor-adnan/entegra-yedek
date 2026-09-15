@@ -34,6 +34,7 @@ import { SatisAyarlar, AlisAyarlar } from './sayfalar/BelgeAyarlar';
 import { Panel } from './sayfalar/Panel';
 import { ParolaZorunlu } from './sayfalar/ParolaZorunlu';
 import { IskontoOnaylari } from './sayfalar/IskontoOnaylari';
+import { calismaOku } from './bilesenler/calismaTercihi';
 import { Dokumler } from './sayfalar/Dokumler';
 
 function Yollar() {
@@ -54,9 +55,17 @@ function Yollar() {
     yetki(l.yetkiKodu) && !l.menuGizli
     && (!l.urunModu || modUyar(l.urunModu, kullanici?.urunModu))
     && modulAcikMi(l, kullanici?.moduller));
-  const ilkYol = yetki('panel')
+  const varsayilanYol = yetki('panel')
     ? '/panel'
     : `/${ilkErisilebilir?.rota ?? ilkErisilebilir?.kaynak ?? 'panel'}`;
+  // ACILIS EKRANI (kullanici ayarlari > calisma tercihleri): kisi kendi
+  //   secmisse ve o ekrana yetkisi varsa oraya; yoksa varsayilan yol.
+  const acilis = calismaOku().acilisEkran;
+  const acilisUygun = acilis === 'panel' ? yetki('panel')
+    : LISTELER.some(l => (l.rota ?? l.kaynak) === acilis && yetki(l.yetkiKodu)
+        && (!l.urunModu || modUyar(l.urunModu, kullanici?.urunModu))
+        && modulAcikMi(l, kullanici?.moduller));
+  const ilkYol = acilis && acilisUygun ? `/${acilis}` : varsayilanYol;
 
   return (
     <Routes>

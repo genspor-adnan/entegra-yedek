@@ -31,7 +31,8 @@ export function DokumListesi({ liste, kaynaklar, seciliId, yukleniyor, onSec, on
             return (
               <tr key={d.id} className={d.id === seciliId ? 'secili' : ''}
                   onDoubleClick={() => onSec(d)}>
-                <td><b>{d.ad}</b>{d.aciklama && <div className="sonuk">{d.aciklama}</div>}</td>
+                <td><b>{d.ad}</b>{d.sistem && <span className="rozet mor" style={{ marginLeft: 6 }}>standart</span>}
+                  {d.aciklama && <div className="sonuk">{d.aciklama}</div>}</td>
                 <td>{kaynakAdi(d.kaynak)}</td>
                 <td className="dk-cipler">
                   {yapraklar(d.tanim).filter(k => k.alan).slice(0, 4).map((k, i) => (
@@ -42,14 +43,14 @@ export function DokumListesi({ liste, kaynaklar, seciliId, yukleniyor, onSec, on
                   {yapraklar(d.tanim).length > 4 && <span className="sonuk">+{yapraklar(d.tanim).length - 4}</span>}
                 </td>
                 <td>{ozet}</td>
-                <td><span className={`rozet ${d.gorunurluk === 0 ? 'gri' : 'mavi'}`}>{GORUNURLUK_ETIKET[d.gorunurluk]}</span></td>
+                <td><span className={`rozet ${d.gorunurluk === 0 ? 'gri' : 'mavi'}`}>{d.sistem ? 'Kurum profili' : GORUNURLUK_ETIKET[d.gorunurluk]}</span></td>
                 <td className="sonuk">{d.sonCalisma ? tarihSaat(d.sonCalisma) : '—'}{d.calismaSayisi > 0 && ` · ${d.calismaSayisi}×`}</td>
-                <td>{d.sahip}</td>
+                <td>{d.sistem ? <span className="sonuk">sistem</span> : d.sahip}</td>
                 <td className="dk-satir-arac">
                   <button className="d bir mini" disabled={d.calistirilabilir === false}
                           title={d.calistirilabilir === false ? 'Kaynağı görme yetkiniz yok' : 'Çalıştır'}
                           onClick={() => onCalistir(d)}>▶</button>
-                  <button className="d mini" title="Tasarla" onClick={() => onSec(d)}>✎</button>
+                  <button className="d mini" title={d.sistem ? 'Kopyalayarak tasarla' : 'Tasarla'} onClick={() => onSec(d)}>✎</button>
                   <button className="d mini" title="Kopyala" onClick={() => onKopyala(d)}>⧉</button>
                   {d.duzenlenebilir && <button className="d mini" title="Sil" onClick={() => onSil(d)}>🗑</button>}
                 </td>
@@ -63,7 +64,8 @@ export function DokumListesi({ liste, kaynaklar, seciliId, yukleniyor, onSec, on
       </table>
       <div className="pano-not">
         <b>?</b> işaretli koşul <b>parametredir</b>: değeri kaydedilmez, döküm her çalıştırıldığında
-        sorulur. Bir kez tasarla, her ay farklı tarih aralığıyla çalıştır.
+        sorulur. Bir kez tasarla, her ay farklı tarih aralığıyla çalıştır. <b>Standart</b> dökümler
+        kurum profiline (ürün modu · açık modüller) göre gelir; değiştirilmez, kopyalanır.
       </div>
     </div>
   );

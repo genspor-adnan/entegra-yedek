@@ -1016,6 +1016,8 @@ export interface DokumKaydi {
   gorunurluk: number; roller: number[];
   sonCalisma?: string | null; calismaSayisi: number;
   duzenlenebilir: boolean; calistirilabilir?: boolean;
+  /** Standart döküm (688): salt okunur, kopyalanır; kurum profiline göre süzülmüş gelir. */
+  sistem?: boolean; urunModu?: number; modul?: string;
 }
 export interface OzetOlcu { ad: string; baslik: string; fn: string; bicim: string }
 export interface OzetYaniti {

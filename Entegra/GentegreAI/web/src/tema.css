@@ -534,10 +534,10 @@ table.grid tr.flt input {
   padding: 7px 12px; border-top: 1px solid var(--cizgi); background: var(--yuz);
   color: var(--soluk); font-size: 11.5px;
 }
-.ka-secenekler { display: flex; gap: 8px; flex-wrap: wrap; padding: 10px }
+.ka-secenekler { display: flex; gap: 7px; flex-wrap: wrap; padding: 8px 10px }
 .ka-sec {
   border: 1px solid var(--cizgi); border-radius: 5px; background: var(--yuz);
-  color: var(--yazi); padding: 9px 14px; font-size: 12px; min-width: 96px;
+  color: var(--yazi); padding: 7px 12px; font-size: 11.5px; min-width: 92px;
   text-align: center; cursor: pointer;
 }
 .ka-sec:hover { border-color: var(--vurgu) }
@@ -548,8 +548,8 @@ table.grid tr.flt input {
 .ka-sec .ikon { display: block; font-size: 17px; margin-bottom: 3px }
 .ka-liste { padding: 4px 10px 10px }
 .ka-satir {
-  display: flex; justify-content: space-between; gap: 12px; padding: 6px 0;
-  font-size: 12.5px; align-items: center;
+  display: flex; justify-content: space-between; gap: 12px; padding: 5px 0;
+  font-size: 12px; align-items: center;
 }
 .ka-satir + .ka-satir { border-top: 1px solid var(--cizgi2, var(--cizgi)) }
 .ka-satir > span { color: var(--soluk) }
@@ -562,12 +562,15 @@ table.grid tr.flt input {
 .kullanici-ayarlari .kagrup > h6 span {
   margin-left: 4px; text-transform: none; letter-spacing: 0; color: var(--soluk); font-weight: 400;
 }
-.kasat { display: grid; grid-template-columns: 118px 1fr; gap: 8px 10px; align-items: center; padding: 10px }
-.kasat label { color: var(--soluk); font-size: 12px }
+/* Olculer DEGISKENLE: kullanici ayarlari penceresi (mockup 26 px edit) ayni sinifi
+   dar olculerle kullanir - ikinci bir kasat tanimi yerine kap degiskeni. */
+.kasat { display: grid; grid-template-columns: var(--kasat-kolon, 118px 1fr); gap: var(--kasat-gap, 8px 10px); align-items: center; padding: var(--kasat-pad, 10px) }
+.kasat label { color: var(--soluk); font-size: var(--kasat-etiket, 12px) }
 .kasat input, .kasat select {
-  height: 32px; border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz);
-  color: var(--yazi); font: inherit; font-size: 12.5px; padding: 0 9px; width: 100%; min-width: 0;
+  height: var(--girdi-yuksek, 32px); border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz);
+  color: var(--yazi); font: inherit; font-size: var(--girdi-yazi, 12.5px); padding: 0 9px; width: 100%; min-width: 0;
 }
+.kasat input[type=checkbox] { width: 16px; height: 16px; flex: none }
 .kasat input:disabled, .kasat select:disabled { background: var(--yuz2); color: var(--soluk); cursor: default }
 .kaara { display: flex; align-items: center; gap: 6px; min-width: 0 }
 .kaara input { flex: 1; min-width: 0 }
@@ -585,7 +588,7 @@ table.grid tr.flt input {
   margin: 8px 10px 0; padding: 7px 9px; border: 1px solid var(--uyarikenar); border-radius: 3px;
   background: var(--uyarizem); color: var(--uyari); font-size: 12px;
 }
-.kanot { margin: 8px 10px 10px; color: var(--soluk); font-size: 11.5px; line-height: 1.35 }
+.kanot { margin: var(--kanot-marj, 8px 10px 10px); color: var(--soluk); font-size: var(--kanot-yazi, 11.5px); line-height: 1.35 }
 .kaalt {
   display: flex; justify-content: flex-end; gap: 8px; padding: 10px 12px;
   border-top: 1px solid var(--cizgi); background: var(--yuz2);
@@ -3722,3 +3725,61 @@ select.acil {
   .dk-kagit-tablo thead { display: table-header-group }
   .dk-kagit-tablo tr { page-break-inside: avoid }
 }
+
+
+/* KULLANICI AYARLARI - mockup birebir (kullanici_ayarlari.html, 5 tur
+   karsilastirma): kimlik basi, iki kolonlu sekme govdesi, sifre gucu cubugu,
+   bilgi kutusu, yetki rozetleri. Pencere mockup gibi 1060 px. */
+.kullanici-ayarlari.kawin { width: min(1060px, 96vw); max-height: calc(100vh - 24px); display: flex; flex-direction: column }
+/* GOVDE: mockup 462 px; icerik uzunsa govde KAYAR, pencere ekrani asmaz
+   (kullanici: "editler cok yuksek, sayfa ekrana sigmiyor"). */
+.kullanici-ayarlari .kagov { height: auto; min-height: 300px; max-height: calc(100vh - 290px); flex: 1 1 auto; background: var(--yuz2); padding: 0 12px 4px }
+/* EDIT YUKSEKLIGI mockup .inp ile ayni: 26 px, 12 px yazi. Genel kart
+   kurali (32 px) bu pencerede fazla yer yiyordu. */
+.kullanici-ayarlari {
+  --kasat-kolon: 130px 1fr; --kasat-gap: 6px 10px; --kasat-pad: 8px 10px; --kasat-etiket: 11.5px;
+  --girdi-yuksek: 26px; --girdi-yazi: 12px; --kanot-marj: 6px 10px 8px; --kanot-yazi: 11px;
+}
+.kullanici-ayarlari .kagrup { margin: 10px 0 0 }
+.kullanici-ayarlari .d { height: 26px; padding: 0 10px; font-size: 11.5px }
+.kullanici-ayarlari table.grid th { padding: 5px 8px; font-size: 11px }
+.kullanici-ayarlari table.grid td { padding: 5px 8px; font-size: 11.5px }
+.ka-kapat { margin-left: 8px; background: none; border: 0; color: #fff; opacity: .9; cursor: pointer; font-size: 13px }
+.ka-kapat:hover { opacity: 1 }
+.ka-kimlik {
+  display: flex; gap: 14px; align-items: center; padding: 10px 16px; background: var(--yuz2);
+  border-bottom: 1px solid var(--cizgi2); flex-wrap: wrap;
+}
+.ka-avatar {
+  width: 56px; height: 56px; border-radius: 50%; background: var(--mor2); color: var(--mor);
+  display: grid; place-items: center; font-weight: 700; font-size: 21px; flex: none;
+  border: 1px solid var(--cizgi); position: relative; cursor: pointer; padding: 0; overflow: visible; font-family: inherit;
+}
+.ka-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block }
+.ka-avatar .kalem {
+  position: absolute; right: -3px; bottom: -3px; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--yuz); border: 1px solid var(--cizgi); display: grid; place-items: center; font-size: 10px; color: var(--yazi);
+}
+.avt img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block }
+.ka-ad { font-size: 16px; font-weight: 700; color: var(--yazi2) }
+.ka-alt { color: var(--soluk); font-size: 11.5px; margin-top: 3px }
+.ka-rozetler { display: flex; gap: 6px; margin-top: 7px; flex-wrap: wrap }
+.ka-kimlik-sag { margin-left: auto; text-align: right; font-size: 11px; color: var(--soluk); line-height: 1.8 }
+.ka-ikili { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; align-items: start }
+@media (max-width: 820px) { .ka-ikili { grid-template-columns: 1fr } }
+.ka-zorunlu::after { content: " *"; color: var(--hata) }
+.ka-bilgi {
+  display: flex; gap: 8px; align-items: flex-start; padding: 9px 12px; font-size: 11.5px; line-height: 1.5;
+  border-radius: var(--r); background: var(--mor2); color: var(--yazi2); border: 1px solid var(--cizgi);
+  margin: 10px 0 0;
+}
+.ka-yetkiler { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 0 2px }
+.ka-guc-kutu { padding: 0 10px 8px }
+.ka-guc { height: 6px; border-radius: 4px; background: var(--yuz2); overflow: hidden; margin-top: 2px }
+.ka-guc i { display: block; height: 100%; background: var(--ok); transition: width .2s }
+.ka-guc i.orta { background: var(--uyari) } .ka-guc i.zayif { background: var(--hata) }
+.ka-kurallar { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; line-height: 1.6; font-size: 11px }
+.kullanici-ayarlari table.grid tr.ka-bu td { background: var(--okzem) }
+/* GRID CIZGILERI (gorunum tercihi): ince varsayilan, belirgin koyu, yok cizgisiz. */
+:root[data-grid="belirgin"] table.grid td { border-bottom: 1px solid var(--cizgi); border-right: 1px solid var(--cizgi2) }
+:root[data-grid="yok"] table.grid td { border-bottom-color: transparent; border-right-color: transparent }

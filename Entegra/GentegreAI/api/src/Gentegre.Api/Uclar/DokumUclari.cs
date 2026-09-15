@@ -58,16 +58,26 @@ public static class DokumUclari
         // Dökümlerim: sahip + rol paylaşımı + kurum geneli; kaynağı görülemeyen
         //   döküm listede kalır ama `calistirilabilir=false`.
         grup.MapGet("/", async (
-            string? kaynak, BaglamCozucu cozucu, DokumDeposu depo, HttpContext ctx, CancellationToken iptal) =>
+            string? kaynak, BaglamCozucu cozucu, DokumDeposu depo, KurumProfilDeposu profil,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dokum", Islem.Gor);
             var tam = baglam.Yetkiler.Var("dokum", Islem.Degistir);
             var liste = await depo.ListeAsync(baglam.KullaniciId, baglam.RolId, tam, kaynak, iptal);
+            // STANDART DOKUMLER KURUM PROFILINE GORE SUZULUR (688): urun modu +
+            //   acik moduller - menuyle ayni kural. Uretilmez, suzulur: modul
+            //   kapaninca dokum kendiliginden kaybolur, tablo degismez.
+            var urunModu = await profil.UrunModuAsync(baglam.SubeId ?? 0, iptal);
+            var acikModuller = await profil.AcikModullerAsync(baglam.SubeId ?? 0, iptal);
+            liste = liste.Where(d => !d.Sistem
+                || (UrunModlari.Uyar(d.UrunModu, urunModu)
+                    && (d.Modul.Length == 0 || acikModuller.Contains(d.Modul)))).ToList();
             return Results.Ok(liste.Select(d => new
             {
                 d.Id, d.Kod, d.Ad, d.Aciklama, d.Kaynak, d.Tanim, d.Surum, d.SahipId, d.Sahip,
                 d.Gorunurluk, d.Roller, d.SonCalisma, d.CalismaSayisi, d.Duzenlenebilir,
+                d.Sistem, d.UrunModu, d.Modul,
                 calistirilabilir = KaynakKatalogu.Bul(d.Kaynak) is { } k && baglam.Yetkiler.Var(k.YetkiKodu, Islem.Gor),
             }));
         });
@@ -93,6 +103,7 @@ public static class DokumUclari
             if (kayit.Id > 0)
             {
                 var eski = await GorulenAsync(depo, kayit.Id, baglam, iptal);
+                if (eski.Sistem) throw GentegreHatasi.Yasak("Standart döküm değiştirilmez - kopyalayıp kendi adınıza kaydedin.");
                 if (!eski.Duzenlenebilir) throw GentegreHatasi.Yasak("Bu dökümü yalnız sahibi düzenleyebilir.");
             }
             if (string.IsNullOrWhiteSpace(kayit.Ad))
@@ -115,6 +126,7 @@ public static class DokumUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dokum", Islem.Sil);
             var d = await GorulenAsync(depo, id, baglam, iptal);
+            if (d.Sistem) throw GentegreHatasi.Yasak("Standart döküm silinmez; kurum profilinden modül kapatılınca gizlenir.");
             if (!d.Duzenlenebilir) throw GentegreHatasi.Yasak("Bu dökümü yalnız sahibi silebilir.");
             await depo.PasifeAlAsync(id, baglam.Yazma, iptal);
             return Results.Ok(new { silindi = true });

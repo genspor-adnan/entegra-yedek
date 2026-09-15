@@ -19,8 +19,9 @@ export interface OlayTercihi { zil: boolean; masaustu: boolean }
 
 export interface BildirimTercihi {
   olaylar: Record<string, OlayTercihi>;
-  /** Sessiz saat: masaüstü bildirimi susar, zil listesi DOLMAYA devam eder. */
-  sessiz: { acik: boolean; bas: string; bit: string };
+  /** Sessiz saat: masaüstü bildirimi susar, zil listesi DOLMAYA devam eder.
+   *  `haftaSonu`: Cumartesi-Pazar tüm gün sessiz (mockup "Hafta sonu"). */
+  sessiz: { acik: boolean; bas: string; bit: string; haftaSonu: boolean };
 }
 
 export interface OlayTanimi {
@@ -33,7 +34,7 @@ export interface OlayTanimi {
 
 const VARSAYILAN: BildirimTercihi = {
   olaylar: {},
-  sessiz: { acik: false, bas: '20:00', bit: '08:00' },
+  sessiz: { acik: false, bas: '20:00', bit: '08:00', haftaSonu: false },
 };
 
 const AYNA = 'gentegre.bildirim';
@@ -59,6 +60,7 @@ function duzelt(h: unknown): BildirimTercihi {
       acik: s.acik === true,
       bas: /^\d{2}:\d{2}$/.test(s.bas ?? '') ? s.bas : VARSAYILAN.sessiz.bas,
       bit: /^\d{2}:\d{2}$/.test(s.bit ?? '') ? s.bit : VARSAYILAN.sessiz.bit,
+      haftaSonu: s.haftaSonu === true,
     },
   };
 }
@@ -103,8 +105,9 @@ export async function bildirimKaydet(t: BildirimTercihi) {
 }
 
 /** Şu an sessiz saatte miyiz? Gece yarısını AŞAN aralık da doğru çalışır. */
-export function sessizMi(simdi = new Date()): boolean {
-  const s = mevcut.sessiz;
+export function sessizMi(simdi = new Date(), tercih: BildirimTercihi = mevcut): boolean {
+  const s = tercih.sessiz;
+  if (s.haftaSonu && (simdi.getDay() === 0 || simdi.getDay() === 6)) return true;
   if (!s.acik) return false;
   const dk = simdi.getHours() * 60 + simdi.getMinutes();
   const [bs, bd] = s.bas.split(':').map(Number);
@@ -124,6 +127,17 @@ export function masaustuBildir(kod: string, baslik: string, metin: string) {
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
   try { new Notification(baslik, { body: metin, tag: `gentegre-${kod}` }) }
   catch { /* tarayici reddetti - sessizce gec */ }
+}
+
+/**
+ * DENEME BİLDİRİMİ (mockup "Deneme bildirimi gönder"): "bildirim gelmiyor"
+ * şikâyetinin yarısı tarayıcının kendi izin ayarındadır - kurulumda test
+ * edilebilmeli. Tercih ve sessiz saat ATLANIR, yalnız izin denenir.
+ */
+export function denemeBildirimi(baslik: string, metin: string): boolean {
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return false;
+  try { new Notification(baslik, { body: metin, tag: 'gentegre-deneme' }); return true }
+  catch { return false }
 }
 
 /** Tarayıcı izni ister; "granted" dönerse masaüstü bildirimi çalışır. */

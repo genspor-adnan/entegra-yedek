@@ -333,6 +333,17 @@ public sealed class KullaniciDeposu
              where id = @p0
             """, new object?[] { tarafId, yeniHash, (short)(degismeli ? 1 : 0) }, iptal);
 
+    /// <summary>PAROLA GECMISI (687): son n hash, yeniden eskiye.</summary>
+    public Task<List<string>> SonParolaHashleriAsync(int tarafId, int adet, CancellationToken iptal = default)
+        => _veri.ListeAsync(
+            "select parola_hash from public.parola_gecmisi where kullanici_id = @p0 order by tarih desc, id desc limit @p1",
+            new object?[] { tarafId, adet }, o => o.GetString(0), iptal);
+
+    public Task ParolaGecmisineYazAsync(int tarafId, string hash, CancellationToken iptal = default)
+        => _veri.CalistirAsync(
+            "insert into public.parola_gecmisi (kullanici_id, parola_hash) values (@p0, @p1)",
+            new object?[] { tarafId, hash }, iptal);
+
     public Task DilAtaAsync(int tarafId, short dil, CancellationToken iptal = default)
         => _veri.CalistirAsync("""
             update public.taraf_kullanici

@@ -3,6 +3,7 @@ import { sonMenuGorunen } from './menuSonKullanilan';
 import { useMenuTercihleri, useKullaniciAyari } from './kabuk/useMenuTercihleri';
 import { DILLER } from '../bilesenler/diller';
 import { KullaniciAyarlari } from '../bilesenler/KullaniciAyarlari';
+import { useProfilResmi } from '../bilesenler/profilResmi';
 import { modulAcikMi } from './listeTanimlari';
 import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
   from '../bilesenler/tema';
@@ -223,7 +224,8 @@ export function Kabuk() {
   // MENU TERCIHLERI (favoriler sunucuda + en son kullanilanlar yerelde)
   //   kendi kancasinda: kabuk/useMenuTercihleri.
   const { favoriler, favoriToggle, sonMenuler, sonKaydet } =
-    useMenuTercihleri(kullanici?.id);
+    useMenuTercihleri(kullanici?.id,
+      { aktif: kullanici?.subeId, liste: kullanici?.subeler ?? [], degistir: subeDegistir });
 
   /**
    * KAYIT NOKTASI ROTA DEGISIMI (menu tiklamasi DEGIL): ayni ekrana favoriden,
@@ -286,6 +288,9 @@ export function Kabuk() {
   const aktifSube = kullanici?.subeler.find(s => s.id === kullanici?.subeId);
   const basHarfler = (kullanici?.ad ?? '?')
     .split(' ').filter(Boolean).slice(0, 2).map(p => p[0]?.toLocaleUpperCase('tr')).join('');
+  // PROFIL FOTOGRAFI: personel kartinin varsayilan resmi (profilResmi.ts) -
+  //   yoksa bas harfler. Ayarlar penceresinden yuklenince burada da tazelenir.
+  const profilResmi = useProfilResmi(kullanici?.id);
 
   /** Ust seritteki arama kutusu komut paletini acar (paletin kendi kisayolu Ctrl+K). */
   const paletiAc = () =>
@@ -405,7 +410,7 @@ export function Kabuk() {
             title={`Kullanıcı Ayarları — ${kullanici?.ad ?? ''}`}
             onClick={() => ayar.setAcik(true)}
           >
-            {basHarfler}
+            {profilResmi ? <img src={profilResmi} alt="" /> : basHarfler}
           </button>
         </div>
       </header>

@@ -121,4 +121,8 @@ public sealed class DokumKaydi
     public DateTime? SonCalisma { get; set; }
     public int CalismaSayisi { get; set; }
     public bool Duzenlenebilir { get; set; }
+    /// <summary>STANDART döküm (688): salt okunur, kopyalanır; kurum profiline göre süzülür.</summary>
+    public bool Sistem { get; set; }
+    public int UrunModu { get; set; }
+    public string Modul { get; set; } = "";
 }

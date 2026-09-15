@@ -82,6 +82,9 @@ export function Dokumler() {
   };
 
   const ac = (d: DokumKaydi, kopya = false) => {
+    // STANDART dokum (688) her zaman KOPYA olarak acilir: tasarim degisirse
+    //   kullanicinin kendi dokumu olur, standart tanim yerinde kalir.
+    kopya = kopya || !!d.sistem;
     setId(kopya ? 0 : d.id); setAd(kopya ? `${d.ad} (kopya)` : d.ad); setAciklama(d.aciklama);
     setGorunurluk(kopya ? 0 : d.gorunurluk); setSurum(kopya ? 0 : d.surum);
     setTanim({ ...bosTanim(d.kaynak), ...d.tanim }); setKirli(kopya); setYanit(null);
@@ -148,7 +151,17 @@ export function Dokumler() {
     finally { setTumCekiliyor(false) }
   };
 
-  const listedenCalistir = (d: DokumKaydi) => { ac(d); setSekme('onizle'); };
+  /** Listeden ▶: standart dokum KOPYALANMADAN, kendi kimligiyle calisir (kirli degil). */
+  const listedenCalistir = (d: DokumKaydi) => {
+    if (d.sistem) {
+      setId(d.id); setAd(d.ad); setAciklama(d.aciklama); setGorunurluk(2); setSurum(d.surum);
+      setTanim({ ...bosTanim(d.kaynak), ...d.tanim }); setKirli(false); setYanit(null);
+      const p: Record<string, unknown> = {};
+      for (const a of parametreAlanlari(d.tanim)) { const ar = a.kural ? kuralAraligi(a.kural) : null; if (ar) p[a.alan] = ar; }
+      setParametreler(p);
+    } else ac(d);
+    setSekme('onizle');
+  };
 
   const sekmeler: [Sekme, string][] = [
     ['liste', 'Dökümlerim'], ['tasarla', 'Tasarla'], ['istatistik', '📈 İstatistik'],

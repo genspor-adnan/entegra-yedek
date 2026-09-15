@@ -322,6 +322,21 @@ istemcide liste yok.
 
 A ve B ayrı commit; C, `zamanli_is` ve dosya deposuna bağlı; D en son.
 
+## 8a. Standart dökümler (688 — uygulandı)
+
+Karar: standart dökümler kurum profiline göre **üretilmez, süzülür** (menüyle aynı
+kural). `dokum_tanimi.sistem=1` satırları `688_standart_dokumler.sql` seed'inden gelir;
+her satırın `urun_modu` (0/1/2) ve `modul` etiketi var. Listeleme `UrunModlari.Uyar` +
+`AcikModullerAsync` ile süzer; kaynak yetkisi olmayan kişi çalıştıramaz. Standart döküm
+salt okunurdur: kaydet/sil 403, tasarımcı kopya olarak açar (sistem=0, kişinin olur).
+Seed yeniden çalışınca `sistem=1` satırlar tazelenir, kopyalar dokunulmaz.
+
+İlk 11: günlük başvuru · kurum bazlı aylık başvuru · randevuya gelmeyenler · randevu
+istatistiği · bekleyen lab istemleri (lab) · radyoloji modalite (radyoloji) · muayene
+bölüm (muayene) · günlük kasa · stok durumu · aylık satış özeti (ERP) · açık sipariş
+satırları (ERP). Not: hesaplanan kolonlar (stok `kalan`) süzülemez/sıralanamaz —
+katalog `Filtrelenebilir=false`; seed buna göre yazıldı.
+
 ## 9. Açık kararlar
 
 1. Excel tavanı: akış ile sınırsız mı, 100 bin satır mı (§ Açık karar 3 ile aynı).

@@ -3,6 +3,7 @@ import { api } from '../../api/istemci';
 import { sonMenuEkle } from '../menuSonKullanilan';
 import { gorunumYukle } from '../../bilesenler/gorunum';
 import { bildirimYukle } from '../../bilesenler/bildirimTercihi';
+import { acilisSubesiGerekliMi, calismaYukle } from '../../bilesenler/calismaTercihi';
 
 /**
  * SOL MENUNUN KULLANICI TERCIHLERI: favoriler ve en son kullanilanlar.
@@ -18,7 +19,11 @@ import { bildirimYukle } from '../../bilesenler/bildirimTercihi';
  * Yol EN BASA yazilir, ayni yol ikinci kez secilince yukari tasinir (kopya
  * birikmez), liste ONDA kirpilir.
  */
-export function useMenuTercihleri(kullaniciId: number | undefined) {
+export function useMenuTercihleri(kullaniciId: number | undefined, sube?: {
+  aktif: number | null | undefined;
+  liste: { id: number }[];
+  degistir(subeId: number): Promise<void>;
+}) {
   const favoriAnahtar = `favoriler.${kullaniciId ?? 0}`;
   const sonAnahtar = `sonMenuler.${kullaniciId ?? 0}`;
 
@@ -42,6 +47,13 @@ export function useMenuTercihleri(kullaniciId: number | undefined) {
         //   istek acmak her acilista bir tur daha maliyet olurdu.
         void gorunumYukle(tercihler);
         void bildirimYukle(tercihler);
+        // ACILIS SUBESI (calisma tercihi): oturumda BIR kez, tercih sunucudan
+        //   okunduktan sonra. Kullanici sonradan seridi kendisi degistirirse
+        //   sayfa yenilemesi onu geri almaz.
+        void calismaYukle(tercihler).then(c => {
+          if (sube && acilisSubesiGerekliMi(c, sube.aktif, sube.liste))
+            void sube.degistir(c.acilisSube).catch(() => {});
+        });
         const ham = tercihler.favoriler;
         if (ham === undefined) {
           // Sunucuda HIC kayit yok: tarayicidaki eski liste bir kez tasinir.

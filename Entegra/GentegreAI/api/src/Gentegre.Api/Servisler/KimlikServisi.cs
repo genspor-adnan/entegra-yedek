@@ -200,7 +200,29 @@ public sealed class KimlikServisi
         var enAz = await AyarAsync("guvenlik.parola_min_uzunluk", ParolaKurali.VarsayilanEnAz, iptal);
         ParolaKurali.Dogrula(istek.YeniParola, enAz);
 
+        // SON n PAROLADAN FARKLI (687, kullanici: "son 3 sifreden farkli"):
+        //   mevcut hash + gecmisteki (n-1) hash ile BCrypt karsilastirmasi.
+        //   Duz metin saklanmaz; eslesme yalniz dogrulamayla anlasilir.
+        var gecmisSayisi = await AyarAsync("guvenlik.parola_gecmis_sayi", 3, iptal);
+        if (gecmisSayisi > 0)
+        {
+            var adaylar = new List<string>();
+            if (kullanici.ParolaHash.Length > 0) adaylar.Add(kullanici.ParolaHash);
+            adaylar.AddRange(await _kullanicilar.SonParolaHashleriAsync(kullaniciId, gecmisSayisi - 1, iptal));
+            foreach (var eski in adaylar.Take(gecmisSayisi))
+            {
+                bool ayni;
+                try { ayni = BCrypt.Net.BCrypt.Verify(istek.YeniParola, eski); }
+                catch { ayni = false; }   // eski algoritma / bozuk hash: kiyaslanamaz, gecer
+                if (ayni)
+                    throw GentegreHatasi.Dogrulama($"Yeni parola son {gecmisSayisi} parolanizdan farkli olmali.",
+                        new AlanHatasi("yeniParola", $"Son {gecmisSayisi} paroladan biri."));
+            }
+        }
+
         var hash = BCrypt.Net.BCrypt.HashPassword(istek.YeniParola, workFactor: 12);
+        if (kullanici.ParolaHash.Length > 0)
+            await _kullanicilar.ParolaGecmisineYazAsync(kullaniciId, kullanici.ParolaHash, iptal);
         await _kullanicilar.ParolaAtaAsync(kullaniciId, hash, degismeli: false, iptal);
 
         // Parola degisince acik oturumlar kapanir.

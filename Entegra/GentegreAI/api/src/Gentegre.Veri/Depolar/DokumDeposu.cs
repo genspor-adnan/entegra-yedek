@@ -24,8 +24,9 @@ public sealed class DokumDeposu
     public DokumDeposu(VeriKaynagi veri, ListeDeposu liste) { _veri = veri; _liste = liste; }
 
     private const string SecimSql = """
-        select d.id, d.kod, d.ad, d.aciklama, d.kaynak, d.tanim::text, d.surum, d.sahip_id,
-               coalesce(tk.kod, '') as sahip, d.gorunurluk, d.roller, d.son_calisma, d.calisma_sayisi
+        select d.id, d.kod, d.ad, d.aciklama, d.kaynak, d.tanim::text, d.surum, coalesce(d.sahip_id, 0),
+               coalesce(tk.kod, '') as sahip, d.gorunurluk, d.roller, d.son_calisma, d.calisma_sayisi,
+               d.sistem, d.urun_modu, d.modul
           from public.dokum_tanimi d
           left join public.taraf_kullanici tk on tk.id = d.sahip_id
         """;
@@ -38,8 +39,10 @@ public sealed class DokumDeposu
         Surum = o.GetInt32(6), SahipId = o.GetInt32(7), Sahip = o.GetString(8),
         Gorunurluk = o.GetInt16(9), Roller = o.IsDBNull(10) ? [] : o.GetFieldValue<int[]>(10),
         SonCalisma = o.IsDBNull(11) ? null : o.GetDateTime(11), CalismaSayisi = o.GetInt32(12),
-        // Düzenleme: sahibi ya da Degistir yetkisi olan (yönetici).
-        Duzenlenebilir = tamYetki || o.GetInt32(7) == kullaniciId,
+        Sistem = o.GetInt16(13) == 1, UrunModu = o.GetInt16(14), Modul = o.GetString(15),
+        // Düzenleme: sahibi ya da Degistir yetkisi olan (yönetici). STANDART
+        //   döküm kimse tarafından düzenlenmez - kopyalanır (688).
+        Duzenlenebilir = o.GetInt16(13) != 1 && (tamYetki || o.GetInt32(7) == kullaniciId),
     };
 
     /// <summary>
@@ -54,7 +57,7 @@ public sealed class DokumDeposu
                and (@p0 or d.sahip_id = @p1 or d.gorunurluk = 2
                     or (d.gorunurluk = 1 and @p2 = any(d.roller)))
                and (@p3 = '' or d.kaynak = @p3)
-             order by d.ad
+             order by d.sistem desc, d.ad
             """, [tamYetki, kullaniciId, rolId, kaynak ?? ""],
             o => Oku(o, kullaniciId, tamYetki), iptal);
 

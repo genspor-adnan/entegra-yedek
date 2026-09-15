@@ -26,7 +26,7 @@ public static class DokumanUclari
             string kartAdi, long kaynakId, BaglamCozucu cozucu, DokumanDeposu depo, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Gor);
+            if (!KendiKartiMi(kartAdi, kaynakId, baglam)) baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Gor);
             return Results.Ok(await depo.ListeleAsync(FizikselKaynak(kartAdi), kaynakId, iptal));
         });
 
@@ -34,7 +34,7 @@ public static class DokumanUclari
             string kartAdi, long kaynakId, BaglamCozucu cozucu, DokumanDeposu depo, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Degistir);
+            if (!KendiKartiMi(kartAdi, kaynakId, baglam)) baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Degistir);
 
             var form = await ctx.Request.ReadFormAsync(iptal);
             var dosya = form.Files.GetFile("dosya")
@@ -88,7 +88,7 @@ public static class DokumanUclari
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Degistir);
+            if (!KendiKartiMi(kartAdi, kaynakId, baglam)) baglam.YetkiIste(YetkiKodu(kartAdi), Islem.Degistir);
             var liste = await depo.SilAsync(dokumanId,
                 baglam.Yazma, iptal);
             return Results.Ok(liste);
@@ -189,6 +189,15 @@ public static class DokumanUclari
         "klasor" => "klasor",
         _ => throw new InvalidOperationException($"Bilinmeyen kart: {kartAdi}"),
     };
+
+    /// <summary>
+    /// PROFİL FOTOĞRAFI (kullanıcı ayarları): kişi KENDİ personel kartının
+    /// resmini personel yetkisi olmadan görür/yükler/siler. Kullanıcı kimliği
+    /// personel kartı kimliğidir (taraf_kullanici.id = taraf.id); başkasının
+    /// kartı için yine kart yetkisi aranır.
+    /// </summary>
+    private static bool KendiKartiMi(string kartAdi, long kaynakId, IstekBaglami baglam)
+        => kartAdi == "personel" && kaynakId == baglam.KullaniciId;
 
     // Kisi kendi yetki kodu yok, cari'yi kullanir (bkz. KisiUclari.cs).
     private static string YetkiKodu(string kartAdi) => kartAdi switch
