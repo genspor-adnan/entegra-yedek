@@ -273,6 +273,25 @@ export function belgeOnizlemesi(
   return { matrah, kdv: brut - matrah, genel: brut };
 }
 
+/**
+ * KART BAŞLIĞI: "Başvuru #114377 — 2026-000000048".
+ *
+ * KAYIT ID'si BAŞLIKTA (kullanıcı): belge no iş numarasıdır (protokol, fatura
+ * no) ve seriye/yıla göre TEKRAR EDEBİLİR; destek ya da kayıt izi sürerken
+ * aranan şey kayıt kimliğidir. İkisi birlikte durur.
+ *
+ * GenoTIP'te aynı tür "Başvuru" adıyla açılır (279): tür kataloğundaki ad
+ * "Satış Siparişi"dir, hasta ekranında o başlığı göstermek yanlış olurdu.
+ */
+export function kartBasligi({ basvuruMu, turAdi, mevcutBelge, kayitliId, belgeNo }: {
+  basvuruMu: boolean; turAdi: string; mevcutBelge: boolean;
+  kayitliId: number; belgeNo?: string | null;
+}): string {
+  const ad = basvuruMu ? 'Başvuru' : turAdi;
+  if (!mevcutBelge) return ad;
+  return `${ad} #${kayitliId}${belgeNo ? ` — ${belgeNo}` : ''}`;
+}
+
 export function acikBorcHesapla(
   satirSayisi: number, onizlemeGenel: number, kayitliGenel: number, tahsilToplam: number,
 ): number {

@@ -17,14 +17,12 @@ import { useBasvuruAlanlari, usePersonelAdi } from './belgeKarti/useBasvuruAlanl
 import { useBelgeAyarlari } from './belgeKarti/useBelgeAyarlari';
 import { useDagilimOnizleme } from './belgeKarti/useDagilimOnizleme';
 import { YEREL_PARA_VARSAYILAN, KAPANMA_ETIKET } from './belgeSabitleri';
-import {
-  TasiyiciSekmesi, EBelgeSekmesi, FaturalamaSekmesi,
-} from '../bilesenler/belge/BelgeSekmeleri';
 import { KalemSekmesi, TahsilatSekmesi } from '../bilesenler/belge/KalemSekmesi';
 import {
   BasvuruSekmesi, ProvizyonSekmesi, OncekiBasvurular, HastaSeridi,
 } from '../bilesenler/belge/BasvuruSekmesi';
 import { BelgeAracCubugu } from '../bilesenler/belge/BelgeAracCubugu';
+import { BelgeErpSekmeleri } from '../bilesenler/belge/BelgeErpSekmeleri';
 import { BelgeBaslik } from '../bilesenler/belge/BelgeBaslik';
 import { useBelgeTahsilat, tahsilToplami } from './belgeTahsilat';
 import { kartImzasi } from './belgeImza';
@@ -45,6 +43,7 @@ import { useKalemAkisi } from './belgeKarti/useKalemAkisi';
 import { useKayitKapisi } from './belgeKarti/useKayitKapisi';
 import {
   provizyonVarMi, gelisSekliKarari, acikBorcHesapla, acikBelgeHesapla, belgeOnizlemesi,
+  kartBasligi,
   acikTahsilatTaraflara, acikBelgeTaraflara, paylasimliKurum,
   dagilimRotasi,
 } from './belgeKartiKurallari';
@@ -1177,16 +1176,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     <Modal
       // GenoTIP'te ayni tur "Başvuru" adiyla acilir (279): tur katalogundaki ad
       //   "Satış Siparişi" - hasta ekraninda o basligi gostermek yanlis olurdu.
-      baslik={(() => {
-        const ad = basvuruMu ? 'Başvuru' : seciliTurAdi;
-        if (!mevcutBelge) return ad;
-        // KAYIT ID'si BASLIKTA (kullanici): belge no is numarasidir (protokol,
-        //   fatura no) ve seriye/yila gore tekrar edebilir; destek ya da kayit
-        //   izi surerken aranan sey KAYIT ID'sidir. Ikisi birlikte durur -
-        //   "#114377 — 2026-000000048".
-        const no = sonuc?.belge.belgeNo ? ` — ${sonuc.belge.belgeNo}` : '';
-        return `${ad} #${kayitliId}${no}`;
-      })()}
+      baslik={kartBasligi({
+        basvuruMu, turAdi: seciliTurAdi, mevcutBelge: !!mevcutBelge,
+        kayitliId, belgeNo: sonuc?.belge.belgeNo ? String(sonuc.belge.belgeNo) : null,
+      })}
       ustBilgi={kullanici?.subeYazma === false
         ? <span className="rozet uyari">salt okuma şubesi</span>
         : <span className="kapt">{kullanici?.subeler.find(s => s.id === kullanici?.subeId)?.ad}</span>}
@@ -1388,46 +1381,37 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           />
         )}
 
-        {/* ========================================= TASIYICI / SEVKIYAT ==== */}
-        {aktifSekme === 'tasiyici' && (
-          <TasiyiciSekmesi
-            kilitli={kilitli}
-            sevkiyat={sevkiyat}
-            belge={sonuc?.belge}
-          />
-        )}
-
-        {aktifSekme === 'ebelge' && (
-          <EBelgeSekmesi
-            kilitli={kilitli} irsaliyeMi={irsaliyeMi} tur={tur}
-            senaryo={senaryo} setSenaryo={setSenaryo}
-            belge={sonuc?.belge}
-          />
-        )}
-
-        {aktifSekme === 'fatura' && (
-          <FaturalamaSekmesi
-            donusumler={donusumListesi} kayitliId={kayitliId}
-            setDonusum={donusumler.setHedefTur}
-            teklifMi={teklifMi} teklifDurum={teklif.durum}
-            donusumAc={donusumler.ac}
+        {/* ERP SEKMELERI (tasiyici · e-Belge · faturalama · imza) tek
+            bilesende: dordu de ayni kumeden beslenir ve basvuruda cizilmez. */}
+        <BelgeErpSekmeleri
+          aktifSekme={aktifSekme} kilitli={kilitli} sevkiyat={sevkiyat}
+          belge={sonuc?.belge} irsaliyeMi={irsaliyeMi} tur={tur}
+          senaryo={senaryo} setSenaryo={setSenaryo}
+          faturalama={{
+            donusumler: donusumListesi,
+            kayitliId,
+            setDonusum: donusumler.setHedefTur,
+            teklifMi, teklifDurum: teklif.durum,
+            donusumAc: donusumler.ac,
             // SILME SONRASI SERIT ANINDA (kullanici: "ücret/tahsilat ve dönüşüm
             //   değiştiği an üstteki açık tahsilat ve belge tutarları da anında
             //   güncellenmeli"): belge silinince kovalarin KAPATILAN sayaci
             //   sunucuda geri doner - satirlar okunmazsa serit eski kalir.
-            donusumSil={async idler => {
+            donusumSil: async (idler: number[]) => {
               await donusumler.sil(idler);
               await paraRef.current.satirlariTazele();
-            }}
-            hizliDonustur={(t, taraf) => void hizliDonustur(t, taraf)}
+            },
+            hizliDonustur: (t: number, taraf?: 'hasta' | 'kurum') =>
+              void hizliDonustur(t, taraf),
             // KURUM TAHAKKUKU YALNIZ PAYLASIMLI KURUMDA (kullanici: "Kurum
             //   Tahakkuk butonu Özel hasta kurum tipinde görünmemeli"): özel
             //   (ücretli) başvuruda kurumun payı hep sıfırdır, düğme her zaman
             //   boş sonuç verirdi. Başvuru DIŞI belgelerde ayrım yok.
-            kurumPayliMi={basvuruMu ? provizyonVar : undefined}
-            olcu={donusumler.olcu} setOlcu={donusumler.setOlcu}
-          />
-        )}
+            kurumPayliMi: basvuruMu ? provizyonVar : undefined,
+            olcu: donusumler.olcu, setOlcu: donusumler.setOlcu,
+          }}
+        />
+
         {aktifSekme === 'tahsilat' && (
           <TahsilatSekmesi sonuc={sonuc} tahsilatlar={tahsilat.tahsilatlar}
                            kayitliId={kayitliId} alisMi={alisMi} tahsilatAc={tahsilatAc}
