@@ -72,12 +72,23 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
   const [yaziyor, setYaziyor] = useState(false);
   const taniyici = useRef<Taniyici | null>(null);
   const destekli = useRef<boolean>(!!taniyiciYap());
+  // DINLEME NIYETI: kullanıcı "dur" demedikçe açık kalır. Tanıyıcı kendi
+  //   kendine kapanabiliyor (sessizlik, ağ, motorun kendi zaman aşımı);
+  //   niyet ayrı tutulmazsa hekim iki cümle arasında sustuğunda dikte
+  //   sessizce ölür ve konuşmaya devam eden hekim hiçbir şey yazılmadığını
+  //   sonradan fark eder.
+  const istek = useRef(false);
+  const sonBaslangic = useRef(0);
+  const [sessiz, setSessiz] = useState(false);
 
   useEffect(() => {
     void (async () => {
       try { setSozluk(await api.gozDikteSozluk()) } catch (h) { setHata(hataMetni(h)) }
     })();
-    return () => { try { taniyici.current?.stop() } catch { /* zaten durmuş */ } };
+    return () => {
+      istek.current = false;
+      try { taniyici.current?.stop() } catch { /* zaten durmuş */ }
+    };
   }, []);
 
   // SÜRE SAYACI: dikte açıkken geçen zaman, hekimin "ne kadardır
@@ -124,6 +135,7 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
       return;
     }
 
+    setSessiz(false);
     const sonuc = dikteAyristir(parca, sozluk);
     for (const k of sonuc.komutlar) {
       if (k.tur === 'goz') setGoz(Number(k.deger));
@@ -151,22 +163,62 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
         if (r.isFinal) parcaIsle(ilk.transcript, ilk.confidence ?? 0);
         else araSonuc += ilk.transcript;
       }
+      if (araSonuc) setSessiz(false);
       setGecici(araSonuc);
     };
     t.onerror = (o: { error: string }) => {
-      setHata(o.error === 'not-allowed'
-        ? 'Mikrofon izni verilmedi.'
-        : `Ses tanıma hatası: ${o.error}`);
+      // SESSİZLİK HATA DEĞİLDİR. Tanıma motoru birkaç saniye ses duymazsa
+      //   `no-speech` verir; hekim muayene sırasında zaten konuşmadan
+      //   bakıyor olabilir. Kırmızı hata kutusu göstermek, çalışan bir
+      //   şeyi bozuk göstermekti - şeritte "sessizlik" yazar, dinleme sürer.
+      // `aborted` de kullanıcının kendi durdurması ya da yeniden
+      //   başlatmanın yan ürünü.
+      if (o.error === 'no-speech') { setSessiz(true); return }
+      if (o.error === 'aborted') return;
+
+      istek.current = false;
+      setHata(
+        o.error === 'not-allowed' || o.error === 'service-not-allowed'
+          ? 'Mikrofon izni verilmedi: tarayıcı adres çubuğundaki izin '
+            + 'simgesinden mikrofona izin verin.'
+        : o.error === 'audio-capture'
+          ? 'Mikrofon bulunamadı: cihaz bağlı mı, başka bir uygulama '
+            + 'kullanıyor mu?'
+        : o.error === 'network'
+          ? 'Tanıma hizmetine ulaşılamadı (ağ). Metni elle yazabilirsiniz.'
+          : `Ses tanıma hatası: ${o.error}`);
       setDinliyor(false);
     };
-    t.onend = () => setDinliyor(false);
+
+    // KENDİLİĞİNDEN KAPANINCA YENİDEN BAŞLAT: tarayıcı `continuous` olsa da
+    //   oturumu belli aralıklarla kapatıyor. Niyet açıksa sürdürülür; iki
+    //   başlangıç arası 1 sn'den kısaysa durulur - yoksa izin reddi gibi
+    //   kalıcı bir durumda saniyede onlarca kez denenirdi.
+    t.onend = () => {
+      if (!istek.current) { setDinliyor(false); return }
+      const simdi = Date.now();
+      if (simdi - sonBaslangic.current < 1000) {
+        istek.current = false;
+        setDinliyor(false);
+        setHata('Dikte sürdürülemedi: mikrofon başka bir uygulamada olabilir.');
+        return;
+      }
+      sonBaslangic.current = simdi;
+      try { t.start() } catch { istek.current = false; setDinliyor(false) }
+    };
+
     taniyici.current = t;
+    istek.current = true;
+    sonBaslangic.current = Date.now();
+    setSessiz(false);
     try { t.start(); setDinliyor(true) } catch { setHata('Dikte başlatılamadı.') }
   };
 
   const dur = () => {
+    istek.current = false;
     try { taniyici.current?.stop() } catch { /* zaten durmuş */ }
     setDinliyor(false);
+    setSessiz(false);
     setGecici('');
   };
 
@@ -225,9 +277,9 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
       {/* KAYIT ŞERİDİ (mockup `.kayitSerit`): ekran "dinliyorum" derken
           gerçekten dinliyor olmalı - tanıma motoru kendiliğinden durduğunda
           şerit de söner. Ses kaydı hiçbir yerde tutulmaz. */}
-      <div className={`dikte-serit${dinliyor ? ' acik' : ''}`}>
+      <div className={`dikte-serit${dinliyor ? ' acik' : ''}${sessiz ? ' sessiz' : ''}`}>
         <span className="mik">{dinliyor ? '●' : '🎙'}</span>
-        <b>{dinliyor ? 'KAYITTA' : 'Hazır'}</b>
+        <b>{!dinliyor ? 'Hazır' : sessiz ? 'DİNLİYOR (sessizlik)' : 'KAYITTA'}</b>
         {dinliyor && (
           <span className="dalga">
             {[8, 15, 22, 12, 26, 18, 9, 20, 24, 14, 7, 17, 23, 11, 19, 6]

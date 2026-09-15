@@ -4584,3 +4584,9 @@ button.dikte-alan:hover { background: var(--serit1) }
 @media (max-width: 760px) {
   .sema-cikti .cikti-tuvaller { grid-template-columns: 1fr }
 }
+
+/* Sessizlik HATA DEGIL: dinleme suruyor, konusma yok. Serit kirmizi degil
+   sakin kalir - yanip sonen kirmizi bir sey, bozuk bir sey gibi okunur. */
+.dikte-serit.acik.sessiz { background: var(--satiralt); border-color: var(--cizgi2) }
+.dikte-serit.acik.sessiz .mik { background: var(--soluk); color: #fff }
+.dikte-serit.acik.sessiz .dalga i { opacity: .45 }
