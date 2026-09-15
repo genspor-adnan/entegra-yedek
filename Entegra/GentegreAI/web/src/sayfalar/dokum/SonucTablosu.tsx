@@ -43,10 +43,13 @@ export function ListeSonucu({ yanit, tanim, kolonlar, baski, gizli }: {
   const ilkToplamIdx = secili.findIndex(k => toplam.includes(k.ad));
   const onKolon = ilkToplamIdx < 0 ? secili.length : ilkToplamIdx;
 
+  // Toplam bicimi kolon TIPINDEN: sayi (test adedi) tam, para iki hane -
+  //   "70,00 test" yaziliyordu.
+  const bicim = (k: DokumKolonMeta) => (k.tip === 'para' || k.tip === 'ondalik') ? '#,##0.00' : '#,##0';
   const toplamHucreleri = (t: Record<string, number> | undefined) =>
     secili.slice(onKolon).map(k => (
       <td key={k.ad} className="sag">
-        {toplam.includes(k.ad) && t ? olcuBicimle(t[k.ad], '#,##0.00') : ''}
+        {toplam.includes(k.ad) && t ? olcuBicimle(t[k.ad], bicim(k)) : ''}
       </td>
     ));
 
@@ -86,7 +89,7 @@ export function ListeSonucu({ yanit, tanim, kolonlar, baski, gizli }: {
             <td colSpan={onKolon || 1}>TOPLAM · {yanit.toplamKayit.toLocaleString('tr-TR')} kayıt</td>
             {secili.slice(onKolon).map(k => (
               <td key={k.ad} className="sag">
-                {toplam.includes(k.ad) ? olcuBicimle(yanit.toplamlar![k.ad], '#,##0.00') : ''}
+                {toplam.includes(k.ad) ? olcuBicimle(yanit.toplamlar![k.ad], bicim(k)) : ''}
               </td>
             ))}
           </tr>
@@ -238,7 +241,8 @@ export function OzetGostergeler({ yanit, tanim, kolonlar, baski }: {
   const kutular = [{ e: 'Kayıt', s: yanit.toplamKayit.toLocaleString('tr-TR') }];
   for (const t of (tanim.toplam ?? []).slice(0, 3)) {
     const k = kolonlar.find(x => x.ad === t);
-    kutular.push({ e: `Σ ${k?.baslik ?? t}`, s: olcuBicimle(yanit.toplamlar?.[t], '#,##0.00') });
+    kutular.push({ e: `Σ ${k?.baslik ?? t}`,
+      s: olcuBicimle(yanit.toplamlar?.[t], k?.tip === 'para' || k?.tip === 'ondalik' ? '#,##0.00' : '#,##0') });
   }
   return <Kutular kutular={kutular} baski={baski} />;
 }

@@ -142,8 +142,13 @@ public sealed class DokumDeposu
             Toplam = tanim.Toplam, Grup = tanim.Grup,
         };
         // Yalnız tanımdaki kolonlar (görünür kümeden) gider; seçilmemişse hepsi.
+        //   GRUP ve TOPLAM kolonları her zaman eklenir: grup kolonu listede
+        //   gösterilmese de satırda gelmeli - yoksa istemci "(boş)" grubu
+        //   çiziyordu (lab istemleri, bölüm koduna göre grup).
         var secilen = tanim.Kolonlar is { Count: > 0 }
-            ? kolonlar.Where(k => tanim.Kolonlar.Contains(k.Ad)).ToList()
+            ? kolonlar.Where(k => tanim.Kolonlar.Contains(k.Ad)
+                                  || (tanim.Grup?.Contains(k.Ad) ?? false)
+                                  || (tanim.Toplam?.Contains(k.Ad) ?? false)).ToList()
             : kolonlar.ToList();
         return _liste.SorgulaAsync(kaynak, istek, secilen, subeId, kapsam, izlemeNo, kullaniciId, iptal);
     }
