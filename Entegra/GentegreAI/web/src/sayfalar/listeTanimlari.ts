@@ -32,10 +32,13 @@ export type { ListeTanimi, ListeGirdisi } from './listeTanimlari.Ortak';
 import { KLINIK_LISTELERI } from './listeTanimlari.Klinik';
 import { LAB_LISTELERI } from './listeTanimlari.Laboratuvar';
 import { RADYOLOJI_LISTELERI } from './listeTanimlari.Radyoloji';
+import { GOZ_LISTELERI } from './listeTanimlari.Goz';
+import { YATAN_LISTELERI } from './listeTanimlari.Yatan';
 import { ENABIZ_LISTELERI } from './listeTanimlari.Enabiz';
 import { CARI_LISTELERI } from './listeTanimlari.Cari';
 import { TICARI_LISTELERI } from './listeTanimlari.Ticari';
 import { STOK_LISTELERI } from './listeTanimlari.Stok';
+import { DOKUM_LISTELERI } from './listeTanimlari.Dokumler';
 import { YONETIM_LISTELERI } from './listeTanimlari.Yonetim';
 
 export const DONUSUM_MENUSU: Record<string, { kod: string; ad: string }[]> = {
@@ -76,11 +79,16 @@ export const LISTELER: ListeGirdisi[] = [
   ...KLINIK_LISTELERI,
   ...LAB_LISTELERI,
   ...RADYOLOJI_LISTELERI,
+  ...GOZ_LISTELERI,
+  ...YATAN_LISTELERI,
   ...ENABIZ_LISTELERI,
   ...CARI_LISTELERI,
   ...TICARI_LISTELERI,
   ...STOK_LISTELERI,
   ...YONETIM_LISTELERI,
+  // Grup basina "📊 Dökümler" baglantisi (plan kural 2): her grubun sonunda
+  //   ayni oge - kullanici "bu isin dokumu nerede" diye aramasin.
+  ...DOKUM_LISTELERI,
 ] as (ListeTanimi & { menuAd: string; ic: string; yetkiKodu: string; menuGrup?: string })[];
 
 
@@ -96,14 +104,23 @@ export const MENU_GRUP_MODUL: Record<string, string> = {
   'Kayıt Kabul':   'kayit_kabul',
   'Randevu':       'randevu',
   'Radyoloji':     'radyoloji',
+  // GOZ (691): kendi modulu - goz klinigi olmayan kurumda menu grubu hic
+  //   cizilmesin. Muayene moduluyle birlestirilseydi, muayene acikken goz
+  //   ekranlari da acilirdi.
+  'Göz':           'goz',
+  // YATAN HASTA (695): kendi modulu - yatan hasta kabul etmeyen kurumda
+  //   (poliklinik, goruntuleme merkezi) menu grubu hic cizilmesin.
+  'Yatan Hasta':   'yatan_hasta',
   'Prim':          'prim',
   'Stok & Hizmet': 'stok',
-  'Kasa':          'kasa',
-  'Banka':         'kasa',
+  // Kasa + Banka = FINANS (menu yeniden duzeni): iki grup tek modulun
+  //   (kasa) altindaydi zaten, birlesince esleme de tek satira dustu.
+  'Finans':        'kasa',
   'Muhasebe':      'muhasebe',
   'Satış':         'erp_satis',
   'Alış':          'erp_satis',
-  'İletişim & AI': 'mesaj',
+  // 'İletişim & AI' grubu kalkti: Mesajlar ve AI ust cubukta (arac, is akisi
+  //   degil). Mesaj modulu kapaliysa ust cubuk dugmesi cizilmez.
   'Üretim':        'uretim',
   // e-Nabiz ekranlari MUAYENE modulune yazilmisti (kopyala-yapistir):
   //   kurum profilinden "e-Nabız" kapatilinca menude kalmaya devam
@@ -113,7 +130,9 @@ export const MENU_GRUP_MODUL: Record<string, string> = {
   'e-Nabız':       'enabiz',
   'Laboratuvar':   'lab',
   'Muayene':       'muayene',
-  'Doküman':       'dokuman',
+  // Dokuman ekranlari Yonetim > Dokuman alt grubuna tasindi; modul suzmesi
+  //   artik LISTENIN KENDI `modul` alanindan gelir (grup Yonetim, ve Yonetim
+  //   hicbir kuruluma kapatilamaz - kapatilan modul geri acilamazdi).
 };
 
 /**

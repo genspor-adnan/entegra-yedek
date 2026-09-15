@@ -288,7 +288,10 @@ export interface PaketIcerikSatiri {
  * bir tip eklendiginde birinde unutuluyordu.
  */
 /** "ondalik" = olculen kesirli deger (ates 36,6 · BKI 30,4); "sayi" tam sayi. */
-export type AlanTipi = 'metin' | 'sayi' | 'ondalik' | 'para' | 'tarih' | 'zaman'
+// 'json': jsonb kolonu (cihaz olcum eslemesi, time-out teyitleri). Istemci
+//   icin METINDIR - cok satirli yazilir; gecerlilik sunucuda dogrulanir ve
+//   yazarken ::jsonb cast'i orada eklenir.
+export type AlanTipi = 'metin' | 'sayi' | 'ondalik' | 'para' | 'tarih' | 'zaman' | 'json'
                      | 'kod' | 'mantik';
 
 /** §2.4 kolon metasi. Yetkisiz kolon bu listede HIC donmez. */
@@ -1018,6 +1021,8 @@ export interface DokumKaydi {
   duzenlenebilir: boolean; calistirilabilir?: boolean;
   /** Standart döküm (688): salt okunur, kopyalanır; kurum profiline göre süzülmüş gelir. */
   sistem?: boolean; urunModu?: number; modul?: string;
+  /** Dökümün ait olduğu MENÜ GRUBU (690); boş = gruba bağlı değil. */
+  menuGrup?: string;
 }
 export interface OzetOlcu { ad: string; baslik: string; fn: string; bicim: string }
 export interface OzetYaniti {

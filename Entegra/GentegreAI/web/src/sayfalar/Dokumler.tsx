@@ -38,6 +38,27 @@ export function Dokumler() {
   const [sekme, setSekme] = useState<Sekme>('liste');
   const [katalog, setKatalog] = useState<DokumKatalogu | null>(null);
   const [liste, setListe] = useState<DokumKaydi[]>([]);
+
+  /**
+   * MENU GRUBU SUZGECI (?grup=Finans) — grup icindeki "📊 Dökümler" ogesinden
+   * gelince yalniz O GRUBUN kaynaklarina ait dokumler listelenir.
+   *
+   * Eslesme MENUNUN KENDISINDEN turer: bir kaynak hangi grubun ekranindaysa
+   * dokumu de o gruba aittir. Ayri bir "dokum grubu" alani acmak, ekran baska
+   * gruba tasindiginda sessizce yanlis yere duserdi.
+   */
+  const grup = new URLSearchParams(window.location.search).get('grup') ?? '';
+
+  /**
+   * Süzgeç DÖKÜMÜN KENDİ GRUBUNDAN (690). Kaynaktan türetmek yanlıştı: `belge`
+   * hem başvuru (Kayıt Kabul) hem fatura (Satış/Alış) ekranlarında kullanılıyor
+   * ve "Aylık alış özeti" Kayıt Kabul'ün dökümleri arasında görünüyordu.
+   *
+   * Grubu BOŞ olan döküm her grupta görünür: kullanıcının kendi kaydettiği
+   * döküm bir menü grubuna ait olmak zorunda değil.
+   */
+  const grupSuz = (d: DokumKaydi) => !grup || !d.menuGrup || d.menuGrup === grup;
+  const gorunen = liste.filter(grupSuz);
   const [yukleniyor, setYukleniyor] = useState(true);
   const [hata, setHata] = useState('');
 
@@ -204,13 +225,16 @@ export function Dokumler() {
                     disabled={k === 'istatistik' && tanim.cikti !== 'ozet'}
                     title={k === 'istatistik' && tanim.cikti !== 'ozet' ? 'Çıktı biçimini "İstatistik" yapın' : undefined}>
               {adi}
-              {k === 'liste' && liste.length > 0 && <span className="rozet gri">{liste.length}</span>}
+              {/* Rozet LISTELENEN sayiyi gosterir: grup suzgeciyle (?grup=)
+                  gelindiginde "16" yazip 2 satir cizmek, suzgeci gorunmez
+                  kilardi. */}
+              {k === 'liste' && gorunen.length > 0 && <span className="rozet gri">{gorunen.length}</span>}
             </button>
           ))}
         </div>
 
         {sekme === 'liste' && (
-          <DokumListesi liste={liste} kaynaklar={katalog?.kaynaklar ?? []} seciliId={id} yukleniyor={yukleniyor}
+          <DokumListesi liste={gorunen} kaynaklar={katalog?.kaynaklar ?? []} seciliId={id} yukleniyor={yukleniyor}
                         onSec={d => ac(d)} onCalistir={listedenCalistir} onKopyala={d => ac(d, true)} onSil={d => void sil(d)} />
         )}
 

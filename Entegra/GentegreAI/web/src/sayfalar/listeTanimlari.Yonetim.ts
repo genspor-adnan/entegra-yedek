@@ -10,6 +10,34 @@ import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
  */
 export const YONETIM_LISTELERI: ListeGirdisi[] = [
   {
+    // KULLANICILAR (Yönetim › Güvenlik) — mockup Ekranlar/Ayarlar/kullanicilar.html.
+    //
+    // Hesap yönetimi üç yere dağılmıştı: hesaplar personel kartından otomatik
+    //   açılıyor, rol ataması rol kartının Kullanıcılar sekmesinden, denetim
+    //   Giriş Kayıtları'ndan yapılıyordu. Bu ekran onları tek yerde toplar ve
+    //   YENİ BİR YETKİ MEKANİZMASI GETİRMEZ - yetki hâlâ ROLDE durur.
+    //
+    // KART YOK: hesap burada "yeni kayıt" gibi açılmaz (personelden açılır) ve
+    //   SİLİNMEZ (işlem günlüğü, belge ve log satırları kullanıcıya bağlı;
+    //   silinen hesap geçmişi sahipsiz bırakır) - pasife alma onun yerini tutar.
+    kaynak: 'kullanici', rota: 'kullanici', baslik: 'Kullanıcılar',
+    yol: 'Yönetim › Güvenlik › Kullanıcılar',
+    aksiyonEkrani: 'kullanici-liste',
+    // KART VAR ama "Yeni" YOK: hesap personelden açılır (kişi kaydı olmayan
+    //   hesap, kime ait olduğu bilinmeyen hesaptır) ve silinmez - pasife alınır.
+    kartYolu: '/kullanici', kartBaslik: 'Kullanıcı',
+    // Yöneticinin "bakılacak" işleri: listede arayarak değil çiple bulunur.
+    cipler: [
+      { ad: 'Aktif',      filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Pasif',      filtre: { alan: 'aktif', op: 'esit', deger: 0 } },
+      { ad: 'Parolasız',  filtre: { alan: 'parolaDurum', op: 'esitDegil', deger: 'kendi' } },
+      { ad: 'Kilitli',    filtre: { alan: 'kilitli', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'Yönetim', menuSira: 100, menuAltGrup: 'Güvenlik',
+    menuAd: 'Kullanıcılar', ic: '👤', yetkiKodu: 'kullanici',
+  },
+  {
     // Kullanici: "İK altına Personel Listesi taşı" - tek ogeli grup, digerleriyle ayni desen.
     kaynak: 'personel', baslik: 'Personel', yol: 'IK › Personel', kartYolu: '/personel',
     aksiyonEkrani: 'personel-liste', cipler: DURUM_CIPLERI,
@@ -19,7 +47,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // Serit suzgecleri (kullanici: "aktif/pasif/durum saginda Bolum agac combo
     //   ve Rol combo"): ikisi de cip ve arama ile AND'lenir.
     bolumSuzgeci: true, rolSuzgeci: true,
-    menuGrup: 'İK', menuAd: 'Personel Listesi', ic: '🧑‍🤝‍🧑', yetkiKodu: 'personel', menuSira: 10,
+    menuGrup: 'İK & Prim', menuAd: 'Personel Listesi', ic: '🧑‍🤝‍🧑', yetkiKodu: 'personel', menuSira: 10,
   },
   // PRIM (kullanici): ana menude kendi basina grup degil, IK'nin ALTINDA
   //   ve Personel Listesi'nden SONRA. menuSira 20/30/40 personelin 10'unun
@@ -32,8 +60,8 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kartYolu: '/prim-plani', kartBaslik: 'Prim Planı',
     aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
     gizliKolonlar: ['baz', 'hekimTipi', 'aciklama'],
-    menuGrup: 'İK', menuAltGrup: 'Prim', menuAd: 'Prim Planları', ic: '🎯',
-    yetkiKodu: 'prim', menuSira: 20, urunModu: 2,
+    menuGrup: 'İK & Prim', menuAd: 'Prim Planları', ic: '🎯',
+    yetkiKodu: 'prim', menuSira: 40, urunModu: 2,
   },
   {
     // HAKEDİŞ SATIRLARI (324): "hangi tahsilattan, hangi kaleme, hangi rolle".
@@ -63,9 +91,8 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       //   toplanir - isaret kaldirilmis ya da yanlis role prim dogmus demektir.
       { ad: 'İşaret yok', filtre: { alan: 'rolIsaretli', op: 'esit', deger: 0 } },
       { ad: 'Tümü' },
-    ],
-    menuGrup: 'İK', menuAltGrup: 'Prim', menuAd: 'Hakediş Satırları', ic: '🧾',
-    yetkiKodu: 'prim', menuSira: 30, urunModu: 2,
+    ], menuAd: 'Hakediş Satırları', menuGizli: true, ic: '🧾',
+    yetkiKodu: 'prim', urunModu: 2,
   },
   {
     // HAKEDİŞLER (324): kapatılmış dönemler. Kapanan satır DONDURULUR -
@@ -81,8 +108,8 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Ödendi',      filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'İK', menuAltGrup: 'Prim', menuAd: 'Hakedişler', ic: '💰',
-    yetkiKodu: 'prim', menuSira: 40, urunModu: 2,
+    menuGrup: 'İK & Prim', menuAd: 'Hakedişler', ic: '💰',
+    yetkiKodu: 'prim', menuSira: 30, urunModu: 2,
   },
   {
     // DEMIRBAS (216, Ekranlar/demirbas_listesi.html) - ana menude IK'nin
@@ -93,9 +120,9 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     menuAd: 'Demirbaş', ic: '🖥️', yetkiKodu: 'demirbas',
   },
   {
-    // DOKUMAN ANA MENUSU (419) - kullanici: "ana menulerde Demirbastan
-    //   sonraya tasi". Grup sirasi TANIM DIZISINDEKI ilk ogeden geldigi icin
-    //   konum burada belirlenir; asagi/yukari tasimak menuyu degistirir.
+    // DOKUMAN ANA MENU GRUBU (kullanici: "dokuman menusu kaybolmus, demirbastan
+    //   onceye gelsin"). Yonetim'in ALT GRUBU yapilinca ana menuden dusmustu -
+    //   dokuman gunluk is, ayar degil. Grup sirasi Kabuk.tsx GRUP_SIRA'dan.
     // DOKUMAN LISTESI - KAYNAK USTU gorunum. Kart galerileri ayni
     //   tabloyu gormeye devam eder; burasi klasor/tur/surum/durum ile kurum
     //   genelinde bakilan liste.
@@ -120,7 +147,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // ORTAK MOD (kullanici): urunModu VERILMEZ - dokuman yonetimi hem ERP
     //   hem HBYS'de ayni; moda baglamak, ayni tabloyu bir urunde gorunmez
     //   kilardi.
-    menuGrup: 'Doküman', menuAd: 'Dokümanlar', ic: '🗄️', yetkiKodu: 'dokuman',
+    menuGrup: 'Doküman', menuSira: 10, menuAd: 'Dokümanlar', modul: 'dokuman', ic: '🗄️', yetkiKodu: 'dokuman',
   },
   {
     // DOKUMAN ONAY KUYRUGU (419) - satir = ADIM, dokuman degil: ayni dokuman
@@ -129,12 +156,12 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     yol: 'Doküman › Onay Kuyruğu',
     aksiyonEkrani: 'dokuman-onay-liste',
     tarihAlani: 'baslama',
-    menuGrup: 'Doküman', menuAd: 'Onay Kuyruğu', ic: '✅', yetkiKodu: 'dokuman.onayla',
+    menuGrup: 'Doküman', menuSira: 20, menuAd: 'Onay Kuyruğu', modul: 'dokuman', ic: '✅', yetkiKodu: 'dokuman.onayla',
   },
   {
     // DOKUMAN KATEGORILERI (419/431) - agac yapili; surumlu mu, hangi akis,
     //   hangi gizlilik. Stok/hizmet kategorisiyle ayni desen.
-    kaynak: 'dokuman-kategori', rota: 'dokuman-kategori',
+    kaynak: 'dokuman-kategori', modul: 'dokuman', rota: 'dokuman-kategori',
     baslik: 'Doküman Kategorileri', yol: 'Doküman › Ayarlar › Kategoriler',
     kartYolu: '/dokuman-kategori', kartBaslik: 'Doküman Kategorisi',
     aksiyonEkrani: 'dokuman-kategori-liste',
@@ -142,13 +169,15 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Doküman', menuAltGrup: 'Ayarlar',
+    // Kategoriler/Klasorler AYARDIR: yol zaten "Doküman › Ayarlar › ..." -
+    //   gunluk listelerle ayni duzeyde durmasinlar.
+    menuGrup: 'Doküman', menuSira: 30, menuAltGrup: 'Ayarlar',
     menuAd: 'Kategoriler', ic: '🏷️', yetkiKodu: 'dokuman',
   },
   {
     // DOKUMAN KLASORLERI (419) - kurumsal agac; kaynak klasorleri SANAL
     //   (kaynak+kaynak_id'den turer, klasor kaydi gerekmez).
-    kaynak: 'dokuman-klasor', rota: 'dokuman-klasor', baslik: 'Doküman Klasörleri',
+    kaynak: 'dokuman-klasor', modul: 'dokuman', rota: 'dokuman-klasor', baslik: 'Doküman Klasörleri',
     yol: 'Doküman › Ayarlar › Klasörler',
     kartYolu: '/dokuman-klasor', kartBaslik: 'Doküman Klasörü',
     aksiyonEkrani: 'dokuman-klasor-liste',
@@ -156,7 +185,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    menuGrup: 'Doküman', menuAltGrup: 'Ayarlar',
+    menuGrup: 'Doküman', menuSira: 31, menuAltGrup: 'Ayarlar',
     menuAd: 'Klasörler', ic: '🗂️', yetkiKodu: 'dokuman',
   },
   {
@@ -164,8 +193,8 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kaynak: 'e-belge', baslik: 'e-Belge Kuyrugu', yol: 'e-Belge › Kuyruk',
     // Kullanici: "e-Belge menusunu Satis ana menu altinda en sona tasi" -
     //   gonderilen belgelerin kuyrugu satis akisinin devami.
-    menuGrup: 'Satış', menuAd: 'e-Belge', ic: '📨', yetkiKodu: 'e_belge',
-    menuSira: 999,
+    menuGrup: 'Muhasebe', menuAd: 'e-Belge', ic: '📨', yetkiKodu: 'e_belge',
+    menuSira: 20,
   },
   {
     // Kullanici: "Yönetim altına Roller ve İşlem Günlüğü al".
@@ -180,7 +209,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Silme',      filtre: { alan: 'islemTipiKod', op: 'esit', deger: 0 } },
     ],
     tarihAlani: 'tarih',
-    menuGrup: 'Yönetim', menuAd: 'İşlem Günlüğü', ic: '📋', yetkiKodu: 'islem_log',
+    menuGrup: 'Yönetim', menuSira: 102, menuAltGrup: 'Güvenlik', menuAd: 'İşlem Günlüğü', ic: '📋', yetkiKodu: 'islem_log',
   },
   {
     // GIRIS KAYITLARI (674, kullanici: "login bilgileri de log da tutulsun").
@@ -198,7 +227,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Başarısız', filtre: { alan: 'basarili', op: 'esit', deger: 0 } },
     ],
     gizliKolonlar: ['kullaniciId'],
-    menuGrup: 'Yönetim', menuAd: 'Giriş Kayıtları', ic: '🔑', yetkiKodu: 'islem_log',
+    menuGrup: 'Yönetim', menuSira: 101, menuAltGrup: 'Güvenlik', menuAd: 'Giriş Kayıtları', ic: '🔑', yetkiKodu: 'islem_log',
   },
   {
     // DOKUMLER & ISTATISTIK (686): kosul verilerek tasarlanan, kaydedilip
@@ -207,7 +236,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   ("Dokumler" acilir menusu) 11_MENU_DUZENI_PLANI ile gelecek.
     kaynak: 'dokumler', rota: 'dokumler', ozelSayfa: true,
     baslik: 'Dökümler', yol: 'Yönetim › Dökümler',
-    menuGrup: 'Yönetim', menuAd: 'Dökümler', ic: '📊', yetkiKodu: 'dokum',
+    menuGrup: 'Yönetim', menuSira: 10, menuAd: 'Dökümler', ic: '📊', yetkiKodu: 'dokum',
   },
   {
     // ONAM METINLERI (398, Faz 0): metin + surum. Teletip, genetik, girisimsel
@@ -215,7 +244,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   onam kopyasini yazmasin diye ortak platformda.
     kaynak: 'onam-metni', baslik: 'Onam Metinleri', yol: 'Yonetim › Onam Metinleri',
     kartYolu: '/onam-metni', cipler: DURUM_CIPLERI,
-    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    menuGrup: 'Yönetim', menuSira: 113, menuAltGrup: 'Platform',
     menuAd: 'Onam Metinleri', ic: '📜', yetkiKodu: 'onam',
   },
   {
@@ -223,7 +252,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   icinden (hasta kabul, teletip gorusmesi) alinir.
     kaynak: 'onam', baslik: 'Onamlar', yol: 'Yonetim › Onamlar',
     aksiyonEkrani: 'cikti-liste', tarihAlani: 'tarih',
-    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    menuGrup: 'Yönetim', menuSira: 114, menuAltGrup: 'Platform',
     menuAd: 'Onam Kayıtları', ic: '✍️', yetkiKodu: 'onam',
   },
   {
@@ -232,7 +261,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     yol: 'Yonetim › Bildirim Şablonları', kartYolu: '/bildirim-sablon',
     aksiyonEkrani: 'bildirim-sablon-liste',
     cipler: DURUM_CIPLERI,
-    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    menuGrup: 'Yönetim', menuSira: 110, menuAltGrup: 'Platform',
     menuAd: 'Bildirim Şablonları', ic: '💬', yetkiKodu: 'bildirim_sablon',
   },
   {
@@ -246,7 +275,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
       { ad: 'Gönderildi',  filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Hata',        filtre: { alan: 'durum', op: 'esit', deger: 4 } },
     ],
-    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    menuGrup: 'Yönetim', menuSira: 111, menuAltGrup: 'Platform',
     menuAd: 'Bildirim Kuyruğu', ic: '📨', yetkiKodu: 'bildirim',
   },
   {
@@ -255,7 +284,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kaynak: 'zamanli-is', baslik: 'Zamanlanmış İşler',
     yol: 'Yonetim › Ortak Platform › Zamanlanmış İşler', kartYolu: '/zamanli-is',
     aksiyonEkrani: 'zamanli-is-liste',
-    menuGrup: 'Yönetim', menuAltGrup: 'Ortak Platform',
+    menuGrup: 'Yönetim', menuSira: 112, menuAltGrup: 'Platform',
     menuAd: 'Zamanlanmış İşler', ic: '⏱️', yetkiKodu: 'zamanli_is',
   },
   {
@@ -265,7 +294,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     yol: 'Muayene › Muayene Ayarları › Klinik Kataloglar', ozelSayfa: true,
     // ICD-10 ve ilac katalogunun DURUM/YUKLEME ekrani: ikisi de Muayene
     //   Ayarlari altinda oldugu icin kurulum ekrani da orada (kullanici).
-    menuSira: 96, menuGrup: 'Muayene', menuAltGrup: 'Muayene Ayarları',
+    menuSira: 94, menuGrup: 'Muayene', menuAltGrup: 'Ayarlar',
     menuAd: 'Klinik Kataloglar', ic: '📚', yetkiKodu: 'katalog', urunModu: 2,
   },
   {
@@ -276,7 +305,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     aksiyonEkrani: 'cikti-liste',
     // AYARLARIN ALTINDA (kullanici): katalog SALT GORUNUM, senkron doldurur -
     //   hekimin gunluk isi degil, kurulum tarafi.
-    menuSira: 94, menuGrup: 'Muayene', menuAltGrup: 'Muayene Ayarları',
+    menuSira: 92, menuGrup: 'Muayene', menuAltGrup: 'Ayarlar',
     menuAd: 'ICD-10 Tanı', ic: '🩺', yetkiKodu: 'katalog', urunModu: 2,
   },
   {
@@ -285,7 +314,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     aksiyonEkrani: 'ilac-liste',
     // MUAYENE ALTINDA, AYARLARIN USTUNDE (kullanici): ilac katalogu recete
     //   yazan hekimin gunluk baktigi liste - ayar degil, calisma ekrani.
-    menuSira: 85, menuGrup: 'Muayene',
+    menuSira: 93, menuGrup: 'Muayene', menuAltGrup: 'Ayarlar',
     // Ikon Receteler ile ayni 💊 idi (kullanici); 📖 de Tibbi Ozet'te kullaniliyor.
     menuAd: 'İlaç Kataloğu', ic: '📕', yetkiKodu: 'katalog', urunModu: 2,
   },
@@ -298,7 +327,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   olsa da gunluk kullanimda personelin ozelligi gibi okunuyor: "kim ne
     //   yapabilir" sorusu personel listesinin hemen yanindan cevaplaniyor.
     //   menuSira 15: Personel Listesi (10) ile Prim grubunun (20+) arasi.
-    menuGrup: 'İK', menuAd: 'Roller', ic: '🛡️', yetkiKodu: 'rol', menuSira: 15,
+    menuGrup: 'Yönetim', menuAltGrup: 'Güvenlik', menuAd: 'Roller', ic: '🛡️', yetkiKodu: 'rol', menuSira: 103,
   },
   {
     // FIRMA / SUBE BILGILERI - mockup: Ekranlar/firma_bilgileri.html.
@@ -307,9 +336,9 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   kesildiyse ONUN bilgileri gider.
     //   Duz liste DEGIL (ozelSayfa): ekran tek firmayi anlatir, subeler onun
     //   altinda bir tablodur (165 / FirmaBilgileri.tsx).
-    kaynak: 'sube', baslik: 'Firma Bilgileri', yol: 'Yonetim › Firma Bilgileri',
+    kaynak: 'sube', baslik: 'Firma / Şubeler', yol: 'Yönetim › Firma / Şubeler',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAd: 'Firma Bilgileri', ic: '🏢', yetkiKodu: 'sube',
+    menuGrup: 'Yönetim', menuSira: 30, menuAd: 'Firma / Şubeler', ic: '🏢', yetkiKodu: 'sube',
   },
   {
     // KURUM PROFILI (489) - Firma Bilgileri'nin sekmesiydi, kullanici menude
@@ -319,13 +348,13 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   ekrani goren kitle degismesin.
     kaynak: 'kurum-profili', baslik: 'Kurum Profili', yol: 'Yonetim › Kurum Profili',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAd: 'Kurum Profili', ic: '🏥', yetkiKodu: 'sube',
+    menuGrup: 'Yönetim', menuSira: 20, menuAd: 'Kurum Profili', ic: '🏥', yetkiKodu: 'sube',
   },
   {
     // Firma geneli DAVRANIS ayarlari (public.referans). Liste degil (ozelSayfa).
     kaynak: 'genel-ayarlar', baslik: 'Genel Ayarlar', yol: 'Yonetim › Ayarlar › Genel',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Modül Ayarları', menuAd: 'Genel', menuSira: 1,
+    menuGrup: 'Yönetim', menuAd: 'Genel', menuSira: 40,
     ic: '⚙️', yetkiKodu: 'ayar',
   },
   {
@@ -334,7 +363,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   satis fisi kesilip kesilmeyecegini belirler.
     kaynak: 'kayit-kabul-ayarlar', baslik: 'Kayıt Kabul Ayarları',
     yol: 'Yonetim › Modül Ayarları › Kayit Kabul', ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Modül Ayarları', menuAd: 'Kayıt Kabul', menuSira: 2,
+    menuGrup: 'Kayıt Kabul', menuAltGrup: 'Ayarlar', menuAd: 'Kayıt Kabul', menuSira: 90,
     ic: '🩺', yetkiKodu: 'ayar', urunModu: 2,
   },
   {
@@ -342,21 +371,21 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   Yönetim grubunun altinda "Ayarlar" alt basligiyla toplanir.
     kaynak: 'stok-ayarlar', baslik: 'Stok Ayarları', yol: 'Yonetim › Ayarlar › Stok Ayarlari',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Modül Ayarları', menuAd: 'Stok Ayarları', menuSira: 3,
+    menuGrup: 'Stok & Hizmet', menuAltGrup: 'Ayarlar', menuAd: 'Stok Ayarları', menuSira: 201,
     ic: '📦', yetkiKodu: 'stok',
   },
   {
     // Kasa modulu ayarlari (149) - simdilik tek sekme: duzeltme gun siniri.
     kaynak: 'kasa-ayarlar', baslik: 'Kasa Ayarları', yol: 'Yonetim › Ayarlar › Kasa',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Modül Ayarları', menuAd: 'Kasa', menuSira: 4,
+    menuGrup: 'Finans', menuAltGrup: 'Ayarlar', menuAd: 'Kasa', menuSira: 90,
     ic: '💵', yetkiKodu: 'kasa_islem',
   },
   {
     // Satis belgesi ayarlari: Genel + e-Belge (e-Belge yalniz GIDEN belgede).
     kaynak: 'satis-ayarlar', baslik: 'Satış Belgeleri', yol: 'Yonetim › Ayarlar › Satış Belgeleri',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Modül Ayarları', menuAd: 'Satış Belgeleri', menuSira: 5,
+    menuGrup: 'Satış', menuAltGrup: 'Ayarlar', menuAd: 'Satış Belgeleri', menuSira: 90,
     ic: '🧾', yetkiKodu: 'belge',
   },
   // İK AYARLARI EKRANI KALDIRILDI (kullanici: "İK Ayarlarinda bolum ve gorevi
@@ -377,7 +406,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // Alis belgesi ayarlari: yalniz Genel - alis faturasini GIB'e biz gondermeyiz.
     kaynak: 'alis-ayarlar', baslik: 'Alış Belgeleri', yol: 'Yonetim › Ayarlar › Alış Belgeleri',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAltGrup: 'Modül Ayarları', menuAd: 'Alış Belgeleri', menuSira: 6,
+    menuGrup: 'Alış', menuAltGrup: 'Ayarlar', menuAd: 'Alış Belgeleri', menuSira: 90,
     ic: '📥', yetkiKodu: 'belge',
   },
 ];

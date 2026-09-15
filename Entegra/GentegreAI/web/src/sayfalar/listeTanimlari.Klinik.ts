@@ -11,15 +11,13 @@ import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
 export const KLINIK_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'mesajlar', rota: 'mesajlar', baslik: 'Mesajlar',
-    yol: 'İletişim & AI › Mesajlar', ozelSayfa: true,
-    menuGrup: 'İletişim & AI', menuAd: 'Mesajlar', ic: '💬',
-    yetkiKodu: 'mesaj', menuSira: 10,
+    yol: 'İletişim & AI › Mesajlar', ozelSayfa: true, menuAd: 'Mesajlar', menuGizli: true, ic: '💬',
+    yetkiKodu: 'mesaj',
   },
   {
     kaynak: 'yapay-zeka', rota: 'yapay-zeka', baslik: 'Yapay Zeka',
-    yol: 'İletişim & AI › Yapay Zeka', ozelSayfa: true,
-    menuGrup: 'İletişim & AI', menuAd: 'Yapay Zeka', ic: '✨',
-    yetkiKodu: 'ai', menuSira: 20,
+    yol: 'İletişim & AI › Yapay Zeka', ozelSayfa: true, menuAd: 'Yapay Zeka', menuGizli: true, ic: '✨',
+    yetkiKodu: 'ai',
   },
   {
     // RANDEVU kendi menu grubu (kullanici: "Randevu diye yeni menu olustur,
@@ -45,8 +43,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     kaynak: 'randevu-ayarlar', ozelSayfa: true, baslik: 'Randevu Ayarları',
     yol: 'Randevu › Randevu Ayarları',
     urunModu: 2,
-    menuGrup: 'Randevu', menuAd: 'Randevu Ayarları', ic: '⚙️',
-    yetkiKodu: 'randevu', menuSira: 11,
+    menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'Randevu Ayarları', ic: '⚙️',
+    yetkiKodu: 'randevu', menuSira: 90,
   },
   {
     // Tek ogeli grup (kullanici: "Cari menu ustune Hasta menusu ac, altina Hasta
@@ -149,7 +147,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     kolonBasliklari: { belgeNo: 'Protokol No', odeyenKurumAdi: 'Kurum' },
     urunModu: 2,
     menuGrup: 'Kayıt Kabul', menuAd: 'Başvurular', ic: '📝', yetkiKodu: 'belge',
-    menuSira: 30,
+    menuSira: 20,
   },
   {
     // ISKONTO ONAYI (666): bankonun limitini asan iskonto taleplerinin
@@ -165,7 +163,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   Onay kuyrugunu gormek belge gormekten ayri bir istir - kararin
     //   TAVANI ayrica `basvuru.iskonto` aksiyonundan gelir.
     menuGrup: 'Kayıt Kabul', menuAd: 'İskonto Onayı', ic: '✅',
-    yetkiKodu: 'iskonto_onay', menuSira: 35,
+    yetkiKodu: 'iskonto_onay', menuSira: 30,
   },
   // RADYOLOJI grubu ana menude KAYIT KABUL ile CRM ARASINDA (kullanici):
   //   grup sirasi bu dizideki ILK gorulme sirasindan gelir.
@@ -188,8 +186,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     // SIGORTA CARI ALTINDA, KURUMLAR'IN ARDINDA (kullanici): sigorta sirketi
     //   bir CARI kayittir; ayarlari da o kartin yaninda aranir.
     //   YALNIZ HBYS (urunModu 2): ozel saglik sigortasi ERP kurulumunda yok.
-    menuGrup: 'Cari', menuAltGrup: 'Sigorta',
-    menuAd: 'Provizyonlar', ic: '🛡️', yetkiKodu: 'sigorta', menuSira: 11,
+    menuGrup: 'Kayıt Kabul',
+    menuAd: 'Provizyonlar', ic: '🛡️', yetkiKodu: 'sigorta', menuSira: 40,
   },
   {
     // KURUM HESAPLARI (430): hangi sigorta sirketi hangi saglayici uzerinden.
@@ -203,8 +201,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Cari', menuAltGrup: 'Sigorta',
-    menuAd: 'Kurum Hesapları', ic: '🔌', yetkiKodu: 'sigorta', menuSira: 12,
+    menuGrup: 'Kurumlar & Sigorta',
+    menuAd: 'Kurum Hesapları', ic: '🔌', yetkiKodu: 'sigorta', menuSira: 30,
   },
   {
     // KOD ESLEME (430): kanonik deger <-> saglayici degeri. Yeni sirket
@@ -214,8 +212,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     kartYolu: '/sigorta-kod-esleme', kartBaslik: 'Kod Eşlemesi',
     aksiyonEkrani: 'sigorta-kod-esleme-liste',
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Cari', menuAltGrup: 'Sigorta',
-    menuAd: 'Kod Eşleme', ic: '🔤', yetkiKodu: 'sigorta', menuSira: 13,
+    menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Ayarlar',
+    menuAd: 'Kod Eşleme', ic: '🔤', yetkiKodu: 'sigorta', menuSira: 90,
   },
   {
     // ISTEK GUNLUGU (430): "biz ne gonderdik, onlar ne dedi". Ihtilafta kanit.
@@ -230,8 +228,8 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuGrup: 'Cari', menuAltGrup: 'Sigorta',
-    menuAd: 'İstek Günlüğü', ic: '🧾', yetkiKodu: 'sigorta', menuSira: 14,
+    menuGrup: 'Kurumlar & Sigorta',
+    menuAd: 'İstek Günlüğü', ic: '🧾', yetkiKodu: 'sigorta', menuSira: 40,
   },
   {
     // CIHAZLAR (432) - laboratuvar/goz/goruntuleme cihazlarinin baglanti
@@ -251,7 +249,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   zorluyordu. Sira lab ekranlarinin ARDINDAN (70/80).
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya',
-    menuAd: 'Cihazlar', ic: '🔌', yetkiKodu: 'cihaz', menuSira: 15,
+    menuAd: 'Cihazlar', ic: '🔌', yetkiKodu: 'cihaz', menuSira: 103,
   },
   {
     // CIHAZ MESAJLARI (432) - gelen ham mesajlar. Ham metin "İçerik"
@@ -269,7 +267,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2, modul: 'lab',
     menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya',
-    menuAd: 'Cihaz Mesajları', ic: '📡', yetkiKodu: 'cihaz', menuSira: 17,
+    menuAd: 'Cihaz Mesajları', ic: '📡', yetkiKodu: 'cihaz', menuSira: 104,
   },
   {
     // ITS BILDIRIM KUYRUGU (427) - ilac karekod bildirimleri.
@@ -289,7 +287,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     // ITS, UTS'nin HEMEN ONUNDE (kullanici): ikisi ayri kurum ve ayri servis
     //   (ITS ilac, UTS tibbi cihaz) ama ayni is - karekod bildirimi; yan yana
     //   dururlar. Sira 68: UTS alt grubu 70'ten basliyor.
-    menuSira: 68, menuGrup: 'Stok & Hizmet', menuAltGrup: 'İTS',
+    menuSira: 100, menuGrup: 'Stok & Hizmet', menuAltGrup: 'İTS',
     menuAd: 'Bildirimler', ic: '💊', yetkiKodu: 'stok',
   },
   {
@@ -319,7 +317,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     kaynak: 'hakedisim', rota: 'hakedisim', ozelSayfa: true,
     baslik: 'Hakedişlerim', yol: 'Muayene › Hakedişlerim',
     urunModu: 2, modul: 'muayene',
-    menuSira: 70, menuGrup: 'Muayene', menuAd: 'Hakedişlerim', ic: '💰',
+    menuSira: 40, menuGrup: 'Muayene', menuAd: 'Hakedişlerim', ic: '💰',
     yetkiKodu: 'prim.kendi',
   },
   {
@@ -330,8 +328,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     yol: 'Muayene › Tıbbi Özet',
     aksiyonEkrani: 'cikti-liste',
     tarihAlani: 'sonMuayene',
-    urunModu: 2, modul: 'muayene',
-    menuSira: 40, menuGrup: 'Muayene', menuAd: 'Tıbbi Özet', ic: '📖', yetkiKodu: 'muayene',
+    urunModu: 2, modul: 'muayene', menuAd: 'Tıbbi Özet', menuGizli: true, ic: '📖', yetkiKodu: 'muayene',
   },
   {
     // KRONIK TANILAR (420) - muayenede "kronik" isaretlenen tani buraya
@@ -346,8 +343,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Geçmiş', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
       { ad: 'Tümü' },
     ],
-    urunModu: 2, modul: 'muayene',
-    menuSira: 50, menuGrup: 'Muayene', menuAd: 'Kronik Tanılar', ic: '🩹', yetkiKodu: 'muayene',
+    urunModu: 2, modul: 'muayene', menuAd: 'Kronik Tanılar', menuGizli: true, ic: '🩹', yetkiKodu: 'muayene',
   },
   {
     // GECMIS OLAYLAR (420) - ameliyat / girisim / yatis / asi / travma.
@@ -356,8 +352,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     kartYolu: '/hasta-gecmis', kartBaslik: 'Geçmiş Olay',
     aksiyonEkrani: 'cari-liste',
     tarihAlani: 'tarih',
-    urunModu: 2, modul: 'muayene',
-    menuSira: 60, menuGrup: 'Muayene', menuAd: 'Geçmiş Olaylar', ic: '🏥', yetkiKodu: 'muayene',
+    urunModu: 2, modul: 'muayene', menuAd: 'Geçmiş Olaylar', menuGizli: true, ic: '🏥', yetkiKodu: 'muayene',
   },
   {
     // HASTA ALERJILERI (413) - ETKEN MADDE bazli. Marka uzerinden tutmak
@@ -370,8 +365,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    urunModu: 2, modul: 'muayene',
-    menuSira: 70, menuGrup: 'Muayene', menuAd: 'Alerjiler', ic: '⚠️', yetkiKodu: 'muayene',
+    urunModu: 2, modul: 'muayene', menuAd: 'Alerjiler', menuGizli: true, ic: '⚠️', yetkiKodu: 'muayene',
   },
   {
     // HASTANIN KULLANDIGI ILACLAR (413) - recete satirlarinin kopyasi DEGIL:
@@ -385,8 +379,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
       { ad: 'Tümü' },
     ],
-    urunModu: 2, modul: 'muayene',
-    menuSira: 80, menuGrup: 'Muayene', menuAd: 'Kullanılan İlaçlar', ic: '🧾', yetkiKodu: 'muayene',
+    urunModu: 2, modul: 'muayene', menuAd: 'Kullanılan İlaçlar', menuGizli: true, ic: '🧾', yetkiKodu: 'muayene',
   },
   {
     // MUAYENE SABLONLARI (411) - brans/kisisel fizik muayene sablonlari.
@@ -401,7 +394,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuSira: 90, menuGrup: 'Muayene', menuAltGrup: 'Muayene Ayarları',
+    menuSira: 90, menuGrup: 'Muayene', menuAltGrup: 'Ayarlar',
     menuAd: 'Muayene Şablonları', ic: '📋', yetkiKodu: 'muayene',
   },
   {
@@ -416,7 +409,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuSira: 92, menuGrup: 'Muayene', menuAltGrup: 'Muayene Ayarları',
+    menuSira: 91, menuGrup: 'Muayene', menuAltGrup: 'Ayarlar',
     menuAd: 'Metin Makroları', ic: '⌨️', yetkiKodu: 'muayene',
   },
   {
@@ -438,7 +431,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuSira: 20, menuGrup: 'Muayene', menuAd: 'Çalışma Listesi', ic: '📋', yetkiKodu: 'muayene',
+    menuSira: 10, menuGrup: 'Muayene', menuAd: 'Çalışma Listesi', ic: '📋', yetkiKodu: 'muayene',
   },
   {
     // MUAYENE (409, Faz 1): tip merkezindeki uzman hekim muayenesi -
@@ -466,6 +459,6 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'muayene',
-    menuSira: 10, menuGrup: 'Muayene', menuAd: 'Muayeneler', ic: '🩺', yetkiKodu: 'muayene',
+    menuSira: 20, menuGrup: 'Muayene', menuAd: 'Muayeneler', ic: '🩺', yetkiKodu: 'muayene',
   },
 ];

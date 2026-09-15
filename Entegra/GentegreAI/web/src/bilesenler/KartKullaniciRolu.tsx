@@ -115,10 +115,15 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade }: {
                    </label>
                  ))}
                </div>
-               <div className="not">
-                 Yetki, ana rol ile ek rollerin <b>birleşimidir</b>; sayısal
-                 sınırlarda (ör. iskonto tavanı) en yüksek değer geçerli olur.
-               </div>
+             </div>
+
+             {/* NOT `.alan`IN DISINDA: `.alan` etiket|deger izgarasidir, notu
+                 icine koyunca deger kolonuna sikisip kelime kelime kiriliyordu
+                 (kullanici). Izgaranin kendi satiri olarak TAM GENISLIK alir ve
+                 soldan saga tek satir okunur. */}
+             <div className="not not-tamsatir">
+               Yetki, ana rol ile ek rollerin <b>birleşimidir</b>; sayısal
+               sınırlarda (ör. iskonto tavanı) en yüksek değer geçerli olur.
              </div>
            </>
          )}

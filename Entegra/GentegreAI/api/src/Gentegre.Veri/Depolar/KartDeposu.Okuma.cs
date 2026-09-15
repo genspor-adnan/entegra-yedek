@@ -296,6 +296,14 @@ public sealed partial class KartDeposu
             "public.v_hekim_lookup",
             // Kampanya (268) - kurum sozlesmesinde secilir.
             "public.v_kampanya_lookup",
+            // GOZ (693): cihaz, tetkik (yalniz goz hizmetleri), postop
+            //   protokolu ve hastanin acik takip plani.
+            "public.v_goz_cihaz_lookup", "public.v_goz_tetkik_lookup",
+            "public.v_goz_protokol_lookup", "public.v_goz_takip_lookup",
+            // YATAN HASTA (696): oda ve yatak secimi. Yatak adi icinde oda
+            //   turu, servis ve DURUM var - bos yatagin verilebilir olup
+            //   olmadigini oda belirler.
+            "public.v_oda_lookup", "public.v_yatak_lookup",
             // RADYOLOJI (283/286): cihaz, tetkik (yalniz radyoloji hizmetleri)
             //   ve istem hekimi (ic + dis).
             "public.v_rad_cihaz_lookup", "public.v_rad_tetkik_lookup",

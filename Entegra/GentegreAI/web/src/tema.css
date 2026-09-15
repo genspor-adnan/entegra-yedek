@@ -3539,7 +3539,7 @@ td.hucre-panik input { border-color: var(--hata); color: var(--hata); font-weigh
 }
 .isk-sat:last-child { border-bottom: 0 }
 .isk-sat > span { color: var(--soluk) }
-.isk-sat.ok  b { color: var(--olumlu) }
+.isk-sat.ok  b { color: var(--ok) }
 .isk-sat.teh b { color: var(--hata) }
 /* Kilitli kalem satiri: gorunur ama secilemez. */
 .detay-tablo tr.pasif td { opacity: .55 }
@@ -3783,3 +3783,804 @@ select.acil {
 /* GRID CIZGILERI (gorunum tercihi): ince varsayilan, belirgin koyu, yok cizgisiz. */
 :root[data-grid="belirgin"] table.grid td { border-bottom: 1px solid var(--cizgi); border-right: 1px solid var(--cizgi2) }
 :root[data-grid="yok"] table.grid td { border-bottom-color: transparent; border-right-color: transparent }
+
+/* KULLANICILAR UST SERIDI (mockup Ekranlar/Ayarlar/kullanicilar.html `.ozet`).
+   Arama kutusunun USTUNDE durur (kullanici): ekrana girince ilk okunan satir
+   "neye bakmam gerek" olsun, "ne ariyorum" degil.
+   Kutu bir SAYAC degil ise giris kapisidir - cipi olan kutu dugmedir. */
+.kul-ozet {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px;
+  background: var(--cizgi2); border: 1px solid var(--cizgi2);
+  border-radius: var(--r); overflow: hidden; margin-bottom: 10px;
+}
+.kul-ozet .k {
+  background: var(--kartzem); color: var(--yazi); padding: 9px 12px;
+  display: flex; flex-direction: column; gap: 2px; text-align: left;
+  font: inherit; border: none; cursor: pointer;
+}
+.kul-ozet .k.bilgi { cursor: default }
+.kul-ozet .k:not(.bilgi):hover { background: linear-gradient(var(--dugh1), var(--dugh2)) }
+.kul-ozet .bas {
+  font-size: 10.5px; color: var(--soluk);
+  text-transform: uppercase; letter-spacing: .3px;
+}
+.kul-ozet .deg { font-size: 18px; font-weight: 700; color: var(--yazi2) }
+/* Sifirken NOTR: her zaman kirmizi duran kutu, gercekten kirmizi oldugunda
+   fark edilmez. */
+.kul-ozet .deg.hata { color: var(--hata) }
+.kul-ozet .deg.uyari { color: var(--uyari) }
+.kul-ozet .alt { font-size: 10.5px; color: var(--soluk) }
+@media (max-width: 1000px) { .kul-ozet { grid-template-columns: repeat(3, 1fr) } }
+@media (max-width: 600px)  { .kul-ozet { grid-template-columns: repeat(2, 1fr) } }
+
+/* LISTE ALT PANELI (mockup `.sekmeler` + `.alt`): secili satirin ayrintisi
+   LISTEYI KAYBETMEDEN gorunur - kullanici satir satir geziyor, her satir icin
+   kart acip kapatmak ayni soruyu bastan sordururdu.
+   ADI MODULSUZ: Kullanicilar ve Goz Hasta Ozeti ayni desene oturuyor; sinif
+   adinda bir modulun adi gececek olsa, ikinci kullanan "benim ekranim degil"
+   diye kopyasini acardi. */
+.altpanel { border-top: 1px solid var(--cizgi); margin-top: 8px }
+.altpanel-sekmeler {
+  display: flex; gap: 2px; padding: 6px 4px 0; background: var(--baslikzem);
+  border-bottom: 1px solid var(--cizgi);
+}
+.altpanel-sekme {
+  border: 1px solid var(--cizgi); border-bottom: none; border-radius: var(--r) var(--r) 0 0;
+  padding: 5px 12px; font: inherit; font-size: 11.5px; color: var(--soluk);
+  background: var(--zemin); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.altpanel-sekme.on {
+  background: var(--kartzem); color: var(--yazi2); font-weight: 700;
+  position: relative; top: 1px;
+}
+.altpanel-govde { background: var(--kartzem); padding: 8px 4px }
+/* Roller ve Subeler YAN YANA: yetki ana rol + ek rollerin birlesimi, sube ise
+   rolden gelir - iki kutu birbirinin cevabi, alt alta konursa bagi kopar. */
+.altpanel-iki { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+@media (max-width: 1000px) { .altpanel-iki { grid-template-columns: 1fr } }
+/* Izgaranin TUM satirini kaplayan aciklama notu: soldan saga tek satir okunur
+   (kullanici). Kutu icinde etiket|deger kolonuna sikisinca kelime kelime
+   kiriliyordu. `span 1` degil `1 / -1`: izgara kac kolonlu olursa olsun. */
+.not-tamsatir {
+  grid-column: 1 / -1;
+  /* Sol kenar DEGER kolonuyla hizali (kullanici): not, ustundeki rol
+     listesinin devami gibi okunmali - etiket kolonundan baslayinca kutunun
+     icinde ikinci bir sutun aciyormus gibi duruyordu.
+     92px = `.alan` etiket kolonu (84px) + column-gap (8px); ikisi de satir 771. */
+  padding-left: 92px;
+}
+/* `.kagrup` yalniz ALT bosluk tasir; bir alan izgarasinin hemen ardindan
+   gelince ustune yapisiyordu (kullanici). Araligi kutuya degil sarmalayiciya
+   veriyoruz - `.kagrup`in kendisi baska yerlerde bitisik isteniyor olabilir. */
+.kagrup-aralikli { margin-top: 10px }
+
+/* ===========================================================================
+   GÖZ (OFTALMOLOJİ) — mockup Ekranlar/Goz/*.html
+   Renk ve ölçüler mockuptan BİREBİR: ayrı bir tasarım dili değil, var olanın
+   göz ekranlarına uzantısı.
+   ======================================================================== */
+
+/* OD/OS MATRİSİ (mockup `.odos`): göz hekimi iki gözü KARŞILAŞTIRARAK okur.
+   "Parametre | OD | OS" üç kolon; satır satır tablo bu karşılaştırmayı
+   bozardı. Sağ göz KIRMIZI, sol göz MAVİ - klinikte şemalar da böyle
+   renklenir ve iki sütun bir bakışta ayrılır. */
+.odos {
+  display: grid; grid-template-columns: 150px 1fr 1fr; gap: 0;
+  border: 1px solid var(--cizgi2); border-radius: var(--r); overflow: hidden;
+  margin: 8px 0;
+}
+.odos > div {
+  padding: 5px 8px; font-size: 11.5px;
+  border-bottom: 1px solid var(--cizgi2); border-right: 1px solid var(--cizgi2);
+}
+.odos > div:nth-child(3n) { border-right: none }
+.odos > div:nth-last-child(-n+3) { border-bottom: none }
+.odos .h {
+  background: linear-gradient(var(--serit1), var(--serit2));
+  font-weight: 700; color: #2c4a6b; text-align: center;
+}
+.odos .l { background: var(--kartzem); color: #3a5573; font-weight: 700 }
+.odos .v { display: flex; gap: 4px; align-items: center; flex-wrap: wrap }
+.odos .v b { font-size: 12.5px; color: var(--yazi2) }
+.odos .v .sonuk { font-size: 10.5px }
+/* Taraf renkleri: mockupla aynı iki değer. */
+.odos .h.od, .goz-od { color: #b3261e }
+.odos .h.os, .goz-os { color: #2f6db3 }
+@media (max-width: 720px) { .odos { grid-template-columns: 110px 1fr 1fr } }
+
+/* ÜNİTE AKIŞI KANBANI (mockup `.kanban`): ünitede iş hastanın kendisinden çok
+   NEREDE beklediğiyle yönetilir - beş istasyon beş kolon. Grid tek başına
+   "hangi masada yığılma var" sorusunu cevaplamıyordu. */
+.kanban {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+  padding: 10px 0; background: transparent;
+}
+.kanban .kol {
+  border: 1px solid var(--cizgi2); border-radius: var(--r);
+  background: var(--kartzem); min-height: 120px;
+}
+/* Yoğun kolon çerçeveyle ayrılır: sayı okumadan da göze çarpsın. */
+.kanban .kol.dolu { border-color: var(--mor) }
+.kanban .kb {
+  display: flex; align-items: center; gap: 6px; padding: 5px 8px;
+  font-size: 11px; font-weight: 700; color: #2c4a6b;
+  background: linear-gradient(var(--serit1), var(--serit2));
+  border-bottom: 1px solid var(--cizgi2);
+}
+.kanban .kb .sp { margin-left: auto; font-weight: 400; color: var(--soluk) }
+.kanban .is {
+  margin: 6px; padding: 5px 7px; font-size: 11px; background: var(--yuz);
+  border: 1px solid var(--cizgi); border-radius: 3px; cursor: pointer;
+}
+.kanban .is:hover { border-color: var(--dugkenar); background: linear-gradient(var(--dugh1), var(--dugh2)) }
+.kanban .is.secili { border-color: var(--mor); background: var(--mor2) }
+.kanban .is b { display: block; color: var(--yazi2) }
+.kanban .is .sonuk { font-size: 10.5px; display: block; margin-top: 1px }
+.kanban .bos { padding: 10px 8px; font-size: 11px; color: var(--soluk); text-align: center }
+@media (max-width: 1250px) { .kanban { grid-template-columns: repeat(3, 1fr) } }
+@media (max-width: 760px)  { .kanban { grid-template-columns: 1fr } }
+
+/* ===========================================================================
+   YATAN HASTA — YATAK PANOSU (mockup Ekranlar/Yatan/yatak_panosu.html)
+   "Yer var mi" sorusu LISTE degil PANO ile cevaplanir: yatak sayisi kurumda
+   sabittir ve gozle taranir. Kutu ODA, satir YATAK - bos yatagin verilebilir
+   olup olmadigini oda belirler (cinsiyet kurali, izolasyon).
+   ======================================================================== */
+.yatak-pano { padding: 8px 0 }
+.yatak-pano-ozet {
+  display: flex; gap: 16px; flex-wrap: wrap; padding: 7px 10px; margin-bottom: 10px;
+  background: var(--kartzem); border: 1px solid var(--cizgi2); border-radius: var(--r);
+  font-size: 11.5px; color: var(--soluk);
+}
+.yatak-pano-ozet b { color: var(--yazi2); font-size: 13px }
+.yatak-pano .kat { margin-bottom: 14px }
+.yatak-pano .kat-bas {
+  display: flex; align-items: center; gap: 10px; padding: 5px 4px; margin-bottom: 8px;
+  font-size: 12.5px; font-weight: 700; color: #2c4a6b;
+  border-bottom: 1px solid var(--cizgi2);
+}
+.yatak-pano .kat-bas .mini { font-weight: 400; color: var(--soluk); font-size: 11px }
+.yatak-pano .odalar {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px;
+}
+.yatak-pano .oda {
+  border: 1px solid var(--cizgi); border-radius: var(--r); background: var(--yuz);
+  overflow: hidden;
+}
+/* Izolasyon odasi CERCEVEYLE ayrilir: rozet okumadan da goze carpsin. */
+.yatak-pano .oda.izo { border-color: #e3a7a0 }
+.yatak-pano .oda-bas {
+  display: flex; align-items: center; gap: 6px; padding: 5px 8px; font-size: 11.5px;
+  font-weight: 700; color: #2c4a6b;
+  background: linear-gradient(var(--serit1), var(--serit2));
+  border-bottom: 1px solid var(--cizgi2);
+}
+.yatak-pano .oda.izo .oda-bas { background: linear-gradient(#fdf1f0, #fbe4e2); color: #8c2119 }
+.yatak-pano .oda-bas .mini { font-weight: 400; color: var(--soluk) }
+.yatak-pano .oda-bas .sp { margin-left: auto; display: flex; gap: 4px }
+.yatak-pano .yatak {
+  display: flex; align-items: center; gap: 7px; padding: 6px 8px; font-size: 11.5px;
+  border-top: 1px solid #f0f4f8;
+}
+.yatak-pano .yatak:first-of-type { border-top: none }
+.yatak-pano .yatak .kod {
+  font-family: Consolas, monospace; font-weight: 700; color: var(--yazi2); min-width: 58px;
+}
+.yatak-pano .yatak .ad { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.yatak-pano .yatak .gun { color: var(--soluk); font-size: 10.5px }
+.yatak-pano .yatak.y-bos { background: #f4fbf6 }
+.yatak-pano .yatak.y-bos .ad { color: var(--ok) }
+.yatak-pano .yatak.y-temizlik { background: #fdfaf0 }
+.yatak-pano .yatak.y-temizlik .ad { color: var(--uyari) }
+.yatak-pano .yatak.y-kapali { background: #f5f6f8 }
+.yatak-pano .yatak.y-kapali .ad { color: #8c98a6 }
+.yatak-pano .yatak.y-cikacak { background: #eef4fc }
+/* Durum NOKTAYLA: kirk sekiz yatakta kirk sekiz rozet panoyu okunmaz yapiyordu.
+   Renk durum icin, rozet yalniz ISTISNA icin (izolasyon, bugun cikacak). */
+.yatak-pano .nk {
+  width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto;
+  border: 1px solid rgba(0, 0, 0, .15);
+  /* Dolgu ACIKCA sifirlanir: durum noktasi kucuk bir isarettir, hangi genel
+     kural gelirse gelsin buyumemeli. */
+  padding: 0; margin: 0; box-sizing: border-box;
+}
+.yatak-pano .nk.y-dolu { background: #2f6db3 }
+.yatak-pano .nk.y-bos { background: #4caf6d }
+.yatak-pano .nk.y-temizlik { background: #e2b33c }
+.yatak-pano .nk.y-rezerve { background: #7e57c2 }
+.yatak-pano .nk.y-kapali { background: #9aa7b4 }
+@media (max-width: 760px) { .yatak-pano .odalar { grid-template-columns: 1fr } }
+
+/* YATIŞ KARTI ÜST ŞERİDİ (mockup Ekranlar/Yatan/yatis_karti.html
+   `.serit-kimlik` + `.vital-serit`) — SEKMELERIN DISINDA: yatan hastada
+   "kim, nerede, kacinci gun, nasil" her kararin onkosulu. */
+.yatis-kimlik {
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  padding: 9px 12px; background: var(--kartzem);
+  border-bottom: 1px solid var(--cizgi2);
+}
+.yatis-kimlik .ad { font-size: 14px; font-weight: 700; color: var(--yazi2) }
+.yatis-kimlik .kv { display: flex; flex-direction: column; gap: 1px }
+.yatis-kimlik .kv > span { font-size: 10.5px; color: var(--soluk) }
+.yatis-kimlik .kv > b { font-size: 12px; display: flex; align-items: center; gap: 4px }
+.yatis-kimlik .yatak-kod { font-family: Consolas, monospace; color: var(--yazi2) }
+.yatis-kimlik .sag { margin-left: auto; display: flex; gap: 5px; flex-wrap: wrap }
+
+/* SON VİTALLER: kart açılır açılmaz "hasta nasıl". Eşiği aşan değer renklenir -
+   hekimin sayıya bakıp kendi eşiğini hatırlamasını beklemek, yoğun bir günde
+   kaçırmak demektir. */
+.vital-serit {
+  display: grid; grid-template-columns: repeat(8, 1fr); gap: 1px;
+  background: var(--cizgi2); border-bottom: 1px solid var(--cizgi2);
+}
+.vital-serit .v { background: var(--yuz); padding: 6px 10px; text-align: center }
+.vital-serit .v > span { display: block; font-size: 10.5px; color: var(--soluk) }
+.vital-serit .v > b { font-size: 15px; color: var(--yazi2) }
+.vital-serit .v > i { display: block; font-size: 10px; color: var(--soluk); font-style: normal }
+.vital-serit .v.uy  > b { color: var(--uyari) }
+.vital-serit .v.teh > b { color: var(--hata) }
+@media (max-width: 1100px) { .vital-serit { grid-template-columns: repeat(4, 1fr) } }
+@media (max-width: 620px)  { .vital-serit { grid-template-columns: repeat(2, 1fr) } }
+
+/* Yatis karti "acik isler" / "risk" kutulari: satirin sag tarafi puan + rozet
+   + zamandan olusuyor ve bitisik yaziliyordu ("Dusme riski (Itaki)14yuksek").
+   Deger, rozet ve tarih AYRI okunmali. */
+.yatis-acik .sat b { display: flex; align-items: center; gap: 6px; justify-content: flex-end }
+.yatis-acik .sat { align-items: center }
+
+/* YATAK SECIMI (mockup Ekranlar/Yatan/yatis_kabul.html `.yataklar` / `.yk`) -
+   kabul ve nakil ayni kutu dizisini kullanir. ACILIR LISTE DEGIL: "hangi
+   yatak" sorusunun cevabi oda kurallariyla BIRLIKTE verilir; combo'da
+   cinsiyet kurali, izolasyon ve oda arkadasi gorunmez.
+
+   Uygun olmayan yatak GIZLENMEZ, soluk gosterilir (`.olmaz`): gizlenirse
+   kabul "yer yok" der, oysa sebep cogu zaman cozulebilir bir seydir. */
+.yatak-secim {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 6px;
+}
+.yatak-secim .yk {
+  border: 1px solid var(--cizgi); border-radius: 4px; background: var(--yuz);
+  padding: 6px 8px; font-size: 11.5px; cursor: pointer;
+}
+.yatak-secim .yk .kod { font-family: Consolas, monospace; font-weight: 700; color: var(--yazi2) }
+.yatak-secim .yk .alt { color: var(--soluk); font-size: 10.5px; margin-top: 2px; line-height: 1.45 }
+.yatak-secim .yk.secili {
+  border-color: var(--vurgu); background: var(--mor2);
+  box-shadow: inset 0 0 0 1px var(--vurgu);
+}
+/* Tiklanmaz: karar sunucunun, ekran onu tekrar yorumlamaz. */
+.yatak-secim .yk.olmaz { background: var(--kartzem); color: var(--soluk); cursor: not-allowed }
+.yatak-secim .yk.olmaz .kod { color: var(--soluk); font-weight: 400 }
+@media (max-width: 620px) { .yatak-secim { grid-template-columns: 1fr } }
+
+/* YATIS KABUL ADIM SERIDI (mockup `.adimlar` / `.adim`) - dort ayri soru
+   sirayla cevaplanir; tek formda olsaydi provizyon beklerken form acik kalir
+   ve yatak kimseye verilmezdi. */
+.yatis-adimlar { display: flex; gap: 0; background: var(--kartzem);
+  border-bottom: 1px solid var(--cizgi); margin: -4px -4px 10px }
+.yatis-adimlar .adim {
+  flex: 1; padding: 7px 10px; font-size: 11.5px; color: var(--soluk);
+  text-align: center; border-right: 1px solid var(--cizgi2); cursor: pointer;
+}
+.yatis-adimlar .adim:last-child { border-right: none }
+.yatis-adimlar .adim.on { background: var(--yuz); color: var(--yazi2); font-weight: 700 }
+.yatis-adimlar .adim.bitti { color: var(--ok) }
+.yatis-adimlar .adim b { display: block; font-size: 10.5px; font-weight: 400; opacity: .8 }
+
+/* CIKIS KONTROL LISTESI (mockup taburcu_epikriz.html `.sat2`) - ENGEL ile
+   UYARI ayri okunmali: engel taburcuyu durdurur, uyari hekim onayiyla gecilir.
+   Hepsini engel yapmak hekimi sistemi asmaya iterdi; hepsini uyari yapmak
+   kontrolu suse cevirirdi. */
+.cikis-kontrol { display: flex; flex-direction: column; gap: 4px }
+.cikis-kontrol .sat2 {
+  display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: center;
+  border: 1px solid var(--cizgi2); border-radius: 4px; padding: 6px 8px;
+  background: var(--yuz); font-size: 12px;
+}
+.cikis-kontrol .sat2.engel { border-color: var(--hata); background: var(--hatazem) }
+.cikis-kontrol .sat2.eksik { border-color: var(--uyari) }
+.cikis-kontrol .sat2 .ik { text-align: center; font-size: 13px }
+.cikis-kontrol .sat2 small { display: block; color: var(--soluk); font-size: 10.5px }
+
+/* ===========================================================================
+   KART GRUBU ICI "OZET SATIRI" (.ic / .sat) — mockup Ekranlar/Yatan/_yatan.css
+   satir 101-105 ile ayni olculer.
+
+   Bu kaliba (etiket solda, deger sagda, satirlar ince cizgiyle ayrilmis) yatan
+   hasta, goz ve kullanici panelleri zaten bel baglamisti ama TEMADA KARSILIGI
+   YOKTU: satirlar `display:block` kalinca etiket ve deger yan yana yapisiyor
+   ("HastaZEYNEP DEMIR") ve okunmuyordu. Kural tek yerde - her ekran kendi
+   kopyasini yazsaydi mockup ailesinden gorunmeyi birakirlardi.
+   ========================================================================= */
+.kagrup > .ic { padding: 8px 12px; background: var(--yuz) }
+.kagrup .sat {
+  display: flex; justify-content: space-between; gap: 10px;
+  padding: 5px 0; font-size: 11.5px;
+}
+.kagrup .sat + .sat { border-top: 1px solid var(--cizgi2) }
+.kagrup .sat > span:first-child { color: var(--soluk) }
+.kagrup .sat b { text-align: right }
+/* Grup DIBINDEKI aciklama notu (mockup `.not`): kutunun icinde, ustundeki
+   satirlardan cizgiyle ayrilir. */
+.kagrup > .not, .kagov > .not {
+  font-size: 11px; color: var(--soluk); line-height: 1.5;
+  padding: 8px 12px; background: var(--yuz2); border-top: 1px solid var(--cizgi2);
+}
+.kagrup > .not b, .kagov > .not b { color: var(--yazi2) }
+/* Modal govdesinde tek basina duran not: kutunun disinda, cerceveli. */
+.kagov > .not { border: 1px solid var(--cizgi2); border-radius: var(--r); margin-top: 8px }
+
+/* ===========================================================================
+   eMAR ÇİZELGESİ — mockup Ekranlar/Yatan/order_ilac_uygulama.html.
+   Satir order, sutun saat: ilac takibi "verildi mi" sorusudur ve bu soru
+   ancak SAATLE birlikte sorulur. Duz liste "gunde uc kez verilecek" der,
+   "16:00 atlandi"yi soylemez.
+   ========================================================================= */
+.emar { background: var(--yuz); border: 1px solid var(--cizgi2); border-radius: var(--r) }
+.emar-serit {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 6px 10px; background: var(--kartzem); border-bottom: 1px solid var(--cizgi2);
+  font-size: 11.5px;
+}
+.emar-serit label { display: flex; align-items: center; gap: 6px; color: var(--soluk) }
+.emar-serit select, .emar-serit input { height: 24px; font-size: 11.5px }
+.emar-ozet { display: flex; gap: 12px; margin-left: auto; flex-wrap: wrap }
+.emar-ozet span { color: var(--soluk) }
+.emar-ozet b { color: var(--yazi2); font-size: 13px; margin-right: 3px }
+.emar-ozet .ok b  { color: var(--ok) }
+.emar-ozet .uy b  { color: var(--uyari) }
+.emar-ozet .teh b { color: var(--hata) }
+
+.emar-tablo { overflow-x: auto }
+.emar-tablo table { border-collapse: collapse; width: 100%; min-width: 820px }
+.emar-tablo th, .emar-tablo td {
+  border-bottom: 1px solid var(--cizgi2); padding: 5px 8px;
+  font-size: 11.5px; text-align: left; vertical-align: top;
+}
+.emar-tablo thead th { background: var(--serit1); color: var(--soluk); font-weight: 400 }
+.emar-tablo th.saat, .emar-tablo td.saat { width: 62px; text-align: center; padding: 3px }
+.emar-tablo .ilac-ad { font-weight: 700; color: var(--yazi2) }
+.emar-tablo .ilac-alt { font-size: 10.5px; color: var(--soluk); margin-top: 2px }
+
+/* DOZ HÜCRESİ: durum rengi mockuptaki ölçülerle. Uygulanmış doz tiklanmaz -
+   geri alma "duzeltme notu" isidir, tek tikla degil. */
+.emar .doz {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 1px;
+  border: 1px solid var(--cizgi); border-radius: 3px; padding: 3px 5px;
+  min-width: 50px; font-size: 10.5px; background: var(--kartzem); color: #4d5d6e;
+  cursor: pointer;
+}
+.emar .doz b { font-size: 11px }
+.emar .doz i { font-size: 9.5px; font-style: normal; opacity: .8 }
+.emar .doz.ok    { background: var(--okzem);    border-color: var(--okkenar);    color: var(--ok); cursor: default }
+.emar .doz.bekle { background: #f4f7fb;         border-color: #cfe0f5;           color: var(--mor) }
+.emar .doz.gec   { background: var(--uyarizem); border-color: var(--uyarikenar); color: var(--uyari) }
+.emar .doz.atla  { background: var(--hatazem);  border-color: var(--hatakenar);  color: var(--hata) }
+.emar .doz.yok   { border-style: dashed; color: #b6c0cb; background: var(--yuz); cursor: default }
+.emar > .not {
+  font-size: 11px; color: var(--soluk); line-height: 1.5;
+  padding: 8px 12px; background: var(--yuz2); border-top: 1px solid var(--cizgi2);
+}
+.emar > .not b { color: var(--yazi2) }
+
+/* ===========================================================================
+   HEMSIRE IZLEM (nobet ekrani) — mockup Ekranlar/Yatan/hemsire_izlem.html.
+   Olcum girisi, egri, sivi dengesi ve risk AYNI ekranda: dordu ayri ekrana
+   bolunseydi hemsire her olcumde dort kez gezinir, kayit nobet sonunda toplu
+   yazilirdi. Saatinde yazilmayan izlem, izlem degildir.
+   ========================================================================= */
+.izlem-pano { background: var(--yuz); border: 1px solid var(--cizgi2); border-radius: var(--r) }
+.izlem-giris {
+  display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap;
+  padding: 8px 10px; border-bottom: 1px solid var(--cizgi2);
+}
+.izlem-giris label {
+  display: flex; flex-direction: column; gap: 2px;
+  font-size: 10.5px; color: var(--soluk);
+}
+.izlem-giris input { width: 78px; height: 24px; font-size: 12px }
+.izlem-govde { padding: 8px 10px }
+
+/* VITAL EGRISI: cift eksen (nabiz/solunum solda, ates sagda) - ortak eksende
+   37,4 ile 38,9 ayni gorunurdu. */
+.vital-egri { border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--yuz) }
+.egri-lejant {
+  display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
+  padding: 4px 10px 6px; font-size: 10.5px; color: var(--soluk);
+}
+.egri-lejant span { display: inline-flex; align-items: center; gap: 4px }
+.egri-lejant i { width: 10px; height: 3px; border-radius: 2px; display: inline-block }
+.egri-lejant em { font-style: normal; opacity: .75 }
+
+.izlem-tablo { width: 100%; border-collapse: collapse; margin-top: 8px }
+.izlem-tablo th, .izlem-tablo td {
+  border-bottom: 1px solid var(--cizgi2); padding: 4px 8px; font-size: 11.5px;
+  text-align: left;
+}
+.izlem-tablo thead th { background: var(--serit1); color: var(--soluk); font-weight: 400 }
+.izlem-tablo tr.satir-kritik td { background: var(--hatazem) }
+
+/* SIVI OZET KUTULARI: denge HESAPLANIR - elle tutulan toplam, gun ortasinda
+   eklenen bir serumla sessizce yanlislanir. */
+.izlem-skor { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px }
+.izlem-skor .k {
+  border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--kartzem);
+  padding: 6px 10px;
+}
+.izlem-skor .k > span { display: block; font-size: 10px; color: var(--soluk); letter-spacing: .3px }
+.izlem-skor .k > b { font-size: 16px; color: var(--yazi2) }
+.izlem-skor .k > i { display: block; font-size: 10.5px; color: var(--soluk); font-style: normal }
+.izlem-skor .k.uy { border-color: var(--uyarikenar); background: var(--uyarizem) }
+.izlem-govde > .not, .izlem-pano .not {
+  font-size: 11px; color: var(--soluk); line-height: 1.5; margin-top: 8px;
+  padding: 8px 10px; background: var(--yuz2); border: 1px solid var(--cizgi2);
+  border-radius: var(--r);
+}
+.izlem-pano .not b { color: var(--yazi2) }
+@media (max-width: 900px) { .izlem-skor { grid-template-columns: repeat(2, 1fr) } }
+
+/* ICMAL TABLOSU — mockup yatan_hizmet_fatura.html. Grup satiri (YATAK VE
+   REFAKAT / ILAC ...) ve sag yasli tutar sutunlari; satirlar elle girilmez,
+   kaynaktan duser. */
+.icmal-pano { background: var(--yuz); border: 1px solid var(--cizgi2); border-radius: var(--r) }
+/* Icerik KENDI kabinda: global sinif adlarini (.izlem-tablo, .izlem-skor)
+   kapsamli kuralla ezmek, ayni ada iki anlam yukler - tema testi bunu kilitli
+   tutuyor (temaSinifCakismasi). Bosluk kabin isi. */
+.icmal-govde { padding: 8px 10px; display: flex; flex-direction: column; gap: 8px }
+.icmal-tablo td.sag, .icmal-tablo th.sag { text-align: right }
+.icmal-tablo tr.grup td {
+  background: var(--grupzem); color: var(--grupyazi); font-weight: 700;
+  font-size: 11px; letter-spacing: .3px;
+}
+
+/* EPIKRIZ ALANLARI (taburcu ekrani, mockup taburcu_epikriz.html `.epikriz`).
+   Metin kutulari GENIS ve ALT ALTA: epikriz bir formdan cok bir metindir;
+   iki kolona sikistirmak cumleleri kirpar. */
+.epikriz-alanlar { display: flex; flex-direction: column; gap: 8px; margin-top: 8px }
+.epikriz-alanlar label { display: flex; flex-direction: column; gap: 3px }
+.epikriz-alanlar label > span {
+  font-size: 11px; color: var(--grupyazi); font-weight: 700; letter-spacing: .3px;
+  display: flex; align-items: center; gap: 6px;
+}
+.epikriz-alanlar .taslak-rozet {
+  font-size: 10px; color: var(--mor); font-weight: 400; font-style: normal;
+}
+.epikriz-alanlar textarea {
+  font: inherit; font-size: 12px; line-height: 1.55; padding: 6px 8px;
+  border: 1px solid var(--cizgi); border-radius: var(--r); background: var(--yuz);
+  resize: vertical;
+}
+.epikriz-alt { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap }
+.epikriz-alt .sonuk { font-size: 11px }
+
+
+/* ===========================================================================
+   GOZ UNITE PANOSU SAYAC SERIDI — mockup Ekranlar/Goz/goz_unite_panosu.html.
+   Panonun ilk bakista soyledigi sey "unite tikali mi": yedi kutu, gun +
+   bekleme + darbogaz. Kanban bunun ALTINDA "kim nerede"yi gosterir.
+   ========================================================================= */
+.unite-ozet {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
+  padding: 8px 0 10px;
+}
+.unite-ozet .k {
+  border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--yuz);
+  padding: 7px 10px; min-width: 0;
+}
+.unite-ozet .k > span { display: block; font-size: 10px; color: var(--soluk); letter-spacing: .3px }
+.unite-ozet .k > b { font-size: 18px; color: var(--yazi2); line-height: 1.25; display: block }
+/* Alt satir TASMAZ, kirpilir: "3 kabul · 6 on tetkik · 9 muayene" dar ekranda
+   kutuyu iki katina cikariyordu - sayaclarin yuksekligi ayni kalmali. */
+.unite-ozet .k > i {
+  display: block; font-size: 10.5px; color: var(--soluk); font-style: normal;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.unite-ozet .k.uy  { background: var(--uyarizem); border-color: var(--uyarikenar) }
+.unite-ozet .k.uy  > b { color: var(--uyari) }
+.unite-ozet .k.teh { background: var(--hatazem); border-color: var(--hatakenar) }
+.unite-ozet .k.teh > b { color: var(--hata) }
+.unite-ozet .k.iyi { background: var(--okzem); border-color: var(--okkenar) }
+.unite-ozet .k.iyi > b { color: var(--ok) }
+@media (max-width: 1250px) { .unite-ozet { grid-template-columns: repeat(4, 1fr) } }
+@media (max-width: 780px)  { .unite-ozet { grid-template-columns: repeat(2, 1fr) } }
+
+
+/* GOZ UNITE PANOSU: surukle-birak geri bildirimi + dilatasyon sayaci +
+   alt tablolar (mockup Ekranlar/Goz/goz_unite_panosu.html).
+
+   Suruklenen kart SOLUR, hedef sutun CERCEVELENIR: birakmanin nereye
+   dusecegini gostermeyen surukleme, kullaniciyi denemeye zorlar. */
+.kanban .is[draggable="true"] { cursor: grab }
+.kanban .is.suruklenen { opacity: .45; cursor: grabbing }
+.kanban .kol.hedef {
+  border-color: var(--vurgu); background: var(--mor2);
+  box-shadow: inset 0 0 0 1px var(--vurgu);
+}
+
+/* DILATASYON SAYACI: pano uzaktan okunuyor - "13 dk kaldi" yazisini okumak
+   icin yaklasmak gerekir, cubuk uzaktan okunur. */
+.kanban .dilat { display: flex; align-items: center; gap: 5px; margin-top: 3px }
+.kanban .dcubuk {
+  flex: 1; min-width: 40px; height: 5px; border-radius: 3px;
+  background: var(--sekmezem); overflow: hidden;
+}
+.kanban .dcubuk > i { display: block; height: 100%; background: #6a3fb5 }
+.kanban .dcubuk.hazir > i { background: var(--ok) }
+
+/* ODA/CIHAZ ve HEKIM YUKU tablolari yan yana: biri "kaynak tikali mi",
+   oteki "kim yetisemiyoR" sorusunu cevapliyor; alt alta konsalar ikincisi
+   ekranin disinda kalirdi. */
+.unite-tablolar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-bottom: 8px }
+.unite-tablolar .kagrup { margin-bottom: 0 }
+/* Bosluk ELEMENT secicisiyle verilir (.izlem-tablo degil): global bir sinif
+   adini kapsamli kuralla ezmek ayni ada iki anlam yukluyor - tema testi bunu
+   kilitli tutuyor (temaSinifCakismasi). */
+.unite-tablolar table { width: calc(100% - 20px); margin: 8px 10px }
+.unite-tablolar .not { margin: 0 10px 10px }
+@media (max-width: 1000px) { .unite-tablolar { grid-template-columns: 1fr } }
+
+
+/* ===========================================================================
+   GOZ MUAYENE KARTI — mockup Ekranlar/Goz/goz_detayli_muayene.html.
+   Kimlik seridi + baglam kutulari + tamamlanma cubugu; olcum sekmelerinin
+   USTUNDE durur (hekim olcume baslamadan once bu dordunu okuyor).
+   ========================================================================= */
+.goz-kimlik {
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  padding: 8px 12px; background: var(--kartzem); border-bottom: 1px solid var(--cizgi2);
+}
+.goz-kimlik .ad { font-size: 14px; font-weight: 700; color: var(--yazi2) }
+.goz-kimlik .kv { display: flex; flex-direction: column; gap: 1px }
+.goz-kimlik .kv > span { font-size: 10.5px; color: var(--soluk) }
+.goz-kimlik .kv > b { font-size: 12px }
+.goz-kimlik .sag { margin-left: auto; display: flex; gap: 5px; flex-wrap: wrap }
+
+/* BAGLAM KUTULARI (mockup `.hdr k4`): dort kolon, okunur alanlar. Mockupta
+   hafif krem zemin - klinik baglami olcum alanlarindan ayiriyor. */
+.goz-baglam {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px 14px;
+  padding: 9px 12px; background: #fffaf3; border-bottom: 1px solid var(--cizgi2);
+}
+.goz-baglam .alan { display: flex; flex-direction: column; gap: 2px; min-width: 0 }
+.goz-baglam .alan > span { font-size: 10.5px; color: var(--soluk) }
+.goz-baglam .alan > b {
+  font-size: 11.5px; font-weight: 400; line-height: 1.45; color: var(--yazi);
+  display: flex; gap: 4px; flex-wrap: wrap; align-items: center;
+}
+.goz-baglam .bos-deger { color: #b6c0cb; font-style: normal }
+@media (max-width: 1100px) { .goz-baglam { grid-template-columns: repeat(2, 1fr) } }
+@media (max-width: 620px)  { .goz-baglam { grid-template-columns: 1fr } }
+
+/* TAMAMLANMA CUBUGU (mockup `.statusbar`): muayeneyi kapatmadan once "neyi
+   olcmedim". Dolu olan yesil tik, bos olan gri halka. */
+.goz-durum {
+  display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
+  padding: 5px 12px; background: var(--serit1);
+  border-bottom: 1px solid var(--cizgi); font-size: 11px; color: var(--soluk);
+}
+.goz-durum .tamam { color: var(--ok); font-weight: 700 }
+.goz-durum .sonuk { margin-left: auto; font-size: 10.5px }
+
+/* OLCUM IZGARASI BASLIGI (mockup `.ic`): "0,8" tek basina ondalik mi logMAR mi
+   belli degil - olcumun adi ve birimi izgaranin ustunde yazar. */
+.odos-baslik { padding: 8px 2px 2px; font-size: 11.5px; color: var(--yazi2) }
+.odos-baslik .sonuk { font-weight: 400 }
+/* Mockuptaki dar deger kutusu (`.inp.k`, 58px): sph/cyl/aks gibi kisa sayilar
+   satiri kaplamasin, iki goz yan yana okunabilsin. */
+.odos .v input.k, .odos .v .k { width: 62px; flex: none; text-align: center }
+.odos .v input { min-width: 0 }
+
+
+/* ===========================================================================
+   GOZ SEMASI (cizim) — mockup Ekranlar/Goz/goz_semasi.html.
+   Uc panel: damga paleti · iki goz tuvali · isaretler + uretilen metin.
+   Sinif adlari kendi on ekiyle (sema-*): kisa ortak adlar temada baska
+   anlam tasiyor.
+   ========================================================================= */
+.sema-sekme { display: flex; gap: 4px; flex-wrap: wrap; padding: 2px 0 8px }
+.sema-duzen {
+  display: grid; grid-template-columns: 208px minmax(0, 1fr) 296px; gap: 10px;
+  align-items: start;
+}
+.sema-duzen .pb,
+.dikte-duzen .pb {
+  background: linear-gradient(var(--serit1), var(--serit2));
+  border: 1px solid var(--cizgi2); border-radius: var(--r);
+  padding: 4px 8px; margin: 8px 0 4px; font-size: 11px; font-weight: 700;
+  color: var(--yazi2); display: flex; align-items: center; gap: 6px;
+}
+.sema-duzen .pb:first-child, .dikte-duzen .pb:first-child { margin-top: 0 }
+.sema-duzen .pb .sp, .dikte-duzen .pb .sp {
+  margin-left: auto; font-weight: 400; color: var(--soluk);
+}
+.sema-palet, .sema-yan { border: 1px solid var(--cizgi2); border-radius: var(--r);
+  background: var(--yuz); padding: 6px 7px; min-width: 0 }
+.sema-damga, .sema-satir {
+  display: flex; align-items: center; gap: 7px; width: 100%;
+  padding: 4px 6px; border: 1px solid transparent; border-radius: var(--r);
+  background: none; font-size: 11.5px; text-align: left; color: var(--yazi);
+}
+.sema-damga { cursor: pointer }
+.sema-damga:hover { background: var(--serit1) }
+.sema-damga.secili, .sema-satir.secili { background: var(--mor2); border-color: var(--vurgu) }
+.sema-damga[disabled] { opacity: .45; cursor: default }
+.sema-damga .sim, .sema-satir .sim {
+  width: 19px; height: 19px; flex: none; display: flex;
+  align-items: center; justify-content: center;
+  border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--yuz);
+}
+.sema-satir .sp, .sema-yan .sp { margin-left: auto; color: var(--soluk); font-size: 10.5px }
+.sema-bos { padding: 6px; font-size: 11px; color: var(--soluk) }
+.sema-tuvaller { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; min-width: 0 }
+.sema-goz { border: 1px solid var(--cizgi2); border-radius: var(--r);
+  background: var(--yuz); overflow: hidden; min-width: 0 }
+.sema-goz .gb {
+  display: flex; align-items: center; gap: 6px; padding: 4px 7px;
+  background: var(--serit1); border-bottom: 1px solid var(--cizgi2); font-size: 11px;
+}
+.sema-goz .gb .sp { margin-left: auto; color: var(--soluk); font-size: 10.5px }
+/* Tuval SVG'si kabina uyar: sema 0-320 koordinatinda cizilir, kayit 0-1
+   oraninda tutulur - ekran boyu degisince isaret yerinden oynamasin. */
+.sema-tuval { display: block; width: 100%; height: auto; touch-action: none }
+.sema-metin {
+  width: 100%; border: 1px solid var(--cizgi); border-radius: var(--r);
+  padding: 5px 7px; font: inherit; font-size: 11.5px; line-height: 1.5; resize: vertical;
+}
+.sema-yaz { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px }
+.sema-yaz select { flex: 1; min-width: 120px }
+.sema-not, .dikte-not { font-size: 10.5px; color: var(--soluk); line-height: 1.5; padding: 5px 2px }
+
+/* ===========================================================================
+   DIKTE — mockup Ekranlar/Goz/goz_dikte.html.
+   Sol hedef alanlar (ve KAPALI olanlar), ortada transkript + duzeltilmis
+   metin + oturum dokumu, sagda komut/cumle/sozluk.
+   ========================================================================= */
+.dikte-duzen {
+  display: grid; grid-template-columns: 240px minmax(0, 1fr) 274px; gap: 10px;
+  align-items: start;
+}
+.dikte-sol, .dikte-orta, .dikte-sag {
+  border: 1px solid var(--cizgi2); border-radius: var(--r);
+  background: var(--yuz); padding: 6px 7px; min-width: 0;
+}
+.dikte-alan {
+  display: flex; align-items: center; gap: 6px; width: 100%;
+  padding: 4px 6px; border: 1px solid transparent; border-radius: var(--r);
+  background: none; font-size: 11.5px; text-align: left; color: var(--yazi);
+}
+button.dikte-alan { cursor: pointer }
+button.dikte-alan:hover { background: var(--serit1) }
+.dikte-alan.secili { background: var(--mor2); border-color: var(--vurgu); font-weight: 700 }
+.dikte-alan.kilit { color: var(--soluk) }
+.dikte-alan .sp { margin-left: auto; color: var(--soluk); font-size: 10.5px; font-weight: 400 }
+/* Ham transkript: tanimanin duydugu. Duzeltilmis metinden AYRI durur -
+   hekim "ben bunu soylemedim" diyebilmeli. */
+.dikte-transkript {
+  border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--kartzem);
+  padding: 7px 9px; font-size: 13px; line-height: 1.7; min-height: 62px;
+}
+.dikte-transkript .gecici { color: var(--soluk); font-style: italic }
+.dikte-transkript .imlec {
+  display: inline-block; width: 2px; height: 14px; background: var(--vurgu);
+  vertical-align: -2px; margin-left: 2px; animation: dikteYanip 1s steps(2, end) infinite;
+}
+@keyframes dikteYanip { 50% { opacity: 0 } }
+.dikte-metin {
+  width: 100%; border: 1px solid var(--cizgi); border-radius: var(--r);
+  padding: 6px 8px; font: inherit; font-size: 12.5px; line-height: 1.6; resize: vertical;
+}
+.dikte-arac { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin-top: 6px }
+.dikte-dokum { overflow-x: auto }
+.dikte-dokum table { width: 100%; border-collapse: collapse; font-size: 11.5px }
+.dikte-dokum th {
+  background: var(--serit1); border-bottom: 1px solid var(--cizgi);
+  text-align: left; padding: 4px 7px; font-size: 11px; color: var(--yazi2);
+}
+.dikte-dokum td { border-bottom: 1px solid var(--cizgi2); padding: 4px 7px }
+.dikte-komut { display: flex; gap: 6px; align-items: center; padding: 3px 6px;
+  border-bottom: 1px solid var(--cizgi2); font-size: 11.5px }
+.dikte-komut .sp { margin-left: auto; color: var(--soluk); font-size: 10.5px }
+.dikte-cumle {
+  display: block; width: 100%; text-align: left; padding: 4px 6px;
+  border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--yuz);
+  font-size: 11.5px; margin-bottom: 4px; cursor: pointer; color: var(--yazi);
+}
+.dikte-cumle:hover { background: var(--serit1) }
+
+@media (max-width: 1100px) {
+  .sema-duzen, .dikte-duzen { grid-template-columns: 1fr }
+  .sema-tuvaller { grid-template-columns: 1fr }
+}
+
+/* Dikte kayit seridi (mockup `.kayitSerit`): ekranin "dinliyorum" dedigi tek
+   yer. Serit yalniz GERCEKTEN dinlerken yanar - tanima motoru kendiliginden
+   durdugunda da soner. */
+.dikte-serit {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 6px 9px; margin-bottom: 8px;
+  border: 1px solid var(--cizgi2); border-radius: var(--r);
+  background: var(--kartzem); font-size: 11.5px;
+}
+.dikte-serit.acik { background: var(--uyarizem); border-color: var(--uyarikenar) }
+.dikte-serit .mik {
+  width: 24px; height: 24px; border-radius: 50%; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--satiralt); color: var(--soluk); font-size: 12px;
+}
+.dikte-serit.acik .mik { background: var(--hata); color: #fff }
+.dikte-serit .dalga { display: flex; align-items: flex-end; gap: 2px; height: 22px }
+.dikte-serit .dalga i { display: block; width: 3px; background: #9fb6d4; border-radius: 2px }
+.dikte-serit .sayac { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--yazi2) }
+.dikte-serit .sag-not { margin-left: auto; font-size: 10.5px; text-align: right }
+
+/* Karsilastirma kipi: ONCEKI cizim ustte, soluk ve salt okunur. Bugunku
+   cizimle ayni zeminde durur - fark ancak ayni cerceveden okunur. */
+.sema-goz.onceki { background: var(--satiralt); opacity: .92 }
+.sema-goz.onceki .gb { background: var(--satiralt) }
+.sema-goz.onceki .sema-tuval { cursor: default }
+.sema-satir.degisim .sim { font-weight: 700 }
+.sema-satir.degisim.yeni .sim { color: var(--hata) }
+.sema-satir.degisim.kayboldu .sim { color: var(--ok) }
+.sema-satir.degisim.duruyor { color: var(--soluk) }
+
+/* ===========================================================================
+   GOZ SEMASI CIKTISI — /goz/sema-cikti/:id.
+   Kagit duzeni: antet · kimlik · sema turu basina iki goz + isaret dokumu.
+   `.cikti-sayfa` ve `.cikti-arac` ORTAK (lab/radyoloji ciktilariyla ayni
+   kagit); buradaki kurallar yalniz semaya ozgu yerlesimi tarif eder.
+   ========================================================================= */
+.sema-cikti .cikti-antet {
+  display: flex; gap: 14px; align-items: flex-start;
+  border-bottom: 2px solid #1c4374; padding-bottom: 8px; margin-bottom: 10px;
+}
+.sema-cikti .cikti-antet b { font-size: 14px; color: #1c4374 }
+.sema-cikti .cikti-antet .sag { margin-left: auto; text-align: right }
+.sema-cikti .cikti-kimlik {
+  width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 12px;
+}
+.sema-cikti .cikti-kimlik th {
+  text-align: left; color: #6b7a8d; font-weight: 400; padding: 3px 8px 3px 0;
+  width: 92px; border-bottom: 1px solid #eef2f6;
+}
+.sema-cikti .cikti-kimlik td {
+  padding: 3px 14px 3px 0; font-weight: 700; border-bottom: 1px solid #eef2f6;
+}
+.sema-cikti .cikti-blok { margin-top: 14px; break-inside: avoid }
+.sema-cikti .cikti-blok h3 {
+  margin: 0 0 6px; font-size: 11.5px; color: #1c4374; text-transform: uppercase;
+  letter-spacing: .3px; border-bottom: 1px solid #e4eaf1; padding-bottom: 2px;
+}
+.sema-cikti .cikti-tuvaller { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
+.sema-cikti .cikti-goz { border: 1px solid #e4eaf1; border-radius: 3px; overflow: hidden }
+.sema-cikti .cikti-goz .gb {
+  display: flex; gap: 6px; padding: 3px 7px; font-size: 11px;
+  background: #f4f7fb; border-bottom: 1px solid #e4eaf1;
+}
+.sema-cikti .cikti-goz .gb .sp { margin-left: auto; color: #6b7a8d }
+.sema-cikti .cikti-sema { display: block; width: 100%; height: auto }
+.sema-cikti .cikti-isaret {
+  width: 100%; border-collapse: collapse; font-size: 11.5px; margin-top: 8px;
+}
+.sema-cikti .cikti-isaret th {
+  text-align: left; border-bottom: 1.5px solid #c9d6e5; padding: 4px 8px 4px 0;
+  color: #4a5b6e;
+}
+.sema-cikti .cikti-isaret td { border-bottom: 1px solid #eef2f6; padding: 4px 8px 4px 0 }
+.sema-cikti .cikti-metin { margin: 6px 0 0; line-height: 1.6 }
+.sema-cikti .cikti-bos { padding: 18px 0; color: #6b7a8d }
+.sema-cikti .cikti-imza {
+  display: flex; gap: 20px; align-items: flex-end; margin-top: 26px; font-size: 11.5px;
+}
+.sema-cikti .cikti-imza .cizgi {
+  border-top: 1px solid #9aa8b6; width: 190px; margin-bottom: 4px;
+}
+.sema-cikti .cikti-imza .sonuk { color: #6b7a8d; max-width: 320px; line-height: 1.5 }
+@media print {
+  /* Kagitta iki goz yan yana kalir; blok bolunmez. */
+  .sema-cikti .cikti-goz { break-inside: avoid }
+}
+@media (max-width: 760px) {
+  .sema-cikti .cikti-tuvaller { grid-template-columns: 1fr }
+}

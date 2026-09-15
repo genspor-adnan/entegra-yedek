@@ -23,8 +23,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Yalniz HBYS: donem icmali odeyen kurum (SGK/OSS) akisinin parcasi,
     //   ERP kurulumunda karsiligi yok (kullanici).
     urunModu: 2,
-    menuGrup: 'Cari', menuAd: 'Kurum İcmalleri', ic: '🧾', yetkiKodu: 'kurum',
-    menuSira: 45,
+    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Kurum İcmalleri', ic: '🧾', yetkiKodu: 'kurum',
+    menuSira: 20,
   },
   {
     // Kaynak id, API route ve yetki kodu 'cari' KALDI - Musteri Listesi kendi URL'ini
@@ -44,8 +44,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Yalniz ERP (kullanici): HBYS'de musterinin karsiligi HASTA listesidir,
     //   iki liste ayni tarafi iki adla gostermesin.
     urunModu: 1,
-    menuGrup: 'Cari', menuAd: 'Müşteri Listesi', ic: '👥', yetkiKodu: 'cari',
-    menuSira: 20,
+    menuGrup: 'Cari & CRM', menuAd: 'Müşteri Listesi', ic: '👥', yetkiKodu: 'cari',
+    menuSira: 10,
   },
   {
     // Musteri Listesi'nin BIREBIR kopyasi (kullanici istegi) - ayni kaynak ('cari'),
@@ -60,8 +60,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     sabitFiltre: { alan: 'tedarikci', op: 'esit', deger: 1 },
     yeniKayitVarsayilanlari: { musteri: false, tedarikci: true },
     yerTutucuSekmeler: ['Mali Durum', 'Banka / IBAN', 'Yorum / Medya', 'Ekstre', 'Ek Alanlar'],
-    menuGrup: 'Cari', menuAd: 'Tedarikçi Listesi', ic: '🚚', yetkiKodu: 'cari',
-    menuSira: 30,
+    menuGrup: 'Stok & Hizmet', menuSira: 70, menuAd: 'Tedarikçiler',
+    ic: '🚚', yetkiKodu: 'cari',
   },
   {
     // ANLASMALI KURUMLAR (249, kullanici: "cari altina musteri benzeri Kurumlar
@@ -84,7 +84,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Ham tur kolonu API'den geliyor (basvuru "Ödeyen Tipi" suzmesi icin) ama
     //   gridde gorunmesin - turAdi zaten var.
     gizliKolonlar: ['tur'],
-    menuGrup: 'Cari', menuAd: 'Anlaşmalı Kurumlar', ic: '🏛️', yetkiKodu: 'kurum',
+    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Anlaşmalı Kurumlar', ic: '🏛️', yetkiKodu: 'kurum',
   },
   {
     // kisi_listesi.html mockup - kullanici "sade grid olsun, altta sekme yanda bilgi
@@ -92,8 +92,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // yapilmadi, ozel bir "sadelestirme" gerekmedi).
     kaynak: 'kisi', baslik: 'Kisiler', yol: 'Cari › Kisiler', kartYolu: '/kisi',
     aksiyonEkrani: 'kisi-liste', cipler: DURUM_CIPLERI,
-    menuGrup: 'Cari', menuAd: 'Kişi Listesi', ic: '🧑', yetkiKodu: 'cari',
-    menuSira: 50,
+    menuGrup: 'Cari & CRM', menuAd: 'Kişi Listesi', ic: '🧑', yetkiKodu: 'cari',
+    menuSira: 30,
   },
   {
     // DIS DOKTORLAR (305, kullanici): goruntuleme merkezine hasta GONDEREN
@@ -121,8 +121,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Hekim Bilgisi ARTIK GENEL SEKMESINDE (kullanici): ayri sekme olarak da
     //   gorunmesi ayni kutuyu iki yere koymak olurdu.
     gizliKartSekmeleri: ['Hekim Bilgisi'],
-    menuGrup: 'Cari', menuAd: 'Dış Doktorlar', ic: '🩺', yetkiKodu: 'personel',
-    menuSira: 60,
+    menuGrup: 'Kurumlar & Sigorta', menuAd: 'Dış Doktorlar', ic: '🩺', yetkiKodu: 'personel',
+    menuSira: 50,
     urunModu: 2,
   },
   {
@@ -134,7 +134,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tumu' },
     ],
     // Grup CRM: musteri iliskileri basligi altinda projeler (kullanici karari).
-    menuGrup: 'CRM', menuAd: 'Projeler', ic: '📁', yetkiKodu: 'proje', menuSira: 30,
+    menuGrup: 'Cari & CRM', menuAd: 'Projeler', ic: '📁', yetkiKodu: 'proje', menuSira: 60,
   },
   {
     // GOREV / HATIRLATMA / TAKVIM (db/108) - ana sayfa panelini besleyen kayitlar.
@@ -145,7 +145,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tamamlanan', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'CRM', menuAd: 'Görevler', ic: '✅', yetkiKodu: 'gorev', menuSira: 40,
+    menuGrup: 'Cari & CRM', menuAd: 'Görevler', ic: '✅', yetkiKodu: 'gorev', menuSira: 70,
   },
   {
     // SATIS FIRSATI (db/121, mockup firsat_karti/firsat_listesi.html) - teklif
@@ -160,7 +160,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     ],
     toplam: ['tahminiTutar', 'agirlikliTutar'],
     yerTutucuSekmeler: ['Teklifler', 'Yorum / Medya', 'Ek Alanlar'],
-    menuGrup: 'CRM', menuAd: 'Satış Fırsatları', ic: '🎯', yetkiKodu: 'firsat', menuSira: 20,
+    menuGrup: 'Cari & CRM', menuAd: 'Satış Fırsatları', ic: '🎯', yetkiKodu: 'firsat', menuSira: 50,
   },
   {
     // ADAY MÜŞTERİLER (db/122): henuz musteri olmayan firmalar. AYNI taraf
@@ -194,7 +194,7 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     //   kullanici). Musteri kartinda zorunlu DEGIL - eski kayitlarin cogunda bos.
     zorunluKartAlanlari: ['temsilci'],
     yerTutucuSekmeler: ['Yorum / Medya'],
-    menuGrup: 'CRM', menuAd: 'Aday Müşteriler', ic: '🌱', yetkiKodu: 'aday', menuSira: 10,
+    menuGrup: 'Cari & CRM', menuAd: 'Aday Müşteriler', ic: '🌱', yetkiKodu: 'aday', menuSira: 40,
   },
   {
     // KATEGORILER (270/345): stok VE hizmet ayni agaci kullanir (sinirsiz
@@ -205,8 +205,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Menude STOK & HIZMET grubunda, Hizmet Listesi'nin (20) hemen ardinda
     //   (kullanici): kategori bu iki listenin siniflandirmasi - Yonetim
     //   altinda ararken kimse bulamiyordu.
-    menuGrup: 'Stok & Hizmet', menuAd: 'Kategoriler', ic: '🌳', yetkiKodu: 'stok',
-    menuSira: 25,
+    menuGrup: 'Stok & Hizmet', menuAltGrup: 'Ayarlar', menuAd: 'Kategoriler', ic: '🌳', yetkiKodu: 'stok',
+    menuSira: 200,
   },
   {
     kaynak: 'hesap-plani', baslik: 'Hesap Planı', yol: 'Yonetim › Hesap Plani',
@@ -215,8 +215,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Çalışan', filtre: { alan: 'calisirMi', op: 'esit', deger: 1 } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Muhasebe', menuAd: 'Hesap Planı', ic: '📒', yetkiKodu: 'hesap_plani',
-    menuSira: 10,
+    menuGrup: 'Muhasebe', menuAltGrup: 'Ayarlar', menuAd: 'Hesap Planı', ic: '📒', yetkiKodu: 'hesap_plani',
+    menuSira: 90,
   },
   {
     // Muhasebe fisleri: kasa islemi/belge kesinlestikce OTOMATIK uretilir; buradan
@@ -228,21 +228,19 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tumu' },
     ],
     menuGrup: 'Muhasebe', menuAd: 'Muhasebe Fişleri', ic: '📕', yetkiKodu: 'muhasebe_fis',
-    menuSira: 20,
+    menuSira: 10,
   },
   {
     kaynak: 'muhasebe-fis-satir', baslik: 'Fiş Satırları', yol: 'Yonetim › Fis Satirlari',
     // Belgeden "Muhasebe Fişini Aç" bu ekrana fisId ile gelir.
     urlFiltreAlani: 'fisId',
-    toplam: ['borc', 'alacak'],
-    menuGrup: 'Muhasebe', menuAd: 'Fiş Satırları', ic: '📗', yetkiKodu: 'muhasebe_fis',
-    menuSira: 30,
+    toplam: ['borc', 'alacak'], menuAd: 'Fiş Satırları', menuGizli: true, ic: '📗', yetkiKodu: 'muhasebe_fis',
   },
   {
     kaynak: 'masraf-merkezi', baslik: 'Masraf Merkezleri', yol: 'Yonetim › Masraf Merkezleri',
     kartYolu: '/masraf-merkezi', cipler: DURUM_CIPLERI,
-    menuGrup: 'Muhasebe', menuAd: 'Masraf Merkezleri', ic: '🏷️', yetkiKodu: 'masraf_merkezi',
-    menuSira: 40,
+    menuGrup: 'Muhasebe', menuAltGrup: 'Ayarlar', menuAd: 'Masraf Merkezleri', ic: '🏷️', yetkiKodu: 'masraf_merkezi',
+    menuSira: 91,
   },
   {
     // Islem turu katalogu: kasa hareketlerinin ekstre/fis davranisini VERI olarak
@@ -252,8 +250,8 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Muhasebe', menuAd: 'İşlem Türleri', ic: '⚙️', yetkiKodu: 'kasa_islem_turu',
-    menuSira: 50,
+    menuGrup: 'Finans', menuAltGrup: 'Ayarlar', menuAd: 'İşlem Türleri', ic: '⚙️', yetkiKodu: 'kasa_islem_turu',
+    menuSira: 93,
   },
   {
     // KAMPANYALAR (268, kullanici: "ayarlara liste ve kart olarak ekle"):
@@ -264,8 +262,9 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     // Menude FIYAT LISTELERININ (27) hemen ardinda (kullanici): kampanya
     //   fiyat listesi uzerine isleyen bir kural - ikisi yan yana okunur,
     //   Yonetim altinda ararken bulunmuyordu.
-    menuGrup: 'Stok & Hizmet', menuAd: 'Kampanyalar', ic: '🏷️',
-    yetkiKodu: 'fiyat_listesi', menuSira: 28,
+    // Kampanya fiyat listesi UZERINE isleyen bir kural: hemen arkasinda durur.
+    menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Ayarlar', menuAd: 'Kampanyalar',
+    ic: '🏷️', yetkiKodu: 'fiyat_listesi', menuSira: 92,
   },
   {
     // DEPARTMANLAR (251): personel departmani ve randevu bolumu AYNI tablo -
@@ -274,6 +273,6 @@ export const CARI_LISTELERI: ListeGirdisi[] = [
     //   degil; kullanici "Departman listesi ekranini 2'ye bol" dedi.
     kaynak: 'departman', baslik: 'Bölüm / Görev', yol: 'Yönetim › Bölüm / Görev',
     ozelSayfa: true,
-    menuGrup: 'Yönetim', menuAd: 'Bölüm / Görev', ic: '🏢', yetkiKodu: 'personel',
+    menuGrup: 'İK & Prim', menuSira: 20, menuAd: 'Bölüm / Görev', ic: '🏢', yetkiKodu: 'personel',
   },
 ];

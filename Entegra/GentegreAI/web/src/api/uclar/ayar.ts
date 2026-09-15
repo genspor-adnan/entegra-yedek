@@ -1,3 +1,4 @@
+import type { AcikOturum, GirisDenemesi } from './kimlik';
 import {
   type AyarSatiri, type YardimKaydi,
   type RandevuBolumDugumu, type RandevuAyarYazma,
@@ -72,6 +73,31 @@ export const ayarUclari = {
     istek<{ satirlar: Record<string, unknown>[] }>(`/api/bildirim/${id}/log`)
       .then(y => y.satirlar),
 
+  // ------------------------------------------- kullanici yonetimi (Guvenlik) ----
+  // Yonetici PAROLA YAZMAZ: sifirlama hesabi parolasiz duruma alir, kisi ilk
+  //   giriste kendi parolasini koyar.
+  kullaniciParolaSifirla: (id: number, kilitCoz = true) =>
+    gonder<{ mesaj: string }>(
+      `/api/kullanici/${id}/parola-sifirla?kilitCoz=${kilitCoz}`, {}),
+  kullaniciKilitCoz: (id: number) =>
+    gonder<{ mesaj: string }>(`/api/kullanici/${id}/kilit-coz`, {}),
+  kullaniciOturumKapat: (id: number) =>
+    gonder<{ mesaj: string }>(`/api/kullanici/${id}/oturum-kapat`, {}),
+  kullaniciDurum: (id: number, aktif: boolean) =>
+    gonder<{ mesaj: string }>(`/api/kullanici/${id}/durum?aktif=${aktif}`, {}),
+  /** Yoneticinin gordugu: BASKASININ acik oturumlari / giris gecmisi. */
+  kullaniciOturumlari: (id: number) =>
+    istek<AcikOturum[]>(`/api/kullanici/${id}/oturumlar`),
+  kullaniciGirisGecmisi: (id: number) =>
+    istek<GirisDenemesi[]>(`/api/kullanici/${id}/giris-gecmisi`),
+  kullaniciTopluAc: () =>
+    gonder<{ acilan: number; mesaj: string }>('/api/kullanici/toplu-ac', {}),
+  /** Gridin ustundeki sayac kutulari - hepsi TEK sorgudan gelir. */
+  kullaniciOzet: () => istek<KullaniciOzeti>('/api/kullanici/ozet'),
+  /** "Bu HESABA ne yapildi" - parola sifirlandi mi, kim pasife aldi. */
+  kullaniciIslemGunlugu: (id: number) =>
+    istek<KullaniciLogSatiri[]>(`/api/kullanici/${id}/islem-gunlugu`),
+
   // ------------------------------------------------- kullanici tercihi ----
   /** Kullanicinin KENDI arayuz tercihleri (397): menu favorileri gibi.
       Deger istemcinin yazdigi JSON metni - sunucu yorumlamaz, saklar. */
@@ -135,3 +161,33 @@ export const ayarUclari = {
     gonder<object>(`/api/kod-liste/${encodeURIComponent(kod)}/${deger}`, undefined, 'DELETE'),
 
 };
+
+/** `GET /api/kullanici/ozet` - Kullanicilar ekraninin ust seridi. */
+export interface KullaniciOzeti {
+  toplam: number;
+  aktif: number;
+  pasif: number;
+  /** Parolasi hic konmamis YA DA varsayilan bayragi acik hesaplar. */
+  parolasiz: number;
+  kilitli: number;
+  /** 90 gundur girmemis (hic girmemis dahil) AKTIF hesaplar. */
+  uykuda: number;
+  /** Aktif personel sayisi - `hesapsiz` bunun altkumesi. */
+  personel: number;
+  hesapsiz: number;
+  /** Acik oturum AILE basina sayilir (rotation cogaltmasin). */
+  oturum: number;
+  oturumKisi: number;
+}
+
+/** `GET /api/kullanici/{id}/islem-gunlugu` - hesaba yapilan islemler. */
+export interface KullaniciLogSatiri {
+  tarih: string;
+  /** islem_log.islem_tipi ham kodu (1 ekle / 2 degistir / 3 sil). */
+  islemTipi: number;
+  /** Islemi YAPAN kisi - hesabin sahibi degil. */
+  kullanici: string;
+  ip: string;
+  /** Yonetim uclarinin bilgi JSON'una yazdigi serbest aciklama. */
+  islem: string;
+}

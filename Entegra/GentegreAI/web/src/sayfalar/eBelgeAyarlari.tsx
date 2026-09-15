@@ -47,7 +47,7 @@ export function EBelgeAyarlari() {
           <b>e-Belge kapalı.</b> Hiçbir şubede <b>e-Fatura Mükellefi</b> işaretli
           değil; belge GİB'e gönderilmez ve fatura/irsaliye numarası her zaman
           <b> Belge No</b> şablonundan verilir. Açmak için
-          <b> Yönetim › Firma Bilgileri</b> → şubeyi açın →
+          <b> Yönetim › Firma / Şubeler</b> → şubeyi açın →
           <b> e-Belge › Genel</b> sekmesinde <b>e-Fatura Mükellefi</b> kutusunu
           işaretleyin.
         </div>
@@ -63,7 +63,7 @@ export function EBelgeAyarlari() {
             <div className="not">
               Entegratör, kullanıcı/şifre, test ortamı ve mükellefiyet bilgileri
               artık <b>şube kaydında</b> tutuluyor:
-              <b> Yönetim › Firma Bilgileri</b> → şubeyi açın →
+              <b> Yönetim › Firma / Şubeler</b> → şubeyi açın →
               <b> e-Belge</b> sekmesi. Böylece ayrı VKN’li şube kendi entegratör
               hesabıyla, merkezin kimliğini kullanan şube merkezin hesabıyla gönderir.
             </div>
@@ -103,7 +103,7 @@ export function EBelgeAyarlari() {
       <div className="not">
         Entegratör hesabı, seri kuralları, XSLT şablonları ve tür ayarları
         (e-Fatura · e-Arşiv · e-İrsaliye · e-SMM) artık
-        <b> Yönetim › Firma Bilgileri</b> → şubeyi açın →
+        <b> Yönetim › Firma / Şubeler</b> → şubeyi açın →
         <b> e-Belge</b> sekmesinde. Burada yalnızca <b>ana şalter</b> kaldı:
         kapalıyken hiçbir belge GİB'e gitmez.
         <b> Alan Eşleştirme</b> tablosu henüz taşınmadı.

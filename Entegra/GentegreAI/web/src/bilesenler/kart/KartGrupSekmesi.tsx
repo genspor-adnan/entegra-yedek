@@ -7,6 +7,9 @@ import { TekKayit } from '../TekKayit';
 import { PersonelKimlikOzet } from '../PersonelKimlikOzet';
 import { KartResimKutusu } from '../KartResimKutusu';
 import { RolKullanicilari } from '../RolKullanicilari';
+import { KartKullaniciRolu } from '../KartKullaniciRolu';
+import { YatisAcikIsler } from '../yatan/YatisAcikIsler';
+import { KullaniciGuvenlik } from '../KullaniciGuvenlik';
 import { TEK_SUTUN_KARTLAR } from '../kartSekmeleri';
 import { VARSAYILAN_UYRUK } from '../yerlerHook';
 import type { KartAlanMeta, KartMetaYaniti } from '../../api/sozlesme';
@@ -449,8 +452,19 @@ const adsizAlt = adsiz.filter(a => enAltAd.has(a.ad));
 const adsizBlok = adsizUst.length > 0 && (
   // RANDEVU (mockup randevu_karti.html): iki sutun, etiketler alanlarin
   //   USTUNDE, Açıklama tam satir - kart mockup'la ayni duzende gorunsun.
+  // KULLANICI KARTI UC SUTUN (kullanici: "ustte 3, 2.sirada 3 item"): alti
+  //   alan otomatik dolguda 4+2 diziliyor ve ikinci satirin sagi bos kaliyordu.
+  //   Uc sutun ikiye bolunce satirlar da anlamli ayriliyor - ust satir "kim"
+  //   (kod / rol / durum), alt satir "nasil ulasilir" (e-posta / cep / dil).
   <div className={`alan-izgara${kaynak === 'kisi' ? ' kisi-ust-satir' : ''}` +
                   (kaynak === 'randevu' ? ' randevu-alanlar' : '') +
+                  (kaynak === 'kullanici' && aktif.baslik === 'Genel' ? ' uc-sutun' : '') +
+                  // GOZLUK RECETESI (mockup goz_gozluk_recetesi.html `.odos`):
+                  //   dort sutun, OD dortlusu ust satir OS dortlusu alt satir -
+                  //   iki goz kendiliginden hizalanir ve karsilastirilarak
+                  //   okunur. Otomatik dolgu bunu 3+5 diziyordu.
+                  (kaynak === 'goz-gozluk-recete' && aktif.baslik.startsWith('Reçete')
+                     ? ' dort-sutun' : '') +
                   (TEK_SUTUN_KARTLAR.has(kaynak) ? ' tek-sutun ayar-formu' : '')}>
     {renderAlanListesi(adsizUst)}
   </div>
@@ -585,6 +599,33 @@ return (
       /* Sube listesi ROLDE DEGIL (kullanici: "rolden kaldir tekrar") -
          personel kartinda, fotografin altinda. */
       <RolKullanicilari rolId={id as number} saltOkunur={salt} />
+    )}
+
+    {/* KULLANICI KARTI (Yonetim > Guvenlik): Genel sekmesinde EK ROLLER,
+        Guvenlik sekmesinde yonetici islemleri (parola sifirla / kilit coz /
+        oturum kapat) + acik oturumlar ve giris hareketleri.
+        Yeni kayit YOK - hesap personelden acilir; id her zaman var. */}
+    {/* YATIS KARTI GENEL SEKMESI (mockup yatis_karti.html sag sutun):
+        acik isler + risk degerlendirmeleri. Taburcu ekrani da AYNI listeyi
+        okur - iki ayri "acik is" tanimi, taburcuda gorunmeyen bir eksik
+        demekti. */}
+    {kaynak === 'yatan' && !yeniMi && aktif.baslik === 'Genel' && (
+      <YatisAcikIsler yatisId={id as number} />
+    )}
+
+    {kaynak === 'kullanici' && !yeniMi && aktif.baslik === 'Genel' && (
+      // Kutu alan izgarasina YAPISIK duruyordu (kullanici): `.kagrup`in yalniz
+      //   alt boslugu var, ustunde yok - kendinden onceki satirdan ayrilsin.
+      <div className="kagrup-aralikli">
+        <KartKullaniciRolu kartId={id as number} saltOkunur={salt} />
+      </div>
+    )}
+    {kaynak === 'kullanici' && !yeniMi && aktif.baslik === 'Güvenlik' && (
+      // Rol kutusuyla ayni sebep: `.kagrup`in ust boslugu yok, ustundeki alan
+      //   izgarasina yapisiyordu (kullanici).
+      <div className="kagrup-aralikli">
+        <KullaniciGuvenlik kullaniciId={id as number} saltOkunur={salt} />
+      </div>
     )}
 
     {/* DIS HEKIM (305) - iki sekme generic akisin disinda:

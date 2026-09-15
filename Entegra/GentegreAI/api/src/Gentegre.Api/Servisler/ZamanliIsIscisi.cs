@@ -78,6 +78,44 @@ public static class ZamanliIsler
             return sonuclar.Count > 0 ? string.Join(" ", sonuclar) : "Sonuc okunamadi.";
         },
 
+        // YATAN HASTA DOZ PLANI (698): aktif order'larin uygulama ufkunu ileri
+        //   tasir ve zamani gecen "bekliyor" dozu GECIKTI'ye ceker.
+        //
+        //   Gecikme hesabini EKRANA birakmadik: ekrani acmayan kimse gecikmeyi
+        //   goremezdi ve nobet devrinde "bekliyor" listesi gercegi soylemezdi.
+        //   Saatlik calisir - gunde bir olsaydi sabah geciken doz aksama kadar
+        //   bekliyor gorunurdu.
+        ["yatan.doz"] = async (servisler, iptal) =>
+        {
+            var veri = servisler.GetRequiredService<VeriKaynagi>();
+            return await veri.TekDegerAsync<string>(
+                "select aciklama from public.fn_order_doz_gunluk(48)", null, iptal)
+                ?? "Sonuc okunamadi.";
+        },
+
+        // YATAK UCRETI TAHAKKUKU (700): bir onceki gunun yatak ve refakat
+        //   ucreti. GECE calisir - gun icinde calissaydi aksam nakil olan
+        //   hastanin gunu yanlis yataga yazilirdi.
+        ["yatan.yatak_ucreti"] = async (servisler, iptal) =>
+        {
+            var veri = servisler.GetRequiredService<VeriKaynagi>();
+            return await veri.TekDegerAsync<string>(
+                "select aciklama from public.fn_yatak_ucreti_tahakkuk(null)", null, iptal)
+                ?? "Sonuc okunamadi.";
+        },
+
+        // GOZ CIHAZ MESAJ KUYRUGU (691/703): otoref, tonometre, OCT ciktilari
+        //   hastanin olcum satirina cevrilir. SAHIPSIZ mesajlar da her turda
+        //   yeniden denenir - hasta sonradan eslesebilir (muayene acilir,
+        //   protokol duzeltilir); tek denemede birakilsaydi o olcum sonsuza
+        //   kadar kuyrukta kalirdi.
+        ["goz.cihaz"] = async (servisler, iptal) =>
+        {
+            var goz = servisler.GetRequiredService<GozCihazServisi>();
+            var s = await goz.CalistirAsync(100, null, iptal);
+            return s.Aciklama;
+        },
+
         // CIHAZ KLASOR TARAMA (432): klasore dosya birakan cihazlar. MLLP
         //   dinleyicisi surekli acik oldugu icin ise ihtiyaci yok; klasor
         //   izleme ise yoklamayla yurur.

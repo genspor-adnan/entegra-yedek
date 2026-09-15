@@ -48,6 +48,24 @@ import { disLabAksiyonu } from './liste/disLabAksiyonlari';
 import { LabDetayPaneli, labDetayVarMi, labYanVarMi } from '../bilesenler/LabDetayPaneli';
 import { EnabizPaketPaneli } from '../bilesenler/EnabizPaketPaneli';
 import { LabOzetSeridi } from '../bilesenler/LabOzetSeridi';
+import { KullaniciOzetSeridi } from '../bilesenler/KullaniciOzetSeridi';
+import { KullaniciAltPanel } from '../bilesenler/KullaniciAltPanel';
+import { GozHastaPaneli } from '../bilesenler/GozHastaPaneli';
+import { GozUniteKanban } from '../bilesenler/GozUniteKanban';
+import { GozUniteOzeti } from '../bilesenler/goz/GozUniteOzeti';
+import { GozUniteTablolari } from '../bilesenler/goz/GozUniteTablolari';
+import { GozSemasi } from '../bilesenler/goz/GozSemasi';
+import { GozDikte } from '../bilesenler/goz/GozDikte';
+import { YatakPanosu } from '../bilesenler/YatakPanosu';
+import { YatisKabulModali } from '../bilesenler/yatan/YatisKabulModali';
+import { EmarCizelgesi } from '../bilesenler/yatan/EmarCizelgesi';
+import { HemsireIzlem } from '../bilesenler/yatan/HemsireIzlem';
+import { YatanIcmal } from '../bilesenler/yatan/YatanIcmal';
+import { DozSatirModali } from '../bilesenler/yatan/DozSatirModali';
+import { NakilModali } from '../bilesenler/yatan/NakilModali';
+import { TaburcuModali } from '../bilesenler/yatan/TaburcuModali';
+import { yatanAksiyonu } from './liste/yatanAksiyonlari';
+import { gozAkisAksiyonu } from './liste/gozAkisAksiyonlari';
 import { aiBaglamAyarla } from '../bilesenler/aiBaglam';
 import { DokumanKlasorPaneli, type KlasorSecimi } from '../bilesenler/DokumanKlasorPaneli';
 import { fiyatListesiAksiyonu } from './liste/fiyatListesiAksiyonlari';
@@ -139,6 +157,28 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
     { tarafId?: number; kisi?: string } | null>(null);
   /** Excel'den iceri alma modali (207) - fiyat listesi; null iken kapali. */
   const [iceriAl, setIceriAl] = useState<{ listeId: number; ad: string } | null>(null);
+  /**
+   * YATIS YASAM DONGUSU MODALLARI (695): kabul · nakil · taburcu. Ucu de
+   * ayri pencere cunku ucu de KARAR ekranidir - yatak secimi, cikis kontrol
+   * listesi ve gerekceler grid satirina sigmaz.
+   */
+  const [yatisKabul, setYatisKabul] =
+    useState<{ hastaId?: number; hastaAdi?: string } | null>(null);
+  const [yatisNakil, setYatisNakil] = useState<number | null>(null);
+  // Göz şeması ve dikte (705): ikisi de açık muayeneye bulgu yazar.
+  const [gozSema, setGozSema] = useState<number | null>(null);
+  const [gozDikte, setGozDikte] = useState<number | null>(null);
+  const [yatisTaburcu, setYatisTaburcu] = useState<number | null>(null);
+  /**
+   * GÖZ ÜNİTE AKIŞINDA SEÇİLİ KART (691). Kanban gridin DIŞINDA bir seçim
+   * yüzeyi: kullanıcı kartı tıklıyor ama gridin satır seçimi değişmiyordu,
+   * bu yüzden araç çubuğu düğmeleri "önce kayıt seçin" diyordu. Kanban seçimi
+   * burada tutulur ve aksiyonlara grid satırının yerine geçer.
+   */
+  const [gozAkisSecili, setGozAkisSecili] = useState<ListeSatiri | null>(null);
+  /** Doz kuyruğu satırından açılan beş doğru penceresi (698). */
+  const [dozSatiri, setDozSatiri] =
+    useState<{ yatisId: number; dozId: number; atla: boolean } | null>(null);
   // ÜTS EKRAN MODALLARI (223/226) tek kancada; cizimi UtsModallari yapar.
   const utsModal = useUtsModallari();
   // Donusum modali (F8): siparis/irsaliye satirlarindan yeni belge uretir.
@@ -496,6 +536,32 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         tazele: () => setYenile(t => t + 1),
       })) return;
 
+      // GOZ UNITE AKISI (691): panonun dugmeleri - cagir, istasyona al,
+      //   dilatasyon, oda, ziyareti kapat. Pano YAZMAZ, TASIR.
+      // KANBAN SEÇİMİ GRİD SEÇİMİNİN YERİNE GEÇER: kullanıcı karta tıklayıp
+      //   düğmeye basıyor; gridden ikinci kez seçtirmek gereksiz bir adım.
+      if (await gozAkisAksiyonu(kod, satir ?? gozAkisSecili, {
+        // Kart araç çubuğundan çağrıldığında (tamamla, önceki muayeneden
+        //   kopyala) kayıt SUNUCUDA değişiyor: liste kadar AÇIK KART da
+        //   tazelenmeli, yoksa getirilen bulgular ekranda görünmez.
+        tazele: () => { setYenile(t => t + 1); setKartTazele(t => t + 1) },
+        git: yol => git(yol),
+        semaAc: id => setGozSema(id),
+        dikteAc: id => setGozDikte(id),
+      })) return;
+
+      // YATAN HASTA (695): kabul · yatakta · nakil · taburcu · yatak temizligi.
+      //   Yatak durumu bu uclarla birlikte degisir - listede ayrica
+      //   guncellenmez.
+      if (await yatanAksiyonu(kod, satir, {
+        tazele: () => { setYenile(t => t + 1); setKartTazele(t => t + 1) },
+        kabulAc: h => setYatisKabul(h ? { hastaId: h.id, hastaAdi: h.ad } : {}),
+        nakilAc: id => setYatisNakil(id),
+        taburcuAc: id => setYatisTaburcu(id),
+        dozAc: (yatisId, dozId, atla) =>
+          setDozSatiri({ yatisId, dozId, atla: !!atla }),
+      })) return;
+
       if (await bildirimAksiyonu(kod, satir, secililer, {
         tazele: () => setYenile(t => t + 1),
       })) return;
@@ -799,7 +865,54 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       //   cizilir - ust serit (arama, cipler, bolum/hekim suzgeci) ortak kalir.
       // SONUC ONAY OZET SERIDI (446, mockup ".ozet"): ciplerin altinda,
       //   gridin ustunde. Cipi olan kutu tiklaninca o suzgeci acar.
-      ustPanel={tanim.kaynak === 'lab-sonuc'
+      // KULLANICILAR (mockup kullanicilar.html `.ozet`): sayaclar ARAMANIN
+      //   USTUNDE (kullanici: "arama editi ustune daha iyi") - ekrana girince
+      //   ilk okunan satir "neye bakmam gerek" olsun.
+      ustSerit={tanim.kaynak === 'kullanici'
+        ? <KullaniciOzetSeridi yenile={yenile} onCip={setCipIndeks} />
+        : undefined}
+      // GOZ UNITE AKISI (mockup goz_hasta_listesi.html `.kanban`): bes
+      //   istasyon yan yana - grid "kim var"i, kanban "hangi masada yigilma
+      //   var"i cevaplar. Ikisi AYNI kaynagi okur (goz-akis).
+      // YATAK PANOSU (mockup yatak_panosu.html): "yer var mi" sorusu LISTE
+      //   degil PANO ile cevaplanir - kutu oda, satir yatak. Grid altta
+      //   suzulebilir haliyle durur.
+      ustPanel={tanim.kaynak === 'yatak'
+        ? <YatakPanosu yenile={yenile} />
+        // eMAR (698): gridin ustunde TEK HASTANIN gun cizelgesi, altinda
+        //   servis genelindeki doz kuyrugu. Ayni veri, iki ayri soru.
+        : tanim.kaynak === 'order-uygulama'
+        ? <EmarCizelgesi yenile={yenile} onDegisti={() => setYenile(t => t + 1)} />
+        // HEMSIRE IZLEMI (699): ustte nobet ekrani (olcum girisi + egri + sivi
+        //   + risk), altta servis genelindeki olcum satirlari.
+        : tanim.kaynak === 'yatis-izlem'
+        ? <HemsireIzlem yenile={yenile} onDegisti={() => setYenile(t => t + 1)} />
+        // HIZMET ICMALI (700): ustte tek yatisin icmali, altta servis
+        //   genelindeki gun sonu tahakkuklari (faturalanmamis olanlar).
+        : tanim.kaynak === 'yatis-tahakkuk'
+        ? <YatanIcmal yenile={yenile} />
+        : tanim.kaynak === 'goz-akis'
+        // ÖNCE SAYAÇ ŞERİDİ, SONRA KANBAN (mockup goz_unite_panosu.html):
+        //   şerit "ünite tıkalı mı", kanban "kim nerede" sorusunu cevaplıyor -
+        //   önce durum, sonra ayrıntı.
+        ? <><GozUniteOzeti yenile={yenile} />
+             <GozUniteKanban yenile={yenile}
+                             seciliId={Number(gozAkisSecili?.id ?? 0) || null}
+                             onSec={sat => setGozAkisSecili(sat as unknown as ListeSatiri)}
+                             // SÜRÜKLE-BIRAK: kart sütuna bırakılınca hasta o
+                             //   istasyona alınır. Kararı sunucu veriyor -
+                             //   dilatasyon uyarısı da oradan geliyor.
+                             onTasi={(sat, istasyon) => void guvenli(async () => {
+                               const y = await api.gozIstasyonaAl(sat.id, { istasyon });
+                               mesaj(y.tamamlandi
+                                 ? `${y.hasta} · ziyaret tamamlandı.`
+                                 : `${y.hasta} → ${y.istasyon}`
+                                   + (y.uyari ? ` — ${y.uyari}` : ''));
+                               setGozAkisSecili(null);
+                               setYenile(t => t + 1);
+                             })} />
+             <GozUniteTablolari yenile={yenile} /></>
+        : tanim.kaynak === 'lab-sonuc'
         ? <LabOzetSeridi yenile={yenile} onCip={setCipIndeks} />
         // MUAYENE LISTESI OZET SERIDI (461, mockup muayene_listesi.html):
         //   poliklinigin o gunku hali - kac muayene, ort. sure, bekleyen,
@@ -847,6 +960,22 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : tanim.kaynak === 'enabiz-paket' && seciliSatir
             && Number(seciliSatir.id ?? 0) > 0
         ? <EnabizPaketPaneli paketId={Number(seciliSatir.id)} />
+        // KULLANICILAR (mockup `.sekmeler` + `.alt`): secili hesabin rolleri,
+        //   acik oturumlari, giris hareketleri ve HESABA yapilan islemler.
+        //   Yonetici satir satir geziyor - her satir icin kart acip kapatmak
+        //   ayni soruyu her seferinde bastan sordururdu.
+        : tanim.kaynak === 'kullanici' && seciliSatir
+            && Number(seciliSatir.id ?? 0) > 0
+        // Yetki SUNUCUDA olculur (rol atama ayri bir yetkidir ve islem_log'a
+        //   yazilir) - panel dugmeleri istemcide karartilmaz, yetkisiz istek
+        //   403 doner ve sebebi panelde yazar.
+        ? <KullaniciAltPanel kullaniciId={Number(seciliSatir.id)} saltOkunur={false} />
+        // GOZ HASTA OZETI (691): satir bir HASTADIR; OD/OS son degerler, takip
+        //   plani, ziyaretler, islemler ve receteler altta acilir - goz
+        //   hekiminin ilk sordugu uc soru tek ekranda toplanir.
+        : tanim.kaynak === 'goz-hasta-ozet' && seciliSatir
+            && Number(seciliSatir.id ?? 0) > 0
+        ? <GozHastaPaneli hastaId={Number(seciliSatir.id)} />
         : undefined}
       ekGorunum={tanim.kaynak === 'randevu' ? {
         ad: 'Takvim', ik: '📅',
@@ -1021,6 +1150,51 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         kisi={donemModali.kisi}
         onKapat={() => setDonemModali(null)}
         onTamam={() => setYenile(x => x + 1)}
+      />
+    )}
+    {yatisKabul && (
+      <YatisKabulModali
+        hastaId={yatisKabul.hastaId ?? null}
+        hastaAdi={yatisKabul.hastaAdi}
+        onKapat={() => setYatisKabul(null)}
+        onTamam={() => setYenile(t => t + 1)}
+      />
+    )}
+    {gozSema !== null && (
+      <GozSemasi
+        gozMuayeneId={gozSema}
+        onKapat={() => setGozSema(null)}
+        onTamam={() => { setYenile(t => t + 1); setKartTazele(t => t + 1) }}
+      />
+    )}
+    {gozDikte !== null && (
+      <GozDikte
+        gozMuayeneId={gozDikte}
+        onKapat={() => setGozDikte(null)}
+        onTamam={() => { setYenile(t => t + 1); setKartTazele(t => t + 1) }}
+      />
+    )}
+    {yatisNakil !== null && (
+      <NakilModali
+        yatisId={yatisNakil}
+        onKapat={() => setYatisNakil(null)}
+        onTamam={() => { setYenile(t => t + 1); setKartTazele(t => t + 1) }}
+      />
+    )}
+    {yatisTaburcu !== null && (
+      <TaburcuModali
+        yatisId={yatisTaburcu}
+        onKapat={() => setYatisTaburcu(null)}
+        onTamam={() => { setYenile(t => t + 1); setKartTazele(t => t + 1) }}
+      />
+    )}
+    {dozSatiri && (
+      <DozSatirModali
+        yatisId={dozSatiri.yatisId}
+        dozId={dozSatiri.dozId}
+        atlaModu={dozSatiri.atla}
+        onKapat={() => setDozSatiri(null)}
+        onTamam={() => setYenile(t => t + 1)}
       />
     )}
     <RadyolojiModallari m={radyolojiModal} tazele={() => setYenile(t => t + 1)} />

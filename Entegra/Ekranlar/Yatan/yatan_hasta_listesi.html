@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yatan Hastalar — Mockup (Gentegre AI · Yatan Hasta)</title>
+<link rel="stylesheet" href="_yatan.css">
+<style>
+  /* Uyari rozetleri tek sutunda yan yana: izolasyon / alerji / dusme riski
+     ayri kolonlar olsaydi grid on iki kolona cikar, asil is (yatak-hasta-gun)
+     ekrandan tasardi. */
+  .uyarilar{display:flex;gap:3px;flex-wrap:wrap}
+  .yatak-kod{font-family:Consolas,monospace;font-weight:bold;color:var(--navy)}
+  .gun{font-weight:bold}
+  .gun.uzun{color:var(--uyari)}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🛏 Yatan Hastalar
+    <span class="sp">Yatan Hasta › Servis Listesi · Dahiliye Servisi · 24 hasta</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>＋</span> Yatış Kabul</div>
+    <div class="btn"><span>✎</span> Yatış Kartı</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🩺</span> Order</div>
+    <div class="btn"><span>💉</span> İlaç Uygulama</div>
+    <div class="btn"><span>📋</span> İzlem</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🔁</span> Nakil / Yatak Değişimi</div>
+    <div class="btn"><span>🚪</span> Taburcu</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🛏</span> Yatak Panosu</div>
+    <div class="btn"><span>⬇</span> Excel</div>
+  </div>
+
+  <div class="serit">
+    <div class="kutu ara">🔍 Hasta adı, dosya no, TCKN, yatak…</div>
+    <div class="kutu combo">🏥 Servis: <b>Dahiliye</b></div>
+    <div class="kutu combo">👨‍⚕️ Hekim: <b>Tümü</b></div>
+    <span class="cip on">Yatakta</span>
+    <span class="cip">Bugün yatan</span>
+    <span class="cip">Taburcu planlı</span>
+    <span class="cip">Kritik</span>
+    <span class="cip">Provizyon sorunlu</span>
+    <span class="cip">Tümü</span>
+  </div>
+
+  <!-- Sayilar KARAR ICIN: "kac hasta var" degil "bugun neye bakmam gerek". -->
+  <div class="ozet">
+    <div class="k"><div class="bas">Yatan hasta</div><div class="deg">24</div>
+      <div class="alt">servis kapasitesi 30</div></div>
+    <div class="k uy"><div class="bas">Doluluk</div><div class="deg">%80</div>
+      <div class="alt">4 boş · 2 temizlikte</div></div>
+    <div class="k"><div class="bas">Bugün yatan</div><div class="deg">3</div>
+      <div class="alt">1 acilden</div></div>
+    <div class="k iyi"><div class="bas">Bugün taburcu planlı</div><div class="deg">5</div>
+      <div class="alt">yatak öğleden sonra boşalır</div></div>
+    <div class="k teh"><div class="bas">Kritik izlem</div><div class="deg">2</div>
+      <div class="alt">erken uyarı skoru ≥ 5</div></div>
+    <div class="k uy"><div class="bas">Geciken ilaç dozu</div><div class="deg">6</div>
+      <div class="alt">3 hastada · saati geçti</div></div>
+  </div>
+
+  <div class="dg">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:26px" class="orta"><input type="checkbox"></th>
+          <th>Yatak</th>
+          <th>Hasta</th>
+          <th class="orta">Yaş / C</th>
+          <th>Dosya No</th>
+          <th>Sorumlu Hekim</th>
+          <th>Yatış</th>
+          <th class="orta">Gün</th>
+          <th>Tanı</th>
+          <th>Ödeyen</th>
+          <th class="orta">Provizyon</th>
+          <th class="orta">Durum</th>
+          <th>Uyarılar</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="sel">
+          <td class="orta"><input type="checkbox" checked></td>
+          <td class="yatak-kod">A-301/1</td>
+          <td>Mehmet YILMAZ</td>
+          <td class="orta">68 / E</td>
+          <td class="sonuk">Y-2026-0417</td>
+          <td>Dr. Osman AKAR</td>
+          <td>09.09.2026 14:20</td>
+          <td class="orta gun">6</td>
+          <td>J18.9 Pnömoni</td>
+          <td>SGK</td>
+          <td class="orta"><span class="rz ok">alındı</span></td>
+          <td class="orta"><span class="rz ok">Yatakta</span></td>
+          <td><div class="uyarilar">
+            <span class="rz kir">🦠 damlacık izolasyon</span>
+            <span class="rz sari">💊 penisilin alerjisi</span>
+          </div></td>
+        </tr>
+        <tr class="teh">
+          <td class="orta"><input type="checkbox"></td>
+          <td class="yatak-kod">A-302/1</td>
+          <td>Ayşe DEMİR</td>
+          <td class="orta">74 / K</td>
+          <td class="sonuk">Y-2026-0402</td>
+          <td>Dr. Osman AKAR</td>
+          <td>04.09.2026 08:10</td>
+          <td class="orta gun uzun">11</td>
+          <td>N18.5 Kronik böbrek yet.</td>
+          <td>SGK</td>
+          <td class="orta"><span class="rz sari">dönem yenile</span></td>
+          <td class="orta"><span class="rz ok">Yatakta</span></td>
+          <td><div class="uyarilar">
+            <span class="rz kir">⚠ erken uyarı 6</span>
+            <span class="rz sari">🚶 düşme riski yüksek</span>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="orta"><input type="checkbox"></td>
+          <td class="yatak-kod">A-302/2</td>
+          <td>Fatma KAYA</td>
+          <td class="orta">59 / K</td>
+          <td class="sonuk">Y-2026-0421</td>
+          <td>Dr. Elif ŞAHİN</td>
+          <td>13.09.2026 11:05</td>
+          <td class="orta gun">2</td>
+          <td>K80.2 Safra taşı</td>
+          <td>SGK</td>
+          <td class="orta"><span class="rz ok">alındı</span></td>
+          <td class="orta"><span class="rz sari">Taburcu planlandı</span></td>
+          <td><div class="uyarilar"><span class="rz mavi">📄 epikriz taslak</span></div></td>
+        </tr>
+        <tr>
+          <td class="orta"><input type="checkbox"></td>
+          <td class="yatak-kod">A-303/1</td>
+          <td>Ali VURAL</td>
+          <td class="orta">45 / E</td>
+          <td class="sonuk">Y-2026-0423</td>
+          <td>Dr. Elif ŞAHİN</td>
+          <td>15.09.2026 03:40</td>
+          <td class="orta gun">1</td>
+          <td>K35.8 Akut apandisit</td>
+          <td>SGK</td>
+          <td class="orta"><span class="rz ok">alındı</span></td>
+          <td class="orta"><span class="rz ok">Yatakta</span></td>
+          <td><div class="uyarilar">
+            <span class="rz mor">🔪 ameliyat planlı 16:00</span>
+            <span class="rz">🍽 aç (NPO)</span>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="orta"><input type="checkbox"></td>
+          <td class="yatak-kod">A-305/2</td>
+          <td>Zeynep ACAR</td>
+          <td class="orta">31 / K</td>
+          <td class="sonuk">Y-2026-0424</td>
+          <td>Dr. Murat TAŞ</td>
+          <td>15.09.2026 09:15</td>
+          <td class="orta gun">1</td>
+          <td class="sonuk">— (tanı bekliyor)</td>
+          <td>Özel · Anadolu Sigorta</td>
+          <td class="orta"><span class="rz pas">gerekmiyor</span></td>
+          <td class="orta"><span class="rz mavi">Yatış kabul</span></td>
+          <td><div class="uyarilar"><span class="rz sari">🛏 yatak rezerve · servise çıkmadı</span></div></td>
+        </tr>
+        <tr>
+          <td class="orta"><input type="checkbox"></td>
+          <td class="yatak-kod">YB-2/3</td>
+          <td>Hüseyin ÖZ</td>
+          <td class="orta">77 / E</td>
+          <td class="sonuk">Y-2026-0390</td>
+          <td>Dr. Osman AKAR</td>
+          <td>28.08.2026 22:50</td>
+          <td class="orta gun uzun">18</td>
+          <td>I50.0 Kalp yetmezliği</td>
+          <td>SGK</td>
+          <td class="orta"><span class="rz kir">reddedildi</span></td>
+          <td class="orta"><span class="rz ok">Yatakta</span></td>
+          <td><div class="uyarilar">
+            <span class="rz mor">🏥 yoğun bakım</span>
+            <span class="rz kir">⚠ erken uyarı 7</span>
+          </div></td>
+        </tr>
+        <tr class="pasif">
+          <td class="orta"><input type="checkbox"></td>
+          <td class="yatak-kod sonuk">A-304/1</td>
+          <td>Hatice ŞEN</td>
+          <td class="orta">66 / K</td>
+          <td class="sonuk">Y-2026-0398</td>
+          <td>Dr. Murat TAŞ</td>
+          <td>02.09.2026 10:00</td>
+          <td class="orta">12</td>
+          <td>E11.9 Tip 2 diyabet</td>
+          <td>SGK</td>
+          <td class="orta"><span class="rz pas">kapandı</span></td>
+          <td class="orta"><span class="rz pas">Taburcu · şifa</span></td>
+          <td><div class="uyarilar"><span class="rz">14.09 16:30</span></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ---------------------------------------- secili hastanin ayrintisi --- -->
+  <div class="sekmeler">
+    <div class="sekme on" data-sekme="ozet">Özet</div>
+    <div class="sekme" data-sekme="order">Bugünün Order'ı <span class="rz mavi">7</span></div>
+    <div class="sekme" data-sekme="izlem">Son İzlem</div>
+    <div class="sekme" data-sekme="hizmet">Hizmet / Tutar</div>
+    <div class="sekme" data-sekme="hareket">Yatak Hareketleri</div>
+  </div>
+
+  <div class="pano iki" data-pano="ozet">
+    <div>
+      <div class="grp">
+        <h4>Mehmet YILMAZ · 68 / E <span class="mini">Y-2026-0417 · 6. gün</span></h4>
+        <div class="ic">
+          <div class="sat"><span>Yatış</span><b>09.09.2026 14:20 · acilden</b></div>
+          <div class="sat"><span>Klinik / hekim</span><b>Dahiliye · Dr. Osman AKAR</b></div>
+          <div class="sat"><span>Yatış tanısı</span><b>J18.9 Pnömoni, tanımlanmamış</b></div>
+          <div class="sat"><span>Yatak</span><b>A-301/1 · tek kişilik · damlacık izolasyon</b></div>
+          <div class="sat"><span>Refakatçi</span><b>Ayten YILMAZ (eş) · ücretli</b></div>
+          <div class="sat"><span>Tahmini çıkış</span><b>17.09.2026</b></div>
+        </div>
+        <div class="not">Tahmini çıkış <b>yatak planlamasının girdisidir</b>: yatak panosundaki
+          "bugün boşalacak" sayısı bu alandan gelir. Boş bırakılırsa yatak, hasta çıkana
+          kadar dolu sayılır ve kabul boşuna yer arar.</div>
+      </div>
+    </div>
+    <div>
+      <div class="grp">
+        <h4>Açık işler <span class="mini">taburcu bunları bekler</span></h4>
+        <div class="ic">
+          <div class="sat"><span>Sonuç bekleyen tetkik</span><b><span class="rz sari">2</span> Kan kültürü · CRP</b></div>
+          <div class="sat"><span>Bekleyen konsültasyon</span><b><span class="rz sari">1</span> Göğüs Hastalıkları</b></div>
+          <div class="sat"><span>Geciken ilaç dozu</span><b><span class="rz kir">1</span> Seftriakson 16:00</b></div>
+          <div class="sat"><span>İmzasız sözel order</span><b><span class="rz kir">1</span> dün 23:40</b></div>
+          <div class="sat"><span>Faturalanmamış hizmet</span><b>3 kalem · 1.240,00 ₺</b></div>
+        </div>
+        <div class="not">Taburcu ekranı bu listeyi <b>yeniden sormaz</b>, aynı listeyi gösterir:
+          çıkışta "bir şey kalmış mıydı" sorusunun cevabı, hasta yatarken de aynı yerde
+          durmalı.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pano" data-pano="order" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Tür</th><th>Order</th><th>Doz / Yol</th><th>Sıklık</th>
+          <th>Saatler</th><th class="orta">Bugün</th><th>Hekim</th><th class="orta">Durum</th></tr></thead>
+        <tbody>
+          <tr><td><span class="rz mavi">İlaç</span></td><td>Seftriakson 1 g flakon</td>
+              <td>1 g · IV</td><td>2×1</td><td class="sonuk">08:00 · 20:00</td>
+              <td class="orta"><span class="rz ok">08:00 ✓</span> <span class="rz kir">20:00 gecikti</span></td>
+              <td class="sonuk">Dr. Osman AKAR</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr><td><span class="rz mavi">İlaç</span></td><td>Parasetamol 500 mg tablet</td>
+              <td>500 mg · PO</td><td>gerektiğinde</td><td class="sonuk">—</td>
+              <td class="orta sonuk">1 kez verildi</td>
+              <td class="sonuk">Dr. Osman AKAR</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr><td><span class="rz">Sıvı</span></td><td>%0.9 NaCl 1000 mL</td>
+              <td>1000 mL · IV</td><td>24 saatte</td><td class="sonuk">sürekli</td>
+              <td class="orta"><span class="rz ok">takılı</span></td>
+              <td class="sonuk">Dr. Osman AKAR</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr><td><span class="rz mor">Tetkik</span></td><td>Kan kültürü (2 set)</td>
+              <td class="sonuk">—</td><td>tek sefer</td><td class="sonuk">—</td>
+              <td class="orta"><span class="rz sari">sonuç bekliyor</span></td>
+              <td class="sonuk">Dr. Osman AKAR</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr><td><span class="rz mor">Konsültasyon</span></td><td>Göğüs Hastalıkları</td>
+              <td class="sonuk">—</td><td>tek sefer</td><td class="sonuk">—</td>
+              <td class="orta"><span class="rz sari">yanıt bekliyor</span></td>
+              <td class="sonuk">Dr. Osman AKAR</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr><td><span class="rz">Diyet</span></td><td>Tuzsuz, yumuşak</td>
+              <td class="sonuk">—</td><td>sürekli</td><td class="sonuk">—</td>
+              <td class="orta sonuk">mutfağa iletildi</td>
+              <td class="sonuk">Dr. Osman AKAR</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr><td><span class="rz">Hemşirelik</span></td><td>4 saatte bir vital takibi</td>
+              <td class="sonuk">—</td><td>6×1</td><td class="sonuk">00-04-08-12-16-20</td>
+              <td class="orta"><span class="rz ok">4/6</span></td>
+              <td class="sonuk">Dr. Osman AKAR</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not">Listede <b>her tür order aynı yerde</b>: ilaç, tetkik, diyet, hemşirelik.
+      Hekim vizitte tek bir yere bakar; ilaçlar eczanede, tetkikler labda, diyet mutfakta
+      ayrı ayrı dursaydı "bu hastaya ne söylenmiş" sorusunun tek cevabı olmazdı.</div>
+  </div>
+
+  <div class="pano" data-pano="izlem" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Zaman</th><th class="orta">TA</th><th class="orta">Nabız</th>
+          <th class="orta">Ateş</th><th class="orta">SpO₂</th><th class="orta">Solunum</th>
+          <th class="orta">Ağrı</th><th class="orta">Erken uyarı</th><th>Ölçen</th></tr></thead>
+        <tbody>
+          <tr><td>15.09.2026 12:00</td><td class="orta">118/72</td><td class="orta">92</td>
+              <td class="orta">37,8</td><td class="orta">94</td><td class="orta">20</td>
+              <td class="orta">3</td><td class="orta"><span class="rz sari">3</span></td>
+              <td class="sonuk">Hem. Selin AK</td></tr>
+          <tr><td>15.09.2026 08:00</td><td class="orta">124/78</td><td class="orta">88</td>
+              <td class="orta">38,3</td><td class="orta">93</td><td class="orta">22</td>
+              <td class="orta">4</td><td class="orta"><span class="rz sari">4</span></td>
+              <td class="sonuk">Hem. Selin AK</td></tr>
+          <tr><td>15.09.2026 04:00</td><td class="orta">130/80</td><td class="orta">96</td>
+              <td class="orta">38,9</td><td class="orta">91</td><td class="orta">24</td>
+              <td class="orta">5</td><td class="orta"><span class="rz kir">6</span></td>
+              <td class="sonuk">Hem. Deniz ER</td></tr>
+          <tr><td>15.09.2026 00:00</td><td class="orta">126/76</td><td class="orta">90</td>
+              <td class="orta">38,1</td><td class="orta">94</td><td class="orta">20</td>
+              <td class="orta">3</td><td class="orta"><span class="rz sari">3</span></td>
+              <td class="sonuk">Hem. Deniz ER</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not"><b>Erken uyarı skoru (NEWS) satırda hesaplanır</b>, elle girilmez:
+      tek tek normal görünen değerler birlikte kötüleşmeyi gösterebilir. Skor eşiği aşınca
+      liste satırı kırmızıya döner ve hekime bildirim gider — hemşirenin "acaba arasam mı"
+      kararını sisteme bırakmamak için.</div>
+  </div>
+
+  <div class="pano" data-pano="hizmet" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Tarih</th><th>Hizmet / Malzeme</th><th class="orta">Adet</th>
+          <th class="sag">Birim</th><th class="sag">Tutar</th><th>Kaynak</th>
+          <th class="orta">Fatura</th></tr></thead>
+        <tbody>
+          <tr><td>09–15.09</td><td>Yatak ücreti · tek kişilik oda</td><td class="orta">6</td>
+              <td class="sag">850,00</td><td class="sag">5.100,00</td>
+              <td class="sonuk">gün sonu · otomatik</td><td class="orta"><span class="rz ok">tahakkuk</span></td></tr>
+          <tr><td>09–15.09</td><td>Refakatçi</td><td class="orta">6</td>
+              <td class="sag">150,00</td><td class="sag">900,00</td>
+              <td class="sonuk">gün sonu · otomatik</td><td class="orta"><span class="rz ok">tahakkuk</span></td></tr>
+          <tr><td>09.09</td><td>Yatan hasta muayenesi</td><td class="orta">1</td>
+              <td class="sag">420,00</td><td class="sag">420,00</td>
+              <td class="sonuk">yatış kabul</td><td class="orta"><span class="rz ok">tahakkuk</span></td></tr>
+          <tr><td>10–15.09</td><td>Seftriakson 1 g flakon</td><td class="orta">12</td>
+              <td class="sag">38,50</td><td class="sag">462,00</td>
+              <td class="sonuk">ilaç uygulama · karekod</td><td class="orta"><span class="rz sari">bekliyor</span></td></tr>
+          <tr><td>11.09</td><td>Toraks BT</td><td class="orta">1</td>
+              <td class="sag">1.150,00</td><td class="sag">1.150,00</td>
+              <td class="sonuk">radyoloji istemi</td><td class="orta"><span class="rz ok">tahakkuk</span></td></tr>
+          <tr><td>14.09</td><td>Kan kültürü (2 set)</td><td class="orta">2</td>
+              <td class="sag">195,00</td><td class="sag">390,00</td>
+              <td class="sonuk">lab istemi</td><td class="orta"><span class="rz sari">bekliyor</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not"><b>Hizmet satırı elle girilmez</b>: yatak ücreti gün sonu işinden, ilaç
+      uygulamadan, tetkik istemden düşer. Elle giriş açık bırakılsaydı aynı kalem hem
+      otomatik hem elle iki kez faturalanırdı.</div>
+  </div>
+
+  <div class="pano" data-pano="hareket" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Başlangıç</th><th>Bitiş</th><th>Yatak</th><th>Klinik</th>
+          <th>Sebep</th><th>Yapan</th></tr></thead>
+        <tbody>
+          <tr><td>13.09.2026 10:15</td><td class="sonuk">— (şu an)</td><td class="yatak-kod">A-301/1</td>
+              <td>Dahiliye</td><td>İzolasyon gereği tek kişilik odaya</td><td class="sonuk">Hem. Selin AK</td></tr>
+          <tr><td>11.09.2026 16:40</td><td>13.09.2026 10:15</td><td class="yatak-kod">A-306/2</td>
+              <td>Dahiliye</td><td>Yoğun bakımdan servise iniş</td><td class="sonuk">Dr. Osman AKAR</td></tr>
+          <tr><td>09.09.2026 14:20</td><td>11.09.2026 16:40</td><td class="yatak-kod">YB-1/2</td>
+              <td>Yoğun Bakım</td><td>İlk yatak · acilden</td><td class="sonuk">Dr. Elif ŞAHİN</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not">Yatak geçmişi <b>faturanın dayanağıdır</b>: iki gün yoğun bakım, iki gün
+      çift kişilik, iki gün tek kişilik oda — üç ayrı ücret. Hastada tek bir "oda no" alanı
+      tutulsaydı bu hesap yapılamazdı.</div>
+  </div>
+
+  <div class="statusbar">
+    <span>24 yatan · 7 gösteriliyor</span><span>·</span>
+    <span>Saatler <b>Merkez</b> şubesinin saat diliminde (Europe/Istanbul)</span><span>·</span>
+    <span>Ortalama yatış süresi <b>5,4 gün</b> · yatak devir hızı 4,1</span><span>·</span>
+    <span>Bu ekrandaki her işlem ISLEMLOG'a yazılır</span>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Yatan Hastalar — tasarım notları</h4>
+  Servisin <b>ana çalışma ekranı</b>. Hekim vizitte, hemşire nöbet devrinde, başhemşire
+  yatak planlarken buraya bakar; üç ayrı ekran yapmak yerine tek liste + <b>seçili hastanın
+  alt paneli</b> tercih edildi — üçünün de sorduğu ilk şey aynı: "kim, nerede, kaçıncı gün".
+  <ul>
+    <li><b>Yatak kolonu ilk sütunda:</b> serviste hasta adıyla değil <i>yatakla</i> konuşulur
+        ("301'in ateşi çıktı"). Adı başa koymak, ekranı konuşulan dilden uzaklaştırırdı.</li>
+    <li><b>"Gün" kolonu hesaplıdır ve uzun yatış sararır:</b> uzayan yatış hem klinik hem
+        mali bir sinyaldir (provizyon dönemi, enfeksiyon riski, yatak devri).</li>
+    <li><b>Uyarılar tek sütunda rozet:</b> izolasyon, alerji, düşme riski, NPO, ameliyat.
+        Her biri ayrı kolon olsaydı grid on iki sütuna çıkar, asıl iş ekrandan taşardı.</li>
+    <li><b>Provizyon durumu listede:</b> "reddedildi" rozetini taburcu gününde görmek geç
+        olur — o gün hastadan ücret istemek ya da faturayı kuruma yazamamak demektir.</li>
+    <li><b>"Yatış kabul" ve "Yatakta" ayrı durumlar:</b> yatak rezerve edilmiş ama hasta
+        henüz servise çıkmamış olabilir (ameliyathanede, acilde bekliyor). Tek durum
+        olsaydı yatak panosunda dolu görünen boş yataklar olurdu.</li>
+    <li><b>Taburcu edilen satır listede kalır</b> (soluk, "Tümü" çipinde): nöbet devrinde
+        "bugün kim çıktı" sorusu, listeden düşen satırla cevaplanamaz.</li>
+    <li><b>Erken uyarı skoru satırda hesaplanır</b>, hemşireye "değerlendir" denmez:
+        tek tek normal görünen vitaller birlikte kötüleşmeyi gösterir.</li>
+  </ul>
+</div>
+
+<script>
+// Alt sekmeler mockup'ta da acilir: dort sekmenin dordu de ayri bir soruyu
+//   cevapliyor, yalnizca ilkini gostermek otekilerin ne oldugunu anlatmazdi.
+document.querySelectorAll('.sekme').forEach(function (s) {
+  s.addEventListener('click', function () {
+    var ad = s.dataset.sekme;
+    document.querySelectorAll('.sekme').forEach(function (x) { x.classList.toggle('on', x === s) });
+    document.querySelectorAll('.pano').forEach(function (p) { p.hidden = p.dataset.pano !== ad });
+  });
+});
+</script>
+
+</body>
+</html>

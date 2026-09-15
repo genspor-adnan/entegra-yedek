@@ -30,7 +30,7 @@ export const ENABIZ_LISTELERI: ListeGirdisi[] = [
     // Bayrak emojisi Windows'ta "TR" harfleri olarak cizilir (dil secicide de
     //   ayni sorun yasanmisti) - gonderim kuyruguna anlamli ikon.
     menuGrup: 'e-Nabız', menuAd: 'Gönderim Kuyruğu', ic: '📤',
-    yetkiKodu: 'entegrasyon', menuSira: 10,
+    yetkiKodu: 'entegrasyon', menuSira: 20,
   },
   {
     // VERI KALITESI PANOSU (454) - mockup enabiz_veri_kalitesi.html.
@@ -40,7 +40,7 @@ export const ENABIZ_LISTELERI: ListeGirdisi[] = [
     baslik: 'e-Nabız Veri Kalitesi', yol: 'e-Nabız › Veri Kalitesi',
     urunModu: 2, modul: 'enabiz',
     menuGrup: 'e-Nabız', menuAd: 'Veri Kalitesi', ic: '📊',
-    yetkiKodu: 'entegrasyon', menuSira: 5,
+    yetkiKodu: 'entegrasyon', menuSira: 10,
   },
   {
     // KOD ESLEME (454): yerel tanim -> SKRS kodu. Esleme yoksa paket
@@ -55,8 +55,8 @@ export const ENABIZ_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'enabiz',
-    menuGrup: 'e-Nabız', menuAd: 'Kod Eşleme', ic: '🔗',
-    yetkiKodu: 'entegrasyon', menuSira: 20,
+    menuGrup: 'e-Nabız', menuAltGrup: 'Ayarlar', menuAd: 'Kod Eşleme', ic: '🔗',
+    yetkiKodu: 'entegrasyon', menuSira: 90,
   },
 
   // CARI grubu ana menude RADYOLOJIDEN SONRA (kullanici).

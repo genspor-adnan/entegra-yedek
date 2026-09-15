@@ -127,6 +127,13 @@ interface Props {
    */
   ustPanel?: React.ReactNode;
   /**
+   * ARAMA SERIDININ USTUNE, baslik ile arama kutusu ARASINA eklenecek serit -
+   * kullanicilar ekranindaki sayac kutulari (kullanici: "arama editi ustune
+   * daha iyi"). `ustPanel`den farki YERI: bu, ekrana girildiginde ilk goze
+   * carpan satirdir - "bugun neye bakmam gerek" sorusu aramadan ONCE gelir.
+   */
+  ustSerit?: React.ReactNode;
+  /**
    * Arama seridine (Liste/Grup/Analiz'in yanina) EK GORUNUM dugmesi: secilince
    * grid yerine `icerik` cizilir - randevu takvimi boyle acilir (kullanici:
    * "arama editi sagina takvim butonu, basinca takvim listeye bassin").
@@ -210,7 +217,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
                           aracCubuguSeritte,
                           seciliBaslangicId, cipSonu, kodSuzgeci, kodSuzgecDeger: kodDisDeger,
                           onKodSuzgec, varsayilanGrup, solPanel, bosEk,
-                          cipBaslangic, altPanel, ustPanel, yanPanel, ekGorunum,
+                          cipBaslangic, altPanel, ustPanel, ustSerit, yanPanel, ekGorunum,
                           onCipSecildi, onCipRota, onSecimDegisti, yenile, odaklaSonEklenen,
                           icerikAlani, icerikBaslik, agacAlani }: Props) {
   // Sayfa boyu: cagiran acikca verdiyse o, yoksa Genel Ayarlar'daki
@@ -501,6 +508,11 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
           <GenToolbar aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} altSecenekler={toolbarAltSecenekler} />
         </div>
       )}
+
+      {/* SAYAC SERIDI ARAMANIN USTUNDE: ekrana girince ilk okunan satir o -
+          arama kutusu "ne ariyorum"u sorar, kutular "neye bakmam gerek"i
+          soyler; ikincisi once gelmeli (kullanici). */}
+      {gorunum === 'liste' && ustSerit}
 
       {!seritGizli && (
       <div className="cipler">

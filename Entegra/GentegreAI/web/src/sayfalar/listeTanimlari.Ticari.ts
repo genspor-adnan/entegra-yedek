@@ -38,7 +38,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Red',          filtre: { alan: 'teklifDurum', op: 'esit', deger: 4 } },
       { ad: 'İptal',        filtre: { alan: 'teklifDurum', op: 'esit', deger: 5 } },
     ],
-    menuGrup: 'Satış', menuAd: 'Satış Teklifleri', ic: '📄', yetkiKodu: 'belge', menuSira: 5,
+    menuGrup: 'Satış', menuAd: 'Satış Teklifleri', ic: '📄', yetkiKodu: 'belge', menuSira: 10,
   },
   {
     // Siparisler AYNI 'belge' kaynagi, tur in (9,19) sabit filtresiyle (Musteri/
@@ -64,7 +64,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Kapanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Satış', menuAd: 'Satış Siparişleri', ic: '📋', yetkiKodu: 'belge',
+    menuGrup: 'Satış', menuSira: 20, menuAd: 'Satış Siparişleri', ic: '📋', yetkiKodu: 'belge',
   },
   {
     // Satis irsaliyeleri (Ekranlar/satis_irsaliye_listesi.html): AYRI kaynak
@@ -82,7 +82,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Faturalandı',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Satış', menuAd: 'Satış İrsaliyeleri', ic: '🚚', yetkiKodu: 'belge',
+    menuGrup: 'Satış', menuSira: 30, menuAd: 'Satış İrsaliyeleri', ic: '🚚', yetkiKodu: 'belge',
   },
   {
     // "Satış" grubu, Cari'nin HEMEN ALTINDA (kullanici istegi) - "Belgeler" ayni kaynak/
@@ -105,7 +105,36 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Fatura', filtre: { alan: 'tipi', op: 'esitDegil', deger: 2 } },
       { ad: 'İade',   filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
     ],
-    menuGrup: 'Satış', menuAd: 'Satış Faturaları', ic: '🧾', yetkiKodu: 'belge',
+    // ERP'de Satış grubunda (bu tanım). HBYS'de o grubun tamamı gizli -
+    //   aşağıdaki ikiz tanıma bak.
+    urunModu: 1,
+    menuGrup: 'Satış', menuSira: 40, menuAd: 'Satış Faturaları', ic: '🧾', yetkiKodu: 'belge',
+  },
+  {
+    // HBYS'DE DE FATURA KESİLİR (kullanıcı: "satış faturaları için menü
+    //   göremedim"). `erp_satis` modülü hastane profilinde KAPALI olduğu için
+    //   Satış grubunun tamamı gizleniyordu - oysa hastane hastaya ve kuruma
+    //   fatura keser; ekran vardı, menüde girişi yoktu.
+    //
+    // AYNI EKRAN, ayrı tanım: rota farklı olmak ZORUNDA (aynı rotayı ikinci
+    //   kez kaydetmek React Router'da sessizce ilkini kazandırır) ve modül
+    //   bağı yok - fatura ticari bir eklenti değil, kurumun temel işi.
+    //   Yeri Kurumlar & Sigorta: hastanede fatura kuruma/hastaya kesilir,
+    //   kurum icmalleriyle aynı yerde aranır.
+    kaynak: 'belge', rota: 'fatura', baslik: 'Faturalar',
+    yol: 'Kurumlar & Sigorta › Faturalar',
+    aksiyonEkrani: 'belge-liste', yeniBelgeTuru: 15, ebelgeMenusu: 'E-Fatura',
+    gizliKolonlar: ['tur', 'turAdi', 'teklifDurumAdi', 'teklifDurum'],
+    sabitFiltre: { alan: 'tur', op: 'esit', deger: 15 },
+    toplam: ['matrah', 'kdvTutari', 'genelToplam'],
+    cipler: [
+      { ad: 'Tumu' },
+      { ad: 'Fatura', filtre: { alan: 'tipi', op: 'esitDegil', deger: 2 } },
+      { ad: 'İade',   filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
+    ],
+    urunModu: 2, modul: '',
+    menuGrup: 'Kurumlar & Sigorta', menuSira: 60, menuAd: 'Faturalar',
+    ic: '🧾', yetkiKodu: 'belge',
   },
   {
     // GELEN e-BELGE KUTUSU (187): bize kesilen e-Fatura / e-Arsiv belgeleri.
@@ -125,7 +154,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     // MENUDE YOK (kullanici): Alis Faturalari > "Gelen Kutusu" sekmesinden
     //   girilir; menude ikinci bir giris ayni ekrani iki yerde gosterirdi.
     menuGizli: true,
-    menuGrup: 'Alış', menuAd: 'Gelen Kutusu', ic: '📥', yetkiKodu: 'belge',
+    menuGrup: 'Alış', menuSira: 10, menuAd: 'Gelen Kutusu', ic: '📥', yetkiKodu: 'belge',
   },
   {
     // SATIS FISI (tur 16): perakende/pesin satis. Fatura ile ayni kart ve ayni
@@ -141,7 +170,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Fiş',  filtre: { alan: 'tipi', op: 'esitDegil', deger: 2 } },
       { ad: 'İade', filtre: { alan: 'tipi', op: 'esit', deger: 2 } },
     ],
-    menuGrup: 'Satış', menuAd: 'Satış Fişleri', ic: '🧾', yetkiKodu: 'belge',
+    menuGrup: 'Satış', menuSira: 50, menuAd: 'Satış Fişleri', ic: '🧾', yetkiKodu: 'belge',
   },
   {
     // TAHAKKUK (17 satis / 13 alis - 334: kucuk kod ALIS, buyuk kod SATIS):
@@ -153,7 +182,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 17 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
-    menuGrup: 'Satış', menuAd: 'Tahakkuklar', ic: '📑', yetkiKodu: 'belge',
+    menuGrup: 'Satış', menuSira: 60, menuAd: 'Tahakkuklar', ic: '📑', yetkiKodu: 'belge',
   },
   {
     // SATIS KONSINYE (tur 119 Giden Konsinye): musteriye BIRAKILAN mal.
@@ -171,8 +200,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     ],
     // Yalniz HBYS (kullanici): konsinye takibi tibbi malzeme/implant akisinda
     //   kullaniliyor, ERP kurulumunda menude yer kaplamasin.
-    urunModu: 2,
-    menuGrup: 'Satış', menuAd: 'Satış Konsinyeler', ic: '📦', yetkiKodu: 'belge',
+    urunModu: 2, menuAd: 'Satış Konsinyeler', menuGizli: true, ic: '📦', yetkiKodu: 'belge',
   },
   // ------------------------------------------------------------- ALIS ----
   //  Satis tarafinin birebir karsiligi: ayni 'belge' kaynagi, ayni kart, yalniz
@@ -189,7 +217,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Kapanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Alış', menuAd: 'Alış Siparişleri', ic: '📋', yetkiKodu: 'belge',
+    menuGrup: 'Alış', menuSira: 20, menuAd: 'Alış Siparişleri', ic: '📋', yetkiKodu: 'belge',
   },
   {
     kaynak: 'belge', rota: 'alis-irsaliye', baslik: 'Alış İrsaliyeleri',
@@ -203,7 +231,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Faturalandı',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Alış', menuAd: 'Alış İrsaliyeleri', ic: '🚛', yetkiKodu: 'belge',
+    menuGrup: 'Alış', menuSira: 30, menuAd: 'Alış İrsaliyeleri', ic: '🚛', yetkiKodu: 'belge',
   },
   {
     kaynak: 'belge', rota: 'alis-fatura', baslik: 'Alış Faturaları',
@@ -219,7 +247,8 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       //   faturasi olarak islenecek belgeler once burada gorunur.
       { ad: '📥 Gelen Kutusu', rota: 'gelen-belge', kosul: 'ebelge' },
     ],
-    menuGrup: 'Alış', menuAd: 'Alış Faturaları', ic: '🧾', yetkiKodu: 'belge',
+    menuGrup: 'Stok & Hizmet', menuSira: 65, menuAd: 'Alış Faturaları', ic: '🧾',
+    yetkiKodu: 'belge',
   },
   {
     kaynak: 'belge', rota: 'alis-fisi', baslik: 'Alış Fişleri',
@@ -227,7 +256,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 12 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['matrah', 'kdvTutari', 'genelToplam'],
-    menuGrup: 'Alış', menuAd: 'Alış Fişleri', ic: '🧾', yetkiKodu: 'belge',
+    menuGrup: 'Alış', menuSira: 50, menuAd: 'Alış Fişleri', ic: '🧾', yetkiKodu: 'belge',
   },
   {
     // ALIS tarafi: alis tahakkuku (13) - tedarikciye borc.
@@ -236,7 +265,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     sabitFiltre: { alan: 'tur', op: 'esit', deger: 13 },
     gizliKolonlar: ['tur', 'turAdi', 'efaturaDurum', 'teklifDurumAdi', 'teklifDurum'],
     toplam: ['genelToplam'],
-    menuGrup: 'Alış', menuAd: 'Tahakkuklar', ic: '📑', yetkiKodu: 'belge',
+    menuGrup: 'Alış', menuSira: 60, menuAd: 'Tahakkuklar', ic: '📑', yetkiKodu: 'belge',
   },
   {
     kaynak: 'belge', rota: 'alis-konsinye', baslik: 'Alış Konsinyeler',
@@ -250,13 +279,13 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Kısmi',   filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 1 } },
       { ad: 'Kapanan', filtre: { alan: 'kapanmaDurum', op: 'esit', deger: 2 } },
     ],
-    menuGrup: 'Alış', menuAd: 'Alış Konsinyeler', ic: '📦', yetkiKodu: 'belge',
+    menuGrup: 'Alış', menuSira: 70, menuAd: 'Alış Konsinyeler', ic: '📦', yetkiKodu: 'belge',
   },
   {
     // "Hangi siparisin nesi teslim edilmedi" - satir bazli acik liste.
     kaynak: 'belge-acik-satir', baslik: 'Açık Sipariş Satırları', yol: 'Satis › Acik Satirlar',
     toplam: ['miktar', 'kapatilanMiktar', 'kalanMiktar'],
-    menuGrup: 'Satış', menuAd: 'Açık Satırlar', ic: '📑', yetkiKodu: 'belge',
+    menuGrup: 'Satış', menuSira: 70, menuAd: 'Açık Satırlar', ic: '📑', yetkiKodu: 'belge',
   },
   {
     // Kasa alt sisteminin ANA ekrani (F2): makbuz seviyesindeki islemler.
@@ -275,7 +304,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       //   duruyor ve prim tetiklemiyor demektir.
       { ad: 'Dağıtılmamış', filtre: { alan: 'dagitilmamis', op: 'buyuk', deger: 0 } },
     ],
-    menuGrup: 'Kasa', menuAd: 'Kasa İşlemleri', ic: '🧾', yetkiKodu: 'kasa_islem',
+    menuGrup: 'Finans', menuSira: 10, menuAd: 'Kasa İşlemleri', ic: '🧾', yetkiKodu: 'kasa_islem',
   },
   {
     // Acik planlar (v_plan_vade): beklenen tahsilat/odemeler, en yakin vade ustte.
@@ -289,15 +318,14 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tahsilat', filtre: { alan: 'turAdi', op: 'icerir', deger: 'Tahsilat' } },
       { ad: 'Ödeme',    filtre: { alan: 'turAdi', op: 'icerir', deger: 'Ödeme' } },
     ],
-    menuGrup: 'Kasa', menuAd: 'Vade / Planlar', ic: '📅', yetkiKodu: 'kasa_islem',
+    menuGrup: 'Finans', menuSira: 70, menuAd: 'Vade / Planlar', ic: '📅', yetkiKodu: 'kasa_islem',
   },
   {
     // "Kasa" grubu, Satış'in HEMEN ALTINDA (kullanici istegi) - "Cari Hareketleri"
     // (mali-hareket) yeniden adlandirildi: hem sayfa basligi hem menu adi "Kasa
     // Hareketleri" oldu (Satış'in aksine kullanici burada baslik metnini ACIKCA verdi).
     kaynak: 'mali-hareket', baslik: 'Kasa Hareketleri', yol: 'Kasa › Hareketler',
-    toplam: ['borc', 'alacak'],
-    menuGrup: 'Kasa', menuAd: 'Kasa Hareketleri', ic: '💰', yetkiKodu: 'mali_hareket',
+    toplam: ['borc', 'alacak'], menuAd: 'Kasa Hareketleri', menuGizli: true, ic: '💰', yetkiKodu: 'mali_hareket',
   },
   // --- Hesaplar: TEK kaynak ('hesap'), tur'e gore 5 ayri ekran. Musteri/Tedarikci
   //     deseninin aynisi: sabitFiltre + rota + yeniKayitVarsayilanlari.
@@ -307,7 +335,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
               tarihAlani: 'islemTarihi' }, baslik: 'Kasalar', yol: 'Kasa › Kasa Hesaplari',
     kartYolu: '/kasa-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'K' },
     toplam: ['yerelBakiye'],
-    menuGrup: 'Kasa', menuAd: 'Kasa Hesapları', ic: '💵', yetkiKodu: 'hesap',
+    menuGrup: 'Finans', menuSira: 20, menuAd: 'Kasa Hesapları', ic: '💵', yetkiKodu: 'hesap',
   },
   // --- BANKA grubu (kullanici istegi): banka tarafi Kasa'dan ayrildi. Kaynak
   //     yine tek 'hesap' tablosu, tur'e gore ayri ekranlar.
@@ -317,7 +345,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
               tarihAlani: 'islemTarihi' }, baslik: 'Banka Hesapları', yol: 'Banka › Hesaplar',
     kartYolu: '/banka-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'B' },
     toplam: ['yerelBakiye'],
-    menuGrup: 'Banka', menuAd: 'Banka Hesapları', ic: '🏦', yetkiKodu: 'hesap',
+    menuGrup: 'Finans', menuSira: 30, menuAd: 'Banka Hesapları', ic: '🏦', yetkiKodu: 'hesap',
   },
   {
     kaynak: 'hesap', rota: 'kredi-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
@@ -325,7 +353,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
               tarihAlani: 'islemTarihi' }, baslik: 'Krediler', yol: 'Banka › Krediler',
     kartYolu: '/kredi-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'R' },
     toplam: ['yerelBakiye'],
-    menuGrup: 'Banka', menuAd: 'Krediler', ic: '🏛️', yetkiKodu: 'hesap',
+    menuGrup: 'Finans', menuSira: 35, menuAd: 'Krediler', ic: '🏛️', yetkiKodu: 'hesap',
   },
   {
     kaynak: 'hesap', rota: 'pos-hesap', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
@@ -333,7 +361,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
               tarihAlani: 'islemTarihi' }, baslik: 'POS Hesapları', yol: 'Banka › POS',
     kartYolu: '/pos-hesap', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'P' },
     toplam: ['yerelBakiye'],
-    menuGrup: 'Banka', menuAd: 'POS', ic: '💳', yetkiKodu: 'hesap',
+    menuGrup: 'Finans', menuSira: 40, menuAd: 'POS', ic: '💳', yetkiKodu: 'hesap',
   },
   {
     kaynak: 'hesap', rota: 'kredi-karti', aksiyonEkrani: 'hesap-liste', cipler: DURUM_CIPLERI,
@@ -341,7 +369,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
               tarihAlani: 'islemTarihi' }, baslik: 'Kredi Kartları', yol: 'Banka › Kredi Kartlari',
     kartYolu: '/kredi-karti', sabitFiltre: { alan: 'tur', op: 'esit', deger: 'V' },
     toplam: ['yerelBakiye'],
-    menuGrup: 'Banka', menuAd: 'Kredi Kartı', ic: '💳', yetkiKodu: 'hesap',
+    menuGrup: 'Finans', menuSira: 50, menuAd: 'Kredi Kartı', ic: '💳', yetkiKodu: 'hesap',
   },
   {
     // BANKA TANIMLARI (db/109): hesap ve cek/senet kartlarindaki banka secimini
@@ -352,7 +380,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Banka', menuAd: 'Banka Tanımları', ic: '🏛️', yetkiKodu: 'hesap',
+    menuGrup: 'Finans', menuSira: 91, menuAltGrup: 'Ayarlar', menuAd: 'Banka Tanımları', ic: '🏛️', yetkiKodu: 'hesap',
   },
   // CEK ve SENET AYRI listeler (kullanici karari): ayni `cek-senet` kaynagi,
   //   sabit filtre tur=1 / tur=2. Ikisi ayni tabloda durur cunku portfoy,
@@ -372,7 +400,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Kapanan', filtre: { alan: 'durum', op: 'icinde', deger: [50, 70] } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Banka', menuAd: 'Çek Listesi', ic: '📃', yetkiKodu: 'cek_senet',
+    menuGrup: 'Finans', menuSira: 60, menuAd: 'Çek Listesi', ic: '📃', yetkiKodu: 'cek_senet',
   },
   {
     kaynak: 'cek-senet', rota: 'senet', baslik: 'Senetler', yol: 'Banka › Senetler',
@@ -387,7 +415,7 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Kapanan', filtre: { alan: 'durum', op: 'icinde', deger: [50, 70] } },
       { ad: 'Tumu' },
     ],
-    menuGrup: 'Banka', menuAd: 'Senet Listesi', ic: '🧾', yetkiKodu: 'cek_senet',
+    menuGrup: 'Finans', menuSira: 65, menuAd: 'Senet Listesi', ic: '🧾', yetkiKodu: 'cek_senet',
   },
   {
     // Yuruyen bakiyeli ekstre: hesap secimi URL'den gelir (?hesapId=), grid
@@ -396,15 +424,15 @@ export const TICARI_LISTELERI: ListeGirdisi[] = [
     // Para birimi gruplu (111): her grubun ara toplami + en altta genel toplam.
     //   Yerel kolonlar da toplanir - genel toplam ancak yerel parada anlamli.
     urlFiltreAlani: 'hesapId', toplam: ['giris', 'cikis', 'yerelBorc', 'yerelAlacak'],
-    menuGrup: 'Kasa', menuAd: 'Hesap Ekstresi', ic: '📈', yetkiKodu: 'hesap',
+    menuGrup: 'Finans', menuSira: 76, menuAd: 'Hesap Ekstresi', ic: '📈', yetkiKodu: 'hesap',
   },
   {
     kaynak: 'cari-ekstre', baslik: 'Cari Ekstre', yol: 'Kasa › Cari Ekstre',
     urlFiltreAlani: 'tarafId', toplam: ['borc', 'alacak', 'yerelBorc', 'yerelAlacak'],
-    menuGrup: 'Kasa', menuAd: 'Cari Ekstre', ic: '🧮', yetkiKodu: 'mali_hareket',
+    menuGrup: 'Finans', menuSira: 74, menuAd: 'Cari Ekstre', ic: '🧮', yetkiKodu: 'mali_hareket',
   },
   {
     kaynak: 'masraf', baslik: 'Masraflar', yol: 'Stok › Masraflar', cipler: DURUM_CIPLERI,
-    menuGrup: 'Kasa', menuAd: 'Masraf Listesi', ic: '🧾', yetkiKodu: 'masraf',
+    menuGrup: 'Finans', menuSira: 72, menuAd: 'Masraf Listesi', ic: '🧾', yetkiKodu: 'masraf',
   },
 ];

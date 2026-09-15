@@ -90,6 +90,9 @@ kurucu.Services.AddSingleton<Gentegre.Cekirdek.Cihaz.ICihazSurucu,
 kurucu.Services.AddSingleton<Gentegre.Cekirdek.Cihaz.ICihazSurucu,
                              Gentegre.Cekirdek.Cihaz.AstmSurucu>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.CihazServisi>();
+// Göz cihaz mesajı ayrıştırıcısı (691/703): ham cihaz çıktısını hastanın
+//   ölçüm satırına çevirir.
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.GozCihazServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.LabServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.KulturServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.GenetikServisi>();
@@ -241,6 +244,7 @@ uygulama.ZamanliIsUclariniEkle();
 uygulama.KurumProfilUclariniEkle();
 uygulama.PanelUclariniEkle();
 uygulama.RolYetkiUclariniEkle();
+uygulama.KullaniciYonetimUclariniEkle();
 uygulama.IskontoOnayUclariniEkle();
 uygulama.DokumUclariniEkle();
 uygulama.DokumanUclariniEkle();
@@ -260,6 +264,10 @@ uygulama.UretimUclariniEkle();
 uygulama.SigortaUclariniEkle();
 uygulama.CihazUclariniEkle();
 uygulama.LabUclariniEkle();
+// GOZ (691): hasta ozeti ve olcum trendi - liste/kart disi iki sorgu.
+uygulama.GozUclariniEkle();
+// YATAN HASTA (695): yatis kartinin ust seridi - kimlik, son vital, acik isler.
+uygulama.YatanUclariniEkle();
 
 // YETKI SENKRONU (kullanici: "menulerdeki ekle/sil/degisimlerde yetki matrisini
 //   update et"): katalogdaki ekran/aksiyon yetkileri ile `yetki` tablosu her

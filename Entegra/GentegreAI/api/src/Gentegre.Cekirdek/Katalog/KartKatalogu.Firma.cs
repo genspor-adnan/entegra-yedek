@@ -149,20 +149,25 @@ public static partial class KartKatalogu
                 Baslik: "Ülke", Grup: "Adres", AltGrup: "Merkez Adresi"),
 
             // ------------------------------------------------- Yerel Ayarlar (666)
-            // Subenin ulkesi, telefon kodu, saati ve parasi. Berlin subesi avro
+            // KIMLIK SEKMESINDE (kullanici): bunlar POSTA ADRESI degil, subenin
+            //   NE OLDUGUNU soyleyen bilgiler - hangi ulkenin mevzuatiyla
+            //   calisiyor, hangi parayla tahsil ediyor, hangi saatle. Adres
+            //   blogunda dururken "sokak/il" ile ayni cinsten sanilip
+            //   atlaniyordu.
+            // Subenin ulkesi, telefon kodu, saati ve parasi: Berlin subesi avro
             //   tahsil eder, Almanya saatiyle calisir ve orada T.C. kimlik
             //   numarasi yoktur - bu dort alan olmadan istemci her subeyi
             //   Turkiye sanardi.
             // ULKE KODU yalnizca bir etiket DEGIL: TR disinda TCKN ve Turkiye
             //   telefon bicimi kontrolu KAPANIR (DegerCevirici / kartDogrulama).
             new("ulkeKod",    "ulke_kod",   "kod", SabitKodlar: UlkeKodlari,
-                Baslik: "Ülke Kodu", Grup: "Adres", AltGrup: "Yerel Ayarlar"),
+                Baslik: "Ülke Kodu", Grup: "Kimlik", AltGrup: "Yerel Ayarlar"),
             new("telefonKodu","telefon_kodu","metin", EnFazlaUzunluk: 6,
-                Baslik: "Telefon Ülke Kodu", Grup: "Adres", AltGrup: "Yerel Ayarlar"),
+                Baslik: "Telefon Ülke Kodu", Grup: "Kimlik", AltGrup: "Yerel Ayarlar"),
             new("zamanDilimi","zaman_dilimi","kod", SabitKodlar: ZamanDilimleri,
-                Baslik: "Saat Dilimi", Grup: "Adres", AltGrup: "Yerel Ayarlar"),
+                Baslik: "Saat Dilimi", Grup: "Kimlik", AltGrup: "Yerel Ayarlar"),
             new("paraBirimi", "para_birimi","kod", SabitKodlar: ParaBirimleri,
-                Baslik: "Para Birimi", Grup: "Adres", AltGrup: "Yerel Ayarlar"),
+                Baslik: "Para Birimi", Grup: "Kimlik", AltGrup: "Yerel Ayarlar"),
             new("postaKodu",  "posta_kodu", "metin", EnFazlaUzunluk: 10,
                 Baslik: "Posta Kodu", Grup: "Adres", AltGrup: "Merkez Adresi"),
 

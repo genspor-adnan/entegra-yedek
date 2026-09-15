@@ -40,10 +40,48 @@ interface MenuOgesi {
  * OLMAYAN grup, tanim sirasindaki yerini korur ve bu listedekilerden SONRA
  * gelir; Yonetim her zaman en sondadir (asagida).
  */
-const GRUP_SIRA = [
-  'İletişim & AI', 'Randevu', 'Kayıt Kabul', 'Muayene', 'Laboratuvar',
-  'Radyoloji', 'e-Nabız', 'Cari', 'CRM', 'Stok & Hizmet', 'Muhasebe',
-  'Satış', 'Alış', 'Kasa', 'Banka', 'İK', 'Demirbaş', 'Doküman',
+/**
+ * MENU SIRASI (plan: dokuman/11_MENU_DUZENI_PLANI.md · mockup
+ * Ekranlar/Ayarlar/menu_duzeni.html).
+ *
+ * TEK LISTE, iki urun: sira hasta akisini ve ticari akisi UST USTE koyar -
+ * urun modu ve modul suzmesi hangi grubun cizilecegine zaten karar veriyor
+ * (HBYS'de Satis/Alis/Uretim yok, ERP'de klinik gruplar yok). Iki ayri liste
+ * tutmak, ortak gruplarin (Finans, Stok, Muhasebe, Yonetim) sirasini iki
+ * yerde bakim etmek demekti.
+ *
+ * 18 grup -> 15: Kasa+Banka = Finans · Cari+CRM = Cari & CRM · Dokuman ve
+ * Roller Yonetim altina · Mesajlar/AI ust cubuga (arac, is akisi degil).
+ */
+const GRUP_SIRA_HBYS = [
+  // hasta akisi
+  // GOZ MUAYENEDEN SONRA (kullanici istegi): goz poliklinigi gunluk is hacmi
+  //   en yuksek dallardan biri; menude ayaktan hasta akisinin hemen ardinda
+  //   duruyor. Yatan hasta ise onun yerine (lab/radyoloji sonrasina) gecti -
+  //   yatis gun boyu acik kalan bir ekran degil, gune birkac kez girilen bir
+  //   is; sik acilan dalin ustte olmasi tiklama sayisini dusuruyor.
+  'Randevu', 'Kayıt Kabul', 'Muayene', 'Göz', 'Laboratuvar', 'Radyoloji', 'Yatan Hasta',
+  'Kurumlar & Sigorta', 'e-Nabız',
+  // PARA HEMEN ARKASINDA (kullanici): hastanin isi bittiginde sira tahsilata
+  //   gelir - vezne gun boyu Finans'a girip cikar, listenin dibinde olmamali.
+  'Finans',
+  // malzeme - kayit
+  // Cari & CRM HBYS'de de var (tedarikci, kisi, gorev): listede YOKSA en dibe
+  //   dusuyordu - Yonetim'in bile altina. Yeri stok ile muhasebe arasi.
+  // DOKUMAN KENDI ANA GRUBU ve DEMIRBASTAN ONCE (kullanici): Yonetim altina
+  //   alt-grup olarak konunca ana menuden kayboldu - kurum dokumani gunluk
+  //   is, ayar degil.
+  'Stok & Hizmet', 'Cari & CRM', 'Muhasebe', 'İK & Prim', 'Doküman', 'Demirbaş',
+];
+
+/**
+ * ERP'de sira TICARI AKISTIR: cari -> satis -> alis -> stok -> uretim -> para.
+ * Finans burada AKISIN SONUNDA durur; HBYS'de hasta akisinin hemen arkasinda.
+ * Tek liste ikisini birden veremiyordu - ayni grubun yeri urune gore farkli.
+ */
+const GRUP_SIRA_ERP = [
+  'Cari & CRM', 'Satış', 'Alış', 'Stok & Hizmet', 'Üretim',
+  'Finans', 'Muhasebe', 'İK & Prim', 'Doküman', 'Demirbaş',
 ];
 
 type MenuSatiri =
@@ -82,23 +120,29 @@ const GRUP_IKON: Record<string, string> = {
   'Randevu': '📅',
   'Kayıt Kabul': '🚑',
   'Radyoloji': '☢️',
+  'Göz': '👁️',
+  'Yatan Hasta': '🛏️',
   // e-Nabiz (kullanici): Radyolojiden sonra ayri ana menu. Bayrak emojisi
   //   Windows'ta harf olarak ciziliyordu; "nabiz" = atan kalp.
   'e-Nabız': '💓',
   // Klinik moduller (360): kurum profilinde kapaliysa menude hic gorunmezler.
   'Muayene': '🩺',
   'Laboratuvar': '🧪',
-  'Cari':    '🤝',
+  // Cari + CRM tek grup (plan): ayni kisiler iki yerde araniyordu.
+  'Cari & CRM': '🤝',
   'Satış':   '🛍️',
   'Alış':    '🛒',
-  'Kasa':    '💵',
-  'Banka':   '🏦',
-  'CRM':     '📈',
+  // Kasa + Banka = Finans (plan): "tahsilat nerede" sorusu iki gruba
+  //   bakilarak cevaplaniyordu.
+  'Finans':  '💰',
+  // HBYS'te "Cari" yabanci bir sozcuk; kurum/sigorta ekranlari kendi grubunda.
+  'Kurumlar & Sigorta': '🏛️',
+  'Üretim':  '🏭',
   'Stok & Hizmet': '📦',
   // Muhasebe ana menusu (kullanici): Stok'tan sonra gelir - hesap plani, fisler,
   //   fis satirlari, masraf merkezleri ve islem turleri Yonetim'den buraya alindi.
   'Muhasebe': '⚖️',
-  'İK':      '👥',
+  'İK & Prim': '👥',
   // Gemi dumeni (kullanici, ucuncu deneme): Unicode'da GERCEK bir gemi
   //   dumeni emojisi YOK. Denenenler: ☸️ (dharma cakri - dini sembol),
   //   🛞 (tekerlek - lastik gibi cizilir). ⎈ (U+2388) anlamca dogru ama
@@ -112,6 +156,13 @@ const GRUP_IKON: Record<string, string> = {
     olmayan alt grup eskisi gibi ⚙️ kalir. */
 const ALTGRUP_IKON: Record<string, string> = {
   'Prim': '%',
+  // Her grubun SON alt grubu "Ayarlar" (plan kural 2): gunluk is listeleri
+  //   ustte, tanimlar ve ayarlar altta - hangi grupta olursan ol ayni desen.
+  'Ayarlar': '⚙️',
+  'Güvenlik': '🛡️',
+  'Platform': '🧩',
+  'Doküman': '📁',
+  'Veri Aktarımı': '⬆️',
   // Laboratuvarin uc dali (kullanici): ortak akis (istem, numune, sonuc)
   //   grubun kokunde kalir, dala ozel ekranlar bu basliklarin altinda.
   // Karekod bildirimi iki kurum: ITS ilac, UTS tibbi cihaz - notr disli
@@ -161,7 +212,7 @@ export function Kabuk() {
     && modulAcikMi(l, kullanici?.moduller));
   const moduller: MenuOgesi[] =
     yetkiliListeler.map(l => ({
-      yol: `/${l.rota ?? l.kaynak}`, ad: cm(l.menuAd), ic: l.ic,
+      yol: l.menuYol ?? `/${l.rota ?? l.kaynak}`, ad: cm(l.menuAd), ic: l.ic,
       rz: l.ozelSayfa ? 'ayar' : 'liste',
       grup: l.menuGrup ? cm(l.menuGrup) : undefined,
       grupHam: l.menuGrup,
@@ -180,11 +231,13 @@ export function Kabuk() {
   // GRUP SIRASI: once GRUP_SIRA'daki duzen, sonra listede olmayanlar kendi
   //   sirasinda. Duz ogeler (grubu olmayan, or. Ana Sayfa) YERINDE kalir -
   //   yalniz grup satirlari kendi aralarinda siralanir.
+  // Urun modu 2 = HBYS (GenoTIP AI); otekiler ticari sirayi kullanir.
+  const grupSirasi = kullanici?.urunModu === 2 ? GRUP_SIRA_HBYS : GRUP_SIRA_ERP;
   const grupYeri = (sat: MenuSatiri) => {
     if (sat.tur !== 'grup') return -1;
     const ham = sat.alt.find(m => m.grupHam)?.grupHam ?? sat.ad;
-    const i = GRUP_SIRA.indexOf(ham);
-    return i < 0 ? GRUP_SIRA.length : i;
+    const i = grupSirasi.indexOf(ham);
+    return i < 0 ? grupSirasi.length : i;
   };
   const grupSatirlari = satirlar.filter(x => x.tur === 'grup');
   const sirali = [...grupSatirlari]
@@ -359,6 +412,16 @@ export function Kabuk() {
                   onClick={() => { const y = temaSonraki(tema); setTema(y); temaUygula(y) }}>
             {TEMA_IKON[tema]}
           </button>
+
+          {/* MESAJLAR ve AI (menu yeniden duzeni, plan kural 6): bunlar ARAC,
+              is akisi degil - ana menude iki ogelik bir grup aciyorlardi.
+              Ust cubuga alindi; yetkisi/modulu olmayanda hic cizilmez. */}
+          {yetki('mesaj') && (
+            <NavLink to="/mesajlar" className="ib" title={c('Mesajlar')}>💬</NavLink>
+          )}
+          {yetki('ai') && (
+            <NavLink to="/yapay-zeka" className="ib" title={c('Yapay Zeka')}>✨</NavLink>
+          )}
 
           {/* ZIL (662): onay bekleyen isler - simdilik iskonto onaylari.
               Dugme vardi ama hicbir sey yapmiyordu. */}

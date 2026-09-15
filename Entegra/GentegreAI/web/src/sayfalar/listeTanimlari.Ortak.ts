@@ -99,6 +99,13 @@ export interface ListeTanimi {
   cipler?: { ad: string; filtre?: Kosul; rota?: string; kosul?: 'ebelge' }[];
   /** Rotasi var ama MENUDE gorunmez (baska bir listenin sekmesinden girilir). */
   menuGizli?: boolean;
+  /**
+   * MENU BAGLANTISI baska bir yola gider; bu tanim icin ROTA ACILMAZ.
+   * Grup basina "📊 Dökümler" ogesi boyle: hepsi /dokumler ekranina gider,
+   * yalniz `?grup=` suzgeci degisir - her biri icin ayri rota acmak ayni
+   * ekrani on kez kaydetmek olurdu (plan: dokuman/11, kural 4).
+   */
+  menuYol?: string;
   /** Mockup'ta olup backend'i henuz olmayan kart sekmeleri (or. stok: "ÜTS Bilgileri"). */
   yerTutucuSekmeler?: string[];
   /** Mockup'taki "Genel" sekmesindeki bos "Resim" kutusu (IMAJ→DOSYA hic baglanmadi). */

@@ -31,6 +31,8 @@ import { TekKayit } from './TekKayit';
 import { GenGrid } from './GenGrid';
 import { HekimGonderimOzeti } from './radyoloji/HekimGonderimOzeti';
 import { IstemAkisi } from './radyoloji/IstemAkisi';
+import { YatisSeridi } from './yatan/YatisSeridi';
+import { GozMuayeneSeridi } from './goz/GozMuayeneSeridi';
 import { KontrolListesi } from './radyoloji/KontrolListesi';
 export { Modal };
 import { RolYetkiMatrisi } from './RolYetkiMatrisi';
@@ -1171,6 +1173,19 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
             sekmelerin USTUNDE - hangi sekmede olursan ol "istem nerede"
             gorunmeli (mockup radyoloji_istem_karti.html). Yeni kayitta yok. */}
         {kaynak === 'radyoloji-istem' && !yeniMi && <IstemAkisi istemId={id as number} />}
+        {/* YATIS KARTI (695, mockup yatis_karti.html): kimlik + son vital
+            seridi SEKMELERIN DISINDA - yatan hastada "kim, nerede, kacinci
+            gun, nasil" her kararin onkosulu; sekmeye gomulurse hekim her
+            seferinde tiklar. */}
+        {kaynak === 'yatan' && !yeniMi && <YatisSeridi yatisId={id as number} />}
+        {/* GOZ MUAYENESI (691, mockup goz_detayli_muayene.html): kimlik +
+            baglam kutulari (sikayet, sistemik/ilac, on tetkik, aile) +
+            tamamlanma cubugu SEKMELERIN USTUNDE - hekim olcume baslamadan
+            once bu dordunu okuyor; sekmeye gomulurse her muayenede iki kez
+            gezinilir. Yeni kayitta yok: henuz muayene numarasi bile olusmadi. */}
+        {kaynak === 'goz-muayene' && !yeniMi && (
+          <GozMuayeneSeridi gozMuayeneId={id as number} />
+        )}
         </>
       )}
       sekmeBar={sekmeler.length > 1 && (

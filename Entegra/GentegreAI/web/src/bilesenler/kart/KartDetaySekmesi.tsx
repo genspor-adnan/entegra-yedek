@@ -7,6 +7,8 @@ import { tarifeHizli, ttbFiyatTuret, tarifeGizli, fiyatSatirKurali, kurumTarifeT
 import type { Deger } from '../kartAlanCizim';
 import type { SekmeTanimi } from '../kartSekmeleri';
 import { api } from '../../api/istemci';
+import { GozOlcumMatrisi } from '../goz/GozOlcumMatrisi';
+import { GOZ_MATRISLERI } from '../goz/gozMatrisTanimlari';
 import { mesaj } from '../mesaj';
 
 /** Sekme icin detay sayfalama/suzme cagrilari - kart govdesinden gelir. */
@@ -78,6 +80,40 @@ export function KartDetaySekmesi({
         /* LAB ISTEMI "Tetkikler" gridi: sonuc satir ici girilir. */
         const labSonucGridi = kaynak === 'lab-istem' && aktif.detay.ad === 'satirlar'
                               && !salt && !aktif.detay.saltOkunur;
+        // GÖZ ÖLÇÜM MATRİSİ (mockup goz_detayli_muayene.html `.odos`):
+        //   satır = parametre, sütun = göz. Genel detay gridi aynı veriyi
+        //   tutuyordu ama hekime her satırda "bu hangi göz, bu hangi tür"
+        //   sorusunu yeniden sorduruyordu; matris iki soruyu da ızgaranın
+        //   kendisine taşır. VERİ MODELİ AYNI - satırlar yine goz_gorme /
+        //   goz_refraksiyon kayıtları, kaydetme yine kartın normal akışı.
+        const gozMatris = kaynak === 'goz-muayene'
+          ? GOZ_MATRISLERI[aktif.detay.ad] : undefined;
+        if (gozMatris) {
+          // EK MATRİS AYNI SEKMEDE (mockup "Görme & Refraksiyon"): iki ölçüm
+          //   birlikte okunuyorsa sekmeye bölmek, hekimi her karşılaştırmada
+          //   sekme değiştirmeye zorlar. İkisi de KENDİ detay durumunu
+          //   günceller - veri modeli değişmiyor, yalnız çizim yeri ortak.
+          const ek = gozMatris.ekMatris ? GOZ_MATRISLERI[gozMatris.ekMatris] : undefined;
+          return (
+            <>
+              <GozOlcumMatrisi
+                tanim={gozMatris}
+                durum={detaylar[aktif.detay.ad] ?? bosDetay()}
+                salt={salt || aktif.detay.saltOkunur}
+                onDegis={yeni => setDetaylar(t => ({ ...t, [aktif.detay.ad]: yeni }))}
+              />
+              {ek && (
+                <GozOlcumMatrisi
+                  tanim={ek}
+                  durum={detaylar[ek.detay] ?? bosDetay()}
+                  salt={salt || aktif.detay.saltOkunur}
+                  onDegis={yeni => setDetaylar(t => ({ ...t, [ek.detay]: yeni }))}
+                />
+              )}
+            </>
+          );
+        }
+
         const grid = (
         <GenDetayTablo
           meta={aktif.detay}

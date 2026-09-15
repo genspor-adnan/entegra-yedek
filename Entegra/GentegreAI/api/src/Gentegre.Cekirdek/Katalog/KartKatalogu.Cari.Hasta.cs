@@ -187,6 +187,84 @@ public static partial class KartKatalogu
     //   EKRANIYDI. Bu kart + Yetki Matrisi sekmesi (RolYetkiMatrisi.tsx, ozel bilesen -
     //   generic Detay mekanizmasina UYMAZ, sabit "yetki" satirlari x Gor/Ekle/Degistir/
     //   Sil sutunlu matris; ayri RolYetkiUclari.cs/RolYetkiDeposu.cs).
+    /// <summary>
+    /// KULLANICI KARTI (Yönetim › Güvenlik › Kullanıcılar) — mockup
+    /// `Ekranlar/Ayarlar/kullanicilar.html`.
+    ///
+    /// <para><b>Hesap buradan AÇILMAZ ve SİLİNMEZ.</b> Açılış personelden olur
+    /// (kişi kaydı olmayan bir hesap, kime ait olduğu bilinmeyen bir hesaptır);
+    /// silme yerine pasife alma vardır - işlem günlüğü, belge ve log satırları
+    /// hesaba bağlı, silinen hesap geçmişi sahipsiz bırakır. Liste ekranındaki
+    /// eylemler de bu yüzden "Aktif / Pasif"tir.</para>
+    ///
+    /// <para><b>Parola alanı YOKTUR.</b> Yönetici parola yazmaz; sıfırlama
+    /// eylemi hesabı parolasız duruma alır ve kişi ilk girişte kendi parolasını
+    /// koyar. Kartta yalnız parolanın DURUMU okunur.</para>
+    ///
+    /// <para>Ad, görev ve şube PERSONEL kartındadır - buradan değişmez; kendi
+    /// kartını düzenleyebilen kişi kendi görevini de değiştirebilirdi.</para>
+    /// </summary>
+    private static KartTanimi Kullanici() => new(
+        Ad: "kullanici",
+        YetkiKodu: "kullanici",
+        Tablo: "public.taraf_kullanici",
+        LogTabloId: 902,
+        SubeKolonu: null,                     // hesap subeye degil ROLE baglidir
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            // GRUP ADI "Genel" (Kimlik DEGIL): "Kimlik" adli grup kartin
+            //   ust seridine cikar ve SEKME OLARAK CIZILMEZ (kartSekmeleri.ts
+            //   KIMLIK_GRUP) - o zaman kartta tek sekme kalip sekme seridi hic
+            //   gorunmuyordu ve Ek Roller kutusu (Genel sekmesine bagli) hic
+            //   cizilmiyordu. Mockup'ta kart SEKMELI (kullanicilar.html).
+            // Kullanici kodu GIRIS ANAHTARIDIR: esnek giriste kod, e-posta,
+            //   cep ve TCKN birlikte aranir (674) - hepsi benzersiz olmali.
+            new("kod", "kod", "metin", Zorunlu: true, EnFazlaUzunluk: 30,
+                Baslik: "Kullanıcı Kodu", Grup: "Genel"),
+            // ANA ROL DURUMDAN ONCE (kullanici): "kim" sorusunun cevabi kod +
+            //   rol; aktif/pasif o kisinin GECICI hali. Yetki rolde durur, ek
+            //   roller ayri bolumde (665) - kart alani degil, kendi
+            //   ekranciginda (KartKullaniciRolu).
+            new("rolId", "rol_id", "kod", KodTablosu: "public.rol", Zorunlu: true,
+                Baslik: "Ana Rol", Grup: "Genel"),
+            new("aktif", "aktif", "kod", SabitKodlar: DurumKodlari,
+                Baslik: "Durum", Grup: "Genel"),
+            new("eposta", "eposta", "metin", EnFazlaUzunluk: 120,
+                Baslik: "E-posta", Grup: "Genel"),
+            new("cepTel", "cep_tel", "metin", EnFazlaUzunluk: 30,
+                Baslik: "Cep Telefonu", Grup: "Genel"),
+            new("dil", "dil", "kod", SabitKodlar: DilKodlari,
+                Baslik: "Arayüz Dili", Grup: "Genel"),
+
+            // ------------------------------------------------------- Güvenlik
+            // Hepsi SALT OKUNUR: bu alanlar sistemin yazdigi izlerdir, elle
+            //   duzeltilecek veri degil. Degistirmek icin listedeki eylemler
+            //   var (parola sifirla / kilidi coz / oturumlari kapat).
+            new("parolaTarihi", "parola_tarihi", "tarih", Yazilabilir: false,
+                Baslik: "Parola Tarihi", Grup: "Güvenlik"),
+            new("sonGirisTarihi", "son_giris_tarihi", "tarih", Yazilabilir: false,
+                Baslik: "Son Giriş", Grup: "Güvenlik"),
+            new("sonGirisIp", "son_giris_ip", "metin", Yazilabilir: false,
+                Baslik: "Son Giriş IP", Grup: "Güvenlik"),
+            new("hataliGiris", "hatali_giris", "sayi", Yazilabilir: false,
+                Baslik: "Hatalı Giriş", Grup: "Güvenlik"),
+            new("kilitBitis", "kilit_bitis", "tarih", Yazilabilir: false,
+                Baslik: "Kilit Bitişi", Grup: "Güvenlik"),
+            new("totpAktif", "totp_aktif", "mantik", Yazilabilir: false,
+                Baslik: "2 Adımlı Doğrulama", Grup: "Güvenlik"),
+            // "Varsayılan parola" EN SONDA, 2 Adımlı Dogrulama'nin saginda
+            //   (kullanici): iki isaret kutusu yan yana dursun - tarih/IP/sayac
+            //   alanlarinin arasinda tek basina duran kutu, izgarada satir
+            //   ortasinda bosluk birakiyordu.
+            new("parolaDegismeli", "parola_degismeli", "mantik", Yazilabilir: false,
+                Baslik: "Varsayılan parola", Grup: "Güvenlik"),
+        });
+
+    /// <summary>Arayuz dilleri - db/081: taraf_kullanici.dil.</summary>
+    private static readonly Dictionary<string, string> DilKodlari =
+        new() { ["0"] = "Türkçe", ["1"] = "English", ["2"] = "Deutsch" };
+
     private static KartTanimi Rol() => new(
         Ad: "rol",
         YetkiKodu: "rol",                     // zaten seed'liydi (yetki.id=15, sira 62)

@@ -60,6 +60,38 @@ public static class AksiyonKatalogu
 
             ["kisi-liste"] = Crud("kisi", "kisi", "cari"),
             ["rol-liste"] = Crud("rol", "rol", "rol", yazdir: false),
+
+            // KULLANICILAR (Yonetim > Guvenlik) - mockup kullanicilar.html.
+            //   CRUD YOK: hesap burada "yeni kayit" gibi acilmaz (personelden
+            //   acilir) ve SILINMEZ - islem gunlugu, belge ve log satirlari
+            //   kullaniciya bagli; silinen hesap gecmisi sahipsiz birakir.
+            //   Pasife alma bunun yerini tutar.
+            ["kullanici-liste"] =
+            [
+                // Parola SIFIRLANIR, yonetici parola YAZMAZ: hesap parolasiz
+                //   duruma doner, kisi ilk giriste kendi parolasini koyar.
+                new("kullanici.parola-sifirla", "🔑 Parola Sıfırla", "kullanici",
+                    Hedef: "araccubugu,sagtus,palet", KaynakKodu: "kullanici",
+                    Islem: Islem.Degistir, KayitGerekir: true, Sira: 10,
+                    Ipucu: "Hesabı parolasız duruma alır ve tüm oturumları kapatır"),
+                // Kilit hatali giristen gelir: parola sorunu DEGIL.
+                new("kullanici.kilit-coz", "🔓 Kilidi Çöz", "kullanici",
+                    Hedef: "araccubugu,sagtus,palet", KaynakKodu: "kullanici",
+                    Islem: Islem.Degistir, KayitGerekir: true, Sira: 20),
+                // Isten ayrilan / cihazini kaybeden kisi: parolasi degismeden
+                //   oturumlari kapatilabilmeli.
+                new("kullanici.oturum-kapat", "⎋ Oturumları Kapat", "kullanici",
+                    Hedef: "araccubugu,sagtus,palet", KaynakKodu: "kullanici",
+                    Islem: Islem.Degistir, KayitGerekir: true, Sira: 30),
+                new("kullanici.durum", "🚫 Aktif / Pasif", "kullanici",
+                    Hedef: "araccubugu,sagtus,palet", KaynakKodu: "kullanici",
+                    Islem: Islem.Degistir, KayitGerekir: true, Sira: 40),
+                // Hesabi olmayan personel: kisi giris yapamayinca aranıyordu.
+                new("kullanici.toplu-ac", "👥 Personelden Toplu Aç", "kullanici",
+                    Hedef: "araccubugu2,palet", KaynakKodu: "kullanici",
+                    Islem: Islem.Ekle, Sira: 50,
+                    Ipucu: "Aktif personelden hesabı olmayanlara hesap açar"),
+            ],
             ["personel-liste"] = Crud("personel", "personel", "personel"),
             ["hasta-liste"] = Crud("hasta", "hasta", "hasta"),
             // Dis doktor (305): personel yetkisiyle, kendi kart adiyla.
@@ -152,6 +184,301 @@ public static class AksiyonKatalogu
                     KaynakKodu: "belge", Islem: Islem.Ekle, KayitGerekir: true, Sira: 20),
                 new("icmal.belge",    "↗ Faturayı Aç", "kurum",
                     KaynakKodu: "belge", Islem: Islem.Gor, KayitGerekir: true, Sira: 30),
+            },
+
+            // ===================================================== GOZ (691) ==
+            // Goz modulunun kayit ekranlari SIRADAN KARTLARDIR: muayene,
+            //   goruntuleme, islem, recete, takip. Hepsinde ekle/duzenle var;
+            //   SILME SAG TUSTA ve dar: klinik kayit silinmez, DURUMU degisir.
+            //   Silmeyi tamamen kapatmadik - yanlis acilan bos kaydi temizlemek
+            //   gerekiyor; ama arac cubugunda durmasi, silmeyi siradan bir
+            //   isleme cevirirdi.
+            // MUAYENE KARTININ ARAC CUBUGU (mockup goz_detayli_muayene.html):
+            //   hekim olcumu bitirince buradan cikis yapiyor - recete, istem,
+            //   islem plani, tamamlama. AYNI KODLAR hem listede hem kartta
+            //   kullanilir (ListeKarti `ekAraclar`): kural ve yetki tek yerde.
+            //
+            //   "Goz semasi" ve "dikte" mockupta var ama BURADA YOK: ikisi de
+            //   bu üründe henüz olmayan yetenekler (cizim yuzeyi, ses).
+            //   Calismayacak dugme koymak, olmayan bir yetenegi vaat etmektir.
+            ["goz-muayene-liste"] =
+            [
+                .. Crud("goz-muayene", "goz", "goz.muayene",
+                        ekleAdi: "＋ Yeni Muayene",
+                        silIpucu: "Ölçümü olan muayene silinmez; "
+                                + "yanlış açılan boş kayıt için"),
+                new("goz.muayene-tamamla", "✔ Muayeneyi Tamamla", "goz",
+                    KaynakKodu: "goz.muayene", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 15, UrunModu: 2, Bicim: "onay",
+                    Ipucu: "Ölçümsüz muayene tamamlanamaz"),
+                new("goz.gozluk-recete", "👓 Gözlük Reçetesi", "goz",
+                    KaynakKodu: "goz.recete", Islem: Islem.Ekle,
+                    KayitGerekir: true, Sira: 40, UrunModu: 2),
+                new("goz.goruntuleme-iste", "📷 Görüntüleme İste", "goz",
+                    KaynakKodu: "goz.goruntuleme", Islem: Islem.Ekle,
+                    KayitGerekir: true, Sira: 45, UrunModu: 2),
+                new("goz.islem-planla", "💉 İşlem Planla", "goz",
+                    KaynakKodu: "goz.islem", Islem: Islem.Ekle,
+                    KayitGerekir: true, Sira: 50, UrunModu: 2,
+                    Ipucu: "Enjeksiyon · lazer · ameliyat"),
+                new("goz.onceki-kopyala", "📋 Önceki Muayeneden Kopyala", "goz",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    KaynakKodu: "goz.muayene", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 55, UrunModu: 2,
+                    Ipucu: "Metinsel bulgular gelir; ölçümler kopyalanmaz"),
+                // ÇİZİM VE DİKTE (705): ikisi de bulgu yazmanın başka bir
+                //   yolu - bu yüzden ayrı yetkileri yok, "goz.muayene"
+                //   değiştirme yetkisine bağlılar.
+                new("goz.sema", "🖼 Göz Şeması", "goz",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    KaynakKodu: "goz.muayene", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 60, UrunModu: 2,
+                    Ipucu: "Fundus / ön segment çizimi; bulgunun yeri"),
+                new("goz.dikte", "🎙 Dikte", "goz",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    KaynakKodu: "goz.muayene", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 65, UrunModu: 2,
+                    Ipucu: "Sesle metin bulgu; ölçüm alanları kapalı"),
+            ],
+            ["goz-goruntuleme-liste"] = Crud("goz-goruntuleme", "goz", "goz.goruntuleme",
+                                             ekleAdi: "＋ Yeni Görüntüleme",
+                                             silIpucu: "Ölçüm satırı olan çekim silinmez"),
+            ["goz-islem-liste"] = Crud("goz-islem", "goz", "goz.islem",
+                                       ekleAdi: "＋ Yeni İşlem",
+                                       silIpucu: "Uygulanmış işlem silinmez; iptal edin"),
+            ["goz-gozluk-recete-liste"] = Crud("goz-gozluk-recete", "goz", "goz.recete",
+                                               ekleAdi: "＋ Yeni Reçete",
+                                               silIpucu: "Hastaya verilmiş reçete silinmez"),
+            ["goz-kontakt-lens-liste"] = Crud("goz-kontakt-lens", "goz", "goz.recete",
+                                              ekleAdi: "＋ Yeni Lens Kaydı"),
+            ["goz-takip-liste"] = Crud("goz-takip", "goz", "goz.takip",
+                                       ekleAdi: "＋ Yeni Takip",
+                                       silIpucu: "Takip kapatılır, silinmez"),
+
+            // AYARLAR: protokol ve cihaz TANIMDIR - kurulum isi, tam CRUD.
+            ["goz-islem-protokol-liste"] = Crud("goz-islem-protokol", "goz", "goz.islem",
+                                                ekleAdi: "＋ Yeni Protokol"),
+            // DİKTE SÖZLÜĞÜ (705): terim/komut/sık cümle VERİDİR - yeni bir
+            //   kısaltma için sürüm çıkmak gerekmesin diye ekrandan yönetilir.
+            ["dikte-terim-liste"] = Crud("dikte-terim", "goz", "goz.dikte_sozluk",
+                                         ekleAdi: "＋ Yeni Terim",
+                                         silIpucu: "Kurum sözlüğünden silmek "
+                                                 + "herkesin diktesini etkiler"),
+            ["goz-cihaz-liste"] = Crud("goz-cihaz", "goz", "goz.cihaz",
+                                       ekleAdi: "＋ Yeni Cihaz",
+                                       silIpucu: "Mesajı olan cihaz silinmez; pasife alın"),
+
+            // CIHAZ MESAJLARI: cihazin gonderdigi HAM KAYIT. Elle eklenmez
+            //   (kaynagi cihaz), duzeltilmez ve silinmez - olcumun nereden
+            //   geldiginin kanitidir.
+            //
+            // YENIDEN ISLE (703): surucu duzeltildiginde ya da hasta sonradan
+            //   eslestiginde mesaj tekrar ayristirilir. Olcum satiri mesajin
+            //   kimligini tasidigi icin mukerrer yazim veritabaninda engelli -
+            //   dugmeye iki kez basmak ikinci bir olcum uretmez.
+            ["goz-cihaz-mesaj-liste"] = new AksiyonTanimi[]
+            {
+                new("goz.mesaj-isle",   "🔁 Yeniden İşle", "goz",
+                    KaynakKodu: "goz.cihaz", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 10, UrunModu: 2,
+                    Ipucu: "Mesajı tekrar ayrıştırır; ölçüm mükerrer yazılmaz"),
+                new("goz.mesaj-kuyruk", "⏩ Kuyruğu İşle", "goz",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    KaynakKodu: "goz.cihaz", Islem: Islem.Degistir, Sira: 20, UrunModu: 2,
+                    Ipucu: "Bekleyen ve sahipsiz bütün mesajları dener"),
+                Yazdir(),
+            },
+
+            // UNITE AKISI ve HASTA OZETI: ikisi de GORUNUMDUR, kayit degil.
+            //   Akistaki satir bir gorunumun (v_goz_unite_akis) satiri; ozet
+            //   ise hastanin son olcumlerinden hesaplaniyor. Ikisinde de
+            //   ekle/duzenle/sil yok - kayit kendi ekraninda acilir.
+            // UNITE AKISI: pano YAZMAZ, TASIR. Dugmeler hastayi bir sonraki
+            //   istasyona alir, dilatasyon baslatir, oda atar. Klinik kayit
+            //   (olcum, tani, islem) kendi kartinda girilir - panoya form
+            //   koymak, ayakta doldurulan yarim kayitlar uretirdi.
+            //
+            // "Siradakini Cagir" KAYIT ISTEMEZ: secili satir yoksa en uzun
+            //   bekleyen cagrilir. Numaraya gore cagirmak, arada dilatasyona
+            //   giren hastayi sonsuza kadar geride birakir.
+            //
+            // HICBIRINDE KayitGerekir YOK: bu ekranda secim KANBAN KARTINDAN
+            //   yapiliyor, gridden degil. Kayit sarti konsaydi kullanici karta
+            //   tikladiktan sonra bir de gridden ayni satiri secmek zorunda
+            //   kalirdi; secili kart yoksa ucun kendisi anlasilir bir cumleyle
+            //   reddediyor.
+            ["goz-akis-liste"] = new AksiyonTanimi[]
+            {
+                new("goz.cagir",       "📢 Sıradakini Çağır", "goz",
+                    KaynakKodu: "goz", Islem: Islem.Degistir, Sira: 10, UrunModu: 2,
+                    Bicim: "onay", Ipucu: "Seçili hasta yoksa en uzun bekleyeni çağırır"),
+                new("goz.istasyona-al", "➡ İstasyona Al", "goz",
+                    KaynakKodu: "goz", Islem: Islem.Degistir, Sira: 20, UrunModu: 2, Bicim: "bir",
+                    Ipucu: "Mevcut istasyon kapanır, yenisi açılır (geçmiş korunur)"),
+                new("goz.dilatasyon",  "💧 Dilatasyon Başlat", "goz",
+                    KaynakKodu: "goz", Islem: Islem.Degistir, Sira: 30, UrunModu: 2, Ipucu: "20 dakikalık sayaç başlar"),
+                new("goz.oda-ata",     "🚪 Oda Ata", "goz",
+                    KaynakKodu: "goz", Islem: Islem.Degistir, Sira: 40, UrunModu: 2),
+                new("goz.muayene-ac",  "👁 Muayeneyi Aç", "goz",
+                    KaynakKodu: "goz.muayene", Islem: Islem.Gor, Sira: 50, UrunModu: 2),
+                new("goz.ziyaret-kapat", "✔ Ziyareti Tamamla", "goz",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    KaynakKodu: "goz", Islem: Islem.Degistir, Sira: 60, UrunModu: 2,
+                    Ipucu: "Açık istasyon kapanır, hasta panodan düşer"),
+                Yazdir(),
+            },
+            ["goz-hasta-ozet-liste"] = new AksiyonTanimi[] { Yazdir() },
+
+            // YATAN HASTA SERVIS LISTESI (695): yatisin YASAM DONGUSU dugmelerle
+            //   ilerler - kabul, hastanin yatagina cikisi, nakil, taburcu.
+            //   Yatak durumu bu uclarla BIRLIKTE degisir; ayri bir "yatagi dolu
+            //   yap" dugmesi olsaydi pano gercegin yarim saat gerisinde kalirdi.
+            //
+            //   Kabul/nakil/taburcu AYRI AKSIYON YETKILERIDIR (yatan.kabul /
+            //   yatan.nakil / yatan.taburcu): kabul masasi yatis acar ama
+            //   taburcu etmez, hemsire izlem girer ama yatak degistirmez.
+            ["yatan-liste"] = new AksiyonTanimi[]
+            {
+                new("yatan.kabul",    "＋ Yatış Kabul", "yatan", Kisayol: "Ctrl+N",
+                    AksiyonYetkisi: "yatan.kabul", Sira: 10, UrunModu: 2),
+                new("yatan.duzenle",  "✎ Yatış Kartı", "yatan", Kisayol: "Enter",
+                    KaynakKodu: "yatan", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 20, UrunModu: 2),
+                // KABUL ile "hasta yataginda" AYRI adimdir: arada provizyon,
+                //   dosya ve transfer var. Yatak ucreti ve hemsire izlemi
+                //   hasta geldiginde baslar.
+                new("yatan.yatakta",  "🛏 Yatağa Alındı", "yatan",
+                    AksiyonYetkisi: "yatan.kabul", KayitGerekir: true,
+                    Sira: 30, UrunModu: 2,
+                    Ipucu: "Yatış kabul → Yatakta; yatak 'dolu' olur"),
+                new("yatan.nakil",    "🔀 Nakil / Yatak Değiştir", "yatan",
+                    AksiyonYetkisi: "yatan.nakil", KayitGerekir: true,
+                    Sira: 40, UrunModu: 2),
+                new("yatan.taburcu-planla", "📅 Taburcu Planla", "yatan",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    AksiyonYetkisi: "yatan.taburcu", KayitGerekir: true,
+                    Sira: 50, UrunModu: 2,
+                    Ipucu: "Panoda 'bugün çıkacak' olarak işaretlenir"),
+                new("yatan.taburcu",  "🚪 Taburcu Et", "yatan",
+                    AksiyonYetkisi: "yatan.taburcu", KayitGerekir: true,
+                    Sira: 60, UrunModu: 2, Bicim: "onay"),
+                // YATIS SILINMEZ, IPTAL EDILIR. Yatisa order, izlem, doz ve
+                //   tahakkuk bagli; silinen yatis bunlari da goturur ve "bu
+                //   hasta yatmis miydi" sorusu cevapsiz kalir. Yanlis acilan
+                //   yatis icin dogru cevap durum 0 (Iptal): kayit kalir,
+                //   yatak serbest kalir.
+                new("yatan.iptal",    "✖ Yatışı İptal Et", "yatan",
+                    Hedef: "sagtus,palet", AksiyonYetkisi: "yatan.kabul",
+                    KayitGerekir: true, Sira: 70, UrunModu: 2, Bicim: "ret",
+                    Ipucu: "Yanlış açılan yatışı iptal eder (kayıt silinmez)"),
+                Yazdir(),
+            },
+
+            // YATAK PANOSU (695): satir YATAKTIR, hasta degil. Temizligi biten
+            //   yatagi BOS'a dondurmek ayri bir olaydir ve kim yaptigi loglanir -
+            //   "yatak hazir" bilgisi kabul masasinin hasta yollama kararidir.
+            ["yatak-liste"] = new AksiyonTanimi[]
+            {
+                new("yatan.yatak-temizlendi", "🧹 Temizlik Bitti", "yatan",
+                    KaynakKodu: "yatan.yatak", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 10, UrunModu: 2, Bicim: "onay",
+                    Ipucu: "Temizlik bekleyen yatağı 'boş' yapar"),
+                // YATAK BIR TANIMDIR: kurulumda acilir, kapanir, duzeltilir.
+                //   Silme SAG TUSTA: ustunde yatis gecmisi olan yatak
+                //   silinemez (yabanci anahtar) - dogru yol pasife almaktir,
+                //   ipucu bunu soyluyor.
+                new("yatak.yeni",    "＋ Yeni Yatak", "yatan", Kisayol: "Ctrl+N",
+                    KaynakKodu: "yatan.yatak", Islem: Islem.Ekle, Sira: 20, UrunModu: 2),
+                new("yatak.duzenle", "✎ Yatak Kartı", "yatan", Kisayol: "Enter",
+                    KaynakKodu: "yatan.yatak", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 30, UrunModu: 2),
+                new("yatak.sil",     "🗑 Sil", "yatan", Hedef: "sagtus,palet", Kisayol: "Del",
+                    KaynakKodu: "yatan.yatak", Islem: Islem.Sil,
+                    KayitGerekir: true, Sira: 40, UrunModu: 2,
+                    Ipucu: "Yatış geçmişi olan yatak silinemez; pasife alın"),
+                Yazdir(),
+            },
+
+            // ODA TANIMLARI (695) - kurulum ekrani. Kural odanin: cinsiyet,
+            //   izolasyon, ucret sinifi. Silme sag tusta ve ayni sebeple
+            //   kisitli: odaya bagli yatak ve gecmis yatislar var.
+            ["oda-liste"] = new AksiyonTanimi[]
+            {
+                new("oda.yeni",    "＋ Yeni Oda", "yatan", Kisayol: "Ctrl+N",
+                    KaynakKodu: "yatan.yatak", Islem: Islem.Ekle, Sira: 10, UrunModu: 2),
+                new("oda.duzenle", "✎ Düzenle", "yatan", Kisayol: "Enter",
+                    KaynakKodu: "yatan.yatak", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 20, UrunModu: 2),
+                new("oda.sil",     "🗑 Sil", "yatan", Hedef: "sagtus,palet", Kisayol: "Del",
+                    KaynakKodu: "yatan.yatak", Islem: Islem.Sil,
+                    KayitGerekir: true, Sira: 30, UrunModu: 2,
+                    Ipucu: "Yatağı olan oda silinemez; pasife alın"),
+                Yazdir(),
+            },
+
+            // ORDER LISTESI (695): talimat kaydi - eklenir, duzeltilir,
+            //   DURDURULUR. Silme sag tusta: uygulanmis dozu olan order
+            //   silinirse "bu ilac neden verildi" sorusu cevapsiz kalir.
+            //   Sozel order imzalama AYRI YETKI (yatan.order.imza): uygulayan
+            //   hemsire kendi imzalayamaz.
+            ["yatis-order-liste"] = new AksiyonTanimi[]
+            {
+                new("yatis-order.yeni",    "＋ Yeni Order", "yatan", Kisayol: "Ctrl+N",
+                    KaynakKodu: "yatan.order", Islem: Islem.Ekle, Sira: 10, UrunModu: 2),
+                new("yatis-order.duzenle", "✎ Düzenle", "yatan", Kisayol: "Enter",
+                    KaynakKodu: "yatan.order", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 20, UrunModu: 2),
+                new("yatan.order-imzala",  "✍ Sözel Order İmzala", "yatan",
+                    AksiyonYetkisi: "yatan.order.imza", KayitGerekir: true,
+                    Sira: 30, UrunModu: 2, Bicim: "onay"),
+                new("yatan.order-durdur",  "⏸ Order Durdur", "yatan",
+                    KaynakKodu: "yatan.order", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 40, UrunModu: 2,
+                    Ipucu: "Gelecekteki bekleyen dozlar düşer, geçmiş kalır"),
+                new("yatis-order.sil",     "🗑 Sil", "yatan", Hedef: "sagtus,palet",
+                    Kisayol: "Del", KaynakKodu: "yatan.order", Islem: Islem.Sil,
+                    KayitGerekir: true, Sira: 50, UrunModu: 2,
+                    Ipucu: "Uygulanmış dozu olan order silinmez; durdurun"),
+                Yazdir(),
+            },
+
+            // DOZ KUYRUGU (698): satir PLANLANMIS DOZDUR ve order'dan uretilir.
+            //   ELLE EKLEME/SILME YOK - elle eklenen doz planin disinda kalir,
+            //   silinen doz "verilmedi mi, hic planlanmadi mi" sorusunu
+            //   cevapsiz birakir. Doz yalniz UYGULANIR ya da sebebiyle ATLANIR.
+            ["order-uygulama-liste"] = new AksiyonTanimi[]
+            {
+                new("yatan.doz-uygula", "💉 Uygulandı", "yatan",
+                    KaynakKodu: "yatan.order", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 10, UrunModu: 2, Bicim: "onay"),
+                new("yatan.doz-atla",   "⤫ Atlandı (sebep gir)", "yatan",
+                    KaynakKodu: "yatan.order", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 20, UrunModu: 2, Bicim: "ret"),
+                Yazdir(),
+            },
+
+            // HEMSIRE IZLEMI (699): olcum ve gozlem HUKUKI KAYITTIR -
+            //   duzeltilmez, silinmez; yanlis kayit yeni bir satirla duzeltilir
+            //   ve ikisi de durur. Bu yuzden listede duzenle/sil YOK.
+            ["yatis-izlem-liste"] = new AksiyonTanimi[]
+            {
+                new("yatan.izlem-bildir", "🔔 Hekime Bildirildi", "yatan",
+                    KaynakKodu: "yatan.izlem", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 10, UrunModu: 2,
+                    Ipucu: "Eşiği aşan ölçüm için bildirim kaydı yazar"),
+                Yazdir(),
+            },
+
+            // HIZMET ICMALI (700): tahakkuk ELLE GIRILMEZ, gun sonu isinden
+            //   duser - elle giris acik olsaydi ayni gun hem otomatik hem elle
+            //   iki kez faturalanirdi. Yeniden hesaplama, isin atladigi bir
+            //   gunu kapatmak icin.
+            ["yatis-tahakkuk-liste"] = new AksiyonTanimi[]
+            {
+                new("yatan.tahakkuk-hesapla", "🔄 Gün Sonunu Yeniden Çalıştır", "yatan",
+                    KaynakKodu: "yatan", Islem: Islem.Degistir, Sira: 10, UrunModu: 2,
+                    Ipucu: "Seçili satırın günü için yatak/refakat tahakkukunu üretir"),
+                Yazdir(),
             },
 
             // RADYOLOJI CALISMA LISTESI (283): modulun giris ekrani. Durum

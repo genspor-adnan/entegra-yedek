@@ -237,8 +237,31 @@ public static partial class KartKatalogu
         Ekle(PrimPlani());
         Ekle(EntegrasyonHesap());
         Ekle(RadyolojiCihaz());
+
+        // GOZ (691/693): olcumler DETAY SEKMESIDIR, kart alani degil - ayni
+        //   ziyarette ayni olcum birden cok kez yapilir (otoref -> subjektif
+        //   -> sikloplejik) ve her satirin kaynagi/zamani ayridir.
+        Ekle(GozMuayeneKarti());
+        Ekle(GozGoruntulemeKarti());
+        Ekle(GozIslemKarti());
+        Ekle(GozGozlukReceteKarti());
+        Ekle(GozTakipKarti());
+        Ekle(GozCihazKarti());
+        Ekle(DikteTerimKarti());
+        Ekle(GozKontaktLensKarti());
+        Ekle(GozIslemProtokolKarti());
+
+        // YATAN HASTA (695): yatis karti modulun merkezi - order, izlem, sivi,
+        //   risk, yatak hareketi ve epikriz onun DETAYLARI. Ayri kartlara
+        //   bolunseydi "bu hastada ne oluyor" sorusu bes ekrana dagilirdi.
+        Ekle(YatisKarti());
+        Ekle(YatakKarti());
+        Ekle(OdaKarti());
+        Ekle(YatisOrderKarti());
         Ekle(PersonelGorev());
         Ekle(Rol());
+        // Kullanici karti (Yonetim > Guvenlik): hesap acilmaz/silinmez, duzenlenir.
+        Ekle(Kullanici());
         Ekle(Stok());
         // Kasa alt sistemi ana verileri (071-074). Kasa ISLEMI kart degil - belge
         //   gibi ayri sozlesme (baslik + bacak), KasaUclari ile yazilir.

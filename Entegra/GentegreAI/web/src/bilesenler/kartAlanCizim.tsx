@@ -279,7 +279,11 @@ export function alanCizici(b: AlanCizimBaglami) {
           disabled={salt || !a.yazilabilir}
           onChange={v => setDeger(d => ({ ...d, [a.ad]: v }))}
         />
-      ) : a.tip === 'metin' && (a.enFazlaUzunluk ?? 0) >= 400
+      ) : ((a.tip === 'metin' && (a.enFazlaUzunluk ?? 0) >= 400)
+           // JSON alani (cihaz olcum eslemesi, time-out teyitleri): metin
+           //   olarak tasinir ve COK SATIRLI yazilir - tek satirlik kutuda
+           //   sus parantezlerinin arasinda ne oldugu gorunmuyordu.
+           || a.tip === 'json')
              && !GIZLI_METIN.test(a.ad) ? (
         // UZUN METIN COK SATIRLI (kullanici): bildirim sablonunun govdesi,
         //   onam metni gibi alanlar 4000 karaktere kadar; tek satirlik kutuda

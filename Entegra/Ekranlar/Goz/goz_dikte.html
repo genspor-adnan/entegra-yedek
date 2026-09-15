@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dikte (sesle bulgu girişi) — Mockup (Gentegre AI · Göz)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .btn.on{border-color:#2f6db3;background:var(--sel);color:var(--navy);font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{margin-left:auto;color:var(--muted);font-size:10.5px}
+  .od{color:#b3261e;font-weight:bold} .os{color:#2f6db3;font-weight:bold}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)}
+  .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)}
+
+  /* ---- dikte ekrani -------------------------------------------------- */
+  .dikteDuzen{display:grid;grid-template-columns:262px 1fr 300px}
+  .dikteDuzen>div{border-right:1px solid var(--line2);min-width:0}
+  .dikteDuzen>div:last-child{border-right:none}
+  .panelBaslik{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;
+    color:#2c4a6b;border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:6px}
+  .panelBaslik .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  /* hedef alan listesi: aktif alanin onunde ok */
+  .alan{display:flex;gap:6px;align-items:center;padding:5px 9px;border-bottom:1px solid var(--line2);font-size:11.5px}
+  .alan.sel{background:var(--sel);font-weight:bold;color:var(--navy)}
+  .alan .ok{width:12px;color:var(--accent)}
+  .alan .sp{margin-left:auto;color:var(--muted);font-size:10.5px;font-weight:normal}
+  .alan.kilit{color:var(--muted)}
+  /* kayit seridi */
+  .kayitSerit{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff8f0;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .mikrofon{width:30px;height:30px;border-radius:50%;background:linear-gradient(#e06a5e,#c0392b);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:14px;flex:none}
+  .dalga{display:flex;align-items:flex-end;gap:2px;height:26px;flex:1;min-width:120px}
+  .dalga i{display:block;width:3px;background:#9fb6d4;border-radius:2px}
+  .sayac{font-variant-numeric:tabular-nums;font-weight:bold;color:var(--navy);font-size:13px}
+  /* transkript */
+  .transkript{padding:10px 12px;font-size:13px;line-height:1.75;min-height:118px;background:#fff}
+  .transkript .dusuk{background:#fdf6e3;border-bottom:2px dotted #d9a12b}
+  .transkript .komut{background:#f1ecfa;border:1px solid #ddd0f2;border-radius:3px;padding:0 4px;color:#6a3fb5;font-size:11.5px}
+  .transkript .yaz{color:var(--muted);font-style:italic}
+  .transkript .imlec{display:inline-block;width:2px;height:15px;background:var(--accent);vertical-align:-2px;
+    animation:yanip 1s steps(2,end) infinite}
+  @keyframes yanip{50%{opacity:0}}
+  .metinKutu{margin:8px 12px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:7px 9px;
+    font-size:12px;line-height:1.6;min-height:74px}
+  .metinKutu .ekle{background:#e2f3e8;border-bottom:1px solid #bfe3cb}
+  .metinKutu .cikar{color:#b3261e;text-decoration:line-through}
+  .sozluk{display:flex;gap:6px;align-items:center;padding:5px 9px;border-bottom:1px solid var(--line2);font-size:11.5px}
+  .sozluk .sp{margin-left:auto;color:var(--muted);font-size:10.5px}
+  .komutSat{display:flex;gap:6px;align-items:center;padding:4px 9px;border-bottom:1px solid var(--line2);font-size:11.5px}
+  .komutSat b{color:var(--navy);min-width:104px;display:inline-block}
+  @media(max-width:1180px){
+    .dikteDuzen{grid-template-columns:1fr}
+    .dikteDuzen>div{border-right:none;border-bottom:1px solid var(--line2)}
+  }
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🎙 Dikte — Mehmet Kaya · 58 E
+    <span class="sp">Protokol 2026/20390 · Dr. E. Aksoy · muayene.id 8830 · goz_muayene.id 4412 · oturum 00:41</span></div>
+
+  <div class="toolbar">
+    <div class="btn danger">⏹ Durdur</div>
+    <div class="btn">⏸ Duraklat</div>
+    <div class="btn on">🎙 Bas-konuş <span class="sonuk" style="color:inherit">F4</span></div>
+    <div class="sepv"></div>
+    <div class="btn ok">✔ Onayla ve alana yaz</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="btn">↶ Son cümleyi sil</div>
+    <div class="sepv"></div>
+    <div class="btn">🎧 Mikrofon: Headset (USB)</div>
+    <div class="btn">🌐 Dil: Türkçe (tıp)</div>
+    <div class="btn sp">✖ Kapat</div>
+  </div>
+
+  <div class="kayitSerit">
+    <div class="mikrofon">●</div>
+    <b style="color:#b3261e">KAYITTA</b>
+    <div class="dalga">
+      <i style="height:8px"></i><i style="height:15px"></i><i style="height:22px"></i><i style="height:12px"></i>
+      <i style="height:26px"></i><i style="height:18px"></i><i style="height:9px"></i><i style="height:20px"></i>
+      <i style="height:24px"></i><i style="height:14px"></i><i style="height:7px"></i><i style="height:17px"></i>
+      <i style="height:23px"></i><i style="height:11px"></i><i style="height:19px"></i><i style="height:6px"></i>
+      <i style="height:13px"></i><i style="height:21px"></i><i style="height:10px"></i><i style="height:16px"></i>
+    </div>
+    <span class="sayac">00:12</span>
+    <span class="rz ok">ses düzeyi iyi</span>
+    <span class="rz mavi">gecikme 0,4 sn</span>
+    <span class="sonuk">hedef: <b class="od">OD</b> · Ön Segment › Kornea</span>
+  </div>
+
+  <div class="dikteDuzen">
+
+    <!-- ---------------- sol: hedef alanlar ---------------- -->
+    <div>
+      <div class="panelBaslik">Hedef alan <span class="sp">sesle de seçilir</span></div>
+      <div class="alan"><span class="ok"></span>Şikâyet <span class="sp">yazıldı</span></div>
+      <div class="alan"><span class="ok"></span>Ön segment › Kapak <span class="sp">OD · OS</span></div>
+      <div class="alan sel"><span class="ok">▶</span>Ön segment › Kornea <span class="sp"><span class="od">OD</span></span></div>
+      <div class="alan"><span class="ok"></span>Ön segment › Ön kamara</div>
+      <div class="alan"><span class="ok"></span>Ön segment › Lens</div>
+      <div class="alan"><span class="ok"></span>Fundus › Disk</div>
+      <div class="alan"><span class="ok"></span>Fundus › Makula</div>
+      <div class="alan"><span class="ok"></span>Fundus › Periferi</div>
+      <div class="alan"><span class="ok"></span>Değerlendirme</div>
+      <div class="alan"><span class="ok"></span>Plan</div>
+      <div class="alan"><span class="ok"></span>Hasta eğitimi</div>
+
+      <div class="panelBaslik" style="border-top:1px solid var(--line2)">Dikteye kapalı</div>
+      <div class="alan kilit"><span class="ok">🔒</span>Görme keskinliği <span class="sp">sayısal</span></div>
+      <div class="alan kilit"><span class="ok">🔒</span>Refraksiyon <span class="sp">sayısal</span></div>
+      <div class="alan kilit"><span class="ok">🔒</span>GİB / pakimetri <span class="sp">sayısal</span></div>
+      <div class="alan kilit"><span class="ok">🔒</span>Tanı (ICD) <span class="sp">kodlu</span></div>
+      <div class="ic sonuk" style="padding-top:6px">
+        Sayısal ölçüm ve kod alanı sesle doldurulmaz: yanlış duyulan
+        <b>"yirmi altı / yirmi yedi"</b> tedavi değiştirir. Bu alanlar elle ya da cihazdan gelir.
+      </div>
+    </div>
+
+    <!-- ---------------- orta: canli transkript + temiz metin ---------------- -->
+    <div>
+      <div class="panelBaslik">Canlı transkript <span class="sp">ham · düzeltilmemiş</span></div>
+      <div class="transkript">
+        <span class="komut">sağ göz</span>
+        kornea saydam<span class="yaz">,</span> floresein boyanması
+        <span class="dusuk">negatif</span><span class="yaz">.</span>
+        <span class="komut">yeni satır</span>
+        ön kamara derin<span class="yaz">,</span> hücre
+        <span class="dusuk">sıfır</span> flare sıfır<span class="yaz">.</span>
+        lens erken <span class="dusuk">nükleer skleroz</span><span class="imlec"></span>
+      </div>
+
+      <div class="panelBaslik" style="border-top:1px solid var(--line2)">
+        Düzeltilmiş metin <span class="sp">noktalama · kısaltma · terim sözlüğü uygulandı</span></div>
+      <div class="metinKutu">
+        <b class="od">OD · Kornea:</b> Saydam, <span class="ekle">fluoresein</span> boyanması
+        <span class="ekle">(−)</span>.<br>
+        <b class="od">OD · Ön kamara:</b> Derin, hücre 0, flare 0.<br>
+        <b class="od">OD · Lens:</b> Erken nükleer skleroz.
+        <span class="sonuk">(LOCS III derecesi <span class="cikar">sesle</span> elle girilecek)</span>
+      </div>
+
+      <div class="ic" style="display:flex;gap:5px;flex-wrap:wrap;padding-top:0">
+        <div class="btn ok">✔ Onayla ve alanlara yaz</div>
+        <div class="btn">✎ Metni düzenle</div>
+        <div class="btn">🔁 Yeniden dinle</div>
+        <div class="btn">🗑 At</div>
+        <span class="sonuk" style="align-self:center">3 alan güncellenecek · mevcut metin <b>üzerine yazılmaz</b>, sonuna eklenir</span>
+      </div>
+
+      <div class="panelBaslik" style="border-top:1px solid var(--line2)">Oturum dökümü</div>
+      <div class="dg"><table>
+        <thead><tr><th>Saat</th><th>Hedef</th><th>Metin</th><th class="orta">Güven</th><th class="orta">Durum</th></tr></thead>
+        <tbody>
+          <tr class="sel"><td>10:44</td><td><span class="od">OD</span> Kornea · Ön kamara · Lens</td>
+            <td>Saydam, fluoresein (−); ön kamara derin…</td><td class="orta">0,93</td>
+            <td class="orta"><span class="rz sari">onay bekliyor</span></td></tr>
+          <tr><td>10:43</td><td><span class="os">OS</span> Kapak</td><td>Doğal, MGD bulgusu yok.</td>
+            <td class="orta">0,96</td><td class="orta"><span class="rz ok">yazıldı</span></td></tr>
+          <tr><td>10:42</td><td><span class="od">OD</span> Kapak</td><td>Doğal, hafif MGD.</td>
+            <td class="orta">0,89</td><td class="orta"><span class="rz ok">yazıldı · düzeltildi</span></td></tr>
+          <tr><td>10:41</td><td>Şikâyet</td><td>Sağ gözde iki haftadır ara ara bulanıklık, ağrı yok.</td>
+            <td class="orta">0,91</td><td class="orta"><span class="rz ok">yazıldı</span></td></tr>
+          <tr><td>10:40</td><td>—</td><td class="sonuk">(anlaşılamadı — gürültü)</td><td class="orta">0,41</td>
+            <td class="orta"><span class="rz kir">atıldı</span></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <!-- ---------------- sag: komutlar, sozluk, sik cumleler ---------------- -->
+    <div>
+      <div class="panelBaslik">Sesli komutlar</div>
+      <div class="komutSat"><b>"sağ göz"</b> <span class="sonuk">hedefi OD yapar</span></div>
+      <div class="komutSat"><b>"sol göz"</b> <span class="sonuk">hedefi OS yapar</span></div>
+      <div class="komutSat"><b>"her iki göz"</b> <span class="sonuk">OU</span></div>
+      <div class="komutSat"><b>"fundus disk"</b> <span class="sonuk">alana atlar</span></div>
+      <div class="komutSat"><b>"yeni satır"</b> <span class="sonuk">satır sonu</span></div>
+      <div class="komutSat"><b>"nokta / virgül"</b> <span class="sonuk">noktalama</span></div>
+      <div class="komutSat"><b>"sil son cümle"</b> <span class="sonuk">geri alır</span></div>
+      <div class="komutSat"><b>"şablon normal"</b> <span class="sonuk">şablon cümle</span></div>
+      <div class="komutSat"><b>"onayla"</b> <span class="sonuk">alana yazar</span></div>
+
+      <div class="panelBaslik" style="border-top:1px solid var(--line2)">Terim sözlüğü
+        <span class="sp">kurum + kişisel</span></div>
+      <div class="sozluk">"gib" → <b>GİB</b> <span class="sp">kurum</span></div>
+      <div class="sozluk">"floresein" → <b>fluoresein</b> <span class="sp">kurum</span></div>
+      <div class="sozluk">"negatif" → <b>(−)</b> <span class="sp">kurum</span></div>
+      <div class="sozluk">"see de" → <b>C/D</b> <span class="sp">kişisel</span></div>
+      <div class="sozluk">"pe ar pe" → <b>PRP</b> <span class="sp">kişisel</span></div>
+      <div class="sozluk">"loks üç" → <b>LOCS III</b> <span class="sp">kişisel</span></div>
+      <div class="ic" style="padding-top:6px"><div class="btn">＋ Sözlüğe terim ekle</div></div>
+
+      <div class="panelBaslik" style="border-top:1px solid var(--line2)">Sık cümleler
+        <span class="sp">Ön segment</span></div>
+      <ul class="liste">
+        <li>Kornea saydam, fluoresein (−). <span class="sp">F7</span></li>
+        <li>Ön kamara derin, hücre 0, flare 0. <span class="sp">F8</span></li>
+        <li>İris doğal, NVI yok. <span class="sp">F9</span></li>
+        <li>Tümü doğal (OU). <span class="sp">F10</span></li>
+      </ul>
+
+      <div class="panelBaslik" style="border-top:1px solid var(--line2)">Bu oturum</div>
+      <div class="sozluk">Tanınan kelime <span class="sp">312</span></div>
+      <div class="sozluk">Ortalama güven <span class="sp">0,92 <span class="bar" style="width:60px;display:inline-block"><i style="width:92%"></i></span></span></div>
+      <div class="sozluk">Elle düzeltme <span class="sp">4 kelime</span></div>
+      <div class="sozluk">Ses kaydı <span class="sp"><span class="rz pas">saklanmıyor</span></span></div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Dikte yalnız <b>metin</b> alanlarına yazar · her yazma muayene kaydına düşer (kaynak: dikte)</span>
+    <span class="sp">Ses akışı kurum sunucusunda çözülür, kayıt tutulmaz · metin
+      <code>muayene</code> / <code>goz_on_segment</code> / <code>goz_fundus</code> alanlarına eklenir ·
+      işlem <code>islem_log</code>'a (kaynak = dikte, güven skoru) yazılır</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ne işe yarar.</b> Göz muayenesinde hekimin elleri biyomikroskopta, gözü okülerdedir; klavyeye
+  dönmek hem muayeneyi böler hem bulguyu kısaltır. Dikte, <b>metinsel bulguyu</b> konuşurken
+  toplar — ölçümü değil.
+  <br>
+  <b>Akış.</b> Bas-konuş (F4) ile parça parça kayıt · canlı ham transkript · terim sözlüğü ve
+  noktalama uygulanmış "düzeltilmiş metin" · hekim onayı · hedef alanların <i>sonuna</i> eklenir.
+  Hedef alan sesle ("sağ göz", "fundus disk") ya da soldaki listeden seçilir; o an açık sekme
+  varsayılan hedeftir.
+  <br>
+  <b>Kurallar.</b> (1) Onaysız hiçbir metin kayda geçmez — otomatik yazma yok. (2) Sayısal ölçüm
+  (VA, refraksiyon, GİB, CCT) ve kodlu alan (ICD, LOCS) dikteye <b>kapalı</b>; yanlış duyulan bir
+  sayı sessizce klinik karara dönüşür. (3) Mevcut metin ezilmez, sonuna eklenir. (4) Güven eşiğinin
+  (0,60) altındaki parça yazılmaz, dökümde "atıldı" görünür. (5) Yazılan her parça
+  <code>islem_log</code>'a kaynağıyla düşer: sonradan "bunu kim yazdı" sorusunun cevabı "dikte,
+  10:44, güven 0,93" olur. (6) Ses kaydı saklanmaz; saklanacaksa bu, hastaya açıkça bildirilen
+  ayrı bir karardır (KVKK · özel nitelikli veri).
+  <br>
+  <b>Uygulamada yok.</b> Ekran henüz yazılmadı; muayene kartı araç çubuğunda "dikte" düğmesi bu
+  yüzden bilerek konmadı. Yazıldığında ses çözümü kurum içinde çalışmalı — muayene metni dışarı
+  çıkan bir hizmete gönderilmez. İlgili ekran: <code>goz_semasi.html</code> (çizimden üretilen metin
+  de aynı onay kuralına tabidir).
+</div>
+
+</body>
+</html>

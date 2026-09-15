@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Npgsql;
 
 namespace Gentegre.Veri.Depolar;
@@ -21,6 +21,28 @@ public static class LogIslemi
 /// </summary>
 public sealed class LogDeposu
 {
+    private readonly VeriKaynagi? _veri;
+
+    public LogDeposu() { }
+    public LogDeposu(VeriKaynagi veri) { _veri = veri; }
+
+    /// <summary>
+    /// BAGIMSIZ LOG: cagiranin acik bir islemi yoksa (kullanici yonetimi gibi
+    /// tek adimlik uclar) kendi baglantisini acar. Islem icinde yazilmasi
+    /// gereken yerler (kart yazimi, silme) baglanti alan surumu kullanmaya
+    /// devam eder - log ile veri ayni islemde donmeli.
+    /// </summary>
+    public async Task YazAsync(short islemTipi, int tabloId, long kayitId,
+        int kullaniciId, int? subeId, string ip, object? bilgi,
+        int ustTabloId = 0, long ustKayitId = 0, int? tarafId = null,
+        int? stokId = null, CancellationToken iptal = default)
+    {
+        if (_veri is null) return;
+        await using var baglanti = await _veri.AcAsync(iptal);
+        await YazAsync(baglanti, null!, islemTipi, tabloId, kayitId, kullaniciId,
+                       subeId, ip, bilgi, ustTabloId, ustKayitId, tarafId, stokId, iptal);
+    }
+
     public async Task YazAsync(NpgsqlConnection baglanti, NpgsqlTransaction islem,
         short islemTipi, int tabloId, long kayitId, int kullaniciId, int? subeId,
         string ip, object? bilgi, int ustTabloId = 0, long ustKayitId = 0,

@@ -16,7 +16,11 @@ export function epostaGecerliMi(deger: string): boolean {
  * gecsin ayni bicim ve ayni dogrulama uygulanir - her ekranda tek tek liste
  * tutmak bir yeni alanda unutulur.
  */
-export const telefonAlaniMi = (ad: string) => /telefon|ceptel|gsm|faks/i.test(ad);
+export const telefonAlaniMi = (ad: string) =>
+  // "telefonKodu" (subenin ULKE KODU, 666) telefon DEGILDIR: adinda "telefon"
+  //   gectigi icin telefon kutusu olarak ciziliyor ve "+90" degerinin yanina
+  //   bos bir numara kutusu koyuyordu. Adi "...kod" ile biten alanlar disarida.
+  /telefon|ceptel|gsm|faks/i.test(ad) && !/kod(u)?$/i.test(ad);
 
 /**
  * TELEFON DOGRULAMASI (genel kural). Bos deger gecerlidir - telefon zorunlu

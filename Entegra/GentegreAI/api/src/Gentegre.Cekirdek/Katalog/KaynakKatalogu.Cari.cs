@@ -778,6 +778,80 @@ public static partial class KaynakKatalogu
 
     // ------------------------------------------------------------- hizmet ----
 
+    // --------------------------------------------------------- kullanici ----
+    /// <summary>
+    /// KULLANICILAR (Yonetim > Guvenlik) - mockup Ekranlar/Ayarlar/kullanicilar.html.
+    ///
+    /// Hesap yonetimi bugune kadar UC YERE dagilmisti: hesaplar personel
+    /// kartindan otomatik aciliyor, rol atamasi rol kartinin Kullanicilar
+    /// sekmesinden, denetim Giris Kayitlari'ndan yapiliyordu. Bu liste onlari
+    /// tek ekranda toplar - YENI BIR YETKI MEKANIZMASI GETIRMEZ.
+    ///
+    /// PAROLA HIC GORUNMEZ: yalniz DURUMU ("kendi" / "varsayilan" / "bos")
+    /// gosterilir. Parola alani olan bir liste, parolanin bir yerde okunur
+    /// durdugunu ima ederdi.
+    /// </summary>
+    private static KaynakTanimi Kullanici() => new(
+        Ad: "kullanici",
+        YetkiKodu: "kullanici",
+        Kaynak: "public.taraf_kullanici k "
+              + "join public.rol r on r.id = k.rol_id "
+              + "left join public.taraf t on t.id = k.id",
+        VarsayilanSirala: "coalesce(t.unvan, k.kod) asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",        "k.id",   "sayi",  "Id", Varsayilan: false),
+            new("kod",       "k.kod",  "metin", "Kullanıcı Kodu", Genislik: 150),
+            new("kisi",      "coalesce(t.unvan, '')", "metin", "Kişi", Genislik: 220),
+            new("anaRol",    "r.ad",   "metin", "Ana Rol", Genislik: 150),
+            // EK ROLLER (665): kisinin ana isinin yaninda tasidigi gorevler.
+            new("ekRoller",
+                "coalesce((select string_agg(er.ad, ', ' order by er.ad) "
+                + "          from public.kullanici_rol kr "
+                + "          join public.rol er on er.id = kr.rol_id "
+                + "         where kr.kullanici_id = k.id), '')",
+                "metin", "Ek Roller", Genislik: 200),
+            // SUBELER ROLDEN gelir (234/665) - kisiye tek tek sube verilmez.
+            new("subeler",
+                "coalesce((select string_agg(s.ad, ' · ' order by s.ad) "
+                + "          from public.fn_kullanici_subeleri(k.id) fs "
+                + "          join public.sube s on s.id = fs.sube_id), '')",
+                "metin", "Şubeler", Genislik: 180),
+            new("aktif",     "k.aktif", "mantik", "Aktif", Hizalama: "orta"),
+            // KILIT hatali giristen gelir ve KENDILIGINDEN cozulur; parola
+            //   sorunundan AYRI bir durumdur - parolayi bilen ama uc kez yanlis
+            //   yazan kisiye parola sifirlatmak gereksiz bir tur attirir.
+            new("kilitli",
+                "case when k.kilit_bitis is not null and k.kilit_bitis > now() "
+                + "    then 1 else 0 end", "mantik", "Kilitli", Hizalama: "orta"),
+            new("hataliGiris", "k.hatali_giris", "sayi", "Hatalı", Hizalama: "orta",
+                                                                   Varsayilan: false),
+            // PAROLA DURUMU - parolanin KENDISI degil:
+            //   bos        hic belirlenmemis (ilk giriste kisi koyar)
+            //   varsayilan zorunlu degisim bayragi acik
+            //   kendi      kisinin kendi koydugu parola
+            new("parolaDurum",
+                "case when coalesce(k.parola_hash, '') = '' then 'boş' "
+                + "    when k.parola_degismeli = 1 then 'varsayılan' "
+                + "    else 'kendi' end", "metin", "Parola", Hizalama: "orta", Genislik: 110),
+            new("sonGiris",  "k.son_giris_tarihi", "tarih", "Son Giriş", Hizalama: "orta",
+                                                            Bicim: "dd.MM.yyyy HH:mm"),
+            new("sonGirisIp", "k.son_giris_ip", "metin", "Son IP", Varsayilan: false),
+            // ACIK OTURUM: AILE basina tek sayilir - rotation her yenilemede yeni
+            //   satir aciyor, ham sayim "47 cihaz" gibi anlamsiz bir sayi verirdi.
+            new("oturum",
+                "(select count(distinct o.aile_id) from public.oturum o "
+                + " where o.kullanici_id = k.id and o.iptal_tarihi is null "
+                + "   and o.bitis_tarihi > now())::int",
+                "sayi", "Oturum", Hizalama: "orta", Genislik: 90),
+            new("eposta",    "coalesce(nullif(k.eposta, ''), t.eposta, '')",
+                                       "metin", "E-posta", Genislik: 220),
+            new("cepTel",    "coalesce(nullif(k.cep_tel, ''), t.cep_tel, '')",
+                                       "metin", "Cep", Varsayilan: false),
+            new("parolaTarihi", "k.parola_tarihi", "tarih", "Parola Tarihi",
+                                Hizalama: "orta", Varsayilan: false),
+        });
+
     // ---------------------------------------------------------------- rol ----
     private static KaynakTanimi Rol() => new(
         Ad: "rol",

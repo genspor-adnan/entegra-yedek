@@ -1,6 +1,19 @@
 # Menü Düzeni — Yeniden Tasarım Planı
 
-Tarih: 15.09.2026 · Durum: **plan (onay bekliyor)** · Mockup: `Ekranlar/Ayarlar/menu_duzeni.html`
+Tarih: 15.09.2026 · Durum: **UYGULANDI** (kullanıcı onayı: "menüleri ideal mockup gibi yap")
+· Mockup: `Ekranlar/Ayarlar/menu_duzeni.html`
+
+> **Uygulama notu (15.09.2026).** 137 menü öğesi yeniden gruplandı, 12 öğe menüden
+> çıkarıldı (rota ve yetki kodu KORUNDU). Grup başına `📊 Dökümler` öğesi eklendi
+> (`listeTanimlari.Dokumler.ts`) ve `/dokumler?grup=…` süzgeciyle çalışıyor; döküm
+> kendi menü grubunu söylüyor (`dokum_tanimi.menu_grup`, göç 690) çünkü `belge`
+> kaynağı üç grupta birden kullanılıyor. Boş açılan grup kalmasın diye altı yeni
+> standart döküm eklendi (göç 689). `Mesajlar` ve `Yapay Zeka` üst çubuğa alındı.
+> Yeni testler: `menuDuzeni.test.ts` (6 kural).
+>
+> **Yapılmayan:** Pano grubu (Günün Özeti / Bekleyen İşlerim ekranları yok) ve
+> `⚙ Ayarlar` için tek `/ayarlar?sekme=` ekranı (Ayarlar Dizini henüz yok) - grup
+> içi Ayarlar şimdilik var olan ayar ekranlarını toplayan bir ALT GRUP.
 (Şimdiki Menü · Önerilen HBYS · Önerilen ERP · Kabuk Önizleme · Menüden Çıkanlar · Kurallar)
 
 Kaynak: `web/src/sayfalar/listeTanimlari.*.ts` (`menuGrup / menuAltGrup / menuSira / menuAd /

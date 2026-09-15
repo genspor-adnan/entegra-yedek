@@ -38,7 +38,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'İstemler', menuSira: 1,
+    menuGrup: 'Laboratuvar', menuAd: 'İstemler', menuSira: 10,
     // Enjektor (kullanici): grup ikonu zaten tup (🧪), istem satiri ayrisiyor.
     ic: '💉', yetkiKodu: 'lab',
   },
@@ -58,7 +58,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Numune Kabul', menuSira: 2,
+    menuGrup: 'Laboratuvar', menuAd: 'Numune Kabul', menuSira: 20,
     ic: '🩸', yetkiKodu: 'lab.numune',
   },
   {
@@ -80,7 +80,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Sonuçlar', menuSira: 54,
+    menuGrup: 'Laboratuvar', menuAd: 'Sonuçlar', menuSira: 30,
     ic: '📊', yetkiKodu: 'lab.sonuc',
   },
   {
@@ -102,7 +102,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     kodSuzgeci: { alan: 'bolum', etiket: 'Tüm Bölümler' },
     varsayilanGrup: 'bolumAdi',
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Tetkik Kataloğu', menuSira: 56,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Tetkik Kataloğu', menuSira: 200,
     ic: '📚', yetkiKodu: 'lab.tetkik',
   },
   {
@@ -117,7 +117,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Paneller', menuSira: 58,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Paneller', menuSira: 201,
     ic: '🧬', yetkiKodu: 'lab.tetkik',
   },
   {
@@ -142,7 +142,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAltGrup: 'Mikrobiyoloji', menuAd: 'Kültür Çalışma Listesi', menuSira: 20,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Mikrobiyoloji', menuAd: 'Kültür Çalışma Listesi', menuSira: 110,
     ic: '🦠', yetkiKodu: 'lab.kultur',
   },
   {
@@ -164,7 +164,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAltGrup: 'Genetik', menuAd: 'Vakalar', menuSira: 30,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Genetik', menuAd: 'Vakalar', menuSira: 120,
     ic: '🧬', yetkiKodu: 'lab.genetik',
   },
   {
@@ -180,7 +180,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAltGrup: 'Genetik', menuAd: 'Varyantlar', menuSira: 31,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Genetik', menuAd: 'Varyantlar', menuSira: 121,
     ic: '🔬', yetkiKodu: 'lab.genetik',
   },
   {
@@ -195,7 +195,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAltGrup: 'Genetik', menuAd: 'Dizileme Runları', menuSira: 32,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Genetik', menuAd: 'Dizileme Runları', menuSira: 122,
     ic: '📚', yetkiKodu: 'lab.genetik',
   },
   {
@@ -213,7 +213,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Kalite Kontrol', menuSira: 11,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Kalite Kontrol', menuSira: 100,
     ic: '📉', yetkiKodu: 'lab.kk',
   },
   {
@@ -228,7 +228,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Dış Kalite', menuSira: 14,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Dış Kalite', menuSira: 102,
     ic: '🌍', yetkiKodu: 'lab.kk',
   },
   {
@@ -243,7 +243,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Kontrol Lotları', menuSira: 12,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Kontrol Lotları', menuSira: 101,
     ic: '🧴', yetkiKodu: 'lab.kk',
   },
   {
@@ -261,7 +261,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Dış Lab Gönderimleri', menuSira: 60,
+    menuGrup: 'Laboratuvar', menuAd: 'Dış Lab Gönderimleri', menuSira: 40,
     // Kurye motoru (kullanici): numune kutusu degil, YOLDAKI numune anlatiliyor.
     ic: '🏍️', yetkiKodu: 'lab.dislab',
   },
@@ -277,7 +277,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAd: 'Dış Laboratuvarlar', menuSira: 62,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Dış Laboratuvarlar', menuSira: 210,
     ic: '🏥', yetkiKodu: 'lab.dislab',
   },
   {
@@ -294,7 +294,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Serum İndeksi', menuSira: 10,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Serum İndeksi', menuSira: 202,
     ic: '🩸', yetkiKodu: 'lab.tetkik',
   },
   {
@@ -309,7 +309,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Westgard Kuralları', menuSira: 13,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Westgard Kuralları', menuSira: 203,
     ic: '⚙️', yetkiKodu: 'lab.kk',
   },
   {
@@ -326,7 +326,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Cihaz Olayları', menuSira: 18,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Cihaz Olayları', menuSira: 105,
     ic: '🔧', yetkiKodu: 'lab.kk',
   },
   {
@@ -341,13 +341,13 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAltGrup: 'Genetik', menuAd: 'Genler', menuSira: 33,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Genler', menuSira: 208,
     ic: '🧬', yetkiKodu: 'lab.gen',
   },
   {
     // GENETIK PANEL KATALOGU (439): gen listesi raporun ekidir.
     kaynak: 'lab-genetik-panel', rota: 'lab-genetik-panel',
-    baslik: 'Genetik Panelleri', yol: 'Laboratuvar › Genetik › Panel Kataloğu',
+    baslik: 'Genetik Panelleri', yol: 'Laboratuvar › Genetik › Genetik Panelleri',
     kartYolu: '/lab-genetik-panel', kartBaslik: 'Genetik Paneli',
     aksiyonEkrani: 'lab-genetik-panel-liste',
     cipler: [
@@ -356,7 +356,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAltGrup: 'Genetik', menuAd: 'Panel Kataloğu', menuSira: 34,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Genetik Panelleri', menuSira: 209,
     ic: '🗂️', yetkiKodu: 'lab.gen',
   },
   {
@@ -372,7 +372,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAltGrup: 'Mikrobiyoloji', menuAd: 'Organizmalar', menuSira: 21,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Organizmalar', menuSira: 205,
     ic: '🧫', yetkiKodu: 'lab.mikro',
   },
   {
@@ -388,7 +388,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAltGrup: 'Mikrobiyoloji', menuAd: 'Antibiyotikler', menuSira: 22,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Antibiyotikler', menuSira: 206,
     ic: '💊', yetkiKodu: 'lab.mikro',
   },
   {
@@ -403,7 +403,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAltGrup: 'Mikrobiyoloji', menuAd: 'Besiyerleri', menuSira: 23,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Besiyerleri', menuSira: 207,
     ic: '🧪', yetkiKodu: 'lab.mikro',
   },
   {
@@ -420,7 +420,7 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2, modul: 'lab',
-    menuGrup: 'Laboratuvar', menuAltGrup: 'Biyokimya', menuAd: 'Cihaz Eşleme', menuSira: 16,
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Cihaz Eşleme', menuSira: 204,
     ic: '🔌', yetkiKodu: 'lab.cihaz',
   },
 ];

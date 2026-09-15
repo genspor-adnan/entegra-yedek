@@ -37,7 +37,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     // EN USTTE (kullanici): radyolojinin gunluk isi burada - istem de
     //   bu ekranin arac cubugundan acilir (ayri istem ekrani yok).
     menuGrup: 'Radyoloji', menuAd: 'Çalışma Listesi', ic: '🖥️', yetkiKodu: 'radyoloji',
-    menuSira: 1,
+    menuSira: 10,
   },
   {
     // RAPOR SABLONLARI (283/288): bolum iskeleti, makrolar ve skor alanlari.
@@ -52,8 +52,8 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Radyoloji', menuAd: 'Rapor Şablonları', ic: '📄', yetkiKodu: 'radyoloji',
-    menuSira: 20,
+    menuGrup: 'Radyoloji', menuAltGrup: 'Ayarlar', menuAd: 'Rapor Şablonları', ic: '📄', yetkiKodu: 'radyoloji',
+    menuSira: 90,
   },
   {
     // ÇEKİM PROTOKOLÜ (314): tetkikin nasıl çekileceği - süre randevu
@@ -65,7 +65,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     kartYolu: '/radyoloji-protokol', kartBaslik: 'Çekim Protokolü',
     aksiyonEkrani: 'cari-liste',
     gizliKolonlar: ['modalite', 'hizmetId', 'hazirlikMetni', 'ozelUyari'],
-    menuGrup: 'Radyoloji', menuAd: 'Çekim Protokolleri', ic: '⚙️',
+    menuGrup: 'Radyoloji', menuSira: 91, menuAltGrup: 'Ayarlar', menuAd: 'Çekim Protokolleri', ic: '⚙️',
     yetkiKodu: 'radyoloji', urunModu: 2,
   },
   {
@@ -77,7 +77,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     kartYolu: '/radyoloji-cihaz', kartBaslik: 'Radyoloji Cihazı',
     aksiyonEkrani: 'cari-liste', cipler: DURUM_CIPLERI,
     gizliKolonlar: ['modalite', 'subeId'],
-    menuGrup: 'Radyoloji', menuAd: 'Cihazlar', ic: '🖥️',
+    menuGrup: 'Radyoloji', menuSira: 92, menuAltGrup: 'Ayarlar', menuAd: 'Cihazlar', ic: '🖥️',
     yetkiKodu: 'radyoloji', urunModu: 2,
   },
   {
@@ -88,7 +88,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     baslik: 'Radyoloji Panosu', yol: 'Radyoloji › Pano',
     urunModu: 2,
     menuGrup: 'Radyoloji', menuAd: 'Pano', ic: '📊',
-    yetkiKodu: 'radyoloji', menuSira: 5,
+    yetkiKodu: 'radyoloji', menuSira: 20,
   },
   {
     // KRİTİK BULGU TAKİBİ (318): hasta güvenliği listesi. Satır bildirim
@@ -112,7 +112,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Radyoloji', menuAd: 'Kritik Bulgular', ic: '🚨',
-    yetkiKodu: 'radyoloji', menuSira: 12,
+    yetkiKodu: 'radyoloji', menuSira: 30,
   },
   {
     // KONSÜLTASYON TAKİBİ (318): cevap bekleyen ikinci görüşler. Cevaplanmayan
@@ -131,7 +131,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Radyoloji', menuAd: 'Konsültasyonlar', ic: '🧑‍⚕️',
-    yetkiKodu: 'radyoloji', menuSira: 14,
+    yetkiKodu: 'radyoloji', menuSira: 40,
   },
   {
     // SONUÇ TESLİM TAKİBİ (318): raporu onaylı ama alınmamış işler. "Hastanın
@@ -150,7 +150,7 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     ],
     urunModu: 2,
     menuGrup: 'Radyoloji', menuAd: 'Sonuç Teslim', ic: '📦',
-    yetkiKodu: 'radyoloji', menuSira: 16,
+    yetkiKodu: 'radyoloji', menuSira: 50,
   },
   // ===================================================================
   //  e-NABIZ ana menusu (kullanici): RADYOLOJIDEN SONRA gelir.

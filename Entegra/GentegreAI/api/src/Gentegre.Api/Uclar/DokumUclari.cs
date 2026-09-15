@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -78,6 +78,9 @@ public static class DokumUclari
                 d.Id, d.Kod, d.Ad, d.Aciklama, d.Kaynak, d.Tanim, d.Surum, d.SahipId, d.Sahip,
                 d.Gorunurluk, d.Roller, d.SonCalisma, d.CalismaSayisi, d.Duzenlenebilir,
                 d.Sistem, d.UrunModu, d.Modul,
+                // 690: dokumun MENU GRUBU - grup icindeki "Dökümler" ogesi
+                //   buna gore suzer (kaynak birden cok grupta olabiliyor).
+                d.MenuGrup,
                 calistirilabilir = KaynakKatalogu.Bul(d.Kaynak) is { } k && baglam.Yetkiler.Var(k.YetkiKodu, Islem.Gor),
             }));
         });

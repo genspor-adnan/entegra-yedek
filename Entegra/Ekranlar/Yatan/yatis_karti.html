@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yatış Kartı — Mockup (Gentegre AI · Yatan Hasta)</title>
+<link rel="stylesheet" href="_yatan.css">
+<style>
+  /* KIMLIK SERIDI: hangi sekmede olursan ol "kim, nerede, kaçıncı gün"
+     ekranda kalır - yatan hastada bu üç bilgi her kararın önkoşulu. */
+  .serit-kimlik{display:flex;gap:18px;align-items:center;padding:9px 12px;
+    background:#fbfcfe;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit-kimlik .ad{font-size:14px;font-weight:bold;color:var(--navy)}
+  .serit-kimlik .kv{display:flex;flex-direction:column;gap:1px}
+  .serit-kimlik .kv span{font-size:10.5px;color:var(--muted)}
+  .serit-kimlik .kv b{font-size:12px}
+  .serit-kimlik .sag{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap}
+  .yatak-kod{font-family:Consolas,monospace;font-weight:bold;color:var(--navy)}
+  .vital-serit{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line2)}
+  .vital-serit .v{background:#fff;padding:7px 10px;text-align:center}
+  .vital-serit .v span{display:block;font-size:10.5px;color:var(--muted)}
+  .vital-serit .v b{font-size:15px;color:var(--navy)}
+  .vital-serit .v.uy b{color:var(--uyari)}
+  .vital-serit .v.teh b{color:var(--kirmizi)}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🛏 Yatış Kartı
+    <span class="sp">Y-2026-0417 · Dahiliye · 6. gün</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>💾</span> Kaydet</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🩺</span> Order Ekle</div>
+    <div class="btn"><span>📋</span> İzlem Gir</div>
+    <div class="btn"><span>🔬</span> Tetkik İste</div>
+    <div class="btn"><span>👨‍⚕️</span> Konsültasyon İste</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🔁</span> Nakil</div>
+    <div class="btn"><span>🚪</span> Taburcu</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🖨</span> Hasta Dosyası</div>
+  </div>
+
+  <div class="serit-kimlik">
+    <div class="ad">Mehmet YILMAZ</div>
+    <div class="kv"><span>Yaş / cinsiyet</span><b>68 / Erkek</b></div>
+    <div class="kv"><span>Yatak</span><b class="yatak-kod">A-301/1</b></div>
+    <div class="kv"><span>Yatış</span><b>09.09.2026 14:20 · acilden</b></div>
+    <div class="kv"><span>Gün</span><b>6</b></div>
+    <div class="kv"><span>Sorumlu hekim</span><b>Dr. Osman AKAR</b></div>
+    <div class="kv"><span>Ödeyen</span><b>SGK · provizyon alındı</b></div>
+    <div class="sag">
+      <span class="rz kir">🦠 damlacık izolasyon</span>
+      <span class="rz sari">💊 penisilin alerjisi</span>
+      <span class="rz mavi">👥 refakatçi var</span>
+    </div>
+  </div>
+
+  <!-- Son vital seridi: kartın açıldığı ilk saniyede "hasta nasıl" sorusunun
+       cevabı. Sekme içine gömülseydi hekim her seferinde tıklardı. -->
+  <div class="vital-serit">
+    <div class="v"><span>TA</span><b>118/72</b></div>
+    <div class="v"><span>Nabız</span><b>92</b></div>
+    <div class="v uy"><span>Ateş</span><b>37,8</b></div>
+    <div class="v uy"><span>SpO₂</span><b>94</b></div>
+    <div class="v"><span>Solunum</span><b>20</b></div>
+    <div class="v uy"><span>Erken uyarı</span><b>3</b></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-sekme="genel">Genel</div>
+    <div class="sekme" data-sekme="order">Order <span class="rz mavi">7</span></div>
+    <div class="sekme" data-sekme="izlem">İzlem</div>
+    <div class="sekme" data-sekme="tetkik">Tetkik &amp; Konsültasyon <span class="rz sari">3</span></div>
+    <div class="sekme" data-sekme="hizmet">Hizmetler</div>
+    <div class="sekme" data-sekme="dosya">Dosya &amp; Epikriz</div>
+  </div>
+
+  <!-- ============================================================ GENEL -->
+  <div class="pano iki" data-pano="genel">
+    <div>
+      <div class="grp">
+        <h4>Yatış bilgileri</h4>
+        <div class="alanlar">
+          <label>Dosya no</label><div class="inp ro">Y-2026-0417</div>
+          <label>Yatış türü</label><div class="inp combo">Normal yatış</div>
+          <label>Geliş şekli</label><div class="inp combo">Acilden</div>
+          <label>Klinik</label><div class="inp combo">Dahiliye</div>
+          <label>Sorumlu hekim</label><div class="inp combo">Dr. Osman AKAR</div>
+          <label>Yatış tanısı</label><div class="inp combo">J18.9 · Pnömoni, tanımlanmamış</div>
+          <label>Tahmini çıkış</label><div class="inp">17.09.2026</div>
+        </div>
+      </div>
+      <div class="grp">
+        <h4>Refakatçi <span class="mini">ücret kalemi bununla açılır</span></h4>
+        <div class="alanlar">
+          <label>Ad soyad</label><div class="inp">Ayten YILMAZ</div>
+          <label>Yakınlık</label><div class="inp combo">Eş</div>
+          <label>TCKN</label><div class="inp">123******78</div>
+        </div>
+        <div class="not">Refakatçi kaydı <b>ücret</b> doğurur (odaya göre günlük);
+          "var/yok" kutusu yerine kişi kaydı tutulur, çünkü gece kalan kişinin kim
+          olduğu hastane güvenliğinin de sorusudur.</div>
+      </div>
+    </div>
+    <div>
+      <div class="grp">
+        <h4>Açık işler <span class="mini">taburcu bunları bekler</span></h4>
+        <div class="ic">
+          <div class="sat"><span>Sonuç bekleyen tetkik</span><b><span class="rz sari">2</span></b></div>
+          <div class="sat"><span>Bekleyen konsültasyon</span><b><span class="rz sari">1</span> Göğüs Hast.</b></div>
+          <div class="sat"><span>Geciken ilaç dozu</span><b><span class="rz kir">1</span> Seftriakson 16:00</b></div>
+          <div class="sat"><span>İmzasız sözel order</span><b><span class="rz kir">1</span> dün 23:40</b></div>
+          <div class="sat"><span>Faturalanmamış hizmet</span><b>3 kalem · 1.240,00 ₺</b></div>
+        </div>
+      </div>
+      <div class="grp">
+        <h4>Risk değerlendirmeleri <span class="mini">24 saatte bir yenilenir</span></h4>
+        <div class="ic">
+          <div class="sat"><span>Düşme riski (İtaki)</span>
+            <b><span class="rz sari">14 · yüksek</span> 15.09 08:00</b></div>
+          <div class="sat"><span>Bası yarası (Braden)</span>
+            <b><span class="rz ok">17 · düşük</span> 15.09 08:00</b></div>
+          <div class="sat"><span>Beslenme (NRS-2002)</span>
+            <b><span class="rz sari">3 · riskli</span> 13.09</b></div>
+          <div class="sat"><span>Bilinç (GKS)</span><b>15</b></div>
+        </div>
+        <div class="not">Ölçekler <b>dönemseldir</b>: yatışta bir kez doldurulup bırakılırsa
+          üçüncü günü düşen hastanın puanı hâlâ yatış günündeki puandır. Süresi geçen
+          değerlendirme listede sararır.</div>
+      </div>
+      <div class="grp">
+        <h4>Tanılar</h4>
+        <div class="ic">
+          <div class="sat"><span>J18.9</span><b>Pnömoni, tanımlanmamış · <i>yatış tanısı</i></b></div>
+          <div class="sat"><span>I10</span><b>Esansiyel hipertansiyon · eşlik eden</b></div>
+          <div class="sat"><span>E11.9</span><b>Tip 2 diyabet · eşlik eden</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ ORDER -->
+  <div class="pano" data-pano="order" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Tür</th><th>Order</th><th>Doz / Yol</th><th>Sıklık</th>
+          <th>Başlangıç – Bitiş</th><th>Hekim</th><th class="orta">Durum</th></tr></thead>
+        <tbody>
+          <tr><td><span class="rz mavi">İlaç</span></td><td>Seftriakson 1 g flakon</td>
+              <td>1 g · IV</td><td>2×1 · 08-20</td><td>10.09 – 17.09</td>
+              <td class="sonuk">Dr. Osman AKAR</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr><td><span class="rz mavi">İlaç</span></td><td>Parasetamol 500 mg tablet</td>
+              <td>500 mg · PO</td><td>gerektiğinde</td><td>10.09 – 17.09</td>
+              <td class="sonuk">Dr. Osman AKAR</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr class="teh"><td><span class="rz mavi">İlaç</span></td><td>Enoksaparin 4000 IU</td>
+              <td>0,4 mL · SC</td><td>1×1 · 22:00</td><td>15.09 – 22.09</td>
+              <td class="sonuk">Dr. Elif ŞAHİN <span class="rz kir">sözel</span></td>
+              <td class="orta"><span class="rz kir">İmza bekliyor</span></td></tr>
+          <tr><td><span class="rz">Sıvı</span></td><td>%0.9 NaCl 1000 mL</td>
+              <td>1000 mL · IV</td><td>24 saatte</td><td>09.09 – …</td>
+              <td class="sonuk">Dr. Osman AKAR</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr><td><span class="rz mor">Tetkik</span></td><td>Kan kültürü (2 set)</td>
+              <td class="sonuk">—</td><td>tek sefer</td><td>14.09</td>
+              <td class="sonuk">Dr. Osman AKAR</td><td class="orta"><span class="rz sari">Sonuç bekliyor</span></td></tr>
+          <tr><td><span class="rz">Diyet</span></td><td>Tuzsuz, yumuşak</td>
+              <td class="sonuk">—</td><td>sürekli</td><td>09.09 – …</td>
+              <td class="sonuk">Dr. Osman AKAR</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr class="pasif"><td><span class="rz mavi">İlaç</span></td><td>Klaritromisin 500 mg</td>
+              <td>500 mg · PO</td><td>2×1</td><td>09.09 – 13.09</td>
+              <td class="sonuk">Dr. Osman AKAR</td><td class="orta"><span class="rz pas">Tamamlandı</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not">
+      <b>Bitişi olmayan order yok.</b> "Sürekli" yazan satırın bile bir gözden geçirme
+      tarihi vardır: süresiz talimat unutulur ve antibiyotik on günü geçer.
+      <b>Sözel order</b> kırmızı durur ve hekim imzalayana kadar rozetli kalır —
+      telefonla verilen talimat, verilmemiş sayılmaz ama imzasız da bırakılmaz.
+    </div>
+  </div>
+
+  <!-- ============================================================ İZLEM -->
+  <div class="pano" data-pano="izlem" hidden>
+    <div class="uc">
+      <div>
+        <div class="grp">
+          <h4>Son vitaller <span class="mini">4 saatte bir</span></h4>
+          <div class="ic">
+            <div class="sat"><span>15.09 12:00</span><b>118/72 · 92 · 37,8°</b></div>
+            <div class="sat"><span>15.09 08:00</span><b>124/78 · 88 · 38,3°</b></div>
+            <div class="sat"><span>15.09 04:00</span><b>130/80 · 96 · 38,9°</b></div>
+            <div class="sat"><span>15.09 00:00</span><b>126/76 · 90 · 38,1°</b></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="grp">
+          <h4>Sıvı dengesi <span class="mini">bugün · 12:00 itibarıyla</span></h4>
+          <div class="ic">
+            <div class="sat"><span>Aldığı (oral)</span><b>750 mL</b></div>
+            <div class="sat"><span>Aldığı (IV)</span><b>1.500 mL</b></div>
+            <div class="sat"><span>Çıkardığı (idrar)</span><b>1.800 mL</b></div>
+            <div class="sat"><span>Çıkardığı (drenaj)</span><b>—</b></div>
+            <div class="sat"><span><b>Denge</b></span><b>+450 mL</b></div>
+          </div>
+          <div class="not">Denge <b>hesaplıdır</b>: hemşire toplamı elle yazsaydı,
+            gün ortasında eklenen bir serum toplamı bozardı.</div>
+        </div>
+      </div>
+      <div>
+        <div class="grp">
+          <h4>Hemşire gözlemi</h4>
+          <div class="ic">
+            <div class="sat"><span>15.09 12:10</span><b>Öksürük azaldı, balgam sarı-yeşil.</b></div>
+            <div class="sat"><span>15.09 06:30</span><b>Gece ateşi 38,9; ıslak kompres uygulandı.</b></div>
+            <div class="sat"><span>14.09 21:00</span><b>Refakatçiye izolasyon eğitimi verildi.</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================ TETKİK & KONSÜLTASYON -->
+  <div class="pano" data-pano="tetkik" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr><th>İstem</th><th>Tür</th><th>İsteyen</th><th>İstem zamanı</th>
+          <th>Sonuç</th><th class="orta">Durum</th></tr></thead>
+        <tbody>
+          <tr><td>Kan kültürü (2 set)</td><td><span class="rz mor">Lab</span></td>
+              <td class="sonuk">Dr. Osman AKAR</td><td>14.09 09:20</td>
+              <td class="sonuk">48 saat bekleme</td>
+              <td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+          <tr><td>CRP · prokalsitonin</td><td><span class="rz mor">Lab</span></td>
+              <td class="sonuk">Dr. Osman AKAR</td><td>15.09 07:00</td>
+              <td class="sonuk">cihazda</td>
+              <td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+          <tr><td>Toraks BT</td><td><span class="rz mavi">Radyoloji</span></td>
+              <td class="sonuk">Dr. Osman AKAR</td><td>11.09 10:05</td>
+              <td>Sağ alt lob konsolidasyon</td>
+              <td class="orta"><span class="rz ok">Sonuçlandı</span></td></tr>
+          <tr><td>Göğüs Hastalıkları</td><td><span class="rz">Konsültasyon</span></td>
+              <td class="sonuk">Dr. Osman AKAR</td><td>14.09 16:40</td>
+              <td class="sonuk">yanıt bekleniyor</td>
+              <td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not">Tetkik ve konsültasyon <b>order'ın türleridir</b>, ayrı bir defter değil:
+      hekim hepsini aynı yerden ister, liste burada yalnız <i>sonuç tarafını</i> gösterir.
+      Sonuç geldiğinde order satırı kendiliğinden tamamlanır.</div>
+  </div>
+
+  <!-- ========================================================= HİZMETLER -->
+  <div class="pano" data-pano="hizmet" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Tarih</th><th>Hizmet / Malzeme</th><th class="orta">Adet</th>
+          <th class="sag">Birim</th><th class="sag">Tutar</th><th>Kaynak</th>
+          <th class="orta">Durum</th></tr></thead>
+        <tbody>
+          <tr><td>09–15.09</td><td>Yatak ücreti · tek kişilik oda</td><td class="orta">6</td>
+              <td class="sag">850,00</td><td class="sag">5.100,00</td>
+              <td class="sonuk">gün sonu · otomatik</td><td class="orta"><span class="rz ok">Tahakkuk</span></td></tr>
+          <tr><td>09–15.09</td><td>Refakatçi</td><td class="orta">6</td>
+              <td class="sag">150,00</td><td class="sag">900,00</td>
+              <td class="sonuk">gün sonu · otomatik</td><td class="orta"><span class="rz ok">Tahakkuk</span></td></tr>
+          <tr><td>10–15.09</td><td>Seftriakson 1 g flakon</td><td class="orta">12</td>
+              <td class="sag">38,50</td><td class="sag">462,00</td>
+              <td class="sonuk">ilaç uygulama · karekod</td><td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+          <tr><td>11.09</td><td>Toraks BT</td><td class="orta">1</td>
+              <td class="sag">1.150,00</td><td class="sag">1.150,00</td>
+              <td class="sonuk">radyoloji istemi</td><td class="orta"><span class="rz ok">Tahakkuk</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not">Satırlar <b>elle eklenmez</b>: yatak ücreti gün sonu işinden, ilaç
+      uygulamadan, tetkik istemden düşer. Elle giriş açık kalsaydı aynı kalem hem otomatik
+      hem elle iki kez faturalanırdı.</div>
+  </div>
+
+  <!-- ==================================================== DOSYA & EPİKRİZ -->
+  <div class="pano iki" data-pano="dosya" hidden>
+    <div>
+      <div class="grp">
+        <h4>Yatış dosyası</h4>
+        <div class="ic">
+          <div class="sat"><span>Yatış onamı</span><b><span class="rz ok">imzalı</span> 09.09</b></div>
+          <div class="sat"><span>İzolasyon bilgilendirmesi</span><b><span class="rz ok">imzalı</span> 13.09</b></div>
+          <div class="sat"><span>Değerli eşya tutanağı</span><b><span class="rz pas">yok</span></b></div>
+          <div class="sat"><span>Kimlik bilekliği</span><b>Y-2026-0417 · 09.09 yazdırıldı</b></div>
+          <div class="sat"><span>Ekli belgeler</span><b>4 dosya (BT raporu, lab, sevk)</b></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="grp">
+        <h4>Epikriz <span class="mini">taburcu ekranında tamamlanır</span></h4>
+        <div class="ic">
+          <div class="sat"><span>Durum</span><b><span class="rz sari">Taslak</span></b></div>
+          <div class="sat"><span>Tetkik özeti</span><b>lab + radyolojiden derlendi</b></div>
+          <div class="sat"><span>Çıkış ilaçları</span><b>henüz girilmedi</b></div>
+          <div class="sat"><span>Kontrol</span><b>önerilmedi</b></div>
+        </div>
+        <div class="not">Epikriz <b>yatış boyunca yazılır</b>, taburcu günü sıfırdan değil:
+          altı günlük seyri çıkış saatinde hatırlamak, epikrizi "yatırıldı, tedavi edildi,
+          taburcu edildi" cümlesine indirger.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Y-2026-0417 · 6. gün</span><span>·</span>
+    <span>Saatler <b>Merkez</b> şubesinin saat diliminde</span><span>·</span>
+    <span>Karttaki her değişiklik ISLEMLOG'a yazılır</span>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Yatış Kartı — tasarım notları</h4>
+  Tek yatışın tamamı. Kart altı sekme; ama <b>kimlik şeridi ve son vitaller sekmelerin
+  dışında</b> durur: yatan hastada "kim, nerede, kaçıncı gün, nasıl" her kararın önkoşulu,
+  sekmeye gömülürse her seferinde tıklanır.
+  <ul>
+    <li><b>Yatış kendi kaydı, muayenenin alanı değil</b> (<code>yatis</code>): günlerce
+        sürer, birden çok hekim görür, kendi durum akışı vardır.</li>
+    <li><b>"Açık işler" kutusu taburcu ekranıyla aynı listeyi gösterir:</b> çıkışta "bir
+        şey kalmış mıydı" sorusunun cevabı, hasta yatarken de aynı yerde durmalı.</li>
+    <li><b>Risk ölçekleri dönemsel:</b> tek seferlik alan olsaydı üçüncü günü düşen
+        hastanın puanı hâlâ yatış günündeki puan olurdu.</li>
+    <li><b>Sözel order ayrı bir hâl:</b> uygulanır ama imzasız kalmaz; kırmızı rozet
+        hekim imzalayana kadar durur.</li>
+    <li><b>Hizmet satırları otomatik:</b> elle giriş, aynı kalemin iki kez
+        faturalanmasının en kısa yolu.</li>
+    <li><b>Epikriz yatış boyunca birikir:</b> taburcu ekranı onu tamamlar, sıfırdan
+        yazmaz.</li>
+  </ul>
+</div>
+
+<script>
+document.querySelectorAll('.sekme').forEach(function (s) {
+  s.addEventListener('click', function () {
+    var ad = s.dataset.sekme;
+    document.querySelectorAll('.sekme').forEach(function (x) { x.classList.toggle('on', x === s) });
+    document.querySelectorAll('.pano').forEach(function (p) { p.hidden = p.dataset.pano !== ad });
+  });
+});
+</script>
+
+</body>
+</html>

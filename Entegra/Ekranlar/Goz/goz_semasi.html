@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Göz Şeması (çizim) — Mockup (Gentegre AI · Göz)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .btn.on{border-color:#2f6db3;background:var(--sel);color:var(--navy);font-weight:bold}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .od{color:#b3261e;font-weight:bold} .os{color:#2f6db3;font-weight:bold}
+
+  /* ---- cizim ekrani ------------------------------------------------- */
+  .cizimDuzen{display:grid;grid-template-columns:232px 1fr 306px}
+  .cizimDuzen>div{border-right:1px solid var(--line2);min-width:0}
+  .cizimDuzen>div:last-child{border-right:none}
+  .panelBaslik{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;
+    color:#2c4a6b;border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:6px}
+  .panelBaslik .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  /* damga paleti: simge + ad, secili olan mavi */
+  .damga{display:flex;align-items:center;gap:7px;padding:5px 9px;border-bottom:1px solid var(--line2);font-size:11.5px}
+  .damga.sel{background:var(--sel)}
+  .damga .sim{width:20px;height:20px;border:1px solid var(--line);border-radius:3px;background:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:12px;flex:none}
+  .damga .ks{margin-left:auto;color:var(--muted);font-size:10px;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .tuval{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 12px;background:#fbfcfe}
+  .goz{border:1px solid var(--line2);border-radius:4px;background:#fff;overflow:hidden}
+  .goz .gb{padding:4px 8px;font-size:11px;font-weight:bold;border-bottom:1px solid var(--line2);
+    background:linear-gradient(#f4f7fb,#e7eef6);display:flex;align-items:center;gap:6px}
+  .goz .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .goz svg{display:block;width:100%;height:auto;background:#fff}
+  .aracKutu{display:flex;gap:4px;padding:5px 8px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap;align-items:center}
+  .renkler{display:flex;gap:3px;margin-left:auto}
+  .renk{width:15px;height:15px;border-radius:3px;border:1px solid var(--line)}
+  .renk.sel{outline:2px solid var(--accent);outline-offset:1px}
+  .isaretSat{display:flex;gap:6px;align-items:center;padding:5px 9px;border-bottom:1px solid var(--line2);font-size:11.5px}
+  .isaretSat .sim{width:16px;text-align:center}
+  .isaretSat .sp{margin-left:auto;color:var(--muted);font-size:10.5px}
+  .metinKutu{margin:8px 9px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:6px 8px;
+    font-size:11.5px;line-height:1.5;min-height:66px}
+  .surum{display:flex;gap:6px;align-items:center;padding:5px 9px;border-bottom:1px solid var(--line2);font-size:11px}
+  .surum .sp{margin-left:auto;color:var(--muted);font-size:10.5px}
+  @media(max-width:1180px){
+    .cizimDuzen{grid-template-columns:1fr}
+    .cizimDuzen>div{border-right:none;border-bottom:1px solid var(--line2)}
+    .tuval{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🖼 Göz Şeması — Mehmet Kaya · 58 E
+    <span class="sp">Protokol 2026/20390 · Dr. E. Aksoy · muayene.id 8830 · goz_muayene.id 4412 · çizim v3 (taslak)</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn ok">✔ Muayeneye işle</div>
+    <div class="sepv"></div>
+    <div class="btn">↶ Geri al</div><div class="btn">↷ İleri</div><div class="btn">🗑 Seçili işareti sil</div>
+    <div class="sepv"></div>
+    <div class="btn">📋 Önceki çizimden başla</div>
+    <div class="btn">⇄ Öncekiyle karşılaştır</div>
+    <div class="btn">🖨 Yazdır / rapora ekle</div>
+    <div class="btn sp">✖ Kapat</div>
+  </div>
+
+  <div class="hdr k4">
+    <div class="fld"><label>Şema</label><div class="inp combo">Fundus — dilate (90 D)</div></div>
+    <div class="fld"><label>Kaynak</label><div class="inp ro">Hekim çizimi · 10:52 · Dr. E. Aksoy</div></div>
+    <div class="fld"><label>Bağlı bulgu</label><div class="inp ro">Fundus sekmesi — OD/OS metin alanları</div></div>
+    <div class="fld"><label>Durum</label><div class="inp ro"><span class="rz sari">Taslak</span> <span class="sonuk">muayene tamamlanınca kilitlenir</span></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme">Ön segment</div>
+    <div class="sekme on">Fundus</div>
+    <div class="sekme">Periferi (saat kadranı)</div>
+    <div class="sekme">Kapak / adneks</div>
+  </div>
+
+  <div class="cizimDuzen">
+
+    <!-- ---------------- sol: damga paleti ---------------- -->
+    <div>
+      <div class="panelBaslik">Damgalar <span class="sp">fundus</span></div>
+      <div class="damga sel"><span class="sim" style="color:#b3261e">●</span> Retina kanaması <span class="ks">1</span></div>
+      <div class="damga"><span class="sim" style="color:#8a6218">▲</span> Sert eksuda <span class="ks">2</span></div>
+      <div class="damga"><span class="sim" style="color:#6b7a8b">☁</span> Yumuşak eksuda (CWS) <span class="ks">3</span></div>
+      <div class="damga"><span class="sim" style="color:#d9a12b">•</span> Drusen <span class="ks">4</span></div>
+      <div class="damga"><span class="sim" style="color:#2e7d46">◍</span> Mikroanevrizma <span class="ks">5</span></div>
+      <div class="damga"><span class="sim" style="color:#6a3fb5">✳</span> Laser spotu <span class="ks">6</span></div>
+      <div class="damga"><span class="sim" style="color:#b3261e">⌇</span> Yırtık / delik <span class="ks">7</span></div>
+      <div class="damga"><span class="sim" style="color:#2f6db3">▨</span> Dekolman alanı <span class="ks">8</span></div>
+      <div class="damga"><span class="sim" style="color:#b3261e">◔</span> Disk kanaması <span class="ks">9</span></div>
+      <div class="damga"><span class="sim" style="color:#8a6218">◌</span> PPA (beta) <span class="ks">0</span></div>
+
+      <div class="panelBaslik" style="border-top:1px solid var(--line2)">Şablonlar</div>
+      <div class="damga"><span class="sim">📄</span> Normal fundus (OU)</div>
+      <div class="damga"><span class="sim">📄</span> NPDR — orta</div>
+      <div class="damga"><span class="sim">📄</span> Glokomatöz disk</div>
+      <div class="damga"><span class="sim">📄</span> PRP sonrası</div>
+
+      <div class="panelBaslik" style="border-top:1px solid var(--line2)">Görünüm</div>
+      <div class="damga"><span class="sim">🔢</span> Saat kadranı <span class="ks">açık</span></div>
+      <div class="damga"><span class="sim">📐</span> Disk çapı (DD) ızgarası <span class="ks">açık</span></div>
+      <div class="damga"><span class="sim">🖼</span> Fundus fotoğrafını altlık yap <span class="ks">kapalı</span></div>
+    </div>
+
+    <!-- ---------------- orta: iki goz tuvali ---------------- -->
+    <div>
+      <div class="aracKutu">
+        <div class="btn on">🖈 Damga</div><div class="btn">✏ Serbest çiz</div><div class="btn">◯ Alan</div>
+        <div class="btn">↔ Ölçü</div><div class="btn">T Etiket</div>
+        <div class="sepv"></div>
+        <span class="sonuk">kalınlık</span><div class="btn">2 px</div>
+        <div class="renkler">
+          <span class="renk sel" style="background:#b3261e"></span>
+          <span class="renk" style="background:#d9a12b"></span>
+          <span class="renk" style="background:#2e7d46"></span>
+          <span class="renk" style="background:#2f6db3"></span>
+          <span class="renk" style="background:#6a3fb5"></span>
+          <span class="renk" style="background:#1f2d3a"></span>
+        </div>
+      </div>
+
+      <div class="tuval">
+        <!-- ---------------- OD ---------------- -->
+        <div class="goz">
+          <div class="gb"><span class="od">OD · Sağ</span> <span class="sp">6 işaret · son 10:52</span></div>
+          <svg viewBox="0 0 320 320" role="img" aria-label="Sağ göz fundus şeması">
+            <!-- fundus zemini -->
+            <circle cx="160" cy="160" r="150" fill="#fdf1ec" stroke="#cdd6e0" stroke-width="1.5"/>
+            <circle cx="160" cy="160" r="100" fill="none" stroke="#e6d3cb" stroke-dasharray="3 4"/>
+            <circle cx="160" cy="160" r="50" fill="none" stroke="#e6d3cb" stroke-dasharray="3 4"/>
+            <!-- saat kadrani -->
+            <g font-size="9" fill="#8a97a5" text-anchor="middle">
+              <text x="160" y="16">12</text><text x="235" y="36">1</text><text x="288" y="90">2</text>
+              <text x="308" y="164">3</text><text x="288" y="238">4</text><text x="235" y="290">5</text>
+              <text x="160" y="312">6</text><text x="85" y="290">7</text><text x="32" y="238">8</text>
+              <text x="12" y="164">9</text><text x="32" y="90">10</text><text x="85" y="36">11</text>
+            </g>
+            <!-- damar arkadlari -->
+            <g fill="none" stroke="#c0564a" stroke-width="2.4" stroke-linecap="round">
+              <path d="M214 160 C 196 120, 150 96, 96 86"/>
+              <path d="M214 160 C 196 200, 150 224, 96 234"/>
+              <path d="M214 160 C 206 138, 186 126, 150 118"/>
+              <path d="M214 160 C 206 182, 186 194, 150 202"/>
+            </g>
+            <g fill="none" stroke="#7f95c4" stroke-width="2" stroke-linecap="round">
+              <path d="M216 152 C 198 112, 154 88, 100 76"/>
+              <path d="M216 168 C 198 208, 154 232, 100 244"/>
+            </g>
+            <!-- optik disk (OD'de nazal = sagda) -->
+            <circle cx="214" cy="160" r="26" fill="#fcefd8" stroke="#c9a96b" stroke-width="1.5"/>
+            <ellipse cx="214" cy="160" rx="15" ry="17" fill="#f6dfae" stroke="#c9a96b"/>
+            <text x="236" y="224" font-size="9" fill="#8a6218" text-anchor="middle">C/D 0,6 / 0,65</text>
+            <!-- PPA -->
+            <path d="M214 186 a26 26 0 0 0 24 -16" fill="none" stroke="#8a6218" stroke-width="5" opacity=".5"/>
+            <!-- makula + fovea -->
+            <circle cx="112" cy="160" r="26" fill="none" stroke="#d8bfb2" stroke-dasharray="2 3"/>
+            <circle cx="112" cy="160" r="4" fill="#a9705c"/>
+            <text x="112" y="204" font-size="9" fill="#8a7f79" text-anchor="middle">makula</text>
+            <!-- isaretler -->
+            <g>
+              <circle cx="150" cy="106" r="5" fill="#b3261e"/>
+              <circle cx="132" cy="212" r="5" fill="#b3261e"/>
+              <path d="M188 104 l7 12 h-14 z" fill="#8a6218"/>
+              <path d="M96 118 l7 12 h-14 z" fill="#8a6218"/>
+              <circle cx="214" cy="134" r="5" fill="#b3261e" stroke="#7a1a15"/>
+              <path d="M70 92 q10 -14 22 -4" fill="none" stroke="#b3261e" stroke-width="2.5"/>
+            </g>
+            <!-- secili isaret -->
+            <circle cx="150" cy="106" r="11" fill="none" stroke="#2f6db3" stroke-dasharray="3 3"/>
+          </svg>
+        </div>
+
+        <!-- ---------------- OS ---------------- -->
+        <div class="goz">
+          <div class="gb"><span class="os">OS · Sol</span> <span class="sp">1 işaret · son 10:54</span></div>
+          <svg viewBox="0 0 320 320" role="img" aria-label="Sol göz fundus şeması">
+            <circle cx="160" cy="160" r="150" fill="#fdf1ec" stroke="#cdd6e0" stroke-width="1.5"/>
+            <circle cx="160" cy="160" r="100" fill="none" stroke="#e6d3cb" stroke-dasharray="3 4"/>
+            <circle cx="160" cy="160" r="50" fill="none" stroke="#e6d3cb" stroke-dasharray="3 4"/>
+            <g font-size="9" fill="#8a97a5" text-anchor="middle">
+              <text x="160" y="16">12</text><text x="235" y="36">11</text><text x="288" y="90">10</text>
+              <text x="308" y="164">9</text><text x="288" y="238">8</text><text x="235" y="290">7</text>
+              <text x="160" y="312">6</text><text x="85" y="290">5</text><text x="32" y="238">4</text>
+              <text x="12" y="164">3</text><text x="32" y="90">2</text><text x="85" y="36">1</text>
+            </g>
+            <g fill="none" stroke="#c0564a" stroke-width="2.4" stroke-linecap="round">
+              <path d="M106 160 C 124 120, 170 96, 224 86"/>
+              <path d="M106 160 C 124 200, 170 224, 224 234"/>
+              <path d="M106 160 C 114 138, 134 126, 170 118"/>
+              <path d="M106 160 C 114 182, 134 194, 170 202"/>
+            </g>
+            <g fill="none" stroke="#7f95c4" stroke-width="2" stroke-linecap="round">
+              <path d="M104 152 C 122 112, 166 88, 220 76"/>
+              <path d="M104 168 C 122 208, 166 232, 220 244"/>
+            </g>
+            <circle cx="106" cy="160" r="26" fill="#fcefd8" stroke="#c9a96b" stroke-width="1.5"/>
+            <ellipse cx="106" cy="160" rx="13" ry="13" fill="#f6dfae" stroke="#c9a96b"/>
+            <text x="84" y="224" font-size="9" fill="#8a6218" text-anchor="middle">C/D 0,5 / 0,5</text>
+            <circle cx="208" cy="160" r="26" fill="none" stroke="#d8bfb2" stroke-dasharray="2 3"/>
+            <circle cx="208" cy="160" r="4" fill="#a9705c"/>
+            <text x="208" y="200" font-size="9" fill="#8a7f79" text-anchor="middle">makula</text>
+            <circle cx="236" cy="120" r="5" fill="#b3261e"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="ic sonuk" style="padding-top:0">
+        Şema <b>ölçüm değildir</b>: C/D oranı, GİB, görme gibi sayısal değerler yine kendi ölçüm
+        sekmelerine yazılır — çizim onların yerini almaz, yerini <i>gösterir</i>.
+      </div>
+    </div>
+
+    <!-- ---------------- sag: isaretler, uretilen metin, surum ---------------- -->
+    <div>
+      <div class="panelBaslik">İşaretler <span class="sp">7 adet</span></div>
+      <div class="isaretSat sel"><span class="sim" style="color:#b3261e">●</span> Retina kanaması
+        <span class="sp"><span class="od">OD</span> · saat 11 · 1,5 DD</span></div>
+      <div class="isaretSat"><span class="sim" style="color:#b3261e">●</span> Retina kanaması
+        <span class="sp"><span class="od">OD</span> · saat 7 · 1 DD</span></div>
+      <div class="isaretSat"><span class="sim" style="color:#8a6218">▲</span> Sert eksuda
+        <span class="sp"><span class="od">OD</span> · saat 1 · makula üstü</span></div>
+      <div class="isaretSat"><span class="sim" style="color:#8a6218">▲</span> Sert eksuda
+        <span class="sp"><span class="od">OD</span> · saat 10 · 2 DD</span></div>
+      <div class="isaretSat"><span class="sim" style="color:#b3261e">◔</span> Disk kanaması
+        <span class="sp"><span class="od">OD</span> · disk üst kutup</span></div>
+      <div class="isaretSat"><span class="sim" style="color:#b3261e">⌇</span> Serbest çizim
+        <span class="sp"><span class="od">OD</span> · saat 10 periferi</span></div>
+      <div class="isaretSat"><span class="sim" style="color:#b3261e">●</span> Retina kanaması
+        <span class="sp"><span class="os">OS</span> · saat 1 · 1 DD</span></div>
+
+      <div class="panelBaslik" style="border-top:1px solid var(--line2)">Çizimden üretilen metin
+        <span class="sp">öneri</span></div>
+      <div class="metinKutu">
+        <b class="od">OD:</b> Saat 11 ve 7 hizasında nokta retina kanaması, saat 1 ve 10'da sert eksuda;
+        disk üst kutbunda disk kanaması. Saat 10 periferinde işaretli alan.<br>
+        <b class="os">OS:</b> Saat 1 hizasında tek nokta kanama.
+      </div>
+      <div class="ic" style="padding-top:0;display:flex;gap:5px;flex-wrap:wrap">
+        <div class="btn ok">✔ Fundus alanına yaz</div>
+        <div class="btn">✎ Düzenleyip yaz</div>
+        <div class="btn pas">✖ Yazma</div>
+      </div>
+      <div class="ic sonuk" style="padding-top:0">
+        Metin <b>hekim onayı olmadan</b> bulgu alanına geçmez. Öneri; cümle kurucudur, tanı koymaz.
+      </div>
+
+      <div class="panelBaslik" style="border-top:1px solid var(--line2)">Sürümler</div>
+      <div class="surum"><b>v3</b> taslak <span class="sp">bugün 10:54 · Dr. E. Aksoy</span></div>
+      <div class="surum">v2 <span class="sp">12.03.2026 · kilitli</span></div>
+      <div class="surum">v1 <span class="sp">04.11.2025 · kilitli</span></div>
+      <div class="ic sonuk" style="padding-top:6px">
+        Tamamlanmış muayenenin çizimi <b>değiştirilmez</b>; yeni muayenede
+        "önceki çizimden başla" ile kopyası açılır — değişim böyle izlenir.
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Kaynak: hekim · dilate: evet (Tropikamid %1 · 10:20)</span>
+    <span class="sp">Çizim <code>goz_cizim</code> (şema türü, göz, sürüm, SVG) + <code>goz_cizim_isaret</code>
+      (tür, konum, saat, boyut) · dosya ekleri <code>DOSYA</code> deposunda · e-Nabız'a çizim gitmez,
+      üretilen metin muayene bulgusu olarak gider</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ne işe yarar.</b> Fundus ve ön segment bulgusu konum bilgisidir: "saat 11'de kanama" cümlesi,
+  aynı hastayı 6 ay sonra gören ikinci hekim için ancak şemayla birlikte anlam taşır. Ekran
+  <b>çizim yüzeyidir</b>, görüntüleme (fundus foto / OCT) değildir — onlar <code>goz_goruntuleme</code>
+  kaydında durur ve burada yalnızca <i>altlık</i> olarak gösterilebilir.
+  <br>
+  <b>Veri.</b> Her çizim bir <code>goz_cizim</code> satırı: <code>goz_muayene_id</code>, <code>goz</code> (OD/OS),
+  <code>sema_turu</code> (ön segment · fundus · periferi · kapak), <code>surum</code>, ölçekten bağımsız
+  SVG ve oluşturan/zaman. İşaretler ayrı satır (<code>goz_cizim_isaret</code>): tür kodu, normalize
+  konum (0–1), saat kadranı, disk çapı cinsinden boyut, not. İşaretler ayrı durduğu için
+  <i>aranabilir</i>: "periferik yırtığı olan hastalar" sorgusu resimden değil satırdan çıkar.
+  <br>
+  <b>Kurallar.</b> (1) Çizim ölçüm alanlarını doldurmaz; C/D, GİB, VA yine kendi tablolarına yazılır.
+  (2) Üretilen metin öneridir, hekim onaylamadan bulgu alanına geçmez. (3) Tamamlanmış muayenenin
+  çizimi kilitlidir — düzeltme yeni sürümle, yeni muayenede yapılır. (4) Sağ/sol karışmasın diye
+  saat kadranı OD'de saat yönünde, OS'de ters numaralanır; şablon damgalar da göz bazlıdır.
+  <br>
+  <b>Uygulamada yok.</b> Bu ekran henüz yazılmadı; muayene kartındaki araç çubuğunda "göz şeması"
+  düğmesi bu yüzden bilerek konmadı — çalışmayan düğme, olmayan bir yeteneği vaat eder.
+</div>
+
+<script>
+// Sekmeler mockup ailesiyle ayni: .sekme tiklaninca .pnl panelleri degisir.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  tabs.forEach(function(t){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');});
+  });
+});
+</script>
+
+</body>
+</html>

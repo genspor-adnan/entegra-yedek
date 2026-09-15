@@ -131,6 +131,35 @@ public static partial class KaynakKatalogu
         Ekle(RadyolojiKonsultasyon());
         Ekle(RadyolojiTeslim());
 
+        // GOZ (691): genel muayenenin USTUNE oturur - unite akisi, goz
+        //   muayeneleri, goruntuleme, islem hatti, gozluk recetesi, kronik
+        //   hastalik takibi ve cihazlar. Olcum tablolari (gorme/refraksiyon/
+        //   tonometri...) LISTE DEGIL, kartin icinde OD/OS ikili cizilir.
+        Ekle(GozAkis());
+        Ekle(GozMuayene());
+        Ekle(GozGoruntuleme());
+        Ekle(GozIslem());
+        Ekle(GozGozlukRecete());
+        Ekle(GozTakip());
+        Ekle(GozCihaz());
+        Ekle(DikteTerim());
+        // Ikincil listeler: recetenin ozel hali + kurulum/bakim ekranlari.
+        Ekle(GozKontaktLens());
+        Ekle(GozIslemProtokol());
+        Ekle(GozCihazMesaj());
+        Ekle(GozHastaOzet());
+
+        // YATAN HASTA (695): servis listesi, yatak panosu, order ve doz
+        //   kuyrugu. Izlem (vital/sivi/risk) LISTE DEGIL - hep bir hastanin
+        //   egrisi sorulur, servis genelinde "butun vitaller" diye bir soru yok.
+        Ekle(Yatan());
+        Ekle(YatakPanosu());
+        Ekle(YatisOrder());
+        Ekle(OrderUygulama());
+        Ekle(YatisIzlem());
+        Ekle(YatisTahakkuk());
+        Ekle(Oda());
+
         // PRIM / HAKEDIS (324): prim tahsil edildikce dogar - hakedis satiri
         //   tahsilat dagitimindan uretilir.
         Ekle(PrimPlani());
@@ -151,6 +180,8 @@ public static partial class KaynakKatalogu
         Ekle(UtsBildirim());
         Ekle(UtsEnvanter());
         Ekle(Rol());
+        // Kullanicilar (Yonetim > Guvenlik): hesap yonetimi tek ekranda.
+        Ekle(Kullanici());
         // Kasa alt sistemi (071-080)
         Ekle(Hesap());
         Ekle(CekSenet());

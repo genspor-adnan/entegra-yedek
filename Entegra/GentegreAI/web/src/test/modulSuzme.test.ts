@@ -34,7 +34,10 @@ describe('modül süzmesi', () => {
   it('her menü grubu bir modüle bağlıdır ya da bilerek bağsızdır', () => {
     // Bağsız kalması GEREKENLER: ayar/kullanıcı ekranları kapatılamaz -
     //   yoksa kapatılan modül geri açılamazdı.
-    const bagsiz = new Set(['Yönetim', 'Ana Sayfa', 'Cari', 'CRM', 'İK']);
+    // Menu yeniden duzeni (plan 11): Cari+CRM tek grup, IK & Prim, ve
+    //   Kurumlar & Sigorta - ucu de kapatilamaz cekirdek ekranlar.
+    const bagsiz = new Set(['Yönetim', 'Ana Sayfa', 'Cari & CRM', 'İK & Prim',
+                            'Kurumlar & Sigorta', 'Demirbaş']);
     const gruplar = new Set(LISTELER.map(l => l.menuGrup).filter(Boolean) as string[]);
 
     for (const g of gruplar) {

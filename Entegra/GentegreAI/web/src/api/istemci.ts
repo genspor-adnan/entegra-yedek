@@ -14,6 +14,8 @@ import { belgeUclari } from './uclar/belge';
 import { stokUclari } from './uclar/stok';
 import { icmalUclari } from './uclar/icmal';
 import { radyolojiUclari } from './uclar/radyoloji';
+import { gozUclari } from './uclar/goz';
+import { yatanUclari } from './uclar/yatan';
 import { yapayZekaUclari } from './uclar/yapayZeka';
 import { mesajUclari } from './uclar/mesaj';
 import { ayarUclari } from './uclar/ayar';
@@ -40,6 +42,8 @@ export const api = {
   ...stokUclari,
   ...icmalUclari,
   ...radyolojiUclari,
+  ...gozUclari,
+  ...yatanUclari,
   ...yapayZekaUclari,
   ...mesajUclari,
   ...ayarUclari,

@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text.Json;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
@@ -26,7 +26,7 @@ public sealed class DokumDeposu
     private const string SecimSql = """
         select d.id, d.kod, d.ad, d.aciklama, d.kaynak, d.tanim::text, d.surum, coalesce(d.sahip_id, 0),
                coalesce(tk.kod, '') as sahip, d.gorunurluk, d.roller, d.son_calisma, d.calisma_sayisi,
-               d.sistem, d.urun_modu, d.modul
+               d.sistem, d.urun_modu, d.modul, d.menu_grup
           from public.dokum_tanimi d
           left join public.taraf_kullanici tk on tk.id = d.sahip_id
         """;
@@ -40,6 +40,10 @@ public sealed class DokumDeposu
         Gorunurluk = o.GetInt16(9), Roller = o.IsDBNull(10) ? [] : o.GetFieldValue<int[]>(10),
         SonCalisma = o.IsDBNull(11) ? null : o.GetDateTime(11), CalismaSayisi = o.GetInt32(12),
         Sistem = o.GetInt16(13) == 1, UrunModu = o.GetInt16(14), Modul = o.GetString(15),
+        // 690: dokumun MENU GRUBU - grup icindeki "Dökümler" ogesi buna gore
+        //   suzer. Kaynaktan turetmek yanlisti: `belge` hem basvuru hem satis
+        //   hem alis ekranlarinda kullaniliyor.
+        MenuGrup = o.GetString(16),
         // Düzenleme: sahibi ya da Degistir yetkisi olan (yönetici). STANDART
         //   döküm kimse tarafından düzenlenmez - kopyalanır (688).
         Duzenlenebilir = o.GetInt16(13) != 1 && (tamYetki || o.GetInt32(7) == kullaniciId),

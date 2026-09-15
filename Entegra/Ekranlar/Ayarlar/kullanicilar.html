@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kullanıcılar — Mockup (Gentegre AI · Yönetim › Güvenlik)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.42}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .kutu{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:27px;
+    display:flex;align-items:center;padding:0 8px;gap:6px}
+  .kutu.ara{flex:1;min-width:230px;color:var(--muted)}
+  .kutu.combo::after{content:"\25BE";margin-left:auto;color:var(--muted)}
+  .kutu b{font-weight:bold}
+  .cip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;
+    background:#fff;color:var(--muted);white-space:nowrap}
+  .cip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+
+  .ozet{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line2);
+    border-bottom:1px solid var(--line)}
+  .ozet .k{background:#fff;padding:9px 12px}
+  .ozet .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .ozet .deg{font-size:18px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .ozet .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .ozet .k.uy .deg{color:var(--uyari)}
+  .ozet .k.teh .deg{color:var(--kirmizi)}
+  .ozet .k.iyi .deg{color:var(--ok)}
+
+  .dg{overflow-x:auto;background:#fff}
+  table{border-collapse:collapse;width:100%}
+  th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+    color:#3a5573;white-space:nowrap}
+  td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+    font-size:11.5px;white-space:nowrap}
+  tr.sel td{background:var(--sel)}
+  tr.pasif td{color:#9aa7b4}
+  .sag{text-align:right}
+  .orta{text-align:center}
+  .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:10px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+
+  /* alt panel: secili kullanicinin ayrintisi */
+  .alt{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--line)}
+  .alt>div+div{border-left:1px solid var(--line2)}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;
+    padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{margin:10px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+  .grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+    border-bottom:1px solid var(--line2);color:#2c4a6b}
+  .grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--muted)}
+  .ic{padding:8px 12px;background:#fff}
+  .sat{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:11.5px}
+  .sat+.sat{border-top:1px solid #eef2f6}
+  .sat span{color:var(--muted)}
+  .sat b{text-align:right}
+  .not{font-size:11px;color:var(--muted);line-height:1.5;padding:8px 12px;background:#f8fafc;
+    border-top:1px solid var(--line2)}
+  .not b{color:var(--ink)}
+  /* Sekme panolari: `.alt` display:grid oldugu icin `hidden` tek basina
+     yetmiyor - gorunurlugu panonun kendisi belirlesin. */
+  .pano[hidden]{display:none!important}
+  .pano table{background:#fff}
+  .pano .bos{color:var(--muted);padding:10px 12px;font-size:11.5px;background:#fff}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+
+  /* modal */
+  .perde{position:relative;margin:18px auto 0;max-width:1480px}
+  .modal{max-width:560px;margin:0 auto;background:#fff;border:1px solid #0f2c50;border-radius:5px;
+    box-shadow:0 14px 40px rgba(8,20,40,.3);overflow:hidden}
+  .modal .mb{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:8px 12px;
+    font-weight:bold;font-size:13px;display:flex;gap:8px;align-items:center}
+  .modal .mb .sp{margin-left:auto;font-weight:normal;font-size:11px;opacity:.85}
+  .alanlar{display:grid;grid-template-columns:140px 1fr;gap:8px 10px;padding:12px;align-items:center}
+  .alanlar label{font-size:11.5px;color:var(--muted)}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:27px;
+    padding:4px 8px;font-size:12px;display:flex;align-items:center;gap:6px}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.combo::after{content:"\25BE";margin-left:auto;color:var(--muted)}
+  .uyari{display:flex;gap:8px;align-items:flex-start;margin:0 12px 12px;padding:9px 11px;
+    border-radius:4px;font-size:11.5px;line-height:1.5}
+  .uyari.sari{background:#fdf6e3;color:#6f4f12;border:1px solid #f2ddbf}
+  .uyari.kir{background:#fbe9e7;color:#8c2119;border:1px solid #f3c4bf}
+  .malt{display:flex;gap:8px;padding:10px 12px;background:var(--head);border-top:1px solid var(--line)}
+  .malt .sp{margin-left:auto}
+
+  .aciklama{max-width:1480px;margin:16px auto 0;color:#5a6b7c;font-size:11px;line-height:1.7}
+  .aciklama h4{margin:0 0 6px;color:var(--ink);font-size:13px}
+  .aciklama b{color:var(--ink)}
+  .aciklama ul{margin:6px 0 0 18px;padding:0}
+  .aciklama li{margin:4px 0}
+  .aciklama code{background:#eef2f7;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  @media(max-width:1000px){.ozet{grid-template-columns:repeat(3,1fr)}.alt{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🛡 Kullanıcılar
+    <span class="sp">Yönetim › Güvenlik › Kullanıcılar · 96 hesap</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>＋</span> Hesap Aç</div>
+    <div class="btn"><span>✎</span> Kart</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🔑</span> Parola Sıfırla</div>
+    <div class="btn"><span>🔓</span> Kilidi Çöz</div>
+    <div class="btn"><span>⎋</span> Oturumları Kapat</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🛡</span> Rol Ata</div>
+    <div class="btn"><span>🚫</span> Pasife Al</div>
+    <div class="sp"></div>
+    <div class="btn"><span>👥</span> Personelden Toplu Aç</div>
+    <div class="btn"><span>⬇</span> Excel</div>
+  </div>
+
+  <div class="serit">
+    <div class="kutu ara">🔍 Ad, kullanıcı kodu, e-posta, cep…</div>
+    <div class="kutu combo">🛡 Rol: <b>Tümü</b></div>
+    <div class="kutu combo">🏢 Şube: <b>Tümü</b></div>
+    <span class="cip on">Aktif</span>
+    <span class="cip">Pasif</span>
+    <span class="cip">Parolasız</span>
+    <span class="cip">Kilitli</span>
+    <span class="cip">90 gün girmemiş</span>
+    <span class="cip">Tümü</span>
+  </div>
+
+  <!-- Sayilar KARAR ICIN: her biri bir cipin karsiligi, tiklayinca listeyi suzer -->
+  <div class="ozet">
+    <div class="k iyi"><div class="bas">Aktif hesap</div><div class="deg">88</div>
+      <div class="alt">96 hesabın 8'i pasif</div></div>
+    <div class="k uy"><div class="bas">Parolasız</div><div class="deg">11</div>
+      <div class="alt">ilk girişte belirleyecek</div></div>
+    <div class="k teh"><div class="bas">Kilitli</div><div class="deg">2</div>
+      <div class="alt">hatalı giriş · 30 dk</div></div>
+    <div class="k"><div class="bas">90 gün girmemiş</div><div class="deg">7</div>
+      <div class="alt">gözden geçirin</div></div>
+    <div class="k"><div class="bas">Hesabı olmayan personel</div><div class="deg">5</div>
+      <div class="alt">aktif personel · 93</div></div>
+    <div class="k"><div class="bas">Açık oturum</div><div class="deg">34</div>
+      <div class="alt">21 kullanıcı · 3 mobil</div></div>
+  </div>
+
+  <div class="dg">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:26px" class="orta"><input type="checkbox"></th>
+          <th>Kullanıcı Kodu</th>
+          <th>Kişi</th>
+          <th>Ana Rol</th>
+          <th>Ek Roller</th>
+          <th>Şubeler</th>
+          <th class="orta">Durum</th>
+          <th class="orta">Parola</th>
+          <th>Son Giriş</th>
+          <th class="orta">Oturum</th>
+          <th>E-posta</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="sel">
+          <td class="orta"><input type="checkbox" checked></td>
+          <td>oakar</td>
+          <td>Dr. Osman AKAR</td>
+          <td>Başhekim Yrd.</td>
+          <td><span class="rz mor">İskonto Onaylayanlar</span></td>
+          <td>Merkez · Ankara</td>
+          <td class="orta"><span class="rz ok">Aktif</span></td>
+          <td class="orta"><span class="rz ok">kendi</span></td>
+          <td>15.09.2026 08:42</td>
+          <td class="orta">2</td>
+          <td class="sonuk">osman.akar@ornekhastane.com</td>
+        </tr>
+        <tr>
+          <td class="orta"><input type="checkbox"></td>
+          <td>ekaraca</td>
+          <td>Elif KARACA</td>
+          <td>Banko</td>
+          <td class="sonuk">—</td>
+          <td>Merkez</td>
+          <td class="orta"><span class="rz ok">Aktif</span></td>
+          <td class="orta"><span class="rz ok">kendi</span></td>
+          <td>15.09.2026 08:05</td>
+          <td class="orta">1</td>
+          <td class="sonuk">elif.karaca@ornekhastane.com</td>
+        </tr>
+        <tr>
+          <td class="orta"><input type="checkbox"></td>
+          <td>p7939</td>
+          <td>Hasan AYDIN</td>
+          <td>Banko</td>
+          <td class="sonuk">—</td>
+          <td>Merkez</td>
+          <td class="orta"><span class="rz ok">Aktif</span></td>
+          <td class="orta"><span class="rz sari">varsayılan</span></td>
+          <td class="sonuk">hiç girmedi</td>
+          <td class="orta sonuk">—</td>
+          <td class="sonuk">hasan@gmail.com</td>
+        </tr>
+        <tr>
+          <td class="orta"><input type="checkbox"></td>
+          <td>dr7889</td>
+          <td>Dr. Hasan AYDIN</td>
+          <td>Doktor</td>
+          <td><span class="rz mor">İskonto Onaylayanlar</span></td>
+          <td>Merkez</td>
+          <td class="orta"><span class="rz kir">Kilitli</span></td>
+          <td class="orta"><span class="rz ok">kendi</span></td>
+          <td>14.09.2026 19:18 <span class="rz kir">5 hatalı</span></td>
+          <td class="orta sonuk">—</td>
+          <td class="sonuk">—</td>
+        </tr>
+        <tr>
+          <td class="orta"><input type="checkbox"></td>
+          <td>ayten2210</td>
+          <td>Ayten ARSLAN</td>
+          <td>Hemşire</td>
+          <td class="sonuk">—</td>
+          <td>Merkez</td>
+          <td class="orta"><span class="rz ok">Aktif</span></td>
+          <td class="orta"><span class="rz sari">boş</span></td>
+          <td class="sonuk">hiç girmedi</td>
+          <td class="orta sonuk">—</td>
+          <td class="sonuk">—</td>
+        </tr>
+        <tr class="pasif">
+          <td class="orta"><input type="checkbox"></td>
+          <td>mdemir</td>
+          <td>Murat DEMİR</td>
+          <td>Rol Atanmamış <span class="rz pas">sistem rolü</span></td>
+          <td class="sonuk">—</td>
+          <td class="sonuk">—</td>
+          <td class="orta"><span class="rz pas">Pasif</span></td>
+          <td class="orta sonuk">—</td>
+          <td>12.06.2026 17:40</td>
+          <td class="orta sonuk">—</td>
+          <td class="sonuk">murat.demir@ornekhastane.com</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ------------------------------------------- secili kullanicinin ayrintisi -->
+  <div class="sekmeler">
+    <div class="sekme on" data-sekme="roller">Roller ve Şubeler</div>
+    <div class="sekme" data-sekme="oturum">Açık Oturumlar <span class="rz mavi">2</span></div>
+    <div class="sekme" data-sekme="giris">Giriş Hareketleri</div>
+    <div class="sekme" data-sekme="gunluk">İşlem Günlüğü</div>
+  </div>
+
+  <div class="pano alt" data-pano="roller">
+    <div>
+      <div class="grp">
+        <h4>Roller <span class="mini">rol kartındaki listeyle AYNI veri</span></h4>
+        <div class="ic">
+          <div class="sat"><span>Ana rol</span><b>Başhekim Yrd.</b></div>
+          <div class="sat"><span>Ek roller</span>
+            <b><span class="rz mor">İskonto Onaylayanlar</span></b></div>
+          <div class="sat"><span>İskonto tavanı</span><b>%25 · en çok 2.500 ₺</b></div>
+          <div class="sat"><span></span>
+            <span><span class="btn" style="display:inline-flex">🛡 Rol Ata</span></span></div>
+        </div>
+        <div class="not">Yetki ana rol ile ek rollerin <b>birleşimidir</b>; sayısal sınırlarda
+          en yüksek değer geçerli olur. Yetkiyi buradan tek tek vermek yok — kişi
+          <b>role</b> eklenir, yetki rolde durur.</div>
+      </div>
+    </div>
+    <div>
+      <div class="grp">
+        <h4>Şubeler <span class="mini">rolden gelir</span></h4>
+        <div class="ic">
+          <div class="sat"><span>Merkez</span><b><span class="rz ok">varsayılan</span> yazma</b></div>
+          <div class="sat"><span>Ankara Şube</span><b>yazma</b></div>
+        </div>
+        <div class="not">Şube yetkisi <b>rolün</b> şubelerinden gelir (rol_sube); kişiye tek tek
+          şube verilmez. Çok rollüde şubeler birleşir, yazma hakkı geniş olan kazanır.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACIK OTURUMLAR: aile basina TEK satir - rotation her yenilemede yeni
+       kayit acar, ham sayim "47 cihaz" gibi anlamsiz bir sayi verirdi. -->
+  <div class="pano" data-pano="oturum" hidden>
+    <div class="dg">
+      <table>
+        <thead>
+          <tr><th>Cihaz</th><th>IP</th><th>Şube</th><th>Açılış</th>
+              <th>Son kullanım</th><th style="width:120px"></th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Chrome · Windows</td>
+            <td class="sonuk">10.20.4.18</td>
+            <td>Merkez</td>
+            <td class="sonuk">15.09.2026 08:42</td>
+            <td>15.09.2026 11:06</td>
+            <td class="orta"><span class="btn" style="display:inline-flex">⎋ Kapat</span></td>
+          </tr>
+          <tr>
+            <td>Safari · iPhone</td>
+            <td class="sonuk">88.230.14.7</td>
+            <td>Ankara Şube</td>
+            <td class="sonuk">14.09.2026 17:55</td>
+            <td>15.09.2026 09:31</td>
+            <td class="orta"><span class="btn" style="display:inline-flex">⎋ Kapat</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not">Oturum kapatmak parolayı <b>değiştirmez</b>: işten ayrılan ya da
+      cihazını kaybeden kişinin oturumu, parolasına dokunmadan düşürülebilmeli.
+      Sayı <b>aile</b> başına verilir — token yenilendikçe açılan satırlar aynı cihazdır.</div>
+  </div>
+
+  <!-- GIRIS HAREKETLERI: basarisiz denemeler de yazar. Yalniz basarili
+       girisleri gostermek, birinin denedigini gizlerdi. -->
+  <div class="pano" data-pano="giris" hidden>
+    <div class="dg">
+      <table>
+        <thead>
+          <tr><th>Zaman</th><th>Sonuç</th><th>IP</th><th>Cihaz</th><th>Şube</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>15.09.2026 08:42</td><td><span class="rz ok">başarılı</span></td>
+              <td class="sonuk">10.20.4.18</td><td class="sonuk">Chrome · Windows</td><td>Merkez</td></tr>
+          <tr><td>14.09.2026 17:55</td><td><span class="rz ok">başarılı</span></td>
+              <td class="sonuk">88.230.14.7</td><td class="sonuk">Safari · iPhone</td><td>Ankara Şube</td></tr>
+          <tr><td>14.09.2026 17:54</td><td><span class="rz kir">parola hatalı</span></td>
+              <td class="sonuk">88.230.14.7</td><td class="sonuk">Safari · iPhone</td><td class="sonuk">—</td></tr>
+          <tr><td>12.09.2026 09:03</td><td><span class="rz ok">başarılı</span></td>
+              <td class="sonuk">10.20.4.18</td><td class="sonuk">Chrome · Windows</td><td>Merkez</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not">Başarısız denemeler de listelenir: "kilitlendim" diyen kişinin
+      kilidi <b>kendi</b> yanlış yazımından mı, başkasının denemesinden mi geldiği
+      ancak burada ayrılır. Üst üste hata <b>kilit</b> doğurur (ayrı eylem, ayrı çözüm).</div>
+  </div>
+
+  <!-- ISLEM GUNLUGU: kisinin YAPTIKLARI degil, HESABINA yapilanlar. Genel
+       islem gunlugu ekrani ayni satirlari gosterir; buradaki fark sorunun
+       dar olmasi - "bu hesaba ne yapildi". -->
+  <div class="pano" data-pano="gunluk" hidden>
+    <div class="dg">
+      <table>
+        <thead>
+          <tr><th>Zaman</th><th>İşlem</th><th>Yapan</th><th>IP</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>14.09.2026 19:22</td><td>Hesap kilidi çözüldü</td>
+              <td class="sonuk">Ayşe YILMAZ</td><td class="sonuk">10.20.4.3</td></tr>
+          <tr><td>02.09.2026 10:14</td><td>Ek rol verildi · İskonto Onaylayanlar</td>
+              <td class="sonuk">Ayşe YILMAZ</td><td class="sonuk">10.20.4.3</td></tr>
+          <tr><td>18.07.2026 16:40</td><td>Parola sıfırlandı, oturumlar kapatıldı</td>
+              <td class="sonuk">Ayşe YILMAZ</td><td class="sonuk">10.20.4.3</td></tr>
+          <tr><td>03.02.2026 09:12</td><td>Hesap açıldı · personelden</td>
+              <td class="sonuk">Sistem</td><td class="sonuk">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not">Bu ekrandaki <b>her</b> işlem ISLEMLOG'a yazılır. Hesap
+      silinmediği için günlük de sahipsiz kalmaz — pasife alınan hesabın geçmişi
+      okunabilir durumda durur.</div>
+  </div>
+
+  <div class="statusbar">
+    <span>96 hesap · 6 gösteriliyor</span><span>·</span>
+    <span>Saatler <b>Merkez</b> şubesinin saat diliminde (Europe/Istanbul)</span><span>·</span>
+    <span>Bu ekrandaki her işlem ISLEMLOG'a yazılır</span>
+  </div>
+</div>
+
+<!-- ======================================================= HESAP AÇ ==== -->
+<div class="perde">
+  <div class="modal">
+    <div class="mb">＋ Hesap Aç <span class="sp">personelden</span></div>
+    <div class="alanlar">
+      <label>Personel</label><div class="inp combo">Ayten ARSLAN · Hemşire · 2210</div>
+      <label>Kullanıcı kodu</label><div class="inp">ayten2210 <span class="rz ok" style="margin-left:auto">uygun</span></div>
+      <label>Ana rol</label><div class="inp combo">Hemşire</div>
+      <label>E-posta</label><div class="inp">ayten.arslan@ornekhastane.com</div>
+      <label>Cep telefonu</label><div class="inp">TR +90 · 532 •••• 41 88</div>
+      <label>Parola</label><div class="inp ro">Kişi ilk girişte kendi belirleyecek</div>
+    </div>
+    <div class="uyari sari">
+      <span>🔑</span>
+      <div><b>Parola burada yazılmaz.</b> Hesap parolasız açılır; kişi ilk girişte
+        kimliğini (TCKN son 4) doğrulayıp kendi parolasını koyar. Yönetici parolası
+        belirlese, kimsenin görmediği bir şifre kayda geçer ve kâğıda yazılır.</div>
+    </div>
+    <div class="malt">
+      <div class="btn">Vazgeç</div>
+      <div class="sp"></div>
+      <div class="btn primary">Hesabı Aç</div>
+    </div>
+  </div>
+</div>
+
+<!-- =================================================== PAROLA SIFIRLA ==== -->
+<div class="perde">
+  <div class="modal">
+    <div class="mb">🔑 Parola Sıfırla <span class="sp">Dr. Hasan AYDIN · dr7889</span></div>
+    <div class="uyari kir" style="margin-top:12px">
+      <span>⚠</span>
+      <div>Sıfırlama <b>kişinin bütün oturumlarını kapatır</b> ve hesabı
+        <b>parolasız</b> duruma alır — kişi ilk girişte kendi parolasını yeniden
+        koyar. Yeni parolayı siz belirleyip söylemezsiniz: telefonda söylenen parola
+        kimin elinde kaldığı bilinmeyen bir paroladır.</div>
+    </div>
+    <div class="alanlar" style="padding-top:0">
+      <label>Kilit durumu</label><div class="inp ro">Kilitli · 5 hatalı giriş (14.09 19:18)</div>
+      <label>Kilidi de çöz</label><div class="inp">☑ Evet</div>
+      <label>Bilgilendir</label><div class="inp combo">E-posta ile bildir</div>
+    </div>
+    <div class="malt">
+      <div class="btn">Vazgeç</div>
+      <div class="sp"></div>
+      <div class="btn danger">Sıfırla</div>
+    </div>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Kullanıcılar — tasarım notları</h4>
+  Bugün kullanıcı yönetimi üç yere dağılmış durumda: hesaplar <b>personelden</b>
+  otomatik açılıyor, rol ataması <b>rol kartının</b> Kullanıcılar sekmesinden,
+  denetim <b>Giriş Kayıtları</b>'ndan yapılıyor. Bu ekran onları tek yerde toplar;
+  <b>yeni bir yetki mekanizması getirmez</b>.
+  <ul>
+    <li><b>Parola hiçbir yerde görünmez ve yönetici parola yazmaz.</b> Hesap
+        parolasız açılır, sıfırlama da parolasız duruma alır; kişi ilk girişte
+        kimliğini doğrulayıp kendi parolasını koyar (bugünkü `ilk-parola` akışı).
+        "Yönetici bir parola belirlesin" demek, o parolanın kâğıda yazılması demek.</li>
+    <li><b>Yetki bu ekranda verilmez.</b> Kişi <i>role</i> eklenir; yetki rolde durur
+        (ana rol + ek roller, birleşim). Kullanıcı başına tek tek yetki, ikinci bir
+        yetki kaynağı olurdu - biri açık öbürü kapalı kaldığı gün sistem sessizce
+        yanlış davranırdı.</li>
+    <li><b>Hesap SİLİNMEZ, pasife alınır.</b> İşlem günlüğü, belge ve log satırları
+        kullanıcıya bağlı; silinen hesap geçmişi sahipsiz bırakır. Pasif hesap giriş
+        yapamaz, listede soluk görünür.</li>
+    <li><b>"Oturumları kapat" yöneticide de var</b> (kişinin kendisinde zaten vardı):
+        işten ayrılan ya da cihazını kaybeden kişinin oturumu, parolası
+        değiştirilmeden kapatılabilmeli.</li>
+    <li><b>Kilit çözme ayrı bir eylem:</b> hatalı giriş kilidi parola sorunundan
+        farklıdır - parolayı bilen ama üç kez yanlış yazan kişiye parola sıfırlatmak
+        gereksiz bir tur attırır.</li>
+    <li><b>Sayı kutuları birer süzgeçtir</b> (parolasız, kilitli, 90 gün girmemiş,
+        hesabı olmayan personel): yönetici "bakılacak" işleri listede arayarak değil,
+        sayıya tıklayarak bulur.</li>
+    <li><b>"Hesabı olmayan personel" sayısı bilerek burada:</b> 93 aktif personelin
+        5'inin hesabı yok ve bu, ekranı açmadan görünmüyordu - kişi giriş yapamayınca
+        aranıyordu. "Personelden Toplu Aç" aynı satırın eylemi.</li>
+    <li><b>Saatler şubenin saat diliminde</b> (666/667): "son giriş 08:42" hangi
+        şubenin 08:42'si sorusu, çok ülkeli kurumda cevapsız kalırdı.</li>
+    <li><b>2 adımlı doğrulama sütunu YOK:</b> sunucuda TOTP akışı yok. Kolon koyup
+        hep "kapalı" yazmak, olmayan bir özelliği varmış gibi gösterirdi.</li>
+  </ul>
+</div>
+
+<script>
+// Sekmeler mockup'ta da ACILIR (kullanici): dort sekmenin dordu de ayri bir
+//   soruyu cevapliyor - yalniz ilkini gosteren mockup, otekilerin ne oldugunu
+//   anlatmadan "var" demis olurdu.
+document.querySelectorAll('.sekme').forEach(function (s) {
+  s.addEventListener('click', function () {
+    var ad = s.dataset.sekme;
+    document.querySelectorAll('.sekme').forEach(function (x) {
+      x.classList.toggle('on', x === s);
+    });
+    document.querySelectorAll('.pano').forEach(function (p) {
+      p.hidden = p.dataset.pano !== ad;
+    });
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Göz Ünite Panosu — Mockup (Gentegre AI · Göz)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+    display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .serit{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;
+    background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+
+  /* ÖZET KUTULARI: panonun ilk bakışta söylediği şey "ünite tıkalı mı". */
+  .ozet{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;padding:10px 12px;
+    background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .ozet .k{border:1px solid var(--line2);border-radius:4px;background:#fff;padding:7px 10px}
+  .ozet .b{font-size:10px;color:var(--muted);letter-spacing:.3px}
+  .ozet .d{font-size:19px;font-weight:bold;color:var(--navy);line-height:1.25}
+  .ozet .a{font-size:10.5px;color:var(--muted)}
+  .ozet .k.uy{background:#fdf9f1;border-color:#f2ddbf}
+  .ozet .k.uy .d{color:var(--uyari)}
+  .ozet .k.teh{background:#fdf1f0;border-color:#f3c4bf}
+  .ozet .k.teh .d{color:var(--kirmizi)}
+  .ozet .k.iyi{background:#f1f9f4;border-color:#bfe3cb}
+  .ozet .k.iyi .d{color:var(--ok)}
+
+  /* KANBAN: sütun = istasyon. Hasta bir ziyarette istasyonlar arasında gezer;
+     satır listesi "kim nerede takıldı" sorusunu ancak sıralayıp sayarak
+     cevaplar, sütun doğrudan gösterir. */
+  .kanban{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:10px 12px;
+    background:var(--head);border-bottom:1px solid var(--line)}
+  .kol{background:#fff;border:1px solid var(--line2);border-radius:4px;
+    display:flex;flex-direction:column;min-height:210px}
+  .kb{padding:5px 8px;font-size:11px;font-weight:bold;color:#2c4a6b;background:#f4f7fb;
+    border-bottom:1px solid var(--line2);display:flex;gap:6px;align-items:center;border-radius:4px 4px 0 0}
+  .kb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .kol .ic{padding:6px;display:flex;flex-direction:column;gap:6px}
+  .is{border:1px solid var(--line2);border-radius:3px;background:#fbfcfd;padding:5px 7px;
+    font-size:11px;line-height:1.45}
+  .is b{display:block;color:var(--navy)}
+  .is .sonuk{display:block;color:var(--muted);font-size:10.5px}
+  .is.simdi{border-color:#2f6db3;background:#eef4fc}
+  .is.gecikti{border-color:#f3c4bf;background:#fdf1f0}
+  .kol.dolu{border-color:#f2ddbf}
+  .bos{padding:10px 8px;color:#b6c0cb;font-size:10.5px;text-align:center}
+
+  .iki{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 12px}
+  .grp{border:1px solid var(--line2);border-radius:4px;background:#fff;overflow:hidden}
+  .grp h4{margin:0;padding:6px 10px;font-size:11.5px;color:#2c4a6b;background:#f4f7fb;
+    border-bottom:1px solid var(--line2);display:flex;gap:8px;align-items:center}
+  .grp h4 .mini{margin-left:auto;font-weight:normal;color:var(--muted);font-size:10.5px}
+  table{border-collapse:collapse;width:100%}
+  th{background:#f7f9fc;border-bottom:1px solid var(--line2);text-align:left;
+    padding:5px 8px;font-size:10.5px;color:#3a5573}
+  td{border-bottom:1px solid #eef2f6;padding:5px 8px;font-size:11.5px}
+  .orta{text-align:center} .sag{text-align:right} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;
+    border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .not{font-size:11px;color:var(--muted);line-height:1.55;padding:8px 10px;
+    background:#f8fafc;border-top:1px solid var(--line2)}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+    border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .aciklama{max-width:1400px;margin:12px auto;color:#6b7a8b;font-size:11.5px;line-height:1.7}
+  .aciklama h4{color:var(--ink);margin:0 0 6px}
+  .aciklama li{margin-bottom:5px}
+  /* Dilatasyon sayacı: kalan süre ÇUBUKLA da gösterilir - "12 dk kaldı"
+     yazısını okumak için panoya yaklaşmak gerekiyor, çubuk uzaktan okunur. */
+  .sayac{display:flex;align-items:center;gap:6px}
+  .cubuk{flex:1;height:6px;border-radius:3px;background:#eceff2;overflow:hidden;min-width:60px}
+  .cubuk i{display:block;height:100%;background:#6a3fb5}
+  .cubuk.hazir i{background:#3f9a5e}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📊 Göz Ünite Panosu
+    <span class="sp">Göz › Ünite Akışı · 03.09.2026 10:12 · 30 sn'de bir yenilenir</span></div>
+
+  <div class="toolbar">
+    <div class="btn ok">📢 Sıradakini Çağır</div>
+    <div class="btn primary">➡ İstasyona Al</div>
+    <div class="btn">💧 Dilatasyon Başlat</div>
+    <div class="btn">🚪 Oda / Cihaz Ata</div>
+    <div class="sepv"></div>
+    <div class="btn">👁 Muayeneyi Aç</div>
+    <div class="btn">📷 Görüntüleme İstemi</div>
+    <div class="btn pas">✖ Ziyareti Kapat</div>
+    <div class="sp"></div>
+    <div class="btn">🖥 Bekleme Ekranı</div>
+    <div class="btn">🖨 Gün Özeti</div>
+  </div>
+
+  <div class="serit">
+    <span class="chip on">Bugün</span>
+    <span class="chip">Bekleyen (22)</span>
+    <span class="chip">Dilatasyonda (4)</span>
+    <span class="chip">Geciken (3)</span>
+    <span class="chip">Acil (1)</span>
+    <span class="sepv"></span>
+    <span class="chip">👨‍⚕️ Hekim ▾</span>
+    <span class="chip">🏥 Ünite: Göz 1 ▾</span>
+    <span class="chip">🕐 Vardiya 08:00–16:00</span>
+  </div>
+
+  <!-- ==================================================== ÖZET SAYAÇLARI -->
+  <div class="ozet">
+    <div class="k"><div class="b">BUGÜN HASTA</div><div class="d">34</div>
+      <div class="a">12 tamamlandı</div></div>
+    <div class="k"><div class="b">ÜNİTEDE</div><div class="d">22</div>
+      <div class="a">5 kabul · 6 ön tetkik · 9 muayene</div></div>
+    <div class="k uy"><div class="b">ORT. BEKLEME</div><div class="d">18 dk</div>
+      <div class="a">hedef ≤ 15 dk</div></div>
+    <div class="k teh"><div class="b">EN UZUN BEKLEME</div><div class="d">31 dk</div>
+      <div class="a">Mehmet Kaya · görüntüleme</div></div>
+    <div class="k"><div class="b">DİLATASYONDA</div><div class="d">4</div>
+      <div class="a">2 hazır · 2 bekliyor</div></div>
+    <div class="k teh"><div class="b">DARBOĞAZ</div><div class="d">Görüntüleme</div>
+      <div class="a">HFA sırası 4 kişi · tek cihaz</div></div>
+    <div class="k iyi"><div class="b">ORT. ZİYARET</div><div class="d">68 dk</div>
+      <div class="a">kabul → karar</div></div>
+  </div>
+
+  <!-- ========================================================== KANBAN -->
+  <div class="kanban">
+    <div class="kol"><div class="kb">1 · Kabul <span class="sp">5</span></div>
+      <div class="ic">
+        <div class="is"><b>Ayşe Yılmaz · 39 K</b>Rutin muayene · Dr. Aksoy
+          <span class="sonuk">09:40 · randevulu · 6 dk</span></div>
+        <div class="is"><b>Nur Gül · 34 K</b>Gözlük kontrol · Dr. Yalçın
+          <span class="sonuk">10:00 · randevusuz · 2 dk</span></div>
+        <div class="is"><b>Emre Tan · 8 E</b><span class="rz mor">çocuk · şaşılık</span>
+          <span class="sonuk">10:05 · refakatçi ile</span></div>
+      </div>
+    </div>
+
+    <div class="kol dolu"><div class="kb">2 · Ön tetkik <span class="sp">6</span></div>
+      <div class="ic">
+        <div class="is simdi"><b>Mehmet Kaya · 58 E</b>Otoref ✔ · Tonometri ✔
+          <span class="sonuk">Tekn. Z. Ak · <span class="rz sari">GİB 26/24</span></span></div>
+        <div class="is"><b>Fatma Demir · 63 K</b>Otoref ✔ · Tonometri —
+          <span class="sonuk">DM · yıllık DR taraması · 6 dk</span></div>
+        <div class="is gecikti"><b>Kerem Us · 45 E</b>Pakimetri sırada
+          <span class="sonuk">24 dk bekliyor · tek otoref cihazı</span></div>
+      </div>
+    </div>
+
+    <div class="kol"><div class="kb">3 · Dilatasyon <span class="sp">4</span></div>
+      <div class="ic">
+        <div class="is"><b>Ali Vural · 71 E</b>Tropikamid · 09:55
+          <div class="sayac"><span class="rz ok">hazır</span>
+            <span class="cubuk hazir"><i style="width:100%"></i></span></div></div>
+        <div class="is"><b>Kerem Us · 45 E</b>Tropikamid · 10:05
+          <div class="sayac"><span class="sonuk">13 dk</span>
+            <span class="cubuk"><i style="width:35%"></i></span></div></div>
+        <div class="is"><b>Sema Ün · 66 K</b>Siklopentolat · 10:08
+          <div class="sayac"><span class="sonuk">17 dk</span>
+            <span class="cubuk"><i style="width:15%"></i></span></div></div>
+      </div>
+    </div>
+
+    <div class="kol dolu"><div class="kb">4 · Hekim muayenesi <span class="sp">9</span></div>
+      <div class="ic">
+        <div class="is simdi"><b>Selin Ar · 27 K</b>Dr. Aksoy · Oda 1
+          <span class="sonuk">muayenede 8 dk · kırmızı göz</span></div>
+        <div class="is"><b>Zeynep Ak · 44 K</b>Dr. Aksoy · sırada
+          <span class="sonuk">otoref −2,25 / −2,00 · GİB 15/16</span></div>
+        <div class="is"><b>Ali Vural · 71 E</b>Dr. Çelik (retina)
+          <span class="sonuk"><span class="rz mor">dilate hazır</span> AMD takip</span></div>
+      </div>
+    </div>
+
+    <div class="kol dolu"><div class="kb">5 · Görüntüleme <span class="sp">4</span></div>
+      <div class="ic">
+        <div class="is simdi"><b>Ali Vural · 71 E</b>OCT makula + FAF
+          <span class="sonuk">OCT-1 · çekiliyor</span></div>
+        <div class="is gecikti"><b>Mehmet Kaya · 58 E</b>Görme alanı 24-2
+          <span class="sonuk">HFA sırada · <span class="rz kir">31 dk</span></span></div>
+        <div class="is"><b>Hasan Öz · 63 E</b>Biyometri (IOL) — OS
+          <span class="sonuk">IOLMaster · sırada</span></div>
+      </div>
+    </div>
+
+    <div class="kol"><div class="kb">6 · Karar / işlem <span class="sp">3</span></div>
+      <div class="ic">
+        <div class="is"><b>Ali Vural · 71 E</b><span class="rz kir">Anti-VEGF OD</span>
+          <span class="sonuk">4. doz · onam ✔ · 11:30</span></div>
+        <div class="is"><b>Fatma Demir · 63 K</b>Gözlük reçetesi + 6 ay kontrol
+          <span class="sonuk">optik: e-reçete</span></div>
+        <div class="is"><b>Hasan Öz · 63 E</b>OS katarakt ameliyat planı
+          <span class="sonuk">10.09 · fako + IOL</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="not">
+    <b>Sütun istasyon, kart hasta.</b> Göz ünitesinde hasta bir ziyarette beş altı
+    istasyondan geçiyor; düz liste "kim nerede takıldı" sorusunu ancak sıralayıp sayarak
+    cevaplıyor, sütun doğrudan gösteriyor. <b>Dilatasyon ayrı sütun:</b> hasta o sırada
+    hiçbir odayı işgal etmiyor ama sırayı da bırakmıyor — muayene sütununda görünseydi
+    hekim onu "bekleyen hasta" sanır, kabulde görünseydi damla unutulurdu.
+  </div>
+
+  <div class="iki">
+    <div class="grp">
+      <h4>Oda ve cihaz doluluğu <span class="mini">darboğaz burada görünür</span></h4>
+      <table>
+        <thead><tr><th>Kaynak</th><th>Kim</th><th>İş</th><th class="orta">Süre</th>
+          <th class="orta">Sıra</th></tr></thead>
+        <tbody>
+          <tr><td>Oda 1 · Dr. Aksoy</td><td>Selin Ar</td><td>Muayene</td>
+              <td class="orta">8 dk</td><td class="orta">4</td></tr>
+          <tr><td>Oda 2 · Dr. Yalçın</td><td class="sonuk">—</td><td class="sonuk">boş · hekim vizitte</td>
+              <td class="orta">—</td><td class="orta">3</td></tr>
+          <tr><td>Oda 3 · Dr. Çelik</td><td>Ali Vural</td><td>Retina değerlendirme</td>
+              <td class="orta">3 dk</td><td class="orta">2</td></tr>
+          <tr><td>OCT-1</td><td>Ali Vural</td><td>OCT makula + FAF</td>
+              <td class="orta">2 dk</td><td class="orta">1</td></tr>
+          <tr><td><b>HFA (görme alanı)</b></td><td>Mehmet Kaya</td>
+              <td>24-2 · <span class="rz kir">tek cihaz</span></td>
+              <td class="orta">—</td><td class="orta"><span class="rz kir">4</span></td></tr>
+          <tr><td>Otoref / tonometri</td><td>Tekn. Z. Ak</td><td>Ön tetkik</td>
+              <td class="orta">4 dk</td><td class="orta"><span class="rz sari">6</span></td></tr>
+          <tr><td>Enjeksiyon odası</td><td class="sonuk">—</td>
+              <td class="sonuk">11:30 · Anti-VEGF (Ali Vural)</td>
+              <td class="orta">—</td><td class="orta">1</td></tr>
+        </tbody>
+      </table>
+      <div class="not">Pano <b>kaynağı</b> gösteriyor, hastayı değil: bekleme çoğu zaman
+        hekimden değil <b>tek cihazdan</b> doğuyor. "Bugün neden geç kaldık" sorusunun
+        cevabı bu tabloda — HFA sırası dört kişiyken muayene odası boş duruyor.</div>
+    </div>
+
+    <div class="grp">
+      <h4>Hekim yükü <span class="mini">vardiya boyunca</span></h4>
+      <table>
+        <thead><tr><th>Hekim</th><th class="orta">Tamam</th><th class="orta">Bekleyen</th>
+          <th class="orta">Ort. muayene</th><th class="orta">Gecikme</th><th>Not</th></tr></thead>
+        <tbody>
+          <tr><td>Dr. Aksoy</td><td class="orta">7</td><td class="orta">4</td>
+              <td class="orta">9 dk</td><td class="orta"><span class="rz sari">+12 dk</span></td>
+              <td class="sonuk">2 postop kontrol</td></tr>
+          <tr><td>Dr. Yalçın</td><td class="orta">3</td><td class="orta">3</td>
+              <td class="orta">11 dk</td><td class="orta"><span class="rz ok">zamanında</span></td>
+              <td class="sonuk">refraktif değerlendirme</td></tr>
+          <tr><td>Dr. Çelik (retina)</td><td class="orta">2</td><td class="orta">2</td>
+              <td class="orta">16 dk</td><td class="orta"><span class="rz sari">+8 dk</span></td>
+              <td class="sonuk">dilatasyon bağımlı</td></tr>
+          <tr><td>Tekn. Z. Ak</td><td class="orta">14</td><td class="orta">6</td>
+              <td class="orta">4 dk</td><td class="orta"><span class="rz kir">sıra uzuyor</span></td>
+              <td class="sonuk">tek ön tetkik istasyonu</td></tr>
+        </tbody>
+      </table>
+      <div class="not"><b>Tekniker de bu tabloda:</b> ön tetkik ünitenin girişidir ve
+        tıkanırsa hekim odası boş kalır. Yalnız hekim sayılsaydı, panonun söylediği
+        "hekimler yavaş" olurdu — oysa sıra girişte.</div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>34 hasta · 22 ünitede · ort. ziyaret 68 dk</span><span>·</span>
+    <span>Kaynak: <code>v_goz_unite_akis</code> (belge + <code>goz_ziyaret_istasyon</code>)</span>
+    <span class="sp">Saatler Merkez şubesinin saat diliminde · pano 30 sn'de bir yenilenir</span>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Göz Ünite Panosu — tasarım notları</h4>
+  Hasta listesi "kim var" sorusunu, pano <b>"ünite tıkalı mı, nerede"</b> sorusunu
+  cevaplıyor. İkisi aynı veriyi (<code>v_goz_unite_akis</code>) okuyor; ayrı olmalarının
+  sebebi soru farkı.
+  <ul>
+    <li><b>Sütun istasyon, kart hasta.</b> Bir ziyarette beş altı istasyon var; düz liste
+        "nerede takıldı"yı ancak sıralayıp sayarak söyler.</li>
+    <li><b>Dilatasyon kendi sütununda.</b> Damla damlatılan hasta hiçbir odayı işgal
+        etmez ama sıradan da düşmez; sayaç kart üstünde çubukla görünür — pano uzaktan
+        okunuyor, "13 dk kaldı" yazısını okumak için yaklaşmak gerekir.</li>
+    <li><b>Darboğaz kutusu tahmin değil, ölçüm:</b> en uzun bekleyen kaynağın adı yazılır
+        (HFA sırası 4 kişi). "Ünite yoğun" demek kimseye bir şey yaptırmaz; "tek görme
+        alanı cihazı tıkalı" ikinci cihazı ya da randevu aralığını gündeme getirir.</li>
+    <li><b>Oda/cihaz tablosu hastayı değil KAYNAĞI sayar.</b> Bekleme çoğu zaman hekimden
+        değil tek cihazdan doğuyor; hasta bazlı bakan pano bunu gizler.</li>
+    <li><b>Tekniker hekim tablosunda.</b> Ön tetkik ünitenin girişi; tıkanırsa hekim odası
+        boş kalır. Yalnız hekim sayan pano "hekimler yavaş" der, oysa sıra girişte.</li>
+    <li><b>Pano yazmaz, taşır:</b> düğmeler hastayı bir sonraki istasyona alır, dilatasyon
+        başlatır, oda/cihaz atar. Klinik kayıt (ölçüm, tanı, işlem) kendi kartında
+        girilir — panoya form koymak, ayakta doldurulan yarım kayıtlar üretirdi.</li>
+    <li><b>30 saniyede bir yenilenir</b> ve yenileme sayacı başlıkta durur: panoya bakan
+        kişi verinin ne kadar taze olduğunu bilmeden sıraya güvenemez.</li>
+  </ul>
+</div>
+
+</body>
+</html>

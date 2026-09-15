@@ -107,7 +107,11 @@ public sealed partial class KartDeposu
             var kolon = ad == "__sube_id" ? "sube_id" : tanim.Alan(ad)?.Kolon;
             if (kolon is null) continue;
             kolonlar.Add(kolon);
-            yerTutucular.Add("@p" + parametreler.Count.ToString(CultureInfo.InvariantCulture));
+            // JSONB KOLONU CAST ISTER: parametre metin olarak gider ve PG
+            //   "column is of type jsonb but expression is of type text" der.
+            //   Tip katalogdan biliniyor - kolonun gercek tipini sormaya gerek yok.
+            yerTutucular.Add("@p" + parametreler.Count.ToString(CultureInfo.InvariantCulture)
+                             + (tanim.Alan(ad)?.Tip == "json" ? "::jsonb" : ""));
             parametreler.Add(deger);
         }
 
@@ -208,9 +212,12 @@ public sealed partial class KartDeposu
 
             foreach (var (ad, deger) in degerler)
             {
-                var kolon = tanim.Alan(ad)?.Kolon;
+                var alan = tanim.Alan(ad);
+                var kolon = alan?.Kolon;
                 if (kolon is null) continue;
-                atamalar.Add($"{kolon} = @p{parametreler.Count.ToString(CultureInfo.InvariantCulture)}");
+                // jsonb: bkz. EkleAsync - metin parametre cast'siz gecmiyor.
+                var cast = alan?.Tip == "json" ? "::jsonb" : "";
+                atamalar.Add($"{kolon} = @p{parametreler.Count.ToString(CultureInfo.InvariantCulture)}{cast}");
                 parametreler.Add(deger);
             }
 

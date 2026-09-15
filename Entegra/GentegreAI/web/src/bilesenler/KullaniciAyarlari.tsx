@@ -7,6 +7,7 @@ import { LISTELER, modulAcikMi } from '../sayfalar/listeTanimlari';
 import { modUyar } from '../api/sozlesme';
 import { TEMA_ADI, TEMA_IKON, temaUygula, type Tema } from './tema';
 import { tarihSaat } from './bicim';
+import { cihazAdi } from './cihazAdi';
 import { DILLER } from './diller';
 import { Bayrak } from './Bayrak';
 import { telefonAyir, telefonBirlestir, ulkeEtiketi, ULKE_KODLARI } from './telefon';
@@ -661,20 +662,6 @@ function Guvenlik({ ayar, c, ad }: {
   );
 }
 
-/** "Mozilla/5.0 (Windows NT 10.0…) … Chrome/…" → "Chrome · Windows". */
-function cihazAdi(istemci: string): string {
-  if (!istemci) return 'Bilinmeyen cihaz';
-  const tarayici = /Edg\//.test(istemci) ? 'Edge'
-    : /Chrome\//.test(istemci) ? 'Chrome'
-    : /Firefox\//.test(istemci) ? 'Firefox'
-    : /Safari\//.test(istemci) ? 'Safari' : 'Tarayıcı';
-  const isletim = /Android/.test(istemci) ? 'Android'
-    : /iPhone|iPad/.test(istemci) ? 'iOS'
-    : /Windows/.test(istemci) ? 'Windows'
-    : /Mac OS/.test(istemci) ? 'macOS'
-    : /Linux/.test(istemci) ? 'Linux' : '';
-  return isletim ? `${tarayici} · ${isletim}` : tarayici;
-}
 
 /* ====================================================== BİLDİRİMLER ==== */
 

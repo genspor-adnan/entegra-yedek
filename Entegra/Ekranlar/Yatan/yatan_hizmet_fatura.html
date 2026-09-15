@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yatan Hasta Hizmet İcmali ve Fatura — Mockup (Gentegre AI · Yatan Hasta)</title>
+<link rel="stylesheet" href="_yatan.css">
+<style>
+  .serit-kimlik{display:flex;gap:18px;align-items:center;padding:9px 12px;
+    background:#fbfcfe;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit-kimlik .ad{font-size:14px;font-weight:bold;color:var(--navy)}
+  .serit-kimlik .kv{display:flex;flex-direction:column;gap:1px}
+  .serit-kimlik .kv span{font-size:10.5px;color:var(--muted)}
+  .serit-kimlik .kv b{font-size:12px}
+  tr.grup td{background:#f4f7fb;font-weight:bold;color:#2c4a6b}
+  tr.toplam td{background:#eef3f9;font-weight:bold;border-top:2px solid var(--line)}
+  .dip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line2);
+    border-top:1px solid var(--line)}
+  .dip .k{background:#fff;padding:9px 12px}
+  .dip .b{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .dip .d{font-size:17px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .dip .a{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .dip .k.uy .d{color:var(--uyari)}
+  .dip .k.teh .d{color:var(--kirmizi)}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🧾 Yatan Hasta Hizmet İcmali
+    <span class="sp">Yatan Hasta › Faturalama · Y-2026-0417 · 09–15.09.2026</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🧾</span> Fatura Oluştur</div>
+    <div class="btn"><span>＋</span> Hizmet Ekle</div>
+    <div class="btn"><span>✎</span> Satır Düzelt</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🔗</span> Medula'ya Gönder</div>
+    <div class="btn"><span>📑</span> Paket Kontrolü</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>💰</span> Tahsilat Al</div>
+    <div class="sp"></div>
+    <div class="btn"><span>⬇</span> Excel</div>
+    <div class="btn"><span>🖨</span> İcmal Yazdır</div>
+  </div>
+
+  <div class="serit-kimlik">
+    <div class="ad">Mehmet YILMAZ</div>
+    <div class="kv"><span>Dosya</span><b>Y-2026-0417</b></div>
+    <div class="kv"><span>Yatış – çıkış</span><b>09.09 14:20 – 15.09 16:00 · 6 gün</b></div>
+    <div class="kv"><span>Klinik</span><b>Dahiliye · Dr. Osman AKAR</b></div>
+    <div class="kv"><span>Ödeyen</span><b>SGK · takip 2026091412345</b></div>
+    <div class="kv"><span>Çıkış tanısı</span><b>J18.9 Pnömoni</b></div>
+  </div>
+
+  <div class="serit">
+    <div class="kutu combo">📦 Gruplama: <b>Hizmet türü</b></div>
+    <div class="kutu combo">🏛 Ödeyen: <b>SGK</b></div>
+    <span class="cip on">Tümü</span>
+    <span class="cip">Faturalanmamış</span>
+    <span class="cip">Kapsam dışı</span>
+    <span class="cip">Pakete dahil</span>
+  </div>
+
+  <div class="dg">
+    <table>
+      <thead>
+        <tr>
+          <th>Tarih</th><th>Hizmet / Malzeme</th><th>SUT</th>
+          <th class="orta">Adet</th><th class="sag">Birim</th><th class="sag">Tutar</th>
+          <th class="sag">SGK</th><th class="sag">Hasta payı</th>
+          <th>Kaynak</th><th class="orta">Durum</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="grup"><td colspan="10">YATAK VE REFAKAT</td></tr>
+        <tr><td>09–11.09</td><td>Yatak ücreti · çift kişilik</td><td class="sonuk">P552010</td>
+            <td class="orta">2</td><td class="sag">620,00</td><td class="sag">1.240,00</td>
+            <td class="sag">1.240,00</td><td class="sag">—</td>
+            <td class="sonuk">gün sonu</td><td class="orta"><span class="rz ok">Tahakkuk</span></td></tr>
+        <tr><td>11–15.09</td><td>Yatak ücreti · tek kişilik (izolasyon)</td><td class="sonuk">P552020</td>
+            <td class="orta">4</td><td class="sag">850,00</td><td class="sag">3.400,00</td>
+            <td class="sag">2.480,00</td><td class="sag">920,00</td>
+            <td class="sonuk">gün sonu</td><td class="orta"><span class="rz sari">Fark var</span></td></tr>
+        <tr><td>09–15.09</td><td>Refakatçi</td><td class="sonuk">—</td>
+            <td class="orta">6</td><td class="sag">150,00</td><td class="sag">900,00</td>
+            <td class="sag">—</td><td class="sag">900,00</td>
+            <td class="sonuk">gün sonu</td><td class="orta"><span class="rz">Kapsam dışı</span></td></tr>
+
+        <tr class="grup"><td colspan="10">HEKİM HİZMETLERİ</td></tr>
+        <tr><td>09.09</td><td>Yatan hasta ilk muayenesi</td><td class="sonuk">520030</td>
+            <td class="orta">1</td><td class="sag">420,00</td><td class="sag">420,00</td>
+            <td class="sag">420,00</td><td class="sag">—</td>
+            <td class="sonuk">yatış kabul</td><td class="orta"><span class="rz ok">Tahakkuk</span></td></tr>
+        <tr><td>10–15.09</td><td>Günlük vizit</td><td class="sonuk">520040</td>
+            <td class="orta">5</td><td class="sag">420,00</td><td class="sag">2.100,00</td>
+            <td class="sag">2.100,00</td><td class="sag">—</td>
+            <td class="sonuk">vizit kaydı</td><td class="orta"><span class="rz ok">Tahakkuk</span></td></tr>
+
+        <tr class="grup"><td colspan="10">LABORATUVAR VE GÖRÜNTÜLEME</td></tr>
+        <tr><td>09–14.09</td><td>Biyokimya / hemogram (9 tetkik)</td><td class="sonuk">çeşitli</td>
+            <td class="orta">9</td><td class="sag">—</td><td class="sag">1.685,00</td>
+            <td class="sag">1.685,00</td><td class="sag">—</td>
+            <td class="sonuk">lab istemi</td><td class="orta"><span class="rz ok">Tahakkuk</span></td></tr>
+        <tr><td>11.09</td><td>Toraks BT (kontrastsız)</td><td class="sonuk">804490</td>
+            <td class="orta">1</td><td class="sag">1.150,00</td><td class="sag">1.150,00</td>
+            <td class="sag">1.150,00</td><td class="sag">—</td>
+            <td class="sonuk">radyoloji istemi</td><td class="orta"><span class="rz ok">Tahakkuk</span></td></tr>
+
+        <tr class="grup"><td colspan="10">İLAÇ VE SARF</td></tr>
+        <tr><td>10–15.09</td><td>Seftriakson 1 g flakon</td><td class="sonuk">—</td>
+            <td class="orta">12</td><td class="sag">38,50</td><td class="sag">462,00</td>
+            <td class="sag">462,00</td><td class="sag">—</td>
+            <td class="sonuk">ilaç uygulama · karekod</td><td class="orta"><span class="rz sari">Faturalanmadı</span></td></tr>
+        <tr><td>09–15.09</td><td>Serum seti · branül · enjektör</td><td class="sonuk">—</td>
+            <td class="orta">19</td><td class="sag">—</td><td class="sag">778,00</td>
+            <td class="sag">778,00</td><td class="sag">—</td>
+            <td class="sonuk">sarf düşümü</td><td class="orta"><span class="rz sari">Faturalanmadı</span></td></tr>
+
+        <tr class="toplam">
+          <td colspan="5">TOPLAM</td>
+          <td class="sag">12.135,00</td><td class="sag">10.315,00</td><td class="sag">1.820,00</td>
+          <td colspan="2"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="dip">
+    <div class="k"><div class="b">Hizmet toplamı</div><div class="d">12.135,00 ₺</div>
+      <div class="a">42 satır · 6 gün</div></div>
+    <div class="k"><div class="b">Kurum (SGK)</div><div class="d">10.315,00 ₺</div>
+      <div class="a">%85 · takip no ile</div></div>
+    <div class="k uy"><div class="b">Hasta payı</div><div class="d">1.820,00 ₺</div>
+      <div class="a">oda farkı 920 · refakat 900</div></div>
+    <div class="k teh"><div class="b">Faturalanmamış</div><div class="d">1.240,00 ₺</div>
+      <div class="a">2 satır · ilaç ve sarf</div></div>
+  </div>
+
+  <div class="not">
+    <b>Satırlar elle girilmez, düşer:</b> yatak ücreti gün sonu işinden, ilaç uygulama
+    kaydından (karekodla), tetkik istemden, sarf stok düşümünden. Elle giriş açık
+    bırakılsaydı aynı kalem hem otomatik hem elle iki kez faturalanırdı — yatan hastada
+    en sık görülen fatura hatası budur.
+  </div>
+
+  <div class="iki">
+    <div>
+      <div class="grp">
+        <h4>Paket ve kapsam kontrolü <span class="mini">fatura öncesi</span></h4>
+        <div class="ic">
+          <div class="sat"><span>Tanı paketi</span><b>J18 pnömoni · <b>paket yok</b> · hizmet bazlı</b></div>
+          <div class="sat"><span>Oda farkı</span><b><span class="rz sari">920,00 ₺</span> tek kişilik · hasta payı</b></div>
+          <div class="sat"><span>Refakatçi</span><b><span class="rz">kapsam dışı</span> 900,00 ₺</b></div>
+          <div class="sat"><span>Kapsam dışı tetkik</span><b>yok</b></div>
+          <div class="sat"><span>Provizyon aşımı</span><b>yok · takip açık</b></div>
+        </div>
+        <div class="not"><b>Oda farkı ve refakat hasta payıdır ve önceden bilinmeli:</b>
+          taburcu gününde öğrenilen 1.820 ₺, tahsil edilemeyen 1.820 ₺'dir. Yatış kabul
+          ekranı bu iki kalemi yatışta gösterir.</div>
+      </div>
+    </div>
+    <div>
+      <div class="grp">
+        <h4>Fatura ve tahsilat</h4>
+        <div class="ic">
+          <div class="sat"><span>Kurum faturası</span><b>Medula'ya gönderilecek · dönem 09/2026</b></div>
+          <div class="sat"><span>Hasta faturası</span><b>1.820,00 ₺ · vezne</b></div>
+          <div class="sat"><span>Tahsil edilen</span><b>0,00 ₺</b></div>
+          <div class="sat"><span>Kalan</span><b>1.820,00 ₺</b></div>
+          <div class="sat"><span>Provizyon kapanışı</span><b>çıkış bildirimiyle</b></div>
+        </div>
+        <div class="not"><b>Fatura taburcuyu beklemez, kapanış bekler:</b> uzun yatışta
+          aylık dönem faturası kesilir (Medula dönem provizyonu). On günlük yatışta her
+          şeyi son güne bırakmak, ay sonunu kaçırmak demektir.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="uyari sari">
+    <span>⚠</span>
+    <div><b>Faturalanmamış iki satır var</b> (ilaç ve sarf · 1.240,00 ₺). Fatura bunlar
+      olmadan kesilirse kalemler <b>hiçbir zaman</b> faturalanmaz: yatış kapandıktan sonra
+      satır eklemek, kapalı belgeyi yeniden açmayı gerektirir. Fatura oluşturma bu satırları
+      önce icmale çeker.</div>
+  </div>
+
+  <div class="statusbar">
+    <span>Y-2026-0417 · 42 satır · 6 gün</span><span>·</span>
+    <span>Tutarlar <b>Merkez</b> şubesinin para biriminde (₺)</span><span>·</span>
+    <span>Fatura ve tahsilat ISLEMLOG'a yazılır</span>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Yatan Hasta Hizmet İcmali — tasarım notları</h4>
+  Yatan hastanın faturası, ayaktan hastanınkinden iki noktada ayrılır: <b>gün bazlı
+  tekrar eden kalemler</b> (yatak, refakat, vizit) ve <b>uzun süreye yayılan tahakkuk</b>.
+  <ul>
+    <li><b>Yatak ücreti gün sonu işinde birikir</b>, taburcuda toplu hesaplanmaz: on
+        günlük yatışta fatura son gün üretilseydi ara provizyon, iskonto ve paket
+        kontrolü hep geç kalırdı. Taburcu yalnız kapanıştır.</li>
+    <li><b>Yatak hareketleri ücreti böler:</b> iki gün çift kişilik, dört gün tek
+        kişilik — üç ayrı satır. <code>yatis_yatak</code> geçmişi olmasaydı bu hesap
+        yapılamazdı.</li>
+    <li><b>Satırlar kaynaklarından düşer, elle girilmez:</b> elle giriş aynı kalemi iki
+        kez faturalamanın en kısa yolu. "Kaynak" kolonu her satırın nereden geldiğini
+        söyler.</li>
+    <li><b>Hasta payı yatışta bilinmeli:</b> oda farkı ve refakat taburcu gününde
+        öğrenilirse tahsil edilemez.</li>
+    <li><b>Faturalanmamış satır uyarısı:</b> yatış kapandıktan sonra satır eklemek kapalı
+        belgeyi açmayı gerektirir — fatura oluşturma önce bunları icmale çeker.</li>
+    <li><b>Uzun yatışta dönem faturası:</b> fatura taburcuyu değil kapanışı bekler.</li>
+  </ul>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yatış Kabul — Mockup (Gentegre AI · Yatan Hasta)</title>
+<link rel="stylesheet" href="_yatan.css">
+<style>
+  .adimlar{display:flex;gap:0;background:var(--head);border-bottom:1px solid var(--line)}
+  .adim{flex:1;padding:7px 10px;font-size:11.5px;color:var(--muted);text-align:center;
+    border-right:1px solid var(--line2)}
+  .adim:last-child{border-right:none}
+  .adim.on{background:#fff;color:var(--navy);font-weight:bold}
+  .adim.bitti{color:#2e7d46}
+  .adim b{display:block;font-size:10.5px;font-weight:normal;opacity:.8}
+
+  /* Yatak secimi: combo DEGIL kutu dizisi - "hangi yatak" sorusu, oda
+     kurallariyla birlikte cevaplanir; acilir listede kural gorunmez. */
+  .yataklar{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:6px;padding:0 12px 12px}
+  .yk{border:1px solid var(--line);border-radius:4px;background:#fff;padding:6px 8px;font-size:11.5px}
+  .yk .kod{font-family:Consolas,monospace;font-weight:bold;color:var(--navy)}
+  .yk .alt{color:var(--muted);font-size:10.5px;margin-top:2px}
+  .yk.secili{border-color:#2f6db3;background:#eef4fc;box-shadow:inset 0 0 0 1px #2f6db3}
+  .yk.olmaz{background:#f5f6f8;color:#9aa7b4}
+  .yk.olmaz .kod{color:#9aa7b4}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🛏 Yatış Kabul
+    <span class="sp">Yatan Hasta › Yatış Kabul · başvurudan "Yatışa Çevir" ile de açılır</span></div>
+
+  <div class="adimlar">
+    <div class="adim bitti">✓ 1 · Hasta<b>kimlik doğrulandı</b></div>
+    <div class="adim on">2 · Klinik &amp; Yatak<b>servis, hekim, yatak</b></div>
+    <div class="adim">3 · Ödeyen &amp; Provizyon<b>Medula yatış takip</b></div>
+    <div class="adim">4 · Onay<b>bileklik · dosya</b></div>
+  </div>
+
+  <div class="alanlar dort">
+    <label>Hasta</label>
+    <div class="inp ro">Zeynep ACAR · 31 / K · TCKN 123******78 <span class="rz ok" style="margin-left:auto">doğrulandı</span></div>
+    <label>Kaynak başvuru</label>
+    <div class="inp ro">B-2026-14872 · 15.09 09:02 · Dahiliye poliklinik</div>
+
+    <label>Yatış türü</label>
+    <div class="inp combo">Normal yatış</div>
+    <label>Geliş şekli</label>
+    <div class="inp combo">Poliklinikten</div>
+
+    <label>Servis / klinik</label>
+    <div class="inp combo">Dahiliye</div>
+    <label>Sorumlu hekim</label>
+    <div class="inp combo">Dr. Murat TAŞ</div>
+
+    <label>Yatış tanısı</label>
+    <div class="inp combo">R50.9 · Ateş, tanımlanmamış</div>
+    <label>Tahmini çıkış</label>
+    <div class="inp">18.09.2026 <span class="sonuk" style="margin-left:auto">3 gün</span></div>
+
+    <label>Refakatçi</label>
+    <div class="inp">Hasan ACAR (eş) · TCKN 987******21</div>
+    <label>Refakatçi ücreti</label>
+    <div class="inp ro">150,00 ₺ / gün · odaya göre</div>
+  </div>
+
+  <div class="grp" style="margin-top:0">
+    <h4>Yatak seçimi <span class="mini">Dahiliye · uygun olanlar · kadın hasta</span></h4>
+  </div>
+  <div class="yataklar">
+    <div class="yk">
+      <div class="kod">A-305/1</div>
+      <div class="alt">çift kişilik · kadın odası<br>oda arkadaşı: — (boş oda)</div>
+    </div>
+    <div class="yk secili">
+      <div class="kod">A-305/2</div>
+      <div class="alt">çift kişilik · kadın odası<br><b>seçildi</b> · 850,00 ₺/gün</div>
+    </div>
+    <div class="yk">
+      <div class="kod">A-304/2</div>
+      <div class="alt">çift kişilik · cinsiyet serbest<br>ilk yatan kuralı kilitler</div>
+    </div>
+    <div class="yk olmaz">
+      <div class="kod">A-303/2</div>
+      <div class="alt">✗ erkek odası<br>cinsiyet kuralı</div>
+    </div>
+    <div class="yk olmaz">
+      <div class="kod">A-304/1</div>
+      <div class="alt">✗ temizlik bekliyor<br>14.09 16:30'dan beri</div>
+    </div>
+    <div class="yk olmaz">
+      <div class="kod">A-301/1</div>
+      <div class="alt">✗ damlacık izolasyon<br>izolasyon endikasyonu yok</div>
+    </div>
+  </div>
+
+  <div class="uyari mavi">
+    <span>ℹ</span>
+    <div><b>Uygun olmayan yataklar gizlenmez, sebebiyle gösterilir.</b> Listeden düşseydi
+      kabul memuru "yer yok" der ve telefonla servise sorardı; sebebi görünce
+      "temizlik bitsin" ya da "oda kuralını değiştir" diyebiliyor. Seçim yine de
+      engelli: gri kutular tıklanmaz.</div>
+  </div>
+
+  <div class="grp">
+    <h4>Ödeyen kurum &amp; provizyon <span class="mini">3. adımın önizlemesi</span></h4>
+    <div class="ic">
+      <div class="sat"><span>Ödeyen</span><b>SGK · Devredilen (SSK)</b></div>
+      <div class="sat"><span>Takip türü</span><b>Yatan hasta provizyonu</b></div>
+      <div class="sat"><span>Provizyon</span>
+        <b><span class="rz sari">alınacak</span> onayda "Provizyon Al" ile</b></div>
+      <div class="sat"><span>Yatış tarihi</span><b>15.09.2026 10:40</b></div>
+    </div>
+    <div class="not">
+      <b>Provizyon alınamazsa yatış engellenmez.</b> Acil vakada hastayı kapıda
+      bekletmek, mali riskten büyük bir risktir; provizyon rozeti listede kırmızı durur
+      ve fatura kapanmadan çözülmesi gerekir. Kural: <i>klinik karar mali kontrole
+      kilitlenmez</i>.
+    </div>
+  </div>
+
+  <div class="uyari sari">
+    <span>⚠</span>
+    <div><b>Aynı hastanın açık yatışı var mı?</b> Kontrol kaydetmeden önce çalışır:
+      kapanmamış bir yatışın üstüne ikinci yatış açmak, iki yatak ve iki fatura
+      demektir. Bulunursa "önceki yatışa dön" ya da "nakil olarak aç" seçenekleri
+      sunulur — sessizce ikinci kayıt açılmaz.</div>
+  </div>
+
+  <div class="malt">
+    <div class="btn">Vazgeç</div>
+    <div class="btn"><span>‹</span> Geri</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🖨</span> Yatış Dosyası Yazdır</div>
+    <div class="btn primary">İleri ›</div>
+  </div>
+</div>
+
+<!-- ================================================= ONAY ADIMI (4) ==== -->
+<div class="perde">
+  <div class="modal genis">
+    <div class="mb">🛏 Yatış Kabul · 4. adım <span class="sp">Zeynep ACAR · A-305/2</span></div>
+    <div class="alanlar dort">
+      <label>Dosya no</label><div class="inp ro">Y-2026-0424 <span class="sonuk" style="margin-left:auto">otomatik</span></div>
+      <label>Yatak</label><div class="inp ro">A-305/2 · çift kişilik · 850,00 ₺/gün</div>
+      <label>Kimlik bilekliği</label><div class="inp">☑ Yazdır · barkod Y-2026-0424</div>
+      <label>Yatış dosyası</label><div class="inp">☑ Kapak + onam formları</div>
+      <label>Bilgilendirilmiş onam</label><div class="inp combo">Yatış onamı · imzalandı</div>
+      <label>Değerli eşya</label><div class="inp">☐ Teslim alındı (tutanak)</div>
+    </div>
+    <div class="uyari mavi">
+      <span>🪪</span>
+      <div><b>Kimlik bilekliği yatışın ilk güvenlik adımıdır.</b> İlaç uygulaması,
+        numune alma ve kan transfüzyonu barkodu bu bileklikten okur; bileklik
+        yazdırılmadan hasta servise çıkarsa sonraki her doğrulama sözlü kalır.</div>
+    </div>
+    <div class="ic" style="padding:0 12px 12px">
+      <div class="sat"><span>Yapılacaklar</span><b>Yatak → dolu · Başvuru → yatışa bağlanır</b></div>
+      <div class="sat"><span></span><b>Yatak ücreti gün sonu işinde tahakkuk eder</b></div>
+      <div class="sat"><span></span><b>e-Nabız yatış bildirimi kuyruğa alınır</b></div>
+      <div class="sat"><span></span><b>Servise "yeni yatış" bildirimi düşer</b></div>
+    </div>
+    <div class="malt">
+      <div class="btn">Vazgeç</div>
+      <div class="btn"><span>‹</span> Geri</div>
+      <div class="sp"></div>
+      <div class="btn"><span>🔗</span> Provizyon Al</div>
+      <div class="btn primary">Yatışı Aç</div>
+    </div>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Yatış Kabul — tasarım notları</h4>
+  Yatış, başvurunun bir <b>sonraki durumu</b> değil, kendi kaydıdır; ama kaynağını
+  bırakmaz — başvuru numarası kartta durur ve ücretlendirme oradan yürür.
+  <ul>
+    <li><b>Dört adım, tek pencere değil:</b> yatış kabul masasında dört ayrı soru
+        sırayla cevaplanıyor ve üçüncüsü (provizyon) bazen dakikalar sürüyor. Tek
+        formda olsaydı, provizyon beklerken form açık kalır ve yatak kimseye
+        verilmezdi.</li>
+    <li><b>Yatak seçimi kutu dizisi, açılır liste değil:</b> "hangi yatak" sorusunun
+        cevabı oda kurallarıyla birlikte verilir. Açılır listede cinsiyet kuralı,
+        izolasyon ve oda arkadaşı görünmez.</li>
+    <li><b>Uygun olmayan yatak sebebiyle gösterilir</b> (gri, tıklanmaz): gizlenirse
+        kabul "yer yok" der, oysa sebep çoğu zaman çözülebilir bir şeydir.</li>
+    <li><b>Provizyon yatışı kilitlemez.</b> Klinik karar mali kontrole bağlanmaz;
+        eksik provizyon rozetle taşınır ve fatura kapanmadan çözülür.</li>
+    <li><b>Açık yatış kontrolü kaydetmeden önce:</b> kapanmamış yatışın üstüne ikinci
+        yatış, iki yatak ve iki fatura demektir.</li>
+    <li><b>Kimlik bilekliği adımın parçası:</b> sonraki bütün barkodlu doğrulamalar
+        (ilaç, numune, kan) ona dayanıyor.</li>
+  </ul>
+</div>
+
+</body>
+</html>

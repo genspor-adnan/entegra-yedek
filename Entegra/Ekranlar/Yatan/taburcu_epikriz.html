@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taburcu ve Epikriz — Mockup (Gentegre AI · Yatan Hasta)</title>
+<link rel="stylesheet" href="_yatan.css">
+<style>
+  .serit-kimlik{display:flex;gap:18px;align-items:center;padding:9px 12px;
+    background:#fbfcfe;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit-kimlik .ad{font-size:14px;font-weight:bold;color:var(--navy)}
+  .serit-kimlik .kv{display:flex;flex-direction:column;gap:1px}
+  .serit-kimlik .kv span{font-size:10.5px;color:var(--muted)}
+  .serit-kimlik .kv b{font-size:12px}
+  .yatak-kod{font-family:Consolas,monospace;font-weight:bold;color:var(--navy)}
+
+  /* KONTROL LİSTESİ: taburcu tek düğme değil, kapanmamış işlerin listesidir. */
+  .kontrol{background:#fff}
+  .kontrol .sat2{display:flex;align-items:center;gap:10px;padding:8px 12px;
+    border-bottom:1px solid #eef2f6;font-size:11.5px}
+  .kontrol .sat2:last-child{border-bottom:none}
+  .kontrol .ik{width:20px;text-align:center;font-size:13px}
+  .kontrol .ad2{flex:1}
+  .kontrol .ad2 small{display:block;color:var(--muted);font-size:10.5px;margin-top:1px}
+  .kontrol .sat2.tamam{background:#f6fbf8}
+  .kontrol .sat2.eksik{background:#fdf6e3}
+  .kontrol .sat2.engel{background:#fbe9e7}
+  .epikriz{background:#fff;padding:10px 12px}
+  .epikriz h5{margin:12px 0 4px;font-size:11.5px;color:#2c4a6b;text-transform:uppercase;
+    letter-spacing:.3px}
+  .epikriz h5:first-child{margin-top:0}
+  .epikriz .kutu2{border:1px solid var(--line2);border-radius:4px;background:#fbfcfd;
+    padding:8px 10px;font-size:11.5px;line-height:1.6;min-height:34px}
+  .epikriz .kutu2.taslak{background:#f7fbff;border-color:#cfe0f5}
+  .rozet-taslak{font-size:10px;color:#2f6db3;margin-left:6px;font-weight:normal}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🚪 Taburcu ve Epikriz
+    <span class="sp">Yatan Hasta › Taburcu · Mehmet YILMAZ · Y-2026-0417 · 6. gün</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>✓</span> Taburcu Et</div>
+    <div class="btn"><span>📅</span> Taburcu Planla</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>📝</span> Epikrizi Doldur</div>
+    <div class="btn"><span>💊</span> Çıkış Reçetesi</div>
+    <div class="btn"><span>📆</span> Kontrol Randevusu</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🖨</span> Epikriz Yazdır</div>
+  </div>
+
+  <div class="serit-kimlik">
+    <div class="ad">Mehmet YILMAZ</div>
+    <div class="kv"><span>Yatak</span><b class="yatak-kod">A-301/1</b></div>
+    <div class="kv"><span>Yatış – çıkış</span><b>09.09 14:20 – 15.09 16:00</b></div>
+    <div class="kv"><span>Yatış günü</span><b>6</b></div>
+    <div class="kv"><span>Hekim</span><b>Dr. Osman AKAR</b></div>
+    <div class="kv"><span>Ödeyen</span><b>SGK · provizyon açık</b></div>
+  </div>
+
+  <div class="alanlar dort">
+    <label>Çıkış şekli</label>
+    <div class="inp combo">Şifa ile taburcu</div>
+    <label>Çıkış zamanı</label>
+    <div class="inp">15.09.2026 16:00</div>
+
+    <label>Çıkış tanısı</label>
+    <div class="inp combo">J18.9 · Pnömoni, tanımlanmamış</div>
+    <label>Eşlik eden tanılar</label>
+    <div class="inp ro">I10 Hipertansiyon · E11.9 Tip 2 diyabet</div>
+  </div>
+
+  <div class="uyari mavi">
+    <span>ℹ</span>
+    <div><b>Çıkış şekli kod listesinden seçilir</b> (şifa · düzelme · sevk · kendi
+      isteğiyle · firar · ölüm · nakil), serbest metin değil. "Taburcu" yazan tek bir
+      alan, ölüm vakasını da taburcu gösterirdi; hem e-Nabız hem Medula hem de kurum
+      istatistiği bu ayrımı ister.</div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-sekme="kontrol">Çıkış Kontrolü <span class="rz kir">2</span></div>
+    <div class="sekme" data-sekme="epikriz">Epikriz</div>
+    <div class="sekme" data-sekme="recete">Çıkış Reçetesi &amp; Kontrol</div>
+    <div class="sekme" data-sekme="mali">Mali Kapanış</div>
+  </div>
+
+  <!-- ==================================================== ÇIKIŞ KONTROLÜ -->
+  <div class="pano kontrol" data-pano="kontrol">
+    <div class="sat2 tamam"><div class="ik">✓</div>
+      <div class="ad2">Aktif order'lar durduruldu
+        <small>7 order · antibiyotik 15.09 son doz verildi</small></div>
+      <div><span class="rz ok">tamam</span></div></div>
+
+    <div class="sat2 engel"><div class="ik">⛔</div>
+      <div class="ad2">Sonuç bekleyen tetkik
+        <small>Kan kültürü (14.09) — 48 saatlik üreme bekleniyor</small></div>
+      <div><span class="rz kir">taburcuyu engeller</span></div></div>
+
+    <div class="sat2 eksik"><div class="ik">⚠</div>
+      <div class="ad2">Yanıtlanmamış konsültasyon
+        <small>Göğüs Hastalıkları · 14.09 16:40'tan beri</small></div>
+      <div><span class="rz sari">hekim onayıyla geçilir</span></div></div>
+
+    <div class="sat2 tamam"><div class="ik">✓</div>
+      <div class="ad2">Epikriz yazıldı
+        <small>taslak hazır · e-imza bekliyor</small></div>
+      <div><span class="rz ok">tamam</span></div></div>
+
+    <div class="sat2 eksik"><div class="ik">⚠</div>
+      <div class="ad2">Faturalanmamış hizmet
+        <small>3 kalem · 1.240,00 ₺ (ilaç uygulamaları)</small></div>
+      <div><span class="rz sari">mali kapanışta</span></div></div>
+
+    <div class="sat2 tamam"><div class="ik">✓</div>
+      <div class="ad2">Refakatçi kaydı kapatıldı
+        <small>6 gün · ücret tahakkuk etti</small></div>
+      <div><span class="rz ok">tamam</span></div></div>
+
+    <div class="sat2 tamam"><div class="ik">✓</div>
+      <div class="ad2">Değerli eşya / kişisel dolap
+        <small>teslim kaydı yok — açılmadı</small></div>
+      <div><span class="rz pas">gerekmiyor</span></div></div>
+
+    <div class="not">
+      <b>Taburcu tek düğme değil, kapanmamış işlerin listesidir.</b> Ayrımı önemli:
+      <span class="rz kir">engel</span> olan madde (sonuç bekleyen kültür) taburcuyu
+      durdurur; <span class="rz sari">uyarı</span> olan madde hekim onayıyla geçilir ve
+      <b>kim geçti</b> kaydedilir. Hepsini engel yapmak, hekimi sistemi aşmaya iterdi;
+      hepsini uyarı yapmak kontrolü süse çevirirdi.
+    </div>
+  </div>
+
+  <!-- =========================================================== EPİKRİZ -->
+  <div class="pano epikriz" data-pano="epikriz" hidden>
+    <h5>Şikâyet ve hikâye</h5>
+    <div class="kutu2">Üç gündür süren ateş, öksürük ve nefes darlığı şikâyetiyle acil
+      servise başvurdu. Bilinen hipertansiyon ve tip 2 diyabet öyküsü var.</div>
+
+    <h5>Fizik muayene bulguları</h5>
+    <div class="kutu2">Genel durum orta, bilinç açık. Ateş 38,9 °C, TA 130/80, nabız 96,
+      SpO₂ %91. Sağ alt zonda raller.</div>
+
+    <h5>Tetkikler <span class="rozet-taslak">lab ve radyolojiden derlendi · hekim düzenleyebilir</span></h5>
+    <div class="kutu2 taslak">
+      11.09 Toraks BT: sağ alt lob konsolidasyon.<br>
+      09.09 CRP 186 mg/L → 14.09 CRP 42 mg/L.<br>
+      09.09 Lökosit 16.800 → 14.09 9.200.<br>
+      14.09 Kan kültürü: sonuç bekleniyor.
+    </div>
+
+    <h5>Tedavi ve klinik seyir</h5>
+    <div class="kutu2">Seftriakson 2×1 g IV ve klaritromisin 2×500 mg ile ampirik tedavi
+      başlandı. Klaritromisin 5. günde kesildi. Üçüncü günden itibaren ateş düştü,
+      oksijen ihtiyacı geriledi. Balgam kültüründe dirençli üreme üzerine 13.09'da
+      damlacık izolasyonuna alındı ve tek kişilik odaya nakledildi.</div>
+
+    <h5>Çıkış durumu</h5>
+    <div class="kutu2">Ateşsiz, oda havasında SpO₂ %95, mobilize. Şifa ile taburcu.</div>
+
+    <div class="not">
+      <b>Epikriz yatış boyunca birikir</b>, çıkış saatinde sıfırdan yazılmaz: altı günlük
+      seyri son anda hatırlamak, epikrizi "yatırıldı, tedavi edildi, taburcu edildi"
+      cümlesine indirger. Tetkik özeti lab ve radyoloji sonuçlarından <b>derlenmiş bir
+      taslaktır</b> — hekim onaylamadan epikrize girmiş sayılmaz.
+    </div>
+  </div>
+
+  <!-- ============================================ ÇIKIŞ REÇETESİ & KONTROL -->
+  <div class="pano" data-pano="recete" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr><th>İlaç</th><th>Doz / Yol</th><th>Süre</th><th>Kullanım notu</th>
+          <th class="orta">Kaynak</th></tr></thead>
+        <tbody>
+          <tr><td>Amoksisilin-klavulanat 1 g</td><td>2×1 · PO</td><td>5 gün</td>
+              <td>Tok karnına</td><td class="orta"><span class="rz mavi">yatış tedavisinin devamı</span></td></tr>
+          <tr><td>Asetilsistein 600 mg</td><td>1×1 · PO</td><td>10 gün</td>
+              <td>Bol su ile</td><td class="orta"><span class="rz mavi">yeni</span></td></tr>
+          <tr><td>Metformin 1000 mg</td><td>2×1 · PO</td><td>sürekli</td>
+              <td>Kendi ilacı, devam</td><td class="orta"><span class="rz pas">evde kullandığı</span></td></tr>
+          <tr><td>Perindopril 5 mg</td><td>1×1 · PO</td><td>sürekli</td>
+              <td>Kendi ilacı, devam</td><td class="orta"><span class="rz pas">evde kullandığı</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not">Çıkış reçetesi <b>evde kullandığı ilaçlarla birlikte</b> çıkar:
+      yalnız yeni yazılanları göstermek, hastanın metforminini kesip kesmediğini belirsiz
+      bırakır. Satırlar e-Reçeteye aktarılır.</div>
+
+    <div class="iki">
+      <div>
+        <div class="grp">
+          <h4>Kontrol ve öneriler</h4>
+          <div class="alanlar">
+            <label>Kontrol tarihi</label><div class="inp">25.09.2026</div>
+            <label>Kontrol bölümü</label><div class="inp combo">Göğüs Hastalıkları</div>
+            <label>Randevu</label><div class="inp ro">Otomatik açılacak · 25.09 10:20</div>
+            <label>Öneriler</label><div class="inp tam">Bol sıvı, sigara içilmemesi;
+              ateş tekrarında acile başvuru.</div>
+          </div>
+          <div class="not">Kontrol randevusu <b>taburcuyla birlikte açılır</b>: "on gün
+            sonra gelin" denip randevu verilmeyen hastanın yarısı gelmez.</div>
+        </div>
+      </div>
+      <div>
+        <div class="grp">
+          <h4>Bildirimler</h4>
+          <div class="ic">
+            <div class="sat"><span>e-Nabız taburcu bildirimi</span><b><span class="rz sari">kuyruğa alınacak</span></b></div>
+            <div class="sat"><span>e-Nabız yatış bildirimi</span><b><span class="rz ok">gönderildi</span> 09.09</b></div>
+            <div class="sat"><span>Medula çıkış</span><b><span class="rz sari">fatura ile</span></b></div>
+            <div class="sat"><span>Hasta portalı</span><b>epikriz + reçete yayımlanır</b></div>
+          </div>
+          <div class="not">Yatış ve taburcu bildirimi <b>iki ayrı gönderimdir</b>: biri
+            gitti diye öteki gitmiş sayılmaz.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================== MALİ KAPANIŞ -->
+  <div class="pano" data-pano="mali" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Kalem</th><th class="orta">Adet</th><th class="sag">Tutar</th>
+          <th class="orta">Durum</th></tr></thead>
+        <tbody>
+          <tr><td>Yatak ücreti · çift kişilik (09–11.09)</td><td class="orta">2</td>
+              <td class="sag">1.240,00</td><td class="orta"><span class="rz ok">Tahakkuk</span></td></tr>
+          <tr><td>Yatak ücreti · tek kişilik izolasyon (11–15.09)</td><td class="orta">4</td>
+              <td class="sag">3.400,00</td><td class="orta"><span class="rz ok">Tahakkuk</span></td></tr>
+          <tr><td>Refakatçi</td><td class="orta">6</td>
+              <td class="sag">900,00</td><td class="orta"><span class="rz ok">Tahakkuk</span></td></tr>
+          <tr><td>Yatan hasta muayenesi / vizit</td><td class="orta">6</td>
+              <td class="sag">2.520,00</td><td class="orta"><span class="rz ok">Tahakkuk</span></td></tr>
+          <tr><td>İlaç ve sarf (uygulama kayıtlarından)</td><td class="orta">31</td>
+              <td class="sag">1.240,00</td><td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+          <tr><td>Laboratuvar</td><td class="orta">9</td>
+              <td class="sag">1.685,00</td><td class="orta"><span class="rz ok">Tahakkuk</span></td></tr>
+          <tr><td>Radyoloji · Toraks BT</td><td class="orta">1</td>
+              <td class="sag">1.150,00</td><td class="orta"><span class="rz ok">Tahakkuk</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="iki">
+      <div>
+        <div class="grp">
+          <h4>Toplam</h4>
+          <div class="ic">
+            <div class="sat"><span>Hizmet toplamı</span><b>12.135,00 ₺</b></div>
+            <div class="sat"><span>SGK kapsamı</span><b>10.895,00 ₺</b></div>
+            <div class="sat"><span>Hasta payı (fark)</span><b>1.240,00 ₺</b></div>
+            <div class="sat"><span>Tahsil edilen</span><b>0,00 ₺</b></div>
+            <div class="sat"><span><b>Kalan</b></span><b>1.240,00 ₺</b></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="grp">
+          <h4>Kapanış adımları</h4>
+          <div class="ic">
+            <div class="sat"><span>Bekleyen hizmet</span><b><span class="rz sari">1 kalem</span> faturaya alınmalı</b></div>
+            <div class="sat"><span>Provizyon</span><b>çıkış bildirimiyle kapanır</b></div>
+            <div class="sat"><span>Vezne</span><b>hasta payı tahsilatı</b></div>
+            <div class="sat"><span>Yatak</span><b>A-301/1 → temizlik bekliyor</b></div>
+          </div>
+          <div class="not"><b>Yatak ücreti gün sonu işinde birikir</b>, taburcuda toplu
+            hesaplanmaz: on günlük yatışta fatura son gün üretilseydi ara provizyon,
+            iskonto ve paket kontrolü hep geç kalırdı. Taburcu yalnız <b>kapanıştır</b>.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Y-2026-0417 · 6 gün · şifa ile taburcu</span><span>·</span>
+    <span>Saatler <b>Merkez</b> şubesinin saat diliminde</span><span>·</span>
+    <span>Taburcu ve epikriz imzası ISLEMLOG'a yazılır</span>
+  </div>
+</div>
+
+<!-- ================================================== TABURCU ONAY PENCERESİ -->
+<div class="perde">
+  <div class="modal">
+    <div class="mb">🚪 Taburcu Onayı <span class="sp">Mehmet YILMAZ · A-301/1</span></div>
+    <div class="uyari kir" style="margin-top:12px">
+      <span>⛔</span>
+      <div><b>Sonuç bekleyen tetkik var:</b> 14.09 kan kültürü. Taburcu edilirse sonucu
+        <b>kimse görmeyebilir</b> — hasta çıkınca kuyruktan da düşer. Sonucu takip edecek
+        hekim seçilmeden taburcu tamamlanmaz.</div>
+    </div>
+    <div class="alanlar">
+      <label>Sonucu takip edecek</label><div class="inp combo">Dr. Osman AKAR</div>
+      <label>Konsültasyon</label><div class="inp">☑ Yanıt beklemeden taburcu (hekim onayı)</div>
+      <label>Epikriz</label><div class="inp ro">e-imza ile imzalanacak</div>
+      <label>Hasta bilgilendirmesi</label><div class="inp">☑ Epikriz + reçete teslim edildi</div>
+    </div>
+    <div class="ic" style="padding:0 12px 12px">
+      <div class="sat"><span>Yapılacaklar</span><b>Yatış → taburcu · Yatak → temizlik</b></div>
+      <div class="sat"><span></span><b>Açık order'lar durur · ilaç çizelgesi kapanır</b></div>
+      <div class="sat"><span></span><b>e-Nabız taburcu bildirimi kuyruğa alınır</b></div>
+      <div class="sat"><span></span><b>Kontrol randevusu açılır (25.09 10:20)</b></div>
+    </div>
+    <div class="malt">
+      <div class="btn">Vazgeç</div>
+      <div class="sp"></div>
+      <div class="btn primary">Taburcu Et</div>
+    </div>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Taburcu ve Epikriz — tasarım notları</h4>
+  Taburcu bir düğme değil, <b>kapanış</b>: klinik, idari ve mali üç işi birden bitirir.
+  <ul>
+    <li><b>"Taburcu planlandı" ayrı bir durum:</b> hekim sabah "bugün çıkabilir" der,
+        çıkış öğleden sonra olur. Arada yatak hâlâ doludur ama yatak panosunda "bugün
+        boşalacak" görünmezse kabul boş yatak arar ve bulamaz.</li>
+    <li><b>Çıkış kontrolü iki kademeli:</b> engel (sonuç bekleyen tetkik) taburcuyu
+        durdurur; uyarı (yanıtsız konsültasyon) hekim onayıyla geçilir ve <i>kimin
+        geçtiği</i> kaydedilir. Hepsini engel yapmak hekimi sistemi aşmaya iter.</li>
+    <li><b>Sonucu takip edecek hekim zorunlu:</b> hasta çıkınca bekleyen kültür sonucu
+        kuyruktan da düşer; sahipsiz kalan sonuç, bulunmamış sonuçtur.</li>
+    <li><b>Çıkış şekli kod listesinden:</b> şifa / sevk / kendi isteğiyle / ölüm / firar.
+        Tek "taburcu" alanı ölüm vakasını da taburcu gösterirdi.</li>
+    <li><b>Epikriz yatış boyunca birikir</b>, tetkik özeti sonuçlardan derlenmiş
+        taslaktır — hekim onaylamadan epikrize girmiş sayılmaz.</li>
+    <li><b>Çıkış reçetesi evde kullandığı ilaçlarla birlikte:</b> yalnız yenileri
+        göstermek, kendi ilacını kesip kesmeyeceğini belirsiz bırakır.</li>
+    <li><b>Kontrol randevusu taburcuyla açılır:</b> "on gün sonra gelin" denip randevu
+        verilmeyen hastanın yarısı gelmez.</li>
+  </ul>
+</div>
+
+<script>
+document.querySelectorAll('.sekme').forEach(function (s) {
+  s.addEventListener('click', function () {
+    var ad = s.dataset.sekme;
+    document.querySelectorAll('.sekme').forEach(function (x) { x.classList.toggle('on', x === s) });
+    document.querySelectorAll('.pano').forEach(function (p) { p.hidden = p.dataset.pano !== ad });
+  });
+});
+</script>
+
+</body>
+</html>

@@ -65,16 +65,15 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     // Menude STOK & HIZMET grubunda, KATEGORILER'in (25) hemen ardinda
     //   (kullanici): fiyat listesi de stok/hizmetin tanim ekrani - Yonetim
     //   altinda ararken bulunmuyordu.
-    menuGrup: 'Stok & Hizmet', menuAd: 'Fiyat Listeleri', ic: '🏷️',
-    yetkiKodu: 'fiyat_listesi', menuSira: 27,
+    menuGrup: 'Kurumlar & Sigorta', menuAltGrup: 'Ayarlar', menuAd: 'Fiyat Listeleri',
+    ic: '🏷️', yetkiKodu: 'fiyat_listesi', menuSira: 91,
   },
   {
     // Liste SATIRLARI ayri ekran: bir listenin binlerce satiri kart icinde
     //   rahat gezilmiyor. Menude gizli - listeden "Satırları Aç" ile gelinir.
     kaynak: 'fiyat-listesi-satir', baslik: 'Fiyat Listesi Satırları',
     yol: 'Yönetim › Fiyat Listesi Satırları', aksiyonEkrani: 'fiyat-listesi-satir-liste',
-    urlFiltreAlani: 'listeId', menuGizli: true, yetkiKodu: 'fiyat_listesi',
-    menuGrup: 'Yönetim', menuAd: 'Fiyat Listesi Satırları', ic: '🏷️',
+    urlFiltreAlani: 'listeId', menuGizli: true, yetkiKodu: 'fiyat_listesi', menuAd: 'Fiyat Listesi Satırları', ic: '🏷️',
   },
   {
     // ÜTS askidaki/gelen urunler (223): karsi kurumlarin bize VERDIGI tekil
@@ -92,7 +91,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     // Uc UTS ekrani "Stok & Hizmet > ÜTS" alt menusunde toplanir (kullanici).
     menuGrup: 'Stok & Hizmet', menuAltGrup: 'ÜTS',
     menuAd: 'Gelen / Askıdakiler', ic: '🪝',
-    yetkiKodu: 'uts', menuSira: 70,
+    yetkiKodu: 'uts', menuSira: 110,
   },
   {
     // ÜTS bildirim gecmisi (223): gonderilen alma/verme/kullanim bildirimleri,
@@ -121,7 +120,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     ],
     menuGrup: 'Stok & Hizmet', menuAltGrup: 'ÜTS',
     menuAd: 'Bildirimler', ic: '📡',
-    yetkiKodu: 'uts', menuSira: 71,
+    yetkiKodu: 'uts', menuSira: 111,
   },
   {
     // ÜTS urun sorgu (223): UNO/LNO/SNO ile ÜTS'den canli tekil urun sorgusu.
@@ -130,7 +129,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     yol: 'Stok › ÜTS Ürün Sorgu',
     menuGrup: 'Stok & Hizmet', menuAltGrup: 'ÜTS',
     menuAd: 'Ürün Sorgu', ic: '🔍',
-    yetkiKodu: 'uts', menuSira: 72,
+    yetkiKodu: 'uts', menuSira: 112,
   },
   {
     // STOKTAN TALEP (tur 105): bir birim depodan mal ISTER. Stok ve cari
@@ -204,7 +203,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     ],
     toplam: ['maliyetMalzeme', 'maliyetIscilik', 'maliyetToplam'],
     modul: 'uretim',
-    menuGrup: 'Üretim', menuAd: 'Ürün Ağaçları', menuSira: 10,
+    menuGrup: 'Üretim', menuAd: 'Ürün Ağaçları', menuSira: 20,
     ic: '🌳', yetkiKodu: 'uretim',
   },
   {
@@ -226,7 +225,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
     ],
     toplam: ['adet', 'uretilenAdet', 'gercekToplam'],
     modul: 'uretim',
-    menuGrup: 'Üretim', menuAd: 'Üretim Emirleri', menuSira: 20,
+    menuGrup: 'Üretim', menuAd: 'Üretim Emirleri', menuSira: 10,
     ic: '🏭', yetkiKodu: 'uretim',
   },
   {
@@ -241,7 +240,7 @@ export const STOK_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     modul: 'uretim',
-    menuGrup: 'Üretim', menuAd: 'İş Merkezleri', menuSira: 30,
+    menuGrup: 'Üretim', menuAltGrup: 'Ayarlar', menuAd: 'İş Merkezleri', menuSira: 90,
     ic: '⚙️', yetkiKodu: 'uretim',
   },
 ];

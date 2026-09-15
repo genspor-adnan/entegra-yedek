@@ -50,6 +50,14 @@ export interface ListeKartiOzellikleri {
  * eylem dugmeleri ile lab tetkik kartinin calisma takvimi burada yasiyor.
  * Davranis degismedi - yalniz yeri degisti.
  */
+/**
+ * Goz muayene kartindaki kisayollarin actigi kartlar (691). Bu uc
+ * kaynak URL'den `hastaId` / `muayeneId` on dolgusu kabul eder.
+ */
+const GOZ_KISAYOL_KAYNAKLARI = new Set([
+  'goz-gozluk-recete', 'goz-goruntuleme', 'goz-islem',
+]);
+
 export function ListeKarti({
   tanim, kartId, kartOzel, sekmeVerisi, aksiyon,
   muayeneBilgiAcik, setMuayeneBilgiAcik, setIcdAramaAcik,
@@ -296,21 +304,42 @@ export function ListeKarti({
             ) : null)
           : undefined}
 
-        // MUAYENE EYLEMLERI KARTTA (461): ayni aksiyon kodlari listedekiyle
-        //   BIREBIR ayni isleyiciye gider - kural ve yetki tek yerde kalir.
-        ekAraclar={tanim.kaynak === 'muayene' && kartId !== 'yeni'
+        // KART ARAC CUBUGU: muayene (461) ve goz muayenesi (691) kendi
+        //   eylemlerini burada gosterir. DUGMELER LISTE AKSIYON KODLARINI
+        //   cagirir - kural ve yetki tek yerde kalir; ayni kod hem sag tus
+        //   menusunden hem karttan gecer.
+        ekAraclar={kartId !== 'yeni'
+                   && (tanim.kaynak === 'muayene' || tanim.kaynak === 'goz-muayene')
           ? (d) => {
-              const satir = { id: Number(kartId), hastaAdi: String(d.tarafAdi ?? '') };
+              const satir = {
+                id: Number(kartId),
+                hastaId: Number(d.hastaId ?? d.tarafId ?? 0),
+                hastaAdi: String(d.tarafAdi ?? d.hastaAdi ?? ''),
+                // Kisayolla acilacak kayitlar bu muayeneye baglanir.
+                muayeneId: Number(d.muayeneId ?? 0),
+              };
               const dugme = (kod: string, ad: string, sinif = 'd') => (
                 <button key={kod} type="button" className={sinif}
                         onClick={() => void aksiyon(kod, satir)}>{ad}</button>
               );
-              return (
+              return tanim.kaynak === 'muayene' ? (
                 <>
                   {dugme('muayene.al', '▶ Muayeneye Al')}
                   {dugme('muayene.istem', '🧪 İstem Aç')}
                   {dugme('muayene.sablon', '📋 Şablon Uygula')}
                   {dugme('muayene.tamamla', '✓ Tamamla')}
+                </>
+              ) : (
+                // GOZ MUAYENESI (mockup goz_detayli_muayene.html araç çubuğu):
+                //   hekim ölçümü bitirince buradan çıkış yapıyor.
+                <>
+                  {dugme('goz.muayene-tamamla', '✔ Tamamla', 'd onay')}
+                  {dugme('goz.gozluk-recete', '👓 Gözlük Reçetesi')}
+                  {dugme('goz.goruntuleme-iste', '📷 Görüntüleme İste')}
+                  {dugme('goz.islem-planla', '💉 İşlem Planla')}
+                  {dugme('goz.onceki-kopyala', '📋 Önceki Muayeneden Kopyala')}
+                  {dugme('goz.sema', '🖼 Göz Şeması')}
+                  {dugme('goz.dikte', '🎙 Dikte')}
                 </>
               );
             }
@@ -331,6 +360,17 @@ export function ListeKarti({
               ...(sorgu.get('hekim') ? { hekimId: Number(sorgu.get('hekim')) } : {}),
               ...(sorgu.get('bolum') ? { bolum: Number(sorgu.get('bolum')) } : {}),
               ...(sorgu.get('cihaz') ? { cihazId: Number(sorgu.get('cihaz')) } : {}),
+            }
+          // GOZ MUAYENESI KISAYOLLARI (691): recete / goruntuleme / islem
+          //   karti muayeneden acildiysa hasta ve muayene bagi ON DOLGU
+          //   gelir - hekim ayni bilgiyi ikinci kez secmesin, bag da
+          //   unutulmasin. Parametre yoksa kart normal bos acilir.
+          : GOZ_KISAYOL_KAYNAKLARI.has(tanim.kaynak) && sorgu.get('hastaId')
+          ? {
+              ...tanim.yeniKayitVarsayilanlari,
+              hastaId: Number(sorgu.get('hastaId')),
+              ...(sorgu.get('muayeneId')
+                  ? { muayeneId: Number(sorgu.get('muayeneId')) } : {}),
             }
           : tanim.yeniKayitVarsayilanlari}
         onKapat={() => git(tanim.kartYolu!)}

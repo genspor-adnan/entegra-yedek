@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (332 ad, 103 tanesi birden cok dosyada)
+## Fonksiyonlar (339 ad, 104 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -93,6 +93,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ebelge_xslt_bul` | `160_xslt_dokumana_tasindi.sql` | 159_ebelge_xslt.sql |
 | `fn_enabiz_siradakiler` | `428_kuyruk_takili_satir.sql` | 415_enabiz_cekirdek.sql |
 | `fn_entegrasyon_hesap_id` | `338_entegrasyon_baz_sube.sql` | — |
+| `fn_erken_uyari` | `699_erken_uyari_skoru.sql` | — |
 | `fn_etiket_anahtar` | `003_goc_taraf.sql` | — |
 | `fn_firsat_asama_izle` | `121_firsat.sql` | — |
 | `fn_firsat_kazanildi_musteri` | `122_aday_musteri.sql` | — |
@@ -213,6 +214,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_numara_onek_yilli` | `366_numara_onek_yil.sql` | — |
 | `fn_numara_sablonu_bul` | `154_numara_sablonu_seed.sql` | 152_numara_sablonu.sql |
 | `fn_numara_sirada` | `152_numara_sablonu.sql` | — |
+| `fn_order_doz_gunluk` | `698_order_doz_uretimi.sql` | — |
+| `fn_order_uygulama_uret` | `698_order_doz_uretimi.sql` | — |
 | `fn_panel_profil` | `513_panel_blok_sirasi.sql` | 508_panel_kurum_profili.sql, 512_panel_tip_merkezi_tam.sql |
 | `fn_parola_ata` | `068_taraf_rol_id_kolonlari.sql` | 020_sema_kimlik.sql |
 | `fn_parola_dogru` | `020_sema_kimlik.sql` | — |
@@ -275,13 +278,15 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_urun_modu` | `489_urun_modu_profilden.sql` | — |
 | `fn_uts_hesap` | `338_entegrasyon_baz_sube.sql` | 223_uts_sema.sql, 227_baz_sube.sql, 337_entegrasyon_uts_ebelge.sql |
 | `fn_yas_metni` | `488_lab_yas_metni.sql` | — |
+| `fn_yatak_ucreti_tahakkuk` | `700_yatis_tahakkuk.sql` | — |
 | `fn_yerel_para` | `111_ekstre_doviz_gruplu.sql` | — |
 | `fn_yetki_surumu_artir` | `020_sema_kimlik.sql` | — |
 | `tg_basvuru_yapan_hekim` | `584_basvuru_yapan_primi.sql` | — |
 | `tg_basvuru_yapan_satir` | `584_basvuru_yapan_primi.sql` | — |
 | `tg_belge_basvuru_sozlesme` | `598_tss_sgk_kullan_tetigi.sql` | 469_basvuru_sozlesme.sql, 485_ozel_kurum_sozlesmesiz.sql, 494_basvuru_kurumu_oder.sql |
 | `tg_belge_satir_dagilim_denge` | `470_belge_satir_dagilim.sql` | — |
-| `tg_belge_satir_iskonto_kilit` | `662_iskonto_onay.sql` | — |
+| `tg_belge_satir_iskonto_kilit` | `681_iskonto_kilit_koruma.sql` | 662_iskonto_onay.sql |
+| `tg_belge_satir_kilit_silme` | `681_iskonto_kilit_koruma.sql` | — |
 | `tg_belge_satir_rol_dogrula` | `361_prim_rol_isaretleri.sql` | — |
 | `tg_belge_satir_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
 | `tg_departman_dongu_engel` | `257_departman_ustbirim.sql` | — |
@@ -340,8 +345,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_tek_aktif` | `248_taraf_hasta_kurum.sql` | — |
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
+| `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
+| `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (141 ad, 43 tanesi birden cok dosyada)
+## Gorunumler (149 ad, 43 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -393,6 +400,11 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_fiyat_listesi_tarife_lookup` | `587_fiyat_listesi_tarife_lookup.sql` | — |
 | `v_gorev_agac_lookup` | `571_gorev_agac_lookup.sql` | — |
 | `v_gorev_lookup` | `255_personel_gorev.sql` | — |
+| `v_goz_cihaz_lookup` | `693_goz_lookup.sql` | — |
+| `v_goz_protokol_lookup` | `693_goz_lookup.sql` | — |
+| `v_goz_takip_lookup` | `693_goz_lookup.sql` | — |
+| `v_goz_tetkik_lookup` | `693_goz_lookup.sql` | — |
+| `v_goz_unite_akis` | `691_goz_modulu.sql` | — |
 | `v_hakedis_ozet` | `330_prim_tahsilat_turu_durum.sql` | 324_prim_semasi.sql |
 | `v_hakedis_satir` | `363_hakedis_rol_isaret_kontrolu.sql` | 324_prim_semasi.sql, 330_prim_tahsilat_turu_durum.sql, 332_prim_zamani.sql |
 | `v_hasta_lookup` | `266_aday_hasta.sql` | 244_hasta_lookup.sql, 262_hasta_lookup_kimlik.sql, 263_hasta_lookup_cinsiyet_yas.sql, 264_hasta_lookup_cinsiyet_bos.sql |
@@ -448,6 +460,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_numara_turu_odeme` | `153_numara_turu_gorunum_tip.sql` | 152_numara_sablonu.sql |
 | `v_numara_turu_satis` | `334_tahakkuk_tur_takas.sql` | 152_numara_sablonu.sql, 153_numara_turu_gorunum_tip.sql |
 | `v_numara_turu_tahsilat` | `153_numara_turu_gorunum_tip.sql` | 152_numara_sablonu.sql |
+| `v_oda_lookup` | `696_yatan_lookup.sql` | — |
 | `v_personel_lookup` | `054_personel_ozluk_mockup_uyum.sql` | — |
 | `v_plan_vade` | `077_v_ekstre.sql` | — |
 | `v_prim_rol_aday` | `576_personel_departman_tek_kaynak.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql, 367_prim_rol_aday_bolum.sql, 369_primli_calisma_sekli.sql |
@@ -486,4 +499,6 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_uretim_emri_lookup` | `429_uretim_v1.sql` | — |
 | `v_uretim_hareket` | `429_uretim_v1.sql` | — |
 | `v_urun_agaci_lookup` | `429_uretim_v1.sql` | — |
+| `v_yatak_lookup` | `696_yatan_lookup.sql` | — |
+| `v_yatak_panosu` | `695_yatan_hasta.sql` | — |
 

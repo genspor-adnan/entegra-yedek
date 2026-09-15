@@ -47,6 +47,83 @@ export async function belgeAksiyonu(
   }
 
   switch (kod) {
+    // ------------------------------------------- KULLANICI YONETIMI (Guvenlik)
+    // Hepsi tek satir uzerinde calisir ve ISLEMLOG'a yazilir. Yetki kontrolu
+    //   sunucuda: burada yalniz onay + mesaj.
+    case 'kullanici.parola-sifirla': {
+      if (!satir) return true;
+      const kim = String(satir.kisi || satir.kod || '');
+      // ONAY SART: sifirlama kisinin oturumlarini da kapatir - yanlis satirda
+      //   basildiginda kisi calisamaz hale gelir.
+      if (!await onay(`${kim}: parola sıfırlansın mı?
+
+`
+        + 'Hesap parolasız duruma alınır ve TÜM oturumları kapanır. '
+        + 'Kişi ilk girişte kimliğini doğrulayıp kendi parolasını belirler.')) return true;
+      await guvenli(async () => {
+        const y = await api.kullaniciParolaSifirla(Number(satir.id));
+        mesaj(y.mesaj);
+        b.tazele();
+      });
+      return true;
+    }
+
+    case 'kullanici.kilit-coz': {
+      if (!satir) return true;
+      await guvenli(async () => {
+        const y = await api.kullaniciKilitCoz(Number(satir.id));
+        mesaj(y.mesaj);
+        b.tazele();
+      });
+      return true;
+    }
+
+    case 'kullanici.oturum-kapat': {
+      if (!satir) return true;
+      const kim = String(satir.kisi || satir.kod || '');
+      if (!await onay(`${kim}: açık oturumların hepsi kapatılsın mı?
+
+`
+        + 'Parola DEĞİŞMEZ; kişi yeniden giriş yapabilir.')) return true;
+      await guvenli(async () => {
+        const y = await api.kullaniciOturumKapat(Number(satir.id));
+        mesaj(y.mesaj);
+        b.tazele();
+      });
+      return true;
+    }
+
+    case 'kullanici.durum': {
+      if (!satir) return true;
+      const aktif = Number(satir.aktif) === 1;
+      const kim = String(satir.kisi || satir.kod || '');
+      // HESAP SILINMEZ, pasife alinir: log ve belge satirlari kullaniciya bagli.
+      if (!await onay(aktif
+        ? `${kim}: hesap pasife alınsın mı?
+
+Giriş yapamaz, açık oturumları kapanır. `
+          + 'Kayıtları ve geçmişi silinmez.'
+        : `${kim}: hesap yeniden aktif edilsin mi?`)) return true;
+      await guvenli(async () => {
+        const y = await api.kullaniciDurum(Number(satir.id), !aktif);
+        mesaj(y.mesaj);
+        b.tazele();
+      });
+      return true;
+    }
+
+    case 'kullanici.toplu-ac': {
+      if (!await onay('Hesabı olmayan aktif personele hesap açılsın mı?\n\n'
+        + 'Hesaplar PAROLASIZ açılır; kişiler ilk girişte kendi parolalarını belirler.'))
+        return true;
+      await guvenli(async () => {
+        const y = await api.kullaniciTopluAc();
+        mesaj(y.mesaj);
+        b.tazele();
+      });
+      return true;
+    }
+
     // Grup basina bir giris: kart tur seridini o grubun turleriyle acar.
     case 'belge.yeni':
       b.setYeniBelgeTuru(b.varsayilanBelgeTuru ?? 15);

@@ -1,0 +1,150 @@
+/* ============================================================================
+   YATAN HASTA MOCKUP'LARI - ORTAK STIL
+   Renk/olcu degerleri Ekranlar/Ayarlar/kullanicilar.html ve Lab/* ile AYNI:
+   yeni bir tasarim dili degil, var olanin yatan hasta ekranlarina uzantisi.
+
+   Ortak dosya, cunku bu dizinde on ekran var ve stilin onunda kopyalanmasi
+   ilk degisiklikte sekiz dosyayi geride birakirdi.
+   ========================================================================= */
+:root{
+  --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+  --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+  --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+  --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --grpbg:#fbfcfe;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+.win{max-width:1480px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+  border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+.win+.win{margin-top:18px}
+.title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+  display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+.title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+
+.toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);
+  border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+  border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;
+  display:flex;gap:5px;align-items:center;white-space:nowrap}
+.btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+.btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+.btn.pas{opacity:.42}
+.sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+.sp{margin-left:auto}
+
+.serit{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;
+  border-bottom:1px solid var(--line2);flex-wrap:wrap}
+.kutu{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:27px;
+  display:flex;align-items:center;padding:0 8px;gap:6px}
+.kutu.ara{flex:1;min-width:230px;color:var(--muted)}
+.kutu.combo::after{content:"\25BE";margin-left:auto;color:var(--muted)}
+.kutu b{font-weight:bold}
+.cip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;
+  background:#fff;color:var(--muted);white-space:nowrap}
+.cip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+
+/* Sayac kutulari: sus degil GIRIS KAPISI - her biri bir cipin karsiligi. */
+.ozet{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line2);
+  border-bottom:1px solid var(--line)}
+.ozet .k{background:#fff;padding:9px 12px}
+.ozet .bas{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+.ozet .deg{font-size:18px;font-weight:bold;color:var(--navy);margin-top:2px}
+.ozet .alt{font-size:10.5px;color:var(--muted);margin-top:2px}
+.ozet .k.uy .deg{color:var(--uyari)}
+.ozet .k.teh .deg{color:var(--kirmizi)}
+.ozet .k.iyi .deg{color:var(--ok)}
+
+.dg{overflow-x:auto;background:#fff}
+table{border-collapse:collapse;width:100%}
+th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+  border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;
+  color:#3a5573;white-space:nowrap}
+td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;
+  font-size:11.5px;white-space:nowrap}
+tr.sel td{background:var(--sel)}
+tr.pasif td{color:#9aa7b4}
+tr.teh td{background:#fdf1f0}
+.sag{text-align:right}
+.orta{text-align:center}
+.sonuk{color:var(--muted)}
+
+.rz{display:inline-block;border-radius:10px;padding:1px 8px;font-size:10.5px;
+  border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+.rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+.rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+.rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+.rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+.rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+.rz.pas{background:#eceff2;color:#6b7a8b}
+
+/* Alt panel / sekmeler */
+.sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);
+  border-bottom:1px solid var(--line);flex-wrap:wrap}
+.sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;
+  padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e;cursor:pointer;
+  display:inline-flex;gap:6px;align-items:center}
+.sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+.pano[hidden]{display:none!important}
+.pano .bos{color:var(--muted);padding:10px 12px;font-size:11.5px;background:#fff}
+
+.iki{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--line)}
+.iki>div+div{border-left:1px solid var(--line2)}
+.uc{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0}
+.uc>div+div{border-left:1px solid var(--line2)}
+
+.grp{margin:10px;border:1px solid var(--line2);border-radius:4px;background:var(--grpbg);overflow:hidden}
+.grp h4{margin:0;padding:7px 10px;font-size:12px;background:linear-gradient(#f6f9fc,#eef3f9);
+  border-bottom:1px solid var(--line2);color:#2c4a6b}
+.grp h4 .mini{float:right;font-weight:normal;font-size:11px;color:var(--muted)}
+.ic{padding:8px 12px;background:#fff}
+.sat{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:11.5px}
+.sat+.sat{border-top:1px solid #eef2f6}
+.sat>span:first-child{color:var(--muted)}
+.sat b{text-align:right}
+.not{font-size:11px;color:var(--muted);line-height:1.5;padding:8px 12px;background:#f8fafc;
+  border-top:1px solid var(--line2)}
+.not b{color:var(--ink)}
+.statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);
+  border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+
+/* Form alanlari */
+.alanlar{display:grid;grid-template-columns:140px 1fr;gap:8px 10px;padding:12px;align-items:center}
+.alanlar.dort{grid-template-columns:130px 1fr 130px 1fr}
+.alanlar label{font-size:11.5px;color:var(--muted)}
+.alanlar .tam{grid-column:2/-1}
+.inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:27px;
+  padding:4px 8px;font-size:12px;display:flex;align-items:center;gap:6px}
+.inp.ro{background:#f4f6f9;color:#4d5d6e}
+.inp.combo::after{content:"\25BE";margin-left:auto;color:var(--muted)}
+
+.uyari{display:flex;gap:8px;align-items:flex-start;margin:0 12px 12px;padding:9px 11px;
+  border-radius:4px;font-size:11.5px;line-height:1.5}
+.uyari.sari{background:#fdf6e3;color:#6f4f12;border:1px solid #f2ddbf}
+.uyari.kir{background:#fbe9e7;color:#8c2119;border:1px solid #f3c4bf}
+.uyari.mavi{background:#eef4fc;color:#1d4a80;border:1px solid #cfe0f5}
+
+/* Modal (pencere icinde pencere) */
+.perde{position:relative;margin:18px auto 0;max-width:1480px}
+.modal{max-width:620px;margin:0 auto;background:#fff;border:1px solid #0f2c50;border-radius:5px;
+  box-shadow:0 14px 40px rgba(8,20,40,.3);overflow:hidden}
+.modal.genis{max-width:980px}
+.modal .mb{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:8px 12px;
+  font-weight:bold;font-size:13px;display:flex;gap:8px;align-items:center}
+.modal .mb .sp{margin-left:auto;font-weight:normal;font-size:11px;opacity:.85}
+.malt{display:flex;gap:8px;padding:10px 12px;background:var(--head);border-top:1px solid var(--line)}
+.malt .sp{margin-left:auto}
+
+.aciklama{max-width:1480px;margin:16px auto 0;color:#5a6b7c;font-size:11px;line-height:1.7}
+.aciklama h4{margin:0 0 6px;color:var(--ink);font-size:13px}
+.aciklama b{color:var(--ink)}
+.aciklama ul{margin:6px 0 0 18px;padding:0}
+.aciklama li{margin:4px 0}
+.aciklama code{background:#eef2f7;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+
+@media(max-width:1000px){
+  .ozet{grid-template-columns:repeat(3,1fr)}
+  .iki,.uc{grid-template-columns:1fr}
+  .alanlar.dort{grid-template-columns:130px 1fr}
+}

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hemşire İzlem — Mockup (Gentegre AI · Yatan Hasta)</title>
+<link rel="stylesheet" href="_yatan.css">
+<style>
+  .serit-kimlik{display:flex;gap:18px;align-items:center;padding:9px 12px;
+    background:#fbfcfe;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit-kimlik .ad{font-size:14px;font-weight:bold;color:var(--navy)}
+  .serit-kimlik .kv{display:flex;flex-direction:column;gap:1px}
+  .serit-kimlik .kv span{font-size:10.5px;color:var(--muted)}
+  .serit-kimlik .kv b{font-size:12px}
+  .serit-kimlik .sag{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap}
+  .yatak-kod{font-family:Consolas,monospace;font-weight:bold;color:var(--navy)}
+
+  /* VITAL EGRISI: yatan hastada vital tek ölçüm değil EĞRİDİR - sayı
+     tablosu "kötüleşiyor mu" sorusunu ancak satır satır okuyarak cevaplar. */
+  .grafik{background:#fff;padding:10px 12px}
+  .grafik svg{width:100%;height:190px;display:block}
+  .gf-lejant{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--muted);
+    padding:4px 12px 10px;background:#fff}
+  .gf-lejant span{display:flex;align-items:center;gap:5px}
+  .gf-lejant i{width:16px;height:3px;border-radius:2px;display:inline-block}
+
+  /* Giriş satırı: hemşire ölçümü ayrı ekran açmadan girsin - nöbette
+     her ölçüm için pencere açmak, kaydın geç girilmesi demek. */
+  .giris{display:grid;grid-template-columns:repeat(9,1fr);gap:6px;padding:8px 12px;
+    background:#f7fafc;border-bottom:1px solid var(--line2);align-items:end}
+  .giris label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .giris .inp{min-height:26px;padding:3px 6px;font-size:12px}
+  .skor{display:flex;gap:10px;flex-wrap:wrap;padding:8px 12px;background:#fff}
+  .skor .k{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px}
+  .skor .k .b{font-size:10.5px;color:var(--muted)}
+  .skor .k .d{font-size:16px;font-weight:bold;color:var(--navy)}
+  .skor .k .a{font-size:10.5px;color:var(--muted)}
+  .skor .k.uy .d{color:var(--uyari)} .skor .k.teh .d{color:var(--kirmizi)}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📋 Hemşire İzlem
+    <span class="sp">Yatan Hasta › İzlem · A-301/1 · nöbet 08:00–20:00</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>＋</span> Ölçüm Kaydet</div>
+    <div class="btn"><span>💧</span> Sıvı Gir</div>
+    <div class="btn"><span>📝</span> Gözlem Notu</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>⚖</span> Risk Değerlendirmesi</div>
+    <div class="btn"><span>🔔</span> Hekime Bildir</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🖨</span> İzlem Formu</div>
+  </div>
+
+  <div class="serit-kimlik">
+    <div class="ad">Mehmet YILMAZ</div>
+    <div class="kv"><span>Yatak</span><b class="yatak-kod">A-301/1</b></div>
+    <div class="kv"><span>Gün</span><b>6</b></div>
+    <div class="kv"><span>Tanı</span><b>J18.9 Pnömoni</b></div>
+    <div class="kv"><span>Hekim</span><b>Dr. Osman AKAR</b></div>
+    <div class="sag">
+      <span class="rz kir">🦠 damlacık izolasyon</span>
+      <span class="rz sari">🚶 düşme riski yüksek</span>
+      <span class="rz sari">⚠ erken uyarı 3</span>
+    </div>
+  </div>
+
+  <!-- Ölçüm girişi TEK SATIR: nöbette her ölçüm için pencere açmak,
+       kaydın saatinde değil vardiya sonunda girilmesi demek. -->
+  <div class="giris">
+    <div><label>Zaman</label><div class="inp">15.09 16:00</div></div>
+    <div><label>Sistolik</label><div class="inp">120</div></div>
+    <div><label>Diyastolik</label><div class="inp">75</div></div>
+    <div><label>Nabız</label><div class="inp">88</div></div>
+    <div><label>Ateş °C</label><div class="inp">37,4</div></div>
+    <div><label>SpO₂ %</label><div class="inp">95</div></div>
+    <div><label>Solunum</label><div class="inp">18</div></div>
+    <div><label>Ağrı (0-10)</label><div class="inp">2</div></div>
+    <div><div class="btn primary" style="justify-content:center">Kaydet</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-sekme="vital">Vital Eğrisi</div>
+    <div class="sekme" data-sekme="sivi">Aldığı–Çıkardığı</div>
+    <div class="sekme" data-sekme="risk">Risk Ölçekleri</div>
+    <div class="sekme" data-sekme="gozlem">Gözlem Notları</div>
+  </div>
+
+  <!-- ===================================================== VİTAL EĞRİSİ -->
+  <div class="pano" data-pano="vital">
+    <div class="grafik">
+      <!-- Eksen: 24 saat. Ateş ve nabız ayni grafikte, cunku birlikte
+           okunur (ates duserken nabiz yuksek kaliyorsa sepsis suphesi). -->
+      <svg viewBox="0 0 720 190" preserveAspectRatio="none">
+        <!-- IKI EKSEN: ates SOL, nabiz SAG. Tek olcek kullanilinca nabiz 92
+             degeri ates grafiginde 39 derece hizasinda duruyordu - ayni
+             kagitta iki birim, okuyani yaniltir. -->
+        <g stroke="#e3e9f0" stroke-width="1">
+          <line x1="44" y1="20"  x2="664" y2="20"/>
+          <line x1="44" y1="60"  x2="664" y2="60"/>
+          <line x1="44" y1="100" x2="664" y2="100"/>
+          <line x1="44" y1="140" x2="664" y2="140"/>
+          <line x1="44" y1="170" x2="664" y2="170"/>
+        </g>
+        <!-- 38,5 C ustu bant: esigi goz karariyla aramaya gerek kalmasin -->
+        <rect x="44" y="20" width="620" height="60" fill="#fdf1f0"/>
+        <g fill="#b3261e" font-size="9" font-family="Trebuchet MS">
+          <text x="6" y="24">40°</text><text x="6" y="64">39°</text>
+          <text x="6" y="104">38°</text><text x="6" y="144">37°</text>
+        </g>
+        <g fill="#2f6db3" font-size="9" font-family="Trebuchet MS">
+          <text x="670" y="24">120</text><text x="670" y="64">110</text>
+          <text x="670" y="104">100</text><text x="670" y="144">90</text>
+          <text x="670" y="174">80</text>
+        </g>
+        <g fill="#6b7a8b" font-size="9" font-family="Trebuchet MS">
+          <text x="50" y="186">00:00</text><text x="184" y="186">04:00</text>
+          <text x="318" y="186">08:00</text><text x="452" y="186">12:00</text>
+          <text x="586" y="186">16:00</text>
+        </g>
+        <!-- Ates: 38,1 / 38,9 / 38,3 / 37,8 / 37,4  (sol eksen) -->
+        <polyline fill="none" stroke="#b3261e" stroke-width="2.5"
+          points="58,96 192,64 326,88 460,108 594,124"/>
+        <g fill="#b3261e">
+          <circle cx="58" cy="96" r="3.5"/><circle cx="192" cy="64" r="3.5"/>
+          <circle cx="326" cy="88" r="3.5"/><circle cx="460" cy="108" r="3.5"/>
+          <circle cx="594" cy="124" r="3.5"/>
+        </g>
+        <!-- Nabiz: 90 / 96 / 88 / 92 / 88  (sag eksen) -->
+        <polyline fill="none" stroke="#2f6db3" stroke-width="2.5" stroke-dasharray="5 3"
+          points="58,144 192,126 326,150 460,138 594,150"/>
+        <g fill="#2f6db3">
+          <circle cx="58" cy="144" r="3"/><circle cx="192" cy="126" r="3"/>
+          <circle cx="326" cy="150" r="3"/><circle cx="460" cy="138" r="3"/>
+          <circle cx="594" cy="150" r="3"/>
+        </g>
+      </svg>
+    </div>
+    <div class="gf-lejant">
+      <span><i style="background:#b3261e"></i> Ateş °C — <b>sol eksen</b></span>
+      <span><i style="background:#2f6db3"></i> Nabız /dk — <b>sağ eksen</b></span>
+      <span>Kırmızı bant: ateş 38,5 °C üzeri</span>
+      <span>SpO₂ ve solunum tabloda: yüzde ile dereceyi aynı ölçekte çizmek yanıltır.</span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Zaman</th><th class="orta">TA</th><th class="orta">Nabız</th>
+          <th class="orta">Ateş</th><th class="orta">SpO₂</th><th class="orta">Solunum</th>
+          <th class="orta">Ağrı</th><th class="orta">Erken uyarı</th><th>Ölçen</th></tr></thead>
+        <tbody>
+          <tr><td>15.09 12:00</td><td class="orta">118/72</td><td class="orta">92</td>
+              <td class="orta">37,8</td><td class="orta">94</td><td class="orta">20</td>
+              <td class="orta">3</td><td class="orta"><span class="rz sari">3</span></td>
+              <td class="sonuk">Hem. Selin AK</td></tr>
+          <tr><td>15.09 08:00</td><td class="orta">124/78</td><td class="orta">88</td>
+              <td class="orta">38,3</td><td class="orta">93</td><td class="orta">22</td>
+              <td class="orta">4</td><td class="orta"><span class="rz sari">4</span></td>
+              <td class="sonuk">Hem. Selin AK</td></tr>
+          <tr class="teh"><td>15.09 04:00</td><td class="orta">130/80</td><td class="orta">96</td>
+              <td class="orta">38,9</td><td class="orta">91</td><td class="orta">24</td>
+              <td class="orta">5</td><td class="orta"><span class="rz kir">6 · hekime bildirildi</span></td>
+              <td class="sonuk">Hem. Deniz ER</td></tr>
+          <tr><td>15.09 00:00</td><td class="orta">126/76</td><td class="orta">90</td>
+              <td class="orta">38,1</td><td class="orta">94</td><td class="orta">20</td>
+              <td class="orta">3</td><td class="orta"><span class="rz sari">3</span></td>
+              <td class="sonuk">Hem. Deniz ER</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not"><b>Erken uyarı skoru (NEWS) satırda hesaplanır</b>, hemşireye
+      "değerlendir" denmez: tek tek normal görünen değerler birlikte kötüleşmeyi gösterir.
+      Eşik aşılınca satır kırmızıya döner ve <b>hekime bildirim düşer</b> — "acaba arasam
+      mı" kararı kişiye bırakılmaz. Bildirimin gittiği satırda kaydı da durur.</div>
+  </div>
+
+  <!-- =============================================== ALDIĞI – ÇIKARDIĞI -->
+  <div class="pano" data-pano="sivi" hidden>
+    <div class="skor">
+      <div class="k"><div class="b">ALDIĞI (bugün)</div><div class="d">2.250 mL</div>
+        <div class="a">oral 750 · IV 1.500</div></div>
+      <div class="k"><div class="b">ÇIKARDIĞI (bugün)</div><div class="d">1.800 mL</div>
+        <div class="a">idrar 1.800 · drenaj —</div></div>
+      <div class="k uy"><div class="b">DENGE</div><div class="d">+450 mL</div>
+        <div class="a">hedef ±500 mL</div></div>
+      <div class="k"><div class="b">SON 24 SAAT İDRAR</div><div class="d">0,9 mL/kg/sa</div>
+        <div class="a">78 kg · normal sınırda</div></div>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Zaman</th><th class="orta">Yön</th><th>Tür</th>
+          <th class="sag">Miktar (mL)</th><th>Kaydeden</th></tr></thead>
+        <tbody>
+          <tr><td>15.09 12:00</td><td class="orta"><span class="rz mavi">Aldı</span></td>
+              <td>IV — %0.9 NaCl</td><td class="sag">500</td><td class="sonuk">Hem. Selin AK</td></tr>
+          <tr><td>15.09 11:30</td><td class="orta"><span class="rz">Çıkardı</span></td>
+              <td>İdrar</td><td class="sag">450</td><td class="sonuk">Hem. Selin AK</td></tr>
+          <tr><td>15.09 10:00</td><td class="orta"><span class="rz mavi">Aldı</span></td>
+              <td>Oral — su / çay</td><td class="sag">300</td><td class="sonuk">Hem. Selin AK</td></tr>
+          <tr><td>15.09 08:00</td><td class="orta"><span class="rz mavi">Aldı</span></td>
+              <td>IV — %0.9 NaCl</td><td class="sag">500</td><td class="sonuk">Hem. Selin AK</td></tr>
+          <tr><td>15.09 07:20</td><td class="orta"><span class="rz">Çıkardı</span></td>
+              <td>İdrar</td><td class="sag">600</td><td class="sonuk">Hem. Deniz ER</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not">Denge <b>hesaplanır, yazılmaz</b>: gün ortasında eklenen bir serum,
+      elle tutulan toplamı sessizce yanlışlar. Kalp yetmezliği ve böbrek hastasında
+      "+450" ile "+1.450" arasındaki fark tedavi değiştirir.</div>
+  </div>
+
+  <!-- ===================================================== RİSK ÖLÇEKLERİ -->
+  <div class="pano" data-pano="risk" hidden>
+    <div class="skor">
+      <div class="k uy"><div class="b">DÜŞME RİSKİ (İTAKİ)</div><div class="d">14</div>
+        <div class="a">yüksek · 15.09 08:00</div></div>
+      <div class="k"><div class="b">BASI YARASI (BRADEN)</div><div class="d">17</div>
+        <div class="a">düşük · 15.09 08:00</div></div>
+      <div class="k uy"><div class="b">BESLENME (NRS-2002)</div><div class="d">3</div>
+        <div class="a">riskli · 13.09 <span class="rz sari">süresi geçti</span></div></div>
+      <div class="k"><div class="b">BİLİNÇ (GKS)</div><div class="d">15</div>
+        <div class="a">15.09 12:00</div></div>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr><th>Tarih</th><th>Ölçek</th><th class="orta">Puan</th>
+          <th class="orta">Risk</th><th>Alınan önlem</th><th>Değerlendiren</th></tr></thead>
+        <tbody>
+          <tr><td>15.09 08:00</td><td>İtaki düşme riski</td><td class="orta">14</td>
+              <td class="orta"><span class="rz sari">Yüksek</span></td>
+              <td>Yatak kenarlığı, dört saatte bir tuvalet desteği, kaymaz terlik</td>
+              <td class="sonuk">Hem. Selin AK</td></tr>
+          <tr><td>15.09 08:00</td><td>Braden bası yarası</td><td class="orta">17</td>
+              <td class="orta"><span class="rz ok">Düşük</span></td>
+              <td>İki saatte bir pozisyon değişimi</td><td class="sonuk">Hem. Selin AK</td></tr>
+          <tr><td>13.09 09:10</td><td>NRS-2002 beslenme</td><td class="orta">3</td>
+              <td class="orta"><span class="rz sari">Riskli</span></td>
+              <td>Diyetisyen konsültasyonu istendi</td><td class="sonuk">Hem. Deniz ER</td></tr>
+          <tr><td>09.09 15:00</td><td>İtaki düşme riski</td><td class="orta">9</td>
+              <td class="orta"><span class="rz ok">Düşük</span></td>
+              <td>Standart önlem</td><td class="sonuk">Hem. Selin AK</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not">
+      <b>Puan tek başına kayıt değildir; alınan önlem de satırda durur.</b> "Yüksek risk"
+      yazıp önlem yazmamak, denetimde de klinikte de boş bir kayıttır.
+      Değerlendirme <b>yatışta + her 24 saatte + durum değişiminde</b> yenilenir; süresi
+      geçen ölçek kutuda sararır — üçüncü günü düşen hastanın puanı hâlâ yatış günündeki
+      puan olmasın diye.
+    </div>
+  </div>
+
+  <!-- ======================================================= GÖZLEM NOTLARI -->
+  <div class="pano" data-pano="gozlem" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr><th style="width:150px">Zaman</th><th>Gözlem</th><th style="width:170px">Kaydeden</th></tr></thead>
+        <tbody>
+          <tr><td>15.09 12:10</td>
+              <td>Öksürük azaldı, balgam sarı-yeşil ve kıvamlı. Oral alım iyi.
+                  Refakatçi yanında, mobilize oldu (koridorda 10 dk yürüdü).</td>
+              <td class="sonuk">Hem. Selin AK</td></tr>
+          <tr><td>15.09 06:30</td>
+              <td>Gece ateşi 38,9 °C ölçüldü; order gereği parasetamol verildi,
+                  ıslak kompres uygulandı. 07:30'da 38,1 °C. Nöbetçi hekime bildirildi.</td>
+              <td class="sonuk">Hem. Deniz ER</td></tr>
+          <tr><td>14.09 21:00</td>
+              <td>Refakatçiye damlacık izolasyonu anlatıldı, maske kullanımı gösterildi.
+                  Oda kapısı uyarı kartı asıldı.</td>
+              <td class="sonuk">Hem. Deniz ER</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not">Gözlem notu <b>silinmez, düzeltilmez</b>: yanlış yazılan not yeni bir
+      satırla düzeltilir ve ikisi de durur. Hemşire gözlemi hukuki bir kayıttır — üzerine
+      yazılabilseydi değeri kalmazdı.</div>
+  </div>
+
+  <div class="statusbar">
+    <span>Nöbet: 08:00–20:00 · Hem. Selin AK</span><span>·</span>
+    <span>Saatler <b>Merkez</b> şubesinin saat diliminde</span><span>·</span>
+    <span>İzlem kayıtları ISLEMLOG'a yazılır ve değiştirilemez</span>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Hemşire İzlem — tasarım notları</h4>
+  Nöbet ekranı. Poliklinikte vital <i>tek ölçümdür</i>; yatan hastada <b>eğridir</b> —
+  ekran da buna göre kurulu: önce grafik, sonra tablo.
+  <ul>
+    <li><b>Ölçüm girişi tek satır, üstte:</b> her ölçüm için pencere açmak, kaydın
+        saatinde değil vardiya sonunda toplu girilmesi demektir — o da saatleri
+        uydurulmuş bir izlem formu üretir.</li>
+    <li><b>Ateş ve nabız aynı grafikte ama İKİ EKSENDE:</b> birlikte okunurlar — ateş
+        düşerken nabız yüksek kalıyorsa bu ayrı bir bulgudur ve iki ayrı grafikte
+        kaybolur. Tek ölçek kullanılınca nabız 92, ateş grafiğinde 39 °C hizasında
+        duruyordu; aynı kâğıtta iki birim varsa eksen de iki olmalı. SpO₂ ve solunum
+        tabloda kalır.</li>
+    <li><b>Erken uyarı skoru hesaplanır ve eşiği aşınca bildirim gider:</b> "acaba hekimi
+        arasam mı" kararı hemşirenin sırtına yüklenmez; bildirimin gittiği satırda
+        kayıtlıdır.</li>
+    <li><b>Sıvı dengesi hesaplı:</b> elle tutulan toplam, gün ortasında eklenen serumla
+        sessizce yanlışlanır.</li>
+    <li><b>Risk ölçeklerinde önlem de satırda:</b> "yüksek risk" yazıp önlem yazmamak boş
+        kayıttır. Süresi geçen değerlendirme sararır.</li>
+    <li><b>Gözlem notu değiştirilemez:</b> düzeltme yeni satırdır; ikisi de durur.</li>
+  </ul>
+</div>
+
+<script>
+document.querySelectorAll('.sekme').forEach(function (s) {
+  s.addEventListener('click', function () {
+    var ad = s.dataset.sekme;
+    document.querySelectorAll('.sekme').forEach(function (x) { x.classList.toggle('on', x === s) });
+    document.querySelectorAll('.pano').forEach(function (p) { p.hidden = p.dataset.pano !== ad });
+  });
+});
+</script>
+
+</body>
+</html>

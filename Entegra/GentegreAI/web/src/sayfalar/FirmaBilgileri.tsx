@@ -38,7 +38,7 @@ const EBELGE_ALT = [
 const SERIT_ALANLARI = ['unvan', 'ad', 'aktif'];
 
 /**
- * FIRMA BILGILERI (Yonetim › Firma Bilgileri) — mockup: Ekranlar/firma_bilgileri.html
+ * FIRMA / SUBELER (Yonetim › Firma / Şubeler) — mockup: Ekranlar/firma_bilgileri.html
  *
  * EKRAN = SUBE LISTESI, kart MODAL olarak acilir (kullanici): firma bilgisi
  * sayfaya gomulu dururken hangi kaydin duzenlendigi belirsizdi ve tek subeli
@@ -142,8 +142,8 @@ export function FirmaBilgileri() {
     <>
       <div className="sayfabas" style={{ marginBottom: 10 }}>
         <div className="basrow">
-          <h1>Firma Bilgileri</h1>
-          <span className="yol">Yönetim › Firma Bilgileri</span>
+          <h1>Firma / Şubeler</h1>
+          <span className="yol">Yönetim › Firma / Şubeler</span>
         </div>
       </div>
 

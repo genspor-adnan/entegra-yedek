@@ -105,6 +105,18 @@ public static class DegerCevirici
                          : throw GentegreHatasi.Dogrulama($"{alanBasligi}: tarih cozulemedi ({s}).",
                                new AlanHatasi(alanAdi, "Gecersiz tarih.")),
 
+            // "json": jsonb kolonu (cihaz olcum eslemesi, time-out teyitleri,
+            //   IOL formul tablosu). Metin olarak tasinir ama BURADA
+            //   DOGRULANIR: bozuk JSON'u veritabanina birakmak, kullaniciya
+            //   "22P02 invalid input syntax" diye anlasilmaz bir hata
+            //   dondurmek demek. Yazarken `::jsonb` cast'i KartDeposu'nda.
+            "json" => string.IsNullOrWhiteSpace(s)
+                       ? null
+                       : JsonGecerliMi(s)
+                         ? s
+                         : throw GentegreHatasi.Dogrulama($"{alanBasligi}: gecersiz JSON.",
+                               new AlanHatasi(alanAdi, "Gecerli bir JSON degil.")),
+
             // "ondalik": olculen deger (ates 36,6 · boy 174,5 · BKI 30,4).
             //   "sayi" TAM SAYIDIR ve olcum alanlarinda 36,6 girilince kayit
             //   "sayi bekleniyor" ile reddediliyordu. VIRGUL DE KABUL EDILIR:
@@ -170,5 +182,12 @@ public static class DegerCevirici
             && (kimlikKurali ?? KimlikKurali.Varsayilan).Hata(deger?.ToString()) is { } mesaj)
             throw GentegreHatasi.Dogrulama($"{alan.Etiket}: {mesaj}",
                 new AlanHatasi(alanYolu, mesaj));
+    }
+
+    /// <summary>jsonb alanina yazilacak metin gercekten JSON mu.</summary>
+    private static bool JsonGecerliMi(string s)
+    {
+        try { using var _ = System.Text.Json.JsonDocument.Parse(s); return true; }
+        catch (System.Text.Json.JsonException) { return false; }
     }
 }

@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Sozlesme;
+﻿namespace Gentegre.Cekirdek.Sozlesme;
 
 /// <summary>
 /// DÖKÜM TANIMI (686) — dokuman/10_DOKUM_ISTATISTIK_PLANI.md §2.
@@ -125,4 +125,6 @@ public sealed class DokumKaydi
     public bool Sistem { get; set; }
     public int UrunModu { get; set; }
     public string Modul { get; set; } = "";
+    /// <summary>Dokumun ait oldugu MENU GRUBU (690); bos = gruba bagli degil.</summary>
+    public string MenuGrup { get; set; } = "";
 }

@@ -28,6 +28,7 @@ import { Hakedisim } from './sayfalar/Hakedisim';
 import { RadyolojiRapor } from './sayfalar/RadyolojiRapor';
 import { RadyolojiRaporCikti } from './sayfalar/RadyolojiRaporCikti';
 import { LabRaporCikti } from './sayfalar/LabRaporCikti';
+import { GozSemaCikti } from './sayfalar/GozSemaCikti';
 import { LabKkGrafik } from './sayfalar/LabKkGrafik';
 import { LabEtiket } from './sayfalar/LabEtiket';
 import { SatisAyarlar, AlisAyarlar } from './sayfalar/BelgeAyarlar';
@@ -81,7 +82,11 @@ function Yollar() {
           && (!l.urunModu || modUyar(l.urunModu, kullanici.urunModu))
           // MODUL suzmesi (359): kapali modulun ROTASI da acilmaz - menude
           //   gizlemek yetmiyor, adres cubuguna yazilinca ekran yine acilirdi.
-          && modulAcikMi(l, kullanici.moduller)).flatMap(l => {
+          && modulAcikMi(l, kullanici.moduller)
+          // MENU BAGLANTISI (menuYol): kendi ekrani yok, var olan bir ekrana
+          //   suzgecle gider - ayni rotayi ikinci kez kaydetmek React Router'da
+          //   sessizce ilkini kazandirirdi.
+          && !l.menuYol).flatMap(l => {
           const rota = l.rota ?? l.kaynak;
           return [
             <Route key={rota} path={`/${rota}`} element={<Liste tanim={l} />} />,
@@ -154,6 +159,11 @@ function Yollar() {
         {/* Lab sonuc raporu (441): istem numarasiyla acilir - bir istemdeki
             sayisal sonuc, kultur ve genetik ayni kagida basilir. */}
         {yetki('lab') && <Route path="/lab/rapor/:id" element={<LabRaporCikti />} />}
+        {/* Goz semasi CIKTISI (705): cizim ekranindan ayri sayfa - kagida
+            palet ve arac degil, antet + kimlik + sema + isaret dokumu gider. */}
+        {yetki('goz.muayene') && (
+          <Route path="/goz/sema-cikti/:id" element={<GozSemaCikti />} />
+        )}
         {/* Levey-Jennings (442): tetkik/lot/seviye sorgu parametresiyle. */}
         {yetki('lab.kk') && <Route path="/lab/kk/grafik" element={<LabKkGrafik />} />}
         {/* Tup barkod etiketi (444): ?istem= tum tupler, ?numune= tek tup. */}

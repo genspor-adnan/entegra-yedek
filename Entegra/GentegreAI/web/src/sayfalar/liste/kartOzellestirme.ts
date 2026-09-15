@@ -174,6 +174,25 @@ export const KART_OZELLESTIRME: Record<string, KartOzellestirme> = {
     seritAlanlari: ['bolumId', 'personelId', 'tur', 'ustMuayeneId',
                     'baslangic', 'bitis'],
   },
+
+  // ------------------------------------------------- GÖZ MUAYENESİ (691) ----
+  // Mockup `Ekranlar/Goz/goz_detayli_muayene.html`: yedi sekme, ölçüm
+  //   kümeleri birlikte okunacak biçimde gruplanmış. Kart makinesi sekmeyi
+  //   DETAY başına açıyor; burada yalnız SIRA ve GİZLEME veriliyor, ölçümün
+  //   kendisi yine kendi tablosuna yazılıyor.
+  'goz-muayene': {
+    // REFRAKSİYON AYRI SEKME DEĞİL: "Görme & Refraksiyon" tek sekmede iki
+    //   ızgara (KartDetaySekmesi `ekMatris`). Hekim "0,3 görüyor" ile
+    //   "−2,50 miyop"u birlikte okuyor; sekmeye bölmek her karşılaştırmada
+    //   sekme değiştirmek demekti.
+    gizliDetaylar: ['refraksiyon'],
+    // Mockup sırası: ölçümler önde (görme → basınç → ön segment → fundus →
+    //   motilite → ek testler), karar en sonda. "Genel" kartın kimlik
+    //   alanları: mockupta başlıkta duruyor, bizde ilk sekme.
+    sekmeSirasi: ['Genel', 'Görme & Refraksiyon', 'Tonometri & Pakimetri',
+                  'Ön Segment', 'Fundus', 'Motilite · Pupil · Alan',
+                  'Gonyoskopi & Ek Testler', 'Tanı & Plan'],
+  },
 };
 
 /** Kartın özelleştirmesi; tanımsızsa boş nesne - çağıran koşul yazmasın. */

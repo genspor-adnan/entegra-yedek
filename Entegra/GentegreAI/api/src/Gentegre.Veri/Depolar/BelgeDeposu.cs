@@ -771,6 +771,15 @@ public sealed partial class BelgeDeposu
                          where u.belge_satir_id = s.id)
              or exists (select 1 from public.kurum_icmal_satir i
                          where i.belge_satir_id = s.id)
+             -- GOZ GORUNTULEMESI / ISLEMI OLAN SATIR (691): radyoloji
+             --   istemiyle ayni kural - OCT cekildikten ya da enjeksiyon
+             --   uygulandiktan sonra ucret satiri silinip yeniden yazilirsa
+             --   klinik kayit sahipsiz kalir; veritabani da birakmaz
+             --   (NO ACTION).
+             or exists (select 1 from public.goz_goruntuleme gg
+                         where gg.belge_satir_id = s.id)
+             or exists (select 1 from public.goz_islem gi
+                         where gi.ucret_belge_satir_id = s.id)
              -- PROVIZYONA GIRMIS SATIR (kullanici: basvuru kaydet ->
              --   "sigorta_provizyon_satir_belge_satir_id_fkey"): sirkete
              --   gonderilen satirin kimligi hospitalRowNumber olarak

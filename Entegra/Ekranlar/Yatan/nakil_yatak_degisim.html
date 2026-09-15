@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nakil / Yatak Değişimi — Mockup (Gentegre AI · Yatan Hasta)</title>
+<link rel="stylesheet" href="_yatan.css">
+<style>
+  .yataklar{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+    gap:6px;padding:0 12px 12px}
+  .yk{border:1px solid var(--line);border-radius:4px;background:#fff;padding:6px 8px;font-size:11.5px}
+  .yk .kod{font-family:Consolas,monospace;font-weight:bold;color:var(--navy)}
+  .yk .alt{color:var(--muted);font-size:10.5px;margin-top:2px;line-height:1.45}
+  .yk.secili{border-color:#2f6db3;background:#eef4fc;box-shadow:inset 0 0 0 1px #2f6db3}
+  .yk.olmaz{background:#f5f6f8;color:#9aa7b4}
+  .yk.olmaz .kod{color:#9aa7b4}
+  .ok-serit{display:flex;align-items:center;gap:14px;padding:10px 12px;background:#fbfcfe;
+    border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .ok-kutu{border:1px solid var(--line);border-radius:4px;background:#fff;padding:7px 12px;min-width:210px}
+  .ok-kutu .b{font-size:10.5px;color:var(--muted)}
+  .ok-kutu .d{font-size:13px;font-weight:bold;color:var(--navy);font-family:Consolas,monospace}
+  .ok-kutu .a{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .ok-ok{font-size:20px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🔁 Nakil / Yatak Değişimi
+    <span class="sp">Yatan Hasta › Nakil · Mehmet YILMAZ · Y-2026-0417</span></div>
+
+  <div class="ok-serit">
+    <div class="ok-kutu">
+      <div class="b">MEVCUT YATAK</div>
+      <div class="d">A-306/2</div>
+      <div class="a">Dahiliye · çift kişilik · 11.09'dan beri · 620 ₺/gün</div>
+    </div>
+    <div class="ok-ok">→</div>
+    <div class="ok-kutu" style="border-color:#2f6db3;background:#eef4fc">
+      <div class="b">HEDEF YATAK</div>
+      <div class="d">A-301/1</div>
+      <div class="a">Dahiliye · tek kişilik · izolasyon odası · 850 ₺/gün</div>
+    </div>
+    <div style="margin-left:auto">
+      <span class="rz sari">Ücret sınıfı değişiyor · +230 ₺/gün</span>
+    </div>
+  </div>
+
+  <div class="alanlar dort">
+    <label>Nakil sebebi</label>
+    <div class="inp combo">İzolasyon gereği</div>
+    <label>Nakil zamanı</label>
+    <div class="inp">15.09.2026 10:15</div>
+
+    <label>Hedef klinik</label>
+    <div class="inp combo">Dahiliye <span class="sonuk" style="margin-left:auto">değişmiyor</span></div>
+    <label>Sorumlu hekim</label>
+    <div class="inp combo">Dr. Osman AKAR</div>
+
+    <label>Açıklama</label>
+    <div class="inp tam">Balgam kültüründe dirençli üreme; damlacık izolasyonu başlatıldı.</div>
+  </div>
+
+  <div class="grp" style="margin-top:0">
+    <h4>Hedef yatak seçimi <span class="mini">Dahiliye · erkek hasta · izolasyon gerekli</span></h4>
+  </div>
+  <div class="yataklar">
+    <div class="yk secili">
+      <div class="kod">A-301/1</div>
+      <div class="alt">tek kişilik · damlacık izolasyon<br><b>seçildi</b> · 850 ₺/gün</div>
+    </div>
+    <div class="yk">
+      <div class="kod">A-307/1</div>
+      <div class="alt">tek kişilik · izolasyon<br>temizlik bitti 09:40</div>
+    </div>
+    <div class="yk olmaz">
+      <div class="kod">A-303/2</div>
+      <div class="alt">✗ çift kişilik<br>izolasyon hastası tek odaya</div>
+    </div>
+    <div class="yk olmaz">
+      <div class="kod">A-305/1</div>
+      <div class="alt">✗ kadın odası<br>cinsiyet kuralı</div>
+    </div>
+    <div class="yk olmaz">
+      <div class="kod">A-304/1</div>
+      <div class="alt">✗ temizlik bekliyor<br>14.09 16:30'dan beri</div>
+    </div>
+    <div class="yk olmaz">
+      <div class="kod">YB-1/3</div>
+      <div class="alt">✗ yoğun bakım<br>yatış türü uygun değil</div>
+    </div>
+  </div>
+
+  <div class="uyari mavi">
+    <span>ℹ</span>
+    <div><b>Uygun olmayan yatak gizlenmez, sebebiyle gösterilir.</b> Listeden düşseydi
+      servis "yer yok" der ve telefon trafiği başlardı; sebep görününce "temizliği
+      öne alalım" ya da "oda kuralını değiştirelim" denebiliyor.</div>
+  </div>
+
+  <div class="iki">
+    <div>
+      <div class="grp">
+        <h4>Nakille birlikte taşınanlar <span class="mini">otomatik</span></h4>
+        <div class="ic">
+          <div class="sat"><span>Açık order'lar</span><b>7 order · aynen devam</b></div>
+          <div class="sat"><span>Bugünün ilaç çizelgesi</span><b>kalan 4 doz yeni yatağa taşındı</b></div>
+          <div class="sat"><span>İzlem ve sıvı takibi</span><b>kesintisiz · aynı yatış</b></div>
+          <div class="sat"><span>Bekleyen tetkik / konsültasyon</span><b>3 kayıt</b></div>
+          <div class="sat"><span>Refakatçi</span><b>tek kişilik odada kalabilir</b></div>
+        </div>
+        <div class="not">Nakil <b>yeni bir yatış değildir</b>: aynı <code>yatis</code>
+          kaydının yatağı değişir (<code>yatis_yatak</code> satırı kapanır, yenisi açılır).
+          Yeni yatış açılsaydı order'lar, izlem ve gün sayısı sıfırlanır; hasta altıncı
+          gününde "birinci gün" görünürdü.</div>
+      </div>
+    </div>
+    <div>
+      <div class="grp">
+        <h4>Nakil sonrası yapılacaklar</h4>
+        <div class="ic">
+          <div class="sat"><span>Eski yatak</span><b>A-306/2 → <span class="rz sari">temizlik bekliyor</span></b></div>
+          <div class="sat"><span>Yeni yatak</span><b>A-301/1 → <span class="rz mavi">dolu</span></b></div>
+          <div class="sat"><span>Yatak ücreti</span><b>10:15'ten itibaren tek kişilik tarifesi</b></div>
+          <div class="sat"><span>Oda kapısı</span><b>izolasyon uyarı kartı basılır</b></div>
+          <div class="sat"><span>Bildirim</span><b>servis, eczane, mutfak, temizlik</b></div>
+        </div>
+        <div class="not"><b>Yatak ücreti gün bölünerek hesaplanmaz</b>, hareket saatinden
+          itibaren yeni tarife işler ve gün sonu işi iki satır üretir. Tek satır tutulsaydı
+          altı günlük yatışta üç farklı oda ücreti hesaplanamazdı.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="uyari sari">
+    <span>⚠</span>
+    <div><b>Klinik değişiyorsa nakil ayrıca hekim devri demektir.</b> Hedef klinik farklıysa
+      sorumlu hekim alanı zorunlu olur ve devir notu istenir: "hastayı kim takip ediyor"
+      sorusunun cevapsız kaldığı saatler, yatan hastadaki en sık aksama.</div>
+  </div>
+
+  <div class="malt">
+    <div class="btn">Vazgeç</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🖨</span> Nakil Formu</div>
+    <div class="btn primary">Nakli Uygula</div>
+  </div>
+
+  <div class="statusbar">
+    <span>Yatak geçmişi faturanın dayanağıdır</span><span>·</span>
+    <span>Saatler <b>Merkez</b> şubesinin saat diliminde</span><span>·</span>
+    <span>Nakil ISLEMLOG'a yazılır</span>
+  </div>
+</div>
+
+<!-- ============================================ KURUM DIŞINA SEVK (ayrı) -->
+<div class="perde">
+  <div class="modal">
+    <div class="mb">🚑 Kurum Dışına Sevk <span class="sp">nakil değil, ÇIKIŞ</span></div>
+    <div class="uyari kir" style="margin-top:12px">
+      <span>⚠</span>
+      <div>Kurum dışına sevk <b>yatışı kapatır</b> (çıkış şekli "sevk"), yatak boşalır ve
+        epikriz istenir. Yatak değişimiyle aynı düğmeye konulsaydı, "başka hastaneye
+        gönderdim" ile "üst kata taşıdım" aynı işlem sanılır ve yatış açık kalırdı.</div>
+    </div>
+    <div class="alanlar">
+      <label>Sevk edilen kurum</label><div class="inp combo">Şehir Hastanesi · Göğüs Hastalıkları</div>
+      <label>Sevk nedeni</label><div class="inp combo">İleri tetkik / tedavi</div>
+      <label>Ulaşım</label><div class="inp combo">112 ambulans · doktor eşliğinde</div>
+      <label>Epikriz</label><div class="inp ro">Taslak hazır — sevkten önce imzalanmalı</div>
+    </div>
+    <div class="malt">
+      <div class="btn">Vazgeç</div>
+      <div class="sp"></div>
+      <div class="btn danger">Sevk Et ve Yatışı Kapat</div>
+    </div>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Nakil / Yatak Değişimi — tasarım notları</h4>
+  Nakil yatan hastada <b>sıradan bir olaydır</b>: oda talebi, izolasyon, yoğun bakıma
+  çıkış, servis değişimi. Bu yüzden ayrı bir ekranı var ve yatış kartının içine bir alan
+  olarak gömülmedi.
+  <ul>
+    <li><b>Yatak hareketi ayrı tabloda</b> (<code>yatis_yatak</code>): <code>yatis</code>
+        üzerinde tek <code>yatak_id</code> tutulsaydı geçmiş kaybolur, yatak ücreti de
+        yanlış hesaplanırdı — fiyat yatağın sınıfına bağlı ve altı günlük yatışta üç
+        farklı oda olabiliyor.</li>
+    <li><b>Nakil yeni yatış değildir:</b> order, izlem, gün sayısı ve dosya numarası
+        aynı kalır. Yeni yatış açmak hastayı altıncı gününde "birinci gün"
+        gösterirdi.</li>
+    <li><b>Ücret sınıfı değişimi peşinen uyarır:</b> tek kişilik odaya geçen hastanın
+        farkı taburcu gününde öğrenilmemeli.</li>
+    <li><b>Eski yatak "boş" değil "temizlik bekliyor" olur:</b> yoksa kabul, hastayı
+        yapılmamış yatağa gönderir.</li>
+    <li><b>Kurum dışına sevk ayrı işlem:</b> o bir çıkıştır, yatışı kapatır ve epikriz
+        ister. Aynı düğmeye konulsaydı yatış açık kalır, yatak dolu görünürdü.</li>
+    <li><b>Klinik değişiyorsa hekim devri zorunlu:</b> "hastayı kim takip ediyor"un
+        cevapsız kaldığı saatler yatan hastadaki en sık aksama.</li>
+  </ul>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Order ve İlaç Uygulama (eMAR) — Mockup (Gentegre AI · Yatan Hasta)</title>
+<link rel="stylesheet" href="_yatan.css">
+<style>
+  .serit-kimlik{display:flex;gap:18px;align-items:center;padding:9px 12px;
+    background:#fbfcfe;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .serit-kimlik .ad{font-size:14px;font-weight:bold;color:var(--navy)}
+  .serit-kimlik .kv{display:flex;flex-direction:column;gap:1px}
+  .serit-kimlik .kv span{font-size:10.5px;color:var(--muted)}
+  .serit-kimlik .kv b{font-size:12px}
+  .serit-kimlik .sag{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap}
+  .yatak-kod{font-family:Consolas,monospace;font-weight:bold;color:var(--navy)}
+
+  /* eMAR ÇİZELGESİ: satır = order, sütun = saat. İlaç takibi "verildi mi"
+     sorusudur ve bu soru ancak SAATLE birlikte sorulur - düz liste
+     "bugün üç kez verilecek"i söyler, "16:00 atlandı"yı söylemez. */
+  .emar{overflow-x:auto;background:#fff}
+  .emar table{border-collapse:collapse;width:100%;min-width:900px}
+  .emar th.saat{width:58px;text-align:center}
+  .emar td.saat{text-align:center;padding:3px}
+  .doz{display:inline-flex;flex-direction:column;align-items:center;gap:1px;
+    border:1px solid var(--line);border-radius:3px;padding:3px 5px;min-width:48px;
+    font-size:10.5px;background:#fbfcfd;color:#4d5d6e}
+  .doz b{font-size:11px}
+  .doz.ok{background:#e9f6ee;border-color:#bfe3cb;color:#2e7d46}
+  .doz.bekle{background:#f4f7fb;border-color:#cfe0f5;color:#2f6db3}
+  .doz.gec{background:#fdf6e3;border-color:#f2ddbf;color:#8a6218}
+  .doz.atla{background:#fbe9e7;border-color:#f3c4bf;color:#b3261e}
+  .doz.yok{border-style:dashed;color:#b6c0cb;background:#fff}
+  .ilac-ad{font-weight:bold}
+  .ilac-alt{font-size:10.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">💉 Order ve İlaç Uygulama (eMAR)
+    <span class="sp">Yatan Hasta › İlaç Uygulama · A-301/1 · 15.09.2026</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>🔎</span> Barkod Oku</div>
+    <div class="btn"><span>✓</span> Uygulandı İşaretle</div>
+    <div class="btn"><span>⤫</span> Atlandı (sebep)</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🩺</span> Order Ekle</div>
+    <div class="btn"><span>⏸</span> Order Durdur</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>✍</span> Sözel Order İmzala <span class="rz kir">1</span></div>
+    <div class="sp"></div>
+    <div class="btn"><span>🖨</span> İlaç Takip Formu</div>
+  </div>
+
+  <div class="serit-kimlik">
+    <div class="ad">Mehmet YILMAZ</div>
+    <div class="kv"><span>Yatak</span><b class="yatak-kod">A-301/1</b></div>
+    <div class="kv"><span>Kimlik bilekliği</span><b>Y-2026-0417</b></div>
+    <div class="kv"><span>Kilo</span><b>78 kg</b></div>
+    <div class="kv"><span>Böbrek (GFR)</span><b>62 mL/dk</b></div>
+    <div class="sag">
+      <span class="rz kir">💊 penisilin alerjisi</span>
+      <span class="rz sari">⚠ 1 doz gecikti</span>
+    </div>
+  </div>
+
+  <div class="serit">
+    <div class="kutu combo">📅 Gün: <b>15.09.2026</b></div>
+    <div class="kutu combo">🕐 Vardiya: <b>08:00–20:00</b></div>
+    <span class="cip on">Bugün</span>
+    <span class="cip">Geciken</span>
+    <span class="cip">Gerektiğinde</span>
+    <span class="cip">Tüm order'lar</span>
+  </div>
+
+  <div class="ozet">
+    <div class="k"><div class="bas">Bugünkü doz</div><div class="deg">14</div>
+      <div class="alt">6 order</div></div>
+    <div class="k iyi"><div class="bas">Uygulandı</div><div class="deg">8</div>
+      <div class="alt">hepsi barkodlu</div></div>
+    <div class="k"><div class="bas">Bekleyen</div><div class="deg">4</div>
+      <div class="alt">sonraki 20:00</div></div>
+    <div class="k teh"><div class="bas">Geciken</div><div class="deg">1</div>
+      <div class="alt">Seftriakson 16:00</div></div>
+    <div class="k uy"><div class="bas">Atlanan</div><div class="deg">1</div>
+      <div class="alt">sebep girildi</div></div>
+    <div class="k teh"><div class="bas">İmzasız sözel order</div><div class="deg">1</div>
+      <div class="alt">dün 23:40</div></div>
+  </div>
+
+  <!-- ==================================================== eMAR ÇİZELGESİ -->
+  <div class="emar">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:320px">Order</th>
+          <th style="width:120px">Doz / Yol</th>
+          <th class="saat">08:00</th><th class="saat">12:00</th><th class="saat">16:00</th>
+          <th class="saat">20:00</th><th class="saat">24:00</th>
+          <th style="width:150px">Son uygulayan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="ilac-ad">Seftriakson 1 g flakon</span>
+              <div class="ilac-alt">antibiyotik · 10.09 – 17.09 · Dr. Osman AKAR</div></td>
+          <td>1 g · IV</td>
+          <td class="saat"><span class="doz ok">✓<b>08:04</b></span></td>
+          <td class="saat"><span class="doz yok">—</span></td>
+          <td class="saat"><span class="doz gec">⏰<b>gecikti</b></span></td>
+          <td class="saat"><span class="doz bekle">○<b>20:00</b></span></td>
+          <td class="saat"><span class="doz yok">—</span></td>
+          <td class="sonuk">Hem. Selin AK</td>
+        </tr>
+        <tr>
+          <td><span class="ilac-ad">Enoksaparin 4000 IU</span>
+              <div class="ilac-alt">antikoagülan · 15.09 – 22.09 ·
+                <span class="rz kir">sözel order · imza bekliyor</span></div></td>
+          <td>0,4 mL · SC</td>
+          <td class="saat"><span class="doz yok">—</span></td>
+          <td class="saat"><span class="doz yok">—</span></td>
+          <td class="saat"><span class="doz yok">—</span></td>
+          <td class="saat"><span class="doz bekle">○<b>22:00</b></span></td>
+          <td class="saat"><span class="doz yok">—</span></td>
+          <td class="sonuk">—</td>
+        </tr>
+        <tr>
+          <td><span class="ilac-ad">Pantoprazol 40 mg</span>
+              <div class="ilac-alt">mide koruyucu · 09.09 – … · Dr. Osman AKAR</div></td>
+          <td>40 mg · IV</td>
+          <td class="saat"><span class="doz ok">✓<b>08:10</b></span></td>
+          <td class="saat"><span class="doz yok">—</span></td>
+          <td class="saat"><span class="doz yok">—</span></td>
+          <td class="saat"><span class="doz yok">—</span></td>
+          <td class="saat"><span class="doz yok">—</span></td>
+          <td class="sonuk">Hem. Selin AK</td>
+        </tr>
+        <tr>
+          <td><span class="ilac-ad">%0.9 NaCl 1000 mL</span>
+              <div class="ilac-alt">sıvı · sürekli infüzyon · 09.09 – …</div></td>
+          <td>1000 mL · IV</td>
+          <td class="saat"><span class="doz ok">✓<b>08:00</b></span></td>
+          <td class="saat"><span class="doz ok">✓<b>12:00</b></span></td>
+          <td class="saat"><span class="doz bekle">○<b>16:00</b></span></td>
+          <td class="saat"><span class="doz bekle">○<b>20:00</b></span></td>
+          <td class="saat"><span class="doz bekle">○<b>24:00</b></span></td>
+          <td class="sonuk">Hem. Selin AK</td>
+        </tr>
+        <tr>
+          <td><span class="ilac-ad">Metformin 1000 mg</span>
+              <div class="ilac-alt">antidiyabetik · 09.09 – … · Dr. Osman AKAR</div></td>
+          <td>1000 mg · PO</td>
+          <td class="saat"><span class="doz ok">✓<b>08:20</b></span></td>
+          <td class="saat"><span class="doz yok">—</span></td>
+          <td class="saat"><span class="doz yok">—</span></td>
+          <td class="saat"><span class="doz atla">✕<b>atlandı</b></span></td>
+          <td class="saat"><span class="doz yok">—</span></td>
+          <td class="sonuk">Hem. Selin AK</td>
+        </tr>
+        <tr>
+          <td><span class="ilac-ad">Parasetamol 500 mg</span>
+              <div class="ilac-alt">ateş / ağrı · <b>gerektiğinde</b> · en çok 4×1</div></td>
+          <td>500 mg · PO</td>
+          <td class="saat" colspan="5">
+            <span class="doz ok">✓<b>06:35</b></span>
+            <span class="sonuk" style="margin-left:8px">bugün 1 kez · ateş 38,9 °C üzerine</span>
+          </td>
+          <td class="sonuk">Hem. Deniz ER</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="not">
+    <b>Satır order, sütun saat.</b> İlaç takibi "verildi mi" sorusudur ve bu soru ancak
+    saatle birlikte sorulur: düz liste "günde üç kez verilecek" der, "16:00 atlandı"yı
+    söylemez. Uygulama satırları order kaydedilirken <b>önceden üretilir</b> — plan
+    görünmeden takip olmaz.
+  </div>
+
+  <!-- ================================================== UYGULAMA PENCERESİ -->
+  <div class="perde">
+    <div class="modal genis">
+      <div class="mb">💉 İlaç Uygulama <span class="sp">Seftriakson 1 g · 16:00 dozu</span></div>
+
+      <div class="uyari kir">
+        <span>⏰</span>
+        <div><b>Bu doz gecikti.</b> Planlanan 16:00, şu an 17:12. Gecikme sebebi
+          uygulama kaydına yazılır — "neden geç verildi" sorusunun cevabı sonradan
+          hatırlanmaz.</div>
+      </div>
+
+      <div class="alanlar dort">
+        <label>Hasta</label>
+        <div class="inp ro">Mehmet YILMAZ · Y-2026-0417
+          <span class="rz ok" style="margin-left:auto">bileklik okundu</span></div>
+        <label>İlaç</label>
+        <div class="inp ro">Seftriakson 1 g flakon
+          <span class="rz ok" style="margin-left:auto">karekod okundu</span></div>
+
+        <label>Doz / yol</label><div class="inp ro">1 g · IV infüzyon</div>
+        <label>Uygulama zamanı</label><div class="inp">15.09.2026 17:12</div>
+
+        <label>Seri / lot</label><div class="inp ro">LOT-4471 · SKT 08.2027</div>
+        <label>Uygulayan</label><div class="inp ro">Hem. Selin AK</div>
+
+        <label>Gecikme sebebi</label>
+        <div class="inp combo tam">Damar yolu yenilendi</div>
+      </div>
+
+      <div class="uyari sari">
+        <span>⚠</span>
+        <div><b>Beş doğru kontrolü barkodla yapılır:</b> doğru hasta (bileklik), doğru
+          ilaç (karekod), doğru doz, doğru yol, doğru zaman. Barkod okutulmadan uygulama
+          kaydedilebilir ama kayıt <b>"elle doğrulandı"</b> olarak işaretlenir — ikisi
+          aynı şey değildir ve denetimde de öyle görünür.</div>
+      </div>
+
+      <div class="ic" style="padding:0 12px 12px">
+        <div class="sat"><span>Alerji kontrolü</span>
+          <b><span class="rz ok">geçti</span> penisilin alerjisi · sefalosporin çapraz
+            reaksiyon riski hekimce değerlendirildi</b></div>
+        <div class="sat"><span>Stok</span><b>Servis ilaç dolabı · 4 flakon kalacak</b></div>
+        <div class="sat"><span>Faturalama</span><b>Uygulama kaydı hizmet satırı doğurur</b></div>
+        <div class="sat"><span>İTS</span><b>Karekod "hasta kullanımı" bildirimine girer</b></div>
+      </div>
+
+      <div class="malt">
+        <div class="btn">Vazgeç</div>
+        <div class="btn danger">Atlandı (sebep gir)</div>
+        <div class="sp"></div>
+        <div class="btn primary">Uygulandı</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Order ve İlaç Uygulama — tasarım notları</h4>
+  Order bir <b>talimat</b>, uygulama bir <b>olaydır</b>. "Günde 2×1 IV" tek satırdır;
+  08:00'de verilmiş, 16:00'da gecikmiş olabilir. İkisi tek tabloda tutulursa "verildi mi"
+  sorusunun cevabı kalmaz.
+  <ul>
+    <li><b>Uygulama satırları order kaydedilirken önceden üretilir</b> (planlanan saatler):
+        plan görünmeden takip olmaz, sonradan üretilen satır da "atlanmış dozu"
+        gizler.</li>
+    <li><b>Atlanan doz sebepsiz olmaz:</b> sebep alanı boş geçilemez. "Hasta reddetti",
+        "damar yolu yok", "NPO" — üçü de klinik bilgidir.</li>
+    <li><b>Beş doğru barkodla:</b> bileklik + ilaç karekodu. Barkodsuz uygulama
+        engellenmez (acil durum) ama <i>"elle doğrulandı"</i> diye işaretlenir; ikisini
+        aynı göstermek, kontrolü kâğıt üstünde bırakmak olurdu.</li>
+    <li><b>Alerji ve etkileşim kontrolü order kaydedilirken çalışır</b>, uygulama anında
+        değil: uyarı uygulama anında çıkarsa ilaç çoktan hazırlanmıştır.</li>
+    <li><b>Sözel order uygulanır ama imzasız kalmaz:</b> kırmızı rozetle taşınır, hekim
+        imzalayana kadar listede durur.</li>
+    <li><b>Uygulama üç yere birden yazar:</b> hasta kaydı, stok düşümü ve hizmet satırı.
+        Hemşire tek işlem yapar; ikinci ve üçüncüsü elle yapılsaydı, biri hep eksik
+        kalırdı.</li>
+  </ul>
+</div>
+
+</body>
+</html>

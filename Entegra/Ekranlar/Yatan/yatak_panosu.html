@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yatak Panosu — Mockup (Gentegre AI · Yatan Hasta)</title>
+<link rel="stylesheet" href="_yatan.css">
+<style>
+  /* PANO GRID: oda kutusu, icinde yatak satirlari. Yatak tek tek kutu
+     olsaydi oda kurallari (cinsiyet, izolasyon) gorunmez olurdu - oda
+     dolulugu yatak dolulugundan bagimsiz bir kisittir. */
+  .pano-govde{padding:10px;background:#f7fafc}
+  .kat{margin-bottom:14px}
+  .kat-bas{display:flex;align-items:center;gap:10px;padding:5px 4px;font-weight:bold;
+    color:#2c4a6b;font-size:12.5px;border-bottom:1px solid var(--line2);margin-bottom:8px}
+  .kat-bas .mini{font-weight:normal;color:var(--muted);font-size:11px}
+  .odalar{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:8px}
+  .oda{border:1px solid var(--line);border-radius:4px;background:#fff;overflow:hidden}
+  .oda-bas{display:flex;align-items:center;gap:6px;padding:5px 8px;font-size:11.5px;
+    background:linear-gradient(#f6f9fc,#eef3f9);border-bottom:1px solid var(--line2);
+    color:#2c4a6b;font-weight:bold}
+  .oda-bas .sp{margin-left:auto;font-weight:normal}
+  .oda.izo{border-color:#e3a7a0}
+  .oda.izo .oda-bas{background:linear-gradient(#fdf1f0,#fbe4e2);color:#8c2119}
+  .yatak{display:flex;align-items:center;gap:7px;padding:6px 8px;font-size:11.5px;
+    border-top:1px solid #f0f4f8}
+  .yatak:first-of-type{border-top:none}
+  .yatak .kod{font-family:Consolas,monospace;font-weight:bold;color:var(--navy);min-width:44px}
+  .yatak .ad{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .yatak .gun{color:var(--muted);font-size:10.5px}
+  .yatak.bos{background:#f4fbf6}
+  .yatak.bos .ad{color:#2e7d46}
+  .yatak.temizlik{background:#fdfaf0}
+  .yatak.temizlik .ad{color:#8a6218}
+  .yatak.kapali{background:#f5f6f8}
+  .yatak.kapali .ad{color:#8c98a6}
+  .yatak.cikacak{background:#eef4fc}
+  /* Durum noktasi: rozet yerine nokta - on iki yatakta on iki rozet,
+     panoyu okunmaz yapiyordu. */
+  .nk{width:9px;height:9px;border-radius:50%;flex:0 0 auto;border:1px solid rgba(0,0,0,.15)}
+  .nk.dolu{background:#2f6db3}
+  .nk.bos{background:#4caf6d}
+  .nk.temizlik{background:#e2b33c}
+  .nk.rezerve{background:#7e57c2}
+  .nk.kapali{background:#9aa7b4}
+  .lejant{display:flex;gap:14px;flex-wrap:wrap;padding:7px 12px;background:#fff;
+    border-top:1px solid var(--line2);font-size:11px;color:var(--muted)}
+  .lejant span{display:flex;align-items:center;gap:5px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🛏 Yatak Panosu
+    <span class="sp">Yatan Hasta › Yatak Yönetimi · B Blok · Dahiliye + Genel Cerrahi</span></div>
+
+  <div class="toolbar">
+    <div class="btn primary"><span>＋</span> Yatış Kabul</div>
+    <div class="btn"><span>🔁</span> Nakil / Yatak Değişimi</div>
+    <div class="sepv"></div>
+    <div class="btn"><span>🧹</span> Temizlendi İşaretle</div>
+    <div class="btn"><span>🚫</span> Yatağı Kapat</div>
+    <div class="btn"><span>🛏</span> Yatak / Oda Tanımları</div>
+    <div class="sp"></div>
+    <div class="btn"><span>🖨</span> Doluluk Raporu</div>
+  </div>
+
+  <div class="serit">
+    <div class="kutu combo">🏢 Blok: <b>B Blok</b></div>
+    <div class="kutu combo">🏥 Servis: <b>Tümü</b></div>
+    <div class="kutu combo">🛏 Yatak tipi: <b>Tümü</b></div>
+    <span class="cip on">Hepsi</span>
+    <span class="cip">Yalnız boş</span>
+    <span class="cip">Bugün boşalacak</span>
+    <span class="cip">Temizlik bekleyen</span>
+    <span class="cip">İzolasyon</span>
+  </div>
+
+  <div class="ozet">
+    <div class="k"><div class="bas">Toplam yatak</div><div class="deg">48</div>
+      <div class="alt">2 blok · 4 servis</div></div>
+    <div class="k uy"><div class="bas">Doluluk</div><div class="deg">%79</div>
+      <div class="alt">38 dolu</div></div>
+    <div class="k iyi"><div class="bas">Boş · hazır</div><div class="deg">6</div>
+      <div class="alt">hemen verilebilir</div></div>
+    <div class="k uy"><div class="bas">Temizlik bekleyen</div><div class="deg">2</div>
+      <div class="alt">ortalama 41 dk</div></div>
+    <div class="k"><div class="bas">Bugün boşalacak</div><div class="deg">5</div>
+      <div class="alt">taburcu planlı</div></div>
+    <div class="k teh"><div class="bas">Kapalı yatak</div><div class="deg">2</div>
+      <div class="alt">arıza · tadilat</div></div>
+  </div>
+
+  <div class="pano-govde">
+
+    <div class="kat">
+      <div class="kat-bas">3. Kat — Dahiliye
+        <span class="mini">12 yatak · 9 dolu · %75</span></div>
+      <div class="odalar">
+
+        <div class="oda izo">
+          <div class="oda-bas">🚪 A-301 · tek kişilik
+            <span class="sp"><span class="rz kir">damlacık izolasyon</span></span></div>
+          <div class="yatak">
+            <span class="nk dolu"></span><span class="kod">301/1</span>
+            <span class="ad">Mehmet YILMAZ · 68 E</span><span class="gun">6. gün</span>
+          </div>
+        </div>
+
+        <div class="oda">
+          <div class="oda-bas">🚪 A-302 · çift kişilik
+            <span class="sp"><span class="rz mavi">kadın</span></span></div>
+          <div class="yatak">
+            <span class="nk dolu"></span><span class="kod">302/1</span>
+            <span class="ad">Ayşe DEMİR · 74 K</span><span class="gun">11. gün</span>
+          </div>
+          <div class="yatak cikacak">
+            <span class="nk dolu"></span><span class="kod">302/2</span>
+            <span class="ad">Fatma KAYA · 59 K</span>
+            <span class="gun"><span class="rz sari">bugün çıkacak</span></span>
+          </div>
+        </div>
+
+        <div class="oda">
+          <div class="oda-bas">🚪 A-303 · çift kişilik
+            <span class="sp"><span class="rz mavi">erkek</span></span></div>
+          <div class="yatak">
+            <span class="nk dolu"></span><span class="kod">303/1</span>
+            <span class="ad">Ali VURAL · 45 E</span><span class="gun">1. gün</span>
+          </div>
+          <div class="yatak bos">
+            <span class="nk bos"></span><span class="kod">303/2</span>
+            <span class="ad">Boş · hazır</span><span class="gun">erkek hastaya</span>
+          </div>
+        </div>
+
+        <div class="oda">
+          <div class="oda-bas">🚪 A-304 · çift kişilik <span class="sp sonuk">kural: ilk yatana göre</span></div>
+          <div class="yatak temizlik">
+            <span class="nk temizlik"></span><span class="kod">304/1</span>
+            <span class="ad">Temizlik bekliyor</span><span class="gun">14.09 16:30'dan beri</span>
+          </div>
+          <div class="yatak bos">
+            <span class="nk bos"></span><span class="kod">304/2</span>
+            <span class="ad">Boş · hazır</span><span class="gun">cinsiyet serbest</span>
+          </div>
+        </div>
+
+        <div class="oda">
+          <div class="oda-bas">🚪 A-305 · çift kişilik <span class="sp"><span class="rz mavi">kadın</span></span></div>
+          <div class="yatak bos">
+            <span class="nk bos"></span><span class="kod">305/1</span>
+            <span class="ad">Boş · hazır</span><span class="gun">kadın hastaya</span>
+          </div>
+          <div class="yatak">
+            <span class="nk rezerve"></span><span class="kod">305/2</span>
+            <span class="ad">Zeynep ACAR · 31 K</span>
+            <span class="gun"><span class="rz mor">rezerve</span></span>
+          </div>
+        </div>
+
+        <div class="oda">
+          <div class="oda-bas">🚪 A-306 · çift kişilik <span class="sp sonuk">—</span></div>
+          <div class="yatak">
+            <span class="nk dolu"></span><span class="kod">306/1</span>
+            <span class="ad">Hatice ŞEN · 66 K</span><span class="gun">12. gün</span>
+          </div>
+          <div class="yatak kapali">
+            <span class="nk kapali"></span><span class="kod">306/2</span>
+            <span class="ad">Kapalı · arıza</span><span class="gun">motor · 12.09</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="kat">
+      <div class="kat-bas">2. Kat — Genel Cerrahi
+        <span class="mini">10 yatak · 8 dolu · %80</span></div>
+      <div class="odalar">
+
+        <div class="oda">
+          <div class="oda-bas">🚪 A-201 · tek kişilik <span class="sp sonuk">suit</span></div>
+          <div class="yatak">
+            <span class="nk dolu"></span><span class="kod">201/1</span>
+            <span class="ad">Kemal ARSLAN · 52 E</span><span class="gun">3. gün</span>
+          </div>
+        </div>
+
+        <div class="oda">
+          <div class="oda-bas">🚪 A-202 · çift kişilik <span class="sp"><span class="rz mavi">erkek</span></span></div>
+          <div class="yatak">
+            <span class="nk dolu"></span><span class="kod">202/1</span>
+            <span class="ad">Yusuf ÇETİN · 39 E</span><span class="gun">2. gün</span>
+          </div>
+          <div class="yatak cikacak">
+            <span class="nk dolu"></span><span class="kod">202/2</span>
+            <span class="ad">Salih GÜL · 61 E</span>
+            <span class="gun"><span class="rz sari">bugün çıkacak</span></span>
+          </div>
+        </div>
+
+        <div class="oda">
+          <div class="oda-bas">🚪 A-203 · çok yataklı (4) <span class="sp"><span class="rz mavi">kadın</span></span></div>
+          <div class="yatak">
+            <span class="nk dolu"></span><span class="kod">203/1</span>
+            <span class="ad">Nuray KOÇ · 48 K</span><span class="gun">4. gün</span>
+          </div>
+          <div class="yatak">
+            <span class="nk dolu"></span><span class="kod">203/2</span>
+            <span class="ad">Sevim AL · 70 K</span><span class="gun">7. gün</span>
+          </div>
+          <div class="yatak temizlik">
+            <span class="nk temizlik"></span><span class="kod">203/3</span>
+            <span class="ad">Temizlik bekliyor</span><span class="gun">bugün 09:10</span>
+          </div>
+          <div class="yatak bos">
+            <span class="nk bos"></span><span class="kod">203/4</span>
+            <span class="ad">Boş · hazır</span><span class="gun">kadın hastaya</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="kat">
+      <div class="kat-bas">1. Kat — Yoğun Bakım
+        <span class="mini">6 yatak · 5 dolu · %83 · ziyaret kapalı</span></div>
+      <div class="odalar">
+        <div class="oda izo">
+          <div class="oda-bas">🚪 YB-1 · yoğun bakım (3 yatak)
+            <span class="sp"><span class="rz kir">koruyucu izolasyon</span></span></div>
+          <div class="yatak">
+            <span class="nk dolu"></span><span class="kod">YB-1/1</span>
+            <span class="ad">İsmail POLAT · 81 E</span><span class="gun">9. gün</span>
+          </div>
+          <div class="yatak">
+            <span class="nk dolu"></span><span class="kod">YB-1/2</span>
+            <span class="ad">Gülten BAY · 76 K</span><span class="gun">4. gün</span>
+          </div>
+          <div class="yatak bos">
+            <span class="nk bos"></span><span class="kod">YB-1/3</span>
+            <span class="ad">Boş · hazır</span><span class="gun">solunum cihazlı</span>
+          </div>
+        </div>
+        <div class="oda">
+          <div class="oda-bas">🚪 YB-2 · yoğun bakım (3 yatak) <span class="sp sonuk">—</span></div>
+          <div class="yatak">
+            <span class="nk dolu"></span><span class="kod">YB-2/1</span>
+            <span class="ad">Osman EKİZ · 69 E</span><span class="gun">2. gün</span>
+          </div>
+          <div class="yatak">
+            <span class="nk dolu"></span><span class="kod">YB-2/2</span>
+            <span class="ad">Leyla TUNÇ · 58 K</span><span class="gun">6. gün</span>
+          </div>
+          <div class="yatak">
+            <span class="nk dolu"></span><span class="kod">YB-2/3</span>
+            <span class="ad">Hüseyin ÖZ · 77 E</span><span class="gun">18. gün</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="lejant">
+    <span><span class="nk dolu"></span> Dolu</span>
+    <span><span class="nk bos"></span> Boş · hazır</span>
+    <span><span class="nk rezerve"></span> Rezerve (hasta servise çıkmadı)</span>
+    <span><span class="nk temizlik"></span> Temizlik bekliyor</span>
+    <span><span class="nk kapali"></span> Kapalı (arıza / tadilat)</span>
+    <span><span class="rz sari">bugün çıkacak</span> tahmini taburcu bugün</span>
+  </div>
+
+  <div class="statusbar">
+    <span>48 yatak · 38 dolu · 6 hazır · 2 temizlikte · 2 kapalı</span><span>·</span>
+    <span>Doluluk <b>%79</b> · bugün boşalacak 5</span><span>·</span>
+    <span>Yatak durumu değişikliği ISLEMLOG'a yazılır</span>
+  </div>
+</div>
+
+<div class="aciklama">
+  <h4>Yatak Panosu — tasarım notları</h4>
+  "Yer var mı?" sorusunun tek cevabı. Liste değil <b>pano</b>: yatak sayısı kurumda
+  sabittir ve gözle taranır; satır satır liste, "şu odada iki boş var mı" sorusunu
+  cevaplamaz.
+  <ul>
+    <li><b>Kutu oda, satır yatak.</b> Yatak tek tek kutu olsaydı oda kuralları
+        (cinsiyet, izolasyon, oda türü) görünmez olurdu — oysa boş yatağın
+        <i>verilebilir</i> olup olmadığını oda belirler: kadın odasındaki boş yatak,
+        erkek hasta için boş değildir.</li>
+    <li><b>Temizlik ayrı bir durum.</b> Taburcu olan yatak anında "boş" sayılsaydı,
+        kabul hastayı yapılmamış yatağa gönderirdi. Personel "temizlendi" deyince
+        yatak hazır olur; bekleme süresi ortalaması özet kutusunda durur, çünkü
+        kurumdaki gizli kapasite kaybı çoğu zaman burada.</li>
+    <li><b>Rezerve, dolunun alt türü değil:</b> yatak ayrılmış ama hasta ameliyathanede
+        ya da acilde bekliyor olabilir. "Dolu" gösterilseydi kimse odaya bakmaz,
+        "boş" gösterilseydi ikinci bir hasta yazılırdı.</li>
+    <li><b>"Bugün çıkacak" yatağı boşa çıkarmaz</b>, işaretler: öğleden sonra boşalacak
+        yatak, sabah gelen hastaya <i>planlanabilir</i> ama <i>verilemez</i>.</li>
+    <li><b>Kapalı yatak doluluk paydasından düşer.</b> Arızalı yatağı payda içinde
+        bırakmak doluluk oranını olduğundan düşük gösterir ve "yer var" yanılgısı
+        üretir.</li>
+    <li><b>Rozet yerine renk noktası:</b> kırk sekiz yatakta kırk sekiz rozet, panoyu
+        okunmaz yapıyordu. Renk durum için, rozet yalnız <i>istisna</i> için
+        (izolasyon, bugün çıkacak).</li>
+  </ul>
+</div>
+
+</body>
+</html>
