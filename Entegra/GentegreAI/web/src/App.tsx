@@ -34,6 +34,7 @@ import { SatisAyarlar, AlisAyarlar } from './sayfalar/BelgeAyarlar';
 import { Panel } from './sayfalar/Panel';
 import { ParolaZorunlu } from './sayfalar/ParolaZorunlu';
 import { IskontoOnaylari } from './sayfalar/IskontoOnaylari';
+import { Dokumler } from './sayfalar/Dokumler';
 
 function Yollar() {
   const { kullanici, yukleniyor, yetki } = useOturum();
@@ -132,6 +133,9 @@ function Yollar() {
             analiz. 'belge' gor yetkisi yeter; KARAR yetkisi ayri (aksiyon
             basvuru.iskonto) ve ekran icinde olculur. */}
         {yetki('iskonto_onay') && <Route path="/iskonto-onay" element={<IskontoOnaylari />} />}
+        {/* DOKUMLER & ISTATISTIK (686): kosullu, kaydedilen, tekrar calistirilan
+            dokum tasarimcisi + baski onizleme. SQL istemcide yok. */}
+        {yetki('dokum') && <Route path="/dokumler" element={<Dokumler />} />}
         {/* Radyoloji raporu: generic kart degil - bolumler sablondan uretilir,
             onay iki asamali ve onaydan sonra rapor kilitlenir (283/284). */}
         {yetki('radyoloji') && <Route path="/radyoloji/rapor/:istemId" element={<RadyolojiRapor />} />}

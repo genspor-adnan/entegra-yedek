@@ -979,3 +979,59 @@ export interface KurumProfilYaniti {
   /** Hizmet/stok kategorileri ve tipin onerisi (527). */
   kategoriler: KurumKategoriSatiri[];
 }
+
+// ---------------------------------------------------------------- döküm ----
+/**
+ * DÖKÜM TANIMI (686) - sunucu Cekirdek/Sozlesme/Dokum.cs ile birebir.
+ * SQL yok: alan adlari katalogdan, sorguyu SorguUretici uretir.
+ */
+export interface DokumBoyut { satir: string[]; sutun?: string | null }
+export interface DokumOlcu { fn: string; alan?: string | null; bolen?: string | null; baslik?: string | null }
+export interface DokumParametre { ad: string; kural: string }
+export interface DokumBaski {
+  yon: 'dikey' | 'yatay';
+  kurumBasligi: boolean; parametreKutusu: boolean; sayfaNo: boolean;
+  damga: boolean; imza: boolean; dipnot: string;
+  ozetGostergeler: boolean; araToplam: boolean; capraz: boolean;
+  satirTavani: number; gizliKolonlar?: string[] | null;
+}
+export interface DokumTanimi {
+  kaynak: string;
+  cikti: 'liste' | 'ozet';
+  filtre?: Kosul | null;
+  kolonlar?: string[] | null;
+  sirala?: Siralama[] | null;
+  toplam?: string[] | null;
+  grup?: string[] | null;
+  boyut?: DokumBoyut | null;
+  olcu?: DokumOlcu[] | null;
+  kiyas: 'yok' | 'oncekiDonem' | 'oncekiYil';
+  esik: number;
+  parametreler?: Record<string, DokumParametre> | null;
+  baski?: DokumBaski | null;
+}
+export interface DokumKaydi {
+  id: number; kod: string; ad: string; aciklama: string; kaynak: string;
+  tanim: DokumTanimi; surum: number; sahipId: number; sahip: string;
+  gorunurluk: number; roller: number[];
+  sonCalisma?: string | null; calismaSayisi: number;
+  duzenlenebilir: boolean; calistirilabilir?: boolean;
+}
+export interface OzetOlcu { ad: string; baslik: string; fn: string; bicim: string }
+export interface OzetYaniti {
+  boyutlar: string[]; olculer: OzetOlcu[];
+  satirlar: Record<string, unknown>[];
+  kiyas?: Record<string, unknown>[] | null;
+  kiyasAraligi: string; sureMs: number; izlemeNo: string;
+}
+export interface DokumKolonMeta {
+  ad: string; baslik: string; tip: AlanTipi; filtrelenebilir: boolean; siralanabilir: boolean;
+  gruplanabilir: boolean; olculebilir: boolean; kodlar?: Record<string, string> | null;
+}
+export interface DokumKaynakMeta { ad: string; yetkiKodu: string; baslik: string; kolonlar: DokumKolonMeta[] }
+export interface DokumKatalogu {
+  kaynaklar: DokumKaynakMeta[]; fnler: string[]; kesmeler: string[]; kurallar: string[];
+}
+export interface DokumAntet {
+  kurum: Record<string, unknown> | null; kullanici: number;
+}

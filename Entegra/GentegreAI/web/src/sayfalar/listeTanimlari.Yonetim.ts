@@ -201,6 +201,15 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Yönetim', menuAd: 'Giriş Kayıtları', ic: '🔑', yetkiKodu: 'islem_log',
   },
   {
+    // DOKUMLER & ISTATISTIK (686): kosul verilerek tasarlanan, kaydedilip
+    //   tekrar calistirilan dokum; capraz tablo, kiyas, baski onizleme.
+    //   Tasarimci Yonetim'de TEK yer; liste ekranlarindan calistirma
+    //   ("Dokumler" acilir menusu) 11_MENU_DUZENI_PLANI ile gelecek.
+    kaynak: 'dokumler', rota: 'dokumler', ozelSayfa: true,
+    baslik: 'Dökümler', yol: 'Yönetim › Dökümler',
+    menuGrup: 'Yönetim', menuAd: 'Dökümler', ic: '📊', yetkiKodu: 'dokum',
+  },
+  {
     // ONAM METINLERI (398, Faz 0): metin + surum. Teletip, genetik, girisimsel
     //   islem ve KVKK aydinlatmasi ayni tablodan beslenir - her modul kendi
     //   onam kopyasini yazmasin diye ortak platformda.

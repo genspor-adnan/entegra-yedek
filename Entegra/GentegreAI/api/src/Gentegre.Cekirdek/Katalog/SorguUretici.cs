@@ -12,7 +12,7 @@ public sealed record SorguParcasi(string Sql, IReadOnlyList<object?> Parametrele
 /// Liste istegini SQL'e cevirir. TEK KURAL: istekten gelen metin asla SQL'e
 /// yazilmaz - alan adlari katalogla eslestirilir, degerler parametre olur.
 /// </summary>
-public sealed class SorguUretici
+public sealed partial class SorguUretici
 {
     private readonly KaynakTanimi _kaynak;
     private readonly List<object?> _par = new();

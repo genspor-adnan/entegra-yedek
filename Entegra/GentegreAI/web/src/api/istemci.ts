@@ -20,6 +20,7 @@ import { ayarUclari } from './uclar/ayar';
 import { kasaUclari } from './uclar/kasa';
 import { iskontoUclari } from './uclar/iskonto';
 import { iceriAlmaUclari } from './uclar/iceriAlma';
+import { dokumUclari } from './uclar/dokum';
 
 export { oturum } from './cekirdek';
 export type {
@@ -45,4 +46,5 @@ export const api = {
   ...kasaUclari,
   ...iskontoUclari,
   ...iceriAlmaUclari,
+  ...dokumUclari,
 };

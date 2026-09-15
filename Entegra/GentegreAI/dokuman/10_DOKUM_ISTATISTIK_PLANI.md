@@ -1,6 +1,6 @@
 # Döküm & İstatistik Tasarımcısı — Uygulama Planı
 
-Tarih: 15.09.2026 · Durum: **plan (onay bekliyor)** · Mockup: `Ekranlar/Ayarlar/dokum_tasarimcisi.html` · baskı: `Ekranlar/Ayarlar/dokum_baski_onizleme.html`
+Tarih: 15.09.2026 · Durum: **Aşama A+B uygulandı (686: şema, `SorguUretici.Ozet`, `/api/dokum`, web `Dokumler` + baskı önizleme); C (zamanlama/xlsx) ve D (AI) bekliyor** · Mockup: `Ekranlar/Ayarlar/dokum_tasarimcisi.html` · baskı: `Ekranlar/Ayarlar/dokum_baski_onizleme.html`
 
 Koşul verilerek (tarih aralığı, kurumlar, doktorlar, bölüm, tutar…) tasarlanan, kaydedilip
 tekrar çalıştırılan, zamanlanabilen ve istatistik (çapraz tablo, zaman serisi, dağılım,
