@@ -8555,3 +8555,97 @@ gerçek bir yapı değişikliği (kullanıcı vazgeçti).
 - Göçler **601-628 yalnız docker'da**, bulut ekspert'e uygulanmadı
 - 29 departmanın klinik kodu boş (25'i klinik değil - arşiv, güvenlik, grup
   başlıkları; 4'ünün kodunu başka bölüm kullanıyor)
+
+---
+
+## 15.09.2026 — Göz muayenesi: kart araç çubuğu, şema çizimi ve dikte (`db/705`)
+
+Göz modülü (691) ekranları ve yatan hasta (695) tamamlandıktan sonra kalan üç
+iş: muayene kartının **klinik kısayolları**, mockup'ta duran ama üründe
+olmayan **göz şeması** ve **dikte**.
+
+### Kararlar
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K— | Kart araç çubuğu düğmeleri **liste aksiyon kodlarını** çağırır | Kural ve yetki tek yerde kalır; aynı eylem hem sağ tuştan hem karttan aynı sunucu ucuna gider. Muayene kartı (461) zaten bu deseni kullanıyordu |
+| K— | **Çizim ölçüm değildir** - ayrı tablo, ölçüm tablolarına dokunmaz | C/D, GİB, görme kendi tablosunda; şema onların yerini almaz, *yerini* gösterir |
+| K— | İşaret **ayrı satır** (`goz_cizim_isaret`), SVG yalnız sunum | Tek SVG metni saklamak kolaydı ama "periferik yırtığı olan hastalar" sorusu resimden cevaplanamazdı |
+| K— | Saat kadranı ve çizimden üretilen cümle **sunucuda** | İki ekran (kart, çıktı) aynı çizimden farklı cümle üretmemeli. OD saat yönünde, OS ters numaralanır - sağ/sol karışması çizimin kendisinde engellenir |
+| K— | Üretilen metin **öneridir**, hekim onaylamadan bulgu alanına geçmez | Çizimden cümle kurmak tanı koymak değil; onay adımı olmadan şema sessizce bulgu yazan bir araç olurdu |
+| K— | Dikte **yalnız metin alanına** yazar; sayısal ölçüm ve kodlu alan (VA, refraksiyon, GİB, ICD, LOCS) **kapalı** | Yanlış duyulan "yirmi altı / yirmi yedi" sessizce tedavi değiştirir. Kapalı alan listesi de sunucudan gelir - ekranın kendi listesi bir gün sessizce açılırdı |
+| K— | Dikte sözlüğü **veridir, kod değil** (`dikte_terim`, kurum + kişisel) | "see de → C/D" eşlemesi hekimden hekime değişir; yeni kısaltma için sürüm çıkmak gerekmemeli |
+| K— | Çizim ve dikte **tek kapıdan** yazar (`/muayene/{id}/bulgu-metni`) | İki ayrı uç, "kapalı muayeneye yazma" kuralının iki kopyası demekti |
+| K— | Yazma **ezmez, sonuna ekler** | Muayene sırasında aynı alana birkaç kez konuşulur; üzerine yazmak hekimin önceki cümlesini sessizce silmek olurdu |
+| K— | Ses tanıma **tarayıcıda**, sunucuya yalnız onaylanmış metin gider | Kurum içi tanıma hizmeti yok; bu, sesin tarayıcının kendi hizmetine gitmesi demek ve ekran bunu şeritte **yazar**, saklamaz. Ses kaydı hiçbir yerde tutulmaz |
+
+### Yapılanlar
+
+**Kart araç çubuğu.** `ListeKarti` içindeki `ekAraclar` yuvası muayene (461) ve
+göz muayenesi (691) için ortak: tamamla · gözlük reçetesi · görüntüleme iste ·
+işlem planla · önceki muayeneden kopyala · göz şeması · dikte. Reçete,
+görüntüleme ve işlem kartları hasta ve muayene bağını URL'den **ön dolgu**
+alıyor; `muayene_id` üç kartta da gizli alan (ekranda ham id göstermenin
+değeri yok, bağın kaybolmasının bedeli var).
+
+Sunucu kuralları: ölçümsüz muayene tamamlanmaz (görme, refraksiyon, basınç, ön
+segment, fundustan biri), tanısızlık **uyarıdır** (ön tanısız kontrol
+muayenesi olabiliyor), tamamlanmış muayene ikinci kez tamamlanmaz ve ona bulgu
+kopyalanmaz. "Önceki muayeneden kopyala" yalnız **metinsel** bulguları getirir
+ve dolu alanı ezmez - ölçüm kopyalamak yapılmamış ölçümü yapılmış göstermek
+olurdu.
+
+**Göz şeması (`db/705`).** `goz_cizim` (muayene · göz · şema türü · sürüm ·
+kilitli · SVG · üretilen metin) + `goz_cizim_isaret` (şekil, tür, 0–1 normalize
+konum, **saat**, DD boyut, serbest çizim yolu). Dört şema: ön segment, fundus,
+periferi (saat kadranı), kapak/adneks. Damga paleti sunucudan (hangi işaret
+hangi şemada, hangi renk, cümlede nasıl okunur - üçü aynı yerde). Ekranda
+damga, serbest çizim, geri al, seçili silme, sürüm listesi; tamamlanmış
+muayenede kilit.
+
+- **Karşılaştırma**: fark sunucuda, işaretin **türü + saati** üzerinden
+  eşleşir - aynı lezyon iki çizimde birebir aynı piksele düşmez, hekim de
+  zaten saat kadranıyla konuşur. Durumlar: yeni · duruyor · kayboldu.
+- **Çıktı**: ayrı sayfa (`/goz/sema-cikti/:id`), lab/radyoloji çıktılarıyla
+  aynı kâğıt. Antet, kimlik, şema türü başına iki göz ve **işaret dökümü
+  tablosu** - çizim fotokopide soluyor, tablo solmuyor.
+
+**Dikte (`db/705`).** `dikte_terim`: terim (kelime düzeltme), sesli komut
+(`goz:1`, `hedef:fundus.disk`, `noktalama:.`) ve sık cümle; kurum satırı
+herkeste, kişisel satır yalnız sahibinde ve kurum satırını ezer. Metin motoru
+ayrı dosyada (`dikteMotoru.ts`) ve testli: komut ayıklama, uzun-önce eşleşme,
+kelime içi eşleşmeyi komut saymama, Türkçe büyütme (`i → İ`), güven eşiği.
+Eşik altı parça **yazılmaz ama gizlenmez** - dökümde "atıldı" olarak durur.
+
+Yönetim ekranı: **Göz › Ayarlar › Dikte Sözlüğü** (`dikte-terim` liste + kart,
+ayrı yetki `goz.dikte_sozluk` - kurum sözlüğünü değiştirmek herkesin diktesini
+etkiler). Sözlük şube süzgeci taşımaz: merkezde eklenen düzeltme şubede de
+geçerli olmalı, yoksa aynı epikrizde iki yazım olurdu.
+
+### Tuzaklar
+
+- **Yeni yetki `tur=1` yazılınca ekran açılmıyordu.** Tur 1 (özel yetki)
+  kullanıcıya çözülen **kaynak** listesine girmiyor; menü görünmüyor, rota
+  açılmıyor, hata da vermiyor. Göz yetkileriyle aynı türe (`tur=0`) alındı ve
+  betiğe düzeltme koşulu eklendi. Yetki eklemek, onu bir role vermeden yarım
+  kalır - `rol_yetki` girişi de betiğe girdi.
+- **Yetki çözümü önbellekli**: rol/yetki satırı eklendikten sonra API yeniden
+  başlatılmadan ekran açılmıyor. Geliştirmede iki kez aynı yere takıldı.
+- Çıktı ucu kolonları snake_case dönüyordu (`hasta_no`), sayfa camelCase
+  okuyor - SQL takma adları düzeltildi.
+- Muayene kartında göz aksiyonları listeyi tazeliyor ama **açık kartı**
+  tazelemiyordu: getirilen bulgular ekranda görünmüyordu (`setKartTazele`).
+
+### Mockup'lar
+
+`Ekranlar/Goz/goz_semasi.html` ve `Ekranlar/Goz/goz_dikte.html` bu turda
+yazıldı - ekranlar onlardan üretildi. İkisinde de "uygulamada yok" notu vardı;
+not artık geçersiz, ekranlar yazıldı.
+
+### Kalanlar
+
+- Şemada fundus fotoğrafını **altlık** yapma (görüntüleme kaydıyla birleştirme)
+  yapılmadı.
+- Dikte için **kurum içi** ses tanıma hizmeti yok; tarayıcı tanıması kullanan
+  kurum bunu bilerek kabul etmeli.
+- Göçler **601-705 yalnız docker'da**, bulut ekspert'e uygulanmadı.
