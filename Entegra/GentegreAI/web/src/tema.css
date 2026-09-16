@@ -4633,7 +4633,12 @@ button.dikte-alan:hover { background: var(--serit1) }
 .ds-islem-ara { border-top: 1px solid var(--cizgi2); background: var(--yuz2) }
 .ds-plan-alt { border-top: 1px solid var(--cizgi2); background: var(--yuz2) }
 .ds-gb.ds-gb-duz { background: transparent; border-bottom: 0 }
-.ds-ozet6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; padding: 2px 10px 6px }
+/* Ozet kutulari SIGDIGI KADAR: blok artik dar sag panelde (agiz ozetinin
+   altinda) duruyor; sabit alti sutun orada 40 px'lik kutulara donuyordu. */
+.ds-ozet6 {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 6px; padding: 2px 10px 6px;
+}
 .ds-ozet6 div { border: 1px solid var(--cizgi2); border-radius: 4px; padding: 6px 8px; background: var(--yuz) }
 .ds-ozet6 span { display: block; font-size: 10px; color: var(--soluk) }
 .ds-ozet6 b { font-size: 14px; color: var(--yazi2) }
