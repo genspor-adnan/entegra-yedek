@@ -286,7 +286,7 @@ export function GozSemasi({ gozMuayeneId, onKapat, onTamam }: {
                  ⇄ Öncekiyle karşılaştır
                </button>
                <button className="d" onClick={yazdir}>🖨 Yazdır / rapora ekle</button>
-               <button className="d" onClick={onKapat}>✖ Kapat</button>
+               <button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}

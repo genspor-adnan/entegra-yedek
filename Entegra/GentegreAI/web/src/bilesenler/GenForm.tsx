@@ -1756,13 +1756,24 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
         />
       )}
 
-      {/* Katalogdaki AcilistaTarafSecimi: yeni kayitta cari secim ekrani.
-          Secim ilgili alana yazilir; kullanici kapatip alandan da secebilir. */}
+      {/* Katalogdaki AcilistaTarafSecimi: yeni kayitta taraf secim ekrani.
+          Secim ilgili alana yazilir; kullanici kapatip alandan da secebilir.
+
+          ARANAN KAYNAK ALANIN KENDI KAYNAGIDIR (`aramaKaynagi`), kosulsuz
+          'cari' DEGIL. Dis modulunde bu alan HASTA'dir (plan, seans, lab is
+          emri): kosulsuz cari acildiginda pencere musteri/tedarikci listesi
+          gosteriyordu ve secilen SIRKET hasta alanina yaziliyordu - uctan uca
+          testte lab is emri "CEMRE ELEKTRİK ... LİMİTED ŞİRKETİ" hastasiyla
+          acildi. Alan zaten katalogda `AramaKaynagi: "hasta"` diyor. */}
       {meta?.acilistaTarafSecimi && (
         <TarafArama
           acik={tarafSecimAcik}
-          kaynaklar={['cari']}
-          yerTutucu="Cari (müşteri/tedarikçi) ara…"
+          kaynaklar={(meta.alanlar.find(a => a.ad === meta.acilistaTarafSecimi)
+                        ?.aramaKaynagi ?? 'cari')
+                       .split(',').map(x => x.trim()).filter(Boolean)}
+          yerTutucu={(meta.alanlar.find(a => a.ad === meta.acilistaTarafSecimi)
+                        ?.aramaKaynagi ?? 'cari') === 'hasta'
+                       ? 'Hasta ara…' : 'Cari (müşteri/tedarikçi) ara…'}
           onKapat={() => setTarafSecimAcik(false)}
           onSec={secilen => {
             setDeger(d => ({ ...d, [meta.acilistaTarafSecimi!]: String(secilen.id) }));

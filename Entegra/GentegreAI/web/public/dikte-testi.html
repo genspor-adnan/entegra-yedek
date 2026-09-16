@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dikte testi — çıplak tarayıcı denemesi</title>
+<style>
+  body { font-family: "Trebuchet MS", "Segoe UI", Tahoma, sans-serif; font-size: 13px;
+         margin: 0; padding: 18px; background: #eef1f5; color: #1f2d3a }
+  .kutu { max-width: 760px; margin: 0 auto; background: #fff; border: 1px solid #cdd6e0;
+          border-radius: 4px; padding: 16px 18px }
+  h1 { font-size: 15px; margin: 0 0 4px; color: #14315a }
+  p.aciklama { color: #6b7a8b; line-height: 1.6; margin: 0 0 12px }
+  button { border: 1px solid #cdd6e0; background: linear-gradient(#fbfcfe, #e7edf4);
+           border-radius: 3px; padding: 6px 12px; font-size: 12.5px; cursor: pointer }
+  button.bas { border-color: #2f6db3; background: linear-gradient(#4d8fd6, #2f6db3);
+               color: #fff; font-weight: bold }
+  .serit { display: flex; gap: 10px; align-items: center; margin: 10px 0; flex-wrap: wrap }
+  .olcer { width: 200px; height: 10px; background: #e7edf4; border-radius: 5px; overflow: hidden }
+  .olcer i { display: block; height: 100%; width: 0; background: linear-gradient(#5cb87a, #3f9a5e) }
+  #metin { border: 1px solid #cdd6e0; border-radius: 3px; min-height: 60px; padding: 8px 10px;
+           font-size: 14px; line-height: 1.6; background: #fbfcfd }
+  #kayit { margin-top: 10px; max-height: 260px; overflow: auto; border: 1px solid #e3e9f0;
+           border-radius: 3px; background: #fbfcfd; padding: 6px 8px; font-size: 11.5px;
+           color: #4d5d6e; white-space: pre-wrap }
+  .k { color: #b3261e; font-weight: bold }
+</style>
+</head>
+<body>
+<div class="kutu">
+  <h1>Dikte testi — uygulamadan bağımsız</h1>
+  <p class="aciklama">
+    Bu sayfa Gentegre kodunu KULLANMAZ: doğrudan tarayıcının kendi ses tanıma
+    arayüzünü (Web Speech API) çağırır. Burada da yazı çıkmıyorsa sorun
+    uygulamada değil, tarayıcı / Windows konuşma ayarı / mikrofon tarafındadır.
+  </p>
+  <div class="serit">
+    <button class="bas" id="basla">🎙 Başla</button>
+    <button id="dur">⏹ Durdur</button>
+    <select id="dil">
+      <option value="tr-TR">Türkçe (tr-TR)</option>
+      <option value="en-US">English (en-US)</option>
+    </select>
+    <label><input type="checkbox" id="olcerAc" checked> mikrofon seviyesi ölç</label>
+    <span class="olcer"><i id="cubuk"></i></span>
+    <span id="durum">hazır</span>
+  </div>
+  <div id="metin"></div>
+  <div id="kayit"></div>
+</div>
+<script>
+// Cıplak deneme: olayların hepsi ekrana yazılır, hiçbir şey gizlenmez.
+var Taniyici = window.SpeechRecognition || window.webkitSpeechRecognition;
+var t = null, akis = null, ctx = null, kare = 0;
+var kayit = document.getElementById('kayit');
+var metin = document.getElementById('metin');
+var durum = document.getElementById('durum');
+var cubuk = document.getElementById('cubuk');
+
+function yaz(s, kritik) {
+  var satir = new Date().toLocaleTimeString('tr-TR') + '  ' + s + '\n';
+  kayit.innerHTML += kritik ? '<span class="k">' + satir + '</span>' : satir;
+  kayit.scrollTop = kayit.scrollHeight;
+}
+
+yaz('güvenli bağlam: ' + window.isSecureContext + ' · protokol: ' + location.protocol
+    + ' · tanıyıcı: ' + (Taniyici ? 'var' : 'YOK') + ' · tarayıcı: ' + navigator.userAgent);
+
+async function olcerAc() {
+  try {
+    akis = await navigator.mediaDevices.getUserMedia({ audio: true });
+    var izler = akis.getAudioTracks().map(function (i) { return i.label; });
+    yaz('mikrofon açıldı: ' + izler.join(', '));
+    ctx = new AudioContext();
+    var kaynak = ctx.createMediaStreamSource(akis);
+    var coz = ctx.createAnalyser();
+    coz.fftSize = 512;
+    kaynak.connect(coz);
+    var tampon = new Uint8Array(coz.frequencyBinCount);
+    (function olc() {
+      coz.getByteTimeDomainData(tampon);
+      var enBuyuk = 0;
+      for (var i = 0; i < tampon.length; i++)
+        enBuyuk = Math.max(enBuyuk, Math.abs(tampon[i] - 128));
+      cubuk.style.width = Math.min(100, enBuyuk / 40 * 100) + '%';
+      kare = requestAnimationFrame(olc);
+    })();
+  } catch (h) { yaz('mikrofon açılamadı: ' + h.name + ' — ' + h.message, true) }
+}
+
+function olcerKapat() {
+  cancelAnimationFrame(kare);
+  if (akis) akis.getTracks().forEach(function (i) { i.stop() });
+  if (ctx) ctx.close();
+  akis = null; ctx = null; cubuk.style.width = '0';
+}
+
+document.getElementById('basla').onclick = function () {
+  if (!Taniyici) { yaz('Bu tarayıcıda SpeechRecognition YOK.', true); return }
+  if (document.getElementById('olcerAc').checked) olcerAc();
+  t = new Taniyici();
+  t.lang = document.getElementById('dil').value;
+  t.continuous = true;
+  t.interimResults = true;
+  ['start', 'audiostart', 'soundstart', 'speechstart', 'speechend', 'soundend',
+   'audioend', 'end', 'nomatch'].forEach(function (ad) {
+    t['on' + ad] = function () { yaz('olay: ' + ad) };
+  });
+  t.onerror = function (o) { yaz('HATA: ' + o.error, true) };
+  t.onresult = function (o) {
+    var ara = '';
+    for (var i = o.resultIndex; i < o.results.length; i++) {
+      var r = o.results[i];
+      if (r.isFinal) {
+        yaz('SONUÇ (final, güven ' + (r[0].confidence || 0).toFixed(2) + '): ' + r[0].transcript);
+        metin.textContent += r[0].transcript + ' ';
+      } else { ara += r[0].transcript }
+    }
+    if (ara) yaz('ara sonuç: ' + ara);
+  };
+  try { t.start(); durum.textContent = 'dinliyor'; yaz('start() çağrıldı, dil ' + t.lang) }
+  catch (h) { yaz('start() patladı: ' + h.name + ' — ' + h.message, true) }
+};
+
+document.getElementById('dur').onclick = function () {
+  try { if (t) t.stop() } catch (h) { /* zaten durmuş */ }
+  olcerKapat();
+  durum.textContent = 'durdu';
+};
+</script>
+</body>
+</html>

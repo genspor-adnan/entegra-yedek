@@ -4590,3 +4590,98 @@ button.dikte-alan:hover { background: var(--serit1) }
 .dikte-serit.acik.sessiz { background: var(--satiralt); border-color: var(--cizgi2) }
 .dikte-serit.acik.sessiz .mik { background: var(--soluk); color: #fff }
 .dikte-serit.acik.sessiz .dalga i { opacity: .45 }
+
+/* ============================================================ DİŞ (706) ====
+   Diş hasta kartı (odontogram + plan) ve günlük akış. Kendi ön eki (ds-):
+   mockup'taki kısa adlar (.r, .grp, .gb, .inp) temanın genel sınıflarıyla
+   çakışırdı (446 dersi). */
+.ds-sahne { padding-top: 0 }
+.ds-hdr { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px 14px; padding: 10px 0; }
+.ds-hdr label { display: block; font-size: 10.5px; color: var(--soluk); margin-bottom: 2px }
+.ds-inp { border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz); min-height: 24px; padding: 3px 7px;
+  font-size: 11.5px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap }
+.ds-inp.big { font-weight: 700; font-size: 12.5px }
+.ds-odo-alan { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 0; border: 1px solid var(--cizgi); border-top: none; background: var(--yuz) }
+.ds-sol { border-right: 1px solid var(--cizgi2); min-width: 0 }
+.ds-sag { padding: 10px; display: flex; flex-direction: column; gap: 10px }
+.ds-arac { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; padding: 6px 8px; background: var(--yuz2); border-bottom: 1px solid var(--cizgi2) }
+.ds-sep { width: 1px; height: 20px; background: var(--cizgi); margin: 0 4px }
+.ds-sp { margin-left: auto; display: inline-flex; gap: 4px; align-items: center; flex-wrap: wrap }
+.ds-gorunum { display: inline-flex; border: 1px solid var(--cizgi); border-radius: 3px; overflow: hidden }
+.ds-gorunum span { padding: 4px 10px; font-size: 11px; cursor: pointer; background: var(--yuz); color: var(--soluk) }
+.ds-gorunum span.on { background: var(--mor); color: #fff; font-weight: 700 }
+.ds-lej { display: flex; gap: 12px; flex-wrap: wrap; padding: 6px 10px; font-size: 10.5px; color: var(--soluk); border-bottom: 1px solid var(--cizgi2) }
+.ds-lej i { width: 12px; height: 12px; border: 1px solid var(--cizgi); border-radius: 2px; display: inline-block; vertical-align: middle; margin-right: 3px }
+.ds-grp { border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--yuz); overflow: hidden }
+.ds-grp.ds-grp-ic { margin: 8px 10px 10px }
+.ds-gb { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--yuz2); border-bottom: 1px solid var(--cizgi2); font-size: 11.5px; flex-wrap: wrap }
+.ds-ic { padding: 8px 10px; font-size: 11.5px; line-height: 1.5 }
+.ds-dg { overflow-x: auto; background: var(--yuz) }
+.ds-dg table { border-collapse: collapse; width: 100% }
+.ds-dg table.ds-plan { width: auto; min-width: 0 }
+.ds-dg th { background: var(--yuz2); border-bottom: 1px solid var(--cizgi); border-right: 1px solid var(--cizgi2);
+  text-align: left; padding: 5px 8px; font-size: 11px; color: var(--yazi2); font-weight: 700; white-space: nowrap }
+.ds-dg td { border-bottom: 1px solid var(--cizgi2); border-right: 1px solid var(--cizgi2); padding: 4px 8px; font-size: 11.5px; white-space: nowrap }
+.ds-dg table.ds-plan th, .ds-dg table.ds-plan td { padding-left: 6px; padding-right: 6px }
+.ds-dg tr.sel td, .ds-dg tr.dis-sec td { background: var(--sec) }
+.ds-dg tr.grup td { background: var(--toplamzem); font-weight: 700 }
+.ds-dg tr.soluk td, .ds-dg tr.eksik td { color: var(--soluk) }
+.ds-dg .sag { text-align: right } .ds-dg .orta { text-align: center }
+.ds-satir-arac { display: flex; gap: 3px }
+.ds-satir-arac .d { padding: 1px 6px; font-size: 11px }
+.ds-kir { color: var(--hata) !important }
+.ds-islem-ara { border-top: 1px solid var(--cizgi2); background: var(--yuz2) }
+.ds-plan-alt { border-top: 1px solid var(--cizgi2); background: var(--yuz2) }
+.ds-gb.ds-gb-duz { background: transparent; border-bottom: 0 }
+.ds-ozet6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; padding: 2px 10px 6px }
+.ds-ozet6 div { border: 1px solid var(--cizgi2); border-radius: 4px; padding: 6px 8px; background: var(--yuz) }
+.ds-ozet6 span { display: block; font-size: 10px; color: var(--soluk) }
+.ds-ozet6 b { font-size: 14px; color: var(--yazi2) }
+.ds-ozet6 i { display: block; font-style: normal; font-size: 10.5px; color: var(--soluk) }
+.ds-bar { height: 7px; background: var(--cizgi2); border-radius: 4px; margin: 0 10px; overflow: hidden }
+.ds-bar i { display: block; height: 100%; background: var(--mor) }
+.ds-palet { display: flex; gap: 5px; flex-wrap: wrap; padding: 8px 10px }
+/* odontogram svg */
+.ds-odo { display: block; width: 100%; max-width: 620px; margin: 0 auto; height: auto; background: var(--yuz) }
+.ds-odo .kron { fill: url(#dsMine); stroke: #8c8478; stroke-width: .6 }
+.ds-odo .kok { fill: url(#dsKok); stroke: #a58f6a; stroke-width: .55 }
+.ds-odo .kanalHat { stroke: #b3261e; stroke-width: 1.1; stroke-linecap: round }
+.ds-odo .imp { fill: url(#dsMetal); stroke: #5b6670; stroke-width: .6 }
+.ds-odo .impDis { stroke: #5b6670; stroke-width: .7 }
+.ds-odo .yz { fill: transparent; stroke: none; cursor: pointer }
+.ds-odo .yz:hover { fill: rgba(47,109,179,.22); stroke: #2f6db3; stroke-width: .6 }
+.ds-odo .yz.sec { stroke: #2f6db3; stroke-width: .8 }
+.ds-odo .yz.curuk { fill: rgba(96,54,30,.78) }
+.ds-odo .yz.dolgu { fill: url(#dsAmalgam); stroke: #5f6b78; stroke-width: .5 }
+.ds-odo .yz.kompozit { fill: rgba(110,160,220,.55) }
+.ds-odo .kronKap { fill: url(#dsAltin); stroke: #a3781c; stroke-width: .7; pointer-events: none }
+.ds-odo .no { font-size: 7px; fill: #1c4374; font-weight: 700; text-anchor: middle; font-family: inherit; cursor: pointer }
+.ds-odo .no.sec { fill: #fff }
+.ds-odo .nokutu { fill: #fff; stroke: #cdd6e0; stroke-width: .6; cursor: pointer }
+.ds-odo .nokutu.sec { fill: #2f6db3; stroke: #2f6db3 }
+.ds-odo .plan { fill: none; stroke: #b3261e; stroke-width: 1.2; stroke-dasharray: 2.2 1.6 }
+.ds-odo .tamam { fill: none; stroke: #2e7d46; stroke-width: 1.2 }
+.ds-odo .eksik .kron, .ds-odo .eksik .kok { fill: none; stroke: #c7ced6; stroke-dasharray: 1.5 1.5 }
+.ds-odo .x { stroke: #b3261e; stroke-width: 1.1; opacity: .7 }
+.ds-odo .cene { font-size: 8px; fill: #6b7a8b; font-family: inherit }
+.ds-odo .orta { stroke: #cdd6e0; stroke-width: .6; stroke-dasharray: 2 2 }
+.ds-odo .dis { stroke: #e3e9f0; stroke-width: .6 }
+/* günlük akış çizelgesi */
+.ds-cizelge { display: grid; gap: 3px; border: 1px solid var(--cizgi2); padding: 4px; background: var(--yuz); border-radius: var(--r); max-height: 460px; overflow: auto }
+.ds-cz-bas { font-size: 11px; font-weight: 700; color: var(--yazi2); background: var(--yuz2); padding: 4px 6px; border-radius: 3px; text-align: center; position: sticky; top: 0 }
+.ds-cz-saat { font-size: 10.5px; color: var(--soluk); text-align: right; padding: 4px 6px 0 0 }
+.ds-cz-hucre { min-height: 30px }
+.ds-r { border: 1px solid var(--cizgi2); border-radius: 3px; padding: 3px 6px; font-size: 10.5px; background: var(--yuz2); cursor: pointer; margin-bottom: 2px; min-width: 0 }
+.ds-r b { display: block; font-size: 11px; color: var(--yazi2) }
+.ds-r.geldi { background: #e2f3e8; border-color: #bfe3cb }
+.ds-r.bitti { background: var(--yuz2); color: var(--soluk) }
+.ds-r.gelmedi { background: #fbe9e7; border-color: #f3c4bf }
+.ds-r.lab { background: #fdf6e3; border-color: #f2ddbf }
+.ds-r.bos { background: transparent; color: var(--soluk); border-style: dashed; cursor: default; text-align: center; font-size: 10px }
+.ds-r.sec { outline: 2px solid var(--mor) }
+.ds-plan-kod { font-size: 10px; color: var(--soluk); margin-left: 3px }
+.ds-plan-kod code { background: var(--yuz); border: 1px solid var(--cizgi2); border-radius: 3px; padding: 0 3px; font-size: 9.5px }
+.ds-sure { height: 4px; background: var(--cizgi2); border-radius: 2px; margin-top: 4px; overflow: hidden }
+.ds-sure i { display: block; height: 100%; background: var(--mor) }
+.ds-sure.gec i { background: var(--hata) }
+@media (max-width: 1100px) { .ds-odo-alan { grid-template-columns: 1fr } .ds-sol { border-right: none } .ds-hdr { grid-template-columns: 1fr 1fr } .ds-ozet6 { grid-template-columns: repeat(3, 1fr) } }
