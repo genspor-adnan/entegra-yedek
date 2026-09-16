@@ -2692,6 +2692,9 @@ const
     //   (GenDepoUpdate135/136 + pg/schema/72). Es zamanli kayitta mukerrer belge
     //   numarasi olusmaz; bedeli: kaydedilmeyen belgede numara boslugu (iade ile azalir).
     Ops_FaturaOpsiyon_BelgeNoSayac = -24121;
+    // 'Bir Satiri Adeti Kadar Satirlara Bol' menusu belge kartinda gorunsun mu
+    //   (kullanici; bool, varsayilan True = eski davranis).
+    Ops_FaturaOpsiyon_SatirBolMenu = -24122;
     Ops_FaturaOpsiyon_Poliklinik = -25000;
     Ops_FaturaOpsiyon_Referans = -25002;
 
@@ -2746,6 +2749,9 @@ const
     Ops_StokOpsiyon_StokMaliyetHesapYontemi= -27015;
     Ops_StokOpsiyon_MuhasebeKodlar = -27016;
     Ops_StokOpsiyon_Birim2Miktar1denFarkliOlamaz = -27016;
+    // Raf omru ZORUNLU (kullanici): isaretliyse izlem girisinde URT<->SKT karttaki raf
+    //   omruyle esitlenir (eski davranis, varsayilan True); degilse ikisi serbest girilir.
+    Ops_StokOpsiyon_RafOmruZorunlu = -27017;
 
 
  //Demirbaş Opsiyonlar 28___

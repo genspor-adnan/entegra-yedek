@@ -15,6 +15,12 @@ export const belgeUclari = {
   kurumProfil: (sube?: number) =>
     istek<KurumProfilYaniti>(`/api/kurum-profil${sube === undefined ? '' : `?sube=${sube}`}`),
   /** Profili yazar - verilmeyen alanlar mevcut degerini korur. */
+  /** Standart roller (712): kurum tipinin şablonları ve kurulum. */
+  standartRoller: (kurumTipi?: string) =>
+    istek<{ kurumTipi: string; roller: { kod: string; ad: string; amac: string; mevcut: boolean; rolId?: number | null; aktif?: boolean | null; yetkiSayisi: number; ekran: number; aksiyon: number }[] }>(
+      `/api/kurum-profil/standart-roller${kurumTipi ? `?kurumTipi=${encodeURIComponent(kurumTipi)}` : ''}`),
+  standartRolleriKur: (g: { kurumTipi?: string; kodlar?: string[]; guncelle?: boolean }) =>
+    gonder<{ kurumTipi: string; kuruldu: string[]; guncellendi: string[]; atlandi: string[] }>('/api/kurum-profil/standart-roller', g),
   kurumProfilYaz: (govde: Partial<KurumProfil>) =>
     gonder<{ profil: KurumProfil }>('/api/kurum-profil', govde, 'PUT'),
   /** Fiyat listesini satirlariyla kopyalar (540). */

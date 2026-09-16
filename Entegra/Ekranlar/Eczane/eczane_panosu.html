@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hastane Eczanesi — Günlük Pano — Mockup (GenoTIP AI · Eczane)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>💊 Hastane Eczanesi — Günlük Pano</span>
+    <span class="sp">16.09.2026 Çarşamba · 09:40 · Merkez · Sorumlu eczacı: Ecz. N. Arslan</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary" data-git="eczane_order_karsilama.html">💊 Order Karşıla</div>
+    <div class="btn" data-git="eczane_talep_karsilama.html">📦 Servis Talebi</div>
+    <div class="btn" data-git="eczane_hazirlama.html">🧪 Hazırlama</div>
+    <div class="sepv"></div>
+    <div class="btn" data-git="eczane_mal_kabul.html">🚚 Mal Kabul</div>
+    <div class="btn" data-git="eczane_stok_miad.html">📅 Stok & Miad</div>
+    <div class="btn" data-git="eczane_kontrollu_ilac.html">🔴 Kontrollü İlaç</div>
+    <div class="btn" data-git="eczane_iade_imha.html">↩️ İade / İmha</div>
+    <div class="sp"></div>
+    <div class="btn">🖨️ Gün Sonu Raporu</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart kir"><div class="b">Eczacı kontrolü bekleyen</div><div class="d">14 <small>order satırı</small></div></div>
+    <div class="kart sari"><div class="b">Hazırlanacak doz</div><div class="d">186 <small>12:00 turu</small></div></div>
+    <div class="kart"><div class="b">Servis talebi</div><div class="d">7 <small>3'ü acil</small></div></div>
+    <div class="kart"><div class="b">Kabul bekleyen</div><div class="d">2 <small>irsaliye</small></div></div>
+    <div class="kart kir"><div class="b">Miadı 90 günden az</div><div class="d">23 <small>kalem</small></div></div>
+    <div class="kart sari"><div class="b">Kritik stok</div><div class="d">9 <small>kalem</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="order">Eczacı Kontrolü<span class="sy">14</span></div>
+    <div class="sekme" data-s="tur">Doz Turu<span class="sy">186</span></div>
+    <div class="sekme" data-s="talep">Servis Talepleri<span class="sy">7</span></div>
+    <div class="sekme" data-s="uyari">Uyarılar<span class="sy">32</span></div>
+  </div>
+
+  <!-- ================================================= ECZACI KONTROLÜ ===== -->
+  <div class="pnl" data-s="order">
+    <div class="arama">
+      <div class="kutu">🔍 Hasta, ilaç ya da servis…</div>
+      <span class="chip on">Bekleyen <b>14</b></span>
+      <span class="chip">Uyarılı <b>5</b></span>
+      <span class="chip">Sözel order <b>2</b></span>
+      <span class="chip">Yüksek riskli <b>3</b></span>
+      <span class="chip">Tümü</span>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:130px">Servis / Yatak</th>
+          <th style="width:160px">Hasta</th>
+          <th>İlaç · Doz · Yol · Sıklık</th>
+          <th style="width:130px">İsteyen Hekim</th>
+          <th style="width:80px" class="orta">Saat</th>
+          <th style="width:240px">Eczacı Uyarısı</th>
+          <th style="width:110px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel">
+            <td class="nw">Dahiliye · 304-A</td><td>Ahmet Yılmaz</td>
+            <td><b>Enoksaparin</b> 6000 anti-Xa/0,6 mL · SC · 1×1
+                <span class="rz mor">Yüksek riskli</span></td>
+            <td>Dr. Kaya</td><td class="orta">08:00</td>
+            <td><span class="rz kir">Böbrek</span> KrKl 28 mL/dk — doz azaltımı gerekir</td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td>
+          </tr>
+          <tr class="tik">
+            <td class="nw">Dahiliye · 304-A</td><td>Ahmet Yılmaz</td>
+            <td><b>Varfarin</b> 5 mg · PO · 1×1</td>
+            <td>Dr. Kaya</td><td class="orta">18:00</td>
+            <td><span class="rz kir">Etkileşim</span> Enoksaparin + Varfarin → kanama riski</td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td>
+          </tr>
+          <tr class="tik">
+            <td class="nw">YBÜ · 2</td><td>Fatma Öz</td>
+            <td><b>Meropenem</b> 1 g · IV · 3×1</td>
+            <td>Dr. Şen</td><td class="orta">08-16-24</td>
+            <td><span class="rz mavi">Antibiyotik</span> 3. gün — Enfeksiyon onayı gerekli</td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td>
+          </tr>
+          <tr class="tik">
+            <td class="nw">YBÜ · 5</td><td>Kemal Deniz</td>
+            <td><b>Potasyum klorür</b> %7,5 20 mL · IV inf · 1×1
+                <span class="rz mor">Yüksek riskli</span></td>
+            <td>Dr. Uçar</td><td class="orta">10:00</td>
+            <td><span class="rz kir">Konsantre</span> Sulandırılmadan verilemez — hazırlama eczanede</td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td>
+          </tr>
+          <tr class="tik">
+            <td class="nw">Onkoloji · 412</td><td>Zeynep Ak</td>
+            <td><b>Ondansetron</b> 8 mg · IV · 2×1</td>
+            <td>Dr. Polat</td><td class="orta">08-20</td>
+            <td class="sonuk">—</td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td>
+          </tr>
+          <tr class="tik">
+            <td class="nw">Ortopedi · 208-B</td><td>Ayşe Yıldırım</td>
+            <td><b>Morfin HCl</b> 10 mg/mL · IM · gerektiğinde
+                <span class="rz kir">Kırmızı reçete</span></td>
+            <td>Dr. Kaya</td><td class="orta">gerekli</td>
+            <td><span class="rz kir">Kontrollü</span> Kasa teslimi + çift imza gerekir</td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td>
+          </tr>
+          <tr class="tik">
+            <td class="nw">Kadın Doğum · 118</td><td>Elif Doğan</td>
+            <td><b>Oksitosin</b> 5 IU · IV inf · tek doz</td>
+            <td>Dr. Aydın</td><td class="orta">11:00</td>
+            <td><span class="rz sari">Sözel order</span> 14:00'a kadar hekim imzası bekleniyor</td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td>
+          </tr>
+          <tr class="tik">
+            <td class="nw">Cerrahi · 301</td><td>Murat Şeker</td>
+            <td><b>Sefazolin</b> 1 g · IV · 3×1</td>
+            <td>Dr. Şen</td><td class="orta">08-16-24</td>
+            <td class="sonuk">—</td>
+            <td class="orta"><span class="rz ok">Onaylandı</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span>Eczacı kontrolü <b>dozdan önce</b> gelir: hazırlanmış doz geri alınamaz, uyarı ise
+        hasta yatağına gitmeden okunur.</span>
+      <span class="sp">Yüksek riskli ilaç (HRM) ve kontrollü ilaç satırları listeden düşürülemez.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================= DOZ TURU ===== -->
+  <div class="pnl" data-s="tur" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Servis ya da hasta…</div>
+      <span class="chip">06:00</span>
+      <span class="chip">08:00 <b>bitti</b></span>
+      <span class="chip on">12:00 <b>186</b></span>
+      <span class="chip">16:00</span>
+      <span class="chip">20:00</span>
+      <span class="chip">24:00</span>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:150px">Servis</th>
+          <th style="width:80px" class="orta">Hasta</th>
+          <th style="width:80px" class="orta">Doz</th>
+          <th style="width:170px">Hazırlayan</th>
+          <th style="width:200px">İlerleme</th>
+          <th style="width:110px" class="orta">Kontrol</th>
+          <th style="width:110px" class="orta">Teslim</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>Dahiliye (3. kat)</td><td class="orta">18</td><td class="orta">54</td>
+            <td>Tekniker M. Ateş</td>
+            <td><span class="bar" style="display:inline-block;width:120px"><i style="width:100%"></i></span> 54/54</td>
+            <td class="orta"><span class="rz ok">Yapıldı</span></td>
+            <td class="orta"><span class="rz ok">11:20</span></td></tr>
+          <tr class="tik"><td>Cerrahi (2. kat)</td><td class="orta">14</td><td class="orta">38</td>
+            <td>Tekniker S. Bal</td>
+            <td><span class="bar m" style="display:inline-block;width:120px"><i style="width:63%"></i></span> 24/38</td>
+            <td class="orta"><span class="rz">—</span></td>
+            <td class="orta"><span class="rz pas">Bekliyor</span></td></tr>
+          <tr class="tik"><td>YBÜ</td><td class="orta">8</td><td class="orta">41</td>
+            <td>Ecz. N. Arslan</td>
+            <td><span class="bar m" style="display:inline-block;width:120px"><i style="width:34%"></i></span> 14/41</td>
+            <td class="orta"><span class="rz">—</span></td>
+            <td class="orta"><span class="rz pas">Bekliyor</span></td></tr>
+          <tr class="tik"><td>Onkoloji</td><td class="orta">9</td><td class="orta">27</td>
+            <td class="sonuk">— atanmadı</td>
+            <td><span class="bar s" style="display:inline-block;width:120px"><i style="width:0"></i></span> 0/27</td>
+            <td class="orta"><span class="rz">—</span></td>
+            <td class="orta"><span class="rz pas">Bekliyor</span></td></tr>
+          <tr class="tik"><td>Ortopedi</td><td class="orta">11</td><td class="orta">26</td>
+            <td class="sonuk">— atanmadı</td>
+            <td><span class="bar s" style="display:inline-block;width:120px"><i style="width:0"></i></span> 0/26</td>
+            <td class="orta"><span class="rz">—</span></td>
+            <td class="orta"><span class="rz pas">Bekliyor</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Ünite doz (unit-dose):</b> her doz tek hasta için, tek saat için hazırlanır ve
+        hasta barkoduyla eşleşir.</span>
+      <span class="sp">Teslim edilen tur servis hemşiresinin barkod okutmasıyla kapanır.</span>
+    </div>
+  </div>
+
+  <!-- ================================================ SERVİS TALEPLERİ ===== -->
+  <div class="pnl" data-s="talep" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Talep no, servis ya da malzeme…</div>
+      <span class="chip on">Bekleyen <b>7</b></span>
+      <span class="chip">Acil <b>3</b></span>
+      <span class="chip">Kısmi karşılanan <b>2</b></span>
+      <span class="chip">Tümü</span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px">Talep No</th>
+          <th style="width:150px">İsteyen Birim</th>
+          <th style="width:80px" class="orta">Kalem</th>
+          <th>Öne çıkanlar</th>
+          <th style="width:90px" class="orta">Öncelik</th>
+          <th style="width:110px" class="orta">İstem Saati</th>
+          <th style="width:120px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>ET-2609-118</code></td><td>Ameliyathane</td>
+            <td class="orta">12</td>
+            <td>Sefazolin 1 g ×20 · Propofol %1 ×10 · Heparin flakon ×5</td>
+            <td class="orta"><span class="rz kir">Acil</span></td><td class="orta">09:05</td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+          <tr class="tik"><td class="nw"><code>ET-2609-119</code></td><td>Acil Servis</td>
+            <td class="orta">6</td>
+            <td>Adrenalin ampul ×10 · Atropin ×10 · SF 500 mL ×20</td>
+            <td class="orta"><span class="rz kir">Acil</span></td><td class="orta">09:12</td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+          <tr class="tik"><td class="nw"><code>ET-2609-120</code></td><td>YBÜ</td>
+            <td class="orta">18</td>
+            <td>Noradrenalin ×8 · Midazolam ×6 <span class="rz kir">yeşil</span> · Sedasyon seti</td>
+            <td class="orta"><span class="rz kir">Acil</span></td><td class="orta">09:18</td>
+            <td class="orta"><span class="rz mavi">Kısmi</span></td></tr>
+          <tr class="tik"><td class="nw"><code>ET-2609-121</code></td><td>Dahiliye Servisi</td>
+            <td class="orta">9</td>
+            <td>Pantoprazol ×15 · İnsülin glarjin ×4 <span class="rz mavi">2-8 °C</span></td>
+            <td class="orta"><span class="rz">Normal</span></td><td class="orta">08:40</td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+          <tr class="tik"><td class="nw"><code>ET-2609-122</code></td><td>Diyaliz</td>
+            <td class="orta">5</td><td>Heparin 25.000 IU ×6 · Eritropoietin ×4</td>
+            <td class="orta"><span class="rz">Normal</span></td><td class="orta">08:55</td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Acil talepler <b>sıraya girmez</b>, listenin başına düşer.</span>
+      <span class="sp">Kısmi karşılanan talep kapanmaz — kalan kalem taleple birlikte yaşar.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================== UYARILAR ===== -->
+  <div class="pnl" data-s="uyari" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:130px" class="orta">Tür</th>
+          <th>Konu</th>
+          <th style="width:200px">Ayrıntı</th>
+          <th style="width:120px" class="orta">Zaman</th>
+          <th style="width:140px" class="orta">İşlem</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="orta"><span class="rz kir">Soğuk zincir</span></td>
+            <td><b>Buzdolabı 2 — sıcaklık 9,4 °C</b> (eşik 2-8 °C)</td>
+            <td>18 dk boyunca eşik üstü · 42 kalem etkilenebilir</td>
+            <td class="orta">08:52</td>
+            <td class="orta"><span class="btn mini">Tutanak aç</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz kir">Miad</span></td>
+            <td><b>Seftriakson 1 g</b> — lot <code>C4482</code> · SKT 30.09.2026</td>
+            <td>14 gün kaldı · 38 kutu · FEFO sırası başında</td>
+            <td class="orta">Bugün</td>
+            <td class="orta"><span class="btn mini">İade/İmha</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz sari">Kritik stok</span></td>
+            <td><b>İnsan albümini %20</b> — kalan 4, min 10</td>
+            <td>Ortalama günlük 3 · 1,3 günlük stok</td>
+            <td class="orta">Bugün</td>
+            <td class="orta"><span class="btn mini">Talep aç</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz mor">LASA</span></td>
+            <td><b>DOPamin / DOBUTamin</b> aynı rafta</td>
+            <td>Yazılışı-okunuşu benzer — ayrı raf + tall-man etiketi önerilir</td>
+            <td class="orta">Denetim</td>
+            <td class="orta"><span class="btn mini">Raf değiştir</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz kir">Kontrollü</span></td>
+            <td><b>Narkotik kasa sayımı</b> — 3 gündür yapılmadı</td>
+            <td>Günlük sayım zorunlu · son sayım 13.09.2026</td>
+            <td class="orta">Gecikmiş</td>
+            <td class="orta"><span class="btn mini">Sayıma git</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz mavi">İTS</span></td>
+            <td><b>6 karekod bildirilmedi</b> — tüketim bildirimi</td>
+            <td>Dün düşülen kalemler · 24 saat içinde bildirilmeli</td>
+            <td class="orta">Dün</td>
+            <td class="orta"><span class="btn mini">İTS'e gönder</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Uyarılar <b>kapatılmaz, çözülür</b>: her satırın bir işlemi var.</span>
+      <span class="sp">Soğuk zincir ihlali ve kontrollü ilaç sayımı gecikmesi yönetici bildirimine düşer.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Hastane eczanesi — süreç haritası.</b> Bu pano dört akışın giriş noktası:
+  <ul>
+    <li><b>Order karşılama</b> — yatan hasta orderı eczacı kontrolünden geçer, ünite doz olarak
+      hazırlanır ve servise teslim edilir.</li>
+    <li><b>Servis talebi</b> — birim deposuna malzeme/ilaç çıkışı (ameliyathane, acil, YBÜ).</li>
+    <li><b>Mal kabul</b> — satın alınan ilacın lot/miad/soğuk zincir kontrolüyle girişi ve
+      İTS bildirimi.</li>
+    <li><b>Stok yönetimi</b> — miad (FEFO), kritik stok, sayım, kontrollü ilaç kasası,
+      iade ve imha.</li>
+  </ul>
+  Sekmeler tıklanabilir; üst şeritteki düğmeler ilgili sürecin ekranına gider.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

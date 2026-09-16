@@ -124,6 +124,7 @@ type
     FBeklemeZamani  : TDateTime;
     FEskiBaslik     : string;
     function  RafOmruSor: Boolean;
+    function  RafOmruZorunlu: Boolean;
     procedure RafOmruOku;
     function  RafOmruBirimAdi: string;
     function  RafOmruEkle(const ATarih: TDateTime; AAdet: Integer): TDateTime;
@@ -658,6 +659,14 @@ begin
   end;
 end;
 
+/// RAF OMRU ZORUNLU MU (Stok Opsiyon -27017, varsayilan True). Isaretliyse URT<->SKT
+///   karttaki raf omruyle esitlenir ve tarih varken raf omru istenir; degilse
+///   kullanici iki tarihi bildigi gibi girer, hicbir hesap/zorlama yapilmaz.
+function TIzlemeDlg.RafOmruZorunlu: Boolean;
+begin
+   Result := Tablo.GENINI.ReadBoolean(Ops_StokOpsiyon_RafOmruZorunlu, True);
+end;
+
 function TIzlemeDlg.RafOmruSor: Boolean;
 var RafOmru : Variant;
     Sure : Integer;
@@ -777,7 +786,7 @@ begin
   // Barkod tarih tasiyorsa BeforePost raf omru ister (SKT<->URT esitlemesi
   // icin). Tanimli degilse satiri ekleyip kullaniciyi "raf omru yok" hatasina
   // dusurmek yerine simdi soralim ve stok kartina kaydedelim.
-  if (RafOmruSure <= 0) and (ABilgi.SktVar or ABilgi.UretimVar) then
+  if RafOmruZorunlu and (RafOmruSure <= 0) and (ABilgi.SktVar or ABilgi.UretimVar) then
   begin
     RafOmruSor;
     if RafOmruSure <= 0 then
@@ -1464,7 +1473,9 @@ begin
    //   BUYUK (gec) olani baz al -> SKT>=URT ise URT:=SKT-rafomru, degilse SKT:=URT+rafomru.
    //   Fark stok kartindaki BIRIME gore hesaplanir (RafOmruEkle: gun/ay/yil/saat/dakika).
    //   Pascal tarih islevleri kullanir (SQL yok) -> hem MSSQL hem PG'de aynen calisir.
-   if TabIzlem.FieldByName('KALAN').AsFloat <> 0 then begin
+   //   Opsiyon kapaliysa (Raf Omru Zorunlu isaretsiz) bu blok atlanir: URT ve SKT
+   //   kullanicinin girdigi gibi kalir, raf omru sorulmaz.
+   if RafOmruZorunlu and (TabIzlem.FieldByName('KALAN').AsFloat <> 0) then begin
       Skt := TabIzlem.FieldByName('SKT').AsDateTime;
       Urt := TabIzlem.FieldByName('URT').AsDateTime;
       if Skt <= EncodeDate(1990,1,1) then Skt := 0;   // bos/sentinel (1990-01-01) -> yok say

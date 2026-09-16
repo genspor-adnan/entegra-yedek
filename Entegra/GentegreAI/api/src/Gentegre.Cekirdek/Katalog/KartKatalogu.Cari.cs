@@ -262,8 +262,8 @@ public static partial class KartKatalogu
             //   da ayni bayrak var (251); ikisi kesisince "hekim" cikar.
             // Grup VERILMEZ: "Kimlik" grubu kartin UST SERIDINI besliyor, alan
             //   orada degil İş Bilgileri kutusunda cizilir (252, kullanici).
-            new("randevuVerilebilir", "randevu_verilebilir", "mantik",
-                Baslik: "Randevu Verilebilir"),
+            // "randevuVerilebilir" KALKTI (711): hekim randevu alir mi = calisma
+            //   plani var mi (Randevu › Çalışma Planları). Kolon DB'de duruyor.
             new("durum",     "durum",      "kod",   SabitKodlar: DurumKodlari, Baslik: "Durum", Grup: "Kimlik"),
             // ik_karti.html mockup'ta idstrip'te DEGIL - Görev "Pozisyon" adiyla Genel
             //   sekmesinin "Özet" kutusunda (PersonelKimlikOzet.tsx). TCKN de "Kimlik
@@ -433,8 +433,7 @@ public static partial class KartKatalogu
                 new("aktif",           "aktif",           "mantik", Baslik: "Randevuya Açık"),
                 new("aciklama",        "aciklama",        "metin", EnFazlaUzunluk: 300,
                     Baslik: "Açıklama"),
-            }, SubeKolonu: null, LogTabloId: 912, Baslik: "Randevu Ayarları",
-               KosulAlani: "randevuVerilebilir")
+            }, SubeKolonu: null, LogTabloId: 912, Baslik: "Randevu Ayarları")
         },
         SilmeEngelleri: new[]
         {

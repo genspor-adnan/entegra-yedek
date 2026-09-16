@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Satınalma — Sipariş ve Teslim Takibi — Mockup (GenoTIP AI · Satınalma)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>📦 Sipariş — SP-2609-038 · İnsan Albümini %20</span>
+    <span class="sp">Hedef Medikal · Çerçeve anlaşma 2026/ALB-04 · 40 şişe · 188.000 ₺ · Teslim 14.09.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="satinalma_panosu.html">◀ Pano</div>
+    <div class="btn primary">📧 Tedarikçiye Gönder</div>
+    <div class="btn">⏱ Gecikme Bildir</div>
+    <div class="btn">⚖ Ceza İşlet</div>
+    <div class="sepv"></div>
+    <div class="btn" data-git="satinalma_kabul_fatura.html">🚚 Mal Kabul</div>
+    <div class="btn">✖ Siparişi İptal Et</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ Sipariş Formu</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart kir"><div class="b">Durum</div><div class="d" style="font-size:13px">Gecikmiş</div></div>
+    <div class="kart sari"><div class="b">Teslim</div><div class="d">10 <small>/ 40</small></div></div>
+    <div class="kart kir"><div class="b">Gecikme</div><div class="d">2 <small>gün</small></div></div>
+    <div class="kart"><div class="b">Sipariş tutarı</div><div class="d" style="font-size:13px">188.000 ₺</div></div>
+    <div class="kart"><div class="b">Faturalanan</div><div class="d" style="font-size:13px">51.700 ₺</div></div>
+    <div class="kart sari"><div class="b">Ceza (hesaplanan)</div><div class="d" style="font-size:13px">376 ₺</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="kalem">Sipariş Kalemleri<span class="sy">1</span></div>
+    <div class="sekme" data-s="teslim">Teslim Takibi<span class="sy">2</span></div>
+    <div class="sekme" data-s="sozlesme">Sözleşme & Koşullar</div>
+    <div class="sekme" data-s="acik">Açık Siparişler<span class="sy">31</span></div>
+  </div>
+
+  <!-- ==================================================== SİPARİŞ KALEMLERİ ===== -->
+  <div class="pnl" data-s="kalem">
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:250px">Malzeme</th>
+          <th style="width:80px" class="sag">Sipariş</th>
+          <th style="width:80px" class="sag">Teslim</th>
+          <th style="width:80px" class="sag">Kalan</th>
+          <th style="width:110px" class="sag">Birim fiyat</th>
+          <th style="width:110px" class="sag">Tutar</th>
+          <th style="width:130px" class="orta">Fiyat kaynağı</th>
+          <th style="width:140px">Şartname</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>İnsan albümini %20 100 mL</b><br>
+              <span class="sonuk">B05AA01 · kan ürünü · 2-8 °C</span></td>
+            <td class="sag">40</td><td class="sag">10</td>
+            <td class="sag"><span class="rz kir">30</span></td>
+            <td class="sag">4.700 ₺</td><td class="sag">188.000 ₺</td>
+            <td class="orta"><span class="rz mavi">Çerçeve anlaşma</span></td>
+            <td>Raf ömrü ≥ 6 ay · İTS karekod · ısı kayıtlı taşıma</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr><th style="width:190px">Alan</th><th>Değer</th></tr></thead>
+        <tbody>
+          <tr><td class="sonuk">Kaynak talep</td>
+            <td><code>SA-2609-074</code> (Eczane, 40 şişe) ·
+              <span class="sonuk">SA-2609-088 (YBÜ, 10 şişe) birleştirilmedi — ayrı sipariş</span></td></tr>
+          <tr><td class="sonuk">Tedarikçi</td><td><b>Hedef Medikal Ltd. Şti.</b> · VKN 1234567890</td></tr>
+          <tr><td class="sonuk">Sipariş tarihi</td><td>11.09.2026 · onay SA-2609-074 üzerinden</td></tr>
+          <tr><td class="sonuk">Söz verilen teslim</td>
+            <td>14.09.2026 <span class="rz kir">2 gün gecikti</span></td></tr>
+          <tr><td class="sonuk">Teslim yeri</td><td>Eczane Ana Depo · mal kabul saatleri 08:00-16:00</td></tr>
+          <tr><td class="sonuk">Kısmi teslim</td>
+            <td><span class="rz ok">Kabul edilir</span> — kritik stok, bekleyemez</td></tr>
+          <tr><td class="sonuk">Ödeme koşulu</td><td>Fatura tarihinden 60 gün · çerçeve anlaşma gereği</td></tr>
+          <tr><td class="sonuk">Muayene kabul</td>
+            <td>Eczacı + Satınalma · lot/SKT/soğuk zincir kontrolü zorunlu</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Fiyat kaynağı siparişte görünür:</b> çerçeve anlaşma fiyatı sabittir, faturada
+        farklı gelirse itiraz dayanağı budur.</span>
+      <span class="sp">Kritik malzemede kısmi teslim kabul edilir — 10 şişe bile 3 gün kazandırır.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================= TESLİM TAKİBİ ===== -->
+  <div class="pnl" data-s="teslim" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:140px" class="orta">Tarih</th>
+          <th style="width:140px">İrsaliye</th>
+          <th style="width:90px" class="sag">Miktar</th>
+          <th style="width:110px">Lot / SKT</th>
+          <th style="width:140px" class="orta">Soğuk zincir</th>
+          <th style="width:130px" class="orta">Kabul</th>
+          <th>Not</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="orta">14.09.2026 11:20</td>
+            <td class="nw"><code>C-2026/1188</code></td><td class="sag">10</td>
+            <td><code>AL3390</code><br>30.11.2026</td>
+            <td class="orta"><span class="rz ok">4,8-7,6 °C</span></td>
+            <td class="orta"><span class="rz ok">Kabul</span></td>
+            <td>Kısmi · kalan 30 şişe için tarih verilmedi</td></tr>
+          <tr class="tik"><td class="orta">—</td>
+            <td class="sonuk">— bekleniyor</td><td class="sag">30</td>
+            <td class="sonuk">—</td><td class="orta sonuk">—</td>
+            <td class="orta"><span class="rz kir">Gecikmiş</span></td>
+            <td>Tedarikçi: "üretici tahsisi bekleniyor" · yazılı bildirim istendi</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ul class="kontrol">
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Teslim tarihi geçti, sistem <b>kendiliğinden</b> gecikme kaydı açtı</span>
+        <span class="imza">15.09.2026 00:05</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Tedarikçiye yazılı bildirim gönderildi, yeni tarih istendi</span>
+        <span class="imza">M. Aydın · 15.09 09:30</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Eczaneye bildirildi: <b>1,3 günlük stok</b> — alternatif tedarikçi araştırılıyor</span>
+        <span class="imza">15.09 10:00</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Tedarikçiden yazılı taahhüt alındı</span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Gecikme cezası hesaplandı ve faturadan mahsup edildi</span>
+        <span class="imza">— hesaplanan 376 ₺</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Gecikme tedarikçi performans skoruna işlendi</span>
+        <span class="imza">—</span></li>
+    </ul>
+
+    <div class="ozet">
+      <div class="kart"><div class="b">Ceza hesabı</div>
+        <div class="d" style="font-size:11.5px;font-weight:normal;line-height:1.7">
+          Teslim edilmeyen tutar <b>141.000 ₺</b> × günlük binde 1 × <b>2 gün</b> =
+          <b>282 ₺</b><br>
+          <span class="sonuk">+ kısmi teslimin geciken kısmı 94 ₺ · toplam 376 ₺ ·
+            üst sınır sözleşme bedelinin %10'u</span>
+        </div></div>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Gecikme kaydı elle açılmaz:</b> tarih geçtiğinde sistem açar — "unutuldu"
+        diye ceza atlanmaz.</span>
+      <span class="sp">Ceza otomatik <b>hesaplanır</b> ama otomatik kesilmez: mahsup kararı satınalma sorumlusunun.</span>
+    </div>
+  </div>
+
+  <!-- ==================================================== SÖZLEŞME & KOŞULLAR ===== -->
+  <div class="pnl" data-s="sozlesme" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr><th style="width:190px">Alan</th><th>Değer</th></tr></thead>
+        <tbody>
+          <tr><td class="sonuk">Çerçeve anlaşma</td>
+            <td><b>2026/ALB-04</b> · İnsan albümini · 01.01.2026 – 31.12.2026</td></tr>
+          <tr><td class="sonuk">Anlaşma tipi</td>
+            <td>Yıllık birim fiyat anlaşması — <b>miktar taahhüdü yok</b>, ihtiyaç kadar sipariş</td></tr>
+          <tr><td class="sonuk">Birim fiyat</td>
+            <td>4.700 ₺ · yıl içinde <b>sabit</b> · TÜFE artışı 6 ayda bir gözden geçirilir</td></tr>
+          <tr><td class="sonuk">Yıllık öngörü</td>
+            <td>1.000 şişe · bugüne kadar <b>742</b> sipariş edildi (%74)</td></tr>
+          <tr><td class="sonuk">Teslim süresi</td>
+            <td>Sipariş tarihinden <b>3 iş günü</b> · acil siparişte 24 saat</td></tr>
+          <tr><td class="sonuk">Gecikme cezası</td>
+            <td>Teslim edilmeyen tutarın <b>günlük binde 1'i</b> · üst sınır sözleşme bedelinin %10'u</td></tr>
+          <tr><td class="sonuk">Raf ömrü taahhüdü</td>
+            <td>Teslimde <b>asgari 6 ay</b> · altındaki parti reddedilir (iade masrafı tedarikçide)</td></tr>
+          <tr><td class="sonuk">Soğuk zincir</td>
+            <td>2-8 °C · ısı kayıt cihazı zorunlu · ihlalde <b>ürün bedeli tedarikçide</b></td></tr>
+          <tr><td class="sonuk">Fesih koşulu</td>
+            <td>Üst üste <b>3 gecikme</b> ya da kalite uygunsuzluğu · 30 gün ihbarla</td></tr>
+          <tr><td class="sonuk">Bu sözleşmedeki gecikme</td>
+            <td><span class="rz sari">2. gecikme</span> (önceki: 22.07.2026, 1 gün) —
+              bir gecikme daha fesih hakkı doğurur</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Çerçeve anlaşma teklif sürecini kaldırır, denetimi kaldırmaz:</b> fiyat sabit
+        ama raf ömrü, soğuk zincir ve gecikme koşulları her siparişte işler.</span>
+      <span class="sp">Fesih sayacı görünürde durur: "3. gecikme" soyut bir madde değil, ekranda sayılan bir şey.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================= AÇIK SİPARİŞLER ===== -->
+  <div class="pnl" data-s="acik" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Sipariş no, malzeme ya da tedarikçi…</div>
+      <span class="chip on">Açık <b>31</b></span>
+      <span class="chip">Geciken <b>5</b></span>
+      <span class="chip">Kısmi <b>8</b></span>
+      <span class="chip">Bugün beklenen <b>4</b></span>
+      <span class="chip">Çerçeve anlaşmalı <b>19</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:120px">Sipariş No</th>
+          <th style="width:210px">Malzeme</th>
+          <th style="width:160px">Tedarikçi</th>
+          <th style="width:110px" class="sag">Tutar</th>
+          <th style="width:110px" class="orta">Teslim</th>
+          <th style="width:110px" class="orta">Durum</th>
+          <th style="width:130px" class="orta">Fiyat kaynağı</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>SP-2609-038</code></td>
+            <td>İnsan albümini %20 ×40</td><td>Hedef Medikal</td>
+            <td class="sag">188.000 ₺</td><td class="orta">14.09</td>
+            <td class="orta"><span class="rz kir">10/40 gecikti</span></td>
+            <td class="orta"><span class="rz mavi">Çerçeve</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SP-2609-041</code></td>
+            <td>Deksmedetomidin 200 µg ×40</td><td>Selçuk Ecza</td>
+            <td class="sag">62.400 ₺</td><td class="orta">12.09</td>
+            <td class="orta"><span class="rz kir">0/40 gecikti</span></td>
+            <td class="orta"><span class="rz mavi">Çerçeve</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SP-2609-052</code></td>
+            <td>Ultrason probu (konveks)</td><td>Mindray Türkiye</td>
+            <td class="sag">126.500 ₺</td><td class="orta">23.09</td>
+            <td class="orta"><span class="rz pas">Bekliyor</span></td>
+            <td class="orta"><span class="rz">Teklif TK-018</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SP-2609-061</code></td>
+            <td>İlaç (8 kalem karma)</td><td>Selçuk Ecza</td>
+            <td class="sag">184.320 ₺</td><td class="orta">16.09</td>
+            <td class="orta"><span class="rz ok">Teslim edildi</span></td>
+            <td class="orta"><span class="rz mavi">Çerçeve</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SP-2608-112</code></td>
+            <td>Cerrahi eldiven ×20.000</td><td>Medikal Grup A.Ş.</td>
+            <td class="sag">462.000 ₺</td><td class="orta">05.09</td>
+            <td class="orta"><span class="rz kir">12.000/20.000</span></td>
+            <td class="orta"><span class="rz">İhale</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SP-2609-029</code></td>
+            <td>Hasta yatağı (motorlu) ×6</td><td>Linet Türkiye</td>
+            <td class="sag">576.000 ₺</td><td class="orta">10.09</td>
+            <td class="orta"><span class="rz sari">0/6 gecikti</span></td>
+            <td class="orta"><span class="rz">Teklif TK-011</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SP-2609-044</code></td>
+            <td>Laboratuvar kit (biyokimya) ×50</td><td>Roche Diagnostics</td>
+            <td class="sag">310.000 ₺</td><td class="orta">15.09</td>
+            <td class="orta"><span class="rz sari">30/50</span></td>
+            <td class="orta"><span class="rz mavi">Çerçeve</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Açık sipariş tutarı bütçede "taahhüt" olarak görünür:</b> 2,84 M ₺ henüz
+        faturalanmadı ama harcanmış sayılır.</span>
+      <span class="sp">Kapanan sipariş listeden düşer; kısmi teslim edilen kapanmaz — kalan kalem siparişle birlikte yaşar.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Süreç:</b> Sipariş ya <b>teklif kararından</b> ya da <b>çerçeve anlaşmadan</b> doğar.
+  Tedarikçiye gönderilir, teslim tarihi izlenir; tarih geçtiğinde gecikme kaydı <b>kendiliğinden</b>
+  açılır ve ceza hesaplanır (kesme kararı insanın). Kısmi teslim kritik malzemede kabul edilir ama
+  siparişi kapatmaz. Sözleşme koşulları (raf ömrü, soğuk zincir, gecikme cezası, fesih sayacı) her
+  siparişte işler — çerçeve anlaşma teklif sürecini kaldırır, denetimi kaldırmaz. Açık siparişler
+  bütçede <b>taahhüt</b> olarak görünür: parası bağlanmıştır.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

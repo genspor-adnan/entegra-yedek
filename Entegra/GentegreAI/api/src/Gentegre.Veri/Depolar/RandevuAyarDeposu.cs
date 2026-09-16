@@ -51,14 +51,14 @@ public sealed class RandevuAyarDeposu
         await using var komut = new NpgsqlCommand("""
             select d.id, d.ad, null::integer as hekim_id, d.ad as satir_ad, 0 as tip
               from public.departman d
-             where d.randevu_verilebilir = 1 and d.durum = 1
+             where d.durum = 1 and (public.fn_bolum_planli(d.id) = 1 or d.randevusuz_kabul = 1)
             union all
             select d.id, d.ad, t.id, t.unvan, 1
               from public.departman d
               join public.taraf t on t.departman = d.id and t.personel = 1
-             where d.randevu_verilebilir = 1 and d.durum = 1
-               -- Bolumdeki HER personel degil, randevu verilebilir olan (252).
-               and t.randevu_verilebilir = 1
+             where d.durum = 1 and (public.fn_bolum_planli(d.id) = 1 or d.randevusuz_kabul = 1)
+               -- Bolumdeki HER personel degil, CALISMA PLANI olan (711): bayrak kalkti.
+               and public.fn_hekim_planli(t.id) = 1
                and coalesce(t.durum, 1) = 1
              order by 2, 5, 4
             """, baglanti);
@@ -161,14 +161,45 @@ public sealed class RandevuAyarDeposu
         k.Parameters.AddWithValue("p11", kullaniciId);
     }
 
-    /// <summary>Departmani randevu bolumu yapar / bolumlukten cikarir.</summary>
-    public async Task BolumIsaretleAsync(int departmanId, bool bolumMu, CancellationToken iptal = default)
+    /// <summary>
+    /// Departmani randevu bolumu yapar / bolumlukten cikarir (711: bayrak yerine
+    /// CALISMA PLANI). Ekle: bolumdeki hekimlere (taraf.hekim=1 ya da personel)
+    /// sablonu yoksa genel ayarlardan "Standart hafta" sablonu acilir; hekimsiz
+    /// bolum randevusuz kabul olur. Cikar: bolumun sablonlari pasiflenir,
+    /// randevusuz kabul kalkar.
+    /// </summary>
+    public async Task<int> BolumIsaretleAsync(int departmanId, bool bolumMu, int kullaniciId = 0, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        await using var k = new NpgsqlCommand(
-            "update public.departman set randevu_verilebilir = @p1 where id = @p0", baglanti);
-        k.Parameters.AddWithValue("p0", departmanId);
-        k.Parameters.AddWithValue("p1", (short)(bolumMu ? 1 : 0));
-        await k.ExecuteNonQueryAsync(iptal);
+        if (!bolumMu)
+        {
+            await using var k0 = new NpgsqlCommand(
+                "update public.hekim_calisma_sablon set aktif = 0, degistiren = @p1, degistirme_tarihi = now() where departman_id = @p0 and aktif = 1;" +
+                "update public.departman set randevusuz_kabul = 0 where id = @p0", baglanti);
+            k0.Parameters.AddWithValue("p0", departmanId); k0.Parameters.AddWithValue("p1", kullaniciId);
+            return await k0.ExecuteNonQueryAsync(iptal);
+        }
+        await using var k = new NpgsqlCommand("""
+            insert into public.hekim_calisma_sablon (hekim_id, departman_id, ad, gunler, bas1, bit1, slot_dk, aciklama, ekleyen)
+            select t.id, @p0, 'Standart hafta',
+                   coalesce(nullif((select deger from public.referans where anahtar = 'randevu.calisma_gunleri'), ''), '1,2,3,4,5'),
+                   coalesce(nullif((select deger from public.referans where anahtar = 'randevu.baslangic_saat'), ''), '09:00')::time,
+                   coalesce(nullif((select deger from public.referans where anahtar = 'randevu.bitis_saat'), ''), '18:00')::time,
+                   coalesce(nullif((select deger from public.referans where anahtar = 'randevu.slot_dk'), '')::int, 15),
+                   'Randevu Ayarları › Bölüm ekle', @p1
+              from public.taraf t
+             where t.departman = @p0 and coalesce(t.durum, 1) = 1 and (t.hekim = 1 or t.personel = 1)
+               and not exists (select 1 from public.hekim_calisma_sablon s where s.hekim_id = t.id and s.departman_id = @p0 and s.aktif = 1)
+            """, baglanti);
+        k.Parameters.AddWithValue("p0", departmanId); k.Parameters.AddWithValue("p1", kullaniciId);
+        var eklenen = await k.ExecuteNonQueryAsync(iptal);
+        if (eklenen == 0)
+        {
+            // Hekimsiz bolum (acil, lab, radyoloji): randevusuz kabul.
+            await using var k2 = new NpgsqlCommand("update public.departman set randevusuz_kabul = 1 where id = @p0", baglanti);
+            k2.Parameters.AddWithValue("p0", departmanId);
+            await k2.ExecuteNonQueryAsync(iptal);
+        }
+        return eklenen;
     }
 }

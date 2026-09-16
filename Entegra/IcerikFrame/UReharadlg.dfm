@@ -22,8 +22,6 @@ object RehberAraDlg: TRehberAraDlg
     LookAndFeel.Kind = lfOffice11
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
-    ExplicitTop = 32
-    ExplicitHeight = 253
     object CariGridView: TcxGridDBTableView
       OnDblClick = CariGridDBTableView1DblClick
       Navigator.Buttons.CustomButtons = <>
@@ -439,7 +437,6 @@ object RehberAraDlg: TRehberAraDlg
     TabOrder = 0
     Transparent = True
     Wrapable = False
-    ExplicitHeight = 29
     object YeniTus: TToolButton
       Left = 0
       Top = 0
@@ -1736,6 +1733,15 @@ object RehberAraDlg: TRehberAraDlg
               Caption = 'Fatura Dip Notu'
               TabOrder = 6
               OnClick = ButtonFaturaDipNotuClick
+            end
+            object ButtonIrsaliyeDipNotu: TcxButton
+              Left = 831
+              Top = 6
+              Width = 147
+              Height = 25
+              Caption = #304'rsaliye Dip Notu'
+              TabOrder = 7
+              OnClick = ButtonIrsaliyeDipNotuClick
             end
           end
         end
@@ -5818,7 +5824,7 @@ object RehberAraDlg: TRehberAraDlg
     DataSet = TabBankaHesaplar
     BCDToCurrency = False
     DataSetOptions = []
-    Left = 415
+    Left = 359
     Top = 41
   end
   object frxSozBelge: TfrxDBDataset
@@ -5966,7 +5972,7 @@ object RehberAraDlg: TRehberAraDlg
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OnPopup = PopupMenuREHBERPopup
-    Left = 41
+    Left = 65
     Top = 34
     object info1: TMenuItem
       Caption = 'info'

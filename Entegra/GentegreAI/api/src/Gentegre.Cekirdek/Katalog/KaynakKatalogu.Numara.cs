@@ -246,6 +246,48 @@ public static partial class KaynakKatalogu
             new("durum",         "n.durum",           "kod",   "Durum", Hizalama: "orta")
         ]);
 
+    /// <summary>
+    /// TEDARİK BELGELERİ (731): satınalma talebi, teklif, mal kabul tutanağı,
+    /// eczane hazırlaması, ilaç imha tutanağı, demirbaş no, kalibrasyon kaydı
+    /// ve iş emri numaraları TEK GRİDDE - sekizi için ayrı grid açmak aynı
+    /// tablonun sekiz kopyası olurdu.
+    ///
+    /// <para>Hasta Belgeleri gridiyle aynı desen: kaynak tablo değil GÖRÜNÜM,
+    /// böylece ayarı olmayan tür de `id = 0` satırı olarak çizilir ve
+    /// kullanıcı o numaranın var olduğunu görür.</para>
+    ///
+    /// <para>SİPARİŞ NUMARASI BURADA YOK: alış siparişi `belge` tür 9'dur,
+    /// Alış Belgeleri gridinden ayarlanır. KONTROLLÜ DEFTER de yok - onun
+    /// serisi mevzuat gereği kırmızı/yeşil ayrı akar ve kendi tetiğindedir
+    /// (730).</para>
+    /// </summary>
+    private static KaynakTanimi NumaraTedarik() => new(
+        Ad: "numara-tedarik",
+        YetkiKodu: "numara_sablonu",
+        Kaynak: """
+            public.v_numara_tedarik n
+              left join public.sube s on s.id = n.sube_id
+            """,
+        VarsayilanSirala: "n.sira asc, n.baslama_tarihi desc",
+        Kolonlar:
+        [
+            new("id",            "n.id",              "sayi",  "Id", Varsayilan: false),
+            new("tur",           "n.tur",             "sayi",  "Tur Kodu", Varsayilan: false),
+            new("turAdi",        "n.tur_adi",         "metin", "Tür", Genislik: 200),
+            new("baslamaTarihi", "n.baslama_tarihi",  "tarih", "Başlama", Hizalama: "orta"),
+            new("onEk",          "n.on_ek",           "metin", "Ön Ek",
+                                                      Hizalama: "orta", Genislik: 90),
+            new("baslamaNo",     "n.baslama_no",      "metin", "Başlama No",
+                                                      Hizalama: "orta", Genislik: 120),
+            new("hane",          "n.hane",            "sayi",  "Hane",
+                                                      Hizalama: "orta", Varsayilan: false),
+            new("subeAdi",       "s.ad",              "metin", "Şube", Varsayilan: false),
+            new("elleGirilir",   "n.elle_girilir",    "mantik", "Elle Girilir",
+                                                      Hizalama: "orta", Genislik: 110),
+            // Ayarsız tür "Pasif" DEĞİL ayarsızdır (636): ayrım `id`de.
+            new("durum",         "n.durum",           "kod",   "Durum", Hizalama: "orta")
+        ]);
+
     private static KaynakTanimi NumaraSatis()    => NumaraKaynagi("numara-satis", NumaraSatisTurleri);
     private static KaynakTanimi NumaraAlis()     => NumaraKaynagi("numara-alis", NumaraAlisTurleri);
     private static KaynakTanimi NumaraTahsilat() => NumaraKaynagi("numara-tahsilat", NumaraTahsilatTurleri);

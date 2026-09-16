@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eczane — Mal Kabul — Mockup (GenoTIP AI · Eczane)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🚚 Mal Kabul — İrsaliye A-2026/44187</span>
+    <span class="sp">Tedarikçi: Selçuk Ecza Deposu · Sipariş SA-2609-061 · 16.09.2026 08:15 · Muayene komisyonu</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="eczane_panosu.html">◀ Pano</div>
+    <div class="btn primary">✓ Kabul Et ve Stoğa Al</div>
+    <div class="btn">⚠ Uygunsuzluk Tutanağı</div>
+    <div class="btn">↩ Kısmi Ret</div>
+    <div class="sepv"></div>
+    <div class="btn">🔦 Karekod Oku</div>
+    <div class="btn">🌡️ Soğuk Zincir Kaydı</div>
+    <div class="btn">📡 İTS Bildir</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ Muayene Tutanağı</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">İrsaliye kalemi</div><div class="d">8</div></div>
+    <div class="kart ok"><div class="b">Okutulan karekod</div><div class="d">412 <small>/ 460</small></div></div>
+    <div class="kart sari"><div class="b">Eksik/fazla</div><div class="d">2 <small>kalem</small></div></div>
+    <div class="kart kir"><div class="b">Uygunsuzluk</div><div class="d">1</div></div>
+    <div class="kart"><div class="b">Tutar</div><div class="d" style="font-size:13px">184.320,00 ₺</div></div>
+    <div class="kart"><div class="b">İTS</div><div class="d" style="font-size:12px">Mal alım bekliyor</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="kalem">Kalem Kabul<span class="sy">8</span></div>
+    <div class="sekme" data-s="karekod">Karekod / Seri<span class="sy">412</span></div>
+    <div class="sekme" data-s="soguk">Soğuk Zincir<span class="sy">2</span></div>
+    <div class="sekme" data-s="its">İTS Bildirimi<span class="sy">412</span></div>
+    <div class="sekme" data-s="uygunsuz">Uygunsuzluk<span class="sy">1</span></div>
+  </div>
+
+  <!-- ======================================================= KALEM KABUL ===== -->
+  <div class="pnl" data-s="kalem">
+    <div class="arama">
+      <div class="kutu">🔍 İlaç adı ya da barkod…</div>
+      <span class="chip on">Tümü <b>8</b></span>
+      <span class="chip">Sapmalı <b>2</b></span>
+      <span class="chip">Soğuk zincir <b>2</b></span>
+      <span class="chip">Kontrollü <b>1</b></span>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:240px">İlaç</th>
+          <th style="width:80px" class="sag">Sipariş</th>
+          <th style="width:80px" class="sag">İrsaliye</th>
+          <th style="width:80px" class="sag">Sayılan</th>
+          <th style="width:110px">Lot</th>
+          <th style="width:100px" class="orta">SKT</th>
+          <th style="width:90px" class="orta">Raf ömrü</th>
+          <th style="width:130px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Sefazolin 1 g flakon</b> <code class="k">J01DB04</code></td>
+            <td class="sag">200</td><td class="sag">200</td><td class="sag">200</td>
+            <td><code>S9902</code></td><td class="orta">31.08.2028</td>
+            <td class="orta"><span class="rz ok">23 ay</span></td>
+            <td class="orta"><span class="rz ok">Uygun</span></td></tr>
+          <tr class="tik"><td><b>Pantoprazol 40 mg flakon</b> <code class="k">A02BC02</code></td>
+            <td class="sag">150</td><td class="sag">150</td><td class="sag">150</td>
+            <td><code>P4410</code></td><td class="orta">30.06.2028</td>
+            <td class="orta"><span class="rz ok">21 ay</span></td>
+            <td class="orta"><span class="rz ok">Uygun</span></td></tr>
+          <tr class="tik"><td><b>Enoksaparin 6000 anti-Xa</b> <code class="k">B01AB05</code>
+              <span class="rz mor">Yüksek riskli</span></td>
+            <td class="sag">100</td><td class="sag">100</td><td class="sag">100</td>
+            <td><code>EX1177</code></td><td class="orta">31.12.2027</td>
+            <td class="orta"><span class="rz ok">15 ay</span></td>
+            <td class="orta"><span class="rz ok">Uygun</span></td></tr>
+          <tr class="tik"><td><b>İnsülin glarjin 100 IU/mL</b> <code class="k">A10AE04</code>
+              <span class="rz mavi">2-8 °C</span></td>
+            <td class="sag">60</td><td class="sag">60</td><td class="sag">60</td>
+            <td><code>IG2280</code></td><td class="orta">31.03.2027</td>
+            <td class="orta"><span class="rz ok">6 ay</span></td>
+            <td class="orta"><span class="rz ok">Uygun</span></td></tr>
+          <tr class="tik"><td><b>Rituksimab 500 mg</b> <code class="k">L01FA01</code>
+              <span class="rz mavi">2-8 °C</span> <span class="rz mor">Pahalı</span></td>
+            <td class="sag">6</td><td class="sag">6</td><td class="sag">6</td>
+            <td><code>RT0091</code></td><td class="orta">30.11.2027</td>
+            <td class="orta"><span class="rz ok">14 ay</span></td>
+            <td class="orta"><span class="rz kir">Isı ihlali</span></td></tr>
+          <tr class="tik"><td><b>Fentanil 0,5 mg/10 mL</b> <code class="k">N01AH01</code>
+              <span class="rz kir">Kırmızı reçete</span></td>
+            <td class="sag">30</td><td class="sag">30</td><td class="sag">30</td>
+            <td><code>FN2255</code></td><td class="orta">30.06.2028</td>
+            <td class="orta"><span class="rz ok">21 ay</span></td>
+            <td class="orta"><span class="rz mavi">Kasaya</span></td></tr>
+          <tr class="tik"><td><b>Seftriakson 1 g flakon</b> <code class="k">J01DD04</code></td>
+            <td class="sag">120</td><td class="sag">120</td><td class="sag">108</td>
+            <td><code>C5501</code></td><td class="orta">31.01.2027</td>
+            <td class="orta"><span class="rz sari">4 ay</span></td>
+            <td class="orta"><span class="rz sari">12 eksik</span></td></tr>
+          <tr class="tik"><td><b>Metamizol 1 g ampul</b> <code class="k">N02BB02</code></td>
+            <td class="sag">200</td><td class="sag">200</td><td class="sag">200</td>
+            <td><code>MZ7730</code></td><td class="orta">31.12.2026</td>
+            <td class="orta"><span class="rz kir">3 ay</span></td>
+            <td class="orta"><span class="rz kir">Raf ömrü kısa</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Raf ömrü kuralı:</b> sözleşmede en az <b>6 ay</b> — altında kalan kalem
+        sorumlu eczacı onayı olmadan kabul edilmez.</span>
+      <span class="sp">Sayım irsaliyeden farklıysa fark tutanağa geçer, irsaliye "doğru" sayılmaz.</span>
+    </div>
+  </div>
+
+  <!-- ==================================================== KAREKOD / SERİ ===== -->
+  <div class="pnl" data-s="karekod" hidden>
+    <div class="arama">
+      <div class="kutu">🔦 Karekod okut — <code>01</code>GTIN <code>17</code>SKT
+        <code>10</code>Lot <code>21</code>Seri</div>
+      <span class="chip on">Okutulan <b>412</b></span>
+      <span class="chip">Bekleyen <b>48</b></span>
+      <span class="chip">Hatalı <b>3</b></span>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:200px">İlaç</th>
+          <th style="width:150px">GTIN</th>
+          <th style="width:110px">Lot</th>
+          <th style="width:100px" class="orta">SKT</th>
+          <th style="width:80px" class="sag">Okutulan</th>
+          <th style="width:80px" class="sag">Beklenen</th>
+          <th style="width:150px" class="orta">Sonuç</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>Sefazolin 1 g</td><td><code>08699541010152</code></td>
+            <td><code>S9902</code></td><td class="orta">08.2028</td>
+            <td class="sag">200</td><td class="sag">200</td>
+            <td class="orta"><span class="rz ok">Tam</span></td></tr>
+          <tr class="tik"><td>Pantoprazol 40 mg</td><td><code>08699514770018</code></td>
+            <td><code>P4410</code></td><td class="orta">06.2028</td>
+            <td class="sag">150</td><td class="sag">150</td>
+            <td class="orta"><span class="rz ok">Tam</span></td></tr>
+          <tr class="tik"><td>İnsülin glarjin</td><td><code>08699546950014</code></td>
+            <td><code>IG2280</code></td><td class="orta">03.2027</td>
+            <td class="sag">60</td><td class="sag">60</td>
+            <td class="orta"><span class="rz ok">Tam</span></td></tr>
+          <tr class="tik"><td>Seftriakson 1 g</td><td><code>08699502270099</code></td>
+            <td><code>C5501</code></td><td class="orta">01.2027</td>
+            <td class="sag">108</td><td class="sag">120</td>
+            <td class="orta"><span class="rz sari">12 eksik</span></td></tr>
+          <tr class="tik"><td>Fentanil 0,5 mg</td><td><code>08699874750027</code></td>
+            <td><code>FN2255</code></td><td class="orta">06.2028</td>
+            <td class="sag">30</td><td class="sag">30</td>
+            <td class="orta"><span class="rz ok">Tam</span></td></tr>
+          <tr class="tik"><td>Rituksimab 500 mg</td><td><code>08699636760031</code></td>
+            <td><code>RT0091</code></td><td class="orta">11.2027</td>
+            <td class="sag">6</td><td class="sag">6</td>
+            <td class="orta"><span class="rz kir">Isı ihlali — beklet</span></td></tr>
+          <tr class="tik"><td class="sonuk">Okunamayan / eşleşmeyen</td><td class="sonuk">—</td>
+            <td class="sonuk">—</td><td class="orta sonuk">—</td>
+            <td class="sag">3</td><td class="sag">—</td>
+            <td class="orta"><span class="rz kir">Elle doğrulanacak</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span>Karekod <b>kutu kutu</b> okutulur: satır toplamı değil, tekil ürün İTS'de takip edilir.</span>
+      <span class="sp">Okunamayan karekod elle girilebilir ama <b>kim girdi</b> kaydedilir.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================= SOĞUK ZİNCİR ===== -->
+  <div class="pnl" data-s="soguk" hidden>
+    <div class="ozet">
+      <div class="kart"><div class="b">Taşıma kutusu</div><div class="d" style="font-size:12px">SZ-2026/1180</div></div>
+      <div class="kart ok"><div class="b">Çıkış ısısı</div><div class="d">4,8 °C</div></div>
+      <div class="kart kir"><div class="b">En yüksek</div><div class="d">11,2 °C</div></div>
+      <div class="kart kir"><div class="b">Eşik üstü süre</div><div class="d">47 <small>dk</small></div></div>
+      <div class="kart"><div class="b">Varış ısısı</div><div class="d">7,6 °C</div></div>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:220px">Kalem</th>
+          <th style="width:110px" class="orta">Saklama</th>
+          <th style="width:130px" class="orta">Ölçüm</th>
+          <th>Değerlendirme</th>
+          <th style="width:150px" class="orta">Karar</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Rituksimab 500 mg</b> ×6</td>
+            <td class="orta">2-8 °C</td><td class="orta"><span class="rz kir">11,2 °C / 47 dk</span></td>
+            <td>Üretici stabilite verisi: 25 °C'de en çok 24 saat — <b>ürün kullanılabilir</b>
+              ancak firma yazılı onayı isteniyor</td>
+            <td class="orta"><span class="rz sari">Karantinada</span></td></tr>
+          <tr class="tik"><td><b>İnsülin glarjin</b> ×60</td>
+            <td class="orta">2-8 °C</td><td class="orta"><span class="rz ok">4,8-7,6 °C</span></td>
+            <td>Eşik aşılmadı</td>
+            <td class="orta"><span class="rz ok">Kabul</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ul class="kontrol">
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Taşıma kutusu ısı kaydı indirildi ve irsaliyeye eklendi</span>
+        <span class="imza">Tekniker S. Bal · 08:22</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Eşik üstü kalemler <b>karantina rafına</b> alındı (stoğa girmedi)</span>
+        <span class="imza">Ecz. N. Arslan · 08:25</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Tedarikçiye ve ruhsat sahibine bildirim yapıldı</span>
+        <span class="imza">Ecz. N. Arslan · 08:40</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Firma yazılı görüşü alındı (kullanılabilir / kullanılamaz)</span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Karar uygulandı: stoğa al ya da iade et</span>
+        <span class="imza">—</span></li>
+    </ul>
+
+    <div class="statusbar">
+      <span><b>Karantina stok değildir:</b> sayımda görünür, çıkışa açılmaz — "elimizde var"
+        diye dağıtılmasın.</span>
+      <span class="sp">Isı ihlalinde kararı firma değil, veri + firma görüşü birlikte verir; kayıt eczacınındır.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================== İTS BİLDİRİM ===== -->
+  <div class="pnl" data-s="its" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 GTIN / lot…</div>
+      <span class="chip on">Bildirilecek <b>412</b></span>
+      <span class="chip">Bildirildi <b>0</b></span>
+      <span class="chip">Hata <b>0</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:150px" class="orta">Bildirim</th>
+          <th style="width:200px">İlaç</th>
+          <th style="width:110px">Lot</th>
+          <th style="width:90px" class="sag">Adet</th>
+          <th style="width:150px">Gönderen (GLN)</th>
+          <th style="width:140px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="orta"><span class="rz mavi">Mal Alım</span></td>
+            <td>Sefazolin 1 g</td><td><code>S9902</code></td><td class="sag">200</td>
+            <td><code>8680000000017</code></td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz mavi">Mal Alım</span></td>
+            <td>Pantoprazol 40 mg</td><td><code>P4410</code></td><td class="sag">150</td>
+            <td><code>8680000000017</code></td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz mavi">Mal Alım</span></td>
+            <td>Enoksaparin</td><td><code>EX1177</code></td><td class="sag">100</td>
+            <td><code>8680000000017</code></td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz mavi">Mal Alım</span></td>
+            <td>Fentanil 0,5 mg</td><td><code>FN2255</code></td><td class="sag">30</td>
+            <td><code>8680000000017</code></td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">Bekletiliyor</span></td>
+            <td>Rituksimab 500 mg</td><td><code>RT0091</code></td><td class="sag">6</td>
+            <td class="sonuk">—</td>
+            <td class="orta"><span class="rz kir">Karantinada</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Karantinadaki kalem bildirilmez:</b> mal alım bildirimi "elimize aldık ve
+        kullanacağız" demektir; kararı verilmemiş ürün için erken olur.</span>
+      <span class="sp">Bildirim 24 saat içinde yapılır; gecikeni sistem uyarı olarak taşır.</span>
+    </div>
+  </div>
+
+  <!-- ========================================================= UYGUNSUZLUK ===== -->
+  <div class="pnl" data-s="uygunsuz" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:130px" class="orta">Tür</th>
+          <th style="width:200px">Kalem</th>
+          <th>Bulgu</th>
+          <th style="width:140px">Kim</th>
+          <th style="width:140px" class="orta">Karar</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="orta"><span class="rz kir">Soğuk zincir</span></td>
+            <td>Rituksimab 500 mg ×6</td>
+            <td>Taşımada 11,2 °C'ye çıkmış, 47 dk eşik üstü kalmış</td>
+            <td>Ecz. N. Arslan</td>
+            <td class="orta"><span class="rz sari">Karantina</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz sari">Miktar</span></td>
+            <td>Seftriakson 1 g</td>
+            <td>İrsaliyede 120, sayımda 108 — 12 adet eksik</td>
+            <td>Tekniker S. Bal</td>
+            <td class="orta"><span class="rz mavi">Eksik kabul</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz kir">Raf ömrü</span></td>
+            <td>Metamizol 1 g ×200</td>
+            <td>SKT 31.12.2026 — sözleşmedeki 6 aylık asgari raf ömrünün altında (3 ay)</td>
+            <td>Ecz. N. Arslan</td>
+            <td class="orta"><span class="rz kir">İade</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span>Uygunsuzluk <b>kabulü durdurmaz</b>, kalemi ayırır: uygun olanlar stoğa girer,
+        sorunlu kalem kendi kararını bekler.</span>
+      <span class="sp">Tutanak tedarikçiye gider; tekrarlayan uygunsuzluk tedarikçi değerlendirmesine işlenir.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Süreç:</b> Sipariş → irsaliyeli mal gelir → <b>muayene kabul</b> (miktar sayımı, lot/SKT,
+  raf ömrü, ambalaj, soğuk zincir ısı kaydı) → karekodlar kutu kutu okutulur →
+  uygun kalemler stoğa girer, sorunlular <b>karantinaya</b> alınır → <b>İTS mal alım bildirimi</b>
+  gönderilir → uygunsuzluk tutanağı tedarikçiye iletilir. Kontrollü ilaçlar stoğa değil
+  doğrudan <b>kasaya</b> alınır ve deftere işlenir.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

@@ -18,6 +18,9 @@ public sealed class TercihDeposu
         new HashSet<string>(StringComparer.Ordinal)
         {
             "favoriler", "sonMenuler",
+            // CALISMA ALANI (menu V2): sol menude gorunen bolge kumesi (banko/hekim/...),
+            //   favoriler gibi hesapta - makine degistiren ayni menuyu bulur.
+            "calismaAlani",
             // Kullanici Ayarlari (669). HESAPTA saklanirlar, tarayicida degil:
             //   kisi hangi cihazdan girerse girsin ayni duzeni bulur. TEMA
             //   bilerek DISARIDA - o cihaza aittir (poliklinikte gunduz,

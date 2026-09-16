@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eczane — Aseptik Hazırlama (Kemoterapi / TPN) — Mockup (GenoTIP AI · Eczane)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🧪 Aseptik Hazırlama Ünitesi</span>
+    <span class="sp">16.09.2026 · Kabin BGK-1 aktif · Hazırlayan: Ecz. T. Yalçın · Kontrol: Ecz. N. Arslan</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="eczane_panosu.html">◀ Pano</div>
+    <div class="btn primary">▶ Hazırlamaya Başla</div>
+    <div class="btn">🧮 Doz Hesapla</div>
+    <div class="btn">🏷️ Etiket Bas</div>
+    <div class="sepv"></div>
+    <div class="btn">🔬 Kabin Kaydı</div>
+    <div class="btn">🚚 Teslim Et</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ Hazırlama Formu</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">Kuyrukta</div><div class="d">11 <small>hazırlama</small></div></div>
+    <div class="kart ok"><div class="b">Tamamlanan</div><div class="d">6</div></div>
+    <div class="kart sari"><div class="b">Doz onayı bekleyen</div><div class="d">2</div></div>
+    <div class="kart kir"><div class="b">İptal (hasta gelmedi)</div><div class="d">1 <small>4.180 ₺</small></div></div>
+    <div class="kart"><div class="b">Kabin çalışma</div><div class="d">3,2 <small>saat</small></div></div>
+    <div class="kart"><div class="b">Sonraki bakım</div><div class="d" style="font-size:12px">28.09.2026</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="kuyruk">Hazırlama Kuyruğu<span class="sy">11</span></div>
+    <div class="sekme" data-s="doz">Protokol & Doz<span class="sy">KT-0412</span></div>
+    <div class="sekme" data-s="kabin">Kabin & Ortam</div>
+    <div class="sekme" data-s="teslim">Etiket & Teslim<span class="sy">6</span></div>
+  </div>
+
+  <!-- =================================================== HAZIRLAMA KUYRUĞU ===== -->
+  <div class="pnl" data-s="kuyruk">
+    <div class="arama">
+      <div class="kutu">🔍 Hasta, protokol ya da ilaç…</div>
+      <span class="chip on">Bugün <b>11</b></span>
+      <span class="chip">Kemoterapi <b>7</b></span>
+      <span class="chip">TPN <b>3</b></span>
+      <span class="chip">İnfüzyon <b>1</b></span>
+      <span class="chip">Beklemede <b>2</b></span>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px">Hazırlama</th>
+          <th style="width:100px" class="orta">Tür</th>
+          <th style="width:170px">Hasta</th>
+          <th>Protokol / İçerik</th>
+          <th style="width:110px" class="orta">Planlanan</th>
+          <th style="width:130px" class="orta">Ön koşul</th>
+          <th style="width:120px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>KT-0412</code></td>
+            <td class="orta"><span class="rz mor">Kemoterapi</span></td><td>Zeynep Ak · 412</td>
+            <td>FEC-100 · 3. kür — Fluorourasil + Epirubisin + Siklofosfamid</td>
+            <td class="orta">11:00</td>
+            <td class="orta"><span class="rz ok">Hemogram OK</span></td>
+            <td class="orta"><span class="rz sari">Hazırlanıyor</span></td></tr>
+          <tr class="tik"><td class="nw"><code>KT-0413</code></td>
+            <td class="orta"><span class="rz mor">Kemoterapi</span></td><td>Hasan Bulut · 415</td>
+            <td>Dosetaksel 75 mg/m² · tek ajan</td>
+            <td class="orta">11:30</td>
+            <td class="orta"><span class="rz ok">Hemogram OK</span></td>
+            <td class="orta"><span class="rz pas">Sırada</span></td></tr>
+          <tr class="tik"><td class="nw"><code>KT-0414</code></td>
+            <td class="orta"><span class="rz mor">Kemoterapi</span></td><td>Sevim Ateş · 409</td>
+            <td>Karboplatin AUC 5 + Paklitaksel 175 mg/m²</td>
+            <td class="orta">13:00</td>
+            <td class="orta"><span class="rz kir">Nötrofil 0,8</span></td>
+            <td class="orta"><span class="rz kir">Beklet</span></td></tr>
+          <tr class="tik"><td class="nw"><code>TP-0188</code></td>
+            <td class="orta"><span class="rz mavi">TPN</span></td><td>Fatma Öz · YBÜ-2</td>
+            <td>Bireysel TPN · 1.800 kcal · 1,3 g/kg protein · elektrolit ayarlı</td>
+            <td class="orta">14:00</td>
+            <td class="orta"><span class="rz ok">Biyokimya OK</span></td>
+            <td class="orta"><span class="rz pas">Sırada</span></td></tr>
+          <tr class="tik"><td class="nw"><code>TP-0189</code></td>
+            <td class="orta"><span class="rz mavi">TPN</span></td><td>Kemal Deniz · YBÜ-5</td>
+            <td>Bireysel TPN · 2.100 kcal · K⁺ kısıtlı (K 5,8)</td>
+            <td class="orta">14:30</td>
+            <td class="orta"><span class="rz sari">Ecz. onayı</span></td>
+            <td class="orta"><span class="rz sari">Doz onayı</span></td></tr>
+          <tr class="tik"><td class="nw"><code>IN-0771</code></td>
+            <td class="orta"><span class="rz">İnfüzyon</span></td><td>Ahmet Yılmaz · 304-A</td>
+            <td>Gliseril trinitrat 10 mg / 50 mL SF · 2 mL/sa</td>
+            <td class="orta">12:00</td>
+            <td class="orta"><span class="rz ok">—</span></td>
+            <td class="orta"><span class="rz ok">Hazır</span></td></tr>
+          <tr class="tik"><td class="nw"><code>KT-0410</code></td>
+            <td class="orta"><span class="rz mor">Kemoterapi</span></td><td>Murat Şeker · 418</td>
+            <td>FOLFOX-6 · Oksaliplatin + Lökovorin + 5-FU</td>
+            <td class="orta">09:00</td>
+            <td class="orta"><span class="rz ok">Hemogram OK</span></td>
+            <td class="orta"><span class="rz kir">İptal · hasta gelmedi</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Hazırlama hastadan sonra başlar:</b> hasta gelmeden karılan kemoterapi çöpe gider —
+        KT-0410 iptalinin bedeli 4.180 ₺.</span>
+      <span class="sp">Ön koşul (hemogram, biyokimya) tutmayan hazırlama kuyrukta bekletilir, iptal edilmez.</span>
+    </div>
+  </div>
+
+  <!-- ==================================================== PROTOKOL & DOZ ===== -->
+  <div class="pnl" data-s="doz" hidden>
+    <div class="ozet">
+      <div class="kart"><div class="b">Hasta</div><div class="d" style="font-size:12px">Zeynep Ak · 54 y</div></div>
+      <div class="kart"><div class="b">Boy / Kilo</div><div class="d" style="font-size:13px">162 cm / 68 kg</div></div>
+      <div class="kart"><div class="b">VYA (BSA)</div><div class="d">1,73 <small>m²</small></div></div>
+      <div class="kart"><div class="b">KrKl</div><div class="d">82 <small>mL/dk</small></div></div>
+      <div class="kart"><div class="b">Kür</div><div class="d">3 <small>/ 6</small></div></div>
+      <div class="kart sari"><div class="b">Kümülatif antrasiklin</div><div class="d">200 <small>/ 550 mg/m²</small></div></div>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:190px">İlaç</th>
+          <th style="width:110px" class="orta">Protokol doz</th>
+          <th style="width:110px" class="sag">Hesaplanan</th>
+          <th style="width:110px" class="sag">Yuvarlanan</th>
+          <th style="width:140px">Sulandırıcı / Hacim</th>
+          <th style="width:110px" class="orta">Süre</th>
+          <th style="width:150px" class="orta">Eczacı kontrolü</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Fluorourasil</b> <code class="k">L01BC02</code></td>
+            <td class="orta">500 mg/m²</td><td class="sag">865 mg</td><td class="sag">870 mg</td>
+            <td>SF %0,9 · 100 mL</td><td class="orta">15 dk bolus</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td></tr>
+          <tr class="tik"><td><b>Epirubisin</b> <code class="k">L01DB03</code>
+              <span class="rz mor">Vezikan</span></td>
+            <td class="orta">100 mg/m²</td><td class="sag">173 mg</td><td class="sag">175 mg</td>
+            <td>SF %0,9 · 100 mL</td><td class="orta">30 dk inf</td>
+            <td class="orta"><span class="rz sari">Kümülatif izle</span></td></tr>
+          <tr class="tik"><td><b>Siklofosfamid</b> <code class="k">L01AA01</code></td>
+            <td class="orta">500 mg/m²</td><td class="sag">865 mg</td><td class="sag">900 mg</td>
+            <td>SF %0,9 · 250 mL</td><td class="orta">60 dk inf</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td></tr>
+          <tr class="grup"><td colspan="7">Destek tedavi (premedikasyon)</td></tr>
+          <tr class="tik"><td>Ondansetron</td><td class="orta">8 mg sabit</td>
+            <td class="sag">8 mg</td><td class="sag">8 mg</td>
+            <td>SF %0,9 · 50 mL</td><td class="orta">15 dk</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td></tr>
+          <tr class="tik"><td>Deksametazon</td><td class="orta">8 mg sabit</td>
+            <td class="sag">8 mg</td><td class="sag">8 mg</td>
+            <td>SF %0,9 · 50 mL</td><td class="orta">15 dk</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ul class="kontrol">
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Boy/kilo <b>bugün</b> ölçüldü — VYA yeniden hesaplandı (önceki kürde 1,76 m²)</span>
+        <span class="imza">Hemş. G. Yurt · 10:20</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Hemogram ve karaciğer fonksiyonları protokol eşiğinin üstünde</span>
+        <span class="imza">Ecz. N. Arslan · 10:34</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Kümülatif antrasiklin dozu hesaplandı: <b>200 mg/m²</b> (sınır 550)</span>
+        <span class="imza">Ecz. N. Arslan · 10:35</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Doz <b>ikinci eczacı</b> tarafından bağımsız olarak doğrulandı</span>
+        <span class="imza">Ecz. T. Yalçın · 10:38</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Hasta üniteye geldi ve damar yolu açıldı — hazırlama başlatılabilir</span>
+        <span class="imza">—</span></li>
+    </ul>
+
+    <div class="statusbar">
+      <span><b>Doz iki eczacı tarafından ayrı hesaplanır</b> (çift kontrol): kemoterapide
+        yanlış doz geri alınamaz.</span>
+      <span class="sp">Kümülatif doz kür kür birikir — antrasiklinde kardiyotoksisite sınırı bu yüzden taşınır.</span>
+    </div>
+  </div>
+
+  <!-- ====================================================== KABİN & ORTAM ===== -->
+  <div class="pnl" data-s="kabin" hidden>
+    <div class="ozet">
+      <div class="kart"><div class="b">Kabin</div><div class="d" style="font-size:12px">BGK-1 · Sınıf II B2</div></div>
+      <div class="kart ok"><div class="b">Ön panel hava hızı</div><div class="d">0,52 <small>m/s</small></div></div>
+      <div class="kart ok"><div class="b">Basınç farkı</div><div class="d">−12 <small>Pa</small></div></div>
+      <div class="kart"><div class="b">HEPA</div><div class="d" style="font-size:12px">Son test 12.06.2026</div></div>
+      <div class="kart sari"><div class="b">Sonraki bakım</div><div class="d" style="font-size:12px">28.09.2026</div></div>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:190px">Kontrol</th>
+          <th style="width:130px" class="orta">Ölçüm</th>
+          <th style="width:130px" class="orta">Sınır</th>
+          <th>Not</th>
+          <th style="width:120px" class="orta">Sonuç</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>Ön panel hava hızı</td><td class="orta">0,52 m/s</td>
+            <td class="orta">0,45-0,60</td><td class="sonuk">—</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td></tr>
+          <tr class="tik"><td>Oda basınç farkı</td><td class="orta">−12 Pa</td>
+            <td class="orta">≤ −10 Pa</td><td>Negatif basınç — sitotoksik oda</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td></tr>
+          <tr class="tik"><td>Partikül sayımı (ISO 7)</td><td class="orta">248.000</td>
+            <td class="orta">≤ 352.000</td><td>0,5 µm / m³</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td></tr>
+          <tr class="tik"><td>Mikrobiyolojik örnek</td><td class="orta">0 kob</td>
+            <td class="orta">≤ 10 kob/plak</td><td>Haftalık · 09.09.2026</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td></tr>
+          <tr class="tik"><td>UV lamba süresi</td><td class="orta">4.180 sa</td>
+            <td class="orta">≤ 6.000 sa</td><td class="sonuk">—</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td></tr>
+          <tr class="tik"><td>Kapalı sistem transfer (CSTD)</td><td class="orta">Kullanıldı</td>
+            <td class="orta">Zorunlu</td><td>Sitotoksik hazırlamada zorunlu</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ul class="kontrol">
+      <li class="ok"><span class="kutu">✓</span><span>Kabin 30 dk önce çalıştırıldı, yüzey dezenfeksiyonu yapıldı</span>
+        <span class="imza">Ecz. T. Yalçın · 10:15</span></li>
+      <li class="ok"><span class="kutu">✓</span><span>Kişisel koruyucu donanım giyildi (çift eldiven, önlük, gözlük, maske)</span>
+        <span class="imza">10:42</span></li>
+      <li class="ok"><span class="kutu">✓</span><span>Dökülme seti erişilebilir ve tam</span>
+        <span class="imza">10:43</span></li>
+      <li class="bos"><span class="kutu"></span><span>Hazırlama sonrası kabin temizliği ve atık ayrıştırması</span>
+        <span class="imza">—</span></li>
+    </ul>
+
+    <div class="statusbar">
+      <span><b>Kabin değerleri hazırlamadan önce okunur:</b> uygun değilse hazırlama başlamaz —
+        sonradan bakmak ürünü değil yalnız kaydı düzeltir.</span>
+      <span class="sp">Sitotoksik atık ayrı toplanır; kullanılan flakon ve setler tıbbi atık değil <b>sitotoksik atık</b>.</span>
+    </div>
+  </div>
+
+  <!-- ====================================================== ETİKET & TESLİM ===== -->
+  <div class="pnl" data-s="teslim" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px">Hazırlama</th>
+          <th style="width:170px">Hasta</th>
+          <th style="width:200px">Ürün</th>
+          <th style="width:130px">Son kullanım</th>
+          <th style="width:130px" class="orta">Saklama</th>
+          <th style="width:150px">Taşıma</th>
+          <th style="width:130px" class="orta">Teslim</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>KT-0412</code></td><td>Zeynep Ak · 412</td>
+            <td>Epirubisin 175 mg / 100 mL SF</td>
+            <td>16.09 · <b>18:40</b> <span class="sonuk">(8 sa)</span></td>
+            <td class="orta">Oda · ışıktan koru</td>
+            <td>Sitotoksik taşıma kabı</td>
+            <td class="orta"><span class="rz sari">Hazırlanıyor</span></td></tr>
+          <tr class="tik"><td class="nw"><code>IN-0771</code></td><td>Ahmet Yılmaz · 304-A</td>
+            <td>Gliseril trinitrat 10 mg / 50 mL</td>
+            <td>17.09 · <b>12:00</b> <span class="sonuk">(24 sa)</span></td>
+            <td class="orta">Oda</td><td>Normal</td>
+            <td class="orta"><span class="rz ok">Teslim 11:52</span></td></tr>
+          <tr class="tik"><td class="nw"><code>TP-0187</code></td><td>Emine Kurt · YBÜ-1</td>
+            <td>TPN 2.000 mL · bireysel</td>
+            <td>17.09 · <b>08:00</b> <span class="sonuk">(24 sa)</span></td>
+            <td class="orta"><span class="rz mavi">2-8 °C</span></td>
+            <td>Soğuk zincir kutusu</td>
+            <td class="orta"><span class="rz ok">Teslim 09:10</span></td></tr>
+          <tr class="tik"><td class="nw"><code>KT-0409</code></td><td>Okan Yaman · 421</td>
+            <td>Karboplatin 480 mg / 250 mL</td>
+            <td>16.09 · <b>16:20</b> <span class="sonuk">(6 sa)</span></td>
+            <td class="orta">Oda</td><td>Sitotoksik taşıma kabı</td>
+            <td class="orta"><span class="rz ok">Teslim 10:35</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ozet">
+      <div class="kart"><div class="b">Etiket içeriği</div>
+        <div class="d" style="font-size:11.5px;font-weight:normal;line-height:1.6">
+          Hasta adı + protokol no · ilaç ve <b>gerçek doz</b> · sulandırıcı ve son hacim ·
+          hazırlama tarihi-saati · <b>son kullanım zamanı</b> · saklama koşulu ·
+          hazırlayan + kontrol eden · uygulama süresi · <span class="rz mor">SİTOTOKSİK</span> uyarısı
+        </div></div>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Son kullanım hazırlama anından sayılır</b>, ilacın kutu miadından değil:
+        karılmış ürünün ömrü saatlerle ölçülür.</span>
+      <span class="sp">Teslim alan hemşire okutur; teslim edilmeyen ürün süresi dolunca imha listesine düşer.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Süreç:</b> Hekim protokolü ister → eczacı <b>ön koşulları</b> (hemogram, biyokimya, kümülatif
+  doz) denetler → doz VYA/AUC üzerinden hesaplanır ve <b>ikinci eczacı bağımsız doğrular</b> →
+  kabin değerleri okunur → hasta üniteye geldikten <b>sonra</b> hazırlanır (gelmezse ürün çöpe
+  gider) → etiket basılır (gerçek doz + son kullanım saati) → sitotoksik taşıma kabıyla teslim
+  edilir. Kabin uygun değilse hazırlama başlamaz; sitotoksik atık ayrı toplanır.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

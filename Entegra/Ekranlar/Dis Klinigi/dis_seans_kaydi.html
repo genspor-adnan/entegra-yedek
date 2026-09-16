@@ -65,6 +65,12 @@
   .inp.ro{background:#f4f6f9;color:#4d5d6e}
   .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line)}
   .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .dg tr.dis-sec td{background:var(--sel)}
+  .btn.mini{display:inline-flex;padding:2px 7px;font-size:10.5px}
+  .ikiPanel{grid-template-columns:1.55fr 1fr}
+  .ikiPanel>div:last-child .dg td,.ikiPanel>div:last-child .dg th{white-space:normal}
+  .detay{border-top:1px solid var(--line2);background:#fbfcfe}
+  .detay .gb{background:transparent}
   .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
   .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
   .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
@@ -137,7 +143,7 @@
 <body>
 
 <div class="win">
-  <div class="title">🪑 Seans Kaydı — Ayşe Yılmaz · 26 kanal tedavisi 2/3 <span class="sp">Ünit 1 · Dt. A. Kaya · asistan Z. Ak · 03.09.2026 09:02 · seans 8841 · plan TP-0412</span></div>
+  <div class="title">🪑 Seans Kaydı — Ayşe Yılmaz · 3 işlem (26 kanal 2/3 · 24 kompozit · 36 kanal 1/2) <span class="sp">Ünit 1 · Dt. A. Kaya · asistan Z. Ak · 03.09.2026 09:02 · seans 8841 · plan TP-0412</span></div>
   <div class="toolbar">
     <div class="btn primary">💾 Kaydet</div><div class="btn ok">✔ Seansı Bitir</div>
     <div class="sepv"></div><div class="btn">🩻 RVG Çek</div><div class="btn">💊 e-Reçete</div><div class="btn">🧪 Lab İş Emri</div><div class="btn">📅 Sonraki Seans</div><div class="btn">🦷 Odontogram</div>
@@ -145,32 +151,54 @@
   </div>
   <div class="hdr k4" style="background:#fff8f0">
     <div class="fld"><label>Hasta</label><div class="inp ro big">Ayşe Yılmaz · 39 K · <span class="rz kir">Penisilin alerjisi</span></div></div>
-    <div class="fld"><label>Bu seans (plandan)</label><div class="inp ro">26 kanal tedavisi — 2/3 şekillendirme · rejyonel anestezi</div></div>
+    <div class="fld"><label>Bu seans (plandan)</label><div class="inp ro">3 işlem · 26 kanal 2/3 (randevudan) + 24 kompozit V + 36 kanal 1/2 · ~75 dk</div></div>
     <div class="fld"><label>Önceki seans notu</label><div class="inp ro">01.09: ekstirpasyon, çalışma boyu MB 20,5 · DB 20 · P 21,5 mm; CaOH; ağrı azaldı</div></div>
     <div class="fld"><label>Onam</label><div class="inp ro"><span class="rz ok">Kanal tedavisi onamı ✔</span></div></div>
   </div>
   <div class="sekmeler"><div class="sekme on">Uygulama</div><div class="sekme">Malzeme &amp; Sarf</div><div class="sekme">Anestezi &amp; İlaç</div><div class="sekme">Plan Satırları</div><div class="sekme">Ücret &amp; Tahsilat</div></div>
   <div class="pnl">
     <div class="ikiPanel">
-      <div class="hdr" style="grid-template-columns:1fr;border:none">
-        <div class="fld"><label class="req">Yapılan işlem (plan satırı)</label><div class="inp combo">26 · DİŞ.3.12 Kanal tedavisi (3 kanallı) — seans 2/3</div></div>
-        <div class="fld"><label>Uygulama notu</label><div class="inp" style="min-height:64px;align-items:flex-start">Rubber dam. Kanal şekillendirme (döner eğe 25/.06), NaOCl %2,5 + EDTA irrigasyonu, apeks bulucu doğrulama. CaOH tekrar, geçici dolgu. Ağrı VAS 2.</div></div>
-        <div class="fld"><label>Çalışma boyu (mm)</label><div class="inp">MB 20,5 · DB 20,0 · P 21,5 <span class="sonuk">· apeks bulucu</span></div></div>
-        <div class="fld"><label>Komplikasyon</label><div class="inp combo">Yok <span class="sonuk">· eğe kırığı / perforasyon / taşkın irrigasyon…</span></div></div>
-        <div class="fld"><label>Sonraki seans planı</label><div class="inp">10.09 · dolum (gutta-perka, lateral kondansasyon) + post-core · 45 dk</div></div>
-        <div class="fld"><label>Hastaya talimat</label><div class="inp">Geçici dolgu 2 saat çiğnemeyin; ağrı için parasetamol; şişlik olursa arayın</div></div>
+      <div>
+        <div class="grp" style="margin:10px 10px 6px"><div class="gb">Yapılan işlemler <span class="sp">seans → plan satırı 1:N · her satır bir işlem</span></div>
+          <div class="dg"><table>
+            <thead><tr><th class="orta">#</th><th class="orta">Diş</th><th class="orta">Yüzey</th><th>İşlem (plan satırı)</th><th class="orta">Seans</th><th class="orta">Bu seansta tamamlandı</th><th>Ücretlendirme</th><th class="sag">Ücret</th><th>Durum</th><th></th></tr></thead>
+            <tbody>
+              <tr class="dis-sec"><td class="orta">1</td><td class="orta"><b>26</b></td><td class="orta">—</td><td>▸ DİŞ.3.12 Kanal tedavisi (3 kanallı) <span class="rz mavi">TP-0412 / 1</span> <span class="sonuk">· randevudan</span></td><td class="orta">2/3</td><td class="orta">☐</td><td>Seans başına oran</td><td class="sag">1.200</td><td><span class="rz mavi">Sürüyor</span></td><td><span class="btn mini">✎</span> <span class="btn mini">✖</span></td></tr>
+              <tr><td class="orta">2</td><td class="orta"><b>24</b></td><td class="orta">V</td><td>DİŞ.2.05 Kompozit dolgu (1 yüzey) <span class="rz mavi">TP-0412 / 6</span></td><td class="orta">1/1</td><td class="orta">☑</td><td>Tamamlanınca</td><td class="sag">1.400</td><td><span class="rz ok">Yapıldı</span></td><td><span class="btn mini">✎</span> <span class="btn mini">✖</span></td></tr>
+              <tr><td class="orta">3</td><td class="orta"><b>36</b></td><td class="orta">—</td><td>DİŞ.3.11 Kanal tedavisi (2 kanallı) <span class="rz mavi">TP-0412 / 4</span></td><td class="orta">1/2</td><td class="orta">☐</td><td>Seans başına oran</td><td class="sag">1.800</td><td><span class="rz mavi">Başladı</span></td><td><span class="btn mini">✎</span> <span class="btn mini">✖</span></td></tr>
+              <tr><td class="orta">4</td><td class="orta">26 · 36</td><td class="orta">—</td><td>700260 Periapikal RVG × 2 <span class="rz">plan dışı</span></td><td class="orta">—</td><td class="orta">☑</td><td>Adet</td><td class="sag">24</td><td><span class="rz sari">Plansız · plana bağla</span></td><td><span class="btn mini">📋 Bağla</span> <span class="btn mini">✖</span></td></tr>
+              <tr class="grup"><td colspan="7">Bu seans · 4 işlem · ücretlenen 3</td><td class="sag">4.424</td><td colspan="2">tamamlanan 2 · süren 2</td></tr>
+            </tbody>
+          </table></div>
+          <div class="toolbar" style="border-top:1px solid var(--line2)"><div class="btn primary">＋ Plan satırından ekle</div><div class="btn">＋ Plan dışı işlem (SUT)</div><div class="btn">🦷 Odontogramdan seç</div><span class="sp sonuk">"Bu seansta tamamlandı" → seans bitince yapıldı + başvuru satırı + odontogram; işaretsiz plan satırı bir seans ilerler.</span></div>
+        </div>
+        <div class="grp detay" style="margin:0 10px 10px"><div class="gb">Seçili işlem — 26 · Kanal tedavisi · seans 2/3 <span class="sp">uygulama ayrıntısı işlem satırına yazılır (dis_seans_islem)</span></div>
+          <div class="hdr" style="grid-template-columns:1fr 1fr;border:none">
+            <div class="fld" style="grid-column:1/3"><label>Uygulama notu</label><div class="inp" style="min-height:56px;align-items:flex-start">Rubber dam. Kanal şekillendirme (döner eğe 25/.06), NaOCl %2,5 + EDTA irrigasyonu, apeks bulucu doğrulama. CaOH tekrar, geçici dolgu. Ağrı VAS 2.</div></div>
+            <div class="fld"><label>Çalışma boyu (mm) · kanal bazlı</label><div class="inp">MB 20,5 · DB 20,0 · P 21,5 <span class="sonuk">· apeks bulucu</span></div></div>
+            <div class="fld"><label>Komplikasyon</label><div class="inp combo">Yok <span class="sonuk">· eğe kırığı / perforasyon / taşkın irrigasyon…</span></div></div>
+            <div class="fld"><label>Sonraki seans planı (bu satır)</label><div class="inp">10.09 · dolum (gutta-perka, lateral kondansasyon) + post-core · 45 dk</div></div>
+            <div class="fld"><label>Geçici dolgu / durum</label><div class="inp combo">Geçici dolgu · CaOH</div></div>
+          </div>
+        </div>
       </div>
       <div>
         <div class="grp" style="margin:10px"><div class="gb">Seans içi RVG</div>
           <div class="dg"><table><thead><tr><th class="orta">Saat</th><th>Diş</th><th>Amaç</th><th>Bulgu</th><th class="orta">Görüntü</th></tr></thead>
-            <tbody><tr><td class="orta">09:15</td><td>26</td><td>Eğe boyu kontrol</td><td>Eğeler apekste, uyumlu</td><td class="orta">🖼</td></tr></tbody></table></div>
+            <tbody><tr><td class="orta">09:15</td><td>26</td><td>Eğe boyu kontrol</td><td>Eğeler apekste, uyumlu</td><td class="orta">🖼</td></tr>
+            <tr><td class="orta">09:48</td><td>36</td><td>Çalışma boyu</td><td>Mesial kanal eğri · 21 mm</td><td class="orta">🖼</td></tr></tbody></table></div>
           <div style="padding:6px 10px"><div class="btn">🩻 RVG Çek (ünit sensörü)</div></div></div>
         <div class="grp" style="margin:10px"><div class="gb">Ekip &amp; süre</div>
           <div class="hdr" style="grid-template-columns:1fr 1fr;border:none">
             <div class="fld"><label>Hekim</label><div class="inp ro">Dt. A. Kaya (Uygulayan · prim)</div></div>
             <div class="fld"><label>Asistan</label><div class="inp combo">Z. Ak</div></div>
-            <div class="fld"><label>Başlangıç / bitiş</label><div class="inp ro">09:02 — <span class="sonuk">devam</span></div></div>
+            <div class="fld"><label>Başlangıç / bitiş</label><div class="inp ro">09:02 — <span class="sonuk">devam · 23 dk</span></div></div>
             <div class="fld"><label>Ünit</label><div class="inp ro">Ünit 1 · sterilizasyon paketi #S-2609</div></div>
+          </div></div>
+        <div class="grp" style="margin:10px"><div class="gb">Seans notu &amp; hastaya talimat <span class="sp">seans geneli (dis_seans)</span></div>
+          <div class="hdr" style="grid-template-columns:1fr;border:none">
+            <div class="fld"><label>Hastaya talimat</label><div class="inp">Geçici dolgu 2 saat çiğnemeyin; ağrı için parasetamol; şişlik olursa arayın</div></div>
+            <div class="fld"><label>Sonraki seans</label><div class="inp">10.09 10:00 · Ünit 1 · 26 dolum + 36 kanal 2/2 · 60 dk <span class="rz mavi">randevu öner</span></div></div>
           </div></div>
       </div>
     </div>
@@ -216,7 +244,7 @@
     <div style="padding:0 12px 10px;display:flex;gap:6px"><div class="btn primary">💳 Tahsilat al (POS)</div><div class="btn">🧾 Fiş / fatura kes (tahsil edilen kadar)</div><div class="btn">📅 Taksit planını gör</div></div>
     <div class="ic sonuk">Tahsilat → satıra dağıtım → "tahsil edilen kadar fiş, kalanı tahakkuk" (352) dönüşümü; ödeme planı taksitleri <code>kasa_islem</code> plan kayıtları.</div>
   </div>
-  <div class="statusbar"><span>Seans 2/3 · 23 dk · sarf 531 ₺ · işlem 1.500 ₺</span><span class="sp">Bitir → randevu tamamlandı · plan ilerledi · odontogram · sarf fişi · başvuru satırı · sonraki seans randevusu</span></div>
+  <div class="statusbar"><span>4 işlem · 23 dk · sarf 531 ₺ · ücretlenen 4.424 ₺</span><span class="sp">Bitir → randevu tamamlandı · plan ilerledi · odontogram · sarf fişi · başvuru satırı · sonraki seans randevusu</span></div>
 </div>
 
 

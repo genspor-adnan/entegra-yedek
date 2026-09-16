@@ -1,0 +1,22 @@
+önce hasta kaydı ve başvuru açıp daha sonra mı hasta kabul/provizyon ekranı ile hak sahipliği sorgulayacağım
+
+Hayır, tersi. Doğru sıra: TCKN → hak sahipliği → hasta kartı/başvuru → provizyon. Müstehaklık sonucu başvurunun ödeyenini (SGK mı, ücretli mi, ÖSS mi) ve provizyon tipini belirler; başvuru açıldıktan sonra sorgulamak "SGK'lı açtım, meğer müstehak değilmiş" düzeltmesi üretir.
+
+Önerilen akış (Kayıt Kabul içinde, ayrı ekrana gitmeden):
+
+1. TCKN girilir (hasta kartı olsun olmasın). Ayar açıksa mustehaklikSorgu otomatik çalışır; sonuç rozet: Müstehak 4/a · katılım payı · sevk zorunlu mu.
+2. Hasta kartı yoksa Medula'dan gelen kimlik bilgisiyle (hastaMedulaBilgileri: ad, soyad, doğum, cinsiyet) kart tek tıkla açılır; varsa kart seçilir.
+3. Başvuru açılır; ödeyen kurum = SGK sonuçtan gelir (müstehak değilse ücretli/ÖSS önerilir).
+4. Başvuru kaydedilince hastaKabul otomatik → takip no belge_provizyon.sgk_takip_no. Medula kapalıysa "provizyon bekliyor", kuyruk sonucu gelince işlenir.
+5. medula_hasta_kabul.html ekranı ise istisna ekranı: otomatik adım hata verdi (1006 açık takip, 1013 müstehak değil), sevkli hasta, takip iptali, elle tekrar. Günlük işte kullanıcı orayı açmaz.
+
+Mockup'ta bu belirsiz: adım şeridi doğru sırayı gösteriyor ama "başvuru 2026/20417" başlıkta hazır duruyor ve not "Başvuru kartı › Medula düğmesi" diyor. İstersen düzeltirim: Hak Sahipliği sekmesine "hasta kartı yok → Medula'dan oluştur" adımı, başlığa "başvuru: henüz yok" hâli ve Kayıt Kabul ekranına gömülü otomatik akışı gösteren küçük bir şerit eklerim.
+
+Eklendi; medula_hasta_kabul.html ve medula_sureci.html yeniden üretildi, sekmeler doğrulandı.
+
+- Adım şeridi yeni sıra: TCKN → hak sahipliği ✔ → hasta kartı (yoksa Medula'dan) → başvuru aç (ödeyen = sonuçtan) → provizyon/takip no (otomatik) → hizmet kaydı → çıkış · fatura.
+- Sarı uyarı kutusu: sıranın gerekçesi ve "bu ekran istisna ekranıdır" notu.
+- "Kayıt Kabul içinde gömülü akış" tablosu: her adımda Kayıt Kabul'de ne olur, hangi Medula servisi çağrılır, hangi rozet gelir, bu ekrana ne zaman gelinir (1013 müstehak değil, 1006 açık takip, Medula kapalı, sevkli).
+- Başlık alanları: hasta "kartı yok" rozeti, başvuru "henüz yok", takip no "başvuruyla alınır".
+- Hak Sahipliği sekmesi: "Hasta kartı yok → Medula'dan oluştur" grubu (hastaMedulaBilgileri: ad, doğum, cinsiyet, sigortalı türü, ödeyen önerisi) + "👤 Hasta kartı oluştur → Başvuru aç" düğmesi.
+- Süreç dokümanında 1. adım ve ekran tablosu aynı sırayla güncellendi.

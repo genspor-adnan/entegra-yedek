@@ -95,6 +95,7 @@
   .odo .kok{fill:#f4efe6;stroke:#9a8f7c;stroke-width:.7}
   .odo .kok.kanal{fill:var(--c-kanal)}
   .odo .kok.implant{fill:var(--c-implant)}
+  .odo .vida{stroke:#2e7d46;stroke-width:.8}
   .odo .no{font-size:7.5px;fill:#1c4374;font-weight:bold;text-anchor:middle;font-family:inherit}
   .odo .no.sec{fill:#fff}
   .odo .nokutu{fill:#fff;stroke:#cdd6e0;stroke-width:.6}
@@ -276,6 +277,7 @@
   <ul>
     <li><b>Anatomik SVG odontogram (5 yüzey):</b> üst/alt çene yay düzeninde 32 diş; her dişte kron 5 bölge (M · D · O/I · V · L) + kök. Yüzeye tıkla → bulgu/plan seç (sağdaki "Hızlı bulgu" çipleri seçili yüzeye uygulanır); numaraya tıkla → tüm diş. Renk = durum (çürük, dolgu, kron), kök rengi = kanal/implant, ✕ = eksik. <b>Katmanlar</b> (mevcut / planlanan / tamamlanan) araç çubuğundan açılıp kapanır; planlanan kesikli kırmızı, tamamlanan yeşil çerçeve. Tarih kaydırıcı geçmiş durumu gösterir (sürümlü kayıt).</li>
     <li><b>Diş tablosu:</b> aynı veriden 32 satır — mevcut durum rozetleri, yüzey ızgarası, planlanan, tamamlanan, son bulgu tarihi/kaynağı, perio cep maks. "Yalnız sorunlu dişler" süzgeci iki görünümde de çalışır. Satıra tıkla → şemada seçilir. Yazdırma, döküm ve klavye girişi bu görünümden.</li>
+    <li><b>Kök şekilleri:</b> 8 diş tipi için tek path (<code>kokYolu</code>): kesici ince tek kök, kanin en uzun, üst 1. küçük azı 2 kök, üst büyük azılar 3 kök (2 bukkal + palatal), alt büyük azılar 2 kök, 20'lik kısa/kaynaşık. Oran referansı <code>Dosya/Dis Ekran görüntüsü 2025-08-24</code> (yalnız bakıldı, çizim bizim — telif temiz). Kanal tedavisi kökü mor, implant kökü yeşil + vida çizgileri.</li>
     <li><b>Tek kaynak:</b> <code>dis_odontogram</code> (diş, yüzey, durum kodu, tarih, kaynak, plan_id, tamamlanma). SVG 32 diş şekli tek dosyadır (daimi); süt dişleri (51–85) aynı şekil seti, yay daha kısa; karma dentisyonda yaşa göre karışık.</li>
     <li><b>Uygulama:</b> React bileşeni <code>Odontogram.tsx</code> (SVG üretimi bu sayfadaki JS ile aynı mantık: yay üstünde 16+16 yuva, her yuvada 5 polygon + kök), <code>DisTablosu.tsx</code> (GenDetayTablo), ikisi <code>useOdontogram(hastaId, tarih)</code> kancasından beslenir. Durum kodları SKRS/kurum kataloğundan (<code>dis_durum_kodu</code>).</li>
   </ul>
@@ -315,23 +317,49 @@ function el(t, a){ var e=document.createElementNS(NS,t); Object.keys(a||{}).forE
 var secili = { dis:36, yz:['O','D'] };
 
 function cizYay(nolar, ustMu){
-  var cx=320, cy= ustMu? 200 : 200, rx=290, ry= ustMu? 165 : 165, n=nolar.length;
+  var cx=320, cy=200, rx=270, ry=150, n=nolar.length;
   nolar.forEach(function(no,i){
     var t = Math.PI*(i+0.5)/n;                       // 0..pi soldan saga
     var x = cx - rx*Math.cos(t);
     var y = ustMu ? cy - ry*Math.sin(t) : cy + ry*Math.sin(t);
     var ang = ustMu ? (t*180/Math.PI - 90) : (90 - t*180/Math.PI);   // kron dis yuzu disari
-    var boy = (no%10>=6)? 22 : (no%10>=4? 18: 16);   // azilar buyuk
+    var boy = (no%10>=6)? 21 : (no%10>=4? 17: 15);   // azilar buyuk
     dis(no, x, y, -ang, boy, ustMu);
   });
+}
+// KOK SEKILLERI - 8 dis tipi, tek path (referans: Dosya/Dis Ekran goruntusu 2025-08-24,
+//   yalniz oran icin bakildi; cizim bizim). Kron [-h,h] karesi; kok -y yonune uzar.
+//   tip: 1-2 kesici (ince tek kok) · 3 kanin (en uzun tek kok) · 4 ust 1. kucuk azi (2 kok,
+//   alt tek) · 5 kucuk azi (tek) · 6-7 ust buyuk azi (3 kok: 2 bukkal + palatal), alt (2 kok)
+//   · 8 yirmilik (kisa, kaynasik).
+function kokYolu(no, h, s){
+  var t = no%10, ust = (Math.floor(no/10)<=2), b = -h;            // b = kron ust kenari
+  var U = function(L){ return b - s*L; };                           // kok ucu y
+  function tek(gen, boy, kay){ kay=kay||0;
+    return 'M'+(-h*gen)+' '+b+' Q'+(-h*gen*0.6+kay)+' '+U(boy*0.55)+' '+(kay)+' '+U(boy)+' Q'+(h*gen*0.6+kay)+' '+U(boy*0.55)+' '+(h*gen)+' '+b+' Z'; }
+  function cift(boy, ac){ // iki kok: sol/sag, arada oyuk
+    return 'M'+(-h*0.85)+' '+b+' Q'+(-h*0.9)+' '+U(boy*0.5)+' '+(-h*ac)+' '+U(boy)+' Q'+(-h*0.2)+' '+U(boy*0.45)+' 0 '+U(boy*0.3)+
+           ' Q'+(h*0.2)+' '+U(boy*0.45)+' '+(h*ac)+' '+U(boy)+' Q'+(h*0.9)+' '+U(boy*0.5)+' '+(h*0.85)+' '+b+' Z'; }
+  function uclu(boy){ // ust buyuk azi: iki bukkal + ortada palatal (daha uzun, geride)
+    return cift(boy*0.85, 0.55) + ' M'+(-h*0.3)+' '+b+' Q'+(-h*0.15)+' '+U(boy*0.6)+' 0 '+U(boy)+' Q'+(h*0.15)+' '+U(boy*0.6)+' '+(h*0.3)+' '+b+' Z'; }
+  switch(t){
+    case 1: return tek(0.45, 1.25);
+    case 2: return tek(0.42, 1.2, ust? 0 : 0);
+    case 3: return tek(0.5, 1.55);
+    case 4: return ust ? cift(1.15, 0.45) : tek(0.55, 1.15);
+    case 5: return tek(0.55, 1.1);
+    case 6: return ust ? uclu(1.15) : cift(1.1, 0.6);
+    case 7: return ust ? uclu(1.05) : cift(1.0, 0.55);
+    default: return ust ? tek(0.7, 0.75) : cift(0.7, 0.4);          // 8: kisa, kaynasik
+  }
 }
 function dis(no, x, y, ang, s, ustMu){
   var d = DISLER[no]||{}; var h=s/2, k=s*0.32;
   var g = el('g', {transform:'translate('+x+' '+y+') rotate('+ang+')', 'data-dis':no, class:(d.eksik?'eksik ':'')});
-  // kok (kron disina: yukari = -y)
-  var kok = el('path', {d:'M'+(-h*0.6)+' '+(-h)+' L'+(-h*0.25)+' '+(-h-s*0.8)+' L'+(h*0.25)+' '+(-h-s*0.8)+' L'+(h*0.6)+' '+(-h)+' Z',
-    class:'kok'+(d.kok?' '+d.kok:'')});
+  // kok (kron disina: yukari = -y) - dis tipine gore 1/2/3 koklu sekil
+  var kok = el('path', {d: kokYolu(no, h, s), class:'kok'+(d.kok?' '+d.kok:''), 'fill-rule':'nonzero'});
   g.appendChild(kok);
+  if(d.kok==='implant'){ for(var q=1;q<=4;q++) g.appendChild(el('line',{x1:-h*0.35,y1:-h-s*0.2*q,x2:h*0.35,y2:-h-s*0.2*q,class:'vida'})); }
   // 5 yuzey: V (dis, ustte -y tarafi... kok tarafi V degil; ic tarafi L). V = disariya bakan: kok karsisi degil.
   // Duzen: merkez O; -y kenar (kok tarafi) = V(vestibul) ust cenede disari bakar; +y = L. sol = M/D yona gore.
   var mez = (no%10), solMu = (Math.floor(no/10)===2 || Math.floor(no/10)===3); // 2x/3x sol

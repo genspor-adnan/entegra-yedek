@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Biyomedikal — Günlük Pano — Mockup (GenoTIP AI · Demirbaş)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🛠️ Biyomedikal — Günlük Pano</span>
+    <span class="sp">16.09.2026 · Merkez · 1.842 kayıtlı cihaz · Sorumlu: Biyomedikal Tekn. E. Kaya</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary" data-git="demirbas_ariza.html">🔧 Arıza Bildir</div>
+    <div class="btn" data-git="demirbas_kalibrasyon.html">📏 Kalibrasyon</div>
+    <div class="btn" data-git="demirbas_bakim.html">🗓️ Periyodik Bakım</div>
+    <div class="sepv"></div>
+    <div class="btn" data-git="demirbas_envanter.html">📋 Envanter</div>
+    <div class="btn" data-git="demirbas_cihaz_karti.html">🗂️ Cihaz Kartı</div>
+    <div class="sp"></div>
+    <div class="btn">🖨️ Aylık Rapor</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart kir"><div class="b">Kalibrasyonu geçmiş</div><div class="d">7 <small>cihaz</small></div></div>
+    <div class="kart sari"><div class="b">30 gün içinde</div><div class="d">34</div></div>
+    <div class="kart sari"><div class="b">Bakımı gelen</div><div class="d">19</div></div>
+    <div class="kart kir"><div class="b">Arızada</div><div class="d">11 <small>4'ü kritik</small></div></div>
+    <div class="kart ok"><div class="b">Kritik cihaz hazır</div><div class="d">%94 <small>128/136</small></div></div>
+    <div class="kart"><div class="b">Ortalama onarım (MTTR)</div><div class="d">18 <small>saat</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="kalib">Kalibrasyon Gecikmiş<span class="sy">7</span></div>
+    <div class="sekme" data-s="bakim">Bakımı Gelen<span class="sy">19</span></div>
+    <div class="sekme" data-s="ariza">Arızada<span class="sy">11</span></div>
+    <div class="sekme" data-s="kritik">Kritik Cihaz Durumu<span class="sy">136</span></div>
+  </div>
+
+  <!-- ================================================ KALİBRASYON GECİKMİŞ ===== -->
+  <div class="pnl" data-s="kalib">
+    <div class="arama">
+      <div class="kutu">🔍 Cihaz, marka/model, demirbaş no ya da birim…</div>
+      <span class="chip on">Süresi geçti <b>7</b></span>
+      <span class="chip">30 gün <b>34</b></span>
+      <span class="chip">90 gün <b>81</b></span>
+      <span class="chip">Kritik cihaz <b>3</b></span>
+      <span class="chip">Tümü</span>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px">Demirbaş No</th>
+          <th style="width:230px">Cihaz</th>
+          <th style="width:150px">Birim / Lokasyon</th>
+          <th style="width:100px" class="orta">Risk</th>
+          <th style="width:110px" class="orta">Son kalibrasyon</th>
+          <th style="width:110px" class="orta">Geçerlilik</th>
+          <th style="width:90px" class="orta">Gecikme</th>
+          <th style="width:130px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>DB-01184</code></td>
+            <td><b>Defibrilatör</b> · Zoll R Series</td>
+            <td>Acil Servis · Resüsitasyon</td>
+            <td class="orta"><span class="rz kir">Yaşam desteği</span></td>
+            <td class="orta">02.09.2025</td><td class="orta">02.09.2026</td>
+            <td class="orta"><span class="rz kir">14 gün</span></td>
+            <td class="orta"><span class="rz kir">Kullanım dışı</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-00937</code></td>
+            <td><b>İnfüzyon pompası</b> · B.Braun Infusomat</td>
+            <td>YBÜ · Yatak 3</td>
+            <td class="orta"><span class="rz kir">Yaşam desteği</span></td>
+            <td class="orta">20.08.2025</td><td class="orta">20.08.2026</td>
+            <td class="orta"><span class="rz kir">27 gün</span></td>
+            <td class="orta"><span class="rz kir">Kullanım dışı</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-01402</code></td>
+            <td><b>Anestezi cihazı</b> · Dräger Primus</td>
+            <td>Ameliyathane · Salon 3</td>
+            <td class="orta"><span class="rz kir">Yaşam desteği</span></td>
+            <td class="orta">10.09.2025</td><td class="orta">10.09.2026</td>
+            <td class="orta"><span class="rz kir">6 gün</span></td>
+            <td class="orta"><span class="rz sari">Planlandı 17.09</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-00611</code></td>
+            <td><b>Tansiyon aleti (dijital)</b> · Omron HBP-1320</td>
+            <td>Dahiliye Poliklinik · Oda 4</td>
+            <td class="orta"><span class="rz sari">Orta</span></td>
+            <td class="orta">28.08.2025</td><td class="orta">28.08.2026</td>
+            <td class="orta"><span class="rz kir">19 gün</span></td>
+            <td class="orta"><span class="rz kir">Kullanım dışı</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-01055</code></td>
+            <td><b>Elektrocerrahi ünitesi</b> · Erbe VIO 300</td>
+            <td>Ameliyathane · Salon 1</td>
+            <td class="orta"><span class="rz kir">Yüksek</span></td>
+            <td class="orta">05.09.2025</td><td class="orta">05.09.2026</td>
+            <td class="orta"><span class="rz kir">11 gün</span></td>
+            <td class="orta"><span class="rz sari">Firma bekleniyor</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-00298</code></td>
+            <td><b>Etüv</b> · Nüve EN 500</td>
+            <td>Laboratuvar · Mikrobiyoloji</td>
+            <td class="orta"><span class="rz sari">Orta</span></td>
+            <td class="orta">01.09.2025</td><td class="orta">01.09.2026</td>
+            <td class="orta"><span class="rz kir">15 gün</span></td>
+            <td class="orta"><span class="rz kir">Kullanım dışı</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-01377</code></td>
+            <td><b>Pulse oksimetre</b> · Masimo Rad-8</td>
+            <td>Cerrahi Servis · Mobil</td>
+            <td class="orta"><span class="rz sari">Orta</span></td>
+            <td class="orta">30.08.2025</td><td class="orta">30.08.2026</td>
+            <td class="orta"><span class="rz kir">17 gün</span></td>
+            <td class="orta"><span class="rz kir">Kullanım dışı</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Süresi geçen cihaz kendiliğinden "kullanım dışı" olur:</b> etiketi kırmızıya döner
+        ve kullanan birime bildirim gider — kalibrasyonsuz ölçüm, ölçüm değildir.</span>
+      <span class="sp">Yaşam destek cihazlarında yedek havuzdan cihaz atanır; birim boş kalmaz.</span>
+    </div>
+  </div>
+
+  <!-- ===================================================== BAKIMI GELEN ===== -->
+  <div class="pnl" data-s="bakim" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Cihaz ya da birim…</div>
+      <span class="chip on">Bu ay <b>19</b></span>
+      <span class="chip">Gecikmiş <b>3</b></span>
+      <span class="chip">Sözleşmeli <b>8</b></span>
+      <span class="chip">İç ekip <b>11</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px">Demirbaş No</th>
+          <th style="width:230px">Cihaz</th>
+          <th style="width:150px">Birim</th>
+          <th style="width:110px" class="orta">Periyot</th>
+          <th style="width:110px" class="orta">Son bakım</th>
+          <th style="width:110px" class="orta">Planlanan</th>
+          <th style="width:140px">Yapacak</th>
+          <th style="width:120px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>DB-01402</code></td>
+            <td>Anestezi cihazı · Dräger Primus</td><td>Ameliyathane S-3</td>
+            <td class="orta">6 ay</td><td class="orta">17.03.2026</td><td class="orta">17.09.2026</td>
+            <td>Dräger Yetkili Servis <span class="rz mavi">Sözleşme</span></td>
+            <td class="orta"><span class="rz sari">Yarın</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-00842</code></td>
+            <td>Ventilatör · Hamilton C1</td><td>YBÜ · Yatak 1</td>
+            <td class="orta">6 ay</td><td class="orta">02.03.2026</td><td class="orta">02.09.2026</td>
+            <td>Hamilton Teknik <span class="rz mavi">Sözleşme</span></td>
+            <td class="orta"><span class="rz kir">14 gün gecikti</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-00155</code></td>
+            <td>Otoklav · Nüve OT 90L</td><td>Sterilizasyon</td>
+            <td class="orta">3 ay</td><td class="orta">18.06.2026</td><td class="orta">18.09.2026</td>
+            <td>Biyomedikal (iç)</td>
+            <td class="orta"><span class="rz">3 gün</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-01190</code></td>
+            <td>Hasta başı monitör · Mindray uMEC12</td><td>Acil · Kırmızı alan</td>
+            <td class="orta">12 ay</td><td class="orta">22.09.2025</td><td class="orta">22.09.2026</td>
+            <td>Biyomedikal (iç)</td>
+            <td class="orta"><span class="rz">6 gün</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-00073</code></td>
+            <td>Röntgen cihazı · Siemens Ysio</td><td>Radyoloji</td>
+            <td class="orta">12 ay</td><td class="orta">29.09.2025</td><td class="orta">29.09.2026</td>
+            <td>Siemens Healthineers <span class="rz mavi">Sözleşme</span></td>
+            <td class="orta"><span class="rz">13 gün</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-01611</code></td>
+            <td>Buzdolabı (ilaç) · Vestel MedCool</td><td>Eczane · BUZDOLABI-2</td>
+            <td class="orta">6 ay</td><td class="orta">14.03.2026</td><td class="orta">14.09.2026</td>
+            <td>Biyomedikal (iç)</td>
+            <td class="orta"><span class="rz kir">2 gün gecikti</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Periyot üreticiden gelir</b>, kurum kısaltabilir uzatamaz: kullanım yoğunluğu
+        artan cihazda süre kısalır.</span>
+      <span class="sp">Eczane buzdolabı bakımı gecikmiş — soğuk zincir uyarısıyla aynı cihaz (bkz. Eczane panosu).</span>
+    </div>
+  </div>
+
+  <!-- ========================================================== ARIZADA ===== -->
+  <div class="pnl" data-s="ariza" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 İş emri, cihaz ya da birim…</div>
+      <span class="chip on">Açık <b>11</b></span>
+      <span class="chip">Kritik <b>4</b></span>
+      <span class="chip">Dış serviste <b>3</b></span>
+      <span class="chip">Parça bekleyen <b>2</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px">İş Emri</th>
+          <th style="width:220px">Cihaz</th>
+          <th style="width:140px">Birim</th>
+          <th>Arıza</th>
+          <th style="width:100px" class="orta">Öncelik</th>
+          <th style="width:100px" class="orta">Duruş</th>
+          <th style="width:140px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>IE-2609-084</code></td>
+            <td>Ventilatör · Hamilton C1 <code class="k">DB-00844</code></td>
+            <td>YBÜ · Yatak 4</td>
+            <td>Oksijen karışım hatası alarmı, FiO₂ ayarı tutmuyor</td>
+            <td class="orta"><span class="rz kir">Kritik</span></td>
+            <td class="orta"><span class="rz kir">31 sa</span></td>
+            <td class="orta"><span class="rz sari">Dış servis yolda</span></td></tr>
+          <tr class="tik"><td class="nw"><code>IE-2609-081</code></td>
+            <td>İnfüzyon pompası · B.Braun <code class="k">DB-00951</code></td>
+            <td>Onkoloji · 412</td>
+            <td>Oklüzyon alarmı sürekli, akış durmuyor</td>
+            <td class="orta"><span class="rz kir">Kritik</span></td>
+            <td class="orta"><span class="rz kir">46 sa</span></td>
+            <td class="orta"><span class="rz mavi">Parça bekleniyor</span></td></tr>
+          <tr class="tik"><td class="nw"><code>IE-2609-079</code></td>
+            <td>Ultrason · Mindray DC-70 <code class="k">DB-01220</code></td>
+            <td>Kadın Doğum</td>
+            <td>Konveks prob görüntü vermiyor</td>
+            <td class="orta"><span class="rz sari">Yüksek</span></td>
+            <td class="orta"><span class="rz sari">3 gün</span></td>
+            <td class="orta"><span class="rz sari">Dış serviste</span></td></tr>
+          <tr class="tik"><td class="nw"><code>IE-2609-088</code></td>
+            <td>Otoklav · Nüve OT 90L <code class="k">DB-00155</code></td>
+            <td>Sterilizasyon</td>
+            <td>Kapak contası kaçırıyor, basınç tutmuyor</td>
+            <td class="orta"><span class="rz kir">Kritik</span></td>
+            <td class="orta"><span class="rz">6 sa</span></td>
+            <td class="orta"><span class="rz ok">İç ekip müdahalede</span></td></tr>
+          <tr class="tik"><td class="nw"><code>IE-2609-090</code></td>
+            <td>Hasta yatağı (motorlu) <code class="k">DB-01705</code></td>
+            <td>Ortopedi · 208</td>
+            <td>Sırtlık motoru çalışmıyor</td>
+            <td class="orta"><span class="rz">Düşük</span></td>
+            <td class="orta"><span class="rz">2 sa</span></td>
+            <td class="orta"><span class="rz pas">Sırada</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Öncelik cihazın kendisinden değil, yerinden gelir:</b> YBÜ'deki ventilatör kritik,
+        depodaki aynı cihaz değil.</span>
+      <span class="sp">Duruş süresi bildirim anından sayılır — "ne zaman bakıldığı"ndan değil.</span>
+    </div>
+  </div>
+
+  <!-- ============================================== KRİTİK CİHAZ DURUMU ===== -->
+  <div class="pnl" data-s="kritik" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:220px">Cihaz türü</th>
+          <th style="width:90px" class="sag">Toplam</th>
+          <th style="width:90px" class="sag">Hazır</th>
+          <th style="width:90px" class="sag">Arızalı</th>
+          <th style="width:110px" class="sag">Kalibrasyonsuz</th>
+          <th style="width:90px" class="sag">Yedek</th>
+          <th style="width:170px">Kullanılabilirlik</th>
+          <th style="width:130px" class="orta">Asgari</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Ventilatör</b></td>
+            <td class="sag">18</td><td class="sag">15</td><td class="sag">2</td>
+            <td class="sag">1</td><td class="sag">2</td>
+            <td><span class="bar" style="display:inline-block;width:110px"><i style="width:83%"></i></span> %83</td>
+            <td class="orta"><span class="rz ok">≥ 14 ✓</span></td></tr>
+          <tr class="tik"><td><b>Defibrilatör</b></td>
+            <td class="sag">22</td><td class="sag">20</td><td class="sag">1</td>
+            <td class="sag">1</td><td class="sag">3</td>
+            <td><span class="bar" style="display:inline-block;width:110px"><i style="width:91%"></i></span> %91</td>
+            <td class="orta"><span class="rz ok">≥ 18 ✓</span></td></tr>
+          <tr class="tik"><td><b>İnfüzyon pompası</b></td>
+            <td class="sag">64</td><td class="sag">58</td><td class="sag">4</td>
+            <td class="sag">2</td><td class="sag">6</td>
+            <td><span class="bar" style="display:inline-block;width:110px"><i style="width:91%"></i></span> %91</td>
+            <td class="orta"><span class="rz ok">≥ 50 ✓</span></td></tr>
+          <tr class="tik"><td><b>Anestezi cihazı</b></td>
+            <td class="sag">6</td><td class="sag">5</td><td class="sag">0</td>
+            <td class="sag">1</td><td class="sag">0</td>
+            <td><span class="bar s" style="display:inline-block;width:110px"><i style="width:83%"></i></span> %83</td>
+            <td class="orta"><span class="rz sari">≥ 6 ✗</span></td></tr>
+          <tr class="tik"><td><b>Hasta başı monitör</b></td>
+            <td class="sag">48</td><td class="sag">47</td><td class="sag">1</td>
+            <td class="sag">0</td><td class="sag">4</td>
+            <td><span class="bar" style="display:inline-block;width:110px"><i style="width:98%"></i></span> %98</td>
+            <td class="orta"><span class="rz ok">≥ 40 ✓</span></td></tr>
+          <tr class="tik"><td><b>Küvöz / inkübatör</b></td>
+            <td class="sag">8</td><td class="sag">8</td><td class="sag">0</td>
+            <td class="sag">0</td><td class="sag">1</td>
+            <td><span class="bar" style="display:inline-block;width:110px"><i style="width:100%"></i></span> %100</td>
+            <td class="orta"><span class="rz ok">≥ 6 ✓</span></td></tr>
+          <tr class="tik"><td><b>Elektrocerrahi ünitesi</b></td>
+            <td class="sag">7</td><td class="sag">6</td><td class="sag">0</td>
+            <td class="sag">1</td><td class="sag">1</td>
+            <td><span class="bar" style="display:inline-block;width:110px"><i style="width:86%"></i></span> %86</td>
+            <td class="orta"><span class="rz ok">≥ 6 ✓</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>"Hazır" = arızasız VE kalibrasyonu geçerli.</b> Çalışan ama kalibrasyonu geçmiş
+        cihaz sayıya girmez — ölçtüğü değere güvenilmiyor.</span>
+      <span class="sp">Anestezi cihazı asgarinin altına düştü: 6 salon var, 5 cihaz hazır — plan bir salonu kapatmalı.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Biyomedikal süreç haritası.</b> Pano dört akışın giriş noktası:
+  <ul>
+    <li><b>Envanter</b> — cihazın künyesi, risk sınıfı, zimmeti, garantisi ve yaşam döngüsü.</li>
+    <li><b>Kalibrasyon</b> — planlı ölçüm, sapma değerlendirmesi, sertifika ve etiket.</li>
+    <li><b>Periyodik bakım</b> — üretici periyoduna göre iş emri ve kontrol listesi.</li>
+    <li><b>Arıza</b> — bildirim, müdahale, duruş süresi ve dış servis takibi.</li>
+  </ul>
+  Kullanılabilirlik <b>"arızasız ve kalibrasyonu geçerli"</b> demektir: cihazın çalışıyor olması
+  yetmez, ölçtüğü değerin doğru olduğunun belgesi de olmalı.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

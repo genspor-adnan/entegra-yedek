@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klinik Kalite — Sağlık Olguları ve Göstergeler — Mockup (GenoTIP AI · Kalite)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>📐 Klinik Kalite — Sağlık Olguları</span>
+    <span class="sp">Türkiye Klinik Kalite Programı · Gösterge Yönetimi Rehberi S.1.1 (Mart 2021) · 16 olgu · 217 gösterge</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">🔄 Dönemi Hesapla</div>
+    <div class="btn" data-git="klinik_kalite_donem.html">📊 Dönem Sonuçları</div>
+    <div class="sepv"></div>
+    <div class="btn" data-git="klinik_kalite_gosterge_karti.html">🗂️ Gösterge Kartı</div>
+    <div class="btn">⬇️ Kod Listesini Dışa Aktar</div>
+    <div class="sepv"></div>
+    <div class="btn pas">✏️ Hedef Düzenle</div>
+    <div class="sp"></div>
+    <div class="btn">🖨️ Yazdır</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">Sağlık olgusu</div><div class="d">16</div></div>
+    <div class="kart"><div class="b">Standart</div><div class="d">45</div></div>
+    <div class="kart"><div class="b">Gösterge</div><div class="d">217</div></div>
+    <div class="kart ok"><div class="b">Otomatik hesaplanabilir</div><div class="d">138 <small>/ 217</small></div></div>
+    <div class="kart sari"><div class="b">Kod listesi eksik (elle)</div><div class="d">79</div></div>
+    <div class="kart"><div class="b">Tekil kod</div><div class="d">929 <small>ICD 460 · SUT 316 · ATC 153</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="olgu">Sağlık Olguları<span class="sy">16</span></div>
+    <div class="sekme" data-s="gos">Göstergeler<span class="sy">217</span></div>
+    <div class="sekme" data-s="kod">Kod Havuzu<span class="sy">929</span></div>
+  </div>
+
+  <!-- ===================================================== OLGULAR ===== -->
+  <div class="pnl" data-s="olgu">
+    <div class="ikiPanel">
+      <div data-liste>
+        <div class="grp" style="margin:8px">
+          <div class="gb">Sağlık Olgusu <span class="sp">kısaltma · gösterge</span></div>
+          <div class="ic" style="padding:0">
+            <div class="olgu on"><span class="kk">DP</span><span class="ad">Diz Protezi</span><span class="sy">17</span></div>
+            <div class="olgu"><span class="kk">GD</span><span class="ad">Gebelik Süreci ve Doğum</span><span class="sy">32</span></div>
+            <div class="olgu"><span class="kk">DM</span><span class="ad">Diabetes Mellitus</span><span class="sy">18</span></div>
+            <div class="olgu"><span class="kk">KP</span><span class="ad">Kalça Protezi</span><span class="sy">16</span></div>
+            <div class="olgu"><span class="kk">İN</span><span class="ad">İnme</span><span class="sy">16</span></div>
+            <div class="olgu"><span class="kk">KB</span><span class="ad">Kronik Böbrek Yetmezliği</span><span class="sy">15</span></div>
+            <div class="olgu"><span class="kk">KK</span><span class="ad">Koroner Kalp Hastalığı</span><span class="sy">12</span></div>
+            <div class="olgu"><span class="kk">KR</span><span class="ad">Kolorektal Kanser</span><span class="sy">11</span></div>
+            <div class="olgu"><span class="kk">MK</span><span class="ad">Meme Kanseri</span><span class="sy">11</span></div>
+            <div class="olgu"><span class="kk">KA</span><span class="ad">Katarakt Cerrahisi</span><span class="sy">10</span></div>
+            <div class="olgu"><span class="kk">ÇA</span><span class="ad">Çocukluk Çağı Astımları</span><span class="sy">9</span></div>
+            <div class="olgu"><span class="kk">HT</span><span class="ad">Hipertansiyon</span><span class="sy">9</span></div>
+            <div class="olgu"><span class="kk">KH</span><span class="ad">KOAH</span><span class="sy">7</span></div>
+            <div class="olgu"><span class="kk">PR</span><span class="ad">Prostat Kanseri</span><span class="sy">7</span></div>
+            <div class="olgu"><span class="kk">Dİ</span><span class="ad">Diş İmplantı</span><span class="sy">7</span></div>
+            <div class="olgu"><span class="kk">BM</span><span class="ad">Bariatrik ve Metabolik Cerrahi</span><span class="sy">20</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="hdr k4">
+          <div class="fld"><label>Sağlık Olgusu</label><div class="inp big ro">DP · Diz Protezi</div></div>
+          <div class="fld"><label>Standart</label><div class="inp ro">4</div></div>
+          <div class="fld"><label>Gösterge</label><div class="inp ro">17</div></div>
+          <div class="fld"><label>Veri Analiz Periyodu</label><div class="inp ro">6 aylık, yıllık</div></div>
+        </div>
+
+        <div class="grp">
+          <div class="gb">DP.S1 — Tüm hastaların etkin bir diz protez operasyonu geçirmesi sağlanmalıdır.
+            <span class="sp">8 gösterge</span></div>
+          <div class="dg">
+            <table>
+              <thead><tr>
+                <th style="width:92px">Kod</th><th>Gösterge</th>
+                <th style="width:62px" class="orta">İzlem</th>
+                <th style="width:76px" class="orta">Hedef</th>
+                <th style="width:150px" class="orta">Veri Kaynağı</th>
+              </tr></thead>
+              <tbody>
+                <tr class="tik sel" data-git="klinik_kalite_gosterge_karti.html">
+                  <td class="nw"><code>DP.G1</code></td>
+                  <td>Patella dislokasyonu nedeni ile yeniden yatış oranı (ilk 2 ay)</td>
+                  <td class="orta"><span class="rz mavi">UBK</span></td>
+                  <td class="orta">≤ %0.8</td>
+                  <td class="orta"><span class="rz">ICD 9</span> <span class="rz">SUT 11</span></td>
+                </tr>
+                <tr class="tik"><td class="nw"><code>DP.G2</code></td>
+                  <td>Reoperasyon geçiren hasta oranı (ilk 2 ay)</td>
+                  <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≤ %5</td>
+                  <td class="orta"><span class="rz">SUT 18</span></td></tr>
+                <tr class="tik"><td class="nw"><code>DP.G3</code></td>
+                  <td>Reoperasyon geçiren hasta oranı (ilk 12 ay)</td>
+                  <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≤ %7</td>
+                  <td class="orta"><span class="rz">SUT 18</span></td></tr>
+                <tr class="tik"><td class="nw"><code>DP.G4</code></td>
+                  <td>Hastanede ortalama yatış gün sayısı</td>
+                  <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≤ 5 gün</td>
+                  <td class="orta"><span class="rz">SUT 2</span></td></tr>
+                <tr class="tik"><td class="nw"><code>DP.G14</code></td>
+                  <td>50 yaş altı hasta oranı</td>
+                  <td class="orta"><span class="rz mavi">UB</span></td><td class="orta">—</td>
+                  <td class="orta"><span class="rz">SUT 2</span></td></tr>
+                <tr class="tik"><td class="nw"><code>DP.G17</code></td>
+                  <td>VKİ 40'ın üzerinde olan hasta oranı</td>
+                  <td class="orta"><span class="rz mavi">UB</span></td><td class="orta">—</td>
+                  <td class="orta"><span class="rz sari">Ölçüm verisi</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grp">
+          <div class="gb">DP.S2 — Diz protezi operasyonu ile ilgili enfeksiyonların önlenmesi için gerekli tedbirler alınmalıdır.
+            <span class="sp">3 gösterge</span></div>
+          <div class="dg">
+            <table>
+              <thead><tr>
+                <th style="width:92px">Kod</th><th>Gösterge</th>
+                <th style="width:62px" class="orta">İzlem</th>
+                <th style="width:76px" class="orta">Hedef</th>
+                <th style="width:150px" class="orta">Veri Kaynağı</th>
+              </tr></thead>
+              <tbody>
+                <tr class="tik"><td class="nw"><code>DP.G5</code></td>
+                  <td>Perioperatif dönemde profilaktik antibiyotik verilen hasta oranı</td>
+                  <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≥ %95</td>
+                  <td class="orta"><span class="rz mor">ATC 24</span> <span class="rz">SUT 2</span></td></tr>
+                <tr class="tik"><td class="nw"><code>DP.G6</code></td>
+                  <td>Cerrahi alan enfeksiyonu tespit edilen hasta oranı (ilk 2 ay)</td>
+                  <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≤ %1</td>
+                  <td class="orta"><span class="rz">ICD 12</span> <span class="rz">SUT 2</span></td></tr>
+                <tr class="tik"><td class="nw"><code>DP.G7</code></td>
+                  <td>Cerrahi alan enfeksiyonu tespit edilen hasta oranı (2–12 ay)</td>
+                  <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≤ %1</td>
+                  <td class="orta"><span class="rz">ICD 12</span> <span class="rz">SUT 2</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grp">
+          <div class="gb">DP.S3 — Tromboembolik olayların önlenmesi için gerekli tedbirler alınmalıdır.
+            <span class="sp">4 gösterge</span></div>
+          <div class="dg">
+            <table>
+              <thead><tr>
+                <th style="width:92px">Kod</th><th>Gösterge</th>
+                <th style="width:62px" class="orta">İzlem</th>
+                <th style="width:76px" class="orta">Hedef</th>
+                <th style="width:150px" class="orta">Veri Kaynağı</th>
+              </tr></thead>
+              <tbody>
+                <tr class="tik"><td class="nw"><code>DP.G8</code></td>
+                  <td>Antikoagulan ilaç verilen hasta oranı</td>
+                  <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≥ %90</td>
+                  <td class="orta"><span class="rz mor">ATC 12</span></td></tr>
+                <tr class="tik"><td class="nw"><code>DP.G9</code></td>
+                  <td>Taburcu edilenlerde antikoagulan ilaç reçete edilenlerin oranı</td>
+                  <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≥ %90</td>
+                  <td class="orta"><span class="rz mor">ATC 12</span></td></tr>
+                <tr class="tik"><td class="nw"><code>DP.G10</code></td>
+                  <td>Derin ven trombozu tespit edilen hasta oranı (ilk 3 ay)</td>
+                  <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≤ %2</td>
+                  <td class="orta"><span class="rz">ICD 6</span></td></tr>
+                <tr class="tik"><td class="nw"><code>DP.G11</code></td>
+                  <td>Pulmoner emboli nedeni ile yeniden yatış oranı (ilk 3 ay)</td>
+                  <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≤ %1</td>
+                  <td class="orta"><span class="rz">ICD 4</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================== GÖSTERGELER ===== -->
+  <div class="pnl" data-s="gos" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Gösterge kodu, adı ya da içerdiği ICD/SUT/ATC kodu…</div>
+      <span class="chip on">Tümü</span>
+      <span class="chip">Otomatik hesaplanabilir</span>
+      <span class="chip">Elle giriş</span>
+      <span class="chip">İlaç (ATC) içeren</span>
+      <span class="chip">Ulusal izlem</span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:92px">Kod</th><th style="width:70px">Olgu</th>
+          <th>Gösterge</th>
+          <th style="width:62px" class="orta">İzlem</th>
+          <th style="width:86px" class="orta">Hedef</th>
+          <th style="width:58px" class="orta">ICD</th>
+          <th style="width:58px" class="orta">SUT</th>
+          <th style="width:58px" class="orta">ATC</th>
+          <th style="width:110px" class="orta">Periyot</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel" data-git="klinik_kalite_gosterge_karti.html">
+            <td class="nw"><code>DP.G1</code></td><td>Diz Protezi</td>
+            <td>Patella dislokasyonu nedeni ile yeniden yatış oranı (ilk 2 ay)</td>
+            <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≤ %0.8</td>
+            <td class="orta">9</td><td class="orta">11</td><td class="orta sonuk">—</td>
+            <td class="orta">6 aylık, yıllık</td></tr>
+          <tr class="tik"><td class="nw"><code>DP.G5</code></td><td>Diz Protezi</td>
+            <td>Perioperatif profilaktik antibiyotik verilen hasta oranı</td>
+            <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≥ %95</td>
+            <td class="orta sonuk">—</td><td class="orta">2</td><td class="orta">24</td>
+            <td class="orta">6 aylık, yıllık</td></tr>
+          <tr class="tik"><td class="nw"><code>DM.G1</code></td><td>Diabetes Mellitus</td>
+            <td>DM tanısı alan hastalarda HbA1c ölçümü yapılanların oranı</td>
+            <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≥ %90</td>
+            <td class="orta">58</td><td class="orta">2</td><td class="orta sonuk">—</td>
+            <td class="orta">6 aylık, yıllık</td></tr>
+          <tr class="tik"><td class="nw"><code>DM.G2</code></td><td>Diabetes Mellitus</td>
+            <td>Yılda en az 4 kez HbA1c ölçümü yapılan hasta oranı</td>
+            <td class="orta"><span class="rz mavi">UB</span></td><td class="orta">≥ %60</td>
+            <td class="orta">58</td><td class="orta">2</td><td class="orta sonuk">—</td>
+            <td class="orta">yıllık</td></tr>
+          <tr class="tik"><td class="nw"><code>HT.G3</code></td><td>Hipertansiyon</td>
+            <td>Antihipertansif ilaç kullanan hasta oranı</td>
+            <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≥ %80</td>
+            <td class="orta">31</td><td class="orta sonuk">—</td><td class="orta">104</td>
+            <td class="orta">6 aylık, yıllık</td></tr>
+          <tr class="tik"><td class="nw"><code>İN.G2</code></td><td>İnme</td>
+            <td>Akut iskemik inmede ilk 4.5 saatte tromboliz uygulanan hasta oranı</td>
+            <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≥ %10</td>
+            <td class="orta">46</td><td class="orta">3</td><td class="orta">1</td>
+            <td class="orta">6 aylık, yıllık</td></tr>
+          <tr class="tik"><td class="nw"><code>GD.G7</code></td><td>Gebelik ve Doğum</td>
+            <td>1. izlemde hemogram tetkiki yapılan gebe oranı</td>
+            <td class="orta"><span class="rz mavi">UB</span></td><td class="orta">≥ %95</td>
+            <td class="orta sonuk">—</td><td class="orta">4</td><td class="orta sonuk">—</td>
+            <td class="orta">6 aylık, yıllık</td></tr>
+          <tr class="tik"><td class="nw"><code>GD.G1</code></td><td>Gebelik ve Doğum</td>
+            <td>1. izlemde (0-14 hafta) kan basıncı ölçümü yapılan gebe oranı</td>
+            <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≥ %95</td>
+            <td class="orta sonuk">—</td><td class="orta sonuk">—</td><td class="orta sonuk">—</td>
+            <td class="orta"><span class="rz sari">İzlem paketi</span></td></tr>
+          <tr class="tik"><td class="nw"><code>KR.G4</code></td><td>Kolorektal Kanser</td>
+            <td>Ameliyat öncesi evreleme yapılan hasta oranı</td>
+            <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≥ %90</td>
+            <td class="orta">22</td><td class="orta">31</td><td class="orta sonuk">—</td>
+            <td class="orta">6 aylık, yıllık</td></tr>
+          <tr class="tik"><td class="nw"><code>KB.G5</code></td><td>Kronik Böbrek Yet.</td>
+            <td>eGFR takibi yapılan hasta oranı</td>
+            <td class="orta"><span class="rz mavi">UBK</span></td><td class="orta">≥ %85</td>
+            <td class="orta">18</td><td class="orta">2</td><td class="orta">14</td>
+            <td class="orta">6 aylık, yıllık</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar"><span>217 gösterge</span><span>gösterilen 10</span>
+      <span class="sp">Kaynak: Klinik Kalite Ölçme ve Değerlendirme Rehberi S.1.1</span></div>
+  </div>
+
+  <!-- =================================================== KOD HAVUZU ===== -->
+  <div class="pnl" data-s="kod" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Kod ya da ad…</div>
+      <span class="chip on">Tümü <b>929</b></span>
+      <span class="chip">ICD-10 <b>460</b></span>
+      <span class="chip">SUT <b>316</b></span>
+      <span class="chip">ATC <b>153</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:70px" class="orta">Tip</th>
+          <th style="width:100px">Kod</th>
+          <th>Ad</th>
+          <th style="width:150px">Kullanan gösterge</th>
+          <th style="width:80px" class="orta">Rol</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="orta"><span class="rz">ICD</span></td><td><code>M22.0</code></td>
+            <td>Patellanın rekürren dislokasyonu</td><td><code>DP.G1</code></td>
+            <td class="orta"><span class="rz mavi">Pay</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">ICD</span></td><td><code>S83.0</code></td>
+            <td>Patella çıkığı</td><td><code>DP.G1</code></td>
+            <td class="orta"><span class="rz mavi">Pay</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">SUT</span></td><td><code>612.420</code></td>
+            <td>Diz artroplastisi, total</td><td><code>DP.G1</code> <span class="sonuk">+16</span></td>
+            <td class="orta"><span class="rz">Payda</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">SUT</span></td><td><code>612.440</code></td>
+            <td>Diz revizyon artroplastisi, total</td><td><code>DP.G2</code> <span class="sonuk">+1</span></td>
+            <td class="orta"><span class="rz mavi">Pay</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz mor">ATC</span></td><td><code>J01DB04</code></td>
+            <td>Sefazolin Sodyum</td><td><code>DP.G5</code> <span class="sonuk">+2</span></td>
+            <td class="orta"><span class="rz mavi">Pay</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz mor">ATC</span></td><td><code>B01AA03</code></td>
+            <td>Varfarin Sodyum</td><td><code>DP.G8</code> <span class="sonuk">+3</span></td>
+            <td class="orta"><span class="rz mavi">Pay</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz mor">ATC</span></td><td><code>B01AF02</code></td>
+            <td>Apiksaban</td><td><code>DP.G8</code> <span class="sonuk">+3</span></td>
+            <td class="orta"><span class="rz mavi">Pay</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz mor">ATC</span></td><td><code>A10BA02</code></td>
+            <td>Metformin</td><td><code>DM.G7</code> <span class="sonuk">+5</span></td>
+            <td class="orta"><span class="rz mavi">Pay</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">ICD</span></td><td><code>E11</code></td>
+            <td>Tip 2 diabetes mellitus</td><td><code>DM.G1</code> <span class="sonuk">+17</span></td>
+            <td class="orta"><span class="rz">Payda</span></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">ICD</span></td><td><code>I10</code></td>
+            <td>Esansiyel (primer) hipertansiyon</td><td><code>HT.G1</code> <span class="sonuk">+8</span></td>
+            <td class="orta"><span class="rz">Payda</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar"><span>929 tekil kod · 5.503 kod–gösterge bağı</span>
+      <span class="sp">Kod listesi rehberden alınır, elle değiştirilmez</span></div>
+  </div>
+
+  <div class="statusbar">
+    <span>Rehber: <b>S.1.1</b> (Mart 2021)</span>
+    <span>Dönem: <b>2026 / 1. yarıyıl</b></span>
+    <span>Şube: <b>Merkez</b></span>
+    <span class="sp">Son hesaplama: 16.09.2026 14:20</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran notları.</b>
+  <ul>
+    <li><b>Kod listesi rehberin malıdır, kullanıcı düzenlemez.</b> ICD-10 / SUT / ATC kümeleri göstergenin
+      pay ve paydasını tanımlar; kurum bunları değiştirirse ürettiği sayı Bakanlığın hesabıyla
+      tutmaz ve kıyaslama anlamını yitirir. Kurumun düzenleyebildiği tek şey kendi <b>hedefi</b>.</li>
+    <li><b>Olgu kısaltması resmîdir</b> (DP, DM, GD…). Kendi sıra numaramızı anahtar yapsaydık rehber
+      bir gösterge iptal edip yenisini eklediğinde geçmiş dönem ölçümleri yanlış göstergeye bağlanırdı.</li>
+    <li><b>"Otomatik hesaplanabilir" ayrımı gerçek bir ayrımdır:</b> 217 göstergenin 138'i HBYS verisinden
+      (tanı + işlem + ilaç) hesaplanabiliyor. Kalan 79'u elle beslenmek zorunda (kimisinde yalnız bir taraf var: rehber paydayı serbest metinle tarif ediyor, çoğu gebe izlem paketi);
+      listede ayrı çiple süzülür ki kullanıcı "neden bu boş" diye aramasın.</li>
+    <li>Gösterge satırına çift tıklama <code>klinik_kalite_gosterge_karti.html</code> ekranını açar.</li>
+  </ul>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

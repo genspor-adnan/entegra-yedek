@@ -10,11 +10,12 @@
       "WebFetch(domain:bap.sdu.edu.tr)",
       "WebFetch(domain:www.dengeakademi.com)",
       "Skill(simplify)",
-      "Skill(update-config)"
+      "Skill(update-config)",
+      "Bash(export *)"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "mssql-bilim"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

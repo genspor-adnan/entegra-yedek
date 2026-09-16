@@ -1,0 +1,22 @@
+Diş modülü uçtan uca test edildi, test verisi duruyor.
+
+Yürütülen akış (hasta: CEMRE YILMAZ, id 5277)
+1. Diş Hastaları → 🦷 Diş Hasta Kartı açıldı (odontogram, ağız özeti, DMFT).
+2. Odontogramda 16 numaralı diş seçilip "● Çürük" işlendi → özet "çürük: 16, 36", DMFT 3 (D2·M1·F0).
+3. Seçili dişe işlem: "dolgu" araması (24 sonuç) → Amalgam Dolgu eklendi; sistem otomatik plan açtı: TP-2026/0002.
+4. 📤 Proforma / Sun → ✍ Hasta Onayı → plan Onaylı.
+5. Plan satırı ✔ Yapıldı → satır 1/1, plan Tamamlandı. Sunucu uyarısı doğru: "Hastanın açık başvurusu yok: ücret satırı yazılmadı".
+6. 🪑 Muayene / Seans Aç → seans #3; seans kartında Yapılan İşlemler sekmesine işlem satırı eklendi (367 işlemli lookup) → ✔ Seansı Bitir ("Seans bitti").
+7. 💳 Ödeme Planı Üret → peşinat 500 + 3 taksit × 1.084,50 (vade 16.09 / 16.10 / 16.11).
+8. Laboratuvar kartı açıldı: "Test Diş Laboratuvarı" (tedarikçi cari seçildi).
+9. Lab iş emri açıldı (diş 16, Zirkonyum) → ➡ Aşamayı İlerlet → "Ölçü bekliyor" → Gönderildi (kurye/portal).
+10. Günlük Akış ekranı: 3 ünitli çizelge, sayaçlar doğru ("Lab teslim bekleyen 1", randevu 2, ünit doluluk %5).
+
+Sekiz ekranın hepsi açıldı, konsol/HTTP hatası yok (tek 422'ler kasıtlı iş kuralı redleriydi: "boş seansta işlem yok", "boş plan sunulmaz").
+
+Bulunan gerçek hata (düzeltildi, commit 128bad2)
+Yeni kart açılışındaki taraf seçim penceresi (AcilistaTarafSecimi) koşulsuz cari arıyordu. Diş plan / seans / lab iş emri kartlarında o alan hasta; pencere müşteri-tedarikçi listesi gösteriyor ve seçilen şirket hasta alanına yazılıyordu — testte iş emri "CEMRE ELEKTRİK … LİMİTED ŞİRKETİ" hastasıyla açıldı. Üstelik aynı anda iki arama penceresi üst üste açılıyordu. Artık kaynak alanın katalogdaki aramaKaynagi değeri (hasta kartlarında zaten "hasta"). Doğrulandı: tek pencere, "Hasta ara…", sonuçlar gerçek hastalar. Yanlış kayıt da kart düzenlemesiyle CEMRE YILMAZ'a çevrildi.
+
+Kalan test verisi: 2 plan / 2 plan satırı · 3 seans (biri kapalı) · 1 seans işlemi · 12 odontogram bulgusu · 1 ödeme planı + 4 taksit · 1 laboratuvar · 1 lab iş emri + 1 aşama kaydı.
+
+Not: tsc -b temiz, vitest 595/595. Geçici Playwright betikleri silindi, test kullanıcısı pasife alındı. Ücret/başvuru bağı sınanmadı — hastanın bugün açık başvurusu yoktu; istersen Kayıt Kabul'den başvuru açıp "Yapıldı" akışını ücret satırıyla birlikte de doğrulayabilirim.

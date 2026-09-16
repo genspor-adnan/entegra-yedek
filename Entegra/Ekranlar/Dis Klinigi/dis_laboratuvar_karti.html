@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diş Laboratuvarı Kartı — Mockup (GenoTIP AI · Medula)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .btn.mini{padding:2px 7px;font-size:10.5px;display:inline-flex}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg td code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)} .hdr.k5{grid-template-columns:repeat(5,1fr)} .hdr.k6{grid-template-columns:repeat(6,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.err{border-color:#c0392b;background:#fff6f5}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .kart.kir .d{color:var(--kirmizi)} .kart.ok .d{color:var(--ok)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)} .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)} .bar.k i{background:linear-gradient(#e06a5e,#c0392b)}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:300px 1fr 320px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .sonuc{margin:10px 12px;border:1px solid #bfe3cb;background:#eef9f1;border-radius:4px;padding:8px 10px;font-size:11.5px}
+  .sonuc.kir{border-color:#f3c4bf;background:#fdf1ef}
+  .sonuc.sari{border-color:#f2ddbf;background:#fdf8ec}
+  .sonuc b{color:var(--navy)}
+  .xml{font-family:Consolas,monospace;font-size:10.5px;background:#1f2d3a;color:#d7e3f2;padding:8px 10px;border-radius:3px;white-space:pre;overflow:auto;margin:0 12px 10px;line-height:1.5}
+  .adim{display:flex;gap:0;padding:8px 12px;flex-wrap:wrap}
+  .adim span{padding:5px 12px;border:1px solid var(--line);background:#fff;font-size:11px;color:var(--muted);position:relative}
+  .adim span+span{border-left:none}
+  .adim span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .adim span.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .icerik{padding:12px 16px;line-height:1.6}
+  .icerik h2{font-size:14px;color:var(--navy);margin:16px 0 6px;border-bottom:1px solid var(--line2);padding-bottom:3px}
+  .icerik h3{font-size:12.5px;color:#2c4a6b;margin:12px 0 4px}
+  .icerik p{margin:4px 0}
+  .icerik table{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:11.5px}
+  .icerik th,.icerik td{border:1px solid var(--line2);padding:4px 7px;text-align:left;vertical-align:top}
+  .icerik th{background:#f4f7fb;color:#3a5573;white-space:nowrap}
+  .icerik code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .kutu{border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;padding:8px 10px;margin:8px 0}
+  .yatay{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:6px 12px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🏭 Diş Laboratuvarı Kartı — Dentalab Protez Lab. <span class="sp">dis_lab · taraf (tedarikçi) · 2 aktif lab · Diş › Ayarlar › Laboratuvarlar</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div><div class="btn">＋ Yeni Lab</div><div class="btn danger">🗑 Pasifleştir</div>
+    <span class="sepv"></span><div class="btn">🧪 Yeni İş Emri</div><div class="btn">📤 Bugünkü Kurye Listesi</div><div class="btn">🧾 Lab Faturası Eşle</div><div class="btn">📊 Lab Performansı</div>
+    <span class="sepv"></span><div class="btn">↗ Tedarikçi Cari Kartı</div><div class="btn sp">✖ Kapat</div>
+  </div>
+  <div class="hdr k4" style="background:#fff8f0">
+    <div class="fld"><label>Laboratuvar</label><div class="inp ro big">Dentalab Protez Laboratuvarı · aktif</div></div>
+    <div class="fld"><label>Tedarikçi cari</label><div class="inp ro">DENTALAB DİŞ PROTEZ SAN. TİC. LTD. ŞTİ. · bakiye 18.450 ₺ (borç)</div></div>
+    <div class="fld"><label>Açık iş</label><div class="inp ro"><span class="rz mavi">Labda 6</span> <span class="rz sari">Geldi · prova 2</span> <span class="rz kir">Gecikti 1</span></div></div>
+    <div class="fld"><label>Performans (son 90 gün)</label><div class="inp ro">SLA uyumu <b>%91</b> · ort. teslim 6,4 gün · geri gönderim %4</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on">Genel</div><div class="sekme">Fiyat Listesi</div><div class="sekme">İş Emirleri</div><div class="sekme">Performans &amp; SLA</div><div class="sekme">Faturalar</div><div class="sekme">Garanti &amp; Koşullar</div><div class="sekme">Kişiler &amp; Belgeler</div>
+  </div>
+
+  <!-- GENEL -->
+  <div class="pnl">
+    <div class="ikiPanel">
+      <div>
+        <div class="grp"><div class="gb">Kimlik</div>
+          <div class="hdr" style="grid-template-columns:1fr 1fr">
+            <div class="fld"><label class="req">Laboratuvar adı</label><div class="inp">Dentalab Protez Laboratuvarı</div></div>
+            <div class="fld"><label class="req">Tedarikçi cari</label><div class="inp combo">DENTALAB DİŞ PROTEZ SAN. TİC. · 4400123</div></div>
+            <div class="fld"><label>Kod</label><div class="inp">LAB-01</div></div>
+            <div class="fld"><label>Şube</label><div class="inp combo">Merkez (tüm şubeler)</div></div>
+            <div class="fld"><label>Ruhsat / tescil no</label><div class="inp">DPL-34-2019-0412</div></div>
+            <div class="fld"><label>Sorumlu diş protez teknisyeni</label><div class="inp">Ahmet Demirci · DPT 10233</div></div>
+            <div class="fld"><label>Adres</label><div class="inp">Sanayi Mah. 12. Sok. No 5, Ümraniye / İstanbul</div></div>
+            <div class="fld"><label>Telefon / e-posta</label><div class="inp">0216 555 12 34 · siparis@dentalab.com.tr</div></div>
+          </div>
+        </div>
+        <div class="grp"><div class="gb">Çalışma biçimi</div>
+          <div class="hdr" style="grid-template-columns:1fr 1fr">
+            <div class="fld"><label>Ölçü tipi</label><div class="inp"><span class="rz ok">Dijital (STL) ✔</span> <span class="rz ok">Geleneksel ✔</span></div></div>
+            <div class="fld"><label>Portal / sipariş adresi</label><div class="inp">https://portal.dentalab.com.tr · kullanıcı genotip01</div></div>
+            <div class="fld"><label>Kurye günleri</label><div class="inp"><span class="rz mavi">Pzt</span> <span class="rz mavi">Çar</span> <span class="rz mavi">Cum</span> · alım 11:00 · teslim 16:00</div></div>
+            <div class="fld"><label>Acil iş</label><div class="inp">Kabul eder · 48 saat · +%30 ücret</div></div>
+            <div class="fld"><label>Standart SLA (iş günü)</label><div class="inp">7 · iş türüne göre fiyat listesinde</div></div>
+            <div class="fld"><label>Gecikme uyarısı</label><div class="inp">Beklenen tarihten 1 gün önce · lab + hekime</div></div>
+            <div class="fld"><label>Varsayılan lab mı</label><div class="inp combo">Evet — kron / köprü / implant üstü</div></div>
+            <div class="fld"><label>Durum</label><div class="inp combo">Aktif</div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Yaptığı işler <span class="sp">iş emrinde seçilebilir türler</span></div>
+          <div class="dg"><table>
+            <thead><tr><th class="orta">☑</th><th>İş türü</th><th>Malzemeler</th><th class="orta">SLA (iş günü)</th><th>Not</th></tr></thead>
+            <tbody>
+              <tr><td class="orta">☑</td><td>Kron</td><td>Zirkonyum · metal destekli porselen · e.max · tam seramik</td><td class="orta">7</td><td>Renk skalası Vita 3D</td></tr>
+              <tr><td class="orta">☑</td><td>Köprü</td><td>Zirkonyum · metal destekli</td><td class="orta">8</td><td></td></tr>
+              <tr><td class="orta">☑</td><td>İmplant üstü</td><td>Vidalı / simante · Ti-base · özel abutment</td><td class="orta">10</td><td>Marka uyumu: Straumann, Nobel, Osstem</td></tr>
+              <tr><td class="orta">☑</td><td>Total protez</td><td>Akrilik · ısı ile polimerize</td><td class="orta">5 aşama × 3 gün</td><td>ölçü → kişisel kaşık → mum prova → diş dizimi → bitim</td></tr>
+              <tr><td class="orta">☑</td><td>Parsiyel protez</td><td>Kroşeli akrilik · döküm iskelet · hassas tutuculu</td><td class="orta">12</td><td></td></tr>
+              <tr><td class="orta">☐</td><td>Ortodonti apareyi</td><td>—</td><td class="orta">—</td><td>Yapmıyor → Ortolab (LAB-02)</td></tr>
+              <tr><td class="orta">☑</td><td>Gece plağı / splint</td><td>Sert · yumuşak</td><td class="orta">3</td><td></td></tr>
+              <tr><td class="orta">☑</td><td>Tamir / besleme</td><td>Akrilik</td><td class="orta">1</td><td>Aynı gün kurye</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="grp"><div class="gb">Özet</div>
+          <div class="ozet" style="padding:8px 10px">
+            <div class="kart"><div class="b">Açık iş emri</div><div class="d">9</div></div>
+            <div class="kart kir"><div class="b">Geciken</div><div class="d">1 <small>LB-0388 · 2 gün</small></div></div>
+            <div class="kart"><div class="b">Bu ay maliyet</div><div class="d">24.300 ₺ <small>31 iş</small></div></div>
+            <div class="kart"><div class="b">Cari bakiye</div><div class="d">18.450 ₺ <small>borç · 2 fatura açık</small></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIYAT LISTESI -->
+  <div class="pnl" hidden>
+    <div class="arama"><span class="sonuk">Fiyat listesi:</span><span class="chip on">Dentalab 2026 (alış)</span><span class="chip">2025 (geçmiş)</span><span class="sp"></span><div class="btn">＋ Satır</div><div class="btn">📥 Excel'den al</div><div class="btn">↔ Hastaya yansıyan fiyatla karşılaştır</div></div>
+    <div class="dg"><table>
+      <thead><tr><th>Kod</th><th>İş türü</th><th>Malzeme</th><th class="orta">Birim</th><th class="sag">Lab fiyatı</th><th class="sag">Acil (+%30)</th><th class="orta">SLA</th><th class="sag">Hastaya yansıyan (hizmet)</th><th class="sag">Marj</th><th>Geçerlilik</th></tr></thead>
+      <tbody>
+        <tr class="grup"><td colspan="10">Kron / köprü</td></tr>
+        <tr><td>KR-ZR</td><td>Kron</td><td>Zirkonyum (monolitik)</td><td class="orta">üye</td><td class="sag">1.450,00</td><td class="sag">1.885,00</td><td class="orta">7</td><td class="sag">4.475,00 · Zirkonyum kron</td><td class="sag">%68</td><td>01.01 → 31.12.2026</td></tr>
+        <tr><td>KR-MDP</td><td>Kron</td><td>Metal destekli porselen</td><td class="orta">üye</td><td class="sag">980,00</td><td class="sag">1.274,00</td><td class="orta">7</td><td class="sag">3.200,00 · MDP kron</td><td class="sag">%69</td><td>2026</td></tr>
+        <tr><td>KR-EMX</td><td>Kron</td><td>e.max (lityum disilikat)</td><td class="orta">üye</td><td class="sag">1.650,00</td><td class="sag">2.145,00</td><td class="orta">7</td><td class="sag">5.100,00 · e.max kron</td><td class="sag">%68</td><td>2026</td></tr>
+        <tr><td>KP-ZR</td><td>Köprü</td><td>Zirkonyum</td><td class="orta">üye</td><td class="sag">1.400,00</td><td class="sag">1.820,00</td><td class="orta">8</td><td class="sag">4.300,00</td><td class="sag">%67</td><td>2026</td></tr>
+        <tr class="grup"><td colspan="10">İmplant üstü</td></tr>
+        <tr><td>IM-VID</td><td>İmplant üstü kron</td><td>Vidalı · Ti-base</td><td class="orta">üye</td><td class="sag">2.100,00</td><td class="sag">2.730,00</td><td class="orta">10</td><td class="sag">7.500,00</td><td class="sag">%72</td><td>2026</td></tr>
+        <tr><td>IM-ABT</td><td>Özel abutment</td><td>Zirkonyum / titanyum</td><td class="orta">adet</td><td class="sag">1.250,00</td><td class="sag">—</td><td class="orta">10</td><td class="sag">dahil</td><td class="sag">—</td><td>2026</td></tr>
+        <tr class="grup"><td colspan="10">Protez</td></tr>
+        <tr><td>PR-TOT</td><td>Total protez</td><td>Akrilik · tek çene</td><td class="orta">çene</td><td class="sag">2.800,00</td><td class="sag">—</td><td class="orta">15</td><td class="sag">9.000,00</td><td class="sag">%69</td><td>2026</td></tr>
+        <tr><td>PR-PAR</td><td>Parsiyel protez</td><td>Döküm iskelet</td><td class="orta">çene</td><td class="sag">3.400,00</td><td class="sag">—</td><td class="orta">12</td><td class="sag">10.500,00</td><td class="sag">%68</td><td>2026</td></tr>
+        <tr><td>PL-SRT</td><td>Gece plağı</td><td>Sert akrilik</td><td class="orta">adet</td><td class="sag">450,00</td><td class="sag">585,00</td><td class="orta">3</td><td class="sag">1.500,00</td><td class="sag">%70</td><td>2026</td></tr>
+        <tr><td>TM-AKR</td><td>Tamir</td><td>Akrilik kırık / besleme</td><td class="orta">adet</td><td class="sag">300,00</td><td class="sag">390,00</td><td class="orta">1</td><td class="sag">900,00</td><td class="sag">%67</td><td>2026</td></tr>
+      </tbody>
+    </table></div>
+    <div class="ic sonuk">Lab fiyatı = <b>alış fiyat listesi</b> (<code>fiyat_listesi</code>, tedarikçi cariye bağlı); iş emri açılırken satırdan <code>dis_lab_isemri.lab_fiyat</code> dolar. "Hastaya yansıyan" hizmet kartının satış fiyatı; marj = (satış − lab) / satış. Lab fiyatı değişince açık iş emirleri etkilenmez.</div>
+  </div>
+
+  <!-- IS EMIRLERI -->
+  <div class="pnl" hidden>
+    <div class="arama"><div class="kutu">🔍 İş emri / hasta / diş…</div><span class="chip on">Açık (9)</span><span class="chip">Gecikti (1)</span><span class="chip">Prova bekleyen (2)</span><span class="chip">Teslim edildi</span><span class="chip">Tümü</span><span class="sp"></span><div class="btn primary">🧪 Yeni İş Emri</div><div class="btn">📤 Kuryeye ver (seçili)</div><div class="btn">📥 Teslim al (seçili)</div></div>
+    <div class="dg"><table>
+      <thead><tr><th class="orta">☐</th><th>İş emri</th><th>Hasta</th><th>Hekim</th><th class="orta">Diş</th><th>İş · malzeme</th><th>Renk</th><th>Gönderim</th><th>Beklenen</th><th>Aşama</th><th>Sonraki randevu</th><th class="sag">Lab fiyatı</th><th></th></tr></thead>
+      <tbody>
+        <tr><td class="orta">☐</td><td>LB-2026/0388</td><td>Hasan Öz</td><td>Dr. C. Er</td><td class="orta">47</td><td>İmplant üstü kron · vidalı</td><td>A3</td><td>03.09.2026</td><td>15.09.2026</td><td><span class="rz kir">Gecikti · üretim</span></td><td>—</td><td class="sag">2.100,00</td><td><span class="btn mini">📞 Sor</span></td></tr>
+        <tr class="sel"><td class="orta">☑</td><td>LB-2026/0402</td><td>Fatma Demir</td><td>Dt. B. Demir</td><td class="orta">16</td><td>Kron · zirkonyum</td><td>A2</td><td>08.09.2026</td><td>16.09.2026</td><td><span class="rz sari">Geldi · prova</span></td><td>17.09 10:00</td><td class="sag">1.450,00</td><td><span class="btn mini">🗓</span></td></tr>
+        <tr><td class="orta">☐</td><td>LB-2026/0410</td><td>Nazmi Er</td><td>Dt. B. Demir</td><td class="orta">üst çene</td><td>Total protez · akrilik</td><td>A3,5</td><td>10.09.2026</td><td>01.10.2026</td><td><span class="rz mavi">Labda · mum prova hazır</span></td><td>19.09 11:00</td><td class="sag">2.800,00</td><td></td></tr>
+        <tr><td class="orta">☐</td><td>LB-2026/0415</td><td>Ayşe Yılmaz</td><td>Dt. A. Kaya</td><td class="orta">26</td><td>Kron · zirkonyum</td><td>B1</td><td>—</td><td>—</td><td><span class="rz">Ölçü bekliyor</span></td><td>—</td><td class="sag">1.450,00</td><td><span class="sonuk">kanal bitince</span></td></tr>
+        <tr><td class="orta">☐</td><td>LB-2026/0419</td><td>Selin Ar</td><td>Dt. A. Kaya</td><td class="orta">—</td><td>Gece plağı · sert</td><td>—</td><td>15.09.2026</td><td>18.09.2026</td><td><span class="rz mavi">Labda</span></td><td>—</td><td class="sag">450,00</td><td></td></tr>
+      </tbody>
+      <tr class="grup"><td colspan="11">Açık 9 iş emri</td><td class="sag">14.650,00</td><td></td></tr>
+    </table></div>
+    <div class="ic sonuk">Bu sekme <code>dis_lab_isemri</code> listesinin lab süzgeçli hâli; kart <code>dis_lab_isemri.html</code>. Aşama geçişleri oradan.</div>
+  </div>
+
+  <!-- PERFORMANS -->
+  <div class="pnl" hidden>
+    <div class="ozet">
+      <div class="kart ok"><div class="b">SLA uyumu (90 gün)</div><div class="d">%91 <small>78 / 86 iş</small></div><div class="bar"><i style="width:91%"></i></div></div>
+      <div class="kart"><div class="b">Ort. teslim süresi</div><div class="d">6,4 gün <small>hedef 7</small></div></div>
+      <div class="kart kir"><div class="b">Geri gönderim (prova sonrası)</div><div class="d">%4 <small>3 iş · renk 2 · uyum 1</small></div></div>
+      <div class="kart"><div class="b">Garanti talebi</div><div class="d">1 <small>kron kırığı · 8. ay</small></div></div>
+      <div class="kart"><div class="b">Ort. lab maliyeti / iş</div><div class="d">1.310 ₺</div></div>
+      <div class="kart"><div class="b">Puan</div><div class="d">4,6 / 5 <small>hekim değerlendirmesi</small></div></div>
+    </div>
+    <div class="ikiPanel">
+      <div>
+        <div class="grp"><div class="gb">İş türüne göre (90 gün)</div>
+          <div class="dg"><table>
+            <thead><tr><th>İş türü</th><th class="sag">Adet</th><th class="sag">Ort. gün</th><th class="sag">SLA</th><th>Uyum</th><th class="sag">Geri gönderim</th></tr></thead>
+            <tbody>
+              <tr><td>Kron (zirkonyum)</td><td class="sag">41</td><td class="sag">6,1</td><td class="sag">7</td><td><div class="bar"><i style="width:95%"></i></div></td><td class="sag">2</td></tr>
+              <tr><td>Köprü</td><td class="sag">12</td><td class="sag">7,8</td><td class="sag">8</td><td><div class="bar"><i style="width:92%"></i></div></td><td class="sag">0</td></tr>
+              <tr><td>İmplant üstü</td><td class="sag">9</td><td class="sag">11,2</td><td class="sag">10</td><td><div class="bar k"><i style="width:67%"></i></div></td><td class="sag">1</td></tr>
+              <tr><td>Total / parsiyel protez</td><td class="sag">14</td><td class="sag">13,5</td><td class="sag">12-15</td><td><div class="bar s"><i style="width:86%"></i></div></td><td class="sag">0</td></tr>
+              <tr><td>Plak / tamir</td><td class="sag">10</td><td class="sag">1,8</td><td class="sag">1-3</td><td><div class="bar"><i style="width:100%"></i></div></td><td class="sag">0</td></tr>
+            </tbody>
+          </table></div>
+          <div class="ic sonuk">İmplant üstü işlerde SLA %67: 10 gün hedef gerçekçi değil ya da lab yavaş - sözleşme görüşmesinde gündem.</div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Aylık eğilim</div>
+          <div class="dg"><table>
+            <thead><tr><th>Ay</th><th class="sag">İş</th><th class="sag">Tutar</th><th class="sag">SLA uyumu</th><th class="sag">Geri gönderim</th><th class="sag">Gecikme (gün)</th></tr></thead>
+            <tbody>
+              <tr><td>Eylül 2026</td><td class="sag">31</td><td class="sag">24.300</td><td class="sag">%90</td><td class="sag">1</td><td class="sag">2,0</td></tr>
+              <tr><td>Ağustos</td><td class="sag">29</td><td class="sag">22.150</td><td class="sag">%93</td><td class="sag">1</td><td class="sag">1,5</td></tr>
+              <tr><td>Temmuz</td><td class="sag">26</td><td class="sag">19.800</td><td class="sag">%88</td><td class="sag">1</td><td class="sag">2,3</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="grp"><div class="gb">Geri gönderim nedenleri</div>
+          <div class="dg"><table>
+            <thead><tr><th>İş emri</th><th>Neden</th><th>Sonuç</th><th class="sag">Ek maliyet</th></tr></thead>
+            <tbody>
+              <tr><td>LB-0362</td><td>Renk uyumsuz (A2 → A3)</td><td>Yeniden yapıldı · 4 gün</td><td class="sag">0 (garanti)</td></tr>
+              <tr><td>LB-0371</td><td>Kontak açık</td><td>Düzeltildi · 2 gün</td><td class="sag">0</td></tr>
+              <tr><td>LB-0380</td><td>Renk (hasta beğenmedi)</td><td>Yeniden · klinik hatası</td><td class="sag">1.450,00</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FATURALAR -->
+  <div class="pnl" hidden>
+    <div class="arama"><span class="chip on">Açık (2)</span><span class="chip">Eşlenmemiş iş emri (4)</span><span class="chip">Ödendi</span><span class="chip">Tümü</span><span class="sp"></span><div class="btn primary">🧾 Alış faturası eşle</div><div class="btn">＋ Alış faturası gir</div><div class="btn">💳 Ödeme (kasa/banka)</div></div>
+    <div class="dg"><table>
+      <thead><tr><th>Fatura no</th><th>Tarih</th><th class="orta">İş emri</th><th class="sag">Tutar</th><th class="sag">Eşlenen iş emri tutarı</th><th class="sag">Fark</th><th>Vade</th><th class="sag">Ödenen</th><th>Durum</th></tr></thead>
+      <tbody>
+        <tr><td>DL2026000431</td><td>05.09.2026</td><td class="orta">14</td><td class="sag">11.200,00</td><td class="sag">11.200,00</td><td class="sag">0,00</td><td>05.10.2026</td><td class="sag">0,00</td><td><span class="rz sari">Açık</span></td></tr>
+        <tr><td>DL2026000398</td><td>20.08.2026</td><td class="orta">11</td><td class="sag">7.250,00</td><td class="sag">6.800,00</td><td class="sag ds-kir" style="color:#b3261e">450,00</td><td>20.09.2026</td><td class="sag">0,00</td><td><span class="rz kir">Fark var</span></td></tr>
+        <tr><td>DL2026000352</td><td>05.08.2026</td><td class="orta">13</td><td class="sag">9.900,00</td><td class="sag">9.900,00</td><td class="sag">0,00</td><td>05.09.2026</td><td class="sag">9.900,00</td><td><span class="rz ok">Ödendi</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="grp"><div class="gb">Eşleme <span class="sp">DL2026000398 · fatura satırı ↔ iş emri</span></div>
+      <div class="dg"><table>
+        <thead><tr><th>Fatura satırı</th><th class="sag">Fatura tutarı</th><th>İş emri</th><th>Hasta · iş</th><th class="sag">İş emri lab fiyatı</th><th class="sag">Fark</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Zirkonyum kron × 3</td><td class="sag">4.350,00</td><td>LB-0362 · LB-0365 · LB-0370</td><td>3 hasta</td><td class="sag">4.350,00</td><td class="sag">0,00</td><td><span class="rz ok">Eşlendi</span></td></tr>
+          <tr><td>İmplant üstü kron × 1</td><td class="sag">2.450,00</td><td>LB-0366</td><td>Hasan Öz · 47</td><td class="sag">2.100,00</td><td class="sag" style="color:#b3261e">350,00</td><td><span class="btn mini">⚖ İtiraz</span></td></tr>
+          <tr><td>Acil farkı</td><td class="sag">450,00</td><td>—</td><td>—</td><td class="sag">—</td><td class="sag" style="color:#b3261e">450,00</td><td><span class="btn mini">🔍 İş emri seç</span></td></tr>
+        </tbody>
+      </table></div>
+      <div class="ic sonuk">Eşleme <code>dis_lab_isemri.alis_belge_satir_id</code>; eşlenmemiş fatura satırı ödeme onayına takılır. Lab maliyeti hekim hakedişinden (tahsil − lab − sarf) düşer - eşleme yapılmadan hakediş kapanmaz.</div>
+    </div>
+  </div>
+
+  <!-- GARANTI -->
+  <div class="pnl" hidden>
+    <div class="ikiPanel">
+      <div>
+        <div class="grp"><div class="gb">Garanti koşulları</div>
+          <div class="dg"><table>
+            <thead><tr><th>İş türü</th><th class="orta">Lab garantisi</th><th class="orta">Kliniğin hastaya garantisi</th><th>Kapsam</th><th>Kapsam dışı</th></tr></thead>
+            <tbody>
+              <tr><td>Kron / köprü (zirkonyum, e.max)</td><td class="orta">2 yıl</td><td class="orta">1 yıl</td><td>Kırık, çatlak, renk değişimi</td><td>Travma, bruksizm (plaksız), kök kırığı</td></tr>
+              <tr><td>Metal destekli porselen</td><td class="orta">2 yıl</td><td class="orta">1 yıl</td><td>Porselen kırığı</td><td>Travma</td></tr>
+              <tr><td>İmplant üstü</td><td class="orta">2 yıl</td><td class="orta">1 yıl</td><td>Vida gevşemesi (ilk 6 ay), kırık</td><td>İmplant kaybı (cerrahi)</td></tr>
+              <tr><td>Total / parsiyel protez</td><td class="orta">1 yıl</td><td class="orta">6 ay</td><td>Kırık, kroşe kırığı</td><td>Kemik rezorpsiyonu (besleme ücretli)</td></tr>
+              <tr><td>Plak / tamir</td><td class="orta">3 ay</td><td class="orta">—</td><td>Kırık</td><td>—</td></tr>
+            </tbody>
+          </table></div>
+          <div class="ic sonuk">İş emri teslim edilince <code>dis_lab_isemri.garanti_bitis</code> = teslim + lab garantisi; hasta kartında "Protez / Lab" sekmesinde görünür. Garanti içi geri gönderim lab fiyatı 0.</div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Sözleşme &amp; ödeme koşulları</div>
+          <div class="hdr" style="grid-template-columns:1fr 1fr">
+            <div class="fld"><label>Sözleşme</label><div class="inp">01.01.2026 → 31.12.2026 · yıllık fiyat</div></div>
+            <div class="fld"><label>Ödeme vadesi</label><div class="inp">30 gün · aylık tek fatura</div></div>
+            <div class="fld"><label>Fatura kesim</label><div class="inp">Her ayın 5'i · teslim edilen işler</div></div>
+            <div class="fld"><label>Ceza / indirim</label><div class="inp">SLA aşımı gün başı %2 (en çok %20)</div></div>
+            <div class="fld"><label>Kurye ücreti</label><div class="inp">Lab karşılar · acil kurye 250 ₺</div></div>
+            <div class="fld"><label>Fiyat artışı</label><div class="inp">Yılda 1 · 30 gün önceden bildirim</div></div>
+          </div>
+        </div>
+        <div class="grp"><div class="gb">Garanti talepleri</div>
+          <div class="dg"><table>
+            <thead><tr><th>Tarih</th><th>İş emri</th><th>Hasta</th><th>Sorun</th><th>Garanti</th><th>Sonuç</th></tr></thead>
+            <tbody>
+              <tr><td>02.09.2026</td><td>LB-2025/0211</td><td>Sevim Al</td><td>Zirkonyum kron kırığı · 8. ay</td><td><span class="rz ok">Lab içi</span></td><td>Yeniden yapıldı · 0 ₺</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KISILER & BELGELER -->
+  <div class="pnl" hidden>
+    <div class="ikiPanel">
+      <div>
+        <div class="grp"><div class="gb">Kişiler</div>
+          <div class="dg"><table>
+            <thead><tr><th>Ad</th><th>Görev</th><th>Telefon</th><th>e-posta</th><th>Konu</th></tr></thead>
+            <tbody>
+              <tr><td>Ahmet Demirci</td><td>Sorumlu DPT</td><td>0532 111 22 33</td><td>ahmet@dentalab.com.tr</td><td>Teknik · renk · prova</td></tr>
+              <tr><td>Elif Kara</td><td>Sipariş / kurye</td><td>0216 555 12 34</td><td>siparis@dentalab.com.tr</td><td>Gönderim · teslim</td></tr>
+              <tr><td>Murat Şen</td><td>Muhasebe</td><td>0216 555 12 35</td><td>muhasebe@dentalab.com.tr</td><td>Fatura · mutabakat</td></tr>
+            </tbody>
+          </table></div>
+          <div class="yatay"><div class="btn">＋ Kişi</div><span class="sonuk">tedarikçi carinin kişileri (<code>taraf_kisi</code>) - burada lab konusuyla</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Belgeler <span class="sp">dokuman · kaynak = dis_lab</span></div>
+          <ul class="liste">
+            <li>📄 <b>Sözleşme 2026</b> <span class="sp">PDF · 01.01.2026</span></li>
+            <li>📄 <b>Fiyat listesi 2026</b> <span class="sp">XLSX · 01.01.2026</span></li>
+            <li>📄 <b>Ruhsat (DPL-34-2019-0412)</b> <span class="sp">PDF · geçerli 2029</span></li>
+            <li>📄 <b>CE / malzeme sertifikaları</b> <span class="sp">zirkonyum blok · e.max</span></li>
+            <li>📄 <b>Renk skalası &amp; laboratuvar formu</b> <span class="sp">şablon · iş emri çıktısı</span></li>
+          </ul>
+          <div class="yatay"><div class="btn">＋ Belge</div><div class="btn">🖨 Lab iş emri formu şablonu</div></div>
+        </div>
+        <div class="grp"><div class="gb">Notlar</div>
+          <div class="ic">Zirkonyumda A2 tonu bir ton açık geliyor - renk seçiminde bir ton koyu iste (Dt. B. Demir, 08.2026). İmplant üstü işlerde abutment markasını iş emrine mutlaka yaz.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar"><span>LAB-01 · Dentalab · aktif · 9 açık iş · SLA %91</span><span class="sp"><code>dis_lab</code> → <code>taraf</code> (tedarikçi) · fiyat listesi alış · iş emirleri <code>dis_lab_isemri</code></span></div>
+</div>
+<div class="not"><b>Diş laboratuvarı kartı.</b> Lab bir <b>tedarikçi caridir</b> (<code>dis_lab.taraf_id</code>): fatura, ödeme ve bakiye cari kartta; bu kart labın <b>işine özgü</b> bilgiyi taşır - yaptığı işler ve SLA'ları, alış fiyat listesi (iş emrinin lab fiyatı buradan), kurye günleri, ölçü tipi, garanti koşulları, performans. "İş Emirleri" sekmesi <code>dis_lab_isemri</code> listesinin lab süzgeçli hâlidir; "Faturalar" alış faturası satırlarını iş emirleriyle eşler (<code>alis_belge_satir_id</code>) - eşlenmemiş satır ödeme onayına takılır ve hekim hakedişi (tahsil − lab − sarf) kapanmaz. Kaynak: <code>dis_lab</code> (706), <code>fiyat_listesi</code>, <code>dis_lab_isemri</code>, <code>belge_satir</code>, <code>dokuman</code>.</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi. Ic ice sekmeler desteklenir.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===scope.closest('.pnl');});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+// Ic toolbar dugmeleri: data-git="dosya.html" olanlar diger mockup'a gecer.
+document.querySelectorAll('[data-git]').forEach(function(b){ b.style.cursor='pointer'; b.addEventListener('click',function(){ location.href=b.dataset.git; }); });
+</script>
+</body>
+</html>

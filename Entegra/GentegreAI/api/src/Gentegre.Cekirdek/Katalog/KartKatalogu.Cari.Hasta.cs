@@ -272,6 +272,16 @@ public static partial class KartKatalogu
         LogTabloId: 903,                      // yeni tablo - eski karsiligi yok (bkz. taraf_adres: 901)
         SubeKolonu: null,                     // ana tanim verisi - subeler arasi ortak
         YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["aktif"] = (short)1 },
+        // SILME ENGELI (kullanici: "rollere silme ikonu ekle, icinde kullanici varsa
+        //   engelle"): ana rolu bu olan kullanici, ek rol atamasi ya da alt rol
+        //   varsa 422 + adet. Yetki/sube satirlari FK cascade ile gider; sistem
+        //   rolunu tetik (664) korur.
+        SilmeEngelleri: new SilmeEngeli[]
+        {
+            new("public.taraf_kullanici", "rol_id", "Bu rol kullanıcılara atanmış; önce kullanıcıların rolünü değiştirin."),
+            new("public.kullanici_rol", "rol_id", "Bu rol kullanıcılara ek rol olarak atanmış; önce atamaları kaldırın."),
+            new("public.rol", "ust_rol_id", "Bu rolün altında roller var; önce üst rol bağını kaldırın."),
+        },
         Alanlar: new KartAlani[]
         {
             new("id",        "id",         "sayi",  Yazilabilir: false),

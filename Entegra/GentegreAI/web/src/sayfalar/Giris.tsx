@@ -33,18 +33,22 @@ export function Giris() {
    */
   const yoldanMod = import.meta.env.BASE_URL.includes('genotip')
     ? URUN_GENOTIP : undefined;
-  const [urunModu, setUrunModu] = useState<number | undefined>(yoldanMod);
+  // Son bilinen mod tarayıcıda saklanır: sunucu cevabı gelene kadar "Gentegre AI"
+  //   yanıp sönüyordu (kullanıcı: "loginde gentegre ai geliyor, hbys ise GenoTIP AI").
+  const saklanan = (() => { try { const v = Number(localStorage.getItem('gentegre.urunModu')); return v > 0 ? v : undefined } catch { return undefined } })();
+  const [urunModu, setUrunModu] = useState<number | undefined>(saklanan ?? yoldanMod);
   useEffect(() => {
     let iptal = false;
     void (async () => {
       try {
         const y = await api.marka();
-        if (!iptal && y.urunModu > 0) setUrunModu(y.urunModu);
+        if (!iptal && y.urunModu > 0) { setUrunModu(y.urunModu); try { localStorage.setItem('gentegre.urunModu', String(y.urunModu)) } catch { /* yoksay */ } }
       } catch { /* sunucu/veritabani yoksa yoldan gelen tahmin kalir */ }
     })();
     return () => { iptal = true };
   }, []);
   const baslik = urunAdi(urunModu);
+  useEffect(() => { document.title = baslik }, [baslik]);
   /* Marka seridi: sembol + urun adi (kabuktaki ust seritle AYNI gorunum).
      BASE_URL: uygulama alt yolda yayinda (/genotipai) - mutlak "/..." 404 verir. */
   const marka = (

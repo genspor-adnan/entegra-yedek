@@ -109,7 +109,7 @@ public static class BelgeUclari
             var bolumler = await baglanti.ListeAsync("""
                 select d.id, d.ad
                   from public.departman d
-                 where d.durum = 1 and d.randevu_verilebilir = 1
+                 where d.durum = 1 and (public.fn_bolum_planli(d.id) = 1 or d.randevusuz_kabul = 1)
                  order by d.ad
                 """, null, [],
                 o => new { id = o.GetInt32(0), ad = o.GetString(1) }, iptal);

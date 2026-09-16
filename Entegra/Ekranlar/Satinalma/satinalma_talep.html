@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Satınalma — Talep ve Onay — Mockup (GenoTIP AI · Satınalma)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>📝 Satınalma Talebi — SA-2609-074 · İnsan Albümini %20</span>
+    <span class="sp">İsteyen: Eczane (Ecz. N. Arslan) · 15.09.2026 · Kaynak: kritik stok · 188.000 ₺</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="satinalma_panosu.html">◀ Pano</div>
+    <div class="btn primary">✓ Onayla ve İlerlet</div>
+    <div class="btn">✖ Reddet</div>
+    <div class="btn">↩ Bilgi İste</div>
+    <div class="sepv"></div>
+    <div class="btn">🔗 Talepleri Birleştir</div>
+    <div class="btn" data-git="satinalma_teklif.html">📊 Teklif İste</div>
+    <div class="btn">📦 Çerçeve Anlaşmadan Sipariş</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ Talep Formu</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart kir"><div class="b">Öncelik</div><div class="d" style="font-size:13px">Kritik stok</div></div>
+    <div class="kart"><div class="b">Kalem</div><div class="d">1</div></div>
+    <div class="kart"><div class="b">Tahmini tutar</div><div class="d" style="font-size:13px">188.000 ₺</div></div>
+    <div class="kart sari"><div class="b">Onay basamağı</div><div class="d">3 <small>/ 3</small></div></div>
+    <div class="kart"><div class="b">Bütçe kalemi</div><div class="d" style="font-size:12px">İlaç · %81</div></div>
+    <div class="kart kir"><div class="b">Stok yeterliliği</div><div class="d">1,3 <small>gün</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="kalem">Talep Kalemleri<span class="sy">1</span></div>
+    <div class="sekme" data-s="gerekce">Gerekçe & Stok<span class="sy">kritik</span></div>
+    <div class="sekme" data-s="onay">Onay Zinciri<span class="sy">3</span></div>
+    <div class="sekme" data-s="liste">Açık Talepler<span class="sy">12</span></div>
+  </div>
+
+  <!-- ====================================================== TALEP KALEMLERİ ===== -->
+  <div class="pnl" data-s="kalem">
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:250px">Malzeme</th>
+          <th style="width:110px">Kod</th>
+          <th style="width:80px" class="sag">Miktar</th>
+          <th style="width:80px" class="orta">Birim</th>
+          <th style="width:110px" class="sag">Son alış fiyatı</th>
+          <th style="width:110px" class="sag">Tahmini tutar</th>
+          <th style="width:140px" class="orta">Alım yolu</th>
+          <th style="width:140px">Not</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>İnsan albümini %20 100 mL</b><br>
+              <span class="sonuk">Kan ürünü · 2-8 °C</span></td>
+            <td><code class="k">B05AA01</code></td>
+            <td class="sag">40</td><td class="orta">şişe</td>
+            <td class="sag">4.700 ₺</td><td class="sag">188.000 ₺</td>
+            <td class="orta"><span class="rz mavi">Çerçeve anlaşma</span></td>
+            <td>Hedef Medikal · 2026 sözleşmesi</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ozet">
+      <div class="kart"><div class="b">Teknik şartname</div>
+        <div class="d" style="font-size:11.5px;font-weight:normal;line-height:1.6">
+          İnsan plazmasından elde edilmiş, %20 konsantrasyon, 100 mL flakon ·
+          <b>asgari raf ömrü 6 ay</b> · soğuk zincir (2-8 °C) taşıma zorunlu ·
+          Sağlık Bakanlığı ruhsatlı · İTS karekod bulunmalı
+        </div></div>
+      <div class="kart"><div class="b">Teslim</div>
+        <div class="d" style="font-size:11.5px;font-weight:normal;line-height:1.6">
+          En geç <b>3 iş günü</b> · Eczane Ana Depo · ısı kayıtlı taşıma kutusu ·
+          kısmi teslim kabul edilir (kritik stok)
+        </div></div>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Alım yolu talepte belirlenir:</b> çerçeve anlaşma varsa teklif toplanmaz,
+        doğrudan sipariş açılır — 188.000 ₺ için üç teklif beklemek 3 gün kaybettirirdi.</span>
+      <span class="sp">Asgari raf ömrü şartnameye yazılır ki mal kabulde reddetme hakkı doğsun (bkz. Metamizol iadesi).</span>
+    </div>
+  </div>
+
+  <!-- ====================================================== GEREKÇE & STOK ===== -->
+  <div class="pnl" data-s="gerekce" hidden>
+    <div class="ozet">
+      <div class="kart kir"><div class="b">Kalan stok</div><div class="d">4 <small>şişe</small></div></div>
+      <div class="kart"><div class="b">Min stok</div><div class="d">10</div></div>
+      <div class="kart"><div class="b">Günlük tüketim</div><div class="d">3,0</div></div>
+      <div class="kart kir"><div class="b">Yeter</div><div class="d">1,3 <small>gün</small></div></div>
+      <div class="kart"><div class="b">Tedarik süresi</div><div class="d">3 <small>gün</small></div></div>
+      <div class="kart sari"><div class="b">Açık</div><div class="d">1,7 <small>gün</small></div></div>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr><th style="width:190px">Alan</th><th>Değer</th></tr></thead>
+        <tbody>
+          <tr><td class="sonuk">Talep gerekçesi</td>
+            <td><b>Kritik stok</b> — kalan 4 şişe, günlük 3 tüketim. Tedarik süresi (3 gün)
+              stoğu aşıyor: <span class="rz kir">1,7 günlük açık</span></td></tr>
+          <tr><td class="sonuk">Tüketim eğilimi</td>
+            <td>Son 3 ay ortalaması 2,4/gün → son 30 gün <b>3,0/gün</b> (%25 artış) ·
+              YBÜ doluluk artışıyla uyumlu</td></tr>
+          <tr><td class="sonuk">Talep miktarı nasıl bulundu</td>
+            <td>Aylık tüketim (90) − eldeki (4) − açık sipariş (30, gecikmiş) =
+              <b>56</b> → çeyrek paletle 40 (parti büyüklüğü)</td></tr>
+          <tr><td class="sonuk">Açık sipariş</td>
+            <td><code>SP-2609-038</code> · 40 şişe · 10 teslim edildi ·
+              <span class="rz kir">2 gün gecikti</span></td></tr>
+          <tr><td class="sonuk">Alternatif</td>
+            <td>Yok — kan ürünü, muadil yok. Hidroksietil nişasta klinik olarak eşdeğer değil.</td></tr>
+          <tr><td class="sonuk">Bütçe kontrolü</td>
+            <td>İlaç bütçesi %81 kullanılmış · kalan 2,68 M ₺ ·
+              <span class="rz ok">bütçe içi</span></td></tr>
+          <tr><td class="sonuk">Geri ödeme</td>
+            <td>SUT kapsamında · endikasyona bağlı geri ödeme
+              <span class="sonuk">(albümin raporu gerekir)</span></td></tr>
+          <tr><td class="sonuk">Konsolidasyon</td>
+            <td><span class="rz mavi">Birleştirilebilir</span> — YBÜ'nün <code>SA-2609-088</code>
+              talebinde de 10 şişe var. Birleştirme %4 fiyat avantajı sağlıyor.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Talep miktarı "gözden" gelmez:</b> tüketim + eldeki + açık sipariş hesabı
+        ekranda görünür — onaylayan neye onay verdiğini bilir.</span>
+      <span class="sp">Aynı malzemeye ait açık talepler <b>birleştirilir</b>: iki ayrı sipariş hem pahalı hem iki teslimat demek.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================== ONAY ZİNCİRİ ===== -->
+  <div class="pnl" data-s="onay" hidden>
+    <ul class="kontrol">
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>1. Birim sorumlusu</b> — Ecz. N. Arslan · "Kritik stok, tüketim arttı, alternatif yok"</span>
+        <span class="imza">15.09.2026 14:20</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>2. Satınalma</b> — M. Aydın · "Çerçeve anlaşma kapsamında, fiyat sözleşmeli.
+          Açık siparişin gecikmesi tedarikçiye bildirildi."</span>
+        <span class="imza">15.09.2026 16:45</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span><b>3. Başhekim</b> — 50.000 ₺ üstü tıbbi malzeme onayı
+          <span class="rz sari">bekliyor · 3 gündür</span></span>
+        <span class="imza">—</span></li>
+    </ul>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:150px" class="orta">Tutar aralığı</th>
+          <th style="width:230px">Onay basamakları</th>
+          <th>Kural</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik"><td class="orta">≤ 50.000 ₺</td>
+            <td>Birim sorumlusu → Satınalma</td>
+            <td>Bütçe içindeyse ek onay aranmaz</td></tr>
+          <tr class="tik sel"><td class="orta">50.000 – 500.000 ₺</td>
+            <td>+ Başhekim</td>
+            <td>Tıbbi malzeme/ilaçta başhekim; idari malzemede müdür</td></tr>
+          <tr class="tik"><td class="orta">&gt; 500.000 ₺</td>
+            <td>+ Yönetim Kurulu</td>
+            <td>Yatırım niteliğindeki alımlar her tutarda kurula gider</td></tr>
+          <tr class="tik"><td class="orta"><span class="rz kir">Bütçe dışı</span></td>
+            <td>+ Mali İşler + Başhekim</td>
+            <td>Bütçe kalemi aşılmışsa tutar ne olursa olsun ek onay</td></tr>
+          <tr class="tik"><td class="orta"><span class="rz kir">Acil</span></td>
+            <td>Sözlü onay → 24 saat içinde yazılı</td>
+            <td>Hasta güvenliğini etkileyen durumda süreç sonradan tamamlanır</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Onay sırasını sistem kurar, kullanıcı seçmez:</b> tutar, bütçe durumu ve malzeme
+        türü sırayı belirler — "kime gönderelim" sorusu ortadan kalkar.</span>
+      <span class="sp">Acilde onay <b>sonradan</b> tamamlanır ama atlanmaz: 24 saat içinde yazılı onay gelmezse uyarıya düşer.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================= AÇIK TALEPLER ===== -->
+  <div class="pnl" data-s="liste" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Talep no, malzeme ya da birim…</div>
+      <span class="chip on">Açık <b>12</b></span>
+      <span class="chip">Birleştirilebilir <b>3</b></span>
+      <span class="chip">Bütçe dışı <b>2</b></span>
+      <span class="chip">Otomatik <b>5</b></span>
+      <span class="chip">Bu ay kapanan <b>41</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:120px">Talep No</th>
+          <th style="width:110px" class="orta">Tarih</th>
+          <th style="width:220px">Malzeme</th>
+          <th style="width:130px">Birim</th>
+          <th style="width:110px" class="sag">Tutar</th>
+          <th style="width:130px" class="orta">Aşama</th>
+          <th style="width:150px" class="orta">Not</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>SA-2609-074</code></td><td class="orta">15.09</td>
+            <td>İnsan albümini %20 ×40</td><td>Eczane</td>
+            <td class="sag">188.000 ₺</td>
+            <td class="orta"><span class="rz sari">Başhekim</span></td>
+            <td class="orta"><span class="rz mavi">Birleştirilebilir</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SA-2609-088</code></td><td class="orta">16.09</td>
+            <td>İnsan albümini %20 ×10</td><td>YBÜ</td>
+            <td class="sag">47.000 ₺</td>
+            <td class="orta"><span class="rz">Satınalma</span></td>
+            <td class="orta"><span class="rz mavi">SA-074 ile</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SA-2609-077</code></td><td class="orta">16.09</td>
+            <td>Traneksamik asit 500 mg ×100</td><td>Eczane</td>
+            <td class="sag">7.400 ₺</td>
+            <td class="orta"><span class="rz">Satınalma</span></td>
+            <td class="orta"><span class="rz kir">Kritik stok</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SA-2609-079</code></td><td class="orta">15.09</td>
+            <td>O₂/hava karışım bloğu (Hamilton)</td><td>Biyomedikal</td>
+            <td class="sag">74.000 ₺</td>
+            <td class="orta"><span class="rz sari">Başhekim</span></td>
+            <td class="orta"><span class="rz kir">Bütçe dışı</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SA-2609-083</code></td><td class="orta">14.09</td>
+            <td>Ultrason probu (konveks)</td><td>Kadın Doğum</td>
+            <td class="sag">142.000 ₺</td>
+            <td class="orta"><span class="rz">Satınalma</span></td>
+            <td class="orta"><span class="rz sari">Teklif toplanıyor</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SA-2609-085</code></td><td class="orta">10.09</td>
+            <td>Hasta başı monitör ×4</td><td>YBÜ</td>
+            <td class="sag">640.000 ₺</td>
+            <td class="orta"><span class="rz sari">Yönetim Kurulu</span></td>
+            <td class="orta"><span class="rz mavi">Yatırım</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SA-2609-081</code></td><td class="orta">16.09</td>
+            <td>Cerrahi sütür seti (12 kalem)</td><td>Ameliyathane</td>
+            <td class="sag">96.500 ₺</td>
+            <td class="orta"><span class="rz">Satınalma</span></td>
+            <td class="orta"><span class="rz">Planlı</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Birleştirme fırsatı listede görünür:</b> SA-074 ve SA-088 aynı malzeme —
+        tek siparişte %4 daha ucuz, tek teslimat.</span>
+      <span class="sp">Kapanan talep silinmez: hangi talebin hangi siparişe gittiği geriye doğru izlenir.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Süreç:</b> Talep ya bir birimden gelir ya da <b>kendiliğinden doğar</b> (kritik stok, cihaz
+  arızası). Sistem stok yeterliliğini, açık siparişleri ve bütçeyi gösterir; miktar hesabı ekranda
+  görünür — onaylayan neye onay verdiğini bilir. Aynı malzemenin açık talepleri <b>birleştirilir</b>.
+  Onay sırasını tutar, bütçe durumu ve malzeme türü belirler; kullanıcı "kime göndereyim" diye
+  sormaz. Çerçeve anlaşma varsa teklif aşaması atlanır, doğrudan sipariş açılır.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

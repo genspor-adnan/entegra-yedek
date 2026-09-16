@@ -118,6 +118,9 @@ public static partial class KaynakKatalogu
         Ekle(BasvuruHekim());
         Ekle(Kurum());
         Ekle(Departman());
+        Ekle(CalismaSablon());
+        Ekle(FtrDegerlendirme()); Ekle(FtrProgram()); Ekle(FtrSeans()); Ekle(FtrOlcek()); Ekle(FtrUnite());
+        Ekle(CalismaIstisna());
         Ekle(Kampanya());
         Ekle(Kategori());
         Ekle(RadyolojiIstem());
@@ -148,6 +151,25 @@ public static partial class KaynakKatalogu
         Ekle(GozIslemProtokol());
         Ekle(GozCihazMesaj());
         Ekle(GozHastaOzet());
+
+        // DIS KLINIGI (706): hasta listesi (karta giris), planlar, seanslar,
+        //   lab is emirleri, odeme planlari, ayarlar (unit / lab).
+        // MEDULA (707): takipler, hizmet kayitlari, faturalar, donemler, kesintiler, raporlar, kuyruk.
+        Ekle(MedulaTakip());
+        Ekle(MedulaIslem());
+        Ekle(MedulaFatura());
+        Ekle(MedulaDonem());
+        Ekle(MedulaKesinti());
+        Ekle(MedulaRapor());
+        Ekle(MedulaKuyruk());
+
+        Ekle(DisHasta());
+        Ekle(DisPlan());
+        Ekle(DisSeans());
+        Ekle(DisLabIsemri());
+        Ekle(DisOdemePlani());
+        Ekle(DisUnit());
+        Ekle(DisLab());
 
         // YATAN HASTA (695): servis listesi, yatak panosu, order ve doz
         //   kuyrugu. Izlem (vital/sivi/risk) LISTE DEGIL - hep bir hastanin
@@ -269,6 +291,7 @@ public static partial class KaynakKatalogu
         Ekle(NumaraHasta());
         Ekle(NumaraBasvuru());
         Ekle(NumaraHastaBelge());
+        Ekle(NumaraTedarik());
         Ekle(NumaraSatis());
         Ekle(NumaraAlis());
         Ekle(NumaraTahsilat());
@@ -298,6 +321,38 @@ public static partial class KaynakKatalogu
         Ekle(GelenBelge());
         Ekle(StokTransfer());
         Ekle(StokTalep());
+        // Klinik Kalite (711)
+        Ekle(KlinikGosterge());
+        Ekle(KlinikGostergeDonem());
+        Ekle(KlinikGostergeKod());
+        // Ameliyathane (715)
+        Ekle(Ameliyat());
+        Ekle(AmeliyatTalep());
+        Ekle(AmeliyatSalon());
+        // Acil servis (716)
+        Ekle(AcilBasvuru());
+        Ekle(AcilCagri());
+        Ekle(AcilYatak());
+        // Eczane (722)
+        Ekle(EczaneKontrol());
+        Ekle(EczaneDoz());
+        Ekle(EczaneHazirlama());
+        Ekle(EczaneIade());
+        Ekle(EczaneImha());
+        Ekle(KontrolluDefter());
+        Ekle(EczaneMiad());
+        // Biyomedikal (723) - envanterin ERP listesi yukarida `Demirbas()`.
+        Ekle(DemirbasCihaz());
+        Ekle(DemirbasKalibrasyon());
+        Ekle(DemirbasIsEmri());
+        // Satinalma (724)
+        Ekle(SatinalmaTalep());
+        Ekle(SatinalmaTeklif());
+        Ekle(SatinalmaSiparis());
+        Ekle(SatinalmaKabul());
+        Ekle(SatinalmaFatura());
+        Ekle(SatinalmaTedarikci());
+        Ekle(SatinalmaButce());
         Ekle(StokFisi(3));
         Ekle(StokFisi(4));
     }

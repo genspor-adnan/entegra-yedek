@@ -39,6 +39,39 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     menuSira: 10,
   },
   {
+    // CALISMA PLANI (711, mockup hekim_calisma_plani.html): hekim x sube x bolum x
+    //   gun/saat x kanal; haftalik plan sablondan turer, "randevu verilebilir"
+    //   bayraklarinin yerini aldi.
+    kaynak: 'calisma-plani', ozelSayfa: true, baslik: 'Çalışma Planları',
+    yol: 'Randevu › Çalışma Planları',
+    urunModu: 2,
+    menuGrup: 'Randevu', menuAd: 'Çalışma Planları', ic: '🗓', yetkiKodu: 'randevu.plan', menuSira: 20,
+  },
+  {
+    kaynak: 'calisma-sablon', rota: 'calisma-sablon', aksiyonEkrani: 'calisma-sablon-liste', baslik: 'Çalışma Şablonları',
+    yol: 'Randevu › Çalışma Şablonları',
+    kartYolu: '/calisma-sablon', kartBaslik: 'Çalışma Şablonu',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2,
+    menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'Çalışma Şablonları', ic: '📋', yetkiKodu: 'randevu.plan', menuSira: 80,
+  },
+  {
+    kaynak: 'calisma-istisna', rota: 'calisma-istisna', aksiyonEkrani: 'calisma-istisna-liste', baslik: 'İzin & İstisnalar',
+    yol: 'Randevu › İzin & İstisnalar',
+    kartYolu: '/calisma-istisna', kartBaslik: 'Çalışma İstisnası',
+    tarihAlani: 'basTarih',
+    cipler: [
+      { ad: 'Onaylı', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Bekliyor', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2,
+    menuGrup: 'Randevu', menuAltGrup: 'Ayarlar', menuAd: 'İzin & İstisnalar', ic: '🏖', yetkiKodu: 'randevu.plan', menuSira: 85,
+  },
+  {
     // Randevu Ayarlari (243): gun/saat duzeni + Bölümler sekmesi (251).
     kaynak: 'randevu-ayarlar', ozelSayfa: true, baslik: 'Randevu Ayarları',
     yol: 'Randevu › Randevu Ayarları',
@@ -66,7 +99,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     // HASTANIN KENDI YETKISI (684): liste `personel` yetkisine bagliydi -
     //   banko gorevlisine hasta listesi vermek icin personel ozluk kayitlarini
     //   da acmak gerekiyordu, matriste de "Kayit Kabul > Personel" gorunuyordu.
-    menuGrup: 'Kayıt Kabul', menuAd: 'Hasta Listesi', ic: '🏥', yetkiKodu: 'hasta',
+    menuGrup: 'Kayıt Kabul', menuAd: 'Hasta Listesi', ic: '🤕', yetkiKodu: 'hasta',
     menuSira: 10,
     urunModu: 2,
   },
@@ -146,7 +179,7 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     //   her zaman hastadir, "Cari" ERP dilidir.
     kolonBasliklari: { belgeNo: 'Protokol No', odeyenKurumAdi: 'Kurum' },
     urunModu: 2,
-    menuGrup: 'Kayıt Kabul', menuAd: 'Başvurular', ic: '📝', yetkiKodu: 'belge',
+    menuGrup: 'Kayıt Kabul', menuAd: 'Başvurular', ic: '♿', yetkiKodu: 'belge',
     menuSira: 20,
   },
   {

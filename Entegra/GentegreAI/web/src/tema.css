@@ -78,8 +78,10 @@ input, select { font: inherit; color: inherit }
    yeniden kullanildiginda beyaz zeminde okunmaz yazi veriyordu - sekiz
    bilesen bunu inline `style` ile eziyordu. Liste aramasi artik `.ara-kutu`. */
 .ust-ara {
-  flex: 1; max-width: 400px; margin: 0 auto; display: flex; align-items: center; gap: 10px;
-  height: 30px; padding: 0 12px; border: 1px solid rgba(255, 255, 255, .25); border-radius: var(--r);
+  /* Kullanici: "ara/komut yaz'i biraz sola al ve %30 kucult" - ortalama yerine
+     markaya yakin, 400 -> 280px, 30 -> 26px. */
+  flex: 1; max-width: 280px; margin: 0 auto 0 68px; display: flex; align-items: center; gap: 8px;
+  height: 26px; padding: 0 10px; font-size: 12px; border: 1px solid rgba(255, 255, 255, .25); border-radius: var(--r);
   background: rgba(255, 255, 255, .12); color: #dce8f6; cursor: pointer;
 }
 .ust-ara:hover { background: rgba(255, 255, 255, .2) }
@@ -175,7 +177,26 @@ input, select { font: inherit; color: inherit }
 .mi:hover { background: var(--satiralt) }
 .mi.on { background: var(--mor2); color: var(--mor); font-weight: 700 }
 .mi .ic { font-size: 14px; width: 18px; text-align: center }
+.ic-hilal { display: inline-flex; align-items: center; justify-content: center }
 .mi .rz { margin-left: auto; font-size: 10px; color: var(--soluk) }
+/* MENU BOLGESI (V2, kabuk/menuBolgeleri.ts): HBYS gruplarinin ustundeki renkli
+   baslik; tiklaninca bolge acilir, otekiler kapanir. Ekran ACMAZ. */
+.mn-bolge {
+  display: flex; align-items: center; gap: 7px; width: 100%; border: 0; background: transparent;
+  cursor: pointer; text-align: left; margin-top: 6px; padding: 8px 8px 4px;
+  border-top: 1px solid var(--cizgi); font-size: 10px; letter-spacing: .5px;
+  text-transform: uppercase; font-weight: 700; color: var(--soluk);
+}
+.mn-bolge:hover { color: var(--yazi2) }
+.mn-bolge i { width: 8px; height: 8px; border-radius: 2px; flex: none }
+.mn-bolge .rz { margin-left: auto; font-size: 10px }
+.mn-diger { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 11px }
+/* CALISMA ALANI secici (menu V2): sol menude Ana Sayfa'nin altinda kucuk select. */
+.mn-alan { padding-top: 3px; padding-bottom: 3px }
+.mn-alan select {
+  flex: 1; min-width: 0; height: 22px; font-size: 11.5px; padding: 0 4px;
+  border: 1px solid var(--cizgi); border-radius: 3px; background: var(--zem); color: var(--yazi2);
+}
 
 /* ------------------------------------------------------- ana calisma ---- */
 .ana { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--zem) }
@@ -183,6 +204,7 @@ input, select { font: inherit; color: inherit }
 .basrow { display: flex; align-items: center; gap: 9px; flex-wrap: wrap }
 .basrow h1 { margin: 0; font-size: 17px; font-weight: 700; color: var(--yazi2); line-height: 1.15 }
 .basrow .yol { font-size: 11px; color: var(--soluk) }
+.basrow .geri-dugme { padding: 3px 9px; font-size: 12px }
 .basrow .sag { margin-left: auto; display: flex; align-items: center; gap: 6px }
 
 .d {
@@ -1357,6 +1379,13 @@ input.skt-gecmis {
 .hata-metin { color: var(--hata) }
 /* Marka (logo + ad) ana sayfaya goturur - imlec bunu belli etsin. */
 .marka-bag { cursor: pointer }
+/* Sube markasi (ust serit, combo yerine): urun markasiyla ayni gorunum */
+.sube-marka-kap { position: relative; flex: 1; display: flex; justify-content: center; min-width: 0 }
+.sube-marka { font-size: 13px; max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.sube-marka .lg img { height: 26px; max-width: 80px; object-fit: contain; background: #fff; border-radius: 3px; padding: 1px }
+.sube-marka .sube-harf { display: inline-flex; width: 26px; height: 26px; border-radius: 6px; background: rgba(255,255,255,.18); align-items: center; justify-content: center; font-size: 13px }
+.sube-marka .sube-ok { font-size: 10px; opacity: .8; margin-left: 2px }
+.sube-menu { min-width: 200px; left: 50%; right: auto; transform: translateX(-50%) }
 .marka-bag:hover { opacity: .85 }
 
 /* ---------------------------------------------------- Numaralama (152) ---- */
@@ -4596,11 +4625,18 @@ button.dikte-alan:hover { background: var(--serit1) }
    mockup'taki kısa adlar (.r, .grp, .gb, .inp) temanın genel sınıflarıyla
    çakışırdı (446 dersi). */
 .ds-sahne { padding-top: 0 }
+.ds-kagov { padding: 0 }
+.ds-kabas-yol { font-size: 11px; font-weight: 400; opacity: .8 }
+.ds-kart-arac { position: sticky; top: 0; z-index: 2 }
 .ds-hdr { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px 14px; padding: 10px 0; }
 .ds-hdr label { display: block; font-size: 10.5px; color: var(--soluk); margin-bottom: 2px }
 .ds-inp { border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz); min-height: 24px; padding: 3px 7px;
   font-size: 11.5px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap }
 .ds-inp.big { font-weight: 700; font-size: 12.5px }
+.ds-uyari-ekle { margin-left: auto; display: inline-flex; gap: 3px }
+.ds-anamnez { margin-top: 4px; padding: 6px; border: 1px solid var(--cizgi2); border-radius: 4px; background: var(--yuz2) }
+.ds-anamnez label { display: inline-flex; align-items: center; gap: 4px; font-size: 11px }
+.ds-uyari-ekle .d.mini { padding: 0 5px; height: 18px; font-size: 10.5px }
 .ds-odo-alan { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 0; border: 1px solid var(--cizgi); border-top: none; background: var(--yuz) }
 .ds-sol { border-right: 1px solid var(--cizgi2); min-width: 0 }
 .ds-sag { padding: 10px; display: flex; flex-direction: column; gap: 10px }
@@ -4643,6 +4679,85 @@ button.dikte-alan:hover { background: var(--serit1) }
 .ds-ozet6 span { display: block; font-size: 10px; color: var(--soluk) }
 .ds-ozet6 b { font-size: 14px; color: var(--yazi2) }
 .ds-ozet6 i { display: block; font-style: normal; font-size: 10.5px; color: var(--soluk) }
+.ds-ok { color: var(--ok) }
+/* Plan karti (710): yasam dongusu seridi, 5 kolonlu baslik, proforma onizleme */
+.ds-adim { display: flex; padding: 6px 10px 0; flex-wrap: wrap }
+.ds-adim span { padding: 4px 12px; border: 1px solid var(--cizgi); background: var(--yuz); font-size: 11px; color: var(--soluk) }
+.ds-adim span + span { border-left: none }
+.ds-adim span.ok { background: var(--okzem, #e2f3e8); color: var(--ok) }
+.ds-adim span.on { background: var(--vurgu); color: #fff; border-color: var(--vurgu); font-weight: 700 }
+.ds-adim span.on.hata { background: var(--hata); border-color: var(--hata) }
+.ds-hdr.ds-hdr5 { grid-template-columns: repeat(5, 1fr) }
+/* Calisma plani (711) - mockup hekim_calisma_plani.html */
+.cp-sayfa { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 8px }
+.cp-arac { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; padding: 6px 8px; background: var(--yuz2); border: 1px solid var(--cizgi2); border-radius: var(--r) }
+.cp-plan { display: grid; grid-template-columns: 180px repeat(7, minmax(120px, 1fr)); border: 1px solid var(--cizgi2); border-radius: var(--r); overflow: auto; background: var(--yuz) }
+.cp-plan > div { border-bottom: 1px solid var(--cizgi2); border-right: 1px solid var(--cizgi2); padding: 5px 6px; font-size: 11px; min-height: 52px }
+.cp-plan .cp-hb { background: var(--yuz2); font-weight: 700; color: var(--yazi2); min-height: auto; padding: 6px 8px; position: sticky; top: 0 }
+.cp-plan .cp-hb.bugun { color: var(--vurgu) }
+.cp-plan .cp-hk { background: var(--yuz2); font-weight: 700; color: var(--yazi2); position: sticky; left: 0 }
+.cp-plan .cp-hk small { display: block; font-weight: 400; color: var(--soluk) }
+.cp-blok { border-radius: 3px; padding: 2px 5px; margin: 1px 0; font-size: 10.5px; border: 1px solid #cfe0f5; background: #eef4fc; color: #1f4c85; white-space: nowrap; cursor: pointer }
+.cp-blok.ist { background: #e2f3e8; color: #2e7d46; border-color: #bfe3cb }
+.cp-blok.kapali { background: #fbe9e7; color: #b3261e; border-color: #f3c4bf }
+.cp-blok.bos { background: var(--yuz2); color: var(--soluk); border-style: dashed; cursor: default }
+.cp-blok .k { opacity: .75; margin-left: 4px }
+.cp-lej { display: flex; gap: 12px; font-size: 10.5px; color: var(--soluk); flex-wrap: wrap; padding: 0 4px }
+.cp-lej i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 3px }
+.cp-ikili { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 8px; align-items: start }
+/* FTR (719): VAS secici, kabin panosu */
+.ft-vas { display: flex; gap: 2px; align-items: center; flex-wrap: wrap }
+.ft-vas i { width: 20px; height: 18px; border: 1px solid var(--cizgi); font-size: 10px; text-align: center; line-height: 18px; font-style: normal; border-radius: 3px; cursor: pointer; background: var(--yuz) }
+.ft-vas i.sec { background: var(--hata); color: #fff; border-color: var(--hata) }
+.ft-kabinler { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px }
+.ft-kb { border: 1px solid var(--cizgi2); border-radius: 5px; background: var(--yuz); padding: 8px; font-size: 11px; min-height: 110px }
+.ft-kb.dolu { border-top: 3px solid var(--vurgu) } .ft-kb.bos { border-top: 3px solid var(--ok) } .ft-kb.bekle { border-top: 3px solid #d9a12b } .ft-kb.bakim { border-top: 3px solid var(--hata); opacity: .7 }
+.ft-kbh { display: flex; align-items: center; gap: 6px; font-weight: 700; color: var(--yazi2); border-bottom: 1px solid var(--cizgi2); padding-bottom: 4px; margin-bottom: 6px }
+.ft-sayac { margin-left: auto; font-family: Consolas, monospace; color: var(--vurgu) }
+.ft-kart { border: 1px solid var(--cizgi2); border-radius: 4px; padding: 5px 7px; margin-top: 4px; cursor: pointer; background: var(--yuz2) }
+.ft-kart-bekle { background: #fdf6e3 }
+/* Lab kanban (711) - mockup dis_lab_kanban.html */
+.ds-kb-sayfa { display: flex; flex-direction: column; min-height: 0 }
+.ds-kb-lej { display: flex; gap: 12px; padding: 4px 10px; font-size: 10.5px; color: var(--soluk); flex-wrap: wrap }
+.ds-kb-lej i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 3px }
+.ds-kb-ikili { display: grid; grid-template-columns: minmax(0, 1fr) 320px; align-items: start }
+.ds-kb-detay { border-left: 1px solid var(--cizgi2); background: var(--yuz); display: flex; flex-direction: column; gap: 8px; padding: 8px }
+.ds-kb { display: grid; grid-template-columns: repeat(6, minmax(128px, 1fr)); gap: 8px; padding: 8px 10px; overflow-x: auto; background: var(--yuz2) }
+.ds-kb-kol { background: var(--yuz3, #e9eef4); border: 1px solid var(--cizgi2); border-radius: 5px; display: flex; flex-direction: column; min-height: 380px }
+.ds-kb-kol.hedef { outline: 2px dashed var(--vurgu); outline-offset: -2px }
+.ds-kb-bas { padding: 6px 8px; font-weight: 700; font-size: 11.5px; color: var(--yazi2); border-bottom: 1px solid var(--cizgi2); display: flex; align-items: center; gap: 6px; background: var(--yuz2); border-radius: 5px 5px 0 0; flex-wrap: wrap }
+.ds-kb-top { font-size: 10px; color: var(--soluk); font-weight: 400 }
+.ds-kb-say { margin-left: auto; background: var(--yuz); border: 1px solid var(--cizgi); border-radius: 9px; padding: 0 7px; font-size: 10.5px; color: var(--soluk) }
+.ds-kb-kol.olcu { border-top: 3px solid #9aa9b8 } .ds-kb-kol.labda { border-top: 3px solid #2f6db3 } .ds-kb-kol.tasarim { border-top: 3px solid #6a3fb5 }
+.ds-kb-kol.geldi { border-top: 3px solid #d9a12b } .ds-kb-kol.duzelt { border-top: 3px solid #c0392b } .ds-kb-kol.teslim { border-top: 3px solid #3f9a5e }
+.ds-kb-govde { padding: 6px; display: flex; flex-direction: column; gap: 6px; flex: 1 }
+.ds-kb-kart { background: var(--yuz); border: 1px solid var(--cizgi); border-radius: 4px; padding: 6px 8px; font-size: 11px; box-shadow: 0 1px 2px rgba(20,40,70,.08); cursor: grab }
+.ds-kb-kart.sel { outline: 2px solid var(--vurgu); background: var(--sec) }
+.ds-kb-kart.gec { border-left: 4px solid var(--hata) }
+.ds-kb-kart.yakin { border-left: 4px solid #d9a12b }
+.ds-kb-no { font-weight: 700; color: var(--yazi2); display: flex; gap: 6px; align-items: center }
+.ds-kb-no .rozet { margin-left: auto }
+.ds-kb-hasta { font-weight: 700; margin-top: 2px }
+.ds-kb-is { color: var(--yazi2) }
+.ds-kb-alt { display: flex; gap: 6px; align-items: center; margin-top: 4px; color: var(--soluk); font-size: 10.5px; flex-wrap: wrap }
+.ds-kb-bar { flex: 1; min-width: 50px; margin: 0 }
+.ds-kb-bar i { background: var(--vurgu) }
+.ds-kb-bar.k i { background: var(--hata) } .ds-kb-bar.s i { background: #d9a12b } .ds-kb-bar.o i { background: var(--ok) }
+.ds-kb-tag { display: inline-block; border-radius: 3px; padding: 0 5px; background: var(--yuz2); border: 1px solid var(--cizgi2); font-size: 10px; color: var(--soluk) }
+.ds-kb-tag.lab { background: #eef4fc; color: #2f6db3; border-color: #cfe0f5 }
+.ds-kb-tag.rnd { background: #fdf6e3; color: #8a6218; border-color: #f2ddbf }
+.ds-kb-tag.kk { background: #e2f3e8; color: #2e7d46; border-color: #bfe3cb }
+.ds-kb-ekle { border: 1px dashed var(--cizgi); border-radius: 4px; padding: 5px; text-align: center; color: var(--soluk); font-size: 10.5px; background: var(--yuz) }
+.ds-kb-asamalar { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px }
+.ds-kb-asamalar .d { justify-content: flex-start; text-align: left; white-space: normal }
+.ds-kb-liste { list-style: none; margin: 0; padding: 0 }
+.ds-kb-liste li { padding: 5px 10px; border-bottom: 1px solid var(--cizgi2); font-size: 11px }
+.ds-kb-kulvar .ds-kb-swim { display: grid; grid-template-columns: 150px minmax(0, 1fr); border-top: 1px solid var(--cizgi2) }
+.ds-kb-lab { padding: 8px; font-size: 11px; background: var(--yuz2); border-right: 1px solid var(--cizgi2) }
+.ds-kb-kisa { grid-template-columns: repeat(6, minmax(130px, 1fr)); padding: 6px 8px; background: var(--yuz) }
+.ds-kb-kol.ds-kb-kol-kisa { min-height: 60px }
+.ds-proforma { font-family: Consolas, monospace; font-size: 10.5px; margin: 0; padding: 8px 10px; white-space: pre; overflow: auto; background: var(--yuz); color: var(--yazi) }
+@media print { .ds-proforma { font-size: 11px } }
 .ds-bar { height: 7px; background: var(--cizgi2); border-radius: 4px; margin: 0 10px; overflow: hidden }
 .ds-bar i { display: block; height: 100%; background: var(--mor) }
 .ds-palet { display: flex; gap: 5px; flex-wrap: wrap; padding: 8px 10px }
@@ -4690,3 +4805,145 @@ button.dikte-alan:hover { background: var(--serit1) }
 .ds-sure i { display: block; height: 100%; background: var(--mor) }
 .ds-sure.gec i { background: var(--hata) }
 @media (max-width: 1100px) { .ds-odo-alan { grid-template-columns: 1fr } .ds-sol { border-right: none } .ds-hdr { grid-template-columns: 1fr 1fr } .ds-ozet6 { grid-template-columns: repeat(3, 1fr) } }
+
+/* ========================================================== MEDULA (707) ====
+   Hasta kabul, hizmet kaydi, fatura & donem, kuyruk sayfalari. Kendi on eki (md-). */
+.md-sahne { padding-top: 6px }
+.md-adim { display: flex; flex-wrap: wrap; margin-bottom: 8px }
+.md-adim span { padding: 4px 12px; border: 1px solid var(--cizgi); background: var(--yuz); font-size: 11px; color: var(--soluk) }
+.md-adim span + span { border-left: none }
+.md-adim span.on { background: var(--mor); color: #fff; border-color: var(--mor); font-weight: 700 }
+.md-adim span.ok { background: var(--okzem); color: var(--ok); border-color: var(--okkenar) }
+.md-hdr { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px 14px; padding: 8px 0 }
+.md-hdr.k2 { grid-template-columns: 1fr 1fr; padding: 8px 10px }
+.md-hdr label { display: block; font-size: 10.5px; color: var(--soluk); margin-bottom: 2px }
+.md-hdr select, .md-hdr input { width: 100% }
+.md-inp { border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz2); min-height: 24px; padding: 3px 7px; font-size: 11.5px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap }
+.md-inp.err { border-color: var(--hata); background: var(--hatazem) }
+.md-sonuc { border: 1px solid var(--okkenar); background: var(--okzem); border-radius: 4px; padding: 8px 10px; font-size: 11.5px; margin: 6px 0 }
+.md-sonuc.kir { border-color: var(--hatakenar); background: var(--hatazem) }
+.md-sonuc.sari { border-color: var(--uyarikenar); background: var(--uyarizem) }
+.md-ozet { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; padding: 6px 0 8px }
+.md-ozet > div { border: 1px solid var(--cizgi2); border-radius: var(--r); padding: 7px 10px; background: var(--yuz) }
+.md-ozet > div > span { display: block; font-size: 10px; color: var(--soluk) }
+.md-ozet > div > b { font-size: 16px; color: var(--yazi2); display: block }
+.md-ozet > div > i { display: block; font-style: normal; font-size: 10.5px; color: var(--soluk) }
+.md-ozet > div.kir > b { color: var(--hata) } .md-ozet > div.ok > b { color: var(--ok) }
+.md-iki { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px }
+.md-grp { border: 1px solid var(--cizgi2); border-radius: var(--r); background: var(--yuz); overflow: hidden; margin-top: 8px }
+.md-gb { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--yuz2); border-bottom: 1px solid var(--cizgi2); font-size: 11.5px; font-weight: 700; color: var(--yazi2) }
+.md-sp { margin-left: auto; font-weight: 400 }
+.md-ic { padding: 8px 10px; font-size: 11.5px }
+.md-arac { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; padding: 6px 10px; background: var(--yuz2); border-top: 1px solid var(--cizgi2) }
+.md-dg { overflow-x: auto; background: var(--yuz) }
+.md-dg table { border-collapse: collapse; width: 100% }
+.md-dg th { background: var(--yuz2); border-bottom: 1px solid var(--cizgi); border-right: 1px solid var(--cizgi2); text-align: left; padding: 5px 8px; font-size: 11px; color: var(--yazi2); font-weight: 700; white-space: nowrap }
+.md-dg td { border-bottom: 1px solid var(--cizgi2); border-right: 1px solid var(--cizgi2); padding: 4px 8px; font-size: 11.5px; white-space: nowrap }
+.md-dg tr.sel td { background: var(--sec) } .md-dg tr.grup td { background: var(--toplamzem); font-weight: 700 }
+.md-dg tr.md-hata td { background: var(--hatazem) }
+.md-dg .sag { text-align: right } .md-dg .orta { text-align: center }
+.md-satir-arac { display: flex; gap: 3px } .md-satir-arac .d { padding: 1px 6px; font-size: 11px }
+.md-kir { color: var(--hata) !important }
+.md-liste { list-style: none; margin: 0; padding: 0 } .md-liste li { padding: 6px 10px; border-bottom: 1px solid var(--cizgi2); font-size: 11.5px; display: flex; gap: 6px; align-items: center }
+.md-xml { font-family: Consolas, monospace; font-size: 10.5px; background: #1f2d3a; color: #d7e3f2; padding: 8px 10px; margin: 0; white-space: pre-wrap; max-height: 320px; overflow: auto }
+.md-bar { height: 8px; background: var(--cizgi2); border-radius: 4px; overflow: hidden; min-width: 70px } .md-bar i { display: block; height: 100%; background: var(--ok) }
+@media (max-width: 1100px) { .md-iki { grid-template-columns: 1fr } .md-ozet { grid-template-columns: repeat(3, 1fr) } .md-hdr { grid-template-columns: 1fr 1fr } }
+
+/* ================================================== ODA x SAAT CIZELGESI ==
+   Ameliyathane masa cizelgesi (719 ucu, mockup ameliyat_plani.html).
+
+   BLOKLAR YUZDEYLE KONUMLANIR, hucreye oturmaz: gercek vaka 08:10-09:55
+   suruyor, saat kutusuna yuvarlamak cizelgenin tek isini (bosluk gostermek)
+   bozardi. Serit bir konumlandirma baglami; saat cizgileri de ayni yuzde
+   olceginde duruyor ki blokla hizalansinlar. */
+.cz-sayfa { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 8px }
+.cz-ozet { display: flex; gap: 8px; flex-wrap: wrap }
+.cz-ozet .kutu {
+  flex: 1 1 130px; border: 1px solid var(--cizgi2); border-radius: var(--r);
+  background: var(--yuz); padding: 6px 10px; display: flex; flex-direction: column; gap: 2px;
+}
+.cz-ozet .kutu b { font-size: 10.5px; color: var(--soluk); font-weight: 600 }
+.cz-ozet .kutu span { font-size: 18px; font-weight: 700; color: var(--yazi2) }
+.cz-ozet .kutu small { font-size: 10px; color: var(--soluk); font-weight: 400; margin-left: 5px }
+.cz-ozet .kutu.ok span { color: var(--ok) }
+.cz-ozet .kutu.sari span { color: var(--uyari) }
+.cz-ozet .kutu.kir span { color: var(--hata) }
+
+.cz-ikili { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 8px; align-items: start }
+.cz-tablo {
+  border: 1px solid var(--cizgi2); border-radius: var(--r);
+  background: var(--yuz); overflow: hidden;
+}
+.cz-bas, .cz-satir { display: grid; grid-template-columns: 190px minmax(0, 1fr) }
+.cz-bas { background: var(--yuz2); border-bottom: 1px solid var(--cizgi2) }
+/* Baslik hucresi AYRI SINIF: oda hucresini kap icinde yeniden tanimlasaydik
+   ayni ad hem global gorunum kurali hem kap-icinde-tanimli ad olurdu -
+   temaSinifCakismasi testinin "iki anlamli ad" kurali bunu yasaklar. Baslik
+   zaten bir oda hucresi degil, sutun basligidir.
+   (Not: o test CSS'i yorumlari AYIKLAMADAN tariyor - yorum icinde kap'li bir
+   secici yazmak da testi kirar.) */
+.cz-basoda {
+  border-right: 1px solid var(--cizgi2); padding: 6px 8px;
+  font-weight: 700; color: var(--yazi2); font-size: 11px;
+}
+.cz-bas .cz-serit { height: 24px }
+.cz-satir { border-bottom: 1px solid var(--cizgi2) }
+.cz-satir:last-child { border-bottom: 0 }
+.cz-oda {
+  border-right: 1px solid var(--cizgi2); padding: 6px 8px; font-size: 11px;
+  display: flex; flex-direction: column; gap: 2px; background: var(--yuz2);
+}
+.cz-oda b { font-size: 11.5px; color: var(--yazi2) }
+.cz-oda span { font-size: 10px; color: var(--soluk) }
+.cz-oda .rozet { align-self: flex-start; font-size: 9.5px; padding: 1px 6px }
+
+/* Serit: bloklarin ve saat cizgilerinin ortak yuzde olcegi. */
+.cz-serit { position: relative; min-height: 52px }
+.cz-saat {
+  position: absolute; top: 0; height: 100%; font-size: 10px; color: var(--soluk);
+  padding: 4px 0 0 4px; border-left: 1px solid var(--cizgi2); box-sizing: border-box;
+}
+.cz-cizgi { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--cizgi2) }
+/* SU AN cizgisi yalniz bugun cizilir - gecmis gunde "simdi" anlamsiz. */
+.cz-simdi { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--hata); opacity: .55; z-index: 3 }
+.cz-bos {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 10.5px; color: var(--soluk);
+}
+
+.cz-blok {
+  position: absolute; top: 4px; bottom: 4px; z-index: 2; overflow: hidden;
+  border-radius: 3px; padding: 3px 6px; cursor: pointer; box-sizing: border-box;
+  border: 1px solid #cfe0f5; background: #eef4fc; color: #1f4c85;
+  display: flex; flex-direction: column; justify-content: center; gap: 1px;
+}
+.cz-blok b { font-size: 10.5px; font-weight: 700; white-space: nowrap; text-overflow: ellipsis; overflow: hidden }
+.cz-blok span { font-size: 9.5px; opacity: .85; white-space: nowrap; text-overflow: ellipsis; overflow: hidden }
+.cz-blok:hover { filter: brightness(.97) }
+.cz-blok.sel { outline: 2px solid var(--vurgu); outline-offset: -2px }
+.cz-blok.hazirlik { background: #fff6e5; border-color: #f0dcb4; color: #8a6412 }
+.cz-blok.suruyor  { background: #e2f3e8; border-color: #bfe3cb; color: #2e7d46 }
+.cz-blok.kapanis  { background: #e8f0e2; border-color: #cbe0bf; color: #4a6b2e }
+.cz-blok.bitti    { background: var(--yuz2); border-color: var(--cizgi2); color: var(--soluk) }
+.cz-blok.iptal    { background: #f7f7f8; border-color: var(--cizgi2); color: var(--soluk); text-decoration: line-through }
+/* GECIKME DURUMDAN AYRI ISARET: suren bir vaka da gecikmeli olabilir, ikisini
+   tek renge indirgemek birini gizlerdi. Sol kenarda kirmizi seritle. */
+.cz-blok.gec { box-shadow: inset 3px 0 0 var(--hata) }
+.cz-bayrak {
+  font-style: normal; font-size: 9px; align-self: flex-start;
+  background: #e3ecfa; color: #2f5c9e; border-radius: 6px; padding: 0 5px;
+}
+
+.cz-lej { display: flex; gap: 10px; flex-wrap: wrap; font-size: 10.5px; color: var(--soluk) }
+.cz-lej i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 3px; border: 1px solid #cfe0f5; background: #eef4fc }
+.cz-lej i.hazirlik { background: #fff6e5; border-color: #f0dcb4 }
+.cz-lej i.suruyor  { background: #e2f3e8; border-color: #bfe3cb }
+.cz-lej i.kapanis  { background: #e8f0e2; border-color: #cbe0bf }
+.cz-lej i.bitti    { background: var(--yuz2); border-color: var(--cizgi2) }
+.cz-lej i.iptal    { background: #f7f7f8; border-color: var(--cizgi2) }
+.cz-lej i.gec      { background: #fff; box-shadow: inset 3px 0 0 var(--hata) }
+
+@media (max-width: 1200px) {
+  .cz-ikili { grid-template-columns: minmax(0, 1fr) }
+  .cz-bas, .cz-satir { grid-template-columns: 140px minmax(0, 1fr) }
+}

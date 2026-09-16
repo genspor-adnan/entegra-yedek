@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hastane Menü Düzeni V2 — Mockup (GenoTIP AI · Medula)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .btn.mini{padding:2px 7px;font-size:10.5px;display:inline-flex}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg td code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)} .hdr.k5{grid-template-columns:repeat(5,1fr)} .hdr.k6{grid-template-columns:repeat(6,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.err{border-color:#c0392b;background:#fff6f5}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .kart.kir .d{color:var(--kirmizi)} .kart.ok .d{color:var(--ok)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)} .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)} .bar.k i{background:linear-gradient(#e06a5e,#c0392b)}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:300px 1fr 320px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .sonuc{margin:10px 12px;border:1px solid #bfe3cb;background:#eef9f1;border-radius:4px;padding:8px 10px;font-size:11.5px}
+  .sonuc.kir{border-color:#f3c4bf;background:#fdf1ef}
+  .sonuc.sari{border-color:#f2ddbf;background:#fdf8ec}
+  .sonuc b{color:var(--navy)}
+  .xml{font-family:Consolas,monospace;font-size:10.5px;background:#1f2d3a;color:#d7e3f2;padding:8px 10px;border-radius:3px;white-space:pre;overflow:auto;margin:0 12px 10px;line-height:1.5}
+  .adim{display:flex;gap:0;padding:8px 12px;flex-wrap:wrap}
+  .adim span{padding:5px 12px;border:1px solid var(--line);background:#fff;font-size:11px;color:var(--muted);position:relative}
+  .adim span+span{border-left:none}
+  .adim span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .adim span.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .icerik{padding:12px 16px;line-height:1.6}
+  .icerik h2{font-size:14px;color:var(--navy);margin:16px 0 6px;border-bottom:1px solid var(--line2);padding-bottom:3px}
+  .icerik h3{font-size:12.5px;color:#2c4a6b;margin:12px 0 4px}
+  .icerik p{margin:4px 0}
+  .icerik table{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:11.5px}
+  .icerik th,.icerik td{border:1px solid var(--line2);padding:4px 7px;text-align:left;vertical-align:top}
+  .icerik th{background:#f4f7fb;color:#3a5573;white-space:nowrap}
+  .icerik code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .kutu{border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;padding:8px 10px;margin:8px 0}
+  .yatay{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:6px 12px}
+</style>
+</head>
+<body>
+
+<style>
+  .duz{display:grid;grid-template-columns:270px 1fr;min-height:640px}
+  .sol{background:#f4f6f9;border-right:1px solid var(--line2);padding:6px 0;font-size:12px}
+  .mi{display:flex;align-items:center;gap:8px;padding:6px 12px;color:#2b3a4a;cursor:default}
+  .mi .ik{width:18px;text-align:center}
+  .mi .rz{margin-left:auto;font-size:10px;color:var(--muted)}
+  .ic ul{margin:0;padding-left:18px;line-height:1.7;text-align:left}.ic p{margin:4px 0}.ic{text-align:left}
+  .mi.on{background:#dbe7f7;color:#1c4374;font-weight:bold}
+  .duz .mi,.duz .mod{line-height:1.3}
+  .kar2 table{width:100%;table-layout:fixed}.kar2 td,.kar2 th{text-align:left;white-space:normal;vertical-align:top}.kar2 td:first-child{width:200px}.kar2 td:nth-child(2){width:120px}.kar2 td:nth-child(3){width:230px}
+  .zon{display:flex;align-items:center;gap:8px;padding:9px 12px 4px;font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:#6b7a8b;font-weight:bold;border-top:1px solid var(--line2);margin-top:4px}
+  .zon i{width:8px;height:8px;border-radius:2px;display:inline-block}
+  .mod{display:flex;align-items:center;gap:8px;padding:6px 12px 6px 14px;font-weight:bold;color:#1c4374;cursor:default}
+  .mod .ok{margin-left:auto;color:var(--muted);font-size:10px}
+  .alt .mi{padding-left:38px;font-weight:normal}
+  .alt .mi.kucuk{padding-left:52px;color:#4d5d6e;font-size:11.5px}
+  .sag{padding:0}
+  .kar{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .kar>div{padding:8px 12px;border-right:1px solid var(--line2)}
+  .kar>div:last-child{border-right:none}
+  .kar ul{margin:0;padding-left:16px;line-height:1.7}
+  .z1{background:#2f6db3}.z2{background:#3f9a5e}.z3{background:#6a3fb5}.z4{background:#c0392b}.z5{background:#d9a12b}.z6{background:#1c8b8b}.z7{background:#6b7a8b}
+  .rolbar{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line2);background:#fff}
+  .persona{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px 12px}
+  .persona .grp{margin:0}
+</style>
+
+<div class="win">
+  <div class="title">🧭 Hastane Menü Düzeni — V2 <span class="sp">7 bölge · 22 modül · 2 seviye · rol/kurum tipine göre daralan sol menü · GenoTIP AI</span></div>
+  <div class="rolbar"><span class="sonuk">Çalışma alanı:</span><span class="chip on">Tümü (yönetici)</span><span class="chip">Banko</span><span class="chip">Hekim</span><span class="chip">Hemşire</span><span class="chip">Lab / Görüntüleme</span><span class="chip">Muhasebe</span><span class="sp"></span><span class="sonuk">Kurum tipi: Hastane · kapalı modül çizilmez (kurum profili)</span></div>
+  <div class="duz">
+    
+<div class="sol">
+  <div class="mi on"><span class="ik">🏠</span>Ana Sayfa</div>
+  <div class="mi"><span class="ik">⭐</span>Favori<span class="rz">3</span></div>
+  <div class="mi"><span class="ik">🕓</span>En Son<span class="rz">5</span></div>
+  <div class="zon"><i class="z1"></i>1 · Hasta Akışı</div>
+  <div class="mod"><span class="ik">📅</span>Randevu<span class="ok">▾</span></div><div class="alt"><div class="mi"><span class="ik">📅</span>Randevular<span class="rz"></span></div><div class="mi"><span class="ik">🗓</span>Çalışma Planları<span class="rz"></span></div><div class="mi"><span class="ik">⚙️</span>Randevu Ayarları<span class="rz">ayar</span></div></div>
+  <div class="mod"><span class="ik">🚑</span>Kayıt Kabul<span class="ok">▾</span></div><div class="alt"><div class="mi"><span class="ik">🤕</span>Hasta Listesi<span class="rz"></span></div><div class="mi"><span class="ik">♿</span>Başvurular<span class="rz"></span></div><div class="mi"><span class="ik">🪪</span>Provizyon / Medula Kabul<span class="rz"></span></div><div class="mi"><span class="ik">💵</span>Vezne<span class="rz"></span></div><div class="mi"><span class="ik">✅</span>İskonto Onayı<span class="rz"></span></div></div>
+  <div class="mod"><span class="ik">🚨</span>Acil<span class="ok">▸</span></div>
+  <div class="zon"><i class="z2"></i>2 · Klinikler</div>
+  <div class="mod"><span class="ik">🩺</span>Poliklinik (Muayene)<span class="ok">▾</span></div><div class="alt"><div class="mi"><span class="ik">🩺</span>Muayeneler<span class="rz"></span></div><div class="mi"><span class="ik">📖</span>Tıbbi Özet<span class="rz"></span></div><div class="mi"><span class="ik">💊</span>Reçete / Rapor<span class="rz"></span></div><div class="mi"><span class="ik">📝</span>Şablonlar<span class="rz">ayar</span></div></div>
+  <div class="mod"><span class="ik">👁️</span>Göz<span class="ok">▸</span></div>
+  <div class="mod"><span class="ik">🦷</span>Diş<span class="ok">▸</span></div>
+  <div class="mod"><span class="ik">🏃</span>FTR<span class="ok">▸</span></div>
+  <div class="zon"><i class="z3"></i>3 · Tanı & Tetkik</div>
+  <div class="mod"><span class="ik">🧪</span>Laboratuvar<span class="ok">▸</span></div>
+  <div class="mod"><span class="ik">☢️</span>Radyoloji<span class="ok">▸</span></div>
+  <div class="zon"><i class="z4"></i>4 · Yatan & Cerrahi</div>
+  <div class="mod"><span class="ik">🛏️</span>Yatan Hasta<span class="ok">▸</span></div>
+  <div class="mod"><span class="ik">🛠</span>Ameliyathane<span class="ok">▸</span></div>
+  <div class="zon"><i class="z5"></i>5 · Ödeyen & Fatura</div>
+  <div class="mod"><span class="ik">🏛️</span>Medula (SGK)<span class="ok">▸</span></div>
+  <div class="mod"><span class="ik">🏛</span>Kurumlar & Sigorta<span class="ok">▸</span></div>
+  <div class="mod"><span class="ik">💓</span>e-Nabız / USBS<span class="ok">▸</span></div>
+  <div class="zon"><i class="z6"></i>6 · Finans & Tedarik</div>
+  <div class="mod"><span class="ik">💵</span>Finans<span class="ok">▸</span></div>
+  <div class="mod"><span class="ik">⚖️</span>Muhasebe<span class="ok">▸</span></div>
+  <div class="mod"><span class="ik">📦</span>Stok & Hizmet<span class="ok">▸</span></div>
+  <div class="mod"><span class="ik">🤝</span>Cari & CRM<span class="ok">▸</span></div>
+  <div class="zon"><i class="z7"></i>7 · Yönetim</div>
+  <div class="mod"><span class="ik">👥</span>İK & Prim<span class="ok">▸</span></div>
+  <div class="mod"><span class="ik">🏅</span>Kalite<span class="ok">▸</span></div>
+  <div class="mod"><span class="ik">📁</span>Doküman<span class="ok">▸</span></div>
+  <div class="mod"><span class="ik">🖥️</span>Demirbaş<span class="ok">▸</span></div>
+  <div class="mod"><span class="ik">⚙️</span>Yönetim<span class="ok">▸</span></div>
+</div>
+
+    <div class="sag">
+      <div class="sekmeler"><div class="sekme on">Neden V2</div><div class="sekme">V1 → V2 Karşılaştırma</div><div class="sekme">Rol Görünümleri</div><div class="sekme">Kurallar &amp; Geçiş</div></div>
+      <div class="pnl">
+        <div class="grp"><div class="gb">Sorun (V1)</div><div class="ic">
+          <p>24 grup tek seviyede alt alta: Randevu, Kayıt Kabul, Muayene, Göz, Diş, FTR, Laboratuvar, Radyoloji, Yatan Hasta, Ameliyathane, Acil, Medula, Kurumlar &amp; Sigorta, e-Nabız, Finans, Stok &amp; Hizmet, Cari &amp; CRM, Muhasebe, İK &amp; Prim, Doküman, Demirbaş, Kalite, Yönetim, Ayarlar… Ekran boyunu aşıyor, kaydırma gerekiyor; klinik dallar (Göz/Diş/FTR) ile tanı hizmetleri (Lab/Radyoloji) ile para (Medula/Finans) aynı düzlemde; banko kullanıcısı her gün 20 gruba bakıyor.</p>
+        </div></div>
+        <div class="grp"><div class="gb">Çözüm (V2)</div><div class="ic">
+          <ul>
+            <li><b>7 bölge (zone)</b>: Hasta Akışı → Klinikler → Tanı &amp; Tetkik → Yatan &amp; Cerrahi → Ödeyen &amp; Fatura → Finans &amp; Tedarik → Yönetim. Sıra <b>hastanın yolculuğu</b>dur: kapıdan girer, muayene olur, tetkik yaptırır, yatar/ameliyat olur, ödeyeni işler, para hareketi, en sonda kurumun yönetimi.</li>
+            <li><b>Bölge başlığı</b> tıklanmaz, renk kodlu ayraç; <b>modül</b> (ikinci seviye) açılır-kapanır; <b>ekranlar</b> üçüncü seviye. Aynı anda tek bölge açık kalır (accordion), diğerleri kapanır → menü hiçbir zaman 1 ekranı aşmaz.</li>
+            <li><b>Çalışma alanı</b> (üst çip / rol varsayılanı): Banko seçince Hasta Akışı + Ödeyen açık, klinikler kapalı; Hekim seçince Klinikler + Tanı açık. Rol standart şablonundan gelir, kullanıcı değiştirebilir (kullanıcı tercihi).</li>
+            <li><b>Kurum tipine göre daralma</b> aynen sürer: tıp merkezinde Yatan &amp; Cerrahi bölgesi hiç çizilmez; dal merkezinde tek klinik modülü.</li>
+            <li>Favori ve En Son en üstte kalır; Dökümler her modülün sonunda, Ayarlar alt grubu her modülün en altında (plan kural 2).</li>
+            <li>Kayıt Kabul'e <b>Vezne</b> ve <b>Provizyon</b> girer (bugün Finans/Medula'da) - banko tek modülde çalışır; Medula bölgede "Ödeyen" olarak kalır (fatura, dönem, kuyruk).</li>
+          </ul>
+        </div></div>
+      </div>
+      <div class="pnl" hidden>
+        <div class="dg kar2"><table>
+          <thead><tr><th>V1 grup (24, tek seviye)</th><th>V2 bölge</th><th>V2 modül</th><th>Değişen</th></tr></thead>
+          <tbody>
+            <tr><td>Randevu</td><td><i class="z1" style="display:inline-block;width:8px;height:8px"></i> Hasta Akışı</td><td>Randevu</td><td>Çalışma Planları burada kalır</td></tr>
+            <tr><td>Kayıt Kabul</td><td>Hasta Akışı</td><td>Kayıt Kabul</td><td>+ Vezne (Finans'tan) · + Provizyon/Medula Kabul (Medula'dan) · İskonto Onayı</td></tr>
+            <tr><td>Acil</td><td>Hasta Akışı</td><td>Acil</td><td>Triyaj, takip panosu, çağrı, yatak</td></tr>
+            <tr><td>Muayene</td><td><i class="z2" style="display:inline-block;width:8px;height:8px"></i> Klinikler</td><td>Poliklinik</td><td>ad "Poliklinik (Muayene)"; Tıbbi Özet / Alerji / Kronik buraya (menüde gizliydi)</td></tr>
+            <tr><td>Göz · Diş · FTR</td><td>Klinikler</td><td>Göz · Diş · FTR</td><td>aynı, bölge altında; kapalı modül çizilmez</td></tr>
+            <tr><td>Laboratuvar · Radyoloji</td><td><i class="z3" style="display:inline-block;width:8px;height:8px"></i> Tanı &amp; Tetkik</td><td>Laboratuvar · Radyoloji</td><td>Teleradyoloji Radyoloji altına alt grup</td></tr>
+            <tr><td>Yatan Hasta · Ameliyathane</td><td><i class="z4" style="display:inline-block;width:8px;height:8px"></i> Yatan &amp; Cerrahi</td><td>Yatan Hasta · Ameliyathane</td><td>Yoğun bakım ileride aynı bölgeye</td></tr>
+            <tr><td>Medula · Kurumlar &amp; Sigorta · e-Nabız</td><td><i class="z5" style="display:inline-block;width:8px;height:8px"></i> Ödeyen &amp; Fatura</td><td>Medula (SGK) · Kurumlar &amp; Sigorta · e-Nabız/USBS</td><td>Medula kabul ekranı Kayıt Kabul'e de bağlanır (aynı ekran, iki yol)</td></tr>
+            <tr><td>Finans · Muhasebe · Stok &amp; Hizmet · Cari &amp; CRM</td><td><i class="z6" style="display:inline-block;width:8px;height:8px"></i> Finans &amp; Tedarik</td><td>Finans · Muhasebe · Stok &amp; Hizmet · Cari &amp; CRM</td><td>Vezne kısayolu Kayıt Kabul'de de</td></tr>
+            <tr><td>İK &amp; Prim · Kalite · Doküman · Demirbaş · Yönetim · Ayarlar</td><td><i class="z7" style="display:inline-block;width:8px;height:8px"></i> Yönetim</td><td>İK &amp; Prim · Kalite · Doküman · Demirbaş · Yönetim</td><td>Ayarlar modül altına dağılır (Randevu Ayarları, Diş Üniteler…); kurum geneli ayar Yönetim'de</td></tr>
+          </tbody>
+        </table></div>
+        <div class="ic sonuk">Mevcut `menuGrup` alanı V2'de <code>bolge</code> + <code>menuGrup</code> olur; `MENU_GRUP_MODUL` eşlemesi değişmez, sadece Kabuk gruplama bir seviye daha kazanır. Rota ve yetki kodları aynı kalır - yalnız menü düzeni değişir.</div>
+      </div>
+      <div class="pnl" hidden>
+        <div class="persona">
+          <div class="grp"><div class="gb">👩‍💼 Banko (Kayıt Kabul)</div><div class="ic">Açık: <b>Hasta Akışı</b> (Randevu, Kayıt Kabul, Acil) · <b>Ödeyen</b> (Medula kabul, Kurumlar). Kapalı: Klinikler, Tanı, Yatan, Finans (yalnız Vezne kısayolu), Yönetim gizli.<br><span class="sonuk">İlk ekran: Kayıt Kabul › Başvurular (bugün).</span></div></div>
+          <div class="grp"><div class="gb">🩺 Hekim</div><div class="ic">Açık: <b>Klinikler</b> (kendi dalı en üstte, ör. FTR) · <b>Tanı &amp; Tetkik</b> (sonuç görme). Kapalı: Hasta Akışı (Randevular yalnız kendi), Ödeyen, Finans gizli.<br><span class="sonuk">İlk ekran: bugünkü muayene / seans listesi.</span></div></div>
+          <div class="grp"><div class="gb">💉 Hemşire / Fizyoterapist</div><div class="ic">Açık: <b>Klinikler</b> (uygulama ekranları: seans, pano) · <b>Yatan</b> (order). Kapalı: geri kalanı.<br><span class="sonuk">İlk ekran: Ünite Panosu / servis listesi.</span></div></div>
+          <div class="grp"><div class="gb">🧪 Lab / Görüntüleme</div><div class="ic">Açık: <b>Tanı &amp; Tetkik</b>. Kapalı: diğerleri; Kayıt Kabul yalnız hasta arama.<br><span class="sonuk">İlk ekran: İstemler / çalışma listesi.</span></div></div>
+          <div class="grp"><div class="gb">🧾 Muhasebe</div><div class="ic">Açık: <b>Ödeyen &amp; Fatura</b> · <b>Finans &amp; Tedarik</b>. Kapalı: klinikler; Kayıt Kabul salt okuma.<br><span class="sonuk">İlk ekran: Medula fatura &amp; dönem.</span></div></div>
+          <div class="grp"><div class="gb">🛠 Yönetici</div><div class="ic">Hepsi; Yönetim bölgesi açık. Kurum profili, roller ("standart rolleri kur"), kalite göstergeleri.<br><span class="sonuk">İlk ekran: Ana Sayfa panosu.</span></div></div>
+        </div>
+        <div class="ic sonuk">Çalışma alanı = standart rol şablonunun <code>acik_bolgeler</code> listesi; kullanıcı üst çipten değiştirir, tercih sunucuda saklanır (favoriler gibi).</div>
+      </div>
+      <div class="pnl" hidden>
+        <div class="grp"><div class="gb">Kurallar</div>
+          <ul class="liste">
+            <li>Bölge sırası hasta yolculuğu; modül sırası günün akışı (günlük iş listeleri → tanımlar → Dökümler → Ayarlar).</li>
+            <li>Aynı anda tek bölge açık (accordion); bölge içinde birden çok modül açık olabilir. Menü yüksekliği ekranı aşmamalı - aşarsa bölge otomatik daralır.</li>
+            <li>Bir ekran birden çok yoldan erişilebilir (Medula kabul: Kayıt Kabul ve Medula); rota tek, menü bağlantısı `menuYol` ile.</li>
+            <li>Kapalı modül / kurum tipine göre gizli modül çizilmez; yetkisi olmayan ekran çizilmez; bölgede hiç modül kalmazsa bölge de çizilmez.</li>
+            <li>Favori, En Son ve komut paleti (Ctrl+K) V1'deki gibi; bölge başlıkları yıldızlanamaz.</li>
+            <li>Mobil / dar ekranda bölgeler ikon şeridine iner (ilk harf + renk), tıklayınca modül listesi açılır.</li>
+          </ul>
+        </div>
+        <div class="grp"><div class="gb">Geçiş</div><div class="ic">
+          1. `listeTanimlari`ye `bolge` (7 sabit) eklenir; Kabuk üç seviyeli çizer, tek-bölge accordion. 2. Standart rol şablonlarına `acikBolgeler` + kullanıcı tercihi `calismaAlani`. 3. Kayıt Kabul'e Vezne/Provizyon `menuYol` bağlantıları. 4. Menü testi: bölge başına modül tavanı (Klinikler ≤ 6, Yönetim ≤ 6), grup toplamı 24 kalır.
+        </div></div>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar"><span>V2 · 7 bölge · 22 modül · accordion · çalışma alanı</span><span class="sp">V1: Kabuk GRUP_SIRA_HBYS (24 grup, tek seviye)</span></div>
+</div>
+<div class="not"><b>Hastane menü düzeni V2.</b> 24 düz grup yerine 7 renk kodlu bölge (hasta yolculuğu sırasında), altında modüller (açılır-kapanır, tek bölge açık), altında ekranlar. Çalışma alanı çipi rol şablonundan gelir ve banko/hekim/lab/muhasebe için ilgili bölgeleri açar. Kayıt Kabul modülü vezne ve provizyonu da kapsar; Ayarlar her modülün altına dağılır. Rota, yetki ve modül eşlemesi değişmez - yalnız Kabuk'un gruplaması bir seviye derinleşir.</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi. Ic ice sekmeler desteklenir.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===scope.closest('.pnl');});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+// Ic toolbar dugmeleri: data-git="dosya.html" olanlar diger mockup'a gecer.
+document.querySelectorAll('[data-git]').forEach(function(b){ b.style.cursor='pointer'; b.addEventListener('click',function(){ location.href=b.dataset.git; }); });
+</script>
+</body>
+</html>

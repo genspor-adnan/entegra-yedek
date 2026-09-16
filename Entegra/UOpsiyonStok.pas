@@ -19,7 +19,9 @@ uses
   dxSkinOffice2013LightGray, dxSkinOffice2016Colorful, dxSkinOffice2016Dark,
   dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
   dxSkinVisualStudio2013Light, cxDBEdit, dxDateRanges, dxScrollbarAnnotations,
-  cxMemo, dxCoreGraphics;
+  cxMemo, dxCoreGraphics, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
+  FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet;
 
 type
   TOpsiyonStokDlg = class(TForm)
@@ -133,6 +135,7 @@ type
     ToolButton12: TToolButton;
     chckStokSeviyeSorma: TcxCheckBox;
     CheckOtomatikKombinasyon: TcxCheckBox;
+    CheckRafOmruZorunlu: TcxCheckBox;
     BtnMuhasebKodlari: TButton;
     cxLabel11: TcxLabel;
     cbHareketBasla: TcxImageComboBox;
@@ -344,6 +347,8 @@ begin
   chckStokSeviyeSorma.Checked := Tablo.GENINI.ReadBoolean(Ops_StokOpsiyon_StokSeviyeleriGiris, False);
   CheckOtomatikKombinasyon.Checked := Tablo.GENINI.ReadBoolean(Ops_StokOpsiyon_OtomatikBoyutOlusturma, False);
   CheckMuhasebeKodlar.Checked := Tablo.GENINI.ReadBoolean(Ops_StokOpsiyon_MuhasebeKodlar, False);
+  // Varsayilan TRUE: mevcut musterilerde davranis degismesin (raf omru esitlemesi eskiden hep vardi).
+  CheckRafOmruZorunlu.Checked := Tablo.GENINI.ReadBoolean(Ops_StokOpsiyon_RafOmruZorunlu, True);
 
   CheckUTSKullanimda.Checked := Tablo.GENINI.ReadBoolean(Ops_CheckUTSKullanimda,False);
   CheckTest.Checked := Tablo.GENINI.ReadBoolean(Ops_CheckTest,False);
@@ -431,6 +436,7 @@ begin
    Tablo.GENINI.WriteBoolean(Ops_StokOpsiyon_LokasyonVar,checkLokasyonVar.Checked);// StokOpsiyon','OnayliSayimDegistirme
    Tablo.GENINI.WriteBoolean(Ops_StokOpsiyon_OtomatikBoyutOlusturma,CheckOtomatikKombinasyon.Checked);
    Tablo.GENINI.WriteBoolean(Ops_StokOpsiyon_MuhasebeKodlar,CheckMuhasebeKodlar.Checked);
+   Tablo.GENINI.WriteBoolean(Ops_StokOpsiyon_RafOmruZorunlu, CheckRafOmruZorunlu.Checked);
 
    Tablo.GENINI.WriteBoolean(Ops_CheckUTSKullanimda,CheckUTSKullanimda.Checked);
    Tablo.GENINI.WriteString(Ops_EditUTSFirmaNo,EditUTSFirmaNo.EditValue);

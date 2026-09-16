@@ -36,8 +36,10 @@ describe('modül süzmesi', () => {
     //   yoksa kapatılan modül geri açılamazdı.
     // Menu yeniden duzeni (plan 11): Cari+CRM tek grup, IK & Prim, ve
     //   Kurumlar & Sigorta - ucu de kapatilamaz cekirdek ekranlar.
+    // Medula (707): modül kapısı yok - SGK'lı hasta kabul eden her HBYS
+    //   kurumunda görünür, hesap tanımsızsa kuyruk ekranı bunu söyler.
     const bagsiz = new Set(['Yönetim', 'Ana Sayfa', 'Cari & CRM', 'İK & Prim',
-                            'Kurumlar & Sigorta', 'Demirbaş']);
+                            'Kurumlar & Sigorta', 'Demirbaş', 'Medula']);
     const gruplar = new Set(LISTELER.map(l => l.menuGrup).filter(Boolean) as string[]);
 
     for (const g of gruplar) {

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FTR Takip & Rapor — Mockup (GenoTIP AI · Medula)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .btn.mini{padding:2px 7px;font-size:10.5px;display:inline-flex}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg td code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)} .hdr.k5{grid-template-columns:repeat(5,1fr)} .hdr.k6{grid-template-columns:repeat(6,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.err{border-color:#c0392b;background:#fff6f5}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .kart.kir .d{color:var(--kirmizi)} .kart.ok .d{color:var(--ok)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)} .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)} .bar.k i{background:linear-gradient(#e06a5e,#c0392b)}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:300px 1fr 320px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .sonuc{margin:10px 12px;border:1px solid #bfe3cb;background:#eef9f1;border-radius:4px;padding:8px 10px;font-size:11.5px}
+  .sonuc.kir{border-color:#f3c4bf;background:#fdf1ef}
+  .sonuc.sari{border-color:#f2ddbf;background:#fdf8ec}
+  .sonuc b{color:var(--navy)}
+  .xml{font-family:Consolas,monospace;font-size:10.5px;background:#1f2d3a;color:#d7e3f2;padding:8px 10px;border-radius:3px;white-space:pre;overflow:auto;margin:0 12px 10px;line-height:1.5}
+  .adim{display:flex;gap:0;padding:8px 12px;flex-wrap:wrap}
+  .adim span{padding:5px 12px;border:1px solid var(--line);background:#fff;font-size:11px;color:var(--muted);position:relative}
+  .adim span+span{border-left:none}
+  .adim span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .adim span.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .icerik{padding:12px 16px;line-height:1.6}
+  .icerik h2{font-size:14px;color:var(--navy);margin:16px 0 6px;border-bottom:1px solid var(--line2);padding-bottom:3px}
+  .icerik h3{font-size:12.5px;color:#2c4a6b;margin:12px 0 4px}
+  .icerik p{margin:4px 0}
+  .icerik table{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:11.5px}
+  .icerik th,.icerik td{border:1px solid var(--line2);padding:4px 7px;text-align:left;vertical-align:top}
+  .icerik th{background:#f4f7fb;color:#3a5573;white-space:nowrap}
+  .icerik code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .kutu{border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;padding:8px 10px;margin:8px 0}
+  .yatay{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:6px 12px}
+</style>
+</head>
+<body>
+
+<style>
+  .akis{display:flex;gap:0;padding:10px 12px;flex-wrap:wrap}
+  .akis .ad{border:1px solid var(--line);background:#fff;padding:8px 12px;min-width:150px;font-size:11px;position:relative}
+  .akis .ad+.ad{border-left:none}
+  .akis .ad b{display:block;color:var(--navy);margin-bottom:2px}
+  .akis .ad.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff} .akis .ad.on b{color:#fff}
+  .vas{display:flex;gap:2px;align-items:center}
+  .vas i{width:18px;height:14px;border:1px solid var(--line);font-size:9px;text-align:center;line-height:14px;font-style:normal;border-radius:2px}
+  .vas i.sec{background:#e06a5e;color:#fff;border-color:#c0392b}
+  .rom{display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr;gap:3px 8px;font-size:11px;padding:6px 10px;align-items:center}
+  .rom .h{font-weight:bold;color:#3a5573;border-bottom:1px solid var(--line2);padding-bottom:2px}
+  .rom .cz{height:9px;background:#e7edf4;border-radius:3px;position:relative}
+  .rom .cz i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:linear-gradient(#4d8fd6,#2f6db3)}
+  .rom .cz i.k{background:linear-gradient(#e06a5e,#c0392b)} .rom .cz i.y{background:linear-gradient(#5cb87a,#3f9a5e)}
+  .kabin{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 12px}
+  .kb{border:1px solid var(--line2);border-radius:5px;background:#fff;padding:8px;font-size:11px;min-height:120px}
+  .kb .kbh{display:flex;align-items:center;gap:6px;font-weight:bold;color:#2c4a6b;border-bottom:1px solid var(--line2);padding-bottom:4px;margin-bottom:6px}
+  .kb .kbh .sp{margin-left:auto}
+  .kb.dolu{border-top:3px solid #2f6db3} .kb.bos{border-top:3px solid #3f9a5e} .kb.bakim{border-top:3px solid #c0392b;opacity:.75} .kb.bekle{border-top:3px solid #d9a12b}
+  .sayac{font-family:Consolas,monospace;font-size:14px;color:var(--navy)}
+  .seansbar{display:flex;gap:2px;margin:4px 0}
+  .seansbar i{width:12px;height:12px;border:1px solid var(--line);border-radius:2px;background:#fff}
+  .seansbar i.y{background:#3f9a5e;border-color:#2e7d46} .seansbar i.b{background:#4d8fd6;border-color:#2f6db3} .seansbar i.k{background:#e06a5e;border-color:#c0392b}
+  .grafik{height:120px;border:1px solid var(--line2);border-radius:4px;background:#fff;position:relative;margin:6px 10px;overflow:hidden}
+  .grafik svg{width:100%;height:100%}
+  .uyg{display:grid;grid-template-columns:24px 1fr 90px 70px 80px 90px;gap:4px 8px;align-items:center;padding:4px 10px;font-size:11px;border-bottom:1px solid var(--line2)}
+  .uyg.h{background:var(--head);font-weight:bold;color:#3a5573}
+  .uyg .ck{width:16px;height:16px;border:1px solid var(--line);border-radius:3px;text-align:center;line-height:16px;font-size:11px}
+  .uyg .ck.y{background:#3f9a5e;color:#fff;border-color:#2e7d46}
+</style>
+<div class="toolbar" style="background:#fff;border-bottom:1px solid var(--line2)"><span class="sonuk">FTR ekranları:</span><span class="chip" data-git="ftr_sureci.html">📘 Süreç</span><span class="chip" data-git="ftr_degerlendirme.html">🩺 FTR Değerlendirme</span><span class="chip" data-git="ftr_program_karti.html">📋 Tedavi Programı (Kür)</span><span class="chip" data-git="ftr_seans.html">🏃 Seans Uygulama</span><span class="chip" data-git="ftr_unite_panosu.html">🏥 Ünite Panosu</span><span class="chip on" data-git="ftr_takip_rapor.html">📈 Takip & Rapor</span></div>
+<div class="win">
+  <div class="title">📈 Takip &amp; Rapor — Ayşe Yılmaz · FT-2026/0318 · Lomber <span class="sp">ara değerlendirme · kür sonu raporu · Medula · hakediş · klinik kalite</span></div>
+  <div class="toolbar">
+    <div class="btn primary">📈 Ara Değerlendirme Kaydet</div><div class="btn ok">📄 Kür Sonu Raporu</div><div class="btn">🔁 Ek Kür Öner</div><div class="btn">🧾 Hizmet Kaydı (toplu)</div>
+    <span class="sepv"></span><div class="btn" data-git="ftr_program_karti.html">📋 Program</div><div class="btn" data-git="ftr_degerlendirme.html">🩺 Değerlendirme</div><div class="btn">🖨 Rapor PDF</div><div class="btn sp">✖ Kapat</div>
+  </div>
+  <div class="sekmeler">
+    <div class="sekme on">Ölçek Seyri</div><div class="sekme">Ara / Kür Sonu Değerlendirme</div><div class="sekme">Kür Sonu Raporu</div><div class="sekme">Medula &amp; Hakediş</div><div class="sekme">Ünite İstatistikleri</div>
+  </div>
+  <div class="pnl">
+    <div class="ikiPanel">
+      <div>
+        <div class="grp"><div class="gb">VAS · seans bazında</div>
+          <div class="grafik"><svg viewBox="0 0 400 120" preserveAspectRatio="none">
+            <line x1="20" y1="100" x2="380" y2="100" stroke="#cdd6e0"/><line x1="20" y1="20" x2="20" y2="100" stroke="#cdd6e0"/>
+            <polyline fill="none" stroke="#c0392b" stroke-width="2" points="30,28 75,36 120,36 165,44 210,44 255,52 300,60 345,68"/>
+            <polyline fill="none" stroke="#3f9a5e" stroke-width="2" points="30,36 75,44 120,44 165,52 210,52 255,60 300,68 345,76"/>
+            <text x="25" y="16" font-size="9" fill="#6b7a8b">10</text><text x="25" y="98" font-size="9" fill="#6b7a8b">0</text>
+          </svg></div>
+          <div class="ic sonuk">Kırmızı seans öncesi, yeşil seans sonrası. Seans içi düşüş sürekli; genel eğilim 7 → 4.</div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Fonksiyon · ölçekler</div>
+          <div class="dg"><table>
+            <thead><tr><th>Ölçek</th><th>Kür başı</th><th>Ara (10.)</th><th>Kür sonu</th><th>Değişim</th><th>MCID</th></tr></thead>
+            <tbody>
+              <tr><td>ODI</td><td>44 %</td><td>30 %</td><td>—</td><td>−14</td><td>≥ 10 <span class="rz ok">anlamlı</span></td></tr>
+              <tr><td>Roland-Morris</td><td>14</td><td>9</td><td>—</td><td>−5</td><td>≥ 5 <span class="rz ok">anlamlı</span></td></tr>
+              <tr><td>Lomber fleksiyon</td><td>40°</td><td>50°</td><td>—</td><td>+10°</td><td>—</td></tr>
+              <tr><td>SLR sağ</td><td>40°</td><td>60°</td><td>—</td><td>+20°</td><td>—</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pnl" hidden>
+    <div class="grp"><div class="gb">Ara değerlendirme · 10. seans · Dr. M. Öz · 30.09.2026</div>
+      <div class="hdr" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="fld"><label>Yanıt</label><div class="inp combo">Kısmi iyi yanıt</div></div>
+        <div class="fld"><label>Karar</label><div class="inp combo">Programa devam · traksiyon kaldır</div></div>
+        <div class="fld"><label>Egzersiz aşaması</label><div class="inp combo">Aşama 2 (bird-dog, plank)</div></div>
+        <div class="fld" style="grid-column:1/4"><label>Not</label><div class="inp">Radiküler bulgular geriledi (SLR 60°). Traksiyon sonlandırıldı; core stabilizasyon yoğunlaştırıldı.</div></div>
+      </div>
+    </div>
+    <div class="grp"><div class="gb">Kür sonu değerlendirme · 20. seans <span class="rz">bekliyor</span></div>
+      <div class="ic sonuk">Kür sonu ölçekler + EHA tekrarı zorunlu; "iyi / kısmi / yanıtsız" sonucu klinik kalite göstergesine ve ek kür kararına gider (ek kür SUT: aynı bölge yılda 2. kür, kalan hak 13).</div>
+    </div>
+  </div>
+  <div class="pnl" hidden>
+    <div class="ikiPanel">
+      <div>
+        <div class="grp"><div class="gb">Kür sonu raporu (taslak)</div>
+          <div class="xml" style="background:#fff;color:#1f2d3a;border:1px solid #e3e9f0">GENOTIP FTR MERKEZİ                         FİZİK TEDAVİ KÜR SONU RAPORU
+Hasta: Ayşe Yılmaz (52 K)      Program: FT-2026/0318      Bölge: Lomber
+Tanı: M54.5 / M51.1            Uzman: Dr. M. Öz           Fzt: E. Demir
+Seans: 20 / 20 (17.09 – 14.10.2026)   Devamsızlık: 1
+Uygulamalar: hotpack, US, TENS, lomber traksiyon (1–10), terapötik egzersiz
+------------------------------------------------------------------------
+Ölçek              Kür başı   Ara     Kür sonu   Değişim
+VAS (aktivite)        7        5         3         −4
+ODI                  44 %     30 %      18 %      −26
+Roland-Morris        14        9         5         −9
+Lomber fleksiyon     40°      50°       58°       +18°
+------------------------------------------------------------------------
+Sonuç: İYİ YANIT. Ev egzersiz programına devam; 3 ay sonra kontrol.
+Öneri: Ergonomi eğitimi verildi; ek kür gerekmez.
+Dr. M. Öz (FTR Uzm.)  _______     Tarih: 14.10.2026</div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Rapor kalemleri</div>
+          <div class="hdr" style="grid-template-columns:1fr 1fr">
+            <div class="fld"><label>Sonuç</label><div class="inp combo">İyi yanıt</div></div>
+            <div class="fld"><label>Ek kür</label><div class="inp combo">Gerekmez</div></div>
+            <div class="fld"><label>Kontrol</label><div class="inp">3 ay · 14.01.2027</div></div>
+            <div class="fld"><label>Sevk eden hekime</label><div class="inp">☑ Rapor kopyası (Dr. K. Ak)</div></div>
+            <div class="fld" style="grid-column:1/3"><label>Öneri</label><div class="inp">Ev egzersizi · ergonomi · kilo kontrolü</div></div>
+          </div>
+          <div class="yatay" style="display:flex;gap:6px;padding:8px 10px"><div class="btn ok">✔ Raporu Kesinleştir</div><div class="btn">📱 e-Nabız'a gönder</div><div class="btn">🖨 PDF</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pnl" hidden>
+    <div class="ikiPanel">
+      <div>
+        <div class="grp"><div class="gb">Medula hizmet kaydı</div>
+          <div class="dg"><table>
+            <thead><tr><th>Seans</th><th>Tarih</th><th>SUT</th><th class="sag">Tutar</th><th>Durum</th></tr></thead>
+            <tbody>
+              <tr><td>1–6</td><td>17–23.09</td><td>9.10</td><td class="sag">1.872,00</td><td><span class="rz ok">gönderildi</span></td></tr>
+              <tr><td>7</td><td>25.09</td><td>9.10</td><td class="sag">312,00</td><td><span class="rz sari">bekliyor</span></td></tr>
+              <tr><td>8–13</td><td>26.09–03.10</td><td>9.10</td><td class="sag">1.872,00</td><td><span class="rz">planlı</span></td></tr>
+              <tr><td>14–20</td><td>06–14.10</td><td>özel</td><td class="sag">3.150,00 (hasta)</td><td><span class="rz">hak dışı</span></td></tr>
+            </tbody>
+          </table></div>
+          <div class="yatay" style="display:flex;gap:6px;padding:8px 10px"><div class="btn primary">🧾 Bekleyeni gönder</div><div class="btn">🔄 Kalan hak</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Hakediş (fizyoterapist · uzman)</div>
+          <div class="dg"><table>
+            <thead><tr><th>Kişi</th><th>Kaynak</th><th class="orta">Adet</th><th class="sag">Birim</th><th class="sag">Tutar</th></tr></thead>
+            <tbody>
+              <tr><td>Fzt. E. Demir</td><td>seans uygulama</td><td class="orta">7</td><td class="sag">40,00</td><td class="sag">280,00</td></tr>
+              <tr><td>Dr. M. Öz</td><td>değerlendirme + ara + kür sonu</td><td class="orta">2</td><td class="sag">150,00</td><td class="sag">300,00</td></tr>
+            </tbody>
+          </table></div>
+          <div class="ic sonuk">Prim kuralı: seans başı sabit ya da SUT tutarının %'si; devamsız seans hakediş yazmaz.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pnl" hidden>
+    <div class="ozet">
+      <div class="kart"><div class="b">Aylık seans</div><div class="d">812</div></div>
+      <div class="kart"><div class="b">Program tamamlanma</div><div class="d">%84</div></div>
+      <div class="kart"><div class="b">Devamsızlık</div><div class="d">%6</div></div>
+      <div class="kart ok"><div class="b">İyi yanıt (ODI MCID)</div><div class="d">%71</div></div>
+      <div class="kart"><div class="b">Ort. bekleme</div><div class="d">9 dk</div></div>
+      <div class="kart"><div class="b">Kabin doluluk</div><div class="d">%72</div></div>
+    </div>
+    <div class="ic sonuk">Klinik kalite göstergeleri (fonksiyonel iyileşme, tamamlanma, devamsızlık) klinik_kalite modülüne olgu olarak akar; ünite raporu dökümlerde.</div>
+  </div>
+  <div class="statusbar"><span>FT-2026/0318 · ara değerlendirme: kısmi iyi yanıt · ODI 44→30</span><span class="sp">Kaynak: <code>ftr_olcek</code> · <code>ftr_program</code> · medula_hizmet · prim · klinik_kalite</span></div>
+</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi. Ic ice sekmeler desteklenir.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===scope.closest('.pnl');});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+// Ic toolbar dugmeleri: data-git="dosya.html" olanlar diger mockup'a gecer.
+document.querySelectorAll('[data-git]').forEach(function(b){ b.style.cursor='pointer'; b.addEventListener('click',function(){ location.href=b.dataset.git; }); });
+</script>
+</body>
+</html>

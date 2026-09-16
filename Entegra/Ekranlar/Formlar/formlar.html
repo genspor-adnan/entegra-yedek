@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formlar (Yönetim) — Mockup (GenoTIP AI · Medula)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .btn.mini{padding:2px 7px;font-size:10.5px;display:inline-flex}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg td code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)} .hdr.k5{grid-template-columns:repeat(5,1fr)} .hdr.k6{grid-template-columns:repeat(6,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.err{border-color:#c0392b;background:#fff6f5}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .kart.kir .d{color:var(--kirmizi)} .kart.ok .d{color:var(--ok)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)} .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)} .bar.k i{background:linear-gradient(#e06a5e,#c0392b)}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:300px 1fr 320px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .sonuc{margin:10px 12px;border:1px solid #bfe3cb;background:#eef9f1;border-radius:4px;padding:8px 10px;font-size:11.5px}
+  .sonuc.kir{border-color:#f3c4bf;background:#fdf1ef}
+  .sonuc.sari{border-color:#f2ddbf;background:#fdf8ec}
+  .sonuc b{color:var(--navy)}
+  .xml{font-family:Consolas,monospace;font-size:10.5px;background:#1f2d3a;color:#d7e3f2;padding:8px 10px;border-radius:3px;white-space:pre;overflow:auto;margin:0 12px 10px;line-height:1.5}
+  .adim{display:flex;gap:0;padding:8px 12px;flex-wrap:wrap}
+  .adim span{padding:5px 12px;border:1px solid var(--line);background:#fff;font-size:11px;color:var(--muted);position:relative}
+  .adim span+span{border-left:none}
+  .adim span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .adim span.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .icerik{padding:12px 16px;line-height:1.6}
+  .icerik h2{font-size:14px;color:var(--navy);margin:16px 0 6px;border-bottom:1px solid var(--line2);padding-bottom:3px}
+  .icerik h3{font-size:12.5px;color:#2c4a6b;margin:12px 0 4px}
+  .icerik p{margin:4px 0}
+  .icerik table{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:11.5px}
+  .icerik th,.icerik td{border:1px solid var(--line2);padding:4px 7px;text-align:left;vertical-align:top}
+  .icerik th{background:#f4f7fb;color:#3a5573;white-space:nowrap}
+  .icerik code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .kutu{border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;padding:8px 10px;margin:8px 0}
+  .yatay{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:6px 12px}
+</style>
+</head>
+<body>
+
+<style>
+  .frm{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 10px;padding:8px 12px}
+  .frm .al{display:flex;flex-direction:column;gap:2px;font-size:11px}
+  .frm .al .lb{color:var(--muted);font-size:10.5px}
+  .frm .al.g2{grid-column:span 2} .frm .al.g4{grid-column:span 4}
+  .kpis{display:flex;gap:8px;padding:8px 12px;flex-wrap:wrap}
+  .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px} .kart .b{font-size:10.5px;color:var(--muted)}
+  .kart.kir .d{color:#c0392b} .kart.ok .d{color:#2e7d46} .kart.sari .d{color:#8a6218}
+  .aile{display:inline-block;border-radius:3px;padding:1px 7px;font-size:10.5px;font-weight:bold;color:#fff}
+  .aile.onam{background:#6a3fb5} .aile.deg{background:#2f6db3} .aile.kl{background:#1c8b8b} .aile.beyan{background:#3f9a5e} .aile.anket{background:#d9a12b}
+  .dg td.w{white-space:normal}
+  .tur{display:inline-block;border-radius:3px;padding:1px 6px;font-size:10.5px;border:1px solid var(--line);background:#fff}
+  .tur.ic{border-color:#2f6db3;color:#2f6db3} .tur.dz{border-color:#c0392b;color:#c0392b} .tur.tb{border-color:#6b7a8b;color:#6b7a8b}
+  .kt{display:inline-block;border-radius:8px;padding:0 6px;font-size:10px;background:#eef2f6;color:#4d5d6e;margin-right:2px}
+  .ed{display:grid;grid-template-columns:230px 1fr 300px;min-height:520px}
+  .ed>div{border-right:1px solid var(--line2)} .ed>div:last-child{border-right:none}
+  .ed .agac{padding:8px;font-size:11.5px;background:#f7f9fc}
+  .ed .agac .bl{padding:5px 8px;border-radius:3px;font-weight:bold;color:#2c4a6b;display:flex;gap:6px;align-items:center;margin-top:6px}
+  .ed .agac .bl .sh{margin-left:auto;font-size:10px;font-weight:normal;border:1px solid var(--line);border-radius:8px;padding:0 6px;background:#fff}
+  .ed .agac .fl{padding:3px 8px 3px 22px;color:#4d5d6e;display:flex;gap:6px;align-items:center}
+  .ed .agac .fl.sec{background:#dbe7f7;color:#1c4374;border-radius:3px}
+  .ed .agac .fl i{font-style:normal;font-size:10px;color:var(--muted);width:44px}
+  .ed .tuval{padding:10px 14px;background:#fff}
+  .ed .tuval .oz{border:1px solid var(--line2);border-radius:6px;padding:10px 12px;margin-bottom:8px;background:#fbfcfe}
+  .ed .tuval .oz.sec{border-color:#2f6db3;box-shadow:0 0 0 2px #dbe7f7}
+  .ed .tuval .oz .et{font-size:11.5px;color:#2b3a4a;margin-bottom:4px;display:flex;gap:6px;align-items:center}
+  .ed .tuval .oz .et .z{color:#c0392b}
+  .ed .tuval .oz .sec2{display:flex;gap:6px;flex-wrap:wrap}
+  .ed .tuval .oz .sec2 span{border:1px solid var(--line);border-radius:12px;padding:2px 10px;font-size:11px;background:#fff}
+  .ed .oze{padding:8px 10px;font-size:11px;background:#f7f9fc}
+  .ed .oze .lb{color:var(--muted);font-size:10.5px;margin-top:6px}
+  .ed .oze .inp{margin-top:2px}
+  .tablet{max-width:760px;margin:10px auto;border:12px solid #1f2a36;border-radius:22px;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.25);overflow:hidden;font-size:12.5px}
+  .tablet .tb{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:10px 16px;font-weight:bold;display:flex;gap:8px;align-items:center}
+  .tablet .tb .sp{margin-left:auto;font-weight:normal;font-size:11px;opacity:.85}
+  .tablet .metin{padding:14px 18px;line-height:1.6;max-height:230px;overflow:auto;border-bottom:1px solid var(--line2)}
+  .tablet .metin h3{margin:0 0 6px;font-size:14px;color:var(--navy)}
+  .tablet .metin .prm{background:#fdf6e3;border-bottom:1px dashed #d9a12b}
+  .tablet .imzalar{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 18px}
+  .tablet .imza{border:1px dashed var(--line);border-radius:8px;height:110px;position:relative;background:#fff}
+  .tablet .imza .ad{position:absolute;left:8px;bottom:6px;font-size:11px;color:var(--muted)}
+  .tablet .imza svg{position:absolute;left:10px;top:10px}
+  .tablet .onay{display:flex;gap:10px;align-items:center;padding:8px 18px;font-size:12px;border-top:1px solid var(--line2)}
+  .tablet .ck{width:18px;height:18px;border:1px solid var(--line);border-radius:4px;text-align:center;line-height:18px;background:#3f9a5e;color:#fff;border-color:#2e7d46}
+  .tablet .dbtn{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold;border-radius:8px;padding:9px 18px;margin-left:auto}
+  .skor{display:grid;grid-template-columns:1fr 70px 70px 70px 70px;gap:2px 8px;padding:6px 12px;font-size:11px;align-items:center}
+  .skor .h{font-weight:bold;color:#3a5573;border-bottom:1px solid var(--line2);padding-bottom:2px;text-align:center}
+  .skor .h:first-child{text-align:left}
+  .skor .p{border:1px solid var(--line);border-radius:3px;text-align:center;padding:3px 0;background:#fff}
+  .skor .p.on{background:#2f6db3;color:#fff;border-color:#1c4374;font-weight:bold}
+  .top{display:flex;gap:10px;align-items:center;padding:8px 12px;font-size:12px;border-top:1px solid var(--line2);background:#f7f9fc}
+  .top b{font-size:16px;color:var(--navy)}
+  .zs{display:grid;grid-template-columns:150px repeat(7,1fr);gap:2px 4px;padding:6px 12px;font-size:11px;align-items:center}
+  .zs .h{font-weight:bold;color:#3a5573;text-align:center;border-bottom:1px solid var(--line2)} .zs .h:first-child{text-align:left}
+  .zs .v{text-align:center;border-radius:3px;padding:2px 0;background:#fff;border:1px solid #eef2f6}
+  .zs .v.k{background:#fbe9e7;color:#b3261e;font-weight:bold} .zs .v.s{background:#fdf6e3;color:#8a6218}
+  .asama{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:8px 12px}
+  .as{border:1px solid var(--line2);border-radius:5px;background:#fff;font-size:11.5px}
+  .as .ah{padding:6px 10px;font-weight:bold;color:#fff;border-radius:5px 5px 0 0;display:flex;gap:6px;align-items:center}
+  .as .ah .sp{margin-left:auto;font-weight:normal;font-size:10.5px;opacity:.9}
+  .as.a1 .ah{background:#2f6db3} .as.a2 .ah{background:#1c8b8b} .as.a3 .ah{background:#6a3fb5}
+  .as.kilit{opacity:.55}
+  .as .md{display:flex;gap:8px;align-items:flex-start;padding:5px 10px;border-bottom:1px solid #eef2f6}
+  .as .md .ck{flex:none;width:16px;height:16px;border:1px solid var(--line);border-radius:3px;text-align:center;line-height:16px;font-size:11px;background:#fff}
+  .as .md .ck.y{background:#3f9a5e;color:#fff;border-color:#2e7d46} .as .md .ck.n{background:#e06a5e;color:#fff;border-color:#c0392b}
+  .as .md .kim{margin-left:auto;font-size:10px;color:var(--muted);white-space:nowrap}
+  .as .af{padding:6px 10px;font-size:10.5px;color:var(--muted);display:flex;gap:8px;align-items:center}
+</style>
+<div class="toolbar" style="background:#fff;border-bottom:1px solid var(--line2)"><span class="sonuk">Form motoru:</span><span class="chip on" data-git="formlar.html">🗂 Formlar (Yönetim)</span><span class="chip" data-git="form_sablon_editoru.html">✎ Şablon Editörü</span><span class="chip" data-git="form_hasta_kartinda.html">🪪 Hasta Kartı › Formlar</span><span class="chip" data-git="form_onam_imza.html">✍️ Onam & İmza (tablet)</span><span class="chip" data-git="form_hemsire_degerlendirme.html">🩹 Hemşire Değerlendirme</span><span class="chip" data-git="form_guvenli_cerrahi.html">🛡 Güvenli Cerrahi Listesi</span><span class="sp"></span><span class="chip" data-git="../ISG/isg_calisan_formu.html">📱 İSG çalışan formu (SMS)</span></div>
+<div class="win">
+  <div class="title">🗂 Yönetim › Formlar <span class="sp">Tek motor · 5 şablon ailesi · onam / değerlendirme / kontrol listesi / beyan / anket · GenoTIP AI</span></div>
+  <div class="toolbar">
+    <span class="btn primary">＋ Şablon</span><span class="btn">✎ Düzenle</span><span class="btn">🗑 Sil</span><span class="btn">⧉ Kopyala</span><span class="btn">⬆ XLSForm / JSON içe al</span>
+    <span class="sonuk" style="margin-left:8px">Aile:</span><span class="chip on">Tümü</span><span class="chip">Onam</span><span class="chip">Değerlendirme</span><span class="chip">Kontrol listesi</span><span class="chip">Beyan</span><span class="chip">Anket</span>
+    <span class="sp"></span><span class="inp" style="width:220px">🔍 şablon ara</span>
+  </div>
+  <div class="kpis">
+    <div class="kart "><div class="b">Şablon</div><div class="d">23 <small>aktif 19</small></div></div><div class="kart "><div class="b">Bu ay doldurulan</div><div class="d">1.482</div></div><div class="kart sari"><div class="b">Bekleyen (gönderildi)</div><div class="d">64</div></div><div class="kart kir"><div class="b">İmza eksik onam</div><div class="d">7</div></div><div class="kart "><div class="b">Süresi dolan link</div><div class="d">12</div></div><div class="kart "><div class="b">Ortalama doldurma</div><div class="d">4,2 dk</div></div>
+  </div>
+  <div class="sekmeler"><div class="sekme on">Şablonlar</div><div class="sekme">Kütüphane (Bakanlık / SKS)</div><div class="sekme">Doldurulan Formlar</div><div class="sekme">Kurallar (tetikleyiciler)</div><div class="sekme">Ayarlar</div></div>
+  <div class="pnl">
+    <div class="dg"><table>
+      <thead><tr><th>Kod</th><th>Ad</th><th>Aile</th><th>Bağlam</th><th>Sahip (bölümler)</th><th>Kanal</th><th>İmza</th><th>Sürüm</th><th>Kullanım (ay)</th><th>Durum</th></tr></thead>
+      <tbody>
+        <tr><td><code>onam_genel</code></td><td><b>Genel Tedavi Onamı</b></td><td><span class="aile onam">Onam</span></td><td>Başvuru</td><td>Hasta</td><td>Kiosk · tablet</td><td>Kanvas + tanık</td><td class="sag">v4</td><td class="sag">612</td><td><span class="rz ok">Aktif</span></td></tr><tr class=sel><td><code>onam_islem</code></td><td><b>İşleme Özel Aydınlatılmış Onam</b></td><td><span class="aile onam">Onam</span></td><td>Muayene · ameliyat</td><td>Hekim (riskler) · hasta</td><td>Tablet · SMS</td><td>Kanvas / OTP · veli</td><td class="sag">v7</td><td class="sag">143</td><td><span class="rz ok">Aktif</span></td></tr><tr><td><code>onam_anestezi</code></td><td><b>Anestezi Onamı</b></td><td><span class="aile onam">Onam</span></td><td>Ameliyat</td><td>Anestezi · hasta</td><td>Tablet</td><td>Kanvas</td><td class="sag">v3</td><td class="sag">58</td><td><span class="rz ok">Aktif</span></td></tr><tr><td><code>kvkk_riza</code></td><td><b>KVKK Aydınlatma & Açık Rıza</b></td><td><span class="aile onam">Onam</span></td><td>Hasta kaydı</td><td>Hasta</td><td>Kiosk · SMS</td><td>OTP / kanvas</td><td class="sag">v2</td><td class="sag">890</td><td><span class="rz ok">Aktif</span></td></tr><tr><td><code>hemsire_kabul</code></td><td><b>Hemşire Hasta Kabul Formu</b></td><td><span class="aile deg">Değerlendirme</span></td><td>Yatış</td><td>Hemşire</td><td>İç ekran</td><td>Kullanıcı</td><td class="sag">v5</td><td class="sag">210</td><td><span class="rz ok">Aktif</span></td></tr><tr><td><code>braden</code></td><td><b>Braden Bası Yarası Riski</b></td><td><span class="aile deg">Değerlendirme</span></td><td>Yatış (tekrarlı 24 s)</td><td>Hemşire</td><td>İç ekran</td><td>—</td><td class="sag">v2</td><td class="sag">640</td><td><span class="rz ok">Aktif</span></td></tr><tr><td><code>itaki</code></td><td><b>İtaki Düşme Riski</b></td><td><span class="aile deg">Değerlendirme</span></td><td>Yatış (tekrarlı)</td><td>Hemşire</td><td>İç ekran</td><td>—</td><td class="sag">v2</td><td class="sag">655</td><td><span class="rz ok">Aktif</span></td></tr><tr><td><code>nrs2002</code></td><td><b>NRS-2002 Nutrisyon Taraması</b></td><td><span class="aile deg">Değerlendirme</span></td><td>Yatış</td><td>Hemşire · diyetisyen</td><td>İç ekran</td><td>—</td><td class="sag">v1</td><td class="sag">198</td><td><span class="rz ok">Aktif</span></td></tr><tr><td><code>who_cerrahi</code></td><td><b>Güvenli Cerrahi Kontrol Listesi (WHO)</b></td><td><span class="aile kl">Kontrol listesi</span></td><td>Ameliyat (3 aşama)</td><td>Anestezi · hemşire · cerrah</td><td>İç ekran (ameliyathane)</td><td>Kullanıcı ×3</td><td class="sag">v3</td><td class="sag">96</td><td><span class="rz ok">Aktif</span></td></tr><tr><td><code>anestezi_preop</code></td><td><b>Anestezi Preop Değerlendirme (ASA)</b></td><td><span class="aile deg">Değerlendirme</span></td><td>Ameliyat</td><td>Anestezi</td><td>İç ekran</td><td>Kullanıcı</td><td class="sag">v2</td><td class="sag">101</td><td><span class="rz ok">Aktif</span></td></tr><tr><td><code>ek2_calisan</code></td><td><b>Ek-2 Çalışan Bölümü (İSG)</b></td><td><span class="aile beyan">Beyan</span></td><td>İSG muayene</td><td>Çalışan · hekim</td><td>SMS · kiosk</td><td>Beyan + hekim</td><td class="sag">v3</td><td class="sag">84</td><td><span class="rz ok">Aktif</span></td></tr><tr><td><code>on_kayit_anamnez</code></td><td><b>Ön Kayıt Anamnezi</b></td><td><span class="aile beyan">Beyan</span></td><td>Randevu</td><td>Hasta</td><td>SMS (randevu ile)</td><td>Beyan</td><td class="sag">v1</td><td class="sag">322</td><td><span class="rz ok">Aktif</span></td></tr><tr><td><code>dis_anamnez</code></td><td><b>Diş Anamnez Formu</b></td><td><span class="aile beyan">Beyan</span></td><td>Diş hasta</td><td>Hasta · diş hekimi</td><td>Kiosk · SMS</td><td>Beyan</td><td class="sag">v2</td><td class="sag">77</td><td><span class="rz ok">Aktif</span></td></tr><tr><td><code>ftr_oswestry</code></td><td><b>Oswestry Bel Engellilik Ölçeği</b></td><td><span class="aile deg">Değerlendirme</span></td><td>FTR program (kür başı/sonu)</td><td>Hasta</td><td>SMS · kiosk</td><td>—</td><td class="sag">v1</td><td class="sag">45</td><td><span class="rz ok">Aktif</span></td></tr><tr><td><code>memnuniyet</code></td><td><b>Hasta Memnuniyet Anketi</b></td><td><span class="aile anket">Anket</span></td><td>Taburcu · muayene sonrası</td><td>Hasta</td><td>SMS (48 s sonra)</td><td>—</td><td class="sag">v3</td><td class="sag">410</td><td><span class="rz ok">Aktif</span></td></tr><tr><td><code>onam_kan</code></td><td><b>Kan ve Kan Ürünü Transfüzyon Onamı</b></td><td><span class="aile onam">Onam</span></td><td>Yatış</td><td>Hekim · hasta</td><td>Tablet</td><td>Kanvas</td><td class="sag">v1</td><td class="sag">0</td><td><span class="rz pas">Taslak</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="statusbar"><span>Kod, aile ve bağlam şablonu tanımlar; alanlar editörde</span><span class="sp">Kullanım sayısı = form_istek (tamamlanan) · Sil: dolduranı olan şablon silinmez (pasife alınır)</span></div>
+  </div>
+
+  <div class="pnl" hidden>
+    <div class="toolbar">
+      <span class="btn primary">📦 Paketi kur (kurum tipine göre)</span><span class="btn">🔄 Sürüm güncelle (3)</span><span class="btn">⧉ Kuruma kopyala &amp; düzenle</span><span class="btn">👁 Resmî örneği gör (PDF)</span>
+      <span class="sonuk" style="margin-left:8px">Kaynak:</span><span class="chip on">SKS Hastane v6.1</span><span class="chip">SKS ADSM</span><span class="chip">SKS Tıp Merkezi</span><span class="chip">ÇSGB (İSG)</span><span class="chip">Resmî bildirim formları</span>
+      <span class="sonuk">Kurum tipi:</span><span class="inp combo">Hastane</span>
+      <span class="sp"></span><span class="inp" style="width:200px">🔍 form ara</span>
+    </div>
+    <div class="kpis">
+      <div class="kart "><div class="b">Kütüphanede</div><div class="d">41 form</div></div><div class="kart "><div class="b">Bu kurum tipinde</div><div class="d">34</div></div><div class="kart ok"><div class="b">Kurulu</div><div class="d">19</div></div><div class="kart "><div class="b">Kurulabilir</div><div class="d">12</div></div><div class="kart sari"><div class="b">Yeni sürüm</div><div class="d">3</div></div><div class="kart "><div class="b">Yalnız döküm düzeni</div><div class="d">6</div></div>
+    </div>
+    <div class="dg"><table>
+      <thead><tr><th>SKS bölümü</th><th>Kod</th><th>Form</th><th>Aile</th><th>Tür</th><th>Kurum tipi</th><th>Durum</th><th>Not</th></tr></thead>
+      <tbody>
+        <tr class="grup"><td colspan="8">Hasta hakları · bilgilendirme ve onam (SKS HHR / SHB)</td></tr>
+        <tr><td>Hasta Hakları</td><td><code>SKS-ONM-01</code></td><td><b>Genel Tedavi ve Bilgilendirme Onam Formu</b></td><td><span class="aile onam">Onam</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span><span class="kt">Tıp Mrk.</span><span class="kt">ADSM</span></td><td><span class="rz ok">Kurulu v2</span></td><td class="w">Bakanlık örnek metni; kurum başlığı ve imza blokları düzenlenebilir</td></tr><tr><td>Hasta Hakları</td><td><code>SKS-ONM-02</code></td><td><b>Cerrahi / Girişimsel İşlem Onam Formu (işleme özel)</b></td><td><span class="aile onam">Onam</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span><span class="kt">Tıp Mrk.</span></td><td><span class="rz ok">Kurulu v2</span></td><td class="w">İşlem başına risk listesi: uzmanlık dernekleri örnekleri eklenir</td></tr><tr><td>Hasta Hakları</td><td><code>SKS-ONM-03</code></td><td><b>Anestezi Uygulaması Onam Formu</b></td><td><span class="aile onam">Onam</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span><span class="kt">Tıp Mrk.</span></td><td><span class="rz ok">Kurulu v2</span></td><td class="w"></td></tr><tr><td>Hasta Hakları</td><td><code>SKS-ONM-04</code></td><td><b>Kan ve Kan Ürünleri Transfüzyonu Onam Formu</b></td><td><span class="aile onam">Onam</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w"></td></tr><tr><td>Hasta Hakları</td><td><code>SKS-ONM-05</code></td><td><b>Radyolojik Tetkik (Kontrast Madde) Onam Formu</b></td><td><span class="aile onam">Onam</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span><span class="kt">Tıp Mrk.</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w"></td></tr><tr><td>Hasta Hakları</td><td><code>SKS-ONM-06</code></td><td><b>Diş Hekimliği İşlem Onam Formu</b></td><td><span class="aile onam">Onam</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">ADSM</span><span class="kt">Hastane</span></td><td><span class="rz ok">Kurulu v2</span></td><td class="w">Diş modülü tedavi planına bağlanır</td></tr><tr><td>Hasta Hakları</td><td><code>SKS-ONM-07</code></td><td><b>Tedaviyi Reddetme / Kendi İsteğiyle Ayrılma Formu</b></td><td><span class="aile onam">Onam</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span><span class="kt">Tıp Mrk.</span><span class="kt">ADSM</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w"></td></tr><tr><td>Hasta Hakları</td><td><code>KVKK-01</code></td><td><b>KVKK Aydınlatma Metni ve Açık Rıza</b></td><td><span class="aile onam">Onam</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span><span class="kt">Tıp Mrk.</span><span class="kt">ADSM</span><span class="kt">OSGB</span></td><td><span class="rz ok">Kurulu v2</span></td><td class="w">Hasta kaydında zorunlu tetikleyici</td></tr>
+        <tr class="grup"><td colspan="8">Hasta bakımı · hemşirelik (SKS HB)</td></tr>
+        <tr><td>Hasta Bakımı</td><td><code>SKS-HB-01</code></td><td><b>Hemşire Hasta Kabul ve Değerlendirme Formu</b></td><td><span class="aile deg">Değerlendirme</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span></td><td><span class="rz ok">Kurulu v2</span></td><td class="w"></td></tr><tr><td>Hasta Bakımı</td><td><code>SKS-HB-02</code></td><td><b>Düşme Riski Değerlendirme — İtaki II (yetişkin)</b></td><td><span class="aile deg">Değerlendirme</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span></td><td><span class="rz sari">Yeni sürüm var</span></td><td class="w">v2 → İtaki II ölçeği (2023); eski dolduranlar v1 ile saklanır</td></tr><tr><td>Hasta Bakımı</td><td><code>SKS-HB-03</code></td><td><b>Düşme Riski — Harizmi (çocuk)</b></td><td><span class="aile deg">Değerlendirme</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w"></td></tr><tr><td>Hasta Bakımı</td><td><code>SKS-HB-04</code></td><td><b>Bası Yarası Riski — Braden</b></td><td><span class="aile deg">Değerlendirme</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span></td><td><span class="rz ok">Kurulu v2</span></td><td class="w">Eşik ≤12 → bakım planı görevi</td></tr><tr><td>Hasta Bakımı</td><td><code>SKS-HB-05</code></td><td><b>Ağrı Değerlendirme (VAS / Wong-Baker / FLACC)</b></td><td><span class="aile deg">Değerlendirme</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span><span class="kt">Tıp Mrk.</span></td><td><span class="rz ok">Kurulu v2</span></td><td class="w"></td></tr><tr><td>Hasta Bakımı</td><td><code>SKS-HB-06</code></td><td><b>Nütrisyon Risk Taraması — NRS-2002 / STRONGkids</b></td><td><span class="aile deg">Değerlendirme</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span></td><td><span class="rz ok">Kurulu v2</span></td><td class="w"></td></tr><tr><td>Hasta Bakımı</td><td><code>SKS-HB-07</code></td><td><b>Hasta Kısıtlama (Tespit) İzlem Formu</b></td><td><span class="aile deg">Değerlendirme</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w">Hekim order + hemşire 30 dk izlem</td></tr><tr><td>Hasta Bakımı</td><td><code>SKS-HB-08</code></td><td><b>Hasta Transfer Formu (birim içi / dış kurum)</b></td><td><span class="aile kl">Kontrol listesi</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w"></td></tr><tr><td>Hasta Bakımı</td><td><code>SKS-HB-09</code></td><td><b>Taburculuk Eğitimi ve Bilgilendirme Formu</b></td><td><span class="aile kl">Kontrol listesi</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w"></td></tr><tr><td>Hasta Bakımı</td><td><code>SKS-HB-10</code></td><td><b>Hemşire Gözlem Formu (vital, aldığı-çıkardığı)</b></td><td>—</td><td><span class="tur tb">Tablo + döküm</span></td><td><span class="kt">Hastane</span></td><td><span class="rz pas">Döküm düzeni</span></td><td class="w">Vital zaman serisi tablosu; döküm düzeni resmî forma benzer</td></tr>
+        <tr class="grup"><td colspan="8">İlaç ve kan yönetimi (SKS İY / TH)</td></tr>
+        <tr><td>İlaç Yönetimi</td><td><code>SKS-IY-01</code></td><td><b>İlaç Uygulama ve İzlem Formu</b></td><td>—</td><td><span class="tur tb">Tablo + döküm</span></td><td><span class="kt">Hastane</span></td><td><span class="rz pas">Döküm düzeni</span></td><td class="w">Order/uygulama tablosu (yatan modülü)</td></tr><tr><td>İlaç Yönetimi</td><td><code>SKS-IY-02</code></td><td><b>Yüksek Riskli İlaç Çift Kontrol Formu</b></td><td><span class="aile kl">Kontrol listesi</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w"></td></tr><tr><td>Transfüzyon</td><td><code>SKS-TH-01</code></td><td><b>Kan Transfüzyonu İzlem Formu (15 dk / 1 s / bitiş)</b></td><td><span class="aile deg">Değerlendirme</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w">Tekrarlı; reaksiyon evet → bildirim</td></tr><tr><td>Transfüzyon</td><td><code>SKS-TH-02</code></td><td><b>Transfüzyon Reaksiyonu Bildirim Formu</b></td><td><span class="aile beyan">Beyan</span></td><td><span class="tur dz">Düzen standart (resmî)</span></td><td><span class="kt">Hastane</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w">Hemovijilans (Bakanlık formu) — döküm düzeni resmî</td></tr>
+        <tr class="grup"><td colspan="8">Cerrahi · anestezi (SKS CH / AN)</td></tr>
+        <tr><td>Cerrahi</td><td><code>SKS-CH-01</code></td><td><b>Güvenli Cerrahi Kontrol Listesi (Bakanlık sürümü)</b></td><td><span class="aile kl">Kontrol listesi</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span><span class="kt">Tıp Mrk.</span></td><td><span class="rz ok">Kurulu v2</span></td><td class="w">WHO 3 aşama; Kalite göstergesi</td></tr><tr><td>Cerrahi</td><td><code>SKS-CH-02</code></td><td><b>Ameliyat Öncesi Hazırlık Kontrol Listesi (servis → ameliyathane)</b></td><td><span class="aile kl">Kontrol listesi</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w"></td></tr><tr><td>Cerrahi</td><td><code>SKS-CH-03</code></td><td><b>Alet-Spanç-İğne Sayım Formu</b></td><td><span class="aile kl">Kontrol listesi</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w"></td></tr><tr><td>Anestezi</td><td><code>SKS-AN-01</code></td><td><b>Anestezi Öncesi Değerlendirme Formu (ASA)</b></td><td><span class="aile deg">Değerlendirme</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span><span class="kt">Tıp Mrk.</span></td><td><span class="rz ok">Kurulu v2</span></td><td class="w"></td></tr><tr><td>Anestezi</td><td><code>SKS-AN-02</code></td><td><b>Anestezi İzlem (intraop) Formu</b></td><td>—</td><td><span class="tur tb">Tablo + döküm</span></td><td><span class="kt">Hastane</span></td><td><span class="rz pas">Döküm düzeni</span></td><td class="w">Dakika bazlı vital — cihaz/tablo; döküm düzeni</td></tr><tr><td>Anestezi</td><td><code>SKS-AN-03</code></td><td><b>Derlenme (PACU) Değerlendirme — Aldrete</b></td><td><span class="aile deg">Değerlendirme</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span><span class="kt">Tıp Mrk.</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w"></td></tr><tr><td>Cerrahi</td><td><code>SKS-CH-04</code></td><td><b>Ameliyat Raporu (notu)</b></td><td>—</td><td><span class="tur tb">Tablo + döküm</span></td><td><span class="kt">Hastane</span><span class="kt">Tıp Mrk.</span></td><td><span class="rz pas">Döküm düzeni</span></td><td class="w">Ameliyathane modülü tablosu + e-Nabız ameliyat bilgisi</td></tr>
+        <tr class="grup"><td colspan="8">Enfeksiyon · acil · doğum · yoğun bakım</td></tr>
+        <tr><td>Enfeksiyon</td><td><code>SKS-EN-01</code></td><td><b>El Hijyeni Gözlem Formu (5 endikasyon)</b></td><td><span class="aile kl">Kontrol listesi</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span><span class="kt">Tıp Mrk.</span><span class="kt">ADSM</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w">Gözlemci doldurur; uyum % göstergesi</td></tr><tr><td>Enfeksiyon</td><td><code>SKS-EN-02</code></td><td><b>İzolasyon Önlemleri Bildirim / Takip Formu</b></td><td><span class="aile kl">Kontrol listesi</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w"></td></tr><tr><td>Acil</td><td><code>SKS-AC-01</code></td><td><b>Triyaj Formu (5 kategori)</b></td><td>—</td><td><span class="tur tb">Tablo + döküm</span></td><td><span class="kt">Hastane</span></td><td><span class="rz pas">Döküm düzeni</span></td><td class="w">Acil modülü triyaj kaydı</td></tr><tr><td>Acil</td><td><code>SKS-AC-02</code></td><td><b>Adli Vaka Kayıt ve Bildirim Formu</b></td><td><span class="aile beyan">Beyan</span></td><td><span class="tur dz">Düzen standart (resmî)</span></td><td><span class="kt">Hastane</span><span class="kt">Tıp Mrk.</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w">Resmî düzen; Cumhuriyet Savcılığına yazı</td></tr><tr><td>Doğum</td><td><code>SKS-DG-01</code></td><td><b>Partograf</b></td><td>—</td><td><span class="tur tb">Tablo + döküm</span></td><td><span class="kt">Hastane</span></td><td><span class="rz pas">Döküm düzeni</span></td><td class="w">Zaman serisi + grafik</td></tr><tr><td>Doğum</td><td><code>SKS-DG-02</code></td><td><b>Yenidoğan Değerlendirme — APGAR</b></td><td><span class="aile deg">Değerlendirme</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w"></td></tr><tr><td>Yoğun Bakım</td><td><code>SKS-YB-01</code></td><td><b>Glasgow Koma Skalası / Sedasyon (RASS) İzlem</b></td><td><span class="aile deg">Değerlendirme</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w">Tekrarlı; vital tablosuyla yan yana</td></tr>
+        <tr class="grup"><td colspan="8">Resmî bildirim formları (düzen standart) ve İSG</td></tr>
+        <tr><td>Bildirim</td><td><code>SB-014</code></td><td><b>Bildirimi Zorunlu Hastalık Formu (Form 014)</b></td><td><span class="aile beyan">Beyan</span></td><td><span class="tur dz">Düzen standart (resmî)</span></td><td><span class="kt">Hastane</span><span class="kt">Tıp Mrk.</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w">Tanı kodundan tetiklenir; USS/UHYS elektronik bildirimi öncelikli</td></tr><tr><td>Bildirim</td><td><code>ÖBS-01</code></td><td><b>Ölüm Belgesi</b></td><td>—</td><td><span class="tur dz">Düzen standart (resmî)</span></td><td><span class="kt">Hastane</span></td><td><span class="rz pas">Döküm düzeni</span></td><td class="w">ÖBS elektronik; kağıt yalnız arıza</td></tr><tr><td>Bildirim</td><td><code>GRS-01</code></td><td><b>Güvenlik Raporlama Sistemi Olay Bildirim (ilaç, cerrahi, düşme, transfüzyon, kesici-delici)</b></td><td><span class="aile beyan">Beyan</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span><span class="kt">Tıp Mrk.</span><span class="kt">ADSM</span></td><td><span class="rz ok">Kurulu v2</span></td><td class="w">Anonim/kimlikli; Kalite modülü GRS ekranına yazar</td></tr><tr><td>Bildirim</td><td><code>HHB-01</code></td><td><b>Hasta Hakları Başvuru Formu</b></td><td><span class="aile beyan">Beyan</span></td><td><span class="tur ic">İçerik standart</span></td><td><span class="kt">Hastane</span><span class="kt">Tıp Mrk.</span><span class="kt">ADSM</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w"></td></tr><tr><td>İSG</td><td><code>ÇSGB-EK2</code></td><td><b>İşe Giriş / Periyodik Muayene Formu (Ek-2)</b></td><td><span class="aile beyan">Beyan</span></td><td><span class="tur dz">Düzen standart (resmî)</span></td><td><span class="kt">OSGB</span><span class="kt">Hastane</span><span class="kt">Tıp Mrk.</span></td><td><span class="rz ok">Kurulu v2</span></td><td class="w">Çalışan bölümü SMS; çıktı resmî Ek-2 düzeni</td></tr><tr><td>İSG</td><td><code>ÇSGB-KAZA</code></td><td><b>İş Kazası ve Meslek Hastalığı Bildirim Formu (SGK)</b></td><td><span class="aile beyan">Beyan</span></td><td><span class="tur dz">Düzen standart (resmî)</span></td><td><span class="kt">OSGB</span><span class="kt">Hastane</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w">e-Bildirge / SGK elektronik; kağıt yedek</td></tr><tr><td>İSG</td><td><code>ÇSGB-DEF</code></td><td><b>Onaylı Defter Sayfası (tespit ve öneri)</b></td><td><span class="aile beyan">Beyan</span></td><td><span class="tur dz">Düzen standart (resmî)</span></td><td><span class="kt">OSGB</span></td><td><span class="rz mavi">Kurulabilir</span></td><td class="w"></td></tr>
+      </tbody>
+    </table></div>
+    <div class="ic sonuk">
+      <b>Tür:</b> <span class="tur ic">İçerik standart</span> = Bakanlık alan listesini verir, düzen serbest → form motoru şablonu olarak paketle gelir · <span class="tur dz">Düzen standart</span> = çıktı resmî forma birebir → veri form/tablodan, yazdırma düzeni döküm tasarımcısında (resmî PDF arka plan) · <span class="tur tb">Tablo + döküm</span> = veri zaten yapılandırılmış ekranda (vital, order, ameliyat notu, triyaj), yalnız yazdırma düzeni.<br>
+      <b>Paket:</b> kaynak + sürüm + yayın tarihi ile kilitli "resmî" kopya; kurum "kuruma kopyala" ile düzenler, resmî kopya güncellenince fark gösterilir. Kurum tipine göre süzülür (ADSM'de yatan formları çıkmaz). SKS denetimi: "form var / dolduruluyor / oran" Kalite göstergesine sayılır.
+    </div>
+  </div>
+  <div class="pnl" hidden>
+    <div class="toolbar"><span class="sonuk">Şablon:</span><span class="inp combo">Tümü</span><span class="sonuk">Durum:</span><span class="chip">Gönderildi</span><span class="chip">Taslak</span><span class="chip on">Tamamlandı</span><span class="chip">İmza eksik</span><span class="chip">Süresi doldu</span><span class="sonuk">Tarih:</span><span class="inp combo">Bu hafta</span><span class="sp"></span><span class="btn">📄 PDF</span><span class="btn">🔁 Yeniden gönder</span></div>
+    <div class="dg"><table>
+      <thead><tr><th>Tarih</th><th>Hasta</th><th>Şablon</th><th>Bağlam</th><th>Kanal</th><th>Dolduran</th><th>İmza</th><th>Skor / sonuç</th><th>Durum</th><th>PDF</th></tr></thead>
+      <tbody>
+        <tr><td>16.09 10:12</td><td>Ayşe Kara</td><td>İşleme özel onam — Kolonoskopi</td><td>Muayene M-2026/1183</td><td>Tablet</td><td>Hasta</td><td>✓ hasta · ✓ hekim · ✓ tanık</td><td>—</td><td><span class="rz ok">Tamamlandı</span></td><td>📄</td></tr>
+        <tr><td>16.09 09:40</td><td>Mehmet Öz</td><td>Braden</td><td>Yatış Y-2026/0412 · 3. gün</td><td>İç ekran</td><td>Hemş. D. Ak</td><td>—</td><td><span class="rz kir">12 — yüksek risk</span></td><td><span class="rz ok">Tamamlandı</span></td><td></td></tr>
+        <tr><td>16.09 08:05</td><td>Mehmet Öz</td><td>Güvenli cerrahi — Sign in</td><td>Ameliyat A-2026/0088</td><td>Ameliyathane</td><td>Anest. Dr. C. Ay</td><td>✓</td><td>7/7</td><td><span class="rz mavi">Time out bekliyor</span></td><td></td></tr>
+        <tr><td>15.09 21:16</td><td>Mehmet Demir</td><td>Ek-2 çalışan</td><td>İSG periyodik</td><td>SMS</td><td>Çalışan</td><td>Beyan ✓</td><td>3 evet</td><td><span class="rz ok">Tamamlandı</span></td><td>📄</td></tr>
+        <tr><td>15.09 17:02</td><td>Ali Yıldız</td><td>Ek-2 çalışan</td><td>İSG periyodik</td><td>SMS</td><td>—</td><td>—</td><td>—</td><td><span class="rz sari">Açılmadı</span></td><td></td></tr>
+        <tr><td>15.09 14:30</td><td>Fatma Şen</td><td>Genel tedavi onamı</td><td>Başvuru P-000151</td><td>Kiosk</td><td>Hasta</td><td><span class="rz kir">Hasta imzası yok</span></td><td>—</td><td><span class="rz kir">İmza eksik</span></td><td></td></tr>
+        <tr><td>14.09 11:00</td><td>Zeynep Ak</td><td>Memnuniyet anketi</td><td>Muayene sonrası</td><td>SMS</td><td>Hasta</td><td>—</td><td>4,6 / 5</td><td><span class="rz ok">Tamamlandı</span></td><td></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <div class="pnl" hidden>
+    <div class="dg"><table>
+      <thead><tr><th>Tetikleyici</th><th>Şablon</th><th>Kime / kanal</th><th>Ne zaman</th><th>Zorunluluk</th><th>Durum</th></tr></thead>
+      <tbody>
+        <tr><td>Yeni hasta kaydı</td><td>KVKK aydınlatma &amp; rıza</td><td>Hasta · kiosk / SMS</td><td>Kayıtta</td><td class="w">Rıza yoksa hasta kartı "rıza eksik" rozeti; SMS/e-posta gönderimi kapalı</td><td><span class="rz ok">Açık</span></td></tr>
+        <tr><td>Randevu oluşturuldu (ilk muayene)</td><td>Ön kayıt anamnezi</td><td>Hasta · SMS</td><td>Randevudan 24 s önce</td><td>—</td><td><span class="rz ok">Açık</span></td></tr>
+        <tr><td>Ameliyat planlandı</td><td>İşleme özel onam · anestezi onamı · anestezi preop</td><td>Hasta (tablet) · anestezi</td><td>Plan onayında</td><td class="w">Onam ve preop tamam değilse "Ameliyata başla" kilitli</td><td><span class="rz ok">Açık</span></td></tr>
+        <tr><td>Ameliyat başladı</td><td>Güvenli cerrahi (3 aşama)</td><td>Anestezi · hemşire · cerrah</td><td>Sign in → time out → sign out</td><td class="w">Aşama tamamlanmadan sonraki açılmaz; kalite göstergesi "uyum %"</td><td><span class="rz ok">Açık</span></td></tr>
+        <tr><td>Yatış kabul</td><td>Hemşire kabul · Braden · İtaki · NRS-2002</td><td>Hemşire · iç ekran</td><td>Kabulde; Braden/İtaki her 24 s ve durum değişince</td><td class="w">24 s geçince görev listesinde "gecikti"; skor eşiği aşınca bakım planı önerisi</td><td><span class="rz ok">Açık</span></td></tr>
+        <tr><td>FTR program açıldı / kapandı</td><td>Oswestry · DASH (bölgeye göre)</td><td>Hasta · SMS / kiosk</td><td>Kür başı ve sonu</td><td>Kalite göstergesi (ölçek zorunlu)</td><td><span class="rz ok">Açık</span></td></tr>
+        <tr><td>İSG muayene randevusu</td><td>Ek-2 çalışan</td><td>Çalışan · SMS</td><td>Randevudan 72 s önce</td><td>—</td><td><span class="rz ok">Açık</span></td></tr>
+        <tr><td>Taburcu / muayene bitti</td><td>Memnuniyet anketi</td><td>Hasta · SMS</td><td>48 s sonra, ayda en çok 1</td><td>—</td><td><span class="rz sari">Yalnız yatan</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="ic sonuk">Tetikleyici = olay + şablon + kanal + zamanlama + kilit kuralı. Olaylar mevcut modüllerden (randevu, başvuru, yatış, ameliyat, FTR, İSG) yayınlanır; form motoru dinler, `form_istek` açar. Kilit kuralı ilgili ekranda "eksik form" rozeti/uyarısı olarak görünür.</div>
+  </div>
+  <div class="pnl" hidden>
+    <div class="frm"><div class="al g4"><span class="lb">SMS şablonu (varsayılan)</span><span class="inp ">{kurum}: {form} — {link} · {saat} saat geçerli. {hekim}</span></div><div class="al"><span class="lb">Bağlantı geçerliliği</span><span class="inp ">72 saat (onam 24 s)</span></div><div class="al"><span class="lb">Hatırlatma</span><span class="inp ">24 saat sonra 1 kez</span></div><div class="al"><span class="lb">Kimlik doğrulama</span><span class="inp ">TCKN son 4 + doğum yılı · 5 deneme</span></div><div class="al"><span class="lb">Kiosk oturumu</span><span class="inp ">10 dk hareketsizlikte kapanır</span></div><div class="al"><span class="lb">İmza yöntemi (onam)</span><span class="inp ">Kanvas ıslak imza (tablet) · OTP (uzaktan) · ıslak kağıt tarama</span></div><div class="al"><span class="lb">Tanık / veli</span><span class="inp ">18 yaş altı ve vasili hastada zorunlu</span></div><div class="al"><span class="lb">PDF arşiv</span><span class="inp ">dokuman › Formlar klasörü · hasta kartına bağlı</span></div><div class="al"><span class="lb">Saklama</span><span class="inp ">Onam 20 yıl · değerlendirme 15 yıl · anket 2 yıl</span></div><div class="al g2"><span class="lb">Açık uç</span><span class="inp ">/f/{kod} · /api/acik/form/* · IP başına 30 istek/dk</span></div><div class="al"><span class="lb">Diller</span><span class="inp ">TR · EN · AR (şablon başına)</span></div><div class="al"><span class="lb">XLSForm içe alma</span><span class="inp ">Açık (select_one / integer / calculate eşlenir)</span></div></div>
+  </div>
+  <div class="statusbar"><span>Yönetim › Formlar · yetki: form.sablon (yaz) · form.gor (doldurulan) — içerik yalnız ilgili klinik rol</span><span class="sp">Veri: form_sablon · form_istek · form_kural</span></div>
+</div>
+<div class="not"><b>Form motoru.</b> Tek şablon tablosu, beş aile. Şablon: bölümler (sahip rol), alanlar (tip, koşul, hesap), bağlam, kanal, imza, sürüm. Doldurma: form_istek (hasta, bağlam, belirteç, taslak/cevap jsonb, imzalar, durum). Tetikleyiciler modül olaylarından otomatik açar, kilit kuralı ilgili ekranı bekletir. Sorgulanacak veri tabloda kalır (vital, ameliyat notu); form cevabı <code>hedefAlan</code> ile tabloya da yazılabilir (skor, kanaat).</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi. Ic ice sekmeler desteklenir.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===scope.closest('.pnl');});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+// Ic toolbar dugmeleri: data-git="dosya.html" olanlar diger mockup'a gecer.
+document.querySelectorAll('[data-git]').forEach(function(b){ b.style.cursor='pointer'; b.addEventListener('click',function(){ location.href=b.dataset.git; }); });
+</script>
+</body>
+</html>

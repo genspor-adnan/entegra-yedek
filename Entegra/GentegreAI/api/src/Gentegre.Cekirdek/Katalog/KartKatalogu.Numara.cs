@@ -108,6 +108,12 @@ public static partial class KartKatalogu
     /// </summary>
     private static KartTanimi NumaraHastaBelge() =>
         NumaraKarti("numara-hasta-belge", "public.v_numara_turu_kimlik", "Numara Türü");
+    /// <summary>
+    /// TEDARIK BELGELERI (731) - talep, teklif, mal kabul, eczane hazirlama,
+    /// ilac imha, demirbas, kalibrasyon ve is emri numaralari ayni karttan.
+    /// </summary>
+    private static KartTanimi NumaraTedarik() =>
+        NumaraKarti("numara-tedarik", "public.v_numara_turu_tedarik", "Numara Türü");
     private static KartTanimi NumaraSatis() =>
         NumaraKarti("numara-satis", "public.v_numara_turu_satis", "Satış Belgesi Türü");
     private static KartTanimi NumaraAlis() =>

@@ -277,8 +277,9 @@ public static partial class KaynakKatalogu
             new("cepTel",       "t.cep_tel",       "metin", "Cep"),
             // Randevu/basvuru hekim secimi (296): "randevu verilebilir" personel
             //   = doktor. Bolume gore suzme t.departman ile yapilir.
-            new("randevuVerilebilir", "t.randevu_verilebilir", "mantik", "Randevu",
-                Hizalama: "orta", Varsayilan: false),
+            // 711: bayrak yerine CALISMA PLANI - aktif sablonu olan personel "Randevu".
+            new("randevuVerilebilir", "public.fn_hekim_planli(t.id)", "mantik", "Randevu (plan)",
+                Hizalama: "orta", Varsayilan: false, Siralanabilir: false),
             // Ham bolum id ISTEMCIYE GELIR (297): basvuruda personel secilince
             //   bolum ONDAN doldurulur. Personel gridinde gizli - orada
             //   departmanAdi var (listeTanimlari.gizliKolonlar).
@@ -557,8 +558,10 @@ public static partial class KaynakKatalogu
                                       "metin", "Üst Birim", Filtrelenebilir: false),
             new("ustbirimId",         "d.ustbirim_id",         "sayi",  "Üst Birim Id",
                 Varsayilan: false),
-            new("randevuVerilebilir", "d.randevu_verilebilir", "mantik","Randevu",
-                Hizalama: "orta"),
+            // 711: bayrak yerine CALISMA PLANI - bolumde planli hekim var mi.
+            new("randevuVerilebilir", "public.fn_bolum_planli(d.id)", "mantik","Randevu (plan)",
+                Hizalama: "orta", Siralanabilir: false),
+            new("randevusuzKabul",    "d.randevusuz_kabul",    "mantik","Randevusuz Kabul", Hizalama: "orta"),
             new("durum",              "d.durum",               "mantik","Durum", Hizalama: "orta"),
             new("sira",               "d.sira",                "sayi",  "Sıra", Varsayilan: false),
         });

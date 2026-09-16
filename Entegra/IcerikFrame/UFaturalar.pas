@@ -2172,6 +2172,7 @@ procedure TFaturalarDlg.pmBelgeDonusturPopup(Sender: TObject);
 var
   gf : TFaturaGorevFrame;
   LTur: Integer;
+  LNereye: string;
 begin
   gf := TFaturaGorevFrame(FFrameBilgi.AnaFrameBilgi.GorevFrameOrnek);
   MenuYanitla.Visible := False;
@@ -2180,7 +2181,7 @@ begin
   mnSatisFisiniOlustur.Enabled:=False;
   KonsinyesiniOlusturMenu.Visible := gf.FAltTur = KasaTur_SatisSiparisi; //19 ise görünsün
   UretimFisiniOlutur.Visible := gf.FAltTur = KasaTur_SatisSiparisi;
-//  IptalIsaretleMenu.Enabled := FATBASLIK.FieldByName('DURUMNEREYE').AsString='';
+//  IptalIsaretleMenu.Enabled := LNereye='';
   MenuDurumuGuncelle.Visible := (gf.FAltTur = 9)or(gf.FAltTur = 19); //alış satış siparişi ise
 
   if gf.FAlttur in [109,119] then begin //konsinye ise
@@ -2191,7 +2192,7 @@ begin
     KaynakBelgeyiA1.Visible:=True;
   end else if gf.FAlttur in [101] then begin //satınalma talebi ise
     SipariiniOlutur1.Visible := True;
-//    SipariiniOlutur1.Enabled := FATBASLIK.FieldByName('DURUMNEREYE').AsString = '';
+//    SipariiniOlutur1.Enabled := LNereye = '';
     mnIrsaliyesiniOlustur.Visible:=False;
     mnFaturasiniOlustur.Visible:=False;
     mnSatisFisiniOlustur.Visible:=False;
@@ -2203,23 +2204,29 @@ begin
     mnSatisFisiniOlustur.Visible:=True;
     KaynakBelgeyiA1.Visible:=True;
   end;
-  if (FATBASLIK.FieldByName('DURUM').AsInteger <> 6) and (FATBASLIK.Active)then begin //belge iptal değil ise
+  // DURUMNEREYE her listede olmayabilir (ozel SQL ile acilan sekmeler): alan yoksa
+  //   'donusmemis' sayilir - FieldByName burada 'Field not found' ile ekrani kilitliyordu.
+  if FATBASLIK.Active and (FATBASLIK.FindField('DURUMNEREYE') <> nil) then
+    LNereye := FATBASLIK.FieldByName('DURUMNEREYE').AsString
+  else
+    LNereye := '';
+  if FATBASLIK.Active and (FATBASLIK.FieldByName('DURUM').AsInteger <> 6) then begin //belge iptal değil ise
     case FATBASLIK.FieldByName('TUR').AsInteger of
       KasaTur_AlisSiparisi, KasaTur_SatisSiparisi : begin
-             mnIrsaliyesiniOlustur.Enabled := (FATBASLIK.FieldByName('DURUMNEREYE').AsString = '')or(FATBASLIK.FieldByName('DURUMNEREYE').AsString = 'Üretim Fişine') ;
-             mnFaturasiniOlustur.Enabled := (FATBASLIK.FieldByName('DURUMNEREYE').AsString = '')or(FATBASLIK.FieldByName('DURUMNEREYE').AsString = 'Üretim Fişine') ;
+             mnIrsaliyesiniOlustur.Enabled := (LNereye = '')or(LNereye = 'Üretim Fişine') ;
+             mnFaturasiniOlustur.Enabled := (LNereye = '')or(LNereye = 'Üretim Fişine') ;
              mnSatisFisiniOlustur.Enabled := mnFaturasiniOlustur.Enabled;
-             KonsinyesiniOlusturMenu.Enabled := (FATBASLIK.FieldByName('DURUMNEREYE').AsString = '')or(FATBASLIK.FieldByName('DURUMNEREYE').AsString = 'Üretim Fişine');
-             UretimFisiniOlutur.Enabled := FATBASLIK.FieldByName('DURUMNEREYE').AsString = '';
+             KonsinyesiniOlusturMenu.Enabled := (LNereye = '')or(LNereye = 'Üretim Fişine');
+             UretimFisiniOlutur.Enabled := LNereye = '';
            end;
       109,119 : begin
-             mnIrsaliyesiniOlustur.Enabled := (FATBASLIK.FieldByName('DURUMNEREYE').AsString = '')and(FATBASLIK.FieldByName('TUR').AsInteger<>KasaTur_SatisIrsaliyesi);
-             mnFaturasiniOlustur.Enabled := FATBASLIK.FieldByName('DURUMNEREYE').AsString = '';
+             mnIrsaliyesiniOlustur.Enabled := (LNereye = '')and(FATBASLIK.FieldByName('TUR').AsInteger<>KasaTur_SatisIrsaliyesi);
+             mnFaturasiniOlustur.Enabled := LNereye = '';
            end;
       KasaTur_AlisIrsaliyesi, KasaTur_SatisIrsaliyesi: begin
 
              mnIrsaliyesiniOlustur.Enabled := False;
-             mnFaturasiniOlustur.Enabled := FATBASLIK.FieldByName('DURUMNEREYE').AsString = '';
+             mnFaturasiniOlustur.Enabled := LNereye = '';
              mnSatisFisiniOlustur.Enabled := mnFaturasiniOlustur.Enabled;
            end;
     end;
@@ -2240,7 +2247,7 @@ begin
       end;
   end;
 //  KaynakBelgeyiA1.Enabled := FATBASLIK.FieldByName('DURUMNEREDEN').AsString <> '';
-//  HedefBelgeyiA1.Enabled := FATBASLIK.FieldByName('DURUMNEREYE').AsString <> '';
+//  HedefBelgeyiA1.Enabled := LNereye <> '';
   //Tur: Giren:0,Çıkan:1 AltTur: sipariş:0,irsaliye:1,Fat:2,fiş:3,Tahakkuk:4,Tümü:-1
 
   //ExceldenBelgeEkle.Visible := gf.FAltTur in [14,15,19];
@@ -2867,7 +2874,18 @@ begin
   end;
   LSQL := YeniGelenMarker +
     ' SELECT F.*, R.KOD AS CARIKOD, R.FIRMA AS CARIAD, ' +
-    '   N'''' AS YAZIYLATOPLAM ' +
+    '   N'''' AS YAZIYLATOPLAM, ' +
+    // DONUSUM DURUMU: liste SP'si (sp_Prog_AlisSatis_IrsFatFisKons_Json2) bu iki kolonu
+    //   uretir, ham gelen SQL'i uretmiyordu -> sag tus menusu (pmBelgeDonusturPopup)
+    //   FieldByName('DURUMNEREYE') ile 'Field not found' veriyordu. Ayni ifade, yalniz
+    //   gelen turleri (10 irsaliye -> 408 fatura / 427 fis; 11 fatura donusmez).
+    '   DURUMNEREYE = CASE ' +
+    '     WHEN F.TUR=10 AND 408 IN (SELECT YERI FROM FATURA WHERE YERID IN (SELECT ID FROM FATURA WHERE FATBASID=F.ID)) THEN N''Faturaya'' ' +
+    '     WHEN F.TUR=10 AND 427 IN (SELECT YERI FROM FATURA WHERE YERID IN (SELECT ID FROM FATURA WHERE FATBASID=F.ID)) THEN N''Fişe'' ' +
+    '     ELSE N'''' END, ' +
+    '   DURUMNEREDEN = CASE ' +
+    '     WHEN EXISTS(SELECT 1 FROM FATURA F1 WHERE F1.FATBASID=F.ID AND F1.YERI IN (406,407)) THEN N''Siparişten'' ' +
+    '     ELSE N'''' END ' +
     ' FROM FATBASLIK F (NOLOCK) ' +
     '   INNER JOIN REHBER R ON R.ID = F.REHBERID ' +
     ' WHERE F.TUR=' + IntToStr(LTur) + ' AND F.EFATURADURUM IN (' + ADurumIn + ')' + AEkKosul +

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hekim Çalışma Planı — Mockup (GenoTIP AI · Medula)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .btn.mini{padding:2px 7px;font-size:10.5px;display:inline-flex}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg td code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)} .hdr.k5{grid-template-columns:repeat(5,1fr)} .hdr.k6{grid-template-columns:repeat(6,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.err{border-color:#c0392b;background:#fff6f5}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .kart.kir .d{color:var(--kirmizi)} .kart.ok .d{color:var(--ok)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)} .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)} .bar.k i{background:linear-gradient(#e06a5e,#c0392b)}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:300px 1fr 320px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .sonuc{margin:10px 12px;border:1px solid #bfe3cb;background:#eef9f1;border-radius:4px;padding:8px 10px;font-size:11.5px}
+  .sonuc.kir{border-color:#f3c4bf;background:#fdf1ef}
+  .sonuc.sari{border-color:#f2ddbf;background:#fdf8ec}
+  .sonuc b{color:var(--navy)}
+  .xml{font-family:Consolas,monospace;font-size:10.5px;background:#1f2d3a;color:#d7e3f2;padding:8px 10px;border-radius:3px;white-space:pre;overflow:auto;margin:0 12px 10px;line-height:1.5}
+  .adim{display:flex;gap:0;padding:8px 12px;flex-wrap:wrap}
+  .adim span{padding:5px 12px;border:1px solid var(--line);background:#fff;font-size:11px;color:var(--muted);position:relative}
+  .adim span+span{border-left:none}
+  .adim span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .adim span.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .icerik{padding:12px 16px;line-height:1.6}
+  .icerik h2{font-size:14px;color:var(--navy);margin:16px 0 6px;border-bottom:1px solid var(--line2);padding-bottom:3px}
+  .icerik h3{font-size:12.5px;color:#2c4a6b;margin:12px 0 4px}
+  .icerik p{margin:4px 0}
+  .icerik table{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:11.5px}
+  .icerik th,.icerik td{border:1px solid var(--line2);padding:4px 7px;text-align:left;vertical-align:top}
+  .icerik th{background:#f4f7fb;color:#3a5573;white-space:nowrap}
+  .icerik code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .kutu{border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;padding:8px 10px;margin:8px 0}
+  .yatay{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:6px 12px}
+</style>
+</head>
+<body>
+
+<style>
+  .plan{display:grid;grid-template-columns:170px repeat(7,1fr);border-top:1px solid var(--line2)}
+  .plan>div{border-bottom:1px solid var(--line2);border-right:1px solid var(--line2);padding:5px 6px;font-size:11px;min-height:54px}
+  .plan .hb{background:linear-gradient(#f4f7fb,#e7eef6);font-weight:bold;color:#3a5573;min-height:auto;padding:6px 8px}
+  .plan .hk{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .plan .hk small{display:block;font-weight:normal;color:var(--muted)}
+  .blok{border-radius:3px;padding:2px 5px;margin:1px 0;font-size:10.5px;border:1px solid var(--line2);background:#eef4fc;color:#1f4c85;white-space:nowrap}
+  .blok.dis{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .blok.kons{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .blok.izin{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .blok.kapali{background:#eceff2;color:#6b7a8b;border-style:dashed}
+  .blok .k{opacity:.75}
+  .kanal{display:inline-block;width:14px;height:14px;border-radius:3px;font-size:9.5px;text-align:center;line-height:14px;margin-left:2px;border:1px solid var(--line)}
+  .kanal.b{background:#eef4fc} .kanal.p{background:#e2f3e8} .kanal.c{background:#fdf6e3}
+  .kanal.off{opacity:.3;text-decoration:line-through}
+  .saat{display:grid;grid-template-columns:70px 1fr;gap:4px 8px;align-items:center;font-size:11px}
+  .cizgi{height:10px;background:#e7edf4;border-radius:3px;position:relative}
+  .cizgi i{position:absolute;top:0;bottom:0;border-radius:3px;background:linear-gradient(#4d8fd6,#2f6db3)}
+  .cizgi i.dis{background:linear-gradient(#5cb87a,#3f9a5e)} .cizgi i.izin{background:linear-gradient(#e06a5e,#c0392b)}
+  .cizgi i.kons{background:linear-gradient(#a88ad6,#6a3fb5)}
+  .lej{display:flex;gap:12px;padding:4px 12px;font-size:10.5px;color:var(--muted);flex-wrap:wrap}
+</style>
+
+<div class="win">
+  <div class="title">🗓 Hekim Çalışma Planı — Dr. Ayşe Kaya · Dahiliye <span class="sp">hekim × şube × bölüm × gün/saat × kanal · randevu takvimi ve kayıt kabul listesi buradan türer · Muayene › Klinik Ayarlar</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div><div class="btn">＋ Çalışma Bloğu</div><div class="btn">📋 Haftalık Şablondan Üret</div><div class="btn">🏖 İzin / İstisna Ekle</div>
+    <span class="sepv"></span><div class="btn">👥 Toplu Plan (bölüm)</div><div class="btn">📅 Takvimde Gör</div><div class="btn">🖨 Yazdır</div>
+    <span class="sepv"></span><div class="btn" data-git="muayene_karti.html">🩺 Muayene Kartı</div><div class="btn sp">✖ Kapat</div>
+  </div>
+  <div class="hdr k5" style="background:#fff8f0">
+    <div class="fld"><label class="req">Hekim</label><div class="inp ro big">Dr. Ayşe Kaya · Dahiliye Uzm. · sicil 10233</div></div>
+    <div class="fld"><label>Şubeler</label><div class="inp ro"><span class="rz mavi">Merkez</span> <span class="rz mavi">Ankara Şube</span></div></div>
+    <div class="fld"><label>Bölümler</label><div class="inp ro"><span class="rz">Dahiliye</span> <span class="rz">Check-up</span> <span class="rz pas">Acil (konsültasyon)</span></div></div>
+    <div class="fld"><label>Randevu kanalları</label><div class="inp ro"><span class="kanal b" title="Banko">B</span> Banko · <span class="kanal p" title="Portal / online">P</span> Portal · <span class="kanal c" title="Çağrı merkezi">Ç</span> Çağrı merkezi</div></div>
+    <div class="fld"><label>Tekrar</label><div class="inp">Şablon <b>her hafta otomatik</b> tekrarlar · 16.09.2026'dan itibaren · bitiş yok <span class="rz ok">yürürlükte</span></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on">Haftalık Plan</div><div class="sekme">Şablonlar</div><div class="sekme">İzin &amp; İstisnalar</div><div class="sekme">Kanal &amp; Kota</div><div class="sekme">Türetilen: Kayıt Kabul &amp; Randevu</div><div class="sekme">Bölüm Toplu Görünüm</div><div class="sekme">Kurallar</div>
+  </div>
+
+  <!-- HAFTALIK PLAN -->
+  <div class="pnl">
+    <div class="arama"><span class="chip on">Hafta: 21–27 Eylül</span><span class="chip">Sonraki</span><span class="chip">Bu dönem (tümü)</span><span class="sp"></span>
+      <span class="sonuk">Bu hafta = şablon + istisnalar, <b>otomatik türer</b>; elle yalnız istisna girilir. Blok = şube · bölüm · saat · slot · kanal.</span></div>
+    <div class="lej"><span><i class="blok" style="padding:0 6px">mavi</i> muayene (randevulu)</span><span><i class="blok dis" style="padding:0 6px">yeşil</i> ikinci şube</span><span><i class="blok kons" style="padding:0 6px">mor</i> konsültasyon (randevusuz)</span><span><i class="blok izin" style="padding:0 6px">kırmızı</i> izin / kongre</span><span><i class="blok kapali" style="padding:0 6px">gri</i> kapalı (kanal yok)</span></div>
+    <div class="plan">
+      <div class="hb">Şube · Bölüm</div><div class="hb">Pzt 21</div><div class="hb">Sal 22</div><div class="hb">Çar 23</div><div class="hb">Per 24</div><div class="hb">Cum 25</div><div class="hb">Cmt 26</div><div class="hb">Paz 27</div>
+      <div class="hk">Merkez<small>Dahiliye</small></div>
+      <div><div class="blok ">09:00–12:30 · 15 dk <span class="k">B P Ç</span></div><div class="blok ">13:30–17:00 · 15 dk <span class="k">B P</span></div></div>
+      <div><div class="blok ">09:00–12:30 · 15 dk <span class="k">B P Ç</span></div><div class="blok kons">14:00–16:00 konsültasyon <span class="k">—</span></div></div>
+      <div><div class="blok izin">Kongre · İzmir (tüm gün)</div></div>
+      <div><div class="blok ">09:00–12:30 · 15 dk <span class="k">B P Ç</span></div><div class="blok ">13:30–17:00 · 20 dk <span class="k">B</span></div></div>
+      <div><div class="blok ">09:00–13:00 · 15 dk <span class="k">B P Ç</span></div></div>
+      <div><div class="blok kapali">kapalı</div></div>
+      <div><div class="blok kapali">kapalı</div></div>
+      <div class="hk">Merkez<small>Check-up</small></div>
+      <div></div><div></div><div></div><div></div>
+      <div><div class="blok ">14:00–17:00 · 30 dk <span class="k">P</span> <span class="rz sari">portal only</span></div></div>
+      <div></div><div></div>
+      <div class="hk">Ankara Şube<small>Dahiliye</small></div>
+      <div></div><div></div><div></div><div></div><div></div>
+      <div><div class="blok dis">09:00–14:00 · 15 dk <span class="k">B Ç</span></div></div>
+      <div></div>
+      <div class="hk">Merkez<small>Acil · konsültasyon</small></div>
+      <div><div class="blok kons">çağrıya açık 17:00–20:00</div></div><div></div><div></div>
+      <div><div class="blok kons">çağrıya açık 17:00–20:00</div></div><div></div><div></div><div></div>
+    </div>
+    <div class="ic sonuk">Blok tıklanınca sağda düzenlenir: şube, bölüm, saat, slot süresi, kanal (B/P/Ç), günlük kota, "yalnız kontrol hastası", not. Aynı saatte iki şubede blok olamaz (çakışma uyarısı). Randevu ekranı bu bloklardan slot üretir; kayıt kabul "bugün çalışan hekim/bölüm" listesini buradan çeker.</div>
+  </div>
+
+  <!-- SABLONLAR -->
+  <div class="pnl" hidden>
+    <div class="ikiPanel">
+      <div>
+        <div class="grp"><div class="gb">Haftalık şablonlar <span class="sp">bir kez tanımla, döneme uygula</span></div>
+          <div class="dg"><table>
+            <thead><tr><th>Şablon</th><th>Hekim / bölüm</th><th>Günler</th><th>Saat</th><th class="orta">Slot</th><th>Kanal</th><th>Tekrar</th><th>Geçerlilik</th><th></th></tr></thead>
+            <tbody>
+              <tr class="sel"><td><b>Standart hafta</b></td><td>Dr. A. Kaya · Dahiliye · Merkez</td><td>Pzt–Cum</td><td>09:00–12:30 · 13:30–17:00</td><td class="orta">15 dk</td><td>B P Ç</td><td><span class="rz ok">her hafta</span></td><td>16.09.2026 – süresiz</td><td><span class="btn mini">Uygula</span></td></tr>
+              <tr><td>Ankara cumartesi</td><td>Dr. A. Kaya · Dahiliye · Ankara</td><td>Cmt</td><td>09:00–14:00</td><td class="orta">15 dk</td><td>B Ç</td><td><span class="rz ok">her hafta</span></td><td>16.09.2026 – süresiz</td><td><span class="btn mini">Uygula</span></td></tr>
+              <tr><td>Check-up cuması</td><td>Dr. A. Kaya · Check-up · Merkez</td><td>Cum</td><td>14:00–17:00</td><td class="orta">30 dk</td><td>P</td><td><span class="rz mavi">2 haftada bir</span></td><td>01.10 – 31.12.2026</td><td><span class="btn mini">Uygula</span></td></tr>
+              <tr><td>Yaz düzeni</td><td>Dahiliye (bölüm geneli)</td><td>Pzt–Cum</td><td>08:00–14:00</td><td class="orta">15 dk</td><td>B P Ç</td><td><span class="rz sari">her yıl · yaz</span></td><td>01.06 – 31.08 (yıllık)</td><td><span class="btn mini">Uygula</span></td></tr>
+            </tbody>
+          </table></div>
+          <div class="yatay" style="display:flex;gap:6px;padding:8px 10px"><div class="btn primary">＋ Şablon</div><div class="btn">📋 Döneme sabitle (blokları üret)</div><span class="sonuk">Şablon <b>tekrar eden</b> kuraldır: hafta geldiğinde kendiliğinden geçerli, üretim gerekmez. "Döneme sabitle" yalnız hakediş/rapor için o dönemin bloklarını dondurmak istendiğinde.</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Şablon: Standart hafta</div>
+          <div class="hdr" style="grid-template-columns:1fr 1fr">
+            <div class="fld"><label class="req">Şube</label><div class="inp combo">Merkez</div></div>
+            <div class="fld"><label class="req">Bölüm</label><div class="inp combo">Dahiliye</div></div>
+            <div class="fld"><label>Günler</label><div class="inp">☑ Pzt ☑ Sal ☑ Çar ☑ Per ☑ Cum ☐ Cmt ☐ Paz</div></div>
+            <div class="fld"><label>Slot süresi</label><div class="inp combo">15 dk</div></div>
+            <div class="fld"><label>Sabah</label><div class="inp">09:00 – 12:30</div></div>
+            <div class="fld"><label>Öğleden sonra</label><div class="inp">13:30 – 17:00</div></div>
+            <div class="fld"><label>Kanallar</label><div class="inp">☑ Banko ☑ Portal ☑ Çağrı merkezi</div></div>
+            <div class="fld"><label>Günlük kota</label><div class="inp">28 randevu · 4 ek (acil)</div></div>
+            <div class="fld"><label>Portal kotası</label><div class="inp">%40 · en erken 2 gün sonrası</div></div>
+            <div class="fld"><label>Kontrol hastası payı</label><div class="inp">%25 (15:30 sonrası)</div></div>
+            <div class="fld"><label>Tekrar</label><div class="inp combo">Her hafta</div></div>
+            <div class="fld"><label>Bitiş</label><div class="inp">☑ Süresiz · ☐ Tarihe kadar · ☐ N hafta</div></div>
+            <div class="fld" style="grid-column:1/3"><label>Değişiklik etkisi</label><div class="inp">Şablon değişince ☑ gelecek haftalara uygulanır · ☐ yalnız yeni dönem (mevcut randevular korunur, çakışanlar listelenir)</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IZIN & ISTISNA -->
+  <div class="pnl" hidden>
+    <div class="dg"><table>
+      <thead><tr><th>Tür</th><th>Başlangıç</th><th>Bitiş</th><th>Kapsam</th><th>Etkilenen randevu</th><th>Yeniden planlama</th><th>Durum</th><th></th></tr></thead>
+      <tbody>
+        <tr><td><span class="rz kir">Kongre</span></td><td>23.09.2026</td><td>23.09.2026</td><td>Tüm şubeler</td><td>14 randevu</td><td><span class="rz sari">6 taşındı · 8 aranacak</span></td><td><span class="rz ok">onaylı</span></td><td><span class="btn mini">📞 Ara listesi</span></td></tr>
+        <tr><td><span class="rz kir">Yıllık izin</span></td><td>13.10.2026</td><td>24.10.2026</td><td>Tüm şubeler</td><td>0 (kapalı)</td><td>—</td><td><span class="rz ok">onaylı</span></td><td></td></tr>
+        <tr><td><span class="rz sari">Saat değişikliği</span></td><td>30.09.2026</td><td>30.09.2026</td><td>Merkez · Dahiliye</td><td>3 randevu</td><td>13:30 yerine 15:00 başlangıç</td><td><span class="rz">bekliyor</span></td><td><span class="btn mini">Uygula</span></td></tr>
+        <tr><td><span class="rz mavi">Ek mesai</span></td><td>04.10.2026 (Cmt)</td><td>04.10.2026</td><td>Merkez · Dahiliye</td><td>+12 slot</td><td>portal kapalı, banko açık</td><td><span class="rz ok">onaylı</span></td><td></td></tr>
+        <tr><td><span class="rz pas">Resmi tatil</span></td><td>29.10.2026</td><td>29.10.2026</td><td>Kurum geneli</td><td>—</td><td>kurum takviminden</td><td><span class="rz ok">otomatik</span></td><td></td></tr>
+      </tbody>
+    </table></div>
+    <div class="ic sonuk">İstisna, plan bloğunu o gün için ezer. Kaydedilince etkilenen randevular listelenir; "taşı" hastaya SMS ile yeni slot önerir, "ara" listesi bankoya düşer. Resmi tatiller kurum takviminden otomatik gelir (fn_GT_Tatilmi karşılığı).</div>
+  </div>
+
+  <!-- KANAL & KOTA -->
+  <div class="pnl" hidden>
+    <div class="ikiPanel">
+      <div>
+        <div class="grp"><div class="gb">Kanal kuralları (hekim)</div>
+          <div class="dg"><table>
+            <thead><tr><th>Kanal</th><th class="orta">Açık</th><th>Kota</th><th>Ufuk</th><th>Kısıt</th></tr></thead>
+            <tbody>
+              <tr><td><span class="kanal b">B</span> Banko / kayıt kabul</td><td class="orta">☑</td><td>sınırsız (blok kotası)</td><td>—</td><td>aynı gün ek randevu 4</td></tr>
+              <tr><td><span class="kanal p">P</span> Portal / online</td><td class="orta">☑</td><td>%40 · 11 slot/gün</td><td>2 gün – 60 gün</td><td>yeni hasta TCKN doğrulama, iptal 24 s önce</td></tr>
+              <tr><td><span class="kanal c">Ç</span> Çağrı merkezi</td><td class="orta">☑</td><td>%30</td><td>0 – 90 gün</td><td>—</td></tr>
+              <tr><td>🏥 Konsültasyon (servis/acil)</td><td class="orta">☑</td><td>çağrıya açık saatlerde</td><td>anlık</td><td>randevusuz · muayene sırası dışı</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Slot dağılımı · Pzt 21.09 · Merkez Dahiliye</div>
+          <div class="ic">
+            <div class="saat"><span>09:00–12:30</span><div class="cizgi"><i style="left:0;width:55%"></i><i class="dis" style="left:55%;width:25%"></i><i class="kons" style="left:80%;width:12%"></i></div>
+              <span>13:30–17:00</span><div class="cizgi"><i style="left:0;width:60%"></i><i class="dis" style="left:60%;width:20%"></i></div></div>
+            <p class="sonuk" style="margin:8px 0 0">mavi banko · yeşil portal · mor çağrı merkezi · boş = açık slot. Kota dolunca kanal kapanır, banko ek randevu hakkını kullanır.</p>
+          </div>
+        </div>
+        <div class="grp"><div class="gb">Kontrol / yeni hasta</div>
+          <div class="ic">Kontrol hastası (30 gün içinde aynı hekim) %25 pay, 15:30 sonrası; yeni hasta slotu 15 dk, kontrol 10 dk (hizmet kartındaki süre plan bloğunu ezer).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TURETILEN -->
+  <div class="pnl" hidden>
+    <div class="ikiPanel">
+      <div>
+        <div class="grp"><div class="gb">Kayıt kabul: bugün çalışan bölüm / hekim <span class="sp">Merkez · Pzt 21.09 · 10:40</span></div>
+          <div class="dg"><table>
+            <thead><tr><th>Bölüm</th><th>Hekim</th><th>Şu an</th><th class="orta">Sıra</th><th class="orta">Boş slot</th><th>Kanal</th></tr></thead>
+            <tbody>
+              <tr><td>Dahiliye</td><td>Dr. A. Kaya</td><td><span class="rz ok">muayenede · 09:00–12:30</span></td><td class="orta">3</td><td class="orta">5</td><td>B P Ç</td></tr>
+              <tr><td>Dahiliye</td><td>Dr. M. Öz</td><td><span class="rz ok">muayenede · 08:30–13:00</span></td><td class="orta">1</td><td class="orta">2</td><td>B Ç</td></tr>
+              <tr><td>Kardiyoloji</td><td>Dr. S. Ay</td><td><span class="rz sari">13:00'te başlar</span></td><td class="orta">—</td><td class="orta">9</td><td>B P</td></tr>
+              <tr><td>Acil</td><td>—</td><td><span class="rz mavi">randevusuz kabul</span></td><td class="orta">4</td><td class="orta">∞</td><td>—</td></tr>
+              <tr><td>Laboratuvar</td><td>—</td><td><span class="rz mavi">randevusuz · numune 07:30–16:00</span></td><td class="orta">7</td><td class="orta">∞</td><td>—</td></tr>
+              <tr class="soluk"><td>Göz</td><td>Dr. E. Can</td><td><span class="rz pas">bugün yok · Sal/Per</span></td><td class="orta">—</td><td class="orta">—</td><td>—</td></tr>
+            </tbody>
+          </table></div>
+          <div class="ic sonuk">Liste <code>departman.randevu_verilebilir</code> bayrağından değil, plan bloklarından türer: bugün bloğu olan hekim/bölüm görünür; randevusuz kabul alan bölümler (acil, lab, radyoloji) bölüm ayarından "randevusuz kabul" ile gelir. Bayrak yalnız planı olmayan bölüm için geriye dönük varsayılan.</div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Randevu ekranı: hekim seçimi</div>
+          <div class="ic">
+            <p>Hekim listesi = seçilen şube + bölüm + tarihte bloğu olan hekimler. Slotlar bloğun süresinden; kota dolunca kanal kapanır. Portalda yalnız <span class="kanal p">P</span> açık bloklar görünür.</p>
+            <p><b>Ankara Şube · Cmt 26.09 · Dahiliye:</b> Dr. A. Kaya 09:00–14:00 (15 dk, banko/çağrı) · portal kapalı.</p>
+            <p><b>Merkez · Çar 23.09:</b> Dr. A. Kaya yok (kongre) → liste Dr. M. Öz'ü gösterir; eski randevular taşındı.</p>
+          </div>
+        </div>
+        <div class="grp"><div class="gb">Geçiş</div>
+          <div class="ic sonuk">1. adım: bayraklar ayrılır (`randevu_verilebilir`, `kayit_kabul_gorunur`, `online_randevu`). 2. adım: bu tablo (<code>hekim_calisma_plani</code>: hekim_id, sube_id, departman_id, gun, bas, bit, slot_dk, kanallar, kota, gecerli_bas/bit) + istisnalar (<code>hekim_calisma_istisna</code>). Ekranlar önce planı okur, yoksa bayrağa düşer.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOLUM TOPLU -->
+  <div class="pnl" hidden>
+    <div class="arama"><span class="chip on">Dahiliye</span><span class="chip">Kardiyoloji</span><span class="chip">Göz</span><span class="chip">Tümü</span><span class="sp"></span><div class="inp combo" style="min-width:140px">Şube: Merkez</div><div class="inp combo" style="min-width:160px">Hafta: 21–27 Eylül</div></div>
+    <div class="plan" style="grid-template-columns:170px repeat(7,1fr)">
+      <div class="hb">Hekim</div><div class="hb">Pzt</div><div class="hb">Sal</div><div class="hb">Çar</div><div class="hb">Per</div><div class="hb">Cum</div><div class="hb">Cmt</div><div class="hb">Paz</div>
+      <div class="hk">Dr. A. Kaya<small>Dahiliye</small></div>
+      <div><div class="blok ">09–12:30 · 13:30–17</div></div><div><div class="blok ">09–12:30</div><div class="blok kons">14–16</div></div><div><div class="blok izin">kongre</div></div><div><div class="blok ">09–12:30 · 13:30–17</div></div><div><div class="blok ">09–13</div></div><div><div class="blok dis">Ankara 09–14</div></div><div></div>
+      <div class="hk">Dr. M. Öz<small>Dahiliye</small></div>
+      <div><div class="blok ">08:30–13</div></div><div><div class="blok ">08:30–13</div></div><div><div class="blok ">08:30–13 · 14–18</div></div><div><div class="blok ">08:30–13</div></div><div><div class="blok ">08:30–13</div></div><div></div><div></div>
+      <div class="hk">Dr. L. Er<small>Dahiliye · yarı zamanlı</small></div>
+      <div></div><div><div class="blok ">14–18</div></div><div></div><div><div class="blok ">14–18</div></div><div></div><div></div><div></div>
+      <div class="hk" style="background:#fff8f0">Kapsama<small>bölüm geneli</small></div>
+      <div><span class="rz ok">08:30–17:00</span></div><div><span class="rz ok">08:30–18:00</span></div><div><span class="rz sari">08:30–18:00 · tek hekim</span></div><div><span class="rz ok">08:30–18:00</span></div><div><span class="rz sari">08:30–13:00 · öğleden sonra boş</span></div><div><span class="rz kir">Merkez kapalı</span></div><div><span class="rz pas">kapalı</span></div>
+    </div>
+    <div class="ic sonuk">Bölüm yöneticisi kapsama boşluklarını burada görür (Cuma öğleden sonra hekim yok); "Toplu Plan" ile bölüm şablonunu tüm hekimlere uygular, kişisel planlar üstüne yazar.</div>
+  </div>
+
+  <!-- KURALLAR -->
+  <div class="pnl" hidden>
+    <div class="grp"><div class="gb">Kurallar</div>
+      <ul class="liste">
+        <li>Haftalık plan <b>elle çizilmez</b>: şablon (her hafta / 2 haftada bir / yıllık dönem) kendiliğinden sonraki haftaya geçer; elle yalnız istisna (izin, saat değişikliği, ek mesai) girilir.</li>
+        <li>Randevu yalnız bloğu olan hekim/şube/bölüm/saatte verilir; blok yoksa hekim listede çıkmaz (bayrak değil, plan).</li>
+        <li>Aynı hekim aynı saatte iki şubede planlanamaz; aynı bölümde çakışan blok birleştirilir.</li>
+        <li>İstisna bloğu ezer; etkilenen randevular kaydedilirken listelenir, taşıma/arama listesi üretilir.</li>
+        <li>Slot süresi: hizmet kartı süresi > blok süresi > bölüm varsayılanı.</li>
+        <li>Kanal kotası dolunca o kanal kapanır; banko "ek randevu" hakkını kullanır (günlük sınır).</li>
+        <li>Plan geçmişi tutulur: geçmiş tarihli blok değiştirilmez, yalnız yeni dönem açılır (hakediş bu bloklara bakar).</li>
+        <li>Bölüm bazlı "randevusuz kabul" (acil, lab, radyoloji) plan gerektirmez; kayıt kabul listesinde hep görünür.</li>
+        <li>Planı olmayan hekim için eski bayrak (<code>randevu_verilebilir</code>) geçiş süresince varsayılan sayılır.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="statusbar"><span>Dr. A. Kaya · 2 şube · 3 bölüm · 3 şablon (otomatik tekrar) · 21 blok/hafta · 1 istisna</span><span class="sp">Kaynak: <code>hekim_calisma_plani</code> · <code>hekim_calisma_istisna</code> · <code>hekim_calisma_sablon</code> · randevu.slot ← plan</span></div>
+</div>
+<div class="not"><b>Hekim çalışma planı</b> — "randevu verilebilir" / "kayıt kabulde görünür" bayraklarının yerine geçen model: hekim × şube × bölüm × gün/saat × kanal blokları. Randevu takvimi slotlarını, kayıt kabul "bugün çalışan bölüm/hekim" listesini ve portalın hekim seçimini bu bloklar üretir. Şablonlar döneme uygulanır, izin/kongre/saat değişikliği istisna olarak bloğu ezer ve etkilenen randevuları yönetir; bölüm görünümü kapsama boşluklarını gösterir. Geçiş: önce bayraklar ayrılır, plan tablosu gelince ekranlar planı, yoksa bayrağı okur.</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi. Ic ice sekmeler desteklenir.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===scope.closest('.pnl');});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+// Ic toolbar dugmeleri: data-git="dosya.html" olanlar diger mockup'a gecer.
+document.querySelectorAll('[data-git]').forEach(function(b){ b.style.cursor='pointer'; b.addEventListener('click',function(){ location.href=b.dataset.git; }); });
+</script>
+</body>
+</html>

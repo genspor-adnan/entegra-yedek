@@ -150,17 +150,17 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
     end
   end
   object PageControl1: TPageControl
-    Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 528
     Height = 592
     ActivePage = TsGenel
     Align = alClient
+    Images = Tablo.PNGImageList2
     TabOrder = 0
     OnChange = PageControl1Change
     object TsGenel: TTabSheet
-      Caption = 'Genel'
+      Caption = 'Genel  '
       ImageIndex = 11
       object Label2: TLabel
         Left = 5
@@ -223,7 +223,7 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
       end
       object RadioStokDurum: TcxRadioGroup
         Left = 163
-        Top = 117
+        Top = 93
         Caption = 'Stok Durum Kontrol Kural'#305
         Properties.Items = <
           item
@@ -244,6 +244,7 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
         Left = 5
         Top = 304
         Caption = 'Varsay'#305'lan Birim'
+        Transparent = True
       end
       object cbVarsBrm: TcxImageComboBox
         Left = 230
@@ -464,7 +465,7 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
       end
       object checkLokasyonVar: TcxCheckBox
         Left = 165
-        Top = 204
+        Top = 180
         Caption = 'Stok hareketleri lokasyonlara g'#246're yap'#305'ls'#305'n'
         Properties.ImmediatePost = True
         Properties.NullStyle = nssUnchecked
@@ -473,21 +474,21 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
       end
       object chckStokSeviyeSorma: TcxCheckBox
         Left = 165
-        Top = 226
+        Top = 202
         Caption = 'Stok seviyeleri yeni kart'#39'da sorulsun'
         TabOrder = 20
         Transparent = True
       end
       object CheckOtomatikKombinasyon: TcxCheckBox
         Left = 165
-        Top = 248
+        Top = 224
         Caption = 'Varolmayan Stok Boyutlar'#305'n'#305' Oto. Olu'#351'tur'
         TabOrder = 21
         Transparent = True
       end
       object BtnMuhasebKodlari: TButton
-        Left = 162
-        Top = 89
+        Left = 339
+        Top = 6
         Width = 156
         Height = 25
         Caption = 'Muhasebe Kodlar'#305
@@ -523,7 +524,7 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
       end
       object RadioStokMaliyet: TcxRadioGroup
         Left = 327
-        Top = 117
+        Top = 93
         Caption = 'Stok Maliyet Hesap Y'#246'ntemi'
         Properties.ImmediatePost = True
         Properties.Items = <
@@ -544,8 +545,8 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
         Width = 158
       end
       object cxButton1: TcxButton
-        Left = 327
-        Top = 89
+        Left = 337
+        Top = 33
         Width = 158
         Height = 25
         Caption = 'T'#252'm Stok Maliyetlerini Yenile'
@@ -554,9 +555,19 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
       end
       object CheckMuhasebeKodlar: TcxCheckBox
         Left = 165
-        Top = 271
+        Top = 247
         Caption = 'Stok Kart'#305'nda Muhasebe Kodlar'#305' G'#246'r'#252'ns'#252'n'
         TabOrder = 27
+        Transparent = True
+      end
+      object CheckRafOmruZorunlu: TcxCheckBox
+        Left = 165
+        Top = 270
+        Caption = 
+          'Raf '#214'mr'#252' Zorunlu (izlem giri'#351'inde '#220'RT/SKT raf '#246'mr'#252'yle e'#351'itlensin' +
+          ')'
+        Properties.NullStyle = nssUnchecked
+        TabOrder = 29
         Transparent = True
       end
       object CheckUrunNoTek: TcxCheckBox
@@ -1387,16 +1398,15 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
     end
   end
   object tabDepolar: TFDQuery
-    Connection = Tablo.FDCnn
     BeforeEdit = tabDepolarBeforeEdit
     BeforePost = tabDepolarBeforePost
     AfterPost = tabDepolarAfterPost
     OnNewRecord = tabDepolarNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from DEPOLAR ')
-    Left = 152
-    Top = 108
+    Left = 136
+    Top = 68
   end
   object dtsDepolar: TDataSource
     DataSet = tabDepolar
@@ -1406,7 +1416,6 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
   end
   object TabListeDuzenle: TFDQuery
     Connection = Tablo.FDCnn
-    ParamData = <>
     SQL.Strings = (
       
         'select * from GENINI where BOLUM=0 and ANAHTAR like '#39'%StokKart_%' +
@@ -1426,9 +1435,8 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
     Top = 153
   end
   object TabStokBoyutlar: TFDQuery
-    Connection = Tablo.FDCnn
     AfterPost = TabStokBoyutlarAfterPost
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from GENINI'
       ''
@@ -1441,23 +1449,21 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
   object DtsBoyutKombinasyon: TDataSource
     DataSet = TabBoyutKombinasyon
     OnStateChange = DtsBoyutKombinasyonStateChange
-    Left = 460
-    Top = 297
+    Left = 492
+    Top = 249
   end
   object TabBoyutKombinasyon: TFDQuery
-    Connection = Tablo.FDCnn
     AfterPost = TabBoyutKombinasyonAfterPost
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from STOKBOYUTGRUPLARI')
     Left = 202
     Top = 186
   end
   object TabBarkodAyar: TFDQuery
-    Connection = Tablo.FDCnn
     BeforePost = TabBarkodAyarBeforePost
     OnNewRecord = TabBarkodAyarNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from BARKODAYARLAR'
       'where SUBEID=0')
@@ -1471,21 +1477,19 @@ object OpsiyonStokDlg: TOpsiyonStokDlg
     Top = 179
   end
   object TabKarekodAyar: TFDQuery
-    Connection = Tablo.FDCnn
     BeforePost = TabKarekodAyarBeforePost
     OnNewRecord = TabKarekodAyarNewRecord
-    ParamData = <>
+    Connection = Tablo.FDCnn
     SQL.Strings = (
       'select * from BARKODAYARLAR'
       'where SUBEID=100')
-    Left = 345
-    Top = 322
+    Left = 361
+    Top = 218
   end
   object DtsKarekodAyar: TDataSource
     DataSet = TabKarekodAyar
     OnStateChange = DtsKarekodAyarStateChange
-    Left = 225
-    Top = 323
+    Left = 153
+    Top = 267
   end
 end
-

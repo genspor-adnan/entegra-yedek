@@ -132,10 +132,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
       PopupMenu = PopupMenuEBelge
       OnExitPage = FaturaEkrExitPage
       OnNextButtonClick = FaturaEkrNextButtonClick
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel3: TPanel
         Left = 0
         Top = 285
@@ -1704,10 +1700,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
         object SheetFatBaslik: TcxTabSheet
           Caption = 'Genel Bilgiler'
           ImageIndex = 11
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelUst: TPanel
             Left = 0
             Top = 0
@@ -2623,10 +2615,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
         object SheetEkAlanlar: TcxTabSheet
           Caption = 'Ek Alanlar'
           ImageIndex = 19
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelEkAlanlar: TPanel
             Left = 0
             Top = 0
@@ -2791,8 +2779,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
       VisibleButtons = [bkBack, bkNext, bkFinish, bkCancel]
       OnPage = DetayEkrPage
       OnExitPage = DetayEkrExitPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar1: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -3206,8 +3192,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
       Caption = 'DokumanEkr'
       OnEnterPage = DokumanEkrEnterPage
       OnPage = DokumanEkrPage
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 575
@@ -3268,7 +3252,6 @@ object FaturaWizardDlg: TFaturaWizardDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
-        ExplicitTop = 554
         AnchorX = 1110
       end
       object GridYorum: TcxGrid

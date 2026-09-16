@@ -789,6 +789,44 @@ public sealed partial class BelgeDeposu
              --   veritabani da zaten birakmiyor (NO ACTION).
              or exists (select 1 from public.sigorta_provizyon_satir sp
                          where sp.belge_satir_id = s.id)
+             -- AMELIYATIN ISLEM / MALZEME SATIRI (720/721): radyoloji istemiyle
+             --   ayni kural. Ucret satiri silinip yeniden yazilsa yeni id alir;
+             --   ameliyatin "faturalandi" bagi yok olmus bir satiri gosterir ve
+             --   tekrar faturalama kalemi "zaten aktarilmis" sayip atlar -
+             --   ameliyatin ucreti belgeden sessizce duser.
+             or exists (select 1 from public.ameliyat_islem ai
+                         where ai.belge_satir_id = s.id)
+             or exists (select 1 from public.ameliyat_sarf asf
+                         where asf.belge_satir_id = s.id)
+             -- DIS SEANS ISLEMI / DIS LAB IS EMRI / MEDULA ISLEMI: ucu de
+             --   belge_satir'a NO ACTION ile bagliydi ama bu listede yoktu -
+             --   o satiri kullanan basvuru BIR DAHA KAYDEDILEMIYORDU
+             --   ("..._belge_satir_id_fkey" hatasi, kullanicinin o sirada
+             --   yaptigi isle ilgisiz bir mesajla). KorunanSatirTestleri
+             --   ucunu de isaret ediyordu.
+             or exists (select 1 from public.dis_seans_islem dsi
+                         where dsi.belge_satir_id = s.id)
+             or exists (select 1 from public.dis_lab_isemri dli
+                         where dli.alis_belge_satir_id = s.id)
+             or exists (select 1 from public.medula_islem mi
+                         where mi.belge_satir_id = s.id)
+             -- SIPARISE DONUSMUS SATINALMA TALEP SATIRI (724): talep satiri
+             --   "hangi siparis satiri bunu karsiladi" bagini tasir. Alis
+             --   siparisi duzenlenip satirlar yeniden yazilsa satir yeni id
+             --   alir; talep "karsilandi" gorunur ama gosterdigi satir yok
+             --   olmustur - ne siparise, ne gelen mala baglanabilir. FK
+             --   NO ACTION oldugu icin veritabani zaten birakmaz: siparis
+             --   BIR DAHA KAYDEDILEMEZ.
+             or exists (select 1 from public.satinalma_talep_satir sts
+                         where sts.belge_satir_id = s.id)
+             -- MUAYENE EDILMIS IRSALIYE SATIRI (733): mal kabul tutanaginin
+             --   satiri hangi irsaliye satirinin muayenesi oldugunu tutar.
+             --   Irsaliye duzenlenip satirlar yeniden yazilsa satir yeni id
+             --   alir; tutanak artik var olmayan bir satiri gosterir ve
+             --   "neyin muayenesi" sorusu yanitsiz kalir. FK NO ACTION oldugu
+             --   icin veritabani da birakmaz: irsaliye BIR DAHA KAYDEDILEMEZ.
+             or exists (select 1 from public.satinalma_kabul_satir sks
+                         where sks.belge_satir_id = s.id)
              -- TAHSILAT DAGITIMI OLAN SATIR: kasa_islem_dagitim satira
              --   CASCADE ile bagli; satir silinip yeniden yazilinca dagitim
              --   (ve ona bagli hakedis_satir) sessizce yok oluyordu. Basvuru

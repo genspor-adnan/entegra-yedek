@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Gentegre.Veri;
 
 namespace Gentegre.Api.Servisler;
@@ -49,6 +49,15 @@ public static class ZamanliIsler
         //   süre sınırı koyuyor). Hesap tanımlı değilse iş SESSİZCE BAŞARILI
         //   sayılmaz - sonuç metni durumu söyler, yoksa kurum gönderim
         //   yapıldığını sanırdı.
+        // MEDULA KUYRUĞU (707): bekleyen / süresi gelen çağrılar. Kapı kapalıysa
+        //   ilk 2001'de durur (gerisi bekler) - sonuç metni bunu söyler.
+        ["medula.kuyruk"] = async (servisler, iptal) =>
+        {
+            var medula = servisler.GetRequiredService<MedulaServisi>();
+            var s = await medula.KuyrukCalistirAsync(200, 0, null, "zamanli", false, iptal);
+            return s.aciklama;
+        },
+
         ["enabiz.gonder"] = async (servisler, iptal) =>
         {
             var gonderim = servisler.GetRequiredService<EnabizGonderimi>();
@@ -93,6 +102,25 @@ public static class ZamanliIsler
                 ?? "Sonuc okunamadi.";
         },
 
+        // KRITIK STOK -> SATINALMA TALEBI (732). Depo basina TEK talep acar;
+        //   acik talebi ya da acik siparisi olan kalem atlanir.
+        //
+        //   SATIR TETIGI DEGIL ZAMANLI IS: tetik belge kaydinin icinde
+        //   calisirdi ve satinalma ayari bozuksa hastaya verilen ilacin cikis
+        //   fisi de kaydedilemezdi. Depo hareketi hicbir kosulda satinalma
+        //   ayarina bagli olmamali (bkz. db/732 basligi).
+        //
+        //   VARSAYILAN KAPALI: fonksiyon `satinalma.kritik_stok_aktif`
+        //   acilmadan hicbir sey yapmaz ve kapali oldugunu SOYLER - kapinin
+        //   nerede oldugu gorunsun (`hizmet.oto_pasif` deseni).
+        ["satinalma.kritik_stok"] = async (servisler, iptal) =>
+        {
+            var veri = servisler.GetRequiredService<VeriKaynagi>();
+            return await veri.TekDegerAsync<string>(
+                "select aciklama from public.fn_kritik_stok_talep(null, false)", null, iptal)
+                ?? "Sonuc okunamadi.";
+        },
+
         // YATAK UCRETI TAHAKKUKU (700): bir onceki gunun yatak ve refakat
         //   ucreti. GECE calisir - gun icinde calissaydi aksam nakil olan
         //   hastanin gunu yanlis yataga yazilirdi.
@@ -116,6 +144,22 @@ public static class ZamanliIsler
             return s.Aciklama;
         },
 
+        // KLINIK KALITE DONEM HESABI (711/713/714): rehberin ICD/SUT/ATC kod
+        //   kumelerini HBYS verisinin uzerinde calistirip gosterge pay/paydasini
+        //   uretir. GECE calisir - butun belge/tani/recete tablolarini tarar.
+        //
+        //   IKI DONEM hesaplanir (guncel + onceki): izlem penceresi olan
+        //   gostergelerde pay olayi donem KAPANDIKTAN sonra dogabiliyor
+        //   ("ilk 60 gunde reoperasyon" aralik ameliyatinda subatta olur).
+        //   Kesinlesmis satira motor dokunmaz, yani tazeleme kullanici donemi
+        //   kapatana kadar surer.
+        ["klinik.kalite"] = async (servisler, iptal) =>
+        {
+            var veri = servisler.GetRequiredService<VeriKaynagi>();
+            return await veri.TekDegerAsync<string>(
+                "select aciklama from public.fn_klinik_kalite_gece()", null, iptal)
+                ?? "Sonuc okunamadi.";
+        },
         // CIHAZ KLASOR TARAMA (432): klasore dosya birakan cihazlar. MLLP
         //   dinleyicisi surekli acik oldugu icin ise ihtiyaci yok; klasor
         //   izleme ise yoklamayla yurur.

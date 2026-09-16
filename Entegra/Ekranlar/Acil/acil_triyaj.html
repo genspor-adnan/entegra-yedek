@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acil Servis — Triyaj ve Kabul — Mockup (GenoTIP AI · Acil)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🚨 Acil Servis — Triyaj ve Kabul</span>
+    <span class="sp">16.09.2026 · 16:45 · Merkez · bekleyen 14 · içeride 23</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary">＋ Hasta Kabul (Triyaj)</div>
+    <div class="btn">🆔 Kimliksiz Hasta</div>
+    <div class="sepv"></div>
+    <div class="btn" data-git="acil_takip_panosu.html">📺 Takip Panosu</div>
+    <div class="btn" data-git="acil_hasta_karti.html">🗂️ Hasta Kartı</div>
+    <div class="sepv"></div>
+    <div class="btn">🔁 Triyajı Yükselt</div>
+    <div class="btn pas">🚑 Sevk</div>
+    <div class="sp"></div>
+    <div class="btn">🖨️ Yazdır</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart kir"><div class="b">Kırmızı (1-2)</div><div class="d">3</div></div>
+    <div class="kart sari"><div class="b">Sarı (3)</div><div class="d">11</div></div>
+    <div class="kart ok"><div class="b">Yeşil (4-5)</div><div class="d">9</div></div>
+    <div class="kart"><div class="b">Triyaj bekleyen</div><div class="d">14</div></div>
+    <div class="kart sari"><div class="b">Hedef aşan</div><div class="d">4 <small>ilk muayene</small></div></div>
+    <div class="kart"><div class="b">Ort. kapı-hekim</div><div class="d">18 <small>dk</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="bekleyen">Triyaj Bekleyen<span class="sy">14</span></div>
+    <div class="sekme" data-s="icerde">Acil İçinde<span class="sy">23</span></div>
+    <div class="sekme" data-s="kriter">Triyaj Ölçütleri</div>
+  </div>
+
+  <!-- ==================================================== BEKLEYEN ===== -->
+  <div class="pnl" data-s="bekleyen">
+    <div class="arama">
+      <div class="kutu">🔍 Ad, TCKN ya da protokol…</div>
+      <span class="chip on">Tümü <b>14</b></span>
+      <span class="chip">Kırmızı <b>3</b></span>
+      <span class="chip">Sarı <b>11</b></span>
+      <span class="chip">Yeşil <b>9</b></span>
+      <span class="chip">112 ile gelen <b>5</b></span>
+      <span class="chip">Adli vaka <b>2</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:95px" class="orta">Triyaj</th>
+          <th style="width:185px">Hasta</th>
+          <th>Şikâyet</th>
+          <th style="width:130px">Geliş</th>
+          <th style="width:95px" class="orta">Geliş Saati</th>
+          <th style="width:100px" class="sag">Bekleme</th>
+          <th style="width:130px" class="orta">Hedef</th>
+          <th style="width:140px">Vital</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="orta"><span class="tri k1"></span><b>1</b></td>
+            <td>Yusuf Bal · 57 y · E</td>
+            <td>Göğüs ağrısı, terleme — <b>EKG ST elevasyonu</b></td>
+            <td>112 <span class="rz kir">Ambulans</span></td>
+            <td class="orta">16:41</td><td class="sag"><b>4 dk</b></td>
+            <td class="orta"><span class="rz ok">Hemen · uyuldu</span></td>
+            <td class="sonuk">TA 90/60 · Nb 112</td></tr>
+          <tr class="tik"><td class="orta"><span class="tri k2"></span><b>2</b></td>
+            <td>Ayten Koç · 74 y · K</td>
+            <td>Ani konuşma bozukluğu, sağ kolda güçsüzlük — <b>inme şüphesi</b></td>
+            <td>112 <span class="rz kir">Ambulans</span></td>
+            <td class="orta">16:29</td><td class="sag"><b>16 dk</b></td>
+            <td class="orta"><span class="rz kir">10 dk · aşıldı</span></td>
+            <td class="sonuk">TA 175/95 · Ş 36,4</td></tr>
+          <tr class="tik"><td class="orta"><span class="tri k2"></span><b>2</b></td>
+            <td>Bebek Demir · 8 ay · E</td>
+            <td>Ateş 39,4 · havale öyküsü</td>
+            <td>Yeşil alan</td>
+            <td class="orta">16:33</td><td class="sag"><b>12 dk</b></td>
+            <td class="orta"><span class="rz kir">10 dk · aşıldı</span></td>
+            <td class="sonuk">Ş 39,4 · Nb 158</td></tr>
+          <tr class="tik"><td class="orta"><span class="tri k3"></span>3</td>
+            <td>Mehmet Aksoy · 41 y · E</td>
+            <td>Karın ağrısı, kusma</td><td>Kendi imkânı</td>
+            <td class="orta">16:12</td><td class="sag">33 dk</td>
+            <td class="orta"><span class="rz sari">60 dk</span></td>
+            <td class="sonuk">TA 130/80 · Ş 37,1</td></tr>
+          <tr class="tik"><td class="orta"><span class="tri k3"></span>3</td>
+            <td>Seda Arı · 28 y · K</td>
+            <td>Trafik kazası — <span class="rz mor">Adli</span></td>
+            <td>112</td>
+            <td class="orta">16:05</td><td class="sag">40 dk</td>
+            <td class="orta"><span class="rz sari">60 dk</span></td>
+            <td class="sonuk">TA 120/75 · GKS 15</td></tr>
+          <tr class="tik"><td class="orta"><span class="tri k4"></span>4</td>
+            <td>Emre Tan · 33 y · E</td>
+            <td>Bilek burkulması</td><td>Kendi imkânı</td>
+            <td class="orta">15:48</td><td class="sag">57 dk</td>
+            <td class="orta"><span class="rz">120 dk</span></td>
+            <td class="sonuk">stabil</td></tr>
+          <tr class="tik"><td class="orta"><span class="tri k5"></span>5</td>
+            <td>Kimliksiz · ~50 y · E</td>
+            <td>Bilinç bulanıklığı — kimlik yok</td><td>Polis</td>
+            <td class="orta">15:20</td><td class="sag">85 dk</td>
+            <td class="orta"><span class="rz">240 dk</span></td>
+            <td class="sonuk">GKS 13</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Liste <b>triyaja göre</b> sıralı, geliş saatine göre değil.</span>
+      <span class="sp">Hedef süresi aşan satır kırmızıya döner — bekleme uzadıkça değil,
+        <b>hedefi aştığında</b>.</span>
+    </div>
+  </div>
+
+  <!-- ===================================================== İÇERİDE ===== -->
+  <div class="pnl" data-s="icerde" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Hasta ya da yatak…</div>
+      <span class="chip on">Tümü <b>23</b></span>
+      <span class="chip">Resüsitasyon <b>2</b></span>
+      <span class="chip">Müşahede <b>9</b></span>
+      <span class="chip">Sonuç bekleyen <b>7</b></span>
+      <span class="chip">Yatış bekleyen <b>3</b></span>
+      <span class="chip">4 saati aşan <b>5</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:85px">Yatak</th>
+          <th style="width:80px" class="orta">Triyaj</th>
+          <th style="width:175px">Hasta</th>
+          <th>Ön Tanı</th>
+          <th style="width:140px">Hekim</th>
+          <th style="width:100px" class="sag">Süre</th>
+          <th style="width:145px" class="orta">Aşama</th>
+          <th style="width:130px">Bekleyen</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>R-1</b></td><td class="orta"><span class="tri k1"></span>1</td>
+            <td>Halil Uz · 63 y</td><td>STEMI — kateter çağrıldı</td><td>Dr. Nöbetçi</td>
+            <td class="sag">22 dk</td>
+            <td class="orta"><span class="rz kir">Resüsitasyon</span></td>
+            <td class="sonuk">Kardiyoloji</td></tr>
+          <tr class="tik"><td><b>R-2</b></td><td class="orta"><span class="tri k1"></span>1</td>
+            <td>Nuray Sert · 81 y</td><td>Solunum yetmezliği</td><td>Dr. Nöbetçi</td>
+            <td class="sag">1 sa 04 dk</td>
+            <td class="orta"><span class="rz kir">Resüsitasyon</span></td>
+            <td class="sonuk">YB yatak</td></tr>
+          <tr class="tik"><td>M-3</td><td class="orta"><span class="tri k3"></span>3</td>
+            <td>Ali Yurt · 45 y</td><td>Renal kolik</td><td>Dr. Acar</td>
+            <td class="sag">1 sa 38 dk</td>
+            <td class="orta"><span class="rz sari">Tetkik</span></td>
+            <td class="sonuk">BT sonucu</td></tr>
+          <tr class="tik"><td>M-5</td><td class="orta"><span class="tri k3"></span>3</td>
+            <td>Sibel Çam · 52 y</td><td>Akut gastroenterit</td><td>Dr. Acar</td>
+            <td class="sag">2 sa 12 dk</td>
+            <td class="orta"><span class="rz mavi">Tedavi</span></td>
+            <td class="sonuk">İV sıvı bitimi</td></tr>
+          <tr class="tik"><td>M-7</td><td class="orta"><span class="tri k2"></span>2</td>
+            <td>Kemal Sarı · 69 y</td><td>Üst GİS kanaması</td><td>Dr. Acar</td>
+            <td class="sag"><b>4 sa 25 dk</b></td>
+            <td class="orta"><span class="rz kir">Yatış bekliyor</span></td>
+            <td class="sonuk">Dahiliye yatak yok</td></tr>
+          <tr class="tik"><td>M-8</td><td class="orta"><span class="tri k4"></span>4</td>
+            <td>Zehra Un · 24 y</td><td>Alerjik reaksiyon</td><td>Dr. Acar</td>
+            <td class="sag">48 dk</td>
+            <td class="orta"><span class="rz ok">Taburcu hazır</span></td>
+            <td class="sonuk">Reçete · epikriz</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>4 saati aşan</b> hasta ayrı çiple süzülür — acil tıkanmasının erken işareti.</span>
+      <span class="sp">"Bekleyen" sütunu hastanın kime/neye takıldığını söyler.</span>
+    </div>
+  </div>
+
+  <!-- ===================================================== ÖLÇÜTLER ===== -->
+  <div class="pnl" data-s="kriter" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px" class="orta">Düzey</th>
+          <th style="width:150px">Renk / Ad</th>
+          <th>Tanım</th>
+          <th style="width:150px" class="orta">Hedef (ilk muayene)</th>
+          <th style="width:130px" class="orta">Alan</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="orta"><span class="tri k1"></span><b>1</b></td>
+            <td>Kırmızı — Resüsitasyon</td>
+            <td>Hayatı tehdit eden; havayolu, solunum ya da dolaşım desteği gerekiyor</td>
+            <td class="orta"><b>Hemen</b></td>
+            <td class="orta">Resüsitasyon</td></tr>
+          <tr class="tik"><td class="orta"><span class="tri k2"></span><b>2</b></td>
+            <td>Turuncu — Acil</td>
+            <td>Yüksek risk; hızla kötüleşebilir (inme, göğüs ağrısı, ateşli bebek)</td>
+            <td class="orta"><b>10 dk</b></td>
+            <td class="orta">Kırmızı alan</td></tr>
+          <tr class="tik"><td class="orta"><span class="tri k3"></span>3</td>
+            <td>Sarı — Acele</td>
+            <td>Birden çok kaynak gerekiyor; stabil ama beklemesi sakıncalı</td>
+            <td class="orta">60 dk</td>
+            <td class="orta">Sarı alan</td></tr>
+          <tr class="tik"><td class="orta"><span class="tri k4"></span>4</td>
+            <td>Yeşil — Az acil</td>
+            <td>Tek kaynak yeterli (röntgen ya da pansuman)</td>
+            <td class="orta">120 dk</td>
+            <td class="orta">Yeşil alan</td></tr>
+          <tr class="tik"><td class="orta"><span class="tri k5"></span>5</td>
+            <td>Mavi — Acil değil</td>
+            <td>Kaynak gerekmiyor; poliklinik işi</td>
+            <td class="orta">240 dk</td>
+            <td class="orta">Yeşil alan</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Triyaj düzeyi <b>yalnız yükseltilebilir</b> — düşürmek hekim kararı ve gerekçe ister.</span>
+      <span class="sp">Her değişiklik kim/ne zaman ile birlikte saklanır.</span>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Bekleyen: <b>14</b></span>
+    <span>İçeride: <b>23</b></span>
+    <span>Kapasite: <b>28 yatak</b></span>
+    <span class="sp">Doluluk %82</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran notları.</b>
+  <ul>
+    <li><b>Sıralama triyaja göre, geliş saatine göre değil.</b> Acil servisin tek kuralı bu; geliş
+      sırası listelenseydi ekran, yapılması gereken işin tersini gösterirdi.</li>
+    <li><b>Hedef süresi düzeye bağlı</b> (hemen · 10 · 60 · 120 · 240 dk) ve satır ancak <i>hedefi
+      aştığında</i> kırmızıya döner. "Uzun bekleyen"i kırmızı yapsaydık, 85 dakika bekleyen yeşil
+      hasta, 12 dakika bekleyen turuncu bebekten daha acil görünürdü.</li>
+    <li><b>Triyaj düzeyi yalnız yükseltilebilir.</b> Düşürme hekim kararı ve gerekçe ister; aksi
+      halde kalabalıkta liste "temizlemek" için düzey düşürülür.</li>
+    <li><b>Kimliksiz hasta ayrı giriş.</b> Bilinci kapalı hastayı kimlik bulunana kadar bekletmek
+      yerine geçici protokolle kabul edilir; kimlik sonradan eşleştirilir.</li>
+    <li><b>"4 saati aşan" ayrı çip</b> — acil tıkanmasının (yatak yokluğunun) erken işareti ve
+      SKS'nin de izlediği gösterge.</li>
+  </ul>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acil Servis — Hasta Kartı — Mockup (GenoTIP AI · Acil)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🗂️ Acil Hasta Kartı — AC-2609-0338</span>
+    <span class="sp">Ayten Koç · 74 y · K · <span class="tri k2"></span>Triyaj 2 · İNME ŞÜPHESİ</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="acil_triyaj.html">◀ Triyaj</div>
+    <div class="sepv"></div>
+    <div class="btn ok">🩺 Hekim Gördü</div>
+    <div class="btn primary">⚡ İnme Protokolü Başlat</div>
+    <div class="btn">🧪 İstem</div>
+    <div class="btn">💊 Order</div>
+    <div class="sepv"></div>
+    <div class="btn">🏥 Yatış İste</div>
+    <div class="btn">🚑 Sevk</div>
+    <div class="btn">🚪 Taburcu</div>
+    <div class="sp"></div>
+    <div class="btn">🖨️ Yazdır</div>
+  </div>
+
+  <div class="hdr k6">
+    <div class="fld"><label>Hasta</label><div class="inp big ro">Ayten Koç · 74 y · K</div></div>
+    <div class="fld"><label>Protokol</label><div class="inp ro">AC-2609-0338</div></div>
+    <div class="fld"><label>Geliş</label><div class="inp ro">112 Ambulans · 16:29</div></div>
+    <div class="fld"><label>Triyaj</label><div class="inp ro"><span class="tri k2"></span>2 — Turuncu</div></div>
+    <div class="fld"><label>Yatak</label><div class="inp ro">R-3 (kırmızı alan)</div></div>
+    <div class="fld"><label>Ödeyen</label><div class="inp ro">SGK · provizyon alındı</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="akis">Akış &amp; Süreler</div>
+    <div class="sekme" data-s="vital">Vital &amp; Skor<span class="sy">5</span></div>
+    <div class="sekme" data-s="istem">İstem &amp; Sonuç<span class="sy">6</span></div>
+    <div class="sekme" data-s="order">Order<span class="sy">4</span></div>
+    <div class="sekme" data-s="cikis">Çıkış Kararı</div>
+    <div class="sekme" data-s="adli">Adli / Bildirim</div>
+  </div>
+
+  <!-- ======================================================== AKIŞ ===== -->
+  <div class="pnl" data-s="akis">
+    <div class="ozet">
+      <div class="kart"><div class="b">Kapı (geliş)</div><div class="d">16:29</div></div>
+      <div class="kart kir"><div class="b">Kapı → hekim</div><div class="d">16 <small>dk · hedef 10</small></div></div>
+      <div class="kart sari"><div class="b">Kapı → görüntüleme</div><div class="d">24 <small>dk</small></div></div>
+      <div class="kart"><div class="b">Kapı → iğne (tromboliz)</div><div class="d">— <small>hedef ≤ 60 dk</small></div></div>
+      <div class="kart"><div class="b">Toplam süre</div><div class="d">32 <small>dk</small></div></div>
+    </div>
+
+    <div class="grp">
+      <div class="gb">İnme Protokolü — zaman kritik
+        <span class="sp">son iyi görülme 15:50 · tromboliz penceresi 4,5 sa → 20:20</span></div>
+      <div class="dg">
+        <table>
+          <thead><tr>
+            <th style="width:250px">Adım</th>
+            <th style="width:100px" class="orta">Saat</th>
+            <th style="width:110px" class="sag">Kapıdan</th>
+            <th style="width:110px" class="orta">Hedef</th>
+            <th style="width:150px">Yapan</th>
+            <th>Not</th>
+          </tr></thead>
+          <tbody>
+            <tr class="tik"><td>Triyaj</td><td class="orta">16:30</td><td class="sag">1 dk</td>
+              <td class="orta"><span class="rz ok">≤ 5 dk</span></td><td>Hem. Deniz</td>
+              <td class="sonuk">FAST pozitif</td></tr>
+            <tr class="tik sel"><td><b>Hekim değerlendirmesi</b></td><td class="orta">16:45</td>
+              <td class="sag"><b>16 dk</b></td>
+              <td class="orta"><span class="rz kir">≤ 10 dk</span></td><td>Dr. Nöbetçi</td>
+              <td class="sonuk">NIHSS 9</td></tr>
+            <tr class="tik"><td>Beyin BT çekimi</td><td class="orta">16:53</td><td class="sag">24 dk</td>
+              <td class="orta"><span class="rz sari">≤ 25 dk</span></td><td>Tek. Burak</td>
+              <td class="sonuk">Kanama yok</td></tr>
+            <tr class="tik"><td>BT raporu</td><td class="orta sonuk">—</td><td class="sag sonuk">—</td>
+              <td class="orta"><span class="rz">≤ 45 dk</span></td><td class="sonuk">bekliyor</td>
+              <td class="sonuk">Radyoloji · kritik bulgu kanalı</td></tr>
+            <tr class="tik"><td>Nöroloji konsültasyonu</td><td class="orta sonuk">—</td>
+              <td class="sag sonuk">—</td><td class="orta"><span class="rz">≤ 30 dk</span></td>
+              <td class="sonuk">çağrıldı 16:46</td><td class="sonuk">Dr. Ateş yolda</td></tr>
+            <tr class="tik"><td><b>Tromboliz kararı / iğne</b></td><td class="orta sonuk">—</td>
+              <td class="sag sonuk">—</td><td class="orta"><span class="rz">≤ 60 dk</span></td>
+              <td class="sonuk">bekliyor</td><td class="sonuk">Pencere 20:20'ye kadar açık</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="statusbar">
+      <span>Süreler <b>kapı saatinden</b> sayılır — her adımın kendi başlangıcından değil.</span>
+      <span class="sp">Klinik Kalite <code>İN.G2</code> göstergesi bu zincirden hesaplanıyor.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================= VİTAL ===== -->
+  <div class="pnl" data-s="vital" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:100px" class="orta">Saat</th>
+          <th style="width:110px" class="sag">TA</th>
+          <th style="width:90px" class="sag">Nabız</th>
+          <th style="width:90px" class="sag">SpO₂</th>
+          <th style="width:90px" class="sag">Ateş</th>
+          <th style="width:90px" class="sag">Solunum</th>
+          <th style="width:90px" class="sag">GKS</th>
+          <th style="width:110px" class="orta">Erken Uyarı</th>
+          <th style="width:140px">Ölçen</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik"><td class="orta">16:30</td><td class="sag">175/95</td><td class="sag">88</td>
+            <td class="sag">96</td><td class="sag">36,4</td><td class="sag">16</td><td class="sag">14</td>
+            <td class="orta"><span class="rz sari">4</span></td><td>Hem. Deniz</td></tr>
+          <tr class="tik"><td class="orta">16:45</td><td class="sag">168/92</td><td class="sag">84</td>
+            <td class="sag">97</td><td class="sag">36,5</td><td class="sag">16</td><td class="sag">14</td>
+            <td class="orta"><span class="rz sari">3</span></td><td>Hem. Deniz</td></tr>
+          <tr class="tik sel"><td class="orta">17:00</td><td class="sag">162/90</td><td class="sag">80</td>
+            <td class="sag">97</td><td class="sag">36,5</td><td class="sag">15</td><td class="sag">15</td>
+            <td class="orta"><span class="rz ok">2</span></td><td>Hem. Deniz</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grp">
+      <div class="gb">Klinik Skorlar</div>
+      <div class="hdr k4">
+        <div class="fld"><label>NIHSS (inme şiddeti)</label><div class="inp big ro">9</div></div>
+        <div class="fld"><label>FAST</label><div class="inp ro">Pozitif (yüz + kol + konuşma)</div></div>
+        <div class="fld"><label>Son iyi görülme</label><div class="inp ro">15:50 (yakını beyanı)</div></div>
+        <div class="fld"><label>Tromboliz penceresi</label><div class="inp ro"><span class="rz ok">20:20'ye kadar</span></div></div>
+      </div>
+    </div>
+    <div class="statusbar">
+      <span><b>Son iyi görülme saati</b> geliş saatinden önemlidir: tromboliz penceresi ondan
+        başlar, kapıdan değil.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================= İSTEM ===== -->
+  <div class="pnl" data-s="istem" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:100px" class="orta">İstem</th>
+          <th>Tetkik</th>
+          <th style="width:100px" class="orta">Saat</th>
+          <th style="width:100px" class="sag">Geçen</th>
+          <th style="width:130px" class="orta">Durum</th>
+          <th>Sonuç</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="orta"><span class="rz kir">Acil</span></td>
+            <td>Beyin BT (kontrastsız)</td><td class="orta">16:47</td><td class="sag">24 dk</td>
+            <td class="orta"><span class="rz sari">Rapor bekliyor</span></td>
+            <td class="sonuk">Çekim yapıldı · ön izlenim: kanama yok</td></tr>
+          <tr class="tik"><td class="orta"><span class="rz kir">Acil</span></td>
+            <td>Tam kan sayımı</td><td class="orta">16:46</td><td class="sag">19 dk</td>
+            <td class="orta"><span class="rz ok">Sonuçlandı</span></td>
+            <td>Hb 12,8 · Plt 244.000</td></tr>
+          <tr class="tik"><td class="orta"><span class="rz kir">Acil</span></td>
+            <td>INR / PT</td><td class="orta">16:46</td><td class="sag">19 dk</td>
+            <td class="orta"><span class="rz ok">Sonuçlandı</span></td>
+            <td><b>INR 1,1</b> — tromboliz için uygun</td></tr>
+          <tr class="tik"><td class="orta"><span class="rz kir">Acil</span></td>
+            <td>Kan şekeri (parmak ucu)</td><td class="orta">16:31</td><td class="sag">1 dk</td>
+            <td class="orta"><span class="rz ok">Sonuçlandı</span></td>
+            <td>118 mg/dL</td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">Rutin</span></td>
+            <td>Biyokimya paneli</td><td class="orta">16:46</td><td class="sag">19 dk</td>
+            <td class="orta"><span class="rz sari">Çalışılıyor</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">Rutin</span></td>
+            <td>EKG 12 derivasyon</td><td class="orta">16:33</td><td class="sag">3 dk</td>
+            <td class="orta"><span class="rz ok">Sonuçlandı</span></td>
+            <td>Sinüs ritmi · AF yok</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Acil</b> işaretli istem laboratuvarda kuyruğun başına geçer ve panik değerde
+        telefonla aranır.</span>
+      <span class="sp">Geçen süre <b>istem anından</b> sayılır; numune alma gecikmesi de buraya yansır.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================= ORDER ===== -->
+  <div class="pnl" data-s="order" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th>İlaç / Uygulama</th>
+          <th style="width:150px">Doz · Yol</th>
+          <th style="width:100px" class="orta">İstem</th>
+          <th style="width:100px" class="orta">Uygulama</th>
+          <th style="width:130px" class="orta">Durum</th>
+          <th style="width:150px">Uygulayan</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>%0,9 NaCl</td><td>500 mL · İV</td>
+            <td class="orta">16:46</td><td class="orta">16:49</td>
+            <td class="orta"><span class="rz ok">Uygulandı</span></td><td>Hem. Deniz</td></tr>
+          <tr class="tik"><td>Oksijen</td><td>2 L/dk · nazal kanül</td>
+            <td class="orta">16:46</td><td class="orta">16:47</td>
+            <td class="orta"><span class="rz ok">Uygulandı</span></td><td>Hem. Deniz</td></tr>
+          <tr class="tik"><td>Parasetamol</td><td>500 mg · İV</td>
+            <td class="orta">16:52</td><td class="orta sonuk">—</td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td>Alteplaz (tromboliz)</td><td>0,9 mg/kg · İV</td>
+            <td class="orta sonuk">—</td><td class="orta sonuk">—</td>
+            <td class="orta"><span class="rz">Karar bekliyor</span></td>
+            <td class="sonuk">Nöroloji onayı sonrası</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Uygulama <b>barkodla</b> doğrulanır (hasta bilekliği + ilaç); acil koşullarda bile
+        atlanamaz, yalnız sonradan gerekçe yazılır.</span>
+    </div>
+  </div>
+
+  <!-- ====================================================== ÇIKIŞ ===== -->
+  <div class="pnl" data-s="cikis" hidden>
+    <div class="grp">
+      <div class="gb">Çıkış Kararı <span class="sp">henüz verilmedi</span></div>
+      <div class="hdr k4">
+        <div class="fld"><label class="req">Çıkış Şekli</label>
+          <div class="inp combo">Seçiniz — Taburcu · Servise yatış · YB · Sevk · Ölüm · Kendi isteğiyle</div></div>
+        <div class="fld"><label>Hedef Bölüm</label><div class="inp combo">Nöroloji</div></div>
+        <div class="fld"><label>Yatak Durumu</label><div class="inp ro"><span class="rz sari">Nöroloji · 1 boş</span></div></div>
+        <div class="fld"><label>Çıkış Tanısı (ICD-10)</label><div class="inp">I63.9 — Serebral enfarktüs, tanımlanmamış</div></div>
+      </div>
+      <div class="ic">
+        <div class="fld"><label>Çıkış Notu / Öneriler</label>
+          <div class="inp uzun">Nöroloji servisine yatışı planlandı. Tromboliz kararı için
+            nöroloji değerlendirmesi bekleniyor. Yakınına son iyi görülme saati ve pencere
+            hakkında bilgi verildi.</div></div>
+      </div>
+    </div>
+    <div class="statusbar">
+      <span><b>Çıkış tanısı zorunlu</b> — ön tanıyla kapatılan dosya klinik kalite ve TİG'de
+        kullanılamaz.</span>
+      <span class="sp">"Kendi isteğiyle" seçilirse imzalı ret formu istenir.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================== ADLİ ===== -->
+  <div class="pnl" data-s="adli" hidden>
+    <div class="grp">
+      <div class="gb">Adli Vaka Durumu</div>
+      <div class="hdr k4">
+        <div class="fld"><label>Adli vaka mı?</label><div class="inp ro">Hayır</div></div>
+        <div class="fld"><label>Bildirim</label><div class="inp ro sonuk">Gerekmiyor</div></div>
+        <div class="fld"><label>Rapor</label><div class="inp ro sonuk">—</div></div>
+        <div class="fld"><label>Kolluk</label><div class="inp ro sonuk">—</div></div>
+      </div>
+    </div>
+    <div class="grp">
+      <div class="gb">Zorunlu Bildirimler</div>
+      <div class="dg">
+        <table>
+          <thead><tr>
+            <th>Bildirim</th><th style="width:130px" class="orta">Durum</th>
+            <th style="width:150px" class="orta">Zaman</th><th>Not</th>
+          </tr></thead>
+          <tbody>
+            <tr class="tik"><td>e-Nabız acil başvuru</td>
+              <td class="orta"><span class="rz ok">Gönderildi</span></td>
+              <td class="orta">16:32</td><td class="sonuk">Otomatik</td></tr>
+            <tr class="tik"><td>SGK provizyon</td>
+              <td class="orta"><span class="rz ok">Alındı</span></td>
+              <td class="orta">16:31</td><td class="sonuk">Acil hâl · 3 iş günü kuralı</td></tr>
+            <tr class="tik"><td>Bulaşıcı hastalık bildirimi</td>
+              <td class="orta"><span class="rz pas">Gerekmiyor</span></td>
+              <td class="orta sonuk">—</td><td></td></tr>
+            <tr class="tik"><td>Adli vaka bildirimi</td>
+              <td class="orta"><span class="rz pas">Gerekmiyor</span></td>
+              <td class="orta sonuk">—</td>
+              <td class="sonuk">İşaretlenirse kolluğa bildirim zorunlu olur</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="statusbar">
+      <span>Adli vaka işaretlenirse <b>bildirim zorunlu alan</b> olur ve dosya bildirim yapılmadan
+        kapatılamaz.</span>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Protokol: <b>AC-2609-0338</b></span>
+    <span>Kapı: <b>16:29</b></span>
+    <span>Süre: <b>32 dk</b></span>
+    <span class="sp">İnme protokolü açık · pencere 20:20</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran notları.</b>
+  <ul>
+    <li><b>Bütün süreler kapı saatinden sayılır.</b> Her adımı kendi başlangıcından ölçseydik
+      zincirdeki gecikme görünmez olurdu: BT "çekime alındıktan 6 dk sonra" bitmiş olur ama hasta
+      kapıdan beri 24 dakikadır bekliyordur. Klinik Kalite <code>İN.G2</code> de kapı-iğne
+      süresinden hesaplanıyor.</li>
+    <li><b>Son iyi görülme saati ayrı alan.</b> Tromboliz penceresi geliş saatinden değil ondan
+      başlar; tek "geliş" alanı olsaydı pencere yanlış hesaplanır ve uygun hastaya tedavi
+      verilmezdi.</li>
+    <li><b>Zaman kritik protokol kendi sekmesinde değil, akışın içinde.</b> İnme/STEMI protokolü
+      ayrı ekranda olsaydı hekim iki ekran arasında gidip gelirdi — kaybedilen dakikalar tam da
+      ölçtüğümüz şey.</li>
+    <li><b>Çıkış tanısı zorunlu, ön tanı yetmez.</b> Ön tanıyla kapatılan dosya ne klinik kalite
+      göstergesine ne TİG'e girebilir.</li>
+    <li><b>Adli vaka işareti bildirimi zorunlu alana çevirir</b> — sonradan "bildirdik mi" sorusunun
+      tek yanıtı bu kayıttır.</li>
+  </ul>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

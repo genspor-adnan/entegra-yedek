@@ -81,6 +81,15 @@ export function GridTablo(p: GridTabloProps) {
   <tbody>
     {satirlar.map((satir, i) => {
       const id = String(satir.id ?? i);
+      // REACT ANAHTARI `id`DEN AYRI. Numaralama gridlerinde ayarı OLMAYAN tür
+      //   `id = 0` satırı olarak gelir (636/731) - sekiz satır aynı anahtarı
+      //   alıyor, React "duplicate key" uyarısı veriyor ve satırları
+      //   birbirine karıştırabiliyordu (kimliği olmayan satırlar çizimde yer
+      //   değiştirir). `id`ye dokunmuyoruz: seçim ve satır açma onu kullanıyor
+      //   ve 0 orada "kaydı yok" demek - anahtar için sıra numarası yeter.
+      const anahtar = satir.id === null || satir.id === undefined
+                   || satir.id === 0 || satir.id === '0' || satir.id === ''
+        ? `s${i}` : id;
       // ---- GRUPLU LISTE (ekstre: para birimi basina) ----------
       //   Grup basligi obegin ilk satirindan ONCE, ara toplam SON
       //   satirindan SONRA. Obek sayfa sonunda BOLUNDUYSE ara toplam
@@ -98,7 +107,7 @@ export function GridTablo(p: GridTabloProps) {
         ? gruplar?.find(g => g.anahtar === grupDeger) : undefined;
 
       return (
-        <Fragment key={`gr-${id}`}>
+        <Fragment key={`gr-${anahtar}`}>
         {grupBasliyor && (
           <tr className="grup-bas">
             <td className="cbk" />

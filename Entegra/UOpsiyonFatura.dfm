@@ -365,6 +365,13 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         TabOrder = 16
         Transparent = True
       end
+      object ChkSatirBolMenu: TcxCheckBox
+        Left = 279
+        Top = 312
+        Caption = 'Sat'#305'r'#305' Adeti Kadar B'#246'l Men'#252's'#252' G'#246'z'#252'ks'#252'n'
+        TabOrder = 24
+        Transparent = True
+      end
       object ComboProjeFirsatSec: TcxImageComboBox
         Left = 112
         Top = 362
@@ -396,7 +403,7 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         Left = 3
         Top = 313
         Caption = 'En x Boy y'#252'zey bilgileri girilebilsin'
-        TabOrder = 19
+        TabOrder = 18
         Transparent = True
       end
       object CheckPozNo: TcxCheckBox
@@ -404,29 +411,29 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         Top = 335
         Caption = 'Poz No otomatik versin. Aral'#305'k'
         Style.TransparentBorder = False
-        TabOrder = 20
+        TabOrder = 19
         Transparent = True
       end
       object SpinEditPozNo: TcxSpinEdit
         Left = 172
         Top = 335
-        TabOrder = 21
+        TabOrder = 20
         Value = 10
         Width = 45
       end
       object CheckFaturaHastaSekmesi: TcxCheckBox
-        Left = 310
+        Left = 282
         Top = 339
         Caption = 'Ba'#351'l'#305'kta Hasta Bilgisi Sekmesi'
         Style.TransparentBorder = False
-        TabOrder = 22
+        TabOrder = 21
         Transparent = True
       end
       object cxGroupBox4: TcxGroupBox
         Left = 312
         Top = 389
         Caption = #214'zelkod Giri'#351' Se'#231'imi'
-        TabOrder = 23
+        TabOrder = 22
         Transparent = True
         Height = 72
         Width = 174
@@ -1234,9 +1241,6 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         object TabSeri: TcxTabSheet
           Caption = 'Seri Bilgileri'
           ImageIndex = 22
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object GridEFaturaSeriKurallari: TcxGrid
             Left = 3
             Top = 47
@@ -1318,9 +1322,6 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           Caption = 'Alan E'#351'le'#351'tirme'
           ImageIndex = 19
           TabVisible = False
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelAlanEslemeSag: TPanel
             Left = 0
             Top = 0
@@ -1445,9 +1446,6 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         object TabEFatura: TcxTabSheet
           Caption = 'E-Fatura'
           ImageIndex = 19
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object CheckIhracatGonderilsin: TcxCheckBox
             Left = 16
             Top = 410
@@ -1612,9 +1610,6 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         object TabEArsivFatura: TcxTabSheet
           Caption = 'E-Ar'#351'iv Fatura'
           ImageIndex = 19
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object CheckEArsivFaturaAktif: TcxCheckBox
             Left = 113
             Top = 35
@@ -1731,9 +1726,6 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         object TabESMM: TcxTabSheet
           Caption = 'E-SMM'
           ImageIndex = 19
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object CheckESMMAktif: TcxCheckBox
             Left = 119
             Top = 24
@@ -1837,9 +1829,6 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
         object TabEIrsaliye: TcxTabSheet
           Caption = 'E-'#304'rsaliye'
           ImageIndex = 19
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object CheckEIrsaliyeAktif: TcxCheckBox
             Left = 122
             Top = 13
@@ -1987,10 +1976,6 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           Tag = 19
           Caption = 'Al'#305'nan Sipari'#351' Durum Ba'#287'lant'#305'lar'#305
           ImageIndex = 4
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object GridDurumBaglanti: TcxGrid
             Left = 0
             Top = 0
@@ -2088,10 +2073,6 @@ object OpsiyonFaturaDlg: TOpsiyonFaturaDlg
           Tag = 9
           Caption = 'Verilen Sipari'#351' Durum Ba'#287'lant'#305'lar'#305
           ImageIndex = 4
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
         end
       end
       object Panel2: TPanel

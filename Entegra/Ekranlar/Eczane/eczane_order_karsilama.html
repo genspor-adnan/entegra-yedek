@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eczane — Order Karşılama (Ünite Doz) — Mockup (GenoTIP AI · Eczane)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>💊 Order Karşılama — Ahmet Yılmaz</span>
+    <span class="sp">Dahiliye · 304-A · 68 y · 72 kg · KrKl 28 mL/dk · Alerji: Penisilin</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="eczane_panosu.html">◀ Pano</div>
+    <div class="btn primary">✓ Eczacı Onayı Ver</div>
+    <div class="btn">✎ Doz Önerisi Yaz</div>
+    <div class="btn">📞 Hekimi Ara</div>
+    <div class="sepv"></div>
+    <div class="btn">🏷️ Doz Etiketi Bas</div>
+    <div class="btn" data-git="eczane_hazirlama.html">🧪 Hazırlamaya Gönder</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ Hasta İlaç Listesi</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">Aktif order</div><div class="d">7 <small>satır</small></div></div>
+    <div class="kart kir"><div class="b">Eczacı uyarısı</div><div class="d">3</div></div>
+    <div class="kart sari"><div class="b">Onay bekleyen</div><div class="d">2</div></div>
+    <div class="kart"><div class="b">Bugünkü doz</div><div class="d">19 <small>5 turda</small></div></div>
+    <div class="kart ok"><div class="b">Teslim edilen</div><div class="d">8</div></div>
+    <div class="kart"><div class="b">İade</div><div class="d">2 <small>kullanılmadı</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="order">Order Satırları<span class="sy">7</span></div>
+    <div class="sekme" data-s="kontrol">Eczacı Kontrolü<span class="sy">3</span></div>
+    <div class="sekme" data-s="doz">Hazırlanan Dozlar<span class="sy">19</span></div>
+    <div class="sekme" data-s="iade">İade<span class="sy">2</span></div>
+  </div>
+
+  <!-- =================================================== ORDER SATIRLARI ===== -->
+  <div class="pnl" data-s="order">
+    <div class="arama">
+      <div class="kutu">🔍 İlaç adı ya da etken madde…</div>
+      <span class="chip on">Aktif <b>7</b></span>
+      <span class="chip">Durdurulan <b>1</b></span>
+      <span class="chip">Gerektiğinde <b>2</b></span>
+      <span class="chip">Tümü</span>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:230px">İlaç (etken madde)</th>
+          <th style="width:110px" class="orta">Doz</th>
+          <th style="width:70px" class="orta">Yol</th>
+          <th style="width:130px">Sıklık / Saatler</th>
+          <th style="width:110px">Başlangıç</th>
+          <th style="width:120px">Hekim</th>
+          <th style="width:160px" class="orta">Eczacı</th>
+          <th style="width:100px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel">
+            <td><b>Clexane</b> <span class="sonuk">(enoksaparin)</span><br>
+              <code class="k">B01AB05</code> <span class="rz mor">Yüksek riskli</span></td>
+            <td class="orta">6000 anti-Xa</td><td class="orta">SC</td>
+            <td>1×1 · 08:00</td><td>14.09.2026</td><td>Dr. Kaya</td>
+            <td class="orta"><span class="rz kir">Doz uyarısı</span></td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td>
+          </tr>
+          <tr class="tik">
+            <td><b>Coumadin</b> <span class="sonuk">(varfarin)</span><br>
+              <code class="k">B01AA03</code> <span class="rz mor">Yüksek riskli</span></td>
+            <td class="orta">5 mg</td><td class="orta">PO</td>
+            <td>1×1 · 18:00</td><td>14.09.2026</td><td>Dr. Kaya</td>
+            <td class="orta"><span class="rz kir">Etkileşim</span></td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td>
+          </tr>
+          <tr class="tik">
+            <td><b>Pantpas</b> <span class="sonuk">(pantoprazol)</span><br><code class="k">A02BC02</code></td>
+            <td class="orta">40 mg</td><td class="orta">IV</td>
+            <td>1×1 · 08:00</td><td>14.09.2026</td><td>Dr. Kaya</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td>
+            <td class="orta"><span class="rz ok">Onaylı</span></td>
+          </tr>
+          <tr class="tik">
+            <td><b>Lasix</b> <span class="sonuk">(furosemid)</span><br><code class="k">C03CA01</code></td>
+            <td class="orta">40 mg</td><td class="orta">IV</td>
+            <td>2×1 · 08-20</td><td>15.09.2026</td><td>Dr. Kaya</td>
+            <td class="orta"><span class="rz sari">K+ izle</span></td>
+            <td class="orta"><span class="rz ok">Onaylı</span></td>
+          </tr>
+          <tr class="tik">
+            <td><b>Augmentin</b> <span class="sonuk">(amoksisilin/klavulanat)</span><br>
+              <code class="k">J01CR02</code></td>
+            <td class="orta">1 g</td><td class="orta">IV</td>
+            <td>2×1 · 08-20</td><td>16.09.2026</td><td>Dr. Kaya</td>
+            <td class="orta"><span class="rz kir">ALERJİ</span></td>
+            <td class="orta"><span class="rz kir">Durduruldu</span></td>
+          </tr>
+          <tr class="tik">
+            <td><b>Perlinganit</b> <span class="sonuk">(gliseril trinitrat)</span><br><code class="k">C01DA02</code></td>
+            <td class="orta">10 mg/50 mL</td><td class="orta">IV inf</td>
+            <td>sürekli · 2 mL/sa</td><td>15.09.2026</td><td>Dr. Kaya</td>
+            <td class="orta"><span class="rz mavi">Hazırlama</span></td>
+            <td class="orta"><span class="rz ok">Onaylı</span></td>
+          </tr>
+          <tr class="tik">
+            <td><b>Novalgin</b> <span class="sonuk">(metamizol)</span><br><code class="k">N02BB02</code></td>
+            <td class="orta">1 g</td><td class="orta">IV</td>
+            <td>gerektiğinde · en çok 3×1</td><td>14.09.2026</td><td>Dr. Kaya</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td>
+            <td class="orta"><span class="rz ok">Onaylı</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Alerji uyarısı geçilemez:</b> Penisilin alerjisi kayıtlı — Augmentin satırı eczacı
+        tarafından durduruldu, hekime bildirildi.</span>
+      <span class="sp">Sürekli infüzyonlar eczanede hazırlanır (bkz. Hazırlama).</span>
+    </div>
+  </div>
+
+  <!-- =================================================== ECZACI KONTROLÜ ===== -->
+  <div class="pnl" data-s="kontrol" hidden>
+    <div class="ikiPanel">
+      <div data-liste>
+        <div class="olgu on"><span class="tri k1"></span><span class="ad"><b>Alerji</b><br>
+          <span class="sy">Augmentin — penisilin</span></span></div>
+        <div class="olgu"><span class="tri k2"></span><span class="ad"><b>Doz (böbrek)</b><br>
+          <span class="sy">Enoksaparin — KrKl 28</span></span></div>
+        <div class="olgu"><span class="tri k2"></span><span class="ad"><b>Etkileşim</b><br>
+          <span class="sy">Enoksaparin + Varfarin</span></span></div>
+        <div class="olgu"><span class="tri k3"></span><span class="ad"><b>İzlem</b><br>
+          <span class="sy">Furosemid — potasyum</span></span></div>
+        <div class="olgu"><span class="tri k4"></span><span class="ad"><b>Uygun</b><br>
+          <span class="sy">Pantoprazol, Metamizol</span></span></div>
+      </div>
+
+      <div>
+        <div class="ozet">
+          <div class="kart kir"><div class="b">Uyarı düzeyi</div><div class="d">Yüksek</div></div>
+          <div class="kart"><div class="b">Kaynak</div><div class="d" style="font-size:12px">Hasta alerji kaydı</div></div>
+          <div class="kart"><div class="b">Kaydeden</div><div class="d" style="font-size:12px">Kayıt Kabul · 14.09</div></div>
+        </div>
+
+        <div class="dg">
+          <table>
+            <thead><tr><th style="width:150px">Alan</th><th>Değer</th></tr></thead>
+            <tbody>
+              <tr><td class="sonuk">Order satırı</td>
+                <td><b>Augmentin 1 g IV 2×1</b> · Dr. Kaya · 16.09.2026 08:10</td></tr>
+              <tr><td class="sonuk">Çakışan kayıt</td>
+                <td><span class="rz kir">Penisilin alerjisi</span> — döküntü + anjiyoödem (2019),
+                  hasta kartında "kesin" olarak işaretli</td></tr>
+              <tr><td class="sonuk">Eczacı kararı</td>
+                <td><span class="rz kir">Verilmedi</span> — satır durduruldu</td></tr>
+              <tr><td class="sonuk">Hekime bildirim</td>
+                <td>16.09.2026 08:22 · Dr. Kaya · <span class="rz ok">Okundu 08:31</span></td></tr>
+              <tr><td class="sonuk">Öneri</td>
+                <td>Beta-laktam dışı seçenek: <b>Levofloksasin 500 mg IV 1×1</b>
+                  (KrKl 28 → 250 mg 1×1'e azalt)</td></tr>
+              <tr><td class="sonuk">Hekim yanıtı</td>
+                <td><span class="rz sari">Bekleniyor</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <ul class="kontrol">
+          <li class="ok"><span class="kutu">✓</span>
+            <span>Alerji kaydı hasta dosyasından doğrulandı</span>
+            <span class="imza">Ecz. N. Arslan · 08:20</span></li>
+          <li class="ok"><span class="kutu">✓</span>
+            <span>Order satırı durduruldu, doz hazırlığına düşmedi</span>
+            <span class="imza">Ecz. N. Arslan · 08:21</span></li>
+          <li class="ok"><span class="kutu">✓</span>
+            <span>İsteyen hekime bildirildi ve seçenek önerildi</span>
+            <span class="imza">Ecz. N. Arslan · 08:22</span></li>
+          <li class="bos"><span class="kutu"></span>
+            <span>Hekim yanıtı alındı, yeni order girildi</span>
+            <span class="imza">—</span></li>
+          <li class="bos"><span class="kutu"></span>
+            <span>İlaç güvenliği bildirimi (advers olay değil, önlenen hata) kaydedildi</span>
+            <span class="imza">—</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="statusbar">
+      <span>Önlenen ilaç hatası <b>kayda geçer</b>: sayısı kalite göstergesidir, kişiye
+        yazılan bir suç değil.</span>
+      <span class="sp">Eczacı önerisi hekimi bağlamaz; karar hekimin, kayıt ikisinin.</span>
+    </div>
+  </div>
+
+  <!-- ================================================ HAZIRLANAN DOZLAR ===== -->
+  <div class="pnl" data-s="doz" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 İlaç ya da saat…</div>
+      <span class="chip on">Bugün <b>19</b></span>
+      <span class="chip">Teslim edildi <b>8</b></span>
+      <span class="chip">Hazırlanıyor <b>5</b></span>
+      <span class="chip">Bekliyor <b>6</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:80px" class="orta">Saat</th>
+          <th style="width:220px">İlaç · Doz</th>
+          <th style="width:150px">Lot / SKT</th>
+          <th style="width:170px">Doz barkodu</th>
+          <th style="width:140px">Hazırlayan</th>
+          <th style="width:110px" class="orta">Kontrol</th>
+          <th style="width:120px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="orta">08:00</td><td>Pantoprazol 40 mg IV</td>
+            <td><code>P2291</code> · 04.2027</td><td><code class="k">UD-2609-004812</code></td>
+            <td>Tekniker M. Ateş</td><td class="orta"><span class="rz ok">✓</span></td>
+            <td class="orta"><span class="rz ok">Uygulandı 08:12</span></td></tr>
+          <tr class="tik"><td class="orta">08:00</td><td>Furosemid 40 mg IV</td>
+            <td><code>F5510</code> · 11.2026</td><td><code class="k">UD-2609-004813</code></td>
+            <td>Tekniker M. Ateş</td><td class="orta"><span class="rz ok">✓</span></td>
+            <td class="orta"><span class="rz ok">Uygulandı 08:15</span></td></tr>
+          <tr class="tik"><td class="orta">08:00</td><td>Enoksaparin 6000 anti-Xa SC</td>
+            <td class="sonuk">—</td><td class="sonuk">—</td>
+            <td class="sonuk">—</td><td class="orta"><span class="rz">—</span></td>
+            <td class="orta"><span class="rz sari">Eczacı onayı bekliyor</span></td></tr>
+          <tr class="tik"><td class="orta">12:00</td><td>Gliseril trinitrat 10 mg/50 mL</td>
+            <td><code>G1180</code> · 02.2027</td><td><code class="k">UD-2609-004840</code></td>
+            <td>Ecz. N. Arslan</td><td class="orta"><span class="rz ok">✓</span></td>
+            <td class="orta"><span class="rz mavi">Hazır · teslim bekliyor</span></td></tr>
+          <tr class="tik"><td class="orta">18:00</td><td>Varfarin 5 mg PO</td>
+            <td class="sonuk">—</td><td class="sonuk">—</td>
+            <td class="sonuk">—</td><td class="orta"><span class="rz">—</span></td>
+            <td class="orta"><span class="rz sari">Eczacı onayı bekliyor</span></td></tr>
+          <tr class="tik"><td class="orta">20:00</td><td>Furosemid 40 mg IV</td>
+            <td class="sonuk">— FEFO'dan seçilecek</td><td class="sonuk">—</td>
+            <td class="sonuk">—</td><td class="orta"><span class="rz">—</span></td>
+            <td class="orta"><span class="rz pas">Bekliyor</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Her doz <b>tek hasta, tek saat</b>: barkod hasta bilekliğiyle eşleşmezse uygulama açılmaz.</span>
+      <span class="sp">Lot/SKT dozla birlikte kaydedilir — geri çağırmada aranan budur.</span>
+    </div>
+  </div>
+
+  <!-- ============================================================= İADE ===== -->
+  <div class="pnl" data-s="iade" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px" class="orta">Tarih</th>
+          <th style="width:220px">İlaç · Doz</th>
+          <th style="width:150px">Lot / SKT</th>
+          <th>İade nedeni</th>
+          <th style="width:130px" class="orta">Kabul</th>
+          <th style="width:130px" class="orta">Sonuç</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="orta">15.09 20:30</td><td>Metamizol 1 g IV</td>
+            <td><code>M8820</code> · 06.2027</td>
+            <td>Hasta uyudu, gerektiğinde dozu kullanılmadı — ambalaj açılmadı</td>
+            <td class="orta"><span class="rz ok">Kabul</span></td>
+            <td class="orta"><span class="rz ok">Stoğa döndü</span></td></tr>
+          <tr class="tik"><td class="orta">16.09 09:05</td><td>Augmentin 1 g IV</td>
+            <td><code>A3301</code> · 01.2027</td>
+            <td>Alerji nedeniyle order durduruldu — hazırlanmadan iade</td>
+            <td class="orta"><span class="rz ok">Kabul</span></td>
+            <td class="orta"><span class="rz ok">Stoğa döndü</span></td></tr>
+          <tr class="tik"><td class="orta">15.09 12:40</td><td>Seftriakson 1 g IV</td>
+            <td><code>C4482</code> · 09.2026</td>
+            <td>Sulandırılmış, 2 saat oda sıcaklığında beklemiş</td>
+            <td class="orta"><span class="rz kir">Ret</span></td>
+            <td class="orta"><span class="rz kir">İmhaya</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Hazırlanmış doz stoğa dönmez</b> — açılmamış, sulandırılmamış ve soğuk zinciri
+        bozulmamış olan döner.</span>
+      <span class="sp">Kontrollü ilaç iadesi bu listeye girmez: kasaya çift imzayla teslim edilir.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Süreç:</b> Hekim order girer → <b>eczacı kontrolü</b> (alerji, doz, etkileşim, böbrek/karaciğer,
+  yüksek riskli ilaç) → onay → <b>ünite doz hazırlama</b> (lot/SKT ile, doz barkodu basılır) →
+  servise teslim → hemşire hasta bilekliğiyle eşleştirip uygular → kullanılmayan doz <b>iade</b>.
+  Eczacı kontrolü dozdan önce gelir: hazırlanmış doz geri alınamaz, uyarı ise hasta yatağına
+  gitmeden okunur.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

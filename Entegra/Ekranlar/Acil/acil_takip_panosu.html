@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acil Servis — Takip Panosu — Mockup (GenoTIP AI · Acil)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>📺 Acil Servis — Takip Panosu</span>
+    <span class="sp">16.09.2026 · 16:45 · Merkez · doluluk %82 · 30 sn'de bir tazelenir</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="acil_triyaj.html">◀ Triyaj</div>
+    <div class="btn" data-git="acil_hasta_karti.html">🗂️ Hasta Kartı</div>
+    <div class="sepv"></div>
+    <div class="btn">🔊 Ses Uyarısı: Açık</div>
+    <div class="btn">🖥️ Tam Ekran</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ Yazdır</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">Acildeki hasta</div><div class="d">23 <small>/ 28 yatak</small></div></div>
+    <div class="kart kir"><div class="b">Yatış bekleyen</div><div class="d">3 <small>ort. 3 sa 40 dk</small></div></div>
+    <div class="kart sari"><div class="b">4 saati aşan</div><div class="d">5</div></div>
+    <div class="kart"><div class="b">Sonuç bekleyen</div><div class="d">7</div></div>
+    <div class="kart ok"><div class="b">Taburcu hazır</div><div class="d">2</div></div>
+    <div class="kart"><div class="b">Bugün toplam</div><div class="d">147 <small>başvuru</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="yatak">Yatak Durumu<span class="sy">28</span></div>
+    <div class="sekme" data-s="tikanma">Tıkanma<span class="sy">8</span></div>
+    <div class="sekme" data-s="sure">Süre Hedefleri</div>
+    <div class="sekme" data-s="cagri">Çağrılar<span class="sy">4</span></div>
+  </div>
+
+  <!-- ======================================================= YATAK ===== -->
+  <div class="pnl" data-s="yatak">
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:80px">Yatak</th>
+          <th style="width:75px" class="orta">Triyaj</th>
+          <th style="width:175px">Hasta</th>
+          <th>Ön Tanı</th>
+          <th style="width:130px">Hekim</th>
+          <th style="width:95px" class="sag">Süre</th>
+          <th style="width:140px" class="orta">Aşama</th>
+          <th style="width:145px">Neyi bekliyor</th>
+        </tr></thead>
+        <tbody>
+          <tr class="grup"><td colspan="8">Resüsitasyon — 3 yatak · 2 dolu</td></tr>
+          <tr class="tik sel"><td><b>R-1</b></td><td class="orta"><span class="tri k1"></span>1</td>
+            <td>Halil Uz · 63 y</td><td>STEMI</td><td>Dr. Nöbetçi</td>
+            <td class="sag">22 dk</td>
+            <td class="orta"><span class="rz kir">Kritik</span></td>
+            <td class="sonuk">Kateter laboratuvarı</td></tr>
+          <tr class="tik"><td><b>R-2</b></td><td class="orta"><span class="tri k1"></span>1</td>
+            <td>Nuray Sert · 81 y</td><td>Solunum yetmezliği</td><td>Dr. Nöbetçi</td>
+            <td class="sag">1 sa 04 dk</td>
+            <td class="orta"><span class="rz kir">Kritik</span></td>
+            <td class="sonuk">YB yatak <b>yok</b></td></tr>
+          <tr class="tik"><td><b>R-3</b></td><td class="orta"><span class="tri k2"></span>2</td>
+            <td>Ayten Koç · 74 y</td><td>İnme şüphesi</td><td>Dr. Nöbetçi</td>
+            <td class="sag">32 dk</td>
+            <td class="orta"><span class="rz sari">Protokol</span></td>
+            <td class="sonuk">BT raporu · nöroloji</td></tr>
+
+          <tr class="grup"><td colspan="8">Müşahede — 16 yatak · 14 dolu</td></tr>
+          <tr class="tik"><td>M-3</td><td class="orta"><span class="tri k3"></span>3</td>
+            <td>Ali Yurt · 45 y</td><td>Renal kolik</td><td>Dr. Acar</td>
+            <td class="sag">1 sa 38 dk</td>
+            <td class="orta"><span class="rz mavi">Tetkik</span></td>
+            <td class="sonuk">BT sonucu</td></tr>
+          <tr class="tik"><td>M-5</td><td class="orta"><span class="tri k3"></span>3</td>
+            <td>Sibel Çam · 52 y</td><td>Gastroenterit</td><td>Dr. Acar</td>
+            <td class="sag">2 sa 12 dk</td>
+            <td class="orta"><span class="rz mavi">Tedavi</span></td>
+            <td class="sonuk">İV sıvı</td></tr>
+          <tr class="tik"><td>M-7</td><td class="orta"><span class="tri k2"></span>2</td>
+            <td>Kemal Sarı · 69 y</td><td>Üst GİS kanaması</td><td>Dr. Acar</td>
+            <td class="sag"><b>4 sa 25 dk</b></td>
+            <td class="orta"><span class="rz kir">Yatış bekliyor</span></td>
+            <td class="sonuk">Dahiliye yatak <b>yok</b></td></tr>
+          <tr class="tik"><td>M-8</td><td class="orta"><span class="tri k4"></span>4</td>
+            <td>Zehra Un · 24 y</td><td>Alerjik reaksiyon</td><td>Dr. Acar</td>
+            <td class="sag">48 dk</td>
+            <td class="orta"><span class="rz ok">Taburcu hazır</span></td>
+            <td class="sonuk">Epikriz imzası</td></tr>
+
+          <tr class="grup"><td colspan="8">Yeşil alan — 9 yatak · 7 dolu</td></tr>
+          <tr class="tik"><td>Y-2</td><td class="orta"><span class="tri k4"></span>4</td>
+            <td>Emre Tan · 33 y</td><td>Bilek burkulması</td><td>Dr. Yaz</td>
+            <td class="sag">57 dk</td>
+            <td class="orta"><span class="rz mavi">Tetkik</span></td>
+            <td class="sonuk">Röntgen</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Pano salon içi — koridor ekranında hasta adı yerine protokol numarası çizilir.</span>
+      <span class="sp">"Neyi bekliyor" sütunu boşsa hasta <b>hiçbir şey beklemiyor</b> demektir;
+        o satır ya taburcu ya yatış kararı ister.</span>
+    </div>
+  </div>
+
+  <!-- ==================================================== TIKANMA ===== -->
+  <div class="pnl" data-s="tikanma" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:80px">Yatak</th><th style="width:175px">Hasta</th>
+          <th style="width:110px" class="sag">Süre</th>
+          <th style="width:190px">Takıldığı yer</th>
+          <th>Ayrıntı</th>
+          <th style="width:140px" class="orta">Eylem</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>M-7</td><td>Kemal Sarı · 69 y</td>
+            <td class="sag"><b>4 sa 25 dk</b></td><td>Servis yatağı yok</td>
+            <td>Dahiliye 0 boş · 2 taburcu planlı (17:30)</td>
+            <td class="orta"><span class="btn mini">📞 Yatak yönetimi</span></td></tr>
+          <tr class="tik"><td>R-2</td><td>Nuray Sert · 81 y</td>
+            <td class="sag"><b>1 sa 04 dk</b></td><td>YB yatağı yok</td>
+            <td>YB 0 boş · en yakın merkez 18 km</td>
+            <td class="orta"><span class="btn mini">🚑 Sevk başlat</span></td></tr>
+          <tr class="tik"><td>M-3</td><td>Ali Yurt · 45 y</td>
+            <td class="sag">1 sa 38 dk</td><td>Görüntüleme sonucu</td>
+            <td>BT çekildi 16:10 · rapor bekliyor (35 dk)</td>
+            <td class="orta"><span class="btn mini">📞 Radyoloji</span></td></tr>
+          <tr class="tik"><td>M-11</td><td>Osman Ak · 58 y</td>
+            <td class="sag">2 sa 05 dk</td><td>Konsültasyon</td>
+            <td>Ortopedi çağrıldı 15:20 · 85 dk yanıt yok</td>
+            <td class="orta"><span class="btn mini">📞 Tekrar çağır</span></td></tr>
+          <tr class="tik"><td>Y-4</td><td>Buse Er · 19 y</td>
+            <td class="sag">1 sa 12 dk</td><td>Laboratuvar</td>
+            <td>Biyokimya · numune 15:55'te ulaştı</td>
+            <td class="orta"><span class="btn mini">📞 Laboratuvar</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Tıkanma <b>acilde değil</b>, acilin dışında oluşur: yatak, rapor, konsültasyon.</span>
+      <span class="sp">Bu sekme sorumluyu gösterir — "acil kalabalık" demek kimseyi harekete
+        geçirmiyor.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================= SÜRE ===== -->
+  <div class="pnl" data-s="sure" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th>Gösterge</th>
+          <th style="width:110px" class="sag">Bugün</th>
+          <th style="width:110px" class="sag">Hedef</th>
+          <th style="width:120px" class="orta">Durum</th>
+          <th style="width:150px">Eğilim (7 gün)</th>
+          <th style="width:150px">Kaynak</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>Kapı → hekim (ort.)</td><td class="sag">18 dk</td>
+            <td class="sag">≤ 15 dk</td>
+            <td class="orta"><span class="rz kir">Hedef dışı</span></td>
+            <td><div class="bar k"><i style="width:100%"></i></div></td>
+            <td class="sonuk">Triyaj kaydı</td></tr>
+          <tr class="tik"><td>Triyaj 2 · ilk muayene ≤ 10 dk</td><td class="sag">%71</td>
+            <td class="sag">≥ %90</td>
+            <td class="orta"><span class="rz kir">Hedef dışı</span></td>
+            <td><div class="bar k"><i style="width:79%"></i></div></td>
+            <td class="sonuk">Triyaj kaydı</td></tr>
+          <tr class="tik"><td>Acilde ortalama kalış</td><td class="sag">2 sa 18 dk</td>
+            <td class="sag">≤ 4 sa</td>
+            <td class="orta"><span class="rz ok">Hedefte</span></td>
+            <td><div class="bar"><i style="width:58%"></i></div></td>
+            <td class="sonuk">Kapı–çıkış</td></tr>
+          <tr class="tik"><td>4 saati aşan hasta oranı</td><td class="sag">%22</td>
+            <td class="sag">≤ %15</td>
+            <td class="orta"><span class="rz sari">Sınırda</span></td>
+            <td><div class="bar s"><i style="width:68%"></i></div></td>
+            <td class="sonuk">Kapı–çıkış</td></tr>
+          <tr class="tik"><td>İnmede kapı → iğne ≤ 60 dk</td><td class="sag">2 / 3</td>
+            <td class="sag">—</td>
+            <td class="orta"><span class="rz sari">İzlemde</span></td>
+            <td><div class="bar m"><i style="width:66%"></i></div></td>
+            <td class="sonuk">Klinik Kalite <code>İN.G2</code></td></tr>
+          <tr class="tik"><td>Acile 72 saat içinde yeniden başvuru</td><td class="sag">%3,1</td>
+            <td class="sag">≤ %5</td>
+            <td class="orta"><span class="rz ok">Hedefte</span></td>
+            <td><div class="bar"><i style="width:62%"></i></div></td>
+            <td class="sonuk">Başvuru geçmişi</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Bu sayılar <b>aynı kayıtlardan</b> üretilir; ayrıca elle girilmez.</span>
+      <span class="sp">Klinik Kalite ve SKS göstergeleri de buradan besleniyor.</span>
+    </div>
+  </div>
+
+  <!-- ====================================================== ÇAĞRI ===== -->
+  <div class="pnl" data-s="cagri" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:130px">Çağrı</th>
+          <th style="width:175px">Hasta / Yer</th>
+          <th style="width:110px" class="orta">Saat</th>
+          <th style="width:110px" class="sag">Geçen</th>
+          <th style="width:130px" class="orta">Durum</th>
+          <th>Yanıtlayan</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><span class="rz kir">Mavi Kod</span></td>
+            <td>R-2 · Nuray Sert</td><td class="orta">16:38</td><td class="sag">2 dk 10 sn</td>
+            <td class="orta"><span class="rz ok">Kapandı</span></td>
+            <td>Dr. Nöbetçi · Hem. Deniz · Tek. Arda</td></tr>
+          <tr class="tik"><td><span class="rz mor">Nöroloji</span></td>
+            <td>R-3 · Ayten Koç</td><td class="orta">16:46</td><td class="sag">—</td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td>
+            <td class="sonuk">Dr. Ateş yolda</td></tr>
+          <tr class="tik"><td><span class="rz mor">Ortopedi</span></td>
+            <td>M-11 · Osman Ak</td><td class="orta">15:20</td><td class="sag"><b>85 dk</b></td>
+            <td class="orta"><span class="rz kir">Yanıt yok</span></td>
+            <td class="sonuk">2. kez çağrıldı</td></tr>
+          <tr class="tik"><td><span class="rz">Kateter Lab</span></td>
+            <td>R-1 · Halil Uz</td><td class="orta">16:44</td><td class="sag">1 dk</td>
+            <td class="orta"><span class="rz ok">Kabul</span></td>
+            <td>Kardiyoloji · masa hazırlanıyor</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Çağrı <b>yanıt süresiyle</b> kaydedilir — "çağırdık" ile "geldi" arasındaki fark
+        ölçülmediği sürece kapanmıyor.</span>
+      <span class="sp">Mavi kod süresi SKS göstergesi.</span>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Yatak: <b>28</b></span>
+    <span>Dolu: <b>23</b></span>
+    <span>Bekleyen: <b>14</b></span>
+    <span class="sp">Tazeleme: 30 sn · son 16:45:12</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran notları.</b>
+  <ul>
+    <li><b>"Neyi bekliyor" sütunu panonun asıl işi.</b> Hasta sayısı kalabalığı söyler ama ne
+      yapılacağını söylemez; her satırın bir bekleme sebebi olmalı, yoksa o hasta karar bekliyordur.</li>
+    <li><b>Tıkanma ayrı sekme, çünkü sebep acilin dışında.</b> Yatak yok · rapor gecikti ·
+      konsültan gelmedi — hepsinin sorumlusu başka birim. "Acil kalabalık" cümlesi kimseyi harekete
+      geçirmiyor; "dahiliyede 0 boş yatak, 2 taburcu 17:30'da" geçiriyor.</li>
+    <li><b>Süre hedefleri aynı kayıtlardan üretilir, elle girilmez.</b> Acil göstergeleri hem SKS'de
+      hem Klinik Kalite'de var; iki ayrı yerde toplanırsa iki farklı sayı çıkar.</li>
+    <li><b>Çağrı yanıt süresiyle kaydedilir.</b> "Çağırdık" ile "geldi" arasındaki fark ölçülmedikçe
+      85 dakikalık konsültasyon beklemesi kimsenin sorunu olmuyor.</li>
+    <li>Koridor ekranı aynı panoyu <b>protokol numarasıyla</b> çizer; hasta adı yalnız salon içinde.</li>
+  </ul>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

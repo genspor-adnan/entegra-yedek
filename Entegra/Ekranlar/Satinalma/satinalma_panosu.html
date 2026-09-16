@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Satınalma — Günlük Pano — Mockup (GenoTIP AI · Satınalma)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🛒 Satınalma — Günlük Pano</span>
+    <span class="sp">16.09.2026 · Merkez · Satınalma Sorumlusu: M. Aydın · 2026 bütçe kullanımı %71</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary" data-git="satinalma_talep.html">📝 Talepler</div>
+    <div class="btn" data-git="satinalma_teklif.html">📊 Teklif / İhale</div>
+    <div class="btn" data-git="satinalma_siparis.html">📦 Siparişler</div>
+    <div class="btn" data-git="satinalma_kabul_fatura.html">🧾 Kabul & Fatura</div>
+    <div class="sepv"></div>
+    <div class="btn" data-git="satinalma_tedarikci.html">🏭 Tedarikçiler</div>
+    <div class="sp"></div>
+    <div class="btn">🖨️ Aylık Rapor</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart kir"><div class="b">Onay bekleyen talep</div><div class="d">12 <small>4'ü acil</small></div></div>
+    <div class="kart sari"><div class="b">Teklif toplanıyor</div><div class="d">6</div></div>
+    <div class="kart"><div class="b">Açık sipariş</div><div class="d">31 <small>2,84 M ₺</small></div></div>
+    <div class="kart kir"><div class="b">Teslimatı geciken</div><div class="d">5</div></div>
+    <div class="kart sari"><div class="b">Fatura farkı</div><div class="d">3 <small>eşleşmedi</small></div></div>
+    <div class="kart"><div class="b">Kalan bütçe</div><div class="d" style="font-size:14px">4,1 M ₺</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="onay">Onay Bekleyen<span class="sy">12</span></div>
+    <div class="sekme" data-s="gecikme">Geciken Teslimat<span class="sy">5</span></div>
+    <div class="sekme" data-s="fark">Fatura Farkı<span class="sy">3</span></div>
+    <div class="sekme" data-s="butce">Bütçe Durumu</div>
+  </div>
+
+  <!-- ====================================================== ONAY BEKLEYEN ===== -->
+  <div class="pnl" data-s="onay">
+    <div class="arama">
+      <div class="kutu">🔍 Talep no, malzeme, birim ya da talep eden…</div>
+      <span class="chip on">Onay bekleyen <b>12</b></span>
+      <span class="chip">Acil <b>4</b></span>
+      <span class="chip">Bütçe dışı <b>2</b></span>
+      <span class="chip">Otomatik (kritik stok) <b>5</b></span>
+      <span class="chip">Tümü</span>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:120px">Talep No</th>
+          <th style="width:230px">Malzeme / Hizmet</th>
+          <th style="width:130px">İsteyen birim</th>
+          <th style="width:110px" class="sag">Tahmini</th>
+          <th style="width:110px" class="orta">Kaynak</th>
+          <th style="width:150px">Onay sırası</th>
+          <th style="width:130px" class="orta">Bekleyen</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>SA-2609-077</code></td>
+            <td><b>Traneksamik asit 500 mg</b><br><span class="sonuk">100 ampul</span></td>
+            <td>Eczane</td><td class="sag">7.400 ₺</td>
+            <td class="orta"><span class="rz kir">Kritik stok</span></td>
+            <td>Eczacı ✓ → <b>Satınalma</b> → Md. Yrd.</td>
+            <td class="orta"><span class="rz kir">1 gün</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SA-2609-079</code></td>
+            <td><b>O₂/hava karışım bloğu</b> (Hamilton C1)<br>
+              <span class="sonuk">parça no 160140 · 1 adet</span></td>
+            <td>Biyomedikal</td><td class="sag">74.000 ₺</td>
+            <td class="orta"><span class="rz kir">Arıza</span></td>
+            <td>Biyomedikal ✓ → Satınalma ✓ → <b>Başhekim</b></td>
+            <td class="orta"><span class="rz kir">2 gün</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SA-2609-074</code></td>
+            <td><b>İnsan albümini %20 100 mL</b><br><span class="sonuk">40 şişe</span></td>
+            <td>Eczane</td><td class="sag">188.000 ₺</td>
+            <td class="orta"><span class="rz kir">Kritik stok</span></td>
+            <td>Eczacı ✓ → Satınalma ✓ → <b>Başhekim</b></td>
+            <td class="orta"><span class="rz sari">3 gün</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SA-2609-081</code></td>
+            <td><b>Cerrahi sütür seti</b> (karma)<br><span class="sonuk">12 kalem</span></td>
+            <td>Ameliyathane</td><td class="sag">96.500 ₺</td>
+            <td class="orta"><span class="rz">Planlı</span></td>
+            <td>Sorumlu hemş. ✓ → <b>Satınalma</b></td>
+            <td class="orta"><span class="rz">4 saat</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SA-2609-083</code></td>
+            <td><b>Ultrason probu</b> (konveks, Mindray DC-70)<br><span class="sonuk">1 adet</span></td>
+            <td>Kadın Doğum</td><td class="sag">142.000 ₺</td>
+            <td class="orta"><span class="rz kir">Arıza</span></td>
+            <td>Biyomedikal ✓ → <b>Satınalma</b> → Başhekim</td>
+            <td class="orta"><span class="rz sari">2 gün</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SA-2609-085</code></td>
+            <td><b>Hasta başı monitör</b><br><span class="sonuk">4 adet · YBÜ yenileme</span></td>
+            <td>YBÜ</td><td class="sag">640.000 ₺</td>
+            <td class="orta"><span class="rz mavi">Yatırım</span></td>
+            <td>Sorumlu hekim ✓ → Satınalma ✓ → Başhekim ✓ → <b>Yönetim Kurulu</b></td>
+            <td class="orta"><span class="rz sari">6 gün</span></td></tr>
+          <tr class="tik"><td class="nw"><code>SA-2609-086</code></td>
+            <td><b>Temizlik malzemesi</b> (aylık)<br><span class="sonuk">18 kalem</span></td>
+            <td>Destek Hizmetleri</td><td class="sag">42.300 ₺</td>
+            <td class="orta"><span class="rz">Periyodik</span></td>
+            <td><b>Satınalma</b></td>
+            <td class="orta"><span class="rz">1 gün</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Onay basamağı tutara göre değişir:</b> 50.000 ₺ üstü başhekim, 500.000 ₺ üstü
+        yönetim kurulu — talep yazan kişi bu sırayı bilmek zorunda değil, sistem kurar.</span>
+      <span class="sp">Kritik stok ve arıza kaynaklı talepler listenin başına düşer: bekleyen yalnız kâğıt değil, hasta.</span>
+    </div>
+  </div>
+
+  <!-- ==================================================== GECİKEN TESLİMAT ===== -->
+  <div class="pnl" data-s="gecikme" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Sipariş no ya da tedarikçi…</div>
+      <span class="chip on">Geciken <b>5</b></span>
+      <span class="chip">Kritik malzeme <b>2</b></span>
+      <span class="chip">Kısmi teslim <b>3</b></span>
+      <span class="chip">Cezalı <b>1</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:120px">Sipariş No</th>
+          <th style="width:210px">Malzeme</th>
+          <th style="width:170px">Tedarikçi</th>
+          <th style="width:110px" class="orta">Söz verilen</th>
+          <th style="width:90px" class="orta">Gecikme</th>
+          <th style="width:120px" class="orta">Teslim</th>
+          <th>Etki</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>SP-2609-041</code></td>
+            <td>Deksmedetomidin 200 µg ×40</td><td>Selçuk Ecza Deposu</td>
+            <td class="orta">12.09.2026</td>
+            <td class="orta"><span class="rz kir">4 gün</span></td>
+            <td class="orta"><span class="rz kir">0 / 40</span></td>
+            <td><span class="rz kir">Stok sıfır</span> — YBÜ alternatif (midazolam) kullanıyor</td></tr>
+          <tr class="tik"><td class="nw"><code>SP-2609-038</code></td>
+            <td>İnsan albümini %20 ×40</td><td>Hedef Medikal</td>
+            <td class="orta">14.09.2026</td>
+            <td class="orta"><span class="rz kir">2 gün</span></td>
+            <td class="orta"><span class="rz sari">10 / 40</span></td>
+            <td><span class="rz kir">Kritik stok</span> — 1,3 günlük stok kaldı</td></tr>
+          <tr class="tik"><td class="nw"><code>SP-2608-112</code></td>
+            <td>Cerrahi eldiven (steril) ×20.000</td><td>Medikal Grup A.Ş.</td>
+            <td class="orta">05.09.2026</td>
+            <td class="orta"><span class="rz kir">11 gün</span></td>
+            <td class="orta"><span class="rz sari">12.000 / 20.000</span></td>
+            <td><span class="rz sari">Ceza işletildi</span> — günlük binde 1, 9.240 ₺</td></tr>
+          <tr class="tik"><td class="nw"><code>SP-2609-029</code></td>
+            <td>Hasta yatağı (motorlu) ×6</td><td>Linet Türkiye</td>
+            <td class="orta">10.09.2026</td>
+            <td class="orta"><span class="rz sari">6 gün</span></td>
+            <td class="orta"><span class="rz">0 / 6</span></td>
+            <td>Ortopedi servis yenilemesi ertelendi</td></tr>
+          <tr class="tik"><td class="nw"><code>SP-2609-044</code></td>
+            <td>Laboratuvar kit (biyokimya) ×50</td><td>Roche Diagnostics</td>
+            <td class="orta">15.09.2026</td>
+            <td class="orta"><span class="rz">1 gün</span></td>
+            <td class="orta"><span class="rz sari">30 / 50</span></td>
+            <td>Laboratuvar 4 günlük stokla çalışıyor</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Gecikmenin etkisi malzemeye göre ölçülür:</b> eldiven 11 gün gecikince ceza yazılır,
+        albümin 2 gün gecikince hasta etkilenir.</span>
+      <span class="sp">Kritik malzemede gecikme <b>alternatif tedarikçi</b> aramayı başlatır — ceza yetmez.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================== FATURA FARKI ===== -->
+  <div class="pnl" data-s="fark" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:130px">Fatura</th>
+          <th style="width:160px">Tedarikçi</th>
+          <th style="width:120px">Sipariş</th>
+          <th style="width:110px" class="sag">Sipariş</th>
+          <th style="width:110px" class="sag">İrsaliye</th>
+          <th style="width:110px" class="sag">Fatura</th>
+          <th>Fark</th>
+          <th style="width:130px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>A-2026/44187</code></td>
+            <td>Selçuk Ecza Deposu</td><td class="nw"><code>SP-2609-061</code></td>
+            <td class="sag">184.320 ₺</td><td class="sag">184.320 ₺</td><td class="sag">184.320 ₺</td>
+            <td><span class="rz sari">Miktar farkı</span> Seftriakson 120 sipariş, 108 sayıldı —
+              12 adet eksik faturalanmış değil</td>
+            <td class="orta"><span class="rz sari">Tutanak bekliyor</span></td></tr>
+          <tr class="tik"><td class="nw"><code>B-2026/9012</code></td>
+            <td>Medikal Grup A.Ş.</td><td class="nw"><code>SP-2608-112</code></td>
+            <td class="sag">462.000 ₺</td><td class="sag">277.200 ₺</td><td class="sag">462.000 ₺</td>
+            <td><span class="rz kir">Tutar farkı</span> Kısmi teslim (12.000/20.000) ama
+              tam tutar faturalanmış</td>
+            <td class="orta"><span class="rz kir">Ödeme durduruldu</span></td></tr>
+          <tr class="tik"><td class="nw"><code>C-2026/1188</code></td>
+            <td>Hedef Medikal</td><td class="nw"><code>SP-2609-038</code></td>
+            <td class="sag">188.000 ₺</td><td class="sag">47.000 ₺</td><td class="sag">51.700 ₺</td>
+            <td><span class="rz kir">Fiyat farkı</span> Birim fiyat sözleşmedekinden %10 yüksek</td>
+            <td class="orta"><span class="rz kir">İtiraz edildi</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Üçlü eşleştirme (sipariş - irsaliye - fatura)</b> tutmadan ödeme çıkmaz:
+        üçü de aynı şeyi söylemeli.</span>
+      <span class="sp">Fark tedarikçi değerlendirmesine işlenir — tekrarlayan fiyat farkı sözleşme yenilemesini etkiler.</span>
+    </div>
+  </div>
+
+  <!-- ========================================================= BÜTÇE DURUMU ===== -->
+  <div class="pnl" data-s="butce" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:230px">Bütçe kalemi</th>
+          <th style="width:130px" class="sag">Yıllık bütçe</th>
+          <th style="width:130px" class="sag">Harcanan</th>
+          <th style="width:130px" class="sag">Taahhüt (açık sipariş)</th>
+          <th style="width:120px" class="sag">Kalan</th>
+          <th style="width:190px">Kullanım</th>
+          <th style="width:110px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>İlaç</b></td>
+            <td class="sag">14.000.000 ₺</td><td class="sag">10.480.000 ₺</td>
+            <td class="sag">840.000 ₺</td><td class="sag">2.680.000 ₺</td>
+            <td><span class="bar m" style="display:inline-block;width:130px"><i style="width:81%"></i></span> %81</td>
+            <td class="orta"><span class="rz ok">Normal</span></td></tr>
+          <tr class="tik"><td><b>Tıbbi sarf malzeme</b></td>
+            <td class="sag">9.500.000 ₺</td><td class="sag">7.220.000 ₺</td>
+            <td class="sag">1.140.000 ₺</td><td class="sag">1.140.000 ₺</td>
+            <td><span class="bar s" style="display:inline-block;width:130px"><i style="width:88%"></i></span> %88</td>
+            <td class="orta"><span class="rz sari">İzlemde</span></td></tr>
+          <tr class="tik"><td><b>Laboratuvar kit / reaktif</b></td>
+            <td class="sag">4.200.000 ₺</td><td class="sag">2.940.000 ₺</td>
+            <td class="sag">310.000 ₺</td><td class="sag">950.000 ₺</td>
+            <td><span class="bar m" style="display:inline-block;width:130px"><i style="width:77%"></i></span> %77</td>
+            <td class="orta"><span class="rz ok">Normal</span></td></tr>
+          <tr class="tik"><td><b>Cihaz bakım / onarım</b></td>
+            <td class="sag">1.800.000 ₺</td><td class="sag">1.612.000 ₺</td>
+            <td class="sag">218.000 ₺</td><td class="sag">−30.000 ₺</td>
+            <td><span class="bar k" style="display:inline-block;width:130px"><i style="width:100%"></i></span> %102</td>
+            <td class="orta"><span class="rz kir">Aşıldı</span></td></tr>
+          <tr class="tik"><td><b>Demirbaş / yatırım</b></td>
+            <td class="sag">6.000.000 ₺</td><td class="sag">3.100.000 ₺</td>
+            <td class="sag">640.000 ₺</td><td class="sag">2.260.000 ₺</td>
+            <td><span class="bar" style="display:inline-block;width:130px"><i style="width:62%"></i></span> %62</td>
+            <td class="orta"><span class="rz ok">Normal</span></td></tr>
+          <tr class="tik"><td><b>Genel / destek hizmet</b></td>
+            <td class="sag">2.400.000 ₺</td><td class="sag">1.540.000 ₺</td>
+            <td class="sag">96.000 ₺</td><td class="sag">764.000 ₺</td>
+            <td><span class="bar" style="display:inline-block;width:130px"><i style="width:68%"></i></span> %68</td>
+            <td class="orta"><span class="rz ok">Normal</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Taahhüt de harcamadır:</b> açık sipariş henüz faturalanmadı ama parası bağlandı —
+        kalan bütçe onu düşerek gösterilir.</span>
+      <span class="sp">Bakım bütçesi aşıldı (%102): 74.000 ₺'lik karışım bloğu talebi <b>bütçe dışı</b> olarak başhekim onayında.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Satınalma süreç haritası.</b> Pano beş akışın giriş noktası:
+  <ul>
+    <li><b>Talep</b> — birim ihtiyacı ya da kritik stok/arıza kaynaklı otomatik talep; stok ve
+      bütçe kontrolünden geçer, tutara göre onay basamaklarını dolaşır.</li>
+    <li><b>Teklif / ihale</b> — en az üç teklif, teknik ve ticari değerlendirme, karar gerekçesi.</li>
+    <li><b>Sipariş</b> — çerçeve anlaşma varsa doğrudan, yoksa teklif kararından; teslim takibi
+      ve gecikme cezası.</li>
+    <li><b>Kabul & fatura</b> — muayene kabul, <b>üçlü eşleştirme</b> (sipariş-irsaliye-fatura),
+      fark yönetimi, ödeme.</li>
+    <li><b>Tedarikçi</b> — sözleşmeler, performans skoru, yasaklılık kontrolü.</li>
+  </ul>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

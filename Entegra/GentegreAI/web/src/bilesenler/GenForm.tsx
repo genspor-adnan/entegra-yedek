@@ -102,6 +102,9 @@ interface Props {
   /** Ekrana ozel varsayilan: mantik alan icin boolean, kod/sayi alani icin
       sayi (or. Cek Listesi'nden 'Yeni' -> tur=1). */
   yeniKayitVarsayilanlari?: Record<string, boolean | number | string>;
+  /** Yeni kartta ON DOLU arama alanlarinin (hastaId vb.) gorunen adi - ad
+      lookup haritasinda yoksa kutu bos gorunurdu (708: seanstan lab is emri). */
+  yeniSecilenAdlar?: Record<string, string>;
   /** Bu EKRANDA cizilmeyecek alanlar (ör. Aday kartinda "Kod"). Alan katalogda
       kalir; deger tasinir, form onu gostermez. */
   gizliAlanlar?: string[];
@@ -227,7 +230,7 @@ const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
 export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, onKaydedildi, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk,
-                          resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari,
+                          resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
   const { kullanici } = useOturum();
   const yeniMi = id === 'yeni';
@@ -624,6 +627,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
         if (yeniKayitVarsayilanlari) {
           Object.entries(yeniKayitVarsayilanlari).forEach(([ad, deger]) => { baslangic[ad] = deger });
         }
+        if (yeniSecilenAdlar) setSecilenAdlar(s => ({ ...s, ...yeniSecilenAdlar }));
         setDeger(baslangic);
         setIlkDeger(baslangic);
         sonKurAnahtari.current = null;   // yeni kartta kur cekilsin

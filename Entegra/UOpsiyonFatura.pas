@@ -141,6 +141,7 @@ type
     chkVade: TcxCheckBox;
     ChkProjeGozuksun: TcxCheckBox;
     ChkDemirbasGozuksun: TcxCheckBox;
+    ChkSatirBolMenu: TcxCheckBox;
     Panel2: TPanel;
     AlSiparisTus: TcxButton;
     VerSiparisTus: TcxButton;
@@ -561,6 +562,7 @@ begin
 
   ChkProjeGozuksun.Checked := Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_ProjeGozuksun, True);
   ChkDemirbasGozuksun.Checked := Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_DemirbasGozuksun, True);
+  ChkSatirBolMenu.Checked := Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_SatirBolMenu, True);
 
   CheckEIrsaliyeAktif.Checked := Tablo.GENINI.ReadBoolean(Ops_OpsiyonEIrsaliye, False);
   CheckIhracatGonderilsin.Checked := Tablo.GENINI.ReadBoolean(Ops_OpsiyonIhracatGonder, True);
@@ -774,6 +776,7 @@ begin
 
   Tablo.GENINI.WriteBoolean(Ops_FaturaOpsiyon_ProjeGozuksun,ChkProjeGozuksun.Checked);
   Tablo.GENINI.WriteBoolean(Ops_FaturaOpsiyon_DemirbasGozuksun,ChkDemirbasGozuksun.Checked);
+  Tablo.GENINI.WriteBoolean(Ops_FaturaOpsiyon_SatirBolMenu, ChkSatirBolMenu.Checked);
 
   Tablo.GENINI.WriteBoolean(Ops_OpsiyonEIrsaliye,CheckEIrsaliyeAktif.Checked);
 

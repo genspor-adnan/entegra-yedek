@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onam & İmza (tablet) — Mockup (GenoTIP AI · Medula)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .btn.mini{padding:2px 7px;font-size:10.5px;display:inline-flex}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg td code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)} .hdr.k5{grid-template-columns:repeat(5,1fr)} .hdr.k6{grid-template-columns:repeat(6,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.err{border-color:#c0392b;background:#fff6f5}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .kart.kir .d{color:var(--kirmizi)} .kart.ok .d{color:var(--ok)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)} .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)} .bar.k i{background:linear-gradient(#e06a5e,#c0392b)}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:300px 1fr 320px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .sonuc{margin:10px 12px;border:1px solid #bfe3cb;background:#eef9f1;border-radius:4px;padding:8px 10px;font-size:11.5px}
+  .sonuc.kir{border-color:#f3c4bf;background:#fdf1ef}
+  .sonuc.sari{border-color:#f2ddbf;background:#fdf8ec}
+  .sonuc b{color:var(--navy)}
+  .xml{font-family:Consolas,monospace;font-size:10.5px;background:#1f2d3a;color:#d7e3f2;padding:8px 10px;border-radius:3px;white-space:pre;overflow:auto;margin:0 12px 10px;line-height:1.5}
+  .adim{display:flex;gap:0;padding:8px 12px;flex-wrap:wrap}
+  .adim span{padding:5px 12px;border:1px solid var(--line);background:#fff;font-size:11px;color:var(--muted);position:relative}
+  .adim span+span{border-left:none}
+  .adim span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .adim span.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .icerik{padding:12px 16px;line-height:1.6}
+  .icerik h2{font-size:14px;color:var(--navy);margin:16px 0 6px;border-bottom:1px solid var(--line2);padding-bottom:3px}
+  .icerik h3{font-size:12.5px;color:#2c4a6b;margin:12px 0 4px}
+  .icerik p{margin:4px 0}
+  .icerik table{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:11.5px}
+  .icerik th,.icerik td{border:1px solid var(--line2);padding:4px 7px;text-align:left;vertical-align:top}
+  .icerik th{background:#f4f7fb;color:#3a5573;white-space:nowrap}
+  .icerik code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .kutu{border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;padding:8px 10px;margin:8px 0}
+  .yatay{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:6px 12px}
+</style>
+</head>
+<body>
+
+<style>
+  .frm{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 10px;padding:8px 12px}
+  .frm .al{display:flex;flex-direction:column;gap:2px;font-size:11px}
+  .frm .al .lb{color:var(--muted);font-size:10.5px}
+  .frm .al.g2{grid-column:span 2} .frm .al.g4{grid-column:span 4}
+  .kpis{display:flex;gap:8px;padding:8px 12px;flex-wrap:wrap}
+  .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px} .kart .b{font-size:10.5px;color:var(--muted)}
+  .kart.kir .d{color:#c0392b} .kart.ok .d{color:#2e7d46} .kart.sari .d{color:#8a6218}
+  .aile{display:inline-block;border-radius:3px;padding:1px 7px;font-size:10.5px;font-weight:bold;color:#fff}
+  .aile.onam{background:#6a3fb5} .aile.deg{background:#2f6db3} .aile.kl{background:#1c8b8b} .aile.beyan{background:#3f9a5e} .aile.anket{background:#d9a12b}
+  .dg td.w{white-space:normal}
+  .tur{display:inline-block;border-radius:3px;padding:1px 6px;font-size:10.5px;border:1px solid var(--line);background:#fff}
+  .tur.ic{border-color:#2f6db3;color:#2f6db3} .tur.dz{border-color:#c0392b;color:#c0392b} .tur.tb{border-color:#6b7a8b;color:#6b7a8b}
+  .kt{display:inline-block;border-radius:8px;padding:0 6px;font-size:10px;background:#eef2f6;color:#4d5d6e;margin-right:2px}
+  .ed{display:grid;grid-template-columns:230px 1fr 300px;min-height:520px}
+  .ed>div{border-right:1px solid var(--line2)} .ed>div:last-child{border-right:none}
+  .ed .agac{padding:8px;font-size:11.5px;background:#f7f9fc}
+  .ed .agac .bl{padding:5px 8px;border-radius:3px;font-weight:bold;color:#2c4a6b;display:flex;gap:6px;align-items:center;margin-top:6px}
+  .ed .agac .bl .sh{margin-left:auto;font-size:10px;font-weight:normal;border:1px solid var(--line);border-radius:8px;padding:0 6px;background:#fff}
+  .ed .agac .fl{padding:3px 8px 3px 22px;color:#4d5d6e;display:flex;gap:6px;align-items:center}
+  .ed .agac .fl.sec{background:#dbe7f7;color:#1c4374;border-radius:3px}
+  .ed .agac .fl i{font-style:normal;font-size:10px;color:var(--muted);width:44px}
+  .ed .tuval{padding:10px 14px;background:#fff}
+  .ed .tuval .oz{border:1px solid var(--line2);border-radius:6px;padding:10px 12px;margin-bottom:8px;background:#fbfcfe}
+  .ed .tuval .oz.sec{border-color:#2f6db3;box-shadow:0 0 0 2px #dbe7f7}
+  .ed .tuval .oz .et{font-size:11.5px;color:#2b3a4a;margin-bottom:4px;display:flex;gap:6px;align-items:center}
+  .ed .tuval .oz .et .z{color:#c0392b}
+  .ed .tuval .oz .sec2{display:flex;gap:6px;flex-wrap:wrap}
+  .ed .tuval .oz .sec2 span{border:1px solid var(--line);border-radius:12px;padding:2px 10px;font-size:11px;background:#fff}
+  .ed .oze{padding:8px 10px;font-size:11px;background:#f7f9fc}
+  .ed .oze .lb{color:var(--muted);font-size:10.5px;margin-top:6px}
+  .ed .oze .inp{margin-top:2px}
+  .tablet{max-width:760px;margin:10px auto;border:12px solid #1f2a36;border-radius:22px;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.25);overflow:hidden;font-size:12.5px}
+  .tablet .tb{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:10px 16px;font-weight:bold;display:flex;gap:8px;align-items:center}
+  .tablet .tb .sp{margin-left:auto;font-weight:normal;font-size:11px;opacity:.85}
+  .tablet .metin{padding:14px 18px;line-height:1.6;max-height:230px;overflow:auto;border-bottom:1px solid var(--line2)}
+  .tablet .metin h3{margin:0 0 6px;font-size:14px;color:var(--navy)}
+  .tablet .metin .prm{background:#fdf6e3;border-bottom:1px dashed #d9a12b}
+  .tablet .imzalar{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 18px}
+  .tablet .imza{border:1px dashed var(--line);border-radius:8px;height:110px;position:relative;background:#fff}
+  .tablet .imza .ad{position:absolute;left:8px;bottom:6px;font-size:11px;color:var(--muted)}
+  .tablet .imza svg{position:absolute;left:10px;top:10px}
+  .tablet .onay{display:flex;gap:10px;align-items:center;padding:8px 18px;font-size:12px;border-top:1px solid var(--line2)}
+  .tablet .ck{width:18px;height:18px;border:1px solid var(--line);border-radius:4px;text-align:center;line-height:18px;background:#3f9a5e;color:#fff;border-color:#2e7d46}
+  .tablet .dbtn{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold;border-radius:8px;padding:9px 18px;margin-left:auto}
+  .skor{display:grid;grid-template-columns:1fr 70px 70px 70px 70px;gap:2px 8px;padding:6px 12px;font-size:11px;align-items:center}
+  .skor .h{font-weight:bold;color:#3a5573;border-bottom:1px solid var(--line2);padding-bottom:2px;text-align:center}
+  .skor .h:first-child{text-align:left}
+  .skor .p{border:1px solid var(--line);border-radius:3px;text-align:center;padding:3px 0;background:#fff}
+  .skor .p.on{background:#2f6db3;color:#fff;border-color:#1c4374;font-weight:bold}
+  .top{display:flex;gap:10px;align-items:center;padding:8px 12px;font-size:12px;border-top:1px solid var(--line2);background:#f7f9fc}
+  .top b{font-size:16px;color:var(--navy)}
+  .zs{display:grid;grid-template-columns:150px repeat(7,1fr);gap:2px 4px;padding:6px 12px;font-size:11px;align-items:center}
+  .zs .h{font-weight:bold;color:#3a5573;text-align:center;border-bottom:1px solid var(--line2)} .zs .h:first-child{text-align:left}
+  .zs .v{text-align:center;border-radius:3px;padding:2px 0;background:#fff;border:1px solid #eef2f6}
+  .zs .v.k{background:#fbe9e7;color:#b3261e;font-weight:bold} .zs .v.s{background:#fdf6e3;color:#8a6218}
+  .asama{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:8px 12px}
+  .as{border:1px solid var(--line2);border-radius:5px;background:#fff;font-size:11.5px}
+  .as .ah{padding:6px 10px;font-weight:bold;color:#fff;border-radius:5px 5px 0 0;display:flex;gap:6px;align-items:center}
+  .as .ah .sp{margin-left:auto;font-weight:normal;font-size:10.5px;opacity:.9}
+  .as.a1 .ah{background:#2f6db3} .as.a2 .ah{background:#1c8b8b} .as.a3 .ah{background:#6a3fb5}
+  .as.kilit{opacity:.55}
+  .as .md{display:flex;gap:8px;align-items:flex-start;padding:5px 10px;border-bottom:1px solid #eef2f6}
+  .as .md .ck{flex:none;width:16px;height:16px;border:1px solid var(--line);border-radius:3px;text-align:center;line-height:16px;font-size:11px;background:#fff}
+  .as .md .ck.y{background:#3f9a5e;color:#fff;border-color:#2e7d46} .as .md .ck.n{background:#e06a5e;color:#fff;border-color:#c0392b}
+  .as .md .kim{margin-left:auto;font-size:10px;color:var(--muted);white-space:nowrap}
+  .as .af{padding:6px 10px;font-size:10.5px;color:var(--muted);display:flex;gap:8px;align-items:center}
+</style>
+<div class="toolbar" style="background:#fff;border-bottom:1px solid var(--line2)"><span class="sonuk">Form motoru:</span><span class="chip" data-git="formlar.html">🗂 Formlar (Yönetim)</span><span class="chip" data-git="form_sablon_editoru.html">✎ Şablon Editörü</span><span class="chip" data-git="form_hasta_kartinda.html">🪪 Hasta Kartı › Formlar</span><span class="chip on" data-git="form_onam_imza.html">✍️ Onam & İmza (tablet)</span><span class="chip" data-git="form_hemsire_degerlendirme.html">🩹 Hemşire Değerlendirme</span><span class="chip" data-git="form_guvenli_cerrahi.html">🛡 Güvenli Cerrahi Listesi</span><span class="sp"></span><span class="chip" data-git="../ISG/isg_calisan_formu.html">📱 İSG çalışan formu (SMS)</span></div>
+<div class="win">
+  <div class="title">✍️ Onam &amp; İmza — tablet görünümü <span class="sp">Anestezi onamı · Mehmet Öz · A-2026/0088 · hasta başında tablet, ya da uzaktan SMS + OTP</span></div>
+  <div class="sekmeler"><div class="sekme on">Tablet (hasta)</div><div class="sekme">Uzaktan (SMS + OTP)</div><div class="sekme">Hekim tarafı &amp; PDF</div></div>
+  <div class="pnl">
+    <div class="tablet">
+      <div class="tb">🩺 GenoTIP AI — Anestezi Onam Formu <span class="sp">Mehmet Öz · 1978 · Y-2026/0412</span></div>
+      <div class="metin">
+        <h3>Anestezi Uygulaması İçin Aydınlatılmış Onam</h3>
+        Sayın <span class="prm">Mehmet Öz</span>, <span class="prm">16.09.2026</span> tarihinde planlanan <span class="prm">laparoskopik kolesistektomi</span> ameliyatı için <span class="prm">genel anestezi</span> uygulanacaktır. Anestezi öncesi değerlendirmeniz yapılmış, ASA sınıfınız <span class="prm">II</span> olarak belirlenmiştir.<br>
+        <b>Olası riskler:</b> bulantı-kusma, boğaz ağrısı, diş hasarı, alerjik reaksiyon, nadiren solunum/dolaşım sorunları… <span class="prm">Ek: sigara kullanımına bağlı solunum komplikasyonu riski</span>.<br>
+        <b>Alternatifler:</b> bölgesel anestezi bu ameliyat için uygun değildir.<br>
+        Sorularınızı anestezi hekiminize sorabilirsiniz. Onamınızı istediğiniz zaman geri alabilirsiniz.
+      </div>
+      <div class="onay"><span class="ck">✓</span> Yukarıdaki bilgileri okudum / bana okundu, anladım.</div>
+      <div class="onay" style="border-top:none;padding-top:0"><span class="ck">✓</span> Sorularım yanıtlandı. Anestezi uygulanmasını kabul ediyorum.</div>
+      <div class="imzalar">
+        <div class="imza"><svg width="220" height="70" viewBox="0 0 220 70" fill="none" stroke="#1c4374" stroke-width="2"><path d="M10 50 C 30 10, 50 60, 70 30 S 110 10, 130 45 S 170 60, 200 20"/></svg><span class="ad">Hasta: Mehmet Öz · 16.09.2026 07:48</span></div>
+        <div class="imza"><span class="ad">Tanık (isteğe bağlı): —</span></div>
+      </div>
+      <div class="onay"><span class="sonuk">Parmağınızla imzalayın · Sil</span><span class="dbtn">İmzala ve bitir ✓</span></div>
+    </div>
+    <div class="ic sonuk">Tablet hemşire/hekim ekranından "Tablete gönder" ile açılır (aynı hesap, kiosk modu; 10 dk sonra kapanır). 18 yaş altı / vasili hastada "Hasta" yerine "Vasi" + tanık zorunlu. Okuma-yazma bilmeyen hasta: "bana okundu" + tanık.</div>
+  </div>
+  <div class="pnl" hidden>
+    <div class="frm"><div class="al"><span class="lb">Kanal</span><span class="inp ">SMS → /f/{kod} · 24 saat</span></div><div class="al"><span class="lb">Kimlik</span><span class="inp ">TCKN son 4 + doğum yılı</span></div><div class="al"><span class="lb">İmza yöntemi</span><span class="inp ">OTP: SMS ile 6 haneli kod, "kabul ediyorum" + kod = imza</span></div><div class="al"><span class="lb">Kayıt</span><span class="inp ">OTP zamanı, telefon, IP, metin sürümü (v7) · PDF'te "OTP ile onaylandı"</span></div><div class="al g2"><span class="lb">Ne zaman</span><span class="inp ">Ameliyat öncesi evden; günübirlik işlemlerde randevu SMS'i ile birlikte</span></div><div class="al g2"><span class="lb">Sınır</span><span class="inp ">Yüksek riskli işlemde uzaktan onam kabul edilmez (şablon ayarı) → tablet</span></div></div>
+    <div class="ic sonuk">OTP imzası hukuken "güvenli e-imza" değil; kurum politikasına göre düşük riskli işlemler / KVKK rızası / anket için. Ameliyat onamı için tablet kanvas (ıslak imza eşdeğeri) ya da kağıt + tarama.</div>
+  </div>
+  <div class="pnl" hidden>
+    <div class="toolbar"><span class="sonuk">Anestezi onamı · Mehmet Öz</span><span class="sp"></span><span class="btn">✎ Hastaya özel risk ekle</span><span class="btn">🖥 Tablete gönder</span><span class="btn">📱 SMS ile gönder</span><span class="btn">📎 Kağıt onamı tara</span><span class="btn ok">✍️ Hekim imzası (e-imza)</span><span class="btn">📄 PDF</span></div>
+    <div class="frm"><div class="al"><span class="lb">Şablon sürümü</span><span class="inp ">onam_anestezi v3</span></div><div class="al"><span class="lb">İşlem</span><span class="inp ">Laparoskopik kolesistektomi (hizmet kataloğu)</span></div><div class="al"><span class="lb">Anestezi</span><span class="inp ">Genel · ASA II (preop formundan)</span></div><div class="al"><span class="lb">Ek riskler</span><span class="inp ">Sigara → solunum komplikasyonu</span></div><div class="al"><span class="lb">Hasta imzası</span><span class="inp ro">✓ kanvas · 16.09 07:48 · tablet #3</span></div><div class="al"><span class="lb">Tanık</span><span class="inp ">—</span></div><div class="al"><span class="lb">Hekim imzası</span><span class="inp ro">Anest. Dr. C. Ay · e-imza · 16.09 07:50</span></div><div class="al"><span class="lb">Durum</span><span class="inp "><span class="rz ok">Tamamlandı · kilitli</span></span></div><div class="al g2"><span class="lb">PDF</span><span class="inp ">dokuman › Formlar › onam_anestezi_A-2026-0088.pdf · hash …9f3a</span></div><div class="al g2"><span class="lb">Ameliyat kilidi</span><span class="inp "><span class="rz ok">Açıldı</span> (onam + preop tamam)</span></div></div>
+    <div class="ic sonuk">İmzalanan form değiştirilemez; hata varsa "iptal + yeni onam". PDF'te metin sürümü, parametre değerleri, imza görüntüleri, zaman/IP/cihaz. Kalite: onamsız işlem sayısı göstergesi.</div>
+  </div>
+  <div class="statusbar"><span>Onam · tablet kanvas · OTP · kağıt tarama · hekim e-imza</span><span class="sp">PDF dokuman deposuna, hasta kartı › Formlar'a</span></div>
+</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi. Ic ice sekmeler desteklenir.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===scope.closest('.pnl');});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+// Ic toolbar dugmeleri: data-git="dosya.html" olanlar diger mockup'a gecer.
+document.querySelectorAll('[data-git]').forEach(function(b){ b.style.cursor='pointer'; b.addEventListener('click',function(){ location.href=b.dataset.git; }); });
+</script>
+</body>
+</html>

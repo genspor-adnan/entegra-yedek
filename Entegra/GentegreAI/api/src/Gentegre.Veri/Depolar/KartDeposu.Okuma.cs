@@ -274,6 +274,11 @@ public sealed partial class KartDeposu
     //   (kullanicidan gelmez), yine de savunma amacli whitelist'e karsi dogrulanir.
     private static readonly HashSet<string> KodTablosuBeyazListe =
         new(StringComparer.Ordinal) {
+            // Klinik Kalite (711/712): gosterge donem kartindaki gosterge combosu,
+            //   gosterge kartindaki (salt okunur) olgu combosu.
+            // Ameliyathane (715) / Acil servis (716) secim kaynaklari.
+            "public.v_ameliyat_salon_lookup", "public.v_acil_yatak_lookup",
+            "public.v_klinik_gosterge_lookup", "public.v_klinik_olgu_lookup",
             "public.kategori", "public.v_cari_lookup", "public.rol", "public.sube", "public.v_personel_lookup",
             "public.v_sube_baz_lookup",
             // Randevu (243): hasta secimi.
@@ -284,7 +289,8 @@ public sealed partial class KartDeposu
             "public.v_tahsilat_turu_lookup",
             // Departman/bolum (251): personel kartinda tum departmanlar, randevu
             //   kartinda yalniz randevu verilebilen bolumler.
-            "public.v_departman_lookup", "public.v_randevu_bolum_lookup",
+            "public.v_departman_lookup", "public.v_randevu_bolum_lookup", "public.v_sube_lookup",
+            "public.v_ftr_hizmet_lookup", "public.v_ftr_unite_lookup", "public.v_ftr_kabin_lookup", "public.v_ftr_degerlendirme_lookup", "public.v_ftr_program_lookup",
             // BOLUM AGACI (577): ust_id tasiyan gorunum - duz lookup agac cizemez.
             "public.v_departman_agac_lookup",
             // Personel gorevi (255) - departmana bagli combo.
@@ -304,6 +310,11 @@ public sealed partial class KartDeposu
             //   turu, servis ve DURUM var - bos yatagin verilebilir olup
             //   olmadigini oda belirler.
             "public.v_oda_lookup", "public.v_yatak_lookup",
+            // DIS (706): unit, laboratuvar, dis islemi (yalniz dis_islem=1) ve plan.
+            "public.v_dis_unit_lookup", "public.v_dis_lab_lookup",
+            "public.v_dis_islem_lookup", "public.v_dis_plan_lookup",
+            // MEDULA (707): kesinti kartinda fatura secimi.
+            "public.v_medula_fatura_lookup",
             // RADYOLOJI (283/286): cihaz, tetkik (yalniz radyoloji hizmetleri)
             //   ve istem hekimi (ic + dis).
             "public.v_rad_cihaz_lookup", "public.v_rad_tetkik_lookup",
@@ -329,6 +340,9 @@ public sealed partial class KartDeposu
             //   Beyaz listede olmayinca kart 500 veriyordu ("Bilinmeyen kod tablosu")
             //   ve numara satiri cift tikla acilamiyordu.
             "public.v_numara_turu_kimlik",
+            // TEDARIK BELGELERI (731): talep/teklif/kabul/hazirlama/
+            //   imha/demirbas/kalibrasyon/is emri numara turleri.
+            "public.v_numara_turu_tedarik",
             // Prim plani rol combosu (362) - rolun yaninda isaretli kisi sayisi.
             "public.v_prim_rol_lookup",
             // Prim plani "Prim Alanlar" sekmesi (375): prim rolu ISARETLI
@@ -393,6 +407,9 @@ public sealed partial class KartDeposu
             //   public.v_skrs_ulke_lookup" (izleme 01M2D4RV39D9BF8BQG4Q3M2Z5C).
             "public.v_skrs_ulke_lookup", "public.v_skrs_meslek_lookup",
             "public.v_skrs_klinik_lookup",
+            // Mal kabul (737): tutanagin irsaliyesi/siparisi. Alan `sayi`
+            //   idi ve kullanicidan ham belge_id bekliyordu.
+            "public.v_kabul_irsaliye_lookup", "public.v_kabul_siparis_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

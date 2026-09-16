@@ -249,6 +249,20 @@ export function MesajKatmani() {
                     <option key={x.kod} value={x.kod}>{x.ad}</option>
                   ))}
                 </select>
+              ) : istek.girdiCokSatir ? (
+                /* COK SATIRLI: okuyucudan gelen kodlar satir satir
+                   yapistirilir. Tek satirlik kutuda tarayici satir sonlarini
+                   siliyor, kodlar birlesik tek metin oluyordu - cagiran
+                   satirlara boldugu icin iki kutu sessizce kayboluyordu.
+                   ENTER SATIR ATLAR: her satir ayri bir koddur, Enter'in
+                   pencereyi kapatmasi cok satirli girdiyi imkansiz kilardi;
+                   onay Ctrl+Enter ya da Tamam dugmesi. */
+                <textarea className="genis-deger" autoFocus rows={5}
+                          value={girdi}
+                          onChange={e => setGirdi(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) kapat(true);
+                          }} />
               ) : (
               <span className="ikili">
                 <input className="genis-deger" autoFocus

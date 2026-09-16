@@ -59,7 +59,9 @@ public static class AksiyonKatalogu
             ],
 
             ["kisi-liste"] = Crud("kisi", "kisi", "cari"),
-            ["rol-liste"] = Crud("rol", "rol", "rol", yazdir: false),
+            // Sil ARAC CUBUGUNDA (kullanici: "rollere silme ikonu ekle"); kullanicili rol
+            //   sunucuda engellenir (KartKatalogu Rol SilmeEngelleri).
+            ["rol-liste"] = Crud("rol", "rol", "rol", yazdir: false, silHedef: null),
 
             // KULLANICILAR (Yonetim > Guvenlik) - mockup kullanicilar.html.
             //   CRUD YOK: hesap burada "yeni kayit" gibi acilmaz (personelden
@@ -329,6 +331,217 @@ public static class AksiyonKatalogu
             },
             ["goz-hasta-ozet-liste"] = new AksiyonTanimi[] { Yazdir() },
 
+            // ===================================================== DIS (706) ==
+            // Hasta listesi: satir HASTA, kart ozel sayfa (odontogram + plan).
+            //   Ekle/sil yok - hasta kaydi Kayit Kabul'de acilir.
+            ["dis-hasta-liste"] = new AksiyonTanimi[]
+            {
+                new("dis.hasta-karti", "🦷 Diş Hasta Kartı", "dis",
+                    KaynakKodu: "dis.hasta", Islem: Islem.Gor, KayitGerekir: true, Sira: 10, UrunModu: 2),
+                new("dis.plan-ac", "📋 Yeni Tedavi Planı", "dis",
+                    KaynakKodu: "dis.plan", Islem: Islem.Ekle, KayitGerekir: true, Sira: 20, UrunModu: 2),
+                Yazdir(),
+            },
+            // Tedavi plani: crud + onay/sunum. Onay AYRI AKSIYON YETKISI
+            //   (dis.plan.onayla): fiyati hekim yazar, onayi hasta danismani alir.
+            ["dis-plan-liste"] =
+            [
+                .. Crud("dis-plan", "dis", "dis.plan",
+                        ekleAdi: "＋ Yeni Plan", silHedef: null, yazdir: false,
+                        silIpucu: "Onaylı plan silinmez; durumu İptal yapılır"),
+                new("dis.plan-sun", "📤 Hastaya Sun", "dis",
+                    KaynakKodu: "dis.plan", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40, UrunModu: 2,
+                    Ipucu: "Taslak → Sunuldu; proforma numarası üretilir"),
+                new("dis.plan-onayla", "✍ Hasta Onayı", "dis",
+                    KaynakKodu: "dis.plan", Islem: Islem.Degistir, KayitGerekir: true, Sira: 50, UrunModu: 2,
+                    AksiyonYetkisi: "dis.plan.onayla", Bicim: "onay",
+                    Ipucu: "Sunulan plan onaylanır; onaylı satır fiyatı değişmez"),
+                new("dis.hasta-karti", "🦷 Diş Hasta Kartı", "dis",
+                    KaynakKodu: "dis.hasta", Islem: Islem.Gor, KayitGerekir: true, Sira: 60, UrunModu: 2),
+                new("dis.odeme-plani-uret", "💳 Ödeme Planı Üret", "dis",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    KaynakKodu: "dis.odeme", Islem: Islem.Ekle, KayitGerekir: true, Sira: 70, UrunModu: 2,
+                    Ipucu: "Plan netinden peşinat + taksit satırları üretir"),
+                Yazdir(),
+            ],
+            // Seans: bitirme AYRI KARAR (dis.seans.bitir) - ucret satiri o anda dogar.
+            ["dis-seans-liste"] =
+            [
+                .. Crud("dis-seans", "dis", "dis.seans", ekleAdi: "＋ Seans Aç", yazdir: false, silHedef: null, silIpucu: "Bitmiş seans silinmez"),
+                new("dis.seans-bitir", "✔ Seansı Bitir", "dis",
+                    KaynakKodu: "dis.seans", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40, UrunModu: 2,
+                    AksiyonYetkisi: "dis.seans.bitir", Bicim: "onay",
+                    Ipucu: "Tamamlanan işlemler başvuruya ücret satırı olarak düşer, odontogram güncellenir"),
+                new("dis.hasta-karti", "🦷 Diş Hasta Kartı", "dis",
+                    KaynakKodu: "dis.hasta", Islem: Islem.Gor, KayitGerekir: true, Sira: 60, UrunModu: 2),
+                Yazdir(),
+            ],
+            // Lab is emri: asama ilerletme tek dugme - hangi asamaya gececegi
+            //   uc tarafinda sirayla belirlenir (olcu → gonderildi → ... → teslim).
+            ["dis-lab-isemri-liste"] =
+            [
+                .. Crud("dis-lab-isemri", "dis", "dis.lab", ekleAdi: "＋ İş Emri", yazdir: false, silHedef: null, silIpucu: "Teslim edilmiş iş emri silinmez"),
+                new("dis.lab-asama", "➡ Aşamayı İlerlet", "dis",
+                    KaynakKodu: "dis.lab", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40, UrunModu: 2, Bicim: "bir",
+                    Ipucu: "Gönderildi / geldi / prova / teslim - her adım zaman damgalı"),
+                new("dis.lab-geri", "🔁 Geri Gönder", "dis",
+                    Hedef: "sagtus,palet",
+                    KaynakKodu: "dis.lab", Islem: Islem.Degistir, KayitGerekir: true, Sira: 50, UrunModu: 2,
+                    Ipucu: "Prova sonrası düzeltme için laba geri"),
+                Yazdir(),
+            ],
+            ["dis-odeme-plani-liste"] = Crud("dis-odeme-plani", "dis", "dis.odeme", ekleAdi: "＋ Ödeme Planı", silHedef: null, silIpucu: "Tahsilatı olan ödeme planı silinmez"),
+
+            // =========================================== KLINIK KALITE (711/713) ==
+            // Donem sonuclari: hesapla / kesinlestir DONEM islemidir, satir
+            //   secimi istemez. Kesinlestirme TEK YON oldugu icin ayri yetki
+            //   (klinik_kalite.kesinlestir) ve kirmizi bicim - geri alinamayan
+            //   islemi gundelik hesaplamayla ayni renkte gostermek yanlis
+            //   dugmeye basmayi kolaylastirirdi.
+            ["klinik-kalite-donem-liste"] = new AksiyonTanimi[]
+            {
+                new("klinik-kalite.hesapla", "🔄 Dönemi Hesapla", "klinik_kalite",
+                    AksiyonYetkisi: "klinik_kalite.hesapla", Sira: 10, UrunModu: 2,
+                    Bicim: "bir",
+                    Ipucu: "Dönemin tüm otomatik göstergelerini yeniden hesaplar; kesinleşmiş satıra dokunmaz"),
+                new("klinik-kalite.kesinlestir", "🔒 Dönemi Kesinleştir", "klinik_kalite",
+                    AksiyonYetkisi: "klinik_kalite.kesinlestir", Sira: 20, UrunModu: 2,
+                    Bicim: "ret",
+                    Ipucu: "Taslak satırları dondurur - geri alınamaz"),
+                new("klinik-kalite.onizle", "🔢 Göstergeyi Önizle", "klinik_kalite",
+                    KaynakKodu: "klinik_kalite", Islem: Islem.Gor, KayitGerekir: true,
+                    Sira: 30, UrunModu: 2,
+                    Ipucu: "Seçili göstergeyi hesaplar ama KAYDETMEZ"),
+                Yazdir(),
+            },
+
+            // Gosterge katalogu: yalniz onizleme. Katalog rehberin mali,
+            //   buradan donem yazilmaz.
+            ["klinik-gosterge-liste"] = new AksiyonTanimi[]
+            {
+                new("klinik-kalite.onizle", "🔢 Bu Göstergeyi Önizle", "klinik_kalite",
+                    KaynakKodu: "klinik_kalite", Islem: Islem.Gor, KayitGerekir: true,
+                    Sira: 10, UrunModu: 2,
+                    Ipucu: "Seçili göstergeyi bir dönem için hesaplar ama KAYDETMEZ"),
+                Yazdir(),
+            },
+            // ================================================== MEDULA (707) ==
+            // Takip listesi: satir BASVURU; hasta kabul / hizmet kaydi ozel sayfalari
+            //   satirdan acilir. Ekle/sil yok - basvuru Kayit Kabul'de acilir.
+            ["medula-takip-liste"] = new AksiyonTanimi[]
+            {
+                new("medula.kabul-ac",   "🪪 Hasta Kabul / Provizyon", "medula",
+                    KaynakKodu: "medula.provizyon", Islem: Islem.Gor, KayitGerekir: true, Sira: 10, UrunModu: 2),
+                new("medula.hizmet-ac",  "🧾 Hizmet Kaydı", "medula",
+                    KaynakKodu: "medula.hizmet", Islem: Islem.Gor, KayitGerekir: true, Sira: 20, UrunModu: 2),
+                new("medula.cikis",      "🚪 Hasta Çıkışı", "medula",
+                    KaynakKodu: "medula.provizyon", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30, UrunModu: 2,
+                    Ipucu: "Takip kapatılır; fatura ancak çıkıştan sonra kesilir"),
+                new("medula.fatura-kaydet", "🧮 Fatura Kaydet", "medula",
+                    KaynakKodu: "medula.fatura", Islem: Islem.Ekle, KayitGerekir: true, Sira: 40, UrunModu: 2),
+                Yazdir(),
+            },
+            ["medula-islem-liste"] = new AksiyonTanimi[]
+            {
+                new("medula.hizmet-ac",  "🧾 Hizmet Kaydı Ekranı", "medula",
+                    KaynakKodu: "medula.hizmet", Islem: Islem.Gor, KayitGerekir: true, Sira: 10, UrunModu: 2),
+                new("medula.islem-iptal", "✖ Kaydı İptal Et", "medula",
+                    KaynakKodu: "medula.hizmet", Islem: Islem.Sil, KayitGerekir: true, Sira: 20, UrunModu: 2, Bicim: "onay"),
+                new("medula.islem-yerel", "💳 Hastaya Ücretli Bırak", "medula",
+                    KaynakKodu: "medula.hizmet", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30, UrunModu: 2),
+                Yazdir(),
+            },
+            ["medula-fatura-liste"] = new AksiyonTanimi[]
+            {
+                new("medula-fatura.duzenle", "✎ Aç", "medula", Kisayol: "Enter",
+                    KaynakKodu: "medula.fatura", Islem: Islem.Gor, KayitGerekir: true, Sira: 10),
+                new("medula.fatura-iptal", "✖ Fatura İptal", "medula",
+                    KaynakKodu: "medula.fatura", Islem: Islem.Sil, KayitGerekir: true, Sira: 20, UrunModu: 2, Bicim: "onay"),
+                new("medula.kesinti-ekle", "➖ Kesinti Yaz", "medula",
+                    KaynakKodu: "medula.fatura", Islem: Islem.Ekle, KayitGerekir: true, Sira: 30, UrunModu: 2),
+                new("medula.donem-ac",   "📅 Fatura & Dönem Ekranı", "medula",
+                    KaynakKodu: "medula.fatura", Islem: Islem.Gor, Sira: 40, UrunModu: 2),
+                Yazdir(),
+            },
+            ["medula-donem-liste"] = new AksiyonTanimi[]
+            {
+                new("medula-donem.duzenle", "✎ Aç", "medula", Kisayol: "Enter",
+                    KaynakKodu: "medula.fatura", Islem: Islem.Degistir, KayitGerekir: true, Sira: 10),
+                new("medula.donem-ac",   "📅 Fatura & Dönem Ekranı", "medula",
+                    KaynakKodu: "medula.fatura", Islem: Islem.Gor, Sira: 20, UrunModu: 2),
+                Yazdir(),
+            },
+            ["medula-kesinti-liste"] =
+            [
+                .. Crud("medula-kesinti", "medula", "medula.fatura", ekleAdi: "＋ Kesinti", yazdir: false),
+                new("medula.itiraz",     "📝 İtiraz Et", "medula",
+                    KaynakKodu: "medula.fatura", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40, UrunModu: 2),
+                new("medula.itiraz-sonuc", "⚖ İtiraz Sonucu", "medula",
+                    KaynakKodu: "medula.fatura", Islem: Islem.Degistir, KayitGerekir: true, Sira: 50, UrunModu: 2),
+                Yazdir(),
+            ],
+            ["medula-rapor-liste"] =
+            [
+                .. Crud("medula-rapor", "medula", "medula.recete", ekleAdi: "＋ Rapor", yazdir: false),
+                new("medula.rapor-gonder", "📤 Medula'ya Gönder", "medula",
+                    KaynakKodu: "medula.recete", Islem: Islem.Ekle, KayitGerekir: true, Sira: 40, UrunModu: 2, Bicim: "onay"),
+                Yazdir(),
+            ],
+            // e-Recete: recete listesinin Medula gorunumu - imzala, gonder, sil.
+            ["medula-recete-liste"] = new AksiyonTanimi[]
+            {
+                new("recete.duzenle", "✎ Reçeteyi Aç", "medula", Kisayol: "Enter",
+                    KaynakKodu: "muayene", Islem: Islem.Degistir, KayitGerekir: true, Sira: 10),
+                new("medula.recete-imzala", "✍ İmzala", "medula",
+                    KaynakKodu: "medula.recete", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20, UrunModu: 2,
+                    Ipucu: "Taslak → imzalı; alerji kontrolü burada"),
+                new("medula.recete-gonder", "📤 Medula'ya Gönder", "medula",
+                    KaynakKodu: "medula.recete", Islem: Islem.Ekle, KayitGerekir: true, Sira: 30, UrunModu: 2, Bicim: "onay"),
+                new("medula.recete-sil", "🗑 Medula'dan Sil", "medula", Hedef: "sagtus,palet",
+                    KaynakKodu: "medula.recete", Islem: Islem.Sil, KayitGerekir: true, Sira: 40, UrunModu: 2, Bicim: "onay",
+                    Ipucu: "Kabul edilmiş reçete değiştirilemez: sil + yeni"),
+                Yazdir(),
+            },
+            ["medula-kuyruk-liste"] = new AksiyonTanimi[]
+            {
+                new("medula.kuyruk-gonder", "↻ Bekleyenleri Gönder", "medula",
+                    KaynakKodu: "medula", Islem: Islem.Degistir, Sira: 10, UrunModu: 2),
+                new("medula.kuyruk-tekrar", "🔁 Yeniden Dene", "medula",
+                    KaynakKodu: "medula", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20, UrunModu: 2),
+                new("medula.kuyruk-iptal", "✖ İptal Et", "medula", Hedef: "sagtus,palet",
+                    KaynakKodu: "medula", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30, UrunModu: 2, Bicim: "onay"),
+                new("medula.kuyruk-ac",  "📡 Kuyruk & Ayarlar Ekranı", "medula",
+                    KaynakKodu: "medula", Islem: Islem.Gor, Sira: 40, UrunModu: 2),
+                Yazdir(),
+            },
+            ["dis-unit-liste"] = Crud("dis-unit", "dis", "dis.unit", ekleAdi: "＋ Ünit", silHedef: null, silIpucu: "Seansı olan ünit silinmez; pasife alın"),
+            // CALISMA PLANI (711): sablon + istisna listeleri.
+            // FTR (719): degerlendirme / program / seans / olcek / unite.
+            // Ekle / Düzenle / Sil ARAC CUBUGUNDA (kullanici): silme engelleri sunucuda (KartKatalogu.Ftr SilmeEngelleri).
+            ["ftr-degerlendirme-liste"] = Crud("ftr-degerlendirme", "ftr", "ftr.degerlendirme", ekleAdi: "＋ Değerlendirme", silHedef: null,
+                                               silIpucu: "Programı olan değerlendirme silinmez"),
+            ["ftr-program-liste"] =
+            [
+                .. Crud("ftr-program", "ftr", "ftr.program", ekleAdi: "＋ Program (Kür)", silHedef: null, yazdir: false,
+                        silIpucu: "Seansı olan program silinmez; sonlandırılır"),
+                new("ftr.program-planla", "🗓 Seansları Planla", "ftr", KaynakKodu: "ftr.program", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40, UrunModu: 2),
+                new("ftr.program-seans-ac", "🏃 Bugünkü Seans", "ftr", KaynakKodu: "ftr.seans", Islem: Islem.Ekle, KayitGerekir: true, Sira: 41, UrunModu: 2),
+                new("ftr.program-sonlandir", "✖ Sonlandır", "ftr", Hedef: "sagtus,palet", KaynakKodu: "ftr.program", Islem: Islem.Degistir, KayitGerekir: true, Sira: 50, UrunModu: 2),
+            ],
+            ["ftr-seans-liste"] =
+            [
+                .. Crud("ftr-seans", "ftr", "ftr.seans", ekleAdi: "＋ Seans", silHedef: null, yazdir: false,
+                        silIpucu: "Yapılmış seans silinmez (uygulama işaretleri kalır)"),
+                new("ftr.seans-bitir", "✔ Seansı Bitir", "ftr", KaynakKodu: "ftr.seans", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40, UrunModu: 2),
+                new("ftr.seans-gelmedi", "⛔ Gelmedi", "ftr", Hedef: "sagtus,palet", KaynakKodu: "ftr.seans", Islem: Islem.Degistir, KayitGerekir: true, Sira: 41, UrunModu: 2),
+            ],
+            ["ftr-olcek-liste"] = Crud("ftr-olcek", "ftr", "ftr.olcek", ekleAdi: "＋ Ölçek", silHedef: null),
+            ["ftr-unite-liste"] = Crud("ftr-unite", "ftr", "ftr.unite", ekleAdi: "＋ Ünite", yazdir: false, silHedef: null,
+                                       silIpucu: "Programı olan ünite silinmez; pasife alın"),
+            ["calisma-sablon-liste"]  = Crud("calisma-sablon", "randevu", "randevu.plan", ekleAdi: "＋ Şablon", yazdir: false),
+            ["calisma-istisna-liste"] = Crud("calisma-istisna", "randevu", "randevu.plan", ekleAdi: "＋ İstisna", yazdir: false),
+            ["dis-lab-liste"] = Crud("dis-lab", "dis", "dis.unit", ekleAdi: "＋ Laboratuvar", silHedef: null, silIpucu: "İş emri olan laboratuvar silinmez; pasife alın"),
+
             // YATAN HASTA SERVIS LISTESI (695): yatisin YASAM DONGUSU dugmelerle
             //   ilerler - kabul, hastanin yatagina cikisi, nakil, taburcu.
             //   Yatak durumu bu uclarla BIRLIKTE degisir; ayri bir "yatagi dolu
@@ -396,6 +609,211 @@ public static class AksiyonKatalogu
                     KaynakKodu: "yatan.yatak", Islem: Islem.Sil,
                     KayitGerekir: true, Sira: 40, UrunModu: 2,
                     Ipucu: "Yatış geçmişi olan yatak silinemez; pasife alın"),
+                Yazdir(),
+            },
+
+            // ===================================================== AMELİYATHANE (715/719) ==
+            // AKIŞ DÜĞMELERİ ARAÇ ÇUBUĞUNDA, AMA HEPSİ DEĞİL. Altı zaman damgası
+            //   var; altısını da birinci sıraya koysaydık çubuk, o an yalnız biri
+            //   geçerli olan altı düğmeyle dolardı. Birinci sıra AMELİYATIN
+            //   OMURGASI (salona alma - kesi - bitiş); anestezi, kapanış ve
+            //   salondan çıkış ikinci sırada - kaydedilirler ama akışı onlar
+            //   taşımaz (lokal anestezide anestezi damgası hiç olmaz).
+            //
+            // KESİ AYRI DURUR (Bicim "bir"): time-out tamamlanmadan sunucu
+            //   reddeder. Düğmeyi gizlemek yerine reddetmeyi seçtik - gizli
+            //   düğme "neden yok" sorusu üretir, red ise NEYİN eksik olduğunu
+            //   söyler.
+            ["ameliyat-liste"] = new AksiyonTanimi[]
+            {
+                new("ameliyat.duzenle", "✎ Ameliyat Kartı", "ameliyathane", Kisayol: "Enter",
+                    KaynakKodu: "ameliyathane.ameliyat", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 10, UrunModu: 2),
+                new("ameliyat.salona-al", "🚪 Salona Alındı", "ameliyathane",
+                    AksiyonYetkisi: "ameliyathane.baslat", KayitGerekir: true,
+                    Sira: 20, UrunModu: 2,
+                    Ipucu: "Masa süresi buradan başlar (plana göre sapma hesaplanır)"),
+                new("ameliyat.kesi", "🔪 Kesi", "ameliyathane",
+                    AksiyonYetkisi: "ameliyathane.baslat", KayitGerekir: true,
+                    Sira: 30, UrunModu: 2, Bicim: "bir",
+                    Ipucu: "Time-out (aşama 2) tamamlanmadan kaydedilmez"),
+                new("ameliyat.bitis", "✅ Ameliyat Bitti", "ameliyathane",
+                    AksiyonYetkisi: "ameliyathane.baslat", KayitGerekir: true,
+                    Sira: 40, UrunModu: 2, Bicim: "onay",
+                    Ipucu: "Cerrahi süre burada kapanır; sayım uyuşmazlığı uyarı verir"),
+                // GÜVENLİ CERRAHİ LİSTESİ kartta SALT OKUNUR (madde metni kopya,
+                //   işaretleyen/zaman elle yazılmamalı) - işaretleme buradan geçer.
+                new("ameliyat.kontrol", "☑ Güvenli Cerrahi Listesi", "ameliyathane",
+                    KaynakKodu: "ameliyathane.ameliyat", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 50, UrunModu: 2),
+
+                // FATURA ve STOK TEK DÜĞMEDE AÇILIR, tek işte DEĞİL: modal
+                //   ikisini ayrı düğmeyle yapar. Ücret hasta başvurusuna, malzeme
+                //   stok çıkış fişine gider - ayrı defter, ayrı yetki. Tek tıkla
+                //   ikisi birden olsaydı faturayı onaylayan kişi farkında olmadan
+                //   depo sayımını da değiştirirdi.
+                new("ameliyat.fatura", "🧾 Fatura & Stok", "ameliyathane",
+                    KaynakKodu: "ameliyathane.ameliyat", Islem: Islem.Gor,
+                    KayitGerekir: true, Sira: 55, UrunModu: 2,
+                    Ipucu: "İşlemleri hasta başvurusuna aktarır, malzemeyi stoktan düşer"),
+
+                new("ameliyat.anestezi", "💉 Anestezi Başladı", "ameliyathane",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    AksiyonYetkisi: "ameliyathane.baslat", KayitGerekir: true,
+                    Sira: 60, UrunModu: 2),
+                new("ameliyat.kapanis", "🧵 Kapanış Başladı", "ameliyathane",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    AksiyonYetkisi: "ameliyathane.baslat", KayitGerekir: true,
+                    Sira: 70, UrunModu: 2),
+                new("ameliyat.cikis", "🚪 Salondan Çıktı", "ameliyathane",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    AksiyonYetkisi: "ameliyathane.baslat", KayitGerekir: true,
+                    Sira: 80, UrunModu: 2,
+                    Ipucu: "Salon bir sonraki vakaya hazır sayılır"),
+                new("ameliyat.not-imzala", "✒ Ameliyat Notunu İmzala", "ameliyathane",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    AksiyonYetkisi: "ameliyathane.not_imzala", KayitGerekir: true,
+                    Sira: 85, UrunModu: 2,
+                    Ipucu: "İmzadan sonra not değişmez; yalnız ek not yazılabilir"),
+                // AMELİYAT SİLİNMEZ, İPTAL EDİLİR: sarf, ekip ve kontrol satırları
+                //   ona bağlı ve "planlandı, olmadı" bilgisi masa kullanımı
+                //   raporunun girdisi. Kesi yapılmışsa sunucu iptali reddeder.
+                new("ameliyat.iptal", "✖ Ameliyatı İptal Et", "ameliyathane",
+                    Hedef: "sagtus,palet", AksiyonYetkisi: "ameliyathane.iptal",
+                    KayitGerekir: true, Sira: 90, UrunModu: 2, Bicim: "ret",
+                    Ipucu: "Kayıt silinmez; talep bekleyen listesine geri döner"),
+                Yazdir(),
+            },
+
+            // BEKLEYEN TALEPLER - tek gerçek iş "planla". Talep ameliyata
+            //   dönüşmez, ameliyat DOĞURUR: bekleme geçmişi talepte kalır ve
+            //   ameliyat iptal olursa geri döneceği yer orasıdır.
+            ["ameliyat-talep-liste"] = new AksiyonTanimi[]
+            {
+                new("ameliyat-talep.yeni", "＋ Yeni Talep", "ameliyathane", Kisayol: "Ctrl+N",
+                    KaynakKodu: "ameliyathane.talep", Islem: Islem.Ekle, Sira: 10, UrunModu: 2),
+                new("ameliyat-talep.duzenle", "✎ Düzenle", "ameliyathane", Kisayol: "Enter",
+                    KaynakKodu: "ameliyathane.talep", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 20, UrunModu: 2),
+                new("ameliyat-talep.planla", "📅 Ameliyata Planla", "ameliyathane",
+                    KaynakKodu: "ameliyathane.plan", Islem: Islem.Ekle,
+                    KayitGerekir: true, Sira: 30, UrunModu: 2, Bicim: "bir",
+                    Ipucu: "Salon ve saat sorulur; eksik hazırlık ve salon çakışması uyarılır"),
+                new("ameliyat-talep.sil", "🗑 Sil", "ameliyathane",
+                    Kisayol: "Del", KaynakKodu: "ameliyathane.talep", Islem: Islem.Sil,
+                    KayitGerekir: true, Sira: 40, UrunModu: 2,
+                    Ipucu: "Planlanmış talep silinemez; önce ameliyatı iptal edin"),
+                Yazdir(),
+            },
+
+            ["ameliyat-salon-liste"] = new AksiyonTanimi[]
+            {
+                new("ameliyat-salon.yeni", "＋ Yeni Salon", "ameliyathane", Kisayol: "Ctrl+N",
+                    KaynakKodu: "ameliyathane.salon", Islem: Islem.Ekle, Sira: 10, UrunModu: 2),
+                new("ameliyat-salon.duzenle", "✎ Düzenle", "ameliyathane", Kisayol: "Enter",
+                    KaynakKodu: "ameliyathane.salon", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 20, UrunModu: 2),
+                new("ameliyat-salon.sil", "🗑 Sil", "ameliyathane",
+                    Kisayol: "Del", KaynakKodu: "ameliyathane.salon", Islem: Islem.Sil,
+                    KayitGerekir: true, Sira: 30, UrunModu: 2,
+                    Ipucu: "Ameliyat geçmişi olan salon silinemez; pasife alın"),
+                Yazdir(),
+            },
+
+            // ========================================================= ACİL (716) ==
+            // TRİYAJ EKRANI ile TAKİP PANOSU aynı kaynağı okur, AYRI aksiyon
+            //   listesi taşır: kabul masasının işi hastayı sıraya sokmak (triyaj,
+            //   yatak, hekim), panonunki ise içerideki hastayı ilerletmek (çağrı,
+            //   çıkış). Tek liste olsaydı her iki kullanıcı da diğerinin
+            //   düğmelerini eleyerek çalışırdı.
+            ["acil-triyaj-liste"] = new AksiyonTanimi[]
+            {
+                new("acil.yeni", "＋ Yeni Başvuru", "acil", Kisayol: "Ctrl+N",
+                    KaynakKodu: "acil.basvuru", Islem: Islem.Ekle, Sira: 10, UrunModu: 2,
+                    Ipucu: "Kimliksiz hasta da kabul edilir (geçici ad ile)"),
+                new("acil.duzenle", "✎ Hasta Kartı", "acil", Kisayol: "Enter",
+                    KaynakKodu: "acil.basvuru", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 20, UrunModu: 2),
+                // TRİYAJ TEK DÜĞME: yükseltme serbest, DÜŞÜRME ayrı yetki ve
+                //   gerekçe ister - kararı sunucu verir, çünkü düşürme hastayı
+                //   sıranın gerisine atar.
+                new("acil.triyaj-ver", "🎨 Triyaj Ver / Değiştir", "acil",
+                    KaynakKodu: "acil.triyaj", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 30, UrunModu: 2, Bicim: "bir",
+                    Ipucu: "Düşürmek ayrı yetki ve gerekçe ister"),
+                new("acil.yatak-ver", "🛏 Yatak Ver", "acil",
+                    KaynakKodu: "acil.basvuru", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 40, UrunModu: 2),
+                new("acil.hekim-gordu", "🩺 Hekim Gördü", "acil",
+                    KaynakKodu: "acil.basvuru", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 50, UrunModu: 2,
+                    Ipucu: "Kapı-hekim süresinin ikinci ucu; bir kez yazılır"),
+                Yazdir(),
+            },
+
+            ["acil-takip-liste"] = new AksiyonTanimi[]
+            {
+                new("acil.duzenle", "✎ Hasta Kartı", "acil", Kisayol: "Enter",
+                    KaynakKodu: "acil.basvuru", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 10, UrunModu: 2),
+                new("acil.hekim-gordu", "🩺 Hekim Gördü", "acil",
+                    KaynakKodu: "acil.basvuru", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 20, UrunModu: 2),
+                // ÇAĞRI PANODAN TEK TIKLA: mavi kodda kart açıp detay satırı
+                //   eklemek, ölçtüğümüz sürenin kendisini uzatır.
+                new("acil.cagri-ac", "📞 Çağrı Aç", "acil",
+                    KaynakKodu: "acil.pano", Islem: Islem.Ekle,
+                    KayitGerekir: true, Sira: 30, UrunModu: 2),
+                new("acil.cikis-karar", "🚪 Çıkış Kararı", "acil",
+                    AksiyonYetkisi: "acil.cikis", KayitGerekir: true,
+                    Sira: 40, UrunModu: 2, Bicim: "onay",
+                    Ipucu: "Çıkış tanısı zorunlu; yatak temizliğe düşer"),
+                new("acil.triyaj-ver", "🎨 Triyaj Değiştir", "acil",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    KaynakKodu: "acil.triyaj", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 50, UrunModu: 2),
+                new("acil.yatak-ver", "🛏 Yatak Değiştir", "acil",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    KaynakKodu: "acil.basvuru", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 60, UrunModu: 2),
+                Yazdir(),
+            },
+
+            // ÇAĞRILAR - üç düğme aynı satırın durumunu ilerletir. "Yanıt yok"
+            //   KIRMIZI ve ayrı: tekrar sayacını artırır ve bekleme süresini
+            //   kapatmaz; yanıtlandı ile karıştırılması ölçümü bozardı.
+            ["acil-cagri-liste"] = new AksiyonTanimi[]
+            {
+                new("acil.cagri-yanit", "✅ Yanıtlandı", "acil",
+                    KaynakKodu: "acil.pano", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 10, UrunModu: 2, Bicim: "onay",
+                    Ipucu: "Yanıt saati bir kez yazılır (çağrı-yanıt süresi)"),
+                new("acil.cagri-kapat", "⏹ Kapat", "acil",
+                    KaynakKodu: "acil.pano", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 20, UrunModu: 2),
+                new("acil.cagri-tekrar", "🔁 Yanıt Yok / Tekrar Çağır", "acil",
+                    KaynakKodu: "acil.pano", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 30, UrunModu: 2, Bicim: "ret"),
+                Yazdir(),
+            },
+
+            ["acil-yatak-liste"] = new AksiyonTanimi[]
+            {
+                // Çıkışta yatak BOŞ değil TEMİZLİKTE olur; boşa dönmesi ayrı bir
+                //   olaydır ve kim yaptığı loglanır - "yatak hazır" bilgisi
+                //   triyajın hasta yollama kararıdır.
+                new("acil.yatak-temizlendi", "🧹 Temizlik Bitti", "acil",
+                    KaynakKodu: "acil.yatak", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 10, UrunModu: 2, Bicim: "onay"),
+                new("acil-yatak.yeni", "＋ Yeni Yatak", "acil", Kisayol: "Ctrl+N",
+                    KaynakKodu: "acil.yatak", Islem: Islem.Ekle, Sira: 20, UrunModu: 2),
+                new("acil-yatak.duzenle", "✎ Düzenle", "acil", Kisayol: "Enter",
+                    KaynakKodu: "acil.yatak", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 30, UrunModu: 2),
+                new("acil-yatak.sil", "🗑 Sil", "acil", Kisayol: "Del",
+                    KaynakKodu: "acil.yatak", Islem: Islem.Sil,
+                    KayitGerekir: true, Sira: 40, UrunModu: 2,
+                    Ipucu: "Başvuru geçmişi olan yatak silinemez; pasife alın"),
                 Yazdir(),
             },
 
@@ -1479,6 +1897,285 @@ public static class AksiyonKatalogu
 
             // DEMIRBAS listesi (216): standart kart Crud'u.
             ["demirbas-liste"] = Crud("demirbas", "demirbas", "demirbas"),
+
+            // ECZANE (722). AKIS DUGMESI YOK: eczaci karari, doz kontrolu,
+            //   hazirlama dogrulamasi ve imha onayi kendi uclarini ister -
+            //   o uclar bu turda YAZILMADI. Calismayan bir dugme koymak,
+            //   kullaniciya var olmayan bir yetenek vaat etmektir.
+            ["eczane-kontrol-liste"] =
+                [.. Crud("eczane-kontrol", "eczane", "eczane.order"),
+                 // KARAR AYRI YETKİ (`eczane.onay`): uyarıyı görmek ile onu
+                 //   kapatmak aynı sorumluluk değil.
+                 new("eczane-kontrol.karar", "✓ Eczacı Kararı", "eczane",
+                     AksiyonYetkisi: "eczane.onay", KayitGerekir: true, Sira: 15,
+                     UrunModu: 2, Bicim: "bir",
+                     Ipucu: "Yüksek düzey uyarıyı 'uygun' kapatmak gerekçe ister"),
+                 new("eczane-kontrol.hekim-yanit", "📞 Hekim Yanıtı", "eczane",
+                     KaynakKodu: "eczane.order", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 16, UrunModu: 2)],
+
+            ["eczane-doz-liste"] =
+                [.. Crud("eczane-doz", "eczane", "eczane.doz"),
+                 // SIRA SUNUCUDA: hazırlanmadan kontrol, kontrol edilmeden teslim yok.
+                 new("eczane-doz.hazirla", "▶ Hazırlandı", "eczane",
+                     KaynakKodu: "eczane.doz", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 15, UrunModu: 2),
+                 new("eczane-doz.kontrol", "✓ Kontrol Edildi", "eczane",
+                     KaynakKodu: "eczane.doz", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 16, UrunModu: 2, Bicim: "bir",
+                     Ipucu: "Hazırlayan kendi hazırladığını kontrol edemez"),
+                 new("eczane-doz.teslim", "🚚 Teslim Et", "eczane",
+                     KaynakKodu: "eczane.doz", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 17, UrunModu: 2),
+                 new("eczane-doz.iade", "↩ İade", "eczane", Hedef: "sagtus,palet",
+                     KaynakKodu: "eczane.doz", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 18, UrunModu: 2),
+                 new("eczane-doz.imha", "🗑 İmha", "eczane", Hedef: "sagtus,palet",
+                     AksiyonYetkisi: "eczane.imha", KayitGerekir: true,
+                     Sira: 19, UrunModu: 2)],
+
+            ["eczane-hazirlama-liste"] =
+                [.. Crud("eczane-hazirlama", "eczane", "eczane.hazirlama"),
+                 new("eczane-hazirlama.doz-hesapla", "🧮 Doz Hesapla", "eczane",
+                     KaynakKodu: "eczane.hazirlama", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 14, UrunModu: 2,
+                     Ipucu: "VYA ve protokol dozundan ÖNERİ üretir; uygulanacak dozu eczacı girer"),
+                 // HASTA GELMEDEN HAZIRLANMAZ: hazırlanıp iptal edilen
+                 //   kemoterapi sitotoksik atık olarak imha edilir.
+                 new("eczane-hazirlama.hasta-geldi", "🧍 Hasta Geldi", "eczane",
+                     KaynakKodu: "eczane.hazirlama", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 15, UrunModu: 2),
+                 new("eczane-hazirlama.hazirla", "▶ Hazırlamaya Başla", "eczane",
+                     KaynakKodu: "eczane.hazirlama", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 16, UrunModu: 2, Bicim: "bir"),
+                 new("eczane-hazirlama.dogrula", "✓ 2. Eczacı Doğrulaması", "eczane",
+                     KaynakKodu: "eczane.hazirlama", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 17, UrunModu: 2, Bicim: "onay",
+                     Ipucu: "Kemoterapide yanlış doz geri alınamaz - doğrulayan başkası olmalı"),
+                 new("eczane-hazirlama.teslim", "🚚 Teslim Et", "eczane",
+                     KaynakKodu: "eczane.hazirlama", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 18, UrunModu: 2),
+                 new("eczane-hazirlama.iptal", "✖ İptal", "eczane", Hedef: "sagtus,palet",
+                     KaynakKodu: "eczane.hazirlama", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 19, UrunModu: 2)],
+
+            ["eczane-iade-liste"] =
+                [.. Crud("eczane-iade", "eczane", "eczane.iade"),
+                 // ÜÇ ÖLÇÜT: ambalaj / sulandırma / soğuk zincir. Biri "evet"
+                 //   ise stoğa kabul REDDEDİLİR - burada zorlama yok.
+                 new("eczane-iade.karar-stok", "✓ Stoğa Kabul", "eczane",
+                     KaynakKodu: "eczane.iade", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 15, UrunModu: 2, Bicim: "onay",
+                     Ipucu: "Ambalajı açılmış / sulandırılmış / soğuk zinciri bozulmuş ilaç kabul edilmez"),
+                 new("eczane-iade.karar-imha", "🔥 İmhaya", "eczane",
+                     AksiyonYetkisi: "eczane.imha", KayitGerekir: true,
+                     Sira: 16, UrunModu: 2),
+                 new("eczane-iade.karar-kasa", "🔴 Kasaya (kontrollü)", "eczane",
+                     AksiyonYetkisi: "eczane.kontrollu", KayitGerekir: true,
+                     Sira: 17, UrunModu: 2,
+                     Ipucu: "Kontrollü ilaç defterine iade satırı yazılır")],
+
+            ["eczane-imha-liste"] =
+                [.. Crud("eczane-imha", "eczane", "eczane.imha"),
+                 new("eczane-imha.onayla", "✓ Komisyon Onayı", "eczane",
+                     AksiyonYetkisi: "eczane.imha_onay", KayitGerekir: true,
+                     Sira: 15, UrunModu: 2,
+                     Ipucu: "İmha tek kişinin işi değil - komisyon yazılmadan ilerlemez"),
+                 new("eczane-imha.imha-et", "🔥 İmha Et (stoktan düş)", "eczane",
+                     AksiyonYetkisi: "eczane.imha_onay", KayitGerekir: true,
+                     Sira: 16, UrunModu: 2, Bicim: "tehlike",
+                     Ipucu: "Çıkış fişi keser; kontrollü kalemler deftere de yazılır")],
+            // KONTROLLU DEFTER ve MIAD: kart yok, yalniz okunur.
+            //   Defter satiri SILINEMEZ (722 tetigi) - "Sil" dugmesi koymak,
+            //   basilinca 422 donen bir dugme olurdu.
+            // DEFTER SATIRI SİLİNMEZ (722 tetiği) - "Sil" düğmesi basılınca
+            //   422 dönen bir düğme olurdu. Yazma kendi ucundan geçer.
+            ["kontrollu-defter-liste"] =
+                [new("kontrollu-defter.yaz", "🗒️ Defter Kaydı", "eczane",
+                     Hedef: "araccubugu", AksiyonYetkisi: "eczane.kontrollu",
+                     Sira: 10, UrunModu: 2,
+                     Ipucu: "Hatalı satır silinmez; düzeltme satırıyla kapatılır"),
+                 Yazdir()],
+            ["eczane-miad-liste"] = [Yazdir()],
+
+            // BIYOMEDIKAL (723). Cihaz envanterinin karti DEMIRBAS kartidir -
+            //   ekran kodu ayri, Crud ayni karta bagli.
+            ["demirbas-cihaz-liste"] =
+                [.. Crud("demirbas", "demirbas", "demirbas"),
+                 new("demirbas-cihaz.hareket-zimmet", "🔄 Zimmet Değiştir", "demirbas",
+                     AksiyonYetkisi: "demirbas.zimmet", KayitGerekir: true,
+                     Sira: 15, UrunModu: 2),
+                 new("demirbas-cihaz.hareket-yer", "📍 Yer Değiştir", "demirbas",
+                     KaynakKodu: "demirbas", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 16, UrunModu: 2),
+                 new("demirbas-cihaz.hareket-havuz", "📦 Yedek Havuza", "demirbas",
+                     KaynakKodu: "demirbas", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 17, UrunModu: 2,
+                     Ipucu: "Arıza anında yerine konacak cihaz havuzu"),
+                 // AÇIK İŞ EMRİ VARKEN HURDA YOK (uç reddeder).
+                 new("demirbas-cihaz.hareket-hurda", "🗑️ Hurdaya Ayır", "demirbas",
+                     Hedef: "sagtus,palet", AksiyonYetkisi: "demirbas.hurda",
+                     KayitGerekir: true, Sira: 18, UrunModu: 2, Bicim: "tehlike")],
+
+            ["demirbas-kalibrasyon-liste"] =
+                [.. Crud("demirbas-kalibrasyon", "demirbas", "demirbas.kalibrasyon"),
+                 new("demirbas-kalibrasyon.tamamla", "✓ Kalibrasyonu Tamamla", "demirbas",
+                     AksiyonYetkisi: "demirbas.kalibrasyon", KayitGerekir: true,
+                     Sira: 15, UrunModu: 2, Bicim: "onay",
+                     Ipucu: "Sonuç ölçümlerden türer; sınır dışı ölçümde 'uygun' seçilemez")],
+
+            ["demirbas-is-emri-liste"] =
+                [.. Crud("demirbas-is-emri", "demirbas", "demirbas.isemri"),
+                 new("demirbas-is-emri.ata", "👤 Ata", "demirbas",
+                     KaynakKodu: "demirbas.isemri", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 15, UrunModu: 2),
+                 new("demirbas-is-emri.mudahale", "▶ Müdahaleye Başla", "demirbas",
+                     KaynakKodu: "demirbas.isemri", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 16, UrunModu: 2, Bicim: "bir",
+                     Ipucu: "Yanıt süresi bu damgadan hesaplanır"),
+                 new("demirbas-is-emri.parca-bekle", "⏸ Parça Bekliyor", "demirbas",
+                     KaynakKodu: "demirbas.isemri", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 17, UrunModu: 2),
+                 new("demirbas-is-emri.dis-servis", "🚚 Dış Servise Gönder", "demirbas",
+                     KaynakKodu: "demirbas.isemri", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 18, UrunModu: 2),
+                 new("demirbas-is-emri.parca-cikis", "🧾 Parçaları Stoktan Düş", "demirbas",
+                     AksiyonYetkisi: "stok", KayitGerekir: true, Sira: 19, UrunModu: 2,
+                     Ipucu: "Yalnız kurumun ödediği parçalar düşülür (garanti/sözleşme düşülmez)"),
+                 new("demirbas-is-emri.tamamla", "✓ Tamamla", "demirbas",
+                     KaynakKodu: "demirbas.isemri", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 20, UrunModu: 2, Bicim: "onay",
+                     Ipucu: "Zorunlu bakım maddeleri işaretsizse gerekçe ister"),
+                 new("demirbas-is-emri.iptal", "✖ İptal", "demirbas", Hedef: "sagtus,palet",
+                     KaynakKodu: "demirbas.isemri", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 21, UrunModu: 2)],
+
+            // SATINALMA (724). Onay/karar/ceza dugmeleri YOK: her biri para
+            //   cikaran ya da imza zinciri isleyen bir karardir ve kendi ucunu
+            //   ister - o uclar bu turda yazilmadi.
+            ["satinalma-talep-liste"] =
+                [.. Crud("satinalma-talep", "satinalma", "satinalma.talep"),
+                 // ZİNCİRİ SİSTEM KURAR: "kime göndereyim" sorulmaz.
+                 new("satinalma-talep.gonder", "📤 Onaya Gönder", "satinalma",
+                     KaynakKodu: "satinalma.talep", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 15, Bicim: "bir",
+                     Ipucu: "Onay basamakları tutar ve bütçe durumundan türer"),
+                 new("satinalma-talep.karar-onayla", "✓ Onayla ve İlerlet", "satinalma",
+                     AksiyonYetkisi: "satinalma.onay_birim", KayitGerekir: true,
+                     Sira: 16, Bicim: "onay",
+                     Ipucu: "Karar hep bekleyen en küçük basamağa yazılır - basamak atlanamaz"),
+                 new("satinalma-talep.karar-bilgi", "↩ Bilgi İste", "satinalma",
+                     AksiyonYetkisi: "satinalma.onay_birim", KayitGerekir: true, Sira: 17),
+                 new("satinalma-talep.karar-sozlu", "🗣 Sözlü Onay", "satinalma",
+                     Hedef: "sagtus,palet", AksiyonYetkisi: "satinalma.onay_birim",
+                     KayitGerekir: true, Sira: 18,
+                     Ipucu: "Yazılı tamamlanma süresi izlenir"),
+                 new("satinalma-talep.karar-reddet", "✖ Reddet", "satinalma",
+                     AksiyonYetkisi: "satinalma.onay_birim", KayitGerekir: true,
+                     Sira: 19, Bicim: "tehlike"),
+                 new("satinalma-talep.birlestir", "🔗 Talepleri Birleştir", "satinalma",
+                     Hedef: "araccubugu,palet", KaynakKodu: "satinalma.talep",
+                     Islem: Islem.Degistir, Sira: 20,
+                     Ipucu: "İlk seçilen HEDEF olur; kaynaklar silinmez, birleştirildi olarak kapanır"),
+                 new("satinalma-talep.siparise", "📦 Siparişe Dönüştür", "satinalma",
+                     AksiyonYetkisi: "satinalma.siparis", KayitGerekir: true, Sira: 21,
+                     Ipucu: "Alış siparişi (belge tür 9) oluşturur")],
+
+            ["satinalma-teklif-liste"] =
+                [.. Crud("satinalma-teklif", "satinalma", "satinalma.teklif"),
+                 new("satinalma-teklif.davet", "📧 Daveti Gönder", "satinalma",
+                     KaynakKodu: "satinalma.teklif", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 15, Bicim: "bir",
+                     Ipucu: "Değerlendirme ağırlıkları KİLİTLENİR"),
+                 new("satinalma-teklif.ac", "📂 Teklifleri Aç", "satinalma",
+                     KaynakKodu: "satinalma.teklif", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 16,
+                     Ipucu: "Son tarihten önce açmak gerekçe ister; puanlar burada hesaplanır"),
+                 new("satinalma-teklif.karar", "✓ Kararı Ver", "satinalma",
+                     AksiyonYetkisi: "satinalma.karar", KayitGerekir: true,
+                     Sira: 17, Bicim: "onay",
+                     Ipucu: "En düşük teklif alınmıyorsa gerekçe zorunlu")],
+
+            ["satinalma-butce-liste"] = Crud("satinalma-butce", "satinalma", "satinalma.butce"),
+            // SIPARIS / FATURA KONTROL / TEDARIKCI: takip listeleri. Siparis
+            //   `belge` (tur 9) kartindan, tedarikci cari kartindan duzenlenir;
+            //   burada ikinci bir duzenleme yolu acilmiyor.
+            ["satinalma-siparis-liste"] =
+                [new("satinalma-siparis.gecikme", "⏱ Gecikme Bildir", "satinalma",
+                     KaynakKodu: "satinalma.siparis", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 10,
+                     Ipucu: "Gecikme söz verilen tarihten sayılır; tedarikçi performansına işlenir"),
+                 // CEZA KENDİLİĞİNDEN TAHSİL OLMAZ: işlemek ayrı karardır.
+                 new("satinalma-siparis.ceza", "⚖ Ceza İşlet", "satinalma",
+                     AksiyonYetkisi: "satinalma.ceza", KayitGerekir: true,
+                     Sira: 20, Bicim: "tehlike",
+                     Ipucu: "Hesap sözleşmeden (binde/gün, üst sınır %)"),
+                 Yazdir()],
+
+            ["satinalma-fatura-liste"] =
+                [new("satinalma-fatura.eslestir", "🧮 Yeniden Eşleştir", "satinalma",
+                     KaynakKodu: "satinalma.fatura", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 10,
+                     Ipucu: "Sipariş - teslim - fatura; karşılaştırma tabanı TESLİMDİR"),
+                 // ÖDEME KARARI AYRI YETKİ: farkı görmekle ödemeyi serbest
+                 //   bırakmak aynı sorumluluk değil.
+                 new("satinalma-fatura.odeme-onay", "✓ Ödemeye Onay Ver", "satinalma",
+                     AksiyonYetkisi: "satinalma.odeme_onay", KayitGerekir: true,
+                     Sira: 20, Bicim: "onay"),
+                 new("satinalma-fatura.odeme-durdur", "⛔ Ödemeyi Durdur", "satinalma",
+                     AksiyonYetkisi: "satinalma.odeme_onay", KayitGerekir: true,
+                     Sira: 21, Bicim: "tehlike"),
+                 new("satinalma-fatura.odeme-itiraz", "📨 Tedarikçiye İtiraz", "satinalma",
+                     AksiyonYetkisi: "satinalma.odeme_onay", KayitGerekir: true, Sira: 22),
+                 Yazdir()],
+
+            // MAL KABUL (733). Muayene tutanağı: satırlar irsaliyeden gelir,
+            //   karar komisyonundur.
+            ["satinalma-kabul-liste"] =
+                [.. Crud("satinalma-kabul", "satinalma", "satinalma.kabul"),
+                 new("satinalma-kabul.tumunu-kabul", "✓ Tüm Kalemleri Kabul Et", "satinalma",
+                     KaynakKodu: "satinalma.kabul", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 15,
+                     Ipucu: "İstisna yoksa otuz satırı tek tek işaretlemek zaman kaybı"),
+                 new("satinalma-kabul.karar-kabul", "✓ Kabul", "satinalma",
+                     KaynakKodu: "satinalma.kabul", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 16, Bicim: "onay",
+                     Ipucu: "Siparişi kapatır; muayenesi bitmemiş tutanak karara bağlanmaz"),
+                 new("satinalma-kabul.karar-kismi", "↩ Kısmi Kabul", "satinalma",
+                     KaynakKodu: "satinalma.kabul", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 17,
+                     Ipucu: "Uygunsuzluk metni zorunlu"),
+                 // RET SİPARİŞİ KAPATMAZ: mal geri gidiyor, taahhüt sürüyor.
+                 new("satinalma-kabul.karar-ret", "✖ Ret", "satinalma",
+                     KaynakKodu: "satinalma.kabul", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 18, Bicim: "tehlike"),
+                 // KAREKOD OKUMA (734): kutular tek tek okutulur, her kod
+                 //   kendi sonucuyla döner - biri okunamadı diye öncekiler
+                 //   silinmez.
+                 new("satinalma-kabul.karekod", "🔦 Karekod Oku", "satinalma",
+                     KaynakKodu: "satinalma.kabul", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 12, Bicim: "bir",
+                     Ipucu: "Aynı kutu iki kez okutulamaz; beklenmeyen kutu kayda geçer"),
+                 new("satinalma-kabul.karekod-ozet", "📋 Karekod Özeti", "satinalma",
+                     Hedef: "sagtus,palet", KaynakKodu: "satinalma.kabul",
+                     Islem: Islem.Gor, KayitGerekir: true, Sira: 13),
+                 // İTS BİLDİRİMİ (736). Kuyruğa alma muayene bittikten SONRA:
+                 //   hangi kutunun kabul edildiği kararla belli olur.
+                 new("satinalma-kabul.its-gonder", "📡 İTS Bildir", "satinalma",
+                     AksiyonYetkisi: "uts.bildir", KayitGerekir: true, Sira: 25,
+                     Ipucu: "Reddedilen kalemin kutusu bildirime girmez"),
+                 new("satinalma-kabul.its-durum", "📋 İTS Durumu", "satinalma",
+                     Hedef: "sagtus,palet", KaynakKodu: "satinalma.kabul",
+                     Islem: Islem.Gor, KayitGerekir: true, Sira: 26),
+                 new("satinalma-kabul.its-iptal", "✖ İTS Bildirimini İptal Et", "satinalma",
+                     Hedef: "sagtus,palet", AksiyonYetkisi: "uts.iptal",
+                     KayitGerekir: true, Sira: 27, Bicim: "tehlike",
+                     Ipucu: "Gönderilmiş bildirim iptal edilemez (iade/deaktivasyon gerekir)"),
+                 new("satinalma-kabul.siparise-git", "📦 Siparişe Git", "satinalma",
+                     Hedef: "sagtus,palet", KaynakKodu: "satinalma.siparis",
+                     Islem: Islem.Gor, KayitGerekir: true, Sira: 19)],
+
+            ["satinalma-tedarikci-liste"] = [Yazdir()],
 
             // ÜTS bildirim gecmisi (223). Iptal/yeniden gonderme RESMI islem:
             //   ayri aksiyon yetkileri (uts.iptal / uts.bildir).

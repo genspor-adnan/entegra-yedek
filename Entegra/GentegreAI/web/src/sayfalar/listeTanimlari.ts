@@ -34,10 +34,19 @@ import { LAB_LISTELERI } from './listeTanimlari.Laboratuvar';
 import { RADYOLOJI_LISTELERI } from './listeTanimlari.Radyoloji';
 import { GOZ_LISTELERI } from './listeTanimlari.Goz';
 import { YATAN_LISTELERI } from './listeTanimlari.Yatan';
+import { DIS_LISTELERI } from './listeTanimlari.Dis';
+import { FTR_LISTELERI } from './listeTanimlari.Ftr';
+import { MEDULA_LISTELERI } from './listeTanimlari.Medula';
+import { KLINIK_KALITE_LISTELERI } from './listeTanimlari.KlinikKalite';
+import { AMELIYATHANE_LISTELERI } from './listeTanimlari.Ameliyathane';
+import { ACIL_LISTELERI } from './listeTanimlari.Acil';
 import { ENABIZ_LISTELERI } from './listeTanimlari.Enabiz';
 import { CARI_LISTELERI } from './listeTanimlari.Cari';
 import { TICARI_LISTELERI } from './listeTanimlari.Ticari';
 import { STOK_LISTELERI } from './listeTanimlari.Stok';
+import { ECZANE_LISTELERI } from './listeTanimlari.Eczane';
+import { BIYOMEDIKAL_LISTELERI } from './listeTanimlari.Biyomedikal';
+import { SATINALMA_LISTELERI } from './listeTanimlari.Satinalma';
 import { DOKUM_LISTELERI } from './listeTanimlari.Dokumler';
 import { YONETIM_LISTELERI } from './listeTanimlari.Yonetim';
 
@@ -81,10 +90,19 @@ export const LISTELER: ListeGirdisi[] = [
   ...RADYOLOJI_LISTELERI,
   ...GOZ_LISTELERI,
   ...YATAN_LISTELERI,
+  ...DIS_LISTELERI,
+  ...FTR_LISTELERI,
+  ...MEDULA_LISTELERI,
+  ...KLINIK_KALITE_LISTELERI,
+  ...AMELIYATHANE_LISTELERI,
+  ...ACIL_LISTELERI,
   ...ENABIZ_LISTELERI,
   ...CARI_LISTELERI,
   ...TICARI_LISTELERI,
   ...STOK_LISTELERI,
+  ...ECZANE_LISTELERI,
+  ...BIYOMEDIKAL_LISTELERI,
+  ...SATINALMA_LISTELERI,
   ...YONETIM_LISTELERI,
   // Grup basina "📊 Dökümler" baglantisi (plan kural 2): her grubun sonunda
   //   ayni oge - kullanici "bu isin dokumu nerede" diye aramasin.
@@ -111,8 +129,24 @@ export const MENU_GRUP_MODUL: Record<string, string> = {
   // YATAN HASTA (695): kendi modulu - yatan hasta kabul etmeyen kurumda
   //   (poliklinik, goruntuleme merkezi) menu grubu hic cizilmesin.
   'Yatan Hasta':   'yatan_hasta',
+  // DIS (706): kendi modulu - dis klinigi olmayan kurumda grup cizilmez.
+  'Diş':           'dis',
+  // FTR (719): fizik tedavi modulu - ftr kapali kurumda grup cizilmez.
+  'FTR':           'ftr',
+  // AMELIYATHANE (715) / ACIL (716): kendi modulleri - ameliyathanesi ya da
+  //   acili olmayan kurumda menu grubu hic cizilmesin. Bagli olmasalardi
+  //   hicbir kuruluma kapatilamazlardi ve poliklinige olmayan bir yetenek
+  //   vaat edilirdi.
+  'Ameliyathane':  'ameliyathane',
+  'Acil':          'acil',
   'Prim':          'prim',
   'Stok & Hizmet': 'stok',
+  // ECZANE (722) / SATINALMA (724): kendi modulleri - hastane eczanesi ya da
+  //   satinalma birimi olmayan kurumda menu grubu hic cizilmesin. Biyomedikal
+  //   (723) BURADA YOK: ekranlari Demirbas grubunda ve `urunModu: 2` ile
+  //   suzuluyor - ERP demirbas ekrani hicbir kurulumda kapatilamamali.
+  'Eczane':        'eczane',
+  'Satınalma':     'satinalma',
   // Kasa + Banka = FINANS (menu yeniden duzeni): iki grup tek modulun
   //   (kasa) altindaydi zaten, birlesince esleme de tek satira dustu.
   'Finans':        'kasa',

@@ -1,3 +1,4 @@
+import type { CalismaPlaniYaniti } from '../sozlesme';
 import type { AcikOturum, GirisDenemesi } from './kimlik';
 import {
   type AyarSatiri, type YardimKaydi,
@@ -16,6 +17,12 @@ export const ayarUclari = {
   randevuBolumleri: () => istek<RandevuBolumDugumu[]>('/api/randevu/bolumler'),
   randevuBolumAyarYaz: (istek_: RandevuAyarYazma) =>
     gonder<{ tamam: boolean }>('/api/randevu/bolum-ayar', istek_, 'PUT'),
+  /** Hekim çalışma planı (711): türetilmiş bloklar ve bugün çalışanlar. */
+  calismaPlani: (g: { bas?: string; bit?: string; hekimId?: number | null; departmanId?: number | null; sube?: number | null } = {}) =>
+    istek<CalismaPlaniYaniti>('/api/calisma-plani?' + Object.entries(g).filter(([, v]) => v !== undefined && v !== null && v !== '').map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`).join('&')),
+  calismaBugun: (gun?: string, sube?: number | null) =>
+    istek<{ gun: string; subeId: number; satirlar: { departmanId: number; departman: string; hekimId: number; hekim: string; saatler: string; kaynak: number; kanallar: string; randevu: number; gelen: number; simdi: boolean }[]; randevusuz: { id: number; ad: string }[] }>(
+      `/api/calisma-plani/bugun?${gun ? `gun=${gun}&` : ''}${sube ? `sube=${sube}` : ''}`),
   randevuBolumIsaretle: (departmanId: number, bolumMu: boolean) =>
     gonder<{ tamam: boolean }>('/api/randevu/bolum', { departmanId, bolumMu }, 'PUT'),
 

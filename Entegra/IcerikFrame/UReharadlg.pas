@@ -748,6 +748,7 @@ type
     EditEIrsaliyeXSLT: TcxButtonEdit;
     cxLabel6: TcxLabel;
     ButtonFaturaDipNotu: TcxButton;
+    ButtonIrsaliyeDipNotu: TcxButton;
     cxLabel7: TcxLabel;
 //    N7: TMenuItem;
     procedure LabelSonArananlarClick(Sender: TObject);
@@ -773,6 +774,7 @@ type
     procedure PageControlSekmeChange(Sender: TObject);
     procedure PageControlCRMChange(Sender: TObject);
     procedure CRMAltSekmeYenile;
+    procedure DipNotuDuzenle(ATur: Integer; const ABaslik: string);
     procedure PageControlServisChange(Sender: TObject);
     procedure ServisAltSekmeYenile;
     procedure PageControlAlisSatisChange(Sender: TObject);
@@ -863,6 +865,7 @@ type
     procedure EditEArsivXSLTPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure EditEIrsaliyeXSLTPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure ButtonFaturaDipNotuClick(Sender: TObject);
+    procedure ButtonIrsaliyeDipNotuClick(Sender: TObject);
     procedure IlgiliEkleClick(Sender: TObject);
     procedure TabProjelerBeforeOpen(DataSet: TDataSet);
     procedure lgiliKurumdanAyrld1Click(Sender: TObject);
@@ -4091,7 +4094,13 @@ begin
   KurumXSLTSec(Ops_KurumXSLT_EIrsaliye, 52, EditEIrsaliyeXSLT, AButtonIndex);
 end;
 
-procedure TRehberAraDlg.ButtonFaturaDipNotuClick(Sender: TObject);
+// CARI DIP NOTLARI (GOREVYORUM, GOREVID=REHBERID):
+//   TUR=400 Fatura dip notu   -> e-Fatura ve e-Arsiv
+//   TUR=401 Irsaliye dip notu -> e-Irsaliye
+// Ikisi AYRI (kullanici): ortak altyapi yuzunden faturanin notu (or. 'Yaziyla TL')
+// irsaliyede de basiliyordu. Oncelik: cariye ozel not -> yoksa Opsiyonlardaki
+// sabit e-Fatura / e-Arsiv / e-Irsaliye notu (UEBelgeOlusturucu.SabitNotlariGetir).
+procedure TRehberAraDlg.DipNotuDuzenle(ATur: Integer; const ABaslik: string);
 var
   LMetin: Variant;
   LRehberID, LID: Integer;
@@ -4105,11 +4114,11 @@ begin
     Exit;
   end;
 
-  // Bu cariye ait fatura dip notu varsa hazirda getir (GOREVYORUM TUR=400)
+  // Bu cariye ait not varsa hazirda getir
   LMevcut := '';
   LID := 0;
   Tablo.TablodanSorguAc(1,
-    'select '+DbUst(1)+'ID, YORUM from GOREVYORUM where TUR=400 and GOREVID=' +
+    'select '+DbUst(1)+'ID, YORUM from GOREVYORUM where TUR=' + IntToStr(ATur) + ' and GOREVID=' +
     IntToStr(LRehberID) + ' order by ID '+DbSinir(1));
   if not Tablo.Query1.Eof then begin
     LID := Tablo.Query1.FieldByName('ID').AsInteger;
@@ -4118,20 +4127,32 @@ begin
   Tablo.Query1.Close;
 
   LMetin := LMevcut;
-  if TGirisKutusuEx.BilgiAlEx('Fatura Dip Notu',
+  if TGirisKutusuEx.BilgiAlEx(ABaslik,
      TGirdiDenetimleri.Create.Memo('Dip Notu', @LMetin)) <> mrOk then
     Exit;
 
-  // GOREVYORUM'a kaydet: TUR=400, GOREVID=REHBERID, YORUM=icerik (upsert)
-  if LID > 0 then
+  // GOREVYORUM'a kaydet (upsert). Bos metin = notu kaldir -> opsiyondaki sabit not devreye girer.
+  if (LID > 0) and (Trim(VarToStr(LMetin)) = '') then
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from GOREVYORUM where ID=&ID', ['&ID'], [LID])
+  else if LID > 0 then
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
       'update GOREVYORUM set YORUM=&Y, DEGISTIREN=&K, DEGISTIRMETARIHI=getdate() where ID=&ID',
       ['&Y', '&K', '&ID'], [VarToStr(LMetin), StrToIntDef(Kullanan, 0), LID])
-  else
+  else if Trim(VarToStr(LMetin)) <> '' then
     Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
       'insert into GOREVYORUM(GOREVID,TUR,YORUM,EKLEYEN,EKLEMETARIHI) ' +
-      'values(&G,400,&Y,&K,getdate())',
-      ['&G', '&Y', '&K'], [LRehberID, VarToStr(LMetin), StrToIntDef(Kullanan, 0)]);
+      'values(&G,&T,&Y,&K,getdate())',
+      ['&G', '&T', '&Y', '&K'], [LRehberID, ATur, VarToStr(LMetin), StrToIntDef(Kullanan, 0)]);
+end;
+
+procedure TRehberAraDlg.ButtonFaturaDipNotuClick(Sender: TObject);
+begin
+  DipNotuDuzenle(400, 'Fatura Dip Notu (e-Fatura / e-Arşiv)');
+end;
+
+procedure TRehberAraDlg.ButtonIrsaliyeDipNotuClick(Sender: TObject);
+begin
+  DipNotuDuzenle(401, 'İrsaliye Dip Notu (e-İrsaliye)');
 end;
 
 procedure TRehberAraDlg.CRMAltSekmeYenile;

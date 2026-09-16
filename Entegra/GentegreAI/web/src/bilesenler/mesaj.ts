@@ -22,6 +22,14 @@ export interface MesajIstegi {
   girdiVarsayilan?: string;
   girdiEtiket?: string;
   /**
+   * COK SATIRLI GIRDI. Tek satirlik `input` yapistirilan metnin satir
+   * sonlarini SESSIZCE siler: mal kabulde okuyucudan gelen uc karekod tek
+   * satira yapisiyor, birlesik metin tek kod gibi cozuluyor ve iki kutu
+   * kayboluyordu (kullaniciya da "1 mukerrer" deniyordu). Cok satirli
+   * istekte `textarea` cizilir; Enter satir atlar, Ctrl+Enter onaylar.
+   */
+  girdiCokSatir?: boolean;
+  /**
    * GIRDI BIR LISTEDEN SECILIYORSA (kullanici: "kabul/ret butonlarinda
    * mesajda girisler combo olsun"). Kutu yerine acilir liste cizilir;
    * donen deger secilen KODDUR. Kod listesini metne yazip kullanicidan
@@ -97,12 +105,14 @@ export function mesaj(metin: string) {
  * Metin sorma penceresi (tarayici `prompt` yerine). Iptalde null doner.
  * e-Arsiv gonderiminde alici e-postasi bununla sorulur.
  */
-export function metinSor(metin: string, varsayilan = '', etiket = ''): Promise<string | null> {
+export function metinSor(metin: string, varsayilan = '', etiket = '',
+                         cokSatir = false): Promise<string | null> {
   if (!dinleyici) return Promise.resolve(prompt(metin, varsayilan));
   return new Promise<string | null>(cozum => {
     dinleyici!({
       metin, onayMi: true, girdiMi: true,
       girdiVarsayilan: varsayilan, girdiEtiket: etiket,
+      girdiCokSatir: cokSatir,
       cozum: () => {}, cozumMetin: cozum,
     });
   });

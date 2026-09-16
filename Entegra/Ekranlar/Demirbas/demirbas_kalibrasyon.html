@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Biyomedikal — Kalibrasyon ve Güvenlik Testi — Mockup (GenoTIP AI · Demirbaş)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>📏 Kalibrasyon — DB-01184 · Defibrilatör (Zoll R Series)</span>
+    <span class="sp">Acil Servis · Resüsitasyon · Seri ZR-88412 · Yaşam desteği · Periyot 12 ay</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="demirbas_panosu.html">◀ Pano</div>
+    <div class="btn primary">✓ Kalibrasyonu Tamamla</div>
+    <div class="btn">📝 Ölçüm Gir</div>
+    <div class="btn">🏷️ Etiket Bas</div>
+    <div class="sepv"></div>
+    <div class="btn">📄 Sertifika Yükle</div>
+    <div class="btn">🚫 Kullanım Dışı Bırak</div>
+    <div class="btn" data-git="demirbas_cihaz_karti.html">🗂️ Cihaz Kartı</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ Kalibrasyon Formu</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart kir"><div class="b">Geçerlilik</div><div class="d" style="font-size:13px">02.09.2026 <small>14 gün geçti</small></div></div>
+    <div class="kart"><div class="b">Ölçüm noktası</div><div class="d">6</div></div>
+    <div class="kart kir"><div class="b">Sınır dışı</div><div class="d">1</div></div>
+    <div class="kart"><div class="b">Kabul kriteri</div><div class="d" style="font-size:13px">±%10 / ±2 J</div></div>
+    <div class="kart"><div class="b">Referans cihaz</div><div class="d" style="font-size:12px">Fluke Impulse 7000DP</div></div>
+    <div class="kart"><div class="b">Belirsizlik (U)</div><div class="d" style="font-size:13px">±1,2 J <small>k=2</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="olcum">Ölçüm & Sapma<span class="sy">6</span></div>
+    <div class="sekme" data-s="est">Elektriksel Güvenlik<span class="sy">IEC 62353</span></div>
+    <div class="sekme" data-s="sertifika">Sertifika & İzlenebilirlik</div>
+    <div class="sekme" data-s="plan">Kalibrasyon Planı<span class="sy">122</span></div>
+  </div>
+
+  <!-- ====================================================== ÖLÇÜM & SAPMA ===== -->
+  <div class="pnl" data-s="olcum">
+    <div class="arama">
+      <div class="kutu">🔍 Ölçüm noktası…</div>
+      <span class="chip on">Ayar öncesi</span>
+      <span class="chip">Ayar sonrası</span>
+      <span class="chip">Sınır dışı <b>1</b></span>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:170px">Ölçüm noktası</th>
+          <th style="width:110px" class="sag">Nominal</th>
+          <th style="width:110px" class="sag">Ölçülen</th>
+          <th style="width:100px" class="sag">Sapma</th>
+          <th style="width:100px" class="sag">Sapma %</th>
+          <th style="width:130px" class="orta">Kabul sınırı</th>
+          <th style="width:120px" class="orta">Sonuç</th>
+          <th>Not</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Enerji çıkışı</b> 2 J</td>
+            <td class="sag">2,0 J</td><td class="sag">2,1 J</td>
+            <td class="sag">+0,1</td><td class="sag">+5,0</td>
+            <td class="orta">±2 J</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><b>Enerji çıkışı</b> 50 J</td>
+            <td class="sag">50,0 J</td><td class="sag">48,4 J</td>
+            <td class="sag">−1,6</td><td class="sag">−3,2</td>
+            <td class="orta">±%10</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><b>Enerji çıkışı</b> 100 J</td>
+            <td class="sag">100,0 J</td><td class="sag">94,0 J</td>
+            <td class="sag">−6,0</td><td class="sag">−6,0</td>
+            <td class="orta">±%10</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><b>Enerji çıkışı</b> 200 J</td>
+            <td class="sag">200,0 J</td><td class="sag">176,5 J</td>
+            <td class="sag">−23,5</td><td class="sag"><span class="rz kir">−11,8</span></td>
+            <td class="orta">±%10</td>
+            <td class="orta"><span class="rz kir">Sınır dışı</span></td>
+            <td>Kapasitör yaşlanması — servis müdahalesi gerekli</td></tr>
+          <tr class="tik"><td><b>Senkron gecikme</b></td>
+            <td class="sag">≤ 60 ms</td><td class="sag">38 ms</td>
+            <td class="sag">—</td><td class="sag">—</td>
+            <td class="orta">≤ 60 ms</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><b>Şarj süresi</b> (200 J)</td>
+            <td class="sag">≤ 10 s</td><td class="sag">6,4 s</td>
+            <td class="sag">—</td><td class="sag">—</td>
+            <td class="orta">≤ 10 s</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td><td class="sonuk">—</td></tr>
+          <tr class="grup"><td colspan="8">EKG / monitör bölümü</td></tr>
+          <tr class="tik"><td>Kalp hızı 60/dk</td>
+            <td class="sag">60</td><td class="sag">60</td><td class="sag">0</td><td class="sag">0,0</td>
+            <td class="orta">±%5</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td>Kalp hızı 180/dk</td>
+            <td class="sag">180</td><td class="sag">178</td><td class="sag">−2</td><td class="sag">−1,1</td>
+            <td class="orta">±%5</td>
+            <td class="orta"><span class="rz ok">Uygun</span></td><td class="sonuk">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ul class="kontrol">
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Referans cihazın kendi kalibrasyonu geçerli (Fluke · TÜRKAK akredite · 14.02.2027)</span>
+        <span class="imza">Tekn. E. Kaya · 09:10</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Ortam koşulları kaydedildi: 22,4 °C · %48 bağıl nem</span>
+        <span class="imza">09:12</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Ölçümler <b>ayar yapılmadan önce</b> alındı (as-found)</span>
+        <span class="imza">09:35</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Sınır dışı nokta için servis müdahalesi yapıldı, <b>ayar sonrası</b> ölçüm alındı</span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Geriye dönük etki değerlendirildi: son kalibrasyondan bu yana bu cihazla yapılan
+          uygulamalar gözden geçirildi</span>
+        <span class="imza">—</span></li>
+    </ul>
+
+    <div class="statusbar">
+      <span><b>Ayar öncesi (as-found) ölçüm atlanamaz:</b> cihaz bozuksa <b>ne kadar süredir</b>
+        bozuk olduğunu ancak o kayıt gösterir — hastaya yanlış enerji verilmiş olabilir.</span>
+      <span class="sp">Belirsizlik (±1,2 J) sonuca dahil: sınıra çok yakın ölçüm "uygun" sayılmaz.</span>
+    </div>
+  </div>
+
+  <!-- ============================================= ELEKTRİKSEL GÜVENLİK ===== -->
+  <div class="pnl" data-s="est" hidden>
+    <div class="ozet">
+      <div class="kart"><div class="b">Standart</div><div class="d" style="font-size:12px">IEC 62353</div></div>
+      <div class="kart"><div class="b">Koruma sınıfı</div><div class="d" style="font-size:13px">Class I</div></div>
+      <div class="kart"><div class="b">Uygulama parçası</div><div class="d" style="font-size:13px">Tip CF <small>defib korumalı</small></div></div>
+      <div class="kart ok"><div class="b">Sonuç</div><div class="d" style="font-size:13px">Geçti</div></div>
+      <div class="kart"><div class="b">Test cihazı</div><div class="d" style="font-size:12px">Fluke ESA615</div></div>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:250px">Test</th>
+          <th style="width:120px" class="sag">Ölçülen</th>
+          <th style="width:130px" class="orta">Sınır</th>
+          <th style="width:120px" class="orta">Sonuç</th>
+          <th>Açıklama</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Koruyucu topraklama direnci</b></td>
+            <td class="sag">0,11 Ω</td><td class="orta">≤ 0,30 Ω</td>
+            <td class="orta"><span class="rz ok">Geçti</span></td>
+            <td>Kablo dahil ölçüldü</td></tr>
+          <tr class="tik"><td><b>Yalıtım direnci</b> (şebeke–toprak)</td>
+            <td class="sag">&gt; 100 MΩ</td><td class="orta">≥ 2 MΩ</td>
+            <td class="orta"><span class="rz ok">Geçti</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><b>Cihaz kaçak akımı</b> (normal)</td>
+            <td class="sag">42 µA</td><td class="orta">≤ 500 µA</td>
+            <td class="orta"><span class="rz ok">Geçti</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><b>Cihaz kaçak akımı</b> (tek hata)</td>
+            <td class="sag">186 µA</td><td class="orta">≤ 1.000 µA</td>
+            <td class="orta"><span class="rz ok">Geçti</span></td>
+            <td>Toprak kesik durumu</td></tr>
+          <tr class="tik"><td><b>Hasta kaçak akımı</b> (Tip CF, normal)</td>
+            <td class="sag">3 µA</td><td class="orta">≤ 10 µA</td>
+            <td class="orta"><span class="rz ok">Geçti</span></td>
+            <td>CF sınırı BF'den 10 kat sıkı</td></tr>
+          <tr class="tik"><td><b>Hasta kaçak akımı</b> (Tip CF, tek hata)</td>
+            <td class="sag">28 µA</td><td class="orta">≤ 50 µA</td>
+            <td class="orta"><span class="rz ok">Geçti</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><b>Görsel kontrol</b></td>
+            <td class="sag">—</td><td class="orta">Hasarsız</td>
+            <td class="orta"><span class="rz sari">Not var</span></td>
+            <td>Kaşık kablosunun kılıfı çatlamaya başlamış — izlemde</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Elektriksel güvenlik kalibrasyon değildir</b> ama aynı ziyarette yapılır: biri
+        "doğru ölçüyor mu", öteki "hastayı çarpar mı" sorusunu yanıtlar.</span>
+      <span class="sp">Tip CF (kalbe doğrudan temas) sınırları Tip BF'den on kat sıkıdır — cihaz tipi yanlış girilirse test yanlış geçer.</span>
+    </div>
+  </div>
+
+  <!-- ============================================ SERTİFİKA & İZLENEBİLİRLİK ===== -->
+  <div class="pnl" data-s="sertifika" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr><th style="width:190px">Alan</th><th>Değer</th></tr></thead>
+        <tbody>
+          <tr><td class="sonuk">Kalibrasyonu yapan</td>
+            <td><b>İç ekip</b> — Biyomedikal Tekn. E. Kaya
+              <span class="sonuk">(yetki belgesi: Zoll eğitim sertifikası, 2025)</span></td></tr>
+          <tr><td class="sonuk">Referans cihaz</td>
+            <td>Fluke Impulse 7000DP · seri <code>IM-44120</code></td></tr>
+          <tr><td class="sonuk">Referansın kalibrasyonu</td>
+            <td>TÜRKAK akredite lab · sertifika <code>KAL-2026/1188</code> ·
+              geçerli 14.02.2027 <span class="rz ok">Geçerli</span></td></tr>
+          <tr><td class="sonuk">İzlenebilirlik zinciri</td>
+            <td>Cihaz → Fluke Impulse 7000DP → TÜRKAK akredite lab → <b>ulusal standart (UME)</b></td></tr>
+          <tr><td class="sonuk">Ölçüm belirsizliği</td>
+            <td>±1,2 J (k=2, %95 güven) — enerji ölçümlerinde sonuca dahil edilir</td></tr>
+          <tr><td class="sonuk">Ortam</td><td>22,4 °C · %48 BN · 16.09.2026 09:12</td></tr>
+          <tr><td class="sonuk">Sonuç</td>
+            <td><span class="rz kir">UYGUN DEĞİL</span> — 200 J noktasında %11,8 sapma
+              (sınır ±%10)</td></tr>
+          <tr><td class="sonuk">Karar</td>
+            <td><b>Kullanım dışı</b> · kırmızı etiket · yedek havuzdan <code>DB-01188</code> atandı</td></tr>
+          <tr><td class="sonuk">Geriye dönük etki</td>
+            <td><span class="rz sari">Değerlendiriliyor</span> — 02.09.2025'ten bu yana bu cihazla
+              41 defibrilasyon kaydı var; kalite birimine bildirildi</td></tr>
+          <tr><td class="sonuk">Sonraki adım</td>
+            <td>Zoll yetkili servise kapasitör değişimi için gönderilecek ·
+              iş emri <code>IE-2609-091</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ozet">
+      <div class="kart"><div class="b">Etiket önizleme</div>
+        <div class="d" style="font-size:11.5px;font-weight:normal;line-height:1.7">
+          <span class="rz kir">KALİBRASYON DIŞI — KULLANMAYIN</span><br>
+          Demirbaş <b>DB-01184</b> · Defibrilatör<br>
+          Ölçüm tarihi: 16.09.2026 · Sonuç: <b>Uygun değil</b><br>
+          Kayıt no: <code>KL-2026/0884</code> · Yapan: Tekn. E. Kaya<br>
+          <span class="sonuk">Uygun sonuçta yeşil etiket basılır: geçerlilik tarihi + sertifika no</span>
+        </div></div>
+    </div>
+
+    <div class="statusbar">
+      <span><b>İzlenebilirlik zinciri kopmaz:</b> ölçen cihazın da kalibrasyonu olmalı — yoksa
+        ölçüm bir sayıdır, delil değildir.</span>
+      <span class="sp">Uygunsuz sonuçta <b>geriye dönük etki</b> değerlendirmesi zorunlu: cihaz ne zamandır sapıyordu?</span>
+    </div>
+  </div>
+
+  <!-- ==================================================== KALİBRASYON PLANI ===== -->
+  <div class="pnl" data-s="plan" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Cihaz türü, birim ya da firma…</div>
+      <span class="chip on">Bu yıl <b>122</b></span>
+      <span class="chip">Eylül <b>18</b></span>
+      <span class="chip">İç ekip <b>74</b></span>
+      <span class="chip">Dış firma <b>48</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:210px">Cihaz türü</th>
+          <th style="width:80px" class="sag">Adet</th>
+          <th style="width:100px" class="orta">Periyot</th>
+          <th style="width:230px">Ölçülen büyüklükler</th>
+          <th style="width:140px" class="orta">Kabul kriteri</th>
+          <th style="width:150px">Yapan</th>
+          <th style="width:110px" class="orta">Bu ay</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>Defibrilatör</td><td class="sag">22</td><td class="orta">12 ay</td>
+            <td>Enerji çıkışı, senkron gecikme, şarj süresi, EKG</td>
+            <td class="orta">±%10 / ±2 J</td><td>İç ekip</td>
+            <td class="orta"><span class="rz sari">3</span></td></tr>
+          <tr class="tik"><td>İnfüzyon pompası</td><td class="sag">64</td><td class="orta">12 ay</td>
+            <td>Akış hızı doğruluğu, oklüzyon basıncı, bolus hacmi</td>
+            <td class="orta">±%5</td><td>İç ekip</td>
+            <td class="orta"><span class="rz sari">6</span></td></tr>
+          <tr class="tik"><td>Ventilatör</td><td class="sag">18</td><td class="orta">12 ay</td>
+            <td>Tidal hacim, basınç, FiO₂, PEEP, solunum sayısı</td>
+            <td class="orta">±%10</td><td>Yetkili servis</td>
+            <td class="orta"><span class="rz">2</span></td></tr>
+          <tr class="tik"><td>Anestezi cihazı</td><td class="sag">6</td><td class="orta">12 ay</td>
+            <td>Vaporizatör çıkış konsantrasyonu, akış, basınç, alarm</td>
+            <td class="orta">±%10</td><td>Yetkili servis</td>
+            <td class="orta"><span class="rz kir">1 gecikti</span></td></tr>
+          <tr class="tik"><td>Elektrocerrahi ünitesi</td><td class="sag">7</td><td class="orta">12 ay</td>
+            <td>Güç çıkışı (kesme/koagülasyon), nötr elektrot alarmı, HF kaçak</td>
+            <td class="orta">±%10</td><td>Yetkili servis</td>
+            <td class="orta"><span class="rz kir">1 gecikti</span></td></tr>
+          <tr class="tik"><td>Tansiyon aleti (dijital)</td><td class="sag">96</td><td class="orta">12 ay</td>
+            <td>0 / 50 / 100 / 150 / 200 / 250 mmHg noktaları, kaçak, boşalma hızı</td>
+            <td class="orta">±3 mmHg</td><td>İç ekip</td>
+            <td class="orta"><span class="rz sari">4</span></td></tr>
+          <tr class="tik"><td>Pulse oksimetre</td><td class="sag">41</td><td class="orta">12 ay</td>
+            <td>SpO₂ %70-100 noktaları, nabız hızı</td>
+            <td class="orta">±%3 SpO₂</td><td>İç ekip</td>
+            <td class="orta"><span class="rz sari">2</span></td></tr>
+          <tr class="tik"><td>Etüv / inkübatör / buzdolabı</td><td class="sag">34</td><td class="orta">6 ay</td>
+            <td>Sıcaklık dağılımı (9 nokta), sapma, kararlılık</td>
+            <td class="orta">±0,5 °C</td><td>Dış lab</td>
+            <td class="orta"><span class="rz">5</span></td></tr>
+          <tr class="tik"><td>Otoklav</td><td class="sag">4</td><td class="orta">12 ay</td>
+            <td>Sıcaklık, basınç, süre; biyolojik/kimyasal indikatör ayrı</td>
+            <td class="orta">±1 °C</td><td>Dış lab</td>
+            <td class="orta"><span class="rz">1</span></td></tr>
+          <tr class="tik"><td>Terazi / hassas terazi</td><td class="sag">12</td><td class="orta">12 ay</td>
+            <td>Doğrusallık, tekrarlanabilirlik, köşe yükü</td>
+            <td class="orta">sınıfına göre</td><td>Dış lab <span class="rz mavi">TÜRKAK</span></td>
+            <td class="orta"><span class="rz">2</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Periyot cihaz türüne göre:</b> sıcaklık kabinleri 6 ayda bir — sapma sinsi ilerler
+        ve içindeki numune/ilaç bozulur.</span>
+      <span class="sp">Plan yılın başında çıkar ve <b>kayar</b>: gecikmiş kalibrasyon bir sonraki yılın planını öteler.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Süreç:</b> Plan (cihaz türü × periyot) → randevu → <b>ayar öncesi (as-found) ölçüm</b> →
+  sapma kabul kriteriyle karşılaştırılır (ölçüm belirsizliği dahil) → uygunsa yeşil etiket ve
+  yeni geçerlilik tarihi; uygun değilse <b>kırmızı etiket + kullanım dışı</b>, servis müdahalesi
+  ve ayar sonrası ölçüm. Uygunsuz sonuçta <b>geriye dönük etki</b> değerlendirilir: cihaz ne
+  zamandır sapıyordu, o süre içinde kaç hastada kullanıldı. Elektriksel güvenlik testi (IEC 62353)
+  aynı ziyarette yapılır ama ayrı bir sorunun yanıtıdır. Ölçen cihazın kendi kalibrasyonu geçerli
+  olmalı — izlenebilirlik zinciri ulusal standarda kadar gider.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eczane — Kontrollü İlaç (Kasa & Defter) — Mockup (GenoTIP AI · Eczane)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🔴 Kontrollü İlaç — Kasa ve Defter</span>
+    <span class="sp">Sorumlu: Ecz. N. Arslan · İkinci anahtar: Ecz. T. Yalçın · 16.09.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="eczane_panosu.html">◀ Pano</div>
+    <div class="btn primary">📋 Günlük Sayım</div>
+    <div class="btn">📤 Servise Teslim</div>
+    <div class="btn">📥 İade Al</div>
+    <div class="sepv"></div>
+    <div class="btn">🗒️ Defter Kaydı</div>
+    <div class="btn">📄 Reçete Arşivi</div>
+    <div class="btn" data-git="eczane_iade_imha.html">🔥 İmha Komisyonu</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ Aylık Bildirim</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart kir"><div class="b">Son sayım</div><div class="d" style="font-size:13px">13.09.2026 <small>3 gün önce</small></div></div>
+    <div class="kart"><div class="b">Kasada kalem</div><div class="d">18</div></div>
+    <div class="kart"><div class="b">Kırmızı reçeteli</div><div class="d">11</div></div>
+    <div class="kart"><div class="b">Yeşil reçeteli</div><div class="d">7</div></div>
+    <div class="kart sari"><div class="b">Bugün çıkış</div><div class="d">9 <small>birim</small></div></div>
+    <div class="kart"><div class="b">Bekleyen iade</div><div class="d">2</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="kasa">Kasa Mevcudu<span class="sy">18</span></div>
+    <div class="sekme" data-s="defter">Kullanım Defteri<span class="sy">2026/418</span></div>
+    <div class="sekme" data-s="sayim">Günlük Sayım</div>
+    <div class="sekme" data-s="recete">Reçete Arşivi<span class="sy">64</span></div>
+  </div>
+
+  <!-- ======================================================= KASA MEVCUDU ===== -->
+  <div class="pnl" data-s="kasa">
+    <div class="arama">
+      <div class="kutu">🔍 İlaç ya da etken madde…</div>
+      <span class="chip on">Tümü <b>18</b></span>
+      <span class="chip">Kırmızı <b>11</b></span>
+      <span class="chip">Yeşil <b>7</b></span>
+      <span class="chip">Sayım farkı <b>0</b></span>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:250px">İlaç</th>
+          <th style="width:110px" class="orta">Reçete</th>
+          <th style="width:110px">Lot</th>
+          <th style="width:100px" class="orta">SKT</th>
+          <th style="width:90px" class="sag">Devir</th>
+          <th style="width:80px" class="sag">Giren</th>
+          <th style="width:80px" class="sag">Çıkan</th>
+          <th style="width:90px" class="sag">Kalan</th>
+          <th style="width:110px" class="orta">Son sayım</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Fentanil 0,5 mg/10 mL</b> <code class="k">N01AH01</code></td>
+            <td class="orta"><span class="rz kir">Kırmızı</span></td>
+            <td><code>FN1190</code></td><td class="orta">06.2027</td>
+            <td class="sag">24</td><td class="sag">30</td><td class="sag">6</td>
+            <td class="sag"><b>48</b></td>
+            <td class="orta"><span class="rz ok">Uyumlu</span></td></tr>
+          <tr class="tik"><td><b>Morfin HCl 10 mg/mL</b> <code class="k">N02AA01</code></td>
+            <td class="orta"><span class="rz kir">Kırmızı</span></td>
+            <td><code>MR4420</code></td><td class="orta">03.2028</td>
+            <td class="sag">40</td><td class="sag">0</td><td class="sag">2</td>
+            <td class="sag"><b>38</b></td>
+            <td class="orta"><span class="rz ok">Uyumlu</span></td></tr>
+          <tr class="tik"><td><b>Petidin 100 mg/2 mL</b> <code class="k">N02AB02</code></td>
+            <td class="orta"><span class="rz kir">Kırmızı</span></td>
+            <td><code>PT0880</code></td><td class="orta">11.2027</td>
+            <td class="sag">20</td><td class="sag">0</td><td class="sag">0</td>
+            <td class="sag"><b>20</b></td>
+            <td class="orta"><span class="rz ok">Uyumlu</span></td></tr>
+          <tr class="tik"><td><b>Remifentanil 2 mg</b> <code class="k">N01AH06</code></td>
+            <td class="orta"><span class="rz kir">Kırmızı</span></td>
+            <td><code>RF1102</code></td><td class="orta">09.2027</td>
+            <td class="sag">15</td><td class="sag">0</td><td class="sag">1</td>
+            <td class="sag"><b>14</b></td>
+            <td class="orta"><span class="rz ok">Uyumlu</span></td></tr>
+          <tr class="tik"><td><b>Midazolam 5 mg/5 mL</b> <code class="k">N05CD08</code></td>
+            <td class="orta"><span class="rz ok">Yeşil</span></td>
+            <td><code>MD3310</code></td><td class="orta">02.2028</td>
+            <td class="sag">60</td><td class="sag">0</td><td class="sag">6</td>
+            <td class="sag"><b>54</b></td>
+            <td class="orta"><span class="rz ok">Uyumlu</span></td></tr>
+          <tr class="tik"><td><b>Diazepam 10 mg/2 mL</b> <code class="k">N05BA01</code></td>
+            <td class="orta"><span class="rz ok">Yeşil</span></td>
+            <td><code>DZ7701</code></td><td class="orta">05.2027</td>
+            <td class="sag">30</td><td class="sag">0</td><td class="sag">0</td>
+            <td class="sag"><b>30</b></td>
+            <td class="orta"><span class="rz ok">Uyumlu</span></td></tr>
+          <tr class="tik"><td><b>Ketamin 500 mg/10 mL</b> <code class="k">N01AX03</code></td>
+            <td class="orta"><span class="rz ok">Yeşil</span></td>
+            <td><code>KT2040</code></td><td class="orta">12.2027</td>
+            <td class="sag">12</td><td class="sag">0</td><td class="sag">0</td>
+            <td class="sag"><b>12</b></td>
+            <td class="orta"><span class="rz ok">Uyumlu</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Kasa stoktan ayrıdır:</b> kalem ana depoya hiç girmez, mal kabulden doğrudan
+        kasaya alınır ve deftere işlenir.</span>
+      <span class="sp">Kasa iki anahtarla açılır; tek kişi açamaz.</span>
+    </div>
+  </div>
+
+  <!-- ==================================================== KULLANIM DEFTERİ ===== -->
+  <div class="pnl" data-s="defter" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Defter no, hasta ya da ilaç…</div>
+      <span class="chip on">Bugün <b>9</b></span>
+      <span class="chip">Bu ay <b>218</b></span>
+      <span class="chip">İade <b>2</b></span>
+      <span class="chip">Artık/İmha <b>3</b></span>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px">Defter No</th>
+          <th style="width:110px" class="orta">Zaman</th>
+          <th style="width:190px">İlaç · Miktar</th>
+          <th style="width:170px">Hasta / Birim</th>
+          <th style="width:150px">Teslim eden</th>
+          <th style="width:150px">Teslim alan</th>
+          <th style="width:120px" class="orta">İmza</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><code>2026/418</code></td><td class="orta">09:24</td>
+            <td>Fentanil 0,5 mg ×6</td><td>Ameliyathane <span class="sonuk">(ET-2609-118)</span></td>
+            <td>Ecz. N. Arslan</td><td>Tekniker S. Bal</td>
+            <td class="orta"><span class="rz ok">Çift imza</span></td></tr>
+          <tr class="tik"><td><code>2026/417</code></td><td class="orta">08:40</td>
+            <td>Midazolam 5 mg ×6</td><td>YBÜ <span class="sonuk">(ET-2609-120)</span></td>
+            <td>Ecz. N. Arslan</td><td>Hemş. G. Yurt</td>
+            <td class="orta"><span class="rz ok">Çift imza</span></td></tr>
+          <tr class="tik"><td><code>2026/416</code></td><td class="orta">07:55</td>
+            <td>Morfin HCl 10 mg ×2</td><td>Ayşe Yıldırım · Ortopedi 208-B</td>
+            <td>Ecz. T. Yalçın</td><td>Hemş. R. Şahin</td>
+            <td class="orta"><span class="rz ok">Çift imza</span></td></tr>
+          <tr class="tik"><td><code>2026/415</code></td><td class="orta">06:10</td>
+            <td>Remifentanil 2 mg ×1</td><td>Ameliyathane · Salon 1</td>
+            <td>Ecz. T. Yalçın</td><td>Anestezi Tekn. K. Deniz</td>
+            <td class="orta"><span class="rz ok">Çift imza</span></td></tr>
+          <tr class="tik"><td><code>2026/414-İ</code></td><td class="orta">15.09 21:30</td>
+            <td><span class="rz mavi">İADE</span> Morfin HCl ×1 <span class="sonuk">(açılmamış)</span></td>
+            <td>Ortopedi 208-B</td>
+            <td>Hemş. R. Şahin</td><td>Ecz. T. Yalçın</td>
+            <td class="orta"><span class="rz ok">Çift imza</span></td></tr>
+          <tr class="tik"><td><code>2026/413-A</code></td><td class="orta">15.09 16:05</td>
+            <td><span class="rz kir">ARTIK</span> Fentanil 0,25 mg <span class="sonuk">(yarım ampul)</span></td>
+            <td>Ameliyathane · Salon 3</td>
+            <td>Anestezi Tekn. K. Deniz</td><td>Ecz. T. Yalçın</td>
+            <td class="orta"><span class="rz ok">Çift imza + tanık</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Artan miktar da deftere yazılır:</b> yarım kalan ampul "kayboldu" olamaz —
+        tanık huzurunda imha edilir ve kaydı tutulur.</span>
+      <span class="sp">Defter satırı silinmez; yanlış kayıt düzeltme satırıyla kapatılır.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================= GÜNLÜK SAYIM ===== -->
+  <div class="pnl" data-s="sayim" hidden>
+    <div class="ozet">
+      <div class="kart kir"><div class="b">Durum</div><div class="d" style="font-size:13px">3 gün gecikmiş</div></div>
+      <div class="kart"><div class="b">Sayılacak</div><div class="d">18 <small>kalem</small></div></div>
+      <div class="kart"><div class="b">1. sayan</div><div class="d" style="font-size:12px">Ecz. N. Arslan</div></div>
+      <div class="kart"><div class="b">2. sayan</div><div class="d" style="font-size:12px">Ecz. T. Yalçın</div></div>
+    </div>
+
+    <ul class="kontrol">
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Kasa iki anahtarla, iki kişi huzurunda açıldı</span>
+        <span class="imza">09:50</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Her kalem <b>ayrı ayrı</b> iki kişi tarafından sayıldı (birbirini görmeden)</span>
+        <span class="imza">09:52</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Defter devir/giren/çıkan toplamı ile karşılaştırıldı</span>
+        <span class="imza">10:04</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Fark varsa <b>düzeltilmeden</b> tutanak açıldı ve yöneticiye bildirildi</span>
+        <span class="imza">— fark yok</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Sayım çift imzayla kapatıldı</span>
+        <span class="imza">—</span></li>
+    </ul>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:250px">İlaç</th>
+          <th style="width:100px" class="sag">Defter</th>
+          <th style="width:100px" class="sag">Sayan 1</th>
+          <th style="width:100px" class="sag">Sayan 2</th>
+          <th style="width:90px" class="sag">Fark</th>
+          <th style="width:150px" class="orta">Sonuç</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>Fentanil 0,5 mg/10 mL</td>
+            <td class="sag">48</td><td class="sag">48</td><td class="sag">48</td>
+            <td class="sag"><span class="rz ok">0</span></td>
+            <td class="orta"><span class="rz ok">Uyumlu</span></td></tr>
+          <tr class="tik"><td>Morfin HCl 10 mg/mL</td>
+            <td class="sag">38</td><td class="sag">38</td><td class="sag">38</td>
+            <td class="sag"><span class="rz ok">0</span></td>
+            <td class="orta"><span class="rz ok">Uyumlu</span></td></tr>
+          <tr class="tik"><td>Petidin 100 mg/2 mL</td>
+            <td class="sag">20</td><td class="sag">20</td><td class="sag">20</td>
+            <td class="sag"><span class="rz ok">0</span></td>
+            <td class="orta"><span class="rz ok">Uyumlu</span></td></tr>
+          <tr class="tik"><td>Midazolam 5 mg/5 mL</td>
+            <td class="sag">54</td><td class="sag">54</td><td class="sag">54</td>
+            <td class="sag"><span class="rz ok">0</span></td>
+            <td class="orta"><span class="rz ok">Uyumlu</span></td></tr>
+          <tr class="tik"><td>Remifentanil 2 mg</td>
+            <td class="sag">14</td><td class="sag">14</td><td class="sag">14</td>
+            <td class="sag"><span class="rz ok">0</span></td>
+            <td class="orta"><span class="rz ok">Uyumlu</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Sayım günlüktür</b> ve gecikmesi yönetici bildirimine düşer: kontrollü ilaçta
+        "sonra sayarız" diye bir şey yoktur.</span>
+      <span class="sp">Fark bulunursa sistem düzeltme yapmaz — tutanak açılır, kayıt olduğu gibi kalır.</span>
+    </div>
+  </div>
+
+  <!-- ====================================================== REÇETE ARŞİVİ ===== -->
+  <div class="pnl" data-s="recete" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Reçete no, hasta ya da hekim…</div>
+      <span class="chip on">Bu ay <b>64</b></span>
+      <span class="chip">Kırmızı <b>41</b></span>
+      <span class="chip">Yeşil <b>23</b></span>
+      <span class="chip">Eksik belge <b>2</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:130px">Reçete No</th>
+          <th style="width:100px" class="orta">Renk</th>
+          <th style="width:110px" class="orta">Tarih</th>
+          <th style="width:170px">Hasta</th>
+          <th style="width:150px">Hekim</th>
+          <th style="width:190px">İlaç · Miktar</th>
+          <th style="width:130px" class="orta">Belge</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><code>KR-2026-0411</code></td>
+            <td class="orta"><span class="rz kir">Kırmızı</span></td><td class="orta">16.09</td>
+            <td>Ayşe Yıldırım</td><td>Dr. Kaya</td><td>Morfin HCl 10 mg ×2</td>
+            <td class="orta"><span class="rz ok">Tam</span></td></tr>
+          <tr class="tik"><td><code>KR-2026-0410</code></td>
+            <td class="orta"><span class="rz kir">Kırmızı</span></td><td class="orta">15.09</td>
+            <td>Okan Yaman</td><td>Dr. Uçar</td><td>Fentanil 0,5 mg ×1</td>
+            <td class="orta"><span class="rz ok">Tam</span></td></tr>
+          <tr class="tik"><td><code>YR-2026-0228</code></td>
+            <td class="orta"><span class="rz ok">Yeşil</span></td><td class="orta">15.09</td>
+            <td>Fatma Öz</td><td>Dr. Şen</td><td>Midazolam 5 mg ×6</td>
+            <td class="orta"><span class="rz ok">Tam</span></td></tr>
+          <tr class="tik"><td><code>KR-2026-0409</code></td>
+            <td class="orta"><span class="rz kir">Kırmızı</span></td><td class="orta">14.09</td>
+            <td>Hasan Bulut</td><td>Dr. Ergin</td><td>Petidin 100 mg ×1</td>
+            <td class="orta"><span class="rz sari">Islak imza yok</span></td></tr>
+          <tr class="tik"><td><code>YR-2026-0227</code></td>
+            <td class="orta"><span class="rz ok">Yeşil</span></td><td class="orta">14.09</td>
+            <td>Kemal Deniz</td><td>Dr. Uçar</td><td>Ketamin 500 mg ×1</td>
+            <td class="orta"><span class="rz sari">Tanı kodu yok</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Reçete arşivi <b>5 yıl</b> saklanır ve denetimde defterle birlikte istenir.</span>
+      <span class="sp">Eksik belgeli reçete çıkışı engellemez ama <b>kapanmaz</b>: eksik tamamlanana kadar listede kalır.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Süreç:</b> Kontrollü ilaç ana depoya hiç girmez — mal kabulden doğrudan <b>kasaya</b> alınır.
+  Çıkış yalnız reçete/order karşılığı, <b>çift imzayla</b> ve deftere numara alarak yapılır.
+  Kullanılmayan ilaç kasaya iade edilir; <b>artan miktar</b> (yarım ampul) tanık huzurunda imha
+  edilir ve o da deftere yazılır. Sayım <b>günlüktür</b>, iki kişi birbirini görmeden sayar,
+  fark bulunursa kayıt düzeltilmez: tutanak açılır. Reçeteler 5 yıl arşivlenir.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

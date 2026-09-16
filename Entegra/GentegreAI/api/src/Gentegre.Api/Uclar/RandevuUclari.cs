@@ -53,7 +53,7 @@ public static class RandevuUclari
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("randevu", Islem.Degistir);
-            await depo.BolumIsaretleAsync(istek.DepartmanId, istek.BolumMu, iptal);
+            await depo.BolumIsaretleAsync(istek.DepartmanId, istek.BolumMu, baglam.KullaniciId, iptal);
             return Results.Ok(new { tamam = true });
         });
     }

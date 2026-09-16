@@ -364,7 +364,8 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kaynak: 'kayit-kabul-ayarlar', baslik: 'Kayıt Kabul Ayarları',
     yol: 'Yonetim › Modül Ayarları › Kayit Kabul', ozelSayfa: true,
     menuGrup: 'Kayıt Kabul', menuAltGrup: 'Ayarlar', menuAd: 'Kayıt Kabul', menuSira: 90,
-    ic: '🩺', yetkiKodu: 'ayar', urunModu: 2,
+    // Kullanici: Kayit Kabul logosu kirmizi hilal ('@hilal' -> Kabuk MenuIkon SVG).
+    ic: '@hilal', yetkiKodu: 'ayar', urunModu: 2,
   },
   {
     // Sekmeli AYAR ekrani - liste degil (ozelSayfa): Genel + Depolar. Menude

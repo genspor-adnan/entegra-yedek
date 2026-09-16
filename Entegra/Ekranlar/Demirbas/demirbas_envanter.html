@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Biyomedikal — Demirbaş Envanteri — Mockup (GenoTIP AI · Demirbaş)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>📋 Demirbaş ve Cihaz Envanteri</span>
+    <span class="sp">Merkez · 1.842 kayıt · 136 kritik cihaz · defter değeri 84,2 M ₺ · 16.09.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="demirbas_panosu.html">◀ Pano</div>
+    <div class="btn primary">＋ Cihaz Kaydet</div>
+    <div class="btn" data-git="demirbas_cihaz_karti.html">🗂️ Cihaz Kartı</div>
+    <div class="btn">🔄 Zimmet / Yer Değiştir</div>
+    <div class="sepv"></div>
+    <div class="btn">🏷️ Demirbaş Etiketi Bas</div>
+    <div class="btn">📦 Sayım Başlat</div>
+    <div class="btn">🗑️ Hurdaya Ayır</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ Envanter Listesi</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">Toplam cihaz</div><div class="d">1.842</div></div>
+    <div class="kart kir"><div class="b">Kritik / yaşam desteği</div><div class="d">136</div></div>
+    <div class="kart sari"><div class="b">Garantisi bitiyor</div><div class="d">28 <small>90 gün</small></div></div>
+    <div class="kart"><div class="b">Sözleşme kapsamında</div><div class="d">214</div></div>
+    <div class="kart sari"><div class="b">Ekonomik ömrü dolmuş</div><div class="d">63</div></div>
+    <div class="kart"><div class="b">Sayımda bulunamayan</div><div class="d">4</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="envanter">Envanter<span class="sy">1842</span></div>
+    <div class="sekme" data-s="zimmet">Zimmet & Lokasyon<span class="sy">4</span></div>
+    <div class="sekme" data-s="garanti">Garanti & Sözleşme<span class="sy">28</span></div>
+    <div class="sekme" data-s="omur">Yaşam Döngüsü<span class="sy">63</span></div>
+  </div>
+
+  <!-- ========================================================== ENVANTER ===== -->
+  <div class="pnl" data-s="envanter">
+    <div class="arama">
+      <div class="kutu">🔍 Demirbaş no, seri no, marka/model ya da ÜTS numarası…</div>
+      <span class="chip on">Aktif <b>1721</b></span>
+      <span class="chip">Kritik <b>136</b></span>
+      <span class="chip">Arızada <b>11</b></span>
+      <span class="chip">Hurda <b>117</b></span>
+      <span class="chip">Tümü</span>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px">Demirbaş No</th>
+          <th style="width:210px">Cihaz</th>
+          <th style="width:130px">Seri No</th>
+          <th style="width:150px">Birim / Lokasyon</th>
+          <th style="width:110px" class="orta">Risk sınıfı</th>
+          <th style="width:100px" class="orta">Kalibrasyon</th>
+          <th style="width:100px" class="orta">Bakım</th>
+          <th style="width:110px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>DB-01184</code></td>
+            <td><b>Defibrilatör</b><br><span class="sonuk">Zoll R Series · 2019</span></td>
+            <td><code>ZR-88412</code></td><td>Acil · Resüsitasyon</td>
+            <td class="orta"><span class="rz kir">Yaşam desteği</span></td>
+            <td class="orta"><span class="rz kir">Geçti</span></td>
+            <td class="orta"><span class="rz ok">03.2027</span></td>
+            <td class="orta"><span class="rz kir">Kullanım dışı</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-01188</code></td>
+            <td><b>Defibrilatör</b><br><span class="sonuk">Zoll R Series · 2021</span></td>
+            <td><code>ZR-91077</code></td><td>Yedek Havuzu → Acil</td>
+            <td class="orta"><span class="rz kir">Yaşam desteği</span></td>
+            <td class="orta"><span class="rz ok">04.2027</span></td>
+            <td class="orta"><span class="rz ok">04.2027</span></td>
+            <td class="orta"><span class="rz ok">Kullanımda</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-01402</code></td>
+            <td><b>Anestezi cihazı</b><br><span class="sonuk">Dräger Primus · 2017</span></td>
+            <td><code>ASJC-0221</code></td><td>Ameliyathane · Salon 3</td>
+            <td class="orta"><span class="rz kir">Yaşam desteği</span></td>
+            <td class="orta"><span class="rz sari">Planlandı</span></td>
+            <td class="orta"><span class="rz sari">17.09</span></td>
+            <td class="orta"><span class="rz ok">Kullanımda</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-00842</code></td>
+            <td><b>Ventilatör</b><br><span class="sonuk">Hamilton C1 · 2020</span></td>
+            <td><code>HC1-4471</code></td><td>YBÜ · Yatak 1</td>
+            <td class="orta"><span class="rz kir">Yaşam desteği</span></td>
+            <td class="orta"><span class="rz ok">01.2027</span></td>
+            <td class="orta"><span class="rz kir">Gecikti</span></td>
+            <td class="orta"><span class="rz ok">Kullanımda</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-00073</code></td>
+            <td><b>Röntgen cihazı</b><br><span class="sonuk">Siemens Ysio · 2015</span></td>
+            <td><code>YS-12008</code></td><td>Radyoloji · Oda 1</td>
+            <td class="orta"><span class="rz kir">Yüksek</span></td>
+            <td class="orta"><span class="rz ok">11.2026</span></td>
+            <td class="orta"><span class="rz ok">09.2026</span></td>
+            <td class="orta"><span class="rz ok">Kullanımda</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-01611</code></td>
+            <td><b>İlaç buzdolabı</b><br><span class="sonuk">Vestel MedCool · 2022</span></td>
+            <td><code>VMC-7781</code></td><td>Eczane · BUZDOLABI-2</td>
+            <td class="orta"><span class="rz sari">Orta</span></td>
+            <td class="orta"><span class="rz ok">12.2026</span></td>
+            <td class="orta"><span class="rz kir">Gecikti</span></td>
+            <td class="orta"><span class="rz sari">Isı ihlali</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-01705</code></td>
+            <td><b>Hasta yatağı (motorlu)</b><br><span class="sonuk">Linet Eleganza · 2023</span></td>
+            <td><code>LE-33190</code></td><td>Ortopedi · 208</td>
+            <td class="orta"><span class="rz">Düşük</span></td>
+            <td class="orta"><span class="rz pas">Gerekmez</span></td>
+            <td class="orta"><span class="rz ok">02.2027</span></td>
+            <td class="orta"><span class="rz sari">Arızada</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-00298</code></td>
+            <td><b>Etüv</b><br><span class="sonuk">Nüve EN 500 · 2016</span></td>
+            <td><code>NE-55012</code></td><td>Laboratuvar · Mikrobiyoloji</td>
+            <td class="orta"><span class="rz sari">Orta</span></td>
+            <td class="orta"><span class="rz kir">Geçti</span></td>
+            <td class="orta"><span class="rz ok">12.2026</span></td>
+            <td class="orta"><span class="rz kir">Kullanım dışı</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Risk sınıfı kalibrasyon ve bakım periyodunu belirler:</b> yaşam desteği cihazı
+        kalibrasyonsuz bekleyemez, düşük riskli yatak motoruysa sırasını bekler.</span>
+      <span class="sp">Kalibrasyon gerekmeyen cihaz da envanterde: bakımı ve zimmeti takip edilir.</span>
+    </div>
+  </div>
+
+  <!-- ==================================================== ZİMMET & LOKASYON ===== -->
+  <div class="pnl" data-s="zimmet" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Demirbaş no ya da zimmetli kişi…</div>
+      <span class="chip on">Sayım farkı <b>4</b></span>
+      <span class="chip">Mobil cihaz <b>128</b></span>
+      <span class="chip">Yedek havuzu <b>17</b></span>
+      <span class="chip">Tümü</span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px">Demirbaş No</th>
+          <th style="width:200px">Cihaz</th>
+          <th style="width:150px">Kayıtlı yer</th>
+          <th style="width:150px">Son görülen</th>
+          <th style="width:150px">Zimmetli</th>
+          <th style="width:120px" class="orta">Son hareket</th>
+          <th style="width:140px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>DB-01377</code></td>
+            <td>Pulse oksimetre · Masimo Rad-8</td>
+            <td>Cerrahi Servis</td><td class="sonuk">— sayımda bulunamadı</td>
+            <td>Cerrahi Servis Sorumlu Hemş.</td>
+            <td class="orta">31.08.2026</td>
+            <td class="orta"><span class="rz kir">Kayıp</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-01412</code></td>
+            <td>Aspiratör (mobil)</td>
+            <td>Acil Servis</td><td>Ameliyathane koridoru</td>
+            <td>Acil Servis Sorumlu Hemş.</td>
+            <td class="orta">14.09.2026</td>
+            <td class="orta"><span class="rz sari">Yeri değişmiş</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-00951</code></td>
+            <td>İnfüzyon pompası · B.Braun</td>
+            <td>Onkoloji</td><td>Biyomedikal atölye</td>
+            <td>Onkoloji Sorumlu Hemş.</td>
+            <td class="orta">14.09.2026</td>
+            <td class="orta"><span class="rz mavi">Arıza — atölyede</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-01188</code></td>
+            <td>Defibrilatör · Zoll R Series</td>
+            <td>Yedek Havuzu</td><td>Acil · Resüsitasyon</td>
+            <td>Biyomedikal</td>
+            <td class="orta">16.09.2026</td>
+            <td class="orta"><span class="rz ok">Geçici atama</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-01705</code></td>
+            <td>Hasta yatağı · Linet</td>
+            <td>Ortopedi 208</td><td>Ortopedi 208</td>
+            <td>Ortopedi Sorumlu Hemş.</td>
+            <td class="orta">02.09.2026</td>
+            <td class="orta"><span class="rz ok">Yerinde</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Mobil cihaz kaybolur:</b> pompa, aspiratör ve oksimetre servisler arasında gezer —
+        sayım farklarının çoğu budur, hırsızlık değil.</span>
+      <span class="sp">Zimmet kişiye değil <b>göreve</b> verilir: sorumlu hemşire değişince zimmet devri gerekmez.</span>
+    </div>
+  </div>
+
+  <!-- ==================================================== GARANTİ & SÖZLEŞME ===== -->
+  <div class="pnl" data-s="garanti" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Cihaz ya da firma…</div>
+      <span class="chip on">90 gün içinde bitiyor <b>28</b></span>
+      <span class="chip">Garantisi var <b>312</b></span>
+      <span class="chip">Bakım sözleşmeli <b>214</b></span>
+      <span class="chip">Kapsamsız <b>1316</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px">Demirbaş No</th>
+          <th style="width:200px">Cihaz</th>
+          <th style="width:150px">Firma</th>
+          <th style="width:110px" class="orta">Garanti bitiş</th>
+          <th style="width:130px" class="orta">Sözleşme</th>
+          <th style="width:120px" class="orta">Kapsam</th>
+          <th style="width:110px" class="sag">Yıllık bedel</th>
+          <th style="width:130px" class="orta">Uyarı</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>DB-01402</code></td><td>Anestezi cihazı · Dräger</td>
+            <td>Dräger Türkiye</td><td class="orta">—</td>
+            <td class="orta">31.12.2026</td>
+            <td class="orta"><span class="rz ok">Tam kapsam</span></td>
+            <td class="sag">148.000 ₺</td>
+            <td class="orta"><span class="rz sari">106 gün</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-00842</code></td><td>Ventilatör · Hamilton C1</td>
+            <td>Hamilton Medical</td><td class="orta">—</td>
+            <td class="orta">30.11.2026</td>
+            <td class="orta"><span class="rz mavi">Parça hariç</span></td>
+            <td class="sag">62.000 ₺</td>
+            <td class="orta"><span class="rz sari">75 gün</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-01705</code></td><td>Hasta yatağı · Linet</td>
+            <td>Linet Türkiye</td><td class="orta">14.11.2026</td>
+            <td class="orta">—</td>
+            <td class="orta"><span class="rz ok">Garanti</span></td>
+            <td class="sag">—</td>
+            <td class="orta"><span class="rz sari">59 gün</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-00073</code></td><td>Röntgen · Siemens Ysio</td>
+            <td>Siemens Healthineers</td><td class="orta">—</td>
+            <td class="orta">31.03.2027</td>
+            <td class="orta"><span class="rz ok">Tam kapsam</span></td>
+            <td class="sag">385.000 ₺</td>
+            <td class="orta"><span class="rz ok">196 gün</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-00951</code></td><td>İnfüzyon pompası · B.Braun</td>
+            <td class="sonuk">— kapsamsız</td><td class="orta">18.05.2024</td>
+            <td class="orta">—</td>
+            <td class="orta"><span class="rz kir">Kapsam dışı</span></td>
+            <td class="sag">—</td>
+            <td class="orta"><span class="rz kir">Onarım ücretli</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Garantisi biten cihaz kendiliğinden kapsamsız kalır:</b> 90 gün önceden uyarı çıkar
+        ki sözleşme kararı bütçeyle birlikte verilebilsin.</span>
+      <span class="sp">"Parça hariç" sözleşmede arıza maliyeti sürprize açıktır — iş emrinde ayrıca gösterilir.</span>
+    </div>
+  </div>
+
+  <!-- ===================================================== YAŞAM DÖNGÜSÜ ===== -->
+  <div class="pnl" data-s="omur" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px">Demirbaş No</th>
+          <th style="width:190px">Cihaz</th>
+          <th style="width:90px" class="orta">Yaş</th>
+          <th style="width:110px" class="orta">Ekonomik ömür</th>
+          <th style="width:110px" class="sag">Alış bedeli</th>
+          <th style="width:110px" class="sag">Defter değeri</th>
+          <th style="width:130px" class="sag">Son 12 ay onarım</th>
+          <th style="width:150px" class="orta">Öneri</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>DB-01184</code></td><td>Defibrilatör · Zoll</td>
+            <td class="orta">7 yıl</td><td class="orta">10 yıl</td>
+            <td class="sag">210.000 ₺</td><td class="sag">63.000 ₺</td>
+            <td class="sag">38.400 ₺ <span class="rz sari">%18</span></td>
+            <td class="orta"><span class="rz sari">Onarım sınırda</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-00298</code></td><td>Etüv · Nüve EN 500</td>
+            <td class="orta">10 yıl</td><td class="orta">10 yıl</td>
+            <td class="sag">48.000 ₺</td><td class="sag">0 ₺</td>
+            <td class="sag">21.600 ₺ <span class="rz kir">%45</span></td>
+            <td class="orta"><span class="rz kir">Yenileme</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-00073</code></td><td>Röntgen · Siemens Ysio</td>
+            <td class="orta">11 yıl</td><td class="orta">12 yıl</td>
+            <td class="sag">4.200.000 ₺</td><td class="sag">350.000 ₺</td>
+            <td class="sag">412.000 ₺ <span class="rz kir">%10</span></td>
+            <td class="orta"><span class="rz sari">Yenileme planla</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-00951</code></td><td>İnfüzyon pompası · B.Braun</td>
+            <td class="orta">8 yıl</td><td class="orta">8 yıl</td>
+            <td class="sag">42.000 ₺</td><td class="sag">0 ₺</td>
+            <td class="sag">19.800 ₺ <span class="rz kir">%47</span></td>
+            <td class="orta"><span class="rz kir">Hurda</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-01188</code></td><td>Defibrilatör · Zoll</td>
+            <td class="orta">5 yıl</td><td class="orta">10 yıl</td>
+            <td class="sag">240.000 ₺</td><td class="sag">120.000 ₺</td>
+            <td class="sag">2.100 ₺ <span class="rz ok">%1</span></td>
+            <td class="orta"><span class="rz ok">Kullanıma devam</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DB-01705</code></td><td>Hasta yatağı · Linet</td>
+            <td class="orta">3 yıl</td><td class="orta">15 yıl</td>
+            <td class="sag">96.000 ₺</td><td class="sag">76.800 ₺</td>
+            <td class="sag">0 ₺ <span class="rz ok">garanti</span></td>
+            <td class="orta"><span class="rz ok">Kullanıma devam</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Yenileme kararı yaşa değil onarım oranına bakar:</b> yıllık onarım, cihazın
+        değerinin %40'ını aşıyorsa yenilemek onarmaktan ucuzdur.</span>
+      <span class="sp">Hurdaya ayrılan cihaz envanterden silinmez: geçmiş iş emirleri ve kalibrasyon kayıtları ona bağlı.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Süreç:</b> Cihaz alınır → demirbaş no ve <b>risk sınıfı</b> verilir (yaşam desteği / yüksek /
+  orta / düşük) → kalibrasyon ve bakım periyotları risk sınıfı ve üretici bilgisine göre kurulur →
+  birime zimmetlenir → garanti/sözleşme kapsamı izlenir → ekonomik ömür ve onarım maliyeti
+  birlikte değerlendirilerek yenileme/hurda kararı verilir. Hurdaya ayrılan cihaz <b>silinmez</b>:
+  geçmiş kalibrasyon ve iş emirleri ona bağlı durur.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

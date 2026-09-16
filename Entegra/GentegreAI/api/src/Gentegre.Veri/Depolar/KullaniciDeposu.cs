@@ -360,6 +360,28 @@ public sealed class KullaniciDeposu
     public async Task<List<SubeOzeti>> SubeleriAsync(int tarafId,
         CancellationToken iptal = default)
     {
+        var liste = await SubeleriHamAsync(tarafId, iptal);
+        if (liste.Count == 0) return liste;
+        // ŞUBE LOGOSU (kullanıcı: üst şeritte şube combosu yerine logo + ad):
+        //   şube kartının "Logo" görseli (dokuman kaynak=sube, belge_turu Logo;
+        //   yoksa adı "logo" ile başlayan ilk resim). Tek sorgu, tüm şubeler.
+        var logolar = await _veri.ListeAsync(
+            "select distinct on (d.kaynak_id) d.kaynak_id, d.id " +
+            "  from public.dokuman d " +
+            " where d.kaynak = 'sube' and d.kaynak_id = any(@p0) and d.durum = 1 " +
+            "   and d.content_type like 'image/%' " +
+            "   and (d.belge_turu ilike 'logo%' or d.ad ilike 'logo%') " +
+            " order by d.kaynak_id, (d.belge_turu ilike 'logo%') desc, d.varsayilan desc, d.id",
+            new object?[] { liste.Select(s => (long)s.Id).ToArray() },
+            o => (kaynakId: (int)o.GetInt64(0), id: o.GetInt32(1)), iptal);
+        if (logolar.Count == 0) return liste;
+        var harita = logolar.ToDictionary(x => x.kaynakId, x => x.id);
+        return liste.Select(s => harita.TryGetValue(s.Id, out var d) ? s with { LogoDokumanId = d } : s).ToList();
+    }
+
+    private async Task<List<SubeOzeti>> SubeleriHamAsync(int tarafId,
+        CancellationToken iptal = default)
+    {
         // 1) KISIYE tanimli subeler (kullanici karari: sube kisiti kisiye
         //    dondu - kullanici_sube), 2) yoksa rolunun subeleri (234 donemi
         //    kayitlari), 3) o da yoksa tek subeli kurulum kurali.

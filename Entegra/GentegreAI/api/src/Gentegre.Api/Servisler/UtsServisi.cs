@@ -150,6 +150,23 @@ public sealed class UtsServisi
         decimal adet, DateTime? git, string? hastaTckn, string? hastaAdi, string? hastaSoyadi,
         int? stokId, int? seriLotId, int? belgeId, int? belgeSatirId,
         int? subeId, YazmaBaglami baglam, CancellationToken iptal)
+        => (await KullanimBildirSonucAsync(uno, lotNo, seriNo, adet, git, hastaTckn,
+                hastaAdi, hastaSoyadi, stokId, seriLotId, belgeId, belgeSatirId,
+                subeId, baglam, iptal)).Yanit;
+
+    /// <summary>
+    /// Kullanım bildirimi - SONUCU DA döndüren biçim.
+    ///
+    /// Uçlar `object` yanıtı olduğu gibi istemciye veriyor; ameliyathane sarf
+    /// düşümü (720) ise sonucu kendisi okuyup `ameliyat_sarf.uts_durum`
+    /// yazmak zorunda. Anonim yanıttan yansımayla alan okumak sessizce
+    /// bozulurdu - alan adı değişse derleyici uyarmazdı.
+    /// </summary>
+    public async Task<(bool Basarili, string Mesaj, object Yanit)> KullanimBildirSonucAsync(
+        string? uno, string? lotNo, string? seriNo,
+        decimal adet, DateTime? git, string? hastaTckn, string? hastaAdi, string? hastaSoyadi,
+        int? stokId, int? seriLotId, int? belgeId, int? belgeSatirId,
+        int? subeId, YazmaBaglami baglam, CancellationToken iptal)
     {
         var u = UtsDogrulama.Uno(uno);
         var l = UtsDogrulama.LotNo(lotNo);
@@ -162,10 +179,9 @@ public sealed class UtsServisi
             Tkn: tckn.Length > 0 ? tckn : null,
             HastaAdi: Bosalt(hastaAdi), HastaSoyadi: Bosalt(hastaSoyadi));
 
-        var sonuc = await GonderAsync(TurKullanim, istek, subeId, baglam,
+        return await GonderAsync(TurKullanim, istek, subeId, baglam,
             stokId, seriLotId, belgeId, belgeSatirId, adt ?? 1, git,
             "", "", u, l ?? "", s ?? "", null, null, iptal);
-        return sonuc.Yanit;
 
         static string? Bosalt(string? d) =>
             string.IsNullOrWhiteSpace(d) ? null : d.Trim();

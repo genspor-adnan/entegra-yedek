@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eczane — İade, İmha ve Geri Çağırma — Mockup (GenoTIP AI · Eczane)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>↩️ İade · İmha · Geri Çağırma</span>
+    <span class="sp">Eczane Ana Depo · 16.09.2026 · İmha komisyonu: 3 üye</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="eczane_panosu.html">◀ Pano</div>
+    <div class="btn primary">✓ Servis İadesini Kabul Et</div>
+    <div class="btn">🏭 Tedarikçiye İade</div>
+    <div class="btn">🔥 İmha Tutanağı Aç</div>
+    <div class="sepv"></div>
+    <div class="btn">📡 İTS Bildir</div>
+    <div class="btn">🔎 Lot Ara (geri çağırma)</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ Tutanak Yazdır</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">Servis iadesi</div><div class="d">14 <small>kalem</small></div></div>
+    <div class="kart ok"><div class="b">Stoğa dönen</div><div class="d">9</div></div>
+    <div class="kart kir"><div class="b">İmhaya giden</div><div class="d">5</div></div>
+    <div class="kart sari"><div class="b">Tedarikçi iadesi</div><div class="d">2 <small>96.400 ₺</small></div></div>
+    <div class="kart kir"><div class="b">Geri çağırma</div><div class="d">1 <small>açık</small></div></div>
+    <div class="kart"><div class="b">Aylık imha değeri</div><div class="d" style="font-size:13px">7.840 ₺</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="servis">Servis İadeleri<span class="sy">14</span></div>
+    <div class="sekme" data-s="tedarikci">Tedarikçi İadesi<span class="sy">2</span></div>
+    <div class="sekme" data-s="imha">İmha Tutanağı<span class="sy">5</span></div>
+    <div class="sekme" data-s="cagirma">Geri Çağırma<span class="sy">1</span></div>
+  </div>
+
+  <!-- ====================================================== SERVİS İADELERİ ===== -->
+  <div class="pnl" data-s="servis">
+    <div class="arama">
+      <div class="kutu">🔍 Servis, ilaç ya da lot…</div>
+      <span class="chip on">Bugün <b>14</b></span>
+      <span class="chip">Kabul <b>9</b></span>
+      <span class="chip">Ret <b>5</b></span>
+      <span class="chip">Kontrollü <b>1</b></span>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:140px">Servis</th>
+          <th style="width:210px">İlaç · Miktar</th>
+          <th style="width:110px">Lot / SKT</th>
+          <th>İade nedeni</th>
+          <th style="width:140px" class="orta">Ambalaj</th>
+          <th style="width:130px" class="orta">Karar</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>Dahiliye</td><td>Pantoprazol 40 mg ×5</td>
+            <td><code>P2291</code><br>04.2027</td>
+            <td>Hasta taburcu oldu, dozlar kullanılmadı</td>
+            <td class="orta"><span class="rz ok">Açılmamış</span></td>
+            <td class="orta"><span class="rz ok">Stoğa</span></td></tr>
+          <tr class="tik"><td>Cerrahi</td><td>Sefazolin 1 g ×8</td>
+            <td><code>S7741</code><br>12.2026</td>
+            <td>Ameliyat iptal edildi</td>
+            <td class="orta"><span class="rz ok">Açılmamış</span></td>
+            <td class="orta"><span class="rz ok">Stoğa</span></td></tr>
+          <tr class="tik"><td>YBÜ</td><td>Noradrenalin 4 mg ×2</td>
+            <td><code>NR5510</code><br>08.2027</td>
+            <td>Sulandırılmış, 6 saat beklemiş</td>
+            <td class="orta"><span class="rz kir">Hazırlanmış</span></td>
+            <td class="orta"><span class="rz kir">İmha</span></td></tr>
+          <tr class="tik"><td>Onkoloji</td><td>Epirubisin 175 mg ×1</td>
+            <td><code>EP1180</code><br>03.2027</td>
+            <td>Hasta üniteye gelmedi, hazırlanmış kemoterapi</td>
+            <td class="orta"><span class="rz kir">Hazırlanmış</span></td>
+            <td class="orta"><span class="rz kir">Sitotoksik imha</span></td></tr>
+          <tr class="tik"><td>Ortopedi</td><td>Morfin HCl 10 mg ×1
+              <span class="rz kir">Kontrollü</span></td>
+            <td><code>MR4420</code><br>03.2028</td>
+            <td>Gerektiğinde dozu kullanılmadı</td>
+            <td class="orta"><span class="rz ok">Açılmamış</span></td>
+            <td class="orta"><span class="rz mavi">Kasaya · çift imza</span></td></tr>
+          <tr class="tik"><td>Dahiliye</td><td>İnsülin glarjin ×1</td>
+            <td><code>IG2280</code><br>03.2027</td>
+            <td>Servis buzdolabı 12 saat kapalı kalmış</td>
+            <td class="orta"><span class="rz kir">Soğuk zincir</span></td>
+            <td class="orta"><span class="rz kir">İmha</span></td></tr>
+          <tr class="tik"><td>Acil</td><td>SF %0,9 500 mL ×6</td>
+            <td><code>SF9012</code><br>06.2028</td>
+            <td>Fazla talep edilmiş</td>
+            <td class="orta"><span class="rz ok">Açılmamış</span></td>
+            <td class="orta"><span class="rz ok">Stoğa</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Üç soru:</b> ambalaj açıldı mı, sulandırıldı mı, saklama koşulu korundu mu —
+        üçü de "hayır" ise stoğa döner.</span>
+      <span class="sp">Kontrollü ilaç iadesi stoğa değil <b>kasaya</b> girer ve deftere yazılır.</span>
+    </div>
+  </div>
+
+  <!-- ==================================================== TEDARİKÇİ İADESİ ===== -->
+  <div class="pnl" data-s="tedarikci" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:230px">İlaç</th>
+          <th style="width:110px">Lot / SKT</th>
+          <th style="width:80px" class="sag">Miktar</th>
+          <th style="width:110px" class="sag">Değer</th>
+          <th>Gerekçe</th>
+          <th style="width:150px">Tedarikçi</th>
+          <th style="width:140px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Rituksimab 500 mg</b> <span class="rz mor">Pahalı</span></td>
+            <td><code>RT8840</code><br>10.2026</td>
+            <td class="sag">4</td><td class="sag">96.400 ₺</td>
+            <td>Miada 45 gün — sözleşmede "miada 3 ay kala iade" maddesi var</td>
+            <td>Selçuk Ecza</td>
+            <td class="orta"><span class="rz sari">Onay bekliyor</span></td></tr>
+          <tr class="tik"><td><b>Metamizol 1 g ampul</b></td>
+            <td><code>MZ7730</code><br>12.2026</td>
+            <td class="sag">200</td><td class="sag">3.400 ₺</td>
+            <td>Mal kabulde reddedildi — asgari raf ömrü (6 ay) altında geldi</td>
+            <td>Selçuk Ecza</td>
+            <td class="orta"><span class="rz ok">Kabul edildi</span></td></tr>
+          <tr class="tik"><td><b>İmmünoglobulin %10 10 g</b></td>
+            <td><code>IG5512</code><br>12.2026</td>
+            <td class="sag">3</td><td class="sag">74.100 ₺</td>
+            <td>Tüketim çok düşük (0,04/gün) — kuruma devir aranıyor</td>
+            <td class="sonuk">— (kurumlar arası)</td>
+            <td class="orta"><span class="rz mavi">Devir aranıyor</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>İade önce denenir, imha son çaredir:</b> 96.400 ₺'lik kalem miada 45 gün kala
+        tedarikçiye dönebiliyorsa çöpe gitmez.</span>
+      <span class="sp">Devir seçeneği pahalı ve az tüketilen kalemler için: başka kuruma satış/devir.</span>
+    </div>
+  </div>
+
+  <!-- ====================================================== İMHA TUTANAĞI ===== -->
+  <div class="pnl" data-s="imha" hidden>
+    <div class="ozet">
+      <div class="kart"><div class="b">Tutanak</div><div class="d" style="font-size:12px">İM-2026/09-03</div></div>
+      <div class="kart"><div class="b">Kalem</div><div class="d">5</div></div>
+      <div class="kart kir"><div class="b">Değer</div><div class="d" style="font-size:13px">7.840 ₺</div></div>
+      <div class="kart"><div class="b">Komisyon</div><div class="d">3 <small>üye</small></div></div>
+      <div class="kart"><div class="b">Atık türü</div><div class="d" style="font-size:12px">Tıbbi + Sitotoksik</div></div>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:230px">İlaç</th>
+          <th style="width:110px">Lot / SKT</th>
+          <th style="width:80px" class="sag">Miktar</th>
+          <th style="width:100px" class="sag">Değer</th>
+          <th style="width:190px">İmha nedeni</th>
+          <th style="width:160px" class="orta">Atık sınıfı</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>Adrenalin 1 mg/mL ampul</td><td><code>AD1120</code><br>08.2026</td>
+            <td class="sag">12</td><td class="sag">240 ₺</td>
+            <td>Miadı geçmiş</td>
+            <td class="orta"><span class="rz">Tıbbi atık</span></td></tr>
+          <tr class="tik"><td>Heparin 25.000 IU flakon</td><td><code>HP0034</code><br>07.2026</td>
+            <td class="sag">3</td><td class="sag">420 ₺</td>
+            <td>Miadı geçmiş</td>
+            <td class="orta"><span class="rz">Tıbbi atık</span></td></tr>
+          <tr class="tik"><td>Noradrenalin 4 mg</td><td><code>NR5510</code><br>08.2027</td>
+            <td class="sag">2</td><td class="sag">380 ₺</td>
+            <td>Sulandırılmış, süresi doldu (servis iadesi)</td>
+            <td class="orta"><span class="rz">Tıbbi atık</span></td></tr>
+          <tr class="tik"><td>İnsülin glarjin 100 IU/mL</td><td><code>IG2280</code><br>03.2027</td>
+            <td class="sag">1</td><td class="sag">465 ₺</td>
+            <td>Soğuk zincir bozulmuş (servis buzdolabı)</td>
+            <td class="orta"><span class="rz">Tıbbi atık</span></td></tr>
+          <tr class="tik"><td>Epirubisin 175 mg / 100 mL</td><td><code>EP1180</code><br>03.2027</td>
+            <td class="sag">1</td><td class="sag">4.180 ₺</td>
+            <td>Hazırlanmış kemoterapi, hasta gelmedi</td>
+            <td class="orta"><span class="rz mor">Sitotoksik atık</span></td></tr>
+          <tr class="tik"><td>Sefazolin 1 g <span class="sonuk">(kırık flakon)</span></td>
+            <td><code>S7741</code><br>12.2026</td>
+            <td class="sag">2</td><td class="sag">80 ₺</td>
+            <td>Sayımda kırık bulundu — kayıt yapılmamıştı</td>
+            <td class="orta"><span class="rz">Tıbbi atık</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ul class="kontrol">
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Kalemler <b>imha bekleyen</b> rafına alındı, stok çıkışa kapatıldı</span>
+        <span class="imza">Ecz. T. Yalçın · 08:30</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span>İade/devir seçenekleri denendi — hiçbiri uygun değil</span>
+        <span class="imza">Ecz. N. Arslan · 09:15</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Komisyon üyeleri (eczacı, idari, kalite) hazır</span>
+        <span class="imza">10:00</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Sitotoksik kalem <b>ayrı kapta</b> toplandı</span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>İmha gerçekleştirildi, atık teslim tutanağı alındı</span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>İTS <b>imha bildirimi</b> gönderildi (karekodlu kalemler)</span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Tutanak üç üye tarafından imzalandı ve arşivlendi</span>
+        <span class="imza">—</span></li>
+    </ul>
+
+    <div class="statusbar">
+      <span><b>İmha stok düşümü değildir:</b> kalem stoktan önce çıkar, imha tutanakla ayrıca
+        kapanır — ikisi ayrı kayıt.</span>
+      <span class="sp">Karekodlu kalem için İTS imha bildirimi zorunlu; sitotoksik atık tıbbi atıktan ayrı toplanır.</span>
+    </div>
+  </div>
+
+  <!-- ====================================================== GERİ ÇAĞIRMA ===== -->
+  <div class="pnl" data-s="cagirma" hidden>
+    <div class="ozet">
+      <div class="kart kir"><div class="b">Geri çağırma</div><div class="d" style="font-size:12px">TİTCK 2026/41</div></div>
+      <div class="kart"><div class="b">İlaç</div><div class="d" style="font-size:12px">Seftriakson 1 g</div></div>
+      <div class="kart"><div class="b">Lot</div><div class="d" style="font-size:13px">C4482</div></div>
+      <div class="kart kir"><div class="b">Bulunan</div><div class="d">57 <small>kutu</small></div></div>
+      <div class="kart sari"><div class="b">Hastaya verilmiş</div><div class="d">23</div></div>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:170px">Nerede</th>
+          <th style="width:100px" class="sag">Miktar</th>
+          <th>Ayrıntı</th>
+          <th style="width:160px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Eczane ana depo</b></td><td class="sag">38</td>
+            <td>Raf A-09 · çıkışa kapatıldı</td>
+            <td class="orta"><span class="rz ok">Toplandı</span></td></tr>
+          <tr class="tik"><td><b>Cerrahi servis deposu</b></td><td class="sag">12</td>
+            <td>Transfer TR-2609-0398 ile gitmişti</td>
+            <td class="orta"><span class="rz ok">Toplandı</span></td></tr>
+          <tr class="tik"><td><b>Acil servis deposu</b></td><td class="sag">7</td>
+            <td>Transfer TR-2609-0402</td>
+            <td class="orta"><span class="rz sari">Toplanıyor</span></td></tr>
+          <tr class="tik"><td><b>Hastaya uygulanmış</b></td><td class="sag">23</td>
+            <td>11 hasta · uygulama kayıtlarından çıkarıldı (doz barkodu ile)</td>
+            <td class="orta"><span class="rz kir">Hekim bildirimi</span></td></tr>
+          <tr class="tik"><td><b>İmha bekleyen</b></td><td class="sag">0</td>
+            <td class="sonuk">—</td>
+            <td class="orta"><span class="rz">—</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ul class="kontrol">
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Lot <b>tek sorguyla</b> bulundu: depo + servis + hasta uygulamaları</span>
+        <span class="imza">Sistem · 10:02</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Tüm depolarda lot çıkışa kapatıldı</span>
+        <span class="imza">Ecz. N. Arslan · 10:05</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Servislere bildirim gönderildi, toplama başladı</span>
+        <span class="imza">10:08</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>İlacı almış 11 hastanın hekimine bildirim yapıldı</span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Toplanan miktar tedarikçiye iade edildi / imha tutanağına alındı</span>
+        <span class="imza">—</span></li>
+    </ul>
+
+    <div class="statusbar">
+      <span><b>Geri çağırmanın karşılığı lot kaydıdır:</b> her çıkışta lot/SKT yazıldığı için
+        "kime gitti" sorusu tek sorguyla yanıtlanır.</span>
+      <span class="sp">Lotsuz kaydedilmiş bir hareket bu listede görünmez — bu yüzden çıkışta karekod zorunlu.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Süreç:</b> Servis iadesi üç soruyla karara bağlanır (açıldı mı / sulandırıldı mı / saklama
+  koşulu korundu mu). Stoğa dönmeyen kalem için sırayla <b>tedarikçiye iade</b> → <b>kuruma devir</b>
+  → <b>imha</b> denenir; imha son çaredir ve komisyonla, tutanakla yapılır. Karekodlu kalemin
+  imhası İTS'ye bildirilir, sitotoksik atık ayrı toplanır. <b>Geri çağırma</b> ayrı bir akış
+  değil, lot kaydının karşılığıdır: her çıkışta lot yazıldığı için ilacın deposu, servisi ve
+  hangi hastaya uygulandığı tek sorguyla bulunur.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

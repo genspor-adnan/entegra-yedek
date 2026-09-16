@@ -28,11 +28,33 @@ export function useMenuTercihleri(kullaniciId: number | undefined, sube?: {
   const sonAnahtar = `sonMenuler.${kullaniciId ?? 0}`;
 
   const [favoriler, setFavoriler] = useState<string[]>([]);
+  // CALISMA ALANI (menu V2): undefined = sunucudan henuz okunmadi / hic secilmemis
+  //   (Kabuk rolden varsayilani kullanir). Favoriler gibi sunucuda, yerelde kopya.
+  const alanAnahtar = `calismaAlani.${kullaniciId ?? 0}`;
+  const [calismaAlani, setCalismaAlaniState] = useState<string | undefined>(() => {
+    try { return localStorage.getItem(alanAnahtar) ?? undefined } catch { return undefined }
+  });
   const [sonMenuler, setSonMenuler] = useState<string[]>([]);
 
   const yerelFavori = (anahtar: string): string[] => {
-    try { return JSON.parse(localStorage.getItem(anahtar) ?? '[]') as string[] }
-    catch { return [] }
+    try {
+      const liste = JSON.parse(localStorage.getItem(anahtar) ?? '[]') as string[];
+      if (Array.isArray(liste) && liste.length > 0) return liste;
+      // KAYIP FAVORI KURTARMA (kullanici: "menuye favoriler kaybolmus"): kullanici
+      //   kimligi degisince (yeniden kurulum / goc) eski `favoriler.<eskiId>`
+      //   anahtari yetim kalir ve menu bos gorunur. Sunucuda da kayit yoksa
+      //   tarayicidaki en dolu eski liste bu kullaniciya devredilir.
+      let enDolu: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k || !k.startsWith('favoriler.') || k === anahtar) continue;
+        try {
+          const eski = JSON.parse(localStorage.getItem(k) ?? '[]') as string[];
+          if (Array.isArray(eski) && eski.length > enDolu.length) enDolu = eski;
+        } catch { /* bozuk kayit */ }
+      }
+      return enDolu;
+    } catch { return [] }
   };
 
   useEffect(() => {
@@ -54,6 +76,11 @@ export function useMenuTercihleri(kullaniciId: number | undefined, sube?: {
           if (sube && acilisSubesiGerekliMi(c, sube.aktif, sube.liste))
             void sube.degistir(c.acilisSube).catch(() => {});
         });
+        const alan = tercihler.calismaAlani;
+        if (alan !== undefined && !iptal) {
+          setCalismaAlaniState(alan);
+          try { localStorage.setItem(alanAnahtar, alan) } catch { /* dolu/kapali depo */ }
+        }
         const ham = tercihler.favoriler;
         if (ham === undefined) {
           // Sunucuda HIC kayit yok: tarayicidaki eski liste bir kez tasinir.
@@ -82,6 +109,12 @@ export function useMenuTercihleri(kullaniciId: number | undefined, sube?: {
     return y;
   });
 
+  const calismaAlaniSec = (kod: string) => {
+    setCalismaAlaniState(kod);
+    try { localStorage.setItem(alanAnahtar, kod) } catch { /* dolu/kapali depo */ }
+    void api.tercihYaz('calismaAlani', kod).catch(() => {});
+  };
+
   useEffect(() => {
     try { setSonMenuler(JSON.parse(localStorage.getItem(sonAnahtar) ?? '[]') as string[]) }
     catch { setSonMenuler([]) }
@@ -94,7 +127,7 @@ export function useMenuTercihleri(kullaniciId: number | undefined, sube?: {
     return y;
   });
 
-  return { favoriler, favoriToggle, sonMenuler, sonKaydet };
+  return { favoriler, favoriToggle, sonMenuler, sonKaydet, calismaAlani, calismaAlaniSec };
 }
 
 /**

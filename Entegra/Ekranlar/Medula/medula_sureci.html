@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Medula (SGK) Entegrasyonu — Süreç, Web Servisler, Veri Modeli — Mockup (GenoTIP AI · Medula)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .btn.mini{padding:2px 7px;font-size:10.5px;display:inline-flex}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg td code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)} .hdr.k5{grid-template-columns:repeat(5,1fr)} .hdr.k6{grid-template-columns:repeat(6,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.err{border-color:#c0392b;background:#fff6f5}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .kart.kir .d{color:var(--kirmizi)} .kart.ok .d{color:var(--ok)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)} .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)} .bar.k i{background:linear-gradient(#e06a5e,#c0392b)}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:300px 1fr 320px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .sonuc{margin:10px 12px;border:1px solid #bfe3cb;background:#eef9f1;border-radius:4px;padding:8px 10px;font-size:11.5px}
+  .sonuc.kir{border-color:#f3c4bf;background:#fdf1ef}
+  .sonuc.sari{border-color:#f2ddbf;background:#fdf8ec}
+  .sonuc b{color:var(--navy)}
+  .xml{font-family:Consolas,monospace;font-size:10.5px;background:#1f2d3a;color:#d7e3f2;padding:8px 10px;border-radius:3px;white-space:pre;overflow:auto;margin:0 12px 10px;line-height:1.5}
+  .adim{display:flex;gap:0;padding:8px 12px;flex-wrap:wrap}
+  .adim span{padding:5px 12px;border:1px solid var(--line);background:#fff;font-size:11px;color:var(--muted);position:relative}
+  .adim span+span{border-left:none}
+  .adim span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .adim span.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .icerik{padding:12px 16px;line-height:1.6}
+  .icerik h2{font-size:14px;color:var(--navy);margin:16px 0 6px;border-bottom:1px solid var(--line2);padding-bottom:3px}
+  .icerik h3{font-size:12.5px;color:#2c4a6b;margin:12px 0 4px}
+  .icerik p{margin:4px 0}
+  .icerik table{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:11.5px}
+  .icerik th,.icerik td{border:1px solid var(--line2);padding:4px 7px;text-align:left;vertical-align:top}
+  .icerik th{background:#f4f7fb;color:#3a5573;white-space:nowrap}
+  .icerik code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .kutu{border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;padding:8px 10px;margin:8px 0}
+  .yatay{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:6px 12px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">🏛 Medula (SGK) Entegrasyonu — Süreç, Web Servisler, Veri Modeli <span class="sp">GenoTIP AI tasarım notu · 16.09.2026 · Kayıt Kabul + Muayene + Reçete + Fatura üzerine</span></div>
+  <div class="toolbar" style="background:#fff;border-bottom:1px solid var(--line2)">
+  <span class="sonuk">Medula ekranları:</span>
+  <span class="chip on" data-git="medula_sureci.html">📘 Süreç</span>
+  <span class="chip" data-git="medula_hasta_kabul.html">🪪 Hasta Kabul / Provizyon</span>
+  <span class="chip" data-git="medula_hizmet_kayit.html">🧾 Hizmet Kaydı</span>
+  <span class="chip" data-git="medula_recete_rapor.html">💊 e-Reçete / e-Rapor</span>
+  <span class="chip" data-git="medula_fatura_donem.html">🧮 Fatura & Dönem</span>
+  <span class="chip" data-git="medula_kuyruk.html">📡 Gönderim Kuyruğu & Ayarlar</span>
+</div>
+
+  <div class="icerik">
+    <div class="kutu"><b>Tek cümle:</b> Medula, SGK'lı hastanın <b>hak sahipliği</b>ni sorar, başvuruya <b>takip numarası</b> (provizyon) verir, yapılan <b>işlem/tanı/tetkik</b>i kaydeder, <b>e-reçete / e-rapor</b>u SGK'ya yazar ve dönem sonunda <b>fatura</b>yı kabul eder. Bizim tarafta her adım <b>yerelde önce yazılır, sonra gönderilir</b>: Medula kapalıyken hasta bekletilmez, gönderim kuyruğa düşer.</div>
+
+    <h2>1. Akış</h2>
+    <table>
+      <tr><th>#</th><th>Adım</th><th>Ne olur</th><th>Medula servisi</th><th>Kayıt</th></tr>
+      <tr><td>1</td><td>Hak sahipliği</td><td>Kayıt kabulde <b>TCKN girilir girilmez</b> (hasta kartı ve başvurudan ÖNCE) müstehaklık sorgusu; sonuç ödeyeni (SGK · ücretli · ÖSS) ve provizyon tipini belirler. Kart yoksa Medula kimlik bilgisiyle kart açılır</td><td><code>mustehaklikSorgu</code></td><td><code>belge_provizyon.sgk_mustehaklik</code></td></tr>
+      <tr><td>2</td><td>Hasta kabul (provizyon)</td><td>Başvuru (tür 19) açılırken <b>takip no</b> alınır; branş, hekim, takip tipi (ayaktan / yatan / günübirlik), tesis kodu</td><td><code>hastaKabul</code> · <code>hastaKabulOku</code> · <code>hastaKabulIptal</code></td><td><code>belge_provizyon.sgk_takip_no / sgk_provizyon_no</code></td></tr>
+      <tr><td>3</td><td>Hizmet kaydı</td><td>Muayene tamamlanınca tanı (ICD-10), işlemler (SUT), tetkik / radyoloji, ilaç / malzeme kayıtları takibe yazılır</td><td><code>hizmetKayit</code> · <code>tetkikVeRadyolojiKayit</code> · <code>ilacKayit</code> · <code>malzemeKayit</code></td><td><code>medula_islem</code> (belge_satir → Medula işlem kaydı)</td></tr>
+      <tr><td>4</td><td>e-Reçete / e-Rapor</td><td>Reçete imzalanınca Medula'ya; ilaç raporu (süreli kullanım) ve sevk / iş göremezlik raporu</td><td><code>eReceteKayit</code> · <code>eReceteSil</code> · <code>raporKayit</code></td><td><code>recete.medula_gonderim / medula_sonuc</code>, <code>medula_rapor</code></td></tr>
+      <tr><td>5</td><td>Hasta çıkışı</td><td>Takip kapatılır (yatan: taburcu; ayaktan: gün sonu); çıkış tarihi ve sonucu</td><td><code>hastaCikisKayit</code></td><td><code>belge_provizyon.sgk_cikis_zaman</code></td></tr>
+      <tr><td>6</td><td>Fatura kaydı</td><td>Takip başına fatura; SUT fiyatı, hasta katılım payı, ilaç / malzeme ayrımı; Medula tutarı hesaplar ve <b>fatura no</b> verir</td><td><code>faturaKayit</code> · <code>faturaTutarOku</code> · <code>faturaIptal</code></td><td><code>medula_fatura</code></td></tr>
+      <tr><td>7</td><td>Dönem sonlandırma</td><td>Ay sonu: dönemdeki faturalar toplanır, <b>dönem sonlandırılır</b>, icmal listesi; sonra <b>evrak / e-fatura</b> SGK'ya</td><td><code>donemSonlandir</code> · <code>donemListesi</code></td><td><code>medula_donem</code>, kurum icmali (<code>kurum_icmal</code>)</td></tr>
+      <tr><td>8</td><td>Kesinti / itiraz</td><td>SGK inceleme sonucu kesinti; itiraz dosyası; kabul edilen tutar tahakkuka</td><td>(Medula web ekranı / dosya)</td><td><code>medula_kesinti</code>, tahakkuk düzeltme belgesi</td></tr>
+    </table>
+
+    <h2>2. Durumlar</h2>
+    <p><b>Takip:</b> <span class="rz">Provizyon alınmadı</span> → <span class="rz ok">Onaylandı</span> · <span class="rz kir">Reddedildi</span> · <span class="rz sari">Kısmi</span> · <span class="rz pas">İptal</span> · <span class="rz mavi">Kapatıldı (çıkış)</span> — <code>belge_provizyon.sgk_durum</code> 0-5.</p>
+    <p><b>Gönderim (kuyruk satırı):</b> <span class="rz">Bekliyor</span> → <span class="rz mavi">Gönderildi</span> → <span class="rz ok">Kabul</span> · <span class="rz kir">Hata</span> (tekrar denenir, 3 denemeden sonra <span class="rz sari">Beklemede · elle</span>) · <span class="rz pas">İptal</span>.</p>
+    <p><b>Fatura:</b> Taslak → Kaydedildi (Medula fatura no) → Dönemde → Dönem kapandı → İncelendi (kesinti) → Ödendi.</p>
+    <p><b>Reçete:</b> 1 taslak · 2 imzalı · 3 Medula kabul · 4 iptal (<code>recete.durum</code>, db/413).</p>
+
+    <h2>3. Tablolar ve alanlar</h2>
+    <table>
+      <tr><th>Tablo</th><th>Durum</th><th>Kritik alanlar</th></tr>
+      <tr><td><code>belge_provizyon</code></td><td>var (299)</td><td>sgk_durum, sgk_provizyon_no, sgk_takip_no, sgk_takip_turu, sgk_provizyon_tipi, sgk_sigorta_turu, sgk_mustehaklik(+zaman), sgk_sevkli / sgk_sevk_kurum, sgk_tesis_kodu, sgk_karsilama, sgk_tutar, sgk_red_nedeni; oss_* (tamamlayıcı sigorta). <b>Ek:</b> sgk_cikis_zaman, sgk_cikis_sekli, sgk_brans_kodu, sgk_hekim_tescil</td></tr>
+      <tr><td><code>entegrasyon_hesap</code></td><td>var (336)</td><td>kod=MEDULA, sube_id, test_mi, kullanici_adi, sifre, kurum_kodu (tesis), url / test_url, ayarlar (jsonb: sertifika, zaman aşımı), son_kullanim, son_sonuc</td></tr>
+      <tr><td><code>medula_islem</code></td><td>yeni</td><td>belge_satir_id, takip_no, islem_kodu (SUT), adet, tarih, hekim_tescil, brans, sonuc_kod, sonuc_mesaj, medula_islem_sira, durum (bekliyor/kabul/hata/iptal), gonderim_zaman</td></tr>
+      <tr><td><code>medula_tani</code></td><td>yeni</td><td>takip_no, icd_kod, ana_tani, tarih, durum — muayene.tani'den türetilir</td></tr>
+      <tr><td><code>medula_rapor</code></td><td>yeni</td><td>hasta_id, muayene_id, rapor_turu (ilaç / sevk / iş göremezlik / malzeme), rapor_no, baslangic / bitis, tani_kodlari, etken_madde satırları (<code>medula_rapor_satir</code>), durum, medula_sonuc</td></tr>
+      <tr><td><code>medula_fatura</code></td><td>yeni</td><td>belge_id (başvuru), takip_no, fatura_turu (ayaktan / yatan / günübirlik / acil), donem_id, medula_fatura_no, toplam, hasta_katilim, sgk_tutar, ilac_tutar, malzeme_tutar, durum, kayit_zaman, iptal_zaman</td></tr>
+      <tr><td><code>medula_donem</code></td><td>yeni</td><td>yil, ay, sube_id, fatura_turu, fatura_sayisi, toplam, sonlandirma_zaman, icmal_no, evrak_gonderim_zaman, durum (açık / sonlandırıldı / incelemede / kapandı)</td></tr>
+      <tr><td><code>medula_kesinti</code></td><td>yeni</td><td>medula_fatura_id, satir_ref, kesinti_kodu, aciklama, tutar, itiraz_durum, itiraz_zaman, sonuc</td></tr>
+      <tr><td><code>medula_kuyruk</code></td><td>yeni</td><td>servis, islem (kayit/iptal/oku), kaynak_tablo, kaynak_id, istek_xml, yanit_xml, deneme, sonraki_deneme, durum, hata_kodu, hata_mesaj, kullanici_id — <b>her çağrı bir satır</b>, yeniden gönderim buradan</td></tr>
+      <tr><td><code>recete</code></td><td>var (413) + kolon</td><td>medula_recete_no, medula_gonderim, medula_sonuc; <b>ek:</b> medula_kuyruk_id</td></tr>
+      <tr><td><code>hizmet</code></td><td>var + kolon</td><td>sut_kodu (484'te huv/sut), medula_islem_grubu, medula_puan, paket_islem_mi</td></tr>
+      <tr><td><code>taraf_personel</code></td><td>var + kolon</td><td>tescil_no (577), medula_brans_kodu, medula_doktor_tipi</td></tr>
+    </table>
+
+    <h2>4. Ekranlar</h2>
+    <table>
+      <tr><th>Ekran</th><th>Mockup</th><th>Nerede açılır</th></tr>
+      <tr><td>Hasta Kabul / Provizyon (müstehaklık, takip al, takip ara, sevk) — <b>istisna ekranı</b>; günlük akış Kayıt Kabul'de gömülü</td><td><code>medula_hasta_kabul.html</code></td><td>Kayıt Kabul'de TCKN → otomatik; hata/sevk/iptal için Başvuru kartı › "Medula" düğmesi; Kayıt Kabul › Medula Takipleri listesi</td></tr>
+      <tr><td>Hizmet Kaydı (tanı · işlem · tetkik · ilaç/malzeme · günlük)</td><td><code>medula_hizmet_kayit.html</code></td><td>Muayene "Tamamla" sonrası otomatik; Muayene › Medula Hizmet Kayıtları</td></tr>
+      <tr><td>e-Reçete / e-Rapor</td><td><code>medula_recete_rapor.html</code></td><td>Reçete kartı "İmzala & Gönder"; Muayene › Raporlar</td></tr>
+      <tr><td>Fatura & Dönem (fatura kayıt, liste, dönem sonlandırma, kesinti/itiraz)</td><td><code>medula_fatura_donem.html</code></td><td>Kurumlar & Sigorta › Medula Faturaları / Dönemler</td></tr>
+      <tr><td>Gönderim Kuyruğu & Ayarlar (bekleyen / hatalı / tamamlanan, hesap, tesis)</td><td><code>medula_kuyruk.html</code></td><td>Yönetim › Entegrasyonlar › Medula; üst çubukta hata sayacı</td></tr>
+    </table>
+
+    <h2>5. Web servisleri (SGK Medula v3 / HTTPS SOAP)</h2>
+    <table>
+      <tr><th>Grup</th><th>Metotlar</th><th>Not</th></tr>
+      <tr><td>HastaKabulIslemleri</td><td>hastaKabul, hastaKabulOku, hastaKabulIptal, hastaCikisKayit, hastaYatisBilgisiKayit</td><td>Takip no üretir; iptal yalnız hizmet kaydı yoksa</td></tr>
+      <tr><td>HizmetKayitIslemleri</td><td>hizmetKayit, hizmetKayitOku, hizmetKayitIptal, tetkikVeRadyolojiKayit, ilacKayit, malzemeKayit</td><td>SUT kodu + adet + tarih + hekim; paket işlemler tek satır</td></tr>
+      <tr><td>FaturaBilgisiKayit</td><td>faturaKayit, faturaOku, faturaIptal, faturaTutarOku, faturaListesi</td><td>Tutarı Medula hesaplar, biz karşılaştırırız (fark uyarısı)</td></tr>
+      <tr><td>ReceteIslemleri / RaporIslemleri</td><td>eReceteKayit, eReceteSil, eReceteOku, raporKayit, raporSil, raporOku</td><td>e-İmza zorunlu; ilaç raporu etken madde bazlı</td></tr>
+      <tr><td>YardimciIslemler</td><td>mustehaklikSorgu, takipAra, takipOku, doktorBilgisi, hastaMedulaBilgileri, sevkOku</td><td>Kayıt kabul ekranının kalbi</td></tr>
+      <tr><td>DonemIslemleri</td><td>donemSonlandir, donemListesi, icmalOku</td><td>Ay sonu vezne / faturalama</td></tr>
+    </table>
+    <div class="kutu">Kimlik: <code>entegrasyon_hesap</code> (kod MEDULA) — kullanıcı adı / şifre / tesis kodu, <b>test ve canlı URL ayrı</b>. Her çağrı <code>medula_kuyruk</code>'a istek + yanıt XML'iyle yazılır; hata kodu ve mesajı satırda durur, "yeniden gönder" aynı satırı tekrar dener. <b>Hasta beklemez:</b> Medula yanıt vermezse başvuru "provizyon bekliyor" ile açılır, takip no gelince başvuruya işlenir.</div>
+
+    <h2>6. Yetkiler &amp; ayarlar</h2>
+    <p><b>Yetkiler:</b> <code>medula</code> (ekran) · <code>medula.provizyon</code> (takip al/iptal) · <code>medula.hizmet</code> (hizmet kaydı gönder/iptal) · <code>medula.recete</code> · <code>medula.fatura</code> · <code>medula.donem</code> (dönem sonlandır — geri alınamaz, ayrı aksiyon) · <code>medula.ayar</code>.</p>
+    <p><b>Ayarlar:</b> otomatik provizyon (kayıt kabulde), muayene tamamlanınca otomatik hizmet kaydı, yeniden deneme aralığı / sayısı, dönem uyarı günü (ayın 5'i), fark eşiği (Medula tutarı ≠ yerel tutar), test modu.</p>
+    <div class="kutu"><b>İlk sürüm:</b> müstehaklık + hasta kabul/iptal + hizmet kaydı + e-reçete + fatura kayıt + dönem sonlandırma + kuyruk/hata ekranı. <b>Sonraya:</b> yatan hasta yatış bilgisi / günlük yatak kaydı, iş göremezlik raporu, kesinti dosyası içe aktarımı, sevk zinciri.</div>
+  </div>
+  <div class="statusbar"><span>Medula v3 · SOAP/HTTPS · e-İmza (reçete/rapor)</span><span class="sp">Yerelde önce yaz, sonra gönder · her çağrı <code>medula_kuyruk</code> satırı</span></div>
+</div>
+<div class="not"><b>Not.</b> Bu doküman süreç ve veri modelini anlatır; ekranlar yanındaki beş mockup'ta. Medula kapısı açılana kadar provizyon alanları elle girilir (db/298 notu); kapı açılınca aynı alanlar otomatik dolar - ekran değişmez.</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi. Ic ice sekmeler desteklenir.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===scope.closest('.pnl');});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+// Ic toolbar dugmeleri: data-git="dosya.html" olanlar diger mockup'a gecer.
+document.querySelectorAll('[data-git]').forEach(function(b){ b.style.cursor='pointer'; b.addEventListener('click',function(){ location.href=b.dataset.git; }); });
+</script>
+</body>
+</html>

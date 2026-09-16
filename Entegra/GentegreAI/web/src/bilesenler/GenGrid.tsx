@@ -28,6 +28,10 @@ interface Props {
   baslik?: string;
   /** Ust satirdaki kirilma yolu: "Cari › Musteriler" */
   yol?: string;
+  /** Liste baska bir ekrandan (dis hasta karti > Lab Isleri) acildiysa
+      basligin solunda "← Geri" - prensip: ekran nereden acildiysa oraya doner. */
+  geriYolu?: string;
+  onGeri?: () => void;
   sabitFiltre?: Kosul;
   /** Toplami istenen kolon adlari (sunucu hesaplar). */
   toplam?: string[];
@@ -207,7 +211,7 @@ interface Props {
  * Kolonlar SUNUCUDAN gelir (/kolonlar): yetkisiz kolon listede hic donmedigi icin
  * arayuzde gizleme mantigi YOKTUR. Filtre, siralama ve sayfalama da sunucuda calisir.
  */
-export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSatirAc,
+export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, toplam, boyut, onSatirAc,
                           aksiyonEkrani, ebelgeMenusu, onAksiyon, cipler, gomulu, seritGizli, aracCubuguSol,
                           dovizsizGizle,
                           gizliKolonlar, kolonBasliklari, kolonSirasi, altSecenekler,
@@ -491,6 +495,7 @@ export function GenGrid({ kaynak, baslik, yol, sabitFiltre, toplam, boyut, onSat
       {!gomulu && (
         <div className="sayfabas">
           <div className="basrow">
+            {geriYolu && <button type="button" className="d geri-dugme" title={`Geri: ${geriYolu}`} onClick={onGeri}>← Geri</button>}
             <h1>{baslik ?? kaynak}</h1>
             {yol && <span className="yol">{yol}</span>}
             <div className="sag">

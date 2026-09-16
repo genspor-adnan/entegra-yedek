@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eczane — Servis Talebi Karşılama — Mockup (GenoTIP AI · Eczane)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>📦 Servis Talebi — ET-2609-118 · Ameliyathane</span>
+    <span class="sp">İsteyen: Ameliyathane Sorumlu Hemş. B. Tunç · 16.09.2026 09:05 · ACİL</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="eczane_panosu.html">◀ Pano</div>
+    <div class="btn primary">✓ Karşıla ve Çıkış Yap</div>
+    <div class="btn">📤 Kısmi Karşıla</div>
+    <div class="btn">✖ Talebi Reddet</div>
+    <div class="sepv"></div>
+    <div class="btn">🔦 Karekod Oku</div>
+    <div class="btn">🏷️ Transfer İrsaliyesi</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ Yazdır</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">İstenen kalem</div><div class="d">12</div></div>
+    <div class="kart ok"><div class="b">Tam karşılanan</div><div class="d">9</div></div>
+    <div class="kart sari"><div class="b">Kısmi</div><div class="d">2</div></div>
+    <div class="kart kir"><div class="b">Karşılanamayan</div><div class="d">1</div></div>
+    <div class="kart"><div class="b">Çıkış deposu</div><div class="d" style="font-size:12px">Eczane Ana Depo</div></div>
+    <div class="kart"><div class="b">Hedef depo</div><div class="d" style="font-size:12px">Ameliyathane</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="kalem">Talep Kalemleri<span class="sy">12</span></div>
+    <div class="sekme" data-s="lot">Lot / Miad Seçimi<span class="sy">11</span></div>
+    <div class="sekme" data-s="cikis">Çıkış Belgesi</div>
+    <div class="sekme" data-s="gecmis">Talep Geçmişi<span class="sy">5</span></div>
+  </div>
+
+  <!-- ==================================================== TALEP KALEMLERİ ===== -->
+  <div class="pnl" data-s="kalem">
+    <div class="arama">
+      <div class="kutu">🔍 İlaç / malzeme…</div>
+      <span class="chip on">Tümü <b>12</b></span>
+      <span class="chip">Karşılanamayan <b>1</b></span>
+      <span class="chip">Kontrollü <b>1</b></span>
+      <span class="chip">Soğuk zincir <b>1</b></span>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:250px">İlaç / Malzeme</th>
+          <th style="width:90px" class="sag">İstenen</th>
+          <th style="width:90px" class="sag">Stok</th>
+          <th style="width:90px" class="sag">Verilen</th>
+          <th style="width:80px" class="orta">Birim</th>
+          <th>Not</th>
+          <th style="width:120px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Sefazolin 1 g flakon</b> <code class="k">J01DB04</code></td>
+            <td class="sag">20</td><td class="sag">148</td><td class="sag">20</td><td class="orta">flakon</td>
+            <td class="sonuk">—</td><td class="orta"><span class="rz ok">Tam</span></td></tr>
+          <tr class="tik"><td><b>Propofol %1 20 mL</b> <code class="k">N01AX10</code></td>
+            <td class="sag">10</td><td class="sag">36</td><td class="sag">10</td><td class="orta">ampul</td>
+            <td class="sonuk">—</td><td class="orta"><span class="rz ok">Tam</span></td></tr>
+          <tr class="tik"><td><b>Fentanil 0,5 mg/10 mL</b> <code class="k">N01AH01</code>
+              <span class="rz kir">Kırmızı reçete</span></td>
+            <td class="sag">6</td><td class="sag">24</td><td class="sag">6</td><td class="orta">ampul</td>
+            <td>Kasadan çift imzayla teslim — <span class="rz mavi">defter no 2026/418</span></td>
+            <td class="orta"><span class="rz ok">Tam</span></td></tr>
+          <tr class="tik"><td><b>Heparin 5.000 IU flakon</b> <code class="k">B01AB01</code>
+              <span class="rz mor">Yüksek riskli</span></td>
+            <td class="sag">5</td><td class="sag">42</td><td class="sag">5</td><td class="orta">flakon</td>
+            <td class="sonuk">—</td><td class="orta"><span class="rz ok">Tam</span></td></tr>
+          <tr class="tik"><td><b>Roküronyum 50 mg/5 mL</b> <code class="k">M03AC09</code>
+              <span class="rz mavi">2-8 °C</span></td>
+            <td class="sag">8</td><td class="sag">15</td><td class="sag">8</td><td class="orta">flakon</td>
+            <td>Soğuk zincir kutusuyla taşınır · ısı kaydı eklenir</td>
+            <td class="orta"><span class="rz ok">Tam</span></td></tr>
+          <tr class="tik"><td><b>İzotonik NaCl %0,9 500 mL</b></td>
+            <td class="sag">40</td><td class="sag">312</td><td class="sag">40</td><td class="orta">şişe</td>
+            <td class="sonuk">—</td><td class="orta"><span class="rz ok">Tam</span></td></tr>
+          <tr class="tik"><td><b>Traneksamik asit 500 mg</b> <code class="k">B02AA02</code></td>
+            <td class="sag">12</td><td class="sag">7</td><td class="sag">7</td><td class="orta">ampul</td>
+            <td><span class="rz sari">Kısmi</span> 5 adet eksik — satın alma talebi açıldı</td>
+            <td class="orta"><span class="rz sari">Kısmi</span></td></tr>
+          <tr class="tik"><td><b>İnsan albümini %20 100 mL</b></td>
+            <td class="sag">4</td><td class="sag">4</td><td class="sag">2</td><td class="orta">şişe</td>
+            <td><span class="rz sari">Kısmi</span> Kritik stok — 2 adet YBÜ için ayrıldı</td>
+            <td class="orta"><span class="rz sari">Kısmi</span></td></tr>
+          <tr class="tik"><td><b>Deksmedetomidin 200 µg</b> <code class="k">N05CM18</code></td>
+            <td class="sag">4</td><td class="sag">0</td><td class="sag">0</td><td class="orta">flakon</td>
+            <td><span class="rz kir">Stok yok</span> Alternatif önerildi: Midazolam</td>
+            <td class="orta"><span class="rz kir">Yok</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Kısmi karşılama talebi kapatmaz:</b> eksik kalem talepte yaşamaya devam eder,
+        gelince ikinci çıkışla verilir.</span>
+      <span class="sp">Kontrollü ilaç bu listeden değil, kasadan teslim edilir — satır yalnız işaret eder.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================= LOT / MİAD ===== -->
+  <div class="pnl" data-s="lot" hidden>
+    <div class="arama">
+      <div class="kutu">🔦 Karekod okut (GTIN + lot + SKT + seri)…</div>
+      <span class="chip on">FEFO sırası</span>
+      <span class="chip">Elle seçim</span>
+      <span class="chip">Okutulan <b>9</b></span>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:230px">İlaç</th>
+          <th style="width:110px">Lot</th>
+          <th style="width:110px" class="orta">SKT</th>
+          <th style="width:100px" class="orta">Kalan gün</th>
+          <th style="width:90px" class="sag">Raf stok</th>
+          <th style="width:90px" class="sag">Verilen</th>
+          <th style="width:130px" class="orta">Karekod</th>
+          <th style="width:110px" class="orta">Raf</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>Sefazolin 1 g</td><td><code>S7741</code></td>
+            <td class="orta">31.12.2026</td><td class="orta"><span class="rz">106</span></td>
+            <td class="sag">148</td><td class="sag">20</td>
+            <td class="orta"><span class="rz ok">Okutuldu</span></td><td class="orta">A-12</td></tr>
+          <tr class="tik"><td>Propofol %1</td><td><code>PR2204</code></td>
+            <td class="orta">28.02.2027</td><td class="orta"><span class="rz">165</span></td>
+            <td class="sag">36</td><td class="sag">10</td>
+            <td class="orta"><span class="rz ok">Okutuldu</span></td><td class="orta">B-03</td></tr>
+          <tr class="tik"><td>Fentanil 0,5 mg</td><td><code>FN1190</code></td>
+            <td class="orta">30.06.2027</td><td class="orta"><span class="rz">287</span></td>
+            <td class="sag">24</td><td class="sag">6</td>
+            <td class="orta"><span class="rz ok">Okutuldu</span></td><td class="orta">KASA</td></tr>
+          <tr class="tik"><td>Roküronyum 50 mg</td><td><code>RK0455</code></td>
+            <td class="orta">31.03.2027</td><td class="orta"><span class="rz">196</span></td>
+            <td class="sag">15</td><td class="sag">8</td>
+            <td class="orta"><span class="rz ok">Okutuldu</span></td><td class="orta">BUZDOLABI-1</td></tr>
+          <tr class="tik"><td>Traneksamik asit</td><td><code>TX8812</code></td>
+            <td class="orta">31.10.2026</td><td class="orta"><span class="rz sari">45</span></td>
+            <td class="sag">7</td><td class="sag">7</td>
+            <td class="orta"><span class="rz ok">Okutuldu</span></td><td class="orta">A-21</td></tr>
+          <tr class="tik"><td>İnsan albümini %20</td><td><code>AL3390</code></td>
+            <td class="orta">30.11.2026</td><td class="orta"><span class="rz sari">75</span></td>
+            <td class="sag">4</td><td class="sag">2</td>
+            <td class="orta"><span class="rz ok">Okutuldu</span></td><td class="orta">BUZDOLABI-2</td></tr>
+          <tr class="tik"><td>Seftriakson 1 g <span class="sonuk">(talepte yok)</span></td>
+            <td><code>C4482</code></td>
+            <td class="orta">30.09.2026</td><td class="orta"><span class="rz kir">14</span></td>
+            <td class="sag">38</td><td class="sag">0</td>
+            <td class="orta"><span class="rz">—</span></td><td class="orta">A-09</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>FEFO</b> (first expired, first out): en yakın miadlı lot önce çıkar — son giren
+        değil, en erken bozulacak olan.</span>
+      <span class="sp">Karekod okutulmadan çıkış kapanmaz: lot/SKT olmayan hareket geri çağırmada işe yaramaz.</span>
+    </div>
+  </div>
+
+  <!-- ===================================================== ÇIKIŞ BELGESİ ===== -->
+  <div class="pnl" data-s="cikis" hidden>
+    <div class="ozet">
+      <div class="kart"><div class="b">Belge türü</div><div class="d" style="font-size:12px">Depo Transferi</div></div>
+      <div class="kart"><div class="b">Belge no</div><div class="d" style="font-size:12px">TR-2609-0441</div></div>
+      <div class="kart"><div class="b">Satır</div><div class="d">11</div></div>
+      <div class="kart"><div class="b">Maliyet</div><div class="d" style="font-size:13px">8.412,60 ₺</div></div>
+      <div class="kart"><div class="b">İTS bildirimi</div><div class="d" style="font-size:12px">9 karekod</div></div>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr><th style="width:170px">Alan</th><th>Değer</th></tr></thead>
+        <tbody>
+          <tr><td class="sonuk">Çıkış deposu</td><td><b>Eczane Ana Depo</b></td></tr>
+          <tr><td class="sonuk">Giriş deposu</td><td><b>Ameliyathane Deposu</b></td></tr>
+          <tr><td class="sonuk">Teslim eden</td><td>Ecz. N. Arslan · 16.09.2026 09:32</td></tr>
+          <tr><td class="sonuk">Teslim alan</td>
+            <td><span class="rz sari">Bekleniyor</span> — servis barkodu okutulunca kapanır</td></tr>
+          <tr><td class="sonuk">Soğuk zincir</td>
+            <td><span class="rz mavi">1 kalem</span> Roküronyum · taşıma kutusu <code>SZ-07</code> ·
+              çıkış ısısı 5,2 °C</td></tr>
+          <tr><td class="sonuk">Kontrollü ilaç</td>
+            <td><span class="rz kir">1 kalem</span> Fentanil ×6 · kasa defteri <code>2026/418</code> ·
+              çift imza alındı</td></tr>
+          <tr><td class="sonuk">İTS</td>
+            <td>Kurum içi transfer — <span class="rz">bildirim gerekmez</span>;
+              tüketim bildirimi uygulamada yapılır</td></tr>
+          <tr><td class="sonuk">Kalan talep</td>
+            <td><span class="rz sari">2 kalem kısmi</span> · <span class="rz kir">1 kalem yok</span> —
+              talep <b>açık</b> kalır</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span>Transfer <b>iki depoyu birden</b> hareket ettirir: eczaneden düşer, ameliyathaneye girer.</span>
+      <span class="sp">Teslim alan okutmadan belge kapanmaz — "verdim ama almadılar" boşluğu kalmasın.</span>
+    </div>
+  </div>
+
+  <!-- ===================================================== TALEP GEÇMİŞİ ===== -->
+  <div class="pnl" data-s="gecmis" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:140px" class="orta">Zaman</th>
+          <th style="width:170px">Kim</th>
+          <th>Olay</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="orta">09:05</td><td>Hemş. B. Tunç</td><td>Talep açıldı — 12 kalem, öncelik <b>acil</b></td></tr>
+          <tr><td class="orta">09:07</td><td>Sistem</td><td>Eczane panosuna düştü · acil talepler listenin başına alınır</td></tr>
+          <tr><td class="orta">09:14</td><td>Ecz. N. Arslan</td><td>Karşılama başlatıldı, FEFO lot önerisi alındı</td></tr>
+          <tr><td class="orta">09:21</td><td>Ecz. N. Arslan</td>
+            <td>Deksmedetomidin <b>stokta yok</b> — alternatif önerisi ameliyathaneye iletildi</td></tr>
+          <tr><td class="orta">09:24</td><td>Ecz. N. Arslan + Tekniker S. Bal</td>
+            <td>Fentanil ×6 kasadan <b>çift imzayla</b> alındı · defter 2026/418</td></tr>
+          <tr><td class="orta">09:28</td><td>Sistem</td>
+            <td>Traneksamik asit kısmi — <b>satın alma talebi</b> otomatik açıldı (SA-2609-077)</td></tr>
+          <tr><td class="orta">09:32</td><td>Ecz. N. Arslan</td><td>Transfer belgesi üretildi: TR-2609-0441</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Geçmiş <b>silinmez</b>: "bu ilaç neden verilmedi" sorusunun yanıtı burada durur.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Süreç:</b> Servis talebi açar → eczane <b>FEFO</b> ile lot önerir → karekod okutularak kalem
+  ayrılır → <b>depo transfer belgesi</b> üretilir (eczaneden düşer, servis deposuna girer) →
+  teslim alan okutur ve belge kapanır. Karşılanamayan kalem talebi kapatmaz; kritik stoğa düşen
+  kalem için satın alma talebi kendiliğinden açılır. Kontrollü ilaç ve soğuk zincir kalemleri
+  ayrı kural taşır.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

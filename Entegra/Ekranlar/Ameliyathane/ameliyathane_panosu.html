@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ameliyathane — Canlı Pano — Mockup (GenoTIP AI · Ameliyathane)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>📺 Ameliyathane — Canlı Pano</span>
+    <span class="sp">16.09.2026 · 16:45 · Merkez · 30 sn'de bir tazelenir</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="ameliyat_plani.html">◀ Plan</div>
+    <div class="btn" data-git="ameliyat_karti.html">🗂️ Ameliyat Kartı</div>
+    <div class="sepv"></div>
+    <div class="btn">🔊 Ses Uyarısı: Açık</div>
+    <div class="btn">🖥️ Tam Ekran</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ Yazdır</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart ok"><div class="b">Salonda</div><div class="d">3 <small>/ 6 masa</small></div></div>
+    <div class="kart sari"><div class="b">Hazırlıkta</div><div class="d">1</div></div>
+    <div class="kart"><div class="b">Derlenme</div><div class="d">2 <small>hasta</small></div></div>
+    <div class="kart kir"><div class="b">Gecikme</div><div class="d">2 <small>ort. 38 dk</small></div></div>
+    <div class="kart"><div class="b">Bugün biten</div><div class="d">7</div></div>
+    <div class="kart"><div class="b">Ort. devir süresi</div><div class="d">27 <small>dk</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="pano">Salon Durumu<span class="sy">6</span></div>
+    <div class="sekme" data-s="akis">Bugünün Akışı<span class="sy">19</span></div>
+    <div class="sekme" data-s="gecikme">Gecikmeler<span class="sy">2</span></div>
+    <div class="sekme" data-s="derlenme">Derlenme<span class="sy">2</span></div>
+  </div>
+
+  <!-- ======================================================== PANO ===== -->
+  <div class="pnl" data-s="pano">
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:150px">Salon</th>
+          <th style="width:190px">Hasta</th>
+          <th>İşlem</th>
+          <th style="width:140px">Cerrah</th>
+          <th style="width:120px" class="orta">Aşama</th>
+          <th style="width:110px" class="orta">Kesi</th>
+          <th style="width:130px" class="sag">Geçen / Plan</th>
+          <th style="width:140px">Sonraki</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Salon 1</b></td><td>Mehmet Demir · 68 y</td>
+            <td>Kalça artroplastisi, total <span class="rz mavi">Sağ</span></td><td>Dr. Kaya</td>
+            <td class="orta"><span class="rz ok">Cerrahi</span></td><td class="orta">10:38</td>
+            <td class="sag"><b>162</b> / 150 dk</td><td class="sonuk">13:30 Artroskopi</td></tr>
+          <tr class="tik"><td><b>Salon 2</b></td><td>Fatma Öz · 61 y</td>
+            <td>Kolorektal rezeksiyon</td><td>Dr. Şen</td>
+            <td class="orta"><span class="rz ok">Cerrahi</span></td><td class="orta">11:22</td>
+            <td class="sag"><b>203</b> / 180 dk</td><td class="sonuk">15:00 Herni</td></tr>
+          <tr class="tik"><td><b>Salon 3</b></td><td>Gül Yurt · 47 y</td>
+            <td>Histerektomi</td><td>Dr. Aydın</td>
+            <td class="orta"><span class="rz sari">Hazırlık</span></td><td class="orta sonuk">—</td>
+            <td class="sag sonuk">— / 90 dk</td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><b>Salon 4</b></td><td class="sonuk">—</td>
+            <td class="sonuk">Temizlik / kurulum</td><td class="sonuk">—</td>
+            <td class="orta"><span class="rz pas">Devir</span></td><td class="orta sonuk">—</td>
+            <td class="sag sonuk">14 dk</td><td class="sonuk">Vitrektomi</td></tr>
+          <tr class="tik"><td><b>Salon 5</b></td><td>Kerem Deniz · 34 y</td>
+            <td>Sleeve gastrektomi</td><td>Dr. Uçar</td>
+            <td class="orta"><span class="rz ok">Cerrahi</span></td><td class="orta">08:58</td>
+            <td class="sag"><b>128</b> / 150 dk</td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td><b>Salon 6</b> <span class="rz kir">Acil</span></td><td class="sonuk">—</td>
+            <td class="sonuk">Boş — acile ayrılmış</td><td class="sonuk">—</td>
+            <td class="orta"><span class="rz">Hazır</span></td><td class="orta sonuk">—</td>
+            <td class="sag sonuk">—</td><td class="sonuk">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Pano <b>hasta adı gösterir</b> — salon içi ekran, koridorda değil.</span>
+      <span class="sp">Koridor ekranı aynı panoyu protokol numarasıyla çizer.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================== AKIŞ ===== -->
+  <div class="pnl" data-s="akis" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Hasta, salon ya da hekim…</div>
+      <span class="chip on">Tümü <b>19</b></span>
+      <span class="chip">Biten <b>7</b></span>
+      <span class="chip">Süren <b>3</b></span>
+      <span class="chip">Bekleyen <b>8</b></span>
+      <span class="chip">İptal <b>1</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:90px">Salon</th>
+          <th style="width:175px">Hasta</th>
+          <th>İşlem</th>
+          <th style="width:95px" class="orta">Plan</th>
+          <th style="width:95px" class="orta">Gerçek</th>
+          <th style="width:90px" class="sag">Sapma</th>
+          <th style="width:110px" class="orta">Durum</th>
+          <th style="width:120px">Anestezi</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik"><td>Salon 1</td><td>Ali Yılmaz</td><td>Diz artroplastisi, total</td>
+            <td class="orta">08:00</td><td class="orta">08:10</td><td class="sag">+10 dk</td>
+            <td class="orta"><span class="rz pas">Bitti</span></td><td>Spinal</td></tr>
+          <tr class="tik sel"><td>Salon 1</td><td>Mehmet Demir</td><td>Kalça artroplastisi, total</td>
+            <td class="orta">10:00</td><td class="orta">10:05</td><td class="sag">+5 dk</td>
+            <td class="orta"><span class="rz ok">Sürüyor</span></td><td>Spinal</td></tr>
+          <tr class="tik"><td>Salon 2</td><td>Hakan Ak</td><td>Kolesistektomi, laparoskopik</td>
+            <td class="orta">08:00</td><td class="orta">08:05</td><td class="sag">+5 dk</td>
+            <td class="orta"><span class="rz pas">Bitti</span></td><td>Genel</td></tr>
+          <tr class="tik"><td>Salon 2</td><td>Fatma Öz</td><td>Kolorektal rezeksiyon</td>
+            <td class="orta">09:30</td><td class="orta">10:08</td><td class="sag"><b>+38 dk</b></td>
+            <td class="orta"><span class="rz kir">Gecikmeli</span></td><td>Genel</td></tr>
+          <tr class="tik"><td>Salon 3</td><td>Esra Kurt</td><td>Sezaryen (primer)</td>
+            <td class="orta">08:00</td><td class="orta">08:00</td><td class="sag">0</td>
+            <td class="orta"><span class="rz pas">Bitti</span></td><td>Spinal</td></tr>
+          <tr class="tik"><td>Salon 5</td><td>Kerem Deniz</td><td>Sleeve gastrektomi</td>
+            <td class="orta">08:30</td><td class="orta">08:30</td><td class="sag">0</td>
+            <td class="orta"><span class="rz ok">Sürüyor</span></td><td>Genel</td></tr>
+          <tr class="tik"><td>Salon 6</td><td>Yusuf Bal</td><td>Apendektomi <span class="rz kir">ACİL</span></td>
+            <td class="orta sonuk">—</td><td class="orta">09:12</td><td class="sag sonuk">plan dışı</td>
+            <td class="orta"><span class="rz ok">Sürüyor</span></td><td>Genel</td></tr>
+          <tr class="tik"><td>Salon 6</td><td>Deniz Kaya</td><td>Tonsillektomi</td>
+            <td class="orta">11:00</td><td class="orta sonuk">—</td><td class="sag sonuk">—</td>
+            <td class="orta"><span class="rz">İptal</span></td><td class="sonuk">— ateş</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Sapma <b>plan saatine göre</b>, süreye göre değil: günü kaydıran şey geç başlamaktır.</span>
+      <span class="sp">İptal satırı listede kalır — sebebi ile birlikte.</span>
+    </div>
+  </div>
+
+  <!-- ==================================================== GECİKME ===== -->
+  <div class="pnl" data-s="gecikme" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:90px">Salon</th><th style="width:175px">Hasta</th>
+          <th style="width:90px" class="sag">Gecikme</th>
+          <th style="width:190px">Sebep</th>
+          <th>Etkisi</th>
+          <th style="width:130px" class="orta">Eylem</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>Salon 2</td><td>Fatma Öz</td><td class="sag"><b>38 dk</b></td>
+            <td>Kan hazırlığı gecikti</td>
+            <td>Aynı salondaki 15:00 herni vakası 15:40'a kayar</td>
+            <td class="orta"><span class="btn mini">🔁 Salon 4'e al</span></td></tr>
+          <tr class="tik"><td>Salon 1</td><td>Mehmet Demir</td><td class="sag"><b>12 dk</b></td>
+            <td>Cerrahi süre aşımı</td>
+            <td>13:30 artroskopi riskli — Dr. Kaya tek cerrah</td>
+            <td class="orta"><span class="btn mini">⏰ Hekime bildir</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Gecikme <b>sebebiyle</b> kaydedilir — sebepsiz gecikme sayısı iyileştirilemez.</span>
+      <span class="sp">Etki sütunu zincirleme kaymayı gösterir; asıl maliyet orada.</span>
+    </div>
+  </div>
+
+  <!-- =================================================== DERLENME ===== -->
+  <div class="pnl" data-s="derlenme" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:90px">Yatak</th><th style="width:175px">Hasta</th>
+          <th style="width:150px">Geldiği salon</th>
+          <th style="width:100px" class="orta">Giriş</th>
+          <th style="width:90px" class="sag">Süre</th>
+          <th style="width:110px" class="sag">Aldrete</th>
+          <th style="width:130px" class="orta">Durum</th>
+          <th>Gideceği yer</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>D-1</td><td>Ali Yılmaz · 71 y</td><td>Salon 1 · 09:55</td>
+            <td class="orta">10:02</td><td class="sag">43 dk</td><td class="sag">9 / 10</td>
+            <td class="orta"><span class="rz ok">Çıkışa hazır</span></td>
+            <td>Ortopedi servisi · 402</td></tr>
+          <tr class="tik"><td>D-2</td><td>Esra Kurt · 29 y</td><td>Salon 3 · 09:10</td>
+            <td class="orta">09:18</td><td class="sag">27 dk</td><td class="sag">7 / 10</td>
+            <td class="orta"><span class="rz sari">İzlemde</span></td>
+            <td>Doğum servisi · 216</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Aldrete <b>9 altında</b> hasta servise çıkarılamaz — panoda skor görünür.</span>
+      <span class="sp">Derlenme yatağı dolduğunda salon devri durur; ameliyathane tıkanmasının
+        en sık sebebi budur.</span>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Salon: <b>6</b></span>
+    <span>Dolu: <b>3</b></span>
+    <span>Hazırlık: <b>1</b></span>
+    <span class="sp">Tazeleme: 30 sn · son 16:45:12</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran notları.</b>
+  <ul>
+    <li><b>Pano ile plan ayrı ekran.</b> Plan "bugün ne yapacağız", pano "şu an ne oluyor" sorusunu
+      yanıtlıyor; ikisi tek ekranda olsaydı, çizelgeyi düzenlemek için gelen kişi canlı durumu,
+      canlı duruma bakan kişi de sürükle-bırak çizelgeyi görürdü.</li>
+    <li><b>Derlenme ayrı sekme, çünkü darboğaz orada.</b> Derlenme yatağı dolduğunda salon devri
+      durur ve gecikme salon tarafında görünür — sebebi başka yerdedir. Aldrete skoru panoda
+      duruyor ki "neden hâlâ çıkmadı" sorusu telefonla sorulmasın.</li>
+    <li><b>Gecikme sebebiyle birlikte kaydedilir.</b> "38 dk gecikti" iyileştirilemez; "kan hazırlığı
+      gecikti" iyileştirilebilir. Etki sütunu zincirleme kaymayı gösterir — asıl maliyet tek
+      vakanın gecikmesi değil, ardından kayan üç vakadır.</li>
+    <li><b>Koridor ekranı aynı panoyu protokol numarasıyla çizer.</b> Hasta adı yalnız salon içi
+      ekranda görünür.</li>
+  </ul>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

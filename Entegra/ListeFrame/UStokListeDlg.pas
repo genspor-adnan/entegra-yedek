@@ -1601,12 +1601,16 @@ begin
    if RafOmruBirim = 0 then
       RafOmruBirim := 3;
 
-   if (RafOmruSure <> 0) and SeriLotTarihDegisti(EskiURT, URT) and
-      (not SeriLotTarihDegisti(EskiSKT, SKT)) then
-      SKT := SeriLotRafOmruEkle(VarToDateTime(URT), RafOmruSure, RafOmruBirim)
-   else if (RafOmruSure <> 0) and SeriLotTarihDegisti(EskiSKT, SKT) and
-      (not SeriLotTarihDegisti(EskiURT, URT)) then
-      URT := SeriLotRafOmruEkle(VarToDateTime(SKT), -RafOmruSure, RafOmruBirim);
+   // Raf omru esitlemesi yalniz Stok Opsiyon 'Raf Omru Zorunlu' isaretliyse (-27017,
+   //   varsayilan True). Kapaliysa kullanicinin girdigi URT/SKT aynen yazilir.
+   if Tablo.GENINI.ReadBoolean(Ops_StokOpsiyon_RafOmruZorunlu, True) then begin
+      if (RafOmruSure <> 0) and SeriLotTarihDegisti(EskiURT, URT) and
+         (not SeriLotTarihDegisti(EskiSKT, SKT)) then
+         SKT := SeriLotRafOmruEkle(VarToDateTime(URT), RafOmruSure, RafOmruBirim)
+      else if (RafOmruSure <> 0) and SeriLotTarihDegisti(EskiSKT, SKT) and
+         (not SeriLotTarihDegisti(EskiURT, URT)) then
+         URT := SeriLotRafOmruEkle(VarToDateTime(SKT), -RafOmruSure, RafOmruBirim);
+   end;
 
    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update STOKSERILOT set LOTNO=&LNO, URT=&URT, SKT=&SKT '+
       'Where ID=&ID ',['&LNO', '&URT', '&SKT', '&ID'],

@@ -86,8 +86,10 @@ public static partial class KartKatalogu
             //   Bos = kok departman. Dongu (kendi altina alma) DB tetiginde.
             new("ustbirimId",         "ustbirim_id",         "kod",
                 KodTablosu: "public.v_departman_lookup", Baslik: "Üst Birim", Grup: "Kimlik"),
-            new("randevuVerilebilir", "randevu_verilebilir", "mantik",
-                Baslik: "Randevu Bölümü", Grup: "Kimlik"),
+            // "randevuVerilebilir" KALKTI (711): bolum randevu bolumu mu = planli hekimi
+            //   var mi; randevusuz kabul (acil/lab) ayri bayrak.
+            new("randevusuzKabul", "randevusuz_kabul", "mantik",
+                Baslik: "Randevusuz Kabul (acil / lab)", Grup: "Kimlik"),
             // Kolon adi `durum` (256, kullanici) - taraf.durum / fiyat_listesi.durum ile ayni.
             new("durum",              "durum",               "mantik", Baslik: "Durum", Grup: "Kimlik"),
             new("sira",               "sira",                "sayi",  Baslik: "Sıra", Grup: "Kimlik"),

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { LISTELER } from '../sayfalar/Liste';
+import { BOLGE_HBYS, GRUP_SIRA_HBYS, CALISMA_ALANLARI, rolCalismaAlani } from '../sayfalar/kabuk/menuBolgeleri';
 
 /**
  * MENÜ DÜZENİ (plan: dokuman/11_MENU_DUZENI_PLANI.md · mockup
@@ -23,7 +24,15 @@ describe('menü düzeni', () => {
   it('grup sayısı tavanı aşmıyor (HBYS 13 · ERP 10 + ortak)', () => {
     // 19: Doküman kendi grubuna geri döndü (kullanıcı) + Göz (691) ve
     //   Yatan Hasta (695) modülleri eklendi.
-    expect(GRUPLAR.length).toBeLessThanOrEqual(19);
+    // 20: Diş (706) modülü eklendi. 21: Medula (707).
+    // 22: Ameliyathane (715) · 23: Acil (716). İkisi de kendi iş akışı ve
+    //   kendi rolü olan modül (plan ilke 1) - Yönetim altına gömseydik günlük
+    //   klinik akış ayarların içinde kalırdı.
+    // 24: FTR (719) - fizik tedavi kendi is akisi (kür / seans / pano).
+    // 27: Eczane (722) ve Satınalma (724) eklendi. Biyomedikal (723) YENİ GRUP
+    //   AÇMADI - hastanedeki cihaz da bir demirbaş, ekranları mevcut Demirbaş
+    //   grubuna girdi; ayrı grup aynı envanteri iki menü dalına bölerdi.
+    expect(GRUPLAR.length).toBeLessThanOrEqual(27);
   });
 
   it('her grubun sonunda Dökümler var', () => {
@@ -67,5 +76,48 @@ describe('menü düzeni', () => {
       const l = LISTELER.find(x => x.menuAd === ad);
       expect(l?.menuGizli || !l?.menuGrup, `"${ad}" menüde durmamalı`).toBeTruthy();
     }
+  });
+
+  it('her HBYS grubunun bir bölgesi var (menü V2)', () => {
+    // Bölgesiz grup son bölgeye (Yönetim) düşer ve orada kaybolur; yeni modül
+    //   eklerken kabuk/menuBolgeleri.ts'e de yazılmalı. ERP'ye özgü gruplar
+    //   (Satış/Alış/Üretim) bölge kullanmaz.
+    const ERP_OZGU = ['Satış', 'Alış', 'Üretim'];
+    for (const g of GRUPLAR.filter(g => !ERP_OZGU.includes(g)))
+      expect(GRUP_SIRA_HBYS, `"${g}" grubu hiçbir bölgede değil`).toContain(g);
+  });
+
+  it('bölge sayısı ve bölge başına grup tavanı (7 · 4)', () => {
+    // Bölge = hasta yolculuğunun bir adımı; dokuzuncu bölge "diğer" olur.
+    //   Bir bölgede 4'ten çok grup accordion'un anlamını bozar (tek bölge
+    //   açıkken bile ekran taşar).
+    // 8: "Tedarik & Teknik" (722-724). Adı olan bir adım, artık bir torba
+    //   değil: eczane - satınalma - depo - biyomedikal aynı zincir. Finans'ın
+    //   ve Yönetim'in içine dağıtılsalardı günlük tedarik işi iki dala bölünürdü.
+    expect(BOLGE_HBYS.length).toBeLessThanOrEqual(8);
+    for (const b of BOLGE_HBYS)
+      expect(b.gruplar.length, `"${b.ad}" bölgesinde çok grup var`).toBeLessThanOrEqual(4);
+    const tekrar = GRUP_SIRA_HBYS.filter((g, i) => GRUP_SIRA_HBYS.indexOf(g) !== i);
+    expect(tekrar, 'grup iki bölgede birden').toEqual([]);
+  });
+
+  it('çalışma alanları var olan bölgelere işaret eder; standart roller bir alana düşer', () => {
+    const bolgeAdlari = BOLGE_HBYS.map(b => b.ad);
+    for (const a of CALISMA_ALANLARI)
+      for (const b of a.bolgeler)
+        expect(bolgeAdlari, `"${a.ad}" alanı olmayan "${b}" bölgesine işaret ediyor`).toContain(b);
+    expect(CALISMA_ALANLARI[0].bolgeler, 'ilk alan Tümü olmalı (boş liste)').toEqual([]);
+    // StandartRolUclari.cs adları: rol varsayılanı boşa düşmesin.
+    const beklenen: [string, string][] = [
+      ['Kayıt Kabul / Banko', 'banko'], ['Vezne', 'banko'], ['Yatış / Taburcu Ofisi', 'banko'],
+      ['Hekim', 'hekim'], ['Diş Hekimi', 'hekim'], ['Göz Hekimi', 'hekim'], ['FTR Uzmanı', 'hekim'],
+      ['Hemşire', 'hemsire'], ['Fizyoterapist', 'hemsire'], ['Diş Asistanı', 'hemsire'],
+      ['Lab Teknisyeni', 'tani'], ['Radyolog', 'tani'], ['Numune Kabul', 'tani'],
+      ['Muhasebe / Finans', 'muhasebe'], ['Medula Sorumlusu', 'muhasebe'],
+      ['Yönetici', 'tumu'], ['Bilgi İşlem Sorumlusu', 'tumu'],
+    ];
+    for (const [rol, alan] of beklenen)
+      expect(rolCalismaAlani(rol), `"${rol}" rolü`).toBe(alan);
+    expect(rolCalismaAlani(undefined)).toBe('tumu');
   });
 });

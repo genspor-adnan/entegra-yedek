@@ -8812,3 +8812,1781 @@ not artık geçersiz, ekranlar yazıldı.
 - Dikte için **kurum içi** ses tanıma hizmeti yok; tarayıcı tanıması kullanan
   kurum bunu bilerek kabul etmeli.
 - Göçler **601-705 yalnız docker'da**, bulut ekspert'e uygulanmadı.
+
+---
+
+## 16.09.2026 — Diş kliniği modülü (`db/706`)
+
+Kaynak tasarım `Ekranlar/Dis Klinigi/dis_sureci.html` (süreç + veri modeli) ve
+yanındaki mockup'lar: hasta kartı **v5** (odontogram + tedavi planı tek
+sekmede, plan & ücret özeti tablonun altında), günlük akış, seans kaydı, lab
+iş emri, ödeme planı. Göz modülüyle aynı desen: katalog tabanlı liste/kart +
+`/api/dis` özel uçlar + iki özel sayfa.
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K— | **İş birimi tedavi planıdır**, muayene değil (`dis_tedavi_plani` + satır) | Diş hekimliğinde muayene bir kez yapılır, iş aylarca süren plan üzerinden yürür. Muayeneye ücret yazılsaydı üç seanslık kanal ilk gün faturalanırdı |
+| K— | **Ücret işlem anında doğar**; plan satırı yalnız ADAYDIR | "Yapıldı" işaretlenince başvuruya (tür 19) `belge_satir` düşer (`plan_satir_id` / `seans_id` / `dis_no` izi). Proforma hastaya gösterilen niyettir, tahakkuk değil |
+| K— | Odontogram **üç katmanlı tek tablo** (`dis_odontogram`: mevcut · planlanan · tamamlanan), yeni durum eskisini pasifleştirir | Aynı kayıt anatomik şemayı ve diş tablosunu besler; "bu diş ne zaman kron oldu" geçmişten okunur |
+| K— | Odontograma **yazan tek yol** `/api/dis` (bulgu, planlanan, tamamlanan) | "Yapıldı" tek tıkla üç kayıt: satır + ücret + odontogram. Üçünü ayrı yazmak birinin unutulduğu yarım kayıtlar üretirdi |
+| K— | Diş muayenesi genel muayenenin **1:1 uzantısı** (`dis_muayene`) | Tanı, e-reçete, e-Nabız ve "Tamamla" Muayene modülünde kalır (göz kararının aynısı) |
+| K— | Randevu **ünit (koltuk) kaynaklı**: `randevu.unit_id / plan_satir_id / lab_isemri_id`; ayrı diş takvimi YOK | Mockup notu: günlük akış Randevu modülünün diş görünümüdür. Lab kısıtı: prova/teslim randevusu iş emrinin beklenen tarihinden önce verilemez (sunucuda) |
+| K— | Lab **tedarikçi caridir** (`dis_lab` → `taraf`), iş emri aşamaları zaman damgalı satır | Tek aşama kolonu geçmişi kaybederdi; lab maliyeti hakedişten düşülecek |
+| K— | Ücret satırı **başvuru ister**; yoksa yazılmaz ve uç bunu SÖYLER | Sessizce ücretsiz iş bırakmak vezneye görünmeyen borç demek |
+| K— | Plan/iş emri numarası sunucuda (`fn_dis_no_uret`: TP-yyyy/nnnn · LB-yyyy/nnnn); plan toplamı satırlardan (`fn_dis_plan_toplam_tazele`) | İki masadan aynı anda açılan iki plan aynı numarayı almasın; iki yerde toplam ayrışmasın |
+| K— | `hizmet.dis_islem` bayrağı: plan satırı yalnız bu bayraklı hizmetten doğar; SUT 40xxxx ve adında "diş" geçen kalemler işaretlendi (367 kalem) | Göz/radyoloji deseni: on binlik katalogda "Toraks BT" diş planına girmesin |
+
+**Yapılanlar.** `db/706`: 16 kod listesi (`dis.*`), tablolar `dis_unit`,
+`dis_muayene`, `dis_odontogram`, `dis_periodontal(_olcum)`,
+`dis_tedavi_plani(_satir)`, `dis_seans(_islem, _sarf)`, `hizmet_sarf_seti`,
+`dis_lab`, `dis_lab_isemri(_asama)`, `dis_odeme_plani`, `dis_odeme_taksit`;
+`hizmet` / `randevu` / `belge_satir` / `tani` / `radyoloji_istem` ek kolonları;
+yetkiler (`dis` kökü + ekran yetkileri tur 0, `dis.plan.onayla` ·
+`dis.plan.fiyat_degistir` · `dis.seans.bitir` tur 1); lookup ve liste
+görünümleri (`v_dis_gunluk_akis`, `v_dis_tedavi_plani`, `v_dis_seans`,
+`v_dis_lab_isemri`, `v_dis_hasta`).
+
+API: `KaynakKatalogu.Dis` (7 liste), `KartKatalogu.Dis` (6 kart, ISLEMLOG 1130
+bloğu), `AksiyonKatalogu` diş girdileri, `DisUclari` (hasta kartı tek soruda ·
+bulgu · plan satırı ekle/iptal/yapıldı · sun/onayla · ödeme planı üret · günlük
+akış · yeniden planla · seans aç/bitir · lab aşaması).
+
+Web: `Diş` menü grubu (modül `dis`), `bilesenler/dis/Odontogram.tsx` (v5
+SVG'sinin React portu: 8 diş tipi kron/kök yolu, 5 görünmez yüzey, süt dişi
+sırası), `sayfalar/dis/DisHastaKarti.tsx` (odontogram + plan + sağ panel +
+periodontal / geçmiş / lab sekmeleri), `sayfalar/dis/DisGunlukAkis.tsx` (ünit ×
+saat çizelgesi, kalan süre çubuğu, yeniden planla, seans aç),
+`liste/disAksiyonlari.ts`, `tema.css` `ds-*` (kendi ön eki - 446 dersi).
+
+**Kimlik ve başvuru sırası** (kullanıcı: "diş için önce kimlik ve başvuru mu
+açılmalı"): kimlik bir kez ve her şeyden önce; başvuru ziyaret başına ama
+yalnız ÜCRET doğuracak iş için (muayene, seans → yapıldı). Odontogram, plan,
+proforma başvurusuz yaşar. Seans açılırken ya da satır "yapıldı" olurken günün
+açık başvurusu yoksa `DisUclari.Basvuru` Kayıt Kabul'e gitmeden açar: ödeyen
+hastanın kayıtlı kurumu (SGK > kurum > ÖSS > ücretli), fiyat listesi kurum
+sözleşmesinden, SGK'lıda `belge_provizyon` "alınmadı" satırı (Medula kapısı
+bağlanınca kuyruk doldurur). Randevu açılan başvuruya bağlanır - aynı
+ziyaretin ikinci seansı yeni başvuru açmaz.
+
+**Tuzaklar.** `hizmet.grubu` smallint - `ilike` ile süzülmez. Docker PG UTC
+çalışıyor: `default current_date` gece yarısından sonra bir gün geride kalır
+(bulgu tarihi 15.09 görünürken yerel saat 16.09 01:30). Seans kartında
+hekim combo'su `v_hekim_lookup`'tan; randevu hekimi orada yoksa boş görünür.
+
+**Kalanlar.** Periodontal 6 nokta giriş ekranı (tablo var, ekran yok);
+sarf seti otomatik düşümü (`hizmet_sarf_seti` → seans bitince sarf fişi);
+proforma PDF / hasta imzası (şimdilik `window.print`); hekim hakedişi
+"tahsil − lab − sarf" bazı; klinik panosu; sterilizasyon paketi; e-Nabız 103
+paketi diş numarası; ortodonti/pedodonti. Göç **706 yalnız docker'da**.
+
+---
+
+## 16.09.2026 — Medula (SGK) entegrasyonu (`db/707`)
+
+Kaynak tasarım `Ekranlar/Medula/medula_sureci.html` ve beş mockup (hasta
+kabul / provizyon, hizmet kaydı, e-reçete / e-rapor, fatura & dönem, gönderim
+kuyruğu & ayarlar). Kullanıcı: "bütün medula süreçleri için mockuplardan tüm
+ekranları projeye ekle, bitince uçtan uca test et".
+
+| # | Karar | Gerekçe |
+|---|---|---|
+| K— | **Yerelde önce yaz, sonra gönder**; her Medula çağrısı `medula_kuyruk` satırı (servis · işlem · kaynak · istek/yanıt · deneme · sonuç kodu) | Hasta bekletilmez; kapı kapalıysa satır bekler, zamanlı iş (`medula.kuyruk`, 5 dk) ya da "Bekleyenleri gönder" aynı satırı tekrar dener. "Bu takip no nereden geldi / neden hata aldı" satırdan okunur |
+| K— | **Kapı soyutlanır** (`IMedulaKapisi`); bu sürümde `MedulaSimulasyonKapisi` | SGK kuralları yerel veriyle taklit edilir (1006 aynı gün açık takip, 1013 müstehak değil, 1020 tescil eksik, 1100 SUT yok, 1200 çıkışsız fatura, 3001 imzasız reçete). Canlı SOAP kapısı aynı arayüzü uygular; ekran ve tablolar değişmez. Hesap `test_mi=0` + URL doluysa canlı beklenir ve "bağlı değil" (2001) SÖYLENİR |
+| K— | Provizyon **mevcut `belge_provizyon`'da** (299), çıkış zamanı / branş / tescil kolonları eklendi | Ayrı "takip" tablosu aynı bilgiyi iki yerde tutmak olurdu |
+| K— | Hizmet kaydı **satır başına** (`medula_islem` ↔ `belge_satir`), tanılar `medula_tani` | Medula kabul/red satır bazında gelir; başvuru düzeyi tek durum "hangi satır reddedildi"yi gizlerdi. Reddedilen satır "hastaya ücretli" bırakılabilir (durum 5) |
+| K— | Sıra: **TCKN → hak sahipliği → kart/başvuru → provizyon → hizmet → çıkış → fatura**; Medula hasta kabul ekranı İSTİSNA ekranıdır | Müstehaklık sonucu ödeyeni belirler; başvuru sonrası sorgulamak düzeltme üretir. Günlük akış Kayıt Kabul'de otomatik (ayarlar `medula.otomatik_*`) |
+| K— | Fatura takip başına (`medula_fatura`), dönem ay başına (`medula_donem`); **fark eşiği** aşan fatura döneme alınmaz; **dönem sonlandırma** engelsiz ve `medula.donem` aksiyon yetkisiyle, geri alınamaz | Yerel ↔ Medula farkı kesinti demektir; sonlandırma sonrası fatura satırı değişmez |
+| K— | e-Reçete: imzala (hash) → gönder; **alerji engeli yerelde ve gönderimden önce** | Medula alerjiyi sormaz; hasta zarar görür. Kabul edilen reçete değiştirilemez: sil + yeni |
+| K— | Kapı sözlüğü **tipli** okunur (`Ondalik`/`Sayi` önce tipe bakar) | decimal → metin → invariant parse "1600,00"u 160000 yapmıştı (Türkçe ondalık virgülü binlik ayracı sanıldı); e2e testte fatura 100 kat çıktı |
+
+**Yapılanlar.** `db/707`: 9 kod listesi (`medula.*`), `medula_kuyruk`,
+`medula_islem`, `medula_tani`, `medula_rapor(_satir)`, `medula_fatura`,
+`medula_donem`, `medula_kesinti`; `belge_provizyon` / `recete` / `hizmet`
+(`sut_kodu`, 6 haneli kodlardan dolduruldu) / `taraf_personel` ek kolonları;
+12 `medula.*` referans ayarı (otomatik adımlar, deneme, eşik, `kapi_kapali`
+simülasyon anahtarı); zamanlı iş; yetkiler (`medula` kökü + provizyon ·
+hizmet · reçete · fatura · ayar tur 0, `medula.donem` tur 1); görünümler
+`v_medula_takip`, `v_medula_kuyruk`, `v_medula_fatura`, `v_medula_fatura_lookup`.
+
+API: `Servisler/MedulaServisi.cs` (kuyruk + kapı + sonuç işleme),
+`MedulaUclari.*` (müstehaklık, hasta kabul/iptal/çıkış, takip ara, hizmet
+görünümü/gönder/iptal/yerel, reçete imzala/gönder/sil, rapor, dönem özeti,
+fatura kaydet/toplu/iptal, dönem sonlandır, kesinti/itiraz/sonuç, kuyruk
+liste/gövde/gönder/tekrar/iptal, hesap testi), `KaynakKatalogu.Medula` (7
+liste), `KartKatalogu.Medula` (rapor · kesinti · dönem · fatura),
+`AksiyonKatalogu` girdileri, `AyarDeposu` beyaz listesi, `ZamanliIsler`.
+
+Web: `Medula` menü grubu (11 giriş), özel sayfalar `MedulaHastaKabul`,
+`MedulaHizmetKayit`, `MedulaFaturaDonem`, `MedulaKuyruk` (`md-*`),
+`liste/medulaAksiyonlari.ts`, `api/uclar/medula.ts`.
+
+**Uçtan uca test** (simülasyon): müstehaklık 0000 → hasta kabul takip no →
+aynı hasta ikinci başvuru 1006 → hizmet kaydı 2/2 kabul (tanı dahil) →
+çıkışsız fatura 1200 → reçete imzasız red, imzala, gönder (e-reçete no) →
+penisilin alerjili reçete imzada engel → rapor kaydı → çıkış → fatura
+(yerel = Medula) → kapı kapalı: hasta kabul kuyrukta bekledi, kapı açılınca
+"bekleyenleri gönder" ile takip alındı → dönem sonlandırma engeli (hizmet
+kaydı eksik) → tamamlanınca sonlandırıldı (icmal no) → kesinti + itiraz +
+iade. Tarayıcı: dört özel sayfanın tüm sekmeleri, sekiz liste, menü grubu,
+bağlantı testi - hata yok.
+
+**Seans kartı (`db/708`, kullanıcı: "seans kartını mockup gibi yapılan işlemler
+listesiyle güncelle").** Generic `dis-seans` kartı yerine özel modal
+(`DisSeansKarti.tsx`, rota `/dis-seans/:id` liste üstünde): yapılan işlemler
+listesi (plan satırı rozeti, seans x/y, "bu seansta tamamlandı", ücretlendirme
+kuralı, tahmini ücret), "plan satırından ekle" (hastanın açık satırları) ve
+"plan dışı işlem", seçili işlemin uygulama ayrıntısı (uygulama notu · çalışma
+boyu · komplikasyon · sonraki seans planı - İŞLEME yazılır, `dis_seans_islem`
+kolonları 708), seans geneli talimat/anestezi, sarf, ücret özeti, seans
+sayacı. Kural: bir seansta birden çok işlem; başvuru seansa değil ZİYARETE
+açılır (günün açık başvurusu bağlanır). Uçlar `DisUclari.SeansKart`.
+
+**Kalanlar.** Canlı SOAP kapısı; Kayıt Kabul ekranına otomatik müstehaklık /
+provizyon kancası (ayarlar var, ekran çağırmıyor); dış tesis sevk okuma;
+kesinti dosyası (Excel) içe aktarımı; yatan hasta yatış bilgisi kaydı; e-imza
+kartı entegrasyonu (imza sunucuda özetleniyor). Göç **707 yalnız docker'da**.
+
+## 16.09.2026 — Diş: plan kartı, geri dönüş zinciri, numara tetikleri (`db/709`, plan kartı 710)
+
+**Lab iş emri seanstan (kullanıcı: "seansta lab iş emri basılınca o hasta
+adına lab iş emri açılsın kaydet denince tekrar seansa dönsün").** Seans
+kartındaki düğme `/dis-lab-isemri/yeni?hastaId&hastaAd&hekimId&planSatirId&disNolar&geri=`
+açar; `ListeKarti` sorgudan ön dolgu yapar (`yeniKayitVarsayilanlari`), arama
+alanının görünen adı için GenForm'a `yeniSecilenAdlar` eklendi (ad lookup
+haritasında yoksa kutu boş görünüyordu). Kaydet/kapat `geri`ye döner; yeni
+kayıtta `geri` varsa karta ara geçiş yapılmaz. `db/709`: `tg_dis_plan_no` /
+`tg_dis_lab_isemri_no` (before insert; boş numarayı `fn_dis_no_uret` ile
+doldurur - generic kartla açılan kayıt numarasız kalıyordu) ve
+`tg_dis_lab_isemri_bag` (**after** insert; plan satırına `lab_isemri_id` +
+`lab_gerekir` yazar - before'da FK ihlal ediyordu, ilk deneme 422'ydi).
+
+**Geri dönüş prensibi (kullanıcı: "ekran nereden açıldıysa oraya dönmeli").**
+Diş hasta kartındaki beş düğme (Seans Aç / Plan Kartı / Ödeme Planı / Lab
+İşleri / Genel Hasta Kartı) o hasta adına açar, kapat geldiği yere döner. İki
+taşıyıcı: özel kartlar (hasta, seans, plan) `state.geri`; generic kart ve
+listeler `?geri=` sorgusu (`ListeKarti.onKapat`, `GenGrid` başlığında "← Geri"
+düğmesi - `Liste` sorgudan `geriYolu` geçirir). Özel kartlar arası **zincir**:
+`state.ustGeri` bir üst geri'yi taşır (plan → hasta → Kapat → plan → Kapat →
+planın geldiği yer). Tarayıcı testi: 5 düğme + zincir, hata yok.
+
+**Tedavi planı kartı (kullanıcı: "diş tedavi plan kartını mockup gibi yap").**
+Mockup `dis_tedavi_plani_karti.html`; generic `dis-plan` kartı özel modala
+döndü (`DisPlanKarti.tsx`, rota `/dis-plan/:id` liste üstünde, `ozelKart`).
+Yaşam döngüsü şeridi, 5 kolonlu başlık (hekim / fiyat listesi / ödeyen kurum /
+geçerlilik / ödeme seçeneği düzenlenir; onaylıda fiyat listesi kilitli), yedi
+özet kartı, sekmeler: Plan Satırları (faz grupları, süzgeç çipleri, ＋ İşlem
+arama, Yapıldı / iptal / 🧪), Seans Programı (plana bağlı seanslar + satır
+randevuları, "Seans aç"), Proforma & Onay (alanlar, sun/onayla, metin
+önizleme, yazdır), Ödeme Planı (varsa taksit tablosu, yoksa üretim formu),
+Lab İşleri (iş emirleri + "iş emri açılmadı" satırları), Alternatif (diş
+bazlı A/B karşılaştırma, "B'yi ana plan yap"), Günlük (ISLEMLOG 1130/1131/
+1138). Uçlar `DisUclari.PlanKart.cs`: `GET /plan/{id}` (tek soruda hepsi),
+`POST /plan` (boş taslak; fiyat listesi kurum sözleşmesi → varsayılan),
+`PATCH /plan/{id}`, `POST /plan/{id}/iptal` (bekleyen satırlar iptal,
+yapılanlar kalır), `/alternatif` (satırları kopyalayan B/C varyantı,
+`ana_plan_id`), `/ana-yap` (diğer varyantlar "iptal · seçilmedi"). Not: API
+JSON'da null alanlar atlanıyor - istemci `?? null` ile okur.
+
+**Lab kanban (711, kullanıcı: "kanbanı da projeye ekle").** Mockup
+`dis_lab_kanban.html`; Lab İş Emirleri listesinin "Kanban" ek görünümü
+(`GenGrid.ekGorunum`, `bilesenler/dis/DisLabPano.tsx`). Kolon = aşama (2-4
+tek "Labda" kolonunda rozetle), HTML5 sürükle-bırak = aşama geçişi
+(`POST /lab-isemri/{id}/asama` + geçmiş + log 1134; geri gönderimde neden
+sorulur), kart rengi SLA'dan (gecikti kırmızı, 2 gün / randevusuz sarı),
+sağda seçili kart + tek tık geçişler + aşama geçmişi, "Laba göre" kulvar ve
+"Kurye günü" (toplu "Gönderildi"). Uçlar `GET /api/dis/lab-pano` (teslim/iptal
+yalnız son 30 gün) ve `GET /lab-isemri/{id}/asamalar`. CSS `ds-kb-*` (tema
+testi: kolon rengi kapsayıcı seçicisiyle değil aynı elemanda değiştirici
+sınıfla). Tarayıcı testi: düğmeyle ve sürükleyerek aşama geçişi, üç görünüm.
+
+**Üst şerit şube markası + giriş başlığı (kullanıcı).** "Merkez" combosu
+kalktı; yerine şube logosu + adı ürün markasıyla aynı görünümde (çok şubeli
+kullanıcıda tıklayınca şube listesi açılır, değiştirme korunur). Logo şube
+kartının "Logo & Kaşe" görselidir: `SubeOzeti.LogoDokumanId`
+(`KullaniciDeposu.SubeleriAsync` tek sorguyla doldurur), istemci
+`useSubeLogo` (yetkili fetch → blob URL, `<img src>` Bearer taşıyamaz).
+Sekme başlığı ürün adı + şube (`document.title`); giriş sayfası son bilinen
+ürün modunu tarayıcıda saklar (`gentegre.urunModu`) - HBYS'de sunucu cevabı
+gelene kadar "Gentegre AI" yanıp sönüyordu, `<title>` da sabitti.
+
+**Odontogram başlığı: tıbbi uyarılar + dental anamnez (`db/710`, kullanıcı).**
+"Tıbbi uyarılar" artık alerji (kırmızı) + aktif kronik tanı (turuncu) +
+sürekli ilaç (mavi) - Tıbbi Özet ile aynı kaynaklar (`hasta_alerji`,
+`hasta_kronik_tani` durum 1, `hasta_ilac` aktif ve bitmemiş). Genel muayene
+kullanılmayan diş kurulumunda giriş yolu: alanın yanındaki **+alerji /
++kronik / +ilaç** düğmeleri hasta ön dolu kayıt kartını açar (`ListeKarti`
+`HASTA_KAYIT_KAYNAKLARI` ön dolgusu), kaydet/kapat odontograma döner. Dental
+anamnez için ayrı kart yoktu: alanın ✎'i satır içi düzenleyici açar
+(anamnez, bruksizm, sigara, hijyen, TME) → `PATCH /api/dis/hasta/{id}/dis-muayene`
+(son diş muayene satırını günceller, yoksa açar; log 1141). `db/710`:
+`dis_muayene.muayene_id` zorunluluğu kalktı - muayenesiz satır olabilir.
+Odontogramdaki lab düğmesi her zaman yeni iş emri açar (hasta ön dolu, geri
+odontograma); mevcut lab işleri kartın "Lab" sekmesinde.
+
+**Kalanlar.** Seans önerisi / "kalan seansları randevuya dönüştür"; proforma
+PDF + tablet imza; plan sürümleri (ek proforma) ayrı kayıt değil. Göç
+**709-710 yalnız docker'da**.
+
+**Türkiye Klinik Kalite Programı — olgular, göstergeler ve kod listeleri
+(`db/711`, kullanıcı).** Kaynak: SHGM **"Klinik Kalite Ölçme ve Değerlendirme
+Rehberi (Sürüm 1.1)", Mart 2021**. Yüklenen: **16 sağlık olgusu · 217 gösterge
+· 5.377 kod satırı** (929 tekil: 460 ICD-10 · 316 SUT · 153 ATC). Ayrıştırma
+217/217 kartı okudu, eksik ve mükerrer yok.
+
+**Bu SKS göstergeleri DEĞİL.** SKS kurumun nasıl işlediğini ölçer (düşme oranı,
+el hijyeni) ve verisi elle toplanır; Klinik Kalite hastanın doğru tedavi edilip
+edilmediğini ölçer (diyabette HbA1c, diz protezinde reoperasyon) ve verisi
+HBYS'den hesaplanır. **Farkı yaratan şey kartlardaki kod kümeleri**: her
+göstergenin payını ve paydasını ICD-10 tanı + SUT işlem + ATC ilaç kodları
+tanımlıyor, yani gösterge `belge_satir` + tanı + reçete verisinden kendiliğinden
+hesaplanabiliyor. 217'nin **202'si otomatik**, 15'i (çoğu gebe izlem paketi)
+elle beslenecek — `klinik_gosterge.otomatik` bunu saklar ki ekran "neden boş"
+sorusunu peşinen yanıtlasın.
+
+`klinik_olgu` · `klinik_standart` · `klinik_gosterge` · `klinik_gosterge_kod`
+(rol pay/payda + tip icd10/sut/atc) · `klinik_gosterge_donem`. Sonuç tek yerde:
+`fn_klinik_gosterge_sonuc` + before-trigger; payda 0 ise sonuç 0'dır (hepsi
+oran göstergesi, payı sonuç yazmak "3 hasta"yı "%3" göstermek olurdu). Hedef
+hem rehberin yazdığı metin (`≤ %0.8`) hem ayrıştırılmış yön+değer+birim olarak
+durur; kurum hedefi ayrı kolonda — tek alan olsaydı kurum kendi hedefini
+yazınca ulusal hedef kaybolurdu. Ölçüm satırı hedefi **dondurur**: rehber
+hedefi değişirse geçmiş dönemin "hedefte miydi" yargısı değişmemeli.
+
+**`klinik_standart` bilerek BOŞ kuruldu.** Standardın metni her kartta var ve
+`klinik_gosterge.standart_metin` olarak yüklendi; resmî kodu (DP.S1) ise yalnız
+olgu giriş sayfalarında geçiyor ve o sayfalar iki sütun dizili, metin çıkarımı
+güvenilir değil. Metinden türetmek denendi ve rehberin kendi saydığı sayıyla
+tutmadı (Diz Protezi 4 yerine 5, DM 3 yerine 12 — aynı standart kartlarda farklı
+sözcüklerle yazılmış); bulanık eşleştirme de 8 olgunun 3'ünü tutturdu. Yanlış
+S-numarası göstergeyi yanlış resmî standarda bağlar, boş bırakmak daha az
+zararlı.
+
+Mockup'lar: `Ekranlar/Kalite/` — `klinik_kalite_olgular.html` (Olgular ·
+Göstergeler · Kod Havuzu), `klinik_kalite_gosterge_karti.html` (Kart · Pay ·
+Payda · Teknik Not · Dönem), `klinik_kalite_donem.html` (Sonuçlar · Veri Eksik ·
+Hesaplama Kuyruğu), ortak `kalite.css` / `kalite.js`. 11 sekmenin hepsi
+Playwright + Edge ile denendi.
+
+**API kataloğu ve web listeleri (`db/712`).** Üç liste: `klinikGosterge`
+(rehber kataloğu), `klinikGostergeDonem` (şube + dönem ölçümü, şube süzmesi
+sunucuda), `klinikGostergeKod` (kod havuzu). Kod sayıları ve dönem `durum`u
+SQL'de üretilir - liste sayfalı geldiği için istemci saysaydı "bu göstergede
+kaç ICD kodu var" sorusu sayfa değiştikçe farklı yanıt verir, eşiği istemci
+uygulasaydı liste ile kart farklı renk gösterirdi. "Sınırda" hedefin %5'i
+içinde kalanlar: hedefi aşmak üzere olanı yeşile boyamak iyileştirme fırsatını
+gizler.
+
+İki kart: `klinikGosterge` (kod/ad/tanım/hesaplama/teknik not ve rehber hedefi
+SALT OKUNUR; yazılabilen tek şey kurum hedefi) ve `klinikGostergeDonem` (elle
+ölçüm; `sonuc` tetiğin kolonu, yazılamaz). **Kod listesinin kartı yok** -
+rehberden gelir, düzenlenebilir bir kart açmak kıyaslamayı bozmanın en kısa
+yolu olurdu; kod havuzu yalnız liste olarak sunulur. `712` olgu seçim
+görünümünü (`v_klinik_olgu_lookup`) ekler. Menüde **Yönetim › Kalite** alt
+grubu - ayrı ana grup `menuDuzeni` testinin grup tavanını deliyordu.
+
+**Hesaplama motoru (`db/713`).** Kod kümelerini HBYS verisinin üzerinde
+çalıştırıp pay/paydayı üretir. Çekirdek tek primitif: `fn_klinik_kod_olay`
+gösterge + rol (pay/payda) alıp **hasta + olay tarihi** satırları döndürür; dört
+kaynağı birleştirir (muayene tanısı ana+ek, yatış/çıkış tanısı, `belge_satir` →
+`hizmet.sut_kodu`, `recete_satir` → `ilac.atc_kod`). 217 gösterge için 217 sorgu
+yazmak bakılamaz olurdu. Tarihi de döndürmesi şart: **izlem penceresi**
+(`pencere_gun`) "payda olayından kaç gün sonra" sorusunu ancak tarihle
+yanıtlıyor.
+
+**Pay, paydanın içinden seçilir** — rehber hemen her kartta "paydaki hastalar
+içinde…" diyor; bağımsız sayılsaydı o dönem ameliyat olmamış ama komplikasyon
+tanısı almış hasta payı şişirir, oran 100'ü aşabilirdi. **Pencere** rehberde
+ayrı alan değil, metnin içinde ("ilk 2 ay", "ilk 60 gün"); ayrıştırıldı (83
+göstergede bulundu) ve düzenlenebilir bırakıldı — DP.G7 "2-12 ay" iki sınırlı,
+tek alana sığmadığı için 60 çıktı. **Motor sonucu hesaplamaz**, pay/payda yazar;
+`sonuc` 711'deki tetiğin işi. Kesinleşmiş dönem yeniden hesaplanmaz.
+
+ICD **üst kodu** (`M22`) alt kodlarını da kapsar, SUT kodu iki tarafta da
+noktasızlaştırılarak eşleşir (rehber `612.420`, `hizmet.sut_kodu` `612420`), ön
+ve ayırıcı tanı (tur 3/4) sayılmaz — "olabilir" kaydı payı şişirirdi.
+
+**`otomatik` bayrağı düzeltildi: 202 → 138.** 711 bunu "kod listesi var mı" diye
+doldurmuştu; motor yazılınca hesaplamanın **hem pay hem payda** kümesini
+istediği görüldü ve 64 göstergede yalnız bir taraf olduğu çıktı (rehber diğer
+tarafı serbest metinle tarif ediyor). Düzeltilmeseydi ekran 202'yi "otomatik"
+gösterir, kullanıcı hesaplamayı çalıştırır, 64'ü sessizce boş kalırdı. Doğru
+sayı **138 otomatik · 79 elle**; mockup'lar da bu sayıya çekildi.
+
+**Sınır — motor rehberin her teknik notunu uygulamaz.** Uyguladıkları: kod
+eşleşmesi, tekil hasta, dönem aralığı, izlem penceresi, şube. Uygulamadıkları:
+yaş/cinsiyet süzgeci (`hedef_grup` serbest metin), taraf (sağ/sol diz) ayrımı,
+"hariç tutulacaklar", HBYS dışı kaynaklar. Sonuç `kaynak = 0` işaretlenir,
+kullanıcı kesinleştirmeden önce görür.
+
+Uçlar: `POST /api/klinik-kalite/hesapla` (dönemi hesapla ve yaz), `/onizle` (tek
+gösterge, **yazmaz** — taslak satırları kirletmeden "bu niye böyle çıktı"),
+`/kesinlestir` (tek yön). Şube istekten değil **bağlamdan** gelir; hesaplama ile
+kesinleştirme **ayrı yetki** — geri alınamayan işlem gündelik işlemle aynı
+kapıda olmamalı.
+
+Duman testi (rollback'li): 3 hasta diz protezi (payda), biri 30 gün sonra
+patella çıkığı tanısı (pencerede), biri 90 gün sonra (pencere dışı) →
+**pay=1 payda=3 sonuç=33,33 hedef `<=0.8` donduruldu**; tüm dönem 138 satır,
+78 ms, kodsuz 0.
+
+**Düğmeler uçlara bağlandı.** Aksiyon kataloğunda iki ekran:
+`klinik-kalite-donem-liste` (🔄 Dönemi Hesapla · 🔒 Dönemi Kesinleştir ·
+🔢 Göstergeyi Önizle) ve `klinik-gosterge-liste` (yalnız önizleme - katalog
+rehberin malı, oradan dönem yazılmaz). İstemci tarafı
+`liste/klinikKaliteAksiyonlari.ts` + `api/uclar/klinikKalite.ts`.
+
+**Dönem sorulur, varsayılmaz** (`listeSor`): kalite birimi çoğu zaman GEÇEN
+dönemi kapatmak için hesaplatıyor; "içinde bulunduğumuz dönem" varsayılsaydı
+yanlış döneme yazıp fark edildiğinde satırlar çoktan oluşmuş olurdu. Gelecek
+dönem teklif edilmez - dolmamış dönemi hesaplamak yarım veriyle "hedef dışı"
+üretir. Hesaplama sonucu **üç sayıyla** bildirilir (yazılan · kesinleşmiş olduğu
+için korunan · kod listesi eksik olduğu için atlanan); yalnız "tamam" deseydik
+boş kalan satırların sebebi görünmezdi. Kesinleştirme **tehlikeli onay** ve
+kırmızı biçimle sorulur - geri alınamayan işlemi gündelik hesaplamayla aynı
+renkte göstermek yanlış düğmeye basmayı kolaylaştırırdı.
+
+**Gece işi (`db/714`).** `fn_klinik_kalite_gece()` + `zamanli_is` satırı
+(`klinik.kalite`, günlük 02:40 - yatak ücreti 01:10, TİTCK 04:00; araya
+girmesin). **İki dönem** hesaplanır, güncel ve bir önceki: izlem penceresi olan
+göstergelerde pay olayı dönem KAPANDIKTAN sonra doğuyor ("ilk 60 günde
+reoperasyon" aralık ameliyatında şubatta olur). Önceki dönem kullanıcı
+kesinleştirene kadar tazelenir. **Her şube ayrı** hesaplanır - ölçüm şubeye ait
+bir kayıt; şube süzmesiz tek hesap çok şubeli kurumda bütün hastaları tek orana
+karıştırırdı. Döngü SQL'de: C# tarafı tek satır, yoksa dönem seçme kuralı gece
+işi ile ekranda iki ayrı yerde olurdu.
+
+**Uçtan uca denendi** (gerçek giriş, dev DB): giriş → gösterge listesi (kod
+sayıları + Otomatik/Elle) → `hesapla` **138 gösterge / 105 ms** → `onizle`
+(`vaka_yok`, dev DB'de hasta verisi yok) → dönem listesi → kod havuzu (ATC
+süzgeci) → geçersiz dönem **400**. Aksiyonlar `/api/aksiyon/...` ucundan
+doğrulandı: hesapla `bicim=bir`, kesinleştir `bicim=ret`, önizle `kayitGerekir`.
+
+Deneme iki kusur çıkardı, ikisi de düzeltildi: (1) hedef metni `FM` maskesinden
+`>= 95.` diye sondaki noktayla geliyordu; (2) paydası 0 olan satır `>= %95`
+hedefine göre **"Hedef dışı"** görünüyordu - kurum hiçbir şey yapmadığı için
+kırmızıya boyanıyordu. Artık payda 0 ise **"Vaka yok"**.
+
+**Kalanlar.** `klinik_standart`
+kodları elde edilince doldurulacak; `pencere_gun`un yanlış çıktığı göstergeler
+(iki sınırlı "2-12 ay" gibi) kart üzerinden düzeltilecek. Göç **711-713 yalnız
+docker'da**.
+
+## 16.09.2026 — Standart roller (712), üst şerit şube markası, favori kurtarma
+
+**Standart roller (kullanıcı: "bir HBYS'de standart roller nelerdir, kurum
+profiline göre listele" → "standart rolleri kur düğmesini ekle").** Kurum
+Profili › "Bu tipin varsayılan paketi" altına "🧩 Standart rolleri kur":
+tipin şablonları önizlenir (rol, amaç, ekran/aksiyon sayısı, var/kurulacak),
+seçilenler kurulur. `StandartRolUclari.cs`: şablon = kod + ad + amaç + kurum
+tipleri + yetki kalıpları (yetki kodu deseni × gör/ekle/değiştir/sil; `%`
+joker, aksiyonlar açıkça istenir, "kapalı" kural geniş deseni daraltır).
+Ortak: Kayıt Kabul/Banko, Muhasebe/Finans, Yönetim Görüntüleyici (salt
+okuma), Kalite Sorumlusu, Bilgi İşlem Sorumlusu (hasta verisi görmez),
+Medula Sorumlusu; tipe özel: Hekim, Hemşire, Vezne, Diş Hekimi / Asistanı /
+Tedavi Danışmanı / Lab Sorumlusu, Göz Hekimi / Optometrist / Göz Teknisyeni,
+FTR Uzmanı / Fizyoterapist, Radyolog / Radyoloji Teknisyeni / Teleradyoloji
+Hekimi, Lab Uzmanı / Teknisyeni / Numune Kabul / Dış İstem Kurumu, Eczane-
+Depo, Yatan Hasta Hemşiresi, Yatış-Taburcu Ofisi. `GET/POST
+/api/kurum-profil/standart-roller` (yetki `rol`); var olan rol (aynı kod)
+ezilmez, `guncelle` ile yetkileri şablona çekilir; rol tüm aktif şubelere
+yazma hakkıyla bağlanır; `rol.yetki_surumu` artar (önbellek); log 903.
+
+**Favori kurtarma.** Menü favorileri boşsa tarayıcıdaki eski
+`favoriler.<eskiId>` anahtarları taranır, en dolu liste devralınır
+(`useMenuTercihleri`) - kullanıcı kimliği değişince yıldızlar kayboluyordu.
+
+**Ameliyathane şeması (`db/715`).** 11 tablo: `ameliyat_salon` · `ameliyat_talep`
+· `ameliyat` · `ameliyat_islem` · `ameliyat_ekip` · `ameliyat_kontrol_madde` +
+`ameliyat_kontrol` · `ameliyat_sarf` · `ameliyat_sayim` · `ameliyat_not` ·
+`ameliyat_komplikasyon`. Mockup'lar `Ekranlar/Ameliyathane/`.
+
+**Talep ve ameliyat ayrı tablo.** Talep planlanmadan da yaşar; tek tabloda
+tutsaydık iptal edilen ameliyat talebi de siler ya da "iptal" damgasıyla
+listede bırakırdı - ikisi de yanlış, hasta hâlâ ameliyat bekliyor. İptal
+ameliyatı kapatır, talebi bekleyene döndürür.
+
+**Zaman damgaları ayrı kolon** (salona alma · anestezi · **kesi** · kapanış ·
+bitiş · salondan çıkış). Tek başlangıç-bitiş masa kullanımı ile cerrahi süreyi
+ayırt edemezdi; verimi bozan şey ikisinin arasındaki devir süresidir. Kesi
+ayrıca klinik kalite için şart: profilaktik antibiyotiğin "kesiden önceki 60
+dk" içinde verilip verilmediği ancak bu damgayla ölçülür.
+
+**Güvenli cerrahi kontrol listesi madde madde**, tek "tamamlandı" bayrağı değil
+- öyle olsaydı liste ameliyat bitince toplu işaretlenirdi. İşaret satırı madde
+METNİNİ kopyalar: tanım sonradan düzenlenince geçmiş kayıt ne imzalandıysa onu
+gösterir. DSÖ/Bakanlık listesinin 18 çekirdek maddesi yüklendi. **Taraf işlem
+satırında**, başlıkta değil: iki taraflı ameliyatta hangi işlemin hangi tarafa
+yapıldığı kaybolmasın. **Komplikasyon ICD-10 koduyla** - serbest metin klinik
+kalite göstergesine (DP.G6 / KP.G1) dönüşemez. Sayım uyumunu tetik hesaplar
+(`fn_ameliyat_sayim_uyum`); iki yerde hesaplansaydı "sayım tamam" diyen ekranla
+"uyuşmuyor" diyen kayıt yan yana gelirdi.
+
+**Acil servis şeması (`db/716`).** 7 tablo: `acil_yatak` · `acil_basvuru` ·
+`acil_triyaj_gecmis` · `acil_protokol` + `acil_protokol_adim` · `acil_cagri` ·
+`acil_bildirim`, bir de `v_acil_sure` görünümü. Mockup'lar `Ekranlar/Acil/`.
+
+**Yeni muayene/tanı/reçete tablosu AÇILMADI.** Acil hastasının muayenesi
+`muayene`, tanısı `tani`, reçetesi `recete`, tetkiki `lab_istem` /
+`radyoloji_istem`. Acile özel kopyalar hastanın tıbbi geçmişini ikiye bölerdi.
+Bu dosya yalnız acilin kendi kavramlarını ekliyor.
+
+**Bütün süreler kapı saatinden** ve tek yerde (`v_acil_sure`): her adımı kendi
+başlangıcından ölçseydik zincirdeki gecikme görünmez olurdu - BT "çekime
+alındıktan 6 dk sonra" biter ama hasta kapıdan beri 24 dakikadır bekliyordur.
+Klinik Kalite `İN.G2` de kapı-iğne süresinden hesaplanıyor. **Son iyi görülme
+protokolde**, başvuruda değil: tromboliz penceresi ondan başlar ve yalnız inmeyi
+ilgilendirir. **Kimliksiz hasta kabul edilir** (`hasta_id` NULL + geçici ad);
+zorunlu tutsaydık bilinci kapalı hasta kimlik gelene kadar sistemde hiç
+görünmezdi - ölçülmeyen süre de o sırada işliyor.
+
+**Triyaj geçmişi ayrı tablo + tetik.** Tek kolon olsaydı "hasta kötüleşti mi,
+baştan yanlış mı triyajlandı" sorusu yanıtsız kalırdı. Tetik İZİ garanti eder
+(doğrudan SQL ile yapılan değişiklik bile düşer), gerekçeyi uygulama yazar.
+Düşürme ayrı işaretlenir - engellemek yerine görünür kılındı, çünkü acil
+koşullarda engel kaydı hiç tutmamaya iter. **Çıkış tanısı zorunlu** (BEFORE
+tetik): ön tanıyla kapatılan dosya ne klinik kaliteye ne TİG'e girebilir.
+
+Duman testi (rollback'li): sayım tetiği 20+10=30 ✓ / 6+4≠9 ✗ / kapanışsız
+"bekliyor"; kimliksiz hasta kabul edildi; triyaj izi üç satır (iki ilk triyaj +
+bir düşürme); `v_acil_sure` kapı-hekim 16 dk / hedef / uyum doğru; çıkış tanısız
+kapatma reddedildi.
+
+**Testin açığa çıkardığı kusur:** `acil_triyaj_gecmis.yapan_id` FK'sı, kullanıcı
+kimliği `taraf`ta bulunamadığında **triyaj güncellemesini iptal ediyordu**.
+Denetim alanı yüzünden klinik kayıt engellenemez - FK kaldırıldı, diğer
+`ekleyen`/`degistiren` alanlarıyla aynı hizaya çekildi (düz integer, iz
+tutulamıyorsa 0).
+
+**API kataloğu ve ekranlar.** Altı liste kaynağı: `ameliyat` ·
+`ameliyatTalep` · `ameliyatSalon` · `acilBasvuru` · `acilCagri` · `acilYatak`.
+Beş kart: `ameliyat` (yedi detay: işlemler · ekip · güvenli cerrahi · sarf ·
+sayım · komplikasyon · 1:1 not), `ameliyatTalep`, `ameliyatSalon`,
+`acilBasvuru` (çağrılar · bildirimler), `acilYatak`. Web'de yedi ekran, iki yeni
+menü grubu (`Ameliyathane`, `Acil`).
+
+**Türetilen kolonlar SQL'de.** Cerrahi süre (kesi→bitiş), plan sapması (plan
+saatine göre — günü kaydıran şey geç başlamaktır), ön hazırlık **eksik
+listesi** (dört bayrağı dört kolon yapmak satırı okunmaz kılıyordu; kullanıcının
+sorusu "hazır mı" değil "nesi eksik"), acil süreleri `v_acil_sure`'den okunur —
+yeniden hesaplanmaz. Sayım `uyumlu` ve kontrol listesi `madde_metin` kartta
+**yazılamaz**: biri tetiğin, öteki tanımın malı.
+
+**Menü grubu tavanı 21 → 23'e çıkarıldı**, gerekçesiyle (Diş 20, Medula 21
+örneğindeki gibi): ikisi de kendi iş akışı ve kendi rolü olan modül. Yönetim
+altına gömseydik günlük klinik akış ayarların içinde kalırdı. `db/717` iki
+modülü `kurum_modul`a ekliyor — menü grubu bir modüle bağlı değilse hiçbir
+kuruluma kapatılamaz ve ameliyathanesi olmayan poliklinikte boş bir grup
+durur. Varsayılan açık yalnız yataklı kurum tipinde (`yatan_hasta` modülü açık
+olan tipler; tip listesi elle yazılsaydı yeni tip eklendiğinde sessizce eksik
+kalırdı).
+
+**Aksiyon ekranı BİLEREK eklenmedi.** "Ameliyatı başlat/bitir", "Talebi planla",
+"Triyajı yükselt", "Çıkış kararı" düğmeleri kendi uçlarını ister; karşılığı
+olmayan düğme çalışmayan bir söz olurdu. Liste ve kart bugün eksiksiz çalışıyor.
+
+Uçtan uca denendi (gerçek giriş + demo veri): ameliyat "cerrahi 140 dk · sapma
++12 dk · Sürüyor", talep "eksik: kan hazırlığı, onam · bekleme 12 gün", acil
+"Turuncu · kapı-hekim 16 / hedef 10 → **Aşıldı**" ve kimliksiz hasta geçici
+adıyla listede, çağrı "yanıt 85 dk · Yanıt yok".
+
+**Kalanlar.** İş akışı uçları (başlat/bitir/planla/triyaj/çıkış) ve aksiyon
+kataloğu; oda × saat çizelgesi özel sayfa olarak (generic grid blok çizmez);
+numaralandırma (`ameliyat_no`, `protokol_no`); ameliyat → fatura ve sarf → stok
+düşümü. Göç **715-717 yalnız docker'da**.
+
+## 16.09.2026 — Hekim çalışma planı (`db/718`): "randevu verilebilir" bayrakları plana bağlandı
+
+**Karar (kullanıcı: "randevu verilecek hekimler / kayıt kabule gelecek bölümler
+için check koyduk, doğru mu?" → "çalışma planını projeye ekle · randevu
+verilebilir checklerini iptal et ve buraya bağla").** Bayrak iki anlam
+taşıyor (randevu alır / kayıt kabulde görünür) ve şube-gün-kanal bağlamı
+yoktu. Yerine hekim × şube × bölüm × gün/saat × kanal **şablonu** (her hafta
+ya da iki haftada bir kendiliğinden tekrar eder; haftalık plan elle çizilmez)
++ **istisna** (izin, kongre, saat değişikliği, ek mesai, kapalı). Mockup
+`Ekranlar/Muayene/hekim_calisma_plani.html`.
+
+**DB.** `hekim_calisma_sablon` (saatler `varchar(5)` 'HH:MM' - generic kart
+metin yazar; `time` parametresi text gelip 42804 verirdi), `hekim_calisma_
+istisna` (`bas_tarih`/`bit_tarih` - `bit` ayrılmış sözcük), `departman.
+randevusuz_kabul` (acil/lab: plan gerektirmez, hep görünür), kod listeleri
+`calisma.istisna_tur` / `calisma.tekrar`, yetki `randevu.plan`, `v_sube_
+lookup`. Türetme `fn_hekim_calisma_bloklari(sube, bas, bit, hekim?,
+departman?)` → şablon blokları − ezilen günler + saat değişikliği / ek mesai
+blokları + kapalı günler (kaynak 1/2/3). `fn_hekim_planli(hekim)` = aktif
+şablonu var; `fn_bolum_planli(departman)` = planlı hekimi var. **Lookup'lar
+plana döndü**: `v_hekim_lookup`, `v_randevu_bolum_lookup` (+ randevusuz
+kabul), `v_basvuru_hekim`, `v_rad_hekim_lookup`; API'de RandevuAyarDeposu
+ağacı, BelgeUclari bölümler, RadyolojiUclari hekimler. Bayrak kolonları
+DB'de duruyor (göç izi), hiçbir ekran okumaz; personel ve departman
+kartından alan kalktı, listelerde "Randevu (plan)" kolonu fonksiyondan.
+**Geçiş**: işaretli 50 hekime randevu ayarlarından (hekim satırı > bölüm
+satırı > genel) "Standart hafta" şablonu üretildi - hiçbir hekim listeden
+düşmedi. Randevu Ayarları › Bölümler "＋ Bölüm" artık bölümdeki hekimlere
+şablon açar (hekimsiz bölüm → randevusuz kabul), "çıkar" şablonları pasifler.
+
+**Ekranlar.** Randevu › **Çalışma Planları** (`/calisma-plani`,
+`CalismaPlani.tsx`): hafta gezintisi, şube/bölüm/hekim süzgeci, Hekim × bölüm
+/ Bölüm toplu / Bugün çalışanlar görünümleri, blok seçince kaynak-slot-kanal-
+randevu sayısı ve şablon/istisna kartına geçiş. Randevu › Ayarlar › **Çalışma
+Şablonları** ve **İzin & İstisnalar** generic liste/kart (`calisma-sablon`,
+`calisma-istisna`; log 1170/1171). Uçlar `GET /api/calisma-plani`
+(türetilmiş bloklar + süzgeç seçenekleri) ve `/bugun` (kayıt kabul listesi).
+
+**Kalanlar.** Randevu takvimi slotlarını plan bloklarından üretmek (şimdi
+`randevu_bolum_ayar` düzeni), kanal kotası uygulaması, istisna kaydında
+etkilenen randevuları taşıma/arama listesi, bölüm kapsama boşluğu uyarısı.
+Göç **718 yalnız docker'da** (711 numarası paralel oturumun klinik kalite göçünde; dosya 718'e alındı).
+
+
+## 16.09.2026 — Ameliyathane & Acil iş akışı uçları (`db/719`)
+
+715/716 tabloları ve kart/liste kataloğu vardı; **düğmeler yoktu** - liste
+tanımlarına "aksiyon ekranı yok (henüz)" notu düşülmüştü, çünkü karşılığı
+olmayan düğme göstermek çalışmayan bir söz vermektir. Bu tur o uçları yazdı.
+
+**Uçlar.** `AmeliyathaneUclari`: talebi planla, akış adımı (tek uç · altı
+damga), iptal, not imzala, kontrol listesi oku/yaz, akış şeridi.
+`AcilUclari`: triyaj, hekim gördü, yatak ata/boşalt, çıkış kararı, çağrı aç,
+çağrı yanıt/kapat/tekrar, yatak temizlendi, süre şeridi.
+
+**Kararlar.**
+
+*Altı zaman damgası TEK UÇTAN geçer* (`/ameliyat/{id}/adim`). Her damgaya ayrı
+uç yazmak aynı sıra ve yetki kontrolünün altı kopyasını üretirdi. Sıra yalnız
+OMURGADA zorunlu (salona alma → kesi → bitiş → çıkış); anestezi ve kapanış
+atlanabilir, çünkü lokal anestezide anestezi damgası hiç olmaz - zorunlu
+kılmak olmayan bir adımı uydurmaya zorlardı.
+
+*Time-out kesiyi ENGELLER, sayım uyuşmazlığı UYARIR.* DSÖ listesinin bütün
+amacı kesiden önce durmaktır; sonradan işaretlenen liste yalnız kâğıt olur.
+Sayımda ise engel, ekibi damgayı hiç yazmamaya iter - uyuşmayan sayımın kayda
+geçmesi tam da istediğimiz şey (716'nın "engellemek yerine görünür kılmak"
+ilkesi). Acil için `zorla` var ama **gerekçesiz değil**: gerekçe işlem
+günlüğüne yazılır, atlanan time-out kurumun cevap vermesi gereken bir olaydır.
+
+*Zorlama bayrakları istemciden kendiliğinden gitmez.* Sunucu önce reddeder ve
+NEYİN eksik olduğunu söyler; kullanıcı ısrar ederse ikinci istekte bayrak ve
+gerekçe gider. Baştan göndermek kuralı süse çevirirdi, engellemek acil vakayı
+planlanamaz kılardı.
+
+*"Zaten kaydedilmiş" kontrolü time-out kapısından ÖNCE.* İlk sıralamada
+yanlışlıkla ikinci kez tıklanan kesi, olmayan bir engeli gerekçeyle geçiriyor
+ve günlüğe asılsız bir "time-out atlandı" satırı düşürüyordu - uçtan uca
+testte yakalandı.
+
+*Triyaj: yükseltme serbest, DÜŞÜRME ayrı yetki + gerekçe* (`acil.triyaj_dusur`).
+Hasta kötüleştiğinde önünde engel olmamalı; düşürmek ise hastayı sıranın
+gerisine atar. Gerekçeyi uygulama yazar (716: tetik izi garanti eder, gerekçeyi
+taşıyacak kolon satırda yok). **Triyaj saati bir kez** yazılır - düzey sonradan
+değişse bile kapı-triyaj süresi kaymaz.
+
+*"Hekim gördü" damgası bir kez.* Kapı-hekim süresinin ikinci ucu budur; hekim
+değişince yenilenseydi hedef tutturulmuş gibi görünürdü. İkinci çağrıda mevcut
+damga korunur ve kullanıcıya olduğu gibi söylenir.
+
+*Çıkış kararı tek uçta üç iş yapar*: tanıyı zorunlu kılar, sevki ayrı yetkiye
+bağlar (`acil.sevk`), yatağı **temizliğe** düşürür (boşa değil - temizlenmemiş
+yatağa hasta yollamak panonun yalan söylemesidir). Ayrı adımlar olsaydı ilk
+ikisi yapılıp yatak dolu kalabilirdi.
+
+*Kesi yapılmış ameliyat İPTAL EDİLEMEZ*: yarıda kesilmiş olsa bile gerçekleşmiş
+bir cerrahidir, notu ve komplikasyonu yazılmalı. İptal edilen vakada talep
+bekleyen listesine geri döner (715 kuralı) - kapalı kalsaydı hasta listeden
+düşer ve unutulurdu.
+
+**db/719.** `v_numara_turu_kimlik` yeniden tanımlandı: ameliyat **906**, acil
+protokol **907**. (İlk denemede 905 seçilmişti - o **reçetenin** türü; test
+ameliyat numarasını `R-000001` olarak üretti ve ayar gridinden "Reçete No"yu
+düşürdü. Kullanılmış bir türe ikinci anlam yüklemek, o türün ön ekini ve
+sayacını paylaşmak demek.) Numarayı **tetik yazar, uç değil**: ameliyat iki
+yoldan doğuyor (planlama + doğrudan kart), acil başvurusu yalnız karttan;
+uca koysaydık karttan açılan kayıt numarasız kalırdı. Şablon yoksa **boş kalır**
+(634/635 kuralı). Ayrıca `fn_ameliyat_not_imza_kilidi` (imzalı not değişmez,
+`ek_not` hariç; imza da geri alınamaz - 715 bunu yorumda söylüyordu, kural
+değildi) ve `fn_ameliyat_salon_cakisma` (aralık kesişimi TEK yerde; engellemez,
+çakışanları döner).
+
+**Aksiyon kataloğu.** Akış düğmeleri araç çubuğunda ama hepsi birinci sırada
+değil: o an yalnız biri geçerli olan altı düğme çubuğu doldururdu. Birinci sıra
+omurga, ikinci sıra (araccubugu2) anestezi/kapanış/çıkış/not imzalama. Acilde
+triyaj ekranı ile takip panosu **ayrı düğme seti** taşır - aynı kaynağı
+okuyorlar ama biri hastayı sıraya sokuyor, öteki içerideki hastayı ilerletiyor.
+
+**Ekran.** Üç modal (`PlanlamaModali`, `KontrolListesiModali`, acil
+`CikisModali`) + dört sorulu akış (triyaj · yatak · çağrı · adımlar) prompt
+pencereleriyle. Kontrol listesi üç aşama ayrı başlıkta: sign-in, time-out,
+sign-out ayrı anlarda ve ayrı kişilerle yapılır; tek düz liste "hepsini sonunda
+işaretleyelim"e davet olurdu.
+
+**Doğrulama.** Gerçek girişle 23 uç senaryosu (kabul + red yolları) ve
+Playwright ile dört ekran akışı: kontrol listesi 18 madde / 3 aşama, planlama
+modalinde salon listesi ve eksik hazırlık uyarısı, çıkış modalinde ICD araması
+(`R10` → 3 sonuç), triyaj sorusu. Konsol hatası yok.
+
+**Kalanlar.** Oda × saat çizelgesi (özel sayfa), ameliyat → fatura ve sarf →
+stok düşümü, acil protokol (inme/STEMI) ekranı - tablosu 716'da var, ekranı yok.
+
+Göç **719 yalnız docker'da**.
+
+
+## 16.09.2026 — Ameliyathane: oda × saat çizelgesi (`/ameliyat-cizelge`)
+
+715/716 turunda bırakılan madde. Ameliyat Planı generic liste olarak açılmıştı;
+liste satır çizer, blok çizmez - "hangi vakalar var" sorusunu yanıtlıyordu ama
+"hangi masa ne zaman boş" sorusunu yanıtlayamıyordu. İkincisi ameliyathanenin
+günlük kararının kendisi: acil vaka geldiğinde nereye konacağı oradan okunur.
+
+**Uç.** `GET /api/ameliyathane/cizelge?gun=&salonId=` — salonlar, günün vakaları,
+gün penceresi ve özet (planlanan · tamamlanan · süren · gecikmeli · plan dışı ·
+bekleyen talep · masa kullanımı) tek istekte.
+
+**Kararlar.**
+
+*Blok GERÇEK saatte durur, planda değil.* Başlamış vaka `salona_alma` →
+`salondan_cikis` (bitmediyse `now()`) aralığını kaplar, başlamamış vaka planını.
+Hep plan çizilseydi ekran ameliyathanenin o anki hâlini değil sabah verilen sözü
+gösterirdi - geciken vakanın bir sonrakini ittiği görünmezdi.
+
+*Günün vakaları = planı bugüne düşenler VEYA bugün salona alınanlar.* Yalnız
+plana baksaydık plansız (acil eklenen) vaka çizelgede hiç görünmezdi; oysa masayı
+çoğu zaman en çok o işgal ediyor.
+
+*Gün penceresi veriden türer* (en erken başlangıç – en geç bitiş), **en az
+08–18**. Sabit pencere gece süren acil vakayı kırpardı, tamamen veriden türeyen
+pencere boş günde hiç olmazdı.
+
+*Bloklar dakika hassasiyetinde, yüzdeyle yerleşir.* Mockup `colspan` kullanıyordu;
+08:10–09:55 süren bir vakayı iki tam saate yuvarlamak çizelgenin tek işini
+(boşluğu göstermek) bozardı.
+
+*Gecikme, durumdan ayrı işaret* (blok sol kenarında kırmızı şerit): süren bir vaka
+da gecikmeli olabilir, ikisini tek renge indirgemek birini gizlerdi. Eşik **15 dk** -
+sıfırdan büyük her sapmayı saysaydık iki dakikalık olağan oynama günlük raporu
+"hep gecikmeli" gösterirdi.
+
+*Düğmeler listedekilerle aynı kodu çalıştırır* (`ameliyathaneAksiyonu` doğrudan
+çağrılır, modal kancası paylaşılır): time-out kapısı, "zaten kaydedilmiş"
+düzeltmesi ve kontrol listesi modalı burada da aynen geçerli. Sayfaya özel bir
+"hızlı başlat" yazsaydık kurallar iki yerde yaşar, biri zamanla gerisinde kalırdı.
+
+**İki hata testte çıktı.** (1) `salonId=` boş gelince `int?` bağlaması isteği 400
+ile düşürüyordu - boş değer "süzgeç yok" demektir; metin alınıp çözümleniyor.
+(2) Pencere duvar saati (08–18), kolonlar `timestamptz` (UTC) idi; karşılaştırma
+çevrilmeden yapıldığı için UTC+3'te öğleden sonraki her vaka pencereden taşıp
+kırpılıyordu - `ToLocalTime()` eklendi.
+
+**Doğrulama.** Uç: dolu gün / salon süzgeci / boş gün. Playwright: 12 saatlik
+pencere, blok konumları (11:10 → %26,4), gecikme şeridi, iptal üstü çizili,
+plan dışı bayrağı, şu-an çizgisi, arama (6 → 1 blok), salon süzgeci (3 blok /
+1 satır), gün gezintisi (yarın 0 blok / 3 boş salon), çizelgeden açılan kontrol
+listesi modalı (18 madde). Konsol hatası yok.
+
+**DB değişikliği yok** - 715/719 nesneleri yetti.
+
+
+## 16.09.2026 — Ameliyat → fatura, sarf → stok (`db/720`, `db/721`)
+
+715'te ameliyatın işlemleri ve sarfı vardı ama hiçbiri para ya da stok tarafına
+bağlanmıyordu: "bu ameliyat faturalandı mı", "bu malzeme depodan düştü mü"
+soruları kayıttan yanıtlanamıyordu.
+
+**Uçlar.** `GET /ameliyat/{id}/fatura` (ne bekliyor / ne aktarıldı / ne düştü),
+`POST /ameliyat/{id}/faturala`, `POST /ameliyat/{id}/stok-dus`.
+
+**Kararlar.**
+
+*İKİ AYRI DEFTER, İKİ AYRI BELGE - çift sayım bu yüzden yok.* Ücret **hasta
+başvurusuna** (tür 19) satır olarak yazılır; tür 19 stok ve muhasebe ETKİLEMEZ
+(`BelgeTuru`), gerçek hareket faturaya dönüşünce oluşur. Malzeme **stok çıkış
+fişiyle** (tür 4) düşer - carisiz, yalnız stok yönü. Tek belgede
+birleştirseydik, faturalanmayan (pakete dahil) malzeme ya stoktan düşmez ya da
+hastaya yazılırdı. Testte doğrulandı: 2+3 adet düşüldü, bakiye 20 → **15**
+(13 değil) - başvuru satırı stoğa dokunmadı.
+
+*Faturaya yansıyan malzeme DE stoktan düşer.* "Hastaya yazdık, o hâlde depodan
+düşmesin" diye bir kural yok: malzeme fiilen kullanıldı.
+
+*Belge sırası: ameliyatın kendi belgesi > yatışın belgesi > yeni başvuru.*
+Yatan hastanın ameliyatı yatış faturasına girmeli; ayrı başvuru açsaydık aynı
+yatışın parası iki belgeye bölünür, hasta iki fatura alırdı.
+
+*Bağ SATIR düzeyinde, "faturalandı" bayrağı değil.* Ameliyata tek bayrak
+koysaydık, sonradan eklenen bir implant onun altında görünmez kalırdı. Tekrar
+çalıştırmak güvenli: yalnız bağsız kalemler eklenir.
+
+*Faturalama ve stok düşümü AYRI aksiyon yetkisi* (`ameliyathane.faturala`,
+`ameliyathane.stok_dus`) ve modalde ayrı düğme. Tek tıkla ikisi birden olsaydı
+faturayı onaylayan kişi farkında olmadan depo sayımını da değiştirirdi.
+
+**721 — testin yakaladığı gerçek hata.** 720 bağ kolonlarını **FK'sız** açmıştı;
+`KorunanSatirTestleri` de bu yüzden onları görmüyordu. Belge kaydetme satırları
+siler ve yeniden yazar: FK yokken silme sorunsuz geçer, `belge_satir_id` yok
+olmuş bir satırı göstermeye devam eder ve tekrar faturalama kalemi "zaten
+aktarılmış" sayıp atlar - **ameliyatın ücreti belgeden sessizce düşerdi.** 721
+gerçek FK'yı (NO ACTION) ekliyor ve `KorunanSatirSql`'e iki tablo giriyor.
+Doğrulandı: ikinci faturalama belgeyi yeniden yazdıktan sonra ilk satırlar
+(5190/5191) **id'lerini korudu**, yenisi eklendi.
+
+*NO ACTION bilerek:* CASCADE olsaydı belge satırı silinince ameliyatın işlem
+satırı da silinirdi - klinik kayıt, faturanın yan etkisi olarak yok olamaz.
+SET NULL da yanlış: "faturalandı" bilgisi sessizce kaybolurdu.
+
+**Aynı testin işaret ettiği üç eski hata da düzeltildi**: `dis_seans_islem`,
+`dis_lab_isemri`, `medula_islem` `belge_satir`'a NO ACTION ile bağlıydı ama
+korunan satır listesinde yoktu - o satırı kullanan başvuru **bir daha
+kaydedilemiyordu**. Üçü de listeye eklendi; xUnit 232/232 geçiyor (atlanan yok).
+
+**Yan bulgular.**
+* `fn_belge_varsayilan_liste(p_tur, p_taraf_id, …)` radyolojide **ters sırayla**
+  çağrılıyordu (hasta id'si `p_tur` olarak gidiyor, liste hemen her zaman NULL
+  dönüyordu - başvuru fiyat listesiz açılıyordu). Düzeltildi.
+* `StokKontrolu = true` **engellemez, kontrol eder**: negatif bakiyede engel mi
+  uyarı mı olacağı kurum ayarına bağlı. Hem burada hem radyolojide yorum bunu
+  yanlış anlatıyordu; düzeltildi.
+* `SatirGovdesi` / `BelgeGovdesiAsync` radyoloji ve üretimde birebir tekrar
+  ediyordu, dördüncüsü yazılacaktı - `Uclar/BelgeGovdesi.cs` ortak yardımcısına
+  alındı, üç çağıran oraya bağlandı.
+* Lot bağı yalnız **izlemli** stokta kurulur (`stok.izleme <> 0`). İzlemsiz
+  karta lot bağlamak belge hattı tarafından reddediliyor ("bu stok için lot/seri
+  tutulmuyor") - sarf satırında lot yazması, stok kartının onu izlediği anlamına
+  gelmiyor. Bu da testte çıktı.
+
+**Ekran.** Ameliyat listesinde ve masa çizelgesinde **🧾 Fatura & Stok**; modal
+işlem ve malzeme satırlarını durumlarıyla (bekliyor / aktarıldı / pakete dahil /
+düşüldü / stok kartı yok) gösterir, iki ayrı düğmeyle çalıştırır. Aktarılmış
+satır soluk gösterilir, gizlenmez - "neden bu kalem eklenmedi" sorusunun yanıtı
+listede durmalı.
+
+**Doğrulama.** Uçtan uca: başvuru 3 satır / 11.921,90 ₺ (SUT 9.421,90 + 2×1.250
+malzeme), çıkış fişi 2 satır, stok 20 → 15, ikinci çağrı 422 "yeni kalem yok",
+düşümden sonra düğmeler kapalı. Konsol hatası yok.
+
+**Kalan.** ÜTS bildirimi düşümle birlikte yapılmıyor (UTS modülünün işi);
+implant için "ÜTS bekliyor" uyarısı veriliyor. Göç **720/721 yalnız docker'da**.
+
+
+## 16.09.2026 — İmplant ÜTS bildirimi düşümle birlikte
+
+720'de sarf düşümü yalnız "ÜTS bekliyor" diye hatırlatıyordu; bildirimin
+kendisi elle, ÜTS ekranından yapılıyordu. 715'in kendi notu bunun neden
+yetmediğini söylüyordu: *"sonradan bildirim, hasta çıkınca seri numarası
+kaybolduğu için çoğu zaman yapılamıyor."* Düşümü yapan kişi elindeki kutuya
+bakıyor - bildirimin en doğru anı o.
+
+**Karar: KULLANIM bildirimi, verme değil.** İmplant hastaya takıldı, başka bir
+kuruma devredilmedi. Verme bildirseydik ürün ÜTS'de hâlâ dolaşımda görünürdü.
+Hasta TCKN/ad/soyad `taraf`tan, kullanım tarihi **ameliyatın kendi saatinden**
+(kesi > salona alma > plan) - düşümün yapıldığı andan değil: implant dün
+takıldıysa ÜTS'ye bugünün tarihini yazmak kaydı yanlışlar.
+
+**Karar: bildirim düşümden SONRA, ve hatası çağrıyı düşürmez.** Sıra tersine
+olsaydı ÜTS'nin bir hatası stok hareketini de geri alırdı; malzeme fiilen
+kullanıldı, depo kaydı dış servisin keyfine bağlanamaz. Reddedilen satır
+`uts_durum = 3` ile kalır.
+
+**Karar: hesap tanımsızsa satırlar "hata" YAPILMAZ.** Kayıtta sorun yok,
+kurulumda var. Hepsini 3 işaretleseydik ÜTS ekranı gerçek reddedilmelerle
+kurulum eksiğini aynı kutuda gösterirdi; ayrı `utsMesaj` alanıyla dönüyor.
+
+**Yeni uç `POST /ameliyat/{id}/uts-bildir`.** Düşüm bir daha çalışmaz (malzeme
+zaten düştü), dolayısıyla bildirimin kendi kapısı olmalı - yoksa `uts_durum = 3`
+kalan implant ameliyat tarafında sonsuza kadar "hata" olarak durur ve yalnız ÜTS
+ekranından, ameliyatla bağı görünmeden yeniden gönderilebilirdi. Yalnız DÜŞÜLMÜŞ
+implantları alır: düşülmemişte ortada stok hareketi yok.
+
+**Testin çıkardığı gerçek hata — UYDURULAN LOT.** İlk yazımda lot eşleşmesi
+"satırda lot boşsa herhangi biri" idi. Lot izlemli bir stokta lotsuz bir sarf
+satırı, kimse söylemeden **rastgele bir lotu** düşürdü: bakiye toplamı doğru
+çıkıyor ama hangi lotun hastaya gittiği uydurulmuş oluyordu - geri çağırmada
+aranan tam da bu bilgi. Artık satır lot ya da seri söylemiyorsa eşleşme
+yapılmaz; izlemli stokta belge hattı "lot seçilmeli" diye reddeder (doğrusu bu:
+hangi lotun kullanıldığı kayda geçmeli).
+
+**Yan düzeltme.** `KullanimBildirAsync` yalnız `object` döndürüyordu; sonucu
+anonim yanıttan yansımayla okumak alan adı değişince sessizce bozulurdu -
+`KullanimBildirSonucAsync` eklendi (tuple), eski imza ona delege ediyor.
+
+**Doğrulama — GERÇEK ÜTS'YE HİÇBİR ŞEY GÖNDERİLMEDİ.** Dev şubenin ÜTS hesabı
+üretim ucuna bakıyordu (`test_mi = 0`, varsayılan `utsuygulama.saglik.gov.tr`);
+sahte bir kullanım bildirimi Bakanlık'ta gerçek kayıt olurdu. Test için üretim
+hesabı geçici olarak pasife alınıp test hesabı yerel bir taklide
+(`localhost:5199`) yönlendirildi, test sonunda **ikisi de bulunduğu hâle geri
+alındı** (üretim aktif, test pasif/tokensuz/URL'siz - doğrulandı).
+
+Senaryolar: lotlu implant → bildirildi (`uts_durum` 2); ÜTS reddi → `uts_durum`
+3, düşüm geçerli kaldı; hesap yok → satırlar işaretlenmedi, ayrı mesaj; tekrar
+dene → 2'ye çekti, `utsBekleyen` 2 → 1; bildirilecek kalmayınca 422. Lotsuz
+implant düşümü "2. satır için lot seçilmeli" ile reddedildi. xUnit 232/232
+(atlanan yok), menü testleri 6/6.
+
+**Ekran.** Fatura & Stok modalinde ÜTS sonucu satır satır: başarılılar yeşil
+bilgi kutusunda, reddedilenler AYRI uyarı kutusunda - biri reddedilse de düşüm
+geçerlidir ve öteki satırlar bildirilmiştir, tek "başarısız" mesajı bunu
+gizlerdi. Bekleyen varken **🏷 ÜTS Bildir (n)** düğmesi çıkar.
+
+**DB değişikliği yok** - 715/720 kolonları yetti.
+
+## 16.09.2026 — FTR (Fizik Tedavi ve Rehabilitasyon) modülü (`db/719`)
+
+**Mockuplar** `Ekranlar/FTR/` (kullanıcı: "fizik tedavi süreçleri için FTR
+dizini açıp mockuplar yap"): süreç, değerlendirme, tedavi programı (kür),
+seans uygulama, ünite panosu, takip & rapor - sekmeler açılır, üst çipler
+ekranlar arası gezer.
+
+**Karar.** İş birimi TEDAVİ PROGRAMI (KÜR): uzman değerlendirmesi (tanı,
+bölge, VAS, EHA/ROM, ölçekler, hedef) → program (SUT uygulamaları, seans
+sayısı, haftalık sıklık, fizyoterapist, ünite/kabin, Medula rapor hakkı)
+→ seanslar (uygulama işaretleri, VAS önce/sonra, ev uyumu, imza) → ara /
+kür sonu değerlendirme (ölçek MCID, yanıt). Gelmeyen seans yakılmaz,
+program uzar; ara değerlendirme seansına ulaşınca program durumu "ara
+değerlendirme", son seansta "tamamlandı".
+
+**DB (719).** Kod listeleri `ftr.*` (bölge, program/seans durumu, ölçek,
+aşama, yanıt, egzersiz yeri, kabin türü); `hizmet.ftr_uygulama` (SUT 9.xx
+otomatik işaretli); tablolar `ftr_unite`, `ftr_kabin`, `ftr_degerlendirme`
+(+ `ftr_eha`), `ftr_program` (+ `_uygulama`, `_egzersiz`), `ftr_seans` (+
+`_uygulama`), `ftr_olcek`; numara `FT-YYYY/NNNN` tetikle, tahmini bitiş
+sıklıktan; görünümler `v_ftr_*` + lookup'lar; yetkiler `ftr`, `ftr.
+degerlendirme/program/seans/olcek/unite`, aksiyonlar `ftr.program.sonlandir`,
+`ftr.seans.bitir`; örnek Ünite A + 6 kabin. Log 1180-1189.
+
+**API.** `KaynakKatalogu.Ftr` (5 liste), `KartKatalogu.Ftr` (değerlendirme
++ EHA/ölçek detayı, program + uygulama/egzersiz detayı, seans + uygulama,
+ölçek, ünite + kabin), `FtrUclari`: `GET /api/ftr/program/{id}` (tek soruda
+kart), `POST /program/{id}/uygulama` · `DELETE /program/uygulama/{id}`,
+`/program/{id}/planla` (sıklığa göre hafta içi takvim), `/seans-ac` (planlı
+seansı başlatır ya da sıradakini açar, uygulamaları kopyalar),
+`/sonlandir`; `GET/PATCH /seans/{id}`, `PATCH /seans/uygulama/{id}`,
+`/seans/{id}/bitir` (sayaçlar, ara/kür sonu geçişi, kalan hak), `/gelmedi`
+(devamsız, 3+ uyarı), `/yarim`; `GET /pano` (kabinler, günün seansları,
+fizyoterapist yükü); `GET /uygulamalar?q=`.
+
+**Web.** Menü grubu **FTR** (modül `ftr`, Diş'ten sonra, ikon 🏃): Ünite
+Panosu (`FtrPano.tsx`), Değerlendirmeler, Tedavi Programları (özel modal
+`FtrProgramKarti.tsx`: adım şeridi, özet, Uygulamalar / Seans Takvimi /
+Egzersiz / Takip & Ölçekler / Günlük; düzenleme gizli generic `ftr-program-
+kart` listesinde, yeni kayıt kaydedilince özel karta geçer), Seanslar (özel
+modal `FtrSeansKarti.tsx`: VAS seçici, uygulama check + neden, sayaç, not,
+bitir / yarım / gelmedi), Ölçekler, Ayarlar › Üniteler & Kabinler; liste
+aksiyonları `ftrAksiyonlari.ts`. Menü grup tavanı 24. Uçtan uca: API
+betiği (değerlendirme → program → uygulama → planla → seans aç/bitir → pano)
+ve tarayıcı (pano, program kartı sekmeleri, seans kartı, geri dönüş, yeni
+program generic kartı) hatasız.
+
+**Kalanlar.** Seans hizmet kaydı / ücret (başvuru satırı, Medula seans
+gönderimi) ve fizyoterapist hakedişi; ölçek soru formları (skor otomatik);
+ev egzersiz PDF / portal; cihaz sayacı; kür sonu rapor PDF; seans randevusu
+→ çalışma planı bağı. Göç **719 yalnız docker'da**. Not: tema testi
+`cz-oda` sınıfını işaretliyor - paralel oturumun ameliyathane çizelgesi.
+
+**Ekle / Düzenle / Sil deseni (kullanıcı: FTR, Acil, Ameliyathane, Diş
+listeleri).** CRUD listelerinde "🗑 Sil" araç çubuğunda (önceden sağ tuş /
+palet): FTR değerlendirme/program/seans/ölçek/ünite, Diş plan/seans/lab iş
+emri/ödeme planı/ünit/laboratuvar, Ameliyathane talep/salon, Acil yatak.
+Koruma sunucuda: `SilmeEngelleri` (FTR: programı olan değerlendirme,
+seansı/ölçeği olan program, programı olan ünite; Diş: seansı/ödeme planı
+olan plan, seansı olan ünit, iş emri olan laboratuvar) + `db/720`
+tetikleri (`GK422`): yapılmış FTR seansı, bitmiş diş seansı, teslim edilmiş
+lab iş emri, tahsilatı olan ödeme planı, yapılmış satırı olan plan silinmez.
+Tuzak: plpgsql'de `and` kısa devre yapmaz - tablo dalları iç içe `if`
+(olmayan alan 42703 veriyordu).
+
+## Menü V2: bölgeler + accordion (web, 16.09.2026)
+
+Kullanıcı: "son eklenen modüllere göre bir hastane için ideal menü düzeni
+V2 olarak mockup yap" → `Ekranlar/Ayarlar/hastane_menu_v2.html`, ardından
+"refaktor" ile projeye alındı. 24 grup tek seviyede ekranı aşıyordu; HBYS'de
+gruplar artık 7 BÖLGE altında (`web/src/sayfalar/kabuk/menuBolgeleri.ts`,
+hasta yolculuğu sırası): Hasta Akışı (Randevu, Kayıt Kabul, Acil) · Klinikler
+(Muayene, Göz, Diş, FTR) · Tanı & Tetkik (Lab, Radyoloji) · Yatan & Cerrahi
+(Yatan, Ameliyathane) · Ödeyen & Fatura (Medula, Kurumlar & Sigorta, e-Nabız)
+· Finans & Tedarik (Finans, Muhasebe, Stok, Cari & CRM) · Yönetim (İK, Doküman,
+Demirbaş, Yönetim). `GRUP_SIRA_HBYS` bu listenin düzleşmiş hali (tek kaynak).
+Kabuk: bölge başlığı `.mn-bolge` (renk karesi, ekran açmaz), TEK bölge açık
+(accordion) - kullanıcı seçmedikçe aktif rotanın bölgesi; bölge içine tıklama
+bölgeyi sabitler. Grup satırı `grupCiz`, grupsuz düz öğe `duzCiz` (Demirbaş
+adıyla bölgesine girer). ERP menüsü değişmedi (bölgesiz). Kayıt Kabul'e
+"Medula Kabul" çapraz bağlantısı (`menuYol`, Dökümler deseni; rota tek).
+`menuDuzeni.test.ts`: her HBYS grubunun bölgesi var, ≤7 bölge, bölge başına
+≤4 grup, grup iki bölgede olamaz.
+
+**Çalışma alanı** (kullanıcı: "çalışma alanı çipini de ekle"): sol menüde
+Ana Sayfa'nın altında seçici (`.mn-alan`): Tümü · Banko · Hekim · Hemşire ·
+Lab/Görüntüleme · Muhasebe (`CALISMA_ALANLARI`, menuBolgeleri.ts). Alan
+dışındaki bölgeler ÇİZİLMEZ (yetki değil, görünüm); "Diğer bölgeler (n)"
+satırı oturum boyunca açar; aktif rota alan dışındaysa o bölge yine görünür.
+Varsayılan rol adından (`rolCalismaAlani`: standart rol adları regex ile;
+Yönetici/Bilgi İşlem = Tümü); seçim sunucuda `kullanici_tercih.calismaAlani`
+(TercihDeposu beyaz listesine eklendi) + yerel kopya. Göç yok.
+
+**Refaktor (kullanıcı: "refaktor")**: `Kabuk.tsx` 800 → ~280 satır. Menü
+kurulumu (yetki/ürün modu/modül süzgeci, grup + alt grup, ürüne göre grup
+sırası, ikon tabloları, `MenuIkon`) saf `kabuk/menuAgaci.tsx`
+(`menuSatirlariKur`); sol menü çizimi + açık grup / bölge accordion / çalışma
+alanı durumu `kabuk/YanMenu.tsx` (props: satirlar, bolgeliMenu, tercih,
+panelYetkisi, aktifSubeAd, kullaniciKod, rolAdi). Kabuk üst şerit, pencereler,
+tercih kancası ve rota → "En Son" kaydı ile kalır. Davranış değişmedi
+(Playwright: bölgeler, alan, Favori/En Son, FTR geçişi, konsol hatasız).
+
+
+## 16.09.2026 — Eczane, Biyomedikal ve Satınalma şemaları (`db/722`, `723`, `724`)
+
+Üç turda çıkarılan mockup'ların (`Ekranlar/Eczane`, `Ekranlar/Demirbas`,
+`Ekranlar/Satinalma`) veri karşılığı. Üçü birlikte kuruldu çünkü birbirine
+bağlılar: eczanenin kritik stoğu satınalma talebi doğuruyor, biyomedikalin
+arızası da öyle; satınalmanın mal kabulü eczane stoğunu besliyor.
+
+**Ne AÇILMADI — ve neden.** Şemanın çoğu karar "yeni tablo yazmamak" üzerine:
+
+* **Order tablosu** — yatan hasta orderı `yatis_order`, uygulaması
+  `order_uygulama` (695). Eczane bunları okur; kendi kopyasını açsaydı hastanın
+  ilaç geçmişi ikiye bölünürdü.
+* **Stok tablosu** — miad/lot/bakiye `stok_durum` · `stok_lot_durum` ·
+  `stok_seri_lot`'ta; eczane deposu bir `depo` kaydı. Ayrı stok yazsaydık FEFO
+  iki yerde hesaplanır ve ikisi ayrışırdı. Tüketim görünümü de `belge_satir`'dan
+  okuyor: ayrı hareket defteri tutmadık.
+* **Sipariş ve fatura tablosu** — alış siparişi `belge` tür 9, irsaliye 10,
+  fatura 11. İkinci bir sipariş tablosu para matematiğini ikiye bölerdi
+  (CLAUDE.md kuralı). `belge_satinalma` 1:1 uzantısı yalnız SÜRECİ taşıyor:
+  teslim taahhüdü, gecikme, ceza, sözleşme bağı.
+* **Cihaz tablosu** — `demirbas` zaten vardı; eksik olan klinik mühendislik
+  katmanıydı (risk sınıfı, periyotlar, kalibrasyon). Genişletildi, ikinci
+  envanter açılmadı. `cihaz` (432) ile de karıştırılmadı: o bir entegrasyon
+  ucudur (HL7/DICOM adresi), biyomedikalinki fiziksel varlıktır —
+  `demirbas.cihaz_id` ikisini bağlar.
+* **Tedarikçi tablosu** — `tedarikci` zaten `taraf` üzerinde bir görünüm.
+
+**722 — Eczane.** `eczane_kontrol` (eczacı uyarısı), `eczane_doz` (ünite doz),
+`eczane_hazirlama` + `_kalem` (kemoterapi/TPN), `eczane_iade`, `eczane_imha` +
+`_satir`, `kontrollu_defter`, `kontrollu_sayim` + `_satir`, `v_eczane_miad`.
+
+*Eczacı kontrolü order satırına bayrak değil, AYRI SATIR:* bir order satırına
+birden çok uyarı düşer (alerji + etkileşim + böbrek dozu) ve her birinin kendi
+kararı, gerekçesi ve hekim bildirimi olur. Önlenen ilaç hatası kalite
+göstergesidir — tek bayrakla sayılamaz.
+
+*Kontrollü ilaç defteri SİLİNMEZ:* tetik `DELETE`'i reddediyor, yanlış kayıt
+düzeltme satırıyla kapatılıyor (`duzeltilen_id`). Mevzuat defteri istiyor; stok
+hareketi defterin yerine geçmez. Günlük sayımda uyum tetikle hesaplanıyor —
+iki kişi birbirini görmeden sayar, fark düzeltilmez.
+
+*Miad görünümü tarihe değil TÜKETİME de bakıyor:* günlük 6 giden kalem 14 gün
+kala iade edilmez, tüketilir.
+
+**723 — Biyomedikal.** `demirbas` künye ekleri (risk sınıfı, periyotlar,
+koruma sınıfı/uygulama tipi, ÜTS UDI, yedek havuz, sözleşme),
+`demirbas_kalibrasyon` + `_olcum`, `demirbas_is_emri` + `_madde` + `_parca`,
+`demirbas_hareket`, `demirbas_belge`, `v_demirbas_durum`.
+
+*Bakım ve arıza TEK tabloda* (`demirbas_is_emri`, tür ayırır): ikisi de
+"cihazda yapılan iş"tir — aynı duruş, aynı parça, aynı geçmiş. Ayırsaydık
+"bu cihaz ne sıklıkla bozuluyor" sorusu iki tablodan toplanırdı.
+
+*Kalibrasyon ve elektriksel güvenlik testi de tek tabloda, ayrı tür:* ikisi de
+"ölçüm noktası + sınır + sonuç" yapısında, ama ayrı soruları yanıtlıyor —
+"doğru ölçüyor mu" / "hastayı çarpar mı".
+
+*Sonuç cihaza tetikle işleniyor:* uygunsuz kalibrasyon cihazı **kullanım dışı**
+(durum 3) yapıyor, uygun sonuç yalnız kalibrasyon yüzünden kapatılmışsa açıyor
+(arızası varsa açmıyor). `v_demirbas_durum`'da **"hazır" = arızasız VE
+kalibrasyonu geçerli** — çalışan ama kalibrasyonu geçmiş cihaz kullanılabilirlik
+sayısına girmiyor. Testte doğrulandı: uygun → hazır=t, uygunsuz → durum 3,
+hazır=f.
+
+*Ayar öncesi/sonrası ayrı kayıt* (`ayar_oncesi_id`) ve uygunsuz sonuçta
+`geriye_donuk_deger` alanı: cihaz ne zamandır sapıyordu, o sürede kaç hastada
+kullanıldı.
+
+**724 — Satınalma.** `butce_kalem`, `satinalma_talep` + `_satir` +
+`satinalma_onay`, `satinalma_teklif` + `_kriter` + `_firma` + `_yanit`,
+`belge_satinalma`, `satinalma_fatura_kontrol`, `satinalma_kabul`,
+`tedarikci_sozlesme` + `_fiyat`, `tedarikci_olay`, `tedarikci_belge`,
+`v_butce_durum`, `v_tedarikci_skor`.
+
+*Talep `belge` DEĞİL:* tür 105 (Stoktan Talep) servis → eczane gibi iç
+taleptir, karşılığı transferdir. Satınalma talebi dışarı çıkar, bütçe ve onay
+zinciri taşır, henüz belge değildir.
+
+*Onay zinciri satır satır* (`satinalma_onay`): kim, ne zaman, hangi basamakta,
+hangi gerekçeyle. Basamakları tutar + bütçe durumu + malzeme türü belirliyor.
+Sözlü onayın yazılı tamamlanma süresi (`yazili_son`) izleniyor.
+
+*Değerlendirme ağırlıkları davetten sonra KİLİTLİ:* tetik değişikliği
+reddediyor. Sonradan ağırlık değiştirmek, kararı seçip gerekçeyi sonradan
+yazmaktır. Testte doğrulandı — davet öncesi değişti, kilit sonrası reddedildi,
+başka alanlar değişmeye devam etti.
+
+*Taahhüt de harcamadır:* `v_butce_durum` açık siparişi (tür 9, takip_durum 0/1)
+ayrı gösteriyor ama kalandan düşüyor — yoksa aynı para iki kez harcanır.
+
+*Tedarikçi skoru HESAPLANIR, girilmez:* her gecikme/uygunsuzluk/fatura farkı
+`tedarikci_olay`'a yazılıyor, `v_tedarikci_skor` son 12 aydan türetiyor. Süresi
+dolmuş belge de görünümde (`belge_suresi_doldu`) — borcu yoktur yazısı aylıktır.
+
+**Doğrulama.** Üç göç uygulandı, üç görünüm çalışıyor (`v_eczane_miad`,
+`v_demirbas_durum`, `v_tedarikci_skor` 141 satır), beş tetik senaryosu test
+edildi ve test verisi temizlendi. `GUNCEL.md` 554 nesne.
+
+**Kalan.** API katalogları ve ekranlar (üç modül için de). Numara şablonları
+(talep no, sipariş no, imha tutanağı, defter no, iş emri no) — 634/719 desenine
+eklenecek. Kritik stok → otomatik talep tetiği. Göç **722/723/724 yalnız
+docker'da**.
+
+## İşyeri Hekimliği (OSGB) mockupları (16.09.2026)
+
+Kullanıcı: "projemiz işyeri hekimliği olarak da kullanılabilir mi?" → evet,
+çekirdek (hasta/taraf, muayene, tıbbi özet, lab/radyoloji istem, randevu +
+çalışma planı, anlaşmalı kurum, kurum profili/roller, dökümler) üstüne bir
+modül. Mockup seti `Ekranlar/ISG/` (üreteç scratchpad `isg_gen.py`): süreç
+(roller, 6331 kuralları, veri modeli, mevcut↔yeni), firma panosu (tehlike
+sınıfı, İSG-KATİP dakika, sağlık gözetimi özeti - işverene sağlık verisi
+gitmez), çalışan kartı (maruziyet → tetkik paketi, muayene geçmişi, aşı,
+olaylar), Ek-2 muayene (öykü / sistem sorgusu / fizik / tetkik / kanaat +
+imza), periyodik takvim (vade hesaplı, toplu randevu, saha günü), ziyaret ·
+kaza · bildirim kuyruğu (onaylı defter, SGK 3 iş günü). Öneri: kurum tipi
+`osgb`, modül `isg`, tablolar `isg_firma / isg_calisan / isg_calisan_maruziyet
+/ isg_muayene / isg_tetkik_paketi / isg_asi / isg_ziyaret / isg_olay /
+isg_sure`. Kod yazılmadı.
+
+
+## 16.09.2026 — Eczane / Biyomedikal / Satınalma: API kataloğu ve ekranlar (`db/725-728`)
+
+722-724 şemasının üstüne kaynak + kart katalogları, aksiyon ekranları ve menü.
+**16 liste, 15 kart, 16 menü öğesi** — üçü de Playwright'ta konsol hatasız açılıyor.
+
+**Kaynak katalogları.** `KaynakKatalogu.Eczane.cs` (7 kaynak),
+`KaynakKatalogu.Biyomedikal.cs` (3), `KaynakKatalogu.Satinalma.cs` (6).
+Türetilmiş kolonlar SQL'de: bekleme dakikası, iade engelleri, çift imza,
+işaretli kalibrasyon/bakım günü (negatif = süresi geçti), duruş saati, yanıt
+dakikası, bekleyen onay basamağı, birleştirilebilir talep, en düşük alınıp
+alınmadığı, gecikme günü, tedarikçi skoru.
+
+**Kart katalogları.** `KartKatalogu.Eczane.cs` (6 kart), `.Biyomedikal.cs` (2),
+`.Satinalma.cs` (6). LogTabloId 1200-1250.
+
+*Kod sözlükleri TEK KAYNAK.* Kart sözlükleri ilk yazımda elle kopyalandı ve
+**onbir tanesi şemayla çelişti** — kalibrasyon sonucunda 2/3 ters ("uygun
+değil" ↔ "şartlı uygun"), parça kapsamında 0/1/2 yerine 1/2/3, iş emri
+önceliğinde "acil/normal/düşük" yerine şema "kritik/yüksek/normal/düşük"
+diyor. Rozet yanlış yazsa da kayıt doğru görünürdü: kullanıcı uygunsuz
+kalibrasyonu "şartlı uygun" okurdu. Çözüm kopyayı düzeltmek değil, kopyayı
+**kaldırmak** oldu: `KaynakKatalogu`'nun sözlükleri `internal` yapıldı, kartlar
+onları kullanıyor. Liste ve kart artık ayrışamaz.
+
+*Biyomedikal için İKİNCİ CİHAZ KARTI AÇILMADI.* Klinik mühendislik künyesi
+(risk sınıfı, periyotlar, ÜTS/UDI, sözleşme) mevcut `demirbas` kartına
+`UrunModu: 2` alanlar olarak eklendi; ERP demirbaş kartı olduğu gibi kaldı.
+Ayrı kart, aynı satır için iki düzenleme ekranı ve iki log tablo kodu demekti -
+denetimde "bu alanı kim değiştirdi" sorusu iki yerden toplanırdı. **Bu turda
+önce yanlış yapıldı:** `KaynakKatalogu.Demirbas.cs` ve `KartKatalogu.Demirbas.cs`
+üzerine yazılıp mevcut ERP demirbaş kaynağı/kartı silinmişti (kayıt yerinde
+duruyordu, derleme kırılacaktı). Geri alındı; yeniler `*.Biyomedikal.cs`'e taşındı.
+
+*Kart olmayanlar ve nedeni.* Kontrollü ilaç defteri (satır silinemez, düzeltme
+ayrı satırla), sipariş ve fatura (`belge` tür 9/11 - para matematiği tek
+yerde), tedarikçi skoru (hesaplanır), demirbaş hareketi (elle düzenlenebilen
+geçmiş, geçmiş sayılmaz). Onay zinciri talep kartında **salt okunur** sekme:
+imzayı elle eklemek zinciri "kim ne zaman"dan "kim ne yazdı"ya çevirirdi.
+
+**Aksiyon ekranları.** 16 ekran kodu. Akış düğmesi YOK - eczacı kararı, doz
+kontrolü, hazırlama doğrulaması, onay/karar/ceza uçları bu turda yazılmadı;
+çalışmayan düğme koymak olmayan bir yetenek vaat etmektir.
+
+**Menü.** İki yeni grup (Eczane, Satınalma) ve **sekizinci bölge: "Tedarik &
+Teknik"** (Eczane · Satınalma · Stok & Hizmet · Demirbaş). Bölge tavanı 7'den
+8'e çıktı - adı olan bir adım, torba değil: eczanenin kritik stoğu satınalma
+talebi doğurur, biyomedikalin arızası da öyle, satınalmanın mal kabulü
+ikisinin de stoğunu besler. Finans'ın ve Yönetim'in içine dağıtılsalardı
+günlük tedarik işi iki menü dalına bölünürdü. Yeni çalışma alanı: "Eczane /
+Tedarik" (`eczane_depo` rolü buraya düşer). Biyomedikal grup AÇMADI - ekranlar
+Demirbaş grubunda, `urunModu: 2` ile.
+
+**725 — modül ve yetki.** `eczane` ve `satinalma` `kurum_modul`'e; hastanede
+varsayılan açık, tıp merkezinde tanımlı-kapalı. Biyomedikal modül açmıyor: ERP
+demirbaş ekranı hiçbir kurulumda kapatılamamalı. Üç yetki eklendi -
+`demirbas.isemri` (bakım ve arıza TEK tablo, tek liste; 723'te ikiye
+ayrılmıştı), `satinalma.fatura` (mal kabul "sipariş ettiğimiz mi", fatura
+kontrolü "tutar tuttu mu" - biri diğerini vermemeli), `satinalma.sozlesme`
+(sözleşme fiyatı siparişi bağlar, yani parayı belirler).
+
+**726 — kart çerçevesinin denetim kolonları.** Kart deposu her insert'e
+`ekleyen`, her update'e `degistiren` yazar; 722-724 tabloları uçtan yazılacağı
+varsayımıyla bu kolonlar olmadan açılmıştı. İlk kart kaydında
+`42703: column "ekleyen" of relation "eczane_imha_satir" does not exist` ile
+düştü. 18 tabloya eklendi. Detay satırı da denetlenir: "bu imha satırını kim
+ekledi" üst kaydın değil satırın sorusudur - tutanağı açanla satırı ekleyen
+aynı kişi olmayabilir.
+
+**727 — ölçüm sapması.** `fn_demirbas_olcum_sonuc` yalnız "sınır içi / dışı"
+yazıyordu; `sapma` ve `sapma_yuzde` boş kalıyordu ve kartta salt okunur
+oldukları için hiçbir yoldan doldurulamıyordu - ölçüm kaydedildi, "ne kadar
+saptı" yanıtsız kaldı. Tetik artık sapmayı da hesaplıyor (işaret korunur -
+ayar yönünü belirler) ve `nominal` değişince de çalışıyor.
+
+**728 — "kalibrasyona tâbi" ölçütü.** `v_demirbas_durum`'da tâbilik yalnız
+`kalibrasyon_periyot_ay > 0` idi: periyodu yazılmamış ama **sertifikası süresi
+dolmuş** cihaz `hazir` görünüyordu - künye eksikliği cihazı kullanılabilir
+gösteriyordu. Ölçüt "periyot ayarlı YA DA geçerlilik tarihi kayıtlı" oldu.
+Tersi korundu: periyodu 0 ve hiç kalibrasyon kaydı olmayan sandalye/monitör
+hazır sayılır. Liste kolonu (`kalibrasyonGun`) aynı ölçüte hizalandı.
+
+**Belge koruması.** `satinalma_talep_satir.belge_satir_id` `belge_satir`'a NO
+ACTION ile bağlıydı ama `KorunanSatirSql`'de yoktu: bir talebi karşılayan alış
+siparişi **bir daha kaydedilemezdi**. `KorunanSatirTestleri` yakaladı, listeye
+eklendi.
+
+**Doğrulama.** API derlemesi temiz; 16 kaynak ve 35 çip süzgeci gerçek
+çağrıyla 200 döndü; 15 kart metası okundu; 10 kart detaylarıyla birlikte
+yazıldı ve tetikleri doğrulandı (sayım uyumu 10/10→1, 9/10→0; kalibrasyon
+cihazın künyesine işlendi; ölçüm sapması 100→101 = 1 / %1). xUnit 232/232,
+vitest 598/598, web derlemesi temiz. Tüm test verisi silindi.
+
+**Ekran bulunmayan ayrıntı.** Çizelge CSS'indeki `cz-oda` hem global görünüm
+kuralı hem kap içinde tanımlıydı (`temaSinifCakismasi` "iki anlamlı ad");
+başlık hücresi kendi sınıfına (`cz-basoda`) ayrıldı.
+
+**Kalan.** Akış uçları (eczacı kararı, doz kontrolü, hazırlama doğrulama,
+onay/karar/ceza, mal kabul). Numara şablonları (talep no, sipariş no, imha
+tutanağı, defter no, iş emri no, hazırlama no) - 634/719 desenine eklenecek.
+Kritik stok → otomatik talep tetiği. Göç **725-728 yalnız docker'da**.
+
+**Çalışan formu (SMS) mockup'ı** (kullanıcı: işe giriş formunu çalışanın
+telefonuna link olarak gönderme; bir kısmı çalışan, bir kısmı hekim doldurur):
+`Ekranlar/ISG/isg_calisan_formu.html`. Akış: gönder (tek/toplu, SMS şablonu,
+72 saat tek kullanımlık belirteç) → telefon (TCKN son 4 + doğum yılı, KVKK açık
+rıza, 5 adım, taslak) → hekim Ek-2'de "çalışan beyanı" bloğu, tek tuşla aktarım,
+düzeltme rozeti, asıl beyan değişmez. Motor genel: `form_sablon` (bölüm sahibi
+hasta/hekim, jsonb, sürümlü) + `form_istek` + açık sayfa `/f/{kod}` +
+`/api/acik/form/*`; mevcut altyapı: bildirim SMS/e-posta, anonim uç deseni
+(ilk-parola), muayene öykü kolonları. Aynı motor ön kayıt/diş anamnezi, FTR
+ölçekleri, memnuniyet için. Kod yazılmadı.
+
+## Form motoru mockupları (16.09.2026)
+
+Kullanıcı: "form motoru ile hasta onam formu, hemşire gözlem, doktor ameliyat
+formu da yapılır mı?" → evet; kural: sorgulanacak veri tabloda (vital, ameliyat
+notu), belge/kontrol listesi/anket/beyan form motorunda, köprü `hedefAlan`.
+Mockup seti `Ekranlar/Formlar/` (üreteç scratchpad `form_gen.py`): `formlar.html`
+(Yönetim › Formlar: 5 aile onam/değerlendirme/kontrol listesi/beyan/anket,
+şablon listesi, doldurulan formlar, tetikleyici kuralları + kilit, ayarlar),
+`form_sablon_editoru.html` (ağaç/tuval/özellikler, parametreli metin bloğu,
+sahip rol, koşul, hesap, imza alanı, sürüm), `form_hasta_kartinda.html`
+(hasta kartı Formlar sekmesi, eksik onam → ameliyat kilidi), `form_onam_imza.html`
+(tablet kanvas imza, uzaktan OTP, hekim e-imza + PDF), `form_hemsire_degerlendirme.html`
+(Braden/İtaki skor tablosu, eşik → görev, zaman çizelgesi; vital tablo),
+`form_guvenli_cerrahi.html` (WHO 3 aşama, 3 rol, aşama kilidi, kalite göstergesi).
+Veri: `form_sablon` · `form_istek` · `form_kural`. Kod yazılmadı.
+
+
+## 16.09.2026 — Eczane / Biyomedikal / Satınalma akış uçları (`db/729`, `730`)
+
+Kart ve liste kaydı okur-yazar; bu tur **durumu ilerleten 26 uç** ile
+düğmelerini yazdı. Mockup'lardaki düğmelerin karşılığı artık çalışıyor.
+
+**Eczane (10 uç).** Eczacı kararı + hekim yanıtı · ünite doz adımı · hazırlama
+adımı · doz hesabı · iade kararı · imha onayı ve imhası · defter satırı ·
+sayım kapanışı.
+
+*Doz hesabı ÖNERİDİR.* VYA Mosteller (√(boy×kilo/3600)), protokol dozundan üç
+biçim tanınır — `mg/m²`, `mg/kg`, `AUC n` (Calvert: AUC × (KrKl+25)).
+Tanınmayan biçim **atlanır, uydurulmaz**: yanlış bir doz önerisi hiç öneri
+olmamasından kötüdür. Uç yalnız `hesaplanan` kolonunu yazar; `uygulanan_doz`
+eczacınındır (flakon yuvarlaması, doz azaltma). Doğrulandı: 170 cm / 70 kg →
+VYA 1.82; 85 mg/m² → 154.70; AUC 5 (KrKl 90) → 575; "8 mg" → çözülemedi.
+
+*ÇİFT KONTROL GEÇİLEBİLİR AMA SESSİZCE DEĞİL.* Ünite dozda ve kemoterapide
+"kontrol eden ≠ hazırlayan" kuralı `zorla` + gerekçe ile geçilir ve günlüğe
+düşer. Sert engel koysaydık kural sistemin dışında işletilir ve hiç kayda
+geçmezdi; serbest bıraksaydık koruma diye bir şey kalmazdı.
+
+*İADE KARARINDA KAÇIŞ YOK.* Ambalaj açık / sulandırılmış / soğuk zincir bozuk /
+miadı geçmiş ise stoğa kabul **reddedilir** - `zorla` yoktur. Diğer kurallarda
+kaçış bıraktık çünkü orada risk bir süreç ihlâliydi; burada risk hastaya giden
+ilacın kendisi. Stoğa kabul giriş fişi (tür 3), imha çıkış fişi (tür 4) keser.
+
+*İmha kontrollü kalemi DEFTERE DE yazar.* Kontrollü olup olmadığı
+`ilac.recete_turu`nden (413) bilinir; stok kartında ikinci bir "kontrollü"
+bayrağı açmadık - iki yerde bakım demekti.
+
+**Biyomedikal (4 uç).** İş emri adımı · parça çıkışı · kalibrasyon sonucu ·
+demirbaş hareketi.
+
+*Parça çıkışı yalnız `kapsam = 0` (kurum ödüyor) için.* Garanti ve sözleşme
+kapsamındaki parça tedarikçinin deposundan gelir; onu da düşseydik hiç
+girmemiş bir malı çıkarmış olurduk.
+
+*Kalibrasyon sonucu ölçümlerden türer:* sınır dışı ölçüm varken "uygun"
+seçilemez (şartlı uygun ya da uygun değil). Uygunsuz sonuçta **geriye dönük
+değerlendirme zorunlu** - cihaz ne zamandır sapıyordu, o sürede kaç hastada
+kullanıldı. Referans sertifikası süresi dolmuşsa gerekçe ister.
+
+*Arıza kapanınca cihaz kendiliğinden açılmaz.* Başka açık arıza varsa
+açılmaz - ama "açılmadı" mesajı NEDENİ AYIRT EDER: başka arıza mı, kalibrasyon
+yüzünden kullanım dışı mı, hurda mı. Tek mesaj yazdığımız ilk sürümde test,
+kalibrasyondan kullanım dışı kalmış cihaz için "başka açık arıza var" dedi -
+teknisyen olmayan bir arızayı arardı.
+
+**Satınalma (12 uç).** Onaya gönderme (zincir kurma) · basamak kararı · talep
+birleştirme · siparişe dönüştürme · teklif daveti / açılışı / kararı · sipariş
+takibi · ceza · mal kabul · üçlü eşleştirme · ödeme kararı.
+
+*ZİNCİRİ SİSTEM KURAR.* "Kime göndereyim" sorulsaydı zincir her talepte
+yeniden icat edilir, pahalı alım küçük bir imzayla geçebilirdi. Basamaklar
+tutar + bütçe durumundan türer; eşikler `referans`ta (729), kodda değil.
+Karar **hep bekleyen en küçük basamağa** yazılır - basamak atlanamaz. Sözlü
+onay `yazili_son` damgası alır: süresiz bırakılsaydı kalıcı bir kaçış olurdu.
+
+*Puan hesaplanır, girilmez.* Fiyat en düşükten, teslim en kısadan, garanti en
+uzundan, performans `v_tedarikci_skor`dan. Elenen firma **karşılaştırma
+tabanına girmez**; skoru olmayan firma 100 alır - geçmişi olmayan firmayı
+cezalandırmak yeni tedarikçiyi baştan elemek olurdu. Doğrulandı: 85.000/5
+gün/12 ay → 95.00 puan, 90.000/20 gün/24 ay → 85.41, zorunlu kriteri
+karşılamayan → elendi ve kazanan seçilemedi.
+
+*Üçlü eşleştirmenin tabanı TESLİMDİR, sipariş değil:* ödenecek olan gelen
+maldır. Teslim kaydı yoksa siparişe düşülür ve bu fark metnine yazılır -
+sessizce siparişi taban almak, gelmemiş malı ödemeye açmak olurdu.
+
+*Ceza kendiliğinden tahsil olmaz:* hesap sözleşmeden (binde/gün, üst sınır %)
+ama işlemek ayrı karardır (`satinalma.ceza`). Sözleşmesiz ceza hesaplanmaz -
+uydurulmuş bir oran, tahsil edilemeyecek bir alacaktır.
+
+**729 — akış ayarları.** Depo ayarları (`eczane.depo`, `demirbas.parca_depo`),
+onay eşikleri, sözlü onay süresi, eşleştirme toleransı. Değerler BOŞ bırakıldı:
+uç, ayar yoksa kod içindeki varsayılanı kullanıyor ve o varsayılanın gerekçesi
+kuralın yanında duruyor. `satinalma_onay (talep_id, basamak)` benzersiz indeksi
+de eklendi - iki eşzamanlı "onaya gönder" zinciri ikiye bölebilirdi.
+
+**730 — defter numarası.** `kontrollu_defter.defter_no` 722'de NOT NULL ve
+varsayılansız açılmıştı; numarayı kimin üreteceği söylenmemişti ve uç satır
+yazamadı. Tetik artık üretiyor: **kırmızı ve yeşil defter ayrı seri**
+(mevzuatta ayrıdır) - tek seri verseydik iki defterin sayfaları iç içe
+numaralanırdı. Doğrulandı: K-000001, K-000002, Y-000001, K-000003.
+
+**Bulunan üç hata.**
+* Talep tutarı hep 0 hesaplanıyordu: `tahmini_tutar` NOT NULL DEFAULT 0 olduğu
+  için `coalesce` onu hiç atlamıyordu (`nullif` gerekiyordu). Sonuç: zincir en
+  kısa hâline düşüyordu - "yazmayan az imzayla geçer" gibi bir kural.
+* `AksiyonKatalogu.KaynakKodu` **yetki kodu** bekliyor, katalog kaynak adı
+  değil. Bir önceki turda `Crud("eczane-doz", "eczane", "eczaneDoz")` yazmıştık;
+  yetki çözülemediği için o ekranlardaki **Yeni/Düzenle/Sil dahil bütün
+  düğmeler** sunucudan hiç gelmiyordu. On iki ekranda düzeltildi.
+* Açılış çipi listeyi boş açıyordu: Talepler "Onayda" ile açılınca yeni
+  (taslak) talep görünmüyor, tam da ona basılacak "Onaya Gönder" düğmesi
+  erişilemez oluyordu. Aynısı Kalibrasyon ("Uygunsuz") ve Bütçe ("Aşıldı")
+  için de geçerliydi - ilk çip artık günlük iş kümesi.
+
+**Ekran tarafı.** `api/uclar/akisTedarik.ts` (26 uç), `liste/tedarikAksiyonlari.ts`
+(tek dağıtıcı), `AksiyonKatalogu`ya 38 düğme. **Modal yazılmadı:** kurallar
+sunucuda olduğu için ekranın yaptığı iş düğmeyi uca bağlamak ve REDDİ SORUYA
+ÇEVİRMEK. `zorla` baştan gönderilmiyor - önce normal istek gider, sunucu
+"geçilemez / eksik / erken" derse gerekçe sorulur, ikinci istek öyle gider.
+
+**Doğrulama.** 26 uç gerçek çağrıyla denendi; 30'dan fazla engel senaryosu
+beklenen hatayı verdi. Tarayıcıda 13 ekranda düğmeler görünüyor (konsol hatası
+yok) ve uçtan uca bir tıklama denendi: Talepler → "Onaya Gönder" → *"Tutar:
+10000 · Bütçe: kalem seçilmemiş · Zincir: 1. Birim sorumlusu → 2. Satınalma →
+3. Mali işler"*. xUnit 232/232, vitest 598/598, iki derleme temiz. Tüm test
+verisi silindi.
+
+**Kalan.** Numara şablonları (talep no, sipariş no, imha tutanağı, hazırlama
+no, iş emri no) - 634/719 desenine eklenecek. Kritik stok → otomatik talep
+tetiği. Mal kabul ekranının kendi listesi (şimdilik uçtan). Göç **729/730
+yalnız docker'da**.
+
+
+## 16.09.2026 — Tedarik belgelerinin numara şablonları (`db/731`)
+
+722-724 bu tabloları `*_no` kolonlarıyla açmış ama numarayı KİMİN üreteceğini
+söylememişti; alanlar boş kalıyor, kullanıcı elle dolduruyordu. **Sekiz yeni
+numara türü (910-917)** ve her biri için üretici tetik:
+
+| Tür | Alan |
+|---|---|
+| 915 Satınalma Talep No | `satinalma_talep.talep_no` |
+| 916 Teklif / İhale No | `satinalma_teklif.teklif_no` |
+| 917 Mal Kabul Tutanak No | `satinalma_kabul.tutanak_no` |
+| 910 Eczane Hazırlama No | `eczane_hazirlama.hazirlama_no` |
+| 911 İlaç İmha Tutanak No | `eczane_imha.tutanak_no` |
+| 912 Demirbaş No | `demirbas.kod` |
+| 913 Kalibrasyon Kayıt No | `demirbas_kalibrasyon.kayit_no` |
+| 914 İş Emri No | `demirbas_is_emri.is_emri_no` |
+
+**ŞABLONA BAĞLI, KODA DEĞİL** (634/635 kuralı). Biçimi kurum belirler: ön ek,
+başlangıç, hane, yıl kapsamı, şube. Şablon yoksa alan **boş kalır** - numarası
+olmayan bir alana kendiliğinden numara basmak, kurumun hiç istemediği bir
+kimliği kayıtlara yazmak olurdu. Mevcut kayıtlar da geriye dönük numaralanmaz.
+
+**TETİK YAZAR, UÇ DEĞİL** (719'da öğrenilen ders). Bu kayıtların çoğu iki
+yoldan doğuyor - generic karttan ve akış ucundan. Numarayı uca koysaydık
+karttan açılan kayıt numarasız kalır, "bazısında var bazısında yok" görünürdü.
+Testte doğrulandı: mal kabul tutanağı `/api/satinalma/kabul` ucundan doğdu ve
+`MK-2026/0001` numarasını aldı.
+
+**DEMİRBAŞ SAYACI KURUM GENELİNDE AKAR** (`p_sube_id = 0`), ötekiler şube
+başına. Sebebi `ux_demirbas_kod`: benzersizlik şube bazlı değil, kolonun
+kendisinde. Şube başına ayrı sayaç verseydik iki şube aynı numarayı üretir ve
+ikincisi kaydedilemezdi. Şube ayrımı isteyen kurum ön eki şube bazlı tanımlar.
+
+**Şablon yoksa demirbaşta eski davranış sürer:** `KartDeposu` boş kalan `kod`a
+kayıt id'sini yazıyor (396). Tetik önce çalışıp şablonlu numarayı koyunca o
+kod "hâlâ boş" olmadığından dokunulmuyor - iki mekanizma çakışmıyor, sıra
+doğru. Testte: şablonsuz `kod = "5"`, şablonlu `kod = "DMB-000001"`.
+
+**BURADA OLMAYAN İKİ NUMARA.** *Sipariş no*: alış siparişi `belge` tür 9'dur ve
+belge hattının kendi numaralama yolu var (Genel Ayarlar › Numaralama › Alış
+Belgeleri); ikinci bir üretici aynı belgeye iki numara verebilirdi. *Kontrollü
+ilaç defteri*: numarası mevzuatın istediği KESİNTİSİZ SERİDİR ve kırmızı/yeşil
+için ayrı akar - şablon sistemi "iki ayrı defter" kuralını ifade edemez, kendi
+tetiğinde kaldı (730).
+
+**Eksik iki benzersiz indeks kapatıldı.** `eczane_hazirlama` ve
+`satinalma_kabul` numara kolonlarında kısmi unique yoktu (ötekilerde vardı);
+numaralanan bir alanın benzersizliği korunmazsa numara kimlik olmaktan çıkar.
+
+**Ayar ekranı.** `v_numara_tedarik` görünümü + `numara-tedarik` kaynağı/kartı;
+Genel Ayarlar › Belge No'ya **"Tedarik Belgeleri"** gridi (sağ sütun, en alt).
+Hasta Belgeleri gridiyle aynı desen: kaynak tablo değil görünüm, böylece ayarı
+olmayan tür de `id = 0` satırı olarak çizilir ve kullanıcı o numaranın var
+olduğunu görür. `urunModu` yok - satınalma, demirbaş ve kalibrasyon hastaneye
+özgü değil.
+
+**Yol boyunca bulunan hata (mevcut).** Ayarı olmayan türler `id = 0` ile
+geldiği için grid satırlarının hepsi aynı React anahtarını (`gr-0`) alıyordu;
+React "duplicate key" uyarısı veriyor ve kimliği olmayan satırları çizimde
+birbirine karıştırabiliyordu. Hasta Belgeleri gridinde de vardı. `GridTablo`
+artık anahtarı `id`den ayırıyor (`id` seçim ve satır açma için olduğu gibi
+kalıyor; 0 orada "kaydı yok" demek).
+
+**Doğrulama.** Şablonsuz yedi kayıt boş numarayla açıldı; sekiz şablon
+açılınca `TLP-2026/0001`, `TLP-2026/0002`, `TKL-2026/0001`, `IMH-2026/001`,
+`HZ-2026/00001`, `KAL-2026/0001`, `IE-2026/00001`, `DMB-000001` üretildi. Elle
+verilen numara korundu (`GOC-2019/0007`), pasif şablonda alan boş kaldı, yıl
+kapsamı doğru aktı (`IMH-2027/001` yeni yıldan, `IMH-2026/002` aynı yıl devam).
+Ayar gridi tarayıcıda sekiz türü de gösteriyor, konsol hatası yok. xUnit
+232/232, vitest 598/598, iki derleme temiz. Test verisi ve sayaçlar silindi.
+
+**Kalan.** Kritik stok → otomatik satınalma talebi tetiği. Mal kabul ekranının
+kendi listesi. Göç **731 yalnız docker'da**.
+
+
+## 16.09.2026 — Kritik stok → otomatik satınalma talebi (`db/732`)
+
+Asgari stoğun altına düşen kalemler için **depo başına bir satınalma talebi**
+(`kaynak = 2`). `fn_kritik_stok_talep` + saatlik zamanlı iş
+(`satinalma.kritik_stok`).
+
+**NEDEN SATIR TETİĞİ DEĞİL.** İlk akla gelen `stok_durum` üzerinde bir AFTER
+UPDATE tetiğiydi; üç sebeple öyle yapılmadı:
+
+1. **Stok hareketi satınalma yüzünden başarısız olamaz.** Tetik belge kayıt
+   işleminin İÇİNDE çalışırdı; talep açılamadığı anda (departman tanımsız,
+   numara şablonu bozuk, yetki yok) hastaya verilen ilacın çıkış fişi de
+   kaydedilemezdi. Depo hareketi hiçbir koşulda satınalma ayarına bağlı olmamalı.
+2. **Her harekette değil, bir kez.** Eşiğin altındaki kalemden gün içinde on kez
+   çıkış yapılır; satır tetiği on kez tetiklenip her seferinde "açık talep var
+   mı" diye sorardı. Periyodik tarama aynı işi tek seferde yapıyor.
+3. **Talep kalem kalem değil, toplu açılır.** Satır tetiği her kalem için ayrı
+   talep doğururdu; satınalma birimi otuz tek satırlık talep yerine depo başına
+   tek talep ister - onay zinciri de bir kez işler.
+
+Bedeli **gecikme**: eşik 03:10'da aşılırsa talep 04:00'da açılır. Saatlik
+periyot bunu kabul edilebilir kılıyor; acil ihtiyaç zaten elle talep açılarak
+karşılanır - kritik stok, acil ihtiyacın kendisi değil UYARISIDIR.
+
+**VARSAYILAN KAPALI.** `satinalma.kritik_stok_aktif` açılmadan hiçbir şey
+yapmaz. Kurumun istemediği halde kendiliğinden satınalma talebi açmak, para
+harcanan bir süreci habersiz başlatmak olurdu. İş kayıtlı ve AKTİF gelir ama
+fonksiyon kapalı olduğunu **söyler** - kapının nerede olduğu görünsün
+(`hizmet.oto_pasif` deseninin aynısı).
+
+**Kurallar.**
+* *Eldeki = kalan − rezerve.* Rezerveyi düşmeseydik tamamı başka bir işe
+  ayrılmış stok "var" görünür, talep hiç açılmazdı.
+* *Eşik:* deponun kendi asgarisi, yoksa stok kartınınki. İkisi de sıfırsa o
+  kalem izlenmiyor demektir - sıfırı "her zaman kritik" okusaydık bütün katalog
+  talebe dönerdi.
+* *Miktar = hedef − eldeki*, yukarı yuvarlanır. Hedef azami stok; tanımsızsa
+  **asgari × kat** (ayar, varsayılan 2). Sadece asgariye tamamlasaydık kalem
+  teslim alındığı gün yine eşikte olur, ilk çıkışta yeni talep doğardı.
+* *Açık talebi olan kalem atlanır* (durum 0-4): ikincisini açmak onay zincirini
+  ikiye böler, aynı kalem iki kez sipariş edilebilirdi.
+* *Yoldaki mal tekrar istenmez:* açık alış siparişi (tür 9, takip 0/1) varsa
+  kalem zaten sipariş edilmiş.
+* *Öncelik "yüksek" (2), acil (1) değil* - hepsini acil açsaydık gerçek acil
+  talep sıradan görünürdü.
+* *Talep TASLAK açılır:* onaya insan gönderir. Sistem miktarın ve fiyatın doğru
+  olduğunu bilmiyor; taslak bir öneridir. Taleplerin açılış çipi geçen tur
+  "Açık" (durum ≤ 1) yapıldığı için taslak listede görünüyor.
+* *Son alış fiyatı* son alış faturasından okunur ve onay zinciri basamağını
+  belirleyen tutarı besler; bulunamazsa satır açıklamasına yazılır ("son alış
+  fiyatı yok") - sessizce 0 geçip en kısa zincire düşmesin.
+
+**Ayarlar ekrana çıktı.** 729'un ayarları (onay eşikleri, sözlü onay süresi,
+eşleştirme toleransı, eczane ve teknik servis depoları) yalnız veritabanından
+düzenlenebiliyordu - kullanılabilir değillerdi. Genel Ayarlar › Genel'e üç grup
+eklendi: **Satınalma**, **Kritik Stok → Satınalma Talebi**, **Depolar**.
+Anahtarlar `AyarDeposu.BeyazListe`ye alındı. `kritik_hedef_kat` bilerek
+`Varsayilan` sözlüğüne KONULMADI: orası tam sayı doğrulaması yapıyor, oysa kat
+ondalıklı olabilir (1.5).
+
+**Yan ürün:** `fn_sayi_sade` - `to_char`ın FM kipi sondaki sıfırları atıyor ama
+ondalık noktayı bırakıyor ("Eldeki 4."). Satır açıklamasını satın alan okuyor.
+
+**Doğrulama.** Altı senaryo: kapalıyken hiçbir şey yapmadı · kuru çalışma
+yazmadan saydı (1 depo, 3 kalem) · ilk çalışma 1 talep/3 kalem açtı (eşiğin
+üstündeki kalem atlandı; miktarlar 40−4=36, 30−3=27, 5×2−2=8; tutar
+36×25,50=918) · ikinci çalışma açık talep yüzünden atladı · talep kapatılıp bir
+kaleme açık sipariş girilince o kalem atlandı, diğer ikisi açıldı · stok
+normale dönünce "Kritik stok yok". Uçtan uca: ayar `PUT /api/ayar/...` ile
+açıldı, iş `/api/zamanli-is/satinalma.kritik_stok/calistir` ile çalıştı, talep
+listede **"Kritik stok · Yüksek · Taslak · 3 kalem · 918,00"** göründü.
+Tarayıcıda üç ayar grubu çiziliyor, konsol hatası yok. xUnit 232/232, vitest
+598/598, iki derleme temiz. Test verisi silindi, ayar kapalıya döndürüldü.
+
+**Kalan.** Mal kabul ekranının kendi listesi. Ayar ekranında birim/depo/personel
+alanları elle NUMARA yazdırıyor (`AyarAlani`'nın seçim kutusu yok) - seçim
+bileşeni ayrı iş. Göç **732 yalnız docker'da**.
+
+
+## 16.09.2026 — Mal kabul ekranı (`db/733`)
+
+724'te `satinalma_kabul` yalnız BAŞLIK olarak açılmıştı (komisyon, sonuç,
+uygunsuzluk) ve listesi yoktu - tutanak sistemde görünmüyordu. Bu tur kalem
+bazlı muayene satırı, soğuk zincir kaydı, liste, kart sekmesi ve karar
+düğmeleri.
+
+**NEDEN SATIR TABLOSU (bayrak yetmiyor).** "Kısmi kabul" bir bayraktı; hangi
+kalemin eksik geldiği, kaç adet sayıldığı, hangi lotun hangi miadla girdiği
+yazılmıyordu. Bayrakla kalsaydı tutanak "bir şey eksikti" demiş olurdu -
+muayene tutanağının işi tam olarak NEYİN eksik olduğunu söylemektir.
+
+**ÜÇ MİKTAR AYRI TUTULUR: sipariş · irsaliye · SAYILAN.** İkisi yetmez -
+tedarikçi 100 sipariş edilene 90 irsaliye kesip 85 gönderebilir. Hangi farkın
+kime ait olduğu (bize mi, taşımaya mı, tedarikçiye mi) ancak üçü birden
+yazılırsa anlaşılır; fatura eşleştirmesi de bu farkı arıyor. Sipariş miktarı
+aynı stoğun sipariş satırlarının TOPLAMI: bir kalem siparişte iki satır hâlinde
+olabilir (iki teslim tarihi), irsaliyede tek satır gelir. Testte doğrulandı:
+60+40 sipariş satırı → tutanakta tek satır, sipariş 100.
+
+**SATIRLAR İRSALİYEDEN KOPYALANIR.** Sayılan miktar irsaliyedekine **eşit**
+doğar - sıfır doğsaydı "henüz sayılmadı" ile "sıfır sayıldı" aynı görünürdü;
+irsaliyeye eşit doğunca FARK, sayımın kendisi olur. Lot ve miad belgenin izlem
+satırından gelir: mal kabulün asıl sorularından biri "hangi lot, ne miadla
+girdi". Birim belgede KOD (smallint), tutanakta METİN: basılıp imzalanan kâğıt
+üstünde "3" değil "AD" yazmalı.
+
+**STOĞA GİRİŞ BURADA OLMAZ.** Malı stoğa alan İRSALİYEDİR (belge tür 10);
+kaydedildiğinde belge hattı stok hareketini yazar. Tutanak stok yazmaz,
+MUAYENEYİ yazar - ikisini de yaptırsaydık aynı mal iki kez girerdi. Mockup'taki
+"Kabul et ve stoğa al" düğmesi bu yüzden iki ayrı işin adı.
+
+**SONUÇ SATIRLARDAN TÜRER, TEK YÖNLÜ.** Tetik başlığı satırlardan aşağı çeker
+(bir satır reddedilmişse tutanak "tam kabul" olamaz) ama YUKARI ÇEKMEZ:
+komisyon kalem dışı bir sebeple (belge eksiği, sözleşme ihlali) tutanağın
+tamamını reddedebilir. Elle seçilebilir bırakıp satırlarla çelişmesine izin
+verseydik tutanak kendi satırlarını yalanlardı.
+
+**SOĞUK ZİNCİR BAŞLIKTA, SATIRDA DEĞİL:** ölçüm sevkiyatın tamamına aittir
+(aracın/kutunun sıcaklığı). Satıra koysaydık aynı ölçüm on satıra kopyalanır ve
+biri değişince hangisinin doğru olduğu sorulurdu. Gereken sevkiyatta ölçüm
+**zorunlu** - "ölçülmedi" ile "uygun" aynı şey değil. Uygunsuz ölçümle kabul
+edilebilir ama tutanağa yazılır ve tedarikçi olayına düşer; karar komisyonun.
+
+**Uçlar.** `/kabul` artık tutanağı AÇIK (0) doğurur ve satırları doldurur -
+sonucu açılışta zorunlu kılsaydık kullanıcı kalemleri saymadan bir karar yazmak
+zorunda kalır, tutanak da o kararı belgelerdi. Yeni: `/kabul/{id}/tumunu-kabul`
+(istisna yoksa otuz satırı tek tek işaretlemek zaman kaybı) ve
+`/kabul/{id}/karar` (komisyon kararı; muayenesi bitmemiş tutanak karara
+bağlanmaz). Siparişi kapatan ve tedarikçi olayını yazan iş **açılıştan karara
+taşındı**: muayenesi yapılmamış bir teslimat siparişi kapatmamalı. **Ret
+siparişi kapatmaz** - mal geri gidiyor, taahhüt sürüyor.
+
+**Liste.** `v_satinalma_kabul`: kalem · eksik · ret · kısa miad · kabul tutarı.
+*Eksik ve ret ayrı sayılır* - "5 kalemde eksik var" ile "2 kalem reddedildi"
+farklı iki sorudur (biri miktar, öteki kalite). *Kısa miad SÖZLEŞMEDEN
+kıyaslanır* (asgari raf ömrü); sözleşme yoksa kıyas yapılmaz - uydurulmuş bir
+eşik kimseyi korumaz. Açılış çipi "Açık": muayenesi bitmemiş tutanak bekleyen iş.
+
+**İki hata bulundu ve düzeltildi.**
+* `raf_omru_gun` üretilmiş kolon olarak yazılmıştı - `current_date` immutable
+  olmadığı için PostgreSQL reddetti; olsaydı da yanlış olurdu (satırın yazıldığı
+  gün dondurulmuş bir "kalan gün" ertesi gün yalan söyler). Liste SQL'inde
+  hesaplanıyor.
+* **Kabul tutarı reddedilen kalemi de sayıyordu.** "Kabul tutarı" ödenecek
+  olandır; reddedileni de saysaydık tutanak, geri gönderilen malın parasını
+  kabul etmiş görünürdü ve fatura eşleştirmesi bu sayıyı taban alırdı.
+  Doğrulandı: 2367,50 → 2167,50.
+
+**Belge koruması.** `satinalma_kabul_satir.belge_satir_id` `belge_satir`a NO
+ACTION ile bağlı; `KorunanSatirTestleri` yakaladı ve `KorunanSatirSql`e
+eklendi. Yoksa irsaliye yeniden kaydedilince muayene sahipsiz kalır ve irsaliye
+**bir daha kaydedilemezdi**.
+
+**Doğrulama.** Yedi senaryo: tutanak açılınca satırlar irsaliyeden geldi
+(sipariş 100 = 60+40) · muayenesi bitmeden karar reddedildi · bir kalem eksik
++ bir kalem ret girilince tetik tutanağı "kısmi"ye çekti · uygunsuzluksuz kısmi
+karar reddedildi, gerekçeliyse kabul edildi ve sipariş "kısmi teslim"e geçti,
+tedarikçi olayı yazıldı · liste doğru sayıları verdi · soğuk zincir ölçümsüz
+karar reddedildi, uygunsuz ölçümle kabul uyarı verdi · belge_satir bağı korundu.
+Tarayıcıda liste kolonları ve düğmeleri çiziliyor, kartta "Muayene Satırları"
+sekmesi (Sipariş/İrsaliye/Sayılan/Lot/SKT) ve "Soğuk Zincir" grubu açılıyor,
+konsol hatası yok. xUnit 232/232, vitest 598/598, iki derleme temiz. Test
+verisi silindi.
+
+**Kapsam dışı bırakılanlar.** Mockup'taki *Karekod/Seri* sekmesi (istemci
+tarafı okuyucu işi) ve *İTS Bildirimi* sekmesi (kendi modülü var, 223-230) bu
+tura alınmadı. Göç **733 yalnız docker'da**.
+
+
+## 16.09.2026 — Mal kabul: Karekod / Seri sekmesi (`db/734`, `735`)
+
+Mockup'taki "Karekod / Seri" (İlaç · GTIN · Lot · SKT · Okutulan · Beklenen ·
+Sonuç). Kutular okutulur, muayene satırlarıyla karşılaştırılır.
+
+**YENİ TABLO AÇILMADI.** Okutulan kutuların gideceği yer zaten vardı:
+`its_bildirim` (tür 1 = mal alım) ve `its_bildirim_satir` karekodu, GTIN'i,
+seriyi, partiyi ve son kullanmayı tutuyor (427). Mal kabulde okutulan kodlar
+ile İTS'e bildirilecek kodlar **aynı kodlardır** - ikinci bir tablo açsaydık
+aynı kutunun iki kaydı olur, biri diğerinden sapar ve "hangisi doğru" sorusu
+ancak ihtilâf çıkınca sorulurdu. Eklenen tek şey `kabul_id`: kutunun hangi
+MUAYENEDE okutulduğu (bildirim belgeye bağlı, ama bir irsaliyenin birden çok
+tutanağı olabilir).
+
+**TEK TEK OKUTULUR, HEPSİ YA DA HİÇBİRİ DEĞİL.** Mevcut `/api/its/bildirim`
+toplu çalışır ve bir kod bozuksa hiçbirini yazmaz - orası bildirimi AÇAN yer,
+orada doğru davranış budur. Mal kabulde iki yüz kutu tek tek okutulur:
+yirmincisi okunamadı diye önceki on dokuzu silmek sayımı baştan başlatmak
+olurdu. Yeni uç her kodu **kendi sonucuyla** döndürür:
+
+* **yazildi** — çözümlendi, muayene satırlarından biriyle eşleşti.
+* **mukerrer** — bu kutu (GTIN + seri) zaten okutulmuş. Serileştirmenin bütün
+  amacı bu; `ux_its_karekod_tekil` veritabanı tarafında da korur. Uçta
+  yakalanır ki kullanıcıya sebebi söylensin ve öteki kodlar yazılmaya devam
+  etsin - tek çakışma iki yüz okutmayı düşürmemeli.
+* **beklenmeyen** — kod geçerli ama bu tutanakta o kalem yok. **İki sebebi
+  ayrı yazılır:** kutu kataloğumuzda hiç yok mu (yeni ruhsat / yabancı kutu),
+  yoksa var ama bu tutanakta beklenmiyor mu (yanlış koli)? Biri katalog
+  güncellemesi, öteki sevkiyatı sorgulamak gerektirir. Kayda GEÇER, işaretlenir.
+* **okunamadi** — çözümlenemedi, yazılmaz.
+
+**GTIN → STOK İKİ YOLDAN:** ilaç kataloğunun bağı (`ilac.stok_id`) ve kurumun
+kendi barkod listesi (`stok_barkod`). İlk sürüm yalnız kataloğa bakıyordu;
+dev veritabanında 23.002 ilaç var ama hiçbiri stok kartına bağlı değil, yani
+her kutu "beklenmeyen" çıkıyordu. Stok kartlarını TİTCK kataloğuna bağlamamış
+bir kurumda okuyucu çalışır ama ekran hiçbir şeyi eşleştiremezdi.
+
+**BEKLENEN SAYININ PAYDASI SAYILAN MİKTARDIR**, irsaliyedeki değil: muayenede
+85 saydıysak 85 kutu okutulmalı. İrsaliyeyi payda alsaydık eksik gelen
+sevkiyatta ekran hep "eksik okutuldu" der, gerçek eksik okutma fark edilmezdi.
+Beklenen yalnız **karekod taşıyan** kalem için sayılır - sarf ve demirbaşı da
+paydaya katsaydık her tutanak "karekod eksik" görünürdü.
+
+**MİAD ÇELİŞKİSİ UYARIDIR, ENGEL DEĞİL:** kutunun üstündeki tarih doğrudur;
+çelişen şey muayene satırına elle yazılandır. Kutuyu reddetmek yerine ikisini
+de göstermek, sayan kişiye hangisinin düzeltileceğini sorar. Miadı geçmiş kutu
+ayrıca işaretlenir.
+
+**Silme ve bildirim yaşam döngüsü.** Yanlış okutulan kutu silinir ama yalnız
+**bildirilmemiş** olan; gönderilmiş bir bildirimin satırını silmek, karşı
+tarafta duran bir kaydı bizde yokmuş gibi göstermektir (İTS'te düzeltme
+deaktivasyon bildirimidir). Gönderilmiş bildirime kutu eklenmez - yenisi
+açılır. Kararı verilmiş tutanağa hiç eklenmez: sayım kapandı, tutanak imzalandı.
+
+**Kart sekmesi SALT OKUNUR.** Kutular okuyucudan gelir; elle satır eklemek
+"kutuyu okutmadan okutuldu demek" olurdu. Silme kendi ucundan geçer - o uç
+bildirilmiş satırı korur, kart bu ayrımı ifade edemez.
+
+**735 — bulunan hata (733'ten).** `fn_satinalma_kabul_sonuc` yalnız ret (3) ve
+kısmi (2) satırları sayıyordu; ikisi de yoksa başlığı "kabul"e çekiyordu. Oysa
+yeni açılan tutanağın bütün satırları `sonuc = 0` (bekliyor) olur - yani
+**tutanak hiçbir kalem sayılmadan "Kabul" oluyordu.** Görünmüyordu çünkü
+tutanağı açan uç yanıtında isteğin sonucunu yansıtıyordu (0), veritabanındakini
+değil; hata ancak karekod ucu yeni açılmış bir tutanakta "Kararı verilmiş
+tutanağa karekod eklenemez" deyince ortaya çıktı. Artık bekleyen satır varken
+başlığa dokunulmuyor. Göç, yanlışlıkla "kabul" olmuş ama muayenesi bitmemiş
+tutanakları geri alıyor - **dar kapsam:** yalnız bütün satırları hâlâ
+"bekliyor" olanlar ve komisyon kararının izi bulunmayanlar.
+
+İkinci düzeltme: "okutulan / beklenen" ekranda "0 / 3.000" görünüyordu
+(`sayilan` numeric). Kutu sayısı tam sayıdır.
+
+**Doğrulama.** Dokuz senaryo: üç kutu yazıldı ve miad çelişkisi yakalandı ·
+aynı kutu ikinci kez "mükerrer" · beklenmeyenin iki sebebi ayrı ayrı doğru ·
+bozuk kod yalnız kendisi düştü ("Bilinmeyen alan tanımlayıcı") · miadı geçmiş
+kutu uyarı verdi · özet ucu 4/3 gösterdi (fazla okutma) · bildirilmemiş kutu
+silindi, bildirilmiş engellendi · gönderilmiş bildirime eklenmeyip yenisi
+açıldı · karar sonrası ekleme engellendi. Tarayıcıda liste kolonu ("Karekod",
+"Karekod eksik" çipi), "🔦 Karekod Oku" düğmesi ve kartta "Karekod / Seri"
+sekmesi (GTIN · Seri No · Lot / Parti · SKT · Durum) çalışıyor, konsol hatası
+yok. xUnit 232/232, vitest 598/598, iki derleme temiz. Test verisi silindi.
+
+**Kalan.** Mockup'taki *İTS Bildirimi* sekmesi: bildirim artık mal kabulde
+oluşuyor, göndermek İTS modülünün kuyruğunda (223-230) - tutanak ekranından
+"şimdi gönder" bağlantısı ayrı bir iş. Göç **734/735 yalnız docker'da**.
+
+## 16.09.2026 — Mal kabul: İTS Bildirimi sekmesi (`db/736`)
+
+Mockup'ın son sekmesi: muayenede okutulan kutuların İTS'e **mal alım
+bildirimi** olarak kuyruğa alınması, durumunun izlenmesi ve iptali.
+
+**Bildirim belgeye, satır muayeneye bağlı.** 734'te kutular
+`its_bildirim_satir.kabul_id` ile tutanağa bağlanmıştı; bildirimin kendisi
+irsaliyeye bağlı kaldı - bir irsaliyenin birden çok tutanağı olabilir ama
+İTS'e giden bildirim sevkiyat başınadır. Bu yüzden tutanağın bildirimleri
+satırlarından **türetilir** (`v_kabul_its_bildirim`, kutu/kalem/beklenmeyen
+sayılarıyla); `its_bildirim`e ikinci bir `kabul_id` koysaydık iki tutanaklı
+irsaliyede o kolon hangi tutanağı göstereceğini bilemezdi.
+
+**Kuyruğa alma muayeneden sonra.** Hangi kutunun kabul edildiği ancak kararla
+belli olur: açık tutanak bildirilemez ("Muayenesi tamamlanmamış tutanak İTS'e
+bildirilemez"), tamamı reddedilen sevkiyat da bildirilmez - mal alınmamıştır.
+
+**Reddedilen ve beklenmeyen kutu bildirime girmez, ama silinmez.** Kuyruğa
+alırken bu kutular yeni bir `durum = 5` (iptal) bildirime taşınır ve not
+alanına sebebi yazılır. Silseydik "okutuldu ama bildirilmedi" izi kaybolur,
+bırakılsaydı reddedilen ilaç bize girmiş görünürdü. Kalan kutu sıfırsa işlem
+geri alınır - boş bildirim kuyruğa girmez.
+
+**İptal gönderimden önce.** Yalnız taslak / kuyrukta / hatalı bildirim iptal
+edilir; gönderilmiş bildirim İTS'te kayıt oluşturmuştur, geri alma ayrı bir
+deaktivasyon bildirimidir. Gerekçe zorunlu ve `its_bildirim.aciklama`ya
+yazılır - `hata_mesaj`a yazmak, hata olmayan bir şeyi hata gibi göstermek
+olurdu (kolon 736'da eklendi).
+
+**Liste ve kart.** Listede "İTS" rozeti (`—` / Bildirilmedi / Taslak /
+Kuyrukta / Gönderiliyor / Gönderildi / HATALI) ve "İTS bildirilmedi" çipi:
+kutusu okutulmuş ama bildirimi kuyruğa alınmamış tutanak unutulmuş bir yasal
+yükümlülüktür. Hiç kutu okutulmamışsa tire - "bildirilmedi" demek, bildirimi
+gereken bir şey varmış gibi okunurdu. Liste durumu **en ileri** bildirimi
+gösterir (iptal hariç): en sonuncuyu göstersek iptal edilmiş bir kaydı durum
+diye okuturduk. Kart sekmesi **salt okunur**; gönderim durumu bizim değil
+İTS'in söylediği şeydir. Test bayrağı sütunda görünür - test ortamına gitmiş
+bir bildirimi gerçek saymak, yapılmamış bildirimi yapılmış saymaktır.
+
+**Doğrulama.** Uçtan uca: iki kalemli irsaliyede beş kutu okutuldu (biri
+beklenmeyen), açık tutanakta bildirim reddedildi, bir kalem ret edilip karar
+"kısmi" verildi; kuyruğa almada 2 kutu bildirime girdi, 3 kutu (reddedilen +
+beklenmeyen) ayrı iptal kaydına taşındı ve kullanıcıya uyarı döndü; ikinci
+kuyruğa alma "zaten kuyrukta" ile engellendi; gerekçesiz iptal ve gönderilmiş
+bildirimin iptali reddedildi. Tarayıcıda "İTS" sütunu, "İTS bildirilmedi"
+çipi, "📡 İTS Bildir" düğmesi ve kartta salt okunur "İTS Bildirimi" sekmesi
+(Durum · Kutu · Kalem · Gönderen GLN · İTS Bildirim No · Test · Deneme · Hata
+· Not) doğru değerlerle çalışıyor, konsol hatası yok. xUnit 232/232, vitest
+598/598, iki derleme temiz. Test verisi silindi.
+
+**Gerçek gönderim yapılmadı.** `entegrasyon_hesap` İTS satırı `aktif = 0`
+bırakıldı; test yalnız kuyruğa almayı doğruladı. Göç **736 yalnız docker'da**.
+
+## 17.09.2026 — Mal kabul ekranının uçtan uca denenmesi ve beş düzeltme
+
+Ekran Playwright ile baştan sona sürüldü (menüden açma, çipler, "Yeni",
+karekod okuma, karar, soğuk zincir, İTS, kart sekmeleri). On bir kusur çıktı;
+beşi düzeltildi - **göç yok, kod değişikliği**.
+
+**"Yeni" muayene edilemeyen tutanak üretiyordu.** Ekranın "＋ Yeni" düğmesi
+genel karta gidiyordu; genel kart yalnız BAŞLIK satırını yazar, muayene
+satırlarını irsaliyeden kopyalayan iş ayrı bir uçtadır. Sonuç: sıfır kalemli
+bir tutanak. Üstelik kart ham `belge_id` istiyordu - kimsenin ezberinde
+olmayan bir iç numara. Artık "Yeni" önce **tutanak bekleyen belgeleri**
+soruyor (`GET /kabul/bekleyen-belgeler`): belge no · tarih · tedarikçi · kalem
+sayısı. Tutanağı olan belge listede yok (bir belgenin tek tutanağı olur),
+iptal belge de yok - iptal edilmiş bir irsaliyeyi muayene etmek olmayan bir
+sevkiyatı tutanağa bağlamaktır. **Sipariş bağı taşınır, uydurulmaz:** irsaliye
+bir siparişten dönüştürüldüyse `kaynak_id` o siparişi gösterir; bağ yoksa boş
+kalır ve kullanıcıya söylenir. Tedarikçiye bakıp "herhalde şu siparişidir"
+demek, muayeneyi yanlış siparişle karşılaştırmak olurdu.
+
+**Satırsız tutanak "Kabul" edilebiliyordu.** Karar ucu "bekleyen satır var mı"
+diye bakıyordu; hiç satır yoksa bekleyen de yoktur, kural sessizce geçiyordu -
+hiçbir kalem sayılmadan kabul edilmiş bir tutanak çıkıyordu ortaya. (735'te
+düzeltilen hatanın kardeşi: orada da "bekleyen yoksa kabul say" kestirmesi
+vardı.) Artık kalem sayısı sıfırsa karar reddediliyor.
+
+**İTS kuyruğuna başka muayenenin kutusu giriyordu.** Taslak bildirim BELGEYE
+bağlı, satırları MUAYENEYE. Reddedilen/beklenmeyen kutuları ayıklayan sorgu
+"bu tutanağın kutuları" diye süzüyordu ama kuyruğa alınan sayı bildirimin
+TAMAMIYDI: aynı irsaliyenin ikinci tutanağının - ya da tutanağı silindiği için
+sahipsiz kalmış - kutuları İTS'e mal alımı olarak gidiyordu, kullanıcıya da
+tutanaktakinden fazla kutu sayısı söyleniyordu. Bu kutular artık kuyruğa
+almadan önce **ayrı bir taslağa** çıkarılıyor (iptale değil: yanlış değiller,
+sırası gelmemiş) ve kullanıcı uyarılıyor.
+
+**Çok satırlı karekod yapıştırma sessizce kutu kaybediyordu.** Mesaj penceresi
+tek satırlık kutu çiziyordu; tarayıcı yapıştırılan metnin satır sonlarını
+siliyor, üç kod birleşip tek kod gibi çözülüyor, iki kutu kayboluyordu -
+üstelik kullanıcıya "1 mükerrer" deniyordu. Pencere artık çok satırlı girdi
+destekliyor (`girdiCokSatir`): Enter satır atlar, onay Ctrl+Enter ya da Tamam.
+
+**Soğuk zincir sıcaklığında virgül yutuluyordu.** `Number('2,5')` NaN döner,
+JSON'da `null` olur: kullanıcı ölçümü yazdığını sanarken tutanağa hiçbir şey
+yazılmıyordu. Türkçe klavyede ondalık ayracı virgüldür. Artık "2,5" de "2.5"
+de aynı ölçüm; rakam hiç yoksa değer yazılmaz ve **söylenir** - sessizce 0
+yazmak "sıfır derece ölçtüm" demek olurdu.
+
+**Doğrulama.** Yeni uç: iptal belge listede yok, sipariş bağlı/bağsız iki
+belge doğru göründü, arama süzgeci çalıştı. Satırsız tutanağın kararı
+reddedildi ve tutanak açık kaldı. İTS: taslağa sokuşturulan sahipsiz kutu
+ayrı taslağa (durum 0) çıkarıldı, kuyruğa yalnız tutanağın 3 kutusu girdi,
+uyarı döndü. Tarayıcıda "Yeni" belge listesini gösterdi ve yeni tutanağın
+kartına gitti; karekod penceresi textarea çizdi, üç satır korundu ve üç kod
+AYRI AYRI çözüldü (2 yazıldı · 1 beklenmeyen), Enter pencereyi kapatmadı;
+sıcaklık "2,5" → 2.50 kaydedildi, "olculmedi" → uyarı verildi ve yazılmadı.
+xUnit 232/232, vitest 598/598, iki derleme temiz. Test verisi silindi.
+
+Aynı turun kalan altı bulgusu bir sonraki maddede (`db/737`).
+
+## 17.09.2026 — Mal kabul: kalan altı kusur (`db/737`)
+
+Uçtan uca denemede çıkan kusurların kalanı.
+
+**İrsaliye ve Sipariş artık seçiliyor, yazılmıyor.** Alanlar `sayi` tipindeydi:
+kullanıcıdan belgenin İÇ NUMARASINI yazması bekleniyordu - kimsenin ezberinde
+olmayan bir sayı. Yanlış yazılırsa muayene BAŞKA bir sevkiyatla karşılaştırılır
+ve hata kendini hiç belli etmez. İki lookup görünümü eklendi (belge no · tarih ·
+tedarikçi); **son bir yılla sınırlı** çünkü açılır liste yüz binlerce belgeyi
+kaldırmaz - eski bir irsaliyeye tutanak açmak istisnadır. İptal belge (durum 2)
+`aktif = 0` gelir: iptal edilmiş bir irsaliyeyi muayene etmek olmayan bir
+sevkiyatı tutanağa bağlamaktır.
+
+**Tarih bugün doğuyor.** Alan zorunluydu ama boş açılıyordu; her yeni tutanakta
+ilk kaydetme "Tarih zorunlu" ile dönüyordu. Muayene tarihi sevkiyatın geldiği
+gündür (`@simdi`); başka bir gün girmek istisnadır.
+
+**Okutulmuş kutusu olan tutanak silinemiyor.** `its_bildirim_satir.kabul_id`
+yabancı anahtarı `ON DELETE SET NULL`dı: tutanak silinince kutular belgenin
+taslak bildiriminde SAHİPSİZ kalıyordu - 736'daki "yabancı kutu İTS'e gidiyor"
+hatası da böyle ortaya çıkmıştı. Anahtar NO ACTION oldu, karta silme engeli
+eklendi. Kutu okutulduysa sayım yapılmıştır ve o sayım kanıttır; gerçekten
+silmek isteyen önce kutuları siler - o da bilinçli bir karardır.
+
+**Karekod eksiği artık söyleniyor.** "Tüm Kalemleri Kabul Et" sayılanı irsaliye
+miktarına çekiyordu; okutulmamış kutu varsa bu, sayılmamış bir şeyi sayıldı
+saymaktır. Toplu kabul ve karar uçları eksik okutmayı, miat çelişkisini ve
+miadı geçmiş kutuyu kalem kalem döndürüyor. **Engel değil uyarı:** karekodsuz
+gelen (okuyucusu bozuk, kodu silinmiş) sevkiyat elle de sayılır - ama sessiz
+kalmak eksik okutmayı görünmez yapıyordu.
+
+**Miat çelişkisi satırın miadı boşken de aranıyor.** Sayaç okutulan kutunun
+miadını muayene satırının miadıyla karşılaştırıyor, satırın miadı boşsa hiç
+bakmıyordu - oysa o alanı dolduran şey zaten kutulardır. Aynı lota iki farklı
+miatlı kutu sessizce girebiliyordu. Artık satırın miadı yazılıysa kutular ona,
+yazılı değilse **birbirine** göre denetleniyor (aynı lotta tek miat olur):
+kutular birbirinin tanığıdır.
+
+**Karar sessiz kalmıyor, "Siparişe Git" gerçekten gidiyor.** "✓ Kabul" hiçbir
+şey söylemiyordu - kullanıcı düğmeye bastı mı anlamıyordu; artık tutanağın
+kapanış sonucu ve varsa uyarılar gösteriliyor. "Siparişe Git" ise belge
+numarasını yazıp kullanıcıyı Siparişler ekranında o numarayı aramaya
+bırakıyordu; sipariş `belge` tür 9'dur ve belge kartı id ile açılır - düğme
+artık kartı modal açıyor.
+
+**Doğrulama.** Uçta: kart metası iki alan için de seçenek döndü, varsayılanlar
+`tarih = @simdi` içeriyor; okutulmuş kutulu tutanağın silinmesi engellendi;
+iki farklı miatlı LOT-A'da çelişki 1 sayıldı; toplu kabul ve karar "1 kutu
+okutulmadı (2/3) · 1 kutuda miat çelişkisi" uyarısını verdi. Tarayıcıda:
+Tarih `2026-09-17` dolu geldi, İrsaliye ve Sipariş açılır liste oldu (belge
+no · tarih · tedarikçi), "Kabul" kararı `Tutanak "Kabul" olarak kapatıldı`
+dedi ve karekod uyarısını gösterdi, "Siparişe Git" `Alış Siparişi #5915 —
+SIP-900` kartını açtı. Konsol hatası yok. xUnit 232/232, vitest 598/598, iki
+derleme temiz. Test verisi silindi. Göç **737 yalnız docker'da**.

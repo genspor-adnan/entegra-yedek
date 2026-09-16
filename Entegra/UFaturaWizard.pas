@@ -718,6 +718,9 @@ type
     FRaporMenuHazir: Boolean;
     FTevkifatListeHazir: Boolean;
     FIstisnaListeHazir: Boolean;
+    // Satirda tevkifat girilince baslik TIPI'sini 22 yapan otomatik ayar (bkz TevkifatTipiOtoAyarla)
+    FTipiTevkifatOto: Boolean;      // TIPI=22'yi BIZ mi atadik (geri alma yalniz bu durumda)
+    FTipiTevkifatOnceki: Integer;   // biz atamadan onceki TIPI degeri
     //KuraGoreFiyatHesaplamaAlani: integer; // faturaadetchange olayında kullanılıyor bu değişken
     BekletDlg: TBekletmeDlg;
     IzlemDlg:TIzlemeDlg;
@@ -767,6 +770,8 @@ type
     procedure FaturaIhracatJsonKaydet(AFaturaID: Integer; const AJson: string);
     function TamIskontoSatiriVar: Boolean;
     function KDVMuafiyetSatiriVar: Boolean;
+    function SatirTevkifatiVar: Boolean;
+    procedure TevkifatTipiOtoAyarla;
     function TamIskontoNedeniSor: Boolean;
     function KDVIstisnaNedeniSorulmaliMi: Boolean;
     procedure IletisimEkleClick(Sender: TObject);
@@ -1283,6 +1288,14 @@ begin
   end;
 end;
 
+{ %0 KDV / muafiyetli satir arar.
+  KDVMUHAFIYETI adi yaniltici: alan KDV MUAFIYETI degil TEVKIFAT ORANI tutar
+  (GENINI BOLUM=Ops_TevkifatOranlari: 20=2/10 ... 90=9/10, 100=Tam Oranli).
+  Bu yuzden KDVMUHAFIYETI=100 "muafiyet" DEGIL tam oranli tevkifattir; burada
+  sayilmaz. Sayilsaydi tam tevkifatli satirda hem Tevkifatli hem KdvMuafiyetli
+  dogar, FaturaTipiDuzenle comboTevkifat ile comboIstisna'yi ayni anda gorunur
+  yapardi (ikisi de Left=87/Top=138 ve ikisi de PLANID'e bagli - ust uste biner,
+  neden listeleri karisir). Muafiyetin gercek gostergesi KDV oraninin 0 olmasi. }
 function TFaturaWizardDlg.KDVMuafiyetSatiriVar: Boolean;
 var
   LBookmark: TBookmark;
@@ -1296,8 +1309,7 @@ begin
   try
     TabFatura.First;
     while not TabFatura.Eof do begin
-      if (TabFatura.FieldByName('KDV').AsFloat <= 0.0001) or
-         (TabFatura.FieldByName('KDVMUHAFIYETI').AsFloat >= 99.9999) then begin
+      if TabFatura.FieldByName('KDV').AsFloat <= 0.0001 then begin
         Result := True;
         Break;
       end;
@@ -1308,6 +1320,90 @@ begin
       TabFatura.GotoBookmark(LBookmark);
     TabFatura.FreeBookmark(LBookmark);
     TabFatura.EnableControls;
+  end;
+end;
+
+{ Satirlarin herhangi birinde KDV tevkifat orani (FATURA.KDVMUHAFIYETI) girilmis mi?
+  Satir basina bayrak tutulmuyor: TIPI baslikta TEK deger, satir ise cok - esleme
+  senkron derdi cikarir ve satir silinince geri donusu kimse hesaplayamaz. Dataset
+  zaten bellekte, satir sayisi az; her seferinde taramak hem ucuz hem idempotent.
+  (KDVMuafiyetSatiriVar / TamIskontoSatiriVar ile ayni desen.) }
+function TFaturaWizardDlg.SatirTevkifatiVar: Boolean;
+var
+  LBookmark: TBookmark;
+begin
+  Result := False;
+  if not TabFatura.Active then
+    Exit;
+
+  TabFatura.DisableControls;
+  LBookmark := TabFatura.GetBookmark;
+  try
+    TabFatura.First;
+    while not TabFatura.Eof do begin
+      if TabFatura.FieldByName('KDVMUHAFIYETI').AsFloat > 0.0001 then begin
+        Result := True;
+        Break;
+      end;
+      TabFatura.Next;
+    end;
+  finally
+    if TabFatura.BookmarkValid(LBookmark) then
+      TabFatura.GotoBookmark(LBookmark);
+    TabFatura.FreeBookmark(LBookmark);
+    TabFatura.EnableControls;
+  end;
+end;
+
+{ Satirda tevkifat orani girilince baslik tipini otomatik "Tevkifatli" (TIPI=22)
+  yapar. TIPI=22 comboTevkifat'i gorunur kilar (FaturaTipiDuzenle) ve FormCloseQuery
+  tevkifat nedeni (PLANID) secilmeden kapanisa izin vermez - bu yuzden tetik KAYIT
+  aninda degil, satir post/silme aninda; kullanici nedeni secebilsin.
+
+  Kurallar:
+  - Yalniz Tur=15 (satis / giden fatura). TIPI=22 giden e-Fatura/e-Arsiv icin
+    anlamli; alis belgesinde karsiligi yok.
+  - Kullanicinin bilincli sectigi ozel tipler EZILMEZ (2=iade, 4/7/8=serbest
+    meslek makbuzu, 5=kur farki, 24=KDV istisna); yalnizca normal tipten (0/1)
+    22'ye gecilir.
+  - Geri alma YALNIZ kendi atadigimiz 22 icin (FTipiTevkifatOto). Kullanici elle
+    22 sectiyse satir tevkifati kalksa bile tipe dokunulmaz.
+  - Geri alirken PLANID de sifirlanir: oraya yazilmis olan TEVKIFAT nedenidir,
+    tip 22'den cikinca istisna nedeni gibi yorumlanip yanlis "secilmis" sayilir.
+
+  DIKKAT: FaturaTipiDuzenle icinden CAGIRMA - o DtsFatBaslikStateChange'den de
+  cagriliyor, buradaki TabFatbaslik.Edit ozyinelemeye yol acar. }
+procedure TFaturaWizardDlg.TevkifatTipiOtoAyarla;
+var
+  LTipi: Integer;
+begin
+  if Tur <> 15 then
+    Exit;
+  if Kilit then
+    Exit;
+  if not (TabFatbaslik.Active and TabFatura.Active) then
+    Exit;
+
+  LTipi := TabFatbaslik.FieldByName('TIPI').AsInteger;
+
+  if SatirTevkifatiVar then begin
+    if LTipi = 22 then
+      Exit;                            // zaten tevkifatli
+    if not (LTipi in [0, 1]) then
+      Exit;                            // ozel tipi ezme
+    FTipiTevkifatOnceki := LTipi;
+    FTipiTevkifatOto    := True;
+    if not (TabFatbaslik.State in [dsEdit, dsInsert]) then
+      TabFatbaslik.Edit;
+    TabFatbaslik.FieldByName('TIPI').AsInteger := 22;
+  end else begin
+    if not (FTipiTevkifatOto and (LTipi = 22)) then
+      Exit;                            // biz atamadiysak geri alma
+    FTipiTevkifatOto := False;
+    if not (TabFatbaslik.State in [dsEdit, dsInsert]) then
+      TabFatbaslik.Edit;
+    TabFatbaslik.FieldByName('TIPI').AsInteger := FTipiTevkifatOnceki;
+    TabFatbaslik.FieldByName('PLANID').AsInteger := 0;
   end;
 end;
 
@@ -1808,6 +1904,18 @@ procedure TFaturaWizardDlg.BirSatrAdetiKadarSatrlaraBolMenuClick(Sender: TObject
 var ID,I,Adet:integer;
     Tutar : Extended;
 begin
+   if TabFatura.IsEmpty then
+      Exit;
+   // IZLEMLI SATIR BOLUNMEZ (kullanici): seri/lot/SKT/karekod kaydi (STOKIZLEME) satira
+   //   bagli; kopya satirlar izlemsiz dogar, ilk satirin izlemi ise adet 1'e dusunce
+   //   miktarla uyusmaz. Kullanici once izlemi cozmeli ya da satiri elle ayirmali.
+   if TabFatura.FieldByName('IZLEME').AsInteger > 0 then begin
+      Application.MessageBox('Bu satır izlemli (seri no / lot / SKT). İzlemli satır adeti kadar '+
+         'satırlara bölünemez; izlem kaydı satıra bağlıdır.', PChar(Uyari), MB_OK + MB_ICONWARNING);
+      Exit;
+   end;
+   if TabFatura.FieldByName('ADET').AsInteger <= 1 then
+      Exit;                                       // bolunecek bir sey yok
    ID   := TabFatura.FieldByName('ID').AsInteger;
    Adet := TabFatura.FieldByName('ADET').AsInteger;
    Tutar:= TabFatura.FieldByName('BIRIMFIYAT').AsExtended;
@@ -2396,6 +2504,8 @@ begin
   FToplamHesapBekliyor := False;
   FRaporMenuHazir := False;
   FTevkifatListeHazir := False;
+  FTipiTevkifatOto    := False;   // otomatik TIPI=22 atamasi bu belge icin henuz yok
+  FTipiTevkifatOnceki := 0;
   FIstisnaListeHazir := False;
 
   if EIrsaliyeKullanimda=False then
@@ -3624,6 +3734,9 @@ end;
 procedure TFaturaWizardDlg.PopupMenuFaturaPopup(Sender: TObject);
 begin
    UTSdenAdetleriKontrolEtMenu.Visible := TabFatbaslik.FieldByName('TUR').AsInteger in [10,11,14,15];
+   // Alis/Satis Opsiyon 'Satiri Adeti Kadar Bol Menusu Gozuksun' (-24122, varsayilan True).
+   //   Izlemli satirda menu gorunur ama tiklaninca uyarir (BirSatrAdetiKadarSatrlaraBolMenuClick).
+   BirSatrAdetiKadarSatrlaraBolMenu.Visible := Tablo.GENINI.ReadBoolean(Ops_FaturaOpsiyon_SatirBolMenu, True);
    // Ihracat bilgileri: satis irsaliye (14) + satis fatura (15). Popup acilirken aktif kayittan.
    IhracatBilgileriMenu.Visible := TabFatbaslik.FieldByName('TUR').AsInteger in [14, 15];
 end;
@@ -4264,6 +4377,8 @@ procedure TFaturaWizardDlg.FATURAAfterDelete(DataSet: TDataSet);
 begin
   FaturaTutarHesapla(True);
   TabFatura.Refresh;
+  // Son tevkifatli satir silindiyse otomatik atanmis TIPI=22 geri alinir.
+  TevkifatTipiOtoAyarla;
   if TabFatura.IsEmpty then begin
      EditKulKur.Visible := False;
      TabFatbaslik.Edit;
@@ -4407,6 +4522,10 @@ begin
     TabFatbaslik.Edit;
     TabFatbaslik.FieldByName('VADE').AsInteger := Trunc(Tablo.Query5.fields[0].AsFloat);
   end;
+
+  // Satirda tevkifat girildiyse baslik tipini Tevkifatli (22) yap - FaturaTipiDuzenle'den
+  //   ONCE, tevkifat nedeni combosu ayni yenilemede gorunur olsun.
+  TevkifatTipiOtoAyarla;
 
   FaturaTipiDuzenle;
   //?zlem bilgisi var m? bakal?m serino vb.
@@ -5060,6 +5179,13 @@ begin
   Istisnali  := TabFatbaslik.Active and (TabFatbaslik.FieldByName('TIPI').AsInteger = 24);
   TamIskontolu := TabFatbaslik.Active and TamIskontoSatiriVar;
   KdvMuafiyetli := TabFatbaslik.Active and KDVMuafiyetSatiriVar;
+  // comboTevkifat ile comboIstisna ayni yerde (Left=87/Top=138) ve ayni alana
+  //   (PLANID) bagli - ikisi birden gorunemez. Tevkifat once gelir: TIPI=22
+  //   belgenin tipi, istisna/muafiyet ise satirdan turetilen bir ipucu.
+  if Tevkifatli then begin
+    TamIskontolu  := False;
+    KdvMuafiyetli := False;
+  end;
   cxLabel4.Visible      := not (Tevkifatli or Istisnali or TamIskontolu or KdvMuafiyetli);
   cxDBTextEdit2.Visible := not (Tevkifatli or Istisnali or TamIskontolu or KdvMuafiyetli);
   LabelTevkifat.Visible := Tevkifatli;

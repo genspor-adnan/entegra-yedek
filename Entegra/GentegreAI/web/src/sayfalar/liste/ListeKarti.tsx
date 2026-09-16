@@ -54,6 +54,7 @@ export interface ListeKartiOzellikleri {
  * Goz muayene kartindaki kisayollarin actigi kartlar (691). Bu uc
  * kaynak URL'den `hastaId` / `muayeneId` on dolgusu kabul eder.
  */
+const HASTA_KAYIT_KAYNAKLARI = new Set(['hasta-alerji', 'hasta-kronik', 'hasta-ilac', 'hasta-gecmis', 'ftr-degerlendirme', 'ftr-program', 'ftr-olcek']);
 const GOZ_KISAYOL_KAYNAKLARI = new Set([
   'goz-gozluk-recete', 'goz-goruntuleme', 'goz-islem',
 ]);
@@ -372,11 +373,44 @@ export function ListeKarti({
               ...(sorgu.get('muayeneId')
                   ? { muayeneId: Number(sorgu.get('muayeneId')) } : {}),
             }
+          // DIS LAB IS EMRI (708, kullanici: "seansta lab is emri basilinca o
+          //   hasta adina acilsin"): seans kartindan hasta, hekim, plan satiri
+          //   ve dis on dolgu gelir; kaydet/kapat `geri` ile seansa doner.
+          : tanim.kaynak === 'dis-lab-isemri' && sorgu.get('hastaId')
+          ? {
+              ...tanim.yeniKayitVarsayilanlari,
+              hastaId: Number(sorgu.get('hastaId')),
+              ...(sorgu.get('hekimId') ? { hekimId: Number(sorgu.get('hekimId')) } : {}),
+              ...(sorgu.get('planSatirId') ? { planSatirId: Number(sorgu.get('planSatirId')) } : {}),
+              ...(sorgu.get('disNolar') ? { disNolar: sorgu.get('disNolar')! } : {}),
+            }
+          // DIS ODEME PLANI (kullanici: odontogramdaki dugme yoksa yeni plan acsin):
+          //   plan ve toplam on dolu; kaydet/kapat `geri` ile odontograma doner.
+          // HASTA KAYITLARI (alerji / kronik / ilac / gecmis): odontogram ya da baska
+          //   ekrandan hasta on dolu acilir; kaydet/kapat `geri` ile doner.
+          // CALISMA PLANI (711): plandan acilan istisna/sablon karti hekim on dolu.
+          : tanim.kaynak.startsWith('calisma-') && sorgu.get('hekimId')
+          ? { ...tanim.yeniKayitVarsayilanlari, hekimId: Number(sorgu.get('hekimId')) }
+          : HASTA_KAYIT_KAYNAKLARI.has(tanim.kaynak) && sorgu.get('hastaId')
+          ? { ...tanim.yeniKayitVarsayilanlari, hastaId: Number(sorgu.get('hastaId')), ...(sorgu.get('programId') ? { programId: Number(sorgu.get('programId')) } : {}) }
+          : tanim.kaynak === 'dis-odeme-plani' && sorgu.get('planId')
+          ? {
+              ...tanim.yeniKayitVarsayilanlari,
+              planId: Number(sorgu.get('planId')),
+              ...(sorgu.get('toplam') ? { toplam: Number(sorgu.get('toplam')) } : {}),
+            }
           : tanim.yeniKayitVarsayilanlari}
-        onKapat={() => git(tanim.kartYolu!)}
+        // `geri`: kart baska bir ekrandan (seans) acildiysa kaydet/kapat oraya
+        //   doner - liste ekranina dusurmek hekimi seansi yeniden aramaya zorlardi.
+        yeniSecilenAdlar={sorgu.get('hastaAd') ? { hastaId: sorgu.get('hastaAd')! } : undefined}
+        onKapat={() => git(sorgu.get('geri') ?? tanim.kartYolu!)}
         onKaydedildi={yeniId => {
           setYenile(t => t + 1);
-          if (kartId === 'yeni') {
+          // `geri` varsa (seanstan lab is emri) yeni kartta kalmaz, onKapat
+          //   geldigi ekrana doner; kart yoluna ara gecis gereksiz gecmis birakirdi.
+          // FTR programi (719): yeni kayit ozel karta (uygulama ekle / planla) gecer.
+          if (kartId === 'yeni' && tanim.kaynak === 'ftr-program') { git(`/ftr-program/${yeniId}?geri=${encodeURIComponent(sorgu.get('geri') ?? '/ftr-program')}`, { replace: true }); return }
+          if (kartId === 'yeni' && !sorgu.get('geri')) {
             setOdaklaSonEklenen(t => t + 1);
             git(`${tanim.kartYolu}/${yeniId}`, { replace: true });
           }

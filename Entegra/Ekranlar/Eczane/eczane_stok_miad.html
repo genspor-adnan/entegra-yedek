@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eczane — Stok & Miad Yönetimi — Mockup (GenoTIP AI · Eczane)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>📅 Eczane — Stok & Miad Yönetimi</span>
+    <span class="sp">Eczane Ana Depo · 1.284 kalem · son sayım 31.08.2026 · 16.09.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="eczane_panosu.html">◀ Pano</div>
+    <div class="btn primary">📋 Sayım Başlat</div>
+    <div class="btn">🛒 Satın Alma Talebi</div>
+    <div class="btn" data-git="eczane_iade_imha.html">↩️ İade / İmha</div>
+    <div class="sepv"></div>
+    <div class="btn">🔁 Depolar Arası Transfer</div>
+    <div class="btn">📊 Tüketim Analizi</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ Stok Raporu</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">Stok değeri</div><div class="d" style="font-size:14px">6,42 M ₺</div></div>
+    <div class="kart kir"><div class="b">Miadı &lt; 90 gün</div><div class="d">23 <small>kalem · 214 bin ₺</small></div></div>
+    <div class="kart sari"><div class="b">Kritik stok</div><div class="d">9 <small>kalem</small></div></div>
+    <div class="kart"><div class="b">Stoksuz</div><div class="d">4 <small>kalem</small></div></div>
+    <div class="kart"><div class="b">Ortalama devir</div><div class="d">38 <small>gün</small></div></div>
+    <div class="kart sari"><div class="b">Hareketsiz &gt; 180 gün</div><div class="d">17</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="miad">Miad Takibi<span class="sy">23</span></div>
+    <div class="sekme" data-s="kritik">Kritik & Stoksuz<span class="sy">13</span></div>
+    <div class="sekme" data-s="stok">Stok Durumu<span class="sy">1284</span></div>
+    <div class="sekme" data-s="sayim">Sayım<span class="sy">açık</span></div>
+    <div class="sekme" data-s="raf">Raf & Yerleşim</div>
+  </div>
+
+  <!-- ========================================================= MİAD TAKİBİ ===== -->
+  <div class="pnl" data-s="miad">
+    <div class="arama">
+      <div class="kutu">🔍 İlaç, lot ya da raf…</div>
+      <span class="chip">Süresi geçmiş <b>2</b></span>
+      <span class="chip on">&lt; 90 gün <b>23</b></span>
+      <span class="chip">&lt; 180 gün <b>51</b></span>
+      <span class="chip">Pahalı kalem <b>6</b></span>
+      <span class="chip">Tümü</span>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:240px">İlaç</th>
+          <th style="width:110px">Lot</th>
+          <th style="width:100px" class="orta">SKT</th>
+          <th style="width:90px" class="orta">Kalan gün</th>
+          <th style="width:80px" class="sag">Miktar</th>
+          <th style="width:110px" class="sag">Değer</th>
+          <th style="width:100px" class="sag">Günlük tüketim</th>
+          <th style="width:170px" class="orta">Öneri</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Rituksimab 500 mg</b> <span class="rz mor">Pahalı</span></td>
+            <td><code>RT8840</code></td><td class="orta">31.10.2026</td>
+            <td class="orta"><span class="rz kir">45</span></td>
+            <td class="sag">4</td><td class="sag">96.400 ₺</td><td class="sag">0,1</td>
+            <td class="orta"><span class="btn mini">Tedarikçiye iade</span></td></tr>
+          <tr class="tik"><td><b>Seftriakson 1 g</b></td>
+            <td><code>C4482</code></td><td class="orta">30.09.2026</td>
+            <td class="orta"><span class="rz kir">14</span></td>
+            <td class="sag">38</td><td class="sag">1.520 ₺</td><td class="sag">6,2</td>
+            <td class="orta"><span class="rz ok">Tüketilir</span></td></tr>
+          <tr class="tik"><td><b>Metamizol 1 g ampul</b></td>
+            <td><code>MZ7730</code></td><td class="orta">31.12.2026</td>
+            <td class="orta"><span class="rz sari">106</span></td>
+            <td class="sag">200</td><td class="sag">3.400 ₺</td><td class="sag">11,0</td>
+            <td class="orta"><span class="rz ok">Tüketilir</span></td></tr>
+          <tr class="tik"><td><b>İnsan albümini %20</b></td>
+            <td><code>AL3390</code></td><td class="orta">30.11.2026</td>
+            <td class="orta"><span class="rz sari">75</span></td>
+            <td class="sag">4</td><td class="sag">18.800 ₺</td><td class="sag">3,0</td>
+            <td class="orta"><span class="rz ok">Tüketilir</span></td></tr>
+          <tr class="tik"><td><b>İmmünoglobulin %10 10 g</b> <span class="rz mor">Pahalı</span></td>
+            <td><code>IG5512</code></td><td class="orta">31.12.2026</td>
+            <td class="orta"><span class="rz sari">106</span></td>
+            <td class="sag">3</td><td class="sag">74.100 ₺</td><td class="sag">0,04</td>
+            <td class="orta"><span class="btn mini">Başka hastaneye devir</span></td></tr>
+          <tr class="tik"><td><b>Adrenalin 1 mg/mL ampul</b></td>
+            <td><code>AD1120</code></td><td class="orta">31.08.2026</td>
+            <td class="orta"><span class="rz kir">−16</span></td>
+            <td class="sag">12</td><td class="sag">240 ₺</td><td class="sag">2,4</td>
+            <td class="orta"><span class="btn mini">İmhaya al</span></td></tr>
+          <tr class="tik"><td><b>Heparin 25.000 IU flakon</b></td>
+            <td><code>HP0034</code></td><td class="orta">31.07.2026</td>
+            <td class="orta"><span class="rz kir">−47</span></td>
+            <td class="sag">3</td><td class="sag">420 ₺</td><td class="sag">1,8</td>
+            <td class="orta"><span class="btn mini">İmhaya al</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Öneri tüketime bakar, yalnız tarihe değil:</b> günlük 6,2 giden Seftriakson
+        14 günde biter — iade edilmez, tüketilir.</span>
+      <span class="sp">Miadı geçen kalem raftan <b>hemen</b> çekilir: sayımda görünür, çıkışa kapalıdır.</span>
+    </div>
+  </div>
+
+  <!-- ====================================================== KRİTİK STOK ===== -->
+  <div class="pnl" data-s="kritik" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 İlaç…</div>
+      <span class="chip on">Kritik <b>9</b></span>
+      <span class="chip">Stoksuz <b>4</b></span>
+      <span class="chip">Acil ilaç <b>3</b></span>
+      <span class="chip">Talebi açık <b>6</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:250px">İlaç</th>
+          <th style="width:80px" class="sag">Kalan</th>
+          <th style="width:80px" class="sag">Min</th>
+          <th style="width:100px" class="sag">Günlük</th>
+          <th style="width:100px" class="orta">Yeter</th>
+          <th style="width:130px">Son sipariş</th>
+          <th style="width:150px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>İnsan albümini %20</b></td>
+            <td class="sag">4</td><td class="sag">10</td><td class="sag">3,0</td>
+            <td class="orta"><span class="rz kir">1,3 gün</span></td>
+            <td>SA-2609-077 · 15.09</td>
+            <td class="orta"><span class="rz sari">Sipariş verildi</span></td></tr>
+          <tr class="tik"><td><b>Deksmedetomidin 200 µg</b></td>
+            <td class="sag">0</td><td class="sag">8</td><td class="sag">1,4</td>
+            <td class="orta"><span class="rz kir">0 gün</span></td>
+            <td>SA-2609-061 · 12.09</td>
+            <td class="orta"><span class="rz kir">Tedarikçide yok</span></td></tr>
+          <tr class="tik"><td><b>Adrenalin 1 mg/mL</b> <span class="rz kir">Acil ilaç</span></td>
+            <td class="sag">18</td><td class="sag">40</td><td class="sag">2,4</td>
+            <td class="orta"><span class="rz sari">7,5 gün</span></td>
+            <td class="sonuk">— açılmadı</td>
+            <td class="orta"><span class="btn mini">Talep aç</span></td></tr>
+          <tr class="tik"><td><b>Atropin 0,5 mg</b> <span class="rz kir">Acil ilaç</span></td>
+            <td class="sag">22</td><td class="sag">40</td><td class="sag">1,1</td>
+            <td class="orta"><span class="rz sari">20 gün</span></td>
+            <td>SA-2609-070 · 14.09</td>
+            <td class="orta"><span class="rz sari">Sipariş verildi</span></td></tr>
+          <tr class="tik"><td><b>Traneksamik asit 500 mg</b></td>
+            <td class="sag">0</td><td class="sag">30</td><td class="sag">4,0</td>
+            <td class="orta"><span class="rz kir">0 gün</span></td>
+            <td>SA-2609-077 · 16.09</td>
+            <td class="orta"><span class="rz sari">Sipariş verildi</span></td></tr>
+          <tr class="tik"><td><b>Naloksan 0,4 mg</b> <span class="rz kir">Acil ilaç</span></td>
+            <td class="sag">6</td><td class="sag">10</td><td class="sag">0,2</td>
+            <td class="orta"><span class="rz">30 gün</span></td>
+            <td class="sonuk">— açılmadı</td>
+            <td class="orta"><span class="rz mavi">İzlemde</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>"Yeter" günlük tüketimden hesaplanır</b>, min stoktan değil: 22 adet Atropin
+        20 gün yeter, 18 adet Adrenalin 7,5 gün.</span>
+      <span class="sp">Acil ilaç listesindeki kalem stoksuz kalamaz — sıfıra inmeden uyarı verir.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================= STOK DURUMU ===== -->
+  <div class="pnl" data-s="stok" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 İlaç, ATC ya da barkod…</div>
+      <span class="chip on">Tümü <b>1284</b></span>
+      <span class="chip">Hareketli <b>842</b></span>
+      <span class="chip">Hareketsiz &gt;180 gün <b>17</b></span>
+      <span class="chip">Karantinada <b>2</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:250px">İlaç</th>
+          <th style="width:100px">ATC</th>
+          <th style="width:90px" class="sag">Ana depo</th>
+          <th style="width:100px" class="sag">Servislerde</th>
+          <th style="width:90px" class="sag">Toplam</th>
+          <th style="width:90px" class="sag">Devir (gün)</th>
+          <th style="width:110px" class="sag">Değer</th>
+          <th style="width:120px" class="orta">Raf</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>Sefazolin 1 g flakon</td><td><code class="k">J01DB04</code></td>
+            <td class="sag">348</td><td class="sag">64</td><td class="sag">412</td>
+            <td class="sag">22</td><td class="sag">16.480 ₺</td><td class="orta">A-12</td></tr>
+          <tr class="tik"><td>Pantoprazol 40 mg flakon</td><td><code class="k">A02BC02</code></td>
+            <td class="sag">286</td><td class="sag">41</td><td class="sag">327</td>
+            <td class="sag">19</td><td class="sag">9.810 ₺</td><td class="orta">A-14</td></tr>
+          <tr class="tik"><td>Enoksaparin 6000 anti-Xa</td><td><code class="k">B01AB05</code></td>
+            <td class="sag">180</td><td class="sag">36</td><td class="sag">216</td>
+            <td class="sag">26</td><td class="sag">42.120 ₺</td><td class="orta">A-18 <span class="rz mor">HRM</span></td></tr>
+          <tr class="tik"><td>İnsülin glarjin 100 IU/mL</td><td><code class="k">A10AE04</code></td>
+            <td class="sag">72</td><td class="sag">18</td><td class="sag">90</td>
+            <td class="sag">31</td><td class="sag">27.900 ₺</td>
+            <td class="orta">BUZDOLABI-1 <span class="rz mavi">2-8</span></td></tr>
+          <tr class="tik"><td>DOPamin 200 mg/5 mL</td><td><code class="k">C01CA04</code></td>
+            <td class="sag">40</td><td class="sag">12</td><td class="sag">52</td>
+            <td class="sag">64</td><td class="sag">1.560 ₺</td>
+            <td class="orta">C-02 <span class="rz mor">LASA</span></td></tr>
+          <tr class="tik"><td>DOBUTamin 250 mg/20 mL</td><td><code class="k">C01CA07</code></td>
+            <td class="sag">28</td><td class="sag">6</td><td class="sag">34</td>
+            <td class="sag">78</td><td class="sag">2.380 ₺</td>
+            <td class="orta">C-07 <span class="rz mor">LASA</span></td></tr>
+          <tr class="tik"><td>Fentanil 0,5 mg/10 mL</td><td><code class="k">N01AH01</code></td>
+            <td class="sag">24</td><td class="sag">6</td><td class="sag">30</td>
+            <td class="sag">45</td><td class="sag">1.800 ₺</td>
+            <td class="orta">KASA <span class="rz kir">Kırmızı</span></td></tr>
+          <tr class="tik"><td>Rituksimab 500 mg</td><td><code class="k">L01FA01</code></td>
+            <td class="sag">4 <span class="sonuk">+6 kar.</span></td><td class="sag">0</td><td class="sag">4</td>
+            <td class="sag">310</td><td class="sag">96.400 ₺</td>
+            <td class="orta">BUZDOLABI-2</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>LASA</b> (yazılışı-okunuşu benzer) kalemler ayrı rafta durur: DOPamin C-02,
+        DOBUTamin C-07 — yan yana konulmaz.</span>
+      <span class="sp">Karantinadaki miktar toplama girmez, ayrı gösterilir.</span>
+    </div>
+  </div>
+
+  <!-- ============================================================= SAYIM ===== -->
+  <div class="pnl" data-s="sayim" hidden>
+    <div class="ozet">
+      <div class="kart"><div class="b">Sayım</div><div class="d" style="font-size:12px">SY-2026/09 · Aylık</div></div>
+      <div class="kart"><div class="b">Sayılan</div><div class="d">418 <small>/ 1284</small></div></div>
+      <div class="kart kir"><div class="b">Fark bulunan</div><div class="d">11</div></div>
+      <div class="kart sari"><div class="b">Fark tutarı</div><div class="d" style="font-size:13px">−4.280 ₺</div></div>
+      <div class="kart"><div class="b">Sayan</div><div class="d" style="font-size:12px">2 kişi</div></div>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:240px">İlaç</th>
+          <th style="width:110px">Lot</th>
+          <th style="width:90px" class="sag">Kayıt</th>
+          <th style="width:90px" class="sag">Sayım 1</th>
+          <th style="width:90px" class="sag">Sayım 2</th>
+          <th style="width:80px" class="sag">Fark</th>
+          <th>Açıklama</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>Sefazolin 1 g</td><td><code>S7741</code></td>
+            <td class="sag">348</td><td class="sag">346</td><td class="sag">346</td>
+            <td class="sag"><span class="rz kir">−2</span></td>
+            <td>Kırık flakon — imha kaydı yapılmamış</td></tr>
+          <tr class="tik"><td>Metamizol 1 g</td><td><code>MZ7730</code></td>
+            <td class="sag">200</td><td class="sag">200</td><td class="sag">200</td>
+            <td class="sag"><span class="rz ok">0</span></td><td class="sonuk">—</td></tr>
+          <tr class="tik"><td>Fentanil 0,5 mg <span class="rz kir">Kontrollü</span></td>
+            <td><code>FN1190</code></td>
+            <td class="sag">24</td><td class="sag">24</td><td class="sag">24</td>
+            <td class="sag"><span class="rz ok">0</span></td>
+            <td>Kasa sayımı — çift imza alındı</td></tr>
+          <tr class="tik"><td>Pantoprazol 40 mg</td><td><code>P2291</code></td>
+            <td class="sag">286</td><td class="sag">291</td><td class="sag">291</td>
+            <td class="sag"><span class="rz sari">+5</span></td>
+            <td>Servis iadesi sisteme geç girilmiş</td></tr>
+          <tr class="tik"><td>İnsan albümini %20</td><td><code>AL3390</code></td>
+            <td class="sag">4</td><td class="sag">3</td><td class="sag">4</td>
+            <td class="sag"><span class="rz sari">?</span></td>
+            <td><span class="rz sari">Sayımlar uyuşmadı</span> — üçüncü sayım gerekiyor</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>İki kişi ayrı ayrı sayar:</b> uyuşmayan kalem düzeltilmez, üçüncü kez sayılır.</span>
+      <span class="sp">Kontrollü ilaç sayımı <b>günlük</b> ve çift imzalı — aylık sayımı beklemez.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================== RAF & YERLEŞİM ===== -->
+  <div class="pnl" data-s="raf" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:130px">Raf / Alan</th>
+          <th style="width:160px" class="orta">Koşul</th>
+          <th style="width:100px" class="sag">Kalem</th>
+          <th>Kural</th>
+          <th style="width:130px" class="orta">Son kontrol</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>A / B / C rafları</b></td><td class="orta">Oda · 15-25 °C</td>
+            <td class="sag">1.041</td>
+            <td>Alfabetik + ATC · LASA kalemler ayrı raf, tall-man etiketli</td>
+            <td class="orta"><span class="rz ok">16.09 08:00</span></td></tr>
+          <tr class="tik"><td><b>BUZDOLABI-1</b></td><td class="orta"><span class="rz mavi">2-8 °C</span></td>
+            <td class="sag">94</td>
+            <td>Sürekli ısı kaydı · günde 2 kez elle kontrol · alarmlı</td>
+            <td class="orta"><span class="rz ok">16.09 08:05</span></td></tr>
+          <tr class="tik"><td><b>BUZDOLABI-2</b></td><td class="orta"><span class="rz kir">2-8 °C · 9,4 °C</span></td>
+            <td class="sag">42</td>
+            <td>Pahalı/biyolojik kalemler · <b>alarm verdi 08:52</b></td>
+            <td class="orta"><span class="rz kir">İhlal</span></td></tr>
+          <tr class="tik"><td><b>KASA</b></td><td class="orta">Kilitli · çift anahtar</td>
+            <td class="sag">18</td>
+            <td>Kırmızı/yeşil reçeteli · günlük sayım · çift imzalı defter</td>
+            <td class="orta"><span class="rz sari">13.09</span></td></tr>
+          <tr class="tik"><td><b>KARANTİNA</b></td><td class="orta">Ayrı kilitli dolap</td>
+            <td class="sag">2</td>
+            <td>Kararı bekleyen kalem · <b>çıkışa kapalı</b>, sayımda görünür</td>
+            <td class="orta"><span class="rz ok">16.09 08:25</span></td></tr>
+          <tr class="tik"><td><b>İMHA BEKLEYEN</b></td><td class="orta">Kırmızı etiketli</td>
+            <td class="sag">7</td>
+            <td>Miadı geçmiş/hasarlı · tutanakla tıbbi atığa</td>
+            <td class="orta"><span class="rz ok">16.09 08:30</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Ayrı raf ayrı kuraldır:</b> karantina ve imha bekleyen kalemler stokta görünür
+        ama çıkışa açılmaz.</span>
+      <span class="sp">Buzdolabı-2 ihlali açık — etkilenen kalemler karantinaya alındı.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Süreç:</b> Stok <b>FEFO</b> ile çıkar (en yakın miadlı önce). Miad uyarısı yalnız tarihe değil
+  <b>tüketim hızına</b> bakar: günlük 6 giden bir kalem 14 gün kala iade edilmez, tüketilir; aylık
+  0,1 giden pahalı kalem 45 gün kala tedarikçiye iade ya da başka kuruma devir için işaretlenir.
+  Kritik stok "min altına düştü" değil <b>"kaç gün yeter"</b> hesabıyla uyarır. Sayım iki kişiyle
+  ve çift sayımla; uyuşmazsa düzeltilmez, yeniden sayılır. Kontrollü ilaç kasası bunların dışında:
+  <b>günlük</b> sayılır.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

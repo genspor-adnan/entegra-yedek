@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { DisHastaKarti as Kart, DisIslemSecenegi, DisPlanSatiri } from '../../api/uclar/dis';
@@ -22,8 +22,9 @@ import {
  * odontogramda planlanan çerçeve tamamlanana döner - hepsi sunucuda
  * (`/api/dis/plan-satir/{id}/yapildi`); ekran yalnız sonucu çizer.
  *
- * Sağ panel: seçili diş bulguları · hızlı bulgu paleti · ağız özeti. Plan &
- * ücret özeti plan tablosunun ALTINDA (v5 kararı).
+ * Sağ panel: seçili diş bulguları · hızlı bulgu paleti · ağız özeti · plan &
+ * ücret özeti (kullanıcı: ikisi de "hasta nerede" sorusunun cevabı, yan yana
+ * okunuyor; mockup v5'te ücret özeti plan tablosunun altındaydı).
  */
 
 const PLAN_DURUM: Record<number, [string, string]> = {
@@ -58,6 +59,22 @@ export function DisHastaKarti() {
   const hastaId = Number(param ?? 0);
   const git = useNavigate();
   const { yetki } = useOturum();
+  const konum = useLocation();
+  // KAPAT: geldigi yere (gunluk akis state.geri verir), yoksa hasta listesine.
+  // GERI ZINCIRI: plan karti -> hasta karti -> Kapat, plan kartina doner; plan
+  //   karti da KENDI geldigi yere (ustGeri) donebilsin diye state ile tasinir.
+  const durum = konum.state as { geri?: string; ustGeri?: string } | null;
+  const geri = durum?.geri ?? '/dis-hasta';
+  const ustGeri = durum?.ustGeri;
+  const kapat = useCallback(() => git(geri, ustGeri ? { state: { geri: ustGeri } } : undefined), [git, geri, ustGeri]);
+  // Buradan acilan generic kart/listeler (odeme plani, lab isleri, genel hasta
+  //   karti) ?geri= ile bu sayfaya doner; ozel kartlar (seans, plan) state.geri alir.
+  const geriParam = encodeURIComponent(konum.pathname);
+  useEffect(() => {
+    const f = (e: KeyboardEvent) => { if (e.key === 'Escape') kapat() };
+    window.addEventListener('keydown', f);
+    return () => window.removeEventListener('keydown', f);
+  }, [kapat]);
   const [kart, setKart] = useState<Kart | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   const [yukleniyor, setYukleniyor] = useState(true);
@@ -67,6 +84,8 @@ export function DisHastaKarti() {
   const [katmanlar, setKatmanlar] = useState({ mevcut: true, plan: true, tamam: true });
   const [sadeceSorunlu, setSadeceSorunlu] = useState(false);
   const [planSuzgec, setPlanSuzgec] = useState<'secili' | 'tumu' | 'yapilan' | 'bekleyen'>('secili');
+  const [anamnezAcik, setAnamnezAcik] = useState(false);
+  const [anamnez, setAnamnez] = useState({ dentalAnamnez: '', bruksizm: false, sigara: false, hijyenDurum: '', tmeBulgu: '' });
   const [islemAra, setIslemAra] = useState<{ acik: boolean; q: string; sonuc: DisIslemSecenegi[]; iskonto: string; seans: string }>(
     { acik: false, q: '', sonuc: [], iskonto: '0', seans: '' });
   const [sut, setSut] = useState(false);
@@ -164,6 +183,9 @@ export function DisHastaKarti() {
     if (!await onay(`${s.islem} satırı iptal edilsin mi?`)) return;
     await guvenli(async () => { await api.disPlanSatirIptal(s.id); await yukle(); });
   };
+  const anamnezKaydet = async () => {
+    await guvenli(async () => { await api.disMuayeneGuncelle(hastaId, anamnez); setAnamnezAcik(false); await yukle(); });
+  };
   const planSun = async () => {
     if (!kart?.plan) return;
     await guvenli(async () => { await api.disPlanSun(kart.plan!.id); mesaj('Plan hastaya sunuldu.'); await yukle(); });
@@ -176,13 +198,23 @@ export function DisHastaKarti() {
   const seansAc = async () => {
     await guvenli(async () => {
       const y = await api.disSeansAc({ hastaId, planId: kart?.plan?.id ?? null });
-      if (y.basvuruYok) mesaj('Seans açıldı ama hastanın bugün açık başvurusu yok: ücret satırı yazılamayacak. Kayıt Kabul\'den başvuru açın.');
-      git(`/dis-seans/${y.id}`);
+      if (y.basvuruAcildi) mesaj(`Başvuru ${y.basvuruNo} açıldı (ödeyen: ${y.odeyen})${y.provizyonBekliyor ? ' - Medula provizyonu bekliyor' : ''}; seans başvuruya bağlandı.`);
+      // Seans karti kapaninca BURAYA doner (prensip: ekran nereden acildiysa oraya).
+      git(`/dis-seans/${y.id}`, { state: { geri: konum.pathname, ustGeri: geri } });
     });
   };
 
-  if (hata) return <div className="sahne"><div className="hata-kutusu">{hata}</div></div>;
-  if (!kart) return <div className="sahne"><span className="sonuk">Yükleniyor…</span></div>;
+  const Perde = ({ children }: { children: ReactNode }) => (
+    <div className="kaperde" onClick={kapat}>
+      <div className="kawin tam" onClick={e => e.stopPropagation()}>
+        <div className="kabas">🦷 Diş Hasta Kartı<span className="kapt">Esc ile kapanır</span>
+          <button className="kabas-dugme" onClick={kapat} title="Kapat">✖</button></div>
+        <div className="kagov">{children}</div>
+      </div>
+    </div>
+  );
+  if (hata) return <Perde><div className="hata-kutusu">{hata}</div></Perde>;
+  if (!kart) return <Perde><span className="sonuk">Yükleniyor…</span></Perde>;
 
   const h = kart.hasta, plan = kart.plan;
   const seciliG = secili ? gorunumler[secili.disNo] : undefined;
@@ -191,40 +223,80 @@ export function DisHastaKarti() {
   const sira = sut ? SUT_SIRASI : DIS_SIRASI;
 
   return (
-    <>
-      <div className="sayfabas">
-        <div className="basrow">
-          <h1>🦷 {h.unvan}{h.yas != null ? ` · ${h.yas}` : ''}</h1>
-          <span className="yol">Diş › Hasta Kartı</span>
+    <div className="kaperde" onClick={kapat}>
+      <div className="kawin tam" onClick={e => e.stopPropagation()}>
+        <div className="kabas">
+          <span>🦷 {h.unvan}{h.yas != null ? ` · ${h.yas}` : ''}</span>
+          <span className="ds-kabas-yol">Diş › Hasta Kartı</span>
           {plan && <span className={`rozet ${PLAN_DURUM[plan.durum]?.[1] ?? 'gri'}`}>{plan.planNo} · {PLAN_DURUM[plan.durum]?.[0]}</span>}
           {bakiye > 0 && <span className="rozet hata">bakiye {para.format(bakiye)}</span>}
-          {yukleniyor && <span className="sonuk">yenileniyor…</span>}
+          {yukleniyor && <span className="ds-kabas-yol">yenileniyor…</span>}
+          <span className="kapt">Esc ile kapanır</span>
+          <button className="kabas-dugme" onClick={kapat} title="Kapat">✖</button>
         </div>
-        <div className="basarac">
+        <div className="kagov ds-kagov">
+        <div className="ds-arac ds-kart-arac">
           {yetki('dis.seans') && <button className="d bir" onClick={() => void seansAc()}>🪑 Muayene / Seans Aç</button>}
           {planYazar && plan?.durum === 1 && <button className="d" onClick={() => void planSun()}>📤 Proforma / Sun</button>}
           {planYazar && plan && (plan.durum === 1 || plan.durum === 2) && <button className="d onay" onClick={() => void planOnayla()}>✍ Hasta Onayı</button>}
-          {plan && <button className="d" onClick={() => git(`/dis-plan/${plan.id}`)}>📋 Plan Kartı</button>}
+          {plan && <button className="d" onClick={() => git(`/dis-plan/${plan.id}`, { state: { geri: konum.pathname, ustGeri: geri } })}>📋 Plan Kartı</button>}
           {plan?.odemePlaniId
-            ? <button className="d" onClick={() => git(`/dis-odeme-plani/${plan.odemePlaniId}`)}>💳 Ödeme Planı</button>
-            : plan && yetki('dis.odeme') && <button className="d" onClick={() => git('/dis-odeme-plani?planId=' + plan.id)}>💳 Ödeme Planı</button>}
-          <button className="d" onClick={() => git(`/dis-lab-isemri?hastaId=${hastaId}`)}>🧪 Lab İşleri</button>
-          <button className="d" onClick={() => git(`/hasta/${hastaId}`)}>↗ Genel Hasta Kartı</button>
+            ? <button className="d" onClick={() => git(`/dis-odeme-plani/${plan.odemePlaniId}?geri=${geriParam}`)}>💳 Ödeme Planı</button>
+            // Odeme plani YOKSA yeni kart acilir (kullanici): plan ve toplam on dolu,
+            //   kaydet/kapat odontograma doner - liste ekranina dusurmek isi yarim birakiyordu.
+            : plan && yetki('dis.odeme') && <button className="d" onClick={() => git(`/dis-odeme-plani/yeni?planId=${plan.id}&toplam=${plan.net}&geri=${geriParam}`)}>💳 Ödeme Planı</button>}
+          {/* Lab isi YOKSA yeni is emri karti acilir (kullanici): hasta on dolu,
+              kaydet/kapat odontograma doner. Varsa hastanin lab listesi. */}
+          <button className="d" onClick={() => git(`/dis-lab-isemri/yeni?hastaId=${hastaId}&hastaAd=${encodeURIComponent(kart?.hasta.unvan ?? '')}&geri=${geriParam}`)}>🧪 Lab İş Emri</button>
+          <button className="d" onClick={() => git(`/hasta/${hastaId}?geri=${geriParam}`)}>↗ Genel Hasta Kartı</button>
           <button className="d" onClick={() => void yukle()} title="Yenile">⟳</button>
+          <button className="d ds-sp" onClick={kapat}>✖ Kapat</button>
         </div>
-      </div>
 
-      <div className="sahne ds-sahne">
+      <div className="ds-sahne">
         {/* ------------------------------------------------------ üst bilgi */}
         <div className="ds-hdr">
           <div><label>Hasta</label><div className="ds-inp big">{h.unvan}{h.yas != null ? ` · ${h.yas}` : ''}{h.cepTel ? ` · ${h.cepTel}` : ''}</div></div>
+          {/* TIBBI UYARILAR (kullanici): alerji (kirmizi) + kronik tani (turuncu) +
+              surekli ilac (mavi) - Tibbi Ozet kaynaklari. Genel muayene
+              kullanilmayan kurulumda giris buradan: "+" dugmeleri hasta on dolu
+              kayit karti acar, kapatinca odontograma doner. */}
           <div><label>Tıbbi uyarılar</label><div className="ds-inp">
-            {h.alerji ? h.alerji.split(', ').map(a => <span key={a} className="rozet hata">{a}</span>) : <span className="sonuk">uyarı yok</span>}
+            {h.alerji && h.alerji.split(', ').map(a => <span key={'a' + a} className="rozet hata" title="Alerji">{a}</span>)}
+            {h.kronik && h.kronik.split(', ').map(a => <span key={'k' + a} className="rozet uyari" title="Kronik tanı">{a}</span>)}
+            {h.ilac && h.ilac.split(', ').map(a => <span key={'i' + a} className="rozet mavi" title="Sürekli ilaç">💊 {a}</span>)}
+            {!h.alerji && !h.kronik && !h.ilac && <span className="sonuk">uyarı yok</span>}
+            {yetki('muayene') && <span className="ds-uyari-ekle">
+              {([['hasta-alerji', 'alerji'], ['hasta-kronik', 'kronik'], ['hasta-ilac', 'ilaç']] as [string, string][]).map(([k, ad]) =>
+                <button key={k} className="d mini" title={`${ad} kaydı ekle`}
+                  onClick={() => git(`/${k}/yeni?hastaId=${hastaId}&hastaAd=${encodeURIComponent(h.unvan)}&geri=${geriParam}`)}>+{ad}</button>)}
+            </span>}
           </div></div>
+          {/* DENTAL ANAMNEZ (kullanici: "nereden girilecek"): dis_muayene icin ayri
+              kart yok - burada ✎ ile duzenlenir (son dis muayene satiri, yoksa acilir). */}
           <div><label>Dental anamnez</label><div className="ds-inp">{h.dentalAnamnez || <span className="sonuk">—</span>}
             {kart.disMuayene?.bruksizm && <span className="rozet uyari">bruksizm</span>}
             {kart.disMuayene?.sigara && <span className="rozet uyari">sigara</span>}
-          </div></div>
+            {kart.disMuayene?.hijyenDurum && <span className="rozet gri">hijyen: {kart.disMuayene.hijyenDurum}</span>}
+            {yetki('dis.hasta') && <span className="ds-uyari-ekle"><button className="d mini" title="Dental anamnezi düzenle"
+              onClick={() => { setAnamnez({ dentalAnamnez: h.dentalAnamnez, bruksizm: !!kart.disMuayene?.bruksizm, sigara: !!kart.disMuayene?.sigara, hijyenDurum: kart.disMuayene?.hijyenDurum ?? '', tmeBulgu: kart.disMuayene?.tmeBulgu ?? '' }); setAnamnezAcik(a => !a) }}>✎</button></span>}
+          </div>
+          {anamnezAcik && (
+            <div className="ds-anamnez">
+              <textarea rows={3} style={{ width: '100%' }} placeholder="Dental anamnez: şikayet, geçmiş tedaviler, alışkanlıklar…" value={anamnez.dentalAnamnez} onChange={e => setAnamnez(a => ({ ...a, dentalAnamnez: e.target.value }))} />
+              <div className="ds-arac" style={{ padding: '4px 0 0', background: 'transparent', borderBottom: 'none' }}>
+                <label><input type="checkbox" checked={anamnez.bruksizm} onChange={e => setAnamnez(a => ({ ...a, bruksizm: e.target.checked }))} /> bruksizm</label>
+                <label><input type="checkbox" checked={anamnez.sigara} onChange={e => setAnamnez(a => ({ ...a, sigara: e.target.checked }))} /> sigara</label>
+                <label className="sonuk">hijyen <input value={anamnez.hijyenDurum} placeholder="iyi / orta / kötü" style={{ width: 90 }} onChange={e => setAnamnez(a => ({ ...a, hijyenDurum: e.target.value }))} /></label>
+                <label className="sonuk">TME <input value={anamnez.tmeBulgu} placeholder="klik / ağrı / —" style={{ width: 110 }} onChange={e => setAnamnez(a => ({ ...a, tmeBulgu: e.target.value }))} /></label>
+                <span className="ds-sp">
+                  <button className="d onay" onClick={() => void anamnezKaydet()}>💾 Kaydet</button>
+                  <button className="d" onClick={() => setAnamnezAcik(false)}>Vazgeç</button>
+                </span>
+              </div>
+            </div>
+          )}
+          </div>
           <div><label>Son ziyaret / hekim</label><div className="ds-inp">
             {h.sonMuayene ? `${gunNokta(h.sonMuayene)}${h.sonHekim ? ' · ' + h.sonHekim : ''}` : <span className="sonuk">muayene yok</span>}
             {h.seansSayisi > 0 && <span className="sonuk"> · {h.seansSayisi} seans</span>}
@@ -529,6 +601,8 @@ export function DisHastaKarti() {
           </div>
         )}
       </div>
-    </>
+        </div>
+      </div>
+    </div>
   );
 }

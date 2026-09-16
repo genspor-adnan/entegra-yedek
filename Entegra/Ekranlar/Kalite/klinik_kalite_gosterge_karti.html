@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klinik Kalite — Gösterge Kartı (DP.G1) — Mockup (GenoTIP AI · Kalite)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🗂️ Gösterge Kartı — DP.G1</span>
+    <span class="sp">Diz Protezi · DP.S1 · Ulusal/Bölgesel/Kurumsal izlem</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="klinik_kalite_olgular.html">◀ Olgular</div>
+    <div class="sepv"></div>
+    <div class="btn primary">🔢 Bu Göstergeyi Hesapla</div>
+    <div class="btn" data-git="klinik_kalite_donem.html">📊 Dönem Sonuçları</div>
+    <div class="sepv"></div>
+    <div class="btn">🎯 Kurum Hedefi Belirle</div>
+    <div class="btn pas">✏️ Kod Listesi (rehberden, salt okunur)</div>
+    <div class="sp"></div>
+    <div class="btn">🖨️ Kartı Yazdır</div>
+  </div>
+
+  <div class="hdr k5">
+    <div class="fld"><label>Gösterge Kodu</label><div class="inp big ro">DP.G1</div></div>
+    <div class="fld"><label>Sağlık Olgusu</label><div class="inp ro">DP · Diz Protezi</div></div>
+    <div class="fld"><label>İzlem Düzeyi</label><div class="inp ro">UBK — Ulusal · Bölgesel · Kurumsal</div></div>
+    <div class="fld"><label>Veri Analiz Periyodu</label><div class="inp ro">6 aylık, yıllık</div></div>
+    <div class="fld"><label>Rehber Sürümü</label><div class="inp ro">S.1.1 (Mart 2021)</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="kart">Gösterge Kartı</div>
+    <div class="sekme" data-s="pay">Pay Kodları<span class="sy">18</span></div>
+    <div class="sekme" data-s="payda">Payda Kodları<span class="sy">2</span></div>
+    <div class="sekme" data-s="teknik">Teknik Not</div>
+    <div class="sekme" data-s="donem">Dönem Sonuçları<span class="sy">6</span></div>
+  </div>
+
+  <!-- ======================================================== KART ===== -->
+  <div class="pnl" data-s="kart">
+    <div class="grp">
+      <div class="gb">Gösterge</div>
+      <div class="ic">
+        <div class="fld" style="margin-bottom:8px">
+          <label>Ad</label>
+          <div class="inp uzun ro">Diz Protezi Operasyonu Geçiren Hastalarda Patella Dislokasyonu
+            Nedeni ile Yeniden Yatış Oranı (İlk 2 ay)</div>
+        </div>
+        <div class="fld" style="margin-bottom:8px">
+          <label>Tanım</label>
+          <div class="inp uzun ro">Diz protezi operasyonu geçiren hastalardan operasyon sonrası ilk 2 ay
+            içerisinde "Patella Dislokasyonu" nedeni ile yeniden yatışı yapılan hastaların oranını ifade
+            etmektedir.</div>
+        </div>
+        <div class="fld">
+          <label>Bağlı Standart — DP.S1</label>
+          <div class="inp uzun ro">Tüm hastaların etkin bir diz protez operasyonu geçirmesi sağlanmalıdır.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="gb">Hesaplama Yöntemi <span class="sp">pay / payda × 100</span></div>
+      <div class="ic">
+        <div class="inp uzun ro" style="margin-bottom:8px">
+          İlgili dönemde; (Diz protezi operasyonu geçiren hastalardan dislokasyon nedeni ile yeniden yatan
+          <b>tekil hasta sayısı</b> / Diz protezi operasyonu geçirmiş toplam <b>tekil hasta sayısı</b>) × 100
+        </div>
+        <div class="hdr k4" style="padding:0;background:none;border:none">
+          <div class="fld"><label>Hedef Değer (rehber)</label><div class="inp ro">≤ %0.8</div></div>
+          <div class="fld"><label>Kurum Hedefi</label><div class="inp">≤ %0,50</div></div>
+          <div class="fld"><label>Hedef Grup</label><div class="inp ro">18 yaş ve üstündeki hastalar</div></div>
+          <div class="fld"><label>Hariç Tutulacaklar</label><div class="inp ro sonuk">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="gb">Sorumlular</div>
+      <div class="ic"><div class="inp uzun ro">SHGM, SKAÇHDB, İl Klinik Kalite Birimi,
+        Klinik Kalite İyileştirme Komitesi</div></div>
+    </div>
+  </div>
+
+  <!-- ========================================================= PAY ===== -->
+  <div class="pnl" data-s="pay" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Kod ya da ad…</div>
+      <span class="chip on">Tümü <b>18</b></span>
+      <span class="chip">ICD-10 <b>9</b></span>
+      <span class="chip">SUT <b>9</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:70px" class="orta">Tip</th>
+          <th style="width:110px">Kod</th>
+          <th>Ad</th>
+          <th style="width:190px">Not</th>
+        </tr></thead>
+        <tbody>
+          <tr class="grup"><td colspan="4">Dislokasyon ICD-10 kodları — ana <b>veya</b> ek tanı</td></tr>
+          <tr class="tik sel"><td class="orta"><span class="rz">ICD</span></td><td><code>M22</code></td><td>Patella bozuklukları</td><td class="sonuk">üst kod</td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">ICD</span></td><td><code>M22.0</code></td><td>Patellanın rekürren dislokasyonu</td><td></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">ICD</span></td><td><code>M22.1</code></td><td>Patellanın rekürren sublüksasyonu</td><td></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">ICD</span></td><td><code>M22.2</code></td><td>Patellofemoral bozukluklar</td><td></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">ICD</span></td><td><code>M22.3</code></td><td>Patellanın diğer yerleşim bozuklukları</td><td></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">ICD</span></td><td><code>M22.4</code></td><td>Kondromalazia patella</td><td></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">ICD</span></td><td><code>M22.8</code></td><td>Patellanın diğer bozuklukları</td><td></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">ICD</span></td><td><code>M22.9</code></td><td>Patellanın bozukluğu, tanımlanmamış</td><td></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">ICD</span></td><td><code>S83.0</code></td><td>Patella çıkığı</td><td></td></tr>
+
+          <tr class="grup"><td colspan="4">Dislokasyon nedeniyle gerçekleştirilen işlemlerin SUT kodları</td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">SUT</span></td><td><code>610.870</code></td><td>Orta eklem çıkığı kapalı redüksiyonu (Bakıcı dirseği dahil)</td><td></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">SUT</span></td><td><code>610.880</code></td><td>Büyük eklem çıkığı kapalı redüksiyonu</td><td></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">SUT</span></td><td><code>611.170</code></td><td>Orta eklem çıkığı açık redüksiyon</td><td></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">SUT</span></td><td><code>611.180</code></td><td>Büyük eklem çıkığı kapalı redüksiyonu</td><td></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">SUT</span></td><td><code>611.190</code></td><td>Büyük eklem çıkığı açık redüksiyon</td><td></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">SUT</span></td><td><code>613.230</code></td><td>Patella distal ve proksimal dizilim cerrahisi</td><td></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">SUT</span></td><td><code>613.240</code></td><td>Patella distal realinman</td><td></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">SUT</span></td><td><code>613.250</code></td><td>Patella proksimal dizilim cerrahisi</td><td></td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">SUT</span></td><td><code>613.320</code></td><td>Büyük eklem habitüel çıkık onarımı</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>VEYA</b> mantığı: ICD kodlarından <b>herhangi biri</b> ve/veya SUT kodlarından
+        <b>herhangi biri</b> yeterlidir.</span>
+      <span class="sp">Zaman penceresi: operasyondan sonraki <b>60 gün</b></span>
+    </div>
+  </div>
+
+  <!-- ======================================================= PAYDA ===== -->
+  <div class="pnl" data-s="payda" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:70px" class="orta">Tip</th><th style="width:110px">Kod</th>
+          <th>Ad</th><th style="width:220px">Not</th>
+        </tr></thead>
+        <tbody>
+          <tr class="grup"><td colspan="4">Diz protezi operasyonu SUT kodları</td></tr>
+          <tr class="tik sel"><td class="orta"><span class="rz">SUT</span></td><td><code>612.420</code></td>
+            <td>Diz artroplastisi, total</td><td class="sonuk">tekil hasta</td></tr>
+          <tr class="tik"><td class="orta"><span class="rz">SUT</span></td><td><code>612.421</code></td>
+            <td>Diz artroplastisi, total, komplex</td><td class="sonuk">tekil hasta</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Payda = ölçüm döneminde bu SUT kodlarından birini alan <b>tekil</b> hasta sayısı.</span>
+      <span class="sp">Tekilleştirmede opere edilen taraf (sağ/sol/bilateral) dikkate alınır.</span>
+    </div>
+  </div>
+
+  <!-- ====================================================== TEKNİK ===== -->
+  <div class="pnl" data-s="teknik" hidden>
+    <div class="grp">
+      <div class="gb">Teknik Notlar — rehberden aynen</div>
+      <div class="ic">
+        <div class="fld" style="margin-bottom:8px">
+          <label>Pay</label>
+          <div class="inp uzun ro">Paydadaki hastalar içinde dislokasyon ICD-10 tanı kodlarından herhangi
+            birini <b>ana veya ek tanı</b> olarak alan ve SUT kodlarından herhangi birini alarak operasyon
+            tarihinden itibaren <b>ilk 60 gün</b> içerisinde yeniden yatan tekil hasta sayısı.
+            <br><br>
+            <i>Not:</i> Payın hesaplanması için dislokasyon ICD-10 kodlarından herhangi biri
+            <b>ve/veya</b> dislokasyon nedeniyle gerçekleştirilen işlemlerle ilişkili SUT kodlarından
+            herhangi birini alarak yatışı yapılan hastalar hesaplamaya dâhil edilir.
+            <br><br>
+            <i>Örnek:</i> 15 Mart tarihinde operasyon geçiren hastalar 14 Mayıs tarihine kadar izlenecektir.</div>
+        </div>
+        <div class="fld">
+          <label>Payda</label>
+          <div class="inp uzun ro">Ölçüm yapılan ilgili dönemde diz protezi operasyonu SUT kodunu alan
+            toplam tekil hasta sayısı.</div>
+        </div>
+      </div>
+    </div>
+    <div class="grp">
+      <div class="gb">Sistemin bu göstergeyi nereden okuduğu <span class="sp">eşleme</span></div>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:140px">Rehberdeki kaynak</th><th>Sistemdeki karşılığı</th></tr></thead>
+          <tbody>
+            <tr><td>ICD-10 ana/ek tanı</td><td><code>muayene_tani</code> · <code>yatis_tani</code> (ana + ek ayrımı <code>tur</code> kolonunda)</td></tr>
+            <tr><td>SUT işlem kodu</td><td><code>belge_satir</code> → <code>hizmet.sut_kodu</code></td></tr>
+            <tr><td>ATC ilaç kodu</td><td><code>recete_satir</code> → <code>ilac.atc_kodu</code></td></tr>
+            <tr><td>Yatış / yeniden yatış</td><td><code>yatis</code> (giriş–çıkış tarihi), 60 günlük pencere</td></tr>
+            <tr><td>Tekil hasta</td><td><code>taraf_id</code> üzerinden <code>distinct</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================= DÖNEM ===== -->
+  <div class="pnl" data-s="donem" hidden>
+    <div class="ozet">
+      <div class="kart ok"><div class="b">2026 / 1. yarıyıl</div><div class="d">%0,42 <small>hedef ≤ %0,8</small></div></div>
+      <div class="kart"><div class="b">Pay</div><div class="d">3 <small>hasta</small></div></div>
+      <div class="kart"><div class="b">Payda</div><div class="d">714 <small>tekil hasta</small></div></div>
+      <div class="kart"><div class="b">Ulusal ortalama</div><div class="d">%0,61</div></div>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:130px">Dönem</th>
+          <th style="width:80px" class="sag">Pay</th>
+          <th style="width:90px" class="sag">Payda</th>
+          <th style="width:90px" class="sag">Sonuç</th>
+          <th style="width:90px" class="sag">Hedef</th>
+          <th style="width:110px" class="orta">Durum</th>
+          <th>Eğilim</th>
+          <th style="width:110px" class="orta">Kayıt</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>2026 / 1. yarıyıl</td><td class="sag">3</td><td class="sag">714</td>
+            <td class="sag"><b>%0,42</b></td><td class="sag">≤ %0,8</td>
+            <td class="orta"><span class="rz ok">Hedefte</span></td>
+            <td><div class="bar"><i style="width:52%"></i></div></td>
+            <td class="orta"><span class="rz mavi">Taslak</span></td></tr>
+          <tr class="tik"><td>2025 / 2. yarıyıl</td><td class="sag">5</td><td class="sag">688</td>
+            <td class="sag">%0,73</td><td class="sag">≤ %0,8</td>
+            <td class="orta"><span class="rz ok">Hedefte</span></td>
+            <td><div class="bar s"><i style="width:91%"></i></div></td>
+            <td class="orta"><span class="rz ok">Kesinleşti</span></td></tr>
+          <tr class="tik"><td>2025 / 1. yarıyıl</td><td class="sag">7</td><td class="sag">651</td>
+            <td class="sag">%1,08</td><td class="sag">≤ %0,8</td>
+            <td class="orta"><span class="rz kir">Hedef dışı</span></td>
+            <td><div class="bar k"><i style="width:100%"></i></div></td>
+            <td class="orta"><span class="rz ok">Kesinleşti</span></td></tr>
+          <tr class="tik"><td>2024 / 2. yarıyıl</td><td class="sag">6</td><td class="sag">602</td>
+            <td class="sag">%1,00</td><td class="sag">≤ %0,8</td>
+            <td class="orta"><span class="rz kir">Hedef dışı</span></td>
+            <td><div class="bar k"><i style="width:100%"></i></div></td>
+            <td class="orta"><span class="rz ok">Kesinleşti</span></td></tr>
+          <tr class="tik"><td>2024 / 1. yarıyıl</td><td class="sag">4</td><td class="sag">571</td>
+            <td class="sag">%0,70</td><td class="sag">≤ %0,8</td>
+            <td class="orta"><span class="rz ok">Hedefte</span></td>
+            <td><div class="bar s"><i style="width:87%"></i></div></td>
+            <td class="orta"><span class="rz ok">Kesinleşti</span></td></tr>
+          <tr class="tik"><td>2023 / 2. yarıyıl</td><td class="sag">8</td><td class="sag">544</td>
+            <td class="sag">%1,47</td><td class="sag">≤ %0,8</td>
+            <td class="orta"><span class="rz kir">Hedef dışı</span></td>
+            <td><div class="bar k"><i style="width:100%"></i></div></td>
+            <td class="orta"><span class="rz ok">Kesinleşti</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Sonuç <b>tek yerde</b> hesaplanır (pay / payda × 100); ekran yeniden hesaplamaz.</span>
+      <span class="sp">Kesinleşen dönem kilitlenir — Bakanlık sistemine giden sayı değişmemeli.</span>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Gösterge: <b>DP.G1</b></span>
+    <span>Kod listesi: <b>18 pay · 2 payda</b></span>
+    <span class="sp">Kaynak: Klinik Kalite Ölçme ve Değerlendirme Rehberi S.1.1, s. 31</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran notları.</b>
+  <ul>
+    <li><b>İki hedef var, ikisi de gösterilir:</b> rehberin ulusal hedefi (≤ %0,8) <i>salt okunur</i>,
+      kurumun kendi hedefi düzenlenebilir. Tek alan olsaydı kurum kendi hedefini yazınca rehberin
+      hedefi kaybolur, sapma neye göre ölçülüyor belirsizleşirdi.</li>
+    <li><b>Pay ve payda ayrı sekme</b> çünkü ikisi farklı soruyu yanıtlıyor ve uzunlukları çok farklı
+      (burada 18'e 2; DM.G1'de 58'e 2). Tek listede rol kolonuyla verilseydi, uzun tarafa bakan
+      kullanıcı payda kodlarını gözden kaçırırdı.</li>
+    <li><b>Kod listesi salt okunur.</b> Düzenlenebilseydi kurumun ürettiği sayı Bakanlığın hesabıyla
+      tutmaz, gösterge kıyaslanamaz hale gelirdi. Rehber güncellenince liste toplu olarak tazelenir.</li>
+    <li><b>Kesinleşen dönem kilitlenir.</b> Gönderilen sayının sonradan değişmesi, geri bildirim
+      raporlarıyla kurum kaydı arasında açıklanamayan fark üretir.</li>
+  </ul>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

@@ -14689,11 +14689,86 @@ begin
   Result := LDataSource;
 end;
 
+{ Ek-alan (_USER) satirini kaydeder.
+
+  MUKERRER KAYIT (duplicate key PK_<tablo>_USER) TUZAGI:
+  UserDataSourceHazirla, satir DB'de yoksa dataset'te BEKLEYEN bir Append acar -
+  satir ancak burada Post edilince DB'ye yazilir. Ayni belgenin _USER satirini
+  DOGRUDAN SQL ile yazan baska yollar da var (fatura/irsaliye: Sevk Bilgisi
+  dialogu USevkBilgisiDlg.Kaydet, Navlun/Sigorta UFaturaWizard). Kullanici once
+  ek alani doldurup (Append bekler) sonra sevk adresi/tasiyici secerse, o SQL
+  "if exists ... else insert" kontrolunde satiri GORMEZ (henuz yok) ve INSERT
+  eder. Kayit aninda buradaki bekleyen Append de INSERT denedigi icin ayni ID
+  iki kez yazilir -> duplicate key.
+
+  Cozum: Post etmeden once, dsInsert durumundaysak satirin bu arada DB'de
+  olusup olusmadigina bakariz; olustuysa Append iptal edilip kayit yeniden
+  okunur ve ayni degerler UPDATE olarak yazilir. Yalnizca kullanicinin girdigi
+  DOLU alanlar tasinir: bekleyen Append'te SEVKBILGISI/NAVLUN gibi alanlar NULL
+  oldugu icin hepsini tasimak, diger yolun yazdigi veriyi silerdi. }
 procedure TTablo.UserDataSourceKaydet(FormName:TComponent; const UserTablo:String);
 var
   LDataSource: TDataSource;
   LName: string;
   LID: Integer;
+
+  // Bekleyen Append'i UPDATE'e cevirir. True donerse kayit yapilmistir.
+  function InsertiGuncellemeyeCevir(ADataSet:TDataSet; AID:Integer):Boolean;
+  var
+    I: Integer;
+    F: TField;
+    LAd: array of string;
+    LDeger: array of Variant;
+  begin
+    Result := False;
+    if (ADataSet.State <> dsInsert) or (AID <= 0) then
+      Exit;
+    if not Veritabani.VeriVarMi(FDCnn,
+         'select 1 from ' + UserTablo + ' where ID=&id', ['&id'], [AID]) then
+      Exit;
+
+    for I := 0 to ADataSet.FieldCount - 1 do begin
+      F := ADataSet.Fields[I];
+      if SameText(F.FieldName, 'ID') or
+         SameText(F.FieldName, 'EKLEYEN') or
+         SameText(F.FieldName, 'EKLEMETARIHI') or
+         SameText(F.FieldName, 'DEGISTIREN') or
+         SameText(F.FieldName, 'DEGISTIRMETARIHI') then
+        Continue;
+      if F.IsNull then
+        Continue;
+      SetLength(LAd, Length(LAd) + 1);
+      SetLength(LDeger, Length(LDeger) + 1);
+      LAd[High(LAd)] := F.FieldName;
+      LDeger[High(LDeger)] := F.Value;
+    end;
+
+    ADataSet.Cancel;
+    ADataSet.Close;
+    ADataSet.Open;                       // SQL zaten "where ID=<AID>"
+    if ADataSet.IsEmpty then begin
+      // Beklenmez (satiri yukarida gormustuk). Yine de eski davranisa don:
+      //   yeni satir ac - boyle bir durumda Post etmeden cikmak dataset'i
+      //   dsBrowse'da birakir ve cagirandaki Post "not in edit mode" verir.
+      ADataSet.Append;
+      ADataSet.FieldByName('ID').AsInteger := AID;
+      if ADataSet.FindField('EKLEYEN') <> nil then
+        ADataSet.FieldByName('EKLEYEN').AsInteger := StrToIntDef(Kullanan, 0);
+      if ADataSet.FindField('EKLEMETARIHI') <> nil then
+        ADataSet.FieldByName('EKLEMETARIHI').AsDateTime := GENINI.BugunTrhSaat;
+    end else
+      ADataSet.Edit;
+
+    for I := 0 to High(LAd) do
+      if ADataSet.FindField(LAd[I]) <> nil then
+        ADataSet.FieldByName(LAd[I]).Value := LDeger[I];
+    if ADataSet.FindField('DEGISTIREN') <> nil then
+      ADataSet.FieldByName('DEGISTIREN').AsInteger := StrToIntDef(Kullanan, 0);
+    if ADataSet.FindField('DEGISTIRMETARIHI') <> nil then
+      ADataSet.FieldByName('DEGISTIRMETARIHI').AsDateTime := GENINI.BugunTrhSaat;
+    ADataSet.Post;
+    Result := True;
+  end;
 
   function KullaniciAlaniDoluMu(ADataSet:TDataSet):Boolean;
   var
@@ -14750,6 +14825,7 @@ begin
   end;
 
   if LDataSource.DataSet.State in [dsEdit, dsInsert] then begin
+    LID := 0;
     if LDataSource.DataSet.FindField('ID') <> nil then begin
       LID := LDataSource.DataSet.FieldByName('ID').AsInteger;
       if (LID <= 0) and (LDataSource.DataSet is TFDQuery) then begin
@@ -14758,6 +14834,10 @@ begin
           LDataSource.DataSet.FieldByName('ID').AsInteger := LID;
       end;
     end;
+    // Satir bu arada baska bir yoldan (Sevk Bilgisi / Navlun-Sigorta) DB'ye
+    //   yazilmis olabilir - Append'i UPDATE'e cevir, yoksa duplicate key.
+    if InsertiGuncellemeyeCevir(LDataSource.DataSet, LID) then
+      Exit;
     if LDataSource.DataSet.FindField('DEGISTIREN') <> nil then
       LDataSource.DataSet.FieldByName('DEGISTIREN').AsInteger := StrToIntDef(Kullanan, 0);
     if LDataSource.DataSet.FindField('DEGISTIRMETARIHI') <> nil then

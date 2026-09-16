@@ -1654,7 +1654,7 @@ object StokListeDlg: TStokListeDlg
   end
   object DtsStoklar: TDataSource
     DataSet = STOKLAR
-    Left = 121
+    Left = 177
     Top = 43
   end
   object STOKLAR: TFDQuery
@@ -1707,8 +1707,8 @@ object StokListeDlg: TStokListeDlg
         '.NOTLAR, StokModel.ANAHTAR ,S.SUBEID'
       ''
       '')
-    Left = 92
-    Top = 130
+    Left = 52
+    Top = 106
   end
   object STOKFIYAT: TFDQuery
     AutoCalcFields = False
@@ -1899,8 +1899,8 @@ object StokListeDlg: TStokListeDlg
     DataSet = STOKLAR
     BCDToCurrency = False
     DataSetOptions = []
-    Left = 311
-    Top = 67
+    Left = 319
+    Top = 59
     FieldDefs = <
       item
         FieldName = 'ID'

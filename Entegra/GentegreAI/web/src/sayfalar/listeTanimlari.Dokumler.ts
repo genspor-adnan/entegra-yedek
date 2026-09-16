@@ -51,11 +51,30 @@ export const DOKUM_LISTELERI = [
   // Yatan hasta (695): doluluk oranı, ortalama yatış süresi, yatak devir hızı,
   //   çıkış şekli dağılımı - kurumun en çok sorulan yönetim sayıları.
   dokumOgesi('Yatan Hasta'),
+  // Diş (706): plan kabul oranı, hekim başına yapılan işlem, lab gecikme
+  //   oranı, borçlu hastalar - klinik panosunun soruları.
+  dokumOgesi('Diş'),
+  // FTR (719): program tamamlanma, devamsizlik, olcek iyilesme (MCID), unite doluluk.
+  dokumOgesi('FTR'),
+  // Medula (707): kabul / red oranı, fatura-kesinti, hata kodu dağılımı.
+  dokumOgesi('Medula'),
+  // Ameliyathane (715): masa kullanımı, plan-gerçek sapması, iptal nedeni,
+  //   cerrahi süre, komplikasyon oranı.
+  dokumOgesi('Ameliyathane'),
+  // Acil (716): kapı-hekim süresi, triyaj dağılımı, 4 saati aşan hasta,
+  //   yeniden başvuru, çağrı yanıt süresi.
+  dokumOgesi('Acil'),
   dokumOgesi('Kurumlar & Sigorta'),
   dokumOgesi('Cari & CRM'),
   dokumOgesi('Satış'),
   dokumOgesi('Alış'),
   dokumOgesi('Stok & Hizmet'),
+  // Eczane (722): miad/imha tutarı, önlenen ilaç hatası, kontrollü ilaç
+  //   uyum oranı, hazırlama süresi.
+  dokumOgesi('Eczane'),
+  // Satınalma (724): talep-sipariş süresi, gecikme ve ceza, bütçe kullanımı,
+  //   tedarikçi skoru, en düşük alınmayan teklifler.
+  dokumOgesi('Satınalma'),
   dokumOgesi('Üretim'),
   dokumOgesi('Finans'),
   dokumOgesi('Muhasebe'),

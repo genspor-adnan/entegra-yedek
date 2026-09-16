@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Biyomedikal — Periyodik Bakım — Mockup (GenoTIP AI · Demirbaş)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🗓️ Periyodik Bakım — IE-2609-093 · DB-01402 Anestezi Cihazı</span>
+    <span class="sp">Dräger Primus · Ameliyathane Salon 3 · 6 aylık bakım · Dräger Yetkili Servis</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="demirbas_panosu.html">◀ Pano</div>
+    <div class="btn primary">✓ Bakımı Tamamla</div>
+    <div class="btn">▶ Başlat</div>
+    <div class="btn">⏸ Parça Bekliyor</div>
+    <div class="sepv"></div>
+    <div class="btn">🧾 Sarf / Parça Ekle</div>
+    <div class="btn" data-git="demirbas_kalibrasyon.html">📏 Kalibrasyona Gönder</div>
+    <div class="btn" data-git="demirbas_cihaz_karti.html">🗂️ Cihaz Kartı</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ Bakım Formu</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">Planlanan</div><div class="d" style="font-size:13px">17.09.2026</div></div>
+    <div class="kart sari"><div class="b">Periyot</div><div class="d">6 <small>ay</small></div></div>
+    <div class="kart"><div class="b">Kontrol maddesi</div><div class="d">18</div></div>
+    <div class="kart ok"><div class="b">Tamamlanan</div><div class="d">11</div></div>
+    <div class="kart"><div class="b">Cihaz duruşu</div><div class="d">3 <small>saat (planlı)</small></div></div>
+    <div class="kart"><div class="b">Kapsam</div><div class="d" style="font-size:12px">Sözleşme · tam</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="kontrol">Kontrol Listesi<span class="sy">18</span></div>
+    <div class="sekme" data-s="parca">Parça & Sarf<span class="sy">5</span></div>
+    <div class="sekme" data-s="plan">Bakım Planı<span class="sy">19</span></div>
+    <div class="sekme" data-s="gecmis">Bakım Geçmişi<span class="sy">8</span></div>
+  </div>
+
+  <!-- ===================================================== KONTROL LİSTESİ ===== -->
+  <div class="pnl" data-s="kontrol">
+    <div class="arama">
+      <div class="kutu">🔍 Kontrol maddesi…</div>
+      <span class="chip on">Tümü <b>18</b></span>
+      <span class="chip">Tamamlanan <b>11</b></span>
+      <span class="chip">Bulgu <b>2</b></span>
+      <span class="chip">Zorunlu <b>14</b></span>
+    </div>
+
+    <ul class="kontrol">
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>Görsel kontrol</b> — gövde, tekerlek, kablo, hortum hasarı</span>
+        <span class="imza">Servis Tekn. A. Demir · 09:12</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>Kaçak testi</b> — solunum devresi sızdırmazlık (&lt; 150 mL/dk)</span>
+        <span class="imza">09:20 · ölçüm 42 mL/dk</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>Vaporizatör</b> — kilitleme, sızdırmazlık, dolum seviyesi</span>
+        <span class="imza">09:28</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>O₂ hücresi</b> — %21 ve %100 kalibrasyonu</span>
+        <span class="imza">09:35 · yeni hücre takıldı</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>Hipoksik karışım koruması</b> — O₂ &lt; %25'te N₂O kesiliyor mu</span>
+        <span class="imza">09:44</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>Alarm testi</b> — düşük O₂, yüksek basınç, apne, devre kopması</span>
+        <span class="imza">09:52</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>Soda kireç</b> (CO₂ absorbanı) — renk değişimi kontrolü</span>
+        <span class="imza">10:02 · <span class="rz sari">değiştirildi</span></span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>Ventilatör</b> — tidal hacim 500 mL doğrulama</span>
+        <span class="imza">10:14 · ölçüm 486 mL <span class="rz ok">±%10</span></span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>Yedek batarya</b> — şebeke kesildiğinde çalışma süresi</span>
+        <span class="imza">10:25 · 68 dk <span class="rz ok">≥ 30 dk</span></span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>Gaz bağlantıları</b> — merkezi sistem basıncı ve tüp yedekleri</span>
+        <span class="imza">10:34</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>Filtre değişimi</b> — hasta devresi ve fan filtresi</span>
+        <span class="imza">10:40</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span><b>Atık gaz tahliye sistemi</b> (AGSS) — akış ve tıkanıklık
+          <span class="rz sari">BULGU: tahliye hortumu ezilmiş</span></span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span><b>Buhar/nemlendirici</b> — varsa temizlik ve dezenfeksiyon</span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span><b>Elektriksel güvenlik testi</b> (IEC 62353) — topraklama ve kaçak akım</span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span><b>Yazılım sürümü</b> — üretici bildirimi varsa güncelleme</span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span><b>Kalibrasyon</b> — bakım sonrası ölçüm doğrulaması</span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span><b>Kullanıma hazır etiketi</b> ve bir sonraki bakım tarihi</span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span><b>Birime teslim</b> — sorumlu hemşire imzası</span>
+        <span class="imza">—</span></li>
+    </ul>
+
+    <div class="statusbar">
+      <span><b>Kontrol listesi üreticiden gelir</b>, kurum madde çıkaramaz — ekleyebilir.
+        Atlanan madde gerekçeli yazılır, boş geçilmez.</span>
+      <span class="sp">Bakım sonrası kalibrasyon zorunlu: parça değişen cihazın ölçümü doğrulanmadan kullanıma açılmaz.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================== PARÇA & SARF ===== -->
+  <div class="pnl" data-s="parca" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:230px">Parça / Sarf</th>
+          <th style="width:130px">Parça No</th>
+          <th style="width:80px" class="sag">Adet</th>
+          <th style="width:110px" class="sag">Birim</th>
+          <th style="width:110px" class="sag">Tutar</th>
+          <th style="width:130px" class="orta">Kapsam</th>
+          <th style="width:130px">Kaynak</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>O₂ hücresi</b></td><td><code>68 50 480</code></td>
+            <td class="sag">1</td><td class="sag">4.200 ₺</td><td class="sag">4.200 ₺</td>
+            <td class="orta"><span class="rz ok">Sözleşme</span></td><td>Dräger servis</td></tr>
+          <tr class="tik"><td><b>Soda kireç kartuşu</b></td><td><code>MX 50 034</code></td>
+            <td class="sag">1</td><td class="sag">1.850 ₺</td><td class="sag">1.850 ₺</td>
+            <td class="orta"><span class="rz ok">Sözleşme</span></td><td>Dräger servis</td></tr>
+          <tr class="tik"><td><b>Hasta devresi filtresi</b></td><td><code>MP 01 790</code></td>
+            <td class="sag">2</td><td class="sag">320 ₺</td><td class="sag">640 ₺</td>
+            <td class="orta"><span class="rz ok">Sözleşme</span></td><td>Dräger servis</td></tr>
+          <tr class="tik"><td><b>Fan filtresi</b></td><td><code>MK 01 130</code></td>
+            <td class="sag">1</td><td class="sag">180 ₺</td><td class="sag">180 ₺</td>
+            <td class="orta"><span class="rz ok">Sözleşme</span></td><td>Dräger servis</td></tr>
+          <tr class="tik"><td><b>AGSS tahliye hortumu</b> <span class="rz sari">bulgu</span></td>
+            <td><code>MP 00 301</code></td>
+            <td class="sag">1</td><td class="sag">960 ₺</td><td class="sag">960 ₺</td>
+            <td class="orta"><span class="rz kir">Kapsam dışı</span></td>
+            <td><span class="rz sari">Sipariş verildi</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ozet">
+      <div class="kart"><div class="b">Sözleşme kapsamında</div><div class="d" style="font-size:13px">6.870 ₺</div></div>
+      <div class="kart sari"><div class="b">Kurum ödeyecek</div><div class="d" style="font-size:13px">960 ₺</div></div>
+      <div class="kart"><div class="b">Parça bekleniyor</div><div class="d">1 <small>kalem</small></div></div>
+      <div class="kart kir"><div class="b">Bakım durumu</div><div class="d" style="font-size:13px">Yarım kaldı</div></div>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Bakımda çıkan arıza bakımı bitirmez:</b> AGSS hortumu bulgusu ayrı iş emri değil,
+        bu bakımın açık maddesi — parça gelene kadar bakım "tamamlandı" sayılmaz.</span>
+      <span class="sp">Sözleşme kapsamı parça bazında görünür: "tam kapsam" dendiğinde neyin dışarıda kaldığı burada ortaya çıkar.</span>
+    </div>
+  </div>
+
+  <!-- ========================================================= BAKIM PLANI ===== -->
+  <div class="pnl" data-s="plan" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Cihaz türü ya da birim…</div>
+      <span class="chip on">Eylül <b>19</b></span>
+      <span class="chip">Ekim <b>24</b></span>
+      <span class="chip">Gecikmiş <b>3</b></span>
+      <span class="chip">Sözleşmeli <b>8</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px" class="orta">Tarih</th>
+          <th style="width:110px">Demirbaş No</th>
+          <th style="width:210px">Cihaz</th>
+          <th style="width:150px">Birim</th>
+          <th style="width:100px" class="orta">Periyot</th>
+          <th style="width:100px" class="orta">Duruş</th>
+          <th style="width:150px">Yapacak</th>
+          <th style="width:120px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik"><td class="orta">02.09</td><td class="nw"><code>DB-00842</code></td>
+            <td>Ventilatör · Hamilton C1</td><td>YBÜ · Yatak 1</td>
+            <td class="orta">6 ay</td><td class="orta">2 sa</td>
+            <td>Hamilton Teknik</td>
+            <td class="orta"><span class="rz kir">14 gün gecikti</span></td></tr>
+          <tr class="tik"><td class="orta">14.09</td><td class="nw"><code>DB-01611</code></td>
+            <td>İlaç buzdolabı · Vestel</td><td>Eczane</td>
+            <td class="orta">6 ay</td><td class="orta">1 sa</td>
+            <td>Biyomedikal (iç)</td>
+            <td class="orta"><span class="rz kir">2 gün gecikti</span></td></tr>
+          <tr class="tik sel"><td class="orta">17.09</td><td class="nw"><code>DB-01402</code></td>
+            <td>Anestezi cihazı · Dräger Primus</td><td>Ameliyathane S-3</td>
+            <td class="orta">6 ay</td><td class="orta">3 sa</td>
+            <td>Dräger Yetkili Servis</td>
+            <td class="orta"><span class="rz sari">Bugün yapılıyor</span></td></tr>
+          <tr class="tik"><td class="orta">18.09</td><td class="nw"><code>DB-00155</code></td>
+            <td>Otoklav · Nüve OT 90L</td><td>Sterilizasyon</td>
+            <td class="orta">3 ay</td><td class="orta">4 sa</td>
+            <td>Biyomedikal (iç)</td>
+            <td class="orta"><span class="rz pas">Planlı</span></td></tr>
+          <tr class="tik"><td class="orta">22.09</td><td class="nw"><code>DB-01190</code></td>
+            <td>Hasta başı monitör · Mindray</td><td>Acil · Kırmızı alan</td>
+            <td class="orta">12 ay</td><td class="orta">1 sa</td>
+            <td>Biyomedikal (iç)</td>
+            <td class="orta"><span class="rz pas">Planlı</span></td></tr>
+          <tr class="tik"><td class="orta">29.09</td><td class="nw"><code>DB-00073</code></td>
+            <td>Röntgen · Siemens Ysio</td><td>Radyoloji</td>
+            <td class="orta">12 ay</td><td class="orta">6 sa</td>
+            <td>Siemens Healthineers</td>
+            <td class="orta"><span class="rz pas">Planlı</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Planlı duruş önceden bilinir:</b> ameliyathane 3 saatlik duruşu çizelgeye
+        yazar — bakım günü o salona vaka konmaz.</span>
+      <span class="sp">Yaşam destek cihazının bakımı için yedek cihaz atanmadan iş emri açılmaz.</span>
+    </div>
+  </div>
+
+  <!-- ====================================================== BAKIM GEÇMİŞİ ===== -->
+  <div class="pnl" data-s="gecmis" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px" class="orta">Tarih</th>
+          <th style="width:120px" class="orta">Tür</th>
+          <th style="width:170px">Yapan</th>
+          <th>Yapılan iş</th>
+          <th style="width:110px" class="sag">Maliyet</th>
+          <th style="width:100px" class="orta">Duruş</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="orta">17.09.2026</td>
+            <td class="orta"><span class="rz mavi">Periyodik</span></td><td>Dräger Servis · A. Demir</td>
+            <td>6 aylık bakım — O₂ hücresi, soda kireç, filtreler değişti;
+              AGSS hortumu bulgusu açık</td>
+            <td class="sag">960 ₺</td><td class="orta">3 sa</td></tr>
+          <tr class="tik"><td class="orta">17.03.2026</td>
+            <td class="orta"><span class="rz mavi">Periyodik</span></td><td>Dräger Servis · M. Yıldız</td>
+            <td>6 aylık bakım — tüm maddeler uygun</td>
+            <td class="sag">0 ₺</td><td class="orta">2,5 sa</td></tr>
+          <tr class="tik"><td class="orta">08.01.2026</td>
+            <td class="orta"><span class="rz kir">Arıza</span></td><td>Dräger Servis · M. Yıldız</td>
+            <td>Vaporizatör kaçağı — conta seti değişti</td>
+            <td class="sag">0 ₺ <span class="sonuk">(sözleşme)</span></td>
+            <td class="orta"><span class="rz sari">11 sa</span></td></tr>
+          <tr class="tik"><td class="orta">14.09.2025</td>
+            <td class="orta"><span class="rz mavi">Periyodik</span></td><td>Dräger Servis · A. Demir</td>
+            <td>6 aylık bakım + yazılım güncellemesi (4.53 → 4.56)</td>
+            <td class="sag">0 ₺</td><td class="orta">4 sa</td></tr>
+          <tr class="tik"><td class="orta">10.09.2025</td>
+            <td class="orta"><span class="rz ok">Kalibrasyon</span></td><td>Dräger Servis</td>
+            <td>Yıllık kalibrasyon — tüm noktalar uygun</td>
+            <td class="sag">0 ₺</td><td class="orta">2 sa</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ozet">
+      <div class="kart"><div class="b">Son 12 ay duruş</div><div class="d">20,5 <small>saat</small></div></div>
+      <div class="kart ok"><div class="b">Kullanılabilirlik</div><div class="d">%99,2</div></div>
+      <div class="kart"><div class="b">Arıza sayısı</div><div class="d">1</div></div>
+      <div class="kart"><div class="b">Toplam maliyet</div><div class="d" style="font-size:13px">960 ₺</div></div>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Geçmiş cihaza bağlıdır, iş emrine değil:</b> "bu cihaz ne sıklıkla bozuluyor"
+        sorusu yenileme kararının girdisidir.</span>
+      <span class="sp">Kalibrasyon ve bakım aynı geçmişte akar — ikisi ayrı ekran ama tek hikâye.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Süreç:</b> Plan üretici periyoduna göre kurulur → iş emri açılır (yaşam destek cihazında
+  <b>yedek atanmadan</b> açılmaz) → planlı duruş ilgili birimin çizelgesine yazılır →
+  <b>kontrol listesi</b> madde madde işaretlenir (atlanan madde gerekçeli) → değişen parça ve
+  sözleşme kapsamı kaydedilir → bakım sonrası <b>kalibrasyon doğrulaması</b> yapılır →
+  kullanıma hazır etiketi basılır ve birime imzayla teslim edilir. Bakımda çıkan bulgu ayrı iş
+  emri değil, o bakımın açık maddesidir: parça gelene kadar bakım tamamlanmış sayılmaz.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

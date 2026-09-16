@@ -2382,11 +2382,17 @@ var
 begin
   SetLength(Result, 0);
 
-  // Once cariye ait fatura dip notu (GOREVYORUM TUR=400); doluysa onu kullan.
+  // DIP NOTU HIYERARSISI (kullanici):
+  //   1) cariye ozel not - GOREVYORUM TUR=400 fatura (e-Fatura/e-Arsiv), TUR=401 irsaliye
+  //      (e-Irsaliye). AYRI tutulur: ortak altyapi yuzunden faturanin 'Yaziyla TL' notu
+  //      irsaliyede de basiliyordu.
+  //   2) cari notu yoksa Opsiyonlardaki sabit e-Fatura / e-Arsiv / e-Irsaliye notu.
   LSablon := '';
   if ABaslik.RehberID > 0 then begin
+    var LNotTuru: Integer := 400;
+    if ABaslik.Tur = EBelgeTuruEIrsaliye then LNotTuru := 401;
     Tablo.TablodanSorguAc(1,
-      'select '+DbUst(1)+'YORUM from GOREVYORUM where TUR=400 and GOREVID=' +
+      'select '+DbUst(1)+'YORUM from GOREVYORUM where TUR=' + IntToStr(LNotTuru) + ' and GOREVID=' +
       IntToStr(ABaslik.RehberID) + ' order by ID '+DbSinir(1));
     if not Tablo.Query1.Eof then
       LSablon := Trim(Tablo.Query1.FieldByName('YORUM').AsString);

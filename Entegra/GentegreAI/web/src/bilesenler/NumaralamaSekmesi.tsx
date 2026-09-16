@@ -35,6 +35,16 @@ const GRIDLER = [
   { kaynak: 'numara-alis',     baslik: 'Alış Belgeleri',   sutun: 'sol' },
   { kaynak: 'numara-tahsilat', baslik: 'Tahsilat Türleri', sutun: 'sag' },
   { kaynak: 'numara-odeme',    baslik: 'Ödeme Türleri',    sutun: 'sag' },
+  // TEDARIK BELGELERI (731): talep · teklif · mal kabul · eczane hazirlama ·
+  //   ilac imha · demirbas · kalibrasyon · is emri. SAGDA ve EN ALTTA:
+  //   gunluk ayar degil, kurulusta bir kez yapilan is - satis/alis
+  //   numaralarinin onune koymak sik kullanilani asagi iterdi.
+  //
+  //   `urunModu` YOK, yani ERP kurulumunda da cizilir: satinalma, demirbas ve
+  //   kalibrasyon hastaneye ozgu degil. Eczane satirlarini ERP'de ayri ayri
+  //   gizlemek yerine hepsini birakiyoruz - numarasi ayarlanmayan tur zaten
+  //   bos kalir ve kimseyi zorlamaz.
+  { kaynak: 'numara-tedarik',  baslik: 'Tedarik Belgeleri', sutun: 'sag' },
 ] as const;
 
 type Kaynak = typeof GRIDLER[number]['kaynak'];

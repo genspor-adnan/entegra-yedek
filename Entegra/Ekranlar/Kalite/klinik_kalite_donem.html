@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klinik Kalite — Dönem Sonuçları — Mockup (GenoTIP AI · Kalite)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>📊 Klinik Kalite — Dönem Sonuçları</span>
+    <span class="sp">2026 / 1. yarıyıl · Merkez · 217 göstergenin 138'i otomatik</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="klinik_kalite_olgular.html">◀ Olgular</div>
+    <div class="sepv"></div>
+    <div class="btn primary">🔄 Dönemi Yeniden Hesapla</div>
+    <div class="btn ok">🔒 Dönemi Kesinleştir</div>
+    <div class="sepv"></div>
+    <div class="btn">⬇️ Excel</div>
+    <div class="btn">📤 Bakanlık Formatı</div>
+    <div class="sp"></div>
+    <div class="btn">🖨️ Yazdır</div>
+  </div>
+
+  <div class="arama">
+    <div class="kutu">🔍 Gösterge kodu ya da adı…</div>
+    <span class="chip on">Tümü <b>217</b></span>
+    <span class="chip">Hedef dışı <b>18</b></span>
+    <span class="chip">Sınırda <b>26</b></span>
+    <span class="chip">Veri eksik <b>79</b></span>
+    <span class="chip">Kesinleşmemiş <b>217</b></span>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">Hesaplanan gösterge</div><div class="d">138 <small>/ 217</small></div></div>
+    <div class="kart ok"><div class="b">Hedefte</div><div class="d">94</div></div>
+    <div class="kart sari"><div class="b">Sınırda</div><div class="d">26</div></div>
+    <div class="kart kir"><div class="b">Hedef dışı</div><div class="d">18</div></div>
+    <div class="kart sari"><div class="b">Veri eksik</div><div class="d">79 <small>elle giriş bekliyor</small></div></div>
+    <div class="kart"><div class="b">Dönem durumu</div><div class="d"><span class="rz mavi" style="font-size:12px">Taslak</span></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="sonuc">Sonuçlar<span class="sy">138</span></div>
+    <div class="sekme" data-s="eksik">Veri Eksik<span class="sy">79</span></div>
+    <div class="sekme" data-s="kuyruk">Hesaplama Kuyruğu</div>
+  </div>
+
+  <!-- ====================================================== SONUÇLAR ==== -->
+  <div class="pnl" data-s="sonuc">
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:92px">Kod</th>
+          <th style="width:150px">Olgu</th>
+          <th>Gösterge</th>
+          <th style="width:70px" class="sag">Pay</th>
+          <th style="width:80px" class="sag">Payda</th>
+          <th style="width:80px" class="sag">Sonuç</th>
+          <th style="width:80px" class="sag">Hedef</th>
+          <th style="width:100px" class="orta">Durum</th>
+          <th style="width:110px">Eğilim</th>
+        </tr></thead>
+        <tbody>
+          <tr class="grup"><td colspan="9">DP · Diz Protezi — 17 gösterge · 15 hedefte · 2 hedef dışı</td></tr>
+          <tr class="tik sel" data-git="klinik_kalite_gosterge_karti.html">
+            <td class="nw"><code>DP.G1</code></td><td>Diz Protezi</td>
+            <td>Patella dislokasyonu nedeni ile yeniden yatış oranı (ilk 2 ay)</td>
+            <td class="sag">3</td><td class="sag">714</td><td class="sag"><b>%0,42</b></td>
+            <td class="sag">≤ %0,8</td>
+            <td class="orta"><span class="rz ok">Hedefte</span></td>
+            <td><div class="bar"><i style="width:52%"></i></div></td></tr>
+          <tr class="tik"><td class="nw"><code>DP.G2</code></td><td>Diz Protezi</td>
+            <td>Reoperasyon geçiren hasta oranı (ilk 2 ay)</td>
+            <td class="sag">41</td><td class="sag">714</td><td class="sag"><b>%5,74</b></td>
+            <td class="sag">≤ %5</td>
+            <td class="orta"><span class="rz kir">Hedef dışı</span></td>
+            <td><div class="bar k"><i style="width:100%"></i></div></td></tr>
+          <tr class="tik"><td class="nw"><code>DP.G5</code></td><td>Diz Protezi</td>
+            <td>Perioperatif profilaktik antibiyotik verilen hasta oranı</td>
+            <td class="sag">702</td><td class="sag">714</td><td class="sag"><b>%98,3</b></td>
+            <td class="sag">≥ %95</td>
+            <td class="orta"><span class="rz ok">Hedefte</span></td>
+            <td><div class="bar"><i style="width:98%"></i></div></td></tr>
+          <tr class="tik"><td class="nw"><code>DP.G8</code></td><td>Diz Protezi</td>
+            <td>Antikoagulan ilaç verilen hasta oranı</td>
+            <td class="sag">660</td><td class="sag">714</td><td class="sag"><b>%92,4</b></td>
+            <td class="sag">≥ %90</td>
+            <td class="orta"><span class="rz sari">Sınırda</span></td>
+            <td><div class="bar s"><i style="width:92%"></i></div></td></tr>
+
+          <tr class="grup"><td colspan="9">DM · Diabetes Mellitus — 18 gösterge · 14 hedefte · 3 hedef dışı · 1 veri eksik</td></tr>
+          <tr class="tik"><td class="nw"><code>DM.G1</code></td><td>Diabetes Mellitus</td>
+            <td>DM tanısı alan hastalarda HbA1c ölçümü yapılanların oranı</td>
+            <td class="sag">3.918</td><td class="sag">4.402</td><td class="sag"><b>%89,0</b></td>
+            <td class="sag">≥ %90</td>
+            <td class="orta"><span class="rz sari">Sınırda</span></td>
+            <td><div class="bar s"><i style="width:89%"></i></div></td></tr>
+          <tr class="tik"><td class="nw"><code>DM.G2</code></td><td>Diabetes Mellitus</td>
+            <td>Yılda en az 4 kez HbA1c ölçümü yapılan hasta oranı</td>
+            <td class="sag">1.847</td><td class="sag">4.402</td><td class="sag"><b>%42,0</b></td>
+            <td class="sag">≥ %60</td>
+            <td class="orta"><span class="rz kir">Hedef dışı</span></td>
+            <td><div class="bar k"><i style="width:70%"></i></div></td></tr>
+          <tr class="tik"><td class="nw"><code>DM.G12</code></td><td>Diabetes Mellitus</td>
+            <td>DM tanılı hastalarda kan basıncı ölçülen hasta oranı</td>
+            <td class="sag">4.120</td><td class="sag">4.402</td><td class="sag"><b>%93,6</b></td>
+            <td class="sag">≥ %90</td>
+            <td class="orta"><span class="rz ok">Hedefte</span></td>
+            <td><div class="bar"><i style="width:94%"></i></div></td></tr>
+
+          <tr class="grup"><td colspan="9">HT · Hipertansiyon — 9 gösterge · 7 hedefte · 2 sınırda</td></tr>
+          <tr class="tik"><td class="nw"><code>HT.G3</code></td><td>Hipertansiyon</td>
+            <td>Antihipertansif ilaç kullanan hasta oranı</td>
+            <td class="sag">6.204</td><td class="sag">7.388</td><td class="sag"><b>%84,0</b></td>
+            <td class="sag">≥ %80</td>
+            <td class="orta"><span class="rz ok">Hedefte</span></td>
+            <td><div class="bar"><i style="width:84%"></i></div></td></tr>
+
+          <tr class="grup"><td colspan="9">İN · İnme — 16 gösterge · 12 hedefte · 3 hedef dışı · 1 veri eksik</td></tr>
+          <tr class="tik"><td class="nw"><code>İN.G2</code></td><td>İnme</td>
+            <td>Akut iskemik inmede ilk 4.5 saatte tromboliz uygulanan hasta oranı</td>
+            <td class="sag">29</td><td class="sag">402</td><td class="sag"><b>%7,2</b></td>
+            <td class="sag">≥ %10</td>
+            <td class="orta"><span class="rz kir">Hedef dışı</span></td>
+            <td><div class="bar k"><i style="width:72%"></i></div></td></tr>
+
+          <tr class="grup"><td colspan="9">GD · Gebelik Süreci ve Doğum — 32 gösterge · 20 hesaplandı · 12 veri eksik</td></tr>
+          <tr class="tik"><td class="nw"><code>GD.G7</code></td><td>Gebelik ve Doğum</td>
+            <td>1. izlemde hemogram tetkiki yapılan gebe oranı</td>
+            <td class="sag">1.104</td><td class="sag">1.140</td><td class="sag"><b>%96,8</b></td>
+            <td class="sag">≥ %95</td>
+            <td class="orta"><span class="rz ok">Hedefte</span></td>
+            <td><div class="bar"><i style="width:97%"></i></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar"><span>138 gösterge · gösterilen 11</span>
+      <span class="sp">Sonuç sütunu sunucuda hesaplandı; ekran yeniden hesaplamaz.</span></div>
+  </div>
+
+  <!-- ==================================================== VERİ EKSİK ==== -->
+  <div class="pnl" data-s="eksik" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:92px">Kod</th><th style="width:170px">Olgu</th>
+          <th>Gösterge</th>
+          <th style="width:230px">Neden hesaplanamıyor</th>
+          <th style="width:130px" class="orta">Eylem</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>GD.G1</code></td><td>Gebelik ve Doğum</td>
+            <td>1. izlemde (0-14 hafta) kan basıncı ölçümü yapılan gebe oranı</td>
+            <td>Rehber <b>gebe izlem paketi</b> (221) diyor; karşılığı e-Nabız izlem verisi, HBYS'de yok</td>
+            <td class="orta"><span class="btn mini">✏️ Elle gir</span></td></tr>
+          <tr class="tik"><td class="nw"><code>GD.G2</code></td><td>Gebelik ve Doğum</td>
+            <td>1. izlemde VKİ ölçümü yapılan gebe oranı</td>
+            <td>Aynı — izlem paketi</td>
+            <td class="orta"><span class="btn mini">✏️ Elle gir</span></td></tr>
+          <tr class="tik"><td class="nw"><code>GD.G17</code></td><td>Gebelik ve Doğum</td>
+            <td>Gebelikte demir desteği verilen gebe oranı</td>
+            <td>Aynı — izlem paketi</td>
+            <td class="orta"><span class="btn mini">✏️ Elle gir</span></td></tr>
+          <tr class="tik"><td class="nw"><code>BM.G1</code></td><td>Bariatrik Cerrahi</td>
+            <td>Ameliyat öncesi VKİ kayıtlı hasta oranı</td>
+            <td><b>VKİ ölçüm verisi</b> — muayene ölçüm setinde boy/kilo girilmemiş</td>
+            <td class="orta"><span class="btn mini">🔗 Ölçüm ekranı</span></td></tr>
+          <tr class="tik"><td class="nw"><code>DP.G17</code></td><td>Diz Protezi</td>
+            <td>VKİ 40'ın üzerinde olan hasta oranı</td>
+            <td><b>VKİ ölçüm verisi</b> eksik — 714 hastanın 268'inde boy/kilo yok</td>
+            <td class="orta"><span class="btn mini">🔗 Ölçüm ekranı</span></td></tr>
+          <tr class="tik"><td class="nw"><code>KB.G8</code></td><td>Kronik Böbrek Yet.</td>
+            <td>Diyaliz öncesi damar yolu hazırlanan hasta oranı</td>
+            <td>Rehberde kod listesi verilmemiş; tanım metne dayalı</td>
+            <td class="orta"><span class="btn mini">✏️ Elle gir</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>79 gösterge otomatik hesaplanamıyor.</span>
+      <span class="sp">Bu ekran "neden boş" sorusunu peşinen yanıtlar — boş satır bırakmak yerine sebebi yazar.</span>
+    </div>
+  </div>
+
+  <!-- ====================================================== KUYRUK ====== -->
+  <div class="pnl" data-s="kuyruk" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:150px">Başlangıç</th><th style="width:110px">Dönem</th>
+          <th style="width:120px">Kapsam</th>
+          <th style="width:110px" class="sag">Gösterge</th>
+          <th style="width:100px" class="sag">Süre</th>
+          <th style="width:120px" class="orta">Durum</th>
+          <th>Not</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>16.09.2026 14:20</td><td>2026 / 1. yarıyıl</td><td>Tüm olgular</td>
+            <td class="sag">138</td><td class="sag">3 dk 41 sn</td>
+            <td class="orta"><span class="rz ok">Bitti</span></td>
+            <td class="sonuk">79 gösterge veri eksikliğinden atlandı</td></tr>
+          <tr class="tik"><td>16.09.2026 11:05</td><td>2026 / 1. yarıyıl</td><td>DM · HT · KB</td>
+            <td class="sag">42</td><td class="sag">54 sn</td>
+            <td class="orta"><span class="rz ok">Bitti</span></td>
+            <td class="sonuk">ATC eşlemesi tazelendi</td></tr>
+          <tr class="tik"><td>02.09.2026 03:00</td><td>2025 / 2. yarıyıl</td><td>Tüm olgular</td>
+            <td class="sag">138</td><td class="sag">3 dk 12 sn</td>
+            <td class="orta"><span class="rz ok">Bitti</span></td>
+            <td class="sonuk">gece işi · dönem kesinleştirildi</td></tr>
+          <tr class="tik"><td>01.09.2026 03:00</td><td>2025 / 2. yarıyıl</td><td>Tüm olgular</td>
+            <td class="sag">0</td><td class="sag">7 sn</td>
+            <td class="orta"><span class="rz kir">Hata</span></td>
+            <td class="sonuk">SUT kod eşlemesi yüklenemedi — hizmet.sut_kodu boş</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Hesaplama gece işi olarak da çalışır; dönem kesinleşene kadar tekrarlanabilir.</span>
+      <span class="sp">Kesinleşmiş dönem yeniden hesaplanmaz.</span>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Dönem: <b>2026 / 1. yarıyıl</b></span>
+    <span>Şube: <b>Merkez</b></span>
+    <span>Durum: <b>Taslak</b></span>
+    <span class="sp">Rehber S.1.1 · son hesaplama 16.09.2026 14:20</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran notları.</b>
+  <ul>
+    <li><b>Olguya göre gruplanır, göstergeye göre değil.</b> 202 satırı düz listelemek, "diyabette
+      durumumuz ne" sorusunu yanıtsız bırakır; iyileştirme çalışması olgu bazında planlanıyor.</li>
+    <li><b>"Veri Eksik" ayrı sekme ve sebebi yazılı.</b> Boş bırakılan satır, kullanıcıya hatalı hesap
+      izlenimi verir. 79 göstergenin çoğu gebe izlem paketi — HBYS'de karşılığı yok, elle girilir.</li>
+    <li><b>Sınırda</b> durumu hedefin %5'i içinde kalanlar için: hedefi henüz aşmamış ama aşmak üzere
+      olan göstergeyi "hedefte" diye yeşile boyamak iyileştirme fırsatını gizler.</li>
+    <li><b>Kesinleştirme tek yönlüdür.</b> Bakanlığa giden sayı ile kurum kaydı arasında sonradan fark
+      çıkmasın diye kesinleşen dönem yeniden hesaplanmaz.</li>
+  </ul>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

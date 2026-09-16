@@ -172,7 +172,7 @@ public static partial class RadyolojiUclari
                   from public.taraf t
                   left join public.departman d on d.id = t.departman
                  where coalesce(t.personel, 0) = 1
-                   and coalesce(t.randevu_verilebilir, 0) = 1
+                   and public.fn_hekim_planli(t.id) = 1
                    and coalesce(t.durum, 1) = 1
                  order by t.unvan
                 """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
@@ -296,7 +296,11 @@ public static partial class RadyolojiUclari
                 //   sozlesme -> cari -> varsayilan sirasi tek yerde (fn)
                 //   cozulur; burada ikinci bir sira kurmak ikisinin sapmasi olur.
                 var listeId = await baglanti.TekDegerAsync<int?>("""
-                    select public.fn_belge_varsayilan_liste(@p0, 19::smallint, current_date, @p1)
+                    -- ARGUMAN SIRASI: (p_tur, p_taraf_id, ...) - tur ONCE gelir. Ters
+                    --   yazilmisti: hasta id'si `p_tur` olarak gidiyor ve
+                    --   liste hemen her zaman NULL donuyordu (basvuru
+                    --   fiyat listesiz aciliyordu).
+                    select public.fn_belge_varsayilan_liste(19, @p0, current_date, @p1)
                     """, null, [istek.HastaId, istek.OdeyenKurumId], iptal);
 
                 // KAMPANYA (274) belgenin KIMLIGIDIR: liste BAZ fiyati, kampanya
@@ -427,7 +431,7 @@ public static partial class RadyolojiUclari
             var uyarilar = new List<string>();
             if (istek.UcretEkle && belgeId is int ucretBelgeId && ucretBelgeId > 0)
             {
-                var (belge, satirlar) = await BelgeGovdesiAsync(baglanti, ucretBelgeId, iptal);
+                var (belge, satirlar) = await BelgeGovdesi.OkuAsync(baglanti, ucretBelgeId, iptal);
 
                 var sira = satirlar.Count;
                 for (var i = 0; i < istek.Tetkikler.Count; i++)
@@ -469,7 +473,7 @@ public static partial class RadyolojiUclari
                         "select coalesce(kdv, 0) from public.hizmet where id = @p0",
                         null, [t.HizmetId], iptal);
 
-                    satirlar.Add(SatirGovdesi(new Dictionary<string, object?>
+                    satirlar.Add(BelgeGovdesi.Satir(new Dictionary<string, object?>
                     {
                         ["tur"] = 2,
                         ["hizmetId"] = t.HizmetId,
@@ -564,67 +568,4 @@ public static partial class RadyolojiUclari
     }
 
 
-    /// <summary>
-    /// Sozluk -> BelgeDeposu'nun bekledigi JsonElement satiri. Belge yazma
-    /// hatti istegi JSON olarak aliyor; radyoloji ucu satiri kod icinde
-    /// kurdugu icin ayni bicime cevrilir (icmal faturasi ile ayni desen).
-    /// </summary>
-    private static Dictionary<string, JsonElement> SatirGovdesi(
-        IDictionary<string, object?> alanlar)
-    {
-        var json = JsonSerializer.SerializeToElement(alanlar);
-        var sozluk = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
-        foreach (var alan in json.EnumerateObject()) sozluk[alan.Name] = alan.Value;
-        return sozluk;
-    }
-
-    /// <summary>
-    /// Mevcut belgeyi (baslik + satirlar) yazma hattinin bekledigi bicimde
-    /// okur. Belgeye SATIR EKLEMEK icin gerekli: BelgeDeposu.GuncelleAsync
-    /// belgeyi butun olarak yazar - eksik gonderilen satir SILINMIS sayilir.
-    /// </summary>
-    private static async Task<(IDictionary<string, object?> Belge,
-                               List<Dictionary<string, JsonElement>> Satirlar)>
-        BelgeGovdesiAsync(NpgsqlConnection baglanti, int belgeId, CancellationToken iptal)
-    {
-        var belge = await baglanti.TekAsync("""
-            select b.tur, b.tipi, b.taraf_id as "tarafId", b.belge_tarihi as "belgeTarihi",
-                   b.belge_seri as "belgeSeri", b.belge_no as "belgeNo",
-                   b.belge_dovizi as "belgeDovizi", b.rapor_dovizi as "raporDovizi",
-                   b.ekstre_dovizi as "ekstreDovizi", b.doviz_kuru as "dovizKuru",
-                   b.vade_gun as "vadeGun", b.aciklama, b.ozel_kod as "ozelKod",
-                   b.satici_id as "saticiId", b.cikis_depo_id as "cikisDepoId",
-                   b.giris_depo_id as "girisDepoId", b.fiyat_listesi_id as "fiyatListesiId",
-                   b.kampanya_id as "kampanyaId", b.sube_id as "subeId", b.senaryo,
-                   -- ODEYEN KURUM (249) uzantida durur ama govdede OLMALI:
-                   --   pay bolusumu (289) bu alandan hesaplaniyor - eksik
-                   --   gonderilirse tum tutar hastaya yazilir.
-                   bb.odeyen_kurum_id as "odeyenKurumId",
-                   bb.bolum_id as "bolumId", bb.personel_id as "personelId"
-              from public.belge b
-              left join public.belge_basvuru bb on bb.id = b.id
-             where b.id = @p0
-            """, null, [belgeId], OkuyucuGenisletmeleri.Sozluk, iptal)
-            ?? throw GentegreHatasi.Bulunamadi("Başvuru bulunamadı.");
-
-        var mevcut = await baglanti.ListeAsync("""
-            select s.id, s.tur, s.stok_id as "stokId", s.hizmet_id as "hizmetId",
-                   s.masraf_id as "masrafId", s.aciklama, s.miktar, s.birim,
-                   s.birim_fiyat as "birimFiyat", s.iskonto, s.kdv,
-                   s.doviz_cinsi as "dovizCinsi",
-                   -- Satirda TEK depo kolonu yok: yon'e gore giris/cikis
-                   --   kolonlari kullaniliyor (belge_satir semasi).
-                   s.giris_depo_id as "girisDepoId", s.cikis_depo_id as "cikisDepoId",
-                   s.kaynak_tur as "kaynakTur", s.kaynak_id as "kaynakId",
-                   s.pay, coalesce(dg.sgk + dg.oss, 0) as "kurumTutar",
-                   coalesce(dg.hasta_provizyon + dg.hasta_ek_katki, 0)
-                     as "hastaTutar",
-                   s.sira
-              from public.belge_satir s
-              left join public.belge_satir_dagilim dg on dg.belge_satir_id = s.id
-             where s.belge_id = @p0 order by s.sira, s.id
-            """, null, [belgeId], OkuyucuGenisletmeleri.Sozluk, iptal);
-
-        return (belge, mevcut.Select(SatirGovdesi).ToList());
-    }
 }

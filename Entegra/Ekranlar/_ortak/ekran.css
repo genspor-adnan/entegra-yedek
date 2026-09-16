@@ -1,0 +1,130 @@
+/* Klinik Kalite mockup'lari - ortak gorunum.
+   Gentegre/GenoTIP ekran dilinin aynisi (bkz Ekranlar/Medula/*.html): ayni
+   degiskenler, ayni bilesen adlari. Uc ekran ayni dosyayi okur ki mockup'lar
+   arasinda gorunum kaymasi olmasin. */
+:root{
+  --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+  --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+  --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+  --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+.win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+.title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+.title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+.toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+.btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+.btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+.btn.pas{opacity:.45}
+.btn.mini{padding:2px 7px;font-size:10.5px;display:inline-flex}
+.sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+.sp{margin-left:auto}
+.arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+.arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+.chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap;cursor:pointer}
+.chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+.dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+.dg table{border-collapse:collapse;width:100%}
+.dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+.dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px}
+.dg td.nw{white-space:nowrap}
+.dg tr.sel td{background:var(--sel)}
+.dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+.dg tr.tik:hover td{background:#f4f8fd;cursor:pointer}
+.dg td code, code.k{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px;font-family:Consolas,monospace}
+.sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+.rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+.rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+.rz.pas{background:#eceff2;color:#6b7a8b}
+.rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+.rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+.rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+.rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+.statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+.not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+.not b{color:var(--ink)}
+.not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+.not ul{margin:6px 0 0 18px;padding:0}
+.hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+.hdr.k2{grid-template-columns:repeat(2,1fr)} .hdr.k4{grid-template-columns:repeat(4,1fr)}
+.hdr.k5{grid-template-columns:repeat(5,1fr)} .hdr.k6{grid-template-columns:repeat(6,1fr)}
+.fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+.fld label.req::after{content:" *";color:#c0392b}
+.inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.inp.big{font-weight:bold;font-size:12.5px}
+.inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+.inp.ro{background:#f4f6f9;color:#4d5d6e}
+.inp.uzun{display:block;min-height:auto;line-height:1.6}
+.sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+.sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+.sekme .sy{display:inline-block;margin-left:6px;border-radius:8px;background:#ccd8e6;color:#31506f;font-size:10px;padding:0 6px}
+.sekme.on .sy{background:#2f6db3;color:#fff}
+.grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+.grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+.grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+.ic{padding:8px 10px}
+.ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+.kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+.kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+.kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+.kart.kir .d{color:var(--kirmizi)} .kart.ok .d{color:var(--ok)} .kart.sari .d{color:var(--uyari)}
+.bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+.bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+.bar.s i{background:linear-gradient(#f0c05a,#d9a12b)} .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)} .bar.k i{background:linear-gradient(#e06a5e,#c0392b)}
+.ikiPanel{display:grid;grid-template-columns:320px 1fr}
+.ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+.olgu{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid var(--line2);cursor:pointer}
+.olgu:hover{background:#f4f8fd}
+.olgu.on{background:var(--sel)}
+.olgu .kk{font-family:Consolas,monospace;font-weight:bold;color:var(--navy);width:34px}
+.olgu .ad{flex:1}
+.olgu .sy{font-size:10.5px;color:var(--muted)}
+
+/* ---- ODA × SAAT ÇİZELGESİ (ameliyathane planı, acil müşahede yatakları) ----
+   Saat başlığı sticky: gün 8 saati aşınca yatay kaydırmada hangi saate
+   bakıldığı kayboluyordu. */
+.cizelge{overflow-x:auto;background:#fff;border-top:1px solid var(--line2)}
+.cizelge table{border-collapse:separate;border-spacing:0;width:100%;min-width:1100px}
+.cizelge th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);
+  border-right:1px solid var(--line2);padding:5px 6px;font-size:10.5px;color:#3a5573;
+  font-weight:bold;white-space:nowrap;position:sticky;top:0;z-index:2}
+.cizelge th.oda{left:0;z-index:3;min-width:150px;text-align:left}
+.cizelge td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;
+  padding:0;height:38px;vertical-align:top}
+.cizelge td.oda{background:#fbfcfe;padding:5px 8px;font-size:11.5px;position:sticky;left:0;
+  z-index:1;min-width:150px;border-right:1px solid var(--line)}
+.cizelge td.oda b{display:block}
+.cizelge td.oda span{font-size:10px;color:var(--muted)}
+/* Ameliyat bloğu: rengi AŞAMAYI söyler, uzunluğu planlanan süreyi. */
+.blok{margin:2px;border-radius:3px;padding:3px 6px;font-size:10.5px;line-height:1.3;
+  border:1px solid #cfe0f5;background:#eef4fc;color:#24415f;overflow:hidden;cursor:pointer}
+.blok b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blok.bekliyor{background:#f4f6f9;border-color:var(--line);color:#4d5d6e}
+.blok.hazirlik{background:#fdf6e3;border-color:#f2ddbf;color:#8a6218}
+.blok.suruyor{background:#e2f3e8;border-color:#bfe3cb;color:#2e7d46;font-weight:bold}
+.blok.bitti{background:#eceff2;border-color:var(--line);color:#6b7a8b}
+.blok.gecikme{background:#fbe9e7;border-color:#f3c4bf;color:#b3261e}
+.blok.iptal{background:repeating-linear-gradient(45deg,#f7f7f8,#f7f7f8 5px,#eceff2 5px,#eceff2 10px);
+  border-color:var(--line);color:#8b97a3;text-decoration:line-through}
+.bosluk{color:#b9c4d0;font-size:10px;padding:10px 6px;text-align:center}
+
+/* ---- KONTROL LİSTESİ (güvenli cerrahi / triyaj) ---- */
+.kontrol{margin:0;padding:0;list-style:none}
+.kontrol li{display:flex;gap:8px;align-items:flex-start;padding:5px 10px;
+  border-bottom:1px solid var(--line2);font-size:11.5px}
+.kontrol li:last-child{border-bottom:none}
+.kontrol .kutu{width:15px;height:15px;border:1px solid var(--line);border-radius:3px;
+  background:#fff;flex:none;text-align:center;line-height:14px;font-size:11px;color:var(--ok)}
+.kontrol li.ok .kutu{background:#e2f3e8;border-color:#bfe3cb}
+.kontrol li.bos .kutu{background:#fff}
+.kontrol .imza{margin-left:auto;font-size:10px;color:var(--muted);white-space:nowrap}
+
+/* ---- TRİYAJ RENKLERİ (ESI / 5 renk) ---- */
+.tri{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.15);
+  vertical-align:-1px;margin-right:5px}
+.tri.k1{background:#c0392b} .tri.k2{background:#e67e22} .tri.k3{background:#f0c05a}
+.tri.k4{background:#5cb87a} .tri.k5{background:#9aa7b4}

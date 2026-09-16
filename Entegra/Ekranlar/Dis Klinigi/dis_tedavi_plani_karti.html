@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diş Tedavi Planı Kartı — Mockup (GenoTIP AI · Medula)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .btn.mini{padding:2px 7px;font-size:10.5px;display:inline-flex}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg td code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)} .hdr.k5{grid-template-columns:repeat(5,1fr)} .hdr.k6{grid-template-columns:repeat(6,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.err{border-color:#c0392b;background:#fff6f5}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .kart.kir .d{color:var(--kirmizi)} .kart.ok .d{color:var(--ok)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)} .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)} .bar.k i{background:linear-gradient(#e06a5e,#c0392b)}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:300px 1fr 320px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .sonuc{margin:10px 12px;border:1px solid #bfe3cb;background:#eef9f1;border-radius:4px;padding:8px 10px;font-size:11.5px}
+  .sonuc.kir{border-color:#f3c4bf;background:#fdf1ef}
+  .sonuc.sari{border-color:#f2ddbf;background:#fdf8ec}
+  .sonuc b{color:var(--navy)}
+  .xml{font-family:Consolas,monospace;font-size:10.5px;background:#1f2d3a;color:#d7e3f2;padding:8px 10px;border-radius:3px;white-space:pre;overflow:auto;margin:0 12px 10px;line-height:1.5}
+  .adim{display:flex;gap:0;padding:8px 12px;flex-wrap:wrap}
+  .adim span{padding:5px 12px;border:1px solid var(--line);background:#fff;font-size:11px;color:var(--muted);position:relative}
+  .adim span+span{border-left:none}
+  .adim span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .adim span.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .icerik{padding:12px 16px;line-height:1.6}
+  .icerik h2{font-size:14px;color:var(--navy);margin:16px 0 6px;border-bottom:1px solid var(--line2);padding-bottom:3px}
+  .icerik h3{font-size:12.5px;color:#2c4a6b;margin:12px 0 4px}
+  .icerik p{margin:4px 0}
+  .icerik table{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:11.5px}
+  .icerik th,.icerik td{border:1px solid var(--line2);padding:4px 7px;text-align:left;vertical-align:top}
+  .icerik th{background:#f4f7fb;color:#3a5573;white-space:nowrap}
+  .icerik code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .kutu{border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;padding:8px 10px;margin:8px 0}
+  .yatay{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:6px 12px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">📋 Tedavi Planı Kartı — TP-2026/0412 · Ayşe Yılmaz · 39 K <span class="sp">dis_tedavi_plani + _satir · varyant A · Onaylı · sürüyor 2/7 · Diş › Tedavi Planları</span></div>
+  <div class="toolbar">
+    <div class="btn primary">💾 Kaydet</div><div class="btn">📤 Hastaya Sun (proforma)</div><div class="btn ok">✍ Hasta Onayı</div><div class="btn">🔁 Alternatif Plan (B)</div>
+    <span class="sepv"></span><div class="btn">🗓 Seansları Planla</div><div class="btn">💳 Ödeme Planı Üret</div><div class="btn">🧪 Lab İş Emri</div><div class="btn">🖨 Proforma PDF</div>
+    <span class="sepv"></span><div class="btn">🦷 Hasta Kartı (odontogram)</div><div class="btn danger">✖ Planı İptal Et</div><div class="btn sp">✖ Kapat</div>
+  </div>
+  <div class="adim"><span class="ok">Taslak</span><span class="ok">Sunuldu · PF-2026/0412</span><span class="ok">Onaylı · 01.09.2026 (tablet imza)</span><span class="on">Sürüyor · 2 / 7</span><span>Tamamlandı</span></div>
+  <div class="hdr k5">
+    <div class="fld"><label class="req">Hasta</label><div class="inp ro big">Ayşe Yılmaz · 12345678901 · 39 K</div></div>
+    <div class="fld"><label class="req">Hekim</label><div class="inp combo">Dt. A. Kaya</div></div>
+    <div class="fld"><label>Muayene</label><div class="inp ro">#8840 · 01.09.2026 · K04.0 Pulpitis (26)</div></div>
+    <div class="fld"><label>Varyant</label><div class="inp combo">A — ana plan <span class="rz mavi">B var (karşılaştır)</span></div></div>
+    <div class="fld"><label>Durum</label><div class="inp ro"><span class="rz mavi">Onaylı · sürüyor</span></div></div>
+    <div class="fld"><label>Fiyat listesi</label><div class="inp combo">Özel (Ücretli) 2026</div></div>
+    <div class="fld"><label>Ödeyen kurum</label><div class="inp combo">— (hasta öder)</div></div>
+    <div class="fld"><label>Geçerlilik</label><div class="inp">30.09.2026 <span class="rz sari">14 gün kaldı</span></div></div>
+    <div class="fld"><label>Ödeme seçeneği</label><div class="inp">Peşinat 4.000 + 3 taksit</div></div>
+    <div class="fld"><label>Önceki plan</label><div class="inp ro">TP-2025/0298 · tamamlandı</div></div>
+  </div>
+  <div class="ozet">
+    <div class="kart"><div class="b">Toplam</div><div class="d">19.400 ₺</div></div>
+    <div class="kart"><div class="b">İndirim</div><div class="d">−1.400 ₺ <small>%7</small></div></div>
+    <div class="kart"><div class="b">Net</div><div class="d">18.000 ₺</div></div>
+    <div class="kart ok"><div class="b">Yapılan</div><div class="d">4.050 ₺ <small>2 işlem</small></div><div class="bar"><i style="width:22%"></i></div></div>
+    <div class="kart"><div class="b">Tahsil</div><div class="d">3.000 ₺ <small>peşinat kısmi</small></div></div>
+    <div class="kart kir"><div class="b">Bakiye (yapılan − tahsil)</div><div class="d">1.050 ₺</div></div>
+    <div class="kart"><div class="b">Lab</div><div class="d">2 <small>1 labda · 1 bekliyor</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on">Plan Satırları (7)</div><div class="sekme">Seans Programı</div><div class="sekme">Proforma &amp; Onay</div><div class="sekme">Ödeme Planı</div><div class="sekme">Lab İşleri</div><div class="sekme">Alternatif B</div><div class="sekme">Sürümler &amp; Günlük</div>
+  </div>
+
+  <!-- PLAN SATIRLARI -->
+  <div class="pnl">
+    <div class="arama"><span class="chip on">Tümü (7)</span><span class="chip">Bekleyen (5)</span><span class="chip">Yapılan (2)</span><span class="chip">Lab gerektiren (2)</span><span class="sp"></span><div class="btn primary">＋ İşlem (SUT / özel kod)</div><div class="btn">📦 Paket (kanal + kron)</div><div class="btn">↕ Faz / sıra</div><div class="btn">💰 Fiyatı yeniden çek</div><div class="btn">🦷 Odontogramda göster</div></div>
+    <div class="dg"><table>
+      <thead><tr><th class="orta">☐</th><th class="orta">#</th><th class="orta">Diş</th><th class="orta">Yüzey</th><th>İşlem (SUT / kod)</th><th>Hekim</th><th class="orta">Seans</th><th class="sag">Liste</th><th class="sag">İnd.</th><th class="sag">Net</th><th>Ücretlendirme</th><th class="orta">Lab</th><th class="orta">Onam</th><th class="orta">Randevu</th><th>Durum</th><th></th></tr></thead>
+      <tbody>
+        <tr class="grup"><td colspan="16">Faz 1 — Acil / ağrı giderme</td></tr>
+        <tr><td class="orta">☐</td><td class="orta">1</td><td class="orta"><b>26</b></td><td class="orta">—</td><td>402153 · Kanal tedavisi (3 kanal)</td><td>Dt. A. Kaya</td><td class="orta">1/3</td><td class="sag">3.600</td><td class="sag">—</td><td class="sag">3.600</td><td>Seans başına oran</td><td class="orta">—</td><td class="orta"><span class="rz ok">✔</span></td><td class="orta">19.09 10:00</td><td><span class="rz mavi">Sürüyor</span></td><td><span class="btn mini">✔ Yapıldı</span></td></tr>
+        <tr><td class="orta">☐</td><td class="orta">2</td><td class="orta">—</td><td class="orta">—</td><td>700270 · Panoramik + RVG 26, 36</td><td>Dt. A. Kaya</td><td class="orta">1/1</td><td class="sag">450</td><td class="sag">—</td><td class="sag">450</td><td>Tamamlanınca</td><td class="orta">—</td><td class="orta">—</td><td class="orta">—</td><td><span class="rz ok">Yapıldı · 01.09</span></td><td></td></tr>
+        <tr class="grup"><td colspan="16">Faz 2 — Restoratif</td></tr>
+        <tr><td class="orta">☐</td><td class="orta">6</td><td class="orta"><b>24</b></td><td class="orta">V</td><td>401110 · Kompozit dolgu (1 yüzey)</td><td>Dt. A. Kaya</td><td class="orta">0/1</td><td class="sag">1.400</td><td class="sag">—</td><td class="sag">1.400</td><td>Tamamlanınca</td><td class="orta">—</td><td class="orta">—</td><td class="orta">—</td><td><span class="rz">Planlı</span></td><td><span class="btn mini">✔ Yapıldı</span> <span class="btn mini">✖</span></td></tr>
+        <tr><td class="orta">☐</td><td class="orta">7</td><td class="orta"><b>35</b></td><td class="orta">O</td><td>401110 · Kompozit dolgu (1 yüzey)</td><td>Dt. A. Kaya</td><td class="orta">0/1</td><td class="sag">1.400</td><td class="sag">—</td><td class="sag">1.400</td><td>Tamamlanınca</td><td class="orta">—</td><td class="orta">—</td><td class="orta">—</td><td><span class="rz">Planlı</span></td><td><span class="btn mini">✔ Yapıldı</span> <span class="btn mini">✖</span></td></tr>
+        <tr><td class="orta">☐</td><td class="orta">4</td><td class="orta"><b>36</b></td><td class="orta">—</td><td>402152 · Kanal tedavisi (2 kanal)</td><td>Dt. A. Kaya</td><td class="orta">0/2</td><td class="sag">3.600</td><td class="sag">—</td><td class="sag">3.600</td><td>Seans başına oran</td><td class="orta">—</td><td class="orta"><span class="rz ok">✔</span></td><td class="orta">—</td><td><span class="rz">Planlı</span></td><td><span class="btn mini">✔ Yapıldı</span> <span class="btn mini">✖</span></td></tr>
+        <tr class="grup"><td colspan="16">Faz 3 — Protetik</td></tr>
+        <tr class="sel"><td class="orta">☑</td><td class="orta">3</td><td class="orta"><b>26</b></td><td class="orta">tüm</td><td>ÖZ-KR-ZR · Zirkonyum kron</td><td>Dt. A. Kaya</td><td class="orta">0/3</td><td class="sag">4.475</td><td class="sag">−700</td><td class="sag">3.775</td><td>Tamamlanınca (teslim)</td><td class="orta"><span class="rz sari">LB-0415 · ölçü bekliyor</span></td><td class="orta"><span class="rz ok">✔</span></td><td class="orta">—</td><td><span class="rz">Planlı · kanal sonrası</span></td><td><span class="btn mini">🧪</span> <span class="btn mini">✖</span></td></tr>
+        <tr><td class="orta">☐</td><td class="orta">5</td><td class="orta"><b>36</b></td><td class="orta">tüm</td><td>ÖZ-KR-ZR · Zirkonyum kron</td><td>Dt. A. Kaya</td><td class="orta">0/3</td><td class="sag">4.475</td><td class="sag">−700</td><td class="sag">3.775</td><td>Tamamlanınca (teslim)</td><td class="orta"><span class="rz">lab gerekir</span></td><td class="orta"><span class="rz ok">✔</span></td><td class="orta">—</td><td><span class="rz">Planlı</span></td><td><span class="btn mini">🧪</span> <span class="btn mini">✖</span></td></tr>
+        <tr class="grup"><td colspan="7">TOPLAM · 7 işlem · 4 faz</td><td class="sag">19.400</td><td class="sag">−1.400</td><td class="sag">18.000</td><td colspan="6"></td></tr>
+      </tbody>
+    </table></div>
+    <div class="sonuc sari"><b>Onaylı planda satır fiyatı değişmez.</b> Yeni işlem eklenirse plan "ek proforma" ister (sürüm 2); silinen satır iptal olur, satır yok olmaz. Fazlar klinik önceliktir: Faz 3 satırı Faz 1 bitmeden seansa alınırsa ekran uyarır (ön koşul).</div>
+  </div>
+
+  <!-- SEANS PROGRAMI -->
+  <div class="pnl" hidden>
+    <div class="ikiPanel">
+      <div>
+        <div class="grp"><div class="gb">Seanslar <span class="sp">plan satırı → seans · süre hizmet kartından</span></div>
+          <div class="dg"><table>
+            <thead><tr><th class="orta">Seans</th><th>Tarih</th><th>Ünit / hekim</th><th class="orta">Süre</th><th>Plan satırları</th><th>Ön koşul</th><th>Durum</th></tr></thead>
+            <tbody>
+              <tr><td class="orta">1</td><td>01.09.2026 09:00</td><td>Ünit 1 · Dt. A. Kaya</td><td class="orta">45 dk</td><td>#2 pano + RVG · #1 kanal 1/3</td><td>—</td><td><span class="rz ok">Yapıldı</span></td></tr>
+              <tr class="sel"><td class="orta">2</td><td>19.09.2026 10:00</td><td>Ünit 1 · Dt. A. Kaya</td><td class="orta">45 dk</td><td>#1 kanal 2/3</td><td>seans 1</td><td><span class="rz mavi">Randevulu</span></td></tr>
+              <tr><td class="orta">3</td><td>26.09.2026 10:00</td><td>Ünit 1 · Dt. A. Kaya</td><td class="orta">45 dk</td><td>#1 kanal 3/3 · #3 kron ölçü</td><td>seans 2</td><td><span class="rz mavi">Randevulu</span></td></tr>
+              <tr><td class="orta">4</td><td>—</td><td>Ünit 1 · Dt. A. Kaya</td><td class="orta">30 dk</td><td>#6 kompozit 24 V · #7 kompozit 35 O</td><td>—</td><td><span class="rz">Planlanacak</span></td></tr>
+              <tr><td class="orta">5</td><td>—</td><td>Ünit 1</td><td class="orta">30 dk</td><td>#3 kron prova</td><td>lab LB-0415 teslim</td><td><span class="rz sari">Lab bekliyor</span></td></tr>
+              <tr><td class="orta">6-7</td><td>—</td><td>Ünit 1</td><td class="orta">60 + 30 dk</td><td>#4 kanal 36 (2 seans) · #5 kron</td><td>faz 2</td><td><span class="rz">Planlanacak</span></td></tr>
+            </tbody>
+          </table></div>
+          <div class="yatay"><div class="btn primary">🗓 Kalan seansları randevuya dönüştür</div><div class="btn">↔ Takvimde göster</div><span class="sonuk">Randevu = ünit + hekim + süre; <code>randevu.plan_satir_id</code>. Lab kısıtı: prova randevusu iş emrinin beklenen tarihinden önce verilemez.</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Seans önerisi (otomatik)</div>
+          <div class="ic">
+            <p>Kural: aynı diş ardışık seanslarda, kanal → kron ölçüsü aynı seansa, kompozitler tek seansta, lab işleri beklenen tarihe göre. Haftada 1 seans, Ünit 1, 10:00 tercih (hasta ayarı).</p>
+            <p><b>Öneri:</b> 19.09 · 26.09 · 03.10 (kompozitler) · 10.10 (kron prova, lab 08.10 bekleniyor) · 17.10 (kron teslim + 36 kanal 1/2) · 24.10 · 31.10.</p>
+          </div>
+          <div class="yatay"><div class="btn ok">✔ Öneriyi uygula</div><div class="btn">✎ Düzenle</div></div>
+        </div>
+        <div class="grp"><div class="gb">Hasta tercihleri</div>
+          <div class="hdr" style="grid-template-columns:1fr 1fr">
+            <div class="fld"><label>Uygun günler</label><div class="inp">Cuma sabah · Salı 17:00 sonrası</div></div>
+            <div class="fld"><label>Hatırlatma</label><div class="inp combo">SMS · 1 gün önce</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFORMA & ONAY -->
+  <div class="pnl" hidden>
+    <div class="ikiPanel">
+      <div>
+        <div class="grp"><div class="gb">Proforma</div>
+          <div class="hdr" style="grid-template-columns:1fr 1fr">
+            <div class="fld"><label>Proforma no</label><div class="inp ro">PF-2026/0412 · sürüm 1</div></div>
+            <div class="fld"><label>Sunum tarihi</label><div class="inp ro">01.09.2026 · tablet</div></div>
+            <div class="fld"><label>Geçerlilik</label><div class="inp">30.09.2026</div></div>
+            <div class="fld"><label>Toplam / indirim / net</label><div class="inp ro">19.400 · −1.400 · <b>18.000 ₺</b></div></div>
+            <div class="fld"><label>Ödeme seçeneği</label><div class="inp combo">Peşinat 4.000 + 3 taksit (4.667)</div></div>
+            <div class="fld"><label>Alternatif plan B</label><div class="inp ro">14.200 ₺ · MDP kron + amalgam <span class="rz">karşılaştırmalı sunuldu</span></div></div>
+          </div>
+        </div>
+        <div class="grp"><div class="gb">Hasta onayı</div>
+          <div class="hdr" style="grid-template-columns:1fr 1fr">
+            <div class="fld"><label>Onay</label><div class="inp ro"><span class="rz ok">Onaylandı</span> 01.09.2026 11:42</div></div>
+            <div class="fld"><label>Yöntem</label><div class="inp ro">Tablet imza · IP 10.0.0.21</div></div>
+            <div class="fld"><label>Onam</label><div class="inp ro">Genel dental v2 ✔ · Kanal ✔ · Protez ✔</div></div>
+            <div class="fld"><label>Belge</label><div class="inp ro">📄 proforma_TP-2026-0412_v1.pdf (dokuman)</div></div>
+          </div>
+          <div class="yatay"><div class="btn ok">✍ Hastaya imzalat (tablet)</div><div class="btn">🖨 PDF</div><div class="btn">📤 Portala / WhatsApp</div><div class="btn">🧾 Ek proforma (sürüm 2)</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Proforma önizleme</div>
+          <div class="xml" style="background:#fff;color:#1f2d3a;border:1px solid #e3e9f0">GENOTIP AĞIZ VE DİŞ SAĞLIĞI MERKEZİ            TEDAVİ PLANI / PROFORMA
+Hasta: Ayşe Yılmaz        Hekim: Dt. A. Kaya       Tarih: 01.09.2026
+Plan: TP-2026/0412 (A)    Proforma: PF-2026/0412   Geçerlilik: 30.09.2026
+--------------------------------------------------------------------
+Diş  İşlem                          Seans   Liste     İnd.     Net
+26   Kanal tedavisi (3 kanal)         3     3.600        -   3.600
+--   Panoramik + RVG                  1       450        -     450
+26   Zirkonyum kron                   3     4.475     -700   3.775
+36   Kanal tedavisi (2 kanal)         2     3.600        -   3.600
+36   Zirkonyum kron                   3     4.475     -700   3.775
+24   Kompozit dolgu (V)               1     1.400        -   1.400
+35   Kompozit dolgu (O)               1     1.400        -   1.400
+--------------------------------------------------------------------
+                                     TOPLAM 19.400   -1.400  18.000
+Ödeme: peşinat 4.000 + 3 taksit × 4.667 · Garanti: kron 1 yıl
+Fiyatlar seans/işlem anında ücretlendirilir; onaylı fiyat değişmez.
+Hasta imzası: ____________   (tablet · 01.09.2026 11:42)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ODEME PLANI -->
+  <div class="pnl" hidden>
+    <div class="ikiPanel">
+      <div>
+        <div class="grp"><div class="gb">Ödeme planı <span class="sp">dis_odeme_plani · taksitler kasa plan kayıtları</span></div>
+          <div class="hdr" style="grid-template-columns:1fr 1fr">
+            <div class="fld"><label>Toplam (net)</label><div class="inp ro">18.000 ₺</div></div>
+            <div class="fld"><label>Peşinat</label><div class="inp">4.000 ₺</div></div>
+            <div class="fld"><label>Taksit</label><div class="inp">3 × 4.666,67</div></div>
+            <div class="fld"><label>İlk vade</label><div class="inp">01.10.2026</div></div>
+            <div class="fld"><label>Yöntem</label><div class="inp combo">POS taksit</div></div>
+            <div class="fld"><label>Durum</label><div class="inp ro"><span class="rz sari">Açık · peşinat kısmi</span></div></div>
+          </div>
+          <div class="dg"><table>
+            <thead><tr><th class="orta">Taksit</th><th>Vade</th><th class="sag">Tutar</th><th class="sag">Ödenen</th><th>Ödeme</th><th>Belge</th><th>Durum</th></tr></thead>
+            <tbody>
+              <tr><td class="orta">0</td><td>01.09.2026</td><td class="sag">4.000,00</td><td class="sag">3.000,00</td><td>01.09 · nakit</td><td>Fiş F-2026/1810</td><td><span class="rz sari">Kısmi · 1.000 açık</span></td></tr>
+              <tr><td class="orta">1</td><td>01.10.2026</td><td class="sag">4.666,67</td><td class="sag">0,00</td><td>—</td><td>—</td><td><span class="rz">Bekliyor</span></td></tr>
+              <tr><td class="orta">2</td><td>01.11.2026</td><td class="sag">4.666,67</td><td class="sag">0,00</td><td>—</td><td>—</td><td><span class="rz">Bekliyor</span></td></tr>
+              <tr><td class="orta">3</td><td>01.12.2026</td><td class="sag">4.666,66</td><td class="sag">0,00</td><td>—</td><td>—</td><td><span class="rz">Bekliyor</span></td></tr>
+            </tbody>
+          </table></div>
+          <div class="yatay"><div class="btn primary">💳 Tahsilat al (POS)</div><div class="btn">🧾 Fiş / fatura (tahsil edilen kadar)</div><div class="btn">↻ Taksitleri yeniden üret</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Ücret akışı</div>
+          <div class="ic">
+            <p><b>Yapılan işlem</b> 4.050 (pano 450 + kanal 1/3 payı 1.200 + …) → başvuru satırları (tür 19).</p>
+            <p><b>Tahsil</b> 3.000 → önce yapılan işlemlere dağıtılır; fazlası <b>avans</b> olarak durur (yapılmamış işin parası borç değildir).</p>
+            <p><b>Bakiye</b> = yapılan − tahsil = <b class="sonuk" style="color:#b3261e">1.050 ₺</b>. Kron teslimi bakiye sıfırlanmadan yapılmaz (ayar: uyarı/engel).</p>
+            <p>Plan iptalinde yapılan işlemler faturalanır, kalan avans iade edilir.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LAB -->
+  <div class="pnl" hidden>
+    <div class="dg"><table>
+      <thead><tr><th>İş emri</th><th class="orta">Plan satırı</th><th>Laboratuvar</th><th class="orta">Diş</th><th>İş · malzeme · renk</th><th>Gönderim</th><th>Beklenen</th><th>Aşama</th><th>Prova / teslim randevusu</th><th class="sag">Lab maliyeti</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>LB-2026/0415</td><td class="orta">#3</td><td>Dentalab</td><td class="orta">26</td><td>Kron · zirkonyum · B1</td><td>—</td><td>—</td><td><span class="rz">Ölçü bekliyor</span></td><td>—</td><td class="sag">1.450</td><td><span class="btn mini">📤 Gönder</span></td></tr>
+        <tr><td>—</td><td class="orta">#5</td><td>Dentalab (varsayılan)</td><td class="orta">36</td><td>Kron · zirkonyum</td><td>—</td><td>—</td><td><span class="rz pas">İş emri açılmadı</span></td><td>—</td><td class="sag">1.450</td><td><span class="btn mini">🧪 İş emri aç</span></td></tr>
+      </tbody>
+      <tr class="grup"><td colspan="9">Lab maliyeti (hakedişten düşer)</td><td class="sag">2.900</td><td></td></tr>
+    </table></div>
+    <div class="ic sonuk">Lab gerektiren satır (hizmet kartı `lab_gerekir`) iş emri açılmadan "yapıldı" olamaz; teslim aşamasıyla satır ücretlenir (ücretlendirme kuralı: tamamlanınca).</div>
+  </div>
+
+  <!-- ALTERNATIF B -->
+  <div class="pnl" hidden>
+    <div class="grp"><div class="gb">Alternatif plan B <span class="sp">ana plan TP-2026/0412 · karşılaştırmalı proforma</span></div>
+      <div class="dg"><table>
+        <thead><tr><th class="orta">Diş</th><th>A — ana plan</th><th class="sag">A net</th><th>B — alternatif</th><th class="sag">B net</th><th class="sag">Fark</th><th>Not</th></tr></thead>
+        <tbody>
+          <tr><td class="orta">26</td><td>Zirkonyum kron</td><td class="sag">3.775</td><td>Metal destekli porselen kron</td><td class="sag">2.500</td><td class="sag">−1.275</td><td>Estetik bölge; hekim A önerir</td></tr>
+          <tr><td class="orta">36</td><td>Zirkonyum kron</td><td class="sag">3.775</td><td>MDP kron</td><td class="sag">2.500</td><td class="sag">−1.275</td><td></td></tr>
+          <tr><td class="orta">24 · 35</td><td>Kompozit dolgu ×2</td><td class="sag">2.800</td><td>Amalgam dolgu ×2</td><td class="sag">1.550</td><td class="sag">−1.250</td><td>Estetik değil</td></tr>
+          <tr><td class="orta">26 · 36</td><td>Kanal ×2 + pano</td><td class="sag">7.650</td><td>aynı</td><td class="sag">7.650</td><td class="sag">0</td><td></td></tr>
+          <tr class="grup"><td></td><td>A toplam</td><td class="sag">18.000</td><td>B toplam</td><td class="sag">14.200</td><td class="sag">−3.800</td><td>hasta A'yı seçti · 01.09</td></tr>
+        </tbody>
+      </table></div>
+      <div class="yatay"><div class="btn">🔁 B'yi ana plan yap</div><div class="btn">🖨 Karşılaştırmalı proforma</div><span class="sonuk">B ayrı plan kaydıdır (<code>varyant='B'</code>, <code>ana_plan_id</code>); onaylanan varyant sürer, öteki "iptal (seçilmedi)".</span></div>
+    </div>
+  </div>
+
+  <!-- SURUMLER & GUNLUK -->
+  <div class="pnl" hidden>
+    <div class="ikiPanel">
+      <div>
+        <div class="grp"><div class="gb">Sürümler</div>
+          <div class="dg"><table>
+            <thead><tr><th class="orta">Sürüm</th><th>Tarih</th><th>Değişiklik</th><th class="sag">Net</th><th>Proforma</th><th>Onay</th></tr></thead>
+            <tbody>
+              <tr><td class="orta">1</td><td>01.09.2026</td><td>İlk plan · 7 satır</td><td class="sag">18.000</td><td>PF-2026/0412</td><td><span class="rz ok">01.09 tablet</span></td></tr>
+              <tr><td class="orta">2 (taslak)</td><td>—</td><td>+ 47 implant (öneri, onaysız)</td><td class="sag">25.500</td><td>ek proforma bekliyor</td><td>—</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">Günlük (ISLEMLOG 1130 / 1131)</div>
+          <ul class="liste">
+            <li>16.09 11:05 · <b>Dt. A. Kaya</b> · #1 kanal seans 1/3 → 2/3 (seans #8841)</li>
+            <li>01.09 11:42 · <b>E. Ak (danışman)</b> · plan onaylandı (tablet imza)</li>
+            <li>01.09 11:30 · <b>E. Ak</b> · hastaya sunuldu · PF-2026/0412</li>
+            <li>01.09 10:20 · <b>Dt. A. Kaya</b> · #3 indirim −700 (kampanya: kron)</li>
+            <li>01.09 10:05 · <b>Dt. A. Kaya</b> · plan açıldı · 7 satır</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar"><span>TP-2026/0412 · A · onaylı · 2/7 · net 18.000 · bakiye 1.050</span><span class="sp">Kaynak: <code>dis_tedavi_plani</code> + <code>_satir</code> · <code>dis_odeme_plani</code> · <code>dis_lab_isemri</code> · <code>randevu.plan_satir_id</code></span></div>
+</div>
+<div class="not"><b>Tedavi planı kartı.</b> Plan = iş birimi: satırlar diş + yüzey + hizmet + hekim + seans + fiyat + lab bağı; fazlar klinik öncelik. Yaşam döngüsü taslak → sunuldu (proforma) → onaylı (hasta imzası; fiyat kilitlenir) → sürüyor (seanslarla) → tamamlandı. Ücret plan satırında değil seans/yapıldı anında doğar (başvuru satırı); bakiye = yapılan − tahsil. Alternatif B ayrı plan kaydı, karşılaştırmalı proforma. Bu kart hasta kartındaki (v5) plan tablosunun <b>tam hâli</b>: seans programı, proforma/onay, ödeme planı, lab ve sürümler burada. Uygulamadaki karşılığı generic <code>dis-plan</code> kartı (706) + <code>/api/dis</code> uçları; seans programı ve alternatif B sekmeleri henüz uygulanmadı.</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi. Ic ice sekmeler desteklenir.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===scope.closest('.pnl');});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+// Ic toolbar dugmeleri: data-git="dosya.html" olanlar diger mockup'a gecer.
+document.querySelectorAll('[data-git]').forEach(function(b){ b.style.cursor='pointer'; b.addEventListener('click',function(){ location.href=b.dataset.git; }); });
+</script>
+</body>
+</html>

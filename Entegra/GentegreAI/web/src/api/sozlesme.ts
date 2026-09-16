@@ -121,6 +121,8 @@ export interface SubeOzeti {
   zamanDilimi: string;
   /** ISO 4217 ('TRY') - belgenin kendi dovizi ayridir. */
   paraBirimi: string;
+  /** Şube kartındaki "Logo" görseli (dokuman id); üst şeritte şube adının yanında. */
+  logoDokumanId?: number | null;
 }
 
 export interface KullaniciOzeti {
@@ -870,6 +872,20 @@ export interface RandevuAyarSatiri {
 }
 
 /** Sol agacin bir dugumu: bolum + altindaki hekimler. */
+/** Hekim çalışma planı (711): şablon + istisnadan türetilen bloklar. */
+export interface CalismaBlok {
+  hekimId: number; hekim: string; subeId: number; departmanId: number; departman: string;
+  gun: string; saatBas?: string | null; saatBit?: string | null; slotDk: number; kanallar: string;
+  /** 1 şablon · 2 istisna (saat değişikliği / ek mesai) · 3 kapalı (izin / kongre / kapalı). */
+  kaynak: number; istisnaTur?: number | null; sablonId?: number | null; istisnaId?: number | null; aciklama: string; randevu: number;
+}
+export interface CalismaPlaniYaniti {
+  bas: string; bit: string; subeId: number; bloklar: CalismaBlok[];
+  hekimler: { id: number; ad: string; departmanId: number }[];
+  bolumler: { id: number; ad: string; randevusuz: boolean }[];
+  subeler: { id: number; ad: string }[];
+}
+
 export interface RandevuBolumDugumu {
   departmanId: number;
   ad: string;

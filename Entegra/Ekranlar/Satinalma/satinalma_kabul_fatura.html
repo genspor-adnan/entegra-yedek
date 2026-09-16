@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Satınalma — Kabul, Fatura ve Ödeme — Mockup (GenoTIP AI · Satınalma)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🧾 Kabul & Fatura — B-2026/9012 · Medikal Grup A.Ş.</span>
+    <span class="sp">Sipariş SP-2608-112 · Cerrahi eldiven ×20.000 · Fatura 462.000 ₺ · Ödeme durduruldu</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="satinalma_panosu.html">◀ Pano</div>
+    <div class="btn primary">✓ Ödemeye Onay Ver</div>
+    <div class="btn">⛔ Ödemeyi Durdur</div>
+    <div class="btn">📨 Tedarikçiye İtiraz</div>
+    <div class="sepv"></div>
+    <div class="btn">🧮 Yeniden Eşleştir</div>
+    <div class="btn" data-git="satinalma_siparis.html">📦 Siparişe Git</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ Kabul Tutanağı</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart kir"><div class="b">Eşleştirme</div><div class="d" style="font-size:13px">Tutmuyor</div></div>
+    <div class="kart"><div class="b">Sipariş</div><div class="d" style="font-size:13px">462.000 ₺</div></div>
+    <div class="kart sari"><div class="b">İrsaliye (teslim)</div><div class="d" style="font-size:13px">277.200 ₺</div></div>
+    <div class="kart kir"><div class="b">Fatura</div><div class="d" style="font-size:13px">462.000 ₺</div></div>
+    <div class="kart kir"><div class="b">Fark</div><div class="d" style="font-size:13px">184.800 ₺</div></div>
+    <div class="kart"><div class="b">Vade</div><div class="d" style="font-size:12px">15.11.2026 <small>60 gün</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="esles">Üçlü Eşleştirme<span class="sy">fark</span></div>
+    <div class="sekme" data-s="kabul">Muayene Kabul<span class="sy">2</span></div>
+    <div class="sekme" data-s="odeme">Ödeme & Mahsup</div>
+    <div class="sekme" data-s="bekleyen">Bekleyen Faturalar<span class="sy">14</span></div>
+  </div>
+
+  <!-- ====================================================== ÜÇLÜ EŞLEŞTİRME ===== -->
+  <div class="pnl" data-s="esles">
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:230px">Kalem</th>
+          <th style="width:110px" class="sag">Sipariş</th>
+          <th style="width:110px" class="sag">İrsaliye</th>
+          <th style="width:110px" class="sag">Sayılan</th>
+          <th style="width:110px" class="sag">Fatura</th>
+          <th style="width:110px" class="sag">Birim fiyat</th>
+          <th style="width:150px" class="orta">Sonuç</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Cerrahi eldiven (steril) 7,0</b></td>
+            <td class="sag">8.000</td><td class="sag">5.000</td><td class="sag">5.000</td>
+            <td class="sag">8.000</td><td class="sag">23,10 ₺</td>
+            <td class="orta"><span class="rz kir">Miktar farkı</span></td></tr>
+          <tr class="tik"><td><b>Cerrahi eldiven (steril) 7,5</b></td>
+            <td class="sag">8.000</td><td class="sag">5.000</td><td class="sag">5.000</td>
+            <td class="sag">8.000</td><td class="sag">23,10 ₺</td>
+            <td class="orta"><span class="rz kir">Miktar farkı</span></td></tr>
+          <tr class="tik"><td><b>Cerrahi eldiven (steril) 8,0</b></td>
+            <td class="sag">4.000</td><td class="sag">2.000</td><td class="sag">2.000</td>
+            <td class="sag">4.000</td><td class="sag">23,10 ₺</td>
+            <td class="orta"><span class="rz kir">Miktar farkı</span></td></tr>
+          <tr class="grup"><td>TOPLAM</td>
+            <td class="sag">20.000</td><td class="sag">12.000</td><td class="sag">12.000</td>
+            <td class="sag">20.000</td><td class="sag">—</td>
+            <td class="orta"><span class="rz kir">8.000 fazla faturalanmış</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:190px">Kontrol</th>
+          <th style="width:150px" class="orta">Sonuç</th>
+          <th>Açıklama</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Miktar</b> (sipariş ↔ irsaliye)</td>
+            <td class="orta"><span class="rz sari">Kısmi</span></td>
+            <td>20.000 sipariş, 12.000 teslim — kısmi teslim sözleşmede kabul ediliyor</td></tr>
+          <tr class="tik"><td><b>Miktar</b> (irsaliye ↔ sayım)</td>
+            <td class="orta"><span class="rz ok">Tuttu</span></td>
+            <td>12.000 irsaliye, 12.000 sayıldı</td></tr>
+          <tr class="tik"><td><b>Miktar</b> (teslim ↔ fatura)</td>
+            <td class="orta"><span class="rz kir">TUTMADI</span></td>
+            <td>12.000 teslim edildi ama <b>20.000 faturalandı</b> — 184.800 ₺ fazla</td></tr>
+          <tr class="tik"><td><b>Birim fiyat</b> (sipariş ↔ fatura)</td>
+            <td class="orta"><span class="rz ok">Tuttu</span></td>
+            <td>23,10 ₺ · ihale fiyatıyla aynı</td></tr>
+          <tr class="tik"><td><b>KDV oranı</b></td>
+            <td class="orta"><span class="rz ok">Tuttu</span></td>
+            <td>%10 · tıbbi sarf malzeme</td></tr>
+          <tr class="tik"><td><b>Tedarikçi bilgileri</b></td>
+            <td class="orta"><span class="rz ok">Tuttu</span></td>
+            <td>VKN, unvan ve banka hesabı cari kartıyla aynı</td></tr>
+          <tr class="tik"><td><b>Muayene kabul</b></td>
+            <td class="orta"><span class="rz ok">Yapıldı</span></td>
+            <td>12.000 adet kabul edildi, uygunsuzluk yok</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Üçlü eşleştirme tutmadan ödeme çıkmaz:</b> sipariş ne dedi, ne geldi, ne
+        faturalandı — üçü aynı şeyi söylemeli.</span>
+      <span class="sp">Sayım irsaliyeden ayrı bir kontroldür: irsaliye "gönderdim" der, sayım "aldım" der.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================= MUAYENE KABUL ===== -->
+  <div class="pnl" data-s="kabul" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:140px" class="orta">Tarih</th>
+          <th style="width:140px">İrsaliye</th>
+          <th style="width:90px" class="sag">Miktar</th>
+          <th style="width:180px">Komisyon</th>
+          <th style="width:130px" class="orta">Sonuç</th>
+          <th>Not</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="orta">05.09.2026</td><td class="nw"><code>MG-2026/3301</code></td>
+            <td class="sag">8.000</td>
+            <td>Satınalma + Ameliyathane + Depo</td>
+            <td class="orta"><span class="rz ok">Kabul</span></td>
+            <td>Ambalaj, sterilizasyon tarihi ve lot kontrol edildi</td></tr>
+          <tr class="tik"><td class="orta">12.09.2026</td><td class="nw"><code>MG-2026/3388</code></td>
+            <td class="sag">4.000</td>
+            <td>Satınalma + Depo</td>
+            <td class="orta"><span class="rz ok">Kabul</span></td>
+            <td>Kısmi · kalan 8.000 için tarih verilmedi</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ul class="kontrol">
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>Miktar sayımı</b> — irsaliye ile birebir (12.000)</span>
+        <span class="imza">Depo · 12.09 14:10</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>Ambalaj bütünlüğü</b> — hasarlı koli yok</span>
+        <span class="imza">12.09 14:15</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>Sterilizasyon tarihi ve son kullanım</b> — asgari raf ömrü karşılanıyor (26 ay)</span>
+        <span class="imza">12.09 14:22</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>Şartname uygunluğu</b> — pudrasız, lateks, steril, tek kullanımlık</span>
+        <span class="imza">Ameliyathane · 05.09</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span><b>Lot ve UDI kaydı</b> — stok girişine işlendi</span>
+        <span class="imza">12.09 14:40</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span><b>Numune kalite kontrolü</b> — her partiden 5 adet delik testi
+          <span class="rz sari">bekliyor</span></span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Kabul tutanağı imzalandı ve faturaya bağlandı</span>
+        <span class="imza">—</span></li>
+    </ul>
+
+    <div class="statusbar">
+      <span><b>Muayene kabul stok girişinden ayrıdır:</b> mal depoya girer ama kabul tutanağı
+        imzalanmadan <b>ödeme</b> süreci başlamaz.</span>
+      <span class="sp">Şartname uygunluğunu malzemeyi kullanacak birim onaylar — depo yalnız sayar.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================= ÖDEME & MAHSUP ===== -->
+  <div class="pnl" data-s="odeme" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr><th style="width:210px">Alan</th><th>Değer</th></tr></thead>
+        <tbody>
+          <tr><td class="sonuk">Fatura tutarı</td><td>462.000 ₺ + KDV %10 = <b>508.200 ₺</b></td></tr>
+          <tr><td class="sonuk">Kabul edilen tutar</td>
+            <td>12.000 × 23,10 ₺ = 277.200 ₺ + KDV = <b>304.920 ₺</b></td></tr>
+          <tr><td class="sonuk">Fazla faturalanan</td>
+            <td><span class="rz kir">184.800 ₺ + KDV = 203.280 ₺</span> — teslim edilmemiş 8.000 adet</td></tr>
+          <tr><td class="sonuk">Gecikme cezası</td>
+            <td>Teslim edilmeyen tutar × binde 1 × 11 gün = <b>9.240 ₺</b>
+              <span class="sonuk">(mahsup edilecek)</span></td></tr>
+          <tr><td class="sonuk">Ödenecek (hesaplanan)</td>
+            <td>304.920 ₺ − 9.240 ₺ = <b>295.680 ₺</b></td></tr>
+          <tr><td class="sonuk">Karar</td>
+            <td><span class="rz kir">Ödeme durduruldu</span> — fatura düzeltilmeden ödenmez</td></tr>
+          <tr><td class="sonuk">İtiraz</td>
+            <td>16.09.2026 · Medikal Grup A.Ş.'ye yazılı bildirim ·
+              <b>iade faturası</b> ya da 12.000 adetlik düzeltilmiş fatura isteniyor</td></tr>
+          <tr><td class="sonuk">Vade</td>
+            <td>15.11.2026 · <span class="sonuk">itiraz süreci vadeyi durdurur, geciktirmez</span></td></tr>
+          <tr><td class="sonuk">Muhasebe</td>
+            <td>Fatura <b>kayda alınmadı</b> — düzeltilmiş fatura beklenirken askıda</td></tr>
+          <tr><td class="sonuk">Tedarikçi etkisi</td>
+            <td>Performans skoruna işlendi: <span class="rz kir">fazla faturalama</span> +
+              <span class="rz kir">11 gün gecikme</span> · skor 74 → 61</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ozet">
+      <div class="kart"><div class="b">Ödeme akışı</div>
+        <div class="d" style="font-size:11.5px;font-weight:normal;line-height:1.7">
+          Fatura gelir → <b>üçlü eşleştirme</b> → tutarsa muayene kabul tutanağıyla birlikte
+          muhasebeye → vade takvimine girer → ödeme günü banka talimatı<br>
+          <span class="sonuk">Tutmazsa: ödeme durur, itiraz edilir, düzeltilmiş fatura beklenir.
+            Kısmi ödeme yapılmaz — fatura bölünmez.</span>
+        </div></div>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Kısmi ödeme yapılmaz:</b> 12.000 adedin parası hazır ama fatura 20.000 diyor —
+        yanlış belgeye doğru para ödenmez.</span>
+      <span class="sp">Gecikme cezası faturadan <b>mahsup</b> edilir; ayrı tahsilat süreci açılmaz.</span>
+    </div>
+  </div>
+
+  <!-- ==================================================== BEKLEYEN FATURALAR ===== -->
+  <div class="pnl" data-s="bekleyen" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Fatura no, tedarikçi ya da sipariş…</div>
+      <span class="chip on">Bekleyen <b>14</b></span>
+      <span class="chip">Eşleşmedi <b>3</b></span>
+      <span class="chip">Vadesi yaklaşan <b>5</b></span>
+      <span class="chip">Vadesi geçen <b>1</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:130px">Fatura</th>
+          <th style="width:160px">Tedarikçi</th>
+          <th style="width:120px">Sipariş</th>
+          <th style="width:110px" class="sag">Tutar</th>
+          <th style="width:110px" class="orta">Vade</th>
+          <th style="width:130px" class="orta">Eşleştirme</th>
+          <th style="width:140px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>B-2026/9012</code></td><td>Medikal Grup A.Ş.</td>
+            <td class="nw"><code>SP-2608-112</code></td><td class="sag">508.200 ₺</td>
+            <td class="orta">15.11</td>
+            <td class="orta"><span class="rz kir">Tutmadı</span></td>
+            <td class="orta"><span class="rz kir">Ödeme durdu</span></td></tr>
+          <tr class="tik"><td class="nw"><code>A-2026/44187</code></td><td>Selçuk Ecza Deposu</td>
+            <td class="nw"><code>SP-2609-061</code></td><td class="sag">202.752 ₺</td>
+            <td class="orta">15.11</td>
+            <td class="orta"><span class="rz sari">Miktar farkı</span></td>
+            <td class="orta"><span class="rz sari">Tutanak bekliyor</span></td></tr>
+          <tr class="tik"><td class="nw"><code>C-2026/1188</code></td><td>Hedef Medikal</td>
+            <td class="nw"><code>SP-2609-038</code></td><td class="sag">56.870 ₺</td>
+            <td class="orta">13.11</td>
+            <td class="orta"><span class="rz kir">Fiyat farkı</span></td>
+            <td class="orta"><span class="rz kir">İtiraz edildi</span></td></tr>
+          <tr class="tik"><td class="nw"><code>R-2026/2204</code></td><td>Roche Diagnostics</td>
+            <td class="nw"><code>SP-2609-044</code></td><td class="sag">204.600 ₺</td>
+            <td class="orta">14.11</td>
+            <td class="orta"><span class="rz ok">Tuttu</span></td>
+            <td class="orta"><span class="rz ok">Ödemeye hazır</span></td></tr>
+          <tr class="tik"><td class="nw"><code>D-2026/0771</code></td><td>Dräger Türkiye</td>
+            <td class="nw"><code>SP-2609-019</code></td><td class="sag">1.056 ₺</td>
+            <td class="orta"><span class="rz kir">10.09</span></td>
+            <td class="orta"><span class="rz ok">Tuttu</span></td>
+            <td class="orta"><span class="rz kir">Vadesi geçti</span></td></tr>
+          <tr class="tik"><td class="nw"><code>L-2026/5512</code></td><td>Linet Türkiye</td>
+            <td class="nw"><code>SP-2609-029</code></td><td class="sag">— </td>
+            <td class="orta">—</td>
+            <td class="orta"><span class="rz pas">Fatura yok</span></td>
+            <td class="orta"><span class="rz pas">Teslim bekliyor</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Vadesi geçen kendi faturamız da uyarıdır:</b> 1.056 ₺'lik fatura eşleşmiş ve
+        ödenmeyi bekliyor — küçük tutar unutulur, tedarikçi ilişkisini yıpratır.</span>
+      <span class="sp">Eşleşmeyen fatura muhasebeye kayda alınmaz: yanlış belge kayda girerse düzeltmesi zor.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Süreç:</b> Mal gelir → <b>muayene kabul</b> komisyonu sayar, şartnameye uygunluğu kullanacak
+  birim onaylar, lot/UDI stok girişine işlenir → fatura geldiğinde <b>üçlü eşleştirme</b> çalışır
+  (sipariş ↔ irsaliye/sayım ↔ fatura): miktar, birim fiyat, KDV ve tedarikçi bilgileri. Tutarsa
+  fatura muhasebeye gider, vade takvimine girer; tutmazsa ödeme durur ve itiraz edilir —
+  <b>kısmi ödeme yapılmaz</b>, fatura bölünmez. Gecikme cezası ayrı tahsilat değil, faturadan
+  <b>mahsup</b>tur. Her fark tedarikçi performans skoruna işlenir.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

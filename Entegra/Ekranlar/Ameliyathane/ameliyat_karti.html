@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ameliyathane — Ameliyat Kartı — Mockup (GenoTIP AI · Ameliyathane)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🗂️ Ameliyat Kartı — AM-2609-0117</span>
+    <span class="sp">Mehmet Demir · 68 y · Salon 1 · Kalça protezi · SÜRÜYOR</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="ameliyat_plani.html">◀ Plan</div>
+    <div class="sepv"></div>
+    <div class="btn ok">▶ Kesi (Bıçak) Zamanı</div>
+    <div class="btn">⏹️ Ameliyatı Bitir</div>
+    <div class="sepv"></div>
+    <div class="btn primary">📝 Ameliyat Notu</div>
+    <div class="btn">🧾 Faturaya Aktar</div>
+    <div class="btn pas">⚠️ Komplikasyon Bildir</div>
+    <div class="sp"></div>
+    <div class="btn">🖨️ Yazdır</div>
+  </div>
+
+  <div class="hdr k6">
+    <div class="fld"><label>Hasta</label><div class="inp big ro">Mehmet Demir · 68 y · E</div></div>
+    <div class="fld"><label>Protokol / Yatış</label><div class="inp ro">2026-004182 · Yatan</div></div>
+    <div class="fld"><label>Salon / Masa</label><div class="inp ro">Salon 1 (laminar akım)</div></div>
+    <div class="fld"><label>Cerrah</label><div class="inp ro">Dr. Kaya</div></div>
+    <div class="fld"><label>Anestezi</label><div class="inp ro">Dr. Özkan · Spinal</div></div>
+    <div class="fld"><label>Durum</label><div class="inp ro"><span class="rz ok">Sürüyor · 12 dk fazla</span></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="ameliyat">Ameliyat</div>
+    <div class="sekme" data-s="ekip">Ekip &amp; Anestezi</div>
+    <div class="sekme" data-s="gckl">Güvenli Cerrahi<span class="sy">3</span></div>
+    <div class="sekme" data-s="sarf">Sarf &amp; Sayım<span class="sy">14</span></div>
+    <div class="sekme" data-s="not">Ameliyat Notu</div>
+    <div class="sekme" data-s="komp">Komplikasyon</div>
+  </div>
+
+  <!-- ==================================================== AMELİYAT ===== -->
+  <div class="pnl" data-s="ameliyat">
+    <div class="grp">
+      <div class="gb">İşlem <span class="sp">SUT kodu faturaya ve klinik kalite göstergesine gider</span></div>
+      <div class="dg">
+        <table>
+          <thead><tr>
+            <th style="width:110px">SUT</th><th>İşlem</th>
+            <th style="width:90px" class="orta">Taraf</th>
+            <th style="width:90px" class="orta">Sıra</th>
+            <th style="width:150px">Cerrah</th>
+          </tr></thead>
+          <tbody>
+            <tr class="tik sel"><td><code>612320</code></td><td>Kalça artroplastisi, total</td>
+              <td class="orta"><span class="rz mavi">Sağ</span></td>
+              <td class="orta">Ana işlem</td><td>Dr. Kaya</td></tr>
+            <tr class="tik"><td><code>610940</code></td><td>Büyük eklemin anestezi altında mobilizasyonu</td>
+              <td class="orta"><span class="rz mavi">Sağ</span></td>
+              <td class="orta">Ek işlem</td><td>Dr. Kaya</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="gb">Zaman Çizgisi <span class="sp">her damga kim/ne zaman ile birlikte saklanır</span></div>
+      <div class="dg">
+        <table>
+          <thead><tr>
+            <th style="width:230px">Aşama</th>
+            <th style="width:110px" class="orta">Saat</th>
+            <th style="width:110px" class="sag">Süre</th>
+            <th style="width:150px">Kaydeden</th>
+            <th>Not</th>
+          </tr></thead>
+          <tbody>
+            <tr class="tik"><td>Salona alındı</td><td class="orta">10:05</td><td class="sag">—</td>
+              <td>Hem. Kerem</td><td class="sonuk">Kimlik + taraf doğrulandı</td></tr>
+            <tr class="tik"><td>Anestezi başlangıcı</td><td class="orta">10:14</td><td class="sag">9 dk</td>
+              <td>Dr. Özkan</td><td class="sonuk">Spinal</td></tr>
+            <tr class="tik sel"><td><b>Kesi (bıçak) zamanı</b></td><td class="orta">10:38</td>
+              <td class="sag">24 dk</td><td>Dr. Kaya</td>
+              <td class="sonuk">Profilaktik antibiyotik 10:12'de verildi (26 dk önce)</td></tr>
+            <tr class="tik"><td>Kapanış başlangıcı</td><td class="orta sonuk">—</td>
+              <td class="sag sonuk">—</td><td class="sonuk">bekliyor</td><td></td></tr>
+            <tr class="tik"><td>Ameliyat bitişi</td><td class="orta sonuk">—</td>
+              <td class="sag sonuk">—</td><td class="sonuk">bekliyor</td><td></td></tr>
+            <tr class="tik"><td>Salondan çıkış</td><td class="orta sonuk">—</td>
+              <td class="sag sonuk">—</td><td class="sonuk">bekliyor</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="ozet">
+      <div class="kart"><div class="b">Planlanan süre</div><div class="d">150 <small>dk</small></div></div>
+      <div class="kart sari"><div class="b">Geçen süre</div><div class="d">162 <small>dk · +12</small></div></div>
+      <div class="kart ok"><div class="b">Antibiyotik profilaksisi</div><div class="d">✓ <small>kesiden 26 dk önce</small></div></div>
+      <div class="kart"><div class="b">Anestezi tipi</div><div class="d" style="font-size:13px">Spinal</div></div>
+    </div>
+  </div>
+
+  <!-- ======================================================== EKİP ===== -->
+  <div class="pnl" data-s="ekip" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:170px">Kişi</th><th style="width:170px">Rol</th>
+          <th style="width:110px" class="orta">Giriş</th>
+          <th style="width:110px" class="orta">Çıkış</th>
+          <th>Not</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td>Dr. Kaya</td><td>Cerrah (sorumlu)</td>
+            <td class="orta">10:30</td><td class="orta sonuk">—</td><td></td></tr>
+          <tr class="tik"><td>Dr. Aras</td><td>1. asistan</td>
+            <td class="orta">10:30</td><td class="orta sonuk">—</td><td></td></tr>
+          <tr class="tik"><td>Dr. Özkan</td><td>Anestezi uzmanı</td>
+            <td class="orta">10:08</td><td class="orta sonuk">—</td>
+            <td class="sonuk">Aynı anda Salon 2'de de sorumlu</td></tr>
+          <tr class="tik"><td>Tekniker Arda</td><td>Anestezi teknikeri</td>
+            <td class="orta">10:08</td><td class="orta sonuk">—</td><td></td></tr>
+          <tr class="tik"><td>Hem. Selin</td><td>Scrub hemşire</td>
+            <td class="orta">10:00</td><td class="orta sonuk">—</td><td></td></tr>
+          <tr class="tik"><td>Hem. Kerem</td><td>Sirküle hemşire</td>
+            <td class="orta">10:00</td><td class="orta sonuk">—</td>
+            <td class="sonuk">Sayım sorumlusu</td></tr>
+          <tr class="tik"><td>Tek. Burak</td><td>Görüntüleme (C-kollu)</td>
+            <td class="orta">10:40</td><td class="orta">11:15</td>
+            <td class="sonuk">Skopi 42 sn · 1,8 mGy</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grp">
+      <div class="gb">Anestezi Kaydı</div>
+      <div class="hdr k4">
+        <div class="fld"><label>Tip</label><div class="inp ro">Spinal</div></div>
+        <div class="fld"><label>ASA Skoru</label><div class="inp ro">ASA III</div></div>
+        <div class="fld"><label>Mallampati</label><div class="inp ro">2</div></div>
+        <div class="fld"><label>Komplikasyon</label><div class="inp ro sonuk">Yok</div></div>
+      </div>
+      <div class="statusbar">
+        <span>Anestezi takip çizelgesi (vital / ilaç / sıvı) ayrı ekranda — 5 dakikalık kayıt.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ GÜVENLİ CERRAHİ ===== -->
+  <div class="pnl" data-s="gckl" hidden>
+    <div class="grp">
+      <div class="gb">1 · Salona girişte (Sign in) — anestezi öncesi
+        <span class="sp">Hem. Kerem · 10:06</span></div>
+      <ul class="kontrol">
+        <li class="ok"><span class="kutu">✓</span> Hasta kimliği doğrulandı<span class="imza">Hem. Kerem 10:06</span></li>
+        <li class="ok"><span class="kutu">✓</span> İşlem ve <b>taraf (sağ)</b> hasta ile doğrulandı<span class="imza">Hem. Kerem 10:06</span></li>
+        <li class="ok"><span class="kutu">✓</span> Taraf işaretlemesi yapıldı<span class="imza">Dr. Kaya 09:50</span></li>
+        <li class="ok"><span class="kutu">✓</span> Onam formu alındı<span class="imza">Hem. Kerem 10:06</span></li>
+        <li class="ok"><span class="kutu">✓</span> Alerji sorgulandı — <b>Penisilin</b><span class="imza">Dr. Özkan 10:07</span></li>
+        <li class="ok"><span class="kutu">✓</span> Anestezi cihazı ve ilaç kontrolü<span class="imza">Dr. Özkan 10:07</span></li>
+        <li class="ok"><span class="kutu">✓</span> Pulse oksimetre takılı ve çalışıyor<span class="imza">Tek. Arda 10:08</span></li>
+      </ul>
+    </div>
+
+    <div class="grp">
+      <div class="gb">2 · Kesi öncesi (Time out) — tüm ekip durur
+        <span class="sp">Hem. Kerem · 10:36</span></div>
+      <ul class="kontrol">
+        <li class="ok"><span class="kutu">✓</span> Ekip üyeleri adı ve rolüyle tanıtıldı<span class="imza">10:36</span></li>
+        <li class="ok"><span class="kutu">✓</span> Hasta · işlem · taraf yüksek sesle teyit edildi<span class="imza">10:36</span></li>
+        <li class="ok"><span class="kutu">✓</span> <b>Antibiyotik profilaksisi son 60 dk içinde verildi</b> (10:12)<span class="imza">Dr. Özkan 10:36</span></li>
+        <li class="ok"><span class="kutu">✓</span> Kritik adımlar / beklenen kanama konuşuldu<span class="imza">Dr. Kaya 10:37</span></li>
+        <li class="ok"><span class="kutu">✓</span> Görüntüleme ekranda ve doğru hastaya ait<span class="imza">Tek. Burak 10:37</span></li>
+        <li class="ok"><span class="kutu">✓</span> Sterilizasyon indikatörü kontrol edildi<span class="imza">Hem. Selin 10:35</span></li>
+      </ul>
+    </div>
+
+    <div class="grp">
+      <div class="gb">3 · Salondan çıkmadan (Sign out)
+        <span class="sp">bekliyor — ameliyat sürüyor</span></div>
+      <ul class="kontrol">
+        <li class="bos"><span class="kutu"></span> Yapılan işlem yüksek sesle söylendi</li>
+        <li class="bos"><span class="kutu"></span> <b>Alet · kompres · iğne sayımı tam</b></li>
+        <li class="bos"><span class="kutu"></span> Patoloji materyali etiketlendi (hasta adı + taraf)</li>
+        <li class="bos"><span class="kutu"></span> Cihaz / malzeme sorunu var mı konuşuldu</li>
+        <li class="bos"><span class="kutu"></span> Derlenme ve bakım planı paylaşıldı</li>
+      </ul>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Sign out tamamlanmadan ameliyat kapatılamaz</b> — sayım uyuşmazlığı ancak
+        hasta salondayken çözülebilir.</span>
+    </div>
+  </div>
+
+  <!-- ================================================ SARF & SAYIM ===== -->
+  <div class="pnl" data-s="sarf" hidden>
+    <div class="sekmeler">
+      <div class="sekme on" data-s="malzeme">Kullanılan Malzeme<span class="sy">9</span></div>
+      <div class="sekme" data-s="sayim">Sayım</div>
+    </div>
+
+    <div class="pnl" data-s="malzeme">
+      <div class="dg">
+        <table>
+          <thead><tr>
+            <th style="width:130px">Barkod / UBB</th><th>Malzeme</th>
+            <th style="width:70px" class="sag">Adet</th>
+            <th style="width:150px">Lot / Seri</th>
+            <th style="width:100px" class="orta">SKT</th>
+            <th style="width:110px" class="orta">İzlenebilirlik</th>
+            <th style="width:100px" class="orta">Faturaya</th>
+          </tr></thead>
+          <tbody>
+            <tr class="grup"><td colspan="7">İmplant — ÜTS bildirimi zorunlu</td></tr>
+            <tr class="tik sel"><td><code>8680001234567</code></td><td>Kalça protezi femoral komponent</td>
+              <td class="sag">1</td><td>LOT-4471 / SN-88213</td><td class="orta">03.2029</td>
+              <td class="orta"><span class="rz ok">ÜTS bildirildi</span></td>
+              <td class="orta"><span class="rz mavi">Evet</span></td></tr>
+            <tr class="tik"><td><code>8680001234574</code></td><td>Asetabular kap + insert</td>
+              <td class="sag">1</td><td>LOT-4471 / SN-88219</td><td class="orta">03.2029</td>
+              <td class="orta"><span class="rz sari">Bekliyor</span></td>
+              <td class="orta"><span class="rz mavi">Evet</span></td></tr>
+            <tr class="grup"><td colspan="7">Sarf</td></tr>
+            <tr class="tik"><td><code>8690002221114</code></td><td>Kemik çimentosu (40 g)</td>
+              <td class="sag">2</td><td>LOT-9920</td><td class="orta">11.2027</td>
+              <td class="orta sonuk">—</td><td class="orta"><span class="rz mavi">Evet</span></td></tr>
+            <tr class="tik"><td><code>8690002229910</code></td><td>Steril örtü seti, ortopedi</td>
+              <td class="sag">1</td><td>LOT-3310</td><td class="orta">06.2028</td>
+              <td class="orta sonuk">—</td><td class="orta"><span class="rz pas">Pakette</span></td></tr>
+            <tr class="tik"><td><code>8690002230015</code></td><td>Emilebilir sütür 2/0</td>
+              <td class="sag">4</td><td>LOT-7781</td><td class="orta">01.2028</td>
+              <td class="orta sonuk">—</td><td class="orta"><span class="rz pas">Pakette</span></td></tr>
+            <tr class="tik"><td><code>—</code></td><td>Sefazolin 1 g flakon (profilaksi)</td>
+              <td class="sag">1</td><td>—</td><td class="orta">—</td>
+              <td class="orta sonuk">—</td><td class="orta"><span class="rz mavi">Evet</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="statusbar">
+        <span>İmplant <b>ÜTS'ye bildirilmeden</b> ameliyat kapatılamaz.</span>
+        <span class="sp">"Pakette" = ameliyat paketine dahil, ayrıca faturalanmaz.</span>
+      </div>
+    </div>
+
+    <div class="pnl" data-s="sayim" hidden>
+      <div class="dg">
+        <table>
+          <thead><tr>
+            <th>Sayılan</th>
+            <th style="width:110px" class="sag">Başlangıç</th>
+            <th style="width:110px" class="sag">Eklenen</th>
+            <th style="width:110px" class="sag">Kapanışta</th>
+            <th style="width:110px" class="orta">Durum</th>
+            <th style="width:150px">Sayan</th>
+          </tr></thead>
+          <tbody>
+            <tr class="tik sel"><td>Kompres (büyük)</td><td class="sag">20</td><td class="sag">10</td>
+              <td class="sag sonuk">—</td><td class="orta"><span class="rz sari">Bekliyor</span></td>
+              <td>Hem. Kerem</td></tr>
+            <tr class="tik"><td>Gazlı bez (küçük)</td><td class="sag">30</td><td class="sag">0</td>
+              <td class="sag sonuk">—</td><td class="orta"><span class="rz sari">Bekliyor</span></td>
+              <td>Hem. Kerem</td></tr>
+            <tr class="tik"><td>İğne</td><td class="sag">6</td><td class="sag">4</td>
+              <td class="sag sonuk">—</td><td class="orta"><span class="rz sari">Bekliyor</span></td>
+              <td>Hem. Selin</td></tr>
+            <tr class="tik"><td>Alet (set 1 — ortopedi temel)</td><td class="sag">48</td><td class="sag">0</td>
+              <td class="sag sonuk">—</td><td class="orta"><span class="rz sari">Bekliyor</span></td>
+              <td>Hem. Selin</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="statusbar">
+        <span>Sayım <b>iki kişi</b> tarafından, ayrı ayrı yapılır.</span>
+        <span class="sp">Uyuşmazlıkta kapanış engellenir ve görüntüleme istenir.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= NOT ===== -->
+  <div class="pnl" data-s="not" hidden>
+    <div class="grp">
+      <div class="gb">Ameliyat Notu <span class="sp">şablondan üretildi · imzalanmadı</span></div>
+      <div class="ic">
+        <div class="fld" style="margin-bottom:8px">
+          <label>Ameliyat Öncesi Tanı</label>
+          <div class="inp uzun ro">M16.1 — Primer koksartroz, tek taraflı (sağ)</div>
+        </div>
+        <div class="fld" style="margin-bottom:8px">
+          <label>Ameliyat Sonrası Tanı</label>
+          <div class="inp uzun">M16.1 — Primer koksartroz, tek taraflı (sağ)</div>
+        </div>
+        <div class="fld" style="margin-bottom:8px">
+          <label>Bulgular ve Uygulanan İşlem</label>
+          <div class="inp uzun">Sağ kalça posterolateral yaklaşımla eksplore edildi. Femur başı
+            eksize edildi, asetabulum oyuldu ve 52 mm kap çakıldı. Femoral kanal genişletildi,
+            çimentolu femoral komponent yerleştirildi. Redüksiyon sonrası stabilite ve bacak
+            uzunluğu kontrol edildi. Hemostaz sonrası dren konularak katlar anatomik kapatıldı.</div>
+        </div>
+        <div class="hdr k4" style="padding:0;background:none;border:none">
+          <div class="fld"><label>Kanama (tahmini)</label><div class="inp">350 ml</div></div>
+          <div class="fld"><label>Dren</label><div class="inp">1 adet · hemovak</div></div>
+          <div class="fld"><label>Patoloji materyali</label><div class="inp">Femur başı — gönderildi</div></div>
+          <div class="fld"><label>Çıkarılan doku</label><div class="inp ro sonuk">—</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="statusbar">
+      <span>Not <b>cerrah e-imzası</b> ile kesinleşir; imzalanınca değiştirilemez, ek not yazılır.</span>
+      <span class="sp">Epikrize ve e-Nabız'a imzalı hali gider.</span>
+    </div>
+  </div>
+
+  <!-- ================================================ KOMPLİKASYON ===== -->
+  <div class="pnl" data-s="komp" hidden>
+    <div class="ozet">
+      <div class="kart ok"><div class="b">Bu ameliyat</div><div class="d">Yok</div></div>
+      <div class="kart"><div class="b">İzlem penceresi</div><div class="d">60 <small>gün</small></div></div>
+      <div class="kart"><div class="b">Bağlı gösterge</div><div class="d" style="font-size:13px">KP.G1 · KP.G5</div></div>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:130px" class="orta">Tarih</th>
+          <th style="width:110px">ICD-10</th>
+          <th>Komplikasyon</th>
+          <th style="width:130px" class="orta">Sınıf</th>
+          <th style="width:150px">Bildiren</th>
+        </tr></thead>
+        <tbody>
+          <tr><td colspan="5" class="orta sonuk" style="padding:14px">
+            Bu ameliyata bağlı komplikasyon kaydı yok.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span>Komplikasyon <b>tanı kodu</b> ile kaydedilir — serbest metin klinik kalite
+        göstergesine dönüşemez.</span>
+      <span class="sp">Ameliyattan sonraki 60 gün içinde açılan kayıt bu ameliyata bağlanır.</span>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span>Ameliyat: <b>AM-2609-0117</b></span>
+    <span>Başlangıç: <b>10:05</b></span>
+    <span>Durum: <b>Sürüyor</b></span>
+    <span class="sp">Güvenli cerrahi: 2/3 aşama tamam</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekran notları.</b>
+  <ul>
+    <li><b>Zaman damgaları ayrı ayrı tutulur</b> (salona alınma · anestezi · kesi · kapanış · bitiş ·
+      çıkış). Tek "başlangıç-bitiş" saklasaydık masa kullanımı ile cerrahi süre ayırt edilemezdi;
+      ameliyathane verimini bozan şey genelde ikisinin arasındaki boşluktur.</li>
+    <li><b>Güvenli cerrahi kontrol listesi üç aşamalı ve imzalı.</b> Sign out tamamlanmadan ameliyat
+      kapanmaz: sayım uyuşmazlığı ancak hasta hâlâ salondayken çözülebilir. Tek bir onay kutusu
+      olsaydı liste sonradan toplu işaretlenirdi ve amacı kalmazdı.</li>
+    <li><b>Taraf (sağ/sol) hem işlemde hem kontrol listesinde.</b> Yanlış taraf cerrahisi en ağır
+      olay; iki bağımsız yerde doğrulanması bilerek yapılmış tekrardır.</li>
+    <li><b>Komplikasyon serbest metin değil, ICD-10 kodu.</b> Klinik kalite göstergeleri
+      (KP.G1, DP.G6…) tanı kodundan hesaplanıyor; metin yazılsaydı gösterge boş kalırdı.</li>
+    <li><b>İmplant ÜTS bildirimi kapanışın ön koşulu</b> — sonradan bildirim, hasta çıkınca
+      seri numarası kaybolduğu için çoğu zaman yapılamıyor.</li>
+  </ul>
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

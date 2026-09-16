@@ -4,6 +4,7 @@ import { guvenli, mesaj, onay } from '../bilesenler/mesaj';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { RandevuTakvimi } from '../bilesenler/RandevuTakvimi';
+import { DisLabPano } from '../bilesenler/dis/DisLabPano';
 import { GenForm } from '../bilesenler/GenForm';
 import { kartOzellestirme } from './liste/kartOzellestirme';
 import { KaynakArama } from '../bilesenler/KaynakArama';
@@ -31,6 +32,12 @@ import { utsAksiyonu } from './liste/utsAksiyonlari';
 import { kasaAksiyonu } from './liste/kasaAksiyonlari';
 import { bildirimAksiyonu } from './liste/bildirimAksiyonlari';
 import { zamanliIsAksiyonu } from './liste/zamanliIsAksiyonlari';
+import { klinikKaliteAksiyonu } from './liste/klinikKaliteAksiyonlari';
+import { ameliyathaneAksiyonu } from './liste/ameliyathaneAksiyonlari';
+import { acilAksiyonu } from './liste/acilAksiyonlari';
+import { tedarikAksiyonu } from './liste/tedarikAksiyonlari';
+import { useAmeliyatAcilModallari } from './liste/useAmeliyatAcilModallari';
+import { AmeliyatAcilModallari } from './liste/AmeliyatAcilModallari';
 import { ilacAksiyonu } from './liste/ilacAksiyonlari';
 import { muayeneAksiyonu } from './liste/muayeneAksiyonlari';
 import { hekimListesiAksiyonu } from './liste/hekimListesiAksiyonlari';
@@ -66,6 +73,9 @@ import { NakilModali } from '../bilesenler/yatan/NakilModali';
 import { TaburcuModali } from '../bilesenler/yatan/TaburcuModali';
 import { yatanAksiyonu } from './liste/yatanAksiyonlari';
 import { gozAkisAksiyonu } from './liste/gozAkisAksiyonlari';
+import { disAksiyonu } from './liste/disAksiyonlari';
+import { ftrAksiyonu } from './liste/ftrAksiyonlari';
+import { medulaAksiyonu } from './liste/medulaAksiyonlari';
 import { aiBaglamAyarla } from '../bilesenler/aiBaglam';
 import { DokumanKlasorPaneli, type KlasorSecimi } from '../bilesenler/DokumanKlasorPaneli';
 import { fiyatListesiAksiyonu } from './liste/fiyatListesiAksiyonlari';
@@ -121,7 +131,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [sorgu] = useSearchParams();
 
   // Kart MODAL acilir (mockup deseni): liste arkada kalir, URL yine /cari/4911.
-  const kartId = id === undefined ? null : (id === 'yeni' ? 'yeni' as const : Number(id));
+  // OZEL KART (dis-hasta): /dis-hasta/:id rotasi liste + kendi modalini cizer;
+  //   generic kart (GenForm) bu kaynak icin ACILMAZ - katalogda karti yok.
+  const kartId = tanim.ozelKart ? null
+    : id === undefined ? null : (id === 'yeni' ? 'yeni' as const : Number(id));
 
   // Ekstre ekranlari: /hesap-ekstre?hesapId=12 -> sunucu filtresi. Tanimdaki
   //   sabitFiltre ile birlikte gelirse ikisi AND'lenir.
@@ -144,6 +157,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   // RADYOLOJI EKRAN MODALLARI (istem · randevu · teslim · kritik bulgu · sarf ·
   //   cihaz kapatma · konsultasyon) tek kancada; cizimi RadyolojiModallari yapar.
   const radyolojiModal = useRadyolojiModallari();
+  const akisModal = useAmeliyatAcilModallari();
   /** SONUC GIRIS penceresi (433) - secili istemin tetkikleri. */
   const [sonucGirisi, setSonucGirisi] = useState<number | null>(null);
   // Yeni kart EKLENINCE (duzenlemede degil) grid "Son Aranan"a gecsin - kullanici
@@ -465,6 +479,33 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         tazele: () => setYenile(t => t + 1),
       })) return;
 
+      if (await klinikKaliteAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+      })) return;
+
+      // AMELİYATHANE ve ACİL akış aksiyonları (715/716/719): zaman damgaları,
+      //   triyaj, yatak ve çıkış kararı. Kart yazmakla olmayan işler - kural
+      //   sunucuda, ekran yalnız soruyu soruyor.
+      if (await ameliyathaneAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        planlaAc: v => akisModal.setPlanlama(v),
+        kontrolAc: v => akisModal.setKontrol(v),
+        faturaAc: v => akisModal.setFaturaStok(v),
+      })) return;
+
+      if (await acilAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        cikisAc: v => akisModal.setAcilCikis(v),
+      })) return;
+
+      // ECZANE · BİYOMEDİKAL · SATINALMA (722-724 akış uçları). Modal yok:
+      //   kurallar sunucuda, ekran yalnız reddi soruya çeviriyor.
+      if (await tedarikAksiyonu(kod, satir, secililer, {
+        tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
+        belgeAc: belgeId => setAcikBelgeId(belgeId),
+      })) return;
+
       if (await itsAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
       })) return;
@@ -548,6 +589,24 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         git: yol => git(yol),
         semaAc: id => setGozSema(id),
         dikteAc: id => setGozDikte(id),
+      })) return;
+
+      // MEDULA (707): kabul/hizmet sayfalari, cikis, fatura, recete imzala/gonder, kuyruk.
+      if (await medulaAksiyonu(kod, satir, {
+        tazele: () => { setYenile(t => t + 1); setKartTazele(t => t + 1) },
+        git: yol => git(yol),
+      })) return;
+
+      // FTR (719): planla, bugunku seans, sonlandir, seans bitir / gelmedi.
+      if (await ftrAksiyonu(kod, satir, {
+        tazele: () => { setYenile(t => t + 1); setKartTazele(t => t + 1) },
+        git: yol => git(yol),
+      })) return;
+
+      // DIS (706): plan sun/onayla, seans bitir, lab asamasi, hasta kartina gec.
+      if (await disAksiyonu(kod, satir, {
+        tazele: () => { setYenile(t => t + 1); setKartTazele(t => t + 1) },
+        git: yol => git(yol),
       })) return;
 
       // YATAN HASTA (695): kabul · yatakta · nakil · taburcu · yatak temizligi.
@@ -751,6 +810,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       kaynak={tanim.kaynak}
       baslik={cm(tanim.baslik)}
       yol={tanim.yol}
+      // Baska ekrandan acilan liste (dis hasta karti > Lab Isleri / Odeme
+      //   Planlari): basligin solunda "← Geri" oraya doner.
+      geriYolu={sorgu.get('geri') ?? undefined}
+      onGeri={() => git(sorgu.get('geri')!)}
       toplam={tanim.toplam}
       cipler={tanim.cipler}
       kodSuzgeci={tanim.kodSuzgeci}
@@ -781,9 +844,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       icerikBaslik={tanim.icerikBaslik}
       onSatirAc={satir => {
         // Belge listelerinde kart MODAL acilir (rota yok); digerlerinde kartYolu.
+        // Satinalma siparis TAKIP listesi de `belge` uzerinde (tur 9) ve
+        //   satir kimligi belge id'sidir: ayri bir kart acmak, ayni belgeye
+        //   ikinci bir duzenleme ekrani demek olurdu.
         if (tanim.kaynak === 'belge' || tanim.kaynak === 'irsaliye'
             || tanim.kaynak === 'stok-transfer' || tanim.kaynak === 'stok-talep'
-            || tanim.kaynak === 'giris-fis' || tanim.kaynak === 'cikis-fis')
+            || tanim.kaynak === 'giris-fis' || tanim.kaynak === 'cikis-fis'
+            || tanim.kaynak === 'satinalmaSiparis')
           setAcikBelgeId(Number(satir.id));
         // Kasa islemi de MODAL (kullanici) - "Aç" aksiyonuyla ayni davranis.
         else if (tanim.kaynak === 'kasa-islem') setAcikKasaId(Number(satir.id));
@@ -977,7 +1044,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
             && Number(seciliSatir.id ?? 0) > 0
         ? <GozHastaPaneli hastaId={Number(seciliSatir.id)} />
         : undefined}
-      ekGorunum={tanim.kaynak === 'randevu' ? {
+      // LAB KANBAN (711): Lab Is Emirleri listesinin "Kanban" gorunumu -
+      //   kolon = asama, surukle-birak = asama gecisi.
+      ekGorunum={tanim.kaynak === 'dis-lab-isemri' ? { ad: 'Kanban', ik: '🗂', icerik: <DisLabPano yenile={yenile} /> }
+      : tanim.kaynak === 'randevu' ? {
         ad: 'Takvim', ik: '📅',
         icerik: (
           <RandevuTakvimi
@@ -1198,6 +1268,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       />
     )}
     <RadyolojiModallari m={radyolojiModal} tazele={() => setYenile(t => t + 1)} />
+    <AmeliyatAcilModallari m={akisModal} tazele={() => setYenile(t => t + 1)} />
     {sonucGirisi !== null && (
       <SonucGirisModali
         istemId={sonucGirisi}

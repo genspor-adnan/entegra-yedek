@@ -234,6 +234,40 @@ public static partial class KartKatalogu
         Ekle(RadyolojiSablon());
         Ekle(RadyolojiProtokol());
 
+        // Klinik Kalite (711)
+        Ekle(KlinikGosterge());
+        Ekle(KlinikGostergeDonem());
+
+        // Ameliyathane (715)
+        Ekle(Ameliyat());
+        Ekle(AmeliyatTalep());
+        Ekle(AmeliyatSalon());
+        // Acil servis (716)
+        Ekle(AcilBasvuru());
+        Ekle(AcilYatak());
+
+        // Eczane (722). KONTROLLU DEFTERIN KARTI YOK: satir silinemez ve
+        //   duzeltme ayri satirla yapilir - generic kartin "duzenle/sil"
+        //   modeli oraya uymaz, yazma isi kendi ucundan gecer.
+        Ekle(EczaneKontrol());
+        Ekle(EczaneDoz());
+        Ekle(EczaneHazirlama());
+        Ekle(EczaneIade());
+        Ekle(EczaneImha());
+        Ekle(KontrolluSayim());
+        // Biyomedikal (723). CIHAZ KARTI AYRI DEGIL: klinik muhendislik
+        //   kunyesi yukaridaki `Demirbas()` kartina UrunModu 2 alanlar olarak
+        //   eklendi - ayni satirin iki duzenleme ekrani olmasin.
+        Ekle(DemirbasKalibrasyon());
+        Ekle(DemirbasIsEmri());
+        // Satinalma (724). SIPARIS/FATURA KARTI YOK: onlar `belge` (tur 9/11).
+        Ekle(SatinalmaButce());
+        Ekle(SatinalmaTalep());
+        Ekle(SatinalmaTeklif());
+        Ekle(SatinalmaKabul());
+        Ekle(TedarikciSozlesme());
+        Ekle(TedarikciOlay());
+
         Ekle(PrimPlani());
         Ekle(EntegrasyonHesap());
         Ekle(RadyolojiCihaz());
@@ -250,6 +284,23 @@ public static partial class KartKatalogu
         Ekle(DikteTerimKarti());
         Ekle(GozKontaktLensKarti());
         Ekle(GozIslemProtokolKarti());
+
+        // DIS KLINIGI (706).
+        // MEDULA (707).
+        Ekle(MedulaRaporKarti());
+        Ekle(CalismaSablonKarti());
+        Ekle(FtrDegerlendirmeKarti()); Ekle(FtrProgramKarti()); Ekle(FtrSeansKarti()); Ekle(FtrOlcekKarti()); Ekle(FtrUniteKarti());
+        Ekle(CalismaIstisnaKarti());
+        Ekle(MedulaKesintiKarti());
+        Ekle(MedulaDonemKarti());
+        Ekle(MedulaFaturaKarti());
+
+        Ekle(DisPlanKarti());
+        Ekle(DisSeansKarti());
+        Ekle(DisLabIsemriKarti());
+        Ekle(DisUnitKarti());
+        Ekle(DisLabKarti());
+        Ekle(DisOdemePlaniKarti());
 
         // YATAN HASTA (695): yatis karti modulun merkezi - order, izlem, sivi,
         //   risk, yatak hareketi ve epikriz onun DETAYLARI. Ayri kartlara
@@ -295,6 +346,7 @@ public static partial class KartKatalogu
         Ekle(NumaraHasta());
         Ekle(NumaraBasvuru());
         Ekle(NumaraHastaBelge());
+        Ekle(NumaraTedarik());
         Ekle(NumaraSatis());
         Ekle(NumaraAlis());
         Ekle(NumaraTahsilat());

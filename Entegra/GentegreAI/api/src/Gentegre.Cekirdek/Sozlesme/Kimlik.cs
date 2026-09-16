@@ -122,7 +122,9 @@ public sealed record SubeOzeti(int Id, string Ad, bool Varsayilan, bool Yazma,
     /// <summary>IANA adi ('Europe/Istanbul') - sabit saat farki DEGIL.</summary>
     string ZamanDilimi = "Europe/Istanbul",
     /// <summary>ISO 4217 ('TRY') - belgenin kendi dovizi ayridir.</summary>
-    string ParaBirimi = "TRY");
+    string ParaBirimi = "TRY",
+    /// <summary>Şube kartındaki "Logo" görseli (dokuman); üst şeritte şube adının yanında. Yoksa null.</summary>
+    int? LogoDokumanId = null);
 
 /// <summary>GET /api/kimlik/ben - profil + cozulmus yetkiler.</summary>
 public sealed class BenYaniti

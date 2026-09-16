@@ -415,7 +415,7 @@ public static class UretimUclari
                              + (istek.Aciklama is { Length: > 0 } a ? $" · {a}" : ""),
             };
 
-            var satir = SatirGovdesi(new Dictionary<string, object?>(StringComparer.Ordinal)
+            var satir = BelgeGovdesi.Satir(new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 ["tur"] = 1,
                 ["stokId"] = emir.StokId,
@@ -492,7 +492,7 @@ public static class UretimUclari
                              + (istek.Neden is { Length: > 0 } n ? $" · {n}" : ""),
             };
 
-            var satir = SatirGovdesi(new Dictionary<string, object?>(StringComparer.Ordinal)
+            var satir = BelgeGovdesi.Satir(new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 ["tur"] = 1,
                 ["stokId"] = istek.StokId,
@@ -938,7 +938,7 @@ public static class UretimUclari
                        : istenen.TryGetValue(s.Id, out var m) ? Math.Min(m, kalan) : 0m;
             if (miktar <= 0) continue;
 
-            fisSatirlari.Add(SatirGovdesi(new Dictionary<string, object?>(StringComparer.Ordinal)
+            fisSatirlari.Add(BelgeGovdesi.Satir(new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 ["tur"] = 1,
                 ["stokId"] = s.StokId,
@@ -1014,16 +1014,4 @@ public static class UretimUclari
         return belgeId;
     }
 
-    /// <summary>
-    /// Sözlük -> BelgeDeposu'nun beklediği JsonElement satırı (radyoloji sarfı
-    /// ve icmal faturasıyla aynı desen).
-    /// </summary>
-    private static Dictionary<string, JsonElement> SatirGovdesi(
-        IDictionary<string, object?> alanlar)
-    {
-        var json = JsonSerializer.SerializeToElement(alanlar);
-        var sozluk = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
-        foreach (var alan in json.EnumerateObject()) sozluk[alan.Name] = alan.Value;
-        return sozluk;
-    }
 }

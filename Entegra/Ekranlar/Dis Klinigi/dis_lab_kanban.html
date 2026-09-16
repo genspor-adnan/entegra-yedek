@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diş Lab İş Emirleri — Kanban — Mockup (GenoTIP AI · Medula)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .btn.mini{padding:2px 7px;font-size:10.5px;display:inline-flex}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg td code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)} .hdr.k5{grid-template-columns:repeat(5,1fr)} .hdr.k6{grid-template-columns:repeat(6,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.err{border-color:#c0392b;background:#fff6f5}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .kart.kir .d{color:var(--kirmizi)} .kart.ok .d{color:var(--ok)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)} .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)} .bar.k i{background:linear-gradient(#e06a5e,#c0392b)}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:300px 1fr 320px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .sonuc{margin:10px 12px;border:1px solid #bfe3cb;background:#eef9f1;border-radius:4px;padding:8px 10px;font-size:11.5px}
+  .sonuc.kir{border-color:#f3c4bf;background:#fdf1ef}
+  .sonuc.sari{border-color:#f2ddbf;background:#fdf8ec}
+  .sonuc b{color:var(--navy)}
+  .xml{font-family:Consolas,monospace;font-size:10.5px;background:#1f2d3a;color:#d7e3f2;padding:8px 10px;border-radius:3px;white-space:pre;overflow:auto;margin:0 12px 10px;line-height:1.5}
+  .adim{display:flex;gap:0;padding:8px 12px;flex-wrap:wrap}
+  .adim span{padding:5px 12px;border:1px solid var(--line);background:#fff;font-size:11px;color:var(--muted);position:relative}
+  .adim span+span{border-left:none}
+  .adim span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .adim span.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .icerik{padding:12px 16px;line-height:1.6}
+  .icerik h2{font-size:14px;color:var(--navy);margin:16px 0 6px;border-bottom:1px solid var(--line2);padding-bottom:3px}
+  .icerik h3{font-size:12.5px;color:#2c4a6b;margin:12px 0 4px}
+  .icerik p{margin:4px 0}
+  .icerik table{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:11.5px}
+  .icerik th,.icerik td{border:1px solid var(--line2);padding:4px 7px;text-align:left;vertical-align:top}
+  .icerik th{background:#f4f7fb;color:#3a5573;white-space:nowrap}
+  .icerik code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .kutu{border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;padding:8px 10px;margin:8px 0}
+  .yatay{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:6px 12px}
+</style>
+</head>
+<body>
+
+<style>
+  .kb{display:grid;grid-template-columns:repeat(6,minmax(165px,1fr));gap:8px;padding:10px 12px;overflow-x:auto;background:#f4f6f9}
+  .kol{background:#e9eef4;border:1px solid var(--line2);border-radius:5px;display:flex;flex-direction:column;min-height:420px}
+  .kol .kb-bas{padding:7px 9px;font-weight:bold;font-size:11.5px;color:#2c4a6b;border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:6px;background:linear-gradient(#f4f7fb,#e7eef6);border-radius:5px 5px 0 0}
+  .kol .kb-bas .say{margin-left:auto;background:#fff;border:1px solid var(--line);border-radius:9px;padding:0 7px;font-size:10.5px;color:var(--muted)}
+  .kol .kb-bas .top{font-size:10px;color:var(--muted);font-weight:normal}
+  .kol.olcu .kb-bas{border-top:3px solid #9aa9b8} .kol.labda .kb-bas{border-top:3px solid #2f6db3} .kol.tasarim .kb-bas{border-top:3px solid #6a3fb5}
+  .kol.geldi .kb-bas{border-top:3px solid #d9a12b} .kol.duzelt .kb-bas{border-top:3px solid #c0392b} .kol.teslim .kb-bas{border-top:3px solid #3f9a5e}
+  .kb-govde{padding:6px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .kart2{background:#fff;border:1px solid var(--line);border-radius:4px;padding:6px 8px;font-size:11px;box-shadow:0 1px 2px rgba(20,40,70,.08);cursor:grab;position:relative}
+  .kart2.sel{outline:2px solid #2f6db3;background:#f3f8ff}
+  .kart2.gec{border-left:4px solid #c0392b}
+  .kart2.yakin{border-left:4px solid #d9a12b}
+  .kart2 .no{font-weight:bold;color:var(--navy);display:flex;gap:6px;align-items:center}
+  .kart2 .no .rz{margin-left:auto}
+  .kart2 .hst{font-weight:bold;margin-top:2px}
+  .kart2 .is{color:#2c4a6b}
+  .kart2 .alt{display:flex;gap:6px;align-items:center;margin-top:4px;color:var(--muted);font-size:10.5px;flex-wrap:wrap}
+  .kart2 .bar{flex:1;min-width:50px}
+  .kart2 .tag{display:inline-block;border-radius:3px;padding:0 5px;background:#eef2f6;border:1px solid var(--line2);font-size:10px;color:#4d5d6e}
+  .kart2 .tag.lab{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .kart2 .tag.rnd{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .kart2 .tag.kk{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .kb-ekle{border:1px dashed var(--line);border-radius:4px;padding:5px;text-align:center;color:var(--muted);font-size:10.5px;background:#fbfcfe}
+  .ucPanelK{display:grid;grid-template-columns:minmax(0,1fr) 300px}
+  .ucPanelK>div:last-child{border-left:1px solid var(--line2);background:#fff}
+  .dtl .hdr{grid-template-columns:1fr 1fr;padding:8px} .dtl .inp{white-space:normal;word-break:break-word} .dtl .btn{white-space:normal}
+  .asamalar{display:flex;flex-direction:column;gap:4px;padding:8px 10px}
+  .asamalar .btn{justify-content:flex-start}
+  .swim{display:grid;grid-template-columns:150px 1fr;border-top:1px solid var(--line2)}
+  .swim .lab{padding:8px;font-weight:bold;color:#2c4a6b;background:#f7f9fc;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);font-size:11px}
+  .swim .kb{grid-template-columns:repeat(6,minmax(150px,1fr));padding:6px 8px;border-bottom:1px solid var(--line2);background:#fff}
+  .swim .kol{min-height:70px;background:#f4f6f9}
+  .lej{display:flex;gap:12px;padding:4px 12px;font-size:10.5px;color:var(--muted);flex-wrap:wrap}
+  .lej i{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:3px}
+</style>
+
+<div class="win">
+  <div class="title">🧪 Lab İş Emirleri — Kanban <span class="sp">dis_lab_isemri · aşama = kolon · sürükle-bırak = aşama geçişi · Diş › Lab İş Emirleri</span></div>
+  <div class="toolbar">
+    <div class="btn primary">＋ İş Emri</div><div class="btn">📤 Bugünkü Kurye Listesi (5)</div><div class="btn">🖨 Lab Formu</div>
+    <span class="sepv"></span><div class="btn">🗓 Prova / Teslim Randevusu</div><div class="btn">🧾 Lab Faturası Eşle</div><div class="btn">📊 Lab Performansı</div>
+    <span class="sepv"></span><div class="btn" data-git="dis_laboratuvar_karti.html">🏭 Laboratuvarlar</div><div class="btn sp">✖ Kapat</div>
+  </div>
+  <div class="arama">
+    <div class="kutu">🔍 iş emri no · hasta · diş · lab…</div>
+    <span class="chip on">Açık işler (17)</span><span class="chip">Gecikenler (3)</span><span class="chip">Bu hafta beklenen (6)</span><span class="chip">Bugün gelen (2)</span><span class="chip">Teslim edilen · 30 gün (24)</span>
+    <span class="sp"></span>
+    <div class="fld"><div class="inp combo" style="min-width:150px">Lab: Tümü</div></div>
+    <div class="fld"><div class="inp combo" style="min-width:140px">Hekim: Tümü</div></div>
+    <div class="fld"><div class="inp combo" style="min-width:120px">İş türü: Tümü</div></div>
+    <div class="fld"><div class="inp combo" style="min-width:110px">Şube: Merkez</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on">Kanban (aşama)</div><div class="sekme">Laba göre (kulvar)</div><div class="sekme">Kurye Günü</div><div class="sekme">Liste</div>
+  </div>
+
+  <!-- KANBAN -->
+  <div class="pnl">
+    <div class="lej"><span><i style="background:#c0392b"></i>Gecikti (beklenen tarih geçti)</span><span><i style="background:#d9a12b"></i>2 gün içinde bekleniyor</span><span>SLA çubuğu: gönderim → beklenen tarih</span><span class="sp">Kart tıkla → sağda ayrıntı · sürükle → aşama değişir (asama + log 1134)</span></div>
+    <div class="ucPanelK">
+      <div>
+        <div class="kb">
+          <div class="kol olcu"><div class="kb-bas">1 · Ölçü bekliyor <span class="top">klinikte</span><span class="say">4</span></div><div class="kb-govde">
+            <div class="kart2 "><div class="no">🧪 LB-2026/0421<span class="rz ">plan #5</span></div>
+<div class="hst">Ayşe Yılmaz <span class="sonuk">· diş 36</span></div><div class="is">Kron · zirkonyum</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Dt. Kaya</span><span class="tag rnd">🗓 26.09 10:00</span></div>
+<div class="alt"><span>⏳ ölçü alınacak · 26.09 prova</span><div class="bar m"><i style="width:0%"></i></div></div></div>
+            <div class="kart2 "><div class="no">🧪 LB-2026/0423<span class="rz ">dijital tarama</span></div>
+<div class="hst">Mehmet Demir <span class="sonuk">· diş 11-21</span></div><div class="is">Lamina · e.max · A1</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Dt. Kaya</span></div>
+<div class="alt"><span>⏳ seans 2'de ölçü</span><div class="bar m"><i style="width:0%"></i></div></div></div>
+            <div class="kart2 yakin"><div class="no">🧪 LB-2026/0424</div>
+<div class="hst">Zeynep Ak <span class="sonuk">· diş üst</span></div><div class="is">Total protez</div>
+<div class="alt"><span class="tag lab">ProtezEvi</span><span>Dt. Öz</span><span class="tag rnd">⚠ randevu ver</span></div>
+<div class="alt"><span>⏳ ölçü randevusu yok</span><div class="bar m"><i style="width:0%"></i></div></div></div>
+            <div class="kart2 "><div class="no">🧪 LB-2026/0425<span class="rz ">TP-2026/0004</span></div>
+<div class="hst">Cemre Yılmaz <span class="sonuk">· diş 14</span></div><div class="is">Kron · MDP</div>
+<div class="alt"><span class="tag lab">Test Lab</span><span>Dt. Kaya</span></div>
+<div class="alt"><span>⏳ seans 5 · ölçü</span><div class="bar m"><i style="width:0%"></i></div></div></div>
+            <div class="kb-ekle">＋ ölçü alındı → "Gönderildi"ye sürükle · kurye listesine düşer</div>
+          </div></div>
+          <div class="kol labda"><div class="kb-bas">2 · Gönderildi / Labda <span class="top">üretim</span><span class="say">6</span></div><div class="kb-govde">
+            <div class="kart2 sel"><div class="no">🧪 LB-2026/0415</div>
+<div class="hst">Ayşe Yılmaz <span class="sonuk">· diş 26</span></div><div class="is">Kron · zirkonyum · B1</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Dt. Kaya</span><span class="tag kk">ölçü OK</span></div>
+<div class="alt"><span>⏳ bekl. 08.10 · 5 gün</span><div class="bar m"><i style="width:55%"></i></div></div></div>
+            <div class="kart2 yakin"><div class="no">🧪 LB-2026/0409<span class="rz sari">yarın</span></div>
+<div class="hst">Ali Can <span class="sonuk">· diş 46</span></div><div class="is">İmplant üstü kron</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Dt. Öz</span><span class="tag rnd">🗓 prova 04.10</span></div>
+<div class="alt"><span>⏳ bekl. 03.10 · 1 gün</span><div class="bar m"><i style="width:90%"></i></div></div></div>
+            <div class="kart2 gec"><div class="no">🧪 LB-2026/0402<span class="rz kir">gecikti</span></div>
+<div class="hst">Fatma Kurt <span class="sonuk">· diş 13-23</span></div><div class="is">Köprü · metal porselen</div>
+<div class="alt"><span class="tag lab">ProtezEvi</span><span>Dt. Kaya</span></div>
+<div class="alt"><span>⏳ bekl. 28.09 · <b>4 gün geçti</b></span><div class="bar k"><i style="width:100%"></i></div></div></div>
+            <div class="kart2 "><div class="no">🧪 LB-2026/0418</div>
+<div class="hst">Hasan Yıldız <span class="sonuk">· diş alt</span></div><div class="is">Parsiyel protez · kroşeli</div>
+<div class="alt"><span class="tag lab">ProtezEvi</span><span>Dt. Öz</span><span class="tag kk">sevk 01.10</span></div>
+<div class="alt"><span>⏳ bekl. 12.10 · 9 gün</span><div class="bar m"><i style="width:30%"></i></div></div></div>
+            <div class="kart2 "><div class="no">🧪 LB-2026/0419</div>
+<div class="hst">Elif Şen <span class="sonuk">· diş 36</span></div><div class="is">Gece plağı</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Dt. Kaya</span></div>
+<div class="alt"><span>⏳ bekl. 06.10 · 3 gün</span><div class="bar m"><i style="width:60%"></i></div></div></div>
+            <div class="kart2 "><div class="no">🧪 LB-2026/0420</div>
+<div class="hst">Murat Tan <span class="sonuk">· diş 21</span></div><div class="is">Kron · e.max</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Dt. Kaya</span><span class="tag ">dijital</span></div>
+<div class="alt"><span>⏳ bekl. 09.10 · 6 gün</span><div class="bar m"><i style="width:40%"></i></div></div></div>
+          </div></div>
+          <div class="kol tasarim"><div class="kb-bas">3 · Tasarım onayı <span class="top">hekim onaylar</span><span class="say">1</span></div><div class="kb-govde">
+            <div class="kart2 yakin"><div class="no">🧪 LB-2026/0416<span class="rz mor">onay?</span></div>
+<div class="hst">Selin Ay <span class="sonuk">· diş 12-22</span></div><div class="is">Lamina · e.max · BL2</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Dt. Kaya</span><span class="tag rnd">🖼 3 görsel</span></div>
+<div class="alt"><span>⏳ tasarım görseli geldi · onay bekliyor</span><div class="bar m"><i style="width:70%"></i></div></div></div>
+            <div class="kb-ekle">✔ onay → Üretim (labda kalır) · ✖ ret → Geri gönderildi + not</div>
+          </div></div>
+          <div class="kol geldi"><div class="kb-bas">4 · Geldi · prova <span class="top">klinikte</span><span class="say">3</span></div><div class="kb-govde">
+            <div class="kart2 "><div class="no">🧪 LB-2026/0398<span class="rz ok">geldi</span></div>
+<div class="hst">Ayşe Yılmaz <span class="sonuk">· diş 16</span></div><div class="is">Kron · zirkonyum</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Dt. Kaya</span><span class="tag kk">kalite kontrol ✔</span><span class="tag rnd">🗓 prova 03.10 11:00</span></div>
+<div class="alt"><span>⏳ geldi 02.10 · KK ✔</span><div class="bar "><i style="width:100%"></i></div></div></div>
+            <div class="kart2 yakin"><div class="no">🧪 LB-2026/0401<span class="rz sari">bekliyor</span></div>
+<div class="hst">Ali Can <span class="sonuk">· diş 47</span></div><div class="is">Kron · MDP</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Dt. Öz</span><span class="tag rnd">⚠ randevu ver</span></div>
+<div class="alt"><span>⏳ geldi 01.10 · prova randevusu yok</span><div class="bar "><i style="width:100%"></i></div></div></div>
+            <div class="kart2 "><div class="no">🧪 LB-2026/0395<span class="rz ok">prova</span></div>
+<div class="hst">Zeynep Ak <span class="sonuk">· diş alt</span></div><div class="is">Total protez · dişli prova</div>
+<div class="alt"><span class="tag lab">ProtezEvi</span><span>Dt. Öz</span><span class="tag kk">KK ✔</span></div>
+<div class="alt"><span>⏳ prova 2/3 yapıldı</span><div class="bar "><i style="width:100%"></i></div></div></div>
+          </div></div>
+          <div class="kol duzelt"><div class="kb-bas">5 · Geri gönderildi <span class="top">düzeltme</span><span class="say">1</span></div><div class="kb-govde">
+            <div class="kart2 "><div class="no">🧪 LB-2026/0390<span class="rz kir">düzeltme</span></div>
+<div class="hst">Fatma Kurt <span class="sonuk">· diş 36</span></div><div class="is">Kron · zirkonyum</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Dt. Kaya</span><span class="tag ">2. tur · ücretsiz</span></div>
+<div class="alt"><span>⏳ geri 30.09 · renk uyumsuz (A2→A3) · bekl. 05.10</span><div class="bar s"><i style="width:45%"></i></div></div></div>
+            <div class="kb-ekle">Geri gönderim nedeni zorunlu (renk / oturmama / kontak / kırık) · lab performansına işler</div>
+          </div></div>
+          <div class="kol teslim"><div class="kb-bas">6 · Teslim edildi <span class="top">bugün · ücretlenir</span><span class="say">2</span></div><div class="kb-govde">
+            <div class="kart2 "><div class="no">🧪 LB-2026/0388<span class="rz ok">teslim</span></div>
+<div class="hst">Murat Tan <span class="sonuk">· diş 46</span></div><div class="is">Kron · zirkonyum</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Dt. Kaya</span><span class="tag kk">ücret 3.775 ₺</span></div>
+<div class="alt"><span>⏳ teslim 03.10 09:40 · plan satırı yapıldı ✔</span><div class="bar "><i style="width:100%"></i></div></div></div>
+            <div class="kart2 "><div class="no">🧪 LB-2026/0385<span class="rz ok">teslim</span></div>
+<div class="hst">Elif Şen <span class="sonuk">· diş üst-alt</span></div><div class="is">Gece plağı</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Dt. Kaya</span><span class="tag ">garanti 03.10.2027</span></div>
+<div class="alt"><span>⏳ teslim 03.10 · garanti 1 yıl</span><div class="bar "><i style="width:100%"></i></div></div></div>
+            <div class="kb-ekle">Teslim = plan satırı "yapıldı" + ücret + odontogram kron katmanı · lab maliyeti hakedişten düşer</div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- SAG: secili kart -->
+      <div class="dtl">
+        <div class="grp" style="margin:10px"><div class="gb">🧪 LB-2026/0415 <span class="rz mavi">Gönderildi</span><span class="sp">Dentalab · gün 6 / 11</span></div>
+          <div class="hdr">
+            <div class="fld"><label>Hasta</label><div class="inp ro">Ayşe Yılmaz · 39 K</div></div>
+            <div class="fld"><label>Plan satırı</label><div class="inp ro">TP-2026/0412 · #3 · Zirkonyum kron</div></div>
+            <div class="fld"><label>Diş / iş</label><div class="inp ro">26 · Kron · zirkonyum</div></div>
+            <div class="fld"><label>Renk · ölçü</label><div class="inp ro">B1 · dijital tarama</div></div>
+            <div class="fld"><label>Hekim</label><div class="inp ro">Dt. A. Kaya</div></div>
+            <div class="fld"><label>Gönderim → beklenen</label><div class="inp ro">27.09 → 08.10 (SLA 11 gün)</div></div>
+            <div class="fld"><label>Lab fiyatı / hasta fiyatı</label><div class="inp ro">1.450 ₺ / 3.775 ₺</div></div>
+            <div class="fld"><label>Prova randevusu</label><div class="inp">— <span class="rz sari">ver: 10.10 önerisi</span></div></div>
+          </div>
+          <div class="ic"><label class="sonuk">Ek istek</label><div class="inp" style="min-height:40px">Kontak noktaları sıkı olmasın; komşu diş 25 lamina var, renk geçişine dikkat.</div></div>
+        </div>
+        <div class="grp" style="margin:10px"><div class="gb">Aşama geçişi <span class="sp">tek tık · log 1134</span></div>
+          <div class="asamalar">
+            <div class="btn">🎨 Tasarım onayına al (lab görsel yolladı)</div>
+            <div class="btn ok">📥 Geldi · kalite kontrol ✔</div>
+            <div class="btn">📥 Geldi · kalite kontrol ✖ (not)</div>
+            <div class="btn danger">↩ Geri gönder (neden)</div>
+            <div class="btn">🗓 Prova / teslim randevusu ver</div>
+            <div class="btn pas">✔ Teslim et (önce Geldi + prova)</div>
+          </div>
+        </div>
+        <div class="grp" style="margin:10px"><div class="gb">Aşama geçmişi</div>
+          <ul class="liste">
+            <li>27.09 16:10 · <b>Gönderildi</b> · kurye · E. Ak</li>
+            <li>27.09 15:30 · <b>Ölçü alındı</b> · dijital · Dt. Kaya (seans #8843)</li>
+            <li>26.09 10:05 · <b>İş emri açıldı</b> · plan #3 · Dt. Kaya</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LABA GORE KULVAR -->
+  <div class="pnl" hidden>
+    <div class="lej"><span>Her lab bir kulvar; kolonlar aynı aşama. Labın yükü ve gecikmesi bir bakışta.</span></div>
+    <div class="swim">
+      <div class="lab">Dentalab<br><span class="sonuk" style="font-weight:normal">11 açık · 1 gecikme · SLA %91</span></div>
+      <div class="kb">
+        <div class="kol olcu"><div class="kb-bas">Ölçü <span class="say">3</span></div><div class="kb-govde"><div class="kart2 "><div class="no">🧪 LB-0421</div>
+<div class="hst">A. Yılmaz <span class="sonuk">· diş 36</span></div><div class="is">Kron zirk.</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Kaya</span></div>
+<div class="alt"><span>⏳ 26.09</span><div class="bar m"><i style="width:0%"></i></div></div></div></div></div>
+        <div class="kol labda"><div class="kb-bas">Labda <span class="say">4</span></div><div class="kb-govde"><div class="kart2 "><div class="no">🧪 LB-0415</div>
+<div class="hst">A. Yılmaz <span class="sonuk">· diş 26</span></div><div class="is">Kron zirk.</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Kaya</span></div>
+<div class="alt"><span>⏳ 08.10</span><div class="bar m"><i style="width:55%"></i></div></div></div><div class="kart2 yakin"><div class="no">🧪 LB-0409</div>
+<div class="hst">A. Can <span class="sonuk">· diş 46</span></div><div class="is">İmpl. kron</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Öz</span></div>
+<div class="alt"><span>⏳ 03.10</span><div class="bar m"><i style="width:90%"></i></div></div></div></div></div>
+        <div class="kol tasarim"><div class="kb-bas">Tasarım <span class="say">1</span></div><div class="kb-govde"><div class="kart2 yakin"><div class="no">🧪 LB-0416</div>
+<div class="hst">S. Ay <span class="sonuk">· diş 12-22</span></div><div class="is">Lamina</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Kaya</span></div>
+<div class="alt"><span>⏳ onay?</span><div class="bar m"><i style="width:70%"></i></div></div></div></div></div>
+        <div class="kol geldi"><div class="kb-bas">Geldi <span class="say">2</span></div><div class="kb-govde"><div class="kart2 "><div class="no">🧪 LB-0398<span class="rz ok">geldi</span></div>
+<div class="hst">A. Yılmaz <span class="sonuk">· diş 16</span></div><div class="is">Kron zirk.</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Kaya</span></div>
+<div class="alt"><span>⏳ prova 03.10</span><div class="bar "><i style="width:100%"></i></div></div></div></div></div>
+        <div class="kol duzelt"><div class="kb-bas">Geri <span class="say">1</span></div><div class="kb-govde"><div class="kart2 "><div class="no">🧪 LB-0390<span class="rz kir">renk</span></div>
+<div class="hst">F. Kurt <span class="sonuk">· diş 36</span></div><div class="is">Kron zirk.</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Kaya</span></div>
+<div class="alt"><span>⏳ 05.10</span><div class="bar s"><i style="width:45%"></i></div></div></div></div></div>
+        <div class="kol teslim"><div class="kb-bas">Teslim <span class="say">2</span></div><div class="kb-govde"><div class="kart2 "><div class="no">🧪 LB-0388<span class="rz ok">teslim</span></div>
+<div class="hst">M. Tan <span class="sonuk">· diş 46</span></div><div class="is">Kron zirk.</div>
+<div class="alt"><span class="tag lab">Dentalab</span><span>Kaya</span></div>
+<div class="alt"><span>⏳ 03.10</span><div class="bar "><i style="width:100%"></i></div></div></div></div></div>
+      </div>
+      <div class="lab">ProtezEvi<br><span class="sonuk" style="font-weight:normal">4 açık · 1 gecikme · SLA %78</span></div>
+      <div class="kb">
+        <div class="kol olcu"><div class="kb-bas">Ölçü <span class="say">1</span></div><div class="kb-govde"><div class="kart2 yakin"><div class="no">🧪 LB-0424</div>
+<div class="hst">Z. Ak <span class="sonuk">· diş üst</span></div><div class="is">Total protez</div>
+<div class="alt"><span class="tag lab">ProtezEvi</span><span>Öz</span></div>
+<div class="alt"><span>⏳ randevu yok</span><div class="bar m"><i style="width:0%"></i></div></div></div></div></div>
+        <div class="kol labda"><div class="kb-bas">Labda <span class="say">2</span></div><div class="kb-govde"><div class="kart2 gec"><div class="no">🧪 LB-0402<span class="rz kir">gecikti</span></div>
+<div class="hst">F. Kurt <span class="sonuk">· diş 13-23</span></div><div class="is">Köprü MP</div>
+<div class="alt"><span class="tag lab">ProtezEvi</span><span>Kaya</span></div>
+<div class="alt"><span>⏳ 28.09 geçti</span><div class="bar k"><i style="width:100%"></i></div></div></div><div class="kart2 "><div class="no">🧪 LB-0418</div>
+<div class="hst">H. Yıldız <span class="sonuk">· diş alt</span></div><div class="is">Parsiyel</div>
+<div class="alt"><span class="tag lab">ProtezEvi</span><span>Öz</span></div>
+<div class="alt"><span>⏳ 12.10</span><div class="bar m"><i style="width:30%"></i></div></div></div></div></div>
+        <div class="kol tasarim"><div class="kb-bas">Tasarım <span class="say">0</span></div><div class="kb-govde"></div></div>
+        <div class="kol geldi"><div class="kb-bas">Geldi <span class="say">1</span></div><div class="kb-govde"><div class="kart2 "><div class="no">🧪 LB-0395<span class="rz ok">prova</span></div>
+<div class="hst">Z. Ak <span class="sonuk">· diş alt</span></div><div class="is">Total · prova</div>
+<div class="alt"><span class="tag lab">ProtezEvi</span><span>Öz</span></div>
+<div class="alt"><span>⏳ prova 2/3</span><div class="bar "><i style="width:100%"></i></div></div></div></div></div>
+        <div class="kol duzelt"><div class="kb-bas">Geri <span class="say">0</span></div><div class="kb-govde"></div></div>
+        <div class="kol teslim"><div class="kb-bas">Teslim <span class="say">0</span></div><div class="kb-govde"></div></div>
+      </div>
+      <div class="lab">Test Diş Lab.<br><span class="sonuk" style="font-weight:normal">2 açık</span></div>
+      <div class="kb">
+        <div class="kol olcu"><div class="kb-bas">Ölçü <span class="say">1</span></div><div class="kb-govde"><div class="kart2 "><div class="no">🧪 LB-0425</div>
+<div class="hst">C. Yılmaz <span class="sonuk">· diş 14</span></div><div class="is">Kron MDP</div>
+<div class="alt"><span class="tag lab">Test Lab</span><span>Kaya</span></div>
+<div class="alt"><span>⏳ seans 5</span><div class="bar m"><i style="width:0%"></i></div></div></div></div></div>
+        <div class="kol labda"><div class="kb-bas">Labda <span class="say">0</span></div><div class="kb-govde"></div></div>
+        <div class="kol tasarim"><div class="kb-bas">Tasarım <span class="say">0</span></div><div class="kb-govde"></div></div>
+        <div class="kol geldi"><div class="kb-bas">Geldi <span class="say">0</span></div><div class="kb-govde"></div></div>
+        <div class="kol duzelt"><div class="kb-bas">Geri <span class="say">0</span></div><div class="kb-govde"></div></div>
+        <div class="kol teslim"><div class="kb-bas">Teslim <span class="say">0</span></div><div class="kb-govde"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KURYE GUNU -->
+  <div class="pnl" hidden>
+    <div class="ikiPanel">
+      <div>
+        <div class="grp"><div class="gb">📤 Bugün gidecek (ölçü alındı → laba) <span class="sp">03.10.2026 · kurye 16:00</span></div>
+          <div class="dg"><table>
+            <thead><tr><th class="orta">☑</th><th>İş emri</th><th>Hasta</th><th class="orta">Diş</th><th>İş · malzeme · renk</th><th>Lab</th><th>Ölçü</th><th>Beklenen (SLA)</th><th>Form</th></tr></thead>
+            <tbody>
+              <tr><td class="orta">☑</td><td>LB-2026/0421</td><td>Ayşe Yılmaz</td><td class="orta">36</td><td>Kron · zirkonyum · B1</td><td>Dentalab</td><td>Silikon · 03.10</td><td>14.10 (11 gün)</td><td><span class="btn mini">🖨</span></td></tr>
+              <tr><td class="orta">☑</td><td>LB-2026/0425</td><td>Cemre Yılmaz</td><td class="orta">14</td><td>Kron · MDP · A3</td><td>Test Lab</td><td>Silikon · 03.10</td><td>10.10 (7 gün)</td><td><span class="btn mini">🖨</span></td></tr>
+              <tr><td class="orta">☐</td><td>LB-2026/0423</td><td>Mehmet Demir</td><td class="orta">11-21</td><td>Lamina · e.max · A1</td><td>Dentalab</td><td>Dijital · portal</td><td>—</td><td><span class="rz mavi">portal ile gönder</span></td></tr>
+            </tbody>
+          </table></div>
+          <div class="yatay" style="display:flex;gap:6px;padding:8px 10px;align-items:center"><div class="btn primary">📤 Seçilenleri "Gönderildi" yap + kurye listesi yazdır</div><span class="sonuk">gönderim_tarihi = bugün · beklenen = bugün + lab SLA</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="grp"><div class="gb">📥 Bugün gelen (labdan) <span class="sp">kalite kontrol</span></div>
+          <div class="dg"><table>
+            <thead><tr><th>İş emri</th><th>Hasta</th><th class="orta">Diş</th><th>İş</th><th>Lab</th><th class="orta">KK</th><th>Prova randevusu</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>LB-2026/0398</td><td>Ayşe Yılmaz</td><td class="orta">16</td><td>Kron · zirkonyum</td><td>Dentalab</td><td class="orta"><span class="rz ok">✔</span></td><td>03.10 11:00</td><td><span class="btn mini">🗓</span></td></tr>
+              <tr><td>LB-2026/0401</td><td>Ali Can</td><td class="orta">47</td><td>Kron · MDP</td><td>Dentalab</td><td class="orta"><span class="rz sari">bekliyor</span></td><td><span class="rz kir">yok</span></td><td><span class="btn mini">🗓 ver</span></td></tr>
+            </tbody>
+          </table></div>
+          <div class="ic sonuk">Kalite kontrol: renk / oturma / kontak / okluzyon · ✖ ise "Geri gönderildi" + neden (lab performansı). Gelen iş için prova randevusu verilmeden kart "Geldi"de kalır; günlük akış "prova bekleyen" olarak gösterir.</div>
+        </div>
+        <div class="grp"><div class="gb">Kurye / portal</div>
+          <div class="ic"><p>Dentalab: kurye Pzt-Çar-Cum 16:00 · dijital tarama portalı (STL). ProtezEvi: kurye Sal-Per. Test Lab: elden.</p><p>Gönderim çıktısı: lab formu (hasta, diş, iş, renk, ölçü tipi, ek istek, beklenen tarih, hekim imzası) — <code>Yazdir('dis-lab-formu')</code>.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LISTE -->
+  <div class="pnl" hidden>
+    <div class="dg"><table>
+      <thead><tr><th>İş emri</th><th>Hasta</th><th class="orta">Diş</th><th>İş</th><th>Malzeme · renk</th><th>Lab</th><th>Gönderim</th><th>Beklenen</th><th>Aşama</th><th class="orta">Gecikti</th><th>Sonraki randevu</th><th class="sag">Lab maliyeti</th></tr></thead>
+      <tbody>
+        <tr><td>LB-2026/0402</td><td>Fatma Kurt</td><td class="orta">13-23</td><td>Köprü</td><td>Metal porselen · A2</td><td>ProtezEvi</td><td>17.09</td><td>28.09</td><td><span class="rz mavi">Gönderildi</span></td><td class="orta"><span class="rz kir">4 gün</span></td><td>—</td><td class="sag">4.200</td></tr>
+        <tr><td>LB-2026/0409</td><td>Ali Can</td><td class="orta">46</td><td>İmplant üstü</td><td>Zirkonyum · A3</td><td>Dentalab</td><td>22.09</td><td>03.10</td><td><span class="rz mavi">Gönderildi</span></td><td class="orta">—</td><td>04.10 prova</td><td class="sag">2.100</td></tr>
+        <tr class="sel"><td>LB-2026/0415</td><td>Ayşe Yılmaz</td><td class="orta">26</td><td>Kron</td><td>Zirkonyum · B1</td><td>Dentalab</td><td>27.09</td><td>08.10</td><td><span class="rz mavi">Gönderildi</span></td><td class="orta">—</td><td>—</td><td class="sag">1.450</td></tr>
+        <tr><td>LB-2026/0416</td><td>Selin Ay</td><td class="orta">12-22</td><td>Lamina</td><td>e.max · BL2</td><td>Dentalab</td><td>29.09</td><td>10.10</td><td><span class="rz mor">Tasarım onayı</span></td><td class="orta">—</td><td>—</td><td class="sag">3.600</td></tr>
+        <tr><td>LB-2026/0398</td><td>Ayşe Yılmaz</td><td class="orta">16</td><td>Kron</td><td>Zirkonyum · B1</td><td>Dentalab</td><td>20.09</td><td>01.10</td><td><span class="rz sari">Geldi</span></td><td class="orta">—</td><td>03.10 11:00 prova</td><td class="sag">1.450</td></tr>
+        <tr><td>LB-2026/0390</td><td>Fatma Kurt</td><td class="orta">36</td><td>Kron</td><td>Zirkonyum · A3</td><td>Dentalab</td><td>30.09 (2.)</td><td>05.10</td><td><span class="rz kir">Geri gönderildi</span></td><td class="orta">—</td><td>—</td><td class="sag">1.450</td></tr>
+        <tr><td>LB-2026/0388</td><td>Murat Tan</td><td class="orta">46</td><td>Kron</td><td>Zirkonyum · A2</td><td>Dentalab</td><td>19.09</td><td>30.09</td><td><span class="rz ok">Teslim edildi</span></td><td class="orta">—</td><td>—</td><td class="sag">1.450</td></tr>
+        <tr class="grup"><td colspan="11">Açık 17 · gecikme 3 · bu hafta beklenen 6 · lab maliyeti (açık)</td><td class="sag">31.250</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="statusbar"><span>Açık 17 · Gecikti 3 · Bugün kurye 3 · Bugün gelen 2</span><span class="sp">Kaynak: <code>dis_lab_isemri</code> (asama 1-9) · <code>dis_lab_asama</code> (geçmiş) · <code>dis_lab</code> (SLA, kurye günleri) · log 1134</span></div>
+</div>
+<div class="not"><b>Lab iş emirleri kanban.</b> Kolon = <code>dis_lab_isemri.asama</code> (1 ölçü bekliyor · 2 gönderildi · 3 tasarım onayı · 4 üretim [labda ile aynı kolonda, rozet] · 5 geldi · 6 prova · 7 geri gönderildi · 8 teslim edildi; 9 iptal panoda yok). Sürükle-bırak = aşama geçişi (<code>POST /api/dis/lab-isemri/{id}/asama</code>, geçmişe <code>dis_lab_asama</code> satırı, log 1134). Kart rengi SLA'dan: beklenen tarih geçti → kırmızı, 2 gün kaldı → sarı. Kurallar: "Gönderildi" gönderim tarihini + beklenen tarihi (lab SLA) yazar ve kurye listesine düşer; "Geldi" kalite kontrol ister, prova randevusu yoksa uyarır; "Teslim edildi" plan satırını <b>yapıldı</b> yapar (ücret + odontogram) ve lab maliyetini hakedişten düşer; "Geri gönderildi" neden ister (lab performansı). Uygulamada: <code>dis-lab-isemri</code> listesine "Kanban" görünümü (ekGorunum) ya da <code>/dis-lab-pano</code> özel sayfa.</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi. Ic ice sekmeler desteklenir.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===scope.closest('.pnl');});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+// Ic toolbar dugmeleri: data-git="dosya.html" olanlar diger mockup'a gecer.
+document.querySelectorAll('[data-git]').forEach(function(b){ b.style.cursor='pointer'; b.addEventListener('click',function(){ location.href=b.dataset.git; }); });
+</script>
+</body>
+</html>

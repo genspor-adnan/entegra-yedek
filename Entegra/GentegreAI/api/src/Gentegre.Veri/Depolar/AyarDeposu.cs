@@ -36,6 +36,30 @@ public sealed class AyarDeposu
         //   (Kayit Kabul yalniz HBYS) ve mesaj basliklari buna gore degisir;
         //   giris yanitiyla istemciye tasinir.
         "genel.urun_modu",
+        // MEDULA (707): otomatik adimlar, deneme, esikler, simulasyon anahtari.
+        "medula.otomatik_mustehaklik", "medula.otomatik_provizyon", "medula.otomatik_hizmet_kaydi",
+        "medula.otomatik_recete", "medula.gece_toplu_fatura", "medula.deneme_sayisi", "medula.deneme_aralik_dk",
+        "medula.tutar_fark_esigi", "medula.donem_uyari_gun", "medula.xml_saklama_gun", "medula.muayene_katilim_payi",
+        "medula.kapi_kapali",
+        // SATINALMA (724/729/732). Onay zinciri esikleri, sozlu onay suresi ve
+        //   fatura eslestirme toleransi. BOS BIRAKILABILIR: uc kendi
+        //   varsayilanini kullanir ve o varsayilanin gerekcesi kuralin
+        //   yanindadir (db/729) - buraya rakam yazip gerekceyi baska yere
+        //   tasimadik.
+        //
+        //   `kritik_hedef_kat` SAYISAL AMA `Varsayilan` sozlugune KONULMADI:
+        //   orasi tam sayi dogrulamasi yapiyor, oysa kat ondalikli olabilir
+        //   (1.5). SQL tarafi degeri temizliyor, bozuk deger varsayilana duser.
+        "satinalma.esik_satinalma", "satinalma.esik_mali", "satinalma.esik_ust",
+        "satinalma.sozlu_onay_saat", "satinalma.eslestirme_tolerans_kurus",
+        // KRITIK STOK -> TALEP (732). Varsayilan KAPALI: kurumun istemedigi
+        //   halde satinalma talebi acmak, para harcanan bir sureci habersiz
+        //   baslatmak olurdu.
+        "satinalma.kritik_stok_aktif", "satinalma.kritik_hedef_kat",
+        "satinalma.kritik_departman", "satinalma.kritik_isteyen",
+        // DEPOLAR (729): eczanenin ve teknik servisin kendi deposu var; genel
+        //   depodan dusmek iki birimin sayimini da bozar.
+        "eczane.depo", "demirbas.parca_depo",
         // Varsayilan doviz (219) - genel.doviz kod listesinden secilir.
         "genel.varsayilan_doviz",
         // ÜTS taban adresleri (223) - bos birakilirsa fn_uts_hesap resmi

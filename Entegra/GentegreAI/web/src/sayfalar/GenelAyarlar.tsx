@@ -170,6 +170,61 @@ export function GenelAyarlar() {
                 {alan('liste.sayfa_boyu', 'Sayfa boyu (bir sayfadaki kayıt sayısı)')}
               </div>
             </div>
+
+            {/* SATINALMA (724/729/732). Bu ayarlar OLMADAN akış uçları kendi
+                varsayılanlarına düşer ve kritik stok işi hiç çalışmaz - kapının
+                nerede olduğu görünsün diye buraya konuldu.
+
+                ONAY EŞİKLERİ BOŞ BIRAKILABİLİR: boşsa uç kendi varsayılanını
+                kullanır (0 / 50.000 / 250.000) ve o varsayılanın gerekçesi
+                kuralın yanında durur (db/729). */}
+            <div className="kagrup">
+              <h6>Satınalma</h6>
+              <div className="alan-izgara tek-sutun ayar-formu">
+                {alan('satinalma.esik_satinalma',
+                      'Satınalma birimi onayı için alt tutar (boş = her talepte)')}
+                {alan('satinalma.esik_mali',
+                      'Mali işler onayı için alt tutar (boş = 50.000)')}
+                {alan('satinalma.esik_ust',
+                      'Üst yönetim onayı için alt tutar (boş = 250.000)')}
+                {alan('satinalma.sozlu_onay_saat',
+                      'Sözlü onayın yazılı tamamlanma süresi, saat (boş = 24)')}
+                {alan('satinalma.eslestirme_tolerans_kurus',
+                      'Fatura eşleştirmesinde yok sayılacak fark, kuruş (boş = 100)')}
+              </div>
+            </div>
+
+            {/* KRİTİK STOK VARSAYILAN KAPALI: kurumun istemediği halde
+                kendiliğinden satınalma talebi açmak, para harcanan bir süreci
+                habersiz başlatmak olurdu. Açılınca saatlik iş çalışır ve depo
+                başına TEK taslak talep açar (onaya insan gönderir). */}
+            <div className="kagrup">
+              <h6>Kritik Stok → Satınalma Talebi</h6>
+              <div className="alan-izgara tek-sutun ayar-formu">
+                {alan('satinalma.kritik_stok_aktif',
+                      'Asgari stoğun altına düşen kalemler için otomatik talep açılsın',
+                      { tip: 'mantik' })}
+                {alan('satinalma.kritik_hedef_kat',
+                      'Azami stok tanımsızsa hedef = asgari × bu kat (boş = 2)')}
+                {alan('satinalma.kritik_departman',
+                      'Otomatik talebin açılacağı birim no (boş = birimsiz taslak)')}
+                {alan('satinalma.kritik_isteyen',
+                      'Otomatik talepte "isteyen" personel no (boş = yazılmaz)')}
+              </div>
+            </div>
+
+            {/* DEPOLAR (729): eczanenin ve teknik servisin kendi deposu vardır;
+                genel depodan düşmek iki birimin sayımını da bozar. Boşsa uç
+                kurumun varsayılan deposuna düşer. */}
+            <div className="kagrup">
+              <h6>Depolar</h6>
+              <div className="alan-izgara tek-sutun ayar-formu">
+                {alan('eczane.depo',
+                      'Eczane giriş/çıkış fişlerinin deposu (boş = varsayılan depo)')}
+                {alan('demirbas.parca_depo',
+                      'Teknik servis parça çıkışının deposu (boş = varsayılan depo)')}
+              </div>
+            </div>
           </>
         ) : aktif === 'numaralama' ? (
           // Belge / tahsilat / odeme numaralandirmasi (152) - dort grid.

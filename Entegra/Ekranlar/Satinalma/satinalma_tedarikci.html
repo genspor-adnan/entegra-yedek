@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Satınalma — Tedarikçi Yönetimi — Mockup (GenoTIP AI · Satınalma)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🏭 Tedarikçi — Medikal Grup A.Ş.</span>
+    <span class="sp">VKN 1234567890 · Tıbbi sarf malzeme · Sözleşmeli · Skor 61/100 · 16.09.2026</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="satinalma_panosu.html">◀ Pano</div>
+    <div class="btn primary">✎ Kartı Düzenle</div>
+    <div class="btn">📄 Sözleşme Ekle</div>
+    <div class="btn">📊 Değerlendirme Yap</div>
+    <div class="sepv"></div>
+    <div class="btn">⚠ Uyarı Yazısı Gönder</div>
+    <div class="btn">⛔ Tedarikçiyi Askıya Al</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ Tedarikçi Dosyası</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart kir"><div class="b">Performans skoru</div><div class="d">61 <small>/ 100 ↓13</small></div></div>
+    <div class="kart sari"><div class="b">Zamanında teslim</div><div class="d">%64</div></div>
+    <div class="kart kir"><div class="b">Açık uygunsuzluk</div><div class="d">2</div></div>
+    <div class="kart"><div class="b">Son 12 ay hacim</div><div class="d" style="font-size:13px">3,8 M ₺</div></div>
+    <div class="kart"><div class="b">Açık sipariş</div><div class="d">1 <small>462.000 ₺</small></div></div>
+    <div class="kart sari"><div class="b">Sözleşme bitiş</div><div class="d" style="font-size:12px">31.12.2026</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="kunye">Künye & Belgeler<span class="sy">7</span></div>
+    <div class="sekme" data-s="skor">Performans<span class="sy">61</span></div>
+    <div class="sekme" data-s="sozlesme">Sözleşmeler<span class="sy">2</span></div>
+    <div class="sekme" data-s="liste">Tedarikçi Listesi<span class="sy">84</span></div>
+  </div>
+
+  <!-- ====================================================== KÜNYE & BELGELER ===== -->
+  <div class="pnl" data-s="kunye">
+    <div class="dg">
+      <table>
+        <thead><tr><th style="width:190px">Alan</th><th>Değer</th></tr></thead>
+        <tbody>
+          <tr><td class="sonuk">Unvan</td><td><b>Medikal Grup Sağlık Ürünleri A.Ş.</b></td></tr>
+          <tr><td class="sonuk">VKN / Vergi dairesi</td><td>1234567890 · Kozyatağı</td></tr>
+          <tr><td class="sonuk">Faaliyet alanı</td>
+            <td>Tıbbi sarf malzeme · cerrahi el aletleri · steril ürün</td></tr>
+          <tr><td class="sonuk">Yetkili kişi</td><td>K. Demirci · 0532 000 00 00 · satis@medikalgrup.com.tr</td></tr>
+          <tr><td class="sonuk">Banka hesabı</td>
+            <td><code>TR00 0000 0000 0000 0000 0000 00</code>
+              <span class="rz ok">Doğrulandı 12.01.2026</span></td></tr>
+          <tr><td class="sonuk">Ödeme koşulu</td><td>Fatura tarihinden 60 gün</td></tr>
+          <tr><td class="sonuk">Durum</td>
+            <td><span class="rz sari">İzlemde</span> — skor 70'in altına düştü, yeni ihalelerde
+              ek teminat isteniyor</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:230px">Belge</th>
+          <th style="width:130px" class="orta">Tarih</th>
+          <th style="width:130px" class="orta">Geçerlilik</th>
+          <th>Not</th>
+          <th style="width:120px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Ticaret sicil gazetesi</b></td>
+            <td class="orta">14.03.2019</td><td class="orta">—</td>
+            <td>Kuruluş ve son değişiklik</td>
+            <td class="orta"><span class="rz ok">Tam</span></td></tr>
+          <tr class="tik"><td><b>İmza sirküleri</b></td>
+            <td class="orta">08.01.2026</td><td class="orta">08.01.2028</td>
+            <td class="sonuk">—</td><td class="orta"><span class="rz ok">Geçerli</span></td></tr>
+          <tr class="tik"><td><b>Vergi borcu yoktur yazısı</b></td>
+            <td class="orta">02.09.2026</td><td class="orta"><span class="rz sari">02.10.2026</span></td>
+            <td>Her sipariş öncesi güncel olmalı</td>
+            <td class="orta"><span class="rz sari">16 gün</span></td></tr>
+          <tr class="tik"><td><b>SGK borcu yoktur yazısı</b></td>
+            <td class="orta">02.09.2026</td><td class="orta"><span class="rz sari">02.10.2026</span></td>
+            <td class="sonuk">—</td><td class="orta"><span class="rz sari">16 gün</span></td></tr>
+          <tr class="tik"><td><b>ÜTS firma kaydı</b></td>
+            <td class="orta">2019</td><td class="orta">—</td>
+            <td>Tıbbi cihaz satışı için zorunlu</td>
+            <td class="orta"><span class="rz ok">Kayıtlı</span></td></tr>
+          <tr class="tik"><td><b>ISO 13485 belgesi</b></td>
+            <td class="orta">18.06.2024</td><td class="orta">18.06.2027</td>
+            <td>Tıbbi cihaz kalite yönetim sistemi</td>
+            <td class="orta"><span class="rz ok">Geçerli</span></td></tr>
+          <tr class="tik"><td><b>Yasaklılık teyidi</b></td>
+            <td class="orta">16.09.2026</td><td class="orta">—</td>
+            <td>Kamu ihalelerinden yasaklı değil</td>
+            <td class="orta"><span class="rz ok">Temiz</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Süresi dolan belge siparişi durdurur:</b> borcu yoktur yazısı 16 gün sonra
+        geçersiz — yenilenmezse yeni sipariş açılmaz.</span>
+      <span class="sp">Banka hesabı değişikliği ayrıca doğrulanır: hesap değiştirme talebi dolandırıcılığın en sık yolu.</span>
+    </div>
+  </div>
+
+  <!-- ========================================================== PERFORMANS ===== -->
+  <div class="pnl" data-s="skor" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:230px">Ölçüt</th>
+          <th style="width:100px" class="orta">Ağırlık</th>
+          <th style="width:130px" class="orta">Değer</th>
+          <th style="width:100px" class="orta">Puan</th>
+          <th>Açıklama</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Zamanında teslim</b></td>
+            <td class="orta">%35</td><td class="orta"><span class="rz kir">%64</span></td>
+            <td class="orta">22 / 35</td>
+            <td>Son 12 ayda 14 siparişin 5'i gecikti</td></tr>
+          <tr class="tik"><td><b>Kalite / uygunsuzluk</b></td>
+            <td class="orta">%25</td><td class="orta"><span class="rz sari">2 açık</span></td>
+            <td class="orta">15 / 25</td>
+            <td>Raf ömrü kısa parti (1) · ambalaj hasarı (1)</td></tr>
+          <tr class="tik"><td><b>Fatura doğruluğu</b></td>
+            <td class="orta">%20</td><td class="orta"><span class="rz kir">%86</span></td>
+            <td class="orta">10 / 20</td>
+            <td><b>Fazla faturalama</b> (B-2026/9012) · 2 fatura düzeltildi</td></tr>
+          <tr class="tik"><td><b>Fiyat rekabetçiliği</b></td>
+            <td class="orta">%10</td><td class="orta"><span class="rz ok">Piyasa −%3</span></td>
+            <td class="orta">9 / 10</td>
+            <td>Fiyatı iyi — skorun düşmesinin sebebi bu değil</td></tr>
+          <tr class="tik"><td><b>İletişim / yanıt süresi</b></td>
+            <td class="orta">%10</td><td class="orta"><span class="rz ok">4 saat</span></td>
+            <td class="orta">5 / 10</td>
+            <td>Hızlı yanıt veriyor ama taahhüt tutmuyor</td></tr>
+          <tr class="grup"><td><b>TOPLAM</b></td><td class="orta">%100</td>
+            <td class="orta"><span class="rz kir">61 / 100</span></td>
+            <td class="orta">—</td>
+            <td>Önceki dönem 74 · <span class="rz kir">−13</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:130px" class="orta">Tarih</th>
+          <th style="width:150px" class="orta">Olay</th>
+          <th>Ayrıntı</th>
+          <th style="width:110px" class="orta">Skor etkisi</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik"><td class="orta">16.09.2026</td>
+            <td class="orta"><span class="rz kir">Fazla faturalama</span></td>
+            <td>12.000 teslim, 20.000 faturalandı · itiraz edildi</td>
+            <td class="orta"><span class="rz kir">−8</span></td></tr>
+          <tr class="tik"><td class="orta">16.09.2026</td>
+            <td class="orta"><span class="rz kir">Gecikme</span></td>
+            <td>SP-2608-112 · 11 gün · ceza işletildi 9.240 ₺</td>
+            <td class="orta"><span class="rz kir">−5</span></td></tr>
+          <tr class="tik"><td class="orta">22.06.2026</td>
+            <td class="orta"><span class="rz sari">Uygunsuzluk</span></td>
+            <td>Sütür partisi asgari raf ömrünün altında geldi · iade edildi</td>
+            <td class="orta"><span class="rz sari">−4</span></td></tr>
+          <tr class="tik"><td class="orta">14.03.2026</td>
+            <td class="orta"><span class="rz ok">Olumlu</span></td>
+            <td>Acil talepte 24 saatte teslim (taahhüt 3 gün)</td>
+            <td class="orta"><span class="rz ok">+3</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ul class="kontrol">
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Skor 70'in altına düştü — <b>izleme</b> durumuna alındı</span>
+        <span class="imza">Sistem · 16.09.2026</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Yazılı uyarı gönderildi ve düzeltici faaliyet istendi</span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Skor 50'nin altına inerse <b>yeni sipariş açılamaz</b> (askıya alma)</span>
+        <span class="imza">— eşik 50</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Sözleşme yenileme değerlendirmesi (31.12.2026)</span>
+        <span class="imza">—</span></li>
+    </ul>
+
+    <div class="statusbar">
+      <span><b>Skor şikâyet değil ölçüdür:</b> her gecikme, uygunsuzluk ve fatura farkı
+        kendiliğinden işlenir — dönem sonunda kimse "hangi firma zor çıkardı" diye hatırlamaya
+        çalışmaz.</span>
+      <span class="sp">Fiyatı iyi olan firma da skoru düşürebilir: ucuz ama geç gelen mal, zamanında gelen pahalı maldan pahalıdır.</span>
+    </div>
+  </div>
+
+  <!-- ========================================================== SÖZLEŞMELER ===== -->
+  <div class="pnl" data-s="sozlesme" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:150px">Sözleşme</th>
+          <th style="width:190px">Konu</th>
+          <th style="width:130px" class="orta">Dönem</th>
+          <th style="width:120px" class="sag">Öngörülen</th>
+          <th style="width:120px" class="sag">Gerçekleşen</th>
+          <th style="width:130px" class="orta">Fiyat</th>
+          <th style="width:140px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>2026/ELD-02</code></td>
+            <td>Cerrahi eldiven (steril)</td>
+            <td class="orta">2026 yıllık</td>
+            <td class="sag">80.000 ad</td><td class="sag">52.000 ad</td>
+            <td class="orta">23,10 ₺ sabit</td>
+            <td class="orta"><span class="rz sari">İzlemde</span></td></tr>
+          <tr class="tik"><td class="nw"><code>2026/SUT-07</code></td>
+            <td>Cerrahi sütür (karma)</td>
+            <td class="orta">2026 yıllık</td>
+            <td class="sag">14.000 ad</td><td class="sag">9.100 ad</td>
+            <td class="orta">Birim listesi</td>
+            <td class="orta"><span class="rz ok">Yürürlükte</span></td></tr>
+          <tr class="tik"><td class="nw"><code>2025/ELD-02</code></td>
+            <td>Cerrahi eldiven (steril)</td>
+            <td class="orta">2025 yıllık</td>
+            <td class="sag">70.000 ad</td><td class="sag">68.400 ad</td>
+            <td class="orta">18,40 ₺ sabit</td>
+            <td class="orta"><span class="rz pas">Sona erdi</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr><th style="width:190px">Alan</th><th>Değer (2026/ELD-02)</th></tr></thead>
+        <tbody>
+          <tr><td class="sonuk">Tip</td><td>Yıllık birim fiyat anlaşması · miktar taahhüdü yok</td></tr>
+          <tr><td class="sonuk">Fiyat artışı</td>
+            <td>2025'e göre <b>+%25,5</b> (18,40 → 23,10 ₺) · TÜFE ile gerekçelendirildi</td></tr>
+          <tr><td class="sonuk">Teslim süresi</td><td>5 iş günü · acil siparişte 48 saat</td></tr>
+          <tr><td class="sonuk">Gecikme cezası</td>
+            <td>Günlük binde 1 · üst sınır %10 ·
+              <span class="rz kir">bu yıl 9.240 ₺ işletildi</span></td></tr>
+          <tr><td class="sonuk">Fesih koşulu</td>
+            <td>Üst üste 3 gecikme ya da 2 kalite uygunsuzluğu ·
+              <span class="rz sari">2 gecikme + 1 uygunsuzluk</span></td></tr>
+          <tr><td class="sonuk">Yenileme değerlendirmesi</td>
+            <td>31.10.2026'ya kadar karar verilmeli ·
+              <span class="rz sari">skor 61 — otomatik yenileme eşiği 70</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Fesih sayacı ekranda durur:</b> "üst üste 3 gecikme" sözleşmede yazan bir cümle
+        değil, sayılan bir şey — 2'de.</span>
+      <span class="sp">Otomatik yenileme eşiği 70; skor altındaysa yenileme elle karara bağlanır ve gerekçe yazılır.</span>
+    </div>
+  </div>
+
+  <!-- ===================================================== TEDARİKÇİ LİSTESİ ===== -->
+  <div class="pnl" data-s="liste" hidden>
+    <div class="arama">
+      <div class="kutu">🔍 Unvan, VKN ya da malzeme grubu…</div>
+      <span class="chip on">Aktif <b>84</b></span>
+      <span class="chip">Sözleşmeli <b>31</b></span>
+      <span class="chip">İzlemde <b>6</b></span>
+      <span class="chip">Askıda <b>2</b></span>
+      <span class="chip">Belgesi eksik <b>4</b></span>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:210px">Tedarikçi</th>
+          <th style="width:170px">Alan</th>
+          <th style="width:90px" class="orta">Skor</th>
+          <th style="width:110px" class="orta">Zamanında</th>
+          <th style="width:120px" class="sag">12 ay hacim</th>
+          <th style="width:110px" class="orta">Sözleşme</th>
+          <th style="width:130px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik"><td><b>Selçuk Ecza Deposu</b></td><td>İlaç · ecza deposu</td>
+            <td class="orta"><span class="rz ok">88</span></td><td class="orta">%94</td>
+            <td class="sag">9,2 M ₺</td>
+            <td class="orta"><span class="rz mavi">3 adet</span></td>
+            <td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr class="tik"><td><b>Mindray Türkiye</b></td><td>Tıbbi cihaz</td>
+            <td class="orta"><span class="rz ok">92</span></td><td class="orta">%89</td>
+            <td class="sag">1,4 M ₺</td>
+            <td class="orta"><span class="rz mavi">1 adet</span></td>
+            <td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr class="tik"><td><b>Roche Diagnostics</b></td><td>Laboratuvar kit/reaktif</td>
+            <td class="orta"><span class="rz ok">85</span></td><td class="orta">%91</td>
+            <td class="sag">3,1 M ₺</td>
+            <td class="orta"><span class="rz mavi">2 adet</span></td>
+            <td class="orta"><span class="rz ok">Aktif</span></td></tr>
+          <tr class="tik sel"><td><b>Medikal Grup A.Ş.</b></td><td>Tıbbi sarf malzeme</td>
+            <td class="orta"><span class="rz kir">61</span></td><td class="orta">%64</td>
+            <td class="sag">3,8 M ₺</td>
+            <td class="orta"><span class="rz mavi">2 adet</span></td>
+            <td class="orta"><span class="rz sari">İzlemde</span></td></tr>
+          <tr class="tik"><td><b>Hedef Medikal</b></td><td>Kan ürünü · ilaç</td>
+            <td class="orta"><span class="rz sari">68</span></td><td class="orta">%72</td>
+            <td class="sag">2,2 M ₺</td>
+            <td class="orta"><span class="rz mavi">1 adet</span></td>
+            <td class="orta"><span class="rz sari">İzlemde</span></td></tr>
+          <tr class="tik"><td><b>Anadolu Medikal</b></td><td>Tıbbi cihaz · muadil</td>
+            <td class="orta"><span class="rz sari">64</span></td><td class="orta">%78</td>
+            <td class="sag">420 bin ₺</td>
+            <td class="orta"><span class="rz pas">—</span></td>
+            <td class="orta"><span class="rz sari">İzlemde</span></td></tr>
+          <tr class="tik"><td><b>Ege Tıbbi Cihaz</b></td><td>Tıbbi cihaz</td>
+            <td class="orta"><span class="rz kir">42</span></td><td class="orta">%51</td>
+            <td class="sag">180 bin ₺</td>
+            <td class="orta"><span class="rz pas">—</span></td>
+            <td class="orta"><span class="rz kir">Askıda</span></td></tr>
+          <tr class="tik"><td><b>Linet Türkiye</b></td><td>Hasta yatağı · mobilya</td>
+            <td class="orta"><span class="rz ok">79</span></td><td class="orta">%83</td>
+            <td class="sag">890 bin ₺</td>
+            <td class="orta"><span class="rz pas">—</span></td>
+            <td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Askıdaki tedarikçiye sipariş açılamaz</b> ama kartı silinmez: geçmiş siparişler,
+        faturalar ve garanti yükümlülükleri ona bağlı.</span>
+      <span class="sp">Skor teklif değerlendirmesinde <b>%15 ağırlıkla</b> kullanılır — geçmiş performans gelecek kararı etkiler.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Süreç:</b> Tedarikçi kaydı belgelerle açılır (sicil, imza sirküleri, borcu yoktur, ÜTS kaydı,
+  kalite belgesi, yasaklılık teyidi); <b>süresi dolan belge yeni siparişi durdurur</b>.
+  Performans skoru elle girilmez: her gecikme, kalite uygunsuzluğu ve fatura farkı olduğu anda
+  işlenir. Skor 70 altı <b>izleme</b>, 50 altı <b>askıya alma</b> demektir; askıdaki firmaya sipariş
+  açılamaz ama kartı silinmez — geçmiş kayıtlar ve garanti yükümlülükleri ona bağlıdır. Skor,
+  teklif değerlendirmesinde ağırlıklı ölçütlerden biridir: ucuz ama geç gelen mal, zamanında gelen
+  pahalı maldan pahalıdır.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

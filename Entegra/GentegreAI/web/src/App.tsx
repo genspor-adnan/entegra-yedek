@@ -11,6 +11,8 @@ import { StokAyarlar } from './sayfalar/StokAyarlar';
 import { KasaAyarlar } from './sayfalar/KasaAyarlar';
 import { IceriAlma } from './sayfalar/IceriAlma';
 import { RandevuAyarlar } from './sayfalar/RandevuAyarlar';
+import { CalismaPlani } from './sayfalar/CalismaPlani';
+import { AmeliyatCizelge } from './sayfalar/AmeliyatCizelge';
 import { KayitKabulAyarlar } from './sayfalar/KayitKabulAyarlar';
 import { KatalogAyarlar } from './sayfalar/KatalogAyarlar';
 import { DepartmanGorev } from './sayfalar/DepartmanGorev';
@@ -29,6 +31,17 @@ import { RadyolojiRapor } from './sayfalar/RadyolojiRapor';
 import { RadyolojiRaporCikti } from './sayfalar/RadyolojiRaporCikti';
 import { LabRaporCikti } from './sayfalar/LabRaporCikti';
 import { GozSemaCikti } from './sayfalar/GozSemaCikti';
+import { DisHastaKarti } from './sayfalar/dis/DisHastaKarti';
+import { DisGunlukAkis } from './sayfalar/dis/DisGunlukAkis';
+import { DisSeansKarti } from './sayfalar/dis/DisSeansKarti';
+import { DisPlanKarti } from './sayfalar/dis/DisPlanKarti';
+import { FtrProgramKarti } from './sayfalar/ftr/FtrProgramKarti';
+import { FtrSeansKarti } from './sayfalar/ftr/FtrSeansKarti';
+import { FtrPano } from './sayfalar/ftr/FtrPano';
+import { MedulaHastaKabul } from './sayfalar/medula/MedulaHastaKabul';
+import { MedulaHizmetKayit } from './sayfalar/medula/MedulaHizmetKayit';
+import { MedulaFaturaDonem } from './sayfalar/medula/MedulaFaturaDonem';
+import { MedulaKuyruk } from './sayfalar/medula/MedulaKuyruk';
 import { LabKkGrafik } from './sayfalar/LabKkGrafik';
 import { LabEtiket } from './sayfalar/LabEtiket';
 import { SatisAyarlar, AlisAyarlar } from './sayfalar/BelgeAyarlar';
@@ -126,6 +139,11 @@ function Yollar() {
         {/* Excel'den iceri alma sihirbazi (548) - liste degil, dort adimli ekran. */}
         {yetki('ayar') && <Route path="/iceri-alma" element={<IceriAlma />} />}
         {yetki('randevu') && <Route path="/randevu-ayarlar" element={<RandevuAyarlar />} />}
+        {/* Calisma plani (711): sablon + istisnadan turetilen haftalik plan. */}
+        {yetki('randevu.plan') && <Route path="/calisma-plani" element={<CalismaPlani />} />}
+        {/* Ameliyathane masa cizelgesi (719): generic liste satir cizer, blok
+            cizmez - "hangi masa ne zaman bos" sorusu kendi sayfasini ister. */}
+        {yetki('ameliyathane.plan') && <Route path="/ameliyat-cizelge" element={<AmeliyatCizelge />} />}
         {/* Departman + gorev (255): tek ekranda iki grid. */}
         {yetki('personel') && <Route path="/departman" element={<DepartmanGorev />} />}
         {yetki('sube') && <Route path="/sube" element={<FirmaBilgileri />} />}
@@ -164,6 +182,55 @@ function Yollar() {
         {yetki('goz.muayene') && (
           <Route path="/goz/sema-cikti/:id" element={<GozSemaCikti />} />
         )}
+        {/* DIS (706): hasta karti (odontogram + plan) ve gunluk akis ozel
+            sayfalardir - generic liste/kart odontogrami cizemez. */}
+        {/* Dis hasta karti MODALDIR (kullanici): arkada Dis Hastalari listesi,
+            ustte odontogram + plan penceresi - generic kartlarla ayni his. */}
+        {yetki('dis.hasta') && (
+          <Route path="/dis-hasta/:hastaId" element={<>
+            <Liste tanim={LISTELER.find(l => l.kaynak === 'dis-hasta')!} />
+            <DisHastaKarti />
+          </>} />
+        )}
+        {yetki('dis') && <Route path="/dis-akis" element={<DisGunlukAkis />} />}
+        {/* Seans karti (708): yapilan islemler listesi - generic detay tablosu
+            "plan satirindan ekle" ve "bu seansta tamamlandi" kuralini tasiyamiyordu. */}
+        {yetki('dis.seans') && (
+          <Route path="/dis-seans/:id" element={<>
+            <Liste tanim={LISTELER.find(l => l.kaynak === 'dis-seans')!} />
+            <DisSeansKarti />
+          </>} />
+        )}
+        {/* FTR (719): unite panosu ozel sayfa; program ve seans kartlari modal.
+            Program karti "yeni-kart" ve ":id/duzenle" yollari generic GenForm'a
+            gider (ozel modal yalniz goruntuler/planlar). */}
+        {yetki('ftr.seans') && <Route path="/ftr-pano" element={<FtrPano />} />}
+        {yetki('ftr.program') && (
+          <Route path="/ftr-program/:id" element={<>
+            <Liste tanim={LISTELER.find(l => l.kaynak === 'ftr-program')!} />
+            <FtrProgramKarti />
+          </>} />
+        )}
+        {yetki('ftr.seans') && (
+          <Route path="/ftr-seans/:id" element={<>
+            <Liste tanim={LISTELER.find(l => l.kaynak === 'ftr-seans')!} />
+            <FtrSeansKarti />
+          </>} />
+        )}
+        {/* Tedavi plani karti (710): mockup dis_tedavi_plani_karti - seans programi,
+            proforma/onay, odeme plani, lab, varyant ve gunluk tek kartta. */}
+        {yetki('dis.plan') && (
+          <Route path="/dis-plan/:id" element={<>
+            <Liste tanim={LISTELER.find(l => l.kaynak === 'dis-plan')!} />
+            <DisPlanKarti />
+          </>} />
+        )}
+        {/* MEDULA (707): hasta kabul, hizmet kaydi, fatura & donem, kuyruk & ayarlar ozel sayfalar. */}
+        {yetki('medula.provizyon') && <Route path="/medula-kabul" element={<MedulaHastaKabul />} />}
+        {yetki('medula.provizyon') && <Route path="/medula-kabul/:belgeId" element={<MedulaHastaKabul />} />}
+        {yetki('medula.hizmet') && <Route path="/medula-hizmet/:belgeId" element={<MedulaHizmetKayit />} />}
+        {yetki('medula.fatura') && <Route path="/medula-fatura-donem" element={<MedulaFaturaDonem />} />}
+        {yetki('medula') && <Route path="/medula-kuyruk-ayar" element={<MedulaKuyruk />} />}
         {/* Levey-Jennings (442): tetkik/lot/seviye sorgu parametresiyle. */}
         {yetki('lab.kk') && <Route path="/lab/kk/grafik" element={<LabKkGrafik />} />}
         {/* Tup barkod etiketi (444): ?istem= tum tupler, ?numune= tek tup. */}

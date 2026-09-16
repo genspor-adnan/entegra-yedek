@@ -187,13 +187,14 @@ public static partial class RadyolojiUclari
                         ["seriLotId"] = z.SeriLotId,
                         ["miktar"] = z.Miktar,
                     }).ToList();
-                fisSatirlari.Add(SatirGovdesi(alanlar));
+                fisSatirlari.Add(BelgeGovdesi.Satir(alanlar));
             }
 
             var (belgeId, uyarilar) = await belgeDepo.KaydetAsync(
                 fis, fisSatirlari,
-                // Stok kontrolu ACIK: elde olmayan malzeme dusulemez - eksi
-                //   bakiye sarf sayimini bastan bozar.
+                // Stok kontrolu ACIK. Negatif bakiyede ENGEL mi UYARI mi olacagi
+                //   kurum ayarina bagli (Genel Ayarlar > Stok: negatif stok);
+                //   varsayilan uyaridir ve `uyarilar` icinde cagirana doner.
                 new BelgeSecenekleri { Taslak = false, StokKontrolu = true },
                 new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), iptal);
 

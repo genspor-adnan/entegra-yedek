@@ -66,6 +66,8 @@ kurucu.Services.AddScoped<RandevuAyarDeposu>();
 kurucu.Services.AddScoped<AyarDeposu>();
 kurucu.Services.AddScoped<KurumProfilDeposu>();
 kurucu.Services.AddScoped<PanelDeposu>();
+// Klinik Kalite hesaplama motoru (713)
+kurucu.Services.AddScoped<KlinikKaliteDeposu>();
 kurucu.Services.AddScoped<RolYetkiDeposu>();
 kurucu.Services.AddScoped<IskontoTalepDeposu>();
 kurucu.Services.AddScoped<DokumDeposu>();
@@ -93,6 +95,9 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.CihazServisi>();
 // Göz cihaz mesajı ayrıştırıcısı (691/703): ham cihaz çıktısını hastanın
 //   ölçüm satırına çevirir.
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.GozCihazServisi>();
+// MEDULA (707): kapi soyut - bu surumde simulasyon; canli SOAP ayni arayuzu uygular.
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.IMedulaKapisi, Gentegre.Api.Servisler.MedulaSimulasyonKapisi>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.MedulaServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.LabServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.KulturServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.GenetikServisi>();
@@ -242,7 +247,14 @@ uygulama.EnabizUclariniEkle();
 uygulama.ItsUclariniEkle();
 uygulama.ZamanliIsUclariniEkle();
 uygulama.KurumProfilUclariniEkle();
+uygulama.StandartRolUclariniEkle();
 uygulama.PanelUclariniEkle();
+uygulama.KlinikKaliteUclariniEkle();
+uygulama.AmeliyathaneUclariniEkle();
+uygulama.AcilUclariniEkle();
+uygulama.EczaneUclariniEkle();
+uygulama.BiyomedikalUclariniEkle();
+uygulama.SatinalmaUclariniEkle();
 uygulama.RolYetkiUclariniEkle();
 uygulama.KullaniciYonetimUclariniEkle();
 uygulama.IskontoOnayUclariniEkle();
@@ -268,6 +280,13 @@ uygulama.LabUclariniEkle();
 uygulama.GozUclariniEkle();
 // YATAN HASTA (695): yatis kartinin ust seridi - kimlik, son vital, acik isler.
 uygulama.YatanUclariniEkle();
+// DIS KLINIGI (706): odontogram, tedavi plani satiri yapildi, gunluk akis,
+//   seans bitirme, lab asamasi, taksit uretimi.
+uygulama.DisUclariniEkle();
+uygulama.CalismaPlaniUclariniEkle();
+uygulama.FtrUclariniEkle();
+// MEDULA (707): mustehaklik, hasta kabul, hizmet kaydi, e-recete/e-rapor, fatura & donem, kuyruk.
+uygulama.MedulaUclariniEkle();
 
 // YETKI SENKRONU (kullanici: "menulerdeki ekle/sil/degisimlerde yetki matrisini
 //   update et"): katalogdaki ekran/aksiyon yetkileri ile `yetki` tablosu her
