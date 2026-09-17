@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teknik Servis — Pano — Mockup (ERP + HBYS ortak)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🔧 Teknik Servis Panosu</span>
+    <span class="sp">Merkez · 17.09.2026 · açık 23 iş emri (14 dış · 9 iç)</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn primary" data-git="teknik_servis_is_emri.html">＋ Yeni İş Emri</div>
+    <div class="btn" data-git="teknik_servis_is_emri.html">Aç</div>
+    <div class="btn">👤 Teknisyen Ata</div>
+    <div class="btn">💬 Teklif Gönder</div>
+    <div class="sepv"></div>
+    <div class="btn">📦 Teslim Et</div>
+    <div class="btn pas">🖨️ Teslim Alma Formu</div>
+    <div class="sp"></div>
+    <div class="btn pas">📊 Servis Analizi</div>
+  </div>
+
+  <div class="arama">
+    <div class="kutu">🔍 İş emri no, müşteri, seri no ya da cihaz ara…</div>
+    <div class="chip on">Tümü</div>
+    <div class="chip">Dış iş</div>
+    <div class="chip">İç iş</div>
+    <div class="chip">Bende</div>
+    <div class="chip">Gecikmiş</div>
+    <div class="chip">Parça bekliyor</div>
+  </div>
+
+  <!-- ÖZET: panonun tek cümlesi "neye bakmam gerekiyor". Gecikmiş ve parça
+       bekleyen ayrı sayılır - ikisi de "açık" görünür ama biri teknisyenin,
+       öteki satınalmanın işidir. -->
+  <div class="ozet">
+    <div class="kart"><div class="b">Açık iş emri</div><div class="d">23</div></div>
+    <div class="kart kir"><div class="b">Gecikmiş</div><div class="d">4</div></div>
+    <div class="kart"><div class="b">Parça bekliyor</div><div class="d">6</div></div>
+    <div class="kart"><div class="b">Teklif onayında</div><div class="d">3</div></div>
+    <div class="kart"><div class="b">Teslime hazır</div><div class="d">5</div></div>
+    <div class="kart"><div class="b">Ort. onarım</div><div class="d">2,8 <small>gün</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="acik">Açık İşler<span class="sy">23</span></div>
+    <div class="sekme" data-s="onay">Teklif &amp; Onay<span class="sy">3</span></div>
+    <div class="sekme" data-s="teslim">Teslime Hazır<span class="sy">5</span></div>
+    <div class="sekme" data-s="emanet">Emanet Cihazlar<span class="sy">7</span></div>
+    <div class="sekme" data-s="kapsam">Garanti &amp; Sözleşme</div>
+  </div>
+
+  <!-- ============================================================ AÇIK ===== -->
+  <div class="pnl" data-s="acik">
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:120px">İş Emri</th>
+          <th style="width:70px" class="orta">Tür</th>
+          <th style="width:190px">Müşteri / Birim</th>
+          <th>Cihaz · Arıza</th>
+          <th style="width:130px">Teknisyen</th>
+          <th style="width:110px" class="orta">Durum</th>
+          <th style="width:80px" class="sag">Gün</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>SE-2609-0142</td><td class="orta"><span class="rz mavi">Dış</span></td>
+            <td>Kaya Diş Polikliniği</td>
+            <td>Dental ünit Fona 1000C · su akışı kesiliyor</td>
+            <td>M. Tuna</td>
+            <td class="orta"><span class="rz sari">Teklif onayında</span></td>
+            <td class="sag">2</td></tr>
+          <tr><td>SE-2609-0138</td><td class="orta"><span class="rz mavi">Dış</span></td>
+            <td>Özel Ege Tıp Merkezi</td>
+            <td>Otoklav · kapak contası kaçırıyor</td>
+            <td>E. Demir</td>
+            <td class="orta"><span class="rz">Onarımda</span></td>
+            <td class="sag">1</td></tr>
+          <tr><td>IE-2609-091</td><td class="orta"><span class="rz mor">İç</span></td>
+            <td>Ameliyathane</td>
+            <td>DB-00902 Otoklav · kalibrasyondan doğdu</td>
+            <td>M. Tuna</td>
+            <td class="orta"><span class="rz kir">Gecikmiş</span></td>
+            <td class="sag">9</td></tr>
+          <tr><td>SE-2609-0131</td><td class="orta"><span class="rz mavi">Dış</span></td>
+            <td>Aydın Görüntüleme</td>
+            <td>Ultrason probu · görüntüde çizgi</td>
+            <td class="sonuk">— atanmadı</td>
+            <td class="orta"><span class="rz sari">Parça bekliyor</span></td>
+            <td class="sag">6</td></tr>
+          <tr><td>IE-2609-084</td><td class="orta"><span class="rz mor">İç</span></td>
+            <td>YBÜ</td>
+            <td>DB-00844 Ventilatör · FiO₂ ayarı tutmuyor</td>
+            <td>Dış servis</td>
+            <td class="orta"><span class="rz sari">Dış serviste</span></td>
+            <td class="sag">2</td></tr>
+          <tr><td>SE-2609-0127</td><td class="orta"><span class="rz mavi">Dış</span></td>
+            <td>Kaya Diş Polikliniği</td>
+            <td>Kompresör · basınç düşük</td>
+            <td>E. Demir</td>
+            <td class="orta"><span class="rz ok">Test</span></td>
+            <td class="sag">3</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not" style="margin:10px 12px">
+      <b>İç ve dış iş aynı listede</b>: teknisyenin günü ikiye bölünmez, sırasını
+      önceliğe göre kurar. Ayrım sütunda durur ve <b>ücret</b> tarafını belirler -
+      listeyi ikiye bölmek, aynı kişinin iki ekrana bakması demekti.
+    </div>
+  </div>
+
+  <!-- ====================================================== TEKLİF & ONAY ==== -->
+  <div class="pnl" data-s="onay">
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:120px">İş Emri</th>
+          <th style="width:70px" class="orta">Tür</th>
+          <th style="width:200px">Müşteri / Birim</th>
+          <th>Bekleyen karar</th>
+          <th style="width:120px" class="sag">Tutar</th>
+          <th style="width:120px" class="orta">Bekleme</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>SE-2609-0142</td><td class="orta"><span class="rz mavi">Dış</span></td>
+            <td>Kaya Diş Polikliniği</td>
+            <td>Müşteri teklifi onaylayacak (TK-2026/0311)</td>
+            <td class="sag">6.850,00</td><td class="orta">1 gün</td></tr>
+          <tr><td>SE-2609-0119</td><td class="orta"><span class="rz mavi">Dış</span></td>
+            <td>Aydın Görüntüleme</td>
+            <td>Teklif hazırlanacak — teşhis bitti</td>
+            <td class="sag sonuk">—</td><td class="orta">3 gün</td></tr>
+          <tr><td>IE-2609-091</td><td class="orta"><span class="rz mor">İç</span></td>
+            <td>Ameliyathane</td>
+            <td><b>Masraflı onarım onayı</b> — eşik aşıldı, zincir yürüyor</td>
+            <td class="sag">34.500,00</td><td class="orta">2 gün</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not" style="margin:10px 12px">
+      Aynı sekmede iki farklı karar var ve karıştırılmamalı: <b>dış işte</b> onayı
+      <i>müşteri</i> verir (ticari teklif), <b>iç işte</b> <i>kurum</i> verir (harcama
+      onayı, var olan onay omurgası). İkisi de "iş duruyor, birini bekliyor" demek
+      olduğu için tek listede toplanır.
+    </div>
+  </div>
+
+  <!-- ========================================================== TESLİME HAZIR -->
+  <div class="pnl" data-s="teslim">
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:120px">İş Emri</th>
+          <th style="width:200px">Müşteri / Birim</th>
+          <th>Cihaz</th>
+          <th style="width:150px" class="orta">Test</th>
+          <th style="width:130px" class="orta">Emanet iadesi</th>
+          <th style="width:120px" class="orta">Fatura</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>SE-2609-0127</td><td>Kaya Diş Polikliniği</td><td>Kompresör</td>
+            <td class="orta"><span class="rz ok">Geçti</span></td>
+            <td class="orta"><span class="rz ok">Yok</span></td>
+            <td class="orta"><span class="rz sari">Kesilecek</span></td></tr>
+          <tr><td>SE-2609-0104</td><td>Özel Ege Tıp Merkezi</td><td>Santrifüj</td>
+            <td class="orta"><span class="rz ok">Geçti</span></td>
+            <td class="orta"><span class="rz kir">Bekliyor</span></td>
+            <td class="orta"><span class="rz pas">—</span></td></tr>
+          <tr><td>IE-2609-077</td><td>Laboratuvar</td><td>DB-00731 Etüv</td>
+            <td class="orta"><span class="rz sari">Kalibrasyon bekliyor</span></td>
+            <td class="orta"><span class="rz ok">Yok</span></td>
+            <td class="orta"><span class="rz pas">İç iş</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not" style="margin:10px 12px">
+      <b>Teslim bir kapı</b>: testi geçmemiş ya da emaneti dönmemiş cihaz teslim
+      edilemez. İç işte ayrıca <b>kalibrasyon ve elektriksel güvenlik testi</b>
+      yapılmadan cihaz birime dönmez - onarım bitti demek, cihaz hazır demek değildir.
+    </div>
+  </div>
+
+  <!-- ============================================================== EMANET ==== -->
+  <div class="pnl" data-s="emanet">
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px">Emanet no</th>
+          <th style="width:200px">Kimde</th>
+          <th>Cihaz</th>
+          <th style="width:120px">Veriliş</th>
+          <th style="width:120px">Bağlı iş emri</th>
+          <th style="width:90px" class="sag">Gün</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>EM-014</td><td>Kaya Diş Polikliniği</td><td>Dental ünit (emanet havuzu)</td>
+            <td>16.09.2026</td><td>SE-2609-0142</td><td class="sag">1</td></tr>
+          <tr><td>EM-011</td><td>Özel Ege Tıp Merkezi</td><td>Santrifüj</td>
+            <td>02.09.2026</td><td>SE-2609-0104</td><td class="sag">15</td></tr>
+          <tr><td>EM-007</td><td>YBÜ (iç)</td><td>DB-00849 Ventilatör — yedek atandı</td>
+            <td>15.09.2026</td><td>IE-2609-084</td><td class="sag">2</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not" style="margin:10px 12px">
+      Emanet cihaz <b>stoktan düşmez</b>, ayrı hareketle izlenir. Bu liste olmadan
+      emanetler yalnız iş emrinin içinde görünür ve kapanan iş emriyle birlikte
+      <b>görünmez</b> olurdu — sahada duran ama envanterde "depoda" yazan cihaz böyle
+      doğuyor. 15 gündür dışarıdaki EM-011 bu yüzden burada.
+    </div>
+  </div>
+
+  <!-- ==================================================== GARANTİ & SÖZLEŞME == -->
+  <div class="pnl" data-s="kapsam">
+    <div class="grp">
+      <div class="gb">Kapsam dağılımı <span class="sp">son 90 gün</span></div>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:190px">Kapsam</th><th style="width:90px" class="sag">İş</th>
+            <th style="width:130px" class="sag">Maliyet</th>
+            <th style="width:130px" class="sag">Tahsil</th><th>Not</th></tr></thead>
+          <tbody>
+            <tr><td>Ücretli (dış)</td><td class="sag">62</td><td class="sag">184.300</td>
+              <td class="sag">241.900</td><td>Normal servis işi</td></tr>
+            <tr><td>Garanti (bizim sattığımız)</td><td class="sag">18</td><td class="sag">41.200</td>
+              <td class="sag">0</td><td>Maliyet garanti giderine yazılır</td></tr>
+            <tr><td>Bakım sözleşmesi</td><td class="sag">24</td><td class="sag">57.800</td>
+              <td class="sag">0</td><td>Sözleşme bedeli ayrı faturalanır</td></tr>
+            <tr><td>İç iş (kurum demirbaşı)</td><td class="sag">31</td><td class="sag">96.400</td>
+              <td class="sag sonuk">—</td><td>Birim maliyetine yazılır</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ic">
+        <b>Sıfır tahsil, sıfır maliyet demek değildir.</b> Garanti ve sözleşme işlerinin
+        maliyeti ölçülmezse sözleşmenin kârlı olup olmadığı bilinemez - fiyat yenilemesi
+        tahmine kalır. Bu yüzden kapsam işaretlenir, tutar hep hesaplanır.
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="gb">Yaklaşan sözleşme yenilemeleri</div>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:230px">Müşteri</th><th style="width:140px">Bitiş</th>
+            <th style="width:110px" class="sag">Yıllık bedel</th>
+            <th style="width:100px" class="sag">Çağrı</th><th>Durum</th></tr></thead>
+          <tbody>
+            <tr><td>Kaya Diş Polikliniği</td><td>31.10.2026</td><td class="sag">48.000</td>
+              <td class="sag">11</td><td><span class="rz sari">Yenileme görüşülmeli</span></td></tr>
+            <tr><td>Aydın Görüntüleme</td><td>15.12.2026</td><td class="sag">96.000</td>
+              <td class="sag">6</td><td><span class="rz ok">Kârlı</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span><b>Gecikmiş iş listenin başındadır:</b> IE-2609-091 otoklav 9 gündür açık —
+      yedeksiz ve ameliyathaneyi durduruyor.</span>
+    <span class="sp">Atanmamış iş emri (SE-2609-0131) kimsenin işi değildir: teknisyen
+      atanana kadar süre işler ama kimse bakmaz.</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Ekranın işi:</b> "bugün neye bakacağım" sorusunu cevaplamak. Bu yüzden satırlar
+  <b>duruma</b> göre değil <b>kime düştüğüne</b> göre kümelenir: teknisyende olan
+  (Açık), müşteride/yönetimde olan (Teklif &amp; Onay), depoda bekleyen (Teslime Hazır),
+  dışarıda unutulan (Emanet).
+  <br><br>
+  <b>ERP ve HBYS aynı pano:</b> dış iş müşteri cihazı ve ücretlidir, iç iş kurum
+  demirbaşıdır ve maliyet üretir. Tür sütunu ayrımı taşır; sekmeler ikisinde de aynı
+  kalır çünkü süreç aynıdır. HBYS'de ek olarak <b>hasta etkilendi mi</b> sorusu vardır
+  ve iş emri kapansa bile olay bildirimi açık kalır.
+  <br><br>
+  <b>Bağlı ekranlar:</b> <code>teknik_servis_is_emri.html</code> (iş emri kartı),
+  <code>../Demirbas/demirbas_panosu.html</code> (kurum cihazları),
+  <code>../Satinalma/*</code> (stokta olmayan parça talebi).
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

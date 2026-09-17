@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teknik Servis — İş Emri — Mockup (ERP + HBYS ortak)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🔧 Servis İş Emri — <b>SE-2609-0142</b> · Dış iş · Kaya Diş Polikliniği</span>
+    <span class="sp">Dental ünit · Fona 1000C · S/N F1C-88213 · Garanti bitti (14.03.2025) ·
+      Teslim alındı 16.09.2026 11:20</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="teknik_servis_panosu.html">◀ Pano</div>
+    <div class="btn primary">✓ Onara Al</div>
+    <div class="btn">💬 Teklif Gönder</div>
+    <div class="btn">🧾 Parça Talebi</div>
+    <div class="sepv"></div>
+    <div class="btn">🚚 Yedek / Emanet Cihaz</div>
+    <div class="btn">📦 Teslim Et</div>
+    <div class="btn pas">🖨️ Servis Formu</div>
+    <div class="sp"></div>
+    <div class="btn pas">⇢ Faturaya Dönüştür</div>
+  </div>
+
+  <!-- ÖZET: ilk bakışta "kim bekliyor, ne kadar sürdü, para ne olacak".
+       Duruş saati İÇ işte, teslim süresi DIŞ işte anlamlıdır - ikisi de
+       gösterilir, boş olan "—" kalır. -->
+  <div class="ozet">
+    <div class="kart"><div class="b">Sahiplik</div><div class="d" style="font-size:12px">Müşteri cihazı</div></div>
+    <div class="kart kir"><div class="b">Öncelik</div><div class="d" style="font-size:13px">Yüksek</div></div>
+    <div class="kart"><div class="b">Serviste</div><div class="d">2 <small>gün</small></div></div>
+    <div class="kart"><div class="b">Teklif</div><div class="d" style="font-size:12px">Onay bekliyor</div></div>
+    <div class="kart"><div class="b">Tahmini tutar</div><div class="d" style="font-size:12px">6.850,00 ₺</div></div>
+    <div class="kart"><div class="b">Emanet cihaz</div><div class="d" style="font-size:12px">verildi</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="isemri">İş Emri</div>
+    <div class="sekme" data-s="iscilik">İşçilik &amp; Parça<span class="sy">5</span></div>
+    <div class="sekme" data-s="ucret">Ücret &amp; Belge</div>
+    <div class="sekme" data-s="emanet">Emanet &amp; Yedek</div>
+    <div class="sekme" data-s="gecmis">Cihaz Geçmişi<span class="sy">7</span></div>
+    <div class="sekme" data-s="belge">Belgeler<span class="sy">4</span></div>
+  </div>
+
+  <!-- ========================================================== İŞ EMRİ ===== -->
+  <div class="pnl" data-s="isemri">
+
+    <!-- TEK İŞ EMRİ, İKİ SAHİPLİK. Modülün tamamı bu ayrımın üstünde durur:
+         aynı ekran hem kurumun kendi cihazını hem müşterinin cihazını izler,
+         değişen tek şey PARANIN kime yazıldığıdır. -->
+    <div class="grp">
+      <div class="gb">Sahiplik
+        <span class="sp">bu seçim ekranın geri kalanını belirler</span></div>
+      <div class="hdr k4">
+        <div class="fld"><label class="req">İş türü</label>
+          <div class="inp combo">Dış iş — müşteri cihazı</div></div>
+        <div class="fld"><label class="req">Müşteri</label>
+          <div class="inp">Kaya Diş Polikliniği <span class="rz mavi">cari</span></div></div>
+        <div class="fld"><label>Demirbaş</label>
+          <div class="inp ro">— <span class="sonuk">(iç işte zorunlu)</span></div></div>
+        <div class="fld"><label>Şube</label><div class="inp ro">Merkez</div></div>
+      </div>
+      <div class="ic">
+        <span class="rz mavi">Dış iş</span> müşteri cihazıdır: <b>ücretlidir</b>, teklif ve
+        fatura yolu açılır, cihaz envanterimizde <b>değildir</b> — marka/model/seri elle
+        girilir. &nbsp;
+        <span class="rz mor">İç iş</span> kurumun kendi demirbaşıdır: ücret yoktur,
+        maliyet <b>birime</b> yazılır ve iş emri demirbaş kartının geçmişine düşer.
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="gb">Cihaz <span class="sp">müşteri cihazında envanter kaydı yok — beyan edilen bilgiler</span></div>
+      <div class="hdr k5">
+        <div class="fld"><label class="req">Cihaz / Ürün</label>
+          <div class="inp">Dental ünit</div></div>
+        <div class="fld"><label>Marka</label><div class="inp">Fona</div></div>
+        <div class="fld"><label>Model</label><div class="inp">1000C</div></div>
+        <div class="fld"><label>Seri no</label><div class="inp">F1C-88213</div></div>
+        <div class="fld"><label>Garanti</label>
+          <div class="inp ro"><span class="rz kir">Bitti · 14.03.2025</span></div></div>
+      </div>
+      <div class="hdr k4">
+        <div class="fld"><label>Satış belgesi</label>
+          <div class="inp ro">FT-2024/1180 <span class="sonuk">bizden alınmış</span></div></div>
+        <div class="fld"><label>Bakım sözleşmesi</label>
+          <div class="inp ro">Yok</div></div>
+        <div class="fld"><label>Aksesuar / teslim alınan</label>
+          <div class="inp">Ayak pedalı, 2 başlık</div></div>
+        <div class="fld"><label>Cihaz durumu (teslimde)</label>
+          <div class="inp">Kasada çizik, kapak mandalı kırık</div></div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="gb">Arıza ve Teşhis</div>
+      <div class="hdr k2">
+        <div class="fld"><label class="req">Müşteri beyanı</label>
+          <div class="inp uzun">"Ünit çalışırken su akışı kesiliyor, türbin basıncı düşüyor,
+            ara ara koltuk yukarı kalkmıyor."</div></div>
+        <div class="fld"><label>Teknisyen ilk teşhisi</label>
+          <div class="inp uzun">Su selenoid valfi tıkalı; koltuk motor kartında röle
+            yapışması şüphesi. Kompresör basıncı normal (6,2 bar).</div></div>
+      </div>
+      <div class="hdr k4">
+        <div class="fld"><label>Bildirim</label><div class="inp ro">16.09.2026 11:20</div></div>
+        <div class="fld"><label>İlk müdahale</label><div class="inp ro">16.09.2026 14:05</div></div>
+        <div class="fld"><label>Atanan teknisyen</label>
+          <div class="inp combo">M. Tuna (Teknik Servis)</div></div>
+        <div class="fld"><label>Planlanan teslim</label><div class="inp">19.09.2026</div></div>
+      </div>
+    </div>
+
+    <!-- DURUM ŞERİDİ: iş emrinin nerede olduğu tek bakışta. Süreç ERP ve
+         HBYS'de aynı; yalnız "Teklif" adımı iç işte ONAY adımına dönüşür
+         (kurum kendi cihazına teklif vermez, harcamayı onaylar). -->
+    <div class="grp">
+      <div class="gb">Akış</div>
+      <div class="ic">
+        <span class="rz ok">1 · Teslim alındı</span>
+        <span class="rz ok">2 · Teşhis</span>
+        <span class="rz sari">3 · Teklif / onay bekliyor</span>
+        <span class="rz pas">4 · Onarım</span>
+        <span class="rz pas">5 · Test</span>
+        <span class="rz pas">6 · Teslim</span>
+        <span class="rz pas">7 · Faturalandı</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================== İŞÇİLİK & PARÇA ==== -->
+  <div class="pnl" data-s="iscilik">
+    <div class="grp">
+      <div class="gb">İşçilik
+        <span class="sp">saat ücreti fiyat listesinden gelir — iç işte ücret yazılmaz, süre yazılır</span></div>
+      <div class="dg">
+        <table>
+          <thead><tr>
+            <th style="width:110px">Tarih</th>
+            <th style="width:150px">Teknisyen</th>
+            <th>Yapılan iş</th>
+            <th style="width:80px" class="sag">Süre</th>
+            <th style="width:110px" class="sag">Br. ücret</th>
+            <th style="width:110px" class="sag">Tutar</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>16.09.2026</td><td>M. Tuna</td>
+              <td>Teşhis, su hattı söküm ve basınç ölçümü</td>
+              <td class="sag">1,5 sa</td><td class="sag">900,00</td><td class="sag">1.350,00</td></tr>
+            <tr><td>17.09.2026</td><td>M. Tuna</td>
+              <td>Selenoid valf değişimi, hat temizliği</td>
+              <td class="sag">2,0 sa</td><td class="sag">900,00</td><td class="sag">1.800,00</td></tr>
+            <tr><td>17.09.2026</td><td>E. Demir</td>
+              <td>Koltuk motor kartı ölçümü (ikinci teknisyen)</td>
+              <td class="sag">0,5 sa</td><td class="sag">900,00</td><td class="sag">450,00</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="3" class="sag"><b>İşçilik toplamı</b></td>
+            <td class="sag"><b>4,0 sa</b></td><td></td><td class="sag"><b>3.600,00</b></td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="gb">Parça <span class="sp">stoktan çıkar — depo "Teknik servis parça deposu" ayarından</span></div>
+      <div class="dg">
+        <table>
+          <thead><tr>
+            <th style="width:120px">Stok kodu</th>
+            <th>Parça</th>
+            <th style="width:90px" class="orta">Miktar</th>
+            <th style="width:110px" class="sag">Birim fiyat</th>
+            <th style="width:110px" class="sag">Tutar</th>
+            <th style="width:120px" class="orta">Durum</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>SRV-0184</td><td>Su selenoid valfi 24V</td>
+              <td class="orta">1</td><td class="sag">1.450,00</td><td class="sag">1.450,00</td>
+              <td class="orta"><span class="rz ok">çıkıldı</span></td></tr>
+            <tr><td>SRV-0219</td><td>Filtre seti (su + hava)</td>
+              <td class="orta">1</td><td class="sag">380,00</td><td class="sag">380,00</td>
+              <td class="orta"><span class="rz ok">çıkıldı</span></td></tr>
+            <tr><td>SRV-0455</td><td>Koltuk motor kartı rölesi</td>
+              <td class="orta">2</td><td class="sag">210,00</td><td class="sag">420,00</td>
+              <td class="orta"><span class="rz sari">stokta yok · sipariş</span></td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="4" class="sag"><b>Parça toplamı</b></td>
+            <td class="sag"><b>2.250,00</b></td><td></td></tr></tfoot>
+        </table>
+      </div>
+      <div class="ic">
+        Stokta olmayan parça <b>satınalma talebine</b> dönüşür ve iş emri "parça bekliyor"
+        durumuna geçer — teknisyen beklerken iş emri kapanmış görünmesin.
+        Parça çıkışı <b>gerçek stok hareketidir</b>: servisten çıkan parça depodan düşer,
+        iş emri iptal olursa iade hareketi yazılır.
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================== ÜCRET & BELGE ==== -->
+  <div class="pnl" data-s="ucret">
+    <div class="grp">
+      <div class="gb">Ücretlendirme
+        <span class="sp">yalnız DIŞ işte doludur</span></div>
+      <div class="hdr k4">
+        <div class="fld"><label>İşçilik</label><div class="inp ro">3.600,00 ₺</div></div>
+        <div class="fld"><label>Parça</label><div class="inp ro">2.250,00 ₺</div></div>
+        <div class="fld"><label>Diğer (nakliye)</label><div class="inp">1.000,00 ₺</div></div>
+        <div class="fld"><label>Toplam</label><div class="inp big ro">6.850,00 ₺</div></div>
+      </div>
+      <div class="hdr k4">
+        <div class="fld"><label>Fiyat listesi</label><div class="inp combo">Servis 2026</div></div>
+        <div class="fld"><label>İskonto</label><div class="inp">%0</div></div>
+        <div class="fld"><label>Garanti kapsamı</label>
+          <div class="inp ro"><span class="rz kir">Kapsam dışı</span> — ücretli</div></div>
+        <div class="fld"><label>Teklif durumu</label>
+          <div class="inp ro"><span class="rz sari">Gönderildi · onay bekliyor</span></div></div>
+      </div>
+      <div class="ic">
+        <b>Garanti / sözleşme kapsamındaysa</b> tutar hesaplanır ama <b>tahsil edilmez</b>:
+        satır "kapsam" işaretiyle sıfırlanır. Sıfır yazmak yerine kapsamı işaretlemek,
+        "bu işin maliyeti neydi" sorusunu sonradan da cevaplanabilir bırakır — firma
+        performansı ve sözleşme kârlılığı buradan ölçülür.
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="gb">Belge</div>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:150px">Belge</th><th style="width:130px">No</th>
+            <th style="width:110px">Tarih</th><th style="width:120px" class="sag">Tutar</th>
+            <th>Not</th></tr></thead>
+          <tbody>
+            <tr><td>Servis teklifi</td><td>TK-2026/0311</td><td>17.09.2026</td>
+              <td class="sag">6.850,00</td><td>Müşteriye e-posta ile gönderildi</td></tr>
+            <tr><td>Fatura</td><td class="sonuk">—</td><td class="sonuk">—</td>
+              <td class="sag sonuk">—</td>
+              <td>Teslimde kesilir; iş emri kalemleri <b>faturaya birebir</b> aktarılır</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ic">
+        <span class="rz mor">HBYS / iç iş</span> bu sekmede belge göstermez: karşılığında
+        <b>maliyet birime</b> yazılır (bütçe ve birim maliyet raporlarına girer) ve tutar
+        eşiği aşarsa <b>onay zinciri</b> çalışır — masraflı onarım onayı zaten var.
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================== EMANET & YEDEK ==== -->
+  <div class="pnl" data-s="emanet">
+    <div class="grp">
+      <div class="gb">Emanet / Yedek Cihaz
+        <span class="sp">müşteriye verilen veya kurum içinde yerine konan cihaz</span></div>
+      <div class="hdr k4">
+        <div class="fld"><label>Verilen cihaz</label>
+          <div class="inp">Dental ünit (emanet havuzu) · EM-014</div></div>
+        <div class="fld"><label>Veriliş</label><div class="inp ro">16.09.2026 11:35</div></div>
+        <div class="fld"><label>İade</label><div class="inp ro">—</div></div>
+        <div class="fld"><label>Durum</label>
+          <div class="inp ro"><span class="rz sari">Müşteride</span></div></div>
+      </div>
+      <div class="ic">
+        Emanet cihaz <b>satış değildir</b>: stoktan düşmez, ayrı bir emanet hareketiyle
+        izlenir ve iş emri kapanırken iadesi sorulur. İade edilmeden iş emri
+        <b>kapanmaz</b> — kapanan iş emriyle birlikte unutulan emanet cihaz, envanterde
+        var görünüp sahada olmayan cihaz demektir.
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="gb">Kurum içi karşılığı <span class="sp">HBYS</span></div>
+      <div class="ic">
+        İç işte aynı alan <b>yedek cihaz atama</b>dır: YBÜ'deki ventilatör servise
+        alınırken yerine yedeği atanır ve o cihaz "kullanımda" görünür. Yaşam destek
+        cihazında yedek atanmadan cihaz servise <b>alınamaz</b>.
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================= CİHAZ GEÇMİŞİ ==== -->
+  <div class="pnl" data-s="gecmis">
+    <div class="grp">
+      <div class="gb">Bu cihazın servis geçmişi
+        <span class="sp">seri numarasına göre — müşteri cihazında envanter kaydı yok</span></div>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:120px">İş emri</th><th style="width:110px">Tarih</th>
+            <th>Yapılan iş</th><th style="width:120px" class="orta">Kapsam</th>
+            <th style="width:110px" class="sag">Tutar</th></tr></thead>
+          <tbody>
+            <tr><td>SE-2609-0142</td><td>16.09.2026</td><td><b>(bu iş emri)</b> Su hattı + koltuk kartı</td>
+              <td class="orta">Ücretli</td><td class="sag">6.850,00</td></tr>
+            <tr><td>SE-2603-0077</td><td>11.03.2026</td><td>Türbin başlığı değişimi</td>
+              <td class="orta">Ücretli</td><td class="sag">3.200,00</td></tr>
+            <tr><td>SE-2511-0410</td><td>22.11.2025</td><td>Periyodik bakım (yıllık)</td>
+              <td class="orta">Sözleşme</td><td class="sag">0,00</td></tr>
+            <tr><td>SE-2502-0139</td><td>07.02.2025</td><td>Su selenoid valfi — <b>aynı arıza</b></td>
+              <td class="orta">Garanti</td><td class="sag">0,00</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ic">
+        <span class="rz kir">Tekrar eden arıza</span> işaretli: aynı parça 19 ay içinde
+        ikinci kez arızalandı. Tekrar eden arıza, teknisyene <b>farklı bir teşhis</b>
+        aratmalı ve garanti/sözleşme görüşmesine girdi olmalı - listede yalnız bir satır
+        daha olarak geçmesi, kronik sorunu görünmez kılıyordu.
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================= BELGELER ==== -->
+  <div class="pnl" data-s="belge">
+    <div class="grp">
+      <div class="gb">Belgeler ve Fotoğraflar
+        <span class="sp">doküman modülü · kaynak = servis iş emri</span></div>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:190px">Ad</th><th style="width:150px">Tür</th>
+            <th style="width:110px">Tarih</th><th>Not</th></tr></thead>
+          <tbody>
+            <tr><td>teslim-alma-formu.pdf</td><td>Teslim Alma Formu</td><td>16.09.2026</td>
+              <td>Müşteri imzalı — teslim alınan aksesuarlar listeli</td></tr>
+            <tr><td>kasa-cizik-1.jpg</td><td>Teslim Durumu Fotoğrafı</td><td>16.09.2026</td>
+              <td>Var olan hasar kayıt altına alındı</td></tr>
+            <tr><td>valf-sokum.jpg</td><td>Müdahale Fotoğrafı</td><td>17.09.2026</td>
+              <td>Tıkalı valf — teklife dayanak</td></tr>
+            <tr><td>teklif-TK-2026-0311.pdf</td><td>Teklif</td><td>17.09.2026</td>
+              <td>Gönderildi</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ic">
+        <b>Teslim alma fotoğrafı</b> zorunludur: cihazdaki var olan hasar teslimde
+        belgelenmezse, teslimde çıkan tartışmanın tarafı olmayan bir kayıt kalmıyor.
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span><b>Kapanış kuralı:</b> emanet cihaz iade edilmeden ve test adımı geçilmeden
+      iş emri kapanmaz.</span>
+    <span class="sp">Dış işte fatura kesilmeden iş emri "faturalandı" olmaz — teslim ile
+      tahsil ayrı adımlardır.</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Neden tek modül:</b> ERP'de teknik servis <i>müşterinin</i> cihazını onarır ve para
+  kazanır; HBYS'de <i>kurumun</i> cihazını onarır ve maliyet üretir. Yapılan iş aynıdır:
+  arıza gelir, teşhis konur, parça takılır, işçilik harcanır, cihaz test edilip teslim
+  edilir. İki ayrı modül yazmak, aynı süreci iki yerde ayrı ayrı bakmak olurdu — parça
+  çıkışı, işçilik kaydı ve cihaz geçmişi ikiye bölünürdü.
+  <br><br>
+  <b>Ayrımı taşıyan tek alan:</b> <code>sahiplik</code> (iç demirbaş / dış müşteri).
+  Ücret, teklif ve fatura sekmeleri yalnız dış işte dolar; iç işte maliyet birime yazılır
+  ve eşik aşılırsa var olan <b>masraflı onarım onay zinciri</b> çalışır.
+  <br><br>
+  <b>Var olanın üstüne kurulur:</b> <code>demirbas_is_emri</code> tablosu (iç iş emri,
+  arıza/bakım/kalibrasyon) zaten duruyor ve HBYS tarafını karşılıyor. Eksik olan, iş
+  emrinin sahibinin <b>müşteri</b> olabilmesi ve ücret/teklif/fatura yolunun açılması.
+  Stok çıkışı için <b>teknik servis parça deposu</b> ayarı da hazır.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>
