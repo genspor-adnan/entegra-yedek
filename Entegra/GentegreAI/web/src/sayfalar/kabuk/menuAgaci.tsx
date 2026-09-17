@@ -137,7 +137,13 @@ export const GRUP_IKON: Record<string, string> = {
   'Diş': '🦷',
   'FTR': '🏃',
   'İşyeri Hekimliği': '👷',
-  'Medula': '🏛️',
+  // MEDULA'YA KENDI IKONU (kullanici): 🏛️ hem burada hem "Kurumlar &
+  //   Sigorta"da duruyordu - iki farkli menu grubu ayni simgeyle cizilince
+  //   goz once ikona takiliyor ve yanlis gruba tikliyordu. 🏛️ KURUM kartini
+  //   anlatan simge olarak kaldi (hasta seridi ve tahsilatta da kuruma
+  //   kesilen belgeyi o gosteriyor); Medula bir kurum degil, SGK'ya baglanan
+  //   provizyon/fatura kanalidir - kalkan sosyal GUVENCEYI anlatiyor.
+  'Medula': '🛡️',
   'Yatan Hasta': '🛏️',
   // e-Nabiz (kullanici): Radyolojiden sonra ayri ana menu. Bayrak emojisi
   //   Windows'ta harf olarak ciziliyordu; "nabiz" = atan kalp.

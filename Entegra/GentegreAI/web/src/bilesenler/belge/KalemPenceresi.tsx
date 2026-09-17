@@ -10,20 +10,16 @@ import { baslangicBrutMetni, bruta, moduCevir } from '../../sayfalar/belgeKarti/
 // FIYAT / ISKONTO MATEMATIGI SAF MODULDE (refaktor): uc kutu ayni alani yazar
 //   ve ayni tabana bakmak zorunda - kural bilesenin icinde dururken uc ayri
 //   hata oradan cikti. Hesap degismedi, yeri degisti; testi kalemFiyat.test.ts.
-import { fiyattanOran, oranKirp as oranKirpCoz }
-  from '../../sayfalar/belgeKarti/kalemFiyat';
 // TURETILMIS DURUM SAF MODULDE: sira hatasi (TDZ) bir daha 1000 satira
 //   yayilmasin - sebebi `kalemDurumu.ts` bastaki yorumda.
-import {
-  type SagMod, kalemDurumu, sagKutuGorunumu,
-} from '../../sayfalar/belgeKarti/kalemDurumu';
+import { kalemDurumu } from '../../sayfalar/belgeKarti/kalemDurumu';
+// ISKONTO ve ONIZLEME kendi dosyalarinda: ilki kendi state'ini tasiyor,
+//   ikincisi hicbir sey yazmiyor.
+import { KalemIskontosu } from './kalem/KalemIskontosu';
+import { KalemOnizlemesi } from './kalem/KalemOnizlemesi';
 import { IzlemPenceresi } from './IzlemPenceresi';
 import { SAF_SGK_ROTA } from '../../sayfalar/belgeKartiKurallari';
 import { useOturum } from '../../kimlik/OturumBaglami';
-
-/** İskonto combosunun hazır oranları; sonuncusu serbest giriş (661). */
-/** İskonto combosunun hazır oranları: %5'ten %50'ye beşer beşer (kullanıcı). */
-const ISKONTO_ORANLARI = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
 
 export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparisMi,
                          basvuruMu, ustSerit, tarifeTipi = 0, rota = 0,
@@ -151,8 +147,8 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    * Eksik degeri "sinirsiz" saymak, degeri girilmemis her rolu serbest
    * birakirdi.
    */
+  //   Tavani `KalemIskontosu` yorumluyor (0 = kutu kapali).
   const iskontoTavani = basvuruMu ? aksiyonDegeri('basvuru.iskonto') : 100;
-  const iskontoYapilir = iskontoTavani > 0;
 
   const degis = (alan: keyof SatirDurumu, deger: string | number) =>
     setR(x => ({ ...x, [alan]: deger }));
@@ -206,15 +202,14 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    * AYNI ADLARLA ACILIYOR: asagidaki 600 satirlik JSX'e dokunulmadi -
    * refaktor davranisi degistirmemeli, gorunurlugu degistirmeli.
    */
-  const {
-    dovizli, adet, etkinRota, sgkKilitli, anaBirimMiktar, kur, fiyat,
-    onizlemeTutar, sutKutusu, kurumRotasi, fiyatKilitli, katkiVar,
-    katkiTutari, iskontoTabani, onizlemeBirim, iskontoluMu, oranSayi,
-    gosterimTabani, tutarIskontosu, hedefFiyat, tabanAdi, izlemGerekli, fg,
-  } = kalemDurumu({
+  const d = kalemDurumu({
     r, rota, tarifeTipi, basvuruMu: !!basvuruMu, yerelPara, kdvDahil,
     brutMetni, girisIzlemi, cikisIzlemi,
   });
+  // Kalan JSX'in dogrudan okudugu alanlar - alt bilesenler `d`yi butun alir.
+  const { dovizli, adet, etkinRota, sgkKilitli, anaBirimMiktar, kur, fiyat,
+          sutKutusu, kurumRotasi, fiyatKilitli, katkiVar, katkiTutari,
+          izlemGerekli } = d;
 
   useEffect(() => {
     if (!dovizli || kurElle.current) return;
@@ -227,70 +222,14 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   }, [dovizli, r.fiyatDovizi, belgeTarihi]);
 
   /**
-   * SAG KUTUNUN ANLAMI COMBODAN GELIR (kullanici):
-   *   hazir oran     -> SALT GORUNUM iskonto TUTARI (200 TL'nin %10'u = 20)
-   *   "Özel İskonto" -> ORAN girilir (%)
-   *   "Birim Fiyat"  -> hedef BIRIM FIYAT girilir; fark orana cevrilir
+   * ISKONTO YAZILIRKEN GORUNMEYEN 2. SLOT HER ZAMAN SIFIRLANIR.
    *
-   * Ucu de AYNI alani (`iskonto`) yazar - satirda saklanan tek sey yuzdedir.
-   * Hazir oranda kutu READONLY: oran zaten combodan secildi, ayni sayiyi iki
-   * yerden degistirilebilir birakmak "hangisi kazanir" sorusu uretirdi.
+   * Orani nasil hesapladigini `KalemIskontosu` bilir (mod, kutu, tavan);
+   * pencereye yalnizca SONUC doner - satirda saklanan tek sey yuzdedir.
    */
-  const [sagMod, setSagMod] = useState<SagMod>(
-    oranSayi > 0 && !ISKONTO_ORANLARI.includes(oranSayi) ? 'oran' : 'tutar');
-  /**
-   * YAZILMAKTA OLAN HAM METIN (kullanici: "combodan birim fiyat sectim ama
-   * giremedim").
-   *
-   * Kutu kontrollu ve degeri MODELDEN turetiliyordu: her tusta sayiya
-   * cevrilip `para.format` ile geri yaziliyordu. "1" yazinca kutu aninda
-   * "1,00" oluyor, imlec kayiyor ve ikinci rakam yazilamiyordu; virgul de
-   * yutuluyordu.
-   *
-   * Cozum: odak KUTUDAYKEN kullanicinin yazdigi metin gosterilir (model yine
-   * her tusta guncellenir - onizleme canli kalir), odak cikinca null'a doner
-   * ve bicimlenmis hali gorunur.
-   */
-  const [sagMetin, setSagMetin] = useState<string | null>(null);
-  const { oranSecimi, deger: sagDeger, etiket: sagEtiket,
-          baslik: sagBaslik } = sagKutuGorunumu(
-    { oranSayi, gosterimTabani, hedefFiyat, tutarIskontosu, tabanAdi },
-    sagMod, String(r.iskonto), yerelPara);
-
-  /** Iskonto yazilirken gorunmeyen 2. slot her zaman sifirlanir. */
   const iskontoYaz = (oran: number | string) =>
     setR(x => ({ ...x, iskonto: String(oran), iskonto2: '0' }));
 
-  /** Oran tavani asmasin - her yoldan gelen deger buradan gecer. */
-  const oranKirp = (oran: number) => oranKirpCoz(oran, iskontoTavani);
-
-  /** Sag kutuya yazildi: moda gore orana cevrilir. */
-  const sagYaz = (metin: string) => {
-    const sayi = hamSayi(metin);
-    if (sagMod === 'oran') {
-      iskontoYaz(metin === '' ? '' : oranKirp(sayi));
-      return;
-    }
-    // Hazir oranda kutu salt gorunum - buraya hic gelinmez.
-    if (sagMod !== 'fiyat' || !(gosterimTabani > 0)) return;
-    // HEDEF BIRIM FIYAT -> ORAN. Kullanici EKRANDAKI (KDV dahil) fiyati yazar;
-    //   oran ayni tabana gore hesaplandigi icin matrah/brut farki onemsiz.
-    //   Girilen fiyat asil fiyattan buyukse iskonto 0'dir (bu kutudan ZAM
-    //   yapilamaz - fiyati yukseltmek fiyat listesinin isidir); tavan gecerli.
-    if (!(sayi > 0)) { iskontoYaz(0); return }
-    iskontoYaz(oranKirp(fiyattanOran(fg, sayi)));
-  };
-
-  /** Combo secimi: hazir oran, "Özel İskonto" ya da "Birim Fiyat" kutusu. */
-  const oranSec = (v: string) => {
-    // Mod degisince yazilmakta olan ham metin DUSER: eski modun sayisi
-    //   (or. %10) yeni modda (birim fiyat) baska sey demektir.
-    setSagMetin(null);
-    if (v === 'ozel')  { setSagMod('oran');  return }
-    if (v === 'fiyat') { setSagMod('fiyat'); return }
-    setSagMod('tutar');
-    iskontoYaz(v === '' ? 0 : v);
-  };
   /* `izlemGerekli` artik `kalemDurumu`dan geliyor (db/114 kurali orada). */
 
   function kaydet() {
@@ -661,86 +600,19 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
             {/* ISKONTO, KDV'DEN ONCE (kullanici: "kdv ve iskonto satirlari
                 yer degissin"): kayit kabulde fiyat girildikten sonraki ilk
                 soru indirimdir; KDV zaten listeden gelen sabit oran, elle
-                dokunulan bir alan degil. */}
-            {!transferMi && !vergisiz && (
-            <label className="alan">
-              {/* ISKONTO TABANI (586): Özel'de satirin tek fiyati, TTB/SUT'ta
-                  hastanin katki payi. Kurumun odedigi SUT/tarife bedeli
-                  indirimden ETKILENMEZ - hastaneyle hasta arasindaki anlasma
-                  SGK'nin odemesini kisamaz. Hesap sunucuda. */}
-              <span className="etiket">
-                İskonto{katkiVar ? ' (katkı üzerinden)' : ''}</span>
-              <span className="ikili">
-                {/* SOL: ORAN COMBOSU - %0'dan %50'ye birer birer (kullanici).
-                    Tavanin USTUNDEKI oranlar listeye HIC girmez: secilemeyen
-                    secenek gostermek, kullaniciyi sunucudan red yemeye
-                    gonderirdi.
+                dokunulan bir alan degil.
 
-                    Son iki secenek sag kutunun ANLAMINI degistirir:
-                      hazir oran     -> sagda SALT GORUNUM tutar karsiligi
-                      "Özel İskonto" -> sagda serbest yuzde
-                      "Birim Fiyat"  -> sagda hedef birim fiyat / katki */}
-                <select className="birim" style={{ width: 138 }}
-                        value={oranSecimi} disabled={!iskontoYapilir}
-                        title={iskontoYapilir
-                          ? `İskonto oranı (en çok %${iskontoTavani})`
-                          : 'İskonto yetkiniz yok (Yetkiler › Başvuru › '
-                            + 'Başvuruda iskonto)'}
-                        onChange={e => oranSec(e.target.value)}>
-                  <option value="">%0</option>
-                  {ISKONTO_ORANLARI.filter(o => o <= iskontoTavani)
-                    .map(o => <option key={o} value={String(o)}>%{o}</option>)}
-                  <option value="ozel">Özel İskonto…</option>
-                  {/* "Birim Fiyat…" -> "Fiyat Gir…" (kullanici): combo bir
-                      EYLEM listesi - oteki secenekler oran veriyor, bu secenek
-                      kutuyu fiyat girisine ceviriyor. Alan adini tekrarlamak
-                      ne yapacagini soylemiyordu. */}
-                  <option value="fiyat">
-                    {sgkKilitli ? 'Katkı Gir…' : 'Fiyat Gir…'}
-                  </option>
-                </select>
-                {/* SAG: TEK KUTU, anlami moda gore (kullanici). Ucu de ayni
-                    alani yazar - satirda saklanan tek sey YUZDEDIR:
-                      tutar  -> tutar / taban
-                      oran   -> dogrudan
-                      fiyat  -> (1 - hedef / asil) x 100
-                    Ayri bir "tutar iskontosu" kolonu acmak, ayni tutarin iki
-                    formulle hesaplandigi ikinci bir yol demekti. */}
-                {/* ETIKET UST KUTUYU IZLER (kullanici: "üstte birim fiyatsa
-                    birim fiyat, katkı ise katkı yazar"): saf SGK'da iskonto
-                    birim fiyata degil HASTA KATKISINA isler (fn_dagilim_coz),
-                    ust kutuda da "Hasta Katkısı" yazar. */}
-                <span className="birim-metin">{sagBaslik}</span>
-                <input className="hiza-sag iskonto-deger" value={sagMetin ?? sagDeger}
-                       onKeyDown={tus} disabled={!iskontoYapilir}
-                       /* HAZIR ORANDA SALT GORUNUM: oran combodan secildi,
-                          buradaki sayi onun TUTAR karsiligi. Ayni orani iki
-                          yerden degistirilebilir birakmak "hangisi kazanir"
-                          sorusu uretirdi. */
-                       readOnly={sagMod === 'tutar'}
-                       placeholder={sagMod === 'oran' ? 'oran'
-                                  : sagMod === 'fiyat'
-                                  ? tabanAdi.toLocaleLowerCase('tr') : ''}
-                       title={sagMod === 'oran'
-                         ? `Serbest iskonto oranı (en çok %${iskontoTavani})`
-                         : sagMod === 'fiyat'
-                         ? `İskonto sonrası ${tabanAdi.toLocaleLowerCase('tr')}`
-                           + ` - asıl değere (${para.format(iskontoTabani)}) göre`
-                           + ' oran hesaplanır'
-                         : `Seçilen oranın tutar karşılığı (${para
-                             .format(gosterimTabani)} × %${oranSayi})`
-                           + (kdvDahil ? ' - KDV dahil' : '')}
-                       onFocus={e => { if (sagMod !== 'tutar') setSagMetin(e.target.value) }}
-                       onBlur={() => setSagMetin(null)}
-                       onChange={e => { setSagMetin(e.target.value); sagYaz(e.target.value) }} />
-                <span className="birim-metin">{sagEtiket}</span>
-              </span>
-              {!iskontoYapilir && (
-                <span className="ipucu">
-                  İskonto yetkiniz yok - Yetkiler › Başvuru › “Başvuruda iskonto”.
-                </span>
-              )}
-            </label>
+                Blogun kendisi `kalem/KalemIskontosu`da: kutunun modu ve
+                yazilmakta olan metni yalniz orada anlamli. */}
+            {!transferMi && !vergisiz && (
+              <KalemIskontosu
+                d={d}
+                iskontoTutari={String(r.iskonto)}
+                iskontoTavani={iskontoTavani}
+                kdvDahil={kdvDahil}
+                yerelPara={yerelPara}
+                tus={tus}
+                onYaz={iskontoYaz} />
             )}
 
             {/* KDV SATIRI BASVURUDA CIZILMEZ (kullanici): oran hizmet
@@ -836,56 +708,16 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                      onChange={e => degis('aciklama', e.target.value)} />
             </label>
 
-            {/* ONIZLEME BOLUMU (mockup'ta ayri bir `.grp` kutusu): girilen
-                alanlarla HESAPLANAN alanlar arasinda gorsel bir sinir olmali -
-                duz liste icinde salt gorunum kutular girilebilir sanilliyordu. */}
-            {!transferMi && (
-              <div className="alan-ayrac">Önizleme</div>
-            )}
+            {/* ONIZLEME (mockup'ta ayri bir `.grp` kutusu): hesaplanan
+                alanlar `kalem/KalemOnizlemesi`de - hicbiri yazilabilir
+                degil, lot kutusuna tiklama disinda. */}
+            <KalemOnizlemesi
+              d={d}
+              transferMi={transferMi}
+              yerelPara={yerelPara}
+              izlemler={r.izlemler}
+              onIzlemAc={() => setIzlemAcik(true)} />
 
-            {/* ISKONTO SONRASI BIRIM (602): yalniz iskonto VARSA cizilir -
-                iskontosuz satirda ust kutudaki sayinin aynisi olurdu. */}
-            {!transferMi && iskontoluMu && (
-            <label className="alan">
-              {/* "(önizleme, KDV dahil)" eki KALKTI (kullanici): kutu zaten
-                  salt gorunum ve basvuruda KDV her zaman dahil - her satirda
-                  tekrarlanan parantez etiketi uzatiyordu. */}
-              <span className="etiket">
-                İskontolu {sgkKilitli ? 'Hasta Katkısı' : 'Birim Fiyat'}</span>
-              <input className="hiza-sag onizleme"
-                     value={para.format(onizlemeBirim)} readOnly />
-              {/* NE UYGULANDIGI YAZAR (661): kutudaki sayi sonuctur, hangi
-                  oran ve hangi tutarin dusuldugu gorunmuyordu - "100 TL
-                  yazdim, dogru mu indi" sorusu ancak hesap makinesiyle
-                  cevaplaniyordu. */}
-              <span className="ipucu">
-                {para.format(gosterimTabani)} − %{oranSayi}
-                {tutarIskontosu > 0.004 && <> ({para.format(tutarIskontosu)} {yerelPara})</>}
-                {' = '}<b>{para.format(onizlemeBirim)} {yerelPara}</b>
-              </span>
-            </label>
-            )}
-
-            {!transferMi && (
-            <label className="alan">
-              <span className="etiket">
-                Tutar</span>
-              <input className="hiza-sag onizleme"
-                     value={para.format(onizlemeTutar)} readOnly />
-            </label>
-            )}
-
-            {/* Izlemli stokta girilmis lotlarin ozeti - kalem penceresine
-                donuldugunde dagitimin yapildigi gorunsun. */}
-            {izlemGerekli && r.izlemler.length > 0 && (
-              <label className="alan">
-                <span className="etiket">Lot / Seri</span>
-                <input className="onizleme" readOnly
-                       value={r.izlemler.map(z => `${z.lotNo || z.seriNo} (${z.miktar})`).join(', ')}
-                       onClick={() => setIzlemAcik(true)}
-                       title="Değiştirmek için tıklayın" />
-              </label>
-            )}
           </div>
         </div>
 

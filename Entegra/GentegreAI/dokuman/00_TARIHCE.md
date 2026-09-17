@@ -12439,3 +12439,60 @@ Ekranda da doğrulandı: kalem seçildi, %10 iskonto uygulandı, karşılığı
 
 vitest 614/614 (+12), derleme temiz. **Sunucuya yayınlanmadı** - davranış
 değişmedi, bir sonraki yayınla gider.
+
+---
+
+## 17.09.2026 — Kalem penceresi: iskonto ve önizleme kendi dosyalarına
+
+Kullanıcı: *"iskonto ve önizlemeyi çıkar"* (bölmenin faydalı olduğu iki blok;
+Birim Fiyat bilerek bırakıldı - `kdvDahil`/`brutMetni` state'ini önizleme ve
+`kaydet` ile paylaşıyor, çıkarmak 8+ prop'u iki yönde gezdirmek olurdu).
+
+**`kalem/KalemIskontosu`** (81 satır JSX + işleyiciler). Uzunluğu için değil
+**sahipliği** için: `sagMod`, `sagMetin`, `sagYaz`, `oranSec`, `oranKirp` ve
+`sagKutuGorunumu` yalnız bu blokta anlamlıydı, kalem penceresinde ilgisiz 800
+satırın arasına dağılmıştı. Pencereye geri giden tek şey **orandır** -
+satırda saklanan da o.
+
+**`kalem/KalemOnizlemesi`** (53 satır). Hiçbir şey yazmıyor (lot kutusuna
+tıklama dışında); hesabı `kalemDurumu` yapıyor, burası yalnız biçimliyor.
+
+**Ölçü.** Pencere 911 → **743 satır**; iki bileşen 183 + 77. Bu turla birlikte
+kalem penceresi 1075'ten 743'e indi ve taşıdığı state iki `useState` azaldı.
+
+**Doğrulama.** vitest 614/614, derleme temiz; ekranda kalem seçildi, %10
+iskonto uygulandı, `2.000,00 − %10 (200,00 TL) = 1.800,00 TL` - sayfa hatası
+yok.
+
+---
+
+## 17.09.2026 — Menü: Medula'nın kendi ikonu
+
+Kullanıcı: *"medula nın ikonunu değiştir"*.
+
+`🏛️` **iki grupta birden** duruyordu - Medula ve "Kurumlar & Sigorta". Aynı
+simgeyle çizilen iki menü grubunda göz önce ikona takılır ve yanlış gruba
+tıklanır. `🏛️` kurum kartını anlatan simge olarak kaldı (hasta şeridinde ve
+tahsilatta da kuruma kesilen belgeyi o gösteriyor); Medula bir kurum değil,
+SGK'ya bağlanan provizyon/fatura kanalıdır - **`🛡️`** sosyal güvenceyi
+anlatıyor.
+
+---
+
+## 17.09.2026 — Sunucuda "Acil" menüde yok: kod değil AYAR
+
+Kullanıcı: *"serverda hasta akışına acil gelmemiş"*.
+
+Kod ve yetki tarafı **aynı**: yayınlanan paket `Triyaj ve Kabul`u içeriyor,
+`acil%` yetkisi iki tarafta da 8 tanım / 8 rol bağı (Yönetici rolünde).
+Fark `kurum_profil.moduller`de - şube 1 için:
+
+| | moduller |
+|---|---|
+| yerel | dis · ftr · goz · isg · **acil** · form · **eczane** · enabiz · **satinalma** · yatan_hasta · **ameliyathane** · teleradyoloji |
+| sunucu | dis · ftr · goz · isg · form · enabiz · yatan_hasta · teleradyoloji |
+
+Yani sunucuda **acil, eczane, satınalma ve ameliyathane** kapalı; menü de
+bunu doğru uyguluyor (360: kurum profilinde kapalı modül menüde hiç
+görünmez). Düzeltme bir kod değişikliği değil, **Kurum Profili** ekranından
+modülün açılması. Canlı kurulumun ayarına kendiliğinden dokunulmadı.
