@@ -2077,6 +2077,61 @@ public static class AksiyonKatalogu
                      Sira: 15, UrunModu: 2, Bicim: "onay",
                      Ipucu: "Sonuç ölçümlerden türer; sınır dışı ölçümde 'uygun' seçilemez")],
 
+            // ============================================= TEKNIK SERVIS (773) ==
+            //  UC KATMAN, UC EKRAN: cagri (SLA isliyor) -> is emri (yapilan
+            //  is) -> ziyaret (bir gidis). Aksiyonlar da o sirayi izler.
+            ["servis-cagri-liste"] =
+                [.. Crud("servis-cagri", "servis", "servis"),
+                 new("servis-cagri.is-emri", "🗂️ İş Emri Aç", "servis",
+                     KaynakKodu: "servis", Islem: Islem.Ekle,
+                     KayitGerekir: true, Sira: 15, Bicim: "bir",
+                     Ipucu: "Çağrı atandı olur, ilk yanıt zamanı damgalanır"),
+                 new("servis-cagri.cihaz-parki", "📋 Cihaz Parkı", "servis",
+                     Hedef: "sagtus,palet", KaynakKodu: "servis.cihaz",
+                     Islem: Islem.Gor, KayitGerekir: true, Sira: 18,
+                     Ipucu: "Müşterideki cihazlar, garanti ve sözleşme durumu")],
+
+            //  IS EMRI: ziyaret ve emanet buradan yurur; TESLIM ayri aksiyon
+            //  yetkisidir (`servis.teslim`) - duzenlemek ile kapatmak ayni
+            //  sorumluluk degil.
+            ["servis-is-emri-liste"] =
+                [.. Crud("servis-is-emri", "servis", "servis"),
+                 new("servis-is-emri.ziyaret", "🚐 Ziyaret Başlat", "servis",
+                     KaynakKodu: "servis", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 15, Bicim: "bir",
+                     Ipucu: "Varış damgalanır; kapanışta imza ve sonuç sorulur"),
+                 new("servis-is-emri.emanet", "🔄 Emanet Cihaz Ver", "servis",
+                     KaynakKodu: "servis", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 16,
+                     Ipucu: "İade alınmadan iş emri kapanmaz"),
+                 new("servis-is-emri.teslim", "📦 Teslim Et", "servis",
+                     AksiyonYetkisi: "servis.teslim", KayitGerekir: true,
+                     Sira: 20, Bicim: "bir",
+                     Ipucu: "Açık emanet ya da kapanmamış ziyaret varken kapanmaz"),
+                 new("servis-is-emri.ziyaretler", "📍 Ziyaretler", "servis",
+                     Hedef: "sagtus,palet", KaynakKodu: "servis",
+                     Islem: Islem.Gor, KayitGerekir: true, Sira: 22)],
+
+            ["servis-ziyaret-liste"] =
+                [.. Crud("servis-ziyaret", "servis", "servis"),
+                 new("servis-ziyaret.kapat", "✓ Ziyareti Kapat", "servis",
+                     KaynakKodu: "servis", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 15, Bicim: "bir",
+                     Ipucu: "İmza alınamadıysa gerekçe zorunlu")],
+
+            //  ACIK EMANET AYRI LISTE: is emrinin icinde kalirsa kapanan is
+            //  emriyle birlikte gorunmez olur.
+            ["servis-emanet-liste"] =
+                [.. Crud("servis-emanet", "servis", "servis"),
+                 new("servis-emanet.iade", "↩ İade Al", "servis",
+                     KaynakKodu: "servis", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 15, Bicim: "bir")],
+
+            ["taraf-cihaz-liste"] = [.. Crud("taraf-cihaz", "servis", "servis.cihaz")],
+
+            ["servis-sozlesme-liste"] =
+                [.. Crud("servis-sozlesme", "servis", "servis.sozlesme")],
+
             ["demirbas-is-emri-liste"] =
                 [.. Crud("demirbas-is-emri", "demirbas", "demirbas.isemri"),
                  new("demirbas-is-emri.ata", "👤 Ata", "demirbas",

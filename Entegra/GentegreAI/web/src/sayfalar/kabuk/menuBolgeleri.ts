@@ -43,7 +43,11 @@ export const BOLGE_HBYS: MenuBolgesi[] = [
   //   satınalma talebi doğurur, biyomedikalin arızası da öyle; satınalmanın
   //   mal kabulü ikisinin de stoğunu besler. Bunları Finans'ın ve Yönetim'in
   //   içine dağıtmak, günlük tedarik işini iki menü dalına bölerdi.
-  { ad: 'Tedarik & Teknik', renk: '#8a6d3b', gruplar: ['Eczane', 'Satınalma', 'Stok & Hizmet', 'Demirbaş'] },
+  // TEKNIK SERVIS DEMIRBASIN YANINDA (773): ikisi de cihaz onarir -
+  //   biri kurumun cihazini (biyomedikal), oteki musterininkini.
+  { ad: 'Tedarik & Teknik', renk: '#8a6d3b',
+    gruplar: ['Eczane', 'Satınalma', 'Stok & Hizmet', 'Demirbaş',
+              'Teknik Servis'] },
   // Kalite Yönetim grubunun alt grubudur (KlinikKalite); Doküman kendi grubu
   //   (kullanıcı: "kurum dokümanı günlük iş, ayar değil").
   { ad: 'Yönetim',          renk: '#6b7a8b', gruplar: ['İK & Prim', 'Doküman', 'Yönetim'] },

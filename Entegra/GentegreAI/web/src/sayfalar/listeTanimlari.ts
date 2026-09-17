@@ -51,6 +51,7 @@ import { BIYOMEDIKAL_LISTELERI } from './listeTanimlari.Biyomedikal';
 import { SATINALMA_LISTELERI } from './listeTanimlari.Satinalma';
 import { ONAY_LISTELERI } from './listeTanimlari.Onay';
 import { IZIN_LISTELERI } from './listeTanimlari.Izin';
+import { SERVIS_LISTELERI } from './listeTanimlari.Servis';
 import { DOKUM_LISTELERI } from './listeTanimlari.Dokumler';
 import { YONETIM_LISTELERI } from './listeTanimlari.Yonetim';
 
@@ -111,6 +112,7 @@ export const LISTELER: ListeGirdisi[] = [
   ...SATINALMA_LISTELERI,
   ...ONAY_LISTELERI,
   ...IZIN_LISTELERI,
+  ...SERVIS_LISTELERI,
   ...YONETIM_LISTELERI,
   // Grup basina "📊 Dökümler" baglantisi (plan kural 2): her grubun sonunda
   //   ayni oge - kullanici "bu isin dokumu nerede" diye aramasin.

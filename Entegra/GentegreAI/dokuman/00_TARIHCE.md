@@ -12566,3 +12566,57 @@ numara uydurmadık. **Katalog (liste/kart) ve ekranlar yapılmadı** - modül
 bugün yalnız uçlardan çalışıyor.
 
 Göç **773 yalnız docker'da**.
+
+---
+
+## 17.09.2026 — Teknik servis: katalog ve ekranlar (db/774)
+
+Kullanıcı: *"katalog ve ekranları da yap"*.
+
+**Altı liste** (`servis-cagri` · `servis-is-emri` · `servis-ziyaret` ·
+`servis-emanet` · `taraf-cihaz` · `servis-sozlesme`), **beş kart** ve altı
+aksiyon ekranı. İş emri kartı açılmadı: `demirbasIsEmri` aynı tabloyu yazıyor
+ve 773'te genişletildi - ikinci kart, aynı satırın iki ayrı doğrulama
+kümesiyle düzenlenmesi olurdu.
+
+Kartlarda durum ve zaman damgaları **salt okunur**: onları uçlar yazıyor.
+Karttan serbest yazılabilseydi "imzasız ziyaret kapanmaz" ve "açık emanetle
+teslim edilemez" kuralları kartın arkasından dolanılabilirdi.
+
+**Menü.** Yeni grup "Teknik Servis", Tedarik & Teknik bölgesinde Demirbaş'ın
+yanında: ikisi de cihaz onarır - biri kurumun, öteki müşterinin. `menuDuzeni`
+testi iki kuralı hatırlattı: grup tavanı bilinçli yükseltilmeli (28 → 29,
+gerekçesiyle) ve **her grubun sonunda Dökümler** olmalı.
+
+**Bu turda üç şey yakalandı.**
+
+1. **Modül kapısının ardında tanım yoktu.** Ekranlar `modul: 'servis'`e
+   bağlıydı ama `kurum_modul`de öyle bir kod yoktu; rotalar hiç kaydolmadı,
+   altı liste sessizce başka bir ekrana düştü. Aynı mekanizma sunucuda
+   "Acil"i gizleyen şeydi. 774 modülü tanımlıyor - **varsayılan açık değil**:
+   teknik servis her kurumun işi değil, kurum Kurum Profili'nden açar.
+
+2. **Açık çağrı ekranda "Pasif" görünüyordu.** Ortak kural `durum` adlı 0/1
+   kolonunu "Aktif/Pasif" rozetine çeviriyor; çağrı durumu ise 0-8 arası çok
+   değerli. 301'de başvuru listesi aynı tuzağa düşüp kolonu listeden
+   çıkarmıştı. Konvansiyona uyduk: çok değerli durum **sunucuda metne
+   çevrilir** (`durum_adi`), sayısal kolon süzgeç/çip için görünmez kalır.
+   Görünümleri düzeltirken önce kendi kendine referans veren bir tanım
+   yazdım - `create or replace` sonsuz özyineleme üretti; `drop + create` ve
+   kolonu **sona** ekleyerek düzeltildi.
+
+3. **`v_taraf_lookup` diye bir görünüm yok.** Kartlarda dört yerde ona
+   bağlanmıştım; `KodTablosuBeyazListeTestleri` "o kartlar hiç açılmaz"
+   diyerek kırıldı. Doğrusu `v_cari_lookup`.
+
+**Doğrulama.** Altı liste ekranda kendi kolonlarıyla çizildi (11-14 kolon,
+çipler yerinde, API hatası yok); listeden **"İş Emri Aç"** aksiyonu çalıştı ve
+çağrı "Atandı"ya geçti. xUnit 234/234, vitest 614/614, iki derleme temiz.
+Test verisi silindi.
+
+**Kalan:** saha mockup'ındaki **teknisyen çizelgesi** (takvim) ve **ziyaret
+kartının mobil düzeni** yapılmadı; bugün ziyaret listeden yürüyor. Periyodik
+bakımdan iş emri üretimi de (`servis_sozlesme.periyot_ay`) henüz zamanlı işe
+bağlanmadı.
+
+Göç **774 yalnız docker'da**.

@@ -33,7 +33,11 @@ describe('menü düzeni', () => {
     //   AÇMADI - hastanedeki cihaz da bir demirbaş, ekranları mevcut Demirbaş
     //   grubuna girdi; ayrı grup aynı envanteri iki menü dalına bölerdi.
     // 28: İşyeri Hekimliği (741) - OSGB / hastane İSG birimi, kendi iş akışı.
-    expect(GRUPLAR.length).toBeLessThanOrEqual(28);
+    // 29: Teknik Servis (773) - MÜŞTERİNİN cihazını onarır; Demirbaş kurumun
+    //   kendi cihazını izler. İkisi aynı iş emri tablosunu paylaşır ama menüde
+    //   ayrıdır: biyomedikal teknisyeni ile saha servisi aynı kişiler değil ve
+    //   çağrı/SLA/sözleşme yalnız dış işte var. ERP kurulumunda da çıkar.
+    expect(GRUPLAR.length).toBeLessThanOrEqual(29);
   });
 
   it('her grubun sonunda Dökümler var', () => {

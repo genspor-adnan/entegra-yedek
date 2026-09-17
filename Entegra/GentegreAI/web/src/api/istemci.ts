@@ -30,6 +30,7 @@ import { acilUclari } from './uclar/acil';
 import { akisTedarikUclari } from './uclar/akisTedarik';
 import { onayUclari } from './uclar/onay';
 import { izinUclari } from './uclar/izin';
+import { servisUclari } from './uclar/servis';
 import { kasaUclari } from './uclar/kasa';
 import { iskontoUclari } from './uclar/iskonto';
 import { iceriAlmaUclari } from './uclar/iceriAlma';
@@ -50,6 +51,7 @@ export const api = {
   ...akisTedarikUclari,
   ...onayUclari,
   ...izinUclari,
+  ...servisUclari,
   ...listeUclari,
   ...labUclari,
   ...sigortaUclari,

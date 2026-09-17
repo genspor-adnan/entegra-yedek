@@ -84,4 +84,5 @@ export const DOKUM_LISTELERI = [
   // Dokuman kendi ana grubu (kullanici): dokum orada da var - "hangi klasorde
   //   kac dosya, suresi dolan, onayda bekleyen" bir dokum sorusudur.
   dokumOgesi('Doküman'),
+  dokumOgesi('Teknik Servis'),
 ];

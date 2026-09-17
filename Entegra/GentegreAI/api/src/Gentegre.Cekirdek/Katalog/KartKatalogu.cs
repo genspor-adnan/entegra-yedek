@@ -270,6 +270,13 @@ public static partial class KartKatalogu
         Ekle(PersonelMasraf());
         Ekle(PersonelBelgeTalep());
         Ekle(BelgeYaziSablonu());
+        // Teknik servis (773). Is emri karti YOK: demirbasIsEmri ayni
+        //   tabloyu yazar ve 773'te genisletildi.
+        Ekle(ServisCagri());
+        Ekle(ServisZiyaret());
+        Ekle(ServisEmanet());
+        Ekle(TarafCihaz());
+        Ekle(ServisSozlesme());
         // RESMI TATIL (749): is gunu hesabinin dayandigi takvim.
         Ekle(ResmiTatil());
         // ONAY AKISI (742): kurumun imza duzeni - basamaklar, esikler.

@@ -296,6 +296,13 @@ public static partial class KaynakKatalogu
         Ekle(NumaraTedarik());
         Ekle(NumaraIk());
         Ekle(BelgeYaziSablonu());
+        // Teknik servis (773): cagri -> is emri -> ziyaret uc katmani.
+        Ekle(ServisCagri());
+        Ekle(ServisIsEmri());
+        Ekle(ServisZiyaret());
+        Ekle(ServisEmanet());
+        Ekle(TarafCihaz());
+        Ekle(ServisSozlesme());
         Ekle(NumaraSatis());
         Ekle(NumaraAlis());
         Ekle(NumaraTahsilat());

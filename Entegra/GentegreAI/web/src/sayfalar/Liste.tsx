@@ -38,6 +38,7 @@ import { acilAksiyonu } from './liste/acilAksiyonlari';
 import { tedarikAksiyonu } from './liste/tedarikAksiyonlari';
 import { onayAksiyonu } from './liste/onayAksiyonlari';
 import { izinAksiyonu } from './liste/izinAksiyonlari';
+import { servisAksiyonu } from './liste/servisAksiyonlari';
 import { useAmeliyatAcilModallari } from './liste/useAmeliyatAcilModallari';
 import { AmeliyatAcilModallari } from './liste/AmeliyatAcilModallari';
 import { ilacAksiyonu } from './liste/ilacAksiyonlari';
@@ -505,6 +506,14 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       // İZİN (743): talep · onaya gönder · bakiye · iptal. Karar YOK -
       //   onay kutusundan ya da zincirden verilir.
       if (await izinAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
+      })) return;
+
+      // TEKNIK SERVIS (773): cagri -> is emri -> ziyaret. Iki kapi UCTA -
+      //   imzasiz ziyaret kapanmaz, acik emanetle teslim edilmez; ekran
+      //   yalnizca soruyu sorar ve reddi gosterir.
+      if (await servisAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
         git: yol => git(yol),
       })) return;
