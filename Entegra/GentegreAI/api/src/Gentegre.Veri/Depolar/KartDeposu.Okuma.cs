@@ -290,7 +290,7 @@ public sealed partial class KartDeposu
             // Departman/bolum (251): personel kartinda tum departmanlar, randevu
             //   kartinda yalniz randevu verilebilen bolumler.
             "public.v_departman_lookup", "public.v_randevu_bolum_lookup", "public.v_sube_lookup",
-            "public.v_ftr_hizmet_lookup", "public.v_ftr_unite_lookup", "public.v_ftr_kabin_lookup", "public.v_ftr_degerlendirme_lookup", "public.v_ftr_program_lookup",
+            "public.v_form_sablon_lookup", "public.v_isg_firma_lookup", "public.v_isg_isveren_lookup", "public.v_isg_bolum_lookup", "public.v_isg_calisan_lookup", "public.v_ftr_hizmet_lookup", "public.v_ftr_unite_lookup", "public.v_ftr_kabin_lookup", "public.v_ftr_degerlendirme_lookup", "public.v_ftr_program_lookup",
             // BOLUM AGACI (577): ust_id tasiyan gorunum - duz lookup agac cizemez.
             "public.v_departman_agac_lookup",
             // Personel gorevi (255) - departmana bagli combo.
@@ -410,6 +410,9 @@ public sealed partial class KartDeposu
             // Mal kabul (737): tutanagin irsaliyesi/siparisi. Alan `sayi`
             //   idi ve kullanicidan ham belge_id bekliyordu.
             "public.v_kabul_irsaliye_lookup", "public.v_kabul_siparis_lookup",
+            // Onay vekaleti (741): hangi akisla sinirli. Kullanici secimi
+            //   zaten listede (v_kullanici_lookup).
+            "public.v_onay_akis_lookup",
         };
 
     private static string KodTablosuDogrula(string tablo)

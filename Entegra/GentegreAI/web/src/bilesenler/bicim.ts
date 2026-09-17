@@ -141,19 +141,27 @@ export function bicimle(deger: unknown, kolon: KolonMeta): string {
       const hane = bicimHanesi(kolon.bicim);
       return hane > 0 ? ondalikSayi(s, hane) : sayi.format(s);
     }
+    // 'zaman' TARIHLE AYNI YOLDAN GECER (738): liste kolonu `zaman` tipinde
+    //   oldugunda switch'e hic girmiyor, `default` dalinda ham ISO metni
+    //   ("2026-09-20T05:15:52.977706Z") ekrana yaziliyordu. Acil ve
+    //   ameliyathane listelerindeki saat kolonlari da bu daldan geciyor -
+    //   tek fark, tarihi olmayan bir zaman biciminin varsayilani saatli
+    //   olmali: `zaman` diye isaretlenen bir kolonun saati sorulmustur.
+    case 'zaman':
     case 'tarih': {
       const metin = String(deger);
+      const saatli = kolon.tip === 'zaman' || !!kolon.bicim?.includes('HH');
       const parca = tarihParcala(metin);
       if (parca) {
         const sadeceTarih = `${parca.gun}.${parca.ay}.${parca.yil}`;
-        return kolon.bicim?.includes('HH') && parca.saat
+        return saatli && parca.saat
           ? `${sadeceTarih} ${parca.saat}:${parca.dakika ?? '00'}`
           : sadeceTarih;
       }
 
       const t = new Date(metin);
       if (Number.isNaN(t.getTime())) return String(deger);
-      return kolon.bicim?.includes('HH') ? tarihSaatBicim.format(t) : tarih.format(t);
+      return saatli ? tarihSaatBicim.format(t) : tarih.format(t);
     }
     case 'mantik':
       return Number(deger) === 1 ? '✓' : '';

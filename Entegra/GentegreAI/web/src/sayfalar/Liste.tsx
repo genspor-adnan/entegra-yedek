@@ -36,6 +36,8 @@ import { klinikKaliteAksiyonu } from './liste/klinikKaliteAksiyonlari';
 import { ameliyathaneAksiyonu } from './liste/ameliyathaneAksiyonlari';
 import { acilAksiyonu } from './liste/acilAksiyonlari';
 import { tedarikAksiyonu } from './liste/tedarikAksiyonlari';
+import { onayAksiyonu } from './liste/onayAksiyonlari';
+import { izinAksiyonu } from './liste/izinAksiyonlari';
 import { useAmeliyatAcilModallari } from './liste/useAmeliyatAcilModallari';
 import { AmeliyatAcilModallari } from './liste/AmeliyatAcilModallari';
 import { ilacAksiyonu } from './liste/ilacAksiyonlari';
@@ -75,6 +77,8 @@ import { yatanAksiyonu } from './liste/yatanAksiyonlari';
 import { gozAkisAksiyonu } from './liste/gozAkisAksiyonlari';
 import { disAksiyonu } from './liste/disAksiyonlari';
 import { ftrAksiyonu } from './liste/ftrAksiyonlari';
+import { formAksiyonu } from './liste/formAksiyonlari';
+import { isgAksiyonu } from './liste/isgAksiyonlari';
 import { medulaAksiyonu } from './liste/medulaAksiyonlari';
 import { aiBaglamAyarla } from '../bilesenler/aiBaglam';
 import { DokumanKlasorPaneli, type KlasorSecimi } from '../bilesenler/DokumanKlasorPaneli';
@@ -498,6 +502,20 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         cikisAc: v => akisModal.setAcilCikis(v),
       })) return;
 
+      // İZİN (743): talep · onaya gönder · bakiye · iptal. Karar YOK -
+      //   onay kutusundan ya da zincirden verilir.
+      if (await izinAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
+      })) return;
+
+      // ONAY GELEN KUTUSU (738/739): karar KUTUDAN verilir - kullanıcıyı
+      //   kaydın kendi ekranına yollamak tek kutunun anlamını bitirirdi.
+      if (await onayAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
+      })) return;
+
       // ECZANE · BİYOMEDİKAL · SATINALMA (722-724 akış uçları). Modal yok:
       //   kurallar sunucuda, ekran yalnız reddi soruya çeviriyor.
       if (await tedarikAksiyonu(kod, satir, secililer, {
@@ -595,6 +613,20 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       if (await medulaAksiyonu(kod, satir, {
         tazele: () => { setYenile(t => t + 1); setKartTazele(t => t + 1) },
         git: yol => git(yol),
+      })) return;
+
+      // ISG (741): firma panosu, calisan karti, Ek-2 ac, form gonder, olay, SGK.
+      if (await isgAksiyonu(kod, satir, {
+        tazele: () => { setYenile(t => t + 1); setKartTazele(t => t + 1) },
+        git: yol => git(yol),
+        geri: `${window.location.pathname.replace(new RegExp('^' + import.meta.env.BASE_URL.replace(/\/$/, '')), '')}${window.location.search}`,
+      })) return;
+
+      // FORM MOTORU (740): sablon kopyala/editor, istek ac/hatirlat/yeniden/iptal, hasta formlari.
+      if (await formAksiyonu(kod, satir, {
+        tazele: () => { setYenile(t => t + 1); setKartTazele(t => t + 1) },
+        git: yol => git(yol),
+        geri: `${window.location.pathname.replace(new RegExp('^' + import.meta.env.BASE_URL.replace(/\/$/, '')), '')}${window.location.search}`,
       })) return;
 
       // FTR (719): planla, bugunku seans, sonlandir, seans bitir / gelmedi.

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Talep ve Onay Ayarları — Mockup (GenoTIP AI · Yönetim)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>⚙️ Talep ve Onay Ayarları</span>
+    <span class="sp">Onay akışları · eşikler · bildirim · vekâlet — kurum genelinde</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="ayarlar_dizini.html">◀ Ayarlar</div>
+    <div class="btn primary">💾 Kaydet</div>
+    <div class="btn">＋ Yeni Akış</div>
+    <div class="btn">🧪 Akışı Dene</div>
+    <div class="sepv"></div>
+    <div class="btn">📜 Değişiklik Geçmişi</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ İmza Yetkisi Dökümü</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">Tanımlı akış</div><div class="d">1</div></div>
+    <div class="kart"><div class="b">Basamak</div><div class="d">6</div></div>
+    <div class="kart sari"><div class="b">Yürüyen onay</div><div class="d">14</div></div>
+    <div class="kart kir"><div class="b">Termini geçen</div><div class="d">3</div></div>
+    <div class="kart"><div class="b">Yürürlükte vekâlet</div><div class="d">2</div></div>
+    <div class="kart"><div class="b">Hatırlatma işi</div><div class="d" style="font-size:13px">Kapalı</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="akis">Onay Akışları<span class="sy">1</span></div>
+    <div class="sekme" data-s="basamak">Basamaklar<span class="sy">6</span></div>
+    <div class="sekme" data-s="talep">Talep Ayarları</div>
+    <div class="sekme" data-s="bildirim">Bildirim<span class="sy">3</span></div>
+    <div class="sekme" data-s="vekalet">Vekâletler<span class="sy">2</span></div>
+  </div>
+
+  <!-- ========================================================== AKIŞLAR ===== -->
+  <div class="pnl" data-s="akis">
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:170px">Akış kodu</th>
+          <th style="width:230px">Adı</th>
+          <th style="width:190px">Hangi kayıt</th>
+          <th style="width:140px">Karar ölçüsü</th>
+          <th style="width:80px" class="orta">Basamak</th>
+          <th style="width:90px" class="orta">Yürüyen</th>
+          <th style="width:80px" class="orta">Aktif</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><code class="k">satinalma.talep</code></td>
+            <td><b>Satınalma Talebi Onayı</b></td>
+            <td>Satınalma talebi <span class="sonuk">(1241)</span></td>
+            <td>Tutar (TL)</td>
+            <td class="orta">6</td><td class="orta">14</td>
+            <td class="orta"><span class="rz ok">✓</span></td></tr>
+          <tr class="sonuk"><td><code class="k">personel.izin</code></td>
+            <td>Yıllık İzin Onayı</td>
+            <td>Personel izni <span class="sonuk">(—)</span></td>
+            <td>Gün</td>
+            <td class="orta">—</td><td class="orta">—</td>
+            <td class="orta"><span class="rz">tanımlı değil</span></td></tr>
+          <tr class="sonuk"><td><code class="k">personel.avans</code></td>
+            <td>Avans Onayı</td>
+            <td>Personel avansı <span class="sonuk">(—)</span></td>
+            <td>Maaş katı</td>
+            <td class="orta">—</td><td class="orta">—</td>
+            <td class="orta"><span class="rz">tanımlı değil</span></td></tr>
+          <tr class="sonuk"><td><code class="k">demirbas.onarim</code></td>
+            <td>Masraflı Onarım Onayı</td>
+            <td>İş emri <span class="sonuk">(—)</span></td>
+            <td>Maliyet (TL)</td>
+            <td class="orta">—</td><td class="orta">—</td>
+            <td class="orta"><span class="rz">tanımlı değil</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Akış bir kayda değil KAYIT TÜRÜNE bağlanır</b> (<code class="k">kaynak_tur</code> =
+        işlem log tablo no). Aynı motor izin, avans ve onarımı da yürütür — yeni tür eklemek
+        bir akış satırı, kod değil.</span>
+      <span class="sp">Gri satırlar henüz tanımlanmadı; motor hazır, akış tanımı bekliyor.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================== BASAMAKLAR ===== -->
+  <div class="pnl" data-s="basamak" hidden>
+    <div class="ozet">
+      <div class="kart"><div class="b">Seçili akış</div>
+        <div class="d" style="font-size:13px">Satınalma Talebi Onayı</div></div>
+      <div class="kart"><div class="b">Her talepte</div><div class="d">1 <small>basamak</small></div></div>
+      <div class="kart"><div class="b">Eşiğe bağlı</div><div class="d">3</div></div>
+      <div class="kart sari"><div class="b">Bayrağa bağlı</div><div class="d">2</div></div>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:55px" class="orta">Sıra</th>
+          <th style="width:200px">Basamak adı</th>
+          <th style="width:160px">Kime düşer</th>
+          <th style="width:130px" class="sag">Eşik (≥)</th>
+          <th style="width:150px">Bayrak koşulu</th>
+          <th style="width:90px" class="orta">Süre (gün)</th>
+          <th style="width:90px" class="orta">e-İmza</th>
+          <th>Not</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik"><td class="orta">1</td>
+            <td><b>Birim Sorumlusu</b></td>
+            <td>Rol · birim <span class="sonuk">(satinalma.onay_birim)</span></td>
+            <td class="sag sonuk">— <span class="rz">her talepte</span></td>
+            <td class="sonuk">—</td>
+            <td class="orta">3</td><td class="orta sonuk">—</td>
+            <td class="sonuk">Talebin o birimin işi olduğunu söyleyen tek kişi</td></tr>
+          <tr><td class="orta">2</td>
+            <td><b>Satınalma</b></td>
+            <td>Rol · satınalma</td>
+            <td class="sag">0 ₺</td>
+            <td class="sonuk">—</td>
+            <td class="orta">3</td><td class="orta sonuk">—</td>
+            <td class="sonuk">Alım yolu ve tedarikçi kararı</td></tr>
+          <tr><td class="orta">3</td>
+            <td><b>Mali İşler</b></td>
+            <td>Rol · mali</td>
+            <td class="sag">50.000 ₺</td>
+            <td class="sonuk">—</td>
+            <td class="orta">3</td><td class="orta sonuk">—</td>
+            <td class="sonuk">Tutar eşiği</td></tr>
+          <tr><td class="orta">4</td>
+            <td><b>Mali İşler (bütçe)</b></td>
+            <td>Rol · mali</td>
+            <td class="sag sonuk">—</td>
+            <td><span class="rz sari">butce</span></td>
+            <td class="orta">3</td><td class="orta sonuk">—</td>
+            <td class="sonuk">Bütçesi olmayan / aşan harcama ayrıca sorulur</td></tr>
+          <tr><td class="orta">5</td>
+            <td><b>Üst Yönetim</b></td>
+            <td>Rol · üst yönetim</td>
+            <td class="sag">250.000 ₺</td>
+            <td class="sonuk">—</td>
+            <td class="orta">5</td><td class="orta"><span class="rz ok">✓</span></td>
+            <td class="sonuk">Üst sınır</td></tr>
+          <tr><td class="orta">6</td>
+            <td><b>Üst Yönetim (bütçe aşımı)</b></td>
+            <td>Rol · üst yönetim</td>
+            <td class="sag sonuk">—</td>
+            <td><span class="rz kir">butce_asildi</span></td>
+            <td class="orta">5</td><td class="orta"><span class="rz ok">✓</span></td>
+            <td class="sonuk">Bütçe tamamen aşıldıysa tutar fark etmez</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ozet">
+      <div class="kart"><div class="b">Kime düşer — üç seçenek</div>
+        <div class="d" style="font-size:11.5px;font-weight:normal;line-height:1.6">
+          <b>Rol:</b> o yetkiye sahip herkes görür, biri imzalar ·
+          <b>Kullanıcı:</b> yalnız o kişi (ve vekili) ·
+          <b>Âmir:</b> talebi açanın üstü — <span class="rz">henüz yok</span>,
+          organizasyon şemasında âmir bağı kurulmadı
+        </div></div>
+      <div class="kart"><div class="b">Süre dolunca ne olur</div>
+        <div class="d" style="font-size:11.5px;font-weight:normal;line-height:1.6">
+          Basamak <b>gecikmiş</b> görünür ve hatırlatma gider.
+          <b>Kimse otomatik onaylanmaz</b> — sessiz onay, onayın kendisini ortadan kaldırırdı.
+        </div></div>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Eşik ve bayrak KURALIN YANINDA durur</b>, kodda değil: aynı motor izinde gün,
+        avansta maaş katı eşiğiyle çalışır.</span>
+      <span class="sp">Karar verilmiş basamak zincir yenilense de silinmez — atılmış imza kaybolmaz.</span>
+    </div>
+  </div>
+
+  <!-- ===================================================== TALEP AYARLARI ===== -->
+  <div class="pnl" data-s="talep" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:260px">Ayar</th>
+          <th style="width:170px">Değer</th>
+          <th style="width:120px" class="orta">Varsayılan</th>
+          <th>Ne işe yarar</th>
+        </tr></thead>
+        <tbody>
+          <tr class="grup"><td colspan="4"><b>Onay eşikleri</b></td></tr>
+          <tr><td>Satınalma basamağı eşiği<br><code class="k">satinalma.esik_satinalma</code></td>
+            <td><input value="0" style="width:120px"> ₺</td>
+            <td class="orta sonuk">0</td>
+            <td class="sonuk">Bu tutarın üstündeki talep satınalma biriminden geçer</td></tr>
+          <tr><td>Mali işler eşiği<br><code class="k">satinalma.esik_mali</code></td>
+            <td><input value="50.000" style="width:120px"> ₺</td>
+            <td class="orta sonuk">50.000</td>
+            <td class="sonuk">Bu tutarın üstünde mali işler basamağı eklenir</td></tr>
+          <tr><td>Üst yönetim eşiği<br><code class="k">satinalma.esik_ust</code></td>
+            <td><input value="250.000" style="width:120px"> ₺</td>
+            <td class="orta sonuk">250.000</td>
+            <td class="sonuk">Bu tutarın üstünde üst yönetim imzası aranır</td></tr>
+          <tr class="grup"><td colspan="4"><b>Karar biçimi</b></td></tr>
+          <tr><td>Sözlü onayın yazılı tamamlanma süresi<br><code class="k">satinalma.sozlu_onay_saat</code></td>
+            <td><input value="24" style="width:120px"> saat</td>
+            <td class="orta sonuk">24</td>
+            <td class="sonuk">Acil alım sözlü onayla başlar; süre dolunca <b>askıda</b> görünür</td></tr>
+          <tr><td>Ret ve bilgi isteğinde gerekçe</td>
+            <td><span class="rz ok">Zorunlu</span></td>
+            <td class="orta sonuk">zorunlu</td>
+            <td class="sonuk">"Hayır" tek başına karar değildir — talebi açana bir şey söylemez</td></tr>
+          <tr class="grup"><td colspan="4"><b>Bütçe</b></td></tr>
+          <tr><td>Bütçe kalemi olmayan talep</td>
+            <td><select style="width:150px">
+                  <option selected>Mali işlere sor</option>
+                  <option>Engelle</option>
+                  <option>Serbest</option>
+                </select></td>
+            <td class="orta sonuk">sor</td>
+            <td class="sonuk">Parasız talep yoktur; kaynağı belirsiz talep vardır</td></tr>
+          <tr><td>Bütçe aşımı davranışı</td>
+            <td class="sonuk">Kalemin kendi ayarı</td>
+            <td class="orta sonuk">—</td>
+            <td class="sonuk">İlaç/acil sarf uyarır, yatırım durdurur — tek genel kural ya
+              acil alımı durdururdu ya bütçeyi anlamsızlaştırırdı</td></tr>
+          <tr class="grup"><td colspan="4"><b>Kendiliğinden doğan talep</b></td></tr>
+          <tr><td>Kritik stok talebi<br><code class="k">satinalma.kritik_stok_aktif</code></td>
+            <td><select style="width:150px"><option selected>Kapalı</option><option>Açık</option></select></td>
+            <td class="orta sonuk">kapalı</td>
+            <td class="sonuk">Saatlik iş; kritik seviyeye düşen kalem için talep açar</td></tr>
+          <tr><td>Hedef stok katsayısı<br><code class="k">satinalma.kritik_hedef_kat</code></td>
+            <td><input value="2" style="width:120px"> ×</td>
+            <td class="orta sonuk">2</td>
+            <td class="sonuk">Miktar = minimum stok × katsayı − eldeki</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Eşikler ayarda, basamaklar akışta:</b> ayar tek bir sayıdır; akış adımı ise
+        "acil satınalma" gibi ikinci bir akışta farklı eşikle tanımlanabilir.</span>
+    </div>
+  </div>
+
+  <!-- ========================================================= BİLDİRİM ===== -->
+  <div class="pnl" data-s="bildirim" hidden>
+    <div class="ozet">
+      <div class="kart"><div class="b">Kanal</div><div class="d" style="font-size:13px">e-posta → SMS</div></div>
+      <div class="kart sari"><div class="b">Hatırlatma işi</div><div class="d" style="font-size:13px">Kapalı</div></div>
+      <div class="kart"><div class="b">Çalışma</div><div class="d" style="font-size:13px">Her gün 09:00</div></div>
+      <div class="kart kir"><div class="b">Bugün gecikmiş</div><div class="d">3</div></div>
+    </div>
+
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:150px">Şablon</th>
+          <th style="width:230px">Konu</th>
+          <th style="width:110px" class="orta">Ne zaman</th>
+          <th style="width:150px">Kime</th>
+          <th style="width:80px" class="orta">Aktif</th>
+          <th>Değişkenler</th>
+        </tr></thead>
+        <tbody>
+          <tr><td><code class="k">onay.istek</code></td>
+            <td>Onayınızda: <span class="sonuk">{{kayitNo}}</span></td>
+            <td class="orta">Sıra gelince</td>
+            <td>Basamağın sahibi<br><span class="sonuk">rolse o rolün herkesi</span></td>
+            <td class="orta"><span class="rz ok">✓</span></td>
+            <td class="sonuk">alici · akisAd · kayitNo · konu · olcu · olcuAdi · adimAd · termin</td></tr>
+          <tr><td><code class="k">onay.hatirlatma</code></td>
+            <td>Bekleyen onay: <span class="sonuk">{{kayitNo}}</span></td>
+            <td class="orta">Termin geçince<br><span class="sonuk">günde bir</span></td>
+            <td>Basamağın sahibi</td>
+            <td class="orta"><span class="rz ok">✓</span></td>
+            <td class="sonuk">alici · kayitNo · konu · adimAd · gecikmeGun</td></tr>
+          <tr><td><code class="k">onay.sonuc</code></td>
+            <td><span class="sonuk">{{kayitNo}} {{sonucAd}}</span></td>
+            <td class="orta">Zincir bitince</td>
+            <td>Talebi açan<br><span class="sonuk">onaylayanlara değil</span></td>
+            <td class="orta"><span class="rz ok">✓</span></td>
+            <td class="sonuk">alici · kayitNo · akisAd · sonucAd · gerekce</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ozet">
+      <div class="kart"><div class="b">Kanal seçimi</div>
+        <div class="d" style="font-size:11.5px;font-weight:normal;line-height:1.6">
+          Kullanıcının <b>e-postası varsa e-posta</b>, yoksa cep telefonu.
+          İkisi de yoksa satır <b>açılmaz</b> — alıcısı olmayan bildirim kuyrukta hata
+          olarak birikir ve kuyruğu tıkar.
+        </div></div>
+      <div class="kart"><div class="b">Gönderim kararı düşürmez</div>
+        <div class="d" style="font-size:11.5px;font-weight:normal;line-height:1.6">
+          Bildirim yalnız <b>kuyruğa yazılır</b>, gönderimi işçi yapar. Şablon pasifse ya da
+          alıcı yoksa <b>onay yine geçerlidir</b>; hata günlüğe düşer — tersi olsaydı iletişim
+          ayarı eksik bir kurumda hiçbir onay verilemezdi.
+        </div></div>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Hatırlatma günde bir yazar.</b> Saatte bir çalışan bir iş, bir günde yirmi dört
+        mesaj gönderir — gürültü de okunmaz.</span>
+      <span class="sp">Hatırlatma hiçbir basamağı onaylamaz, yalnız görünür kılar.</span>
+    </div>
+  </div>
+
+  <!-- ========================================================= VEKÂLET ===== -->
+  <div class="pnl" data-s="vekalet" hidden>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:200px">Devreden</th>
+          <th style="width:200px">Vekil</th>
+          <th style="width:110px" class="orta">Başlangıç</th>
+          <th style="width:110px" class="orta">Bitiş</th>
+          <th style="width:180px">Yalnız bu akış</th>
+          <th style="width:110px" class="orta">Durum</th>
+          <th>Açıklama</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik"><td><b>Dr. M. Aydın</b> <span class="sonuk">(mali müdür)</span></td>
+            <td><b>S. Korkmaz</b></td>
+            <td class="orta">17.09.2026</td><td class="orta">30.09.2026</td>
+            <td class="sonuk">— <span class="rz">tüm akışlar</span></td>
+            <td class="orta"><span class="rz ok">Yürürlükte</span></td>
+            <td class="sonuk">Yıllık izin</td></tr>
+          <tr><td><b>E. Şahin</b> <span class="sonuk">(satınalma)</span></td>
+            <td><b>N. Arslan</b></td>
+            <td class="orta">01.10.2026</td><td class="orta">05.10.2026</td>
+            <td>Satınalma Talebi Onayı</td>
+            <td class="orta"><span class="rz sari">Bekliyor</span></td>
+            <td class="sonuk">Kongre — yalnız satınalma onayları</td></tr>
+          <tr class="sonuk"><td>A. Yapan</td><td>Sistem Yöneticisi</td>
+            <td class="orta">01.08.2026</td><td class="orta">15.08.2026</td>
+            <td class="sonuk">—</td>
+            <td class="orta"><span class="rz">Süresi doldu</span></td>
+            <td class="sonuk">Rapor</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ozet">
+      <div class="kart"><div class="b">İmza vekilin adıyla atılır</div>
+        <div class="d" style="font-size:11.5px;font-weight:normal;line-height:1.6">
+          Vekâlet, kararı devredenin adına <b>yazmaz</b>: zincire vekilin kaydı düşer.
+          Vekâlet olmadığında kurum çareyi "şifresini ver"de buluyor ve
+          <b>imzanın kime ait olduğu o noktada kayboluyor</b>.
+        </div></div>
+      <div class="kart"><div class="b">Tarih aralığı zorunlu</div>
+        <div class="d" style="font-size:11.5px;font-weight:normal;line-height:1.6">
+          Süresiz vekâlet, imza yetkisinin kalıcı devridir — o bir vekâlet değil,
+          <b>rol değişikliğidir</b> ve kullanıcı yönetiminden yapılır.
+        </div></div>
+      <div class="kart"><div class="b">"Aktif" ile "yürürlükte" ayrı</div>
+        <div class="d" style="font-size:11.5px;font-weight:normal;line-height:1.6">
+          Aktif kullanıcının bayrağı, yürürlükte <b>tarihin cevabı</b>.
+          Tek kolonda birleştirseydik ileri tarihli vekâlet "pasif" görünür ve
+          ikinci kez tanımlanırdı.
+        </div></div>
+    </div>
+
+    <div class="statusbar">
+      <span><b>Vekâleti kullanıcı yönetimi yetkisi tanımlar</b>, onay sahibi değil:
+        "onayı olan herkes kendi vekâletini yazsın" deseydik imza zinciri kişinin
+        kendi kararına kalırdı.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Süreç:</b> Onay bir kayda değil <b>kayıt türüne</b> bağlanır; aynı motor satınalma talebini,
+  izni, avansı ve masraflı onarımı yürütür. Basamakların eşiği ve koşulu <b>veridir</b> — yeni bir
+  talep türü eklemek bir akış tanımı, kod değil. Sıra gelen kişiye bildirim <b>kuyruğa</b> yazılır;
+  gönderim başarısız olsa bile karar geçerlidir. Termin dolunca basamak <b>gecikmiş görünür</b>,
+  kimse otomatik onaylanmaz. İzindeki âmirin kutusunda iş beklemesin diye vekâlet tanımlanır ve
+  <b>imza vekilin adıyla</b> atılır.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>

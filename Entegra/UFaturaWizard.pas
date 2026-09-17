@@ -353,7 +353,7 @@ type
     LabelFatNo: TcxLabel;
     cbIrsaliyeli: TcxDBCheckBox;
     cxLabel1: TcxLabel;
-    lbKaynakSeriNo: TcxDBLabel;
+    lbKaynakFaturaNo: TcxDBLabel;
     cxDBLabel2: TcxDBLabel;
     EditFatTarih: TcxDBDateEdit;
     EditFaturaSaat: TcxDBTimeEdit;
@@ -3494,7 +3494,9 @@ begin
   Tablo.Query1.SQL.Add(' end, ');
   Tablo.Query1.SQL.Add(' KAYNAKBELGENO=case ');
   Tablo.Query1.SQL.Add(' 	when YERI in (406,407,409,410) then (select SIPARISNO from SIPARIS where ID=(select SIPARISID from SIPARISDETAY where ID=F.YERID)) ');
-  Tablo.Query1.SQL.Add(' 	when YERI in (408,411) then (select FATURANO from FATBASLIK where ID=(select FATBASID from FATURA where ID=F.YERID))               ');
+  // IRSALIYE -> FATURA (408/411): kaynak irsaliyenin numarasi IRSALIYENO'da, FATURANO '0' kalir
+  //   (kullanici: "Kaynak: alaninda irsaliye no gosterilmeli"). Ayni kural fn_KaynakBelgeNolariStrOlarakGetir'de (Update_SQL_192).
+  Tablo.Query1.SQL.Add(' 	when YERI in (408,411) then (select COALESCE(NULLIF(NULLIF(IRSALIYENO,''''),''0''), NULLIF(NULLIF(FATURANO,''''),''0''), '''') from FATBASLIK where ID=(select FATBASID from FATURA where ID=F.YERID)) ');
   Tablo.Query1.SQL.Add(' 	when YERI in (412,413) then (select TEKLIFNO from TEKLIF where ID=(SELECT TEKLIFID FROM TEKLIFDETAY where ID=F.YERID))             ');
   Tablo.Query1.SQL.Add(' end, ');
   Tablo.Query1.SQL.Add(' KAYNAKID=case      ');

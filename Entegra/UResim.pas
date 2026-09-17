@@ -436,7 +436,12 @@ begin
       if TabResim.RecordCount > 0 then
          Varsaylanyap1Click(Self)
       else
-         Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update STOKLAR set RESIM=null where ID='+IntToStr(YerId),[],[]);
+         // SON RESIM SILINDI: X.RESIM cache'ini YERI'ye gore temizle. Eskiden
+         //   'update STOKLAR' sabitti - rehber (71) / demirbas / masraf kartinda
+         //   kart resmi (LogoResim, DataField=RESIM) silinmis resmi gostermeye
+         //   devam ediyordu (kullanici: "iceride silinmesine ragmen disarida
+         //   silinmemis geliyor").
+         VarsayilanResimTazele(Yeri, YerId);
    end;
 end;
 

@@ -19,6 +19,7 @@ const TIP_GORSEL: Record<string, { ikon: string; aciklama: string }> = {
   goruntuleme_lab: { ikon: '🩻🧪', aciklama: 'Radyoloji + LIS birlikte · dış kurum portalı · ortak kabul' },
   dis:             { ikon: '🦷',  aciklama: 'Odontogram · tedavi planı/proforma · ünit çizelgesi · protez lab · taksit' },
   tip_merkezi:     { ikon: '🏥',  aciklama: 'Poliklinikler · muayene · lab + radyoloji · teletıp · e-Nabız tam · kurum sözleşmeleri' },
+  osgb:            { ikon: '👷',  aciklama: 'İşyeri hekimliği: firma · çalışan · Ek-2 (SMS) · periyodik takvim · ziyaret · iş kazası · İSG-KATİP süre' },
   hastane:         { ikon: '🏨',  aciklama: '+ yatan hasta · ameliyathane · eczane/depo · acil · yoğun bakım · HBYS tam (sonraki faz)' },
   erp:             { ikon: '🏭',  aciklama: 'Üretim · ticaret · stok · satış/alış · muhasebe (HBYS modülleri kapalı)' },
 };

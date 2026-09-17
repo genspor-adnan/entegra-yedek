@@ -136,6 +136,7 @@ export const GRUP_IKON: Record<string, string> = {
   'Göz': '👁️',
   'Diş': '🦷',
   'FTR': '🏃',
+  'İşyeri Hekimliği': '👷',
   'Medula': '🏛️',
   'Yatan Hasta': '🛏️',
   // e-Nabiz (kullanici): Radyolojiden sonra ayri ana menu. Bayrak emojisi
@@ -175,6 +176,8 @@ export const ALTGRUP_IKON: Record<string, string> = {
   // Her grubun SON alt grubu "Ayarlar" (plan kural 2): gunluk is listeleri
   //   ustte, tanimlar ve ayarlar altta - hangi grupta olursan ol ayni desen.
   'Ayarlar': '⚙️',
+  // FORM MOTORU (740): Yönetim › Formlar alt grubu.
+  'Formlar': '🗂',
   'Güvenlik': '🛡️',
   'Platform': '🧩',
   'Doküman': '📁',

@@ -101,7 +101,8 @@ public static partial class SatinalmaUclari
         // ONAYA GÖNDER: zinciri kurar, durumu "onayda"ya alır.
         grup.MapPost("/talep/{id:long}/gonder", async (
             long id, TalepGonderIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+            LogDeposu log, Servisler.OnayMotoru onay, Servisler.OnayBildirimi haber,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("satinalma.talep", Islem.Degistir);
@@ -121,8 +122,10 @@ public static partial class SatinalmaUclari
                                coalesce(s.son_alis_fiyat, 0) * s.miktar)), 0)
                           from public.satinalma_talep_satir s
                          where s.talep_id = t.id) as "satirTutar",
-                       (select count(*) from public.satinalma_onay o
-                         where o.talep_id = t.id and o.durum <> 0) as "kararliBasamak"
+                       (select count(*) from public.onay_adim a
+                          join public.onay n on n.id = a.onay_id
+                         where n.kaynak_tur = 1241 and n.kaynak_id = t.id
+                           and a.durum <> 0) as "kararliBasamak"
                   from public.satinalma_talep t where t.id = @p0
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Talep bulunamadı.");
@@ -149,32 +152,25 @@ public static partial class SatinalmaUclari
             var butceDurumu = await ButceDurumuAsync(baglanti, null,
                 t["butceKalemId"] as int?, tutar, iptal);
 
-            var basamaklar = await ZincirKurAsync(baglanti, tutar, butceDurumu, iptal);
-
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-            // KARAR VERİLMİŞ BASAMAK SİLİNMEZ. Zincir yenilenirken verilmiş
-            //   imzaları da silseydik, onaylayan kişinin kaydı kaybolur ve
-            //   zincir "hiç onaylanmamış" görünürdü.
-            await baglanti.CalistirAsync("""
-                delete from public.satinalma_onay
-                 where talep_id = @p0 and durum = 0
-                """, islem, [id], iptal);
+            // ZİNCİRİ ONAY MOTORU KURAR (738). Eşikler artık `onay_akis_adim`
+            //   satırlarında; burada C# içinde üç `if` vardı ve izin/avans
+            //   geldiğinde dördüncü, beşinci dal olarak çoğalacaktı.
+            //   Motor karar verilmiş basamağı korur - verilmiş imzayı silmek,
+            //   onaylayanın kaydını yok etmek olurdu.
+            //
+            //   BÜTÇE DURUMU BAYRAĞA ÇEVRİLİR: sayıya sığmayan bir koşuldur
+            //   (0 bütçesiz · 2 aşıldı · 3 tamamen aşıldı).
+            var bayraklar = new List<string>();
+            if (butceDurumu is 0 or 2 or 3) bayraklar.Add("butce");
+            if (butceDurumu == 3) bayraklar.Add("butce_asildi");
 
-            var mevcut = await baglanti.ListeAsync<int>("""
-                select basamak from public.satinalma_onay where talep_id = @p0
-                """, islem, [id], o => o.GetInt16(0), iptal);
-
-            var eklenen = 0;
-            foreach (var (basamak, rol) in basamaklar)
-            {
-                if (mevcut.Contains(basamak)) continue;
-                await baglanti.CalistirAsync("""
-                    insert into public.satinalma_onay (talep_id, basamak, rol, durum, ekleyen)
-                    values (@p0, @p1, @p2, 0, @p3)
-                    """, islem, [id, basamak, rol, baglam.KullaniciId], iptal);
-                eklenen++;
-            }
+            var zincir = await onay.BaslatAsync(baglanti, islem, "satinalma.talep",
+                id, tutar, bayraklar, baglam, iptal);
+            var basamaklar = zincir.Adimlar
+                .Select(a => (Basamak: a.Sira, Rol: a.Rol)).ToList();
+            var eklenen = zincir.Adimlar.Count(a => a.Durum == Servisler.OnayMotoru.Bekliyor);
 
             await baglanti.CalistirAsync("""
                 update public.satinalma_talep
@@ -193,6 +189,17 @@ public static partial class SatinalmaUclari
                 }, iptal: iptal);
 
             await islem.CommitAsync(iptal);
+
+            // İLK BASAMAĞA HABER (741): zincir kurulur kurulmaz sıranın kimde
+            //   olduğu bellidir; haber vermeyi bekletmek, onayın gecikmesini
+            //   kişinin kutuya bakma alışkanlığına bırakmak olurdu.
+            try
+            {
+                await haber.SiradakiniBildirAsync(baglanti, zincir.OnayId,
+                    baglam.KullaniciId, baglam.SubeId, iptal);
+            }
+            catch (Exception) { /* zincir kuruldu; bildirim hatası onu düşürmez */ }
+
             return Results.Ok(new
             {
                 durum = TalepOnayda, tutar, butceDurumu,
@@ -204,57 +211,48 @@ public static partial class SatinalmaUclari
         // BASAMAK KARARI. Hep BEKLEYEN EN KÜÇÜK basamağa yazılır.
         grup.MapPost("/talep/{id:long}/karar", async (
             long id, OnayKararIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+            LogDeposu log, Servisler.OnayMotoru onay, Servisler.OnayBildirimi haber,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
 
             var karar = (istek.Karar ?? "").Trim().ToLowerInvariant();
-            // onay durumu: 0 bekliyor · 1 onaylandı · 2 reddedildi
-            //              3 bilgi istendi · 4 sözlü onay
+            // onay_adim.durum: 0 bekliyor · 1 onaylandı · 2 reddedildi
+            //                  3 bilgi istendi · 4 sözlü onay
             var kararKodu = karar switch
             {
-                "onayla" => (short)1,
-                "reddet" => (short)2,
-                "bilgi-iste" => (short)3,
-                "sozlu-onay" => (short)4,
+                "onayla" => Servisler.OnayMotoru.Onaylandi,
+                "reddet" => Servisler.OnayMotoru.Reddedildi,
+                "bilgi-iste" => Servisler.OnayMotoru.BilgiIstendi,
+                "sozlu-onay" => Servisler.OnayMotoru.SozluOnay,
                 _ => throw GentegreHatasi.Dogrulama("Bilinmeyen karar.",
                         new AlanHatasi("karar", "onayla · reddet · bilgi-iste · sozlu-onay"))
             };
 
-            if (kararKodu is 2 or 3 && string.IsNullOrWhiteSpace(istek.Gerekce))
-                throw GentegreHatasi.Dogrulama("Gerekçe zorunlu.",
-                    new AlanHatasi("gerekce", "Ret ve bilgi isteğinde gerekçe zorunlu."));
-
             await using var baglanti = await veri.AcAsync(iptal);
 
             var t = await baglanti.TekAsync("""
-                select t.durum,
-                       (select min(o.basamak) from public.satinalma_onay o
-                         where o.talep_id = t.id and o.durum in (0, 3)) as "bekleyen",
-                       (select count(*) from public.satinalma_onay o
-                         where o.talep_id = t.id) as "basamakSayisi"
-                  from public.satinalma_talep t where t.id = @p0
+                select t.durum from public.satinalma_talep t where t.id = @p0
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Talep bulunamadı.");
 
             if (Convert.ToInt16(t["durum"] ?? (short)0) != TalepOnayda)
                 throw GentegreHatasi.IsKurali("Onayda olmayan talepte karar verilemez.");
-            if (t["bekleyen"] is null)
-                throw GentegreHatasi.IsKurali("Bekleyen onay basamağı yok.");
-
-            var basamak = Convert.ToInt16(t["bekleyen"]);
-
-            var o = await baglanti.TekAsync("""
-                select o.id, o.rol from public.satinalma_onay o
-                 where o.talep_id = @p0 and o.basamak = @p1
-                """, null, [id, basamak], OkuyucuGenisletmeleri.Sozluk, iptal)
-                ?? throw GentegreHatasi.Bulunamadi("Onay basamağı bulunamadı.");
 
             // YETKİ BASAMAĞIN ROLÜNE GÖRE (724 yetkileri). Birim sorumlusunun
             //   yetkisiyle üst yönetim basamağı imzalanamaz - zincirin anlamı
-            //   farklı kişilerin bakması.
-            var rol = Convert.ToInt16(o["rol"] ?? (short)1);
-            baglam.AksiyonIste(rol switch
+            //   FARKLI kişilerin bakması. Rol kodları SATINALMANIN kendi
+            //   yetkileridir; onay motoru onları bilmez, bu yüzden kontrol
+            //   burada - motora taşısaydık her modülün yetki haritası
+            //   motorun içine dolardı.
+            var bekleyen = await baglanti.TekAsync("""
+                select a.rol from public.v_onay_bekleyen a
+                 where a.kaynak_tur = 1241 and a.kaynak_id = @p0
+                 order by a.sira limit 1
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                ?? throw GentegreHatasi.IsKurali("Bekleyen onay basamağı yok.");
+
+            baglam.AksiyonIste(Convert.ToInt16(bekleyen["rol"] ?? (short)1) switch
             {
                 1 => "satinalma.onay_birim",
                 2 => "satinalma.onay_satinalma",
@@ -262,76 +260,63 @@ public static partial class SatinalmaUclari
                 _ => "satinalma.onay_ust"
             });
 
-            var simdi = DateTime.Now;
             // SÖZLÜ ONAYIN YAZILI TAMAMLAMA SÜRESİ - kurum ayarı, varsayılan 24 saat.
             var yaziliSaat = istek.YaziliSaat
                 ?? await AyarSayiAsync(baglanti, "satinalma.sozlu_onay_saat", 24, iptal);
 
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
+            var sonuc = await onay.KararAsync(baglanti, islem, 1241, id, kararKodu,
+                istek.Gerekce, baglam, yaziliSaat, iptal);
+
+            // KAYDIN KENDİ DURUMUNU MODÜL YAZAR: motor sırayı yürütür, "talep
+            //   onaylandı mı" sorusu satınalmanın sorusudur.
+            var yeniDurum = sonuc.ZincirDurum switch
+            {
+                Servisler.OnayMotoru.ZincirOnaylandi => TalepOnaylandi,
+                Servisler.OnayMotoru.ZincirReddedildi => TalepReddedildi,
+                _ => TalepOnayda,
+            };
+
             await baglanti.CalistirAsync("""
-                update public.satinalma_onay
-                   set durum = @p2, onaylayan_id = @p3, karar_zamani = @p4,
-                       gerekce = coalesce(nullif(@p5, ''), gerekce),
-                       yazili_son = case when @p2 = 4 then @p4 + (@p6 || ' hours')::interval
-                                         else yazili_son end,
+                update public.satinalma_talep
+                   set durum = @p1,
+                       red_neden = case when @p1 = @p4 then @p2 else red_neden end,
                        degistiren = @p3, degistirme_tarihi = (now())::timestamp
-                 where talep_id = @p0 and basamak = @p1
+                 where id = @p0
                 """, islem,
-                [id, basamak, kararKodu, baglam.KullaniciId, simdi,
-                 istek.Gerekce ?? "", ((int)yaziliSaat).ToString()], iptal);
-
-            short yeniDurum;
-            short? sonrakiBasamak = null;
-
-            if (kararKodu == 2)
-            {
-                // RET ZİNCİRİ BİTİRİR: bekleyen basamakları da kapatırız, yoksa
-                //   reddedilmiş bir talep listede hâlâ "onayda" görünürdü.
-                await baglanti.CalistirAsync("""
-                    update public.satinalma_onay set durum = 2, karar_zamani = @p1,
-                           gerekce = 'Talep reddedildi'
-                     where talep_id = @p0 and durum = 0
-                    """, islem, [id, simdi], iptal);
-                yeniDurum = TalepReddedildi;
-                await baglanti.CalistirAsync("""
-                    update public.satinalma_talep set durum = @p1, red_neden = @p2,
-                           degistiren = @p3, degistirme_tarihi = (now())::timestamp
-                     where id = @p0
-                    """, islem, [id, yeniDurum, istek.Gerekce ?? "", baglam.KullaniciId], iptal);
-            }
-            else if (kararKodu == 3)
-            {
-                // BİLGİ İSTENDİ zinciri DURDURUR ama bitirmez: basamak hâlâ
-                //   bekleyendir (durum 3 de bekleyen sayılır), talep onayda kalır.
-                yeniDurum = TalepOnayda;
-            }
-            else
-            {
-                // ONAY (1) ya da SÖZLÜ ONAY (4): sıradaki basamağa geç.
-                sonrakiBasamak = await baglanti.TekDegerAsync<short?>("""
-                    select min(o.basamak) from public.satinalma_onay o
-                     where o.talep_id = @p0 and o.durum in (0, 3)
-                    """, islem, [id], iptal);
-
-                yeniDurum = sonrakiBasamak is null ? TalepOnaylandi : TalepOnayda;
-                await baglanti.CalistirAsync("""
-                    update public.satinalma_talep set durum = @p1,
-                           degistiren = @p2, degistirme_tarihi = (now())::timestamp
-                     where id = @p0
-                    """, islem, [id, yeniDurum, baglam.KullaniciId], iptal);
-            }
+                [id, yeniDurum, istek.Gerekce ?? "", baglam.KullaniciId, TalepReddedildi],
+                iptal);
 
             await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogOnay,
-                Convert.ToInt64(o["id"]), baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-                new { karar, basamak, rol, gerekce = istek.Gerekce, talepDurum = yeniDurum },
+                sonuc.OnayId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new
+                {
+                    karar, basamak = sonuc.Sira, rol = sonuc.Rol,
+                    adim = sonuc.AdimAd, gerekce = istek.Gerekce, talepDurum = yeniDurum
+                },
                 LogTalep, id, iptal: iptal);
 
             await islem.CommitAsync(iptal);
+
+            // SIRASI GELENE HABER (741) - karar hangi uçtan verilirse verilsin
+            //   aynı bildirim gider; iki ayrı yol iki ayrı davranış demekti.
+            //   BİLDİRİM KARARI DÜŞÜRMEZ (bkz. OnayBildirimi başlığı).
+            try
+            {
+                if (sonuc.ZincirDurum == Servisler.OnayMotoru.ZincirYuruyor)
+                    await haber.SiradakiniBildirAsync(baglanti, sonuc.OnayId,
+                        baglam.KullaniciId, baglam.SubeId, iptal);
+                else
+                    await haber.SonucBildirAsync(baglanti, sonuc.OnayId, sonuc.ZincirDurum,
+                        istek.Gerekce, baglam.KullaniciId, baglam.SubeId, iptal);
+            }
+            catch (Exception) { /* karar yazıldı; bildirim yolundaki hata onu düşürmez */ }
+
             return Results.Ok(new
             {
-                karar, basamak, talepDurum = yeniDurum, sonrakiBasamak,
-                yaziliSon = kararKodu == 4 ? simdi.AddHours((double)yaziliSaat) : (DateTime?)null,
+                karar, basamak = sonuc.Sira, talepDurum = yeniDurum,
+                sonrakiBasamak = sonuc.SonrakiSira, yaziliSon = sonuc.YaziliSon,
                 izlemeNo = baglam.IzlemeNo
             });
         });
@@ -469,37 +454,10 @@ public static partial class SatinalmaUclari
         };
     }
 
-    /// <summary>
-    /// Basamakları TUTAR ve BÜTÇE DURUMUNDAN kurar. Eşikler `referans`ta -
-    /// kurum kendi sınırını belirler, kodda sabit bir rakam olamaz.
-    ///
-    /// rol: 1 birim sorumlusu · 2 satınalma · 3 başhekim/müdür ·
-    ///      4 mali işler · 5 yönetim kurulu
-    /// </summary>
-    private static async Task<List<(short Basamak, short Rol)>> ZincirKurAsync(
-        NpgsqlConnection baglanti, decimal tutar, short butceDurumu, CancellationToken iptal)
-    {
-        var esikSatinalma = await AyarSayiAsync(baglanti, "satinalma.esik_satinalma", 0, iptal);
-        var esikMali = await AyarSayiAsync(baglanti, "satinalma.esik_mali", 50_000, iptal);
-        var esikUst = await AyarSayiAsync(baglanti, "satinalma.esik_ust", 250_000, iptal);
-
-        // BİRİM SORUMLUSU HER TALEPTE VAR: talebi açan kişinin âmiri, talebin
-        //   gerçekten o birimin işi olduğunu söyleyen tek kişidir.
-        var zincir = new List<(short, short)> { ((short)1, (short)1) };
-        short sira = 2;
-
-        if (tutar >= esikSatinalma) zincir.Add((sira++, 2));
-        if (tutar >= esikMali) zincir.Add((sira++, 4));
-
-        // BÜTÇE AŞIMI EK BASAMAK EKLER (mali işler zaten yoksa): bütçesi
-        //   olmayan ya da aşan bir harcamanın sorumlusu ayrıca sorulmalı.
-        if (butceDurumu is 0 or 2 or 3 && !zincir.Any(z => z.Item2 == 4))
-            zincir.Add((sira++, 4));
-
-        if (tutar >= esikUst || butceDurumu == 3) zincir.Add((sira++, 5));
-
-        return zincir.Select(z => ((short)z.Item1, (short)z.Item2)).ToList();
-    }
+    // ZİNCİR KURALLARI ARTIK VERİ (738). Eşikler `onay_akis_adim`
+    //   satırlarında duruyor; burada üç `if` dalı vardı ve izin/avans
+    //   geldiğinde beşe, altıya çıkacaktı. Kuralı tabloya taşımak, aynı
+    //   soruyu (kim imzalar) her modülde yeniden yazmayı bitirir.
 
     /// <summary>
     /// SAYISAL KURUM AYARI, VARSAYILANI ÇAĞRI YERİNDE.

@@ -16,6 +16,14 @@ import { tarihYaz } from '../bilesenler/bicim';
  */
 const GUN_AD = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 const ISTISNA: Record<number, string> = { 1: 'İzin', 2: 'Kongre / eğitim', 3: 'Saat değişikliği', 4: 'Ek mesai', 5: 'Kapalı' };
+
+/**
+ * KAYNAK 4 = İK İZNİ (748). Kapalı gün üretir ama plan istisnası DEĞİLDİR:
+ * kaydı İK'da durur, bu ekrandan düzeltilemez - izin ekranından iptal edilir.
+ * Üçüyle aynı gösterseydik kullanıcı "istisnayı silerim" deyip aramaya
+ * çıkar ve silecek bir kayıt bulamazdı.
+ */
+const KAPALI = (k: number) => k === 3 || k === 4;
 type Gorunum = 'hekim' | 'bolum' | 'bugun';
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -60,10 +68,12 @@ export function CalismaPlani() {
   }, [bloklar, gorunum, veri]);
 
   const Blok = ({ b }: { b: CalismaBlok }) => (
-    <div className={`cp-blok${b.kaynak === 3 ? ' kapali' : b.kaynak === 2 ? ' ist' : ''}${secili === b ? ' sel' : ''}`}
-      title={b.kaynak === 3 ? `${ISTISNA[b.istisnaTur ?? 0]}${b.aciklama ? ' · ' + b.aciklama : ''}` : `${b.hekim} · ${b.departman} · ${b.saatBas}–${b.saatBit} · slot ${b.slotDk} dk · ${b.kanallar}${b.randevu ? ` · ${b.randevu} randevu` : ''}`}
+    <div className={`cp-blok${KAPALI(b.kaynak) ? ' kapali' : b.kaynak === 2 ? ' ist' : ''}${secili === b ? ' sel' : ''}`}
+      title={KAPALI(b.kaynak)
+        ? `${b.kaynak === 4 ? 'İK izni' : ISTISNA[b.istisnaTur ?? 0]}${b.aciklama ? ' · ' + b.aciklama : ''}`
+        : `${b.hekim} · ${b.departman} · ${b.saatBas}–${b.saatBit} · slot ${b.slotDk} dk · ${b.kanallar}${b.randevu ? ` · ${b.randevu} randevu` : ''}`}
       onClick={() => setSecili(b)}>
-      {b.kaynak === 3 ? <>{ISTISNA[b.istisnaTur ?? 0]}{b.aciklama ? ` · ${b.aciklama}` : ''}</>
+      {KAPALI(b.kaynak) ? <>{b.kaynak === 4 ? '🌴 ' : ''}{b.kaynak === 4 ? (b.aciklama || 'İzin') : ISTISNA[b.istisnaTur ?? 0]}{b.kaynak !== 4 && b.aciklama ? ` · ${b.aciklama}` : ''}</>
         : <>{b.saatBas}–{b.saatBit} · {b.slotDk} dk<span className="k">{b.kanallar.replace(/,/g, ' ')}</span>{b.kaynak === 2 ? <span className="k">· {ISTISNA[b.istisnaTur ?? 0]}</span> : null}{b.randevu ? <span className="k">· {b.randevu} rnd</span> : null}</>}
     </div>
   );
@@ -111,13 +121,19 @@ export function CalismaPlani() {
               {secili ? (
                 <div className="ds-ic">
                   <div><span className="sonuk">Gün</span> · {tarihYaz(String(secili.gun).slice(0, 10))} {secili.saatBas ? `${secili.saatBas}–${secili.saatBit}` : ''}</div>
-                  <div><span className="sonuk">Kaynak</span> · {secili.kaynak === 1 ? 'şablon (tekrar eden)' : secili.kaynak === 2 ? `istisna · ${ISTISNA[secili.istisnaTur ?? 0]}` : `kapalı · ${ISTISNA[secili.istisnaTur ?? 0]}`}</div>
-                  {secili.kaynak !== 3 && <div><span className="sonuk">Slot / kanal</span> · {secili.slotDk} dk · {secili.kanallar} · {secili.randevu} randevu</div>}
+                  <div><span className="sonuk">Kaynak</span> · {secili.kaynak === 1 ? 'şablon (tekrar eden)'
+                    : secili.kaynak === 2 ? `istisna · ${ISTISNA[secili.istisnaTur ?? 0]}`
+                    // İK İZNİ AYRI YAZILIR: buradan düzeltilemeyeceğini
+                    //   kullanıcı kartı açmadan bilmeli.
+                    : secili.kaynak === 4 ? `İK izni · ${secili.aciklama || 'izin'} (İzinler ekranından yönetilir)`
+                    : `kapalı · ${ISTISNA[secili.istisnaTur ?? 0]}`}</div>
+                  {!KAPALI(secili.kaynak) && <div><span className="sonuk">Slot / kanal</span> · {secili.slotDk} dk · {secili.kanallar} · {secili.randevu} randevu</div>}
                   {secili.aciklama && <div className="sonuk">{secili.aciklama}</div>}
                   <div style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap' }}>
                     {secili.sablonId && <button className="d" onClick={() => git(`/calisma-sablon/${secili.sablonId}?geri=%2Fcalisma-plani`)}>📋 Şablonu aç</button>}
                     {secili.istisnaId && <button className="d" onClick={() => git(`/calisma-istisna/${secili.istisnaId}?geri=%2Fcalisma-plani`)}>🏖 İstisnayı aç</button>}
-                    {yazar && secili.kaynak !== 3 && <button className="d" onClick={() => git(`/calisma-istisna/yeni?hekimId=${secili.hekimId}&geri=%2Fcalisma-plani`)}>＋ Bu hekime istisna</button>}
+                    {yazar && !KAPALI(secili.kaynak) && <button className="d" onClick={() => git(`/calisma-istisna/yeni?hekimId=${secili.hekimId}&geri=%2Fcalisma-plani`)}>＋ Bu hekime istisna</button>}
+                    {secili.kaynak === 4 && <button className="d" onClick={() => git('/personel-izin')}>🌴 İzinlere git</button>}
                     <button className="d" onClick={() => git(`/randevu?hekimId=${secili.hekimId}`)}>📅 Randevuları</button>
                   </div>
                 </div>

@@ -54,7 +54,7 @@ export interface ListeKartiOzellikleri {
  * Goz muayene kartindaki kisayollarin actigi kartlar (691). Bu uc
  * kaynak URL'den `hastaId` / `muayeneId` on dolgusu kabul eder.
  */
-const HASTA_KAYIT_KAYNAKLARI = new Set(['hasta-alerji', 'hasta-kronik', 'hasta-ilac', 'hasta-gecmis', 'ftr-degerlendirme', 'ftr-program', 'ftr-olcek']);
+const HASTA_KAYIT_KAYNAKLARI = new Set(['hasta-alerji', 'hasta-kronik', 'hasta-ilac', 'hasta-gecmis', 'ftr-degerlendirme', 'ftr-program', 'ftr-olcek', 'isg-calisan']);
 const GOZ_KISAYOL_KAYNAKLARI = new Set([
   'goz-gozluk-recete', 'goz-goruntuleme', 'goz-islem',
 ]);
@@ -389,6 +389,9 @@ export function ListeKarti({
           // HASTA KAYITLARI (alerji / kronik / ilac / gecmis): odontogram ya da baska
           //   ekrandan hasta on dolu acilir; kaydet/kapat `geri` ile doner.
           // CALISMA PLANI (711): plandan acilan istisna/sablon karti hekim on dolu.
+          // ISG (741): olay / ziyaret firma ve calisan on dolu (calisan karti, pano).
+          : tanim.kaynak.startsWith('isg-') && (sorgu.get('firmaId') || sorgu.get('calisanId'))
+          ? { ...tanim.yeniKayitVarsayilanlari, ...(sorgu.get('firmaId') ? { firmaId: Number(sorgu.get('firmaId')) } : {}), ...(sorgu.get('calisanId') ? { calisanId: Number(sorgu.get('calisanId')) } : {}) }
           : tanim.kaynak.startsWith('calisma-') && sorgu.get('hekimId')
           ? { ...tanim.yeniKayitVarsayilanlari, hekimId: Number(sorgu.get('hekimId')) }
           : HASTA_KAYIT_KAYNAKLARI.has(tanim.kaynak) && sorgu.get('hastaId')
@@ -409,6 +412,8 @@ export function ListeKarti({
           // `geri` varsa (seanstan lab is emri) yeni kartta kalmaz, onKapat
           //   geldigi ekrana doner; kart yoluna ara gecis gereksiz gecmis birakirdi.
           // FTR programi (719): yeni kayit ozel karta (uygulama ekle / planla) gecer.
+          // ISG (741): yeni calisan kaydedince ozel karta (muayene ac / form gonder).
+          if (kartId === 'yeni' && tanim.kaynak === 'isg-calisan') { git(`/isg-calisan/${yeniId}?geri=${encodeURIComponent(sorgu.get('geri') ?? '/isg-calisan')}`, { replace: true }); return }
           if (kartId === 'yeni' && tanim.kaynak === 'ftr-program') { git(`/ftr-program/${yeniId}?geri=${encodeURIComponent(sorgu.get('geri') ?? '/ftr-program')}`, { replace: true }); return }
           if (kartId === 'yeni' && !sorgu.get('geri')) {
             setOdaklaSonEklenen(t => t + 1);

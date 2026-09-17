@@ -64,22 +64,28 @@ public static partial class KaynakKatalogu
                 Kodlar: SaOncelikKodlari),
             new("butceAd", "coalesce(b.ad, '')", "metin", "Bütçe Kalemi", Genislik: 150),
             // BEKLEYEN BASAMAK: "onayda" demek yetmez, kimde beklediği görünmeli.
+            // ONAY OMURGASI ÜZERİNDEN (738): basamaklar `onay_adim`da.
+            //   Basamağın kendi ADI gösterilir - rol kodunu ikinci kez
+            //   metne çevirmek, akış tanımındaki adı görmezden gelmekti
+            //   ("Mali İşler (bütçe)" ile "Mali İşler" aynı rol, ayrı basamak).
             new("bekleyenBasamak",
-                "(select case o.rol when 1 then 'Birim sorumlusu' when 2 then 'Satınalma'" +
-                "        when 3 then 'Başhekim / Müdür' when 4 then 'Mali İşler'" +
-                "        when 5 then 'Yönetim Kurulu' else '' end" +
-                "   from public.satinalma_onay o" +
-                "  where o.talep_id = t.id and o.durum in (0, 4)" +
-                "  order by o.basamak limit 1)",
+                "(select v.adim_ad from public.v_onay_bekleyen v" +
+                "  where v.kaynak_tur = 1241 and v.kaynak_id = t.id" +
+                "  order by v.sira limit 1)",
                 "metin", "Bekleyen", Hizalama: "orta", Genislik: 150, Bicim: "rozet",
                 Filtrelenebilir: false),
             new("bekleyenGun",
-                "(select (current_date - o.ekleme_tarihi::date)" +
-                "   from public.satinalma_onay o" +
-                "  where o.talep_id = t.id and o.durum in (0, 4)" +
-                "  order by o.basamak limit 1)",
+                "(select (current_date - v.baslama::date) from public.v_onay_bekleyen v" +
+                "  where v.kaynak_tur = 1241 and v.kaynak_id = t.id" +
+                "  order by v.sira limit 1)",
                 "sayi", "Bekleme (gün)", Hizalama: "sag", Genislik: 110,
                 Filtrelenebilir: false),
+            // GECİKEN BASAMAK: termini geçmiş onay, unutulmuş bir karardır.
+            new("onayGecikmeGun",
+                "coalesce((select max(v.gecikme_gun) from public.v_onay_bekleyen v" +
+                "  where v.kaynak_tur = 1241 and v.kaynak_id = t.id), 0)",
+                "sayi", "Onay Gecikmesi", Hizalama: "sag", Genislik: 120,
+                Varsayilan: false),
             new("durumAdi",
                 "case t.durum when 0 then 'Taslak' when 1 then 'Onayda'" +
                 " when 2 then 'Onaylandı' when 3 then 'Reddedildi' when 4 then 'Teklifte'" +

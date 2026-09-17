@@ -123,10 +123,16 @@ public static partial class KartKatalogu
 
             // ONAY ZİNCİRİ SALT OKUNUR: basamaklar uçtan işlenir (onayla/reddet).
             //   Elle satır eklemek imza zincirini anlamsız kılardı.
-            new("onaylar", "public.satinalma_onay", "talep_id", new KartAlani[]
+            //
+            //   OMURGA ÜZERİNDE (738): satırlar artık `satinalma_onay`da
+            //   değil, modülden bağımsız `onay_adim`da. Görünüm talebin
+            //   zincirini `kaynak_tur = 1241` ile süzer - izin ve avans da
+            //   aynı tabloyu kullanacak, sekme kodu değişmeyecek.
+            new("onaylar", "public.v_satinalma_talep_onay", "talep_id", new KartAlani[]
             {
                 new("id", "id", "sayi", Yazilabilir: false),
                 new("basamak", "basamak", "sayi", Baslik: "Basamak"),
+                new("adimAd", "adim_ad", "metin", Baslik: "Basamak Adı"),
                 new("rol", "rol", "kod", Baslik: "Onay Rolü",
                     SabitKodlar: SaKartOnayRolKodlari),
                 new("onaylayanId", "onaylayan_id", "sayi", Baslik: "Onaylayan",
@@ -138,6 +144,10 @@ public static partial class KartKatalogu
                 // SÖZLÜ ONAYIN YAZILI TAMAMLANMA SÜRESİ: acil alım sözlü
                 //   onayla başlar, yazılı tamamlanmazsa askıda kalır.
                 new("yaziliSon", "yazili_son", "zaman", Baslik: "Yazılı Son"),
+                // TERMİN: basamak bu tarihe kadar karara bağlanmalı. Süre
+                //   dolunca KİMSE otomatik onaylanmaz - sessiz onay, onayın
+                //   kendisini ortadan kaldırırdı; hatırlatma içindir.
+                new("termin", "termin", "zaman", Baslik: "Termin"),
             }, Sirala: "basamak, id", Baslik: "Onay Zinciri",
                SubeKolonu: null, LogTabloId: 1243, SaltOkunur: true),
         },

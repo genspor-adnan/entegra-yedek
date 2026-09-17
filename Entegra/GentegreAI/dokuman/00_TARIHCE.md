@@ -10590,3 +10590,524 @@ no · tarih · tedarikçi), "Kabul" kararı `Tutanak "Kabul" olarak kapatıldı`
 dedi ve karekod uyarısını gösterdi, "Siparişe Git" `Alış Siparişi #5915 —
 SIP-900` kartını açtı. Konsol hatası yok. xUnit 232/232, vitest 598/598, iki
 derleme temiz. Test verisi silindi. Göç **737 yalnız docker'da**.
+
+## Form motoru projeye alındı (db/740, 17.09.2026)
+
+Kullanıcı: "formlar dizinindeki mockupları ve form motorunu projeye ekle".
+`db/740_form_motoru.sql`: kod listeleri `form.*`, `form_sablon` (jsonb tanım:
+bölümler → alanlar, sahip rol, koşul, skor satırları, hesap eşikleri, imza
+tanımları; resmi=1 kütüphane kopyası kilitli, kurum kopyası `ust_sablon_id`),
+`form_istek` (hasta, bağlam, kanal, SHA-256 belirteç özeti, taslak/cevap/
+imzalar jsonb, skor, durum), `form_kural` (tetikleyici olay → şablon, veri
+olarak; motor bağlantısı sonraki adım), görünümler `v_form_*`, yetkiler
+`form.*` (gönder/doldur/aktar EKRAN türü - istemci `yetki()` aksiyon türünü
+görmez), modül `form` (kurum_profil.moduller'e de yazılır), bildirim
+şablonları `form.baglanti` (SMS) / `form.baglanti.eposta`, 22 resmî şablon
+(KVKK, onamlar, Braden, İtaki II, ağrı, NRS-2002, ASA preop, Aldrete, WHO
+güvenli cerrahi 3 aşama, ameliyat hazırlık, el hijyeni, ön kayıt anamnezi, diş
+anamnezi, GRS, hasta hakları, memnuniyet) + 4 kurum kopyası.
+
+API `FormUclari.cs`: `/api/form/*` (sablon tanım kaydet/yayınla, gönder
+[SMS/e-posta kuyruğa, kiosk/iç ekran kod döner], istek, cevap [aşamalı formda
+aşama kapatma, skor sunucuda], hatırlat, yeniden, iptal, aktar [hedefAlan →
+muayene kolonları, mevcut metnin sonuna "[Hasta beyanı]"], hasta formları,
+kütüphane + kur) ve ANONİM `/api/acik/form/{kod}` (özet, doğrula = TCKN son 4
++ doğum yılı, 5 deneme → kilit, 30 dk oturum anahtarı, taslak, gönder/reddet;
+IP oran sınırı). Zaman kıyasları SQL'de (`now()` UTC ↔ .NET yerel farkı
+oturumu erken düşürüyordu). Kataloglar `KaynakKatalogu.Form.cs`,
+`KartKatalogu.Form.cs` (log 1190-1192), aksiyonlar (şablon kopyala/önizle/
+editör, istek aç/hatırlat/yeniden/iptal, hasta listesinde 📋 Formlar).
+
+Web: `api/uclar/form.ts` (+ `formAcik` token'sız fetch), `bilesenler/form/
+FormCizici.tsx` (tanım → ekran; koşul, skor, metin bloğu parametreleri,
+sahip rozeti, büyük mod CSS değişkenleriyle), `ImzaKanvas.tsx` (pointer
+events, PNG data URL), sayfalar `form/FormAcik.tsx` (`/f/:kod`, Giriş'ten ÖNCE
+oturumsuz; karşılama+doğrulama → bölüm adımları, taslak otomatik → özet+beyan
++kanvas imza → teşekkür), `FormDoldur.tsx` (`/form-doldur/:id` modal; klinik
+rol bölümleri, uzaktan beyan gelmişse hasta bölümü salt, aşama kapatma,
+kullanıcı imzası / hasta kanvas imzası, aktar, yazdır), `HastaFormlari.tsx`
+(`/hasta-formlar/:hastaId`; form doldur / SMS / e-posta / tablete ver = açık
+sayfa yeni sekme), `FormKutuphane.tsx` (`/form-kutuphane`), `FormSablonEditor.tsx`
+(`/form-editor/:id`; ağaç/tuval/özellik, JSON düzenleme yalnız skor satırları
+ve hesap için), `listeTanimlari.Form.ts` (Yönetim › Formlar alt grubu:
+Şablonlar, Kütüphane, Doldurulan Formlar, Kurallar), `formAksiyonlari.ts`.
+Tuzak: modal perdesi bileşen İÇİNDE tanımlanınca her state değişiminde
+remount oluyor (kanvas imza kayboluyor) - Perde/Kabuk dışarı alındı.
+Tema testi: `.fm-buyuk .fm-cip` gibi kap altı restyle yasak → ölçüler CSS
+değişkeni (`--fm-boy`…). Doğrulandı: API dumanı + Playwright (menü, kütüphane
+kur, editör, hasta formları, iç ekran onam + kanvas imza + tamamla, telefonda
+açık form baştan sona). Kalan: form_kural motoru (olay dinleme + kilit
+rozetleri), PDF arşivi (dokuman), OTP imza, XLSForm içe alma.
+
+## İşyeri Hekimliği (İSG / OSGB) modülü (db/741, 17.09.2026)
+
+Kullanıcı: "mockuplara uygun şekilde isg ekranlarını projeye ekle". Form
+motoru (740) üstüne. `db/741_isg_modulu.sql`: kod listeleri `isg.*`
+(tehlike, maruziyet 14, muayene türü, kanaat, olay/ziyaret türü, aşı, çalışma
+şekli), tablolar `isg_firma` (taraf.kurum=1 uzantısı: NACE, tehlike, atamalar,
+sözleşme dk), `isg_firma_bolum` (maruziyet JSON metni - generic kart detay
+gridi jsonb'ye cast etmiyordu, kolon varchar + okuyan `::jsonb`), `isg_calisan`
+(hasta + firma, tek aktif), `isg_muayene` (form_istek bağı, kanaat/koşul/
+sonraki/sevk/tetkik özeti, süre dk), `isg_asi`, `isg_ziyaret` (onaylı defter,
+termin, üç imza), `isg_olay` (kaza / meslek hastalığı şüphesi / ramak kala,
+SGK bildirim, kök neden). Fonksiyonlar `fn_isg_periyot_ay` (hekim kısaltması
+> bölüm > tehlike 60/36/12 ay; gece ≤ 24; portör 6), `fn_isg_aylik_dk`.
+Görünümler `v_isg_*` (vade, kalan gün, süre dk, SGK kalan gün) + lookup'lar.
+Yetkiler `isg.*`, modül `isg` (kurum_profil.moduller'e de), kurum tipi `osgb`
+(muayenehane modül seti + isg), Ek-2 resmî şablonu `ek2` + kurum kopyası
+(çalışan bölümleri: kimlik/öykü/sistem sorgusu/meslek; hekim: fizik/tetkik/
+kanaat; `hedefAlan` isg_muayene.*). Detay tabloları `sube_id` ister.
+
+API `IsgUclari.cs`: `/api/isg/pano`, `/firma/{id}` (bölümler, 6 aylık süre,
+sağlık gözetimi özeti - işverene yalnız sayı/kanaat dağılımı), `/calisan/{id}`
+(muayeneler, aşı, olay, formlar, tıbbi özet), `/calisan/{id}/muayene-ac`
+(isg_muayene + Ek-2 form isteği: kanal 3 SMS / 2 tablet / 1 iç ekran; açık
+muayene varsa o döner), `/muayene/{id}/isle|iptal`, `/takvim` (firma/bölüm/
+gün/tür), `/takvim/toplu` (seçilenlere Ek-2 + SMS), `/olay/{id}/sgk|kapat`.
+`MuayeneyiIsleAsync`: form tamamlanınca kanaat metninden kod, sonraki tarih,
+sevk, tetkik özeti; FormUclari cevap ucundan kaynak_tur 8'de çağrılır.
+FormUclari: `GonderCalistirAsync` public; açık gönderimde personel bölümü
+varsa istek durum 3 (beyan alındı, hekim tamamlar). Kataloglar
+`KaynakKatalogu.Isg.cs` / `KartKatalogu.Isg.cs` (1200-1206), aksiyonlar
+(çalışan: kart / Ek-2 aç / formu gönder / olay bildir; muayene: form / kanaati
+işle / iptal; olay: SGK bildirildi / kapat), standart roller isyeri_hekimi,
+isg_uzmani, dsp, osgb_sekreter, firma_yetkilisi (`osgb` Klinik dizisinde).
+
+Web: `listeTanimlari.Isg.ts` (grup İşyeri Hekimliği: Firma Panosu, Periyodik
+Takvim, Çalışanlar [özel kart + gizli generic `isg-calisan-kart`], Ek-2
+Muayeneleri, Ziyaretler, Olaylar, Ayarlar › Firmalar), `sayfalar/isg/IsgPano.tsx`
+(KPI, firma tablosu, seçili firma: kart/bölümler, özet, süre), `IsgCalisanKarti.tsx`
+(modal; kimlik, maruziyet → tetkik önerisi, muayene geçmişi → Ek-2 formu,
+aşı, tıbbi özet, olaylar; Ek-2 aç: tür + kanal seçimi), `IsgTakvim.tsx`
+(ay kutuları, süzgeçler, toplu Ek-2 + SMS), `isgAksiyonlari.ts`, ListeKarti
+ön dolgu (`firmaId`/`calisanId`) ve yeni çalışan → özel kart, bölge Klinikler
+(cap 5), `GRUP_IKON` 👷, kurum tipi görseli `osgb`, çalışma alanı rol eşlemesi
+(sekreter → banko, dsp → hemşire), CSS `isg-*`. Doğrulandı: API dumanı (firma
++ bölüm + çalışan → Ek-2 kiosk → çalışan beyanı → hekim tamamla → kanaat 2 /
+sonraki / sevk → olay + SGK → ziyaret → pano süre) ve Playwright (menü, pano,
+takvim, çalışan listesi/kartı, Ek-2 formu "hasta beyanı var", olay/muayene
+listeleri; konsol hatasız). Kalan: İSG-KATİP elle eşleme, firma faturası,
+onaylı defter / Ek-2 PDF (döküm tasarımcısı), aşı kampanyası toplu kayıt,
+cloud DB göçleri (740/741 docker-only).
+
+
+## 17.09.2026 — Onay omurgası ve satınalmanın taşınması (`db/738`-`740`)
+
+İzin, avans, arıza onarımı ve satınalma talebi aynı soruyu soruyor: **bu
+kaydı kim, hangi sırayla imzalayacak.** Bugün bunun dört yarım cevabı vardı -
+`satinalma_onay` (kuralları C# içinde), `dokuman_akis`+`dokuman_onay` (gerçek
+bir motor ama yalnız dokümana bağlı), `iskonto_talep` ve `personel_izin`
+(onaylayanı bile yok). Beşincisini yazmak, vekâleti · süre aşımını · ret
+dalını · gelen kutusunu beş yerde bakılacak beş koda çevirirdi.
+
+**Omurga.** `onay_akis` + `onay_akis_adim` (tanım), `onay` + `onay_adim`
+(yürüyen örnek), `onay_vekalet`. `dokuman_akis` motorunun modülden bağımsız
+hâli. Kayda bağ **`kaynak_tur` + `kaynak_id`** ile: `kaynak_tur` kurumun
+zaten kullandığı `islem_log.tablo_id`dir (satınalma talebi 1241). İkinci bir
+numaralandırma açsaydık aynı tablo iki ayrı adla anılır, log ile onay kaydı
+birbirine bağlanamazdı.
+
+**Kural artık veri.** Zincir `ZincirKurAsync` içinde üç `if` dalıydı; izin
+gün sayısına, avans maaş katına göre dallanacaktı. Eşik ve bayrak koşulu
+adımın kendi özelliği oldu (`esik_alt`, `bayrak`) - "bütçe aşıldı" gibi sayıya
+sığmayan koşullar bayrak olarak geçiyor. Satınalmanın 724/729 zinciri tohum
+olarak yüklendi; davranış birebir korundu.
+
+**Motor karar vermez, sırayı yürütür.** "Bu talep onaylanmalı mı" sorusu
+motorun işi değil; kaydın kendi durumunu (talep "onayda" mı "onaylandı" mı)
+modül yazar. Motorun içine koysaydık her yeni tür için motora bir `switch`
+dalı eklenirdi. Aynı gerekçeyle **yetki de modülde**: basamağın rolü
+satınalmanın yetki koduysa satınalmanınki sorulur.
+
+**Ret zinciri bitirir, bilgi isteme durdurur ama bitirmez** (724'ten gelen
+kural, omurgada korundu). **Sözlü onay** yazılı tamamlama süresi taşır.
+**Süre aşımı kimseyi onaylamaz:** termin geçince basamak yalnız "gecikmiş"
+görünür - sessiz onay, onayın kendisini ortadan kaldırırdı.
+
+**Vekâlet.** İzindeki âmirin kutusunda talep beklemesin diye; devredilen imza
+**devralanın adıyla** atılır. Vekâlet olmayınca kurum çareyi "şifresini ver"
+ile buluyor ve imzanın kime ait olduğu o noktada kayboluyor.
+
+**Tek gelen kutusu.** `v_onay_kutusu`: türü fark etmeksizin bekleyen
+basamaklar, kaydın konusu/sahibi çözülmüş hâlde. Yeni tür eklemek bir `case`
+dalı. Karar **kutudan** verilir - kullanıcıyı kaydın kendi ekranına yollamak
+tek kutunun anlamını bitirirdi.
+
+**740 — bulunan hata (738'den).** Kutu "kararı verilmemiş her basamağı"
+gösteriyordu: beş basamaklı talep kutuda beş satırdı. Yalnız kalabalık değil,
+**yanlış imza** sebebi - karar bekleyen en küçük basamağa yazılır, dolayısıyla
+üst yönetim üyesi kendi satırına onay verdiğinde karar birim sorumlusunun
+basamağına yazılıyordu. Kutu artık yalnız sırası gelmiş basamağı gösteriyor;
+sırası gelmemişler kaydın "Onay Zinciri" sekmesinde duruyor. Kutu "şimdi ne
+yapmalıyım" sorusunu yanıtlar, "bu kayıt kimlerden geçecek" sorusunu değil.
+
+**Yan bulgu.** Liste kolonlarında `zaman` tipi hiç biçimlenmiyordu (`bicim.ts`
+switch'inde dalı yoktu) - ham ISO metni ekrana yazılıyordu. Acil ve
+ameliyathane listelerindeki saat kolonları da aynı daldan geçiyor; tek yerde
+düzeltildi.
+
+**Doğrulama.** 300.000 TL + bütçesiz talep beş basamaklı zincir kurdu
+(birim → satınalma → mali → mali/bütçe → üst yönetim, terminleriyle);
+1.000 TL'lik talep üç basamak. Gerekçesiz ret reddedildi; bilgi isteme
+zinciri durdurdu ama kapatmadı ve aynı basamak sonra onaylandı; sözlü onay
+yazılı süresini yazdı; son basamak onaylanınca zincir bitti ve **talep
+durumu 2 (onaylandı)** oldu; bitmiş zincirde karar engellendi. Ret dalında
+bekleyen basamaklar "atlandı" işaretlendi, talep 3 (reddedildi) oldu ve
+kutudan düştü. Satınalmanın kendi `talep/karar` ucu da aynı omurgaya yazıyor.
+Tarayıcıda kutu ekranı (12 sütun, 5 çip), araç çubuğu ve sağ tuş düğmeleri,
+"Onay Zinciri" penceresi, gerekçe soran "Bilgi İste" ve "Onayla" çalışıyor;
+konsol hatası yok. xUnit 232/232, vitest 598/598, iki derleme temiz. Test
+verisi silindi.
+
+**`satinalma_onay` SİLİNMEDİ.** Veri omurgaya kopyalandı, tablo yerinde
+duruyor: müşteride yürüyen onay olabilir ve göç geri alınamaz değildir.
+Okuma/yazma yeni omurgaya geçti; tablo bir dahaki sürümde düşer.
+
+**Kalan.** Bildirim şablonları (`onay.istek` · `onay.hatirlatma` ·
+`onay.sonuc`) yüklendi ama **kuyruğa yazan tetik henüz yok** - sıra gelen
+kişiye e-posta/SMS gitmiyor, kutuya bakmak gerekiyor. Vekâlet tablosu var,
+**ekranı yok**. Âmir bazlı onay (`sahip_turu = 3`) bilinçli olarak
+çözülmüyor: `personel_gorev` ağacında âmir bağı kurulu değil, olmayan bir
+bağa dayanan akış ilk talepte "onaylayacak kimse yok" ile dururdu. Göçler
+**738-740 yalnız docker'da**.
+
+## 17.09.2026 — Onay bildirimi ve vekâlet ekranı (`db/741`)
+
+738-740'ta kutu vardı ama **kimse haberdar olmuyordu**: onay, kişinin kutuyu
+açma alışkanlığına kalmıştı. Acil bir talep, âmiri o gün sisteme girmediği
+için bekler; kurum çareyi telefonla aramada bulur ve zincirin kaydı ile
+gerçekte olan iş birbirinden ayrılır. Vekâlet tablosu vardı, **ekranı yoktu**.
+
+**Bildirim tetiği.** `OnayBildirimi`: sıra gelen basamağın sahiplerine
+`onay.istek`, zincir bitince talebi açana `onay.sonuc`, termini geçende
+`onay.hatirlatma`. Rol basamağında **o rolün herkesine** yazılır - yalnız
+birine haber vermek "kim bakacak" sorusunu kuruma bırakmak olurdu; kişiye
+atanmış basamakta sahibi ve **vekili**. Alıcının e-postası varsa e-posta,
+yoksa cep; ikisi de yoksa satır açılmaz (alıcısız bildirim kuyruğu tıkar).
+
+**Gönderim değil, kuyruğa almadır.** Uçtan doğrudan SMS/e-posta göndermeye
+kalksaydık onay kararı sağlayıcı yavaşladığında beklerdi. Bildirim
+`bildirim` kuyruğuna yazılır, gönderimi mevcut `BildirimIscisi` yapar; hata
+**kararı düşürmez** - iletişim ayarı eksik bir kurumda hiçbir onay
+verilememesi, bildirimin gitmemesinden kötüdür.
+
+**Hatırlatma günde bir.** `zamanli_is` satırı `onay.hatirlatma` (her gün
+09:00, **varsayılan kapalı**). Saatte bir çalışsaydı bir günde yirmi dört
+mesaj olurdu; gürültü de okunmaz. Kimseyi onaylamaz - sessiz onay, onayın
+kendisini ortadan kaldırırdı.
+
+**Vekâlet ekranı.** Kart (devreden · vekil · tarih aralığı · yalnız bu akış ·
+aktif) ve liste ("Yürürlükte / Bekleyen / Aktif / Tümü"). Tarih aralığı
+zorunlu: süresiz vekâlet imza yetkisinin kalıcı devridir, o bir vekâlet
+değil **rol değişikliğidir**. Yetki `kullanici` - "onayı olan herkes kendi
+vekâletini yazsın" deseydik imza zinciri kişinin kendi kararına kalırdı.
+Kullanıcı seçimi mevcut `v_kullanici_lookup` ile; ikinci bir liste açmadık.
+
+**İki hata, testte bulundu.** (1) 739'daki şablonlar tek süslü parantez
+kullanıyordu (`{kayitNo}`); doldurucu **çift** parantez arar, yani mesaj
+kullanıcıya `Onayınızda: {kayitNo}` diye giderdi - yanlış giden bildirim
+gitmeyenden kötüdür, kurum sistemin çalıştığını sanır. (2) Hatırlatmanın
+"bugün yazıldı mı" süzgeci şablona bakmıyordu: sıra geldiğinde yazılan
+`onay.istek`, hatırlatmayı tam da gecikmenin başladığı gün bastırıyordu.
+
+**Doğrulama.** Onaya gönderince ilk basamağa e-posta yazıldı (`Onayınızda:
+BLD-1`, gövdede tutar/basamak/termin dolu); her onayda sıradakine, zincir
+bitince talep sahibine `BLD-1 ONAYLANDI`. Hatırlatma işi 4 gün gecikmiş
+basamak için bir satır yazdı, **aynı gün ikinci çalıştırmada yazmadı**.
+Vekâlet: başkasına atanmış basamak admin kutusunda görünmedi ve karar
+`vekâletiniz yok` ile reddedildi; vekâlet tanımlanınca kutuda göründü,
+karar geçti ve **imza vekilin adıyla** (4901) düştü. Tarayıcıda menüde
+"Onay Vekâleti", liste (8 sütun, 4 çip) ve kart (kullanıcı combo'ları 96
+seçenek, başlangıç bugün dolu) çalışıyor; konsol hatası yok. xUnit 232/232,
+vitest 598/598, iki derleme temiz. Test verisi silindi.
+
+**Mockup.** `Ekranlar/Ayarlar/onay_akis_ayarlari.html` - tasarım kaynağı:
+akışlar · basamaklar (eşik/bayrak/süre/e-imza) · talep ayarları (eşikler,
+sözlü onay, bütçe, kritik stok) · bildirim şablonları · vekâletler. İzin,
+avans ve masraflı onarım akışları ekranda **"tanımlı değil"** olarak
+duruyor: motor hazır, akış tanımı bekliyor.
+
+**Kalan.** Akış tanımı ekranı (`onay_akis` / `onay_akis_adim`) henüz yok -
+akışlar göçle geliyor; mockup o ekranın tasarımı. Âmir bazlı onay
+(`sahip_turu = 3`) hâlâ çözülmüyor. Göç **741 yalnız docker'da**.
+
+## 17.09.2026 — Onay akışı tanım ekranı (`db/742`)
+
+Kurallar 738'de veriye taşınmıştı ama **düzenleyecek ekran yoktu**: kurum bir
+eşiği değiştirmek istediğinde göç dosyası yazmak gerekiyordu - yani kural yine
+koda gömülüydü, yalnız adı değişmişti.
+
+**Akış bir kart, basamaklar onun detayı.** `onayAkis` kartı (kod · ad · hangi
+kayıt · karar ölçüsü · aktif) ve yazılabilir "Basamaklar" sekmesi (sıra · ad ·
+kime düşer · rol/kullanıcı · eşik · bayrak · karar türü · süre · e-imza).
+Yürüyen zincirin basamağı (`onay_adim`) hâlâ salt okunur: tanımı değiştirmek
+gelecekteki zincirleri etkiler, **atılmış imzaları değil**.
+
+**Kaynak türü serbest metin değil.** Akış bir kayıt türüne bağlanır ve o türün
+"onaylandı ne demek" eşlemesi uçta yazılıdır. Listeye yalnız motorun
+yürütebildiği türleri koyuyoruz - olmayan bir türe akış tanımlatmak, ilk
+kararda "kayıt durumu eşlemesi tanımlı değil" ile duran bir zincir üretirdi.
+Bugün tek tür var (Satınalma Talebi); yeni tür eklemek uçta bir dal **ve**
+katalogda bir satır, ikisi birlikte.
+
+**Akışı Dene — kuru çalıştırma.** Verilen ölçü ve bayraklarla hangi
+basamakların çıkacağını gösterir, **kayıt üretmez**. Eşiği değiştiren kişi
+sonucunu gerçek bir talep açmadan görmeli; yoksa akışın doğru kurulup
+kurulmadığı ancak ilk gerçek talepte, karar yanlış kişiye düşünce anlaşılırdı.
+Zincir kurmayla **aynı metottan** geçiyor (`SecilenAdimlarAsync`, 738'den
+çıkarıldı): ayrı yazılsaydı deneme ekranı gerçekte kurulacaktan başka bir şey
+gösterebilir ve kimse farkı görmezdi.
+
+**Üç uyarı denemede çıkar:** hiç basamak çıkmıyorsa "kayıt imzasız onaylanır",
+akış pasifse "hiçbir kayıtta çalışmaz", âmir bazlı basamak varsa "âmir bağı
+kurulu değil". Listede de aynı soru sütun olarak duruyor: **"Her Kayıtta"**
+(eşiksiz/bayraksız taban basamak sayısı) sıfırsa küçük tutarlı kayıt hiç imza
+görmeden geçer - "Taban basamağı yok" çipi bunu ortaya çıkarır.
+
+**Bulunan hata.** Akış ve vekâlet listeleri şubeye göre süzülüyordu; ikisi de
+**kurum geneli** tanımdır ve `sube_id`leri boştur - liste bu yüzden tamamen
+boş geldi. Şube süzmesi kaldırıldı (kartlardaki şube damgası da): imza düzeni
+şubeye göre değişmez, vekâlet de kişinindir.
+
+**Doğrulama.** 1.000 TL'de 2 basamak, 300.000 TL + iki bayrakla 6 basamak
+çıktı; basamaksız akış "imzasız onaylanır", pasif akış "hiçbir kayıtta
+çalışmaz" uyarısını verdi. Kart üzerinden yeni akış açıldı, üç basamak
+eklendi ve gün eşiği çalıştı (5 gün → 2 basamak, 14 gün → 3). Tarayıcıda
+liste (11 sütun, 4 çip), "🧪 Akışı Dene" (iki soru + basamak dökümü) ve
+kartın düzenlenebilir "Basamaklar" sekmesi çalışıyor; konsol hatası yok.
+xUnit 232/232, vitest 598/598, iki derleme temiz. Test verisi silindi.
+
+**Kalan.** Âmir bazlı onay (`sahip_turu = 3`) hâlâ çözülmüyor -
+`personel_gorev` ağacında âmir bağı yok; ekran seçeneği "(henüz yok)" diye
+gösteriyor. Göç **742 yalnız docker'da**.
+
+## 17.09.2026 — İzin modülü (`db/743`, `744`, `747`) + göç numarası çakışması
+
+`personel_izin` 052'den beri vardı ama bir **kayıt defteriydi**: `durum`
+kolonuna "onaylı" yazılabiliyordu, kimin onayladığı hiçbir yerde durmuyordu;
+personelin o günü olup olmadığı da hesaplanmıyordu. Artık izin, onay
+omurgasından (738) geçen bir **talep**.
+
+**Hak İş Kanunu md. 53'ten.** `fn_izin_hak_gun`: 1-5 yıl 14, 5-15 yıl 20,
+15+ 26 gün; 18 yaş altı / 50 yaş üstünde en az 20. Bir yılı doldurmayanın
+hakkı doğmaz. **İşe giriş tarihi yoksa NULL döner** - sıfır dönmek "hakkı
+bitti" ile karıştırılırdı; bakiye ekranı bunu "İşe giriş yok" diye ayrıca
+söylüyor ve kendi çipi var.
+
+**Hak tabloda tutulur** (`personel_izin_hak`), her açılışta yeniden
+türetilmez: kurum toplu sözleşmeyle ya da kıdem ödülüyle fazladan gün
+verebilir; hesaplanan değere dönmek o kararı silerdi. Devir ve ek gün ayrı
+kolonlar.
+
+**Kullanılan ile planlanan ayrı.** Onaylı ama henüz başlamamış izin
+bakiyeden düşer ama "kullanıldı" değildir; onaydaki talep de düşülür - yoksa
+iki talep birden onaylanır ve bakiye eksiye düşerdi. Tek sayı gösterseydik
+personel "iznim duruyor" sanıp ikinci kez isterdi.
+
+**Gün sayısını sunucu hesaplar** (`fn_izin_gun`): takvim günü varsayılan,
+`is_gunu` seçilirse hafta sonu düşülür. **Resmî tatil düşülmez** - tatil
+tablosu yok; olmayan bir listeye dayanıp "doğru" gün üretmek, yanlış sayıyı
+doğru sanmaktır. İki yerde hesaplansaydı ekranın gösterdiği ile bakiyeden
+düşen farklı olur ve fark kimsenin dikkatini çekmeden bakiyeyi eritirdi.
+
+**Âmir bazlı onay çözüldü.** 738'de "henüz yok" diye bırakılan
+`sahip_turu = 3`, `taraf_personel.yonetici_taraf_id` üzerinden çalışıyor:
+zincir kurulurken âmir **bir kez** çözülüp basamağa yazılıyor - her karar
+anında yeniden sorsaydık, personelin âmiri izin sürerken değiştiğinde basamak
+el değiştirir ve "bu bana ne zaman düştü" sorusunun cevabı kalmazdı.
+**Âmirsiz personelin izni onaya gönderilemiyor**: sessizce geçseydik izin
+kimsenin kutusunda görünmeden İK'ya kalır, âmirin haberi hiç olmazdı.
+
+**Zincir:** Âmir → İK → (10 günü aşarsa) Üst Yönetim, artı **bakiye aşımı**
+bayrağıyla ek İK basamağı. Bakiye aşımı **engel değil**: hakkı olmayana izin
+vermek ücretsiz ya da avans izindir - ayrı bir karardır, engellemek yerine
+bir imza daha isteniyor.
+
+**Çakışma iki yerde.** Aynı personelin aynı günlerde ikinci izni engelleniyor
+(bakiyeyi iki kez düşürür, hangisinin geçerli olduğu belirsiz kalır). Aynı
+**âmire bağlı** başka personelin çakışan izni ise sayılıp listede gösteriliyor:
+onaylayanın sorusu "bu kişi gidebilir mi" değil, "ekip ayakta kalır mı".
+Birim yerine âmir, çünkü `taraf_personel.gorev` serbest metindir ve departman
+bağı taşımaz - departmana göre saymak her zaman sıfır döndürürdü.
+
+**İptal siler değil kapatır:** onaylı izin de iptal edilir (personel
+vazgeçer, kurum geri çağırır), gerekçe zorunlu ve yürüyen zincir de kapanır -
+iptal edilmiş bir iznin onayı kimsenin kutusunda beklememeli.
+
+**Üç ekran:** İzin Talepleri (çipler: Açık · Onayda · Onaylı · **Çakışan** ·
+Onay gecikti), İzin Bakiyeleri (hak/devir/kullanılan/planlanan/onayda/kalan,
+"İşe giriş girilmemiş" çipi) ve gizli Hakediş kartı. Onay **düğmesi yok**:
+karar onay kutusundan ya da zincirden verilir - izin ekranına ikinci bir onay
+yolu koymak, aynı kararı iki ayrı yerde farklı kurallarla vermek olurdu.
+
+**Göç numarası çakışması düzeltildi.** `740` ve `741` numaraları bu oturumdan
+önce alınmıştı (form motoru, İSG modülü); onay omurgasının iki dosyası aynı
+numaraları ikinci kez kullanıyordu. `745_onay_sirasi_gelen.sql` ve
+`746_onay_bildirim_vekalet.sql` olarak yeniden numaralandırıldı, göç geçmişi
+de güncellendi. Yetki tanımlamak onu kimseye vermiyor: 743 `yetki` satırlarını
+ekledi ama role bağlamadı ve izin uçları yönetici hesabında bile 403 döndü -
+`747` yönetici rolüne veriyor.
+
+**Doğrulama.** İşe girişi olmayan personelde bakiye "hesaplanamıyor" dedi;
+2018 girişli personelde hak 20 gün çıktı. 5 günlük talep açıldı (bakiye
+20 → 15), çakışan ikinci talep reddedildi, âmirsizken onaya gönderme
+engellendi; âmir tanımlanınca zincir "Birim Âmiri → İnsan Kaynakları" kuruldu
+ve **âmir basamağı 4901'e atandı**. Kutuda izin "Yıllık izin · 05.10-09.10.2026"
+diye göründü; iki onaydan sonra izin durumu 2 oldu ve bakiye onaydan
+planlanana geçti. 29 günlük talep dört basamak kurdu (bakiye aşımı + üst
+yönetim). Gerekçesiz iptal reddedildi, gerekçeliyle izin ve zincir kapandı,
+kutudan düştü. Tarayıcıda menü, iki liste, "📊 Bakiye" ve "🧾 Onay Zinciri"
+pencereleri çalışıyor; konsol hatası yok. xUnit 232/232, vitest 598/598, iki
+derleme temiz. Test verisi silindi.
+
+**Bulunan hata.** Bakiye listesinde yıl "2.026" diye görünüyordu (sayı
+kolonu binlik ayracı alıyor). Yıl bir miktar değil etikettir - metin oldu.
+
+**Kalan.** Resmî tatil tablosu yok (iş günü hesabı yalnız hafta sonunu
+düşüyor). İzin onayı **çalışma planını etkilemiyor**: onaylı izindeki hekime
+randevu açılabiliyor - `hekim_calisma_istisna` ile bağ ayrı bir iş. Göçler
+**743-747 yalnız docker'da**.
+
+## 17.09.2026 — Onaylı izin çalışma planını kapatır (`db/748`)
+
+743'te izin onaydan geçmeye başladı ama **plana dokunmuyordu**: onaylı
+izindeki hekimin takvimi açık kalıyor, randevu yazılabiliyordu. İzni
+onaylayan "tamam" diyor, kayıt kabul aynı gün o hekime hasta yazıyor -
+ikisi de sistemi kullanıyor ve ikisi de haklı.
+
+**İzin kopyalanmaz, okunur.** `hekim_calisma_istisna`ya satır ÜRETMİYORUZ:
+üretseydik izin kaydı iki yerde dururdu ve izin tarihi değişince (ya da
+iptal edilince) istisna eski hâlinde kalıp planı yanlış gösterirdi.
+`fn_hekim_calisma_bloklari` onaylı izinleri doğrudan `personel_izin`den
+okuyor - 718'in "izin/kongre/kapalı o günün bloklarını kaldırır" dalı
+zaten vardı, izin oraya bir kaynak olarak eklendi.
+
+**Yalnız ONAYLI izin (durum 2).** Taslak ya da onaydaki talep henüz bir
+karar değildir; planı ona göre kapatmak, onaylanmamış bir izni uygulamak
+olurdu. Testte doğrulandı: izin "onayda"yken blok açık, onaylanınca kapalı.
+
+**Kaynak 4 = İK izni.** Plan istisnasıyla aynı göstermedik: izin kaydı
+İK'da durur ve plan ekranından düzeltilemez. Üçüyle aynı gösterseydik
+kullanıcı "istisnayı silerim" deyip aramaya çıkar, silecek bir kayıt
+bulamazdı. Ekran bloğu 🌴 ile işaretliyor ve seçilince "İzinlere git"
+düğmesi çıkıyor.
+
+**Randevu engeli tetikleyicide.** Randevu birden çok yoldan yazılıyor
+(kart, diş akışı, radyoloji panosu, epikriz); uçlardan birine koysaydık
+öteki yollar kuralsız kalırdı. `tr_randevu_izin` izinli hekime randevuyu
+reddediyor ve mesajda izin tarihlerini söylüyor.
+
+**Sert kural seçenekli.** `randevu.izinli_hekim` ayarı 1 olursa yalnız
+uyarır: kurum bilerek yazmak isteyebilir (izin dönüşü ilk gün planlanan
+kontrol, yarım gün izin). Seçenek koymasaydık kurum randevuyu kâğıda yazar
+ve takvim bir daha hiç doğru olmazdı.
+
+**Var olan randevular taşınmaz, sayılır.** İzin talebi açılırken ve onaya
+gönderilirken o tarihlerdeki açık randevu sayısı uyarı olarak dönüyor.
+Kimin kiminle konuşacağını bu belirler; onaylandıktan sonra söylemek
+hastanın kapıda öğrenmesi demektir.
+
+**Doğrulama.** Şablonlu hekime onaylı izin verildi: 21-23 Eylül blokları
+"(kapalı) · kaynak 4 · Yıllık izin" oldu, izinsiz hekimde 09:00 bloğu
+durdu. İzinli hekime randevu hem SQL'den hem kart ucundan reddedildi
+("Dr. Burak Kılıç 22.10.2026 tarihinde izinli (19.10.2026 - 23.10.2026)");
+ayar 1'ken yazıldı ve yalnız uyarı düştü; taslak izin planı kapatmadı.
+Randevulu tarihe açılan talep "Bu tarihlerde 2 randevusu var" uyarısını
+verdi, onaya gönderme aynı sayıyı döndürdü ve iki onaydan sonra plan
+kapandı. xUnit 232/232, vitest 598/598, iki derleme temiz. Test verisi
+silindi.
+
+**Kalan.** Resmî tatil tablosu hâlâ yok (iş günü hesabı yalnız hafta sonunu
+düşüyor). İzin onaylanınca mevcut randevuların taşınması/iptali elle -
+toplu taşıma ayrı bir iş. Göç **748 yalnız docker'da**.
+
+## 17.09.2026 — Resmî tatil takvimi (`db/749`, `750`)
+
+743'ün iş günü hesabı yalnız cumartesi-pazarı düşüyordu: 29 Ekim'e denk
+gelen bir izin bir gün fazla sayılıyordu. Fonksiyonun başında bu açıkça
+yazılıydı - liste artık var.
+
+**Millî tatiller üretilir, dinî bayramlar girilir.** Millî bayramlar mîlâdî
+takvimde sabit tarihlidir; `fn_resmi_tatil_uret` bir yılın sekizini tek
+çağrıda yazar (28 Ekim yarım gün dâhil). Ramazan ve Kurban hicrî takvime
+bağlı ve Diyanet'in ilanına göre kayar: **algoritmayla üretmiyoruz.** Bir
+gün kayan hesap izin gününü ve bordroyu yanlış hesaplar; "yaklaşık doğru"
+bir tatil takvimi, olmayan takvimden daha tehlikelidir çünkü kimse kontrol
+etmez. Üretim ucu, o yıl dinî bayram tanımlı değilse bunu **uyarı olarak
+söylüyor**.
+
+**Yarım gün 0,5 sayılır.** Arife günleri (13:00'ten sonra) yarım gündür;
+tam gün saymak çalışanın yarım gününü yer, hiç saymamak kurumun yarım
+gününü. Hafta sonuna denk gelen tatil **iki kez düşmez** - zaten iş günü
+değil.
+
+**Tatil "kapalı" demek değildir.** `calisma_var` varsayılan 1: sağlık
+kurumunda acil, yatan ve nöbet tatilde de sürer. Bayrağı tersine kursaydık
+29 Ekim'de hastane kapalı görünürdü.
+
+**Yerel tatil şubeye bağlanır** (`sube_id`); boşsa kurum geneli. Liste şube
+süzmesi kullanmıyor - süzseydi kurum geneli satırlar hiç görünmezdi.
+
+**750 — bulunan iki hata (749'dan).** (1) 743'ün üç parametreli
+`fn_izin_gun`u ile 749'un dört parametrelisi yan yana kaldı ve üç argümanlı
+her çağrı `function is not unique` ile **düştü** - izin talebi açan uç
+dâhil. Daha kötüsü de mümkündü: çağrı sessizce tatili bilmeyen sürüme
+düşebilirdi. Eski imza kaldırıldı. (2) Gün adı `to_char(..., 'TMDay')` ile
+üretiliyordu ve sunucunun `lc_time` ayarına bağlıydı - kurulumda
+"Thursday" çıkıyordu. Ekranda görünen bir metnin sunucu ayarına göre
+değişmesi, aynı ürünün iki kurulumda farklı görünmesi demek; gün adı sabit
+hâle getirildi.
+
+**Doğrulama.** 2026 ve 2027 için sekizer millî tatil üretildi; ikinci kez
+çalıştırmak hiçbir şey yazmadı (mükerrer yok). Gün hesabı: 26-30 Ekim
+takvim 5 gün, iş günü **3,5** (28 yarım + 29 tam tatil); 22-24 Nisan iş
+günü 2 (23 Nisan); 28-31 Ağustos 2 (30 Ağustos pazara denk, çift
+düşmüyor); elle girilen Ramazan bayramıyla 16-27 Mart iş günü 8,5. İzin
+talebi ucu da aynı sayıyı verdi (26-30 Ekim → 3,5 gün). Tarayıcıda liste
+(10 sütun, 5 çip), "📅 Yılın Millî Tatillerini Üret" düğmesi ve dinî bayram
+uyarısı çalışıyor; konsol hatası yok. xUnit 232/232, vitest 598/598, iki
+derleme temiz. Test verisi silindi (2026-2027 millî takvimi bırakıldı).
+
+**Kalan.** Dinî bayramlar kurulumda boş - kurum Diyanet takvimine göre
+girer. Tatil bilgisi çalışma planını **kapatmıyor** (sağlık kurumunda tatil
+= kapalı değil); poliklinik randevusunu tatilde kapatmak isteyen kurum için
+ayrı bir ayar gerekir. Göçler **749-750 yalnız docker'da**.
+
+## 17.09.2026 — Dinî bayram tohumu ve yerel tatil süzmesi (`db/751`)
+
+**Yerel tatil zaten vardı, süzmesi hatalıydı.** `resmi_tatil.sube_id` 749'da
+kurulmuştu (boşsa kurum geneli, doluysa yalnız o şube - İzmir'in kurtuluş
+günü). Ama `fn_izin_gun`un süzgeci "şube verilmemişse hepsini al" diyordu ve
+izin ucu şubesiz çağırıyordu: bir şubeye özgü tatil **bütün şubelerin** izin
+hesabından düşüyordu. Artık şube verilmezse yalnız kurum geneli sayılıyor -
+hangi şubede olduğu bilinmeyen bir hesap yerel tatili varsaymamalı - ve izin
+ucu personelin şubesini geçiyor.
+
+**Dinî bayramlar girildi ama "doğrulanmadı" olarak.** 749 hicrî takvimi
+algoritmayla üretmeyi reddetmişti; o karar duruyor. 2026-2027 Ramazan ve
+Kurban tarihleri **tohum** olarak yazıldı ve yeni `dogrulandi` kolonu 0
+işaretlendi: bunlar takvim hesabıdır, Diyanet'in ilanı değildir. Kurum ilan
+çıkınca tarihi kontrol edip bayrağı 1 yapar. Bayrak olmadan yazsaydık kurum
+bu tarihlere kesin gözüyle bakar ve bir gün kayma bordroya kadar giderdi.
+Listede "Doğrulanmadı" çipi var - bayram yaklaşınca bakılacak tek yer.
+
+**Aynı güne denk gelen iki tatil.** 19 Mayıs 2027 hem Gençlik Bayramı hem
+Kurban'ın 3. günü; benzersiz indeks (bir gün = bir satır) ikincisini almadı.
+İş günü hesabı için fark yok - gün zaten tatil - ama listede "Kurban 3. gün"
+görünmüyor. Kullanıcı bayramı eksik sanmasın diye var olan satırın
+açıklamasına yazıldı.
+
+**Ekran.** Listeye "Doğrulandı", "Yerel" ve "Şube" sütunları, "Doğrulanmadı"
+ve "Yerel" çipleri eklendi; karta doğrulama bayrağı geldi.
+
+**Doğrulama.** 17 dinî bayram satırı yazıldı (biri 19 Mayıs çakışması
+nedeniyle atlandı). Yerel tatil: şubesiz çağrıda düşmüyor (5 gün), şube 1'de
+düşüyor (4), şube 2'de düşmüyor (5); izin ucu şube 1 personeli için 4 gün
+verdi. Ramazan bayramıyla 16-27 Mart iş günü 8,5; Kurban'la 25-31 Mayıs 1,5.
+xUnit 232/232, vitest 598/598, iki derleme temiz. Test verisi silindi;
+takvimde 16 millî + 17 dinî tatil kaldı.
+
+**Kalan.** Dinî bayram tarihleri **doğrulanmayı bekliyor** (`dogrulandi = 0`)
+- Diyanet ilanıyla karşılaştırılmalı. 2028 ve sonrası için dinî bayram yok;
+millî tatiller "Yılın Millî Tatillerini Üret" ile, dinî olanlar elle girilir.
+Göç **751 yalnız docker'da**.

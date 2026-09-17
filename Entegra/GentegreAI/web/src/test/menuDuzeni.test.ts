@@ -32,7 +32,8 @@ describe('menü düzeni', () => {
     // 27: Eczane (722) ve Satınalma (724) eklendi. Biyomedikal (723) YENİ GRUP
     //   AÇMADI - hastanedeki cihaz da bir demirbaş, ekranları mevcut Demirbaş
     //   grubuna girdi; ayrı grup aynı envanteri iki menü dalına bölerdi.
-    expect(GRUPLAR.length).toBeLessThanOrEqual(27);
+    // 28: İşyeri Hekimliği (741) - OSGB / hastane İSG birimi, kendi iş akışı.
+    expect(GRUPLAR.length).toBeLessThanOrEqual(28);
   });
 
   it('her grubun sonunda Dökümler var', () => {
@@ -96,7 +97,8 @@ describe('menü düzeni', () => {
     //   ve Yönetim'in içine dağıtılsalardı günlük tedarik işi iki dala bölünürdü.
     expect(BOLGE_HBYS.length).toBeLessThanOrEqual(8);
     for (const b of BOLGE_HBYS)
-      expect(b.gruplar.length, `"${b.ad}" bölgesinde çok grup var`).toBeLessThanOrEqual(4);
+      // 5: Klinikler bölgesine İşyeri Hekimliği (741) eklendi - beşinci klinik dal.
+      expect(b.gruplar.length, `"${b.ad}" bölgesinde çok grup var`).toBeLessThanOrEqual(5);
     const tekrar = GRUP_SIRA_HBYS.filter((g, i) => GRUP_SIRA_HBYS.indexOf(g) !== i);
     expect(tekrar, 'grup iki bölgede birden').toEqual([]);
   });

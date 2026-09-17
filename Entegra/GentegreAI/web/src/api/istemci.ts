@@ -18,6 +18,8 @@ import { gozUclari } from './uclar/goz';
 import { yatanUclari } from './uclar/yatan';
 import { disUclari } from './uclar/dis';
 import { ftrUclari } from './uclar/ftr';
+import { formUclari } from './uclar/form';
+import { isgUclari } from './uclar/isg';
 import { medulaUclari } from './uclar/medula';
 import { yapayZekaUclari } from './uclar/yapayZeka';
 import { mesajUclari } from './uclar/mesaj';
@@ -26,6 +28,8 @@ import { klinikKaliteUclari } from './uclar/klinikKalite';
 import { ameliyathaneUclari } from './uclar/ameliyathane';
 import { acilUclari } from './uclar/acil';
 import { akisTedarikUclari } from './uclar/akisTedarik';
+import { onayUclari } from './uclar/onay';
+import { izinUclari } from './uclar/izin';
 import { kasaUclari } from './uclar/kasa';
 import { iskontoUclari } from './uclar/iskonto';
 import { iceriAlmaUclari } from './uclar/iceriAlma';
@@ -44,6 +48,8 @@ export const api = {
   ...ameliyathaneUclari,
   ...acilUclari,
   ...akisTedarikUclari,
+  ...onayUclari,
+  ...izinUclari,
   ...listeUclari,
   ...labUclari,
   ...sigortaUclari,
@@ -57,6 +63,8 @@ export const api = {
   ...yatanUclari,
   ...disUclari,
   ...ftrUclari,
+  ...formUclari,
+  ...isgUclari,
   ...medulaUclari,
   ...yapayZekaUclari,
   ...mesajUclari,

@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { modulAcikMi } from './sayfalar/listeTanimlari';
 import { modUyar } from './api/sozlesme';
 import { OturumSaglayici, useOturum } from './kimlik/OturumBaglami';
@@ -38,6 +38,14 @@ import { DisPlanKarti } from './sayfalar/dis/DisPlanKarti';
 import { FtrProgramKarti } from './sayfalar/ftr/FtrProgramKarti';
 import { FtrSeansKarti } from './sayfalar/ftr/FtrSeansKarti';
 import { FtrPano } from './sayfalar/ftr/FtrPano';
+import { FormAcik } from './sayfalar/form/FormAcik';
+import { FormDoldur } from './sayfalar/form/FormDoldur';
+import { HastaFormlari } from './sayfalar/form/HastaFormlari';
+import { FormKutuphane } from './sayfalar/form/FormKutuphane';
+import { FormSablonEditor } from './sayfalar/form/FormSablonEditor';
+import { IsgPano } from './sayfalar/isg/IsgPano';
+import { IsgCalisanKarti } from './sayfalar/isg/IsgCalisanKarti';
+import { IsgTakvim } from './sayfalar/isg/IsgTakvim';
 import { MedulaHastaKabul } from './sayfalar/medula/MedulaHastaKabul';
 import { MedulaHizmetKayit } from './sayfalar/medula/MedulaHizmetKayit';
 import { MedulaFaturaDonem } from './sayfalar/medula/MedulaFaturaDonem';
@@ -53,6 +61,11 @@ import { Dokumler } from './sayfalar/Dokumler';
 
 function Yollar() {
   const { kullanici, yukleniyor, yetki } = useOturum();
+  const konum = useLocation();
+
+  // ACIK FORM SAYFASI (740): /f/{kod} - hastanin telefonunda, OTURUMSUZ. Giris
+  //   ekranindan ONCE: kimlik kaniti bağlantı + TCKN son 4, JWT degil.
+  if (konum.pathname.startsWith('/f/')) return <Routes><Route path="/f/:kod" element={<FormAcik />} /></Routes>;
 
   if (yukleniyor) return <div className="tam-ekran-bilgi">Yukleniyor…</div>;
   if (!kullanici) return <Giris />;
@@ -225,6 +238,31 @@ function Yollar() {
             <DisPlanKarti />
           </>} />
         )}
+        {/* FORM MOTORU (740): doldurma ve hasta formlari modal (arkada ilgili liste),
+            kutuphane ve editor tam sayfa. */}
+        {yetki('form.istek') && (
+          <Route path="/form-doldur/:id" element={<>
+            <Liste tanim={LISTELER.find(l => l.kaynak === 'form-istek')!} />
+            <FormDoldur />
+          </>} />
+        )}
+        {yetki('form.istek') && (
+          <Route path="/hasta-formlar/:hastaId" element={<>
+            <Liste tanim={LISTELER.find(l => l.kaynak === 'form-istek')!} />
+            <HastaFormlari />
+          </>} />
+        )}
+        {yetki('form.kutuphane') && <Route path="/form-kutuphane" element={<FormKutuphane />} />}
+        {/* ISG (741): firma panosu ve periyodik takvim tam sayfa; calisan karti modal. */}
+        {yetki('isg.pano') && <Route path="/isg-pano" element={<IsgPano />} />}
+        {yetki('isg.takvim') && <Route path="/isg-takvim" element={<IsgTakvim />} />}
+        {yetki('isg.calisan') && (
+          <Route path="/isg-calisan/:id" element={<>
+            <Liste tanim={LISTELER.find(l => l.kaynak === 'isg-calisan' && l.rota === 'isg-calisan')!} />
+            <IsgCalisanKarti />
+          </>} />
+        )}
+        {yetki('form.sablon') && <Route path="/form-editor/:id" element={<FormSablonEditor />} />}
         {/* MEDULA (707): hasta kabul, hizmet kaydi, fatura & donem, kuyruk & ayarlar ozel sayfalar. */}
         {yetki('medula.provizyon') && <Route path="/medula-kabul" element={<MedulaHastaKabul />} />}
         {yetki('medula.provizyon') && <Route path="/medula-kabul/:belgeId" element={<MedulaHastaKabul />} />}

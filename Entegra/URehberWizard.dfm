@@ -605,6 +605,8 @@ object RehberWizardDlg: TRehberWizardDlg
           Properties.Caption = 'Resim i'#231'in t'#305'klay'#305'n'
           Properties.FitMode = ifmProportionalStretch
           Properties.GraphicClassName = 'TdxSmartImage'
+          Properties.PopupMenuLayout.MenuItems = [pmiCopy, pmiDelete, pmiSave]
+          Properties.OnEditValueChanged = LogoResimPropertiesEditValueChanged
           TabOrder = 40
           OnClick = LogoResimClick
           Height = 97

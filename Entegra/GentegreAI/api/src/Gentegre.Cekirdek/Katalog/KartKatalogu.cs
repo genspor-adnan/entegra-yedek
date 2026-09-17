@@ -262,6 +262,15 @@ public static partial class KartKatalogu
         Ekle(DemirbasIsEmri());
         // Satinalma (724). SIPARIS/FATURA KARTI YOK: onlar `belge` (tur 9/11).
         Ekle(SatinalmaButce());
+        // IZIN (743): talep ve yillik izin hakki.
+        Ekle(PersonelIzin());
+        Ekle(PersonelIzinHak());
+        // RESMI TATIL (749): is gunu hesabinin dayandigi takvim.
+        Ekle(ResmiTatil());
+        // ONAY AKISI (742): kurumun imza duzeni - basamaklar, esikler.
+        Ekle(OnayAkis());
+        // ONAY VEKALETI (741): imza yetkisinin gecici devri.
+        Ekle(OnayVekalet());
         Ekle(SatinalmaTalep());
         Ekle(SatinalmaTeklif());
         Ekle(SatinalmaKabul());
@@ -291,6 +300,8 @@ public static partial class KartKatalogu
         Ekle(CalismaSablonKarti());
         Ekle(FtrDegerlendirmeKarti()); Ekle(FtrProgramKarti()); Ekle(FtrSeansKarti()); Ekle(FtrOlcekKarti()); Ekle(FtrUniteKarti());
         Ekle(CalismaIstisnaKarti());
+        Ekle(FormSablonKarti()); Ekle(FormKuralKarti());   // form motoru (740)
+        Ekle(IsgFirmaKarti()); Ekle(IsgCalisanKarti()); Ekle(IsgMuayeneKarti()); Ekle(IsgZiyaretKarti()); Ekle(IsgOlayKarti());   // isg (741)
         Ekle(MedulaKesintiKarti());
         Ekle(MedulaDonemKarti());
         Ekle(MedulaFaturaKarti());

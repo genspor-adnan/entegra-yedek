@@ -121,6 +121,8 @@ public static partial class KaynakKatalogu
         Ekle(CalismaSablon());
         Ekle(FtrDegerlendirme()); Ekle(FtrProgram()); Ekle(FtrSeans()); Ekle(FtrOlcek()); Ekle(FtrUnite());
         Ekle(CalismaIstisna());
+        Ekle(FormSablon()); Ekle(FormIstek()); Ekle(FormKural());   // form motoru (740)
+        Ekle(IsgFirma()); Ekle(IsgCalisan()); Ekle(IsgMuayene()); Ekle(IsgZiyaret()); Ekle(IsgOlay());   // isg (741)
         Ekle(Kampanya());
         Ekle(Kategori());
         Ekle(RadyolojiIstem());
@@ -346,6 +348,13 @@ public static partial class KaynakKatalogu
         Ekle(DemirbasKalibrasyon());
         Ekle(DemirbasIsEmri());
         // Satinalma (724)
+        // ONAY GELEN KUTUSU (738): tum modullerin bekleyen onaylari.
+        Ekle(OnayKutusu());
+        Ekle(PersonelIzinKaynagi());
+        Ekle(IzinBakiyeKaynagi());
+        Ekle(ResmiTatilKaynagi());
+        Ekle(OnayAkisKaynagi());
+        Ekle(OnayVekaletKaynagi());
         Ekle(SatinalmaTalep());
         Ekle(SatinalmaTeklif());
         Ekle(SatinalmaSiparis());

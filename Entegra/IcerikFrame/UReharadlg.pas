@@ -952,6 +952,7 @@ type
     procedure BtnKotaClick(Sender: TObject);
     procedure TabEkipmanlarAfterPost(DataSet: TDataSet);
     procedure MusteriListesineEkleMenuClick(Sender: TObject);
+    function CariKoduKullanan(const AKod: string; HaricID: Integer): string;
     procedure TabFirsatAfterOpen(DataSet: TDataSet);
     procedure FirsatDuzenleTusClick(Sender: TObject);
     procedure FirsatEkleTusClick(Sender: TObject);
@@ -3892,21 +3893,63 @@ begin
    Tablo.GridDokumanTara(labelFileName, BtnMesajGonder);
 end;
 
-procedure TRehberAraDlg.MusteriListesineEkleMenuClick(Sender: TObject);
-var EditKOD : String;
-    YeniKod : Variant;
+// KOD baska bir caride kullaniliyor mu (REHBER.unq_KOD). Kullaniliyorsa o carinin
+//   adini doner - "UNIQUE KEY constraint unq_KOD" yerine anlasilir mesaj.
+function TRehberAraDlg.CariKoduKullanan(const AKod: string; HaricID: Integer): string;
+var LFirma: Variant;
 begin
+  if Veritabani.VeriVarMi(Tablo.FDCnn, 'select FIRMA from REHBER where KOD=&Kod and ID<>&ID', ['&Kod', '&ID'], [AKod, HaricID], LFirma) then
+     Result := VarToStr(LFirma)
+  else
+     Result := '';
+end;
+
+procedure TRehberAraDlg.MusteriListesineEkleMenuClick(Sender: TObject);
+// POTANSIYEL -> CARI (kullanici: "kutucuga bir sey yazip Son'a basinca UNIQUE KEY
+//   hatasi"): girilen/uretilen kod baska bir caride varsa unq_KOD patliyordu ve ham
+//   SQL hatasi gorunuyordu. Simdi: kod bos/kullanimda ise anlasilir mesaj + yeniden
+//   sor; ayrica satir gridden DeleteRecord ile degil liste yenilenerek dusurulur
+//   (REHBER dataset'i SP sonucudur - dataset silmesi kayit siler/hata verir).
+var EditKOD, Kullanan : String;
+    YeniKod : Variant;
+    RehID : Integer;
+begin
+   RehID := REHBER.FieldByName('ID').AsInteger;
    if tablo.GENINI.ReadInteger(Ops_OpsiyonCari_CariKodGirisi, 2) <> 2 then begin // CariOpsiyon  CariKodGirisi
       //kod manuel
-      if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi, TGirdiDenetimleri.Create.Edit(BGMusteri_kodu_gir, @YeniKod)) <> mrOk then
-         Abort;
-      EditKOD :=  VarToStr(YeniKod);
-   end else
+      repeat
+        if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi, TGirdiDenetimleri.Create.Edit(BGMusteri_kodu_gir, @YeniKod)) <> mrOk then
+           Abort;
+        EditKOD := Trim(VarToStr(YeniKod));
+        Kullanan := '';
+        if EditKOD = '' then
+           ShowMessage('Cari kodu boş olamaz.')
+        else begin
+           Kullanan := CariKoduKullanan(EditKOD, RehID);
+           if Kullanan <> '' then
+              ShowMessage('"' + EditKOD + '" kodu zaten "' + Kullanan + '" carisinde kullanılıyor. Başka bir kod girin.');
+        end;
+      until (EditKOD <> '') and (Kullanan = '');
+   end else begin
       EditKOD := tablo.KodBulmaSihirbazi(120, 'HESAPPLANI', 'HESAPKODU', 'HESAPADI', 'REHBER', 'KOD',120);
+      if (EditKOD <> '0') and (EditKOD <> '') then begin
+         Kullanan := CariKoduKullanan(EditKOD, RehID);
+         if Kullanan <> '' then
+            raise Exception.Create('Üretilen "' + EditKOD + '" kodu zaten "' + Kullanan + '" carisinde kullanılıyor; hesap planı / cari kodlarını kontrol edin.');
+      end;
+   end;
 
-   if EditKOD <> '0' then begin
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update REHBER Set GRUP=120, KOD='''+EditKOD+''' Where ID=&RehID',['&RehID'],[REHBER.FieldByName('ID').AsInteger]);
-      CariGridView.DataController.DeleteRecord(CariGridView.DataController.FocusedRecordIndex);
+   if (EditKOD <> '0') and (EditKOD <> '') then begin
+      try
+        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update REHBER Set GRUP=120, KOD=&Kod Where ID=&RehID',['&Kod', '&RehID'],[EditKOD, RehID]);
+      except
+        on E: Exception do
+          if Pos('UNIQUE', UpperCase(E.Message)) > 0 then
+             raise Exception.Create('"' + EditKOD + '" cari kodu zaten kullanımda; başka bir kod girin.')
+          else
+             raise;
+      end;
+      TabloYenile(REHBER, []);
    end;
 end;
 
@@ -4506,8 +4549,12 @@ begin
    if Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from CEKLER where REHBERID =  &RId', ['&RId'],[REHBER.FieldByName('ID').AsInteger]) then
       raise Exception.Create(Hareketgormussilinemez);
 
-    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update REHBER Set GRUP=1, KOD='''+REHBER.FieldByName('ID').AsString+''' Where ID=&RehID',['&RehID'],[REHBER.FieldByName('ID').AsInteger]);
-    CariGridView.DataController.DeleteRecord(CariGridView.DataController.FocusedRecordIndex);
+    // Potansiyelin kodu = ID; o kod baska bir kayitta varsa (eski surum potansiyele
+    //   "max(ID)+1" yaziyordu, baskasinin ID'sine denk gelebiliyor) 'P' + ID.
+    var LKod: string := REHBER.FieldByName('ID').AsString;
+    if CariKoduKullanan(LKod, REHBER.FieldByName('ID').AsInteger) <> '' then LKod := 'P' + LKod;
+    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'Update REHBER Set GRUP=1, KOD=&Kod Where ID=&RehID',['&Kod', '&RehID'],[LKod, REHBER.FieldByName('ID').AsInteger]);
+    TabloYenile(REHBER, []);
 end;
 
 procedure TRehberAraDlg.ProjeDuzenleClick(Sender: TObject);

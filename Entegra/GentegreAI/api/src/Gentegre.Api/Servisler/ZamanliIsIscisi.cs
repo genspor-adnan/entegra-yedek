@@ -35,6 +35,21 @@ public static class ZamanliIsler
             return $"SKRS e-Reçete {s.Tarih}: {s.Yazilan} ilacın reçete türü güncellendi.";
         },
 
+        // ONAY HATIRLATMA (741): termini geçmiş basamak unutulmuş bir karardır.
+        //   KİMSEYİ ONAYLAMAZ - sessiz onay, onayın kendisini ortadan
+        //   kaldırırdı; iş yalnız hatırlatma yazar ve günde bir kez (aynı
+        //   basamağa bugün yazılmışsa atlar).
+        ["onay.hatirlatma"] = async (servisler, iptal) =>
+        {
+            var haber = servisler.GetRequiredService<OnayBildirimi>();
+            var veri = servisler.GetRequiredService<Gentegre.Veri.VeriKaynagi>();
+            await using var baglanti = await veri.AcAsync(iptal);
+            var (adim, bildirim) = await haber.HatirlatAsync(baglanti, iptal);
+            return adim == 0
+                ? "Gecikmiş onay basamağı yok."
+                : $"{adim} gecikmiş basamak için {bildirim} hatırlatma kuyruğa alındı.";
+        },
+
         // İTS KUYRUĞU: ilaç bildirimleri (mal alım). Hesap tanımlı değilse iş
         //   yine çalışır ve durumu SÖYLER - kapı açıldığı gün kimsenin fark
         //   etmemesi olmasın.

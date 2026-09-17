@@ -27,7 +27,7 @@ public static class StandartRolUclari
     private sealed record Sablon(string Kod, string Ad, string Amac, string[] Tipler, Kural[] Kurallar);
 
     private const string TUM = "*";
-    private static readonly string[] Klinik = ["muayenehane", "dal_goz", "dal_ftr", "goruntuleme", "lab", "goruntuleme_lab", "dis", "tip_merkezi", "hastane"];
+    private static readonly string[] Klinik = ["muayenehane", "dal_goz", "dal_ftr", "goruntuleme", "lab", "goruntuleme_lab", "dis", "tip_merkezi", "hastane", "osgb"];
 
     // Her rolde: ana sayfa, mesaj, görev, dökümler, AI rehber (gör).
     private static readonly Kural[] Ortak = [new("panel"), new("mesaj", true, true, true), new("gorev", true, true, true), new("dokum"), new("ai"), new("ai.rehber"), new("dokuman", true, true)];
@@ -123,6 +123,20 @@ public static class StandartRolUclari
             K(Y("yatan"), T("hasta"), T("muayene"), T("katalog"), Y("lab.numune"), T("lab"), Y("onam"))),
         new("yatis_ofisi", "Yatış / Taburcu Ofisi", "Yatış, oda-yatak, taburcu ve tahakkuk.", ["hastane"],
             K(Y("yatan"), Y("hasta"), Y("belge"), Y("belge_satir"), Y("randevu"), T("kurum"), Y("medula.provizyon"), T("medula"))),
+        // ---- işyeri hekimliği (741): OSGB ya da hastane/tıp merkezi İSG birimi.
+        new("isyeri_hekimi", "İşyeri Hekimi", "Ek-2 muayene, kanaat, ziyaret, olay, periyodik takvim; firma ve çalışan tanımı.", ["osgb", "tip_merkezi", "hastane"],
+            K(Y("isg"), Y("isg.pano"), Y("isg.firma"), Y("isg.calisan"), Y("isg.muayene"), Y("isg.takvim"), Y("isg.ziyaret"), Y("isg.olay"), Y("isg.asi"),
+              Y("form"), Y("form.istek"), Y("form.gonder"), Y("form.doldur"), Y("form.aktar"), T("form.sablon"),
+              Y("muayene"), T("hasta"), Y("randevu"), Y("lab"), T("lab.sonuc"), Y("radyoloji-istem"), T("radyoloji"), T("kurum"), Y("onam"))),
+        new("isg_uzmani", "İSG Uzmanı", "Ziyaret tutanağı, olay/kaza kaydı, öneri defteri; sağlık verisi görmez.", ["osgb", "tip_merkezi", "hastane"],
+            K(T("isg"), T("isg.pano"), T("isg.firma"), T("isg.calisan"), Y("isg.ziyaret"), Y("isg.olay"), T("kurum"))),
+        new("dsp", "Diğer Sağlık Personeli (DSP)", "Çalışan kaydı, aşı, tetkik takibi, periyodik takvim, form gönderimi; kanaat yazmaz.", ["osgb", "tip_merkezi", "hastane"],
+            K(T("isg"), T("isg.pano"), T("isg.firma"), Y("isg.calisan"), T("isg.muayene"), Y("isg.takvim"), Y("isg.asi"), T("isg.olay"),
+              Y("form.istek"), Y("form.gonder"), Y("form.doldur"), Y("hasta"), Y("randevu"), Y("lab"), T("kurum"))),
+        new("osgb_sekreter", "OSGB Sekreteri", "Firma ve çalışan kaydı, sözleşme dakikası, randevu, form gönderimi; muayene içeriği görmez.", ["osgb"],
+            K(T("isg"), T("isg.pano"), Y("isg.firma"), Y("isg.calisan"), Y("isg.takvim"), T("isg.olay"), Y("form.gonder"), Y("hasta"), Y("randevu"), Y("belge"), Y("cari"), Y("kurum"))),
+        new("firma_yetkilisi", "Firma Yetkilisi (portal)", "Kendi firmasının çalışan listesi, periyodik takvim ve sağlık gözetimi özeti; sağlık verisi görmez.", ["osgb"],
+            K(T("isg"), T("isg.pano"), T("isg.firma"), T("isg.calisan"), T("isg.takvim"))),
     ];
 
     public static void StandartRolUclariniEkle(this IEndpointRouteBuilder yol)

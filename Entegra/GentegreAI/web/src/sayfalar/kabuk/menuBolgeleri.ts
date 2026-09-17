@@ -30,7 +30,8 @@ export interface MenuBolgesi {
 export const BOLGE_HBYS: MenuBolgesi[] = [
   { ad: 'Hasta Akışı',      renk: '#2f6db3', gruplar: ['Randevu', 'Kayıt Kabul', 'Acil'] },
   // GÖZ MUAYENEDEN SONRA (kullanıcı): günlük iş hacmi en yüksek dallardan biri.
-  { ad: 'Klinikler',        renk: '#3f9a5e', gruplar: ['Muayene', 'Göz', 'Diş', 'FTR'] },
+  // İŞYERİ HEKİMLİĞİ (741) beşinci klinik dal: OSGB kurum tipinde tek klinik.
+  { ad: 'Klinikler',        renk: '#3f9a5e', gruplar: ['Muayene', 'Göz', 'Diş', 'FTR', 'İşyeri Hekimliği'] },
   { ad: 'Tanı & Tetkik',    renk: '#6a3fb5', gruplar: ['Laboratuvar', 'Radyoloji'] },
   { ad: 'Yatan & Cerrahi',  renk: '#c0392b', gruplar: ['Yatan Hasta', 'Ameliyathane'] },
   // MEDULA (707) klinik akışın ardında, para önünde.
@@ -95,13 +96,13 @@ export function calismaAlaniBul(kod: string | undefined): CalismaAlani {
 export function rolCalismaAlani(rolAdi: string | undefined): string {
   const r = (rolAdi ?? '').toLocaleLowerCase('tr');
   if (!r) return 'tumu';
-  if (/banko|kayıt kabul|kayit kabul|vezne|yatış|yatis/.test(r)) return 'banko';
+  if (/banko|kayıt kabul|kayit kabul|vezne|yatış|yatis|sekreter/.test(r)) return 'banko';
   // ECZANE/DEPO ROLÜ muhasebeden ÖNCE bakılır: "Eczane / Depo" içindeki
   //   sözcükler başka dala düşmesin.
   if (/eczac|eczane|depo|biyomedikal|satınalma|satinalma/.test(r)) return 'tedarik';
   if (/muhasebe|finans|medula/.test(r)) return 'muhasebe';
   if (/radyolo|lab |lab$|laboratuvar|numune|teknisyen|teleradyoloji/.test(r)) return 'tani';
-  if (/hemşire|hemsire|fizyoterapist|asistan/.test(r)) return 'hemsire';
+  if (/hemşire|hemsire|fizyoterapist|asistan|dsp|diğer sağlık/.test(r)) return 'hemsire';
   if (/hekim|uzman|optometrist|doktor/.test(r)) return 'hekim';
   return 'tumu';
 }

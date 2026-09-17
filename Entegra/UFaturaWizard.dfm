@@ -2342,7 +2342,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
                 Caption = 'Kaynak:'
                 Transparent = True
               end
-              object lbKaynakSeriNo: TcxDBLabel
+              object lbKaynakFaturaNo: TcxDBLabel
                 Left = 139
                 Top = 105
                 DataBinding.DataField = 'KAYNAKBELGENO'
@@ -4271,7 +4271,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
       'from REHBERBILGI RB INNER JOIN REHBERAYAR RA ON RB.SIRA=RA.SIRA'
       'where RB.YERI= :Yeri  and RB.YER_ID= :Yeri_Id   '
       'order by  1')
-    Left = 120
+    Left = 144
     Top = 17
     ParamData = <
       item
@@ -4485,9 +4485,10 @@ object FaturaWizardDlg: TFaturaWizardDlg
         'om SIPARIS where ID=(select SIPARISID from SIPARISDETAY where ID' +
         '=F.YERID)) '
       
-        '   '#9#9#9#9#9'when YERI in (408,411) then (select FATURANO from FATBAS' +
-        'LIK where ID=(select FATBASID from FATURA where ID=F.YERID))    ' +
-        '           '
+        '   '#9#9#9#9#9'when YERI in (408,411) then (select COALESCE(NULLIF(NUL' +
+        'LIF(IRSALIYENO,''''),''0''), NULLIF(NULLIF(FATURANO,''''),''0''), '''') fr' +
+        'om FATBASLIK where ID=(select FATBASID from FATURA where ID=F.YE' +
+        'RID)) '
       
         '   '#9#9#9#9#9'when YERI in (412,413) then (select TEKLIFNO from TEKLIF' +
         ' where ID=(SELECT TEKLIFID FROM TEKLIFDETAY where ID=F.YERID))  ' +

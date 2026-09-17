@@ -120,6 +120,11 @@ kurucu.Services.AddHostedService<Gentegre.Api.Servisler.CihazDinleyici>();
 kurucu.Services.AddScoped<KasaDeposu>();
 kurucu.Services.AddScoped<GunlukDeposu>();
 kurucu.Services.AddScoped<UtsDeposu>();
+// ONAY MOTORU (738): modulden bagimsiz onay zinciri - satinalma talebi
+//   ilk kullanicisi, izin/avans/onarim ayni motora baglanacak.
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.OnayMotoru>();
+// ONAY BILDIRIMI (741): sirasi gelene haber, sonucu talep sahibine.
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.OnayBildirimi>();
 kurucu.Services.AddSingleton<LogDeposu>();
 kurucu.Services.AddScoped<KimlikServisi>();
 kurucu.Services.AddScoped<BaglamCozucu>();
@@ -255,6 +260,10 @@ uygulama.AcilUclariniEkle();
 uygulama.EczaneUclariniEkle();
 uygulama.BiyomedikalUclariniEkle();
 uygulama.SatinalmaUclariniEkle();
+// ONAY GELEN KUTUSU (738/739): tum modullerin bekleyen onaylari tek ucta.
+uygulama.OnayUclariniEkle();
+// IZIN MODULU (743): talep, bakiye ve onay zinciri.
+uygulama.IzinUclariniEkle();
 uygulama.RolYetkiUclariniEkle();
 uygulama.KullaniciYonetimUclariniEkle();
 uygulama.IskontoOnayUclariniEkle();
@@ -285,6 +294,8 @@ uygulama.YatanUclariniEkle();
 uygulama.DisUclariniEkle();
 uygulama.CalismaPlaniUclariniEkle();
 uygulama.FtrUclariniEkle();
+uygulama.FormUclariniEkle();
+uygulama.IsgUclariniEkle();
 // MEDULA (707): mustehaklik, hasta kabul, hizmet kaydi, e-recete/e-rapor, fatura & donem, kuyruk.
 uygulama.MedulaUclariniEkle();
 

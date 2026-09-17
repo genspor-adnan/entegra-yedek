@@ -36,6 +36,8 @@ import { GOZ_LISTELERI } from './listeTanimlari.Goz';
 import { YATAN_LISTELERI } from './listeTanimlari.Yatan';
 import { DIS_LISTELERI } from './listeTanimlari.Dis';
 import { FTR_LISTELERI } from './listeTanimlari.Ftr';
+import { FORM_LISTELERI } from './listeTanimlari.Form';
+import { ISG_LISTELERI } from './listeTanimlari.Isg';
 import { MEDULA_LISTELERI } from './listeTanimlari.Medula';
 import { KLINIK_KALITE_LISTELERI } from './listeTanimlari.KlinikKalite';
 import { AMELIYATHANE_LISTELERI } from './listeTanimlari.Ameliyathane';
@@ -47,6 +49,8 @@ import { STOK_LISTELERI } from './listeTanimlari.Stok';
 import { ECZANE_LISTELERI } from './listeTanimlari.Eczane';
 import { BIYOMEDIKAL_LISTELERI } from './listeTanimlari.Biyomedikal';
 import { SATINALMA_LISTELERI } from './listeTanimlari.Satinalma';
+import { ONAY_LISTELERI } from './listeTanimlari.Onay';
+import { IZIN_LISTELERI } from './listeTanimlari.Izin';
 import { DOKUM_LISTELERI } from './listeTanimlari.Dokumler';
 import { YONETIM_LISTELERI } from './listeTanimlari.Yonetim';
 
@@ -92,6 +96,8 @@ export const LISTELER: ListeGirdisi[] = [
   ...YATAN_LISTELERI,
   ...DIS_LISTELERI,
   ...FTR_LISTELERI,
+  ...FORM_LISTELERI,
+  ...ISG_LISTELERI,
   ...MEDULA_LISTELERI,
   ...KLINIK_KALITE_LISTELERI,
   ...AMELIYATHANE_LISTELERI,
@@ -103,6 +109,8 @@ export const LISTELER: ListeGirdisi[] = [
   ...ECZANE_LISTELERI,
   ...BIYOMEDIKAL_LISTELERI,
   ...SATINALMA_LISTELERI,
+  ...ONAY_LISTELERI,
+  ...IZIN_LISTELERI,
   ...YONETIM_LISTELERI,
   // Grup basina "📊 Dökümler" baglantisi (plan kural 2): her grubun sonunda
   //   ayni oge - kullanici "bu isin dokumu nerede" diye aramasin.
@@ -133,6 +141,8 @@ export const MENU_GRUP_MODUL: Record<string, string> = {
   'Diş':           'dis',
   // FTR (719): fizik tedavi modulu - ftr kapali kurumda grup cizilmez.
   'FTR':           'ftr',
+  // ISG (741): isyeri hekimligi - OSGB / hastane / tip merkezi.
+  'İşyeri Hekimliği': 'isg',
   // AMELIYATHANE (715) / ACIL (716): kendi modulleri - ameliyathanesi ya da
   //   acili olmayan kurumda menu grubu hic cizilmesin. Bagli olmasalardi
   //   hicbir kuruluma kapatilamazlardi ve poliklinige olmayan bir yetenek

@@ -271,6 +271,7 @@ type
     procedure TabCariIletNewRecord(DataSet: TDataSet);
     procedure TabTicariNewRecord(DataSet: TDataSet);
     procedure LogoResimClick(Sender: TObject);
+    procedure LogoResimPropertiesEditValueChanged(Sender: TObject);
     procedure GirisEkrNextButtonClick(Sender: TObject; var Stop: Boolean);
     procedure TabRehberBeforePost(DataSet: TDataSet);
     procedure TabRehberNewRecord(DataSet: TDataSet);
@@ -2065,6 +2066,26 @@ begin
    TabloYenile(TabRehber, [TabRehber.Fields[0].AsInteger]);
 end;
 
+procedure TRehberWizardDlg.LogoResimPropertiesEditValueChanged(Sender: TObject);
+// DIS RESIMDEN SAG TIK > SIL (kullanici): TcxDBImage'in acilir menusu yalniz
+//   REHBER.RESIM cache'ini (dataset alani) bosaltiyordu; IMAJ satiri (YERI=71,
+//   VARSAYILAN=1) yerinde kaliyor, resim sihirbazi acilinca resim "geri geliyordu".
+//   Cache degil, KAYNAK silinir: varsayilan IMAJ satiri silinir, kalan resimler
+//   (varsayilan olmayan) sihirbazda durur. Snapshot ONCE yakalanir - iptalde
+//   IMAJ geri gelir ve cache tazelenir (KapatClick/LDegisti).
+//   Yalniz KULLANICI eylemi (EditModified): dataset kaydi yuklenirken de
+//   EditValue degisir; o yolda silme yapilsaydi bos cache'li her kart acilista
+//   IMAJ'i sildirirdi.
+begin
+   if (RehberID <= 0) or (not LogoResim.EditModified) then Exit;
+   if not VarIsNull(LogoResim.EditValue) then Exit;   // yapistir/yukle: acilir menuden kapali, sihirbaz yolu
+   if not Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from IMAJ where YERI=&Yeri and YER_ID=&YerId and VARSAYILAN=1',
+                               ['&Yeri', '&YerId'], [TabNo_REHBER, RehberID]) then Exit;
+   ULog.OturumYakala(FOturumID);
+   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'delete from IMAJ where YERI=&Yeri and YER_ID=&YerId and VARSAYILAN=1',
+                                 ['&Yeri', '&YerId'], [TabNo_REHBER, RehberID]);
+end;
+
 procedure TRehberWizardDlg.MenuItem7Click(Sender: TObject);
 begin
   veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
@@ -2326,6 +2347,16 @@ begin
     // tek sefer yapiliyor.
   end;
   YeniEklenenKayit := False;
+  // POTANSIYEL KODU = GERCEK ID (post sonrasi, catisma kontrollu): BeforePost'taki
+  //   "max(ID)+1" tahmini kaldirildi; KOD='' penceresi bu satirla kapanir - ayni
+  //   anda iki bos kod (unq_KOD) olusmaz. O ID kod olarak baska kayittaysa 'P'+ID.
+  if Potansiyel and (TabRehber.FieldByName('KOD').AsString = '') and (TabRehber.FieldByName('ID').AsInteger > 0) then
+  begin
+    veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+      'UPDATE R SET KOD = case when exists (select 1 from REHBER X where X.KOD = cast(R.ID as varchar(20)) and X.ID <> R.ID) '+
+      ' then ''P'' + cast(R.ID as varchar(19)) else cast(R.ID as varchar(20)) end FROM REHBER R WHERE R.ID=&ID and R.KOD=''''',
+      ['&ID'], [TabRehber.FieldByName('ID').AsInteger]);
+  end;
   //temsilci de?i?irse ge?mi?e ekleme yapal?m..
   if OncekiTemsilciId <> TabRehber.FieldByName('TEMSILCI').AsInteger  then begin
      if TabRehber.FieldByName('TEMSILCI').AsInteger > 0  then
@@ -2429,10 +2460,10 @@ begin
   TabRehber.FieldByName('DEGISTIREN').AsString := Kullanan;
   TabRehber.FieldByName('DEGISTIRMETARIHI').AsDateTime := tablo.GENINI.BugunTrh;
 
-  if (Potansiyel)and(TabRehber.FieldByName('KOD').AsString='') then begin
-      Tablo.TablodanSorguAc(1,'select isnull(max(ID),0) + 1 from REHBER ');
-      TabRehber.FieldByName('KOD').AsString:= Tablo.Query1.Fields[0].AsString;
-  end;
+  // POTANSIYEL KODU: eskiden "max(ID)+1" TAHMINI yaziliyordu; identity bosluk /
+  //   es zamanli kayit oldugunda bu kod BASKA bir kaydin ID'sine denk geliyor, o
+  //   kayit Finish'teki "KOD='' -> ID" doldurmasinda unq_KOD'a takiliyordu. Bos
+  //   birakilir; Finish gercek ID ile (catisma kontrollu) doldurur.
 end;
 
 procedure TRehberWizardDlg.TabRehberIletisimNewRecord(DataSet: TDataSet);
@@ -2732,7 +2763,11 @@ begin
   // buffer'lari LogYaz uzerinden yazildigindan LogUstModu override eder.)
   if YeniKayit then LogUstModu := 1 else LogUstModu := 2;
   //e?er daha ?nce kodu bo? olarak kaydedilmi? varsa kodunu Id yaps?n
-  veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'UPDATE REHBER SET KOD=cast(ID as varchar(20)) WHERE KOD=''''',[],[]);
+  // KOD = ID doldurmasi CATISMA KONTROLLU: o ID'yi kod olarak tasiyan baska kayit
+  //   varsa (eski "max(ID)+1" potansiyel kodlari) 'P' + ID yazilir - unq_KOD patlamaz.
+  veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+    'UPDATE R SET KOD = case when exists (select 1 from REHBER X where X.KOD = cast(R.ID as varchar(20)) and X.ID <> R.ID) '+
+    ' then ''P'' + cast(R.ID as varchar(19)) else cast(R.ID as varchar(20)) end FROM REHBER R WHERE R.KOD=''''',[],[]);
 
   case Cagiran of
   // 0 Kurum i?in yeni, 1 kurum ileti?im,  2 Ticari, 3 Personel ?zl?k, 4 Personel ileti?im, i?in ileti?im bilgileri

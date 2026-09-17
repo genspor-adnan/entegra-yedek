@@ -95,7 +95,12 @@ public static class AksiyonKatalogu
                     Ipucu: "Aktif personelden hesabı olmayanlara hesap açar"),
             ],
             ["personel-liste"] = Crud("personel", "personel", "personel"),
-            ["hasta-liste"] = Crud("hasta", "hasta", "hasta"),
+            ["hasta-liste"] =
+            [
+                .. Crud("hasta", "hasta", "hasta"),
+                // FORM MOTORU (740): hastanın formları (onam, değerlendirme, beyan).
+                new("form.hasta-formlar", "📋 Formlar", "form", Hedef: "araccubugu2,sagtus,palet", KaynakKodu: "form.istek", Islem: Islem.Gor, KayitGerekir: true, Sira: 60, UrunModu: 2),
+            ],
             // Dis doktor (305): personel yetkisiyle, kendi kart adiyla.
             ["dis-hekim-liste"] = Crud("dis-hekim", "dis-hekim", "personel"),
 
@@ -518,6 +523,54 @@ public static class AksiyonKatalogu
             // CALISMA PLANI (711): sablon + istisna listeleri.
             // FTR (719): degerlendirme / program / seans / olcek / unite.
             // Ekle / Düzenle / Sil ARAC CUBUGUNDA (kullanici): silme engelleri sunucuda (KartKatalogu.Ftr SilmeEngelleri).
+            // FORM MOTORU (740): şablon CRUD + kopyala/önizle; doldurulan formlar
+            //   açılır, hatırlatılır, yeniden gönderilir; kurallar CRUD.
+            ["form-sablon-liste"] =
+            [
+                .. Crud("form-sablon", "form", "form.sablon", ekleAdi: "＋ Şablon", silHedef: null, yazdir: false),
+                new("form.sablon-kopyala", "⧉ Kopyala", "form", KaynakKodu: "form.sablon", Islem: Islem.Ekle, KayitGerekir: true, Sira: 40, UrunModu: 2),
+                new("form.sablon-onizle", "👁 Önizle / Test doldur", "form", KaynakKodu: "form.sablon", Islem: Islem.Gor, KayitGerekir: true, Sira: 41, UrunModu: 2),
+                new("form.sablon-editor", "✎ Görsel editör", "form", KaynakKodu: "form.sablon", Islem: Islem.Degistir, KayitGerekir: true, Sira: 42, UrunModu: 2),
+            ],
+            ["form-istek-liste"] =
+            [
+                new("form.istek-ac", "📄 Aç / Doldur", "form", Kisayol: "Enter", KaynakKodu: "form.istek", Islem: Islem.Gor, KayitGerekir: true, Sira: 10, UrunModu: 2),
+                new("form.istek-hatirlat", "🔔 Hatırlat", "form", KaynakKodu: "form.gonder", Islem: Islem.Ekle, KayitGerekir: true, Sira: 20, UrunModu: 2),
+                new("form.istek-yeniden", "🔁 Yeniden gönder", "form", KaynakKodu: "form.gonder", Islem: Islem.Ekle, KayitGerekir: true, Sira: 21, UrunModu: 2),
+                new("form.istek-iptal", "✖ İptal", "form", Hedef: "sagtus,palet", KaynakKodu: "form.gonder", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30, UrunModu: 2),
+                Yazdir(),
+            ],
+            ["form-kural-liste"] = Crud("form-kural", "form", "form.kural", ekleAdi: "＋ Kural", silHedef: null, yazdir: false),
+            // İŞYERİ HEKİMLİĞİ (741): firma/çalışan/ziyaret/olay CRUD + Ek-2 açma,
+            //   SMS, çalışan kartı, SGK bildirimi. Muayene listesi formu açar.
+            ["isg-firma-liste"] =
+            [
+                .. Crud("isg-firma", "isg", "isg.firma", ekleAdi: "＋ Firma", silHedef: null, yazdir: false),
+                new("isg.firma-kart", "🏭 Firma panosu", "isg", KaynakKodu: "isg.firma", Islem: Islem.Gor, KayitGerekir: true, Sira: 40, UrunModu: 2),
+            ],
+            ["isg-calisan-liste"] =
+            [
+                .. Crud("isg-calisan", "isg", "isg.calisan", ekleAdi: "＋ Çalışan", silHedef: null, yazdir: false),
+                new("isg.calisan-kart", "👷 Çalışan kartı", "isg", KaynakKodu: "isg.calisan", Islem: Islem.Gor, KayitGerekir: true, Sira: 40, UrunModu: 2),
+                new("isg.muayene-ac", "🩺 Ek-2 muayene aç", "isg", KaynakKodu: "isg.muayene", Islem: Islem.Ekle, KayitGerekir: true, Sira: 41, UrunModu: 2),
+                new("isg.form-gonder", "📱 Formu gönder (SMS)", "isg", KaynakKodu: "isg.muayene", Islem: Islem.Ekle, KayitGerekir: true, Sira: 42, UrunModu: 2),
+                new("isg.olay-bildir", "🚨 Olay bildir", "isg", Hedef: "araccubugu2,sagtus,palet", KaynakKodu: "isg.olay", Islem: Islem.Ekle, KayitGerekir: true, Sira: 50, UrunModu: 2),
+            ],
+            ["isg-muayene-liste"] =
+            [
+                new("isg.muayene-form", "📄 Ek-2 formu", "isg", Kisayol: "Enter", KaynakKodu: "isg.muayene", Islem: Islem.Gor, KayitGerekir: true, Sira: 10, UrunModu: 2),
+                new("isg.muayene-isle", "✔ Kanaati işle", "isg", KaynakKodu: "isg.muayene", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20, UrunModu: 2),
+                new("isg-muayene.duzenle", "✎ Düzenle", "isg", KaynakKodu: "isg.muayene", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30, UrunModu: 2),
+                new("isg.muayene-iptal", "✖ İptal", "isg", Hedef: "sagtus,palet", KaynakKodu: "isg.muayene", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40, UrunModu: 2),
+                Yazdir(),
+            ],
+            ["isg-ziyaret-liste"] = Crud("isg-ziyaret", "isg", "isg.ziyaret", ekleAdi: "＋ Ziyaret", silHedef: null),
+            ["isg-olay-liste"] =
+            [
+                .. Crud("isg-olay", "isg", "isg.olay", ekleAdi: "＋ Olay", silHedef: null),
+                new("isg.olay-sgk", "🏛 SGK'ya bildirildi", "isg", KaynakKodu: "isg.olay", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40, UrunModu: 2),
+                new("isg.olay-kapat", "✔ Kapat", "isg", Hedef: "sagtus,palet", KaynakKodu: "isg.olay", Islem: Islem.Degistir, KayitGerekir: true, Sira: 41, UrunModu: 2),
+            ],
             ["ftr-degerlendirme-liste"] = Crud("ftr-degerlendirme", "ftr", "ftr.degerlendirme", ekleAdi: "＋ Değerlendirme", silHedef: null,
                                                silIpucu: "Programı olan değerlendirme silinmez"),
             ["ftr-program-liste"] =
@@ -2053,6 +2106,89 @@ public static class AksiyonKatalogu
             // SATINALMA (724). Onay/karar/ceza dugmeleri YOK: her biri para
             //   cikaran ya da imza zinciri isleyen bir karardir ve kendi ucunu
             //   ister - o uclar bu turda yazilmadi.
+            // ONAY GELEN KUTUSU (738/739). TÜR FARK ETMEZ: satır bir
+            //   BASAMAKTIR, kararı da basamağa verilir. Kaydın kendi ekranına
+            //   gitmeden karar verilebilmesi kutunun varlık sebebi - aksi
+            //   hâlde kullanıcı yine tür tür ekran gezerdi.
+            // IZIN (743). TALEP -> ONAY -> IPTAL. "Onayla" dugmesi YOK:
+            //   karar onay kutusundan ya da kaydin kendi zincirinden verilir -
+            //   izin ekranina ikinci bir onay yolu koymak, ayni karari iki
+            //   ayri yerde farkli kurallarla vermek olurdu.
+            ["personel-izin-liste"] =
+                [.. Crud("personel-izin", "ik", "ik.izin"),
+                 new("personel-izin.gonder", "📤 Onaya Gönder", "ik",
+                     KaynakKodu: "ik.izin", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 15, Bicim: "bir",
+                     Ipucu: "Zincir: âmir → İK → (10 günü aşarsa) üst yönetim"),
+                 new("personel-izin.bakiye", "📊 Bakiye", "ik",
+                     KaynakKodu: "ik.izin", Islem: Islem.Gor,
+                     KayitGerekir: true, Sira: 16),
+                 new("personel-izin.zincir", "🧾 Onay Zinciri", "ik",
+                     Hedef: "sagtus,palet", KaynakKodu: "ik.izin", Islem: Islem.Gor,
+                     KayitGerekir: true, Sira: 17),
+                 new("personel-izin.iptal", "✖ İzni İptal Et", "ik",
+                     Hedef: "sagtus,palet", KaynakKodu: "ik.izin",
+                     Islem: Islem.Degistir, KayitGerekir: true, Sira: 20,
+                     Bicim: "tehlike",
+                     Ipucu: "Onaylı izin de iptal edilir - gerekçe zorunlu")],
+
+            // RESMI TATIL (749). "Yili Uret" yalniz MILLI tatilleri yazar;
+            //   dini bayramlar elle girilir - hicri takvim algoritmayla
+            //   uretilmiyor (bir gun kayan hesap izni yanlis sayar).
+            ["resmi-tatil-liste"] =
+                [.. Crud("resmi-tatil", "ik", "ik.tatil"),
+                 new("resmi-tatil.yil-uret", "📅 Yılın Millî Tatillerini Üret", "ik",
+                     KaynakKodu: "ik.tatil", Islem: Islem.Ekle, Sira: 15, Bicim: "bir",
+                     Ipucu: "Dinî bayramlar dâhil değildir - onları elle girin")],
+
+            // BAKIYE LISTESI salt okunur: hak karti ayri ekrandir.
+            ["izin-bakiye-liste"] =
+                [new("izin-bakiye.izin-ac", "＋ İzin Talebi Aç", "ik",
+                     KaynakKodu: "ik.izin", Islem: Islem.Ekle,
+                     KayitGerekir: true, Sira: 10, Bicim: "bir"),
+                 new("izin-bakiye.hak-tanimla", "✎ Hakediş Tanımla", "ik",
+                     KaynakKodu: "ik.izin_hak", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 11)],
+
+            ["personel-izin-hak-liste"] =
+                [.. Crud("personel-izin-hak", "ik", "ik.izin_hak")],
+
+            // AKIS TANIMI (742): kurumun imza duzeni. "Akisi Dene" KURU
+            //   CALISTIRMADIR - kayit uretmez, yalnizca verilen olcu ve
+            //   bayraklarla hangi basamaklarin cikacagini gosterir. Eşiği
+            //   degistiren kisi sonucunu gercek bir talep acmadan gormeli.
+            ["onay-akis-liste"] =
+                [.. Crud("onay-akis", "onay", "kullanici"),
+                 new("onay-akis.dene", "🧪 Akışı Dene", "onay",
+                     KaynakKodu: "kullanici", Islem: Islem.Gor,
+                     KayitGerekir: true, Sira: 15,
+                     Ipucu: "Kayıt üretmez - hangi basamakların çıkacağını gösterir"),
+                 new("onay-akis.yuruyenler", "📋 Yürüyen Onaylar", "onay",
+                     Hedef: "sagtus,palet", KaynakKodu: "kullanici", Islem: Islem.Gor,
+                     KayitGerekir: true, Sira: 16)],
+
+            // VEKALET EKRANI (741): imza yetkisinin gecici devri. CRUD
+            //   yeter - vekaletin akisi yok, tanimlanir ya da kaldirilir.
+            ["onay-vekalet-liste"] =
+                [.. Crud("onay-vekalet", "onay", "kullanici")],
+
+            ["onay-kutusu-liste"] =
+                [new("onay-kutusu.onayla", "✓ Onayla", "onay",
+                     KayitGerekir: true, Sira: 10, Bicim: "onay",
+                     Ipucu: "Karar bekleyen en küçük basamağa yazılır"),
+                 new("onay-kutusu.bilgi", "↩ Bilgi İste", "onay",
+                     KayitGerekir: true, Sira: 11,
+                     Ipucu: "Zinciri durdurur ama bitirmez - basamak beklemeye devam eder"),
+                 new("onay-kutusu.reddet", "✖ Reddet", "onay",
+                     KayitGerekir: true, Sira: 12, Bicim: "tehlike"),
+                 new("onay-kutusu.sozlu", "🗣 Sözlü Onay", "onay",
+                     Hedef: "sagtus,palet", KayitGerekir: true, Sira: 13,
+                     Ipucu: "Yazılı tamamlanma süresi izlenir"),
+                 new("onay-kutusu.kayda-git", "🔎 Kayda Git", "onay",
+                     Hedef: "sagtus,palet", KayitGerekir: true, Sira: 20),
+                 new("onay-kutusu.zincir", "🧾 Onay Zinciri", "onay",
+                     Hedef: "sagtus,palet", KayitGerekir: true, Sira: 21)],
+
             ["satinalma-talep-liste"] =
                 [.. Crud("satinalma-talep", "satinalma", "satinalma.talep"),
                  // ZİNCİRİ SİSTEM KURAR: "kime göndereyim" sorulmaz.
