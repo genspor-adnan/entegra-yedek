@@ -64,7 +64,7 @@ Onay omurgası bunları destekliyor; hiçbir akış kullanmıyor.
 | 4.3 | **755'te taşınamayan avans log satırları.** 907 ile yazılmış satırların hangisinin avans hangisinin hasta olduğu satırdan anlaşılmıyordu; dev'deki avans-şekilli satırlar silindi, gerçek hasta satırları yerinde. Müşteride 753 hiç yayınlanmadığı için sorun yok. | Kapalı sayılabilir; kayıt için burada. |
 | 4.4 | **Eski 10 "vazgeçildi" bildirim satırı.** 13-16 Eylül'den kalma randevu/panik bildirimleri, alıcıları gerçek görünen telefon numaraları. Sağlayıcı tanımlanınca **yeniden gönderilmesi istenmiyor**; durum 6 oldukları için işçi almıyor. | Silinecekse ayrı karar. |
 | 4.5 | **`entegrasyon_hesap.sifre` düz metin.** SMTP/SMS şifresi şifrelenmeden saklanıyor (`BildirimHesaplari` doğrudan okuyor). En azından uygulama şifresi (app password) kullanılmalı; kalıcı çözüm şifreleme. | — |
-| 4.6 | **`db/178` e-Belge önizlemesinde para biçimi yerel ayara bağlı.** `to_char(..., 'FM999G999G990D00')` `G`/`D` ayırıcıları sunucunun `lc_numeric`inden alıyor; bu kurulumda İngilizce biçim (`68,500.00`) üretiyor. 768'de aynı kusur literal ayırıcı + `translate` ile çözüldü, 178'e dokunulmadı. | Önizleme ekranı; tutar doğru, ayırıcı yanlış. |
+| 4.6 | ~~**`db/178` e-Belge önizlemesinde para biçimi yerel ayara bağlı.**~~ — **769'da kapandı.** Biçim `fn_para_tr`ye taşındı (ayıraç şablonda literal + `translate`, locale'e bakmaz); `fn_ebelge_html` yeniden tanımlandı, KDV oranı da biçimden geçiyor. | `436` aynı kusuru kendi içinde çözmüş (koloni sayısı, para değil); `768` satır içi çözüyor - o fonksiyon elden geçince `fn_para_tr`ye bağlanmalı. |
 
 ---
 

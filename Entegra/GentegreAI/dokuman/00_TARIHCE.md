@@ -12189,3 +12189,43 @@ Test verisi silindi (1 talep, sayaç) ve geçici doldurulan personel alanları
 geri alındı; vekâlet senaryosu verisi korundu.
 
 Göç **768 yalnız docker'da**.
+
+---
+
+## 17.09.2026 — e-Belge önizlemesinde para biçimi (db/769)
+
+Kullanıcı: *"178'deki para biçimi kusurunu da düzelt"* (kalan iş 4.6).
+
+`to_char(x, 'FM999G999G990D00')` içindeki **`G`** ve **`D`** ayıraçları
+sunucunun `lc_numeric` ayarından gelir; bu kurulumda `C` olduğu için e-Belge
+önizlemesi **`68,500.00`** basıyordu. Tutar doğru, ayıraç ters — ve tam bu iki
+işaretin yer değiştirmesi sayıyı **bin kat yanlış okutur**: Türkçe okuyan biri
+için `68,500.00` altmış sekiz bin beş yüz değil, altmış sekiz virgül beştir.
+Müşteriye gösterilen belgede kabul edilemez.
+
+**Ayıraç locale'e bırakılmıyor.** Şablona literal `,` ve `.` yazılıp
+`translate` ile yer değiştiriliyor — PG sayı şablonunda bu iki işaret
+locale'e bakmaz. `lc_numeric`i değiştirmek de bir seçenekti ama yanlış olurdu:
+kurulum genelinde bir ayarı tek bir ekranın biçimi için zorlamak, üstelik
+müşteri sunucusunda o hakkımız da yok.
+
+Biçim artık **`fn_para_tr(tutar, hane)`** içinde: `1.234,56`, `hane = 0` ile
+ondalıksız, NULL girdi **boş** metin (yazılmamış tutarı `0,00` göstermek
+olmayan bir bilgiyi varmış gibi gösterirdi). 178 bir göçtür, düzenlenmedi —
+`fn_ebelge_html` 769'da yeniden tanımlandı; gövdenin tek farkı sayı biçimi.
+
+**KDV oranı da biçimden geçiyor:** önceden ham `numeric` birleştiriliyor ve
+satırda `20.00` görünüyordu; düzeltilmiş tutarların yanında tek başına
+İngilizce kalan bir sayı olurdu. Artık tam oran `20`, küsuratlı oran `8,50`.
+
+**Taranan başka yer yok.** Aynı kalıbı kullanan tek diğer dosya
+`436_lab_mikrobiyoloji.sql` ve o zaten `translate` ile çözmüş; orada biçim
+para değil koloni sayısı ve tam sayıda ondalık **istenmiyor**, bilerek
+bırakıldı. 768'deki satır içi düzeltme de yerinde — o fonksiyon bir daha elden
+geçtiğinde `fn_para_tr`ye bağlanmalı (150 satırlık gövdeyi yalnız bunun için
+kopyalamak, kazancından çok risk taşıyordu).
+
+**Doğrulama.** Gerçek belgede (id 5381) matrah `13.028,64`, KDV `1.302,86`,
+KDV oranı `10`. xUnit 234/234, vitest 598/598.
+
+Göç **769 yalnız docker'da**.

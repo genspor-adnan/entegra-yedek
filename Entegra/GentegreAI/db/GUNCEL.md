@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (392 ad, 109 tanesi birden cok dosyada)
+## Fonksiyonlar (393 ad, 110 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -90,7 +90,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ebelge_govde_izibiz` | `166_ebelge_json.sql` | — |
 | `fn_ebelge_hazirla` | `186_gib_kullanici_alias.sql` | 163_ebelge_hazirla.sql, 179_ebelge_ana_salter.sql |
 | `fn_ebelge_hesap` | `338_entegrasyon_baz_sube.sql` | 171_sube_ebelge_mukellef.sql, 337_entegrasyon_uts_ebelge.sql |
-| `fn_ebelge_html` | `178_ebelge_onizleme.sql` | — |
+| `fn_ebelge_html` | `769_para_bicimi_tr.sql` | 178_ebelge_onizleme.sql |
 | `fn_ebelge_iptal_edilebilir` | `188_ebelge_iptal.sql` | — |
 | `fn_ebelge_iptal_yaz` | `188_ebelge_iptal.sql` | — |
 | `fn_ebelge_kimlik_semasi` | `166_ebelge_json.sql` | — |
@@ -255,6 +255,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_order_doz_gunluk` | `698_order_doz_uretimi.sql` | — |
 | `fn_order_uygulama_uret` | `698_order_doz_uretimi.sql` | — |
 | `fn_panel_profil` | `513_panel_blok_sirasi.sql` | 508_panel_kurum_profili.sql, 512_panel_tip_merkezi_tam.sql |
+| `fn_para_tr` | `769_para_bicimi_tr.sql` | — |
 | `fn_parola_ata` | `068_taraf_rol_id_kolonlari.sql` | 020_sema_kimlik.sql |
 | `fn_parola_dogru` | `020_sema_kimlik.sql` | — |
 | `fn_plan_gerceklestir` | `085_fn_kasa_f3.sql` | — |
