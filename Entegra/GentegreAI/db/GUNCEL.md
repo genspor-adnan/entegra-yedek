@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (393 ad, 110 tanesi birden cok dosyada)
+## Fonksiyonlar (393 ad, 111 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -49,7 +49,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_belge_satir_tahsil_tazele` | `660_iade_satir_tahsil.sql` | 321_tahsilat_satir_dagitim.sql, 471_dagilim_kapanma_tahsil.sql, 478_pay_kolonlari_dusur.sql |
 | `fn_belge_sil` | `217_belge_sil_stok_guard.sql` | 181_belge_sil.sql |
 | `fn_belge_silinebilir` | `226_uts_belge_guard.sql` | 181_belge_sil.sql |
-| `fn_belge_talep_yazi` | `768_belge_talep_yazisi.sql` | — |
+| `fn_belge_talep_yazi` | `770_belge_talep_yazisi_para_bicimi.sql` | 768_belge_talep_yazisi.sql |
 | `fn_belge_varsayilan_liste` | `601_sgk_tarife_sut_listesi.sql` | 205_belge_fiyat_listesi.sql, 278_odeyen_kurum_varsayilan_liste.sql, 292_varsayilan_liste_kampanya.sql, 302_kurum_sozlesme_fiyat_listesi.sql, 468_kurum_sozlesme_1n.sql, 588_kurum_tarifesi_coklu_sozlesme.sql |
 | `fn_belge_yon` | `205_belge_fiyat_listesi.sql` | — |
 | `fn_bolum_planli` | `718_hekim_calisma_plani.sql` | — |

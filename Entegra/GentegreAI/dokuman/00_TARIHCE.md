@@ -12229,3 +12229,30 @@ kopyalamak, kazancından çok risk taşıyordu).
 KDV oranı `10`. xUnit 234/234, vitest 598/598.
 
 Göç **769 yalnız docker'da**.
+
+---
+
+## 17.09.2026 — Belge talebi yazısı da `fn_para_tr`ye bağlandı (db/770)
+
+Kullanıcı: *"768'i de fn_para_tr'ye bağla"*.
+
+769 Türkçe sayı biçimini `fn_para_tr`de toplamıştı ama `fn_belge_talep_yazi`
+kendi satır içi kopyasını taşımaya devam ediyordu. İkisi de bugün **doğru**
+sonuç veriyordu; sorun sonrasıydı: biçim bir daha değişirse biri güncellenir
+öteki unutulur ve maaş yazısı ile e-Belge önizlemesi aynı tutarı farklı yazar.
+Aynı olması gereken iki şeyin iki yerde tanımlı olması, farkın ortaya
+çıkmasını zaman meselesine çevirir.
+
+768 bir göçtür, düzenlenmedi. Fonksiyon 770'te yeniden tanımlandı; gövde
+768'den **programatik olarak kopyalandı** (elle yazılsa transkripsiyon hatası
+riski vardı) ve yalnız tek ifade değişti — `diff` bunu doğruluyor: 13 satırın
+hepsi o ifade ve açıklaması.
+
+**Davranış aynı.** `fn_para_tr` NULL girdide boş metin döndürür; satır içi hâli
+de öyleydi. Doğrulama: maaş dolu iken `1.234.567,50`, boş iken `eksik`
+listesinde `maas` görünüyor — ikisi de 768'deki gibi.
+
+Önceki turda *"gövdeyi yalnız bunun için kopyalamak kazancından çok risk
+taşıyor"* demiştim; kopyayı elle değil betikle üretince risk kalktı.
+
+xUnit 234/234, vitest 598/598. Göç **770 yalnız docker'da**.
