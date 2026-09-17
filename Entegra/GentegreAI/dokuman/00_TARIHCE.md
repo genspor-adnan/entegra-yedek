@@ -12835,3 +12835,45 @@ gösteriliyor; çizmeden kapatma **engellendi**. xUnit 234/234, vitest 614/614.
 Test verisi (çağrı, iş emri, iki ziyaret, imza dosyası) silindi.
 
 **DB göçü yok** - doküman modülü kaynağı kod tarafında tanımlı.
+
+---
+
+## 17.09.2026 — Ziyaretten parça ekleme (779)
+
+Kullanıcı: *"ziyaretten parça eklemeyi de yap"* — teknik servisin son açığı.
+
+**Satır burada açılır, stok çıkışı orada.** Fiili stok hareketini var olan
+`/api/demirbas/is-emri/{id}/parca-cikis` yazıyor (depo, kapsam ve fiş kuralları
+orada duruyor); yeni uç yalnız **parça satırını** açıyor. İkinci bir çıkış yolu
+yazmak, aynı parçanın iki farklı fişle düşmesi demekti.
+
+**Ziyarete bağlanır, iş emrine değil.** "İkinci gidişte ne götürüldü" ve araç
+stoğu sayımı bunsuz cevaplanamaz; iş emri düzeyinde tutmak üç gidişin parçasını
+tek yığına atardı. (`ziyaret_id` kolonu 773'te açılmıştı, şimdi kullanılıyor.)
+
+**Kapsam iş emrinden türer.** Üretici garantisinde parça **üreticinin malıdır**,
+bizim stoğumuza hiç girmez (`kapsam = 1`) ve stok çıkışı onu zaten atlar.
+Ötekilerde parça bizim stoktan çıkar; sözleşme ve kendi garantimizde tahsil
+edilmez ama **maliyet bizimdir**. Ekran ayrıca "sökülen arızalı parça toplandı"
+soruyor - üretici garantisinde iade edilmezse alacak reddedilir.
+
+**Silme yalnız çıkışı yapılmamış satırda**; fişi kesilmiş parçayı silmek, stok
+hareketiyle iş emrini ayrıştırırdı (denendi: 422 ve neden yapılamayacağını
+söyleyen mesaj).
+
+**Bu turda yakalanan kusur.** Stok kartından fiyat okumaya çalışmıştım
+(`s.satis_fiyati`) - **stokta fiyat kolonu yok**, fiyat listesinden gelir; uç
+500 veriyordu. Uydurma kaynak kaldırıldı: stok seçilince ekran var olan
+`fiyatKalem` ucuna soruyor, teknisyen gerekirse üstüne yazıyor, boş bırakırsa
+satır 0 ile açılıp ofiste fiyatlanıyor. İkinci bir fiyat kaynağı, ekranda
+görünen ile satıra yazılanı ayırırdı.
+
+**Doğrulama (390×844).** Elle parça eklendi (`2 × 1.450 ₺ · arızalı parça
+toplandı`), stok araması 5 sonuç getirdi, satır silindi; iş emri toplamı tetikle
+500,00'a güncellendi; çıkışı yapılmış satırın silinmesi 422 ile reddedildi.
+xUnit 234/234, vitest 614/614, derlemeler temiz. Test verisi silindi.
+
+**DB göçü yok** - `ziyaret_id` ve `iade_durum` kolonları 773'te gelmişti.
+
+Teknik servis modülü böylece tamamlandı: çağrı → iş emri → ziyaret, çizelge,
+mobil kart, çizilen imza, parça, emanet, periyodik bakım ve numaralar.

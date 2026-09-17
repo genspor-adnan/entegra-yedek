@@ -113,6 +113,23 @@ export const servisUclari = {
   }) => gonder<{ durum: number; toplamTutar: number; mesaj: string }>(
       `/api/servis/ziyaret/${ziyaretId}/kapat`, g),
 
+  /**
+   * Ziyarete parça satırı ekler. Fiili STOK ÇIKIŞI burada yapılmaz - onu iş
+   * emrindeki `parca-cikis` ucu yazar (depo, kapsam ve fiş kuralları orada).
+   * Üretici garantisinde parça üreticinin malıdır, stoktan düşülmez.
+   */
+  servisParcaEkle: (ziyaretId: number, g: {
+    stokId?: number; parcaNo?: string; ad?: string; miktar: number;
+    birimFiyat?: number; iadeToplandi?: boolean; aciklama?: string;
+  }) => gonder<{ id: number; isEmriId: number; toplamTutar: number;
+                 kapsam: number; mesaj: string }>(
+      `/api/servis/ziyaret/${ziyaretId}/parca`, g),
+
+  /** Yalnız stok çıkışı YAPILMAMIŞ satır silinebilir. */
+  servisParcaSil: (parcaId: number) =>
+    istek<{ silindi: number; toplamTutar: number }>(
+      `/api/servis/parca/${parcaId}`, { method: 'DELETE' }),
+
   servisEmanetVer: (isEmriId: number, g: {
     tarafId?: number; demirbasId?: number; cihazMetni?: string; aciklama?: string;
   }) => gonder<{ id: number; emanetNo: string; mesaj: string }>(

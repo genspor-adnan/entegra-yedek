@@ -98,6 +98,18 @@ public static class TeknikServisUclari
 
     public sealed class TeslimIstegi { public string? Not { get; set; } }
 
+    public sealed class ParcaIstegi
+    {
+        public int? StokId { get; set; }
+        public string? ParcaNo { get; set; }
+        public string? Ad { get; set; }
+        public decimal Miktar { get; set; } = 1;
+        public decimal? BirimFiyat { get; set; }
+        /// <summary>Sökülen arızalı parça toplandı mı (üretici garantisinde şart).</summary>
+        public bool IadeToplandi { get; set; }
+        public string? Aciklama { get; set; }
+    }
+
     public static void TeknikServisUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/servis").WithTags("Teknik Servis")
@@ -608,6 +620,144 @@ public static class TeknikServisUclari
             var z = await ZiyaretOkuAsync(veri, id, iptal);
             if (z is null) throw GentegreHatasi.Bulunamadi("Ziyaret bulunamadı.");
             return Results.Ok(new { ziyaret = z, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // ------------------------------------------- ziyarete parça ----
+        // SATIR BURADA AÇILIR, STOK ÇIKIŞI ORADA: fiili stok hareketini
+        //   `/api/demirbas/is-emri/{id}/parca-cikis` yazıyor ve depo, kapsam,
+        //   fiş kuralları orada duruyor. İkinci bir çıkış yolu yazmak, aynı
+        //   parçanın iki farklı fişle düşmesi demekti.
+        //
+        //   ZİYARETE BAĞLANIR: "ikinci gidişte ne götürüldü" ve araç stoğu
+        //   sayımı bunsuz cevaplanamaz - iş emri düzeyinde tutmak üç gidişin
+        //   parçasını tek yığına atardı.
+        grup.MapPost("/ziyaret/{id:long}/parca", async (
+            long id, ParcaIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("servis", Islem.Degistir);
+
+            if (istek.StokId is null or <= 0
+                && string.IsNullOrWhiteSpace(istek.Ad)
+                && string.IsNullOrWhiteSpace(istek.ParcaNo))
+                throw GentegreHatasi.Dogrulama("Parça seçilmeli ya da adı yazılmalı.",
+                    new AlanHatasi("ad",
+                        "Stoktan seçin ya da parçanın adını yazın - adsız satır, "
+                      + "sonradan kimsenin ne olduğunu bilemediği bir maliyettir."));
+            if (istek.Miktar <= 0)
+                throw GentegreHatasi.Dogrulama("Miktar sıfırdan büyük olmalı.",
+                    new AlanHatasi("miktar", "Kaç adet takıldı?"));
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var z = await baglanti.TekAsync("""
+                select z.is_emri_id as "isEmriId", z.sonuc, e.kapsam_tur
+                  from public.servis_ziyaret z
+                  join public.demirbas_is_emri e on e.id = z.is_emri_id
+                 where z.id = @p0
+                """, null, [id],
+                o => new { IsEmriId = o.GetInt64(0), Sonuc = (short)o.Sayi("sonuc"),
+                           Kapsam = (short)o.Sayi("kapsam_tur") }, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Ziyaret bulunamadı.");
+
+            if (z.Sonuc != 0)
+                throw GentegreHatasi.IsKurali(
+                    "Kapatılmış ziyarete parça eklenemez - yeni ziyaret açın.");
+
+            // KAPSAM İŞ EMRİNDEN TÜRER: üretici garantisinde parça ÜRETİCİNİN
+            //   malıdır, bizim stoğumuza hiç girmez (kapsam 1) ve stok çıkışı
+            //   onu zaten atlar. Ötekilerde parça bizim stoktan çıkar; sözleşme
+            //   ve kendi garantimizde tahsil edilmez ama MALİYET bizimdir.
+            var parcaKapsam = z.Kapsam == 3 ? (short)1 : (short)0;
+
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var parcaId = await baglanti.TekDegerAsync<long>("""
+                insert into public.demirbas_is_emri_parca
+                       (is_emri_id, ziyaret_id, stok_id, parca_no, ad, miktar,
+                        birim_fiyat, kapsam, iade_durum, aciklama, ekleyen)
+                values (@p0, @p1, @p2, @p3,
+                        coalesce(nullif(@p4, ''),
+                                 (select s.ad from public.stok s where s.id = @p2),
+                                 @p3),
+                        @p5,
+                        -- FİYAT STOKTAN TÜRETİLMEZ: stok kartında fiyat kolonu
+                        --   YOK, fiyat listesinden gelir (`fn_fiyat_kalem`).
+                        --   Ekran stok seçilince o uca sorup buraya yazıyor;
+                        --   burada ikinci bir fiyat kaynağı uydurmak, ekranda
+                        --   görünen ile satıra yazılanı ayırırdı.
+                        coalesce(@p6, 0),
+                        @p7, @p8, @p9, @p10)
+                returning id
+                """, islem,
+                [z.IsEmriId, id, istek.StokId, istek.ParcaNo ?? "", istek.Ad ?? "",
+                 istek.Miktar, istek.BirimFiyat, parcaKapsam,
+                 istek.IadeToplandi ? 1 : 0, istek.Aciklama ?? "",
+                 baglam.KullaniciId], iptal);
+
+            await log.YazAsync(baglanti, islem, LogIslemi.Ekle, LogIsEmri,
+                (int)z.IsEmriId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { parca = istek.Ad ?? istek.ParcaNo, istek.Miktar,
+                      ziyaretId = id, kapsam = parcaKapsam }, iptal: iptal);
+
+            await islem.CommitAsync(iptal);
+
+            var t = await baglanti.TekDegerAsync<decimal>(
+                "select toplam_tutar from public.demirbas_is_emri where id = @p0",
+                null, [z.IsEmriId], iptal);
+
+            return Results.Ok(new
+            {
+                id = parcaId, isEmriId = z.IsEmriId, toplamTutar = t,
+                kapsam = parcaKapsam,
+                mesaj = parcaKapsam == 1
+                    ? "Parça eklendi. Üretici garantisi: parça üreticinin malı, "
+                      + "stoktan düşülmez - sökülen arızalıyı iade etmeyi unutmayın."
+                    : "Parça eklendi. Stok çıkışı iş emrinden yapılır.",
+                izlemeNo = baglam.IzlemeNo
+            });
+        });
+
+        // SATIR SİLME: yalnız stok çıkışı YAPILMAMIŞ satır. Fişi kesilmiş
+        //   parçayı silmek, stok hareketiyle iş emrini ayrıştırırdı.
+        grup.MapDelete("/parca/{id:long}", async (
+            long id, BaglamCozucu cozucu, VeriKaynagi veri, LogDeposu log,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("servis", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var p = await baglanti.TekAsync("""
+                select is_emri_id as "isEmriId", belge_id as "belgeId"
+                  from public.demirbas_is_emri_parca where id = @p0
+                """, null, [id],
+                o => new { IsEmriId = o.GetInt64(0),
+                           Cikildi = !o.IsDBNull(o.GetOrdinal("belgeId")) }, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Parça satırı bulunamadı.");
+
+            if (p.Cikildi)
+                throw GentegreHatasi.IsKurali(
+                    "Bu parçanın stok çıkışı yapılmış - satır silinemez. "
+                  + "Gerekiyorsa stok tarafında iade fişi kesin.");
+
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+            await baglanti.CalistirAsync(
+                "delete from public.demirbas_is_emri_parca where id = @p0",
+                islem, [id], iptal);
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogIsEmri,
+                (int)p.IsEmriId, baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { parcaSilindi = id }, iptal: iptal);
+            await islem.CommitAsync(iptal);
+
+            var t = await baglanti.TekDegerAsync<decimal>(
+                "select toplam_tutar from public.demirbas_is_emri where id = @p0",
+                null, [p.IsEmriId], iptal);
+
+            return Results.Ok(new { silindi = id, toplamTutar = t,
+                                    izlemeNo = baglam.IzlemeNo });
         });
 
         // ------------------------------------------ periyodik üretim ----

@@ -5257,3 +5257,17 @@ textarea.fm-giris { resize: vertical }
   border: 1px dashed var(--cizgi); border-radius: 6px; padding: 24px;
   text-align: center; color: var(--soluk); font-size: 12px;
 }
+
+/* ZİYARETTE PARÇA (779): satır + ekleme kutusu. Sil düğmesi satırın sağında,
+   listeyi okurken göze girmesin diye küçük. */
+.zm-parca { display: flex; align-items: center; gap: 10px }
+.zm-parca > div { flex: 1 }
+.zm-bosluk { padding: 10px 0; font-size: 12px; color: var(--soluk) }
+.zm-parca-ekle { width: 100%; min-height: 44px; margin-top: 8px }
+.zm-parca-kutu {
+  margin-top: 10px; padding: 10px; border: 1px dashed var(--cizgi);
+  border-radius: 6px; background: #fbfcfe;
+}
+.zm-ara { display: flex; gap: 6px }
+.zm-ara input { flex: 1 }
+.zm-ara .d { min-height: 44px; padding: 0 14px }

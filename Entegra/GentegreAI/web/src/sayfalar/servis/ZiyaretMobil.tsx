@@ -54,6 +54,16 @@ export function ZiyaretMobil() {
   const [imzaBlob, setImzaBlob] = useState<Blob | null>(null);
   /** Kayıtlı imzanın görsel adresi - kapanmış ziyarette okunur. */
   const [imzaUrl, setImzaUrl] = useState<string | null>(null);
+  /** Parça ekleme kutusu - sahada tek elle doldurulur. */
+  const [parcaAcik, setParcaAcik] = useState(false);
+  const [parcaAra, setParcaAra] = useState('');
+  const [parcaSecenek, setParcaSecenek] = useState<
+    { id: number; kod: string; ad: string }[]>([]);
+  const [parcaAd, setParcaAd] = useState('');
+  const [parcaStokId, setParcaStokId] = useState<number | null>(null);
+  const [parcaMiktar, setParcaMiktar] = useState('1');
+  const [parcaFiyat, setParcaFiyat] = useState('');
+  const [parcaIade, setParcaIade] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -89,6 +99,41 @@ export function ZiyaretMobil() {
   if (!z) return <div className="yukleniyor">Yükleniyor…</div>;
 
   const kapali = z.sonuc !== 0;
+
+  const tazele = async () => setZ((await api.servisZiyaretDetay(z.id)).ziyaret);
+
+  // STOK ARAMA SAHADA KISA TUTULUR: ilk beş sonuç yeter, uzun liste telefonda
+  //   kaydırmaktan başka bir şey değil. Aramayı kullanıcı tetikler - her
+  //   tuşta istek atmak zayıf bağlantıda ekranı kilitlerdi.
+  const stokAra = () => guvenli(async () => {
+    const y = await api.liste('stok', {
+      sayfa: 1, boyut: 5, arama: parcaAra,
+    } as Parameters<typeof api.liste>[1]);
+    setParcaSecenek(y.satirlar.map(r => ({
+      id: Number(r.id), kod: String(r.kod ?? ''), ad: String(r.ad ?? ''),
+    })));
+  });
+
+  const parcaEkle = () => guvenli(async () => {
+    const y = await api.servisParcaEkle(z.id, {
+      stokId: parcaStokId ?? undefined,
+      ad: parcaAd.trim() || undefined,
+      miktar: Number((parcaMiktar || '1').replace(',', '.')),
+      birimFiyat: parcaFiyat.trim()
+        ? Number(parcaFiyat.replace(',', '.')) : undefined,
+      iadeToplandi: parcaIade,
+    });
+    mesaj(y.mesaj);
+    setParcaAcik(false); setParcaAd(''); setParcaStokId(null);
+    setParcaMiktar('1'); setParcaFiyat(''); setParcaIade(false);
+    setParcaAra(''); setParcaSecenek([]);
+    await tazele();
+  });
+
+  const parcaSil = (parcaId: number) => guvenli(async () => {
+    await api.servisParcaSil(parcaId);
+    await tazele();
+  });
   const sayi = (m: string) => (m.trim() ? Number(m.replace(',', '.')) : undefined);
 
   const kapat = () => guvenli(async () => {
@@ -224,18 +269,94 @@ export function ZiyaretMobil() {
         </label>
       </div>
 
-      {z.parcalar.length > 0 && (
-        <div className="zm-kart">
-          <div className="zm-baslik">Kullanılan parça</div>
-          {z.parcalar.map(p => (
-            <div key={p.id} className="zm-parca">
+      <div className="zm-kart">
+        <div className="zm-baslik">Kullanılan parça</div>
+        {z.parcalar.map(p => (
+          <div key={p.id} className="zm-parca">
+            <div>
               <b>{p.ad || p.parcaNo}</b>
               <span>{p.miktar} × {p.birimFiyat} ₺
                 {p.iadeDurum === 1 ? ' · arızalı parça toplandı' : ''}</span>
             </div>
-          ))}
-        </div>
-      )}
+            {!kapali && (
+              <button type="button" className="d mini" onClick={() => parcaSil(p.id)}>
+                Sil
+              </button>
+            )}
+          </div>
+        ))}
+        {z.parcalar.length === 0 && (
+          <div className="zm-bosluk">Bu ziyarette parça kullanılmadı.</div>
+        )}
+
+        {!kapali && !parcaAcik && (
+          <button type="button" className="d zm-parca-ekle"
+                  onClick={() => setParcaAcik(true)}>＋ Parça Ekle</button>
+        )}
+
+        {!kapali && parcaAcik && (
+          <div className="zm-parca-kutu">
+            {/* STOKTAN SEÇ YA DA ELLE YAZ: sahada her parça katalogda
+                olmayabilir (müşterinin getirdiği, dışarıdan alınan). Adsız
+                satır yasak - sonradan kimsenin ne olduğunu bilemediği bir
+                maliyet olurdu. */}
+            <label className="zm-alan">
+              <span>Stokta ara</span>
+              <div className="zm-ara">
+                <input value={parcaAra} placeholder="Parça adı ya da kodu…"
+                       onChange={e => setParcaAra(e.target.value)} />
+                <button type="button" className="d" onClick={stokAra}>Ara</button>
+              </div>
+            </label>
+            {parcaSecenek.map(o => (
+              <button key={o.id} type="button"
+                      className={`zm-sec${parcaStokId === o.id ? ' on' : ''}`}
+                      style={{ width: '100%', marginBottom: 6, minHeight: 44 }}
+                      onClick={() => guvenli(async () => {
+                        setParcaStokId(o.id); setParcaAd(o.ad);
+                        // FİYAT TEK YERDEN: stok kartında fiyat yok, fiyat
+                        //   LİSTESİNDEN gelir. Teknisyen gerekirse üstüne
+                        //   yazar; boş bırakırsa ofis fiyatlar.
+                        const f = await api.fiyatKalem({ stokId: o.id }, {});
+                        if (f.fiyat) setParcaFiyat(String(f.fiyat));
+                      })}>
+                {o.ad}<i>{o.kod}</i>
+              </button>
+            ))}
+            <label className="zm-alan">
+              <span>Parça adı</span>
+              <input value={parcaAd} placeholder="Katalogda yoksa elle yazın"
+                     onChange={e => { setParcaAd(e.target.value); setParcaStokId(null) }} />
+            </label>
+            <div className="zm-ucer">
+              <label className="zm-alan">
+                <span>Miktar</span>
+                <input inputMode="decimal" value={parcaMiktar}
+                       onChange={e => setParcaMiktar(e.target.value)} />
+              </label>
+              <label className="zm-alan">
+                <span>Birim fiyat</span>
+                <input inputMode="decimal" value={parcaFiyat}
+                       onChange={e => setParcaFiyat(e.target.value)} />
+              </label>
+            </div>
+            {/* ARIZALI PARÇA İADESİ: üretici garantisinde sökülen parça
+                üreticiye geri gönderilmezse alacak REDDEDİLİR. */}
+            <label className="zm-onay">
+              <input type="checkbox" checked={parcaIade}
+                     onChange={e => setParcaIade(e.target.checked)} />
+              Sökülen arızalı parça toplandı
+            </label>
+            <div className="zm-secim">
+              <button type="button" className="zm-sec on" onClick={parcaEkle}>
+                Ekle
+              </button>
+              <button type="button" className="zm-sec"
+                      onClick={() => setParcaAcik(false)}>Vazgeç</button>
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="zm-kart">
         <div className="zm-baslik">Müşteri imzası</div>
