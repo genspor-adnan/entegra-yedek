@@ -400,16 +400,12 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
       if (e.repeat) return;
       // Kalem penceresi yeni kapandiysa bu Enter ona aitti - 400 ms sus.
       if (Date.now() - oneGelis.current < 400) return;
-      // ENTER = 1 ADET, PENCERESIZ (786).
-      void sec(satirlar[secili], true);
-    }
-    else if (e.key === 'F12' && satirlar[secili]) {
-      // F12 = MIKTAR/FIYAT PENCERESI (786). preventDefault tarayicinin
-      //   gelistirici araclarini her ortamda engellemez (F12 tarayici
-      //   kisayolu); bu yuzden ayni is basliktaki dugmede de duruyor.
-      e.preventDefault();
-      if (e.repeat) return;
-      void sec(satirlar[secili], false);
+      // ENTER = 1 ADET PENCERESIZ · SHIFT+ENTER = MIKTAR/FIYAT PENCERESI
+      //   (786). Kisayol once F12 idi; F12 tarayicinin gelistirici arac
+      //   kisayolu ve `preventDefault` her ortamda onu yutmuyordu
+      //   (kullanici: "kısayolu shift+enter yap"). Shift+Enter ayni elin
+      //   ayni tusu - hiz kaybi yok.
+      void sec(satirlar[secili], !e.shiftKey);
     }
   };
 
@@ -421,10 +417,9 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
       onKapat={onKapat}
       /* BASLIGIN SAGINDA IKI EKLEME DUGMESI (786, kullanici): ayni is iki
          hizda yapilir - cogu ucret tek adet ve liste fiyatiyla girilir
-         (Enter), miktar ya da fiyat degisecekse pencere acilir (F12).
-         Klavye kisayollari listede de calisiyor; dugmeler hem kesfedilebilir
-         kilar hem F12'nin tarayici tarafindan yutuldugu ortamlarda tek
-         yoldur. */
+         (Enter), miktar ya da fiyat degisecekse pencere acilir (Shift+Enter).
+         Klavye kisayollari arama kutusunda calisiyor; dugmeler ayni isi
+         kesfedilebilir kilar ve fareyle calisan kullaniciya da yol acar. */
       ustBilgi={
         <span className="stok-ara-eylem">
           <button className="d bir" disabled={!satirlar[secili]}
@@ -435,7 +430,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
           <button className="d" disabled={!satirlar[secili]}
                   title="Miktar ve fiyat penceresini açar"
                   onClick={() => satirlar[secili] && void sec(satirlar[secili], false)}>
-            🔢 Miktar Ekle (F12)
+            🔢 Miktar Ekle (Shift+Enter)
           </button>
           {/* EKLENDI BILGISI DUGMELERIN SAGINDA (786, kullanici): once
               pencerenin ALT seridindeydi - goz listede ve dugmelerdeyken

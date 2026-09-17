@@ -1,4 +1,5 @@
 import { Fragment, useState } from 'react';
+import { mesaj } from '../mesaj';
 import { para, say4, tarihSaat, hamSayi as sayi } from '../bicim';
 import { iskonatoMetni, satirTutari, type SatirDurumu } from '../../sayfalar/belgeSatir';
 import { DOVIZ_KODLARI } from '../../sayfalar/belgeSabitleri';
@@ -482,7 +483,23 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
           <Fragment key={r.anahtar}>
           <tr className={secili ? 'secili' : ''}
               onClick={e => satirTikla(sira, e)}
-              onDoubleClick={() => !kilitli && !r.iskontoKilit && setKalem(r)}>
+              /* CIFT TIK = FIYAT / MIKTAR PENCERESI (787, kullanici: "ücret
+                 satırında da çift tıklayınca fiyat / miktar ekranı açıp
+                 güncellenebilmeli"). Acilmadigi iki durumda SEBEP soyleniyor:
+                 eskiden tiklama sessizce yutuluyor ve ekran bozuk saniliyordu. */
+              onDoubleClick={() => {
+                if (kilitli) {
+                  void mesaj('Kesin belge satırı düzenlenemez - önce belgeyi '
+                           + 'İptal edip yeniden kesin.');
+                  return;
+                }
+                if (r.iskontoKilit) {
+                  void mesaj('İskontosu onaya gönderilmiş/onaylanmış satır '
+                           + 'değiştirilemez - iskonto talebini geri çekin.');
+                  return;
+                }
+                setKalem(r);
+              }}>
             <td className="hiza-orta">
               {/* Onay kutusu TEK satiri ekler/cikarir - satir tiklamasi
                   (duz tik = yalniz o satir) tetiklenmesin. */}

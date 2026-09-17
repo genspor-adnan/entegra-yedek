@@ -13426,3 +13426,24 @@ açılmadan satır eklendi ve şerit *"✓ 1 kalem eklendi · son: Muayene İşl
 oldu; "Miktar Ekle" düğmesi miktar/fiyat penceresini açtı. Test
 `stokAramaEkleme.test.tsx`: iki düğme + eklendi bilgisi şeritte, Enter
 `hizli=true`, F12 `hizli=false`, düğmeler aynı iki yolu açar. vitest 655/655.
+
+**Kısayol Shift+Enter oldu (786).** Kullanıcı: *"kısayolu shift+enter yap"*.
+F12 tarayıcının geliştirici araçları kısayolu ve `preventDefault` her ortamda
+onu yutmuyordu. Artık **Enter** 1 adet ekler, **Shift+Enter** miktar/fiyat
+penceresini açar; düğme etiketi de bunu yazıyor.
+
+## 18.09.2026 — Ücret satırında çift tık (787)
+
+Kullanıcı: *"ücret satırında da çift tıklayınca fiyat / miktar ekranı açıp
+güncellenebilmeli"*.
+
+**Ölçüldü: çalışıyor.** Ücretlendirme gridinde satıra çift tıklamak kalem
+penceresini açıyor ve düzenleme satırı GÜNCELLİYOR (yeni satır eklemiyor):
+hızlı eklenen bir satırda miktar 1→3 yapıldı, satır sayısı 3'te kaldı, genel
+toplam 2.657,70 → 3.973,10 oldu.
+
+**Eksik olan sebebin görünmesiydi.** Çift tık iki durumda sessizce hiçbir şey
+yapmıyordu: belge KESİN (`kilitli`) ve satırın iskontosu onaya gönderilmiş
+(`iskontoKilit`). Araç çubuğundaki ✎ düğmesi sebebi `title`da söylüyordu ama
+satıra çift tıklayan kullanıcı ekranı bozuk sanıyordu. Artık her iki durumda
+sebep mesajla yazılıyor.

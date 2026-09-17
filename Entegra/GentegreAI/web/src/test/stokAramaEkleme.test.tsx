@@ -6,8 +6,9 @@ import { act, render, waitFor } from '@testing-library/react';
  * STOK / HİZMET ARAMA: İKİ EKLEME HIZI (786).
  *
  * Kullanıcı: *"sola '1 Adet Ekle (Enter)' basınca veya Enter basınca fiyat
- * ekranı açmadan direkt 1 adet eklesin.. sağına 'Miktar Ekle (F12)' basınca
- * fiyat / miktar sorma ekranı açsın"*.
+ * ekranı açmadan direkt 1 adet eklesin.. sağına 'Miktar Ekle' basınca fiyat /
+ * miktar sorma ekranı açsın"*. Kısayol önce F12'ydi, tarayıcının geliştirici
+ * araçlarıyla çakıştığı için **Shift+Enter** oldu (kullanıcı).
  *
  * Kayıt kabulde ücretlerin çoğu tek adet ve liste fiyatıyla giriliyor; her
  * birinde kalem penceresi açıp Enter'lamak iki fazladan tuştu. Ayrım tek bir
@@ -42,11 +43,11 @@ const ciz = (onSec = vi.fn()) => {
 };
 
 /** Arama kutusuna tuş gönderir (liste zaten yüklü). */
-const tus = async (kod: string) => {
+const tus = async (kod: string, shift = false) => {
   const kutu = document.querySelector('input[type=search]') as HTMLInputElement;
   await act(async () => {
     kutu.dispatchEvent(new KeyboardEvent('keydown',
-      { key: kod, bubbles: true, cancelable: true }));
+      { key: kod, shiftKey: shift, bubbles: true, cancelable: true }));
   });
 };
 
@@ -62,7 +63,7 @@ describe('stok arama: ekleme hızları (786)', () => {
     const serit = document.querySelector('.stok-ara-eylem')!;
     const metin = (serit.textContent ?? '').replace(/\s+/g, ' ');
     expect(metin).toContain('1 Adet Ekle (Enter)');
-    expect(metin).toContain('Miktar Ekle (F12)');
+    expect(metin).toContain('Miktar Ekle (Shift+Enter)');
     // Kullanıcı: "üstte eklendi mesajı yine devam etsin, butonların sağında" -
     //   eskiden pencerenin ALT şeridindeydi, listeye bakan göz görmüyordu.
     expect(metin).toContain('2 kalem eklendi');
@@ -78,10 +79,10 @@ describe('stok arama: ekleme hızları (786)', () => {
     expect((onSec.mock.calls[0][0] as { id: number }).id).toBe(9);
   });
 
-  it('F12 miktar/fiyat penceresini açar: hizli = false', async () => {
+  it('SHIFT+ENTER miktar/fiyat penceresini açar: hizli = false', async () => {
     const { onSec } = ciz();
     await waitFor(() => expect(liste).toHaveBeenCalled());
-    await tus('F12');
+    await tus('Enter', true);
     await waitFor(() => expect(onSec).toHaveBeenCalled());
     expect(onSec.mock.calls[0][1]).toBe(false);
   });
