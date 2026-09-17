@@ -27,14 +27,15 @@ Bunlar kodda eksik olan bir şey değil; kurulumda girilecek veri.
 
 ## 2. Omurgada duran ama hiç kullanılmamış yetenekler
 
-Onay omurgası bunları destekliyor; hiçbir akış kullanmıyor. Her biri
-"çalışıyor mu" sorusuna bugün **denenmedi** cevabı veriyor.
+Onay omurgası bunları destekliyor; hiçbir akış kullanmıyor.
+
+**Bloke:** e-imza (2.3) kütüphane seçimini bekliyor - başlanmamalı.
 
 | # | Yetenek | Bugünkü durum |
 |---|---|---|
 | 2.1 | ~~**Vekâlet**~~ — **17.09.2026'da gerçek veriyle denendi ve çalışıyor.** Engel, karar, gelen kutusu ve bildirim dört yönüyle doğrulandı. | Kayıt: **1** (E2E Test Kullanicisi → Sistem Yoneticisi, 17.09-17.10). Deneme verisi **bilerek bırakıldı**. |
 | 2.2 | ~~**Sözlü onay** takibi~~ — **763'te kapandı.** `v_onay_sozlu` görünümü, `onay.sozlu_takip` günlük işi (09:30) ve `/api/onay/adim/{id}/yaziliya` ucu geldi. | Kullanım hâlâ **0** (kimse sözlü onay vermedi) ama artık verilirse takip ediliyor. |
-| 2.3 | **e-İmza** (`onay_akis_adim.e_imza_zorunlu`) — kolon var, akış tanımı ekranından işaretlenebilir. | İşaretli adım: **0**. İmza atma/doğrulama akışı **hiç yazılmadı**; bayrak bugün hiçbir şey yapmıyor. |
+| 2.3 | **e-İmza** (`onay_akis_adim.e_imza_zorunlu`) — kolon var, akış tanımı ekranından işaretlenebilir. **KÜTÜPHANE BEKLENİYOR** (17.09.2026, kullanıcı kararı): PAdES/TSA kütüphanesi seçilmeden veri modeli ve uçlar yazılmayacak - önce yazıp sonra kütüphaneye uydurmak, imza biçimini kodun değil kodu imza biçiminin belirlemesi gereken bir yerde tersine çevirirdi. Tasarım hazır: `dokuman/02_EIMZA_LAB.md` (`belge_imza` tablosu, imza aracı zinciri, toplu imza, addendum). | İşaretli adım: **0**. İmza atma/doğrulama akışı **hiç yazılmadı**; bayrak bugün hiçbir şey yapmıyor. |
 
 ---
 
