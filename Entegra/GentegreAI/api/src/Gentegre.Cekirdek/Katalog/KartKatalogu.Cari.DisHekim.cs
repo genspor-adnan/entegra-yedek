@@ -121,7 +121,9 @@ public static partial class KartKatalogu
             // SubeKolonu VARSAYILAN: taraf_personel.sube_id NOT NULL - detay
             //   satiri oturumun subesiyle yazilir (null verilirse insert
             //   "subeId bos birakilamaz" ile patlar).
-            }, Baslik: "Hekim Bilgisi", LogTabloId: 906, TekSatir: true,
+            // 1261 (756): 906 Acil Durum Kişi'nin - iki detay aynı
+            //   numarayı taşıyordu.
+            }, Baslik: "Hekim Bilgisi", LogTabloId: 1261, TekSatir: true,
                // Kaydi DIS hekim yapan bayrak KULLANICIDAN ISTENMEZ (305):
                //   hangi karttan girildigiyle belli. Kutu isaretlettirmek, ayni
                //   tabloyu paylasan iki kart arasindaki farki kullanicinin

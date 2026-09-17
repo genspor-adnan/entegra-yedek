@@ -166,7 +166,8 @@ public static partial class KartKatalogu
         Ad: "resmiTatil",
         YetkiKodu: "ik.tatil",
         Tablo: "public.resmi_tatil",
-        LogTabloId: 906,
+        // 1262 (756): 906 Acil Durum Kişi'nin.
+        LogTabloId: 1262,
         // KURUM GENELİ: şube alanı doldurulursa YEREL tatil olur (kurtuluş
         //   günü), boşsa bütün kurumu bağlar.
         SubeKolonu: null,
@@ -211,7 +212,8 @@ public static partial class KartKatalogu
         Ad: "personelIzinHak",
         YetkiKodu: "ik.izin_hak",
         Tablo: "public.personel_izin_hak",
-        LogTabloId: 905,
+        // 1260 (756): 905 Eğitim/Sertifika'nın.
+        LogTabloId: 1260,
         SubeKolonu: "sube_id",
         Alanlar: new KartAlani[]
         {

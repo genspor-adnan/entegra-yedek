@@ -12,7 +12,9 @@ public static partial class KartKatalogu
         Ad: "randevu",
         YetkiKodu: "randevu",
         Tablo: "public.randevu",
-        LogTabloId: 905,
+        // 1259 (756): 905 Eğitim/Sertifika'nın. Randevu değişiklikleri
+        //   log ekranında sertifika kaydı diye görünüyordu.
+        LogTabloId: 1259,
         SubeKolonu: "sube_id",
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {

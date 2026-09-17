@@ -30,7 +30,8 @@ public static class IzinUclari
     /// <summary>islem_log.tablo_id - personel_izin.</summary>
     private const int LogIzin = 904;
     /// <summary>islem_log.tablo_id - resmi_tatil.</summary>
-    private const int LogTatil = 906;
+    // 1262 (756): 906 Acil Durum Kişi'nin, 749'da yanlışlıkla alınmıştı.
+    private const int LogTatil = 1262;
 
     private const short Taslak = 0, Onayda = 1, Onayli = 2,
                         Reddedildi = 3, Iptal = 4;

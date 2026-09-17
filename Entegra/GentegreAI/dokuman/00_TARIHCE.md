@@ -11393,3 +11393,61 @@ vitest 598/598, iki derleme temiz. Test verisi silindi.
 gasp durumunda - 743/749 turlarından. Bunlar omurgada değil, yalnız denetim
 izini ilgilendiriyor. Ayrıca bu turdan önce de var olan iki çakışma:
 `taraf_hekim` 906, `taraf_hasta_kurum` 908. Göç **755 yalnız docker'da**.
+
+
+## 17.09.2026 — 905 / 906 çakışmaları ayıklandı (`db/756`)
+
+755'te avansın 907/908'i düzeltildi; aynı sıkışıklık 905 ve 906'da da vardı.
+Numaraların kanonik sahibi `KaynakKatalogu.Log.cs`'teki `TabloAdiIfade`
+case'idir: **905 = Eğitim/Sertifika** (`personel_egitim`), **906 = Acil Durum
+Kişi** (`taraf_acil_kisi`). Katalogda ise üçer kart aynı numarayı taşıyordu:
+
+    905 -> personel_egitim (kanonik) · randevu · personel_izin_hak
+    906 -> taraf_acil_kisi (kanonik) · "Hekim Bilgisi" · resmi_tatil
+
+Kanonik sahipler yerinde bırakıldı, sonradan oturanlar taşındı:
+**1259 = Randevu · 1260 = İzin Hakedişi · 1261 = Hekim Bilgisi ·
+1262 = Resmî Tatil**.
+
+**Zararın yeri neresiydi (755'in kaydına düzeltme).** `tablo_id` bugün log
+ekranında ada çevrilmiyor - ada çevrilen yalnız `ust_tablo_id`. Yani 755'te
+yazdığımın aksine avans logu ekranda "Hasta Bilgisi" **etiketiyle
+görünmüyordu**; o kayıttaki doğru tespit `kayit_id`nin yanlış kayda
+bağlanmasıydı. Çakışmanın gerçek zararı üç yerde: (1) numaraya bakarak kaydı
+çözen her yol yanlış tabloya gider - 908'in `kasa_islem`e join'i tam böyleydi
+ve avans kesintisi kasa işlemiyle eşleşiyordu (755'te düzeldi); (2) alt satır
+olarak yazılan kayıtlarda `ust_tablo_id` doğrudan yanlış adı gösterir;
+(3) `tablo_id` + `kayit_id` denetim izinin kimlik çiftidir, iki tablo aynı
+numarayı paylaşınca satırın hangi kayda ait olduğu artık kayıttan okunamaz.
+
+**Geçmiş satırlar bu kez taşınabildi.** 755'te avans ile hasta kaydını ayırt
+edecek bir işaret yoktu ve satırlar taşınmamıştı. Burada var: kanonik
+sahiplerin ikisi de bir kart detayıdır ve personel kartının altında
+(`ust_tablo_id = 73`) yazılır; randevu, izin hakedişi ve resmî tatil kendi
+başına kayıttır (`ust_tablo_id = 0`). Ayrım yine de tek işarete bırakılmadı -
+her güncelleme ikinci bir işaret daha arıyor. Hekim Bilgisi için bu
+`kayit_id = ust_kayit_id`: 1:1 detay olduğu için satır kartıyla aynı numarayı
+taşır, acil kişi ise ayrı bir tabloda kendi id'siyle durur. **Tabloda
+varlığa bakılmadı**: kaydı sonradan silinmiş bir personelin log satırı da
+taşınmalı - denetim izinin değeri zaten silinmiş kaydı anlatabilmesinde.
+(İlk denemede varlık koşulu kullanılmıştı ve 11 satırın hepsi silinmiş
+personellere ait olduğu için hiçbiri taşınmamıştı.)
+
+**Sonuç.** 30 randevu ve 3 resmî tatil satırı `ust_tablo_id = 0`dan,
+11 hekim bilgisi satırı `ust_tablo_id = 73`ten taşındı; 905'te yalnız 3
+gerçek eğitim/sertifika satırı kaldı, 906'da hiç satır kalmadı (acil durum
+kişisi için hiç log yazılmamış). Kod tarafında `KartKatalogu.Randevu`,
+`KartKatalogu.Izin` (hakediş + resmî tatil), `KartKatalogu.Cari.DisHekim` ve
+`IzinUclari.LogTatil` yeni numaralara çekildi; log ekranının tablo adı
+listesine 1259-1262 eklendi.
+
+**Doğrulama.** Katalogdaki bütün `LogTabloId` değerleri yeniden tarandı:
+905 ve 906 artık tekil. xUnit 232/232, vitest 598/598, iki derleme temiz.
+
+**Kalan çakışmalar.** 907 hâlâ iki kartta ama ikisi de aynı fiziksel tabloyu
+(`taraf_hasta`) gösteriyor - gerçek çakışma değil. Bu turdan önce de var olan
+ve dokunulmayanlar: 913 (Yapı ↔ Kasa), 914/915 (Kampanya ↔ Kasa), 923
+(Firma ↔ Fiyat Listesi), 925 (Demirbaş ↔ Firma), 960/961 (Onam ↔ Sağlık),
+962/963 (Lab ↔ Sağlık ↔ Zamanlı İş), 1016 (Lab ↔ Mikrobiyoloji), 1244-1246
+(Onay ↔ Satınalma) ve 918-920 (Kasa ↔ Numara ↔ Stok). Hepsi aynı sınıf hata;
+hiçbiri onay omurgasında değil. Göç **756 yalnız docker'da**.
