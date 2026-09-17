@@ -88,6 +88,26 @@ export function MenuIkon({ ic }: { ic: string }) {
         </svg>
       </span>
     );
+  // '@eczane' (kullanici: "eczane menü ikonu kadehe sarılmış yılan olsun"):
+  //   Hygieia kasesi eczaciligin dunya simgesi ama Unicode'da EMOJISI YOK -
+  //   ⚕️ asa+yilandir (tip), 🐍 yalniz yilan, 🏺 kupa. Uctan cizim tek
+  //   dogru karsilik: kadeh + govdesine sarilan yilan.
+  if (ic === '@eczane')
+    return (
+      <span className="ic ic-eczane" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+          {/* Kadeh: kase + ayak + taban. */}
+          <path d="M7 6.5h10c0 3.6-2.2 5.6-5 5.6S7 10.1 7 6.5Z"
+                fill="#dbe7f3" stroke="#2f6db3" strokeWidth="1.1" strokeLinejoin="round" />
+          <path d="M12 12.1v6.4M8.6 18.9h6.8" stroke="#2f6db3"
+                strokeWidth="1.6" strokeLinecap="round" />
+          {/* Yilan: kadehin sapina sarilir, bas kasenin uzerinde. */}
+          <path d="M14.6 3.4c-2 .2-3.2 1.5-3 2.8.2 1.3 1.8 1.9 3.1 2.6 1.3.7 1.9 1.7 1.4 2.8-.5 1.1-2 1.7-3.4 1.6"
+                fill="none" stroke="#2e7d46" strokeWidth="1.5" strokeLinecap="round" />
+          <circle cx="15.2" cy="3.3" r="1.1" fill="#2e7d46" />
+        </svg>
+      </span>
+    );
   if (ic === '@hilal')
     return (
       <span className="ic ic-hilal" aria-hidden="true">
@@ -164,9 +184,10 @@ export const GRUP_IKON: Record<string, string> = {
   // 781 - kalan dort grup da varsayilan klasorle (📁) ciziliyordu; "uygun
   //   sekilde ata" (kullanici). Secimde tek olcut: simge grubun ISINI
   //   soylesin ve oteki gruplarla karismasin.
-  //   ECZANE: hap. (Alt grup "İTS" de 💊 kullaniyor ama o ILAC BILDIRIMIDIR -
-  //   ayni ailenin iki seviyesi, ana menuyle karismaz.)
-  'Eczane':  '💊',
+  //   ECZANE: kadehe sarilmis yilan - Hygieia kasesi (kullanici). Emoji
+  //   setinde yok, ucta cizilir ('@eczane'). Onceki 💊 alt grup "İTS" ile
+  //   ayni simgeydi ve eczacilik yerine "ilac"i anlatiyordu.
+  'Eczane':  '@eczane',
   //   DEMIRBAS: sabit kiymet - sandalye, zimmet/demirbas sayiminin klasik
   //   simgesi. Cihaz simgeleri (🩻/🔌) Radyoloji ve ÜTS'de kullaniliyor.
   'Demirbaş': '🪑',

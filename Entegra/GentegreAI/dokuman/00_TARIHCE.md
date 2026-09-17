@@ -13246,3 +13246,24 @@ göründü ama beş öğeli "İade / İptal" menüsünde de vardı. Tahsilat gru
 kalkıyor, öteki gruplar köşe/tablo kırpmasını koruyor. Ölçüldü: menü alt
 kenarı 683 px, grup alt kenarı 665 px - menü artık kutunun dışına taşıyor ve
 son öğe görünür.
+
+**Avans şeridi anında güncelleniyor (781).** Kullanıcı: *"avans aldım ama
+anında üstte aldığım avans miktarı görünmedi.. kaydedip çıkıp girince
+göründü.. bir de avans iade edince orası sıfırlanmalı anında"*.
+
+Sebep iki ayrı okuyucuydu: hasta şeridi avansı KENDİ soruyor (yalnız hasta
+kimliği değişince), tahsilat çubuğu ayrı bir `useAvansDurumu` tutuyordu. Avans
+alınınca ya da iade edilince şerit kendi sorgusunu tekrarlamıyordu. Durum artık
+KARTTA (`BelgeKarti`) tek yerde: şerit yalnızca gösteriyor (`avans` prop'u),
+tahsilat çubuğu aynı nesneyi alıyor, kasa penceresi her kapandığında
+(`onPencereKapandi`) tazeleniyor - mahsup zaten kancanın içinden tazeliyordu.
+
+Ölçüldü (Aslı Taş, başlangıç 30.000 ₺): Avans Al ▸ Nakit 150 ₺ → şerit
+**30.150,00** oldu, karttan çıkılmadı; ardından Avans İade ▸ ilk avans (30.000)
+→ şerit **150,00**. İkisi de pencere kapanır kapanmaz.
+
+**Eczane ikonu (781).** Kullanıcı: *"eczane menü ikonu kadehe sarılmış yılan
+olsun"*. Hygieia kasesinin Unicode emojisi yok (⚕️ asa+yılandır, 🐍 yalnız
+yılan), bu yüzden ameliyathane gibi uçta çizildi: `'@eczane'` → kadeh + sapına
+sarılan yılan SVG'si. Önceki 💊 hem alt grup "İTS" ile aynıydı hem eczacılığı
+değil ilacı anlatıyordu.

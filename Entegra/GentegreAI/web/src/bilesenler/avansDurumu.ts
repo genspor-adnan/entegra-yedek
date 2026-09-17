@@ -71,3 +71,6 @@ export function useAvansDurumu(tarafId?: number | null) {
 
   return { toplam, satirlar, adet, calisiyor, hata, tazele, mahsupEt };
 }
+
+/** Kancanin donusu - serit ve tahsilat cubugu ayni nesneyi paylasir. */
+export type AvansDurumu = ReturnType<typeof useAvansDurumu>;

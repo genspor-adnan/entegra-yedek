@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useAvansDurumu } from '../avansDurumu';
+import type { AvansDurumu } from '../avansDurumu';
 import { mesaj } from '../mesaj';
 import { para, tarihSaat, paraYaz } from '../bicim';
 import type { BelgeYaniti } from '../../api/sozlesme';
@@ -13,7 +13,8 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
                                   onYenile, kurumTahakkukAc, kurumKalan, kurumBelgeleri,
                                   basvuruMu,
                                   hizliNakit, hesapSecAc, acikBorc,
-                                  iadeAc, avansAl, avansIadeAc, yerelPara = 'TL' }: {
+                                  iadeAc, avansAl, avansIadeAc, avans,
+                                  yerelPara = 'TL' }: {
   /** Basvuru kartinda arac cubugu SADE: "＋" (tam ekran) cizilmez. */
   basvuruMu?: boolean;
   sonuc: BelgeYaniti | null;
@@ -58,6 +59,12 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
    * iade TEK bir kasa islemine baglanir (780).
    */
   avansIadeAc?(avansId: number, tutar: number): void;
+  /**
+   * HASTANIN AVANS DURUMU (781) - KART tutar, serit ve bu sekme AYNI nesneyi
+   * okur. Sekme kendi sorsaydi, avans alindiginda serit bayat kalirdi
+   * (kullanici: "avans aldım ama anında üstte görünmedi").
+   */
+  avans: AvansDurumu;
   /** Yerel para kodu - "dövizli tahsilat var mı" bunun disindakilerle olculur. */
   yerelPara?: string;
   /** Gridde tutar hucresine tiklaninca cagrilir (satir ici duzenleme). */
@@ -113,12 +120,8 @@ useEffect(() => {
   window.addEventListener('click', kapat);
   return () => window.removeEventListener('click', kapat);
 }, [aracMenu, iadeMenu, avansMenu, avansIadeMenu]);
-/**
- * HASTANIN ACIK AVANSI (781) - serit, "Avans Kullan" ve onun etkinligi TEK
- * kaynaktan okur; mahsuptan sonra ucu birden tazelenir.
- */
+/** Avans durumu KARTTAN gelir (781): serit ve bu cubuk ayni sayiyi konusur. */
 const hastaId = Number(sonuc?.belge.tarafId ?? 0);
-const avans = useAvansDurumu(hastaId || null);
 const avansVar = avans.toplam > 0;
 
 /** "Avans Kullan": acik avansi bu belgenin satirlarina mahsup eder (322). */

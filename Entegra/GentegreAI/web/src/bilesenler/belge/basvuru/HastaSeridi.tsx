@@ -13,7 +13,7 @@ import { MUSTEHAKLIK } from './alanlar';
  * "son basvuru" uyarisi cizilir.
  */
 export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
-                              sysTakipNo, paylasimli,
+                              sysTakipNo, paylasimli, avans = 0,
                               kurumAdi, acikBorc, taraflar }: {
   tarafId?: number | null;
   /** BELGENIN odeyen kurumu (kullanici): serit hastanin sigortasini degil,
@@ -54,15 +54,16 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
    * USS kimligi (SYS Takip No) vardir ve memur ikisini birlikte gorur.
    */
   paylasimli?: boolean;
+  /**
+   * HASTANIN ACIK AVANSI (781). Serit ONCEDEN KENDI SORUYORDU; avans alinca
+   * ya da iade edilince hucre degismiyordu - kullanici: *"avans aldım ama
+   * anında üstte aldığım avans miktarı görünmedi"*. Veriyi artik KART tutuyor
+   * (tek `useAvansDurumu`), serit yalnizca gosteriyor: tahsilat sekmesindeki
+   * dugmeler ve serit ayni sayiyi konusur.
+   */
+  avans?: number;
 }) {
   const [h, setH] = useState<Record<string, unknown> | null>(null);
-  /**
-   * HASTANIN KULLANILMAMIS AVANSI (779). Serit "doğru hastadayım" sorusunun
-   * yanina bir soru daha koyuyor: bu hastanin kasada duran parasi var mi.
-   * Eskiden avans ancak Tahsilat sekmesine girilince goruluyordu - memur
-   * hastadan yeniden para isteyebiliyordu.
-   */
-  const [avans, setAvans] = useState(0);
 
   useEffect(() => {
     if (!tarafId) { setH(null); return }
@@ -77,18 +78,6 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
         const s = y.satirlar[0] ?? null;
         setH(s);
       } catch { if (!iptal) setH(null) }
-    })();
-    return () => { iptal = true };
-  }, [tarafId]);
-
-  useEffect(() => {
-    if (!tarafId) { setAvans(0); return }
-    let iptal = false;
-    void (async () => {
-      try {
-        const y = await api.kasaAvans(tarafId);
-        if (!iptal) setAvans(Number(y.toplam ?? 0));
-      } catch { if (!iptal) setAvans(0) }   // yetkisi yoksa hucre cizilmez
     })();
     return () => { iptal = true };
   }, [tarafId]);

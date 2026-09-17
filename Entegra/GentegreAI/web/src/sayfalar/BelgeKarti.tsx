@@ -14,6 +14,7 @@ import { type SatirDurumu, yanittanSatirlar } from './belgeSatir';
 import { type BelgeGirdisi } from './belgeKaydet';
 import { belgeKaydetmeKur } from './belgeKarti/useBelgeKaydetme';
 import { useBasvuruAlanlari, usePersonelAdi } from './belgeKarti/useBasvuruAlanlari';
+import { useAvansDurumu } from '../bilesenler/avansDurumu';
 import { useBelgeAyarlari } from './belgeKarti/useBelgeAyarlari';
 import { useDagilimOnizleme } from './belgeKarti/useDagilimOnizleme';
 import { YEREL_PARA_VARSAYILAN, KAPANMA_ETIKET } from './belgeSabitleri';
@@ -336,6 +337,19 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   } = useBasvuruAlanlari({ basvuruMu, gonderenModu, muayeneAcik });
 
   /**
+   * HASTANIN AVANS DURUMU (781) - TEK OKUYUCU. Hasta seridi ve tahsilat arac
+   * cubugu ayni nesneyi paylasir; avans alinip iade edilince ikisi BIRLIKTE
+   * tazelenir (kullanici: "avans aldım ama anında üstte görünmedi... iade
+   * edince orası sıfırlanmalı anında").
+   */
+  const avansDurumu = useAvansDurumu(
+    basvuruMu ? (Number(basvuruBilgi.hastaId ?? 0) || cari?.id || null) : null);
+  /** Tahsilat kancasina verilen geri cagri BAYAT KALMASIN: hasta degisince
+      `tazele` yeni kimlikle uretiliyor, ref her render'da guncelleniyor. */
+  const avansRef = useRef(avansDurumu.tazele);
+  avansRef.current = avansDurumu.tazele;
+
+  /**
    * ILK SEKME (kullanici): YENI basvuruda "Başvuru" - once hasta, bolum,
    * gonderen ve odeyen kurum girilir. KAYITLI basvuruda "Ücretlendirme":
    * kayit zaten acilmis, memur karta islem eklemek icin doner.
@@ -509,6 +523,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
                                      onPencereKapandi: tur => { void (async () => {
                                        await paraRef.current.posSonrasi(tur);
                                        await paraRef.current.satirlariTazele();
+                                       // AVANS AL / IADE de bu pencereden
+                                       //   gecer (781): serit ve cubuk pencere
+                                       //   kapanir kapanmaz guncel olsun.
+                                       await avansRef.current();
                                      })() } });
   const { tahsilatAdimi } = tahsilat;
   // HER TAHSILATTAN SONRA KURUM TAHAKKUKU (kullanici): hizli banka/POS yolu
@@ -1256,6 +1274,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
                        // ÖSS/SGK'da kimlik hucresi SYS takip no da gosterir;
                        //   ozel iste yalniz dosya no (608).
                        paylasimli={paylasimliKurum(kurumlar, odeyenKurumId)}
+                       // AVANS KARTTAN (781): serit kendi sormuyor, boylece
+                       //   avans alinir alinmaz hucre degisiyor.
+                       avans={avansDurumu.toplam}
                        taraflar={seritTaraflari} />
         )}
 
@@ -1428,6 +1449,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
                            // AVANS IADE (781): secilen avansin kalani,
                            //   nakit odeme kartinda onerili gelir.
                            avansIadeAc={(id, tutar) => tahsilat.avansIadeAc(id, tutar)}
+                           avans={avansDurumu}
                            tahsilatSil={async idler => {
                              await tahsilat.tahsilatSil(idler);
                              // Tahsilat silinince kovalarin TAHSIL sayaci duser.

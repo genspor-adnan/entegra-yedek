@@ -178,6 +178,8 @@ input, select { font: inherit; color: inherit }
 .mi.on { background: var(--mor2); color: var(--mor); font-weight: 700 }
 .mi .ic { font-size: 14px; width: 18px; text-align: center }
 .ic-hilal { display: inline-flex; align-items: center; justify-content: center }
+/* Eczane (781): cizilmis Hygieia kasesi - emoji gibi hizalansin. */
+.ic-eczane { display: inline-flex; align-items: center; justify-content: center }
 .mi .rz { margin-left: auto; font-size: 10px; color: var(--soluk) }
 /* MENU BOLGESI (V2, kabuk/menuBolgeleri.ts): HBYS gruplarinin ustundeki renkli
    baslik; tiklaninca bolge acilir, otekiler kapanir. Ekran ACMAZ. */
