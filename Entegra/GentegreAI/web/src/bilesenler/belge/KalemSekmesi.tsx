@@ -50,6 +50,16 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
    *   3) Bir satir kendi dovizinde girildiyse (100 USD) o satirda kendi
    *      degerleri; yerel karsiligi zaten "Birim Fiyat (TL)" kolonunda.
    */
+  /**
+   * FIYAT LISTESI COMBOSU cizilsin mi (779). Basvuruda HAYIR: liste odeyen
+   * kurumun sozlesmesinden gelir ve elle degistirilmesi anlasma disi
+   * ucretlendirmeye yol acar (kullanici: "ücretlendirme sekmesinde altta fiyat
+   * listesi combosu olmasın"). ERP belgelerinde combo yerinde kalir - orada
+   * liste cariye gore secilir ve degistirilmesi normal bir istir.
+   */
+  const fiyatListesiGoster = !basvuruMu
+    && !!fiyatListesi && fiyatListesi.listeler.length > 0;
+
   const raporKur = sayi(doviz?.kur);
   const raporDovizli = !!doviz && doviz.raporDovizi !== yerelPara && raporKur > 0;
   //   Kolonlar YALNIZ rapor dovizi secilince cikar (kullanici): hic doviz
@@ -810,20 +820,28 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
 )}
 
 {/* FIYAT LISTESI (218): basliktan buraya tasindi - doviz cercevesinin
-    SAGINDA (kullanici). Degistirilince satirlar yeniden fiyatlanir. */}
-{fiyatListesi && fiyatListesi.listeler.length > 0 && (
+    SAGINDA (kullanici). Degistirilince satirlar yeniden fiyatlanir.
+
+    BASVURUDA (779) HIC CIZILMEZ (kullanici: "ücretlendirme sekmesinde altta
+    fiyat listesi combosu olmasın"). Basvurunun listesi ODEYEN KURUMUN
+    sozlesmesinden gelir; combo onu elle degistirmeye aciyordu ve memur
+    farkinda olmadan anlasma disi bir listeyle ucretlendirebiliyordu. Kutunun
+    kendisi kalir: Depo secimi ve kampanya rozeti icinde duruyor. */}
+{(fiyatListesiGoster || depoSecimi || fiyatListesi?.kampanyaAdi) && (
   // marginRight:auto - kutu SOLDAKI doviz cercevesine yanasik durur,
   //   dip toplam sagda kalir (kullanici).
   <div className="kagrup belge-doviz" style={{ marginRight: 'auto' }}>
     <div className="alan-izgara tek-sutun">
+      {fiyatListesiGoster && (
       <label className="alan">
         <span className="etiket">Fiyat Listesi</span>
-        <select value={fiyatListesi.seciliId ?? ''} disabled={kilitli}
-                onChange={e => fiyatListesi.sec(e.target.value ? Number(e.target.value) : null)}>
+        <select value={fiyatListesi!.seciliId ?? ''} disabled={kilitli}
+                onChange={e => fiyatListesi!.sec(e.target.value ? Number(e.target.value) : null)}>
           <option value="">(liste yok)</option>
-          {fiyatListesi.listeler.map(l => <option key={l.id} value={l.id}>{l.ad}</option>)}
+          {fiyatListesi!.listeler.map(l => <option key={l.id} value={l.id}>{l.ad}</option>)}
         </select>
       </label>
+      )}
       {/* DEPO (296): basvuruda baslikta Doktor'a yer acildi, depo buraya indi.
           Diger turlerde baslikta kaldigi icin burada CIZILMEZ. */}
       {depoSecimi && (
@@ -839,7 +857,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
       {/* KAMPANYA ROZETI (274): SALT OKUNUR - kampanya kurumun sozlesmesinden
           (ya da cariden) gelir, belgede elle secilmez; kullanici yanlislikla
           anlasmadan cikmasin. Liste bazi, kampanya indirimi verir. */}
-      {fiyatListesi.kampanyaAdi && (
+      {fiyatListesi?.kampanyaAdi && (
         <label className="alan">
           <span className="etiket">Kampanya</span>
           <span className="deger-serit">

@@ -111,7 +111,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                                  sozlesmeler, altKurumlar,
                                  aciklama, setAciklama, gonderenModu,
                                  personelAd, onPersonelSec, kurumHatasi,
-                                 bolumHatasi, personelHatasi,
+                                 bolumHatasi, personelHatasi, turHatasi,
                                  kendiIstegi, onKendiIstegi }: {
   bilgi: BasvuruBilgi;
   /**
@@ -126,6 +126,8 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
   /** Bolum ve hekim de ZORUNLU (kullanici) - hata alanin altinda yazar. */
   bolumHatasi?: string;
   personelHatasi?: string;
+  /** Basvuru turu bos birakilamaz (779) - muayene modulu acik kurulumda. */
+  turHatasi?: string;
   /** "Kendi İsteği" isareti (370) - gonderen zorunlulugunu bu da karsilar. */
   kendiIstegi?: boolean;
   onKendiIstegi?(v: boolean): void;
@@ -455,7 +457,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
             "Laboratuvar / Görüntüleme"dir, kayitta 5 olarak yazilir. */}
         {!gonderenModu && (
           <KodSecim etiket="Başvuru Türü" listeKod="basvuru.tur" zorunlu vurgu={2}
-                    deger={bilgi.basvuruTuru} kilitli={kilitli}
+                    deger={bilgi.basvuruTuru} kilitli={kilitli} hata={turHatasi}
                     onDeger={v => degistir({ basvuruTuru: v })} />
         )}
 

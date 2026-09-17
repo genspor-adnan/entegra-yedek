@@ -317,6 +317,12 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
    * ERP'de ayni belge normal satis siparisidir.
    */
   const basvuruMu = tur === 19 && kullanici?.urunModu === URUN_GENOTIP;
+  /**
+   * MUAYENE MODULU ACIK MI (779). Basvuru turunun varsayilani (Poliklinik) ve
+   * zorunlulugu buna bagli: modul kapali bir kurulum poliklinik yapmiyordur,
+   * orada turu "Poliklinik" diye damgalamak veya sart kosmak yanlis olurdu.
+   */
+  const muayeneAcik = (kullanici?.moduller ?? []).includes('muayene');
 
   // BASVURU ALANLARI KENDI KANCASINDA: odeyen kurum, bolum, personel ve
   //   basvuru sekmesi alanlari HBYS'ye ozgudur - ERP belgesinde hic
@@ -327,7 +333,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
     odeyenKurumId, setOdeyenKurumId, bolumId, setBolumId,
     personelId, setPersonelId, personelAd, setPersonelAd,
     basvuruBilgi, setBasvuruBilgi,
-  } = useBasvuruAlanlari({ basvuruMu, gonderenModu });
+  } = useBasvuruAlanlari({ basvuruMu, gonderenModu, muayeneAcik });
 
   /**
    * ILK SEKME (kullanici): YENI basvuruda "Başvuru" - once hasta, bolum,
@@ -873,7 +879,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         //   FONKSIYON eler (belgeKaydet: PROVIZYON_SALT_OKUNUR) - kartin ikinci
         //   bir suzgeci vardi, liste iki yerde buyuyordu. Kural tek yerde:
         //   "Bilinmeyen belge alani: …" hatasi uc kez ayni sekilde yasandi.
-        ? { odeyenKurumId, bolumId, personelId, basvuruAlanlari: basvuruBilgi }
+        ? { odeyenKurumId, bolumId, personelId, basvuruAlanlari: basvuruBilgi,
+            muayeneAcik }
         : {}),
       fiyatListesiId,
       // Kampanya belgeye YAZILIR (274): kurum sonradan kampanya degistirse
@@ -1521,6 +1528,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
             kurumHatasi={alanHatalari.odeyenKurumId}
             bolumHatasi={alanHatalari.bolumId}
             personelHatasi={alanHatalari.personelId}
+            turHatasi={alanHatalari.basvuruTuru}
             kendiIstegi={Number(basvuruBilgi.kendiIstegi ?? 0) === 1}
             onKendiIstegi={kendiIstegiDegisti}
             randevuBilgi={sonuc?.belge.randevuOzet

@@ -99,3 +99,43 @@ describe('kurallarin GECERLI OLMADIGI durumlar', () => {
     expect(belgeDogrula(g({ satirlar: [] }))).toBeNull();
   });
 });
+
+/**
+ * BASVURU TURU (779, kullanici: "başvuru türü varsayılan poliklinik olacak
+ * boş geçilemeyecek (muayene modülü kullanılıyorsa)").
+ *
+ * Tur, hastanin hangi kapidan girdigidir: poliklinik / acil / yatan /
+ * gunubirlik ayrimi fiyatlandirmayi ve SGK gonderimini degistirir. Kart yeni
+ * basvuruyu Poliklinik ile acar; buradaki kural alanin geri BOSALTILMASINA
+ * ve turu hic sorulmamis eski bir kaydin oylece kaydedilmesine karsidir.
+ */
+describe('basvuru turu (779)', () => {
+  it('muayene modulu ACIKKEN tur bos ise hata verir', () => {
+    expect(belgeDogrula(g({ muayeneAcik: true, basvuruAlanlari: {} })))
+      .toEqual({ basvuruTuru: 'Başvuru türü seçilmeli.' });
+  });
+
+  it('tur doluysa gecer', () => {
+    expect(belgeDogrula(g({ muayeneAcik: true,
+                            basvuruAlanlari: { basvuruTuru: 1 } }))).toBeNull();
+  });
+
+  it('muayene modulu KAPALIYKEN tur sorulmaz', () => {
+    // Yalniz laboratuvar / goruntuleme veren kurumda tur ekranda hic
+    //   gosterilmiyor (5 olarak damgalaniyor) - zorunlu tutmak, memurun
+    //   dolduramayacagi bir alani sart kosmak olurdu.
+    expect(belgeDogrula(g({ muayeneAcik: false, basvuruAlanlari: {} }))).toBeNull();
+  });
+
+  it('KILITLI belgede tur de aranmaz', () => {
+    expect(belgeDogrula(g({ muayeneAcik: true, kilitli: true,
+                            basvuruAlanlari: {} }))).toBeNull();
+  });
+
+  it('BASVURU DEGILSE (ERP siparisi) tur aranmaz', () => {
+    expect(belgeDogrula(g({
+      muayeneAcik: true, basvuruMu: false, basvuruAlanlari: {},
+      satirlar: [{ stokId: 1 } as never],
+    }))).toBeNull();
+  });
+});

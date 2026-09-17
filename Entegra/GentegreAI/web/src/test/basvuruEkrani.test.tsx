@@ -268,14 +268,15 @@ describe('kayitli basvuru karti', () => {
     await waitFor(() => expect(varsayilanListe)
       .toHaveBeenCalledWith(19, expect.any(Number), 4987));
 
-    // Ucretlendirme sekmesindeki kutu da o listeyi gosterir.
+    // 779: Ucretlendirme sekmesinde fiyat listesi COMBOSU YOK (kullanici:
+    //   "ücretlendirme sekmesinde altta fiyat listesi combosu olmasın").
+    //   Liste odeyen kurumun sozlesmesinden gelir - yukaridaki cagri onu
+    //   gosteriyor; elle degistirilebilir bir kutu anlasma disi
+    //   ucretlendirmeye kapi aciyordu.
     await act(async () => { (await sekme('Ücretlendirme')).click() });
-    await waitFor(() => {
-      const listeKutusu = screen.getAllByRole('combobox')
-        .find(x => [...x.querySelectorAll('option')]
-          .some(o => o.textContent === 'TTB2018'))!;
-      expect((listeKutusu as HTMLSelectElement).value).toBe('9');
-    });
+    await waitFor(() => expect(screen.getAllByRole('combobox')
+      .some(x => [...x.querySelectorAll('option')]
+        .some(o => o.textContent === 'TTB2018'))).toBe(false));
   });
 
   // 495: "belge kesilmedi" rozeti yerine DONUSMEYEN TUTAR yazar.

@@ -13018,3 +13018,51 @@ listesine eklendi. Yeni bir borç değil, var olanın kısa yolu: pencereler zat
 sayısı **0**, ekranda hasta kartı (`hasta #5277 · CEMRE YILMAZ`) açıldı; Kapat
 sonrası yine arama yok, başvuru kartı geri geldi. Konsol/ağ hatası yok.
 vitest 617/617.
+
+## 17.09.2026 — Başvuru türü: varsayılan Poliklinik, boş geçilemez (779)
+
+Kullanıcı: *"başvuru türü varsayılan poliklinik olacak boş geçilemeyecek
+(muayene modülü kullanılıyorsa)"* ve *"ücretlendirme sekmesinde altta fiyat
+listesi combosu olmasın"*.
+
+**Varsayılan.** Yeni başvuru artık **Poliklinik** (`basvuru.tur` = 1) ile
+açılıyor. Başvuruların ezici çoğunluğu poliklinik başvurusu; memura her
+hastada aynı seçimi yaptırmak, unutulduğunda da türsüz kayıt bırakıyordu.
+Varsayılan YALNIZ alan boşken yazılıyor: kayıtlı bir "Yatan Hasta" başvurusu
+karta her girişte Poliklinik'e dönmüyor. Acil kapısı türü kendi düğmesiyle
+değiştirmeye devam ediyor.
+
+**Zorunluluk.** `belgeDogrula` başvuruda türü boş bırakılan kaydı reddediyor
+(*"Başvuru türü seçilmeli."*), hata artık combonun ALTINDA yazıyor (`KodSecim`
+bir `hata` propu aldı — bölüm/gönderen alanlarıyla aynı düzen). Tür, hastanın
+hangi kapıdan girdiğidir: acil / yatan / günübirlik ayrımı hem fiyatlandırmayı
+hem SGK gönderimini değiştirir, sonradan uydurulamaz.
+
+**Modül kapısı.** İki kural da yalnız **muayene modülü açıkken** işliyor.
+Yalnız laboratuvar / görüntüleme veren kurumda tür zaten sorulmuyor (5 olarak
+damgalanıyor); oraya "Poliklinik" yazmak veriyi bozar, zorunlu tutmak ise
+doldurulamayan bir alanı şart koşardı.
+
+**Sunucu tarafı (778).** Başvuru satırı ekrandan başka yollarla da doğuyor
+(dış kurum numunesi, diş/FTR akışları, API). `tg_belge_basvuru_tur` tetiği
+türü boş gelen satıra — o şubede muayene modülü açıksa — Poliklinik yazıyor.
+Tetik **reddetmiyor**, varsayılan dolduruyor: reddetmek ekranda zaten
+yakalanan durumu ikinci kez, anlaşılmaz bir yerde patlatır ve türü hiç
+sorulmamış eski kayıtların güncellenmesini kilitlerdi. Tetik `update of
+basvuru_turu` ile sınırlı; türe dokunmayan bir güncelleme eski boş değeri
+olduğu gibi bırakıyor. Mevcut 22 türsüz başvuruya **dokunulmadı** — kimi acil,
+kimi günübirlik olabilir, toplu damga veri uydurmak olurdu.
+
+**Fiyat listesi combosu kalktı.** Ücretlendirme sekmesinin altındaki kutu
+başvuruda hiç çizilmiyor. Başvurunun listesi ödeyen kurumun sözleşmesinden
+geliyor; combo onu elle değiştirmeye açıyor ve memur farkında olmadan anlaşma
+dışı bir listeyle ücretlendirebiliyordu. ERP belgelerinde combo yerinde: orada
+liste cariye göre seçilir, değiştirilmesi normal bir iştir. Kutunun kendisi
+kaldı — Depo seçimi ve kampanya rozeti içinde duruyor.
+
+**Doğrulama.** Yeni başvuru açıldı: tür kutusu **Poliklinik**. Tür "— Seçiniz
+—"e alınıp kaydedilmek istendi: kart *"Başvuru türü seçilmeli."* yazısını
+alanın altında gösterdi ve kaydetmedi. Tetik `begin … rollback` içinde
+denendi: türü null'a çekilen satır **1** olarak geri okundu. Kayıtlı başvuruda
+(P-000135) Ücretlendirme sekmesinde fiyat listesi kutusu yok, Depo duruyor.
+vitest 627/627 (yeni: `basvuruTuruVarsayilan`, `basvuruDogrulama` +5 durum).

@@ -9,7 +9,8 @@ import { api } from '../../../api/istemci';
  * bicim degisikligi de tek yerde oluyor.
  */
 /** Kod listesi combosu - deger kod_deger.deger, gosterim ad. */
-export function KodSecim({ etiket, listeKod, deger, onDeger, kilitli, zorunlu, vurgu }: {
+export function KodSecim({ etiket, listeKod, deger, onDeger, kilitli, zorunlu, vurgu,
+                          hata }: {
   etiket: string; listeKod: string; deger?: number | null;
   onDeger(v: number | null): void; kilitli?: boolean; zorunlu?: boolean;
   /**
@@ -18,6 +19,12 @@ export function KodSecim({ etiket, listeKod, deger, onDeger, kilitli, zorunlu, v
    * kaybolmasin - "acil mi degil mi" listede goze carpan seydi.
    */
   vurgu?: number;
+  /**
+   * Kaydetmede donen alan hatasi (779). Bolum/gonderen alanlari hatayi
+   * ALANIN ALTINDA gosteriyordu; zorunlu bir combo'nun hatasini yalniz ust
+   * seritte yazmak, memura hangi kutunun eksik oldugunu aratiyordu.
+   */
+  hata?: string;
 }) {
   const [secenekler, setSecenekler] = useState<{ deger: number; ad: string }[]>([]);
   useEffect(() => {
@@ -40,6 +47,7 @@ export function KodSecim({ etiket, listeKod, deger, onDeger, kilitli, zorunlu, v
         <option value="">— Seçiniz —</option>
         {secenekler.map(x => <option key={x.deger} value={x.deger}>{x.ad}</option>)}
       </select>
+      {hata && <span className="alan-hata">{hata}</span>}
     </label>
   );
 }

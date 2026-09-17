@@ -110,6 +110,13 @@ export interface BelgeGirdisi {
   /** Tahakkuk (17/13): basvuru gibi KDV DAHIL belgedir (372). */
   tahakkukMu?: boolean;
   /**
+   * MUAYENE MODULU ACIK MI (779). Basvuru turu ancak poliklinik yapan
+   * kurulumda zorunlu: yalniz laboratuvar/goruntuleme veren kurumda tur
+   * sorulmaz ("Laboratuvar / Görüntüleme" olarak damgalanir), orada
+   * "secilmeli" demek doldurulamayan bir alani sart kosmak olurdu.
+   */
+  muayeneAcik?: boolean;
+  /**
    * Kart SALT OKUNUR mu (kesin/kapanmis belge). Zorunluluk kurallari yalniz
    * DUZENLENEBILIR kartta calisir: alani degistiremeyen kullaniciya "boş
    * bırakılamaz" demek, belgeyi hic kaydedilemez hale getirir.
@@ -127,7 +134,8 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
   const { cari, depoBelgesi, stokFisiMi, fisTipi, fisCikisMi, depo, tarih,
           tarihEnGec, tarihEnErken, geriGun, talepMi, teslimAlan, girisDepo,
           transferMi, teslimEden, disNumarali, belgeNo, satirlar, basvuruMu,
-          odeyenKurumId, bolumId, personelId, basvuruAlanlari, kilitli } = g;
+          odeyenKurumId, bolumId, personelId, basvuruAlanlari, kilitli,
+          muayeneAcik } = g;
 
   // Transferde cari YOK (sunucu da katalogtan ayni karari veriyor).
   if (!cari && !depoBelgesi && !stokFisiMi) {
@@ -213,6 +221,15 @@ export function belgeDogrula(g: BelgeGirdisi): Record<string, string> | null {
     //   gonderildigi ancak GONDEREN varsa anlamlidir. Kendi gelen hastada alan
     //   bos kalir - doldurulmasi istenirse memur olmayan bir bilgiyi uydurur.
     if (!bolumId && !kendiIstegi) eksik.bolumId = 'Bölüm seçilmeli.';
+    // BASVURU TURU BOS GECILEMEZ (779, kullanici: "başvuru türü varsayılan
+    //   poliklinik olacak boş geçilemeyecek (muayene modülü kullanılıyorsa)").
+    //   Kart yeni basvuruyu zaten Poliklinik ile aciyor; kural, memurun alani
+    //   "— Seçiniz —"e geri almasi ve tur sorulmadan kalmis ESKI bir basvurunun
+    //   duzenlenmesi icin. Tur, hastanin hangi kapidan girdigidir: acil /
+    //   yatan / gunubirlik ayrimi hem fiyatlandirmayi hem SGK gonderimini
+    //   degistirir, bos kalinca sonradan uydurulamaz.
+    if (muayeneAcik && !Number(basvuruAlanlari?.basvuruTuru ?? 0))
+      eksik.basvuruTuru = 'Başvuru türü seçilmeli.';
     if (Object.keys(eksik).length > 0) return eksik;
   }
 

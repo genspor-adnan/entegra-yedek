@@ -20,6 +20,8 @@ export function useBasvuruAlanlari(p: {
   basvuruMu: boolean;
   /** Dış hekim gönderimi (lab/görüntüleme) modu. */
   gonderenModu: boolean;
+  /** Muayene modülü açık mı (779) - başvuru türünün varsayılanı buna bağlı. */
+  muayeneAcik?: boolean;
 }) {
   /**
    * ÖDEYEN KURUM (296): başvurunun faturalanacağı kurum (anlaşmalı kurum /
@@ -54,6 +56,23 @@ export function useBasvuruAlanlari(p: {
     if (!p.basvuruMu || !p.gonderenModu) return;
     setBasvuruBilgi(o => (Number(o.basvuruTuru ?? 0) === 5 ? o : { ...o, basvuruTuru: 5 }));
   }, [p.basvuruMu, p.gonderenModu]);
+
+  /**
+   * VARSAYILAN POLİKLİNİK (779, kullanıcı: *"başvuru türü varsayılan
+   * poliklinik olacak boş geçilemeyecek (muayene modülü kullanılıyorsa)"*).
+   *
+   * Başvuruların ezici çoğunluğu poliklinik başvurusudur; memura her hastada
+   * aynı seçimi yaptırmak, unutulduğunda da türsüz kayda yol açıyordu. Acil
+   * kapısı türü "Acil Başvuru" düğmesiyle zaten değiştiriyor.
+   *
+   * YALNIZ HENÜZ BOŞKEN yazılır: kayıtlı bir başvuru açıldığında sunucudan
+   * gelen tür (ör. Yatan Hasta) bu efektle ezilmez - okuma `basvuruBilgi`yi
+   * tümüyle değiştirir, buradaki koşul o değere dokunmaz.
+   */
+  useEffect(() => {
+    if (!p.basvuruMu || p.gonderenModu || !p.muayeneAcik) return;
+    setBasvuruBilgi(o => (o.basvuruTuru != null ? o : { ...o, basvuruTuru: 1 }));
+  }, [p.basvuruMu, p.gonderenModu, p.muayeneAcik]);
 
   return {
     odeyenKurumId, setOdeyenKurumId,
