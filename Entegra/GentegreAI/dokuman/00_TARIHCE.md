@@ -13398,3 +13398,31 @@ Yanlış tutarla mahsup eden memur ne satırı silebiliyor ne düzeltebiliyordu.
 `50.000 / 0 / 50.000 · Açık`'a döndü, belgedeki dağıtım satırı kalmadı ve
 **ücret satırı yerinde** kaldı. Test `tahsilatAvansAkisi.test.tsx`: onay kutusu
 etkin, 🗑 negatif kimliği geçirir, ✎ pasif. vitest 651/651, xUnit 250/250.
+
+## 17.09.2026 — Ücretlendirmede iki ekleme hızı (786)
+
+Kullanıcı: *"stok hizmet ara ekranında sol üst başlığa 2 buton ekle: sola '1
+Adet Ekle (Enter)' basınca veya Enter basınca fiyat ekranı açmadan direkt 1
+adet eklesin.. sağına 'Miktar Ekle (F12)' basınca veya F12'ye basınca fiyat /
+miktar sorma ekranı açsın"* ve *"üstte eklendi mesajı yine devam etsin,
+butonların sağında"*.
+
+Kayıt kabulde ücretlerin çoğu tek adet ve liste fiyatıyla giriliyor; her
+birinde kalem penceresi açılıp Enter'lanıyordu - iki fazladan tuş.
+
+- **Enter / "＋ 1 Adet Ekle"**: kalem penceresi HİÇ açılmaz, satır 1 adet ve
+  fiyat listesinden gelen fiyatla doğrudan gride düşer.
+- **F12 / "🔢 Miktar Ekle"**: eski davranış - miktar/fiyat penceresi açılır.
+  F12 aynı zamanda tarayıcının geliştirici araçları kısayolu ve `preventDefault`
+  her ortamda yutmuyor; bu yüzden aynı iş başlıktaki düğmede de duruyor.
+- Ayrım tek bir bayrakta (`hizli`) taşınıyor: pencere iki yol bilmiyor,
+  `stokSecildi` ya `kalemKaydet` çağırıyor ya kalem penceresini açıyor.
+  `stokSecildi` artık `kalemKaydet`in ALTINDA tanımlı (TDZ dersi, 4.x).
+- **"✓ N kalem eklendi · son: …"** bilgisi düğmelerin sağına, başlık şeridine
+  taşındı: pencerenin alt şeridinde, göz listedeyken fark edilmiyordu.
+
+**Doğrulama.** Arama açıldı, "muayene" arandı, ↓ + Enter: kalem penceresi
+açılmadan satır eklendi ve şerit *"✓ 1 kalem eklendi · son: Muayene İşlemi"*
+oldu; "Miktar Ekle" düğmesi miktar/fiyat penceresini açtı. Test
+`stokAramaEkleme.test.tsx`: iki düğme + eklendi bilgisi şeritte, Enter
+`hizli=true`, F12 `hizli=false`, düğmeler aynı iki yolu açar. vitest 655/655.

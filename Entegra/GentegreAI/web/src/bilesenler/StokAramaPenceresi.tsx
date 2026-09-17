@@ -36,7 +36,12 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
   /** Ustunde kalem penceresi acikken false olur; true'ya donunce arama
       kutusuna odak GERI GELIR (ardisik girişte fare gerekmesin). */
   etkin: boolean;
-  onSec(satir: ListeSatiri): void;
+  /**
+   * Satir secildi. `hizli` (786): kalem penceresi ACILMADAN 1 adet eklensin -
+   * kullanici: *"1 Adet Ekle (Enter) basınca fiyat ekranı açmadan direkt 1
+   * adet eklesin"*.
+   */
+  onSec(satir: ListeSatiri, hizli?: boolean): void;
   onKapat(): void;
   /**
    * Bu pencere acikken EKLENEN kalemler (kullanici): arama penceresi ard arda
@@ -363,8 +368,8 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
    * yuzden ard arda ayni ilaca basmak ikinci kart acmaz.
    */
   const [uretiliyor, setUretiliyor] = useState(false);
-  const sec = async (r: ListeSatiri) => {
-    if (r.tip !== 'ilac') { onSec(r); return }
+  const sec = async (r: ListeSatiri, hizli = false) => {
+    if (r.tip !== 'ilac') { onSec(r, hizli); return }
     if (uretiliyor) return;
     setUretiliyor(true);
     setHata(null);
@@ -380,7 +385,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
       //   gormeden okunursa kalem penceresi bos acilirdi).
       onSec({ ...stok.satirlar[0], tip: 'stok',
               fiyat: Number(stok.satirlar[0].fiyat ?? 0) > 0
-                     ? stok.satirlar[0].fiyat : (fiyat || undefined) });
+                     ? stok.satirlar[0].fiyat : (fiyat || undefined) }, hizli);
     } catch (h) {
       setHata(hataMetni(h));
     } finally { setUretiliyor(false) }
@@ -395,7 +400,16 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
       if (e.repeat) return;
       // Kalem penceresi yeni kapandiysa bu Enter ona aitti - 400 ms sus.
       if (Date.now() - oneGelis.current < 400) return;
-      void sec(satirlar[secili]);
+      // ENTER = 1 ADET, PENCERESIZ (786).
+      void sec(satirlar[secili], true);
+    }
+    else if (e.key === 'F12' && satirlar[secili]) {
+      // F12 = MIKTAR/FIYAT PENCERESI (786). preventDefault tarayicinin
+      //   gelistirici araclarini her ortamda engellemez (F12 tarayici
+      //   kisayolu); bu yuzden ayni is basliktaki dugmede de duruyor.
+      e.preventDefault();
+      if (e.repeat) return;
+      void sec(satirlar[secili], false);
     }
   };
 
@@ -405,6 +419,35 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
               : ilacAranir ? (yalnizStok ? "Stok / İlaç Ara" : "Stok / Hizmet / İlaç Ara")
               : yalnizStok ? "Stok Ara" : "Stok / Hizmet Ara"}
       onKapat={onKapat}
+      /* BASLIGIN SAGINDA IKI EKLEME DUGMESI (786, kullanici): ayni is iki
+         hizda yapilir - cogu ucret tek adet ve liste fiyatiyla girilir
+         (Enter), miktar ya da fiyat degisecekse pencere acilir (F12).
+         Klavye kisayollari listede de calisiyor; dugmeler hem kesfedilebilir
+         kilar hem F12'nin tarayici tarafindan yutuldugu ortamlarda tek
+         yoldur. */
+      ustBilgi={
+        <span className="stok-ara-eylem">
+          <button className="d bir" disabled={!satirlar[secili]}
+                  title="Seçili satırı 1 adet, liste fiyatıyla ekler (fiyat penceresi açılmaz)"
+                  onClick={() => satirlar[secili] && void sec(satirlar[secili], true)}>
+            ＋ 1 Adet Ekle (Enter)
+          </button>
+          <button className="d" disabled={!satirlar[secili]}
+                  title="Miktar ve fiyat penceresini açar"
+                  onClick={() => satirlar[secili] && void sec(satirlar[secili], false)}>
+            🔢 Miktar Ekle (F12)
+          </button>
+          {/* EKLENDI BILGISI DUGMELERIN SAGINDA (786, kullanici): once
+              pencerenin ALT seridindeydi - goz listede ve dugmelerdeyken
+              asagidaki yazi fark edilmiyordu. Ust seritte, eklemeyi yapan
+              dugmelerin hemen yaninda duruyor. */}
+          {eklenen && eklenen.sayi > 0 && (
+            <span className="kapt stok-ara-eklendi">
+              ✓ {eklenen.sayi} kalem eklendi{eklenen.son ? ` · son: ${eklenen.son}` : ''}
+            </span>
+          )}
+        </span>
+      }
       /* SABIT YUKSEKLIK (kullanici): satir sayisi her aramada degisiyor;
          pencere icerige gore buyuyup kuculunce de kirpisma suruyordu. Govde
          sabit, liste kendi icinde kayar. */
@@ -413,16 +456,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
          pencereyi kirpistiriyordu (kullanici). Bu pencerenin yuksekligi
          CSS'ten gelir, kilide gerek yok. */
       olcumYok
-      alt={
-        <>
-          {eklenen && eklenen.sayi > 0 && (
-            <span className="kapt" style={{ marginRight: 'auto' }}>
-              ✓ {eklenen.sayi} kalem eklendi{eklenen.son ? ` · son: ${eklenen.son}` : ''}
-            </span>
-          )}
-          <button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>
-        </>
-      }
+      alt={<button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>}
     >
       <>
         {hata && <div className="hata-kutusu">{hata}</div>}

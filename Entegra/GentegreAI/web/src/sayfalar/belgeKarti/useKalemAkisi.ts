@@ -46,14 +46,6 @@ export function useKalemAkisi({
    * açılışta kopyalar (useState); sonradan gönderilen fiyat güncellemesi ona
    * ULAŞMAZ.
    */
-  const stokSecildi = async (sec: Record<string, unknown>) => {
-    const yeni = await stokSeciminiCoz(sec, {
-      satirlar, yerelPara, tarafId: cariId, odeyenKurumId,
-      fiyatListesiId, kampanyaId, basvuruBilgi,
-    });
-    setKalem(yeni);
-  };
-
   /** Kalem penceresinden dönen satırı yazar (yeni ise ekler). */
   const kalemKaydet = (satir: SatirDurumu) => {
     const yazilacak = satir.paket
@@ -89,6 +81,26 @@ export function useKalemAkisi({
         setSatirlar(s => paketIcerigiUygula(s, satir, icerik));
       })
       .catch(h => setHata(hataMetni(h)));
+  };
+
+  /**
+   * Arama ekranindan stok/hizmet secildi. `kalemKaydet`in ALTINDA duruyor:
+   * hizli ekleme onu cagiriyor ve JS'te `const` bildirimleri once gelmeli -
+   * ayni siniftan bir TDZ hatasi (KalemPenceresi, 4.x) bir kez yasandi.
+   *
+   * `hizli` (786, kullanici: *"1 Adet Ekle (Enter)"*) kalem penceresini HIC
+   * acmaz: satir 1 adetle, fiyat listesinden gelen fiyatla dogrudan gride
+   * duser. Kayit kabulde ucretlerin cogu tek adet ve liste fiyatiyla
+   * giriliyor; her birinde pencere acip Enter'lamak fazladan iki tus.
+   * Miktar/fiyat degistirilecekse "Miktar Ekle (F12)" penceresi acilir.
+   */
+  const stokSecildi = async (sec: Record<string, unknown>, hizli = false) => {
+    const yeni = await stokSeciminiCoz(sec, {
+      satirlar, yerelPara, tarafId: cariId, odeyenKurumId,
+      fiyatListesiId, kampanyaId, basvuruBilgi,
+    });
+    if (hizli) { kalemKaydet(yeni); return }
+    setKalem(yeni);
   };
 
   return { stokSecildi, kalemKaydet };

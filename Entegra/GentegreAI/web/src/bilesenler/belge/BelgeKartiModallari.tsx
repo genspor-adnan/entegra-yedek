@@ -101,7 +101,8 @@ export interface BelgeKartiModalProps {
   setStokArama: Ayarla<boolean>;
   aramaEklenen: { sayi: number; son: string };
   setAramaEklenen: Ayarla<{ sayi: number; son: string }>;
-  stokSecildi(sec: Record<string, unknown>): void | Promise<void>;
+  /** `hizli` (786): kalem penceresi acilmadan 1 adet eklenir. */
+  stokSecildi(sec: Record<string, unknown>, hizli?: boolean): void | Promise<void>;
   kalem: SatirDurumu | null;
   setKalem: Ayarla<SatirDurumu | null>;
   kalemKaydet(satir: SatirDurumu): void;
@@ -330,7 +331,15 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
           //   gecmisine gore siralanir.
           bolumId={bolumId}
           onKapat={() => { setStokArama(false); setAramaEklenen({ sayi: 0, son: '' }) }}
-          onSec={sec => void stokSecildi(sec)}
+          // HIZLI EKLEME (786): kalem penceresi acilmadan gride dustugu icin
+          //   sayaci BURASI artirir - pencere yoluyla eklemede sayaci kalem
+          //   penceresinin onKaydet'i artiriyor.
+          onSec={(sec, hizli) => void (async () => {
+            await stokSecildi(sec, hizli);
+            if (hizli)
+              setAramaEklenen(o => ({ sayi: o.sayi + 1,
+                                      son: String(sec.ad ?? sec.stokAdi ?? '') }));
+          })()}
         />
       )}
 

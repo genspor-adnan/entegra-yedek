@@ -1238,6 +1238,11 @@ input.skt-gecmis {
    kesiliyordu ("⋯" menusunde Avans Kullan, İade menusunde Senet).
    Kirpma yalniz bu grupta kalkiyor. */
 .kagrup.tahsilat-kutu { overflow: visible }
+/* Stok/hizmet arama penceresinin BASLIK YANINDAKI ekleme dugmeleri (786):
+   "1 Adet Ekle (Enter)" ve "Miktar Ekle (F12)". */
+.stok-ara-eylem { display: inline-flex; gap: 6px; align-items: center }
+.stok-ara-eylem .d { height: 24px; font-size: 11.5px }
+.stok-ara-eklendi { margin-left: 4px; white-space: nowrap }
 
 /* Cip seridindeki tarih araligi (ör. hesap ekstresi). */
 .tarih-araligi { display: inline-flex; align-items: center; gap: 4px }
