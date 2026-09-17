@@ -23,6 +23,8 @@ public static partial class KartKatalogu
     private static readonly Dictionary<string, string> OnKaynakTuruKodlari = new()
     {
         ["1241"] = "Satınalma Talebi",
+        ["904"] = "Personel İzni",
+        ["1224"] = "Demirbaş İş Emri",
     };
 
     /// <summary>onay_akis_adim.sahip_turu</summary>
@@ -37,8 +39,12 @@ public static partial class KartKatalogu
     /// </summary>
     private static readonly Dictionary<string, string> OnRolKodlari = new()
     {
+        // ROL KODU AKIŞIN KENDİ DİLİ: 6 izin akışında İK, onarımda teknik
+        //   müdürdür. Tek bir küresel harita kursaydık iki modül birbirinin
+        //   imza düzenini belirlerdi - adlar bu yüzden eğik yazılı.
         ["1"] = "Birim sorumlusu", ["2"] = "Satınalma", ["3"] = "Başhekim / Müdür",
         ["4"] = "Mali işler", ["5"] = "Üst yönetim",
+        ["6"] = "İK / Teknik müdür (akışa göre)", ["0"] = "Kişiye atanır",
     };
 
     /// <summary>onay_akis_adim.karar_turu</summary>

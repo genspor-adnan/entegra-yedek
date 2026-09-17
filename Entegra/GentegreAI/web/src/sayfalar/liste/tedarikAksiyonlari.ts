@@ -293,6 +293,50 @@ export async function tedarikAksiyonu(
     return true;
   }
 
+  // ======================================== biyomedikal · onarım onayı ==
+  // ONAY PARAYI ONAYLAR, İŞİ İLERLETMEZ: cihaz hâlâ teknisyende. Eşiği
+  //   aşan iş emri onaysız dış servise gönderilemez - fatura geldikten
+  //   sonra "kim onayladı" diye sormak, sormamakla aynı şey.
+  if (kod === 'demirbas-is-emri.onaya-gonder') {
+    if (!id) return kayitGerek();
+    const ham = await metinSor(
+      'Tahmini onarım maliyeti (TL) - boş bırakılırsa iş emrindeki tutar:',
+      satir?.maliyet ? String(satir.maliyet) : '', 'Tutar');
+    if (ham === null) return true;
+    await guvenli(async () => {
+      const y = await api.demirbasOnarimOnayaGonder(id, {
+        tutar: ham ? tutarOku(ham) : undefined,
+      });
+      const satirlar = [
+        `${y.tutar} TL onarım onaya gönderildi.`,
+        `Zincir: ${y.basamaklar.map(a => a.ad).join(' → ')}`,
+      ];
+      if (y.bayraklar.includes('kapsam_disi'))
+        satirlar.push('', 'Garanti/sözleşme kapsamı dışı - zincire ek basamak eklendi.');
+      mesaj(satirlar.join('\n'));
+      b.tazele();
+    });
+    return true;
+  }
+
+  if (kod === 'demirbas-is-emri.onay-zinciri') {
+    if (!id) return kayitGerek();
+    await guvenli(async () => {
+      // 1224 = demirbas_is_emri (islem_log.tablo_id).
+      const y = await api.onayZinciri(1224, id);
+      if (!y.onay) { mesaj('Bu iş emri onaya gönderilmemiş.'); return }
+      const DURUM: Record<number, string> = {
+        0: 'bekliyor', 1: 'ONAYLANDI', 2: 'REDDEDİLDİ',
+        3: 'bilgi istendi', 4: 'sözlü onay', 5: 'atlandı',
+      };
+      mesaj([`${y.onay.akisAd} · ${y.onay.olcuAdi}: ${y.onay.olcu}`, '',
+             ...y.adimlar.map(a =>
+               `${a.sira}. ${a.ad} — ${DURUM[a.durum] ?? a.durum}`
+               + (a.gerekce ? `\n     ${a.gerekce}` : ''))].join('\n'));
+    });
+    return true;
+  }
+
   // =========================================== biyomedikal · kalibrasyon ==
   if (kod === 'demirbas-kalibrasyon.tamamla') {
     if (!id) return kayitGerek();

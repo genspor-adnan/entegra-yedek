@@ -11111,3 +11111,53 @@ takvimde 16 millî + 17 dinî tatil kaldı.
 - Diyanet ilanıyla karşılaştırılmalı. 2028 ve sonrası için dinî bayram yok;
 millî tatiller "Yılın Millî Tatillerini Üret" ile, dinî olanlar elle girilir.
 Göç **751 yalnız docker'da**.
+
+## 17.09.2026 — Masraflı onarım onayı (`db/752`)
+
+`demirbas_is_emri` akışı vardı (ata → müdahale → parça bekle → dış servis →
+tamamla) ama **paraya hiç bakmıyordu**: teknisyen cihazı dış servise
+gönderiyor, fatura gelince "bunu kim onayladı" sorusu yanıtsız kalıyordu.
+Satınalma talebi 50.000 TL'de mali işlere giderken aynı tutarlı bir onarım
+kimseye sorulmadan yapılıyordu.
+
+**Onay onarımdan önce.** Zincir, iş emri **dış servise gönderilmeden ya da
+tamamlanmadan** önce yürür; uç bu iki adımı onaysız reddediyor. Sonradan
+onaylatmak "onay" değil, olan biteni kayda geçirmektir - kimse hayır diyemez.
+**Ara adımlar serbest:** cihaza bakmak ve parça beklemek para harcamaz;
+onayı oraya dayatmak teknisyeni bekletirdi.
+
+**Onay parayı onaylar, işi ilerletmez.** Zincir bitince `onay_durum` yazılır,
+iş emrinin kendi durumuna dokunulmaz - cihaz hâlâ teknisyendedir.
+
+**Onaylanan tutar ayrı tutulur.** `maliyet` gerçekleşendir ve iş bitince
+değişir; `onayli_tutar` onayın verildiği tutardır. Tek kolon olsaydı
+"50.000'e onay verdim, 90.000 geldi" sorusu sorulamazdı. Gerçekleşen onaylanan
+tutarı aşarsa tamamlamada **uyarı** çıkıyor (engel değil - iş bitmiştir).
+
+**Kapsam dışı ek basamak.** Garanti/sözleşme kapsamındaki onarımın kuruma
+maliyeti yoktur; eşiği ona da uygulamak bedava işi imzaya boğmak olurdu.
+Kapsam boşsa `kapsam_disi` bayrağı zincire ikinci bir teknik müdür basamağı
+ekliyor.
+
+**Rol kodu akışın kendi dili.** Rol 6 izin akışında İK, onarımda teknik
+müdürdür. Tek bir küresel "rol 6 = şu yetki" haritası kursaydık iki modül
+birbirinin imza düzenini belirlerdi; eşleme akış koduyla birlikte çözülüyor.
+
+**Eşikler ayarda:** `demirbas.onarim_esik_teknik` (10.000) ·
+`_mali` (50.000) · `_ust` (250.000). Gelen kutusu onarımı da tanıyor -
+konu "cihaz · arıza", çünkü onaylayanın sorusu yalnız "ne kadar" değil,
+"hangi cihaz, neden bozuk".
+
+**Doğrulama.** 80.000 TL'lik kapsam dışı iş emri: onaysız dış servis
+reddedildi ("10.000 TL eşiğini aşıyor"), onaya gönderildi (zincir Teknik
+Müdür → Mali İşler → Teknik Müdür (kapsam dışı)), onay beklerken adım yine
+reddedildi, kutuda "IE-TEST-1 · Dell Latitude · Kompresör arızası ·
+80.000 Maliyet (TL)" göründü; üç onaydan sonra `onay_durum = 2` oldu ve dış
+servis geçti. Maliyet 120.000'e çıkarılıp tamamlandığında "onaylanan tutarı
+aşıyor" uyarısı verdi. xUnit 232/232, vitest 598/598, iki derleme temiz.
+Test verisi silindi.
+
+**Kalan.** Avans modülü (tablo yok, mali tarafı karar bekliyor), iskonto
+talebi ve doküman onayının omurgaya taşınması, `satinalma_onay` tablosunun
+düşürülmesi. Göç **752 yalnız docker'da** - bulut ekspert artık hedef değil
+(kullanıcı kararı, 17.09.2026).

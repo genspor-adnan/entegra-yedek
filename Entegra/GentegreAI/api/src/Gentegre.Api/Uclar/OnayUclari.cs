@@ -285,6 +285,16 @@ public static class OnayUclari
             6 => "ik.izin_onay_ik",
             _ => "ik.izin_onay_ust",
         },
+        // MASRAFLI ONARIM (752). Rol 6 burada TEKNİK MÜDÜR - izin akışında
+        //   aynı kod İK'yı gösteriyor. Rol kodları akışın kendi dilidir;
+        //   tek bir "rol 6 = şu yetki" haritası kursaydık iki modül
+        //   birbirinin imza düzenini belirlerdi.
+        "demirbas.onarim" => rol switch
+        {
+            6 => "demirbas.onarim_onay_teknik",
+            4 => "demirbas.onarim_onay_mali",
+            _ => "demirbas.onarim_onay_ust",
+        },
         _ => throw GentegreHatasi.IsKurali(
             $"Bu akışın karar yetkisi tanımlı değil: {akisKod}."),
     };
@@ -315,6 +325,20 @@ public static class OnayUclari
                      where id = @p0
                     """, islem, [kaynakId, yeni, gerekce ?? "", baglam.KullaniciId], iptal);
                 return yeni;
+
+            case "demirbas.onarim":
+                // 2 onaylandı · 3 reddedildi (demirbas_is_emri.onay_durum).
+                //   İŞ EMRİNİN KENDİ DURUMUNA DOKUNULMAZ: onay parayı
+                //   onaylar, işi ilerletmez - cihaz hâlâ teknisyende.
+                short onarimDurum = zincirDurum == Servisler.OnayMotoru.ZincirOnaylandi
+                                  ? (short)2 : (short)3;
+                await baglanti.CalistirAsync("""
+                    update public.demirbas_is_emri
+                       set onay_durum = @p1,
+                           degistiren = @p2, degistirme_tarihi = now()
+                     where id = @p0
+                    """, islem, [kaynakId, onarimDurum, baglam.KullaniciId], iptal);
+                return onarimDurum;
 
             case "personel.izin":
                 // 2 onaylı · 3 reddedildi (personel_izin.durum).

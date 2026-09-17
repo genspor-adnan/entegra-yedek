@@ -108,6 +108,8 @@ public sealed class OnayBildirimi
                                                 '#' || o.kaynak_id::text)
                         when 904  then coalesce(nullif(z.izin_no, ''),
                                                 'İzin #' || o.kaynak_id::text)
+                        when 1224 then coalesce(nullif(w.is_emri_no, ''),
+                                                'İş emri #' || o.kaynak_id::text)
                         else '#' || o.kaynak_id::text end as "kayitNo"
               from public.onay o
               left join public.onay_akis k on k.id = o.akis_id
@@ -115,6 +117,8 @@ public sealed class OnayBildirimi
                      on o.kaynak_tur = 1241 and t.id = o.kaynak_id
               left join public.personel_izin z
                      on o.kaynak_tur = 904 and z.id = o.kaynak_id
+              left join public.demirbas_is_emri w
+                     on o.kaynak_tur = 1224 and w.id = o.kaynak_id
              where o.id = @p0
             """, null, [onayId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
@@ -237,6 +241,12 @@ public sealed class OnayBildirimi
             0 => "ik.izin_onay_amir",
             6 => "ik.izin_onay_ik",
             _ => "ik.izin_onay_ust",
+        },
+        "demirbas.onarim" => rol switch
+        {
+            6 => "demirbas.onarim_onay_teknik",
+            4 => "demirbas.onarim_onay_mali",
+            _ => "demirbas.onarim_onay_ust",
         },
         _ => "",
     };

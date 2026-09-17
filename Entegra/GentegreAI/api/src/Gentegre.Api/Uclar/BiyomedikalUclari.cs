@@ -36,6 +36,33 @@ public static class BiyomedikalUclari
 
     // ---------------------------------------------------------- istekler ----
 
+    public sealed class OnarimOnayIstegi
+    {
+        /// <summary>Tahmini onarım maliyeti; boşsa iş emrindeki `maliyet`.</summary>
+        public decimal? Tutar { get; set; }
+        /// <summary>Boşsa iş emrinin kapsam alanından çıkarılır.</summary>
+        public bool? KapsamDisi { get; set; }
+    }
+
+    /// <summary>
+    /// ONARIM ONAY EŞİKLERİ (752). Kurum ayarı; varsayılanı çağrı yerinde
+    /// tutuyoruz ki eşiğin NEDEN o değer olduğu kuralın yanında dursun.
+    /// </summary>
+    private static async Task<(decimal Teknik, decimal Mali, decimal Ust)>
+        OnarimEsigiAsync(Npgsql.NpgsqlConnection baglanti, CancellationToken iptal)
+    {
+        async Task<decimal> Oku(string anahtar, decimal varsayilan)
+        {
+            var m = await AyarDeposu.MetinAsync(baglanti, null, anahtar, "", iptal);
+            return decimal.TryParse(m, System.Globalization.NumberStyles.Any,
+                       System.Globalization.CultureInfo.InvariantCulture, out var d) && d > 0
+                ? d : varsayilan;
+        }
+        return (await Oku("demirbas.onarim_esik_teknik", 10_000),
+                await Oku("demirbas.onarim_esik_mali", 50_000),
+                await Oku("demirbas.onarim_esik_ust", 250_000));
+    }
+
     public sealed class IsEmriAdimIstegi
     {
         /// <summary>ata · mudahale · parca-bekle · dis-servis · tamamla · iptal</summary>
@@ -97,6 +124,86 @@ public static class BiyomedikalUclari
     // ============================================================ iş emri ==
     private static void IsEmriUclari(RouteGroupBuilder grup)
     {
+        // --------------------------------------------- onarım onayı ----
+        // ONAY ONARIMDAN ÖNCE (752): iş emri dış servise gönderilmeden ya da
+        //   tamamlanmadan önce yürür. Sonradan onaylatmak "onay" değil, olan
+        //   biteni kayda geçirmektir - ve kimse hayır diyemez.
+        grup.MapPost("/is-emri/{id:long}/onaya-gonder", async (
+            long id, OnarimOnayIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            LogDeposu log, Servisler.OnayMotoru onay, Servisler.OnayBildirimi haber,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("demirbas.isemri", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var e = await baglanti.TekAsync("""
+                select e.durum, e.maliyet, e.kapsam, e.onay_durum as "onayDurum",
+                       coalesce(nullif(d.ad, ''), '') as "cihazAd"
+                  from public.demirbas_is_emri e
+                  left join public.demirbas d on d.id = e.demirbas_id
+                 where e.id = @p0
+                """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("İş emri bulunamadı.");
+
+            if (Convert.ToInt16(e["durum"] ?? (short)0) is 5 or 8)
+                throw GentegreHatasi.IsKurali("Kapanmış iş emri onaya gönderilemez.");
+
+            // TUTAR TAHMİNDİR AMA ZORUNLUDUR: "ne kadar" sorusunun yanıtı
+            //   olmadan onay istenmez - imza atan neye imza attığını bilmeli.
+            var tutar = istek.Tutar ?? Convert.ToDecimal(e["maliyet"] ?? 0m);
+            if (tutar <= 0)
+                throw GentegreHatasi.Dogrulama("Onaylanacak tutar zorunlu.",
+                    new AlanHatasi("tutar",
+                        "Tahmini onarım maliyetini girin - sıfır tutara onay istenmez."));
+
+            var esik = await OnarimEsigiAsync(baglanti, iptal);
+            if (tutar < esik.Teknik)
+                throw GentegreHatasi.IsKurali(
+                    $"Bu tutar onay eşiğinin altında ({esik.Teknik:N0} TL) - "
+                    + "onarım onaysız yapılabilir.");
+
+            // KAPSAM DIŞI BAYRAĞI: garanti/sözleşme kapsamındaki onarım
+            //   kurumun cebinden çıkmaz; kapsam dışı olan ayrıca sorulur.
+            var kapsam = (e["kapsam"] as string ?? "").Trim();
+            var bayraklar = new List<string>();
+            if (istek.KapsamDisi ?? kapsam.Length == 0) bayraklar.Add("kapsam_disi");
+
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            var zincir = await onay.BaslatAsync(baglanti, islem, "demirbas.onarim",
+                id, tutar, bayraklar, baglam, iptal);
+
+            await baglanti.CalistirAsync("""
+                update public.demirbas_is_emri
+                   set onay_durum = 1, onayli_tutar = @p1,
+                       degistiren = @p2, degistirme_tarihi = now()
+                 where id = @p0
+                """, islem, [id, tutar, baglam.KullaniciId], iptal);
+
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogIsEmri, id,
+                baglam.KullaniciId, baglam.SubeId, baglam.Ip,
+                new { onayDurum = 1, tutar, bayraklar, basamak = zincir.Adimlar.Count },
+                iptal: iptal);
+
+            await islem.CommitAsync(iptal);
+
+            try
+            {
+                await haber.SiradakiniBildirAsync(baglanti, zincir.OnayId,
+                    baglam.KullaniciId, baglam.SubeId, iptal);
+            }
+            catch (Exception) { /* zincir kuruldu; bildirim hatası onu düşürmez */ }
+
+            return Results.Ok(new
+            {
+                onayDurum = 1, tutar, bayraklar,
+                basamaklar = zincir.Adimlar.Select(a => new { a.Sira, a.Ad, a.Rol }),
+                izlemeNo = baglam.IzlemeNo
+            });
+        });
+
         grup.MapPost("/is-emri/{id:long}/adim", async (
             long id, IsEmriAdimIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
             LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
@@ -130,6 +237,8 @@ public static class BiyomedikalUclari
                 select e.durum, e.tur, e.demirbas_id as "demirbasId",
                        e.ilk_mudahale as "ilkMudahale", e.tamamlanma,
                        e.yedek_demirbas_id as "yedekId",
+                       e.maliyet, e.onay_durum as "onayDurum",
+                       e.onayli_tutar as "onayliTutar",
                        (select count(*) from public.demirbas_is_emri_madde m
                          where m.is_emri_id = e.id and m.zorunlu = 1
                            and coalesce(m.sonuc, 0) = 0) as "eksikMadde",
@@ -147,6 +256,43 @@ public static class BiyomedikalUclari
                 throw GentegreHatasi.IsKurali("Kapanmış iş emrinde akış ilerletilemez.");
 
             var uyarilar = new List<string>();
+
+            // MASRAFLI ONARIM ONAYSIZ İLERLEMEZ (752). Eşiği aşan bir onarım
+            //   dış servise gönderilmeden ya da tamamlanmadan önce onaydan
+            //   geçmeli: fatura geldikten sonra "kim onayladı" diye sormak,
+            //   sormamakla aynı şey.
+            //
+            //   ARA ADIMLAR SERBEST: cihaza bakmak, parça beklemek para
+            //   harcamaz - onayı oraya dayatmak teknisyeni bekletirdi.
+            if (adim is "dis-servis" or "tamamla")
+            {
+                var maliyet = Convert.ToDecimal(e["maliyet"] ?? 0m);
+                var onayDurum = Convert.ToInt16(e["onayDurum"] ?? (short)0);
+                var esik = await OnarimEsigiAsync(baglanti, iptal);
+
+                if (maliyet >= esik.Teknik && onayDurum != 2)
+                {
+                    if (onayDurum == 1)
+                        throw GentegreHatasi.IsKurali(
+                            $"Onarım onayı bekleniyor ({maliyet:N0} TL) - karar "
+                            + "verilmeden iş emri ilerletilemez.");
+                    if (onayDurum == 3)
+                        throw GentegreHatasi.IsKurali(
+                            "Onarım onayı REDDEDİLDİ - bu tutarla iş emri "
+                            + "ilerletilemez. Maliyeti düşürüp yeniden onaya gönderin.");
+                    throw GentegreHatasi.IsKurali(
+                        $"{maliyet:N0} TL onarım {esik.Teknik:N0} TL eşiğini aşıyor - "
+                        + "önce onaya gönderin.", new { esik = esik.Teknik, maliyet });
+                }
+
+                // ONAYLANAN TUTAR AŞILDIYSA SÖYLENİR: onay 50.000'e verildiyse
+                //   90.000'lik iş o onayın kapsamında değildir.
+                var onayli = e["onayliTutar"] as decimal?;
+                if (onayDurum == 2 && onayli is not null && maliyet > onayli.Value)
+                    uyarilar.Add($"Gerçekleşen maliyet ({maliyet:N0} TL) onaylanan "
+                                 + $"tutarı ({onayli.Value:N0} TL) aşıyor - "
+                                 + "yeniden onay gerekebilir.");
+            }
 
             if (adim == "tamamla")
             {

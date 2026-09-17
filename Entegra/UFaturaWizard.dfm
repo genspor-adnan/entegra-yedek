@@ -4486,9 +4486,9 @@ object FaturaWizardDlg: TFaturaWizardDlg
         '=F.YERID)) '
       
         '   '#9#9#9#9#9'when YERI in (408,411) then (select COALESCE(NULLIF(NUL' +
-        'LIF(IRSALIYENO,''''),''0''), NULLIF(NULLIF(FATURANO,''''),''0''), '''') fr' +
-        'om FATBASLIK where ID=(select FATBASID from FATURA where ID=F.YE' +
-        'RID)) '
+        'LIF(IRSALIYENO,''''),''0''), NULLIF(NULLIF(FATURANO,''''),''0''), ''Irsali' +
+        'ye #'' + CAST(ID as varchar(12))) from FATBASLIK where ID=(select ' +
+        'FATBASID from FATURA where ID=F.YERID)) '
       
         '   '#9#9#9#9#9'when YERI in (412,413) then (select TEKLIFNO from TEKLIF' +
         ' where ID=(SELECT TEKLIFID FROM TEKLIFDETAY where ID=F.YERID))  ' +

@@ -221,6 +221,18 @@ public static partial class KaynakKatalogu
                 Varsayilan: false),
             new("demirbasId", "e.demirbas_id", "sayi", "Demirbaş Id", Varsayilan: false),
             new("subeId", "e.sube_id", "sayi", "Şube", Varsayilan: false),
+            // ONARIM ONAYI (752): "bu onarım onaylı mı" sorusu listede
+            //   yanıtlanmalı - eşiği aşan ama onaya gönderilmemiş iş emri,
+            //   faturası gelene kadar kimsenin dikkatini çekmez.
+            new("onayDurumAdi",
+                "case coalesce(e.onay_durum, 0) when 1 then 'Onayda'" +
+                " when 2 then 'Onaylı' when 3 then 'REDDEDİLDİ' else '—' end",
+                "metin", "Onarım Onayı", Hizalama: "orta", Genislik: 120,
+                Bicim: "rozet", Filtrelenebilir: false),
+            new("onayDurum", "coalesce(e.onay_durum, 0)", "sayi", "Onay Kodu",
+                Varsayilan: false),
+            new("onayliTutar", "e.onayli_tutar", "para", "Onaylanan", Hizalama: "sag",
+                Genislik: 110, Varsayilan: false),
         });
 
     internal static readonly Dictionary<string, string> DbRiskKodlari = new()

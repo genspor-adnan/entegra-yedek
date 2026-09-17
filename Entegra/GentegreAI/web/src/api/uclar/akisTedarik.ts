@@ -160,6 +160,18 @@ export const akisTedarikUclari = {
     gonder<{ durum: number; uyumsuz: number }>(`/api/eczane/sayim/${id}/kapat`, g),
 
   // ====================================================== biyomedikal ==
+  /**
+   * MASRAFLI ONARIM ONAYI (752). Onay onarımdan ÖNCE yürür: iş emri dış
+   * servise gönderilmeden ya da tamamlanmadan önce. Sonradan onaylatmak
+   * "onay" değil, olan biteni kayda geçirmektir - kimse hayır diyemez.
+   */
+  demirbasOnarimOnayaGonder: (id: number, g: {
+    tutar?: number; kapsamDisi?: boolean;
+  }) => gonder<{
+    onayDurum: number; tutar: number; bayraklar: string[];
+    basamaklar: { sira: number; ad: string; rol: number }[];
+  }>(`/api/demirbas/is-emri/${id}/onaya-gonder`, g),
+
   demirbasIsEmriAdim: (id: number, g: {
     adim: IsEmriAdimi; yapanId?: number; firmaId?: number; yedekDemirbasId?: number;
     yapilanIs?: string; kapsam?: string; maliyet?: number;

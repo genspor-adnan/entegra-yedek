@@ -2086,6 +2086,15 @@ public static class AksiyonKatalogu
                      KaynakKodu: "demirbas.isemri", Islem: Islem.Degistir,
                      KayitGerekir: true, Sira: 16, UrunModu: 2, Bicim: "bir",
                      Ipucu: "Yanıt süresi bu damgadan hesaplanır"),
+                 // MASRAFLI ONARIM ONAYI (752): esigi asan is emri dis
+                 //   servise gonderilmeden once onaydan gecer.
+                 new("demirbas-is-emri.onaya-gonder", "📤 Onarımı Onaya Gönder", "demirbas",
+                     KaynakKodu: "demirbas.isemri", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 14, UrunModu: 2, Bicim: "bir",
+                     Ipucu: "Eşiği aşan onarım onaysız dış servise gönderilemez"),
+                 new("demirbas-is-emri.onay-zinciri", "🧾 Onay Zinciri", "demirbas",
+                     Hedef: "sagtus,palet", KaynakKodu: "demirbas.isemri",
+                     Islem: Islem.Gor, KayitGerekir: true, Sira: 18, UrunModu: 2),
                  new("demirbas-is-emri.parca-bekle", "⏸ Parça Bekliyor", "demirbas",
                      KaynakKodu: "demirbas.isemri", Islem: Islem.Degistir,
                      KayitGerekir: true, Sira: 17, UrunModu: 2),
