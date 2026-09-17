@@ -13342,3 +13342,26 @@ yükseldi ve liste anında güncellendi; üçüncü denemede 110,00. xUnit 250/2
 vitest 642/642 (yeni `avansDurumu.test.ts`: kalanı sıfır avans listelenmez,
 kısmi mahsupta gövdeye tutar konur, tutarsız çağrı tamamını dağıtır, mahsup
 sonrası durum tazelenir).
+
+## 17.09.2026 — "Avans Kullan" girilen ücreti siliyordu (784)
+
+Kullanıcı: *"ücret girdim, avans kullan dediğim zaman girdiğim ücreti sildi"*
+(başvuru **P-000140 / 7509**).
+
+**Kök sebep.** Mahsup bitince kart satırları SUNUCUDAN tazeliyor
+(`satirlariTazele`). Gridde duran ama henüz KAYDEDİLMEMİŞ ücret satırı o
+tazelemede kayboluyordu. Denetim kaydı bunu doğruladı: 7509'da tek bir "ekle"
+logu vardı, `belge_satir` boştu - ücret hiç kaydedilmemişti, dolayısıyla
+mahsup edilecek açık satır da yoktu (avans zaten 0 dağıttı).
+
+Tahsilat araçları (Nakit / POS / Banka) bu kapıdan zaten geçiyordu
+(`kayitSart`); avans eylemleri geçmiyordu.
+
+**Düzeltme.** "Avans Kullan", "Avans Al" ve "Avans İade" artık önce bekleyen
+kalem değişikliğini kaydettiriyor. Kayıt geçmezse (zorunlu alan eksik)
+**eylem hiç yapılmıyor**: tutar bile sorulmuyor - kaydedilemeyen belgede
+mahsup zaten yapılamaz ve memura "kaydetmedim ama sildi" dedirtmez.
+
+Regresyon testi `tahsilatAvansAkisi.test.tsx`: kayıt önce çağrılır ve sıra
+`kayıt → mahsup`'tur; kayıt geçmezse mahsup denenmez; tutar iptal edilirse
+mahsup yapılmaz; Avans Al/İade de aynı kapıdan geçer. vitest 648/648.

@@ -1450,6 +1450,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
                            //   nakit odeme kartinda onerili gelir.
                            avansIadeAc={(id, tutar) => tahsilat.avansIadeAc(id, tutar)}
                            avans={avansDurumu}
+                           // KAYIT KAPISI (784): avans eylemleri satirlari
+                           //   tazeledigi icin bekleyen ucret degisikligi
+                           //   once kaydedilir - yoksa girilen ucret silinir.
+                           kayitSart={async () => (kalemDegisti || kirli
+                             ? akisRef.current.kayitSart() : true)}
                            tahsilatSil={async idler => {
                              await tahsilat.tahsilatSil(idler);
                              // Tahsilat silinince kovalarin TAHSIL sayaci duser.

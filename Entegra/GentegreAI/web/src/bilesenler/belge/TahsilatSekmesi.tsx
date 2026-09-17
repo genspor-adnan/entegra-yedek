@@ -13,7 +13,7 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
                                   onYenile, kurumTahakkukAc, kurumKalan, kurumBelgeleri,
                                   basvuruMu,
                                   hizliNakit, hesapSecAc, acikBorc,
-                                  iadeAc, avansAl, avansIadeAc, avans,
+                                  iadeAc, avansAl, avansIadeAc, avans, kayitSart,
                                   yerelPara = 'TL' }: {
   /** Basvuru kartinda arac cubugu SADE: "＋" (tam ekran) cizilmez. */
   basvuruMu?: boolean;
@@ -59,6 +59,17 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
    * iade TEK bir kasa islemine baglanir (780).
    */
   avansIadeAc?(avansId: number, tutar: number): void;
+  /**
+   * BEKLEYEN KALEM DEGISIKLIGINI KAYDETTIRIR (784, kullanici: "ücret girdim,
+   * avans kullan dediğim zaman girdiğim ücreti sildi").
+   *
+   * Avans eylemleri sonunda satirlari SUNUCUDAN tazeliyor; gridde duran ama
+   * daha kaydedilmemis ucret satirlari o tazelemede kayboluyordu. Tahsilat
+   * araclari (Nakit/POS) ayni kapidan geciyor - avans da gecmeli.
+   * `false` donerse eylem YAPILMAZ: kayit gecmeden satirlara dokunmak, memura
+   * "kaydetmedim ama sildi" dedirtir.
+   */
+  kayitSart?(): Promise<boolean>;
   /**
    * HASTANIN AVANS DURUMU (781) - KART tutar, serit ve bu sekme AYNI nesneyi
    * okur. Sekme kendi sorsaydi, avans alindiginda serit bayat kalirdi
@@ -129,6 +140,20 @@ const hastaId = Number(sonuc?.belge.tarafId ?? 0);
 const avansVar = avans.toplam > 0;
 
 /**
+ * AVANS AL / IADE de ayni kapidan gecer (784): kasa penceresi kapaninca kart
+ * satirlari SUNUCUDAN tazeliyor - kaydedilmemis ucret satiri orada da
+ * kaybolurdu.
+ */
+const avansAlGuvenli = async (tur: number) => {
+  if (kayitSart && !(await kayitSart())) return;
+  avansAl?.(tur);
+};
+const avansIadeGuvenli = async (avansId: number, tutar: number) => {
+  if (kayitSart && !(await kayitSart())) return;
+  avansIadeAc?.(avansId, tutar);
+};
+
+/**
  * "Avans Kullan": acik avansin BIR KISMINI (ya da tamamini) bu belgenin
  * satirlarina mahsup eder (322/783).
  *
@@ -141,6 +166,9 @@ const avansVar = avans.toplam > 0;
  */
 const avansKullan = async () => {
   if (!kayitliId || !avansVar) return;
+  // ONCE KAYIT (784): mahsup satirlari sunucuda tazeler, kaydedilmemis
+  //   ucret satiri o anda kaybolurdu.
+  if (kayitSart && !(await kayitSart())) return;
   const acik = kalan > 0 ? kalan : avans.toplam;
   const onerilen = Math.min(avans.toplam, acik);
   const secim = await paraSor('Avanstan ne kadar kullanılsın?', {
@@ -315,11 +343,11 @@ return (
           {avansMenu && (
             <div className="dugme-menu-liste">
               <button type="button" className="mi"
-                      onClick={() => { setAvansMenu(false); avansAl(21) }}>💵 Nakit</button>
+                      onClick={() => { setAvansMenu(false); void avansAlGuvenli(21) }}>💵 Nakit</button>
               <button type="button" className="mi"
-                      onClick={() => { setAvansMenu(false); avansAl(22) }}>🏦 Banka</button>
+                      onClick={() => { setAvansMenu(false); void avansAlGuvenli(22) }}>🏦 Banka</button>
               <button type="button" className="mi"
-                      onClick={() => { setAvansMenu(false); avansAl(25) }}>💳 POS</button>
+                      onClick={() => { setAvansMenu(false); void avansAlGuvenli(25) }}>💳 POS</button>
             </div>
           )}
         </span>
@@ -346,7 +374,7 @@ return (
               {avans.satirlar.map(a => (
                 <button key={a.kasaIslemId} type="button" className="mi"
                         onClick={() => { setAvansIadeMenu(false);
-                                         avansIadeAc(a.kasaIslemId, a.kalan) }}>
+                                         void avansIadeGuvenli(a.kasaIslemId, a.kalan) }}>
                   {tarihSaat(a.islemTarihi).slice(0, 10)}
                   <span className="mi-tutar">{paraYaz(a.kalan)}</span>
                 </button>
