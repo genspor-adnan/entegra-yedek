@@ -198,6 +198,30 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Kayıt Kabul', menuAd: 'İskonto Onayı', ic: '✅',
     yetkiKodu: 'iskonto_onay', menuSira: 30,
   },
+  {
+    // HASTA AVANSLARI (779, kullanici: "hastadan alinan avans tahsilati
+    //   takibi yapabilmeliyiz").
+    //
+    //   Ayni para Kasa Islemleri listesinde "Dagitilmamis" cipiyle de
+    //   goruluyordu, ama finans diliyle ve butun carilerle birlikte. Kayit
+    //   kabulun sordugu soru daha dar: HANGI HASTANIN ne kadar avansi kaldi.
+    //   Bu yuzden ayri bir ekran - ayni veriye hasta kiriliminda bakar.
+    kaynak: 'hasta-avans', rota: 'hasta-avans', baslik: 'Hasta Avansları',
+    yol: 'Kayıt Kabul › Hasta Avansları',
+    aksiyonEkrani: 'avans-liste',
+    // Kart YOK: avansin kendisi bir kasa islemi, "Aç" onu modalde acar.
+    tarihAlani: 'islemTarihi',
+    cipler: [
+      // Acik avans = KALAN parasi olan; kayit kabulun gunluk sorusu budur.
+      { ad: 'Açık', filtre: { alan: 'kalan', op: 'buyuk', deger: 0 } },
+      { ad: 'Kullanıldı', filtre: { alan: 'kalan', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    toplam: ['alinan', 'kullanilan', 'kalan'],
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Kayıt Kabul', menuAd: 'Hasta Avansları', ic: '💰',
+    yetkiKodu: 'kasa_islem', menuSira: 35,
+  },
   // RADYOLOJI grubu ana menude KAYIT KABUL ile CRM ARASINDA (kullanici):
   //   grup sirasi bu dizideki ILK gorulme sirasindan gelir.
   {

@@ -56,6 +56,13 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
   paylasimli?: boolean;
 }) {
   const [h, setH] = useState<Record<string, unknown> | null>(null);
+  /**
+   * HASTANIN KULLANILMAMIS AVANSI (779). Serit "doğru hastadayım" sorusunun
+   * yanina bir soru daha koyuyor: bu hastanin kasada duran parasi var mi.
+   * Eskiden avans ancak Tahsilat sekmesine girilince goruluyordu - memur
+   * hastadan yeniden para isteyebiliyordu.
+   */
+  const [avans, setAvans] = useState(0);
 
   useEffect(() => {
     if (!tarafId) { setH(null); return }
@@ -70,6 +77,18 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
         const s = y.satirlar[0] ?? null;
         setH(s);
       } catch { if (!iptal) setH(null) }
+    })();
+    return () => { iptal = true };
+  }, [tarafId]);
+
+  useEffect(() => {
+    if (!tarafId) { setAvans(0); return }
+    let iptal = false;
+    void (async () => {
+      try {
+        const y = await api.kasaAvans(tarafId);
+        if (!iptal) setAvans(Number(y.toplam ?? 0));
+      } catch { if (!iptal) setAvans(0) }   // yetkisi yoksa hucre cizilmez
     })();
     return () => { iptal = true };
   }, [tarafId]);
@@ -147,6 +166,19 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
           )}
         </span>
       </span>
+      {/* AVANS (779): hastanin kasada duran, henuz bir hizmete sayilmamis
+          parasi. YALNIZ VARSA cizilir - "0,00" yazan bir hucre her hastada
+          yer kaplar ve hicbir sey soylemezdi. Mahsup Tahsilat sekmesinde
+          yapilir; burasi haber verir. */}
+      {avans > 0 && (
+        <span className="hs">
+          <span className="k">Avans</span>
+          <span className="v olumlu"
+                title="Hastanın kullanılmamış avansı — Tahsilat sekmesinden bu başvuruya mahsup edilir.">
+            {paraYaz(avans)}
+          </span>
+        </span>
+      )}
       {/* Telefon ve son basvuru seritte YOK (kullanici): hasta zaten secilmis
           durumda - ikisi de arama penceresinde ise yarar, kabul ekraninda yer
           kaplar. Kalan hucreler seride esit araliklarla dagitilir. */}

@@ -656,7 +656,11 @@ public static class KasaUclari
     {
         "tur" or "tarafId" or "karsiTarafId" or "hesapId" or "karsiHesapId" or "masrafId" or
         "hizmetId" or "projeId" or "merkezId" or "cekSenetId" or "krediTaksitId" or
-        "kuponTuruId" or "belgeId" or "planIslemId" or "subeId" or "girisKaynak" => "sayi",
+        "kuponTuruId" or "belgeId" or "planIslemId" or "subeId" or "girisKaynak" or
+        // AVANS DAMGASI (779): hasta avansi olarak alinan tahsilat. Yazma
+        //   beyaz listesine eklemek yetmiyor - baslik dogrulayicisi katalogda
+        //   olmayan adi REDDEDIYOR (tasarim): iki liste de bilmeli.
+        "avans" => "sayi",
 
         "tutar" or "dovizKuru" or "karsiTutar" or "karsiKur" or "masrafTutar" => "para",
 

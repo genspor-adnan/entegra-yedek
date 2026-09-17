@@ -440,6 +440,56 @@ public static partial class KaynakKatalogu
             new("subeId",        "ki.sube_id",           "sayi",  "Şube",      Varsayilan: false)
         });
 
+    // ------------------------------------------------------- hasta avansi ----
+    /// <summary>
+    /// HASTA AVANSLARI (779) - kullanici: "hastadan alinan avans tahsilati
+    /// takibi yapabilmeliyiz".
+    ///
+    /// Kasa Islemleri listesindeki "Dagitilmamis" cipi ayni parayi gosteriyordu
+    /// ama finans diliyle ve butun carilerle birlikte; kayit kabul "hangi
+    /// hastanin ne kadar avansi kaldi" sorusunu oradan cevaplayamiyordu. Bu
+    /// liste yalniz HASTA (grup 101) tahsilatlarina bakar ve parayi UC RAKAMLA
+    /// anlatir: alinan / kullanilan / kalan.
+    ///
+    /// Gorunum `v_hasta_avans`: damgali avanslar kullanilsalar bile listede
+    /// kalir (gecmise donuk "bu avans nereye gitti" sorusu), damgasiz
+    /// dagitilmamis tahsilatlar ise kapaninca duser.
+    /// </summary>
+    private static KaynakTanimi HastaAvans() => new(
+        Ad: "hasta-avans",
+        // Para ekrani: yetki kasa islemiyle ayni - avansi goren, kasayi da
+        //   gorendir. Ayri bir yetki kodu matriste ikinci bir satir acar ve
+        //   "kasayi gormeyen ama avansi goren" gibi bir rol uretirdi.
+        YetkiKodu: "kasa_islem",
+        Kaynak: "public.v_hasta_avans a",
+        SubeKolonu: "a.sube_id",
+        KapsamKolonu: "a.taraf_id",
+        VarsayilanSirala: "a.islem_tarihi desc, a.kasa_islem_id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",           "a.kasa_islem_id",  "sayi",  "Id", Varsayilan: false),
+            new("kasaIslemId",  "a.kasa_islem_id",  "sayi",  "İşlem Id", Varsayilan: false),
+            new("islemTarihi",  "a.islem_tarihi",   "tarih", "Tarih", Hizalama: "orta", Bicim: "dd.MM.yyyy"),
+            new("makbuzNo",     "a.makbuz_no",      "metin", "Makbuz No", Genislik: 130),
+            new("dosyaNo",      "a.dosya_no",       "metin", "Dosya No", Genislik: 120),
+            new("hasta",        "a.hasta_adi",      "metin", "Hasta", Genislik: 220),
+            new("islemAdi",     "a.islem_adi",      "metin", "İşlem", Genislik: 150),
+            new("hesapAdi",     "a.hesap_adi",      "metin", "Hesap", Genislik: 160, Varsayilan: false),
+            new("alinan",       "a.alinan",         "para",  "Alınan", Hizalama: "sag", Bicim: "#,##0.00"),
+            new("kullanilan",   "a.kullanilan",     "para",  "Kullanılan", Hizalama: "sag", Bicim: "#,##0.00"),
+            new("kalan",        "a.kalan",          "para",  "Kalan", Hizalama: "sag", Bicim: "#,##0.00"),
+            // Durum METIN olarak doner (rozet): `durum` adli sayisal kolon
+            //   gridde 0/1 -> Aktif/Pasif cizilirdi, uc degerli bir durum
+            //   oraya sigmaz.
+            new("durumAdi",     "a.durum_adi",      "metin", "Durum", Hizalama: "orta", Bicim: "rozet"),
+            new("avans",        "a.avans",          "sayi",  "Damgalı", Varsayilan: false),
+            new("belgeId",      "a.belge_id",       "sayi",  "Belge Id", Varsayilan: false),
+            new("belgeNo",      "a.belge_no",       "metin", "Mahsup Belgesi", Genislik: 150, Varsayilan: false),
+            new("tarafId",      "a.taraf_id",       "sayi",  "Hasta Id", Varsayilan: false),
+            new("aciklama",     "a.aciklama",       "metin", "Açıklama", Genislik: 240, Varsayilan: false),
+            new("subeId",       "a.sube_id",        "sayi",  "Şube", Varsayilan: false)
+        });
+
     // ------------------------------------------------------- muhasebe fisi ----
 
     // ------------------------------------------------------- muhasebe fisi ----

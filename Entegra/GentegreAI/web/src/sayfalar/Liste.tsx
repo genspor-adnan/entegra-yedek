@@ -246,6 +246,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [acikKasaId, setAcikKasaId] = useState<number | null>(null);
   /** Cek/senet ile tahsilat-odemede once acilan KIYMET KARTININ turu (23/24/33/34). */
   const [cekTuru, setCekTuru] = useState<number | null>(null);
+  /** HASTA AVANSI (779): avans damgasiyla acilan tahsilat kartinin turu. */
+  const [avansTuru, setAvansTuru] = useState<number | null>(null);
   /** Kiymet kaydedildikten sonra acilan kasa islemi (ayni kiymete bagli). */
   const [kasaAcilis, setKasaAcilis] = useState<{
     tur: number; tarafId?: number; tarafUnvan?: string; tutar?: string;
@@ -672,6 +674,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         tazele: () => setYenile(t => t + 1),
         git: yol => git(yol),
         setKasaTuru, setCekTuru, setAcikKasaId,
+        setAvansTuru, setAcikBelgeId,
       })) return;
 
       if (await fiyatListesiAksiyonu(kod, satir, {
@@ -1179,6 +1182,16 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         //   acilinca memur hastayi ve tutari ikinci kez yaziyordu.
         acilis={tahsilatAcilisi(kasaTuru)}
         onKapat={() => { setKasaTuru(null); setYenile(t => t + 1) }}
+      />
+    )}
+
+    {/* HASTA AVANSI (779): tahsilat karti AVANS damgasiyla acilir - taraf
+        aramasi da yalniz hastalari gosterir. Damga, para tumuyle mahsup
+        edildikten sonra da kaydin avans listesinde kalmasini saglar. */}
+    {avansTuru !== null && (
+      <KasaIslemKarti
+        acilis={{ tur: avansTuru, avans: true }}
+        onKapat={() => { setAvansTuru(null); setYenile(t => t + 1) }}
       />
     )}
 

@@ -47,6 +47,12 @@ export interface KasaGirdisi {
    * akisindan girilir.
    */
   iadeMi?: boolean;
+  /**
+   * HASTA AVANSI (779): tahsilat bilerek AVANS olarak alindi. Damga kasa
+   * isleminde durur; avans listesi, para tumuyle mahsup edildikten sonra da
+   * kaydi bu damgayla gosterir ("bu avans nereye gitti" cevapsiz kalmasin).
+   */
+  avansMi?: boolean;
 }
 
 /** Turun sekil kurallari - hem dogrulama hem govde ayni yerden okusun. */
@@ -80,6 +86,10 @@ export function kasaDogrula(g: KasaGirdisi, plan: boolean): Record<string, strin
   } else if (sayi(g.tutar) <= 0) hatalar.tutar = 'Sıfırdan büyük olmalı.';
   if (donusum && sayi(g.karsiTutar) <= 0) hatalar.karsiTutar = 'Sıfırdan büyük olmalı.';
   if (g.cariZorunlu === 1 && !g.cari) hatalar.tarafId = 'Cari zorunlu.';
+  // AVANSTA HASTA ZORUNLU (779): avans "kimin parasi" sorusunun cevabidir.
+  //   Sahipsiz avans hicbir basvuruya mahsup edilemez ve listede takip
+  //   edilemez - kasada duran, kime ait oldugu bilinmeyen para olurdu.
+  if (g.avansMi && !g.cari) hatalar.tarafId = 'Avans için hasta seçilmeli.';
   if (plan && !g.planTarihi) hatalar.planTarihi = 'Vade zorunlu.';
   return hatalar;
 }
@@ -109,6 +119,9 @@ export function kasaGovdesi(g: KasaGirdisi, taslak: boolean, plan: boolean) {
       masrafId: g.kalem?.id ?? null,
       projeId: g.proje?.id ?? null,
       aciklama: g.aciklama,
+      // Damga YALNIZ isaretliyken gonderilir: sunucu varsayilani 0, her
+      //   tahsilata "avans: 0" yazmak govdeyi sisirirdi.
+      ...(g.avansMi ? { avans: 1 } : {}),
       ...(g.mevcutKiymet ? { cekSenetId: g.mevcutKiymet } : {}),
     },
     // Cek/senet turlerinde kiymetin kendisi de gonderilir: sunucu once

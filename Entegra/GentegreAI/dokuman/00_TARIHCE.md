@@ -13066,3 +13066,61 @@ alanın altında gösterdi ve kaydetmedi. Tetik `begin … rollback` içinde
 denendi: türü null'a çekilen satır **1** olarak geri okundu. Kayıtlı başvuruda
 (P-000135) Ücretlendirme sekmesinde fiyat listesi kutusu yok, Depo duruyor.
 vitest 627/627 (yeni: `basvuruTuruVarsayilan`, `basvuruDogrulama` +5 durum).
+
+## 17.09.2026 — Hasta avansı: damga, takip ekranı, şerit (779)
+
+Kullanıcı: *"hastadan alınan avans tahsilatı takibi yapabilmeliyiz"*.
+
+**Zaten olan.** 322 avansı dolaylı tanımlamıştı: belge satırlarına dağıtılmamış
+tahsilat avanstır (`v_taraf_avans`) ve belge kartındaki şerit onu satırlara
+mahsup eder. Eksik olan TAKİPTİ — kimden ne zaman ne kadar alındığı, ne
+kadarının kullanıldığı, kimde ne kaldığı hiçbir ekranda toplu görünmüyordu.
+Aynı para Kasa İşlemleri listesinde "Dağıtılmamış" çipiyle görülebiliyordu ama
+finans diliyle ve bütün carilerle birlikte.
+
+**Damga (`kasa_islem.avans`).** "Dağıtılmamış olan avanstır" kuralı iki ayrı
+şeyi karıştırıyor: kayıt kabulün BİLEREK aldığı avans (kapora, peşin paket) ve
+bir başvuru tahsilatının kuruş kalıntısı. Damga niyeti kaydeder ve avans
+tamamen kullanıldıktan sonra da kaydı listede tutar — *"geçen ay aldığımız
+2.000 TL nereye gitti"* sorusu para bitince cevapsız kalmasın. Damgasız
+dağıtılmamış tahsilatlar da listede görünür (322 davranışı korunur), yalnız
+kapandıklarında düşerler.
+
+**Ayrı tablo açılmadı.** Avans bir kasa işlemidir: nakit/POS/banka ayrımı,
+makbuz no, iptal, muhasebe fişi, şube ve kullanıcı damgası hep orada. İkinci
+tablo kasa bakiyesini avanstan habersiz bırakırdı (753'te personel avansında
+verilen kararın aynısı).
+
+**Ekranlar.**
+- **Kayıt Kabul › Hasta Avansları** (`hasta-avans`, `v_hasta_avans`): Tarih ·
+  Makbuz · Dosya No · Hasta · İşlem · **Alınan / Kullanılan / Kalan** · Durum
+  rozeti (Açık · Kısmen Kullanıldı · Kullanıldı). Çipler: Açık / Kullanıldı /
+  Tümü. Yalnız HBYS + muayene modülü.
+- **"＋ Avans Al"**: tahsilat kartını avans damgasıyla açar (Nakit / Banka /
+  POS). Kartta taraf araması yalnız HASTA gösterir ve hasta ZORUNLUDUR:
+  sahipsiz avans mahsup edilemez, takip de edilemez. Başlık "Hasta Avansı".
+- **Hasta şeridi**: hastanın kullanılmamış avansı varsa "Avans 300,00 ₺"
+  hücresi çizilir (yoksa hiç çizilmez — "0,00" yazan hücre her hastada yer
+  kaplardı). Eskiden avans ancak Tahsilat sekmesine girilince görülüyordu,
+  memur hastadan yeniden para isteyebiliyordu.
+- **Mahsup** yine BELGEDE yapılır (322 şeridi): hangi satıra sayılacağı orada
+  bellidir.
+
+**Sunucu.** `avans` alanı İKİ listeye birden eklendi — `KasaDeposu.Kolonlar`
+(yazma) ve `KasaUclari.BaslikTipi` (başlık doğrulayıcı beyaz listesi). İlki
+tek başına yetmedi: doğrulayıcı katalogda olmayan adı bilerek reddediyor
+(*"Bilinmeyen kasa işlemi alanı: avans"*) — tarayıcı denemesinde çıktı.
+
+**Doğrulama.** Ekrandan nakit avans alındı (adem dere 500 ₺) → listede
+`500,00 / 0,00 / 500,00 · Açık`. CEMRE YILMAZ'a 300 ₺ avans yazıldı →
+başvuru şeridinde "Avans 300,00 ₺", Tahsilat sekmesinde mahsup şeridi.
+Uçtan uca mahsup ayrı bir başvuruda denendi (Sami Uzun, 800 ₺): mahsup
+`dagitilan: 800` döndü ve avans satırı `800 / 800 / 0 · Kullanıldı` oldu —
+damgalı olduğu için listede kaldı. P-000135 başvurusunda mahsup *"açık satır
+kalmadı"* diyor; sebebi avans değil o eski test kaydının kova dağılımının hiç
+üretilmemiş olması (`v_belge_satir_tahsilat` satırları sıfır).
+
+xUnit 239/239 (yeni `HastaAvansTestleri`: alınan/kullanılan/kalan ve durum,
+bakiye yalnız kalanı sayar, damgasız kapanınca düşer, hasta olmayan cari
+listede yok, iptal edilen sayılmaz — hepsi geri alınan transaction içinde),
+vitest 631/631.

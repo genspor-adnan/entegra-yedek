@@ -407,7 +407,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (233 ad, 55 tanesi birden cok dosyada)
+## Gorunumler (235 ad, 55 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -497,6 +497,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_goz_unite_akis` | `691_goz_modulu.sql` | — |
 | `v_hakedis_ozet` | `330_prim_tahsilat_turu_durum.sql` | 324_prim_semasi.sql |
 | `v_hakedis_satir` | `363_hakedis_rol_isaret_kontrolu.sql` | 324_prim_semasi.sql, 330_prim_tahsilat_turu_durum.sql, 332_prim_zamani.sql |
+| `v_hasta_avans` | `779_hasta_avansi.sql` | — |
+| `v_hasta_avans_bakiye` | `779_hasta_avansi.sql` | — |
 | `v_hasta_lookup` | `266_aday_hasta.sql` | 244_hasta_lookup.sql, 262_hasta_lookup_kimlik.sql, 263_hasta_lookup_cinsiyet_yas.sql, 264_hasta_lookup_cinsiyet_bos.sql |
 | `v_hasta_tibbi_ozet` | `420_hasta_tibbi_gecmis.sql` | — |
 | `v_hekim_calisma_istisna` | `718_hekim_calisma_plani.sql` | — |

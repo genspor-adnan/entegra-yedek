@@ -122,3 +122,33 @@ describe('kasaTurBilgisi', () => {
     expect(kasaTurBilgisi(61, 'plan').planMi).toBe(true);
   });
 });
+
+/**
+ * HASTA AVANSI (779, kullanici: "hastadan alinan avans tahsilati takibi
+ * yapabilmeliyiz").
+ *
+ * Avans AYRI BIR EKRAN DEGIL, tahsilatin damgalanmis hali: damga kaybolursa
+ * para kasaya girer ama avans listesinde gorunmez - takip edilemeyen bir
+ * tahsilata doner.
+ */
+describe('avans damgasi (779)', () => {
+  it('avans isaretliyken govdeye avans: 1 yazilir', () => {
+    expect(kasaGovdesi({ ...temel, avansMi: true }, false, false).islem.avans).toBe(1);
+  });
+
+  it('normal tahsilatta alan HIC gonderilmez', () => {
+    // Sunucu varsayilani 0: her tahsilata "avans: 0" yazmak govdeyi sisirir.
+    expect(kasaGovdesi(temel, false, false).islem).not.toHaveProperty('avans');
+  });
+
+  it('avansta HASTA zorunlu - sahipsiz avans mahsup edilemez', () => {
+    const h = kasaDogrula({ ...temel, avansMi: true, cari: null, cariZorunlu: 0 }, false);
+    expect(h.tarafId).toContain('hasta');
+  });
+
+  it('avans olmayan tahsilatta cari zorunlulugu TURDEN gelir', () => {
+    // Tur serbest birakiyorsa (cariZorunlu 0) tahsilat carisiz da kaydedilir.
+    expect(kasaDogrula({ ...temel, cari: null, cariZorunlu: 0 }, false))
+      .not.toHaveProperty('tarafId');
+  });
+});

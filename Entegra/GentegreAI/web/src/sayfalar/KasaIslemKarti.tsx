@@ -71,6 +71,12 @@ const GRUP_ADI: Record<string, string> = {
 export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   acilis?: { tur?: number; tarafId?: number; tarafUnvan?: string; belgeId?: number;
              tutar?: string;
+             /**
+              * HASTA AVANSI (779): tahsilat AVANS olarak damgalanir ve taraf
+              * aramasi yalniz hastalari gosterir. Kasa ekranindan girilen
+              * normal tahsilattan ayrildigi tek nokta bu damgadir.
+              */
+             avans?: boolean;
              /** MEVCUT kiymete baglanma (kasa listesinde once cek karti acilir). */
              cekSenetId?: number };
   /** MODAL kullanimda MEVCUT kaydi acmak icin (ör. ekstre satirina cift tik).
@@ -90,6 +96,12 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const [turler, setTurler] = useState<KasaIslemTuru[]>([]);
   const [tur, setTur] = useState<number>(
     acilis?.tur ?? (Number(sorgu.get('tur')) || 21));
+  /**
+   * AVANS KIPI (779). Karta ayri bir ekran acmak yerine damga: alanlarin
+   * tamami (tutar, hesap, makbuz, aciklama) tahsilatla ayni, degisen yalniz
+   * "bu para henuz bir hizmete sayilmadi" bilgisi.
+   */
+  const avansMi = acilis?.avans ?? sorgu.get('avans') === '1';
   // Islem tarihi SAATIYLE birlikte (146): gun icinde hangi tahsilatin once
   //   alindigi kasa sayiminda ve ekstre siralamasinda onemli. Yerel an -
   //   toISOString() UTC verir, aksam saatlerinde bir sonraki gunu yazardi.
@@ -268,6 +280,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     csVade: kiymet.vade, csSeriNo: kiymet.seriNo, csKesideci: kiymet.kesideci,
     csBanka: kiymet.banka, csSube: kiymet.sube,
     mevcutKiymet, belgeBagi, cariZorunlu: secili?.cariZorunlu,
+    avansMi,
     // IADE KAYDI (660): eksi tutarli islem - kart onu duzeltmek icin
     //   acildiginda "Sıfırdan büyük olmalı" kurali kaydi kilitliyordu.
     //   Olcu KAYDIN kendisi, kutuya yazilan deger degil: kullanici artiya
@@ -415,16 +428,22 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
           <div className="alan-izgara dort-sutun belge-hdr">
               {secili?.cariZorunlu !== -1 && (
                 <TarafSecici
-                  etiket={cariVirman ? 'Kaynak Cari' : 'Cari'}
-                  zorunlu={secili?.cariZorunlu === 1}
+                  // AVANSTA (779) taraf ZORUNLU ve yalniz HASTA: avans
+                  //   "kimin parasi" sorusunun cevabi olmadan takip
+                  //   edilemez - sahipsiz avans, mahsup edilecek carisi
+                  //   olmayan paradir.
+                  etiket={avansMi ? 'Hasta' : cariVirman ? 'Kaynak Cari' : 'Cari'}
+                  zorunlu={avansMi || secili?.cariZorunlu === 1}
                   deger={cari?.unvan}
                   hata={alanHatalari.tarafId}
                   kilitli={kilitli}
                   // PERSONEL de taraf olabilir (kullanici): is avansi, maas
                   //   odemesi, harcirah... Muhasebe tarafi zaten hazir -
                   //   fn_muh_hesap_coz personeli 335/196'ya yaziyor.
-                  kaynaklar={['cari', 'personel']}
-                  yerTutucu="Müşteri / tedarikçi / personel ara…"
+                  kaynaklar={avansMi ? ['hasta'] : ['cari', 'personel']}
+                  yerTutucu={avansMi
+                    ? 'Hastayı isim/tel ile ara…'
+                    : 'Müşteri / tedarikçi / personel ara…'}
                   onSec={sec => setCari({ id: sec.id, unvan: sec.unvan })}
                   onTemizle={() => setCari(null)}
                 />
@@ -752,7 +771,10 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   if (modalMi)
     return (
       <Modal
-        baslik={`${secili?.ad ?? 'Kasa İşlemi'}${sonuc?.islem.islemNo ? ` — ${sonuc.islem.islemNo}` : ''}`}
+        // AVANSTA BASLIK BUNU SOYLER (779): ayni kart hem normal tahsilat hem
+        //   avans icin aciliyor; memur hangi kipte oldugunu basliktan gorsun.
+        baslik={`${avansMi ? 'Hasta Avansı' : secili?.ad ?? 'Kasa İşlemi'}`
+                + (sonuc?.islem.islemNo ? ` — ${sonuc.islem.islemNo}` : '')}
         ustBilgi={durum !== null
           ? <span className={`rozet ${durum === 2 ? 'ok' : durum === 3 ? 'uyari' : 'gri'}`}>
               {KASA_DURUM[durum] ?? durum}
@@ -769,7 +791,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     <>
       <div className="sayfabas">
         <div className="basrow">
-          <h1>{secili?.ad ?? 'Kasa İşlemi'}</h1>
+          <h1>{avansMi ? 'Hasta Avansı' : secili?.ad ?? 'Kasa İşlemi'}</h1>
           <span className="yol">
             Kasa › {GRUP_ADI[grup] ?? grup}
             {sonuc?.islem.islemNo ? ` · ${sonuc.islem.islemNo}` : ''}

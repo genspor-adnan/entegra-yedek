@@ -2642,6 +2642,27 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
             },
 
+            // HASTA AVANSLARI (779): kayit kabulun ekrani. "Avans Al" tahsilat
+            //   kartini AVANS DAMGASIYLA acar - damga, para tamamen
+            //   kullanildiktan sonra da kaydin listede kalmasini saglar.
+            ["avans-liste"] = new AksiyonTanimi[]
+            {
+                new("avans.yeni", "＋ Avans Al", "kasa", Kisayol: "Ctrl+N",
+                    KaynakKodu: "kasa_islem", Islem: Islem.Ekle, Sira: 10),
+                new("kasa.ac",    "Aç",          "kasa", Kisayol: "Enter",
+                    KaynakKodu: "kasa_islem", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+                // Mahsup BELGEDE yapilir (322): hangi satira sayilacagi orada
+                //   belli. Listede "mahsup et" dugmesi, parayi hangi basvuruya
+                //   yazdigini gostermeden harcamak olurdu.
+                new("avans.basvuru-ac", "Mahsup Edilen Belgeyi Aç", "kasa",
+                    Hedef: "sagtus,palet", KaynakKodu: "belge", Islem: Islem.Gor,
+                    KayitGerekir: true, Sira: 30),
+                new("kasa.iptal", "İptal Et", "kasa", Hedef: "sagtus,palet",
+                    AksiyonYetkisi: "kasa.iptal", KayitGerekir: true, Sira: 40),
+                new("genel.yazdir", "🖨️ Yazdır", "genel", Hedef: "araccubugu,palet",
+                    AksiyonYetkisi: "veri.disa-aktar", Sira: 90),
+            },
+
             ["kasa-kart"] = new AksiyonTanimi[]
             {
                 new("kasa.kesinlestir", "Kesinleştir", "kasa",

@@ -28,7 +28,11 @@ public sealed partial class KasaDeposu
         ["merkezId"] = "merkez_id", ["cekSenetId"] = "cek_senet_id",
         ["krediTaksitId"] = "kredi_taksit_id", ["kuponTuruId"] = "kupon_turu_id",
         ["belgeId"] = "belge_id", ["planIslemId"] = "plan_islem_id",
-        ["aciklama"] = "aciklama", ["subeId"] = "sube_id", ["girisKaynak"] = "giris_kaynak"
+        ["aciklama"] = "aciklama", ["subeId"] = "sube_id", ["girisKaynak"] = "giris_kaynak",
+        // AVANS DAMGASI (779): tahsilat bilerek avans olarak alindi mi. Kasa
+        //   isleminin kendi alani - avansi ayri bir tabloya tasimak kasa
+        //   bakiyesini ve iptal akisini ikilerdi.
+        ["avans"] = "avans"
     };
 
     private async Task<int> BaslikEkleAsync(NpgsqlConnection baglanti, NpgsqlTransaction tx,

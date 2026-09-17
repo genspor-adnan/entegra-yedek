@@ -19,6 +19,14 @@ export interface KasaBaglam {
   setCekTuru(tur: number): void;
   /** Mevcut kaydi modalde acar - kart kendi turuyle gelir. */
   setAcikKasaId(id: number): void;
+  /**
+   * HASTA AVANSI (779): tahsilat karti AVANS DAMGASIYLA acilir. Ayri bir
+   * setter, cunku damga kartin govdesine giriyor - `setKasaTuru` ile acilan
+   * normal tahsilattan ayirt edilmeli.
+   */
+  setAvansTuru?(tur: number): void;
+  /** Avansin mahsup edildigi belgeyi acar (satirdaki belgeId). */
+  setAcikBelgeId?(id: number): void;
 }
 
 /** Cek/senet ile tahsilat-odeme turleri: once kiymet karti acilir. */
@@ -39,6 +47,13 @@ export async function kasaAksiyonu(
     return true;
   }
 
+  // AVANS ALMA (779): arac menusu "avans.yeni.<tur>" olarak geri gelir -
+  //   nakit / banka / POS ayrimi normal tahsilatla ayni.
+  if (kod.startsWith('avans.yeni.')) {
+    b.setAvansTuru?.(Number(kod.slice(11)));
+    return true;
+  }
+
   switch (kod) {
     // Tahsilat/odeme dugmeleri ARAC (nakit/banka/pos/cek/senet) menusu acar;
     //   secilen aracin kodu "kasa.yeni.<tur>" olarak geri gelir ve kart MODAL
@@ -48,6 +63,21 @@ export async function kasaAksiyonu(
     case 'kasa.virman.yeni':   b.setKasaTuru(41); return true;
     case 'kasa.doviz.yeni':    b.setKasaTuru(45); return true;
     case 'kasa.plan.yeni':     b.setKasaTuru(61); return true;
+
+    // Dugmenin kendisi ARAC menusunu acar (nakit/banka/POS); secim
+    //   "avans.yeni.<tur>" olarak yukarida ele alinir. Menu gelmezse (eski
+    //   tanim) nakit avansa duseriz - dugme sessiz kalmasin.
+    case 'avans.yeni': b.setAvansTuru?.(21); return true;
+
+    case 'avans.basvuru-ac': {
+      const belgeId = Number(satir?.belgeId ?? 0);
+      if (!belgeId) {
+        mesaj('Bu avans henüz bir belgeye mahsup edilmedi.');
+        return true;
+      }
+      b.setAcikBelgeId?.(belgeId);
+      return true;
+    }
 
     case 'kasa.gerceklestir':
       // Gerceklestirme hesap/tutar secimi ister - plan kartindaki panele goturur.

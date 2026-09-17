@@ -74,6 +74,13 @@ export const KASA_ARAC_MENUSU: Record<string, { kod: string; ad: string }[]> = {
     { kod: 'kasa.yeni.23', ad: '🧾 Çek' },
     { kod: 'kasa.yeni.24', ad: '📜 Senet' },
   ],
+  // HASTA AVANSI (779): avans da nakit/banka/POS ile alinir - arac secimi
+  //   tahsilatla ayni, ayrilan tek sey damga.
+  'avans.yeni': [
+    { kod: 'avans.yeni.21', ad: '💵 Nakit' },
+    { kod: 'avans.yeni.22', ad: '🏦 Banka' },
+    { kod: 'avans.yeni.25', ad: '💳 POS' },
+  ],
   'kasa.odeme.yeni': [
     { kod: 'kasa.yeni.31', ad: '💵 Nakit' },
     { kod: 'kasa.yeni.32', ad: '🏦 Banka' },

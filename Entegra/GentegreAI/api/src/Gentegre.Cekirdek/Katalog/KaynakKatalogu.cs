@@ -316,6 +316,8 @@ public static partial class KaynakKatalogu
         Ekle(CariEkstre());
         // Kasa motoru (076, F2)
         Ekle(KasaIslem());
+        // Hasta avansi (779) - kasa isleminin hasta kirilimi.
+        Ekle(HastaAvans());
         Ekle(MuhasebeFis());
         Ekle(MuhasebeFisSatir());
         Ekle(PlanVade());
