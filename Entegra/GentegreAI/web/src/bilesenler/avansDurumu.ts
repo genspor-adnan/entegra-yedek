@@ -57,10 +57,12 @@ export function useAvansDurumu(tarafId?: number | null) {
    * (`/api/kasa-islem/avans-mahsup`): hangi kovaya ne kadar gideceğini satır
    * bazlı kalanlar belirler, istemci tutar bölüştürmez.
    */
-  const mahsupEt = useCallback(async (belgeId: number) => {
+  const mahsupEt = useCallback(async (belgeId: number, tutar?: number) => {
     setHata(''); setCalisiyor(true);
     try {
-      const y = await api.kasaAvansMahsup({ belgeId });
+      // `tutar` verilmezse avansin TAMAMI dagitilir (belgenin acik satirlari
+      //   kadar); verilirse o kadari - kismi kullanim (783).
+      const y = await api.kasaAvansMahsup({ belgeId, ...(tutar ? { tutar } : {}) });
       await tazele();
       return y;
     } catch (h) {

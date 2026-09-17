@@ -83,7 +83,9 @@ export const mesajUclari = {
    * Avansi belgenin acik satirlarina dagit (322). Prim tarihi dagitim gunu
    * DEGIL, tahsilatin islem tarihidir.
    */
-  kasaAvansMahsup: (govde: { belgeId: number; islemIdler?: number[] }) =>
+  //   `tutar` verilirse KISMI mahsup (783): avansta daha cok para olsa bile
+  //   bu belgeye yalniz o kadari sayilir.
+  kasaAvansMahsup: (govde: { belgeId: number; islemIdler?: number[]; tutar?: number }) =>
     gonder<{ dagitilan: number; islemSayisi: number }>(
       '/api/kasa-islem/avans-mahsup', govde),
 

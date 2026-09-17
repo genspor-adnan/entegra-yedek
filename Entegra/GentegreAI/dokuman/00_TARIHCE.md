@@ -13311,3 +13311,34 @@ Tahsilat** · — · 800,00`. Hasta Avansları'nda aynı avans `800 / 800 / 0 ·
 Kullanıldı · P-000133`. xUnit 250/250 (yeni `BelgeTahsilatGorunumuTestleri`:
 tür 27 + dağıtılan tutar, `belge_id` dolu olsa bile satır iki kez düşmez,
 normal tahsilat kendi türüyle kalır, tür 27 elle seçilemez), vitest 637/637.
+
+## 17.09.2026 — Kısmi avans kullanımı (783)
+
+Kullanıcı: *"avans kullan dediğimde tutarı sorsun, kısmi kullanabileyim"*.
+
+"Avans Kullan" açık avansın TAMAMINI belgenin açık satırlarına dağıtıyordu.
+Hasta 2.000 ₺ bırakıp bugün 500 ₺'lik işlem yaptırmışsa kalan avans yok
+oluyordu; sonraki başvuruda para görünmüyordu.
+
+- Menüye basınca **tutar penceresi** açılıyor (`paraSor`). Önerilen değer
+  ikisinin küçüğü: avansın kalanı ve belgenin açık borcu — ikisini de aşmanın
+  anlamı yok. Tavan avansın kalanı: olmayan parayı belgeye saymak, sonradan
+  kapatılamayan bir tahsilat gösterirdi.
+- Sunucu: `/api/kasa-islem/avans-mahsup` gövdesine **`tutar`** eklendi.
+  `AvansDagitAsync` bu tutarı TAVAN kabul ediyor; uç, birden fazla açık avans
+  varsa bütçeyi sırayla harcıyor (hasta iki kez avans bırakmış olabilir) ve
+  bütçe bitince duruyor. Sıfır/eksi tutar reddediliyor. Tutar verilmezse eski
+  davranış (tamamı) sürüyor.
+- Aynı avans ikinci kez mahsup edilirse dağıtım satırı **üzerine ekleniyor**
+  (`on conflict … tutar + excluded.tutar`) - kısmi kullanım tekrarlanabilir.
+- Mahsuptan sonra artık **tahsilat listesi de** tazeleniyor; eskiden yalnız
+  satır sayaçları tazeleniyordu ve "Avans ile Tahsilat" satırı karttan çıkıp
+  girmeden görünmüyordu.
+
+**Doğrulama.** 500 ₺ avans açıldı, P-000139'a 60 ₺ mahsup edildi: avans
+`500 / 60 / 440 · Kısmen Kullanıldı`, belgede `Avans ile Tahsilat 60,00`.
+Ekrandan 25 ₺ daha kullanıldı: pencere 440 ₺ önerdi, satır **85,00**'e
+yükseldi ve liste anında güncellendi; üçüncü denemede 110,00. xUnit 250/250,
+vitest 642/642 (yeni `avansDurumu.test.ts`: kalanı sıfır avans listelenmez,
+kısmi mahsupta gövdeye tutar konur, tutarsız çağrı tamamını dağıtır, mahsup
+sonrası durum tazelenir).

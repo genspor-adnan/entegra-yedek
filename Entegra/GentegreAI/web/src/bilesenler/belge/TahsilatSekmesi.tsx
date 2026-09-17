@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { AvansDurumu } from '../avansDurumu';
-import { mesaj } from '../mesaj';
+import { mesaj, paraSor } from '../mesaj';
 import { para, tarihSaat, paraYaz } from '../bicim';
 import type { BelgeYaniti } from '../../api/sozlesme';
 
@@ -128,10 +128,30 @@ useEffect(() => {
 const hastaId = Number(sonuc?.belge.tarafId ?? 0);
 const avansVar = avans.toplam > 0;
 
-/** "Avans Kullan": acik avansi bu belgenin satirlarina mahsup eder (322). */
+/**
+ * "Avans Kullan": acik avansin BIR KISMINI (ya da tamamini) bu belgenin
+ * satirlarina mahsup eder (322/783).
+ *
+ * TUTAR SORULUR (kullanici: "avans kullan dedigimde tutari sorsun, kismi
+ * kullanabileyim"): hasta 2.000 birakip bugun 500'luk islem yaptirmis
+ * olabilir; tamamini bu belgeye saymak kalan avansi yok eder ve sonraki
+ * basvuruda para gorunmez. Onerilen deger ikisinin KUCUGU: avans kalani ve
+ * belgenin acik borcu - ikisini de asmanin anlami yok (fazlasi zaten
+ * dagitilamaz, sunucu acik satir kadarini yazar).
+ */
 const avansKullan = async () => {
   if (!kayitliId || !avansVar) return;
-  const y = await avans.mahsupEt(kayitliId);
+  const acik = kalan > 0 ? kalan : avans.toplam;
+  const onerilen = Math.min(avans.toplam, acik);
+  const secim = await paraSor('Avanstan ne kadar kullanılsın?', {
+    varsayilan: onerilen > 0 ? String(onerilen) : '',
+    // TAVAN avansin kalani: olmayan parayi belgeye saymak, sonradan
+    //   kapatilamayan bir tahsilat gostergesi uretirdi.
+    enCok: avans.toplam,
+    yerelPara, doviz: yerelPara, dovizler: [yerelPara],
+  });
+  if (!secim || secim.tutar <= 0) return;
+  const y = await avans.mahsupEt(kayitliId, secim.tutar);
   if (!y) return;
   mesaj(y.dagitilan > 0
     ? `${para.format(y.dagitilan)} avans bu belgenin satırlarına mahsup edildi.`

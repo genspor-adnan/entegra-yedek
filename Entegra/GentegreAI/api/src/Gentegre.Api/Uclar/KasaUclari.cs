@@ -32,7 +32,13 @@ public static class KasaUclari
     /// "tahsil edildikce" dogdugu icin mahsup edilmeyen avans primi de
     /// tetiklemez - bu yuzden ekranda gorunur olmasi gerekiyor.
     /// </summary>
-    public sealed record MahsupIstegi(int BelgeId, IReadOnlyList<int>? IslemIdler);
+    /// <param name="Tutar">
+    /// KISMI MAHSUP (783, kullanici: "avans kullan dedigimde tutari sorsun,
+    /// kismi kullanabileyim"): bu belgeye EN COK bu kadar avans sayilir.
+    /// Verilmezse avansin tamami (eski davranis) dagitilir.
+    /// </param>
+    public sealed record MahsupIstegi(int BelgeId, IReadOnlyList<int>? IslemIdler,
+                                      decimal? Tutar = null);
 
     /// <summary>
     /// Bir kasa isleminin DAGITILMAMIS kismini belgenin acik satirlarina
@@ -41,12 +47,16 @@ public static class KasaUclari
     /// KORUNUR: mahsup ekleme islemidir, yeniden yazma degil.
     /// </summary>
     private static async Task<decimal> AvansDagitAsync(NpgsqlConnection baglanti,
-        int kasaIslemId, int belgeId, int kullaniciId, CancellationToken iptal)
+        int kasaIslemId, int belgeId, int kullaniciId, CancellationToken iptal,
+        decimal? azami = null)
     {
         var kalanTutar = await baglanti.TekDegerAsync<decimal>("""
             select coalesce(v.dagitilmamis, 0) from public.v_kasa_islem_dagitim v
              where v.kasa_islem_id = @p0
             """, null, [kasaIslemId], iptal);
+        // KISMI MAHSUP (783): kullanicinin verdigi tutar TAVANDIR - avansta
+        //   daha cok para olsa bile yalniz bu kadari bu belgeye sayilir.
+        if (azami is { } tavan) kalanTutar = Math.Min(kalanTutar, tavan);
         if (kalanTutar <= 0) return 0;
 
         var acik = await baglanti.ListeAsync("""
@@ -503,9 +513,16 @@ public static class KasaUclari
 
             decimal toplam = 0;
             var sayac = 0;
+            // KALAN BUTCE (783): istenen tutar birden fazla avansa yayilabilir
+            //   (hasta iki kez avans birakmis olabilir) - her dagitimdan sonra
+            //   butceden dusulur, bitince durulur.
+            var butce = istek.Tutar is > 0 ? istek.Tutar : null;
+            if (istek.Tutar is <= 0)
+                throw GentegreHatasi.IsKurali("Mahsup tutarı sıfırdan büyük olmalı.");
 
             foreach (var isl in islemler)
             {
+                if (butce is <= 0) break;
                 var islemId = Convert.ToInt32(isl["id"]);
 
                 // Belgede kalan yoksa devam etmenin anlami yok: sonraki avans
@@ -519,8 +536,12 @@ public static class KasaUclari
                 if (kalanVar <= 0) break;
 
                 var dagitilan = await AvansDagitAsync(baglanti, islemId, istek.BelgeId,
-                                                      baglam.KullaniciId, iptal);
-                if (dagitilan > 0) { toplam += dagitilan; sayac++; }
+                                                      baglam.KullaniciId, iptal, butce);
+                if (dagitilan > 0)
+                {
+                    toplam += dagitilan; sayac++;
+                    if (butce is { } b) butce = b - dagitilan;
+                }
             }
 
             return Results.Ok(new { dagitilan = toplam, islemSayisi = sayac });

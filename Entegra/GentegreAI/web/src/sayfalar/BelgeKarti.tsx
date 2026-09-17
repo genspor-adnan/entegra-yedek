@@ -1504,7 +1504,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
                                tutar: Number(d.tutar ?? 0),
                                hastaMi: !!d.hastaMi,
                              }))}
-                           onYenile={() => { void paraRef.current.satirlariTazele() }}
+                           // MAHSUPTAN SONRA (783): satirlarin TAHSIL
+                           //   sayaclari VE tahsilat listesi birlikte
+                           //   tazelenir - avans satiri ("Avans ile
+                           //   Tahsilat") hemen gorunsun, kullanici karttan
+                           //   cikip girmek zorunda kalmasin.
+                           onYenile={() => { void paraRef.current.satirlariTazele();
+                                             tahsilat.tazele() }}
                            // KURUM TAHAKKUKU (331): kurum payini Satış
                            //   Tahakkukuna (17) donusturur - tahsilat DEGIL.
                            //   KENDI ODEYENDE (Özel, tur 1) GORUNMEZ
