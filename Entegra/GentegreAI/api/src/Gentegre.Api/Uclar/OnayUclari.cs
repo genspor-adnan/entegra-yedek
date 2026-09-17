@@ -40,6 +40,12 @@ public static class OnayUclari
         public string? Karar { get; set; }
         public string? Gerekce { get; set; }
         public decimal? YaziliSaat { get; set; }
+        /// <summary>
+        /// KISMİ ONAY: kararla birlikte ölçüyü DÜŞÜRMEK (iskontoda "%20
+        /// istendi, %10 verildi"). Verilirse yalnız "onayla" ile anlamlıdır;
+        /// yükseltilemez. Ölçü düşünce gerekmeyen ileri basamaklar atlanır.
+        /// </summary>
+        public decimal? Olcu { get; set; }
     }
 
     public static void OnayUclariniEkle(this IEndpointRouteBuilder yol)
@@ -201,7 +207,8 @@ public static class OnayUclari
             await using var baglanti = await veri.AcAsync(iptal);
 
             var b = await baglanti.TekAsync("""
-                select v.rol, v.akis_kod as "akisKod", v.adim_ad as "adimAd"
+                select v.rol, v.akis_kod as "akisKod", v.adim_ad as "adimAd",
+                       v.onay_id as "onayId", v.olcu
                   from public.v_onay_bekleyen v
                  where v.kaynak_tur = @p0 and v.kaynak_id = @p1
                  order by v.sira limit 1
@@ -210,13 +217,34 @@ public static class OnayUclari
 
             var akisKod = b["akisKod"] as string ?? "";
             var rol = Convert.ToInt16(b["rol"] ?? (short)0);
+            var onayId = Convert.ToInt64(b["onayId"]);
+            var mevcutOlcu = Convert.ToDecimal(b["olcu"] ?? 0m);
 
             // YETKİ AKIŞIN KENDİ MODÜLÜNDEN: basamağın rolü satınalmanın
             //   yetki koduysa satınalmanınkini isteriz. Motorun içine
             //   taşımadık - her modülün yetki haritası motora dolardı.
             baglam.AksiyonIste(AksiyonKodu(akisKod, rol));
 
+            // ÖLÇÜ SINIRI AKIŞIN KENDİ MODÜLÜNDEN: "en çok kaç verebilirsin"
+            //   sorusu yetki koduyla değil, yetkinin DEĞERİYLE cevaplanır ve
+            //   yalnız bazı modüllerde vardır. Karar yazılmadan önce sorulur.
+            var etkinOlcu = istek.Olcu ?? mevcutOlcu;
+            if (kararKodu is Servisler.OnayMotoru.Onaylandi
+                          or Servisler.OnayMotoru.SozluOnay)
+                OlcuSiniriDogrula(akisKod, etkinOlcu, baglam);
+
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            // KISMİ ONAY KARARDAN ÖNCE: ölçü düşürülünce gerekmeyen ileri
+            //   basamaklar atlanır, sonra karar yazılır. Ters sırada olsaydı
+            //   karar "sıradaki basamak" olarak az sonra atlanacak bir
+            //   basamağı gösterir, bildirim de oraya giderdi.
+            Servisler.OnayMotoru.OlcuSonucu? olcuSonucu = null;
+            if (istek.Olcu is not null
+                && kararKodu is Servisler.OnayMotoru.Onaylandi
+                             or Servisler.OnayMotoru.SozluOnay)
+                olcuSonucu = await onay.OlcuDusurAsync(baglanti, islem, onayId,
+                    istek.Olcu.Value, baglam, iptal);
 
             var sonuc = await onay.KararAsync(baglanti, islem, kaynakTur, kaynakId,
                 kararKodu, istek.Gerekce, baglam, istek.YaziliSaat ?? 24, iptal);
@@ -230,7 +258,10 @@ public static class OnayUclari
                 new
                 {
                     karar, basamak = sonuc.Sira, rol = sonuc.Rol, adim = sonuc.AdimAd,
-                    akis = akisKod, gerekce = istek.Gerekce, kayitDurum
+                    akis = akisKod, gerekce = istek.Gerekce, kayitDurum,
+                    olcu = olcuSonucu is null ? null
+                         : $"{olcuSonucu.EskiOlcu:0.##} -> {olcuSonucu.YeniOlcu:0.##}",
+                    atlanan = olcuSonucu?.AtlananAdim
                 }, iptal: iptal);
 
             await islem.CommitAsync(iptal);
@@ -258,7 +289,9 @@ public static class OnayUclari
             {
                 karar, basamak = sonuc.Sira, adim = sonuc.AdimAd, bildirim = haberler,
                 zincirDurum = sonuc.ZincirDurum, sonrakiBasamak = sonuc.SonrakiSira,
-                kayitDurum, yaziliSon = sonuc.YaziliSon, izlemeNo = baglam.IzlemeNo
+                kayitDurum, yaziliSon = sonuc.YaziliSon,
+                olcu = olcuSonucu?.YeniOlcu, atlananBasamak = olcuSonucu?.AtlananAdim,
+                izlemeNo = baglam.IzlemeNo
             });
         });
     }
@@ -295,6 +328,15 @@ public static class OnayUclari
             4 => "demirbas.onarim_onay_mali",
             _ => "demirbas.onarim_onay_ust",
         },
+        // İSKONTO (754). Rol 1 birim, 4 mali, 5 üst yönetim - satınalmadaki
+        //   rol düzeniyle aynı, çünkü ikisi de kurumun parasına dokunur ve
+        //   aynı imza hiyerarşisinden geçer.
+        "belge.iskonto" => rol switch
+        {
+            1 => "belge.iskonto_onay_birim",
+            4 => "belge.iskonto_onay_mali",
+            _ => "belge.iskonto_onay_ust",
+        },
         "personel.avans" => rol switch
         {
             0 => "ik.avans_onay_amir",
@@ -305,6 +347,33 @@ public static class OnayUclari
         _ => throw GentegreHatasi.IsKurali(
             $"Bu akışın karar yetkisi tanımlı değil: {akisKod}."),
     };
+
+    /// <summary>
+    /// ÖLÇÜ TAVANI (754) — bazı akışlarda onaylayanın verebileceği en büyük
+    /// değer yetkinin DEĞERİNDE saklıdır ("bu kişi en çok %10 iskonto
+    /// verebilir"). Bu yetki kodunun kendisiyle sorulamaz: kod "sıra sende
+    /// mi" sorusunu, değer "en çok kaç" sorusunu cevaplar.
+    ///
+    /// Tavansız akışlar buradan sessizce geçer - her modüle tavan uydurmak,
+    /// olmayan bir sınırı varmış gibi göstermek olurdu.
+    /// </summary>
+    private static void OlcuSiniriDogrula(string akisKod, decimal olcu,
+                                          IstekBaglami baglam)
+    {
+        if (akisKod != "belge.iskonto") return;
+
+        // 661'den beri iskonto tavanı `basvuru.iskonto` yetkisinin sayısal
+        //   değeridir; 754 basamak yetkilerini eklerken onu KALDIRMADI,
+        //   çünkü basamağı hak etmek ile oranı hak etmek ayrı şeylerdir.
+        var tavan = baglam.Yetkiler.AksiyonDegeri("basvuru.iskonto");
+        if (tavan <= 0)
+            throw GentegreHatasi.IsKurali(
+                "İskonto onay tavanınız tanımlı değil; bu kararı veremezsiniz.");
+        if (olcu > tavan)
+            throw GentegreHatasi.Dogrulama(
+                $"Onaylanan oran yetkinizin üstünde (en çok %{tavan:0.##}).",
+                new AlanHatasi("olcu", $"En çok %{tavan:0.##}."));
+    }
 
     /// <summary>
     /// Zincir bitince kaydın kendi durumunu yazar. Zincir yürüyorsa kayda
@@ -362,6 +431,25 @@ public static class OnayUclari
                      where id = @p0
                     """, islem, [kaynakId, onarimDurum, baglam.KullaniciId], iptal);
                 return onarimDurum;
+
+            case "belge.iskonto":
+                // SATIRA YAZAN TEK YER `fn_iskonto_talep_karar` (662): oranı
+                //   satırlara yazmak ve satırları kilitlemek ayrılamaz iki
+                //   iştir. Zincir bitince onu çağırıyoruz; onaylanan oran
+                //   `onay.olcu`dur - kısmi onayda düşürülmüş hâli.
+                short iskontoDurum = zincirDurum == Servisler.OnayMotoru.ZincirOnaylandi
+                                   ? (short)1 : (short)2;
+                var olcu = await baglanti.TekDegerAsync<decimal>("""
+                    select olcu from public.onay
+                     where kaynak_tur = 1256 and kaynak_id = @p0
+                     order by id desc limit 1
+                    """, islem, [kaynakId], iptal);
+                await baglanti.CalistirAsync(
+                    "select public.fn_iskonto_talep_karar(@p0, @p1, @p2, @p3, @p4)",
+                    islem, [(int)kaynakId, iskontoDurum,
+                            iskontoDurum == 1 ? olcu : 0m,
+                            gerekce ?? "", baglam.KullaniciId], iptal);
+                return iskontoDurum;
 
             case "personel.izin":
                 // 2 onaylı · 3 reddedildi (personel_izin.durum).

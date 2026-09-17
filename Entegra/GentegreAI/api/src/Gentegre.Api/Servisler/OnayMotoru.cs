@@ -354,6 +354,91 @@ public sealed class OnayMotoru
             liste.FirstOrDefault(x => x.Durum is Bekliyor or BilgiIstendi)?.Sira);
     }
 
+    // ====================================================== kısmi onay ==
+
+    /// <summary>Ölçü düşürüldüğünde atlanan basamak sayısı ve yeni ölçü.</summary>
+    public sealed record OlcuSonucu(decimal EskiOlcu, decimal YeniOlcu, int AtlananAdim);
+
+    /// <summary>
+    /// KISMİ ONAY: ölçüyü DÜŞÜREREK onaylamak.
+    ///
+    /// İskonto onayında yetkili talebi düşürerek onaylar (%20 istendi, %10
+    /// verildi). Ölçü düşünce o ölçüye göre GEREKMEYEN ileri basamaklar
+    /// ortada kalır: %30 üst yönetime gidiyorsa ve mali işler %8'e indirdiyse,
+    /// üst yönetimin imzası artık var olmayan bir iş için istenmiş olur.
+    /// Bekletmek talebi günlerce açık tutar, silmek ise "bu imza neden
+    /// alınmadı" sorusunu cevapsız bırakır - <c>durum = 5 (atlandı)</c>
+    /// ikisini de çözer ve gerekçesi kaydın içinde kalır.
+    ///
+    /// YALNIZ DÜŞÜRÜLÜR. Yükseltmek yeni basamaklar doğururdu ve zaten karar
+    /// vermiş olanların imzası başka bir rakama verilmiş sayılırdı; yetkili
+    /// daha yüksek bir oran istiyorsa kendi talebini açar.
+    ///
+    /// GEÇMİŞ BASAMAĞA DOKUNULMAZ: yalnız bekleyenler (durum 0) atlanır.
+    /// </summary>
+    public async Task<OlcuSonucu> OlcuDusurAsync(
+        NpgsqlConnection baglanti, NpgsqlTransaction? islem, long onayId,
+        decimal yeniOlcu, IstekBaglami baglam, CancellationToken iptal = default)
+    {
+        var n = await baglanti.TekAsync("""
+            select o.olcu, o.akis_id as "akisId", o.bayraklar, o.durum
+              from public.onay o where o.id = @p0
+            """, islem, [onayId], OkuyucuGenisletmeleri.Sozluk, iptal)
+            ?? throw GentegreHatasi.Bulunamadi("Onay zinciri bulunamadı.");
+
+        if (Convert.ToInt16(n["durum"]) != 0)
+            throw GentegreHatasi.IsKurali("Sonuçlanmış zincirin ölçüsü değiştirilemez.");
+
+        var eski = Convert.ToDecimal(n["olcu"]);
+        if (yeniOlcu > eski)
+            throw GentegreHatasi.IsKurali(
+                $"Ölçü yükseltilemez ({eski:0.##} yerine {yeniOlcu:0.##} "
+                + "istendi); daha yükseğini isteyen yeni bir talep açmalı.");
+        if (yeniOlcu == eski) return new OlcuSonucu(eski, eski, 0);
+
+        await baglanti.CalistirAsync("""
+            update public.onay set olcu = @p1,
+                   degistiren = @p2, degistirme_tarihi = now()
+             where id = @p0
+            """, islem, [onayId, yeniOlcu, baglam.KullaniciId], iptal);
+
+        // YENİ ÖLÇÜYLE HANGİ BASAMAKLAR GEREKLİ: seçim, zincir kurulurken
+        //   kullanılan metodun AYNISI - ikinci bir eşik yorumu yazsaydık
+        //   kurulan zincir ile kısaltılan zincir farklı kurallara uyardı.
+        var akisId = n["akisId"] as int?;
+        if (akisId is null) return new OlcuSonucu(eski, yeniOlcu, 0);
+
+        var gerekli = await SecilenAdimlarAsync(baglanti, islem, akisId.Value,
+            yeniOlcu, n["bayraklar"] as string ?? "", iptal);
+        var gerekliAdlar = gerekli.Select(a => a.Ad).ToHashSet(StringComparer.Ordinal);
+
+        // EŞLEŞME AD ÜZERİNDEN: yürüyen zincirin sırası yeniden numaralanmış
+        //   olduğu için (SecilenAdimlarAsync 1'den sayar) tanım sırası ile
+        //   basamak sırası birbirini tutmaz; basamağın adı ise tanımdan
+        //   kopyalanır ve akış içinde benzersizdir.
+        //   SIRASI GELEN BASAMAK ATLANMAZ: ölçüyü düşüren kararı veren odur.
+        //   Kendi eşiğinin altına inen bir basamak da (mali işler %30'u %8'e
+        //   indirdiğinde mali işlerin kendi eşiği %10'dur) atlanmış sayılsaydı,
+        //   az önce atılan imza kaydın içinde "gerekmedi" diye görünürdü.
+        var atlanan = await baglanti.TekDegerAsync<int>("""
+            with atla as (
+                update public.onay_adim
+                   set durum = 5, karar_zamani = now(),
+                       gerekce = @p2,
+                       degistiren = @p3, degistirme_tarihi = now()
+                 where onay_id = @p0 and durum = 0 and not (ad = any(@p1))
+                   and sira > coalesce((select min(a2.sira) from public.onay_adim a2
+                                         where a2.onay_id = @p0 and a2.durum in (0, 3)), 0)
+                returning 1)
+            select count(*)::int from atla
+            """, islem,
+            [onayId, gerekliAdlar.ToArray(),
+             $"Ölçü {yeniOlcu:0.##}'e düşürüldüğü için gerekmedi",
+             baglam.KullaniciId], iptal);
+
+        return new OlcuSonucu(eski, yeniOlcu, atlanan);
+    }
+
     /// <summary>Kaydın yürüyen zinciri (yoksa null).</summary>
     public static async Task<long?> AcikOnayIdAsync(
         NpgsqlConnection baglanti, NpgsqlTransaction? islem,

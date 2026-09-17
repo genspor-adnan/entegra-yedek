@@ -34,9 +34,23 @@ export const iskontoUclari = {
     gonder<{ id: number }>('/api/iskonto-talep',
       { belgeId, oran, gerekce, kalemler }),
 
+  /**
+   * ONAY/RET OMURGADAN (754): iskontonun kendi karar ucu yok, talep
+   * `belge.iskonto` zincirinde yuruyor (kaynak_tur 1256).
+   *
+   * KISMI ONAY = OLCUYU DUSURMEK: `olcu` verilince zincirin olcusu o orana
+   * cekilir ve o orana artik gerekmeyen ileri basamaklar ATLANIR - %30 ust
+   * yonetime gidiyorsa ve mali isler %8'e indirdiyse ust yonetimin imzasi
+   * ortadan kalkmis bir is icin istenmis olurdu.
+   */
   iskontoOnayla: (id: number, oran: number, not: string) =>
-    gonder<{ durum: number }>(`/api/iskonto-talep/${id}/onay`, { oran, not }),
+    gonder<{ zincirDurum: number; kayitDurum: number | null;
+             olcu: number | null; atlananBasamak: number | null }>(
+      `/api/onay/kayit/1256/${id}/karar`,
+      { karar: 'onayla', olcu: oran, gerekce: not }),
 
   iskontoReddet: (id: number, not: string) =>
-    gonder<{ durum: number }>(`/api/iskonto-talep/${id}/ret`, { oran: 0, not }),
+    gonder<{ zincirDurum: number; kayitDurum: number | null }>(
+      `/api/onay/kayit/1256/${id}/karar`,
+      { karar: 'reddet', gerekce: not }),
 };

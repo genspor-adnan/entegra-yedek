@@ -569,7 +569,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_onay_akis_adim` | `742_onay_akis_ekrani.sql` | — |
 | `v_onay_akis_lookup` | `746_onay_bildirim_vekalet.sql` | — |
 | `v_onay_bekleyen` | `745_onay_sirasi_gelen.sql` | 738_onay_omurgasi.sql |
-| `v_onay_kutusu` | `753_avans_modulu.sql` | 739_onay_gelen_kutusu.sql, 744_izin_onay_kutusu.sql, 752_onarim_onayi.sql |
+| `v_onay_kutusu` | `754_iskonto_omurga.sql` | 739_onay_gelen_kutusu.sql, 744_izin_onay_kutusu.sql, 752_onarim_onayi.sql, 753_avans_modulu.sql |
 | `v_onay_vekalet` | `746_onay_bildirim_vekalet.sql` | — |
 | `v_personel_avans` | `753_avans_modulu.sql` | — |
 | `v_personel_izin` | `743_izin_modulu.sql` | — |

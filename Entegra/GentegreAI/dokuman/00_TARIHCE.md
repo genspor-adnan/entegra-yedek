@@ -11232,3 +11232,101 @@ eklendi.
 **Kalan.** İskonto talebi ve doküman onayının omurgaya taşınması,
 `satinalma_onay` tablosunun düşürülmesi. Göç **753 yalnız docker'da** -
 bulut ekspert artık hedef değil (kullanıcı kararı, 17.09.2026).
+
+
+## 17.09.2026 — İskonto talebi onay omurgasına taşındı (`db/754`)
+
+662'de iskonto onayı **tek basamaklıydı**: tavanı yeten herkes talebi zilinde
+görüyor, ilk basan kararı veriyordu. Tavanı %100 olan biri %40'lık indirimi
+tek başına verebiliyor, "sıra kimdeydi, kim atladı" sorularının cevabı
+olmuyordu. Talep artık 738 omurgasında yürüyor: akış `belge.iskonto`,
+kaynak_tur **1256**, ölçü **iskonto oranı (%)**.
+
+**Zincir:** Birim Sorumlusu (her talepte) → %10 üstü Mali İşler → %25 üstü
+Üst Yönetim → kilitli satıra ikinci indirimde (`tekrar_iskonto`) Üst Yönetim.
+
+**Eşik yüzde, tutar değil.** Aynı %30 hem 200 TL'lik hem 20.000 TL'lik bir
+başvuruda kurumun fiyat politikasına aynı ölçüde dokunur. Tutar eşiği isteyen
+kurum ikinci bir akış tanımlar - eşik adımın kendi özelliğidir.
+
+**Kısmi onay = ölçüyü düşürerek onaylamak.** 662'nin en değerli davranışı
+kısmi onaydı (%20 istendi, %10 verildi) ve omurgada karşılığı yoktu. Artık
+`onay.olcu` yeni orana çekiliyor ve o orana **gerekmeyen ileri basamaklar
+`durum = 5 (atlandı)`** ile kapanıyor: %30 üst yönetime gidiyorsa ve mali
+işler %8'e indirdiyse, üst yönetimin imzası ortadan kalkmış bir iş için
+istenmiş olur. Bekletmek talebi günlerce açık tutardı, silmek ise "bu imza
+neden alınmadı" sorusunu cevapsız bırakırdı. **Sırası gelen basamak
+atlanmaz** - ölçüyü düşüren kararı veren odur; kendi eşiğinin altına inse
+bile az önce atılan imza "gerekmedi" diye görünemez. Ölçü **yükseltilemez**:
+daha yükseğini isteyen yeni bir talep açar (662 kuralı).
+
+Bu davranış iskontoya özel bir uç değil, **karar ucunun genel bir alanı**
+(`olcu`): satınalmada da bir onaylayan tutarı düşürerek onaylayabilir.
+Basamak seçimi, zincir kurulurken kullanılan `SecilenAdimlarAsync`'in
+aynısından geçiyor - ikinci bir eşik yorumu yazsaydık kurulan zincir ile
+kısaltılan zincir farklı kurallara uyardı.
+
+**Ne değişmedi.** `iskonto_talep` / `iskonto_talep_satir` tabloları duruyor:
+talebin kendi verisi (hangi satırlar, kalem oranları, talep anındaki fiyat)
+omurgaya ait değil. `fn_iskonto_talep_karar` da duruyor ve **satıra yazan tek
+yer** o kalıyor - oranı yazmak ile satırı kilitlemek ayrılamaz iki iştir.
+Zincir bitince omurga onu çağırıyor; ara basamakta kimse satıra dokunmuyor.
+Onaylanan oran `onay.olcu`dur, yani kısmi onayda düşürülmüş hâli.
+
+**İkinci karar ucu bırakılmadı.** `/api/iskonto-talep/{id}/onay` ve `/ret`
+kaldırıldı; karar `/api/onay/kayit/1256/{id}/karar`dan veriliyor. İki yol
+kalsaydı biri zinciri yürütür, öteki doğrudan `fn_iskonto_talep_karar`
+çağırır ve sıradaki basamak hiç sorulmadan talep kapanırdı. Web istemcisinin
+`iskontoOnayla` / `iskontoReddet` imzaları aynı kaldı, yalnız adresleri
+değişti - onay ekranı ve modal değişmedi.
+
+**Zil artık sırayı gösteriyor.** Süzgeç "durum 0 ve oran ≤ tavanım" değil,
+"sırası bende olan basamak" (`v_onay_bekleyen`, vekâlet dâhil). Bütün zinciri
+göstermek, üst yönetimin birim sorumlusunun basamağını imzalaması demekti -
+745'te aynı hata onay kutusunda düzeltilmişti. Tavan süzgeci kaldı: basamağı
+hak etmek ile oranı hak etmek ayrı şeylerdir.
+
+**Talep açmak = zinciri başlatmak**, aynı işlemde. Depo kendi işlemini
+açsaydı, talep yazıldıktan sonra zincir kurulurken bir hata olunca onaya hiç
+düşmeyecek bir talep kalırdı ve kimse onu beklediğini bilmezdi.
+
+**Mevcut veri taşındı.** Sonuçlanmış talepler **tek basamakla** kopyalandı
+(o karar gerçekten tek kişinin imzasıydı; bugünkü akışa göre üç basamak
+uydurmak, alınmamış iki imzayı alınmış göstermek olurdu). Bekleyenler gerçek
+zincire bağlandı - önlerinde zaten karar verilmemiş bir yol vardı. Bayrak
+koşullu basamak geçmişe uygulanmadı.
+
+**Bu turda bulunan iki kusur.**
+- Onay kutusunun **Tür** rozeti yalnız satınalmayı tanıyordu; izin, onarım,
+  avans ve iskonto "Diğer" görünüyordu. Karar verecek kişiye önüne düşen
+  şeyin ne olduğunu söylemeyen bir rozetti; beş akış da eklendi.
+- `OnayBildirimi`'nin **kendi** yetki haritası var (kutunun değil). İskonto
+  oraya yazılmasaydı sırası gelen kimseye haber gitmez, talep kimsenin
+  görmediği bir kuyrukta beklerdi. Dal eklendi ve boş dönüşün ne anlama
+  geldiği yorumlandı.
+
+**Doğrulama.** %30'luk talep üç basamaklı zincir kurdu; oran yükseltme
+reddedildi; birim sorumlusu onayladı; mali işler %8'e düşürerek onayladı →
+üst yönetim basamağı "Ölçü 8'e düşürüldüğü için gerekmedi" gerekçesiyle
+atlandı, zincir onaylandı, satıra %8 yazılıp kilitlendi. Kilitli satıra
+açılan ikinci talep `tekrar_iskonto` bayrağıyla Üst Yönetim basamağı aldı;
+gerekçesiz ret engellendi, gerekçeli ret talebi kapattı. Arayüzde
+(Playwright) iskonto onay ekranından verilen karar zinciri **ilerletti**
+(talep açık kaldı, satıra yazılmadı) - eskiden aynı tık talebi kapatırdı;
+zil ve onay kutusu talebi "İskonto · hasta · kalem sayısı" olarak gösterdi.
+xUnit 232/232, vitest 598/598, iki derleme temiz. Test verisi silindi,
+satırların iskontosu `onceki_iskonto`dan geri yazıldı.
+
+**Not: `kaynak_tur` çakışması.** Katalogdaki `LogTabloId` uzayında 905, 906,
+907 ve 908 birden fazla tabloda kullanılıyor (izin hakediş / resmî tatil /
+avans / avans kesinti, sırasıyla eğitim-randevu / hekim-acil kişi / hasta /
+hasta kurum ile). Omurgayı bugün ilgilendiren tek çakışma **907 (avans ↔
+`taraf_hasta`)**: hastaya zincir açılmadığı için çalışma anında karışmıyor
+ama `onay.kaynak_tur = 907` iki tabloyu birden gösterebiliyor. İskontoya bu
+yüzden yeni ve boş bir numara (1256) verildi. Avansın numarasını değiştirmek
+`kasa_islem.kaynak_tur`'u da ilgilendirdiği için ayrı bir tura bırakıldı.
+
+**Kalan.** Doküman onayının omurgaya taşınması, `satinalma_onay` tablosunun
+düşürülmesi, 905-908 `LogTabloId` çakışmalarının ayıklanması. Göç **754
+yalnız docker'da** - bulut ekspert artık hedef değil (kullanıcı kararı,
+17.09.2026).

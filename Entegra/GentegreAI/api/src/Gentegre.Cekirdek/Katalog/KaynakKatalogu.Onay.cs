@@ -31,8 +31,17 @@ public static partial class KaynakKatalogu
             new("onayId", "v.onay_id", "sayi", "Onay", Varsayilan: false),
             new("kaynakTur", "v.kaynak_tur", "sayi", "Kayıt Türü", Varsayilan: false),
             new("kaynakId", "v.kaynak_id", "sayi", "Kayıt Id", Varsayilan: false),
+            // TÜR ROZETİ HER AKIŞ İÇİN: kutu beş modülü birden taşıyor ve
+            //   "Diğer" yazan bir rozet, karar verecek kişiye önüne düşen
+            //   şeyin ne olduğunu söylemez. Yeni akış eklenince buraya da
+            //   bir dal gelir (v_onay_kutusu'ndaki dalın eşi).
             new("turAdi",
-                "case v.kaynak_tur when 1241 then 'Satınalma Talebi' else 'Diğer' end",
+                "case v.kaynak_tur when 1241 then 'Satınalma Talebi'" +
+                " when 904  then 'İzin'" +
+                " when 1224 then 'Onarım'" +
+                " when 907  then 'Avans'" +
+                " when 1256 then 'İskonto'" +
+                " else 'Diğer' end",
                 "metin", "Tür", Hizalama: "orta", Genislik: 150, Bicim: "rozet",
                 Filtrelenebilir: false),
             new("kayitNo", "v.kayit_no", "metin", "Kayıt No", Genislik: 130),

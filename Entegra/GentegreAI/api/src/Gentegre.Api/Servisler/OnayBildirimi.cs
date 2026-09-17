@@ -259,6 +259,16 @@ public sealed class OnayBildirimi
             4 => "ik.avans_onay_mali",
             _ => "ik.avans_onay_ust",
         },
+        "belge.iskonto" => rol switch
+        {
+            1 => "belge.iskonto_onay_birim",
+            4 => "belge.iskonto_onay_mali",
+            _ => "belge.iskonto_onay_ust",
+        },
+        // BOŞ = ALICI YOK, HATA YOK: bildirim kararı düşürmez. Ama akış
+        //   eklenip buraya dal gelmezse sırası gelen kimseye HABER GİTMEZ
+        //   ve talep kimsenin görmediği bir kuyrukta bekler - yeni akış
+        //   eklerken OnayUclari.AksiyonKodu ile birlikte burası da yazılmalı.
         _ => "",
     };
 

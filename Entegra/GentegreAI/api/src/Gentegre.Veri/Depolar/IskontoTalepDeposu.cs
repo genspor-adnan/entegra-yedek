@@ -137,28 +137,41 @@ public sealed class IskontoTalepDeposu
     }
 
     /// <summary>
-    /// ZİLE DÜŞENLER: bekleyen talepler, YALNIZ tavanı yeten kullanıcıya.
-    /// Tavanı %10 olan birine %20'lik talep gösterilmez - onaylayamayacağı bir
-    /// işi listede tutmak, talebi bekletirken kimsenin üstlenmediği bir kuyruk
-    /// yaratırdı.
+    /// ZİLE DÜŞENLER (754: artık omurgadan).
     ///
-    /// "İlk onaylayandan sonra ötekilerde görünmesin" (663) için ek bir şey
-    /// gerekmez: süzgeç <c>durum = 0</c>'dır, karar verilen talep herkesin
-    /// listesinden aynı anda düşer.
+    /// 662'de süzgeç "durum = 0 ve oran &lt;= tavanım" idi: tavanı yeten HERKES
+    /// talebi görüyor, ilk basan kararı veriyordu. Artık talebin sırası var;
+    /// zil YALNIZ SIRASI KENDİSİNDE OLAN basamağı gösterir. Bütün zinciri
+    /// göstermek, üst yönetimin birim sorumlusunun basamağını imzalaması
+    /// demekti (745'te aynı hata onay kutusunda düzeltildi).
+    ///
+    /// TAVAN SÜZGECİ KALDI: basamağı hak etmek ile oranı hak etmek ayrı
+    /// şeylerdir - sırası kendisinde olsa bile tavanı yetmeyen kişi o oranı
+    /// onaylayamaz, listede tutmak kuyruğu kimsenin üstlenmediği bir işe
+    /// çevirirdi. (Kısmi onayla düşürerek onaylayabileceği için tavan
+    /// TALEBİN oranıyla değil, sıfırla karşılaştırılır: tavanı olan görür.)
     /// </summary>
     public async Task<IReadOnlyList<IskontoTalebi>> BekleyenlerAsync(
-        int subeId, decimal tavan, CancellationToken iptal = default)
+        int subeId, int kullaniciId, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         var sonuc = new List<IskontoTalebi>();
         await using (var komut = baglanti.Komut(
             SecimSql + """
              where t.durum = 0
-               and t.oran <= @p1
+               and exists (
+                   select 1 from public.v_onay_bekleyen v
+                    where v.kaynak_tur = 1256 and v.kaynak_id = t.id
+                      and (v.atanan_kullanici_id is null
+                           or v.atanan_kullanici_id = @p1
+                           or exists (select 1 from public.onay_vekalet k
+                                       where k.devreden_id = v.atanan_kullanici_id
+                                         and k.devralan_id = @p1 and k.aktif = 1
+                                         and current_date between k.baslangic and k.bitis)))
                -- Şube süzmesi SUNUCUDA (API §7): başka şubenin talebi hiç dönmez.
                and (@p0 = 0 or t.sube_id is null or t.sube_id = @p0)
              order by t.istek_ts
-            """, null, subeId, tavan))
+            """, null, subeId, kullaniciId))
         {
             await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
             while (await okuyucu.ReadAsync(iptal)) sonuc.Add(Oku(okuyucu));
@@ -230,20 +243,23 @@ public sealed class IskontoTalepDeposu
     /// Talep acar. <paramref name="kalemler"/> KALEM BAZLI oranlari tasir (673);
     /// baslik orani bunlarin EN YUKSEGIDIR - yetki tavani onunla olculur,
     /// cunku siniri zorlayan kalem odur.
+    ///
+    /// BAGLANTI VE ISLEM DISARIDAN (754): talep ile onay zinciri AYNI islemde
+    /// dogmali. Depo kendi islemini acsaydi, talep yazildiktan sonra zincir
+    /// kurulurken bir hata olunca ortada onaya HIC dusmeyecek bir talep
+    /// kalirdi - ve kimse onu bekledigini bilmezdi.
     /// </summary>
-    public async Task<int> TalepAcAsync(int belgeId, decimal oran, string gerekce,
-        IReadOnlyList<(int SatirId, decimal Oran)> kalemler, YazmaBaglami baglam,
+    public static async Task<int> TalepAcAsync(NpgsqlConnection baglanti,
+        NpgsqlTransaction islem, int belgeId, decimal oran, string gerekce,
+        IReadOnlyList<(int SatirId, decimal Oran)> kalemler, int kullaniciId,
         int subeId, CancellationToken iptal = default)
     {
-        await using var baglanti = await _veri.AcAsync(iptal);
-        await using var islem = await baglanti.BeginTransactionAsync(iptal);
-
         await using var basKomut = baglanti.Komut("""
             insert into public.iskonto_talep
                    (belge_id, sube_id, oran, gerekce, durum, isteyen_id, ekleyen)
             values (@p0, nullif(@p1, 0), @p2, @p3, 0, @p4, @p4)
             returning id
-            """, islem, belgeId, subeId, oran, gerekce, baglam.KullaniciId);
+            """, islem, belgeId, subeId, oran, gerekce, kullaniciId);
         var id = (int)(await basKomut.ExecuteScalarAsync(iptal))!;
 
         // SATIRIN O ANKİ FİYATI saklanır: onay ertesi gün gelse de yetkilinin
@@ -261,17 +277,24 @@ public sealed class IskontoTalepDeposu
             """, islem, id, belgeId, idler, oranlar);
         await satirKomut.ExecuteNonQueryAsync(iptal);
 
-        await islem.CommitAsync(iptal);
         return id;
     }
 
-    public async Task KararAsync(int talepId, short onay, decimal oran, string not,
-        YazmaBaglami baglam, CancellationToken iptal = default)
+    /// <summary>
+    /// TEKRAR İNDİRİM Mİ (754): seçilen satırlardan biri zaten ONAYLI bir
+    /// iskonto taşıyor mu (`iskonto_kilit = 1`). Taşıyorsa üstüne yazılacak
+    /// indirim, verilmiş bir kararı değiştirmektir ve oranı küçük olsa bile
+    /// zincire üst yönetim basamağı ekler.
+    /// </summary>
+    public static async Task<bool> TekrarIndirimMiAsync(NpgsqlConnection baglanti,
+        NpgsqlTransaction? islem, IReadOnlyList<int> satirIdler,
+        CancellationToken iptal = default)
     {
-        await using var baglanti = await _veri.AcAsync(iptal);
-        await using var komut = baglanti.Komut(
-            "select public.fn_iskonto_talep_karar(@p0, @p1, @p2, @p3, @p4)", null,
-            talepId, onay, oran, not, baglam.KullaniciId);
-        await komut.ExecuteNonQueryAsync(iptal);
+        if (satirIdler.Count == 0) return false;
+        await using var komut = baglanti.Komut("""
+            select count(*) from public.belge_satir
+             where id = any(@p0) and coalesce(iskonto_kilit, 0) = 1
+            """, islem, satirIdler.ToArray());
+        return Convert.ToInt64(await komut.ExecuteScalarAsync(iptal)) > 0;
     }
 }
