@@ -95,7 +95,11 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
 }) {
 /* SECIM: faturalama gridiyle AYNI desen - duz tik tek satir secer, Ctrl/Cmd
    ekler-cikarir, Shift aralik secer; basliktaki kutu tumunu secer. */
-const idler = tahsilatlar.map(k => Number(k.id ?? 0)).filter(Boolean);
+/* AVANS KULLANIM satirlari SECILEMEZ (781): silinecek/duzeltilecek bir kasa
+   islemi degil, mahsubun kendisidir - avans kartindan yonetilir. */
+const secilebilir = (k: Record<string, unknown>) => Number(k.avansKullanim ?? 0) === 0;
+const idler = tahsilatlar.filter(secilebilir)
+  .map(k => Number(k.id ?? 0)).filter(Boolean);
 const hepsi = idler.length > 0 && secili.length === idler.length;
 const cevir = (id: number) =>
   setSecili(secili.includes(id) ? secili.filter(x => x !== id) : [...secili, id]);
@@ -142,7 +146,8 @@ const satirTikla = (e: React.MouseEvent, sira: number, id: number) => {
   if (!id) return;
   if (e.shiftKey && capa.current != null) {
     const [bas, son] = capa.current <= sira ? [capa.current, sira] : [sira, capa.current];
-    setSecili(tahsilatlar.slice(bas, son + 1).map(k => Number(k.id ?? 0)).filter(Boolean));
+    setSecili(tahsilatlar.slice(bas, son + 1).filter(secilebilir)
+      .map(k => Number(k.id ?? 0)).filter(Boolean));
     return;
   }
   capa.current = sira;
@@ -453,7 +458,12 @@ return (
           </tr>
         ))}
         {tahsilatlar.map((k, i) => {
-          const kid = Number(k.id ?? 0);
+          // AVANS KULLANIMI (781): bu satir bir kasa islemi DEGIL, mahsubun
+          //   kendisidir - secilemez, cift tikla kart acilmaz. Kasa islemi
+          //   olarak duzeltilecek/silinecek bir sey yok; avansin kendisi
+          //   Hasta Avansları ekranindan yonetilir.
+          const avansSatiri = !secilebilir(k);
+          const kid = avansSatiri ? 0 : Number(k.id ?? 0);
           return (
           <tr key={i} className={kid && secili.includes(kid) ? 'secili' : ''}
               style={{ userSelect: 'none' }}
@@ -461,6 +471,9 @@ return (
               onDoubleClick={() => kid && tahsilatAcKart(kid)}>
             <td className="check" onClick={e => e.stopPropagation()}>
               <input type="checkbox" checked={!!kid && secili.includes(kid)} disabled={!kid}
+                     title={avansSatiri
+                       ? 'Avans kullanımı bir kasa işlemi değil - mahsup, Hasta Avansları ekranından yönetilir.'
+                       : undefined}
                      onChange={() => { if (kid) { capa.current = i; cevir(kid) } }} />
             </td>
             {/* Tarih + saat: ayni gun birden fazla tahsilat olunca

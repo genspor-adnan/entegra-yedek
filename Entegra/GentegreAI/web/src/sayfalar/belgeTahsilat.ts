@@ -185,13 +185,22 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
     if (!kayitliId) { setTahsilatlar([]); return }
     void (async () => {
       try {
-        const y = await api.liste('kasa-islem', {
+        // KAYNAK `belge-tahsilat` (781): belgeye dogrudan bagli kasa
+        //   islemleri + bu belgeye MAHSUP EDILEN avanslar ("Avans Kullanımı",
+        //   dagitilan tutar). `kasa-islem`den cekildiginde mahsup, avansin
+        //   kendi turu/tarihi/tam tutariyla goruluyordu - bugun kasaya nakit
+        //   girmis gibi (kullanici).
+        const y = await api.liste('belge-tahsilat', {
           sayfa: 1, boyut: 50,
           // ESKIDEN YENIYE (kullanici): tahsilat listesi bir hikaye - once
           //   alinan, sonra iade edilen. Sunucunun varsayilan sirasi (id
           //   tersi) iadeyi ait oldugu tahsilatin USTUNE koyuyordu. Ikincil
           //   olcut id: ayni gun girilen iki islem giris sirasini korur.
-          sirala: [{ alan: 'islemTarihi', yon: 'asc' }, { alan: 'id', yon: 'asc' }],
+          //   Ikincil olcut `kasaIslemId`: avans kullanim satirlarinin id'si
+          //   NEGATIF (iki dalin kimligi carpismasin) - 'id' ile siralamak
+          //   onlari listenin basina atardi.
+          sirala: [{ alan: 'islemTarihi', yon: 'asc' },
+                   { alan: 'kasaIslemId', yon: 'asc' }],
           // Iptal edilen islem (durum 3) ve onun TERS kaydi listeye girmez -
           //   ikisi de iptalIslemId tasir, toplami sisirmesinler.
           filtre: { op: 'and', kosullar: [

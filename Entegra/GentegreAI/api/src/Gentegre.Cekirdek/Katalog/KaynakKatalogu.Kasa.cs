@@ -440,6 +440,50 @@ public static partial class KaynakKatalogu
             new("subeId",        "ki.sube_id",           "sayi",  "Şube",      Varsayilan: false)
         });
 
+    // ---------------------------------------------------- belge tahsilati ----
+    /// <summary>
+    /// BELGENIN TAHSILAT SATIRLARI (781) - kart "Tahsilat" sekmesinin listesi.
+    ///
+    /// Eskiden dogrudan `kasa-islem` kaynagindan `belgeId` filtresiyle
+    /// cekiliyordu. Avans mahsubu, avansin KENDI kasa islemini belgeye
+    /// bagladigi icin satir "Nakit Tahsilat · avansin alindigi gun · avansin
+    /// TAM tutari" olarak goruluyordu - kullanici: "avanstan kullan dedigimde
+    /// tur AVANS olmali, bugun kasaya nakit girisi yok".
+    ///
+    /// `v_belge_tahsilat` iki kaynagi birlestirir: belgeye dogrudan bagli
+    /// islemler + bu belgeye DAGITILAN avanslar ("Avans Kullanımı", dagitilan
+    /// tutar, mahsup tarihi). Ikinci dalin id'si NEGATIFTIR: ayni kasa islemi
+    /// baska bir belgede de gorunebilir, kimlikler carpismasin.
+    /// </summary>
+    private static KaynakTanimi BelgeTahsilat() => new(
+        Ad: "belge-tahsilat",
+        YetkiKodu: "kasa_islem",
+        Kaynak: "public.v_belge_tahsilat t",
+        SubeKolonu: "t.sube_id",
+        VarsayilanSirala: "t.islem_tarihi, t.kasa_islem_id",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",            "t.id",            "sayi",  "Id", Varsayilan: false),
+            new("kasaIslemId",   "t.kasa_islem_id", "sayi",  "İşlem Id", Varsayilan: false),
+            new("belgeId",       "t.belge_id",      "sayi",  "Belge Id", Varsayilan: false),
+            new("islemTarihi",   "t.islem_tarihi",  "tarih", "Tarih", Hizalama: "orta", Bicim: "dd.MM.yyyy"),
+            new("islemNo",       "t.islem_no",      "metin", "Makbuz No"),
+            new("tur",           "t.tur",           "sayi",  "Tür Kodu", Varsayilan: false),
+            new("turAdi",        "t.tur_adi",       "metin", "İşlem", Genislik: 180),
+            new("hesapAdi",      "t.hesap_adi",     "metin", "Kasa / Banka", Genislik: 180),
+            new("tutar",         "t.tutar",         "para",  "Tutar", Hizalama: "sag", Bicim: "#,##0.00"),
+            new("yerelTutar",    "t.yerel_tutar",   "para",  "TL Tutar", Hizalama: "sag", Bicim: "#,##0.00", Varsayilan: false),
+            new("dovizCinsi",    "t.doviz_cinsi",   "metin", "Döviz", Hizalama: "orta", Varsayilan: false),
+            new("durum",         "t.durum",         "kod",   "Durum Kodu", Varsayilan: false),
+            new("iptalIslemId",  "t.iptal_islem_id", "sayi", "Ters İşlem", Varsayilan: false),
+            new("aciklama",      "t.aciklama",      "metin", "Açıklama", Genislik: 240, Varsayilan: false),
+            // Satirin AVANS KULLANIMI mi oldugu: istemci bu satirda secim
+            //   kutusu cizmez - silinecek/duzeltilecek bir kasa islemi degil,
+            //   mahsubun kendisidir (avans kartindan yonetilir).
+            new("avansKullanim", "t.avans_kullanim", "sayi", "Avans", Varsayilan: false),
+            new("subeId",        "t.sube_id",       "sayi",  "Şube", Varsayilan: false)
+        });
+
     // ------------------------------------------------------- hasta avansi ----
     /// <summary>
     /// HASTA AVANSLARI (779) - kullanici: "hastadan alinan avans tahsilati

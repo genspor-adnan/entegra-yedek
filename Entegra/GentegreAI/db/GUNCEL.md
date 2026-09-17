@@ -409,7 +409,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (235 ad, 58 tanesi birden cok dosyada)
+## Gorunumler (236 ad, 59 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -432,6 +432,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_belge_satir_izlem` | `115_izlem_depo.sql` | 114_belge_izlem.sql |
 | `v_belge_satir_tahsilat` | `471_dagilim_kapanma_tahsil.sql` | 321_tahsilat_satir_dagitim.sql, 323_tahsilat_kdv_dahil.sql |
 | `v_belge_sevkiyat` | `177_belge_sevkiyat.sql` | — |
+| `v_belge_tahsilat` | `782_avans_tahsilat_turu.sql` | 781_belge_tahsilat_avans_kullanimi.sql |
 | `v_belge_yazi_sablonu` | `768_belge_talep_yazisi.sql` | — |
 | `v_butce_durum` | `724_satinalma.sql` | — |
 | `v_cari_ekstre` | `111_ekstre_doviz_gruplu.sql` | 077_v_ekstre.sql, 097_ekstre_kaynak_kayit.sql |
@@ -499,8 +500,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_goz_unite_akis` | `691_goz_modulu.sql` | — |
 | `v_hakedis_ozet` | `330_prim_tahsilat_turu_durum.sql` | 324_prim_semasi.sql |
 | `v_hakedis_satir` | `363_hakedis_rol_isaret_kontrolu.sql` | 324_prim_semasi.sql, 330_prim_tahsilat_turu_durum.sql, 332_prim_zamani.sql |
-| `v_hasta_avans` | `780_avans_iadesi.sql` | 779_hasta_avansi.sql |
-| `v_hasta_avans_bakiye` | `780_avans_iadesi.sql` | 779_hasta_avansi.sql |
+| `v_hasta_avans` | `781_belge_tahsilat_avans_kullanimi.sql` | 779_hasta_avansi.sql, 780_avans_iadesi.sql |
+| `v_hasta_avans_bakiye` | `781_belge_tahsilat_avans_kullanimi.sql` | 779_hasta_avansi.sql, 780_avans_iadesi.sql |
 | `v_hasta_lookup` | `266_aday_hasta.sql` | 244_hasta_lookup.sql, 262_hasta_lookup_kimlik.sql, 263_hasta_lookup_cinsiyet_yas.sql, 264_hasta_lookup_cinsiyet_bos.sql |
 | `v_hasta_tibbi_ozet` | `420_hasta_tibbi_gecmis.sql` | — |
 | `v_hekim_calisma_istisna` | `718_hekim_calisma_plani.sql` | — |

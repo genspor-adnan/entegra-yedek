@@ -318,6 +318,8 @@ public static partial class KaynakKatalogu
         Ekle(KasaIslem());
         // Hasta avansi (779) - kasa isleminin hasta kirilimi.
         Ekle(HastaAvans());
+        // Belge tahsilat satirlari (781) - avans kullanimi ayri satir.
+        Ekle(BelgeTahsilat());
         Ekle(MuhasebeFis());
         Ekle(MuhasebeFisSatir());
         Ekle(PlanVade());

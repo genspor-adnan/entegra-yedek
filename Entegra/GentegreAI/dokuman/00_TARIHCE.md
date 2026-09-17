@@ -13267,3 +13267,47 @@ olsun"*. Hygieia kasesinin Unicode emojisi yok (⚕️ asa+yılandır, 🐍 yaln
 yılan), bu yüzden ameliyathane gibi uçta çizildi: `'@eczane'` → kadeh + sapına
 sarılan yılan SVG'si. Önceki 💊 hem alt grup "İTS" ile aynıydı hem eczacılığı
 değil ilacı anlatıyordu.
+
+## 17.09.2026 — Avans kullanımı kendi tahsilat türü oldu (781/782)
+
+Kullanıcı: *"başvuruda tahsilatta avanstan kullan dediğim zaman tahsilat
+türünün avans olması gerekir.. çünkü dün avans almışımdır kasaya nakit
+girmiştir, bugün onu kullanacağım, bugün nakit girişi yok.. kullandığım avans
+hastadan alınmış olan avanstan düşer"* ve *"avans da nakit/pos gibi tahsilat
+türü olacak"*.
+
+**Kusur.** 322'nin mahsubu avansın kasa işlemini belgeye bağlıyordu
+(`kasa_islem.belge_id`). Tahsilat sekmesi listeyi `kasa-islem` kaynağından
+çektiği için satır üç yönden yanlış okunuyordu: **tür** avansın kendi türü
+(Nakit Tahsilat) — bugün kasaya para girmiş gibi; **tutar** avansın tamamı —
+kısmi mahsupta belgeye sayılan kısım değil; **bağ** tek `belge_id` — avans iki
+başvuruya bölünürse biri kayboluyordu.
+
+**Yeni kasa işlemi AÇILMIYOR.** Para avans alındığı gün kasaya girdi; bugün
+olan tek şey o paranın bu belgeye sayılmasıdır. İkinci bir tahsilat kaydı aynı
+parayı kasaya iki kez sokardı.
+
+- **`v_belge_tahsilat` (781)** iki kaynağı birleştirir: belgeye doğrudan bağlı
+  kasa işlemleri + bu belgenin satırlarına **dağıtılmış** avanslar. Avans
+  satırının tutarı bu belgeye sayılan kadar, tarihi mahsup anı, hesabı boş
+  (bugün kasaya para girmedi). İkinci dalın id'si negatif: aynı kasa işlemi
+  başka belgede de görünebilir, kimlikler çakışmasın.
+- **Tür 27 · "Avans ile Tahsilat" (782)** — nakit/POS ile aynı rafta
+  (`grup='tahsilat'`), ama `ana_hesap_turu` boş, `bakiye_dahil=0`,
+  `cari_etkiler=0`, `fis_mi=0` ve `aktif=0`: kasa kartının "Yeni" listesinde
+  çıkmaz, elle seçilip işlem açılacak bir tür değil — mahsubun görünen adıdır.
+  Kod olmadan tür koduna bakan her yer (filtre, çip, döküm) satırı nakit
+  tahsilat sayıyordu.
+- **Mahsup artık `belge_id` yazmıyor** (KasaUclari): "hangi belgeye ne kadar"
+  dağıtımda duruyor. `v_hasta_avans`ın "Mahsup Belgesi" kolonu da dağıtımdan
+  çözülüyor - avans iki başvuruya bölünmüşse ikisi de yazılıyor.
+- Tahsilat listesinde avans satırı **seçilemez** (onay kutusu pasif, çift tık
+  kart açmaz): silinecek/düzeltilecek bir kasa işlemi değil; avansın kendisi
+  Hasta Avansları ekranından yönetilir.
+
+**Doğrulama.** Başvuru P-000133 (Sami Uzun): liste `15.09.2026 · Nakit
+Tahsilat · TL KASASI · -1.500,00` ve `17.09.2026 21:47 · **Avans ile
+Tahsilat** · — · 800,00`. Hasta Avansları'nda aynı avans `800 / 800 / 0 ·
+Kullanıldı · P-000133`. xUnit 250/250 (yeni `BelgeTahsilatGorunumuTestleri`:
+tür 27 + dağıtılan tutar, `belge_id` dolu olsa bile satır iki kez düşmez,
+normal tahsilat kendi türüyle kalır, tür 27 elle seçilemez), vitest 637/637.

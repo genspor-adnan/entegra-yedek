@@ -108,13 +108,12 @@ public static class KasaUclari
             }
         }
 
-        // Avans belgeye BAGLANIR: "bu para hangi belgeye sayildi" sorusunun
-        //   cevabi kasa isleminin kendisinde de dursun (belgesiz tahsilat).
-        if (yazilan > 0)
-            await baglanti.CalistirAsync("""
-                update public.kasa_islem set belge_id = coalesce(belge_id, @p1)
-                 where id = @p0
-                """, tx, [kasaIslemId, belgeId], iptal);
+        // BELGE BAGI YAZILMIYOR (781, kullanici: "avanstan kullan dedigimde
+        //   tur AVANS olmali... bugun nakit girisi yok"): 322 burada avansin
+        //   `belge_id`sini dolduruyordu ve belgenin tahsilat listesi o kasa
+        //   islemini kendi turu/tarihi/TAM tutariyla gosteriyordu. "Hangi
+        //   belgeye ne kadar sayildi" bilgisi DAGITIM satirlarinda duruyor;
+        //   liste `v_belge_tahsilat` ile oradan okuyor ("Avans Kullanımı").
 
         // SGK KATILIM PAYI EMANETI (473): tahsil edilen katilim payi hastanin
         //   borcundan dusmez, SGK'ya aittir - hasta carisinden SGK carisine
@@ -417,13 +416,14 @@ public static class KasaUclari
             await baglanti.CalistirAsync(
                 "select public.fn_sgk_katilim_emanet_yaz(@p0)", tx, [id], iptal);
 
-            // Belgesiz tahsilat dagitilinca belgeye BAGLANIR (322): avansin
-            //   hangi belgeye sayildigi kasa isleminden de okunabilsin.
-            if (yazilacak.Count > 0)
-                await baglanti.CalistirAsync("""
-                    update public.kasa_islem set belge_id = coalesce(belge_id, @p1)
-                     where id = @p0
-                    """, tx, [id, belgeId], iptal);
+            // BELGE BAGI YAZILMIYOR (781): 322'de avansin `belge_id`si
+            //   mahsupta doldruluyordu; sonuc, belgenin tahsilat listesinde
+            //   avansin KENDI kasa islemini "Nakit Tahsilat · avansin alindigi
+            //   gun · TAM tutar" olarak gostermekti (kullanici: "bugun kasaya
+            //   nakit girisi yok"). Avansin hangi belgeye ne kadar sayildigi
+            //   zaten DAGITIM satirlarinda; tek bir `belge_id` avans iki
+            //   basvuruya bolununce de yaniltiyordu. Liste artik
+            //   `v_belge_tahsilat` uzerinden dagitimi okuyor.
 
             await tx.CommitAsync(iptal);
 
