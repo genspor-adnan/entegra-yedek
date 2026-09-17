@@ -44,6 +44,7 @@
     <div class="sekme on" data-s="isemri">İş Emri</div>
     <div class="sekme" data-s="iscilik">İşçilik &amp; Parça<span class="sy">5</span></div>
     <div class="sekme" data-s="ucret">Ücret &amp; Belge</div>
+    <div class="sekme" data-s="ziyaret">Ziyaretler<span class="sy">2</span></div>
     <div class="sekme" data-s="emanet">Emanet &amp; Yedek</div>
     <div class="sekme" data-s="gecmis">Cihaz Geçmişi<span class="sy">7</span></div>
     <div class="sekme" data-s="belge">Belgeler<span class="sy">4</span></div>
@@ -217,16 +218,25 @@
       <div class="hdr k4">
         <div class="fld"><label>Fiyat listesi</label><div class="inp combo">Servis 2026</div></div>
         <div class="fld"><label>İskonto</label><div class="inp">%0</div></div>
-        <div class="fld"><label>Garanti kapsamı</label>
-          <div class="inp ro"><span class="rz kir">Kapsam dışı</span> — ücretli</div></div>
+        <div class="fld"><label>Kapsam</label>
+          <div class="inp combo"><span class="rz kir">Kapsam dışı</span> — ücretli</div></div>
         <div class="fld"><label>Teklif durumu</label>
           <div class="inp ro"><span class="rz sari">Gönderildi · onay bekliyor</span></div></div>
       </div>
       <div class="ic">
-        <b>Garanti / sözleşme kapsamındaysa</b> tutar hesaplanır ama <b>tahsil edilmez</b>:
-        satır "kapsam" işaretiyle sıfırlanır. Sıfır yazmak yerine kapsamı işaretlemek,
-        "bu işin maliyeti neydi" sorusunu sonradan da cevaplanabilir bırakır — firma
-        performansı ve sözleşme kârlılığı buradan ölçülür.
+        <b>Kapsam, tutarın KİME yazıldığını belirler</b> - dördü de ayrı davranır:
+        <br>
+        <span class="rz mavi">Ücretli</span> müşteriye faturalanır &nbsp;·&nbsp;
+        <span class="rz mor">Sözleşme</span> tahsil edilmez, sözleşme kârlılığına yazılır
+        &nbsp;·&nbsp;
+        <span class="rz sari">Üretici garantisi</span> <b>ÜRETİCİYE</b> faturalanır -
+        yetkili servis için bu bir GELİRDİR, gider değil; sökülen arızalı parçanın
+        üreticiye iadesi de şart, iade edilmezse alacak reddedilir &nbsp;·&nbsp;
+        <span class="rz pas">Kendi garantimiz</span> bizim sattığımız cihazsa maliyet
+        garanti giderine yazılır.
+        <br><br>
+        Dördünde de tutar <b>hesaplanır</b>; sıfır yazmak yerine kapsamı işaretlemek
+        "bu işin maliyeti neydi" sorusunu sonradan da cevaplanabilir bırakır.
       </div>
     </div>
 
@@ -250,6 +260,45 @@
         <span class="rz mor">HBYS / iç iş</span> bu sekmede belge göstermez: karşılığında
         <b>maliyet birime</b> yazılır (bütçe ve birim maliyet raporlarına girer) ve tutar
         eşiği aşarsa <b>onay zinciri</b> çalışır — masraflı onarım onayı zaten var.
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== ZİYARETLER === -->
+  <div class="pnl" data-s="ziyaret">
+    <div class="grp">
+      <div class="gb">Bu iş emrine bağlı ziyaretler
+        <span class="sp">saha işinde iş emri bir GİDİŞ değildir - ayrıntı
+          <code>teknik_servis_saha.html</code></span></div>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:60px" class="orta">#</th>
+            <th style="width:130px">Tarih</th><th style="width:130px">Teknisyen</th>
+            <th>Yapılan / sonuç</th><th style="width:90px" class="sag">Süre</th>
+            <th style="width:80px" class="sag">Yol</th>
+            <th style="width:110px" class="orta">Sonuç</th></tr></thead>
+          <tbody>
+            <tr><td class="orta">1</td><td>16.09.2026</td><td>M. Tuna</td>
+              <td>Teşhis: selenoid valf tıkalı, röle şüphesi — parça yok</td>
+              <td class="sag">1,5 sa</td><td class="sag">18 km</td>
+              <td class="orta"><span class="rz sari">Çözülemedi</span></td></tr>
+            <tr><td class="orta">2</td><td>17.09.2026</td><td>M. Tuna</td>
+              <td>Valf ve röle değişimi, hat temizliği, hareket testi</td>
+              <td class="sag">2,25 sa</td><td class="sag">18 km</td>
+              <td class="orta"><span class="rz ok">Çözüldü</span></td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="4" class="sag"><b>Toplam</b></td>
+            <td class="sag"><b>3,75 sa</b></td><td class="sag"><b>36 km</b></td>
+            <td></td></tr></tfoot>
+        </table>
+      </div>
+      <div class="ic">
+        <b>İkinci ziyaret ücretsiz yoldur.</b> İlk gidişte çözülemeyen iş, ikinci kez
+        yol ve teknisyen saati harcar ama müşteriye ikinci kez fatura edilmez -
+        <b>ilk gidişte çözüm oranı</b> saha servisinin asıl verimlilik ölçüsüdür ve
+        ancak ziyaretler ayrı kayıtsa hesaplanabilir.
+        <br><br>
+        Atölyeye getirilen işte bu sekme boş kalır: gidiş yoktur, cihaz gelmiştir.
       </div>
     </div>
   </div>

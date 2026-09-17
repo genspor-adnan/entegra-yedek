@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teknik Servis — Saha: Çağrı, Ziyaret, Çizelge — Mockup (ERP)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🚐 Saha Servisi — Çağrı ve Ziyaret Planı</span>
+    <span class="sp">17.09.2026 Perşembe · 4 teknisyen · 19 açık çağrı · 3 SLA riski</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="teknik_servis_panosu.html">◀ Servis Panosu</div>
+    <div class="btn primary">📞 Yeni Çağrı</div>
+    <div class="btn">🚐 Ziyaret Planla</div>
+    <div class="btn">👤 Teknisyen Ata</div>
+    <div class="sepv"></div>
+    <div class="btn">🧾 Parça Rezerve</div>
+    <div class="btn" data-git="teknik_servis_is_emri.html">🗂️ İş Emri</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ Günlük Yol Listesi</div>
+  </div>
+
+  <!-- ÖZET: saha ekibinin günü tek satırda. SLA ayrı sayılır: gecikmiş iş ile
+       "taahhüt saati dolmak üzere" farklı aciliyetlerdir. -->
+  <div class="ozet">
+    <div class="kart"><div class="b">Açık çağrı</div><div class="d">19</div></div>
+    <div class="kart kir"><div class="b">SLA riski</div><div class="d">3</div></div>
+    <div class="kart"><div class="b">Bugünkü ziyaret</div><div class="d">11</div></div>
+    <div class="kart"><div class="b">Atanmamış</div><div class="d">4</div></div>
+    <div class="kart"><div class="b">İlk gidişte çözüm</div><div class="d">%68</div></div>
+    <div class="kart"><div class="b">Bugün yol</div><div class="d">214 <small>km</small></div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="cagri">Çağrılar<span class="sy">19</span></div>
+    <div class="sekme" data-s="cizelge">Teknisyen Çizelgesi</div>
+    <div class="sekme" data-s="ziyaret">Ziyaret Kartı</div>
+    <div class="sekme" data-s="park">Müşteri Cihaz Parkı</div>
+    <div class="sekme" data-s="sozlesme">Sözleşme &amp; Periyodik</div>
+  </div>
+
+  <!-- ============================================================ ÇAĞRILAR === -->
+  <div class="pnl" data-s="cagri">
+    <div class="arama">
+      <div class="kutu">🔍 Çağrı no, müşteri, telefon, seri no…</div>
+      <div class="chip on">Açık</div>
+      <div class="chip">SLA riski</div>
+      <div class="chip">Atanmamış</div>
+      <div class="chip">Bugün planlı</div>
+      <div class="chip">Parça bekleyen</div>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:105px">Çağrı</th>
+          <th style="width:175px">Müşteri</th>
+          <th style="width:130px">Bölge</th>
+          <th>Cihaz · Şikâyet</th>
+          <th style="width:110px" class="orta">Kapsam</th>
+          <th style="width:120px" class="orta">SLA</th>
+          <th style="width:120px">Teknisyen</th>
+          <th style="width:80px" class="orta">Ziyaret</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>CG-26-1184</td><td>Kaya Diş Polikliniği</td><td>Kadıköy</td>
+            <td>Dental ünit · su akışı kesiliyor</td>
+            <td class="orta"><span class="rz mavi">Ücretli</span></td>
+            <td class="orta"><span class="rz ok">6 sa kaldı</span></td>
+            <td>M. Tuna</td><td class="orta">2</td></tr>
+          <tr><td>CG-26-1181</td><td>Ege Un Fabrikası</td><td>Çerkezköy</td>
+            <td>Paketleme hattı · bant duruyor</td>
+            <td class="orta"><span class="rz mor">Sözleşme</span></td>
+            <td class="orta"><span class="rz kir">42 dk kaldı</span></td>
+            <td>E. Demir</td><td class="orta">1</td></tr>
+          <tr><td>CG-26-1179</td><td>Aydın Görüntüleme</td><td>Bakırköy</td>
+            <td>Ultrason probu · görüntüde çizgi</td>
+            <td class="orta"><span class="rz sari">Üretici garantisi</span></td>
+            <td class="orta"><span class="rz sari">Yarın 12:00</span></td>
+            <td class="sonuk">— atanmadı</td><td class="orta">0</td></tr>
+          <tr><td>CG-26-1176</td><td>Bilge Market (5 şube)</td><td>Ümraniye</td>
+            <td>Soğutucu reyon · sıcaklık yüksek</td>
+            <td class="orta"><span class="rz mor">Sözleşme</span></td>
+            <td class="orta"><span class="rz kir">Aşıldı · 3 sa</span></td>
+            <td>S. Ak</td><td class="orta">2</td></tr>
+          <tr><td>CG-26-1170</td><td>Özel Ege Tıp Merkezi</td><td>Ataşehir</td>
+            <td>Otoklav · kapak contası</td>
+            <td class="orta"><span class="rz mavi">Ücretli</span></td>
+            <td class="orta"><span class="rz">—</span></td>
+            <td>M. Tuna</td><td class="orta">1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not" style="margin:10px 12px">
+      <b>Çağrı ile iş emri aynı şey değildir.</b> Çağrı müşterinin aramasıdır ve
+      <b>SLA saati onunla başlar</b>; iş emri o çağrıyı kapatmak için yapılan iştir ve
+      bir çağrı <b>birden çok ziyarete</b> bölünebilir (ilk gidiş teşhis, ikinci gidiş
+      parçayla). Tek düzeyde tutmak "kaç saatte yanıt verdik, kaç günde kapattık"
+      sorularını ölçülemez yapardı - taahhüt ilkine, memnuniyet ikincisine bakar.
+      <br><br>
+      <b>İlk gidişte çözüm oranı</b> (%68) saha servisinin asıl verimlilik ölçüsüdür:
+      ikinci ziyaret, ücretsiz bir yol demektir.
+    </div>
+  </div>
+
+  <!-- ============================================================= ÇİZELGE ==== -->
+  <div class="pnl" data-s="cizelge">
+    <div class="arama">
+      <div class="kutu">📅 17.09.2026 Perşembe</div>
+      <div class="chip on">Bugün</div>
+      <div class="chip">Yarın</div>
+      <div class="chip">Hafta</div>
+      <div class="chip">Boş kapasite</div>
+    </div>
+    <div class="cizelge">
+      <table>
+        <thead>
+          <tr>
+            <th class="oda">Teknisyen / Bölge</th>
+            <th>08:00</th><th>09:00</th><th>10:00</th><th>11:00</th><th>12:00</th>
+            <th>13:00</th><th>14:00</th><th>15:00</th><th>16:00</th><th>17:00</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="oda"><b>M. Tuna</b><span>Anadolu yakası · 34 ABC 123</span></td>
+            <td colspan="2"><div class="blok bitti"><b>CG-26-1170 Otoklav</b>Özel Ege Tıp · 08:20–09:40 · bitti</div></td>
+            <td><div class="blok bekliyor"><b>yol</b>18 km</div></td>
+            <td colspan="3"><div class="blok suruyor"><b>CG-26-1184 Dental ünit</b>Kaya Diş · 11:10– · 2. ziyaret (parçayla)</div></td>
+            <td colspan="2" class="bosluk">— boş —</td>
+            <td colspan="2"><div class="blok hazirlik"><b>Periyodik bakım</b>Bilge Market Ümraniye · planlı</div></td>
+          </tr>
+          <tr>
+            <td class="oda"><b>E. Demir</b><span>Trakya · 34 DEF 456</span></td>
+            <td colspan="3"><div class="blok gecikme"><b>CG-26-1181 Paketleme hattı</b>Ege Un · SLA 42 dk · yolda</div></td>
+            <td colspan="4" class="bosluk">— yol (Çerkezköy 96 km) —</td>
+            <td colspan="3"><div class="blok bekliyor"><b>dönüş</b>atölyeye parça bırakma</div></td>
+          </tr>
+          <tr>
+            <td class="oda"><b>S. Ak</b><span>Avrupa yakası · 34 GHI 789</span></td>
+            <td colspan="2"><div class="blok bitti"><b>CG-26-1176 Reyon</b>Bilge Market Şube 2 · çözülemedi</div></td>
+            <td colspan="2"><div class="blok gecikme"><b>CG-26-1176 (2. ziyaret)</b>kompresör değişimi · SLA aşıldı</div></td>
+            <td colspan="2" class="bosluk">— boş —</td>
+            <td colspan="4" class="bosluk">— izinli (yarım gün) —</td>
+          </tr>
+          <tr>
+            <td class="oda"><b>Atölye (yerinde onarım)</b><span>servise gelen cihazlar</span></td>
+            <td colspan="10"><div class="blok bekliyor"><b>6 iş emri açık</b>2 parça bekliyor · 3 teslime hazır — <span class="sonuk">pano ekranında</span></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="not" style="margin:10px 12px">
+      <b>Yol da bir bloktur.</b> Çerkezköy'e 96 km giden teknisyenin günü dört saat
+      kısalır; boş görünen saatler aslında yoldadır. Yolu çizelgede göstermemek,
+      planlayanı "bu saat boş" sanıp ikinci iş yazmaya iter ve iki çağrı da gecikir.
+      <br><br>
+      Atölye ayrı satır: <b>yerinde</b> ve <b>servise getirilen</b> iş aynı ekipten çıkar,
+      kapasite tek yerden görünmeli.
+    </div>
+  </div>
+
+  <!-- ======================================================== ZİYARET KARTI === -->
+  <div class="pnl" data-s="ziyaret">
+    <div class="grp">
+      <div class="gb">Ziyaret — CG-26-1184 / 2. ziyaret
+        <span class="sp">teknisyenin telefonunda doldurduğu ekran</span></div>
+      <div class="hdr k4">
+        <div class="fld"><label>Müşteri</label><div class="inp ro">Kaya Diş Polikliniği</div></div>
+        <div class="fld"><label>Adres</label><div class="inp ro">Kadıköy · Bağdat Cd. 210/4</div></div>
+        <div class="fld"><label>İlgili</label><div class="inp ro">Dt. S. Kaya · 0532 000 00 00</div></div>
+        <div class="fld"><label>Cihaz</label><div class="inp ro">Dental ünit · F1C-88213</div></div>
+      </div>
+      <div class="hdr k5">
+        <div class="fld"><label>Varış</label><div class="inp">11:10</div></div>
+        <div class="fld"><label>Ayrılış</label><div class="inp">13:25</div></div>
+        <div class="fld"><label>Yerinde süre</label><div class="inp ro">2,25 sa</div></div>
+        <div class="fld"><label>Yol (km)</label><div class="inp">18</div></div>
+        <div class="fld"><label>Mesai dışı</label>
+          <div class="inp ro">Hayır <span class="sonuk">(×1,00)</span></div></div>
+      </div>
+      <div class="hdr k2">
+        <div class="fld"><label class="req">Yapılan iş</label>
+          <div class="inp uzun">Su selenoid valfi değiştirildi, hat basınçla temizlendi.
+            Koltuk motor kartındaki yapışan röle değiştirildi, hareket testi yapıldı.</div></div>
+        <div class="fld"><label>Sonuç</label>
+          <div class="inp uzun"><span class="rz ok">Çözüldü</span> — cihaz çalışır durumda
+            teslim edildi. Kapak mandalı kırığı müşteriye bildirildi, ayrı teklif
+            istenecek.</div></div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="gb">Kullanılan parça <span class="sp">araç stoğundan düşer</span></div>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:120px">Stok</th><th>Parça</th>
+            <th style="width:110px" class="orta">Miktar</th>
+            <th style="width:140px" class="orta">Kaynak</th>
+            <th style="width:120px" class="orta">Arızalı iade</th></tr></thead>
+          <tbody>
+            <tr><td>SRV-0184</td><td>Su selenoid valfi 24V</td><td class="orta">1</td>
+              <td class="orta">Araç 34 ABC 123</td>
+              <td class="orta"><span class="rz sari">Toplandı</span></td></tr>
+            <tr><td>SRV-0455</td><td>Koltuk motor kartı rölesi</td><td class="orta">2</td>
+              <td class="orta">Araç 34 ABC 123</td>
+              <td class="orta"><span class="rz pas">—</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ic">
+        <b>Servis aracı bir depodur.</b> Parça araçtan düşer, ana depodan değil - yoksa
+        stok "depoda var" der, teknisyen sabah yükleyemez. Akşam <b>araç sayımı</b> ile
+        eksikler tamamlanır.
+        <br><br>
+        <b>Arızalı parça iadesi</b> ayrı izlenir: üretici garantisindeki işte sökülen
+        parça üreticiye geri gönderilir, gönderilmezse garanti alacağı reddedilir.
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="gb">Kapanış</div>
+      <div class="hdr k4">
+        <div class="fld"><label>Kapsam</label>
+          <div class="inp combo">Ücretli — müşteriye faturalanır</div></div>
+        <div class="fld"><label>Ziyaret tutarı</label>
+          <div class="inp ro">3.180,00 ₺ <span class="sonuk">işçilik + parça + yol</span></div></div>
+        <div class="fld"><label>Tahsilat</label>
+          <div class="inp combo">Yerinde nakit / kart · açık hesap</div></div>
+        <div class="fld"><label class="req">Müşteri imzası</label>
+          <div class="inp ro"><span class="rz ok">Alındı · 13:25</span></div></div>
+      </div>
+      <div class="ic">
+        <b>İmzasız ziyaret kapanmaz.</b> Yerinde yapılan işin tek kanıtı müşterinin
+        onayıdır; sonradan "gelmediler / yapmadılar" tartışmasının tarafı olmayan bir
+        kayıt kalmıyordu. İmza alınamıyorsa gerekçe yazılır ve çağrı <b>açık kalır</b>.
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================== MÜŞTERİ CİHAZ PARKI == -->
+  <div class="pnl" data-s="park">
+    <div class="grp">
+      <div class="gb">Kaya Diş Polikliniği — cihaz parkı
+        <span class="sp">müşteride duran, bizim servisini verdiğimiz cihazlar</span></div>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:150px">Cihaz</th><th style="width:150px">Marka / Model</th>
+            <th style="width:130px">Seri no</th><th style="width:120px">Kurulum</th>
+            <th style="width:130px" class="orta">Garanti</th>
+            <th style="width:130px" class="orta">Sözleşme</th>
+            <th style="width:90px" class="sag">Çağrı</th></tr></thead>
+          <tbody>
+            <tr><td>Dental ünit</td><td>Fona 1000C</td><td>F1C-88213</td><td>14.03.2022</td>
+              <td class="orta"><span class="rz kir">Bitti</span></td>
+              <td class="orta"><span class="rz mor">Var · 31.10.2026</span></td>
+              <td class="sag">7</td></tr>
+            <tr><td>Kompresör</td><td>Dürr Duo</td><td>DD-41902</td><td>14.03.2022</td>
+              <td class="orta"><span class="rz kir">Bitti</span></td>
+              <td class="orta"><span class="rz mor">Var</span></td>
+              <td class="sag">3</td></tr>
+            <tr><td>Panoramik röntgen</td><td>Vatech PaX-i</td><td>PX-77310</td><td>02.08.2025</td>
+              <td class="orta"><span class="rz ok">21.08.2027</span></td>
+              <td class="orta"><span class="rz pas">Yok</span></td>
+              <td class="sag">1</td></tr>
+            <tr><td>Otoklav</td><td>Melag 23B+</td><td>ML-55128</td><td>—</td>
+              <td class="orta"><span class="rz pas">Bilinmiyor</span></td>
+              <td class="orta"><span class="rz pas">Yok</span></td>
+              <td class="sag">0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ic">
+        <b>Cihaz parkı bir varlıktır.</b> "Hangi müşteride hangi cihaz var, garantisi ne
+        zaman bitiyor, hangisi sözleşme dışında" - satışın da servisin de baktığı liste
+        budur. Yalnız seri numarasıyla geçmiş tutmak, <b>hiç arızalanmamış</b> cihazı
+        görünmez yapar; oysa yenileme ve sözleşme teklifi tam onlara gider.
+        <br><br>
+        Bizim satmadığımız cihaz da (Melag otoklav) parkta durur: servisini veriyorsak
+        kaydı bizde olmalı.
+      </div>
+    </div>
+  </div>
+
+  <!-- =================================================== SÖZLEŞME & PERİYODİK == -->
+  <div class="pnl" data-s="sozlesme">
+    <div class="grp">
+      <div class="gb">Bakım sözleşmeleri</div>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:210px">Müşteri</th><th style="width:110px">Bitiş</th>
+            <th style="width:120px" class="orta">Kapsam</th>
+            <th style="width:110px" class="orta">SLA</th>
+            <th style="width:120px" class="orta">Periyot</th>
+            <th style="width:100px" class="sag">Yıllık</th>
+            <th>Durum</th></tr></thead>
+          <tbody>
+            <tr><td>Kaya Diş Polikliniği</td><td>31.10.2026</td>
+              <td class="orta">İşçilik + yol</td><td class="orta">24 sa</td>
+              <td class="orta">6 ayda 1</td><td class="sag">48.000</td>
+              <td><span class="rz sari">Yenileme görüşülmeli · 44 gün</span></td></tr>
+            <tr><td>Ege Un Fabrikası</td><td>01.03.2027</td>
+              <td class="orta">Tam kapsam</td><td class="orta"><b>4 sa</b></td>
+              <td class="orta">3 ayda 1</td><td class="sag">180.000</td>
+              <td><span class="rz ok">Yürürlükte</span></td></tr>
+            <tr><td>Bilge Market (5 şube)</td><td>15.06.2027</td>
+              <td class="orta">İşçilik</td><td class="orta">8 sa</td>
+              <td class="orta">Ayda 1</td><td class="sag">96.000</td>
+              <td><span class="rz kir">Bu ay 2 SLA aşımı</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ic">
+        <b>SLA sözleşmeden gelir</b>, çağrının önceliğinden değil: aynı arıza 4 saatlik
+        sözleşmede acil, 24 saatlikte normaldir. Panoda "SLA riski" sayısı bu tablodan
+        hesaplanır.
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="gb">Periyodik bakımdan doğan işler
+        <span class="sp">sözleşme takvimi iş emrini KENDİSİ açar</span></div>
+      <div class="dg">
+        <table>
+          <thead><tr><th style="width:150px">Planlanan</th><th style="width:210px">Müşteri</th>
+            <th>Kapsam</th><th style="width:130px">Teknisyen</th>
+            <th style="width:120px" class="orta">Durum</th></tr></thead>
+          <tbody>
+            <tr><td>17.09.2026 16:00</td><td>Bilge Market · Ümraniye</td>
+              <td>Aylık reyon bakımı (5 cihaz)</td><td>M. Tuna</td>
+              <td class="orta"><span class="rz sari">Planlandı</span></td></tr>
+            <tr><td>24.09.2026</td><td>Ege Un Fabrikası</td>
+              <td>3 aylık hat bakımı</td><td class="sonuk">— atanmadı</td>
+              <td class="orta"><span class="rz">Açıldı</span></td></tr>
+            <tr><td>05.10.2026</td><td>Kaya Diş Polikliniği</td>
+              <td>6 aylık ünit + kompresör bakımı</td><td class="sonuk">—</td>
+              <td class="orta"><span class="rz pas">Beklemede</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ic">
+        Periyodik bakım <b>hatırlatma değil iş emridir</b>: takvim gelince kayıt kendi
+        açılır, planlanmazsa "gecikmiş" olur ve sözleşme yükümlülüğü ölçülebilir hâle
+        gelir. Hatırlatma olarak bırakmak, yapılmayan bakımın hiç iz bırakmaması
+        demekti - fatura kesilmeye devam ederken.
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <span><b>SLA aşımı sözleşmeye yazılır:</b> Bilge Market bu ay ikinci aşımda —
+      sözleşme cezası ve yenileme görüşmesinin girdisi.</span>
+    <span class="sp">Atanmamış çağrıda SLA saati işlemeye devam eder; kimsenin işi
+      olmaması taahhüdü durdurmaz.</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Bu ekran neyi ekliyor:</b> atölye mockup'ı (<code>teknik_servis_panosu.html</code> +
+  <code>teknik_servis_is_emri.html</code>) "cihaz bize gelir" varsayıyordu. İşi servis
+  olan firmada teknisyen <b>müşteriye gider</b>; ölçü de değişir: yanıt süresi, ilk
+  gidişte çözüm, yol, araç stoğu, yerinde imza.
+  <br><br>
+  <b>Üç katmanlı yapı:</b> <code>çağrı</code> (müşteri aradı, SLA işliyor) →
+  <code>iş emri</code> (çağrıyı kapatacak iş) → <code>ziyaret</code> (bir gidiş).
+  Bir çağrının birden çok ziyareti olur; ikinci ziyaret ücretsiz yol demektir ve
+  ölçülmeden iyileştirilemez.
+  <br><br>
+  <b>HBYS'de karşılığı:</b> çağrı = birimin arıza bildirimi, ziyaret = biyomedikal
+  teknisyeninin servise çıkması, sözleşme = yetkili servis anlaşması. Aynı üç katman
+  çalışır; değişen yalnız <b>paranın</b> kime yazıldığıdır - orada birime, burada
+  müşteriye ya da üreticiye.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>
