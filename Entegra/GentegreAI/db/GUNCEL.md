@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (393 ad, 111 tanesi birden cok dosyada)
+## Fonksiyonlar (393 ad, 112 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -229,7 +229,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_lab_kk_gecerli` | `442_lab_kalite_kontrol.sql` | — |
 | `fn_lab_kk_hedef` | `442_lab_kalite_kontrol.sql` | — |
 | `fn_lab_kk_kumulatif` | `442_lab_kalite_kontrol.sql` | — |
-| `fn_lab_kultur_ozet` | `436_lab_mikrobiyoloji.sql` | — |
+| `fn_lab_kultur_ozet` | `771_kultur_ozeti_para_bicimi.sql` | 436_lab_mikrobiyoloji.sql |
 | `fn_lab_loinc_esle` | `530_lab_loinc_eslesme.sql` | — |
 | `fn_lab_loinc_numune_uyar` | `530_lab_loinc_eslesme.sql` | — |
 | `fn_lab_referans` | `644_lab_referans_cinsiyetsiz.sql` | 433_lab_v1.sql, 434_lab_cihaz_esleme.sql |

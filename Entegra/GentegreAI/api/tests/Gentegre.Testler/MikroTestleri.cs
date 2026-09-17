@@ -269,6 +269,23 @@ public class MikroTestleri : IClassFixture<VeritabaniOlgusu>
             // Sayı biçimi kurulumdan bağımsız olmalı: "100.000 CFU/mL".
             Assert.Equal("Escherichia coli — 100.000 CFU/mL", ozet);
 
+            // KÜSURATLI KOLONİ SAYISI (771): 436'daki `translate` yalnız
+            //   virgülü çeviriyordu; `lc_numeric = C` altında ondalık ayıracı
+            //   NOKTA kalıyor ve grup ayıracıyla aynı işarete düşüyordu
+            //   ("1.234.5" - hangi noktanın ne olduğu belirsiz). Tam sayı dalı
+            //   doğru olduğu için gözden kaçmıştı; test artık iki dalı da tutar.
+            await veri.CalistirAsync("""
+                update public.lab_kultur_ureme set koloni_sayisi = 1234.5
+                 where id = @p0
+                """, [uremeId]);
+            Assert.Equal("Escherichia coli — 1.234,50 CFU/mL",
+                await veri.TekDegerAsync<string>(
+                    "select public.fn_lab_kultur_ozet(@p0)", [kulturId]));
+            await veri.CalistirAsync("""
+                update public.lab_kultur_ureme set koloni_sayisi = 100000
+                 where id = @p0
+                """, [uremeId]);
+
             // İzolat yoksa "Üreme yok": kültür sonuçsuz kapanmamalı.
             await veri.CalistirAsync(
                 "delete from public.lab_kultur_ureme where id = @p0", [uremeId]);

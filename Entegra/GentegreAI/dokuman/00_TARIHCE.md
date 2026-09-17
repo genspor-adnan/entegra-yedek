@@ -12256,3 +12256,43 @@ listesinde `maas` görünüyor — ikisi de 768'deki gibi.
 taşıyor"* demiştim; kopyayı elle değil betikle üretince risk kalktı.
 
 xUnit 234/234, vitest 598/598. Göç **770 yalnız docker'da**.
+
+---
+
+## 17.09.2026 — Kültür özeti de `fn_para_tr`ye bağlandı (db/771)
+
+Kullanıcı: *"436'yı da fn_para_tr'ye bağla"*.
+
+Geçen turda 436'yı "zaten kendi içinde çözmüş, bilerek bırakıldı" diye
+kapatmıştım. **Bağlarken bir kusur çıktı** ve bu değerlendirme eksikti.
+
+436 grup ayıracını `translate(..., ',', '.')` ile düzeltiyordu ama **yalnız
+virgülü** çeviriyordu. `lc_numeric = C` altında `G` virgül, `D` **nokta**
+üretir; küsuratlı bir koloni sayısında:
+
+```
+1234.5  ->  to_char "1,234.5"  ->  translate  ->  "1.234.5"
+```
+
+Ondalık ayıracı grup ayıracıyla **aynı işarete** düşüyordu. Rapor metninde
+"1.234.5" hiçbir şey okutmaz — hangi noktanın ne olduğu belirsizdir. Tam sayı
+dalı (asıl kullanılan dal) doğru olduğu için gözden kaçmış; `fn_para_tr` iki
+ayıracı birlikte çevirdiği için bağlanma ile düzeltme aynı değişiklik oldu:
+artık **`1.234,50`**.
+
+**Değişen davranış.** Küsuratlı sayıda basamak sayısı sabit 2 oldu (`2,50`);
+eskiden `FM` sondaki sıfırı atıyordu (`2.5`). Rapor metninde sabit basamak
+okumayı kolaylaştırır ve veride küsuratlı koloni sayısı yok (sorguladım:
+0 satır). Tam sayı biçimi **değişmedi**.
+
+**Test kusuru tutuyor.** `MikroTestleri` yalnız `100.000 CFU/mL` beklentisini
+sınıyordu - doğru dalı. Küsuratlı dal için ikinci bir doğrulama eklendi;
+biçim bir daha kayarsa test kırılır.
+
+436 bir göçtür, düzenlenmedi: fonksiyon 771'de yeniden tanımlandı, gövde
+770'teki gibi **betikle** kopyalandı, `diff` yalnız o ifadeyi gösteriyor.
+
+**Artık G/D kullanan yürürlükteki nesne yok** — 178 ve 436 geçmişte kaldı
+(sırasıyla 769 ve 771 yürürlükte), 769'daki tek geçiş bir açıklama satırı.
+
+xUnit 234/234, vitest 598/598. Göç **771 yalnız docker'da**.
