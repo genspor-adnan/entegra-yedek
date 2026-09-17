@@ -231,10 +231,18 @@ public sealed class OnayBildirimi
         var aksiyon = AksiyonKodu(akisKod, rol);
         if (aksiyon.Length == 0) return [];
 
+        // EK ROLLER DE SAYILIR (665): kullanıcının ana rolü (`rol_id`) yanında
+        //   `kullanici_rol` üzerinden taşıdığı roller de var. Yalnız ana role
+        //   baksaydık, yetkiyi ek rolle alan kişi kararı VEREBİLİR ama haberi
+        //   HİÇ ALMAZDI - ve "bu talep neden bekliyor" sorusunun cevabı
+        //   kimsenin görmediği bir kuyrukta kalırdı.
         return await baglanti.ListeAsync<int>("""
-            select k.id
+            select distinct k.id
               from public.taraf_kullanici k
-              join public.rol_yetki ry on ry.rol_id = k.rol_id
+              join public.rol_yetki ry
+                on ry.rol_id = k.rol_id
+                or ry.rol_id in (select kr.rol_id from public.kullanici_rol kr
+                                  where kr.kullanici_id = k.id)
               join public.yetki y on y.id = ry.yetki_id
              where k.aktif = 1 and y.tur = 1 and y.kod = @p0
                and coalesce(ry.gor, 0) = 1
@@ -302,7 +310,17 @@ public sealed class OnayBildirimi
             try
             {
                 var k = await KullaniciAsync(baglanti, kid, iptal);
-                if (k is null) continue;
+                if (k is null)
+                {
+                    // SESSİZ DÜŞMESİN: alıcının e-postası da cebi de yoksa
+                    //   satır açılmaz (bkz. başlık) ama bu bir VERİ EKSİĞİDİR,
+                    //   normal akış değil. Günlüğe yazmazsak onay zinciri
+                    //   kimseye haber vermeden yürür ve kimse farkı anlamaz.
+                    _gunluk.LogWarning(
+                        "Onay bildirimi gönderilemedi: kullanıcı {Kid} için e-posta "
+                        + "ve cep telefonu tanımlı değil (şablon {S}).", kid, sablon);
+                    continue;
+                }
 
                 var (kanal, alici, ad) = k.Value;
                 var d = new Dictionary<string, string>(degiskenler) { ["alici"] = ad };

@@ -11659,3 +11659,54 @@ silindi, doküman başlığı önceki yayın sürümünden geri yazıldı.
 Onay omurgası artık **tek motor**: satınalma talebi, izin, masraflı onarım,
 avans, iskonto ve doküman sürümü aynı `onay` / `onay_adim` üzerinde yürüyor;
 modüllerin kendi zincir tabloları kalmadı. Göç **760 yalnız docker'da**.
+
+
+## 17.09.2026 — Onay bildirimleri neden kuyruğa düşmüyordu (`db/761`)
+
+Durum raporunda `bildirim` kuyruğunda `kaynak_tur = 21` ile **hiç satır
+olmadığı** görülmüştü: onay zinciri yürüyor ama kimse haberdar olmuyordu.
+Bildirim çağrıları kararı düşürmesin diye try/catch içinde olduğundan hata
+da görünmüyordu. Üç ayrı sebep çıktı.
+
+**1. Asıl sebep: alıcıların iletişim bilgisi yok.** `KullaniciAsync`
+e-posta yoksa cebe, o da yoksa **satır açmıyor** - bu bilinçli bir kural
+(alıcısız bildirim kuyruğu tıkar). Bu ortamda onay yetkisi olan iki
+kullanıcının ikisinin de e-postası ve cebi boştu; iletişim bilgisi olan üç
+kullanıcının hiçbirinde onay yetkisi yoktu. Kesişim sıfırdı.
+
+Kural doğru ama **sessizdi**: `continue` ile atlanıyordu, günlüğe bile
+düşmüyordu. Artık uyarı yazılıyor - bu bir veri eksiğidir, normal akış
+değil; yazmazsak zincir kimseye haber vermeden yürür ve kimse farkı anlamaz.
+
+**2. Yetki türü yanlıştı (`tur = 0`).** `yetki.tur` 020'de tanımlı: **0
+kaynak** (gör/ekle/değiştir/sil), **1 aksiyon** (yalnız `gor` = çalıştırma
+izni). Onay basamağı yetkileri aksiyondur ve satınalma/izin/avans/onarım
+hepsi `tur = 1`. 754 (iskonto) ve 758 (doküman) dört yetkiyi **`tur = 0`**
+ile eklemişti: `belge.iskonto_onay_birim/_mali/_ust` ve `dokuman.onay`.
+
+Karar verme bundan etkilenmedi - `AksiyonIste` türe bakmıyor. Bozulan
+bildirimdi: `AlicilarAsync` alıcıları `... where y.tur = 1 and y.kod = @p0`
+ile arıyor, `tur = 0` olan yetki bu süzgeçten düşüyor ve liste boş dönüyordu.
+761 dördünü `tur = 1` yaptı; `rol_yetki` satırlarına dokunulmadı (yetkinin
+kime verildiği değişmedi), yalnız aksiyon yetkisinde anlamsız olan
+ekle/değiştir/sil bayrakları sıfırlandı.
+
+**3. Ek roller sayılmıyordu.** Alıcı sorgusu yalnız `taraf_kullanici.rol_id`
+(ana rol) üzerinden gidiyordu; 665'te gelen `kullanici_rol` (ek rol) tablosu
+yok sayılıyordu. Yetkiyi ek rolle alan kişi kararı **verebiliyor** ama haberi
+**hiç almıyordu**. Sorgu ek rolleri de kapsayacak biçimde genişletildi.
+
+**Doğrulama.** Onay yetkisi olan kullanıcılara geçici e-posta verildi.
+Doküman: onaya gönderme 2 alıcıya `onay.istek` yazdı, 1. basamak onayı
+sonraki basamağa 2 bildirim, son basamak başlatana 1 `onay.sonuc`. İskonto:
+yeni talep 4 alıcıya `onay.istek` yazdı - `tur = 0` yüzünden daha önce
+sıfırdı. xUnit 234/234, vitest 598/598, iki derleme temiz. Test verisi ve
+geçici e-postalar geri alındı.
+
+**Not: `iskonto_onay` yetkisi `tur = 0` kalıyor** - o bir EKRAN yetkisi
+(iskonto onay ekranını görme), basamak yetkisi değil.
+
+**Kalan.** Kuyruk artık doluyor ama **gönderen yok**: gerçek kurulumda
+alıcıların e-posta/cep bilgisi girilmeli ve `BildirimIscisi` çalışmalı.
+`onay.hatirlatma` zamanlı işi hâlâ `aktif = 0` - geciken onay hatırlatması
+devreye alınmadı. Göç **761 yalnız docker'da**.
