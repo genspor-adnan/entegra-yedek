@@ -12620,3 +12620,43 @@ bakımdan iş emri üretimi de (`servis_sozlesme.periyot_ay`) henüz zamanlı i�
 bağlanmadı.
 
 Göç **774 yalnız docker'da**.
+
+---
+
+## 17.09.2026 — Teknisyen çizelgesi (db/775)
+
+Kullanıcı: *"teknisyen çizelgesini de yap"* — saha mockup'ının çizelge sekmesi.
+
+**Neden ayrı sayfa.** Generic liste satır çizer, blok çizmez: *"kimde boş
+kapasite var"* sorusu ancak zaman ekseninde görülür. Ziyaret listesi aynı
+veriyi taşıyor ama o *"ne yapıldı"* sorusunun ekranı. Ameliyat çizelgesiyle
+aynı kabuk (`cz-*`) kullanıldı - ikinci bir çizelge düzeni yazmak, aynı
+görünümün iki yerde ayrı ayrı bakımı olurdu.
+
+**Teknisyen tablosu açılmadı.** `v_servis_teknisyen` = rolünde `servis`
+yetkisi olan aktif kullanıcılar. İkinci bir liste tutmak, personel işten
+ayrıldığında çizelgede duran bir ad bırakırdı.
+
+**Ziyareti olmayan teknisyen de satır açar** - çizelgenin asıl sorusu boş
+kapasitedir; yalnız dolu satırları göstermek, iş atanacak kişiyi ekrandan
+silerdi. Aynı gerekçeyle **atanmamış çağrılar** çizelgenin altında duruyor:
+kimsenin işi değil ama SLA saati işliyor, ve boş kapasiteyi gören kişi oradan
+iş emri açabiliyor.
+
+**Süren ziyaret ŞİMDİYE kadar uzar** (`v_servis_cizelge` kuralı): kapanmamış
+işi bir saatlik blok çizmek, üç saattir süren işi bitmiş gibi gösterirdi.
+
+**Yol ölçülen, tahmin edilen değil.** Mockup yolu ayrı blok olarak çiziyordu;
+burada yol süresi uydurulmuyor - `yol_km` teknisyen satırında ve blok
+ipucunda yazıyor, gün toplamı özette. Tahmini yol süresi üretmek, ölçmediğimiz
+bir sayıyı planın içine koymak olurdu.
+
+**Doğrulama.** İki teknisyen satırı, saat cetveli, 12:00-14:00 çözülmüş ziyaret
+ve süren ikinci ziyaret çizildi; blok tıklanınca ayrıntı paneli açıldı; özet
+"2 ziyaret · 1 süren · 1 çözüldü · 18 km" dedi. xUnit 234/234, vitest 614/614,
+derlemeler temiz. Test verisi silindi.
+
+**Kalan:** ziyaret kartının mobil (teknisyen telefonu) düzeni ve sözleşmeden
+periyodik iş emri üretimi hâlâ yapılmadı.
+
+Göç **775 yalnız docker'da**.

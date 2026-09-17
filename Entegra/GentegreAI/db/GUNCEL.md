@@ -405,7 +405,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (231 ad, 55 tanesi birden cok dosyada)
+## Gorunumler (233 ad, 55 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -611,9 +611,11 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_satinalma_kabul` | `736_kabul_its_bildirim.sql` | 733_mal_kabul_satir.sql, 734_kabul_karekod.sql |
 | `v_satinalma_talep_onay` | `739_onay_gelen_kutusu.sql` | — |
 | `v_servis_cagri` | `774_teknik_servis_modulu.sql` | 773_teknik_servis.sql |
+| `v_servis_cizelge` | `775_servis_teknisyen_cizelge.sql` | — |
 | `v_servis_emanet` | `774_teknik_servis_modulu.sql` | 773_teknik_servis.sql |
 | `v_servis_is_emri` | `774_teknik_servis_modulu.sql` | 773_teknik_servis.sql |
 | `v_servis_sozlesme` | `773_teknik_servis.sql` | — |
+| `v_servis_teknisyen` | `775_servis_teknisyen_cizelge.sql` | — |
 | `v_servis_ziyaret` | `773_teknik_servis.sql` | — |
 | `v_sgk_katilim_emanet` | `473_katilim_emaneti.sql` | — |
 | `v_sigorta_hesap_lookup` | `430_sigorta_v1.sql` | — |

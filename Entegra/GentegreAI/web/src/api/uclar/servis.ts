@@ -21,7 +21,38 @@ export interface ServisCihazi {
   durum: number;
 }
 
+export interface CizelgeZiyareti {
+  id: number; isEmriId: number; isEmriNo: string; cagriNo: string;
+  teknisyenId: number | null; teknisyenAdi: string;
+  tarafAdi: string; cihaz: string; bolge: string;
+  /** Varış, yoksa planlanan zaman. */
+  bas: string;
+  /** Ayrılış; süren ziyarette ŞİMDİ (sunucu kuralı). */
+  bit: string;
+  sonuc: number; yolKm: number; arac: string; mesaiDisi: number;
+  oncelik: number; sahiplik: number; slaAsildi: number; yapilan: string;
+}
+
+export interface ServisCizelgesi {
+  tarih: string;
+  /** Ziyareti OLMAYAN teknisyen de gelir - çizelgenin sorusu boş kapasite. */
+  teknisyenler: { id: number; ad: string; gorev: string; rolAdi: string }[];
+  ziyaretler: CizelgeZiyareti[];
+  atanmamis: {
+    id: number; cagriNo: string; tarafAdi: string; cihaz: string;
+    slaKalanDk: number | null; oncelik: number; bolge: string;
+  }[];
+  ozet: {
+    ziyaret: number; suren: number; cozuldu: number; cozulemedi: number;
+    yolKm: number; atanmamis: number; teknisyen: number;
+  };
+}
+
 export const servisUclari = {
+  /** Günlük teknisyen çizelgesi: satırlar teknisyen, bloklar ziyaret. */
+  servisCizelge: (tarih: string) =>
+    istek<ServisCizelgesi>(`/api/servis/cizelge?tarih=${tarih}`),
+
   /**
    * Çağrı açar. Sözleşme verilmezse cihazınki, o da yoksa carinin yürürlükteki
    * sözleşmesi bulunur ve SLA ondan hesaplanır - taahhüt sözleşmeden kopmasın.

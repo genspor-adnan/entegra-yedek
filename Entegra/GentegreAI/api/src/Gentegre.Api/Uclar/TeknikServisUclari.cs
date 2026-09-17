@@ -593,6 +593,111 @@ public static class TeknikServisUclari
             });
         });
 
+        // ---------------------------------------------------- çizelge ----
+        // GÜNLÜK TEKNİSYEN ÇİZELGESİ (775): kim, hangi saatte, nerede.
+        //
+        //   Satırlar ziyareti OLMAYAN teknisyeni de içerir - çizelgenin asıl
+        //   sorusu "kimde boş kapasite var". Yalnız dolu satırları göstermek,
+        //   iş atanacak kişiyi ekrandan silerdi.
+        grup.MapGet("/cizelge", async (
+            DateOnly? tarih, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("servis", Islem.Gor);
+
+            var gun = tarih ?? DateOnly.FromDateTime(DateTime.Today);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var teknisyenler = await baglanti.ListeAsync("""
+                select taraf_id, ad, gorev, rol_adi
+                  from public.v_servis_teknisyen
+                 order by ad
+                """, null, [], o => new
+                {
+                    id = o.Sayi("taraf_id"),
+                    ad = o.Metin("ad"),
+                    gorev = o.Metin("gorev"),
+                    rolAdi = o.Metin("rol_adi"),
+                }, iptal);
+
+            var ziyaretler = await baglanti.ListeAsync("""
+                select id, is_emri_id, is_emri_no, cagri_no, cagri_id,
+                       teknisyen_id, teknisyen_adi, taraf_adi, cihaz, bolge,
+                       bas, bit, sonuc, yol_km, arac, mesai_disi, oncelik,
+                       sahiplik, sla_asildi, yapilan
+                  from public.v_servis_cizelge
+                 where bas >= @p0::date and bas < (@p0::date + 1)
+                 order by teknisyen_id nulls last, bas
+                """, null, [gun], o => new
+                {
+                    id = o.GetInt64(0),
+                    isEmriId = o.GetInt64(1),
+                    isEmriNo = o.Metin("is_emri_no"),
+                    cagriNo = o.Metin("cagri_no"),
+                    teknisyenId = o.IsDBNull(o.GetOrdinal("teknisyen_id"))
+                        ? (int?)null : o.Sayi("teknisyen_id"),
+                    teknisyenAdi = o.Metin("teknisyen_adi"),
+                    tarafAdi = o.Metin("taraf_adi"),
+                    cihaz = o.Metin("cihaz"),
+                    bolge = o.Metin("bolge"),
+                    bas = o.GetFieldValue<DateTimeOffset>(o.GetOrdinal("bas")),
+                    bit = o.GetFieldValue<DateTimeOffset>(o.GetOrdinal("bit")),
+                    sonuc = o.Sayi("sonuc"),
+                    yolKm = o.GetDecimal(o.GetOrdinal("yol_km")),
+                    arac = o.Metin("arac"),
+                    mesaiDisi = o.Sayi("mesai_disi"),
+                    oncelik = o.Sayi("oncelik"),
+                    sahiplik = o.Sayi("sahiplik"),
+                    slaAsildi = o.Sayi("sla_asildi"),
+                    yapilan = o.Metin("yapilan"),
+                }, iptal);
+
+            // ATANMAMIŞ ÇAĞRI ÇİZELGENİN YANINDA DURUR: kimsenin işi değil ama
+            //   SLA saati işliyor. Çizelgeye bakan kişi boş kapasiteyi görüp
+            //   buradan atar - iki ekran arasında gidip gelmesin.
+            var atanmamis = await baglanti.ListeAsync("""
+                select c.id, c.cagri_no, c.taraf_adi, c.cihaz, c.sla_kalan_dk,
+                       c.oncelik, c.bolge
+                  from public.v_servis_cagri c
+                 where c.durum = 0
+                 order by c.sla_kalan_dk nulls last, c.acilis
+                 limit 20
+                """, null, [], o => new
+                {
+                    id = o.GetInt64(0),
+                    cagriNo = o.Metin("cagri_no"),
+                    tarafAdi = o.Metin("taraf_adi"),
+                    cihaz = o.Metin("cihaz"),
+                    slaKalanDk = o.IsDBNull(o.GetOrdinal("sla_kalan_dk"))
+                        ? (int?)null : o.Sayi("sla_kalan_dk"),
+                    oncelik = o.Sayi("oncelik"),
+                    bolge = o.Metin("bolge"),
+                }, iptal);
+
+            return Results.Ok(new
+            {
+                tarih = gun,
+                teknisyenler,
+                ziyaretler,
+                atanmamis,
+                ozet = new
+                {
+                    ziyaret = ziyaretler.Count,
+                    suren = ziyaretler.Count(z => z.sonuc == 0),
+                    cozuldu = ziyaretler.Count(z => z.sonuc == 1),
+                    cozulemedi = ziyaretler.Count(z => z.sonuc == 2),
+                    // YOL TOPLAMI: günün gerçek maliyeti - çizelgede boş
+                    //   görünen saatlerin nereye gittiğini bu sayı söyler.
+                    yolKm = ziyaretler.Sum(z => z.yolKm),
+                    atanmamis = atanmamis.Count,
+                    teknisyen = teknisyenler.Count,
+                },
+                izlemeNo = baglam.IzlemeNo
+            });
+        });
+
         // ------------------------------------------------ cihaz parkı ----
         // Servis geçmişiyle birlikte: "bu cihaz kaç kez bozuldu, hangisi
         //   sözleşme dışında" sorusu tek çağrıda cevaplanır.

@@ -56,6 +56,15 @@ export const SERVIS_LISTELERI: ListeGirdisi[] = [
     yetkiKodu: 'servis', modul: 'servis', menuSira: 20,
   },
   {
+    // ÇİZELGE ÖZEL SAYFA: generic liste satır çizer, blok çizmez. Menüde
+    //   ziyaretlerin ÜSTÜNDE çünkü gün önce planlanır, sonra yazılır.
+    kaynak: 'servis-cizelge', rota: 'servis-cizelge', ozelSayfa: true,
+    baslik: 'Teknisyen Çizelgesi',
+    yol: 'Teknik Servis › Çizelge',
+    menuGrup: 'Teknik Servis', menuAd: 'Çizelge', ic: '📅',
+    yetkiKodu: 'servis', modul: 'servis', menuSira: 25,
+  },
+  {
     kaynak: 'servis-ziyaret', rota: 'servis-ziyaret',
     baslik: 'Ziyaretler',
     yol: 'Teknik Servis › Ziyaretler',

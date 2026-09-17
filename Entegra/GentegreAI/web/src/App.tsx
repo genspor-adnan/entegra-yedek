@@ -32,6 +32,7 @@ import { RadyolojiRaporCikti } from './sayfalar/RadyolojiRaporCikti';
 import { LabRaporCikti } from './sayfalar/LabRaporCikti';
 import { GozSemaCikti } from './sayfalar/GozSemaCikti';
 import { BelgeYazisi } from './sayfalar/BelgeYazisi';
+import { ServisCizelge } from './sayfalar/ServisCizelge';
 import { DisHastaKarti } from './sayfalar/dis/DisHastaKarti';
 import { DisGunlukAkis } from './sayfalar/dis/DisGunlukAkis';
 import { DisSeansKarti } from './sayfalar/dis/DisSeansKarti';
@@ -200,6 +201,11 @@ function Yollar() {
             antet + metin + imza gider, arac cubugu gitmez. */}
         {yetki('ik.belge_talep') && (
           <Route path="/belge-talep/yazi/:id" element={<BelgeYazisi />} />
+        )}
+        {/* Teknisyen cizelgesi (775): generic liste satir cizer, BLOK cizmez -
+            "kimde bos kapasite var" sorusu zaman ekseninde gorulur. */}
+        {yetki('servis') && (
+          <Route path="/servis-cizelge" element={<ServisCizelge />} />
         )}
         {/* DIS (706): hasta karti (odontogram + plan) ve gunluk akis ozel
             sayfalardir - generic liste/kart odontogrami cizemez. */}
