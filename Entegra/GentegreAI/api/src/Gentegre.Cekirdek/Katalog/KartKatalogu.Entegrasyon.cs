@@ -74,6 +74,18 @@ public static partial class KartKatalogu
             new("testUrl", "test_url", "metin", EnFazlaUzunluk: 300,
                 Baslik: "Test Adresi", Grup: "Genel", AltGrup: "Adres ve Durum"),
 
+            // SAGLAYICIYA OZEL AYARLAR (jsonb): SMTP'de port/ssl/gonderen,
+            //   SMS'te govde/tip/baslik. Bunlari kolona cevirmedik - her
+            //   saglayici baska anahtar istiyor ve "yeni saglayici baglamak
+            //   KOD DEGIL AYAR isidir" tasarimi (399) bozulurdu.
+            //
+            //   BILDIRIM HESABI ICIN `bildirim_kanal` SART: kuyruk saglayiciyi
+            //   yalniz bu anahtarla buluyor (1 SMS · 2 e-posta).
+            new("ayarlar", "ayarlar", "json", EnFazlaUzunluk: 4000,
+                Baslik: "Sağlayıcı Ayarları (JSON) — SMTP: bildirim_kanal 2, "
+                      + "port, ssl, gonderen · SMS: bildirim_kanal 1, baslik, govde",
+                Grup: "Genel", AltGrup: "Adres ve Durum"),
+
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300,
                 Baslik: "Açıklama", Grup: "Genel", AltGrup: "Adres ve Durum"),
             // Son kullanim/sonuc SERVIS tarafindan yazilir - salt okunur.

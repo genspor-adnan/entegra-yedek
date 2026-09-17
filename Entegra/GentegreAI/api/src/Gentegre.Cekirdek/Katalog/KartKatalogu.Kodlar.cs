@@ -94,6 +94,11 @@ public static partial class KartKatalogu
             ["ENABIZ"] = "e-Nabız",
             ["MEDULA"] = "MEDULA (SGK)",
             ["SMS"]    = "SMS Sağlayıcı",
+            // E-POSTA (SMTP) AYRI BIR KOD: bildirim kuyrugu saglayiciyi
+            //   `ayarlar.bildirim_kanal` ile buluyor ama kod, listede hangi
+            //   hesabin ne icin oldugunu soyleyen tek isarettir. Yoksa SMTP
+            //   hesabi eklemek icin SQL yazmak gerekiyordu.
+            ["EPOSTA"] = "E-Posta (SMTP) Sağlayıcı",
         };
 
     /// <summary>

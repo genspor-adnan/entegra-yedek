@@ -11784,3 +11784,37 @@ oldukları için işçi onları yeniden almıyor.
 yok): `entegrasyon_hesap`a `bildirim_kanal` ayarlı bir SMTP/SMS hesabı
 eklenmeli ve alıcıların `taraf_kullanici.eposta` / `cep_tel` bilgisi
 doldurulmalı. Hesap eklendiği anda `KayitModu` hiç devreye girmez.
+
+
+## 17.09.2026 — SMTP/SMS sağlayıcısı artık ekrandan tanımlanıyor
+
+Bildirim kuyruğu sağlayıcıyı `entegrasyon_hesap`ta `ayarlar->>'bildirim_kanal'`
+ile arıyor. Ekran tarafında iki eksik vardı ve e-posta hesabı **yalnız SQL
+ile** eklenebiliyordu:
+
+- `EntegrasyonKodlari` listesinde **e-posta yoktu** (EBELGE, UTS, SKRS,
+  ENABIZ, MEDULA, SMS vardı). `EPOSTA` eklendi.
+- `ayarlar` (jsonb) kolonu **kartta hiç yoktu**, yani `bildirim_kanal`,
+  `port`, `ssl`, `gonderen` girilemiyordu. Alan eklendi.
+
+**Kolonlaştırmadık.** Her sağlayıcı başka anahtar istiyor (SMTP'de port/ssl/
+gönderen, SMS'te gövde/tip/başlık) ve 399'un tasarımı "yeni sağlayıcı
+bağlamak KOD DEĞİL AYAR işidir" diyor. `ayarlar` tek alan olarak açıldı;
+başlık, iki kanalın anahtarlarını da yazıyor.
+
+**Altyapı zaten hazırmış.** Kart yazma yolu `Tip == "json"` alanlarına
+`::jsonb` cast'i ekliyor (hem insert hem update) ve web `json` tipini çok
+satırlı çiziyor - form motorunda değişiklik gerekmedi. Kartta jsonb alanı
+hiç kullanılmadığı için bu desen görünmüyordu.
+
+**Doğrulama.** Genel Ayarlar ekranında alan göründü (başlık ve 18 alan).
+Ekranın kullandığı kart ucundan `EPOSTA` hesabı kaydedildi; `ayarlar` doğru
+jsonb oldu. Ardından hatırlatma tetiklendi: kuyruk hesabı **buldu** ve
+`KayitModu` devreden çıkıp gerçek SMTP denemesi yaptı - sahte sunucu olduğu
+için `"Failure sending mail."`, yani zincirin tamamı doğru kuruluyor. xUnit
+234/234, vitest 598/598, iki derleme temiz. Test hesabı ve verisi silindi.
+
+**Kurulum notu.** `sifre` kolonu düz metin saklanıyor; kişisel hesap şifresi
+yerine uygulama şifresi (app password) kullanılmalı. Hesap tanımlanınca
+`appsettings.Development.json` içindeki `Bildirim:KayitModu` kapatılmalı -
+hesap silinirse sessizce sahte gönderime dönmesin.
