@@ -190,7 +190,7 @@ public static partial class KartKatalogu
                 new("bitis",     "bitis",     "tarih", Zorunlu: true, Baslik: "Bitiş"),
                 new("nedenTur",  "neden_tur", "kod", KodListesi: "rad.kapatma", Baslik: "Neden"),
                 new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 200, Baslik: "Açıklama"),
-            }, SubeKolonu: null, Baslik: "Kapatma / Bakım", LogTabloId: 944),
+            }, SubeKolonu: null, Baslik: "Kapatma / Bakım", LogTabloId: 1282),
         });
 
     /// <summary>
@@ -202,7 +202,7 @@ public static partial class KartKatalogu
         Ad: "radyoloji-protokol",
         YetkiKodu: "radyoloji",
         Tablo: "public.radyoloji_protokol",
-        LogTabloId: 943,
+        LogTabloId: 1280,
         SubeKolonu: null,
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {
@@ -252,7 +252,7 @@ public static partial class KartKatalogu
                         Baslik: "Kural / Not"),
                     new("sira", "sira", "sayi", Baslik: "Sıra"),
                 },
-                SubeKolonu: null, Baslik: "Malzeme / Sarf", LogTabloId: 943),
+                SubeKolonu: null, Baslik: "Malzeme / Sarf", LogTabloId: 1281),
         });
 
     private static KartTanimi RadyolojiSablon() => new(
@@ -301,7 +301,7 @@ public static partial class KartKatalogu
                 new("zorunlu", "zorunlu", "mantik", Baslik: "Zorunlu"),
                 // Kapaliysa bolum ekranda gorunur ama hasta ciktisina basilmaz.
                 new("yazdir",  "yazdir",  "mantik", Baslik: "Yazdir"),
-            }, SubeKolonu: null, Baslik: "Bolumler", LogTabloId: 942),
+            }, SubeKolonu: null, Baslik: "Bolumler", LogTabloId: 1278),
 
             new("makrolar", "public.radyoloji_sablon_makro", "sablon_id", new KartAlani[]
             {
@@ -312,7 +312,7 @@ public static partial class KartKatalogu
                 new("metin",   "metin",   "metin", Baslik: "Metin"),
                 new("hedefBolum", "hedef_bolum", "metin", EnFazlaUzunluk: 60,
                     Baslik: "Hedef Bolum"),
-            }, SubeKolonu: null, Baslik: "Makrolar", LogTabloId: 942),
+            }, SubeKolonu: null, Baslik: "Makrolar", LogTabloId: 1279),
 
             new("skorlar", "public.radyoloji_sablon_alan", "sablon_id", new KartAlani[]
             {
@@ -328,6 +328,6 @@ public static partial class KartKatalogu
                     Baslik: "Secenekler (| ile)"),
                 new("zorunlu",  "zorunlu",  "mantik", Baslik: "Zorunlu"),
                 new("raporaBas", "rapora_bas", "mantik", Baslik: "Rapora Bas"),
-            }, SubeKolonu: null, Baslik: "Skor Alanlari", LogTabloId: 942),
+            }, SubeKolonu: null, Baslik: "Skor Alanlari", LogTabloId: 1277),
         });
 }

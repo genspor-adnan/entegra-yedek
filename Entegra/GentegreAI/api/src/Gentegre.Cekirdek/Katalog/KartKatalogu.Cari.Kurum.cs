@@ -79,7 +79,7 @@ public static partial class KartKatalogu
             new("id",  "id",  "sayi", Yazilabilir: false),
             new("tur", "tur", "kod",  Zorunlu: true,
                 KodListesi: "taraf.kurum_turu", Baslik: "Kurum Türü"),
-        }, SubeKolonu: null, Baslik: "Kurum Türü", LogTabloId: 909, TekSatir: true));
+        }, SubeKolonu: null, Baslik: "Kurum Türü", LogTabloId: 1265, TekSatir: true));
 
         // SOZLESMELER - 1:N (468, kullanici: "alt kurum sozlesmeye bagli;
         //   birden fazla sozlesme varsa hasta secer"). Ayni sigorta sirketiyle
@@ -134,7 +134,7 @@ public static partial class KartKatalogu
                 Baslik: "Varsayılan Karşılama %"),
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama"),
         }, SubeKolonu: "sube_id", Sirala: "alt_kurum, id", Baslik: "Sözleşmeler",
-           LogTabloId: 909));
+           LogTabloId: 1264));
 
 
         return c with

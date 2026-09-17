@@ -19,7 +19,7 @@ public static partial class KartKatalogu
         Ad: "ameliyat",
         YetkiKodu: "ameliyathane.ameliyat",
         Tablo: "public.ameliyat",
-        LogTabloId: 1150,
+        LogTabloId: 1298,
         SubeKolonu: "sube_id",
         Alanlar: new KartAlani[]
         {
@@ -82,7 +82,7 @@ public static partial class KartKatalogu
                 new("cerrahId", "cerrah_id", "sayi", Baslik: "Cerrah",
                     KodTablosu: "public.v_hekim_lookup"),
                 new("aciklama", "aciklama", "metin", Baslik: "Açıklama", EnFazlaUzunluk: 300),
-            }, Sirala: "sira, id", Baslik: "İşlemler", LogTabloId: 1151),
+            }, Sirala: "sira, id", Baslik: "İşlemler", LogTabloId: 1306),
 
             new("ekip", "public.ameliyat_ekip", "ameliyat_id", new KartAlani[]
             {
@@ -95,7 +95,7 @@ public static partial class KartKatalogu
                 new("cikis", "cikis", "zaman", Baslik: "Çıkış"),
                 new("sorumlu", "sorumlu", "mantik", Baslik: "Sorumlu"),
                 new("aciklama", "aciklama", "metin", Baslik: "Not", EnFazlaUzunluk: 200),
-            }, Sirala: "rol, id", Baslik: "Ekip", LogTabloId: 1152),
+            }, Sirala: "rol, id", Baslik: "Ekip", LogTabloId: 1307),
 
             new("kontrol", "public.ameliyat_kontrol", "ameliyat_id", new KartAlani[]
             {
@@ -111,7 +111,7 @@ public static partial class KartKatalogu
                 new("isaretZamani", "isaret_zamani", "zaman", Baslik: "Zaman"),
                 new("notMetni", "not_metni", "metin", Baslik: "Not", EnFazlaUzunluk: 300),
             }, Sirala: "asama, sira", Baslik: "Güvenli Cerrahi", SaltOkunur: true,
-               LogTabloId: 1153),
+               LogTabloId: 1308),
 
             new("sarf", "public.ameliyat_sarf", "ameliyat_id", new KartAlani[]
             {
@@ -128,7 +128,7 @@ public static partial class KartKatalogu
                 // Pakete dahil malzeme ayrıca faturalanmaz; işaretlenmezse
                 //   hastadan çift ücret alınır.
                 new("faturaya", "faturaya", "mantik", Baslik: "Faturaya"),
-            }, Sirala: "id", Baslik: "Sarf & İmplant", LogTabloId: 1154),
+            }, Sirala: "id", Baslik: "Sarf & İmplant", LogTabloId: 1309),
 
             new("sayim", "public.ameliyat_sayim", "ameliyat_id", new KartAlani[]
             {

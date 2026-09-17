@@ -7,13 +7,16 @@ namespace Gentegre.Cekirdek.Katalog;
 /// </summary>
 public static partial class KartKatalogu
 {
-    private const int LogIsgFirma   = 1200;
-    private const int LogIsgBolum   = 1201;
-    private const int LogIsgCalisan = 1202;
-    private const int LogIsgAsi     = 1203;
-    private const int LogIsgMuayene = 1204;
-    private const int LogIsgZiyaret = 1205;
-    private const int LogIsgOlay    = 1206;
+    // 1300-1303 (757): ISG modulu (741) eczanenin 1200-1206 blogunun
+    //   ustune oturmustu - ayni numarayi iki modul paylasiyordu.
+    private const int LogIsgFirma   = 1300;
+    private const int LogIsgBolum   = 1301;
+    private const int LogIsgCalisan = 1310;
+    private const int LogIsgAsi     = 1302;
+    // 1299 (757): 1204 eczane imhasinin.
+    private const int LogIsgMuayene = 1299;
+    private const int LogIsgZiyaret = 1311;
+    private const int LogIsgOlay    = 1303;
 
     private static readonly Dictionary<string, string> IsgAktifKodlari = new() { ["1"] = "Aktif", ["0"] = "Pasif" };
     private static readonly Dictionary<string, string> IsgCalisanDurum = new() { ["1"] = "Aktif", ["0"] = "Ayrıldı" };

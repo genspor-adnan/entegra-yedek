@@ -19,8 +19,9 @@ namespace Gentegre.Api.Uclar;
 /// </summary>
 public static class IsgUclari
 {
-    private const int LogMuayene = 1204;
-    private const int LogOlay    = 1206;
+    // 1299 (757): 1204 eczane imhasinin (EczaneUclari).
+    private const int LogMuayene = 1299;
+    private const int LogOlay    = 1303;
 
     public sealed record MuayeneAcIstegi(int? Tur, int? Kanal, int? HekimId, string? Telefon);
     public sealed record TopluIstegi(int[] CalisanIds, int? Tur, int? Kanal);

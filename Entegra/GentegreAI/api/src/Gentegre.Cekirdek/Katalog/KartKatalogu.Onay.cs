@@ -65,7 +65,7 @@ public static partial class KartKatalogu
         //   kendi basamağını kaldırabilirdi.
         YetkiKodu: "kullanici",
         Tablo: "public.onay_akis",
-        LogTabloId: 1245,
+        LogTabloId: 1295,
         // KURUM GENELİ (bkz. liste kaynağı): şube damgası konsaydı tanım
         //   yalnız damgalandığı şubede görünür olurdu.
         SubeKolonu: null,
@@ -116,7 +116,7 @@ public static partial class KartKatalogu
                 new("eImzaZorunlu", "e_imza_zorunlu", "mantik", Baslik: "e-İmza"),
                 new("aktif", "aktif", "mantik", Baslik: "Aktif"),
             }, Sirala: "sira, id", Baslik: "Basamaklar",
-               SubeKolonu: null, LogTabloId: 1246,
+               SubeKolonu: null, LogTabloId: 1296,
                YeniSatirVarsayilanlari: new Dictionary<string, object?>
                {
                    ["sahip_turu"] = 1, ["rol"] = 1, ["karar_turu"] = 0,
@@ -136,7 +136,7 @@ public static partial class KartKatalogu
         //   deseydik, imza zinciri kişinin kendi kararına kalırdı.
         YetkiKodu: "kullanici",
         Tablo: "public.onay_vekalet",
-        LogTabloId: 1244,
+        LogTabloId: 1294,
         SubeKolonu: null,
         Alanlar: new KartAlani[]
         {

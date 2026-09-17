@@ -26,7 +26,8 @@ namespace Gentegre.Api.Uclar;
 public static partial class AmeliyathaneUclari
 {
     /// <summary>islem_log.tablo_id - KartKatalogu.Ameliyathane ile aynı.</summary>
-    private const int LogTabloAmeliyat = 1150;
+    // 1298 (757): 1150 medula_kuyruk'un (MedulaServisi).
+    private const int LogTabloAmeliyat = 1298;
     private const int LogTabloTalep = 1158;
 
     /// <summary>ameliyat.durum - 0 planlandı · 1 hazırlık · 2 sürüyor · 3 kapanışta · 4 bitti · 8 iptal.</summary>

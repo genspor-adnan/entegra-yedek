@@ -235,7 +235,7 @@ public static partial class KartKatalogu
                     Yazilabilir: false),
                 new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama")
             }, SubeKolonu: null, Sirala: "sira, id", Baslik: "Tetkikler",
-               LogTabloId: 962),
+               LogTabloId: 1288),
 
             // NUMUNELER (mockup "Etiketler" kutusu): tup plani, alim/kabul
             //   zamanlari ve KALITE. Ret nedeni gorunur kalir - hasta ikinci
@@ -273,7 +273,7 @@ public static partial class KartKatalogu
                 new("retAciklama", "ret_aciklama", "metin", EnFazlaUzunluk: 300,
                     Baslik: "Ret Açıklaması"),
             }, SubeKolonu: "sube_id", Sirala: "id", Baslik: "Numuneler",
-               LogTabloId: 963)
+               LogTabloId: 1290)
         });
 
     /// <summary>

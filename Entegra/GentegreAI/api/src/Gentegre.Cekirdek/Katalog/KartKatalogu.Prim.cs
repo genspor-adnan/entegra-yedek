@@ -14,7 +14,7 @@ public static partial class KartKatalogu
         Ad: "prim-plani",
         YetkiKodu: "prim",
         Tablo: "public.prim_plani",
-        LogTabloId: 950,
+        LogTabloId: 1283,
         // Sube ALAN olarak girilir, otomatik damgalanmaz: bos birakilan plan
         //   KURUM GENELI'dir (tüm şubeler). SubeKolonu dolu olsaydi her plan
         //   oturumun subesine damgalanir, kurum geneli plan yazilamazdi.
@@ -139,7 +139,7 @@ public static partial class KartKatalogu
                     new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 200,
                         Baslik: "Açıklama"),
                 },
-                SubeKolonu: null, Baslik: "Prim Satırları", LogTabloId: 950),
+                SubeKolonu: null, Baslik: "Prim Satırları", LogTabloId: 1284),
 
             // PRİM ALANLAR (375, kullanıcı): planın kapsadığı kişiler.
             //   BOŞ = plan o roldeki HERKESE uyar; DOLU = yalnızca listedekilere.
@@ -197,7 +197,7 @@ public static partial class KartKatalogu
                     new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
                         Baslik: "Açıklama"),
                 },
-                SubeKolonu: null, Baslik: "Prim Alanlar", LogTabloId: 950),
+                SubeKolonu: null, Baslik: "Prim Alanlar", LogTabloId: 1285),
         },
         // Kullanilmis plan SILINMEZ: hakedis satiri hangi kuraldan dogdugunu
         //   plan satirinda tasiyor (denetim izi). Engel KARTTA tanimli, cunku

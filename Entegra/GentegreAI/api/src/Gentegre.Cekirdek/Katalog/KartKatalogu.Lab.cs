@@ -256,7 +256,7 @@ public static partial class KartKatalogu
                 new("altKod", "alt_kod", "metin", EnFazlaUzunluk: 40, Baslik: "Alt Kod"),
                 new("durum", "durum", "kod", SabitKodlar: LabKayitDurumKodlari,
                     Baslik: "Durum"),
-            }, Sirala: "id", Baslik: "Cihaz Eşleme", LogTabloId: 1016),
+            }, Sirala: "id", Baslik: "Cihaz Eşleme", LogTabloId: 1293),
 
             // PANELLER - SALT OKUNUR (mockup "bu tetkik nerede geciyor").
             //   Silmeden once okunacak yerdir: katalogtan tetkik silmek onu
@@ -327,7 +327,7 @@ public static partial class KartKatalogu
         Ad: "lab-cihaz-esleme",
         YetkiKodu: "lab.cihaz",
         Tablo: "public.lab_cihaz_test_esleme",
-        LogTabloId: 1014,
+        LogTabloId: 1293,
         SubeKolonu: null,
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {

@@ -159,7 +159,7 @@ public static partial class KartKatalogu
                 //   KULLANILMAZ (tutar paket satirinda durur).
                 new("birimFiyat",    "birim_fiyat",    "para",  Baslik: "Birim Fiyat"),
                 new("dovizCinsi",    "doviz_cinsi",    "kod",   SabitKodlar: DovizKodlari, Baslik: "Döviz")
-            }, Sirala: "id", SubeKolonu: null, LogTabloId: 920,
+            }, Sirala: "id", SubeKolonu: null, LogTabloId: 1274,
                Baslik: "Paket", KosulAlani: "paket"),
 
             // ÜTS / medikal bilgileri (119) - stok_uts 1:1 uzanti. Tek satirlik
@@ -181,7 +181,7 @@ public static partial class KartKatalogu
                 new("ihaleSiraNo",   "ihale_sira_no",  "metin", EnFazlaUzunluk: 100, Baslik: "İhale Sıra No"),
                 new("dmoKodu",       "dmo_kodu",       "metin", EnFazlaUzunluk: 40,  Baslik: "DMO Şartname Kodu"),
                 new("smKodu",        "sm_kodu",        "metin", EnFazlaUzunluk: 40,  Baslik: "SM Kodu")
-            }, Sirala: "id", SubeKolonu: null, LogTabloId: 903, Baslik: "ÜTS Bilgileri"),
+            }, Sirala: "id", SubeKolonu: null, LogTabloId: 1263, Baslik: "ÜTS Bilgileri"),
 
             // "Seri / Lot" AYRI SEKME DEGIL (kullanici karari, 115): lot dokumu
             //   artik Stok Durumu sekmesinde DEPO BAZINDA, master-detail olarak.
@@ -369,7 +369,7 @@ public static partial class KartKatalogu
                     Baslik: "Personel Uyarısı"),
                 new("ozelUyari",   "ozel_uyari",     "metin", EnFazlaUzunluk: 400,
                     Baslik: "Uyarı Metni"),
-            }, SubeKolonu: null, LogTabloId: 943, Baslik: "Radyoloji Protokolü",
+            }, SubeKolonu: null, LogTabloId: 1280, Baslik: "Radyoloji Protokolü",
                TekSatir: true, KosulAlani: "radyoloji"),
 
             // PANEL / PAKET ICERIGI (496, kullanici: "tekrarli tetkik
@@ -409,7 +409,7 @@ public static partial class KartKatalogu
                     "metin", Yazilabilir: false, Baslik: "Kategori"),
                 new("adet",           "adet",              "para", Baslik: "Adet"),
                 new("sira",           "sira",              "sayi", Baslik: "Sıra")
-            }, Sirala: "sira, id", SubeKolonu: null, LogTabloId: 921,
+            }, Sirala: "sira, id", SubeKolonu: null, LogTabloId: 1275,
                Baslik: "Paket / Panel", KosulAlani: "paket")
         },
         SilmeEngelleri: new[]
@@ -422,7 +422,7 @@ public static partial class KartKatalogu
         Ad: "depo",
         YetkiKodu: "stok",
         Tablo: "public.depo",
-        LogTabloId: 918,
+        LogTabloId: 1269,
         SubeKolonu: "sube_id",
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
             { ["durum"] = (short)1, ["maliyetiEtkilesin"] = (short)1, ["varsayilan"] = (short)0,

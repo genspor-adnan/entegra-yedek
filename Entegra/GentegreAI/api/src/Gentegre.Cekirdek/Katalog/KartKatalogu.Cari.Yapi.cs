@@ -106,7 +106,7 @@ public static partial class KartKatalogu
         Ad: "personel-gorev",
         YetkiKodu: "personel",
         Tablo: "public.personel_gorev",
-        LogTabloId: 913,
+        LogTabloId: 1266,
         SubeKolonu: null,                     // ana veri - subeler arasi ORTAK
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {

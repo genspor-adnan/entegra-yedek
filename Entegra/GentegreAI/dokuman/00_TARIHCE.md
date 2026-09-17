@@ -11451,3 +11451,57 @@ ve dokunulmayanlar: 913 (Yapı ↔ Kasa), 914/915 (Kampanya ↔ Kasa), 923
 962/963 (Lab ↔ Sağlık ↔ Zamanlı İş), 1016 (Lab ↔ Mikrobiyoloji), 1244-1246
 (Onay ↔ Satınalma) ve 918-920 (Kasa ↔ Numara ↔ Stok). Hepsi aynı sınıf hata;
 hiçbiri onay omurgasında değil. Göç **756 yalnız docker'da**.
+
+
+## 17.09.2026 — Log tablo kodu çakışmalarının tamamı ayıklandı (`db/757`)
+
+755 (avans 907/908) ve 756 (905/906) tek tek ayıklamıştı; bu tur katalogdaki
+**ve** `Uclar`/`Depolar` sabitlerindeki bütün çakışmaları birden kapattı:
+**37 tablo** 1263-1311 aralığına taşındı.
+
+**Neden bu kadar çoktu.** Kullanılan numaraların tek bir listesi yoktu -
+katalog dosyalarına ve uç sabitlerine dağılmış durumdaydı, yeni bir kart
+yazan kişi boş sandığı numarayı alıyordu. Üç modül birden başka bir modülün
+bloğuna oturmuştu: **İSG (741)** eczanenin 1200-1206'sına, **Ameliyathane**
+Medula'nın 1150-1154'üne, **Göz ek kartları** göz çizimi/dikte sözlüğünün
+1108-1109'una. Ayrıca tek tek çakışmalar: 903 (rol ↔ stok_uts), 904
+(personel_izin ↔ kullanici_sube), 909, 913-915, 918-921, 923, 925, 942-944,
+950, 960-963, 966, 1016 ve 1244-1246 (onay omurgası ↔ satınalma teklifi).
+
+**Asıl önlem bu dosya değil, test.** `LogTabloIdTestleri` katalogu gezip aynı
+numarayı iki farklı tabloya veren değişikliği yakalıyor ve hangi iki tablo
+olduğunu yazıyor. Doğrulaması için randevuya geçici olarak stok'un numarası
+verildi; test `88: public.randevu | public.stok` diyerek kırıldı, sonra geri
+alındı. İkinci bir test muafiyet listesinin çürümesini engelliyor: bir kod
+artık tek tabloya aitse muafiyet satırı kalkmalı.
+
+**Muaf tutulanlar - bunlar çakışma değil, gruplama.** Bir modülün birkaç
+detay tablosunu tek numarayla izlemek bilinçli bir tercih: göz muayenesinin
+yedi ölçüm tablosu (1106) "ölçüm detayı" olarak, yatış izlemleri (1121),
+diş seansı işlem+sarf (1133), medula raporu+satırları (1153) böyle. Yedi kod
+muafiyet listesinde; onları da ayırmak yirmiden fazla yeni numara dağıtmak ve
+bir tasarım kararını tersine çevirmek olurdu.
+
+**Geçmiş satırlarda yalnız kesin olanlar taşındı.** Her taşıma "bu satır TAM
+OLARAK BİR adaya ait" koşuluyla: `kayit_id` hedef tabloda var ve aynı
+numarayı paylaşan öteki tabloların hiçbirinde yok. **83 satır** taşındı;
+402 satır eski numaralarda kaldı (kanonik sahibe ait olanlar + kaydı silindiği
+için ayırt edilemeyenler). Belirsiz satırı tahminle taşımak, onu kendinden
+emin ama yanlış bir satıra çevirirdi - denetim izinde bu daha kötüdür.
+
+**Üç taşıma hiç yapılamadı:** `kullanici_sube` ve `zamanli_is` tablolarında
+`id` kolonu yok (bağ tabloları), bir satırın onlara ait olup olmadığı
+ölçülemiyor. Kod tarafında numaraları ayrıldı (904 → 1297, 962 → 1289) ama
+geçmiş satırlar yerinde; aynı numaradaki `lab_istem_satir` da bu yüzden
+taşınmadı - ayıramadığımız bir kümeden tek tarafı çekmek kalanı yanlış
+biçimde kesinleştirirdi.
+
+**Bu turda düzeltilen bir yöntem hatası.** İlk tarama `LogTabloId: <sayı>`
+arıyordu; oysa katalog detayları iki ayrı sözdizimiyle yazılıyor ve numara
+çoğu modülde sabit ADIYLA veriliyor (`LogTabloId: LogIsgFirma`). İlk liste bu
+yüzden hem eksik hem de bazı tabloları yanlış eşlemişti (962'yi `lab_istem`
+sanmıştı, doğrusu `lab_istem_satir`). Tarama sabitleri çözecek biçimde
+yeniden yazıldı; kalıcı hâli artık testin içinde.
+
+**Doğrulama.** Katalogda modüller-arası çakışma sıfır. xUnit 234/234 (2 yeni
+test), vitest 598/598, iki derleme temiz. Göç **757 yalnız docker'da**.

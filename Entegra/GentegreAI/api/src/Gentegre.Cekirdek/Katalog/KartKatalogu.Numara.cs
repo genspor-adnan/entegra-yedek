@@ -68,7 +68,7 @@ public static partial class KartKatalogu
         Ad: "ebelge-seri",
         YetkiKodu: "ebelge_seri",
         Tablo: "public.ebelge_seri",
-        LogTabloId: 919,
+        LogTabloId: 1272,
         SubeKolonu: null,
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {

@@ -593,7 +593,7 @@ public static partial class KartKatalogu
         Ad: "muayene-sablon",
         YetkiKodu: "muayene",
         Tablo: "public.muayene_sablon",
-        LogTabloId: 966,
+        LogTabloId: 1292,
         SubeKolonu: "sube_id",
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {

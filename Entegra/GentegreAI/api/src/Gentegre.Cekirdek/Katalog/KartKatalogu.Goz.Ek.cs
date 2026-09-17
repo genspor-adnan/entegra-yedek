@@ -11,8 +11,10 @@ namespace Gentegre.Cekirdek.Katalog;
 /// </summary>
 public static partial class KartKatalogu
 {
-    private const int LogGozKontaktLens = 1108;
-    private const int LogGozProtokol    = 1109;
+    // 1304/1305 (757): 1108 goz cizimi, 1109 dikte sozlugu (Goz.cs) -
+    //   iki dosya ayni iki numarayi paylasiyordu.
+    private const int LogGozKontaktLens = 1304;
+    private const int LogGozProtokol    = 1305;
 
     // ------------------------------------------------------- kontakt lens ----
     private static KartTanimi GozKontaktLensKarti() => new(

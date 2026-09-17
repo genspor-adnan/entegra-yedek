@@ -14,7 +14,7 @@ public static partial class KartKatalogu
         YetkiKodu: "zamanli_is",
         Tablo: "public.zamanli_is",
         IdKolonu: "kod",
-        LogTabloId: 962,
+        LogTabloId: 1289,
         SubeKolonu: null,
         Alanlar: new KartAlani[]
         {

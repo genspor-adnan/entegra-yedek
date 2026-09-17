@@ -14,7 +14,7 @@ public static partial class KartKatalogu
         Ad: "onam-metni",
         YetkiKodu: "onam",
         Tablo: "public.onam_metni",
-        LogTabloId: 960,
+        LogTabloId: 1286,
         SubeKolonu: null,
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {
@@ -75,7 +75,7 @@ public static partial class KartKatalogu
         Ad: "bildirim-sablon",
         YetkiKodu: "bildirim_sablon",
         Tablo: "public.bildirim_sablon",
-        LogTabloId: 961,
+        LogTabloId: 1287,
         SubeKolonu: null,
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {

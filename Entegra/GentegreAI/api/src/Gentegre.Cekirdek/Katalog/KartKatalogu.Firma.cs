@@ -75,7 +75,7 @@ public static partial class KartKatalogu
         Ad: "sube",
         YetkiKodu: "sube",
         Tablo: "public.sube",
-        LogTabloId: 923,
+        LogTabloId: 1276,
         // Subenin KENDISI sube kolonu tasimaz - kayit zaten subedir.
         SubeKolonu: null,
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
@@ -342,7 +342,7 @@ public static partial class KartKatalogu
                 Tablo: "public.depo",
                 UstKolon: "sube_id",
                 Baslik: "Depolar",
-                LogTabloId: 925,
+                LogTabloId: 1269,
                 // Depo kaydinin sube kolonu ZATEN ust bagdir; ikinci kez yazilmaz.
                 SubeKolonu: null,
                 Sirala: "ad",

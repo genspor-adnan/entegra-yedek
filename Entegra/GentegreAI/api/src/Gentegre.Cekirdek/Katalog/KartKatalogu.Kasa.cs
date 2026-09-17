@@ -227,7 +227,7 @@ public static partial class KartKatalogu
         Ad: "gorev",
         YetkiKodu: "gorev",
         Tablo: "public.gorev",
-        LogTabloId: 918,                      // yeni tablo - eski karsiligi yok
+        LogTabloId: 1271,                      // yeni tablo - eski karsiligi yok
         SubeKolonu: null,
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
             { ["tur"] = (short)1, ["durum"] = (short)0, ["oncelik"] = (short)2 },
@@ -291,7 +291,7 @@ public static partial class KartKatalogu
         Ad: "firsat",
         YetkiKodu: "firsat",
         Tablo: "public.firsat",
-        LogTabloId: 918,
+        LogTabloId: 1270,
         SubeKolonu: "sube_id",
         KapsamKolonu: "taraf_id",
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
@@ -342,7 +342,7 @@ public static partial class KartKatalogu
                 new("miktar",      "miktar",      "para",  Baslik: "Miktar"),
                 new("birimFiyat",  "birim_fiyat", "para",  Baslik: "Birim Fiyat"),
                 new("tutar",       "tutar",       "para",  Baslik: "Tutar")
-            }, Sirala: "sira, id", SubeKolonu: null, LogTabloId: 919, Baslik: "Ürünler"),
+            }, Sirala: "sira, id", SubeKolonu: null, LogTabloId: 1273, Baslik: "Ürünler"),
 
             // "Aktiviteler": firsata bagli gorusme/toplanti/hatirlatma. Ayri
             //   tablo YOK - gorev (108) tablosundaki firsat_id ile baglanir.
@@ -355,7 +355,7 @@ public static partial class KartKatalogu
                 new("baslangic",  "baslangic",  "tarih", Baslik: "Başlama"),
                 new("termin",     "termin",     "tarih", Baslik: "Termin"),
                 new("durum",      "durum",      "kod",   KodListesi: "gorev.durum", Baslik: "Durum")
-            }, Sirala: "coalesce(baslangic, ekleme_tarihi) desc, id desc", LogTabloId: 108, Baslik: "Aktiviteler")
+            }, Sirala: "coalesce(baslangic, ekleme_tarihi) desc, id desc", LogTabloId: 1271, Baslik: "Aktiviteler")
         },
         SilmeEngelleri: Array.Empty<SilmeEngeli>());
 
@@ -369,7 +369,7 @@ public static partial class KartKatalogu
         Ad: "masraf-merkezi",
         YetkiKodu: "masraf_merkezi",
         Tablo: "public.masraf_merkezi",
-        LogTabloId: 915,
+        LogTabloId: 1268,
         SubeKolonu: null,
         YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["durum"] = (short)1 },
         Alanlar: new KartAlani[]
@@ -395,7 +395,7 @@ public static partial class KartKatalogu
         Ad: "hesap-plani",
         YetkiKodu: "hesap_plani",
         Tablo: "public.hesap_plani",
-        LogTabloId: 914,
+        LogTabloId: 1267,
         SubeKolonu: null,
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
             { ["durum"] = (short)1, ["dovizCinsi"] = "TL", ["calisirMi"] = (short)1 },

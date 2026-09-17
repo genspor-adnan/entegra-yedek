@@ -20,7 +20,9 @@ public sealed class KullaniciSubeDeposu
 {
     private readonly VeriKaynagi _veri;
     private readonly LogDeposu _log;
-    private const int LogTabloKullaniciSube = 904;
+    // 1297 (757): 904 personel_izin'in - kullanici_sube onunla ayni
+    //   numaradaydi.
+    private const int LogTabloKullaniciSube = 1297;
 
     public KullaniciSubeDeposu(VeriKaynagi veri, LogDeposu log)
     {
