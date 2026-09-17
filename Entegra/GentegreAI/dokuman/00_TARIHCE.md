@@ -11710,3 +11710,33 @@ geçici e-postalar geri alındı.
 alıcıların e-posta/cep bilgisi girilmeli ve `BildirimIscisi` çalışmalı.
 `onay.hatirlatma` zamanlı işi hâlâ `aktif = 0` - geciken onay hatırlatması
 devreye alınmadı. Göç **761 yalnız docker'da**.
+
+
+## 17.09.2026 — Onay hatırlatma işi devreye alındı (`db/762`)
+
+746 `onay.hatirlatma` zamanlı işini kurmuş ama **`aktif = 0`** bırakmıştı: o
+tarihte bildirim yolu uçtan uca denenmemişti ve her sabah kimseye ulaşmayan
+bir iş koşturmanın anlamı yoktu. 761 bildirimlerin neden kuyruğa düşmediğini
+çözünce iş gerçekten çalışır oldu; `aktif = 1` yapıldı.
+
+**Ne yapar.** Her gün **09:00**'da `v_onay_kutusu`'ndaki `gecikme_gun > 0`
+basamakları tarar ve sahiplerine `onay.hatirlatma` yazar. Sabah saati
+bilinçli: gecikmiş imzayı gün başında hatırlatmak, akşam hatırlatıp ertesi
+güne bırakmaktan iyidir. Günde bir kez yazar - süzgeç şablona bakar, "herhangi
+bir onay bildirimi" deseydi sıra geldiğinde yazılan `onay.istek` tam da
+gecikmenin başladığı gün hatırlatmayı bastırırdı.
+
+**Devreye almadan önce denendi.** Elle tetiklendi: 3 gecikmiş basamak için
+**12 hatırlatma** (4 alıcı) kuyruğa alındı; aynı gün ikinci tetikte 0 yazdı -
+günde bir kez kuralı tuttu. `sonraki` null bırakıldı ve işçi devralınca
+yarının 09:00'ını hesapladı; geçmişte kalmış bir `sonraki` yüzünden işin
+devreye girer girmez koşması böylece önlendi.
+
+**761'in uyarısı da doğrulandı.** Test e-postaları geri alındıktan sonraki
+tetikte iş "3 gecikmiş basamak için 0 hatırlatma" dedi ve günlüğe dört satır
+düştü: *"Onay bildirimi gönderilemedi: kullanıcı N için e-posta ve cep
+telefonu tanımlı değil (şablon onay.hatirlatma)."* Sessiz kayıp artık görünür.
+
+**Kalan.** Kuyruk doluyor, hatırlatma koşuyor ama **gönderen yok**: gerçek
+kurulumda alıcıların e-posta/cep bilgisi girilmeli ve `BildirimIscisi`
+çalışmalı. Göç **762 yalnız docker'da**.
