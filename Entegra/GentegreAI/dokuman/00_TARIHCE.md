@@ -12750,3 +12750,37 @@ dedi. xUnit 234/234, vitest 614/614, derleme temiz. Test verisi silindi.
 (`731` deseninde ayarsız tür boş kalır, kurum Belge No ekranından tanımlar).
 
 Göç **776 yalnız docker'da**.
+
+---
+
+## 17.09.2026 — İş emri numarası (db/777)
+
+Kullanıcı: *"914 numara şablonunu da tanımla"*.
+
+731 tür kodunu tanımlamış ama şablon satırı yazmamıştı; ayarsız tür boş numara
+üretiyor ve iş emri listede `#id` görünüyordu. 773/776'da açılan servis iş
+emirleri de numarasız doğuyordu.
+
+**Tek dizi, tek ön ek.** `demirbas_is_emri` hem kurumun kendi cihazının iş
+emrini hem müşteri cihazının servis iş emrini tutuyor (773: tek iş emri, iki
+sahiplik) - numara da tektir. Mockup iç işte `IE-`, dış işte `SE-`
+gösteriyordu; iki ön ek iki sayaç demek olurdu ve aynı tabloda iki dizi,
+*"IE-84 ile SE-84 aynı kayıt mı"* sorusunu doğururdu. Ayrımı `sahiplik`
+kolonu taşıyor ve listede "Tür" sütununda yazıyor. Ön ek nötr: **`IE-`**.
+
+Ön ek yıl içermiyor (767'deki gerekçe): sayaç sürekli artar, "geçen yılki 84
+numaralı iş emri" ömür boyu tek kaydı gösterir. Yıllı isteyen kurum Genel
+Ayarlar › Belge No › Tedarik Belgeleri'nden değiştirir.
+
+**Geçmiş kayıtlara numara verilmedi** - hiç kesilmemiş numarayı sonradan
+uydurmak, iki kurulumda aynı iş emrine farklı numara vermek olurdu.
+
+**Öteki tedarik türleri ayarsız bırakıldı** (910 eczane hazırlama · 911 ilaç
+imha · 912 demirbaş · 913 kalibrasyon · 915 satınalma talep · 916 teklif ·
+917 mal kabul): kurumun kullanmadığı belgeye numara dizisi açmak olurdu.
+
+**Doğrulama.** Şablon ayar gridinde göründü; uçtan açılan iş emri
+**`IE-000001`** numarasını aldı (çağrı `CG-000001`). xUnit 234/234. Test
+verisi ve sayaçları silindi.
+
+Göç **777 yalnız docker'da**.
