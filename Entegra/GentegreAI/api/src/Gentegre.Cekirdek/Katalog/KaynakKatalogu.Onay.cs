@@ -42,6 +42,8 @@ public static partial class KaynakKatalogu
                 " when 1257 then 'Avans'" +
                 " when 1256 then 'İskonto'" +
                 " when 976  then 'Doküman'" +
+                " when 1312 then 'Masraf Beyanı'" +
+                " when 1314 then 'Belge Talebi'" +
                 " else 'Diğer' end",
                 "metin", "Tür", Hizalama: "orta", Genislik: 150, Bicim: "rozet",
                 Filtrelenebilir: false),

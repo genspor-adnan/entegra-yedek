@@ -266,6 +266,8 @@ uygulama.OnayUclariniEkle();
 uygulama.IzinUclariniEkle();
 // AVANS MODULU (753): talep, onay, odeme (kasa) ve mahsup plani.
 uygulama.AvansUclariniEkle();
+uygulama.MasrafBeyaniUclariniEkle();
+uygulama.BelgeTalebiUclariniEkle();
 uygulama.RolYetkiUclariniEkle();
 uygulama.KullaniciYonetimUclariniEkle();
 uygulama.IskontoOnayUclariniEkle();

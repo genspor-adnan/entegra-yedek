@@ -31,6 +31,8 @@ public static partial class KartKatalogu
         ["1256"] = "İskonto Talebi",
         // 976 = dokuman_surum: onay DOKÜMANA değil SÜRÜME verilir.
         ["976"] = "Doküman Sürümü",
+        ["1312"] = "Masraf Beyanı",
+        ["1314"] = "Belge Talebi",
     };
 
     /// <summary>onay_akis_adim.sahip_turu</summary>

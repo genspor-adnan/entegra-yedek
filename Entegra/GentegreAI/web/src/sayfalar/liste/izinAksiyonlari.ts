@@ -53,13 +53,127 @@ export async function izinAksiyonu(
     return true;
   }
 
-  // AVANS DA BU DOSYADA: izinle aynı omurgayı (onay zinciri + âmir) kullanır,
-  //   ayrı dosya açmak aynı deseni iki yerde tutmak olurdu.
+  // MASRAF VE BELGE TALEBİ DE BU DOSYADA: hepsi aynı omurgayı (onay zinciri
+  //   + âmir) kullanıyor, ayrı dosya açmak aynı deseni dört yerde tutmak
+  //   olurdu.
   if (!kod.startsWith('personel-izin.') && !kod.startsWith('izin-bakiye.')
-      && !kod.startsWith('personel-avans.')) return false;
+      && !kod.startsWith('personel-avans.') && !kod.startsWith('personel-masraf.')
+      && !kod.startsWith('personel-belge-talep.')) return false;
 
   const id = Number(satir?.id ?? 0);
   const tarafId = Number(satir?.tarafId ?? 0);
+
+  // =========================================================== MASRAF ==
+  if (kod.startsWith('personel-masraf.')) {
+    if (!id) { mesaj('Önce bir masraf beyanı seçin.'); return true }
+
+    if (kod === 'personel-masraf.gonder') {
+      await guvenli(async () => {
+        const y = await api.masrafGonder(id);
+        mesaj([`${y.toplamTutar} TL'lik beyan onaya gönderildi.`,
+               `Zincir: ${y.basamaklar.map(a => a.ad).join(' → ')}`,
+               '', 'Ödeme bu modülde YAPILMAZ - zincir onayla biter, '
+                 + 'ödemeyi muhasebe kendi akışında yapar.'].join('\n'));
+        b.tazele();
+      });
+      return true;
+    }
+
+    if (kod === 'personel-masraf.zincir') {
+      await guvenli(async () => {
+        // 1312 = personel_masraf (islem_log.tablo_id).
+        const y = await api.onayZinciri(1312, id);
+        if (!y.onay) { mesaj('Bu beyan onaya gönderilmemiş.'); return }
+        const DURUM: Record<number, string> = {
+          0: 'bekliyor', 1: 'ONAYLANDI', 2: 'REDDEDİLDİ',
+          3: 'bilgi istendi', 4: 'sözlü onay', 5: 'atlandı',
+        };
+        mesaj([`${y.onay.akisAd} · ${y.onay.olcuAdi}: ${y.onay.olcu}`, '',
+               ...y.adimlar.map(a => `${a.sira}. ${a.ad} — ${DURUM[a.durum] ?? a.durum}`
+                 + (a.gerekce ? `\n     ${a.gerekce}` : ''))].join('\n'));
+      });
+      return true;
+    }
+
+    if (kod === 'personel-masraf.iptal') {
+      const gerekce = await metinSor('Masraf beyanı iptal edilecek. Gerekçe:',
+                                     '', 'Gerekçe');
+      if (!gerekce) return true;
+      await guvenli(async () => {
+        await api.masrafIptal(id, gerekce);
+        mesaj('Beyan iptal edildi, varsa onay zinciri kapandı. Kayıt silinmedi - '
+            + '"bu harcama talep edilmiş miydi" sorusu sonradan da sorulur.');
+        b.tazele();
+      });
+      return true;
+    }
+    return false;
+  }
+
+  // ==================================================== BELGE TALEBİ ==
+  if (kod.startsWith('personel-belge-talep.')) {
+    if (!id) { mesaj('Önce bir belge talebi seçin.'); return true }
+
+    if (kod === 'personel-belge-talep.hazirla') {
+      const not = await metinSor('Belge hazırlandı. Not (isteğe bağlı):', '', 'Not');
+      if (not === null) return true;
+      await guvenli(async () => {
+        await api.belgeTalepHazirla(id, not.trim() || undefined);
+        mesaj('Belge hazırlandı olarak işaretlendi. Teslim edilince '
+            + '"Teslim Edildi" ile kapatın - personelin beklediği şey belgenin '
+            + 'kendisi.');
+        b.tazele();
+      });
+      return true;
+    }
+
+    if (kod === 'personel-belge-talep.teslim') {
+      const not = await metinSor('Belge teslim edildi. Not (isteğe bağlı):', '', 'Not');
+      if (not === null) return true;
+      await guvenli(async () => {
+        await api.belgeTalepTeslim(id, not.trim() || undefined);
+        mesaj('Belge teslim edildi; talep kapandı.');
+        b.tazele();
+      });
+      return true;
+    }
+
+    if (kod === 'personel-belge-talep.zincir') {
+      await guvenli(async () => {
+        // 1314 = personel_belge_talep (islem_log.tablo_id).
+        const y = await api.onayZinciri(1314, id);
+        if (!y.onay) {
+          // OTOMATİK ONAYDA ZİNCİR KURULMAZ: boş bir zinciri "yok" diye
+          //   göstermek yerine sebebini söylüyoruz.
+          mesaj('Bu talepte onay zinciri yok.\n\n'
+              + 'Belge talepleri "ik.belge_talep_otomatik" ayarı açıkken '
+              + 'otomatik onaylanır ve doğrudan hazırlık kuyruğuna düşer.');
+          return;
+        }
+        const DURUM: Record<number, string> = {
+          0: 'bekliyor', 1: 'ONAYLANDI', 2: 'REDDEDİLDİ',
+          3: 'bilgi istendi', 4: 'sözlü onay', 5: 'atlandı',
+        };
+        mesaj([y.onay.akisAd, '',
+               ...y.adimlar.map(a => `${a.sira}. ${a.ad} — ${DURUM[a.durum] ?? a.durum}`
+                 + (a.gerekce ? `\n     ${a.gerekce}` : ''))].join('\n'));
+      });
+      return true;
+    }
+
+    if (kod === 'personel-belge-talep.reddet') {
+      const gerekce = await metinSor(
+        'Belge talebi reddedilecek. Gerekçe (personele söylenecek):', '', 'Gerekçe');
+      if (!gerekce) return true;
+      await guvenli(async () => {
+        await api.belgeTalepReddet(id, gerekce);
+        mesaj('Talep reddedildi.');
+        b.tazele();
+      });
+      return true;
+    }
+    return false;
+  }
 
   // ============================================================ AVANS ==
   if (kod.startsWith('personel-avans.')) {

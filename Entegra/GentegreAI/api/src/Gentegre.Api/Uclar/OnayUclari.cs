@@ -427,6 +427,16 @@ public static class OnayUclari
             4 => "belge.iskonto_onay_mali",
             _ => "belge.iskonto_onay_ust",
         },
+        // MASRAF BEYANI (764). Âmir (rol 0) harcamanın iş amaçlı olduğunu,
+        //   mali işler tutarı, üst yönetim eşik üstünü onaylar.
+        "personel.masraf" => rol switch
+        {
+            0 => "ik.masraf_onay_amir",
+            4 => "ik.masraf_onay_mali",
+            _ => "ik.masraf_onay_ust",
+        },
+        // BELGE TALEBİ (765): tek basamak İK.
+        "personel.belge_talep" => "ik.belge_talep_onay",
         "personel.avans" => rol switch
         {
             0 => "ik.avans_onay_amir",
@@ -552,6 +562,36 @@ public static class OnayUclari
                     islem, [(int)kaynakId, dokumanSonuc, gerekce ?? "",
                             baglam.KullaniciId], iptal);
                 return dokumanSonuc;
+
+            case "personel.masraf":
+                // 2 onaylandı · 3 reddedildi. ÖDEME YOK: zincir onayla biter,
+                //   muhasebe dışarıda öder (kullanıcı kararı, 764).
+                short masrafDurum = zincirDurum == Servisler.OnayMotoru.ZincirOnaylandi
+                                  ? (short)2 : (short)3;
+                await baglanti.CalistirAsync("""
+                    update public.personel_masraf
+                       set durum = @p1,
+                           red_neden = case when @p1 = 3 then @p2 else red_neden end,
+                           degistiren = @p3, degistirme_tarihi = now()
+                     where id = @p0
+                    """, islem, [(int)kaynakId, masrafDurum, gerekce ?? "",
+                                 baglam.KullaniciId], iptal);
+                return masrafDurum;
+
+            case "personel.belge_talep":
+                // 2 HAZIRLANACAK (onaylı) · 3 reddedildi. Onay burada sonun
+                //   değil BAŞLANGICIN işareti: asıl iş yazıyı hazırlamak.
+                short belgeDurum = zincirDurum == Servisler.OnayMotoru.ZincirOnaylandi
+                                 ? (short)2 : (short)3;
+                await baglanti.CalistirAsync("""
+                    update public.personel_belge_talep
+                       set durum = @p1,
+                           red_neden = case when @p1 = 3 then @p2 else red_neden end,
+                           degistiren = @p3, degistirme_tarihi = now()
+                     where id = @p0
+                    """, islem, [(int)kaynakId, belgeDurum, gerekce ?? "",
+                                 baglam.KullaniciId], iptal);
+                return belgeDurum;
 
             case "personel.izin":
                 // 2 onaylı · 3 reddedildi (personel_izin.durum).

@@ -73,6 +73,49 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
     yetkiKodu: 'ik.avans', modul: 'ik', menuSira: 14,
   },
   {
+    // MASRAF BEYANI (764): cepten yapılan iş harcamasının geri ödeme talebi.
+    //   Listenin asıl sorusu "ne kadar ve kaç belge" - tutar tek başına
+    //   beyanı anlatmaz; 3.000 TL / 1 belge ile 3.000 TL / 12 belge farklı
+    //   şeylerdir. ÖDEME BU LİSTEDE YOK: zincir onayla biter.
+    kaynak: 'personelMasraf', rota: 'personel-masraf',
+    baslik: 'Masraf Beyanları',
+    yol: 'İK & Prim › Masraf Beyanları',
+    kartYolu: '/personel-masraf', kartBaslik: 'Masraf Beyanı',
+    aksiyonEkrani: 'personel-masraf-liste',
+    tarihAlani: 'beyanTarihi',
+    cipler: [
+      { ad: 'Açık',       filtre: { alan: 'durum', op: 'kucukEsit', deger: 1 } },
+      { ad: 'Taslak',     filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Onayda',     filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Onaylandı',  filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Reddedildi', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'İK & Prim', menuAd: 'Masraf Beyanları', ic: '🧾',
+    yetkiKodu: 'ik.masraf', modul: 'ik', menuSira: 15,
+  },
+  {
+    // BELGE TALEBİ (765): çalışma/maaş/vize yazısı. Asıl iş onay değil
+    //   HAZIRLAMAK - ilk çip "Hazırlanacak", çünkü İK'nın ekranı açma
+    //   sebebi odur. Bekleme günü teslime kadar işler.
+    kaynak: 'personelBelgeTalep', rota: 'personel-belge-talep',
+    baslik: 'Belge Talepleri',
+    yol: 'İK & Prim › Belge Talepleri',
+    kartYolu: '/personel-belge-talep', kartBaslik: 'Belge Talebi',
+    aksiyonEkrani: 'personel-belge-talep-liste',
+    tarihAlani: 'talepTarihi',
+    cipler: [
+      { ad: 'Hazırlanacak', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Onayda',       filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Hazırlandı',   filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      { ad: 'Teslim edildi', filtre: { alan: 'durum', op: 'esit', deger: 5 } },
+      { ad: 'Reddedildi',   filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'İK & Prim', menuAd: 'Belge Talepleri', ic: '📄',
+    yetkiKodu: 'ik.belge_talep', modul: 'ik', menuSira: 16,
+  },
+  {
     // RESMÎ TATİL (749): iş günü hesabının dayandığı takvim. İK & Prim
     //   altında, çünkü izin gününü de vardiyayı da bu liste belirler.
     kaynak: 'resmiTatil', rota: 'resmi-tatil',

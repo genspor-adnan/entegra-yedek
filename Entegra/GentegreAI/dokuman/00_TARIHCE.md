@@ -11944,3 +11944,92 @@ Beklenen davranış - gitmeyen bildirim gitmiş görünmüyor.
 **Dev ortamında bırakılan veri:** 1 vekâlet kaydı, 2 izin talebi (biri
 vekâleten onaylanmış), 1 âmir tanımı (7882 → 5059) ve iki kullanıcıya
 e-posta (`admin@ornek.test`, `e2e@ornek.test`).
+
+
+## 17.09.2026 — Masraf beyanı ve belge talebi (`db/764`, `765`, `766`)
+
+Kullanıcı iki yeni talep türü tanımladı; ikisi de onay omurgasına eklendi.
+Omurga artık **sekiz akış** taşıyor.
+
+### Masraf beyanı (`personel.masraf`, kaynak_tur 1312)
+
+Personelin cepten yaptığı iş harcamalarının (taksi, temsil ağırlama, acil
+malzeme) fatura/fiş karşılığında geri ödeme talebi.
+
+**Başlık + satır.** Bir beyan birden çok fişi taşır: bir saha ziyaretinde
+taksi, otopark ve yemek ayrı belgelerdir ama tek onaya gider. Her fiş ayrı
+beyan olsaydı âmir günde on kez aynı kararı verirdi. Satır, gider kalemini
+mevcut **`masraf` kataloğundan** seçer (282 kayıt, muhasebe kodu ve KDV oranı
+orada) - ikinci bir "harcama türü" listesi açmak aynı kalemi iki yerde
+tanımlamak olurdu.
+
+**Belgesiz satır yok.** "Fatura/fiş karşılığında" kuralın kendisi: `belge_no`
+zorunlu ve db kısıtı da korur. Beyan bir harcama iddiası değil, belgeye
+dayanan bir talep. Fişin görseli için ayrı kolon açılmadı - doküman modülü
+`kaynak` + `kaynak_id` ile her kayda ek bağlayabiliyor.
+
+**Toplam satırlardan türetilir** (db tetiği) ve **taslak dışında satır
+değişmez**: onaya gönderilmiş beyanın tutarı değişirse imza başka bir rakama
+verilmiş olur (662'deki iskonto kilidiyle aynı gerekçe).
+
+**Ödeme bu modülde değil** (kullanıcı kararı): zincir "onaylandı" ile biter,
+ödemeyi muhasebe kendi akışında yapar. Avanstaki `kasa_islem` bağı ve "Öde"
+aksiyonu yok - olmayan bir ödeme izini varmış gibi göstermektense hiç
+göstermemek doğru. Bu yüzden durum kodlarında "ödendi" de yok.
+
+**Zincir:** Birim Âmiri (her beyanda) → %2.500 üstü Mali İşler → %10.000 üstü
+Üst Yönetim. Âmir harcamanın gerçekten iş amaçlı olduğunu söyleyebilecek tek
+kişi; mali işler tutara bakar, işin niteliğine değil.
+
+### Belge talebi (`personel.belge_talep`, kaynak_tur 1314)
+
+Çalışma belgesi, maaş yazısı, vize yazısı, SGK hizmet dökümü.
+
+**Asıl iş onay değil, hazırlamak.** Öteki taleplerde karar zordur; burada
+karar kolay - çalışan çalışıyorsa belge verilir. Zor olan yazının
+hazırlanması ve teslimi. Bu yüzden durum onayla bitmiyor:
+
+    talep → (onay) → HAZIRLANACAK → hazırlandı → teslim edildi
+
+Onayı sonun işareti sayan bir tasarım, personelin belgeyi ne zaman alacağını
+cevapsız bırakırdı - oysa sorduğu tam olarak budur. Bekleme günü de teslime
+kadar işler.
+
+**Otomatik onay ayarla, kapatılabilir** (kullanıcı kararı):
+`ik.belge_talep_otomatik` açıkken (varsayılan) zincir **hiç kurulmaz**, talep
+onaylı doğar ve doğrudan hazırlık kuyruğuna düşer. Boş bir zincir yazıp hemen
+kapatmak, gelen kutusunu kimsenin bakmadığı satırlarla doldururdu. Kapalıyken
+tek basamaklı İK onayı çalışır.
+
+**Red yolu her iki hâlde açık**: otomatik onay "hiç reddedilemez" demek
+değil - deneme süresindeki personele kredi yazısı vermemek gibi haklı
+gerekçeler var.
+
+**Amaç zorunlu**: yazının metni amaca göre değişir (vize yazısı İngilizce ve
+maaş bilgili olur, çalışma belgesi olmayabilir). Amaçsız talep İK'ya "ne
+yazayım" sorusu bıraktırır.
+
+### Bu turda bulunan kusur (`db/766`)
+
+764'ün koruma tetiği fazla geniş davranıyordu: beyanın **kendisi**
+silindiğinde FK kaskadı satırları silmeye çalışıyor, tetik onu da "satır
+değiştirme" sayıp engelliyordu. Sonuç: **onaylanmış beyan hiç silinemiyordu**
+ve kullanıcı anlamsız bir hata alıyordu (*"satırları değiştirilemez"* - oysa
+silmek istediği beyandı). 681'deki `pg_trigger_depth()` deseniyle çözüldü:
+koruma yalnız derinlik 1'de (doğrudan satır işlemi) uygulanıyor.
+
+Ayrıca gelen kutusunun **Tür** rozetine iki yeni akış eklendi; eklenmeseydi
+ikisi de "Diğer" görünecekti (757'de aynı eksik bulunmuştu).
+
+**Doğrulama.** Masraf: belgesiz satır engellendi, toplam satırlardan türedi
+(450 → 1.650 → 1.830), 1.830 TL yalnız âmire gitti, 12.000 TL üç basamak
+aldı (âmir → mali → üst yönetim), onaya gönderilmiş beyana satır eklenemedi,
+zincir onaylanınca beyan "onaylandı" oldu. Belge talebi: otomatik onayda
+durum "hazırlanacak" ve zincir yok; amaçsız talep engellendi; hazırla →
+teslim akışı çalıştı, ikinci kez hazırlama engellendi; ayar kapatılınca tek
+basamaklı İK zinciri kuruldu ve onay "hazırlanacak" yazdı. Ekranlarda iki
+liste de doğru kolonlarla açıldı; gelen kutusu "Masraf Beyanı" rozetini
+gösterdi. xUnit 234/234, vitest 598/598, iki derleme temiz. Test verisi
+silindi (vekâlet senaryosunun verisi korundu).
+
+Göç **764/765/766 yalnız docker'da**.

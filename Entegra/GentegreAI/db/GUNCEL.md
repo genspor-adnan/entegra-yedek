@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (390 ad, 108 tanesi birden cok dosyada)
+## Fonksiyonlar (391 ad, 109 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -360,6 +360,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_lab_panel_hizmet` | `501_panel_icerigi_tek_kaynak.sql` | — |
 | `tg_lab_panel_satir_yaz` | `639_hemogram_23_parametre.sql` | 501_panel_icerigi_tek_kaynak.sql |
 | `tg_lab_varyant_sinif` | `439_lab_genetik.sql` | — |
+| `tg_masraf_toplam` | `766_masraf_satir_kilit_duzeltmesi.sql` | 764_masraf_beyani.sql |
 | `tg_mesaj_sohbet_tazele` | `342_mesajlasma.sql` | — |
 | `tg_muayene_durum_istemden` | `418_muayene_istem_bagi.sql` | — |
 | `tg_muayene_istem_radyoloji` | `418_muayene_istem_bagi.sql` | — |
@@ -399,7 +400,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (218 ad, 52 tanesi birden cok dosyada)
+## Gorunumler (220 ad, 52 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -570,13 +571,15 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_onay_akis_adim` | `742_onay_akis_ekrani.sql` | — |
 | `v_onay_akis_lookup` | `746_onay_bildirim_vekalet.sql` | — |
 | `v_onay_bekleyen` | `745_onay_sirasi_gelen.sql` | 738_onay_omurgasi.sql |
-| `v_onay_kutusu` | `758_dokuman_onay_omurga.sql` | 739_onay_gelen_kutusu.sql, 744_izin_onay_kutusu.sql, 752_onarim_onayi.sql, 753_avans_modulu.sql, 754_iskonto_omurga.sql, 755_avans_kaynak_tur_duzeltmesi.sql |
+| `v_onay_kutusu` | `765_personel_belge_talebi.sql` | 739_onay_gelen_kutusu.sql, 744_izin_onay_kutusu.sql, 752_onarim_onayi.sql, 753_avans_modulu.sql, 754_iskonto_omurga.sql, 755_avans_kaynak_tur_duzeltmesi.sql, 758_dokuman_onay_omurga.sql, 764_masraf_beyani.sql |
 | `v_onay_sozlu` | `763_sozlu_onay_takibi.sql` | — |
 | `v_onay_vekalet` | `746_onay_bildirim_vekalet.sql` | — |
 | `v_personel_avans` | `755_avans_kaynak_tur_duzeltmesi.sql` | 753_avans_modulu.sql |
+| `v_personel_belge_talep` | `765_personel_belge_talebi.sql` | — |
 | `v_personel_izin` | `743_izin_modulu.sql` | — |
 | `v_personel_izin_bakiye` | `743_izin_modulu.sql` | — |
 | `v_personel_lookup` | `054_personel_ozluk_mockup_uyum.sql` | — |
+| `v_personel_masraf` | `764_masraf_beyani.sql` | — |
 | `v_plan_vade` | `077_v_ekstre.sql` | — |
 | `v_prim_rol_aday` | `576_personel_departman_tek_kaynak.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql, 367_prim_rol_aday_bolum.sql, 369_primli_calisma_sekli.sql |
 | `v_prim_rol_lookup` | `391_prim_rol_lookup_onarim.sql` | 362_gonderen_calisma_sekli.sql |

@@ -2165,6 +2165,44 @@ public static class AksiyonKatalogu
                      Bicim: "tehlike",
                      Ipucu: "Ödenmiş avans iptal edilemez - geri alım ayrı tahsilattır")],
 
+            // MASRAF BEYANI (764). Odeme aksiyonu YOK: zincir onayla biter,
+            //   muhasebe disarida oder (kullanici karari).
+            ["personel-masraf-liste"] =
+                [.. Crud("personel-masraf", "ik", "ik.masraf"),
+                 new("personel-masraf.gonder", "📤 Onaya Gönder", "ik",
+                     KaynakKodu: "ik.masraf", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 15, Bicim: "bir",
+                     Ipucu: "Zincir: âmir → (tutar eşiğine göre) mali işler / üst yönetim"),
+                 new("personel-masraf.zincir", "🧾 Onay Zinciri", "ik",
+                     Hedef: "sagtus,palet", KaynakKodu: "ik.masraf", Islem: Islem.Gor,
+                     KayitGerekir: true, Sira: 18),
+                 new("personel-masraf.iptal", "✖ Beyanı İptal Et", "ik",
+                     Hedef: "sagtus,palet", KaynakKodu: "ik.masraf",
+                     Islem: Islem.Degistir, KayitGerekir: true, Sira: 20,
+                     Bicim: "tehlike",
+                     Ipucu: "Beyan silinmez - \"bu harcama talep edilmiş miydi\" sorusu sonradan da sorulur")],
+
+            // BELGE TALEBI (765). Asil is onay degil HAZIRLAMAK: aksiyonlar
+            //   da o sirayi izler (hazirla -> teslim).
+            ["personel-belge-talep-liste"] =
+                [.. Crud("personel-belge-talep", "ik", "ik.belge_talep"),
+                 new("personel-belge-talep.hazirla", "🖨 Hazırlandı", "ik",
+                     KaynakKodu: "ik.belge_talep", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 15, Bicim: "bir",
+                     Ipucu: "Yalnız onaylanmış (hazırlanacak) talep hazırlanabilir"),
+                 new("personel-belge-talep.teslim", "📬 Teslim Edildi", "ik",
+                     KaynakKodu: "ik.belge_talep", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 16,
+                     Ipucu: "Personelin beklediği şey onay değil belgenin kendisi"),
+                 new("personel-belge-talep.zincir", "🧾 Onay Zinciri", "ik",
+                     Hedef: "sagtus,palet", KaynakKodu: "ik.belge_talep",
+                     Islem: Islem.Gor, KayitGerekir: true, Sira: 18,
+                     Ipucu: "Otomatik onaylanan talepte zincir kurulmaz"),
+                 new("personel-belge-talep.reddet", "✖ Reddet", "ik",
+                     Hedef: "sagtus,palet", AksiyonYetkisi: "ik.belge_talep_onay",
+                     KayitGerekir: true, Sira: 20, Bicim: "tehlike",
+                     Ipucu: "Otomatik onaylanmış talep de gerekçeyle reddedilebilir")],
+
             // RESMI TATIL (749). "Yili Uret" yalniz MILLI tatilleri yazar;
             //   dini bayramlar elle girilir - hicri takvim algoritmayla
             //   uretilmiyor (bir gun kayan hesap izni yanlis sayar).

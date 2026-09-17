@@ -99,4 +99,51 @@ export const izinUclari = {
   /** Onaylı izin de iptal edilir - silinmez; "alınmış mıydı" sorusu sonra da sorulur. */
   izinIptal: (id: number, gerekce: string) =>
     gonder<{ durum: number }>(`/api/ik/izin/${id}/iptal`, { gerekce }),
+
+  // ======================================================= masraf beyani ==
+  //  ODEME YOK (764): zincir onayla biter, muhasebe disarida oder.
+
+  masrafAc: (g: { tarafId: number; beyanTarihi?: string; aciklama?: string }) =>
+    gonder<{ id: number; durum: number }>('/api/ik/masraf', g),
+
+  /** Belgesiz satir YAZILAMAZ - `belgeNo` zorunlu (db kisiti da korur). */
+  masrafSatirEkle: (id: number, g: {
+    masrafId?: number; harcamaTarihi?: string; belgeTuru?: number;
+    belgeNo: string; tutar: number; kdvTutar?: number; aciklama?: string;
+  }) => gonder<{ satirId: number; toplamTutar: number }>(
+      `/api/ik/masraf/${id}/satir`, g),
+
+  masrafSatirSil: (satirId: number) =>
+    istek<{ satirId: number }>(`/api/ik/masraf/satir/${satirId}`,
+                               { method: 'DELETE' }),
+
+  masrafGonder: (id: number) =>
+    gonder<{
+      durum: number; toplamTutar: number;
+      basamaklar: { sira: number; ad: string; rol: number }[];
+    }>(`/api/ik/masraf/${id}/gonder`, {}),
+
+  masrafIptal: (id: number, gerekce: string) =>
+    gonder<{ durum: number }>(`/api/ik/masraf/${id}/iptal`, { gerekce }),
+
+  // ======================================================== belge talebi ==
+  //  ASIL IS ONAY DEGIL HAZIRLAMAK (765): durum onayla bitmez.
+
+  belgeTalepAc: (g: {
+    tarafId: number; tur?: number; amac: string; muhatap?: string;
+    adet?: number; teslimSekli?: number; aciklama?: string;
+  }) => gonder<{
+    id: number; durum: number; otomatikOnay: boolean; mesaj: string;
+    basamaklar?: { sira: number; ad: string; rol: number }[];
+  }>('/api/ik/belge-talep', g),
+
+  belgeTalepHazirla: (id: number, not?: string) =>
+    gonder<{ durum: number }>(`/api/ik/belge-talep/${id}/hazirla`, { gerekce: not }),
+
+  belgeTalepTeslim: (id: number, not?: string) =>
+    gonder<{ durum: number }>(`/api/ik/belge-talep/${id}/teslim`, { gerekce: not }),
+
+  /** Otomatik onaylanmis talep de gerekceyle reddedilebilir. */
+  belgeTalepReddet: (id: number, gerekce: string) =>
+    gonder<{ durum: number }>(`/api/ik/belge-talep/${id}/reddet`, { gerekce }),
 };

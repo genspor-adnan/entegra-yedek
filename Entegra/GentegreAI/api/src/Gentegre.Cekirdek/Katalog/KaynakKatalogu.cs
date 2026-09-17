@@ -353,6 +353,8 @@ public static partial class KaynakKatalogu
         Ekle(PersonelIzinKaynagi());
         Ekle(IzinBakiyeKaynagi());
         Ekle(PersonelAvansKaynagi());
+        Ekle(PersonelMasrafKaynagi());
+        Ekle(BelgeTalepKaynagi());
         Ekle(ResmiTatilKaynagi());
         Ekle(OnayAkisKaynagi());
         Ekle(OnayVekaletKaynagi());

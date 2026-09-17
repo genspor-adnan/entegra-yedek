@@ -267,6 +267,8 @@ public static partial class KartKatalogu
         Ekle(PersonelIzinHak());
         // AVANS (753): talep, odeme ve mahsup plani.
         Ekle(PersonelAvans());
+        Ekle(PersonelMasraf());
+        Ekle(PersonelBelgeTalep());
         // RESMI TATIL (749): is gunu hesabinin dayandigi takvim.
         Ekle(ResmiTatil());
         // ONAY AKISI (742): kurumun imza duzeni - basamaklar, esikler.
