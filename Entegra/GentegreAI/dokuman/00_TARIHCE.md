@@ -12784,3 +12784,54 @@ imha · 912 demirbaş · 913 kalibrasyon · 915 satınalma talep · 916 teklif �
 verisi ve sayaçları silindi.
 
 Göç **777 yalnız docker'da**.
+
+---
+
+## 17.09.2026 — Çizilen müşteri imzası (778)
+
+Kullanıcı: *"çizilen imzayı da yap"*.
+
+`imza_alindi` bayrağı "alındı" der ama **kimin imzaladığını göstermez**.
+Yerinde yapılan işin tek kanıtı müşterinin onayıdır; sonradan çıkan
+*"gelmediler / yapmadılar"* tartışmasında bir onay kutusu delil değildir.
+
+**Tuval, doküman modülüne yazıyor.** `kaynak = servis-ziyaret`,
+`kaynak_id = ziyaret kimliği`, `belge_turu = İmza`. Ziyaret kimliği - iş
+emrine bağlamak, hangi gidişte kimin imzaladığını kaybetmek olurdu. Ayrı bir
+imza kolonu/tablosu açılmadı: doküman modülü zaten dosya saklıyor ve aynı
+ziyarete fotoğraf da eklenebilir; imzayı ötekilerden ayıran tek şey etiketi.
+
+Beyaz liste **iki yerde**: `DokumanUclari` eşlemesi + `DokumanDeposu`.
+3.7'de (masraf fişi) birini unutmak HTTP 500 vermişti; bu kez ikisi birden.
+
+**Pointer event, touch değil.** `pointerdown/move/up` parmağı, kalemi ve fareyi
+tek kodla karşılar; ayrı `touch`+`mouse` dinleyicisi aynı çizimin iki yolunu
+tutmak olurdu. `touch-action: none` olmadan parmak sayfayı kaydırıp çizgiyi
+koparıyor; tuval `devicePixelRatio` ile ölçekleniyor - bulanık imza kanıt
+olmaz.
+
+**İki kusur çıktı ve düzeltildi.**
+
+1. **Açık ziyarette "Alınamadı" ön seçiliydi.** Ekran kayıtlı `imza_alindi`
+   bayrağını olduğu gibi alıyordu; o bayrak her açık ziyarette 0 olduğu için
+   imza tuvali hiç çizilmiyor, teknisyen imza almayı düşünmeden gerekçe
+   kutusuyla karşılaşıyordu. Açık ziyarette varsayılan artık "Alındı";
+   kapanmışta kayıtlı değer okunur.
+
+2. **"Alındı" deyip çizmeden kapatılabiliyordu** - eski boş iddianın aynısı,
+   üstelik bu kez görseli olmayan bir kanıt sözüyle. Kapanış artık çizim
+   (ya da kayıtlı görsel) istiyor. Kural **ekranda**, çünkü imza yalnız
+   dokunmatik ekranda çizilebilir ve uç imzayı bilmeden karar veremez;
+   masaüstündeki liste yolu bayrak + gerekçeyle yürümeye devam ediyor.
+
+**İmza önce yüklenir, sonra ziyaret kapanır**: tersi olsaydı yükleme düşünce
+"imza alındı" diyen ama görseli olmayan kayıt kalırdı. Bu sırayla en kötü hâl
+kapanmamış bir ziyaret - o tekrar denenebilir.
+
+**Doğrulama (390×844).** Tuval 344×180 çizildi, çizim sonrası ipucu kayboldu,
+kapanışta **7.432 baytlık PNG** `belge_turu = İmza` ile kaydedildi ve ziyaret
+`imza_alindi = 1` ile kapandı; kapanmış ziyarette görsel salt okunur
+gösteriliyor; çizmeden kapatma **engellendi**. xUnit 234/234, vitest 614/614.
+Test verisi (çağrı, iş emri, iki ziyaret, imza dosyası) silindi.
+
+**DB göçü yok** - doküman modülü kaynağı kod tarafında tanımlı.

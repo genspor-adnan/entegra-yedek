@@ -183,6 +183,10 @@ public static class DokumanUclari
         //   basina ayri kaynak acmadik - hangi fisin hangi satira ait oldugu
         //   `belge_turu`nde (satirin belge numarasi) tasiniyor.
         "personelMasraf" => "masraf-beyan",
+        // ZİYARET İMZASI (778): teknisyenin telefonunda çizilen imza
+        //   `kaynak_id` ZİYARET kimliğidir - iş emrine bağlamak, hangi
+        //   gidişte kimin imzaladığını kaybetmek olurdu.
+        "servisZiyaret" => "servis-ziyaret",
         // Muayene DOSYALARI (mockup muayene_karti.html "Dosyalar"): disaridan
         //   gelen tetkik, epikriz, ragit... kaynak_id muayene kimligidir.
         "muayene" => "muayene",
@@ -217,6 +221,7 @@ public static class DokumanUclari
         //   ayri bir "fis yetkisi" acmak, beyanla fisini iki ayri izne
         //   baglamak olurdu.
         "personelMasraf" => "ik.masraf",
+        "servisZiyaret" => "servis",
         _ => kartAdi
     };
 

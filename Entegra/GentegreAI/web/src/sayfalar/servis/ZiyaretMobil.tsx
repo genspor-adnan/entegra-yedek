@@ -4,6 +4,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { ZiyaretDetayi } from '../../api/uclar/servis';
 import { guvenli, mesaj } from '../../bilesenler/mesaj';
+import { ImzaTuvali } from '../../bilesenler/ImzaTuvali';
 
 /**
  * ZİYARET KARTI — TEKNİSYENİN TELEFONU (776).
@@ -49,6 +50,10 @@ export function ZiyaretMobil() {
   const [mesaiDisi, setMesaiDisi] = useState(false);
   const [imza, setImza] = useState(true);
   const [imzaNotu, setImzaNotu] = useState('');
+  /** Çizilen imza (PNG); kapanışta doküman olarak yüklenir. */
+  const [imzaBlob, setImzaBlob] = useState<Blob | null>(null);
+  /** Kayıtlı imzanın görsel adresi - kapanmış ziyarette okunur. */
+  const [imzaUrl, setImzaUrl] = useState<string | null>(null);
 
   useEffect(() => {
     void (async () => {
@@ -64,8 +69,18 @@ export function ZiyaretMobil() {
         setIscilikSaat(y.ziyaret.iscilikSaat ? String(y.ziyaret.iscilikSaat) : '');
         setTutar(y.ziyaret.tutar ? String(y.ziyaret.tutar) : '');
         setMesaiDisi(y.ziyaret.mesaiDisi === 1);
-        setImza(y.ziyaret.imzaAlindi === 1);
+        // AÇIK ZİYARETTE VARSAYILAN "ALINDI": kayıtlı bayrak her açık
+        //   ziyarette 0'dır ve onu olduğu gibi almak "Alınamadı"yı ön seçili
+        //   yapıyordu - imza tuvali hiç çizilmiyor, teknisyen imza almayı
+        //   düşünmeden gerekçe kutusuyla karşılaşıyordu. Kapanmış ziyarette
+        //   kayıtlı değer okunur; orada bayrak gerçeği söyler.
+        setImza(y.ziyaret.sonuc === 0 ? true : y.ziyaret.imzaAlindi === 1);
         setImzaNotu(y.ziyaret.imzaNotu);
+        // KAPANMIŞ ZİYARETTE İMZA GÖRSELİ OKUNUR: ekran aynı zamanda kanıt
+        //   ekranıdır - "o gün kim imzaladı" sorusu burada cevaplanır.
+        const d = await api.dokumanlar('servisZiyaret', Number(id));
+        const imzaSatiri = d.find(x => x.belgeTuru === 'İmza');
+        if (imzaSatiri) setImzaUrl(await api.dokumanIcerikUrl(imzaSatiri.id));
       } catch (h) { setHata(hataMetni(h)) }
     })();
   }, [id]);
@@ -77,6 +92,30 @@ export function ZiyaretMobil() {
   const sayi = (m: string) => (m.trim() ? Number(m.replace(',', '.')) : undefined);
 
   const kapat = () => guvenli(async () => {
+    // "ALINDI" DİYİP ÇİZMEMEK, ESKİ BOŞ İDDİANIN AYNISI. Kural burada
+    //   çünkü imza ancak dokunmatik ekranda çizilebilir; uç, imzayı bilmeden
+    //   karar veremez (masaüstündeki liste yolu bayrak + gerekçeyle yürür).
+    if (imza && !imzaBlob && !imzaUrl) {
+      mesaj(['Müşteri imzası çizilmedi.', '',
+             'Ya tuvale imzalatın ya da "Alınamadı" seçip gerekçe yazın - '
+             + 'yerinde yapılan işin tek kanıtı müşterinin onayıdır.'
+            ].join(String.fromCharCode(10)));
+      return;
+    }
+    // İMZA ÖNCE YÜKLENİR, SONRA KAPANIŞ: ziyaret kapandıktan sonra yükleme
+    //   düşerse "imza alındı" diyen ama görseli olmayan bir kayıt kalırdı.
+    //   Bu sırayla en kötü hâl kapanmamış bir ziyaret - o tekrar denenebilir.
+    if (imza && imzaBlob) {
+      const ad = `imza-${z.cagriNo || z.isEmriNo || z.id}.png`;
+      await api.dokumanYukle('servisZiyaret', z.id,
+        new File([imzaBlob], ad, { type: 'image/png' }), false);
+      const yuklenen = (await api.dokumanlar('servisZiyaret', z.id))
+        .filter(x => x.ad === ad).slice(-1)[0];
+      // BELGE TÜRÜ "İmza": aynı ziyarete fotoğraf da eklenebilir; imzayı
+      //   ötekilerden ayıran tek şey bu etiket.
+      if (yuklenen) await api.dokumanDuzenle('servisZiyaret', z.id,
+                                             yuklenen.id, ad, 'İmza');
+    }
     const y = await api.servisZiyaretKapat(z.id, {
       yapilan, sonuc, sonucMetni: sonucMetni || undefined,
       yolKm: sayi(yolKm), iscilikSaat: sayi(iscilikSaat), tutar: sayi(tutar),
@@ -210,6 +249,15 @@ export function ZiyaretMobil() {
                   className={`zm-sec${!imza ? ' on' : ''}`}
                   onClick={() => setImza(false)}>Alınamadı</button>
         </div>
+        {imza && (
+          // ÇİZİLEN İMZA: bayrak "alındı" der, görsel KİMİN imzaladığını
+          //   gösterir - onay kutusu, sonradan çıkan "gelmediler" tartışmasında
+          //   delil değildir.
+          <div className="zm-alan">
+            <span>Müşteri buraya imzalasın</span>
+            <ImzaTuvali salt={kapali} deger={imzaUrl} onDegisti={setImzaBlob} />
+          </div>
+        )}
         {!imza && (
           <label className="zm-alan">
             <span>Gerekçe (zorunlu)</span>

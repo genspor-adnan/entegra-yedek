@@ -5233,3 +5233,27 @@ textarea.fm-giris { resize: vertical }
   .zm-ucer { grid-template-columns: 1fr 1fr }
   .zm-ucer > label:last-child { grid-column: 1 / -1 }
 }
+
+/* İMZA TUVALİ (778) — parmakla çizilen müşteri imzası.
+   `touch-action: none` şart: olmadan parmak hareketi sayfayı kaydırır ve
+   çizgi kopar. Tuval CSS boyutuyla değil `devicePixelRatio` ile ölçekleniyor
+   (bileşende) - bulanık bir imza kanıt olmaz. */
+.imza-kutu { position: relative; margin-top: 4px }
+.imza-tuval {
+  width: 100%; height: 180px; touch-action: none; display: block;
+  border: 1px dashed #9aa8b6; border-radius: 6px; background: #fff;
+  cursor: crosshair;
+}
+.imza-ipucu {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  pointer-events: none; color: var(--soluk); font-size: 13px;
+}
+.imza-temizle { position: absolute; right: 8px; bottom: 8px }
+.imza-gorsel {
+  width: 100%; max-height: 180px; object-fit: contain;
+  border: 1px solid var(--cizgi); border-radius: 6px; background: #fff;
+}
+.imza-yok {
+  border: 1px dashed var(--cizgi); border-radius: 6px; padding: 24px;
+  text-align: center; color: var(--soluk); font-size: 12px;
+}

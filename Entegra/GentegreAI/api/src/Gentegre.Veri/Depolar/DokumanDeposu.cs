@@ -35,9 +35,15 @@ public sealed class DokumanDeposu
         //   yuklenemiyordu; uzaktan onaylayan amir belgeyi goremiyordu.
         //   kaynak_id BEYAN kimligidir; hangi fisin hangi satira ait oldugu
         //   `belge_turu`nde (satirin belge numarasi) tasinir.
+        //   "servis-ziyaret" (778): teknisyenin telefonunda CIZILEN musteri
+        //   imzasi. Yerinde yapilan isin tek kaniti musterinin onayidir;
+        //   `imza_alindi` bayragi "alindi" der ama KIMIN imzaladigini
+        //   gostermez - gorsel o bosluğu kapatir. kaynak_id ZIYARET
+        //   kimligidir: is emrine baglamak, hangi gidiste imzalandigini
+        //   kaybetmek olurdu.
         new(StringComparer.Ordinal)
             { "taraf", "stok", "ebelge-xslt", "sube", "radyoloji-istem", "klasor",
-              "muayene", "masraf-beyan" };
+              "muayene", "masraf-beyan", "servis-ziyaret" };
 
     /// <summary>
     /// KABUL EDILEN ICERIK TIPLERI.
