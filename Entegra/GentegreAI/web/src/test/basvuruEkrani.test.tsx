@@ -457,7 +457,7 @@ describe('tahsilat arac cubugu duzeni', () => {
     expect(c.textContent).not.toContain('Senet');
   });
 
-  it('"⋯" basilinca Banka / Çek / Senet menusu acilir', async () => {
+  it('"⋯" basilinca Banka / Çek / Senet + Avans Kullan menusu acilir', async () => {
     ciz();
     const c = await araclar();
     expect(document.querySelector('.dugme-menu-liste')).toBeNull();
@@ -465,8 +465,36 @@ describe('tahsilat arac cubugu duzeni', () => {
       .find(b => b.textContent?.trim() === '⋯')!;
     await act(async () => { ucNokta.click() });
     const menu = document.querySelector('.dugme-menu-liste')!;
-    expect([...menu.querySelectorAll('button')].map(b => (b.textContent ?? '').trim()))
-      .toEqual(['🏦 Banka', '🧾 Çek', '📜 Senet']);
+    const ogeler = [...menu.querySelectorAll('button')]
+      .map(b => (b.textContent ?? '').trim());
+    // AVANS KULLAN (781) araclardan AYRAC ile ayrilir: tahsilat araci degil,
+    //   zaten kasada duran parayi bu belgeye sayar.
+    expect(ogeler.slice(0, 3)).toEqual(['🏦 Banka', '🧾 Çek', '📜 Senet']);
+    expect(ogeler[3]).toContain('Avans Kullan');
+    expect(menu.querySelector('.menu-ayrac')).not.toBeNull();
+    // Avansi olmayan hastada PASIF ama gorunur: "avans diye bir sey yok"
+    //   izlenimi vermesin.
+    expect((menu.querySelectorAll('button')[3] as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('AVANS AL dugmesi "⋯" ile İade arasinda durur (781)', async () => {
+    ciz();
+    const c = await araclar();
+    const adlar = dugmeler(c);
+    const i = adlar.findIndex(a => a.includes('Avans Al'));
+    expect(i).toBeGreaterThan(-1);
+    expect(adlar[i - 1]).toBe('⋯');
+    expect(adlar[i + 1]).toContain('İade');
+  });
+
+  it('AVANS IADE dugmesi avansi OLMAYAN hastada CIZILMEZ (781)', async () => {
+    // Kullanici: "avans al her zaman görünür.. avans iade eğer alınmış avans
+    //   varsa görünür". Iade edilecek parasi olmayan hastada duran bir dugme
+    //   cubugu kalabaliklastirir ve basildiginda bos menu acardi.
+    ciz();
+    const c = await araclar();
+    expect(dugmeler(c).some(a => a.includes('Avans Al'))).toBe(true);
+    expect(dugmeler(c).some(a => a.includes('Avans İade'))).toBe(false);
   });
 
   it('KENDI ODEYENDE (Özel) Kuruma Tahakkuk dugmesi CIZILMEZ', async () => {

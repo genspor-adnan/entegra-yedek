@@ -13171,3 +13171,46 @@ edilmiş" diyor, boş kart açmıyor. Durum merdiveni: Açık · Kısmen Kullan�
 değişir, kalanı aşamaz, kullanılmış avansta yalnız kalan kadar iade,
 iade edilen avans mahsup edilemez, tahsilat türünde olamaz, sahibine yapılır,
 iptal edilen iade kalanı geri verir), vitest 634/634.
+
+## 17.09.2026 — Tahsilat sekmesinde avans: Kullan · Al · İade (781)
+
+Kullanıcı: *"başvuruda tahsilat sekmesinde 3 nokta (...) butonu aşağı açılan
+menüye senetten sonra separator Avans Kullan ekle.. Avans Alındığı zaman
+aktif olacak"*, *"bu 3 nokta butonun sağında Avans Al butonu ekle"*,
+*"avans al her zaman görünür.. avans iade eğer alınmış avans varsa görünür"*.
+
+**Araç çubuğu:** `💵 Nakit · 💳 POS · ⋯ · 💰 Avans Al · ↩ Avans İade ·
+↩ İade / İptal`.
+
+- **⋯ menüsü**: Banka · Çek · Senet — sonra **ayraç** — **💰 Avans Kullan**
+  (sağında hastanın açık avans tutarı). Ayraç bir ayrım taşıyor: ötekiler
+  tahsilat *aracı*, bu ise zaten kasada duran parayı bu belgenin satırlarına
+  sayıyor (322 mahsubu). Avansı yokken **pasif ama görünür**; düğmeyi hiç
+  çizmemek "avans diye bir şey yok" izlenimi verirdi, `title` sebebini yazıyor.
+- **Avans Al** her zaman görünür (hasta seçilmemişse pasif), alt menüsü Nakit /
+  Banka / POS. Kasa kartı avans damgasıyla ve **belgesiz** açılır: avans
+  ileriye dönük paradır, belgeye bağlansa "bu başvurunun tahsilatı" olur ve
+  avans olmaktan çıkardı. Başvurunun kaydedilmiş olması da gerekmez.
+- **Avans İade** yalnız açık avans varken çizilir. Menü hastanın açık
+  avanslarını *tarih + kalan* ile listeler: iade TEK kasa işlemine bağlanır
+  (780), "hepsini iade et" demek hangi makbuzun geri verildiğini
+  kaydetmemek olurdu. Seçilen avansın kalanı ödeme kartına önerilir.
+
+**Tek okuyucu.** Şerit, menü öğesinin etkinliği ve iade menüsü aynı veriyi
+kullanıyor; üçü ayrı sorsaydı mahsuptan sonra biri tazelenip öteki bayat
+kalırdı ("kullandım ama hâlâ yazıyor"). Durum `useAvansDurumu` kancasında
+toplandı; `AvansMahsup` bileşeni kaldırıldı (şerit artık sekmenin kendi
+parçası, veri tek yerden geliyor).
+
+**Menü ikonu.** Kullanıcı: *"satınalma menü ikonu alışveriş sepeti olsun"*.
+`Satınalma` grubu ikon tablosunda yoktu, menüde varsayılan klasörle (📁)
+çiziliyordu → **🛒**. Yeni test "her grubun kendi ikonu var" diyor; **Eczane ·
+Demirbaş · Teknik Servis · Doküman** hâlâ 📁 ile çiziliyor - ikon seçimi
+kullanıcının tercihi olduğu için uydurulmadı, bilinen eksik listesine yazıldı
+(yenisinin eklenmesi artık testi kırar).
+
+**Doğrulama.** Başvuru (P-000135, avansı 300 ₺ olan hasta): çubuk sırası
+yukarıdaki gibi çizildi; ⋯ menüsünde ayraç + *"💰 Avans Kullan 300,00 ₺"*
+etkin; Avans Al menüsü Nakit/Banka/POS; Avans İade menüsü *"17.09.2026 ·
+300,00 ₺"* ve seçince kart "Avans İadesi" başlığıyla açıldı. Avansı olmayan
+hastada (P-000139) Avans Al görünür, Avans İade çizilmedi. vitest 637/637.

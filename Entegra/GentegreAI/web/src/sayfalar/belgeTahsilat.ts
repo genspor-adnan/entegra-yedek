@@ -39,6 +39,17 @@ export interface TahsilatAcilisi {
   belgeId?: number;
   tutar?: string;
   cekSenetId?: number;
+  /**
+   * AVANS (781): kasa karti avans damgasiyla acilir (779). Avans BELGEYE
+   * BAGLANMAZ - ileriye donuk paradir; belgeye baglanan para "bu belgenin
+   * tahsilati" olur ve avans olmaktan cikar.
+   */
+  avans?: boolean;
+  /**
+   * AVANS IADESI (781): bu odeme HANGI avansin iadesi (780 bagi). Kart
+   * "Avans İadesi" basligiyla acilir, hasta kilitlidir.
+   */
+  avansKaynakId?: number;
 }
 
 export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, setHata,
@@ -224,6 +235,27 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
    * vade... kasa kartinda sorulamayacak kadar cok alan var. Diger araclar
    * (nakit/banka/POS) dogrudan kasa kartini acar.
    */
+  /**
+   * AVANS AL (781): hastadan ileriye donuk para. Kart AVANS DAMGASIYLA ve
+   * BELGESIZ acilir; belge kaydedilmis olmasi da gerekmez - avansin
+   * basvuruyla bagi, sonradan yapilan MAHSUPTUR ("⋯ > Avans Kullan").
+   */
+  const avansAc = (tur: number) => {
+    if (!cari?.id) { setHata('Avans için önce hasta seçin.'); return }
+    setTahsilatAcilis({ tur, tarafId: cari.id, tarafUnvan: cari.unvan, avans: true });
+  };
+
+  /**
+   * AVANS IADESI (781): kalan avansi hastaya geri oder. Belgeye BAGLANMAZ -
+   * para basvurunun tahsilati degil, avansin geri verilmesidir. Tutar kalanla
+   * onerilir; ustunu sunucu tetigi reddeder (780).
+   */
+  const avansIadeAc = (avansId: number, tutar: number, tur = 31) => {
+    if (!cari?.id) { setHata('İade için önce hasta seçin.'); return }
+    setTahsilatAcilis({ tur, tarafId: cari.id, tarafUnvan: cari.unvan,
+                        tutar: String(tutar), avansKaynakId: avansId });
+  };
+
   const tahsilatAdimi = (tahsilatTuru: number, id: number) => {
     if (CEK_SENET_TURLERI.includes(tahsilatTuru)) {
       setCekTuru({ tur: tahsilatTuru, belgeId: id });
@@ -264,6 +296,7 @@ export function useBelgeTahsilat({ kayitliId, aktifSekme, cari, onKaydedildi, se
     belgeId: kayitliId,
     tahsilatlar,
     tahsilEdilen,
+    avansAc, avansIadeAc,
     tahsilatAcik, setTahsilatAcik,
     cekTuru, setCekTuru,
     tahsilatAcilis, setTahsilatAcilis,

@@ -1221,6 +1221,15 @@ input.skt-gecmis {
 }
 .dugme-menu-liste .mi { width: 100%; border: 0; background: transparent; text-align: left; cursor: pointer }
 .dugme-menu-liste .mi:hover { background: var(--mor2); color: var(--mor) }
+/* Menu icinde GRUP AYRACI (781): "Avans Kullan" bir tahsilat araci degil -
+   para zaten kasada, menude de araclardan ince bir cizgiyle ayrilir. */
+.dugme-menu-liste .menu-ayrac { height: 1px; margin: 4px 0; background: var(--cizgi) }
+/* Pasif menu ogesi GORUNUR kalir (avansi olmayan hasta): kaybolan dugme
+   "boyle bir sey yok" izlenimi verirdi; title sebebini soyluyor. */
+.dugme-menu-liste .mi:disabled { opacity: .45; cursor: default }
+.dugme-menu-liste .mi:disabled:hover { background: transparent; color: inherit }
+/* Menu ogesinin sagindaki tutar (avans toplami). */
+.dugme-menu-liste .mi-tutar { float: right; margin-left: 12px; opacity: .75 }
 
 /* Cip seridindeki tarih araligi (ör. hesap ekstresi). */
 .tarih-araligi { display: inline-flex; align-items: center; gap: 4px }

@@ -1421,6 +1421,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
                            secili={tahsilat.seciliTahsilatlar}
                            setSecili={tahsilat.setSeciliTahsilatlar}
                            tahsilatAcKart={tahsilat.setTahsilatKayitId}
+                           // AVANS AL (781): kart avans damgasiyla, belgesiz
+                           //   acilir - para ileriye donuktur, bu belgenin
+                           //   tahsilati degildir.
+                           avansAl={tur => tahsilat.avansAc(tur)}
+                           // AVANS IADE (781): secilen avansin kalani,
+                           //   nakit odeme kartinda onerili gelir.
+                           avansIadeAc={(id, tutar) => tahsilat.avansIadeAc(id, tutar)}
                            tahsilatSil={async idler => {
                              await tahsilat.tahsilatSil(idler);
                              // Tahsilat silinince kovalarin TAHSIL sayaci duser.

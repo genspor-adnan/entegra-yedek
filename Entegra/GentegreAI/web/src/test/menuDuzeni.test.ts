@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { LISTELER } from '../sayfalar/Liste';
 import { BOLGE_HBYS, GRUP_SIRA_HBYS, CALISMA_ALANLARI, rolCalismaAlani } from '../sayfalar/kabuk/menuBolgeleri';
+import { GRUP_IKON, GRUP_IKON_CEV } from '../sayfalar/kabuk/menuAgaci';
 
 /**
  * MENÜ DÜZENİ (plan: dokuman/11_MENU_DUZENI_PLANI.md · mockup
@@ -12,6 +13,21 @@ import { BOLGE_HBYS, GRUP_SIRA_HBYS, CALISMA_ALANLARI, rolCalismaAlani } from '.
 const GRUPLAR = [...new Set(LISTELER.map(l => l.menuGrup).filter(Boolean))] as string[];
 
 describe('menü düzeni', () => {
+  it('her grubun KENDİ ikonu var (varsayılan klasöre düşmüyor)', () => {
+    // 781: "Satınalma" ikon tablosunda yoktu ve menüde 📁 ile çiziliyordu -
+    //   on beş grubun arasında hiçbir şey anlatmayan bir klasör. Yeni grup
+    //   açan, ikonunu da yazsın: eksik ikon ekranda ancak o menü açılınca
+    //   fark ediliyor.
+    // BİLİNEN EKSİKLER: bu dördü de bugün 📁 ile çiziliyor. İkon seçimi
+    //   kullanıcının tercihidir (daha önce Medula, Yönetim ve Prim için tek
+    //   tek konuşuldu), o yüzden burada uydurulmuyor - liste borcu görünür
+    //   tutuyor ve YENİSİNİN eklenmesini engelliyor.
+    const bilinen = ['Eczane', 'Demirbaş', 'Teknik Servis', 'Doküman'];
+    const eksik = GRUPLAR.filter(g => !GRUP_IKON[g] && !GRUP_IKON_CEV[g]
+                                   && !bilinen.includes(g));
+    expect(eksik, `İkonu olmayan menü grubu: ${eksik.join(', ')}`).toEqual([]);
+  });
+
   it('kaldırılan gruplar geri gelmedi', () => {
     // Kasa+Banka = Finans · Cari+CRM = Cari & CRM · Roller Yönetim'de ·
     //   Mesajlar/AI üst çubukta.

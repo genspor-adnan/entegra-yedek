@@ -155,6 +155,12 @@ export const GRUP_IKON: Record<string, string> = {
   'Cari & CRM': '🤝',
   'Satış':   '🛍️',
   'Alış':    '🛒',
+  // SATINALMA (781, kullanici: "satınalma menü ikonu alışveriş sepeti
+  //   olsun"): grup tabloda yoktu, menude varsayilan klasor (📁) ile
+  //   ciziliyordu - onbes grubun arasinda hicbir sey anlatmiyordu. ERP'de
+  //   "Alış" da sepet kullaniyor; ikisi ayni kurulumda goruluyorsa ayrimi
+  //   BASLIK tasir (Alış belge akisi, Satınalma talep-teklif-siparis).
+  'Satınalma': '🛒',
   // Kasa + Banka = Finans (plan): "tahsilat nerede" sorusu iki gruba
   //   bakilarak cevaplaniyordu.
   'Finans':  '💰',

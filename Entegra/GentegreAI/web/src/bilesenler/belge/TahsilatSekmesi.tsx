@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { AvansMahsup } from '../AvansMahsup';
+import { useAvansDurumu } from '../avansDurumu';
+import { mesaj } from '../mesaj';
 import { para, tarihSaat, paraYaz } from '../bicim';
 import type { BelgeYaniti } from '../../api/sozlesme';
 
@@ -12,7 +13,7 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
                                   onYenile, kurumTahakkukAc, kurumKalan, kurumBelgeleri,
                                   basvuruMu,
                                   hizliNakit, hesapSecAc, acikBorc,
-                                  iadeAc, yerelPara = 'TL' }: {
+                                  iadeAc, avansAl, avansIadeAc, yerelPara = 'TL' }: {
   /** Basvuru kartinda arac cubugu SADE: "＋" (tam ekran) cizilmez. */
   basvuruMu?: boolean;
   sonuc: BelgeYaniti | null;
@@ -44,6 +45,19 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
    * neden combosu da sorulur). Verilmezse dugme cizilmez.
    */
   iadeAc?(arac: 'nakit' | 'pos' | 'banka' | 'cek' | 'senet'): void;
+  /**
+   * AVANS AL (781): hastadan ileriye donuk para alir - BU BELGEYE
+   * BAGLANMAZ. Avans, henuz bir hizmete sayilmamis paradir; belgeye
+   * baglamak onu "bu basvurunun tahsilati" yapar ve avans olmaktan cikarirdi.
+   * Kasa karti avans damgasiyla acilir (779).
+   */
+  avansAl?(tur: number): void;
+  /**
+   * AVANS IADE (781): kalan avansi hastaya geri oder. Hangi avansin iade
+   * edilecegi menude secilir - hastanin birden fazla acik avansi olabilir ve
+   * iade TEK bir kasa islemine baglanir (780).
+   */
+  avansIadeAc?(avansId: number, tutar: number): void;
   /** Yerel para kodu - "dövizli tahsilat var mı" bunun disindakilerle olculur. */
   yerelPara?: string;
   /** Gridde tutar hucresine tiklaninca cagrilir (satir ici duzenleme). */
@@ -88,12 +102,35 @@ const capa = useRef<number | null>(null);   // son tiklanan satirin sirasi
 const [aracMenu, setAracMenu] = useState(false);
 /** IADE arac menusu - "⋯" ile ayni desen, ayri acilir. */
 const [iadeMenu, setIadeMenu] = useState(false);
+/** AVANS AL arac menusu (781): nakit / banka / POS. */
+const [avansMenu, setAvansMenu] = useState(false);
+/** AVANS IADE menusu (781): hangi avans iade edilecek. */
+const [avansIadeMenu, setAvansIadeMenu] = useState(false);
 useEffect(() => {
-  if (!aracMenu && !iadeMenu) return;
-  const kapat = () => { setAracMenu(false); setIadeMenu(false) };
+  if (!aracMenu && !iadeMenu && !avansMenu && !avansIadeMenu) return;
+  const kapat = () => { setAracMenu(false); setIadeMenu(false);
+                        setAvansMenu(false); setAvansIadeMenu(false) };
   window.addEventListener('click', kapat);
   return () => window.removeEventListener('click', kapat);
-}, [aracMenu, iadeMenu]);
+}, [aracMenu, iadeMenu, avansMenu, avansIadeMenu]);
+/**
+ * HASTANIN ACIK AVANSI (781) - serit, "Avans Kullan" ve onun etkinligi TEK
+ * kaynaktan okur; mahsuptan sonra ucu birden tazelenir.
+ */
+const hastaId = Number(sonuc?.belge.tarafId ?? 0);
+const avans = useAvansDurumu(hastaId || null);
+const avansVar = avans.toplam > 0;
+
+/** "Avans Kullan": acik avansi bu belgenin satirlarina mahsup eder (322). */
+const avansKullan = async () => {
+  if (!kayitliId || !avansVar) return;
+  const y = await avans.mahsupEt(kayitliId);
+  if (!y) return;
+  mesaj(y.dagitilan > 0
+    ? `${para.format(y.dagitilan)} avans bu belgenin satırlarına mahsup edildi.`
+    : 'Mahsup edilecek açık satır kalmadı.');
+  onYenile?.();
+};
 /* PARA USTU dugmesi yalniz dovizli tahsilat varken: yerel parada alinan tutar
    zaten net yazilir, "ustu" diye ayri bir satira gerek yok. */
 const dovizliTahsilatVar = tahsilatlar.some(
@@ -128,10 +165,23 @@ return (
     {/* AVANS MAHSUBU (322): hasta once para yatirip ucret satiri sonra
         girildiyse o tahsilat hicbir satira bagli degildir - prim de dogmaz.
         Serit yalniz dagitilmamis tahsilat VARSA cizilir. */}
-    {kayitliId > 0 && Number(sonuc?.belge.tarafId ?? 0) > 0 && (
-      <AvansMahsup belgeId={kayitliId}
-                   tarafId={Number(sonuc?.belge.tarafId)}
-                   onTamam={onYenile} />
+    {kayitliId > 0 && avansVar && (
+      <div className="uyari-kutusu" style={{ display: 'flex', gap: 10,
+                                             alignItems: 'center', flexWrap: 'wrap' }}>
+        <span>
+          Bu hastanın <b>{para.format(avans.toplam)}</b> kullanılmamış avansı var
+          {avans.adet > 1 ? ` (${avans.adet} işlem)` : ''}.
+          {' '}Mahsup edilmezse satırların tahsilatı görünmez ve <b>prim doğmaz</b>.
+        </span>
+        <button type="button" className="d" disabled={avans.calisiyor}
+                style={{ marginLeft: 'auto' }}
+                onClick={() => void avansKullan()}>
+          {avans.calisiyor ? '⏳ Mahsup ediliyor…' : '⇄ Bu Belgeye Mahsup Et'}
+        </button>
+        {avans.hata && (
+          <div className="hata-kutusu" style={{ flexBasis: '100%' }}>{avans.hata}</div>
+        )}
+      </div>
     )}
     {/* Tahsilat araclari: Nakit 21 / Banka 22 / POS 25 - hepsi ayni
         modali (kasa karti) cari + tutar onyuklu acar. Cek/Senet kasa
@@ -190,9 +240,88 @@ return (
                     onClick={() => { setAracMenu(false); void tahsilatAc(alisMi ? 34 : 24) }}>
               📜 Senet
             </button>
+            {/* AVANS KULLAN (781, kullanici: "senetten sonra separator Avans
+                Kullan ekle... Avans alındığı zaman aktif olacak"): tahsilat
+                ARACI DEGIL - para zaten kasada, burada yalnizca BU BELGENIN
+                satirlarina sayilir. Ayrac bu farki gosteriyor.
+                AVANSI YOKKEN PASIF ama GORUNUR: dugmeyi hic cizmemek
+                "avans diye bir sey yok" izlenimi verirdi; title sebebini
+                yaziyor. */}
+            <div className="menu-ayrac" />
+            <button type="button" className="mi" disabled={!avansVar || !kayitliId}
+                    title={!kayitliId ? 'Önce belgeyi kaydedin.'
+                           : avansVar
+                             ? `Hastanın ${paraYaz(avans.toplam)} avansını bu belgeye mahsup eder`
+                             : 'Bu hastanın kullanılmamış avansı yok.'}
+                    onClick={() => { setAracMenu(false); void avansKullan() }}>
+              💰 Avans Kullan
+              {avansVar && <span className="mi-tutar">{paraYaz(avans.toplam)}</span>}
+            </button>
           </div>
         )}
       </span>
+      {/* AVANS AL (781, kullanici: "bu 3 nokta butonun sağında Avans Al
+          butonu ekle... alta doğru tür açılsın ve avans kaydı yapılsın").
+
+          Tahsilat araclarinin YANINDA ama onlardan ayri bir is: tahsilat bu
+          belgenin borcunu kapatir, avans ise ileriye donuk paradir ve
+          BELGEYE BAGLANMAZ - baglansaydi "bu basvurunun tahsilati" olur,
+          avans olmaktan cikardi. Kullanilmasi ayri bir eylem: "⋯" icindeki
+          Avans Kullan.
+
+          HASTA SART: avans kimin parasi oldugu bilinmeden takip edilemez. */}
+      {avansAl && (
+        <span className="dugme-menu">
+          <button className="d" disabled={!hastaId}
+                  title={hastaId
+                    ? 'Hastadan avans al (bu belgeye bağlanmaz)'
+                    : 'Önce hasta seçin.'}
+                  onClick={e => { e.stopPropagation(); setAvansMenu(v => !v) }}>
+            💰 Avans Al
+          </button>
+          {avansMenu && (
+            <div className="dugme-menu-liste">
+              <button type="button" className="mi"
+                      onClick={() => { setAvansMenu(false); avansAl(21) }}>💵 Nakit</button>
+              <button type="button" className="mi"
+                      onClick={() => { setAvansMenu(false); avansAl(22) }}>🏦 Banka</button>
+              <button type="button" className="mi"
+                      onClick={() => { setAvansMenu(false); avansAl(25) }}>💳 POS</button>
+            </div>
+          )}
+        </span>
+      )}
+      {/* AVANS İADE (781, kullanici: "eğer avans varsa görünecek şekilde Avans
+          Al butonu sağında Avans İade butonu görünsün ve avansı iade etsin").
+
+          AVANSI YOKSA HİÇ ÇİZİLMEZ (pasif değil): "Avans Kullan" menünün
+          içinde olduğu için pasif dururken sebebini title'da söyleyebiliyor;
+          araç çubuğunda ise iade edilecek parası olmayan hastada duran bir
+          düğme, cubugu gereksiz kalabaliklastirirdi.
+
+          HANGİ AVANS sorusu menüde sorulur: hastanın birden fazla açık avansı
+          olabilir ve iade TEK kasa işlemine bağlanır (780) - "hepsini iade
+          et" demek, hangi makbuzun geri verildiğini kaydetmemek olurdu. */}
+      {avansIadeAc && avansVar && (
+        <span className="dugme-menu">
+          <button className="d" title="Kalan avansı hastaya geri öde"
+                  onClick={e => { e.stopPropagation(); setAvansIadeMenu(v => !v) }}>
+            ↩ Avans İade
+          </button>
+          {avansIadeMenu && (
+            <div className="dugme-menu-liste">
+              {avans.satirlar.map(a => (
+                <button key={a.kasaIslemId} type="button" className="mi"
+                        onClick={() => { setAvansIadeMenu(false);
+                                         avansIadeAc(a.kasaIslemId, a.kalan) }}>
+                  {tarihSaat(a.islemTarihi).slice(0, 10)}
+                  <span className="mi-tutar">{paraYaz(a.kalan)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </span>
+      )}
       {/* IADE / IPTAL (kullanici: "3 nokta buton sağına ↩ İade / İptal
           butonu ekle, basınca alta doğru menü gelsin Nakit/Pos/Banka/Çek/
           Senet"). Arac menusu tahsilattaki ile AYNI: para hangi araçla
