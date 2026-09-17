@@ -11740,3 +11740,47 @@ telefonu tanımlı değil (şablon onay.hatirlatma)."* Sessiz kayıp artık gör
 **Kalan.** Kuyruk doluyor, hatırlatma koşuyor ama **gönderen yok**: gerçek
 kurulumda alıcıların e-posta/cep bilgisi girilmeli ve `BildirimIscisi`
 çalışmalı. Göç **762 yalnız docker'da**.
+
+
+## 17.09.2026 — Bildirim işçisi: kuyruk neden boşalmıyordu
+
+**İşçi zaten çalışıyordu.** `BildirimIscisi` `AddHostedService` ile kayıtlı
+ve API açıkken arka planda dönüyor; "kapalı" olan o değildi. `bildirim_log`
+teşhisi verdi:
+
+    Sms sağlayıcısı tanımlı değil (entegrasyon hesabı yok).
+
+Üç deneme sonra satırlar **durum 6 (vazgeçildi)**'ye düşüyordu. Sağlayıcı
+`entegrasyon_hesap` tablosunda `ayarlar->>'bildirim_kanal'` ile aranıyor ve
+o ayara sahip **hiçbir hesap yoktu** (UTS, e-Fatura, e-Nabız, Medula var;
+bildirim kanalı yok).
+
+**Geliştirmede doğru davranış `KayitModu`.** Sağlayıcı yokken gövdeyi
+günlüğe yazar ve gönderilmiş sayar. `appsettings.Development.json` açıldı
+(daha önce yoktu) ve `Bildirim:KayitModu = true` verildi. Dosyaya kimlik
+bilgisi yazılmadı - depoda duruyor; sağlayıcı kimlikleri
+`entegrasyon_hesap`ta.
+
+Üretimde bu bayrak **asla true olmamalı**: gitmemiş bir bildirim
+"gönderildi" görünürse, hasta hatırlatması ya da onay uyarısı ulaşmadığı
+hâlde sistem ulaştı sanır. Bu yüzden ayar dosyasının içine de yazıldı.
+
+**Doğrulama.** Hatırlatma işi tetiklendi, 3 gecikmiş basamak için 6 bildirim
+kuyruğa girdi; işçi ~15 sn içinde aldı, hepsi **durum 3 (gönderildi)** oldu
+ve `bildirim_log`'a başarılı deneme yazdı. Günlükte gövde göründü:
+
+    BILDIRIM (kayıt modu) #777 Eposta → ...: P-000133 kaydı 1 gündür
+    onayınızda bekliyor. Basamak: Birim Sorumlusu
+
+xUnit 234/234. Test bildirimleri ve geçici e-postalar geri alındı.
+
+**Eski 10 "vazgeçildi" satırına DOKUNULMADI.** 13-16 Eylül'den kalma randevu
+/ panik bildirimleri ve alıcıları gerçek görünen telefon numaraları. Kayıt
+modunda "gönderildi" işaretlemek yanıltıcı olurdu; gerçek sağlayıcı
+tanımlandığında da günler önceki mesajların gitmesi istenmez. Durum 6
+oldukları için işçi onları yeniden almıyor.
+
+**Gerçek gönderim için kalan iki adım** (ikisi de kurulum kararı, kodda iş
+yok): `entegrasyon_hesap`a `bildirim_kanal` ayarlı bir SMTP/SMS hesabı
+eklenmeli ve alıcıların `taraf_kullanici.eposta` / `cep_tel` bilgisi
+doldurulmalı. Hesap eklendiği anda `KayitModu` hiç devreye girmez.
