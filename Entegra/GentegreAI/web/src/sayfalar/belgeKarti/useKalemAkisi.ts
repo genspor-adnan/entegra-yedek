@@ -48,9 +48,28 @@ export function useKalemAkisi({
    */
   /** Kalem penceresinden dönen satırı yazar (yeni ise ekler). */
   const kalemKaydet = (satir: SatirDurumu) => {
-    const yazilacak = satir.paket
+    const temel = satir.paket
       ? { ...satir, birimFiyat: '0', dovizFiyat: '0' }
       : satir;
+    /**
+     * DUZENLENEN SATIRIN KOVALARI DUSURULUR (787, kullanici: "ücret satırını
+     * çift tıklayıp adet veya fiyat değişince satırın hemen refresh olması
+     * gerekir").
+     *
+     * Gridin "Tutar" kolonu kayitli satirda SUNUCUNUN yazdigi dagilim
+     * kovalarindan olceklenir (602). Miktari 1'den 4'e cikaran kullanici
+     * miktar kolonunun degistigini ama tutarin 2.000,00'de kaldigini
+     * goruyordu: kovalar hala 1 adetlikti. Kovayi dusurunce satir ONCE kendi
+     * brut tutarini gosterir (aninda dogru), ardindan onizleme ucu yeni
+     * dagilimi getirir - onizleme zaten "dagilimi olmayan" satirlar icin
+     * calisiyor.
+     *
+     * ELLE GIRILMIS dagilim (kalem penceresindeki katki/SUT kutulari)
+     * KORUNUR: onu kullanici yazdi, yeniden hesaplamak girdisini silerdi.
+     */
+    const yazilacak = temel.dagilim && Number(temel.dagilim.elle ?? 0) !== 1
+      ? { ...temel, dagilim: undefined }
+      : temel;
     setSatirlar(s => {
       const ge = Number.isFinite(yazilacak.anahtar)
         ? yazilacak : { ...yazilacak, anahtar: sonAnahtar(s) + 1 };

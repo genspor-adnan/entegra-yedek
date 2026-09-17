@@ -13453,3 +13453,19 @@ bandına sola yanaşık olarak taşı"*. Başlık satırında pencere adıyla ay
 paylaşıyorlardı ve dar ekranda başlığı itiyorlardı; bant zaten boştu. Şimdi
 solda "＋ 1 Adet Ekle (Enter)" ve "🔢 Miktar Ekle (Shift+Enter)", hemen
 yanlarında "✓ N kalem eklendi · son: …", sağda "✖ Kapat".
+
+**Düzenlenen satır anında tazeleniyor (787).** Kullanıcı: *"ücret satırını
+çift tıklayıp adet veya fiyat değişince satırın hemen refresh olması
+gerekir"*. Ölçüldü: kalem penceresi doğru hesaplıyordu (miktar 1→4, Tutar
+8.000,00) ama **grid satırı** miktarı 4 gösterip tutarı 2.000,00'de
+bırakıyordu. Sebep 602'nin kuralı: başvuruda gridin tutar kolonu KAYITLI
+satırda sunucunun yazdığı **dağılım kovalarından** ölçekleniyor ve kovalar
+hâlâ 1 adetlikti - satır kendi içinde tutarsız görünüyordu.
+
+`kalemKaydet` artık düzenlenen satırın kovalarını düşürüyor: satır önce kendi
+brüt tutarını gösteriyor (anında doğru), ardından dağılım önizleme ucu yeni
+kovaları getiriyor (önizleme zaten "dağılımı olmayan" satırlar için
+çalışıyor). **Elle girilmiş** dağılım (katkı/SUT kutuları) korunuyor - onu
+kullanıcı yazdı. Doğrulama: aynı satırda miktar 4 yapıldı, grid **6.800,00**
+(4 × 2.000 − %15) gösterdi - pencereyle aynı. Test `kalemGuncelleme.test.ts`.
+vitest 658/658.
