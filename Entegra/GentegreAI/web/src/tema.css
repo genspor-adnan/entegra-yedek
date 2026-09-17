@@ -1230,6 +1230,12 @@ input.skt-gecmis {
 .dugme-menu-liste .mi:disabled:hover { background: transparent; color: inherit }
 /* Menu ogesinin sagindaki tutar (avans toplami). */
 .dugme-menu-liste .mi-tutar { float: right; margin-left: 12px; opacity: .75 }
+/* TAHSILAT GRUBU MENULERI KIRPILMASIN (781): .kagrup varsayilan olarak
+   `overflow: hidden` - kose yuvarlamasi ve tablo tasmasi icin. Arac
+   cubugundan asagi acilan menu de o kirpmaya takiliyor ve alt ogeler
+   kesiliyordu ("⋯" menusunde Avans Kullan, İade menusunde Senet).
+   Kirpma yalniz bu grupta kalkiyor. */
+.kagrup.tahsilat-kutu { overflow: visible }
 
 /* Cip seridindeki tarih araligi (ör. hesap ekstresi). */
 .tarih-araligi { display: inline-flex; align-items: center; gap: 4px }

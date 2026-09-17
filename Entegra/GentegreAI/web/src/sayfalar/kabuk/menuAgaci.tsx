@@ -161,6 +161,21 @@ export const GRUP_IKON: Record<string, string> = {
   //   "Alış" da sepet kullaniyor; ikisi ayni kurulumda goruluyorsa ayrimi
   //   BASLIK tasir (Alış belge akisi, Satınalma talep-teklif-siparis).
   'Satınalma': '🛒',
+  // 781 - kalan dort grup da varsayilan klasorle (📁) ciziliyordu; "uygun
+  //   sekilde ata" (kullanici). Secimde tek olcut: simge grubun ISINI
+  //   soylesin ve oteki gruplarla karismasin.
+  //   ECZANE: hap. (Alt grup "İTS" de 💊 kullaniyor ama o ILAC BILDIRIMIDIR -
+  //   ayni ailenin iki seviyesi, ana menuyle karismaz.)
+  'Eczane':  '💊',
+  //   DEMIRBAS: sabit kiymet - sandalye, zimmet/demirbas sayiminin klasik
+  //   simgesi. Cihaz simgeleri (🩻/🔌) Radyoloji ve ÜTS'de kullaniliyor.
+  'Demirbaş': '🪑',
+  //   TEKNIK SERVIS: anahtar. 🧰 (alet cantasi) de dusunuldu ama servis
+  //   ONARIMDIR, kutu degil; 🔧 tek isle bagdasiyor.
+  'Teknik Servis': '🔧',
+  //   DOKUMAN: sayfa. Klasor (📁) BILEREK kullanilmadi - varsayilan ikon o;
+  //   grubun kendi simgesi varsayilanla ayni olsaydi "atanmamis" gorunurdu.
+  'Doküman': '📄',
   // Kasa + Banka = Finans (plan): "tahsilat nerede" sorusu iki gruba
   //   bakilarak cevaplaniyordu.
   'Finans':  '💰',

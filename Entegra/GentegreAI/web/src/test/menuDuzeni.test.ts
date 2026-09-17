@@ -18,13 +18,9 @@ describe('menü düzeni', () => {
     //   on beş grubun arasında hiçbir şey anlatmayan bir klasör. Yeni grup
     //   açan, ikonunu da yazsın: eksik ikon ekranda ancak o menü açılınca
     //   fark ediliyor.
-    // BİLİNEN EKSİKLER: bu dördü de bugün 📁 ile çiziliyor. İkon seçimi
-    //   kullanıcının tercihidir (daha önce Medula, Yönetim ve Prim için tek
-    //   tek konuşuldu), o yüzden burada uydurulmuyor - liste borcu görünür
-    //   tutuyor ve YENİSİNİN eklenmesini engelliyor.
-    const bilinen = ['Eczane', 'Demirbaş', 'Teknik Servis', 'Doküman'];
-    const eksik = GRUPLAR.filter(g => !GRUP_IKON[g] && !GRUP_IKON_CEV[g]
-                                   && !bilinen.includes(g));
+    // 781'de dördü (Eczane · Demirbaş · Teknik Servis · Doküman) atandı;
+    //   artık istisna yok - yeni grup açan ikonunu da yazar.
+    const eksik = GRUPLAR.filter(g => !GRUP_IKON[g] && !GRUP_IKON_CEV[g]);
     expect(eksik, `İkonu olmayan menü grubu: ${eksik.join(', ')}`).toEqual([]);
   });
 

@@ -13214,3 +13214,35 @@ yukarıdaki gibi çizildi; ⋯ menüsünde ayraç + *"💰 Avans Kullan 300,00 �
 etkin; Avans Al menüsü Nakit/Banka/POS; Avans İade menüsü *"17.09.2026 ·
 300,00 ₺"* ve seçince kart "Avans İadesi" başlığıyla açıldı. Avansı olmayan
 hastada (P-000139) Avans Al görünür, Avans İade çizilmedi. vitest 637/637.
+
+## 17.09.2026 — Kalan menü grubu ikonları (781)
+
+Kullanıcı: *"eczane demirbaş teknik servis ve doküman ikonlarını da uygun
+şekilde ata"*. Dördü de varsayılan klasörle (📁) çiziliyordu.
+
+- **Eczane 💊** — hap. Alt grup "İTS" de 💊 kullanıyor ama o ilaç
+  bildirimidir: aynı ailenin iki seviyesi, ana menüyle karışmaz.
+- **Demirbaş 🪑** — sabit kıymet/zimmet sayımının klasik simgesi. Cihaz
+  simgeleri (🩻 / 🔌) Radyoloji ve ÜTS'de kullanılıyor, alınmadı.
+- **Teknik Servis 🔧** — anahtar. 🧰 (alet çantası) de düşünüldü; servis
+  ONARIMDIR, kutu değil.
+- **Doküman 📄** — sayfa. Klasör (📁) bilerek kullanılmadı: varsayılan ikon o,
+  grubun kendi simgesi varsayılanla aynı olsaydı "atanmamış" görünürdü.
+
+"Her grubun kendi ikonu var" testindeki istisna listesi boşaldı — yeni grup
+açan ikonunu da yazmak zorunda. vitest 637/637.
+
+**Not:** `Alış` (ERP) ve `Satınalma` ikisi de 🛒 kullanıyor. HBYS menüsünde
+Alış grubu bölge listesinde olmadığı için yan yana gelmiyorlar; ERP
+kurulumunda ikisi birden açıksa ayrımı başlık taşır. Ayrı simge istenirse
+Alış değiştirilir.
+
+**Menü kırpılması düzeltildi (781).** Kullanıcı: *"tahsilat sekmesinde 3 nokta
+menü açtım.. altta avans görünmüyor, kırpılmış"*. Sebep yeni öğe değil,
+`.kagrup`ın varsayılan `overflow: hidden`ı: araç çubuğundan aşağı açılan menü
+grubun alt kenarında kesiliyordu. Dördüncü öğe (Avans Kullan) eklenince
+göründü ama beş öğeli "İade / İptal" menüsünde de vardı. Tahsilat grubuna
+`tahsilat-kutu` sınıfı eklendi (`overflow: visible`) - kırpma yalnız burada
+kalkıyor, öteki gruplar köşe/tablo kırpmasını koruyor. Ölçüldü: menü alt
+kenarı 683 px, grup alt kenarı 665 px - menü artık kutunun dışına taşıyor ve
+son öğe görünür.

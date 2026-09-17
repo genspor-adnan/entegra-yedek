@@ -161,7 +161,12 @@ const kalan = acikBorc != null
   ? Math.round(acikBorc * 100) / 100
   : Math.round((genel - tahsil) * 100) / 100;
 return (
-  <div className="kagrup">
+  /* `tahsilat-kutu` (781): grubun varsayilan `overflow: hidden`i arac
+     cubugundan acilan menuleri KIRPIYORDU - "⋯" menusune dorduncu oge
+     (Avans Kullan) eklenince alt kenar kesiliyor, ayni sey bes ogeli
+     "İade / İptal" menusunde de oluyordu. Kirpma yalniz BU grupta
+     kaldiriliyor: menu kutunun disina tasabilsin. */
+  <div className="kagrup tahsilat-kutu">
     {/* AVANS MAHSUBU (322): hasta once para yatirip ucret satiri sonra
         girildiyse o tahsilat hicbir satira bagli degildir - prim de dogmaz.
         Serit yalniz dagitilmamis tahsilat VARSA cizilir. */}
