@@ -125,6 +125,57 @@ describe('avans eylemleri kayıt kapısından geçer (784)', () => {
     expect(avansIadeAc).toHaveBeenCalledWith(5, 1000);
   });
 
+  it('TAHSILAT ARACLARININ TAMAMI kapidan gecer (784)', async () => {
+    // Kullanici: "herhangi bir tahsilat (avans dahil) basıldıysa ücreti
+    //   kaydetsin önce". Her arac eninde sonunda satirlari sunucudan
+    //   tazeliyor; biri kapinin disinda kalirsa ucret yine silinir.
+    const kayitSart = vi.fn(async () => true);
+    const hizliNakit = vi.fn();
+    const hesapSecAc = vi.fn();
+    const iadeAc = vi.fn();
+    const tahsilatAc = vi.fn(async () => {});
+    const kurumTahakkukAc = vi.fn();
+    ciz({ kayitSart, hizliNakit, hesapSecAc, iadeAc, tahsilatAc,
+          kurumTahakkukAc, kurumKalan: 100 });
+
+    const bas = async (ad: string) => {
+      const d = [...document.querySelectorAll('button')]
+        .find(b => (b.textContent ?? '').includes(ad))!;
+      await act(async () => { d.click() });
+    };
+
+    await bas('Nakit');                     // hizli nakit
+    await bas('POS');                       // hesap secimi
+    await menuden('Çek');                   // "⋯" > cek
+    await bas('Kuruma Tahakkuk');
+
+    expect(hizliNakit).toHaveBeenCalled();
+    expect(hesapSecAc).toHaveBeenCalledWith('P');
+    expect(tahsilatAc).toHaveBeenCalledWith(23);
+    expect(kurumTahakkukAc).toHaveBeenCalled();
+    // Dort eylem, dort kapi: hicbiri kayit yapmadan gecmedi.
+    expect(kayitSart.mock.calls.length).toBe(4);
+    expect(iadeAc).not.toHaveBeenCalled();
+  });
+
+  it('kayıt geçmezse HİÇBİR araç çalışmaz', async () => {
+    const kayitSart = vi.fn(async () => false);
+    const hizliNakit = vi.fn();
+    const hesapSecAc = vi.fn();
+    ciz({ kayitSart, hizliNakit, hesapSecAc });
+
+    const bas = async (ad: string) => {
+      const d = [...document.querySelectorAll('button')]
+        .find(b => (b.textContent ?? '').includes(ad))!;
+      await act(async () => { d.click() });
+    };
+    await bas('Nakit');
+    await bas('POS');
+
+    expect(hizliNakit).not.toHaveBeenCalled();
+    expect(hesapSecAc).not.toHaveBeenCalled();
+  });
+
   it('avans YOKSA "Avans İade" çizilmez, "Avans Al" durur', () => {
     // `avansAl` verilmezse dugme hic cizilmez (cagiran onu baglamamis
     //   demektir); burada baglanmis bir kart taklit ediliyor.

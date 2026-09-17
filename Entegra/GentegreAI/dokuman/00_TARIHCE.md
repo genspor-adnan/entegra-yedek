@@ -13362,6 +13362,15 @@ kalem değişikliğini kaydettiriyor. Kayıt geçmezse (zorunlu alan eksik)
 **eylem hiç yapılmıyor**: tutar bile sorulmuyor - kaydedilemeyen belgede
 mahsup zaten yapılamaz ve memura "kaydetmedim ama sildi" dedirtmez.
 
+**Kural genişletildi** (kullanıcı: *"herhangi bir tahsilat (avans dahil)
+basıldıysa ücreti kaydetsin önce"*): kapı artık araç çubuğunun TAMAMI için -
+Nakit · POS · Banka · Çek · Senet · İade/İptal'in beş aracı · Kuruma Tahakkuk ·
+Avans Kullan/Al/İade. Hepsi tek sarmalayıcıdan (`kapidan`) geçiyor; bekleyen
+değişiklik yoksa `kayitSart` hiçbir şey yazmadan `true` döndüğü için çift
+kayıt olmuyor ve çağıran taraftaki eski kapılar da yerinde kalıyor.
+
 Regresyon testi `tahsilatAvansAkisi.test.tsx`: kayıt önce çağrılır ve sıra
-`kayıt → mahsup`'tur; kayıt geçmezse mahsup denenmez; tutar iptal edilirse
-mahsup yapılmaz; Avans Al/İade de aynı kapıdan geçer. vitest 648/648.
+`kayıt → mahsup`'tur; kayıt geçmezse mahsup denenmez ve tutar bile sorulmaz;
+tutar iptal edilirse mahsup yapılmaz; Avans Al/İade de aynı kapıdan geçer;
+dört araç dört kayıt çağrısı üretir; kayıt geçmezse hiçbir araç çalışmaz.
+vitest 650/650.

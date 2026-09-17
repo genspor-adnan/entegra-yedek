@@ -140,18 +140,33 @@ const hastaId = Number(sonuc?.belge.tarafId ?? 0);
 const avansVar = avans.toplam > 0;
 
 /**
+ * KAYIT KAPISI - TAHSILAT ARAC CUBUGUNUN TAMAMI (784, kullanici: "herhangi
+ * bir tahsilat (avans dahil) basıldıysa ücreti kaydetsin önce").
+ *
+ * Her tahsilat eylemi eninde sonunda satirlari SUNUCUDAN tazeliyor (kasa
+ * penceresi kapaninca, mahsuptan sonra, hizli satir yazildiktan sonra);
+ * gridde duran kaydedilmemis ucret o anda kayboluyordu. Kapi tek yerde: hangi
+ * dugmeye basilirsa basilsin once kayit, sonra eylem. Kayit gecmezse eylem
+ * HIC baslamaz - yarim is birakmak, memura "kaydetmedim ama sildi" dedirtir.
+ *
+ * Bekleyen degisiklik yoksa `kayitSart` zaten hicbir sey yazmadan `true`
+ * doner; cagiran taraflarda (BelgeKarti) var olan kapilar da yerinde kalir -
+ * iki kez kaydetmez.
+ */
+const kapidan = async (is?: () => void | Promise<void>) => {
+  if (!is) return;
+  if (kayitSart && !(await kayitSart())) return;
+  await is();
+};
+
+/**
  * AVANS AL / IADE de ayni kapidan gecer (784): kasa penceresi kapaninca kart
  * satirlari SUNUCUDAN tazeliyor - kaydedilmemis ucret satiri orada da
  * kaybolurdu.
  */
-const avansAlGuvenli = async (tur: number) => {
-  if (kayitSart && !(await kayitSart())) return;
-  avansAl?.(tur);
-};
-const avansIadeGuvenli = async (avansId: number, tutar: number) => {
-  if (kayitSart && !(await kayitSart())) return;
-  avansIadeAc?.(avansId, tutar);
-};
+const avansAlGuvenli = (tur: number) => kapidan(() => avansAl?.(tur));
+const avansIadeGuvenli = (avansId: number, tutar: number) =>
+  kapidan(() => avansIadeAc?.(avansId, tutar));
 
 /**
  * "Avans Kullan": acik avansin BIR KISMINI (ya da tamamini) bu belgenin
@@ -268,13 +283,13 @@ return (
               title={`Varsayılan kasaya nakit ${alisMi ? 'ödeme' : 'tahsilat'} satırı ekler`
                 + (acikBorc && acikBorc > 0 ? ` (${paraYaz(acikBorc)})` : '')
                 + (kayitliId ? '' : ' — belge önce kaydedilir')}
-              onClick={() => hizliNakit?.()}>
+              onClick={() => void kapidan(() => hizliNakit?.())}>
         💵 Nakit
       </button>
       <button className="d bir"
               title={'POS hesabı seç ve satır ekle'
                      + (kayitliId ? '' : ' — belge önce kaydedilir')}
-              onClick={() => hesapSecAc?.('P')}>
+              onClick={() => void kapidan(() => hesapSecAc?.('P'))}>
         💳 POS
       </button>
       {/* SEYREK ARACLAR MENUDE (kullanici: "sağında ... şeklinde 3 nokta
@@ -290,15 +305,17 @@ return (
         {aracMenu && (
           <div className="dugme-menu-liste">
             <button type="button" className="mi"
-                    onClick={() => { setAracMenu(false); hesapSecAc?.('B') }}>
+                    onClick={() => { setAracMenu(false); void kapidan(() => hesapSecAc?.('B')) }}>
               🏦 Banka
             </button>
             <button type="button" className="mi"
-                    onClick={() => { setAracMenu(false); void tahsilatAc(alisMi ? 33 : 23) }}>
+                    onClick={() => { setAracMenu(false);
+                                     void kapidan(() => tahsilatAc(alisMi ? 33 : 23)) }}>
               🧾 Çek
             </button>
             <button type="button" className="mi"
-                    onClick={() => { setAracMenu(false); void tahsilatAc(alisMi ? 34 : 24) }}>
+                    onClick={() => { setAracMenu(false);
+                                     void kapidan(() => tahsilatAc(alisMi ? 34 : 24)) }}>
               📜 Senet
             </button>
             {/* AVANS KULLAN (781, kullanici: "senetten sonra separator Avans
@@ -399,15 +416,15 @@ return (
           {iadeMenu && (
             <div className="dugme-menu-liste">
               <button type="button" className="mi"
-                      onClick={() => { setIadeMenu(false); iadeAc('nakit') }}>💵 Nakit</button>
+                      onClick={() => { setIadeMenu(false); void kapidan(() => iadeAc('nakit')) }}>💵 Nakit</button>
               <button type="button" className="mi"
-                      onClick={() => { setIadeMenu(false); iadeAc('pos') }}>💳 POS</button>
+                      onClick={() => { setIadeMenu(false); void kapidan(() => iadeAc('pos')) }}>💳 POS</button>
               <button type="button" className="mi"
-                      onClick={() => { setIadeMenu(false); iadeAc('banka') }}>🏦 Banka</button>
+                      onClick={() => { setIadeMenu(false); void kapidan(() => iadeAc('banka')) }}>🏦 Banka</button>
               <button type="button" className="mi"
-                      onClick={() => { setIadeMenu(false); iadeAc('cek') }}>🧾 Çek</button>
+                      onClick={() => { setIadeMenu(false); void kapidan(() => iadeAc('cek')) }}>🧾 Çek</button>
               <button type="button" className="mi"
-                      onClick={() => { setIadeMenu(false); iadeAc('senet') }}>📜 Senet</button>
+                      onClick={() => { setIadeMenu(false); void kapidan(() => iadeAc('senet')) }}>📜 Senet</button>
             </div>
           )}
         </span>
@@ -425,7 +442,9 @@ return (
                        ? 'Belgelenmemiş kurum payı yok'
                        : 'Kurumdan alınacak payı belgeler: kuruma Satış Tahakkuku '
                          + 'kesilir. Para kurumdan gelince normal tahsilat işlenir.'}
-                onClick={kurumTahakkukAc}>
+                // Tahakkuk da satirlari degistiriyor (kurum payi belgeye
+                //   cikar): bekleyen ucret once kaydedilir (784).
+                onClick={() => void kapidan(kurumTahakkukAc)}>
           {/* "TAHSILAT" DEGIL "TAHAKKUK" (kullanici: "kurumun ödeyeceği ve
               kuruma yapacağım faturalama karşılığı olarak değil mi"): kurum
               payi iki asamalidir - once kuruma BELGE kesilir (alacak dogar),
