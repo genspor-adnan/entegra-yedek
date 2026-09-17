@@ -180,8 +180,15 @@ public static class AvansUclari
             var zincir = await onay.BaslatAsync(baglanti, islem, "personel.avans",
                 id, tutar, bayraklar, baglam, iptal, sahipTarafId: tarafId);
 
+            // NUMARA BURADA KESİLİR (767): kayıt onay sürecine girdiği anda.
+            //   Taslakta verseydik iptal edilen her taslak numara boşluğu
+            //   bırakırdı. `coalesce(nullif(...))` ile TEKRAR GÖNDERİMDE
+            //   numara değişmez - bir kez kesilen numara kaydın kimliğidir.
             await baglanti.CalistirAsync("""
                 update public.personel_avans set durum = @p1,
+                       avans_no = coalesce(nullif(avans_no, ''),
+                                  public.fn_numara_kimlik_uret(
+                                      906, sube_id, 'personel_avans', 'avans_no')),
                        degistiren = @p2, degistirme_tarihi = now()
                  where id = @p0
                 """, islem, [id, Onayda, baglam.KullaniciId], iptal);

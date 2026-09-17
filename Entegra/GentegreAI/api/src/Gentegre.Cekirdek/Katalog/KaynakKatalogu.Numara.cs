@@ -288,6 +288,38 @@ public static partial class KaynakKatalogu
             new("durum",         "n.durum",           "kod",   "Durum", Hizalama: "orta")
         ]);
 
+    /// <summary>
+    /// İK TALEPLERİ (767): avans · masraf beyanı · belge talebi. Tedarik
+    /// gridiyle aynı desen - kaynak tablo değil GÖRÜNÜM, böylece şablonu
+    /// olmayan tür de `id = 0` satırı olarak çizilir ve kullanıcı o
+    /// numaranın var olduğunu görür.
+    /// </summary>
+    private static KaynakTanimi NumaraIk() => new(
+        Ad: "numara-ik",
+        YetkiKodu: "numara_sablonu",
+        Kaynak: """
+            public.v_numara_ik n
+              left join public.sube s on s.id = n.sube_id
+            """,
+        VarsayilanSirala: "n.sira asc, n.baslama_tarihi desc",
+        Kolonlar:
+        [
+            new("id",            "n.id",              "sayi",  "Id", Varsayilan: false),
+            new("tur",           "n.tur",             "sayi",  "Tur Kodu", Varsayilan: false),
+            new("turAdi",        "n.tur_adi",         "metin", "Tür", Genislik: 200),
+            new("baslamaTarihi", "n.baslama_tarihi",  "tarih", "Başlama", Hizalama: "orta"),
+            new("onEk",          "n.on_ek",           "metin", "Ön Ek",
+                                                      Hizalama: "orta", Genislik: 90),
+            new("baslamaNo",     "n.baslama_no",      "metin", "Başlama No",
+                                                      Hizalama: "orta", Genislik: 120),
+            new("hane",          "n.hane",            "sayi",  "Hane",
+                                                      Hizalama: "orta", Varsayilan: false),
+            new("subeAdi",       "s.ad",              "metin", "Şube", Varsayilan: false),
+            new("elleGirilir",   "n.elle_girilir",    "mantik", "Elle Girilir",
+                                                      Hizalama: "orta", Genislik: 110),
+            new("durum",         "n.durum",           "kod",   "Durum", Hizalama: "orta")
+        ]);
+
     private static KaynakTanimi NumaraSatis()    => NumaraKaynagi("numara-satis", NumaraSatisTurleri);
     private static KaynakTanimi NumaraAlis()     => NumaraKaynagi("numara-alis", NumaraAlisTurleri);
     private static KaynakTanimi NumaraTahsilat() => NumaraKaynagi("numara-tahsilat", NumaraTahsilatTurleri);

@@ -12033,3 +12033,57 @@ gösterdi. xUnit 234/234, vitest 598/598, iki derleme temiz. Test verisi
 silindi (vekâlet senaryosunun verisi korundu).
 
 Göç **764/765/766 yalnız docker'da**.
+
+
+## 17.09.2026 — Avans / masraf / belge talebi numaraları (`db/767`)
+
+753, 764 ve 765 üç tabloya `avans_no` · `beyan_no` · `talep_no` kolonu koymuş
+ama hiçbirini doldurmamıştı: üçü de boş kalıyor, listeler ve gelen kutusu
+`#id`'ye düşüyordu. Numara üretme altyapısı 152'den beri duruyordu
+(`numara_sablonu` + `fn_numara_kimlik_uret`); eksik olan yalnız tür kodu ve
+şablon satırıydı.
+
+**Tür kodları 906-908.** `numara_sablonu.tur` belge/kasa türü kataloğudur;
+belge olmayan kayıtlar 358'den beri 900+ kendi kodunu alıyor (900 hasta
+dosya, 901 lab, 902 muayene, 903 radyoloji, 904 e-Nabız, 905 reçete).
+Sıradaki üç boş numara alındı: **906 Avans No · 907 Masraf Beyan No ·
+908 Belge Talep No**, ön ekleri `AV-` / `MB-` / `BT-`, 6 hane.
+
+**Numara ne zaman kesilir.** Kayıt **resmîleştiği anda**:
+- avans ve masrafta **onaya gönderilirken** (ikisinde de taslak var; taslakta
+  numara verseydik iptal edilen her taslak numara boşluğu bırakırdı),
+- belge talebinde **açılışta** (orada taslak yok - kayıt açıldığı anda sürece
+  giriyor, otomatik onayda doğrudan hazırlık kuyruğuna).
+
+Tekrar gönderimde numara **değişmiyor**: `coalesce(nullif(no, ''), üret())`
+ile bir kez kesilen numara kaydın kimliği olarak kalıyor.
+
+**Geçmiş kayıtlara numara verilmedi.** Var olan kayıtlara toplu numara
+dağıtmak, hiç kesilmemiş bir numarayı sonradan uydurmak olurdu - iki
+kurulumda aynı avans farklı numara alır ve "12 numaralı avans" cümlesi
+kuruma göre değişirdi. Numarasız eski kayıt listede `#id` görünür;
+`v_onay_kutusu` bunu 753'ten beri `coalesce` ile karşılıyordu.
+
+**Ön ekler yılsız.** `fn_numara_onek_yilli` ön ekte yıl görürse sayacı her
+yıl baştan akıtıyor. Varsayılanı yılsız seçtik: bu üç talepte numara yıl
+içinde değil **ömür boyu** tekil olmalı - personel "geçen yılki 12 numaralı
+avansım" diyebilmeli. Yıllı isteyen kurum ekrandan değiştirir.
+
+**Genel Ayarlar › Belge No'ya yeni grup** (kullanıcı isteği): "İK Talepleri".
+Tedarik gridiyle aynı desen - kaynak tablo değil `v_numara_ik` görünümü,
+böylece şablonu olmayan tür de `id = 0` satırı olarak çizilir ve kullanıcı o
+numaranın var olduğunu görür. Ayrı grup açıldı, satış/tedarik gridlerine
+karıştırılmadı: bunlar belge değil personel talebi.
+
+**Bu turda düzeltilen eksik.** İlk yazımda yalnız kart (`numara-ik`)
+eklenmişti, **liste kaynağı** eklenmemişti; grid *"Bilinmeyen liste kaynagi:
+numara-ik"* diyordu. Numara gridleri hem kart hem kaynak ister.
+
+**Doğrulama.** Avans taslakta numarasız, gönderince `AV-000001`; masraf
+`MB-000001`; belge talebi açılışta `BT-000001`, ikincisi `BT-000002` (sayaç
+ilerliyor). Gelen kutusu artık `#id` yerine numarayı gösteriyor. Ayarlar
+ekranında üç satır düzenlenebilir hâlde çizildi. xUnit 234/234, vitest
+598/598, iki derleme temiz. Test verisi **ve sayaçları** silindi - test
+numaraları gerçek kurulumun sayacını ilerletmesin.
+
+Göç **767 yalnız docker'da**.

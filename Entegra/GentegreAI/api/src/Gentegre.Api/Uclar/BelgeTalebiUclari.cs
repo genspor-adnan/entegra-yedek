@@ -83,12 +83,18 @@ public static class BelgeTalebiUclari
 
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
+            // NUMARA AÇILIŞTA KESİLİR (767): belge talebinin taslağı yok -
+            //   kayıt açıldığı anda sürece giriyor (otomatik onayda doğrudan
+            //   hazırlık kuyruğuna, kapalıyken İK onayına). Avans/masrafta
+            //   numara onaya gönderirken kesiliyor çünkü orada taslak var.
             var id = await baglanti.TekDegerAsync<int>("""
                 insert into public.personel_belge_talep
                        (taraf_id, sube_id, tur, amac, muhatap, adet, teslim_sekli,
-                        durum, otomatik_onay, aciklama, ekleyen)
+                        durum, otomatik_onay, aciklama, ekleyen, talep_no)
                 values (@p0, @p1, coalesce(@p2, 1), @p3, @p4, coalesce(@p5, 1),
-                        coalesce(@p6, 1), @p7, @p8, @p9, @p10)
+                        coalesce(@p6, 1), @p7, @p8, @p9, @p10,
+                        public.fn_numara_kimlik_uret(
+                            908, @p1, 'personel_belge_talep', 'talep_no'))
                 returning id
                 """, islem,
                 [istek.TarafId, baglam.SubeId ?? 0, istek.Tur, istek.Amac,

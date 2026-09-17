@@ -4,7 +4,7 @@ Bu liste `00_TARIHCE.md`'deki her turun sonuna dağılmış "Kalan" notlarının
 toplanmış ve **canlı veriyle doğrulanmış** hâlidir. Tarihçe *ne yapıldığını*
 anlatır; burası *ne yapılmadığını*.
 
-Son güncelleme: **17.09.2026**, `db/766` sonrası.
+Son güncelleme: **17.09.2026**, `db/767` sonrası.
 
 Doğrulama yöntemi: maddeler dev veritabanına (docker `gentegre-pg18`) ve
 koda bakılarak yazıldı; sayılar o anki gerçek durumdur. Bir maddeyi
@@ -51,7 +51,7 @@ Onay omurgası bunları destekliyor; hiçbir akış kullanmıyor.
 | 3.6 | **Onay akışı ayarları mockup'ının kalan sekmeleri.** `Ekranlar/Ayarlar/onay_akis_ayarlari.html` beş sekmeli; karşılığı olarak akış tanımı (`/onay-akis`) ve vekâlet (`/onay-vekalet`) ekranları yapıldı. Kalan sekmeler yapılmadı. | — |
 | 3.7 | **Masraf beyanında fiş/fatura GÖRSELİ bağlanmıyor.** 764 belge NUMARASINI zorunlu kıldı ama görselin kendisi yüklenemiyor. Doküman modülü `kaynak` + `kaynak_id` ile her kayda ek bağlayabiliyor; eksik olan bu yolu masraf kartına açmak. Numara denetim için yeter demiyoruz - fişin fotoğrafı olmadan uzaktan onaylayan âmir belgeyi göremiyor. | — |
 | 3.8 | **Belge talebinde yazının KENDİSİ üretilmiyor.** 765 talebi ve hazırlık/teslim akışını izliyor; metni İK elle yazıyor. Şablondan (kurum anteti + personel bilgisi + amaca göre metin) PDF üretmek ayrı bir iş - form motoru (740) ve doküman modülü ikisi de hazır, bağlanmadı. | Bugün "hazırlandı" bir işaret, üretilmiş bir belge değil. |
-| 3.9 | **`beyan_no` / `talep_no` / `avans_no` üretilmiyor** - üçü de boş kalıyor. Numara üretme altyapısı VAR (`fn_numara_sablonu_bul`, `fn_numara_onek_yilli`, `numara_sablonu` tablosu) ama bu üç modül kullanmıyor; listeler ve gelen kutusu `#id`'ye düşüyor. | `v_onay_kutusu` zaten `coalesce(nullif(no,''), '#'||id)` ile yazılmıştı - numara gelince kendiliğinden görünür. |
+| 3.9 | ~~**`beyan_no` / `talep_no` / `avans_no` üretilmiyor**~~ — **767'de kapandı.** Tür kodları 906-908, ön ekler `AV-`/`MB-`/`BT-`; numara kayıt resmîleştiği anda kesiliyor (avans/masrafta onaya gönderirken, belge talebinde açılışta). Genel Ayarlar › Belge No › **İK Talepleri** grubundan düzenlenir. | Geçmiş kayıtlara numara **verilmedi** - hiç kesilmemiş numarayı sonradan uydurmak olurdu; onlar `#id` görünmeye devam eder. |
 
 ---
 

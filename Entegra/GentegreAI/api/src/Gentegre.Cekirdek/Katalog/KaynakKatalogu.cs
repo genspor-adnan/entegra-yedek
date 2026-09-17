@@ -294,6 +294,7 @@ public static partial class KaynakKatalogu
         Ekle(NumaraBasvuru());
         Ekle(NumaraHastaBelge());
         Ekle(NumaraTedarik());
+        Ekle(NumaraIk());
         Ekle(NumaraSatis());
         Ekle(NumaraAlis());
         Ekle(NumaraTahsilat());

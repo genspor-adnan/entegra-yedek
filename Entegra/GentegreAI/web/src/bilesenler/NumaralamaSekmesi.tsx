@@ -45,6 +45,11 @@ const GRIDLER = [
   //   gizlemek yerine hepsini birakiyoruz - numarasi ayarlanmayan tur zaten
   //   bos kalir ve kimseyi zorlamaz.
   { kaynak: 'numara-tedarik',  baslik: 'Tedarik Belgeleri', sutun: 'sag' },
+  // IK TALEPLERI (767): avans · masraf beyani · belge talebi. AYRI GRUP,
+  //   tedarik/satis gridlerine karistirilmadi: bunlar belge degil personel
+  //   talebi ve numarayi kesen de baska bir modul. `urunModu` YOK - avans ve
+  //   masraf beyani ERP kurulumunda da var.
+  { kaynak: 'numara-ik',       baslik: 'İK Talepleri',      sutun: 'sag' },
 ] as const;
 
 type Kaynak = typeof GRIDLER[number]['kaynak'];

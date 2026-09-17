@@ -400,7 +400,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (220 ad, 52 tanesi birden cok dosyada)
+## Gorunumler (222 ad, 52 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -559,8 +559,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_muayene_sablon_alan_lookup` | `409_muayene_v1.sql` | — |
 | `v_muayene_sablon_lookup` | `411_muayene_sablon_makro.sql` | 409_muayene_v1.sql |
 | `v_numara_hasta_belge` | `636_hasta_belge_numara_gorunumu.sql` | — |
+| `v_numara_ik` | `767_ik_talep_numaralari.sql` | — |
 | `v_numara_tedarik` | `731_tedarik_numaralari.sql` | — |
 | `v_numara_turu_alis` | `334_tahakkuk_tur_takas.sql` | 152_numara_sablonu.sql, 153_numara_turu_gorunum_tip.sql |
+| `v_numara_turu_ik` | `767_ik_talep_numaralari.sql` | — |
 | `v_numara_turu_kimlik` | `719_ameliyathane_acil_akis.sql` | 358_numara_sablonu_elle_girilir.sql, 633_lab_istem_no_ayari.sql, 634_hasta_belge_numaralari.sql, 635_recete_no_numaralandirma.sql |
 | `v_numara_turu_odeme` | `153_numara_turu_gorunum_tip.sql` | 152_numara_sablonu.sql |
 | `v_numara_turu_satis` | `334_tahakkuk_tur_takas.sql` | 152_numara_sablonu.sql, 153_numara_turu_gorunum_tip.sql |

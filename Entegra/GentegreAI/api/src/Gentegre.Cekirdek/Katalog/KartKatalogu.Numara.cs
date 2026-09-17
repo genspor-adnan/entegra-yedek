@@ -114,6 +114,11 @@ public static partial class KartKatalogu
     /// </summary>
     private static KartTanimi NumaraTedarik() =>
         NumaraKarti("numara-tedarik", "public.v_numara_turu_tedarik", "Numara Türü");
+
+    // İK TALEPLERİ (767): avans · masraf beyanı · belge talebi. Belge
+    //   değiller, bu yüzden 900+ kendi tür kodlarını taşıyorlar (906-908).
+    private static KartTanimi NumaraIk() =>
+        NumaraKarti("numara-ik", "public.v_numara_turu_ik", "Numara Türü");
     private static KartTanimi NumaraSatis() =>
         NumaraKarti("numara-satis", "public.v_numara_turu_satis", "Satış Belgesi Türü");
     private static KartTanimi NumaraAlis() =>

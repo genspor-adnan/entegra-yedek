@@ -362,6 +362,7 @@ public static partial class KartKatalogu
         Ekle(NumaraBasvuru());
         Ekle(NumaraHastaBelge());
         Ekle(NumaraTedarik());
+        Ekle(NumaraIk());
         Ekle(NumaraSatis());
         Ekle(NumaraAlis());
         Ekle(NumaraTahsilat());

@@ -207,8 +207,12 @@ public static class MasrafBeyaniUclari
             var zincir = await onay.BaslatAsync(baglanti, islem, "personel.masraf",
                 id, toplam, [], baglam, iptal, sahipTarafId: tarafId);
 
+            // NUMARA ONAYA GÖNDERİRKEN KESİLİR (767) - taslakta değil.
             await baglanti.CalistirAsync("""
                 update public.personel_masraf set durum = @p1,
+                       beyan_no = coalesce(nullif(beyan_no, ''),
+                                  public.fn_numara_kimlik_uret(
+                                      907, sube_id, 'personel_masraf', 'beyan_no')),
                        degistiren = @p2, degistirme_tarihi = now()
                  where id = @p0
                 """, islem, [id, Onayda, baglam.KullaniciId], iptal);
