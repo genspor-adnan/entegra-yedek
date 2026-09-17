@@ -415,34 +415,6 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
               : ilacAranir ? (yalnizStok ? "Stok / İlaç Ara" : "Stok / Hizmet / İlaç Ara")
               : yalnizStok ? "Stok Ara" : "Stok / Hizmet Ara"}
       onKapat={onKapat}
-      /* BASLIGIN SAGINDA IKI EKLEME DUGMESI (786, kullanici): ayni is iki
-         hizda yapilir - cogu ucret tek adet ve liste fiyatiyla girilir
-         (Enter), miktar ya da fiyat degisecekse pencere acilir (Shift+Enter).
-         Klavye kisayollari arama kutusunda calisiyor; dugmeler ayni isi
-         kesfedilebilir kilar ve fareyle calisan kullaniciya da yol acar. */
-      ustBilgi={
-        <span className="stok-ara-eylem">
-          <button className="d bir" disabled={!satirlar[secili]}
-                  title="Seçili satırı 1 adet, liste fiyatıyla ekler (fiyat penceresi açılmaz)"
-                  onClick={() => satirlar[secili] && void sec(satirlar[secili], true)}>
-            ＋ 1 Adet Ekle (Enter)
-          </button>
-          <button className="d" disabled={!satirlar[secili]}
-                  title="Miktar ve fiyat penceresini açar"
-                  onClick={() => satirlar[secili] && void sec(satirlar[secili], false)}>
-            🔢 Miktar Ekle (Shift+Enter)
-          </button>
-          {/* EKLENDI BILGISI DUGMELERIN SAGINDA (786, kullanici): once
-              pencerenin ALT seridindeydi - goz listede ve dugmelerdeyken
-              asagidaki yazi fark edilmiyordu. Ust seritte, eklemeyi yapan
-              dugmelerin hemen yaninda duruyor. */}
-          {eklenen && eklenen.sayi > 0 && (
-            <span className="kapt stok-ara-eklendi">
-              ✓ {eklenen.sayi} kalem eklendi{eklenen.son ? ` · son: ${eklenen.son}` : ''}
-            </span>
-          )}
-        </span>
-      }
       /* SABIT YUKSEKLIK (kullanici): satir sayisi her aramada degisiyor;
          pencere icerige gore buyuyup kuculunce de kirpisma suruyordu. Govde
          sabit, liste kendi icinde kayar. */
@@ -451,7 +423,32 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
          pencereyi kirpistiriyordu (kullanici). Bu pencerenin yuksekligi
          CSS'ten gelir, kilide gerek yok. */
       olcumYok
-      alt={<button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>}
+      /* EKLEME DUGMELERI KAPAT BANDINDA, SOLA YANASIK (787, kullanici):
+         basliktayken pencere adiyla ayni satiri paylasiyor ve dar ekranda
+         basligi itiyordu. Bant zaten bos duruyordu; dugmeler solda, "eklendi"
+         bilgisi yaninda, Kapat sagda. */
+      alt={
+        <>
+          <span className="stok-ara-eylem" style={{ marginRight: 'auto' }}>
+            <button className="d bir" disabled={!satirlar[secili]}
+                    title="Seçili satırı 1 adet, liste fiyatıyla ekler (fiyat penceresi açılmaz)"
+                    onClick={() => satirlar[secili] && void sec(satirlar[secili], true)}>
+              ＋ 1 Adet Ekle (Enter)
+            </button>
+            <button className="d" disabled={!satirlar[secili]}
+                    title="Miktar ve fiyat penceresini açar"
+                    onClick={() => satirlar[secili] && void sec(satirlar[secili], false)}>
+              🔢 Miktar Ekle (Shift+Enter)
+            </button>
+            {eklenen && eklenen.sayi > 0 && (
+              <span className="kapt stok-ara-eklendi">
+                ✓ {eklenen.sayi} kalem eklendi{eklenen.son ? ` · son: ${eklenen.son}` : ''}
+              </span>
+            )}
+          </span>
+          <button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>
+        </>
+      }
     >
       <>
         {hata && <div className="hata-kutusu">{hata}</div>}

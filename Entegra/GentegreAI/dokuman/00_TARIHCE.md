@@ -13447,3 +13447,9 @@ yapmıyordu: belge KESİN (`kilitli`) ve satırın iskontosu onaya gönderilmiş
 (`iskontoKilit`). Araç çubuğundaki ✎ düğmesi sebebi `title`da söylüyordu ama
 satıra çift tıklayan kullanıcı ekranı bozuk sanıyordu. Artık her iki durumda
 sebep mesajla yazılıyor.
+
+**Düğmeler Kapat bandına taşındı (787).** Kullanıcı: *"butonları kapat butonu
+bandına sola yanaşık olarak taşı"*. Başlık satırında pencere adıyla aynı yeri
+paylaşıyorlardı ve dar ekranda başlığı itiyorlardı; bant zaten boştu. Şimdi
+solda "＋ 1 Adet Ekle (Enter)" ve "🔢 Miktar Ekle (Shift+Enter)", hemen
+yanlarında "✓ N kalem eklendi · son: …", sağda "✖ Kapat".
