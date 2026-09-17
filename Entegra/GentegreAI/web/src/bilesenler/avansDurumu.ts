@@ -71,7 +71,24 @@ export function useAvansDurumu(tarafId?: number | null) {
     } finally { setCalisiyor(false) }
   }, [tazele]);
 
-  return { toplam, satirlar, adet, calisiyor, hata, tazele, mahsupEt };
+  /**
+   * MAHSUBU GERI AL (785): belgeye sayilan avans geri doner, kalan artar.
+   * Avans kaydi silinmez - para hastadan alinmisti; geri alinan yalnizca bu
+   * belgeye sayilmasidir.
+   */
+  const mahsupIptal = useCallback(async (belgeId: number, kasaIslemId: number) => {
+    setHata(''); setCalisiyor(true);
+    try {
+      const y = await api.kasaAvansMahsupIptal({ belgeId, kasaIslemId });
+      await tazele();
+      return y;
+    } catch (h) {
+      setHata(hataMetni(h));
+      return null;
+    } finally { setCalisiyor(false) }
+  }, [tazele]);
+
+  return { toplam, satirlar, adet, calisiyor, hata, tazele, mahsupEt, mahsupIptal };
 }
 
 /** Kancanin donusu - serit ve tahsilat cubugu ayni nesneyi paylasir. */

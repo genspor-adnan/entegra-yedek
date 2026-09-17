@@ -13374,3 +13374,27 @@ Regresyon testi `tahsilatAvansAkisi.test.tsx`: kayıt önce çağrılır ve sır
 tutar iptal edilirse mahsup yapılmaz; Avans Al/İade de aynı kapıdan geçer;
 dört araç dört kayıt çağrısı üretir; kayıt geçmezse hiçbir araç çalışmaz.
 vitest 650/650.
+
+## 17.09.2026 — Avans kullanımı geri alınabiliyor (785)
+
+Kullanıcı: *"ücreti tekrar girip avans kullandım ama silmek istiyorum, enable
+değil"*.
+
+781'de avans kullanım satırı **seçilemez** yapılmıştı ("kasa işlemi değil"
+gerekçesiyle) - doğru ama eksik: mahsubu geri almanın HİÇBİR yolu kalmamıştı.
+Yanlış tutarla mahsup eden memur ne satırı silebiliyor ne düzeltebiliyordu.
+
+- Satır artık **seçilebilir**; 🗑 onu silmez, **geri alır**: `POST
+  /api/kasa-islem/avans-mahsup/iptal` bu belgeye ait dağıtım satırlarını
+  siler, avansın kalanı geri döner. Avansın KENDİSİ durur - para hastadan
+  alınmıştı; geri alınan yalnızca bu belgeye sayılmasıdır.
+- Aynı avans başka bir başvuruya da sayılmışsa **o mahsup yerinde kalır**:
+  silme `belge_satir.belge_id` ile sınırlı.
+- **Düzeltme (✎) pasif**: avans kullanımının düzeltilecek bir kasa işlemi yok;
+  tutarı değiştirmek demek geri alıp yeniden kullanmaktır - title bunu söylüyor.
+- Çift tık da kart açmıyor (kimliği negatif; açılacak işlem yok).
+
+**Doğrulama.** P-000140'ta 1.000 ₺ mahsup geri alındı: hastanın avansı
+`50.000 / 0 / 50.000 · Açık`'a döndü, belgedeki dağıtım satırı kalmadı ve
+**ücret satırı yerinde** kaldı. Test `tahsilatAvansAkisi.test.tsx`: onay kutusu
+etkin, 🗑 negatif kimliği geçirir, ✎ pasif. vitest 651/651, xUnit 250/250.

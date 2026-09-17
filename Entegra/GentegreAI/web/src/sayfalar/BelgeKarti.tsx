@@ -1456,7 +1456,20 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
                            kayitSart={async () => (kalemDegisti || kirli
                              ? akisRef.current.kayitSart() : true)}
                            tahsilatSil={async idler => {
-                             await tahsilat.tahsilatSil(idler);
+                             // AVANS KULLANIMI (785): kimligi NEGATIF olan
+                             //   satirlar kasa islemi degil, mahsuptur -
+                             //   silinmez, GERI ALINIR (tutar avansa doner).
+                             const mahsuplar = idler.filter(x => x < 0);
+                             const islemler = idler.filter(x => x > 0);
+                             for (const m of mahsuplar) {
+                               const y = await avansDurumu.mahsupIptal(kayitliId, -m);
+                               if (y) mesaj(`${para.format(y.geriAlinan)} avans geri alındı.`);
+                             }
+                             if (mahsuplar.length) {
+                               tahsilat.setSeciliTahsilatlar([]);
+                               tahsilat.tazele();
+                             }
+                             if (islemler.length) await tahsilat.tahsilatSil(islemler);
                              // Tahsilat silinince kovalarin TAHSIL sayaci duser.
                              await paraRef.current.satirlariTazele();
                            }}

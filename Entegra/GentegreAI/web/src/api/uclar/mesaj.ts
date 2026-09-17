@@ -89,6 +89,13 @@ export const mesajUclari = {
     gonder<{ dagitilan: number; islemSayisi: number }>(
       '/api/kasa-islem/avans-mahsup', govde),
 
+  /**
+   * Avansin BU BELGEYE yapilmis mahsubunu geri alir (785). Avansin kendisi
+   * (kasa islemi) durur - geri alinan yalnizca belgeye sayilmasidir.
+   */
+  kasaAvansMahsupIptal: (govde: { belgeId: number; kasaIslemId: number }) =>
+    gonder<{ geriAlinan: number }>('/api/kasa-islem/avans-mahsup/iptal', govde),
+
   /** Radyoloji panosu (320): sayaclar + cihaz dolulugu + uyarilar tek uctan. */
   radyolojiPano: <T,>(gun?: string) =>
     istek<T>(`/api/radyoloji/pano${gun ? `?gun=${encodeURIComponent(gun)}` : ''}`),

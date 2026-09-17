@@ -176,6 +176,47 @@ describe('avans eylemleri kayıt kapısından geçer (784)', () => {
     expect(hesapSecAc).not.toHaveBeenCalled();
   });
 
+  it('AVANS KULLANIM satiri secilebilir, 🗑 mahsubu GERI ALIR (785)', async () => {
+    // Kullanici: "avans kullandım ama silmek istiyorum, enable değil".
+    //   Satirin kimligi NEGATIF (gorunumun ikinci dali) - cagiran taraf bunu
+    //   silme degil MAHSUP IPTALI olarak isler.
+    const tahsilatSil = vi.fn(async () => {});
+    const setSecili = vi.fn();
+    const avansSatiri = { id: -713, kasaIslemId: 713, islemTarihi: '2026-09-17',
+                          islemNo: '00000044', turAdi: 'Avans ile Tahsilat',
+                          tutar: 1000, avansKullanim: 1 };
+    const { rerender } = render(
+      <TahsilatSekmesi
+        sonuc={{ belge: { tarafId: 42, genelToplam: 500 } } as never}
+        tahsilatlar={[avansSatiri]} kayitliId={7509} alisMi={false}
+        tahsilatAc={async () => {}} secili={[]} setSecili={setSecili}
+        tahsilatAcKart={() => {}} tahsilatSil={tahsilatSil}
+        basvuruMu avans={avansDurumu(50000)} />);
+
+    // Onay kutusu ETKIN: eskiden pasifti ve kullanici mahsubu geri alamiyordu.
+    const kutu = document.querySelector('td.check input') as HTMLInputElement;
+    expect(kutu.disabled).toBe(false);
+
+    // Secili haldeyken 🗑 negatif kimligi geciriyor.
+    rerender(
+      <TahsilatSekmesi
+        sonuc={{ belge: { tarafId: 42, genelToplam: 500 } } as never}
+        tahsilatlar={[avansSatiri]} kayitliId={7509} alisMi={false}
+        tahsilatAc={async () => {}} secili={[-713]} setSecili={setSecili}
+        tahsilatAcKart={() => {}} tahsilatSil={tahsilatSil}
+        basvuruMu avans={avansDurumu(50000)} />);
+    const sil = [...document.querySelectorAll('button')]
+      .find(b => b.textContent === '🗑') as HTMLButtonElement;
+    expect(sil.disabled).toBe(false);
+    await act(async () => { sil.click() });
+    expect(tahsilatSil).toHaveBeenCalledWith([-713]);
+
+    // DUZELTME pasif: avans kullaniminin duzeltilecek kasa islemi yok.
+    const duzelt = [...document.querySelectorAll('button')]
+      .find(b => b.textContent === '✎') as HTMLButtonElement;
+    expect(duzelt.disabled).toBe(true);
+  });
+
   it('avans YOKSA "Avans İade" çizilmez, "Avans Al" durur', () => {
     // `avansAl` verilmezse dugme hic cizilmez (cagiran onu baglamamis
     //   demektir); burada baglanmis bir kart taklit ediliyor.

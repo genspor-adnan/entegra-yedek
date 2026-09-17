@@ -106,11 +106,16 @@ export function TahsilatSekmesi({ sonuc, tahsilatlar, kayitliId, alisMi, tahsila
 }) {
 /* SECIM: faturalama gridiyle AYNI desen - duz tik tek satir secer, Ctrl/Cmd
    ekler-cikarir, Shift aralik secer; basliktaki kutu tumunu secer. */
-/* AVANS KULLANIM satirlari SECILEMEZ (781): silinecek/duzeltilecek bir kasa
-   islemi degil, mahsubun kendisidir - avans kartindan yonetilir. */
-const secilebilir = (k: Record<string, unknown>) => Number(k.avansKullanim ?? 0) === 0;
-const idler = tahsilatlar.filter(secilebilir)
-  .map(k => Number(k.id ?? 0)).filter(Boolean);
+/**
+ * AVANS KULLANIM satiri DUZELTILEMEZ ama SECILEBILIR (785, kullanici: "avans
+ * kullandım ama silmek istiyorum, enable değil"): duzeltilecek bir kasa islemi
+ * yoktur (para avans gununde alindi), ama mahsup GERI ALINABILIR - satir
+ * secilip 🗑'e basilinca avansa iade edilir.
+ *
+ * Kimligi NEGATIF (gorunumun ikinci dali): silme yolu bununla ayirt edilir.
+ */
+const avansMi = (k: Record<string, unknown>) => Number(k.avansKullanim ?? 0) === 1;
+const idler = tahsilatlar.map(k => Number(k.id ?? 0)).filter(Boolean);
 const hepsi = idler.length > 0 && secili.length === idler.length;
 const cevir = (id: number) =>
   setSecili(secili.includes(id) ? secili.filter(x => x !== id) : [...secili, id]);
@@ -209,7 +214,7 @@ const satirTikla = (e: React.MouseEvent, sira: number, id: number) => {
   if (!id) return;
   if (e.shiftKey && capa.current != null) {
     const [bas, son] = capa.current <= sira ? [capa.current, sira] : [sira, capa.current];
-    setSecili(tahsilatlar.slice(bas, son + 1).filter(secilebilir)
+    setSecili(tahsilatlar.slice(bas, son + 1)
       .map(k => Number(k.id ?? 0)).filter(Boolean));
     return;
   }
@@ -468,13 +473,22 @@ return (
                                  : 'Önce belgeyi kaydedin'}
                 onClick={() => void tahsilatAc(alisMi ? 31 : 21)}>＋</button>
       )}
-      <button className="d" disabled={!tekSecili}
+      {/* DUZELTME yalniz KASA ISLEMINDE (785): avans kullaniminin duzeltilecek
+          bir islemi yok - tutari degistirmek demek mahsubu geri alip yeniden
+          yapmaktir. */}
+      <button className="d" disabled={!tekSecili || tekSecili < 0}
               title={!secili.length ? 'Önce satır seçin'
                      : secili.length > 1 ? 'Düzeltme için tek satır seçin'
-                     : 'Seçili işlemi düzelt'}
-              onClick={() => tekSecili && tahsilatAcKart(tekSecili)}>✎</button>
+                     : tekSecili < 0
+                       ? 'Avans kullanımı düzeltilemez - geri alıp yeniden kullanın.'
+                       : 'Seçili işlemi düzelt'}
+              onClick={() => tekSecili > 0 && tahsilatAcKart(tekSecili)}>✎</button>
       <button className="d teh" disabled={!secili.length}
-              title={secili.length ? 'Seçili işlemleri sil' : 'Önce satır seçin'}
+              title={secili.length
+                ? (secili.some(x => x < 0)
+                    ? 'Seçili avans kullanımını geri alır (tutar avansa döner)'
+                    : 'Seçili işlemleri sil')
+                : 'Önce satır seçin'}
               onClick={() => { void tahsilatSil(secili) }}>🗑</button>
       {secili.length > 1 && <span className="kapt">{secili.length} işlem seçili</span>}
     </div>
@@ -525,21 +539,20 @@ return (
           </tr>
         ))}
         {tahsilatlar.map((k, i) => {
-          // AVANS KULLANIMI (781): bu satir bir kasa islemi DEGIL, mahsubun
-          //   kendisidir - secilemez, cift tikla kart acilmaz. Kasa islemi
-          //   olarak duzeltilecek/silinecek bir sey yok; avansin kendisi
-          //   Hasta Avansları ekranindan yonetilir.
-          const avansSatiri = !secilebilir(k);
-          const kid = avansSatiri ? 0 : Number(k.id ?? 0);
+          // AVANS KULLANIMI (781/785): kasa islemi DEGIL, mahsubun kendisi.
+          //   Cift tikla kart ACILMAZ (duzeltilecek islem yok) ama satir
+          //   SECILEBILIR: 🗑 mahsubu geri alir.
+          const avansSatiri = avansMi(k);
+          const kid = Number(k.id ?? 0);
           return (
           <tr key={i} className={kid && secili.includes(kid) ? 'secili' : ''}
               style={{ userSelect: 'none' }}
               onClick={e => satirTikla(e, i, kid)}
-              onDoubleClick={() => kid && tahsilatAcKart(kid)}>
+              onDoubleClick={() => { if (kid > 0) tahsilatAcKart(kid) }}>
             <td className="check" onClick={e => e.stopPropagation()}>
               <input type="checkbox" checked={!!kid && secili.includes(kid)} disabled={!kid}
                      title={avansSatiri
-                       ? 'Avans kullanımı bir kasa işlemi değil - mahsup, Hasta Avansları ekranından yönetilir.'
+                       ? 'Avans kullanımı: seçip 🗑 ile geri alabilirsiniz (tutar avansa döner).'
                        : undefined}
                      onChange={() => { if (kid) { capa.current = i; cevir(kid) } }} />
             </td>

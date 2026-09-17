@@ -41,6 +41,14 @@ public static class KasaUclari
                                       decimal? Tutar = null);
 
     /// <summary>
+    /// AVANS MAHSUBUNU GERI AL (785, kullanici: "ücreti tekrar girip avans
+    /// kullandım ama silmek istiyorum"): belgeye sayilan avans geri alinir,
+    /// avansin kalani artar. Avansin KENDISI (kasa islemi) durur - para
+    /// hastadan alinmisti, silinecek olan yalnizca bu belgeye sayilmasidir.
+    /// </summary>
+    public sealed record MahsupIptalIstegi(int BelgeId, int KasaIslemId);
+
+    /// <summary>
     /// Bir kasa isleminin DAGITILMAMIS kismini belgenin acik satirlarina
     /// siraya gore yazar (once hasta payi - kasadan gelen para cogunlukla
     /// hastanindir, kurum payi icmalle kapanir). Mevcut dagitim satirlari
@@ -545,6 +553,46 @@ public static class KasaUclari
             }
 
             return Results.Ok(new { dagitilan = toplam, islemSayisi = sayac });
+        });
+
+        // POST /api/kasa-islem/avans-mahsup/iptal
+        //   Bir avansin BU BELGEYE yapilmis mahsubunu geri alir: dagitim
+        //   satirlari silinir, avansin kalani geri doner.
+        grup.MapPost("/avans-mahsup/iptal", async (
+            MahsupIptalIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("kasa_islem", Islem.Degistir);
+
+            if (istek.BelgeId <= 0 || istek.KasaIslemId <= 0)
+                throw GentegreHatasi.IsKurali("Geri alınacak avans mahsubu belirtilmeli.");
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            // SILINEN TUTAR once okunur: kullaniciya "ne kadar geri dondu"
+            //   soylenecek ve silme sonrasi bu bilgi kalmaz.
+            var tutar = await baglanti.TekDegerAsync<decimal>("""
+                select coalesce(sum(d.tutar), 0)
+                  from public.kasa_islem_dagitim d
+                  join public.belge_satir bs on bs.id = d.belge_satir_id
+                 where d.kasa_islem_id = @p0 and bs.belge_id = @p1
+                """, null, [istek.KasaIslemId, istek.BelgeId], iptal);
+
+            if (tutar <= 0)
+                throw GentegreHatasi.IsKurali("Bu belgeye yapılmış bir avans mahsubu yok.");
+
+            // YALNIZ BU BELGENIN dagitimlari silinir: ayni avans baska bir
+            //   basvuruya da sayilmis olabilir, onun mahsubu yerinde kalir.
+            //   Hakedis satirlari dagitima CASCADE bagli - onlar da duser.
+            await baglanti.CalistirAsync("""
+                delete from public.kasa_islem_dagitim d
+                 using public.belge_satir bs
+                 where bs.id = d.belge_satir_id
+                   and d.kasa_islem_id = @p0 and bs.belge_id = @p1
+                """, null, [istek.KasaIslemId, istek.BelgeId], iptal);
+
+            return Results.Ok(new { geriAlinan = tutar, izlemeNo = baglam.IzlemeNo });
         });
 
         // POST /api/kasa-islem/{id}/kesinlestir
