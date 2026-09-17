@@ -2651,6 +2651,10 @@ public static class AksiyonKatalogu
                     KaynakKodu: "kasa_islem", Islem: Islem.Ekle, Sira: 10),
                 new("kasa.ac",    "Aç",          "kasa", Kisayol: "Enter",
                     KaynakKodu: "kasa_islem", Islem: Islem.Gor, KayitGerekir: true, Sira: 20),
+                // IADE (780): kalan avansi hastaya geri odeme. Avans kaydini
+                //   KUCULTMEZ - odeme yonunde ayri bir kasa islemi acar.
+                new("avans.iade", "↩ İade Et", "kasa",
+                    KaynakKodu: "kasa_islem", Islem: Islem.Ekle, KayitGerekir: true, Sira: 25),
                 // Mahsup BELGEDE yapilir (322): hangi satira sayilacagi orada
                 //   belli. Listede "mahsup et" dugmesi, parayi hangi basvuruya
                 //   yazdigini gostermeden harcamak olurdu.

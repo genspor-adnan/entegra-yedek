@@ -248,6 +248,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const [cekTuru, setCekTuru] = useState<number | null>(null);
   /** HASTA AVANSI (779): avans damgasiyla acilan tahsilat kartinin turu. */
   const [avansTuru, setAvansTuru] = useState<number | null>(null);
+  /** AVANS IADESI (780): kalan avansin hastaya geri odendigi odeme karti. */
+  const [avansIade, setAvansIade] = useState<{
+    avansId: number; tarafId: number; tarafUnvan: string; tutar: string;
+  } | null>(null);
   /** Kiymet kaydedildikten sonra acilan kasa islemi (ayni kiymete bagli). */
   const [kasaAcilis, setKasaAcilis] = useState<{
     tur: number; tarafId?: number; tarafUnvan?: string; tutar?: string;
@@ -674,7 +678,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         tazele: () => setYenile(t => t + 1),
         git: yol => git(yol),
         setKasaTuru, setCekTuru, setAcikKasaId,
-        setAvansTuru, setAcikBelgeId,
+        setAvansTuru, setAcikBelgeId, setAvansIade,
       })) return;
 
       if (await fiyatListesiAksiyonu(kod, satir, {
@@ -1192,6 +1196,18 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       <KasaIslemKarti
         acilis={{ tur: avansTuru, avans: true }}
         onKapat={() => { setAvansTuru(null); setYenile(t => t + 1) }}
+      />
+    )}
+
+    {/* AVANS IADESI (780): NAKIT ODEME karti, avansa bagli acilir. Tutar
+        kalanla onerilir; fazlasini sunucu tetigi reddeder ("İade tutarı kalan
+        avansı aşamaz"). */}
+    {avansIade !== null && (
+      <KasaIslemKarti
+        acilis={{ tur: 31, tarafId: avansIade.tarafId,
+                  tarafUnvan: avansIade.tarafUnvan, tutar: avansIade.tutar,
+                  avansKaynakId: avansIade.avansId }}
+        onKapat={() => { setAvansIade(null); setYenile(t => t + 1) }}
       />
     )}
 

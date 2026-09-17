@@ -13124,3 +13124,50 @@ xUnit 239/239 (yeni `HastaAvansTestleri`: alınan/kullanılan/kalan ve durum,
 bakiye yalnız kalanı sayar, damgasız kapanınca düşer, hasta olmayan cari
 listede yok, iptal edilen sayılmaz — hepsi geri alınan transaction içinde),
 vitest 631/631.
+
+## 17.09.2026 — Avans iadesi (780)
+
+Kullanıcı: *"avans iadesini de yap"* (779'un devamı).
+
+**İade, avansın küçültülmesi değil ayrı bir kayıttır.** Hasta kalan avansını
+geri istediğinde avans satırının tutarını düşürmek kasayı yalan söyletirdi:
+para bir gün girmiş, başka bir gün çıkmıştır; iki hareketi tek satıra ezmek
+gün sonu sayımını bozar ve *"ne zaman iade ettik"* sorusunu cevapsız bırakır.
+İade artık **ödeme yönünde ayrı bir kasa işlemi** ve `kasa_islem.avans_kaynak_id`
+ile avansına bağlı. Avans kaydı olduğu gibi duruyor; listede "İade Edildi"
+görünüyor ve iade edilen tutar KALAN'dan düşüyor.
+
+**Kurallar tetikte (`tg_kasa_islem_avans_iade`), ekranda değil.** "İade kalan
+avansı aşamaz" paranın kendisiyle ilgili bir kural: aşarsa kurum hastaya
+almadığı parayı öder. Ekranda dursaydı aynı avansa iki pencereden yazılan iade
+ikisi de kendi anına göre haklı çıkardı — tetik kaynağı `for update` ile
+kilitleyip bakıyor. Denetlenenler: kaynak gerçekten bir tahsilat mı, iptal
+edilmemiş mi, iade ÖDEME türünde mi (tahsilat türü parayı kasaya ikinci kez
+sokardı), aynı cariye mi, tutar kalanı aşıyor mu. Hatalar `errcode GK422` ile
+atılıyor — 076'nın kuralı: API bu mesajı kullanıcıya aynen gösteriyor
+(kodsuz `raise` 500 "beklenmeyen hata" olurdu).
+
+**Mahsup da iadeyi görüyor.** 322'nin `v_taraf_avans` görünümü "dağıtılmamış
+tahsilat" diyordu; iade bir dağıtım olmadığı için geri ödenen para orada hâlâ
+mahsup edilebilir görünüyordu — aynı 500 TL hem hastaya verilir hem
+başvurusuna sayılırdı. Görünüm artık iadeyi de düşüyor: mahsup şeridi ile
+avans listesi aynı rakamı konuşuyor. İade edilen tutarın tek tanımı
+`fn_avans_iade_toplam` (iptal edilen iade sayılmaz) — üç yerde ayrı yazılsaydı
+biri geride kalırdı.
+
+**Ekran.** Hasta Avansları listesine **İade** kolonu (Kullanılan'dan ayrı: biri
+hizmete sayıldı, öteki kasadan çıktı), **İade** çipi, "İade Tarihi" (gizli
+kolon) ve **↩ İade Et** aksiyonu eklendi. Aksiyon ödeme kartını "Avans İadesi"
+başlığıyla açıyor; hasta ön-dolu ve KİLİTLİ (iade avansın sahibine yapılır),
+tutar kalanla öneriliyor ama kilitli değil — hasta kalanın bir kısmını
+bırakabilir. Kalanı olmayan avansta düğme "tamamı kullanılmış ya da iade
+edilmiş" diyor, boş kart açmıyor. Durum merdiveni: Açık · Kısmen Kullanıldı ·
+**Kısmen İade** · Kullanıldı · **İade Edildi**.
+
+**Doğrulama.** 50.000 ₺ avansa 99.999 ₺ iade denendi: kart kırmızı şeritte
+*"İade tutarı kalan avansı aşamaz (kalan: 50.000,00)."* (HTTP 422 IS_KURALI).
+200 ₺ iade kaydedildi: liste `50.000,00 / 0,00 / 200,00 / 49.800,00 · Kısmen
+İade`. xUnit 246/246 (yeni `AvansIadesiTestleri`: kalandan düşer ve durum
+değişir, kalanı aşamaz, kullanılmış avansta yalnız kalan kadar iade,
+iade edilen avans mahsup edilemez, tahsilat türünde olamaz, sahibine yapılır,
+iptal edilen iade kalanı geri verir), vitest 634/634.

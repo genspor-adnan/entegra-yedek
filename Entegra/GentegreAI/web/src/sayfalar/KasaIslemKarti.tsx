@@ -77,6 +77,12 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
               * normal tahsilattan ayrildigi tek nokta bu damgadir.
               */
              avans?: boolean;
+             /**
+              * AVANS IADESI (780): bu odeme hangi avansin iadesi. Kart odeme
+              * turuyle acilir, kayit avansa baglanir ve avans listesinde
+              * "İade Edildi" gorunur.
+              */
+             avansKaynakId?: number;
              /** MEVCUT kiymete baglanma (kasa listesinde once cek karti acilir). */
              cekSenetId?: number };
   /** MODAL kullanimda MEVCUT kaydi acmak icin (ör. ekstre satirina cift tik).
@@ -102,6 +108,10 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
    * "bu para henuz bir hizmete sayilmadi" bilgisi.
    */
   const avansMi = acilis?.avans ?? sorgu.get('avans') === '1';
+  /** AVANS IADESI (780): kalan avansin hastaya geri odenmesi. */
+  const avansKaynakId = acilis?.avansKaynakId
+    ?? (Number(sorgu.get('avansKaynakId')) || 0);
+  const iadeKipi = avansKaynakId > 0;
   // Islem tarihi SAATIYLE birlikte (146): gun icinde hangi tahsilatin once
   //   alindigi kasa sayiminda ve ekstre siralamasinda onemli. Yerel an -
   //   toISOString() UTC verir, aksam saatlerinde bir sonraki gunu yazardi.
@@ -280,7 +290,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     csVade: kiymet.vade, csSeriNo: kiymet.seriNo, csKesideci: kiymet.kesideci,
     csBanka: kiymet.banka, csSube: kiymet.sube,
     mevcutKiymet, belgeBagi, cariZorunlu: secili?.cariZorunlu,
-    avansMi,
+    avansMi, avansKaynakId,
     // IADE KAYDI (660): eksi tutarli islem - kart onu duzeltmek icin
     //   acildiginda "Sıfırdan büyük olmalı" kurali kaydi kilitliyordu.
     //   Olcu KAYDIN kendisi, kutuya yazilan deger degil: kullanici artiya
@@ -432,11 +442,15 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                   //   "kimin parasi" sorusunun cevabi olmadan takip
                   //   edilemez - sahipsiz avans, mahsup edilecek carisi
                   //   olmayan paradir.
-                  etiket={avansMi ? 'Hasta' : cariVirman ? 'Kaynak Cari' : 'Cari'}
-                  zorunlu={avansMi || secili?.cariZorunlu === 1}
+                  etiket={avansMi || iadeKipi ? 'Hasta'
+                          : cariVirman ? 'Kaynak Cari' : 'Cari'}
+                  zorunlu={avansMi || iadeKipi || secili?.cariZorunlu === 1}
                   deger={cari?.unvan}
                   hata={alanHatalari.tarafId}
-                  kilitli={kilitli}
+                  // IADEDE HASTA DEGISTIRILEMEZ (780): iade avansin sahibine
+                  //   yapilir; baskasina odenen para iade degil baska bir
+                  //   islemdir (sunucu tetigi de reddeder).
+                  kilitli={kilitli || iadeKipi}
                   // PERSONEL de taraf olabilir (kullanici): is avansi, maas
                   //   odemesi, harcirah... Muhasebe tarafi zaten hazir -
                   //   fn_muh_hesap_coz personeli 335/196'ya yaziyor.
@@ -773,7 +787,8 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
       <Modal
         // AVANSTA BASLIK BUNU SOYLER (779): ayni kart hem normal tahsilat hem
         //   avans icin aciliyor; memur hangi kipte oldugunu basliktan gorsun.
-        baslik={`${avansMi ? 'Hasta Avansı' : secili?.ad ?? 'Kasa İşlemi'}`
+        baslik={`${iadeKipi ? 'Avans İadesi'
+                  : avansMi ? 'Hasta Avansı' : secili?.ad ?? 'Kasa İşlemi'}`
                 + (sonuc?.islem.islemNo ? ` — ${sonuc.islem.islemNo}` : '')}
         ustBilgi={durum !== null
           ? <span className={`rozet ${durum === 2 ? 'ok' : durum === 3 ? 'uyari' : 'gri'}`}>
@@ -791,7 +806,8 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
     <>
       <div className="sayfabas">
         <div className="basrow">
-          <h1>{avansMi ? 'Hasta Avansı' : secili?.ad ?? 'Kasa İşlemi'}</h1>
+          <h1>{iadeKipi ? 'Avans İadesi'
+               : avansMi ? 'Hasta Avansı' : secili?.ad ?? 'Kasa İşlemi'}</h1>
           <span className="yol">
             Kasa › {GRUP_ADI[grup] ?? grup}
             {sonuc?.islem.islemNo ? ` · ${sonuc.islem.islemNo}` : ''}

@@ -53,6 +53,12 @@ export interface KasaGirdisi {
    * kaydi bu damgayla gosterir ("bu avans nereye gitti" cevapsiz kalmasin).
    */
   avansMi?: boolean;
+  /**
+   * AVANS IADESI (780): bu odeme HANGI avansin iadesi. Bag olmadan iade,
+   * hastaya yapilmis siradan bir odemedir - avans listesinde "İade Edildi"
+   * gorunmez ve kalan dusmez.
+   */
+  avansKaynakId?: number;
 }
 
 /** Turun sekil kurallari - hem dogrulama hem govde ayni yerden okusun. */
@@ -122,6 +128,7 @@ export function kasaGovdesi(g: KasaGirdisi, taslak: boolean, plan: boolean) {
       // Damga YALNIZ isaretliyken gonderilir: sunucu varsayilani 0, her
       //   tahsilata "avans: 0" yazmak govdeyi sisirirdi.
       ...(g.avansMi ? { avans: 1 } : {}),
+      ...(g.avansKaynakId ? { avansKaynakId: g.avansKaynakId } : {}),
       ...(g.mevcutKiymet ? { cekSenetId: g.mevcutKiymet } : {}),
     },
     // Cek/senet turlerinde kiymetin kendisi de gonderilir: sunucu once

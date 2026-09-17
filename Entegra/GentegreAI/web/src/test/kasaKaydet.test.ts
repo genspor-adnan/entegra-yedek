@@ -152,3 +152,30 @@ describe('avans damgasi (779)', () => {
       .not.toHaveProperty('tarafId');
   });
 });
+
+/**
+ * AVANS IADESI (780, kullanici: "avans iadesini de yap").
+ *
+ * Iade, avansa BAGLI bir odeme kaydidir. Bag kopunca kayit hastaya yapilmis
+ * siradan bir odemeye doner: avans listesinde "İade Edildi" gorunmez, kalan
+ * dusmez ve ayni para bir de basvuruya mahsup edilebilir.
+ */
+describe('avans iadesi (780)', () => {
+  it('iade kaydi avansa BAGLANIR', () => {
+    const g = kasaGovdesi({ ...temel, tur: 31, grup: 'odeme', avansKaynakId: 42 },
+                          false, false);
+    expect(g.islem.avansKaynakId).toBe(42);
+  });
+
+  it('bag YOKSA alan gonderilmez - siradan odeme', () => {
+    expect(kasaGovdesi({ ...temel, tur: 31, grup: 'odeme' }, false, false).islem)
+      .not.toHaveProperty('avansKaynakId');
+  });
+
+  it('iade AVANS DAMGASI tasimaz - ikisi ayri kayittir', () => {
+    // Damga "bu para avans olarak ALINDI" demek; iade parayi geri veriyor.
+    const g = kasaGovdesi({ ...temel, tur: 31, grup: 'odeme', avansKaynakId: 42 },
+                          false, false);
+    expect(g.islem).not.toHaveProperty('avans');
+  });
+});

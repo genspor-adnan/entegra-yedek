@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (398 ad, 112 tanesi birden cok dosyada)
+## Fonksiyonlar (400 ad, 112 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -17,6 +17,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ameliyat_salon_cakisma` | `719_ameliyathane_acil_akis.sql` | — |
 | `fn_ameliyat_sayim_uyum` | `715_ameliyathane.sql` | — |
 | `fn_ara_metin` | `027_arama_normalize.sql` | — |
+| `fn_avans_iade_toplam` | `780_avans_iadesi.sql` | — |
 | `fn_baslik_harf` | `653_baslik_harfi_kisaltma_ek.sql` | 630_baslik_harf.sql, 651_hizmet_adi_baslik_harfi.sql, 652_baslik_harfi_tireli_kisaltma.sql |
 | `fn_baslik_kelime` | `630_baslik_harf.sql` | — |
 | `fn_baslik_parca` | `653_baslik_harfi_kisaltma_ek.sql` | 652_baslik_harfi_tireli_kisaltma.sql |
@@ -355,6 +356,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_kasa_dagitim_kontrol` | `660_iade_satir_tahsil.sql` | 321_tahsilat_satir_dagitim.sql, 323_tahsilat_kdv_dahil.sql, 471_dagilim_kapanma_tahsil.sql |
 | `tg_kasa_dagitim_sil_tazele` | `354_kasa_islem_silme_kosullari.sql` | — |
 | `tg_kasa_dagitim_tazele` | `321_tahsilat_satir_dagitim.sql` | — |
+| `tg_kasa_islem_avans_iade` | `780_avans_iadesi.sql` | — |
 | `tg_kasa_islem_iade_dagit` | `660_iade_satir_tahsil.sql` | — |
 | `tg_kasa_islem_sil_fis` | `354_kasa_islem_silme_kosullari.sql` | — |
 | `tg_kasa_islem_tahsil_tazele` | `321_tahsilat_satir_dagitim.sql` | — |
@@ -407,7 +409,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (235 ad, 55 tanesi birden cok dosyada)
+## Gorunumler (235 ad, 58 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -497,8 +499,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_goz_unite_akis` | `691_goz_modulu.sql` | — |
 | `v_hakedis_ozet` | `330_prim_tahsilat_turu_durum.sql` | 324_prim_semasi.sql |
 | `v_hakedis_satir` | `363_hakedis_rol_isaret_kontrolu.sql` | 324_prim_semasi.sql, 330_prim_tahsilat_turu_durum.sql, 332_prim_zamani.sql |
-| `v_hasta_avans` | `779_hasta_avansi.sql` | — |
-| `v_hasta_avans_bakiye` | `779_hasta_avansi.sql` | — |
+| `v_hasta_avans` | `780_avans_iadesi.sql` | 779_hasta_avansi.sql |
+| `v_hasta_avans_bakiye` | `780_avans_iadesi.sql` | 779_hasta_avansi.sql |
 | `v_hasta_lookup` | `266_aday_hasta.sql` | 244_hasta_lookup.sql, 262_hasta_lookup_kimlik.sql, 263_hasta_lookup_cinsiyet_yas.sql, 264_hasta_lookup_cinsiyet_bos.sql |
 | `v_hasta_tibbi_ozet` | `420_hasta_tibbi_gecmis.sql` | — |
 | `v_hekim_calisma_istisna` | `718_hekim_calisma_plani.sql` | — |
@@ -637,7 +639,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_sube_baz_lookup` | `227_baz_sube.sql` | — |
 | `v_sube_lookup` | `718_hekim_calisma_plani.sql` | — |
 | `v_tahsilat_turu_lookup` | `330_prim_tahsilat_turu_durum.sql` | — |
-| `v_taraf_avans` | `322_avans_mahsup.sql` | — |
+| `v_taraf_avans` | `780_avans_iadesi.sql` | 322_avans_mahsup.sql |
 | `v_taraf_cihaz` | `773_teknik_servis.sql` | — |
 | `v_tedarikci_skor` | `724_satinalma.sql` | — |
 | `v_ulke_lookup` | `119_stok_uts.sql` | — |

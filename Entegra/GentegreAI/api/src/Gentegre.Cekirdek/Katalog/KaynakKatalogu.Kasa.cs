@@ -477,11 +477,17 @@ public static partial class KaynakKatalogu
             new("hesapAdi",     "a.hesap_adi",      "metin", "Hesap", Genislik: 160, Varsayilan: false),
             new("alinan",       "a.alinan",         "para",  "Alınan", Hizalama: "sag", Bicim: "#,##0.00"),
             new("kullanilan",   "a.kullanilan",     "para",  "Kullanılan", Hizalama: "sag", Bicim: "#,##0.00"),
+            // IADE (780): hastaya GERI ODENEN kisim. Kullanilandan ayri kolon -
+            //   ikisi de "avanstan dusen" ama biri hizmete sayildi, oteki
+            //   kasadan cikti; tek kolonda toplamak parayi kaybettirirdi.
+            new("iade",         "a.iade",           "para",  "İade", Hizalama: "sag", Bicim: "#,##0.00"),
             new("kalan",        "a.kalan",          "para",  "Kalan", Hizalama: "sag", Bicim: "#,##0.00"),
             // Durum METIN olarak doner (rozet): `durum` adli sayisal kolon
             //   gridde 0/1 -> Aktif/Pasif cizilirdi, uc degerli bir durum
             //   oraya sigmaz.
             new("durumAdi",     "a.durum_adi",      "metin", "Durum", Hizalama: "orta", Bicim: "rozet"),
+            new("iadeTarihi",   "a.iade_tarihi",    "tarih", "İade Tarihi", Hizalama: "orta",
+                                                     Bicim: "dd.MM.yyyy", Varsayilan: false),
             new("avans",        "a.avans",          "sayi",  "Damgalı", Varsayilan: false),
             new("belgeId",      "a.belge_id",       "sayi",  "Belge Id", Varsayilan: false),
             new("belgeNo",      "a.belge_no",       "metin", "Mahsup Belgesi", Genislik: 150, Varsayilan: false),

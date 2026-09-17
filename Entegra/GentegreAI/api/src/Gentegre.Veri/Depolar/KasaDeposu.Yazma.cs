@@ -32,7 +32,10 @@ public sealed partial class KasaDeposu
         // AVANS DAMGASI (779): tahsilat bilerek avans olarak alindi mi. Kasa
         //   isleminin kendi alani - avansi ayri bir tabloya tasimak kasa
         //   bakiyesini ve iptal akisini ikilerdi.
-        ["avans"] = "avans"
+        ["avans"] = "avans",
+        // AVANS IADESI (780): bu odeme hangi avansin iadesi. Avans kaydi
+        //   degismez - iade AYRI satirdir, kasa iki hareketi de gorur.
+        ["avansKaynakId"] = "avans_kaynak_id"
     };
 
     private async Task<int> BaslikEkleAsync(NpgsqlConnection baglanti, NpgsqlTransaction tx,

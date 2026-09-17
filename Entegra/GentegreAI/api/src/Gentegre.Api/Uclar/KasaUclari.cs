@@ -660,7 +660,7 @@ public static class KasaUclari
         // AVANS DAMGASI (779): hasta avansi olarak alinan tahsilat. Yazma
         //   beyaz listesine eklemek yetmiyor - baslik dogrulayicisi katalogda
         //   olmayan adi REDDEDIYOR (tasarim): iki liste de bilmeli.
-        "avans" => "sayi",
+        "avans" or "avansKaynakId" => "sayi",
 
         "tutar" or "dovizKuru" or "karsiTutar" or "karsiKur" or "masrafTutar" => "para",
 

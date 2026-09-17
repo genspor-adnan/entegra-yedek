@@ -215,9 +215,12 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
       // Acik avans = KALAN parasi olan; kayit kabulun gunluk sorusu budur.
       { ad: 'Açık', filtre: { alan: 'kalan', op: 'buyuk', deger: 0 } },
       { ad: 'Kullanıldı', filtre: { alan: 'kalan', op: 'esit', deger: 0 } },
+      // IADE (780): parasi hastaya GERI ODENEN avanslar - "kullanildi" ile
+      //   ayni kutuda durmamali, biri hizmete sayildi oteki kasadan cikti.
+      { ad: 'İade', filtre: { alan: 'iade', op: 'buyuk', deger: 0 } },
       { ad: 'Tümü' },
     ],
-    toplam: ['alinan', 'kullanilan', 'kalan'],
+    toplam: ['alinan', 'kullanilan', 'iade', 'kalan'],
     urunModu: 2, modul: 'muayene',
     menuGrup: 'Kayıt Kabul', menuAd: 'Hasta Avansları', ic: '💰',
     yetkiKodu: 'kasa_islem', menuSira: 35,

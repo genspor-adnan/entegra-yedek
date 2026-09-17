@@ -27,6 +27,13 @@ export interface KasaBaglam {
   setAvansTuru?(tur: number): void;
   /** Avansin mahsup edildigi belgeyi acar (satirdaki belgeId). */
   setAcikBelgeId?(id: number): void;
+  /**
+   * AVANS IADESI (780): kalan avansi hastaya geri odeme karti. Kart ODEME
+   * turuyle acilir ve `avansKaynakId` ile avansa baglanir - avans kaydi
+   * degismez, kasa iki hareketi de gorur.
+   */
+  setAvansIade?(g: { avansId: number; tarafId: number; tarafUnvan: string;
+                     tutar: string }): void;
 }
 
 /** Cek/senet ile tahsilat-odeme turleri: once kiymet karti acilir. */
@@ -68,6 +75,26 @@ export async function kasaAksiyonu(
     //   "avans.yeni.<tur>" olarak yukarida ele alinir. Menu gelmezse (eski
     //   tanim) nakit avansa duseriz - dugme sessiz kalmasin.
     case 'avans.yeni': b.setAvansTuru?.(21); return true;
+
+    case 'avans.iade': {
+      if (!satir) return true;
+      const kalan = Number(satir.kalan ?? 0);
+      // KALANI OLMAYAN AVANS IADE EDILEMEZ: para ya hizmete sayilmis ya da
+      //   zaten geri odenmistir - kart acip "0 iade" yazdirmak yanlis is.
+      if (kalan <= 0) {
+        mesaj('Bu avansın kalanı yok: tamamı kullanılmış ya da iade edilmiş.');
+        return true;
+      }
+      b.setAvansIade?.({
+        avansId: Number(satir.id),
+        tarafId: Number(satir.tarafId ?? 0),
+        tarafUnvan: String(satir.hasta ?? ''),
+        // Tutar KALAN ile ONERILIR, kilitli degil: hasta kalanin bir kismini
+        //   birakmak isteyebilir. Ustunu sunucu tetigi reddeder.
+        tutar: String(kalan),
+      });
+      return true;
+    }
 
     case 'avans.basvuru-ac': {
       const belgeId = Number(satir?.belgeId ?? 0);
