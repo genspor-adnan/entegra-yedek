@@ -65,6 +65,25 @@ public static class ZamanliIsler
                 : $"{adim} sözlü onay için {bildirim} hatırlatma kuyruğa alındı.";
         },
 
+        // PERİYODİK BAKIM İŞ EMRİ (776): sözleşmedeki "3 ayda bir bakım" bir
+        //   takvim notu değil TAAHHÜTTÜR. Hatırlatma olarak bırakmak,
+        //   yapılmayan bakımın hiç iz bırakmaması demekti - fatura kesilmeye
+        //   devam ederken. İş emri doğunca planlanmazsa "gecikmiş" olur.
+        ["servis.periyodik"] = async (servisler, iptal) =>
+        {
+            var veri = servisler.GetRequiredService<Gentegre.Veri.VeriKaynagi>();
+            await using var baglanti = await veri.AcAsync(iptal);
+            var s = await baglanti.TekAsync("""
+                select uretilen, atlanan from public.fn_servis_periyodik_uret(30)
+                """, null, [],
+                // TekAsync basvuru turu ister; anonim tip demet yerine.
+                o => new { Uretilen = o.Sayi("uretilen"), Atlanan = o.Sayi("atlanan") },
+                iptal);
+            return (s?.Uretilen ?? 0) == 0
+                ? $"Üretilecek periyodik bakım yok ({s?.Atlanan ?? 0} sözleşme sırası gelmemiş)."
+                : $"{s!.Uretilen} periyodik bakım iş emri açıldı, {s.Atlanan} sözleşme atlandı.";
+        },
+
         // İTS KUYRUĞU: ilaç bildirimleri (mal alım). Hesap tanımlı değilse iş
         //   yine çalışır ve durumu SÖYLER - kapı açıldığı gün kimsenin fark
         //   etmemesi olmasın.

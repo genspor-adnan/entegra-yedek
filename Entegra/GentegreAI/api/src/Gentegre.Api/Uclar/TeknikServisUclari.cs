@@ -610,6 +610,36 @@ public static class TeknikServisUclari
             return Results.Ok(new { ziyaret = z, izlemeNo = baglam.IzlemeNo });
         });
 
+        // ------------------------------------------ periyodik üretim ----
+        // ELLE TETİKLEME: iş günde bir kendiliğinden çalışır; bu uç yeni
+        //   sözleşme bağlandığında beklemeden ilk bakımı açmak ve denemek
+        //   için. Aynı fonksiyonu çağırır - ikinci bir üretim yolu yazmak,
+        //   iki yolun farklı satır üretmesi demekti.
+        grup.MapPost("/periyodik-uret", async (
+            BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("servis", Islem.Ekle);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var s = await baglanti.TekAsync("""
+                select uretilen, atlanan from public.fn_servis_periyodik_uret(30)
+                """, null, [],
+                o => new { uretilen = o.Sayi("uretilen"), atlanan = o.Sayi("atlanan") },
+                iptal);
+
+            return Results.Ok(new
+            {
+                s?.uretilen, s?.atlanan,
+                mesaj = (s?.uretilen ?? 0) == 0
+                    ? "Sırası gelen periyodik bakım yok."
+                    : $"{s!.uretilen} periyodik bakım iş emri açıldı "
+                      + "(kapsam: sözleşme - ücretlendirilmez, maliyeti ölçülür).",
+                izlemeNo = baglam.IzlemeNo
+            });
+        });
+
         // ---------------------------------------------------- çizelge ----
         // GÜNLÜK TEKNİSYEN ÇİZELGESİ (775): kim, hangi saatte, nerede.
         //

@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (396 ad, 112 tanesi birden cok dosyada)
+## Fonksiyonlar (397 ad, 112 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -285,6 +285,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_satinalma_teklif_no_uret` | `731_tedarik_numaralari.sql` | — |
 | `fn_sayi_sade` | `732_kritik_stok_talep.sql` | — |
 | `fn_servis_is_emri_topla` | `773_teknik_servis.sql` | — |
+| `fn_servis_periyodik_uret` | `776_servis_periyodik_uretim.sql` | — |
 | `fn_servis_sla_bitis` | `773_teknik_servis.sql` | — |
 | `fn_sgk_katilim_emanet_yaz` | `477_katilim_emanet_doviz.sql` | 473_katilim_emaneti.sql |
 | `fn_sigorta_durum_ekran` | `631_provizyon_durum_cevrimi.sql` | — |

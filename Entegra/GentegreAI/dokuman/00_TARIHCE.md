@@ -12705,3 +12705,48 @@ imzasız kapatma reddedildi**, gerekçe yazılınca "Ziyaret kapandı, çağrı
 **Kalan:** ıslak/çizilen imza (bugün "alındı" işareti + gerekçe) ve ziyaretten
 parça ekleme - parça çıkışı var olan biyomedikal ucundan yürüyor, ziyarete
 bağlamak ayrı iş. Sözleşmeden periyodik iş emri üretimi de hâlâ yapılmadı.
+
+---
+
+## 17.09.2026 — Sözleşmeden periyodik iş emri üretimi (db/776)
+
+Kullanıcı: *"periyodik iş emri üretimini de yap"* — teknik servis modülünün en
+baştan beri duran açığı.
+
+**Hatırlatma değil iş emri.** Sözleşmedeki "3 ayda bir bakım" bir takvim notu
+değil taahhüttür. Hatırlatma olarak bırakmak, yapılmayan bakımın **hiç iz
+bırakmaması** demekti - fatura kesilmeye devam ederken. İş emri olarak doğunca
+planlanmazsa "gecikmiş" olur, yapılırsa maliyeti ölçülür (sözleşme kârlılığı),
+yapılmazsa yükümlülük ihlali kayıtta kalır.
+
+**İki kez üretmez.** Benzersizlik `sozlesme_id + tur = 1 + planlanan` üçlüsüyle:
+aynı gün için ikinci satır açılmaz. Sayaç kolonu (`son_uretim`) tutmadım - elle
+silinen bir iş emrinden sonra sıra kayardı; **var olan iş emirleri tek doğruluk
+kaynağı**.
+
+**Geçmiş dönemler toplu açılmaz.** Sözleşme yeni bağlandığında ya da iş uzun
+süre çalışmadığında geriye dönük on iş emri açmak, yapılmamış bakımları
+yapılacakmış gibi gösterirdi. En fazla **bir** dönem açılır ve bugüne çekilir;
+kaçırılmış dönemler sözleşmenin bakım/SLA raporunda kalır.
+
+**Ufuk 30 gün.** İş emri bakım tarihinden bir ay önce doğar: bugün doğsaydı
+planlamaya vakit kalmazdı, üç ay önce doğsaydı liste aylar sonrasının işleriyle
+dolar ve "açık iş" sayısı anlamını yitirirdi.
+
+**Kapsam = sözleşme**: periyodik bakım ücretlendirilmez ama tutarı yine
+hesaplanır (773 kuralı) - sözleşmenin kârlı olup olmadığı ancak böyle ölçülür.
+
+`zamanli_is` › **`servis.periyodik`**, her gün 05:10 - onay hatırlatmasından
+(09:30) önce, günün listesi açılmadan hazır olsun diye. Elle tetikleme ucu da
+var (`POST /api/servis/periyodik-uret`): yeni sözleşme bağlandığında beklemeden
+ilk bakımı açmak için, **aynı fonksiyonu** çağırır.
+
+**Doğrulama.** 5 ay önce başlamış, 3 ayda bir bakımlı sözleşmede: ilk çalışma
+**1 iş emri** açtı (kapsam sözleşme, tür periyodik bakım, planlanan bugün),
+ikinci çalışma **0 üretti / 1 atladı**; uçtan tetikleme de "sırası gelen yok"
+dedi. xUnit 234/234, vitest 614/614, derleme temiz. Test verisi silindi.
+
+**Açık kalan:** iş emri numarası boş geliyor - 914 türünün şablonu yok
+(`731` deseninde ayarsız tür boş kalır, kurum Belge No ekranından tanımlar).
+
+Göç **776 yalnız docker'da**.
