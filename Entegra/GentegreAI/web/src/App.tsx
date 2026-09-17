@@ -33,6 +33,7 @@ import { LabRaporCikti } from './sayfalar/LabRaporCikti';
 import { GozSemaCikti } from './sayfalar/GozSemaCikti';
 import { BelgeYazisi } from './sayfalar/BelgeYazisi';
 import { ServisCizelge } from './sayfalar/ServisCizelge';
+import { ZiyaretMobil } from './sayfalar/servis/ZiyaretMobil';
 import { DisHastaKarti } from './sayfalar/dis/DisHastaKarti';
 import { DisGunlukAkis } from './sayfalar/dis/DisGunlukAkis';
 import { DisSeansKarti } from './sayfalar/dis/DisSeansKarti';
@@ -290,6 +291,19 @@ function Yollar() {
             girebildigi ILK ekrana (yetkisi hic yoksa oldugu yerde kalir). */}
         <Route path="*" element={<Navigate to={ilkYol} replace />} />
       </Route>
+
+      {/* ZİYARET KARTI KABUĞUN DIŞINDA (776) — teknisyenin telefonu.
+          Yan menü telefon genişliğinde açık kalıyor ve kartı 114 px'lik bir
+          şeride sıkıştırıyordu; sahada tek elle doldurulacak ekranın tam
+          genişliğe ihtiyacı var. Açık form sayfası (`/f/:kod`) da aynı
+          sebeple kabuk dışında.
+
+          YOL AYRI KÖKTEN: liste `/servis-ziyaret/:id` rotasını da kaydediyor,
+          alt yol olsaydı "mobil" onun `:id`'si olarak eşleşip listeyi
+          açardı - React Router'da önce kaydedilen kazanır. */}
+      {yetki('servis') && (
+        <Route path="/ziyaret-karti/:id" element={<ZiyaretMobil />} />
+      )}
     </Routes>
   );
 }

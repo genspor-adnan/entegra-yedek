@@ -12660,3 +12660,48 @@ derlemeler temiz. Test verisi silindi.
 periyodik iş emri üretimi hâlâ yapılmadı.
 
 Göç **775 yalnız docker'da**.
+
+---
+
+## 17.09.2026 — Ziyaret kartı: teknisyenin telefonu
+
+Kullanıcı: *"mobil düzeni de yap"* — saha mockup'ının "Ziyaret Kartı" sekmesi.
+
+**Neden ayrı ekran.** Generic kart iki sütunlu bir form çizer; sahadaki
+teknisyen tek elle, güneş altında, zayıf bağlantıyla doldurur. Tek sütun,
+44-52 px dokunma alanları, üç sonucu yan yana büyük düğme, altta **sabit tek
+kaydet**. Yarım dolmuş bir form, akşam ofiste hatırlanarak tamamlanan bir
+kayıt demektir.
+
+Ekran **tek çağrıda** doluyor (`GET /api/servis/ziyaret/{id}`): ziyaret + iş
+emri + çağrı + müşteri iletişimi + o ziyaretin parçaları. Sahada iki istek
+atmak ekranı yarım bırakırdı. Telefon `tel:` bağlantısı - numarayı elle
+çevirmek, telefonda duran bir uygulamada anlamsız.
+
+**Üç şey yakalandı.**
+
+1. **Rota çakışması.** `/servis-ziyaret/mobil/:id` yazmıştım; liste
+   `/servis-ziyaret/:id` rotasını da kaydediyor ve **"mobil" onun `:id`'si**
+   olarak eşleşip listeyi açıyordu (React Router'da önce kaydedilen kazanır).
+   Yol ayrı köke alındı: `/ziyaret-karti/:id`.
+
+2. **Kabuk telefonda kartı eziyordu.** Yan menü 390 px genişlikte açık kalıp
+   kartı **114 px**'lik bir şeride sıkıştırıyordu. Ekran kabuğun DIŞINA alındı
+   - açık form sayfası (`/f/:kod`) da aynı sebeple orada. Sonuç: tam genişlik,
+   yatay taşma yok, metin kutusu 344 px.
+
+3. **`taraf` tablosunda adres kolonu yok** (adresler `taraf_adres`'te); uç 500
+   veriyordu. Adres önce **cihazın** adresi: aynı müşterinin iki şubesi olabilir
+   ve cihaz hangisindeyse teknisyen oraya gider.
+
+Ayrıca `temaSinifCakismasi` testi `.zm-alan`ı başka kabın içinden ezdiğimi
+yakaladı (iki anlamlı ad); kural kabın kendi seçicisine bağlandı.
+
+**Doğrulama (390×844 telefon).** Ekran tam genişlikte çizildi, `tel:` bağlantısı
+doğru, sonuç düğmeleri 109×66 px, kaydet düğmesi altta sabit; **gerekçesiz
+imzasız kapatma reddedildi**, gerekçe yazılınca "Ziyaret kapandı, çağrı
+çözüldü". xUnit 234/234, vitest 614/614, derlemeler temiz. Test verisi silindi.
+
+**Kalan:** ıslak/çizilen imza (bugün "alındı" işareti + gerekçe) ve ziyaretten
+parça ekleme - parça çıkışı var olan biyomedikal ucundan yürüyor, ziyarete
+bağlamak ayrı iş. Sözleşmeden periyodik iş emri üretimi de hâlâ yapılmadı.

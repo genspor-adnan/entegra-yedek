@@ -48,7 +48,30 @@ export interface ServisCizelgesi {
   };
 }
 
+export interface ZiyaretDetayi {
+  id: number; isEmriId: number; sira: number;
+  varis: string | null; ayrilis: string | null;
+  yolKm: number; arac: string; mesaiDisi: number;
+  yapilan: string; sonuc: number; sonucMetni: string;
+  imzaAlindi: number; imzaNotu: string;
+  iscilikSaat: number; tutar: number;
+  isEmriNo: string; sahiplik: number; kapsamTur: number;
+  arizaMetni: string; toplamTutar: number;
+  cagriNo: string; sikayet: string; telefon: string; bildiren: string;
+  tarafAdi: string; cihaz: string; adres: string; seriNo: string;
+  parcalar: { id: number; parcaNo: string; ad: string; miktar: number;
+              birimFiyat: number; iadeDurum: number }[];
+}
+
 export const servisUclari = {
+  /**
+   * Mobil ziyaret ekranının TEK sorgusu: ziyaret + iş emri + çağrı + müşteri
+   * iletişimi + parçalar. Sahada bağlantı zayıf; iki istek ekranı yarım
+   * bırakırdı.
+   */
+  servisZiyaretDetay: (id: number) =>
+    istek<{ ziyaret: ZiyaretDetayi }>(`/api/servis/ziyaret/${id}`),
+
   /** Günlük teknisyen çizelgesi: satırlar teknisyen, bloklar ziyaret. */
   servisCizelge: (tarih: string) =>
     istek<ServisCizelgesi>(`/api/servis/cizelge?tarih=${tarih}`),

@@ -121,6 +121,15 @@ export async function servisAksiyonu(
   }
 
   // ====================================================== ZİYARET ==
+  // MOBİL KART: sahadaki teknisyen buradan doldurur; liste aksiyonu da
+  //   oraya götürür - masaüstünde de aynı ekran açılır, iki ayrı kapanış
+  //   formu tutmak ikisinin ayrışması demekti.
+  if (kod === 'servis-ziyaret.mobil') {
+    if (!id) { mesaj('Önce bir ziyaret seçin.'); return true }
+    b.git?.(`/ziyaret-karti/${id}`);
+    return true;
+  }
+
   if (kod === 'servis-ziyaret.kapat') {
     if (!id) { mesaj('Önce bir ziyaret seçin.'); return true }
     if (Number(satir?.sonuc ?? 0) !== 0) {

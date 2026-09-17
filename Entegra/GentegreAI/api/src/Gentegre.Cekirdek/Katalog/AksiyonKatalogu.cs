@@ -2114,6 +2114,13 @@ public static class AksiyonKatalogu
 
             ["servis-ziyaret-liste"] =
                 [.. Crud("servis-ziyaret", "servis", "servis"),
+                 // MOBIL KART: sahadaki teknisyenin ekrani. Masaustunde de
+                 //   ayni ekran acilir - iki ayri kapanis formu tutmak
+                 //   ikisinin ayrismasi demekti.
+                 new("servis-ziyaret.mobil", "📱 Ziyaret Kartı", "servis",
+                     KaynakKodu: "servis", Islem: Islem.Gor,
+                     KayitGerekir: true, Sira: 14, Bicim: "bir",
+                     Ipucu: "Tek sütun, büyük alanlar - telefonda doldurulur"),
                  new("servis-ziyaret.kapat", "✓ Ziyareti Kapat", "servis",
                      KaynakKodu: "servis", Islem: Islem.Degistir,
                      KayitGerekir: true, Sira: 15, Bicim: "bir",

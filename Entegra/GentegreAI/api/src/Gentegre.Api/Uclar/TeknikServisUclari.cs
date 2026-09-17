@@ -593,6 +593,23 @@ public static class TeknikServisUclari
             });
         });
 
+        // ----------------------------------------- ziyaret (mobil) ----
+        // TEKNİSYENİN TELEFONUNDAKİ EKRAN tek çağrıda dolar: sahada bağlantı
+        //   zayıf, iki istek atmak ekranı yarım bırakırdı. Adres ve telefon da
+        //   burada - teknisyen "nereye gideceğim, kimi arayacağım" için başka
+        //   ekrana bakmasın.
+        grup.MapGet("/ziyaret/{id:long}", async (
+            long id, BaglamCozucu cozucu, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("servis", Islem.Gor);
+
+            var z = await ZiyaretOkuAsync(veri, id, iptal);
+            if (z is null) throw GentegreHatasi.Bulunamadi("Ziyaret bulunamadı.");
+            return Results.Ok(new { ziyaret = z, izlemeNo = baglam.IzlemeNo });
+        });
+
         // ---------------------------------------------------- çizelge ----
         // GÜNLÜK TEKNİSYEN ÇİZELGESİ (775): kim, hangi saatte, nerede.
         //
@@ -733,5 +750,103 @@ public static class TeknikServisUclari
 
             return Results.Ok(new { satirlar, izlemeNo = baglam.IzlemeNo });
         });
+    }
+
+    /// <summary>
+    /// Mobil ziyaret ekranının tek sorgusu: ziyaret + iş emri + çağrı + müşteri
+    /// iletişimi + o ziyarette kullanılan parçalar.
+    /// </summary>
+    private static async Task<object?> ZiyaretOkuAsync(
+        VeriKaynagi veri, long id, CancellationToken iptal)
+    {
+        await using var baglanti = await veri.AcAsync(iptal);
+
+        var z = await baglanti.TekAsync("""
+            select z.id, z.is_emri_id, z.sira, z.varis, z.ayrilis, z.plan_zamani,
+                   z.yol_km, z.arac, z.mesai_disi, z.yapilan, z.sonuc,
+                   z.sonuc_metni, z.imza_alindi, z.imza_notu, z.iscilik_saat,
+                   z.tutar,
+                   e.is_emri_no, e.sahiplik, e.kapsam_tur, e.ariza_metni,
+                   e.toplam_tutar,
+                   coalesce(g.cagri_no, '')   as cagri_no,
+                   coalesce(g.sikayet, '')    as sikayet,
+                   coalesce(g.telefon, '')    as telefon,
+                   coalesce(g.bildiren, '')   as bildiren,
+                   coalesce(mt.unvan, d.ad, '') as taraf_adi,
+                   coalesce(nullif(tc.ad, ''), nullif(g.cihaz_metni, ''), d.ad, '')
+                                              as cihaz,
+                   -- ADRES ÖNCE CİHAZIN: aynı müşterinin iki şubesi olabilir
+                   --   ve cihaz hangisindeyse teknisyen oraya gider. Yoksa
+                   --   carinin adres kaydına düşülür (`taraf_adres`; `taraf`
+                   --   tablosunda adres kolonu YOK).
+                   coalesce(nullif(tc.adres, ''), nullif(ta.adres, ''), '')
+                                              as adres,
+                   coalesce(tc.seri_no, '')   as seri_no
+              from public.servis_ziyaret z
+              join public.demirbas_is_emri e on e.id = z.is_emri_id
+              left join public.servis_cagri g on g.id = e.cagri_id
+              left join public.taraf mt on mt.id = e.musteri_taraf_id
+              left join public.taraf_cihaz tc on tc.id = e.taraf_cihaz_id
+              left join lateral (select a.adres from public.taraf_adres a
+                                  where a.taraf_id = e.musteri_taraf_id
+                                  order by a.tur, a.id limit 1) ta on true
+              left join public.demirbas d on d.id = e.demirbas_id
+             where z.id = @p0
+            """, null, [id], o => new
+            {
+                id = o.GetInt64(0),
+                isEmriId = o.GetInt64(1),
+                sira = o.Sayi("sira"),
+                varis = o.IsDBNull(o.GetOrdinal("varis")) ? (DateTimeOffset?)null
+                    : o.GetFieldValue<DateTimeOffset>(o.GetOrdinal("varis")),
+                ayrilis = o.IsDBNull(o.GetOrdinal("ayrilis")) ? (DateTimeOffset?)null
+                    : o.GetFieldValue<DateTimeOffset>(o.GetOrdinal("ayrilis")),
+                yolKm = o.GetDecimal(o.GetOrdinal("yol_km")),
+                arac = o.Metin("arac"),
+                mesaiDisi = o.Sayi("mesai_disi"),
+                yapilan = o.Metin("yapilan"),
+                sonuc = o.Sayi("sonuc"),
+                sonucMetni = o.Metin("sonuc_metni"),
+                imzaAlindi = o.Sayi("imza_alindi"),
+                imzaNotu = o.Metin("imza_notu"),
+                iscilikSaat = o.GetDecimal(o.GetOrdinal("iscilik_saat")),
+                tutar = o.GetDecimal(o.GetOrdinal("tutar")),
+                isEmriNo = o.Metin("is_emri_no"),
+                sahiplik = o.Sayi("sahiplik"),
+                kapsamTur = o.Sayi("kapsam_tur"),
+                arizaMetni = o.Metin("ariza_metni"),
+                toplamTutar = o.GetDecimal(o.GetOrdinal("toplam_tutar")),
+                cagriNo = o.Metin("cagri_no"),
+                sikayet = o.Metin("sikayet"),
+                telefon = o.Metin("telefon"),
+                bildiren = o.Metin("bildiren"),
+                tarafAdi = o.Metin("taraf_adi"),
+                cihaz = o.Metin("cihaz"),
+                adres = o.Metin("adres"),
+                seriNo = o.Metin("seri_no"),
+            }, iptal);
+        if (z is null) return null;
+
+        var parcalar = await baglanti.ListeAsync("""
+            select p.id, p.parca_no, p.ad, p.miktar, p.birim_fiyat, p.iade_durum
+              from public.demirbas_is_emri_parca p
+             where p.ziyaret_id = @p0
+             order by p.id
+            """, null, [id], o => new
+            {
+                id = o.GetInt64(0),
+                parcaNo = o.Metin("parca_no"),
+                ad = o.Metin("ad"),
+                miktar = o.GetDecimal(o.GetOrdinal("miktar")),
+                birimFiyat = o.GetDecimal(o.GetOrdinal("birim_fiyat")),
+                iadeDurum = o.Sayi("iade_durum"),
+            }, iptal);
+
+        return new { z.id, z.isEmriId, z.sira, z.varis, z.ayrilis, z.yolKm,
+                     z.arac, z.mesaiDisi, z.yapilan, z.sonuc, z.sonucMetni,
+                     z.imzaAlindi, z.imzaNotu, z.iscilikSaat, z.tutar,
+                     z.isEmriNo, z.sahiplik, z.kapsamTur, z.arizaMetni,
+                     z.toplamTutar, z.cagriNo, z.sikayet, z.telefon, z.bildiren,
+                     z.tarafAdi, z.cihaz, z.adres, z.seriNo, parcalar };
     }
 }
