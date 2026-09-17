@@ -257,6 +257,12 @@ export function sekmeleriKur(secenek: {
   if (kaynak === 'radyoloji-istem' && !yeniMi) {
     s.push({ tur: 'ozel', anahtar: 'ozel:dokuman', baslik: 'İstem Kâğıdı' });
   }
+  // MASRAF BEYANI FISLERI (768): 764 belge NUMARASINI zorunlu kilmisti ama
+  //   fisin kendisi yuklenemiyordu - uzaktan onaylayan amir belgeyi
+  //   goremiyordu. Yeni kayitta beyan id'si yok, once kaydedilmeli.
+  if (kaynak === 'personelMasraf' && !yeniMi) {
+    s.push({ tur: 'ozel', anahtar: 'ozel:dokuman', baslik: 'Fiş / Fatura' });
+  }
   // Ekrana ozel ek sekmeler EN SONA: mockup'taki sira (e-Recete, Rapor,
   //   Sevk, Islem & Ucret, Gecmis, Dosyalar) ekranin verdigi siradir.
   if (!yeniMi)

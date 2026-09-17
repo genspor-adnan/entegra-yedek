@@ -179,6 +179,10 @@ public static class DokumanUclari
         "sube" => "sube",
         // Radyoloji istem kagidi (310) - kaynak_id istem kimligidir.
         "radyoloji-istem" => "radyoloji-istem",
+        // MASRAF BEYANI FISLERI (768): kaynak_id BEYAN kimligidir. Satir
+        //   basina ayri kaynak acmadik - hangi fisin hangi satira ait oldugu
+        //   `belge_turu`nde (satirin belge numarasi) tasiniyor.
+        "personelMasraf" => "masraf-beyan",
         // Muayene DOSYALARI (mockup muayene_karti.html "Dosyalar"): disaridan
         //   gelen tetkik, epikriz, ragit... kaynak_id muayene kimligidir.
         "muayene" => "muayene",
@@ -209,6 +213,10 @@ public static class DokumanUclari
         "muayene" => "muayene",
         // Kurumsal klasore yukleme DOKUMAN yetkisiyle (kaynak kart yok).
         "klasor" => "dokuman",
+        // MASRAF BEYANI FISLERI (768): beyani gorebilen fisi de gorur -
+        //   ayri bir "fis yetkisi" acmak, beyanla fisini iki ayri izne
+        //   baglamak olurdu.
+        "personelMasraf" => "ik.masraf",
         _ => kartAdi
     };
 

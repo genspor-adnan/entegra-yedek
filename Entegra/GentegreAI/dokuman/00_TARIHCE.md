@@ -12087,3 +12087,42 @@ ekranında üç satır düzenlenebilir hâlde çizildi. xUnit 234/234, vitest
 numaraları gerçek kurulumun sayacını ilerletmesin.
 
 Göç **767 yalnız docker'da**.
+
+---
+
+## 17.09.2026 — Masraf beyanına fiş / fatura görseli
+
+Kullanıcı: *"masraf beyanına fiş görseli eklenmesini yap"* (kalan iş 3.7).
+
+764 harcama satırında belge **numarasını** zorunlu kılmıştı ama görselin
+kendisi yüklenemiyordu; uzaktan onaylayan âmir fişi göremiyordu.
+
+**Yeni tablo açılmadı.** Doküman modülü (`dokuman.kaynak` + `kaynak_id`) her
+kayda ek bağlayabiliyor; eksik olan yalnız bu yolu masraf kartına açmaktı.
+Dört yerde dört satır:
+
+| Yer | Ne |
+|---|---|
+| `DokumanUclari.YetkiKodu` | `personelMasraf` → `ik.masraf`. Varsayılan kart adını döndürüyor, öyle bir yetki yok - konsa 403 verirdi. |
+| `DokumanUclari.FizikselKaynak` | `personelMasraf` → `masraf-beyan` |
+| `DokumanDeposu.KaynakBeyazListe` | `masraf-beyan` eklendi |
+| `kartSekmeleri.ts` | kayıtlı beyanda **"Fiş / Fatura"** sekmesi (`ozel:dokuman`) |
+
+**Fiş hangi harcamanın?** `kaynak_id` **beyanın** kimliği; satır bağı ayrı bir
+bağlantı tablosu yerine dokümanın `belge_turu` alanında taşınıyor.
+`DokumanGalerisi` bir masraf beyanının satırlarını çekip belge numaralarını
+(`FS-500 — Taksi`) `datalist` önerisi yapıyor: yükleyen listeden seçiyor,
+elle de yazabiliyor. Bir satırda birden çok fiş olabildiği ve bir fiş birden
+çok satırı kapsayabildiği için katı bir FK zaten yanlış olurdu.
+
+**Bu turda bulunan açık.** İlk yükleme HTTP 500 döndü:
+*"Bilinmeyen kaynak: masraf-beyan"*. Beyaz liste `DokumanDeposu`'nda ayrı
+duruyor - uç noktadaki eşleme tek başına yetmiyor, **iki yer** de yazılmalı.
+
+**Doğrulama.** Yükleme HTTP 200, `dokuman` satırı `masraf-beyan/5` olarak
+düştü; ekranda sekme çizildi, galeri dosyayı listeledi, düzenle kipinde iki
+harcama satırı (`FS-500 — Taksi`, `FT-2026/77 — Yemek`) öneri olarak geldi.
+xUnit 234/234, vitest 598/598, iki derleme temiz. Test verisi silindi
+(2 beyan, 3 satır, 1 doküman); vekâlet senaryosu verisi korundu.
+
+**DB göçü yok** - değişikliklerin dördü de kod tarafında.

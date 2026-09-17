@@ -91,6 +91,11 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
   const [secili, setSecili] = useState<Set<number>>(new Set());
   const [paylasimMesaji, setPaylasimMesaji] = useState<string | null>(null);
   const [duzenlenen, setDuzenlenen] = useState<{ id: number; ad: string; belgeTuru: string } | null>(null);
+  // MASRAF BEYANI (768): bir beyanda birden çok fiş var ve hangi görselin
+  //   hangi harcamaya ait olduğu bilinmeli. Ayrı bir bağ tablosu açmak
+  //   yerine beyanın SATIR BELGE NUMARALARINI tür önerisi yapıyoruz -
+  //   kullanıcı yüklediği fişi listeden seçerek eşliyor.
+  const [masrafBelgeNolari, setMasrafBelgeNolari] = useState<string[]>([]);
   const girdiRef = useRef<HTMLInputElement | null>(null);
   const sonSeciliIndex = useRef<number | null>(null);
 
@@ -138,6 +143,24 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
   };
 
   useEffect(() => { yenile() }, [kartAdi, kaynakId]);
+
+  useEffect(() => {
+    if (kartAdi !== 'personelMasraf' || !kaynakId) { setMasrafBelgeNolari([]); return }
+    let gecerli = true;
+    api.kartDetaySayfasi('personelMasraf', kaynakId, 'harcamalar', 1, 200)
+      .then(y => {
+        if (!gecerli) return;
+        setMasrafBelgeNolari((y.satirlar ?? [])
+          .map(r => {
+            const no = String((r as Record<string, unknown>).belgeNo ?? '').trim();
+            const ack = String((r as Record<string, unknown>).aciklama ?? '').trim();
+            return no && ack ? `${no} — ${ack}` : no;
+          })
+          .filter(Boolean));
+      })
+      .catch(() => { if (gecerli) setMasrafBelgeNolari([]) });
+    return () => { gecerli = false };
+  }, [kartAdi, kaynakId]);
 
   // Resim blob URL'lerini SADECE band acikken cek (liste ucu icerik dondurmuyor, sadece
   // metadata - gereksiz indirme yapmayalim).
@@ -279,10 +302,14 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
                 onChange={e => setDuzenlenen(d => d && ({ ...d, belgeTuru: e.target.value }))}
                 list="dokuman-belge-turu-secenekleri"
                 autoFocus
-                placeholder="İş sözleşmesi, sağlık raporu..."
+                placeholder={kartAdi === 'personelMasraf'
+                  ? 'Hangi harcamanın fişi (belge no)'
+                  : 'İş sözleşmesi, sağlık raporu...'}
               />
               <datalist id="dokuman-belge-turu-secenekleri">
-                {(kartAdi === 'sube' ? FIRMA_GORSELLERI : OZLUK_TURLERI)
+                {(kartAdi === 'sube' ? FIRMA_GORSELLERI
+                  : kartAdi === 'personelMasraf' ? masrafBelgeNolari
+                  : OZLUK_TURLERI)
                   .map(s => <option key={s} value={s} />)}
               </datalist>
             </label>

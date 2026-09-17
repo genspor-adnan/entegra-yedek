@@ -30,9 +30,14 @@ public sealed class DokumanDeposu
         //   "muayene" (mockup muayene karti "Dosyalar"): hastanin getirdigi dis
         //   tetkik, epikriz, rapor - o MUAYENEYE aittir, hasta kartina degil:
         //   hangi muayenede degerlendirildigi bilgisi kayboluyordu.
+        //   "masraf-beyan" (768): personelin cepten yaptigi harcamanin FISI -
+        //   764 belge NUMARASINI zorunlu kilmisti ama fisin kendisi
+        //   yuklenemiyordu; uzaktan onaylayan amir belgeyi goremiyordu.
+        //   kaynak_id BEYAN kimligidir; hangi fisin hangi satira ait oldugu
+        //   `belge_turu`nde (satirin belge numarasi) tasinir.
         new(StringComparer.Ordinal)
             { "taraf", "stok", "ebelge-xslt", "sube", "radyoloji-istem", "klasor",
-              "muayene" };
+              "muayene", "masraf-beyan" };
 
     /// <summary>
     /// KABUL EDILEN ICERIK TIPLERI.
