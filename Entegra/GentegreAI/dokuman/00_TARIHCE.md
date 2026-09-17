@@ -12374,3 +12374,28 @@ vitest 602/602 (+4), derleme temiz.
 
 **Sunucuya YAYINLANMADI** - yayın kullanıcının kararı. `46.36.201.170/genotipai`
 düzeltme yayınlanana kadar beyaz ekranı göstermeye devam eder.
+
+---
+
+## 17.09.2026 — `/genotipai` sunucusuna yayın (711 → 772)
+
+Kullanıcı beyaz ekran düzeltmesinin yayınlanmasını istedi. Yayından önce
+`yayinla.ps1` okundu: `/genotipai` = **hbys** kurulumu (db `gentegre_ai`,
+kök `gentegre-ai`, konteyner `gentegre-api`, port 5180); `/gentegreai` ise
+ayrı ERP kurulumu ve bu turda **dokunulmadı**.
+
+**Sunucu 61 göç geridiydi** (711'de). Bu, düzeltmeyi yayınlamanın yanında
+canlı veritabanında 712-772 arasının çalışması demekti - ölçüsü beklenenden
+büyük olduğu için kullanıcıya soruldu. Karar: **önce yedek, sonra tam yayın**.
+
+**Yedek.** `pg_dump -Fc` ile `~/yedek/gentegre_ai_20260917_1204.dump`
+(51 MB); `pg_restore -l` ile arşivin okunabilirliği doğrulandı - alınmış ama
+bozuk bir yedek, yedeksizlikten daha kötüdür çünkü güven verir.
+
+**Sonuç.** 63 yeni göç uygulandı (695 atlandı), web ve API güncellendi,
+sağlık kontrolü geçti. Sunucu artık **758 göç, son `772_sube_antet_ve_logo`**.
+Onay omurgası, avans/masraf/belge talebi modülleri, numaralar, para biçimi ve
+antet logosu sunucuda da yürürlükte.
+
+Yayın betiği göç düşerse geri alma yapar ama **uygulanmış göçleri geri
+almaz**; yedeğin sebebi buydu.
