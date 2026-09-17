@@ -12503,4 +12503,9 @@ aç"*): sunucuda şube 1'in `moduller`ine `acil`, `eczane`, `satinalma` ve
 anahtarlara dokunmadan). Dördünün de yetkileri zaten tanımlıydı ve Yönetici
 rolündeydi (8 · 10 · 16 · 10). `moduller` jetona gömülü değil, her
 `/api/kimlik/ben` çağrısında okunuyor - sayfayı yenilemek yeter, yeniden
-giriş gerekmez. Şube 0 ve 3'e dokunulmadı (yereldeki gibi `isg` + `form`).
+giriş gerekmez.
+
+Ardından *"şube 0 ve 3'ü de aç"*: **aynı dört modül** onlara da eklendi
+(0 = kurum geneli, 3 = Ankara şubesi). Şube 1'e özgü `dis` · `ftr` · `goz` ·
+`enabiz` · `yatan_hasta` · `teleradyoloji` KOPYALANMADI - istenen dört
+moduldu, bir şubenin klinik kurulumunu ötekine taşımak ayrı bir karar.
