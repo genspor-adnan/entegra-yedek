@@ -53,10 +53,96 @@ export async function izinAksiyonu(
     return true;
   }
 
-  if (!kod.startsWith('personel-izin.') && !kod.startsWith('izin-bakiye.')) return false;
+  // AVANS DA BU DOSYADA: izinle aynı omurgayı (onay zinciri + âmir) kullanır,
+  //   ayrı dosya açmak aynı deseni iki yerde tutmak olurdu.
+  if (!kod.startsWith('personel-izin.') && !kod.startsWith('izin-bakiye.')
+      && !kod.startsWith('personel-avans.')) return false;
 
   const id = Number(satir?.id ?? 0);
   const tarafId = Number(satir?.tarafId ?? 0);
+
+  // ============================================================ AVANS ==
+  if (kod.startsWith('personel-avans.')) {
+    if (!id) { mesaj('Önce bir avans seçin.'); return true }
+
+    if (kod === 'personel-avans.gonder') {
+      await guvenli(async () => {
+        const y = await api.avansGonder(id);
+        const satirlar = [
+          `${y.tutar} TL avans onaya gönderildi.`,
+          `Zincir: ${y.basamaklar.map(a => a.ad).join(' → ')}`,
+        ];
+        // AÇIK AVANS ENGEL DEĞİL, BASAMAK: üstüne avans ayrı bir karardır.
+        if (y.bayraklar.includes('acik_avans'))
+          satirlar.push('', 'Personelin açık avansı var - zincire "İK (açık avans)" '
+                            + 'basamağı eklendi.');
+        mesaj(satirlar.join('\n'));
+        b.tazele();
+      });
+      return true;
+    }
+
+    if (kod === 'personel-avans.ode') {
+      // ÖDEME KASADAN GEÇER: hangi hesaptan çıktığı sorulmadan para
+      //   çıkarılmaz - kasa bakiyesi avansı görmeli.
+      const hesap = await metinSor(
+        'Ödemenin çıkacağı kasa/banka hesabının numarası:', '', 'Hesap');
+      if (!hesap) return true;
+      const nakit = await onay('Nakit ödeme mi? (Hayır = havale/EFT)');
+      await guvenli(async () => {
+        const y = await api.avansOde(id, {
+          hesapId: Number(hesap), tur: nakit ? 31 : 32,
+        });
+        mesaj([`${y.tutar} TL ödendi (kasa işlemi #${y.kasaIslemId}).`,
+               `${y.taksit} taksitlik kesinti planı açıldı.`,
+               '', 'Mahsup bordroya YAZILMAZ - kesintiler bu ekrandan işaretlenir.']
+              .join('\n'));
+        b.tazele();
+      });
+      return true;
+    }
+
+    if (kod === 'personel-avans.kesinti') {
+      await guvenli(async () => {
+        const y = await api.avansKesinti(id, {});
+        mesaj([`${y.donem} dönemi kesintisi işlendi: ${y.tutar} TL (${y.sira}. taksit).`,
+               y.kalanTaksit === 0
+                 ? 'Son taksitti - avans KAPANDI.'
+                 : `Kalan ${y.kalanTaksit} taksit.`].join('\n'));
+        b.tazele();
+      });
+      return true;
+    }
+
+    if (kod === 'personel-avans.zincir') {
+      await guvenli(async () => {
+        // 907 = personel_avans (islem_log.tablo_id).
+        const y = await api.onayZinciri(907, id);
+        if (!y.onay) { mesaj('Bu avans onaya gönderilmemiş.'); return }
+        const DURUM: Record<number, string> = {
+          0: 'bekliyor', 1: 'ONAYLANDI', 2: 'REDDEDİLDİ',
+          3: 'bilgi istendi', 4: 'sözlü onay', 5: 'atlandı',
+        };
+        mesaj([`${y.onay.akisAd} · ${y.onay.olcuAdi}: ${y.onay.olcu}`, '',
+               ...y.adimlar.map(a => `${a.sira}. ${a.ad} — ${DURUM[a.durum] ?? a.durum}`
+                 + (a.gerekce ? `\n     ${a.gerekce}` : ''))].join('\n'));
+      });
+      return true;
+    }
+
+    if (kod === 'personel-avans.iptal') {
+      const gerekce = await metinSor('Avans iptal edilecek. Gerekçe:', '', 'Gerekçe');
+      if (!gerekce) return true;
+      await guvenli(async () => {
+        await api.avansIptal(id, gerekce);
+        mesaj('Avans iptal edildi, varsa onay zinciri kapandı.');
+        b.tazele();
+      });
+      return true;
+    }
+    return false;
+  }
+
 
   // ------------------------------------------------------ onaya gönder --
   if (kod === 'personel-izin.gonder') {

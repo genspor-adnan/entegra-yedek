@@ -295,6 +295,13 @@ public static class OnayUclari
             4 => "demirbas.onarim_onay_mali",
             _ => "demirbas.onarim_onay_ust",
         },
+        "personel.avans" => rol switch
+        {
+            0 => "ik.avans_onay_amir",
+            6 => "ik.avans_onay_ik",
+            4 => "ik.avans_onay_mali",
+            _ => "ik.avans_onay_ust",
+        },
         _ => throw GentegreHatasi.IsKurali(
             $"Bu akışın karar yetkisi tanımlı değil: {akisKod}."),
     };
@@ -325,6 +332,22 @@ public static class OnayUclari
                      where id = @p0
                     """, islem, [kaynakId, yeni, gerekce ?? "", baglam.KullaniciId], iptal);
                 return yeni;
+
+            case "personel.avans":
+                // 2 onaylandı · 3 reddedildi (personel_avans.durum).
+                //   ÖDEME AYRI ADIM: onay parayı çıkarmaz, çıkarma iznini
+                //   verir - kasa işlemi ayrı bir kararla yazılır.
+                short avansDurum = zincirDurum == Servisler.OnayMotoru.ZincirOnaylandi
+                                 ? (short)2 : (short)3;
+                await baglanti.CalistirAsync("""
+                    update public.personel_avans
+                       set durum = @p1,
+                           red_neden = case when @p1 = 3 then @p2 else red_neden end,
+                           degistiren = @p3, degistirme_tarihi = now()
+                     where id = @p0
+                    """, islem, [(int)kaynakId, avansDurum, gerekce ?? "",
+                                 baglam.KullaniciId], iptal);
+                return avansDurum;
 
             case "demirbas.onarim":
                 // 2 onaylandı · 3 reddedildi (demirbas_is_emri.onay_durum).

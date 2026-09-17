@@ -25,6 +25,7 @@ public static partial class KartKatalogu
         ["1241"] = "Satınalma Talebi",
         ["904"] = "Personel İzni",
         ["1224"] = "Demirbaş İş Emri",
+        ["907"] = "Personel Avansı",
     };
 
     /// <summary>onay_akis_adim.sahip_turu</summary>

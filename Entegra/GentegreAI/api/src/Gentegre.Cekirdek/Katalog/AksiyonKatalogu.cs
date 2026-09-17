@@ -2141,6 +2141,30 @@ public static class AksiyonKatalogu
                      Bicim: "tehlike",
                      Ipucu: "Onaylı izin de iptal edilir - gerekçe zorunlu")],
 
+            // AVANS (753). ODEME ONAYDAN SONRA ve AYRI DUGMEDIR: onay
+            //   parayi cikarmaz, cikarma iznini verir.
+            ["personel-avans-liste"] =
+                [.. Crud("personel-avans", "ik", "ik.avans"),
+                 new("personel-avans.gonder", "📤 Onaya Gönder", "ik",
+                     KaynakKodu: "ik.avans", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 15, Bicim: "bir",
+                     Ipucu: "Zincir: âmir → İK → (tutar eşiğine göre) mali işler / üst yönetim"),
+                 new("personel-avans.ode", "💸 Öde", "ik",
+                     AksiyonYetkisi: "ik.avans_ode", KayitGerekir: true, Sira: 16,
+                     Ipucu: "Kasa/banka işlemi üretir ve kesinti planını açar"),
+                 new("personel-avans.kesinti", "✂ Kesinti İşle", "ik",
+                     KaynakKodu: "ik.avans", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 17,
+                     Ipucu: "Bekleyen en eski taksit kesildi olarak işaretlenir"),
+                 new("personel-avans.zincir", "🧾 Onay Zinciri", "ik",
+                     Hedef: "sagtus,palet", KaynakKodu: "ik.avans", Islem: Islem.Gor,
+                     KayitGerekir: true, Sira: 18),
+                 new("personel-avans.iptal", "✖ Avansı İptal Et", "ik",
+                     Hedef: "sagtus,palet", KaynakKodu: "ik.avans",
+                     Islem: Islem.Degistir, KayitGerekir: true, Sira: 20,
+                     Bicim: "tehlike",
+                     Ipucu: "Ödenmiş avans iptal edilemez - geri alım ayrı tahsilattır")],
+
             // RESMI TATIL (749). "Yili Uret" yalniz MILLI tatilleri yazar;
             //   dini bayramlar elle girilir - hicri takvim algoritmayla
             //   uretilmiyor (bir gun kayan hesap izni yanlis sayar).

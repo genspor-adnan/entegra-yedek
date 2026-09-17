@@ -264,6 +264,8 @@ uygulama.SatinalmaUclariniEkle();
 uygulama.OnayUclariniEkle();
 // IZIN MODULU (743): talep, bakiye ve onay zinciri.
 uygulama.IzinUclariniEkle();
+// AVANS MODULU (753): talep, onay, odeme (kasa) ve mahsup plani.
+uygulama.AvansUclariniEkle();
 uygulama.RolYetkiUclariniEkle();
 uygulama.KullaniciYonetimUclariniEkle();
 uygulama.IskontoOnayUclariniEkle();

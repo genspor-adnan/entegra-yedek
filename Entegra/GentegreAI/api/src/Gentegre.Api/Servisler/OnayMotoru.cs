@@ -125,12 +125,31 @@ public sealed class OnayMotoru
         //   yazılır. Her karar anında yeniden sorsaydık, personelin âmiri
         //   izin sürerken değiştiğinde basamak el değiştirir ve "bu bana ne
         //   zaman düştü" sorusunun cevabı kalmazdı.
+        //   ÂMİRİN KULLANICI HESABI ŞART: `yonetici_taraf_id` bir TARAF'tır,
+        //   imzayı atacak olan ise bir KULLANICIDIR. İkisinin id'si aynı
+        //   uzayda (taraf_kullanici.id -> taraf.id) ama her âmirin hesabı
+        //   olmayabilir. Hesabı yokken basamağı yine de yazsaydık,
+        //   `atanan_kullanici_id` hiçbir kullanıcıya denk gelmez (kolonda FK
+        //   de yok), basamak kimsenin kutusuna düşmez ve talep sessizce
+        //   sonsuza kadar "onayda" kalırdı. Bu yüzden ÇÖZÜLEMEDİĞİNDE
+        //   ZİNCİR HİÇ KURULMAZ - talep sahibi hatayı gönderirken görür.
         int? amirId = null;
         if (sahipTarafId is not null && secilen.Any(a => a.SahipTuru == 3))
+        {
             amirId = await baglanti.TekDegerAsync<int?>("""
-                select p.yonetici_taraf_id from public.taraf_personel p
+                select k.id
+                  from public.taraf_personel p
+                  join public.taraf_kullanici k on k.id = p.yonetici_taraf_id
+                                               and k.aktif = 1
                  where p.id = @p0
                 """, islem, [sahipTarafId.Value], iptal);
+
+            if (amirId is null)
+                throw GentegreHatasi.IsKurali(
+                    "Bu personelin âmiri tanımlı değil ya da âmirin aktif bir "
+                    + "kullanıcı hesabı yok; onay zinciri kurulamaz. İnsan "
+                    + "Kaynakları personel kartından âmiri tanımlamalı.");
+        }
 
         foreach (var a in secilen)
         {

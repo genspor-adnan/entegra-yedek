@@ -62,6 +62,40 @@ export const izinUclari = {
     gonder<{ yil: number; eklenen: number; dini: number; uyarilar: string[] }>(
       `/api/ik/tatil/uret/${yil}`, {}),
 
+  // ======================================================= AVANS (753) ==
+  // BORDRO YOK: mahsup kendi kesinti planında izlenir. Ödeme kasa
+  // işlemidir - avansta yalnız bağ durur.
+  avansAc: (g: {
+    tarafId: number; tutar: number; taksitSayisi?: number;
+    ilkDonem?: string; gerekce?: string;
+  }) => gonder<{
+    id: number; tutar: number; taksit: number; ilkDonem: string;
+    durum: number; uyarilar: string[];
+  }>('/api/ik/avans', g),
+
+  avansGonder: (id: number) =>
+    gonder<{
+      durum: number; tutar: number; bayraklar: string[];
+      basamaklar: { sira: number; ad: string; rol: number }[];
+    }>(`/api/ik/avans/${id}/gonder`, {}),
+
+  /** Yalnız ONAYLANMIŞ avans ödenir; kasa işlemi ve kesinti planı burada doğar. */
+  avansOde: (id: number, g: {
+    hesapId: number; tur?: number; tarih?: string; aciklama?: string;
+  }) => gonder<{
+    durum: number; tutar: number; kasaIslemId: number; taksit: number;
+  }>(`/api/ik/avans/${id}/ode`, g),
+
+  /** Bekleyen EN ESKİ taksiti keser - sıra atlanmaz. */
+  avansKesinti: (id: number, g: { kesintiId?: number; tarih?: string; aciklama?: string }) =>
+    gonder<{
+      kesintiId: number; sira: number; donem: string; tutar: number;
+      kalanTaksit: number; avansDurum: number;
+    }>(`/api/ik/avans/${id}/kesinti`, g),
+
+  avansIptal: (id: number, gerekce: string) =>
+    gonder<{ durum: number }>(`/api/ik/avans/${id}/iptal`, { gerekce }),
+
   /** Onaylı izin de iptal edilir - silinmez; "alınmış mıydı" sorusu sonra da sorulur. */
   izinIptal: (id: number, gerekce: string) =>
     gonder<{ durum: number }>(`/api/ik/izin/${id}/iptal`, { gerekce }),

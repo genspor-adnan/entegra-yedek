@@ -80,6 +80,80 @@ public static partial class KartKatalogu
         ["1"] = "Millî", ["2"] = "Dinî", ["3"] = "İdarî",
     };
 
+    /// <summary>personel_avans.durum</summary>
+    private static readonly Dictionary<string, string> AvansDurumKodlari = new()
+    {
+        ["0"] = "Taslak", ["1"] = "Onayda", ["2"] = "Onaylandı",
+        ["3"] = "Reddedildi", ["4"] = "Ödendi", ["5"] = "Kapandı", ["8"] = "İptal",
+    };
+
+    private static readonly Dictionary<string, string> AvansKesintiDurumKodlari = new()
+    {
+        ["0"] = "Planlandı", ["1"] = "Kesildi", ["2"] = "Ertelendi", ["3"] = "İptal",
+    };
+
+    // ------------------------------------------------------------ avans ----
+    // TUTAR VE TAKSİT KARTTAN, KESİNTİ PLANI UÇTAN. Plan ödemeyle birlikte
+    //   doğar (ödenmemiş avansın kesintisini takvimlemek, olmayan bir borcu
+    //   planlamaktır) ve sekme SALT OKUNUR: satırı elle eklemek "kesildi"
+    //   demenin kolay yolu olurdu.
+    private static KartTanimi PersonelAvans() => new(
+        Ad: "personelAvans",
+        YetkiKodu: "ik.avans",
+        Tablo: "public.personel_avans",
+        LogTabloId: 907,
+        SubeKolonu: "sube_id",
+        Alanlar: new KartAlani[]
+        {
+            new("avansNo", "avans_no", "metin", Yazilabilir: false, Baslik: "Avans No",
+                Grup: "Avans", EnFazlaUzunluk: 30),
+            new("tarafId", "taraf_id", "sayi", Zorunlu: true, Baslik: "Personel",
+                Grup: "Avans", KodTablosu: "public.v_personel_lookup"),
+            new("talepTarihi", "talep_tarihi", "tarih", Baslik: "Talep Tarihi",
+                Grup: "Avans"),
+            new("tutar", "tutar", "para", Zorunlu: true, Baslik: "Tutar", Grup: "Avans"),
+            new("taksitSayisi", "taksit_sayisi", "sayi", Baslik: "Taksit Sayısı",
+                Grup: "Avans"),
+            // DÖNEM 'yyyy-AA': mahsup bir güne değil bir maaş dönemine aittir.
+            new("ilkDonem", "ilk_donem", "metin", Baslik: "İlk Kesinti Dönemi",
+                Grup: "Avans", EnFazlaUzunluk: 7),
+            new("durum", "durum", "kod", Yazilabilir: false, Baslik: "Durum",
+                Grup: "Avans", SabitKodlar: AvansDurumKodlari),
+            new("gerekce", "gerekce", "metin", Baslik: "Gerekçe", Grup: "Gerekçe",
+                EnFazlaUzunluk: 400),
+            new("aciklama", "aciklama", "metin", Baslik: "Açıklama", Grup: "Gerekçe",
+                EnFazlaUzunluk: 300),
+            new("redNeden", "red_neden", "metin", Yazilabilir: false,
+                Baslik: "Red Nedeni", Grup: "Gerekçe", EnFazlaUzunluk: 400),
+            new("iptalNeden", "iptal_neden", "metin", Yazilabilir: false,
+                Baslik: "İptal Nedeni", Grup: "Gerekçe", EnFazlaUzunluk: 400),
+            // ÖDEME BAĞI SALT OKUNUR: para kasadan çıkar, karttan değil.
+            new("odemeTarihi", "odeme_tarihi", "tarih", Yazilabilir: false,
+                Baslik: "Ödeme Tarihi", Grup: "Ödeme"),
+            new("odemeIslemId", "odeme_islem_id", "sayi", Yazilabilir: false,
+                Baslik: "Kasa İşlemi", Grup: "Ödeme"),
+        },
+        Detaylar: new DetayTanimi[]
+        {
+            new("kesintiler", "public.personel_avans_kesinti", "avans_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("sira", "sira", "sayi", Yazilabilir: false, Baslik: "Sıra"),
+                new("donem", "donem", "metin", Yazilabilir: false, Baslik: "Dönem"),
+                new("tutar", "tutar", "para", Yazilabilir: false, Baslik: "Tutar"),
+                new("durum", "durum", "kod", Yazilabilir: false, Baslik: "Durum",
+                    SabitKodlar: AvansKesintiDurumKodlari),
+                new("kesintiTarihi", "kesinti_tarihi", "tarih", Yazilabilir: false,
+                    Baslik: "Kesinti Tarihi"),
+                new("aciklama", "aciklama", "metin", Yazilabilir: false, Baslik: "Not"),
+            }, Sirala: "sira, id", Baslik: "Kesinti Planı",
+               SubeKolonu: null, LogTabloId: 908, SaltOkunur: true),
+        },
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["durum"] = 0, ["taksit_sayisi"] = 1, ["talep_tarihi"] = "@simdi",
+        });
+
     // ------------------------------------------------------ resmî tatil ----
     // DİNÎ BAYRAM ELLE GİRİLİR: hicrî takvim algoritmayla üretilmiyor - bir
     //   gün kayan hesap izin gününü ve bordroyu yanlış hesaplar, üstelik

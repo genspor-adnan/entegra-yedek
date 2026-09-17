@@ -11161,3 +11161,74 @@ Test verisi silindi.
 talebi ve doküman onayının omurgaya taşınması, `satinalma_onay` tablosunun
 düşürülmesi. Göç **752 yalnız docker'da** - bulut ekspert artık hedef değil
 (kullanıcı kararı, 17.09.2026).
+
+
+## 17.09.2026 — Avans modülü (`db/753`)
+
+Personel avansı talepten mahsuba kadar açıldı: `personel_avans` (talep,
+tutar, taksit sayısı, ilk kesinti dönemi, gerekçe, durum) ve
+`personel_avans_kesinti` (sıra, dönem, tutar, durum) tabloları,
+`v_personel_avans` listesi, `personel.avans` onay akışı ve beş uç
+(`/api/ik/avans`, `/gonder`, `/ode`, `/kesinti`, `/iptal`). Ekran
+**Avanslar** (`personel-avans-liste`), kartta salt okunur "Kesinti Planı"
+sekmesi var.
+
+**Bordro yok, o yüzden mahsup burada izlenir.** Avansın asıl sorusu "ne
+kadarı geri geldi"dir. Bordro modülü olmadığı için kesintiyi maaş
+hesabına yazamayız; kendi kesinti planımızı `donem` alanında `yyyy-mm`
+olarak tutuyoruz. Bordro yazıldığında her taksit satırı hazır duruyor ve
+oraya bağlanır - avansı "ödendi" bırakıp izlemeyi sonraya atmak, personel
+ayrıldığında tahsil edilemeyen avans demekti.
+
+**Ödeme `kasa_islem`'den geçer.** Avans ödemesi bir kasa/banka
+hareketidir ve tablo zaten var; ikinci bir ödeme tablosu açmak aynı parayı
+iki yerde tutmak olurdu. Ödeme `kaynak_tur = 907` · `kaynak_id = avans.id`
+ile yazılıyor, nakit 31 / havale 32. Ödeme uçtan hangi hesaptan çıkacağı
+sorulmadan yapılmıyor.
+
+**Son taksit kalanı alır.** 1.000 TL'yi 3'e bölünce 333,33 üç kez
+yazılsaydı 1 kuruş açık kalırdı; taban aşağı yuvarlanıyor ve son taksit
+farkı üstleniyor.
+
+**Açık avans engel değil, basamak.** Üstüne avans ayrı bir karardır;
+personelin açık avansı varsa zincire "İK (açık avans)" basamağı ekleniyor.
+Engel yapmak, gerçek ihtiyacı görünmez bir kurala çarptırırdı.
+
+**Ödeme yalnız onaydan sonra, ödenmiş avans iptal edilemez.** Ödenmiş
+avansı iptal etmek kasadan çıkmış parayı kayıttan silmek olurdu; iptal
+yalnız ödeme öncesi mümkün.
+
+**Eşikler ayarda:** `ik.avans_esik_mali` (10.000) · `_ust` (50.000) ·
+`_azami_taksit`. Zincir: Birim Âmiri → İK → (10.000 üstü) Mali İşler →
+(50.000 üstü) Üst Yönetim → (açık avans) İK. Gelen kutusu 907'yi tanıyor.
+
+**Omurga düzeltmesi: âmirin kullanıcı hesabı şart.** `yonetici_taraf_id`
+bir *taraf*tır, imzayı atan ise bir *kullanıcı*. İkisinin id'si aynı uzayda
+(`taraf_kullanici.id` → `taraf.id`) ama her âmirin hesabı olmayabilir ve
+`onay_adim.atanan_kullanici_id` üzerinde FK yok. Hesabı yokken basamak
+yazılınca talep kimsenin kutusuna düşmeden sonsuza kadar "onayda" kalıyordu.
+`OnayMotoru.BaslatAsync` artık âmiri `taraf_kullanici` üzerinden aktif hesap
+şartıyla çözüyor; çözemezse zincir hiç kurulmuyor ve talep sahibi hatayı
+gönderirken görüyor. Bu düzeltme izin ve avansın ikisini birden ilgilendirir
+(ikisi de âmir basamağıyla başlar).
+
+**Doğrulama.** 15.000 TL / 3 taksit avans: azami taksit ve onaysız ödeme
+engelleri çalıştı, açık avans bayrağı zincire İK basamağını ekledi, ödeme
+`kasa_islem #484` yazdı, üç kesintiden sonra avans **kapandı**. Arayüzden
+(Playwright) 6.000 TL / 2 taksit ile talep → onaya gönder → onay zinciri →
+öde (kasa #485) → kesinti 1 → kesinti 2 ("Son taksitti - avans KAPANDI") →
+üçüncü denemede "Bekleyen kesinti yok" akışı baştan sona geçti; iptal
+gerekçeli olarak ayrı bir avansta doğrulandı. Liste çipleri (Açık · Onayda ·
+Ödenecek · Mahsupta · Kesinti gecikti · Tümü), Kesinti Planı sekmesi salt
+okunur (18 alan, 0 düzenlenebilir). xUnit 232/232, vitest 598/598, iki
+derleme temiz. Test verisi silindi.
+
+**Bu turda bulunan kusur.** `izinAksiyonlari.ts` erken çıkışı yalnız
+`personel-izin.` ve `izin-bakiye.` öneklerini geçiriyordu; avans bloğu
+koddan sonra geldiği için **beş avans aksiyonunun hiçbiri arayüzde
+çalışmıyordu** (API uçları çalışıyordu). Önek listesine `personel-avans.`
+eklendi.
+
+**Kalan.** İskonto talebi ve doküman onayının omurgaya taşınması,
+`satinalma_onay` tablosunun düşürülmesi. Göç **753 yalnız docker'da** -
+bulut ekspert artık hedef değil (kullanıcı kararı, 17.09.2026).

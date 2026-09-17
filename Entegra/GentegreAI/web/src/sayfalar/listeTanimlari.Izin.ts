@@ -50,6 +50,29 @@ export const IZIN_LISTELERI: ListeGirdisi[] = [
     yetkiKodu: 'ik.izin', modul: 'ik', menuSira: 11,
   },
   {
+    // AVANS (753): talep → onay → ödeme → mahsup. Listenin asıl sorusu
+    //   "ne kadarı geri geldi" - kesilen/kalan ve geciken taksit sütunları
+    //   olmadan ödenmiş avans izlenemez.
+    kaynak: 'personelAvans', rota: 'personel-avans',
+    baslik: 'Personel Avansları',
+    yol: 'İK & Prim › Avanslar',
+    kartYolu: '/personel-avans', kartBaslik: 'Personel Avansı',
+    aksiyonEkrani: 'personel-avans-liste',
+    tarihAlani: 'talepTarihi',
+    cipler: [
+      { ad: 'Açık',     filtre: { alan: 'durum', op: 'kucukEsit', deger: 2 } },
+      { ad: 'Onayda',   filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Ödenecek', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Mahsupta', filtre: { alan: 'durum', op: 'esit', deger: 4 } },
+      // GECİKEN KESİNTİ: dönemi geçmiş ama kesilmemiş mahsup unutulmuştur;
+      //   personel ayrılırsa tahsil edilemez.
+      { ad: 'Kesinti gecikti', filtre: { alan: 'gecikenTaksit', op: 'buyuk', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'İK & Prim', menuAd: 'Avanslar', ic: '💸',
+    yetkiKodu: 'ik.avans', modul: 'ik', menuSira: 14,
+  },
+  {
     // RESMÎ TATİL (749): iş günü hesabının dayandığı takvim. İK & Prim
     //   altında, çünkü izin gününü de vardiyayı da bu liste belirler.
     kaynak: 'resmiTatil', rota: 'resmi-tatil',
