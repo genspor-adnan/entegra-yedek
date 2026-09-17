@@ -11908,3 +11908,39 @@ yalnız avans/satınalma/izin/onarımı çözüyordu; iskonto `#4` diye görün�
 (gerçek iskonto taleplerinin basamakları bekleyene döndürüldü).
 
 xUnit 234/234, vitest 598/598, iki derleme temiz. Göç **763 yalnız docker'da**.
+
+
+## 17.09.2026 — Vekâlet gerçek veriyle denendi (kod değişikliği yok)
+
+`onay_vekalet` 746'dan beri duruyordu ama hiç kaydı yoktu: "çalışıyor mu"
+sorusunun cevabı **denenmedi**'ydi. Denendi, çalışıyor. Deneme verisi
+kullanıcı isteğiyle **silinmedi**, dev ortamında duruyor.
+
+**Kurulum.** Dev veritabanında hiç âmir tanımlı değildi (`yonetici_taraf_id`
+0 kayıt) ve hiç izin talebi yoktu - yani kişiye atanan basamak hiç
+oluşmamıştı. Dr. Ayşe Kaya'nın (7882) âmiri **E2E Test Kullanicisi** (5059)
+yapıldı; vekâlet **5059 → admin (4901)**, 17.09-17.10.
+
+**Dört yönüyle doğrulandı.**
+1. **Engel:** vekâlet yokken admin, 5059'a atanmış basamağı imzalamayı
+   deneyince *"Bu basamak başka bir kullanıcıya atanmış; vekâletiniz yok."*
+2. **Karar:** vekâlet tanımlandıktan sonra aynı basamağı imzaladı ve
+   `karar_veren_id = 4901` yazıldı - **imza devralanın adıyla atılıyor**,
+   kimin imzaladığı kaybolmuyor (746'nın ilkesi). Zincir 2. basamağa geçti.
+3. **Bildirim:** ikinci bir izin talebi onaya gönderildiğinde `onay.istek`
+   **hem âmire hem vekile** yazıldı (`e2e@ornek.test`, `admin@ornek.test`).
+4. **Gelen kutusu:** admin'in kutusunda *"İzin #9 · Birim Âmiri ·
+   atanan 5059"* satırı göründü - başkasına atanmış basamağı vekâleten
+   görüyor.
+
+Ekranlarda da doğru: Vekâletler listesi kaydı "Yürürlükte" gösteriyor,
+İzinler listesi iki talebi bekleyen basamaklarıyla ("Birim Âmiri" /
+"İnsan Kaynakları") sıralıyor.
+
+**Kalan yan etki.** Bildirimler `durum 1` (kuyrukta) kaldı: sağlayıcı hesabı
+yok ve `KayitModu` kapalı, yani üç denemeden sonra "vazgeçildi"ye düşecekler.
+Beklenen davranış - gitmeyen bildirim gitmiş görünmüyor.
+
+**Dev ortamında bırakılan veri:** 1 vekâlet kaydı, 2 izin talebi (biri
+vekâleten onaylanmış), 1 âmir tanımı (7882 → 5059) ve iki kullanıcıya
+e-posta (`admin@ornek.test`, `e2e@ornek.test`).
