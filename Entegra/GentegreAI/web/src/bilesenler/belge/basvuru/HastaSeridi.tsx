@@ -12,9 +12,9 @@ import { MUSTEHAKLIK } from './alanlar';
  * henuz yok, uydurma bilgi gostermek yaniltici olurdu. Yerine gercek veriden
  * "son basvuru" uyarisi cizilir.
  */
-export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, acikBelge,
+export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
                               sysTakipNo, paylasimli,
-                              kurumAdi, acikBorc, taraflar, onAra, onYeniHasta }: {
+                              kurumAdi, acikBorc, taraflar }: {
   tarafId?: number | null;
   /** BELGENIN odeyen kurumu (kullanici): serit hastanin sigortasini degil,
       bu basvuruyu odeyecek kurumu gosterir - ikisi farkli olabilir. */
@@ -41,7 +41,6 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, acikBel
   /** Belgenin SGK mustehaklik durumu (299) - sigortanin yanina rozet. */
   mustehaklik?: number | null;
   /** Belge numarasi - mockupta arama satirinin son alani. */
-  protokolNo?: string;
   /**
    * USS SYS TAKIP NO (608): 101 gonderiminde doner, basvurunun e-Nabiz
    * kimligidir. Hasta ADININ ALTINDA gosterilir - memur basvurunun USS'ye
@@ -55,24 +54,11 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, acikBel
    * USS kimligi (SYS Takip No) vardir ve memur ikisini birlikte gorur.
    */
   paylasimli?: boolean;
-  kilitli?: boolean;
-  /** Arama penceresini acar; kutulara yazilan metin ON-DOLGU olarak gecer. */
-  onAra?(metin: string): void;
-  onYeniHasta?(): void;
 }) {
   const [h, setH] = useState<Record<string, unknown> | null>(null);
-  /**
-   * ARAMA SATIRI kutulari (mockup, kullanici: "butonlarin altinda tcno, hasta
-   * no, ad soyad, protokolno, ara buton, yeni hasta kaydi buton"). Secili hasta
-   * varsa onun bilgileriyle dolu gelir; memur uzerine yazip Ara'ya (ya da
-   * Enter'a) basinca BASKA hastayi arar.
-   */
-  const [tc, setTc] = useState('');
-  const [dosyaNo, setDosyaNo] = useState('');
-  const [adSoyad, setAdSoyad] = useState('');
 
   useEffect(() => {
-    if (!tarafId) { setH(null); setTc(''); setDosyaNo(''); setAdSoyad(''); return }
+    if (!tarafId) { setH(null); return }
     let iptal = false;
     void (async () => {
       try {
@@ -83,9 +69,6 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, acikBel
         if (iptal) return;
         const s = y.satirlar[0] ?? null;
         setH(s);
-        setTc(String(s?.vkno ?? ''));
-        setDosyaNo(String(s?.kod ?? ''));
-        setAdSoyad(String(s?.unvan ?? ''));
       } catch { if (!iptal) setH(null) }
     })();
     return () => { iptal = true };
@@ -103,72 +86,17 @@ export function HastaSeridi({ tarafId, mustehaklik, protokolNo, kilitli, acikBel
   const dogum = String(h?.dogumTarihi ?? '').slice(0, 10);
   const yas = h?.yas != null && h.yas !== '' ? `${h.yas} y` : '';
 
-  /**
-   * Ara: memurun DEGISTIRDIGI kutuyla arar (T.C. > dosya no > ad). Kutular
-   * secili hastanin bilgileriyle dolu geldigi icin dokunulmamis degeri arama
-   * metni saymak yanlis olurdu - ustelik T.C. MASKELI gosterilir
-   * ("111******10"), onunla arama hicbir sey bulmaz. Hicbiri degismemisse
-   * pencere bos acilir (tum liste).
-   */
-  const ara = () => {
-    const degisen = [[tc, h?.vkno], [dosyaNo, h?.kod], [adSoyad, h?.unvan]]
-      .map(([kutu, kayitli]) => String(kutu ?? '').trim() === String(kayitli ?? '').trim()
-        ? '' : String(kutu ?? '').trim())
-      .find(Boolean);
-    onAra?.(degisen ?? '');
-  };
-  const enter = (e: React.KeyboardEvent) => { if (e.key === 'Enter') { e.preventDefault(); ara() } };
-
-  // F3 = Ara (mockup butonunun etiketi). Tarayicinin "sayfada bul-sonraki"
-  //   davranisi engellenir; kilitli belgede kisayol da calismaz.
-  useEffect(() => {
-    if (kilitli) return;
-    const tus = (e: KeyboardEvent) => {
-      if (e.key !== 'F3') return;
-      e.preventDefault();
-      ara();
-    };
-    window.addEventListener('keydown', tus);
-    return () => window.removeEventListener('keydown', tus);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kilitli, tc, dosyaNo, adSoyad, h]);
-
   return (
     <>
-      {/* 1) HASTA ARAMA SATIRI (mockup): arac cubugunun altinda, bandin
-             ustunde. PROTOKOL VERILINCE KAYBOLUR (kullanici): basvuru
-             acildiktan sonra hasta degismez - degismesi gerekiyorsa basvuru
-             iptal edilip yenisi acilir, satir o zaman geri gelir. */}
-      {!protokolNo && (
-      <div className="hasta-arama">
-        <label className="alan">
-          <span className="etiket">Kimlik No</span>
-          <input value={tc} disabled={kilitli} onKeyDown={enter}
-                 onChange={e => setTc(e.target.value)} />
-        </label>
-        <label className="alan">
-          <span className="etiket">Hasta No</span>
-          <input value={dosyaNo} disabled={kilitli} onKeyDown={enter}
-                 onChange={e => setDosyaNo(e.target.value)} />
-        </label>
-        <label className="alan genis">
-          <span className="etiket">Ad Soyad</span>
-          <input value={adSoyad} disabled={kilitli} onKeyDown={enter}
-                 onChange={e => setAdSoyad(e.target.value)} />
-        </label>
-        {/* Protokol no BELGENIN numarasi - aranmaz, kayitta atanir. Satir
-            zaten yalniz protokol YOKKEN cizildigi icin hep bos gorunur;
-            numara verilince alan Basvuru sekmesinde okunur. */}
-        <label className="alan">
-          <span className="etiket">Protokol No</span>
-          <input value="" readOnly placeholder="(kaydedince atanacak)" />
-        </label>
-        <button type="button" className="d bir" onClick={ara}
-                disabled={kilitli}>🔍 Ara (F3)</button>
-        <button type="button" className="d" onClick={() => onYeniHasta?.()}
-                disabled={kilitli}>✚ Yeni Hasta Kaydı</button>
-      </div>
-      )}
+      {/* HASTA ARAMA SATIRI KALDIRILDI (781, kullanici): kimlik no, hasta no,
+          ad soyad, protokol, "Ara" ve "Yeni Hasta Kaydı" kutuları yeni
+          başvuru sayfasında çizilmiyordu bile denecek kadar dar bir işi
+          görüyordu - hasta zaten randevudan, hasta listesinden ya da arama
+          penceresinden seçilerek geliyor. Serit artık yalnız SEÇİLİ hastayı
+          gösteriyor: "doğru hastadayım" sorusunun cevabı.
+
+          Hasta seçme yolları: araç çubuğundaki hasta arama, "Randevudan
+          Getir" ve hasta kartından başvuru açma. */}
 
       {/* 2) SECILI HASTA BANDI - hasta secilene kadar cizilmez. */}
       {tarafId ? (

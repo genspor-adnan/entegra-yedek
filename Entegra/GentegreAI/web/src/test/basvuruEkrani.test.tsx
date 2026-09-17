@@ -174,11 +174,20 @@ describe('yeni basvuru karti', () => {
     expect(screen.getByText('Bölüm')).toBeInTheDocument();
     expect(screen.queryByText('Başvurulan Bölüm')).toBeNull();
 
-    // PROTOKOL NO sekmede YOK ama kartin BASLIK seridinde var - ayni salt
-    //   okunur numarayi iki yerde gostermek sekmede bos yer harciyordu.
+    // PROTOKOL NO SEKMEDE YOK: aynı salt okunur numarayı iki yerde göstermek
+    //   sekmede boş yer harcıyordu; numara kartın BAŞLIK şeridinde durur.
+    //
+    //   781'e kadar hasta arama satırında da boş bir "Protokol No" kutusu
+    //   vardı ("(kaydedince atanacak)"); kullanıcı isteğiyle o satırın tamamı
+    //   kaldırıldı - yeni başvuruda protokol henüz YOKTUR, boş bir kutu
+    //   göstermek numaranın girilebileceğini ima ediyordu.
     const grup = screen.getByText('Başvuru Bilgileri').closest('.kagrup')!;
     expect(grup.textContent).not.toContain('Protokol No');
-    expect(screen.getByText('Protokol No')).toBeInTheDocument();
+    // HASTA ARAMA SATIRI KALDIRILDI (781): kimlik no, hasta no, ad soyad,
+    //   protokol, "Ara" ve "Yeni Hasta Kaydı" artık çizilmiyor.
+    expect(document.querySelector('.hasta-arama')).toBeNull();
+    expect(screen.queryByText('Yeni Hasta Kaydı')).toBeNull();
+    expect(screen.queryByText('Kimlik No')).toBeNull();
   });
 
   it('BOLUM ve ODEYEN KURUM combolari sunucudan doldurulur', async () => {

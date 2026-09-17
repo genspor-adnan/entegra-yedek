@@ -1242,19 +1242,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
                        kurumAdi={kurumlar.find(k => k.id === odeyenKurumId)?.ad}
                        acikBorc={basvuruAcikBorc}
                        mustehaklik={Number(basvuruBilgi.sgkMustehaklik ?? 0)}
-                       protokolNo={belgeNo || String(sonuc?.belge.belgeNo ?? '')}
-                       kilitli={kilitli}
                        acikBelge={basvuruAcikBelge}
                        // e-Nabiz SYS takip no (608): hasta adinin altinda.
                        sysTakipNo={String(basvuruBilgi.sysTakipNo ?? '')}
                        // ÖSS/SGK'da kimlik hucresi SYS takip no da gosterir;
                        //   ozel iste yalniz dosya no (608).
                        paylasimli={paylasimliKurum(kurumlar, odeyenKurumId)}
-                       taraflar={seritTaraflari}
-                       onAra={metin => { arama.setHastaMetni(metin);
-                                         arama.setCari(true) }}
-                       onYeniHasta={() => { arama.setHastaYeni(true);
-                                            arama.setCari(true) }} />
+                       taraflar={seritTaraflari} />
         )}
 
         {/* TAMAMLANMA SERIDI (370, kullanici): "bu basvuruda daha ne eksik"

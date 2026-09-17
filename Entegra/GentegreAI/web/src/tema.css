@@ -434,19 +434,12 @@ table.grid tr.flt input {
 /* HASTA ARAMA SATIRI (300, mockup): arac cubugu ile hasta bandi arasinda.
    Alanlar esnek, iki buton sagda sabit. DIS CERCEVE YOK (kullanici): satir
    kendi kutusunda degil, hemen altindaki hasta bandiyla tek blok okunur. */
-.hasta-arama {
-  display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap;
-  padding: 0 2px; margin-bottom: 8px;
-}
-/* Etiket USTTE (mockup) - kartin genel "etiket solda" kuralinin disinda. */
-/* Kutular %35 DAR (kullanici): T.C./hasta no/ad soyad icin bu genislik yeter,
-   artani dugmelere ve bosluga kalsin. */
-.hasta-arama .alan {
-  display: flex; flex-direction: column; gap: 2px;
-  flex: 0 1 85px; min-width: 0;
-}
-.hasta-arama .alan.genis { flex: 0 1 130px }
-.hasta-arama .d { flex: 0 0 auto }
+/* `.hasta-arama` KALDIRILDI (781): yeni başvuruda kimlik no / hasta no /
+   ad soyad / protokol kutuları ve "Ara" · "Yeni Hasta Kaydı" düğmeleri
+   kullanıcı isteğiyle çıkarıldı - hasta randevudan, hasta listesinden ya da
+   araç çubuğundaki aramadan seçiliyor. Kuralları kullanan kalmadığı için
+   biçim de duruyor olmasın: ölü CSS, sonraki okuyanı var olmayan bir ekranı
+   aramaya yollar. */
 
 .hasta-serit {
   display: flex; align-items: center; gap: 18px; flex-wrap: wrap;

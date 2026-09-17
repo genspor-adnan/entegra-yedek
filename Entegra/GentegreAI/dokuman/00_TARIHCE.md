@@ -12913,3 +12913,37 @@ off`). vitest 614/614, xUnit 234/234, derleme temiz.
 **Not:** `autocomplete` tarayıcıya verilen bir **istektir**; parola yöneticileri
 kendi kurallarıyla yine "kaydedeyim mi" diye sorabilir. Uygulamanın
 yapabileceği son nokta burasıdır.
+
+---
+
+## 17.09.2026 — Yeni başvuruda hasta arama satırı kaldırıldı (781)
+
+Kullanıcı: *"yeni başvuru sayfası açılınca üstte bulunan hasta editleri: kimlik
+no, hasta no, ad soyad, protokol, arama ve yeni hasta kaydı butonlarını kaldır"*.
+
+Satır yalnız **protokol yokken** çiziliyordu, yani sadece yeni başvuruda. Hasta
+zaten üç yoldan geliyor: araç çubuğundaki hasta araması, "Randevudan Getir" ve
+hasta kartından başvuru açma - dördüncü bir arama kutusu kümesi kartın en
+üstünde yer tutuyordu.
+
+Kaldırılan yalnız işaretler değil: satırla birlikte onu besleyen üç `useState`,
+`Ara` işlevi, Enter ve **F3** kısayolu, `onAra`/`onYeniHasta` propları ve
+çağrı yerindeki bağlar da gitti. Ölü CSS (`.hasta-arama`) da silindi - duran
+biçim, sonraki okuyanı var olmayan bir ekranı aramaya yollar.
+
+**Protokol numarası kaybolmadı**: kartın başlık şeridinde duruyor ("Protokol
+No"). Satırdaki kutu zaten hep boştu ve *"(kaydedince atanacak)"* yazıyordu -
+yeni başvuruda protokol henüz yoktur, boş bir kutu göstermek numaranın
+girilebileceğini ima ediyordu.
+
+**Test güncellendi.** `basvuruEkrani` testi "protokol sekmede yok ama bir
+yerde var" diyordu ve o "bir yer" bu satırdı; kural artık "satırın tamamı
+yok" olarak yazıldı (`.hasta-arama`, "Yeni Hasta Kaydı", "Kimlik No"
+aranmıyor).
+
+**Doğrulama.** Yeni başvuru ekranında `.hasta-arama` yok; "Kimlik No",
+"Hasta No", "Ara (F3)", "Yeni Hasta Kaydı" ekranda değil; "Protokol No"
+başlıkta duruyor. vitest 614/614, derleme temiz.
+
+**Not:** hasta seçme yolu değişmedi ama **azaldı** - bu satırdan hasta arayan
+bir alışkanlık varsa, kullanıcı artık araç çubuğundaki aramayı kullanacak.
