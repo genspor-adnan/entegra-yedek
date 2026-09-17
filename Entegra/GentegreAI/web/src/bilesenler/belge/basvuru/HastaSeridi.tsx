@@ -160,7 +160,9 @@ export function HastaSeridi({ tarafId, mustehaklik, acikBelge,
           yer kaplar ve hicbir sey soylemezdi. Mahsup Tahsilat sekmesinde
           yapilir; burasi haber verir. */}
       {avans > 0 && (
-        <span className="hs">
+        /* 20 px SAGA (788, kullanici): hucre "Ödeyen Kurum"un rozetine
+           yapisik duruyordu; aradaki bosluk ikisini ayirir. */
+        <span className="hs hs-avans">
           <span className="k">Avans</span>
           <span className="v olumlu"
                 title="Hastanın kullanılmamış avansı — Tahsilat sekmesinden bu başvuruya mahsup edilir.">

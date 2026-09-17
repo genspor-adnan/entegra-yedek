@@ -224,6 +224,45 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   useEffect(() => { setMuayeneBilgiAcik(false) }, [kartId]);
   // Belge (fatura/siparis) karti da MODAL: liste arkada kalir, rota degismez.
   const [yeniBelgeTuru, setYeniBelgeTuru] = useState<number | null>(null);
+  /**
+   * HASTA KARTINDAN BASVURU (782/788).
+   *
+   * Kullanici: *"hasta kartında iken başvuru aç basılırsa kapanmamış son
+   * başvuru kartı ekrana gelir"*. Hasta ayni gun icinde ikinci kez kayit
+   * kabule geldiginde memur "Yeni Başvuru" diyor ve ONCEKI basvurusu hala
+   * acikken ikinci bir protokol aciliyordu: ucretler iki karta bolunuyor,
+   * tahsilat ve provizyon hangi protokole yazildi sorusu doguyordu.
+   *
+   * ACIK = TAMAMLANMA %100'DEN AZ (kullanici: *"tamamlanma %100 ise başvuru
+   * kapanmış demektir"*). Olcut `kapanmaDurum` DEGIL: o yalniz faturaya
+   * donusme adimini bilir; basvuru provizyon/ucret/tahsilat adimlarindan biri
+   * eksikken de aciktir. Yuzde kart ustundeki asama seridiyle AYNI kuraldan
+   * gelir (370/602). En yenisi acilir; yoksa yeni basvuru.
+   * Sorgu basarisiz olursa (yetki/ag) yeni basvuruya duseriz - memuru
+   * bosluga birakmak daha kotu.
+   */
+  async function basvuruAc(tarafId: number, unvan: string) {
+    try {
+      const y = await api.liste('belge', {
+        sayfa: 1, boyut: 1,
+        sirala: [{ alan: 'belgeTarihi', yon: 'desc' }, { alan: 'id', yon: 'desc' }],
+        filtre: { op: 'and', kosullar: [
+          { alan: 'tarafId', op: 'esit', deger: tarafId },
+          { alan: 'tur', op: 'esit', deger: 19 },
+          { alan: 'tipi', op: 'esit', deger: 30 },
+          { alan: 'tamamlanma', op: 'kucuk', deger: 100 },
+        ] },
+      });
+      const acik = Number(y.satirlar[0]?.id ?? 0);
+      if (acik) {
+        mesaj('Bu hastanın kapanmamış başvurusu var - o başvuru açıldı.');
+        setAcikBelgeId(acik);
+        return;
+      }
+    } catch { /* sorgu basarisizsa yeni basvuru acilir */ }
+    setYeniBasvuruHasta({ id: tarafId, unvan });
+  }
+
   const [yeniBasvuruHasta, setYeniBasvuruHasta] =
     useState<{ id: number; unvan: string } | null>(null);
   // Mevcut belgeyi ac (salt gorunum) - ayni modal, id ile.
@@ -1417,7 +1456,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       kartTazele={kartTazele} setKartTazele={setKartTazele}
       sorgu={sorgu} git={git} setYenile={setYenile}
       setOdaklaSonEklenen={setOdaklaSonEklenen}
-      onBasvuruAc={(tarafId, unvan) => setYeniBasvuruHasta({ id: tarafId, unvan })}
+      onBasvuruAc={(tarafId, unvan) => void basvuruAc(tarafId, unvan)}
     />
     </>
   );

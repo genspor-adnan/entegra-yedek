@@ -13469,3 +13469,28 @@ kovaları getiriyor (önizleme zaten "dağılımı olmayan" satırlar için
 kullanıcı yazdı. Doğrulama: aynı satırda miktar 4 yapıldı, grid **6.800,00**
 (4 × 2.000 − %15) gösterdi - pencereyle aynı. Test `kalemGuncelleme.test.ts`.
 vitest 658/658.
+
+## 18.09.2026 — Hasta kartından başvuru: açık başvuru varsa o açılır (788)
+
+Kullanıcı: *"hasta kartında iken başvuru aç basılırsa kapanmamış son başvuru
+kartı ekrana gelir yoksa yeni kart açılır"* ve *"tamamlanma %100 ise başvuru
+kapanmış demektir"*.
+
+Hasta aynı gün ikinci kez kayıt kabule geldiğinde memur "Yeni Başvuru" diyor
+ve ÖNCEKİ başvurusu hâlâ açıkken ikinci bir protokol doğuyordu: ücretler iki
+karta bölünüyor, "tahsilat hangi protokole yazıldı" sorusu çıkıyordu.
+
+Ölçüt **`tamamlanma < 100`** - `kapanmaDurum` değil: o yalnız faturaya dönüşme
+adımını bilir, oysa başvuru provizyon/ücretlendirme/tahsilat adımlarından biri
+eksikken de açıktır. Yüzde, kart üstündeki aşama şeridiyle aynı kuraldan gelir
+(370/602). En yeni açık başvuru açılıyor, memura *"Bu hastanın kapanmamış
+başvurusu var - o başvuru açıldı."* deniyor. Sorgu başarısız olursa (yetki/ağ)
+yeni başvuruya düşülüyor - memuru boşlukta bırakmak daha kötü.
+
+**Doğrulama.** Açık başvurusu olan hastada (A/00000036 · P-000140, tamamlanma
+%25) "Yeni Başvuru" → mesaj çıktı ve **P-000140** kartı açıldı. Açık başvurusu
+olmayan hastada (A/00000039) yeni başvuru kartı açıldı.
+
+**Şerit düzeni.** Kullanıcı: *"başvuruda hasta bilgi bandındaki avans kaydını
+20 piksel sağa al"* - Avans hücresi "Ödeyen Kurum"un rozetine yapışıktı
+(`.hs-avans { margin-left: 20px }`).
