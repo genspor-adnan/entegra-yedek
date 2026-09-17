@@ -268,6 +268,7 @@ uygulama.IzinUclariniEkle();
 uygulama.AvansUclariniEkle();
 uygulama.MasrafBeyaniUclariniEkle();
 uygulama.BelgeTalebiUclariniEkle();
+uygulama.TeknikServisUclariniEkle();
 uygulama.RolYetkiUclariniEkle();
 uygulama.KullaniciYonetimUclariniEkle();
 uygulama.IskontoOnayUclariniEkle();

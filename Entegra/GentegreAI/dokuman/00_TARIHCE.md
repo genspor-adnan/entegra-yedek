@@ -12509,3 +12509,60 @@ Ardından *"şube 0 ve 3'ü de aç"*: **aynı dört modül** onlara da eklendi
 (0 = kurum geneli, 3 = Ankara şubesi). Şube 1'e özgü `dis` · `ftr` · `goz` ·
 `enabiz` · `yatan_hasta` · `teleradyoloji` KOPYALANMADI - istenen dört
 moduldu, bir şubenin klinik kurulumunu ötekine taşımak ayrı bir karar.
+
+---
+
+## 17.09.2026 — Teknik servis: şema ve uçlar (db/773)
+
+Kullanıcı mockup'ları onayladıktan sonra: *"şema ve uçları yaz"*.
+
+**İkinci iş emri tablosu açılmadı.** `demirbas_is_emri` (541) iç işi zaten
+karşılıyordu; eksik olan sahibinin **müşteri** olabilmesiydi. Tabloya
+`sahiplik` geldi ve `demirbas_id` zorunlu olmaktan çıktı; bir CHECK kısıtı
+sahipliğin gerektirdiği alanı zorunlu tutuyor (iç → demirbaş, dış → müşteri).
+Ayrı tablo, parça çıkışını ve cihaz geçmişini ikiye bölerdi. Tablonun adı
+tarihsel kaldı - veri ve bağları duran bir tabloyu yalnız adı için yeniden
+adlandırmak kazancından çok risk taşırdı; okunur ad `v_servis_is_emri`.
+
+**Beş yeni tablo:** `taraf_cihaz` (müşteri cihaz parkı), `servis_sozlesme`,
+`servis_cagri`, `servis_ziyaret`, `servis_emanet`. Altı görünüm, iki fonksiyon
+(`fn_servis_sla_bitis`, `fn_servis_is_emri_topla`) ve iki tetik.
+
+**Toplam tek yerde**: işçilik ziyaretlerden, parça parça satırlarından; tetik
+her iki tabloyu izliyor. Uçta toplamak, ekrandaki tutarla faturaya gidenin
+ayrışmasına kapı bırakırdı (masraf beyanında aynı karar verilmişti).
+
+**SLA sözleşmeden gelir**, çağrının önceliğinden değil: aynı arıza 4 saatlik
+sözleşmede acil, 24 saatlikte normaldir. Sözleşme yoksa kurum ayarı
+(`servis.sla_saat`), o da yoksa **SLA yoktur** - uydurulmuş bir taahhüt,
+tutulmadığında kimsenin sözünü vermediği bir borç yaratır.
+
+**Uçlar** (`/api/servis`): çağrı aç · çağrıdan iş emri · ziyaret aç · ziyaret
+kapat · emanet ver · emanet iade · teslim · cihaz parkı. İki kural uçta
+korunuyor: **imzasız ziyaret kapanmaz** (alınamıyorsa gerekçe yazılır - kural
+esner ama iz kalır) ve **açık emanet varken iş emri teslim edilemez**.
+
+Çağrı ziyaretin sonucunu izler: çözüldüyse kapanır, parça bekliyorsa o duruma
+geçer, çözülemediyse **açık kalır** - ikinci gidiş gerekiyor demektir ve "ilk
+gidişte çözüm" ölçüsü tam orada düşer.
+
+**Bu turda yakalanan iki hata.** (1) Emanet numarası için 910 seçmiştim;
+`731_tedarik_numaralari` onu **"Eczane Hazırlama No"** olarak çoktan almıştı -
+Belge No ekranında aynı kod iki ad gösterecekti, tam da 755/756/757'de
+temizlenen çakışma sınıfı. 918'e alındı. (2) İş emri numarası için yeni tür
+uydurmuştum; 914 **"İş Emri No"** zaten var, servis iş emri de o diziden
+kesiliyor - iki sayaç, aynı tabloda iki numara dizisi demekti.
+
+**Doğrulama (uçtan uca, gerçek cari).** Çağrı `CG-000001` açıldı · şikâyetsiz
+çağrı 400 · çağrıdan iş emri, çağrı "atandı" + ilk yanıt damgalandı · 1.
+ziyaret çözülemedi, çağrı **açık kaldı** · imzasız/gerekçesiz kapatma 400 ·
+emanet verildi · 2. ziyaret çözdü, çağrı kapandı · açık emanetle teslim 422 ·
+iade sonrası teslim, toplam **3.375,00** (iki ziyaretin işçiliği), çağrı
+durum 5. Test verisi ve sayaçları silindi. xUnit 234/234, derleme temiz.
+
+**Açık kalan:** iş emri numarası boş geliyor çünkü 914 türünün şablonu yok -
+`731` deseninde ayarsız tür boş kalır ve kurum Belge No ekranından tanımlar;
+numara uydurmadık. **Katalog (liste/kart) ve ekranlar yapılmadı** - modül
+bugün yalnız uçlardan çalışıyor.
+
+Göç **773 yalnız docker'da**.

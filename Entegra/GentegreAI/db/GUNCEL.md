@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (393 ad, 112 tanesi birden cok dosyada)
+## Fonksiyonlar (396 ad, 112 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -284,6 +284,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_satinalma_talep_no_uret` | `731_tedarik_numaralari.sql` | — |
 | `fn_satinalma_teklif_no_uret` | `731_tedarik_numaralari.sql` | — |
 | `fn_sayi_sade` | `732_kritik_stok_talep.sql` | — |
+| `fn_servis_is_emri_topla` | `773_teknik_servis.sql` | — |
+| `fn_servis_sla_bitis` | `773_teknik_servis.sql` | — |
 | `fn_sgk_katilim_emanet_yaz` | `477_katilim_emanet_doviz.sql` | 473_katilim_emaneti.sql |
 | `fn_sigorta_durum_ekran` | `631_provizyon_durum_cevrimi.sql` | — |
 | `fn_sigorta_ozet_tazele` | `631_provizyon_durum_cevrimi.sql` | 430_sigorta_v1.sql |
@@ -393,6 +395,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_radyoloji_protokol_metin` | `515_radyoloji_protokol_combo.sql` | — |
 | `tg_randevu_cakisma` | `317_randevu_tetkik_uyum.sql` | 316_randevu_cihaz_kaynagi.sql |
 | `tg_randevu_izin_kontrol` | `748_izin_calisma_plani.sql` | — |
+| `tg_servis_toplam` | `773_teknik_servis.sql` | — |
 | `tg_sube_vkn_dogrula` | `170_sube_vkn_dogrula.sql` | — |
 | `tg_tani_kronik_yansit` | `420_hasta_tibbi_gecmis.sql` | — |
 | `tg_taraf_hasta_dosya_no` | `396_hasta_dosya_no_otomatik.sql` | 356_hasta_dosya_no_otomatik.sql, 358_numara_sablonu_elle_girilir.sql |
@@ -402,7 +405,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (224 ad, 52 tanesi birden cok dosyada)
+## Gorunumler (231 ad, 52 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -569,6 +572,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_numara_turu_kimlik` | `719_ameliyathane_acil_akis.sql` | 358_numara_sablonu_elle_girilir.sql, 633_lab_istem_no_ayari.sql, 634_hasta_belge_numaralari.sql, 635_recete_no_numaralandirma.sql |
 | `v_numara_turu_odeme` | `153_numara_turu_gorunum_tip.sql` | 152_numara_sablonu.sql |
 | `v_numara_turu_satis` | `334_tahakkuk_tur_takas.sql` | 152_numara_sablonu.sql, 153_numara_turu_gorunum_tip.sql |
+| `v_numara_turu_servis` | `773_teknik_servis.sql` | — |
 | `v_numara_turu_tahsilat` | `153_numara_turu_gorunum_tip.sql` | 152_numara_sablonu.sql |
 | `v_numara_turu_tedarik` | `731_tedarik_numaralari.sql` | — |
 | `v_oda_lookup` | `696_yatan_lookup.sql` | — |
@@ -606,6 +610,11 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_rol_lookup` | `425_dokuman_erisim.sql` | — |
 | `v_satinalma_kabul` | `736_kabul_its_bildirim.sql` | 733_mal_kabul_satir.sql, 734_kabul_karekod.sql |
 | `v_satinalma_talep_onay` | `739_onay_gelen_kutusu.sql` | — |
+| `v_servis_cagri` | `773_teknik_servis.sql` | — |
+| `v_servis_emanet` | `773_teknik_servis.sql` | — |
+| `v_servis_is_emri` | `773_teknik_servis.sql` | — |
+| `v_servis_sozlesme` | `773_teknik_servis.sql` | — |
+| `v_servis_ziyaret` | `773_teknik_servis.sql` | — |
 | `v_sgk_katilim_emanet` | `473_katilim_emaneti.sql` | — |
 | `v_sigorta_hesap_lookup` | `430_sigorta_v1.sql` | — |
 | `v_sigorta_saglayici_lookup` | `430_sigorta_v1.sql` | — |
@@ -623,6 +632,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_sube_lookup` | `718_hekim_calisma_plani.sql` | — |
 | `v_tahsilat_turu_lookup` | `330_prim_tahsilat_turu_durum.sql` | — |
 | `v_taraf_avans` | `322_avans_mahsup.sql` | — |
+| `v_taraf_cihaz` | `773_teknik_servis.sql` | — |
 | `v_tedarikci_skor` | `724_satinalma.sql` | — |
 | `v_ulke_lookup` | `119_stok_uts.sql` | — |
 | `v_uretim_emri_lookup` | `429_uretim_v1.sql` | — |
