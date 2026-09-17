@@ -46,6 +46,8 @@ vi.mock('../bilesenler/belge/IadeSatirPenceresi', () => ({ IadeSatirPenceresi: t
 vi.mock('../bilesenler/belge/HesapSecModali', () => ({ HesapSecModali: taklit('hesap') }));
 vi.mock('../bilesenler/belge/BelgeTahsilatModallari',
         () => ({ BelgeTahsilatModallari: taklit('tahsilat') }));
+// HASTA KARTI (781): kart artik dogrudan GenForm ile aciliyor.
+vi.mock('../bilesenler/GenForm', () => ({ GenForm: taklit('hastaKart') }));
 // Kartin KENDISI (turetilmis belge ustte acilir) - gercegini yuklemek tum
 //   sayfayi ve api'yi getirirdi; burada yalniz "acildi mi" onemli.
 vi.mock('../sayfalar/BelgeKarti', () => ({ BelgeKarti: taklit('altKart') }));
@@ -97,13 +99,41 @@ describe('cari / hasta arama', () => {
   });
 
   it('secim yapilinca hasta arama durumu TEMIZLENIR (kart bayat metinle acilmasin)', () => {
-    const setCari = vi.fn(), setMetin = vi.fn(), setYeni = vi.fn(), setKart = vi.fn();
+    const setCari = vi.fn(), setMetin = vi.fn(), setYeni = vi.fn();
     ciz({ cariArama: true, setCari, setHastaAramaMetni: setMetin,
-          setHastaAramaYeni: setYeni, setHastaKartId: setKart });
+          setHastaAramaYeni: setYeni });
     (cizilen.taraf.onSec as Secim)(HASTA);
     expect(setCari).toHaveBeenCalledWith(HASTA);
     expect(setMetin).toHaveBeenCalledWith('');
     expect(setYeni).toHaveBeenCalledWith(false);
+  });
+});
+
+/**
+ * "Hasta Kartini Ac" ONCE arama penceresinden geciyordu (`baslangicKartId`):
+ * hasta zaten seciliyken arama ekrani aciliyor, kart kapaninca kullanici
+ * basvuruya degil arama listesine dusuyordu. Kullanici: "basvurudayken kimlik
+ * karti ac denince hasta arama ekrani gelmesin".
+ */
+describe('hasta karti (781)', () => {
+  it('hastaKartId ile kart DOGRUDAN acilir, arama penceresi cizilmez', () => {
+    const { getByTestId, queryByTestId } = ciz({ basvuruMu: true, cari: HASTA,
+                                                 cariArama: false, hastaKartId: 7 });
+    expect(getByTestId('hastaKart')).toBeTruthy();
+    expect(cizilen.hastaKart.kaynak).toBe('hasta');
+    expect(cizilen.hastaKart.id).toBe(7);
+    expect(queryByTestId('taraf')).toBeNull();
+  });
+
+  it('hastaKartId yokken kart hic mount edilmez', () => {
+    const { queryByTestId } = ciz({ basvuruMu: true, cari: HASTA, hastaKartId: null });
+    expect(queryByTestId('hastaKart')).toBeNull();
+  });
+
+  it('kart kapaninca basvuruya donulur (kart durumu sifirlanir)', () => {
+    const setKart = vi.fn();
+    ciz({ basvuruMu: true, cari: HASTA, hastaKartId: 7, setHastaKartId: setKart });
+    (cizilen.hastaKart.onKapat as () => void)();
     expect(setKart).toHaveBeenCalledWith(null);
   });
 });

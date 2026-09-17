@@ -12989,3 +12989,32 @@ farklı.
 MERNİS düğmesi kayboldu (hasta kartı kapandı), ekranda **tek** kart kaldı ve o
 başvuru kartıydı; hasta ön-dolgu geldi; düğme yeni etiketiyle çizildi.
 vitest 614/614, xUnit 234/234, derleme temiz.
+
+## 17.09.2026 — Hasta kartı arama penceresinden geçmiyor (783)
+
+Kullanıcı: *"başvurudayken kimlik kartı aç denince hasta arama ekranı
+gelmesin"*.
+
+**Kusur.** "👤 Hasta Kartını Aç" düğmesi hasta kartını doğrudan açmıyordu:
+`TarafArama`yı `baslangicKartId` ile açıyor, arama penceresi de açılışta kart
+kipine geçiyordu. Sonuç iki yerde sızıyordu - kartın çizilmesinden önce arama
+ekranı bir an görünüyordu ve kart **kapatılınca** kullanıcı başvuruya değil o
+arama listesine düşüyordu. Hasta zaten seçiliydi; aranacak bir şey yoktu.
+
+**Değişiklik.** `hastaKartId` artık aramanın bir parametresi değil, tek başına
+"şu hastanın kartı açık" durumudur: `BelgeKartiModallari` bu durumda `GenForm`u
+(`kaynak='hasta'`) doğrudan çiziyor, kapanınca başvuruya dönülüyor. Kartta ad
+değiştirilip kaydedilirse şerit bayat kalmasın diye unvan geri okunuyor.
+`TarafArama.baslangicKartId` tek kullanıcısı kalmadığı için kaldırıldı -
+"açılışta kart kipi" yalnız *Yeni* kaydında anlamlı.
+
+**Döngüsel import.** Yeni `GenForm` kenarı, `donguselImport` testinin bilinen
+listesine eklendi. Yeni bir borç değil, var olanın kısa yolu: pencereler zaten
+üç komşusu üzerinden (`BelgeDonusumModali`, `BelgeTahsilatModallari`,
+`TarafArama`) `GenForm`a ulaşıyordu; kökteki `GenForm → BelgeKarti` kenarı
+(karttan başvuru açılır) kırılmadan bu aile temizlenemiyor.
+
+**Doğrulama.** Başvuru kartında (P-000135) düğmeye basıldı: `.taraf-arama`
+sayısı **0**, ekranda hasta kartı (`hasta #5277 · CEMRE YILMAZ`) açıldı; Kapat
+sonrası yine arama yok, başvuru kartı geri geldi. Konsol/ağ hatası yok.
+vitest 617/617.

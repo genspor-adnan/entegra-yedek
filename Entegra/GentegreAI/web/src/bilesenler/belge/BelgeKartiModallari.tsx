@@ -2,6 +2,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { api } from '../../api/istemci';
 import type { BelgeYaniti } from '../../api/sozlesme';
 import { TarafArama } from '../TarafArama';
+import { GenForm } from '../GenForm';
 import { StokAramaPenceresi } from '../StokAramaPenceresi';
 import { BelgeDonusumModali } from '../BelgeDonusumModali';
 import { IstemModali } from '../radyoloji/IstemModali';
@@ -79,6 +80,8 @@ export interface BelgeKartiModalProps {
   setHastaAramaMetni: Ayarla<string>;
   hastaAramaYeni: boolean;
   setHastaAramaYeni: Ayarla<boolean>;
+  /** Doğrudan açılacak hasta kartının id'si (781) - arama penceresinden
+      geçmez; null = kart kapalı. */
   hastaKartId: number | null;
   setHastaKartId: Ayarla<number | null>;
 
@@ -197,21 +200,46 @@ export function BelgeKartiModallari(p: BelgeKartiModalProps) {
           ? 'Hastayı isim/tel ile ara…' : 'Müşteri / tedarikçi ara…'}
         baslangicMetni={hastaAramaMetni}
         baslangicYeni={hastaAramaYeni}
-        baslangicKartId={hastaKartId}
         onKapat={() => {
           setCariArama(false);
           setHastaAramaMetni('');
           setHastaAramaYeni(false);
-          setHastaKartId(null);
         }}
         onSec={sec => {
           setCari({ id: sec.id, unvan: sec.unvan });
           setCariArama(false);
           setHastaAramaMetni('');
           setHastaAramaYeni(false);
-          setHastaKartId(null);
         }}
       />
+
+      {/* HASTA KARTI (781) - "👤 Hasta Kartını Aç".
+          Kart ONCE arama penceresinden geciyordu (`baslangicKartId`): hasta
+          ZATEN secili oldugu halde bir arama ekrani aciliyor, kart kapaninca
+          da kullanici basvuruya degil o arama listesine dusuyordu (kullanici:
+          "basvurudayken kimlik karti ac denince hasta arama ekrani gelmesin").
+          Secili hastanin karti artik DOGRUDAN aciliyor; kapaninca basvuruya
+          donulur. Ad degistiyse serit eskiyi gostermesin diye kayitta unvan
+          tazelenir. */}
+      {hastaKartId != null && (
+        <GenForm
+          kaynak="hasta"
+          id={hastaKartId}
+          cariyeBaglaGizli
+          onKapat={() => setHastaKartId(null)}
+          onKaydedildi={async id => {
+            try {
+              const y = await api.kartOku('hasta', id);
+              const k = y.kart as Record<string, unknown>;
+              const unvan = String(k.unvan
+                ?? `${k.ad ?? ''} ${k.soyad ?? ''}`).trim();
+              if (unvan) setCari({ id, unvan });
+            } catch {
+              // Ad tazelenemedi: serit eski adla kalir, kart kaydi gecerlidir.
+            }
+          }}
+        />
+      )}
 
       {/* RADYOLOJI ISTEMI (304): basvurudan acilan IC istem - hasta ve
           protokol hazir, ucret satirlari bu basvuruya eklenir. */}

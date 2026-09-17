@@ -1205,8 +1205,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           rezerveVar={rezerveVar} rezerveCalisiyor={rezerveCalisiyor}
           rezerveDegistir={rezerveDegistir}
           hastaVar={!!cari?.id}
-          hastaKartiAc={() => { arama.setHastaKartId(cari?.id ?? null);
-                                arama.setCari(true) }}
+          // Secili hastanin karti DOGRUDAN acilir (781) - arada arama
+          //   penceresi yok (dugme zaten hasta secili degilken pasif).
+          hastaKartiAc={() => { if (cari?.id) arama.setHastaKartId(cari.id) }}
           radyolojiIstemi={() => arama.setIstem(true)}
           // Acil kapisi: tur "Acil" (2), gelis sekli "Ambulans" (2).
           acilBasvuru={() => setBasvuruBilgi(o => ({ ...o, basvuruTuru: 2, gelisSekli: 2 }))}

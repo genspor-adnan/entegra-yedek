@@ -112,11 +112,6 @@ interface Props {
    */
   baslangicYeni?: boolean;
   /**
-   * Acilista dogrudan BU KAYDIN karti acilsin ("Hasta Kartini Ac" dugmesi):
-   * arama penceresi arada gorunmez.
-   */
-  baslangicKartId?: number | null;
-  /**
    * COKLU ISARETLEME KIPI (375, kullanici alternatif 1): satirlar KUTUCUKLA
    * isaretlenir - arama degistirilse bile isaretler KORUNUR - ve "Seç"e
    * basilinca hepsi birden eklenip pencere kapanir.
@@ -156,7 +151,7 @@ interface Props {
  * butonu) acik/kapali kontrol edilir (`acik` prop) - kendi tetikleyicisi yok.
  */
 export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekFiltre,
-                             yerTutucu, baslangicMetni, baslangicYeni, baslangicKartId,
+                             yerTutucu, baslangicMetni, baslangicYeni,
                              cokluSecim = false, onSecCoklu, secimDenetimi,
                              onKapat, onSec }: Props) {
   /**
@@ -275,7 +270,6 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
       //   hemen tetiklenir - debounce beklemeden sonuc gelsin.
       if (baslangicMetni) { setMetin(baslangicMetni); setArama(baslangicMetni) }
       if (baslangicYeni) setKartAcik({ kaynak: yeniKaynak ?? kaynaklar[0], id: 'yeni' });
-      else if (baslangicKartId) setKartAcik({ kaynak: kaynaklar[0], id: baslangicKartId });
       setTimeout(() => kutu.current?.focus(), 0);
       return;
     }

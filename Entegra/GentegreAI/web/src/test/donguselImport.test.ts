@@ -94,6 +94,13 @@ describe('modül grafiği', () => {
       'bilesenler/GenForm.tsx -> sayfalar/BelgeKarti.tsx -> bilesenler/belge/BelgeKartiModallari.tsx -> bilesenler/radyoloji/IstemModali.tsx -> sayfalar/KasaIslemKarti.tsx -> bilesenler/GenForm.tsx',
       'bilesenler/GenForm.tsx -> sayfalar/BelgeKarti.tsx -> bilesenler/belge/BelgeKartiModallari.tsx -> bilesenler/belge/BelgeTahsilatModallari.tsx -> bilesenler/GenForm.tsx',
       'sayfalar/BelgeKarti.tsx -> bilesenler/belge/BelgeKartiModallari.tsx -> sayfalar/BelgeKarti.tsx',
+      // 781 - hasta karti (GenForm) artik pencerelerden DOGRUDAN aciliyor.
+      //   Yeni bir borc degil, var olanin kisa yolu: BelgeKartiModallari zaten
+      //   uc ayri komsusu uzerinden GenForm'a ulasiyordu (BelgeDonusumModali,
+      //   BelgeTahsilatModallari, TarafArama). Kokte GenForm -> BelgeKarti
+      //   kenari var (karttan basvuru acilir); onu kirmadan bu aile
+      //   temizlenemez.
+      'bilesenler/GenForm.tsx -> sayfalar/BelgeKarti.tsx -> bilesenler/belge/BelgeKartiModallari.tsx -> bilesenler/GenForm.tsx',
     ];
 
     const yeniler = zincirler.filter(z => !bilinen.includes(z));
