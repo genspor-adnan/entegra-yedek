@@ -224,6 +224,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   useEffect(() => { setMuayeneBilgiAcik(false) }, [kartId]);
   // Belge (fatura/siparis) karti da MODAL: liste arkada kalir, rota degismez.
   const [yeniBelgeTuru, setYeniBelgeTuru] = useState<number | null>(null);
+  const [yeniBasvuruHasta, setYeniBasvuruHasta] =
+    useState<{ id: number; unvan: string } | null>(null);
   // Mevcut belgeyi ac (salt gorunum) - ayni modal, id ile.
   const [acikBelgeId, setAcikBelgeId] = useState<number | null>(null);
 
@@ -1191,6 +1193,20 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       <BelgeKarti id={acikBelgeId} onKapat={() => setAcikBelgeId(null)} />
     )}
 
+    {/* HASTA KARTINDAN YENİ BAŞVURU (782, kullanıcı): hasta kartı KAPANIR,
+        başvuru kartı onun yerine açılır. Önceden ikisi üst üste duruyordu ve
+        "hangi karttayım" sorusu doğuyordu. Hasta ön-dolgu olarak geçer -
+        başvuru cari aramasıyla değil, hasta seçili açılır. */}
+    {yeniBasvuruHasta !== null && (
+      <BelgeKarti
+        tur={19}
+        tarafId={yeniBasvuruHasta.id}
+        tarafUnvan={yeniBasvuruHasta.unvan}
+        onKapat={() => setYeniBasvuruHasta(null)}
+        onKaydedildi={() => setYenile(t => t + 1)}
+      />
+    )}
+
     {yeniBelgeTuru !== null && (
       <BelgeKarti
         tur={yeniBelgeTuru}
@@ -1372,6 +1388,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       kartTazele={kartTazele} setKartTazele={setKartTazele}
       sorgu={sorgu} git={git} setYenile={setYenile}
       setOdaklaSonEklenen={setOdaklaSonEklenen}
+      onBasvuruAc={(tarafId, unvan) => setYeniBasvuruHasta({ id: tarafId, unvan })}
     />
     </>
   );

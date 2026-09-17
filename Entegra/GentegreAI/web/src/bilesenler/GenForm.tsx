@@ -51,6 +51,12 @@ interface Props {
   id: number | 'yeni';
   baslik?: string;
   onKapat?(): void;
+  /**
+   * Hasta kartındaki "＋ Yeni Başvuru": KART KAPANIR, başvuru kartı onun
+   * yerine açılır (kullanıcı). Verilmezse başvuru kartın ÜSTÜNDE açılır -
+   * iki kart üst üste, "hangisindeyim" sorusunu doğuruyordu.
+   */
+  onBasvuruAc?(tarafId: number, unvan: string): void;
   /** Bir GRUP sekmesinin icerigini sarmalar - ekran o sekmeye alt sekme cubugu
       ya da ek bolum ekleyebilir (Firma Bilgileri'nde e-Belge sekmesi: Genel /
       Seri / XSLT / tur ayarlari). Verilmezse sekme dogrudan cizilir. */
@@ -228,7 +234,7 @@ export interface EkSekmeBaglami {
  */
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
-export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, onKaydedildi, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, onKaydedildi, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
@@ -930,6 +936,25 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
     onKapat?.();
   }, [kaydedilmemisDegisiklikVar, onKapat]);
 
+  /**
+   * YENİ BAŞVURU: hasta kartını KAPATIP başvuru kartını açar (kullanıcı).
+   *
+   * Kaydedilmemiş değişiklik koruması aynen geçerli - `kapatIstendi` üzerinden
+   * gidiyor; hasta kartında yarım kalmış bir düzenleme, başvuru açılırken
+   * sessizce kaybolmasın.
+   *
+   * Çağıran bu yolu vermediyse (başka ekranlar) eski davranış sürer: başvuru
+   * kartın üstünde açılır.
+   */
+  const basvuruAc = useCallback(() => {
+    if (!onBasvuruAc) { setAcilanBasvuru(0); return }
+    const unvan = String(deger.unvan
+      ?? `${deger.ad ?? ''} ${deger.soyad ?? ''}`.trim());
+    onBasvuruAc(id as number, unvan);
+    kapatIstendi();
+  }, [onBasvuruAc, deger, id, kapatIstendi]);
+
+
   // Kart acildiginda/kapatildiginda bekleyen ek kayit isleri temizlenir -
   //   baska kartin degisikligi buraya sizmasin.
   useEffect(() => { ekKaydetTemizle(); return () => ekKaydetTemizle() }, [kaynak, id]);
@@ -1333,7 +1358,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, seritAlanlari, seritSarma
                       onClick={() => setHata('Provizyon/müstehaklık servisi henüz bağlı değil.')}>
                 Provizyon/Müstehaklık Sorgula
               </button>
-              <button className="d yesil" type="button" onClick={() => setAcilanBasvuru(0)}>
+              <button className="d yesil" type="button" onClick={() => basvuruAc()}>
                 ＋ Yeni Başvuru
               </button>
             </>

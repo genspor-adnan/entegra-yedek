@@ -12947,3 +12947,45 @@ başlıkta duruyor. vitest 614/614, derleme temiz.
 
 **Not:** hasta seçme yolu değişmedi ama **azaldı** - bu satırdan hasta arayan
 bir alışkanlık varsa, kullanıcı artık araç çubuğundaki aramayı kullanacak.
+
+---
+
+## 17.09.2026 — Hasta kartından başvuru: kart kapanıp yerine açılıyor (782)
+
+Kullanıcı: *"hasta kartındayken yeni başvuru butona basınca hasta kartı kapanıp
+başvuru kartı açılsın"* ve *"buton label Başvuruyu Aç → Başvuruyu Kaydet
+(Protokol Ver)"*.
+
+**Önceden başvuru, hasta kartının ÜSTÜNDE açılıyordu** - iki kart üst üste ve
+"hangisindeyim" sorusu. Artık hasta kartı kapanıyor, başvuru onun yerine
+açılıyor; hasta **ön-dolgu** olarak geçiyor, yani başvuru cari aramasıyla değil
+hasta seçili başlıyor (doğrulamada "Hasta adem dere · Dosya No A/00000002").
+
+**Kaydedilmemiş değişiklik koruması korundu**: yeni yol `kapatIstendi`
+üzerinden gidiyor, hasta kartında yarım kalmış bir düzenleme başvuru açılırken
+sessizce kaybolmuyor.
+
+**Kartı GenForm kapatamaz**, çünkü başvuru kartı onun çocuğuydu - kapanınca
+başvuru da giderdi. Yeni `onBasvuruAc` geri çağrısı listeye çıkıyor; kartı ve
+başvuruyu **liste ekranı** barındırıyor. Çağıran bu yolu vermezse eski davranış
+sürüyor (başvuru kartın üstünde açılır).
+
+Yazarken `basvuruAc`ı `kapatIstendi`in ÜSTÜNE koymuştum; bu turda tam bu
+sınıftan (TDZ) bir hata çıkmıştı - tıklamada çalıştığı için patlamazdı ama
+sıra düzeltildi ve bağımlılık dizisine yazıldı.
+
+**Düğme etiketi**: *"✔ Başvuruyu Aç (Protokol Ver)"* → **"💾 Başvuruyu Kaydet
+(Protokol Ver)"**. Düğme bir kayıt işlemi yapıyor, ekran açmıyor; "Aç" kelimesi
+yeni bir pencere bekletiyordu. Test beklentisi de güncellendi.
+
+**Bir düzeltme.** 781'de *"protokol numarası başlık şeridinde 'Protokol No'
+olarak duruyor"* demiştim; doğrulamam zayıftı (metin eşleşmesi listenin
+kolon başlığından geliyordu). Doğrusu: kayıtlı başvuruda numara **kart
+başlığında** görünür - *"Başvuru #5380 — P-000135"*. Yeni başvuruda numara
+zaten yoktur. Sonuç değişmiyor (numara kayıp değil) ama nerede göründüğü
+farklı.
+
+**Doğrulama.** Hasta kartı açıkken düğmeye basıldı: adres `/hasta`ya döndü,
+MERNİS düğmesi kayboldu (hasta kartı kapandı), ekranda **tek** kart kaldı ve o
+başvuru kartıydı; hasta ön-dolgu geldi; düğme yeni etiketiyle çizildi.
+vitest 614/614, xUnit 234/234, derleme temiz.

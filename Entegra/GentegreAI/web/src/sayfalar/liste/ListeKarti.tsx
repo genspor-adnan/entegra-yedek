@@ -39,6 +39,8 @@ export interface ListeKartiOzellikleri {
   sorgu: URLSearchParams;
   git(yol: string, secenek?: { replace?: boolean }): void;
   setYenile(f: (t: number) => number): void;
+  /** Hasta kartındaki "＋ Yeni Başvuru": kart kapanır, başvuru açılır (782). */
+  onBasvuruAc?(tarafId: number, unvan: string): void;
   setOdaklaSonEklenen(f: (t: number) => number): void;
 }
 
@@ -63,6 +65,7 @@ export function ListeKarti({
   tanim, kartId, kartOzel, sekmeVerisi, aksiyon,
   muayeneBilgiAcik, setMuayeneBilgiAcik, setIcdAramaAcik,
   kartTazele, setKartTazele, sorgu, git, setYenile, setOdaklaSonEklenen,
+  onBasvuruAc,
 }: ListeKartiOzellikleri) {
   if (kartId === null || !tanim.kartYolu || tanim.ozelKart) return null;
 
@@ -406,6 +409,7 @@ export function ListeKarti({
         // `geri`: kart baska bir ekrandan (seans) acildiysa kaydet/kapat oraya
         //   doner - liste ekranina dusurmek hekimi seansi yeniden aramaya zorlardi.
         yeniSecilenAdlar={sorgu.get('hastaAd') ? { hastaId: sorgu.get('hastaAd')! } : undefined}
+        onBasvuruAc={onBasvuruAc}
         onKapat={() => git(sorgu.get('geri') ?? tanim.kartYolu!)}
         onKaydedildi={yeniId => {
           setYenile(t => t + 1);

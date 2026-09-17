@@ -77,9 +77,11 @@ export function BelgeAracCubugu({
         </button>
       : <button className="d onay" disabled={kaydediyor} onClick={() => void kes()}>
           {/* BASVURUDA kaydetmek "protokol vermek"tir (mockup): numara kayitla
-              atanir, o yuzden dugme isini soyluyor. */}
+              atanir, o yuzden dugme isini soyluyor. "Aç" yerine KAYDET
+              (782, kullanici): dugme bir kayit islemi yapiyor, ekran acmiyor -
+              "Aç" kelimesi yeni bir pencere bekletiyordu. */}
           {kaydediyor ? '💾 Kaydediliyor…'
-            : basvuruMu ? '✔ Başvuruyu Aç (Protokol Ver)' : '💾 Kaydet'}
+            : basvuruMu ? '💾 Başvuruyu Kaydet (Protokol Ver)' : '💾 Kaydet'}
         </button>}
   {/* Basvuruda IPTAL en SONDA (mockup) - dugme grubunun sonunda durur. */}
   {!basvuruMu && (

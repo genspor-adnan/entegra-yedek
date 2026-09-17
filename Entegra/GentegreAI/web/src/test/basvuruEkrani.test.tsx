@@ -139,14 +139,14 @@ describe('yeni basvuru karti', () => {
     expect(await sekme('Tahsilat')).toBeInTheDocument();
     expect(await sekme('Belgeye Dönüşüm')).toBeInTheDocument();
     // YENI basvuruda dugme "protokol ver" der - kayitli belgede "kaydet".
-    expect(screen.getByText(/Başvuruyu Aç \(Protokol Ver\)/)).toBeInTheDocument();
+    expect(screen.getByText(/Başvuruyu Kaydet \(Protokol Ver\)/)).toBeInTheDocument();
   });
 
   it('HASTA ON-DOLGU: taraf hazir gelir, arama penceresi ACILMAZ', async () => {
     // Hasta kartindaki "＋ Yeni Başvuru" bu yoldan acilir: hasta zaten belli,
     //   kullaniciya bir kez daha "hastayi ara" dedirtmek gereksiz adimdi.
     ciz({ tarafId: 5023, tarafUnvan: 'TEST ÖZEL HASTA' });
-    expect(await screen.findByText(/Başvuruyu Aç \(Protokol Ver\)/)).toBeInTheDocument();
+    expect(await screen.findByText(/Başvuruyu Kaydet \(Protokol Ver\)/)).toBeInTheDocument();
     expect(screen.queryByPlaceholderText(/Hastayı isim\/tel ile ara/)).toBeNull();
   });
 
