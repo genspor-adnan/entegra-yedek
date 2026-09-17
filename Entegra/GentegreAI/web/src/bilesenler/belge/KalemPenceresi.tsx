@@ -207,6 +207,30 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   }, [dovizli, r.fiyatDovizi, belgeTarihi]);
 
   const adet = hamSayi(r.adet);
+  /**
+   * ETKIN ROTA VE SGK KILIDI EN USTTE (772 duzeltmesi).
+   *
+   * Ikisi de asagida, `fg()`den SONRA duruyordu; `fg` `sgkKilitli`yi
+   * kapsiyor ve `brutFiyat` satiri `fg()`yi HEMEN cagirdigi icin pencere
+   * her acilista TDZ ile patliyordu ("Cannot access 'sgkKilitli' before
+   * initialization") - kullaniciya beyaz ekran. Ikisi de yalniz PROP'lara
+   * bakiyor, en basta hesaplanmalari guvenli.
+   */
+  const etkinRota = Number(r.rota ?? 0) || Number(rota ?? 0);
+  /**
+   * SGK'DA FIYAT VE KATKI SALT OKUNUR (602, kullanici: "SGK'da birim fiyat ve
+   * katkı değişmez. İskonto uygulanabilir ama o da sadece katkıya uygulanır.
+   * SUT fiyatı hiçbir şekilde değişmez").
+   *
+   * Saf SGK'da birim fiyat SUT bedelidir - SGK'nin mevzuatla belirlenmis
+   * odemesi. Hastanenin onu degistirmesi diye bir sey yoktur; katki da
+   * listeden gelen tanimli tutardir. Degistirilebilir birakmak, kaydedince
+   * sunucunun listeden okudugu rakama geri donen bir kutu demekti.
+   *
+   * ISKONTO KUTUSU ACIK KALIR: indirim mesrudur, yalniz KATKIYA isler
+   * (fn_dagilim_coz - SUT carpani koşulsuz miktardir).
+   */
+  const sgkKilitli = etkinRota === SAF_SGK_ROTA;
   /** Ana birim karsiligi: "2 Kutu = 24 Adet". Ana birim seciliyse gosterilmez. */
   const seciliCarpan = Number(r.birimCarpan ?? 1) || 1;
   const anaBirimMiktar = seciliCarpan !== 1 && adet > 0
@@ -259,8 +283,9 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    * ÖSS ve Karma'da hastanin payi KARSILAMA ORANINDAN cikar. Kutu oralarda da
    * aciliyor, kullanici hicbir yere yazilmayan bir rakam giriyordu.
    * Satirin kendi rotasi (kayitli satirda sunucudan gelir) onceliklidir.
+   * (`etkinRota` yukari tasindi - `fg()` ondan turetilen `sgkKilitli`yi
+   * kapsiyor ve hemen cagriliyor.)
    */
-  const etkinRota = Number(r.rota ?? 0) || Number(rota ?? 0);
   const katkiliTarife = [2, 3].includes(Number(tarifeTipi))
                      && EK_KATKILI_ROTALAR.includes(etkinRota);
   /**
@@ -270,20 +295,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    * Bedel kaydederken birim fiyattan turetilir (bkz. `kaydet`).
    */
   const sutKutusu = !!r.sgkGerekli && etkinRota !== SAF_SGK_ROTA;
-  /**
-   * SGK'DA FIYAT VE KATKI SALT OKUNUR (602, kullanici: "SGK'da birim fiyat ve
-   * katkı değişmez. İskonto uygulanabilir ama o da sadece katkıya uygulanır.
-   * SUT fiyatı hiçbir şekilde değişmez").
-   *
-   * Saf SGK'da birim fiyat SUT bedelidir - SGK'nin mevzuatla belirlenmis
-   * odemesi. Hastanenin onu degistirmesi diye bir sey yoktur; katki da
-   * listeden gelen tanimli tutardir. Degistirilebilir birakmak, kaydedince
-   * sunucunun listeden okudugu rakama geri donen bir kutu demekti.
-   *
-   * ISKONTO KUTUSU ACIK KALIR: indirim mesrudur, yalniz KATKIYA isler
-   * (fn_dagilim_coz - SUT carpani koşulsuz miktardir).
-   */
-  const sgkKilitli = etkinRota === SAF_SGK_ROTA;
+  /* `sgkKilitli` yukariya, `fg()`den ONCEYE tasindi (772 duzeltmesi). */
   /**
    * BIRIM FIYAT KILIDI (661, kullanici: "öss ve sgk tiplerinde birim fiyat hep
    * kapalı olmalı, özel tipte yetkiye bağlı olmalı").

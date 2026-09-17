@@ -12336,3 +12336,41 @@ döndürüyor, üst şerit de aynı kimliği veriyor. Dev verisindeki logo
 xUnit 234/234, vitest 598/598. Test verisi silindi (1 talep).
 
 Göç **772 yalnız docker'da**.
+
+---
+
+## 17.09.2026 — Başvuruda ücret eklerken beyaz ekran (regresyon)
+
+Kullanıcı sunucuda gördü: *"başvuruya ücret eklemek için + ya bastım liste
+geldi, birine tıklayınca fiyat yerine beyaz ekran geliyor"*.
+
+Yerelde birebir tekrarlandı ve sebep kesin:
+
+```
+ReferenceError: Cannot access 'sgkKilitli' before initialization
+    at KalemPenceresi (KalemPenceresi.tsx)
+```
+
+**Temporal dead zone.** `fg()` yardımcısı `sgkKilitli`yi kapsıyor ve
+`const brutFiyat = brutBirimFiyat(fg())` satırı onu **hemen** çağırıyor;
+`sgkKilitli` ise 40 satır aşağıda tanımlıydı. Pencere her açılışta patlıyor,
+React hiçbir şey basamıyor - kullanıcı beyaz ekran görüyor.
+
+Regresyon `f0cc446` ile girmiş (fiyat matematiğinin saf modüle taşınması):
+taşıma sırasında `fg` yukarı çıktı, `sgkKilitli` yerinde kaldı. **Hesap
+doğruydu, patlayan bileşenin kendisiydi** - bu yüzden `kalemFiyat.test.ts`
+yakalayamadı.
+
+**Düzeltme.** `etkinRota` ve `sgkKilitli` en yukarı, `fg`den öncesine taşındı.
+İkisi de yalnız prop'lara bakıyor, orada hesaplanmaları güvenli.
+
+**Test.** `kalemPenceresiCizim.test.tsx`: pencere dört tarife/rota bileşiminde
+(özel · saf SGK · TSS · başvuru) çiziliyor mu - kilit kararları rotaya göre
+ayrı dallar açıyor ve bir dalda çizilen pencere ötekinde patlayabilir. Testin
+hatayı gerçekten yakaladığı doğrulandı: hatalı sürümle **4/4 kırılıyor**
+(aynı `ReferenceError`), düzeltilmişle geçiyor.
+
+vitest 602/602 (+4), derleme temiz.
+
+**Sunucuya YAYINLANMADI** - yayın kullanıcının kararı. `46.36.201.170/genotipai`
+düzeltme yayınlanana kadar beyaz ekranı göstermeye devam eder.
