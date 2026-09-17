@@ -11625,3 +11625,37 @@ temiz. Test verisi silindi.
 durmuyor: kullanıcı onları saymadı ve akış tanımı, yürüyen süreçten ayrı bir
 karardır. Artık hiçbir kod onlara bakmıyor (758'de `onay_akis`e taşındılar);
 istendiğinde ayrı bir dosyayla düşerler. Göç **759 yalnız docker'da**.
+
+
+## 17.09.2026 — Doküman akış tanımı tabloları düştü (`db/760`)
+
+758 doküman onayını omurgaya taşırken akış TANIMINI da `onay_akis` /
+`onay_akis_adim`a kopyalamış, `dokuman.akis_id` ve `dokuman_kategori.akis_id`
+kolonlarını yeni id'lere çevirmiş ama eski tabloları yerinde bırakmıştı.
+759 yürüyen süreç tablolarını düşürmüştü; bu dosya tanım tablolarını
+(`dokuman_akis`, `dokuman_akis_adim`) düşürüyor.
+
+**Üç kanıt arandı.** (1) Her `dokuman_akis` satırının omurgada karşılığı
+(`onay_akis.kod = 'dokuman.<eski id>'`), (2) her `dokuman_akis_adim`ın aynı
+sırada bir `onay_akis_adim`ı, (3) **`dokuman` ve `dokuman_kategori`nin
+`akis_id`lerinin gerçekten `onay_akis`i gösterdiği**. Üçüncüsü en önemlisi:
+758'in kolon güncellemesi eksik kalmış olsaydı, tabloyu düşürmek o
+dokümanları var olmayan bir akışa bağlı bırakır ve bir daha onaya
+gönderilemezlerdi. Eksik olsaydı dosya hata verip duracaktı; 3 doküman ve
+4 kategorinin hepsi omurgayı gösteriyordu.
+
+**Kolonlara FK konulmadı.** Omurgada bir akış silinebilir; FK, kurumun
+kullanmadığı bir akışı silmesini engellerdi. Bağ 758'den beri `onay_akis`
+üzerinden okunuyor ve okuma yolu (`v_dokuman_akis_lookup`) geçersiz id'yi
+boş gösterir.
+
+**Doğrulama.** Eski tablolar olmadan tam akış koşuldu: yeni sürüm → onaya
+gönder (zincir İnceleme > Onay) → iki basamak onay → sürüm yayınlandı. Doküman
+türleri listesi akış adını ("İnceleme + Onay") göstermeye devam etti. Kodda
+tabloya referans kalmadı, bağımlı görünüm yoktu, tek FK iki tablonun kendi
+arasındaydı. xUnit 234/234, vitest 598/598, iki derleme temiz. Test verisi
+silindi, doküman başlığı önceki yayın sürümünden geri yazıldı.
+
+Onay omurgası artık **tek motor**: satınalma talebi, izin, masraflı onarım,
+avans, iskonto ve doküman sürümü aynı `onay` / `onay_adim` üzerinde yürüyor;
+modüllerin kendi zincir tabloları kalmadı. Göç **760 yalnız docker'da**.
