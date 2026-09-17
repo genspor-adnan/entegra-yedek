@@ -12877,3 +12877,39 @@ xUnit 234/234, vitest 614/614, derlemeler temiz. Test verisi silindi.
 
 Teknik servis modülü böylece tamamlandı: çağrı → iş emri → ziyaret, çizelge,
 mobil kart, çizilen imza, parça, emanet, periyodik bakım ve numaralar.
+
+---
+
+## 17.09.2026 — Tarayıcı otomatik tamamlaması kapatıldı (780)
+
+Kullanıcı: *"kimlik ekranı ve diğer ekranlarda dahil editlerin içine tıklayınca
+otomatik tamamlama gelmesin."*
+
+**Tek tek yazmak çözüm değil.** Uygulamada 500'den fazla `<input>` var; hepsine
+`autoComplete="off"` yazmak bugünküleri kapatır ama **yarın eklenecek alanı**
+kapatmaz - kural kodun her yerine dağılır ve bir sonraki ekranda yine unutulur.
+Kural tek yerde: `useOtomatikTamamlamaKapali` uygulama kökünde bir kez çalışıyor,
+var olan alanları tarıyor ve bir `MutationObserver` ile sonradan çizilenleri de
+yakalıyor (React her ekranda yeni alan çiziyor; ilk taramayla yetinmek ikinci
+ekranda kuralı kaybetmek olurdu).
+
+**Parolada `off` yetmez.** Chrome ve Edge `type="password"` alanlarında
+`autocomplete="off"`u **yok sayar**; dinledikleri tek değer `new-password`tür.
+Giriş ekranındaki bilinçli `username` / `current-password` işaretleri de
+kaldırıldı - kullanıcı açıkça kimlik ekranını da istedi.
+
+**Kendi önerilerimiz etkilenmiyor.** `datalist` ile verdiğimiz listeler (ör.
+masraf beyanında fiş belge numaraları) tarayıcı geçmişi değil bizim
+listemizdir; kapanan yalnız tarayıcının kendi geçmiş/adres/parola önerisi.
+
+Düğme, onay kutusu, dosya gibi alanlara öznitelik **yazılmıyor** - onlarda
+otomatik tamamlama zaten yok, yazmak DOM'u boş yere kalabalıklaştırırdı.
+
+**Doğrulama.** Giriş (2/2), Servis Çağrıları (3/3), Genel Ayarlar (12/12),
+Başvuru (1/1) - sayılabilir her alan kapalı, parola alanları `new-password`.
+Sonradan DOM'a eklenen üç alan da gözlemciyle kapandı (`off | new-password |
+off`). vitest 614/614, xUnit 234/234, derleme temiz.
+
+**Not:** `autocomplete` tarayıcıya verilen bir **istektir**; parola yöneticileri
+kendi kurallarıyla yine "kaydedeyim mi" diye sorabilir. Uygulamanın
+yapabileceği son nokta burasıdır.

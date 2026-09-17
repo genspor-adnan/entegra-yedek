@@ -61,6 +61,7 @@ import { ParolaZorunlu } from './sayfalar/ParolaZorunlu';
 import { IskontoOnaylari } from './sayfalar/IskontoOnaylari';
 import { calismaOku } from './bilesenler/calismaTercihi';
 import { Dokumler } from './sayfalar/Dokumler';
+import { useOtomatikTamamlamaKapali } from './bilesenler/otomatikTamamlama';
 
 function Yollar() {
   const { kullanici, yukleniyor, yetki } = useOturum();
@@ -309,6 +310,11 @@ function Yollar() {
 }
 
 export default function App() {
+  // TARAYICI OTOMATIK TAMAMLAMASI KAPALI (780, kullanici): 500'den fazla
+  //   input'a tek tek yazmak bugunkuleri kapatir, yarin eklenecegi kapatmaz.
+  //   Kural tek yerde ve sonradan cizilen alanlari da kapsiyor.
+  useOtomatikTamamlamaKapali();
+
   // basename: uygulama alt yolda yayinda olabilir (sunucuda /ai) - rotalar o
   //   onekle calisir. import.meta.env.BASE_URL vite'in `base` degeri, yerelde "/".
   return (

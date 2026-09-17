@@ -164,11 +164,17 @@ export function Giris() {
           <>
             <label>
               Kullanici
-              <input value={kod} onChange={e => setKod(e.target.value)} autoFocus autoComplete="username" />
+              {/* OTOMATIK TAMAMLAMA KAPALI (780, kullanici): kullanici adi
+                  ve parola alanlarinda tarayicinin kayitli kimlik onerisi
+                  cikmasin. Paroladaki "new-password", Chrome/Edge'in
+                  `off`u yok saymasi yuzunden (bkz. otomatikTamamlama.ts). */}
+              <input value={kod} onChange={e => setKod(e.target.value)} autoFocus
+                     autoComplete="off" />
             </label>
             <label>
               Parola
-              <input type="password" value={parola} onChange={e => setParola(e.target.value)} autoComplete="current-password" />
+              <input type="password" value={parola} autoComplete="new-password"
+                     onChange={e => setParola(e.target.value)} />
             </label>
           </>
         ) : (
