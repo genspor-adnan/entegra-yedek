@@ -11859,3 +11859,52 @@ sessizliği, hatırlatma işi ve SMTP ekran desteği bu turda bitmişti; listeye
 
 Bundan sonra kalan iş eklendiğinde/kapandığında bu dosya güncellenecek;
 tarihçe *ne yapıldığını*, o dosya *ne yapılmadığını* anlatıyor.
+
+
+## 17.09.2026 — Sözlü onayın yazılı teyidi takip ediliyor (`db/763`)
+
+738'den beri karar ucunda `sozlu-onay` vardı: basamak `durum = 4` olur ve
+`yazili_son`a "şu saate kadar yazılıya çevrilmeli" damgası yazılırdı. O
+damgaya **kimse bakmıyordu**.
+
+**Neden önemliydi.** Sözlü onay zinciri **ilerletir**: `KararAsync` durum
+4'ü "karar verilmiş" sayar, sıradaki basamağa geçer ve gerekirse zinciri
+tamamlar - yani sözlü bir onayla avans ödenebilir, doküman yayınlanabilir.
+Üstelik `v_onay_bekleyen` yalnız `durum in (0, 3)` döndürdüğü için sözlü
+onaylı basamak **hiçbir kuyrukta görünmüyordu**. Teyit gelmezse kayıtta
+yalnız "sözlü onay" kalıyor ve kimse fark etmiyordu: imza yerine bir telefon
+konuşması geçiyordu.
+
+**Geri almıyoruz.** Süre dolunca basamağı bekleyene döndürmek ilk akla gelen
+çözüm ama yanlış olurdu: zincir çoktan ilerlemiş, para ödenmiş, sürüm
+yayınlanmış olabilir; basamağı geri almak o eylemleri geri almaz, yalnız
+kaydı tutarsız yapar. "Motor karar vermez, sırayı yürütür" burada da geçerli
+- iş **görünür kılınır ve hatırlatılır**, kararı insan verir.
+
+**Üç parça geldi.**
+- `v_onay_sozlu` görünümü: yazılı teyit bekleyen bütün sözlü onaylar,
+  gecikme **saat** cinsinden (gün yuvarlaması "bugün doldu"yu gizlerdi).
+  Zincir kapanmış olsa da satır kalır - teyidin gerekliliği zincire değil
+  verilmiş söze bağlı, ve en tehlikeli hâl tam budur.
+- `onay.sozlu_takip` günlük işi, **09:30** (onay hatırlatmasından yarım saat
+  sonra; aynı dakikada koşsalar aynı kişiye iki mesaj aynı anda düşer ve
+  ikisi de okunmazdı). Alıcı **sözü veren kişidir** - teyidi başkası veremez.
+  Günde bir kez, süzgeç şablona bakar.
+- `POST /api/onay/adim/{adimId}/yaziliya`: sözlü onayı yazılıya çevirir.
+  Hatırlatma "şunu yap" diyorsa o şey yapılabilir olmalıydı. Zincire
+  dokunmaz - değişen, basamağın **dayanağıdır**. Teyidi sözü veren ya da
+  **vekili** verebilir; gerekçe üstüne yazılmaz, sonuna eklenir.
+
+**Doğrulama.** Bir iskonto basamağına 1 saatlik sözlü onay verildi: görünümde
+göründü, gecikmeden önce iş "yok" dedi. Termin geçmişe çekilince 1 hatırlatma
+yazıldı (doğru alıcı, doğru gövde), aynı gün ikinci tetik 0 verdi. Yazılıya
+çevirme `durum = 1` yaptı, `yazili_son`u temizledi ve gerekçeyi birleştirdi
+(*"telefonda onayladi · Yazılı teyit: imzali form geldi"*); ikinci çevirme
+"bu basamak sözlü onay değil" ile engellendi ve görünüm boşaldı.
+
+**Bu turda düzeltilen bir eksik.** Hatırlatmadaki kayıt numarası ilk yazımda
+yalnız avans/satınalma/izin/onarımı çözüyordu; iskonto `#4` diye görünüyordu.
+İskonto ve doküman eklendi, artık `P-000133` yazıyor. Test verisi geri alındı
+(gerçek iskonto taleplerinin basamakları bekleyene döndürüldü).
+
+xUnit 234/234, vitest 598/598, iki derleme temiz. Göç **763 yalnız docker'da**.

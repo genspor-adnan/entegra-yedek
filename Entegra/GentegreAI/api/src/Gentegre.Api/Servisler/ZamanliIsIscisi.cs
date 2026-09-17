@@ -50,6 +50,21 @@ public static class ZamanliIsler
                 : $"{adim} gecikmiş basamak için {bildirim} hatırlatma kuyruğa alındı.";
         },
 
+        // SÖZLÜ ONAY TAKİBİ (763): sözlü onay zinciri İLERLETİR ve hiçbir
+        //   kuyrukta görünmez; yazılı teyit gelmezse kayıtta yalnız bir
+        //   konuşma kalır. İş basamağı GERİ ALMAZ - zincir ilerlemiş, para
+        //   ödenmiş olabilir; yalnız sözü vereni uyarır.
+        ["onay.sozlu_takip"] = async (servisler, iptal) =>
+        {
+            var haber = servisler.GetRequiredService<OnayBildirimi>();
+            var veri = servisler.GetRequiredService<Gentegre.Veri.VeriKaynagi>();
+            await using var baglanti = await veri.AcAsync(iptal);
+            var (adim, bildirim) = await haber.SozluTakipAsync(baglanti, iptal);
+            return adim == 0
+                ? "Yazılı teyidi geciken sözlü onay yok."
+                : $"{adim} sözlü onay için {bildirim} hatırlatma kuyruğa alındı.";
+        },
+
         // İTS KUYRUĞU: ilaç bildirimleri (mal alım). Hesap tanımlı değilse iş
         //   yine çalışır ve durumu SÖYLER - kapı açıldığı gün kimsenin fark
         //   etmemesi olmasın.

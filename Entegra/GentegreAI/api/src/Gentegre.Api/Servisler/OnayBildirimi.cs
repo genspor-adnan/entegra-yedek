@@ -204,6 +204,90 @@ public sealed class OnayBildirimi
         return (gecikenler.Count, yazilan);
     }
 
+    // ============================================ sözlü onay takibi ==
+
+    /// <summary>
+    /// YAZILI TEYİDİ GECİKEN SÖZLÜ ONAYLAR (763). Zamanlı işten çağrılır.
+    ///
+    /// Sözlü onay zinciri İLERLETİR (durum 4, `KararAsync` onu "karar
+    /// verilmiş" sayar) ve `v_onay_bekleyen` onu göstermez - yani teyit
+    /// gelmezse kimse fark etmez. Bu iş o boşluğu kapatıyor.
+    ///
+    /// ALICI KARARI VEREN KİŞİDİR: teyidi ondan başkası veremez. Rol
+    /// basamağı olsa bile sözü söyleyen bellidir (`karar_veren_id`).
+    ///
+    /// GÜNDE BİR KEZ, hatırlatmayla aynı gerekçe: saatte bir çalışsaydı
+    /// gürültüye dönerdi. Süzgeç yine ŞABLONA bakar.
+    ///
+    /// BASAMAĞI GERİ ALMAZ: zincir ilerlemiş, para ödenmiş, sürüm
+    /// yayınlanmış olabilir; geri almak o eylemleri geri almaz, yalnız
+    /// kaydı tutarsız yapar.
+    /// </summary>
+    public async Task<(int Adim, int Bildirim)> SozluTakipAsync(
+        NpgsqlConnection baglanti, CancellationToken iptal = default)
+    {
+        var gecikenler = await baglanti.ListeAsync("""
+            select v.adim_id as "adimId", v.kaynak_tur as "kaynakTur",
+                   v.kaynak_id as "kaynakId", v.adim_ad as "adimAd",
+                   v.karar_veren_id as "kararVerenId", v.yazili_son as "yaziliSon",
+                   v.gecikme_saat as "gecikmeSaat", v.sube_id as "subeId"
+              from public.v_onay_sozlu v
+             where v.gecikti = 1
+               and v.karar_veren_id is not null
+               and not exists (
+                     select 1 from public.bildirim b
+                      where b.kaynak_tur = @p0 and b.kaynak_id = v.adim_id
+                        and b.sablon_id = (select x.id from public.bildirim_sablon x
+                                            where x.kod = 'onay.sozlu_gecikti')
+                        and b.ekleme_tarihi::date = current_date)
+             order by v.gecikme_saat desc
+             limit 200
+            """, null, [KaynakOnay], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+        var yazilan = 0;
+        foreach (var g in gecikenler)
+        {
+            // KAYIT NO / KONU gelen kutusu görünümünden çözülür; sözlü adım
+            //   orada olmadığı için kaydın kendisine ayrıca bakıyoruz.
+            var kayit = await baglanti.TekAsync("""
+                select coalesce(nullif(av.avans_no, ''), nullif(t.talep_no, ''),
+                                nullif(z.izin_no, ''), nullif(w.is_emri_no, ''),
+                                nullif(ib.belge_no, ''),
+                                nullif(dk.kod, '') || ' v' || ds.surum_no::text,
+                                '#' || @p1::text)                 as "kayitNo",
+                       coalesce(nullif(av.gerekce, ''), nullif(t.gerekce, ''),
+                                nullif(w.ariza_metni, ''), nullif(isk.gerekce, ''),
+                                nullif(dk.ad, ''), '')            as konu
+                  from (select 1) q
+                  left join public.personel_avans av on @p0 = 1257 and av.id = @p1
+                  left join public.satinalma_talep t on @p0 = 1241 and t.id = @p1
+                  left join public.personel_izin z   on @p0 = 904  and z.id = @p1
+                  left join public.demirbas_is_emri w on @p0 = 1224 and w.id = @p1
+                  left join public.iskonto_talep isk on @p0 = 1256 and isk.id = @p1
+                  left join public.belge ib          on ib.id = isk.belge_id
+                  left join public.dokuman_surum ds  on @p0 = 976  and ds.id = @p1
+                  left join public.dokuman dk        on dk.id = ds.dokuman_id
+                """, null,
+                [Convert.ToInt32(g["kaynakTur"]), Convert.ToInt64(g["kaynakId"])],
+                OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            var yaziliSon = g["yaziliSon"] as DateTime?;
+
+            yazilan += await YazAsync(baglanti,
+                [Convert.ToInt32(g["kararVerenId"])], "onay.sozlu_gecikti",
+                new Dictionary<string, string>
+                {
+                    ["kayitNo"] = kayit?["kayitNo"] as string ?? "",
+                    ["konu"] = kayit?["konu"] as string ?? "",
+                    ["adimAd"] = g["adimAd"] as string ?? "",
+                    ["gecikmeSaat"] = Convert.ToInt32(g["gecikmeSaat"] ?? 0).ToString(),
+                    ["yaziliSon"] = yaziliSon?.ToString("dd.MM.yyyy HH:mm") ?? "",
+                }, Convert.ToInt64(g["adimId"]), 0, g["subeId"] as int?, iptal);
+        }
+
+        return (gecikenler.Count, yazilan);
+    }
+
     // ======================================================= yardımcılar ==
 
     /// <summary>

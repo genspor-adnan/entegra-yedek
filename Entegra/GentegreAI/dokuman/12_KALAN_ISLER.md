@@ -4,7 +4,7 @@ Bu liste `00_TARIHCE.md`'deki her turun sonuna dağılmış "Kalan" notlarının
 toplanmış ve **canlı veriyle doğrulanmış** hâlidir. Tarihçe *ne yapıldığını*
 anlatır; burası *ne yapılmadığını*.
 
-Son güncelleme: **17.09.2026**, `db/762` sonrası.
+Son güncelleme: **17.09.2026**, `db/763` sonrası.
 
 Doğrulama yöntemi: maddeler dev veritabanına (docker `gentegre-pg18`) ve
 koda bakılarak yazıldı; sayılar o anki gerçek durumdur. Bir maddeyi
@@ -33,7 +33,7 @@ Onay omurgası bunları destekliyor; hiçbir akış kullanmıyor. Her biri
 | # | Yetenek | Bugünkü durum |
 |---|---|---|
 | 2.1 | **Vekâlet** — ekran ve motor desteği var (`onay_vekalet`), karar ucu vekili tanıyor, bildirim vekile de gidiyor. | Kayıt: **0**. Gerçek veriyle hiç denenmedi. |
-| 2.2 | **Sözlü onay** (`onay_adim.durum = 4`) — karar ucunda var, `yazili_son` termini yazılıyor. | Kullanım: **0**. Terminin dolduğunu takip eden bir iş **yok** — sözlü onay verilip yazılıya çevrilmezse kimse fark etmez. |
+| 2.2 | ~~**Sözlü onay** takibi~~ — **763'te kapandı.** `v_onay_sozlu` görünümü, `onay.sozlu_takip` günlük işi (09:30) ve `/api/onay/adim/{id}/yaziliya` ucu geldi. | Kullanım hâlâ **0** (kimse sözlü onay vermedi) ama artık verilirse takip ediliyor. |
 | 2.3 | **e-İmza** (`onay_akis_adim.e_imza_zorunlu`) — kolon var, akış tanımı ekranından işaretlenebilir. | İşaretli adım: **0**. İmza atma/doğrulama akışı **hiç yazılmadı**; bayrak bugün hiçbir şey yapmıyor. |
 
 ---
@@ -65,7 +65,7 @@ Onay omurgası bunları destekliyor; hiçbir akış kullanmıyor. Her biri
 
 ## 5. Onay omurgası — kapandı
 
-Kayıt için: 738-762 arasında tamamlandı, açık iş kalmadı.
+Kayıt için: 738-763 arasında tamamlandı, açık iş kalmadı.
 
 - Altı akış tek motorda: satınalma talebi, izin, masraflı onarım, avans,
   iskonto, doküman sürümü (`onay_akis`: **6 kayıt**).
@@ -74,3 +74,5 @@ Kayıt için: 738-762 arasında tamamlandı, açık iş kalmadı.
 - Kısmi onay (ölçüyü düşürerek onaylama) karar ucunun genel alanı.
 - Gelen kutusu, vekâlet, hatırlatma, bildirim ve gecikme takibi ortak.
 - `LogTabloIdTestleri` yeni çakışmayı derlemeden değil testten geri çeviriyor.
+- Sözlü onayın yazılı teyidi takip ediliyor (`v_onay_sozlu`,
+  `onay.sozlu_takip`, `/adim/{id}/yaziliya`).

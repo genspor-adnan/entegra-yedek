@@ -294,6 +294,90 @@ public static class OnayUclari
                 izlemeNo = baglam.IzlemeNo
             });
         });
+
+        // -------------------------------------------- sözlü -> yazılı ----
+        // POST /api/onay/adim/{adimId}/yaziliya
+        //   Sözlü onayı (durum 4) YAZILI onaya (durum 1) çevirir. 763'teki
+        //   hatırlatma bunu istiyor; istenen eylem yapılabilir olmalı.
+        //
+        //   ZİNCİRE DOKUNULMAZ: sözlü onay zinciri zaten ilerletmişti, kayıt
+        //   çoktan onaylanmış/ödenmiş olabilir. Burada değişen, o basamağın
+        //   DAYANAĞIdır - "telefonda dedi" yerine "yazılı teyit etti".
+        grup.MapPost("/adim/{adimId:long}/yaziliya", async (
+            long adimId, OnayKararIstegi istek, BaglamCozucu cozucu,
+            VeriKaynagi veri, LogDeposu log,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+
+            var a = await baglanti.TekAsync("""
+                select a.onay_id as "onayId", a.durum, a.ad,
+                       a.karar_veren_id as "kararVerenId", a.gerekce,
+                       n.kaynak_tur as "kaynakTur", n.kaynak_id as "kaynakId",
+                       k.kod as "akisKod", a.rol
+                  from public.onay_adim a
+                  join public.onay n on n.id = a.onay_id
+                  left join public.onay_akis k on k.id = n.akis_id
+                 where a.id = @p0
+                """, null, [adimId], OkuyucuGenisletmeleri.Sozluk, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Onay basamağı bulunamadı.");
+
+            if (Convert.ToInt16(a["durum"]) != Servisler.OnayMotoru.SozluOnay)
+                throw GentegreHatasi.IsKurali(
+                    "Bu basamak sözlü onay değil; yazılıya çevrilemez.");
+
+            // TEYİDİ SÖZÜ VEREN KİŞİ VERİR - ya da vekili. Başkasının sözünü
+            //   yazıya geçirmek, imzayı devretmekle aynı şey olurdu.
+            var kararVeren = a["kararVerenId"] as int?;
+            if (kararVeren is not null && kararVeren != baglam.KullaniciId)
+            {
+                var vekil = await baglanti.TekDegerAsync<int>("""
+                    select count(*) from public.onay_vekalet
+                     where devreden_id = @p0 and devralan_id = @p1 and aktif = 1
+                       and current_date between baslangic and bitis
+                    """, null, [kararVeren.Value, baglam.KullaniciId], iptal);
+                if (vekil == 0)
+                    throw GentegreHatasi.IsKurali(
+                        "Sözlü onayı veren kişi (ya da vekili) teyit edebilir.");
+            }
+
+            baglam.AksiyonIste(AksiyonKodu(a["akisKod"] as string ?? "",
+                                           Convert.ToInt16(a["rol"] ?? (short)0)));
+
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            // GEREKÇE KORUNUR, ÜSTÜNE YAZILMAZ: sözlü kararın kendi notu
+            //   kaydın parçası; teyit onu silmez, sonuna eklenir.
+            await baglanti.CalistirAsync("""
+                update public.onay_adim
+                   set durum = 1, yazili_son = null,
+                       gerekce = trim(both ' ' from
+                                   coalesce(nullif(gerekce, ''), '')
+                                   || case when coalesce(nullif(gerekce, ''), '') <> ''
+                                           then ' · ' else '' end
+                                   || 'Yazılı teyit: '
+                                   || coalesce(nullif(@p1, ''), '(not yok)')),
+                       degistiren = @p2, degistirme_tarihi = now()
+                 where id = @p0
+                """, islem, [adimId, istek.Gerekce ?? "", baglam.KullaniciId], iptal);
+
+            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogOnay,
+                Convert.ToInt64(a["onayId"]), baglam.KullaniciId, baglam.SubeId,
+                baglam.Ip,
+                new { islem = "sozlu-yaziliya", adim = a["ad"], gerekce = istek.Gerekce },
+                iptal: iptal);
+
+            await islem.CommitAsync(iptal);
+
+            return Results.Ok(new
+            {
+                adimId, durum = 1, adim = a["ad"],
+                mesaj = "Sözlü onay yazılı teyide çevrildi.",
+                izlemeNo = baglam.IzlemeNo
+            });
+        });
     }
 
     /// <summary>
