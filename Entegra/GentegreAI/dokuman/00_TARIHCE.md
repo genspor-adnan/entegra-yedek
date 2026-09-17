@@ -12495,4 +12495,12 @@ Fark `kurum_profil.moduller`de - şube 1 için:
 Yani sunucuda **acil, eczane, satınalma ve ameliyathane** kapalı; menü de
 bunu doğru uyguluyor (360: kurum profilinde kapalı modül menüde hiç
 görünmez). Düzeltme bir kod değişikliği değil, **Kurum Profili** ekranından
-modülün açılması. Canlı kurulumun ayarına kendiliğinden dokunulmadı.
+modülün açılması.
+
+**Kullanıcı isteğiyle açıldı** (*"acil eczane satınalma ameliyathane hepsini
+aç"*): sunucuda şube 1'in `moduller`ine `acil`, `eczane`, `satinalma` ve
+`ameliyathane` eklendi (`moduller || jsonb_build_object(...)` - var olan
+anahtarlara dokunmadan). Dördünün de yetkileri zaten tanımlıydı ve Yönetici
+rolündeydi (8 · 10 · 16 · 10). `moduller` jetona gömülü değil, her
+`/api/kimlik/ben` çağrısında okunuyor - sayfayı yenilemek yeter, yeniden
+giriş gerekmez. Şube 0 ve 3'e dokunulmadı (yereldeki gibi `isg` + `form`).
