@@ -110,8 +110,10 @@ public sealed class OnayBildirimi
                                                 'İzin #' || o.kaynak_id::text)
                         when 1224 then coalesce(nullif(w.is_emri_no, ''),
                                                 'İş emri #' || o.kaynak_id::text)
-                        when 907  then coalesce(nullif(av.avans_no, ''),
+                        when 1257 then coalesce(nullif(av.avans_no, ''),
                                                 'Avans #' || o.kaynak_id::text)
+                        when 1256 then coalesce(nullif(ib.belge_no, ''),
+                                                'Başvuru #' || o.kaynak_id::text)
                         else '#' || o.kaynak_id::text end as "kayitNo"
               from public.onay o
               left join public.onay_akis k on k.id = o.akis_id
@@ -122,7 +124,10 @@ public sealed class OnayBildirimi
               left join public.demirbas_is_emri w
                      on o.kaynak_tur = 1224 and w.id = o.kaynak_id
               left join public.personel_avans av
-                     on o.kaynak_tur = 907 and av.id = o.kaynak_id
+                     on o.kaynak_tur = 1257 and av.id = o.kaynak_id
+              left join public.iskonto_talep isk
+                     on o.kaynak_tur = 1256 and isk.id = o.kaynak_id
+              left join public.belge ib on ib.id = isk.belge_id
              where o.id = @p0
             """, null, [onayId], OkuyucuGenisletmeleri.Sozluk, iptal);
 

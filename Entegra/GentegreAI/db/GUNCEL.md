@@ -398,7 +398,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (217 ad, 49 tanesi birden cok dosyada)
+## Gorunumler (217 ad, 50 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -569,9 +569,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_onay_akis_adim` | `742_onay_akis_ekrani.sql` | — |
 | `v_onay_akis_lookup` | `746_onay_bildirim_vekalet.sql` | — |
 | `v_onay_bekleyen` | `745_onay_sirasi_gelen.sql` | 738_onay_omurgasi.sql |
-| `v_onay_kutusu` | `754_iskonto_omurga.sql` | 739_onay_gelen_kutusu.sql, 744_izin_onay_kutusu.sql, 752_onarim_onayi.sql, 753_avans_modulu.sql |
+| `v_onay_kutusu` | `755_avans_kaynak_tur_duzeltmesi.sql` | 739_onay_gelen_kutusu.sql, 744_izin_onay_kutusu.sql, 752_onarim_onayi.sql, 753_avans_modulu.sql, 754_iskonto_omurga.sql |
 | `v_onay_vekalet` | `746_onay_bildirim_vekalet.sql` | — |
-| `v_personel_avans` | `753_avans_modulu.sql` | — |
+| `v_personel_avans` | `755_avans_kaynak_tur_duzeltmesi.sql` | 753_avans_modulu.sql |
 | `v_personel_izin` | `743_izin_modulu.sql` | — |
 | `v_personel_izin_bakiye` | `743_izin_modulu.sql` | — |
 | `v_personel_lookup` | `054_personel_ozluk_mockup_uyum.sql` | — |

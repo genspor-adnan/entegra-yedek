@@ -116,8 +116,9 @@ export async function izinAksiyonu(
 
     if (kod === 'personel-avans.zincir') {
       await guvenli(async () => {
-        // 907 = personel_avans (islem_log.tablo_id).
-        const y = await api.onayZinciri(907, id);
+        // 1257 = personel_avans (islem_log.tablo_id). 907 DEĞİL: o numara
+        //   Hasta Bilgisi'nin, 753'te yanlışlıkla alınmıştı (755).
+        const y = await api.onayZinciri(1257, id);
         if (!y.onay) { mesaj('Bu avans onaya gönderilmemiş.'); return }
         const DURUM: Record<number, string> = {
           0: 'bekliyor', 1: 'ONAYLANDI', 2: 'REDDEDİLDİ',

@@ -25,7 +25,10 @@ public static partial class KartKatalogu
         ["1241"] = "Satınalma Talebi",
         ["904"] = "Personel İzni",
         ["1224"] = "Demirbaş İş Emri",
-        ["907"] = "Personel Avansı",
+        // 1257 (755): 907 DEĞİL - o numara Hasta Bilgisi'nin, 753'te
+        //   yanlışlıkla alınmıştı.
+        ["1257"] = "Personel Avansı",
+        ["1256"] = "İskonto Talebi",
     };
 
     /// <summary>onay_akis_adim.sahip_turu</summary>

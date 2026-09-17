@@ -39,7 +39,7 @@ public static partial class KaynakKatalogu
                 "case v.kaynak_tur when 1241 then 'Satınalma Talebi'" +
                 " when 904  then 'İzin'" +
                 " when 1224 then 'Onarım'" +
-                " when 907  then 'Avans'" +
+                " when 1257 then 'Avans'" +
                 " when 1256 then 'İskonto'" +
                 " else 'Diğer' end",
                 "metin", "Tür", Hizalama: "orta", Genislik: 150, Bicim: "rozet",

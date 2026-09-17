@@ -28,8 +28,10 @@ namespace Gentegre.Api.Uclar;
 public static class AvansUclari
 {
     /// <summary>islem_log.tablo_id - personel_avans.</summary>
-    private const int LogAvans = 907;
-    private const int LogKesinti = 908;
+    // 1257/1258 (755): 907 = Hasta Bilgisi, 908 = Kasa İşlemi. 753 bu iki
+    //   numarayı gasp etmişti; avans logu hasta kaydı diye yazılıyordu.
+    private const int LogAvans = 1257;
+    private const int LogKesinti = 1258;
 
     private const short Taslak = 0, Onayda = 1, Onaylandi = 2, Reddedildi = 3,
                         Odendi = 4, Kapandi = 5, Iptal = 8;

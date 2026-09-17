@@ -101,7 +101,10 @@ public static partial class KartKatalogu
         Ad: "personelAvans",
         YetkiKodu: "ik.avans",
         Tablo: "public.personel_avans",
-        LogTabloId: 907,
+        // 1257 (755): 907 Hasta Bilgisi'nin, 908 Kasa İşlemi'nin -
+        //   753 ikisini de gasp etmişti ve avansın denetim izi hasta
+        //   kaydı gibi görünüyordu.
+        LogTabloId: 1257,
         SubeKolonu: "sube_id",
         Alanlar: new KartAlani[]
         {
@@ -147,7 +150,7 @@ public static partial class KartKatalogu
                     Baslik: "Kesinti Tarihi"),
                 new("aciklama", "aciklama", "metin", Yazilabilir: false, Baslik: "Not"),
             }, Sirala: "sira, id", Baslik: "Kesinti Planı",
-               SubeKolonu: null, LogTabloId: 908, SaltOkunur: true),
+               SubeKolonu: null, LogTabloId: 1258, SaltOkunur: true),
         },
         YeniKayitVarsayilanlari: new Dictionary<string, object?>
         {

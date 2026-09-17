@@ -11330,3 +11330,66 @@ yüzden yeni ve boş bir numara (1256) verildi. Avansın numarasını değiştir
 düşürülmesi, 905-908 `LogTabloId` çakışmalarının ayıklanması. Göç **754
 yalnız docker'da** - bulut ekspert artık hedef değil (kullanıcı kararı,
 17.09.2026).
+
+
+## 17.09.2026 — Avansın kaynak türü düzeltildi: 907/908 → 1257/1258 (`db/755`)
+
+753'te avans modülü yazılırken `personel_avans`a **907**, kesinti planına
+**908** verilmişti. Bu numaralar boş değildi:
+
+    907 = Hasta Bilgisi (taraf_hasta)
+    908 = Kasa İşlemi   (kasa_islem)
+
+Kanonik liste `KaynakKatalogu.Log.cs`'teki `TabloAdiIfade` case'i; ayrı bir
+kayıt tablosu yok, numaralar Delphi `ISLEMLOG.TABLOID` uzayından geliyor.
+
+**Numara üç yerde birden anlam taşıyor.**
+- `islem_log.tablo_id` — **denetim izi**. Avansın değişiklik logu "Hasta
+  Bilgisi" etiketiyle ve hasta id'si sanılacak bir `kayit_id` ile
+  yazılıyordu: avans #3'ün logu, log ekranında 3 numaralı hastanın kaydı gibi
+  görünüyordu. Geliştirme veritabanında **12 satır** bu hâldeydi.
+- `onay.kaynak_tur` — omurga zinciri kayda bununla bağlanıyor. Hastaya zincir
+  açılmadığı için bugün karışmıyordu, ama bu bir tesadüf.
+- `kasa_islem.kaynak_tur` — avans ödemesi kasa hareketine 907 ile
+  bağlanıyordu, yani "bu paranın kaynağı bir hasta kaydı" diyordu.
+
+**Neden 1257/1258.** Katalogda kullanılan en yüksek numara 1256 (754'te
+iskonto talebine verildi). Avansı 9xx bloğuna sıkıştırmak yerine kesin boş
+iki numara almak, aynı hatayı üçüncü kez yapma riskini kaldırıyor.
+
+**Geçmiş 907 log satırları taşınmadı.** Hangi satırın avans hangisinin hasta
+olduğu satırın kendisinden anlaşılmıyor - ayrım tam da kaybolan bilgi.
+`kayit_id`si bir avansla eşleşenleri taşımak, aynı id'ye sahip gerçek bir
+hasta kaydını da avans yapardı; denetim izini onarmak için ikinci kez bozmak
+olurdu. Bunun yerine geliştirme ortamındaki avans-şekilli satırlar (`bilgi`
+içinde `bayraklar`, ya da `taksit`/`donem` + `tutar`) **silindi**; kayıp yok,
+çünkü 753 hiçbir müşteriye gitmedi. Kalan 10 satırın hepsi gerçek hasta
+kaydı.
+
+Yürüyen zincirler `kaynak_tur` üzerinden değil **akış üzerinden** taşındı
+(`onay_akis.kod = 'personel.avans'`): 907'ye bakarak seçseydik, hasta
+kartına açılmış bir zinciri de avans sanıp taşırdık.
+
+Kod tarafında `KartKatalogu.Izin` (avans kartı + kesinti sekmesi),
+`AvansUclari` log sabitleri, `KartKatalogu.Onay` kaynak türü sözlüğü,
+`KaynakKatalogu.Onay` tür rozeti, `OnayBildirimi`'nin kayıt-no sorgusu ve
+web'deki `onayZinciri(907)` çağrısı yeni numaraya çekildi; log ekranının
+tablo adı listesine 1256/1257/1258 eklendi.
+
+**Yanında kapatılan iki eksik.** `KartKatalogu.Onay`'daki "motorun
+yürütebildiği kayıt türleri" sözlüğünde iskonto (1256) yoktu; `OnayBildirimi`
+bildirim metnindeki kayıt numarasını iskonto için çözemiyor, `#id`
+yazıyordu.
+
+**Doğrulama.** Yeni avans açıldı, zincir kuruldu ve `/api/onay/kayit/1257/...`
+üzerinden okundu; `907` ile sorulduğunda artık boş dönüyor. İki basamak
+onaylandı, ödeme yazıldı: `kasa_islem.kaynak_tur = 1257`. Denetim izinde
+avans satırları 1257 altında, 907'de yalnız gerçek hasta kayıtları kaldı.
+Arayüzde avans "Onay Zinciri" aksiyonu yeni numarayla çalıştı. xUnit 232/232,
+vitest 598/598, iki derleme temiz. Test verisi silindi.
+
+**Kalan çakışmalar (bu turda dokunulmadı).** `personel_izin_hak` **905**
+(Eğitim/Sertifika ile) ve `resmi_tatil` **906** (Acil Durum Kişi ile) hâlâ
+gasp durumunda - 743/749 turlarından. Bunlar omurgada değil, yalnız denetim
+izini ilgilendiriyor. Ayrıca bu turdan önce de var olan iki çakışma:
+`taraf_hekim` 906, `taraf_hasta_kurum` 908. Göç **755 yalnız docker'da**.
