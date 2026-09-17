@@ -12399,3 +12399,43 @@ antet logosu sunucuda da yürürlükte.
 
 Yayın betiği göç düşerse geri alma yapar ama **uygulanmış göçleri geri
 almaz**; yedeğin sebebi buydu.
+
+---
+
+## 17.09.2026 — Kalem penceresi refaktörü: türetilmiş durum saf modüle
+
+Kullanıcı: *"sonra refaktor"* (beyaz ekran düzeltmesinin ardından).
+
+Beyaz ekranın **sebebi** bir yazım hatası değil, **yerleşimdi**: ~30 türetilmiş
+değer 1075 satırlık bileşenin içine, JSX'in arasına dağılmıştı ve birbirini
+besliyordu. Sıra bozulduğunda TypeScript uyarmıyor, tarayıcı çalışma anında
+patlıyor. Düzeltme tek satırı yerine taşıdı; bu tur **hatanın sınıfını**
+kaldırıyor.
+
+**`kalemDurumu.ts` (yeni).** `kalemDurumu(girdi)` bütün türetmeleri tek blokta,
+bağımlılık sırasında yapıyor: `etkinRota` → `sgkKilitli` → `fg` → ondan
+türeyen her şey. Bir daha kaydıklarında 60 satırlık bir fonksiyonda görünürler,
+300 satır arayla değil. `sagKutuGorunumu` ayrı tutuldu çünkü `sagMod` bir
+`useState` ve başlangıcı `oranSayi`dan geliyor - state'i türetilmiş değerin
+içine sokmak olurdu.
+
+**Bileşende JSX'e dokunulmadı.** Değerler aynı adlarla destructure ediliyor;
+600 satırlık JSX bire bir aynı. Refaktör davranışı değil görünürlüğü
+değiştirmeli - ilk denemede toplu yeniden adlandırma yapılmıştı ve regex
+string'lerin içine de girdi (`'fiyat'` → `'d.fiyat'`); o deneme atıldı,
+destructure ile yeniden yapıldı.
+
+**Ölçü.** Bileşen 1075 → **911 satır**; türetme 199 satırlık saf modülde.
+
+**Test.** `kalemDurumu.test.ts` (12 test) kararları ekran açmadan ölçüyor:
+satırın rotası belgeninkini ezer · saf SGK'da fiyat kilitli, SUT kutusu
+çizilmez, iskonto tabanı katkıdır · TSS'de SUT kutusu çizilir · ÖSS/Karma'da
+ek katkı doğmaz · başvuruda üst kutu kapalı, ERP'de açık · dövizli fiyat
+kurla çarpılır · lot adımı yalnız izlemli stok satırında. Bunlar daha önce
+**yalnız ekran açılarak** denenebiliyordu.
+
+Ekranda da doğrulandı: kalem seçildi, %10 iskonto uygulandı, karşılığı
+`200,00`, iskontolu birim `1.800,00`; sayfa hatası yok.
+
+vitest 614/614 (+12), derleme temiz. **Sunucuya yayınlanmadı** - davranış
+değişmedi, bir sonraki yayınla gider.

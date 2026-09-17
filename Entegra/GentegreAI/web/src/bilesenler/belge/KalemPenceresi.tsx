@@ -10,13 +10,15 @@ import { baslangicBrutMetni, bruta, moduCevir } from '../../sayfalar/belgeKarti/
 // FIYAT / ISKONTO MATEMATIGI SAF MODULDE (refaktor): uc kutu ayni alani yazar
 //   ve ayni tabana bakmak zorunda - kural bilesenin icinde dururken uc ayri
 //   hata oradan cikti. Hesap degismedi, yeri degisti; testi kalemFiyat.test.ts.
+import { fiyattanOran, oranKirp as oranKirpCoz }
+  from '../../sayfalar/belgeKarti/kalemFiyat';
+// TURETILMIS DURUM SAF MODULDE: sira hatasi (TDZ) bir daha 1000 satira
+//   yayilmasin - sebebi `kalemDurumu.ts` bastaki yorumda.
 import {
-  type FiyatGirdisi, brutBirimFiyat, fiyattanOran, gosterimTabani as tabanCoz,
-  hedefBirimFiyat, iskontoKarsiligi, iskontoTabani as tabanIskonto,
-  iskontoluBirim as iskontoluBirimCoz, iskontoVarMi, oranKirp as oranKirpCoz,
-} from '../../sayfalar/belgeKarti/kalemFiyat';
+  type SagMod, kalemDurumu, sagKutuGorunumu,
+} from '../../sayfalar/belgeKarti/kalemDurumu';
 import { IzlemPenceresi } from './IzlemPenceresi';
-import { EK_KATKILI_ROTALAR, SAF_SGK_ROTA } from '../../sayfalar/belgeKartiKurallari';
+import { SAF_SGK_ROTA } from '../../sayfalar/belgeKartiKurallari';
 import { useOturum } from '../../kimlik/OturumBaglami';
 
 /** İskonto combosunun hazır oranları; sonuncusu serbest giriş (661). */
@@ -192,10 +194,28 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
     if (e.key === 'Enter' && !e.repeat) { e.preventDefault(); kaydet() }
   };
 
-  const dovizli = r.fiyatDovizi !== yerelPara && r.fiyatDovizi !== '';
+  /**
+   * TURETILMIS DEGERLER TEK BLOKTA (`kalemDurumu`, 17.09.2026 refaktoru).
+   *
+   * Bunlar once JSX'in arasina dagilmisti ve birbirini besliyordu; sira
+   * bozulunca TypeScript uyarmaz, tarayici calisma aninda patlar - nitekim
+   * patladi (`sgkKilitli` TDZ hatasi, kullaniciya BEYAZ EKRAN). Artik hepsi
+   * saf bir fonksiyonda, bagimlilik sirasinda ve bilesen cizmeden test
+   * edilebilir (`kalemDurumu.test.ts`).
+   *
+   * AYNI ADLARLA ACILIYOR: asagidaki 600 satirlik JSX'e dokunulmadi -
+   * refaktor davranisi degistirmemeli, gorunurlugu degistirmeli.
+   */
+  const {
+    dovizli, adet, etkinRota, sgkKilitli, anaBirimMiktar, kur, fiyat,
+    onizlemeTutar, sutKutusu, kurumRotasi, fiyatKilitli, katkiVar,
+    katkiTutari, iskontoTabani, onizlemeBirim, iskontoluMu, oranSayi,
+    gosterimTabani, tutarIskontosu, hedefFiyat, tabanAdi, izlemGerekli, fg,
+  } = kalemDurumu({
+    r, rota, tarifeTipi, basvuruMu: !!basvuruMu, yerelPara, kdvDahil,
+    brutMetni, girisIzlemi, cikisIzlemi,
+  });
 
-  // Dovizli kalemde gunun kuru cekilir; kullanici kutuyu elle degistirdiyse
-  //   dokunulmaz (kur pazarlikli olabiliyor - "istenirse degistirilebilsin").
   useEffect(() => {
     if (!dovizli || kurElle.current) return;
     void (async () => {
@@ -206,161 +226,9 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
     })();
   }, [dovizli, r.fiyatDovizi, belgeTarihi]);
 
-  const adet = hamSayi(r.adet);
-  /**
-   * ETKIN ROTA VE SGK KILIDI EN USTTE (772 duzeltmesi).
-   *
-   * Ikisi de asagida, `fg()`den SONRA duruyordu; `fg` `sgkKilitli`yi
-   * kapsiyor ve `brutFiyat` satiri `fg()`yi HEMEN cagirdigi icin pencere
-   * her acilista TDZ ile patliyordu ("Cannot access 'sgkKilitli' before
-   * initialization") - kullaniciya beyaz ekran. Ikisi de yalniz PROP'lara
-   * bakiyor, en basta hesaplanmalari guvenli.
-   */
-  const etkinRota = Number(r.rota ?? 0) || Number(rota ?? 0);
-  /**
-   * SGK'DA FIYAT VE KATKI SALT OKUNUR (602, kullanici: "SGK'da birim fiyat ve
-   * katkı değişmez. İskonto uygulanabilir ama o da sadece katkıya uygulanır.
-   * SUT fiyatı hiçbir şekilde değişmez").
-   *
-   * Saf SGK'da birim fiyat SUT bedelidir - SGK'nin mevzuatla belirlenmis
-   * odemesi. Hastanenin onu degistirmesi diye bir sey yoktur; katki da
-   * listeden gelen tanimli tutardir. Degistirilebilir birakmak, kaydedince
-   * sunucunun listeden okudugu rakama geri donen bir kutu demekti.
-   *
-   * ISKONTO KUTUSU ACIK KALIR: indirim mesrudur, yalniz KATKIYA isler
-   * (fn_dagilim_coz - SUT carpani koşulsuz miktardir).
-   */
-  const sgkKilitli = etkinRota === SAF_SGK_ROTA;
-  /** Ana birim karsiligi: "2 Kutu = 24 Adet". Ana birim seciliyse gosterilmez. */
-  const seciliCarpan = Number(r.birimCarpan ?? 1) || 1;
-  const anaBirimMiktar = seciliCarpan !== 1 && adet > 0
-    ? Math.round(adet * seciliCarpan * 1e6) / 1e6
-    : null;
-  const kur = dovizli ? (hamSayi(r.kur)) : 1;
-  const dovizFiyat = hamSayi(r.dovizFiyat);
-  // Yerel birim fiyat: dovizli kalemde doviz fiyati x kur, degilse dogrudan girilen.
-  const fiyat = dovizli
-    ? Math.round(dovizFiyat * kur * 100) / 100
-    : (hamSayi(r.birimFiyat));
-  const tutar = satirTutari(adet, fiyat, r.iskonto, r.iskonto2);
-  /**
-   * ONIZLEME KDV MODUNU IZLER (kullanici: "tutar (önizleme) için kdv durumuna
-   * bak, dahilse burayı da dahil, hariçse hariç yap").
-   *
-   * Satirda saklanan `birimFiyat` HER ZAMAN matrahtir; onizleme ise kullanicinin
-   * KUTUYA YAZDIGI sayiyla ayni dilde konusmali - "100 TL dahil" yazip altta
-   * 83,33 gormek, fiyati yanlis girdim sanisi veriyordu.
-   */
-  /**
-   * BRUT, MATRAHI CARPARAK DEGIL KULLANICININ YAZDIGI SAYIDAN (kullanici:
-   * "fiyat ekranina 500 girdim, altta onizlemede 500,01 gorundu").
-   *
-   * Dahil modunda kutuya yazilan BRUTTUR; satira matrah olarak cevrilip
-   * saklanir. Onizleme ise ters yone gidiyordu: 500 / 1,10 = 454,5455,
-   * satir tutari 454,55'e yuvarlaniyor, x 1,10 = 500,005 -> 500,01. Kurus
-   * bir kez yuvarlandiktan sonra geri gelmiyor.
-   *
-   * Dogrusu brut fiyati TABAN almak; satir tutari yuvarlamasi ona uygulanir.
-   * Sunucu da ayni kurali izler - dip toplamda KDV "brut tutar - matrah
-   * tutar"dir, orandan hesaplanmaz (`BelgeDeposu.Yazma`).
-   */
-  /** Hesap girdisi - saf fonksiyonlarin hepsi bunu alir. */
-  const fg = (): FiyatGirdisi => ({
-    fiyat, brutMetni, kdv: r.kdv, kdvDahil, sgkKilitli,
-    katkiTutar: r.katkiTutar, iskonto: String(r.iskonto ?? '0'),
-    iskonto2: String(r.iskonto2 ?? '0'),
-  });
-  const brutFiyat = brutBirimFiyat(fg());
-  const onizlemeTutar = kdvDahil
-    ? satirTutari(adet, brutFiyat, r.iskonto, r.iskonto2) : tutar;
-  /**
-   * KATKI (HASTA EK KATKISI) KUTUSU (586) - yalniz TTB/HUV ve SUT tarifesinde
-   * ve kalemin katkisi VARSA. Özel tarifede boyle bir ayrim yok: tek fiyat
-   * zaten hastanindir.
-   *
-   * ROTA DA SORULUR (595, kullanici: "ÖSS, Karma'da katkı ve ek katkı payı
-   * yok"): hasta ek katkısı yalnız TSS (3) ve SGK (5) rotasında doğar -
-   * ÖSS ve Karma'da hastanin payi KARSILAMA ORANINDAN cikar. Kutu oralarda da
-   * aciliyor, kullanici hicbir yere yazilmayan bir rakam giriyordu.
-   * Satirin kendi rotasi (kayitli satirda sunucudan gelir) onceliklidir.
-   * (`etkinRota` yukari tasindi - `fg()` ondan turetilen `sgkKilitli`yi
-   * kapsiyor ve hemen cagriliyor.)
-   */
-  const katkiliTarife = [2, 3].includes(Number(tarifeTipi))
-                     && EK_KATKILI_ROTALAR.includes(etkinRota);
-  /**
-   * SGK HASTASINDA SUT KUTUSU YOK (601, kullanici: "SGK (SUT) Bedeli zaten
-   * birim fiyatta var bir daha yazmaya gerek yok"). Saf SGK'da tarife = SUT
-   * oldugu icin ustteki "Birim Fiyat" ile bu kutu AYNI sayiyi soruyordu.
-   * Bedel kaydederken birim fiyattan turetilir (bkz. `kaydet`).
-   */
-  const sutKutusu = !!r.sgkGerekli && etkinRota !== SAF_SGK_ROTA;
-  /* `sgkKilitli` yukariya, `fg()`den ONCEYE tasindi (772 duzeltmesi). */
-  /**
-   * BIRIM FIYAT KILIDI (661, kullanici: "öss ve sgk tiplerinde birim fiyat hep
-   * kapalı olmalı, özel tipte yetkiye bağlı olmalı").
-   *
-   * KURUM ROTALARINDA (ÖSS 2 · TSS 3 · Karma 4 · SGK 5) fiyat sozlesmeden ya
-   * da SUT'tan gelir - orada yetki SORULMAZ, kutu herkese kapalidir. Yetkiyle
-   * acilabilir birakmak, sozlesme fiyatinin uzerine yazilabilecegi anlamina
-   * gelirdi; kaydedince sunucunun listeden okudugu rakama geri donerdi.
-   *
-   * ARTIK OZEL ROTADA DA KAPALI (kullanici: "en üstteki birim fiyat veya
-   * katkı neyse tüm roller için readonly olsun"). Yetkiyle acilabilen bir
-   * kutu da TUTULMADI - `basvuru.fiyat` yetkisi 661'den kaldirildi.
-   * ERP belgelerinde (basvuru degil) kutu eskisi gibi acik.
-   *
-   * ERP belgelerinde (basvuru degil) eski davranis aynen surer.
-   */
-  const kurumRotasi = etkinRota > 0 && etkinRota !== 1;
-  // BASVURUDA UST KUTU TUM ROLLERE KAPALI (kullanici): birim fiyat / hasta
-  //   katkisi listeden gelir, ekrandan degistirilmez. Indirim yapilacaksa
-  //   ISKONTO satirindan yapilir - orada kim ne kadar indirdigi oran olarak
-  //   kayda geciyor ve onaya tabi (661/662); fiyatin uzerine yazmak ayni
-  //   indirimi izsiz birakirdi. ERP belgelerinde kutu eskisi gibi acik.
-  const fiyatKilitli = sgkKilitli || basvuruMu;
-  const katkiVar = katkiliTarife && hamSayi(r.katkiTutar ?? '0') > 0;
-  /** Iskontolu katki - sunucudaki kural (586) ile ayni: birim x adet x iskonto. */
-  const katkiTutari = satirTutari(adet, hamSayi(r.katkiTutar ?? '0'),
-                                  r.iskonto, r.iskonto2);
-
-  /**
-   * ISKONTO SONRASI BIRIM FIYAT - ONIZLEME (602, kullanici: "fiyat ekranında
-   * en alta önizlemeye iskonto sonrası birim fiyatı getir").
-   *
-   * Ust kutu iskontoSUZ birimi gosterir (özel iste oldugu gibi); iskonto ancak
-   * Tutar'a bakilinca anlasiliyor ve adet 1'den buyukse orada da goze
-   * carpmiyordu. Taban, UST KUTUDA YAZAN sayidir: saf SGK'da hasta katkisi,
-   * oteki rotalarda birim fiyat - SUT iskontolanmaz (fn_dagilim_coz), onu
-   * iskontolu gostermek yanlis olurdu.
-   *
-   * Hesap `satirTutari` ile yapilir (adet 1): satir tutarindaki yuvarlama
-   * kuralinin AYNISI - kendi carpanini yazmak kurus farki uretirdi.
-   */
-  const iskontoTabani = tabanIskonto(fg());
-  // Iskontolu birim de brut tabandan (yukaridaki ayni gerekce).
-  const onizlemeBirim = iskontoluBirimCoz(fg());
-  /** Iskonto gercekten var mi - yoksa satir ust kutunun kopyasi olurdu. */
-  const iskontoluMu = iskontoVarMi(fg());
-
-  /* ---------------------------------------------------------------- iskonto --
-   * TEK ISKONTO, IKI YAZILISI (661, kullanici: "iskonto2'yi buradan kaldır").
-   *
-   * Sol combo ORAN, sag kutu TUTAR - ikisi de AYNI alani (`iskonto`) yazar,
-   * biri yuzdeyle biri lirayla. Hangisine dokunulduysa oteki onun karsiligini
-   * gosterir; iki ayri indirim degildir.
-   *
-   * Ikinci iskonto slotu (`iskonto2`) bu pencerede KULLANILMIYOR: tutari oraya
-   * yazmak, ekranda gorunmeyen ikinci bir indirim birakiyordu - satir baska
-   * yerden acildiginda nereden geldigi anlasilmayan bir yuzde. Kullanici
-   * burada iskontoya dokunursa ikinci slot SIFIRLANIR; gorunmeyen indirim
-   * toplami sessizce dusurmesin.
-   */
-  const oranSayi = hamSayi(r.iskonto);
-
   /**
    * SAG KUTUNUN ANLAMI COMBODAN GELIR (kullanici):
-   *   hazir oran   -> SALT GORUNUM iskonto TUTARI (200 TL'nin %10'u = 20)
+   *   hazir oran     -> SALT GORUNUM iskonto TUTARI (200 TL'nin %10'u = 20)
    *   "Özel İskonto" -> ORAN girilir (%)
    *   "Birim Fiyat"  -> hedef BIRIM FIYAT girilir; fark orana cevrilir
    *
@@ -368,7 +236,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    * Hazir oranda kutu READONLY: oran zaten combodan secildi, ayni sayiyi iki
    * yerden degistirilebilir birakmak "hangisi kazanir" sorusu uretirdi.
    */
-  const [sagMod, setSagMod] = useState<'tutar' | 'oran' | 'fiyat'>(
+  const [sagMod, setSagMod] = useState<SagMod>(
     oranSayi > 0 && !ISKONTO_ORANLARI.includes(oranSayi) ? 'oran' : 'tutar');
   /**
    * YAZILMAKTA OLAN HAM METIN (kullanici: "combodan birim fiyat sectim ama
@@ -384,41 +252,10 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    * ve bicimlenmis hali gorunur.
    */
   const [sagMetin, setSagMetin] = useState<string | null>(null);
-  const oranSecimi = sagMod === 'oran' ? 'ozel'
-    : sagMod === 'fiyat' ? 'fiyat'
-    : (oranSayi > 0 ? String(oranSayi) : '');
-
-  /**
-   * EKRANDA GOSTERILEN TABAN (kullanici: "iskonto miktari sag tarafa kdv
-   * dahil gelsin"). Ust kutu DAHIL modunda brut gosterir; sagdaki tutar
-   * matrahtan hesaplanirsa iki sayi ayni satirda farkli tabana bakar ve
-   * "200'un %10'u neden 16,67" sorusunu dogururdu.
-   *
-   * ORAN DEGISMEZ: yuzde olcek-bagimsizdir, brut ya da matrah - ayni oran.
-   * Degisen yalniz GOSTERILEN ve GIRILEN sayidir; satira yine yuzde yazilir.
-   */
-  const gosterimTabani = tabanCoz(fg());
-  /** Oranin TUTAR karsiligi - gosterim tabanindan. */
-  const tutarIskontosu = iskontoKarsiligi(fg());
-  /** Oranin HEDEF BIRIM FIYAT karsiligi (iskonto sonrasi birim). */
-  const hedefFiyat = hedefBirimFiyat(fg());
-
-  /** Iskonto tabaninin ADI - ust kutudaki etiketin aynisi. */
-  const tabanAdi = sgkKilitli ? 'Katkı' : 'Birim Fiyat';
-
-  /** Sag kutuda gorunen deger - moda gore. */
-  const sagDeger = sagMod === 'oran'
-    ? (oranSayi > 0 ? String(r.iskonto) : '')
-    : sagMod === 'fiyat'
-    ? (gosterimTabani > 0 ? para.format(hedefFiyat) : '')
-    : (tutarIskontosu > 0.004 ? para.format(tutarIskontosu) : '');
-
-  const sagEtiket = sagMod === 'oran' ? '%' : yerelPara;
-  // HAZIR ORAN secilince sagdaki kutu o oranin PARA KARSILIGIDIR (salt
-  //   okunur), girilen bir iskonto degil - basligi "İskonto" demek kutuyu
-  //   doldurulacak bir alan gibi gosteriyordu (kullanici: "rename Karşılığı").
-  const sagBaslik = sagMod === 'oran' ? 'Oran'
-    : sagMod === 'fiyat' ? tabanAdi : 'Karşılığı';
+  const { oranSecimi, deger: sagDeger, etiket: sagEtiket,
+          baslik: sagBaslik } = sagKutuGorunumu(
+    { oranSayi, gosterimTabani, hedefFiyat, tutarIskontosu, tabanAdi },
+    sagMod, String(r.iskonto), yerelPara);
 
   /** Iskonto yazilirken gorunmeyen 2. slot her zaman sifirlanir. */
   const iskontoYaz = (oran: number | string) =>
@@ -441,7 +278,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
     //   Girilen fiyat asil fiyattan buyukse iskonto 0'dir (bu kutudan ZAM
     //   yapilamaz - fiyati yukseltmek fiyat listesinin isidir); tavan gecerli.
     if (!(sayi > 0)) { iskontoYaz(0); return }
-    iskontoYaz(oranKirp(fiyattanOran(fg(), sayi)));
+    iskontoYaz(oranKirp(fiyattanOran(fg, sayi)));
   };
 
   /** Combo secimi: hazir oran, "Özel İskonto" ya da "Birim Fiyat" kutusu. */
@@ -454,8 +291,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
     setSagMod('tutar');
     iskontoYaz(v === '' ? 0 : v);
   };
-  /** Izlemli stokta lot adimi: giriste DAGITIM, cikista SECIM (db/114). */
-  const izlemGerekli = (girisIzlemi || cikisIzlemi) && r.satirTur === 1 && r.izleme > 0;
+  /* `izlemGerekli` artik `kalemDurumu`dan geliyor (db/114 kurali orada). */
 
   function kaydet() {
     // TEK SEFER (kullanici: "tamam deyince ücret satırına 2 tane muayene
