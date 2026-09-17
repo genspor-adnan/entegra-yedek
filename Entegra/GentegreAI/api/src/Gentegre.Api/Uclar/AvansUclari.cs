@@ -404,17 +404,8 @@ public static class AvansUclari
 
             await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-            await baglanti.CalistirAsync("""
-                update public.onay_adim set durum = 5, karar_zamani = now(),
-                       gerekce = 'Avans iptal edildi'
-                 where durum in (0, 3)
-                   and onay_id in (select id from public.onay
-                                    where kaynak_tur = @p0 and kaynak_id = @p1)
-                """, islem, [LogAvans, (long)id], iptal);
-            await baglanti.CalistirAsync("""
-                update public.onay set durum = 3, bitis = now()
-                 where kaynak_tur = @p0 and kaynak_id = @p1 and durum = 0
-                """, islem, [LogAvans, (long)id], iptal);
+            await Servisler.OnayMotoru.IptalAsync(baglanti, islem, LogAvans, id,
+                "Avans iptal edildi", iptal);
 
             await baglanti.CalistirAsync("""
                 update public.personel_avans

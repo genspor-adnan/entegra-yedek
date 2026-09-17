@@ -327,17 +327,8 @@ public static class IzinUclari
 
             // YÜRÜYEN ZİNCİR DE KAPANIR: iptal edilmiş bir iznin onayı
             //   kimsenin kutusunda beklememeli.
-            await baglanti.CalistirAsync("""
-                update public.onay_adim set durum = 5, karar_zamani = now(),
-                       gerekce = 'İzin iptal edildi'
-                 where durum in (0, 3)
-                   and onay_id in (select id from public.onay
-                                    where kaynak_tur = @p0 and kaynak_id = @p1)
-                """, islem, [LogIzin, (long)id], iptal);
-            await baglanti.CalistirAsync("""
-                update public.onay set durum = 3, bitis = now()
-                 where kaynak_tur = @p0 and kaynak_id = @p1 and durum = 0
-                """, islem, [LogIzin, (long)id], iptal);
+            await Servisler.OnayMotoru.IptalAsync(baglanti, islem, LogIzin, id,
+                "İzin iptal edildi", iptal);
 
             await baglanti.CalistirAsync("""
                 update public.personel_izin

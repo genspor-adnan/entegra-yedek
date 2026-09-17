@@ -451,6 +451,39 @@ public sealed class OnayMotoru
         return new OlcuSonucu(eski, yeniOlcu, atlanan);
     }
 
+    /// <summary>
+    /// ZİNCİRİ İPTAL EDER: kayıt geri çekilince (izin iptali, avans iptali,
+    /// talep birleştirme) bekleyen basamaklar kapanır ve zincir "iptal"
+    /// (durum 3) olur.
+    ///
+    /// Bekleyenleri kapatmak ŞART: kapatılmazsa geri çekilmiş bir kayıt
+    /// gelen kutusunda beklemeye devam eder ve birisi olmayan bir işi
+    /// imzalar. Gerekçe basamağa yazılıyor - "bu imza neden alınmadı"
+    /// sorusunun cevabı kaydın içinde kalmalı.
+    ///
+    /// YÜRÜMEYEN ZİNCİRE DOKUNMAZ: zaten sonuçlanmış (onaylanmış/reddedilmiş)
+    /// bir zinciri iptale çevirmek, verilmiş kararları silmek olurdu.
+    /// </summary>
+    public static async Task<int> IptalAsync(
+        NpgsqlConnection baglanti, NpgsqlTransaction? islem,
+        int kaynakTur, long kaynakId, string gerekce,
+        CancellationToken iptal = default)
+    {
+        await baglanti.CalistirAsync("""
+            update public.onay_adim set durum = 5, karar_zamani = now(),
+                   gerekce = @p2
+             where durum in (0, 3)
+               and onay_id in (select id from public.onay
+                                where kaynak_tur = @p0 and kaynak_id = @p1
+                                  and durum = 0)
+            """, islem, [kaynakTur, kaynakId, gerekce], iptal);
+
+        return await baglanti.CalistirAsync("""
+            update public.onay set durum = 3, bitis = now()
+             where kaynak_tur = @p0 and kaynak_id = @p1 and durum = 0
+            """, islem, [kaynakTur, kaynakId], iptal);
+    }
+
     /// <summary>Kaydın yürüyen zinciri (yoksa null).</summary>
     public static async Task<long?> AcikOnayIdAsync(
         NpgsqlConnection baglanti, NpgsqlTransaction? islem,

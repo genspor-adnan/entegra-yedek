@@ -385,12 +385,13 @@ public static partial class SatinalmaUclari
                 """, islem, [istek.HedefId, kaynaklar, TalepBirlestirildi, baglam.KullaniciId], iptal);
 
             // Bekleyen onay basamakları da kapanır - birleştirilmiş talebin
-            //   onayı hedef talepte alınacak.
-            await baglanti.CalistirAsync("""
-                update public.satinalma_onay set durum = 2, karar_zamani = now(),
-                       gerekce = 'Talep birleştirildi'
-                 where talep_id = any(@p0) and durum = 0
-                """, islem, [kaynaklar], iptal);
+            //   onayı hedef talepte alınacak. 759'A KADAR BU GÜNCELLEME ESKİ
+            //   `satinalma_onay` TABLOSUNA GİDİYORDU: 738'de zincir omurgaya
+            //   taşınmıştı ve birleştirilen talebin omurga zinciri açık
+            //   kalıyordu - gelen kutusunda, artık var olmayan bir iş için.
+            foreach (var kaynakId in kaynaklar)
+                await Servisler.OnayMotoru.IptalAsync(baglanti, islem, LogTalep,
+                    kaynakId, "Talep birleştirildi", iptal);
 
             // Hedefin tahmini tutarı satırlardan yeniden hesaplanır.
             var yeniTutar = await baglanti.TekDegerAsync<decimal>("""

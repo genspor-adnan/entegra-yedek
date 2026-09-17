@@ -11581,3 +11581,47 @@ başlığı önceki yayın sürümünden geri yazıldı.
 **Kalan.** `satinalma_onay`, `dokuman_onay`, `dokuman_akis` tabloları veri
 olarak duruyor ama artık yazılmıyor; bir dahaki sürümde düşürülebilir. Göç
 **758 yalnız docker'da**.
+
+
+## 17.09.2026 — Eski onay tabloları düştü (`db/759`)
+
+738 satınalmanın, 758 dokümanın zincirini omurgaya taşımış ve ikisi de eski
+tabloyu yerinde bırakıp "veri korunuyor; bir dahaki sürümde düşer" notunu
+düşmüştü. `satinalma_onay`, `dokuman_onay` ve `dokuman_onay_adim` düşürüldü.
+
+**Düşürmeden önce kanıt arandı.** Dosya, eski tablodaki her kaydın omurgada
+karşılığı olduğunu doğruluyor: her satınalma talebi için bir `onay`, her
+doküman süreci için bir `onay` ve her adım için bir `onay_adim`. Eksik varsa
+**hata verip duruyor** - yarım göçün üstüne silmek, onay geçmişini tamamen
+yok ederdi. Kontrol sayıya değil eşleşmeye bakıyor: "aynı sayıda satır var"
+ile "aynı kayıtlar var" farklı şeylerdir. Bu ortamda 3 doküman süreci ve
+6 adımın hepsi omurgada bulundu; `satinalma_onay` zaten boştu.
+
+**`dokuman_surum.onay_id` yeniden eşlendi.** Kolon eski `dokuman_onay.id`'yi
+gösteriyordu; tablo düşünce hiçbir şeye işaret etmeyen bir sayı kalırdı.
+Omurgadaki `onay.id`'ye çevrildi. Kolon düşürülmedi: zincir `kaynak_tur 976 +
+kaynak_id` ile de bulunabiliyor ama kolon kartta ve liste kaynağında okunuyor.
+
+**Düşürmeden önce yakalanan kusur.** `satinalma_onay`a yazan **bir kod yolu
+kalmıştı**: talep birleştirmede kaynak talebin bekleyen onay basamakları
+kapatılıyordu - ama eski tabloda. 738'den beri zincir omurgadaydı, yani
+birleştirilen talebin **omurga zinciri açık kalıyordu** ve gelen kutusunda,
+artık var olmayan bir iş için bekliyordu. Tabloyu düşürmek bu satırı zaten
+kıracaktı; doğrusuyla değiştirildi.
+
+**Zincir iptali motora alındı.** Aynı desen üç yerde kopyalanmıştı (izin
+iptali, avans iptali, şimdi talep birleştirme): bekleyen basamakları 5
+(atlandı) yap, zinciri 3 (iptal) yap. `OnayMotoru.IptalAsync` oldu ve üçü de
+ona bağlandı. Yürümeyen zincire dokunmuyor - sonuçlanmış bir zinciri iptale
+çevirmek, verilmiş kararları silmek olurdu.
+
+**Doğrulama.** Onaya gönderilmiş bir talep taslak bir talebe birleştirildi:
+kaynağın zinciri **iptal** (durum 3) oldu ve üç basamağı da "Talep
+birleştirildi" gerekçesiyle kapandı. Düşen üç tablo şemada kalmadı, kodda
+yalnız yorum referansları kaldı. xUnit 234/234, vitest 598/598, iki derleme
+temiz. Test verisi silindi.
+
+**Düşürülmeyenler.** `dokuman_akis` ve `dokuman_akis_adim` bu dosyada
+durmuyor: kullanıcı onları saymadı ve akış tanımı, yürüyen süreçten ayrı bir
+karardır. Artık hiçbir kod onlara bakmıyor (758'de `onay_akis`e taşındılar);
+istendiğinde ayrı bir dosyayla düşerler. Göç **759 yalnız docker'da**.
