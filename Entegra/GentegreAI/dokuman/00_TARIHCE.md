@@ -11840,3 +11840,22 @@ aksine. xUnit 234/234. Test verisi silindi.
 
 **Sıradaki adım kurulumda:** Genel Ayarlar > Entegrasyon Hesapları'ndan
 `EPOSTA` hesabı tanımlanınca bu hata kaybolur ve gerçek gönderim başlar.
+
+
+## 17.09.2026 — Kalan iş listesi tek dosyada (`dokuman/12_KALAN_ISLER.md`)
+
+"Kalan" notları her turun sonuna dağılmıştı; hangisinin hâlâ geçerli olduğunu
+görmek için tarihçeyi baştan okumak gerekiyordu. Toplandı ve **canlı veriyle
+doğrulandı** - maddelerdeki sayılar hafızadan değil, dev veritabanından.
+
+Beş başlık: kurulum adımları (kod işi yok), omurgada duran ama hiç
+kullanılmamış yetenekler, modüllerde yarım kalanlar, teknik borç, ve
+kapanmış olan onay omurgası.
+
+**Doğrulama sırasında kapanmış madde bulundu:** iskonto ve doküman onayının
+omurgaya taşınması, eski zincir tablolarının düşürülmesi, bildirim
+sessizliği, hatırlatma işi ve SMTP ekran desteği bu turda bitmişti; listeye
+"kapandı" olarak değil, hiç girmediler.
+
+Bundan sonra kalan iş eklendiğinde/kapandığında bu dosya güncellenecek;
+tarihçe *ne yapıldığını*, o dosya *ne yapılmadığını* anlatıyor.
