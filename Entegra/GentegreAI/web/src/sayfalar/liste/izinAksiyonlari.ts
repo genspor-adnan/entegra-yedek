@@ -114,14 +114,26 @@ export async function izinAksiyonu(
   if (kod.startsWith('personel-belge-talep.')) {
     if (!id) { mesaj('Önce bir belge talebi seçin.'); return true }
 
+    // YAZININ KENDİSİ (768): ayrı sayfa - kâğıda antet + metin + imza gider.
+    if (kod === 'personel-belge-talep.yazi') {
+      window.open(`/belge-talep/yazi/${id}`, '_blank');
+      return true;
+    }
+
     if (kod === 'personel-belge-talep.hazirla') {
       const not = await metinSor('Belge hazırlandı. Not (isteğe bağlı):', '', 'Not');
       if (not === null) return true;
       await guvenli(async () => {
-        await api.belgeTalepHazirla(id, not.trim() || undefined);
-        mesaj('Belge hazırlandı olarak işaretlendi. Teslim edilince '
-            + '"Teslim Edildi" ile kapatın - personelin beklediği şey belgenin '
-            + 'kendisi.');
+        // HAZIRLAMAK ARTIK BELGEYİ ÜRETİR (768): metin dondurulur. Eksik yer
+        //   tutucu varsa uç reddeder ve hangi alanların boş olduğunu söyler.
+        const y = await api.belgeTalepHazirla(id, not.trim() || undefined);
+        mesaj([y.elleDuzenlenmis
+                 ? 'Elle düzenlenmiş metin korundu ve belge hazırlandı.'
+                 : `Yazı "${y.sablonAd ?? ''}" şablonundan üretildi ve donduruldu.`,
+               'Metin bundan sonra şablon değişse de değişmez - '
+                 + '"Yazıyı Göster" ile yazdırabilirsiniz.',
+               '', 'Teslim edilince "Teslim Edildi" ile kapatın - personelin '
+                 + 'beklediği şey belgenin kendisi.'].join('\n'));
         b.tazele();
       });
       return true;

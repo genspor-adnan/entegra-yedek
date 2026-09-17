@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (391 ad, 109 tanesi birden cok dosyada)
+## Fonksiyonlar (392 ad, 109 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -49,6 +49,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_belge_satir_tahsil_tazele` | `660_iade_satir_tahsil.sql` | 321_tahsilat_satir_dagitim.sql, 471_dagilim_kapanma_tahsil.sql, 478_pay_kolonlari_dusur.sql |
 | `fn_belge_sil` | `217_belge_sil_stok_guard.sql` | 181_belge_sil.sql |
 | `fn_belge_silinebilir` | `226_uts_belge_guard.sql` | 181_belge_sil.sql |
+| `fn_belge_talep_yazi` | `768_belge_talep_yazisi.sql` | — |
 | `fn_belge_varsayilan_liste` | `601_sgk_tarife_sut_listesi.sql` | 205_belge_fiyat_listesi.sql, 278_odeyen_kurum_varsayilan_liste.sql, 292_varsayilan_liste_kampanya.sql, 302_kurum_sozlesme_fiyat_listesi.sql, 468_kurum_sozlesme_1n.sql, 588_kurum_tarifesi_coklu_sozlesme.sql |
 | `fn_belge_yon` | `205_belge_fiyat_listesi.sql` | — |
 | `fn_bolum_planli` | `718_hekim_calisma_plani.sql` | — |
@@ -400,7 +401,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (222 ad, 52 tanesi birden cok dosyada)
+## Gorunumler (223 ad, 52 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -423,6 +424,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_belge_satir_izlem` | `115_izlem_depo.sql` | 114_belge_izlem.sql |
 | `v_belge_satir_tahsilat` | `471_dagilim_kapanma_tahsil.sql` | 321_tahsilat_satir_dagitim.sql, 323_tahsilat_kdv_dahil.sql |
 | `v_belge_sevkiyat` | `177_belge_sevkiyat.sql` | — |
+| `v_belge_yazi_sablonu` | `768_belge_talep_yazisi.sql` | — |
 | `v_butce_durum` | `724_satinalma.sql` | — |
 | `v_cari_ekstre` | `111_ekstre_doviz_gruplu.sql` | 077_v_ekstre.sql, 097_ekstre_kaynak_kayit.sql |
 | `v_cari_lookup` | `122_aday_musteri.sql` | 037_kisi_karti.sql |

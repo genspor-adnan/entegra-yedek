@@ -320,6 +320,39 @@ public static partial class KaynakKatalogu
             new("durum",         "n.durum",           "kod",   "Durum", Hizalama: "orta")
         ]);
 
+    /// <summary>
+    /// BELGE YAZISI ŞABLONLARI (768) — Genel Ayarlar › Belge Yazıları.
+    ///
+    /// Numaralama gridleriyle aynı dosyada duruyor çünkü aynı ekranın
+    /// komşu sekmesi: ikisi de "belge nasıl çıksın" ayarı - biri numarayı,
+    /// öteki metni belirler.
+    ///
+    /// `yerTutucular` kolonu görünümde hesaplanıyor: satıra bakıp "bu şablon
+    /// maaş istiyor mu" sorusu şablonu açmadan cevaplanabilsin.
+    /// </summary>
+    private static KaynakTanimi BelgeYaziSablonu() => new(
+        Ad: "belge-yazi-sablonu",
+        YetkiKodu: "ik.belge_talep",
+        Kaynak: "public.v_belge_yazi_sablonu s",
+        VarsayilanSirala: "s.tur asc, s.dil asc",
+        Kolonlar:
+        [
+            new("id",            "s.id",             "sayi",  "Id", Varsayilan: false),
+            new("tur",           "s.tur",            "sayi",  "Tür Kodu", Varsayilan: false),
+            new("turAdi",        "s.tur_adi",        "metin", "Belge Türü", Genislik: 190),
+            new("dil",           "s.dil",            "metin", "Dil",
+                                                     Hizalama: "orta", Genislik: 70),
+            new("ad",            "s.ad",             "metin", "Şablon", Genislik: 200),
+            new("baslik",        "s.baslik",         "metin", "Yazı Başlığı",
+                                                     Varsayilan: false),
+            new("subeAd",        "s.sube_ad",        "metin", "Şube", Genislik: 130),
+            new("yerTutucular",  "s.yer_tutucular",  "metin", "Yer Tutucular",
+                                                     Varsayilan: false),
+            new("durum",         "s.durum",          "kod",   "Durum", Hizalama: "orta"),
+            new("aciklama",      "s.aciklama",       "metin", "Açıklama",
+                                                     Varsayilan: false)
+        ]);
+
     private static KaynakTanimi NumaraSatis()    => NumaraKaynagi("numara-satis", NumaraSatisTurleri);
     private static KaynakTanimi NumaraAlis()     => NumaraKaynagi("numara-alis", NumaraAlisTurleri);
     private static KaynakTanimi NumaraTahsilat() => NumaraKaynagi("numara-tahsilat", NumaraTahsilatTurleri);

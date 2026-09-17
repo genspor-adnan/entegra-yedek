@@ -36,6 +36,18 @@ public static partial class KartKatalogu
         ["1"] = "Elden", ["2"] = "e-Posta", ["3"] = "Kargo",
     };
 
+    // 768: maaş yazısında yazılacak tutarın türü. Bordro modülü yok - tutarı
+    //   İK elle girer, net/brüt ayrımı yazının anlamını değiştirir.
+    internal static readonly Dictionary<string, string> MaasTuruKodlari = new()
+    {
+        ["0"] = "Belirtilmemiş", ["1"] = "Net", ["2"] = "Brüt",
+    };
+
+    internal static readonly Dictionary<string, string> BelgeYaziDili = new()
+    {
+        ["tr"] = "Türkçe", ["en"] = "İngilizce",
+    };
+
     // ------------------------------------------------------ masraf beyanı ----
     private static KartTanimi PersonelMasraf() => new(
         Ad: "personelMasraf",
@@ -121,8 +133,23 @@ public static partial class KartKatalogu
                 Grup: "Talep", SabitKodlar: BelgeTeslimSekli),
             new("durum", "durum", "kod", Yazilabilir: false, Baslik: "Durum",
                 Grup: "Talep", SabitKodlar: BelgeTalepDurumu),
+            // MAAŞ ELLE GİRİLİR (768): bordro modülü yok. Maaş/vize yazısı
+            //   tutarı yazmak zorunda; boşsa `fn_belge_talep_yazi` eksik
+            //   bildirir ve hazırlama reddedilir - uydurulmuş bir sayı ya da
+            //   boş bırakılmış bir satır resmî yazıya girmesin.
+            new("maasTutar", "maas_tutar", "para", Baslik: "Maaş Tutarı",
+                Grup: "Talep"),
+            new("maasTuru", "maas_turu", "kod", Baslik: "Maaş Türü",
+                Grup: "Talep", SabitKodlar: MaasTuruKodlari),
             new("otomatikOnay", "otomatik_onay", "mantik", Yazilabilir: false,
                 Baslik: "Otomatik onaylandı", Grup: "Hazırlık"),
+            // ÜRETİLEN YAZI SALT OKUNUR: metin `/yazi` ucundan dondurulur.
+            //   Kart alanından serbest yazmak, dondurulmuş metni kaydın
+            //   geçmişi olmadan değiştirmenin yolu olurdu.
+            new("yaziBaslik", "yazi_baslik", "metin", Yazilabilir: false,
+                Baslik: "Yazı Başlığı", Grup: "Hazırlık", EnFazlaUzunluk: 200),
+            new("yaziTarihi", "yazi_tarihi", "zaman", Yazilabilir: false,
+                Baslik: "Yazı Üretildi", Grup: "Hazırlık"),
             new("hazirlayanId", "hazirlayan_id", "kod", Yazilabilir: false,
                 Baslik: "Hazırlayan", Grup: "Hazırlık",
                 KodTablosu: "public.v_kullanici_lookup"),
@@ -139,5 +166,52 @@ public static partial class KartKatalogu
         {
             ["durum"] = 0, ["tur"] = 1, ["adet"] = 1, ["teslim_sekli"] = 1,
             ["talep_tarihi"] = "@simdi",
+        });
+
+    // ---------------------------------------------------- yazı şablonu ----
+    /// <summary>
+    /// BELGE YAZISI ŞABLONU (768) — Genel Ayarlar › Belge Yazıları.
+    ///
+    /// Gövde DÜZ METİNDİR, HTML değil: antet/başlık/imza bloğu ekranın sabit
+    /// düzeni. Yer tutucular `{personel_ad}` biçiminde; `fn_belge_talep_yazi`
+    /// çözer ve çözemediğini EKSİK olarak bildirir.
+    ///
+    /// Aynı (tür · dil · şube) için tek ETKİN şablon olabilir (db'de kısmi
+    /// benzersiz index) - iki etkin satır "hangisiyle yazıldı" sorusunu
+    /// rastgeleye bırakırdı. Pasif satır serbesttir: eski sürüm saklanabilsin.
+    /// </summary>
+    private static KartTanimi BelgeYaziSablonu() => new(
+        Ad: "belgeYaziSablonu",
+        YetkiKodu: "ik.belge_talep",
+        Tablo: "public.belge_yazi_sablonu",
+        LogTabloId: 1315,
+        SubeKolonu: null,
+        Alanlar: new KartAlani[]
+        {
+            new("tur", "tur", "kod", Zorunlu: true, Baslik: "Belge Türü",
+                Grup: "Şablon", SabitKodlar: BelgeTalepTuru),
+            new("dil", "dil", "kod", Baslik: "Dil", Grup: "Şablon",
+                SabitKodlar: BelgeYaziDili),
+            new("ad", "ad", "metin", Zorunlu: true, Baslik: "Şablon Adı",
+                Grup: "Şablon", EnFazlaUzunluk: 120),
+            new("subeId", "sube_id", "sayi", Baslik: "Şube (0 = tümü)",
+                Grup: "Şablon"),
+            new("durum", "durum", "kod", Baslik: "Durum", Grup: "Şablon",
+                SabitKodlar: new Dictionary<string, string>
+                    { ["1"] = "Aktif", ["0"] = "Pasif" }),
+            new("baslik", "baslik", "metin", Baslik: "Yazı Başlığı",
+                Grup: "Metin", EnFazlaUzunluk: 200),
+            new("govde", "govde", "metin", Zorunlu: true, Baslik: "Gövde",
+                Grup: "Metin"),
+            new("altNot", "alt_not", "metin", Baslik: "Alt Not",
+                Grup: "Metin", EnFazlaUzunluk: 400),
+            new("imzaUnvan", "imza_unvan", "metin", Baslik: "İmza Unvanı",
+                Grup: "Metin", EnFazlaUzunluk: 120),
+            new("aciklama", "aciklama", "metin", Baslik: "Açıklama",
+                Grup: "Metin", EnFazlaUzunluk: 400),
+        },
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["tur"] = 1, ["dil"] = "tr", ["durum"] = 1, ["sube_id"] = 0,
         });
 }

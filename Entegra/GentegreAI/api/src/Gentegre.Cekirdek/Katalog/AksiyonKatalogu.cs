@@ -2186,6 +2186,12 @@ public static class AksiyonKatalogu
             //   da o sirayi izler (hazirla -> teslim).
             ["personel-belge-talep-liste"] =
                 [.. Crud("personel-belge-talep", "ik", "ik.belge_talep"),
+                 // YAZI EN ÜSTTE (768): hazırlamadan ÖNCE bakılır. Sıra
+                 //   işin sırasıdır - önce metni gör, sonra hazırlandı de.
+                 new("personel-belge-talep.yazi", "📄 Yazıyı Göster", "ik",
+                     KaynakKodu: "ik.belge_talep", Islem: Islem.Gor,
+                     KayitGerekir: true, Sira: 14,
+                     Ipucu: "Şablondan üretilen metin; yazdırılır ve düzeltilebilir"),
                  new("personel-belge-talep.hazirla", "🖨 Hazırlandı", "ik",
                      KaynakKodu: "ik.belge_talep", Islem: Islem.Degistir,
                      KayitGerekir: true, Sira: 15, Bicim: "bir",

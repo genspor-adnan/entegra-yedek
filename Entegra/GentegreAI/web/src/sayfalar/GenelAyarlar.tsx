@@ -4,6 +4,7 @@ import { api } from '../api/istemci';
 import { type ListeSatiri } from '../api/sozlesme';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
 import { NumaralamaSekmesi } from '../bilesenler/NumaralamaSekmesi';
+import { BelgeYaziSekmesi } from '../bilesenler/BelgeYaziSekmesi';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
 import { guvenli, mesaj, onay } from '../bilesenler/mesaj';
@@ -15,6 +16,9 @@ const SEKMELER = [
   { anahtar: 'guvenlik',    baslik: 'Güvenlik' },
   { anahtar: 'entegrasyon', baslik: 'Entegrasyon' },
   { anahtar: 'numaralama',  baslik: 'Belge No' },
+  // Belge No'nun SAGINDA (768): ikisi de "belge nasil ciksin" ayari -
+  //   biri numarayi, oteki metni belirler.
+  { anahtar: 'belge-yazisi', baslik: 'Belge Yazıları' },
 ] as const;
 
 type Sekme = typeof SEKMELER[number]['anahtar'];
@@ -40,7 +44,11 @@ export function GenelAyarlar() {
 
   // Entegrasyon hesaplari ayri yetkiye bagli - sekme de o yetkiyle cikar.
   const entegrasyonGorur = yetki('entegrasyon');
-  const sekmeler = SEKMELER.filter(s => s.anahtar !== 'entegrasyon' || entegrasyonGorur);
+  // Belge yazisi sablonlari IK yetkisine bagli: satis kullanicisi personel
+  //   yazisi sablonunu duzenlememeli.
+  const sekmeler = SEKMELER.filter(s =>
+    (s.anahtar !== 'entegrasyon'  || entegrasyonGorur)
+ && (s.anahtar !== 'belge-yazisi' || yetki('ik.belge_talep')));
 
   const [kart, setKart] = useState<number | 'yeni' | null>(null);
   const [yenile, setYenile] = useState(0);
@@ -229,6 +237,9 @@ export function GenelAyarlar() {
         ) : aktif === 'numaralama' ? (
           // Belge / tahsilat / odeme numaralandirmasi (152) - dort grid.
           <NumaralamaSekmesi />
+        ) : aktif === 'belge-yazisi' ? (
+          // Belge talebinde uretilen resmi yazinin sablonlari (768).
+          <BelgeYaziSekmesi />
         ) : aktif === 'entegrasyon' ? (
           <>
             {/* Mockup: Ekranlar/Ayarlar/entegrasyon_hesaplari.html - arama +

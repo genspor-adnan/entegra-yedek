@@ -269,6 +269,7 @@ public static partial class KartKatalogu
         Ekle(PersonelAvans());
         Ekle(PersonelMasraf());
         Ekle(PersonelBelgeTalep());
+        Ekle(BelgeYaziSablonu());
         // RESMI TATIL (749): is gunu hesabinin dayandigi takvim.
         Ekle(ResmiTatil());
         // ONAY AKISI (742): kurumun imza duzeni - basamaklar, esikler.

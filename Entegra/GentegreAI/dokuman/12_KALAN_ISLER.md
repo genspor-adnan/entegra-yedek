@@ -50,7 +50,7 @@ Onay omurgası bunları destekliyor; hiçbir akış kullanmıyor.
 | 3.5 | **Resmî tatilde klinik planını kapatma ayarı.** Tatil tablosu var, plana etkisi yok. | `referans`ta tatille ilgili ayar: **yok**. |
 | 3.6 | **Onay akışı ayarları mockup'ının kalan sekmeleri.** `Ekranlar/Ayarlar/onay_akis_ayarlari.html` beş sekmeli; karşılığı olarak akış tanımı (`/onay-akis`) ve vekâlet (`/onay-vekalet`) ekranları yapıldı. Kalan sekmeler yapılmadı. | — |
 | 3.7 | ~~**Masraf beyanında fiş/fatura GÖRSELİ bağlanmıyor.**~~ — **kapandı.** Doküman modülü masraf kartına açıldı: kayıtlı beyanda **"Fiş / Fatura"** sekmesi, `kaynak = masraf-beyan` + `kaynak_id = beyan id`. Fişin hangi harcamaya ait olduğu ayrı bağlantı tablosu yerine dokümanın `belge_turu` alanında; galeri beyanın satır belge numaralarını öneri olarak veriyor. | Katı FK yok: bir satırda çok fiş, bir fişte çok satır olabilir. |
-| 3.8 | **Belge talebinde yazının KENDİSİ üretilmiyor.** 765 talebi ve hazırlık/teslim akışını izliyor; metni İK elle yazıyor. Şablondan (kurum anteti + personel bilgisi + amaca göre metin) PDF üretmek ayrı bir iş - form motoru (740) ve doküman modülü ikisi de hazır, bağlanmadı. | Bugün "hazırlandı" bir işaret, üretilmiş bir belge değil. |
+| 3.8 | ~~**Belge talebinde yazının KENDİSİ üretilmiyor.**~~ — **768'de kapandı.** `belge_yazi_sablonu` (6 varsayılan şablon, yer tutuculu düz metin) + `fn_belge_talep_yazi` metni üretir; `/hazirla` onu **dondurur**, şablon sonradan değişse de belge değişmez. Yazdırma `/belge-talep/yazi/{id}` sayfasında, şablonlar Genel Ayarlar › Belge Yazıları'nda. | Maaş bordrodan gelmiyor (**3.3** bekliyor): tutarı İK talebin `maas_tutar` alanına girer, boşsa belge hazırlanamaz. |
 | 3.9 | ~~**`beyan_no` / `talep_no` / `avans_no` üretilmiyor**~~ — **767'de kapandı.** Tür kodları 906-908, ön ekler `AV-`/`MB-`/`BT-`; numara kayıt resmîleştiği anda kesiliyor (avans/masrafta onaya gönderirken, belge talebinde açılışta). Genel Ayarlar › Belge No › **İK Talepleri** grubundan düzenlenir. | Geçmiş kayıtlara numara **verilmedi** - hiç kesilmemiş numarayı sonradan uydurmak olurdu; onlar `#id` görünmeye devam eder. |
 
 ---
@@ -64,6 +64,7 @@ Onay omurgası bunları destekliyor; hiçbir akış kullanmıyor.
 | 4.3 | **755'te taşınamayan avans log satırları.** 907 ile yazılmış satırların hangisinin avans hangisinin hasta olduğu satırdan anlaşılmıyordu; dev'deki avans-şekilli satırlar silindi, gerçek hasta satırları yerinde. Müşteride 753 hiç yayınlanmadığı için sorun yok. | Kapalı sayılabilir; kayıt için burada. |
 | 4.4 | **Eski 10 "vazgeçildi" bildirim satırı.** 13-16 Eylül'den kalma randevu/panik bildirimleri, alıcıları gerçek görünen telefon numaraları. Sağlayıcı tanımlanınca **yeniden gönderilmesi istenmiyor**; durum 6 oldukları için işçi almıyor. | Silinecekse ayrı karar. |
 | 4.5 | **`entegrasyon_hesap.sifre` düz metin.** SMTP/SMS şifresi şifrelenmeden saklanıyor (`BildirimHesaplari` doğrudan okuyor). En azından uygulama şifresi (app password) kullanılmalı; kalıcı çözüm şifreleme. | — |
+| 4.6 | **`db/178` e-Belge önizlemesinde para biçimi yerel ayara bağlı.** `to_char(..., 'FM999G999G990D00')` `G`/`D` ayırıcıları sunucunun `lc_numeric`inden alıyor; bu kurulumda İngilizce biçim (`68,500.00`) üretiyor. 768'de aynı kusur literal ayırıcı + `translate` ile çözüldü, 178'e dokunulmadı. | Önizleme ekranı; tutar doğru, ayırıcı yanlış. |
 
 ---
 

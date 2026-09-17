@@ -12126,3 +12126,66 @@ xUnit 234/234, vitest 598/598, iki derleme temiz. Test verisi silindi
 (2 beyan, 3 satır, 1 doküman); vekâlet senaryosu verisi korundu.
 
 **DB göçü yok** - değişikliklerin dördü de kod tarafında.
+
+---
+
+## 17.09.2026 — Belge talebinde yazının kendisi (db/768)
+
+Kullanıcı: *"belge talebinde yazının kendisini üret"* (kalan iş 3.8).
+
+765'te **"hazırlandı" yalnız bir işaretti**: metni İK kendi bilgisayarında
+yazıyordu. Sistem iki soruyu cevaplayamıyordu - *"o yazıda ne yazıyordu"* ve
+*"kim neyi taahhüt etti"*. Teslim edilmiş belgenin metni hiçbir yerde yoktu.
+
+**Şablon ile üretilmiş metin ayrı saklanıyor.** `belge_yazi_sablonu` kurumun
+değişebilir şablonu; `personel_belge_talep.yazi_metin` o talep için üretilmiş
+ve **dondurulmuş** metin. Şablon sonradan değişince eski belgenin metni
+değişmez - yazıyı her açılışta yeniden üretmek, iki yıl önce bankaya verilmiş
+kâğıtla ekrandaki metni ayırırdı. Test bunu doğruluyor: şablon değiştirildi,
+dondurulmuş metin aynı kaldı.
+
+**Metni üreten tek yer `fn_belge_talep_yazi`.** Uçta ikinci bir birleştirme
+yazılsaydı önizleme ile dondurulan metin sessizce ayrışırdı. Fonksiyon
+`eksik[]` de döndürüyor: şablonda geçen ama **değeri boş** yer tutucular.
+Tanınmayan yer tutucu da eksiktir (şablonu yazan `{maaas}` yazmış olabilir) ve
+metinde olduğu gibi kalır - sessizce silmek onu gizlerdi.
+
+`/hazirla` artık belgeyi **üretir**; eksik varsa 422 ile reddeder ve hangi
+alanların boş olduğunu söyler. Elle dondurulmuş metin varsa korunur.
+
+**Maaş: bordro yok, elle girilir.** Maaş ve vize yazısı tutarı yazmak zorunda,
+üründe bordro/puantaj modülü yok (kalan iş 3.3 de onu bekliyor). Uydurmak
+yerine talebe `maas_tutar` + `maas_turu` (net/brüt) alanları eklendi; boşsa
+belge hazırlanamıyor. Boş bırakıp "___ TL" basmak, imzalanacak resmî yazıda
+boşluk bırakmak olurdu. Bordro gelince `{maas}` oradan beslenmeli.
+
+**Gövde düz metin, HTML değil.** Antet, başlık, imza bloğu ve sayfa düzeni
+ekranın sabit HTML'i. İki sebep: `dokuman` içerik ucu HTML'i bilerek kabul
+etmiyor (XSS) ve resmî Türkçe yazı zaten paragraflardan ibaret. Yazdırma
+tarayıcının kendi diyalogu - göz/lab/radyoloji çıktılarıyla aynı karar, ayrı
+PDF üreticisi yok.
+
+**Ekran.** Liste aksiyonu **"📄 Yazıyı Göster"** (hazırlamanın solunda - önce
+metni gör, sonra hazırlandı de) `/belge-talep/yazi/{id}` sayfasını açıyor:
+antet, metin, imza bloğu, yazdır/PDF ve **Düzenle → Metni Dondur**. Şablonun
+her durumu karşılaması beklenemez; metni hiç düzenletmemek İK'yı sistemin
+dışına iterdi - tam kaçtığımız şey. Şablonlar **Genel Ayarlar › Belge
+Yazıları** sekmesinde (Belge No'nun sağında; ikisi de "belge nasıl çıksın"
+ayarı), yer tutucu listesiyle birlikte.
+
+**Bu turda bulunan iki açık.** (1) `to_char(..., 'FM999G999G999D00')`
+sunucunun `lc_numeric`ine bakıyor ve bu kurulumda **68,500.00** üretiyordu;
+ayırıcı literal yazılıp çevriliyor (`68.500,00`). *Aynı kusur `db/178`
+e-Belge önizlemesinde de var - kalan işlere yazıldı.* (2) Uyarı kutusuna
+global `.uyari-kutusu` adını kapsamlı kuralla vermiştim; `temaSinifCakismasi`
+testi "bu ad iki anlamlı oldu" diye kırıldı ve haklıydı - kutu `.yazi-eksik`
+oldu.
+
+**Doğrulama.** Eksik alanla hazırlama 422; alanlar dolunca yazı tam üretildi;
+hazırlama metni dondurdu; şablon değiştirildi, dondurulmuş metin değişmedi;
+teslim edilmiş yazının değiştirilmesi 422. Ekranda sayfa ve **Belge Yazıları**
+sekmesi (6 şablon) çizildi. xUnit 234/234, vitest 598/598, iki derleme temiz.
+Test verisi silindi (1 talep, sayaç) ve geçici doldurulan personel alanları
+geri alındı; vekâlet senaryosu verisi korundu.
+
+Göç **768 yalnız docker'da**.

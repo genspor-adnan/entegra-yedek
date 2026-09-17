@@ -11,6 +11,28 @@ import { gonder, istek } from '../cekirdek';
  * ya da avans izindir - ayrı bir karardır ve zincire bir basamak ekler.
  */
 
+/** 768: belge talebi icin uretilmis (ya da dondurulmus) yazi. */
+export interface BelgeYazisi {
+  /** true = metin bu talep icin DONDURULMUS; sablon degisse de degismez. */
+  donmus: boolean;
+  baslik: string;
+  govde: string;
+  altNot: string;
+  imzaUnvan: string;
+  sablonId: number;
+  sablonAd: string;
+  /** Sablonda gecen ama degeri BOS yer tutucular - bunlar varken hazirlanamaz. */
+  eksik: string[];
+  adet: number;
+  talepNo: string;
+  personelAd: string;
+  durum: number;
+  antet: {
+    unvan: string; adres: string; il: string; ilce: string;
+    telefon: string; vkno: string; vd: string;
+  };
+}
+
 export interface IzinBakiyesi {
   tarafId: number;
   personelAd: string;
@@ -137,8 +159,11 @@ export const izinUclari = {
     basamaklar?: { sira: number; ad: string; rol: number }[];
   }>('/api/ik/belge-talep', g),
 
+  /** 768: artik metni de URETIR ve dondurur; eksik yer tutucu varsa reddeder. */
   belgeTalepHazirla: (id: number, not?: string) =>
-    gonder<{ durum: number }>(`/api/ik/belge-talep/${id}/hazirla`, { gerekce: not }),
+    gonder<{ durum: number; sablonAd: string | null; baslik: string | null;
+             elleDuzenlenmis: boolean }>(
+      `/api/ik/belge-talep/${id}/hazirla`, { gerekce: not }),
 
   belgeTalepTeslim: (id: number, not?: string) =>
     gonder<{ durum: number }>(`/api/ik/belge-talep/${id}/teslim`, { gerekce: not }),
@@ -146,4 +171,20 @@ export const izinUclari = {
   /** Otomatik onaylanmis talep de gerekceyle reddedilebilir. */
   belgeTalepReddet: (id: number, gerekce: string) =>
     gonder<{ durum: number }>(`/api/ik/belge-talep/${id}/reddet`, { gerekce }),
+
+  // ------------------------------------------------------ yazinin kendisi --
+  //  768: "hazirlandi" artik bir ISARET degil, URETILMIS metin.
+  //
+  //  `donmus = true` ise metin o talep icin DONDURULMUS demektir; sablon
+  //  sonradan degisse de bu metin degismez - teslim edilen kagitla ekrandaki
+  //  yazi ayrismasin. `sablon` verilirse dondurulmus metin degil, o sablonun
+  //  onizlemesi doner.
+  belgeTalepYazi: (id: number, sablon?: number) =>
+    istek<BelgeYazisi>(`/api/ik/belge-talep/${id}/yazi`
+                       + (sablon ? `?sablon=${sablon}` : '')),
+
+  /** Elle duzeltilmis metni dondurur; hazirlama bunu korur. */
+  belgeTalepYaziKaydet: (id: number,
+                         g: { baslik: string; govde: string; sablonId?: number }) =>
+    gonder<{ donduruldu: boolean }>(`/api/ik/belge-talep/${id}/yazi`, g),
 };

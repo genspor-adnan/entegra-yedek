@@ -4610,6 +4610,50 @@ button.dikte-alan:hover { background: var(--serit1) }
   /* Kagitta iki goz yan yana kalir; blok bolunmez. */
   .sema-cikti .cikti-goz { break-inside: avoid }
 }
+
+/* BELGE TALEBI YAZISI (768) — ayni `.sema-cikti` kabugunu kullanir; kagit,
+   antet ve arac cubugu davranisi ortak. Buradaki fark METNIN kendisi:
+   govde DUZ METIN ve satir sonlari anlamli (`pre-wrap`) - sablonda
+   "T.C. Kimlik No : ..." hizalamasi kagitta da korunmali. */
+.sema-cikti .yazi-baslik {
+  margin: 18px 0 14px; text-align: center; font-size: 15px; letter-spacing: .4px;
+  color: #1c4374;
+}
+.sema-cikti .yazi-govde {
+  white-space: pre-wrap; line-height: 1.85; font-size: 12.5px; text-align: justify;
+}
+.sema-cikti .yazi-altnot {
+  margin-top: 18px; font-size: 11px; color: #6b7a8d; line-height: 1.6;
+  border-top: 1px dotted #d8e0ea; padding-top: 8px;
+}
+/* IMZA SAGDA: resmi yazida imza sag altta olur. */
+.sema-cikti .yazi-imza {
+  display: flex; justify-content: flex-end; margin-top: 40px; font-size: 11.5px;
+  text-align: center;
+}
+.sema-cikti .yazi-imza .cizgi {
+  border-top: 1px solid #9aa8b6; width: 210px; margin: 0 auto 4px;
+}
+.sema-cikti .yazi-imza .sonuk { color: #6b7a8d; margin-top: 2px }
+.sema-cikti .yazi-baslik-girdi {
+  width: 100%; font-size: 14px; font-weight: 600; text-align: center;
+  padding: 6px; border: 1px solid #c9d6e5; border-radius: 3px;
+}
+/* DUZENLEME KUTUSU ESLESIR: yazarken gorulen satir sonu, kagittaki satir
+   sonudur - ayri yazi tipi kullanmak hizalamayi yaniltirdi. */
+.sema-cikti .yazi-govde-girdi {
+  width: 100%; margin-top: 10px; padding: 10px; line-height: 1.8;
+  font-family: inherit; font-size: 12.5px; border: 1px solid #c9d6e5;
+  border-radius: 3px; resize: vertical;
+}
+/* KENDI ADI (768): global `.uyari-kutusu`yu kapsamli bir kuralla ezmek onu
+   iki anlamli yapardi - `temaSinifCakismasi` testi bunu yakaladi ve hakliydi:
+   buradaki kutu kagit genisliginde, ustten ayrik bir SERIT. */
+.sema-cikti .yazi-eksik {
+  background: #fff6e5; border: 1px solid #f0d9a8; border-radius: 3px;
+  padding: 8px 12px; font-size: 12px; line-height: 1.6; color: #6a5320;
+  display: block; margin-bottom: 8px;
+}
 @media (max-width: 760px) {
   .sema-cikti .cikti-tuvaller { grid-template-columns: 1fr }
 }
