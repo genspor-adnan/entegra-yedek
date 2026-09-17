@@ -1742,6 +1742,23 @@ input.skt-gecmis {
   width: 52px; height: 52px; flex: 0 0 52px; border: 1px solid #d5dee8;
   border-radius: 6px; display: grid; place-items: center; font-size: 26px;
 }
+/* LOGO GORSELI (772): kutu boyu sabit, gorsel ORANINI KORUR. `cover`
+   secilseydi genis bir logo kirpilirdi - kurum kimligi kirpilmaz. */
+.cikti-sayfa .logo img,
+.sema-cikti .cikti-antet .logo img,
+.dk-kagit .dk-logo img {
+  max-width: 100%; max-height: 100%; object-fit: contain; display: block;
+}
+/* Belge yazisi ve sema ciktisi antedi: logo metnin SOLUNDA. */
+.sema-cikti .cikti-antet .logo {
+  width: 52px; height: 52px; flex: 0 0 52px; border: 1px solid #d5dee8;
+  border-radius: 6px; display: grid; place-items: center; font-size: 26px;
+  margin-right: 10px;
+}
+.dk-kagit .dk-logo {
+  width: 44px; height: 44px; flex: 0 0 44px; display: grid; place-items: center;
+  margin-right: 10px;
+}
 .cikti-sayfa .kbaslik h1 { margin: 0; font-size: 16px; color: #1c4374 }
 .cikti-sayfa .kbaslik .alt { font-size: 11px; color: #6b7a8d; line-height: 1.5 }
 .cikti-sayfa .kbaslik .sag {

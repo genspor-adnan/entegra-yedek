@@ -402,7 +402,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (223 ad, 52 tanesi birden cok dosyada)
+## Gorunumler (224 ad, 52 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -618,6 +618,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_stok_kullanilabilir` | `142_siparis_rezervasyon.sql` | — |
 | `v_stok_lookup` | `121_firsat.sql` | — |
 | `v_stok_onek_dagilim` | `524_stok_kategorisi.sql` | — |
+| `v_sube_antet` | `772_sube_antet_ve_logo.sql` | — |
 | `v_sube_baz_lookup` | `227_baz_sube.sql` | — |
 | `v_sube_lookup` | `718_hekim_calisma_plani.sql` | — |
 | `v_tahsilat_turu_lookup` | `330_prim_tahsilat_turu_durum.sql` | — |

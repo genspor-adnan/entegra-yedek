@@ -203,16 +203,19 @@ public static class BelgeTalebiUclari
                 select b.durum, b.adet, b.talep_no,
                        b.yazi_baslik, b.yazi_metin, b.yazi_tarihi,
                        coalesce(tr.unvan, '')   as personel_ad,
+                       -- ANTET TEK KAYNAKTAN (772): `v_sube_antet`. Logo da
+                       --   onun kolonu - resmî yazıda kurum logosu beklenir.
                        coalesce(su.unvan, '')   as kurum_unvan,
                        coalesce(su.adres, '')   as kurum_adres,
                        coalesce(su.il, '')      as kurum_il,
                        coalesce(su.ilce, '')    as kurum_ilce,
                        coalesce(su.telefon, '') as kurum_telefon,
                        coalesce(su.vkno, '')    as kurum_vkno,
-                       coalesce(su.vd, '')      as kurum_vd
+                       coalesce(su.vd, '')      as kurum_vd,
+                       su.logo_dokuman_id       as kurum_logo
                   from public.personel_belge_talep b
                   join public.taraf tr on tr.id = b.taraf_id
-                  left join public.sube su on su.id = b.sube_id
+                  left join public.v_sube_antet su on su.sube_id = b.sube_id
                  where b.id = @p0
                 """, null, [id], o => new
                 {
@@ -229,6 +232,8 @@ public static class BelgeTalebiUclari
                         il = o.Metin("kurum_il"), ilce = o.Metin("kurum_ilce"),
                         telefon = o.Metin("kurum_telefon"),
                         vkno = o.Metin("kurum_vkno"), vd = o.Metin("kurum_vd"),
+                        logoDokumanId = o.IsDBNull(o.GetOrdinal("kurum_logo"))
+                            ? (int?)null : o.Sayi("kurum_logo"),
                     },
                 }, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Belge talebi bulunamadı.");

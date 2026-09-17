@@ -12296,3 +12296,43 @@ biçim bir daha kayarsa test kırılır.
 (sırasıyla 769 ve 771 yürürlükte), 769'daki tek geçiş bir açıklama satırı.
 
 xUnit 234/234, vitest 598/598. Göç **771 yalnız docker'da**.
+
+---
+
+## 17.09.2026 — Antette logo (db/772)
+
+Kullanıcı: *"antette logoyu da göster"* (kalan iş 3.10).
+
+Şube logosu 234'ten beri duruyor ve **üst şeritte çiziliyordu**: `dokuman`
+kaynağı `sube`, `belge_turu` "Logo" (yoksa adı "logo" ile başlayan ilk resim).
+Kâğıda basılan **beş** çıktının hiçbiri onu kullanmıyordu; lab ve radyoloji
+logonun yerine emoji koymuştu (🧪 / 🏥). Ekranda görünen logo ile kâğıtta
+görünmeyen logo, aynı kurumun iki kimliği demekti.
+
+**Asıl sorun logo değil, kopyaydı.** `coalesce(nullif(s.unvan,''), s.ad) …`
+antet sorgusu **beş dosyada** birebir tekrar ediyordu (`DokumDeposu`,
+`GozUclari.CizimCikti`, `LabUclari.Rapor`, `RadyolojiUclari.Rapor`, 768'in yazı
+ucu). Logoyu beşine ayrı eklemek kopyayı altıya çıkarmak olurdu. `v_sube_antet`
+antedi tek yerde tanımlıyor; logo onun bir kolonu. Yarın antede "web adresi"
+eklenirse beş yer gezilmeyecek.
+
+**Logo seçme kuralı da tek yazan oldu.** Kural `KullaniciDeposu.SubeleriAsync`
+içinde satır içi SQL'di; o kod da görünüme bağlandı. İki kopya kalsaydı üst
+şeritteki logo ile kâğıttaki bir gün farklı dosyayı gösterebilirdi. "Kaşe" ve
+"İmza" bilerek dışarıda: onlar antet değil, imza bloğunun malzemesi.
+
+**Ekran tarafı tek bileşen.** `AntetLogo` hangi dosyanın logo olduğuna karar
+vermez - sunucudan gelen kimliği çizer, okunamazsa sessizce yedeğe düşer
+(logonun okunamaması raporun basılmasını engellememeli). Logo da yedek de
+yoksa kutu **hiç çizilmez**; boş çerçeve, olmayan bir logonun yerini
+tutuyormuş gibi görünürdü. Görsel `object-fit: contain` - `cover` geniş bir
+logoyu kırpardı, kurum kimliği kırpılmaz.
+
+**Doğrulama.** Beş çıktının hepsi bağlandı; ikisi ekranda görüldü: belge
+talebi yazısı ve lab raporu logoyu 52 px kutuda çiziyor (`naturalWidth` 52,
+API hatası yok). `/api/dokum/antet` ve belge yazısı ucu `logoDokumanId = 54`
+döndürüyor, üst şerit de aynı kimliği veriyor. Dev verisindeki logo
+`belge_turu` boş ama adı `Logo.png` - tam da yedek kuralın yakaladığı durum.
+xUnit 234/234, vitest 598/598. Test verisi silindi (1 talep).
+
+Göç **772 yalnız docker'da**.

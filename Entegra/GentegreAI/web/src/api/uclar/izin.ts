@@ -30,6 +30,8 @@ export interface BelgeYazisi {
   antet: {
     unvan: string; adres: string; il: string; ilce: string;
     telefon: string; vkno: string; vd: string;
+    /** Kurum logosunun dokuman kimligi (772); logosuz kurulumda null. */
+    logoDokumanId: number | null;
   };
 }
 

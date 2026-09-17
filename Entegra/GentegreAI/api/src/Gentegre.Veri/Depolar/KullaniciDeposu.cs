@@ -362,18 +362,17 @@ public sealed class KullaniciDeposu
     {
         var liste = await SubeleriHamAsync(tarafId, iptal);
         if (liste.Count == 0) return liste;
-        // ŞUBE LOGOSU (kullanıcı: üst şeritte şube combosu yerine logo + ad):
-        //   şube kartının "Logo" görseli (dokuman kaynak=sube, belge_turu Logo;
-        //   yoksa adı "logo" ile başlayan ilk resim). Tek sorgu, tüm şubeler.
+        // ŞUBE LOGOSU (kullanıcı: üst şeritte şube combosu yerine logo + ad).
+        //   KURAL TEK YERDE (772): `v_sube_antet.logo_dokuman_id`. Burada satır
+        //   içi duruyordu; çıktı antetleri de aynı logoyu göstermek zorunda ve
+        //   iki kopya, bir gün üst şeritteki logonun kâğıttakinden farklı
+        //   dosyayı göstermesi demekti.
         var logolar = await _veri.ListeAsync(
-            "select distinct on (d.kaynak_id) d.kaynak_id, d.id " +
-            "  from public.dokuman d " +
-            " where d.kaynak = 'sube' and d.kaynak_id = any(@p0) and d.durum = 1 " +
-            "   and d.content_type like 'image/%' " +
-            "   and (d.belge_turu ilike 'logo%' or d.ad ilike 'logo%') " +
-            " order by d.kaynak_id, (d.belge_turu ilike 'logo%') desc, d.varsayilan desc, d.id",
-            new object?[] { liste.Select(s => (long)s.Id).ToArray() },
-            o => (kaynakId: (int)o.GetInt64(0), id: o.GetInt32(1)), iptal);
+            "select a.sube_id, a.logo_dokuman_id " +
+            "  from public.v_sube_antet a " +
+            " where a.sube_id = any(@p0) and a.logo_dokuman_id is not null",
+            new object?[] { liste.Select(s => s.Id).ToArray() },
+            o => (kaynakId: o.GetInt32(0), id: o.GetInt32(1)), iptal);
         if (logolar.Count == 0) return liste;
         var harita = logolar.ToDictionary(x => x.kaynakId, x => x.id);
         return liste.Select(s => harita.TryGetValue(s.Id, out var d) ? s with { LogoDokumanId = d } : s).ToList();

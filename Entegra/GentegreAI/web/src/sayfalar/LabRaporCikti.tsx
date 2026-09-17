@@ -1,6 +1,7 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/istemci';
+import { AntetLogo } from '../bilesenler/AntetLogo';
 import { hataMetni } from '../api/sozlesme';
 import { tarihSaat, gunNokta, yasMetni } from '../bilesenler/bicim';
 import { BOLUM, ZIGOSITE } from '../bilesenler/labKodlari';
@@ -132,7 +133,7 @@ export function LabRaporCikti() {
       <div className="cikti-sayfa">
         {/* --- KURUM ANTETİ --- */}
         <div className="kbaslik">
-          <div className="logo">🧪</div>
+          <AntetLogo dokumanId={k.logoDokumanId as number | undefined} yedek="🧪" />
           <div>
             <h1>{String(k.unvan ?? '—')}</h1>
             <div className="alt">

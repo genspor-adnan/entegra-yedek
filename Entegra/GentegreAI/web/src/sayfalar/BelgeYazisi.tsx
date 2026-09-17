@@ -4,6 +4,7 @@ import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import type { BelgeYazisi as Yazi } from '../api/uclar/izin';
 import { guvenli, mesaj } from '../bilesenler/mesaj';
+import { AntetLogo } from '../bilesenler/AntetLogo';
 
 /**
  * BELGE TALEBİ YAZISI (768) — personelin İK'dan istediği resmî yazının
@@ -92,6 +93,10 @@ export function BelgeYazisi() {
 
       <div className="cikti-sayfa">
         <div className="cikti-antet">
+          {/* Resmî yazıda kurum logosu beklenir (772). Logosuz kurulumda
+              kutu hiç çizilmez - boş çerçeve logonun yerini tutuyormuş gibi
+              görünürdü. */}
+          <AntetLogo dokumanId={a.logoDokumanId} />
           <div>
             <b>{a.unvan || '—'}</b>
             {adres && <div className="sonuk">{adres}</div>}

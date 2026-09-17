@@ -4,7 +4,7 @@ Bu liste `00_TARIHCE.md`'deki her turun sonuna dağılmış "Kalan" notlarının
 toplanmış ve **canlı veriyle doğrulanmış** hâlidir. Tarihçe *ne yapıldığını*
 anlatır; burası *ne yapılmadığını*.
 
-Son güncelleme: **17.09.2026**, `db/771` sonrası.
+Son güncelleme: **17.09.2026**, `db/772` sonrası.
 
 Doğrulama yöntemi: maddeler dev veritabanına (docker `gentegre-pg18`) ve
 koda bakılarak yazıldı; sayılar o anki gerçek durumdur. Bir maddeyi
@@ -49,7 +49,7 @@ Onay omurgası bunları destekliyor; hiçbir akış kullanmıyor.
 | 3.4 | **Onaylanan izinde randevuların toplu taşınması / iptali.** Bugün izin onaylanınca hekimin planı kapanıyor ve yeni randevu engelleniyor, ama **o güne daha önce alınmış randevular yerinde kalıyor**. | `randevu.izinli_hekim` ayarı **0** (engelle). |
 | 3.5 | **Resmî tatilde klinik planını kapatma ayarı.** Tatil tablosu var, plana etkisi yok. | `referans`ta tatille ilgili ayar: **yok**. |
 | 3.6 | **Onay akışı ayarları mockup'ının kalan sekmeleri.** `Ekranlar/Ayarlar/onay_akis_ayarlari.html` beş sekmeli; karşılığı olarak akış tanımı (`/onay-akis`) ve vekâlet (`/onay-vekalet`) ekranları yapıldı. Kalan sekmeler yapılmadı. | — |
-| 3.10 | **Antette LOGO yok — hiçbir çıktıda.** `sube.logo` (bytea) ve `dokuman` kaynağı `sube` (`belge_turu`: Logo / Kaşe / İmza / Antet) 193'ten beri duruyor; göz şeması, döküm baskısı ve 768'in belge yazısı **üçü de** yalnız metin antet çiziyor. Resmî yazıda kurum logosu beklenir. | Tek ekranın değil, ortak bir çıktı bileşeninin işi. Bugün veri de boş: logolu şube **0**, `kaynak = sube` doküman **1** (türü boş). |
+| 3.10 | ~~**Antette LOGO yok — hiçbir çıktıda.**~~ — **772'de kapandı.** `v_sube_antet` antedi (ve logo kimliğini) tek yerde tanımlıyor; beş dosyaya kopyalanmış antet sorgusu ile `KullaniciDeposu`'ndaki logo kuralı ona bağlandı. Ekranda tek bileşen: `AntetLogo`. | Beş çıktı: belge yazısı, göz şeması, döküm baskısı, lab ve radyoloji raporu. Logosuz kurulumda kutu çizilmez; lab/radyolojide emoji yedeği kalır. **Kaşe ve İmza** hâlâ kullanılmıyor - onlar imza bloğunun malzemesi, ayrı iş. |
 | 3.11 | **Belge talebinde `teslim_sekli` işlevsiz.** Alan doldurulup saklanıyor (1 elden · 2 e-posta · 3 kargo) ama hiçbir davranışı değiştirmiyor: "e-Posta" seçilse bile yazı kendiliğinden gönderilmiyor, İK elle iletiyor. | 768 metni ürettiğine göre gönderim artık mümkün - `bildirim` kuyruğu ve şablon altyapısı hazır, eksik olan yalnız ek/gövde olarak yazının bağlanması. **1.1** (sağlayıcı hesabı) ön koşul. |
 
 **Bu turda kapananlar.** Kayıt için, ayrıntı tarihçede:

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/istemci';
+import { AntetLogo } from '../bilesenler/AntetLogo';
 import { hataMetni } from '../api/sozlesme';
 import { tarihSaat, gunNokta, yasMetni } from '../bilesenler/bicim';
 import { SemaZemini } from '../bilesenler/goz/gozSemaZemini';
@@ -54,6 +55,7 @@ export function GozSemaCikti() {
 
       <div className="cikti-sayfa">
         <div className="cikti-antet">
+          <AntetLogo dokumanId={k.logoDokumanId as number | undefined} />
           <div>
             <b>{String(k.unvan ?? '')}</b>
             {adres && <div className="sonuk">{adres}</div>}

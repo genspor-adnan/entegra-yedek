@@ -172,12 +172,14 @@ public static partial class GozUclari
             // ANTET: muayenenin şubesi; yoksa varsayılan şube. Hastaya verilen
             //   belgede kurum kimliği zorunlu.
             var kurum = await baglanti.TekAsync("""
-                select coalesce(nullif(s.unvan, ''), s.ad) as unvan, s.adres, s.ilce, s.il,
-                       s.telefon, s.vkno, s.vd
-                  from public.sube s
-                 where s.id = coalesce((select gm.sube_id from public.goz_muayene gm
-                                         where gm.id = @p0),
-                                       (select id from public.sube where varsayilan = 1 limit 1))
+                select a.unvan, a.adres, a.ilce, a.il, a.telefon,
+                       a.mersis_no as "mersisNo", a.vkno, a.vd,
+                       a.logo_dokuman_id as "logoDokumanId"
+                  from public.v_sube_antet a
+                 where a.sube_id = coalesce(
+                           (select gm.sube_id from public.goz_muayene gm
+                             where gm.id = @p0),
+                           (select id from public.sube where varsayilan = 1 limit 1))
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new

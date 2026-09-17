@@ -235,13 +235,15 @@ public static partial class RadyolojiUclari
             // ANTET: raporun ait olduğu şube (kurum kimliği hastaya verilen
             //   belgede zorunlu). Şube yoksa varsayılan şube kullanılır.
             var kurum = await baglanti.TekAsync("""
-                select coalesce(nullif(s.unvan, ''), s.ad) as unvan, s.adres, s.ilce, s.il,
-                       s.telefon, s.mersis_no as "mersisNo", s.vkno, s.vd
-                  from public.sube s
-                 where s.id = coalesce((select i.sube_id from public.radyoloji_istem i
-                                         join public.radyoloji_rapor r on r.istem_id = i.id
-                                        where r.id = @p0),
-                                       (select id from public.sube where varsayilan = 1 limit 1))
+                select a.unvan, a.adres, a.ilce, a.il, a.telefon,
+                       a.mersis_no as "mersisNo", a.vkno, a.vd,
+                       a.logo_dokuman_id as "logoDokumanId"
+                  from public.v_sube_antet a
+                 where a.sube_id = coalesce(
+                           (select i.sube_id from public.radyoloji_istem i
+                              join public.radyoloji_rapor r on r.istem_id = i.id
+                             where r.id = @p0),
+                           (select id from public.sube where varsayilan = 1 limit 1))
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { rapor, bolumler, alanlar, ekler, kurum });

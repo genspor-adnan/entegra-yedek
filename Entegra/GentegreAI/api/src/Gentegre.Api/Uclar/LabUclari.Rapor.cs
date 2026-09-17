@@ -202,12 +202,14 @@ public static partial class LabUclari
             // ANTET: istemin şubesi; yoksa varsayılan şube. Kurum kimliği
             //   hastaya verilen belgede zorunludur.
             var kurum = await baglanti.TekAsync("""
-                select coalesce(nullif(s.unvan, ''), s.ad) as unvan, s.adres, s.ilce, s.il,
-                       s.telefon, s.mersis_no as "mersisNo", s.vkno, s.vd
-                  from public.sube s
-                 where s.id = coalesce((select i.sube_id from public.lab_istem i
-                                         where i.id = @p0),
-                                       (select id from public.sube where varsayilan = 1 limit 1))
+                select a.unvan, a.adres, a.ilce, a.il, a.telefon,
+                       a.mersis_no as "mersisNo", a.vkno, a.vd,
+                       a.logo_dokuman_id as "logoDokumanId"
+                  from public.v_sube_antet a
+                 where a.sube_id = coalesce(
+                           (select i.sube_id from public.lab_istem i
+                             where i.id = @p0),
+                           (select id from public.sube where varsayilan = 1 limit 1))
                 """, null, [istemId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { istem, sonuclar, kulturler, izolatlar, antibiyogram,

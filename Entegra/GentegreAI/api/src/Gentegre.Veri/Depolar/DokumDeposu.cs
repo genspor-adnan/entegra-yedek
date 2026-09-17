@@ -203,11 +203,15 @@ public sealed class DokumDeposu
 
     /// <summary>Kurum anteti (baskı): aktif şube; yoksa varsayılan şube.</summary>
     public Task<Dictionary<string, object?>?> AntetAsync(int? subeId, CancellationToken iptal)
+        // ANTET TEK KAYNAKTAN (772): `v_sube_antet`. Aynı sorgu beş dosyada
+        //   kopyalanmıştı; logoyu beşine ayrı eklemek kopyayı artırırdı.
         => _veri.TekAsync("""
-            select coalesce(nullif(s.unvan, ''), s.ad) as unvan, s.adres, s.ilce, s.il,
-                   s.telefon, s.mersis_no as "mersisNo", s.vkno, s.vd, s.ad as "subeAd"
-              from public.sube s
-             where s.id = coalesce(@p0, (select id from public.sube where varsayilan = 1 limit 1))
+            select a.unvan, a.adres, a.ilce, a.il, a.telefon,
+                   a.mersis_no as "mersisNo", a.vkno, a.vd, a.sube_ad as "subeAd",
+                   a.logo_dokuman_id as "logoDokumanId"
+              from public.v_sube_antet a
+             where a.sube_id = coalesce(@p0,
+                   (select id from public.sube where varsayilan = 1 limit 1))
             """, [subeId], o =>
             {
                 var d = new Dictionary<string, object?>(StringComparer.Ordinal);

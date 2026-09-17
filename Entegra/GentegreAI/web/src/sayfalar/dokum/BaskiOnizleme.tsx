@@ -2,6 +2,7 @@ import type { DokumBaski, DokumKolonMeta, DokumTanimi, ListeYaniti, OzetYaniti }
 import { tarihSaat } from '../../bilesenler/bicim';
 import { KURAL_ETIKET, bosBaski, parametreAlanlari, tanimCumlesi, yonOnerisi } from './ortak';
 import { CubukGrafik, ListeSonucu, OzetGostergeler, OzetSonucu, ozetMi } from './SonucTablosu';
+import { AntetLogo } from '../../bilesenler/AntetLogo';
 
 /**
  * BASKI ÖNİZLEME (mockup Ekranlar/Ayarlar/dokum_baski_onizleme.html).
@@ -116,6 +117,8 @@ export function BaskiOnizleme({ tanim, setTanim, kolonlar, kaynakAdi, ad, yanit,
           {b.damga && <div className="dk-damga">GİZLİ</div>}
           {b.kurumBasligi && (
             <div className="dk-kurum">
+              <AntetLogo dokumanId={antet?.logoDokumanId as number | undefined}
+                         sinif="dk-logo" />
               <div>
                 <div className="ad">{String(antet?.unvan ?? '—')}</div>
                 <div className="alt">
