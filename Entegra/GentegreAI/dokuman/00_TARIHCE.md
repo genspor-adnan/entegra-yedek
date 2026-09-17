@@ -11505,3 +11505,79 @@ yeniden yazıldı; kalıcı hâli artık testin içinde.
 
 **Doğrulama.** Katalogda modüller-arası çakışma sıfır. xUnit 234/234 (2 yeni
 test), vitest 598/598, iki derleme temiz. Göç **757 yalnız docker'da**.
+
+
+## 17.09.2026 — Doküman onayı omurgaya taşındı (`db/758`)
+
+419'da doküman yönetimi **kendi akış motorunu** getirmişti: `dokuman_akis` +
+`dokuman_akis_adim` (tanım), `dokuman_onay` + `dokuman_onay_adim` (yürüyen
+süreç). 738'in omurgası yazılırken bu yapı yerinde bırakılmış, başlığına da
+"akış motoru ama yalnız dokümana bağlı" notu düşülmüştü. Artık omurgada:
+akış `dokuman.<akisId>`, **kaynak_tur 976**.
+
+**Aynı işi yapan iki motor**, her yeni özelliğin iki kez yazılması demekti.
+Omurgada olan hiçbiri dokümanda yoktu: onay kimseye atanmıyor, gelen kutusuna
+düşmüyor, vekâlet tanımıyor, geciken basamağı göstermiyordu. Taşımayla bunlar
+kendiliğinden geldi - onay kuyruğuna "Gecikme (gün)" sütunu da eklendi.
+
+**Kaynak sürüm, doküman değil.** `kaynak_id = dokuman_surum.id`. Onay bir
+SÜRÜME verilir: "v3 onaylandı" doğru, "doküman onaylandı" eksik. Omurganın
+`ux_onay_acik (kaynak_tur, kaynak_id) where durum = 0` kısıtı da bu sayede
+doğru şeyi korur - aynı dokümanın iki farklı sürümü aynı anda onayda
+olabilir, aynı sürüm iki kez olamaz.
+
+**Yeni sahip türü: 4 = kaydın sahibi.** `dokuman_akis_adim.dinamik` üç değer
+tanımlıyordu (1 sahip · 2 klasör sorumlusu · 3 bölüm sorumlusu) ama yalnız
+1'i uygulanmıştı; 2 ve 3 için kod hiç yazılmamış, adım kimseye atanmadan
+bırakılıyordu. Omurgaya `sahip_turu = 4` eklendi - modüle özel değil, genel
+bir kavram (satınalmada "talebi açan", dokümanda "dosyanın sahibi").
+**Klasör/bölüm sorumlusu taşınmadı**: var olmayan bir davranışı göç sırasında
+uydurmak, çalıştığı sanılan ama hiç denenmemiş bir kural bırakırdı; o adımlar
+bugünkü hâllerini (rol basamağı, atanmamış) koruyor.
+
+Sahip basamağı çözülemezse **hata fırlatılmıyor**, basamak sahipsiz kalıyor -
+âmirden farkı bu: "sahibi olmayan kayıt" olağandır ve o basamağı yetkisi olan
+herkes imzalayabilir; âmir bağı ise tanımlı olmalıdır, eksikse imza kimseye
+düşmeden zincir beklerdi.
+
+**Kararın sonucunu modül yazar.** Sürümü yayınlamak (öncekini arşive
+düşürmek, başlığın hash/sürüm no'sunu güncellemek) ya da reddetmek dokümanın
+kendi işi ve C# içindeki `YayinlaIcAsync`'teydi; omurga oradan çağıramazdı.
+`fn_dokuman_onay_sonuc`a taşındı - iskontodaki `fn_iskonto_talep_karar` ile
+aynı desen: yazan tek yer, onu da yalnız omurga çağırır. Ret'te önceki yayın
+sürümü **yürürlükte kalır**; doküman ancak hiç yayını yoksa taslağa döner.
+
+**İkinci karar ucu bırakılmadı.** `/api/dokuman-yonetim/onay/{id}/karar`
+kaldırıldı; karar `/api/onay/kayit/976/{surumId}/karar`dan veriliyor. Web
+istemcisinin `dokumanOnayKarar` imzası artık sürüm id alıyor ve kuyruk
+kaynağına `surumId` kolonu eklendi.
+
+**Okuma yolları da omurgaya çevrildi.** `v_dokuman_akis_lookup` (akış seçim
+listesi) ve `v_dokuman_onay_adim` (kartın "Onay Akışı" sekmesi) adlarını ve
+kolonlarını koruyarak `onay`/`onay_adim` üzerine yeniden yazıldı - kart
+tanımına, liste kaynağına ve beyaz listeye dokunmak gerekmedi. `dokuman-onay`
+kuyruğu `v_onay_bekleyen`den okuyor (o görünüm zaten yalnız sırası gelen
+basamağı döndürür, eski `a.sira = o.guncel_adim` koşulunun karşılığı).
+
+**Göç sırasında yakalanan eksik.** İlk yazımda yalnız `dokuman.akis_id`
+güncellenmişti; oysa yeni dokümanın akışı **`dokuman_kategori.akis_id`**'den
+kopyalanıyor. Kategori güncellenmeseydi bundan sonra açılan her doküman var
+olmayan bir akışı gösterir ve onaya hiç gönderilemezdi.
+
+**Doğrulama.** Yeni sürüm → onaya gönder (zincir İnceleme > Onay) → 1.
+basamak onay (sürüm "onayda" kaldı) → 2. basamak onay: sürüm **yayınlandı**,
+önceki yayın arşive düştü, doküman başlığı yeni sürümü gösterdi, `dokuman_olay`
+5/6/9 yazıldı. Ret senaryosunda sürüm reddedildi, **önceki yayın yürürlükte
+kaldı**, ikinci basamak "Zincir reddedilerek kapandı" gerekçesiyle atlandı;
+gerekçesiz ret engellendi. `sahip_turu = 4` denendi: basamak dokümanın
+sahibine atandı ve başka kullanıcı imzalamaya kalkınca "bu basamak başka bir
+kullanıcıya atanmış" engeline takıldı. Arayüzde kuyruktan iki basamak da
+onaylandı ve mesajlar zincirin gerçek durumunu söyledi ("1. basamak
+onaylandı; sıra sonraki basamakta" / "sürüm yayınlandı"). Gelen kutusu
+dokümanı `Doküman | DOK-1 v5 | … | İş Sözleşmesi` olarak gösterdi. xUnit
+234/234, vitest 598/598, iki derleme temiz. Test verisi silindi, doküman
+başlığı önceki yayın sürümünden geri yazıldı.
+
+**Kalan.** `satinalma_onay`, `dokuman_onay`, `dokuman_akis` tabloları veri
+olarak duruyor ama artık yazılmıyor; bir dahaki sürümde düşürülebilir. Göç
+**758 yalnız docker'da**.

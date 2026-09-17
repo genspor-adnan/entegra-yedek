@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (389 ad, 108 tanesi birden cok dosyada)
+## Fonksiyonlar (390 ad, 108 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -74,6 +74,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_dokuman_kategori_yol` | `431_dokuman_kategori.sql` | — |
 | `fn_dokuman_klasor_alt_yol` | `431_dokuman_kategori.sql` | — |
 | `fn_dokuman_klasor_yol` | `431_dokuman_kategori.sql` | — |
+| `fn_dokuman_onay_sonuc` | `758_dokuman_onay_omurga.sql` | — |
 | `fn_dokuman_tipi` | `431_dokuman_kategori.sql` | — |
 | `fn_doviz_iso` | `083_doviz_kod_iso.sql` | — |
 | `fn_doviz_kur_getir` | `083_doviz_kod_iso.sql` | — |
@@ -398,7 +399,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (217 ad, 50 tanesi birden cok dosyada)
+## Gorunumler (217 ad, 52 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -441,12 +442,12 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_dis_seans` | `706_dis_modulu.sql` | — |
 | `v_dis_tedavi_plani` | `706_dis_modulu.sql` | — |
 | `v_dis_unit_lookup` | `706_dis_modulu.sql` | — |
-| `v_dokuman_akis_lookup` | `431_dokuman_kategori.sql` | — |
+| `v_dokuman_akis_lookup` | `758_dokuman_onay_omurga.sql` | 431_dokuman_kategori.sql |
 | `v_dokuman_baglanti` | `423_dokuman_iliski.sql` | — |
 | `v_dokuman_erisim` | `425_dokuman_erisim.sql` | — |
 | `v_dokuman_kategori_lookup` | `431_dokuman_kategori.sql` | — |
 | `v_dokuman_klasor_lookup` | `421_dokuman_lookup.sql` | — |
-| `v_dokuman_onay_adim` | `422_dokuman_kart_gorunumleri.sql` | — |
+| `v_dokuman_onay_adim` | `758_dokuman_onay_omurga.sql` | 422_dokuman_kart_gorunumleri.sql |
 | `v_dokuman_paylasim` | `424_dokuman_paylasim.sql` | — |
 | `v_dokuman_turu_lookup` | `421_dokuman_lookup.sql` | — |
 | `v_ebelge_entegrator_lookup` | `171_sube_ebelge_mukellef.sql` | — |
@@ -569,7 +570,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_onay_akis_adim` | `742_onay_akis_ekrani.sql` | — |
 | `v_onay_akis_lookup` | `746_onay_bildirim_vekalet.sql` | — |
 | `v_onay_bekleyen` | `745_onay_sirasi_gelen.sql` | 738_onay_omurgasi.sql |
-| `v_onay_kutusu` | `755_avans_kaynak_tur_duzeltmesi.sql` | 739_onay_gelen_kutusu.sql, 744_izin_onay_kutusu.sql, 752_onarim_onayi.sql, 753_avans_modulu.sql, 754_iskonto_omurga.sql |
+| `v_onay_kutusu` | `758_dokuman_onay_omurga.sql` | 739_onay_gelen_kutusu.sql, 744_izin_onay_kutusu.sql, 752_onarim_onayi.sql, 753_avans_modulu.sql, 754_iskonto_omurga.sql, 755_avans_kaynak_tur_duzeltmesi.sql |
 | `v_onay_vekalet` | `746_onay_bildirim_vekalet.sql` | — |
 | `v_personel_avans` | `755_avans_kaynak_tur_duzeltmesi.sql` | 753_avans_modulu.sql |
 | `v_personel_izin` | `743_izin_modulu.sql` | — |

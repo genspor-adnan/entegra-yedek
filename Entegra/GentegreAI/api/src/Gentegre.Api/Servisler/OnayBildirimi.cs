@@ -114,6 +114,8 @@ public sealed class OnayBildirimi
                                                 'Avans #' || o.kaynak_id::text)
                         when 1256 then coalesce(nullif(ib.belge_no, ''),
                                                 'Başvuru #' || o.kaynak_id::text)
+                        when 976  then coalesce(nullif(dk.kod, ''), 'Doküman')
+                                       || ' v' || coalesce(ds.surum_no::text, '?')
                         else '#' || o.kaynak_id::text end as "kayitNo"
               from public.onay o
               left join public.onay_akis k on k.id = o.akis_id
@@ -128,6 +130,9 @@ public sealed class OnayBildirimi
               left join public.iskonto_talep isk
                      on o.kaynak_tur = 1256 and isk.id = o.kaynak_id
               left join public.belge ib on ib.id = isk.belge_id
+              left join public.dokuman_surum ds
+                     on o.kaynak_tur = 976 and ds.id = o.kaynak_id
+              left join public.dokuman dk on dk.id = ds.dokuman_id
              where o.id = @p0
             """, null, [onayId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
@@ -264,6 +269,8 @@ public sealed class OnayBildirimi
             4 => "ik.avans_onay_mali",
             _ => "ik.avans_onay_ust",
         },
+        var _ when akisKod.StartsWith("dokuman.", StringComparison.Ordinal)
+            => "dokuman.onay",
         "belge.iskonto" => rol switch
         {
             1 => "belge.iskonto_onay_birim",

@@ -41,6 +41,7 @@ public static partial class KaynakKatalogu
                 " when 1224 then 'Onarım'" +
                 " when 1257 then 'Avans'" +
                 " when 1256 then 'İskonto'" +
+                " when 976  then 'Doküman'" +
                 " else 'Diğer' end",
                 "metin", "Tür", Hizalama: "orta", Genislik: 150, Bicim: "rozet",
                 Filtrelenebilir: false),

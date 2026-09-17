@@ -29,6 +29,8 @@ public static partial class KartKatalogu
         //   yanlışlıkla alınmıştı.
         ["1257"] = "Personel Avansı",
         ["1256"] = "İskonto Talebi",
+        // 976 = dokuman_surum: onay DOKÜMANA değil SÜRÜME verilir.
+        ["976"] = "Doküman Sürümü",
     };
 
     /// <summary>onay_akis_adim.sahip_turu</summary>

@@ -328,6 +328,12 @@ public static class OnayUclari
             4 => "demirbas.onarim_onay_mali",
             _ => "demirbas.onarim_onay_ust",
         },
+        // DOKÜMAN (758). Akış kodu `dokuman.<akisId>` - kurum birden çok
+        //   doküman akışı tanımlayabilir, hepsi aynı karar yetkisini ister.
+        //   Basamak rolüne göre ayrı yetki ÜRETİLMİYOR: doküman akış
+        //   adımlarında rol bugün hiç kullanılmıyor (hepsi boş).
+        var _ when akisKod.StartsWith("dokuman.", StringComparison.Ordinal)
+            => "dokuman.onay",
         // İSKONTO (754). Rol 1 birim, 4 mali, 5 üst yönetim - satınalmadaki
         //   rol düzeniyle aynı, çünkü ikisi de kurumun parasına dokunur ve
         //   aynı imza hiyerarşisinden geçer.
@@ -450,6 +456,18 @@ public static class OnayUclari
                             iskontoDurum == 1 ? olcu : 0m,
                             gerekce ?? "", baglam.KullaniciId], iptal);
                 return iskontoDurum;
+
+            case var _ when akisKod.StartsWith("dokuman.", StringComparison.Ordinal):
+                // SÜRÜMÜ YAYINLAYAN / REDDEDEN TEK YER `fn_dokuman_onay_sonuc`
+                //   (758): önceki yayını arşive düşürmek ile bu sürümü
+                //   yayınlamak ayrılamaz iki iştir. Kaynak id = sürüm id.
+                short dokumanSonuc = zincirDurum == Servisler.OnayMotoru.ZincirOnaylandi
+                                   ? (short)1 : (short)0;
+                await baglanti.CalistirAsync(
+                    "select public.fn_dokuman_onay_sonuc(@p0, @p1, @p2, @p3)",
+                    islem, [(int)kaynakId, dokumanSonuc, gerekce ?? "",
+                            baglam.KullaniciId], iptal);
+                return dokumanSonuc;
 
             case "personel.izin":
                 // 2 onaylı · 3 reddedildi (personel_izin.durum).

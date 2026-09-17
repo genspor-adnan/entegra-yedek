@@ -437,163 +437,78 @@ public static class DokumanYonetimUclari
         });
 
         // POST /api/dokuman-yonetim/surum/{surumId}/onaya-gonder
+        //   ZİNCİRİ OMURGA KURAR (758): doküman artık kendi akış motorunu
+        //   çalıştırmıyor, `onay`/`onay_adim` üzerinde yürüyor. Kaynak SÜRÜM
+        //   (kaynak_tur 976): onay bir sürüme verilir, dokümana değil.
         grup.MapPost("/surum/{surumId:int}/onaya-gonder", async (
             int surumId, BaglamCozucu cozucu, VeriKaynagi veri,
+            Servisler.OnayMotoru onay, Servisler.OnayBildirimi haber,
             HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dokuman", Islem.Degistir);
 
             await using var baglanti = await veri.AcAsync(iptal);
-            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
             var s = await baglanti.TekAsync("""
-                select s.dokuman_id, s.durum, d.akis_id, d.sahip_id
+                select s.dokuman_id, s.durum, d.akis_id, d.sahip_id,
+                       k.kod as "akisKod"
                   from public.dokuman_surum s
                   join public.dokuman d on d.id = s.dokuman_id
-                 where s.id = @p0 for update of s
-                """, islem, [surumId],
+                  left join public.onay_akis k on k.id = d.akis_id
+                 where s.id = @p0
+                """, null, [surumId],
                 o => new { DokumanId = o.GetInt32(0), Durum = o.GetInt16(1),
                            AkisId = o.IsDBNull(2) ? (int?)null : o.GetInt32(2),
-                           SahipId = o.IsDBNull(3) ? (int?)null : o.GetInt32(3) }, iptal);
+                           SahipId = o.IsDBNull(3) ? (int?)null : o.GetInt32(3),
+                           AkisKod = o.IsDBNull(4) ? null : o.GetString(4) }, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("Sürüm bulunamadı.");
 
-            if (s is null) return Results.NotFound(new { hata = new
-                { kod = "BULUNAMADI", mesaj = "Surum bulunamadi." } });
             if (s.Durum != 1)
-                throw GentegreHatasi.IsKurali("Yalniz taslak surum onaya gonderilebilir.");
-            if (s.AkisId is null)
+                throw GentegreHatasi.IsKurali("Yalnız taslak sürüm onaya gönderilebilir.");
+            if (s.AkisId is null || s.AkisKod is null)
                 throw GentegreHatasi.IsKurali(
-                    "Dokuman turunde onay akisi tanimli degil; surum dogrudan yayinlanabilir.");
+                    "Doküman türünde onay akışı tanımlı değil; sürüm doğrudan "
+                    + "yayınlanabilir.");
 
-            var onayId = await baglanti.TekDegerAsync<int>("""
-                insert into public.dokuman_onay (dokuman_id, surum_id, akis_id, baslatan_id)
-                values (@p0, @p1, @p2, @p3)
-                returning id
-                """, islem, [s.DokumanId, surumId, s.AkisId, baglam.KullaniciId], iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
 
-            // Adimlar SABLONDAN KOPYALANIR: akis sonradan degisirse suren
-            //   onay etkilenmemeli - denetimde "hangi kurala gore onaylandi"
-            //   sorusunun cevabi surecin kendisinde durmali.
-            await baglanti.CalistirAsync("""
-                insert into public.dokuman_onay_adim
-                       (onay_id, sira, ad, atanan_rol_id, atanan_kullanici_id)
-                select @p0, a.sira, a.ad, a.rol_id,
-                       case when a.dinamik = 1 then @p2 else a.kullanici_id end
-                  from public.dokuman_akis_adim a
-                 where a.akis_id = @p1
-                 order by a.sira
-                """, islem, [onayId, s.AkisId, s.SahipId], iptal);
+            // ÖLÇÜ 0: dokümanda eşiğe konu bir sayı yok, bütün basamaklar
+            //   koşulsuz. SAHİP basamağı (sahip_turu 4) `sahipTarafId`den
+            //   çözülür - dokümanın sahibi.
+            var zincir = await onay.BaslatAsync(baglanti, islem, s.AkisKod,
+                surumId, 0m, [], baglam, iptal, sahipTarafId: s.SahipId);
 
-            await baglanti.CalistirAsync("""
-                update public.dokuman_surum set durum = 2, onay_id = @p1 where id = @p0
-                """, islem, [surumId, onayId], iptal);
             await baglanti.CalistirAsync(
-                "update public.dokuman set durum = 2 where id = @p0", islem, [s.DokumanId], iptal);
+                "update public.dokuman_surum set durum = 2 where id = @p0",
+                islem, [surumId], iptal);
+            await baglanti.CalistirAsync(
+                "update public.dokuman set durum = 2 where id = @p0",
+                islem, [s.DokumanId], iptal);
 
             await OlayYazAsync(baglanti, islem, s.DokumanId, surumId, (short)6,
                                baglam.KullaniciId, "", iptal);
             await islem.CommitAsync(iptal);
 
-            return Results.Ok(new { onayId, mesaj = "Surum onaya gonderildi.",
-                                    izlemeNo = baglam.IzlemeNo });
+            try
+            {
+                await haber.SiradakiniBildirAsync(baglanti, zincir.OnayId,
+                    baglam.KullaniciId, baglam.SubeId, iptal);
+            }
+            catch (Exception) { /* zincir kuruldu; bildirim hatasi onu dusurmez */ }
+
+            return Results.Ok(new
+            {
+                onayId = zincir.OnayId,
+                basamaklar = zincir.Adimlar.Select(a => new { a.Sira, a.Ad, a.Rol }),
+                mesaj = "Sürüm onaya gönderildi.", izlemeNo = baglam.IzlemeNo
+            });
         });
 
-        // POST /api/dokuman-yonetim/onay/{onayId}/karar
-        //   Sıradaki adıma karar verir; son adım onaylanınca sürüm YAYINLANIR.
-        grup.MapPost("/onay/{onayId:int}/karar", async (
-            int onayId, KararIstegi istek, BaglamCozucu cozucu, VeriKaynagi veri,
-            HttpContext ctx, CancellationToken iptal) =>
-        {
-            var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("dokuman", Islem.Degistir);
-
-            if (istek.Karar is not (1 or 2))
-                throw GentegreHatasi.Dogrulama("Karar 1 (onay) ya da 2 (ret) olmali.",
-                    [new("karar", "Gecersiz karar.")]);
-
-            await using var baglanti = await veri.AcAsync(iptal);
-            await using var islem = await baglanti.BeginTransactionAsync(iptal);
-
-            var o_ = await baglanti.TekAsync("""
-                select o.dokuman_id, o.surum_id, o.guncel_adim, o.durum,
-                       (select count(*) from public.dokuman_onay_adim a where a.onay_id = o.id)
-                  from public.dokuman_onay o where o.id = @p0 for update
-                """, islem, [onayId],
-                o => new { DokumanId = o.GetInt32(0),
-                           SurumId = o.IsDBNull(1) ? (int?)null : o.GetInt32(1),
-                           Adim = o.GetInt16(2), Durum = o.GetInt16(3),
-                           AdimSayisi = o.GetInt64(4) }, iptal);
-
-            if (o_ is null) return Results.NotFound(new { hata = new
-                { kod = "BULUNAMADI", mesaj = "Onay sureci bulunamadi." } });
-            if (o_.Durum != 1)
-                throw GentegreHatasi.IsKurali("Onay sureci zaten kapanmis.");
-
-            await baglanti.CalistirAsync("""
-                update public.dokuman_onay_adim
-                   set karar = @p2, karar_veren_id = @p3, karar_zamani = now(),
-                       not_metni = @p4
-                 where onay_id = @p0 and sira = @p1
-                """, islem, [onayId, o_.Adim, (short)istek.Karar, baglam.KullaniciId,
-                             istek.Not ?? ""], iptal);
-
-            string mesaj;
-            if (istek.Karar == 2)
-            {
-                // RET: surum reddedilir, dokuman TASLAGA doner. Hazirlayan
-                //   duzeltip yeni surum acar - reddedilen surumu yeniden
-                //   onaya gondermek, neyin degistigini gorunmez kilardi.
-                await baglanti.CalistirAsync("""
-                    update public.dokuman_onay set durum = 3, bitis = now() where id = @p0
-                    """, islem, [onayId], iptal);
-                await baglanti.CalistirAsync(
-                    "update public.dokuman_surum set durum = 5 where id = @p0",
-                    islem, [o_.SurumId], iptal);
-                await baglanti.CalistirAsync("""
-                    update public.dokuman set durum = case
-                        when exists (select 1 from public.dokuman_surum s
-                                      where s.dokuman_id = @p0 and s.durum = 3)
-                        then 3 else 1 end
-                     where id = @p0
-                    """, islem, [o_.DokumanId], iptal);
-                await OlayYazAsync(baglanti, islem, o_.DokumanId, o_.SurumId, (short)8,
-                                   baglam.KullaniciId, istek.Not ?? "", iptal);
-
-                // MESAJ DURUMU DOGRU SOYLEMELI: onceden yayinlanmis bir surum
-                //   varsa dokuman YAYINDA KALIR - "taslaga dondu" demek,
-                //   kullanicinin yururlukteki belgenin kalktigini sanmasina
-                //   yol acardi.
-                var yayindaKaldi = await baglanti.TekDegerAsync<int>("""
-                    select count(*) from public.dokuman_surum s
-                     where s.dokuman_id = @p0 and s.durum = 3
-                    """, islem, [o_.DokumanId], iptal) > 0;
-                mesaj = yayindaKaldi
-                    ? "Surum reddedildi; onceki yayin surumu yururlukte kaldi."
-                    : "Surum reddedildi; dokuman taslaga dondu.";
-            }
-            else if (o_.Adim < o_.AdimSayisi)
-            {
-                await baglanti.CalistirAsync(
-                    "update public.dokuman_onay set guncel_adim = guncel_adim + 1 where id = @p0",
-                    islem, [onayId], iptal);
-                await OlayYazAsync(baglanti, islem, o_.DokumanId, o_.SurumId, (short)7,
-                                   baglam.KullaniciId, istek.Not ?? "", iptal);
-                mesaj = "Adim onaylandi; sonraki adima gecti.";
-            }
-            else
-            {
-                await baglanti.CalistirAsync("""
-                    update public.dokuman_onay set durum = 2, bitis = now() where id = @p0
-                    """, islem, [onayId], iptal);
-                await YayinlaIcAsync(baglanti, islem, o_.DokumanId, o_.SurumId!.Value, iptal);
-                await OlayYazAsync(baglanti, islem, o_.DokumanId, o_.SurumId, (short)9,
-                                   baglam.KullaniciId, istek.Not ?? "", iptal);
-                mesaj = "Onay tamamlandi; surum yayinlandi.";
-            }
-
-            await islem.CommitAsync(iptal);
-            return Results.Ok(new { onayId, mesaj, izlemeNo = baglam.IzlemeNo });
-        });
+        // KARAR UCU YOK (758): karar `/api/onay/kayit/976/{surumId}/karar`
+        //   ucundan veriliyor. İkinci bir yol bırakılsaydı biri zinciri
+        //   yürütür, öteki doğrudan sürümü yayınlardı - ve sıradaki basamak
+        //   hiç sorulmadan doküman yayına çıkardı.
     }
 
     /// <summary>

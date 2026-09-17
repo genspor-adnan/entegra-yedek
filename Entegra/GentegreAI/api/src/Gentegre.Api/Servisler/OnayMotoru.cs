@@ -155,7 +155,19 @@ public sealed class OnayMotoru
         {
             if (mevcut.Contains(a.Sira)) continue;
 
-            var atanan = a.SahipTuru == 3 ? amirId : a.KullaniciId;
+            // 3 ÂMİR · 4 KAYDIN SAHİBİ · 2 belirli kullanıcı · 1 rol.
+            //   Sahip basamağı (4) çözülemezse basamak SAHİPSİZ kalır ve rol
+            //   basamağı gibi davranır - âmirde olduğu gibi hata fırlatmıyoruz,
+            //   çünkü "sahibi olmayan kayıt" olağan bir durumdur (dokümanın
+            //   sahip alanı boş olabilir) ve o basamağı yetkisi olan herkes
+            //   imzalayabilir. Âmirde ise bağ TANIMLI OLMALIYDI: eksikse
+            //   imza kimseye düşmeden zincir beklerdi.
+            var atanan = a.SahipTuru switch
+            {
+                3 => amirId,
+                4 => sahipTarafId,
+                _ => a.KullaniciId,
+            };
 
             await baglanti.CalistirAsync("""
                 insert into public.onay_adim (onay_id, sira, ad, sahip_turu, rol,

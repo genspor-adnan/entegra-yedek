@@ -137,16 +137,26 @@ export const uretimUclari = {
     gonder<{ mesaj: string }>(`/api/dokuman-yonetim/${id}/baglanti`,
       { kaynak, kaynakId, rol }),
 
-  /** Surumu onaya gonderir (419): akis adimlari SABLONDAN KOPYALANIR, akis
-      sonradan degisirse suren onay etkilenmez. */
+  /** Surumu onaya gonderir (419 · 758'de omurgaya tasindi): zinciri onay
+      omurgasi kurar, basamaklar akis TANIMINDAN secilir. */
   dokumanOnayaGonder: (surumId: number) =>
-    gonder<{ onayId: number; mesaj: string }>(
+    gonder<{ onayId: number; mesaj: string;
+             basamaklar: { sira: number; ad: string; rol: number }[] }>(
       `/api/dokuman-yonetim/surum/${surumId}/onaya-gonder`, {}),
 
-  /** Onay adimi karari (419): 1 onay · 2 ret. Son adim onaylaninca YAYINLANIR. */
-  dokumanOnayKarar: (onayId: number, karar: number, not?: string) =>
-    gonder<{ mesaj: string }>(`/api/dokuman-yonetim/onay/${onayId}/karar`,
-                              { karar, not }),
+  /**
+   * Onay adimi karari (758): artik OMURGA ucundan, kaynak_tur 976 ve
+   * kaynak_id SURUM id'si. Dokumanin kendi karar ucu kaldirildi - iki yol
+   * olsaydi biri zinciri yurutur, oteki dogrudan surumu yayinlardi.
+   *
+   * Son basamak onaylaninca surum YAYINLANIR, onceki yayin arsive duser
+   * (`fn_dokuman_onay_sonuc`).
+   */
+  dokumanOnayKarar: (surumId: number, karar: number, not?: string) =>
+    gonder<{ zincirDurum: number; kayitDurum: number | null;
+             basamak: number; adim: string; sonrakiBasamak: number | null }>(
+      `/api/onay/kayit/976/${surumId}/karar`,
+      { karar: karar === 1 ? 'onayla' : 'reddet', gerekce: not }),
 
   /** e-Nabiz paketini KAYNAKTAN yeniden uretir (415): paket satirini elle
       duzeltmek, gonderilen veriyle kayittaki veriyi ayirirdi. */

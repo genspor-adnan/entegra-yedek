@@ -225,29 +225,42 @@ Kod: ${y.kod}`);
 
   if (kod !== 'dokuman.onay' && kod !== 'dokuman.ret') return false;
 
-  const onayId = Number(satir?.onayId ?? 0);
-  if (!onayId) { mesaj('Önce bir onay adımı seçin.'); return true }
+  // KARAR ARTIK SURUME VERILIR (758): omurga kaydi `kaynak_tur 976 +
+  //   kaynak_id = surum.id` ile bagliyor. Eski `onayId` gecmiyor.
+  const surumId = Number(satir?.surumId ?? 0);
+  if (!surumId) { mesaj('Önce bir onay adımı seçin.'); return true }
   const ad = String(satir?.dokumanAd ?? '');
+  const surumNo = Number(satir?.surumNo ?? 0);
+  const etiket = surumNo > 0 ? `"${ad}" v${surumNo}` : `"${ad}"`;
 
   if (kod === 'dokuman.onay') {
-    if (!await onay(`"${ad}" onaylansın mı?\n\n`
-                  + 'Son adımsa sürüm yayınlanır ve önceki sürüm arşive düşer.')) return true;
+    if (!await onay(`${etiket} onaylansın mı?
+
+`
+                  + 'Son basamaksa sürüm yayınlanır ve önceki sürüm arşive düşer.'))
+      return true;
     await guvenli(async () => {
-      const y = await api.dokumanOnayKarar(onayId, 1);
-      mesaj(y.mesaj);
+      const y = await api.dokumanOnayKarar(surumId, 1);
+      // ZINCIR BITTI MI: omurga "yurudu mu / bitti mi" cevabini veriyor,
+      //   kullaniciya hangisinin oldugunu soylemek gerekiyor - "onaylandi"
+      //   demek, arkada iki imza daha varken belgeyi yayinda sanmaya yol acar.
+      mesaj(y.zincirDurum === 0
+        ? `${y.basamak}. basamak (${y.adim}) onaylandı; sıra sonraki basamakta.`
+        : 'Onay tamamlandı; sürüm yayınlandı ve önceki sürüm arşive düştü.');
       b.tazele();
     });
     return true;
   }
 
   // RET GEREKÇESİ ZORUNLU: hazırlayan neyi düzelteceğini bilmeli.
-  const gerekce = await metinSor(`"${ad}" neden reddediliyor?`, '', 'Gerekçe');
+  const gerekce = await metinSor(`${etiket} neden reddediliyor?`, '', 'Gerekçe');
   if (gerekce === null) return true;
   if (!gerekce.trim()) { mesaj('Ret gerekçesi zorunlu.'); return true }
 
   await guvenli(async () => {
-    const y = await api.dokumanOnayKarar(onayId, 2, gerekce.trim());
-    mesaj(y.mesaj);
+    await api.dokumanOnayKarar(surumId, 2, gerekce.trim());
+    mesaj('Sürüm reddedildi. Varsa önceki yayın sürümü yürürlükte kalır; '
+        + 'hazırlayan düzeltip yeni sürüm açar.');
     b.tazele();
   });
   return true;
