@@ -11818,3 +11818,25 @@ için `"Failure sending mail."`, yani zincirin tamamı doğru kuruluyor. xUnit
 yerine uygulama şifresi (app password) kullanılmalı. Hesap tanımlanınca
 `appsettings.Development.json` içindeki `Bildirim:KayitModu` kapatılmalı -
 hesap silinirse sessizce sahte gönderime dönmesin.
+
+
+## 17.09.2026 — `Bildirim:KayitModu` kapatıldı
+
+Kayıt modu geliştirmede kuyruğun uçtan uca çalıştığını görmek için açılmıştı;
+görevi bitince kapatıldı (`appsettings.Development.json`, `false`).
+
+**Yeni davranış.** Sağlayıcı hesabı tanımlı değilken gönderim artık
+**başarısız oluyor**: satır kuyrukta kalıyor, `bildirim_log`a sebep yazılıyor
+(*"Eposta sağlayıcısı tanımlı değil (entegrasyon hesabı yok)"*) ve üç
+denemeden sonra "vazgeçildi"ye düşüyor. Gerçek kurulumun beklediği davranış
+bu: **gitmeyen bildirim gitmiş görünmüyor.**
+
+Dosyadaki açıklama da güncellendi - hem kapalı hem açık hâlin ne anlama
+geldiği, hem de "üretimde asla true olmamalı" notu yerinde duruyor.
+
+**Doğrulama.** Hatırlatma tetiklendi, 3 bildirim kuyruğa girdi ve hepsi
+`durum 1` + yukarıdaki hata ile kaldı - kayıt modundaki "gönderildi"nin
+aksine. xUnit 234/234. Test verisi silindi.
+
+**Sıradaki adım kurulumda:** Genel Ayarlar > Entegrasyon Hesapları'ndan
+`EPOSTA` hesabı tanımlanınca bu hata kaybolur ve gerçek gönderim başlar.
