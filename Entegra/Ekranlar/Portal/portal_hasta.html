@@ -4,88 +4,241 @@
 <title>Portal — Hasta — Mockup</title>
 <link rel="stylesheet" href="_ortak.css"></head><body>
 
+<!-- ============================ 1) PANO ============================ -->
 <div class="win">
   <div class="title">🙋 Hasta Portalı — <b>Ayşe Yılmaz</b>
-    <span class="sp">Kapsam: yalnız <b>kendi</b> kayıtlarınız · portal_turu = 3</span></div>
+    <span class="sp">Kapsam: yalnız <b>kendi</b> kayıtlarınız · <code>portal_turu = 3</code></span></div>
 
-  <div class="selam">Merhaba Ayşe Hanım
-    <span>18 Eylül 2026 Cuma · Merkez</span></div>
+  <div class="kabuk">
+    <nav class="yan">
+      <div class="grp">Portalım</div>
+      <a class="on" href="#">🏠 Özetim</a>
+      <a href="#">📅 Randevularım <span class="sy">1</span></a>
+      <div class="ayrac"></div>
+      <div class="grp">Sonuçlarım</div>
+      <a href="#">🧪 Lab sonuçlarım <span class="sy">2</span></a>
+      <a href="#">📑 Radyoloji raporlarım</a>
+      <a href="#">🩺 Muayene özetlerim</a>
+      <div class="grp">Sağlığım</div>
+      <a href="#">💊 İlaçlarım <span class="sy">3</span></a>
+      <a href="#">📈 Takip grafiklerim</a>
+      <a href="#">📁 Belgelerim</a>
+      <div class="ayrac"></div>
+      <div class="grp">Hesabım</div>
+      <a href="#">💳 Ödemelerim</a>
+      <a href="#">🔒 Gizlilik ve rıza</a>
+      <div class="kimlik">Ayşe Yılmaz<br><span class="sonuk">TC ***18 · SMS ile giriş</span></div>
+    </nav>
 
-  <div class="kutular">
-    <div class="kutu"><div class="b">YAKLAŞAN RANDEVU</div><div class="d">1</div><div class="a">22 Eylül 10:30</div></div>
-    <div class="kutu ok"><div class="b">YENİ SONUÇ</div><div class="d">2</div><div class="a">bakılmadı</div></div>
-    <div class="kutu"><div class="b">KULLANDIĞIM İLAÇ</div><div class="d">3</div><div class="a">1'i bugün bitiyor</div></div>
-    <div class="kutu uy"><div class="b">ÖDENMEMİŞ</div><div class="d">450 ₺</div><div class="a">18.09 başvurusu</div></div>
+    <div class="icerik">
+      <div class="ust-serit">
+        <span class="ara">🔍 Sonuç, rapor ya da ilaç ara…</span>
+        <span class="dug bir">＋ Randevu al</span>
+      </div>
+
+      <div class="kutular" style="padding:0 0 10px">
+        <div class="kutu"><div class="b">YAKLAŞAN RANDEVU</div><div class="d">1</div><div class="a">22 Eylül 10:30</div></div>
+        <div class="kutu ok"><div class="b">YENİ SONUÇ</div><div class="d">2</div><div class="a">bakılmadı</div></div>
+        <div class="kutu"><div class="b">KULLANDIĞIM İLAÇ</div><div class="d">3</div><div class="a">1'i bugün bitiyor</div></div>
+        <div class="kutu uy"><div class="b">ÖDENMEMİŞ</div><div class="d">450 ₺</div><div class="a">18.09 başvurusu</div></div>
+      </div>
+
+      <div class="satir" style="padding:0">
+        <div class="blok"><h4>📅 Randevularım <span class="sp">al · değiştir · iptal et</span></h4>
+          <table><thead><tr>
+            <th>Tarih</th><th>Bölüm / Hekim</th><th>Yer</th><th>Durum</th><th></th>
+          </tr></thead><tbody>
+            <tr><td><b>22.09 10:30</b></td><td>Dahiliye · Dr. Kemal Aydın</td><td class="sonuk">Merkez · 2. kat</td><td><span class="rz mavi">Onaylı</span></td><td><span class="rz">İptal</span></td></tr>
+            <tr><td class="sonuk">03.09 09:00</td><td>Laboratuvar · numune</td><td class="sonuk">Merkez · kan alma</td><td><span class="rz ok">Geldi</span></td><td class="sonuk">—</td></tr>
+            <tr><td class="sonuk">14.08 16:15</td><td>Dahiliye · Dr. Kemal Aydın</td><td class="sonuk">Merkez · 2. kat</td><td><span class="rz kir">Gelmedi</span></td><td class="sonuk">—</td></tr>
+          </tbody></table></div>
+
+        <div class="blok"><h4>🧪 Son sonuçlarım <span class="sp">hekim onayından sonra görünür</span></h4>
+          <table><thead><tr>
+            <th>Tarih</th><th>Tetkik</th><th class="sag">Sonuç</th><th>Referans</th><th>Durum</th>
+          </tr></thead><tbody>
+            <tr><td class="sonuk">18.09</td><td>Hemogram</td><td class="sag sonuk">—</td><td class="sonuk">—</td><td><span class="rz">Hazırlanıyor</span></td></tr>
+            <tr><td class="sonuk">03.09</td><td>TSH</td><td class="sag">3,8</td><td class="sonuk">0,4 – 4,0</td><td><span class="rz ok">Normal</span></td></tr>
+            <tr><td class="sonuk">03.09</td><td>Hemoglobin</td><td class="sag">11,2</td><td class="sonuk">12,0 – 16,0</td><td><span class="rz sari">Düşük</span></td></tr>
+            <tr><td class="sonuk">14.08</td><td>Vitamin D</td><td class="sag">18</td><td class="sonuk">30 – 100</td><td><span class="rz sari">Düşük</span></td></tr>
+          </tbody></table></div>
+      </div>
+    </div>
   </div>
+</div>
 
-  <div class="satir">
-    <div class="blok"><h4>📅 Randevularım <span class="sp">al · değiştir · iptal et</span></h4>
-      <table><thead><tr>
-        <th>Tarih</th><th>Bölüm / Hekim</th><th>Yer</th><th>Durum</th><th></th>
-      </tr></thead><tbody>
-        <tr><td><b>22.09 10:30</b></td><td>Dahiliye · Dr. Kemal Aydın</td><td class="sonuk">Merkez · 2. kat</td><td><span class="rz mavi">Onaylı</span></td><td><span class="rz">İptal</span></td></tr>
-        <tr><td class="sonuk">03.09 09:00</td><td>Laboratuvar · numune</td><td class="sonuk">Merkez · kan alma</td><td><span class="rz ok">Geldi</span></td><td class="sonuk">—</td></tr>
-        <tr><td class="sonuk">14.08 16:15</td><td>Dahiliye · Dr. Kemal Aydın</td><td class="sonuk">Merkez · 2. kat</td><td><span class="rz kir">Gelmedi</span></td><td class="sonuk">—</td></tr>
-      </tbody></table>
-      <div style="padding:8px 10px;border-top:1px solid var(--line2)">
-        <span class="rz mavi">＋ Randevu al</span>
-        <span class="sonuk">Bölüm → hekim → uygun saat (çalışma planından)</span>
-      </div></div>
+<!-- ======================= 2) LAB SONUCUM (RAPOR) ======================= -->
+<div class="win">
+  <div class="title">🧪 Lab sonucum — <b>03.09.2026</b>
+    <span class="sp">Portalım › Lab sonuçlarım › Rapor</span></div>
+  <div class="kabuk">
+    <nav class="yan">
+      <div class="grp">Portalım</div>
+      <a href="#">🏠 Özetim</a>
+      <a href="#">📅 Randevularım</a>
+      <div class="grp">Sonuçlarım</div>
+      <a class="on" href="#">🧪 Lab sonuçlarım</a>
+      <a href="#">📑 Radyoloji raporlarım</a>
+      <a href="#">🩺 Muayene özetlerim</a>
+      <div class="grp">Sağlığım</div>
+      <a href="#">💊 İlaçlarım</a>
+      <a href="#">📈 Takip grafiklerim</a>
+      <div class="kimlik">Ayşe Yılmaz</div>
+    </nav>
 
-    <div class="blok"><h4>🧪 Sonuçlarım <span class="sp">hekim onayından sonra görünür</span></h4>
-      <table><thead><tr>
-        <th>Tarih</th><th>Tetkik</th><th class="sag">Sonuç</th><th>Referans</th><th>Durum</th>
-      </tr></thead><tbody>
-        <tr><td class="sonuk">18.09</td><td>Hemogram</td><td class="sag sonuk">—</td><td class="sonuk">—</td><td><span class="rz">Hazırlanıyor</span></td></tr>
-        <tr><td class="sonuk">03.09</td><td>TSH</td><td class="sag">3,8</td><td class="sonuk">0,4 – 4,0</td><td><span class="rz ok">Normal</span></td></tr>
-        <tr><td class="sonuk">03.09</td><td>Hemoglobin</td><td class="sag">11,2</td><td class="sonuk">12,0 – 16,0</td><td><span class="rz sari">Düşük</span></td></tr>
-        <tr><td class="sonuk">14.08</td><td>Vitamin D</td><td class="sag">18</td><td class="sonuk">30 – 100</td><td><span class="rz sari">Düşük</span></td></tr>
-      </tbody></table>
-      <div style="padding:8px 10px;border-top:1px solid var(--line2)">
-        <span class="rz mavi">PDF indir</span>
-        <span class="rz">Değişim grafiği</span>
-        <span class="sonuk">Sonucunuzu hekiminizle değerlendirin.</span>
-      </div></div>
+    <div class="icerik">
+      <div class="ust-serit">
+        <span class="dug">← Listeye dön</span>
+        <span class="ara">03.09.2026 · Merkez Laboratuvarı</span>
+        <span class="dug">🖨 Yazdır</span><span class="dug bir">⬇ PDF</span>
+      </div>
+
+      <div class="rapor">
+        <div class="bas">
+          <div>
+            <h3>Laboratuvar Sonuç Raporu</h3>
+            <div class="sonuk">Merkez Laboratuvarı · Biyokimya / Hematoloji</div>
+          </div>
+          <div class="sag">İstem No <b>LI-23880</b><br>Rapor tarihi 03.09.2026 14:20</div>
+        </div>
+
+        <div class="kunye">
+          <div><i>Ad Soyad</i><b>Ayşe Yılmaz</b></div>
+          <div><i>Doğum</i>07.06.1978 (48)</div>
+          <div><i>Protokol</i>2026/43118</div>
+          <div><i>İsteyen hekim</i>Dr. Kemal Aydın</div>
+          <div><i>Numune</i>03.09 09:05</div>
+          <div><i>Açlık</i>Evet (10 saat)</div>
+        </div>
+
+        <table style="margin-top:6px"><thead><tr>
+          <th>Test</th><th class="sag">Sonuç</th><th>Birim</th><th>Referans</th><th class="orta">Durum</th><th>Önceki (14.08)</th>
+        </tr></thead><tbody>
+          <tr><td>TSH</td><td class="sag">3,8</td><td>mIU/L</td><td class="sonuk">0,4 – 4,0</td><td class="orta"><span class="rz ok">Normal</span></td><td class="sonuk">3,5</td></tr>
+          <tr><td><b>Hemoglobin</b></td><td class="sag"><b>11,2</b></td><td>g/dL</td><td class="sonuk">12,0 – 16,0</td><td class="orta"><span class="rz sari">Düşük</span></td><td class="sonuk">11,8 ↓</td></tr>
+          <tr><td>Ferritin</td><td class="sag">14</td><td>ng/mL</td><td class="sonuk">15 – 150</td><td class="orta"><span class="rz sari">Düşük</span></td><td class="sonuk">16</td></tr>
+          <tr><td>Vitamin B12</td><td class="sag">340</td><td>pg/mL</td><td class="sonuk">200 – 900</td><td class="orta"><span class="rz ok">Normal</span></td><td class="sonuk">310</td></tr>
+        </tbody></table>
+
+        <div class="imza">
+          <span>Onaylayan: <b>Uzm. Dr. Nihal Er</b> · 03.09.2026 14:15</span>
+          <span>e-İmza: <b>doğrulandı</b></span>
+        </div>
+
+        <div class="not" style="margin:10px 0 0;max-width:none">
+          <b>Bu rapor bir tanı değildir.</b> Sonuçlarınızı <b>hekiminizle</b>
+          değerlendirin; referans aralıkları laboratuvara ve yönteme göre değişir.
+        </div>
+      </div>
+
+      <div class="satir" style="padding:10px 0 0">
+        <div class="blok"><h4>📈 Hemoglobin seyrim <span class="sp">son 4 ölçüm</span></h4>
+          <table><tbody>
+            <tr><td class="sonuk">03.09.2026</td><td class="sag"><b>11,2</b></td><td><span class="cubuk"><i class="uy" style="width:70%"></i></span></td></tr>
+            <tr><td class="sonuk">14.08.2026</td><td class="sag">11,8</td><td><span class="cubuk"><i class="uy" style="width:74%"></i></span></td></tr>
+            <tr><td class="sonuk">02.05.2026</td><td class="sag">12,6</td><td><span class="cubuk"><i style="width:79%"></i></span></td></tr>
+            <tr><td class="sonuk">10.01.2026</td><td class="sag">13,1</td><td><span class="cubuk"><i style="width:82%"></i></span></td></tr>
+          </tbody></table></div>
+
+        <div class="blok"><h4>💊 Bu sonuçla ilgili ilacım</h4>
+          <table><tbody>
+            <tr><td>Ferrous sülfat 100 mg</td><td class="sonuk">1×1 aç karnına</td><td><span class="rz ok">Devam</span></td></tr>
+            <tr><td colspan="3" class="sonuk">03.09'da Dr. Kemal Aydın tarafından başlandı · 3 ay</td></tr>
+          </tbody></table></div>
+      </div>
+    </div>
   </div>
+</div>
 
-  <div class="satir">
-    <div class="blok"><h4>💊 Kullandığım ilaçlar <span class="sp">reçetelerimden</span></h4>
-      <table><thead><tr>
-        <th>İlaç</th><th>Doz</th><th>Başlangıç</th><th>Bitiş</th><th>Durum</th>
-      </tr></thead><tbody>
-        <tr><td>Ferrous sülfat 100 mg</td><td>1×1 aç karnına</td><td class="sonuk">03.09</td><td class="sonuk">03.12</td><td><span class="rz ok">Devam</span></td></tr>
-        <tr><td>D vitamini 1000 IU</td><td>1×1</td><td class="sonuk">14.08</td><td class="sonuk">14.11</td><td><span class="rz ok">Devam</span></td></tr>
-        <tr><td>Amoksisilin 1 g</td><td>2×1</td><td class="sonuk">11.09</td><td class="sonuk"><b>18.09</b></td><td><span class="rz sari">Bugün bitiyor</span></td></tr>
-      </tbody></table></div>
+<!-- ================== 3) RANDEVU AL + RADYOLOJİ RAPORU ================== -->
+<div class="win">
+  <div class="title">📅 Randevu al — <b>Dahiliye</b>
+    <span class="sp">Portalım › Randevularım › Yeni</span></div>
+  <div class="kabuk">
+    <nav class="yan">
+      <div class="grp">Portalım</div>
+      <a href="#">🏠 Özetim</a>
+      <a class="on" href="#">📅 Randevularım</a>
+      <div class="grp">Sonuçlarım</div>
+      <a href="#">🧪 Lab sonuçlarım</a>
+      <a href="#">📑 Radyoloji raporlarım</a>
+      <div class="grp">Sağlığım</div>
+      <a href="#">💊 İlaçlarım</a>
+      <a href="#">📁 Belgelerim</a>
+      <div class="kimlik">Ayşe Yılmaz</div>
+    </nav>
 
-    <div class="blok"><h4>📁 Belgelerim <span class="sp">rapor · onam · fatura</span></h4>
-      <table><tbody>
-        <tr><td>Laboratuvar sonuç raporu</td><td class="sonuk">03.09.2026</td><td><span class="rz mavi">PDF</span></td></tr>
-        <tr><td>Radyoloji raporu (Akciğer)</td><td class="sonuk">14.08.2026</td><td><span class="rz mavi">PDF</span></td></tr>
-        <tr><td>Bilgilendirilmiş onam</td><td class="sonuk">14.08.2026</td><td><span class="rz mavi">PDF</span></td></tr>
-        <tr><td>Fatura / makbuz</td><td class="sonuk">18.09.2026</td><td><span class="rz mavi">PDF</span></td></tr>
-      </tbody></table></div>
+    <div class="icerik">
+      <div class="satir" style="padding:0">
+        <div class="blok"><h4>1️⃣ Bölüm ve hekim</h4>
+          <table><tbody>
+            <tr><td style="width:110px" class="sonuk">Bölüm</td><td><b>Dahiliye</b> ▾</td></tr>
+            <tr><td class="sonuk">Hekim</td><td>Dr. Kemal Aydın ▾ <span class="sonuk">(fark etmez seçilebilir)</span></td></tr>
+            <tr><td class="sonuk">Şube</td><td>Merkez ▾</td></tr>
+            <tr><td class="sonuk">Sebep</td><td>Kontrol · kan değerleri</td></tr>
+          </tbody></table></div>
+
+        <div class="blok"><h4>2️⃣ Uygun saatler <span class="sp">hekimin çalışma planından</span></h4>
+          <table><thead><tr><th>Gün</th><th>Saatler</th></tr></thead><tbody>
+            <tr><td><b>22.09 Pzt</b></td><td><span class="rz mavi">10:30</span> <span class="rz">11:00</span> <span class="rz">11:30</span> <span class="rz sonuk">14:00 dolu</span></td></tr>
+            <tr><td>23.09 Sal</td><td><span class="rz">09:00</span> <span class="rz">09:30</span> <span class="rz sonuk">10:00 dolu</span></td></tr>
+            <tr><td>24.09 Çar</td><td class="sonuk">hekim izinli</td></tr>
+            <tr><td>25.09 Per</td><td><span class="rz">15:00</span> <span class="rz">15:30</span> <span class="rz">16:00</span></td></tr>
+          </tbody></table>
+          <div style="padding:8px 10px;border-top:1px solid var(--line2)">
+            <span class="dug bir">22.09 · 10:30 için randevu al</span>
+            <span class="sonuk">Onay SMS ile gelir.</span>
+          </div></div>
+      </div>
+
+      <div class="satir" style="padding:10px 0 0">
+        <div class="blok"><h4>📑 Radyoloji raporum <span class="sp">14.08.2026 · Akciğer grafisi</span></h4>
+          <div style="padding:10px 12px">
+            <div class="kunye" style="border:0;padding:0 0 6px">
+              <div><i>Tetkik</i><b>Akciğer grafisi (PA)</b></div>
+              <div><i>Çekim</i>14.08.2026 11:20</div>
+              <div><i>İsteyen</i>Dr. Kemal Aydın</div>
+              <div><i>Rapor</i>14.08.2026 14:05</div>
+            </div>
+            <div class="metin"><b>SONUÇ</b>
+Her iki akciğer havalanması doğaldır. Aktif patolojik bulgu saptanmamıştır.
+Kalp gölgesi normal sınırlarda.</div>
+            <div class="imza"><span>Raporlayan: <b>Uzm. Dr. Selim Barış</b></span>
+              <span>e-İmza: <b>doğrulandı</b></span>
+              <span class="rz mavi">⬇ PDF</span></div>
+          </div></div>
+
+        <div class="blok"><h4>🔒 Gizlilik ve rıza <span class="sp">KVKK</span></h4>
+          <table><tbody>
+            <tr><td>Aydınlatma metni</td><td class="sonuk">okundu · 12.01.2026</td><td><span class="rz mavi">Görüntüle</span></td></tr>
+            <tr><td>Açık rıza (portal erişimi)</td><td><span class="rz ok">Verildi</span></td><td><span class="rz">Geri al</span></td></tr>
+            <tr><td>Erişim günlüğüm</td><td class="sonuk">son 30 günde 6 görüntüleme</td><td><span class="rz mavi">Listele</span></td></tr>
+            <tr><td>Vekâlet (çocuğum)</td><td class="sonuk">Efe Yılmaz (9) · veli</td><td><span class="rz mavi">Kayıtlarına geç</span></td></tr>
+          </tbody></table></div>
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="not">
   <b>Kapsam (db/794).</b> Her ekran <code>portal_turu = 3</code> kuralıyla
-  süzülür: randevu <code>rv.hasta_id</code>, istem/sonuç
-  <code>i.taraf_id</code>, hasta kartı <code>taraf.id = &lt;kullanıcı&gt;</code>.
-  Kuralı yazılmamış kaynak bu rol için kapalıdır.
-  <b>Bu ekran henüz uygulanmadı</b> - plan: <code>dokuman/13_PORTAL_ROLLERI_PLANI.md</code>.
+  süzülür: randevu <code>rv.hasta_id</code>, istem/sonuç <code>i.taraf_id</code>,
+  hasta kartı <code>taraf.id = &lt;kullanıcı&gt;</code>. Kuralı yazılmamış
+  kaynak bu rol için kapalıdır. <b>Bu portal henüz uygulanmadı</b> — plan:
+  <code>dokuman/13_PORTAL_ROLLERI_PLANI.md</code>.
   <ul>
-    <li><b>Giriş ayrı bir yüzeydir:</b> TC + doğum tarihi + SMS doğrulama; kurum
-      içi giriş ekranı değil.</li>
-    <li><b>Onaylanmamış sonuç gösterilmez</b> - "Hazırlanıyor" kalır. Bu klinik
-      bir karardır: hekim görmeden hastaya sonuç göstermek, yorumsuz bir sayıyı
-      tanı yerine koyar.</li>
-    <li><b>KVKK:</b> aydınlatma metni + açık rıza kaydı; her görüntüleme
-      günlüğe yazılır.</li>
-    <li><b>Veli / vasi:</b> reşit olmayan çocuğun kayıtları velinin hesabından
-      görünür (<code>kullanici_kapsam</code> ile).</li>
-    <li>Randevu <b>alma ve iptal</b> portalda; saatler hekimin çalışma planından
-      gelir - portal kuruma randevu "uydurmaz".</li>
+    <li><b>Giriş ayrı bir yüzeydir:</b> TC + doğum tarihi + SMS doğrulama;
+      kurum içi giriş ekranı değil.</li>
+    <li><b>Onaylanmamış sonuç gösterilmez</b> - "Hazırlanıyor" kalır. Hekim
+      görmeden hastaya sonuç göstermek, yorumsuz bir sayıyı tanı yerine koyar.</li>
+    <li>Her raporun altında <b>"bu rapor bir tanı değildir"</b> uyarısı.</li>
+    <li><b>KVKK:</b> aydınlatma + açık rıza kaydı, <b>erişim günlüğü hastaya
+      da açık</b> (kim ne zaman baktı).</li>
+    <li><b>Veli / vasi:</b> çocuğun kayıtlarına velinin hesabından geçilir
+      (<code>kullanici_kapsam</code>).</li>
+    <li>Randevu saatleri <b>hekimin çalışma planından</b> gelir - portal saat
+      uydurmaz; onay SMS ile döner.</li>
+    <li>Ödemeler yalnız <b>kendi</b> borcu; kurumun tahsilat ekranı değildir.</li>
   </ul>
 </div>
 

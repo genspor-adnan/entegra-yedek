@@ -4,76 +4,223 @@
 <title>Portal — Dış İstem Kurumu — Mockup</title>
 <link rel="stylesheet" href="_ortak.css"></head><body>
 
+<!-- ============================ 1) PANO ============================ -->
 <div class="win">
   <div class="title">🏥 Dış Kurum Portalı — <b>Özel Yaşam Tıp Merkezi</b>
-    <span class="sp">Kapsam: yalnız <b>kendi gönderdiğiniz</b> istemler · portal_turu = 2</span></div>
+    <span class="sp">Kapsam: yalnız <b>kendi gönderdiğiniz</b> istemler · <code>portal_turu = 2</code></span></div>
 
-  <div class="selam">Merhaba, Özel Yaşam Tıp Merkezi
-    <span>18 Eylül 2026 Cuma · anlaşmalı kurum hesabı</span></div>
+  <div class="kabuk">
+    <nav class="yan">
+      <div class="grp">Portal</div>
+      <a class="on" href="#">🏠 Panom</a>
+      <a href="#">👤 Gönderdiğim hastalar <span class="sy">128</span></a>
+      <div class="ayrac"></div>
+      <div class="grp">Laboratuvar</div>
+      <a href="#">🧾 İstemlerim <span class="sy">27</span></a>
+      <a href="#">🔎 Numune durumu <span class="sy">5</span></a>
+      <a href="#">📄 Lab sonuçları</a>
+      <div class="grp">Görüntüleme</div>
+      <a href="#">🖥 Tetkiklerim</a>
+      <a href="#">📑 Radyoloji raporları</a>
+      <div class="ayrac"></div>
+      <div class="grp">İşlem</div>
+      <a href="#">➕ Yeni istem</a>
+      <a href="#">🖨 Barkod yazdır</a>
+      <a href="#">❓ Yardım (AI rehber)</a>
+      <div class="kimlik">Özel Yaşam Tıp Merkezi<br><span class="sonuk">Anlaşmalı kurum · VKN ***5521</span></div>
+    </nav>
 
-  <div class="kutular">
-    <div class="kutu"><div class="b">BUGÜN GÖNDERDİĞİM</div><div class="d">14</div><div class="a">9 numune ulaştı</div></div>
-    <div class="kutu uy"><div class="b">NUMUNE BEKLENİYOR</div><div class="d">5</div><div class="a">en eskisi 3 saat</div></div>
-    <div class="kutu"><div class="b">ÇALIŞILIYOR</div><div class="d">22</div><div class="a">tahmini 2s 10d</div></div>
-    <div class="kutu ok"><div class="b">SONUÇLANAN (7 GÜN)</div><div class="d">96</div><div class="a">ort. 3s 05d</div></div>
-    <div class="kutu teh"><div class="b">RED / TEKRAR</div><div class="d">2</div><div class="a">hemoliz 1 · yetersiz 1</div></div>
+    <div class="icerik">
+      <div class="ust-serit">
+        <span class="ara">🔍 İstem no, barkod ya da hasta ara…</span>
+        <span class="dug">Son 7 gün ▾</span>
+        <span class="dug bir">➕ Yeni istem</span>
+      </div>
+
+      <div class="kutular" style="padding:0 0 10px">
+        <div class="kutu"><div class="b">BUGÜN GÖNDERDİĞİM</div><div class="d">14</div><div class="a">9 numune ulaştı</div></div>
+        <div class="kutu uy"><div class="b">NUMUNE BEKLENİYOR</div><div class="d">5</div><div class="a">en eskisi 3 saat</div></div>
+        <div class="kutu"><div class="b">ÇALIŞILIYOR</div><div class="d">22</div><div class="a">tahmini 2s 10d</div></div>
+        <div class="kutu ok"><div class="b">SONUÇLANAN (7 GÜN)</div><div class="d">96</div><div class="a">ort. 3s 05d</div></div>
+        <div class="kutu teh"><div class="b">RED / TEKRAR</div><div class="d">2</div><div class="a">hemoliz 1 · yetersiz 1</div></div>
+      </div>
+
+      <div class="satir" style="padding:0">
+        <div class="blok"><h4>🧾 Gönderdiğim istemler <span class="sp">son 7 gün</span></h4>
+          <table><thead><tr>
+            <th>İstem No</th><th>Hasta</th><th>Tetkik</th><th>Numune</th><th>Durum</th><th class="sag">Tarih</th>
+          </tr></thead><tbody>
+            <tr><td>LI-24118</td><td>A** Y*****</td><td>Hemogram · CRP</td><td><span class="rz ok">Kabul</span></td><td><span class="rz mavi">Çalışılıyor</span></td><td class="sag">18.09 09:10</td></tr>
+            <tr><td>LI-24117</td><td>M**** D****</td><td>TSH · fT4</td><td><span class="rz ok">Kabul</span></td><td><span class="rz ok">Sonuçlandı</span></td><td class="sag">18.09 08:40</td></tr>
+            <tr><td>LI-24115</td><td>S**** K***</td><td>İdrar kültürü</td><td><span class="rz sari">Yolda</span></td><td><span class="rz">Bekliyor</span></td><td class="sag">18.09 08:05</td></tr>
+            <tr><td>RD-90233</td><td>H***** A***</td><td>Akciğer grafisi</td><td class="sonuk">—</td><td><span class="rz ok">Rapor hazır</span></td><td class="sag">17.09 16:50</td></tr>
+            <tr><td>LI-24109</td><td>H***** A***</td><td>Biyokimya paneli</td><td><span class="rz kir">Red</span></td><td><span class="rz kir">Tekrar iste</span></td><td class="sag">17.09 16:20</td></tr>
+          </tbody></table></div>
+
+        <div class="blok"><h4>🔎 Numune durumu <span class="sp">"kan alındı mı, laba ulaştı mı"</span></h4>
+          <table><thead><tr>
+            <th>Barkod</th><th>Hasta</th><th>Tüp</th><th>Alındı</th><th>Laba ulaştı</th><th>Durum</th>
+          </tr></thead><tbody>
+            <tr><td>N-889201</td><td>A** Y*****</td><td>EDTA</td><td class="sonuk">08:55</td><td class="sonuk">09:20</td><td><span class="rz ok">Kabul</span></td></tr>
+            <tr><td>N-889198</td><td>S**** K***</td><td>Steril kap</td><td class="sonuk">08:02</td><td class="sonuk">—</td><td><span class="rz sari">Yolda</span></td></tr>
+            <tr><td>N-889177</td><td>H***** A***</td><td>Jelli</td><td class="sonuk">dün 15:40</td><td class="sonuk">dün 17:05</td><td><span class="rz kir">Hemoliz</span></td></tr>
+          </tbody></table></div>
+      </div>
+    </div>
   </div>
+</div>
 
-  <div class="satir">
-    <div class="blok"><h4>🧾 Gönderdiğim istemler <span class="sp">son 7 gün</span></h4>
-      <table><thead><tr>
-        <th>İstem No</th><th>Hasta</th><th>Tetkik</th><th>Numune</th><th>Durum</th><th class="sag">Tarih</th>
-      </tr></thead><tbody>
-        <tr><td>LI-24118</td><td>A** Y*****</td><td>Hemogram · CRP</td><td><span class="rz ok">Kabul</span></td><td><span class="rz mavi">Çalışılıyor</span></td><td class="sag">18.09 09:10</td></tr>
-        <tr><td>LI-24117</td><td>M**** D****</td><td>TSH · fT4</td><td><span class="rz ok">Kabul</span></td><td><span class="rz ok">Sonuçlandı</span></td><td class="sag">18.09 08:40</td></tr>
-        <tr><td>LI-24115</td><td>S**** K***</td><td>İdrar kültürü</td><td><span class="rz sari">Yolda</span></td><td><span class="rz">Bekliyor</span></td><td class="sag">18.09 08:05</td></tr>
-        <tr><td>LI-24109</td><td>H***** A***</td><td>Biyokimya paneli</td><td><span class="rz kir">Red</span></td><td><span class="rz kir">Tekrar iste</span></td><td class="sag">17.09 16:20</td></tr>
-        <tr><td>LI-24104</td><td>E*** Ç****</td><td>HbA1c</td><td><span class="rz ok">Kabul</span></td><td><span class="rz ok">Sonuçlandı</span></td><td class="sag">17.09 11:55</td></tr>
-      </tbody></table></div>
+<!-- ======================== 2) LAB SONUÇ RAPORU ======================== -->
+<div class="win">
+  <div class="title">📄 Lab sonuç raporu — <b>M**** D****</b>
+    <span class="sp">Portal › Lab sonuçları › Rapor</span></div>
+  <div class="kabuk">
+    <nav class="yan">
+      <div class="grp">Portal</div>
+      <a href="#">🏠 Panom</a>
+      <a href="#">👤 Gönderdiğim hastalar</a>
+      <div class="grp">Laboratuvar</div>
+      <a href="#">🧾 İstemlerim</a>
+      <a href="#">🔎 Numune durumu</a>
+      <a class="on" href="#">📄 Lab sonuçları</a>
+      <div class="grp">Görüntüleme</div>
+      <a href="#">🖥 Tetkiklerim</a>
+      <a href="#">📑 Radyoloji raporları</a>
+      <div class="kimlik">Özel Yaşam Tıp Merkezi</div>
+    </nav>
 
-    <div class="blok"><h4>🔎 Numune durumu <span class="sp">"kan alındı mı, laba ulaştı mı"</span></h4>
-      <table><thead><tr>
-        <th>Barkod</th><th>Hasta</th><th>Tüp</th><th>Alındı</th><th>Laba ulaştı</th><th>Durum</th>
-      </tr></thead><tbody>
-        <tr><td>N-889201</td><td>A** Y*****</td><td>EDTA</td><td class="sonuk">08:55</td><td class="sonuk">09:20</td><td><span class="rz ok">Kabul</span></td></tr>
-        <tr><td>N-889198</td><td>S**** K***</td><td>Steril kap</td><td class="sonuk">08:02</td><td class="sonuk">—</td><td><span class="rz sari">Yolda</span></td></tr>
-        <tr><td>N-889177</td><td>H***** A***</td><td>Jelli</td><td class="sonuk">dün 15:40</td><td class="sonuk">dün 17:05</td><td><span class="rz kir">Hemoliz</span></td></tr>
-      </tbody></table></div>
+    <div class="icerik">
+      <div class="ust-serit">
+        <span class="dug">← Listeye dön</span>
+        <span class="ara">İstem LI-24117 · 18.09.2026</span>
+        <span class="dug">🖨 Yazdır</span><span class="dug bir">⬇ PDF</span>
+      </div>
+
+      <div class="rapor">
+        <div class="bas">
+          <div>
+            <h3>Laboratuvar Sonuç Raporu</h3>
+            <div class="sonuk">Merkez Laboratuvarı · Hormon</div>
+          </div>
+          <div class="sag">İstem No <b>LI-24117</b><br>Rapor tarihi 18.09.2026 12:10</div>
+        </div>
+
+        <div class="kunye">
+          <div><i>Hasta</i><b>M**** D****</b></div>
+          <div><i>Doğum</i>**.**.1965 (61)</div>
+          <div><i>Cinsiyet</i>Erkek</div>
+          <div><i>Gönderen kurum</i><b>Özel Yaşam Tıp Merkezi</b></div>
+          <div><i>Kurum protokolü</i>ÖY-2026/1188</div>
+          <div><i>Numune</i>18.09 08:20 · Jelli tüp</div>
+          <div><i>Kabul</i>18.09 08:55</div>
+          <div><i>Ön tanı</i>E03.9 Hipotiroidi şüphesi</div>
+        </div>
+
+        <table style="margin-top:6px"><thead><tr>
+          <th>Test</th><th class="sag">Sonuç</th><th>Birim</th><th>Referans</th><th class="orta">İşaret</th><th>Yöntem</th>
+        </tr></thead><tbody>
+          <tr><td>TSH</td><td class="sag">3,8</td><td>mIU/L</td><td class="sonuk">0,4 – 4,0</td><td class="orta"><span class="rz ok">Normal</span></td><td class="sonuk">ECLIA</td></tr>
+          <tr><td>fT4</td><td class="sag">1,1</td><td>ng/dL</td><td class="sonuk">0,8 – 1,8</td><td class="orta"><span class="rz ok">Normal</span></td><td class="sonuk">ECLIA</td></tr>
+          <tr><td>fT3</td><td class="sag">2,9</td><td>pg/mL</td><td class="sonuk">2,0 – 4,4</td><td class="orta"><span class="rz ok">Normal</span></td><td class="sonuk">ECLIA</td></tr>
+          <tr><td>Anti-TPO</td><td class="sag"><b>82</b></td><td>IU/mL</td><td class="sonuk">&lt; 34</td><td class="orta"><span class="rz sari">↑ Yüksek</span></td><td class="sonuk">ECLIA</td></tr>
+        </tbody></table>
+
+        <div class="imza">
+          <span>Onaylayan: <b>Uzm. Dr. Nihal Er</b> · 18.09.2026 12:05</span>
+          <span>e-İmza: <b>doğrulandı</b></span>
+          <span class="sonuk">Doğrulama kodu: 2B41-90DC</span>
+        </div>
+      </div>
+
+      <div class="blok" style="margin-top:10px"><h4>ℹ️ Portal notu</h4>
+        <table><tbody>
+          <tr><td class="sonuk">Hasta adı</td><td>Portalda <b>maskeli</b> gösterilir; tam ad PDF raporunda ve kurum kaydınızda.</td></tr>
+          <tr><td class="sonuk">Ücret</td><td>Portalda <b>yer almaz</b> - anlaşma ve fatura kurumlar arasındadır.</td></tr>
+          <tr><td class="sonuk">Onay</td><td>Yalnız <b>uzman onayı verilmiş</b> sonuç görünür.</td></tr>
+        </tbody></table></div>
+    </div>
   </div>
+</div>
 
-  <div class="satir">
-    <div class="blok"><h4>📄 Sonuçlarım <span class="sp">yalnız onaylanmış sonuç</span></h4>
-      <table><thead><tr>
-        <th>Hasta</th><th>Tetkik</th><th class="sag">Sonuç</th><th>Referans</th><th>Onay</th><th>Rapor</th>
-      </tr></thead><tbody>
-        <tr><td>M**** D****</td><td>TSH</td><td class="sag">3,8</td><td class="sonuk">0,4 – 4,0 mIU/L</td><td><span class="rz ok">Onaylı</span></td><td><span class="rz mavi">PDF</span></td></tr>
-        <tr><td>M**** D****</td><td>fT4</td><td class="sag">1,1</td><td class="sonuk">0,8 – 1,8 ng/dL</td><td><span class="rz ok">Onaylı</span></td><td><span class="rz mavi">PDF</span></td></tr>
-        <tr><td>E*** Ç****</td><td>HbA1c</td><td class="sag"><b>8,4</b></td><td class="sonuk">&lt; 5,7 %</td><td><span class="rz ok">Onaylı</span></td><td><span class="rz mavi">PDF</span></td></tr>
-        <tr><td>A** Y*****</td><td>Hemogram</td><td class="sag sonuk">—</td><td class="sonuk">—</td><td><span class="rz">Bekliyor</span></td><td class="sonuk">—</td></tr>
-      </tbody></table></div>
+<!-- ====================== 3) YENİ İSTEM + RADYOLOJİ ====================== -->
+<div class="win">
+  <div class="title">➕ Yeni istem — <b>kurum adına</b>
+    <span class="sp">Portal › Yeni istem</span></div>
+  <div class="kabuk">
+    <nav class="yan">
+      <div class="grp">Portal</div>
+      <a href="#">🏠 Panom</a>
+      <a href="#">👤 Gönderdiğim hastalar</a>
+      <div class="grp">Laboratuvar</div>
+      <a href="#">🧾 İstemlerim</a>
+      <a href="#">📄 Lab sonuçları</a>
+      <div class="grp">Görüntüleme</div>
+      <a href="#">📑 Radyoloji raporları</a>
+      <div class="grp">İşlem</div>
+      <a class="on" href="#">➕ Yeni istem</a>
+      <a href="#">🖨 Barkod yazdır</a>
+      <div class="kimlik">Özel Yaşam Tıp Merkezi</div>
+    </nav>
 
-    <div class="blok"><h4>➕ Yeni istem <span class="sp">kurum adına</span></h4>
-      <table><tbody>
-        <tr><td style="width:120px" class="sonuk">Hasta</td><td>TC / ad-soyad ile arar ya da <b>yeni hasta</b> açar</td></tr>
-        <tr><td class="sonuk">Tetkikler</td><td>Anlaşmalı panelden seçim (fiyat <b>görünmez</b>)</td></tr>
-        <tr><td class="sonuk">Klinik bilgi</td><td>Ön tanı, ilaç kullanımı, gebelik/açlık notu</td></tr>
-        <tr><td class="sonuk">Numune</td><td>Kurumda alındı / laboratuvarda alınacak</td></tr>
-        <tr><td class="sonuk">Barkod</td><td>İstem kaydedilince yazdırılır</td></tr>
-      </tbody></table></div>
+    <div class="icerik">
+      <div class="satir" style="padding:0">
+        <div class="blok"><h4>👤 Hasta <span class="sp">TC ile ara ya da yeni aç</span></h4>
+          <table><tbody>
+            <tr><td style="width:120px" class="sonuk">TC Kimlik</td><td><b>*** *** ** 18</b> <span class="rz ok">bulundu</span></td></tr>
+            <tr><td class="sonuk">Ad Soyad</td><td>A** Y*****</td></tr>
+            <tr><td class="sonuk">Doğum</td><td>1978 · Kadın</td></tr>
+            <tr><td class="sonuk">Telefon</td><td>0532 *** ** 41</td></tr>
+            <tr><td class="sonuk">Kurum protokolü</td><td>ÖY-2026/1192</td></tr>
+          </tbody></table></div>
+
+        <div class="blok"><h4>🧪 Tetkik seçimi <span class="sp">anlaşmalı panel · fiyat görünmez</span></h4>
+          <table><thead><tr><th class="orta">✓</th><th>Tetkik</th><th>Tüp</th><th>Hazırlık</th></tr></thead><tbody>
+            <tr><td class="orta">☑</td><td>Hemogram (CBC)</td><td>EDTA</td><td class="sonuk">—</td></tr>
+            <tr><td class="orta">☑</td><td>CRP</td><td>Jelli</td><td class="sonuk">—</td></tr>
+            <tr><td class="orta">☐</td><td>HbA1c</td><td>EDTA</td><td class="sonuk">—</td></tr>
+            <tr><td class="orta">☐</td><td>Açlık glukoz</td><td>Jelli</td><td class="sonuk"><b>8 saat açlık</b></td></tr>
+            <tr><td class="orta">☐</td><td>Akciğer grafisi (PA)</td><td class="sonuk">görüntüleme</td><td class="sonuk">gebelik sorgusu</td></tr>
+          </tbody></table></div>
+      </div>
+
+      <div class="satir" style="padding:10px 0 0">
+        <div class="blok"><h4>📝 Klinik bilgi <span class="sp">laboratuvarın sonucu yorumlaması için</span></h4>
+          <table><tbody>
+            <tr><td style="width:120px" class="sonuk">Ön tanı (ICD)</td><td>R50 Ateş · <span class="rz">zorunlu</span></td></tr>
+            <tr><td class="sonuk">İlaç</td><td>Antibiyotik başlandı (2. gün)</td></tr>
+            <tr><td class="sonuk">Gebelik / açlık</td><td>Hayır · Aç değil</td></tr>
+            <tr><td class="sonuk">Numune</td><td>◉ Kurumda alındı &nbsp; ○ Laboratuvarda alınacak</td></tr>
+            <tr><td class="sonuk">Öncelik</td><td>◉ Normal &nbsp; ○ Acil</td></tr>
+          </tbody></table></div>
+
+        <div class="blok"><h4>🖨 Kaydet ve barkod <span class="sp">istem no kayıtta verilir</span></h4>
+          <table><tbody>
+            <tr><td>Seçili tetkik</td><td class="sag"><b>2</b></td></tr>
+            <tr><td>Tüp sayısı</td><td class="sag"><b>2</b> (EDTA · Jelli)</td></tr>
+            <tr><td>Tahmini sonuç</td><td class="sag">bugün 14:30</td></tr>
+          </tbody></table>
+          <div style="padding:8px 10px;border-top:1px solid var(--line2)">
+            <span class="dug bir">Kaydet ve barkod yazdır</span>
+            <span class="dug">Taslak bırak</span>
+          </div></div>
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="not">
-  <b>Kapsam (db/794 · 795).</b> Bu ekranların tamamı <code>portal_turu = 2</code>
-  kuralıyla süzülür: <code>lab_istem.dis_kurum_id = &lt;kullanıcı&gt;</code>; hasta
-  listesi/kartı ise "kendi gönderdiği istemi olan hasta". Kuralı yazılmamış her
-  kaynak bu rol için <b>kapalıdır</b> - liste de kart da boş döner.
+  <b>Kapsam (db/794 · 795).</b> Bütün ekranlar <code>portal_turu = 2</code> ile
+  süzülür: <code>lab_istem.dis_kurum_id = &lt;kullanıcı&gt;</code>, radyolojide
+  <code>radyoloji_istem.istek_kurum_id</code>; hasta listesi/kartı "kendi
+  gönderdiği istemi olan hasta". Kuralı yazılmamış kaynak bu rol için
+  <b>kapalıdır</b> - liste de kart da boş döner.
   <ul>
-    <li><b>Hasta adları maskeli</b> gösterilir; kurum kendi gönderdiği hastayı
-      zaten biliyor, portal ekranı omuz üstünden okunabilecek bir yerde durur.</li>
+    <li><b>Hasta adları maskeli</b>: portal ekranı omuz üstünden okunabilecek
+      bir bankoda durur; tam ad PDF raporunda.</li>
     <li><b>Fiyat/anlaşma bilgisi yok</b> - portalın işi tetkik ve sonuç.</li>
-    <li><b>Yalnız onaylanmış sonuç</b> görünür; onaysız satır "Bekliyor" kalır.</li>
-    <li>Kurum içi ekranlar (görev, mesaj, doküman, pano) bu rolde <b>yok</b>.</li>
+    <li><b>Yalnız onaylanmış sonuç</b>; onaysız satır "Bekliyor" kalır.</li>
+    <li>Kurum içi ekranlar (görev, mesaj, doküman, pano) bu rolde <b>yok</b> -
+      menüde de görünmez.</li>
   </ul>
 </div>
 

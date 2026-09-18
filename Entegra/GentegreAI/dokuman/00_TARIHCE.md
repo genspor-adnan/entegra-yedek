@@ -14221,3 +14221,28 @@ on rolde duruyor, hiçbir işe yaramıyordu. Artık radyoloji çalışma listesi
 de veriyor, kimse ekran kaybetmiyor.
 
 xUnit 306/306, vitest 672/672.
+
+
+## 18.09.2026 — Portal mockupları: kabuk + rapor ekranları
+
+Kullanıcı: *"portaldaki mockuplar çok basit olmuş, daha detaylı - 3'ünde de
+menü falan olacak, rad rapor lab rapor vb. gösterecek şekilde olsun"*.
+
+Üç mockup yeniden yazıldı; her biri artık **üç pencere**:
+
+| Dosya | Pencereler |
+|---|---|
+| `portal_dis_kurum.html` | Pano · **Lab sonuç raporu** · Yeni istem (hasta + tetkik + klinik bilgi + barkod) |
+| `portal_dis_doktor.html` | Pano · **Lab sonuç raporu** (önceki değerle + seyir) · **Radyoloji raporu** (teknik/bulgular/sonuç + görüntüler) |
+| `portal_hasta.html` | Özetim · **Lab sonucum** (sade dille + "bu rapor bir tanı değildir") · Randevu al + **radyoloji raporum** + KVKK |
+
+**Portal kabuğu ayrı bir dil:** sol dar menü (`.kabuk`/`.yan`) + içerik. Menüde
+yalnız **kapsamı yazılmış** ekranlar var - kurum içi görev/mesaj/doküman
+görünmüyor; dış doktorda radyoloji dar yetkiyle (cihaz/şablon/protokol yok).
+
+**Rapor bloğu** (`.rapor`) gerçek rapor düzeni: başlık + künye ızgarası (hasta,
+protokol, isteyen hekim, numune saati) + sonuç tablosu (birim · referans ·
+işaret · **önceki değer**) + e-imza satırı ve doğrulama kodu.
+
+Üç portalın farkı mockuplarda da görünüyor: dış kurumda **ad maskeli**, dış
+doktorda **açık** (hekim hastasını tanıyor), hastada **sade dil + uyarı**.

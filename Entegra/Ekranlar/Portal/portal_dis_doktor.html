@@ -4,81 +4,240 @@
 <title>Portal — Dış Doktor — Mockup</title>
 <link rel="stylesheet" href="_ortak.css"></head><body>
 
+<!-- ============================ 1) PANO ============================ -->
 <div class="win">
   <div class="title">🩺 Dış Doktor Portalı — <b>Dr. Kemal Aydın</b>
-    <span class="sp">Kapsam: yalnız <b>gönderdiğiniz</b> hastalar · portal_turu = 1</span></div>
+    <span class="sp">Kapsam: yalnız <b>gönderdiğiniz</b> hastalar · <code>portal_turu = 1</code></span></div>
 
-  <div class="selam">İyi günler, Dr. Kemal Aydın
-    <span>18 Eylül 2026 Cuma · gönderen hekim hesabı</span></div>
+  <div class="kabuk">
+    <nav class="yan">
+      <div class="grp">Portal</div>
+      <a class="on" href="#">🏠 Panom</a>
+      <a href="#">👤 Hastalarım <span class="sy">47</span></a>
+      <div class="ayrac"></div>
+      <div class="grp">Laboratuvar</div>
+      <a href="#">🧾 İstemlerim <span class="sy">6</span></a>
+      <a href="#">🔎 Numune durumu</a>
+      <a href="#">📄 Lab sonuçları <span class="sy">4</span></a>
+      <div class="grp">Radyoloji</div>
+      <a href="#">🖥 Tetkiklerim</a>
+      <a href="#">📑 Radyoloji raporları <span class="sy">2</span></a>
+      <div class="ayrac"></div>
+      <div class="grp">İşlem</div>
+      <a href="#">➕ Hasta gönder</a>
+      <a href="#">🔔 Bildirimler <span class="sy">4</span></a>
+      <a href="#">❓ Yardım (AI rehber)</a>
+      <div class="kimlik">Dr. Kemal Aydın<br><span class="sonuk">Dış hekim · TC ***4218</span></div>
+    </nav>
 
-  <div class="kutular">
-    <div class="kutu"><div class="b">GÖNDERDİĞİM HASTA (30 GÜN)</div><div class="d">47</div><div class="a">bu hafta 9</div></div>
-    <div class="kutu"><div class="b">SONUÇ BEKLEYEN</div><div class="d">6</div><div class="a">en eskisi 1 gün</div></div>
-    <div class="kutu ok"><div class="b">YENİ SONUÇ</div><div class="d">4</div><div class="a">bakılmamış</div></div>
-    <div class="kutu teh"><div class="b">KRİTİK DEĞER</div><div class="d">1</div><div class="a">telefonla bildirildi</div></div>
+    <div class="icerik">
+      <div class="ust-serit">
+        <span class="ara">🔍 Hasta adı, TC ya da istem no ara…</span>
+        <span class="dug">Son 30 gün ▾</span>
+        <span class="dug bir">➕ Hasta gönder</span>
+      </div>
+
+      <div class="kutular" style="padding:0 0 10px">
+        <div class="kutu"><div class="b">GÖNDERDİĞİM HASTA (30 GÜN)</div><div class="d">47</div><div class="a">bu hafta 9</div></div>
+        <div class="kutu"><div class="b">SONUÇ BEKLEYEN</div><div class="d">6</div><div class="a">en eskisi 1 gün</div></div>
+        <div class="kutu ok"><div class="b">YENİ SONUÇ</div><div class="d">4</div><div class="a">bakılmamış</div></div>
+        <div class="kutu teh"><div class="b">KRİTİK DEĞER</div><div class="d">1</div><div class="a">telefonla bildirildi</div></div>
+      </div>
+
+      <div class="satir" style="padding:0">
+        <div class="blok"><h4>👤 Gönderdiğim hastalar <span class="sp">son işlem sırasına göre</span></h4>
+          <table><thead><tr>
+            <th>Hasta</th><th>Doğum</th><th>Gönderme</th><th>İşlem</th><th>Durum</th>
+          </tr></thead><tbody>
+            <tr><td><b>Ayşe Yılmaz</b></td><td class="sonuk">1978</td><td class="sonuk">18.09</td><td>Hemogram · CRP</td><td><span class="rz mavi">Çalışılıyor</span></td></tr>
+            <tr><td><b>Mehmet Demir</b></td><td class="sonuk">1965</td><td class="sonuk">18.09</td><td>Tiroid paneli</td><td><span class="rz ok">Sonuçlandı</span></td></tr>
+            <tr><td><b>Elif Çetin</b></td><td class="sonuk">1990</td><td class="sonuk">17.09</td><td>HbA1c</td><td><span class="rz kir">Kritik</span></td></tr>
+            <tr><td><b>Hasan Arslan</b></td><td class="sonuk">1954</td><td class="sonuk">17.09</td><td>Akciğer grafisi</td><td><span class="rz ok">Rapor hazır</span></td></tr>
+            <tr><td><b>Selin Kaya</b></td><td class="sonuk">1983</td><td class="sonuk">16.09</td><td>İdrar kültürü</td><td><span class="rz sari">48 saat</span></td></tr>
+          </tbody></table></div>
+
+        <div class="blok"><h4>🔔 Bildirimler <span class="sp">yalnız kendi hastam</span></h4>
+          <table><tbody>
+            <tr><td><span class="rz kir">Kritik</span></td><td>Elif Çetin · HbA1c 8,4 — 17.09 14:20 telefonla bildirildi</td></tr>
+            <tr><td><span class="rz ok">Sonuç</span></td><td>Mehmet Demir · Tiroid paneli tamamlandı</td></tr>
+            <tr><td><span class="rz ok">Rapor</span></td><td>Hasan Arslan · Akciğer grafisi raporlandı</td></tr>
+            <tr><td><span class="rz sari">Numune</span></td><td>Selin Kaya · kültür 48 saat sürecek</td></tr>
+          </tbody></table></div>
+      </div>
+    </div>
   </div>
+</div>
 
-  <div class="satir">
-    <div class="blok"><h4>👤 Gönderdiğim hastalar <span class="sp">son işlem sırasına göre</span></h4>
-      <table><thead><tr>
-        <th>Hasta</th><th>Doğum</th><th>Gönderme</th><th>İşlem</th><th>Durum</th>
-      </tr></thead><tbody>
-        <tr><td><b>Ayşe Yılmaz</b></td><td class="sonuk">1978</td><td class="sonuk">18.09</td><td>Hemogram · CRP</td><td><span class="rz mavi">Çalışılıyor</span></td></tr>
-        <tr><td><b>Mehmet Demir</b></td><td class="sonuk">1965</td><td class="sonuk">18.09</td><td>Tiroid paneli</td><td><span class="rz ok">Sonuçlandı</span></td></tr>
-        <tr><td><b>Elif Çetin</b></td><td class="sonuk">1990</td><td class="sonuk">17.09</td><td>HbA1c</td><td><span class="rz kir">Kritik</span></td></tr>
-        <tr><td><b>Hasan Arslan</b></td><td class="sonuk">1954</td><td class="sonuk">17.09</td><td>Akciğer grafisi</td><td><span class="rz ok">Rapor hazır</span></td></tr>
-        <tr><td><b>Selin Kaya</b></td><td class="sonuk">1983</td><td class="sonuk">16.09</td><td>İdrar kültürü</td><td><span class="rz sari">48 saat</span></td></tr>
-      </tbody></table></div>
+<!-- ======================== 2) LAB SONUÇ RAPORU ======================== -->
+<div class="win">
+  <div class="title">📄 Lab sonuç raporu — <b>Elif Çetin</b>
+    <span class="sp">Portal › Lab sonuçları › Rapor</span></div>
+  <div class="kabuk">
+    <nav class="yan">
+      <div class="grp">Portal</div>
+      <a href="#">🏠 Panom</a>
+      <a href="#">👤 Hastalarım</a>
+      <div class="grp">Laboratuvar</div>
+      <a href="#">🧾 İstemlerim</a>
+      <a href="#">🔎 Numune durumu</a>
+      <a class="on" href="#">📄 Lab sonuçları</a>
+      <div class="grp">Radyoloji</div>
+      <a href="#">🖥 Tetkiklerim</a>
+      <a href="#">📑 Radyoloji raporları</a>
+      <div class="kimlik">Dr. Kemal Aydın</div>
+    </nav>
 
-    <div class="blok"><h4>📄 Sonuç / rapor <span class="sp">Elif Çetin · 17.09.2026</span></h4>
-      <table><thead><tr>
-        <th>Tetkik</th><th class="sag">Sonuç</th><th>Referans</th><th>İşaret</th>
-      </tr></thead><tbody>
-        <tr><td>HbA1c</td><td class="sag"><b>8,4</b></td><td class="sonuk">&lt; 5,7 %</td><td><span class="rz kir">Yüksek</span></td></tr>
-        <tr><td>Açlık glukoz</td><td class="sag">168</td><td class="sonuk">70 – 99 mg/dL</td><td><span class="rz sari">Yüksek</span></td></tr>
-        <tr><td>Kreatinin</td><td class="sag">0,9</td><td class="sonuk">0,6 – 1,1 mg/dL</td><td><span class="rz ok">Normal</span></td></tr>
-        <tr><td>eGFR</td><td class="sag">92</td><td class="sonuk">&gt; 90</td><td><span class="rz ok">Normal</span></td></tr>
-      </tbody></table>
-      <div style="padding:8px 10px;border-top:1px solid var(--line2)">
-        <span class="rz mavi">PDF indir</span>
-        <span class="rz">Öncekiyle karşılaştır</span>
-        <span class="rz">Grafik (6 ay)</span>
-      </div></div>
+    <div class="icerik">
+      <div class="ust-serit">
+        <span class="dug">← Listeye dön</span>
+        <span class="ara">Elif Çetin · 17.09.2026 · İstem LI-24109</span>
+        <span class="dug">🖨 Yazdır</span><span class="dug bir">⬇ PDF</span>
+      </div>
+
+      <div class="rapor">
+        <div class="bas">
+          <div>
+            <h3>Laboratuvar Sonuç Raporu</h3>
+            <div class="sonuk">Merkez Laboratuvarı · Biyokimya</div>
+          </div>
+          <div class="sag">İstem No <b>LI-24109</b><br>Rapor tarihi 17.09.2026 15:42</div>
+        </div>
+
+        <div class="kunye">
+          <div><i>Hasta</i><b>Elif Çetin</b></div>
+          <div><i>Doğum</i>12.04.1990 (36)</div>
+          <div><i>Cinsiyet</i>Kadın</div>
+          <div><i>Protokol</i>2026/44812</div>
+          <div><i>Gönderen hekim</i><b>Dr. Kemal Aydın</b></div>
+          <div><i>Numune</i>17.09 09:05 · Jelli tüp</div>
+          <div><i>Kabul</i>17.09 09:40</div>
+          <div><i>Ön tanı</i>E11 Tip 2 DM</div>
+        </div>
+
+        <table style="margin-top:6px"><thead><tr>
+          <th>Test</th><th class="sag">Sonuç</th><th>Birim</th><th>Referans</th><th class="orta">İşaret</th><th>Önceki (14.08)</th>
+        </tr></thead><tbody>
+          <tr><td><b>HbA1c</b></td><td class="sag"><b>8,4</b></td><td>%</td><td class="sonuk">&lt; 5,7</td><td class="orta"><span class="rz kir">↑ Yüksek</span></td><td class="sonuk">7,9 ↑</td></tr>
+          <tr><td>Açlık glukoz</td><td class="sag">168</td><td>mg/dL</td><td class="sonuk">70 – 99</td><td class="orta"><span class="rz sari">↑</span></td><td class="sonuk">152</td></tr>
+          <tr><td>Kreatinin</td><td class="sag">0,9</td><td>mg/dL</td><td class="sonuk">0,6 – 1,1</td><td class="orta"><span class="rz ok">Normal</span></td><td class="sonuk">0,9</td></tr>
+          <tr><td>eGFR</td><td class="sag">92</td><td>mL/dk</td><td class="sonuk">&gt; 90</td><td class="orta"><span class="rz ok">Normal</span></td><td class="sonuk">94</td></tr>
+          <tr><td>Total kolesterol</td><td class="sag">228</td><td>mg/dL</td><td class="sonuk">&lt; 200</td><td class="orta"><span class="rz sari">↑</span></td><td class="sonuk">215</td></tr>
+        </tbody></table>
+
+        <div class="imza">
+          <span>Onaylayan: <b>Uzm. Dr. Nihal Er</b> · 17.09.2026 15:40</span>
+          <span>e-İmza: <b>doğrulandı</b></span>
+          <span class="sonuk">Doğrulama kodu: 8F2A-11C7</span>
+        </div>
+      </div>
+
+      <div class="blok" style="margin-top:10px"><h4>📈 Değişim <span class="sp">HbA1c · son 4 ölçüm</span></h4>
+        <table><thead><tr><th>Tarih</th><th class="sag">HbA1c</th><th>Seyir</th></tr></thead><tbody>
+          <tr><td class="sonuk">17.09.2026</td><td class="sag"><b>8,4</b></td><td><span class="cubuk"><i class="teh" style="width:84%"></i></span></td></tr>
+          <tr><td class="sonuk">14.08.2026</td><td class="sag">7,9</td><td><span class="cubuk"><i class="uy" style="width:79%"></i></span></td></tr>
+          <tr><td class="sonuk">02.05.2026</td><td class="sag">7,1</td><td><span class="cubuk"><i class="uy" style="width:71%"></i></span></td></tr>
+          <tr><td class="sonuk">10.01.2026</td><td class="sag">6,4</td><td><span class="cubuk"><i style="width:64%"></i></span></td></tr>
+        </tbody></table></div>
+    </div>
   </div>
+</div>
 
-  <div class="satir">
-    <div class="blok"><h4>➕ Hasta gönder <span class="sp">yeni istem</span></h4>
-      <table><tbody>
-        <tr><td style="width:130px" class="sonuk">Hasta</td><td>TC ile arar; yoksa ad-soyad, doğum tarihi, telefon ile açar</td></tr>
-        <tr><td class="sonuk">İstek</td><td>Laboratuvar tetkiki / görüntüleme</td></tr>
-        <tr><td class="sonuk">Ön tanı</td><td>ICD-10 arama (zorunlu)</td></tr>
-        <tr><td class="sonuk">Klinik not</td><td>İlaç, gebelik, açlık, önceki tetkik</td></tr>
-        <tr><td class="sonuk">Randevu</td><td><span class="sonuk">Kurum tercihi: portal randevu verebilir / veremez</span></td></tr>
-      </tbody></table></div>
+<!-- ====================== 3) RADYOLOJİ RAPORU ====================== -->
+<div class="win">
+  <div class="title">📑 Radyoloji raporu — <b>Hasan Arslan</b>
+    <span class="sp">Portal › Radyoloji raporları › Rapor</span></div>
+  <div class="kabuk">
+    <nav class="yan">
+      <div class="grp">Portal</div>
+      <a href="#">🏠 Panom</a>
+      <a href="#">👤 Hastalarım</a>
+      <div class="grp">Laboratuvar</div>
+      <a href="#">🧾 İstemlerim</a>
+      <a href="#">📄 Lab sonuçları</a>
+      <div class="grp">Radyoloji</div>
+      <a href="#">🖥 Tetkiklerim</a>
+      <a class="on" href="#">📑 Radyoloji raporları</a>
+      <div class="kimlik">Dr. Kemal Aydın</div>
+    </nav>
 
-    <div class="blok"><h4>🔔 Bildirimler <span class="sp">yalnız kendi hastam</span></h4>
-      <table><tbody>
-        <tr><td><span class="rz kir">Kritik</span></td><td>Elif Çetin · HbA1c 8,4 — 17.09 14:20 telefonla bildirildi</td></tr>
-        <tr><td><span class="rz ok">Sonuç</span></td><td>Mehmet Demir · Tiroid paneli tamamlandı</td></tr>
-        <tr><td><span class="rz sari">Numune</span></td><td>Selin Kaya · kültür 48 saat sürecek</td></tr>
-        <tr><td><span class="rz kir">Red</span></td><td>Hasan Arslan · hemoliz, tekrar numune gerekli</td></tr>
-      </tbody></table></div>
+    <div class="icerik">
+      <div class="ust-serit">
+        <span class="dug">← Listeye dön</span>
+        <span class="ara">Hasan Arslan · 17.09.2026 · Akciğer grafisi (PA)</span>
+        <span class="dug">🖼 Görüntüler (2)</span>
+        <span class="dug">🖨 Yazdır</span><span class="dug bir">⬇ PDF</span>
+      </div>
+
+      <div class="rapor">
+        <div class="bas">
+          <div>
+            <h3>Radyoloji Raporu — Akciğer Grafisi (PA)</h3>
+            <div class="sonuk">Merkez Görüntüleme · Röntgen 1 · DR sistem</div>
+          </div>
+          <div class="sag">Tetkik No <b>RD-90212</b><br>Çekim 17.09.2026 11:20</div>
+        </div>
+
+        <div class="kunye">
+          <div><i>Hasta</i><b>Hasan Arslan</b></div>
+          <div><i>Doğum</i>03.02.1954 (72)</div>
+          <div><i>Cinsiyet</i>Erkek</div>
+          <div><i>Protokol</i>2026/44790</div>
+          <div><i>İsteyen hekim</i><b>Dr. Kemal Aydın</b></div>
+          <div><i>Klinik bilgi</i>Öksürük, 3 haftadır</div>
+          <div><i>Modalite</i>DX · PA akciğer</div>
+          <div><i>Doz</i>DAP 0,18 Gy·cm²</div>
+        </div>
+
+        <div class="metin" style="margin-top:8px"><b>TEKNİK</b>
+Ayakta, derin inspiryumda PA akciğer grafisi.
+
+<b>BULGULAR</b>
+Her iki akciğer havalanması doğaldır. Sağ alt zonda, kostofrenik sinüse komşu
+yaklaşık 18 mm çapında, kenarları düzgün nodüler dansite izlenmiştir.
+Mediasten genişliği normal sınırlarda. Kalp gölgesi kardiyotorasik oranı 0,48.
+Her iki kostofrenik sinüs açık. Kemik yapılarda litik/blastik lezyon yok.
+
+<b>SONUÇ</b>
+Sağ alt zonda 18 mm nodüler dansite. Ayırıcı tanı için <b>toraks BT</b>
+önerilir. Varsa eski grafilerle karşılaştırma yararlı olacaktır.</div>
+
+        <div class="imza">
+          <span>Raporlayan: <b>Uzm. Dr. Selim Barış</b> (Radyoloji) · 17.09.2026 14:05</span>
+          <span>e-İmza: <b>doğrulandı</b></span>
+          <span class="sonuk">Doğrulama kodu: 5C90-77AE</span>
+        </div>
+      </div>
+
+      <div class="satir" style="padding:10px 0 0">
+        <div class="blok"><h4>🖼 Görüntüler <span class="sp">portalda küçük boy · tam boy PACS bağlantısı</span></h4>
+          <table><tbody>
+            <tr><td>PA akciğer</td><td class="sonuk">1 seri · 1 kesit</td><td><span class="rz mavi">Aç</span></td></tr>
+            <tr><td>Lateral</td><td class="sonuk">1 seri · 1 kesit</td><td><span class="rz mavi">Aç</span></td></tr>
+          </tbody></table></div>
+        <div class="blok"><h4>🔁 Önceki tetkikler <span class="sp">yalnız benim gönderdiklerim</span></h4>
+          <table><tbody>
+            <tr><td class="sonuk">02.03.2026</td><td>Akciğer grafisi</td><td><span class="rz ok">Normal</span></td></tr>
+            <tr><td class="sonuk">18.11.2025</td><td>Toraks BT</td><td class="sonuk">başka hekim · <span class="rz">görünmez</span></td></tr>
+          </tbody></table></div>
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="not">
-  <b>Kapsam (db/794).</b> "Benim hastam" bağı <code>belge_satir_rol</code>
-  tablosundadır: satırın <b>rol = 1 (Gönderen)</b> kaydı bu hekimi gösteriyorsa
-  hasta, istem, numune ve sonuç bu portalda görünür. Hekim kendi gönderdiği
-  hastanın <b>yalnız gönderdiği işlemi</b> görür - aynı hastanın başka bir
-  hekimle yaptırdığı tetkik bu listede yoktur.
+  <b>Kapsam (db/794 · 796).</b> "Benim hastam" bağı iki yerde olabilir:
+  laboratuvarda istemi açan hekim <code>lab_istem.personel_id</code>, başvurudan
+  gelen işte satırın "Gönderen" rolü (<code>belge_satir_rol</code>, rol = 1).
+  Radyolojide bağ doğrudan <code>radyoloji_istem.istek_hekim_id</code>.
   <ul>
-    <li><b>Ad açık</b> yazılır: hekim hastasını zaten tanıyor, maskeleme burada
-      klinik kararı zorlaştırır (dış kurum portalından farkı budur).</li>
-    <li><b>Ücret/tahsilat yok.</b></li>
-    <li><b>Yalnız onaylanmış sonuç</b>; onay öncesi satır "Çalışılıyor" kalır.</li>
-    <li>Kritik değer bildirimi telefon akışını <b>değiştirmez</b> - portal
-      bildirimi onun yerine geçmez, kaydını gösterir.</li>
+    <li><b>Ad açık</b> yazılır - hekim hastasını zaten tanıyor; maskeleme klinik
+      kararı zorlaştırır (dış kurum portalından farkı budur).</li>
+    <li><b>Aynı hastanın başka hekimle</b> yaptırdığı tetkik görünmez - yukarıdaki
+      "Önceki tetkikler" listesindeki gri satır bunu anlatır.</li>
+    <li><b>Ücret/tahsilat yok</b>; menüde de yok.</li>
+    <li><b>Yalnız onaylanmış/imzalanmış</b> sonuç ve rapor; öncesi "Çalışılıyor".</li>
+    <li>Radyolojide <b>dar yetki</b> (<code>radyoloji-istem</code>): cihaz,
+      şablon, protokol, teslim ekranları bu rolde yok.</li>
   </ul>
 </div>
 
