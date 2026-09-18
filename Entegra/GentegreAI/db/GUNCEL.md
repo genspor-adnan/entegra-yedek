@@ -420,7 +420,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (238 ad, 59 tanesi birden cok dosyada)
+## Gorunumler (239 ad, 59 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -656,6 +656,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_taraf_cihaz` | `773_teknik_servis.sql` | — |
 | `v_tedarikci_skor` | `724_satinalma.sql` | — |
 | `v_telerad_istek` | `797_teleradyoloji.sql` | — |
+| `v_telerad_kurum_lookup` | `798_telerad_kart.sql` | — |
 | `v_ulke_lookup` | `119_stok_uts.sql` | — |
 | `v_uretim_emri_lookup` | `429_uretim_v1.sql` | — |
 | `v_uretim_hareket` | `429_uretim_v1.sql` | — |

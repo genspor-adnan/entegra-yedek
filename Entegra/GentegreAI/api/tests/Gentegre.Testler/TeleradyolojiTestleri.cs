@@ -228,3 +228,86 @@ public sealed class TeleradyolojiTestleri(VeritabaniOlgusu olgu)
         Assert.Equal("false", kaynak.PortalKosullari[PortalKapsam.Hasta]);
     }
 }
+
+/// <summary>
+/// TELERADYOLOJİ İSTEK KARTI (798).
+///
+/// Kullanıcı: *"teleradyoloji istek kartını da yap"* - listede çift tık hiçbir
+/// şey açmıyordu.
+///
+/// Kart işin ÇEVRESİNİ düzenler (kurum, tetkik, görüntü, atama, teslim);
+/// rapor mevcut radyoloji ekranıyla yazılır. Hesaplanan alanlar salt okunur:
+/// ekrandan yazılabilir olsalardı aynı sayıyı tetik ve ekran iki ayrı yerden
+/// hesaplardı.
+/// </summary>
+public sealed class TeleradyolojiKartTestleri
+{
+    private static KartTanimi Kart()
+    {
+        var k = KartKatalogu.Bul("telerad-istek");
+        Assert.NotNull(k);
+        return k!;
+    }
+
+    [Fact]
+    public void Hesaplanan_alanlar_SALT_OKUNUR()
+    {
+        var kart = Kart();
+        foreach (var ad in new[] { "istekNo", "slaDk", "slaBitis", "slaAsildi",
+                                   "okumaBas", "onayZamani", "teslimZamani",
+                                   "teslimDurum", "teslimHata", "sozlesmeId" })
+        {
+            var alan = kart.Alanlar.FirstOrDefault(a => a.Ad == ad);
+            Assert.True(alan is not null, $"Kartta \"{ad}\" alani yok.");
+            Assert.False(alan!.Yazilabilir, $"\"{ad}\" tetikle yaziliyor, ekrandan degil.");
+        }
+    }
+
+    [Fact]
+    public void Kurum_secimi_CARI_listesi_degil()
+    {
+        // Her cari teleradyoloji kurumu degildir; cari listesinden sectirmek
+        //   sessizce kirik kayit uretirdi (798 lookup).
+        var alan = kart_kurum();
+        Assert.Equal("public.v_telerad_kurum_lookup", alan.KodTablosu);
+        Assert.True(alan.Zorunlu, "Kurum olmadan istek anlamsiz.");
+
+        static KartAlani kart_kurum()
+        {
+            var a = Kart().Alanlar.FirstOrDefault(x => x.Ad == "kurumId");
+            Assert.NotNull(a);
+            return a!;
+        }
+    }
+
+    [Fact]
+    public void Atama_gecmisi_SALT_OKUNUR_detay()
+    {
+        // Satirlari tetik yaziyor (tg_telerad_atama_izi); elle satir eklemek
+        //   "kim atadi" sorusunun cevabini uydurulabilir kilardi.
+        var detay = Kart().Detaylar.FirstOrDefault(d => d.Ad == "atamalar");
+        Assert.NotNull(detay);
+        Assert.True(detay!.SaltOkunur);
+        Assert.Equal("public.telerad_atama", detay.Tablo);
+        Assert.All(detay.Alanlar, a => Assert.False(a.Yazilabilir));
+    }
+
+    [Fact]
+    public void Kart_PORTAL_kapsamini_tasir()
+    {
+        // Liste suzulup kart serbest kalirsa kapsam bir gorunum suslemesine
+        //   doner: id'yi bilen portal kullanicisi baskasinin istegini acardi.
+        var kart = Kart();
+        Assert.NotNull(kart.PortalKosullari);
+        Assert.Contains("telerad_kurum", kart.PortalKosullari![PortalKapsam.DisKurum]);
+        Assert.Contains("atanan_radyolog_id", kart.PortalKosullari[PortalKapsam.DisDoktor]);
+        Assert.Equal("false", kart.PortalKosullari[PortalKapsam.Hasta]);
+    }
+
+    [Fact]
+    public void Kart_ve_liste_AYNI_yetkide()
+    {
+        // Kart serbest kalirsa liste suzmesi anlamsizlasir.
+        Assert.Equal(KaynakKatalogu.Bul("telerad-istek")!.YetkiKodu, Kart().YetkiKodu);
+    }
+}

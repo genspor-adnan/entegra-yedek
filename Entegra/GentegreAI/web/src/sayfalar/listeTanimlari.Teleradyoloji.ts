@@ -20,6 +20,9 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     //   `atanan_radyolog_id` ile ayrı bir işte çözülecek.
     kaynak: 'telerad-istek', rota: 'teleradyoloji', baslik: 'Teleradyoloji Çalışma Listesi',
     yol: 'Teleradyoloji › Çalışma Listesi',
+    // KART (798): cift tik istegi acar. Kart rotasi LISTE ROTASINDAN turetilir
+    //   (/teleradyoloji/:id) - farkli yazilirsa cift tik tanimsiz rotaya gider.
+    kartYolu: '/teleradyoloji', kartBaslik: 'Teleradyoloji İsteği',
     cipler: [
       { ad: 'Bekleyen', filtre: { alan: 'durum', op: 'kucukEsit', deger: 3 } },
       { ad: 'Okunuyor', filtre: { alan: 'durum', op: 'esit', deger: 4 } },

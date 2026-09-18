@@ -116,7 +116,8 @@ portalı açılırsa gönderdiğinden fazlasını görür.
 - **Otomatik atama kuralları** (`telerad_atama_kurali`) + **nöbet çizelgesi**
   (`telerad_nobet`).
 - **Dönem faturası** (`telerad.faturala`) ve radyolog hakedişi bağı.
-- **İstek kartı:** çalışma listesinde çift tık bugün bir şey açmıyor - kart
-  tanımı yok. Kart gelene kadar satır iç radyoloji istemine bağlanabilir.
+- ~~**İstek kartı**~~ **yapıldı** (798): çift tık isteği modal kartta açıyor
+  (kimlik · hasta · tetkik · görüntü · atama & SLA · teslim & ücret · bağlar +
+  salt okunur atama geçmişi).
 - Portal: gönderen kurumun istek açma ekranı (mockup
   `Ekranlar/Teleradyoloji/telerad_kurum_portali.html`).

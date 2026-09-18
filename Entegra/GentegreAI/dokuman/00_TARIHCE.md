@@ -14309,3 +14309,39 @@ SLA ile `kalan -6 dk · SLA aşımı`, rutin istek 1440 dk; atama tetiği geçmi
 yazdı, onayda aşım kararı verildi. Tarayıcıda çalışma listesi mockup
 kolonlarıyla çiziliyor (ACİL/Rutin rozetleri, kalan dakika). xUnit 313/313
 (yeni `TeleradyolojiTestleri`), vitest 672/672.
+
+
+## 18.09.2026 — Teleradyoloji istek kartı (798)
+
+Kullanıcı: *"teleradyoloji istek kartını da yap"*. 797 faz 1'de kart yoktu,
+çalışma listesinde çift tık hiçbir şey açmıyordu.
+
+**Kart işin ÇEVRESİNİ düzenler, raporu değil:** kimlik (istek no, kurum, durum,
+öncelik) · hasta (kimlik, kayıt, erişim no, isteyen hekim) · tetkik (modalite,
+tetkik, klinik bilgi, onam) · görüntü (çekim/geliş, durum, sayı, Study UID) ·
+atama & SLA · teslim & ücret · bağlar. Rapor mevcut radyoloji raporlama
+ekranıyla yazılır.
+
+**Hesaplananlar salt okunur:** istek numarası, SLA dakikası/bitişi, aşım
+işareti, okuma/onay/teslim zamanları. Hepsini `tg_telerad_istek` yazıyor;
+ekrandan yazılabilir yapmak aynı sayıyı iki ayrı yerden hesaplatırdı.
+
+**Kurum seçimi cari listesi DEĞİL** (`v_telerad_kurum_lookup`, db/798): her
+cari teleradyoloji kurumu değildir, olmayan bir kurumu seçmek sessizce kırık
+kayıt üretirdi. Combo'da yön de yazıyor (aynı cari hem gönderen hem alıcı
+olabilir).
+
+**Atama geçmişi salt okunur detay:** satırları tetik yazıyor
+(`tg_telerad_atama_izi`); elle satır eklemek "kim atadı" sorusunun cevabını
+uydurulabilir kılardı.
+
+**Kart da portal kapsamında** (794/795): gönderen kurum kendi isteğini, atanan
+radyolog kendi işini açar; başkasının isteği "bulunamadı" döner. Liste süzülüp
+kart serbest kalsaydı kapsam bir görünüm süslemesine dönerdi.
+
+**Doğrulama sırasında çıkan (kod hatası değil):** ekranlar bir ara kayboldu -
+aktif şubenin profili `hastane` olmuş ve teleradyoloji o tipte **opsiyonel**
+(`kurum_tipi_modul.varsayilan = 2`), yani kapalı. Modül kapalıyken menü de rota
+da yok; doğru davranış. Dev'de modül şube 1 için açıldı
+(`kurum_profil.moduller = {"teleradyoloji": 1}`) ve kart `/teleradyoloji/1`
+adresinde modal olarak açıldı. xUnit 318/318, vitest 672/672.

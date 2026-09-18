@@ -334,6 +334,9 @@ public sealed partial class KartDeposu
             //   ve istem hekimi (ic + dis).
             "public.v_rad_cihaz_lookup", "public.v_rad_tetkik_lookup",
             "public.v_rad_hekim_lookup",
+            // TELERADYOLOJI (798): kurum secimi CARI LISTESI DEGIL - yalniz
+            //   teleradyoloji iliskisi tanimlanmis kurumlar.
+            "public.v_telerad_kurum_lookup",
             // Randevunun CIHAZ kaynagi (316) - radyolojide randevu cihaza verilir.
             "public.v_radyoloji_cihaz_lookup",
             // Kasa alt sistemi (071/074). Hepsi "id, ad, aktif" kolonlu gorunum -
