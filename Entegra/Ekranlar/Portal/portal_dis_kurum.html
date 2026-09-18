@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portal — Dış İstem Kurumu — Mockup</title>
+<link rel="stylesheet" href="_ortak.css"></head><body>
+
+<div class="win">
+  <div class="title">🏥 Dış Kurum Portalı — <b>Özel Yaşam Tıp Merkezi</b>
+    <span class="sp">Kapsam: yalnız <b>kendi gönderdiğiniz</b> istemler · portal_turu = 2</span></div>
+
+  <div class="selam">Merhaba, Özel Yaşam Tıp Merkezi
+    <span>18 Eylül 2026 Cuma · anlaşmalı kurum hesabı</span></div>
+
+  <div class="kutular">
+    <div class="kutu"><div class="b">BUGÜN GÖNDERDİĞİM</div><div class="d">14</div><div class="a">9 numune ulaştı</div></div>
+    <div class="kutu uy"><div class="b">NUMUNE BEKLENİYOR</div><div class="d">5</div><div class="a">en eskisi 3 saat</div></div>
+    <div class="kutu"><div class="b">ÇALIŞILIYOR</div><div class="d">22</div><div class="a">tahmini 2s 10d</div></div>
+    <div class="kutu ok"><div class="b">SONUÇLANAN (7 GÜN)</div><div class="d">96</div><div class="a">ort. 3s 05d</div></div>
+    <div class="kutu teh"><div class="b">RED / TEKRAR</div><div class="d">2</div><div class="a">hemoliz 1 · yetersiz 1</div></div>
+  </div>
+
+  <div class="satir">
+    <div class="blok"><h4>🧾 Gönderdiğim istemler <span class="sp">son 7 gün</span></h4>
+      <table><thead><tr>
+        <th>İstem No</th><th>Hasta</th><th>Tetkik</th><th>Numune</th><th>Durum</th><th class="sag">Tarih</th>
+      </tr></thead><tbody>
+        <tr><td>LI-24118</td><td>A** Y*****</td><td>Hemogram · CRP</td><td><span class="rz ok">Kabul</span></td><td><span class="rz mavi">Çalışılıyor</span></td><td class="sag">18.09 09:10</td></tr>
+        <tr><td>LI-24117</td><td>M**** D****</td><td>TSH · fT4</td><td><span class="rz ok">Kabul</span></td><td><span class="rz ok">Sonuçlandı</span></td><td class="sag">18.09 08:40</td></tr>
+        <tr><td>LI-24115</td><td>S**** K***</td><td>İdrar kültürü</td><td><span class="rz sari">Yolda</span></td><td><span class="rz">Bekliyor</span></td><td class="sag">18.09 08:05</td></tr>
+        <tr><td>LI-24109</td><td>H***** A***</td><td>Biyokimya paneli</td><td><span class="rz kir">Red</span></td><td><span class="rz kir">Tekrar iste</span></td><td class="sag">17.09 16:20</td></tr>
+        <tr><td>LI-24104</td><td>E*** Ç****</td><td>HbA1c</td><td><span class="rz ok">Kabul</span></td><td><span class="rz ok">Sonuçlandı</span></td><td class="sag">17.09 11:55</td></tr>
+      </tbody></table></div>
+
+    <div class="blok"><h4>🔎 Numune durumu <span class="sp">"kan alındı mı, laba ulaştı mı"</span></h4>
+      <table><thead><tr>
+        <th>Barkod</th><th>Hasta</th><th>Tüp</th><th>Alındı</th><th>Laba ulaştı</th><th>Durum</th>
+      </tr></thead><tbody>
+        <tr><td>N-889201</td><td>A** Y*****</td><td>EDTA</td><td class="sonuk">08:55</td><td class="sonuk">09:20</td><td><span class="rz ok">Kabul</span></td></tr>
+        <tr><td>N-889198</td><td>S**** K***</td><td>Steril kap</td><td class="sonuk">08:02</td><td class="sonuk">—</td><td><span class="rz sari">Yolda</span></td></tr>
+        <tr><td>N-889177</td><td>H***** A***</td><td>Jelli</td><td class="sonuk">dün 15:40</td><td class="sonuk">dün 17:05</td><td><span class="rz kir">Hemoliz</span></td></tr>
+      </tbody></table></div>
+  </div>
+
+  <div class="satir">
+    <div class="blok"><h4>📄 Sonuçlarım <span class="sp">yalnız onaylanmış sonuç</span></h4>
+      <table><thead><tr>
+        <th>Hasta</th><th>Tetkik</th><th class="sag">Sonuç</th><th>Referans</th><th>Onay</th><th>Rapor</th>
+      </tr></thead><tbody>
+        <tr><td>M**** D****</td><td>TSH</td><td class="sag">3,8</td><td class="sonuk">0,4 – 4,0 mIU/L</td><td><span class="rz ok">Onaylı</span></td><td><span class="rz mavi">PDF</span></td></tr>
+        <tr><td>M**** D****</td><td>fT4</td><td class="sag">1,1</td><td class="sonuk">0,8 – 1,8 ng/dL</td><td><span class="rz ok">Onaylı</span></td><td><span class="rz mavi">PDF</span></td></tr>
+        <tr><td>E*** Ç****</td><td>HbA1c</td><td class="sag"><b>8,4</b></td><td class="sonuk">&lt; 5,7 %</td><td><span class="rz ok">Onaylı</span></td><td><span class="rz mavi">PDF</span></td></tr>
+        <tr><td>A** Y*****</td><td>Hemogram</td><td class="sag sonuk">—</td><td class="sonuk">—</td><td><span class="rz">Bekliyor</span></td><td class="sonuk">—</td></tr>
+      </tbody></table></div>
+
+    <div class="blok"><h4>➕ Yeni istem <span class="sp">kurum adına</span></h4>
+      <table><tbody>
+        <tr><td style="width:120px" class="sonuk">Hasta</td><td>TC / ad-soyad ile arar ya da <b>yeni hasta</b> açar</td></tr>
+        <tr><td class="sonuk">Tetkikler</td><td>Anlaşmalı panelden seçim (fiyat <b>görünmez</b>)</td></tr>
+        <tr><td class="sonuk">Klinik bilgi</td><td>Ön tanı, ilaç kullanımı, gebelik/açlık notu</td></tr>
+        <tr><td class="sonuk">Numune</td><td>Kurumda alındı / laboratuvarda alınacak</td></tr>
+        <tr><td class="sonuk">Barkod</td><td>İstem kaydedilince yazdırılır</td></tr>
+      </tbody></table></div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Kapsam (db/794 · 795).</b> Bu ekranların tamamı <code>portal_turu = 2</code>
+  kuralıyla süzülür: <code>lab_istem.dis_kurum_id = &lt;kullanıcı&gt;</code>; hasta
+  listesi/kartı ise "kendi gönderdiği istemi olan hasta". Kuralı yazılmamış her
+  kaynak bu rol için <b>kapalıdır</b> - liste de kart da boş döner.
+  <ul>
+    <li><b>Hasta adları maskeli</b> gösterilir; kurum kendi gönderdiği hastayı
+      zaten biliyor, portal ekranı omuz üstünden okunabilecek bir yerde durur.</li>
+    <li><b>Fiyat/anlaşma bilgisi yok</b> - portalın işi tetkik ve sonuç.</li>
+    <li><b>Yalnız onaylanmış sonuç</b> görünür; onaysız satır "Bekliyor" kalır.</li>
+    <li>Kurum içi ekranlar (görev, mesaj, doküman, pano) bu rolde <b>yok</b>.</li>
+  </ul>
+</div>
+
+</body></html>

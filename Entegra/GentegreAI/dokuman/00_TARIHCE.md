@@ -14165,3 +14165,25 @@ vardır ya da yetki rolde durmaz. xUnit 304/304.
 
 **Açık kalan:** modüle özel uçlar (LabUclari sonuç/PDF, panolar, dökümler)
 kapsama bağlanmadı - bu yüzden rolde o ekranların yetkisi yok.
+
+
+## 18.09.2026 — Portal ekran mockupları (Ekranlar/Portal)
+
+Kullanıcı: *"dış kurum/dış doktor/hasta rolleri için ekran mockupları yap"*.
+
+Üç mockup, `Ekranlar/` dilinde (aynı `_ortak.css`):
+
+- **`portal_dis_kurum.html`** — gönderdiğim istemler · numune durumu ("kan
+  alındı mı, laba ulaştı mı") · sonuçlarım · yeni istem. Hasta adları
+  **maskeli**, fiyat/anlaşma bilgisi yok.
+- **`portal_dis_doktor.html`** — gönderdiğim hastalar · sonuç/rapor (referans +
+  işaret) · hasta gönder · bildirimler. Ad **açık** yazılır: hekim hastasını
+  zaten tanıyor, maskeleme klinik kararı zorlaştırırdı - dış kurumdan farkı bu.
+  Hekim aynı hastanın **başka bir hekimle** yaptırdığı tetkiki görmez.
+- **`portal_hasta.html`** — randevularım (al/iptal) · sonuçlarım · kullandığım
+  ilaçlar · belgelerim. Onaylanmamış sonuç "Hazırlanıyor" kalır.
+
+Her mockupun altında kapsam kuralı yazılı: hangi kolon, hangi tablo, hangi
+`portal_turu`. Üçünde de ortak üç sınır: **onaysız sonuç gösterilmez**,
+**ücret/tahsilat portalda yok** (hasta portalında yalnız kendi borcu),
+**kuralı yazılmamış kaynak kapalıdır**.

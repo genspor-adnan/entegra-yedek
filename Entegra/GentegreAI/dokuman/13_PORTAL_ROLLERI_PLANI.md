@@ -1,5 +1,8 @@
 # Portal rolleri planı — Dış Doktor · Dış Kurum · Hasta
 
+**Mockup:** `Ekranlar/Portal/portal_dis_kurum.html` ·
+`portal_dis_doktor.html` · `portal_hasta.html`
+
 **Durum:** 1. adım (kapsam altyapısı) **yapıldı** - `db/794_portal_kapsami.sql`
 + `PortalKosullari` / `SorguUretici` / `IstekBaglami.PortalTuru`. Rol şablonları
 (2-4. adımlar) bekliyor.
@@ -114,8 +117,9 @@ Hasta girişi kurum içi kullanıcıdan farklı bir yüzeydir:
 
 1. `PortalKosulu` + `rol.portal_turu` + katalog koşulları (lab/radyoloji/
    muayene/randevu/belge/hasta) ve testleri.
-2. Dış Kurum: mevcut `dis_istem_kurumu` rolünü kapsama bağla (var olan rol,
-   bugün geniş görüyor - **öncelik**).
+2. ~~Dış Kurum: mevcut `dis_istem_kurumu` rolünü kapsama bağla~~ **yapıldı**
+   (795): `portal_turu = 2`, kart okuması da kapsandı, kurum içi ekranlar
+   rolden kaldırıldı.
 3. Dış Doktor rolü.
 4. Hasta portalı (ayrı giriş yüzeyi + KVKK + onaylı sonuç kuralı).
 
