@@ -14246,3 +14246,66 @@ işaret · **önceki değer**) + e-imza satırı ve doğrulama kodu.
 
 Üç portalın farkı mockuplarda da görünüyor: dış kurumda **ad maskeli**, dış
 doktorda **açık** (hekim hastasını tanıyor), hastada **sade dil + uyarı**.
+
+
+## 18.09.2026 — Teleradyoloji çekirdeği (797)
+
+Kullanıcı: *"teleradyolojiyi yap"* · *"mockuplar vardı"*. Tasarım kaynağı
+`Ekranlar/Teleradyoloji/telerad_sureci.html` (tablolar ve alanlar oradan) +
+çalışma listesi / raporlama / portal / sözleşme mockupları.
+
+**Tek cümlede:** dış kurumun görüntüsü bize gelir, çalışma listesine SLA'lı bir
+istek olarak düşer, radyolog **mevcut** radyoloji raporlama altyapısıyla okuyup
+e-imzalar, rapor kuruma teslim edilir; ücret dönem faturasına, radyolog payı
+hakedişe gider. Ters yön aynı tablolarla `yon = 2`.
+
+**Neden ayrı istek tablosu.** Okuma/raporlama iç akışın AYNISIDIR
+(`radyoloji_istem` + `radyoloji_rapor` + kritik bulgu). Teleradyolojiye özel
+olan işin kendisi değil ÇEVRESİ: hangi kurum, hangi sözleşme, SLA ne zaman
+doluyor, görüntü ulaştı mı, kime atandı, teslim edildi mi, kaç para. Bu yüzden
+`telerad_istek` bir **sarmal** - iç istemi işaret eder, yerine geçmez
+(`radyoloji_istem.telerad_istek_id` + `kaynak`).
+
+**Kurulan tablolar:** `telerad_kurum` (cariye bağlı; yön, DICOM AE, teslim
+kanalı), `telerad_sozlesme` (dönem, ücret modeli, tarife, SLA süreleri),
+`telerad_istek` (çalışma listesinin satırı), `telerad_atama` (atama geçmişi).
+DICOM alımı, HL7 teslimi, otomatik atama kuralları ve nöbet çizelgesi **sonraki
+faz** - o tablolar bilerek açılmadı: kullanılmayan tablo, kurulmuş gibi görünen
+bir söz verir.
+
+**Kurallar tetikte, tek yerde** (`tg_telerad_istek`): istek numarası
+(`TR-yyyy/nnnnn`), sözleşme çözümü, **SLA kopyası** (sözleşme sonradan
+değişince geçmiş isteğin sözü değişmesin), durum geçişleri ve onayda SLA aşımı
+kararı. **SLA görüntünün geldiği an başlar**, isteğin açıldığı an değil: kurum
+isteği akşam açıp görüntüyü sabah gönderebilir; söz verdiğimiz süre okumaya
+başlayabildiğimiz andan işler.
+
+**Atama geçmişi kendiliğinden** (`tg_telerad_atama_izi`): "kim atamış" sorusu
+ekranın hatırlamasına bırakılmaz. Atama kalkınca iş sıraya döner - atanmış ama
+kimsede olmayan iş, çalışma listesinde görünmeyen iştir.
+
+**Kalan SLA dakikası sunucuda** (`v_telerad_istek`): iki ekran iki farklı
+"şimdi" kullanırsa liste kendi içinde çelişir. Eksi değer gecikmeyi anlatır -
+saklamak, listeye bakana "yetişiyoruz" dedirtirdi.
+
+**Ekranlar:** çalışma listesi (`telerad-istek`, mockup kolonları), kurumlar ve
+sözleşmeler. Raporlama ekranı YOK - o iş mevcut radyoloji raporlamasıyla
+yapılır. Menüde **Radyolojinin alt grubu** (ayrı ana grup değil): teleradyoloji
+radyolojinin kendisidir, yalnız işin kaynağı dışarıdan gelir - menü grup tavanı
+testi de bunu söyledi.
+
+**Portal kapsamı hazır** (794): gönderen kurum kendi isteklerini
+(`kurum_taraf_id`), atanan radyolog kendi işini görür; hasta bu listede açıkça
+kapalı.
+
+**Yeni yetki kimsede yoksa ekran da yok:** yönetici dahil hiçbir rol yeni
+yetkiyi kendiliğinden almaz - göç dağıtımı yapıyor (klinik taraf radyolog/
+teleradyoloji hekimi, ticari taraf muhasebe, salt okuma yönetim
+görüntüleyici/üst yönetim). Bu blok olmadan modül açık olsa bile menüde hiçbir
+şey görünmüyordu.
+
+**Doğrulama.** Dev'de kurum + sözleşme + iki istek açıldı: acil istek 30 dk
+SLA ile `kalan -6 dk · SLA aşımı`, rutin istek 1440 dk; atama tetiği geçmişi
+yazdı, onayda aşım kararı verildi. Tarayıcıda çalışma listesi mockup
+kolonlarıyla çiziliyor (ACİL/Rutin rozetleri, kalan dakika). xUnit 313/313
+(yeni `TeleradyolojiTestleri`), vitest 672/672.

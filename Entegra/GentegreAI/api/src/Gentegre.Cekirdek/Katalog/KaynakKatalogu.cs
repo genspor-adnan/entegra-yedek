@@ -189,6 +189,10 @@ public static partial class KaynakKatalogu
         //   alinmamis sonuc" sorularinin ekrani.
         Ekle(RadyolojiKritik());
         Ekle(RadyolojiKonsultasyon());
+        // TELERADYOLOJI (797): calisma listesi + kurum + sozlesme.
+        Ekle(TeleradIstek());
+        Ekle(TeleradKurum());
+        Ekle(TeleradSozlesme());
         Ekle(RadyolojiTeslim());
 
         // GOZ (691): genel muayenenin USTUNE oturur - unite akisi, goz

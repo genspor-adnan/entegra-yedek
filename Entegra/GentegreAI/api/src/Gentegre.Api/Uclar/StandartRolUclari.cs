@@ -97,6 +97,9 @@ public static class StandartRolUclari
         A("muhasebe.donem-kilitle"), A("kredi.taksit-ode"), A("prim.%"), A("veri.disa-aktar"), A("basvuru.iskonto"),
         // Onay ekraninin denetim izi (685) - muhasebe kararlari GORUR.
         T("iskonto_onay"),
+        // TELERADYOLOJI TICARI TARAFI (797): kurum sozlesmesi, tarife ve donem
+        //   faturasi muhasebenin isi; calisma listesi degil.
+        Y("teleradyoloji.kurum"), Y("teleradyoloji.sozlesme"), A("telerad.faturala"),
         // ISKONTO MALI BASAMAGI BURADA DEGIL (788, 787 ile ayni gerekce):
         //   basamagi `muhasebe` rolune vermek, muhasebedeki HER calisani mali
         //   onayci yapiyordu. Imza kadro unvanina ait: `muhasebe_sorumlu`.
@@ -203,6 +206,9 @@ public static class StandartRolUclari
             K(T("%"), new("ayar", false), new("rol", false), new("kullanici", false), new("sube", false), new("referans", false), new("entegrasyon", false), new("dokuman.ozel_nitelikli", false))),
         new("kalite", "Kalite Sorumlusu", "Hepsi kalite göstergeleri, dönem hesabı, doküman onayı; klinik ekranlar salt okuma.", Hepsi,
             K(H("klinik_kalite"), H("klinik_kalite.%"), A("klinik_kalite.%"), Y("dokuman.onayla"), T("islem_log"), T("hasta"), T("muayene"), T("lab"), T("radyoloji"), T("yatan"))),
+        // TELERADYOLOJI IDARI (797): kurum tanimi, sozlesme, donem faturasi -
+        //   isin klinik tarafi degil TICARI tarafi. Muhasebe rolune eklendi
+        //   (asagida MuhasebeTemel), burada yalniz sablon sirasi korunuyor.
         new("medula_sorumlu", "Medula Sorumlusu", "SGK kuyruğu, hizmet kaydı, fatura, dönem sonlandırma, kesinti.", ["tip_merkezi", "hastane", "dal_goz", "dal_ftr", "dis", "goruntuleme", "goruntuleme_lab"],
             K(H("medula"), H("medula.%"), A("medula.donem"), T("kurum"), T("belge"), T("hasta"), T("hizmet"))),
         new("bilgi_islem", "Bilgi İşlem Sorumlusu", "Kullanıcı, rol ve şube tanımı, ayarlar, entegrasyon ve cihaz hesapları, işlem günlüğü; hasta verisi görmez.", Hepsi,
@@ -231,11 +237,17 @@ public static class StandartRolUclari
             K(Y("muayene"), T("hasta"), Y("randevu"), T("belge"), Y("onam"), T("prim.kendi"))),
         // ---- görüntüleme
         new("radyolog", "Radyolog", "Rapor yazma ve onay, sonuç teslimi.", ["goruntuleme", "goruntuleme_lab", "tip_merkezi", "hastane"],
-            K(H("radyoloji"), H("radyoloji-istem"), A("rad.rapor_yaz"), A("rad.rapor_onayla"), A("rad.teslim"), A("rad.istem_iptal"), T("hasta"), T("katalog"), T("muayene"), T("prim.kendi"))),
+            K(H("radyoloji"), H("radyoloji-istem"), A("rad.rapor_yaz"), A("rad.rapor_onayla"), A("rad.teslim"), A("rad.istem_iptal"), T("hasta"), T("katalog"), T("muayene"), T("prim.kendi"),
+              // TELERADYOLOJI (797): kurumun kendi radyologu dis kurum
+              //   isteklerini de okur - calisma listesi ve atama onda.
+              Y("teleradyoloji"), A("telerad.ata"), A("telerad.teslim"))),
         new("rad_teknisyen", "Radyoloji Teknisyeni", "Çekim, cihaz, sonuç teslimi.", ["goruntuleme", "goruntuleme_lab", "tip_merkezi", "hastane"],
             K(Y("radyoloji"), Y("radyoloji-istem"), Y("cihaz"), A("cihaz.isle"), A("rad.teslim"), T("hasta"), T("randevu"))),
-        new("teleradyoloji_hekim", "Teleradyoloji Hekimi (dış)", "Yalnız rapor yazma ve onay; kayıt/kabul görmez.", ["goruntuleme", "goruntuleme_lab"],
-            K(T("radyoloji"), T("radyoloji-istem"), A("rad.rapor_yaz"), A("rad.rapor_onayla"))),
+        // TELERADYOLOJI HEKIMI (797 ile genisledi): calisma listesi + atama +
+        //   raporlama. Kurum/sozlesme ekranlari IDARI - onda yok.
+        new("teleradyoloji_hekim", "Teleradyoloji Hekimi (dış)", "Teleradyoloji çalışma listesi, rapor yazma ve onay; kayıt/kabul görmez.", ["goruntuleme", "goruntuleme_lab"],
+            K(T("radyoloji"), T("radyoloji-istem"), A("rad.rapor_yaz"), A("rad.rapor_onayla"),
+              Y("teleradyoloji"), A("telerad.ata"), A("telerad.teslim"))),
         // ---- laboratuvar
         new("lab_uzmani", "Lab Uzmanı", "Sonuç onayı, kalite kontrol serbest bırakma, katalog.", ["lab", "goruntuleme_lab", "tip_merkezi", "hastane"],
             K(H("lab"), H("lab.%"), A("lab.onay"), A("lab.kk.onay"), T("hasta"), T("katalog"), T("cihaz"), T("prim.kendi"))),
