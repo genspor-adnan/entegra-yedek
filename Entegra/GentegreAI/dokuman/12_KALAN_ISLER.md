@@ -105,3 +105,18 @@ sızıntısı.
 
 **Öncelik:** var olan `dis_istem_kurumu` rolü bugün kapsamsız - dış kurum
 portalı açılırsa gönderdiğinden fazlasını görür.
+
+## Teleradyoloji faz 2 — 18.09.2026
+
+797 çekirdeği kurdu (kurum · sözleşme · istek · atama). Kalanlar:
+
+- **DICOM alımı** (`telerad_dicom_olay`), sahipsiz çalışma listesi, erişim no
+  eşleştirme.
+- **HL7 / FHIR teslimi** (`telerad_teslim`), deneme kaydı ve tekrar.
+- **Otomatik atama kuralları** (`telerad_atama_kurali`) + **nöbet çizelgesi**
+  (`telerad_nobet`).
+- **Dönem faturası** (`telerad.faturala`) ve radyolog hakedişi bağı.
+- **İstek kartı:** çalışma listesinde çift tık bugün bir şey açmıyor - kart
+  tanımı yok. Kart gelene kadar satır iç radyoloji istemine bağlanabilir.
+- Portal: gönderen kurumun istek açma ekranı (mockup
+  `Ekranlar/Teleradyoloji/telerad_kurum_portali.html`).

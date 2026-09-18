@@ -142,9 +142,13 @@ export function KomutPaleti({ satirlar, favoriler, sonMenuler, acik, onKapat, on
     }
 
     const ekranEslesen = ekranlar
-      .map(e => ({ e, puan: paletPuan(e.ad, e.grup, q) }))
-      .filter((x): x is { e: PaletEkrani; puan: number } => x.puan !== null)
-      .sort((a, b) => a.puan - b.puan || a.e.ad.localeCompare(b.e.ad, 'tr'))
+      .map((e, i) => ({ e, i, puan: paletPuan(e.ad, e.grup, q) }))
+      .filter((x): x is { e: PaletEkrani; i: number; puan: number } => x.puan !== null)
+      // ESIT PUANDA MENU SIRASI: "telerad" yazip Enter'a basan kullanici
+      //   calisma listesini bekler, ayarlar ekranini degil - alfabetik sira
+      //   "Telerad Kurumlari"ni one aliyordu. Menu sirasi isin onceligini
+      //   zaten tasiyor (menuSira), palet de onu izlesin.
+      .sort((a, b) => a.puan - b.puan || a.i - b.i)
       .slice(0, 20)
       .map<Oge>(x => ({ tur: 'ekran', anahtar: 'e' + x.e.yol, ad: x.e.ad, grup: x.e.grup, yol: x.e.yol }));
 
