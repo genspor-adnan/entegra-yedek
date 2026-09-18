@@ -806,7 +806,19 @@ public static partial class KaynakKatalogu
             new("id",        "k.id",   "sayi",  "Id", Varsayilan: false),
             new("kod",       "k.kod",  "metin", "Kullanıcı Kodu", Genislik: 150),
             new("kisi",      "coalesce(t.unvan, '')", "metin", "Kişi", Genislik: 220),
-            new("anaRol",    "r.ad",   "metin", "Ana Rol", Genislik: 150),
+            // BOLUM ve GOREV, KISININ SAGINDA (kullanici: "kullanıcı listesinde
+            //   kişi sağına bölüm ve görev sütunları da ekle"): "bu hesap kimin"
+            //   sorusunun cevabi yalniz ad degil - ayni adli iki kisi ya da
+            //   tanimadigin bir sicil, bolum/gorev olmadan kim oldugunu
+            //   soylemiyor. Ifadeler personel listesiyle AYNI (TarafKatalog) -
+            //   iki ekran ayni kisiye iki farkli bolum yazmasin.
+            new("bolum",     TarafKatalog.DepartmanAdi, "metin", "Bölüm", Genislik: 160),
+            new("gorev",     TarafKatalog.PozisyonAdi,  "metin", "Görev", Genislik: 160),
+            // ANA ROL ROZET (kullanici): ek rollerin yaninda hangisinin ANA rol
+            //   oldugu duz metinde kayboluyordu. `Bicim: "rozet"` gridde
+            //   renkli etiket cizdirir (gridHucre.rozetHucre).
+            new("anaRol",    "r.ad",   "metin", "Ana Rol", Genislik: 150,
+                Bicim: "rozet"),
             // EK ROLLER (665): kisinin ana isinin yaninda tasidigi gorevler.
             new("ekRoller",
                 "coalesce((select string_agg(er.ad, ', ' order by er.ad) "

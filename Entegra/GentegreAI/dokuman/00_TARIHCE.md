@@ -14005,3 +14005,23 @@ profilde ne geçerli" sorusu kaybolmasın diye üç hızlı süzgeç eklendi:
 `Tümü · Geçerli · Şablon önerisi`.
 
 vitest 672/672.
+
+
+## 18.09.2026 — Kullanıcı listesinde bölüm/görev · ana rol rozet (794)
+
+Kullanıcı: *"Kullanıcı listesinde kişi sağına bölüm ve görev sütunları da
+ekle.. ana rol rozet yap"*.
+
+**Bölüm ve Görev, Kişi'nin sağında.** "Bu hesap kimin" sorusunun cevabı yalnız
+ad değil: aynı adlı iki kişi ya da tanımadığın bir sicil, bölüm/görev olmadan
+kim olduğunu söylemiyor. İfadeler personel listesiyle **aynı yerden**
+(`TarafKatalog.DepartmanAdi` / `PozisyonAdi`) - iki ekran aynı kişiye iki farklı
+bölüm yazmasın.
+
+**Ana Rol artık rozet** (`Bicim: "rozet"`): ek rollerin yanında hangisinin ANA
+rol olduğu düz metinde kayboluyordu.
+
+Doğrulama: tarayıcıda kolon sırası `Kullanıcı Kodu · Kişi · Bölüm · Görev ·
+Ana Rol · Ek Roller · Şubeler…`, ilk satır "Ali Yıldırım · Depo / Ambar · Depo
+Sorumlusu · [Rol Atanmamış]" ve rol rozet olarak çiziliyor. xUnit 293/293,
+vitest 672/672.
