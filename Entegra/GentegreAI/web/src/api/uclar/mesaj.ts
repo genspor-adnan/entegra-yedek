@@ -100,6 +100,10 @@ export const mesajUclari = {
   radyolojiPano: <T,>(gun?: string) =>
     istek<T>(`/api/radyoloji/pano${gun ? `?gun=${encodeURIComponent(gun)}` : ''}`),
 
+  /** Teleradyoloji panosu (801): sayaclar + SLA ozeti + kirilimlar tek uctan. */
+  teleradPano: <T,>(gun?: string) =>
+    istek<T>(`/api/telerad/pano${gun ? `?gun=${encodeURIComponent(gun)}` : ''}`),
+
   /**
    * Cihazin kapali araliklari (318): bakim/ariza/tatil + ogle arasi.
    * Takvim bunlari tarali blok olarak cizer - kural zaten tetikte, bu

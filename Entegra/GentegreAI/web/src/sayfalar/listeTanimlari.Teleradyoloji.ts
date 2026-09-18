@@ -45,6 +45,17 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     yetkiKodu: 'teleradyoloji', modul: 'teleradyoloji', urunModu: 2,
   },
   {
+    // PANO (801): modülün "bugün ne durumdayız" ekranı - liste değil
+    //   (ozelSayfa). Sayaçlar çalışma listesine kendi çipiyle götürür.
+    //   Mockup `telerad_pano.html`; yalnız verisi HAZIR paneller çizilir
+    //   (nöbet/hakediş/dönem faturası yapılmadı, uydurma sayı yok).
+    kaynak: 'telerad-pano', rota: 'telerad-pano', ozelSayfa: true,
+    baslik: 'Teleradyoloji Panosu', yol: 'Teleradyoloji › Pano',
+    menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Telerad Panosu',
+    ic: '📊', menuSira: 38, yetkiKodu: 'teleradyoloji',
+    modul: 'teleradyoloji', urunModu: 2,
+  },
+  {
     // KURUMLAR: cari kartına bağlı teleradyoloji ilişkisi (yön, DICOM AE,
     //   teslim kanalı). "Kurum var ama sözleşmesi yok" en sık eksiklik
     //   olduğu için aktif sözleşme sayısı listede.

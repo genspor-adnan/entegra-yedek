@@ -14438,3 +14438,54 @@ Tarayıcıda uçtan uca denendi: her iki listede araç çubuğu, kartların sekm
 SLA), kurum kartında açılışta cari seçimi, kayıt sonrası varsayılanlar
 (sözleşme taslak + 30/240/1440 dk, kurum yön gelen + aktif + şube damgası).
 Deneme satırları silindi. xUnit 328/328, vitest 672/672.
+
+## 18.09.2026 — Teleradyoloji ekranları mockup ailesine hizalandı + pano (801)
+
+Kullanıcı: *"mevcut ekranları mockuplara görsel ve davranışsal olarak
+yaklaştır"* ve *"teleradyolojinin diğer ekranlarını da yap"*.
+
+**Ölçüm önce:** tema token'ları (palet, font, gradyan, yarıçap, gölge) zaten
+`Ekranlar/cari_karti.html` ile birebir; responsive'de taşma/kesilme yok.
+Sapma üç yerdeydi.
+
+**1. Rozet renkleri (ortak component).** Telerad metinlerinin hiçbiri ortak
+`ROZET_SINIFI` sözlüğünde yoktu: çalışma listesindeki **beş rozet kolonu da
+gri** düşüyordu (ölçüldü: `rgb(243,246,250)`). Mockup ailesinin en belirgin
+işareti renkli durum çipidir. Öncelik, durum akışı, görüntü durumu ve yön
+metinleri eklendi; test bekleyen ile biten işin aynı renge düşmemesini tutuyor.
+
+**2. SLA'sı kaçan satır renklenmiyordu.** Zaten var olan `satirRengi`
+sözleşmesi (yatan hasta erken uyarı skorunda kullanılıyor) teleradyolojide
+kullanılmamıştı. Sunucu tarafında eklendi: kalan < 0 → `kritik`, son çeyrek →
+`uyari`, onaylı/iptal işte renk yok. **Eşik SQL'de** - istemci kural yazmaz,
+liste ile pano aynı işe iki farklı renk vermez. Kurum listesinde: aktif
+sözleşmesi olmayan kurum `uyari`, pasif kurum soluk.
+
+**3. Kart etiketleri.** 84px'lik sabit etiket sütununa sığmayan 19 başlık iki
+satıra kırılıp ızgarayı bozuyordu; kısaltıldı. Ayrıca **etiket hizası sağa
+alındı** (`.alan .etiket`, mockup `cari_karti.html` `.grid2 label`): kısa
+etiketli satırlar girdiden kopuk duruyordu. Etiketi girdinin ÜSTÜNDE çizen
+düzenler (kimlik şeridi, ayar formu, muayene anamnez sütunu, vital ikili
+ızgara, belge başlığı, randevu alanları, mantık satırı) sola döndürüldü.
+
+**Kabul edilen sapmalar (değiştirilmedi):** araç çubuğu sayfa başlığında ve
+sağda (app geneli kabuk kararı; mockuplarda başlığın altında tam genişlik) ·
+kart gövdesinde etiket solda-sağa yaslı (ERP kart mockupu; radyoloji kart
+mockupları etiketi üstte çiziyor, generic kart motoru tek modül için
+değiştirilmez) · liste üstündeki çip + görünüm modu şeridi.
+
+**Pano (801):** `/telerad-pano`, mockup `telerad_pano.html`. Radyoloji
+panosuyla **aynı bileşenler** (`pano-kutu`, `kagrup`, `detay-tablo`) - ekrana
+özel CSS yok; yalnız 24 sütunlu saatlik şerit yeni (`telerad-saat`, renkler
+tema değişkenlerinden). Tek uç `/api/telerad/pano`: sayaçlar, 30 günlük SLA
+özeti, kurum ve modalite kırılımı, radyolog yükü, saatlik geliş/onay.
+
+- **Yeni tablo yok:** hepsi `v_telerad_istek` üzerinde sayım/ortalama.
+- **SLA uyumu sözü olan işler üzerinden:** sözleşmesi olmayan isteğe (SLA 0)
+  "uyduk" demek uydurma olurdu.
+- **Olmayan panel çizilmiyor:** vardiya, hakediş ve dönem faturası kutuları
+  yok - o işler yapılmadı; uydurma sayı panoyu güvenilmez kılar. Ekranda bunun
+  notu var.
+- Her sayaç çalışma listesini kendi çipiyle açar.
+
+xUnit 330/330, vitest 677/677.

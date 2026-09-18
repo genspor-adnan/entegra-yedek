@@ -2449,6 +2449,30 @@ input.skt-gecmis {
   background: var(--mor2); border: 1px solid var(--mor); min-width: 6px;
 }
 
+/* SAATLIK YIGILMA (801, teleradyoloji panosu): mockup telerad_pano.html'deki
+   24 sutunlu serit. Renkler tema degiskenlerinden - gelen ACIK (henuz is),
+   onaylanan KOYU (biten is); ikisi ayni sutunda yan yana durur ki "geldi ama
+   okunmadi" farki gorulsun. */
+/* Alt bosluk SERIDIN KENDISINDE: saat etiketleri sutunun altina tasiyor ve
+   altindaki nota giriyordu. `.telerad-saat + .pano-not` yazmak `pano-not`u
+   iki anlamli bir ada cevirirdi (temaSinifCakismasi testi bunu kilitliyor). */
+.telerad-saat {
+  display: flex; align-items: flex-end; gap: 3px; height: 108px; padding: 4px 0 18px;
+}
+.telerad-saat .sut {
+  flex: 1; min-width: 0; height: 100%; position: relative;
+  display: flex; align-items: flex-end; gap: 1px;
+}
+.telerad-saat .sut i { flex: 1; min-width: 0; border-radius: 2px 2px 0 0; min-height: 1px }
+.telerad-saat .gel { background: var(--mor2); border: 1px solid var(--dugkenar); border-bottom: 0 }
+.telerad-saat .ona { background: var(--mor) }
+/* Saat etiketi sutunun ALTINDA: her sutuna yazmak 24 sayiyi ust uste
+   bindiriyordu, altinci saatte bir yeter. */
+.telerad-saat .sa {
+  position: absolute; bottom: -14px; left: 0; right: 0; text-align: center;
+  font-size: 9.5px; color: var(--soluk);
+}
+
 /* ================================================================ MESAJLAR ==
    Ekranlar/umesajlar.html (341/342): uc panel - sohbet listesi / akis /
    sohbet bilgisi. Renkler tema degiskenlerinden; gece temasinda da calisir
