@@ -827,6 +827,15 @@ public sealed partial class BelgeDeposu
              --   icin veritabani da birakmaz: irsaliye BIR DAHA KAYDEDILEMEZ.
              or exists (select 1 from public.satinalma_kabul_satir sks
                          where sks.belge_satir_id = s.id)
+             -- FATURALANMIS TELERADYOLOJI ISTEGI (807): istek hangi fatura
+             --   SATIRINA girdigini tutar - raporlayan payi (hakedis) o
+             --   satirdan dagitiliyor. Donem faturasi duzenlenip satirlar
+             --   yeniden yazilsa satir yeni id alir; isin payi var olmayan
+             --   bir satiri gosterir ve prim sahipsiz kalir. FK NO ACTION
+             --   oldugu icin veritabani da birakmaz: fatura BIR DAHA
+             --   KAYDEDILEMEZ (KorunanSatirTestleri bunu yakaladi).
+             or exists (select 1 from public.telerad_istek ti
+                         where ti.fatura_satir_id = s.id)
              -- TAHSILAT DAGITIMI OLAN SATIR: kasa_islem_dagitim satira
              --   CASCADE ile bagli; satir silinip yeniden yazilinca dagitim
              --   (ve ona bagli hakedis_satir) sessizce yok oluyordu. Basvuru

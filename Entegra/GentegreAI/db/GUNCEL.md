@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (415 ad, 116 tanesi birden cok dosyada)
+## Fonksiyonlar (416 ad, 116 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -322,6 +322,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_taraf_kampanya` | `468_kurum_sozlesme_1n.sql` | 274_belge_kampanya.sql |
 | `fn_taraf_kisi_unvan_ata` | `037_kisi_karti.sql` | — |
 | `fn_telefon_rakam` | `123_telefon_arama.sql` | — |
+| `fn_telerad_fatura_rol` | `807_telerad_hakedis_bagi.sql` | — |
 | `fn_telerad_istek_no` | `797_teleradyoloji.sql` | — |
 | `fn_telerad_portal_kurum` | `804_telerad_kurum_portali.sql` | — |
 | `fn_telerad_radyolog_oner` | `801_telerad_nobet_ve_atama_kurali.sql` | — |

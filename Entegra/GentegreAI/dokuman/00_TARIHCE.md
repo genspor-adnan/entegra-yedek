@@ -14696,3 +14696,54 @@ tarayıcıda açılmış gerçek sohbetle benzersizlik kısıtında çakıştı.
 artık kendi kurumunu ve isteğini açıyor.
 
 xUnit 354/354, vitest 677/677.
+
+## 18.09.2026 — Teleradyoloji hakediş bağı: raporlayan payı (807)
+
+Kullanıcı: *"hakediş bağıyla devam et"*. Tasarım (797 adım 9): onaylı rapor →
+rol **Raporlayan** → Prim modülü.
+
+803'te dönem faturası üretiliyordu ama satırlarına **kimse yazılmıyordu**:
+`belge_satir_rol` boş kaldığı için işi okuyan radyolog hiç prim kazanmıyordu.
+Radyolojide bu bağ 326'da kurulmuştu (istemden rol türetme); teleradyolojide
+eksikti.
+
+**Yeni prim motoru yazılmadı.** Rol yazılır, gerisini mevcut hat yapar
+(`fn_prim_uret_belge` faturalama zamanlı, `fn_prim_uret` tahsilat zamanlı).
+Teleradyolojiye özel bir hakediş hesabı, aynı parayı iki yerden hesaplamak
+olurdu.
+
+**Pay adede göre bölünür.** Bir fatura satırı aynı tetkikten onlarca işi
+toplar ve bunları farklı radyologlar okumuş olabilir. Satırı radyologa göre
+bölmek müşteriye anlamsız satırlar gösterirdi; `belge_satir_rol.pay_yuzde`
+zaten bunun için var ("iki cerrah %50/%50"). Yuvarlama artığı en çok okuyana.
+
+**Atanmamış işin payı boşta kalır:** payda satırdaki TÜM işler. Kalanı
+okuyanlara dağıtmak, yapılmamış iş için prim ödemekti.
+
+**İş hangi satırda:** `telerad_istek.fatura_satir_id`. Sadece `fatura_belge_id`
+varken "hangi iş hangi satırı besledi" tahminle bulunurdu — tahmin, para
+dağıtımında kullanılacak bir şey değil.
+
+**Elle yazılmış rol ezilmez** (326 deseni): türetilmiş (kaynak 2) satırlar
+tazelenir, kullanıcının yazdığı (kaynak 1) korunur. Tekrar çalıştırmak
+güvenli.
+
+**Çarpışan kural, bilerek esnetilmedi:** db/361 *"dış hekim yalnız Gönderen
+rolünde prim alabilir"* diyor - o gün dış hekim hasta GÖNDEREN taraftı;
+teleradyolojide işi YAPAN da dış olabiliyor. Kuralı tek modül için esnetmek
+yerine dış radyolog **atlanıyor** ve fatura ucu bunu uyarı olarak bildiriyor
+("N iş dış radyolog tarafından okundu; … payı yazılmadı"). Sessizce başkasına
+yazmak ya da kuralı delmek, parayı yanlış yere göndermenin iki ayrı yoluydu.
+**Karar kullanıcıya bırakıldı.**
+
+**Var olan bir test gerçek bir hatayı yakaladı:** `KorunanSatirTestleri` -
+`telerad_istek.fatura_satir_id` NO ACTION ile `belge_satir`'a bağlandığı için
+dönem faturası **bir daha kaydedilemez** durumdaydı. `KorunanSatirSql`e
+eklendi (radyoloji istemi, ameliyat kalemi, provizyon satırıyla aynı kural).
+
+Uçtan uca (tarayıcı + DB): 4 iş tek satırda (4 × 500 = 2.000), radyolog A 2 iş
+(%50), radyolog B 1 iş (%25), 1 iş atanmamış (%25 boşta). Geçici %20'lik
+faturalama zamanlı plan ile hakediş: **A 200 ₺, B 100 ₺**. Deneme verisi
+(istekler, fatura, plan, prim rol işaretleri, hizmet) silindi.
+
+xUnit 359/359, vitest 677/677.

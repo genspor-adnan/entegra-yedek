@@ -188,14 +188,59 @@ public static partial class TeleradUclari
                  where id = any(@p0) and fatura_belge_id is null
                 """, null, [ozet.IstekIdler, belgeId, baglam.KullaniciId], iptal);
 
+            // İŞ HANGİ SATIRDA (807): raporlayan payı satır bazında dağıtılır -
+            //   "bu satırı kim okudu" sorusu tahminle (hizmet + ücret
+            //   eşleştirmesi) değil, işin kendi kaydıyla cevaplanmalı. Satır
+            //   id'si belge yazıldıktan sonra bilinir; eşleşme GRUPLAMA
+            //   ANAHTARIYLA yapılır (hizmet + birim fiyat + iskonto) ve o
+            //   anahtar satır başına benzersizdir.
+            foreach (var s in ozet.Satirlar)
+                await baglanti.CalistirAsync("""
+                    update public.telerad_istek i
+                       set fatura_satir_id = bs.id
+                      from public.belge_satir bs
+                     where bs.belge_id = @p1 and bs.hizmet_id = @p2
+                       and bs.birim_fiyat = @p3 and bs.iskonto = @p4
+                       and i.id = any(@p0)
+                    """, null,
+                    [s.Istekler, belgeId, s.HizmetId, s.BirimFiyat, s.CezaOrani], iptal);
+
+            // ROLÜ VE PRİMİ VERİTABANI YAZAR (807): teleradyolojiye özel bir
+            //   hakediş hesabı yok - `fn_telerad_fatura_rol` raporlayan payını
+            //   adede göre dağıtıp mevcut prim hattını çalıştırıyor.
+            var rolSayisi = await baglanti.TekDegerAsync<int>(
+                "select public.fn_telerad_fatura_rol(@p0)", null, [belgeId], iptal);
+
+            // DIŞ RADYOLOĞUN PAYI YAZILAMAZ (361): "dış hekim yalnız Gönderen
+            //   rolünde prim alabilir" kuralı, dış hekimin hasta GÖNDEREN
+            //   taraf olduğu varsayımıyla yazılmıştı; teleradyolojide işi
+            //   YAPAN da dış olabiliyor. Kuralı tek modül için esnetmek yerine
+            //   durum KULLANICIYA bildiriliyor - sessizce atlamak, hak edilmiş
+            //   primin ay sonunda fark edilmesi demekti.
+            var disOkuyan = await baglanti.TekDegerAsync<int>("""
+                select count(*)::int
+                  from public.telerad_istek i
+                  join public.taraf_personel p on p.id = i.atanan_radyolog_id
+                 where i.fatura_belge_id = @p0 and coalesce(p.dis_hekim, 0) = 1
+                """, null, [belgeId], iptal);
+            if (disOkuyan > 0)
+                uyarilar.Add(
+                    $"{disOkuyan} iş DIŞ radyolog tarafından okundu; \"dış hekim yalnız "
+                    + "Gönderen rolünde prim alabilir\" kuralı (db/361) gereği bu işlerin "
+                    + "raporlayan payı yazılmadı.");
+
             await log.YazAsync(LogIslemi.Ekle, LogTabloTeleradFatura, belgeId,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,
-                new { istek.KurumId, donem, satir = satirlar.Count, isaretlenen },
+                new { istek.KurumId, donem, satir = satirlar.Count, isaretlenen, rolSayisi },
                 iptal: iptal);
 
             return Results.Ok(new
             {
                 belgeId, satir = satirlar.Count, istek = isaretlenen,
+                // RAPORLAYAN PAYI (807): kaç satıra rol yazıldı - hiç
+                //   yazılmadıysa (0) radyolog atanmamış demektir, ekranda
+                //   görünsün.
+                raporlayanPayi = rolSayisi,
                 tutar = ozet.Toplam, uyarilar, izlemeNo = baglam.IzlemeNo,
             });
         });
@@ -206,7 +251,11 @@ public static partial class TeleradUclari
 
     private sealed record FaturaSatiri(
         int HizmetId, string HizmetAdi, decimal Kdv, decimal BirimFiyat,
-        bool SlaAsildi, int Adet, decimal Tutar, decimal CezaOrani);
+        bool SlaAsildi, int Adet, decimal Tutar, decimal CezaOrani,
+        // HANGİ İŞLER BU SATIRDA: raporlayan payı (807) satır bazında
+        //   dağıtılıyor - "bu satırı kim okudu" sorusu tahminle değil, işin
+        //   kendi kaydıyla cevaplanmalı.
+        int[] Istekler);
 
     private sealed record FaturaOzeti(
         int TarafId, string KurumAdi, string Vkno, string Vd, short UcretModeli,
@@ -258,10 +307,10 @@ public static partial class TeleradUclari
             Tutar: Convert.ToDecimal(x["tutar"] ?? 0m),
             // Ceza YALNIZ süresi kaçan satıra: zamanında biten işten indirim
             //   yapmak sözleşmeye aykırı olurdu.
-            CezaOrani: (bool)(x["slaAsildi"] ?? false) ? cezaOrani : 0m)).ToList();
+            CezaOrani: (bool)(x["slaAsildi"] ?? false) ? cezaOrani : 0m,
+            Istekler: (int[])(x["istekler"] ?? Array.Empty<int>()))).ToList();
 
-        var idler = ham.SelectMany(x => (int[])(x["istekler"] ?? Array.Empty<int>()))
-                       .ToArray();
+        var idler = satirlar.SelectMany(x => x.Istekler).ToArray();
 
         var eksikler = await baglanti.ListeAsync(EksikSql, null,
             [kurumId, baslangic, bitis], OkuyucuGenisletmeleri.Sozluk, iptal);
