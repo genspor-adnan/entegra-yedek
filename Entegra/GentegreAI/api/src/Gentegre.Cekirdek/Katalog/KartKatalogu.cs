@@ -243,6 +243,8 @@ public static partial class KartKatalogu
         Ekle(TeleradIstek());
         Ekle(TeleradKurum());
         Ekle(TeleradSozlesme());
+        Ekle(TeleradNobet());
+        Ekle(TeleradKural());
         Ekle(RadyolojiSablon());
         Ekle(RadyolojiProtokol());
 

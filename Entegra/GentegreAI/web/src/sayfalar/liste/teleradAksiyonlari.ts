@@ -40,6 +40,27 @@ export async function teleradAksiyonu(
   const id = satir ? Number(satir.id) : 0;
   const no = satir ? String(satir.istekNo ?? satir.id ?? '') : '';
 
+  // OTOMATIK DAGIT (801): siradaki atanmamis isler nobet cizelgesi ve atama
+  //   kurallarina gore paylastirilir. KAYIT SECIMI ISTEMEZ - isi tek tek
+  //   sectirmek "gece listeye bakan kimse yok" sorununu cozmezdi.
+  //   KURALI SUNUCU YORUMLAR (`fn_telerad_radyolog_oner`): istemci kural
+  //   bilmez, yalniz sonucu yazar.
+  if (kod === 'telerad.dagit') {
+    if (!(await onay(
+          'Sıradaki atanmamış istekler nöbet çizelgesi ve atama kurallarına göre '
+          + 'dağıtılsın mı? Kuralı uymayan iş sırada kalır.'))) return true;
+    await guvenli(async () => {
+      const sonuc = await api.teleradDagit();
+      b.tazele();
+      mesaj(sonuc.atanan > 0
+        ? `${sonuc.atanan} istek atandı${sonuc.kalan > 0 ? `, ${sonuc.kalan} istek sırada kaldı` : ''}.`
+        : sonuc.sirada === 0
+          ? 'Dağıtılacak istek yok.'
+          : 'Hiçbir istek atanmadı: kural uymadı ya da nöbetçi yok.');
+    });
+    return true;
+  }
+
   // BANA ATA: atama durumu da yukseltir (tetik: atanan var + durum 2 -> 3).
   //   Radyolog olmayan kullaniciyi sunucu reddeder (alan `v_rad_hekim_lookup`
   //   ile sinirli) - istemci ikinci bir kural yazmaz.

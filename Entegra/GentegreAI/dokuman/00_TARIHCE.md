@@ -14489,3 +14489,60 @@ tema değişkenlerinden). Tek uç `/api/telerad/pano`: sayaçlar, 30 günlük SL
 - Her sayaç çalışma listesini kendi çipiyle açar.
 
 xUnit 330/330, vitest 677/677.
+
+## 18.09.2026 — Teleradyoloji nöbet çizelgesi + otomatik atama (801 · 802)
+
+Kullanıcı: *"nöbet çizelgesi ve atama kurallarıyla devam et"*.
+
+797'de atama **yalnız elleydi**: gelen iş sırada bekliyor, birinin listeye
+bakıp "bunu ben alayım" demesi gerekiyordu. Gece ve hafta sonu
+teleradyolojinin asıl iş saatidir; o saatte listeye bakan kişi olmayabilir.
+
+**Nöbet çizelgesi (`telerad_nobet`)** — "şu an kim iş başında". Poliklinik
+çalışma planından (718) AYRI: radyolog evden okur, vardiya gece yarısını
+geçer. Bu yüzden saat değil **tam tarih-saat aralığı** saklanıyor; 'HH:MM'
+saklamak geceyi iki satıra bölmek ya da "bitiş başlangıçtan küçük" istisnası
+uydurmak demekti. Vardiya türü (gündüz · gece · hafta sonu · **yedek**),
+kuruma/modaliteye daraltma, azami açık iş. Aynı radyolog aynı saatlerde iki
+nöbette olamaz (tetik) - çizelge kendi içinde çelişirse "şu an kim nöbetçi"
+sorusunun iki cevabı olur.
+
+**Atama kuralları (`telerad_atama_kurali`)** — "hangi iş kime". **Sıra karar
+sırasıdır**, ilk uyan kural kazanır: "acil BT önce Dr. X'e" kuralı "her iş
+nöbetçiye" kuralının üstünde durmalı. Koşul: kurum · modalite · öncelik ·
+gün/saat penceresi (çalışma planıyla aynı biçim, pencere gece yarısını
+geçebilir). Hedef: **o anki nöbetçi** · belirli radyolog · en az yüklü.
+Azami açık iş: otomatik dağıtım bir kişiyi boğmasın.
+
+**Kural veritabanında** (`fn_telerad_radyolog_oner`): aynı kararı hem ekranın
+"Otomatik Dağıt" düğmesi hem ileride DICOM alımından gelen iş verecek - iki
+yerde yorumlamak iki farklı radyolog demekti. Fonksiyon **önerir**, atamayı
+yazan yine `atanan_radyolog_id` güncellemesidir; durum geçişini ve atama izini
+797 tetikleri yazar. Kural uymazsa ya da herkes doluysa **null döner ve iş
+sırada kalır** - uydurma atama yapılmaz.
+
+**Çalışma listesine "🤖 Otomatik Dağıt"** (`/api/telerad/dagit`): sıradaki
+atanmamış işleri acil-önce sırasıyla dağıtır. **Kayıt seçimi istemez** - işi
+tek tek seçtirmek "gece listeye bakan kimse yok" sorununu çözmezdi. Dağıtım
+`telerad.ata` yetkisinde: okuyan herkes işi dağıtamaz.
+
+**802 — atama nedeni.** Otomatik dağıtım geçmişe "Elle" diye düşüyordu:
+kartın kod listesinde duran **"1 Otomatik (kural)" değerini yazan kimse
+yoktu** (799'daki salt okunur damga hatasının aynısı). Neden artık işlem
+ayarından okunuyor (`set_config('telerad.atama_nedeni','1',true)`); ayar yoksa
+eski davranış aynen sürüyor, elle atama yapan ekranların değişmesi gerekmedi.
+
+Ekranlar: **Nöbet Çizelgesi** (çipler: Şimdi · Tümü; dolan nöbetçi uyarı
+rengi, geçmiş vardiya soluk) ve **Atama Kuralları** (sıra sırasıyla, pasif
+kural soluk). İkisi de kurulumun yetkisiyle (`teleradyoloji.nobet` /
+`.kural`) - gece okuyan radyologa kural değiştirme hakkı vermeden atama hakkı
+verilebilsin.
+
+Tarayıcıda uçtan uca: kartlardan nöbet ve kural açıldı, çalışma listesinde
+"Otomatik Dağıt" iki isteği nöbetçiye atadı (durum 2 → 3), atama izine neden
+**1 (Otomatik)** yazıldı. Deneme satırları silindi. xUnit 338/338,
+vitest 677/677.
+
+**Test dersi:** dev veritabanında ekrandan girilmiş kural/nöbet, testlerin
+"ilk uyan kural" sırasına karışıp iki testi kırdı. Kurulum artık işlem içinde
+tüm kural ve nöbetleri pasife alıyor - kural kümesi testin kendisidir.

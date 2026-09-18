@@ -105,6 +105,14 @@ export const mesajUclari = {
     istek<T>(`/api/telerad/pano${gun ? `?gun=${encodeURIComponent(gun)}` : ''}`),
 
   /**
+   * OTOMATIK DAGITIM (801): siradaki atanmamis isleri nobet cizelgesi ve
+   * atama kurallarina gore paylastirir. Kurali SUNUCU yorumlar
+   * (`fn_telerad_radyolog_oner`) - istemci kural bilmez.
+   */
+  teleradDagit: () =>
+    gonder<{ sirada: number; atanan: number; kalan: number }>('/api/telerad/dagit', {}),
+
+  /**
    * Cihazin kapali araliklari (318): bakim/ariza/tatil + ogle arasi.
    * Takvim bunlari tarali blok olarak cizer - kural zaten tetikte, bu
    * GORUNURLUK icin.

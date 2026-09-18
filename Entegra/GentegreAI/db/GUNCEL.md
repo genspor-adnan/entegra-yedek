@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (411 ad, 115 tanesi birden cok dosyada)
+## Fonksiyonlar (413 ad, 116 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -323,6 +323,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_taraf_kisi_unvan_ata` | `037_kisi_karti.sql` | — |
 | `fn_telefon_rakam` | `123_telefon_arama.sql` | — |
 | `fn_telerad_istek_no` | `797_teleradyoloji.sql` | — |
+| `fn_telerad_radyolog_oner` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
 | `fn_tevkifat_orani` | `176_tevkifat_istisna.sql` | — |
 | `fn_tr_baslik` | `563_gorev_adi_bicim.sql` | — |
 | `fn_ubl_taraf` | `182_ebelge_ubl.sql` | — |
@@ -415,12 +416,13 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_tek_aktif` | `248_taraf_hasta_kurum.sql` | — |
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
-| `tg_telerad_atama_izi` | `797_teleradyoloji.sql` | — |
+| `tg_telerad_atama_izi` | `802_telerad_atama_nedeni.sql` | 797_teleradyoloji.sql |
 | `tg_telerad_istek` | `799_telerad_durum_damgalari.sql` | 797_teleradyoloji.sql |
+| `tg_telerad_nobet_cakisma` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (240 ad, 59 tanesi birden cok dosyada)
+## Gorunumler (241 ad, 59 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -658,6 +660,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_tedarikci_skor` | `724_satinalma.sql` | — |
 | `v_telerad_istek` | `797_teleradyoloji.sql` | — |
 | `v_telerad_kurum_lookup` | `798_telerad_kart.sql` | — |
+| `v_telerad_nobetci` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
 | `v_ulke_lookup` | `119_stok_uts.sql` | — |
 | `v_uretim_emri_lookup` | `429_uretim_v1.sql` | — |
 | `v_uretim_hareket` | `429_uretim_v1.sql` | — |

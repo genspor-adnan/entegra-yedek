@@ -70,6 +70,34 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     ic: '🏥', menuSira: 42, yetkiKodu: 'teleradyoloji.kurum', modul: 'teleradyoloji', urunModu: 2,
   },
   {
+    // NÖBET ÇİZELGESİ (801): "şu an kim iş başında". Poliklinik çalışma
+    //   planından (718) AYRI - radyolog evden okur, vardiya gece yarısını
+    //   geçer. Otomatik dağıtımın girdisi: hedefi "o anki nöbetçi" olan
+    //   kural buraya bakar.
+    kaynak: 'telerad-nobet', rota: 'telerad-nobet', baslik: 'Teleradyoloji Nöbet Çizelgesi',
+    yol: 'Teleradyoloji › Nöbet',
+    kartYolu: '/telerad-nobet', kartBaslik: 'Nöbet',
+    aksiyonEkrani: 'telerad-nobet-liste',
+    cipler: [
+      { ad: 'Şimdi', filtre: { alan: 'suAn', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Nöbet Çizelgesi',
+    ic: '🌙', menuSira: 46, yetkiKodu: 'teleradyoloji.nobet',
+    modul: 'teleradyoloji', urunModu: 2,
+  },
+  {
+    // ATAMA KURALLARI (801): "hangi iş kime". Sıra KARAR sırasıdır - ilk uyan
+    //   kural kazanır, liste de o sırada okunur.
+    kaynak: 'telerad-kural', rota: 'telerad-kural', baslik: 'Teleradyoloji Atama Kuralları',
+    yol: 'Teleradyoloji › Atama Kuralları',
+    kartYolu: '/telerad-kural', kartBaslik: 'Atama Kuralı',
+    aksiyonEkrani: 'telerad-kural-liste',
+    menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Atama Kuralları',
+    ic: '🤖', menuSira: 48, yetkiKodu: 'teleradyoloji.kural',
+    modul: 'teleradyoloji', urunModu: 2,
+  },
+  {
     // SÖZLEŞMELER: dönem, ücret modeli, tarife ve SLA süreleri. İsteğe
     //   KOPYALANIR (db/797) - sözleşme sonradan değişince geçmiş isteğin sözü
     //   değişmesin.

@@ -466,9 +466,15 @@ public sealed class TeleradyolojiKartTestleri
         Assert.Equal("telerad.teslim",
             ekran.First(a => a.Kod == "telerad.teslim").AksiyonYetkisi);
 
-        // Akis dugmeleri KAYIT ISTER: secim olmadan "teslim et" anlamsiz.
-        Assert.All(ekran.Where(a => a.Kod != "telerad.yeni" && a.Grup == "telerad"),
+        // SATIR AKSIYONLARI KAYIT ISTER: secim olmadan "teslim et" anlamsiz.
+        //   TOPLU olanlar disarida: "Yeni" henuz kayit yok, "Otomatik Dagit"
+        //   (801) siradaki TUM isleri dagitir - isi tek tek sectirmek "gece
+        //   listeye bakan kimse yok" sorununu cozmezdi.
+        var topluAksiyonlar = new[] { "telerad.yeni", "telerad.dagit" };
+        Assert.All(ekran.Where(a => !topluAksiyonlar.Contains(a.Kod) && a.Grup == "telerad"),
                    a => Assert.True(a.KayitGerekir, a.Kod + " kayit secilmeden calisiyor."));
+        Assert.All(topluAksiyonlar.Select(k => ekran.First(a => a.Kod == k)),
+                   a => Assert.False(a.KayitGerekir, a.Kod + " toplu aksiyon, kayit istememeli."));
     }
 }
 

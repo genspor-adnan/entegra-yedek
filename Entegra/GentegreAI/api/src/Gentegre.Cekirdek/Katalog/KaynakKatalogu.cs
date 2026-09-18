@@ -193,6 +193,8 @@ public static partial class KaynakKatalogu
         Ekle(TeleradIstek());
         Ekle(TeleradKurum());
         Ekle(TeleradSozlesme());
+        Ekle(TeleradNobet());
+        Ekle(TeleradKural());
         Ekle(RadyolojiTeslim());
 
         // GOZ (691): genel muayenenin USTUNE oturur - unite akisi, goz

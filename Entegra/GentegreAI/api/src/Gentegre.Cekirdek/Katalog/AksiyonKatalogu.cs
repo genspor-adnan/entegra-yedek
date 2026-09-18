@@ -1047,6 +1047,14 @@ public static class AksiyonKatalogu
                 new("telerad.ata",      "👤 Bana Ata", "telerad",
                     AksiyonYetkisi: "telerad.ata", KayitGerekir: true, Sira: 30,
                     Ipucu: "İsteği üstüne alır (durum: Atandı)"),
+                // OTOMATİK DAĞIT (801): sıradaki atanmamış işleri kurallara
+                //   göre radyologlara paylaştırır. KAYIT SEÇİMİ İSTEMEZ -
+                //   işi tek tek seçtirmek, "gece listeye bakan kimse yok"
+                //   sorununu çözmezdi. Kuralı sunucu yorumlar
+                //   (`fn_telerad_radyolog_oner`), ekran kural bilmez.
+                new("telerad.dagit",    "🤖 Otomatik Dağıt", "telerad",
+                    AksiyonYetkisi: "telerad.ata", Sira: 32,
+                    Ipucu: "Sıradaki işleri nöbet çizelgesi ve atama kurallarına göre dağıtır"),
                 new("telerad.birak",    "↩ Atamayı Bırak", "telerad",
                     Hedef: "sagtus,palet", AksiyonYetkisi: "telerad.ata",
                     KayitGerekir: true, Sira: 35, Ipucu: "İstek sıraya geri döner"),
@@ -1078,6 +1086,16 @@ public static class AksiyonKatalogu
                 Crud("telerad-kurum", "telerad", "teleradyoloji.kurum",
                      ekleAdi: "＋ Yeni Kurum",
                      silIpucu: "Kurumla birlikte sözleşmeleri de silinir"),
+            // NÖBET ÇİZELGESİ ve ATAMA KURALLARI (801): tanım ekranları.
+            //   Günlük işin (`telerad.ata`) değil KURULUMUN yetkisiyle -
+            //   gece okuyan radyologa kural değiştirme hakkı vermeden atama
+            //   hakkı verilebilsin.
+            ["telerad-nobet-liste"] =
+                Crud("telerad-nobet", "telerad", "teleradyoloji.nobet",
+                     ekleAdi: "＋ Yeni Nöbet"),
+            ["telerad-kural-liste"] =
+                Crud("telerad-kural", "telerad", "teleradyoloji.kural",
+                     ekleAdi: "＋ Yeni Kural"),
             ["telerad-sozlesme-liste"] =
                 Crud("telerad-sozlesme", "telerad", "teleradyoloji.sozlesme",
                      ekleAdi: "＋ Yeni Sözleşme"),

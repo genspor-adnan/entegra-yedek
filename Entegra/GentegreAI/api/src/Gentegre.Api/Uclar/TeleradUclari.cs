@@ -211,5 +211,72 @@ public static class TeleradUclari
                 sayaclar, ay, kurumlar, modalite, radyologlar, saatler,
             });
         });
+
+        // ------------------------------------------------- otomatik dağıtım ----
+        // "Gece listeye bakan kimse yok" sorununun karşılığı (801): sıradaki
+        //   atanmamış işler nöbet çizelgesi ve atama kurallarına göre
+        //   radyologlara paylaştırılır.
+        //
+        // KURALI SUNUCU YORUMLAR: seçimi `fn_telerad_radyolog_oner` yapar -
+        //   ekran da, ileride DICOM alımından gelen iş de AYNI fonksiyonu
+        //   çağırır. İki yerde yorumlamak, ekran ile arka planın farklı
+        //   radyolog seçmesi demekti.
+        //
+        // ATAMA YİNE TEK KAPIDAN: fonksiyon önerir, yazan `atanan_radyolog_id`
+        //   güncellemesidir - durum geçişini ve atama izini 797 tetikleri
+        //   yazar. Buradan ikinci bir "atandı" kaydı atılmaz.
+        grup.MapPost("/dagit", async (
+            BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            // DAĞITIM AYRI YETKİ: okuyan herkes işi dağıtamaz (797).
+            baglam.AksiyonIste("telerad.ata");
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            await using var islem = await baglanti.BeginTransactionAsync(iptal);
+
+            // ATAMA NEDENİ "OTOMATİK" (802): atama izini tetik yazıyor ve
+            //   neden'i işlem ayarından okuyor. Bildirmezsek otomatik dağıtım
+            //   geçmişe "Elle" diye düşer - kartın kod listesinde duran
+            //   "Otomatik (kural)" değerini yazan kimse olmazdı.
+            await baglanti.CalistirAsync(
+                "select set_config('telerad.atama_nedeni', '1', true)", islem, [], iptal);
+
+            // SIRA İŞİN KENDİSİDİR: acil önce, sonra SLA'sı dolmak üzere olan -
+            //   çalışma listesiyle AYNI sıra. Dağıtımın farklı bir öncelik
+            //   anlayışı olsaydı, listeye bakan kişiyle robot farklı işi
+            //   önemli sayardı.
+            var sirada = await baglanti.ListeAsync("""
+                select i.id
+                  from public.telerad_istek i
+                 where i.durum in (2, 8)
+                   and i.atanan_radyolog_id is null
+                   and (@p0::int is null or i.sube_id = @p0)
+                 order by i.oncelik desc, i.sla_bitis nulls last, i.id
+                 limit 200
+                """, islem, [baglam.SubeId], o => o.GetInt32(0), iptal);
+
+            var atanan = 0;
+            var kalan = 0;
+            foreach (var id in sirada)
+            {
+                var radyolog = await baglanti.TekDegerAsync<int?>(
+                    "select public.fn_telerad_radyolog_oner(@p0)", islem, [id], iptal);
+                if (radyolog is null or 0) { kalan++; continue; }
+
+                // `degistiren`: atama izinde "kim atadı" bu kolondan yazılır
+                //   (tg_telerad_atama_izi).
+                await baglanti.CalistirAsync("""
+                    update public.telerad_istek
+                       set atanan_radyolog_id = @p1, degistiren = @p2
+                     where id = @p0 and atanan_radyolog_id is null
+                    """, islem, [id, radyolog.Value, baglam.KullaniciId], iptal);
+                atanan++;
+            }
+
+            await islem.CommitAsync(iptal);
+            return Results.Ok(new { sirada = sirada.Count, atanan, kalan });
+        });
     }
 }
