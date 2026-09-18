@@ -127,12 +127,21 @@
   .tablo tr.pk td.k{font-weight:bold}
   .tablo .alt{padding:6px 10px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line2);background:#fbfcfd}
 
+  /* durum rozetleri (798-800 sonrasi): tasarim notu ile gercek arasindaki farki
+     tek bakista gostersin - "yazilmis" sanilan bir tablo icin ikinci kez
+     tasarim yapilmasin. */
+  .rz.yapildi{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb;font-weight:bold}
+  .rz.faz2{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .durumKutu{border:1px solid #bfe3cb;background:#f2faf5;border-radius:4px;padding:10px 12px;margin:12px 0}
+  .durumKutu b{color:#1f2d3a}
+  .durumKutu ul{margin:6px 0 0 18px;padding:0}
+  .durumKutu li{margin:2px 0}
 </style>
 </head>
 <body>
 
 <div class="win">
-  <div class="title">🛰 Teleradyoloji Modülü — Süreç, Tablolar, Alanlar <span class="sp">Gentegre AI · tasarım notu · 03.09.2026</span></div>
+  <div class="title">🛰 Teleradyoloji Modülü — Süreç, Tablolar, Alanlar <span class="sp">Gentegre AI · tasarım notu (03.09.2026) · durum güncellemesi 18.09.2026</span></div>
   <div class="icerik">
 
     <div class="kutu">
@@ -145,6 +154,28 @@
       <code>telerad_kurum_sozlesme_karti.html</code> · <code>telerad_istek_karti.html</code> ·
       <code>telerad_pano.html</code> ·
       mevcut radyoloji: <code>../Radyoloji/</code></span>
+    </div>
+
+    <div class="durumKutu">
+      <b>18.09.2026 — nerede duruyoruz.</b> Bu belge <b>tasarım notudur</b>; aşağısı hem yapılanı
+      hem tasarlanıp yapılmayanı içerir. Ayrımı rozetler söyler:
+      <span class="rz yapildi">yapıldı</span> gerçekten var ve çalışıyor ·
+      <span class="rz faz2">faz 2</span> yalnızca bu belgede duruyor.
+      <ul>
+        <li><b>Yapıldı (db 797 · 798 · 799 · 800):</b> <code>telerad_kurum</code> ·
+          <code>telerad_sozlesme</code> · <code>telerad_istek</code> · <code>telerad_atama</code>
+          tabloları, <code>tg_telerad_istek</code> (istek no, sözleşme çözümü, SLA kopyası, durum
+          geçişleri, zaman damgaları) ve <code>tg_telerad_atama_izi</code>;
+          <code>v_telerad_istek</code> (kalan dk + SLA riski sunucuda);
+          çalışma listesi + araç çubuğu (Bana Ata · Okumaya Başla · Teslim Et);
+          istek, kurum ve sözleşme kartları; portal kapsamı (794/795/796).</li>
+        <li><b>Yapılmadı:</b> DICOM alımı ve sahipsiz görüntüler · HL7/FHIR teslim ·
+          otomatik atama kuralları · nöbet çizelgesi · istek üzerinde mesajlaşma ·
+          dönem faturası · hakediş bağı · kurum portalı istek ekranı · pano.
+          Karşılığı <code>GentegreAI/dokuman/12_KALAN_ISLER.md</code>.</li>
+        <li><b>Teslim faz 1'de elle:</b> çalışma listesinden <b>Teslim Et</b> → durum 7;
+          <code>teslim_zamani</code> / <code>teslim_durum</code> damgasını tetik yazar (799).</li>
+      </ul>
     </div>
 
     <h2>1. Akış (gelen yön — biz raporlama merkeziyiz)</h2>
@@ -161,17 +192,17 @@
       <span class="a">e-Nabız görüntüleme paketi (gönderen kurum)</span>
     </div>
     <table>
-      <tr><th style="width:40px">#</th><th style="width:200px">Adım</th><th>Ne olur</th><th style="width:220px">Kayıt</th></tr>
-      <tr><td>1</td><td><b>Tanım</b></td><td>Kurum cari kartına bağlanır; yön, tesis kodu, DICOM AE/HL7 adresi, rapor şablonu. Sözleşme: dönem, ücret modeli, tarife (fiyat listesi), SLA süreleri, acil ek oranı. Kurum kullanıcıları (hekim/teknisyen) portal rolüyle açılır.</td><td><code>telerad_kurum</code>, <code>telerad_sozlesme</code>, <code>telerad_kurum_kullanici</code>, <code>fiyat_listesi</code></td></tr>
-      <tr><td>2</td><td><b>İstek</b></td><td>Kurum portaldan istek açar (hasta, erişim no, tetkik, öncelik, klinik bilgi, onam) ya da PACS otomatik gönderir ve istek DICOM'dan üretilir (eksik alanlar portalda tamamlanır). Dış hasta bizde minimal <code>taraf</code> kaydı olarak açılır (dış kurum bayrağı).</td><td><code>telerad_istek</code>, <code>taraf</code>/<code>taraf_hasta</code></td></tr>
-      <tr><td>3</td><td><b>Görüntü alımı</b></td><td>DICOM alıcı (bizim PACS/VNA) çalışmayı alır; AE title → kurum, accession → istek eşleşir. Eşleşmeyen çalışma "sahipsiz" listesine. Tüm seriler gelince <b>geliş zamanı</b> yazılır, SLA başlar. Eksik seri → "ek görüntü iste".</td><td><code>telerad_dicom_olay</code>, <code>telerad_istek.gelis_zamani</code></td></tr>
-      <tr><td>4</td><td><b>Atama</b></td><td>Kural: modalite / bölge / öncelik / saat / kurum → radyolog ya da havuz; azami bekleyen sınırı; nöbet çizelgesi. Elle yeniden atama, nöbet devri.</td><td><code>telerad_atama</code>, <code>telerad_atama_kurali</code>, <code>telerad_nobet</code></td></tr>
-      <tr><td>5</td><td><b>Okuma</b></td><td>Radyolog viewer'da okur (MPR, ölçüm, önceki tetkik karşılaştırma); şablon/makro, dikte, AI taslak (hekim onayı ile); yapılandırılmış alanlar (ASPECTS, BI-RADS, Lung-RADS). Mevcut <code>radyoloji_istem</code> + <code>radyoloji_rapor</code> akışı kullanılır (kaynak = teleradyoloji).</td><td><code>radyoloji_istem</code>, <code>radyoloji_rapor</code>, <code>radyoloji_sablon</code></td></tr>
-      <tr><td>6</td><td><b>Kritik bulgu</b></td><td>Radyolog işaretler → gönderen hekime telefon/SMS/portal; karşı teyit zorunlu, süre ölçülür. Mevcut kritik bulgu listesi çok-kurumlu hale gelir.</td><td><code>radyoloji_kritik_bulgu</code></td></tr>
-      <tr><td>7</td><td><b>Onay / teslim</b></td><td>e-imza, kurum logolu PDF; HL7 ORU^R01 (MLLP) / REST / FHIR DiagnosticReport ile kurum HBYS'ye; portalda görünür; SMS bildirimi. Teslim denemeleri loglanır, hata → tekrar.</td><td><code>telerad_teslim</code>, <code>dosya</code></td></tr>
-      <tr><td>8</td><td><b>Ücret / fatura</b></td><td>İstek anında tarife × öncelik oranı kopyalanır; SLA aşımı varsa ceza oranı. Dönem sonu "Dönem Faturası Üret": kurum carisine satış faturası (satır = tetkik grupları) → e-Fatura.</td><td><code>telerad_istek.ucret</code>, <code>belge</code> (satış faturası)</td></tr>
-      <tr><td>9</td><td><b>Hakediş</b></td><td>Onaylı rapor → rol Raporlayan → Prim modülü teleradyoloji planı (tetkik başı / %); gece nöbeti farklı oran. Dönem hakedişi.</td><td><code>belge_satir_rol</code>, <code>hakedis</code></td></tr>
-      <tr><td>10</td><td><b>Pano / kalite</b></td><td>SLA uyumu, süreler, radyolog yükü, kurum hacmi, kritik bulgu teyit süresi; çift okuma / uyumsuzluk (peer review) sonraki aşama.</td><td>rapor sorguları</td></tr>
+      <tr><th style="width:40px">#</th><th style="width:190px">Adım</th><th>Ne olur</th><th style="width:200px">Kayıt</th><th style="width:90px">Durum</th></tr>
+      <tr><td>1</td><td><b>Tanım</b></td><td>Kurum cari kartına bağlanır; yön, tesis kodu, DICOM AE/HL7 adresi, rapor şablonu. Sözleşme: dönem, ücret modeli, tarife (fiyat listesi), SLA süreleri, acil ek oranı. Kurum kullanıcıları (hekim/teknisyen) portal rolüyle açılır.</td><td><code>telerad_kurum</code>, <code>telerad_sozlesme</code>, <code>fiyat_listesi</code><br><span class="kucuk">kurum kullanıcısı ayrı tablo DEĞİL: portal rolü + <code>telerad_kurum.taraf_id</code> (794/795)</span></td><td class="orta"><span class="rz yapildi">yapıldı</span></td></tr>
+      <tr><td>2</td><td><b>İstek</b></td><td>Kurum portaldan istek açar (hasta, erişim no, tetkik, öncelik, klinik bilgi, onam) ya da PACS otomatik gönderir ve istek DICOM'dan üretilir (eksik alanlar portalda tamamlanır). Dış hasta bizde minimal <code>taraf</code> kaydı olarak açılır (dış kurum bayrağı).</td><td><code>telerad_istek</code>, <code>taraf</code>/<code>taraf_hasta</code></td><td class="orta"><span class="rz yapildi">kart var</span><br><span class="kucuk">portal ekranı faz 2</span></td></tr>
+      <tr><td>3</td><td><b>Görüntü alımı</b></td><td>DICOM alıcı (bizim PACS/VNA) çalışmayı alır; AE title → kurum, accession → istek eşleşir. Eşleşmeyen çalışma "sahipsiz" listesine. Tüm seriler gelince <b>geliş zamanı</b> yazılır, SLA başlar. Eksik seri → "ek görüntü iste".</td><td><code>telerad_istek.gelis_zamani</code><br><span class="kucuk">bugün elle girilir; girilince tetik SLA bitişini hesaplar</span></td><td class="orta"><span class="rz faz2">faz 2</span><br><span class="kucuk">geliş zamanı elle</span></td></tr>
+      <tr><td>4</td><td><b>Atama</b></td><td>Kural: modalite / bölge / öncelik / saat / kurum → radyolog ya da havuz; azami bekleyen sınırı; nöbet çizelgesi. Elle yeniden atama, nöbet devri.</td><td><code>telerad_atama</code><br><span class="kucuk">atama izini tetik yazar; kural/nöbet tabloları yok</span></td><td class="orta"><span class="rz yapildi">elle</span><br><span class="kucuk">kural/nöbet faz 2</span></td></tr>
+      <tr><td>5</td><td><b>Okuma</b></td><td>Radyolog viewer'da okur (MPR, ölçüm, önceki tetkik karşılaştırma); şablon/makro, dikte, AI taslak (hekim onayı ile); yapılandırılmış alanlar (ASPECTS, BI-RADS, Lung-RADS). Mevcut <code>radyoloji_istem</code> + <code>radyoloji_rapor</code> akışı kullanılır (kaynak = teleradyoloji).</td><td><code>radyoloji_istem</code>, <code>radyoloji_rapor</code>, <code>radyoloji_sablon</code></td><td class="orta"><span class="rz yapildi">yapıldı</span><br><span class="kucuk">viewer faz 2</span></td></tr>
+      <tr><td>6</td><td><b>Kritik bulgu</b></td><td>Radyolog işaretler → gönderen hekime telefon/SMS/portal; karşı teyit zorunlu, süre ölçülür. Mevcut kritik bulgu listesi çok-kurumlu hale gelir.</td><td><code>radyoloji_kritik_bulgu</code></td><td class="orta"><span class="rz yapildi">iç akışta</span><br><span class="kucuk">telerad bağı ◐</span></td></tr>
+      <tr><td>7</td><td><b>Onay / teslim</b></td><td>e-imza, kurum logolu PDF; HL7 ORU^R01 (MLLP) / REST / FHIR DiagnosticReport ile kurum HBYS'ye; portalda görünür; SMS bildirimi. Teslim denemeleri loglanır, hata → tekrar.</td><td><code>telerad_istek.teslim_*</code><br><span class="kucuk">deneme günlüğü (<code>telerad_teslim</code>) faz 2</span></td><td class="orta"><span class="rz yapildi">elle teslim</span><br><span class="kucuk">HL7/FHIR faz 2</span></td></tr>
+      <tr><td>8</td><td><b>Ücret / fatura</b></td><td>İstek anında tarife × öncelik oranı kopyalanır; SLA aşımı varsa ceza oranı. Dönem sonu "Dönem Faturası Üret": kurum carisine satış faturası (satır = tetkik grupları) → e-Fatura.</td><td><code>telerad_istek.ucret</code>, <code>belge</code> (satış faturası)</td><td class="orta"><span class="rz yapildi">ücret</span><br><span class="kucuk">dönem faturası faz 2</span></td></tr>
+      <tr><td>9</td><td><b>Hakediş</b></td><td>Onaylı rapor → rol Raporlayan → Prim modülü teleradyoloji planı (tetkik başı / %); gece nöbeti farklı oran. Dönem hakedişi.</td><td><code>belge_satir_rol</code>, <code>hakedis</code></td><td class="orta"><span class="rz faz2">faz 2</span></td></tr>
+      <tr><td>10</td><td><b>Pano / kalite</b></td><td>SLA uyumu, süreler, radyolog yükü, kurum hacmi, kritik bulgu teyit süresi; çift okuma / uyumsuzluk (peer review) sonraki aşama.</td><td>rapor sorguları</td><td class="orta"><span class="rz faz2">faz 2</span></td></tr>
     </table>
 
     <h3>Giden yön (biz gönderiyoruz)</h3>
@@ -190,70 +221,70 @@
     <h2>3. Tablolar ve alanlar</h2>
     <h3>Yeni tablolar</h3>
 <div class="tablo">
-  <div class="tb"><code>telerad_kurum</code> <span class="rz ok">yeni</span> <span class="sp">teleradyoloji ilişkisi olan kurumlar — cari kartına bağlı</span></div>
+  <div class="tb"><code>telerad_kurum</code> <span class="rz yapildi">yapıldı · 797 · kart 800</span> <span class="sp">teleradyoloji ilişkisi olan kurumlar — cari kartına bağlı</span></div>
   <table>
     <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
     <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">taraf_id</td><td class="t">int</td><td>→ taraf (müşteri/tedarikçi cari) — fatura buradan</td></tr><tr><td class="k">yon</td><td class="t">smallint</td><td>1 gelen (onlar gönderir, biz raporlarız) · 2 giden (biz göndeririz) · 3 iki yön</td></tr><tr><td class="k">tesis_kodu</td><td class="t">varchar(10)</td><td>ÇKYS tesis kodu (rapor başlığı, e-Nabız)</td></tr><tr><td class="k">dicom_ae_title</td><td class="t">varchar(16)</td><td>kurum PACS AE</td></tr><tr><td class="k">dicom_host / dicom_port</td><td class="t">varchar / int</td><td>C-STORE / C-MOVE</td></tr><tr><td class="k">hl7_adres</td><td class="t">varchar(120)</td><td>ORU teslim (MLLP / REST)</td></tr><tr><td class="k">hl7_tur</td><td class="t">smallint</td><td>0 yok (portal) · 1 ORU MLLP · 2 REST · 3 FHIR DiagnosticReport</td></tr><tr><td class="k">rapor_sablon_id</td><td class="t">int</td><td>kurum logolu rapor başlığı → radyoloji_sablon</td></tr><tr><td class="k">gece_nobet</td><td class="t">smallint</td><td>gece hizmeti var mı</td></tr><tr><td class="k">varsayilan_oncelik</td><td class="t">smallint</td><td></td></tr><tr><td class="k">onam_zorunlu</td><td class="t">smallint</td><td>gönderimde hasta onamı işaretlenmeli</td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
   </table>
 </div>
 <div class="tablo">
-  <div class="tb"><code>telerad_sozlesme</code> <span class="rz ok">yeni</span> <span class="sp">dönem sözleşmesi + SLA + tarife</span></div>
+  <div class="tb"><code>telerad_sozlesme</code> <span class="rz yapildi">yapıldı · 797 · kart 800</span> <span class="sp">dönem sözleşmesi + SLA + tarife</span></div>
   <table>
     <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
     <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">kurum_id</td><td class="t">int</td><td>→ telerad_kurum</td></tr><tr><td class="k">baslangic / bitis</td><td class="t">date</td><td></td></tr><tr><td class="k">ucret_modeli</td><td class="t">smallint</td><td>1 tetkik başı · 2 aylık sabit + aşım · 3 vaka başı</td></tr><tr><td class="k">fiyat_listesi_id</td><td class="t">int</td><td>→ fiyat_listesi (modalite/tetkik bazlı tarife)</td></tr><tr><td class="k">aylik_sabit</td><td class="t">numeric</td><td>model 2</td></tr><tr><td class="k">aylik_adet_siniri</td><td class="t">int</td><td>model 2 aşım eşiği</td></tr><tr><td class="k">acil_ek_oran</td><td class="t">numeric(5,2)</td><td>acil için % ek</td></tr><tr><td class="k">oncelikli_ek_oran</td><td class="t">numeric(5,2)</td><td></td></tr><tr><td class="k">sla_acil_dk / sla_oncelikli_dk / sla_rutin_dk</td><td class="t">int</td><td>SLA süreleri (dakika)</td></tr><tr><td class="k">sla_ceza_oran</td><td class="t">numeric(5,2)</td><td>aşımda indirim (varsa)</td></tr><tr><td class="k">fatura_periyodu</td><td class="t">smallint</td><td>aylık / 15 günlük</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>taslak / aktif / bitti</td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
   </table>
 </div>
 <div class="tablo">
-  <div class="tb"><code>telerad_kurum_kullanici</code> <span class="rz ok">yeni</span> <span class="sp">gönderen kurum portal kullanıcıları</span></div>
+  <div class="tb"><code>telerad_kurum_kullanici</code> <span class="rz faz2">tasarım · yazılmadı</span> <span class="sp">gönderen kurum portal kullanıcıları</span></div>
   <table>
     <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
     <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">kurum_id</td><td class="t">int</td><td></td></tr><tr><td class="k">taraf_id</td><td class="t">int</td><td>→ taraf (kişi/hekim)</td></tr><tr><td class="k">kullanici_id</td><td class="t">int</td><td>→ kullanici (portal rolü, kapsam = kurum)</td></tr><tr><td class="k">rol</td><td class="t">smallint</td><td>1 hekim (istek açar, rapor görür) · 2 teknisyen (yükler) · 3 yönetici (döküm)</td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
   </table>
-</div>
+<div class="alt"><b>Yazılmadı ve muhtemelen yazılmayacak:</b> portal kullanıcısı kurumun <b>cari</b> kaydıdır — bağ <code>telerad_kurum.taraf_id</code> üzerinden kurulur, rolün portal türü <code>rol.portal_turu = 2</code> (794/795). Ayrı bir kullanıcı tablosu ikinci bir kimlik kaynağı demekti.</div></div>
 <div class="tablo">
-  <div class="tb"><code>telerad_istek</code> <span class="rz ok">yeni</span> <span class="sp">raporlama isteği — merkez çalışma listesinin satırı</span></div>
+  <div class="tb"><code>telerad_istek</code> <span class="rz yapildi">yapıldı · 797 · kart 798/799</span> <span class="sp">raporlama isteği — merkez çalışma listesinin satırı</span></div>
   <table>
     <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
     <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">istek_no</td><td class="t">varchar(20)</td><td>TR-yyyy/nnnnn</td></tr><tr><td class="k">kurum_id</td><td class="t">int</td><td>→ telerad_kurum</td></tr><tr><td class="k">yon</td><td class="t">smallint</td><td>gelen / giden (kurumdan kopya)</td></tr><tr><td class="k">sozlesme_id</td><td class="t">int</td><td>fiyat ve SLA çözümü için</td></tr><tr><td class="k">hasta_id</td><td class="t">int</td><td>→ taraf — gelen istekte kurum hastası bizde 'dış hasta' olarak açılır (kimlik + demografi, min.)</td></tr><tr><td class="k">dis_hasta_kimlik</td><td class="t">varchar(11)</td><td>Kimlik No / pasaport (hash'li aramada)</td></tr><tr><td class="k">dis_erisim_no</td><td class="t">varchar(40)</td><td>kurum PACS accession number</td></tr><tr><td class="k">isteyen_hekim</td><td class="t">varchar(120)</td><td>gönderen kurum hekimi (ad) — kullanıcıysa kurum_kullanici_id</td></tr><tr><td class="k">kurum_kullanici_id</td><td class="t">int</td><td></td></tr><tr><td class="k">modalite</td><td class="t">smallint</td><td>kod listesi radyoloji.modalite</td></tr><tr><td class="k">tetkik_hizmet_id</td><td class="t">int</td><td>→ hizmet (radyoloji tetkik kartı)</td></tr><tr><td class="k">oncelik</td><td class="t">smallint</td><td>1 rutin · 2 öncelikli · 3 acil</td></tr><tr><td class="k">klinik_bilgi</td><td class="t">text</td><td></td></tr><tr><td class="k">onam</td><td class="t">smallint</td><td>dış kurum paylaşım onamı işaretlendi</td></tr><tr><td class="k">cekim_zamani</td><td class="t">timestamp</td><td>DICOM StudyDate/Time</td></tr><tr><td class="k">gelis_zamani</td><td class="t">timestamp</td><td>görüntülerin bize ulaştığı an — SLA başlangıcı</td></tr><tr><td class="k">sla_dk</td><td class="t">int</td><td>sözleşmeden kopya</td></tr><tr><td class="k">sla_bitis</td><td class="t">timestamp</td><td>gelis + sla</td></tr><tr><td class="k">study_uid</td><td class="t">varchar(64)</td><td>DICOM StudyInstanceUID</td></tr><tr><td class="k">goruntu_sayisi / seri_sayisi</td><td class="t">int</td><td></td></tr><tr><td class="k">goruntu_durum</td><td class="t">smallint</td><td>0 bekleniyor · 1 tamam · 2 eksik seri · 3 hatalı</td></tr><tr><td class="k">radyoloji_istem_id</td><td class="t">int</td><td>→ radyoloji_istem (iç akışla birleşim: rapor, kritik bulgu, konsültasyon oradan)</td></tr><tr><td class="k">rapor_id</td><td class="t">int</td><td>→ radyoloji_rapor</td></tr><tr><td class="k">durum</td><td class="t">smallint</td><td>1 görüntü bekleniyor · 2 sırada · 3 atandı · 4 okunuyor · 5 taslak · 6 onaylı · 7 teslim edildi · 8 ek görüntü istendi · 0 iptal</td></tr><tr><td class="k">atanan_radyolog_id</td><td class="t">int</td><td>→ taraf_hekim (güncel)</td></tr><tr><td class="k">okuma_bas / onay_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">teslim_zamani</td><td class="t">timestamp</td><td>kuruma HL7/portal teslimi</td></tr><tr><td class="k">teslim_durum</td><td class="t">smallint</td><td>0 bekliyor · 1 teslim · 2 hata</td></tr><tr><td class="k">teslim_hata</td><td class="t">varchar(400)</td><td></td></tr><tr><td class="k">ucret</td><td class="t">numeric</td><td>tarife × öncelik oranı (istek anında kopya)</td></tr><tr><td class="k">sla_asildi</td><td class="t">smallint</td><td>onay > sla_bitis</td></tr><tr><td class="k">fatura_belge_id</td><td class="t">int</td><td>dönem faturası satırı</td></tr><tr><td class="k">hakedis_satir_id</td><td class="t">int</td><td>radyolog hakedişi (Prim)</td></tr><tr><td class="k">sube_id</td><td class="t">int</td><td></td></tr><tr><td class="k">ekleyen / ekleme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr><tr><td class="k">degistiren / degistirme_tarihi</td><td class="t">int / timestamp</td><td>standart denetim</td></tr>
   </table><div class="alt">indeks: (durum, oncelik, sla_bitis) çalışma listesi · (kurum_id, gelis_zamani) portal · unique (kurum_id, dis_erisim_no)</div>
 </div>
 <div class="tablo">
-  <div class="tb"><code>telerad_atama</code> <span class="rz ok">yeni</span> <span class="sp">atama geçmişi (kim, ne zaman, neden)</span></div>
+  <div class="tb"><code>telerad_atama</code> <span class="rz yapildi">yapıldı · 797</span> <span class="sp">atama geçmişi (kim, ne zaman, neden)</span></div>
   <table>
     <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
     <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">istek_id</td><td class="t">int</td><td></td></tr><tr><td class="k">radyolog_id</td><td class="t">int</td><td></td></tr><tr><td class="k">atama_zamani</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">atayan_id</td><td class="t">int</td><td>null = otomatik</td></tr><tr><td class="k">neden</td><td class="t">smallint</td><td>1 otomatik (kural) · 2 elle · 3 yeniden atama · 4 nöbet devri</td></tr><tr><td class="k">birakma_zamani</td><td class="t">timestamp</td><td>devredildiyse</td></tr>
   </table>
 </div>
 <div class="tablo">
-  <div class="tb"><code>telerad_atama_kurali</code> <span class="rz ok">yeni</span> <span class="sp">otomatik atama kuralları</span></div>
+  <div class="tb"><code>telerad_atama_kurali</code> <span class="rz faz2">tasarım · yazılmadı</span> <span class="sp">otomatik atama kuralları</span></div>
   <table>
     <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
     <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">sira</td><td class="t">smallint</td><td></td></tr><tr><td class="k">modalite</td><td class="t">smallint</td><td>boş = tümü</td></tr><tr><td class="k">vucut_bolgesi</td><td class="t">smallint</td><td>boş = tümü</td></tr><tr><td class="k">oncelik</td><td class="t">smallint</td><td></td></tr><tr><td class="k">kurum_id</td><td class="t">int</td><td>boş = tümü</td></tr><tr><td class="k">saat_bas / saat_bit</td><td class="t">varchar(5)</td><td>gündüz/gece</td></tr><tr><td class="k">radyolog_id</td><td class="t">int</td><td>ya da havuz</td></tr><tr><td class="k">havuz_id</td><td class="t">int</td><td>→ telerad_havuz (uzmanlık grubu)</td></tr><tr><td class="k">azami_bekleyen</td><td class="t">smallint</td><td>radyolog üstünde en çok kaç iş</td></tr><tr><td class="k">aktif</td><td class="t">smallint</td><td></td></tr>
   </table>
 </div>
 <div class="tablo">
-  <div class="tb"><code>telerad_nobet</code> <span class="rz ok">yeni</span> <span class="sp">radyolog nöbet / vardiya çizelgesi</span></div>
+  <div class="tb"><code>telerad_nobet</code> <span class="rz faz2">tasarım · yazılmadı</span> <span class="sp">radyolog nöbet / vardiya çizelgesi</span></div>
   <table>
     <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
     <tr class="pk"><td class="k">id</td><td class="t">int</td><td></td></tr><tr><td class="k">radyolog_id</td><td class="t">int</td><td></td></tr><tr><td class="k">tarih</td><td class="t">date</td><td></td></tr><tr><td class="k">bas / bit</td><td class="t">varchar(5)</td><td></td></tr><tr><td class="k">tur</td><td class="t">smallint</td><td>gündüz / akşam / gece / icap</td></tr><tr><td class="k">modaliteler</td><td class="t">smallint[]</td><td>bu nöbette bakılan</td></tr><tr><td class="k">kapasite</td><td class="t">smallint</td><td>hedef adet</td></tr>
   </table>
 </div>
 <div class="tablo">
-  <div class="tb"><code>telerad_mesaj</code> <span class="rz ok">yeni</span> <span class="sp">istek üzerinde kurum ↔ radyolog yazışması — mesaj modülü sohbeti</span></div>
+  <div class="tb"><code>telerad_mesaj</code> <span class="rz faz2">tasarım · yazılmadı</span> <span class="sp">istek üzerinde kurum ↔ radyolog yazışması — mesaj modülü sohbeti</span></div>
   <table>
     <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
     <tr><td class="k">istek_id</td><td class="t">int</td><td>→ telerad_istek</td></tr><tr><td class="k">sohbet_id</td><td class="t">int</td><td>→ mesaj_sohbet (tür = telerad istek)</td></tr>
   </table><div class="alt">ayrı tablo yerine mesaj_sohbet.kaynak_tur/kaynak_id de yeterli; burada bağ tablosu olarak gösterildi.</div>
 </div>
 <div class="tablo">
-  <div class="tb"><code>telerad_teslim</code> <span class="rz ok">yeni</span> <span class="sp">rapor teslim denemeleri (HL7 / REST / portal)</span></div>
+  <div class="tb"><code>telerad_teslim</code> <span class="rz faz2">tasarım · yazılmadı</span> <span class="sp">rapor teslim denemeleri (HL7 / REST / portal)</span></div>
   <table>
     <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
     <tr class="pk"><td class="k">id</td><td class="t">bigint</td><td></td></tr><tr><td class="k">istek_id</td><td class="t">int</td><td></td></tr><tr><td class="k">rapor_id</td><td class="t">int</td><td></td></tr><tr><td class="k">kanal</td><td class="t">smallint</td><td>1 HL7 ORU · 2 REST · 3 FHIR · 4 portal</td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">sonuc</td><td class="t">smallint</td><td></td></tr><tr><td class="k">yanit</td><td class="t">varchar(400)</td><td>ACK / hata</td></tr><tr><td class="k">deneme</td><td class="t">smallint</td><td></td></tr>
   </table>
 </div>
 <div class="tablo">
-  <div class="tb"><code>telerad_dicom_olay</code> <span class="rz ok">yeni</span> <span class="sp">DICOM alım / gönderim izi</span></div>
+  <div class="tb"><code>telerad_dicom_olay</code> <span class="rz faz2">tasarım · yazılmadı</span> <span class="sp">DICOM alım / gönderim izi</span></div>
   <table>
     <tr><th style="width:230px">Alan</th><th style="width:150px">Tip</th><th>Açıklama</th></tr>
     <tr class="pk"><td class="k">id</td><td class="t">bigint</td><td></td></tr><tr><td class="k">istek_id</td><td class="t">int</td><td>eşleşince dolar</td></tr><tr><td class="k">study_uid</td><td class="t">varchar(64)</td><td></td></tr><tr><td class="k">kurum_id</td><td class="t">int</td><td>AE title'dan çözülür</td></tr><tr><td class="k">yon</td><td class="t">smallint</td><td>alındı / gönderildi</td></tr><tr><td class="k">zaman</td><td class="t">timestamp</td><td></td></tr><tr><td class="k">goruntu</td><td class="t">int</td><td></td></tr><tr><td class="k">seri</td><td class="t">int</td><td></td></tr><tr><td class="k">eslesme</td><td class="t">smallint</td><td>0 eşleşmedi (erişim no yok) · 1 eşleşti · 2 elle eşlendi</td></tr><tr><td class="k">hata</td><td class="t">varchar(400)</td><td></td></tr>
@@ -322,7 +353,8 @@
       <tr><td>Nöbet Çizelgesi <span class="kucuk">(sonra)</span></td><td>Radyolog vardiya/nöbet; atama kuralları.</td><td>—</td></tr>
     </table>
 
-    <h2>6. Ayarlar (Ayarlar › Teleradyoloji)</h2>
+    <h2>6. Ayarlar (Ayarlar › Teleradyoloji) <span class="rz faz2">tasarım · ekran yok</span></h2>
+    <p class="kucuk">Bugün teleradyolojinin kendi ayar ekranı yok. Modülün açık olup olmadığı kurum profilinden gelir (<code>kurum_profil.moduller</code>); SLA süreleri <b>sözleşmede</b>, rapor şablonu ve gece nöbeti <b>kurum kartında</b> durur — aşağıdakiler bunların dışında kalan, henüz yeri olmayan ayarlardır.</p>
     <ul>
       <li>Bizim AE title / port; görüntü önbellek süresi (90 gün); viewer seçimi.</li>
       <li>Atama modu: otomatik / elle; azami bekleyen; nöbet zorunlu mu.</li>
@@ -333,20 +365,35 @@
     </ul>
 
     <h2>7. Yetkiler</h2>
+    <p class="kucuk">Tasarımda <code>telerad.*</code> diye kurgulanmıştı; <b>gerçekte</b> kaynak
+      yetkileri modül adıyla (<code>teleradyoloji*</code>, tür 0) ve iş yetkileri
+      <code>telerad.*</code> (tür 1 = aksiyon) olarak ayrıldı — liste/kart yetkisi ile
+      "şu işi yapabilir" yetkisi farklı şeylerdir.</p>
     <table>
-      <tr><th style="width:260px">Yetki</th><th>Kapsam</th></tr>
-      <tr><td><code>telerad.liste</code></td><td>Merkez çalışma listesi.</td></tr>
-      <tr><td><code>telerad.rapor</code></td><td>Okuma ve onay (radyolog); yalnız atanan ya da havuz.</td></tr>
-      <tr><td><code>telerad.atama</code></td><td>Atama / yeniden atama / nöbet.</td></tr>
-      <tr><td><code>telerad.kurum</code></td><td>Kurum, sözleşme, tarife.</td></tr>
-      <tr><td><code>telerad.fatura</code></td><td>Dönem faturası üretme.</td></tr>
-      <tr><td><code>telerad.portal</code></td><td>Gönderen kurum kullanıcısı (kapsam = kurum).</td></tr>
+      <tr><th style="width:230px">Yetki</th><th style="width:70px">Tür</th><th>Kapsam</th><th style="width:90px">Durum</th></tr>
+      <tr><td><code>teleradyoloji</code></td><td>kaynak</td><td>Çalışma listesi + istek kartı (aynı yetki: kart serbest kalırsa liste süzmesi anlamsızlaşır).</td><td class="orta"><span class="rz yapildi">yapıldı</span></td></tr>
+      <tr><td><code>teleradyoloji.kurum</code></td><td>kaynak</td><td>Kurum listesi ve kartı.</td><td class="orta"><span class="rz yapildi">yapıldı</span></td></tr>
+      <tr><td><code>teleradyoloji.sozlesme</code></td><td>kaynak</td><td>Sözleşme listesi ve kartı.</td><td class="orta"><span class="rz yapildi">yapıldı</span></td></tr>
+      <tr><td><code>telerad.ata</code></td><td>aksiyon</td><td>Bana Ata / Atamayı Bırak — dağıtım okumaktan ayrı bir karardır.</td><td class="orta"><span class="rz yapildi">yapıldı</span></td></tr>
+      <tr><td><code>telerad.teslim</code></td><td>aksiyon</td><td>Raporu kuruma teslim et (durum 7).</td><td class="orta"><span class="rz yapildi">yapıldı</span></td></tr>
+      <tr><td><code>telerad.faturala</code></td><td>aksiyon</td><td>Dönem faturasını üret.</td><td class="orta"><span class="rz faz2">yetki var<br>ekran yok</span></td></tr>
+      <tr><td><code>radyoloji</code> · <code>rad.rapor_yaz</code> · <code>rad.rapor_onayla</code></td><td>mevcut</td><td>Okuma ve rapor onayı: teleradyolojiye ÖZEL yetki yok, iş iç akışın aynısı.</td><td class="orta"><span class="rz yapildi">yapıldı</span></td></tr>
+      <tr><td><code>radyoloji-istem</code></td><td>kaynak</td><td>Dış doktorun dar yetkisi (796): yalnız istem kaynağı — <code>radyoloji</code> yedi kaynağı birden açıyordu.</td><td class="orta"><span class="rz yapildi">yapıldı</span></td></tr>
     </table>
+    <p class="kucuk"><b>Portal tarafı:</b> ayrı bir <code>telerad.portal</code> yetkisi yok;
+      kapsam <code>rol.portal_turu</code> + kaynak/kart <code>PortalKosullari</code> ile kurulur
+      (kuralı olmayan kaynak portal rolüne <b>kapalı</b>). Dış kurum rolünde bugün teleradyoloji
+      yetkisi yok — ekranı olmayan yetki "boş ama açık kapı" olurdu.</p>
 
     <div class="tamam">
-      <b>İlk sürüm:</b> kurum/sözleşme, DICOM alım + erişim no eşleme, çalışma listesi + elle atama, mevcut raporlama ekranıyla okuma, PDF + portal teslim, tetkik başı ücret + dönem faturası, hakediş.
-      Sonraya: HL7/FHIR teslim, otomatik atama kuralları, nöbet çizelgesi, giden yön, AI taslak, peer review.
-    </div>
+      <b>Faz 1 (yapıldı · db 797-800):</b> kurum ve sözleşme (liste + kart), çalışma listesi +
+      istek kartı, elle atama ve atama izi, SLA'nın sözleşmeden kopyalanması ve sunucuda
+      hesaplanması, durum akışı düğmeleri (ata · okumaya başla · teslim et) ve zaman damgaları,
+      ücretin istek anında kopyalanması, portal kapsamı. Okuma ve rapor mevcut radyoloji
+      raporlama ekranıyla.
+      <br><b>Faz 2:</b> DICOM alımı + sahipsiz görüntüler, HL7/FHIR teslim, otomatik atama
+      kuralları, nöbet çizelgesi, istek üzerinde mesajlaşma, kurum portalı istek ekranı,
+      dönem faturası + hakediş, pano. Sonraya: giden yön, AI taslak, peer review.</div>
   </div>
 </div>
 
