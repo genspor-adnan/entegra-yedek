@@ -87,6 +87,11 @@ public static class KimlikUclari
                     Moduller = await kurum.AcikModullerAsync(baglam.SubeId ?? 0, iptal),
                     // Basvuruda sorulan hekim rolu (361/364) - aktif subeye gore.
                     HekimRolu = await kurum.HekimRoluAsync(baglam.SubeId ?? 0, iptal),
+                    // KURUM PROFILI (786): sol menunun Oturum bolumu yazar.
+                    //   /ben'de de donmeli - sayfayi yenileyen kullanicinin
+                    //   oturumu giris yanitindan degil buradan kuruluyor.
+                    KurumTipi = (await kurum.KurumTipiAsync(baglam.SubeId ?? 0, iptal)).Kod,
+                    KurumTipiAdi = (await kurum.KurumTipiAsync(baglam.SubeId ?? 0, iptal)).Ad,
                     // ISKONTO ONAY ESIGI (783): ekran limiti tavanla BIRLIKTE
                     //   bunu da gozetir - esik ustu iskonto onayli talepten
                     //   gelmek zorunda (kural sunucuda tetikle korunuyor).

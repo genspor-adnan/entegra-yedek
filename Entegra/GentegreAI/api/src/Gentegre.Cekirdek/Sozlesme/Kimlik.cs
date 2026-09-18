@@ -100,6 +100,16 @@ public sealed class KullaniciOzeti
     /// </summary>
     public IReadOnlyList<string> Moduller { get; set; } = Array.Empty<string>();
     /// <summary>
+    /// AKTIF SUBENIN KURUM PROFILI (786): tip kodu ve ekranda yazilan adi.
+    /// Sol menunun "Oturum" bolumu bunu gosterir - kullanici hangi profilde
+    /// calistigini menuyu okuyarak degil, yazili gorerek bilsin (kullanici:
+    /// "oturum basligi altina profil ikonu ve saginda o anki o subedeki
+    /// secili profil gelsin").
+    /// </summary>
+    public string KurumTipi { get; set; } = "";
+    public string KurumTipiAdi { get; set; } = "";
+
+    /// <summary>
     /// AKTIF SUBEDE basvuruda sorulan hekim rolu (361/364): lab/goruntuleme
     /// subesinde 1 "Gönderen" (dis doktor), digerlerinde 4 "Yapan" (personel).
     /// Basvuru karti doktor combosunu bu role gore doldurur.

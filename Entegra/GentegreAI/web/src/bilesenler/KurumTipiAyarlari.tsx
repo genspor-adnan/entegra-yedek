@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import './kurumTipiAyarlari.css';
 import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
-import { hataMetni, type KurumProfil, type KurumProfilYaniti } from '../api/sozlesme';
+import { hataMetni, type KurumProfil, type KurumProfilYaniti, type ProfilRolu }
+  from '../api/sozlesme';
 import { mesaj } from './mesaj';
 
 /**
@@ -144,6 +145,43 @@ export function KurumTipiAyarlari() {
 
 
   /**
+   * PROFILDE GECERLI ROLLER (786, kullanici: "profil sayfasinda altta her bir
+   * profil icin gecerli (aktif) rolleri isaretleyeyim.. ustte kaydet deyip o
+   * profilin rollerine girince onlar gecerli olsun").
+   *
+   * Liste KURULU TUM ROLLERDIR - kapatilacaklari gormeden isaretleme yapilamaz.
+   * Sablonun karari `varsayilan` sutununda ipucu olarak durur; kutucuk kurumun
+   * kararidir ve ust seritteki Kaydet ile yazilir.
+   */
+  const [profilRol, setProfilRol] = useState<ProfilRolu[]>([]);
+  const [rolGecerli, setRolGecerli] = useState<Set<string>>(new Set());
+  const [rolYazili, setRolYazili] = useState(false);
+  const tip = profil?.kurumTipi ?? '';
+  useEffect(() => {
+    let iptal = false;
+    if (!tip) { setProfilRol([]); setRolGecerli(new Set()); return }
+    void (async () => {
+      try {
+        const y = await api.profilRolleri(tip);
+        if (iptal) return;
+        setProfilRol(y.roller);
+        setRolGecerli(new Set(y.roller.filter(r => r.gecerli || r.kilitli).map(r => r.kod)));
+        setRolYazili(y.yazili);
+      } catch { /* yetkisi yoksa bolum bos kalir */ }
+    })();
+    return () => { iptal = true };
+  }, [tip]);
+
+  const rolCevir = (r: ProfilRolu) => {
+    if (r.kilitli) return;                    // yonetici/atanmamis kapanamaz
+    setRolGecerli(o => {
+      const n = new Set(o);
+      if (n.has(r.kod)) n.delete(r.kod); else n.add(r.kod);
+      return n;
+    });
+  };
+
+  /**
    * KATEGORI ACIK/KAPALI (527). Yalniz kategori yazilir; altindaki hizmet ve
    * stoklarin durumunu DB tetigi yayar - kural iki yerde tekrarlanmasin.
    */
@@ -178,10 +216,19 @@ export function KurumTipiAyarlari() {
     if (!profil) return;
     setKaydediyor(true);
     try {
-      const y = await api.kurumProfilYaz({ ...profil, subeId });
+      // ROL HARITASI AYNI KAYDETTE (786): isaretliler gecerli, isaretsizler
+      //   pasif. `rolAdaylari` ekranin GOSTERDIGI liste - sunucu "isaretsiz =
+      //   pasif" kararini ancak neyin gosterildigini bilirse verebilir.
+      const y = await api.kurumProfilYaz({
+        ...profil, subeId,
+        ...(profilRol.length > 0
+            ? { roller: [...rolGecerli], rolAdaylari: profilRol.map(r => r.kod) }
+            : {}),
+      });
       setProfil(y.profil);
       setVeri(v => (v ? { ...v, profil: y.profil } : v));
       setHata(null);
+      if (profilRol.length > 0) setRolYazili(true);
       // AKTIF SUBEYI etkilediyse menu/rotalar hemen degissin: acik modul kumesi
       //   oturumdan geliyor (359/364), yoksa kullanici degisikligi ancak yeniden
       //   giriste gorurdu.
@@ -430,6 +477,61 @@ export function KurumTipiAyarlari() {
                   <button className="d onay" type="button" disabled={rolMesgul} onClick={() => void rolleriKur()}>✔ Seçilenleri kur ({rolSecim.size})</button>
                   <label style={{ display: 'inline-flex', gap: 4, alignItems: 'center', fontSize: 11 }}><input type="checkbox" checked={rolGuncelle} onChange={e => setRolGuncelle(e.target.checked)} /> var olan rollerin yetkilerini şablona çek (elle verilen yetkiler silinir)</label>
                   <button className="d" type="button" onClick={() => setRolPanel(false)}>Kapat</button>
+                </div>
+              </div>
+            )}
+        </div>
+
+        {/* BU PROFILDE GECERLI ROLLER (786) - sayfanin ALTINDA, kullanicinin
+            istedigi yerde. Kutucuk kurumun karari; ust seritteki Kaydet
+            yazar ve rol.aktif alanina uygular. */}
+        <div className="grp" style={{ margin: '10px' }}>
+          <div className="gb">Bu profilde geçerli roller — {tipAdi(profil?.kurumTipi) || '—'}
+            <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+              <span className="sonuk" style={{ fontSize: 11 }}>{rolGecerli.size}/{profilRol.length} seçili</span>
+              <button className="d" type="button"
+                      onClick={() => setRolGecerli(new Set(profilRol.filter(r => r.varsayilan || r.kilitli).map(r => r.kod)))}>
+                ↺ Şablon önerisi
+              </button>
+            </span>
+          </div>
+          <div className="ic sonuk">
+            İşaretli roller bu profilde <b>geçerlidir</b>; işaretsizler <b>pasife</b> alınır
+            (silinmez, kullanıcıları kalır). Üstteki <b>Kaydet</b> ile yazılır.
+            {rolYazili ? '' : ' Henüz işaretlenmedi: şu an şablonun önerisi geçerli.'}
+          </div>
+          {profilRol.length === 0
+            ? <div className="ic sonuk">Kurum tipi seçilince roller listelenir.</div>
+            : (
+              <div className="ic">
+                <div className="dg"><table>
+                  <thead><tr>
+                    <th className="orta">Geçerli</th><th>Rol</th><th>Amaç</th>
+                    <th className="orta">Kullanıcı</th><th className="orta">Şablon</th><th>Durum</th>
+                  </tr></thead>
+                  <tbody>
+                    {profilRol.map(r => (
+                      <tr key={r.kod} className={rolGecerli.has(r.kod) ? '' : 'sonuk'}>
+                        <td className="orta">
+                          <input type="checkbox" checked={rolGecerli.has(r.kod)}
+                                 disabled={r.kilitli} onChange={() => rolCevir(r)}
+                                 title={r.kilitli ? 'Bu rol pasife alınamaz' : ''} />
+                        </td>
+                        <td><b>{r.ad}</b> <span className="sonuk">({r.kod})</span>
+                          {r.kilitli && <span className="rz" title="Kurum kendi sistemine girebilsin diye her zaman açık"> kilitli</span>}</td>
+                        <td>{r.amac}</td>
+                        <td className="orta">{r.kisi || ''}</td>
+                        <td className="orta" title={r.modul ? `Modül: ${r.modul}` : ''}>
+                          {r.sablon ? (r.varsayilan ? '✔' : (r.modulKapali ? '⊘' : '–')) : ''}
+                        </td>
+                        <td>{r.aktif ? <span className="rz ok">aktif</span> : <span className="rz">pasif</span>}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table></div>
+                <div className="ic sonuk" style={{ paddingLeft: 0 }}>
+                  Şablon sütunu: ✔ bu tipe önerilir · ⊘ modülü bu kurulumda kapalı ·
+                  – başka tipin rolü · boş = kurumun kendi rolü.
                 </div>
               </div>
             )}

@@ -266,7 +266,8 @@ export function Kabuk() {
         <aside className="yan">
           <YanMenu satirlar={satirlar} bolgeliMenu={kullanici?.urunModu === 2} tercih={tercih}
                    panelYetkisi={yetki('panel')} aktifSubeAd={aktifSube?.ad}
-                   kullaniciKod={kullanici?.kod} rolAdi={kullanici?.rolAdi} />
+                   kullaniciKod={kullanici?.kod} rolAdi={kullanici?.rolAdi}
+                   kurumProfilAdi={kullanici?.kurumTipiAdi} />
         </aside>
 
         <main className="ana" key={ceviriSurumu}><Outlet /></main>

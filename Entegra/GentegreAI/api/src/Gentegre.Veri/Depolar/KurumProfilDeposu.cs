@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Gentegre.Cekirdek.Sozlesme;
 using Npgsql;
 
@@ -262,6 +262,37 @@ public sealed class KurumProfilDeposu
     {
         await using var baglanti = await _veri.AcAsync(iptal);
         return await UrunModuAsync(baglanti, subeId, iptal);
+    }
+
+    /// <summary>
+    /// AKTIF SUBENIN KURUM TIPI (786): kod + ekranda yazilan ad. Sol menunun
+    /// "Oturum" bolumu ve giris/ben yanitlari ayni yerden okur - iki ayri
+    /// sorgu, iki farkli cevap verme riski tasiyordu (sube devralmasi).
+    /// </summary>
+    public async Task<(string Kod, string Ad)> KurumTipiAsync(
+        int subeId = 0, CancellationToken iptal = default)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        return await KurumTipiAsync(baglanti, subeId, iptal);
+    }
+
+    public static async Task<(string Kod, string Ad)> KurumTipiAsync(
+        NpgsqlConnection baglanti, int subeId = 0, CancellationToken iptal = default)
+    {
+        // SUBE DEVRALMASI: subenin kendi satiri yoksa kurum geneli (0) okunur -
+        //   profil ekraninin okuma kurali da bu.
+        await using var komut = baglanti.Komut("""
+            select p.kurum_tipi, coalesce(t.ad, p.kurum_tipi)
+              from public.kurum_profil p
+              left join public.kurum_tipi t on t.kod = p.kurum_tipi
+             where p.sube_id in (@p0, 0)
+             order by (p.sube_id = @p0) desc
+             limit 1
+            """, null, subeId);
+        await using var okuyucu = await komut.ExecuteReaderAsync(iptal);
+        if (!await okuyucu.ReadAsync(iptal)) return ("", "");
+        return (okuyucu.IsDBNull(0) ? "" : okuyucu.GetString(0),
+                okuyucu.IsDBNull(1) ? "" : okuyucu.GetString(1));
     }
 
     public static async Task<int> UrunModuAsync(NpgsqlConnection baglanti,

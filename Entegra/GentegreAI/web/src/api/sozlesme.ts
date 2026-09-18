@@ -147,6 +147,13 @@ export interface KullaniciOzeti {
    */
   moduller?: string[];
   /**
+   * AKTIF SUBENIN KURUM PROFILI (786): sol menunun "Oturum" bolumu yazar.
+   * Kullanici hangi profilde calistigini menuyu yorumlayarak degil, yazili
+   * gorerek bilsin.
+   */
+  kurumTipi?: string;
+  kurumTipiAdi?: string;
+  /**
    * AKTIF SUBEDE basvuruda sorulan hekim rolu (361/364): 1 "Gönderen"
    * (lab/goruntuleme subesi - dis doktor), 4 "Yapan" (digerleri - personel).
    */
@@ -908,6 +915,19 @@ export type RandevuAyarYazma = Omit<RandevuAyarSatiri, 'id' | 'ad'>;
 export interface KurumKatalogSatiri { kod: string; ad: string; sira: number }
 
 /** Tip x modul varsayilani: 0 gizli · 1 acik · 2 opsiyonel. */
+/**
+ * PROFILDE GECERLI ROL (786). `varsayilan` sablonun karari, `gecerli` kurumun
+ * karari (yoksa varsayilan), `yazili` kurum bu tip icin kaydini yazdi mi.
+ * `kilitli` roller (yonetici, atanmamis) pasife alinamaz - DB tetigi de
+ * reddeder.
+ */
+export interface ProfilRolu {
+  id: number; kod: string; ad: string; amac: string;
+  aktif: boolean; sistem: boolean; kisi: number;
+  sablon: boolean; modul?: string | null; modulKapali: boolean;
+  varsayilan: boolean; gecerli: boolean; yazili: boolean; kilitli: boolean;
+}
+
 export interface KurumTipiModul { kurumTipi: string; modul: string; varsayilan: number }
 
 /** Kurulumun kurum profili - tek satir (kurum_profil.id = 1). */

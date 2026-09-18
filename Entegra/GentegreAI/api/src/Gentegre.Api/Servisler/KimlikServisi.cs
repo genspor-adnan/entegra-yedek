@@ -140,6 +140,7 @@ public sealed class KimlikServisi
                 await UrunModuAsync(subeId, iptal),
                 await AcikModullerAsync(subeId, iptal),
                 await HekimRoluAsync(subeId, iptal),
+                await KurumTipiAsync(subeId, iptal),
                 await IskontoEsigiAsync(iptal))
         };
     }
@@ -348,6 +349,7 @@ public sealed class KimlikServisi
                 await UrunModuAsync(subeId, iptal),
                 await AcikModullerAsync(subeId, iptal),
                 await HekimRoluAsync(subeId, iptal),
+                await KurumTipiAsync(subeId, iptal),
                 await IskontoEsigiAsync(iptal))
         };
     }
@@ -390,6 +392,14 @@ public sealed class KimlikServisi
             ? d : 0m;
     }
 
+    /// <summary>Aktif subenin kurum tipi (786) - tek okuyucu depoda.</summary>
+    private async Task<(string Kod, string Ad)> KurumTipiAsync(int? subeId,
+        CancellationToken iptal)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        return await KurumProfilDeposu.KurumTipiAsync(baglanti, subeId ?? 0, iptal);
+    }
+
     private async Task<IReadOnlyList<string>> AcikModullerAsync(int? subeId,
         CancellationToken iptal)
     {
@@ -402,6 +412,7 @@ public sealed class KimlikServisi
     private static KullaniciOzeti KullaniciOzetiKur(KullaniciKaydi kullanici,
         IReadOnlyList<SubeOzeti> subeler, int? subeId, int urunModu,
         IReadOnlyList<string> moduller, int hekimRolu,
+        (string Kod, string Ad) kurumTipi = default,
         decimal iskontoEsigi = 0m) => new()
     {
         Id = kullanici.TarafId,
@@ -419,6 +430,8 @@ public sealed class KimlikServisi
         UrunModu = urunModu,
         Moduller = moduller,
         HekimRolu = hekimRolu,
+        KurumTipi = kurumTipi.Kod ?? "",
+        KurumTipiAdi = kurumTipi.Ad ?? "",
         IskontoOnayEsigi = iskontoEsigi
     };
 

@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (402 ad, 113 tanesi birden cok dosyada)
+## Fonksiyonlar (404 ad, 113 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -212,6 +212,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kurum_modul_acik` | `364_kurum_profil_sube.sql` | 359_kurum_profil.sql |
 | `fn_kurum_profil` | `364_kurum_profil_sube.sql` | — |
 | `fn_kurum_sozlesme_sec` | `468_kurum_sozlesme_1n.sql` | — |
+| `fn_kurum_tipi_rol_uygula` | `786_kurum_tipi_rol.sql` | — |
 | `fn_lab_acmg_sinif` | `439_lab_genetik.sql` | — |
 | `fn_lab_antibiyogram_bildirim` | `437_lab_kombinasyon_ajani.sql` | 436_lab_mikrobiyoloji.sql |
 | `fn_lab_antibiyogram_paneli` | `509_mikro_organizma_besiyeri.sql` | — |
@@ -278,6 +279,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_radyoloji_rapor_onaylanabilir` | `284_radyoloji_operasyon.sql` | — |
 | `fn_radyoloji_sonuc_durumu` | `418_muayene_istem_bagi.sql` | — |
 | `fn_resmi_tatil_uret` | `749_resmi_tatil.sql` | — |
+| `fn_rol_kilit_koru` | `786_kurum_tipi_rol.sql` | — |
 | `fn_rol_sistem_koru` | `785_iskonto_basamak_rolleri_ve_sistem_rolleri.sql` | 664_sistem_rolleri.sql |
 | `fn_satinalma_agirlik_kilit` | `724_satinalma.sql` | — |
 | `fn_satinalma_kabul_no_uret` | `731_tedarik_numaralari.sql` | — |

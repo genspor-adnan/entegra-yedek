@@ -269,6 +269,101 @@ public static class StandartRolUclari
             await islem.CommitAsync(iptal);
             return Results.Ok(new { kurumTipi = tip, kuruldu, guncellendi, atlandi });
         });
+
+        // ------------------------------------------- profile göre geçerli rol --
+        // GET /api/kurum-profil/standart-roller/profil-rolleri?kurumTipi=osgb
+        //
+        // Kullanıcı: *"profili görüntüleme yaptım bütün roller görünüyor.. isg
+        //   yaptım yine bütün roller görünüyor.. böyle olmasın.. profil
+        //   sayfasında altta her bir profil için geçerli (aktif) rolleri
+        //   işaretleyeyim"*.
+        //
+        // KURULU ROLLERİN TAMAMI listelenir (şablon süzgeci burada UYGULANMAZ):
+        //   işaretleme ekranı, "bu profilde neyi kapatayım" sorusunu ancak
+        //   kapatılacakları da gösterirse cevaplayabilir. Şablonun kararı
+        //   `varsayilan` sütununda ipucu olarak durur.
+        grup.MapGet("/profil-rolleri", async (string? kurumTipi, VeriKaynagi veri,
+                                              BaglamCozucu cozucu, KurumProfilDeposu profil,
+                                              HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("rol", Islem.Gor);
+            var tip = kurumTipi ?? await KurumTipiAsync(profil, baglam.SubeId ?? 0, iptal);
+            var acikModuller = await profil.AcikModullerAsync(baglam.SubeId ?? 0, iptal);
+
+            await using var b = await veri.AcAsync(iptal);
+            var harita = await b.ListeAsync(
+                "select rol_kod, gecerli from public.kurum_tipi_rol where kurum_tipi = @p0",
+                null, [tip], o => new { kod = o.GetString(0), gecerli = o.GetInt16(1) == 1 }, iptal);
+            var roller = await b.ListeAsync("""
+                select r.id, r.kod, r.ad, r.amac, r.aktif, r.sistem,
+                       (select count(*) from public.taraf_kullanici k
+                         where k.rol_id = r.id and k.aktif = 1) as kisi
+                  from public.rol r
+                 order by r.sistem desc, r.ad
+                """, null, [],
+                o => new { id = o.GetInt32(0), kod = o.GetString(1), ad = o.GetString(2),
+                           amac = o.GetString(3), aktif = o.GetInt16(4) == 1,
+                           sistem = o.GetInt16(5) == 1, kisi = o.GetInt64(6) }, iptal);
+
+            var liste = roller.Select(r =>
+            {
+                var s = Sablonlar.FirstOrDefault(x => x.Kod == r.kod);
+                var modul = SablonModul.GetValueOrDefault(r.kod);
+                // ŞABLON VARSAYILANI: bu tip şablonda geçiyor mu + modülü açık mı.
+                //   Şablonu olmayan rol (kurumun kendi açtığı) varsayılan olarak
+                //   GEÇERLİDİR - kimse onu bir tipe bağlamamış.
+                var varsayilan = s is null
+                    || ((s.Tipler.Contains(tip) || s.Tipler.Contains(TUM))
+                        && (modul is null || acikModuller.Contains(modul)));
+                var kayit = harita.FirstOrDefault(h => h.kod == r.kod);
+                return new
+                {
+                    r.id, r.kod, r.ad, r.amac, r.aktif, r.sistem, r.kisi,
+                    sablon = s is not null, modul,
+                    modulKapali = modul is not null && !acikModuller.Contains(modul),
+                    varsayilan,
+                    gecerli = kayit?.gecerli ?? varsayilan,
+                    // İŞARETLENMİŞ Mİ: kurum bu tip için kaydını yazdı mı.
+                    yazili = kayit is not null,
+                    // KİLİTLİ: pasife alınamaz (786 tetiği) - kutu kapatılamaz.
+                    kilitli = r.kod is "yonetici" or "atanmamis",
+                };
+            }).ToList();
+
+            return Results.Ok(new { kurumTipi = tip, roller = liste,
+                                    yazili = harita.Count > 0 });
+        });
+    }
+
+    /// <summary>
+    /// Profil kaydedilirken çağrılır: haritayı yazar ve `rol.aktif` alanına
+    /// uygular. Uygulamayı DB'deki `fn_kurum_tipi_rol_uygula` yapar - kural
+    /// tek yerde (786).
+    /// </summary>
+    public static async Task ProfilRolleriYazAsync(
+        NpgsqlConnection b, NpgsqlTransaction? islem, string kurumTipi,
+        IReadOnlyCollection<string> gecerliKodlar, IReadOnlyCollection<string> tumKodlar,
+        int kullaniciId, CancellationToken iptal)
+    {
+        if (string.IsNullOrWhiteSpace(kurumTipi) || tumKodlar.Count == 0) return;
+        foreach (var kod in tumKodlar)
+        {
+            // KILITLI ROL HARITAYA DA 1 YAZILIR: `yonetici` ve `atanmamis`
+            //   pasife alınamıyor (786 tetiği) - haritada 0 görünmesi, ekranda
+            //   "geçersiz ama aktif" gibi okunan yalan bir satır bırakırdı.
+            var gecerli = (short)(gecerliKodlar.Contains(kod)
+                                  || kod is "yonetici" or "atanmamis" ? 1 : 0);
+            await b.CalistirAsync("""
+                insert into public.kurum_tipi_rol (kurum_tipi, rol_kod, gecerli, ekleyen)
+                values (@p0, @p1, @p2, @p3)
+                on conflict (kurum_tipi, rol_kod) do update
+                   set gecerli = excluded.gecerli, degistiren = @p3,
+                       degistirme_tarihi = now()
+                """, islem, [kurumTipi, kod, gecerli, kullaniciId], iptal);
+        }
+        await b.CalistirAsync("select public.fn_kurum_tipi_rol_uygula(@p0)",
+                              islem, [kurumTipi], iptal);
     }
 
     /// <param name="TumModuller">

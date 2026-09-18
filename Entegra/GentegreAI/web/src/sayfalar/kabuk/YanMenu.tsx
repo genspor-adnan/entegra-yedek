@@ -27,9 +27,12 @@ export interface YanMenuProps {
   aktifSubeAd?: string;
   kullaniciKod?: string;
   rolAdi?: string;
+  /** Aktif subenin kurum profili (786) - Oturum bolumunde yazilir. */
+  kurumProfilAdi?: string;
 }
 
-export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSubeAd, kullaniciKod, rolAdi }: YanMenuProps) {
+export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSubeAd,
+                          kullaniciKod, rolAdi, kurumProfilAdi }: YanMenuProps) {
   const konum = useLocation();
   const { favoriler, favoriToggle, sonMenuler, calismaAlani, calismaAlaniSec } = tercih;
 
@@ -288,6 +291,17 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
               <span>{kullaniciKod}</span>
               <span className="rz">{rolAdi}</span>
             </div>
+            {/* KURUM PROFILI (786, kullanici: "oturum basligi altina profil
+                ikonu ve saginda o anki o subedeki secili profil gelsin"):
+                menu, kart sekmeleri ve rol onerileri bu profile gore
+                suzuluyor - hangisinde oldugu yazili dursun. */}
+            {kurumProfilAdi && (
+              <div className="mi" style={{ cursor: 'default' }}
+                   title={cm('Bu şubenin kurum profili')}>
+                <span className="ic">🪪</span>
+                <span>{kurumProfilAdi}</span>
+              </div>
+            )}
           </div>
   );
 }

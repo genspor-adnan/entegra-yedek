@@ -3,7 +3,7 @@ import {
   type AcikSatir,
   type EBelgeMesaji,
   type TopluEBelgeSonucu,
-  type KurumProfil, type KurumProfilYaniti,
+  type KurumProfil, type KurumProfilYaniti, type ProfilRolu,
 } from '../sozlesme';
 import { istek, gonder } from '../cekirdek';
 
@@ -21,8 +21,19 @@ export const belgeUclari = {
       `/api/kurum-profil/standart-roller${kurumTipi ? `?kurumTipi=${encodeURIComponent(kurumTipi)}` : ''}`),
   standartRolleriKur: (g: { kurumTipi?: string; kodlar?: string[]; guncelle?: boolean }) =>
     gonder<{ kurumTipi: string; kuruldu: string[]; guncellendi: string[]; atlandi: string[] }>('/api/kurum-profil/standart-roller', g),
-  kurumProfilYaz: (govde: Partial<KurumProfil>) =>
-    gonder<{ profil: KurumProfil }>('/api/kurum-profil', govde, 'PUT'),
+  /**
+   * PROFILDE GECERLI ROLLER (786): kurulu TUM roller + sablonun varsayilani +
+   * kurumun kendi isareti. Isaretleme ekrani kapatilacaklari da gormeli, o
+   * yuzden burada sablon suzgeci UYGULANMAZ.
+   */
+  profilRolleri: (kurumTipi?: string) =>
+    istek<{ kurumTipi: string; yazili: boolean; roller: ProfilRolu[] }>(
+      `/api/kurum-profil/standart-roller/profil-rolleri${
+        kurumTipi ? `?kurumTipi=${encodeURIComponent(kurumTipi)}` : ''}`),
+  /** Profili yazar - verilmeyen alanlar mevcut degerini korur. `roller` +
+      `rolAdaylari` birlikte verilirse rol haritasi da yazilir ve uygulanir. */
+  kurumProfilYaz: (govde: Partial<KurumProfil> & { roller?: string[]; rolAdaylari?: string[] }) =>
+    gonder<{ profil: KurumProfil; rolSayisi?: number | null }>('/api/kurum-profil', govde, 'PUT'),
   /** Fiyat listesini satirlariyla kopyalar (540). */
   fiyatListesiKopyala: (id: number, ad?: string) =>
     gonder<{ id: number; mesaj: string }>(

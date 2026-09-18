@@ -13714,3 +13714,58 @@ başvuru satırı"nı seçiyordu; başka testler kendi satırını açıp sildi�
 satır iki adım arasında yok olabiliyor ve update sıfır satıra dokunuyordu
 (suite'te ~5 koşuda 1 kırmızı). Artık en ESKİ satır seçiliyor - duran veri,
 evdeki desenin aynısı.
+
+
+## 18.09.2026 — Profile göre geçerli roller · menüde profil satırı (786)
+
+Kullanıcı: *"profili görüntüleme yaptım bütün roller görünüyor.. isg yaptım
+yine bütün roller görünüyor.. böyle olmasın.. profil sayfasında altta her bir
+profil için geçerli (aktif) rolleri işaretleyeyim.. üstte kaydet deyip o
+profilin rollerine girince onlar geçerli olsun"* ve *"solda menünün altında
+oturum başlığı altına profil ikonu ve sağında o anki o şubedeki seçili profil
+gelsin"*.
+
+**Eksik bağ neydi.** 785'te on kurum tipinin şablonları birden kuruldu
+(kullanıcının isteğiyle). Şablonun kendi süzgeci — kurum tipi + açık modül —
+yalnız KURULUM anında çalışıyor; kurulduktan sonra rolün hangi profile ait
+olduğu hiçbir yerde yazmıyordu. Roller ekranı da bu yüzden profil ne olursa
+olsun 38 rolün hepsini gösteriyordu.
+
+**`kurum_tipi_rol`** o bağ: hangi rol hangi tipte geçerli. Tablo **boş başlar**
+ve boş kaldığı sürece şablonun listesi varsayılandır; kurum işaretleyince satır
+yazılır ve **artık kurumun kararı** geçerlidir (şablon yeni sürümde değişse de
+ezilmez). Bu yüzden seed yok - varsayılanı iki yerde tutmak, ikisinin
+ayrışmasını beklemektir.
+
+**Uygulama tek yerden:** `fn_kurum_tipi_rol_uygula(tip)` haritayı `rol.aktif`
+alanına yazan tek fonksiyon. **Haritada adı geçmeyen role dokunmaz** - profil
+değişimi kimsenin elle kurduğu rolü sessizce kapatmasın. 785'in "sistem rolü
+pasife alınabilir" kararı tam olarak bu kapıyı açmıştı.
+
+**Kendini kilitleme koruması:** `yonetici` ve `atanmamis` pasife ALINAMAZ
+(`tg_rol_kilit_koru`). İlki kurulumu yöneten tek rol, ikincisi rolsüz kalanın
+düştüğü yer; ikisi de kapanırsa kurum kendi sistemine giremez. Kural tetikte -
+ekran unutsa da, doğrudan SQL yazılsa da tutar; uygulama fonksiyonu da onları
+atlar ki tek rol yüzünden bütün profil uygulaması durmasın.
+
+**Ekran:** Kurum Profili sayfasının altında "Bu profilde geçerli roller" -
+kurulu rollerin TAMAMI listelenir (işaretleme, kapatılacakları görmeden
+yapılamaz). Şablon sütunu ipucu: ✔ bu tipe önerilir · ⊘ modülü kapalı ·
+– başka tipin rolü · boş = kurumun kendi rolü. "↺ Şablon önerisi" kutucukları
+şablona döndürür. Üstteki **Kaydet** profil + harita + uygulamayı tek istekte
+yapar (`roller` işaretliler, `rolAdaylari` ekranın gösterdiği liste; ikisi
+birlikte "işaretsizler pasif" demektir - sunucu neyin gösterildiğini bilmeden
+bu kararı veremez).
+
+**Sol menü › Oturum** artık şube ve kullanıcının altında 🪪 ile aktif şubenin
+kurum profilini yazıyor. Menü, kart sekmeleri ve rol önerileri bu profile göre
+süzülüyor; hangisinde olduğu yazılı dursun. Kurum tipini okuyan tek yer
+`KurumProfilDeposu.KurumTipiAsync` - giriş ve `/ben` aynı yerden okur (şube
+devralması iki ayrı sorguda iki farklı cevap verebilirdi).
+
+**Doğrulama.** Dev'de: `osgb` profilinde 38 rol listelendi, varsayılan geçerli
+10 (İSG rolleri `isg` modülü kapalı olduğu için düşüyor); işaretsiz rol pasife
+alındı, `yonetici` korundu (GK422). Tarayıcıda profil sayfasında bölüm 38
+satırla çiziliyor, sol menüde "🪪 Görüntüleme Merkezi" görünüyor. Deneme
+satırları geri alındı (`kurum_tipi_rol` boş, `dis_hekimi` yeniden aktif).
+xUnit 282/282, vitest 669/669.

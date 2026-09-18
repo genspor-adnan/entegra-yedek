@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -24,7 +24,18 @@ public static class KurumProfilUclari
         /// <summary>Kimlik no bicimi (679): otomatik | tc | serbest | desen.</summary>
         string? KimlikBicimi = null,
         string? KimlikDeseni = null,
-        string? KimlikAciklama = null);
+        string? KimlikAciklama = null,
+        /// <summary>
+        /// BU PROFILDE GECERLI ROLLER (786, kullanici: "profil sayfasinda altta
+        /// her bir profil icin gecerli (aktif) rolleri isaretleyeyim.. ustte
+        /// kaydet deyip o profilin rollerine girince onlar gecerli olsun").
+        /// `RolAdaylari` ekranin GOSTERDIGI tum roller, `Roller` isaretli
+        /// olanlardir - ikisi birlikte "isaretsizler pasif" demek olur.
+        /// Verilmezse rol haritasina DOKUNULMAZ (baska sekme kaydederken
+        /// roller sifirlanmasin).
+        /// </summary>
+        List<string>? Roller = null,
+        List<string>? RolAdaylari = null);
 
     public static void KurumProfilUclariniEkle(this IEndpointRouteBuilder yol)
     {
@@ -93,7 +104,7 @@ public static class KurumProfilUclari
 
         grup.MapPut("/", async (
             ProfilIstegi istek, BaglamCozucu cozucu, KurumProfilDeposu depo,
-            HttpContext ctx, CancellationToken iptal) =>
+            VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("ayar", Islem.Degistir);
@@ -122,7 +133,25 @@ public static class KurumProfilUclari
                 KimlikAciklama: istek.KimlikAciklama ?? mevcut.KimlikAciklama);
 
             var sonuc = await depo.YazAsync(yeni, baglam.Yazma, iptal);
-            return Results.Ok(new { profil = sonuc, izlemeNo = baglam.IzlemeNo });
+
+            // ROL HARITASI AYNI KAYDETTE (786): "ustte kaydet deyip o profilin
+            //   rollerine girince onlar gecerli olsun". Profil yazildiktan
+            //   SONRA uygulanir - acik modul kumesi degismis olabilir ve
+            //   gecerlilik ona da bagli.
+            int? rolSayisi = null;
+            if (istek.Roller is not null && istek.RolAdaylari is { Count: > 0 })
+            {
+                baglam.YetkiIste("rol", Islem.Degistir);
+                await using var b = await veri.AcAsync(iptal);
+                await using var islem = await b.BeginTransactionAsync(iptal);
+                await StandartRolUclari.ProfilRolleriYazAsync(
+                    b, islem, sonuc.KurumTipi ?? "", istek.Roller, istek.RolAdaylari,
+                    baglam.KullaniciId, iptal);
+                await islem.CommitAsync(iptal);
+                rolSayisi = istek.Roller.Count;
+            }
+
+            return Results.Ok(new { profil = sonuc, rolSayisi, izlemeNo = baglam.IzlemeNo });
         });
     }
 }
