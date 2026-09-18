@@ -13981,3 +13981,27 @@ sönüyor ve adı "Rolleri şablona hizala" oluyor.
 **Doğrulama.** Ayar API'den %15 yazıldı (200), %101 reddedildi (400), %10'a
 döndürüldü. Dev'deki oranlar: eşik %10 · Banko %10 · Banko Şefi %25 · Mali
 İşler Müdürü %25 · Muhasebe %25 · Yönetici %100. xUnit 293/293, vitest 672/672.
+
+
+## 18.09.2026 — Roller ekranı profildeki seçimi gösteriyor (793 devamı)
+
+Kullanıcı: *"görüntülemede rol listesi ne giriyorum hala bütün roller
+geliyor"*, *"burada görünecek rolleri profilden seçtim"*.
+
+**Eksik halka ekrandaydı.** 786 profil seçimini `rol.aktif` alanına
+uyguluyordu (işaretsiz rol pasife alınır) ama **Roller ekranı hepsini
+listeliyordu**: kullanıcı profilde seçim yapıyor, listeye bakıyor, hiçbir şey
+değişmemiş gibi görünüyordu. Liste artık `Aktif · Pasif · Tümü` çipleriyle
+açılıyor ve **varsayılanı Aktif** - yani profilde seçilenler. Pasifler
+silinmiyor, bir tıkla görülüp geri açılabiliyor.
+
+Dev'de doğrulandı: varsayılan görünüm 13 satır (profilde seçilen 13 rol),
+"Tümü" 40 satır. Kullanıcıya rol atarken zaten yalnız aktif roller
+öneriliyordu (`RolKullaniciDeposu`), o taraf doğruydu.
+
+**Profil ekranındaki tablo bilerek hepsini gösteriyor** - orası işaretleme
+yüzeyi, kapatacağını görmeden işaret kaldıramazsın. 40 satırın içinde "bu
+profilde ne geçerli" sorusu kaybolmasın diye üç hızlı süzgeç eklendi:
+`Tümü · Geçerli · Şablon önerisi`.
+
+vitest 672/672.

@@ -138,6 +138,15 @@ export function KurumTipiAyarlari() {
    * EKSIK oldugunu yaziyor, eksik yoksa kendini soluk gosteriyor.
    */
   const [eksikSablon, setEksikSablon] = useState<number | null>(null);
+  /**
+   * ROL TABLOSU SUZGECI (793, kullanici: "görüntülemede rol listesi ne
+   * giriyorum hala bütün roller geliyor").
+   *
+   * Tablo ISARETLEME yuzeyi oldugu icin varsayilani "Tümü" - kapatacagini
+   * gormeden isaret kaldiramazsin. Ama 40 satirin icinde "bu profilde ne
+   * gecerli" sorusu kayboluyordu; iki hizli suzgec onu one cikariyor.
+   */
+  const [rolSuzgec, setRolSuzgec] = useState<'tumu' | 'gecerli' | 'sablon'>('tumu');
   const [rolListe, setRolListe] = useState<{ kod: string; ad: string; amac: string; mevcut: boolean; yetkiSayisi: number; ekran: number; aksiyon: number }[]>([]);
   const [rolSecim, setRolSecim] = useState<Set<string>>(new Set());
   const [rolGuncelle, setRolGuncelle] = useState(false);
@@ -637,6 +646,12 @@ export function KurumTipiAyarlari() {
           <div className="gb">Bu profilde geçerli roller — {tipAdi(profil?.kurumTipi) || '—'}
             <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 6, alignItems: 'center' }}>
               <span className="sonuk" style={{ fontSize: 11 }}>{rolGecerli.size}/{profilRol.length} seçili</span>
+              {([['tumu', 'Tümü'], ['gecerli', 'Geçerli'], ['sablon', 'Şablon önerisi']] as const)
+                .map(([k, ad]) => (
+                  <button key={k} type="button"
+                          className={`d${rolSuzgec === k ? ' bir' : ''}`}
+                          onClick={() => setRolSuzgec(k)}>{ad}</button>
+                ))}
               <button className="d" type="button"
                       onClick={() => setRolGecerli(new Set(profilRol.filter(r => r.varsayilan || r.kilitli).map(r => r.kod)))}>
                 ↺ Şablon önerisi
@@ -658,7 +673,11 @@ export function KurumTipiAyarlari() {
                     <th className="orta">Kullanıcı</th><th className="orta">Şablon</th><th>Durum</th>
                   </tr></thead>
                   <tbody>
-                    {profilRol.map(r => (
+                    {profilRol
+                      .filter(r => rolSuzgec === 'tumu'
+                                || (rolSuzgec === 'gecerli' && rolGecerli.has(r.kod))
+                                || (rolSuzgec === 'sablon' && r.varsayilan))
+                      .map(r => (
                       <tr key={r.kod} className={rolGecerli.has(r.kod) ? '' : 'sonuk'}>
                         <td className="orta">
                           <input type="checkbox" checked={rolGecerli.has(r.kod)}

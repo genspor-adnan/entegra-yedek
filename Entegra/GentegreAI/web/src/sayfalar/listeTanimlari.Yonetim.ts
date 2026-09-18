@@ -323,6 +323,18 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     //   UYMAZ, kullanilmadi (yoksa "Bilinmeyen alan: durum" 400 verirdi).
     kaynak: 'rol', baslik: 'Roller', yol: 'IK › Roller ve Yetkiler', kartYolu: '/rol',
     aksiyonEkrani: 'rol-liste',
+    // VARSAYILAN GORUNUM AKTIF ROLLER (793, kullanici: "görüntülemede rol
+    //   listesi ne giriyorum hala bütün roller geliyor"): kurum profilinde
+    //   "bu profilde geçerli roller" isaretlenince gecersizler PASIFE
+    //   aliniyor (786) - ama Roller ekrani hepsini listeledigi icin secim
+    //   ekranda hicbir sey degistirmiyor gibi gorunuyordu.
+    //   Pasifler SILINMIYOR: "Pasif" ve "Tümü" cipleriyle her an gorulur,
+    //   geri acilabilir.
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Pasif', filtre: { alan: 'aktif', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
     // ROLLER IK ALTINDA, PERSONELDEN SONRA (kullanici). Rol bir YETKI kaydi
     //   olsa da gunluk kullanimda personelin ozelligi gibi okunuyor: "kim ne
     //   yapabilir" sorusu personel listesinin hemen yanindan cevaplaniyor.
