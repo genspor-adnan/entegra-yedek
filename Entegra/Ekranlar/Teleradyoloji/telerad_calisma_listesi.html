@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Teleradyoloji Çalışma Listesi — Raporlama Merkezi — Mockup (Gentegre AI · Teleradyoloji)</title>
+<title>Teleradyoloji Çalışma Listesi — Mockup (Gentegre AI · Teleradyoloji)</title>
 <style>
   :root{
     --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
@@ -102,17 +102,95 @@
 </head>
 <body>
 
+<!-- =====================================================================
+     TELERADYOLOJI CALISMA LISTESI — YAPILDI (797 cekirdek · 798 kart ·
+     799 arac cubugu). Mockup ekranin GERCEK halini anlatir; heniiz
+     yapilmamis olanlar "faz 2" etiketiyle ayri durur ki tasarim niyeti
+     kaybolmasin ama ekranda varmis gibi gorunmesin.
+
+     Satir = `telerad_istek`, liste `v_telerad_istek` gorunumunden beslenir:
+     KALAN DAKIKA VE RISK ISARETI SUNUCUDA hesaplanir - iki ekran iki farkli
+     "simdi" kullanip liste kendi icinde celismesin.
+     ================================================================== -->
 <div class="win">
-  <div class="title">🛰 Teleradyoloji — Çalışma Listesi (Raporlama Merkezi) <span class="sp">Gentegre AI · Teleradyoloji · 03.09.2026 14:20</span></div>
+  <div class="title">🛰 Teleradyoloji Çalışma Listesi
+    <span class="sp">Radyoloji › Teleradyoloji › Çalışma Listesi · /teleradyoloji · <code>telerad-istek</code></span></div>
+
+  <!-- ARAC CUBUGU (799): 797'de `telerad.ata` / `telerad.teslim` yetkileri
+       rollere dagitilmisti ama onlari kullanan aksiyon yoktu; liste tanimi
+       `aksiyonEkrani` vermedigi icin cubuk HIC cizilmiyordu. -->
   <div class="toolbar">
-    <div class="btn primary">📝 Rapor Yaz</div><div class="btn">👤 Bana Ata</div><div class="btn">↔ Yeniden Ata</div><div class="btn">🖼 Görüntüle (PACS)</div>
-    <div class="sepv"></div><div class="btn">🚨 Kritik Bulgu</div><div class="btn">💬 Kuruma Mesaj</div><div class="btn">🔁 Ek Görüntü İste</div>
-    <div class="sepv"></div><div class="btn">📊 Pano</div><div class="btn sp">🖨 Yazdır ▾</div>
+    <div class="btn primary">＋ Yeni İstek</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="sepv"></div>
+    <div class="btn">👤 Bana Ata</div>
+    <div class="btn primary">▶ Okumaya Başla</div>
+    <div class="btn ok">📦 Teslim Et</div>
+    <div class="sepv"></div>
+    <div class="btn pas">↩ Atamayı Bırak <span class="sonuk">sağ tuş</span></div>
+    <div class="btn pas">✖ İsteği İptal Et <span class="sonuk">sağ tuş</span></div>
+    <div class="btn pas">🗑 Sil <span class="sonuk">sağ tuş</span></div>
+    <div class="btn sp">🖨️ Yazdır ▾</div>
   </div>
+
+  <!-- CIPLER: durum kodu suzgeci (listeTanimlari.Teleradyoloji.ts).
+       "Bende" cipi YOK - o suzgec kullaniciya baglidir, sunucu tarafinda
+       `atanan_radyolog_id` ile ayri bir iste cozulecek (faz 2). -->
   <div class="arama">
-    <div class="kutu">🔍 Hasta, erişim no, kurum…</div>
-    <span class="chip on">Bekleyen</span><span class="chip">Bende</span><span class="chip">Taslak</span><span class="chip">Onaylı</span><span class="chip">Tümü</span>
-    <span class="sepv"></span><span class="chip">🏥 Kurum ▾</span><span class="chip">🩻 Modalite ▾</span><span class="chip">⚡ Acil</span><span class="chip">⏰ SLA aşımı</span><span class="chip">🌙 Gece</span>
+    <div class="kutu">🔍 Bu listede ara…</div>
+    <span class="chip on">Bekleyen</span><span class="chip">Okunuyor</span><span class="chip">Taslak</span>
+    <span class="chip">Onaylı</span><span class="chip">Teslim</span><span class="chip">Tümü</span>
+    <span class="sepv"></span>
+    <span class="chip sonuk">🏥 Kurum ▾ <b>faz 2</b></span>
+    <span class="chip sonuk">⏰ SLA aşımı <b>faz 2</b></span>
+    <span class="chip sonuk">👤 Bende <b>faz 2</b></span>
+  </div>
+
+  <!-- KOLONLAR = KaynakKatalogu.Teleradyoloji (varsayilan gorunum).
+       Gizli kolonlar (kullanici acabilir): Erişim No · SLA (dk) ·
+       Görüntü Durumu · Onay · Teslim · Ücret · SLA Aşıldı · Id'ler.
+       SIRA: acil once, sonra SLA'si dolmak uzere olan - bu bir tercih
+       degil isin kendisidir, radyolog listenin basindan alir. -->
+  <div class="dg"><table>
+    <thead><tr>
+      <th style="width:26px"></th><th>İstek No</th><th class="orta">Öncelik</th><th>Kurum</th><th>Hasta</th>
+      <th class="orta">Modalite</th><th>Tetkik</th><th class="orta">Çekim</th><th class="orta">Geldi</th>
+      <th class="sag">Kalan (dk)</th><th class="orta">SLA aşımı</th><th>Klinik Bilgi</th><th>Radyolog</th>
+      <th class="sag">Görüntü</th><th class="orta">Durum</th>
+    </tr></thead>
+    <tbody>
+      <tr class="sel"><td></td><td>TR-2026/00014</td><td class="orta"><span class="rz kir">ACİL</span></td><td>Yıldız Hastanesi (Bursa)</td><td>M. Kaya</td><td class="orta"><span class="rz">BT</span></td><td>Beyin BT (kontrastsız)</td><td class="orta">18.09 13:42</td><td class="orta">18.09 13:51</td><td class="sag"><span class="rz kir">−4</span></td><td class="orta"><span class="rz kir">Evet</span></td><td>Ani konuşma bozukluğu, inme?</td><td class="sonuk">—</td><td class="sag">120</td><td class="orta"><span class="rz sari">Sırada</span></td></tr>
+      <tr><td></td><td>TR-2026/00015</td><td class="orta"><span class="rz kir">ACİL</span></td><td>Deniz Tıp Merkezi</td><td>A. Şen</td><td class="orta"><span class="rz">BT</span></td><td>Toraks BT Anjiyo</td><td class="orta">18.09 13:55</td><td class="orta">18.09 14:03</td><td class="sag">13</td><td class="orta">—</td><td>PE şüphesi, D-dimer ↑</td><td>Dr. E. Ay</td><td class="sag">340</td><td class="orta"><span class="rz mavi">Okunuyor</span></td></tr>
+      <tr><td></td><td>TR-2026/00012</td><td class="orta"><span class="rz sari">Öncelikli</span></td><td>Yıldız Hastanesi (Bursa)</td><td>S. Demir</td><td class="orta"><span class="rz">MR</span></td><td>Lomber MR</td><td class="orta">18.09 12:10</td><td class="orta">18.09 12:31</td><td class="sag">131</td><td class="orta">—</td><td>Bel ağrısı, sol bacağa yayılan</td><td class="sonuk">—</td><td class="sag">210</td><td class="orta"><span class="rz sari">Sırada</span></td></tr>
+      <tr><td></td><td>TR-2026/00011</td><td class="orta"><span class="rz sari">Öncelikli</span></td><td>Yıldız Hastanesi (Bursa)</td><td>H. Öz</td><td class="orta"><span class="rz">BT</span></td><td>Batın BT kontrastlı</td><td class="orta">18.09 11:05</td><td class="orta">18.09 11:30</td><td class="sag">50</td><td class="orta">—</td><td>Karın ağrısı, apandisit?</td><td>Dr. E. Ay</td><td class="sag">96</td><td class="orta"><span class="rz mor">Ek görüntü istendi</span></td></tr>
+      <tr><td></td><td>TR-2026/00009</td><td class="orta"><span class="rz">Rutin</span></td><td>Ege Görüntüleme</td><td>K. Us</td><td class="orta"><span class="rz">MR</span></td><td>Diz MR sağ</td><td class="orta">18.09 10:20</td><td class="orta">18.09 10:44</td><td class="sag">1180</td><td class="orta">—</td><td>Menisküs?</td><td>Dr. C. Er</td><td class="sag">180</td><td class="orta"><span class="rz mavi">Taslak</span></td></tr>
+      <tr><td></td><td>TR-2026/00008</td><td class="orta"><span class="rz">Rutin</span></td><td>Deniz Tıp Merkezi</td><td>F. Ak</td><td class="orta"><span class="rz">USG</span></td><td>Tiroid USG</td><td class="orta">18.09 09:15</td><td class="orta">18.09 09:20</td><td class="sag">1115</td><td class="orta">—</td><td>Nodül takip</td><td class="sonuk">—</td><td class="sag">24</td><td class="orta"><span class="rz sari">Sırada</span></td></tr>
+      <tr><td></td><td>TR-2026/00004</td><td class="orta"><span class="rz">Rutin</span></td><td>Anadolu Dış Hekimi (Dr. K.)</td><td>Z. Ak</td><td class="orta"><span class="rz">Röntgen</span></td><td>Akciğer PA</td><td class="orta">17.09 17:40</td><td class="orta">17.09 17:41</td><td class="sag"><span class="rz kir">−178</span></td><td class="orta"><span class="rz kir">Evet</span></td><td>Öksürük 3 hafta</td><td class="sonuk">—</td><td class="sag">2</td><td class="orta"><span class="rz sari">Sırada</span></td></tr>
+      <tr><td></td><td>TR-2026/00001</td><td class="orta"><span class="rz">Rutin</span></td><td>Yıldız Hastanesi (Bursa)</td><td>M. Kaya</td><td class="orta"><span class="rz">BT</span></td><td>BT TORAKS (kontrastsız)</td><td class="orta">18.09 09:12</td><td class="orta">18.09 09:34</td><td class="sag sonuk">—</td><td class="orta">—</td><td>Nefes darlığı, PE ekartasyonu</td><td>Dr. A. Kaya</td><td class="sag">412</td><td class="orta"><span class="rz ok">Onaylı</span></td></tr>
+      <tr><td></td><td>TR-2026/00002</td><td class="orta"><span class="rz">Rutin</span></td><td>Ege Görüntüleme</td><td>B. Can</td><td class="orta"><span class="rz">MR</span></td><td>Beyin MR</td><td class="orta">17.09 08:30</td><td class="orta">17.09 08:52</td><td class="sag sonuk">—</td><td class="orta">—</td><td>Baş ağrısı</td><td>Dr. C. Er</td><td class="sag">260</td><td class="orta"><span class="rz ok">Teslim edildi</span></td></tr>
+    </tbody></table></div>
+
+  <div class="statusbar">
+    <span>Çift tık isteği açar → <code>/teleradyoloji/:id</code> (<code>telerad_istek_karti.html</code>)</span>
+    <span>Kalan dakika SUNUCUDA: <code>v_telerad_istek.kalan_dk</code> · eksiye düşebilir — gecikmeyi saklamak "yetişiyoruz" dedirtirdi</span>
+    <span class="sp">yetki: <code>teleradyoloji</code> · şube süzmeli</span>
+  </div>
+</div>
+
+<!-- =====================================================================
+     FAZ 2 (dokuman/12_KALAN_ISLER.md) - tasarim duruyor, ekranda YOK.
+     ================================================================== -->
+<div class="win">
+  <div class="title">⏭ Faz 2 — henüz yapılmadı <span class="sp">tasarım niyeti; ekranda bu düğmeler ve özet şeridi yok</span></div>
+  <div class="toolbar">
+    <div class="btn pas">🖼 Görüntüle (PACS)</div>
+    <div class="btn pas">📝 Rapor Yaz</div>
+    <div class="btn pas">🚨 Kritik Bulgu</div>
+    <div class="btn pas">💬 Kuruma Mesaj</div>
+    <div class="btn pas">🔁 Ek Görüntü İste</div>
+    <div class="btn pas">↔ Otomatik Dağıt (kural)</div>
+    <div class="btn pas">🧾 Dönem Faturası</div>
+    <div class="btn pas sp">📊 Pano</div>
   </div>
   <div class="ozet">
     <div class="kart"><div class="b">Bekleyen</div><div class="d">37 <small>· 6 acil</small></div></div>
@@ -122,21 +200,30 @@
     <div class="kart"><div class="b">Kritik bulgu (açık)</div><div class="d" style="color:#8a6218">1 <small>teyit bekliyor</small></div></div>
     <div class="kart"><div class="b">Aktif kurum</div><div class="d">9 <small>· 3 gece nöbet</small></div></div>
   </div>
-  <div class="dg"><table>
-    <thead><tr><th style="width:26px"></th><th class="orta">Öncelik</th><th>Kurum</th><th>Hasta</th><th class="orta">Yaş/C</th><th class="orta">Modalite</th><th>Tetkik</th><th class="orta">Çekim</th><th class="orta">Geldi</th><th class="orta">SLA</th><th class="orta">Kalan</th><th>Klinik Bilgi</th><th>Radyolog</th><th class="orta">Görüntü</th><th class="orta">Durum</th></tr></thead>
-    <tbody>
-      <tr class="sel"><td></td><td class="orta"><span class="rz kir">ACİL</span></td><td>Yıldız Hast. (Bursa)</td><td>M. Kaya</td><td class="orta">58 E</td><td class="orta">BT</td><td>Beyin BT (kontrastsız)</td><td class="orta">13:42</td><td class="orta">13:51</td><td class="orta">30 dk</td><td class="orta"><span class="rz kir">−4 dk</span></td><td>Ani konuşma bozukluğu, inme?</td><td class="sonuk">—</td><td class="orta"><span class="rz ok">120 img</span></td><td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
-      <tr><td></td><td class="orta"><span class="rz kir">ACİL</span></td><td>Deniz Tıp Merkezi</td><td>A. Şen</td><td class="orta">34 K</td><td class="orta">BT</td><td>Toraks BT Anjiyo</td><td class="orta">13:55</td><td class="orta">14:03</td><td class="orta">30 dk</td><td class="orta">13 dk</td><td>PE şüphesi, D-dimer ↑</td><td>Dr. E. Ay</td><td class="orta"><span class="rz ok">340 img</span></td><td class="orta"><span class="rz mavi">Okunuyor</span></td></tr>
-      <tr><td></td><td class="orta"><span class="rz sari">Öncelikli</span></td><td>Yıldız Hast. (Bursa)</td><td>S. Demir</td><td class="orta">71 K</td><td class="orta">MR</td><td>Lomber MR</td><td class="orta">12:10</td><td class="orta">12:31</td><td class="orta">4 s</td><td class="orta">2 s 11 dk</td><td>Bel ağrısı, sol bacağa yayılan</td><td class="sonuk">—</td><td class="orta"><span class="rz ok">210 img</span></td><td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
-      <tr><td></td><td class="orta"><span class="rz">Rutin</span></td><td>Ege Görüntüleme</td><td>K. Us</td><td class="orta">45 E</td><td class="orta">MR</td><td>Diz MR sağ</td><td class="orta">10:20</td><td class="orta">10:44</td><td class="orta">24 s</td><td class="orta">20 s</td><td>Menisküs?</td><td>Dr. C. Er</td><td class="orta"><span class="rz ok">180 img</span></td><td class="orta"><span class="rz mavi">Taslak</span></td></tr>
-      <tr><td></td><td class="orta"><span class="rz">Rutin</span></td><td>Deniz Tıp Merkezi</td><td>F. Ak</td><td class="orta">29 K</td><td class="orta">US</td><td>Tiroid USG</td><td class="orta">09:15</td><td class="orta">09:20</td><td class="orta">24 s</td><td class="orta">19 s</td><td>Nodül takip</td><td class="sonuk">—</td><td class="orta"><span class="rz ok">24 img</span></td><td class="orta"><span class="rz sari">Bekliyor</span></td></tr>
-      <tr><td></td><td class="orta"><span class="rz">Rutin</span></td><td>Anadolu Dış Hekimi</td><td>Z. Ak</td><td class="orta">40 K</td><td class="orta">CR</td><td>Akciğer PA</td><td class="orta">dün 17:40</td><td class="orta">dün 17:41</td><td class="orta">24 s</td><td class="orta"><span class="rz kir">−3 s</span></td><td>Öksürük 3 hafta</td><td class="sonuk">—</td><td class="orta"><span class="rz ok">2 img</span></td><td class="orta"><span class="rz kir">SLA aşımı</span></td></tr>
-      <tr><td></td><td class="orta"><span class="rz sari">Öncelikli</span></td><td>Yıldız Hast. (Bursa)</td><td>H. Öz</td><td class="orta">63 E</td><td class="orta">BT</td><td>Batın BT kontrastlı</td><td class="orta">11:05</td><td class="orta">11:30</td><td class="orta">4 s</td><td class="orta">50 dk</td><td>Karın ağrısı, apandisit?</td><td>Dr. E. Ay</td><td class="orta"><span class="rz sari">eksik seri</span></td><td class="orta"><span class="rz mor">Ek görüntü istendi</span></td></tr>
-      <tr><td></td><td class="orta"><span class="rz">Rutin</span></td><td>Ege Görüntüleme</td><td>B. Can</td><td class="orta">52 E</td><td class="orta">MR</td><td>Beyin MR</td><td class="orta">08:30</td><td class="orta">08:52</td><td class="orta">24 s</td><td class="orta">—</td><td>Baş ağrısı</td><td>Dr. C. Er</td><td class="orta"><span class="rz ok">260 img</span></td><td class="orta"><span class="rz ok">Onaylı 13:10</span></td></tr>
-    </tbody></table></div>
-  <div class="statusbar"><span>37 bekleyen · 5 bende · 3 SLA aşımı</span><span>Kalan = SLA − (şimdi − geldi); acil 30 dk · öncelikli 4 s · rutin 24 s (sözleşmeden)</span><span class="sp">Görüntüler kurum PACS'ından DICOM ile geldi; yerelde 90 gün önbellek</span></div>
+  <div class="statusbar">
+    <span>DICOM alımı · HL7/FHIR teslim · otomatik atama kuralları · nöbet çizelgesi · dönem faturası · kurum portalı istek ekranı</span>
+    <span class="sp">rapor yazma faz 1'de de var — mevcut radyoloji raporlama ekranından (<code>telerad_raporlama.html</code>)</span>
+  </div>
 </div>
-<div class="not"><b>Kimin ekranı?</b> Raporlama merkezinin (bizim kurum) radyologları. Satır = <code>telerad_istek</code>: gönderen kurumun istemi + DICOM çalışması + SLA. Atama otomatik (modalite/uzmanlık/nöbet) ya da elle. "Ek görüntü iste" gönderen kuruma mesaj + durum. Mevcut <code>../Radyoloji/radyoloji_calisma_listesi.html</code> kurum içi listedir; bu ekran çok-kurumlu ve SLA'lıdır.</div>
+
+<div class="not">
+  <b>Kimin ekranı?</b> Raporlama merkezinin (bizim kurum) radyologları. Satır =
+  <code>telerad_istek</code>: gönderen kurumun istemi + DICOM çalışması + SLA. Mevcut
+  <code>../Radyoloji/radyoloji_calisma_listesi.html</code> kurum içi listedir; bu ekran
+  çok-kurumlu ve SLA'lıdır.<br>
+  <b>Durum akışı düğmelerle ilerler (799):</b> Bana Ata → <i>Atandı</i> · Okumaya Başla →
+  <i>Okunuyor</i> (<code>okuma_bas</code> damgası) · Teslim Et → <i>Teslim edildi</i>
+  (<code>teslim_zamani</code> + <code>teslim_durum</code>). Düğmeler durum ve atama gönderir,
+  <b>zaman damgası göndermez</b>: damgaları <code>tg_telerad_istek</code> yazar. Dağıtım ve
+  teslim ayrı yetkide (<code>telerad.ata</code> · <code>telerad.teslim</code>) — okuyan herkes
+  işi dağıtamaz.<br>
+  <b>Portal kapsamı (794/795):</b> gönderen kurum yalnız kendi isteklerini, dış doktor
+  kendi işini görür; hasta bu listeye kapalıdır. Süzme sunucuda —
+  <code>kurum_taraf_id = {kullanıcı}</code>.<br>
+  <b>Komşu mockuplar:</b> istek kartı <code>telerad_istek_karti.html</code> · kurum/sözleşme
+  kartları <code>telerad_kurum_sozlesme_karti.html</code> · raporlama
+  <code>telerad_raporlama.html</code> · süreç bütünü <code>telerad_sureci.html</code>.
+</div>
 
 
 <script>
