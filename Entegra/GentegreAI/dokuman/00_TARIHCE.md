@@ -15372,3 +15372,34 @@ motorunun istediği her yetki en az bir şablonda var mı (sahipsiz basamak =
 duran talep). İkisi de kaynağı okuyor.
 
 xUnit 480/480.
+
+## 829 — Portal rolleri kurum profili rol haritasından muaf
+
+Kullanıcı: *"portal rollerini o listeden muaf tut"*.
+
+786'daki harita ("bu profilde geçerli roller") kurum **içi kadroyu** anlatıyor:
+tıp merkezinde diş hekimi rolü gerekmez, kapatılır. Portal rolleri (dış doktor,
+dış kurum klinik/yönetici, hasta) kadro değil **dışarıya açılan kapı**.
+
+Canlı denemede görüldü: "Hastane" profilinde Kaydet'e basınca, listede
+işaretlenmemiş olan `dis_istem_kurumu` pasife alındı — dış kurumun klinik
+kullanıcıları bir anda giriş yapamaz oldu. Kimse portal rolünü kapatmak
+istememişti; yalnızca iç kadro listesinde işaretlememişti.
+
+Üç katman:
+1. `fn_kurum_tipi_rol_uygula` portal rolüne dokunmaz (kural tek yerde: eski
+   harita, göç ve betik hepsi buradan geçiyor).
+2. Haritaya portal satırı girmez (`tg_kurum_tipi_rol_portal` sessizce atlar —
+   hata fırlatsaydı toplu profil kaydı tek satır yüzünden düşerdi). Mevcut 7
+   satır silindi, yedeği `kurum_tipi_rol_portal_yedek_829`.
+3. Uçlar portal rolünü göstermez: `profil-rolleri` listesi ve şablon listesi
+   (`PortalTuru > 0` olan şablonlar) filtrelendi.
+
+Onarım körü körüne değil: yalnız haritada `gecerli = 0` yüzünden kapanmış
+portal rolleri açıldı — elle kapatılmış olabileceği için ötekine dokunulmadı.
+
+Testler (`PortalRolMuafiyetiTestleri`): haritaya portal rolü yazılamaz, harita
+uygulanınca portal rolü kapanmaz, iç kadro rolü eskisi gibi kapanmaya devam
+eder.
+
+xUnit 483/483.

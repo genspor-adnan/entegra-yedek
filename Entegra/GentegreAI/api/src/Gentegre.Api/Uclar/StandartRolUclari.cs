@@ -464,7 +464,15 @@ public static class StandartRolUclari
             var mevcut = await b.ListeAsync("select kod, id, ad, aktif from public.rol", null, [],
                 o => new { kod = o.GetString(0), id = o.GetInt32(1), ad = o.GetString(2), aktif = o.GetInt16(3) == 1 }, iptal);
             var yetkiler = await YetkilerAsync(b, iptal);
-            var liste = Sablonlar.Where(s => s.Tipler.Contains(tip) || s.Tipler.Contains(TUM)).Select(s =>
+            // PORTAL SABLONLARI BU LISTEDE YOK (829): Kurum Profili > Roller
+            //   sekmesi kurum ICI kadroyu kuruyor. Portal rolleri (dis doktor,
+            //   dis kurum, hasta) gocle geliyor ve kurum tipi haritasindan da
+            //   muaf - onlari "kurulacak kadro" gibi gostermek, kapatilabilir
+            //   sanilmalarina yol acardi.
+            var liste = Sablonlar
+                .Where(s => s.PortalTuru == 0
+                            && (s.Tipler.Contains(tip) || s.Tipler.Contains(TUM)))
+                .Select(s =>
             {
                 var m = mevcut.FirstOrDefault(x => x.kod == s.Kod);
                 var esle = Eslestir(s, yetkiler);
@@ -561,11 +569,19 @@ public static class StandartRolUclari
             var harita = await b.ListeAsync(
                 "select rol_kod, gecerli from public.kurum_tipi_rol where kurum_tipi = @p0",
                 null, [tip], o => new { kod = o.GetString(0), gecerli = o.GetInt16(1) == 1 }, iptal);
+            // PORTAL ROLLERI LISTEDE YOK (829, kullanici: "portal rollerini o
+            //   listeden muaf tut"): bu harita kurum ICI kadroyu anlatiyor -
+            //   "tip merkezinde dis hekimi gerekmez". Portal rolu (dis doktor,
+            //   dis kurum, hasta) kadro degil DISARIYA ACILAN KAPI; kurum
+            //   tipiyle ilgisi yok. Canli denemede "Hastane" profilinde
+            //   isaretlenmedigi icin `dis_istem_kurumu` pasife alinmis ve dis
+            //   kurumun kullanicilari giris yapamaz olmustu.
             var roller = await b.ListeAsync("""
                 select r.id, r.kod, r.ad, r.amac, r.aktif, r.sistem,
                        (select count(*) from public.taraf_kullanici k
                          where k.rol_id = r.id and k.aktif = 1) as kisi
                   from public.rol r
+                 where coalesce(r.portal_turu, 0) = 0
                  order by r.sistem desc, r.ad
                 """, null, [],
                 o => new { id = o.GetInt32(0), kod = o.GetString(1), ad = o.GetString(2),
