@@ -99,8 +99,17 @@ public static partial class KartKatalogu
                 AramaKaynagi: "hasta", Baslik: "Hasta Kaydı", Grup: "Hasta"),
             new("disErisimNo", "dis_erisim_no", "metin", EnFazlaUzunluk: 40,
                 Baslik: "Erişim No", Grup: "Hasta"),
+            // PID-3 (816): kurumun KENDİ dosya numarası. TCKN'si olmayan
+            //   hastada (yabancı, yenidoğan) görüntüyle eşleşmenin tek yolu.
+            new("disHastaNo", "dis_hasta_no", "metin", EnFazlaUzunluk: 30,
+                Baslik: "Kurum Dosya No", Grup: "Hasta"),
             new("isteyenHekim", "isteyen_hekim", "metin", EnFazlaUzunluk: 120,
                 Baslik: "İsteyen Hekim", Grup: "Hasta"),
+            // TCKN AYRI ALAN (810): Bakanlik ORC-12/OBR-16 hekimin TCKN'sini
+            //   istiyor ve eksik/hataliysa mesaji reddediyor. Adin icine
+            //   yazilirsa iki bilgi de kullanilamaz hale gelir.
+            new("isteyenHekimTckn", "isteyen_hekim_tckn", "metin", EnFazlaUzunluk: 11,
+                Baslik: "İsteyen Hekim TCKN", Grup: "Hasta"),
 
             // ----------------------------------------------------- tetkik ---
             new("modalite", "modalite", "kod", SabitKodlar: TeleradKartModalite,
@@ -210,6 +219,12 @@ public static partial class KartKatalogu
     private static readonly Dictionary<string, string> TeleradKartKanal = new()
         { ["0"] = "Portal", ["1"] = "HL7 ORU (MLLP)", ["2"] = "REST", ["3"] = "FHIR" };
 
+    // MSH-18 (812): Bakanliga ONCEDEN BILDIRILEN encoding ile ayni olmak
+    //   zorunda - yanlis secim Turkce karakterleri bozar, mesaj kabul edilse
+    //   bile rapor okunmaz hale gelir.
+    private static readonly Dictionary<string, string> TeleradKartEncoding = new()
+        { ["1"] = "UTF8", ["2"] = "Windows1254" };
+
     private static readonly Dictionary<string, string> TeleradKartUcretModeli = new()
         { ["1"] = "Tetkik başı", ["2"] = "Aylık sabit + aşım", ["3"] = "Vaka başı" };
 
@@ -236,6 +251,7 @@ public static partial class KartKatalogu
             ["yon"] = (short)1,               // gelen
             ["aktif"] = (short)1,
             ["varsayilanOncelik"] = (short)1,
+            ["mshEncoding"] = (short)1,      // UTF8
         },
         Alanlar: new KartAlani[]
         {
@@ -270,6 +286,29 @@ public static partial class KartKatalogu
                 Baslik: "Teslim Kanalı", Grup: "Teslim"),
             new("hl7Adres", "hl7_adres", "metin", EnFazlaUzunluk: 120,
                 Baslik: "Teslim Adresi", Grup: "Teslim"),
+            new("hl7AliciUygulama", "hl7_alici_uygulama", "metin", EnFazlaUzunluk: 30,
+                Baslik: "Alıcı Uygulama (MSH-5)", Grup: "Teslim"),
+            new("hl7AliciTesis", "hl7_alici_tesis", "metin", EnFazlaUzunluk: 30,
+                Baslik: "Alıcı Tesis (MSH-6)", Grup: "Teslim"),
+
+            // ---------------------------------------------------- bakanlık ----
+            // BAKANLIK HEDEFI AYRI (812): kurum-kuruma teleradyoloji bu alanlar
+            //   olmadan da calisir. Acikken gonderim oncesi kontrol devreye
+            //   girer (fn_telerad_bakanlik_eksik).
+            new("bakanlikGonderim", "bakanlik_gonderim", "mantik",
+                Baslik: "Bakanlığa Bildir", Grup: "Bakanlık"),
+            new("skrsKodu", "skrs_kodu", "metin", EnFazlaUzunluk: 10,
+                Baslik: "SKRS Kodu (ORC-21)", Grup: "Bakanlık"),
+            new("mshUygulama", "msh_uygulama", "metin", EnFazlaUzunluk: 30,
+                Baslik: "Firma Kodu (MSH-3)", Grup: "Bakanlık"),
+            new("mshTesis", "msh_tesis", "metin", EnFazlaUzunluk: 30,
+                Baslik: "Gönderen Tesis (MSH-4)", Grup: "Bakanlık"),
+            new("mshEncoding", "msh_encoding", "kod", SabitKodlar: TeleradKartEncoding,
+                Baslik: "Encoding (MSH-18)", Grup: "Bakanlık"),
+            // WADO ADRESI GORUNTU KAPISI (812/kılavuz §4.2): Bakanlik da
+            //   goruntuyu merkeze tasimiyor - kurumun WADO servisinden cekiyor.
+            new("wadoAdres", "wado_adres", "metin", EnFazlaUzunluk: 200,
+                Baslik: "WADO Adresi", Grup: "Bakanlık"),
 
             // ------------------------------------------------- raporlama ----
             new("raporSablonId", "rapor_sablon_id", "kod",

@@ -2347,6 +2347,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
                 Top = 105
                 DataBinding.DataField = 'KAYNAKBELGENO'
                 DataBinding.DataSource = DtsFatBaslik
+                Style.TextColor = clNavy
+                Transparent = True
                 OnClick = LbIrsaliyeBilgileriClick
                 Height = 21
                 Width = 135
@@ -4221,6 +4223,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
   object TabFatbaslik: TFDQuery
     AutoCalcFields = False
     BeforeOpen = FATBASLIKBeforeOpen
+    AfterOpen = FATBASLIKAfterOpen
     BeforeEdit = FATBASLIKBeforeEdit
     BeforePost = FATBASLIKBeforePost
     AfterPost = FATBASLIKAfterPost
@@ -4228,7 +4231,8 @@ object FaturaWizardDlg: TFaturaWizardDlg
     OnNewRecord = FATBASLIKNewRecord
     Connection = Tablo.FDCnn
     SQL.Strings = (
-      'SELECT F.*'
+      'SELECT F.*, '
+      'KAYNAKBELGENO=dbo.fn_KaynakBelgeNolariStrOlarakGetir(F.TUR,F.ID)'
       'FROM FATBASLIK F Left outer join DOVIZCINSLERI D on  '
       'F.DIL=D.DIL and F.DOVIZ_CINSI=D.DOVIZ'
       'WHERE F.ID = :Par')
@@ -4271,7 +4275,7 @@ object FaturaWizardDlg: TFaturaWizardDlg
       'from REHBERBILGI RB INNER JOIN REHBERAYAR RA ON RB.SIRA=RA.SIRA'
       'where RB.YERI= :Yeri  and RB.YER_ID= :Yeri_Id   '
       'order by  1')
-    Left = 144
+    Left = 120
     Top = 17
     ParamData = <
       item
@@ -4485,10 +4489,10 @@ object FaturaWizardDlg: TFaturaWizardDlg
         'om SIPARIS where ID=(select SIPARISID from SIPARISDETAY where ID' +
         '=F.YERID)) '
       
-        '   '#9#9#9#9#9'when YERI in (408,411) then (select COALESCE(NULLIF(NUL' +
-        'LIF(IRSALIYENO,''''),''0''), NULLIF(NULLIF(FATURANO,''''),''0''), ''Irsali' +
-        'ye #'' + CAST(ID as varchar(12))) from FATBASLIK where ID=(select ' +
-        'FATBASID from FATURA where ID=F.YERID)) '
+        '   '#9#9#9#9#9'when YERI in (408,411) then (select COALESCE(NULLIF(NULL' +
+        'IF(IRSALIYENO,'#39#39'),'#39'0'#39'), NULLIF(NULLIF(FATURANO,'#39#39'),'#39'0'#39'), '#39'Irsali' +
+        'ye #'#39' + CAST(ID as varchar(12))) from FATBASLIK where ID=(select' +
+        ' FATBASID from FATURA where ID=F.YERID)) '
       
         '   '#9#9#9#9#9'when YERI in (412,413) then (select TEKLIFNO from TEKLIF' +
         ' where ID=(SELECT TEKLIFID FROM TEKLIFDETAY where ID=F.YERID))  ' +

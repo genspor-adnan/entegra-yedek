@@ -12,7 +12,6 @@ object IKListeDlg: TIKListeDlg
   ParentFont = False
   TabOrder = 0
   object cxPageControl1: TcxPageControl
-    Properties.Images = Tablo.PNGImageList2
     Left = 0
     Top = 0
     Width = 970
@@ -21,6 +20,7 @@ object IKListeDlg: TIKListeDlg
     TabOrder = 0
     Properties.ActivePage = TabSheetTek
     Properties.CustomButtons.Buttons = <>
+    Properties.Images = Tablo.PNGImageList2
     OnChange = cxPageControl1Change
     ClientRectBottom = 554
     ClientRectLeft = 4
@@ -29,21 +29,19 @@ object IKListeDlg: TIKListeDlg
     object TabSheetTek: TcxTabSheet
       Caption = 'Tek'
       ImageIndex = 35
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object IKGrid: TcxGrid
         Left = 0
-        Top = 32
+        Top = 35
         Width = 962
-        Height = 228
+        Height = 225
         Align = alClient
         PopupMenu = PopupMenuYeni
         TabOrder = 0
         LookAndFeel.Kind = lfOffice11
         LookAndFeel.NativeStyle = True
         LookAndFeel.ScrollbarMode = sbmClassic
+        ExplicitTop = 32
+        ExplicitHeight = 228
         object IKGridView: TcxGridDBTableView
           OnDblClick = IKGridViewDblClick
           Navigator.Buttons.CustomButtons = <>
@@ -413,9 +411,9 @@ object IKListeDlg: TIKListeDlg
         Height = 259
         Align = alBottom
         TabOrder = 3
-        Properties.Images = Tablo.PNGImageList2
         Properties.ActivePage = TabSheetIlet
         Properties.CustomButtons.Buttons = <>
+        Properties.Images = Tablo.PNGImageList2
         OnChange = PageControlSekmeChange
         ClientRectBottom = 255
         ClientRectLeft = 4
@@ -424,10 +422,6 @@ object IKListeDlg: TIKListeDlg
         object TabSheetIlet: TcxTabSheet
           Caption = #304'leti'#351'im'
           ImageIndex = 33
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object ToolBar10: TToolBar
             AlignWithMargins = True
             Left = 3
@@ -1049,10 +1043,6 @@ object IKListeDlg: TIKListeDlg
         object TabYorumMedya: TcxTabSheet
           Caption = 'Yorum/Medya'
           ImageIndex = 38
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object Panel7: TPanel
             Left = 0
             Top = 187
@@ -1113,7 +1103,6 @@ object IKListeDlg: TIKListeDlg
             Properties.Alignment.Horz = taRightJustify
             Transparent = True
             Visible = False
-            ExplicitTop = 166
             AnchorX = 954
           end
           object GridYorum: TcxGrid
@@ -1200,10 +1189,6 @@ object IKListeDlg: TIKListeDlg
         object TabSheetGorev: TcxTabSheet
           Caption = #304#351' Listesi'
           ImageIndex = 54
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object SQLGorevMemo: TcxMemo
             Left = 75
             Top = 46
@@ -2062,10 +2047,6 @@ object IKListeDlg: TIKListeDlg
         object TabSheetIsDeneyimi: TcxTabSheet
           Caption = #304#351' Deneyimi'
           ImageIndex = 19
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object GridIKDeneyim: TcxGrid
             Left = 0
             Top = 44
@@ -2768,10 +2749,6 @@ object IKListeDlg: TIKListeDlg
         object TabSheetDemirbas: TcxTabSheet
           Caption = 'Demirba'#351' Bilgileri'
           ImageIndex = 12
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object GridDemirbas: TcxGrid
             Left = 0
             Top = 0
@@ -3151,10 +3128,6 @@ object IKListeDlg: TIKListeDlg
         object TabSheetPDKS: TcxTabSheet
           Caption = 'PDKS'
           ImageIndex = 21
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object Panel13: TPanel
             Left = 0
             Top = 0
@@ -3257,10 +3230,6 @@ object IKListeDlg: TIKListeDlg
         object TabSheetHareketler: TcxTabSheet
           Caption = 'Hareketler'
           ImageIndex = 32
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object ToolBar15: TToolBar
             Left = 0
             Top = 0
@@ -3932,14 +3901,12 @@ object IKListeDlg: TIKListeDlg
         Control = PageControlSekme
         Color = clAqua
         ParentColor = False
-        ExplicitWidth = 8
       end
       object ToolBar1: TToolBar
         AlignWithMargins = True
         Left = 3
         Top = 3
         Width = 956
-        Height = 29
         Margins.Bottom = 0
         AutoSize = True
         ButtonHeight = 30
@@ -3967,6 +3934,7 @@ object IKListeDlg: TIKListeDlg
         TabOrder = 5
         Transparent = True
         Wrapable = False
+        ExplicitHeight = 29
         object YeniTus: TToolButton
           Left = 0
           Top = 0
@@ -4050,16 +4018,11 @@ object IKListeDlg: TIKListeDlg
     object TabSheetGrup: TcxTabSheet
       Caption = 'Grup'
       ImageIndex = 53
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ToolBar13: TToolBar
         AlignWithMargins = True
         Left = 3
         Top = 3
         Width = 956
-        Height = 29
         Margins.Bottom = 0
         AutoSize = True
         ButtonHeight = 30
@@ -4087,6 +4050,7 @@ object IKListeDlg: TIKListeDlg
         TabOrder = 0
         Transparent = True
         Wrapable = False
+        ExplicitHeight = 29
         object YeniGrup: TToolButton
           Left = 0
           Top = 0
@@ -4115,14 +4079,12 @@ object IKListeDlg: TIKListeDlg
       end
       object Panel14: TPanel
         Left = 468
-        Top = 32
+        Top = 35
         Width = 494
-        Height = 495
+        Height = 492
         Align = alRight
         Caption = 'PanelFiyatAltSag'
         TabOrder = 1
-        ExplicitTop = 35
-        ExplicitHeight = 492
         object ToolBar16: TToolBar
           AlignWithMargins = True
           Left = 4
@@ -4198,9 +4160,9 @@ object IKListeDlg: TIKListeDlg
       end
       object GridGrup: TcxGrid
         Left = 0
-        Top = 32
+        Top = 35
         Width = 468
-        Height = 495
+        Height = 492
         Align = alClient
         BevelEdges = []
         BevelInner = bvNone
@@ -4208,8 +4170,6 @@ object IKListeDlg: TIKListeDlg
         TabOrder = 2
         LookAndFeel.Kind = lfStandard
         LookAndFeel.NativeStyle = True
-        ExplicitTop = 35
-        ExplicitHeight = 492
         object GridGrupView: TcxGridDBTableView
           Navigator.Buttons.CustomButtons = <>
           ScrollbarAnnotations.CustomAnnotations = <>
@@ -4862,8 +4822,8 @@ object IKListeDlg: TIKListeDlg
     Images = Tablo.PNGImageList2
     OwnerDraw = True
     OnPopup = PopupMenuYeniPopup
-    Left = 67
-    Top = 118
+    Left = 51
+    Top = 94
     object info1: TMenuItem
       Caption = 'info'
       ImageIndex = 22
@@ -5469,6 +5429,7 @@ object IKListeDlg: TIKListeDlg
   end
   object DtsHareketler: TDataSource
     DataSet = TabHareketler
+    OnStateChange = DtsHareketlerStateChange
     Left = 816
     Top = 336
   end

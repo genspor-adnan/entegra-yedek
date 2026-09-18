@@ -11,7 +11,6 @@
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { c, cm } from '../../dil/ceviri';
-import { sonMenuGorunen } from '../menuSonKullanilan';
 import { MenuIkon, grupla, GRUP_IKON, GRUP_IKON_CEV, ALTGRUP_IKON,
          type MenuOgesi, type MenuSatiri } from './menuAgaci';
 import { BOLGE_HBYS, GRUP_SIRA_HBYS, grupBolgesi, CALISMA_ALANLARI, calismaAlaniBul, rolCalismaAlani,
@@ -34,7 +33,7 @@ export interface YanMenuProps {
 export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSubeAd,
                           kullaniciKod, rolAdi, kurumProfilAdi }: YanMenuProps) {
   const konum = useLocation();
-  const { favoriler, favoriToggle, sonMenuler, calismaAlani, calismaAlaniSec } = tercih;
+  const { favoriler, favoriToggle, calismaAlani, calismaAlaniSec } = tercih;
 
   /** "liste" rozetinin yerine yildiz: bos = ekle, dolu = cikar. */
   const yildiz = (yol: string) => (
@@ -213,38 +212,10 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
               </div>
             )}
 
-            {/* EN SON: favorilerin HEMEN ALTINDA (kullanici). Favoriler bilerek
-                isaretlenir, bu liste kendiliginden birikir - ikisi ust uste
-                durunca "hep gittiklerim" ile "bugun gittiklerim" ayni yerde
-                olur. Favorideki oge burada TEKRARLANMAZ. */}
-            {sonMenuGorunen(sonMenuler, favoriler).length > 0 && (
-              <div>
-                <button type="button" className="mi"
-                        style={{ width: '100%', border: 0, background: 'transparent', cursor: 'pointer' }}
-                        onClick={() => setAcikGruplar(g => ({ ...g, '🕓En Son': !(g['🕓En Son'] ?? true) }))}>
-                  <span className="ic">🕓</span>
-                  <span>{cm('En Son')}</span>
-                  <span className="rz">{(acikGruplar['🕓En Son'] ?? true) ? '▾' : '▸'}</span>
-                </button>
-                {/* Siralama SON KULLANIM sirasidir (favorideki gibi menu sirasi
-                    DEGIL): en son acilan en ustte - listenin isi zaten "az once
-                    neredeydim" sorusuna cevap vermek. */}
-                {(acikGruplar['🕓En Son'] ?? true) && sonMenuGorunen(sonMenuler, favoriler)
-                  .map(yol => satirlar
-                    .flatMap(sat => (sat.tur === 'duz' ? [sat.m] : sat.alt))
-                    .find(m => m.yol === yol))
-                  // Yetkisi kalkan / kaldirilan menu listede kalabilir - cizilmez.
-                  .filter((m): m is NonNullable<typeof m> => !!m)
-                  .map(m => (
-                    <NavLink key={`son-${m.yol}`} to={m.yol} style={{ paddingLeft: 34 }}
-                             className={() => `mi ${konum.pathname.startsWith(m.yol) ? 'on' : ''}`}>
-                      <MenuIkon ic={m.ic} />
-                      <span>{m.ad}</span>
-                      {yildiz(m.yol)}
-                    </NavLink>
-                  ))}
-              </div>
-            )}
+            {/* EN SON BOLUMU KALDIRILDI (kullanici): favoriler bilerek
+                isaretleniyor; kendiliginden biriken ikinci bir liste menuyu
+                uzatiyordu. Son kullanim bilgisi DURUYOR - komut paleti
+                (Ctrl+K) siralamasinda kullaniliyor. */}
 
             {/* "Calisma alani" bolum basligi kaldirildi (kullanici). */}
             {/* BOLGESIZ (ERP) ya da bolgeye girmeyen duz ogeler. */}

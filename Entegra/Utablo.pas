@@ -3289,6 +3289,55 @@ function TTablo.BelgeDonustur(DonusTuru, KaynakBaslikId: integer; HedefBasID:int
     end;
   end;
 
+  // IZLEME SECIMI SONRASI TEKRAR GONDERIM: secim yalniz UYARILI satirlar icin gelir; sunucu
+  //   satirlar[] verilince YALNIZ o satirlari donusturur -> secim gerektirmeyen satirlar (tek
+  //   aday lot = sunucu otomatik secer; izlemsiz urun) belgeye HIC GIRMIYORDU (kullanici: siparis
+  //   25236 -> irsaliye 116211, tek lotlu satir eksik). Kaynagin kalanli diger satirlari da
+  //   listeye eklenir; adet verilmez (sunucu kalani kullanir). Yalniz SIPARIS kaynakli rotalar
+  //   (IZLEME_SECIMI_EKSIK yalniz orada dogar).
+  function SatirlariTamamla(const ASatirlar: string): string;
+  var
+    LArr: TJSONArray;
+    LVar: TStringList;
+    LS: TJSONObject;
+    I: Integer;
+    LDetay: string;
+  begin
+    Result := ASatirlar;
+    LDetay := VarToStr(Veritabani.BasitKomutÇalıştır(FDCnn,
+      'select KaynakDetayTablo from dbo.fn_Prog_BelgeDonusum_Rota() where DonusumTuru=&dt',
+      ['&dt'], [DonusTuru], True));
+    if not SameText(LDetay, 'SIPARISDETAY') then Exit;
+    LArr := TJSONObject.ParseJSONValue(ASatirlar) as TJSONArray;
+    if LArr = nil then Exit;
+    LVar := TStringList.Create;
+    try
+      for I := 0 to LArr.Count - 1 do
+        if LArr.Items[I] is TJSONObject then
+          LVar.Add(IntToStr(TJSONObject(LArr.Items[I]).GetValue<Integer>('satirId', 0)));
+      // Kalan hesabi DonusumIzlemSecimiSor ile ayni: SIPARISDETAY'dan donusmus tum hedef adetleri dusulur.
+      TablodanSorguAc(1,
+        'select SD.ID from SIPARISDETAY SD where SD.SIPARISID=' + IntToStr(KaynakBaslikId) +
+        ' and SD.ADET - isnull((select sum(F.ADET) from FATURA F where F.YERID=SD.ID' +
+        '   and F.YERI in (select DonusumTuru from dbo.fn_Prog_BelgeDonusum_Rota()' +
+        '   where KaynakDetayTablo=''SIPARISDETAY'')),0) > 0 order by SD.ID');
+      while not Query1.Eof do
+      begin
+        if LVar.IndexOf(Query1.Fields[0].AsString) < 0 then
+        begin
+          LS := TJSONObject.Create;
+          LS.AddPair('satirId', TJSONNumber.Create(Query1.Fields[0].AsInteger));
+          LArr.Add(LS);
+        end;
+        Query1.Next;
+      end;
+      Result := LArr.ToJSON;
+    finally
+      LVar.Free;
+      LArr.Free;
+    end;
+  end;
+
 begin
   // ============================================================
   // YENI YOL: donusumun tamami sunucuda
@@ -3357,6 +3406,7 @@ begin
         Result := 0;
         Exit;
       end;
+      LSatirlar := SatirlariTamamla(LSatirlar);   // sorulmayan satirlar da belgeye girsin
       LId := BelgeDonusumUygula(DonusTuru, KaynakBaslikId, HedefBasID, True, False,
                                 LSonuc, LSatirlar);
       if LId > 0 then
@@ -9385,30 +9435,42 @@ begin
     if RehberId <= 0 then
       exit;
   end;
-  if FaturaWizardDlg<>nil then
-    freeandnil(FaturaWizardDlg);
-  Application.CreateForm(TFaturaWizardDlg, FaturaWizardDlg);
-  FaturaWizardDlg.Tur := Tur;
-  FaturaWizardDlg.Cagiran := Cagiran;
-  FaturaWizardDlg.TabFaturaIDsi := FaturaId;
-  FaturaWizardDlg.RehberId := RehberId;
-  FaturaWizardDlg.Tipi := Tipi;
-  FaturaWizardDlg.Kilit:= Kilit;
-  FaturaWizardDlg.ServisID := ServisID;
-  FaturaWizardDlg.IslemOp := IslemOp;
-  FaturaWizardDlg.MasrafMerkezi := MasrafMerkezi;
-  if IslemOp='P' then begin
-    FaturaWizardDlg.Formshow(Self);
-    //FatDlg.BaskiOnizlemeMenu.Click;
-    FaturaWizardDlg.YaziciyaYazdirMenu.Click;
-  end else
-    FaturaWizardDlg.ShowModal;
-  if FaturaWizardDlg <> nil then begin
-    if FaturaWizardDlg.ModalResult = mrOk then
-      Result := FaturaWizardDlg.TabFaturaIDsi
+  // IC ICE ACILIS (kullanici: fatura kartinda "Kaynak:" irsaliye no'ya tiklayinca irsaliye acilir,
+  //   kapatinca access violation): eskiden global FaturaWizardDlg kosulsuz FreeAndNil edilip yeniden
+  //   yaratiliyordu -> ACIK OLAN dis fatura karti (ayni sinif) yok ediliyor, ic kart kapaninca
+  //   ShowModal serbest birakilmis forma donuyordu. Simdi form yerel degiskende acilir; global
+  //   yalniz en distaki (acik kart yokken) karti tasir, ic ice acilista dis karta dokunulmaz.
+  var LIcIce: Boolean := (FaturaWizardDlg <> nil) and FaturaWizardDlg.Visible;
+  var LDlg: TFaturaWizardDlg := nil;
+  if not LIcIce and (FaturaWizardDlg <> nil) then
+    FreeAndNil(FaturaWizardDlg);
+  Application.CreateForm(TFaturaWizardDlg, LDlg);
+  if not LIcIce then
+    FaturaWizardDlg := LDlg;
+  try
+    LDlg.Tur := Tur;
+    LDlg.Cagiran := Cagiran;
+    LDlg.TabFaturaIDsi := FaturaId;
+    LDlg.RehberId := RehberId;
+    LDlg.Tipi := Tipi;
+    LDlg.Kilit:= Kilit;
+    LDlg.ServisID := ServisID;
+    LDlg.IslemOp := IslemOp;
+    LDlg.MasrafMerkezi := MasrafMerkezi;
+    if IslemOp='P' then begin
+      LDlg.Formshow(Self);
+      //FatDlg.BaskiOnizlemeMenu.Click;
+      LDlg.YaziciyaYazdirMenu.Click;
+    end else
+      LDlg.ShowModal;
+    if LDlg.ModalResult = mrOk then
+      Result := LDlg.TabFaturaIDsi
     else
       Result := -99;
-    FreeAndNil(FaturaWizardDlg);
+  finally
+    if FaturaWizardDlg = LDlg then
+      FaturaWizardDlg := nil;
+    FreeAndNil(LDlg);
   end;
 end;
 function TTablo.MakbuzSihirbazBaslat(IslemOp: Char; Tur, Cagiran, MakbuzId,

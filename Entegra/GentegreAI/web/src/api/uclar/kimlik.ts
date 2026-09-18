@@ -33,6 +33,20 @@ export const kimlikUclari = {
   ilkParola: (kod: string, tcknSon4: string, yeniParola: string) =>
     gonder<{ mesaj: string }>('/api/kimlik/ilk-parola', { kod, tcknSon4, yeniParola }),
 
+  /**
+   * PORTAL DAVETI (822) - OTURUMSUZ. Baglanti gecerli mi, kime ait.
+   * Gecersizde SEBEP donmez: "suresi doldu" ile "boyle bir baglanti yok"
+   * ayrimi, elindeki jetonun gercek olup olmadigini soylerdi.
+   */
+  davetDurum: (jeton: string) =>
+    istek<{ gecerli: boolean; kisi?: string; kanit?: string }>(
+      `/api/davet/${encodeURIComponent(jeton)}`),
+
+  /** Daveti kullanir: kimlik kaniti + yeni parola -> hesap acilir. */
+  davetKullan: (jeton: string, tcknSon4: string, yeniParola: string) =>
+    gonder<{ tamam: boolean; kod: string; mesaj: string }>(
+      '/api/davet/kullan', { jeton, tcknSon4, yeniParola }),
+
   parolaDegistir: (eskiParola: string, yeniParola: string) =>
     gonder<void>('/api/kimlik/parola', { eskiParola, yeniParola }),
 

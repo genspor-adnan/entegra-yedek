@@ -882,7 +882,10 @@ begin
           [ProjeID,Kullanan,EskiProjeID]);
 
   if Tablo.ProjeSihirbazBaslat('K',ProjeID,PROJELER.FieldByName('REHBERID').AsInteger,Tablo.GENINI.BugunTrhSaat) > 0 then begin
-     TabloYenile(PROJELER,[Kullanan]);
+     // Liste artik sunucu-tarafi SP ile yuklenir (@Baslik/@Kosullar); eski TabloYenile(PROJELER,[Kullanan])
+     //   ilk parametreye (@Baslik = SELECT ek kolonlari) kullanici no'yu basiyor, SP "SELECT 2 ..." kuruyordu
+     //   -> "Incorrect syntax near '2'" (kullanici: kopyala + Son). Ayni modla yeniden yukle.
+     if FSonMod > 0 then Liste_SP_Cagir(FSonMod) else Liste_SP_Cagir(4);
      ProjeID := ProjeID;
      RehberId:= PROJELER.FieldByName('REHBERID').AsInteger;
   end;

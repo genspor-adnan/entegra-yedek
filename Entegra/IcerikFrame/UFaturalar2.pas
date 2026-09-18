@@ -1421,9 +1421,19 @@ begin
                end;
              end else }
                  Tablo.SiparisSihirbazBaslat('D',Tablo.Query1.FieldByName('TUR').AsInteger, 0,yeniid, FATBASLIK.FieldByName('REHBERID').AsInteger);
-       10,14://e?er al?? veya sat?? irsaliyesi faturaya d?n???yorsa, faturada irsaliye no ve tarihi de g?r?nmeli
+       11,15://IRSALIYE -> FATURA: faturada kaynak irsaliyenin no ve tarihi de gorunmeli (cbIrsaliyeli / IRSALIYENO).
+             // DUZELTME: bu dal eskiden '10,14' idi, yani HEDEF belge irsaliye iken calisiyordu. Siparis ->
+             //   irsaliyede yeni irsaliyeye siparis listesinin FATURANO'su (= SIPARISNO) ve tarihi IRSALIYENO/
+             //   IRSALIYETARIH olarak yaziliyordu (kullanici: "irsaliye numarasi neden siparis numarasiyla ayni").
+             //   Simdi yalniz kaynak irsaliye (10/14) -> fatura (11/15) iken calisir; numara kaynagin
+             //   IRSALIYENO'su, o bossa FATURANO'su (e-irsaliyede FATURANO '0' kalir - Update_SQL_192 ile ayni kural).
              begin
-                Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update FATBASLIK set IRSALIYETARIH='''+FormatDateTime('yyyy-mm-dd hh:nn', FATBASLIK.FieldByName('FATURATARIH').AsDateTime)+''',IRSALIYENO='''+FATBASLIK.FieldByName('FATURANO').AsString+''' where ID='+IntToStr(yeniid),[],[]);
+                if FATBASLIK.FieldByName('TUR').AsInteger in [10,14] then
+                   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+                     'update H set IRSALIYETARIH=K.FATURATARIH, ' +
+                     'IRSALIYENO=COALESCE(NULLIF(NULLIF(K.IRSALIYENO,''''),''0''), NULLIF(NULLIF(K.FATURANO,''''),''0'')) ' +
+                     'from FATBASLIK H inner join FATBASLIK K on K.ID=&Kaynak where H.ID=&Hedef',
+                     ['&Kaynak', '&Hedef'], [FATBASLIK.FieldByName('ID').AsInteger, yeniid]);
                 Tablo.FaturaSihirbazBaslat('E', Tablo.Query1.FieldByName('TUR').AsInteger, 0,yeniid, FATBASLIK.FieldByName('REHBERID').AsInteger, 1,False,-1);
              end
        else

@@ -1512,7 +1512,14 @@ begin
     tabStiller.Close;
     tabStiller.Open;
   end  else if PageControl1.ActivePage = shtKocanAyarlari then  begin
-    TcxImageComboBoxProperties(clmKocanTur.Properties).Items := Tablo.imgComboboxInit('select distinct K.TUR,AD from ISLEMTURLERI I inner join KOCANAYARLARI K on K.TUR=I.TUR ').Items;
+    TcxImageComboBoxProperties(clmKocanTur.Properties).Items := Tablo.imgComboboxInit(
+      // LEFT JOIN (kullanici): eski INNER JOIN kocani olmayan turu listeye almiyordu -> o tur icin kocan
+      //   hic acilamiyordu (or. Alis Irsaliyesi). Kocanli turler: KOCANAYARI bayragi, mevcut kocan satiri
+      //   ya da sp_BelgeNoGetir'in numaraladigi belge turleri. Ad: turun ilk tanimi (ayni TUR'de cok satir var).
+      'select I.TUR, AD=(select top 1 X.AD from ISLEMTURLERI X where X.TUR=I.TUR order by X.ID) ' +
+      'from ISLEMTURLERI I left join KOCANAYARLARI K on K.TUR=I.TUR ' +
+      'where I.KOCANAYARI=1 or K.TUR is not null or I.TUR in (3,4,6,8,9,10,11,12,14,15,16,19,20,39,110,116,119,222) ' +
+      'group by I.TUR order by I.TUR').Items;
     with TcxImageComboBoxProperties(clmKocanTur.Properties).Items.Add do begin
       description := 'Tahsilat Makbuzu';
       value := -101;

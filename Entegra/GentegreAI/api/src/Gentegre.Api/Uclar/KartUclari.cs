@@ -88,7 +88,7 @@ public static class KartUclari
             // PORTAL (795): dis kurum / dis doktor / hasta yalniz KENDI kaydini
             //   acabilir; baskasinin karti "bulunamadi" doner.
             var kart = await depo.OkuAsync(tanim, id, okunabilir, baglam.Kapsam, iptal,
-                                           baglam.PortalTuru, baglam.KullaniciId)
+                                           baglam.PortalTuru, baglam.PortalKimlik)
                        ?? throw GentegreHatasi.Bulunamadi();
 
             // KULLANICI_ARAMA karsiligi: kart her acilista upsert (Son/Sik Aranan).
@@ -238,7 +238,7 @@ public static class KartUclari
                     .LogError(h, "Lab istem {Id}: dis kurum ucretlendirmesi yapilamadi.", id); }
 
             var kart = await depo.OkuAsync(tanim, id, okunabilir, baglam.Kapsam, iptal,
-                                           baglam.PortalTuru, baglam.KullaniciId)
+                                           baglam.PortalTuru, baglam.PortalKimlik)
                        ?? throw GentegreHatasi.Bulunamadi();
             var govde = new Dictionary<string, object?>(kart.Kart, StringComparer.Ordinal)
             {
@@ -342,7 +342,7 @@ public static class KartUclari
                 .ToDictionary(t => t!, t => depo.KodTablosuSecenekleriAsync(
                     // PORTAL (804): kimlik sizdiran secim listeleri daraltilir -
                     //   dis kurum kullanicisi oteki kurumlarin adini gormesin.
-                    t!, iptal, baglam.PortalTuru, baglam.KullaniciId));
+                    t!, iptal, baglam.PortalTuru, baglam.PortalKimlik));
             var listeGorevleri = tumAlanlar.Select(a => a.KodListesi).Where(t => t is not null).Distinct()
                 .ToDictionary(t => t!, t => depo.KodListesiSecenekleriAsync(t!, iptal));
             // BAGLI alanlarin (Şube -> Banka) ust haritasi: arayuz secenekleri

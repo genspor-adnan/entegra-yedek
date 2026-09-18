@@ -89,6 +89,16 @@ public static partial class KartKatalogu
             new("kontrast",  "kontrast",   "kod", KodListesi: "rad.kontrast",
                 Baslik: "Kontrast", Grup: "Çekim"),
             new("kontrastMl", "kontrast_ml", "para", Baslik: "Kontrast (ml)", Grup: "Çekim"),
+            // KONTRAST AYRINTISI (811): Bakanlik OBX-17 `yol^etkin madde^
+            //   konsantrasyon` istiyor ve TICARI ISMI YASAKLIYOR. ml MIKTARDIR,
+            //   konsantrasyon ayri sayidir (300 mg/ml'den 80 ml verilebilir).
+            new("kontrastYol", "kontrast_yol", "kod",
+                KodTablosu: "public.v_rad_kontrast_yol_lookup",
+                Baslik: "Kontrast Yolu", Grup: "Çekim"),
+            new("kontrastMadde", "kontrast_madde", "metin", EnFazlaUzunluk: 80,
+                Baslik: "Etkin Madde", Grup: "Çekim"),
+            new("kontrastKonsantrasyon", "kontrast_konsantrasyon", "para",
+                Baslik: "Konsantrasyon (mg/ml)", Grup: "Çekim"),
             // Doz BT/skopide hasta dozimetrisi için takip edilir.
             new("dlp",       "dlp",        "para", Baslik: "DLP (mGy·cm)", Grup: "Çekim"),
             new("ctdi",      "ctdi",       "para", Baslik: "CTDIvol (mGy)", Grup: "Çekim"),

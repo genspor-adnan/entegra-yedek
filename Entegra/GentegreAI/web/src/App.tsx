@@ -4,6 +4,8 @@ import { modUyar } from './api/sozlesme';
 import { OturumSaglayici, useOturum } from './kimlik/OturumBaglami';
 import { Giris } from './sayfalar/Giris';
 import { Kabuk } from './sayfalar/Kabuk';
+import { PortalKabuk } from './sayfalar/portal/PortalKabuk';
+import { PortalDavet } from './sayfalar/portal/PortalDavet';
 import { BelgeKarti } from './sayfalar/BelgeKarti';
 import { KasaIslemKarti } from './sayfalar/KasaIslemKarti';
 import { Liste, LISTELER } from './sayfalar/Liste';
@@ -73,6 +75,11 @@ function Yollar() {
   //   ekranindan ONCE: kimlik kaniti bağlantı + TCKN son 4, JWT degil.
   if (konum.pathname.startsWith('/f/')) return <Routes><Route path="/f/:kod" element={<FormAcik />} /></Routes>;
 
+  // PORTAL DAVETI (822): /davet/{jeton} - hastanin telefonunda, OTURUMSUZ.
+  //   Giris ekranindan ONCE: kisi henuz kullanici degil, hesabini burada acar.
+  if (konum.pathname.startsWith('/davet/'))
+    return <Routes><Route path="/davet/:jeton" element={<PortalDavet />} /></Routes>;
+
   if (yukleniyor) return <div className="tam-ekran-bilgi">Yukleniyor…</div>;
   if (!kullanici) return <Giris />;
   // ZORUNLU PAROLA DEGISIMI (667): varsayilan parolayla (kart id) giren kisi
@@ -100,9 +107,15 @@ function Yollar() {
         && modulAcikMi(l, kullanici?.moduller));
   const ilkYol = acilis && acilisUygun ? `/${acilis}` : varsayilanYol;
 
+  // PORTAL KABUGU V2 (796/818): dis hekim / dis kurum / hasta AYRI kabuk
+  //   gorur - telefon icin cekmece menu, acilir bolumler, sade ust serit.
+  //   Rotalar AYNI: portal kullanicisi zaten yalnizca yetkili oldugu
+  //   ekranlari goruyor ve her liste kendi kapsam kuraliyla suzuluyor (794).
+  const portalMi = (kullanici.portalTuru ?? 0) > 0;
+
   return (
     <Routes>
-      <Route element={<Kabuk />}>
+      <Route element={portalMi ? <PortalKabuk /> : <Kabuk />}>
         {/* Kart modal oldugu icin liste ile AYNI bilesende acilir: /cari ve /cari/4911
             ayni ekrani cizer, ikincisinde modal ustte durur. Rota=kaynak DEGILDIR
             zorunlu olarak - ayni kaynak ('cari') Musteri/Tedarikci gibi birden fazla

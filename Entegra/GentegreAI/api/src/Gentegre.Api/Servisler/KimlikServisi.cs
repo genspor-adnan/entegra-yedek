@@ -1,4 +1,5 @@
 ﻿using Gentegre.Cekirdek;
+using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
@@ -420,6 +421,9 @@ public sealed class KimlikServisi
         // PORTAL TURU (806): giris yanitinda da tasinir - sayfa yenilenmeden
         //   once ekran portal kullanicisina anlamsiz dugmeyi gostermesin.
         PortalTuru = portalTuru,
+        // PORTAL MENUSU (796 V2): kapsami ACIK kaynaklar. Yetki tek basina
+        //   yetmiyor - kurali `false` olan ekran acilsa bos gelirdi.
+        PortalKaynaklar = KaynakKatalogu.PortalKaynaklari(portalTuru),
         Id = kullanici.TarafId,
         Kod = kullanici.Kod,
         Ad = kullanici.Ad,

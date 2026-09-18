@@ -3143,6 +3143,25 @@ input.skt-gecmis {
 .pano-seri .cubuk i { position: absolute; left: 0; right: 0; bottom: 0; background: var(--hata) }
 .pano-seri .gun { font-size: 10px; color: var(--soluk); margin-top: 3px }
 
+/* TESLIM IZI (814): kuyruk satirinin altinda deneme gecmisi + ham mesaj.
+   Ham ORU tek satirlik bir metindir; <pre> kaydirmadan tasarsa yatay kaydirma
+   cubugu grid'i bozuyordu - bu yuzden sarma acik ve yukseklik sinirli. */
+.telerad-iz { display: flex; flex-direction: column; gap: 8px }
+.telerad-iz-govde { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+@media (max-width: 1100px) { .telerad-iz-govde { grid-template-columns: 1fr } }
+.telerad-iz-govde h5 { margin: 0 0 4px }
+.telerad-iz-govde pre {
+  margin: 0; padding: 6px 8px; max-height: 220px; overflow: auto;
+  background: var(--yuz2); border: 1px solid var(--cizgi2); border-radius: var(--r);
+  font-size: 11px; line-height: 1.45; white-space: pre-wrap; word-break: break-all;
+}
+
+/* GELEN RAPOR OZETI (817): ham mesajin ustundeki tek satirlik kimlik seridi. */
+.telerad-gelen-ozet {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  font-size: 11.5px;
+}
+
 /* PAKET KARTI (454): kuyruk satirinin altinda acilan salt okunur detay. */
 .enabiz-detay { display: grid; grid-template-columns: 1.3fr 1fr; gap: 10px }
 @media (max-width: 1100px) { .enabiz-detay { grid-template-columns: 1fr } }
@@ -5340,3 +5359,177 @@ textarea.fm-giris { resize: vertical }
              font-size: 11px; line-height: 1; color: inherit; opacity: .7 }
 .rozet-sil:hover:not(:disabled) { opacity: 1 }
 .rozet-sil:disabled { cursor: default; opacity: .4 }
+
+/* ===================================================================
+   PORTAL KABUGU V2 (796/818) — mockup Ekranlar/Portal/portal_*.html
+   Dis hekim · dis kurum · hasta. Telefon ILK tasarlandi: dar ekranda
+   menu CEKMECE, genis ekranda sol sabit serit. Kurum ici kabuktan AYRI
+   sinif oneki (.pk-) - iki kabugun stilleri birbirine karismasin.
+   =================================================================== */
+.pk {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas: "ust ust" "yan icerik";
+  min-height: 100vh;
+  /* Telefonda adres cubugu acilip kapaninca 100vh ziplar; dvh varsa o. */
+  min-height: 100dvh;
+  background: var(--zem);
+}
+.pk-ust {
+  grid-area: ust; display: flex; align-items: center; gap: 8px;
+  padding: 0 10px; min-height: 52px;
+  background: linear-gradient(#2b5c95, #1c4374); color: #fff;
+}
+.pk-marka { display: flex; flex-direction: column; min-width: 0; margin-right: auto }
+.pk-ad { font-weight: bold; font-size: 14px; line-height: 1.2 }
+.pk-kisi { font-size: 11px; opacity: .85; overflow: hidden; text-overflow: ellipsis;
+           white-space: nowrap }
+/* DOKUNMA HEDEFI 44px (Apple/Google kilavuzu): 28px'lik ikon dugmeleri
+   telefonda isabet etmiyordu. */
+.pk-ust button {
+  min-width: 44px; min-height: 44px; border: 0; background: transparent;
+  color: #fff; font-size: 17px; cursor: pointer; border-radius: var(--r);
+}
+.pk-ust button:hover { background: rgba(255, 255, 255, .14) }
+.pk-cikis { font-size: 12.5px !important; padding: 0 12px; border: 1px solid rgba(255,255,255,.35) !important }
+.pk-hamburger { display: none }
+
+.pk-yan {
+  grid-area: yan; background: linear-gradient(#14315a, #0f2647); color: #cfe0f5;
+  padding: 6px 0 14px; overflow-y: auto; display: flex; flex-direction: column;
+}
+.pk-bolum-bas {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; padding: 11px 14px; border: 0; background: transparent; cursor: pointer;
+  color: #7fa3d0; font-size: 10.5px; letter-spacing: .6px; text-transform: uppercase;
+  font-family: inherit; min-height: 42px;
+}
+.pk-bolum-bas:hover { color: #cfe0f5; background: rgba(255, 255, 255, .05) }
+/* DURUM ELEMENTIN KENDISINDE: bolum kabina bagli bir secici yazmak adi iki
+   anlamli yapiyordu (temaSinifCakismasi testi) - acilir durumu zaten
+   aria-expanded tasiyor, stil de ondan okunur. */
+.pk-bolum-bas[aria-expanded="true"] { color: #cfe0f5 }
+.pk-bolum-bas .ok { font-size: 11px; opacity: .8 }
+.pk-liste { display: flex; flex-direction: column; padding-bottom: 4px }
+.pk-oge {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  color: #dce8f8; text-decoration: none; font-size: 13px;
+  border-left: 3px solid transparent; min-height: 44px;
+}
+.pk-oge:hover { background: rgba(255, 255, 255, .07) }
+.pk-oge.on { background: rgba(255, 255, 255, .13); border-left-color: #7fb2f0;
+             font-weight: bold; color: #fff }
+.pk-oge .ic { width: 20px; text-align: center; font-size: 15px; flex: none }
+.pk-oge .ad { min-width: 0; overflow: hidden; text-overflow: ellipsis }
+.pk-kimlik {
+  margin-top: auto; padding: 10px 14px 0; font-size: 11px; color: #9fc0e8;
+  border-top: 1px solid rgba(255, 255, 255, .12); display: flex; flex-direction: column;
+}
+.pk-kimlik .sonuk { color: #7fa3d0; font-size: 10.5px }
+.pk-bos { padding: 14px; font-size: 12px; color: #9fc0e8; line-height: 1.6 }
+
+.pk-icerik { grid-area: icerik; min-width: 0; overflow-x: hidden; padding: 10px 12px }
+/* GENIS TABLO KUTUSUNUN ICINDE KAYAR: liste sahnesi zaten kendi kaydirmasini
+   yapiyor (.sahne overflow:auto) - portalda kenar bosluklarini kucultup
+   sayfanin KENDISININ yatay kaymasini engelliyoruz; yoksa telefonda tablo
+   ust seridi de beraberinde kaydiriyordu. */
+.pk-icerik .sahne { padding: 8px 10px 12px }
+.pk-icerik .sayfabas { padding-left: 10px; padding-right: 10px }
+.pk-perde { display: none }
+
+@media (max-width: 900px) {
+  .pk { grid-template-columns: 1fr; grid-template-areas: "ust" "icerik" }
+  .pk-hamburger { display: block }
+  .pk-yan {
+    position: fixed; z-index: 60; top: 0; left: 0; bottom: 0; width: 82vw;
+    max-width: 300px; transform: translateX(-100%);
+    transition: transform .18s ease-out; padding-top: 56px;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, .35);
+  }
+  /* Acik/kapali sinifi CEKMECENIN KENDISINDE: kok sinifiyla kapsamak adi
+     iki anlamli yapiyordu. */
+  .pk-yan.acik { transform: translateX(0) }
+  .pk-perde.acik {
+    display: block; position: fixed; inset: 0; z-index: 55;
+    background: rgba(12, 24, 40, .5);
+  }
+  .pk-icerik { padding: 8px }
+  /* Ust serit cekmecenin ustunde kalsin - kapatma dugmesi hep erisilebilir. */
+  .pk-ust { position: relative; z-index: 70 }
+}
+
+/* Cok dar telefon: kisi adi baslikta yer kaplamasin, menude zaten yaziyor. */
+@media (max-width: 420px) {
+  .pk-kisi { display: none }
+  .pk-cikis { padding: 0 8px }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pk-yan { transition: none }
+}
+
+/* ------------------------------------------- portalda liste/kart (telefon) --
+   Liste ekranlari masaustu icin tasarlandi: baslik + cipler + arac cubugu tek
+   satir, grid genis. Portal kullanicisinin elinde telefon var; burada YALNIZ
+   portal kabugunun icindekiler degistirilir - kurum ici ekranlar dokunulmadan
+   kalir (ayni kurallari global yapmak, bankodaki 24" ekrani da daraltirdi). */
+@media (max-width: 900px) {
+  .pk-icerik .sayfabas { padding: 8px 10px 0 }
+  /* TEK YATAY KAYDIRICI: sahne de, grid kutusu da kayinca telefonda ust uste
+     iki cubuk cikiyordu - kaydirma GRID kutusunun kendisinde kalir. */
+  .pk-icerik .sahne { overflow-x: hidden }
+  .pk-icerik .basrow h1 { font-size: 15px }
+  /* Yol (breadcrumb) telefonda iki satir kaplıyordu; baslik zaten ust seritte. */
+  .pk-icerik .basrow .yol { display: none }
+  .pk-icerik .basrow .sag { margin-left: 0; width: 100%; flex-wrap: wrap }
+  .pk-icerik .cipler { padding: 8px 10px 0; gap: 6px }
+  /* Cipler tek satirda kalip TASMAK yerine kendi icinde yatay kayar:
+     tiklanabilir alan buyur, sayfa genisligi bozulmaz. */
+  .pk-icerik .cipler { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none }
+  .pk-icerik .cipler::-webkit-scrollbar { display: none }
+  .pk-icerik .cip { height: 30px; font-size: 12.5px; flex: none }
+  .pk-icerik .cipler > .arac-cubugu { margin-left: 0 }
+  .pk-icerik .cipler > .arac-cubugu .d { height: 30px; font-size: 12px; padding: 0 12px }
+  .pk-icerik .d { height: 34px; padding: 0 12px; font-size: 12.5px }
+  /* Satirlar parmakla secilebilsin: 22px'lik satirda yanlis satira basiliyordu. */
+  .pk-icerik table.grid td { padding-top: 7px; padding-bottom: 7px; font-size: 12.5px }
+  .pk-icerik table.grid th { font-size: 11px }
+  /* Kart modali telefonda TAM EKRAN: ortalanmis dar pencere klavye acilinca
+     kayboluyordu. */
+  .pk-icerik .kawin, .pk .kawin {
+    width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh;
+    border-radius: 0; margin: 0;
+  }
+  .pk .alan-izgara, .pk .alan-izgara.iki-sutun, .pk .alan-izgara.uc-sutun,
+  .pk .alan-izgara.dort-sutun { grid-template-columns: 1fr }
+  /* Form alanlari: 16px'in altinda iOS Safari sayfayi yakinlastiriyor. */
+  .pk input, .pk select, .pk textarea { font-size: 16px; min-height: 40px }
+}
+
+/* ------------------------------------------------- portal daveti (822) ----
+   Hastanin telefonunda acilan OTURUMSUZ sayfa: tek kart, buyuk dokunma
+   hedefleri, 16px yazi (altinda iOS Safari sayfayi yakinlastiriyor). */
+.davet-sayfa {
+  min-height: 100vh; min-height: 100dvh; display: flex; align-items: center;
+  justify-content: center; padding: 16px; background: var(--zem);
+}
+.davet-kart {
+  width: 100%; max-width: 420px; background: var(--yuz); border: 1px solid var(--cizgi);
+  border-radius: 8px; box-shadow: var(--golge); padding: 20px 18px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.davet-kart h1 { margin: 0; font-size: 19px; color: var(--yazi2) }
+.davet-kart p { margin: 0; font-size: 13px; line-height: 1.5 }
+.davet-kart .alan { display: flex; flex-direction: column; gap: 4px }
+/* Etiket SOLA: global `.alan .etiket` kart izgarasi icin saga dayali
+   (mockup .grid2); tek sutunlu davet kartinda ortada duruyordu. */
+.davet-kart .alan .etiket {
+  font-size: 12px; color: var(--soluk); text-align: left; align-self: flex-start;
+  width: auto; min-width: 0;
+}
+.davet-kart input {
+  height: 44px; font-size: 16px; padding: 0 10px;
+  border: 1px solid var(--cizgi); border-radius: var(--r); background: var(--yuz);
+}
+.davet-dugme { height: 46px; justify-content: center; font-size: 15px; margin-top: 4px }

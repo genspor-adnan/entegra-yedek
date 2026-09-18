@@ -139,10 +139,12 @@ public sealed class SmtpGonderici : IBildirimGonderici
 /// Bu yüzden gövde de sağlayıcının kendisi gibi AYARDAN gelir:
 ///
 ///   ayarlar.govde   : gönderilecek istek gövdesi, {{alici}} {{mesaj}}
-///                     {{kullanici}} {{sifre}} {{baslik}} yer tutucularıyla
-///   ayarlar.tip     : "json" (varsayılan) · "form"
+///                     {{kullanici}} {{sifre}} {{baslik}} {{bayi}} {{zaman}}
+///                     yer tutucularıyla
+///   ayarlar.tip     : "json" (varsayılan) · "form" · "xml"
 ///   ayarlar.basarili: yanıtta ARANACAK metin (yoksa yalnız HTTP 2xx bakılır)
 ///   ayarlar.baslik  : SMS başlığı (originator)
+///   ayarlar.bayi    : sağlayıcının bayi/şirket kodu ({{bayi}})
 ///
 /// Böylece yeni sağlayıcı bağlamak KOD DEĞİL AYAR işidir; sağlayıcı gerçekten
 /// farklı bir protokol istiyorsa (SOAP, imzalı) kendi sınıfı yazılır.
@@ -174,14 +176,28 @@ public sealed class HttpSmsGonderici : IBildirimGonderici
             ["kullanici"] = _hesap.KullaniciAdi,
             ["sifre"] = _hesap.Sifre,
             ["baslik"] = _hesap.Ayar("baslik"),
+            // BAYI/ŞIRKET KODU: bazı sağlayıcılar kullanıcı adının yanında
+            //   ayrıca bayi kodu istiyor (Ayyıldız `CompanyCode`).
+            ["bayi"] = _hesap.Ayar("bayi"),
+            // İLERİ TARİHLİ GÖNDERİM: sağlayıcının beklediği biçimde zaman;
+            //   anlık gönderimde BOŞ kalır ama etiket yine yazılır.
+            ["zaman"] = "",
         });
 
         try
         {
             using var istek = new HttpRequestMessage(HttpMethod.Post, _hesap.EtkinUrl);
-            istek.Content = _hesap.Ayar("tip", "json") == "form"
-                ? new StringContent(govde, Encoding.UTF8, "application/x-www-form-urlencoded")
-                : new StringContent(govde, Encoding.UTF8, "application/json");
+            // İÇERİK TÜRÜ SAĞLAYICIYA GÖRE: Türkiye'deki sağlayıcıların bir
+            //   kısmı hâlâ XML POST istiyor (Ayyıldız SendSmsMulti). Bunu
+            //   ayrı bir gönderici sınıfıyla çözmek, aynı "gövde şablondan
+            //   gelir" tasarımını ikinci kez yazmak olurdu.
+            istek.Content = _hesap.Ayar("tip", "json") switch
+            {
+                "form" => new StringContent(govde, Encoding.UTF8,
+                                            "application/x-www-form-urlencoded"),
+                "xml" => new StringContent(govde, Encoding.UTF8, "text/xml"),
+                _ => new StringContent(govde, Encoding.UTF8, "application/json"),
+            };
 
             var jeton = _hesap.Ayar("yetki_basligi");
             if (!string.IsNullOrWhiteSpace(jeton))
@@ -205,11 +221,20 @@ public sealed class HttpSmsGonderici : IBildirimGonderici
         }
     }
 
-    /// <summary>JSON gövdeye metin gömülüyorsa tırnak/satır sonu kaçışlanmalı.</summary>
+    /// <summary>
+    /// Gövdeye gömülen metin taşıyıcının kurallarına göre kaçışlanır.
+    ///
+    /// XML'de mesaj CDATA içinde gidiyor: kaçış gerekmez AMA metnin içinde
+    /// <c>]]&gt;</c> geçerse CDATA erken kapanır ve mesajın gerisi etiket
+    /// sanılır - tek gerçek tehlike odur, bölünerek etkisizleştirilir.
+    /// </summary>
     private static string KacisliMetin(string metin, string tip)
-        => tip == "form"
-            ? Uri.EscapeDataString(metin)
-            : JsonEncodedText.Encode(metin).ToString();
+        => tip switch
+        {
+            "form" => Uri.EscapeDataString(metin),
+            "xml" => metin.Replace("]]>", "]]]]><![CDATA[>", StringComparison.Ordinal),
+            _ => JsonEncodedText.Encode(metin).ToString(),
+        };
 
     private static string Kirp(string m, int n) => m.Length <= n ? m : m[..n];
 }

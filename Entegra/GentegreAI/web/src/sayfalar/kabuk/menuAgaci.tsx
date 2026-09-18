@@ -23,6 +23,10 @@ export interface MenuOgesi {
   altGrup?: string;
   /** Grup ICINDEKI sira (kucuk once). Gruplarin kendi sirasi degismez. */
   sira?: number;
+  /** Ekranin LISTE KAYNAGI - portal menusu kapsam suzgecinde kullanir (796 V2). */
+  kaynak?: string;
+  /** Ozel sayfa mi (pano/ayar): liste kaynagi yoktur. */
+  ozelSayfa?: boolean;
 }
 
 /**
@@ -303,6 +307,8 @@ export function menuSatirlariKur(
       adHam: l.menuAd,
       altGrup: l.menuAltGrup ? cm(l.menuAltGrup) : undefined,
       sira: l.menuSira,
+      kaynak: l.kaynak,
+      ozelSayfa: l.ozelSayfa,
     }));
 
   // Iki seviye: grup (Cari, Kasa, Yönetim…) ve grubun icinde alt grup

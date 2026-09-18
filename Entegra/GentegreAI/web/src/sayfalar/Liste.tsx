@@ -57,6 +57,8 @@ import { kkAksiyonu } from './liste/kkAksiyonlari';
 import { disLabAksiyonu } from './liste/disLabAksiyonlari';
 import { LabDetayPaneli, labDetayVarMi, labYanVarMi } from '../bilesenler/LabDetayPaneli';
 import { EnabizPaketPaneli } from '../bilesenler/EnabizPaketPaneli';
+import { TeleradTeslimIzi } from '../bilesenler/TeleradTeslimIzi';
+import { TeleradGelenPaneli } from '../bilesenler/TeleradGelenPaneli';
 import { LabOzetSeridi } from '../bilesenler/LabOzetSeridi';
 import { KullaniciOzetSeridi } from '../bilesenler/KullaniciOzetSeridi';
 import { KullaniciAltPanel } from '../bilesenler/KullaniciAltPanel';
@@ -103,6 +105,7 @@ import { icmalAksiyonu } from './liste/icmalAksiyonlari';
 import { radyolojiAksiyonu } from './liste/radyolojiAksiyonlari';
 import { teleradAksiyonu } from './liste/teleradAksiyonlari';
 import { useOturum } from '../kimlik/OturumBaglami';
+import { usePortalBaslik, usePortaldaMi } from './portal/portalBaslik';
 import { hakedisAksiyonu } from './liste/hakedisAksiyonlari';
 import { randevuAksiyonu } from './liste/randevuAksiyonlari';
 import { Modal } from '../bilesenler/Modal';
@@ -133,6 +136,10 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   //   sirasi, gomulu detaylar, izgara. Buradaki uclu kosullar yuz satir saf
   //   yapilandirmayi bilesenin ortasina yayiyordu.
   const kartOzel = kartOzellestirme(tanim.kaynak);
+  // PORTAL BASLIGI (796 V2): portal kabugunun icindeysek ekranin adi menude
+  //   yazan addir; disarida undefined doner ve tanimin kendi basligi kalir.
+  const portalBaslik = usePortalBaslik(`/${tanim.rota ?? tanim.kaynak}`);
+  const portalda = usePortaldaMi();
   // TELERADYOLOJI "Bana Ata" oturumun taraf kimligini yazar (799).
   const { kullanici } = useOturum();
   const git = useNavigate();
@@ -377,8 +384,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   const cipler = tanim.cipler;
   const suzgecsizCip = cipler && cipler.length > 1 && !cipler[cipler.length - 1].filtre
     ? cipler.length - 1 : null;
+  // PORTALDA DA SUZGECSIZ CIP (796 V2): cip setleri KURUM ICI kuyruklardir
+  //   ("Numune Uygunsuz", "Teknik Onay", "Bekleyen Çekim"). Portal
+  //   kullanicisinin kuyrugu yok; kapsam zaten sunucuda daraltiyor - ilk cip
+  //   ona hep BOS liste gosteriyordu. Cipler ekranda kalir, isteyen daraltir.
   const [cipIndeks, setCipIndeks] = useState(() => (
-    urlDegeri && suzgecsizCip !== null ? suzgecsizCip : 0));
+    (urlDegeri || portalda) && suzgecsizCip !== null ? suzgecsizCip : 0));
 
   /**
    * URL FILTRESI SONRADAN GELIRSE de suzgecsiz cipe gec.
@@ -909,8 +920,11 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       //   secilince Islem Gunlugu'ne gecince orada da "son" gonderiliyordu).
       key={tanim.rota ?? tanim.kaynak}
       kaynak={tanim.kaynak}
-      baslik={cm(tanim.baslik)}
-      yol={tanim.yol}
+      // PORTALDA BASLIK MENU ADIYLA AYNI (796 V2); portal disinda degismez.
+      //   Kirintili yol (Randevu > Randevular) portalda GIZLENIR: kurum ici
+      //   menu agacini anlatiyor, portal kullanicisinda karsiligi yok.
+      baslik={portalBaslik ?? cm(tanim.baslik)}
+      yol={portalBaslik ? undefined : tanim.yol}
       // Baska ekrandan acilan liste (dis hasta karti > Lab Isleri / Odeme
       //   Planlari): basligin solunda "← Geri" oraya doner.
       geriYolu={sorgu.get('geri') ?? undefined}
@@ -1045,7 +1059,14 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       // YATAK PANOSU (mockup yatak_panosu.html): "yer var mi" sorusu LISTE
       //   degil PANO ile cevaplanir - kutu oda, satir yatak. Grid altta
       //   suzulebilir haliyle durur.
-      ustPanel={tanim.kaynak === 'yatak'
+      // PORTALDA OZET SERITLERI HIC CIZILMEZ (796 V2 - GUVENLIK).
+      //   Bu seritler KURUMUN GENELINI sayiyor: "8 onay bekliyor", "2 panik
+      //   acik", "TAT asimi 1", cihaz durumu. Liste satirlari kapsam
+      //   kuraliyla suzuluyor ama SERIT kendi sorgusunu yapiyor - hasta
+      //   portalinda laboratuvarin butun kuyrugu gorunuyordu. Kapsam disi
+      //   sayilari gostermek, kaydin kendisini gostermekle ayni sinifta.
+      ustPanel={portalda ? undefined
+        : tanim.kaynak === 'yatak'
         ? <YatakPanosu yenile={yenile} />
         // eMAR (698): gridin ustunde TEK HASTANIN gun cizelgesi, altinda
         //   servis genelindeki doz kuyrugu. Ayni veri, iki ayri soru.
@@ -1115,12 +1136,15 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       solPanel={tanim.kaynak === 'lab-tetkik'
         ? <LabKatalogAgaci secim={agacSecim} onSecim={setAgacSecim} />
         : undefined}
-      yanPanel={tanim.kaynak === 'lab-tetkik'
+      // Yan panel de kurum ici ozet tasiyor (lab tetkik ozeti, detay paneli).
+      yanPanel={portalda ? undefined
+        : tanim.kaynak === 'lab-tetkik'
         ? <LabTetkikOzeti id={seciliSatir ? Number(seciliSatir.id) : null} />
         : labYanVarMi(tanim.kaynak)
         ? <LabDetayPaneli kaynak={tanim.kaynak} satir={seciliSatir} kisim="yan" />
         : undefined}
-      altPanel={labDetayVarMi(tanim.kaynak) && seciliSatir
+      altPanel={portalda ? undefined
+        : labDetayVarMi(tanim.kaynak) && seciliSatir
         ? <LabDetayPaneli kaynak={tanim.kaynak} satir={seciliSatir} kisim="ana" />
         // e-NABIZ (454): "Eksik Alan" yazan satirin cevabi paketin
         //   alanlarinda. Kart yerine grid alti: kuyrukta calisan kisi
@@ -1128,6 +1152,16 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         : tanim.kaynak === 'enabiz-paket' && seciliSatir
             && Number(seciliSatir.id ?? 0) > 0
         ? <EnabizPaketPaneli paketId={Number(seciliSatir.id)} />
+        // TESLIM KUYRUGU (814): "gitti mi, gitmediyse neden" sorusunun cevabi
+        //   denemelerde. Ham ORU ve ham ACK satirin altinda acilir - kuyrukta
+        //   calisan kisi listeyi kaybetmeden nedeni gorur (e-Nabiz deseni).
+        : tanim.kaynak === 'telerad-teslim' && seciliSatir
+            && Number(seciliSatir.id ?? 0) > 0
+        ? <TeleradTeslimIzi teslimId={Number(seciliSatir.id)} />
+        // GELEN RAPOR (817): "eslesmedi" yazan satirin cevabi ham mesajdadir.
+        : tanim.kaynak === 'telerad-gelen' && seciliSatir
+            && Number(seciliSatir.id ?? 0) > 0
+        ? <TeleradGelenPaneli gelenId={Number(seciliSatir.id)} />
         // KULLANICILAR (mockup `.sekmeler` + `.alt`): secili hesabin rolleri,
         //   acik oturumlari, giris hareketleri ve HESABA yapilan islemler.
         //   Yonetici satir satir geziyor - her satir icin kart acip kapatmak

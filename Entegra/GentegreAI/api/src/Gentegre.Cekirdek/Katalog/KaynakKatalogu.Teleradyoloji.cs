@@ -28,6 +28,21 @@ public static partial class KaynakKatalogu
     private static readonly Dictionary<string, string> TeleradGoruntu = new()
         { ["0"] = "Bekleniyor", ["1"] = "Tamam", ["2"] = "Eksik seri", ["3"] = "Hatalı" };
 
+    private static readonly Dictionary<string, string> TeleradGelenDurum = new()
+    {
+        ["0"] = "Çözümlenemedi", ["1"] = "Eşleşmedi", ["2"] = "İşlendi",
+        ["3"] = "Mükerrer", ["4"] = "Hata",
+    };
+
+    private static readonly Dictionary<string, string> TeleradTeslimHedef = new()
+        { ["1"] = "Kurum", ["2"] = "Bakanlık" };
+
+    private static readonly Dictionary<string, string> TeleradTeslimDurum = new()
+    {
+        ["0"] = "İptal", ["1"] = "Bekliyor", ["2"] = "Gönderiliyor",
+        ["3"] = "Teslim edildi", ["4"] = "Hata",
+    };
+
     private static readonly Dictionary<string, string> TeleradYon = new()
         { ["1"] = "Gelen", ["2"] = "Giden", ["3"] = "İki yön" };
 
@@ -183,6 +198,139 @@ public static partial class KaynakKatalogu
                 + "                  where sz.kurum_id = k.id and sz.durum = 1) then 'uyari' "
                 + "else '' end",
                 "metin", "", Varsayilan: false, Filtrelenebilir: false),
+        });
+
+    /// <summary>
+    /// BAKANLIK EKSİKLERİ (813) — Bakanlığa bildirilecek ama gönderilemeyecek
+    /// işler. Eksik listesi SUNUCUDA hesaplanır (fn_telerad_bakanlik_eksik);
+    /// istemci "hangi alan boş" kuralını bilmez.
+    /// </summary>
+    private static KaynakTanimi TeleradBakanlikEksik() => new(
+        Ad: "telerad-bakanlik-eksik",
+        YetkiKodu: "teleradyoloji",
+        Kaynak: "public.v_telerad_bakanlik_eksik e",
+        SubeKolonu: "e.sube_id",
+        // PORTALA KAPALI (794 deseni): eksik metni bizim KURULUM alanlarımızı
+        //   da sayıyor (SKRS kodu, firma kodu, e-Nabız numaraları). Gönderen
+        //   kuruma "sizde accession eksik" demek portalın işi değil - o bilgi
+        //   isteğin kendi kartında zaten görünüyor.
+        PortalKosullari: PortalKapsam.Kur(
+            disDoktor: "false", disKurum: "false", hasta: "false"),
+        VarsayilanSirala: "e.gelis_zamani desc nulls last, e.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",        "e.id",        "sayi",  "Id", Varsayilan: false),
+            new("istekNo",   "e.istek_no",  "metin", "İstek No", Genislik: 130),
+            new("kurumAdi",  "e.kurum_adi", "metin", "Kurum", Genislik: 200),
+            new("erisimNo",  "e.dis_erisim_no", "metin", "Erişim No", Genislik: 140),
+            new("modaliteAdi",
+                "case e.modalite when 1 then 'BT' when 2 then 'MR' when 3 then 'USG' "
+                + "when 4 then 'Röntgen' when 5 then 'Mamografi' when 6 then 'DEXA' "
+                + "when 7 then 'Anjiyo' when 8 then 'Skopi' else '' end",
+                "metin", "Modalite", Hizalama: "orta", Genislik: 100,
+                Filtrelenebilir: false),
+            new("durumAdi",
+                "case e.durum when 0 then 'İptal' when 1 then 'Görüntü bekleniyor' "
+                + "when 2 then 'Sırada' when 3 then 'Atandı' when 4 then 'Okunuyor' "
+                + "when 5 then 'Raporlandı' when 6 then 'Onaylandı' "
+                + "when 7 then 'Teslim edildi' else 'Ek görüntü istendi' end",
+                "metin", "Durum", Hizalama: "orta", Genislik: 150, Bicim: "rozet",
+                Filtrelenebilir: false),
+            new("durum",     "e.durum",     "kod",   "Durum Kodu", Varsayilan: false,
+                Kodlar: TeleradDurum),
+            new("teslimZamani", "e.teslim_zamani", "zaman", "Teslim", Hizalama: "orta",
+                                                Genislik: 140),
+            // EKSİK METNİ TEK KOLON: hangi alan boşsa adıyla yazar - operasyon
+            //   HL7 alan numarasını burada görür, kılavuzu açmak zorunda kalmaz.
+            new("eksik",     "e.eksik",     "metin", "Eksik Alanlar", Genislik: 420),
+            new("kurumId",   "e.kurum_id",  "sayi",  "Kurum Id", Varsayilan: false),
+            new("satirRengi", "e.satir_rengi", "metin", "", Varsayilan: false,
+                Filtrelenebilir: false),
+        });
+
+    /// <summary>
+    /// TESLİM KUYRUĞU (814) — hangi rapor, hangi hedefe, kaçıncı denemede.
+    /// Kalıcı hata kırmızı; bekleyen tekrar sarı - kuyruğun uzaması sessiz
+    /// kalmasın.
+    /// </summary>
+    private static KaynakTanimi TeleradTeslim() => new(
+        Ad: "telerad-teslim",
+        YetkiKodu: "teleradyoloji",
+        Kaynak: "public.v_telerad_teslim t",
+        SubeKolonu: "t.sube_id",
+        // BEKLEYEN VE HATALI ÖNCE: kuyruk ekranına bakan kişi "ne takıldı"
+        //   sorusuyla geliyor, "ne gitti" sorusuyla değil.
+        VarsayilanSirala: "case when t.durum in (1, 4) then 0 else 1 end, t.sonraki_deneme",
+        // Portala kapalı: teslim kuyruğu bizim işletme ekranımız.
+        PortalKosullari: PortalKapsam.Kur(
+            disDoktor: "false", disKurum: "false", hasta: "false"),
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",        "t.id",        "sayi",  "Id", Varsayilan: false),
+            new("istekNo",   "t.istek_no",  "metin", "İstek No", Genislik: 130),
+            new("kurumAdi",  "t.kurum_adi", "metin", "Kurum", Genislik: 200),
+            new("hedefAdi",  "t.hedef_adi", "metin", "Hedef", Hizalama: "orta",
+                Genislik: 100, Bicim: "rozet", Filtrelenebilir: false),
+            new("hedef",     "t.hedef",     "kod",   "Hedef Kodu", Varsayilan: false,
+                Kodlar: TeleradTeslimHedef),
+            new("durumAdi",  "t.durum_adi", "metin", "Durum", Hizalama: "orta",
+                Genislik: 130, Bicim: "rozet", Filtrelenebilir: false),
+            new("durum",     "t.durum",     "kod",   "Durum Kodu", Varsayilan: false,
+                Kodlar: TeleradTeslimDurum),
+            new("denemeNo",  "t.deneme_no", "sayi",  "Deneme", Hizalama: "orta",
+                Genislik: 90),
+            new("sonDeneme", "t.son_deneme", "zaman", "Son Deneme", Hizalama: "orta",
+                Genislik: 145),
+            new("sonrakiDeneme", "t.sonraki_deneme", "zaman", "Sıradaki",
+                Hizalama: "orta", Genislik: 145),
+            new("ackKodu",   "t.ack_kodu",  "metin", "ACK", Hizalama: "orta",
+                Genislik: 70),
+            new("hata",      "t.hata_metni", "metin", "Hata", Genislik: 360),
+            new("istekId",   "t.istek_id",  "sayi",  "İstek Id", Varsayilan: false),
+            new("satirRengi", "t.satir_rengi", "metin", "", Varsayilan: false,
+                Filtrelenebilir: false),
+        });
+
+    /// <summary>
+    /// GELEN RAPORLAR (817) — dışarıdan ORU ile gelen raporlar. Eşleşmeyen
+    /// satır KIRMIZI: karşı taraf raporu gönderdiğini sanıyor, bizde hiçbir
+    /// işe oturmadı.
+    /// </summary>
+    private static KaynakTanimi TeleradGelen() => new(
+        Ad: "telerad-gelen",
+        YetkiKodu: "teleradyoloji",
+        Kaynak: "public.v_telerad_gelen g",
+        SubeKolonu: "g.sube_id",
+        // EŞLEŞMEYEN ÖNCE: ekrana bakan kişi "hangisi oturmadı" sorusuyla gelir.
+        VarsayilanSirala: "case when g.durum in (0, 1, 4) then 0 else 1 end, "
+                        + "g.geldi_zamani desc",
+        PortalKosullari: PortalKapsam.Kur(
+            disDoktor: "false", disKurum: "false", hasta: "false"),
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",          "g.id",           "sayi",  "Id", Varsayilan: false),
+            new("geldiZamani", "g.geldi_zamani", "zaman", "Geliş", Hizalama: "orta",
+                Genislik: 145),
+            new("durumAdi",    "g.durum_adi",    "metin", "Durum", Hizalama: "orta",
+                Genislik: 130, Bicim: "rozet", Filtrelenebilir: false),
+            new("durum",       "g.durum",        "kod",   "Durum Kodu", Varsayilan: false,
+                Kodlar: TeleradGelenDurum),
+            new("accessionNo", "g.accession_no", "metin", "Erişim No", Genislik: 150),
+            new("istekNo",     "g.istek_no",     "metin", "İstek No", Genislik: 130),
+            new("kurumAdi",    "g.kurum_adi",    "metin", "Kurum", Genislik: 180),
+            new("kaynakAdi",   "g.kaynak_adi",   "metin", "Kaynak", Hizalama: "orta",
+                Genislik: 110, Bicim: "rozet", Filtrelenebilir: false),
+            new("radyologAd",  "g.radyolog_ad",  "metin", "Raporlayan", Genislik: 170),
+            new("hastaTckn",   "g.hasta_tckn",   "metin", "Hasta TCKN", Genislik: 120,
+                Varsayilan: false),
+            new("onayZamani",  "g.onay_zamani",  "zaman", "Onay", Hizalama: "orta",
+                Genislik: 145, Varsayilan: false),
+            new("hata",        "g.hata_metni",   "metin", "Açıklama", Genislik: 340),
+            new("kaynakIp",    "g.kaynak_ip",    "metin", "Kaynak IP", Genislik: 120,
+                Varsayilan: false),
+            new("istekId",     "g.istek_id",     "sayi",  "İstek Id", Varsayilan: false),
+            new("satirRengi",  "g.satir_rengi",  "metin", "", Varsayilan: false,
+                Filtrelenebilir: false),
         });
 
     /// <summary>SÖZLEŞMELER — dönem, ücret modeli, SLA.</summary>

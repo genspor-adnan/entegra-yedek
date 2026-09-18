@@ -126,6 +126,48 @@ export const mesajUclari = {
     gonder<{ sohbetId: number; istekNo: string }>(
       `/api/telerad/istek/${istekId}/sohbet`, {}),
 
+  /**
+   * BAKANLIK HAZIRLIGI (812): istegin ORU mesajina girecek degerleri ve
+   * EKSIKLERI dondurur. Eksik kurali SUNUCUDA
+   * (`fn_telerad_bakanlik_eksik`) - istemci "hangi alan zorunlu" bilmez.
+   */
+  teleradBakanlik: <T,>(istekId: number) =>
+    istek<T>(`/api/telerad/istek/${istekId}/bakanlik`),
+
+  /**
+   * TESLIM (814): yolu SUNUCU secer - kurumun kanali HL7 ORU ise mesaj
+   * kuyruga girip gonderilir, "Portal" ise yalnizca teslim damgasi yazilir.
+   */
+  teleradTeslim: (istekId: number, hedef = 1) =>
+    gonder<{ yol: string; teslimId?: number; basarili?: boolean;
+             ackKodu?: string; hata?: string; durum?: number }>(
+      `/api/telerad/istek/${istekId}/teslim?hedef=${hedef}`, {}),
+
+  /** Kuyruk satirini yeniden dener (duzeltme yapildiysa kalici hatayi da). */
+  teleradTeslimDene: (teslimId: number) =>
+    gonder<{ basarili: boolean; ackKodu: string; hata: string; durum: number }>(
+      `/api/telerad/teslim/${teslimId}/dene`, {}),
+
+  /** Gonderilmeyecek isi kuyruktan cikarir - her gun yeniden denenmesin. */
+  teleradTeslimIptal: (teslimId: number) =>
+    gonder<{ tamam: boolean }>(`/api/telerad/teslim/${teslimId}/iptal`, {}),
+
+  /** Deneme gecmisi: ham ORU ve ham ACK ile. */
+  teleradTeslimIz: <T,>(teslimId: number) =>
+    istek<T>(`/api/telerad/teslim/${teslimId}/iz`),
+
+  /** GELEN RAPOR (817): ham mesaj + eslestirme sonucu. */
+  teleradGelen: <T,>(gelenId: number) =>
+    istek<T>(`/api/telerad/gelen/${gelenId}`),
+
+  /**
+   * ELLE BAGLA (817): accession tutmadigi icin eslesmemis raporu dogru ise
+   * baglar ve raporu yazar. Eslestirme KURALI gevsetilmez - karar insanindir.
+   */
+  teleradGelenBagla: (gelenId: number, istekId: number) =>
+    gonder<{ durum: number; mesaj: string }>(
+      `/api/telerad/gelen/${gelenId}/bagla?istekId=${istekId}`, {}),
+
   /** DONEM FATURASI: donemin onayli isleri TEK satis faturasina girer. */
   teleradFatura: (kurumId: number, baslangic: string, bitis: string) =>
     gonder<{ belgeId: number; satir: number; istek: number; tutar: number }>(

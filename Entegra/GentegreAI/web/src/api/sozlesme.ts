@@ -137,6 +137,12 @@ export interface KullaniciOzeti {
    */
   portalTuru?: number;
   /**
+   * PORTALDA KAPSAMI ACIK kaynak adlari (796 V2). Yetki tek basina yetmiyor:
+   * kurali `false` olan ekran acilsa BOS gelir - portal menusu bununla
+   * suzulur. Ic kullanicida bos dizi.
+   */
+  portalKaynaklar?: string[];
+  /**
    * ZORUNLU PAROLA DEGISIMI (674): varsayilan parolayla (personel kart id'si)
    * giren kisi once kendi parolasini belirler. /ben de tasir - yalniz giris
    * yanitinda olsaydi sayfayi yenileyen kullanici zorunlulugu atlardi.

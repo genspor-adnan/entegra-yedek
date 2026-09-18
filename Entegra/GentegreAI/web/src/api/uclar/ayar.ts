@@ -97,8 +97,67 @@ export const ayarUclari = {
     istek<AcikOturum[]>(`/api/kullanici/${id}/oturumlar`),
   kullaniciGirisGecmisi: (id: number) =>
     istek<GirisDenemesi[]>(`/api/kullanici/${id}/giris-gecmisi`),
+  /**
+   * BILDIRIM KANALI SINAMASI (820): SMS / e-posta hesabina GERCEK test
+   * mesaji gonderir - "Baglantiyi Sina" yalnizca adrese bakiyor, kanalda
+   * hicbir sey soylemez. Dısarıya mesaj gider (SMS ucretlidir).
+   */
+  bildirimSina: (hesapId: number, alici: string, mesaj?: string) =>
+    gonder<{ basarili: boolean; mesaj: string; saglayiciRef: string;
+             hamYanit: string; httpDurum: number }>(
+      `/api/entegrasyon/${hesapId}/test-bildirim`, { alici, mesaj }),
+
   kullaniciTopluAc: () =>
     gonder<{ acilan: number; mesaj: string }>('/api/kullanici/toplu-ac', {}),
+
+  /**
+   * PORTAL HESABI (819): dis hekim / kurum / hasta. Hesap PAROLASIZ acilir -
+   * kisi ilk giriste kendi parolasini koyar. Kurum portalinda hesap KISIYE
+   * acilir, kapsam `kurumId` ile kuruma baglanir.
+   */
+  portalHesapDurum: (tarafId: number) =>
+    istek<{
+      id: number; unvan: string; vkno: string; kisi: number; musteri: number;
+      hasta: number; disHekim: number; mevcutKod: string | null;
+      mevcutPortal: number; mevcutRol: string; kapsamTarafId: number | null;
+      hesapAktif: number;
+      /** Kisi kartindaki "Bagli Kurum" (309) - kurum portalinda varsayilan kapsam. */
+      bagliKurumId: number | null; bagliKurumAdi: string;
+      /**
+       * Acilabilir portal rolleri (824). Kurum portalinda IKI rol var
+       * (Klinik / Yonetici) ve ayri seyler gorurler - hangisinin acilacagi
+       * SORULUR, sunucu tahmin etmez.
+       */
+      roller: { kod: string; ad: string; portalTuru: number; amac: string }[];
+    }>(`/api/kullanici/portal-durum/${tarafId}`),
+
+  /**
+   * PORTAL DAVETI (822): hastaya SMS/e-posta ile tek kullanimlik baglanti.
+   * Jeton YANITTA DONMEZ - baglanti yalniz kisiye gider.
+   */
+  portalDavetGonder: (govde: { tarafId: number; kanal: number; alici?: string }) =>
+    gonder<{ davetId: number; kanal: number; alici: string; gecerlilikSaat: number;
+             mesaj: string }>('/api/kullanici/portal-davet', govde),
+
+  /**
+   * TOPLU PORTAL ROLU (819): hesabi olan dis hekimlere/hastalara portal
+   * rolunu atar. Yetkili bir IC rolu tasiyan hesap ATLANIR - rolunu ezmek
+   * o kisinin butun yetkilerini sessizce kaldirirdi.
+   */
+  portalTopluRol: (portalTuru: number) =>
+    gonder<{ atanan: number; atlanan: { id: number; unvan: string; rol: string;
+                                        sebep: string }[]; mesaj: string }>(
+      `/api/kullanici/portal-toplu-rol?portalTuru=${portalTuru}`, {}),
+
+  portalHesapAc: (govde: {
+    tarafId: number; portalTuru: number; kod?: string; kurumId?: number;
+    /** Portal turunde birden cok rol varsa ZORUNLU (824). */
+    rolKodu?: string;
+    eposta?: string; cepTel?: string;
+  }) =>
+    gonder<{ tarafId: number; kod: string; portalTuru: number;
+             kapsamTarafId: number | null; parolasiz: boolean; mesaj: string }>(
+      '/api/kullanici/portal-hesap', govde),
   /** Gridin ustundeki sayac kutulari - hepsi TEK sorgudan gelir. */
   kullaniciOzet: () => istek<KullaniciOzeti>('/api/kullanici/ozet'),
   /** "Bu HESABA ne yapildi" - parola sifirlandi mi, kim pasife aldi. */

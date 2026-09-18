@@ -1,5 +1,5 @@
 import { api } from '../../api/istemci';
-import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
+import { guvenli, listeSor, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { UtsBelgeBildirimYaniti } from '../../api/istemci';
 
@@ -108,6 +108,141 @@ Giriş yapamaz, açık oturumları kapanır. `
         const y = await api.kullaniciDurum(Number(satir.id), !aktif);
         mesaj(y.mesaj);
         b.tazele();
+      });
+      return true;
+    }
+
+    // PORTAL ERISIMI (819): dis hekim / kurum / hasta. Uc karttan da ayni
+    //   aksiyon cagrilir; portal TURU kaydin ne oldugundan cikar - kullaniciya
+    //   "bu kisi hasta mi hekim mi" diye sormak, zaten kartta yazan seyi
+    //   ikinci kez sormak olurdu.
+    case 'kullanici.portal': {
+      if (!satir) return true;
+      const tarafId = Number(satir.id);
+      const kim = String(satir.unvan || satir.ad || satir.kod || '');
+
+      await guvenli(async () => {
+        const d = await api.portalHesapDurum(tarafId);
+        if (d.mevcutKod) {
+          mesaj(`${kim}: zaten "${d.mevcutKod}" kodlu bir hesabı var`
+                + `${d.mevcutRol ? ` (${d.mevcutRol})` : ''}. `
+                + 'Rolü Kullanıcılar ekranından değiştirin.');
+          return;
+        }
+
+        // TUR KAYITTAN: hasta kartı hasta portalı, dış hekim kartı hekim
+        //   portalı, cari/kişi kartı kurum portalı açar.
+        const turler: { kod: string; ad: string }[] = [];
+        if (d.disHekim === 1) turler.push({ kod: '1', ad: 'Hekim portalı (kendi istemleri)' });
+        if (d.hasta === 1) turler.push({ kod: '3', ad: 'Hasta portalı (kendi kayıtları)' });
+        if (d.kisi === 1 || d.musteri === 1)
+          turler.push({ kod: '2', ad: 'Kurum portalı (bir kurumun işleri)' });
+        if (turler.length === 0) {
+          mesaj(`${kim}: bu kayda portal erişimi verilemez `
+                + '(dış hekim, hasta ya da kişi/cari kartı olmalı).');
+          return;
+        }
+
+        const tur = turler.length === 1 ? turler[0].kod
+          : await listeSor('Hangi portal?', turler, turler[0].kod, 'Portal');
+        if (!tur) return;
+
+        // KURUM PORTALI KISI BASI: hesap kişiye açılır, kapsam KURUMA bağlanır.
+        //   Hangi kurumun işlerini göreceği açıkça sorulur.
+        let kurumId: number | undefined;
+        if (tur === '2') {
+          // VARSAYILAN BAĞLI KURUM (309): kişi kartındaki "Bağlı Kurum" zaten
+          //   bu bilgiyi taşıyor - kullanıcıya kart numarası yazdırmak,
+          //   kayıtlı olanı ikinci kez sormak olurdu.
+          const varsayilan = d.bagliKurumId ?? (d.musteri === 1 ? d.id : 0);
+          const kurumKodu = await metinSor(
+            d.bagliKurumAdi
+              ? `Bu hesap hangi kurumun işlerini görecek? (Bağlı kurum: ${d.bagliKurumAdi})`
+              : 'Bu hesap hangi kurumun işlerini görecek?',
+            varsayilan ? String(varsayilan) : '', 'Kurum (cari) kayıt numarası');
+          if (!kurumKodu) return;
+          kurumId = Number(kurumKodu);
+          if (!kurumId) { mesaj('Geçerli bir cari kayıt numarası girin.'); return }
+        }
+
+        // ROL SORULUR, TAHMİN EDİLMEZ (824): kurum portalında iki rol var -
+        //   Klinik hasta/lab ekranı görür, Yönetici yalnız fatura ve ekstre.
+        //   Sunucu "ilk rolü" seçseydi muhasebeciye tıbbi ekran açılırdı.
+        //   Tek rollü portal türünde soru sorulmaz.
+        const rolSecenek = (d.roller ?? []).filter(r => r.portalTuru === Number(tur));
+        let rolKodu: string | undefined;
+        if (rolSecenek.length > 1) {
+          const secim = await listeSor(
+            'Bu hesap hangi rolde açılsın?',
+            rolSecenek.map(r => ({ kod: r.kod, ad: r.ad })),
+            rolSecenek[0].kod, 'Rol');
+          if (!secim) return;
+          rolKodu = secim;
+        } else if (rolSecenek.length === 1) rolKodu = rolSecenek[0].kod;
+
+        const kod = await metinSor(
+          'Giriş kodu (boş bırakılırsa TCKN/VKN kullanılır):',
+          d.vkno ?? '', 'Giriş kodu');
+        if (kod === null) return;
+
+        const y = await api.portalHesapAc({
+          tarafId, portalTuru: Number(tur), kod: kod.trim() || undefined, kurumId,
+          rolKodu,
+        });
+        b.tazele();
+        // PAROLA YOK: yonetici parola yazmaz, kisi ilk giriste kendi koyar.
+        mesaj(y.mesaj);
+      });
+      return true;
+    }
+
+    // TOPLU PORTAL ROLU (819): gocle gelen dis hekimlerin rolu "Rol
+    //   Atanmamis" kaliyor; tek tek kart acmak 20+ islem demekti.
+    case 'kullanici.portal-toplu': {
+      if (!await onay('Hesabı olan tüm dış hekimlere "Dış Doktor (portal)" rolü '
+        + 'atansın mı?\n\nYetkili bir iç rolü olan hesaplar ATLANIR.')) return true;
+      await guvenli(async () => {
+        const y = await api.portalTopluRol(1);
+        b.tazele();
+        // ATLANANLAR SAYIYLA DEGIL ADIYLA: "3 atlandi" demek, hangisine
+        //   bakilacagini soylemez.
+        mesaj(y.mesaj + (y.atlanan.length > 0
+          ? ` Atlananlar: ${y.atlanan.map(a => a.unvan).join(', ')}`
+          : ''));
+      });
+      return true;
+    }
+
+    // PORTAL DAVETI (822): baglanti KISIYE gider, hesabini kendi acar.
+    case 'kullanici.portal-davet': {
+      if (!satir) return true;
+      const tarafId = Number(satir.id);
+      const kim = String(satir.unvan || satir.ad || '');
+
+      const kanal = await listeSor('Davet nasıl gönderilsin?',
+        [{ kod: '1', ad: 'SMS' }, { kod: '2', ad: 'E-posta' }], '1', 'Kanal');
+      if (!kanal) return true;
+
+      // ALICI BOS BIRAKILABILIR: karttaki cep/e-posta kullanilir.
+      const alici = await metinSor(
+        kanal === '1'
+          ? 'Numara (boş bırakılırsa karttaki cep telefonu):'
+          : 'E-posta (boş bırakılırsa karttaki adres):',
+        '', kanal === '1' ? 'Numara (905XXXXXXXXX)' : 'E-posta');
+      if (alici === null) return true;
+
+      if (!await onay(`${kim} kişisine portal daveti gönderilsin mi?
+
+`
+        + 'Tek kullanımlık bir bağlantı gider; kişi TCKN’sinin son 4 hanesiyle '
+        + 'doğrulanıp kendi parolasını belirler.')) return true;
+
+      await guvenli(async () => {
+        const y = await api.portalDavetGonder({
+          tarafId, kanal: Number(kanal), alici: alici.trim() || undefined,
+        });
+        b.tazele();
+        mesaj(y.mesaj);
       });
       return true;
     }

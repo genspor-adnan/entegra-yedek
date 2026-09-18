@@ -14778,3 +14778,533 @@ Uçtan uca: dış radyolog (Primli + Raporlayan işaretli) 2 iş okudu (2 × 400
 (dış hekim kartı, plan, istekler, fatura, hizmet) silindi.
 
 xUnit 360/360, vitest 677/677.
+
+## 18.09.2026 — Bakanlık Teleradyoloji profili (belge; kod yok)
+
+Kullanıcı: *"sağlık bakanlığının teleradyoloji süreci var ona bak bi"* →
+*"evet, o bölümü ekle"*. Kod değişmedi; `14_TELERAD_ENTEGRASYON_KAPSAMI.md`'ye
+**5. bölüm** eklendi (eski 5–7 → 6–8) ve şu kaynağa dayanıyor: T.C. Sağlık
+Bakanlığı *Teletıp ve Teleradyoloji Sistemi Entegrasyon Kılavuzu* **3.46**.
+
+**Bakanlık sistemi rakip değil zemin:** HBYS `ORM^O01` ile istemi TCP-LLP
+üzerinden gönderir, PACS görüntünün kendisini değil **KOS** özetini merkez XDS
+repository'ye iletir ve görüntüyü kendi **WADO** servisinden sunar, rapor
+`ORU^R01` ile döner. **C-MOVE kılavuzdan kaldırılmış** (rev. 2.02) — bu,
+"kendi PACS'ımızı kurmuyoruz, müşterininkine bağlanırız" kararının aynısıdır.
+Pratik sonuç: **WADO birincil görüntü yolu**, C-FIND yedek, `fo-dicom` kararı
+ertelenebilir.
+
+**Rapor iki yönlü:** Bakanlık radyoloğu okursa ORU bize gelir; **bizim
+radyoloğumuz okursa ORU'yu biz Teleradyoloji'ye göndermek zorundayız.** Bu
+yüzden ORU üreticisi baştan 2.3.1 Bakanlık profiline göre yazılacak — sonradan
+uyarlamak iki ayrı üretici demek.
+
+**Kurum-kuruma modelimiz kılavuzda tanımlı:** "A hastanesinin B hastanesinden
+görüntüleme hizmeti alması" senaryosunda raporu gönderen kurum `OBR-15.1`'e
+kendi SKRS kodunu yazar (`6789&&SKRS^^^^^R`); karşı taraf istemi
+`GetPatientOrderList` ile çeker.
+
+**Eşleştirmenin tek anahtarı accession** (`OBR-18` = `ORC-2` = DICOM
+`0010,0080`); tek çekim–çok istem altı kurala bağlı (aynı TCKN/hekim/modalite,
+randevu farkı ≤ 40 dk, farklı accession, görüntü en sonda).
+
+Alan eşlemesi çıkarıldı; bizde **var** olanlar: accession (`dis_erisim_no`),
+`study_uid`, TCKN, `hizmet.sut_kodu` + `hizmet.loinc`, onay zamanı (799),
+`enabiz_paket.sys_takip_no` (605). **Eksik sekiz madde** yazıldı: rapor
+gövdesinin dört parçaya sabitlenmesi (Bulgular < 50 karakter reddediliyor),
+hekim/radyolog TCKN'leri, modalite SKRS eşlemesi, `OBX-13` değerlendirme,
+`OBX-17` kontrast madde, e-Nabız bağı (`OBR-20/21`, `PV1-19`), MSH encoding ve
+firma kodu, accession zorunluluğu.
+
+**Yazılmıyor:** hedef müşterinin Bakanlık sisteminde olup olmadığı
+netleşmeden bu sekiz madde başlamaz — özel/muayenehane müşteride bölümün
+tamamı kapsam dışıdır.
+
+## 18.09.2026 — Bakanlık profili uygulandı (809 · 810 · 811 · 812 · 813)
+
+Kullanıcı: *"bunları yap"* — `14_TELERAD_ENTEGRASYON_KAPSAMI.md` 5.5'teki
+sekiz eksik. Kılavuz 3.46'nın **mesajı reddettiren** kuralları artık veride.
+
+**809 · rapor dört parça.** `radyoloji_sablon_bolum` ve `radyoloji_rapor_bolum`
+`bakanlik_parca` taşıyor (1 Teknik · 2 Karşılaştırma · 3 Bulgular · 4 Sonuç ve
+Öneriler). Başlık serbest kaldı, parça numarası tetikle türüyor
+(`fn_rad_bakanlik_parca`); **tanınmayan başlık 0 kalır** - sessizce yanlış
+parçaya yazmaktansa eksik demek yeğ. Onay kapısı
+(`fn_radyoloji_rapor_onaylanabilir`) Bulgular < 50 karakter ya da Sonuç boşsa
+durduruyor. **Kapı ayara bağlı:** `radyoloji.bakanlik_profili` varsayılan
+**kapalı** - özel hastane müşterisinin radyoloğu bu duvara çarpmaz.
+
+**810 · TCKN ve modalite.** `telerad_istek.isteyen_hekim_tckn` ve
+`radyoloji_istem.dis_hekim_tckn` açıldı (ORC-12/OBR-16); radyolog TCKN'si zaten
+`taraf.vkno`. Modalite eşlemesi VERİ: `rad_modalite_kod` (BT→CT, MR→MR, USG→US,
+Röntgen→**CR** - dijital detektörde DX yapılabilir, Mamografi→MG, DEXA→BMD,
+Anjiyo→XA, Skopi→RF). Eşleme yoksa `fn_rad_modalite_kod` **boş döner** -
+iki harf şartını sağlamak için uydurma kod üretmek, tetkiki yanlış yönteme
+yazmak olurdu.
+
+**811 · OBX-13 / OBX-17.** Rapora iki puan alanı (istem nedeni · çekim
+kalitesi, 1-5). `goruntu_durum` bunun yerine geçmiyor: o "görüntü ulaştı mı"
+sorusunun cevabı. Kontrast artık `yol ^ etkin madde ^ konsantrasyon`
+(`fn_rad_kontrast_obx17`); `kontrast_ml` MİKTAR olarak duruyor - 300 mg/ml'lik
+maddeden 80 ml verilebilir, ikisi ayrı sayı. Kılavuz ticari ismi yasaklıyor.
+
+**812 · kurum kimliği, e-Nabız, accession.** `telerad_kurum`'a Bakanlık grubu:
+`bakanlik_gonderim`, `skrs_kodu` (ORC-21), `msh_uygulama`/`msh_tesis`,
+`msh_encoding` (UTF8/Windows1254), MSH-5/6 alıcı adları ve `wado_adres`.
+`tesis_kodu` DEĞİŞMEDİ - o ÇKYS/Medula kodu. e-Nabız bağı
+`fn_enabiz_basvuru_referans` ile kuruldu (OBR-20 SYSTakipNo, OBR-21/PV1-19
+hastane referans no) - ikisi de zaten 605/606'daydı, eksik olan bağdı.
+Accession kurum içinde benzersiz; Bakanlığa bildiren kurumda **zorunlu**
+(kılavuz §5.2: görüntüyü isteme bağlayan tek anahtar).
+
+**813 · eksik listesi.** `v_telerad_bakanlik_eksik` + `telerad-bakanlik-eksik`
+kaynağı (menüde "Bakanlık Eksikleri"). Ayrı uç yazılmadı: liste altyapısı yetki,
+şube süzgeci ve sayfalamayı zaten çözüyor. **Portala kapalı** - eksik metni
+kurulum alanlarımızı (SKRS, firma kodu) sayıyor. Tek istek için
+`GET /api/telerad/istek/{id}/bakanlik`: mesaja girecek değerler + eksikler +
+dört parçanın uzunluğu.
+
+**Onayı ne durdurur, ne durdurmaz:** radyoloğun düzeltebileceği eksik (Bulgular,
+Sonuç) onayı durdurur; accession/TCKN/SKRS gibi kurulum eksikleri durdurmaz,
+listede görünür. Düzeltemeyeceği duvara radyoloğu çarptırmamak için.
+
+Uçtan uca denendi: Bakanlık bildirimi açık deneme kurumu + istek → eksik
+listesi `hasta TCKN (PID-4) · isteyen hekim TCKN (ORC-12) · onaylı rapor`,
+modalite karşılığı `CR`. Deneme verisi silindi.
+
+xUnit 380/380 (20 yeni test), vitest 677/677.
+
+## 18.09.2026 — ORU üreticisi, MLLP istemcisi ve teslim kuyruğu (814 · 815 · 816)
+
+Kullanıcı: *"ORU üreticisiyle devam et"*. Raporun karşı sisteme gitmesi artık
+uçtan uca çalışıyor.
+
+**Üretici saf işlev.** `OruUretici` veritabanı/ağ/saat bilmiyor: içeri veri,
+dışarı metin. Mesajın biçimi bu yüzden karşı uç olmadan sınanabiliyor -
+kapsam belgesindeki *"HL7 önce yapılabilir"* gerekçesinin karşılığı. **Tek
+üretici, iki profil:** Bakanlık 2.3.1 + dört parça base64, kurum HBYS'si 2.5 +
+satır satır TX. İki ayrı sınıf yazmak, bir alanı birinde düzeltip ötekinde
+unutmak olurdu.
+
+**Alanlar dizi indeksiyle yazılıyor.** İlk sürümde "kaç ayırıcı saydım"
+yöntemi `PID-3` ile `PID-4`'ü kaydırmıştı - numara artık kılavuzda yazan
+numaradır ve testler alan alan sınıyor.
+
+**Kaçış zorunlu**, iki istisna öğrenildi: `MSH-2` kodlama karakterleri ham
+gider, `OBX-17` de ham gider - o alan zaten bileşenli geliyor
+(`IV^Ioheksol^300`) ve kaçırmak kontrast bilgisini tek parçaya çökertiyordu
+(test yakaladı). Rapor metnindeki satır sonu `\X0D0A\` olarak kaçılıyor:
+kaçılmazsa segment bölünüyor.
+
+**Başlık büyük harfe çevrilmiyor:** `ToUpperInvariant` Türkçe'de "Öneriler"i
+"ÖNERILER" yapıyordu. Karşı tarafa bozuk Türkçe göndermektense başlık
+yazıldığı gibi gidiyor.
+
+**Kuyruk iki tablo, iki soru** (814): `telerad_teslim` "şu an ne durumda"
+(istek + hedef başına TEK satır), `telerad_teslim_iz` "ne oldu" (her deneme,
+ham ORU ve ham ACK ile). Hedef anahtarın parçası: kuruma gitmiş olmak
+Bakanlığa gittiği anlamına gelmez.
+
+**ACK politikası:** AA teslim · **AE kalıcı hata, otomatik tekrar YOK** (aynı
+mesaj yine reddedilir, kuyruk sonsuza kadar dönmesin) · AR ve yanıtsızlık
+artan aralıkla tekrar (1 dk · 5 dk · 15 dk · 1 sa · 4 sa · günde bir).
+Zamanlama satırda (`sonraki_deneme`), bellekte değil: uygulama yeniden
+başlayınca bütün kuyruk aynı anda denenmesin.
+
+**Kanal seçimi sunucuda.** Tek "Teslim Et" düğmesi: kurumun kanalı HL7 ORU ise
+kuyruk + gönderim, "Portal" ise yalnız teslim damgası. Ekran kanal bilmiyor.
+Otomatik kuyruklama ayarı (`telerad.teslim_otomatik`) **kapalı** doğuyor.
+
+**Bakanlık hedefinde eksik varsa mesaj hiç gönderilmiyor**: reddedilecek
+mesajı yollamak kuyruğu ve karşı tarafın günlüğünü şişirirdi; eksikler zaten
+813 ekranında.
+
+**816:** üretici yazılırken `PID-3` için kaynağımızın olmadığı görüldü -
+`telerad_istek.dis_hasta_no` açıldı. **815:** `OBR-15` hizmeti VEREN kurumun
+SKRS kodunu istiyor; o biziz ve kurum kartında duramaz - ayar
+`kurum.skrs_kodu`.
+
+Uçtan uca denendi (sahte HBYS alıcısı, gerçek soket): kurum profilinde 2.5 +
+başlıklı TX satırları, Bakanlık profilinde 2.3.1 + `TXT^BASE64` dört parça,
+`OBX-13` `4^5`, `OBX-16` radyolog TCKN'si, `OBX-17` `IV^Ioheksol^300`,
+`OBR-15` `55999&&SKRS`. İki hedefte de ACK **AA**, istek damgalandı, iz
+satırları ham gövdeleriyle yazıldı. Deneme verisi silindi.
+
+xUnit 419/419 (39 yeni test), vitest 677/677.
+
+## 18.09.2026 — Gelen ORU: dışarıdan gelen rapor (817)
+
+Kullanıcı: *"gelen ORU'yu da yap"*. Teslim yönünün aynası tamamlandı.
+
+**İki kaynak, tek kapı.** Rapor ya Bakanlık havuzundaki radyologtan gelir
+(kılavuz § 3.1.4.1) ya da bizim gönderdiğimiz işi (yon = 2) raporlayan karşı
+kurumdan. Mesaj ikisinde de ORU^R01, eşleştirme ikisinde de accession - tek
+tablo (`telerad_gelen`), tek eşleştirme işlevi.
+
+**Çözümleyici üreticinin aynası.** `OruCozumleyici` de saf işlev: ayırıcılar
+MSH'den okunur, iki gövde biçimi de anlaşılır (Bakanlık dört parça base64,
+kurum düz TX satırları). Kendi ürettiğimiz mesajı geri okuyan **gidiş-dönüş
+testi** en değerlisi: biri değişip öteki değişmezse kırılır.
+
+**Dinleyici cihaz portundan AYRI.** 432'deki port bir cihaz kartına bağlı ve
+mesajı lab sonucu sayıyor; teleradyoloji raporu cihaz değil - kurulum için
+sahte bir "analizör" kartı açmak ekranlarda cihaz gibi görünen bir şey
+bırakırdı. Port ayardan gelir, **0 = kapalı** doğar: rapor almayan kurulumda
+dinlenen kapı bırakılmaz. IP beyaz listesi boşsa açılışta uyarı düşer
+(kılavuz alıcının yalnız Teleradyoloji SBA IP'sinden veri kabul etmesini
+istiyor).
+
+**Eşleştirme veritabanında** (`fn_telerad_gelen_istek`): accession zorunlu,
+SKRS ve TCKN doğrulayıcı. **Birden çok aday varsa hiçbiri seçilmez** - iki
+kurum aynı numarayı kullanabilir ve yanlış hastanın raporunu yazmaktansa
+"eşleşmedi" demek yeğdir. Eşleşmeyen satır ekranda **kırmızı**, "İsteğe Bağla"
+ile insan kararıyla oturtuluyor; eşleştirme kuralı gevşetilmiyor.
+
+**ACK politikası:** işlendi/mükerrer → AA · eşleşmedi, çözümlenemedi → **AE**
+(tekrar göndermek bir şey değiştirmez, kayıt bizde) · bizim tarafta hata →
+**AR** (karşı taraf tekrar denesin). Mükerrer ayıklama `MSH-10` benzersiz
+indeksiyle; kontrol numarasız (çözümlenemeyen) mesajlar kuralın dışında.
+
+**Rapor iç akışa yazılıyor:** iç istem yoksa açılıyor ve rapor
+`radyoloji_rapor` + parça numaralı bölümler olarak kaydediliyor - ayrı bir
+"dış rapor" tablosu, raporu mevcut ekranların hiçbirinde göstermemek olurdu.
+Radyolog TCKN'den bulunuyor; tanınmıyorsa onaylayan boş kalıyor ve adı
+"Raporlayan" bölümünde yazıyor (yanlış kişiye imza attırmamak için). Önceki
+rapor kilitliyse yeni rapor **ek rapor** olarak açılıyor.
+
+İki hata testler/uçtan uca denemede yakalandı: PID-5'te kaçış bileşenden önce
+açılınca ad bölünüyordu; servis sorgusunda takma adsız kolon (`tetkik_hizmet_id`)
+sözlük anahtarını kaydırıyordu.
+
+Uçtan uca denendi (gerçek soket, sahte Bakanlık göndericisi): eşleşen rapor →
+AA + dört bölüm + `RAD-2026-…` numarası + puanlar, eşleşmeyen → AE + kırmızı
+satır, aynı MSH-10 ikinci kez → AA "daha önce alınmıştı", elle bağlama →
+rapor yazıldı. Deneme verisi silindi, port 0'a döndürüldü.
+
+xUnit 443/443 (24 yeni test), vitest 677/677.
+
+## 18.09.2026 — Portal V2: açılır menü + telefon (818)
+
+Kullanıcı: *"dış dr / dış kurum / hasta portallarını ver2 olarak menüler
+açılır şekilde ve cep telefonunda rahat kullanılır (responsive) şekilde
+yeniden tasarla"* → *"mockup bekliyordum"*.
+
+**Önce mockup:** `Ekranlar/Portal/portal_dis_doktor_v2.html`,
+`portal_dis_kurum_v2.html`, `portal_hasta_v2.html` (+ `_portal_v2.css`). Her
+dosya aynı ekranın **üç hâlini yan yana** gösteriyor: telefon (menü kapalı),
+telefon (çekmece açık), masaüstü (menü sabit). Sınıf adları uygulamadaki
+kabukla aynı (`pk-*`) - mockup ile kod arasında ad çevirisi yok.
+
+**Ayrı kabuk** (`sayfalar/portal/PortalKabuk.tsx`). Kurum içi kabuk 13 gruplu
+menü, favoriler, çalışma alanı, komut paleti, şube seçimi ve bildirim paneli
+taşıyor; portal kullanıcısının tek şubesi ve beş-altı ekranı var. Aynı kabuğu
+"sadeleştirerek" kullanmak, her yeni kurum içi özelliğin portalda ayrıca
+gizlenmesini gerektirirdi - biri unutulduğunda portal kullanıcısı basamayacağı
+düğmeyi görürdü. Rotalar değişmedi: yalnız kabuk değişiyor.
+
+**Menü açılır, telefonda çekmece.** Bölümler accordion, aynı anda tek bölüm
+açık; bulunulan ekranın bölümü kendiliğinden açılıyor. 900px altında menü
+off-canvas: rota değişince ve perdeye dokununca kapanıyor, ESC de kapatıyor.
+Dokunma hedefleri 44px, form alanları 16px (altında iOS Safari sayfayı
+yakınlaştırıyor), kart telefonda tam ekran.
+
+**Menü adları portala göre.** Aynı ekran üç portalda üç ayrı şey: "Hasta
+Listesi" dış hekimde **Hastalarım**, kurumda **Gönderdiğim hastalar**, hastada
+**Kayıtlarım**. Eşleme tek dosyada (`portalMenu.ts`), tabloda olmayan ekran
+gizlenmiyor - "Diğer" bölümüne düşüyor.
+
+**Tarayıcıda bulunan kusur - menü yetkiye değil YETKİ + KAPSAMA bakmalı.**
+Dış kurum menüsünde "Diğer" altında Teslim Kuyruğu, Gelen Raporlar, Bakanlık
+Eksikleri ve Telerad Panosu görünüyordu: kurum rolü `teleradyoloji` yetkisini
+kendi isteğini açabilmek için taşıyor, ama o ekranların portal kapsam kuralı
+`false` - açılsalar boş gelirdi. Düzeltme: `KaynakKatalogu.PortalKaynaklari`
+kapsamı açık kaynak adlarını veriyor, giriş yanıtı `portalKaynaklar` olarak
+taşıyor, menü onunla süzülüyor. **Kapsam sunucuda kalıyor** - istemci
+"portalda çalışan ekranlar" listesi tutsaydı, sunucu kuralı değişince menü
+yanılırdı.
+
+**818 - hasta portalı rolü.** Üç portal türünün kapsam kuralları 794'te
+yazılmıştı ama hasta rolü hiç açılmamıştı: kural vardı, taşıyacak rol yoktu.
+Rol **salt okur** (hasta, randevu, lab, lab sonuç, radyoloji istem, AI
+rehber); randevu alma ve mesajlaşma bilerek dışarıda - ilki kendi
+doğrulamasını (çakışma, kapasite, onam) ister, ikincisi tıbbi sorumluluk
+doğurur.
+
+Tarayıcıda üç portalda da doğrulandı (390px ve 1400px): çekmece açılıp
+kapanıyor, yatay taşma yok, kapsam süzgeci sonrası kurum menüsünde yalnız
+"Görüntü isteklerim" kalıyor. Telefonda üst üste çıkan ikinci yatay kaydırma
+çubuğu da kaldırıldı.
+
+**Dev veritabanında deneme kullanıcıları bırakıldı:** `pdemdr`, `pdemkrm`,
+`pdemhst` (admin parolasıyla) - portal V2 ekrandan denenebilsin diye.
+
+**Başlık menü adıyla eşlendi** (kullanıcı: *"evet, başlığı menü adıyla eşle"*).
+Menüde "Randevularım"a tıklayıp sayfada "Randevular" görmek, tıklanan adı
+sayfada bulamamak demekti. Ad tek yerde (`portalMenu`) duruyor; portal kabuğu
+küçük bir bağlamla (`portalBaslik.tsx`) ekrana taşıyor. **Liste tanımına ikinci
+bir ad kolonu eklenmedi:** aynı ekran üç portalda üç ayrı ad taşıyor, tanıma
+tek "portal adı" yazmak üçünden ikisinde yanlış olurdu. Kırıntı yolu
+("Randevu › Randevular") portalda gizlendi - kurum içi menü ağacını anlatıyor,
+portal kullanıcısında karşılığı yok. Portal dışında hiçbir şey değişmiyor:
+sağlayıcı yoksa kanca `undefined` döner.
+
+vitest 693/693 (16 yeni test), xUnit 443/443.
+
+## 18.09.2026 — Portal erişimi verme akışı (819)
+
+Kullanıcı: *"hasta veya dış doktoru nasıl kullanıcı yapacağız"* →
+*"1 ve 2'yi yap, kurum hesabı kişi başı olsun"*.
+
+**Eksik olan:** hesap açma yalnız personele bağlıydı
+(`OtomatikHesapAcAsync ... where t.personel = 1`); kullanıcı kartı hesabı
+açmıyor, var olanı düzenliyordu. Yani dış hekime, kuruma ya da hastaya
+ekrandan erişim verilemiyordu - portal rolleri hazır olduğu hâlde.
+
+**Kurum hesabı KİŞİ BAŞI.** Kurum portalını kullanan bir insandır; hesap
+kurumun cari kaydında değil, ekranı kullanan kişinin kaydında açılır ve
+kapsam yeni `taraf_kullanici.portal_taraf_id` ile kuruma bağlanır.
+Paylaşımlı hesapta kim ne yaptı bilinmez, biri ayrılınca parola herkes için
+değişirdi.
+
+**Kapsam kuralları DEĞİŞMEDİ** (794): kurallar hâlâ `{kullanici}` diyor;
+değişen tek şey oraya konan sayı. `fn_kullanici_portal_taraf` =
+`coalesce(portal_taraf_id, id)`; istek bağlamında `PortalKimlik` olarak
+taşınıyor. Kuralları kişi/kurum diye ikiye bölmek, aynı soruyu iki yerde
+bakım etmek olurdu. Dış hekim ve hastada kolon boş kalır, davranış aynı.
+
+**Hesap PAROLASIZ doğar** - kurum içi desenin aynısı (674). Yönetici parola
+yazmaz; kişi giriş ekranındaki "ilk parola" akışıyla TCKN son 4 hanesini
+doğrulayıp kendi parolasını koyar.
+
+**Ayrı yetki:** `kullanici.portal`. Kurum içi hesap açma yetkisi bankoda
+birçok kişide var; dışarıya kapı açmak ayrı bir karardır - yalnız yönetici
+rolüne verildi.
+
+**Ekran:** üç kartın araç çubuğunda **🔑 Portal Erişimi** (cari, dış hekim,
+hasta). Portal türü kaydın ne olduğundan çıkar - kartta yazan şey ikinci kez
+sorulmaz; birden çok uygun tür varsa seçtirilir. Kurum portalında "hangi
+kurumun işlerini görecek" açıkça sorulur.
+
+**Uçlar:** `GET /api/kullanici/portal-durum/{tarafId}` (hesap var mı, hangi
+türler uygun), `POST /api/kullanici/portal-hesap`.
+
+Uçtan uca denendi: dış hekim (Dr. Selin Ak) ve kurum temsilcisi (Merve
+Yıldız → Özel Yaşam Tıp Merkezi) hesapları açıldı, ilk parola akışıyla giriş
+yapıldı; temsilci hesabı **kurumun** kapsamını gördü (3 teleradyoloji isteği,
+1 lab istemi, 1 hasta) - kendi kaydının değil.
+
+**Kurulum notu:** "Dış İstem Kurumu (portal)" rolü dev veritabanında
+`aktif = 0` geliyordu; uç aktif rol bulamayınca açıkça hata verdi. Rol dev'de
+aktif edildi - kurulumda bilinçli açılması gereken bir anahtar.
+
+xUnit 449/449 (6 yeni test), vitest 693/693.
+
+## 18.09.2026 — SMS + e-posta kanalları ve hasta daveti (820 · 821 · 822)
+
+Kullanıcı SMTP ve Ayyıldız SMS bilgilerini verdi → *"sms ve eposta
+entegrasyonu da yap"* → *"hasta davetini de yap"*. İki kanal da **canlıda
+doğrulandı** (SMS telefona, e-posta kutuya ulaştı).
+
+**820 - kanallar.** `EPOSTA` (SMTP, port 587) ve `SMS` (Ayyıldız XML POST)
+hesapları. **Göç dosyasına parola yazılmadı**: iskelet (adres, port, gövde
+şablonu, başlık) göçte, kimlik bilgileri kurulumda. Göç dosyaları depoya
+girer ve müşteriden müşteriye taşınır - içine bir kurumun SMTP parolasını
+yazmak, onu bütün kurulumlara dağıtmak olurdu.
+
+**XML POST desteği** `HttpSmsGonderici`'ye eklendi (`tip: "xml"`). Ayyıldız'ın
+gövdesi ayarda durur; yer tutucular `{{kullanici}} {{sifre}} {{bayi}}
+{{baslik}} {{mesaj}} {{alici}} {{zaman}}`. Ayrı bir sağlayıcı sınıfı
+yazılmadı - 399'daki "yeni sağlayıcı bağlamak KOD DEĞİL AYAR işidir" kararı
+korundu. Mesaj CDATA içinde gidiyor; metinde `]]>` geçerse CDATA erken kapanıp
+gerisi etiket sanılacağı için bölünerek etkisizleştiriliyor.
+
+**Sınama düğmesi** (`POST /api/entegrasyon/{id}/test-bildirim`): mevcut
+"Bağlantıyı Sına" adresin ayakta olmasına bakıyor, kanalda hiçbir şey
+söylemiyor. Kanalın çalıştığının tek kanıtı ulaşan mesajdır.
+
+**821 - canlı denemede bulunan kusur.** Sağlayıcı HTTP 200 ile iki farklı şey
+dönüyor: kabul `ID:84134257`, ret `01`. Parola bozukken de "gönderildi"
+diyorduk - ölçüt yalnız HTTP 2xx'ti. Başarı ölçütü artık yanıtta `ID:`
+aramak; yanlış parola **başarısız** dönüyor. Sessiz başarısızlık burada en
+pahalı hata: davet kodu gitmediği hâlde sistem "gitti" der.
+
+**E-postada aynı garanti YOK** ve verilemedi: `srvm08.trwww.com` kendi alan
+adına teslimatta AUTH zorlamıyor - parola bozukken de kabul etti. "Başarılı"
+yanıtı mesajın gittiğini söyler, parolanın doğruluğunu değil. Kurulum notu
+olarak duruyor.
+
+**822 - hasta daveti.** 819'daki "Portal Erişimi" hesabı parolasız açıp kodu
+kişiye söylüyor; dış hekimde çalışır, hastada çalışmaz - hastaya "portalımız
+var, şu kodla gir" demek pratikte kimseyi girdirmiyor. Davet bunu tersine
+çeviriyor: bağlantı hastaya gider, hesabını kendi açar.
+
+**Jeton depoda düz durmaz:** saklanan SHA-256 özeti; gelen jeton özetlenip
+aranır. Yedek dosyasını okuyan biri çalışan bağlantı üretemez.
+
+**Doğrulama iki parçalı** (bağlantı + TCKN son 4) ve üç sınırlı: 48 saat
+(ayar), tek kullanım, beş yanlış denemede kapanma. Yalnız bağlantı yeterli
+olsaydı yanlış numaraya giden ya da ekran görüntüsü paylaşılan bir SMS
+başkasının sağlık kayıtlarını açardı. Geçersiz davette SEBEP söylenmez -
+"süresi doldu" ile "böyle bir bağlantı yok" ayrımı, jetonun gerçek olup
+olmadığını söylerdi. **Jeton yanıtta da dönmez:** bağlantı yalnız kişiye
+gider, yöneticiye göstermek hastanın kaydını yönetici eliyle açılabilir
+kılardı.
+
+Ekran: hasta kartında **📨 Portal Daveti Gönder**; hastanın telefonunda
+oturumsuz `/davet/{jeton}` sayfası (44px hedefler, 16px yazı).
+
+Uçtan uca denendi - gerçek SMS ile: davet gönderildi (`ID:84134276`),
+bağlantı geçerli döndü, **yanlış son 4 reddedildi**, doğru son 4 ile hesap
+açıldı, aynı bağlantı ikinci kez `gecerli: false`, yeni hesapla girişte
+`portalTuru = 3` (Hasta portalı).
+
+xUnit 456/456 (7 yeni test), vitest 693/693.
+
+## 824 — Dış kurum: Klinik ve Yönetici rolleri, kurumun mali ekranları
+
+Kullanıcı: *"anlaşmalı kurumdan hasta gönderen doktor ve hesapları kontrol
+eden yönetici var"* → *"kurum kapsamı olsun, fatura satırında hasta adı
+görünmesin"*.
+
+**Kapsam aynı, yetki ayrı.** İkisi de kurumun işlerini görür (`portal_turu
+= 2`, kapsam kimliği 819'daki `portal_taraf_id`); değişen yalnız hangi
+ekranların açık olduğu. Klinik: hasta · lab · görüntü isteği · yazışma.
+Yönetici: kurumun faturaları · cari ekstre · yazışma — **tıbbi ekran yok**.
+"Nasılsa aynı kurum" demek, kapsamı kurumun tamamına açmak demekti.
+
+**Kolon gizlemek yerine dar kaynak.** Kurum içi `belge` listesi `hastaAdi`,
+`doktor`, `poliklinik` taşıyor; `cari-ekstre` açıklamasında başvuru
+faturasının metni (ve orada hasta adı) geçiyor. Gizlenen kolon bir gün
+varsayılan görünüme geri eklendiğinde sessizce açılır — **olmayan kolon
+açılamaz**: portal için `kurum-belge` ve `kurum-ekstre` kaynakları yazıldı
+(`KaynakKatalogu.Portal.cs`, yetki `portal.mali`). Ödenen tutar `belge`de
+değil `kasa_islem`de: kurum içi listedeki `tahsilatDurum` ile aynı hesap.
+
+**Kurum ↔ çalışan bağı kartın kendisinde.** Kişinin kurumu `taraf.bag_id`
+("Bağlı Kurum", db/309); `taraf_personel.kurum_id` 309'da kaldırılmıştı.
+Portal erişimi verilirken kurum artık sorulmuyor, **bağlı kurum varsayılan
+geliyor** (`portal-durum` ucu `bagliKurumId`/`bagliKurumAdi` döner) — kartta
+yazan şeyi ikinci kez sormak olurdu.
+
+Menüde yeni **Mali** bölümü (yalnız kurum portalı). Testler iki yönü de
+kilitliyor: yönetici tıbbi ekran görmez, klinik rol mali ekran görmez, ve
+mali ekranların yetki kodu `portal.mali`dan başkası olamaz.
+
+## 825 — Gönderen primi: kendi adına gönderene
+
+Kullanıcı: *"kendi adına hasta gönderen doktor eğer tanımlıysa gönderen primi
+alır"* · *"kurum adına hasta gönderen doktor prim almaz"*.
+
+**Ölçüt kişinin kartı değil istemin satırı.** `radyoloji_istem.istek_kurum_id`
+doluysa iş kurum adına gelmiştir; boşsa hekim kendi adına göndermiştir. Kart
+(`taraf.bag_id`) ölçüt olsaydı, kuruma bağlı bir hekimin kendi özel hastasını
+göndermesi de kurum işi sayılır ve hak ettiği prim düşerdi.
+
+Tek "Gönderen" satırı (rol 1): kurum doluysa **kurum**, boş + dış hekimse
+**hekim**, iç personel ise İsteyen (rol 2, değişmedi). Eski kural kurumu yalnız
+hekim boşken gönderen sayıyordu — hekim + kurum birlikte geldiğinde prim
+hekime yazılıyordu, kullanıcının kuralının tersi.
+
+**"Tanımlıysa" için ek koşul yazılmadı:** rol yazılması prim doğurmaz,
+`fn_prim_plan_satiri` eşleşen plan bulamazsa prim üretilmez. Planı olmayan
+hekimde rol durur (hakedişte kimin gönderdiği görünür), prim doğmaz.
+
+Geri dolgu yalnız OTOMATIK (`kaynak = 2`) rolleri tazeler; elle düzeltilmiş rol
+yerinde kalır. Dev veritabanında etkilenen istem: 0.
+
+xUnit 459/459 (3 yeni test).
+
+## 826 — İstem kurumu hekimin bağlı kurumundan
+
+825 gönderen primini `radyoloji_istem.istek_kurum_id`'ye bağladı; o alanı ise
+yalnız ekran dolduruyordu. Kuruma bağlı hekimin istemi kurumsuz kaydolunca
+kurumun portalı satırı görmüyor, fatura kuruma bağlanmıyor ve prim yanlışlıkla
+hekime yazılıyordu.
+
+**Varsayılan tetikte, uçta değil:** ekran, portal, göç ve HL7 aynı kuraldan
+geçsin. `tg_rad_istem_kurumu` INSERT'te kurum boşsa hekimin `taraf.bag_id`'sini
+yazar; UPDATE'te yalnız HEKİM DEĞİŞTİĞİNDE ve kurum elle seçilmemişse yeniden
+türetir.
+
+**Boşaltma korunur:** memur kurumu bilerek sildiyse (hekim kendi özel hastasını
+gönderiyor) tetik geri doldurmaz — yoksa "kendi adına gönderme" hiç
+yazılamazdı. Elle seçilmiş başka kurum da ezilmez (hekim iki kurumda
+çalışabilir).
+
+**Geri dolgu yok:** kapanmış istemin kurumunu sonradan yazmak primi geçmişe
+dönük değiştirir; bu para kararı, tetik kararı değil. Dev veritabanında
+etkilenen satır 0.
+
+xUnit 463/463 (4 yeni test: otomatik dolum, elle boşaltma, bağımsız hekim,
+elle seçilmiş kurum).
+
+## 827 — Lab isteminde gönderen kurum + "dış hekim" kapısı
+
+826 radyolojide kurumu hekimin kartından türetti; lab tarafında aynı boşluk
+duruyordu (`lab_istem.dis_kurum_id` yalnız ekrandan, 146 istemin 4'ünde dolu).
+Kurum boş kalınca kurumun portalı kendi hekiminin istemini görmüyor, iş kuruma
+faturalanmıyordu. Aynı kural `tg_lab_istem_kurumu` ile lab'a kuruldu:
+INSERT'te doldur, UPDATE'te yalnız hekim değişince türet, elle seçilmiş ya da
+boşaltılmış kuruma dokunma.
+
+**Dış hekim kapısı 826'yı da kapsıyor:** `taraf.bag_id` kişi/personel kartının
+da alanı ("Bağlı Cari"). İç personelin kartına bağlı cari yazılsaydı 826'nın
+tetiği o kişinin istemine kurum yazar, 825 gereği gönderen primini oraya
+taşırdı. Ortak `fn_dis_hekim_kurumu` artık `taraf_personel.dis_hekim = 1`
+arıyor; `tg_rad_istem_kurumu` bu yüzden burada yeniden tanımlandı (yürürlükteki
+tanım 827).
+
+**Lab primi ayrı karar:** lab kalemine bugün hiçbir prim rolü yazılmıyor (rol
+yazan tek yer radyoloji, muayene, teleradyoloji). 825'in gönderen primini lab'a
+kurmak yeni prim doğurur — istenmeden yapılmadı. Bu göç yalnız kurum bağını
+kurar. Geri dolgu yok.
+
+xUnit 466/466 (3 yeni test: lab otomatik dolum, lab elle boşaltma, iç
+personelin bağlı carisi kurum sayılmaz).
+
+## 828 — Lab kaleminde gönderen primi
+
+825'in kuralı ("kendi adına gönderen doktor tanımlıysa gönderen primi alır,
+kurum adına gönderen almaz") radyolojide çalışıyordu; laboratuvarda kalem rolü
+hiç yazılmıyordu — rol yazan tek yerler radyoloji (326/825), muayene (584) ve
+teleradyoloji (807) idi. Dış hekimin gönderdiği lab işi hakedişte hiç
+görünmüyordu.
+
+**Bağ ücret satırı üzerinden:** `lab_istem_satir.belge_satir_id` şemada var ama
+hiçbir yol onu yazmıyor (0/103). `fn_lab_rol_tazele(belge_id)` istemin
+belgesindeki, hizmeti `lab_tetkik`/`lab_panel` karşılığı olan kalemleri
+rolleyor — aynı eşlemeyi `LabServisi.BasvurudanIstemTamamla` istemi üretirken
+de kullanıyor, iki yerde iki ölçü olmasın.
+
+**Kim:** `dis_kurum_id` doluysa kurum, boşsa ve gönderen dış hekimse hekim; iç
+personelin istemi gönderen primi doğurmaz. Belgede farklı göndericili birden
+çok lab istemi varsa **hiç rol yazılmaz** — aynı kaleme iki gönderen yazmak
+primi ikiye katlar, birini seçmek uydurma olurdu; öyle bir belge elle rollenir.
+
+**Ücret kalemi sonra gelebilir:** `belge_satir` tetiği kalem eklenince aynı
+fonksiyonu çağırıyor (326'daki "kalem sonradan oluşunca tetik yeniden çalışır"
+kuralının lab karşılığı). Plan kapısı yok (326 ile aynı): rol yazılması prim
+değildir, plan yoksa prim doğmaz. Elle girilen rol ezilmez. Geri dolgu yok —
+geçmişteki 2 belge bilerek rollenmedi.
+
+xUnit 471/471 (5 yeni test: kendi adına hekim, kurum adına, iç personel,
+kalem sonra, farklı göndericiler).
+
+## Portal hesabında rol seçimi (824 düzeltmesi)
+
+824'te kurum portalına ikinci rol eklendi (Klinik / Yönetici) ama hesap açan
+uç rolü hâlâ `select ... where portal_turu = @p0 order by id limit 1` ile
+seçiyordu: iki rol olunca HER ZAMAN Klinik (id 62) geliyordu. Muhasebeciye
+hesap açıldığında ona hasta, lab ve görüntüleme ekranları veriliyordu —
+824'ün kurduğu ayrımı akışın kendisi deliyordu.
+
+**Sunucu tahmin etmez:** `portal-durum` artık açık portal rollerini de döner,
+`portal-hesap` `rolKodu` alır. Tek rollü portal türünde (hekim, hasta) soru
+sorulmaz; çok rollü türde rol kodu zorunlu ve doğrulanır — "en düşük id" bir
+iş kuralı değil, rastlantıdır. Ekran rolü `listeSor` ile sorar.
+
+Testler: DB tarafında `DisKurumRolleriTestleri` (kurum portalında birden çok
+rol var, Yönetici'de tıbbi yetki yok, Klinik'te mali yetki yok, `portal.mali`
+tek rolde), menü tarafında `portalDisKurumRolleri.test.ts`.
+
+xUnit 475/475, vitest 696/696.

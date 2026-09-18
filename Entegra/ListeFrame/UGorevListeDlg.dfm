@@ -198,10 +198,8 @@ object GorevListeDlg: TGorevListeDlg
       HotZoneClassName = 'TcxMediaPlayer8Style'
       AlignSplitter = salBottom
       Control = cxPageControl1
-      ExplicitWidth = 8
     end
     object cxPageControl1: TcxPageControl
-      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 413
       Width = 653
@@ -210,6 +208,7 @@ object GorevListeDlg: TGorevListeDlg
       TabOrder = 5
       Properties.ActivePage = cxTabSheet1
       Properties.CustomButtons.Buttons = <>
+      Properties.Images = Tablo.PNGImageList2
       OnChange = cxPageControl1Change
       ClientRectBottom = 189
       ClientRectLeft = 4
@@ -218,10 +217,6 @@ object GorevListeDlg: TGorevListeDlg
       object cxTabSheet1: TcxTabSheet
         Caption = #304#231'erik'
         ImageIndex = 19
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object MemoNOTLAR: TcxDBMemo
           Left = 0
           Top = 33
@@ -315,7 +310,6 @@ object GorevListeDlg: TGorevListeDlg
             Style.IsFontAssigned = True
             Properties.Alignment.Horz = taRightJustify
             Transparent = True
-            ExplicitTop = 108
             AnchorX = 351
           end
           object GridYorum: TcxGrid
@@ -408,7 +402,6 @@ object GorevListeDlg: TGorevListeDlg
       end
     end
     object PageControlUst: TcxPageControl
-      Properties.Images = Tablo.PNGImageList2
       Left = 1
       Top = 42
       Width = 653
@@ -417,6 +410,7 @@ object GorevListeDlg: TGorevListeDlg
       TabOrder = 4
       Properties.ActivePage = TabSheetListe
       Properties.CustomButtons.Buttons = <>
+      Properties.Images = Tablo.PNGImageList2
       OnChange = PageControlUstChange
       ClientRectBottom = 359
       ClientRectLeft = 4
@@ -425,10 +419,6 @@ object GorevListeDlg: TGorevListeDlg
       object TabSheetListe: TcxTabSheet
         Caption = 'Liste'
         ImageIndex = 32
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object GridGorev: TcxGrid
           Left = 0
           Top = 0
@@ -446,7 +436,6 @@ object GorevListeDlg: TGorevListeDlg
             OnCanFocusRecord = GridGorevViewCanFocusRecord
             OnCellDblClick = GridGorevViewCellDblClick
             OnSelectionChanged = GridGorevViewSelectionChanged
-            Styles.OnGetContentStyle = GridGorevViewStylesGetContentStyle
             DataController.DataModeController.SmartRefresh = True
             DataController.DataSource = DtsGorevler
             DataController.KeyFieldNames = 'ID'
@@ -497,6 +486,7 @@ object GorevListeDlg: TGorevListeDlg
             OptionsView.GroupFooters = gfAlwaysVisible
             OptionsView.Indicator = True
             Preview.MaxLineCount = 0
+            Styles.OnGetContentStyle = GridGorevViewStylesGetContentStyle
             object GridGorevViewACKAPA: TcxGridDBColumn
               DataBinding.FieldName = 'ACKAPA'
               DataBinding.IsNullValueType = True
@@ -605,10 +595,6 @@ object GorevListeDlg: TGorevListeDlg
       object TabSheetGrup: TcxTabSheet
         Caption = 'Grup'
         ImageIndex = 19
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object FTileControl: TdxTileControl
           Left = 0
           Top = 0
@@ -675,8 +661,8 @@ object GorevListeDlg: TGorevListeDlg
       end
     end
     object SQLKullan: TMemo
-      Left = 70
-      Top = 120
+      Left = 22
+      Top = 128
       Width = 480
       Height = 33
       Lines.Strings = (
@@ -1091,10 +1077,10 @@ object GorevListeDlg: TGorevListeDlg
         Transparent = True
       end
       object edTakvimSayisi: TSpinEdit
-        Left = 121
+        Left = 243
         Top = 24
         Width = 43
-        Height = 24
+        Height = 26
         MaxValue = 20
         MinValue = 1
         TabOrder = 0
@@ -1103,7 +1089,7 @@ object GorevListeDlg: TGorevListeDlg
       end
       object ToolButton1: TToolButton
         Tag = 6
-        Left = 164
+        Left = 286
         Top = 24
         Caption = 'Gant '#350'emas'#305
         ImageIndex = 35
@@ -1450,8 +1436,8 @@ object GorevListeDlg: TGorevListeDlg
   end
   object SchedulerDataSource: TDataSource
     DataSet = TabGorevler
-    Left = 682
-    Top = 161
+    Left = 578
+    Top = 137
   end
   object AraQuery1: TFDQuery
     Connection = Tablo.FDCnn

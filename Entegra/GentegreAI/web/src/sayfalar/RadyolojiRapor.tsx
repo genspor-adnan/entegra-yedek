@@ -47,6 +47,11 @@ const KRITIK_YOL: Record<number, string> = {
   1: 'Telefon', 2: 'SMS', 3: 'Yüz yüze', 4: 'e-Posta',
 };
 
+/** OBX-13 birinci deger (811) - 0 girilmedi. */
+const ISTEM_NEDENI_PUAN = ['', 'Yok', 'Yetersiz', 'Orta', 'İyi', 'Mükemmel'];
+/** OBX-13 ikinci deger (811). */
+const CEKIM_KALITE_PUAN = ['', 'Çok kötü', 'Kötü', 'Orta', 'İyi', 'Çok iyi'];
+
 export function RadyolojiRapor() {
   const { istemId } = useParams();
   const git = useNavigate();
@@ -63,6 +68,13 @@ export function RadyolojiRapor() {
   const [kritikler, setKritikler] = useState<Kritik[]>([]);
   const [sablonId, setSablonId] = useState<number | null>(null);
   const [kritik, setKritik] = useState(false);
+  /**
+   * BAKANLIK OBX-13 (811): iki AYRI degerlendirme - istemin gerekcesi ve
+   * cekimin kalitesi. Ayar kapaliysa alanlar hic gosterilmez.
+   */
+  const [bakanlikProfili, setBakanlikProfili] = useState(false);
+  const [nedeniPuan, setNedeniPuan] = useState(0);
+  const [kalitePuan, setKalitePuan] = useState(0);
   const [yukleniyor, setYukleniyor] = useState(true);
   const [hata, setHata] = useState('');
   const [kritikModal, setKritikModal] = useState(false);
@@ -91,6 +103,9 @@ export function RadyolojiRapor() {
       setKritikler(y.kritikler as unknown as Kritik[]);
       setKonsultasyonlar(await api.radyolojiKonsultasyonlar(id));
       setKritik(Number(y.istem?.kritik ?? 0) === 1);
+      setBakanlikProfili(Boolean(y.bakanlikProfili));
+      setNedeniPuan(Number(y.rapor?.istemNedeniPuan ?? 0));
+      setKalitePuan(Number(y.rapor?.cekimKalitePuan ?? 0));
 
       const sec = (y.rapor?.sablonId as number | undefined)
                ?? (y.sablonlar as unknown as Sablon[])[0]?.id ?? null;
@@ -167,6 +182,9 @@ export function RadyolojiRapor() {
     alanlar: skorlar.map(s => ({ alanKod: s.alanKod, alanAd: s.alanAd,
                                  deger: skorDeger[s.alanKod] ?? '' })),
     kritik: kritik ? 1 : 0,
+    // PUANLAR YALNIZ PROFIL ACIKKEN GONDERILIR: kapaliyken alan ekranda yok,
+    //   0 gondermek daha once girilmis degeri silerdi.
+    ...(bakanlikProfili ? { istemNedeniPuan: nedeniPuan, cekimKalitePuan: kalitePuan } : {}),
   });
 
   const kaydet = async (sonra?: () => Promise<void>) =>
@@ -374,6 +392,35 @@ export function RadyolojiRapor() {
                   )}
                 </label>
               ))}
+            </>
+          )}
+
+          {bakanlikProfili && (
+            <>
+              <h5 style={{ marginTop: 12 }}>Bakanlık Değerlendirmesi</h5>
+              <label className="alan">
+                <span className="etiket">İstem Nedeni</span>
+                <select value={nedeniPuan} disabled={kilitli}
+                        onChange={e => setNedeniPuan(Number(e.target.value))}>
+                  {ISTEM_NEDENI_PUAN.map((ad, i) => (
+                    <option key={i} value={i}>{i === 0 ? '—' : `${i} · ${ad}`}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="alan">
+                <span className="etiket">Çekim Kalitesi</span>
+                <select value={kalitePuan} disabled={kilitli}
+                        onChange={e => setKalitePuan(Number(e.target.value))}>
+                  {CEKIM_KALITE_PUAN.map((ad, i) => (
+                    <option key={i} value={i}>{i === 0 ? '—' : `${i} · ${ad}`}</option>
+                  ))}
+                </select>
+              </label>
+              <div className="not kucuk">
+                Bakanlık Teleradyoloji mesajında (OBX-13) gider. <b>Bulgular en az
+                50 karakter</b> ve <b>Sonuç ve Öneriler</b> dolu olmadan rapor
+                onaylanamaz.
+              </div>
             </>
           )}
 

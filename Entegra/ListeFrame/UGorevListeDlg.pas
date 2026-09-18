@@ -217,6 +217,7 @@ type
     procedure GorevGridDBTableView1DragDrop(Sender, Source: TObject; X,
       Y: Integer);
     procedure GorevlerMenuPopup(Sender: TObject);
+    procedure GrupKartiniKaldir(AGorevId: Integer);
     procedure BuiiEPostaGnder1Click(Sender: TObject);
     procedure Listele;
     procedure EkleDuzenleTusClick(Sender: TObject);
@@ -318,8 +319,14 @@ type
 
 implementation
 
+
 uses FetaKurulusSiniflari, FetaClassExtensions, PrjConst,LocOnFly, UGenNotificationUtils,
    UGorevDlg, FetaUtil, UIslistesi, UAnaForm, UAksiyonlarGorevFrame, UVeriMotor;
+
+type
+  // HitTest / PopupMenu TdxCustomTileControl'de protected (E2362; PopupMenu DFM'de yayinlanmiyor)
+  //   -> ayni unit icinde erisim icin cracker.
+  TdxTileControlErisim = class(TdxTileControl);
 
 {$R *.dfm}
 { TGorevListeDlg }
@@ -389,6 +396,9 @@ var
   i:integer;
   gf : TAksiyonlarGorevFrame;
 begin
+  // Grup sekmesi kart kontrolu: sag tik menusu (PopupMenu DFM'de yayinlanmiyor -> kodla).
+  if FTileControl <> nil then
+    TdxTileControlErisim(FTileControl).PopupMenu := GorevlerMenu;
 {  if cxSplitter1<>nil then begin
     if TJvNavPanelButton( Sender ).Tag = 0 then
        //PanelTakvim.visible := false
@@ -912,14 +922,35 @@ begin
 end;
 
 procedure TGorevListeDlg.IsiSilMenuClick(Sender: TObject);
+var
+  LId: Integer;
 begin
+  // Toolbar "Sil" de buraya bagli (MenuGorevId yalniz sag tik menusunde dolar): silinen is
+  //   her zaman secili kayittir; kart kaldirma da ayni ID ile.
+  LId := TabGorevler.FieldByName('ID').AsInteger;
   if Application.MessageBox(PChar(SeciliSatirSil),PChar(Onay), MB_OKCANCEL  + MB_ICONQUESTION) = ID_OK then begin
      if TabGorevler.FieldByName('LISTEID').AsInteger=Servis then
         Tablo.ServisSil(MenuGorevId)
      else
         Tablo.GorevSil(TabGorevler.FieldByName('ID').AsInteger);
+     // GRUP SEKMESI: kartlar yalniz sekme degisince yeniden kurulur (PageControlUstChange/Grupla);
+     //   Listele agaci yeniler, kart yerinde kalirdi (kullanici: "silince direkt listeden kaybolmali";
+     //   toolbar Sil dugmesi de bu yordama bagli). Silinen isin karti dogrudan kaldirilir.
+     GrupKartiniKaldir(LId);
      Listele;
   end;
+end;
+
+procedure TGorevListeDlg.GrupKartiniKaldir(AGorevId: Integer);
+var
+  i: Integer;
+begin
+  if (FTileControl = nil) or (AGorevId <= 0) then Exit;
+  for i := FTileControl.Items.Count - 1 downto 0 do
+    if SameText(FTileControl.Items[i].Name, 'A' + IntToStr(AGorevId)) then begin
+      if SecilenItem = FTileControl.Items[i] then SecilenItem := nil;
+      FTileControl.DeleteItem(FTileControl.Items[i]);
+    end;
 end;
 
 
@@ -1922,6 +1953,8 @@ end;
 procedure TGorevListeDlg.GorevlerMenuPopup(Sender: TObject);
 var
     selectedEvent : TcxSchedulerControlEvent;
+    LP: TPoint;
+    LHit: TdxTileControlHitTest;
 begin
 //   if TPopupMenu(TMenuItem(Sender).GetParentComponent).PopupComponent.ClassName = 'TcxScheduler' then begin
   BuTariheIsEkleMenu.Visible := True;
@@ -1929,6 +1962,22 @@ begin
       if Scheduler.SelectedEventCount = 0 then Exit;
       selectedEvent := Scheduler.SelectedEvents[0];
       MenuGorevId := StrToInt(selectedEvent.GetCustomFieldValueByName('GOREV_ID'))
+  end
+  else if TPopupMenu(Sender).PopupComponent = FTileControl then begin
+     // GRUP SEKMESI (kart gorunumu): kart kontrolunun sag tik menusu yoktu. Menu FTileControl'e
+     //   baglandi; imlecin altindaki kart hit-test ile bulunur, secili is o karta cekilir
+     //   (kart adi 'A'+GorevID, Tag = RehberID - GrubaElemanEkle).
+     LP := FTileControl.ScreenToClient(Mouse.CursorPos);
+     LHit := TdxTileControlErisim(FTileControl).HitTest;
+     LHit.Calculate(LP.X, LP.Y);
+     if (not LHit.HitAtItem) or (LHit.Item = nil) or (Copy(LHit.Item.Name, 1, 1) <> 'A') then
+        Abort;   // bos alan / gorunmez tutucu kart: menu acilmasin
+     SecilenItem   := LHit.Item;
+     AktifGorevId  := StrToIntDef(Copy(SecilenItem.Name, 2, 99), 0);
+     AktifRehberId := SecilenItem.Tag;
+     TabGorevler.Locate('ID', AktifGorevId, []);
+     MenuGorevId := AktifGorevId;
+     BuTariheIsEkleMenu.Visible := False;
   end
   else {if FArama.CheckTemas.Checked then //temas listesi açıksa menü görünmesin
      Abort

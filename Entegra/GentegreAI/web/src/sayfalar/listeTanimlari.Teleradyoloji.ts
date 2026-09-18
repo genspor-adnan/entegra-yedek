@@ -118,4 +118,37 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Telerad Sözleşmeleri',
     ic: '📜', menuSira: 44, yetkiKodu: 'teleradyoloji.sozlesme', modul: 'teleradyoloji', urunModu: 2,
   },
+  {
+    // TESLİM KUYRUĞU (814): hangi rapor, hangi hedefe, kaçıncı denemede.
+    //   "Rapor gitti mi" sorusunun tek cevap yeri - başarısız gönderim
+    //   sessizce kaybolmasın.
+    kaynak: 'telerad-teslim', rota: 'telerad-teslim', baslik: 'Teslim Kuyruğu',
+    yol: 'Teleradyoloji › Teslim Kuyruğu',
+    aksiyonEkrani: 'telerad-teslim-liste',
+    menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Teslim Kuyruğu',
+    ic: '📤', menuSira: 50, yetkiKodu: 'teleradyoloji', modul: 'teleradyoloji', urunModu: 2,
+  },
+  {
+    // GELEN RAPORLAR (817): dışarıdan ORU ile gelen raporlar. Eşleşmeyen satır
+    //   kırmızı - karşı taraf raporu gönderdiğini sanıyor, bizde hiçbir işe
+    //   oturmadı.
+    kaynak: 'telerad-gelen', rota: 'telerad-gelen', baslik: 'Gelen Raporlar',
+    yol: 'Teleradyoloji › Gelen Raporlar',
+    aksiyonEkrani: 'telerad-gelen-liste',
+    menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Gelen Raporlar',
+    ic: '📥', menuSira: 51, yetkiKodu: 'teleradyoloji', modul: 'teleradyoloji', urunModu: 2,
+  },
+  {
+    // BAKANLIK EKSİKLERİ (813): Bakanlığa bildirilecek ama bir alanı eksik
+    //   olduğu için gönderilemeyecek işler. Kurumda "Bakanlığa Bildir"
+    //   kapalıysa liste BOŞ kalır - özel hastane müşterisi bu ekranı açsa da
+    //   bir şey görmez.
+    kaynak: 'telerad-bakanlik-eksik', rota: 'telerad-bakanlik-eksik',
+    baslik: 'Bakanlık Gönderim Eksikleri',
+    yol: 'Teleradyoloji › Bakanlık Eksikleri',
+    // KART YOK: düzeltme yeri isteğin kendi kartı, ayrı bir kart açmak aynı
+    //   veriyi iki ekrandan yazılabilir kılardı.
+    menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Bakanlık Eksikleri',
+    ic: '🏛', menuSira: 49, yetkiKodu: 'teleradyoloji', modul: 'teleradyoloji', urunModu: 2,
+  },
 ];

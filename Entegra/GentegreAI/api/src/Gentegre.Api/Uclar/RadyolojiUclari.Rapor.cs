@@ -65,7 +65,10 @@ public static partial class RadyolojiUclari
                 select r.id, r.sablon_id as "sablonId", r.sablon_surum as "sablonSurum",
                        r.durum, r.kilit, r.ust_rapor_id as "ustRaporId",
                        coalesce(yz.unvan, '') as "yazan", r.yazma_tarihi as "yazmaTarihi",
-                       coalesce(on_.unvan, '') as "onaylayan", r.onay_tarihi as "onayTarihi"
+                       coalesce(on_.unvan, '') as "onaylayan", r.onay_tarihi as "onayTarihi",
+                       -- BAKANLIK OBX-13 (811): iki ayri degerlendirme.
+                       r.istem_nedeni_puan as "istemNedeniPuan",
+                       r.cekim_kalite_puan as "cekimKalitePuan"
                   from public.radyoloji_rapor r
                   left join public.taraf yz on yz.id = r.yazan_id
                   left join public.taraf on_ on on_.id = r.onaylayan_id
@@ -144,8 +147,14 @@ public static partial class RadyolojiUclari
                   from public.radyoloji_kritik_bulgu where istem_id = @p0 order by id desc
                 """, null, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
+            // BAKANLIK PROFILI (809): puan alanlari ve dort parca uyarisi
+            //   yalniz bu ayar acikken gosterilir - ozel hastane musterisinin
+            //   raporlama ekrani kalabaliklasmasin.
+            var bakanlikProfili = await AyarDeposu.MetinAsync(
+                baglanti, null, "radyoloji.bakanlik_profili", "0", iptal) == "1";
+
             return Results.Ok(new { istem, rapor, bolumler, alanlar, sablonlar, makrolar,
-                                    skorlar, gecmis, kritikler });
+                                    skorlar, gecmis, kritikler, bakanlikProfili });
         });
 
         // ------------------------------------------------- rapor ÇIKTISI ----
@@ -280,12 +289,15 @@ public static partial class RadyolojiUclari
             {
                 raporId = Convert.ToInt32(await baglanti.TekDegerAsync<int>("""
                     insert into public.radyoloji_rapor
-                           (istem_id, sablon_id, sablon_surum, durum, yazan_id, yazma_tarihi, ekleyen)
+                           (istem_id, sablon_id, sablon_surum, durum, yazan_id, yazma_tarihi, ekleyen,
+                            istem_nedeni_puan, cekim_kalite_puan)
                     select @p0, @p1,
                            coalesce((select surum from public.radyoloji_sablon where id = @p1), 1),
-                           1, @p2, now()::timestamp, @p2
+                           1, @p2, now()::timestamp, @p2,
+                           coalesce(@p3, 0), coalesce(@p4, 0)
                     returning id
-                    """, islem, [id, istek.SablonId, baglam.KullaniciId], iptal));
+                    """, islem, [id, istek.SablonId, baglam.KullaniciId,
+                                 istek.IstemNedeniPuan, istek.CekimKalitePuan], iptal));
             }
             else
             {
@@ -293,9 +305,14 @@ public static partial class RadyolojiUclari
                 await baglanti.CalistirAsync("""
                     update public.radyoloji_rapor
                        set sablon_id = coalesce(@p1, sablon_id),
+                           -- PUAN GONDERILMEDIYSE KORUNUR (coalesce): ekranin
+                           --   puan alani olmayan bir cagrisi degeri silmesin.
+                           istem_nedeni_puan = coalesce(@p3, istem_nedeni_puan),
+                           cekim_kalite_puan = coalesce(@p4, cekim_kalite_puan),
                            degistiren = @p2, degistirme_tarihi = now()::timestamp
                      where id = @p0
-                    """, islem, [raporId, istek.SablonId, baglam.KullaniciId], iptal);
+                    """, islem, [raporId, istek.SablonId, baglam.KullaniciId,
+                                 istek.IstemNedeniPuan, istek.CekimKalitePuan], iptal);
             }
 
             if (istek.Bolumler is { Count: > 0 })

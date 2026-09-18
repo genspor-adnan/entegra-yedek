@@ -32,6 +32,8 @@ public static partial class TeleradUclari
         FaturaUclariniEkle(grup);
         // IS SOHBETI (806): istek uzerinde kurum <-> radyolog yazismasi.
         SohbetUclariniEkle(grup);
+        // BAKANLIK PROFILI (809-812): gonderim oncesi eksik kontrolu.
+        BakanlikUclariniEkle(grup);
 
         grup.MapGet("/pano", async (
             DateTime? gun, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,

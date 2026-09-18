@@ -117,6 +117,17 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.RehberServisi>();
 // AI KONTROLLU ONERI (449): kayittaki eksikleri isaret eder, yazmaz.
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.OneriServisi>();
 kurucu.Services.AddHostedService<Gentegre.Api.Servisler.CihazDinleyici>();
+// TELERADYOLOJI TESLIMI (814): ORU uretici + MLLP istemci + kuyruk iscisi.
+//   Istemci TEK ORNEK: yalniz TCP yapiyor, durum tasimiyor.
+kurucu.Services.AddSingleton<Gentegre.Api.Servisler.MllpIstemci>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.TeleradTeslimServisi>();
+kurucu.Services.AddHostedService<Gentegre.Api.Servisler.TeslimKuyrukIscisi>();
+// GELEN ORU (817): disaridan gelen rapor. Dinleyici AYRI - cihaz portu lab
+//   analizorune, bu teleradyoloji raporuna bakiyor; port ayardan gelir.
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.TeleradGelenServisi>();
+// PORTAL DAVETI (822): jeton uretimi + bildirim kuyrugu - TEK yer.
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.PortalDavetServisi>();
+kurucu.Services.AddHostedService<Gentegre.Api.Servisler.TeleradOruDinleyici>();
 kurucu.Services.AddScoped<KasaDeposu>();
 kurucu.Services.AddScoped<GunlukDeposu>();
 kurucu.Services.AddScoped<UtsDeposu>();
@@ -241,6 +252,8 @@ uygulama.IcmalUclariniEkle();
 
 uygulama.PrimUclariniEkle();
 uygulama.EntegrasyonUclariniEkle();
+// BILDIRIM KANALI SINAMASI (820): SMS/e-posta hesabina gercek test mesaji.
+uygulama.BildirimSinamaUclariniEkle();
 uygulama.MesajUclariniEkle();
 uygulama.AiUclariniEkle();
 uygulama.AyarUclariniEkle();
@@ -272,6 +285,10 @@ uygulama.BelgeTalebiUclariniEkle();
 uygulama.TeknikServisUclariniEkle();
 uygulama.RolYetkiUclariniEkle();
 uygulama.KullaniciYonetimUclariniEkle();
+// PORTAL HESABI (819): dis hekim / kurum / hasta erisimi - ayri yetki.
+uygulama.PortalHesapUclariniEkle();
+// PORTAL DAVETI (822): hastaya SMS/e-posta ile tek kullanimlik baglanti.
+uygulama.PortalDavetUclariniEkle();
 uygulama.IskontoOnayUclariniEkle();
 uygulama.DokumUclariniEkle();
 uygulama.DokumanUclariniEkle();

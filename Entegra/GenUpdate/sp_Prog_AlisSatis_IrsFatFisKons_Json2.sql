@@ -245,7 +245,7 @@ FROM FATBASLIK F WITH (NOLOCK)
         SET @SQL += ' AND EXISTS (SELECT 1 FROM KULLANICI_ARAMA KA
                                    WHERE KA.KAYITID = F.ID AND KA.MODUL = @Modul AND KA.KULID = @Kul)';
 
-    SET @SQL += ' ORDER BY F.FATURATARIH DESC';   -- Son/Sik siralamasi GRID'den yapilir
+    SET @SQL += ' ORDER BY F.ID DESC';   -- Son/Sik siralamasi GRID'den yapilir (Update_SQL_195: tarih yerine ID)
 
 
 

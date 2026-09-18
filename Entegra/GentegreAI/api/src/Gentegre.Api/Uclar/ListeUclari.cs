@@ -32,7 +32,10 @@ public static class ListeUclari
             if (kolonlar.Count == 0) throw GentegreHatasi.Yasak("Bu listede gorebileceginiz kolon yok.");
 
             var yanit = await depo.SorgulaAsync(tanim, istek ?? new ListeIstegi(), kolonlar,
-                baglam.SubeId, baglam.Kapsam, baglam.IzlemeNo, baglam.KullaniciId, iptal,
+                baglam.SubeId, baglam.Kapsam, baglam.IzlemeNo,
+                // KAPSAM KIMLIGI (819): kurum portalinda hesap kisinin ama
+                //   kapsam KURUMUN - kurala konan sayi budur.
+                baglam.PortalKimlik, iptal,
                 // PORTAL KAPSAMI (794): dis doktor/dis kurum/hasta yalniz kendi
                 //   kayitlarini gorur; kural kaynak katalogunda.
                 baglam.PortalTuru);

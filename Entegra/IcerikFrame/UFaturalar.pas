@@ -298,6 +298,7 @@ type
     procedure Calendar1Change(Sender: TObject);
     procedure CheckTarihAralikClick(Sender: TObject);
     procedure CheckEkAlanlarListeClick(Sender: TObject);
+    procedure KayitliDuzeniAyikla;
     procedure SilTusClick(Sender: TObject);
     procedure BaskiOnizlemeMenuClick(Sender: TObject);
     procedure FATBASLIKAfterOpen(DataSet: TDataSet);
@@ -802,6 +803,7 @@ begin
     end;
 
   Tablo.GridAyarRestore('AlisSatisListeGridi-'+IntToStr(gf.FAltTur)+'-'+BoolToStr(FArama.CheckEkAlanlarListelensin.checked, False), GridFatListeTview );
+  KayitliDuzeniAyikla;
 
   Self.Align := alClient;
   GridFatListe.LookAndFeel.ScrollbarMode := sbmClassic;
@@ -1019,6 +1021,33 @@ begin
    except
    end;
 end;
+procedure TFaturalarDlg.KayitliDuzeniAyikla;
+// KAYITLI GRID DUZENI (AYAR) geri yuklendikten sonra:
+//   1) HAYALET KOLON: cxGrid RestoreFromStream, akista olup gorunumde olmayan kolonu (eski bir
+//      ek alan) YENIDEN YARATIR - alansiz, basliksiz, genis bir kolon en basa gelir (kullanici:
+//      "ek alan listelenince en basa genis bos bir sutun ekledi"). Tasarimdaki 46 kolonun hepsi
+//      alana bagli; alansiz kolon yalniz bu yoldan dogar -> silinir.
+//   2) SIRALAMA: kayitli duzendeki kolon siralamasi (hayalet kolon dahil) sunucu sirasini
+//      (ORDER BY F.ID DESC - Update_SQL_195) eziyordu ("liste ID desc gelmedi"). Temizlenir;
+//      kullanici oturum icinde basliga tiklayarak yine siralayabilir. GGridAyarYukleniyor
+//      bayragi: bu temizlik kullanici eylemi degildir, TSayfaliListe tam-liste moduna gecmesin.
+var
+  i: Integer;
+  LEski: Boolean;
+begin
+  LEski := GGridAyarYukleniyor;
+  GGridAyarYukleniyor := True;
+  try
+    for i := GridFatListeTview.ColumnCount - 1 downto 0 do
+      if Trim(GridFatListeTview.Columns[i].DataBinding.FieldName) = '' then
+        GridFatListeTview.Columns[i].Free;
+    if GridFatListeTview.SortedItemCount > 0 then
+      GridFatListeTview.DataController.ClearSorting(True);
+  finally
+    GGridAyarYukleniyor := LEski;
+  end;
+end;
+
 procedure TFaturalarDlg.EkKolonSil;
 var
   i, Tekrar: Integer;
@@ -1047,20 +1076,34 @@ end;
 
 
 Function TFaturalarDlg.EkAlanlariGetir(TabloAdi:String):String;
+// EK ALANLAR LISTELE (kullanici: "check=true olunca gride ek alanlar da gelmeli"):
+//   ALANLAR.TABLO artik '<Tablo>_USER' (kolonlar FATBASLIK_USER / SIPARIS_USER'da); eski kod
+//   yalniz 'FATBASLIK' aradigi icin 0 satir buluyordu, kolon uretilmiyordu. Simdi ana tablo
+//   (F.) ve _USER tablosu (FU.) birlikte; liste SP'si @Baslik doluysa _USER'i FU alias'iyla
+//   join'ler (Update_SQL_196). Kolon adi koseli parantezli (bosluk/karisik harf guvenli),
+//   grid kolonu ALANLAR.TUR'e gore tipli (1/4 metin, 2 sayi, 3 tarih, 5 mantik).
+//   Sonuc ',FU.[ALAN] AS [ALAN],...' - SP SELECT listesinin sonuna eklenir.
+var
+  LAlan, LOnek: string;
+  LKolon: TcxGridColumn;
 begin
-  //if FaturalarDlg=nil then exit;
-  if  FArama.CheckEkAlanlarListelensin.checked then begin
-      Tablo.TablodanSorguAc(5,' select ALANADI,CAPTION from ALANLAR where TUR not in (11,12) and TABLO='''+TabloAdi+'''');
-      Result:='';
-      while not Tablo.Query5.eof do begin
-       // if GridFatListeTview.GetColumnByFieldName(Tablo.Query5.Fields[0].AsString) = nil then begin
-       if FindComponent(Tablo.Query5.Fields[1].AsString) = nil then begin
-          Add_Column(1,Tablo.Query5.Fields[1].AsString,Tablo.Query5.Fields[0].AsString);
-          EkAlanKolonList.Add(Tablo.Query5.Fields[0].AsString);
-        end;
-        Result:=Result+','+Tablo.Query5.Fields[0].AsString;
-        Tablo.Query5.Next;
+  Result := '';
+  if not FArama.CheckEkAlanlarListelensin.checked then Exit;
+  Tablo.TablodanSorguAc(5, 'select ALANADI, CAPTION, TUR, TABLO, WIDTH from ALANLAR where TUR not in (11,12) ' +
+     'and TABLO in (''' + TabloAdi + ''', ''' + TabloAdi + '_USER'') order by KONUM, ID');
+  while not Tablo.Query5.Eof do begin
+    LAlan := Trim(Tablo.Query5.FieldByName('ALANADI').AsString);
+    if LAlan <> '' then begin
+      if SameText(Tablo.Query5.FieldByName('TABLO').AsString, TabloAdi) then LOnek := 'F.' else LOnek := 'FU.';
+      if GridFatListeTview.GetColumnByFieldName(LAlan) = nil then begin
+        LKolon := Add_Column(Tablo.Query5.FieldByName('TUR').AsInteger, Tablo.Query5.FieldByName('CAPTION').AsString, LAlan);
+        if (LKolon <> nil) and (Tablo.Query5.FieldByName('WIDTH').AsInteger > 0) then
+          LKolon.Width := Tablo.Query5.FieldByName('WIDTH').AsInteger;
+        EkAlanKolonList.Add(LAlan);
       end;
+      Result := Result + ',' + LOnek + '[' + LAlan + '] AS [' + LAlan + ']';
+    end;
+    Tablo.Query5.Next;
   end;
 end;
 
@@ -2020,9 +2063,19 @@ begin
                end;
              end else }
                  Tablo.SiparisSihirbazBaslat('D',Tablo.Query1.FieldByName('TUR').AsInteger, 0,yeniid, FATBASLIK.FieldByName('REHBERID').AsInteger);
-       10,14://eğer alış veya satış irsaliyesi faturaya dönüşüyorsa, faturada irsaliye no ve tarihi de görünmeli
+       11,15://IRSALIYE -> FATURA: faturada kaynak irsaliyenin no ve tarihi de gorunmeli (cbIrsaliyeli / IRSALIYENO).
+             // DUZELTME: bu dal eskiden '10,14' idi, yani HEDEF belge irsaliye iken calisiyordu. Siparis ->
+             //   irsaliyede yeni irsaliyeye siparis listesinin FATURANO'su (= SIPARISNO) ve tarihi IRSALIYENO/
+             //   IRSALIYETARIH olarak yaziliyordu (kullanici: "irsaliye numarasi neden siparis numarasiyla ayni").
+             //   Simdi yalniz kaynak irsaliye (10/14) -> fatura (11/15) iken calisir; numara kaynagin
+             //   IRSALIYENO'su, o bossa FATURANO'su (e-irsaliyede FATURANO '0' kalir - Update_SQL_192 ile ayni kural).
              begin
-                Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update FATBASLIK set IRSALIYETARIH='''+FormatDateTime('yyyy-mm-dd hh:nn', FATBASLIK.FieldByName('FATURATARIH').AsDateTime)+''',IRSALIYENO='''+FATBASLIK.FieldByName('FATURANO').AsString+''' where ID='+IntToStr(yeniid),[],[]);
+                if FATBASLIK.FieldByName('TUR').AsInteger in [10,14] then
+                   Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,
+                     'update H set IRSALIYETARIH=K.FATURATARIH, ' +
+                     'IRSALIYENO=COALESCE(NULLIF(NULLIF(K.IRSALIYENO,''''),''0''), NULLIF(NULLIF(K.FATURANO,''''),''0'')) ' +
+                     'from FATBASLIK H inner join FATBASLIK K on K.ID=&Kaynak where H.ID=&Hedef',
+                     ['&Kaynak', '&Hedef'], [FATBASLIK.FieldByName('ID').AsInteger, yeniid]);
                 Tablo.FaturaSihirbazBaslat('E', Tablo.Query1.FieldByName('TUR').AsInteger, 0,yeniid, FATBASLIK.FieldByName('REHBERID').AsInteger, 1,False,-1);
              end
        else
@@ -2872,6 +2925,15 @@ begin
         StringReplace(Trim(FArama.AraAciklama.Text), '''', '''''', [rfReplaceAll]) +
         '%''';
   end;
+  // EK ALANLAR (kullanici: "satis fatura listesinde geliyor, alis fatura/irsaliye listesinde
+  //   gelmiyor"): alis belgeleri bu ham SQL ile yuklenir, SP'deki @Baslik/FU join'i burada yoktu.
+  //   Ayni kolon listesi (EkAlanlariGetir -> 'FU.[ALAN] AS [ALAN]') + FATBASLIK_USER join'i.
+  if (FArama <> nil) and FArama.CheckEkAlanlarListelensin.Checked then begin
+    if EkAlanKolonList = nil then EkAlanKolonList := TStringList.Create;
+    if EkAlanKolonList.Count = 0 then
+      FatEkAlanlar := EkAlanlariGetir('FATBASLIK');
+  end else
+    FatEkAlanlar := '';
   LSQL := YeniGelenMarker +
     ' SELECT F.*, R.KOD AS CARIKOD, R.FIRMA AS CARIAD, ' +
     '   N'''' AS YAZIYLATOPLAM, ' +
@@ -2886,11 +2948,13 @@ begin
     '   DURUMNEREDEN = CASE ' +
     '     WHEN EXISTS(SELECT 1 FROM FATURA F1 WHERE F1.FATBASID=F.ID AND F1.YERI IN (406,407)) THEN N''Siparişten'' ' +
     '     ELSE N'''' END ' +
+    FatEkAlanlar +   // bos ya da ',FU.[ALAN] AS [ALAN],...'
     ' FROM FATBASLIK F (NOLOCK) ' +
     '   INNER JOIN REHBER R ON R.ID = F.REHBERID ' +
+    IfThen(FatEkAlanlar <> '', '   LEFT JOIN FATBASLIK_USER FU (NOLOCK) ON FU.ID = F.ID ') +
     ' WHERE F.TUR=' + IntToStr(LTur) + ' AND F.EFATURADURUM IN (' + ADurumIn + ')' + AEkKosul +
     LFiltreEk +
-    ' ORDER BY F.FATURATARIH DESC';
+    ' ORDER BY F.ID DESC';   // liste SP'si ile ayni siralama (Update_SQL_195)
   FATBASLIK.Close;
   FATBASLIK.SQL.Text := LSQL;
   if AktifVeriMotor = vmPG then FATBASLIK.SQL.Text := PgSqlCevir(FATBASLIK.SQL.Text);

@@ -55,6 +55,7 @@ import { IZIN_LISTELERI } from './listeTanimlari.Izin';
 import { SERVIS_LISTELERI } from './listeTanimlari.Servis';
 import { DOKUM_LISTELERI } from './listeTanimlari.Dokumler';
 import { YONETIM_LISTELERI } from './listeTanimlari.Yonetim';
+import { PORTAL_LISTELERI } from './listeTanimlari.Portal';
 
 export const DONUSUM_MENUSU: Record<string, { kod: string; ad: string }[]> = {
   'belge.donustur': [
@@ -124,6 +125,8 @@ export const LISTELER: ListeGirdisi[] = [
   ...IZIN_LISTELERI,
   ...SERVIS_LISTELERI,
   ...YONETIM_LISTELERI,
+  // PORTAL MALI (824): yalniz dis kurum YONETICI rolunde acilir (portal.mali).
+  ...PORTAL_LISTELERI,
   // Grup basina "📊 Dökümler" baglantisi (plan kural 2): her grubun sonunda
   //   ayni oge - kullanici "bu isin dokumu nerede" diye aramasin.
   ...DOKUM_LISTELERI,

@@ -453,6 +453,16 @@ public sealed class KullaniciDeposu
     /// </summary>
     public async Task<short> PortalTuruAsync(int kullaniciId, CancellationToken iptal = default)
         => await _veri.TekDegerAsync<short>(
-            "select public.fn_kullanici_portal_turu(@p0)", [kullaniciId], iptal);}
+            "select public.fn_kullanici_portal_turu(@p0)", [kullaniciId], iptal);
+
+    /// <summary>
+    /// PORTAL KAPSAMININ TARAFI (819): kurum hesabinda temsil edilen kurum,
+    /// otekilerde kisinin kendisi. Kural veritabaninda - iki yerde iki farkli
+    /// "kapsam kimi" tanimi olmasin.
+    /// </summary>
+    public async Task<int> PortalKimligiAsync(int kullaniciId, CancellationToken iptal = default)
+        => await _veri.TekDegerAsync<int>(
+            "select public.fn_kullanici_portal_taraf(@p0)", [kullaniciId], iptal);
+}
 
 

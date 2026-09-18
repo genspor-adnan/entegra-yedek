@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portal V2 — Dış Doktor — Mockup</title>
+<link rel="stylesheet" href="_portal_v2.css"></head><body>
+
+<h2 class="bas">🩺 Hekim Portalı V2
+  <span>dış hekim · <code>portal_turu = 1</code> · telefon ilk, menü açılır</span></h2>
+
+<!-- ================================================== 1) TELEFON: liste -->
+<div class="tezgah">
+  <div class="cerceve telefon">
+    <div class="etiket">📱 <b>Telefon 390px</b> · menü kapalı — çalışma ekranı tam genişlik</div>
+    <div class="ekran">
+      <div class="pk dar kapali">
+        <div class="pk-ust">
+          <span class="tus">☰</span>
+          <div class="pk-marka">
+            <span class="pk-ad">Hekim Portalı</span>
+            <span class="pk-kisi">Dr. Kemal Aydın</span>
+          </div>
+          <span class="tus">🌗</span><span class="tus">⚙</span>
+          <span class="cikis">Çıkış</span>
+        </div>
+        <div class="pk-perde"></div>
+        <div class="pk-yan"></div>
+        <div class="pk-icerik">
+          <div class="sayfabas"><h1>Hastalarım</h1></div>
+          <div class="cipler">
+            <span class="cip on">Bugün</span><span class="cip">Bu hafta</span>
+            <span class="cip">Sonuç bekleyen</span><span class="cip">Tümü</span>
+          </div>
+          <div class="blok">
+            <h4>👤 Gönderdiğim hastalar <span class="sp">47 kayıt</span></h4>
+            <table>
+              <thead><tr><th>Hasta</th><th>Son işlem</th><th>Durum</th></tr></thead>
+              <tbody>
+                <tr><td><b>Ayşe Yılmaz</b><div class="sonuk">TC ***18</div></td>
+                    <td>Hemogram<div class="sonuk">18.09</div></td>
+                    <td><span class="rz ok">Sonuç hazır</span></td></tr>
+                <tr><td><b>Mehmet Kaya</b><div class="sonuk">TC ***42</div></td>
+                    <td>Beyin MR<div class="sonuk">17.09</div></td>
+                    <td><span class="rz sari">Raporlanıyor</span></td></tr>
+                <tr><td><b>Fatma Demir</b><div class="sonuk">TC ***07</div></td>
+                    <td>Biyokimya<div class="sonuk">17.09</div></td>
+                    <td><span class="rz mavi">Numune alındı</span></td></tr>
+                <tr><td><b>Ali Şahin</b><div class="sonuk">TC ***91</div></td>
+                    <td>Akciğer grafi<div class="sonuk">16.09</div></td>
+                    <td><span class="rz ok">Sonuç hazır</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="sonuk">Kayıt: 47 · 38 ms</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ 2) TELEFON: çekmece -->
+  <div class="cerceve telefon">
+    <div class="etiket">📱 <b>Telefon</b> · ☰ çekmece — bölümler açılır/kapanır</div>
+    <div class="ekran">
+      <div class="pk dar">
+        <div class="pk-ust">
+          <span class="tus">✕</span>
+          <div class="pk-marka">
+            <span class="pk-ad">Hekim Portalı</span>
+            <span class="pk-kisi">Dr. Kemal Aydın</span>
+          </div>
+          <span class="tus">🌗</span><span class="tus">⚙</span>
+          <span class="cikis">Çıkış</span>
+        </div>
+        <div class="pk-perde"></div>
+        <div class="pk-yan">
+          <div class="pk-bolum-bas on"><span>Portal</span><span>▾</span></div>
+          <a class="pk-oge on"><span class="ic">👤</span><span>Hastalarım</span>
+             <span class="sy">47</span></a>
+          <div class="pk-bolum-bas"><span>Laboratuvar</span><span>▸</span></div>
+          <div class="pk-bolum-bas"><span>Radyoloji</span><span>▸</span></div>
+          <div class="pk-bolum-bas"><span>İşlem</span><span>▸</span></div>
+          <div class="pk-kimlik">Dr. Kemal Aydın
+            <span class="sonuk">Dış hekim · yalnız kendi kayıtlarınız</span></div>
+        </div>
+        <div class="pk-icerik">
+          <div class="sayfabas"><h1>Hastalarım</h1></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ 3) MASAÜSTÜ -->
+  <div class="cerceve masaustu">
+    <div class="etiket">🖥 <b>Masaüstü ≥900px</b> · menü sabit — aynı bölümler, aynı adlar</div>
+    <div class="ekran">
+      <div class="pk">
+        <div class="pk-ust">
+          <div class="pk-marka">
+            <span class="pk-ad">Hekim Portalı</span>
+            <span class="pk-kisi">Dr. Kemal Aydın · Dış hekim</span>
+          </div>
+          <span class="tus">🌗</span><span class="tus">⚙</span>
+          <span class="cikis">Çıkış</span>
+        </div>
+        <div class="pk-yan">
+          <div class="pk-bolum-bas on"><span>Portal</span><span>▾</span></div>
+          <a class="pk-oge"><span class="ic">👤</span><span>Hastalarım</span>
+             <span class="sy">47</span></a>
+          <div class="pk-bolum-bas on"><span>Laboratuvar</span><span>▾</span></div>
+          <a class="pk-oge on"><span class="ic">🧾</span><span>Lab istemlerim</span>
+             <span class="sy">6</span></a>
+          <a class="pk-oge"><span class="ic">🔎</span><span>Numune durumu</span></a>
+          <a class="pk-oge"><span class="ic">📄</span><span>Lab sonuçları</span>
+             <span class="sy">4</span></a>
+          <div class="pk-bolum-bas"><span>Radyoloji</span><span>▸</span></div>
+          <div class="pk-bolum-bas"><span>İşlem</span><span>▸</span></div>
+          <div class="pk-kimlik">Dr. Kemal Aydın
+            <span class="sonuk">Dış hekim · yalnız kendi kayıtlarınız</span></div>
+        </div>
+        <div class="pk-icerik">
+          <div class="sayfabas"><h1>Lab istemlerim</h1>
+            <span style="margin-left:auto"><span class="dug bir">＋ Yeni istem</span></span></div>
+          <div class="cipler">
+            <span class="cip on">Açık</span><span class="cip">Numune bekleyen</span>
+            <span class="cip">Sonuçlanan</span><span class="cip">Tümü</span>
+          </div>
+          <div class="kutular">
+            <div class="kutu"><div class="b">AÇIK İSTEM</div><div class="d">6</div>
+              <div class="a">2'si bugün</div></div>
+            <div class="kutu ok"><div class="b">SONUÇ HAZIR</div><div class="d">4</div>
+              <div class="a">bakılmadı</div></div>
+            <div class="kutu uy"><div class="b">NUMUNE BEKLİYOR</div><div class="d">2</div>
+              <div class="a">en eski 2 gün</div></div>
+          </div>
+          <div class="blok">
+            <h4>🧾 İstemlerim <span class="sp">kapsam: yalnız benim açtıklarım</span></h4>
+            <table>
+              <thead><tr><th>İstem</th><th>Hasta</th><th>Tetkik</th><th>Tarih</th>
+                         <th>Durum</th></tr></thead>
+              <tbody>
+                <tr><td><b>LAB-2026/1187</b></td><td>Ayşe Yılmaz</td><td>Hemogram</td>
+                    <td class="sonuk">18.09 09:20</td><td><span class="rz ok">Sonuçlandı</span></td></tr>
+                <tr><td><b>LAB-2026/1186</b></td><td>Mehmet Kaya</td><td>Biyokimya paneli</td>
+                    <td class="sonuk">18.09 08:55</td><td><span class="rz sari">Çalışılıyor</span></td></tr>
+                <tr><td><b>LAB-2026/1180</b></td><td>Fatma Demir</td><td>TSH</td>
+                    <td class="sonuk">17.09 16:10</td><td><span class="rz mavi">Numune alındı</span></td></tr>
+                <tr><td><b>LAB-2026/1174</b></td><td>Ali Şahin</td><td>HbA1c</td>
+                    <td class="sonuk">17.09 11:02</td><td><span class="rz">Numune bekleniyor</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>V2'de değişen üç şey.</b>
+  <ul>
+    <li><b>Ayrı kabuk.</b> Kurum içi kabuk 13 gruplu menü, favoriler, çalışma alanı, komut
+      paleti ve şube seçimi taşıyor; portal kullanıcısının tek şubesi ve beş-altı ekranı var.
+      Aynı kabuğu "sadeleştirerek" kullanmak, her yeni kurum içi özelliğin portalda ayrıca
+      gizlenmesini gerektirirdi — biri unutulduğunda portal kullanıcısı basamayacağı düğmeyi görür.</li>
+    <li><b>Menü açılır.</b> Bölümler accordion, aynı anda tek bölüm açık; bulunulan ekranın
+      bölümü kendiliğinden açılır. Telefonda menü çekmece, ekrana tıklayınca ya da ekran
+      değişince kapanır.</li>
+    <li><b>Dokunma hedefi 44px.</b> Menü satırı, cip ve düğmeler büyütüldü; form alanları
+      16px yazı (iOS Safari altında sayfayı yakınlaştırıyordu). Kart telefonda tam ekran.</li>
+  </ul>
+  <b>Menüde ne görünür?</b> Karar <b>yetki + portal kapsamı</b>: ekranın portal kuralı
+  <code>false</code> ise açıldığında boş gelirdi, menüde de durmaz. Yetkisi olan ama tabloda
+  adlandırılmamış bir ekran gizlenmez — "Diğer" bölümüne düşer.
+</div>
+
+</body></html>

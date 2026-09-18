@@ -26,6 +26,13 @@ public sealed class IstekBaglami
     /// EKLER; kural tanimlanmamis kaynak portal kullanicisina kapalidir.
     /// </summary>
     public short PortalTuru { get; init; }
+    /// <summary>
+    /// PORTAL KAPSAMININ BAGLANDIGI TARAF (819). Dis hekim ve hastada kisinin
+    /// KENDISI; kurum portalinda hesabin temsil ettigi KURUM - kurum hesabi
+    /// kisi basi aciliyor, kapsam ise kuruma ait.
+    /// Portal disi kullanicida <see cref="KullaniciId"/> ile aynidir.
+    /// </summary>
+    public int PortalKimlik { get; init; }
     public IReadOnlyList<SubeOzeti> Subeler { get; init; } = Array.Empty<SubeOzeti>();
     public string IzlemeNo { get; init; } = "";
     /// <summary>Istegi yapan istemcinin IP adresi - islem gunlugune yazilir.</summary>
@@ -101,6 +108,11 @@ public sealed class BaglamCozucu
         var yetkiler = await _yetkiCozucu.CozAsync(kullaniciId, iptal);
         var kapsam = await _kullanicilar.KapsamAsync(kullaniciId, iptal);
         var portalTuru = await _kullanicilar.PortalTuruAsync(kullaniciId, iptal);
+        // KAPSAM KIMLIGI (819): kurum portalinda hesap KISININ, kapsam
+        //   KURUMUN - iki sayi ayni degil.
+        var portalKimlik = portalTuru > 0
+            ? await _kullanicilar.PortalKimligiAsync(kullaniciId, iptal)
+            : kullaniciId;
         var subeler = await _kullanicilar.SubeleriAsync(kullaniciId, iptal);
         var subeId = SubeCoz(ctx, subeler);
         // Kimlik bicimi (679) ONBELLEKLI okunur: her istekte sorgu atmak
@@ -116,6 +128,7 @@ public sealed class BaglamCozucu
             Yetkiler = yetkiler,
             Kapsam = kapsam,
             PortalTuru = portalTuru,
+            PortalKimlik = portalKimlik,
             Subeler = subeler,
             IzlemeNo = ctx.Items["izlemeNo"] as string ?? Izleme.YeniNo(),
             // IP her uc dosyasinda ayri bir `Ip(HttpContext)` yardimcisiyla

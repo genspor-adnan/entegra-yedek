@@ -1156,7 +1156,7 @@ var
 begin
   Tablo.RehberEkBilgileriniGetir(TabRehberIlgili.FieldByName('ID').AsInteger,4,[RehVars_EPosta],Etiketler,Bilgiler);
   if Bilgiler[0]='' then begin
-    Tablo.UyariGoster(Uyari,'Eposta Adresi Tan�ml� De�il.');
+    Tablo.UyariGoster(Uyari,'Eposta Adresi Tanımlı Değil.');
     Abort;
   end;
   Tablo.TablodanSorguAc(0,'select * from MAILSABLON where MODULID=77 and ID=77');
@@ -1821,7 +1821,12 @@ begin
    else
       s:='';
    Tablo.GridAyarRestore('CariListeGridi'+s, CariGridView );
-   //AraTusClick(Self);
+   // DETAY KOLONLARI ICERIKSIZ GELIYORDU (kullanici: "ilce ve il sutunlari geliyor ama icerik
+   //   gelmiyor"): detay alanlari (ILCE/ILLER/ADRES/...) SELECT listesine yalniz SubSelectGetir
+   //   -> Liste_SP_Cagir ile girer; kutu degisince liste yeniden yuklenmiyordu, kolonlar acik
+   //   ama dataset'te alan yoktu. Liste acik ise ayni modla (normal/analiz/son-aranan) yenilenir.
+   if REHBER.Active and (FCariSonMod > 0) then
+      Liste_SP_Cagir(FCariSonMod);
    PageControlSekmeChange(Self);
 end;
 
@@ -1996,7 +2001,13 @@ begin
   if (FArama.ComboCariAnaliz.Visible)and(FArama.ComboCariAnaliz.Itemindex in [1..5]) then
         Paramst :=Paramst + ' ,TOPLAM_BORC,TOPLAM_ALACAK,KUR,TOPLAM_BORC-TOPLAM_ALACAK AS BAKIYE, TAKIPTE,IRSALIYE '
   else if FArama.CheckDetay.Checked then begin
-        Paramst :=Paramst + ',ALTSEKTOR=(select ANAHTAR from GENINI G where G.DIL=-1 and G.DEGER = R.ALTSEKTOR AND G.BOLUM=cast(''-2204''+cast(R.SEKTOR as varchar(10)) as int)),ILLER= X1.BILGI, '+
+        Paramst :=Paramst + ',ALTSEKTOR=(select ANAHTAR from GENINI G where G.DIL=-1 and G.DEGER = R.ALTSEKTOR AND G.BOLUM=cast(''-2204''+cast(R.SEKTOR as varchar(10)) as int)),'+
+          // IL: eskiden 'ILLER = X1.BILGI' idi; SP'deki X1 = REHBERAYAR YERI=2/VARSAYILAN=10 ("Fatura
+          //   Basligi") -> Il kolonu hep bos. Il, varsayilan iletisimin YERI=1/VARSAYILAN=8 bilgisidir
+          //   (asagidaki IL ile ayni kaynak; grid kolonu ILLER alanina bagli).
+          ' ILLER=(SELECT '+DbUst(1)+'BILGI FROM REHBERBILGI RB (nolock)'+
+          '   INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=1 and RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI '+
+          '   INNER JOIN REHBERILETISIM RI (nolock) on R.ID=RI.REHBERID and RI.VARSAYILAN=1 WHERE RB.YER_ID=RI.ID AND RA.VARSAYILAN=8 '+DbSinir(1)+'), '+
           ' ADRES = (SELECT '+DbUst(1)+'BILGI FROM REHBERBILGI RB (nolock)'+
           '   INNER JOIN REHBERAYAR RA (nolock) ON RA.YERI=1 and RA.SIRA=RB.SIRA AND RA.YERI=RB.YERI '+
           '   INNER JOIN REHBERILETISIM RI (nolock) on R.ID=RI.REHBERID and RI.VARSAYILAN=1 WHERE RB.YER_ID=RI.ID AND RA.VARSAYILAN=2 '+DbSinir(1)+'), '+
@@ -2085,8 +2096,15 @@ begin
 end;
 
 procedure TRehberAraDlg.BankaDuzenleTusClick(Sender: TObject);
+var
+  LId: Integer;
 begin
-   Tablo.BankaTanimSihirbazBaslat('D', 1, TabBankaHesaplar.Fields[0].AsInteger, REHBER.Fields[0].AsInteger);
+   LId := TabBankaHesaplar.Fields[0].AsInteger;
+   Tablo.BankaTanimSihirbazBaslat('D', 1, LId, REHBER.Fields[0].AsInteger);
+   // Duzenleme sihirbazi kaydi DB'de degistirir; liste gridi yenilenmiyordu (kullanici: "icerde
+   //   degisiyor, disariya yansimiyor"). Ekle/Sil'deki gibi yenile, secili hesapta kal.
+   TabloYenile(TabBankaHesaplar, [REHBER.Fields[0].AsInteger]);
+   TabBankaHesaplar.Locate('ID', LId, []);
 end;
 
 procedure TRehberAraDlg.BankaEkleTusClick(Sender: TObject);
@@ -3910,13 +3928,20 @@ procedure TRehberAraDlg.MusteriListesineEkleMenuClick(Sender: TObject);
 //   SQL hatasi gorunuyordu. Simdi: kod bos/kullanimda ise anlasilir mesaj + yeniden
 //   sor; ayrica satir gridden DeleteRecord ile degil liste yenilenerek dusurulur
 //   (REHBER dataset'i SP sonucudur - dataset silmesi kayit siler/hata verir).
+// HESAP KODU SECICI (kullanici: "hesap kodu istiyor, onun yerine hesap kodu secme ekrani
+//   gelmeli ve oradan siradaki numarayi almali"): opsiyon elle-giris olsa da, hesap planinda
+//   musteri grubu (120) tanimliysa kod kutusu yerine hesap kodu secici acilir (cari kartindaki
+//   KodAgaciTus ile ayni sihirbaz, secilen dalin siradaki numarasi). Vazgecilirse islem iptal.
+//   Hesap plani yoksa eski elle giris kutusu calisir.
 var EditKOD, Kullanan : String;
     YeniKod : Variant;
     RehID : Integer;
+    PlanVar : Boolean;
 begin
    RehID := REHBER.FieldByName('ID').AsInteger;
-   if tablo.GENINI.ReadInteger(Ops_OpsiyonCari_CariKodGirisi, 2) <> 2 then begin // CariOpsiyon  CariKodGirisi
-      //kod manuel
+   PlanVar := Veritabani.VeriVarMi(Tablo.FDCnn, 'select ID from HESAPPLANI where DURUM=1 and VARSAYILAN=&Grup', ['&Grup'], [120]);
+   if (tablo.GENINI.ReadInteger(Ops_OpsiyonCari_CariKodGirisi, 2) <> 2) and (not PlanVar) then begin // CariOpsiyon  CariKodGirisi
+      //kod manuel (hesap plani tanimsiz)
       repeat
         if TGirisKutusuEx.BilgiAlEx(BGYeni_bilgi_girisi, TGirdiDenetimleri.Create.Edit(BGMusteri_kodu_gir, @YeniKod)) <> mrOk then
            Abort;
@@ -3931,12 +3956,14 @@ begin
         end;
       until (EditKOD <> '') and (Kullanan = '');
    end else begin
+      // Hesap kodu secici: tek dal varsa sormadan siradaki kodu verir, birden fazla dalda
+      //   agac acilir; '0' = vazgecildi / dal yok.
       EditKOD := tablo.KodBulmaSihirbazi(120, 'HESAPPLANI', 'HESAPKODU', 'HESAPADI', 'REHBER', 'KOD',120);
-      if (EditKOD <> '0') and (EditKOD <> '') then begin
-         Kullanan := CariKoduKullanan(EditKOD, RehID);
-         if Kullanan <> '' then
-            raise Exception.Create('Üretilen "' + EditKOD + '" kodu zaten "' + Kullanan + '" carisinde kullanılıyor; hesap planı / cari kodlarını kontrol edin.');
-      end;
+      if (EditKOD = '0') or (EditKOD = '') then
+         Abort;
+      Kullanan := CariKoduKullanan(EditKOD, RehID);
+      if Kullanan <> '' then
+         raise Exception.Create('Üretilen "' + EditKOD + '" kodu zaten "' + Kullanan + '" carisinde kullanılıyor; hesap planı / cari kodlarını kontrol edin.');
    end;
 
    if (EditKOD <> '0') and (EditKOD <> '') then begin

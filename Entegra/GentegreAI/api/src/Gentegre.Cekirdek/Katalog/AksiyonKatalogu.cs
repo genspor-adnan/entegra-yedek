@@ -52,6 +52,13 @@ public static class AksiyonKatalogu
             ["cari-liste"] =
             [
                 .. Crud("cari", "kart", "cari"),
+                // PORTAL ERISIMI (819): kurum portalini KISI kullanir - hesap
+                //   burada kurumu TEMSIL EDEN kisiye acilir, kapsam kuruma
+                //   baglanir. Paylasimli hesapta kim ne yapti bilinmez.
+                new("kullanici.portal", "🔑 Portal Erişimi", "kullanici",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    AksiyonYetkisi: "kullanici.portal", KayitGerekir: true, Sira: 80,
+                    Ipucu: "Dışarıdan giriş icin PAROLASIZ hesap acar - kisi ilk giriste kendi parolasini koyar"),
                 // GIB e-Fatura kaydini entegratore sorar ve karta isler (183).
                 new("cari.ebelge-mukellef", "e-Fatura Mükellefiyeti Sorgula", "kart",
                     Hedef: "sagtus,palet", KaynakKodu: "cari", Islem: Islem.Degistir,
@@ -100,9 +107,39 @@ public static class AksiyonKatalogu
                 .. Crud("hasta", "hasta", "hasta"),
                 // FORM MOTORU (740): hastanın formları (onam, değerlendirme, beyan).
                 new("form.hasta-formlar", "📋 Formlar", "form", Hedef: "araccubugu2,sagtus,palet", KaynakKodu: "form.istek", Islem: Islem.Gor, KayitGerekir: true, Sira: 60, UrunModu: 2),
+                // PORTAL DAVETI (822): hastaya SMS/e-posta ile tek kullanimlik
+                //   baglanti gider, hesabini KENDI acar. Hastaya "portalimiz
+                //   var, su kodla gir" demek pratikte kimseyi girdirmiyor.
+                new("kullanici.portal-davet", "📨 Portal Daveti Gönder", "kullanici",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    AksiyonYetkisi: "kullanici.portal", KayitGerekir: true, Sira: 78,
+                    Ipucu: "SMS/e-posta ile tek kullanimlik hesap acma baglantisi"),
+                // PORTAL ERISIMI (819): hasta kendi sonuc ve randevularini
+                //   gorsun diye. Davet gonderemedigin durumda (numara yok)
+                //   hesap dogrudan acilir, parola YOKTUR.
+                new("kullanici.portal", "🔑 Portal Erişimi", "kullanici",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    AksiyonYetkisi: "kullanici.portal", KayitGerekir: true, Sira: 80,
+                    Ipucu: "Dışarıdan giriş icin PAROLASIZ hesap acar - kisi ilk giriste kendi parolasini koyar"),
             ],
             // Dis doktor (305): personel yetkisiyle, kendi kart adiyla.
-            ["dis-hekim-liste"] = Crud("dis-hekim", "dis-hekim", "personel"),
+            ["dis-hekim-liste"] =
+            [
+                .. Crud("dis-hekim", "dis-hekim", "personel"),
+                // TOPLU ROL (819/822): gocle gelen dis hekimlerin HESABI VAR
+                //   ama rolu "Rol Atanmamis" - giris yapsalar hicbir ekran
+                //   goremezler. Yetkili bir IC rolu tasiyan hesap atlanir.
+                new("kullanici.portal-toplu", "👥 Tümüne Portal Rolü", "kullanici",
+                    Hedef: "araccubugu2,palet", AksiyonYetkisi: "kullanici.portal",
+                    Sira: 85,
+                    Ipucu: "Hesabi olan dis hekimlere Dis Doktor (portal) rolunu atar"),
+                // PORTAL ERISIMI (819): dis hekim kendi istem ve sonuclarini
+                //   gorsun diye.
+                new("kullanici.portal", "🔑 Portal Erişimi", "kullanici",
+                    Hedef: "araccubugu2,sagtus,palet",
+                    AksiyonYetkisi: "kullanici.portal", KayitGerekir: true, Sira: 80,
+                    Ipucu: "Dışarıdan giriş icin PAROLASIZ hesap acar - kisi ilk giriste kendi parolasini koyar"),
+            ],
 
             // AKSIYON KOMBOSU (sagtus hedefi) yalniz KOPYALA icerir (kullanici):
             //   Yeni/Duzenle/Sil zaten arac cubugunda dugme; komboda tekrar
@@ -1089,6 +1126,41 @@ public static class AksiyonKatalogu
                 Yazdir(),
             },
 
+            // TESLIM KUYRUGU (814). Kuyrukta yapilabilecek uc sey var:
+            //   yeniden dene, iptal et, mesaji gor. "Yeni kayit" YOK - kuyruk
+            //   satiri elle acilmaz, teslim akisindan dogar.
+            ["telerad-teslim-liste"] = new AksiyonTanimi[]
+            {
+                new("telerad.teslim_dene", "↻ Yeniden Dene", "telerad",
+                    AksiyonYetkisi: "telerad.teslim_kuyruk", KayitGerekir: true,
+                    Sira: 10, Bicim: "bir",
+                    Ipucu: "Mesaji yeniden uretip gonderir - duzeltme yapildiysa "
+                         + "kalici hataya dusmus satir da denenebilir"),
+                new("telerad.teslim_iptal", "✖ Kuyruktan Çıkar", "telerad",
+                    Hedef: "sagtus,palet", AksiyonYetkisi: "telerad.teslim_kuyruk",
+                    KayitGerekir: true, Sira: 20, Bicim: "ret",
+                    Ipucu: "Gonderilmeyecek is her gun yeniden denenmesin"),
+                new("telerad.teslim_istek", "🔎 İsteğe Git", "telerad",
+                    KaynakKodu: "teleradyoloji", Islem: Islem.Gor,
+                    KayitGerekir: true, Sira: 30),
+                Yazdir(),
+            },
+
+            // GELEN RAPORLAR (817). Eslesmeyen rapor iki sekilde cozulur:
+            //   dogru ise ELLE BAGLANIR ya da ham mesaja bakilip karsi tarafa
+            //   sorulur. "Yeni kayit" YOK - satir disaridan dogar.
+            ["telerad-gelen-liste"] = new AksiyonTanimi[]
+            {
+                new("telerad.gelen_bagla", "🔗 İsteğe Bağla", "telerad",
+                    AksiyonYetkisi: "telerad.gelen", KayitGerekir: true, Sira: 10,
+                    Bicim: "bir",
+                    Ipucu: "Eslesmeyen raporu dogru isteğe baglar ve raporu yazar"),
+                new("telerad.gelen_istek", "🔎 İsteğe Git", "telerad",
+                    KaynakKodu: "teleradyoloji", Islem: Islem.Gor,
+                    KayitGerekir: true, Sira: 20),
+                Yazdir(),
+            },
+
             // KURUM VE SOZLESME (800): isin SARTLARI. Kart yoktu, bu yuzden
             //   arac cubugu da yoktu - iliski yalniz gocle/betikle
             //   kurulabiliyordu.
@@ -1145,6 +1217,12 @@ public static class AksiyonKatalogu
                 // Baglanti sinama: kimlik dogru mu, adres ayakta mi.
                 new("entegrasyon.sina",     "🔌 Bağlantıyı Sına", "entegrasyon",
                     Islem: Islem.Gor, KayitGerekir: true, Sira: 40),
+                // KANAL SINAMASI (820): SMS/e-posta hesabina GERCEK mesaj.
+                //   Adres denemesi kanalda hicbir sey soylemiyor - kullanici
+                //   adi yanlis olsa da sunucu ayakta gorunur. DEGISTIR yetkisi
+                //   ister: disariya mesaj gider, SMS ucretlidir.
+                new("entegrasyon.test-bildirim", "✉ Test Mesajı Gönder",
+                    "entegrasyon", Islem: Islem.Degistir, KayitGerekir: true, Sira: 45),
                 // SKRS: kod listelerini servisten cekip yerel listeleri tazeler.
                 new("entegrasyon.skrs-senkron", "⟳ SKRS Listelerini Güncelle",
                     "entegrasyon", Islem: Islem.Degistir, KayitGerekir: true, Sira: 50,

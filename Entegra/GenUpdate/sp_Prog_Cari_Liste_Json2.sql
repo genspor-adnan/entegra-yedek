@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- sp_Prog_Cari_Liste_Json2 — Cari/Rehber liste ekrani (2-param JSON forma, MSSQL-ONLY)
 --   IKI PARAM: @Baslik = SELECT kolonlari (ham SQL, app SubSelectGetir ile birebir/GUVENILIR);
 --              @Kosullar = filtreler (JSON: cast/parametreli DEGERLER).
@@ -15,6 +15,11 @@ BEGIN
 
     -- ---- JSON -> yerel degiskenler (tipli). Absent key -> NULL (typed default korunur). ----
     DECLARE @SelectList    NVARCHAR(MAX) = ISNULL(@Baslik, N'');
+    -- Update197: Son/Sik (Mod 3/5) siralama kolonlari SELECT listesine alias'la alinir; CRM=1
+    --   sarmalamasi (select * from (...) cc) disinda KA gorunmez -> "KA.DEGISTIRMETARIHI could not be bound".
+    IF ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.Mod') AS SMALLINT), 0) IN (3, 5)
+       AND JSON_VALUE(@Kosullar,'$.KulId') IS NOT NULL AND JSON_VALUE(@Kosullar,'$.Modul') IS NOT NULL
+        SET @SelectList = @SelectList + N', KA.DEGISTIRMETARIHI AS KA_DEGISTIRMETARIHI, KA.SAY AS KA_SAY';
     DECLARE @Variant       SMALLINT      = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.Variant')      AS SMALLINT), 0);
     DECLARE @TopN          INT           = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.TopN')         AS INT), 200);
     DECLARE @Mod           SMALLINT      = ISNULL(TRY_CAST(JSON_VALUE(@Kosullar,'$.Mod')          AS SMALLINT), 4);
@@ -259,9 +264,9 @@ BEGIN
 
     -- --------- ORDER BY --------------------------------------
     IF @Mod = 5
-        SET @SQL = @SQL + N' ORDER BY KA.DEGISTIRMETARIHI DESC ';
+        SET @SQL = @SQL + N' ORDER BY KA_DEGISTIRMETARIHI DESC ';
     ELSE IF @Mod = 3
-        SET @SQL = @SQL + N' ORDER BY KA.SAY DESC ';
+        SET @SQL = @SQL + N' ORDER BY KA_SAY DESC ';
     ELSE IF @Mod = 1
         SET @SQL = @SQL + N' ORDER BY 1 ';
     ELSE IF @Mod = 4

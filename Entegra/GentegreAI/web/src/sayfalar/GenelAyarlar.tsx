@@ -7,7 +7,7 @@ import { NumaralamaSekmesi } from '../bilesenler/NumaralamaSekmesi';
 import { BelgeYaziSekmesi } from '../bilesenler/BelgeYaziSekmesi';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
-import { guvenli, mesaj, onay } from '../bilesenler/mesaj';
+import { guvenli, mesaj, metinSor, onay } from '../bilesenler/mesaj';
 import { useOturum } from '../kimlik/OturumBaglami';
 
 const SEKMELER = [
@@ -75,6 +75,30 @@ export function GenelAyarlar() {
           setYenile(t => t + 1);
         });
         return;
+      // KANAL SINAMASI (820): SMS/e-posta hesabina GERCEK mesaj gonderir.
+      //   "Baglantiyi Sina" sunucunun ayakta olduguna bakiyor; kullanici adi
+      //   yanlis ya da XML govdesi saglayicinin bekledigi bicimde degilse
+      //   yine "basarili" derdi - kanalin calistiginin tek kaniti ULASAN
+      //   mesajdir.
+      case 'entegrasyon.test-bildirim': {
+        if (!satir) return;
+        const kanal = String(satir.kod ?? '');
+        const smsMi = kanal === 'SMS';
+        const alici = await metinSor(
+          smsMi ? 'Test SMS hangi numaraya gitsin?' : 'Test e-postası hangi adrese gitsin?',
+          '', smsMi ? 'Numara (905XXXXXXXXX)' : 'E-posta adresi');
+        if (!alici || !alici.trim()) return;
+        // DISARIYA GIDER: SMS ucretli, e-posta gercek bir kutuya duser.
+        if (!await onay(smsMi
+          ? `${alici} numarasına GERÇEK bir test SMS'i gönderilecek (ücretlidir). Devam?`
+          : `${alici} adresine gerçek bir test e-postası gönderilecek. Devam?`)) return;
+        await guvenli(async () => {
+          const y = await api.bildirimSina(Number(satir.id), alici.trim());
+          mesaj(y.mesaj + (y.saglayiciRef ? ` · sağlayıcı: ${y.saglayiciRef}` : ''));
+          setYenile(t => t + 1);
+        });
+        return;
+      }
       // SKRS listelerini servisten cekip YEREL kod listelerini tazeler.
       case 'entegrasyon.skrs-senkron':
         if (!satir) return;

@@ -24,7 +24,11 @@ public static partial class RadyolojiUclari
     public sealed record BolumIstegi(int? Id, int Sira, string Baslik, string Metin, short Yazdir);
     public sealed record AlanIstegi(string AlanKod, string AlanAd, string Deger);
     public sealed record RaporIstegi(int? SablonId, IReadOnlyList<BolumIstegi>? Bolumler,
-                                     IReadOnlyList<AlanIstegi>? Alanlar, short? Kritik);
+                                     IReadOnlyList<AlanIstegi>? Alanlar, short? Kritik,
+                                     /// <summary>OBX-13 birinci deger: istemin gerekcesi (811) - 0 girilmedi.</summary>
+                                     short? IstemNedeniPuan = null,
+                                     /// <summary>OBX-13 ikinci deger: cekim kalitesi (811) - 0 girilmedi.</summary>
+                                     short? CekimKalitePuan = null);
     public sealed record KritikIstegi(string Bulgu, string BildirilenAd, short Yol,
                                       string GeriBildirim,
                                       /// <summary>Bildirilen hekim aldigini teyit etti mi (318).</summary>

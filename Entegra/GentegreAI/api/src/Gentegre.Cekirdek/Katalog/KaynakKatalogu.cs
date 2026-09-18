@@ -190,6 +190,32 @@ public static partial class KaynakKatalogu
 
     public static IEnumerable<KaynakTanimi> Tumu => Kaynaklar.Values;
 
+    /// <summary>
+    /// PORTAL TURUNE KAPSAMI ACIK kaynak adlari (796 V2).
+    ///
+    /// <para>Portal kullanicisinin YETKISI olabilir ama kapsam kurali kapali
+    /// olabilir: dis kurum rolu `teleradyoloji` yetkisini tasiyor (kendi
+    /// istegini acsin diye), ama "Teslim Kuyrugu" ya da "Bakanlik Eksikleri"
+    /// ekranlarinin portal kurali `false`. O ekran acilsa BOS gelir.</para>
+    ///
+    /// <para>Menuyu buna gore suzmek icin liste ISTEMCIDE degil sunucuda
+    /// bilinir - kapsam kurallari burada. Yeni bir kaynak portala acildiginda
+    /// menu kendiliginden buyur; kapatildiginda menuden duser.</para>
+    /// </summary>
+    public static IReadOnlyList<string> PortalKaynaklari(short portalTuru)
+    {
+        if (portalTuru <= 0) return [];
+        return [.. Kaynaklar.Values
+            .Where(k => k.PortalKosullari is { } p
+                        && p.TryGetValue(portalTuru, out var kosul)
+                        // "false" = kural YAZILMIS ama kapali: ekran portalda
+                        //   hicbir satir gostermez, menude de durmamali.
+                        && !string.Equals(kosul.Trim(), "false",
+                                          StringComparison.OrdinalIgnoreCase))
+            .Select(k => k.Ad)
+            .OrderBy(x => x, StringComparer.Ordinal)];
+    }
+
     static KaynakKatalogu()
     {
         Ekle(Cari());
@@ -225,6 +251,12 @@ public static partial class KaynakKatalogu
         Ekle(TeleradIstek());
         Ekle(TeleradKurum());
         Ekle(TeleradSozlesme());
+        Ekle(TeleradBakanlikEksik());
+        Ekle(TeleradTeslim());
+        Ekle(TeleradGelen());
+        // PORTAL MALI (824): dis kurum yoneticisinin dar fatura/ekstre ekranlari.
+        Ekle(KurumBelge());
+        Ekle(KurumEkstre());
         Ekle(TeleradNobet());
         Ekle(TeleradKural());
         Ekle(RadyolojiTeslim());

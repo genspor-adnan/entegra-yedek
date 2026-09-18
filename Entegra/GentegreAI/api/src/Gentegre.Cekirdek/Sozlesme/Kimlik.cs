@@ -84,6 +84,16 @@ public sealed class KullaniciOzeti
     /// gostermek kullaniciya yalan soylemektir.
     /// </summary>
     public short PortalTuru { get; set; }
+    /// <summary>
+    /// PORTALDA KAPSAMI ACIK kaynak adlari (796 V2) - portal menusu bununla
+    /// suzulur. Ic kullanicida BOS: kurum ici menu yetkiye gore cizilir.
+    ///
+    /// Yetki tek basina yetmiyor: dis kurum rolu `teleradyoloji` yetkisini
+    /// tasiyor ama "Teslim Kuyrugu" ekraninin portal kurali `false` - o ekran
+    /// acilsa bos gelirdi. Bos gelen ekrani menude gostermek, her zaman hata
+    /// veren dugme gostermekle ayni sinifta.
+    /// </summary>
+    public IReadOnlyList<string> PortalKaynaklar { get; set; } = [];
     public int Dil { get; set; }
     /// <summary>
     /// ILK GIRIS PAROLA ZORUNLULUGU (674): varsayilan parola (personel kart

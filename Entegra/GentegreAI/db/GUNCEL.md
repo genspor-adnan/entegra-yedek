@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (416 ad, 118 tanesi birden cok dosyada)
+## Fonksiyonlar (437 ad, 120 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -70,6 +70,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_demirbas_olcum_sonuc` | `727_olcum_sapma.sql` | 723_demirbas_kalibrasyon.sql |
 | `fn_depo_kural_kontrol` | `093_depo_kurallar.sql` | — |
 | `fn_depo_varsayilan_tek` | `090_depo_varsayilan.sql` | — |
+| `fn_dis_hekim_kurumu` | `827_lab_istem_kurumu.sql` | — |
 | `fn_dis_no_uret` | `706_dis_modulu.sql` | — |
 | `fn_dis_plan_toplam_tazele` | `706_dis_modulu.sql` | — |
 | `fn_dokuman_kategori_alt_yol` | `431_dokuman_kategori.sql` | — |
@@ -111,6 +112,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ebelge_xslt_bul` | `160_xslt_dokumana_tasindi.sql` | 159_ebelge_xslt.sql |
 | `fn_eczane_hazirlama_no_uret` | `731_tedarik_numaralari.sql` | — |
 | `fn_eczane_imha_no_uret` | `731_tedarik_numaralari.sql` | — |
+| `fn_enabiz_basvuru_referans` | `812_bakanlik_kurum_enabiz_accession.sql` | — |
 | `fn_enabiz_siradakiler` | `428_kuyruk_takili_satir.sql` | 415_enabiz_cekirdek.sql |
 | `fn_entegrasyon_hesap_id` | `338_entegrasyon_baz_sube.sql` | — |
 | `fn_erken_uyari` | `699_erken_uyari_skoru.sql` | — |
@@ -201,6 +203,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kullanici_ana_rol_temizle` | `665_cok_rollu_kullanici.sql` | — |
 | `fn_kullanici_iskonto_tavani` | `792_sorumlu_kendi_tavani.sql` | — |
 | `fn_kullanici_kasa` | `197_kasa_atama_tek_alan.sql` | 196_kasa_atama.sql |
+| `fn_kullanici_portal_taraf` | `819_portal_hesabi.sql` | — |
 | `fn_kullanici_portal_turu` | `794_portal_kapsami.sql` | — |
 | `fn_kullanici_rol_dogrula` | `665_cok_rollu_kullanici.sql` | — |
 | `fn_kullanici_rolleri` | `665_cok_rollu_kullanici.sql` | — |
@@ -240,6 +243,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_lab_referans` | `644_lab_referans_cinsiyetsiz.sql` | 433_lab_v1.sql, 434_lab_cihaz_esleme.sql |
 | `fn_lab_referans_kime` | `488_lab_yas_metni.sql` | — |
 | `fn_lab_referans_metin` | `644_lab_referans_cinsiyetsiz.sql` | 643_lab_satir_katalog_dolgusu.sql |
+| `fn_lab_rol_tazele` | `828_lab_gonderen_primi.sql` | — |
 | `fn_lab_sayi_metni` | `644_lab_referans_cinsiyetsiz.sql` | — |
 | `fn_lab_tetkik_bolum` | `529_lab_tetkik_katalogu_skrs.sql` | — |
 | `fn_lab_tetkik_numune` | `529_lab_tetkik_katalogu_skrs.sql` | — |
@@ -276,11 +280,15 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_prim_taslak_mi` | `330_prim_tahsilat_turu_durum.sql` | — |
 | `fn_prim_uret` | `339_prim_taslak_uretilmez.sql` | 324_prim_semasi.sql, 326_radyoloji_prim_rol.sql, 328_prim_kapsam_kampanya_deseni.sql, 330_prim_tahsilat_turu_durum.sql, 331_kurum_tahakkuk_prim.sql, 332_prim_zamani.sql |
 | `fn_prim_uret_belge` | `492_prim_dagilim_kovalari.sql` | 332_prim_zamani.sql |
+| `fn_rad_bakanlik_eksik` | `809_bakanlik_rapor_parcalari.sql` | — |
+| `fn_rad_bakanlik_parca` | `809_bakanlik_rapor_parcalari.sql` | — |
 | `fn_rad_istem_hizmet_kullanim` | `550_hizmet_kullanim_puani.sql` | — |
-| `fn_rad_rol_tazele` | `332_prim_zamani.sql` | 326_radyoloji_prim_rol.sql |
+| `fn_rad_kontrast_obx17` | `811_bakanlik_degerlendirme_ve_kontrast.sql` | — |
+| `fn_rad_modalite_kod` | `810_bakanlik_hekim_ve_modalite.sql` | — |
+| `fn_rad_rol_tazele` | `825_gonderen_primi_kendi_adina.sql` | 326_radyoloji_prim_rol.sql, 332_prim_zamani.sql |
 | `fn_radyoloji_accession` | `283_radyoloji_cekirdek.sql` | — |
 | `fn_radyoloji_rapor_no` | `303_radyoloji_rapor_no.sql` | — |
-| `fn_radyoloji_rapor_onaylanabilir` | `284_radyoloji_operasyon.sql` | — |
+| `fn_radyoloji_rapor_onaylanabilir` | `809_bakanlik_rapor_parcalari.sql` | 284_radyoloji_operasyon.sql |
 | `fn_radyoloji_sonuc_durumu` | `418_muayene_istem_bagi.sql` | — |
 | `fn_resmi_tatil_uret` | `749_resmi_tatil.sql` | — |
 | `fn_rol_kilit_koru` | `786_kurum_tipi_rol.sql` | — |
@@ -322,10 +330,14 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_taraf_kampanya` | `468_kurum_sozlesme_1n.sql` | 274_belge_kampanya.sql |
 | `fn_taraf_kisi_unvan_ata` | `037_kisi_karti.sql` | — |
 | `fn_telefon_rakam` | `123_telefon_arama.sql` | — |
+| `fn_telerad_bakanlik_eksik` | `812_bakanlik_kurum_enabiz_accession.sql` | — |
 | `fn_telerad_fatura_rol` | `808_dis_hekim_raporlayan.sql` | 807_telerad_hakedis_bagi.sql |
+| `fn_telerad_gelen_istek` | `817_telerad_gelen_oru.sql` | — |
 | `fn_telerad_istek_no` | `797_teleradyoloji.sql` | — |
 | `fn_telerad_portal_kurum` | `804_telerad_kurum_portali.sql` | — |
 | `fn_telerad_radyolog_oner` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
+| `fn_telerad_teslim_kuyrukla` | `814_telerad_teslim_kuyrugu.sql` | — |
+| `fn_telerad_teslim_sonraki` | `814_telerad_teslim_kuyrugu.sql` | — |
 | `fn_tevkifat_orani` | `176_tevkifat_istisna.sql` | — |
 | `fn_tr_baslik` | `563_gorev_adi_bicim.sql` | — |
 | `fn_ubl_taraf` | `182_ebelge_ubl.sql` | — |
@@ -373,11 +385,15 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_kasa_islem_tahsil_tazele` | `321_tahsilat_satir_dagitim.sql` | — |
 | `tg_kategori_aktiflik` | `527_profil_kategori.sql` | — |
 | `tg_kategori_dongu_engel` | `270_kategori_agaci.sql` | — |
+| `tg_kullanici_portal_taraf` | `819_portal_hesabi.sql` | — |
 | `tg_kurum_sozlesme_kontrol` | `601_sgk_tarife_sut_listesi.sql` | 468_kurum_sozlesme_1n.sql, 493_kurum_turu_kurumu_oder.sql, 517_kurum_sozlesme_sgk_carisi.sql |
+| `tg_lab_istem_kurumu` | `827_lab_istem_kurumu.sql` | — |
 | `tg_lab_istem_no` | `641_lab_istem_no_tetik.sql` | — |
 | `tg_lab_istem_satir_katalog` | `643_lab_satir_katalog_dolgusu.sql` | — |
 | `tg_lab_panel_hizmet` | `501_panel_icerigi_tek_kaynak.sql` | — |
 | `tg_lab_panel_satir_yaz` | `639_hemogram_23_parametre.sql` | 501_panel_icerigi_tek_kaynak.sql |
+| `tg_lab_rol_istem` | `828_lab_gonderen_primi.sql` | — |
+| `tg_lab_rol_kalem` | `828_lab_gonderen_primi.sql` | — |
 | `tg_lab_varyant_sinif` | `439_lab_genetik.sql` | — |
 | `tg_masraf_toplam` | `766_masraf_satir_kilit_duzeltmesi.sql` | 764_masraf_beyani.sql |
 | `tg_mesaj_sohbet_tazele` | `342_mesajlasma.sql` | — |
@@ -387,6 +403,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_muayene_rapor_hasta` | `462_muayene_rapor.sql` | — |
 | `tg_muayene_vital_bki` | `463_vital_bki.sql` | — |
 | `tg_onay_adim_tek_imza` | `784_onay_tek_imza_ve_iskonto_rolu.sql` | — |
+| `tg_portal_davet_tekil` | `822_portal_daveti.sql` | — |
 | `tg_prim_belge_tur` | `332_prim_zamani.sql` | 330_prim_tahsilat_turu_durum.sql |
 | `tg_prim_dagitim` | `324_prim_semasi.sql` | — |
 | `tg_prim_donusum` | `332_prim_zamani.sql` | 324_prim_semasi.sql |
@@ -400,6 +417,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_prim_satir_rol` | `385_prim_satir_rol_plandan.sql` | — |
 | `tg_prim_satir_silme` | `329_prim_satir_silme_mesaji.sql` | — |
 | `tg_prim_satir_zaman` | `333_prim_zamani_ilk_kapi.sql` | — |
+| `tg_rad_istem_kurumu` | `827_lab_istem_kurumu.sql` | 826_istem_kurumu_bagli_kurumdan.sql |
+| `tg_rad_rapor_bolum_parca` | `809_bakanlik_rapor_parcalari.sql` | — |
 | `tg_rad_rol_istem` | `326_radyoloji_prim_rol.sql` | — |
 | `tg_rad_rol_rapor` | `326_radyoloji_prim_rol.sql` | — |
 | `tg_radyoloji_cekim_kontrolu` | `312_cekim_kontrolu_is_kurali_kodu.sql` | 310_radyoloji_kontrol_listesi.sql |
@@ -419,13 +438,15 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
 | `tg_taraf_prim_rol_dogrula` | `808_dis_hekim_raporlayan.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql, 369_primli_calisma_sekli.sql |
 | `tg_telerad_atama_izi` | `802_telerad_atama_nedeni.sql` | 797_teleradyoloji.sql |
+| `tg_telerad_bakanlik_dogrula` | `812_bakanlik_kurum_enabiz_accession.sql` | — |
 | `tg_telerad_istek` | `799_telerad_durum_damgalari.sql` | 797_teleradyoloji.sql |
 | `tg_telerad_istek_portal` | `804_telerad_kurum_portali.sql` | — |
 | `tg_telerad_nobet_cakisma` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
+| `tg_telerad_teslim_otomatik` | `814_telerad_teslim_kuyrugu.sql` | — |
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (241 ad, 60 tanesi birden cok dosyada)
+## Gorunumler (247 ad, 60 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -614,6 +635,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_personel_lookup` | `054_personel_ozluk_mockup_uyum.sql` | — |
 | `v_personel_masraf` | `764_masraf_beyani.sql` | — |
 | `v_plan_vade` | `077_v_ekstre.sql` | — |
+| `v_portal_davet` | `822_portal_daveti.sql` | — |
 | `v_prim_rol_aday` | `808_dis_hekim_raporlayan.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql, 367_prim_rol_aday_bolum.sql, 369_primli_calisma_sekli.sql, 576_personel_departman_tek_kaynak.sql |
 | `v_prim_rol_lookup` | `391_prim_rol_lookup_onarim.sql` | 362_gonderen_calisma_sekli.sql |
 | `v_prim_taraf_lookup` | `378_prim_taraf_lookup_aktif.sql` | 375_prim_plani_taraf.sql, 377_prim_taraf_lookup_genis.sql |
@@ -621,6 +643,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_proje_lookup` | `071_kasa_master.sql` | — |
 | `v_rad_cihaz_lookup` | `286_radyoloji_lookup.sql` | — |
 | `v_rad_hekim_lookup` | `718_hekim_calisma_plani.sql` | 283_radyoloji_cekirdek.sql, 313_rad_hekim_lookup_dis_hekim.sql |
+| `v_rad_kontrast_yol_lookup` | `811_bakanlik_degerlendirme_ve_kontrast.sql` | — |
+| `v_rad_modalite_kod_lookup` | `810_bakanlik_hekim_ve_modalite.sql` | — |
 | `v_rad_sablon_lookup` | `800_telerad_kurum_sozlesme_karti.sql` | — |
 | `v_rad_tetkik_lookup` | `286_radyoloji_lookup.sql` | — |
 | `v_radyoloji_cihaz_lookup` | `316_randevu_cihaz_kaynagi.sql` | — |
@@ -661,9 +685,12 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_taraf_avans` | `780_avans_iadesi.sql` | 322_avans_mahsup.sql |
 | `v_taraf_cihaz` | `773_teknik_servis.sql` | — |
 | `v_tedarikci_skor` | `724_satinalma.sql` | — |
+| `v_telerad_bakanlik_eksik` | `813_bakanlik_eksik_listesi.sql` | — |
+| `v_telerad_gelen` | `817_telerad_gelen_oru.sql` | — |
 | `v_telerad_istek` | `797_teleradyoloji.sql` | — |
 | `v_telerad_kurum_lookup` | `798_telerad_kart.sql` | — |
 | `v_telerad_nobetci` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
+| `v_telerad_teslim` | `814_telerad_teslim_kuyrugu.sql` | — |
 | `v_ulke_lookup` | `119_stok_uts.sql` | — |
 | `v_uretim_emri_lookup` | `429_uretim_v1.sql` | — |
 | `v_uretim_hareket` | `429_uretim_v1.sql` | — |

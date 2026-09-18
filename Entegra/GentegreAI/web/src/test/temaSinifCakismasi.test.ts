@@ -90,6 +90,12 @@ const IKI_ANLAMLI = [
   'alan-izgara', 'bos', 'cikti-arac', 'd', 'detay-tablo', 'dip-toplam',
   'kagov', 'kagrup-resim', 'kawin', 'lookup-kutu', 'lookup-liste', 'mi',
   'minibtn', 'resim-kutusu', 'satir-ici', 'tuslar', 'yan',
+  // PORTAL KABUGU V2 (796/818) — BILINCLI: liste ekranlarinin telefon
+  //   duzeni yalniz `.pk-icerik` icinde degisiyor (satir yuksekligi, cip
+  //   seridi, baslik). Ayni kurallari GLOBAL yapmak bankodaki genis ekrani
+  //   da daraltirdi; portal icin ayri bir liste bileseni yazmak ise ayni
+  //   ekranin iki kopyasini bakim etmek olurdu.
+  'basrow', 'cip', 'cipler', 'sahne', 'sayfabas',
 ];
 
 const GORUNUM = /\b(width|height|border|background|position|display|padding|flex)\b/;

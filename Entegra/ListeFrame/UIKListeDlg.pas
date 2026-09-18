@@ -604,6 +604,7 @@ type
     procedure LabelTumKayitlarClick(Sender: TObject);
     procedure LabelSikArananlarClick(Sender: TObject);
     procedure Liste_SP_Cagir(AMod: SmallInt);  // sunucu-tarafi listeleme (sp_Prog_IK_Liste)
+    procedure IKListesiniYenile;
     procedure AraTusClick(Sender :TObject);
     procedure ComboBox1DropDown(Sender :TObject);
     procedure AraFirmaKeyUp(Sender :TObject; var Key :Word;  Shift :TShiftState);
@@ -778,6 +779,7 @@ type
     procedure TBtnHareketlerEkleClick(Sender: TObject);
     procedure PozisyonDegisimiMenuClick(Sender: TObject);
     procedure TabHareketlerAfterScroll(DataSet: TDataSet);
+    procedure DtsHareketlerStateChange(Sender: TObject);
     procedure GorevEkleTusClick(Sender: TObject);
     procedure GorevSilTusClick(Sender: TObject);
     procedure CheckTamamlananClick(Sender: TObject);
@@ -1163,8 +1165,20 @@ begin
     TabDil.FieldByName('REHBERID').AsInteger := REHBER.FieldByName('ID').AsInteger;
 end;
 
+// Hareketler: Kaydet / Iptal dugmeleri yalniz duzenleme (dsEdit/dsInsert) sirasinda gorunur;
+//   browse kipinde gizli (kullanici).
+procedure TIKListeDlg.DtsHareketlerStateChange(Sender: TObject);
+var
+  LDuzenleniyor: Boolean;
+begin
+  LDuzenleniyor := TabHareketler.Active and (TabHareketler.State in [dsEdit, dsInsert]);
+  TBtnHareketKaydet.Visible := LDuzenleniyor;
+  TBtnHareketIptal.Visible  := LDuzenleniyor;
+end;
+
 procedure TIKListeDlg.TabHareketlerAfterScroll(DataSet: TDataSet);
 begin
+   DtsHareketlerStateChange(nil);
    TabHareketler.FetchAll;
    TBtnHareketlerSil.Enabled := TabHareketler.RecNo=TabHareketler.RecordCount;
 end;
@@ -1282,6 +1296,7 @@ procedure TIKListeDlg.TBtnHareketlerEkleClick(Sender: TObject);
 var  ROLID : Integer;
      Tarih,ACIKLAMA : Variant;
      Trh:TDateTime;
+     LSube: string;
 begin
   ROLID := Tablo.RolAra_IDGetir;
   if ROLID <> -99 then begin
@@ -1289,7 +1304,11 @@ begin
      if TGirisKutusuEx.BilgiAlEx(BGTarih_gir, TGirdiDenetimleri.Create.DateTimePicker(BGTarih_gir+':', @Tarih,dtkDate).Edit(BGAciklama_gir +':' , @ACIKLAMA)) = mrOk then begin
         Trh := TDateTime(Tarih);
 
-        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update REHBER set SINIF='+IntToStr(ROLID)+',SUBEID='+Tablo.AciklamaGetir('ROLLER', 'SUBEID', ROLID)+' where ID='+REHBER.FieldByName('ID').AsString,[],[]);
+        // Rolun subesi bos olabilir -> 'SUBEID=' + '' sozdizimi bozulurdu; bos ise personelin subesi korunur.
+        LSube := Trim(Tablo.AciklamaGetir('ROLLER', 'SUBEID', ROLID));
+        Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, 'update REHBER set SINIF=&Sinif, SUBEID=' +
+          IfThen(LSube <> '', LSube, 'SUBEID') + ' where ID=&ID', ['&Sinif', '&ID'],
+          [ROLID, REHBER.FieldByName('ID').AsInteger]);
 
 {        Tablo.TablodanSorguAc(1,'select SUBEID=(select FIRMA from REHBER where ID=ROL.SUBEID),'+
         ' DEPARTMAN=(SELECT TOP 1 ANAHTAR FROM GENINI WHERE BOLUM=-2251 AND DEGER = ROL.DEPARTMAN AND DIL=-1 ),'+
@@ -1299,7 +1318,7 @@ begin
           ,['&REHBERID', '&TUR', '&ROLID', '&ACIKLAMA'], [REHBER.FieldByName('ID').AsInteger,2, ROLID, VarToStr(ACIKLAMA)]);
 
         PageControlSekmeChange(Self);
-        if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[0]);
+        IKListesiniYenile;   // eski TabloYenile(REHBER,[0]): SP parametresine 0 basiyordu -> "syntax near '0'"
      end;
   end;
 end;
@@ -1619,7 +1638,7 @@ begin
 
 
    if TcxDBTreeList(Sender).FocusedColumn.tag=1 then begin
-      UpdateveMail(MasaUstu, TabGorevler.FieldByName('LISTEID').AsInteger, TabGorevler.Fields[0].AsInteger,
+      UpdateveMail(MasaUstu, TabGorevler.FieldByName('LISTEID').AsInteger, TabGorevler.FieldByName('ID').AsInteger,
                   TabGorevler.FieldByName('EKLEYEN').AsInteger, TabGorevler.FieldByName('ACKAPA').AsBoolean, TcxDBTreeList(Sender).FocusedNode.HasChildren);
       PlayWavFromResource('Blink');
       PageControlSekmeChange(Self);
@@ -2407,9 +2426,9 @@ procedure TIKListeDlg.AktiviteSilTusClick(Sender: TObject);
 begin
    if Application.MessageBox(PChar(SSilmeSorusu), PChar(SGenotipOnay), MB_YESNO) = IDYES then begin
       //varsa dokumanlar?n silinmeli
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[51, TabGorevler.Fields[0].AsInteger]);
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from IMAJ where YERI=&yeri and YER_ID=&yer_id ',['&yeri', '&yer_id'],[51, TabGorevler.FieldByName('ID').AsInteger]);
       //varsa proje ba?lant?lar? silinmeli
-      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from AKTIVITELER where Id=&id ',['&id'],[TabGorevler.Fields[0].AsInteger]);
+      Veritabani.BasitKomutÇalıştır(Tablo.FDCnn, ' delete from AKTIVITELER where Id=&id ',['&id'],[TabGorevler.FieldByName('ID').AsInteger]);
       PageControlSekmeChange(Self);
       Abort;
    end;
@@ -2665,7 +2684,7 @@ begin
       else
          REHBER.SQL.Text:= StringReplace(SQL_IK_Memo.Text,'set @DIL = -1','set @DIL = '+IntToStr(Dil),[rfReplaceAll]);;
 
-      if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[0]);
+      IKListesiniYenile;   // eski TabloYenile(REHBER,[0]): SP parametresine 0 basiyordu -> "syntax near '0'"
       REHBER.Locate('ID', ID, []);}
   end;
 end;
@@ -2743,19 +2762,19 @@ begin
       Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'insert into [PERS_HAREKET] (REHBERID,TARIH,TUR,ACIKLAMA,ROLID)values(&REHBERID,'''+FormatDateTime('yyyy-mm-dd', Trh)+''' ,&TUR,&ACIKLAMA,&ROLID)'
           ,['&REHBERID','&TUR','&ACIKLAMA','&ROLID'], [REHBER.FieldByName('ID').AsInteger,99, Tablo.Query1.Fields[0].AsString, Tablo.Query2.Fields[0].AsInteger]);
       //DuyuruYayinla(3402);
-      if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[0]);
+      IKListesiniYenile;   // eski TabloYenile(REHBER,[0]): SP parametresine 0 basiyordu -> "syntax near '0'"
    end;
 end;
 
 procedure TIKListeDlg.IsiKopyalaMenuClick(Sender: TObject);
 begin
-  Tablo.GorevKopyala(TabGorevler.Fields[0].AsInteger, TabGorevler.FieldByName('KONUSU').AsString);
+  Tablo.GorevKopyala(TabGorevler.FieldByName('ID').AsInteger, TabGorevler.FieldByName('KONUSU').AsString);
   PageControlSekmeChange(Self);
 end;
 
 procedure TIKListeDlg.IsiSilMenuClick(Sender: TObject);
 begin
-   if Tablo.GorevSil(TabGorevler.Fields[0].AsInteger) then
+   if Tablo.GorevSil(TabGorevler.FieldByName('ID').AsInteger) then
       PageControlSekmeChange(Self);
 end;
 
@@ -2763,7 +2782,7 @@ procedure TIKListeDlg.IstenCikisIptalMenuClick(Sender: TObject);
 begin
    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'update REHBER set DURUM=1 where ID='+REHBER.FieldByName('ID').AsString,[],[]);
    Veritabani.BasitKomutÇalıştır(Tablo.FDCnn,'delete from PERS_HAREKET where TUR=99 and REHBERID='+REHBER.FieldByName('ID').AsString,[],[]);
-   if AktifVeriMotor <> vmPG then TabloYenile(REHBER,[0]);
+   IKListesiniYenile;   // eski TabloYenile(REHBER,[0]): SP parametresine 0 basiyordu -> "syntax near '0'"
 end;
 
 procedure TIKListeDlg.ProjeAktarm1Click(Sender: TObject);
@@ -2916,7 +2935,7 @@ begin
   if AcellViewinfo.Item.Tag = 1 then begin
 //     TamamlandiIsaretleMenuClick(Self);
 //     Menu_Tamam(GorevlerMenu, GorevGridDBTableView1, Scheduler, FArama.TabListe.Fields[0].AsInteger);
-     UpdateveMail(Masaustu, TabGorevler.FieldByName('LISTEID').AsInteger, TabGorevler.Fields[0].AsInteger,
+     UpdateveMail(Masaustu, TabGorevler.FieldByName('LISTEID').AsInteger, TabGorevler.FieldByName('ID').AsInteger,
                   TabGorevler.FieldByName('EKLEYEN').AsInteger, TabGorevler.FieldByName('ACKAPA').AsBoolean,False);
      PlayWavFromResource('Blink');
      PageControlSekmeChange(Self);
@@ -2930,9 +2949,11 @@ begin
 end;
 
 procedure TIKListeDlg.GorevSilTusClick(Sender: TObject);
+// IS SILINEMIYORDU: TabGorevler fn_prg_IsListesi* sonucudur, ilk kolonu takvim alani 'type' (ID degil);
+//   Fields[0] -> 0 -> GorevSil(0) sessiz cikiyordu. Bu unit'teki tum Fields[0] -> FieldByName('ID').
 begin
   if Application.MessageBox(PChar(SeciliSatirSil),PChar(Onay), MB_OKCANCEL  + MB_ICONQUESTION) = ID_OK then begin
-     Tablo.GorevSil(TabGorevler.Fields[0].AsInteger);
+     Tablo.GorevSil(TabGorevler.FieldByName('ID').AsInteger);
      PageControlSekmeChange(Self);
   end;
 end;
@@ -3233,6 +3254,14 @@ begin
   if not Assigned(FArama) then Exit;
   if Tablo.IlkAcilisSonArananMi(FIlkSonAranan) then begin Liste_SP_Cagir(5); Exit; end;   // ilk acilis: Son Aranan
   Liste_SP_Cagir(4);   // filtre/normal listeleme -> sunucu-tarafi SP (sp_Prog_IK_Liste)
+end;
+
+// IK listesi sunucu-tarafi SP ile yuklenir (@Baslik/@Kosullar); pozisyonel TabloYenile(REHBER,[0])
+//   ilk parametreye 0 basip "Incorrect syntax near '0'" veriyordu (kullanici: hareket ekle / pozisyon
+//   degisimi + bolum sec). Ayni modla yeniden yukle (secili kayit ListeSPJson LocateID ile korunur).
+procedure TIKListeDlg.IKListesiniYenile;
+begin
+  if FSonMod > 0 then Liste_SP_Cagir(FSonMod) else Liste_SP_Cagir(4);
 end;
 
 procedure TIKListeDlg.Liste_SP_Cagir(AMod: SmallInt);

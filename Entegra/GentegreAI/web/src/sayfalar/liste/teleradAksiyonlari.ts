@@ -1,5 +1,5 @@
 import { api } from '../../api/istemci';
-import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
+import { guvenli, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
 
 /**
@@ -127,9 +127,17 @@ export async function teleradAksiyonu(
     if (!satir) return true;
     if (!(await onay(`${no} isteği gönderen kuruma teslim edilsin mi?`))) return true;
     await guvenli(async () => {
-      await istekGuncelle(id, { durum: 7 });
+      // YOLU SUNUCU SECER (814): HL7 ORU kanalinda mesaj kuyruga girip
+      //   gonderilir ve ACK beklenir; "Portal" kanalinda yalniz damga yazilir.
+      //   Ekran kanal bilmez - ayni kural iki yerde yasamasin.
+      const y = await api.teleradTeslim(id);
       b.tazele();
-      mesaj(`${no} teslim edildi.`);
+      if (y.yol === 'portal') { mesaj(`${no} teslim edildi.`); return }
+      if (y.basarili) { mesaj(`${no} karşı sisteme gönderildi (ACK ${y.ackKodu}).`); return }
+      // BASARISIZ GONDERIM SESSIZ GECILMEZ: is kuyrukta kaldi, kullanici
+      //   nedenini simdi gormeli - kuyruk ekrani da ayrica listeliyor.
+      mesaj(`${no} gönderilemedi: ${y.hata || 'karşı uç yanıt vermedi'}. `
+            + 'İş teslim kuyruğunda, otomatik tekrar denenecek.');
     });
     return true;
   }
@@ -146,6 +154,78 @@ export async function teleradAksiyonu(
       b.tazele();
       mesaj(`${no} iptal edildi.`);
     });
+    return true;
+  }
+
+  // ---------------------------------------------------- TESLIM KUYRUGU ----
+  // Kuyruk ekraninin satiri bir TESLIM kaydidir, istek degil: id de teslim
+  //   id'sidir. Ayni aksiyon dosyasinda durmasi bilincli - ikisi de "raporun
+  //   karsi tarafa gitmesi" isinin parcasi.
+  if (kod === 'telerad.teslim_dene') {
+    if (!satir) return true;
+    await guvenli(async () => {
+      const y = await api.teleradTeslimDene(id);
+      b.tazele();
+      mesaj(y.basarili
+        ? `Teslim başarılı (ACK ${y.ackKodu}).`
+        : `Gönderilemedi: ${y.hata || 'karşı uç yanıt vermedi'}.`);
+    });
+    return true;
+  }
+
+  if (kod === 'telerad.teslim_iptal') {
+    if (!satir) return true;
+    if (!(await onay('Bu teslim kuyruktan çıkarılsın mı? '
+                   + 'Rapor karşı sisteme GÖNDERİLMEYECEK.'))) return true;
+    await guvenli(async () => {
+      await api.teleradTeslimIptal(id);
+      b.tazele();
+      mesaj('Teslim kuyruktan çıkarıldı.');
+    });
+    return true;
+  }
+
+  // ISTEGE GIT: kuyruktaki satirin isini acar - duzeltme orada yapilir.
+  if (kod === 'telerad.teslim_istek') {
+    if (!satir) return true;
+    const istekId = Number(satir.istekId ?? 0);
+    if (istekId > 0) b.git(`/telerad-istek/${istekId}`);
+    return true;
+  }
+
+  // ------------------------------------------------------ GELEN RAPORLAR ----
+  // Satır bir GELEN MESAJDIR; id de gelen kaydının id'sidir.
+  if (kod === 'telerad.gelen_bagla') {
+    if (!satir) return true;
+    const acc = String(satir.accessionNo ?? '');
+    // İSTEK NUMARASI SORULUR: accession tutmadığı için eşleşmemiş olan
+    //   raporu hangi işe yazacağımıza İNSAN karar verir - eşleştirme kuralını
+    //   gevşetmek yanlış hastaya rapor yazma riskidir.
+    const no = await metinSor(
+      `Gelen rapor (erişim no ${acc || '—'}) hangi isteğe bağlansın?`,
+      '', 'İstek No (TR-…)');
+    if (!no || !no.trim()) return true;
+
+    await guvenli(async () => {
+      const y = await api.liste('telerad-istek', {
+        sayfa: 1, boyut: 2,
+        filtre: { alan: 'istekNo', op: 'esit', deger: no.trim() },
+      });
+      if (y.satirlar.length === 0) { mesaj(`${no} numaralı istek bulunamadı.`); return }
+
+      const istekId = Number(y.satirlar[0].id ?? 0);
+      const s = await api.teleradGelenBagla(id, istekId);
+      b.tazele();
+      mesaj(s.mesaj || 'Rapor kaydedildi.');
+    });
+    return true;
+  }
+
+  if (kod === 'telerad.gelen_istek') {
+    if (!satir) return true;
+    const istekId = Number(satir.istekId ?? 0);
+    if (istekId > 0) b.git(`/telerad-istek/${istekId}`);
+    else mesaj('Bu rapor henüz bir isteğe bağlanmadı.');
     return true;
   }
 

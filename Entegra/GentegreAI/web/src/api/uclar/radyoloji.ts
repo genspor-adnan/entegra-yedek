@@ -17,6 +17,8 @@ export const radyolojiUclari = {
       skorlar: Record<string, unknown>[];
       gecmis: Record<string, unknown>[];
       kritikler: Record<string, unknown>[];
+      /** Bakanlik profili acik mi (809) - OBX-13 alanlari buna gore gosterilir. */
+      bakanlikProfili: boolean;
     }>(`/api/radyoloji/istem/${istemId}/rapor`),
 
   radyolojiRaporYaz: (istemId: number, govde: unknown) =>

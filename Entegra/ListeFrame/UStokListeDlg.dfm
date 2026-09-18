@@ -1654,8 +1654,8 @@ object StokListeDlg: TStokListeDlg
   end
   object DtsStoklar: TDataSource
     DataSet = STOKLAR
-    Left = 177
-    Top = 43
+    Left = 113
+    Top = 51
   end
   object STOKLAR: TFDQuery
     BeforeOpen = STOKLARBeforeOpen
@@ -1818,8 +1818,8 @@ object StokListeDlg: TStokListeDlg
   end
   object PopupMenuYaz: TPopupMenu
     Images = Tablo.PNGImageList2
-    Left = 204
-    Top = 96
+    Left = 220
+    Top = 80
     object BaskiOnizlemeMenu: TMenuItem
       Caption = 'Bask'#305' '#214'nizleme'
       ImageIndex = 0

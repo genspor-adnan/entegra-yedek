@@ -1,0 +1,121 @@
+/* ============================================================================
+   PORTAL V2 — ortak stil (dış doktor · dış kurum · hasta)
+   Mockup'ın amacı: TELEFON ilk. Aynı ekranın üç hâli yan yana gösterilir:
+   telefon (menü kapalı) · telefon (çekmece açık) · masaüstü (sabit menü).
+   Sınıf adları uygulamadaki portal kabuğuyla AYNI (.pk-*): mockup ile kod
+   arasında ad çevirisi olmasın.
+   ========================================================================= */
+:root{
+  --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+  --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+  --sel:#d7e7fb; --head:#f3f6fa; --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+h2.bas{max-width:1440px;margin:0 auto 10px;font-size:15px;color:var(--navy)}
+h2.bas span{font-weight:normal;font-size:11.5px;color:var(--muted);margin-left:8px}
+
+/* Üç görünümü yan yana koyan tezgâh. */
+.tezgah{max-width:1440px;margin:0 auto 18px;display:flex;gap:16px;align-items:flex-start;
+  flex-wrap:wrap}
+.cerceve{background:#fff;border:1px solid var(--line);border-radius:6px;
+  box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+.cerceve .etiket{background:#243b58;color:#cfe0f5;font-size:10.5px;padding:4px 9px;
+  display:flex;gap:6px;align-items:center}
+.cerceve .etiket b{color:#fff}
+.telefon{width:330px}
+.telefon .ekran{height:620px;overflow:hidden;position:relative}
+.masaustu{flex:1;min-width:520px}
+.masaustu .ekran{height:620px;overflow:hidden;position:relative}
+
+/* ------------------------------------------------------- portal kabuğu ---- */
+.pk{display:grid;grid-template-columns:240px 1fr;grid-template-rows:auto 1fr;
+  grid-template-areas:"ust ust" "yan icerik";height:100%;background:var(--bg)}
+.pk.dar{grid-template-columns:1fr;grid-template-areas:"ust" "icerik"}
+.pk-ust{grid-area:ust;display:flex;align-items:center;gap:8px;padding:0 10px;min-height:52px;
+  background:linear-gradient(#2b5c95,#1c4374);color:#fff;position:relative;z-index:3}
+.pk-marka{display:flex;flex-direction:column;min-width:0;margin-right:auto}
+.pk-ad{font-weight:bold;font-size:14px;line-height:1.2}
+.pk-kisi{font-size:11px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pk-ust .tus{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;
+  border-radius:4px;font-size:17px}
+.pk-ust .cikis{font-size:12.5px;padding:6px 12px;border:1px solid rgba(255,255,255,.35);
+  border-radius:4px;white-space:nowrap}
+
+.pk-yan{grid-area:yan;background:linear-gradient(#14315a,#0f2647);color:#cfe0f5;
+  padding:6px 0 14px;display:flex;flex-direction:column;overflow:auto}
+.pk-bolum-bas{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:11px 14px;color:#7fa3d0;font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;
+  min-height:42px}
+.pk-bolum-bas.on{color:#cfe0f5}
+.pk-oge{display:flex;align-items:center;gap:10px;padding:10px 14px;color:#dce8f8;
+  text-decoration:none;font-size:13px;border-left:3px solid transparent;min-height:44px}
+.pk-oge.on{background:rgba(255,255,255,.13);border-left-color:#7fb2f0;font-weight:bold;color:#fff}
+.pk-oge .ic{width:20px;text-align:center;font-size:15px}
+.pk-oge .sy{margin-left:auto;background:rgba(255,255,255,.16);border-radius:9px;padding:0 6px;
+  font-size:10px}
+.pk-kimlik{margin-top:auto;padding:10px 14px 0;font-size:11px;color:#9fc0e8;
+  border-top:1px solid rgba(255,255,255,.12);display:flex;flex-direction:column}
+.pk-kimlik .sonuk{color:#7fa3d0;font-size:10.5px}
+.pk-icerik{grid-area:icerik;min-width:0;overflow:hidden;padding:8px 10px}
+
+/* Telefonda menü ÇEKMECE: içeriğin üstüne kayar, arkası kararır. */
+.pk.dar .pk-yan{position:absolute;top:0;left:0;bottom:0;width:78%;max-width:280px;z-index:2;
+  padding-top:56px;box-shadow:4px 0 20px rgba(0,0,0,.35)}
+.pk.dar.kapali .pk-yan{display:none}
+.pk-perde{position:absolute;inset:0;background:rgba(12,24,40,.5);z-index:1}
+.pk.dar.kapali .pk-perde{display:none}
+
+/* ------------------------------------------------------- içerik parçaları -- */
+.sayfabas{display:flex;align-items:center;gap:8px;padding:2px 2px 8px}
+.sayfabas h1{margin:0;font-size:15px;color:var(--navy)}
+.cipler{display:flex;gap:6px;overflow:hidden;padding-bottom:8px}
+.cip{display:inline-flex;align-items:center;height:30px;padding:0 12px;border-radius:15px;
+  border:1px solid var(--line);background:#fff;color:var(--muted);font-size:12.5px;white-space:nowrap}
+.cip.on{background:var(--accent);border-color:#2a5f9c;color:#fff}
+.dug{display:inline-flex;align-items:center;height:34px;padding:0 12px;border:1px solid var(--line);
+  border-radius:4px;background:#fff;color:#2f4a68;font-size:12.5px;white-space:nowrap}
+.dug.bir{background:linear-gradient(#3d7ec4,#2f6db3);border-color:#2a5f9c;color:#fff}
+.kutular{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;
+  padding-bottom:8px}
+.kutu{border:1px solid var(--line);border-radius:4px;background:linear-gradient(#fff,#fbfcfe);
+  padding:8px 10px}
+.kutu .b{font-size:10.5px;color:var(--muted)}
+.kutu .d{font-size:19px;font-weight:bold;margin:2px 0 1px}
+.kutu .a{font-size:10.5px;color:var(--muted)}
+.kutu.ok .d{color:var(--ok)} .kutu.uy .d{color:var(--uyari)} .kutu.teh .d{color:var(--kirmizi)}
+.blok{border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#fff;margin-bottom:8px}
+.blok h4{margin:0;padding:6px 10px;background:var(--head);border-bottom:1px solid var(--line2);
+  font-size:11.5px;color:#3a5573;display:flex;gap:6px;align-items:center}
+.blok h4 .sp{margin-left:auto;font-weight:normal;color:var(--muted);font-size:10.5px}
+table{border-collapse:collapse;width:100%}
+th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);text-align:left;
+  padding:6px 8px;font-size:11px;color:#3a5573;white-space:nowrap}
+td{border-bottom:1px solid var(--line2);padding:7px 8px;font-size:12.5px;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+.sag{text-align:right} .sonuk{color:var(--muted)}
+.rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);
+  background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+.rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+.rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+.rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+.rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+
+/* KART TELEFONDA TAM EKRAN: ortalanmış dar pencere klavye açılınca kayboluyordu. */
+.kart-tam{position:absolute;inset:0;background:#fff;z-index:4;display:flex;flex-direction:column}
+.kart-tam .bas{background:linear-gradient(#f0f5fa,#e6eef6);border-bottom:1px solid var(--line);
+  padding:10px 12px;font-weight:bold;color:var(--navy);display:flex;align-items:center;gap:8px}
+.kart-tam .bas .kapat{margin-left:auto;font-weight:normal;color:var(--muted)}
+.kart-tam .gov{padding:10px 12px;display:flex;flex-direction:column;gap:10px;overflow:auto}
+.alan{display:flex;flex-direction:column;gap:3px}
+.alan .et{font-size:11px;color:var(--muted)}
+.alan .kut{border:1px solid var(--line);border-radius:4px;background:#fff;padding:10px;
+  font-size:14px;min-height:40px}
+.kart-tam .dip{margin-top:auto;border-top:1px solid var(--line2);padding:10px 12px;display:flex;gap:8px}
+.kart-tam .dip .dug{flex:1;justify-content:center;height:42px}
+
+.not{max-width:1440px;margin:10px auto 22px;color:#6b7a8b;font-size:11.5px;line-height:1.7}
+.not b{color:var(--ink)}
+.not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+.not ul{margin:6px 0 0;padding-left:18px}

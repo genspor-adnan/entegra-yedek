@@ -13,15 +13,17 @@ object RehberAraDlg: TRehberAraDlg
   TabOrder = 0
   object CariGrid: TcxGrid
     Left = 0
-    Top = 35
+    Top = 32
     Width = 1044
-    Height = 250
+    Height = 253
     Align = alClient
     PopupMenu = PopupMenuREHBER
     TabOrder = 1
     LookAndFeel.Kind = lfOffice11
     LookAndFeel.NativeStyle = True
     LookAndFeel.ScrollbarMode = sbmClassic
+    ExplicitTop = 35
+    ExplicitHeight = 250
     object CariGridView: TcxGridDBTableView
       OnDblClick = CariGridDBTableView1DblClick
       Navigator.Buttons.CustomButtons = <>
@@ -410,6 +412,7 @@ object RehberAraDlg: TRehberAraDlg
     Left = 3
     Top = 3
     Width = 1038
+    Height = 29
     Margins.Bottom = 0
     AutoSize = True
     ButtonHeight = 30
@@ -587,6 +590,7 @@ object RehberAraDlg: TRehberAraDlg
     HotZoneClassName = 'TcxMediaPlayer8Style'
     AlignSplitter = salBottom
     Control = PageControlSekme
+    ExplicitWidth = 8
   end
   object PageControlSekme: TcxPageControl
     Left = 0
@@ -606,6 +610,10 @@ object RehberAraDlg: TRehberAraDlg
     object TabSheetIlet: TcxTabSheet
       Caption = #304'leti'#351'im'
       ImageIndex = 33
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar10: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -1272,6 +1280,10 @@ object RehberAraDlg: TRehberAraDlg
     object TabSheetTicari: TcxTabSheet
       Caption = 'Ticari Bilgiler'
       ImageIndex = 11
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object cxPageControl1: TcxPageControl
         Left = 0
         Top = 0
@@ -1289,6 +1301,9 @@ object RehberAraDlg: TRehberAraDlg
         object cxTabSheet1: TcxTabSheet
           Caption = 'Temel Bilgiler'
           ImageIndex = 22
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object ToolBar7: TToolBar
             AlignWithMargins = True
             Left = 3
@@ -1748,6 +1763,9 @@ object RehberAraDlg: TRehberAraDlg
         object cxTabSheet3: TcxTabSheet
           Caption = 'Banka Bilgileri'
           ImageIndex = 46
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object ToolBar3: TToolBar
             AlignWithMargins = True
             Left = 3
@@ -1950,7 +1968,7 @@ object RehberAraDlg: TRehberAraDlg
               end
               object GridBankaDBTableView1ACIKLAMA: TcxGridDBColumn
                 Caption = 'A'#231#305'klama'
-                DataBinding.FieldName = 'ACIKLAMA'
+                DataBinding.FieldName = 'HESAPACIKLAMA'
                 DataBinding.IsNullValueType = True
                 Width = 86
               end
@@ -1965,6 +1983,10 @@ object RehberAraDlg: TRehberAraDlg
     object TabSheetAlisSatis: TcxTabSheet
       Caption = 'Al'#305#351'/Sat'#305#351
       ImageIndex = 49
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object PageControlAlisSatis: TcxPageControl
         Left = 0
         Top = 0
@@ -1984,21 +2006,33 @@ object RehberAraDlg: TRehberAraDlg
           Tag = 19
           Caption = 'Sat'#305#351' Sipari'#351
           ImageIndex = 4
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
         object TabSheetSatisIrs: TcxTabSheet
           Tag = 14
           Caption = 'Sat'#305#351' '#304'rsaliye'
           ImageIndex = 19
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
         object TabSheetSatisKons: TcxTabSheet
           Tag = 119
           Caption = 'Sat'#305#351' Konsinye'
           ImageIndex = 12
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
         object TabSheetAlisSip: TcxTabSheet
           Tag = 9
           Caption = 'Al'#305#351' Sipari'#351
           ImageIndex = 4
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object GridCariBelge: TcxGrid
             Left = 0
             Top = 0
@@ -2176,11 +2210,17 @@ object RehberAraDlg: TRehberAraDlg
           Tag = 10
           Caption = 'Al'#305#351' '#304'rsaliye'
           ImageIndex = 19
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
         object TabSheetAlisKons: TcxTabSheet
           Tag = 109
           Caption = 'Al'#305#351' Konsinye'
           ImageIndex = 12
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
       end
     end
@@ -2670,6 +2710,10 @@ object RehberAraDlg: TRehberAraDlg
     object TabSheetCRM: TcxTabSheet
       Caption = 'CRM'
       ImageIndex = 36
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object PageControlCRM: TcxPageControl
         Left = 0
         Top = 0
@@ -2688,6 +2732,9 @@ object RehberAraDlg: TRehberAraDlg
         object TabSheetGorev: TcxTabSheet
           Caption = #304#351' Listesi'
           ImageIndex = 54
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object TreeListGorev: TcxDBTreeList
             Left = 0
             Top = 30
@@ -3148,6 +3195,9 @@ object RehberAraDlg: TRehberAraDlg
         object TabSheetFirsat: TcxTabSheet
           Caption = 'Sat'#305#351' F'#305'rsatlar'#305
           ImageIndex = 31
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object Panel7: TPanel
             Left = 0
             Top = 0
@@ -3429,6 +3479,9 @@ object RehberAraDlg: TRehberAraDlg
         object TabSheetProje: TcxTabSheet
           Caption = 'Projeler'
           ImageIndex = 13
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object GridCariProjeler: TcxGrid
             Left = 0
             Top = 30
@@ -3726,6 +3779,10 @@ object RehberAraDlg: TRehberAraDlg
     object TabSheetTeklifler: TcxTabSheet
       Caption = 'Teklif'
       ImageIndex = 4
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object ToolBar12: TToolBar
         AlignWithMargins = True
         Left = 3
@@ -3926,6 +3983,10 @@ object RehberAraDlg: TRehberAraDlg
     object TabSheetYaslandirma: TcxTabSheet
       Caption = 'Ya'#351'land'#305'rma'
       ImageIndex = 21
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GridYaslandir: TcxGrid
         Left = 0
         Top = 33
@@ -4115,6 +4176,10 @@ object RehberAraDlg: TRehberAraDlg
     object TabSheetServisAna: TcxTabSheet
       Caption = 'Servis'
       ImageIndex = 7
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object PageControlServis: TcxPageControl
         Left = 0
         Top = 0
@@ -4133,6 +4198,9 @@ object RehberAraDlg: TRehberAraDlg
         object TabSheetServisListe: TcxTabSheet
           Caption = 'Servis'
           ImageIndex = 7
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object GridCariServis: TcxGrid
             Left = 0
             Top = 0
@@ -4206,6 +4274,9 @@ object RehberAraDlg: TRehberAraDlg
         object SheetBizimEkipman: TcxTabSheet
           Caption = 'M'#252#351'teri Ekipman'
           ImageIndex = 12
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object ToolBarEkipmanDetay: TToolBar
             AlignWithMargins = True
             Left = 3
@@ -4655,6 +4726,9 @@ object RehberAraDlg: TRehberAraDlg
         object SheetRakipEkipman: TcxTabSheet
           Caption = 'Rakip Ekipman'
           ImageIndex = 13
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object ToolBar8: TToolBar
             AlignWithMargins = True
             Left = 3
@@ -4806,6 +4880,10 @@ object RehberAraDlg: TRehberAraDlg
     object TabYorumMedya: TcxTabSheet
       Caption = 'Yorum/Medya'
       ImageIndex = 38
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 167
@@ -4866,6 +4944,7 @@ object RehberAraDlg: TRehberAraDlg
         Properties.Alignment.Horz = taRightJustify
         Transparent = True
         Visible = False
+        ExplicitTop = 207
         AnchorX = 1036
       end
       object GridYorum: TcxGrid

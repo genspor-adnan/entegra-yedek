@@ -608,6 +608,7 @@ type
     procedure FaturaEkrExitPage(Sender: TObject;
       const FromPage: TJvWizardCustomPage);
     procedure FATBASLIKBeforeOpen(DataSet: TDataSet);
+    procedure FATBASLIKAfterOpen(DataSet: TDataSet);
     procedure KampanyaDzenle1Click(Sender: TObject);
     procedure TabFaturaIptalIsaretleClick(Sender: TObject);
     procedure IptalTusClick(Sender: TObject);
@@ -834,6 +835,7 @@ var
   CarideEFatura, KilitKaldirildi: Boolean;
   Tab: TFDQuery;
   OncekiFaturaNo, OncekiDovizCinsi : string;
+  FKocanVerilenNo: string;   // yeni belgede kocandan verilen no (elle degisirse KOCANNO=0)
   OncekiSubeId, TabloNo :integer;
   KulMaxIsk1,KulMaxIsk2,KulMaxIskToplam:Extended;
   IadeOlanUrununSatisTarihi:TDateTime;
@@ -1926,6 +1928,10 @@ begin
    TabFatura.Edit;
    TabFatura.FieldByName('ADET').AsInteger := 1;
    TabFatura.Post;
+   // Kopya satirlar SQL ile eklendi (SQLSatiriKopyala), dataset'te yok -> gridde yalniz ilk satir
+   //   gorunuyordu, cikip girince digerleri geliyordu (kullanici). Satirlari yeniden yukle, ilk satirda kal.
+   TabloYenile(TabFatura, [TabFatbaslik.FieldByName('ID').AsInteger]);
+   TabFatura.Locate('ID', ID, []);
 end;
 
 procedure TFaturaWizardDlg.DetayTablosuAc;
@@ -4180,6 +4186,17 @@ begin
   end;
 end;
 
+procedure TFaturaWizardDlg.FATBASLIKAfterOpen(DataSet: TDataSet);
+// KAYNAKBELGENO hesaplanan kolondur (fn_KaynakBelgeNolariStrOlarakGetir), FATBASLIK'te yok.
+//   UpdateTableName='FATBASLIK' ile FireDAC UPDATE'e bu kolonu da koymaya kalkar -> "Invalid
+//   column name". Guncelleme/anahtar bayraklari kaldirilir (salt okunur gosterim).
+//   Kolon buraya EKLENDI: lbKaynakFaturaNo bu alana bagliydi ama TabFatbaslik 'SELECT F.*'
+//   ile aciliyordu -> alan hic yoktu, "Kaynak:" etiketi hep bos (gri kutu) kaliyordu.
+begin
+   if TabFatbaslik.FindField('KAYNAKBELGENO') <> nil then
+      TabFatbaslik.FieldByName('KAYNAKBELGENO').ProviderFlags := [];
+end;
+
 procedure TFaturaWizardDlg.FATBASLIKBeforeOpen(DataSet: TDataSet);
 begin
    TabFatbaslik.SQL.Text := StringReplace(TabFatbaslik.SQL.Text,'@Dil',IntToStr(Dil),[rfReplaceAll]);
@@ -5356,6 +5373,7 @@ begin
   OncekiFaturaNo := '';
   Tablo.FATBASLIKYeniKayit(TabFatbaslik, RehberId, Tur, Tipi, -1,-1,cbIrsaliyeli.Checked,MasrafMerkezi, ServisId, ProjeId, AktiviteId);
   PgFatbaslikIdHazirla;
+  FKocanVerilenNo := TabFatbaslik.FieldByName('FATURANO').AsString;   // BelgeNoIslemleri'nin kocandan verdigi no
 
   if Tur in [4,14, 15, 16, 119] then begin // ??k??
      Tablo.RehberIletisimAD(RehberId,REHBERILETID,REHBERILETAD,REHBERILETADHINT);
@@ -5729,7 +5747,7 @@ function TFaturaWizardDlg.BoslukKontrolu: Boolean;
 var
   i: Int64;
   s: string[20];
-  belgenosonuc: string;
+  belgenosonuc, LKocanRef: string;
 begin
   BoslukKontrolu := True;
 
@@ -5815,6 +5833,17 @@ begin
         Abort;
       end;
     end;
+  end;
+
+  // GELEN IRSALIYE (10): belge no kocandan sirayla verilir ama tedarikcinin numarasi ELLE de girilebilir.
+  //   Elle degistirildiyse KOCANNO=0 yazilir -> sp_BelgeNoGetir (KOCANNO=@Kocan suzgeci) bu kaydi
+  //   siradaki numara hesabinda DIKKATE ALMAZ, kocan sirasi bozulmaz (kullanici). Referans: yeni belgede
+  //   kocandan verilen no (FKocanVerilenNo), duzenlemede acilistaki no (OncekiFaturaNo).
+  if (Tur = 10) and (TabFatbaslik.FieldByName('KOCANNO').AsInteger <> 0) then begin
+    LKocanRef := FKocanVerilenNo;
+    if LKocanRef = '' then LKocanRef := OncekiFaturaNo;
+    if (LKocanRef <> '') and (LKocanRef <> '0') and (Trim(TabFatbaslik.FieldByName('FATURANO').AsString) <> Trim(LKocanRef)) then
+      TabFatbaslik.FieldByName('KOCANNO').AsInteger := 0;
   end;
   BoslukKontrolu := False;
 end;
