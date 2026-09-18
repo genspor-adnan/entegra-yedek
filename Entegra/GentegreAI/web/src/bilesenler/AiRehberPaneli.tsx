@@ -43,6 +43,8 @@ const ORNEKLER = [
   'Yeni hasta kaydı nasıl açılır?',
   'Bir cariye fatura nasıl keserim?',
   'Hastanın laboratuvar sonucuna nereden bakarım?',
+  // Rol sorusu (789): cevap katalogdan değil rol tanımından gelir.
+  'Rolüm ne yapabilir?',
 ];
 
 /**
@@ -226,6 +228,7 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
               {yanit.kaynakTuru === 1 && <span className="rehber-not">rehber kataloğu</span>}
               {yanit.kaynakTuru === 2 && <span className="rehber-not">ekran eşleşmesi</span>}
               {yanit.kaynakTuru === 3 && <span className="rehber-not">bu ekranın yardımı</span>}
+              {yanit.kaynakTuru === 6 && <span className="rehber-not">rol tanımı</span>}
               {yanit.kaynakTuru === 0 && <span className="rehber-not">eşleşme yok</span>}
               {/* Cevabın kaynağı gizlenmez: katalog cevabı kurumun yazdığı
                   adımdır, model cevabı yorumdur - kullanıcı ayırt edebilmeli. */}

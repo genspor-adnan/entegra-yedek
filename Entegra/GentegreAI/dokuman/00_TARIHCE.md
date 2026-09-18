@@ -13617,3 +13617,38 @@ rolü artık yalnız `Tipler` listesi belirliyor.
 `lab` profilinde 9 rol (diş ve İSG yok), `dis` profilinde lab uzmanı/teknisyeni
 yok. Sistem rolü silinmeye GK422 veriyor, pasife alınıyor. xUnit 265/265, vitest
 662/662.
+
+
+## 18.09.2026 — Asistan bir rolün ne yapabildiğini anlatıyor (789)
+
+Kullanıcı: *"projedeki yapay zekaya bir rolü sorduğumda yapabileceklerini bana
+söylemeli"*.
+
+**Cevap katalogdan değil ROL TANIMINDAN.** "Banko ne yapabilir" sorusunun cevabı
+kurumun kendi yetki dağılımıdır; rehber konusu bunu bilemez, genel bir ekran
+tarifi verir ve kullanıcıyı yanıltır. `RehberServisi.RolYanitiAsync` rol_yetki
+satırlarını okuyup bölüm bölüm yazıyor: açabildiği ekranlar · kayıt açıp
+değiştirebildiği · silebildiği · yalnız görebildiği (salt okuma) · işlem
+yetkileri · **sınırlar**. Rolün adı, sistem rolü olup olmadığı, kullanıcı sayısı
+ve şablon amacı başlıkta.
+
+**Kelime sınırı şart:** "kontrol" içinde de "rol" geçiyor. Metin araması "kalite
+kontrol nasıl yapılır" sorusunu rol dökümüne çevirirdi; bu yüzden sorunun
+JETONLARINA bakılıyor ("rol…" / "yetki…" ile başlayan kelime).
+
+**Yetki kapısı.** Kendi rolünü herkes sorabilir - kendi yetkisi zaten her
+ekranda görünür. Başka bir rolün dökümü `rol` yetkisi ister: kimin neye
+erişebildiği kurumun yetki haritasıdır. Düğmeler de SORANIN yetkisine göre
+çiziliyor; anlatılan rol on ekran açabiliyor olsa da soran kişiye yalnız kendi
+girebildikleri düğme olarak veriliyor.
+
+**İki ayrım.** Değer taşıyan yetki (`deger_alir = 1`) işlem listesinde
+sayılmıyor, "Sınırlar" başlığına ayrılıyor - o bir düğme değil tavandır (661,
+ör. "Başvuruda iskonto: 10"). Listeler kırpıldığı için (ilk 12 + "+N") sıralama
+da anlamlı: rolün YAZABİLDİĞİ ekran başta, salt okuduğu sonra; alfabetik sıra
+banko rolünün ilk satırını "Alış Faturaları" yapıyordu.
+
+**Doğrulama.** Dev'de: Kayıt Kabul → 27 ekran · 4 işlem · sınır %10; Muhasebe →
+40 ekran · 23 işlem · sınır %25; Yönetici → 168 ekran · 96 işlem. "hekim rolü"
+sorusunda "Diş Hekimi / Göz Hekimi mi?" diye soruyor. xUnit 276/276 (yeni
+`RolRehberTestleri`), vitest 662/662.

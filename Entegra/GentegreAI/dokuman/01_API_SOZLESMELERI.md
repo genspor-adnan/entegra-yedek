@@ -1055,7 +1055,7 @@ Yanıt:
 | `guvenSkoru` | 0–1; panelde açıkça yazılır |
 | `eksikBilgiSorusu` | Emin olunmadığında sorulacak tek soru |
 | `uyarilar[]` | Ön koşul, yetki ve kapalı modül notları |
-| `konuKod`, `kaynakTuru` | 1 katalog konusu · 2 ekran eşleşmesi · 0 eşleşme yok |
+| `konuKod`, `kaynakTuru` | 1 katalog konusu · 2 ekran eşleşmesi · 3 bağlamsal · 5 model · **6 rol tanımı** · 0 eşleşme yok |
 | `kontorBakiye` | Kontör bakiyesi (katalog cevabı ücretsizdir) |
 
 **Bağlam serbest metin DB erişimi DEĞİL.** Model bağlansa da göreceği bağlam
@@ -1092,6 +1092,24 @@ var", "şu alan ne demek" kalıbındaysa ve `aktifSayfa` doluysa cevap
   alanı tarif etmek de bir sızıntıdır.
 - Kullanıcı o ekranı göremiyorsa bağlamsal yol atlanır, soru genel rehber
   yoluna düşer: uydurma "bu ekranda şunlar var" cevabı üretilmez.
+
+**Faz 3 — rol sorusu (789).** *"Kayıt Kabul rolü ne yapabilir"*, *"muhasebe
+rolünün yetkileri neler"*, *"rolüm ne yapabilir"* soruları katalogdan değil
+**rol tanımından** cevaplanır (`kaynakTuru = 6`): rolün açabildiği ekranlar,
+kayıt açıp değiştirebildiği / silebildiği yerler, salt okuduğu ekranlar, işlem
+yetkileri ve sayısal **sınırlar** (`rol_yetki.deger` — ör. iskonto tavanı %10)
+`adimlar[]` içinde bölüm bölüm döner. Kurallar:
+
+- **Kelime sınırı**: soru bir rol sorusu sayılmak için *jetonlarında* "rol…" ya
+  da "yetki…" geçmeli. "kalite **kontrol** nasıl yapılır" rol sorusu değildir.
+- **Yetki**: kendi rolünü herkes sorabilir (yetkisi zaten ekranlarda görünür);
+  **başka bir rolün dökümü `rol` yetkisi ister** - kimin neye erişebildiği
+  kurumun yetki haritasıdır.
+- **Düğmeler soranın yetkisine göre**: anlatılan rol on ekran açabiliyor olsa da
+  `onerilenEkranlar[]` yalnız **soranın** girebildiklerini taşır.
+- Değer taşıyan yetki (`deger_alir = 1`) işlem listesinde sayılmaz, "Sınırlar"
+  başlığına ayrılır: o bir düğme değil tavandır (661).
+- Rol pasifse uyarı eklenir; hiç yetkisi yoksa cevap bunu açıkça söyler.
 
 **Kontör (`ai_kontor`).** Katalogdan üretilen cevap **ücretsizdir** (dış
 maliyet yok). Dil modeli bağlandığında çağrı başına `cagri_ucreti` düşülür ve

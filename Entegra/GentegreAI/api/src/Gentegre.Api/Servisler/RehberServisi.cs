@@ -86,6 +86,19 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
         var kontorBakiye = await baglanti.TekDegerAsync<decimal>(
             "select bakiye from public.ai_kontor where id = 1", null, [], iptal);
 
+        // ------------------------------------------------------ rol sorusu
+        // "Kayıt Kabul rolü ne yapabilir?" — cevabı katalogda değil ROL
+        //   TANIMINDA. Bağlamsal yardımdan ÖNCE bakılır: soru hem "ne
+        //   yapabilirim" kalıbını hem rol adını taşıyorsa, kullanıcı
+        //   durduğu ekranı değil rolü soruyordur.
+        if (RehberMetin.RolSorusuMu(soru))
+        {
+            var rolYaniti = await RolYanitiAsync(baglanti, soru, urunModu, baglam,
+                                                 uyarilar, kontorBakiye, istek,
+                                                 kronometre, iptal);
+            if (rolYaniti is not null) return rolYaniti;
+        }
+
         // ------------------------------------------------- bağlamsal yardım
         // "Bu ekranda ne yapabilirim?" sorusunun cevabı DURDUĞUNUZ ekrana
         //   bağlıdır: ekranın kendisi, yetkili düğmeleri ve o ekranla ilgili
@@ -316,6 +329,195 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
             """, null,
             [ucret, "AI rehber cevabı (" + modelAdi + ")", baglam.KullaniciId, logId, jeton],
             iptal);
+    }
+
+    // -------------------------------------------------------- rol tanımı ---
+    /// <summary>
+    /// "Şu rol ne yapabilir?" sorusunu ROL TANIMINDAN cevaplar: açabildiği
+    /// ekranlar, kayıt açıp değiştirebildikleri, salt okuduğu yerler, işlem
+    /// yetkileri ve sayısal sınırlar (ör. iskonto tavanı).
+    ///
+    /// <b>Neden katalog değil de rol:</b> "banko ne yapabilir" sorusunun
+    /// cevabı kurumun kendi yetki dağılımıdır; rehber konusu bunu bilemez,
+    /// genel bir ekran tarifi verir ve kullanıcı yanıltılır.
+    ///
+    /// <b>Yetki:</b> kendi rolünü herkes sorabilir - kendi yetkisi zaten her
+    /// ekranda görünür. BAŞKA bir rolün dökümü `rol` yetkisi ister: kurumun
+    /// yetki haritası, "kimin neye erişebildiği" bilgisidir.
+    ///
+    /// <b>Düğmeler kullanıcının kendi yetkisine göre çizilir:</b> anlatılan rol
+    /// on ekran açabiliyor olabilir; soran kişiye yalnız KENDİ girebildikleri
+    /// düğme olarak verilir - açılmayacak ekranın düğmesi hatadan başka bir
+    /// şey üretmez.
+    /// </summary>
+    private async Task<Yanit?> RolYanitiAsync(
+        NpgsqlConnection baglanti, string soru, short urunModu, IstekBaglami baglam,
+        List<string> uyarilar, decimal kontorBakiye, Istek istek, Stopwatch kronometre,
+        CancellationToken iptal)
+    {
+        var kelimeler = RehberMetin.RolAramaKelimeleri(soru);
+        // "Rolüm" ancak oturumun bir rolü VARSA kendi rolüdür; rolsüz
+        //   kullanıcıda bu dal arama kelimesi olmadan her rolü eşit puanla
+        //   getirir ve rastgele bir rolü anlatırdı.
+        var kendi = RehberMetin.KendiRoluMu(soru) && baglam.RolId > 0;
+        if (kelimeler.Length == 0 && !kendi) return null;
+
+        // Rol adı/kodu üzerinde kelime araması; "benim rolüm" doğrudan
+        //   oturumun rolüdür (ad yazılmamıştır).
+        var adaylar = await baglanti.ListeAsync("""
+            select r.id, r.kod, r.ad, r.amac, r.aktif, r.sistem,
+                   (select count(*) from public.taraf_kullanici k
+                     where k.rol_id = r.id and k.aktif = 1) as kisi,
+                   (select count(*) from unnest(@p1::text[]) w
+                     where ' ' || public.fn_ara_metin(r.ad || ' ' || r.kod)
+                           like '% ' || w || '%') as vurus,
+                   similarity(public.fn_ara_metin(r.ad), public.fn_ara_metin(@p0)) as benzerlik
+              from public.rol r
+             where @p2 = 0 or r.id = @p2
+             order by vurus desc, benzerlik desc, r.ad
+             limit 3
+            """, null, [soru, kelimeler, kendi ? baglam.RolId : 0],
+            OkuyucuGenisletmeleri.Sozluk, iptal);
+
+        var rol = adaylar.FirstOrDefault();
+        if (rol is null) return null;
+        if (!kendi && Convert.ToInt32(rol["vurus"]) < 1) return null;   // rol adı geçmiyor
+
+        var rolId = Convert.ToInt32(rol["id"]);
+        var rolAd = rol["ad"]?.ToString() ?? "";
+
+        // YETKİ KAPISI: başka rolün dökümü kurumun yetki haritasıdır.
+        if (rolId != baglam.RolId && !baglam.Yetkiler.Var("rol", Islem.Gor))
+        {
+            await LogAsync(baglanti, baglam, soru, 6, "rol:yetkisiz", 0.5m, istek,
+                           kronometre, iptal);
+            return new Yanit(
+                $"**{rolAd}** rolünün yetki dökümünü paylaşamıyorum: başka bir rolün "
+                + "neye erişebildiği kurumun yetki haritasıdır ve bunun için `rol` "
+                + "yetkisi gerekiyor. Kendi rolünüzü sorabilirsiniz: "
+                + "\"rolüm ne yapabilir\".",
+                [], [], [], 0.5m, null, uyarilar, "rol", 6, kontorBakiye);
+        }
+
+        var satirlar = await baglanti.ListeAsync("""
+            select y.kod, y.ad, y.grup, y.tur, y.deger_alir as "degerAlir",
+                   ry.gor, ry.ekle, ry.degistir, ry.sil, ry.deger
+              from public.rol_yetki ry
+              join public.yetki y on y.id = ry.yetki_id
+             where ry.rol_id = @p0 and y.aktif = 1
+               and (y.urun_modu <> 2 or @p1 in (2, 3))
+               and (ry.gor = 1 or ry.ekle = 1 or ry.degistir = 1 or ry.sil = 1)
+             -- Liste KIRPILIYOR (ilk 12 + "…"), o yüzden sıra anlamlı: rolün
+             --   yazabildiği ekran onun asıl işidir, başta dursun.
+             order by y.tur, (ry.ekle + ry.degistir) desc, y.grup, y.sira, y.ad
+            """, null, [rolId, urunModu], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+        var sistem = Convert.ToInt16(rol["sistem"]) == 1;
+        var aktif = Convert.ToInt16(rol["aktif"]) == 1;
+        var kisi = Convert.ToInt64(rol["kisi"]);
+        var amac = rol["amac"]?.ToString() ?? "";
+
+        var baslik = $"**{rolAd}** — " + (sistem ? "sistem rolü · " : "")
+                   + (aktif ? "" : "PASİF · ")
+                   + (kisi == 0 ? "kullanıcısı yok" : $"{kisi} kullanıcı");
+        if (amac.Length > 0) baslik += ". " + amac;
+        if (!aktif)
+            uyarilar.Add("Bu rol pasif: yeni kullanıcıya atanamaz "
+                       + "(Yönetim › Roller ekranından aktif edilebilir).");
+
+        if (satirlar.Count == 0)
+        {
+            await LogAsync(baglanti, baglam, soru, 6, "rol:" + rol["kod"], 0.8m, istek,
+                           kronometre, iptal);
+            return new Yanit(
+                baslik + " Bu rolde tanımlı hiçbir yetki yok: rolü taşıyan kullanıcı "
+                + "hiçbir ekranı açamaz.",
+                [], [], [], 0.8m, null, uyarilar, "rol:" + rol["kod"], 6, kontorBakiye);
+        }
+
+        static bool Bayrak(IDictionary<string, object?> s, string alan) =>
+            Convert.ToInt16(s[alan]) == 1;
+        static string Ad(IDictionary<string, object?> s) => s["ad"]?.ToString() ?? "";
+
+        var ekranlar = satirlar.Where(s => Convert.ToInt16(s["tur"]) == 0).ToList();
+        var yazabildigi = ekranlar.Where(s => Bayrak(s, "ekle") || Bayrak(s, "degistir"))
+                                  .Select(Ad).ToList();
+        var saltOkur = ekranlar.Where(s => Bayrak(s, "gor") && !Bayrak(s, "ekle")
+                                        && !Bayrak(s, "degistir") && !Bayrak(s, "sil"))
+                               .Select(Ad).ToList();
+        var silebildigi = ekranlar.Where(s => Bayrak(s, "sil")).Select(Ad).ToList();
+        // DEĞER TAŞIYAN yetki bir işlem değil SINIRDIR ("Başvuruda iskonto (en
+        //   çok %)"); iki listede birden görünürse kullanıcı onu ayrı bir
+        //   düğme sanır.
+        var islemler = satirlar.Where(s => Convert.ToInt16(s["tur"]) == 1
+                                        && Convert.ToInt16(s["degerAlir"]) == 0)
+                               .Select(Ad).ToList();
+        // SINIR: yetkinin DEĞERİ bir tavandır (661 - iskonto gibi). Rolün ne
+        //   yapabildiğini anlatırken en çok merak edilen satır budur.
+        var sinirlar = satirlar
+            .Where(s => Convert.ToInt16(s["degerAlir"]) == 1
+                     && (s["deger"]?.ToString() ?? "").Trim() is { Length: > 0 } d
+                     && d != "0")
+            .Select(s => Ad(s) + ": " + s["deger"])
+            .ToList();
+
+        var adimlar = new List<Adim>();
+        void Bolum(string etiket, IReadOnlyList<string> liste, int azami = 10)
+        {
+            if (liste.Count == 0) return;
+            var metin = string.Join(" · ", liste.Take(azami));
+            if (liste.Count > azami) metin += $" (+{liste.Count - azami})";
+            adimlar.Add(new Adim(adimlar.Count + 1,
+                                 $"{etiket} ({liste.Count}): {metin}", null, null));
+        }
+
+        Bolum("Açabildiği ekranlar", ekranlar.Select(Ad).ToList(), 12);
+        Bolum("Kayıt açıp değiştirebildiği", yazabildigi);
+        Bolum("Silebildiği", silebildigi, 6);
+        Bolum("Yalnız görebildiği (salt okuma)", saltOkur, 8);
+        Bolum("İşlem yetkileri", islemler, 10);
+        if (sinirlar.Count > 0)
+            adimlar.Add(new Adim(adimlar.Count + 1,
+                                 "Sınırlar — " + string.Join(" · ", sinirlar), null, null));
+
+        // Düğmeler: rolün ekranlarından SORAN KİŞİNİN de girebildikleri.
+        var oneriler = (await baglanti.ListeAsync("""
+            select e.kaynak, e.baslik, e.rota, e.yol, e.menu_grup as "menuGrup",
+                   e.yetki_kodu as "yetkiKodu"
+              from public.ai_rehber_ekran e
+              join public.yetki y on y.kod = e.yetki_kodu
+              join public.rol_yetki ry on ry.yetki_id = y.id and ry.rol_id = @p0
+             where e.durum = 0 and e.menu_gizli = 0 and ry.gor = 1
+               and (e.urun_modu <> 2 or @p1 in (2, 3))
+             -- ROLÜN ÇALIŞMA EKRANI ÖNCE: yazma yetkisi olduğu ekran o rolün
+             --   asıl işidir. Alfabetik sıra "Alış Faturaları"nı banko rolünün
+             --   ilk düğmesi yapıyordu - salt okunur bir ekran, rolün işi değil.
+             order by (ry.ekle + ry.degistir) desc, y.sira, e.baslik
+             limit 30
+            """, null, [rolId, urunModu], OkuyucuGenisletmeleri.Sozluk, iptal))
+            .Where(s => YetkiVar(s["yetkiKodu"]?.ToString(), baglam))
+            .Select(s => new EkranOnerisi(
+                s["kaynak"]?.ToString() ?? "", s["baslik"]?.ToString() ?? "",
+                s["rota"]?.ToString() ?? "", s["yol"]?.ToString() ?? "",
+                s["menuGrup"]?.ToString() ?? ""))
+            .DistinctBy(e => e.Rota)
+            .Take(5)
+            .ToList();
+
+        // BAŞKA ROL DE UYDU: "hekim" sorusu "Diş Hekimi"ne de vurur. Yanlış
+        //   rolü anlatıp susmak yerine alternatifi söylemek gerekir.
+        var ikinci = adaylar.Skip(1)
+            .Where(a => Convert.ToInt32(a["vurus"]) >= Convert.ToInt32(rol["vurus"]))
+            .Select(a => a["ad"]?.ToString() ?? "").ToList();
+
+        await LogAsync(baglanti, baglam, soru, 6, "rol:" + rol["kod"], 0.85m, istek,
+                       kronometre, iptal);
+        return new Yanit(
+            baslik, adimlar, oneriler, [], 0.85m,
+            ikinci.Count > 0
+                ? "Şunu mu kastettiniz: " + string.Join(" / ", ikinci) + "?"
+                : null,
+            uyarilar, "rol:" + rol["kod"], 6, kontorBakiye);
     }
 
     // -------------------------------------------------- bağlamsal yardım ---

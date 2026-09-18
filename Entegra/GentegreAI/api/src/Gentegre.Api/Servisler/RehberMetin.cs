@@ -1,4 +1,4 @@
-namespace Gentegre.Api.Servisler;
+﻿namespace Gentegre.Api.Servisler;
 
 /// <summary>
 /// AI REHBER — METİN İŞLERİ (447).
@@ -53,12 +53,15 @@ public static class RehberMetin
         return sb.ToString();
     }
 
+    /// <summary>Kelime ayıracı: jeton ve kelime ayıklama AYNI kuralı kullanır.</summary>
+    private static readonly char[] Ayirac =
+        [' ', '\t', '\n', '\r', ',', '.', '?', '!', ':', ';', '/', '(', ')',
+         '\'', '"'];
+
     /// <summary>Sorudan anlamlı kelimeler (3+ harf, durak değil, en çok 12).</summary>
     public static string[] Kelimeler(string soru) =>
         Sadelestir(soru)
-            .Split([' ', '\t', '\n', '\r', ',', '.', '?', '!', ':', ';', '/', '(', ')',
-                    '\'', '"'],
-                   StringSplitOptions.RemoveEmptyEntries)
+            .Split(Ayirac, StringSplitOptions.RemoveEmptyEntries)
             .Where(k => k.Length >= 3 && !Durak.Contains(k))
             .Distinct(StringComparer.Ordinal)
             .Take(12)
@@ -97,6 +100,46 @@ public static class RehberMetin
         }
         return puan;
     }
+
+    /// <summary>
+    /// ROL sorusu mu: *"kayıt kabul rolü ne yapabilir"*, *"hekimin yetkileri
+    /// neler"*, *"benim rolüm"*.
+    ///
+    /// KELİME SINIRI şart: "kontrol" içinde de "rol" geçer. Bu yüzden sorunun
+    /// JETONLARINA bakılır, metnin içine değil - "kalite kontrol nasıl yapılır"
+    /// bir rol sorusu değildir.
+    /// </summary>
+    public static bool RolSorusuMu(string soru) =>
+        Jetonlar(soru).Any(j => (j.StartsWith("rol", StringComparison.Ordinal)
+                                 || j.StartsWith("yetki", StringComparison.Ordinal))
+                                && j.Length <= 11);
+
+    /// <summary>KENDİ rolünü soruyor: "benim rolüm", "rolüm ne yapabilir".</summary>
+    public static bool KendiRoluMu(string soru)
+    {
+        var jeton = Jetonlar(soru);
+        return jeton.Contains("benim", StringComparer.Ordinal)
+            || jeton.Any(j => j is "rolum" or "rolumun" or "rolumde" or "yetkilerim"
+                                   or "yetkim" or "yetkilerimi");
+    }
+
+    /// <summary>
+    /// Rol ADINI aramak için kelimeler: soruyu kuran kalıp ("rolü", "ne
+    /// yapabilir") rol adına karışmamalı - yoksa adında "yetki" geçmeyen her
+    /// rol aynı puanı alır.
+    /// </summary>
+    public static string[] RolAramaKelimeleri(string soru) =>
+        Kelimeler(soru)
+            .Where(k => !k.StartsWith("rol", StringComparison.Ordinal)
+                     && !k.StartsWith("yetki", StringComparison.Ordinal)
+                     && k is not ("yapabilir" or "yapabilirim" or "yapar" or "neler"
+                                  or "nelere" or "kimdir" or "benim" or "gorebilir"
+                                  or "yapabilecek" or "tanimi" or "kullanici"))
+            .ToArray();
+
+    /// <summary>Sadeleştirilmiş jetonlar (durak kelimeler DAHİL).</summary>
+    private static string[] Jetonlar(string soru) =>
+        Sadelestir(soru).Split(Ayirac, StringSplitOptions.RemoveEmptyEntries);
 
     /// <summary>Alan sorusunun kendi kalıp kelimeleri kolon aramasına girmez.</summary>
     public static string[] AlanAramaKelimeleri(string soru) =>
