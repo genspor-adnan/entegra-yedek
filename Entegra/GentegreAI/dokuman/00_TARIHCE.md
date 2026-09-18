@@ -14025,3 +14025,36 @@ Doğrulama: tarayıcıda kolon sırası `Kullanıcı Kodu · Kişi · Bölüm ·
 Ana Rol · Ek Roller · Şubeler…`, ilk satır "Ali Yıldırım · Depo / Ambar · Depo
 Sorumlusu · [Rol Atanmamış]" ve rol rozet olarak çiziliyor. xUnit 293/293,
 vitest 672/672.
+
+
+## 18.09.2026 — Personel kartı İş Bilgileri: Ana Rol · Yan Rol (794)
+
+Kullanıcı: *"personelde İş Bilgileri bölümünde alta Ana Rol (zorunlu)(listeye
+rol atanmamış da gelebilir) ve Yan Rol combo ekle"*.
+
+Rol zaten vardı ama iki yerde eksik duruyordu: kimlik şeridinde tek "Rol"
+combosu (ek roller görünmüyor, düzenlenemiyor) ve kartın altında ayrı bir
+"Kullanıcı Rolleri" kutusu. **Rol bir İŞ bilgisidir** - artık İş Bilgileri
+kutusunun sonunda iki combo:
+
+- **Ana Rol** (zorunlu): hesap rolsüz kalamaz. "Rol Atanmamış" da listede -
+  786'dan beri kilitli bir sistem rolü ve rolü kaldırılan kullanıcının düştüğü
+  yer.
+- **Yan Rol**: combodan seçilince eklenir, seçilenler altta rozet olarak durur,
+  ✕ ile kaldırılır. Yetki ana rol ile yan rollerin **birleşimidir**.
+
+Değişiklik **kart kaydetmeye bağlı değil**: rol `taraf_kullanici` kaydındadır,
+seçim anında uygulanır ve `islem_log`'a yazılır (var olan `KartKullaniciRolu`
+davranışı).
+
+**İki yerde çizilen aynı alan artık senkron:** şeritteki combo ile İş
+Bilgileri'ndeki aynı karta bakıyor; birinde yapılan değişiklikten sonra öteki
+eski değeri gösterirse kullanıcı hangisinin doğru olduğunu bilemez - değişiklik
+sonrası aynı kartın bütün örnekleri tazeleniyor.
+
+Hesabı olmayan personelde alan yerine "kullanıcı hesabı yok - rol ataması hesap
+açılınca yapılır" notu çıkıyor.
+
+Doğrulama: tarayıcıda İş Bilgileri kutusunun etiketleri `… Sözleşme Türü ·
+Deneme Süresi · Ana Rol · Yan Rol`; yan rol combosunda 13 seçenek (aktif
+roller). vitest 672/672.

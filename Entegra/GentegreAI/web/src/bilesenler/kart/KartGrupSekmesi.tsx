@@ -331,22 +331,32 @@ const adliBlok = (
               onOzlukDegis={yeni => setDetaylar(t => ({ ...t, [ozlukDetay.ad]: yeni }))}
               kaynakId={yeniMi ? undefined : (id as number)}
               isBilgiEk={(() => {
+                // ANA ROL + YAN ROL (794, kullanici: "personelde İş Bilgileri
+                //   bölümünde alta Ana Rol (zorunlu) ve Yan Rol combo ekle").
+                //   Rol `taraf_kullanici` kaydinda durur - kart kaydetmeye bagli
+                //   degil, secim aninda uygulanir (KartKullaniciRolu).
+                const roller = kaynak === 'personel' && !yeniMi && id
+                  ? <KartKullaniciRolu isBilgi kartId={id as number} saltOkunur={salt} />
+                  : null;
                 // RANDEVU VERILEBILIR (252): hekim mi - is bilgisi oldugu icin
                 //   İş Bilgileri kutusunda (kullanici), kimlik seridinde degil.
                 const a = meta.alanlar.find(x => x.ad === 'randevuVerilebilir');
-                if (!a || kaynak !== 'personel') return undefined;
+                if (!a || kaynak !== 'personel') return roller ?? undefined;
                 // Etiket kutunun SAGINDA, tek satir (kullanici) - diger
                 //   alanlardaki "etiket solda, deger sagda" duzeni burada
                 //   etiketi iki satira sarip kutuyu tek basina birakiyordu.
                 return (
-                  <label className="alan onay-satiri">
-                    <input type="checkbox" disabled={salt}
-                           checked={Number(deger.randevuVerilebilir ?? 0) === 1}
-                           onChange={e => setDeger(d => ({
-                             ...d, randevuVerilebilir: e.target.checked ? 1 : 0,
-                           }))} />
-                    <span>{a.baslik}</span>
-                  </label>
+                  <>
+                    <label className="alan onay-satiri">
+                      <input type="checkbox" disabled={salt}
+                             checked={Number(deger.randevuVerilebilir ?? 0) === 1}
+                             onChange={e => setDeger(d => ({
+                               ...d, randevuVerilebilir: e.target.checked ? 1 : 0,
+                             }))} />
+                      <span>{a.baslik}</span>
+                    </label>
+                    {roller}
+                  </>
                 );
               })()}
               ozetGizli={kaynak === 'hasta'}

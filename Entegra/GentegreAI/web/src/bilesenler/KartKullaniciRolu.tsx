@@ -18,23 +18,48 @@ import { hataMetni } from '../api/sozlesme';
  * çokluğu ise beklenen durum - ikisini aynı kutuya koymak "hangisi asıl işi"
  * sorusunu cevapsız bırakırdı.
  */
-export function KartKullaniciRolu({ kartId, saltOkunur, sade }: {
+/**
+ * AYNI KARTIN IKI YERDE CIZILMESI (794): rol hem kimlik seridinde (`sade`) hem
+ * İş Bilgileri kutusunda (`isBilgi`) duruyor. Birinde yapilan degisiklik
+ * otekinde ESKI degeri birakirsa kullanici hangisinin dogru oldugunu bilemez -
+ * degisiklik sonrasi ayni karta bakan butun ornekler tazelenir.
+ */
+const dinleyiciler = new Set<(kartId: number) => void>();
+const rolDegisti = (kartId: number) => dinleyiciler.forEach(d => d(kartId));
+
+export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi }: {
   kartId: number;
   saltOkunur: boolean;
   /** Kimlik seridinde tek alan olarak cizilir (kutu/baslik yok). */
   sade?: boolean;
+  /**
+   * IS BILGILERI KUTUSUNUN ICINDE (794, kullanici: "personelde İş Bilgileri
+   * bölümünde alta Ana Rol (zorunlu) ve Yan Rol combo ekle"): kendi kutusu
+   * ("Kullanıcı Rolleri") yerine iki combo olarak cizilir - rol, personelin
+   * IS bilgisidir; ayri bir kutuda dururken kartin en altinda kaliyordu.
+   * Yan rol combodan SECILINCE eklenir, secilenler rozet olarak altta durur.
+   */
+  isBilgi?: boolean;
 }) {
   const [bilgi, setBilgi] = useState<KartRolBilgisi | null>(null);
   const [hata, setHata] = useState('');
   const [islemde, setIslemde] = useState(false);
   const [mesaj, setMesaj] = useState('');
 
+  const [surum, setSurum] = useState(0);
   useEffect(() => {
     let iptal = false;
     api.kartRol(kartId)
       .then(b => { if (!iptal) setBilgi(b) })
       .catch(h => { if (!iptal) setHata(hataMetni(h)) });
     return () => { iptal = true };
+  }, [kartId, surum]);
+
+  // Baska bir ornek ayni karti degistirdiyse bu ornek de tazelensin.
+  useEffect(() => {
+    const dinle = (k: number) => { if (k === kartId) setSurum(v => v + 1) };
+    dinleyiciler.add(dinle);
+    return () => { dinleyiciler.delete(dinle) };
   }, [kartId]);
 
   const degistir = async (rolId: number) => {
@@ -42,6 +67,7 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade }: {
     try {
       const y = await api.kartRolDegistir(kartId, rolId);
       setBilgi(y);
+      rolDegisti(kartId);
       // Eski ana rol EK role duser (665) - kullanici bunu tahmin etmesin.
       setMesaj(`Ana rol "${y.rolAdi}" oldu; önceki rol ek rollere taşındı.`);
     } catch (h) { setHata(hataMetni(h)) } finally { setIslemde(false) }
@@ -56,6 +82,7 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade }: {
     try {
       const y = await api.kartEkRoller(kartId, yeni);
       setBilgi(y);
+      rolDegisti(kartId);
       const ad = y.roller.find(r => r.id === rolId)?.ad ?? '';
       setMesaj(secili ? `"${ad}" ek rolü verildi.` : `"${ad}" ek rolü kaldırıldı.`);
     } catch (h) { setHata(hataMetni(h)) } finally { setIslemde(false) }
@@ -70,6 +97,54 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade }: {
       {bilgi.roller.map(r => <option key={r.id} value={r.id}>{r.ad}</option>)}
     </select>
   );
+
+  // IS BILGILERI modu: iki combo yan yana (kutu/baslik yok - kutunun icindeyiz).
+  if (isBilgi) {
+    if (!bilgi) return null;
+    if (!bilgi.kullaniciVar) {
+      return <div className="not">Bu personelin kullanıcı hesabı yok - rol
+        ataması Yönetim › Kullanıcılar'dan hesap açılınca yapılır.</div>;
+    }
+    const ekler = bilgi.roller.filter(r => bilgi.ekRolIdleri.includes(r.id));
+    return (
+      <>
+        <label className="alan tip-kod">
+          {/* ZORUNLU: kullanici hesabinin rolsuz kalmasi mumkun degil -
+              "Rol Atanmamış" da bir roldur ve listede gelir (786'dan beri
+              kilitli sistem rolu). */}
+          <span className="etiket zorunlu-isaret">Ana Rol</span>
+          {anaCombo}
+        </label>
+        <label className="alan tip-kod">
+          <span className="etiket">Yan Rol</span>
+          <select value="" disabled={saltOkunur || islemde}
+                  onChange={e => { const v = Number(e.target.value);
+                                   if (v) void ekDegistir(v, true) }}>
+            <option value="">+ Yan rol ekle…</option>
+            {bilgi.roller
+              .filter(r => r.id !== bilgi.rolId && !bilgi.ekRolIdleri.includes(r.id))
+              .map(r => <option key={r.id} value={r.id}>{r.ad}</option>)}
+          </select>
+          {ekler.length > 0 && (
+            <span className="secim-rozetleri">
+              {ekler.map(r => (
+                <span key={r.id} className="rozet mavi">
+                  {r.ad}
+                  {!saltOkunur && (
+                    <button type="button" className="rozet-sil" title="Yan rolü kaldır"
+                            disabled={islemde}
+                            onClick={() => void ekDegistir(r.id, false)}>✕</button>
+                  )}
+                </span>
+              ))}
+            </span>
+          )}
+        </label>
+        {hata && <div className="alan-hata">{hata}</div>}
+        {mesaj && <div className="bilgi-kutusu">{mesaj}</div>}
+      </>
+    );
+  }
 
   // SERIT modu: kimlik seridinde departmanin sagindaki tek alan. Ek roller
   //   burada DUZENLENMEZ, yalniz sayisi yazar - serit dar, karar yeri kart.
