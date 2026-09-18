@@ -13569,3 +13569,51 @@ basamak yetkisini zaten taşıyor (754), kurum isterse kendi rollerine de verir.
 imzalayamadı (GK422), başkası imzalayınca geçti. Rol: 0 yetki · 0 kullanıcı.
 xUnit 261/261 (yeni `OnayTekImzaTestleri`: aynı kişi ikinciyi imzalayamaz,
 başkası imzalar, ret de imzadır, bilgi isteme imza sayılmaz), vitest 662/662.
+
+
+## 18.09.2026 — İskonto basamakları üç role · standart roller sistem rolü (785)
+
+Kullanıcı: *"785'i kur ama yüzdeleri ben ayarlayabileyim.. bir de hbys için
+standart rolleri sistem rolü olarak ekle.. silinemesin aktif/pasif yapılabilsin"*,
+ardından *"bir de kurum profiline göre gelebilsin"*, *"örneğin bir lab merkezinde
+diş hekimi rolü görünmemeli"*, *"her profil için rolleri çıkar ben aktif/pasif
+yapayım"*.
+
+**1) Basamaklar üç ayrı role dağıldı.** 784 "İskonto Onaylayanlar"ı boşaltınca üç
+basamak yetkisi yalnız `yonetici` rolünde kalmıştı: bankonun açtığı her talep
+yöneticiye düşüyor, tek-imza kuralı yüzünden eşik üstü talep **iki ayrı yönetici**
+istiyordu. 754'ün üç kademesi ancak üç ayrı rolde anlam kazanır — Birim Sorumlusu
+→ `kayit_kabul`, Mali İşler → `muhasebe`, Üst Yönetim → `yonetici`. Muhasebe
+ayrıca `iskonto_onay` ekranını görüyor (karar veren denetim izini de görmeli, 685).
+
+**Yüzdeler ekrandan ayarlanır**, göç yalnız başlangıç değeri yazar ve **var olan
+değeri ezmez**: rol tavanı (`basvuru.iskonto` değeri, 661) Yetkiler › "Sınır"
+(kayit_kabul %10 · muhasebe %25 · yonetici %100), basamak eşiği
+(`onay_akis_adim.esik_alt`, 754) Onay Akışları › "Eşik (≥)", onaysız uygulanabilen
+tavan (`basvuru.iskonto_onay_esik`, 783) Genel Ayarlar.
+
+**2) Standart roller artık sistem rolü.** 712 şablonları `sistem = 0` yazıyordu:
+yönetici "Diş Hekimi"ni silebiliyor, silinen rolün kullanıcıları rolsüz kalıyordu.
+33 şablon kodu `sistem = 1` işaretlendi, `StandartRolUclari` yeni rolü de böyle
+açıyor. **Ama pasife alınabilir**: 663'ün "sistem rolü pasife alınamaz" yasağı
+gevşetildi, koruma SİLMEYE ve KİMLİĞE (kod · sistem bayrağı) kaldı. Gerekçe:
+o yasak rolün sessizce çalışmamasını önlemek içindi, oysa pasif rol ekranda PASİF
+görünür — sessiz değildir. 784'te boşaltılan `iskonto_onay` böylece pasife alındı.
+
+**3) Rol önerisi kurum profiline göre.** İki süzgeç var: **kurum tipi** (şablonun
+`Tipler` listesi) ve **açık modül** (yeni `SablonModul` haritası +
+`fn_kurum_modul_acik`). Lab merkezinde diş hekimi, diş kliniğinde lab uzmanı, lab
+merkezinde İSG uzmanı artık listeye gelmiyor; kapalı modülün rolü `tumModuller=true`
+ile görülebilir ama kurulmaz.
+
+**Sessiz arıza testle yakalandı:** haritaya yazılan `medula_sorumlu → "medula"`
+kodu `kurum_modul` kataloğunda YOK (Medula bir entegrasyon ayarı, açılıp kapanan
+modül değil). Harita modülü hiçbir kurumda "açık" göremeyeceği için rol hiçbir
+kurulumda önerilmeyecekti — kimse hata almadan rol ortadan kaybolur. Yeni
+`StandartRolModulTestleri` haritayı katalogla karşılaştırıyor; eşleme kaldırıldı,
+rolü artık yalnız `Tipler` listesi belirliyor.
+
+**Doğrulama.** 10 kurum tipi için şablonlar kuruldu: 36 sistem rolü / 38 toplam,
+`lab` profilinde 9 rol (diş ve İSG yok), `dis` profilinde lab uzmanı/teknisyeni
+yok. Sistem rolü silinmeye GK422 veriyor, pasife alınıyor. xUnit 265/265, vitest
+662/662.

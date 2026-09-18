@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -49,6 +49,10 @@ public static class StandartRolUclari
         Y("hasta"), Y("randevu"), Y("belge"), Y("belge_satir"), Y("taraf"), Y("cari"), T("kurum"), T("hizmet"), T("fiyat_listesi"),
         Y("sigorta"), A("sigorta.provizyon"), A("sigorta.iptal"), Y("medula.provizyon"), T("medula"), Y("kasa_islem"), Y("mali_hareket"),
         T("hesap"), A("kasa.makbuz-yazdir"), Y("onam"), T("bildirim"), T("iskonto_onay"), T("muayene"), Y("aday"),
+        // ISKONTO BIRIM BASAMAGI (785): bankonun actigi talebin ilk imzasi
+        //   birim sorumlusundadir; talebi ACAN kendi talebini onaylayamaz
+        //   (783/784), yani ayni roldeki BASKA biri imzalar.
+        T("belge.iskonto_onay_birim"),
     ];
     private static readonly Kural[] MuhasebeTemel =
     [
@@ -58,7 +62,40 @@ public static class StandartRolUclari
         T("medula.ayar"), T("sigorta"), H("prim"), T("doviz_kur"), T("demirbas"), T("stok"), T("islem_log"),
         A("belge.kesinlestir"), A("belge.iptal"), A("belge.donustur"), A("kasa.%"), A("ceksenet.%"), A("ebelge.%"), A("fis.ters-kayit"),
         A("muhasebe.donem-kilitle"), A("kredi.taksit-ode"), A("prim.%"), A("veri.disa-aktar"), A("basvuru.iskonto"),
+        // ISKONTO MALI BASAMAGI (785) + onay ekraninin denetim izi (685).
+        T("belge.iskonto_onay_mali"), T("iskonto_onay"),
     ];
+
+    /// <summary>
+    /// ŞABLON -> KURUM MODÜLÜ (785, kullanici: "bir de kurum profiline gore
+    /// gelebilsin"). Kurum tipi "hangi is kolu" sorusunu, modul "bu kurulumda
+    /// acik mi" sorusunu cevaplar: tip merkezi olup dis modulu kapali olan
+    /// kuruma "Dis Hekimi" rolu onermek, kullanmayacagi bir rolu listeye
+    /// koymaktir.
+    ///
+    /// Haritada OLMAYAN sablon her kurulumda gecerlidir (kayit kabul, muhasebe,
+    /// yonetim gorutuleyici, bilgi islem...): onlar modulden bagimsiz.
+    /// </summary>
+    private static readonly Dictionary<string, string> SablonModul = new(StringComparer.Ordinal)
+    {
+        ["hekim"] = "muayene", ["hemsire"] = "muayene",
+        // medula_sorumlu BURAYA YAZILMAZ: "medula" bir `kurum_modul` kodu
+        //   degil (SGK baglantisi entegrasyon ayari). Haritaya konulsa
+        //   modul hicbir kurumda "acik" gorunmez ve rol HIC onerilmez.
+        //   Hangi kurumda cikacagini sablonun `Tipler` listesi belirler.
+        ["dis_hekimi"] = "dis", ["dis_asistan"] = "dis",
+        ["tedavi_danismani"] = "dis", ["dis_lab_sorumlu"] = "dis",
+        ["goz_hekimi"] = "goz", ["optometrist"] = "goz", ["goz_teknisyen"] = "goz",
+        ["ftr_uzmani"] = "ftr", ["fizyoterapist"] = "ftr",
+        ["radyolog"] = "radyoloji", ["rad_teknisyen"] = "radyoloji",
+        ["teleradyoloji_hekim"] = "teleradyoloji",
+        ["lab_uzmani"] = "lab", ["lab_teknisyen"] = "lab",
+        ["numune_kabul"] = "lab", ["dis_istem_kurumu"] = "lab",
+        ["eczane_depo"] = "eczane",
+        ["yatan_hemsire"] = "yatan_hasta", ["yatis_ofisi"] = "yatan_hasta",
+        ["isyeri_hekimi"] = "isg", ["isg_uzmani"] = "isg", ["dsp"] = "isg",
+        ["osgb_sekreter"] = "isg", ["firma_yetkilisi"] = "isg",
+    };
 
     private static readonly Sablon[] Sablonlar =
     [
@@ -144,12 +181,20 @@ public static class StandartRolUclari
         var grup = yol.MapGroup("/api/kurum-profil/standart-roller").WithTags("KurumProfil").RequireAuthorization();
 
         // Önizleme: tipin şablonları + hangileri zaten var.
-        grup.MapGet("/", async (string? kurumTipi, VeriKaynagi veri, BaglamCozucu cozucu, KurumProfilDeposu profil,
+        grup.MapGet("/", async (string? kurumTipi, bool? tumModuller, VeriKaynagi veri,
+                                BaglamCozucu cozucu, KurumProfilDeposu profil,
                                 HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("rol", Islem.Gor);
             var tip = kurumTipi ?? await KurumTipiAsync(profil, baglam.SubeId ?? 0, iptal);
+            // KURUM PROFILINE GORE (785, kullanici: "örneğin bir lab
+            //   merkezinde diş hekimi rolü görünmemeli"): tip "hangi is kolu",
+            //   acik moduller "bu kurulumda ne var" sorusunu cevaplar. Kapali
+            //   modulun rolu LISTEDE HIC CIKMAZ - kullanilmayacak rolu onermek
+            //   yoneticiyi gereksiz secime zorlar. `tumModuller=true` ile
+            //   tamami istenebilir (modulu yarin acacak kurum icin).
+            var acikModuller = await profil.AcikModullerAsync(baglam.SubeId ?? 0, iptal);
             await using var b = await veri.AcAsync(iptal);
             var mevcut = await b.ListeAsync("select kod, id, ad, aktif from public.rol", null, [],
                 o => new { kod = o.GetString(0), id = o.GetInt32(1), ad = o.GetString(2), aktif = o.GetInt16(3) == 1 }, iptal);
@@ -158,9 +203,11 @@ public static class StandartRolUclari
             {
                 var m = mevcut.FirstOrDefault(x => x.kod == s.Kod);
                 var esle = Eslestir(s, yetkiler);
+                var modul = SablonModul.GetValueOrDefault(s.Kod);
                 return new { s.Kod, s.Ad, s.Amac, mevcut = m is not null, rolId = m?.id, aktif = m?.aktif,
+                             modul, modulKapali = modul is not null && !acikModuller.Contains(modul),
                              yetkiSayisi = esle.Count, ekran = esle.Count(x => x.tur == 0), aksiyon = esle.Count(x => x.tur == 1) };
-            }).ToList();
+            }).Where(r => tumModuller == true || !r.modulKapali).ToList();
             return Results.Ok(new { kurumTipi = tip, roller = liste });
         });
 
@@ -172,8 +219,16 @@ public static class StandartRolUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("rol", Islem.Ekle);
             var tip = istek.KurumTipi ?? await KurumTipiAsync(profil, baglam.SubeId ?? 0, iptal);
+            // KAPALI MODULUN ROLU KURULMAZ (785) - ama ACIKCA istenirse
+            //   (`kodlar` ile secilerek ya da `tumModuller`) kurulur: kurum
+            //   modulu yarin acacaksa rolu bugunden hazirlayabilmeli.
+            var acikModuller = await profil.AcikModullerAsync(baglam.SubeId ?? 0, iptal);
+            var secildi = istek.Kodlar is { Count: > 0 };
             var secim = Sablonlar.Where(s => (s.Tipler.Contains(tip) || s.Tipler.Contains(TUM))
-                                          && (istek.Kodlar is null || istek.Kodlar.Count == 0 || istek.Kodlar.Contains(s.Kod))).ToList();
+                                          && (!secildi || istek.Kodlar!.Contains(s.Kod))
+                                          && (secildi || istek.TumModuller == true
+                                              || SablonModul.GetValueOrDefault(s.Kod) is not { } m
+                                              || acikModuller.Contains(m))).ToList();
             if (secim.Count == 0) throw GentegreHatasi.Dogrulama("Bu kurum tipi için şablon yok.");
 
             await using var b = await veri.AcAsync(iptal);
@@ -195,7 +250,11 @@ public static class StandartRolUclari
                     continue;
                 }
                 var yeniId = await b.TekDegerAsync<int>("""
-                    insert into public.rol (kod, ad, amac, sistem, aktif, ekleyen) values (@p0, @p1, @p2, 0, 1, @p3) returning id
+                    -- SISTEM ROLU (785, kullanici: "standart rolleri sistem
+                    --   rolu olarak ekle.. silinemesin aktif/pasif
+                    --   yapilabilsin"): silinmeye karsi korunur, kullanilmayan
+                    --   rol PASIFE alinir (fn_rol_sistem_koru).
+                    insert into public.rol (kod, ad, amac, sistem, aktif, ekleyen) values (@p0, @p1, @p2, 1, 1, @p3) returning id
                     """, islem, [s.Kod, s.Ad, s.Amac, baglam.KullaniciId], iptal);
                 await YetkileriYazAsync(b, islem, yeniId, s, yetkiler, baglam.KullaniciId, false, iptal);
                 foreach (var sb in subeler)
@@ -212,7 +271,12 @@ public static class StandartRolUclari
         });
     }
 
-    public sealed record KurIstegi(string? KurumTipi, List<string>? Kodlar, bool? Guncelle);
+    /// <param name="TumModuller">
+    /// KAPALI MODULUN ROLUNU DE KUR (785): varsayilan false - kurum profilinde
+    /// kapali modulun rolu listede de cikmaz, kurulmaz da.
+    /// </param>
+    public sealed record KurIstegi(string? KurumTipi, List<string>? Kodlar, bool? Guncelle,
+                                   bool? TumModuller = null);
     private const int LogTabloRol = 903;   // rol karti ile ayni (KartKatalogu.Cari.Hasta)
 
     private sealed record YetkiSatir(int id, string kod, short tur);
