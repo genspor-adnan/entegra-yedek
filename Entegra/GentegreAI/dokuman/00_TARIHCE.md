@@ -14187,3 +14187,37 @@ Her mockupun altında kapsam kuralı yazılı: hangi kolon, hangi tablo, hangi
 `portal_turu`. Üçünde de ortak üç sınır: **onaysız sonuç gösterilmez**,
 **ücret/tahsilat portalda yok** (hasta portalında yalnız kendi borcu),
 **kuralı yazılmamış kaynak kapalıdır**.
+
+
+## 18.09.2026 — Dış doktor portal rolü + dar radyoloji yetkisi (796)
+
+Kullanıcı: *"dış doktor rolünü de ekle"*.
+
+**Rol:** `dis_doktor` ("Dış Doktor (portal)"), `portal_turu = 1`. Gördükleri:
+`lab` (gör + istem aç) · `lab.sonuc` · `lab.numune` · `radyoloji-istem`
+(gör + istem aç) · `hasta` · `ai.rehber`. Ücret/tahsilat ve kurum içi ekranlar
+yok.
+
+**"Benim hastam" bağı iki yerde olabilir:** laboratuvarda istemi açan hekim
+`lab_istem.personel_id`de, başvurudan gelen işte satırın "Gönderen" rolünde
+(`belge_satir_rol`, rol = 1). Kapsam koşulu **ikisini de** kabul ediyor -
+birini seçmek ötekini görünmez yapardı. Radyolojide bağ daha doğrudan:
+`radyoloji_istem.istek_hekim_id` (dış kurum için `istek_kurum_id`).
+
+**İstem açabilir:** portal "sonuç bakma" ekranı değil, iş akışının bir ucu -
+hastayı gönderen kişi istemi de oradan girer. Kurum istemiyorsa yetkiyi
+kaldırır.
+
+### Dar radyoloji yetkisi — testin yakaladığı tasarım hatası
+
+`Dis_doktor_roluNUN_her_yetkisi_kapsamli` testi kırmızı verdi: `radyoloji`
+yetkisi **yedi kaynağı** birden açıyor (cihaz · şablon · protokol · kritik ·
+konsültasyon · teslim · çalışma listesi). Dış hekime "sonucunu görsün" demek
+için kurumun bütün radyoloji ayarlarını açmak gerekiyordu.
+
+`radyoloji-istem` yetkisi **zaten vardı** ama hiçbir kaynağa bağlı değildi -
+on rolde duruyor, hiçbir işe yaramıyordu. Artık radyoloji çalışma listesi
+(kaynak + kart + menü) ona bağlı; `radyoloji` taşıyan her role göç bu yetkiyi
+de veriyor, kimse ekran kaybetmiyor.
+
+xUnit 306/306, vitest 672/672.

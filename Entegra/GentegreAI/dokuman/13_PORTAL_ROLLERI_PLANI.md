@@ -120,7 +120,7 @@ Hasta girişi kurum içi kullanıcıdan farklı bir yüzeydir:
 2. ~~Dış Kurum: mevcut `dis_istem_kurumu` rolünü kapsama bağla~~ **yapıldı**
    (795): `portal_turu = 2`, kart okuması da kapsandı, kurum içi ekranlar
    rolden kaldırıldı.
-3. Dış Doktor rolü.
+3. ~~Dış Doktor rolü~~ **yapıldı** (796).
 4. Hasta portalı (ayrı giriş yüzeyi + KVKK + onaylı sonuç kuralı).
 
 ERP standart rolleri bu plandan bağımsız olarak **tamamlandı** (795).

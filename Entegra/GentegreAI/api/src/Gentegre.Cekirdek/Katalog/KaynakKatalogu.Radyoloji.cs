@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// RADYOLOJİ ÇALIŞMA LİSTESİ (283) - modülün giriş ekranı.
@@ -111,7 +111,13 @@ public static partial class KaynakKatalogu
 
     private static KaynakTanimi RadyolojiIstem() => new(
         Ad: "radyoloji-istem",
-        YetkiKodu: "radyoloji",
+        // DAR YETKI (796): calisma listesi `radyoloji-istem` yetkisine bagli,
+        //   `radyoloji`ye degil. `radyoloji` YEDI kaynagi birden aciyor
+        //   (cihaz, sablon, protokol, kritik, konsultasyon, teslim) - dis
+        //   hekime "sonuc gorsun" demek icin kurumun butun radyoloji
+        //   ayarlarini acmak gerekiyordu. Yetki zaten vardi ama hicbir
+        //   kaynaga bagli degildi (10 rolde duruyor, bir ise yaramiyordu).
+        YetkiKodu: "radyoloji-istem",
         Kaynak: "public.radyoloji_istem i " +
                 "left join public.taraf  h  on h.id  = i.hasta_id " +
                 "left join public.hizmet hz on hz.id = i.hizmet_id " +
@@ -126,6 +132,13 @@ public static partial class KaynakKatalogu
         SubeKolonu: "i.sube_id",
         // ACİL en üstte, sonra en eski bekleyen: liste açılınca "önce neye
         //   bakmalıyım" sorusu sıralamayla cevaplanır.
+        // PORTAL (796): radyolojide bag DOGRUDAN istemin uzerinde -
+        //   `istek_hekim_id` / `istek_kurum_id`. Dis hekim kendi istedigi
+        //   tetkiki ve raporunu, hasta kendi tetkikini gorur.
+        PortalKosullari: PortalKapsam.Kur(
+            disDoktor: "i.istek_hekim_id = {kullanici}",
+            disKurum:  "i.istek_kurum_id = {kullanici}",
+            hasta:     "i.hasta_id = {kullanici}"),
         VarsayilanSirala: "i.oncelik desc, coalesce(i.cekim_tarihi, i.ekleme_tarihi) asc",
         Kolonlar: new KolonTanimi[]
         {

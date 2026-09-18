@@ -1,4 +1,4 @@
-using Gentegre.Cekirdek.Katalog;
+﻿using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri;
 using Npgsql;
@@ -200,9 +200,64 @@ public sealed class DisKurumPortalTestleri(VeritabaniOlgusu olgu)
     }
 
     [Fact]
-    public async Task Roldeki_her_yetkinin_kapsam_kurali_VAR()
+    public Task Dis_kurum_roluNUN_her_yetkisi_kapsamli()
+        => KapsamliMiAsync("dis_istem_kurumu", PortalKapsam.DisKurum);
+
+    [Fact]
+    public Task Dis_doktor_roluNUN_her_yetkisi_kapsamli()
+        => KapsamliMiAsync("dis_doktor", PortalKapsam.DisDoktor);
+
+    [Fact]
+    public async Task Dis_doktor_rolu_PORTAL_ve_ucretsiz()
     {
-        if (!_olgu.Baglandi(nameof(Roldeki_her_yetkinin_kapsam_kurali_VAR))) return;
+        if (!_olgu.Baglandi(nameof(Dis_doktor_rolu_PORTAL_ve_ucretsiz))) return;
+        var veri = _olgu.Gerekli();
+
+        Assert.Equal((short)1, await veri.TekDegerAsync<short>(
+            "select portal_turu from public.rol where kod = 'dis_doktor'",
+            [], CancellationToken.None));
+
+        // Dış hekim ÜCRET görmez: gönderdiği hastanın borcu kurumun işidir.
+        var ucret = await veri.TekDegerAsync<long>(
+            "select count(*) from public.rol r "
+            + "  join public.rol_yetki ry on ry.rol_id = r.id "
+            + "  join public.yetki y on y.id = ry.yetki_id "
+            + " where r.kod = 'dis_doktor' "
+            + "   and y.kod in ('belge','kasa_islem','mali_hareket','fiyat_listesi')",
+            [], CancellationToken.None);
+        Assert.Equal(0, ucret);
+
+        // İSTEM AÇABİLİR: portal iş akışının bir ucu, salt okuma ekranı değil.
+        var istem = await veri.TekDegerAsync<long>(
+            "select count(*) from public.rol r "
+            + "  join public.rol_yetki ry on ry.rol_id = r.id "
+            + "  join public.yetki y on y.id = ry.yetki_id "
+            + " where r.kod = 'dis_doktor' "
+            + "   and y.kod in ('lab','radyoloji-istem') and ry.ekle = 1",
+            [], CancellationToken.None);
+        Assert.Equal(2, istem);
+
+        // GENIS radyoloji yetkisi VERILMEZ (796): `radyoloji` yedi kaynagi
+        //   birden acar (cihaz, sablon, protokol...); dis hekime "sonucunu
+        //   gorsun" demek icin kurumun butun radyoloji ayarlarini acmak
+        //   gerekirdi. Dar yetki `radyoloji-istem` zaten vardi.
+        Assert.Equal(0, await veri.TekDegerAsync<long>(
+            "select count(*) from public.rol r "
+            + "  join public.rol_yetki ry on ry.rol_id = r.id "
+            + "  join public.yetki y on y.id = ry.yetki_id "
+            + " where r.kod = 'dis_doktor' and y.kod = 'radyoloji'",
+            [], CancellationToken.None));
+    }
+
+    /// <summary>
+    /// EN DEĞERLİ KONTROL: rolün gördüğü her LİSTE kaynağı için o portal
+    /// türünün kuralı yazılmış olmalı. Yazılmamışsa kaynak kapalıdır (veri
+    /// sızmaz) ama ekran boş gelir - kullanıcı "portal bozuk" der. İkisi de
+    /// kabul edilemez; kural ya vardır ya da yetki rolde durmaz.
+    /// </summary>
+    private async Task KapsamliMiAsync(string rolKodu, short portalTuru)
+    {
+        if (!_olgu.Baglandi(nameof(KapsamliMiAsync) + ":" + rolKodu)) return;
         var veri = _olgu.Gerekli();
 
         // EN ONEMLI TEST: rolün gördüğü her LİSTE kaynağı için tür 2 kuralı
@@ -213,8 +268,8 @@ public sealed class DisKurumPortalTestleri(VeritabaniOlgusu olgu)
             "select y.kod from public.rol r "
             + "  join public.rol_yetki ry on ry.rol_id = r.id "
             + "  join public.yetki y on y.id = ry.yetki_id "
-            + " where r.kod = 'dis_istem_kurumu' and y.tur = 0 and ry.gor = 1",
-            [], o => o.GetString(0), CancellationToken.None);
+            + " where r.kod = @p0 and y.tur = 0 and ry.gor = 1",
+            [rolKodu], o => o.GetString(0), CancellationToken.None);
 
         var kuralsiz = new List<string>();
         foreach (var yetki in yetkiler)
@@ -225,12 +280,12 @@ public sealed class DisKurumPortalTestleri(VeritabaniOlgusu olgu)
             if (kaynaklar.Count == 0) continue;          // liste kaynagi olmayan ekran
             foreach (var k in kaynaklar)
                 if (k.PortalKosullari is null
-                    || !k.PortalKosullari.ContainsKey(PortalKapsam.DisKurum))
+                    || !k.PortalKosullari.ContainsKey(portalTuru))
                     kuralsiz.Add($"{k.Ad} ({yetki})");
         }
 
         Assert.True(kuralsiz.Count == 0,
-            "Dış kurum rolünün gördüğü ama kapsam kuralı yazılmamış kaynak: "
+            $"\"{rolKodu}\" rolünün gördüğü ama kapsam kuralı yazılmamış kaynak: "
             + string.Join(", ", kuralsiz));
     }
 }

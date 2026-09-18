@@ -243,6 +243,23 @@ public static class StandartRolUclari
             K(Y("lab"), Y("lab.numune"), Y("lab.sonuc"), Y("lab.kk"), Y("lab.cihaz"), Y("lab.kultur"), T("lab.mikro"), T("lab.tetkik"), Y("cihaz"), A("cihaz.isle"), T("hasta"))),
         new("numune_kabul", "Numune Kabul", "Numune kabul, barkod, dış laboratuvar gönderimi.", ["lab", "goruntuleme_lab"],
             K(Y("lab"), H("lab.numune"), Y("lab.dislab"), T("lab.sonuc"), Y("hasta"), Y("belge"), T("randevu"))),
+        // DIS DOKTOR PORTAL ROLU (796, kullanici: "Disardan hasta gonderen 'Dis
+        //   Doktor' gonderdigi hastalarin sonuclarini gorecek"): `portal_turu = 1`.
+        //   Bag iki yerde olabilir - lab isteminde `personel_id`, basvuru
+        //   satirinda "Gonderen" rolu (belge_satir_rol, rol = 1); radyolojide
+        //   dogrudan `istek_hekim_id`.
+        //
+        //   ISTEM ACABILIR (lab + radyoloji): dis hekim portali "sonuc
+        //   bakma" ekrani degil, is akisinin bir ucu - hastayi gonderen kisi
+        //   istemi de oradan girer. Kurum istemezse yetkiyi kaldirir.
+        new("dis_doktor", "Dış Doktor (portal)",
+            "Dışarıdan hasta gönderen hekim: kendi gönderdiği hastanın istemi, numunesi ve sonucu.",
+            ["lab", "goruntuleme", "goruntuleme_lab", "tip_merkezi", "hastane"],
+            P(new("lab", true, true), T("lab.sonuc"), T("lab.numune"),
+              // DAR YETKI: yalniz calisma listesi + kart. `radyoloji` yetkisi
+              //   cihaz/sablon/protokol ekranlarini da acardi.
+              new("radyoloji-istem", true, true), T("hasta")),
+            PortalTuru: 1),
         // DIS KURUM PORTAL ROLU (795): `portal_turu = 2` - yalniz KENDI
         //   gonderdigi istemi, onun sonucunu ve o hastayi gorur. Kural kaynak
         //   ve kart kataloglarinda (PortalKosullari), rol yalniz damgayi

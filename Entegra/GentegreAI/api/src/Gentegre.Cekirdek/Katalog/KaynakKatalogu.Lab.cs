@@ -202,7 +202,7 @@ public static partial class KaynakKatalogu
         // PORTAL (795): dis kurum kendi gonderdigi istemin NUMUNE durumunu
         //   gorur ("kan alindi mi, laba ulasti mi"); hasta kendi numunesini.
         PortalKosullari: PortalKapsam.Kur(
-            disDoktor: PortalKapsam.GonderenHekim("i.belge_id"),
+            disDoktor: PortalKapsam.LabGonderen("i.belge_id", "i.personel_id"),
             disKurum:  "i.dis_kurum_id = {kullanici}",
             hasta:     "i.taraf_id = {kullanici}"),
         VarsayilanSirala: "n.id desc",
@@ -298,7 +298,7 @@ public static partial class KaynakKatalogu
         // PORTAL (794): sonuc en hassas kayit - kosulsuz kaynak portal
         //   roluNE KAPALIDIR, bu yuzden ucu de acikca yazilir.
         PortalKosullari: PortalKapsam.Kur(
-            disDoktor: PortalKapsam.GonderenHekim("i.belge_id"),
+            disDoktor: PortalKapsam.LabGonderen("i.belge_id", "i.personel_id"),
             disKurum:  "i.dis_kurum_id = {kullanici}",
             hasta:     "i.taraf_id = {kullanici}"),
         VarsayilanSirala: "ls.id desc",

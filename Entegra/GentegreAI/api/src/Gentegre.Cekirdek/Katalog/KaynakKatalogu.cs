@@ -73,6 +73,15 @@ public static class PortalKapsam
       + $"         where bs.belge_id = {belgeIdIfadesi} and bsr.rol = 1 "
       + $"           and bsr.taraf_id = {{kullanici}})";
 
+    /// <summary>
+    /// LAB İSTEMİNDE gönderen hekim (796) — bağ İKİ yerde olabilir:
+    /// `lab_istem.personel_id` (istemi açan / isteyen hekim) ya da başvuru
+    /// satırının "Gönderen" rolü. Dış hekimin istemi hangi yoldan girildiyse
+    /// oradan bağlanıyor; birini seçmek ötekini görünmez yapardı.
+    /// </summary>
+    public static string LabGonderen(string belgeIdIfadesi, string hekimKolonu) =>
+        $"({hekimKolonu} = {{kullanici}} or {GonderenHekim(belgeIdIfadesi)})";
+
     public static IReadOnlyDictionary<short, string> Kur(
         string? disDoktor = null, string? disKurum = null, string? hasta = null)
     {

@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 /// <summary>
 /// RADYOLOJİ İSTEM KARTI (283).
@@ -15,7 +15,9 @@ public static partial class KartKatalogu
 {
     private static KartTanimi RadyolojiIstem() => new(
         Ad: "radyoloji-istem",
-        YetkiKodu: "radyoloji",
+        // Liste ile AYNI yetki (796): kart serbest kalirsa liste suzmesi
+        //   anlamsizlasir.
+        YetkiKodu: "radyoloji-istem",
         Tablo: "public.radyoloji_istem",
         LogTabloId: 940,
         SubeKolonu: "sube_id",

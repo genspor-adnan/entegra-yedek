@@ -36,7 +36,10 @@ export const RADYOLOJI_LISTELERI: ListeGirdisi[] = [
     //   modalitelerin ekranidir (kullanici).
     // EN USTTE (kullanici): radyolojinin gunluk isi burada - istem de
     //   bu ekranin arac cubugundan acilir (ayri istem ekrani yok).
-    menuGrup: 'Radyoloji', menuAd: 'Çalışma Listesi', ic: '🖥️', yetkiKodu: 'radyoloji',
+    // DAR YETKI (796): calisma listesi `radyoloji-istem` yetkisine bagli -
+    //   `radyoloji` yedi ekrani birden aciyor, dis hekim portali icin
+    //   kurumun butun radyoloji ayarlarini acmak gerekiyordu.
+    menuGrup: 'Radyoloji', menuAd: 'Çalışma Listesi', ic: '🖥️', yetkiKodu: 'radyoloji-istem',
     menuSira: 10,
   },
   {

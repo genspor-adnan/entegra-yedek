@@ -86,7 +86,7 @@ public static partial class KaynakKatalogu
         // PORTAL (794): dis doktor kendi GONDERDIGI hastanin istemini, dis
         //   kurum KENDI gonderdigi istemi, hasta KENDI istemini gorur.
         PortalKosullari: PortalKapsam.Kur(
-            disDoktor: PortalKapsam.GonderenHekim("i.belge_id"),
+            disDoktor: PortalKapsam.LabGonderen("i.belge_id", "i.personel_id"),
             disKurum:  "i.dis_kurum_id = {kullanici}",
             hasta:     "i.taraf_id = {kullanici}"),
         VarsayilanSirala: "i.istem_tarihi desc, i.id desc",
