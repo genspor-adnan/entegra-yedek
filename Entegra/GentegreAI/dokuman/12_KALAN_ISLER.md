@@ -110,14 +110,20 @@ portalı açılırsa gönderdiğinden fazlasını görür.
 
 797 çekirdeği kurdu (kurum · sözleşme · istek · atama). Kalanlar:
 
-- **DICOM alımı** (`telerad_dicom_olay`), sahipsiz çalışma listesi, erişim no
-  eşleştirme.
-- **HL7 / FHIR teslimi** (`telerad_teslim`), deneme kaydı ve tekrar.
-- **Otomatik atama kuralları** (`telerad_atama_kurali`) + **nöbet çizelgesi**
-  (`telerad_nobet`).
-- **Dönem faturası** (`telerad.faturala`) ve radyolog hakedişi bağı.
-- ~~**İstek kartı**~~ **yapıldı** (798): çift tık isteği modal kartta açıyor
-  (kimlik · hasta · tetkik · görüntü · atama & SLA · teslim & ücret · bağlar +
-  salt okunur atama geçmişi).
-- Portal: gönderen kurumun istek açma ekranı (mockup
-  `Ekranlar/Teleradyoloji/telerad_kurum_portali.html`).
+**18.09.2026 akşamı itibarıyla yalnız ENTEGRASYON bloğu kaldı.** Kapsamı ayrı
+belgede: `14_TELERAD_ENTEGRASYON_KAPSAMI.md` (kararlar: müşteri PACS'ına
+bağlanma · önce HL7 v2 ORU/MLLP · kod kurulum bilgileri netleşince).
+
+- **DICOM alımı** — sahipsiz çalışma listesi, erişim no eşleştirme, "görüntü
+  geldi" olayı. **Karar:** kendi PACS'ımız YOK, müşterinin PACS'ına bağlanılır
+  (DICOMweb yoklaması · C-FIND · portal bildirimi). Bloke: pilot kurum + C-FIND
+  için kütüphane kararı.
+- **HL7 v2 ORU teslimi** (`telerad_teslim`), deneme kaydı ve tekrar. Üretici ve
+  MLLP istemci yazılacak; **çözümleyici ve MLLP dinleyici elimizde** (432), bu
+  yüzden karşı uç olmadan loopback ile test edilebilir.
+- FHIR / REST kanalı — kuyruk kanal sürücüsüyle sonradan.
+- ~~**İstek kartı**~~ **yapıldı** (798) · ~~**otomatik atama + nöbet**~~
+  **yapıldı** (801) · ~~**pano**~~ **yapıldı** (801) · ~~**dönem faturası**~~
+  **yapıldı** (803) · ~~**kurum portalı istek ekranı**~~ **yapıldı** (804/805) ·
+  ~~**istek üzerinde yazışma**~~ **yapıldı** (806) · ~~**radyolog hakedişi
+  bağı**~~ **yapıldı** (807/808 - dış radyolog da Raporlayan payı alır).
