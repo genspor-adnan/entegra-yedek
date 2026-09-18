@@ -26,6 +26,7 @@ import { YapayZeka } from './sayfalar/YapayZeka';
 import { UtsSorgu } from './sayfalar/UtsSorgu';
 import { RadyolojiPanosu } from './sayfalar/RadyolojiPanosu';
 import { TeleradyolojiPanosu } from './sayfalar/TeleradyolojiPanosu';
+import { TeleradFatura } from './sayfalar/TeleradFatura';
 import { EnabizPanosu } from './sayfalar/EnabizPanosu';
 import { Hakedisim } from './sayfalar/Hakedisim';
 import { RadyolojiRapor } from './sayfalar/RadyolojiRapor';
@@ -174,6 +175,7 @@ function Yollar() {
         {/* Radyoloji panosu (320): liste degil - sayac/doluluk/uyari ekrani. */}
         {yetki('radyoloji') && <Route path="/radyoloji-pano" element={<RadyolojiPanosu />} />}
         {yetki('teleradyoloji') && <Route path="/telerad-pano" element={<TeleradyolojiPanosu />} />}
+        {yetki('teleradyoloji.kurum') && <Route path="/telerad-fatura" element={<TeleradFatura />} />}
         {yetki('entegrasyon') && <Route path="/enabiz-pano" element={<EnabizPanosu />} />}
         {/* HAKEDISLERIM: hekimin KENDI prim dokumu - liste degil, ozet +
             gruplu dokum. Yetki `prim.kendi`; butun kisileri goren ekran

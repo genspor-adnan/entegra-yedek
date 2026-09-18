@@ -18,6 +18,7 @@ import type { ListeSatiri } from '../../api/sozlesme';
  */
 export interface TeleradBaglam {
   tazele(): void;
+  git(yol: string): void;
   /** Oturumun taraf kimligi - "Bana Ata" bunu yazar. */
   kullaniciId: number;
 }
@@ -39,6 +40,14 @@ export async function teleradAksiyonu(
 
   const id = satir ? Number(satir.id) : 0;
   const no = satir ? String(satir.istekNo ?? satir.id ?? '') : '';
+
+  // DONEM FATURASI (803): kurum listesinden secili kurumla fatura ekranini
+  //   acar. Faturayi ekran DEGIL sunucu uretir; buradan yalniz gecis var.
+  if (kod === 'telerad.faturala') {
+    if (!satir) return true;
+    b.git(`/telerad-fatura?kurumId=${Number(satir.id)}`);
+    return true;
+  }
 
   // OTOMATIK DAGIT (801): siradaki atanmamis isler nobet cizelgesi ve atama
   //   kurallarina gore paylastirilir. KAYIT SECIMI ISTEMEZ - isi tek tek

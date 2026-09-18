@@ -762,6 +762,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       //   Zaman damgalarini tetik yazar; buradan yalniz durum ve atama gider.
       if (await teleradAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
+        git: yol => git(yol),
         kullaniciId: Number(kullanici?.id ?? 0),
       })) return;
 

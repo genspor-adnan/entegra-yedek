@@ -1083,9 +1083,17 @@ public static class AksiyonKatalogu
             // SILME SAG TUSTA: kurum silinince sozlesmeleri de gider
             //   (`on delete cascade`, 797) - gunluk akisin dugmesi degildir.
             ["telerad-kurum-liste"] =
-                Crud("telerad-kurum", "telerad", "teleradyoloji.kurum",
-                     ekleAdi: "＋ Yeni Kurum",
-                     silIpucu: "Kurumla birlikte sözleşmeleri de silinir"),
+            [
+                .. Crud("telerad-kurum", "telerad", "teleradyoloji.kurum",
+                        ekleAdi: "＋ Yeni Kurum",
+                        silIpucu: "Kurumla birlikte sözleşmeleri de silinir"),
+                // DÖNEM FATURASI (803): kurum seçili olarak fatura ekranını
+                //   açar. Teleradyoloji işi tek tek faturalanmaz - dönem sonunda
+                //   o kurumun onaylı işleri TEK satış faturasına girer.
+                new("telerad.faturala", "🧾 Dönem Faturası", "telerad",
+                    AksiyonYetkisi: "telerad.faturala", KayitGerekir: true, Sira: 40,
+                    Ipucu: "Dönemin onaylı işlerini tek satış faturasına toplar"),
+            ],
             // NÖBET ÇİZELGESİ ve ATAMA KURALLARI (801): tanım ekranları.
             //   Günlük işin (`telerad.ata`) değil KURULUMUN yetkisiyle -
             //   gece okuyan radyologa kural değiştirme hakkı vermeden atama

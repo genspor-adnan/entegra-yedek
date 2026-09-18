@@ -14546,3 +14546,52 @@ vitest 677/677.
 **Test dersi:** dev veritabanında ekrandan girilmiş kural/nöbet, testlerin
 "ilk uyan kural" sırasına karışıp iki testi kırdı. Kurulum artık işlem içinde
 tüm kural ve nöbetleri pasife alıyor - kural kümesi testin kendisidir.
+
+## 18.09.2026 — Teleradyoloji dönem faturası (803)
+
+Kullanıcı: *"dönem faturasıyla devam et"*. 797'de `telerad.faturala` yetkisi
+tanımlıydı ama ekranı yoktu; ücret isteğin üstünde duruyor, kuruma fatura
+kesilemiyordu.
+
+**Yeni para mantığı yazılmadı.** Ücret istek açılırken sözleşme tarifesinden
+kopyalanmıştı (`telerad_istek.ucret`); burada yapılan iş onu satırlara
+toplamak. Tutarı mevcut belge hattı hesaplıyor (`BelgeHesap` /
+`fn_belge_diptoplam`) - satır toplamı, iskonto ve KDV ikinci kez
+hesaplanmıyor. Belge sıradan bir **satış faturası** (tür 15), kurumun cari
+kaydına kesiliyor.
+
+**Aynı tetkik + aynı ücret TEK satır:** kuruma otuz ayrı satır göndermek
+faturayı okunamaz kılardı; adet sütunu bunun için var.
+
+**SLA cezası satır İSKONTOSUDUR.** Sözleşmedeki ceza oranı yalnız süresi kaçan
+işlerin satırına indirim olarak yazılır - bu yüzden geç işler ayrı satırda
+toplanıyor. Ayrı bir "ceza" kalemi üretmek eksi tutarlı satır ya da modüle
+özel indirim mantığı demekti.
+
+**Faturaya giremeyenler EKRANDA:** tetkik eşleşmesi olmayan ya da ücreti
+yazılmamış istek faturaya girmez ama listelenir ve tıklanır. Eksiği sessizce
+atlamak, kuruma eksik fatura kesmek olurdu.
+
+**İki kez faturalanamaz:** faturaya giren istek `fatura_belge_id` ile
+işaretlenir; önizleme ve üretim yalnız işaretsizleri alır ve işaretleme
+koşulu üretimde tekrarlanır (iki kullanıcı aynı anda üretirse ikincisi boş
+döner).
+
+**Aylık sabit + aşım modeli reddediliyor:** sabit ücretin hangi hizmet
+kalemine yazılacağı tanımlı değil. Uydurma kalem üretmek yerine açık hata
+mesajı veriliyor; tetkik başı ve vaka başı modeller ücreti isteğin üstünde
+taşıdığı için çalışıyor.
+
+Ekran `/telerad-fatura` (kurum + ay seçimi, önizleme, "Fatura Üret"); kurum
+listesinde "🧾 Dönem Faturası" düğmesi kurumu seçili getiriyor. Testler ucun
+**kendi SQL'ini** kullanıyor (`TeleradUclari.SatirSql`/`EksikSql`) - kuralı
+test için ikinci kez yazmak, testin kendi kopyasını doğrulaması olurdu.
+
+**Doğrulama sırasında çıkan (belge hattının kuralı):** dönem sonu ileri
+tarihliyse belge reddediliyordu ("Belge tarihi ileri tarihli olamaz"). Ay
+kapanmadan ara fatura kesilebilmeli - belge tarihi artık dönem sonu ile bugünün
+küçüğü. Tarayıcıda uçtan uca: 4 istekten 3'ü faturalandı (biri tetkiksiz),
+2×450 iskontosuz + 1×600 %10 SLA cezalı satır, dip toplam 1.500 / iskonto 60 /
+KDV 288 / genel 1.728. Deneme verisi (istekler, belge, hizmet) silindi.
+
+xUnit 344/344, vitest 677/677.

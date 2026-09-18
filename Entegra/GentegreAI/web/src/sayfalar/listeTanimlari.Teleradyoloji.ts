@@ -70,6 +70,16 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     ic: '🏥', menuSira: 42, yetkiKodu: 'teleradyoloji.kurum', modul: 'teleradyoloji', urunModu: 2,
   },
   {
+    // DÖNEM FATURASI (803): kurumun dönemdeki onaylı işleri TEK satış
+    //   faturasına girer. Liste değil (ozelSayfa) - önce önizleme, sonra
+    //   fatura. Kurum listesindeki "Dönem Faturası" düğmesi de buraya gelir.
+    kaynak: 'telerad-fatura', rota: 'telerad-fatura', ozelSayfa: true,
+    baslik: 'Teleradyoloji Dönem Faturası', yol: 'Teleradyoloji › Dönem Faturası',
+    menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Dönem Faturası',
+    ic: '🧾', menuSira: 50, yetkiKodu: 'teleradyoloji.kurum',
+    modul: 'teleradyoloji', urunModu: 2,
+  },
+  {
     // NÖBET ÇİZELGESİ (801): "şu an kim iş başında". Poliklinik çalışma
     //   planından (718) AYRI - radyolog evden okur, vardiya gece yarısını
     //   geçer. Otomatik dağıtımın girdisi: hedefi "o anki nöbetçi" olan

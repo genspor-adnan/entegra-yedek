@@ -112,6 +112,16 @@ export const mesajUclari = {
   teleradDagit: () =>
     gonder<{ sirada: number; atanan: number; kalan: number }>('/api/telerad/dagit', {}),
 
+  /** DONEM FATURASI ONIZLEME (803): "bu donemde ne faturalanacak", fatura uretmeden. */
+  teleradFaturaOnizleme: <T,>(kurumId: number, baslangic: string, bitis: string) =>
+    istek<T>(`/api/telerad/fatura-onizleme?kurumId=${kurumId}`
+             + `&baslangic=${baslangic}&bitis=${bitis}`),
+
+  /** DONEM FATURASI: donemin onayli isleri TEK satis faturasina girer. */
+  teleradFatura: (kurumId: number, baslangic: string, bitis: string) =>
+    gonder<{ belgeId: number; satir: number; istek: number; tutar: number }>(
+      '/api/telerad/fatura', { kurumId, baslangic, bitis }),
+
   /**
    * Cihazin kapali araliklari (318): bakim/ariza/tatil + ogle arasi.
    * Takvim bunlari tarali blok olarak cizer - kural zaten tetikte, bu

@@ -21,11 +21,15 @@ namespace Gentegre.Api.Uclar;
 /// Nöbet, hakediş ve dönem faturası panelleri o işler yapılmadığı için burada
 /// da YOK - uydurma sayı göstermek panoyu güvenilmez kılar.
 /// </summary>
-public static class TeleradUclari
+public static partial class TeleradUclari
 {
     public static void TeleradUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/telerad").WithTags("Teleradyoloji").RequireAuthorization();
+
+        // DÖNEM FATURASI (803) ayrı dosyada: bu dosya panonun sorgularıyla
+        //   zaten uzun; fatura hattı kendi kurallarını taşıyor.
+        FaturaUclariniEkle(grup);
 
         grup.MapGet("/pano", async (
             DateTime? gun, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,
