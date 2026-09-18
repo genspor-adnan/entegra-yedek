@@ -263,6 +263,71 @@ public sealed class TeleradyolojiTestleri(VeritabaniOlgusu olgu)
     }
 
     [Fact]
+    public async Task SLA_kacan_satir_SUNUCUDA_renklenir()
+    {
+        if (!_olgu.Baglandi(nameof(SLA_kacan_satir_SUNUCUDA_renklenir))) return;
+        await using var b = await _olgu.Gerekli().AcAsync();
+        await using var t = await b.BeginTransactionAsync();
+
+        // MOCKUP'TA GECIKEN IS KIRMIZI SATIRDIR: "Kalan" sutunundaki eksi
+        //   sayiyi fark etmeyi beklemek yogun bir gunde kacirmak demek.
+        //   ESIK SUNUCUDA - istemci kural yazmaz, liste ile pano ayni ise iki
+        //   farkli renk vermez.
+        var kolon = KaynakKatalogu.Bul("telerad-istek")!.Kolonlar
+            .FirstOrDefault(k => k.Ad == "satirRengi");
+        Assert.True(kolon is not null, "Calisma listesinde satirRengi kolonu yok.");
+
+        var (kurum, _) = await KurulumAsync(b, t, slaAcil: 30, slaRutin: 1440);
+        var gec      = await IstekAcAsync(b, t, kurum, 3, "R-001", gecenDk: 45);  // acil 30 dk
+        var sonCeyrek = await IstekAcAsync(b, t, kurum, 3, "R-002", gecenDk: 24); // 6 dk kaldi
+        var rahat    = await IstekAcAsync(b, t, kurum, 1, "R-003");               // rutin 1440 dk
+
+        async Task<string> Renk(int id) => (await b.ListeAsync(
+            $"select {kolon!.Sql} as renk from public.v_telerad_istek i where i.id = @p0",
+            t, [id], o => o.GetString(0), CancellationToken.None))[0];
+
+        Assert.Equal("kritik", await Renk(gec));
+        Assert.Equal("uyari", await Renk(sonCeyrek));
+        Assert.Equal("", await Renk(rahat));
+
+        // ONAYLANMIS ISTE RENK YOK: is bitti, gecmis gecikme listeyi
+        //   kirmiziya bogmasin.
+        await b.CalistirAsync("update public.telerad_istek set durum = 6 where id = @p0",
+            t, [gec], CancellationToken.None);
+        Assert.Equal("", await Renk(gec));
+
+        await t.RollbackAsync();
+    }
+
+    [Fact]
+    public async Task Sozlesmesiz_kurum_UYARI_rengiyle_gelir()
+    {
+        if (!_olgu.Baglandi(nameof(Sozlesmesiz_kurum_UYARI_rengiyle_gelir))) return;
+        await using var b = await _olgu.Gerekli().AcAsync();
+        await using var t = await b.BeginTransactionAsync();
+
+        // "Kurum var ama sozlesmesi yok" en sik eksiklik: sozlesmesiz kurumun
+        //   istegi SLA'siz ve ucretsiz dogar.
+        var kolon = KaynakKatalogu.Bul("telerad-kurum")!.Kolonlar
+            .First(k => k.Ad == "satirRengi");
+        var (kurum, sozlesme) = await KurulumAsync(b, t);
+
+        async Task<string> Renk() => (await b.ListeAsync(
+            $"select {kolon.Sql} as renk from public.telerad_kurum k where k.id = @p0",
+            t, [kurum], o => o.GetString(0), CancellationToken.None))[0];
+
+        Assert.Equal("", await Renk());                       // aktif sozlesmesi var
+        await b.CalistirAsync("update public.telerad_sozlesme set durum = 2 where id = @p0",
+            t, [sozlesme], CancellationToken.None);
+        Assert.Equal("uyari", await Renk());                  // sozlesme bitti
+        await b.CalistirAsync("update public.telerad_kurum set aktif = 0 where id = @p0",
+            t, [kurum], CancellationToken.None);
+        Assert.Equal("pasif", await Renk());                  // pasif kurum soluk
+
+        await t.RollbackAsync();
+    }
+
+    [Fact]
     public void Portal_kurumu_KENDI_isteklerini_gorur()
     {
         // Gönderen kurum portalı (794/795): kurum bağı `telerad_kurum.taraf_id`

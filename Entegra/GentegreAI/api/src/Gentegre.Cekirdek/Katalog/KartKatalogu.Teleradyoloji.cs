@@ -96,9 +96,9 @@ public static partial class KartKatalogu
             new("disHastaKimlik", "dis_hasta_kimlik", "metin", EnFazlaUzunluk: 11,
                 Baslik: "Kimlik No", Grup: "Hasta"),
             new("hastaId", "hasta_id", "kod", KodTablosu: "public.v_hasta_lookup",
-                AramaKaynagi: "hasta", Baslik: "Hasta Kaydı (varsa)", Grup: "Hasta"),
+                AramaKaynagi: "hasta", Baslik: "Hasta Kaydı", Grup: "Hasta"),
             new("disErisimNo", "dis_erisim_no", "metin", EnFazlaUzunluk: 40,
-                Baslik: "Erişim No (accession)", Grup: "Hasta"),
+                Baslik: "Erişim No", Grup: "Hasta"),
             new("isteyenHekim", "isteyen_hekim", "metin", EnFazlaUzunluk: 120,
                 Baslik: "İsteyen Hekim", Grup: "Hasta"),
 
@@ -112,26 +112,26 @@ public static partial class KartKatalogu
             //   bilmeden okursa bulguyu yorumlayamaz.
             new("klinikBilgi", "klinik_bilgi", "metin", EnFazlaUzunluk: 2000,
                 Baslik: "Klinik Bilgi", Grup: "Tetkik"),
-            new("onam", "onam", "mantik", Baslik: "Paylaşım onamı alındı", Grup: "Tetkik"),
+            new("onam", "onam", "mantik", Baslik: "Paylaşım Onamı", Grup: "Tetkik"),
 
             // ---------------------------------------------------- görüntü ---
             new("cekimZamani", "cekim_zamani", "zaman", Baslik: "Çekim", Grup: "Görüntü"),
             // SLA GÖRÜNTÜNÜN GELDİĞİ AN BAŞLAR (797): bu alan yazılınca tetik
             //   `sla_bitis`i hesaplar - o yüzden elle de girilebilir.
             new("gelisZamani", "gelis_zamani", "zaman",
-                Baslik: "Görüntü Geliş", Grup: "Görüntü"),
+                Baslik: "Geliş", Grup: "Görüntü"),
             new("goruntuDurum", "goruntu_durum", "kod", SabitKodlar: TeleradKartGoruntu,
-                Baslik: "Görüntü Durumu", Grup: "Görüntü"),
-            new("goruntuSayisi", "goruntu_sayisi", "sayi", Baslik: "Görüntü Sayısı",
+                Baslik: "Durum", Grup: "Görüntü"),
+            new("goruntuSayisi", "goruntu_sayisi", "sayi", Baslik: "Görüntü",
                 Grup: "Görüntü"),
-            new("seriSayisi", "seri_sayisi", "sayi", Baslik: "Seri Sayısı", Grup: "Görüntü"),
+            new("seriSayisi", "seri_sayisi", "sayi", Baslik: "Seri", Grup: "Görüntü"),
             new("studyUid", "study_uid", "metin", EnFazlaUzunluk: 64,
                 Baslik: "Study UID", Grup: "Görüntü"),
 
             // ------------------------------------------------ atama / SLA ---
             new("atananRadyologId", "atanan_radyolog_id", "kod",
                 KodTablosu: "public.v_rad_hekim_lookup",
-                Baslik: "Atanan Radyolog", Grup: "Atama & SLA"),
+                Baslik: "Radyolog", Grup: "Atama & SLA"),
             // HESAPLANANLAR SALT OKUNUR: hepsini tetik yazar.
             new("slaDk", "sla_dk", "sayi", Yazilabilir: false,
                 Baslik: "SLA (dk)", Grup: "Atama & SLA"),
@@ -140,17 +140,17 @@ public static partial class KartKatalogu
             new("slaAsildi", "sla_asildi", "mantik", Yazilabilir: false,
                 Baslik: "SLA Aşıldı", Grup: "Atama & SLA"),
             new("okumaBas", "okuma_bas", "zaman", Yazilabilir: false,
-                Baslik: "Okumaya Başlandı", Grup: "Atama & SLA"),
+                Baslik: "Okuma", Grup: "Atama & SLA"),
             new("onayZamani", "onay_zamani", "zaman", Yazilabilir: false,
                 Baslik: "Onay", Grup: "Atama & SLA"),
 
             // -------------------------------------------- teslim / ücret ----
             new("teslimDurum", "teslim_durum", "kod", Yazilabilir: false,
-                SabitKodlar: TeleradKartTeslim, Baslik: "Teslim Durumu", Grup: "Teslim & Ücret"),
+                SabitKodlar: TeleradKartTeslim, Baslik: "Teslim Durum", Grup: "Teslim & Ücret"),
             new("teslimZamani", "teslim_zamani", "zaman", Yazilabilir: false,
                 Baslik: "Teslim", Grup: "Teslim & Ücret"),
             new("teslimHata", "teslim_hata", "metin", Yazilabilir: false,
-                EnFazlaUzunluk: 400, Baslik: "Teslim Hatası", Grup: "Teslim & Ücret"),
+                EnFazlaUzunluk: 400, Baslik: "Teslim Hata", Grup: "Teslim & Ücret"),
             // ÜCRET İSTEK ANINDA KOPYALANIR (tarife × öncelik): sözleşme
             //   sonradan değişse de geçmiş işin fiyatı değişmesin.
             new("ucret", "ucret", "para", Baslik: "Ücret", Grup: "Teslim & Ücret"),
@@ -163,7 +163,7 @@ public static partial class KartKatalogu
             new("raporId", "rapor_id", "sayi", Yazilabilir: false,
                 Baslik: "Rapor Id", Grup: "Bağlar"),
             new("faturaBelgeId", "fatura_belge_id", "sayi", Yazilabilir: false,
-                Baslik: "Fatura Belge Id", Grup: "Bağlar"),
+                Baslik: "Fatura Id", Grup: "Bağlar"),
             // EKLEYEN/EKLEME TARİHİ KARTTA YOK: hiçbir kartta yok - denetim
             //   bilgisi log ekranının işi. Gruba yazılmadıkları için tek
             //   başlarına boş bir "Genel" sekmesi açıyorlardı.
@@ -256,7 +256,7 @@ public static partial class KartKatalogu
             //   hangi kurumdan geldiğini bu adla söyler; iki kurum aynı adı
             //   taşırsa çalışma yanlış kuruma yazılır.
             new("dicomAeTitle", "dicom_ae_title", "metin", EnFazlaUzunluk: 16,
-                Baslik: "DICOM AE Başlığı", Grup: "Görüntü Bağlantısı"),
+                Baslik: "DICOM AE", Grup: "Görüntü Bağlantısı"),
             new("dicomHost", "dicom_host", "metin", EnFazlaUzunluk: 120,
                 Baslik: "DICOM Sunucu", Grup: "Görüntü Bağlantısı"),
             new("dicomPort", "dicom_port", "sayi",
@@ -277,15 +277,15 @@ public static partial class KartKatalogu
                 Baslik: "Rapor Şablonu", Grup: "Raporlama"),
             new("varsayilanOncelik", "varsayilan_oncelik", "kod",
                 SabitKodlar: TeleradKartOncelik,
-                Baslik: "Varsayılan Öncelik", Grup: "Raporlama"),
+                Baslik: "Vars. Öncelik", Grup: "Raporlama"),
             // GECE NÖBETİ: kurumun işi gece de karşılanıyor mu - otomatik
             //   dağıtım ve nöbet çizelgesi (faz 2) buna bakacak.
             new("geceNobet", "gece_nobet", "mantik",
-                Baslik: "Gece nöbeti kapsamında", Grup: "Raporlama"),
+                Baslik: "Gece Nöbeti", Grup: "Raporlama"),
             // ONAM: kurumun hastasının görüntüsü bize geliyor - paylaşım onamı
             //   zorunlu tutulabilsin (KVKK).
             new("onamZorunlu", "onam_zorunlu", "mantik",
-                Baslik: "Paylaşım onamı zorunlu", Grup: "Raporlama"),
+                Baslik: "Onam Zorunlu", Grup: "Raporlama"),
         },
         Detaylar: new[]
         {
@@ -359,22 +359,22 @@ public static partial class KartKatalogu
                 Baslik: "Tarife", Grup: "Ücret"),
             new("aylikSabit", "aylik_sabit", "para", Baslik: "Aylık Sabit", Grup: "Ücret"),
             new("aylikAdetSiniri", "aylik_adet_siniri", "sayi",
-                Baslik: "Aylık Adet Sınırı", Grup: "Ücret"),
+                Baslik: "Adet Sınırı", Grup: "Ücret"),
             new("acilEkOran", "acil_ek_oran", "ondalik",
                 Baslik: "Acil Ek %", Grup: "Ücret"),
             new("oncelikliEkOran", "oncelikli_ek_oran", "ondalik",
                 Baslik: "Öncelikli Ek %", Grup: "Ücret"),
             new("faturaPeriyodu", "fatura_periyodu", "kod", SabitKodlar: TeleradKartPeriyot,
-                Baslik: "Fatura Periyodu", Grup: "Ücret"),
+                Baslik: "Periyot", Grup: "Ücret"),
 
             // ------------------------------------------------------- SLA ----
             // SLA DAKİKASI ÖNCELİĞE GÖRE AYRI ve istek açılırken KOPYALANIR
             //   (797): sözleşme sonradan değişince geçmiş isteğin sözü
             //   değişmez.
-            new("slaAcilDk", "sla_acil_dk", "sayi", Baslik: "Acil (dk)", Grup: "SLA"),
+            new("slaAcilDk", "sla_acil_dk", "sayi", Baslik: "Acil dk", Grup: "SLA"),
             new("slaOncelikliDk", "sla_oncelikli_dk", "sayi",
-                Baslik: "Öncelikli (dk)", Grup: "SLA"),
-            new("slaRutinDk", "sla_rutin_dk", "sayi", Baslik: "Rutin (dk)", Grup: "SLA"),
+                Baslik: "Öncelikli dk", Grup: "SLA"),
+            new("slaRutinDk", "sla_rutin_dk", "sayi", Baslik: "Rutin dk", Grup: "SLA"),
             new("slaCezaOran", "sla_ceza_oran", "ondalik",
                 Baslik: "SLA Ceza %", Grup: "SLA"),
         });

@@ -152,6 +152,26 @@ export const ROZET_SINIFI: Record<string, string> = {
   // Varyant sinifi (ACMG): patojenik kirmizi, VUS sari, benign yesil.
   'Patojenik': 'hata', 'Olası patojenik': 'hata', 'VUS': 'uyari',
   'Olası benign': 'ok', 'Benign': 'ok',
+  // TELERADYOLOJI (797-800). Calisma listesinin BES rozet kolonu da (oncelik,
+  //   durum, modalite, goruntu durumu, yon) sozlukte olmadigi icin HEPSI GRI
+  //   dusuyordu: mockup ailesinin en belirgin isareti olan renkli durum cipi
+  //   kayboluyor, yan yana bes gri rozet hicbir sey soylemiyordu.
+  //   Renkler mockup'taki (telerad_calisma_listesi.html) karsiliklaridir.
+  // Oncelik: "ACİL" buyuk harf yazilir (mockup) - kucuk harfli "Acil"
+  //   yukarida zaten var, ikisi ayni renk.
+  'ACİL': 'hata', 'Rutin': 'gri',
+  // Durum akisi: bekleyen isler SARI (bizde is var), okuma MAVI (calisiliyor),
+  //   biten YESIL, ek goruntu EFLATUN (top karsi tarafta - beklemekten farkli),
+  //   iptal kirmizi (yukarida 'İptal' olarak var).
+  'Görüntü bekleniyor': 'uyari', 'Sırada': 'sari', 'Atandı': 'mavi',
+  'Okunuyor': 'mavi', 'Teslim edildi': 'ok', 'Ek görüntü istendi': 'eflatun',
+  // Goruntu durumu: gelmeyen/eksik goruntu okumayi durdurur.
+  'Bekleniyor': 'uyari', 'Tamam': 'ok', 'Eksik seri': 'uyari', 'Hatalı': 'hata',
+  // Yon: gelen is BIZIM SLA'miz ve faturamiz, giden onlarin - listede iki is
+  //   ayni satir gibi durmasin.
+  'Gelen': 'mavi', 'Giden': 'eflatun', 'İki yön': 'turkuaz',
+  // Sozlesme donemi: aktif yesil (yukarida), taslak gri (yukarida), bitmis notr.
+  'Bitti': 'gri',
 };
 
 /**

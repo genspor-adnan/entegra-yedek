@@ -118,6 +118,21 @@ public static partial class KaynakKatalogu
             new("kurumId",     "i.kurum_id",    "sayi",  "Kurum Id", Varsayilan: false),
             new("radyolojiIstemId", "i.radyoloji_istem_id", "sayi", "İstem Id", Varsayilan: false),
             new("raporId",     "i.rapor_id",    "sayi",  "Rapor Id", Varsayilan: false),
+            // SLA'SI KAÇAN SATIR RENKLENİR (`satirRengi` sözleşmesi, mockup
+            //   `telerad_calisma_listesi.html`): tasarımda geciken iş kırmızı
+            //   satırdır - "Kalan" sütunundaki eksi sayıyı fark etmeyi beklemek
+            //   yoğun bir günde kaçırmak demektir.
+            //   EŞİK SUNUCUDA: istemci kural yazmaz, liste ile pano aynı işe
+            //   iki farklı renk vermez. Süresi dolmuş = kritik, son çeyreğe
+            //   girmiş = uyarı; onaylanmış işte (durum >= 6) renk YOK - iş
+            //   bitti, geçmiş gecikme listeyi kırmızıya boğmasın.
+            new("satirRengi",
+                "case when i.durum >= 6 or i.durum = 0 then '' "
+                + "when i.kalan_dk is null then '' "
+                + "when i.kalan_dk < 0 then 'kritik' "
+                + "when i.sla_dk > 0 and i.kalan_dk * 4 <= i.sla_dk then 'uyari' "
+                + "else '' end",
+                "metin", "", Varsayilan: false, Filtrelenebilir: false),
         });
 
     /// <summary>KURUMLAR — cari kartına bağlı teleradyoloji ilişkisi.</summary>
@@ -158,6 +173,16 @@ public static partial class KaynakKatalogu
                 Hizalama: "orta", Genislik: 120),
             new("aktif",     "k.aktif",     "mantik", "Aktif", Hizalama: "orta"),
             new("tarafId",   "k.taraf_id",  "sayi",  "Cari Id", Varsayilan: false),
+            // "KURUM VAR AMA SÖZLEŞMESİ YOK" en sık karşılaşılan eksiklik
+            //   (797 yorumu): sayıya bakıp fark etmeyi beklemek yerine satır
+            //   uyarı rengiyle gelsin - sözleşmesiz kurumun isteği SLA'sız ve
+            //   ücretsiz doğar. Pasif kurum soluk satır.
+            new("satirRengi",
+                "case when k.aktif = 0 then 'pasif' "
+                + "when not exists (select 1 from public.telerad_sozlesme sz "
+                + "                  where sz.kurum_id = k.id and sz.durum = 1) then 'uyari' "
+                + "else '' end",
+                "metin", "", Varsayilan: false, Filtrelenebilir: false),
         });
 
     /// <summary>SÖZLEŞMELER — dönem, ücret modeli, SLA.</summary>
