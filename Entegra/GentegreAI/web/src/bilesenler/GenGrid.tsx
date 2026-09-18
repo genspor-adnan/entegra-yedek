@@ -5,8 +5,10 @@ import { ayarSayi } from '../api/ayarlar';
 import { type AksiyonYaniti, type Kosul, type ListeSatiri } from '../api/sozlesme';
 import { bicimle } from './bicim';
 import { gorunumOku } from './gorunum';
-import { GenKomutPaleti, GenSagTus, GenToolbar, hedefte, useAksiyonlar,
+import { GenSagTus, GenToolbar, hedefte, useAksiyonlar,
          type AltSecenek } from './Aksiyonlar';
+import { paletKomutlariAyarla, paletKomutlariTemizle }
+  from '../sayfalar/kabuk/paletKomutlari';
 import { Modal } from './Modal';
 import { LogTablosu, GORUNUMLER } from './gridHucre';
 import { GridTablo } from './grid/GridTablo';
@@ -378,6 +380,31 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
     onAksiyon?.(kod === 'genel.yazdir.dogrudan' ? 'genel.yazdir' : kod, seciliSatir,
                 satirlar.filter((sr, i) => secili.has(String(sr.id ?? i))));
   };
+
+  /**
+   * KOMUT PALETI (790): acik ekranin dugmeleri KABUKTAKI palete yayinlanir.
+   * Palet eskiden burada duruyordu ve yalniz liste ekranlarinda aciliyordu;
+   * kartta ya da panoda ust seritteki arama kutusu hicbir sey yapmiyordu.
+   *
+   * `calistir` REF uzerinden gecer: her cizimde yeni bir kapanis (closure)
+   * olusuyor, depoya yazmak da her cizimde tum aboneleri uyandiracakti.
+   */
+  const paletCalistirRef = useRef(aksiyonCalistir);
+  paletCalistirRef.current = aksiyonCalistir;
+  const paletEkrani = aksiyonEkrani ?? '';
+  useEffect(() => {
+    if (!paletEkrani) return;
+    paletKomutlariAyarla({
+      ekran: paletEkrani,
+      komutlar: aksiyonlar.filter(a => hedefte(a, 'palet')).map(a => ({
+        kod: a.kod, ad: a.ad, grup: a.grup,
+        kisayol: a.kisayol ?? undefined, aktif: a.aktif,
+        pasifSebep: a.pasifSebep ?? undefined,
+      })),
+      calistir: kod => paletCalistirRef.current(kod),
+    });
+    return () => paletKomutlariTemizle(paletEkrani);
+  }, [paletEkrani, aksiyonlar]);
 
   /** "🖨️ Yazdır" dugmesi acilir menu: CSV Kaydet + Yazdir. Disaridan gelen
       alt menuler (ör. kasa tahsilat araclari) korunur. */
@@ -837,7 +864,6 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
             konum={sagTusKonumu}
             onKapat={() => setSagTusKonumu(null)}
           />
-          <GenKomutPaleti aksiyonlar={aksiyonlar} calistir={aksiyonCalistir} />
         </>
       )}
 

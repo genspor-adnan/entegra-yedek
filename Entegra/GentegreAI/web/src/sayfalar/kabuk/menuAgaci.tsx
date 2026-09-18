@@ -238,6 +238,12 @@ export const ALTGRUP_IKON: Record<string, string> = {
   // UTS = tibbi CIHAZ takibi (kullanici): cihaz simgesi - stetoskop muayeneyi,
   //   rontgen goruntulemeyi cagristiriyordu.
   'ÜTS': '🔌',
+  // KALITE (kullanici: "ana menüde kalite ikonu değiş"): tabloda yoktu,
+  //   varsayilan ⚙️ ile ciziliyordu - Yonetim'in altinda "Ayarlar" ile ayni
+  //   simge, iki alt grup birbirinden ayirt edilemiyordu. Madalya KALITE
+  //   BELGESINI/akreditasyonu anlatiyor; 🎯 (Satis Firsatlari, Prim Planlari)
+  //   ve 📊 (e-Nabiz Veri Kalitesi) zaten kullanimda.
+  'Kalite': '🏅',
   'Biyokimya': '⚗️',
   'Mikrobiyoloji': '🦠',
   'Genetik': '🧬',

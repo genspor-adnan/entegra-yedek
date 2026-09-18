@@ -29,10 +29,14 @@ public sealed class IskontoKurallariTestleri(VeritabaniOlgusu olgu)
     private static async Task<(int BelgeId, int SatirId)> BasvuruSatiriAsync(
         NpgsqlConnection b, NpgsqlTransaction t)
     {
+        // EN ESKI satir (en yeni degil): baska testler kendi basvuru satirini
+        //   acip siliyor, "en yeni satir" iki kosu arasinda yok olabiliyordu -
+        //   update sifir satira dokunuyor, test "iskonto yazilmadi" diye
+        //   kiriliyordu (gercek bir hata degil, yaris). Eski satirlar duragan.
         var satirlar = await b.ListeAsync(
             "select s.id, s.belge_id from public.belge_satir s "
             + "  join public.belge bl on bl.id = s.belge_id "
-            + " where bl.tur = 19 and bl.tipi = 30 order by s.id desc limit 1",
+            + " where bl.tur = 19 and bl.tipi = 30 order by s.id limit 1",
             t, [], o => (Id: o.GetInt32(0), BelgeId: o.GetInt32(1)), CancellationToken.None);
         Assert.Single(satirlar);
         return (satirlar[0].BelgeId, satirlar[0].Id);

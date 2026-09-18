@@ -112,16 +112,21 @@ public static class BaglantiGenisletmeleri
     /// sorun yok (derleyici hepsini sarar).
     /// </remarks>
     public static NpgsqlCommand Komut(this NpgsqlConnection baglanti, string sql,
-                                      NpgsqlTransaction? islem, params object?[] par)
+                                      NpgsqlTransaction? islem, params object?[]? par)
     {
         var komut = new NpgsqlCommand(sql, baglanti, islem);
-        if (par.Length > 0) Parametre.Ekle(komut, par);
+        // PAR NULL OLABILIR: `params` dizisi acikca `null` gecilebilir ve
+        //   VeriKaynagi'nin kendi yardimcilari zaten "parametre yok" icin
+        //   null aliyor - iki tarafin kurali ayrisinca parametresiz bir sorgu
+        //   NullReferenceException veriyordu (rol kartindan kullanici cikarma,
+        //   791). Parametresiz sorgu normaldir; cokme degil bos liste demektir.
+        if (par is { Length: > 0 }) Parametre.Ekle(komut, par);
         return komut;
     }
 
     /// <summary>INSERT/UPDATE/DELETE - etkilenen satir sayisi.</summary>
     public static async Task<int> CalistirAsync(this NpgsqlConnection baglanti, string sql,
-        NpgsqlTransaction? islem, object?[] par, CancellationToken iptal = default)
+        NpgsqlTransaction? islem, object?[]? par, CancellationToken iptal = default)
     {
         await using var komut = baglanti.Komut(sql, islem, par);
         return await komut.ExecuteNonQueryAsync(iptal);
@@ -134,7 +139,7 @@ public static class BaglantiGenisletmeleri
     /// "TekDegerAsync&lt;int?&gt; KULLANMA" notuyla dolasmasi gerekiyordu.
     /// </summary>
     public static async Task<T?> TekDegerAsync<T>(this NpgsqlConnection baglanti, string sql,
-        NpgsqlTransaction? islem, object?[] par, CancellationToken iptal = default)
+        NpgsqlTransaction? islem, object?[]? par, CancellationToken iptal = default)
     {
         await using var komut = baglanti.Komut(sql, islem, par);
         var sonuc = await komut.ExecuteScalarAsync(iptal);
@@ -145,7 +150,7 @@ public static class BaglantiGenisletmeleri
 
     /// <summary>Satirlari <paramref name="cevir"/> ile nesneye donusturur.</summary>
     public static async Task<List<T>> ListeAsync<T>(this NpgsqlConnection baglanti, string sql,
-        NpgsqlTransaction? islem, object?[] par, Func<NpgsqlDataReader, T> cevir,
+        NpgsqlTransaction? islem, object?[]? par, Func<NpgsqlDataReader, T> cevir,
         CancellationToken iptal = default)
     {
         var sonuc = new List<T>();
@@ -157,7 +162,7 @@ public static class BaglantiGenisletmeleri
 
     /// <summary>Ilk satir; satir yoksa null.</summary>
     public static async Task<T?> TekAsync<T>(this NpgsqlConnection baglanti, string sql,
-        NpgsqlTransaction? islem, object?[] par, Func<NpgsqlDataReader, T> cevir,
+        NpgsqlTransaction? islem, object?[]? par, Func<NpgsqlDataReader, T> cevir,
         CancellationToken iptal = default) where T : class
     {
         await using var komut = baglanti.Komut(sql, islem, par);

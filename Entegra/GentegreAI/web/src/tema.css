@@ -1091,6 +1091,11 @@ input.skt-gecmis {
 .palet-liste button.secili { background: var(--mor2); color: var(--mor) }
 .palet-liste button:disabled { opacity: .5; cursor: default }
 .palet-liste .grup { color: var(--soluk); font-size: 10.5px; margin-left: auto }
+/* EKRAN mi KOMUT mu (790): ok "gider", simsek "calistirir" - iki oge
+   ayni listede yan yana durdugu icin ayirt edilebilmeli. */
+.palet-liste .palet-tur { width: 14px; text-align: center; color: var(--soluk); font-size: 11px }
+.palet-liste .secili .palet-tur { color: var(--mor) }
+.palet .bos { padding: 16px; font-size: 11.5px }
 
 /* --------------------------------------------------------------- giris ---- */
 .giris-sayfa {

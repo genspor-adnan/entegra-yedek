@@ -6,6 +6,7 @@ import { useProfilResmi } from '../bilesenler/profilResmi';
 import { useSubeLogo } from '../bilesenler/subeLogo';
 import { menuSatirlariKur } from './kabuk/menuAgaci';
 import { YanMenu } from './kabuk/YanMenu';
+import { KomutPaleti } from './kabuk/KomutPaleti';
 import { TEMA_ADI, TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
   from '../bilesenler/tema';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -107,9 +108,13 @@ export function Kabuk() {
   //   yoksa bas harfler. Ayarlar penceresinden yuklenince burada da tazelenir.
   const profilResmi = useProfilResmi(kullanici?.id);
 
-  /** Ust seritteki arama kutusu komut paletini acar (paletin kendi kisayolu Ctrl+K). */
-  const paletiAc = () =>
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }));
+  /**
+   * KOMUT PALETI (790) kabukta: ust seritteki kutu da, Ctrl+K de ayni pencereyi
+   * acar. Eskiden palet GenGrid'in icindeydi; kutuya basmak sahte bir Ctrl+K
+   * olayi yayinliyordu ve LISTE DISINDA (kart, pano, ozel sayfa) hicbir sey
+   * olmuyordu - kullanicinin gozunde dugme bozuktu.
+   */
+  const [paletAcik, setPaletAcik] = useState(false);
 
   /** Bayraktan dil degistir - Kullanici Ayarlari'ndaki kutuyla ayni ucu cagirir. */
   async function dilSec(dil: number) {
@@ -147,7 +152,7 @@ export function Kabuk() {
           {urunAdi(kullanici?.urunModu)}
         </div>
 
-        <button className="ust-ara" onClick={paletiAc} title={c('Komut paleti')}>
+        <button className="ust-ara" onClick={() => setPaletAcik(true)} title={c('Komut paleti')}>
           <span>🔍</span>
           <span>{c('Ara ya da komut yaz…')}</span>
           <kbd>Ctrl K</kbd>
@@ -276,6 +281,14 @@ export function Kabuk() {
       {/* AI REHBER (447): sag altta, her ekranda. Yol gosterir; kayit
           degistirmez. Yetkisi olmayana hic cizilmez. */}
       {yetki('ai.rehber') && <AiRehberPaneli urunModu={kullanici?.urunModu} />}
+
+      {/* KOMUT PALETI (790): ust seritteki "Ara ya da komut yaz" kutusunun
+          karsiligi. Icerigi SOL MENUNUN KENDISI (ayni yetki/modul suzgeci) +
+          acik ekranin dugmeleri. */}
+      <KomutPaleti satirlar={satirlar} favoriler={tercih.favoriler}
+                   sonMenuler={tercih.sonMenuler} acik={paletAcik}
+                   onAc={() => setPaletAcik(true)} onKapat={() => setPaletAcik(false)}
+                   git={git} />
     </div>
   );
 }

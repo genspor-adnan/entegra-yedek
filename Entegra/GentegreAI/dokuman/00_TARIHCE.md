@@ -13652,3 +13652,65 @@ banko rolünün ilk satırını "Alış Faturaları" yapıyordu.
 40 ekran · 23 işlem · sınır %25; Yönetici → 168 ekran · 96 işlem. "hekim rolü"
 sorusunda "Diş Hekimi / Göz Hekimi mi?" diye soruyor. xUnit 276/276 (yeni
 `RolRehberTestleri`), vitest 662/662.
+
+
+## 18.09.2026 — Komut paleti menüden besleniyor · kalite ikonu (790)
+
+Kullanıcı: *"en üstteki ara ya da komut yaz editini şu anki menü ve ekran
+adlarına göre yapılandır.. oradan kısa yoldan ulaşabileyim"*.
+
+**Kaynak menünün KENDİSİ.** Palet artık sol menüyü çizen `menuSatirlariKur`
+çıktısından besleniyor: ekran adları, grup adları, yetki ve kapalı modül
+süzgeci neyse palet de o. Ayrı bir "komut listesi" tutmak, menü değiştikçe
+sessizce eskiyen ikinci bir katalog demekti - olmayan ekrana götüren ya da yeni
+ekranı hiç bilmeyen bir arama kutusu.
+
+**Palet kabuğa taşındı.** Eskiden `GenGrid`in içindeydi ve yalnız LİSTE
+ekranlarında açılıyordu; kartta, panoda, özel sayfada üstteki kutuya basmak
+(sahte bir Ctrl+K olayı yayınlıyordu) hiçbir şey yapmıyordu. Artık
+`sayfalar/kabuk/KomutPaleti`; açık ekranın düğmelerini yeni `paletKomutlari`
+deposundan okuyor (`aiBaglam` deseni: ekran yazar, palet okur, ekran kapanırken
+kendi yazdığını temizler).
+
+**Arama Türkçe duyarsız** (`İstem` → `istem`; tr'de `lower('I') = 'ı'` olduğu
+için iki taraf aynı kurala indirgenmezse sonuç boş döner) ve çok kelimeli
+(`kasa isl`); her kelime tutmak zorunda - yarısı tutan eşleşme kullanıcıyı
+yanlış ekrana götürür. Adın BAŞI grup eşleşmesinden değerli.
+
+**Boş aramada kısa yol:** favoriler, sonra en son kullanılanlar, sonra bu
+ekranın düğmeleri. Tüm menüyü dökmek (100+ satır) aramadan önce hiçbir şey
+söylemiyor. Satırda ↗ "gider", ⚡ "çalıştırır".
+
+**Kalite ikonu** (kullanıcı: *"ana menüde kalite ikonu değiş"*): Yönetim ›
+Kalite alt grubu ikon tablosunda yoktu, varsayılan ⚙️ ile çiziliyordu - aynı
+menüdeki "Ayarlar" ile aynı simge. 🏅 kalite belgesini/akreditasyonu anlatıyor;
+🎯 (Satış Fırsatları, Prim Planları) ve 📊 (e-Nabız Veri Kalitesi) zaten
+kullanımda.
+
+**Doğrulama.** Tarayıcıda: kutuya basınca palet açılıyor, "hasta" → Hasta
+Avansları · Hasta Listesi · Hasta Özeti…, Enter ekrana gidiyor, Ctrl+K kart
+ekranında da açılıyor, boş arama son kullanılanları + o ekranın düğmelerini
+veriyor. vitest 669/669 (yeni `komutPaleti.test.ts`), xUnit 278/278.
+
+## 18.09.2026 — Rol kartından kullanıcı çıkarma 500 veriyordu (791)
+
+Kullanıcı: *"rol kartında bir kullanıcıyı silmek isteyince hata: Beklenmeyen
+bir hata olustu"* (izleme `01M2SCMS8Q8CVAQZDXY4GMDGFN`).
+
+Kök neden depoda değil YARDIMCIDAYDI: `BaglantiGenisletmeleri.Komut` imzası
+`params object?[] par` ve gövdesi `par.Length` okuyordu. `params` dizisi açıkça
+`null` geçilebilir - `VeriKaynagi`nin kendi yardımcıları da "parametre yok"
+için zaten `null` alıyor. İki tarafın kuralı ayrışınca **parametresiz tek bir
+sorgu** (`select id from public.rol where kod = 'atanmamis'`)
+`NullReferenceException` veriyordu; kullanıcı "beklenmeyen hata" görüyordu.
+
+Düzeltme tek yerde: `par is { Length: > 0 }`. Parametresiz sorgu normaldir -
+çökme değil boş liste demektir. Dört yardımcının imzası da `object?[]?` oldu.
+`BaglantiYardimcilariTestleri` bunu ve yer tutucu rolün (`atanmamis`) varlığını
+koruyor.
+
+**Ayrıca bir yarış testi düzeltildi:** `IskontoKurallariTestleri` "en YENİ
+başvuru satırı"nı seçiyordu; başka testler kendi satırını açıp sildiği için
+satır iki adım arasında yok olabiliyor ve update sıfır satıra dokunuyordu
+(suite'te ~5 koşuda 1 kırmızı). Artık en ESKİ satır seçiliyor - duran veri,
+evdeki desenin aynısı.
