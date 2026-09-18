@@ -98,51 +98,143 @@
   .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
   .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
 
+  /* ek siniflar: uyari seridi + veri durumu rozetleri */
+  .uyariSerit{background:#fdf6e3;border-bottom:1px solid #f2ddbf;color:#8a6218;
+    padding:7px 12px;font-size:11.5px}
+  .uyariSerit code{background:#fff;border:1px solid #f2ddbf;border-radius:3px;padding:0 4px}
+  .aciklama{padding:0 10px 9px;color:var(--muted);font-size:11px}
+  .dr{display:inline-block;border-radius:9px;padding:0 6px;font-size:10.5px;border:1px solid var(--line);white-space:nowrap}
+  .dr.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .dr.yari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .dr.yok{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .kart .ipucu{margin-top:4px;font-size:10px;color:var(--muted);line-height:1.5}
+  .kart .ipucu code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 3px}
 </style>
 </head>
 <body>
 
+<!-- =====================================================================
+     TELERADYOLOJI PANOSU — HENUZ YAPILMADI (faz 2).
+
+     Menude teleradyolojinin uc ekrani var (calisma listesi · kurumlar ·
+     sozlesmeler); pano yok. Mockup tasarim niyetini tutuyor, ama her panelin
+     VERISI BUGUN VAR MI sorusu isaretlendi:
+
+       ✔ veri hazir  - `v_telerad_istek` / `telerad_atama` ile hesaplanir,
+                       eksik olan yalniz ekran ve ozet ucu
+       ◐ kismen      - alan var ama bagi ya da toplami yazilmadi
+       ✖ veri yok    - once o isin kendisi yapilmali (nobet, hakedis, fatura)
+
+     Boylece "panoyu yapalim" dendiginde nereden baslanacagi bellidir.
+     ================================================================== -->
 <div class="win">
-  <div class="title">📊 Teleradyoloji Panosu <span class="sp">Eylül 2026 · canlı</span></div>
-  <div class="toolbar"><div class="btn">📅 Ay ▾</div><div class="btn">🏥 Kurum ▾</div><div class="btn">🩻 Modalite ▾</div><div class="btn">👨‍⚕️ Radyolog ▾</div><div class="btn sp">📥 Excel</div></div>
-  <div class="ozet">
-    <div class="kart"><div class="b">Bugün gelen / raporlanan</div><div class="d">149 / 112</div></div>
-    <div class="kart"><div class="b">SLA uyumu (ay)</div><div class="d">%96,8</div><div class="bar"><i style="width:97%"></i></div></div>
-    <div class="kart"><div class="b">Ort. rapor süresi</div><div class="d">38 <small>dk · acil 19 dk</small></div></div>
-    <div class="kart"><div class="b">Bekleyen</div><div class="d">37 <small>· 3 SLA aşımı</small></div></div>
-    <div class="kart"><div class="b">Kritik bulgu (ay)</div><div class="d">14 <small>· teyit ort. 6 dk</small></div></div>
-    <div class="kart"><div class="b">Ay cirosu (tahmini)</div><div class="d">412.300 <small>₺</small></div></div>
+  <div class="title">📊 Teleradyoloji Panosu <span class="sp">tasarım · ekran yapılmadı (faz 2)</span></div>
+
+  <div class="uyariSerit">⚠ <b>Bu ekran yok.</b> Teleradyoloji menüsünde bugün üç ekran var:
+    Çalışma Listesi · Telerad Kurumları · Telerad Sözleşmeleri. Aşağıdaki paneller
+    <b>veri durumu</b> ile işaretli — <span class="dr ok">✔ veri hazır</span>
+    <span class="dr yari">◐ kısmen</span> <span class="dr yok">✖ veri yok</span>.</div>
+
+  <div class="toolbar">
+    <div class="btn pas">📅 Ay ▾</div><div class="btn pas">🏥 Kurum ▾</div>
+    <div class="btn pas">🩻 Modalite ▾</div><div class="btn pas">👨‍⚕️ Radyolog ▾</div>
+    <div class="btn pas sp">📥 Excel</div>
   </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">Bugün gelen / raporlanan <span class="dr ok">✔</span></div><div class="d">149 / 112</div>
+      <div class="ipucu"><code>gelis_zamani</code> · <code>onay_zamani</code></div></div>
+    <div class="kart"><div class="b">SLA uyumu (ay) <span class="dr ok">✔</span></div><div class="d">%96,8</div>
+      <div class="bar"><i style="width:97%"></i></div>
+      <div class="ipucu"><code>sla_asildi</code> — kararı onay anında tetik verir</div></div>
+    <div class="kart"><div class="b">Ort. rapor süresi <span class="dr ok">✔</span></div><div class="d">38 <small>dk · acil 19 dk</small></div>
+      <div class="ipucu"><code>onay_zamani − gelis_zamani</code>; okuma süresi ayrıca <code>okuma_bas</code> (799)</div></div>
+    <div class="kart"><div class="b">Bekleyen <span class="dr ok">✔</span></div><div class="d">37 <small>· 3 SLA aşımı</small></div>
+      <div class="ipucu"><code>durum ≤ 3</code> · <code>sla_riskli</code></div></div>
+    <div class="kart"><div class="b">Kritik bulgu (ay) <span class="dr yari">◐</span></div><div class="d">14 <small>· teyit ort. 6 dk</small></div>
+      <div class="ipucu"><code>radyoloji_kritik_bulgu</code> var; teleradyoloji bağı rapor üzerinden kurulmalı</div></div>
+    <div class="kart"><div class="b">Ay cirosu (tahmini) <span class="dr yari">◐</span></div><div class="d">412.300 <small>₺</small></div>
+      <div class="ipucu"><code>ucret</code> istekte var; aylık sabit + aşım modeli dönem hesabı ister</div></div>
+  </div>
+
   <div class="ikiPanel">
     <div>
-      <div class="grp" style="margin:10px"><div class="gb">Radyolog yükü (bugün)</div>
+      <div class="grp" style="margin:10px"><div class="gb">Radyolog yükü (bugün)
+        <span class="sp"><span class="dr yari">◐</span> sayılar hazır · <b>vardiya</b> yok</span></div>
         <div class="dg"><table><thead><tr><th>Radyolog</th><th>Uzmanlık</th><th class="orta">Vardiya</th><th class="sag">Bende</th><th class="sag">Onaylı</th><th class="sag">Ort. dk</th><th class="sag">SLA aşımı</th><th class="sag">Hakediş (ay)</th></tr></thead>
           <tbody>
-            <tr><td>Dr. E. Ay</td><td>Nöro / Toraks</td><td class="orta">08–17</td><td class="sag">5</td><td class="sag">41</td><td class="sag">31</td><td class="sag">1</td><td class="sag">38.400</td></tr>
-            <tr><td>Dr. C. Er</td><td>Kas-iskelet</td><td class="orta">08–17</td><td class="sag">3</td><td class="sag">38</td><td class="sag">44</td><td class="sag">0</td><td class="sag">31.900</td></tr>
-            <tr><td>Dr. D. Su</td><td>Abdomen</td><td class="orta">13–22</td><td class="sag">2</td><td class="sag">22</td><td class="sag">40</td><td class="sag">0</td><td class="sag">24.100</td></tr>
-            <tr><td>Dr. F. Kaya (dış)</td><td>Genel · gece</td><td class="orta">20–08</td><td class="sag">0</td><td class="sag">11</td><td class="sag">35</td><td class="sag">2</td><td class="sag">19.600</td></tr>
-          </tbody></table></div></div>
-      <div class="grp" style="margin:10px"><div class="gb">Kuruma göre (ay)</div>
+            <tr><td>Dr. E. Ay</td><td>Nöro / Toraks</td><td class="orta sonuk">—</td><td class="sag">5</td><td class="sag">41</td><td class="sag">31</td><td class="sag">1</td><td class="sag sonuk">—</td></tr>
+            <tr><td>Dr. C. Er</td><td>Kas-iskelet</td><td class="orta sonuk">—</td><td class="sag">3</td><td class="sag">38</td><td class="sag">44</td><td class="sag">0</td><td class="sag sonuk">—</td></tr>
+            <tr><td>Dr. D. Su</td><td>Abdomen</td><td class="orta sonuk">—</td><td class="sag">2</td><td class="sag">22</td><td class="sag">40</td><td class="sag">0</td><td class="sag sonuk">—</td></tr>
+            <tr><td>Dr. F. Kaya (dış)</td><td>Genel · gece</td><td class="orta sonuk">—</td><td class="sag">0</td><td class="sag">11</td><td class="sag">35</td><td class="sag">2</td><td class="sag sonuk">—</td></tr>
+          </tbody></table></div>
+        <div class="aciklama">Bende / onaylı / ortalama / aşım: <code>atanan_radyolog_id</code> ve
+          <code>telerad_atama</code> ile hesaplanır. <b>Vardiya</b> için nöbet çizelgesi
+          (<span class="dr yok">✖</span>), <b>hakediş</b> için Prim bağı
+          (<span class="dr yok">✖</span>) yazılmadı.</div>
+      </div>
+
+      <div class="grp" style="margin:10px"><div class="gb">Kuruma göre (ay)
+        <span class="sp"><span class="dr ok">✔</span> tutar hariç hazır</span></div>
         <div class="dg"><table><thead><tr><th>Kurum</th><th class="sag">İstek</th><th class="sag">SLA %</th><th class="sag">Ort. dk</th><th class="sag">Kritik</th><th class="sag">Tutar</th></tr></thead>
           <tbody>
             <tr><td>Yıldız Hastanesi</td><td class="sag">312</td><td class="sag">97,1</td><td class="sag">36</td><td class="sag">8</td><td class="sag">148.900</td></tr>
             <tr><td>Ege Görüntüleme</td><td class="sag">204</td><td class="sag">98,5</td><td class="sag">51</td><td class="sag">2</td><td class="sag">96.000 <span class="sonuk">sabit</span></td></tr>
             <tr><td>Deniz Tıp Merkezi</td><td class="sag">118</td><td class="sag">94,0</td><td class="sag">33</td><td class="sag">4</td><td class="sag">61.200</td></tr>
-          </tbody></table></div></div>
+          </tbody></table></div>
+        <div class="aciklama">İstek / SLA / süre <code>v_telerad_istek</code>'ten kurum kırılımıyla gelir.
+          "Sabit" satırındaki tutar aylık sabit + aşım modelidir — dönem hesabı
+          (<span class="dr yok">✖</span> dönem faturası) ister.</div>
+      </div>
     </div>
+
     <div>
-      <div class="grp" style="margin:10px"><div class="gb">Saatlik geliş / raporlama (bugün)</div>
+      <div class="grp" style="margin:10px"><div class="gb">Saatlik geliş / raporlama (bugün)
+        <span class="sp"><span class="dr ok">✔</span></span></div>
         <div class="ic" style="display:flex;gap:3px;align-items:flex-end;height:110px">
           <div style="flex:1;background:#cfe0f5;height:15%"></div><div style="flex:1;background:#cfe0f5;height:10%"></div><div style="flex:1;background:#cfe0f5;height:8%"></div><div style="flex:1;background:#cfe0f5;height:12%"></div><div style="flex:1;background:#cfe0f5;height:20%"></div><div style="flex:1;background:#cfe0f5;height:25%"></div>
           <div style="flex:1;background:#4d8fd6;height:40%"></div><div style="flex:1;background:#4d8fd6;height:55%"></div><div style="flex:1;background:#4d8fd6;height:75%"></div><div style="flex:1;background:#4d8fd6;height:90%"></div><div style="flex:1;background:#4d8fd6;height:100%"></div><div style="flex:1;background:#4d8fd6;height:85%"></div><div style="flex:1;background:#4d8fd6;height:70%"></div><div style="flex:1;background:#e06a5e;height:95%"></div><div style="flex:1;background:#4d8fd6;height:60%"></div>
-        </div><div class="ic sonuk" style="padding-top:0">00–14 saat; kırmızı: 13:00 acil yığılması (SLA aşımları)</div></div>
-      <div class="grp" style="margin:10px"><div class="gb">Modalite dağılımı (ay)</div>
+        </div>
+        <div class="ic sonuk" style="padding-top:0">00–14 saat; kırmızı: 13:00 acil yığılması (SLA aşımları)</div>
+        <div class="aciklama">Saat kırılımı <code>gelis_zamani</code> / <code>onay_zamani</code> ile;
+          yığılma saatini görmek otomatik dağıtım kuralının (faz 2) ilk girdisidir.</div>
+      </div>
+
+      <div class="grp" style="margin:10px"><div class="gb">Modalite dağılımı (ay)
+        <span class="sp"><span class="dr ok">✔</span></span></div>
         <div class="dg"><table><thead><tr><th>Modalite</th><th class="sag">Adet</th><th class="sag">Pay</th><th class="sag">Ort. dk</th></tr></thead>
-          <tbody><tr><td>BT</td><td class="sag">298</td><td class="sag">%47</td><td class="sag">29</td></tr><tr><td>MR</td><td class="sag">214</td><td class="sag">%34</td><td class="sag">52</td></tr><tr><td>CR/DR</td><td class="sag">96</td><td class="sag">%15</td><td class="sag">18</td></tr><tr><td>US / MG</td><td class="sag">26</td><td class="sag">%4</td><td class="sag">40</td></tr></tbody></table></div></div>
+          <tbody><tr><td>BT</td><td class="sag">298</td><td class="sag">%47</td><td class="sag">29</td></tr>
+            <tr><td>MR</td><td class="sag">214</td><td class="sag">%34</td><td class="sag">52</td></tr>
+            <tr><td>Röntgen</td><td class="sag">96</td><td class="sag">%15</td><td class="sag">18</td></tr>
+            <tr><td>USG / Mamografi</td><td class="sag">26</td><td class="sag">%4</td><td class="sag">40</td></tr></tbody></table></div>
+        <div class="aciklama">Modalite adları çalışma listesiyle aynı ifadeden gelir
+          (<code>KaynakKatalogu</code>) — iki ekran aynı tetkike iki ad yazmasın.</div>
+      </div>
     </div>
   </div>
-  <div class="statusbar"><span>Kaynak: <code>telerad_istek</code>, <code>telerad_atama</code>, <code>radyoloji_rapor</code>, <code>hakedis</code></span><span class="sp">Hakediş = Prim modülü, rol Raporlayan (bkz. ../Prim/)</span></div>
+
+  <div class="statusbar">
+    <span>Hazır kaynak: <code>v_telerad_istek</code> (kalan dk, SLA riski, ücret sunucuda) · <code>telerad_atama</code></span>
+    <span class="sp">Eksik: nöbet çizelgesi · hakediş (Prim) bağı · dönem faturası</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Panoya nereden başlanır?</b> ✔ işaretli paneller yeni tablo istemiyor: sayım, ortalama ve
+  kırılım <code>v_telerad_istek</code> üzerinde SQL'dir; iş, özet ucu + ekrandır.
+  ◐ işaretliler bir bağ bekliyor (kritik bulgu → teleradyoloji isteği, ücret → dönem hesabı).
+  ✖ işaretliler önce kendi işinin yapılmasını ister: <b>nöbet çizelgesi</b>, <b>hakediş</b>
+  (Prim modülü, rol Raporlayan) ve <b>dönem faturası</b>
+  (<code>telerad.faturala</code> yetkisi tanımlı, ekranı yok).<br>
+  <b>Sayılar tek yerden:</b> kalan dakika ve SLA riski zaten sunucuda hesaplanıyor
+  (<code>v_telerad_istek.kalan_dk</code> / <code>sla_riskli</code>) — pano da onları kullanmalı,
+  kendi "şimdi"siyle yeniden hesaplamamalı; yoksa liste ile pano aynı iş için iki farklı
+  sayı gösterir.<br>
+  <b>Komşu mockuplar:</b> çalışma listesi <code>telerad_calisma_listesi.html</code> · istek kartı
+  <code>telerad_istek_karti.html</code> · kurum/sözleşme kartları
+  <code>telerad_kurum_sozlesme_karti.html</code> · raporlama <code>telerad_raporlama.html</code> ·
+  kurum portalı <code>telerad_kurum_portali.html</code> · süreç bütünü
+  <code>telerad_sureci.html</code>.
 </div>
 
 
