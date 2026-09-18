@@ -98,56 +98,159 @@
   .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
   .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
 
+  /* ek siniflar: uyari seridi + faz notu (telerad_istek_karti.html ile ayni dil) */
+  .uyariSerit{background:#fdf6e3;border-bottom:1px solid #f2ddbf;color:#8a6218;
+    padding:7px 12px;font-size:11.5px}
+  .uyariSerit code{background:#fff;border:1px solid #f2ddbf;border-radius:3px;padding:0 4px}
+  .aciklama{padding:0 12px 10px;color:var(--muted);font-size:11px}
+  .dg tr.baskaKurum td{background:#f7f9fc;color:var(--muted);font-style:italic;white-space:normal}
 </style>
 </head>
 <body>
 
+<!-- =====================================================================
+     TELERADYOLOJI — GONDEREN KURUM PORTALI
+
+     BUGUN NEREDEYIZ: portal KAPSAMI yazildi (794/795/796) - dis kurum rolu
+     `rol.portal_turu = 2`, teleradyoloji kaynagi ve karti
+     `kurum_taraf_id = {kullanici}` ile suzulur, kapsam kurali OLMAYAN kaynak
+     portal roluNE KAPALIDIR (varsayilan `false`).
+
+     AMA dis kurum rolunde `teleradyoloji` YETKISI HENUZ YOK: portalda bu
+     ekran gorunmuyor. Yetki bos bir ekran acmasin diye bilerek verilmedi -
+     istek acma / DICOM yukleme / rapor indirme faz 2
+     (dokuman/12_KALAN_ISLER.md · 13_PORTAL_ROLLERI_PLANI.md).
+
+     Bugun dis kurum rolu lab sonuclarini goruyor:
+     ../Portal/portal_dis_kurum.html
+     ================================================================== -->
 <div class="win">
-  <div class="title">🏥 Teleradyoloji Portalı — Yıldız Hastanesi (Bursa) <span class="sp">gönderen kurum kullanıcısı · Dr. S. Yıldırım · sözleşme 2026</span></div>
+  <div class="title">🏥 Teleradyoloji Portalı — Yıldız Hastanesi (Bursa)
+    <span class="sp">gönderen kurum kullanıcısı · rol <code>dis_istem_kurumu</code> · <code>portal_turu = 2</code></span></div>
+
+  <div class="uyariSerit">⚠ <b>Bu ekran portalda henüz açık değil.</b>
+    Kapsam kuralı yazıldı (794/795) ama rolde <code>teleradyoloji</code> yetkisi yok —
+    yetki verildiği gün liste aşağıdaki gibi <b>yalnız kendi kurumunun</b> istekleriyle açılır.</div>
+
+  <!-- ARAC CUBUGU: bugun hicbiri yok. Tasarim niyeti duruyor; her dugmenin
+       karsiligi faz 2'de yazilacak (istek acma ucu, DICOM alimi, PDF). -->
   <div class="toolbar">
-    <div class="btn primary">＋ Yeni Raporlama İsteği</div><div class="btn">📤 DICOM Yükle</div><div class="btn">🔗 PACS Otomatik Gönderim <span class="rz ok">bağlı</span></div>
-    <div class="sepv"></div><div class="btn">📄 Raporu İndir</div><div class="btn">💬 Radyoloğa Mesaj</div><div class="btn">🔄 İkinci Görüş İste</div>
-    <div class="sepv"></div><div class="btn sp">📑 Aylık Hizmet Dökümü</div>
+    <div class="btn pas">＋ Yeni Raporlama İsteği <span class="sonuk">faz 2</span></div>
+    <div class="btn pas">📤 DICOM Yükle <span class="sonuk">faz 2</span></div>
+    <div class="btn pas">🔗 PACS Otomatik Gönderim <span class="sonuk">faz 2</span></div>
+    <div class="sepv"></div>
+    <div class="btn pas">📄 Raporu İndir <span class="sonuk">faz 2</span></div>
+    <div class="btn pas">💬 Radyoloğa Mesaj <span class="sonuk">faz 2</span></div>
+    <div class="sepv"></div>
+    <div class="btn pas sp">📑 Aylık Hizmet Dökümü <span class="sonuk">faz 2</span></div>
   </div>
+
+  <!-- LISTE: yetki verilince aynen calisma listesidir - AYRI BIR KAYNAK YOK.
+       Kolonlar `telerad-istek` kaynagindan; satirlar sunucuda suzulur. -->
   <div class="arama">
-    <div class="kutu">🔍 Hasta, erişim no…</div>
-    <span class="chip on">Açık</span><span class="chip">Raporlandı</span><span class="chip">Tümü</span>
-    <span class="sepv"></span><span class="chip">📅 Bugün ▾</span><span class="chip">🩻 Modalite ▾</span><span class="chip">🚨 Kritik bulgu</span>
+    <div class="kutu">🔍 Bu listede ara…</div>
+    <span class="chip on">Bekleyen</span><span class="chip">Okunuyor</span><span class="chip">Taslak</span>
+    <span class="chip">Onaylı</span><span class="chip">Teslim</span><span class="chip">Tümü</span>
+    <span class="sepv"></span><span class="sonuk">çipler çalışma listesiyle aynı — portalda ayrı bir kaynak yok, aynı kaynak süzülür</span>
   </div>
+
+  <div class="dg"><table>
+    <thead><tr><th>İstek No</th><th>Erişim No</th><th>Hasta</th><th class="orta">Modalite</th><th>Tetkik</th>
+      <th class="orta">Öncelik</th><th class="orta">Geldi</th><th class="sag">Kalan (dk)</th><th>Radyolog</th><th class="orta">Durum</th></tr></thead>
+    <tbody>
+      <tr class="sel"><td>TR-2026/00014</td><td>YH-2026-44120</td><td>M. Kaya</td><td class="orta"><span class="rz">BT</span></td><td>Beyin BT (kontrastsız)</td><td class="orta"><span class="rz kir">ACİL</span></td><td class="orta">18.09 13:51</td><td class="sag"><span class="rz kir">−4</span></td><td class="sonuk">—</td><td class="orta"><span class="rz sari">Sırada</span></td></tr>
+      <tr><td>TR-2026/00012</td><td>YH-2026-44118</td><td>S. Demir</td><td class="orta"><span class="rz">MR</span></td><td>Lomber MR</td><td class="orta"><span class="rz sari">Öncelikli</span></td><td class="orta">18.09 12:31</td><td class="sag">131</td><td class="sonuk">—</td><td class="orta"><span class="rz sari">Sırada</span></td></tr>
+      <tr><td>TR-2026/00011</td><td>YH-2026-44115</td><td>H. Öz</td><td class="orta"><span class="rz">BT</span></td><td>Batın BT kontrastlı</td><td class="orta"><span class="rz sari">Öncelikli</span></td><td class="orta">18.09 11:30</td><td class="sag">50</td><td>Dr. E. Ay</td><td class="orta"><span class="rz mor">Ek görüntü istendi</span></td></tr>
+      <tr><td>TR-2026/00001</td><td>ACC-1001</td><td>M. Kaya</td><td class="orta"><span class="rz">BT</span></td><td>BT TORAKS (kontrastsız)</td><td class="orta"><span class="rz">Rutin</span></td><td class="orta">18.09 09:34</td><td class="sag sonuk">—</td><td>Dr. A. Kaya</td><td class="orta"><span class="rz ok">Onaylı</span></td></tr>
+      <tr><td>TR-2026/00002</td><td>YH-2026-44102</td><td>N. Gül</td><td class="orta"><span class="rz">MR</span></td><td>Beyin MR</td><td class="orta"><span class="rz">Rutin</span></td><td class="orta">17.09 08:52</td><td class="sag sonuk">—</td><td>Dr. C. Er</td><td class="orta"><span class="rz ok">Teslim edildi</span></td></tr>
+      <tr class="baskaKurum"><td colspan="10">Deniz Tıp Merkezi · Ege Görüntüleme · Anadolu Dış Hekimi satırları <b>hiç gelmez</b> — süzme sunucuda, <code>kurum_taraf_id = {kullanıcı}</code></td></tr>
+    </tbody></table></div>
+
+  <div class="statusbar">
+    <span>Kurum bağı <code>telerad_kurum.taraf_id</code> üzerinden: portal kullanıcısı kurumun <b>CARİ</b> kaydıdır</span>
+    <span>Kart da kapsamlı: id'yi bilen kullanıcı başkasının isteğini açamaz — "bulunamadı" döner</span>
+    <span class="sp">yetki: <code>teleradyoloji</code> <b>(rolde yok)</b></span>
+  </div>
+</div>
+
+<!-- =====================================================================
+     FAZ 2 — istek acma, goruntu yukleme, rapor indirme, donem dokumu.
+     Tasarim duruyor; hicbiri yazilmadi.
+     ================================================================== -->
+<div class="win">
+  <div class="title">⏭ Faz 2 — kurum portalı istek ekranı
+    <span class="sp">tasarım niyeti; <code>dokuman/12_KALAN_ISLER.md</code></span></div>
   <div class="ikiPanel">
     <div>
-      <div class="dg"><table>
-        <thead><tr><th>Erişim No</th><th>Hasta</th><th class="orta">Modalite</th><th>Tetkik</th><th class="orta">Öncelik</th><th class="orta">Gönderim</th><th class="orta">Görüntü</th><th>Radyolog</th><th class="orta">Rapor</th><th class="orta">Durum</th></tr></thead>
-        <tbody>
-          <tr class="sel"><td>YH-2026-44120</td><td>M. Kaya</td><td class="orta">BT</td><td>Beyin BT</td><td class="orta"><span class="rz kir">ACİL</span></td><td class="orta">13:51</td><td class="orta"><span class="rz ok">alındı</span></td><td>Dr. E. Ay</td><td class="orta">—</td><td class="orta"><span class="rz mavi">Okunuyor</span></td></tr>
-          <tr><td>YH-2026-44118</td><td>S. Demir</td><td class="orta">MR</td><td>Lomber MR</td><td class="orta"><span class="rz sari">Öncelikli</span></td><td class="orta">12:31</td><td class="orta"><span class="rz ok">alındı</span></td><td class="sonuk">—</td><td class="orta">—</td><td class="orta"><span class="rz sari">Sırada</span></td></tr>
-          <tr><td>YH-2026-44115</td><td>H. Öz</td><td class="orta">BT</td><td>Batın BT</td><td class="orta"><span class="rz sari">Öncelikli</span></td><td class="orta">11:30</td><td class="orta"><span class="rz sari">eksik seri</span></td><td>Dr. E. Ay</td><td class="orta">—</td><td class="orta"><span class="rz mor">Ek görüntü istendi</span></td></tr>
-          <tr><td>YH-2026-44102</td><td>N. Gül</td><td class="orta">MR</td><td>Beyin MR</td><td class="orta"><span class="rz">Rutin</span></td><td class="orta">dün 16:00</td><td class="orta"><span class="rz ok">alındı</span></td><td>Dr. C. Er</td><td class="orta">📄 PDF</td><td class="orta"><span class="rz ok">Raporlandı 09:40</span></td></tr>
-          <tr><td>YH-2026-44098</td><td>T. Kar</td><td class="orta">CR</td><td>Akciğer PA</td><td class="orta"><span class="rz">Rutin</span></td><td class="orta">dün 15:10</td><td class="orta"><span class="rz ok">alındı</span></td><td>Dr. C. Er</td><td class="orta">📄 PDF</td><td class="orta"><span class="rz kir">Kritik bulgu · teyit ✔</span></td></tr>
-        </tbody></table></div>
-    </div>
-    <div>
-      <div class="grp" style="margin:10px"><div class="gb">Yeni Raporlama İsteği <span class="sp">PACS otomatik gönderiyorsa yalnız klinik bilgi + öncelik</span></div>
+      <div class="grp" style="margin:10px"><div class="gb">Yeni Raporlama İsteği
+        <span class="sp">PACS otomatik gönderiyorsa yalnız klinik bilgi + öncelik</span></div>
         <div class="hdr" style="grid-template-columns:1fr 1fr;border:none">
           <div class="fld"><label class="req">Hasta</label><div class="inp">M. Kaya · 12345678901 · 58 E</div></div>
           <div class="fld"><label class="req">Erişim No (PACS)</label><div class="inp">YH-2026-44120 <span class="rz ok">eşleşti</span></div></div>
           <div class="fld"><label class="req">Modalite / Tetkik</label><div class="inp combo">BT · Beyin BT kontrastsız</div></div>
           <div class="fld"><label class="req">Öncelik</label><div class="inp combo">ACİL (30 dk)</div></div>
-          <div class="fld" style="grid-column:span 2"><label class="req">Klinik Bilgi</label><div class="inp" style="min-height:44px;align-items:flex-start">Ani konuşma bozukluğu, sağ kol güçsüzlüğü 40 dk. İnme protokolü.</div></div>
+          <div class="fld" style="grid-column:span 2"><label class="req">Klinik Bilgi</label>
+            <div class="inp" style="min-height:44px;align-items:flex-start">Ani konuşma bozukluğu, sağ kol güçsüzlüğü 40 dk. İnme protokolü.</div></div>
           <div class="fld"><label>İsteyen Hekim</label><div class="inp combo">Dr. S. Yıldırım · Acil</div></div>
-          <div class="fld"><label>Önceki Tetkik</label><div class="inp">12.03.2025 Beyin BT <span class="sonuk">· otomatik bulundu</span></div></div>
-          <div class="fld" style="grid-column:span 2"><label>Hasta Onamı (dış kurum paylaşımı)</label><div class="inp">☑ Görüntü ve bilgilerin raporlama merkeziyle paylaşımı için onam alındı</div></div>
+          <div class="fld"><label>Önceki Tetkik</label><div class="inp">12.03.2026 Beyin BT <span class="sonuk">· otomatik bulundu</span></div></div>
+          <div class="fld" style="grid-column:span 2"><label>Hasta Onamı (dış kurum paylaşımı)</label>
+            <div class="inp">☑ Görüntü ve bilgilerin raporlama merkeziyle paylaşımı için onam alındı</div></div>
         </div>
-        <div style="padding:0 10px 10px;display:flex;gap:6px"><div class="btn primary">📤 Gönder</div><div class="btn">DICOM Dosyası Ekle</div></div>
+        <div style="padding:0 10px 10px;display:flex;gap:6px">
+          <div class="btn pas">📤 Gönder</div><div class="btn pas">DICOM Dosyası Ekle</div></div>
+        <div class="aciklama">Alanların tamamı <code>telerad_istek</code>'te zaten var (798 kartı):
+          kurum, hasta kimliği, erişim no, modalite/tetkik, öncelik, klinik bilgi, isteyen hekim,
+          onam. Eksik olan <b>portal tarafındaki uç ve yükleme kanalı</b>.
+          Erişim no aynı kurumda <b>benzersizdir</b> — PACS çalışmayı tekrar gönderirse ikinci kayıt
+          değil aynı istek güncellenir.</div>
       </div>
-      <div class="grp" style="margin:10px"><div class="gb">Bu ay <span class="sp">sözleşme: BT 450 · MR 600 · CR 120 · US 200 ₺ (acil +%50)</span></div>
-        <div class="ozet"><div class="kart"><div class="b">İstek</div><div class="d">312</div></div><div class="kart"><div class="b">Ort. rapor süresi</div><div class="d">41 <small>dk</small></div></div><div class="kart"><div class="b">SLA uyumu</div><div class="d">%97</div></div><div class="kart"><div class="b">Tahmini tutar</div><div class="d">148.900 <small>₺</small></div></div></div>
+    </div>
+    <div>
+      <div class="grp" style="margin:10px"><div class="gb">Rapor &amp; Teslim <span class="sp">faz 2</span></div>
+        <ul class="liste">
+          <li class="sonuk">📄 Onaylı raporu PDF indir (kurum başlıklı)</li>
+          <li class="sonuk">🔁 Ek görüntü isteğine yanıt (durum 8 → yeniden yükleme)</li>
+          <li class="sonuk">💬 Radyoloğa mesaj · 🚨 kritik bulgu teyidi</li>
+          <li class="sonuk">📦 Otomatik teslim: HL7 ORU / FHIR ile kurum HBYS'ine</li>
+        </ul>
+        <div class="aciklama">Faz 1'de teslim <b>elle</b>: merkez çalışma listesinden 📦 Teslim Et →
+          durum 7; damgayı <code>tg_telerad_istek</code> yazar (799).</div>
+      </div>
+      <div class="grp" style="margin:10px"><div class="gb">Bu Ay <span class="sp">faz 2 · dönem faturası</span></div>
+        <div class="ozet">
+          <div class="kart"><div class="b">İstek</div><div class="d">312</div></div>
+          <div class="kart"><div class="b">Ort. rapor süresi</div><div class="d">41 <small>dk</small></div></div>
+          <div class="kart"><div class="b">SLA uyumu</div><div class="d">%97</div></div>
+          <div class="kart"><div class="b">Tahmini tutar</div><div class="d">148.900 <small>₺</small></div></div>
+        </div>
+        <div class="aciklama">Ücret istek açılırken sözleşme tarifesinden kopyalanır
+          (<code>telerad_istek.ucret</code>); dönem faturası satış faturasıdır —
+          <code>telerad.faturala</code> yetkisi tanımlı, ekranı faz 2.</div>
       </div>
     </div>
   </div>
-  <div class="statusbar"><span>Kurum kullanıcısı yalnız kendi kurumunun isteklerini görür (<code>telerad_kurum_kullanici</code>)</span><span class="sp">Rapor teslimi: portal + HL7 ORU → kurum HBYS</span></div>
 </div>
-<div class="not"><b>İki yön.</b> Bu portal, <b>bizim kurum raporlama merkezi</b> olduğunda gönderen kurumların kullandığı yüzdür. Tersi senaryo (bizim görüntülerimizi dış merkeze göndermek) aynı tablolarla <code>yon = giden</code>; o zaman bu ekran bizde "Dış Raporlama İstekleri" olur ve rapor gelince <code>radyoloji_rapor</code>'a düşer.</div>
+
+<div class="not">
+  <b>Portal kapsamı nasıl çalışıyor (794/795/796)?</b> Kural veritabanı sorgusuna eklenir,
+  ekranda gizleme yoktur: <code>KaynakTanimi.PortalKosullari</code> / <code>KartTanimi.PortalKosullari</code>
+  içinde portal türüne göre koşul durur (<code>{kullanıcı}</code> parametre olarak bağlanır).
+  <b>Koşulu olmayan kaynak portal rolüne kapalıdır</b> — yeni bir ekran eklenince portal
+  kullanıcısına kendiliğinden açılmaz. Dış kurum: <code>kurum_taraf_id = {kullanıcı}</code> ·
+  dış doktor: <code>atanan_radyolog_id = {kullanıcı}</code> · hasta: <code>false</code>.
+  Karma rol yasak (<code>fn_portal_rol_karisim_koru</code>): bir kullanıcı hem iç hem portal rolü taşıyamaz.<br>
+  <b>Bugün dış kurum rolünde ne var?</b> <code>lab</code> · <code>lab.numune</code> ·
+  <code>lab.sonuc</code> · <code>hasta</code> · <code>ai.rehber</code>. Teleradyoloji yetkisi
+  <b>bilerek verilmedi</b>: karşılığı olmayan yetki "boş ama açık kapı" olurdu.
+  Dış doktor ayrıca <code>radyoloji-istem</code> (dar yetki, 796) taşır.<br>
+  <b>İki yön.</b> Bu portal, bizim kurum <b>raporlama merkezi</b> olduğunda gönderen kurumların
+  kullandığı yüzdür. Tersi (bizim görüntümüzü dış merkeze göndermek) aynı tablolarla
+  <code>yon = 2 (giden)</code>; istek kartında yön alanı bunun için var (799).<br>
+  <b>Komşu mockuplar:</b> çalışma listesi <code>telerad_calisma_listesi.html</code> · istek kartı
+  <code>telerad_istek_karti.html</code> · kurum/sözleşme kartları
+  <code>telerad_kurum_sozlesme_karti.html</code> · genel dış kurum portalı
+  <code>../Portal/portal_dis_kurum.html</code> · süreç bütünü <code>telerad_sureci.html</code>.
+</div>
 
 
 <script>
