@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teleradyoloji İstek Kartı — Mockup (Gentegre AI · Teleradyoloji)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1180px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .title .surum{font-weight:normal;font-size:10.5px;background:rgba(255,255,255,.18);
+    border-radius:9px;padding:1px 8px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1180px;margin:10px auto 22px;color:#6b7a8b;font-size:11px;line-height:1.7}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart: kimlik seridi ustte (sekme DEGIL), altta alan gruplari sekme olarak */
+  .hdr{display:grid;grid-template-columns:repeat(5,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.bos{color:var(--muted)}
+  .inp.uzun{min-height:52px;align-items:flex-start}
+  .inp.onay{border:none;background:none;padding-left:0}
+  .kutucuk{display:inline-block;width:13px;height:13px;border:1px solid var(--line);border-radius:2px;background:#fff;position:relative}
+  .kutucuk.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3}
+  .kutucuk.on::after{content:"✓";color:#fff;font-size:10px;position:absolute;left:1.5px;top:-2px}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e;display:flex;gap:6px;align-items:center}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .sayi{background:#cfdcea;color:#2c4a6b;border-radius:8px;padding:0 6px;font-size:10px}
+  .pnl{padding:2px 0 6px}
+  .alanlar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:12px}
+  .alanlar.k2{grid-template-columns:repeat(2,1fr)}
+  .alanlar.k4{grid-template-columns:repeat(4,1fr)}
+  .genis{grid-column:1 / -1}
+  .aciklama{padding:0 12px 10px;color:var(--muted);font-size:11px}
+  .saltOkunur{margin:0 12px 10px;border:1px solid var(--line2);border-radius:4px;overflow:hidden}
+  .saltOkunur .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .saltOkunur .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .kilit{font-size:10px;color:var(--muted);margin-left:4px}
+</style>
+</head>
+<body>
+
+<!-- =====================================================================
+     TELERADYOLOJI ISTEK KARTI (db/798 · 799 · KartKatalogu.Teleradyoloji.cs)
+
+     Kullanici: "teleradyoloji istek kartını da yap" - 797 faz 1'de kart
+     yoktu, calisma listesinde cift tik hicbir sey acmiyordu.
+
+     KART ISIN CEVRESINI duzenler, RAPORU DEGIL: okuma ve rapor yazma mevcut
+     radyoloji raporlama ekraniyla yapilir (telerad_raporlama.html); burada
+     hangi kurumdan geldigi, hangi tetkik, goruntu durumu, kime atandigi ve
+     teslim/ucret bilgisi durur.
+
+     Mockup ekranin GERCEK halini anlatir (tarayicida dogrulandi): kimlik
+     seridi ustte, alan gruplari sekmeye doner, atama gecmisi salt okunur
+     detay olarak en sonda. Hesaplanan alanlar 🔒 ile isaretli - hepsini
+     tg_telerad_istek yazar (798/799).
+     ================================================================== -->
+<div class="win">
+  <div class="title">🛰 Teleradyoloji İsteği — #1 <span class="surum">sürüm 530859</span>
+    <span class="sp">Radyoloji › Teleradyoloji › Çalışma Listesi · /teleradyoloji/1 · <code>telerad_istek</code></span></div>
+  <div class="toolbar">
+    <div class="btn primary">Kaydet</div>
+    <div class="btn danger">Sil</div>
+    <div class="btn sp">Kapat</div>
+  </div>
+
+  <!-- KIMLIK SERIDI: "Kimlik" grubu sekme olarak DEGIL burada cizilir -
+       hangi istek olduğu her sekmede gorunur kalsin. -->
+  <div class="hdr">
+    <div class="fld"><label>İstek No <span class="kilit">🔒</span></label><div class="inp ro">TR-2026/00001</div></div>
+    <div class="fld"><label class="req">Gönderen Kurum</label><div class="inp combo">YILDIZ HASTANESİ (BURSA)</div></div>
+    <div class="fld"><label>Yön</label><div class="inp combo">Gelen (biz raporlarız)</div></div>
+    <div class="fld"><label>Durum</label><div class="inp combo">Onaylı</div></div>
+    <div class="fld"><label>Öncelik</label><div class="inp combo">ACİL</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="hasta">Hasta</div>
+    <div class="sekme" data-s="tetkik">Tetkik</div>
+    <div class="sekme" data-s="goruntu">Görüntü</div>
+    <div class="sekme" data-s="atama">Atama &amp; SLA</div>
+    <div class="sekme" data-s="teslim">Teslim &amp; Ücret</div>
+    <div class="sekme" data-s="baglar">Bağlar</div>
+    <div class="sekme" data-s="gecmis">Atama Geçmişi <span class="sayi">1</span></div>
+  </div>
+
+  <!-- HASTA: dis kurumun hastasi bizde minimal kayit olarak acilabilir ama
+       ZORUNLU DEGIL - kimlik ve erisim numarasi cogu iste yeter. -->
+  <div class="pnl" data-s="hasta">
+    <div class="alanlar">
+      <div class="fld"><label>Kimlik No</label><div class="inp">12345678901</div></div>
+      <div class="fld"><label>Hasta Kaydı (varsa)</label><div class="inp combo bos">— seçiniz —</div></div>
+      <div class="fld"><label>Erişim No (accession)</label><div class="inp">ACC-1001</div></div>
+      <div class="fld"><label>İsteyen Hekim</label><div class="inp">Dr. Yılmaz</div></div>
+    </div>
+    <div class="aciklama">Aynı kurumda aynı erişim numarası <b>iki kez</b> girilemez
+      (<code>ux_telerad_istek_erisim</code>): kurumun PACS'i çalışmayı tekrar gönderirse
+      ikinci kayıt değil aynı istek güncellenir — yoksa iş iki radyologa düşer.</div>
+  </div>
+
+  <!-- TETKIK: klinik bilgi raporun yarisidir - radyolog "neden cekildi"
+       bilmeden okursa bulguyu yorumlayamaz. -->
+  <div class="pnl" data-s="tetkik" hidden>
+    <div class="alanlar">
+      <div class="fld"><label>Modalite</label><div class="inp combo">BT</div></div>
+      <div class="fld"><label>Tetkik</label><div class="inp combo">BT TORAKS (kontrastsız)</div></div>
+      <div class="fld"><label>Paylaşım onamı alındı</label><div class="inp onay"><span class="kutucuk on"></span> Evet</div></div>
+      <div class="fld genis"><label>Klinik Bilgi</label>
+        <div class="inp uzun">Nefes darlığı, 3 gündür öksürük. D-dimer yüksek; pulmoner emboli ekartasyonu istendi.</div></div>
+    </div>
+    <div class="aciklama">Onam kutusu kurum kartındaki <b>"Paylaşım onamı zorunlu"</b> ayarıyla
+      birlikte çalışır — görüntü bize dışarıdan geliyor (KVKK).</div>
+  </div>
+
+  <!-- GORUNTU: SLA GORUNTUNUN GELDIGI AN baslar (797), istegin acildigi an
+       degil; "Görüntü Geliş" yazilinca tetik sla_bitis'i hesaplar. -->
+  <div class="pnl" data-s="goruntu" hidden>
+    <div class="alanlar">
+      <div class="fld"><label>Çekim</label><div class="inp">18.09.2026 09:12</div></div>
+      <div class="fld"><label>Görüntü Geliş</label><div class="inp">18.09.2026 09:34</div></div>
+      <div class="fld"><label>Görüntü Durumu</label><div class="inp combo">Tamam</div></div>
+      <div class="fld"><label>Görüntü Sayısı</label><div class="inp">412</div></div>
+      <div class="fld"><label>Seri Sayısı</label><div class="inp">6</div></div>
+      <div class="fld"><label>Study UID</label><div class="inp">1.2.826.0.1.3680043.8.498.10</div></div>
+    </div>
+    <div class="aciklama">Görüntü durumu "Tamam" olunca istek kendiliğinden <b>Sırada</b>'ya geçer
+      (tetik). Kurum isteği akşam açıp görüntüyü sabah gönderebilir; söz verdiğimiz süre
+      okumaya başlayabildiğimiz andan işler.</div>
+  </div>
+
+  <!-- ATAMA & SLA: atama yapilinca durum "Atandı"ya yukselir, atama kalkinca
+       siraya doner. SLA ve zaman damgalari SALT OKUNUR (798/799). -->
+  <div class="pnl" data-s="atama" hidden>
+    <div class="alanlar">
+      <div class="fld"><label>Atanan Radyolog</label><div class="inp combo">Dr. A. Kaya</div></div>
+      <div class="fld"><label>SLA (dk) <span class="kilit">🔒</span></label><div class="inp ro">30</div></div>
+      <div class="fld"><label>SLA Bitişi <span class="kilit">🔒</span></label><div class="inp ro">18.09.2026 10:04</div></div>
+      <div class="fld"><label>SLA Aşıldı <span class="kilit">🔒</span></label><div class="inp ro"><span class="rz ok">Hayır</span></div></div>
+      <div class="fld"><label>Okumaya Başlandı <span class="kilit">🔒</span></label><div class="inp ro">18.09.2026 09:41</div></div>
+      <div class="fld"><label>Onay <span class="kilit">🔒</span></label><div class="inp ro">18.09.2026 09:58</div></div>
+    </div>
+    <div class="aciklama">🔒 alanları <code>tg_telerad_istek</code> yazar: SLA dakikası sözleşmeden
+      kopyalanır, bitiş görüntünün gelişinden hesaplanır, <b>aşım kararı onay anında</b> verilir.
+      Okuma damgası <b>ilk</b> okuma anıdır — iş taslağa/ek görüntüye dönüp geri gelirse
+      değişmez (799).</div>
+  </div>
+
+  <!-- TESLIM & UCRET: ucret istek aninda kopyalanir (tarife x oncelik);
+       teslim damgasi ve teslim durumu durum 7 ile birlikte dogar (799). -->
+  <div class="pnl" data-s="teslim" hidden>
+    <div class="alanlar">
+      <div class="fld"><label>Teslim Durumu <span class="kilit">🔒</span></label><div class="inp ro"><span class="rz">Bekliyor</span></div></div>
+      <div class="fld"><label>Teslim <span class="kilit">🔒</span></label><div class="inp ro bos">—</div></div>
+      <div class="fld"><label>Teslim Hatası <span class="kilit">🔒</span></label><div class="inp ro bos">—</div></div>
+      <div class="fld"><label>Ücret</label><div class="inp sag">675,00</div></div>
+      <div class="fld"><label>Sözleşme Id <span class="kilit">🔒</span></label><div class="inp ro">1</div></div>
+    </div>
+    <div class="aciklama">Ücret <b>istek anında</b> kopyalanır (tarife × öncelik): sözleşme
+      sonradan değişse de geçmiş işin fiyatı değişmez. Sözleşme verilmediyse kurumun
+      o tarihte aktif sözleşmesinden çözülür.</div>
+  </div>
+
+  <!-- BAGLAR: okuma/rapor IC AKISIN AYNISIDIR - istek ic isteme baglanir,
+       rapor radyoloji_rapor'da durur, donem faturasi belgeye bakar. -->
+  <div class="pnl" data-s="baglar" hidden>
+    <div class="alanlar">
+      <div class="fld"><label>İç İstem Id <span class="kilit">🔒</span></label><div class="inp ro">8412</div></div>
+      <div class="fld"><label>Rapor Id <span class="kilit">🔒</span></label><div class="inp ro">5190</div></div>
+      <div class="fld"><label>Fatura Belge Id <span class="kilit">🔒</span></label><div class="inp ro bos">— (dönem faturası)</div></div>
+    </div>
+    <div class="aciklama">Rapor bu kartta yazılmaz: teleradyoloji isteği iç isteme bağlanır
+      (<code>radyoloji_istem.telerad_istek_id</code>) ve okuma mevcut raporlama ekranıyla yapılır
+      (<code>telerad_raporlama.html</code>).</div>
+  </div>
+
+  <!-- ATAMA GECMISI SALT OKUNUR: satirlari tetik yaziyor
+       (tg_telerad_atama_izi). Elle satir eklemek "kim atadi" sorusunun
+       cevabini uydurulabilir kilardi. -->
+  <div class="pnl" data-s="gecmis" hidden>
+    <div class="saltOkunur">
+      <div class="gb">Atama Geçmişi <span class="sp">salt okunur — satırları tetik yazar (<code>tg_telerad_atama_izi</code>)</span></div>
+      <div class="dg"><table>
+        <thead><tr><th>Radyolog</th><th>Atama</th><th>Neden</th><th>Bırakma</th></tr></thead>
+        <tbody>
+          <tr><td>Dr. A. Kaya</td><td>18.09.2026 09:36</td><td>Elle</td><td class="sonuk">—</td></tr>
+        </tbody></table></div>
+    </div>
+    <div class="aciklama">Neden kodları: Otomatik (kural) · Elle · Yeniden atama · Nöbet devri.
+      Atama kalkarsa istek <b>Sırada</b>'ya döner — "atandı ama kimsede olmayan iş",
+      çalışma listesinde görünmeyen iştir.</div>
+  </div>
+
+  <div class="statusbar">
+    <span>Portal kapsamında (794/795): gönderen kurum kendi isteğini, atanan radyolog kendi işini açar — başkasının isteği "bulunamadı" döner</span>
+    <span class="sp">yetki: <code>teleradyoloji</code> · şube damgalı</span>
+  </div>
+</div>
+
+<!-- =====================================================================
+     CALISMA LISTESI ARAC CUBUGU (799) - kartin degil LISTENIN dugmeleri.
+     Durum akisi bu dugmelerle ilerler; kartta "Durum" kutusundan da
+     degistirilebilir ama dugme ayni gecisi tek tikla ve dogru damgayla
+     yapar (damgalari tetik yazar).
+     ================================================================== -->
+<div class="win">
+  <div class="title">🛰 Çalışma Listesi — akış düğmeleri <span class="sp">telerad-istek-liste · <code>AksiyonKatalogu</code></span></div>
+  <div class="toolbar">
+    <div class="btn primary">＋ Yeni İstek</div>
+    <div class="btn">✎ Düzenle</div>
+    <div class="sepv"></div>
+    <div class="btn">👤 Bana Ata</div>
+    <div class="btn primary">▶ Okumaya Başla</div>
+    <div class="btn ok">📦 Teslim Et</div>
+    <div class="sepv"></div>
+    <div class="btn pas">↩ Atamayı Bırak <span class="sonuk">(sağ tuş)</span></div>
+    <div class="btn pas">✖ İsteği İptal Et <span class="sonuk">(sağ tuş)</span></div>
+    <div class="btn pas">🗑 Sil <span class="sonuk">(sağ tuş)</span></div>
+    <div class="btn sp">🖨️ Yazdır</div>
+  </div>
+  <div class="statusbar">
+    <span><b>Bana Ata</b> ve <b>Teslim Et</b> ayrı yetkide (<code>telerad.ata</code> · <code>telerad.teslim</code>): okuyan herkes işi dağıtamaz</span>
+    <span class="sp">düğmeler durum + atama gönderir, <b>zaman damgası göndermez</b></span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Durum akışı.</b> 1 Görüntü bekleniyor → 2 Sırada → 3 Atandı → 4 Okunuyor → 5 Taslak →
+  6 Onaylı → 7 Teslim edildi · 8 Ek görüntü istendi · 0 İptal. Geçişlerin tamamı
+  <code>tg_telerad_istek</code> içinde: görüntü tamam → sırada, atama → atandı, atama kalktı →
+  sırada, durum ≥ 4 → <code>okuma_bas</code>, durum ≥ 6 → <code>onay_zamani</code> + SLA aşım kararı,
+  durum 7 → <code>teslim_zamani</code> + <code>teslim_durum</code>.<br>
+  <b>Alan → kolon.</b> İstek No <code>istek_no</code> · Kurum <code>kurum_id</code>
+  (<code>v_telerad_kurum_lookup</code>) · <code>yon</code> · <code>durum</code> · <code>oncelik</code> ·
+  <code>dis_hasta_kimlik / hasta_id / dis_erisim_no / isteyen_hekim</code> ·
+  <code>modalite / tetkik_hizmet_id / klinik_bilgi / onam</code> ·
+  <code>cekim_zamani / gelis_zamani / goruntu_durum / goruntu_sayisi / seri_sayisi / study_uid</code> ·
+  <code>atanan_radyolog_id / sla_dk / sla_bitis / sla_asildi / okuma_bas / onay_zamani</code> ·
+  <code>teslim_durum / teslim_zamani / teslim_hata / ucret / sozlesme_id</code> ·
+  <code>radyoloji_istem_id / rapor_id / fatura_belge_id</code>. Denetim alanları
+  (<code>ekleyen</code>, <code>ekleme_tarihi</code>) kartta <b>yok</b> — log ekranının işi (799).<br>
+  <b>Komşu mockuplar:</b> çalışma listesi <code>telerad_calisma_listesi.html</code> ·
+  raporlama <code>telerad_raporlama.html</code> · kurum/sözleşme kartları
+  <code>telerad_kurum_sozlesme_karti.html</code> · süreç bütünü <code>telerad_sureci.html</code>.
+</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>
