@@ -326,3 +326,70 @@ public sealed class OnayTekImzaTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 }
+
+/// <summary>
+/// BİRİM İMZASI BANKO ŞEFİNDE (787).
+///
+/// Kullanıcı: *"kayıt kabul (banko) sorumlusu bulamadım, iskonto talebi ilk
+/// olarak ona gitmeyecek miydi"*.
+///
+/// 785 birim basamağını `kayit_kabul` rolüne vermişti: bankodaki her çalışan
+/// birim onaycısı oluyordu. 783 kişinin KENDİ talebini onaylamasını kapatıyor
+/// ama yanındaki mesai arkadaşı imzalayabiliyordu - denetim değil karşılıklı
+/// imza. Basamak `kayit_kabul_sorumlu` (banko şefi) rolüne taşındı.
+/// </summary>
+public sealed class BankoSefiTestleri(VeritabaniOlgusu olgu)
+    : IClassFixture<VeritabaniOlgusu>
+{
+    private readonly VeritabaniOlgusu _olgu = olgu;
+
+    private static Task<long> YetkiSayisiAsync(VeriKaynagi veri, string rol, string yetki)
+        => veri.TekDegerAsync<long>("""
+            select count(*)
+              from public.rol r
+              join public.rol_yetki ry on ry.rol_id = r.id
+              join public.yetki y on y.id = ry.yetki_id
+             where r.kod = @p0 and y.kod = @p1
+            """, [rol, yetki], CancellationToken.None);
+
+    [Fact]
+    public async Task Birim_imzasi_BANKODA_degil_SORUMLUDA()
+    {
+        if (!_olgu.Baglandi(nameof(Birim_imzasi_BANKODA_degil_SORUMLUDA))) return;
+        var veri = _olgu.Gerekli();
+
+        Assert.Equal(0, await YetkiSayisiAsync(veri, "kayit_kabul", "belge.iskonto_onay_birim"));
+        Assert.Equal(1, await YetkiSayisiAsync(veri, "kayit_kabul_sorumlu", "belge.iskonto_onay_birim"));
+        // Karar veren denetim izini de görür (685).
+        Assert.Equal(1, await YetkiSayisiAsync(veri, "kayit_kabul_sorumlu", "iskonto_onay"));
+    }
+
+    [Fact]
+    public async Task Her_basamak_AYRI_rolde()
+    {
+        if (!_olgu.Baglandi(nameof(Her_basamak_AYRI_rolde))) return;
+        var veri = _olgu.Gerekli();
+
+        // Üç kademe üç ayrı role dağılmazsa (754) zincir kâğıt üstünde kalır:
+        //   tek kişi ardışık basamakları imzalayamıyor (784), o yüzden aynı
+        //   rolde toplanan basamak talebi kilitler.
+        Assert.Equal(1, await YetkiSayisiAsync(veri, "kayit_kabul_sorumlu", "belge.iskonto_onay_birim"));
+        Assert.Equal(1, await YetkiSayisiAsync(veri, "muhasebe", "belge.iskonto_onay_mali"));
+        Assert.Equal(1, await YetkiSayisiAsync(veri, "yonetici", "belge.iskonto_onay_ust"));
+
+        // YÖNETİCİ ÜÇÜNÜ DE TAŞIR: sorumlu rolüne kimse atanmadan önce talep
+        //   boşta kalmasın - ilk imzayı yönetici atar.
+        Assert.Equal(1, await YetkiSayisiAsync(veri, "yonetici", "belge.iskonto_onay_birim"));
+    }
+
+    [Fact]
+    public async Task Sorumlu_bankonun_EKRANLARINI_tasir()
+    {
+        if (!_olgu.Baglandi(nameof(Sorumlu_bankonun_EKRANLARINI_tasir))) return;
+        var veri = _olgu.Gerekli();
+
+        // Sorumlu bankonun işini de yapar: hasta, randevu, başvuru, tahsilat.
+        foreach (var kod in new[] { "hasta", "randevu", "belge", "kasa_islem" })
+            Assert.Equal(1, await YetkiSayisiAsync(veri, "kayit_kabul_sorumlu", kod));
+    }
+}

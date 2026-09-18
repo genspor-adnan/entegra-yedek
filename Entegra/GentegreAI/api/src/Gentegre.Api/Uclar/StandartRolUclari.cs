@@ -49,10 +49,28 @@ public static class StandartRolUclari
         Y("hasta"), Y("randevu"), Y("belge"), Y("belge_satir"), Y("taraf"), Y("cari"), T("kurum"), T("hizmet"), T("fiyat_listesi"),
         Y("sigorta"), A("sigorta.provizyon"), A("sigorta.iptal"), Y("medula.provizyon"), T("medula"), Y("kasa_islem"), Y("mali_hareket"),
         T("hesap"), A("kasa.makbuz-yazdir"), Y("onam"), T("bildirim"), T("iskonto_onay"), T("muayene"), Y("aday"),
-        // ISKONTO BIRIM BASAMAGI (785): bankonun actigi talebin ilk imzasi
-        //   birim sorumlusundadir; talebi ACAN kendi talebini onaylayamaz
-        //   (783/784), yani ayni roldeki BASKA biri imzalar.
+        // ISKONTO BIRIM BASAMAGI BURADA DEGIL (787, kullanici: "kayıt kabul
+        //   (banko) sorumlusu bulamadım, iskonto talebi ilk olarak ona
+        //   gitmeyecek miydi"): 785 basamagi `kayit_kabul` rolune vermisti ve
+        //   bu, HER BANKO CALISANINI birim onaycisi yapiyordu - talebi acan
+        //   kendi talebini onaylayamasa da (783) yanindaki mesai arkadasi
+        //   onaylayabiliyordu. Denetim degil karsilikli imza olurdu.
+        //   Basamak ayri bir role tasindi: `kayit_kabul_sorumlu`.
+    ];
+
+    /// <summary>
+    /// BANKO SEFI (787): bankonun yaptigi isin tamami + iskonto talebinin
+    /// BIRIM imzasi. Ayri rol, cunku "sorumlu" kadro unvanidir - ekranlar ayni,
+    /// imza yetkisi farkli.
+    /// </summary>
+    private static readonly Kural[] KayitKabulSorumluTemel =
+    [
+        .. KayitKabulTemel,
         T("belge.iskonto_onay_birim"),
+        // Karar veren denetim izini de gormeli (685).
+        Y("iskonto_onay"),
+        // Banko sefi vardiyayi da kapatir.
+        Y("kasa_kapatma"), A("kasa.kapat"), A("kasa.kesinlestir"),
     ];
     private static readonly Kural[] MuhasebeTemel =
     [
@@ -100,6 +118,9 @@ public static class StandartRolUclari
     private static readonly Sablon[] Sablonlar =
     [
         new("kayit_kabul", "Kayıt Kabul / Banko", "Hasta kaydı, randevu, başvuru, provizyon, fiş ve tahsilat.", Klinik, K(KayitKabulTemel)),
+        new("kayit_kabul_sorumlu", "Kayıt Kabul Sorumlusu (Banko Şefi)",
+            "Bankonun tüm işleri + iskonto talebinin birim imzası, vardiya/kasa kapatma.", Klinik,
+            K(KayitKabulSorumluTemel)),
         new("hekim", "Hekim", "Muayene, tanı, istem, reçete ve rapor; kendi hakedişi.", ["muayenehane", "tip_merkezi", "hastane"], K(HekimTemel)),
         new("hemsire", "Hemşire", "Vital, enjeksiyon, pansuman, numune; muayene kaydına yardım.", ["tip_merkezi", "hastane", "dal_ftr"],
             K(T("hasta"), Y("muayene"), T("randevu"), Y("lab.numune"), T("lab"), Y("onam"), T("katalog"), T("belge"))),

@@ -13769,3 +13769,35 @@ alındı, `yonetici` korundu (GK422). Tarayıcıda profil sayfasında bölüm 38
 satırla çiziliyor, sol menüde "🪪 Görüntüleme Merkezi" görünüyor. Deneme
 satırları geri alındı (`kurum_tipi_rol` boş, `dis_hekimi` yeniden aktif).
 xUnit 282/282, vitest 669/669.
+
+
+## 18.09.2026 — Kayıt Kabul Sorumlusu (Banko Şefi): birim imzası ona geçti (787)
+
+Kullanıcı: *"kayıt kabul (banko) sorumlusu bulamadım, iskonto talebi ilk olarak
+ona gitmeyecek miydi"*.
+
+**Haklı: rol yoktu.** 785 zincirin üç basamağını dağıtırken BİRİM basamağını
+`kayit_kabul` rolüne verdi ve tarihçeye "banko sorumlusu" diye yazdı - öyle bir
+rol hiç açılmamıştı. Sonuç: bankodaki **her çalışan** birim onaycısı oldu. 783
+kişinin kendi talebini onaylamasını kapatıyor, ama yanındaki mesai arkadaşı
+imzalayabiliyordu; bu denetim değil **karşılıklı imza**dır - iki banko çalışanı
+birbirinin indirimini sırayla onaylar ve zincir kâğıt üstünde kalır.
+
+Basamak bir KADRO UNVANINA ait. `kayit_kabul_sorumlu` ("Kayıt Kabul Sorumlusu /
+Banko Şefi") açıldı: bankonun bütün yetkileri + `belge.iskonto_onay_birim` +
+`iskonto_onay` ekranı (karar veren denetim izini de görmeli, 685) + vardiya /
+kasa kapatma. `belge.iskonto_onay_birim` `kayit_kabul` rolünden **kaldırıldı**.
+
+**Zincir boşta kalmaz:** `yonetici` üç basamağı da taşıyor. Sorumlu rolüne kimse
+atanmamışken talep doğrudan yöneticiye düşer; kurum banko şefini atayınca ilk
+imza ona gelir. Göç kimseyi role ATAMAZ - kişi ataması yöneticinin kararıdır
+(Yönetim › Roller).
+
+**Tavan değişmedi:** `basvuru.iskonto` değeri (%10) bankonun onaysız
+uygulayabildiği orandır, sorumluya da aynısı kopyalandı. Yükseltmek kurumun
+kararı (Yetkiler › Sınır).
+
+**Doğrulama.** Dev'de rol kuruldu (id 70, 35 yetki), `kayit_kabul` artık birim
+yetkisi taşımıyor (0), basamaklar üç ayrı rolde: sorumlu/muhasebe/yönetici.
+Yeni `BankoSefiTestleri` bunu ve sorumlunun banko ekranlarını taşıdığını
+koruyor. xUnit 285/285.
