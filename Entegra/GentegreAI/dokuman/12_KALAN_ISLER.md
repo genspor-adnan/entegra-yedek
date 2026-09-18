@@ -95,3 +95,13 @@ Kayıt için: 738-768 arasında tamamlandı, açık iş kalmadı.
   varsayılan açık): zincir hiç kurulmaz, talep onaylı doğar. Red yolu açık.
 - Belge talebinde asıl iş onay değil **hazırlamak**: 768'den beri "hazırlandı"
   bir işaret değil, üretilmiş ve dondurulmuş metin.
+
+## Portal rolleri (Dış Doktor · Dış Kurum · Hasta) — 18.09.2026
+
+Plan: `dokuman/13_PORTAL_ROLLERI_PLANI.md`. Rol yazmak kolay, asıl iş KAPSAM:
+`kullanici_kapsam` + `KapsamKolonu` yalnız cari/belge/kasa kaynaklarına bağlı,
+lab/radyoloji/muayene/randevu'da hiç yok. Kapsamsız portal rolü = veri
+sızıntısı.
+
+**Öncelik:** var olan `dis_istem_kurumu` rolü bugün kapsamsız - dış kurum
+portalı açılırsa gönderdiğinden fazlasını görür.
