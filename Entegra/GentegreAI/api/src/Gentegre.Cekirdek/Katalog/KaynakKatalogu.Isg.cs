@@ -13,6 +13,13 @@ public static partial class KaynakKatalogu
         Kaynak: "public.v_isg_firma f",
         SubeKolonu: null,
         VarsayilanSirala: "f.durum desc, f.firma_adi",
+        // FIRMA YETKILISI PORTALI (830): kendi firmasinin karti. Kapsam
+        //   kimligi firmanin CARI kaydidir (`isg_firma.taraf_id`) - hesap
+        //   kisiye acilir, kapsam firmaya baglanir (819 deseni).
+        PortalKosullari: PortalKapsam.Kur(
+            disDoktor: "false",
+            disKurum:  "f.taraf_id = {kullanici}",
+            hasta:     "false"),
         Kolonlar: new KolonTanimi[]
         {
             new("id",            "f.id",             "sayi",  "Id", Varsayilan: false),
@@ -41,6 +48,15 @@ public static partial class KaynakKatalogu
         Kaynak: "public.v_isg_calisan c",
         SubeKolonu: null,
         VarsayilanSirala: "c.durum desc, c.kalan_gun, c.calisan_adi",
+        // YALNIZ KENDI CALISANLARI (830). Kolonlar muayene VADESI ve KANAAT
+        //   tasiyor: ikisi de isverene mevzuat geregi bildirilen bilgi (Ek-2
+        //   kanaati "calisir / sartli calisir"). Muayenenin KENDISI - tani,
+        //   bulgu, tetkik - bu portalda kapali (`isg-muayene` kurali false).
+        PortalKosullari: PortalKapsam.Kur(
+            disDoktor: "false",
+            disKurum:  "c.firma_id in (select f.id from public.isg_firma f "
+                     + "               where f.taraf_id = {kullanici})",
+            hasta:     "false"),
         Kolonlar: new KolonTanimi[]
         {
             new("id",            "c.id",             "sayi",  "Id", Varsayilan: false),
@@ -72,6 +88,11 @@ public static partial class KaynakKatalogu
         YetkiKodu: "isg.muayene",
         Kaynak: "public.v_isg_muayene m",
         SubeKolonu: "m.sube_id",
+        // PORTALA KAPALI (830): Ek-2 muayenesinin kendisi - tani, bulgu,
+        //   kanaatin gerekcesi - saglik verisidir. Isverene giden bilgi
+        //   calisan satirindaki VADE ve KANAAT ile sinirli.
+        PortalKosullari: PortalKapsam.Kur(
+            disDoktor: "false", disKurum: "false", hasta: "false"),
         VarsayilanSirala: "m.durum, m.tarih desc, m.id desc",
         Kolonlar: new KolonTanimi[]
         {
@@ -101,6 +122,10 @@ public static partial class KaynakKatalogu
         YetkiKodu: "isg.ziyaret",
         Kaynak: "public.v_isg_ziyaret z",
         SubeKolonu: "z.sube_id",
+        // PORTALA KAPALI (830): ziyaret tutanagi OSGB'nin denetim kaydidir;
+        //   firmaya raporu ayri bir cikti olarak verilir.
+        PortalKosullari: PortalKapsam.Kur(
+            disDoktor: "false", disKurum: "false", hasta: "false"),
         VarsayilanSirala: "z.tarih desc, z.id desc",
         Kolonlar: new KolonTanimi[]
         {
@@ -126,6 +151,11 @@ public static partial class KaynakKatalogu
         Kaynak: "public.v_isg_olay o",
         SubeKolonu: "o.sube_id",
         VarsayilanSirala: "o.durum, o.tarih desc",
+        // PORTALA KAPALI (830): olay kaydı yaralanma ve tedavi ayrıntısı
+        //   taşıyor. Firma yetkilisinin kaza bildirimi ayrı bir iş; burada
+        //   açmak, bir çalışanın sağlık kaydını işverene açmak olurdu.
+        PortalKosullari: PortalKapsam.Kur(
+            disDoktor: "false", disKurum: "false", hasta: "false"),
         Kolonlar: new KolonTanimi[]
         {
             new("id",           "o.id",            "sayi",  "Id", Varsayilan: false),

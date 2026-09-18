@@ -318,8 +318,23 @@ public static class StandartRolUclari
               Y("form.istek"), Y("form.gonder"), Y("form.doldur"), Y("hasta"), Y("randevu"), Y("lab"), T("kurum"))),
         new("osgb_sekreter", "OSGB Sekreteri", "Firma ve çalışan kaydı, sözleşme dakikası, randevu, form gönderimi; muayene içeriği görmez.", ["osgb"],
             K(T("isg"), T("isg.pano"), Y("isg.firma"), Y("isg.calisan"), Y("isg.takvim"), T("isg.olay"), Y("form.gonder"), Y("hasta"), Y("randevu"), Y("belge"), Y("cari"), Y("kurum"))),
-        new("firma_yetkilisi", "Firma Yetkilisi (portal)", "Kendi firmasının çalışan listesi, periyodik takvim ve sağlık gözetimi özeti; sağlık verisi görmez.", ["osgb"],
-            K(T("isg"), T("isg.pano"), T("isg.firma"), T("isg.calisan"), T("isg.takvim"))),
+        // FIRMA YETKILISI ARTIK GERCEKTEN PORTAL ROLU (830, kullanici:
+        //   "portal rolü olsun"): adinda "(portal)" yaziyordu ama
+        //   `portal_turu = 0` idi - kurum ICI ekranlari (gorev, mesaj, pano)
+        //   aliyor ve kurum tipi rol haritasiyla kapatilabiliyordu.
+        //
+        //   Tur 2 (kurum): kapsam kimligi firmanin CARI kaydi. Kaynak
+        //   kurallari `KaynakKatalogu.Isg.cs`'te: firma karti ve calisan
+        //   listesi KENDI firmasiyla sinirli; muayene, ziyaret ve olay
+        //   portalda KAPALI (saglik verisi).
+        //
+        //   `P()` kullanilir: portal rolune kurum ici ekranlar verilmez.
+        //   Pano ve periyodik takvim OZEL SAYFA (liste kaynagi yok) - portal
+        //   menusunde gorunmezler; yetki ileride o ekranlara kapsam
+        //   yazilirsa ise yarar.
+        new("firma_yetkilisi", "Firma Yetkilisi (portal)", "Kendi firmasının çalışan listesi ve sağlık gözetimi takibi (vade, kanaat); muayene içeriği ve ziyaret tutanağı görmez.", ["osgb"],
+            P(T("isg"), T("isg.firma"), T("isg.calisan")),
+            PortalTuru: 2),
         // ---- ERP (795, kullanici: "bir de standart ERP rolleri var, bunlari
         //      da dusunelim"): ERP kurulumunun bugune kadar HIC sablon rolu
         //      yoktu - "Standart rolleri kur" dugmesi ERP'de bos liste

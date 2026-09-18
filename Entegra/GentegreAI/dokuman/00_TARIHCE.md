@@ -15403,3 +15403,33 @@ uygulanınca portal rolü kapanmaz, iç kadro rolü eskisi gibi kapanmaya devam
 eder.
 
 xUnit 483/483.
+
+## 830 — Firma Yetkilisi gerçekten portal rolü
+
+Kullanıcı: *"portal rolü olsun"*.
+
+Rolün adı "Firma Yetkilisi (portal)" idi ama `portal_turu = 0`: kurum içi
+ekranları (görev, mesaj, doküman, pano) alıyordu, 829'daki portal muafiyetinin
+dışında kalıyordu (üç kurum tipinde `gecerli = 0` yazılmış, rol pasifti) ve
+kapsam kuralı olmadığı için "kendi firması" sınırı hiç yoktu.
+
+Artık **tür 2 (kurum)**: hesap kişiye açılır, kapsam firmanın cari kaydına
+bağlanır (`isg_firma.taraf_id`). Şablon `P()` kullanıyor - portal rolüne kurum
+içi ekran verilmez; roldeki `panel/mesaj/gorev/dokum/dokuman/ai` ve
+`isg.pano/isg.takvim` yetkileri düşürüldü (4 yetki kaldı: `ai.rehber`, `isg`,
+`isg.firma`, `isg.calisan`).
+
+Kapsam kuralları `KaynakKatalogu.Isg.cs`:
+- `isg-firma` → `f.taraf_id = {kullanici}`
+- `isg-calisan` → `c.firma_id in (select f.id from isg_firma f where f.taraf_id = {kullanici})`
+- `isg-muayene`, `isg-ziyaret`, `isg-olay` → **açıkça `false`**. Ek-2
+  muayenesinin kendisi, ziyaret tutanağı ve olay kaydı çalışanın sağlık
+  verisidir; işverene giden bilgi çalışan satırındaki **vade ve kanaatle**
+  sınırlı (ikisi de mevzuat gereği işverene bildirilen bilgi).
+
+Pano ve periyodik takvim özel sayfa (liste kaynağı yok) - portal menüsünde
+görünmezler; yetkileri de düşürüldü.
+
+Portal menüsüne kurum türü için iki etiket: **Firmam**, **Çalışanlarım**.
+
+xUnit 485/485 (2 yeni kapsam testi), vitest 696/696.

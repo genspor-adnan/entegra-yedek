@@ -153,6 +153,39 @@ public sealed class PortalKapsamiTestleri(VeritabaniOlgusu olgu)
 
         await t.RollbackAsync();
     }
+
+    // ------------------------------------------ İSG firma yetkilisi (830) ----
+
+    [Fact(DisplayName = "Firma yetkilisi YALNIZ kendi firmasını ve çalışanlarını görür")]
+    public void Firma_yetkilisi_kendi_firmasini_gorur()
+    {
+        // Kapsam kimliği firmanın CARİ kaydı (`isg_firma.taraf_id`).
+        var firma = Uret("isg-firma", PortalKapsam.DisKurum, 909);
+        Assert.Contains("f.taraf_id = @p", firma.Sql);
+        Assert.Contains(909, firma.Parametreler);
+
+        var calisan = Uret("isg-calisan", PortalKapsam.DisKurum, 909);
+        Assert.Contains("c.firma_id in (select f.id from public.isg_firma f", calisan.Sql);
+        Assert.Contains(909, calisan.Parametreler);
+    }
+
+    [Fact(DisplayName = "İşverene sağlık kaydı açılmaz: muayene, ziyaret, olay kapalı")]
+    public void Firma_yetkilisi_saglik_kaydini_gormez()
+    {
+        // Kuralı "false" yazılan kaynak portalda HİÇ satır döndürmez - Ek-2
+        //   muayenesi, ziyaret tutanağı ve olay kaydı çalışanın sağlık
+        //   verisidir; işverene giden bilgi vade ve kanaatle sınırlı.
+        foreach (var ad in new[] { "isg-muayene", "isg-ziyaret", "isg-olay" })
+        {
+            var sorgu = Uret(ad, PortalKapsam.DisKurum, 909);
+            // Kapsam kuralı yerine `false` yazılır: sorgu satır döndüremez.
+            //   Kullanıcı id'si yine parametre listesinde olabilir (kaynağın
+            //   başka bir kolonu onu kullanıyor olabilir) - ölçü SQL'in
+            //   kendisi.
+            Assert.Contains("false", sorgu.Sql);
+            Assert.DoesNotContain("firma_id in", sorgu.Sql);
+        }
+
 }
 
 /// <summary>
@@ -309,4 +342,5 @@ public sealed class DisKurumPortalTestleri(VeritabaniOlgusu olgu)
             $"\"{rolKodu}\" rolünün gördüğü ama kapsam kuralı yazılmamış kaynak: "
             + string.Join(", ", kuralsiz));
     }
+}
 }

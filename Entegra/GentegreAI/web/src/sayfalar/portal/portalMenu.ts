@@ -72,6 +72,11 @@ const ETIKETLER: Record<PortalTuru, Record<string, Etiket>> = {
     '/lab-numune':      { ad: 'Numune durumu',        ic: '🔎', bolum: 'Laboratuvar', sira: 30 },
     '/lab-sonuc':       { ad: 'Lab sonuçları',        ic: '📄', bolum: 'Laboratuvar', sira: 40 },
     '/teleradyoloji':   { ad: 'Görüntü isteklerim',   ic: '🖥', bolum: 'Görüntüleme', sira: 50 },
+    // İSG FİRMA YETKİLİSİ (830): OSGB'nin anlaşmalı firmasının kendi
+    //   kayıtları. Aynı portal türünü (kurum) kullanır; hangi satırların
+    //   çıkacağına yetki karar verir - klinik/yönetici rolünde `isg.*` yok.
+    '/isg-firma':       { ad: 'Firmam',                ic: '🏭', bolum: 'Portal', sira: 12 },
+    '/isg-calisan':     { ad: 'Çalışanlarım',          ic: '👷', bolum: 'Portal', sira: 14 },
     // MALİ (824): yalnız YÖNETİCİ rolünde açılır - klinik rolde `portal.mali`
     //   yetkisi yok, menü satırı hiç üretilmez.
     '/kurum-belge':     { ad: 'Faturalarım',          ic: '🧾', bolum: 'Mali', sira: 60 },
