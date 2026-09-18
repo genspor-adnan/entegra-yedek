@@ -1,4 +1,4 @@
-﻿using Gentegre.Api.AraKatman;
+using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -28,6 +28,12 @@ public static class StandartRolUclari
 
     private const string TUM = "*";
     private static readonly string[] Klinik = ["muayenehane", "dal_goz", "dal_ftr", "goruntuleme", "lab", "goruntuleme_lab", "dis", "tip_merkezi", "hastane", "osgb"];
+    /// <summary>
+    /// HER KURULUMDA olan roller (795): muhasebe, yonetim goruntuleyici, kalite,
+    /// bilgi islem ve iskonto kademeleri is koluna bagli degildir - ERP
+    /// kurulumunda da aynen gecerli. Klinik listesine 'erp' eklenmis hali.
+    /// </summary>
+    private static readonly string[] Hepsi = [.. Klinik, "erp"];
 
     // Her rolde: ana sayfa, mesaj, görev, dökümler, AI rehber (gör).
     private static readonly Kural[] Ortak = [new("panel"), new("mesaj", true, true, true), new("gorev", true, true, true), new("dokum"), new("ai"), new("ai.rehber"), new("dokuman", true, true)];
@@ -142,6 +148,11 @@ public static class StandartRolUclari
         ["yatan_hemsire"] = "yatan_hasta", ["yatis_ofisi"] = "yatan_hasta",
         ["isyeri_hekimi"] = "isg", ["isg_uzmani"] = "isg", ["dsp"] = "isg",
         ["osgb_sekreter"] = "isg", ["firma_yetkilisi"] = "isg",
+        // ERP rolleri de kendi modullerine bagli (795): stok modulu kapaliysa
+        //   depo sorumlusu onerilmez.
+        ["erp_satis"] = "erp_satis", ["erp_alis"] = "satinalma",
+        ["erp_depo"] = "stok", ["erp_uretim"] = "uretim", ["erp_servis"] = "servis",
+        ["erp_ik"] = "ik",
     };
 
     private static readonly Sablon[] Sablonlar =
@@ -170,22 +181,22 @@ public static class StandartRolUclari
         new("hekim", "Doktor", "Muayene, tanı, istem, reçete ve rapor; kendi hakedişi.", ["muayenehane", "tip_merkezi", "hastane"], K(HekimTemel)),
         new("hemsire", "Hemşire", "Vital, enjeksiyon, pansuman, numune; muayene kaydına yardım.", ["tip_merkezi", "hastane", "dal_ftr"],
             K(T("hasta"), Y("muayene"), T("randevu"), Y("lab.numune"), T("lab"), Y("onam"), T("katalog"), T("belge"))),
-        new("muhasebe", "Muhasebe / Finans", "Fatura, kasa-banka, dönem sonlandırma, kesinti ve itiraz.", Klinik, K(MuhasebeTemel)),
+        new("muhasebe", "Muhasebe / Finans", "Fatura, kasa-banka, dönem sonlandırma, kesinti ve itiraz.", Hepsi, K(MuhasebeTemel)),
         new("muhasebe_sorumlu", "Mali İşler Müdürü",
-            "Muhasebenin tüm işleri + iskonto talebinin mali imzası.", Klinik,
+            "Muhasebenin tüm işleri + iskonto talebinin mali imzası.", Hepsi,
             K(MuhasebeSorumluTemel)),
         new("ust_yonetim", "Üst Yönetim (Mesul Müdür / Genel Müdür)",
-            "Salt okuma dökümler + iskonto zincirinin son imzası.", Klinik,
+            "Salt okuma dökümler + iskonto zincirinin son imzası.", Hepsi,
             K(UstYonetimTemel)),
         new("vezne", "Vezne", "Tahsilat, makbuz, fatura kapatma.", ["tip_merkezi", "hastane"],
             K(Y("kasa_islem"), Y("mali_hareket"), T("hesap"), Y("kasa_kapatma"), A("kasa.kapat"), A("kasa.makbuz-yazdir"), A("kasa.kesinlestir"), T("belge"), T("hasta"), T("cari"))),
-        new("rapor_goruntuleyici", "Yönetim Görüntüleyici", "Kurum sahibi / mesul müdür: salt okuma dökümler ve günlük.", Klinik,
+        new("rapor_goruntuleyici", "Yönetim Görüntüleyici", "Kurum sahibi / mesul müdür: salt okuma dökümler ve günlük.", Hepsi,
             K(T("%"), new("ayar", false), new("rol", false), new("kullanici", false), new("sube", false), new("referans", false), new("entegrasyon", false), new("dokuman.ozel_nitelikli", false))),
-        new("kalite", "Kalite Sorumlusu", "Klinik kalite göstergeleri, dönem hesabı, doküman onayı; klinik ekranlar salt okuma.", Klinik,
+        new("kalite", "Kalite Sorumlusu", "Hepsi kalite göstergeleri, dönem hesabı, doküman onayı; klinik ekranlar salt okuma.", Hepsi,
             K(H("klinik_kalite"), H("klinik_kalite.%"), A("klinik_kalite.%"), Y("dokuman.onayla"), T("islem_log"), T("hasta"), T("muayene"), T("lab"), T("radyoloji"), T("yatan"))),
         new("medula_sorumlu", "Medula Sorumlusu", "SGK kuyruğu, hizmet kaydı, fatura, dönem sonlandırma, kesinti.", ["tip_merkezi", "hastane", "dal_goz", "dal_ftr", "dis", "goruntuleme", "goruntuleme_lab"],
             K(H("medula"), H("medula.%"), A("medula.donem"), T("kurum"), T("belge"), T("hasta"), T("hizmet"))),
-        new("bilgi_islem", "Bilgi İşlem Sorumlusu", "Kullanıcı, rol ve şube tanımı, ayarlar, entegrasyon ve cihaz hesapları, işlem günlüğü; hasta verisi görmez.", Klinik,
+        new("bilgi_islem", "Bilgi İşlem Sorumlusu", "Kullanıcı, rol ve şube tanımı, ayarlar, entegrasyon ve cihaz hesapları, işlem günlüğü; hasta verisi görmez.", Hepsi,
             K(H("kullanici"), A("kullanici.parola-sifirla"), H("rol"), H("sube"), H("ayar"), H("referans"), H("entegrasyon"), H("cihaz"), A("cihaz.isle"),
               H("kod_liste"), H("numara_sablonu"), H("bildirim_sablon"), Y("bildirim"), T("islem_log"), A("log.geri-al"), H("dokuman"), H("katalog"),
               T("medula.ayar"), A("sigorta.ayar"), H("goz.cihaz"), H("lab.cihaz"), H("ebelge_seri"), H("ebelge_xslt"), A("veri.iceri-al"), A("veri.disa-aktar"))),
@@ -247,6 +258,48 @@ public static class StandartRolUclari
             K(T("isg"), T("isg.pano"), Y("isg.firma"), Y("isg.calisan"), Y("isg.takvim"), T("isg.olay"), Y("form.gonder"), Y("hasta"), Y("randevu"), Y("belge"), Y("cari"), Y("kurum"))),
         new("firma_yetkilisi", "Firma Yetkilisi (portal)", "Kendi firmasının çalışan listesi, periyodik takvim ve sağlık gözetimi özeti; sağlık verisi görmez.", ["osgb"],
             K(T("isg"), T("isg.pano"), T("isg.firma"), T("isg.calisan"), T("isg.takvim"))),
+        // ---- ERP (795, kullanici: "bir de standart ERP rolleri var, bunlari
+        //      da dusunelim"): ERP kurulumunun bugune kadar HIC sablon rolu
+        //      yoktu - "Standart rolleri kur" dugmesi ERP'de bos liste
+        //      donuyordu ve yonetici 150 yetkiyi elle isaretliyordu.
+        //      Ayrim TICARI AKISA gore: satan, alan, mal hareketini yazan,
+        //      ureten, serviste calisan. Muhasebe/yonetim/bilgi islem/kalite
+        //      rolleri zaten her tipte (Klinik listesine 'erp' eklendi).
+        new("erp_satis", "Satış Sorumlusu",
+            "Müşteri, teklif, sipariş, irsaliye, fatura ve tahsilat takibi; stok ve fiyat görür.",
+            ["erp"],
+            K(Y("cari"), Y("taraf"), Y("aday"), Y("firsat"), Y("belge"), Y("belge_satir"),
+              H("e_belge"), A("belge.kesinlestir"), A("belge.donustur"), A("ebelge.%"),
+              T("stok"), T("hizmet"), T("fiyat_listesi"), T("depo"), T("kasa_islem"),
+              T("mali_hareket"), A("basvuru.iskonto"))),
+        new("erp_alis", "Satınalma Sorumlusu",
+            "Talep, teklif, sipariş, mal kabul ve tedarikçi faturası; bütçe ve sözleşme takibi.",
+            ["erp"],
+            K(Y("satinalma"), Y("satinalma.talep"), Y("satinalma.teklif"), Y("satinalma.siparis"),
+              Y("satinalma.kabul"), Y("satinalma.fatura"), Y("satinalma.tedarikci"),
+              T("satinalma.butce"), Y("satinalma.sozlesme"),
+              Y("cari"), Y("belge"), Y("belge_satir"), T("stok"), T("depo"), T("hizmet"),
+              T("fiyat_listesi"))),
+        new("erp_depo", "Depo / Sevkiyat Sorumlusu",
+            "Stok giriş-çıkış, sayım, transfer, irsaliye ve sevkiyat; fiyat görmez.",
+            ["erp"],
+            K(Y("stok"), Y("depo"), Y("belge"), Y("belge_satir"), T("cari"), T("uts"),
+              A("veri.disa-aktar"))),
+        new("erp_uretim", "Üretim Sorumlusu",
+            "İş emri, reçete, üretim girişi ve sarf; depo hareketleriyle birlikte.",
+            ["erp"],
+            K(Y("uretim"), Y("stok"), Y("depo"), T("belge"), T("hizmet"), T("demirbas"))),
+        new("erp_servis", "Teknik Servis Sorumlusu",
+            "Servis kaydı, cihaz ve sözleşme takibi; müşteri ve stok görür.",
+            ["erp"],
+            K(Y("servis"), Y("servis.cihaz"), Y("servis.sozlesme"), Y("demirbas"),
+              Y("demirbas.isemri"), Y("demirbas.ariza"), Y("demirbas.bakim"),
+              T("cari"), T("stok"), T("belge"))),
+        new("erp_ik", "İK Sorumlusu",
+            "Personel kartı, izin, avans, masraf ve belge talepleri; prim hesabı.",
+            ["erp", "tip_merkezi", "hastane"],
+            K(H("personel"), Y("ik.izin"), Y("ik.izin_hak"), Y("ik.avans"), Y("ik.masraf"),
+              Y("ik.belge_talep"), T("ik.tatil"), Y("prim"), T("rol"), T("islem_log"))),
     ];
 
     public static void StandartRolUclariniEkle(this IEndpointRouteBuilder yol)

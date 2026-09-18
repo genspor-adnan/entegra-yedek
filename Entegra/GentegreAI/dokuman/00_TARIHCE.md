@@ -14058,3 +14058,36 @@ açılınca yapılır" notu çıkıyor.
 Doğrulama: tarayıcıda İş Bilgileri kutusunun etiketleri `… Sözleşme Türü ·
 Deneme Süresi · Ana Rol · Yan Rol`; yan rol combosunda 13 seçenek (aktif
 roller). vitest 672/672.
+
+
+## 18.09.2026 — ERP kurulumuna standart roller (795)
+
+Kullanıcı: *"bir de standart ERP rolleri var.. bunları da düşünelim"*.
+
+**ERP'de "Standart rolleri kur" boş liste dönüyordu**: bütün şablonlar klinik
+tiplere yazılmıştı, ERP kurulumunda yönetici 150 yetkiyi elle işaretliyordu.
+Altı rol eklendi, ayrım **ticari akışa** göre - satan, alan, mal hareketini
+yazan, üreten, serviste çalışan:
+
+| Rol | Ne yapar |
+|---|---|
+| **Satış Sorumlusu** | Müşteri, teklif, sipariş, irsaliye, fatura, e-belge; stok ve fiyat görür |
+| **Satınalma Sorumlusu** | Talep, teklif, sipariş, mal kabul, tedarikçi faturası, bütçe/sözleşme |
+| **Depo / Sevkiyat** | Stok giriş-çıkış, sayım, transfer, irsaliye; **fiyat görmez** |
+| **Üretim Sorumlusu** | İş emri, reçete, üretim girişi, sarf |
+| **Teknik Servis** | Servis kaydı, cihaz, sözleşme, demirbaş iş emri |
+| **İK Sorumlusu** | Personel, izin/avans/masraf/belge talebi, prim (tıp merkezi ve hastanede de geçerli) |
+
+**İş kolundan bağımsız roller artık ERP'de de var:** Muhasebe, Mali İşler
+Müdürü, Üst Yönetim, Yönetim Görüntüleyici, Kalite, Bilgi İşlem. Bunlar yeni
+`Hepsi` listesini kullanıyor (Klinik + erp) - "muhasebe yalnız kliniklerde
+olur" gibi bir kural yok.
+
+ERP rolleri de **kendi modüllerine bağlı** (`SablonModul`): stok modülü
+kapalıysa Depo Sorumlusu önerilmez. Dev'de (HBYS kurulumu) `erp` tipi
+sorulduğunda 8 rol dönüyor - satış/alış/üretim/servis modülleri kapalı olduğu
+için düşüyorlar, `tumModuller=true` ile hepsi görünür.
+
+Şablonlar **kurulmadı**: dev bir HBYS kurulumu. ERP kurumu "Standart rolleri
+kur" dediğinde gelecekler. Yeni test ERP şablonlarının varlığını ve ortak
+rollerin `Hepsi` listesini kullandığını koruyor. xUnit 294/294.

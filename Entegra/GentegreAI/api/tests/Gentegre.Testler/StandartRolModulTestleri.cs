@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Gentegre.Veri;
 
 namespace Gentegre.Testler;
@@ -117,5 +117,43 @@ public sealed class StandartRolModulTestleri(VeritabaniOlgusu olgu)
         Assert.Contains("silinemez", h.MessageText);
 
         await t.RollbackAsync();
+    }
+
+    [Fact]
+    public void ERP_kurulumunun_da_sablonu_var()
+    {
+        // 795 (kullanici: "bir de standart ERP rolleri var, bunlari da
+        //   dusunelim"): ERP kurulumunda "Standart rolleri kur" BOS liste
+        //   donuyordu - butun sablonlar klinik tiplere yazilmisti ve yonetici
+        //   150 yetkiyi elle isaretliyordu.
+        var metin = KaynakOku();
+        foreach (var kod in new[] { "erp_satis", "erp_alis", "erp_depo",
+                                    "erp_uretim", "erp_servis", "erp_ik" })
+            Assert.Contains($"new(\"{kod}\"", metin);
+
+        // IS KOLUNDAN BAGIMSIZ roller ERP'de de gecerli olmali: muhasebe,
+        //   yonetim goruntuleyici, kalite, bilgi islem. Bunlar `Hepsi`
+        //   listesini kullanir (Klinik + erp).
+        Assert.Contains("private static readonly string[] Hepsi", metin);
+        foreach (var kod in new[] { "muhasebe", "rapor_goruntuleyici", "kalite",
+                                    "bilgi_islem" })
+        {
+            var i = metin.IndexOf($"new(\"{kod}\"", StringComparison.Ordinal);
+            Assert.True(i > 0, kod + " sablonu yok");
+            var satir = metin.Substring(i, Math.Min(400, metin.Length - i));
+            Assert.True(satir.Contains("Hepsi"),
+                $"\"{kod}\" rolu ERP kurulumunda da gecerli olmali (Hepsi).");
+        }
+    }
+
+    /// <summary>Şablon kaynağının metni (harita testleriyle aynı dosya).</summary>
+    private static string KaynakOku()
+    {
+        var dizin = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dizin is not null && !Directory.Exists(Path.Combine(dizin.FullName, "src")))
+            dizin = dizin.Parent;
+        Assert.NotNull(dizin);
+        return File.ReadAllText(Path.Combine(dizin!.FullName, "src", "Gentegre.Api",
+                                             "Uclar", "StandartRolUclari.cs"));
     }
 }
