@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (416 ad, 116 tanesi birden cok dosyada)
+## Fonksiyonlar (416 ad, 118 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -322,7 +322,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_taraf_kampanya` | `468_kurum_sozlesme_1n.sql` | 274_belge_kampanya.sql |
 | `fn_taraf_kisi_unvan_ata` | `037_kisi_karti.sql` | — |
 | `fn_telefon_rakam` | `123_telefon_arama.sql` | — |
-| `fn_telerad_fatura_rol` | `807_telerad_hakedis_bagi.sql` | — |
+| `fn_telerad_fatura_rol` | `808_dis_hekim_raporlayan.sql` | 807_telerad_hakedis_bagi.sql |
 | `fn_telerad_istek_no` | `797_teleradyoloji.sql` | — |
 | `fn_telerad_portal_kurum` | `804_telerad_kurum_portali.sql` | — |
 | `fn_telerad_radyolog_oner` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
@@ -349,7 +349,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_belge_satir_iskonto_esik` | `792_sorumlu_kendi_tavani.sql` | 783_iskonto_kendi_onayi_ve_esik.sql |
 | `tg_belge_satir_iskonto_kilit` | `681_iskonto_kilit_koruma.sql` | 662_iskonto_onay.sql |
 | `tg_belge_satir_kilit_silme` | `681_iskonto_kilit_koruma.sql` | — |
-| `tg_belge_satir_rol_dogrula` | `361_prim_rol_isaretleri.sql` | — |
+| `tg_belge_satir_rol_dogrula` | `808_dis_hekim_raporlayan.sql` | 361_prim_rol_isaretleri.sql |
 | `tg_belge_satir_uygunluk` | `482_hizmet_cinsiyet_yas.sql` | — |
 | `tg_departman_dongu_engel` | `257_departman_ustbirim.sql` | — |
 | `tg_dis_lab_isemri_bag` | `709_dis_numara_tetikleri.sql` | — |
@@ -417,7 +417,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_hasta_dosya_no` | `396_hasta_dosya_no_otomatik.sql` | 356_hasta_dosya_no_otomatik.sql, 358_numara_sablonu_elle_girilir.sql |
 | `tg_taraf_hasta_kurum_tek_aktif` | `248_taraf_hasta_kurum.sql` | — |
 | `tg_taraf_hasta_kurum_yansit` | `277_hasta_kurum_tek_kaynak.sql` | — |
-| `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
+| `tg_taraf_prim_rol_dogrula` | `808_dis_hekim_raporlayan.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql, 369_primli_calisma_sekli.sql |
 | `tg_telerad_atama_izi` | `802_telerad_atama_nedeni.sql` | 797_teleradyoloji.sql |
 | `tg_telerad_istek` | `799_telerad_durum_damgalari.sql` | 797_teleradyoloji.sql |
 | `tg_telerad_istek_portal` | `804_telerad_kurum_portali.sql` | — |
@@ -614,7 +614,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_personel_lookup` | `054_personel_ozluk_mockup_uyum.sql` | — |
 | `v_personel_masraf` | `764_masraf_beyani.sql` | — |
 | `v_plan_vade` | `077_v_ekstre.sql` | — |
-| `v_prim_rol_aday` | `576_personel_departman_tek_kaynak.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql, 367_prim_rol_aday_bolum.sql, 369_primli_calisma_sekli.sql |
+| `v_prim_rol_aday` | `808_dis_hekim_raporlayan.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql, 367_prim_rol_aday_bolum.sql, 369_primli_calisma_sekli.sql, 576_personel_departman_tek_kaynak.sql |
 | `v_prim_rol_lookup` | `391_prim_rol_lookup_onarim.sql` | 362_gonderen_calisma_sekli.sql |
 | `v_prim_taraf_lookup` | `378_prim_taraf_lookup_aktif.sql` | 375_prim_plani_taraf.sql, 377_prim_taraf_lookup_genis.sql |
 | `v_proje_ekstre` | `077_v_ekstre.sql` | — |

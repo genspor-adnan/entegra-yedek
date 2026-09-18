@@ -211,23 +211,11 @@ public static partial class TeleradUclari
             var rolSayisi = await baglanti.TekDegerAsync<int>(
                 "select public.fn_telerad_fatura_rol(@p0)", null, [belgeId], iptal);
 
-            // DIŞ RADYOLOĞUN PAYI YAZILAMAZ (361): "dış hekim yalnız Gönderen
+            // DIŞ RADYOLOG DA PAY ALIR (808): "dış hekim yalnız Gönderen
             //   rolünde prim alabilir" kuralı, dış hekimin hasta GÖNDEREN
-            //   taraf olduğu varsayımıyla yazılmıştı; teleradyolojide işi
-            //   YAPAN da dış olabiliyor. Kuralı tek modül için esnetmek yerine
-            //   durum KULLANICIYA bildiriliyor - sessizce atlamak, hak edilmiş
-            //   primin ay sonunda fark edilmesi demekti.
-            var disOkuyan = await baglanti.TekDegerAsync<int>("""
-                select count(*)::int
-                  from public.telerad_istek i
-                  join public.taraf_personel p on p.id = i.atanan_radyolog_id
-                 where i.fatura_belge_id = @p0 and coalesce(p.dis_hekim, 0) = 1
-                """, null, [belgeId], iptal);
-            if (disOkuyan > 0)
-                uyarilar.Add(
-                    $"{disOkuyan} iş DIŞ radyolog tarafından okundu; \"dış hekim yalnız "
-                    + "Gönderen rolünde prim alabilir\" kuralı (db/361) gereği bu işlerin "
-                    + "raporlayan payı yazılmadı.");
+            //   taraf olduğu varsayımıyla yazılmıştı. Teleradyolojide işi
+            //   dışarıdan çalışan radyolog YAPIYOR - kural daraltıldı
+            //   (Gönderen + Raporlayan), burada ayrı bir istisna kalmadı.
 
             await log.YazAsync(LogIslemi.Ekle, LogTabloTeleradFatura, belgeId,
                 baglam.KullaniciId, baglam.SubeId, baglam.Ip,

@@ -148,17 +148,17 @@ public sealed class TeleradHakedisTestleri(VeritabaniOlgusu olgu)
     }
 
     [Fact]
-    public async Task DIS_radyologun_payi_yazilmaz()
+    public async Task DIS_radyolog_da_PAY_alir()
     {
-        if (!_olgu.Baglandi(nameof(DIS_radyologun_payi_yazilmaz))) return;
+        if (!_olgu.Baglandi(nameof(DIS_radyolog_da_PAY_alir))) return;
         await using var b = await _olgu.Gerekli().AcAsync();
         await using var t = await b.BeginTransactionAsync();
 
-        // "Dış hekim yalnız Gönderen rolünde prim alabilir" (db/361). Kural o
-        //   gün dış hekimin hasta GÖNDEREN taraf olduğu varsayımıyla
-        //   yazılmıştı; teleradyolojide işi YAPAN da dış olabiliyor. Kuralı
-        //   tek modül için esnetmek yerine dış radyolog atlanıyor ve fatura
-        //   ucu bunu UYARI olarak bildiriyor.
+        // 361 "dis hekim yalniz Gonderen rolunde prim alabilir" diyordu; o
+        //   kural dis hekimin hastayi GONDEREN taraf oldugu varsayimiyla
+        //   yazilmisti. Teleradyolojide isi disaridan calisan radyolog YAPAR -
+        //   kural 808'de daraltildi (Gonderen + Raporlayan) ve dis radyolog
+        //   artik payini alir. 807'de bu is paysiz kaliyordu.
         var (satir, kurum, sube) = await SatirKurAsync(b, t);
         var ic  = await RadyologAcAsync(b, t, sube, 'I' + Guid.NewGuid().ToString("N")[..6]);
         var dis = await RadyologAcAsync(b, t, sube, 'D' + Guid.NewGuid().ToString("N")[..6],
@@ -167,13 +167,48 @@ public sealed class TeleradHakedisTestleri(VeritabaniOlgusu olgu)
         await IstekAcAsync(b, t, kurum, sube, satir, ic);
         await IstekAcAsync(b, t, kurum, sube, satir, dis);
 
-        await RolUretAsync(b, t, satir);
+        Assert.Equal(2, await RolUretAsync(b, t, satir));
         var paylar = await PaylarAsync(b, t, satir);
-        Assert.Single(paylar);
-        Assert.Equal(ic, paylar[0].Taraf);
-        // Dış hekimin işi paydada: kalan pay BOŞTA kalır, iç radyoloğa
-        //   hak etmediği pay yazılmaz.
-        Assert.Equal(50m, paylar[0].Pay);
+        Assert.Equal(2, paylar.Count);
+        Assert.Contains(paylar, x => x.Taraf == dis && x.Pay == 50m);
+        Assert.Contains(paylar, x => x.Taraf == ic  && x.Pay == 50m);
+
+        await t.RollbackAsync();
+    }
+
+    [Fact]
+    public async Task DIS_hekime_OTEKI_roller_kapali()
+    {
+        if (!_olgu.Baglandi(nameof(DIS_hekime_OTEKI_roller_kapali))) return;
+        await using var b = await _olgu.Gerekli().AcAsync();
+        await using var t = await b.BeginTransactionAsync();
+
+        // KURAL SILINMEDI, DARALTILDI (808): "Uygulayan" / "Anestezi" /
+        //   "Teknisyen" kurum icinde fiilen yapilan islerdir - disaridan
+        //   calisan biri onlari yapmaz, o rolde prim satiri neredeyse her
+        //   zaman yanlis kisi secimidir.
+        var (satir, _, sube) = await SatirKurAsync(b, t);
+        var dis = await RadyologAcAsync(b, t, sube, 'D' + Guid.NewGuid().ToString("N")[..6],
+                                        disHekim: 1);
+
+        await b.CalistirAsync("savepoint sp_rol", t, [], CancellationToken.None);
+        var h = await Assert.ThrowsAsync<PostgresException>(() => b.CalistirAsync(
+            "insert into public.belge_satir_rol "
+            + "(belge_satir_id, rol, taraf_id, pay_yuzde, kaynak) "
+            + "values (@p0, 3, @p1, 100, 1)",              // 3 = Uygulayan
+            t, [satir, dis], CancellationToken.None));
+        Assert.Equal("GK422", h.SqlState);
+        await b.CalistirAsync("rollback to savepoint sp_rol", t, [], CancellationToken.None);
+
+        // GONDEREN ve RAPORLAYAN gecer.
+        foreach (var rol in new[] { 1, 5 })
+        {
+            await b.CalistirAsync(
+                "insert into public.belge_satir_rol "
+                + "(belge_satir_id, rol, taraf_id, pay_yuzde, kaynak) "
+                + "values (@p0, @p2, @p1, 50, 1)",
+                t, [satir, dis, rol], CancellationToken.None);
+        }
 
         await t.RollbackAsync();
     }

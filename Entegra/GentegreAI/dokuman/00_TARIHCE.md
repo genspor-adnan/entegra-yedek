@@ -14747,3 +14747,34 @@ faturalama zamanlı plan ile hakediş: **A 200 ₺, B 100 ₺**. Deneme verisi
 (istekler, fatura, plan, prim rol işaretleri, hizmet) silindi.
 
 xUnit 359/359, vitest 677/677.
+
+## 18.09.2026 — Dış hekim "Raporlayan" rolünde de prim alabilir (808)
+
+Kullanıcı: *"361'i dış radyolog Raporlayan alacak şekilde genişlet"*.
+
+**361'deki kuralın varsayımı değişti.** O gün dış hekim, hastayı BİZE GÖNDEREN
+taraftı: işi biz yapıyorduk, o sevk ediyordu — "dış hekim yalnız Gönderen
+rolünde prim alabilir" bu yüzden doğruydu. Teleradyoloji (797) varsayımı
+bozdu: dışarıdan çalışan radyolog **işi kendisi yapıyor**, raporu o yazıyor.
+807'de dış radyolog paysız kalıyor, fatura ekranı bunu uyarı olarak
+bildiriyordu.
+
+**Kural silinmedi, daraltıldı:** dış hekim hâlâ her rolde prim alamaz —
+yalnız **Gönderen (1)** ve **Raporlayan (5)**. "Uygulayan", "Anestezi",
+"Teknisyen" kurum içinde fiilen yapılan işlerdir; dışarıdan çalışan biri
+onları yapmaz ve o rolde prim satırı neredeyse her zaman yanlış kişi
+seçimidir. Test ikisini de tutuyor.
+
+**Rol satırı artık girilebilir** (369'daki yasak Raporlayan için kalktı): dış
+hekimin rapor yazıp yazmadığı **bilinmeli** — kimi sevk eder, kimi okur.
+**Gönderen örtük kaldı:** Çalışma Şekli "Primli" olan her dış hekim gönderen
+adayıdır, ayrıca sorulmaz. `v_prim_rol_aday` bu iki kaynağı birleştiriyor.
+
+807'deki "dış radyoloğu atla" istisnası ve fatura ucundaki uyarı kalktı.
+
+Uçtan uca: dış radyolog (Primli + Raporlayan işaretli) 2 iş okudu (2 × 400 =
+800), %30'luk faturalama zamanlı planla hakediş **240 ₺**. Aynı kişiye
+"Uygulayan" rolü yazma denemesi beklendiği gibi reddedildi. Deneme verisi
+(dış hekim kartı, plan, istekler, fatura, hizmet) silindi.
+
+xUnit 360/360, vitest 677/677.

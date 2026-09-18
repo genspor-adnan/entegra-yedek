@@ -296,8 +296,13 @@ public static partial class KartKatalogu
         {
             // PRIM ROLLERI (361): kisi hangi rolde prim alabilir. Bir kisi hem
             //   isteyen hem yapan hem uygulayan olabilir - o yuzden GRID, tek
-            //   secim degil. DIS HEKIM yalniz "Gonderen" alabilir; kurali DB
-            //   dogrular (tg_taraf_prim_rol_dogrula).
+            //   secim degil.
+            //
+            // DIS HEKIM (808): "Gonderen" ORTUKTUR (Calisma Sekli "Primli"
+            //   olan her dis hekim gonderen adayidir), burada yalnizca
+            //   "Raporlayan" isaretlenir - teleradyolojide isi disaridan
+            //   calisan radyolog yapiyor. Kurali DB dogrular
+            //   (tg_taraf_prim_rol_dogrula).
             new DetayTanimi("primRolleri", "public.taraf_prim_rol", "taraf_id", new KartAlani[]
             {
                 // ID SART (387): cerceve detay satirlarini `id` ile adresler
