@@ -74,7 +74,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
                             tarafUnvan: onDolguUnvan, onKapat, onKaydedildi }: Props = {}) {
   const git = useNavigate();
   const [sorgu] = useSearchParams();
-  const { yetki, kullanici, aksiyonDegeri } = useOturum();
+  const { yetki, kullanici, aksiyonDegeri, aksiyonVar } = useOturum();
 
   // SUNUCUDAN GELEN AYARLAR kendi kancasinda: tur adlari, tarih penceresi,
   //   yerel para ve POS aksiyonu acilista bir kez okunur, bir daha degismez.
@@ -1681,7 +1681,9 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
           // 783: talep penceresi "limit ici mi" kararini da esikle birlikte
           //   verir - tavani yeten kullanici esik ustunu dogrudan uygulayamaz.
           iskontoTavani={iskontoEkranLimiti(aksiyonDegeri('basvuru.iskonto'),
-                                            kullanici?.iskontoOnayEsigi)}
+                                            kullanici?.iskontoOnayEsigi,
+                                            // 792: basamak sahibi esikten muaf.
+                                            aksiyonVar('belge.iskonto_onay_birim'))}
           kalemSeridi={{
             // HASTA ADI, CARI DEGIL (kullanici: "hasta adi yanlis, kurum adi
             //   gelmis"): dis kurum numunesinde belgenin carisi GONDEREN

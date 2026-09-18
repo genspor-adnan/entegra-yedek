@@ -140,7 +140,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   /** Kalem gride YAZILDI mi - ikinci "Tamam" (Enter + tik) satiri cogaltmasin. */
   const kaydedildi = useRef(false);
 
-  const { aksiyonDegeri, kullanici } = useOturum();
+  const { aksiyonDegeri, aksiyonVar, kullanici } = useOturum();
   /**
    * ISKONTO TAVANI (661): rolun `basvuru.iskonto` yetkisindeki sayisal sinir.
    * 0 = iskonto YAPAMAZ (yetki yok ya da deger girilmemis) - varsayilan budur.
@@ -154,7 +154,10 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   //   yazmaktan kurtarir; daha fazlasi icin "İskonto Onayı İste".
   const iskontoTavani = basvuruMu
     ? iskontoEkranLimiti(aksiyonDegeri('basvuru.iskonto'),
-                         kullanici?.iskontoOnayEsigi)
+                         kullanici?.iskontoOnayEsigi,
+                         // 792: birim imzasinin sahibi kendi tavanina kadar
+                         //   dogrudan uygular - imzayi kendisinden isteyemez.
+                         aksiyonVar('belge.iskonto_onay_birim'))
     : 100;
 
   const degis = (alan: keyof SatirDurumu, deger: string | number) =>

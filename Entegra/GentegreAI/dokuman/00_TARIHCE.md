@@ -13903,3 +13903,48 @@ SİLEMEZ. Şablon-modül haritasında `randevu` modülüne bağlılar.
 
 **Doğrulama.** Dev: 40 rol (38 sistem + 2 yeni), ajan 16 yetki / sorumlu 18.
 xUnit 290/290, vitest 669/669.
+
+
+## 18.09.2026 — Basamağın sahibi kendi tavanına kadar doğrudan iskonto (792)
+
+Kullanıcı: *"banko sorumlusu kendi kayıt yapıyorsa ona tanımlanmış orana kadar
+direkt iskonto yapabilir"*.
+
+**Üç doğru karar bir kilit üretmişti.** 783 eşiği koydu ("bu oranın üstü onaylı
+talepten gelir, tavan ne olursa olsun"), 787 birim imzasını banko şefine verdi,
+789 yedeği yöneticiden aldı. Sonuç: banko şefi kendi açtığı kayda eşik üstü
+indirim yapmak isterse talep açmak zorunda, talebin **ilk imzası yine
+kendisinde** ve kendi talebini onaylayamıyor (783) - talep hiç imzalanamıyor.
+
+**Kural:** bir basamağın SAHİBİ o basamak için eşiğe tabi değildir; sınırı
+KENDİ TAVANIDIR (`basvuru.iskonto` değeri, 661). Eşik "tek başına yapma, bir
+imza daha al" demek; imzanın sahibi zaten o kişiyse alınacak ikinci imza yok -
+kuralı uygulamak işi imkânsız kılmaktan başka bir şey üretmiyor. Denetim
+kaybolmuyor: kişi kendi tavanını **aşamıyor** ve tavanı kurum veriyor.
+
+**Muafiyet yalnız birim basamağı sahibine.** Mali ve üst imza sahibi kayıt
+açtığında zincirin ilk imzası başkasındadır - onlar için kilit yok, eşik aynen
+işler.
+
+**Tavan artık veritabanında da korunuyor.** Muafiyet eşiği tek DB kuralı
+olmaktan çıkardığı için yerine tavan kontrolü kondu (`tg_belge_satir_iskonto_esik`
++ yeni `fn_kullanici_iskonto_tavani` / `fn_kullanici_yetkili`). Tavan bugüne
+kadar yalnız ekranda ve API'de bakılıyordu.
+
+**Yazan kişi** satırın `degistiren`/`ekleyen` damgasından okunuyor (API her
+yazıya kullanıcıyı damgalıyor). Damga yoksa - göç, elle SQL - muafiyet
+çalışmaz, eski eşik kuralı geçerlidir: kimliği bilinmeyen yazıma ayrıcalık
+verilmez.
+
+**Ekran da aynı hesabı yapıyor:** `iskontoEkranLimiti(tavan, esik, birimImzasi)`
+- imza sahibinde kutu tavana kadar açılır, ötekilerde eşikte kesilir.
+
+**Başlangıç tavanı:** 787 sorumluyu kurarken bankonun %10'unu kopyalamıştı;
+sorumlunun tavanı bankonunkiyle aynı kalırsa muafiyetin karşılığı olmaz.
+Başlangıç **%25** (muhasebeyle aynı, 785); değeri değiştirilmişse dokunulmaz.
+
+**Doğrulama.** Dev: sorumlu %25, banko %10, eşik %10. Sorumlu rolündeki
+kullanıcı %15 yazabiliyor, %30'da "Kendi iskonto tavanınız %25" hatası alıyor;
+banko çalışanı %15'te "onay ister" hatası almaya devam ediyor. xUnit 293/293,
+vitest 672/672 (bir test sahte oturumunda `aksiyonVar` eksikti, mock
+tamamlandı).

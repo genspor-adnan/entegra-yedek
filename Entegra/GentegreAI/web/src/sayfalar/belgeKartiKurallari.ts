@@ -466,8 +466,17 @@ export function paylasimliKurum(
  * Kucugu gecerlidir: esik tavani asmayan bir kullaniciyi kisitlamaz, tavani
  * %100 olan kullaniciyi ise zincire dusurur - "İskonto Onaylayanlar" rolu
  * (663) sinirsiz indirimi tek basina yapamasin.
+ *
+ * BASAMAK SAHIBI MUAF (792, kullanici: "banko sorumlusu kendi kayıt yapıyorsa
+ * ona tanımlanmış orana kadar direkt iskonto yapabilir"): zincirin ILK imzasi
+ * (`belge.iskonto_onay_birim`) kendisindeyse esik ona islemez - talebi
+ * acsaydi imzayi kendisinden istemis olurdu ve 783 kendi talebini onaylamayi
+ * yasakliyor, yani talep hic imzalanamazdi. Sinir KENDI TAVANI; ayni kural
+ * sunucuda tetikte de var, bu yalniz kutuyu dogru yerde kesiyor.
  */
-export function iskontoEkranLimiti(tavan: number, esik?: number | null) {
+export function iskontoEkranLimiti(tavan: number, esik?: number | null,
+                                   birimImzasi?: boolean) {
+  if (birimImzasi) return tavan;
   const e = Number(esik ?? 0);
   return e > 0 ? Math.min(tavan, e) : tavan;
 }

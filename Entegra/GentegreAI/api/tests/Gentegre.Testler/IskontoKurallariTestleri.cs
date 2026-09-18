@@ -428,3 +428,124 @@ public sealed class BankoSefiTestleri(VeritabaniOlgusu olgu)
             Assert.Equal(1, await YetkiSayisiAsync(veri, "kayit_kabul_sorumlu", kod));
     }
 }
+
+/// <summary>
+/// BASAMAK SAHIBI KENDI TAVANINA KADAR DOGRUDAN ISKONTO (792).
+///
+/// Kullanici: *"banko sorumlusu kendi kayit yapiyorsa ona tanimlanmis orana
+/// kadar direkt iskonto yapabilir"*.
+///
+/// 783 esigi koydu, 787 birim imzasini banko sefine verdi, 789 yedegi
+/// yoneticiden aldi. Ucu birlestiginde KILIT cikti: banko sefi esik ustu
+/// iskonto icin talep acmak zorunda, talebin ilk imzasi yine kendisinde ve
+/// kendi talebini onaylayamiyor - talep hic imzalanamiyor. Basamagin sahibi
+/// artik esikten muaf; sinir KENDI TAVANI.
+/// </summary>
+public sealed class BasamakSahibiTavaniTestleri(VeritabaniOlgusu olgu)
+    : IClassFixture<VeritabaniOlgusu>
+{
+    private readonly VeritabaniOlgusu _olgu = olgu;
+
+    /// <summary>Sorumlu rolune gecici olarak tasinan gercek bir kullanici.</summary>
+    private static async Task<int> SorumluKullaniciAsync(
+        NpgsqlConnection b, NpgsqlTransaction t)
+    {
+        var rolId = await b.TekDegerAsync<int>(
+            "select id from public.rol where kod = 'kayit_kabul_sorumlu'",
+            t, [], CancellationToken.None);
+        var kullanici = await b.TekDegerAsync<int>(
+            "select id from public.taraf_kullanici where aktif = 1 order by id limit 1",
+            t, [], CancellationToken.None);
+        await b.CalistirAsync("update public.taraf_kullanici set rol_id = @p1 where id = @p0",
+            t, [kullanici, rolId], CancellationToken.None);
+        return kullanici;
+    }
+
+    private static async Task<(int SatirId, decimal Esik, decimal Tavan)> HazirlaAsync(
+        NpgsqlConnection b, NpgsqlTransaction t, int kullanici)
+    {
+        var satir = await b.TekDegerAsync<int>(
+            "select s.id from public.belge_satir s "
+            + "  join public.belge bl on bl.id = s.belge_id "
+            + " where bl.tur = 19 and bl.tipi = 30 order by s.id limit 1",
+            t, [], CancellationToken.None);
+        var esik = await b.TekDegerAsync<decimal>(
+            "select coalesce(nullif(deger, '')::numeric, 0) from public.referans "
+            + " where anahtar = 'basvuru.iskonto_onay_esik'", t, [], CancellationToken.None);
+        var tavan = await b.TekDegerAsync<decimal>(
+            "select public.fn_kullanici_iskonto_tavani(@p0)", t, [kullanici],
+            CancellationToken.None);
+        return (satir, esik, tavan);
+    }
+
+    [Fact]
+    public async Task Basamak_sahibi_ESIK_USTUNU_dogrudan_uygular()
+    {
+        if (!_olgu.Baglandi(nameof(Basamak_sahibi_ESIK_USTUNU_dogrudan_uygular))) return;
+        await using var b = await _olgu.Gerekli().AcAsync();
+        await using var t = await b.BeginTransactionAsync();
+
+        var kullanici = await SorumluKullaniciAsync(b, t);
+        var (satirId, esik, tavan) = await HazirlaAsync(b, t, kullanici);
+        Assert.True(tavan > esik, "Sorumlunun tavani esikten buyuk olmali (792: %25).");
+
+        // Esigin USTU ama tavanin ALTI: eskiden reddediliyordu.
+        await b.CalistirAsync(
+            "update public.belge_satir set iskonto = @p1, degistiren = @p2 where id = @p0",
+            t, [satirId, esik + 5m, kullanici], CancellationToken.None);
+
+        var yazilan = await b.TekDegerAsync<decimal>(
+            "select iskonto from public.belge_satir where id = @p0", t, [satirId],
+            CancellationToken.None);
+        Assert.Equal(esik + 5m, yazilan);
+
+        await t.RollbackAsync();
+    }
+
+    [Fact]
+    public async Task Kendi_TAVANINI_asamaz()
+    {
+        if (!_olgu.Baglandi(nameof(Kendi_TAVANINI_asamaz))) return;
+        await using var b = await _olgu.Gerekli().AcAsync();
+        await using var t = await b.BeginTransactionAsync();
+
+        var kullanici = await SorumluKullaniciAsync(b, t);
+        var (satirId, _, tavan) = await HazirlaAsync(b, t, kullanici);
+
+        // MUAFIYET ESIGI KALDIRIR, TAVANI DEGIL: sinir kurumun verdigi sayidir.
+        var h = await Assert.ThrowsAsync<PostgresException>(() => b.CalistirAsync(
+            "update public.belge_satir set iskonto = @p1, degistiren = @p2 where id = @p0",
+            t, [satirId, tavan + 5m, kullanici], CancellationToken.None));
+        Assert.Equal("GK422", h.SqlState);
+        Assert.Contains("tavan", h.MessageText.ToLowerInvariant());
+
+        await t.RollbackAsync();
+    }
+
+    [Fact]
+    public async Task Imza_sahibi_OLMAYAN_icin_esik_aynen_isler()
+    {
+        if (!_olgu.Baglandi(nameof(Imza_sahibi_OLMAYAN_icin_esik_aynen_isler))) return;
+        await using var b = await _olgu.Gerekli().AcAsync();
+        await using var t = await b.BeginTransactionAsync();
+
+        // Banko calisani (imzasi yok): esik ustu yazamaz - 783 oldugu gibi.
+        var rolId = await b.TekDegerAsync<int>(
+            "select id from public.rol where kod = 'kayit_kabul'", t, [],
+            CancellationToken.None);
+        var kullanici = await b.TekDegerAsync<int>(
+            "select id from public.taraf_kullanici where aktif = 1 order by id limit 1",
+            t, [], CancellationToken.None);
+        await b.CalistirAsync("update public.taraf_kullanici set rol_id = @p1 where id = @p0",
+            t, [kullanici, rolId], CancellationToken.None);
+        var (satirId, esik, _) = await HazirlaAsync(b, t, kullanici);
+
+        var h = await Assert.ThrowsAsync<PostgresException>(() => b.CalistirAsync(
+            "update public.belge_satir set iskonto = @p1, degistiren = @p2 where id = @p0",
+            t, [satirId, esik + 5m, kullanici], CancellationToken.None));
+        Assert.Equal("GK422", h.SqlState);
+        Assert.Contains("onay ister", h.MessageText);
+
+        await t.RollbackAsync();
+    }
+}

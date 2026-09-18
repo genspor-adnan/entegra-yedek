@@ -32,7 +32,10 @@ vi.mock('../api/istemci', () => ({
 }));
 
 vi.mock('../kimlik/OturumBaglami', () => ({
-  useOturum: () => ({ aksiyonDegeri: () => 0 }),
+  // aksiyonVar da veriliyor (792): pencere iskonto limitini hesaplarken birim
+  //   imzasinin sahibi mi diye soruyor - eksik sahte oturum "beyaz ekran"
+  //   testini gercek bir hatayla degil mock eksigiyle kirdi.
+  useOturum: () => ({ aksiyonDegeri: () => 0, aksiyonVar: () => false }),
 }));
 
 const cizdir = (ek: Record<string, unknown>) => render(

@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (404 ad, 113 tanesi birden cok dosyada)
+## Fonksiyonlar (406 ad, 114 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -199,12 +199,14 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kritik_stok_talep` | `732_kritik_stok_talep.sql` | — |
 | `fn_kullanici_alan_yetkileri` | `665_cok_rollu_kullanici.sql` | — |
 | `fn_kullanici_ana_rol_temizle` | `665_cok_rollu_kullanici.sql` | — |
+| `fn_kullanici_iskonto_tavani` | `792_sorumlu_kendi_tavani.sql` | — |
 | `fn_kullanici_kasa` | `197_kasa_atama_tek_alan.sql` | 196_kasa_atama.sql |
 | `fn_kullanici_rol_dogrula` | `665_cok_rollu_kullanici.sql` | — |
 | `fn_kullanici_rolleri` | `665_cok_rollu_kullanici.sql` | — |
 | `fn_kullanici_subeleri` | `666_sube_yerel_ayarlar.sql` | 665_cok_rollu_kullanici.sql |
 | `fn_kullanici_yetki_surumu` | `665_cok_rollu_kullanici.sql` | — |
 | `fn_kullanici_yetkileri` | `665_cok_rollu_kullanici.sql` | 020_sema_kimlik.sql, 068_taraf_rol_id_kolonlari.sql, 661_basvuru_fiyat_iskonto_yetkisi.sql |
+| `fn_kullanici_yetkili` | `792_sorumlu_kendi_tavani.sql` | — |
 | `fn_kurum_entegrasyon_durumu` | `491_kurum_entegrasyon_durumu.sql` | — |
 | `fn_kurum_kampanya` | `274_belge_kampanya.sql` | 272_kampanya_fiyat.sql |
 | `fn_kurum_kategori_uygula` | `527_profil_kategori.sql` | — |
@@ -338,7 +340,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_belge_basvuru_sozlesme` | `598_tss_sgk_kullan_tetigi.sql` | 469_basvuru_sozlesme.sql, 485_ozel_kurum_sozlesmesiz.sql, 494_basvuru_kurumu_oder.sql |
 | `tg_belge_basvuru_tur` | `778_basvuru_turu_varsayilan.sql` | — |
 | `tg_belge_satir_dagilim_denge` | `470_belge_satir_dagilim.sql` | — |
-| `tg_belge_satir_iskonto_esik` | `783_iskonto_kendi_onayi_ve_esik.sql` | — |
+| `tg_belge_satir_iskonto_esik` | `792_sorumlu_kendi_tavani.sql` | 783_iskonto_kendi_onayi_ve_esik.sql |
 | `tg_belge_satir_iskonto_kilit` | `681_iskonto_kilit_koruma.sql` | 662_iskonto_onay.sql |
 | `tg_belge_satir_kilit_silme` | `681_iskonto_kilit_koruma.sql` | — |
 | `tg_belge_satir_rol_dogrula` | `361_prim_rol_isaretleri.sql` | — |
