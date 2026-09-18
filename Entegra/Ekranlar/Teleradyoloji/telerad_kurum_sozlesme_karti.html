@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teleradyoloji Kurum &amp; Sözleşme Kartları — Mockup (Gentegre AI · Teleradyoloji)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1180px;margin:0 auto 18px;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .title .surum{font-weight:normal;font-size:10.5px;background:rgba(255,255,255,.18);
+    border-radius:9px;padding:1px 8px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .sp{margin-left:auto}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);
+    text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1180px;margin:10px auto 22px;color:#6b7a8b;font-size:11px;line-height:1.7}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  /* kart: kimlik seridi ustte (sekme DEGIL), altta sekmeler */
+  .hdr{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k5{grid-template-columns:repeat(5,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.bos{color:var(--muted)}
+  .inp.onay{border:none;background:none;padding-left:0}
+  .kutucuk{display:inline-block;width:13px;height:13px;border:1px solid var(--line);border-radius:2px;background:#fff;position:relative}
+  .kutucuk.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3}
+  .kutucuk.on::after{content:"✓";color:#fff;font-size:10px;position:absolute;left:1.5px;top:-2px}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e;display:flex;gap:6px;align-items:center}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .sekme .sayi{background:#cfdcea;color:#2c4a6b;border-radius:8px;padding:0 6px;font-size:10px}
+  .pnl{padding:2px 0 6px}
+  .alanlar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:12px}
+  .alanlar.k2{grid-template-columns:repeat(2,1fr)}
+  .alanlar.k4{grid-template-columns:repeat(4,1fr)}
+  .aciklama{padding:0 12px 10px;color:var(--muted);font-size:11px}
+  .saltOkunur{margin:0 12px 10px;border:1px solid var(--line2);border-radius:4px;overflow:hidden}
+  .saltOkunur .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .saltOkunur .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- =====================================================================
+     TELERADYOLOJI KURUM KARTI (db/800 · KartKatalogu.Teleradyoloji.cs)
+
+     Kullanici: "kurum ve sözleşme kartlarını da yap" - 797'de iki liste
+     ekrani vardi ama karti yoktu, is iliskisi ekrandan HIC kurulamiyordu.
+
+     Mockup ekranin GERCEK halini anlatir (tarayicida dogrulandi): kimlik
+     seridi ustte (Kimlik grubu sekme olarak cizilmez), alan gruplari
+     sekmeye doner, salt okunur detay en sonda.
+     ================================================================== -->
+<div class="win">
+  <div class="title">🏥 Teleradyoloji Kurumu — #1 <span class="surum">sürüm 530912</span>
+    <span class="sp">Radyoloji › Teleradyoloji › Telerad Kurumları · /telerad-kurum/1 · <code>telerad_kurum</code></span></div>
+  <div class="toolbar">
+    <div class="btn primary">Kaydet</div>
+    <div class="btn danger">Sil</div>
+    <div class="btn sp">Kapat</div>
+  </div>
+
+  <!-- KIMLIK SERIDI: kartin ust seridi. "Kimlik" grubu sekme olarak DEGIL
+       burada cizilir - kaydin kim oldugu her sekmede gorunur kalsin. -->
+  <div class="hdr">
+    <div class="fld"><label class="req">Cari</label><div class="inp combo">YILDIZ HASTANESİ (BURSA)</div></div>
+    <div class="fld"><label>Yön</label><div class="inp combo">Gelen (onlar gönderir, biz raporlarız)</div></div>
+    <div class="fld"><label>Tesis Kodu</label><div class="inp">11723456</div></div>
+    <div class="fld"><label>Aktif</label><div class="inp onay"><span class="kutucuk on"></span> Aktif</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="goruntu">Görüntü Bağlantısı</div>
+    <div class="sekme" data-s="teslim">Teslim</div>
+    <div class="sekme" data-s="rapor">Raporlama</div>
+    <div class="sekme" data-s="sozlesme">Sözleşmeler <span class="sayi">1</span></div>
+  </div>
+
+  <!-- GORUNTU BAGLANTISI: gelen calismanin hangi kurumdan oldugunu DICOM AE
+       adi soyler; ad benzersizdir (ux_telerad_kurum_ae) - iki kurum ayni adi
+       tasirsa calisma yanlis kuruma yazilir. -->
+  <div class="pnl" data-s="goruntu">
+    <div class="alanlar">
+      <div class="fld"><label>DICOM AE Başlığı</label><div class="inp">YILDIZ_PACS</div></div>
+      <div class="fld"><label>DICOM Sunucu</label><div class="inp">10.20.0.5</div></div>
+      <div class="fld"><label>DICOM Port</label><div class="inp">104</div></div>
+    </div>
+    <div class="aciklama">AE başlığı kurumlar arasında benzersizdir (<code>ux_telerad_kurum_ae</code>):
+      gelen çalışmanın hangi kurumdan olduğunu bu ad söyler.</div>
+  </div>
+
+  <!-- TESLIM: rapor geri nasil gidiyor. Portal = kurum kendi ekranindan alir
+       (faz 1); ORU/REST/FHIR otomatik gonderim (faz 2). -->
+  <div class="pnl" data-s="teslim" hidden>
+    <div class="alanlar k2">
+      <div class="fld"><label>Teslim Kanalı</label><div class="inp combo">HL7 ORU (MLLP)</div></div>
+      <div class="fld"><label>Teslim Adresi</label><div class="inp">10.20.0.6:2575</div></div>
+    </div>
+    <div class="aciklama">Kanal seçenekleri: <b>Portal</b> · HL7 ORU (MLLP) · REST · FHIR.
+      Faz 1'de teslim portaldan yapılır; otomatik gönderim faz 2
+      (<code>dokuman/12_KALAN_ISLER.md</code>).</div>
+  </div>
+
+  <!-- RAPORLAMA: kurumun isine ozel raporlama sartlari. Gece nobeti ve
+       varsayilan oncelik otomatik dagitim/nobet cizelgesinin (faz 2) girdisi. -->
+  <div class="pnl" data-s="rapor" hidden>
+    <div class="alanlar k2">
+      <div class="fld"><label>Rapor Şablonu</label><div class="inp combo">BT-01 · Toraks BT raporu</div></div>
+      <div class="fld"><label>Varsayılan Öncelik</label><div class="inp combo">Rutin</div></div>
+      <div class="fld"><label>Gece nöbeti kapsamında</label><div class="inp onay"><span class="kutucuk on"></span> Evet</div></div>
+      <div class="fld"><label>Paylaşım onamı zorunlu</label><div class="inp onay"><span class="kutucuk on"></span> Evet</div></div>
+    </div>
+    <div class="aciklama">Onam kutusu işaretliyse kurumun isteği, hastanın paylaşım onamı
+      alınmadan sıraya girmez — görüntü bize dışarıdan geliyor (KVKK).</div>
+  </div>
+
+  <!-- SOZLESMELER SALT OKUNUR: yazma yeri sozlesme kartidir. Iki yerden
+       yazilabilseydi ayni donem iki farkli SLA ile kaydedilebilirdi. Burada
+       durmasi "kurum var ama sozlesmesi yok" eksikligini gorunur kilar. -->
+  <div class="pnl" data-s="sozlesme" hidden>
+    <div class="saltOkunur">
+      <div class="gb">Sözleşmeler <span class="sp">salt okunur — düzenleme sözleşme kartında</span></div>
+      <div class="dg"><table>
+        <thead><tr><th>Başlangıç</th><th>Bitiş</th><th>Ücret Modeli</th><th class="sag">SLA Rutin (dk)</th><th class="orta">Durum</th></tr></thead>
+        <tbody>
+          <tr><td>19.08.2026</td><td class="sonuk">— (süresiz)</td><td>Tetkik başı</td><td class="sag">1440</td><td class="orta"><span class="rz ok">Aktif</span></td></tr>
+        </tbody></table></div>
+    </div>
+    <div class="aciklama">"Kurum var ama sözleşmesi yok" en sık karşılaşılan eksiklik:
+      sözleşmeler kurumun kendi kartında görünür, ama buradan <b>yazılmaz</b>.</div>
+  </div>
+
+  <div class="statusbar">
+    <span>Yeni kayıt <b>cari seçimiyle</b> açılır — teleradyoloji kurumu ayrı bir müşteri değil, carinin bir özelliğidir</span>
+    <span class="sp">yetki: <code>teleradyoloji.kurum</code> · şube damgalı</span>
+  </div>
+</div>
+
+<!-- =====================================================================
+     TELERADYOLOJI SOZLESME KARTI
+     ================================================================== -->
+<div class="win">
+  <div class="title">📜 Teleradyoloji Sözleşmesi — #1 <span class="surum">sürüm 530944</span>
+    <span class="sp">Radyoloji › Teleradyoloji › Telerad Sözleşmeleri · /telerad-sozlesme/1 · <code>telerad_sozlesme</code></span></div>
+  <div class="toolbar">
+    <div class="btn primary">Kaydet</div>
+    <div class="btn danger">Sil</div>
+    <div class="btn sp">Kapat</div>
+  </div>
+
+  <div class="hdr">
+    <div class="fld"><label class="req">Kurum</label><div class="inp combo">YILDIZ HASTANESİ (BURSA)</div></div>
+    <div class="fld"><label class="req">Başlangıç</label><div class="inp">19.08.2026</div></div>
+    <div class="fld"><label>Bitiş</label><div class="inp bos">— (süresiz)</div></div>
+    <div class="fld"><label>Durum</label><div class="inp combo">Aktif</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="ucret">Ücret</div>
+    <div class="sekme" data-s="sla">SLA</div>
+  </div>
+
+  <!-- UCRET: tarife (fiyat listesi) istege KOPYALANIR - sozlesme sonradan
+       degisince gecmis isin fiyati degismesin. -->
+  <div class="pnl" data-s="ucret">
+    <div class="alanlar">
+      <div class="fld"><label>Ücret Modeli</label><div class="inp combo">Tetkik başı</div></div>
+      <div class="fld"><label>Tarife</label><div class="inp combo">Teleradyoloji Yıldız 2026</div></div>
+      <div class="fld"><label>Aylık Sabit</label><div class="inp sag">0,00</div></div>
+      <div class="fld"><label>Aylık Adet Sınırı</label><div class="inp">0</div></div>
+      <div class="fld"><label>Acil Ek %</label><div class="inp">50,00</div></div>
+      <div class="fld"><label>Öncelikli Ek %</label><div class="inp">20,00</div></div>
+      <div class="fld"><label>Fatura Periyodu</label><div class="inp combo">Aylık</div></div>
+    </div>
+    <div class="aciklama">Ücret modeli: <b>Tetkik başı</b> · Aylık sabit + aşım · Vaka başı.
+      Ücret istek açılırken kopyalanır (tarife × öncelik) — sözleşme sonradan değişse de
+      geçmiş işin fiyatı değişmez.</div>
+  </div>
+
+  <!-- SLA: oncelige gore ayri dakika. Istege kopyalanir; SLA GORUNTUNUN
+       GELDIGI AN baslar, istegin acildigi an degil. -->
+  <div class="pnl" data-s="sla" hidden>
+    <div class="alanlar k4">
+      <div class="fld"><label>Acil (dk)</label><div class="inp">30</div></div>
+      <div class="fld"><label>Öncelikli (dk)</label><div class="inp">240</div></div>
+      <div class="fld"><label>Rutin (dk)</label><div class="inp">1440</div></div>
+      <div class="fld"><label>SLA Ceza %</label><div class="inp">0,00</div></div>
+    </div>
+    <div class="aciklama">Süre <b>görüntünün geldiği an</b> başlar, istek açıldığı an değil:
+      kurum isteği akşam açıp görüntüyü sabah gönderebilir. Yeni sözleşme
+      30 / 240 / 1440 dk ile açılır — 0 dakika SLA'yı tümden kapatırdı.</div>
+  </div>
+
+  <div class="statusbar">
+    <span>Yeni sözleşme <b>Taslak</b> doğar: isteğe yalnız <b>Aktif</b> sözleşme kopyalanır</span>
+    <span class="sp">yetki: <code>teleradyoloji.sozlesme</code> · şube kolonu yok — sözleşme kurumun</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Alan → kolon eşleşmesi.</b> Kurum: Cari <code>taraf_id</code> · Yön <code>yon</code>
+  (1 gelen · 2 giden · 3 iki yön) · Tesis Kodu <code>tesis_kodu</code> ·
+  DICOM <code>dicom_ae_title/host/port</code> · Teslim <code>hl7_tur</code> (0 portal · 1 ORU ·
+  2 REST · 3 FHIR) + <code>hl7_adres</code> · Rapor Şablonu <code>rapor_sablon_id</code>
+  (<code>v_rad_sablon_lookup</code>, db/800) · <code>gece_nobet</code> · <code>varsayilan_oncelik</code> ·
+  <code>onam_zorunlu</code>. Sözleşme: <code>kurum_id</code> (<code>v_telerad_kurum_lookup</code>) ·
+  <code>baslangic/bitis</code> · <code>durum</code> (0 taslak · 1 aktif · 2 bitti) ·
+  <code>ucret_modeli</code> · <code>fiyat_listesi_id</code> · <code>aylik_sabit</code> ·
+  <code>aylik_adet_siniri</code> · <code>acil_ek_oran</code> · <code>oncelikli_ek_oran</code> ·
+  <code>fatura_periyodu</code> · <code>sla_acil_dk / sla_oncelikli_dk / sla_rutin_dk</code> ·
+  <code>sla_ceza_oran</code>.<br>
+  <b>İstek kartı işin kendisi, bu iki kart şartları:</b> kurum "kiminle, hangi kanalla",
+  sözleşme "hangi dönem, hangi ücret, ne kadar sürede". Çalışma listesi ve istek kartı
+  <code>telerad_calisma_listesi.html</code> · süreç bütünü <code>telerad_sureci.html</code>.
+</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===null;});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+</script>
+
+</body>
+</html>
