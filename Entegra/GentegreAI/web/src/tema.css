@@ -786,9 +786,16 @@ tr.panel-basligi .d.mini {
 .alan-izgara.tek-sutun .genis-2 { grid-column: span 1 }
 /* Iki sutun kaplayan alan (or. sevk adresi) - sekme icindeki izgarada da gecerli. */
 .alan-izgara .genis-2 { grid-column: span 2 }
-/* Genel form kurali: etiket solda, input sagda genisler. */
+/* Genel form kurali: etiket solda, input sagda genisler.
+   ETIKET SAGA YASLI (mockup `Ekranlar/cari_karti.html` `.grid2 label`):
+   84px'lik sabit sutunda sola yasli etiket ile girdi arasinda uzunluga gore
+   degisen bir bosluk kaliyor, kisa etiketli satirlar ("Kod", "Yön") girdiden
+   kopuk duruyordu. Saga yaslayinca etiket her satirda girdinin dibinde
+   biter - goz tek bir dikey cizgi izler, mockup ailesindeki duzen budur.
+   Etiketi INPUTUN USTUNDE cizen duzenler (kimlik seridi, ayar formu, mantik
+   satiri) kendi kurallarinda sola doner. */
 .alan { display: grid; grid-template-columns: 84px 1fr; column-gap: 8px; align-items: center }
-.alan .etiket { grid-column: 1; font-size: 11px; color: var(--soluk); text-align: left }
+.alan .etiket { grid-column: 1; font-size: 11px; color: var(--soluk); text-align: right }
 .alan .zorunlu { color: var(--hata) }
 /* Alanin ALTINA dusen kisa aciklama (483, "SUT listesinde fiyat yok"). Ucuncu
    grid ogesi varsayilan olarak ETIKET sutununa duser ve 84px'e sikisip on
@@ -798,8 +805,10 @@ tr.panel-basligi .d.mini {
 /* Grid ogesi varsayilan min-width:auto ile KUCULMEZ: date girdileri dogal
    genisliginden dar sutunda sagdan kirpiliyordu (İşten Çıkış, SGK Başlama). */
 .alan input, .alan select, .alan textarea { min-width: 0 }
-/* Personel kartinda etiketler SAGA yasli (kullanici) - girdiye yaklassin;
-   kimlik seridindeki etiketler etkilenmez (.kaid ayri kural). */
+/* Personel kartinda etiketler SAGA yasli (kullanici) - girdiye yaklassin.
+   ARTIK VARSAYILAN (yukaridaki `.alan .etiket`): kural no-op olarak duruyor,
+   cunku sinifi kullanan ekranlar var ve "saga yasli olsun" niyeti burada
+   yaziyor. Varsayilan bir gun geri donerse bu ekran yine saga yasli kalir. */
 .etiket-sag .alan .etiket { text-align: right }
 /* Zorunlu alan yildizi. GenLookup etikete <b class="zorunlu"> * </b> koyuyordu,
    TarafAlani/fis tipi/tedarikci fatura no ise `zorunlu-isaret` sinifi veriyordu -
@@ -1319,8 +1328,11 @@ input.skt-gecmis {
 .alan-izgara.ayar-formu .alan {
   display: flex; flex-direction: column; align-items: stretch; gap: 3px;
 }
-/* Etiket edit genisligini asmasin: uzun cumleler satiri dagitiyordu. */
-.alan-izgara.ayar-formu .alan .etiket { width: 100%; max-width: 460px; font-size: 11px }
+/* Etiket edit genisligini asmasin: uzun cumleler satiri dagitiyordu.
+   SOLA YASLI: bu duzende etiket girdinin USTUNDE, saga yaslamak cumleyi
+   ekranin ortasina itiyordu. */
+.alan-izgara.ayar-formu .alan .etiket { width: 100%; max-width: 460px; font-size: 11px;
+  text-align: left }
 .alan-izgara.ayar-formu .alan input { max-width: 160px }
 /* YAN YANA ayar dizisi (Genel: Urun modu | Yerel para | Doviz) - kullanici:
    combolar Belge Girisi editi olcusunde (160px), aralarinda belirgin bosluk. */
@@ -3212,7 +3224,9 @@ input.skt-gecmis {
    ve mockup ailesinden kopuyordu. Kural YALNIZ bu sutuna baglidir. */
 .muayene-ikili .mi-sol .alan-izgara { grid-template-columns: 1fr; gap: 8px 0 }
 .muayene-ikili .mi-sol .alan { grid-template-columns: 1fr; row-gap: 2px; align-items: start }
-.muayene-ikili .mi-sol .alan .etiket { grid-column: 1; font-size: 10.5px }
+/* Etiket USTTE: saga yaslamak basligi metin kutusunun sagina itiyordu. */
+.muayene-ikili .mi-sol .alan .etiket { grid-column: 1; font-size: 10.5px;
+  text-align: left }
 .muayene-ikili .mi-sol .alan input,
 .muayene-ikili .mi-sol .alan select,
 .muayene-ikili .mi-sol .alan textarea { grid-column: 1 }
@@ -3302,10 +3316,10 @@ input.skt-gecmis {
 /* "Tansiyon" ve "Boy / Kilo": tek etiket, YAN YANA iki kutu (tek sütun
    kuralı bunları alt alta düşürüyordu). */
 .mi-sag .vital-izgara-kip .alan.ikili { grid-template-columns: 1fr 1fr; column-gap: 4px }
-.mi-sag .vital-izgara-kip .alan.ikili .etiket { grid-column: 1 / -1 }
+.mi-sag .vital-izgara-kip .alan.ikili .etiket { grid-column: 1 / -1; text-align: left }
 .mi-sag .vital-izgara-kip .alan.ikili input { grid-column: auto; width: 100%; min-width: 0 }
 .vital-izgara-kip .alan.ikili { grid-template-columns: 1fr 1fr; column-gap: 4px }
-.vital-izgara-kip .alan.ikili .etiket { grid-column: 1 / -1 }
+.vital-izgara-kip .alan.ikili .etiket { grid-column: 1 / -1; text-align: left }
 
 /* e-REÇETE başlık ızgarası (mockup): tür · provizyon · tanı · açıklama. */
 .recete-baslik { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
