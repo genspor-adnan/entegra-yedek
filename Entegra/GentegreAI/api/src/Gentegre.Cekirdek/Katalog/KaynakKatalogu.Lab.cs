@@ -199,6 +199,12 @@ public static partial class KaynakKatalogu
               + "  join public.lab_istem i on i.id = n.istem_id "
               + "  join public.taraf h on h.id = n.hasta_id",
         SubeKolonu: "n.sube_id",
+        // PORTAL (795): dis kurum kendi gonderdigi istemin NUMUNE durumunu
+        //   gorur ("kan alindi mi, laba ulasti mi"); hasta kendi numunesini.
+        PortalKosullari: PortalKapsam.Kur(
+            disDoktor: PortalKapsam.GonderenHekim("i.belge_id"),
+            disKurum:  "i.dis_kurum_id = {kullanici}",
+            hasta:     "i.taraf_id = {kullanici}"),
         VarsayilanSirala: "n.id desc",
         Kolonlar: new KolonTanimi[]
         {

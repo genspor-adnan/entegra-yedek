@@ -19,15 +19,18 @@ public sealed partial class KartDeposu
     // ============================================================== OKUMA ====
     public async Task<(IDictionary<string, object?> Kart, string Surum)?> OkuAsync(
         KartTanimi tanim, long id, IReadOnlyList<KartAlani> alanlar,
-        IReadOnlyList<int>? kapsam, CancellationToken iptal = default)
+        IReadOnlyList<int>? kapsam, CancellationToken iptal = default,
+        short portalTuru = 0, int portalKullanici = 0)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
-        return await OkuAsync(baglanti, null, tanim, id, alanlar, kapsam, iptal);
+        return await OkuAsync(baglanti, null, tanim, id, alanlar, kapsam, iptal,
+                              portalTuru, portalKullanici);
     }
 
     private async Task<(IDictionary<string, object?> Kart, string Surum)?> OkuAsync(
         NpgsqlConnection baglanti, NpgsqlTransaction? islem, KartTanimi tanim, long id,
-        IReadOnlyList<KartAlani> alanlar, IReadOnlyList<int>? kapsam, CancellationToken iptal)
+        IReadOnlyList<KartAlani> alanlar, IReadOnlyList<int>? kapsam, CancellationToken iptal,
+        short portalTuru = 0, int portalKullanici = 0)
     {
         var secim = string.Join(", ", alanlar.Select(a => $"{a.Kolon} as \"{a.Ad}\""));
         var sql = new StringBuilder()
@@ -40,8 +43,20 @@ public sealed partial class KartDeposu
         if (kapsam is { Count: > 0 } && tanim.KapsamKolonu is { } kk)
             sql += $" and {kk} = any(@p1)";
 
+        // PORTAL KAPSAMI (795): liste suzulup kart serbest kalirsa kapsam
+        //   sadece bir gorunum suslemesi olurdu - id'yi bilen portal
+        //   kullanicisi baskasinin kartini acardi. Kosul yoksa kapi KAPALI.
+        if (portalTuru > 0)
+        {
+            var kosul = tanim.PortalKosullari is { } harita
+                     && harita.TryGetValue(portalTuru, out var pk) ? pk : null;
+            sql += kosul is null ? " and false"
+                 : " and (" + kosul.Replace("{kullanici}", "@pk") + ")";
+        }
+
         await using var komut = baglanti.Komut(sql, islem,
             id);
+        if (portalTuru > 0) komut.Parameters.AddWithValue("pk", portalKullanici);
         if (kapsam is { Count: > 0 } && tanim.KapsamKolonu is not null)
             komut.Parameters.AddWithValue("p1", kapsam.ToArray());
 

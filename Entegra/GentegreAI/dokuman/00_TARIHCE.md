@@ -14130,3 +14130,38 @@ yani bugünkü davranış birebir aynı. İç kullanıcıda koşul sorguya hiç 
 Yeni `PortalKapsamiTestleri`: kendi kaydı görünür, gönderen bağı
 `belge_satir_rol`dan, kuralsız kaynak kapalı, iç kullanıcıda koşul yok, karışık
 rol reddedilir, portal türü rollerden çözülür. xUnit 301/301.
+
+
+## 18.09.2026 — Dış kurum rolü kapsama bağlandı (795)
+
+Kullanıcı: *"dış kurum rolünü kapsama bağla"*.
+
+**Rol vardı, kapsamı yoktu.** `dis_istem_kurumu` ("Dış İstem Kurumu (portal)")
+712'den beri duruyor ve `lab` · `lab.sonuc` · `hasta` yetkilerini taşıyordu -
+kapsam kuralı olmadığı için **kurumun bütün hastalarını ve bütün sonuçlarını**
+görebilecek durumdaydı. Portal adı taşıyan ama portal gibi davranmayan bir rol.
+
+Artık `portal_turu = 2`: `lab-istem` · `lab-sonuc` · `lab-numune` için
+`i.dis_kurum_id = <kullanıcı>`, `hasta` için "kendi gönderdiği istemi olan
+hasta". Kuralı yazılmamış kaynak bu rol için kapalı (794).
+
+**Kart okuması da kapsandı.** Liste süzülüp kart serbest kalsaydı kapsam bir
+görünüm süslemesine dönerdi: id'yi bilen portal kullanıcısı başkasının kartını
+açardı. `KartTanimi.PortalKosullari` + `KartDeposu.OkuAsync` - koşulu olmayan
+kart portal rolüne kapalı; başkasının kartı "bulunamadı" döner.
+
+**Kurum içi ekranlar rolden kalktı** (`gorev`, `mesaj`, `dokuman`, `dokum`,
+`panel`, `ai`): dış kurumun personel görev listesinde, kurum panosunda işi yok.
+Üstelik bu ekranların verisi liste/kart dışındaki uçlardan da geliyor ve portal
+kapsamı oralara henüz bağlanmadı - yetkiyi bırakmak "boş ama açık kapı"
+demekti. Kalan: `ai.rehber`, `lab`, `lab.sonuc`, `lab.numune` (numune durumu
+eklendi - portalın en çok sorduğu soru "kan alındı mı, laba ulaştı mı"),
+`hasta`.
+
+**En değerli test:** `Roldeki_her_yetkinin_kapsam_kurali_VAR` - rolün gördüğü
+her liste kaynağı için tür 2 kuralı yazılmış olmalı. Yazılmazsa kaynak
+kapalıdır (veri sızmaz) ama ekran boş gelir; ikisi de kabul edilemez, kural ya
+vardır ya da yetki rolde durmaz. xUnit 304/304.
+
+**Açık kalan:** modüle özel uçlar (LabUclari sonuç/PDF, panolar, dökümler)
+kapsama bağlanmadı - bu yüzden rolde o ekranların yetkisi yok.

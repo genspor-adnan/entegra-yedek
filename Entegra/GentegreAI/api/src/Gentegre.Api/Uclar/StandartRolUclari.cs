@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -24,7 +24,8 @@ public static class StandartRolUclari
 {
     /// <summary>Yetki kalıbı: `desen` SQL LIKE (yetki.kod), `tam` = kodların birebir listesi.</summary>
     private sealed record Kural(string Desen, bool Gor = true, bool Ekle = false, bool Degistir = false, bool Sil = false);
-    private sealed record Sablon(string Kod, string Ad, string Amac, string[] Tipler, Kural[] Kurallar);
+    private sealed record Sablon(string Kod, string Ad, string Amac, string[] Tipler,
+                                Kural[] Kurallar, short PortalTuru = 0);
 
     private const string TUM = "*";
     private static readonly string[] Klinik = ["muayenehane", "dal_goz", "dal_ftr", "goruntuleme", "lab", "goruntuleme_lab", "dis", "tip_merkezi", "hastane", "osgb"];
@@ -38,6 +39,14 @@ public static class StandartRolUclari
     // Her rolde: ana sayfa, mesaj, görev, dökümler, AI rehber (gör).
     private static readonly Kural[] Ortak = [new("panel"), new("mesaj", true, true, true), new("gorev", true, true, true), new("dokum"), new("ai"), new("ai.rehber"), new("dokuman", true, true)];
     private static Kural[] K(params Kural[] k) => [.. Ortak, .. k];
+    /// <summary>
+    /// PORTAL ROLU (795): `Ortak` seti VERILMEZ. Gorev, mesaj, dokuman ve ana
+    /// sayfa kurum ICI ekranlardir - dis kurumun personel gorev listesinde,
+    /// kurum panosunda isi yok. Ustelik bu ekranlarin verisi liste/kart
+    /// disindaki uclardan da geliyor; portal kapsami oralara henuz baglanmadi.
+    /// Portal rolune yalniz kapsami YAZILMIS kaynaklar verilir.
+    /// </summary>
+    private static Kural[] P(params Kural[] k) => [new("ai.rehber"), .. k];
     private static Kural T(string d) => new(d, true);                       // gör
     private static Kural Y(string d) => new(d, true, true, true);           // gör+ekle+değiştir
     private static Kural H(string d) => new(d, true, true, true, true);     // hepsi
@@ -234,8 +243,13 @@ public static class StandartRolUclari
             K(Y("lab"), Y("lab.numune"), Y("lab.sonuc"), Y("lab.kk"), Y("lab.cihaz"), Y("lab.kultur"), T("lab.mikro"), T("lab.tetkik"), Y("cihaz"), A("cihaz.isle"), T("hasta"))),
         new("numune_kabul", "Numune Kabul", "Numune kabul, barkod, dış laboratuvar gönderimi.", ["lab", "goruntuleme_lab"],
             K(Y("lab"), H("lab.numune"), Y("lab.dislab"), T("lab.sonuc"), Y("hasta"), Y("belge"), T("randevu"))),
-        new("dis_istem_kurumu", "Dış İstem Kurumu (portal)", "Anlaşmalı kurum: istem girer, kendi sonuçlarını görür.", ["lab", "goruntuleme_lab"],
-            K(new("lab", true, true), T("lab.sonuc"), T("hasta"))),
+        // DIS KURUM PORTAL ROLU (795): `portal_turu = 2` - yalniz KENDI
+        //   gonderdigi istemi, onun sonucunu ve o hastayi gorur. Kural kaynak
+        //   ve kart kataloglarinda (PortalKosullari), rol yalniz damgayi
+        //   tasir. Kurum ici ekranlar (gorev/mesaj/dokuman/panel) VERILMEZ.
+        new("dis_istem_kurumu", "Dış İstem Kurumu (portal)", "Anlaşmalı kurum: istem girer, kendi gönderdiği hastanın sonucunu görür.", ["lab", "goruntuleme_lab"],
+            P(new("lab", true, true), T("lab.sonuc"), T("lab.numune"), T("hasta")),
+            PortalTuru: 2),
         // ---- eczane / depo
         new("eczane_depo", "Eczane / Depo", "İlaç-sarf stoğu, karekod (ÜTS), depo hareketleri.", ["tip_merkezi", "hastane"],
             K(H("stok"), H("depo"), T("katalog"), H("uts"), A("uts.%"), T("yatan"), T("belge"), Y("belge_satir"))),
@@ -380,8 +394,9 @@ public static class StandartRolUclari
                     --   rolu olarak ekle.. silinemesin aktif/pasif
                     --   yapilabilsin"): silinmeye karsi korunur, kullanilmayan
                     --   rol PASIFE alinir (fn_rol_sistem_koru).
-                    insert into public.rol (kod, ad, amac, sistem, aktif, ekleyen) values (@p0, @p1, @p2, 1, 1, @p3) returning id
-                    """, islem, [s.Kod, s.Ad, s.Amac, baglam.KullaniciId], iptal);
+                    insert into public.rol (kod, ad, amac, sistem, aktif, ekleyen, portal_turu)
+                    values (@p0, @p1, @p2, 1, 1, @p3, @p4) returning id
+                    """, islem, [s.Kod, s.Ad, s.Amac, baglam.KullaniciId, s.PortalTuru], iptal);
                 await YetkileriYazAsync(b, islem, yeniId, s, yetkiler, baglam.KullaniciId, false, iptal);
                 foreach (var sb in subeler)
                     await b.CalistirAsync("""

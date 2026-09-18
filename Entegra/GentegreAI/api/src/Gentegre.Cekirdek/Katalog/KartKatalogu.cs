@@ -186,6 +186,14 @@ public sealed record KartTanimi(
     string? SabitKosul = null,
     string? SubeKolonu = null,
     string? KapsamKolonu = null,
+    /// <summary>
+    /// PORTAL KAPSAMI (795) — kart okumasinda da gecerli. Liste suzulup kart
+    /// serbest kalirsa kapsam bir gorunum suslemesine doner: id'yi bilen
+    /// portal kullanicisi baskasinin kartini acabilirdi.
+    /// Anahtar `rol.portal_turu`, deger `{kullanici}` yer tutuculu kosul.
+    /// Kosulu olmayan kart portal roluNE KAPALIDIR.
+    /// </summary>
+    IReadOnlyDictionary<short, string>? PortalKosullari = null,
     IReadOnlyDictionary<string, object?>? YeniKayitVarsayilanlari = null,
     // YENI kayitta acilir acilmaz taraf (cari) secim ekrani acilsin mi - deger,
     //   secimin yazilacagi alan adidir ("tarafId"). Belge kartindaki desenin

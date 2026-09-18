@@ -154,3 +154,83 @@ public sealed class PortalKapsamiTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 }
+
+/// <summary>
+/// DIŞ KURUM ROLÜ KAPSAMA BAĞLI (795).
+///
+/// Kullanıcı: *"dış kurum rolünü kapsama bağla"*.
+///
+/// `dis_istem_kurumu` 712'den beri duruyordu ve `lab.sonuc` yetkisi taşıyordu -
+/// kapsam kuralı olmadığı için kurumun BÜTÜN sonuçlarını görebilecek
+/// durumdaydı. Portal adı taşıyan ama portal gibi davranmayan bir rol.
+/// </summary>
+public sealed class DisKurumPortalTestleri(VeritabaniOlgusu olgu)
+    : IClassFixture<VeritabaniOlgusu>
+{
+    private readonly VeritabaniOlgusu _olgu = olgu;
+
+    [Fact]
+    public async Task Rol_PORTAL_damgasini_tasir()
+    {
+        if (!_olgu.Baglandi(nameof(Rol_PORTAL_damgasini_tasir))) return;
+        var veri = _olgu.Gerekli();
+
+        Assert.Equal((short)2, await veri.TekDegerAsync<short>(
+            "select portal_turu from public.rol where kod = 'dis_istem_kurumu'",
+            [], CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task Kurum_ICI_ekranlar_roldEN_kalkti()
+    {
+        if (!_olgu.Baglandi(nameof(Kurum_ICI_ekranlar_roldEN_kalkti))) return;
+        var veri = _olgu.Gerekli();
+
+        // Gorev/mesaj/dokuman/pano kurum ici ekranlardir; verileri liste-kart
+        //   disindaki uclardan da geliyor ve portal kapsami oralara henuz
+        //   baglanmadi - yetkiyi birakmak "bos ama acik kapi" olurdu.
+        var sayi = await veri.TekDegerAsync<long>(
+            "select count(*) from public.rol r "
+            + "  join public.rol_yetki ry on ry.rol_id = r.id "
+            + "  join public.yetki y on y.id = ry.yetki_id "
+            + " where r.kod = 'dis_istem_kurumu' "
+            + "   and y.kod in ('gorev','mesaj','dokuman','dokum','panel','ai')",
+            [], CancellationToken.None);
+        Assert.Equal(0, sayi);
+    }
+
+    [Fact]
+    public async Task Roldeki_her_yetkinin_kapsam_kurali_VAR()
+    {
+        if (!_olgu.Baglandi(nameof(Roldeki_her_yetkinin_kapsam_kurali_VAR))) return;
+        var veri = _olgu.Gerekli();
+
+        // EN ONEMLI TEST: rolün gördüğü her LİSTE kaynağı için tür 2 kuralı
+        //   yazılmış olmalı. Yazılmamışsa kaynak kapalıdır (veri sızmaz) ama
+        //   ekran boş gelir - kullanıcı "portal bozuk" der. İkisi de kabul
+        //   edilemez; kural ya vardır ya da yetki rolde durmaz.
+        var yetkiler = await veri.ListeAsync(
+            "select y.kod from public.rol r "
+            + "  join public.rol_yetki ry on ry.rol_id = r.id "
+            + "  join public.yetki y on y.id = ry.yetki_id "
+            + " where r.kod = 'dis_istem_kurumu' and y.tur = 0 and ry.gor = 1",
+            [], o => o.GetString(0), CancellationToken.None);
+
+        var kuralsiz = new List<string>();
+        foreach (var yetki in yetkiler)
+        {
+            // Ekran yetkisinin karsiligi olan kaynaklar.
+            var kaynaklar = KaynakKatalogu.Tumu
+                .Where(k => k.YetkiKodu == yetki).ToList();
+            if (kaynaklar.Count == 0) continue;          // liste kaynagi olmayan ekran
+            foreach (var k in kaynaklar)
+                if (k.PortalKosullari is null
+                    || !k.PortalKosullari.ContainsKey(PortalKapsam.DisKurum))
+                    kuralsiz.Add($"{k.Ad} ({yetki})");
+        }
+
+        Assert.True(kuralsiz.Count == 0,
+            "Dış kurum rolünün gördüğü ama kapsam kuralı yazılmamış kaynak: "
+            + string.Join(", ", kuralsiz));
+    }
+}

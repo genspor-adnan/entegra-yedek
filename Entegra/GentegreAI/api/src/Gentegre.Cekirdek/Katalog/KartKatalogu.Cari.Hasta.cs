@@ -156,6 +156,19 @@ public static partial class KartKatalogu
             YetkiKodu = "hasta",
             LogTabloId = 71,
             SabitKosul = "grup = 101",
+            // PORTAL (795): hasta KENDI kartini; dis doktor/dis kurum yalniz
+            //   KENDI gonderdigi hastayi acabilir. Liste suzulup kart serbest
+            //   kalirsa kapsam bir gorunum suslemesine donerdi.
+            PortalKosullari = PortalKapsam.Kur(
+                disDoktor: "exists (select 1 from public.belge bb "
+                         + "          join public.belge_satir bs on bs.belge_id = bb.id "
+                         + "          join public.belge_satir_rol bsr on bsr.belge_satir_id = bs.id "
+                         + "         where bb.taraf_id = taraf.id and bsr.rol = 1 "
+                         + "           and bsr.taraf_id = {kullanici})",
+                disKurum:  "exists (select 1 from public.lab_istem li "
+                         + "         where li.taraf_id = taraf.id "
+                         + "           and li.dis_kurum_id = {kullanici})",
+                hasta:     "taraf.id = {kullanici}"),
             YeniKayitVarsayilanlari = new Dictionary<string, object?>
             {
                 ["grup"] = (short)101,
