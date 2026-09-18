@@ -36,6 +36,14 @@ public static class VeriHatasi
         //   depo kurallari): mesaj kullaniciya gosterilmek uzere yazilmistir.
         "GK422" => GentegreHatasi.IsKurali(h.MessageText),
 
+        // YETKI KURALI VERITABANINDA (805): portal kullanicisinin yazamayacagi
+        //   alanlar tetikle korunuyor ve `errcode = '42501'` (insufficient
+        //   privilege) ile reddediliyor. Cevrilmeden 500 "Beklenmeyen bir hata"
+        //   donuyordu - kullanici neyi yapamadigini goremiyordu. Mesaj
+        //   tetikte KULLANICIYA gosterilmek uzere yazilmistir.
+        "42501" when !string.IsNullOrWhiteSpace(h.MessageText)
+            => GentegreHatasi.Yasak(h.MessageText),
+
         // PLPGSQL'in VARSAYILAN hata kodu. Bu semada tetikler ve fonksiyonlar
         //   kullaniciya gosterilmek uzere TURKCE mesaj firlatiyor (237 yer);
         //   `using errcode = 'GK422'` etiketi yalnizca bir kismina yazilmis.

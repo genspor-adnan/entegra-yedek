@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (413 ad, 116 tanesi birden cok dosyada)
+## Fonksiyonlar (415 ad, 116 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -323,6 +323,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_taraf_kisi_unvan_ata` | `037_kisi_karti.sql` | — |
 | `fn_telefon_rakam` | `123_telefon_arama.sql` | — |
 | `fn_telerad_istek_no` | `797_teleradyoloji.sql` | — |
+| `fn_telerad_portal_kurum` | `804_telerad_kurum_portali.sql` | — |
 | `fn_telerad_radyolog_oner` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
 | `fn_tevkifat_orani` | `176_tevkifat_istisna.sql` | — |
 | `fn_tr_baslik` | `563_gorev_adi_bicim.sql` | — |
@@ -418,6 +419,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_taraf_prim_rol_dogrula` | `369_primli_calisma_sekli.sql` | 361_prim_rol_isaretleri.sql, 362_gonderen_calisma_sekli.sql |
 | `tg_telerad_atama_izi` | `802_telerad_atama_nedeni.sql` | 797_teleradyoloji.sql |
 | `tg_telerad_istek` | `799_telerad_durum_damgalari.sql` | 797_teleradyoloji.sql |
+| `tg_telerad_istek_portal` | `804_telerad_kurum_portali.sql` | — |
 | `tg_telerad_nobet_cakisma` | `801_telerad_nobet_ve_atama_kurali.sql` | — |
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |

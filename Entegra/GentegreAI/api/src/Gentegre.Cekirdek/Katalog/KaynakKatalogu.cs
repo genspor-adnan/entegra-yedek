@@ -91,6 +91,38 @@ public static class PortalKapsam
         if (hasta     is not null) d[Hasta]     = hasta;
         return d;
     }
+
+    /// <summary>
+    /// SEÇİM LİSTESİ (lookup) KAPSAMI (804).
+    ///
+    /// Kayıt kapsamı kaynak/kart kurallarıyla kapalı; ama bir kartın SEÇİM
+    /// KUTUSU başka bir tablodan besleniyor ve o listede kimin adı geçtiği de
+    /// bilgidir: dış kurum kullanıcısı teleradyoloji isteği açarken "Gönderen
+    /// Kurum" kutusunda ÖTEKİ kurumların adını görmemeli - rakip listesi
+    /// olurdu.
+    ///
+    /// <b>Kuralı olmayan lookup açık kalır</b> - kaynak/kart kuralının
+    /// tersine. Sebep: lookup kayıt erişimi değil, alan doldurma listesidir;
+    /// kapalı varsayılan portal kullanıcısının hasta/tetkik seçmesini de
+    /// engeller ve ekran kullanılamaz olurdu. Kimlik sızdıran listelere
+    /// AÇIKÇA kural yazılır.
+    /// </summary>
+    private static readonly Dictionary<string, IReadOnlyDictionary<short, string>>
+        LookupKosullari = new(StringComparer.OrdinalIgnoreCase)
+        {
+            // Dış kurum YALNIZ KENDİ kurumunu seçebilir; dış doktor ve hasta
+            //   zaten kurum seçmez.
+            ["public.v_telerad_kurum_lookup"] = Kur(
+                disDoktor: "false",
+                disKurum:  "id in (select k.id from public.telerad_kurum k "
+                         + "        where k.taraf_id = {kullanici})",
+                hasta:     "false"),
+        };
+
+    /// <summary>Lookup için portal koşulu; kural yoksa null (liste açık kalır).</summary>
+    public static string? LookupKosulu(string tablo, short portalTuru)
+        => portalTuru > 0 && LookupKosullari.TryGetValue(tablo, out var k)
+           && k.TryGetValue(portalTuru, out var kosul) ? kosul : null;
 }
 
 public sealed record KaynakTanimi(

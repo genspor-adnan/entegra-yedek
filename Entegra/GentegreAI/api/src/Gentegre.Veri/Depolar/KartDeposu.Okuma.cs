@@ -446,17 +446,31 @@ public sealed partial class KartDeposu
     /// kartta KULLANILAN tek degeri cozer, bu ise butun secilebilir listeyi doner).
     /// </summary>
     public async Task<Dictionary<string, string>> KodTablosuSecenekleriAsync(
-        string tablo, CancellationToken iptal = default)
-        => (await _veri.ListeAsync(
+        string tablo, CancellationToken iptal = default,
+        short portalTuru = 0, int portalKullanici = 0)
+    {
+        // PORTAL KAPSAMI (804): kimlik sizdiran secim listeleri daraltilir -
+        //   dis kurum kullanicisi "Gonderen Kurum" kutusunda OTEKI kurumlarin
+        //   adini gormemeli. Kurali olmayan lookup ACIK kalir (bkz.
+        //   PortalKapsam.LookupKosullari): lookup kayit erisimi degil, alan
+        //   doldurma listesidir - kapali varsayilan portal kullanicisinin
+        //   hasta/tetkik secmesini de engellerdi.
+        var kosul = PortalKapsam.LookupKosulu(tablo, portalTuru);
+        var portalSuzgeci = kosul is null ? "" : $" and ({kosul.Replace("{kullanici}", "@p0")})";
+        object?[] par = kosul is null ? [] : [portalKullanici];
+
+        return (await _veri.ListeAsync(
                 // id = 0 satiri ("Kendisi" gibi sabit secenekler) alfabetik
                 //   siraya girmez, HEP basta durur (227).
                 // id METIN de olabilir (ICD-10 kodu "A09.0"): karsilastirma ve
                 //   okuma tip VARSAYMAZ - "id = 0" varchar kolonda
                 //   "operator does not exist" ile dusuyordu.
                 $"select id, ad from {KodTablosuDogrula(tablo)} where aktif = 1 " +
-                "order by case when id::text = '0' then 0 else 1 end, ad",
-                null, r => (Id: r.GetValue(0)?.ToString() ?? "", Ad: r.GetString(1)), iptal))
+                portalSuzgeci +
+                " order by case when id::text = '0' then 0 else 1 end, ad",
+                par, r => (Id: r.GetValue(0)?.ToString() ?? "", Ad: r.GetString(1)), iptal))
             .ToDictionary(x => x.Id, x => x.Ad, StringComparer.Ordinal);
+    }
 
     /// <summary>
     /// BAGLI KOD LISTESI (544): deger -> UST listedeki deger. Model markaya,

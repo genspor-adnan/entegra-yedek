@@ -14595,3 +14595,52 @@ küçüğü. Tarayıcıda uçtan uca: 4 istekten 3'ü faturalandı (biri tetkiks
 KDV 288 / genel 1.728. Deneme verisi (istekler, belge, hizmet) silindi.
 
 xUnit 344/344, vitest 677/677.
+
+## 18.09.2026 — Kurum portalı: dış kurum kendi isteğini açar (804 · 805)
+
+Kullanıcı: *"kurum portalı istek ekranıyla devam et"*.
+
+794/795'te portal **kapsamı** yazılmıştı (dış kurum yalnız kendi isteklerini
+görür) ama rolde `teleradyoloji` yetkisi yoktu: ekran portalda hiç
+görünmüyordu. Yetki bilerek verilmemişti - karşılığı olmayan yetki "boş ama
+açık kapı" olurdu. Artık karşılığı var.
+
+**Eksik olan yazma tarafıydı.** Okuma kapsamı kapalıydı ama:
+portal kullanıcısı `kurum_id`'yi elle seçip **başkasının adına** istek
+açabilirdi; durum/atama/ücret/SLA/teslim alanları da yazılabilirdi - kurum
+kendi işini "onaylı" yapıp faturalatabilirdi.
+
+**Kural veritabanında (804):** `tg_telerad_a_portal` - portal kullanıcısının
+(`fn_kullanici_portal_turu`) yazdığı satırda kurum **sunucuda zorlanır**
+(başka kurum → hata), istek "görüntü bekleniyor" doğar, ücret/atama/damgalar
+sıfırlanır; güncellemede merkezin alanları değiştirilemez. Aynı istek portal
+ekranından da, API'den de, ileride DICOM alımından da açılabilir - "ne
+yazabilir" sorusunun cevabı tek yerde.
+
+**Sessizce eski değere döndürmek yerine hata:** kullanıcının ekranda yaptığı
+değişikliği yutup "kaydedildi" demek ona yanlış bir dünya gösterirdi.
+
+**Seçim listesi de daraldı (804):** dış kurum kullanıcısı "Gönderen Kurum"
+kutusunda öteki kurumların adını görüyordu - rakip listesi. `PortalKapsam`'a
+lookup kapsam haritası eklendi. **Kuralı olmayan lookup açık kalır** (kaynak/
+kart kuralının tersine): lookup kayıt erişimi değil alan doldurma listesidir,
+kapalı varsayılan portal kullanıcısının hasta/tetkik seçmesini de engellerdi.
+
+**805 — iş akışı ayrı yetki.** `teleradyoloji/degistir` yetkisi portal
+kullanıcısına verilince çalışma listesindeki "▶ Okumaya Başla" düğmesi de onun
+araç çubuğunda görünür oldu. Veritabanı zaten engelliyordu ama **her zaman
+hata veren bir düğme göstermek kullanıcıya yalan söylemektir**. Yeni
+`telerad.akis` yetkisi (okumaya başla / iptal) `telerad.ata` sahibi iç rollere
+verildi; portal rollerine verilmedi.
+
+**Hata çevirisi:** tetiğin `errcode = 42501` reddi çevrilmeden 500
+"Beklenmeyen bir hata" dönüyordu - kullanıcı neyi yapamadığını göremiyordu.
+`VeriHatasi` artık 42501'i **403 YASAK + tetiğin mesajı** olarak çeviriyor.
+
+Tarayıcıda gerçek portal hesabıyla uçtan uca: sol menüde "Dış İstem Kurumu
+(portal)", çalışma listesinde yalnız kendi kurumunun satırı, araç çubuğunda
+yalnız "Yeni İstek / Düzenle", kurum kutusunda yalnız kendi kurumu; portaldan
+açılan istek `durum = 1`, `ucret = 0`, kurum sunucudan; durum değiştirme
+denemesi okunur bir 403 ile reddedildi. Deneme hesabı ve satırları silindi.
+
+xUnit 349/349, vitest 677/677.

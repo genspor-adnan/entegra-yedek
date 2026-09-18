@@ -1061,15 +1061,19 @@ public static class AksiyonKatalogu
                 // OKUMAYA BASLA: `okuma_bas` damgasi buradan dogar - SLA
                 //   raporlamasinda "sirada bekleme" ile "okuma suresi" ancak
                 //   bu damga varsa ayrilabilir.
+                // IS AKISI AYRI YETKIDE (805): kaynak yetkisine bagliyken
+                //   portal kullanicisinin (dis kurum) cubugunda da
+                //   gorunuyordu - veritabani engelliyordu ama HER ZAMAN HATA
+                //   VEREN DUGME gostermek kullaniciya yalan soylemektir.
                 new("telerad.oku",      "▶ Okumaya Başla", "telerad",
-                    KaynakKodu: "teleradyoloji", Islem: Islem.Degistir,
+                    AksiyonYetkisi: "telerad.akis",
                     KayitGerekir: true, Sira: 40, Bicim: "bir"),
                 new("telerad.teslim",   "📦 Teslim Et", "telerad",
                     AksiyonYetkisi: "telerad.teslim", KayitGerekir: true, Sira: 50,
                     Bicim: "onay", Ipucu: "Onaylı raporu gönderen kuruma teslim eder"),
                 new("telerad.iptal",    "✖ İsteği İptal Et", "telerad",
-                    Hedef: "sagtus,palet", KaynakKodu: "teleradyoloji",
-                    Islem: Islem.Degistir, KayitGerekir: true, Sira: 60, Bicim: "ret"),
+                    Hedef: "sagtus,palet", AksiyonYetkisi: "telerad.akis",
+                    KayitGerekir: true, Sira: 60, Bicim: "ret"),
                 new("telerad.sil",      "🗑 Sil", "telerad", Hedef: "sagtus,palet",
                     Kisayol: "Del", KaynakKodu: "teleradyoloji", Islem: Islem.Sil,
                     KayitGerekir: true, Sira: 70),

@@ -339,7 +339,10 @@ public static class KartUclari
             var tabloGorevleri = tumAlanlar.Select(a => a.KodTablosu)
                 .Where(t => t is not null && !aramaTablolari.Contains(t))
                 .Distinct()
-                .ToDictionary(t => t!, t => depo.KodTablosuSecenekleriAsync(t!, iptal));
+                .ToDictionary(t => t!, t => depo.KodTablosuSecenekleriAsync(
+                    // PORTAL (804): kimlik sizdiran secim listeleri daraltilir -
+                    //   dis kurum kullanicisi oteki kurumlarin adini gormesin.
+                    t!, iptal, baglam.PortalTuru, baglam.KullaniciId));
             var listeGorevleri = tumAlanlar.Select(a => a.KodListesi).Where(t => t is not null).Distinct()
                 .ToDictionary(t => t!, t => depo.KodListesiSecenekleriAsync(t!, iptal));
             // BAGLI alanlarin (Şube -> Banka) ust haritasi: arayuz secenekleri
