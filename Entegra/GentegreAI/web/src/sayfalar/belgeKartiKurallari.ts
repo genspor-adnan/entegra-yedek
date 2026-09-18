@@ -453,3 +453,21 @@ export function paylasimliKurum(
   const t = Number(kurumlar.find(k => k.id === kurumId)?.tur ?? 0);
   return t === 2 || t === 3;
 }
+
+
+/**
+ * ISKONTO EKRAN LIMITI (661 + 783).
+ *
+ * Iki ayri sinir var ve ikisi de gecerli:
+ *   · TAVAN   - rolun `basvuru.iskonto` yetkisindeki sayi ("en cok % kac").
+ *   · ESIK    - kurumun `basvuru.iskonto_onay_esik` ayari ("bunun ustu onay
+ *               ister, tavanin ne olursa olsun").
+ *
+ * Kucugu gecerlidir: esik tavani asmayan bir kullaniciyi kisitlamaz, tavani
+ * %100 olan kullaniciyi ise zincire dusurur - "İskonto Onaylayanlar" rolu
+ * (663) sinirsiz indirimi tek basina yapamasin.
+ */
+export function iskontoEkranLimiti(tavan: number, esik?: number | null) {
+  const e = Number(esik ?? 0);
+  return e > 0 ? Math.min(tavan, e) : tavan;
+}

@@ -139,7 +139,8 @@ public sealed class KimlikServisi
             Kullanici = KullaniciOzetiKur(kullanici, subeler, subeId,
                 await UrunModuAsync(subeId, iptal),
                 await AcikModullerAsync(subeId, iptal),
-                await HekimRoluAsync(subeId, iptal))
+                await HekimRoluAsync(subeId, iptal),
+                await IskontoEsigiAsync(iptal))
         };
     }
 
@@ -346,7 +347,8 @@ public sealed class KimlikServisi
             Kullanici = KullaniciOzetiKur(kullanici, subeler, subeId,
                 await UrunModuAsync(subeId, iptal),
                 await AcikModullerAsync(subeId, iptal),
-                await HekimRoluAsync(subeId, iptal))
+                await HekimRoluAsync(subeId, iptal),
+                await IskontoEsigiAsync(iptal))
         };
     }
 
@@ -372,6 +374,22 @@ public sealed class KimlikServisi
         return await KurumProfilDeposu.HekimRoluAsync(baglanti, subeId ?? 0, iptal);
     }
 
+    /// <summary>
+    /// ISKONTO ONAY ESIGI (783): bu oranin ustundeki iskonto - yetki tavani ne
+    /// olursa olsun - onayli talepten gelmek zorunda. Ekran limiti bunu da
+    /// hesaba katar; kural sunucuda TETIKLE korunuyor, buradaki deger yalnizca
+    /// kullaniciyi bosa ugrastirmamak icin.
+    /// </summary>
+    private async Task<decimal> IskontoEsigiAsync(CancellationToken iptal)
+    {
+        await using var baglanti = await _veri.AcAsync(iptal);
+        var m = await AyarDeposu.MetinAsync(baglanti, null,
+                                            "basvuru.iskonto_onay_esik", "", iptal);
+        return decimal.TryParse(m, System.Globalization.NumberStyles.Any,
+                   System.Globalization.CultureInfo.InvariantCulture, out var d) && d > 0
+            ? d : 0m;
+    }
+
     private async Task<IReadOnlyList<string>> AcikModullerAsync(int? subeId,
         CancellationToken iptal)
     {
@@ -383,7 +401,8 @@ public sealed class KimlikServisi
 
     private static KullaniciOzeti KullaniciOzetiKur(KullaniciKaydi kullanici,
         IReadOnlyList<SubeOzeti> subeler, int? subeId, int urunModu,
-        IReadOnlyList<string> moduller, int hekimRolu) => new()
+        IReadOnlyList<string> moduller, int hekimRolu,
+        decimal iskontoEsigi = 0m) => new()
     {
         Id = kullanici.TarafId,
         Kod = kullanici.Kod,
@@ -399,7 +418,8 @@ public sealed class KimlikServisi
         Subeler = subeler,
         UrunModu = urunModu,
         Moduller = moduller,
-        HekimRolu = hekimRolu
+        HekimRolu = hekimRolu,
+        IskontoOnayEsigi = iskontoEsigi
     };
 
     private static int? SubeSec(int? istenen, IReadOnlyList<SubeOzeti> subeler)

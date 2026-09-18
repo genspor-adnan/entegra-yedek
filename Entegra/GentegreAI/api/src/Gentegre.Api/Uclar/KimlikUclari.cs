@@ -86,7 +86,11 @@ public static class KimlikUclari
                     // Acik moduller (359): menu ve rotalar bunlara gore suzulur.
                     Moduller = await kurum.AcikModullerAsync(baglam.SubeId ?? 0, iptal),
                     // Basvuruda sorulan hekim rolu (361/364) - aktif subeye gore.
-                    HekimRolu = await kurum.HekimRoluAsync(baglam.SubeId ?? 0, iptal)
+                    HekimRolu = await kurum.HekimRoluAsync(baglam.SubeId ?? 0, iptal),
+                    // ISKONTO ONAY ESIGI (783): ekran limiti tavanla BIRLIKTE
+                    //   bunu da gozetir - esik ustu iskonto onayli talepten
+                    //   gelmek zorunda (kural sunucuda tetikle korunuyor).
+                    IskontoOnayEsigi = await IskontoEsigiAsync(veri, iptal)
                 },
                 // Yetkisiz aksiyon HIC donmez (API §7).
                 Aksiyonlar = baglam.Yetkiler.Tumu.Where(y => y.Tur == 1 && y.Gor)
@@ -259,4 +263,20 @@ public static class KimlikUclari
 
     private static string Istemci(HttpContext ctx)
         => ctx.Request.Headers.UserAgent.ToString();
+
+    /// <summary>
+    /// ISKONTO ONAY ESIGI (783): `basvuru.iskonto_onay_esik` ayari. Bu oranin
+    /// ustundeki iskonto, yetki tavani ne olursa olsun onayli talepten gelir;
+    /// ekran limiti bunu gozeterek daralir. 0 = kural kapali.
+    /// </summary>
+    private static async Task<decimal> IskontoEsigiAsync(VeriKaynagi veri,
+                                                         CancellationToken iptal)
+    {
+        await using var baglanti = await veri.AcAsync(iptal);
+        var m = await AyarDeposu.MetinAsync(baglanti, null,
+                                            "basvuru.iskonto_onay_esik", "", iptal);
+        return decimal.TryParse(m, System.Globalization.NumberStyles.Any,
+                   System.Globalization.CultureInfo.InvariantCulture, out var d) && d > 0
+            ? d : 0m;
+    }
 }

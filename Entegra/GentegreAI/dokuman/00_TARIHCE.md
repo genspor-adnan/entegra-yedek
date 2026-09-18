@@ -13494,3 +13494,46 @@ olmayan hastada (A/00000039) yeni başvuru kartı açıldı.
 **Şerit düzeni.** Kullanıcı: *"başvuruda hasta bilgi bandındaki avans kaydını
 20 piksel sağa al"* - Avans hücresi "Ödeyen Kurum"un rozetine yapışıktı
 (`.hs-avans { margin-left: 20px }`).
+
+## 18.09.2026 — İskontoda iki kural: kendi onayı yok · eşik üstü onaysız geçmez (783)
+
+Tasarım konuşmasından çıktı (kullanıcı: *"ücret iskontoyu onaylayacaklar diye
+rol oluşturduk, bu doğru mu"* → *"iki kuralı yaz"*).
+
+**1) Kendi talebini onaylayamaz.** İskonto talebi bir imzadır: "ben istedim,
+şu kişi uygun buldu". İsteyenle karar veren aynı kişi olunca kayıt belge
+olmaktan çıkar. `fn_iskonto_talep_karar` artık `isteyen_id = karar veren` ise
+GK422 atıyor - **ret de aynı kurala tabi**: kendi talebini reddetmek zararsız
+görünür ama zinciri kendi üstünden kaldırmanın yolu olurdu. Vekâlet (763) bunu
+bozmaz: vekil başkasının imzasını atar.
+
+**2) Eşik üstü iskonto onaysız yazılamaz.** 661'den beri `basvuru.iskonto`
+yetkisinin değeri bir TAVANDI ve tavanı yeten kullanıcı talebi hiç açmadan
+indirimi uyguluyordu. Sonuç: tavanı %100 olan "İskonto Onaylayanlar" rolü
+(663) sınırsız indirimi tek başına, kayıtsız yapabiliyordu - onay zinciri
+(754: birim · mali · üst) o kişi için hiç işlemiyordu. Artık kurumun
+**`basvuru.iskonto_onay_esik`** ayarının (varsayılan **%10**, 754'teki "Mali
+İşler" eşiğiyle aynı) üstündeki her iskonto onaylanmış talepten gelmek
+zorunda. Muafiyetin anahtarı `iskonto_kilit = 1`: onaylanan satırı
+`fn_iskonto_talep_karar` böyle yazıyor, yani "zincirden geçti" demek.
+
+Kural **veritabanında** (`tg_belge_satir_iskonto_esik`): ekran yalnız
+kullanıcıyı boşa uğraştırmamak için biliyor, API'den ya da başka yoldan gelen
+yazım da aynı duvara çarpıyor. **Yalnız başvuruda** (tur 19 · tipi 30) -
+ERP belgesinde iskonto ticari pazarlıktır. Geçmişteki 3 eşik üstü onaysız
+satıra **dokunulmadı** (tetik yalnız yeni yazımda çalışır).
+
+**Ekran.** Kimlik yanıtı eşiği taşıyor (`iskontoOnayEsigi`); kalem penceresi
+ve iskonto talep penceresi limiti `min(tavan, eşik)` olarak hesaplıyor
+(`iskontoEkranLimiti`) - kullanıcı reddedilecek bir oranı yazmıyor, fazlası
+için "İskonto Onayı İste" akışına gidiyor.
+
+**Doğrulama.** xUnit 257/257 (yeni `IskontoKurallariTestleri`: eşik üstü
+reddedilir, eşik altı serbest, onaylı satır muaf, ERP belgesi muaf, kendi
+talebini onaylayamaz/reddedemez, başkası onaylayınca satır kilitle yazılır),
+vitest 662/662 (`iskontoLimiti.test.ts`).
+
+**Not (rol tartışması).** "İskonto Onaylayanlar" rolü adres kutusu olarak
+kalıyor ama artık zinciri atlatamıyor. Basamak başına ayrı rol (birim/mali/
+üst) ya da rolü hiç kullanmayıp yetkileri kurumun kendi rollerine verme
+seçeneği hâlâ açık - bu iki kural onlardan bağımsız çalışır.

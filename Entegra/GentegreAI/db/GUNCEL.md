@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (400 ad, 112 tanesi birden cok dosyada)
+## Fonksiyonlar (401 ad, 112 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -166,7 +166,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ilac_stok_kart_ac` | `511_ilac_stok_koprusu.sql` | — |
 | `fn_isg_aylik_dk` | `741_isg_modulu.sql` | — |
 | `fn_isg_periyot_ay` | `741_isg_modulu.sql` | — |
-| `fn_iskonto_talep_karar` | `673_iskonto_kalem_orani.sql` | 662_iskonto_onay.sql |
+| `fn_iskonto_talep_karar` | `783_iskonto_kendi_onayi_ve_esik.sql` | 662_iskonto_onay.sql, 673_iskonto_kalem_orani.sql |
 | `fn_its_siradakiler` | `428_kuyruk_takili_satir.sql` | 427_its_bildirim.sql |
 | `fn_izin_gun` | `751_dini_bayram_ve_yerel_tatil.sql` | 743_izin_modulu.sql, 749_resmi_tatil.sql |
 | `fn_izin_hak_gun` | `743_izin_modulu.sql` | — |
@@ -336,6 +336,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_belge_basvuru_sozlesme` | `598_tss_sgk_kullan_tetigi.sql` | 469_basvuru_sozlesme.sql, 485_ozel_kurum_sozlesmesiz.sql, 494_basvuru_kurumu_oder.sql |
 | `tg_belge_basvuru_tur` | `778_basvuru_turu_varsayilan.sql` | — |
 | `tg_belge_satir_dagilim_denge` | `470_belge_satir_dagilim.sql` | — |
+| `tg_belge_satir_iskonto_esik` | `783_iskonto_kendi_onayi_ve_esik.sql` | — |
 | `tg_belge_satir_iskonto_kilit` | `681_iskonto_kilit_koruma.sql` | 662_iskonto_onay.sql |
 | `tg_belge_satir_kilit_silme` | `681_iskonto_kilit_koruma.sql` | — |
 | `tg_belge_satir_rol_dogrula` | `361_prim_rol_isaretleri.sql` | — |

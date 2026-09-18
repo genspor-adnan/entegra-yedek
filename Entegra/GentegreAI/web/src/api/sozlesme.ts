@@ -151,6 +151,13 @@ export interface KullaniciOzeti {
    * (lab/goruntuleme subesi - dis doktor), 4 "Yapan" (digerleri - personel).
    */
   hekimRolu?: number;
+  /**
+   * ISKONTO ONAY ESIGI (783): bu oranin USTUNDEKI iskonto, kullanicinin
+   * tavani yetse bile ONAYLI talepten gelmek zorunda. 0 = kural kapali.
+   * Kural sunucuda tetikle korunur; ekran limiti bunu gozetip kullaniciyi
+   * reddedilecek bir orani yazmaktan kurtarir.
+   */
+  iskontoOnayEsigi?: number;
 }
 
 /** Urun modlari (215). Ad sol ust marka, mesaj basligi ve menu suzmede kullanilir. */

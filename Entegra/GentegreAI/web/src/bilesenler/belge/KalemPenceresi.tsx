@@ -18,7 +18,7 @@ import { kalemDurumu } from '../../sayfalar/belgeKarti/kalemDurumu';
 import { KalemIskontosu } from './kalem/KalemIskontosu';
 import { KalemOnizlemesi } from './kalem/KalemOnizlemesi';
 import { IzlemPenceresi } from './IzlemPenceresi';
-import { SAF_SGK_ROTA } from '../../sayfalar/belgeKartiKurallari';
+import { SAF_SGK_ROTA, iskontoEkranLimiti } from '../../sayfalar/belgeKartiKurallari';
 import { useOturum } from '../../kimlik/OturumBaglami';
 
 export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparisMi,
@@ -140,7 +140,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
   /** Kalem gride YAZILDI mi - ikinci "Tamam" (Enter + tik) satiri cogaltmasin. */
   const kaydedildi = useRef(false);
 
-  const { aksiyonDegeri } = useOturum();
+  const { aksiyonDegeri, kullanici } = useOturum();
   /**
    * ISKONTO TAVANI (661): rolun `basvuru.iskonto` yetkisindeki sayisal sinir.
    * 0 = iskonto YAPAMAZ (yetki yok ya da deger girilmemis) - varsayilan budur.
@@ -148,7 +148,14 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
    * birakirdi.
    */
   //   Tavani `KalemIskontosu` yorumluyor (0 = kutu kapali).
-  const iskontoTavani = basvuruMu ? aksiyonDegeri('basvuru.iskonto') : 100;
+  //   ONAY ESIGI (783) tavanla BIRLIKTE olculur: esik ustu iskonto - tavan
+  //   ne olursa olsun - onayli talepten gelmek zorunda, sunucu tetigi oyle
+  //   diyor. Kutuyu esikte kesmek kullaniciyi reddedilecek bir orani
+  //   yazmaktan kurtarir; daha fazlasi icin "İskonto Onayı İste".
+  const iskontoTavani = basvuruMu
+    ? iskontoEkranLimiti(aksiyonDegeri('basvuru.iskonto'),
+                         kullanici?.iskontoOnayEsigi)
+    : 100;
 
   const degis = (alan: keyof SatirDurumu, deger: string | number) =>
     setR(x => ({ ...x, [alan]: deger }));

@@ -105,6 +105,13 @@ public sealed class KullaniciOzeti
     /// Basvuru karti doktor combosunu bu role gore doldurur.
     /// </summary>
     public int HekimRolu { get; set; } = 4;
+
+    /// <summary>
+    /// ISKONTO ONAY ESIGI (783) - `basvuru.iskonto_onay_esik` ayari. Bu oranin
+    /// USTUNDEKI iskonto, kullanicinin tavani yetse bile ONAYLI talepten
+    /// gelmek zorunda; ekran limiti buna gore daraltir. 0 = kural kapali.
+    /// </summary>
+    public decimal IskontoOnayEsigi { get; set; }
 }
 
 /// <summary>

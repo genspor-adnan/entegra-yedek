@@ -46,7 +46,7 @@ import {
   provizyonVarMi, gelisSekliKarari, acikBorcHesapla, acikBelgeHesapla, belgeOnizlemesi,
   kartBasligi,
   acikTahsilatTaraflara, acikBelgeTaraflara, paylasimliKurum,
-  dagilimRotasi,
+  dagilimRotasi, iskontoEkranLimiti,
 } from './belgeKartiKurallari';
 import { BelgeKartiModallari } from '../bilesenler/belge/BelgeKartiModallari';
 import { BasvuruAsamaSeridi } from '../bilesenler/belge/BasvuruAsamaSeridi';
@@ -1678,7 +1678,10 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
              kalir, bu uc bilgi orada da okunabilmeli. */
           iskontoTalebi={iskontoTalebi}
           setIskontoTalebi={setIskontoTalebi}
-          iskontoTavani={aksiyonDegeri('basvuru.iskonto')}
+          // 783: talep penceresi "limit ici mi" kararini da esikle birlikte
+          //   verir - tavani yeten kullanici esik ustunu dogrudan uygulayamaz.
+          iskontoTavani={iskontoEkranLimiti(aksiyonDegeri('basvuru.iskonto'),
+                                            kullanici?.iskontoOnayEsigi)}
           kalemSeridi={{
             // HASTA ADI, CARI DEGIL (kullanici: "hasta adi yanlis, kurum adi
             //   gelmis"): dis kurum numunesinde belgenin carisi GONDEREN
