@@ -420,7 +420,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (239 ad, 59 tanesi birden cok dosyada)
+## Gorunumler (240 ad, 59 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -616,6 +616,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_proje_lookup` | `071_kasa_master.sql` | — |
 | `v_rad_cihaz_lookup` | `286_radyoloji_lookup.sql` | — |
 | `v_rad_hekim_lookup` | `718_hekim_calisma_plani.sql` | 283_radyoloji_cekirdek.sql, 313_rad_hekim_lookup_dis_hekim.sql |
+| `v_rad_sablon_lookup` | `800_telerad_kurum_sozlesme_karti.sql` | — |
 | `v_rad_tetkik_lookup` | `286_radyoloji_lookup.sql` | — |
 | `v_radyoloji_cihaz_lookup` | `316_randevu_cihaz_kaynagi.sql` | — |
 | `v_radyoloji_kritik_takip` | `318_radyoloji_takip_listeleri.sql` | — |

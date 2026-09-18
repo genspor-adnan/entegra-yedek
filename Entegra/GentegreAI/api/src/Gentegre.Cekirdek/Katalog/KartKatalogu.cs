@@ -241,6 +241,8 @@ public static partial class KartKatalogu
         Ekle(RadyolojiIstem());
         // TELERADYOLOJI ISTEK KARTI (798): calisma listesinin satirini acar.
         Ekle(TeleradIstek());
+        Ekle(TeleradKurum());
+        Ekle(TeleradSozlesme());
         Ekle(RadyolojiSablon());
         Ekle(RadyolojiProtokol());
 

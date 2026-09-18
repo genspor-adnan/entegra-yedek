@@ -1068,10 +1068,20 @@ public static class AksiyonKatalogu
                 Yazdir(),
             },
 
-            // KURUM / SOZLESME EKRANLARI BILEREK YOK: onlarin karti henuz
-            //   tanimli degil (KartKatalogu'nda telerad-kurum/-sozlesme yok);
-            //   "Yeni" dugmesi acacak bir kart bulamazdi.
+            // KURUM VE SOZLESME (800): isin SARTLARI. Kart yoktu, bu yuzden
+            //   arac cubugu da yoktu - iliski yalniz gocle/betikle
+            //   kurulabiliyordu.
             //
+            // SILME SAG TUSTA: kurum silinince sozlesmeleri de gider
+            //   (`on delete cascade`, 797) - gunluk akisin dugmesi degildir.
+            ["telerad-kurum-liste"] =
+                Crud("telerad-kurum", "telerad", "teleradyoloji.kurum",
+                     ekleAdi: "＋ Yeni Kurum",
+                     silIpucu: "Kurumla birlikte sözleşmeleri de silinir"),
+            ["telerad-sozlesme-liste"] =
+                Crud("telerad-sozlesme", "telerad", "teleradyoloji.sozlesme",
+                     ekleAdi: "＋ Yeni Sözleşme"),
+
             // ENTEGRASYON HESAPLARI (336): Ayarlar > Kayit Kabul > Entegrasyon.
             // KATEGORILER (345): iki bolmeli ekran - her iki gridin de kendi
             //   arac cubugu var, aksiyonlar ortak.

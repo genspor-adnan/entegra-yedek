@@ -50,6 +50,11 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     //   olduğu için aktif sözleşme sayısı listede.
     kaynak: 'telerad-kurum', rota: 'telerad-kurum', baslik: 'Teleradyoloji Kurumları',
     yol: 'Teleradyoloji › Kurumlar',
+    // KART (800): kurum ve sözleşme yalnız göç/betikle açılabiliyordu - iş
+    //   ilişkisi ekrandan hiç kurulamıyordu. Kart rotası liste rotasından
+    //   türetilir (/telerad-kurum/:id).
+    kartYolu: '/telerad-kurum', kartBaslik: 'Teleradyoloji Kurumu',
+    aksiyonEkrani: 'telerad-kurum-liste',
     menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Telerad Kurumları',
     ic: '🏥', menuSira: 42, yetkiKodu: 'teleradyoloji.kurum', modul: 'teleradyoloji', urunModu: 2,
   },
@@ -59,6 +64,8 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     //   değişmesin.
     kaynak: 'telerad-sozlesme', rota: 'telerad-sozlesme', baslik: 'Teleradyoloji Sözleşmeleri',
     yol: 'Teleradyoloji › Sözleşmeler',
+    kartYolu: '/telerad-sozlesme', kartBaslik: 'Teleradyoloji Sözleşmesi',
+    aksiyonEkrani: 'telerad-sozlesme-liste',
     menuGrup: 'Radyoloji', menuAltGrup: 'Teleradyoloji', menuAd: 'Telerad Sözleşmeleri',
     ic: '📜', menuSira: 44, yetkiKodu: 'teleradyoloji.sozlesme', modul: 'teleradyoloji', urunModu: 2,
   },

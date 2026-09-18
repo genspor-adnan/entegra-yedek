@@ -14394,3 +14394,47 @@ xUnit 322/322, vitest 672/672.
 **Kalan (bu işin dışında):** `telerad-kurum` ve `telerad-sozlesme` kartları
 yok - o iki listede "Yeni" düğmesi açacak bir kart bulamayacağı için araç
 çubuğu bilerek tanımlanmadı; kurum/sözleşme hâlâ yalnız göç/betikle açılıyor.
+
+## 18.09.2026 — Teleradyoloji kurum ve sözleşme kartları (800)
+
+Kullanıcı: *"kurum ve sözleşme kartlarını da yap"*. 797'de iki liste ekranı
+vardı ama kartı yoktu: **iş ilişkisi ekrandan hiç kurulamıyordu** - kurum ve
+sözleşme yalnız göç/betikle açılabiliyordu, o yüzden 799'da bu iki listeye
+araç çubuğu da tanımlanmamıştı ("Yeni" açacak kart yoktu).
+
+**İstek kartı işin KENDİSİ, bu ikisi ŞARTLARI:** kurum "kiminle, hangi
+kanalla", sözleşme "hangi dönem, hangi ücret, ne kadar sürede".
+
+**Kurum kartı** — kimlik (cari, yön, tesis kodu, aktif) · görüntü bağlantısı
+(DICOM AE / sunucu / port) · teslim (kanal + adres) · raporlama (rapor şablonu,
+varsayılan öncelik, gece nöbeti, onam zorunlu) · **Sözleşmeler** (salt okunur
+detay). Yeni kayıt **cari seçimiyle** başlar: teleradyoloji kurumu ayrı bir
+müşteri değil, carinin bir özelliğidir (797) - fatura, tahsilat ve bakiye zaten
+orada.
+
+Sözleşme detayı salt okunur; yazma yeri sözleşme kartıdır. İki yerden
+yazılabilseydi aynı dönem iki farklı SLA ile kaydedilebilirdi. Burada durması
+"kurum var ama sözleşmesi yok" eksikliğini kurumun kendi kartında görünür
+kılıyor.
+
+**Sözleşme kartı** — kimlik (kurum, başlangıç/bitiş, durum) · ücret (model,
+tarife, aylık sabit, adet sınırı, acil/öncelikli ek oran, fatura periyodu) ·
+SLA (acil/öncelikli/rutin dakika, ceza oranı). Şube kolonu **yok**: sözleşme
+kurumun sözleşmesidir, tabloda `sube_id` de yok.
+
+**db/800:** `v_rad_sablon_lookup` (rapor şablonu seçimi; `ust_id` = modalite) -
+kartın ihtiyaç duyduğu tek yeni DB nesnesi. Kart lookup beyaz listesine eklendi.
+
+**Doğrulama sırasında yakalanan hata (kendi kodumda):** yeni kayıt
+varsayılanlarını önce **kolon adıyla** yazmıştım (`sla_acil_dk`,
+`ucret_modeli`…). `KartDeposu.EkleAsync` varsayılanları `degerler` sözlüğüne
+**alan adıyla** koyuyor - kolon adıyla yazılan varsayılan hiçbir alana denk
+gelmez ve sessizce kaybolurdu: yeni sözleşme "0 dakika" SLA sözü vererek
+doğardı (0 SLA'yı tümden kapatıyor). Alan adlarına çevrildi ve test artık her
+varsayılan anahtarının gerçek bir alan olduğunu doğruluyor.
+
+Tarayıcıda uçtan uca denendi: her iki listede araç çubuğu, kartların sekmeleri
+(kurum: Görüntü Bağlantısı · Teslim · Raporlama · Sözleşmeler; sözleşme: Ücret ·
+SLA), kurum kartında açılışta cari seçimi, kayıt sonrası varsayılanlar
+(sözleşme taslak + 30/240/1440 dk, kurum yön gelen + aktif + şube damgası).
+Deneme satırları silindi. xUnit 328/328, vitest 672/672.

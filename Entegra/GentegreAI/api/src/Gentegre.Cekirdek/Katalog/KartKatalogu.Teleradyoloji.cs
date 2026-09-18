@@ -190,4 +190,192 @@ public static partial class KartKatalogu
                     Baslik: "Bırakma"),
             }, SubeKolonu: null, Baslik: "Atama Geçmişi", SaltOkunur: true),
         });
+
+    // ================================================================= 800 ==
+    // KURUM VE SÖZLEŞME KARTLARI. Kullanıcı: *"kurum ve sözleşme kartlarını da
+    // yap"*. 797'de iki liste ekranı vardı ama kartı yoktu: iş ilişkisi
+    // ekrandan hiç kurulamıyordu, kurum ve sözleşme yalnız göç/betikle
+    // açılabiliyordu.
+    //
+    // İSTEK KARTI İŞİN KENDİSİ, BU İKİSİ ŞARTLARI: kurum "kiminle ve hangi
+    // kanalla", sözleşme "hangi dönem, hangi ücret, ne kadar sürede".
+
+    private static readonly Dictionary<string, string> TeleradKartKurumYon = new()
+    {
+        ["1"] = "Gelen (onlar gönderir, biz raporlarız)",
+        ["2"] = "Giden (biz gönderiyoruz)",
+        ["3"] = "İki yön",
+    };
+
+    private static readonly Dictionary<string, string> TeleradKartKanal = new()
+        { ["0"] = "Portal", ["1"] = "HL7 ORU (MLLP)", ["2"] = "REST", ["3"] = "FHIR" };
+
+    private static readonly Dictionary<string, string> TeleradKartUcretModeli = new()
+        { ["1"] = "Tetkik başı", ["2"] = "Aylık sabit + aşım", ["3"] = "Vaka başı" };
+
+    private static readonly Dictionary<string, string> TeleradKartSozlesmeDurum = new()
+        { ["0"] = "Taslak", ["1"] = "Aktif", ["2"] = "Bitti" };
+
+    private static readonly Dictionary<string, string> TeleradKartPeriyot = new()
+        { ["1"] = "Aylık", ["2"] = "On beş günlük" };
+
+    private static KartTanimi TeleradKurum() => new(
+        Ad: "telerad-kurum",
+        YetkiKodu: "teleradyoloji.kurum",
+        Tablo: "public.telerad_kurum",
+        LogTabloId: 1321,
+        SubeKolonu: "sube_id",
+        // YENİ KAYIT CARİ SEÇİMİYLE BAŞLAR: teleradyoloji kurumu ayrı bir
+        //   müşteri değil, CARİNİN bir özelliğidir (797) - fatura, tahsilat ve
+        //   bakiye zaten orada. Önce hangi cari sorulur.
+        AcilistaTarafSecimi: "tarafId",
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            // ANAHTARLAR ALAN ADI (API adi), kolon adi DEGIL: varsayilanlar
+            //   `degerler` sozlugune alan adiyla yaziliyor (KartDeposu.EkleAsync).
+            ["yon"] = (short)1,               // gelen
+            ["aktif"] = (short)1,
+            ["varsayilanOncelik"] = (short)1,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+
+            // ---------------------------------------------------- kimlik ----
+            new("tarafId", "taraf_id", "kod", Zorunlu: true,
+                KodTablosu: "public.v_cari_lookup", AramaKaynagi: "cari",
+                Baslik: "Cari", Grup: "Kimlik"),
+            new("yon", "yon", "kod", SabitKodlar: TeleradKartKurumYon,
+                Baslik: "Yön", Grup: "Kimlik"),
+            new("tesisKodu", "tesis_kodu", "metin", EnFazlaUzunluk: 10,
+                Baslik: "Tesis Kodu", Grup: "Kimlik"),
+            new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Kimlik"),
+
+            // --------------------------------------------------- görüntü ----
+            // DICAM AE ADI BENZERSİZ (797, `ux_telerad_kurum_ae`): görüntü
+            //   hangi kurumdan geldiğini bu adla söyler; iki kurum aynı adı
+            //   taşırsa çalışma yanlış kuruma yazılır.
+            new("dicomAeTitle", "dicom_ae_title", "metin", EnFazlaUzunluk: 16,
+                Baslik: "DICOM AE Başlığı", Grup: "Görüntü Bağlantısı"),
+            new("dicomHost", "dicom_host", "metin", EnFazlaUzunluk: 120,
+                Baslik: "DICOM Sunucu", Grup: "Görüntü Bağlantısı"),
+            new("dicomPort", "dicom_port", "sayi",
+                Baslik: "DICOM Port", Grup: "Görüntü Bağlantısı"),
+
+            // ---------------------------------------------------- teslim ----
+            // KANAL "RAPOR NASIL GERİ GİDİYOR": portal = kurum kendi ekranından
+            //   alır (faz 1'de geçerli olan), diğerleri otomatik gönderim
+            //   (faz 2 - `dokuman/12_KALAN_ISLER.md`).
+            new("hl7Tur", "hl7_tur", "kod", SabitKodlar: TeleradKartKanal,
+                Baslik: "Teslim Kanalı", Grup: "Teslim"),
+            new("hl7Adres", "hl7_adres", "metin", EnFazlaUzunluk: 120,
+                Baslik: "Teslim Adresi", Grup: "Teslim"),
+
+            // ------------------------------------------------- raporlama ----
+            new("raporSablonId", "rapor_sablon_id", "kod",
+                KodTablosu: "public.v_rad_sablon_lookup",
+                Baslik: "Rapor Şablonu", Grup: "Raporlama"),
+            new("varsayilanOncelik", "varsayilan_oncelik", "kod",
+                SabitKodlar: TeleradKartOncelik,
+                Baslik: "Varsayılan Öncelik", Grup: "Raporlama"),
+            // GECE NÖBETİ: kurumun işi gece de karşılanıyor mu - otomatik
+            //   dağıtım ve nöbet çizelgesi (faz 2) buna bakacak.
+            new("geceNobet", "gece_nobet", "mantik",
+                Baslik: "Gece nöbeti kapsamında", Grup: "Raporlama"),
+            // ONAM: kurumun hastasının görüntüsü bize geliyor - paylaşım onamı
+            //   zorunlu tutulabilsin (KVKK).
+            new("onamZorunlu", "onam_zorunlu", "mantik",
+                Baslik: "Paylaşım onamı zorunlu", Grup: "Raporlama"),
+        },
+        Detaylar: new[]
+        {
+            // SÖZLEŞMELER BURADA SALT OKUNUR: yazma yeri sözleşme kartıdır.
+            //   İki yerden yazılabilseydi aynı dönem iki farklı SLA ile
+            //   kaydedilebilirdi. Burada durması "kurum var ama sözleşmesi
+            //   yok" eksikliğini kurumun kendi kartında görünür kılıyor.
+            new DetayTanimi("sozlesmeler", "public.telerad_sozlesme", "kurum_id",
+                new KartAlani[]
+                {
+                    new("id", "id", "sayi", Yazilabilir: false),
+                    new("baslangic", "baslangic", "tarih", Yazilabilir: false,
+                        Baslik: "Başlangıç"),
+                    new("bitis", "bitis", "tarih", Yazilabilir: false, Baslik: "Bitiş"),
+                    new("ucretModeli", "ucret_modeli", "kod", Yazilabilir: false,
+                        SabitKodlar: TeleradKartUcretModeli, Baslik: "Ücret Modeli"),
+                    new("slaRutinDk", "sla_rutin_dk", "sayi", Yazilabilir: false,
+                        Baslik: "SLA Rutin (dk)"),
+                    new("durum", "durum", "kod", Yazilabilir: false,
+                        SabitKodlar: TeleradKartSozlesmeDurum, Baslik: "Durum"),
+                }, SubeKolonu: null, Sirala: "baslangic desc",
+                   Baslik: "Sözleşmeler", SaltOkunur: true),
+        });
+
+    private static KartTanimi TeleradSozlesme() => new(
+        Ad: "telerad-sozlesme",
+        YetkiKodu: "teleradyoloji.sozlesme",
+        Tablo: "public.telerad_sozlesme",
+        LogTabloId: 1322,
+        // ŞUBE KOLONU YOK: sözleşme kurumun sözleşmesidir, şubenin değil -
+        //   tabloda `sube_id` de yok (797). Şube süzmesi kurum üzerinden gelir.
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["ucretModeli"] = (short)1,      // tetkik başı
+            ["durum"] = (short)0,            // taslak
+            ["faturaPeriyodu"] = (short)1,   // aylık
+            // SLA VARSAYILANLARI tablodakiyle aynı (797): boş bir sözleşme
+            //   "0 dakika" sözü vermiş olmasın - 0 SLA'yı kapatır.
+            ["slaAcilDk"] = 30,
+            ["slaOncelikliDk"] = 240,
+            ["slaRutinDk"] = 1440,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+
+            // ---------------------------------------------------- kimlik ----
+            new("kurumId", "kurum_id", "kod", Zorunlu: true,
+                KodTablosu: "public.v_telerad_kurum_lookup",
+                Baslik: "Kurum", Grup: "Kimlik"),
+            new("baslangic", "baslangic", "tarih", Zorunlu: true,
+                Baslik: "Başlangıç", Grup: "Kimlik"),
+            // BİTİŞ BOŞ = SÜRESİZ. Boş bırakmak geçerli: çoğu sözleşme
+            //   fesih olana kadar işler (`ck_telerad_sozlesme_tarih` yalnız
+            //   bitişin başlangıçtan önce olmasını engeller).
+            new("bitis", "bitis", "tarih", Baslik: "Bitiş", Grup: "Kimlik"),
+            // DURUM "AKTİF" OLAN SÖZLEŞME İSTEĞE KOPYALANIR (797 tetiği):
+            //   taslak sözleşme fiyat ve SLA sözü vermez.
+            new("durum", "durum", "kod", SabitKodlar: TeleradKartSozlesmeDurum,
+                Baslik: "Durum", Grup: "Kimlik"),
+
+            // ----------------------------------------------------- ücret ----
+            new("ucretModeli", "ucret_modeli", "kod", SabitKodlar: TeleradKartUcretModeli,
+                Baslik: "Ücret Modeli", Grup: "Ücret"),
+            // TARİFE = FİYAT LİSTESİ: tetkik başı modelde ücret buradan okunur;
+            //   isteğe KOPYALANIR, sonradan değişmesi geçmiş işin fiyatını
+            //   değiştirmez.
+            new("fiyatListesiId", "fiyat_listesi_id", "kod",
+                KodTablosu: "public.v_fiyat_listesi_tarife_lookup",
+                Baslik: "Tarife", Grup: "Ücret"),
+            new("aylikSabit", "aylik_sabit", "para", Baslik: "Aylık Sabit", Grup: "Ücret"),
+            new("aylikAdetSiniri", "aylik_adet_siniri", "sayi",
+                Baslik: "Aylık Adet Sınırı", Grup: "Ücret"),
+            new("acilEkOran", "acil_ek_oran", "ondalik",
+                Baslik: "Acil Ek %", Grup: "Ücret"),
+            new("oncelikliEkOran", "oncelikli_ek_oran", "ondalik",
+                Baslik: "Öncelikli Ek %", Grup: "Ücret"),
+            new("faturaPeriyodu", "fatura_periyodu", "kod", SabitKodlar: TeleradKartPeriyot,
+                Baslik: "Fatura Periyodu", Grup: "Ücret"),
+
+            // ------------------------------------------------------- SLA ----
+            // SLA DAKİKASI ÖNCELİĞE GÖRE AYRI ve istek açılırken KOPYALANIR
+            //   (797): sözleşme sonradan değişince geçmiş isteğin sözü
+            //   değişmez.
+            new("slaAcilDk", "sla_acil_dk", "sayi", Baslik: "Acil (dk)", Grup: "SLA"),
+            new("slaOncelikliDk", "sla_oncelikli_dk", "sayi",
+                Baslik: "Öncelikli (dk)", Grup: "SLA"),
+            new("slaRutinDk", "sla_rutin_dk", "sayi", Baslik: "Rutin (dk)", Grup: "SLA"),
+            new("slaCezaOran", "sla_ceza_oran", "ondalik",
+                Baslik: "SLA Ceza %", Grup: "SLA"),
+        });
 }

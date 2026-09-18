@@ -406,3 +406,113 @@ public sealed class TeleradyolojiKartTestleri
                    a => Assert.True(a.KayitGerekir, a.Kod + " kayit secilmeden calisiyor."));
     }
 }
+
+/// <summary>
+/// TELERADYOLOJİ KURUM VE SÖZLEŞME KARTLARI (800).
+///
+/// Kullanıcı: *"kurum ve sözleşme kartlarını da yap"*. 797'de iki liste ekranı
+/// vardı ama kartı yoktu: iş ilişkisi ekrandan hiç kurulamıyordu.
+///
+/// İstek kartı işin KENDİSİ, bu ikisi ŞARTLARI: kurum "kiminle, hangi kanalla",
+/// sözleşme "hangi dönem, hangi ücret, ne kadar sürede".
+/// </summary>
+public sealed class TeleradyolojiSartKartlariTestleri
+{
+    private static KartTanimi Kart(string ad)
+    {
+        var k = KartKatalogu.Bul(ad);
+        Assert.True(k is not null, $"\"{ad}\" karti yok.");
+        return k!;
+    }
+
+    [Fact]
+    public void Iki_kart_da_LISTEYLE_ayni_yetkide()
+    {
+        // Kart serbest kalirsa liste suzmesi anlamsizlasir.
+        foreach (var ad in new[] { "telerad-kurum", "telerad-sozlesme" })
+            Assert.Equal(KaynakKatalogu.Bul(ad)!.YetkiKodu, Kart(ad).YetkiKodu);
+    }
+
+    [Fact]
+    public void Her_alan_bir_gruba_ait()
+    {
+        // Grupsuz alan kendine bos bir "Genel" sekmesi acar (799).
+        foreach (var ad in new[] { "telerad-kurum", "telerad-sozlesme" })
+        {
+            var grupsuz = Kart(ad).Alanlar
+                .Where(a => a.Ad != "id" && string.IsNullOrEmpty(a.Grup))
+                .Select(a => a.Ad).ToArray();
+            Assert.True(grupsuz.Length == 0,
+                $"{ad}: grupsuz alan(lar) {string.Join(", ", grupsuz)}");
+        }
+    }
+
+    [Fact]
+    public void Kurum_CARIYE_baglanir()
+    {
+        // Teleradyoloji kurumu ayri bir "musteri" DEGIL, carinin bir
+        //   ozelligidir (797): fatura, tahsilat ve bakiye zaten orada.
+        var kart = Kart("telerad-kurum");
+        var taraf = kart.Alanlar.First(a => a.Ad == "tarafId");
+        Assert.True(taraf.Zorunlu, "Carisi olmayan kurum kaydi anlamsiz.");
+        Assert.Equal("public.v_cari_lookup", taraf.KodTablosu);
+        // Yeni kayit cari secimiyle baslar - once "hangi cari" sorulur.
+        Assert.Equal("tarafId", kart.AcilistaTarafSecimi);
+    }
+
+    [Fact]
+    public void Kurumun_SOZLESMELERI_salt_okunur()
+    {
+        // Yazma yeri sozlesme kartidir: iki yerden yazilabilseydi ayni donem
+        //   iki farkli SLA ile kaydedilebilirdi. Burada durmasi "kurum var ama
+        //   sozlesmesi yok" eksikligini kurumun kartinda gorunur kiliyor.
+        var detay = Kart("telerad-kurum").Detaylar!.First(d => d.Ad == "sozlesmeler");
+        Assert.True(detay.SaltOkunur);
+        Assert.Equal("public.telerad_sozlesme", detay.Tablo);
+        Assert.All(detay.Alanlar, a => Assert.False(a.Yazilabilir));
+    }
+
+    [Fact]
+    public void Sozlesme_SUBESIZ_ve_SLA_varsayilanli()
+    {
+        var kart = Kart("telerad-sozlesme");
+        // Sozlesme kurumun sozlesmesidir, subenin degil - tabloda sube_id de
+        //   yok (797). Sube kolonu yazmak var olmayan kolona INSERT ederdi.
+        Assert.Null(kart.SubeKolonu);
+
+        // BOS SOZLESME "0 DAKIKA" SOZU VERMESIN: 0 SLA'yi tumden kapatir
+        //   (tetik `sla_dk = 0` iken sozlesmeden kopyalar), yani sure sozu
+        //   olmayan bir sozlesme sessizce dogardi.
+        // ANAHTAR ALAN ADI, KOLON ADI DEGIL: varsayilanlar `degerler`
+        //   sozlugune alan adiyla yaziliyor (KartDeposu.EkleAsync) - kolon
+        //   adiyla yazilan varsayilan hicbir alana denk gelmez, sessizce
+        //   kaybolurdu.
+        var v = kart.YeniKayitVarsayilanlari!;
+        Assert.All(v.Keys, k => Assert.True(kart.Alan(k) is not null,
+            $"Varsayilan \"{k}\" kartta bir alan degil."));
+        Assert.Equal(30, v["slaAcilDk"]);
+        Assert.Equal(240, v["slaOncelikliDk"]);
+        Assert.Equal(1440, v["slaRutinDk"]);
+        // Yeni sozlesme TASLAK dogar: aktif olan istege kopyalanir (797),
+        //   yarim doldurulmus sozlesme fiyat ve SLA sozu vermemeli.
+        Assert.Equal((short)0, v["durum"]);
+
+        // Kurum secimi CARI listesi degil - her cari telerad kurumu degildir.
+        Assert.Equal("public.v_telerad_kurum_lookup",
+                     kart.Alanlar.First(a => a.Ad == "kurumId").KodTablosu);
+    }
+
+    [Fact]
+    public void Iki_listenin_de_ARAC_CUBUGU_var()
+    {
+        foreach (var (ekranAd, onEk) in new[]
+                 { ("telerad-kurum-liste", "telerad-kurum"),
+                   ("telerad-sozlesme-liste", "telerad-sozlesme") })
+        {
+            var ekran = AksiyonKatalogu.Ekran(ekranAd);
+            Assert.True(ekran is not null, $"{ekranAd} aksiyon ekrani yok.");
+            foreach (var son in new[] { ".yeni", ".duzenle", ".sil" })
+                Assert.Contains(ekran!, a => a.Kod == onEk + son);
+        }
+    }
+}
