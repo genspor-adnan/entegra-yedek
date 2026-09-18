@@ -85,6 +85,11 @@ public sealed class AyarDeposu
         //   degisebilir… yanina da tahakkuk edecek SUT fiyat kodlari editini
         //   koy"). Kod listesi bosken eski davranis surer (muayene kategorisi).
         "basvuru.sgk_katilim_payi", "basvuru.sgk_katilim_kodlari",
+        // ISKONTO ONAY ESIGI (783/793): bu oranin USTUNDEKI iskonto, kisinin
+        //   tavani yetse bile onayli talep ister. 792'den beri basamagin
+        //   SAHIBI muaf (imzayi kendisinden isteyemez). Ayar beyaz listede
+        //   degildi: kural vardi ama orani yalnizca SQL ile degistirilebiliyordu.
+        "basvuru.iskonto_onay_esik",
         // Radyoloji sarf dusumu (320): stok modulunu kullanmayan kurumda
         //   kapatilabilir; depo secimi sarf cikis fisinin kaynagidir.
         "radyoloji.sarf_aktif", "radyoloji.sarf_depo",
@@ -157,6 +162,7 @@ public sealed class AyarDeposu
         //   sistemde kendiliginden fis kesmek yanlis olurdu.
         ["basvuru.pos_aksiyon"] = 0,
         ["basvuru.sgk_katilim_payi"] = 100,
+        ["basvuru.iskonto_onay_esik"] = 10,
         ["guvenlik.jwt_dakika"] = 30,
         ["guvenlik.refresh_gun"] = 30,
         ["guvenlik.parola_min_uzunluk"] = 8,
@@ -182,6 +188,9 @@ public sealed class AyarDeposu
         ["liste.sayfa_boyu"] = (10, 500),
         ["stok.negatif_davranis"] = (0, 2),          // serbest / uyar / engelle
         ["basvuru.pos_aksiyon"] = (0, 2),            // yok / otomatik fis / sor
+        // 0 = kural kapali (her iskonto dogrudan), 100 = hicbir iskonto onay
+        //   istemez anlamina gelir; ikisi de mesru ama arasi normal kullanim.
+        ["basvuru.iskonto_onay_esik"] = (0, 100),
         ["efatura.senaryo"] = (1, 8),                // 1 Temel / 2 Ticari / 8 Ilac
         ["belge.satis.vade_gun"] = (0, 3650),
         ["belge.alis.vade_gun"] = (0, 3650),

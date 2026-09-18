@@ -115,6 +115,28 @@ export function KayitKabulAyarlar() {
                        tip="metin" genis
                        ayarlar={ayarlar} onYaz={yaz} />
           </div>
+
+          {/* ISKONTO ONAY ESIGI (783/792/793, kullanici: "oranları nereden
+              değiştireceğim"): kural vardi ama orani yalnizca SQL ile
+              degistirilebiliyordu - ayar beyaz listede degildi.
+
+              UC SAYI UC AYRI YERDE, karistirilmasin diye alttaki not ikisini
+              de adresliyor: bu kutu KURUMUN esigi, rol tavani Yetkiler
+              ekraninda. */}
+          <div className="alan-izgara ayar-formu">
+            <AyarAlani anahtar="basvuru.iskonto_onay_esik"
+                       etiket="İskonto Onay Eşiği (%)"
+                       ayarlar={ayarlar} onYaz={yaz} />
+          </div>
+          <div className="not">
+            Bu oranın <b>üstündeki</b> iskonto, kişinin tavanı yetse bile
+            <b> onaylı talepten</b> gelmek zorunda; <b>0</b> yazarsanız kural
+            kapanır. Kişi başına <b>tavan</b> ayrı bir ayardır:
+            <b> Yönetim › Roller ve Yetkiler</b> → rolü seçin → <b>Başvuru ›
+            İskonto</b> satırının <b>Sınır</b> kutusu. Onay zincirinin hangi
+            oranda hangi kademeye gideceği ise <b>Onay Akışları</b> ekranındaki
+            <b> Eşik (≥)</b> alanıdır.
+          </div>
         </div>
         {/* PROTOKOL NO gridi de 634'te Hasta Belgeleri'ne tasindi. */}
         <div className="not">

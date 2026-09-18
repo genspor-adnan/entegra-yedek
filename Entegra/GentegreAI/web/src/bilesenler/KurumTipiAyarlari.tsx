@@ -127,6 +127,17 @@ export function KurumTipiAyarlari() {
   //   secili tipin rol sablonlari onizlenir, secilenler kurulur; var olan rol
   //   ezilmez (istenirse yetkileri sablona cekilir).
   const [rolPanel, setRolPanel] = useState(false);
+  /**
+   * EKSIK SABLON SAYISI (793, kullanici: "standart rolleri kur butonu neye
+   * yarıyor artık gerek var mı").
+   *
+   * Butonun isi kurulumun ILK gunuyle sinirli degil: yeni modul acilinca o
+   * modulun rolleri, yeni surum bir sablon ekleyince (Banko Sefi, Mali Isler
+   * Muduru, Cagri Merkezi) o roller "kurulacak" olarak cikar. Ama her sey
+   * kuruluyken buton "ne ise yariyor" sorusunu doguruyordu - artik KAC ROL
+   * EKSIK oldugunu yaziyor, eksik yoksa kendini soluk gosteriyor.
+   */
+  const [eksikSablon, setEksikSablon] = useState<number | null>(null);
   const [rolListe, setRolListe] = useState<{ kod: string; ad: string; amac: string; mevcut: boolean; yetkiSayisi: number; ekran: number; aksiyon: number }[]>([]);
   const [rolSecim, setRolSecim] = useState<Set<string>>(new Set());
   const [rolGuncelle, setRolGuncelle] = useState(false);
@@ -172,6 +183,8 @@ export function KurumTipiAyarlari() {
         setProfilRol(y.roller);
         setRolGecerli(new Set(y.roller.filter(r => r.gecerli || r.kilitli).map(r => r.kod)));
         setRolYazili(y.yazili);
+        const t2 = await api.standartRoller(tip);
+        if (!iptal) setEksikSablon(t2.roller.filter(r => !r.mevcut).length);
       } catch { /* yetkisi yoksa bolum bos kalir */ }
     })();
     return () => { iptal = true };
@@ -569,12 +582,29 @@ export function KurumTipiAyarlari() {
         <div className="grp" style={{ margin: '10px' }}>
           <div className="gb">Standart roller — {tipAdi(profil?.kurumTipi)}
             <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 6 }}>
-              <button className="d bir" type="button" onClick={() => void rolleriGetir()}>🧩 Standart rolleri kur</button>
+              <button className={`d${eksikSablon ? ' bir' : ''}`} type="button"
+                      title={eksikSablon
+                             ? 'Bu kurum tipinde henüz kurulmamış şablon roller var'
+                             : 'Tüm şablon roller kurulu; yetkileri şablona hizalamak için açın'}
+                      onClick={() => void rolleriGetir()}>
+                🧩 {eksikSablon
+                    ? `Eksik rolleri kur (${eksikSablon})`
+                    : 'Rolleri şablona hizala'}
+              </button>
               <button className="d" type="button" onClick={() => git('/rol')}>Roller</button>
             </span>
           </div>
           {!rolPanel
-            ? <div className="ic sonuk">Kurum tipine göre hazır roller (Kayıt Kabul, Hekim, Hemşire, Muhasebe, Diş Hekimi, Radyolog, Lab Teknisyeni…) varsayılan yetkileriyle tek tıkla kurulur; sonra Yönetim › Roller'den inceltilir. Var olan rol ezilmez.</div>
+            ? <div className="ic sonuk">
+                Kurum tipine göre hazır roller (Kayıt Kabul, Doktor, Hemşire, Muhasebe,
+                Diş Hekimi, Radyolog, Lab Teknisyeni…) varsayılan yetkileriyle tek tıkla
+                kurulur; sonra Yönetim › Roller'den inceltilir. <b>Var olan rol ezilmez.</b>
+                {eksikSablon === 0
+                  ? ' Şu an eksik rol yok - bu düğme yeni bir modül açtığınızda ya da'
+                    + ' sürüm yeni bir şablon eklediğinde işe yarar; ayrıca var olan'
+                    + ' rollerin yetkilerini şablona geri çekmek için kullanılır.'
+                  : ''}
+              </div>
             : (
               <div className="ic">
                 <div className="dg"><table>

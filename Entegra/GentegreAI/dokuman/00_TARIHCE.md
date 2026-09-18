@@ -13948,3 +13948,36 @@ kullanıcı %15 yazabiliyor, %30'da "Kendi iskonto tavanınız %25" hatası alı
 banko çalışanı %15'te "onay ister" hatası almaya devam ediyor. xUnit 293/293,
 vitest 672/672 (bir test sahte oturumunda `aksiyonVar` eksikti, mock
 tamamlandı).
+
+
+## 18.09.2026 — Oranlar ekrandan: iskonto onay eşiği ayara girdi (793)
+
+Kullanıcı: *"oranları nereden değiştireceğim"* ve *"standart rolleri kur butonu
+neye yarıyor artık gerek var mı"*.
+
+**Üç ayrı sayı var, biri ekranda yoktu:**
+
+| Sayı | Ne demek | Nereden |
+|---|---|---|
+| Rol tavanı (`basvuru.iskonto` değeri) | "Bu rol en çok %X iskonto yapar" | Yönetim › Roller ve Yetkiler › rol › Başvuru › İskonto › **Sınır** |
+| Onay eşiği (`basvuru.iskonto_onay_esik`) | "Bunun üstü onaylı talep ister" | **Kayıt Kabul Ayarları › Başvuru** (793'te eklendi) |
+| Basamak eşiği (`onay_akis_adim.esik_alt`) | "Şu orandan sonra mali/üst kademe de imzalar" | Onay Akışları › **Eşik (≥)** |
+
+783 eşiği `referans` tablosuna yazmıştı ama `AyarDeposu` **beyaz listesine
+eklenmemişti**: kural işliyor, oranı yalnız SQL ile değişiyordu - kurumun kendi
+kararı olması gereken bir sayı kuruma kapalıydı. Beyaz listeye, varsayılana
+(%10) ve aralığa (0-100) eklendi; Kayıt Kabul Ayarları › Başvuru'ya alan kondu.
+Altındaki not üç sayıyı birbirinden ayırıyor - biri ötekinin yerine
+ayarlanırsa kural sessizce yanlış çalışır.
+
+**"Standart rolleri kur" düğmesi duruyor ama artık ne yaptığını söylüyor.**
+İşi kurulumun ilk günüyle sınırlı değil: yeni modül açılınca o modülün rolleri,
+sürüm yeni bir şablon ekleyince (Banko Şefi, Mali İşler Müdürü, Çağrı Merkezi)
+o roller "kurulacak" olarak çıkar; ayrıca var olan rollerin yetkilerini şablona
+geri çeker. Her şey kuruluyken düğme "ne işe yarıyor" sorusunu doğuruyordu -
+artık **kaç rol eksik** yazıyor (`Eksik rolleri kur (3)`), eksik yoksa vurgusu
+sönüyor ve adı "Rolleri şablona hizala" oluyor.
+
+**Doğrulama.** Ayar API'den %15 yazıldı (200), %101 reddedildi (400), %10'a
+döndürüldü. Dev'deki oranlar: eşik %10 · Banko %10 · Banko Şefi %25 · Mali
+İşler Müdürü %25 · Muhasebe %25 · Yönetici %100. xUnit 293/293, vitest 672/672.
