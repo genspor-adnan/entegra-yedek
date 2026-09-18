@@ -118,3 +118,128 @@ public sealed class ProfilRolleriTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 }
+
+/// <summary>
+/// İSKONTO BASAMAKLARI YALNIZ KADRODA (789).
+///
+/// Kullanıcı: *"yönetici rolünden basamak yetkilerini kaldır"*. 787/788 üç
+/// basamağı üç kadro rolüne vermişti; `yonetici` üçünü de YEDEK taşıyordu.
+/// Yedek kalkınca yeni tehlike doğuyor: kadroya kimse atanmamışsa o basamağı
+/// imzalayacak kimse yok ve talep kuyrukta SESSİZCE bekler.
+/// `v_onay_basamak_sahibi` bunu görünür kılar.
+/// </summary>
+public sealed class OnayBasamakSahibiTestleri(VeritabaniOlgusu olgu)
+    : IClassFixture<VeritabaniOlgusu>
+{
+    private readonly VeritabaniOlgusu _olgu = olgu;
+
+    [Fact]
+    public async Task Yonetici_artik_IMZA_atmaz_ama_ekrani_gorur()
+    {
+        if (!_olgu.Baglandi(nameof(Yonetici_artik_IMZA_atmaz_ama_ekrani_gorur))) return;
+        var veri = _olgu.Gerekli();
+
+        var basamak = await veri.TekDegerAsync<long>("""
+            select count(*)
+              from public.rol r
+              join public.rol_yetki ry on ry.rol_id = r.id
+              join public.yetki y on y.id = ry.yetki_id
+             where r.kod = 'yonetici' and y.kod like 'belge.iskonto_onay_%'
+            """, [], CancellationToken.None);
+        Assert.Equal(0, basamak);
+
+        // ONAY EKRANI KALIR: imza atmasa da zincirin nerede takıldığını
+        //   görmek zorunda - "onaya gitti, sonra ne oldu" sorusunun tek
+        //   cevabı o ekran.
+        var ekran = await veri.TekDegerAsync<long>("""
+            select count(*)
+              from public.rol r
+              join public.rol_yetki ry on ry.rol_id = r.id
+              join public.yetki y on y.id = ry.yetki_id
+             where r.kod = 'yonetici' and y.kod = 'iskonto_onay'
+            """, [], CancellationToken.None);
+        Assert.Equal(1, ekran);
+    }
+
+    [Fact]
+    public async Task Sahipsiz_basamak_GORUNUR()
+    {
+        if (!_olgu.Baglandi(nameof(Sahipsiz_basamak_GORUNUR))) return;
+        var veri = _olgu.Gerekli();
+
+        // Görünüm bir SAYIM, kapı değil: talebi açmayı engellemek, indirim
+        //   yapmak isteyen bankoyu kurumun kadro eksiğinden ötürü durdururdu.
+        var satirlar = await veri.ListeAsync("""
+            select yetki_kodu, kisi_sayisi, sahipsiz, roller
+              from public.v_onay_basamak_sahibi
+             where yetki_kodu like 'belge.iskonto_onay_%'
+             order by yetki_kodu
+            """, [], o => (Kod: o.GetString(0), Kisi: o.GetInt64(1),
+                           Sahipsiz: o.GetInt16(2), Roller: o.GetString(3)),
+            CancellationToken.None);
+
+        Assert.Equal(3, satirlar.Count);
+        foreach (var s in satirlar)
+        {
+            // Basamağın ROLÜ her hâlükârda var (787/788); kişi olmayabilir.
+            Assert.NotEqual("", s.Roller);
+            Assert.Equal(s.Kisi == 0 ? (short)1 : (short)0, s.Sahipsiz);
+        }
+    }
+}
+
+/// <summary>
+/// ÇAĞRI MERKEZİ ROLLERİ (791).
+///
+/// Kullanıcı: *"Çağrı Merkezi Ajanı ve Çağrı Merkezi Sorumlusu da ekle"*.
+///
+/// İki kural korunuyor: çağrı merkezi hastanın PARASINI görmez (telefonda
+/// borç konuşmak bankonun işidir) ve ajan ile sorumlu arasındaki fark
+/// silme/şablon yetkisidir - ikisi aynı olsaydı ayrı rol olmalarının anlamı
+/// kalmazdı.
+/// </summary>
+public sealed class CagriMerkeziRolleriTestleri(VeritabaniOlgusu olgu)
+    : IClassFixture<VeritabaniOlgusu>
+{
+    private readonly VeritabaniOlgusu _olgu = olgu;
+
+    [Fact]
+    public async Task Cagri_merkezi_PARA_ekranlarini_gormez()
+    {
+        if (!_olgu.Baglandi(nameof(Cagri_merkezi_PARA_ekranlarini_gormez))) return;
+
+        var sayi = await _olgu.Gerekli().TekDegerAsync<long>(
+            "select count(*) from public.rol r "
+            + "  join public.rol_yetki ry on ry.rol_id = r.id "
+            + "  join public.yetki y on y.id = ry.yetki_id "
+            + " where r.kod in ('cagri_ajani','cagri_sorumlu') "
+            + "   and y.kod in ('belge','belge_satir','kasa_islem','mali_hareket','hesap')",
+            [], CancellationToken.None);
+        Assert.Equal(0, sayi);
+    }
+
+    [Fact]
+    public async Task Ajan_randevu_SILEMEZ_sorumlu_siler()
+    {
+        if (!_olgu.Baglandi(nameof(Ajan_randevu_SILEMEZ_sorumlu_siler))) return;
+        var veri = _olgu.Gerekli();
+
+        static string Sql(string rol, string yetki, string alan) =>
+            $"select coalesce(max(ry.{alan}), -1) from public.rol r "
+            + "  join public.rol_yetki ry on ry.rol_id = r.id "
+            + "  join public.yetki y on y.id = ry.yetki_id "
+            + $" where r.kod = '{rol}' and y.kod = '{yetki}'";
+
+        Assert.Equal((short)0, await veri.TekDegerAsync<short>(Sql("cagri_ajani", "randevu", "sil"), [], CancellationToken.None));
+        Assert.Equal((short)1, await veri.TekDegerAsync<short>(Sql("cagri_sorumlu", "randevu", "sil"), [], CancellationToken.None));
+
+        // HASTA KAYDINI İKİSİ DE SİLEMEZ: telefonla açılan kaydı telefonla
+        //   silmek, hasta geçmişini çağrı masasına emanet etmek olurdu.
+        foreach (var rol in new[] { "cagri_ajani", "cagri_sorumlu" })
+            Assert.Equal((short)0, await veri.TekDegerAsync<short>(Sql(rol, "hasta", "sil"), [], CancellationToken.None));
+
+        // Hatırlatma şablonu yalnız sorumluda.
+        Assert.Equal((short)-1, await veri.TekDegerAsync<short>(Sql("cagri_ajani", "bildirim_sablon", "gor"), [], CancellationToken.None));
+        Assert.Equal((short)1, await veri.TekDegerAsync<short>(Sql("cagri_sorumlu", "bildirim_sablon", "gor"), [], CancellationToken.None));
+    }
+}

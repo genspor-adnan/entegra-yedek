@@ -49,7 +49,12 @@ const MATRIS_ISARET: Record<number, { sinif: string; im: string }> = {
  * baglanmadi - kurulum sihirbazinin ekran karsiligi. Baglama sirasinda bu
  * bilesenin ic sekme duzeni degismeyecek.
  */
-const SEKMELER = ['1 · Profil', '2 · Modüller', '3 · Kayıt & Ücretlendirme', '4 · Klinik Ayarlar', '5 · Entegrasyonlar', '6 · Kaynaklar (birim/ünit/cihaz)', '7 · Özet & Kurulum'];
+// ROLLER KENDI SEKMESINDE (789, kullanici: "modüllerin sağına Roller diye
+//   sekme aç ve rolleri oraya taşı"): profil sekmesi tip kartlari + modul
+//   ozeti + iki rol tablosuyla uzayip gidiyordu; rol isi ayri bir adimdir.
+const SEKMELER = ['1 · Profil', '2 · Modüller', '3 · Roller', '4 · Kayıt & Ücretlendirme',
+                  '5 · Klinik Ayarlar', '6 · Entegrasyonlar', '7 · Kaynaklar (birim/ünit/cihaz)',
+                  '8 · Özet & Kurulum'];
 
 export function KurumTipiAyarlari() {
   const [aktif, setAktif] = useState(0);
@@ -446,96 +451,6 @@ export function KurumTipiAyarlari() {
               .map(m => m.ad).join(' · ') || '—'}
           </div>
         </div>
-
-        {/* STANDART ROLLER: tipin hazir rol seti (712). */}
-        <div className="grp" style={{ margin: '10px' }}>
-          <div className="gb">Standart roller — {tipAdi(profil?.kurumTipi)}
-            <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 6 }}>
-              <button className="d bir" type="button" onClick={() => void rolleriGetir()}>🧩 Standart rolleri kur</button>
-              <button className="d" type="button" onClick={() => git('/rol')}>Roller</button>
-            </span>
-          </div>
-          {!rolPanel
-            ? <div className="ic sonuk">Kurum tipine göre hazır roller (Kayıt Kabul, Hekim, Hemşire, Muhasebe, Diş Hekimi, Radyolog, Lab Teknisyeni…) varsayılan yetkileriyle tek tıkla kurulur; sonra Yönetim › Roller'den inceltilir. Var olan rol ezilmez.</div>
-            : (
-              <div className="ic">
-                <div className="dg"><table>
-                  <thead><tr><th className="orta"><input type="checkbox" checked={rolListe.length > 0 && rolListe.every(r => rolSecim.has(r.kod))} onChange={e => setRolSecim(e.target.checked ? new Set(rolListe.map(r => r.kod)) : new Set())} /></th><th>Rol</th><th>Amaç</th><th className="orta">Ekran</th><th className="orta">Aksiyon</th><th>Durum</th></tr></thead>
-                  <tbody>
-                    {rolListe.map(r => (
-                      <tr key={r.kod}>
-                        <td className="orta"><input type="checkbox" checked={rolSecim.has(r.kod)} onChange={e => setRolSecim(s => { const n = new Set(s); if (e.target.checked) n.add(r.kod); else n.delete(r.kod); return n })} /></td>
-                        <td><b>{r.ad}</b> <span className="sonuk">({r.kod})</span></td><td>{r.amac}</td>
-                        <td className="orta">{r.ekran}</td><td className="orta">{r.aksiyon}</td>
-                        <td>{r.mevcut ? <span className="rz ok">var</span> : <span className="rz mavi">kurulacak</span>}</td>
-                      </tr>
-                    ))}
-                    {rolListe.length === 0 && <tr><td colSpan={6} className="sonuk">Bu tip için şablon yok.</td></tr>}
-                  </tbody>
-                </table></div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8, flexWrap: 'wrap' }}>
-                  <button className="d onay" type="button" disabled={rolMesgul} onClick={() => void rolleriKur()}>✔ Seçilenleri kur ({rolSecim.size})</button>
-                  <label style={{ display: 'inline-flex', gap: 4, alignItems: 'center', fontSize: 11 }}><input type="checkbox" checked={rolGuncelle} onChange={e => setRolGuncelle(e.target.checked)} /> var olan rollerin yetkilerini şablona çek (elle verilen yetkiler silinir)</label>
-                  <button className="d" type="button" onClick={() => setRolPanel(false)}>Kapat</button>
-                </div>
-              </div>
-            )}
-        </div>
-
-        {/* BU PROFILDE GECERLI ROLLER (786) - sayfanin ALTINDA, kullanicinin
-            istedigi yerde. Kutucuk kurumun karari; ust seritteki Kaydet
-            yazar ve rol.aktif alanina uygular. */}
-        <div className="grp" style={{ margin: '10px' }}>
-          <div className="gb">Bu profilde geçerli roller — {tipAdi(profil?.kurumTipi) || '—'}
-            <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 6, alignItems: 'center' }}>
-              <span className="sonuk" style={{ fontSize: 11 }}>{rolGecerli.size}/{profilRol.length} seçili</span>
-              <button className="d" type="button"
-                      onClick={() => setRolGecerli(new Set(profilRol.filter(r => r.varsayilan || r.kilitli).map(r => r.kod)))}>
-                ↺ Şablon önerisi
-              </button>
-            </span>
-          </div>
-          <div className="ic sonuk">
-            İşaretli roller bu profilde <b>geçerlidir</b>; işaretsizler <b>pasife</b> alınır
-            (silinmez, kullanıcıları kalır). Üstteki <b>Kaydet</b> ile yazılır.
-            {rolYazili ? '' : ' Henüz işaretlenmedi: şu an şablonun önerisi geçerli.'}
-          </div>
-          {profilRol.length === 0
-            ? <div className="ic sonuk">Kurum tipi seçilince roller listelenir.</div>
-            : (
-              <div className="ic">
-                <div className="dg"><table>
-                  <thead><tr>
-                    <th className="orta">Geçerli</th><th>Rol</th><th>Amaç</th>
-                    <th className="orta">Kullanıcı</th><th className="orta">Şablon</th><th>Durum</th>
-                  </tr></thead>
-                  <tbody>
-                    {profilRol.map(r => (
-                      <tr key={r.kod} className={rolGecerli.has(r.kod) ? '' : 'sonuk'}>
-                        <td className="orta">
-                          <input type="checkbox" checked={rolGecerli.has(r.kod)}
-                                 disabled={r.kilitli} onChange={() => rolCevir(r)}
-                                 title={r.kilitli ? 'Bu rol pasife alınamaz' : ''} />
-                        </td>
-                        <td><b>{r.ad}</b> <span className="sonuk">({r.kod})</span>
-                          {r.kilitli && <span className="rz" title="Kurum kendi sistemine girebilsin diye her zaman açık"> kilitli</span>}</td>
-                        <td>{r.amac}</td>
-                        <td className="orta">{r.kisi || ''}</td>
-                        <td className="orta" title={r.modul ? `Modül: ${r.modul}` : ''}>
-                          {r.sablon ? (r.varsayilan ? '✔' : (r.modulKapali ? '⊘' : '–')) : ''}
-                        </td>
-                        <td>{r.aktif ? <span className="rz ok">aktif</span> : <span className="rz">pasif</span>}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table></div>
-                <div className="ic sonuk" style={{ paddingLeft: 0 }}>
-                  Şablon sütunu: ✔ bu tipe önerilir · ⊘ modülü bu kurulumda kapalı ·
-                  – başka tipin rolü · boş = kurumun kendi rolü.
-                </div>
-              </div>
-            )}
-        </div>
       </div>
 
       <div className="pnl" hidden={aktif !== 1}>
@@ -646,6 +561,102 @@ export function KurumTipiAyarlari() {
       </div>
 
       <div className="pnl" hidden={aktif !== 2}>
+        <div className="ic sonuk">Roller iki adimdir: once tipin hazir
+          sablonlari <b>kurulur</b>, sonra bu profilde hangilerinin
+          <b>gecerli</b> olacagi isaretlenir. Isaretleme ust seritteki
+          <b>Kaydet</b> ile yazilir.</div>
+        {/* STANDART ROLLER: tipin hazir rol seti (712). */}
+        <div className="grp" style={{ margin: '10px' }}>
+          <div className="gb">Standart roller — {tipAdi(profil?.kurumTipi)}
+            <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 6 }}>
+              <button className="d bir" type="button" onClick={() => void rolleriGetir()}>🧩 Standart rolleri kur</button>
+              <button className="d" type="button" onClick={() => git('/rol')}>Roller</button>
+            </span>
+          </div>
+          {!rolPanel
+            ? <div className="ic sonuk">Kurum tipine göre hazır roller (Kayıt Kabul, Hekim, Hemşire, Muhasebe, Diş Hekimi, Radyolog, Lab Teknisyeni…) varsayılan yetkileriyle tek tıkla kurulur; sonra Yönetim › Roller'den inceltilir. Var olan rol ezilmez.</div>
+            : (
+              <div className="ic">
+                <div className="dg"><table>
+                  <thead><tr><th className="orta"><input type="checkbox" checked={rolListe.length > 0 && rolListe.every(r => rolSecim.has(r.kod))} onChange={e => setRolSecim(e.target.checked ? new Set(rolListe.map(r => r.kod)) : new Set())} /></th><th>Rol</th><th>Amaç</th><th className="orta">Ekran</th><th className="orta">Aksiyon</th><th>Durum</th></tr></thead>
+                  <tbody>
+                    {rolListe.map(r => (
+                      <tr key={r.kod}>
+                        <td className="orta"><input type="checkbox" checked={rolSecim.has(r.kod)} onChange={e => setRolSecim(s => { const n = new Set(s); if (e.target.checked) n.add(r.kod); else n.delete(r.kod); return n })} /></td>
+                        <td><b>{r.ad}</b> <span className="sonuk">({r.kod})</span></td><td>{r.amac}</td>
+                        <td className="orta">{r.ekran}</td><td className="orta">{r.aksiyon}</td>
+                        <td>{r.mevcut ? <span className="rz ok">var</span> : <span className="rz mavi">kurulacak</span>}</td>
+                      </tr>
+                    ))}
+                    {rolListe.length === 0 && <tr><td colSpan={6} className="sonuk">Bu tip için şablon yok.</td></tr>}
+                  </tbody>
+                </table></div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8, flexWrap: 'wrap' }}>
+                  <button className="d onay" type="button" disabled={rolMesgul} onClick={() => void rolleriKur()}>✔ Seçilenleri kur ({rolSecim.size})</button>
+                  <label style={{ display: 'inline-flex', gap: 4, alignItems: 'center', fontSize: 11 }}><input type="checkbox" checked={rolGuncelle} onChange={e => setRolGuncelle(e.target.checked)} /> var olan rollerin yetkilerini şablona çek (elle verilen yetkiler silinir)</label>
+                  <button className="d" type="button" onClick={() => setRolPanel(false)}>Kapat</button>
+                </div>
+              </div>
+            )}
+        </div>
+
+        {/* BU PROFILDE GECERLI ROLLER (786) - sayfanin ALTINDA, kullanicinin
+            istedigi yerde. Kutucuk kurumun karari; ust seritteki Kaydet
+            yazar ve rol.aktif alanina uygular. */}
+        <div className="grp" style={{ margin: '10px' }}>
+          <div className="gb">Bu profilde geçerli roller — {tipAdi(profil?.kurumTipi) || '—'}
+            <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+              <span className="sonuk" style={{ fontSize: 11 }}>{rolGecerli.size}/{profilRol.length} seçili</span>
+              <button className="d" type="button"
+                      onClick={() => setRolGecerli(new Set(profilRol.filter(r => r.varsayilan || r.kilitli).map(r => r.kod)))}>
+                ↺ Şablon önerisi
+              </button>
+            </span>
+          </div>
+          <div className="ic sonuk">
+            İşaretli roller bu profilde <b>geçerlidir</b>; işaretsizler <b>pasife</b> alınır
+            (silinmez, kullanıcıları kalır). Üstteki <b>Kaydet</b> ile yazılır.
+            {rolYazili ? '' : ' Henüz işaretlenmedi: şu an şablonun önerisi geçerli.'}
+          </div>
+          {profilRol.length === 0
+            ? <div className="ic sonuk">Kurum tipi seçilince roller listelenir.</div>
+            : (
+              <div className="ic">
+                <div className="dg"><table>
+                  <thead><tr>
+                    <th className="orta">Geçerli</th><th>Rol</th><th>Amaç</th>
+                    <th className="orta">Kullanıcı</th><th className="orta">Şablon</th><th>Durum</th>
+                  </tr></thead>
+                  <tbody>
+                    {profilRol.map(r => (
+                      <tr key={r.kod} className={rolGecerli.has(r.kod) ? '' : 'sonuk'}>
+                        <td className="orta">
+                          <input type="checkbox" checked={rolGecerli.has(r.kod)}
+                                 disabled={r.kilitli} onChange={() => rolCevir(r)}
+                                 title={r.kilitli ? 'Bu rol pasife alınamaz' : ''} />
+                        </td>
+                        <td><b>{r.ad}</b> <span className="sonuk">({r.kod})</span>
+                          {r.kilitli && <span className="rz" title="Kurum kendi sistemine girebilsin diye her zaman açık"> kilitli</span>}</td>
+                        <td>{r.amac}</td>
+                        <td className="orta">{r.kisi || ''}</td>
+                        <td className="orta" title={r.modul ? `Modül: ${r.modul}` : ''}>
+                          {r.sablon ? (r.varsayilan ? '✔' : (r.modulKapali ? '⊘' : '–')) : ''}
+                        </td>
+                        <td>{r.aktif ? <span className="rz ok">aktif</span> : <span className="rz">pasif</span>}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table></div>
+                <div className="ic sonuk" style={{ paddingLeft: 0 }}>
+                  Şablon sütunu: ✔ bu tipe önerilir · ⊘ modülü bu kurulumda kapalı ·
+                  – başka tipin rolü · boş = kurumun kendi rolü.
+                </div>
+              </div>
+            )}
+        </div>
+      </div>
+
+      <div className="pnl" hidden={aktif !== 3}>
           <div className="hdr k4">
             <div className="fld"><label>Başvuru modeli</label><div className="inp combo">Tek başvuru = tek muayene <span className="sonuk">· tıp merkezi: başvuru altında çoklu hizmet · hastane: yatış</span></div></div>
             <div className="fld"><label>Ödeyen kurumlar</label><div className="inp">☑ Özel (kendi) · ☑ SGK · ☑ Özel sigorta (ÖSS) · ☐ Kurum sözleşmeleri · ☐ Yabancı/sağlık turizmi</div></div>
@@ -662,7 +673,7 @@ export function KurumTipiAyarlari() {
           </div>
         </div>
 
-      <div className="pnl" hidden={aktif !== 3}>
+      <div className="pnl" hidden={aktif !== 4}>
           <div className="ikiPanel">
             <div className="hdr" style={{gridTemplateColumns: '1fr 1fr'}}>
               <div className="fld"><label>Muayene şablonu</label><div className="inp combo">Dahiliye genel <span className="sonuk">· dal: göz OD/OS, FTR skala, diş odontogram</span></div></div>
@@ -689,7 +700,7 @@ export function KurumTipiAyarlari() {
           </div>
         </div>
 
-      <div className="pnl" hidden={aktif !== 4}>
+      <div className="pnl" hidden={aktif !== 5}>
           {/* ENTEGRASYONLAR CANLI (491, kullanici): mockup'ta 12 sabit satir
               vardi ve "bağlı / test / gizli" rozetleri gercek hesaplara
               bakmiyordu. Gereklilik urun modu + acik modullerden, durum
@@ -743,7 +754,7 @@ export function KurumTipiAyarlari() {
           </div>
         </div>
 
-      <div className="pnl" hidden={aktif !== 5}>
+      <div className="pnl" hidden={aktif !== 6}>
           <div className="ikiPanel">
             <div className="grp" style={{margin: '10px'}}><div className="gb">Birimler / kaynaklar <span className="sp">tipe göre: oda · ünit · cihaz · servis/yatak</span></div>
               <div className="dg"><table><thead><tr><th>Kaynak</th><th>Tür</th><th>Bağlı</th><th className="orta">Randevu</th><th className="orta">Aktif</th></tr></thead>
@@ -765,7 +776,7 @@ export function KurumTipiAyarlari() {
           </div>
         </div>
 
-      <div className="pnl" hidden={aktif !== 6}>
+      <div className="pnl" hidden={aktif !== 7}>
           {/* OZET VE KURULUM ADIMLARI CANLI (490, kullanici: "profil yanlış
               geliyor" + "kurulum adımları tablosunu da canlıya bağla"):
               mockup'tan gelen sabit sekiz satir hangi adimin gercekten tamam

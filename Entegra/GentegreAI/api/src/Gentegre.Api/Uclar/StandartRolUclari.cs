@@ -123,6 +123,9 @@ public static class StandartRolUclari
     private static readonly Dictionary<string, string> SablonModul = new(StringComparer.Ordinal)
     {
         ["hekim"] = "muayene", ["hemsire"] = "muayene",
+        // Cagri merkezi RANDEVU modulune bagli: randevu kapaliysa telefonla
+        //   randevu alacak bir ekip de yoktur.
+        ["cagri_ajani"] = "randevu", ["cagri_sorumlu"] = "randevu",
         // medula_sorumlu BURAYA YAZILMAZ: "medula" bir `kurum_modul` kodu
         //   degil (SGK baglantisi entegrasyon ayari). Haritaya konulsa
         //   modul hicbir kurumda "acik" gorunmez ve rol HIC onerilmez.
@@ -147,7 +150,24 @@ public static class StandartRolUclari
         new("kayit_kabul_sorumlu", "Kayıt Kabul Sorumlusu (Banko Şefi)",
             "Bankonun tüm işleri + iskonto talebinin birim imzası, vardiya/kasa kapatma.", Klinik,
             K(KayitKabulSorumluTemel)),
-        new("hekim", "Hekim", "Muayene, tanı, istem, reçete ve rapor; kendi hakedişi.", ["muayenehane", "tip_merkezi", "hastane"], K(HekimTemel)),
+        // AD "Doktor" (790, kullanici: "Hekim rename Doktor") - KOD `hekim`
+        //   kalir: basamaklar, sablonlar ve menu suzgeci koda bakiyor.
+        // CAGRI MERKEZI (791, kullanici: "Çağrı Merkezi Ajanı ve Çağrı Merkezi
+        //   Sorumlusu da ekle"): telefonla randevu alan ekip. Ajan randevu ve
+        //   hasta kaydi acar; HASTANIN PARASINI GORMEZ (belge/kasa yetkisi
+        //   yok) - telefonda borc konusmak bankonun isidir.
+        new("cagri_ajani", "Çağrı Merkezi Ajanı",
+            "Telefonla randevu alma/değiştirme, hasta ve aday kaydı, hekim uygunluğu.",
+            Klinik,
+            K(Y("randevu"), T("randevu.plan"), Y("hasta"), Y("aday"), T("firsat"),
+              T("kurum"), T("hizmet"), T("bildirim"), T("muayene"))),
+        new("cagri_sorumlu", "Çağrı Merkezi Sorumlusu",
+            "Ajanların işi + randevu iptali, hatırlatma şablonları, kuyruk ve günlük takibi.",
+            Klinik,
+            K(H("randevu"), T("randevu.plan"), Y("hasta"), H("aday"), Y("firsat"),
+              T("kurum"), T("hizmet"), Y("bildirim"), Y("bildirim_sablon"),
+              T("muayene"), T("islem_log"))),
+        new("hekim", "Doktor", "Muayene, tanı, istem, reçete ve rapor; kendi hakedişi.", ["muayenehane", "tip_merkezi", "hastane"], K(HekimTemel)),
         new("hemsire", "Hemşire", "Vital, enjeksiyon, pansuman, numune; muayene kaydına yardım.", ["tip_merkezi", "hastane", "dal_ftr"],
             K(T("hasta"), Y("muayene"), T("randevu"), Y("lab.numune"), T("lab"), Y("onam"), T("katalog"), T("belge"))),
         new("muhasebe", "Muhasebe / Finans", "Fatura, kasa-banka, dönem sonlandırma, kesinti ve itiraz.", Klinik, K(MuhasebeTemel)),

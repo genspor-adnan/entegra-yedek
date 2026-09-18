@@ -13837,3 +13837,69 @@ rolünden Yönetim › Yetkiler'den kaldırır.
 
 Göç kimseyi role ATAMAZ - kişi ataması yöneticinin kararıdır (Yönetim ›
 Roller). xUnit 286/286.
+
+
+## 18.09.2026 — İskonto imzası yalnız kadroda · Roller sekmesi · rol temizliği (789-791)
+
+### 789 — Yönetici artık imza atmaz
+
+Kullanıcı: *"yönetici rolünden basamak yetkilerini kaldır"*. 788'de üç basamak
+`yonetici` rolünde YEDEK duruyordu (kadro atanana kadar talep kuyrukta
+kalmasın diye); kurum yedeği istemiyor. Üçü de kaldırıldı - sistem yöneticisi
+yetkiyi DAĞITIR, kararı vermez. `iskonto_onay` ekranı onda kalıyor: imza
+atmasa da zincirin nerede takıldığını görmek zorunda.
+
+**Yedek kalkınca yeni tehlike:** kadroya kimse atanmamışsa o basamağı
+imzalayacak kimse yok ve talep kuyrukta SESSİZCE bekler - kimse hata almaz,
+kullanıcı "onaya gitti" sanır. `v_onay_basamak_sahibi` görünümü her basamak
+yetkisinin kaç AKTİF kullanıcıda olduğunu sayar, sıfırsa `sahipsiz = 1`; göç
+de uyarıyı basar. Bir SAYIM, kapı değil: talebi açmayı engellemek, indirim
+yapmak isteyen bankoyu kurumun kadro eksiğinden ötürü durdururdu.
+
+### Roller kendi sekmesinde
+
+Kullanıcı: *"modüllerin sağına Roller diye sekme aç ve rolleri oraya taşı"*.
+Kurum Profili artık 8 sekme: Profil · Modüller · **Roller** · Kayıt &
+Ücretlendirme · Klinik Ayarlar · Entegrasyonlar · Kaynaklar · Özet. "Standart
+roller" ve "Bu profilde geçerli roller" birinci sekmeden çıkıp buraya geçti -
+profil sekmesi tip kartları + modül özeti + iki rol tablosuyla uzayıp
+gidiyordu; rol işi ayrı bir adımdır.
+
+### 790 — Elle eklenen roller silindi, "İskonto Onaylayanlar" gerçekten gitti
+
+Kullanıcı: *"benim eklediğim rolleri kaldır"*, *"İskonto Onaylayanlar'ı kaldır
+demiştim hala görünüyor"*, *"Hekim rename Doktor"*.
+
+- `doktor` (50 kullanıcı) ve `bnk1` (boş) silindi. **Önce kişiler, sonra rol:**
+  50 kullanıcı standart `hekim` rolüne taşındı (kullanıcının kararı), rol AKTİF
+  edildi ve profil haritasında geçerli işaretlendi - yoksa 50 kişi pasif bir
+  role taşınmış olur, ilk profil kaydında (786) yeniden kapanırdı.
+- `iskonto_onay` **silindi**. 784 onu silememişti (sistem rolü), boşaltmıştı;
+  785 pasife aldı ama kayıt listede kaldı ve ilk profil kaydında yeniden aktif
+  işaretlendi. Rol artık 0 yetki / 0 kullanıcı ve basamak sahipliği rol
+  kaydına değil YETKİ koduna bakıyor (754) - taşıdığı bir şey kalmamıştı.
+  `fn_rol_sistem_koru` silmeyi reddettiği için tetik bu TEK kayıt için açıkça
+  kapatılıp hemen geri açıldı: korumayı "boş sistem rolü silinebilir" diye
+  gevşetmek, bir rolü önce boşaltıp sonra silmenin yolunu açardı.
+- `hekim` rolünün ADI "Doktor" oldu; **kodu `hekim` kalıyor** - basamaklar,
+  şablonlar ve menü süzgeci koda bakıyor (sistem rolünün kodu zaten
+  değiştirilemez). Şablon da güncellendi, yeni kurulumlar da "Doktor" görür.
+
+### 791 — Çağrı merkezi rolleri
+
+Kullanıcı: *"Çağrı Merkezi Ajanı ve Çağrı Merkezi Sorumlusu da ekle 2 tane"*.
+
+- **Ajan**: randevu al/değiştir · hasta ve aday kaydı · hekim uygunluğu
+  (çalışma planı) · kurum/hizmet sorgusu · gönderilen hatırlatmaları görür.
+- **Sorumlu**: ajanın hepsi + randevu/aday İPTALİ · hatırlatma şablonları ·
+  bildirim kuyruğu · işlem günlüğü.
+
+**Para ekranı bilerek yok** (`belge`, `kasa_islem`, `mali_hareket`): telefonda
+borç/tahsilat konuşmak bankonun işidir; çağrı merkezine hesabı açmak, personel
+devrinin en yüksek olduğu masaya en hassas veriyi vermek olurdu. Göç bunu
+yazmakla kalmıyor, sonunda DOĞRULUYOR (yetki eklenirse hata verir) ve
+`CagriMerkeziRolleriTestleri` de aynı kuralı koruyor. Hasta kaydını ikisi de
+SİLEMEZ. Şablon-modül haritasında `randevu` modülüne bağlılar.
+
+**Doğrulama.** Dev: 40 rol (38 sistem + 2 yeni), ajan 16 yetki / sorumlu 18.
+xUnit 290/290, vitest 669/669.

@@ -386,12 +386,14 @@ public sealed class BankoSefiTestleri(VeritabaniOlgusu olgu)
         Assert.Equal(1, await YetkiSayisiAsync(veri, "kayit_kabul", "iskonto_onay"));
         Assert.Equal(1, await YetkiSayisiAsync(veri, "muhasebe", "iskonto_onay"));
 
-        // YÖNETİCİ ÜÇÜNÜ DE TAŞIR (yedek): kadro rollerine kimse atanmadan
-        //   önce talep kuyrukta kalmasın. 784 tek-imza kuralı burada da
-        //   geçerli - bir yönetici zincirde yalnız BİR basamağı imzalar.
+        // YÖNETİCİ ARTIK İMZA ATMAZ (789, kullanıcı: "yönetici rolünden
+        //   basamak yetkilerini kaldır"). 788'de yedek olarak duruyordu -
+        //   kadro atanana kadar talep kuyrukta kalmasın diye; kurum yedeği
+        //   istemiyor, imza yalnız kadroda. Sistem yöneticisi yetkiyi dağıtır,
+        //   kararı vermez.
         foreach (var kod in new[] { "belge.iskonto_onay_birim", "belge.iskonto_onay_mali",
                                     "belge.iskonto_onay_ust" })
-            Assert.Equal(1, await YetkiSayisiAsync(veri, "yonetici", kod));
+            Assert.Equal(0, await YetkiSayisiAsync(veri, "yonetici", kod));
     }
 
     [Fact]
