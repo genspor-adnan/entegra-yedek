@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Teleradyoloji Raporlama — Radyolog Çalışma Alanı — Mockup (Gentegre AI · Teleradyoloji)</title>
+<title>Teleradyoloji Raporlama (iç radyoloji ekranı) — Mockup (Gentegre AI · Teleradyoloji)</title>
 <style>
   :root{
     --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
@@ -98,76 +98,217 @@
   .is{margin:6px;border:1px solid var(--line);border-radius:3px;background:#fff;padding:5px 7px;font-size:11px}
   .is b{display:block;color:var(--navy)} .is .sonuk{font-size:10.5px}
 
+  /* kart mockuplariyla ayni ek siniflar (telerad_istek_karti.html) */
+  .title .surum{font-weight:normal;font-size:10.5px;background:rgba(255,255,255,.18);
+    border-radius:9px;padding:1px 8px}
+  .aciklama{padding:0 12px 10px;color:var(--muted);font-size:11px}
+  .inp.onay{border:none;background:none;padding-left:0}
+  .kutucuk{display:inline-block;width:13px;height:13px;border:1px solid var(--line);border-radius:2px;background:#fff;position:relative}
+  .kutucuk.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3}
+  .kutucuk.on::after{content:"✓";color:#fff;font-size:10px;position:absolute;left:1.5px;top:-2px}
 </style>
 </head>
 <body>
 
+<!-- =====================================================================
+     TELERADYOLOJI RAPORLAMA.
+
+     FAZ 1'DE TELERADYOLOJIYE OZEL RAPORLAMA EKRANI YOK ve bilerek yok:
+     okuma isi IC AKISIN AYNISIDIR. Teleradyoloji istegi ic isteme baglanir
+     (`radyoloji_istem.telerad_istek_id`) ve rapor MEVCUT radyoloji raporlama
+     ekraniyla yazilir (`web/src/sayfalar/RadyolojiRapor.tsx`, tasarim
+     `../radyoloji_rapor_yaz.html`). Ikinci bir rapor ekrani, ayni raporu iki
+     ayri yerden yazmak demekti.
+
+     Asagidaki birinci pencere O EKRANIN gercek halidir; teleradyolojiye ozel
+     olan (viewer, kuruma mesaj, otomatik teslim) ikinci pencerede faz 2
+     olarak durur.
+     ================================================================== -->
 <div class="win">
-  <div class="title">📝 Raporlama — M. Kaya · Beyin BT · Yıldız Hast. (Bursa) <span class="sp">TR-2026/08811 · erişim no YH-2026-44120 · ACİL · SLA −4 dk</span></div>
-  <div style="display:grid;grid-template-columns:1fr 460px">
-    <div style="background:#0f171f;min-height:560px;position:relative;color:#cfd8e3">
-      <div style="position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:2px">
-        <div style="background:#1a2430;display:flex;align-items:center;justify-content:center;opacity:.6">🧠 Axial · 1/120</div>
-        <div style="background:#1a2430;display:flex;align-items:center;justify-content:center;opacity:.6">Coronal MPR</div>
-        <div style="background:#1a2430;display:flex;align-items:center;justify-content:center;opacity:.6">Sagittal MPR</div>
-        <div style="background:#1a2430;display:flex;align-items:center;justify-content:center;opacity:.6">Önceki: 12.03.2025 Beyin BT (karşılaştır)</div>
+  <div class="title">📝 Radyoloji Raporu <span class="surum">ACC-1001</span>
+    <span class="sp">yapıldı (283/284) · /radyoloji/rapor/:istemId · <code>radyoloji_rapor</code> — teleradyoloji isteği de buraya düşer</span></div>
+
+  <!-- SAYFA EYLEMLERI: onay IKI ASAMALI (asistan -> uzman) ve onaydan sonra
+       rapor KILITLENIR; duzeltme ancak EK RAPOR (addendum) ile yazilir. -->
+  <div class="toolbar">
+    <div class="btn primary">💾 Taslak Kaydet</div>
+    <div class="btn">➜ Uzmana Gönder</div>
+    <div class="btn ok">✍ Onayla ve İmzala</div>
+    <div class="btn danger">⚠ Kritik Bulgu Bildir</div>
+    <div class="sepv"></div>
+    <div class="btn pas">＋ Ek Rapor <span class="sonuk">yalnız kilitliyken</span></div>
+    <div class="btn">🖨 Çıktı</div>
+    <div class="btn sp">Kapat</div>
+  </div>
+
+  <!-- KIMLIK SERIDI: her zaman gorunur. Onayli raporda "🔒 Kilitli" rozeti
+       eklenir - metin alanlari salt okunur olur. -->
+  <div class="hdr" style="grid-template-columns:repeat(4,1fr)">
+    <div class="fld"><label>Hasta</label><div class="inp ro big">M. Kaya <span class="sonuk">58 y</span></div></div>
+    <div class="fld"><label>Tetkik</label><div class="inp ro">BT-TOR-01 · BT TORAKS (kontrastsız)</div></div>
+    <div class="fld"><label>Çekim</label><div class="inp ro">18.09.2026 09:12 · Siemens SOMATOM</div></div>
+    <div class="fld"><label>Durum</label><div class="inp ro"><span class="rz sari">Taslak</span></div></div>
+  </div>
+
+  <div class="ucPanel">
+    <!-- SOL: hastanin gecmisi + kritik bulgu bildirim izi -->
+    <div>
+      <div class="grp" style="margin:10px 8px">
+        <div class="gb">Önceki Tetkikler</div>
+        <div class="ic">
+          <div class="is"><b>Toraks BT · 12.03.2026</b><span class="sonuk">Dr. C. Er — Nodül izlenmedi.</span></div>
+          <div class="is"><b>Akciğer PA · 02.11.2025</b><span class="sonuk">Dr. A. Kaya — Normal sınırlarda.</span></div>
+        </div>
       </div>
-      <div style="position:absolute;left:10px;top:10px;display:flex;gap:6px"><span class="rz kir">ACİL</span><span class="rz">W/L Beyin</span><span class="rz">Kalınlık 5 mm</span><span class="rz mavi">Önceki tetkik: 1</span></div>
-      <div style="position:absolute;bottom:0;left:0;right:0;display:flex;gap:6px;justify-content:center;padding:10px;background:linear-gradient(transparent,rgba(0,0,0,.7))">
-        <div class="btn">🔍 Zoom</div><div class="btn">📏 Ölçüm</div><div class="btn">🪟 W/L</div><div class="btn">🔗 Senkron</div><div class="btn">⬛ 1×1</div><div class="btn">⊞ 2×2</div><div class="btn">🎨 MPR</div><div class="btn">📎 Anahtar Görüntü</div><div class="btn">🖥 Tam Ekran / 2. Monitör</div>
+      <div class="grp" style="margin:10px 8px">
+        <div class="gb">Kritik Bulgu Bildirimleri</div>
+        <div class="ic sonuk">Bu tetkikte bildirim yok.</div>
       </div>
     </div>
-    <div style="border-left:1px solid var(--line2)">
-      <div class="hdr" style="grid-template-columns:1fr 1fr">
-        <div class="fld"><label>Hasta</label><div class="inp ro big">M. Kaya · 58 E</div></div>
-        <div class="fld"><label>Gönderen</label><div class="inp ro">Yıldız Hast. · Dr. S. Yıldırım (Acil)</div></div>
-        <div class="fld" style="grid-column:span 2"><label>Klinik Bilgi</label><div class="inp ro">Ani konuşma bozukluğu, sağ kol güçsüzlüğü 40 dk. İnme protokolü. Antikoagülan kullanmıyor.</div></div>
+
+    <!-- ORTA: bolumler SABLONDAN uretilir; zorunlu bolum bos birakilamaz. -->
+    <div>
+      <div class="hdr" style="grid-template-columns:1fr">
+        <div class="fld"><label>Teknik</label>
+          <div class="inp">Kontrastsız toraks BT, 1 mm kesit; aksiyel/koronal MPR.</div></div>
+        <div class="fld"><label class="req">Bulgular</label>
+          <div class="inp" style="min-height:110px;align-items:flex-start">Her iki akciğer parankiminde
+            belirgin konsolidasyon veya buzlu cam dansitesi izlenmedi. Plevral efüzyon yok.
+            Mediastinal yapılar doğal. Kalp boyutları normal sınırlarda.</div></div>
+        <div class="fld"><label class="req">Sonuç</label>
+          <div class="inp" style="min-height:44px;align-items:flex-start"><b>Toraks BT normal sınırlarda.
+            Pulmoner emboli lehine bulgu saptanmadı (kontrastsız tetkik sınırlılığı ile).</b></div></div>
+        <div class="fld"><label>Öneri</label>
+          <div class="inp">Klinik şüphe sürerse BT anjiyo önerilir.</div></div>
       </div>
-      <div class="sekmeler"><div class="sekme on">Rapor</div><div class="sekme">Şablon / Makro</div><div class="sekme">Önceki (1)</div><div class="sekme">İstem</div><div class="sekme">Mesajlar</div></div>
-      <div class="pnl">
-        <div class="hdr" style="grid-template-columns:1fr">
-          <div class="fld"><label>Teknik</label><div class="inp">Kontrastsız aksiyel beyin BT, 5 mm; koronal/sagittal MPR.</div></div>
-          <div class="fld"><label class="req">Bulgular</label><div class="inp" style="min-height:120px;align-items:flex-start">Sol MCA sulama alanında, insular kortekste gri-beyaz cevher ayrımında silinme ve hafif hipodansite izlenmektedir (erken iskemik değişiklik, ASPECTS 8). Sol MCA M1 segmentinde hiperdens arter işareti mevcuttur. Kanama, kitle etkisi, orta hat şifti izlenmedi. Ventriküller normal genişliktedir.</div></div>
-          <div class="fld"><label class="req">Sonuç</label><div class="inp" style="min-height:48px;align-items:flex-start"><b>Sol MCA erken iskemik değişiklikler ve hiperdens MCA işareti — akut iskemik inme ile uyumlu. Kanama yok.</b> <span class="rz kir">KRİTİK BULGU</span></div></div>
-          <div class="fld"><label>Öneri</label><div class="inp">Nöroloji ile acil değerlendirme; BT anjiyo / perfüzyon önerilir.</div></div>
-          <div class="fld"><label>Yapılandırılmış alanlar</label><div class="inp">ASPECTS: <b>8</b> · Kanama: <b>Yok</b> · Orta hat şifti: <b>0 mm</b> <span class="sonuk">— şablondan, rapor JSON'una yazılır</span></div></div>
-        </div>
-        <div style="padding:6px 10px;display:flex;gap:6px;flex-wrap:wrap">
-          <div class="btn">🎙 Dikte</div><div class="btn">🤖 AI Taslak</div><div class="btn">💾 Taslak Kaydet</div><div class="btn danger">🚨 Kritik Bulgu Bildir</div>
-          <div class="btn ok sp">✍ e-İmzala &amp; Onayla</div>
-        </div>
-      </div>
-      <div class="pnl">
+      <div class="aciklama">Bölümler <code>radyoloji_sablon_bolum</code>'den gelir; zorunlu bölüm
+        (★) boşken onay reddedilir. Onaydan sonra rapor <b>kilitlenir</b> — düzeltme ek rapor ile.</div>
+    </div>
+
+    <!-- SAG: sablon, makro, yapilandirilmis alanlar, kritik bulgu, konsultasyon -->
+    <div>
+      <div class="grp" style="margin:10px 8px">
+        <div class="gb">Şablon</div>
         <ul class="liste">
-          <li class="sel">📄 Beyin BT — Acil inme protokolü <span class="sp">yapılandırılmış · ASPECTS</span></li>
-          <li>📄 Beyin BT — Normal <span class="sp">makro: "bt_beyin_normal"</span></li>
-          <li>📄 Beyin BT — Travma <span class="sp"></span></li>
-          <li>📄 Beyin BT — Kitle <span class="sp"></span></li>
+          <li class="sel">BT-TOR-01 · Toraks BT raporu <span class="sp">v3 · varsayılan</span></li>
+          <li>BT-TOR-02 · Toraks BT — PE protokolü <span class="sp">v1</span></li>
         </ul>
-        <div class="ic sonuk">Şablonlar mevcut <code>radyoloji_sablon</code> / <code>radyoloji_sablon_makro</code>; kurum başına farklı rapor başlığı/altbilgi.</div>
       </div>
-      <div class="pnl">
-        <div class="dg"><table><thead><tr><th>Tarih</th><th>Kurum</th><th>Tetkik</th><th>Sonuç</th><th></th></tr></thead>
-          <tbody><tr><td>12.03.2025</td><td>Yıldız Hast.</td><td>Beyin BT</td><td>Normal sınırlarda.</td><td>🖼 Karşılaştır</td></tr></tbody></table></div>
-        <div class="ic sonuk">Önceki tetkikler gönderen kurumun PACS'ından ve e-Nabız'dan (izinle) listelenir.</div>
+      <div class="grp" style="margin:10px 8px">
+        <div class="gb">Makrolar <span class="sp">imlecin bölümüne ekler</span></div>
+        <ul class="liste">
+          <li>/norm <span class="sp">Toraks normal metni</span></li>
+          <li>/nodul <span class="sp">Nodül tarifi (boyut · lokalizasyon)</span></li>
+        </ul>
       </div>
-      <div class="pnl">
-        <div class="hdr" style="grid-template-columns:1fr 1fr">
-          <div class="fld"><label>Erişim No</label><div class="inp ro">YH-2026-44120</div></div><div class="fld"><label>İstem Zamanı</label><div class="inp ro">03.09.2026 13:30</div></div>
-          <div class="fld"><label>Çekim</label><div class="inp ro">13:42 · Siemens SOMATOM · 120 kV</div></div><div class="fld"><label>Geliş (DICOM)</label><div class="inp ro">13:51 · 120 görüntü · 1 seri</div></div>
-          <div class="fld"><label>Sözleşme / Tarife</label><div class="inp ro">Yıldız Hast. 2026 · BT acil 450 ₺</div></div><div class="fld"><label>SLA</label><div class="inp ro">30 dk · <span class="rz kir">aşıldı</span></div></div>
+      <div class="grp" style="margin:10px 8px">
+        <div class="gb">Yapılandırılmış Alanlar</div>
+        <div class="ic">
+          <div class="fld"><label>Plevral efüzyon</label><div class="inp combo">Yok</div></div>
+          <div class="fld" style="margin-top:6px"><label>Nodül sayısı</label><div class="inp">0</div></div>
         </div>
       </div>
-      <div class="pnl">
-        <div class="ic"><div class="is" style="max-width:80%"><b>Dr. S. Yıldırım (Yıldız Acil) · 13:52</b>Hasta tPA penceresinde, lütfen öncelik.</div>
-          <div class="is" style="max-width:80%;margin-left:auto;background:#eef4fc"><b>Siz · 13:58</b>Okuyorum, 5 dk.</div></div>
-        <div class="toolbar" style="border-bottom:none"><div class="inp" style="flex:1">Mesaj…</div><div class="btn">📞 Ara</div><div class="btn primary">Gönder</div></div>
+      <div class="grp" style="margin:10px 8px">
+        <div class="gb">Kritik Bulgu</div>
+        <div class="ic">
+          <div class="inp onay" style="border:none;background:none;padding-left:0">
+            <span class="kutucuk"></span> Bu tetkikte kritik bulgu var</div>
+          <div class="aciklama" style="padding:6px 0 0">İşaretliyse <b>bildirim kaydı olmadan rapor
+            onaylanamaz</b>: kime, hangi yolla, ne zaman haber verildiği kayda geçer.</div>
+        </div>
+      </div>
+      <div class="grp" style="margin:10px 8px">
+        <div class="gb">Konsültasyon</div>
+        <div class="ic"><div class="btn" style="display:inline-flex">＋ İkinci Görüş İste</div>
+          <div class="aciklama" style="padding:6px 0 0">Rapor kilitli olsa da istenebilir; görüş
+            gelince ek rapor yazılır.</div></div>
       </div>
     </div>
   </div>
-  <div class="statusbar"><span>Okuma süresi 06:40</span><span>Görüntü: yerel önbellek · 12 ms</span><span>e-imza: sertifika geçerli</span><span class="sp">Onayla → rapor PDF (kurum başlıklı) + HL7/API ile gönderen kuruma + kritik bulgu teyit akışı</span></div>
+
+  <div class="statusbar">
+    <span>Onay iki aşamalı: <b>Uzmana Gönder</b> (ön rapor) → <b>Onayla ve İmzala</b> → 🔒 kilit</span>
+    <span class="sp">yetki: <code>rad.rapor_yaz</code> · <code>rad.rapor_onayla</code></span>
+  </div>
 </div>
-<div class="not"><b>Onay sonrası</b>: rapor <code>radyoloji_rapor</code>'a (kaynak = teleradyoloji), PDF e-imzalı; gönderen kuruma HL7 ORU / REST ile iletilir, teslim teyidi <code>telerad_istek.teslim_*</code>'e. Kritik bulgu: telefon/SMS + <code>radyoloji_kritik_bulgu</code>, karşı tarafın teyidi zorunlu (mevcut kritik bulgu listesi). Ücret: sözleşme tarifesinden <code>telerad_istek.ucret</code>, dönem sonunda kuruma fatura + radyoloğa hakediş (Prim modülü, rol Raporlayan).</div>
+
+<!-- =====================================================================
+     TELERADYOLOJIYE OZEL OLANLAR — FAZ 2 (dokuman/12_KALAN_ISLER.md)
+     ================================================================== -->
+<div class="win">
+  <div class="title">⏭ Faz 2 — teleradyolojiye özel raporlama eklentileri
+    <span class="sp">tasarım niyeti; ekranda henüz yok</span></div>
+
+  <!-- VIEWER: DICOM alimi faz 2. Faz 1'de goruntu kurumun PACS'inda kalir,
+       radyolog kendi viewer'inda acar; kart yalnizca Study UID'yi tutar. -->
+  <div style="display:grid;grid-template-columns:1fr 360px">
+    <div style="background:#0f171f;min-height:300px;position:relative;color:#cfd8e3">
+      <div style="position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:2px">
+        <div style="background:#1a2430;display:flex;align-items:center;justify-content:center;opacity:.55">Axial · 1/412</div>
+        <div style="background:#1a2430;display:flex;align-items:center;justify-content:center;opacity:.55">Coronal MPR</div>
+        <div style="background:#1a2430;display:flex;align-items:center;justify-content:center;opacity:.55">Sagittal MPR</div>
+        <div style="background:#1a2430;display:flex;align-items:center;justify-content:center;opacity:.55">Önceki: 12.03.2026 Toraks BT (karşılaştır)</div>
+      </div>
+      <div style="position:absolute;left:10px;top:10px;display:flex;gap:6px">
+        <span class="rz">W/L Akciğer</span><span class="rz">1 mm</span><span class="rz mavi">Önceki tetkik: 1</span></div>
+      <div style="position:absolute;bottom:0;left:0;right:0;display:flex;gap:6px;justify-content:center;padding:10px;background:linear-gradient(transparent,rgba(0,0,0,.65))">
+        <div class="btn pas">🔍 Zoom</div><div class="btn pas">📏 Ölçüm</div><div class="btn pas">🪟 W/L</div>
+        <div class="btn pas">🔗 Senkron</div><div class="btn pas">🎨 MPR</div><div class="btn pas">📎 Anahtar Görüntü</div>
+        <div class="btn pas">🖥 2. Monitör</div>
+      </div>
+    </div>
+    <div style="border-left:1px solid var(--line2)">
+      <div class="grp" style="margin:10px 8px">
+        <div class="gb">Teleradyoloji Bağlamı <span class="sp">faz 2</span></div>
+        <div class="ic">
+          <div class="fld"><label>İstek</label><div class="inp ro">TR-2026/00001 · Yıldız Hastanesi</div></div>
+          <div class="fld" style="margin-top:6px"><label>Erişim No</label><div class="inp ro">ACC-1001</div></div>
+          <div class="fld" style="margin-top:6px"><label>SLA</label><div class="inp ro">30 dk · kalan <b>13 dk</b></div></div>
+          <div class="fld" style="margin-top:6px"><label>Sözleşme / Ücret</label><div class="inp ro">Yıldız 2026 · 675,00</div></div>
+        </div>
+        <div class="aciklama">Bugün bu bilgiler raporlama ekranında görünmüyor; çalışma
+          listesinden ve istek kartından okunur (<code>telerad_istek_karti.html</code>).</div>
+      </div>
+      <div class="grp" style="margin:10px 8px">
+        <div class="gb">Kuruma Mesaj <span class="sp">faz 2</span></div>
+        <div class="ic">
+          <div class="is" style="max-width:85%"><b>Dr. S. Yıldırım (Yıldız Acil) · 09:52</b>Hasta acilde, öncelik rica ederim.</div>
+          <div class="is" style="max-width:85%;margin-left:auto;background:#eef4fc"><b>Siz · 09:58</b>Okuyorum.</div>
+        </div>
+      </div>
+      <div class="grp" style="margin:10px 8px">
+        <div class="gb">Diğer <span class="sp">faz 2</span></div>
+        <ul class="liste">
+          <li class="sonuk">🎙 Dikte · 🤖 AI taslak</li>
+          <li class="sonuk">🔁 Ek görüntü iste (kuruma bildirim + durum 8)</li>
+          <li class="sonuk">📦 Otomatik teslim: onaydan sonra HL7 ORU / FHIR ile kuruma</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar">
+    <span>Faz 1'de teslim <b>elle</b>: çalışma listesinde 📦 Teslim Et → durum 7, damgayı tetik yazar (799)</span>
+    <span class="sp">DICOM alımı · HL7/FHIR teslim · otomatik atama · nöbet çizelgesi</span>
+  </div>
+</div>
+
+<div class="not">
+  <b>Neden ayrı raporlama ekranı yok?</b> Teleradyolojiye özel olan işin ÇEVRESİDİR
+  (kurum, sözleşme, SLA, görüntü, atama, teslim, ücret); okuma ve rapor yazma iç akışın
+  aynısıdır. İstek iç isteme bağlanır (<code>radyoloji_istem.telerad_istek_id</code>) ve rapor
+  <code>radyoloji_rapor</code>'a yazılır — ikinci bir ekran, aynı raporu iki ayrı yerden
+  yazmak olurdu.<br>
+  <b>Onay sonrası (faz 1):</b> rapor kilitlenir, çıktı alınabilir; teslim çalışma listesinden
+  <b>Teslim Et</b> ile yapılır — <code>telerad_istek.teslim_durum / teslim_zamani</code> damgasını
+  <code>tg_telerad_istek</code> yazar. Ücret istek açılırken sözleşme tarifesinden kopyalanmıştı;
+  dönem faturası ve radyolog hakedişi faz 2.<br>
+  <b>Kritik bulgu</b> mevcut akışın aynısı: işaretliyse bildirim kaydı olmadan onay yok
+  (<code>radyoloji_kritik_bulgu</code>, karşı tarafın teyidi ayrı liste).<br>
+  <b>Komşu mockuplar:</b> çalışma listesi <code>telerad_calisma_listesi.html</code> · istek kartı
+  <code>telerad_istek_karti.html</code> · kurum/sözleşme kartları
+  <code>telerad_kurum_sozlesme_karti.html</code> · iç raporlama ekranı
+  <code>../radyoloji_rapor_yaz.html</code> · süreç bütünü <code>telerad_sureci.html</code>.
+</div>
 
 
 <script>
