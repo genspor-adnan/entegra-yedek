@@ -203,3 +203,122 @@ public sealed class IskontoKurallariTestleri(VeritabaniOlgusu olgu)
         await t.RollbackAsync();
     }
 }
+
+/// <summary>
+/// ZİNCİRDE TEK İMZA (784) — kullanıcı: *"1'i yaz"* ("aynı kişi ardışık
+/// basamakları imzalayamaz").
+///
+/// 783 kendi TALEBİNİ onaylamayı kapattı; açık kalan taraf başkasının
+/// talebinde üç imzayı tek elde toplamaktı: basamaklar role düşüyor (754:
+/// birim · mali · üst) ve üç rolü birden taşıyan kişi - "İskonto
+/// Onaylayanlar" rolü tam da öyleydi - zinciri tek başına yürütebiliyordu.
+/// İki imza aynı elden çıkınca ikincisi denetim değil tekrardır.
+///
+/// Kural OMURGANIN TAMAMINDA: satınalma · izin · avans · iskonto · doküman.
+/// </summary>
+public sealed class OnayTekImzaTestleri(VeritabaniOlgusu olgu)
+    : IClassFixture<VeritabaniOlgusu>
+{
+    private readonly VeritabaniOlgusu _olgu = olgu;
+
+    /// <summary>İki basamaklı bir deneme zinciri açar.</summary>
+    private static async Task<long> ZincirAsync(NpgsqlConnection b, NpgsqlTransaction t)
+    {
+        var onayId = await b.TekDegerAsync<long>(
+            "insert into public.onay (akis_id, kaynak_tur, kaynak_id, durum, ekleyen, sube_id) "
+            + "select k.id, 1256, 999999, 0, 1, 0 from public.onay_akis k "
+            + " where k.kod = 'belge.iskonto' returning id",
+            t, [], CancellationToken.None);
+        await b.CalistirAsync(
+            "insert into public.onay_adim (onay_id, sira, ad, sahip_turu, rol, durum) "
+            + "values (@p0, 1, 'Birim', 1, 1, 0), (@p0, 2, 'Mali', 1, 4, 0)",
+            t, [onayId], CancellationToken.None);
+        return onayId;
+    }
+
+    private static Task<int> ImzalaAsync(NpgsqlConnection b, NpgsqlTransaction t,
+        long onayId, short sira, int kullanici, short durum = 1)
+        => b.CalistirAsync(
+            "update public.onay_adim set durum = @p3, karar_veren_id = @p2 "
+            + " where onay_id = @p0 and sira = @p1",
+            t, [onayId, sira, kullanici, durum], CancellationToken.None);
+
+    [Fact]
+    public async Task Ayni_kisi_IKINCI_basamagi_imzalayamaz()
+    {
+        if (!_olgu.Baglandi(nameof(Ayni_kisi_IKINCI_basamagi_imzalayamaz))) return;
+        await using var b = await _olgu.Gerekli().AcAsync();
+        await using var t = await b.BeginTransactionAsync();
+
+        var onayId = await ZincirAsync(b, t);
+        await ImzalaAsync(b, t, onayId, 1, 555);
+
+        var h = await Assert.ThrowsAsync<PostgresException>(
+            () => ImzalaAsync(b, t, onayId, 2, 555));
+        Assert.Equal("GK422", h.SqlState);
+        Assert.Contains("daha önce imza attınız", h.MessageText);
+
+        await t.RollbackAsync();
+    }
+
+    [Fact]
+    public async Task BASKASI_ikinci_basamagi_imzalar()
+    {
+        if (!_olgu.Baglandi(nameof(BASKASI_ikinci_basamagi_imzalar))) return;
+        await using var b = await _olgu.Gerekli().AcAsync();
+        await using var t = await b.BeginTransactionAsync();
+
+        var onayId = await ZincirAsync(b, t);
+        await ImzalaAsync(b, t, onayId, 1, 555);
+        await ImzalaAsync(b, t, onayId, 2, 777);
+
+        var imzalar = await b.ListeAsync(
+            "select sira, karar_veren_id from public.onay_adim where onay_id = @p0 "
+            + " and durum = 1 order by sira", t, [onayId],
+            o => (Sira: o.GetInt16(0), Kisi: o.GetInt32(1)), CancellationToken.None);
+        Assert.Equal(2, imzalar.Count);
+        Assert.NotEqual(imzalar[0].Kisi, imzalar[1].Kisi);
+
+        await t.RollbackAsync();
+    }
+
+    [Fact]
+    public async Task RET_de_imzadir_ayni_kisi_tekrar_karar_veremez()
+    {
+        if (!_olgu.Baglandi(nameof(RET_de_imzadir_ayni_kisi_tekrar_karar_veremez))) return;
+        await using var b = await _olgu.Gerekli().AcAsync();
+        await using var t = await b.BeginTransactionAsync();
+
+        // Ret de bir karardır: reddeden kişi ikinci basamağı onaylayarak
+        //   kendi kararını dolanamaz.
+        var onayId = await ZincirAsync(b, t);
+        await ImzalaAsync(b, t, onayId, 1, 555, durum: 2);
+
+        var h = await Assert.ThrowsAsync<PostgresException>(
+            () => ImzalaAsync(b, t, onayId, 2, 555));
+        Assert.Equal("GK422", h.SqlState);
+
+        await t.RollbackAsync();
+    }
+
+    [Fact]
+    public async Task BILGI_ISTEME_imza_sayilmaz()
+    {
+        if (!_olgu.Baglandi(nameof(BILGI_ISTEME_imza_sayilmaz))) return;
+        await using var b = await _olgu.Gerekli().AcAsync();
+        await using var t = await b.BeginTransactionAsync();
+
+        // "Bilgi istendi" (3) soru sorar, karar vermez: aynı kişi soruyu
+        //   sorup sonra kendi basamağını imzalayabilmeli.
+        var onayId = await ZincirAsync(b, t);
+        await ImzalaAsync(b, t, onayId, 1, 555, durum: 3);
+        await ImzalaAsync(b, t, onayId, 1, 555);
+
+        var durum = await b.TekDegerAsync<short>(
+            "select durum from public.onay_adim where onay_id = @p0 and sira = 1",
+            t, [onayId], CancellationToken.None);
+        Assert.Equal((short)1, durum);
+
+        await t.RollbackAsync();
+    }
+}

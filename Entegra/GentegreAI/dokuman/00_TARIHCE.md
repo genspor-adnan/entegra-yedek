@@ -13537,3 +13537,35 @@ vitest 662/662 (`iskontoLimiti.test.ts`).
 kalıyor ama artık zinciri atlatamıyor. Basamak başına ayrı rol (birim/mali/
 üst) ya da rolü hiç kullanmayıp yetkileri kurumun kendi rollerine verme
 seçeneği hâlâ açık - bu iki kural onlardan bağımsız çalışır.
+
+## 18.09.2026 — Zincirde tek imza · "İskonto Onaylayanlar" rolü boşaltıldı (784)
+
+Kullanıcı: *"'İskonto Onaylayanlar' rolünü kaldır ve 1'i yaz"*.
+
+**1) Bir zincirde bir kişi bir imza.** 783 kendi TALEBİNİ onaylamayı kapatmıştı;
+açık kalan taraf başkasının talebinde üç imzayı tek elde toplamaktı - basamaklar
+role düşüyor (754: birim · mali · üst) ve üç rolü birden taşıyan kişi zinciri tek
+başına yürütebiliyordu. `tg_onay_adim_tek_imza` artık "bu zincirde daha önce karar
+veren kişi ikinci bir basamağı imzalayamaz" diyor. Kural **omurganın tamamında**
+(satınalma · izin · avans · iskonto · doküman) - bir modülde gevşetilen kural
+ötekilerde de gevşemiş sayılırdı. İmza sayılan durumlar 1 onay · 2 ret · 4 sözlü
+onay; "bilgi istendi" (3) soru sorar, "atlandı" (5) kimse imzalamadan geçer.
+Vekâlet muaf değil: `karar_veren_id` fiilen imzalayandır.
+
+**2) Rol boşaltıldı.** `iskonto_onay` bir SİSTEM rolü ve `fn_rol_sistem_koru`
+pasif sistem rolünü bilerek reddediyor ("özelliği kullanmıyorsanız rolü boş
+bırakın"). Göç tam da onu yapıyor: yetkileri (`basvuru.iskonto` %100 + üç basamak
++ ekran yetkileri) kaldırıldı, ad "(kullanılmıyor - 784)" notunu aldı, kayıt boş
+kabuk olarak kaldı. **Kullanıcısı varsa dokunulmuyor**, yalnız uyarıyor:
+gerçek vakada dev veritabanında **Sistem Yöneticisi** bu roldeydi; yetkileri
+sessizce kaldırmak onu kilitlerdi. Dev'de iki kullanıcı önce uygun rollere
+taşındı (Sistem Yöneticisi → Yönetici, Burak Kılıç → Muhasebe/Finans), sonra göç
+rolü boşalttı.
+
+Onay basamakları rol KAYDINA değil YETKİ koduna bakıyor: `yonetici` rolü üç
+basamak yetkisini zaten taşıyor (754), kurum isterse kendi rollerine de verir.
+
+**Doğrulama.** İki basamaklı deneme zincirinde aynı kişi ikinci basamağı
+imzalayamadı (GK422), başkası imzalayınca geçti. Rol: 0 yetki · 0 kullanıcı.
+xUnit 261/261 (yeni `OnayTekImzaTestleri`: aynı kişi ikinciyi imzalayamaz,
+başkası imzalar, ret de imzadır, bilgi isteme imza sayılmaz), vitest 662/662.
