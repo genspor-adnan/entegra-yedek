@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (406 ad, 114 tanesi birden cok dosyada)
+## Fonksiyonlar (408 ad, 114 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -201,6 +201,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kullanici_ana_rol_temizle` | `665_cok_rollu_kullanici.sql` | — |
 | `fn_kullanici_iskonto_tavani` | `792_sorumlu_kendi_tavani.sql` | — |
 | `fn_kullanici_kasa` | `197_kasa_atama_tek_alan.sql` | 196_kasa_atama.sql |
+| `fn_kullanici_portal_turu` | `794_portal_kapsami.sql` | — |
 | `fn_kullanici_rol_dogrula` | `665_cok_rollu_kullanici.sql` | — |
 | `fn_kullanici_rolleri` | `665_cok_rollu_kullanici.sql` | — |
 | `fn_kullanici_subeleri` | `666_sube_yerel_ayarlar.sql` | 665_cok_rollu_kullanici.sql |
@@ -263,6 +264,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_parola_ata` | `068_taraf_rol_id_kolonlari.sql` | 020_sema_kimlik.sql |
 | `fn_parola_dogru` | `020_sema_kimlik.sql` | — |
 | `fn_plan_gerceklestir` | `085_fn_kasa_f3.sql` | — |
+| `fn_portal_rol_karisim_koru` | `794_portal_kapsami.sql` | — |
 | `fn_prim_belge_turu` | `332_prim_zamani.sql` | 324_prim_semasi.sql, 330_prim_tahsilat_turu_durum.sql, 331_kurum_tahakkuk_prim.sql |
 | `fn_prim_gelir_belgesi` | `589_prim_gelir_belgesi_kovalar.sql` | 332_prim_zamani.sql, 472_dagilim_sigorta_prim.sql |
 | `fn_prim_kademe_orani` | `388_prim_kademe_baglandi.sql` | — |

@@ -50,6 +50,40 @@ public sealed record KolonTanimi(
 /// SubeKolonu dolu ise HAREKET tablosudur ve sube filtresi SUNUCUDA eklenir;
 /// bos ise ana veridir (subeler arasi ortak - 019'daki model).
 /// </summary>
+/// <summary>
+/// PORTAL KOŞULLARI (794) — "bu satır bana ait mi" sorusunun üç ayrı cevabı.
+///
+/// Dış doktor için cevap `belge_satir_rol`da (rol 1 = "Gönderen"), dış kurum
+/// için `lab_istem.dis_kurum_id`de, hasta için kaydın kendi hasta id'sinde.
+/// Tek bir "kapsam listesi" bunu anlatamaz: dış doktorun hastaları her yeni
+/// istemle değişir - kapsam KURALDIR, liste değil.
+///
+/// `{kullanici}` yer tutucusu SorguUretici tarafından PARAMETREYLE bağlanır.
+/// </summary>
+public static class PortalKapsam
+{
+    public const short DisDoktor = 1;
+    public const short DisKurum  = 2;
+    public const short Hasta     = 3;
+
+    /// <summary>Belgeyi gönderen hekim BENİM (belge_satir_rol, rol = 1).</summary>
+    public static string GonderenHekim(string belgeIdIfadesi) =>
+        $"exists (select 1 from public.belge_satir_rol bsr "
+      + $"          join public.belge_satir bs on bs.id = bsr.belge_satir_id "
+      + $"         where bs.belge_id = {belgeIdIfadesi} and bsr.rol = 1 "
+      + $"           and bsr.taraf_id = {{kullanici}})";
+
+    public static IReadOnlyDictionary<short, string> Kur(
+        string? disDoktor = null, string? disKurum = null, string? hasta = null)
+    {
+        var d = new Dictionary<short, string>();
+        if (disDoktor is not null) d[DisDoktor] = disDoktor;
+        if (disKurum  is not null) d[DisKurum]  = disKurum;
+        if (hasta     is not null) d[Hasta]     = hasta;
+        return d;
+    }
+}
+
 public sealed record KaynakTanimi(
     string Ad,                     // yol parcasi: "cari", "belge"
     string YetkiKodu,
@@ -74,6 +108,18 @@ public sealed record KaynakTanimi(
     string? SabitKosul = null,     // "t.musteri = 1 or t.tedarikci = 1"
     string VarsayilanSirala = "id desc",
     string? KapsamKolonu = null,   // kullanici_kapsam (tur=1) suzmesi icin taraf id kolonu
+    /// <summary>
+    /// PORTAL KAPSAMI (794) — dis doktor / dis kurum / hasta kullanicisi bu
+    /// kaynakta NEYI gorur. Anahtar `rol.portal_turu` (1 dis doktor · 2 dis
+    /// kurum · 3 hasta), deger `{kullanici}` yer tutuculu SQL kosulu; yer
+    /// tutucu PARAMETREYLE baglanir, istekten metin gelmez.
+    ///
+    /// <b>Kosulu olmayan kaynak portal roluNE KAPALIDIR.</b> Beyaz liste
+    /// mantigi: yarin eklenen bir ekran, kimse fark etmeden portal
+    /// kullanicisinin onune dusmesin - unutulan kaynak "hepsini goster" degil
+    /// "hic gosterme" olmali.
+    /// </summary>
+    IReadOnlyDictionary<short, string>? PortalKosullari = null,
     // GRUPLU LISTE (ekstreler): satirlar bu kolonun degerine gore obeklenir, her
     //   obegin sonuna ARA TOPLAM satiri gelir (or. "dovizCinsi": once TL
     //   hareketleri ve toplami, sonra USD...). Grup toplamlari sunucuda, butun

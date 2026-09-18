@@ -763,6 +763,19 @@ public static partial class KaynakKatalogu
             //   hastayi kayit kabul gorevlisi gorur, personel kartini IK.
             YetkiKodu = "hasta",
             SabitKosul = "t.grup = 101",
+            // PORTAL (794): hasta KENDI kartini; dis doktor/dis kurum yalniz
+            //   KENDI gonderdigi hastayi gorur - hasta listesi portal
+            //   kullanicisi icin "benim hastalarim" listesidir.
+            PortalKosullari = PortalKapsam.Kur(
+                disDoktor: "exists (select 1 from public.belge bb "
+                         + "          join public.belge_satir bs on bs.belge_id = bb.id "
+                         + "          join public.belge_satir_rol bsr on bsr.belge_satir_id = bs.id "
+                         + "         where bb.taraf_id = t.id and bsr.rol = 1 "
+                         + "           and bsr.taraf_id = {kullanici})",
+                disKurum:  "exists (select 1 from public.lab_istem li "
+                         + "         where li.taraf_id = t.id "
+                         + "           and li.dis_kurum_id = {kullanici})",
+                hasta:     "t.id = {kullanici}"),
             // Hasta ozluk (1:1) ve VARSAYILAN adres (1:n'den tek satir - lateral,
             //   yoksa cok adresli hastada satir cogalirdi).
             Kaynak = p.Kaynak + """

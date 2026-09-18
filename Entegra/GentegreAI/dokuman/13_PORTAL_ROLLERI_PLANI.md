@@ -1,6 +1,8 @@
 # Portal rolleri planı — Dış Doktor · Dış Kurum · Hasta
 
-**Durum:** tasarım. Kod yazılmadı (kullanıcı: *"şimdilik yalnız tasarla"*).
+**Durum:** 1. adım (kapsam altyapısı) **yapıldı** - `db/794_portal_kapsami.sql`
++ `PortalKosullari` / `SorguUretici` / `IstekBaglami.PortalTuru`. Rol şablonları
+(2-4. adımlar) bekliyor.
 **İstek (18.09.2026):** *"Dışardan hasta gönderen 'Dış Doktor' gönderdiği
 hastaların sonuçlarını görecek, dışardan hasta gönderen 'Dış Kurum' gönderdiği
 hastaların sonuçlarını görecek. Hasta rolü olan hastalar randevu alıp

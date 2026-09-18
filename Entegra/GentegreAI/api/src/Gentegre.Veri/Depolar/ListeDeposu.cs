@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 
@@ -15,15 +15,23 @@ public sealed class ListeDeposu
     /// </summary>
     public async Task<ListeYaniti> SorgulaAsync(KaynakTanimi kaynak, ListeIstegi istek,
         IReadOnlyList<KolonTanimi> kolonlar, int? subeId, IReadOnlyList<int>? kapsam,
-        string izlemeNo, int? kullaniciId, CancellationToken iptal = default)
+        string izlemeNo, int? kullaniciId, CancellationToken iptal = default,
+        short portalTuru = 0)
     {
         var kronometre = Stopwatch.StartNew();
 
-        var satirUretici = new SorguUretici(kaynak);
+        // PORTAL KAPSAMI (794): tur > 0 ise her sorgu (satir, sayim, toplam)
+        //   AYNI kosulu tasir - biri unutulursa sayfa "3 kayit" der, gride
+        //   baskasinin kaydini cizer.
+        SorguUretici Uretici() => portalTuru > 0
+            ? new SorguUretici(kaynak, portalTuru, kullaniciId ?? 0)
+            : new SorguUretici(kaynak);
+
+        var satirUretici = Uretici();
         var satirSorgu = satirUretici.Satirlar(istek, kolonlar, subeId, kapsam, kullaniciId);
 
-        var sayimSorgu = new SorguUretici(kaynak).Sayim(istek, subeId, kapsam, kullaniciId);
-        var toplamSorgu = new SorguUretici(kaynak).Toplamlar(istek, kolonlar, subeId, kapsam, kullaniciId);
+        var sayimSorgu = Uretici().Sayim(istek, subeId, kapsam, kullaniciId);
+        var toplamSorgu = Uretici().Toplamlar(istek, kolonlar, subeId, kapsam, kullaniciId);
 
         await using var baglanti = await _veri.AcAsync(iptal);
 
@@ -63,7 +71,7 @@ public sealed class ListeDeposu
         // Gruplu liste (ekstre: para birimi basina ara toplam). Kaynak GrupKolonu
         //   tanimlamadiysa sorgu hic uretilmez.
         List<GrupOzeti>? gruplar = null;
-        var grupSorgu = new SorguUretici(kaynak).Gruplar(istek, kolonlar, subeId, kapsam, kullaniciId);
+        var grupSorgu = Uretici().Gruplar(istek, kolonlar, subeId, kapsam, kullaniciId);
         if (grupSorgu is not null)
         {
             gruplar = new List<GrupOzeti>();

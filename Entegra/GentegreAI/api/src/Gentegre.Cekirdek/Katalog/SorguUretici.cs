@@ -19,6 +19,22 @@ public sealed partial class SorguUretici
 
     public SorguUretici(KaynakTanimi kaynak) => _kaynak = kaynak;
 
+    /// <summary>
+    /// PORTAL KULLANICISI (794): rolun `portal_turu` ve kullanicinin taraf
+    /// id'si. Sifirdan buyukse kaynagin `PortalKosullari` girdisi WHERE'e
+    /// EKLENIR; kaynakta kosul yoksa sorgu HIC SATIR dondurmez - portal
+    /// rolune kapali kaynak, yanlislikla acilmis bir kapidan daha iyidir.
+    /// </summary>
+    public SorguUretici(KaynakTanimi kaynak, short portalTuru, int portalKullanici)
+        : this(kaynak)
+    {
+        _portalTuru = portalTuru;
+        _portalKullanici = portalKullanici;
+    }
+
+    private readonly short _portalTuru;
+    private readonly int _portalKullanici;
+
     private string Ekle(object? deger)
     {
         _par.Add(deger);
@@ -198,6 +214,18 @@ public sealed partial class SorguUretici
         // Kayit kapsami (eski YETKIALANI): satir varsa yalniz o kayitlar gorunur.
         if (kapsamTarafIdleri is { Count: > 0 } && _kaynak.KapsamKolonu is { } kk)
             parcalar.Add($"{kk} = any({Ekle(kapsamTarafIdleri.ToArray())})");
+
+        // PORTAL KAPSAMI (794): dis doktor / dis kurum / hasta yalniz KENDI
+        //   kayitlarini gorur. Kural katalogda, yer tutucu parametreyle
+        //   baglanir; kaynakta kural yoksa kapi KAPALI (false).
+        if (_portalTuru > 0)
+        {
+            var kosul = _kaynak.PortalKosullari is { } harita
+                     && harita.TryGetValue(_portalTuru, out var k) ? k : null;
+            parcalar.Add(kosul is null
+                ? "false"
+                : kosul.Replace("{kullanici}", Ekle(_portalKullanici)));
+        }
 
         if (istek.Filtre is { } f)
         {

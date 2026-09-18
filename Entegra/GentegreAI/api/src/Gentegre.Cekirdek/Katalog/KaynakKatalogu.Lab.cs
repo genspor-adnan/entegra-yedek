@@ -289,6 +289,12 @@ public static partial class KaynakKatalogu
               + "  left join public.lab_numune n on n.id = ls.numune_id "
               + "  left join public.cihaz c on c.id = ls.cihaz_id",
         SubeKolonu: "ls.sube_id",
+        // PORTAL (794): sonuc en hassas kayit - kosulsuz kaynak portal
+        //   roluNE KAPALIDIR, bu yuzden ucu de acikca yazilir.
+        PortalKosullari: PortalKapsam.Kur(
+            disDoktor: PortalKapsam.GonderenHekim("i.belge_id"),
+            disKurum:  "i.dis_kurum_id = {kullanici}",
+            hasta:     "i.taraf_id = {kullanici}"),
         VarsayilanSirala: "ls.id desc",
         Kolonlar: new KolonTanimi[]
         {

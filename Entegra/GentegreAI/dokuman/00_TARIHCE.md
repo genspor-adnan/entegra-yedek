@@ -14091,3 +14091,42 @@ için düşüyorlar, `tumModuller=true` ile hepsi görünür.
 Şablonlar **kurulmadı**: dev bir HBYS kurulumu. ERP kurumu "Standart rolleri
 kur" dediğinde gelecekler. Yeni test ERP şablonlarının varlığını ve ortak
 rollerin `Hepsi` listesini kullandığını koruyor. xUnit 294/294.
+
+
+## 18.09.2026 — Portal kapsamı: altyapı (794)
+
+Kullanıcı: *"kapsamla başla"*. Plan: `dokuman/13_PORTAL_ROLLERI_PLANI.md`.
+
+**Kapsam kuraldır, liste değil.** `kullanici_kapsam` (tur=1) bir kayıt
+listesidir - "şu taraf id'lerini görebilir". Dış doktorun hastaları her yeni
+istemle değiştiği için liste tutulamaz; portal kapsamı bir KURAL: *"bu satırın
+göndereni benim"*.
+
+**Role damga:** `rol.portal_turu` (0 iç · 1 dış doktor · 2 dış kurum · 3 hasta),
+kullanıcının türü `fn_kullanici_portal_turu` ile ana + ek rollerden çözülür.
+
+**Kural kaynak kataloğunda:** `KaynakTanimi.PortalKosullari` - portal türü →
+`{kullanici}` yer tutuculu SQL. Yer tutucu `SorguUretici`de **parametreyle**
+bağlanır, istekten metin gelmez. Bağlananlar: `lab-istem`, `lab-sonuc`,
+`randevu` (yalnız hasta), `hasta`.
+
+**Kuralı olmayan kaynak portal rolüne KAPALI** (`false`): yarın eklenen bir
+ekran, kimse fark etmeden portal kullanıcısının önüne düşmesin - unutulan
+kaynak "hepsini göster" değil "hiç gösterme" olmalı. Randevuda dış doktor/dış
+kurum kuralı bilerek yok (randevu kurumun kendi takvimi).
+
+**Sayım ve toplamlar da aynı koşulu taşıyor:** biri unutulsa sayfa "3 kayıt"
+der, gride başkasının kaydını çizerdi.
+
+**Karışık rol yasak** (`tg_*_portal_karisim`): portal rolü iç rolle ya da başka
+bir portal türüyle birleşemez - yetki rollerin birleşimidir (665), ikinci rol
+kapsamı sessizce delerdi. Ana rolü portale ÇEVİRMEK serbest: BEFORE UPDATE'te
+tabloda hâlâ eski değer durduğu için satırın kendi eski ana rolü sayılmıyor
+(ilk sürüm bu yüzden kendi kendini reddediyordu).
+
+**Roller henüz işaretlenmedi** - damga hazır, `portal_turu > 0` olan rol yok;
+yani bugünkü davranış birebir aynı. İç kullanıcıda koşul sorguya hiç girmiyor.
+
+Yeni `PortalKapsamiTestleri`: kendi kaydı görünür, gönderen bağı
+`belge_satir_rol`dan, kuralsız kaynak kapalı, iç kullanıcıda koşul yok, karışık
+rol reddedilir, portal türü rollerden çözülür. xUnit 301/301.

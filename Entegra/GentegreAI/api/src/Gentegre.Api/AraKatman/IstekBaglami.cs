@@ -20,6 +20,12 @@ public sealed class IstekBaglami
     public bool SubeYazma { get; init; } = true;
     public YetkiSeti Yetkiler { get; init; } = default!;
     public IReadOnlyList<int> Kapsam { get; init; } = Array.Empty<int>();
+    /// <summary>
+    /// PORTAL TURU (794): 0 ic kullanici · 1 dis doktor · 2 dis kurum · 3 hasta.
+    /// Sifirdan buyukse liste sorgulari kaynagin `PortalKosullari` kuralini
+    /// EKLER; kural tanimlanmamis kaynak portal kullanicisina kapalidir.
+    /// </summary>
+    public short PortalTuru { get; init; }
     public IReadOnlyList<SubeOzeti> Subeler { get; init; } = Array.Empty<SubeOzeti>();
     public string IzlemeNo { get; init; } = "";
     /// <summary>Istegi yapan istemcinin IP adresi - islem gunlugune yazilir.</summary>
@@ -94,6 +100,7 @@ public sealed class BaglamCozucu
 
         var yetkiler = await _yetkiCozucu.CozAsync(kullaniciId, iptal);
         var kapsam = await _kullanicilar.KapsamAsync(kullaniciId, iptal);
+        var portalTuru = await _kullanicilar.PortalTuruAsync(kullaniciId, iptal);
         var subeler = await _kullanicilar.SubeleriAsync(kullaniciId, iptal);
         var subeId = SubeCoz(ctx, subeler);
         // Kimlik bicimi (679) ONBELLEKLI okunur: her istekte sorgu atmak
@@ -108,6 +115,7 @@ public sealed class BaglamCozucu
             SubeYazma = subeId is null || subeler.FirstOrDefault(s => s.Id == subeId)?.Yazma != false,
             Yetkiler = yetkiler,
             Kapsam = kapsam,
+            PortalTuru = portalTuru,
             Subeler = subeler,
             IzlemeNo = ctx.Items["izlemeNo"] as string ?? Izleme.YeniNo(),
             // IP her uc dosyasinda ayri bir `Ip(HttpContext)` yardimcisiyla

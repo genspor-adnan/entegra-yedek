@@ -83,6 +83,12 @@ public static partial class KaynakKatalogu
               + "  left join public.v_personel_lookup p on p.id = i.personel_id "
               + "  left join public.taraf dk on dk.id = i.dis_kurum_id",
         SubeKolonu: "i.sube_id",
+        // PORTAL (794): dis doktor kendi GONDERDIGI hastanin istemini, dis
+        //   kurum KENDI gonderdigi istemi, hasta KENDI istemini gorur.
+        PortalKosullari: PortalKapsam.Kur(
+            disDoktor: PortalKapsam.GonderenHekim("i.belge_id"),
+            disKurum:  "i.dis_kurum_id = {kullanici}",
+            hasta:     "i.taraf_id = {kullanici}"),
         VarsayilanSirala: "i.istem_tarihi desc, i.id desc",
         // KOLON SIRASI = mockup lab_istem_numune_kabul.html grid'i:
         //   İstem No · Hasta · Yaş/C · Protokol · İsteyen · Öncelik ·

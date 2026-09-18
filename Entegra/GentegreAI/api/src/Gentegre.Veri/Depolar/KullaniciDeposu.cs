@@ -444,6 +444,15 @@ public sealed class KullaniciDeposu
     public Task<List<int>> KapsamAsync(int tarafId, CancellationToken iptal = default)
         => _veri.ListeAsync("select hedef_id from public.kullanici_kapsam where kullanici_id = @p0 and tur = 1",
             new object?[] { tarafId }, o => o.GetInt32(0), iptal);
-}
+
+
+    /// <summary>
+    /// PORTAL TURU (794): kullanicinin rollerinden cozulur (ana + ek). Kural
+    /// DB'de - `fn_kullanici_portal_turu`; iki yerde ayri hesaplanirsa biri
+    /// eskir ve kapsam sessizce acilir.
+    /// </summary>
+    public async Task<short> PortalTuruAsync(int kullaniciId, CancellationToken iptal = default)
+        => await _veri.TekDegerAsync<short>(
+            "select public.fn_kullanici_portal_turu(@p0)", [kullaniciId], iptal);}
 
 

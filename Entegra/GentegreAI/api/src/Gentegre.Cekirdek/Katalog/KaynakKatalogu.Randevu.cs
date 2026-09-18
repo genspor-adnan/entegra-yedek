@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Katalog;
+﻿namespace Gentegre.Cekirdek.Katalog;
 
 public static partial class KaynakKatalogu
 {
@@ -18,6 +18,10 @@ public static partial class KaynakKatalogu
             left join public.radyoloji_cihaz cz on cz.id = rv.cihaz_id
             """,
         SubeKolonu: "rv.sube_id",
+        // PORTAL (794): hasta KENDI randevusunu gorur (ve alir). Dis doktor /
+        //   dis kurum icin kural YOK - randevu kurumun kendi takvimi, gonderen
+        //   taraf onu gormez.
+        PortalKosullari: PortalKapsam.Kur(hasta: "rv.hasta_id = {kullanici}"),
         VarsayilanSirala: "rv.baslangic desc, rv.id desc",
         Kolonlar: new KolonTanimi[]
         {
