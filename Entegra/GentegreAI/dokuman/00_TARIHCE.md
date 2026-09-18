@@ -15308,3 +15308,26 @@ rol var, Yönetici'de tıbbi yetki yok, Klinik'te mali yetki yok, `portal.mali`
 tek rolde), menü tarafında `portalDisKurumRolleri.test.ts`.
 
 xUnit 475/475, vitest 696/696.
+
+## Kurum Profili › Roller: iki tablo tek tabloya indi
+
+Kullanıcı: *"Kurum Profili'nde roller sekmesinde 2 rol gridini teke düşür..
+böyle karışıklık oluyor.. roller seçilip kaydet dendiğinde o profil için roller
+listesine gelir"*.
+
+Eskiden üstte "Standart roller" (ayrı bir **Seçilenleri kur** düğmesiyle),
+altta "Bu profilde geçerli roller" (üst şeritteki **Kaydet** ile) vardı. Aynı
+rol iki listede iki ayrı kutucukla görünüyor, hangisinin ne yaptığı
+anlaşılmıyordu.
+
+Artık tek tablo: kurulu roller + bu kurum tipinin **henüz kurulmamış**
+şablonları. Kutucuk tek soruyu sorar — "bu profilde geçerli mi". Kaydet,
+işaretli olup kurulmamış olanları önce kurar (`standart-roller`), sonra
+geçerlilik haritasını yazar; kurulanlar `rolAdaylari`na eklenir, yoksa sunucu
+onları "işaretsiz = pasif" sayardı.
+
+**Yetkileri şablona hizala** Kaydet'e binmedi: elle verilmiş yetkileri sildiği
+için ayrı düğme ve onay ile çalışır.
+
+Tarayıcıda denendi: tablo 1'e düştü (44 satır, 1'i "kurulacak"), "İK Sorumlusu
+(erp_ik)" işaretlenip Kaydet denince kuruldu ve satır "aktif" oldu.
