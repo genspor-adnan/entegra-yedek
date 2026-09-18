@@ -13801,3 +13801,39 @@ kararı (Yetkiler › Sınır).
 yetkisi taşımıyor (0), basamaklar üç ayrı rolde: sorumlu/muhasebe/yönetici.
 Yeni `BankoSefiTestleri` bunu ve sorumlunun banko ekranlarını taşıdığını
 koruyor. xUnit 285/285.
+
+
+## 18.09.2026 — Mali İşler Müdürü · Üst Yönetim: zincirin öteki imzaları (788)
+
+Kullanıcı: *"ve sonraki iskonto onay aşamaları için de"* (787'nin devamı).
+
+**Aynı hata öteki iki basamakta da vardı.** `belge.iskonto_onay_mali`
+`muhasebe` rolündeydi - muhasebedeki her çalışan mali onaycıydı; kendi talebini
+onaylayamaz (783) ama karşı masadaki arkadaşı onaylayabilirdi.
+`belge.iskonto_onay_ust` ise yalnız `yonetici` (sistem yöneticisi) rolündeydi;
+üst imza bir KURUM kararıdır, bilgi işlem yöneticisinin kadrosu değildir.
+
+İki rol daha açıldı: **Mali İşler Müdürü** (`muhasebe_sorumlu`) — muhasebenin
+bütün yetkileri + mali imza; **Üst Yönetim** (`ust_yonetim`, Mesul Müdür /
+Genel Müdür) — salt okuma dökümler + son imza. İkincisi
+`rapor_goruntuleyici`den ayrı bir rol, çünkü o rol bilerek **karar vermeyen**
+roldür ("bak ama karışma"); imzayı ona eklemek rolün anlamını değiştirirdi.
+Departman rolleri (`kayit_kabul`, `muhasebe`) imzayı bıraktı ama
+`iskonto_onay` ekranını **görmeye devam ediyor**: kendi talebinin nerede
+olduğunu izleyemeyen kullanıcı aynı talebi ikinci kez açar.
+
+**Yönetici üç basamağı da taşımaya devam ediyor — bilerek.** Yeni roller
+kurulduğu anda kimse onlara atanmış değil; yedek imza olmasa göçten sonraki
+ilk talep hiçbir basamağı bulamayıp kuyrukta kalırdı. 784'ün tek-imza kuralı
+burada da geçerli: bir yönetici zincirde yalnız BİR basamağı imzalar. Kurum
+kadroyu atadıkça yedeğe gerek kalmaz, isteyen basamak yetkilerini `yonetici`
+rolünden Yönetim › Yetkiler'den kaldırır.
+
+**Zincirin son hali** (dev, göç çıktısı):
+
+    birim -> Kayıt Kabul Sorumlusu (Banko Şefi) · Yonetici
+    mali  -> Mali İşler Müdürü · Yonetici
+    üst   -> Üst Yönetim (Mesul Müdür / Genel Müdür) · Yonetici
+
+Göç kimseyi role ATAMAZ - kişi ataması yöneticinin kararıdır (Yönetim ›
+Roller). xUnit 286/286.

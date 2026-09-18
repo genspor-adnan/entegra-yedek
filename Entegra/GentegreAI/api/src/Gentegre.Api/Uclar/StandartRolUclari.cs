@@ -80,8 +80,34 @@ public static class StandartRolUclari
         T("medula.ayar"), T("sigorta"), H("prim"), T("doviz_kur"), T("demirbas"), T("stok"), T("islem_log"),
         A("belge.kesinlestir"), A("belge.iptal"), A("belge.donustur"), A("kasa.%"), A("ceksenet.%"), A("ebelge.%"), A("fis.ters-kayit"),
         A("muhasebe.donem-kilitle"), A("kredi.taksit-ode"), A("prim.%"), A("veri.disa-aktar"), A("basvuru.iskonto"),
-        // ISKONTO MALI BASAMAGI (785) + onay ekraninin denetim izi (685).
-        T("belge.iskonto_onay_mali"), T("iskonto_onay"),
+        // Onay ekraninin denetim izi (685) - muhasebe kararlari GORUR.
+        T("iskonto_onay"),
+        // ISKONTO MALI BASAMAGI BURADA DEGIL (788, 787 ile ayni gerekce):
+        //   basamagi `muhasebe` rolune vermek, muhasebedeki HER calisani mali
+        //   onayci yapiyordu. Imza kadro unvanina ait: `muhasebe_sorumlu`.
+    ];
+
+    /// <summary>
+    /// MALI ISLER MUDURU (788): muhasebenin yaptigi isin tamami + iskonto
+    /// talebinin MALI imzasi.
+    /// </summary>
+    private static readonly Kural[] MuhasebeSorumluTemel =
+    [
+        .. MuhasebeTemel,
+        T("belge.iskonto_onay_mali"), Y("iskonto_onay"),
+    ];
+
+    /// <summary>
+    /// UST YONETIM (788): mesul mudur / genel mudur - zincirin SON imzasi.
+    /// Ekranlari "Yonetim Goruntuleyici" gibi salt okumadir; farki imzadir.
+    /// Ayri rol, cunku `rapor_goruntuleyici` bilerek KARAR VERMEYEN roldur.
+    /// </summary>
+    private static readonly Kural[] UstYonetimTemel =
+    [
+        T("%"), new("ayar", false), new("rol", false), new("kullanici", false),
+        new("sube", false), new("referans", false), new("entegrasyon", false),
+        new("dokuman.ozel_nitelikli", false),
+        T("belge.iskonto_onay_ust"), Y("iskonto_onay"),
     ];
 
     /// <summary>
@@ -125,6 +151,12 @@ public static class StandartRolUclari
         new("hemsire", "Hemşire", "Vital, enjeksiyon, pansuman, numune; muayene kaydına yardım.", ["tip_merkezi", "hastane", "dal_ftr"],
             K(T("hasta"), Y("muayene"), T("randevu"), Y("lab.numune"), T("lab"), Y("onam"), T("katalog"), T("belge"))),
         new("muhasebe", "Muhasebe / Finans", "Fatura, kasa-banka, dönem sonlandırma, kesinti ve itiraz.", Klinik, K(MuhasebeTemel)),
+        new("muhasebe_sorumlu", "Mali İşler Müdürü",
+            "Muhasebenin tüm işleri + iskonto talebinin mali imzası.", Klinik,
+            K(MuhasebeSorumluTemel)),
+        new("ust_yonetim", "Üst Yönetim (Mesul Müdür / Genel Müdür)",
+            "Salt okuma dökümler + iskonto zincirinin son imzası.", Klinik,
+            K(UstYonetimTemel)),
         new("vezne", "Vezne", "Tahsilat, makbuz, fatura kapatma.", ["tip_merkezi", "hastane"],
             K(Y("kasa_islem"), Y("mali_hareket"), T("hesap"), Y("kasa_kapatma"), A("kasa.kapat"), A("kasa.makbuz-yazdir"), A("kasa.kesinlestir"), T("belge"), T("hasta"), T("cari"))),
         new("rapor_goruntuleyici", "Yönetim Görüntüleyici", "Kurum sahibi / mesul müdür: salt okuma dökümler ve günlük.", Klinik,

@@ -370,16 +370,49 @@ public sealed class BankoSefiTestleri(VeritabaniOlgusu olgu)
         if (!_olgu.Baglandi(nameof(Her_basamak_AYRI_rolde))) return;
         var veri = _olgu.Gerekli();
 
-        // Üç kademe üç ayrı role dağılmazsa (754) zincir kâğıt üstünde kalır:
-        //   tek kişi ardışık basamakları imzalayamıyor (784), o yüzden aynı
-        //   rolde toplanan basamak talebi kilitler.
+        // Üç kademe üç ayrı KADRO rolünde (754/787/788). Departman rolüne
+        //   (banko, muhasebe) verilirse aynı masadaki iki kişi birbirinin
+        //   indirimini onaylar - denetim değil karşılıklı imza olur.
         Assert.Equal(1, await YetkiSayisiAsync(veri, "kayit_kabul_sorumlu", "belge.iskonto_onay_birim"));
-        Assert.Equal(1, await YetkiSayisiAsync(veri, "muhasebe", "belge.iskonto_onay_mali"));
-        Assert.Equal(1, await YetkiSayisiAsync(veri, "yonetici", "belge.iskonto_onay_ust"));
+        Assert.Equal(1, await YetkiSayisiAsync(veri, "muhasebe_sorumlu", "belge.iskonto_onay_mali"));
+        Assert.Equal(1, await YetkiSayisiAsync(veri, "ust_yonetim", "belge.iskonto_onay_ust"));
 
-        // YÖNETİCİ ÜÇÜNÜ DE TAŞIR: sorumlu rolüne kimse atanmadan önce talep
-        //   boşta kalmasın - ilk imzayı yönetici atar.
-        Assert.Equal(1, await YetkiSayisiAsync(veri, "yonetici", "belge.iskonto_onay_birim"));
+        // DEPARTMAN ROLLERİ İMZA TAŞIMAZ (787/788)...
+        Assert.Equal(0, await YetkiSayisiAsync(veri, "kayit_kabul", "belge.iskonto_onay_birim"));
+        Assert.Equal(0, await YetkiSayisiAsync(veri, "muhasebe", "belge.iskonto_onay_mali"));
+
+        // ...ama kararları GÖRÜRLER (685): kendi talebinin nerede olduğunu
+        //   izleyemeyen kullanıcı aynı talebi ikinci kez açar.
+        Assert.Equal(1, await YetkiSayisiAsync(veri, "kayit_kabul", "iskonto_onay"));
+        Assert.Equal(1, await YetkiSayisiAsync(veri, "muhasebe", "iskonto_onay"));
+
+        // YÖNETİCİ ÜÇÜNÜ DE TAŞIR (yedek): kadro rollerine kimse atanmadan
+        //   önce talep kuyrukta kalmasın. 784 tek-imza kuralı burada da
+        //   geçerli - bir yönetici zincirde yalnız BİR basamağı imzalar.
+        foreach (var kod in new[] { "belge.iskonto_onay_birim", "belge.iskonto_onay_mali",
+                                    "belge.iskonto_onay_ust" })
+            Assert.Equal(1, await YetkiSayisiAsync(veri, "yonetici", kod));
+    }
+
+    [Fact]
+    public async Task Ust_yonetim_SALT_OKUMA_ama_imza_atar()
+    {
+        if (!_olgu.Baglandi(nameof(Ust_yonetim_SALT_OKUMA_ama_imza_atar))) return;
+        var veri = _olgu.Gerekli();
+
+        // Mesul müdür dökümleri görür, kayıt DEĞİŞTİRMEZ; farkı imzadır.
+        //   `rapor_goruntuleyici`den ayrı bir rol olmasının sebebi bu: o rol
+        //   bilerek karar VERMEYEN roldür.
+        var yazan = await veri.TekDegerAsync<long>(
+            "select count(*) from public.rol r "
+            + "  join public.rol_yetki ry on ry.rol_id = r.id "
+            + "  join public.yetki y on y.id = ry.yetki_id "
+            + " where r.kod = 'ust_yonetim' and y.tur = 0 "
+            + "   and (ry.ekle = 1 or ry.degistir = 1 or ry.sil = 1) "
+            + "   and y.kod <> 'iskonto_onay'",
+            [], CancellationToken.None);
+        Assert.Equal(0, yazan);
+        Assert.Equal(1, await YetkiSayisiAsync(veri, "ust_yonetim", "belge.iskonto_onay_ust"));
     }
 
     [Fact]
