@@ -244,6 +244,10 @@ export const ALTGRUP_IKON: Record<string, string> = {
   //   BELGESINI/akreditasyonu anlatiyor; 🎯 (Satis Firsatlari, Prim Planlari)
   //   ve 📊 (e-Nabiz Veri Kalitesi) zaten kullanimda.
   'Kalite': '🏅',
+  // TELERADYOLOJI (799): tabloda yoktu, varsayilan ⚙️ ile ciziliyordu -
+  //   Radyoloji'nin altinda "Ayarlar" ile AYNI simge. Uydu, isin disaridan
+  //   gelip disariya gitmesini anlatiyor; ☢️ zaten Radyoloji'nin kendisi.
+  'Teleradyoloji': '🛰',
   'Biyokimya': '⚗️',
   'Mikrobiyoloji': '🦠',
   'Genetik': '🧬',

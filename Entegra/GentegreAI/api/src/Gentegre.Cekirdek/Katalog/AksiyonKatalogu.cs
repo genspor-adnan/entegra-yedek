@@ -1025,6 +1025,53 @@ public static class AksiyonKatalogu
                     AksiyonYetkisi: "rad.rapor_yaz", KayitGerekir: true, Sira: 30),
             },
 
+            // TELERADYOLOJI CALISMA LISTESI (799). 797'de `telerad.ata` ve
+            //   `telerad.teslim` yetkileri rollere dagitilmisti ama hicbir
+            //   aksiyon onlari kullanmiyordu: ekranin arac cubugu hic yoktu
+            //   (liste tanimi `aksiyonEkrani` vermeyince GenGrid cubugu
+            //   cizmiyor), yani istek ne acilabiliyor ne de akis
+            //   ilerletilebiliyordu - kart yalniz cift tikla aciliyordu.
+            //
+            // DURUM DEGISIKLIGI DUGMELERLE: radyoloji worklist'iyle ayni desen.
+            //   Durum alani kartta da secilebilir; dugme ayni gecisi TEK tikla
+            //   ve dogru zaman damgasiyla yapar (damgalari tetik yazar).
+            ["telerad-istek-liste"] = new AksiyonTanimi[]
+            {
+                new("telerad.yeni",     "＋ Yeni İstek", "telerad", Kisayol: "Ctrl+N",
+                    KaynakKodu: "teleradyoloji", Islem: Islem.Ekle, Sira: 10),
+                new("telerad.duzenle",  "✎ Düzenle", "telerad", Kisayol: "Enter",
+                    KaynakKodu: "teleradyoloji", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 20),
+                // BANA ATA: dagitim yetkisi ayri (`telerad.ata`) - isi kimin
+                //   alacagina karar vermek okumaktan farkli bir yetkidir.
+                new("telerad.ata",      "👤 Bana Ata", "telerad",
+                    AksiyonYetkisi: "telerad.ata", KayitGerekir: true, Sira: 30,
+                    Ipucu: "İsteği üstüne alır (durum: Atandı)"),
+                new("telerad.birak",    "↩ Atamayı Bırak", "telerad",
+                    Hedef: "sagtus,palet", AksiyonYetkisi: "telerad.ata",
+                    KayitGerekir: true, Sira: 35, Ipucu: "İstek sıraya geri döner"),
+                // OKUMAYA BASLA: `okuma_bas` damgasi buradan dogar - SLA
+                //   raporlamasinda "sirada bekleme" ile "okuma suresi" ancak
+                //   bu damga varsa ayrilabilir.
+                new("telerad.oku",      "▶ Okumaya Başla", "telerad",
+                    KaynakKodu: "teleradyoloji", Islem: Islem.Degistir,
+                    KayitGerekir: true, Sira: 40, Bicim: "bir"),
+                new("telerad.teslim",   "📦 Teslim Et", "telerad",
+                    AksiyonYetkisi: "telerad.teslim", KayitGerekir: true, Sira: 50,
+                    Bicim: "onay", Ipucu: "Onaylı raporu gönderen kuruma teslim eder"),
+                new("telerad.iptal",    "✖ İsteği İptal Et", "telerad",
+                    Hedef: "sagtus,palet", KaynakKodu: "teleradyoloji",
+                    Islem: Islem.Degistir, KayitGerekir: true, Sira: 60, Bicim: "ret"),
+                new("telerad.sil",      "🗑 Sil", "telerad", Hedef: "sagtus,palet",
+                    Kisayol: "Del", KaynakKodu: "teleradyoloji", Islem: Islem.Sil,
+                    KayitGerekir: true, Sira: 70),
+                Yazdir(),
+            },
+
+            // KURUM / SOZLESME EKRANLARI BILEREK YOK: onlarin karti henuz
+            //   tanimli degil (KartKatalogu'nda telerad-kurum/-sozlesme yok);
+            //   "Yeni" dugmesi acacak bir kart bulamazdi.
+            //
             // ENTEGRASYON HESAPLARI (336): Ayarlar > Kayit Kabul > Entegrasyon.
             // KATEGORILER (345): iki bolmeli ekran - her iki gridin de kendi
             //   arac cubugu var, aksiyonlar ortak.

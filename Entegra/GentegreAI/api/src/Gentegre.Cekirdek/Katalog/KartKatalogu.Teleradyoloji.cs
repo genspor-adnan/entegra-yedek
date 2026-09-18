@@ -40,6 +40,11 @@ public static partial class KartKatalogu
     private static readonly Dictionary<string, string> TeleradKartTeslim = new()
         { ["0"] = "Bekliyor", ["1"] = "Teslim edildi", ["2"] = "Hata" };
 
+    // YÖN İSTEK BAZINDA İKİ DEĞER: kurumun kendisi "iki yön" olabilir (797),
+    //   ama tek bir istek ya bize gelir ya dışarı gider.
+    private static readonly Dictionary<string, string> TeleradKartYon = new()
+        { ["1"] = "Gelen (biz raporlarız)", ["2"] = "Giden (dışarı gönderiyoruz)" };
+
     private static KartTanimi TeleradIstek() => new(
         Ad: "telerad-istek",
         // Liste ile AYNI yetki: kart serbest kalırsa liste süzmesi anlamsızlaşır.
@@ -75,6 +80,11 @@ public static partial class KartKatalogu
             new("kurumId", "kurum_id", "kod", Zorunlu: true,
                 KodTablosu: "public.v_telerad_kurum_lookup",
                 Baslik: "Gönderen Kurum", Grup: "Kimlik"),
+            // YÖN KARTTA GÖRÜNMELİ: giden iş bizim faturamız değil ONLARIN
+            //   faturası, SLA'yı da biz tutmuyoruz - listede iki iş aynı
+            //   satır gibi durduğu için kartta ayırt edilebilmeli.
+            new("yon", "yon", "kod", SabitKodlar: TeleradKartYon,
+                Baslik: "Yön", Grup: "Kimlik"),
             new("durum", "durum", "kod", SabitKodlar: TeleradKartDurum,
                 Baslik: "Durum", Grup: "Kimlik"),
             new("oncelik", "oncelik", "kod", SabitKodlar: TeleradKartOncelik,
@@ -154,8 +164,9 @@ public static partial class KartKatalogu
                 Baslik: "Rapor Id", Grup: "Bağlar"),
             new("faturaBelgeId", "fatura_belge_id", "sayi", Yazilabilir: false,
                 Baslik: "Fatura Belge Id", Grup: "Bağlar"),
-            new("ekleyen", "ekleyen", "sayi", Yazilabilir: false),
-            new("eklemeTarihi", "ekleme_tarihi", "tarih", Yazilabilir: false),
+            // EKLEYEN/EKLEME TARİHİ KARTTA YOK: hiçbir kartta yok - denetim
+            //   bilgisi log ekranının işi. Gruba yazılmadıkları için tek
+            //   başlarına boş bir "Genel" sekmesi açıyorlardı.
         },
         Detaylar: new[]
         {

@@ -23,6 +23,11 @@ export const TELERADYOLOJI_LISTELERI: ListeGirdisi[] = [
     // KART (798): cift tik istegi acar. Kart rotasi LISTE ROTASINDAN turetilir
     //   (/teleradyoloji/:id) - farkli yazilirsa cift tik tanimsiz rotaya gider.
     kartYolu: '/teleradyoloji', kartBaslik: 'Teleradyoloji İsteği',
+    // ARAC CUBUGU (799): `aksiyonEkrani` verilmeyince GenGrid cubugu HIC
+    //   cizmiyor - ekranda ne "Yeni İstek" ne de akis dugmeleri vardi, istek
+    //   yalnizca cift tikla acilabiliyordu. 797'de dagitilan `telerad.ata` /
+    //   `telerad.teslim` yetkilerinin karsiligi da bu katalogda.
+    aksiyonEkrani: 'telerad-istek-liste',
     cipler: [
       { ad: 'Bekleyen', filtre: { alan: 'durum', op: 'kucukEsit', deger: 3 } },
       { ad: 'Okunuyor', filtre: { alan: 'durum', op: 'esit', deger: 4 } },

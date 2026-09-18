@@ -14345,3 +14345,52 @@ aktif şubenin profili `hastane` olmuş ve teleradyoloji o tipte **opsiyonel**
 da yok; doğru davranış. Dev'de modül şube 1 için açıldı
 (`kurum_profil.moduller = {"teleradyoloji": 1}`) ve kart `/teleradyoloji/1`
 adresinde modal olarak açıldı. xUnit 318/318, vitest 672/672.
+
+## 18.09.2026 — Teleradyoloji istek kartı eksikleri (799)
+
+Kullanıcı: *"Teleradyoloji istek kartı eksikleri tamamla"*.
+
+**Önce bir düzeltme:** bir önceki turda "kartta gruplar/alanlar eksik" diye
+rapor etmiştim - **yanlıştı**, seçici hatasıydı. Sekme şeridi `.katab` içinde
+`div.kat` çocukları olarak duruyor; `.katab button` hiçbir zaman eşleşmiyordu.
+Tarayıcıda tek tek tıklanınca yedi sekmenin de alanlarını çizdiği görüldü.
+
+**Gerçek eksikler (üçü de tarayıcıda doğrulandı):**
+
+1. **Boş "Genel" sekmesi.** `ekleyen` / `ekleme_tarihi` gruba yazılmamıştı;
+   `kartSekmeleri.ts` grupsuz alanları "Genel" kovasına atıyor ve kullanıcının
+   gördüğü şey iki denetim alanından ibaret bir sekme oluyordu. Hiçbir kartta
+   bu alanlar yok - denetim bilgisi log ekranının işi; karttan çıkarıldılar.
+   Test: *Her_alan_bir_gruba_ait*.
+2. **`yon` kartta yoktu.** Gelen iş bizim SLA'mız ve bizim faturamız, giden iş
+   onların; listede iki iş aynı satır gibi duruyordu. Kimlik şeridine eklendi.
+3. **Yazanı olmayan salt okunur alanlar.** Kart `okuma_bas`, `teslim_zamani` ve
+   `teslim_durum` alanlarını "tetik yazıyor" diye salt okunur işaretlemişti ama
+   797 tetiği yalnız `onay_zamani`yi damgalıyordu: **bu üç alanı yazan kimse
+   yoktu.** `db/799` damgaları tetiğe taşıdı - okuma damgası İLK okuma anıdır
+   (iş taslağa/ek görüntüye dönüp geri gelirse değişmez), teslim damgası ve
+   `teslim_durum` durum 7 ile birlikte doğar.
+
+**Çalışma listesinin araç çubuğu yoktu.** Liste tanımı `aksiyonEkrani`
+vermeyince `GenGrid` araç çubuğunu hiç çizmiyor: ekranda ne "Yeni İstek" ne de
+akış düğmesi vardı, istek yalnızca çift tıkla açılabiliyordu. 797'de rollere
+dağıtılan `telerad.ata` / `telerad.teslim` yetkilerini de kullanan bir aksiyon
+yoktu. `telerad-istek-liste` eklendi: Yeni · Düzenle · **Bana Ata** · Atamayı
+Bırak · **Okumaya Başla** · **Teslim Et** · İptal · Sil. Dağıtım ve teslim ayrı
+yetkide - okuyan herkes işi dağıtamaz.
+
+Aksiyonlar durumu ve atamayı gönderir, **zaman damgası göndermez** (radyoloji
+worklist'iyle aynı desen): damgalar tetikte doğar, aynı sayı iki yerden
+hesaplanmasın.
+
+**Menüde alt grup ikonu:** "Teleradyoloji" ikon tablosunda yoktu, varsayılan
+⚙️ ile çiziliyordu - Radyoloji'nin altında "Ayarlar" ile aynı simge. 🛰 oldu.
+
+Tarayıcıda (mevcut Chrome, CDP) uçtan uca denendi: "Okumaya Başla" durumu
+2 → 4 yaptı ve `okuma_bas` damgalandı; "Teslim Et" durumu 7'ye alıp
+`teslim_durum = 1` + `teslim_zamani` yazdı. Dev satırları eski hâline döndürüldü.
+xUnit 322/322, vitest 672/672.
+
+**Kalan (bu işin dışında):** `telerad-kurum` ve `telerad-sozlesme` kartları
+yok - o iki listede "Yeni" düğmesi açacak bir kart bulamayacağı için araç
+çubuğu bilerek tanımlanmadı; kurum/sözleşme hâlâ yalnız göç/betikle açılıyor.

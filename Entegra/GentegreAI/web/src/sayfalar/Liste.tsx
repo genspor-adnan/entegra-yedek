@@ -101,6 +101,8 @@ import { PersonelSeridi } from './liste/PersonelSeridi';
 import { belgeAksiyonu, ebelgeTopluAksiyonu } from './liste/belgeAksiyonlari';
 import { icmalAksiyonu } from './liste/icmalAksiyonlari';
 import { radyolojiAksiyonu } from './liste/radyolojiAksiyonlari';
+import { teleradAksiyonu } from './liste/teleradAksiyonlari';
+import { useOturum } from '../kimlik/OturumBaglami';
 import { hakedisAksiyonu } from './liste/hakedisAksiyonlari';
 import { randevuAksiyonu } from './liste/randevuAksiyonlari';
 import { Modal } from '../bilesenler/Modal';
@@ -131,6 +133,8 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
   //   sirasi, gomulu detaylar, izgara. Buradaki uclu kosullar yuz satir saf
   //   yapilandirmayi bilesenin ortasina yayiyordu.
   const kartOzel = kartOzellestirme(tanim.kaynak);
+  // TELERADYOLOJI "Bana Ata" oturumun taraf kimligini yazar (799).
+  const { kullanici } = useOturum();
   const git = useNavigate();
   const { id } = useParams();
   const [sorgu] = useSearchParams();
@@ -752,6 +756,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         setTeslimModali: radyolojiModal.setTeslim,
         setKritikModali: radyolojiModal.setKritik,
         setKonsultasyonModali: radyolojiModal.setKonsultasyon,
+      })) return;
+
+      // TELERADYOLOJI (799): ata / birak / okumaya basla / teslim / iptal.
+      //   Zaman damgalarini tetik yazar; buradan yalniz durum ve atama gider.
+      if (await teleradAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
+        kullaniciId: Number(kullanici?.id ?? 0),
       })) return;
 
       // PRIM (324): hakedis satiri TAHSILATTAN dogar, elle eklenmez.

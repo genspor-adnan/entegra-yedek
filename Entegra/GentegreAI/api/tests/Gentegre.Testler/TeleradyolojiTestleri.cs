@@ -179,6 +179,52 @@ public sealed class TeleradyolojiTestleri(VeritabaniOlgusu olgu)
     }
 
     [Fact]
+    public async Task Okuma_ve_teslim_ZAMANLARI_tetikte_dogar()
+    {
+        if (!_olgu.Baglandi(nameof(Okuma_ve_teslim_ZAMANLARI_tetikte_dogar))) return;
+        await using var b = await _olgu.Gerekli().AcAsync();
+        await using var t = await b.BeginTransactionAsync();
+
+        // 798 KARTI BU UC ALANI "salt okunur - tetik yaziyor" diye isaretledi
+        //   ama 797 tetigi yalnizca onay zamanini damgaliyordu: alanlari YAZAN
+        //   KIMSE YOKTU. 799 damgalari tetige tasidi.
+        var (kurum, _) = await KurulumAsync(b, t);
+        var id = await IstekAcAsync(b, t, kurum, 1, "T-006");
+
+        await b.CalistirAsync("update public.telerad_istek set durum = 4 where id = @p0",
+            t, [id], CancellationToken.None);
+        var okuma = await b.ListeAsync(
+            "select okuma_bas from public.telerad_istek where id = @p0", t, [id],
+            o => o.IsDBNull(0) ? (DateTime?)null : o.GetDateTime(0), CancellationToken.None);
+        Assert.NotNull(okuma[0]);
+
+        // OKUMA BASLANGICI ILK ANDIR: is taslaga/ek goruntuye donup geri
+        //   gelirse damga degismemeli - yoksa bekleme suresi silinir.
+        var ilk = okuma[0];
+        await b.CalistirAsync("update public.telerad_istek set durum = 8 where id = @p0",
+            t, [id], CancellationToken.None);
+        await b.CalistirAsync("update public.telerad_istek set durum = 4 where id = @p0",
+            t, [id], CancellationToken.None);
+        Assert.Equal(ilk, (await b.ListeAsync(
+            "select okuma_bas from public.telerad_istek where id = @p0", t, [id],
+            o => (DateTime?)o.GetDateTime(0), CancellationToken.None))[0]);
+
+        // TESLIM: durum 7 damgayi ve teslim durumunu birlikte dogurur -
+        //   "teslim edildi" yazip zamani bos birakmak cevapsiz soru uretirdi.
+        await b.CalistirAsync("update public.telerad_istek set durum = 7 where id = @p0",
+            t, [id], CancellationToken.None);
+        var teslim = await b.ListeAsync("""
+            select teslim_durum, teslim_zamani is not null
+              from public.telerad_istek where id = @p0
+            """, t, [id], o => (Durum: o.GetInt16(0), Damga: o.GetBoolean(1)),
+            CancellationToken.None);
+        Assert.Equal((short)1, teslim[0].Durum);
+        Assert.True(teslim[0].Damga, "Teslim zamani damgalanmadi.");
+
+        await t.RollbackAsync();
+    }
+
+    [Fact]
     public async Task Ayni_erisim_numarasi_IKI_KEZ_girilemez()
     {
         if (!_olgu.Baglandi(nameof(Ayni_erisim_numarasi_IKI_KEZ_girilemez))) return;
@@ -305,9 +351,58 @@ public sealed class TeleradyolojiKartTestleri
     }
 
     [Fact]
+    public void Her_alan_bir_gruba_ait()
+    {
+        // GRUPSUZ ALAN KENDINE SEKME ACAR: web kartSekmeleri.ts grupsuz
+        //   alanlari "Genel" kovasina atiyor - ekleyen/ekleme tarihi kartta
+        //   dururken kullanicinin gordugu sey iki denetim alanindan ibaret
+        //   bos bir sekmeydi. Alan ya bir gruba girer ya karttan cikar.
+        var grupsuz = Kart().Alanlar
+            .Where(a => a.Ad != "id" && string.IsNullOrEmpty(a.Grup))
+            .Select(a => a.Ad).ToArray();
+        Assert.True(grupsuz.Length == 0,
+            "Grupsuz alan(lar) bos \"Genel\" sekmesi acar: " + string.Join(", ", grupsuz));
+    }
+
+    [Fact]
+    public void Yon_kartta_secilebilir()
+    {
+        // Gelen is bizim SLA'miz ve bizim faturamiz, giden is onlarin;
+        //   listede iki is ayni satir gibi durdugu icin kartta ayrilmali.
+        var alan = Kart().Alanlar.FirstOrDefault(a => a.Ad == "yon");
+        Assert.True(alan is not null, "Kartta \"yon\" alani yok.");
+        Assert.True(alan!.Yazilabilir);
+        Assert.NotNull(alan.SabitKodlar);
+        Assert.True(alan.SabitKodlar!.ContainsKey("1") && alan.SabitKodlar.ContainsKey("2"));
+    }
+
+    [Fact]
     public void Kart_ve_liste_AYNI_yetkide()
     {
         // Kart serbest kalirsa liste suzmesi anlamsizlasir.
         Assert.Equal(KaynakKatalogu.Bul("telerad-istek")!.YetkiKodu, Kart().YetkiKodu);
+    }
+
+    [Fact]
+    public void Calisma_listesinin_ARAC_CUBUGU_var()
+    {
+        // 797'de `telerad.ata` / `telerad.teslim` yetkileri rollere dagitildi
+        //   ama hicbir aksiyon onlari kullanmiyordu: ekranda arac cubugu yoktu,
+        //   istek ne acilabiliyor ne de akis ilerletilebiliyordu (799).
+        var ekran = AksiyonKatalogu.Ekran("telerad-istek-liste");
+        Assert.True(ekran is not null, "Teleradyoloji calisma listesinin aksiyon ekrani yok.");
+        foreach (var kod in new[] { "telerad.yeni", "telerad.duzenle", "telerad.ata",
+                                    "telerad.oku", "telerad.teslim", "telerad.sil" })
+            Assert.Contains(ekran!, a => a.Kod == kod);
+
+        // DAGITIM VE TESLIM AYRI YETKI: okuyan herkes isi dagitamaz.
+        Assert.Equal("telerad.ata",
+            ekran!.First(a => a.Kod == "telerad.ata").AksiyonYetkisi);
+        Assert.Equal("telerad.teslim",
+            ekran.First(a => a.Kod == "telerad.teslim").AksiyonYetkisi);
+
+        // Akis dugmeleri KAYIT ISTER: secim olmadan "teslim et" anlamsiz.
+        Assert.All(ekran.Where(a => a.Kod != "telerad.yeni" && a.Grup == "telerad"),
+                   a => Assert.True(a.KayitGerekir, a.Kod + " kayit secilmeden calisiyor."));
     }
 }
