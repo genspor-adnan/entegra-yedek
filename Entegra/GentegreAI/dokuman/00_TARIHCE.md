@@ -15331,3 +15331,44 @@ için ayrı düğme ve onay ile çalışır.
 
 Tarayıcıda denendi: tablo 1'e düştü (44 satır, 1'i "kurulacak"), "İK Sorumlusu
 (erp_ik)" işaretlenip Kaydet denince kuruldu ve satır "aktif" oldu.
+
+## Yeni şablon roller + talep onay zincirinin sahipleri
+
+Kullanıcı: *"şu rolleri de ekle: İK Personeli, Eczacı, Eczane Teknisyeni,
+Kalite Görevlisi, Bilgi İşlem Personeli, Acil Hekimi"* ve ardından *"talep onay
+mekanizması vardı.. onlar için roller nasıl olacak? bu listede var mı?"*
+
+**Altı yeni şablon.** Beşi var olan bir "Sorumlu" rolün dar hali; ayrımın tek
+ölçüsü imza/onay ve tanım yetkisinin sorumluda kalması: İK Personeli (onay
+yok), Eczacı (eczacı onayı, kontrollü ilaç, imha), Eczane Teknisyeni (order/doz
+/iade + stok, onay yok), Kalite Görevlisi (veri girişi + dönem hesabı;
+kesinleştirme ve hedef yok), Bilgi İşlem Personeli (kullanıcı/parola/cihaz;
+rol-şube-ayar tanımı ve veri aktarımı yok, `kullanici.portal` yok). Karşılığı
+hiç olmayan tek rol **Acil Hekimi** (hastane): acil başvuru, triyaj, pano,
+çıkış ve sevk kararı + hekim temeli.
+
+**Talep onay zinciri sahipsizdi.** İzin, avans, masraf, belge talebi,
+satınalma ve demirbaş onarımı basamaklarının yetkileri (`ik.*_onay_*`,
+`satinalma.onay_*`, `demirbas.onarim_onay_*`) **hiçbir şablonda yoktu**; tek
+sahibi sistem yöneticisiydi, talepler ilk basamakta bekliyordu. Dağıtıldı:
+- yeni **Birim Âmiri / Departman Sorumlusu**: izin/avans/masraf ilk imzası +
+  birim satınalma onayı. Kimin âmir olduğu rolden değil kadro ağacından gelir
+  (`taraf_personel.yonetici_taraf_id`, `sahip_turu = 3`).
+- **İK Sorumlusu**: izin/avans İK basamağı + belge talebi.
+- **Mali İşler Müdürü**: avans/masraf mali basamağı, demirbaş onarımı mali,
+  satınalma ödeme onayı.
+- **Satınalma Sorumlusu**: talebin satınalma imzası.
+- **Teknik Servis**: demirbaş onarımının teknik müdür imzası.
+- **Üst Yönetim**: zincirlerin son imzası — `T("%")` aksiyonları kapsamadığı
+  için tek tek yazıldı.
+- **Kalite Sorumlusu + Üst Yönetim**: `dokuman.onay`. `dokuman.onayla` onay
+  kuyruğu EKRANI (tur 0), karar ise ayrı bir aksiyon — kalite rolü kuyruğu
+  görüyor ama imzalayamıyordu.
+
+**Yeni test** `SablonYetkiKodlariTestleri` iki sessiz arızayı kapatıyor:
+şablondaki her yetki deseninin katalogda karşılığı var mı (yanlış yazılan kod
+sessizce eksik kalıyordu — `satinalma.onay_mali` böyle yakalandı) ve onay
+motorunun istediği her yetki en az bir şablonda var mı (sahipsiz basamak =
+duran talep). İkisi de kaynağı okuyor.
+
+xUnit 480/480.

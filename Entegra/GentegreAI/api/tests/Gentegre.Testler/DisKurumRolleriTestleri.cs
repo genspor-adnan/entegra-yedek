@@ -36,9 +36,11 @@ public sealed class DisKurumRolleriTestleri(VeritabaniOlgusu olgu)
         if (!_olgu.Baglandi(nameof(KurumPortalindaCokRol))) return;
         await using var b = await _olgu.Gerekli().AcAsync();
 
+        // AKTİFLİK ARANMAZ: rol Kurum Profili'nin rol haritasıyla pasife
+        //   alınabiliyor (786) - testin konusu "bu portal türünde birden çok
+        //   rol TANIMLI mı", kurulumun o anki işaretleri değil.
         var roller = await b.ListeAsync(
-            "select kod from public.rol "
-            + " where portal_turu = 2 and coalesce(aktif, 1) = 1 order by id",
+            "select kod from public.rol where portal_turu = 2 order by id",
             null, [], o => o.GetString(0), Iptal);
 
         // Uç (`portal-hesap`) eskiden "order by id limit 1" ile rol seçiyordu;

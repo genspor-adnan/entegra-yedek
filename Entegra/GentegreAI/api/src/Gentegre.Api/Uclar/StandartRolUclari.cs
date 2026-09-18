@@ -113,6 +113,12 @@ public static class StandartRolUclari
     [
         .. MuhasebeTemel,
         T("belge.iskonto_onay_mali"), Y("iskonto_onay"),
+        // TALEP ONAY ZINCIRININ "MALI ISLER" BASAMAGI (738): avans, masraf,
+        //   demirbas onarimi ve satinalma odemesi bu imzadan geciyor. Yetki
+        //   hicbir sablonda yoktu - basamagin sahibi yalniz sistem
+        //   yoneticisiydi ve zincir orada bekliyordu.
+        A("ik.avans_onay_mali"), A("ik.masraf_onay_mali"),
+        A("demirbas.onarim_onay_mali"), A("satinalma.odeme_onay"),
     ];
 
     /// <summary>
@@ -126,6 +132,10 @@ public static class StandartRolUclari
         new("sube", false), new("referans", false), new("entegrasyon", false),
         new("dokuman.ozel_nitelikli", false),
         T("belge.iskonto_onay_ust"), Y("iskonto_onay"),
+        // ZINCIRIN SON IMZASI (738): `T("%")` aksiyonlari KAPSAMAZ (aksiyon
+        //   acikca istenir) - bu yuzden her onay basamagi tek tek yazilir.
+        A("ik.izin_onay_ust"), A("ik.avans_onay_ust"), A("ik.masraf_onay_ust"),
+        A("satinalma.onay_ust"), A("demirbas.onarim_onay_ust"), A("dokuman.onay"),
     ];
 
     /// <summary>
@@ -164,7 +174,12 @@ public static class StandartRolUclari
         //   depo sorumlusu onerilmez.
         ["erp_satis"] = "erp_satis", ["erp_alis"] = "satinalma",
         ["erp_depo"] = "stok", ["erp_uretim"] = "uretim", ["erp_servis"] = "servis",
-        ["erp_ik"] = "ik",
+        ["erp_ik"] = "ik", ["ik_personel"] = "ik",
+        // Eczaci ve teknisyen eczane modulune bagli; acil hekimi acile.
+        ["eczaci"] = "eczane", ["eczane_teknisyen"] = "eczane",
+        ["acil_hekimi"] = "acil",
+        // Kalite gorevlisi, bilgi islem personeli ve birim amiri MODULSUZ:
+        //   kalite/kullanici yonetimi/onay zinciri her kurulumda var.
     };
 
     private static readonly Sablon[] Sablonlar =
@@ -205,7 +220,11 @@ public static class StandartRolUclari
         new("rapor_goruntuleyici", "Yönetim Görüntüleyici", "Kurum sahibi / mesul müdür: salt okuma dökümler ve günlük.", Hepsi,
             K(T("%"), new("ayar", false), new("rol", false), new("kullanici", false), new("sube", false), new("referans", false), new("entegrasyon", false), new("dokuman.ozel_nitelikli", false))),
         new("kalite", "Kalite Sorumlusu", "Hepsi kalite göstergeleri, dönem hesabı, doküman onayı; klinik ekranlar salt okuma.", Hepsi,
-            K(H("klinik_kalite"), H("klinik_kalite.%"), A("klinik_kalite.%"), Y("dokuman.onayla"), T("islem_log"), T("hasta"), T("muayene"), T("lab"), T("radyoloji"), T("yatan"))),
+            K(H("klinik_kalite"), H("klinik_kalite.%"), A("klinik_kalite.%"), Y("dokuman.onayla"),
+              // KUYRUGU GORMEK KARAR VERMEK DEGIL: `dokuman.onayla`
+              //   ekrandir (tur 0), karar `dokuman.onay` aksiyonudur -
+              //   kalite rolu kuyrugu goruyor ama imzalayamiyordu.
+              A("dokuman.onay"), T("islem_log"), T("hasta"), T("muayene"), T("lab"), T("radyoloji"), T("yatan"))),
         // TELERADYOLOJI IDARI (797): kurum tanimi, sozlesme, donem faturasi -
         //   isin klinik tarafi degil TICARI tarafi. Muhasebe rolune eklendi
         //   (asagida MuhasebeTemel), burada yalniz sablon sirasi korunuyor.
@@ -322,7 +341,9 @@ public static class StandartRolUclari
               Y("satinalma.kabul"), Y("satinalma.fatura"), Y("satinalma.tedarikci"),
               T("satinalma.butce"), Y("satinalma.sozlesme"),
               Y("cari"), Y("belge"), Y("belge_satir"), T("stok"), T("depo"), T("hizmet"),
-              T("fiyat_listesi"))),
+              T("fiyat_listesi"),
+              // SATINALMA BASAMAGI (738): talebin ikinci imzasi.
+              A("satinalma.onay_satinalma"))),
         new("erp_depo", "Depo / Sevkiyat Sorumlusu",
             "Stok giriş-çıkış, sayım, transfer, irsaliye ve sevkiyat; fiyat görmez.",
             ["erp"],
@@ -337,12 +358,87 @@ public static class StandartRolUclari
             ["erp"],
             K(Y("servis"), Y("servis.cihaz"), Y("servis.sozlesme"), Y("demirbas"),
               Y("demirbas.isemri"), Y("demirbas.ariza"), Y("demirbas.bakim"),
-              T("cari"), T("stok"), T("belge"))),
+              T("cari"), T("stok"), T("belge"),
+              // TEKNIK MUDUR BASAMAGI (738): onarim talebinin ilk imzasi ve
+              //   kapsam disi is icin son soz.
+              A("demirbas.onarim_onay_teknik"))),
         new("erp_ik", "İK Sorumlusu",
             "Personel kartı, izin, avans, masraf ve belge talepleri; prim hesabı.",
             ["erp", "tip_merkezi", "hastane"],
             K(H("personel"), Y("ik.izin"), Y("ik.izin_hak"), Y("ik.avans"), Y("ik.masraf"),
-              Y("ik.belge_talep"), T("ik.tatil"), Y("prim"), T("rol"), T("islem_log"))),
+              Y("ik.belge_talep"), T("ik.tatil"), Y("prim"), T("rol"), T("islem_log"),
+              // IK BASAMAGI (738): izin/avans zincirinin ikinci imzasi ve
+              //   belge talebinin tek imzasi.
+              A("ik.izin_onay_ik"), A("ik.avans_onay_ik"), A("ik.belge_talep_onay"))),
+
+        // ---- ROL/YARDIMCI KADROLAR (kullanici: "şu rolleri de ekle: İK
+        //      Personeli, Eczacı, Eczane Teknisyeni, Kalite Görevlisi, Bilgi
+        //      İşlem Personeli, Acil Hekimi").
+        //
+        //      HEPSI VAR OLAN BIR "SORUMLU" ROLUN DAR HALI (Acil Hekimi
+        //      disinda - onun karsiligi hic yoktu). Ayrimin tek olcusu:
+        //      IMZA/ONAY ve TANIM yetkisi sorumluda kalir, gunluk is
+        //      personeldedir. Ayni rolu iki kisiye verip "dikkat et" demek
+        //      denetim degildir.
+        new("ik_personel", "İK Personeli",
+            "İzin, avans, masraf ve belge taleplerinin kaydı; personel kartı. Onay ve prim İK Sorumlusunda.",
+            ["erp", "tip_merkezi", "hastane"],
+            // ONAY AKSIYONLARI (ik.%_onay_ik) BILEREK YOK: talebi giren kisi
+            //   kendi girdigini onaylayamamali.
+            K(Y("personel"), Y("ik.izin"), Y("ik.avans"), Y("ik.masraf"),
+              Y("ik.belge_talep"), T("ik.izin_hak"), T("ik.tatil"))),
+        new("eczaci", "Eczacı",
+            "Order karşılama, ünite doz, aseptik hazırlama, kontrollü ilaç ve imha; eczacı onayı.",
+            ["tip_merkezi", "hastane"],
+            // ECZACI ONAYI (eczane.onay), kontrollu ilac teslimi ve imha onayi
+            //   MESLEKI SORUMLULUKTUR - teknisyene verilmez.
+            K(H("eczane"), H("eczane.%"), A("eczane.%"), Y("stok"), Y("depo"), T("uts"),
+              T("yatan"), T("hasta"), T("muayene"), T("katalog"), T("belge"))),
+        new("eczane_teknisyen", "Eczane Teknisyeni",
+            "Order hazırlama, ünite doz, iade kabulü ve stok/karekod işleri; eczacı onayı gerektiren işler hariç.",
+            ["tip_merkezi", "hastane"],
+            K(T("eczane"), Y("eczane.order"), Y("eczane.doz"), Y("eczane.iade"),
+              Y("stok"), Y("depo"), Y("uts"), A("uts.bildir"), T("yatan"), T("katalog"))),
+        new("kalite_gorevli", "Kalite Görevlisi",
+            "Gösterge ve olgu verisinin girişi, dönem hesabı; hedef belirleme ve dönem kesinleştirme Kalite Sorumlusunda.",
+            Hepsi,
+            // KESINLESTIRME kuruma karsi imzadir: hesaplayan kisi kendi
+            //   hesabini kesinlestirmesin.
+            K(Y("klinik_kalite"), Y("klinik_kalite.olgu"), T("klinik_kalite.donem"),
+              A("klinik_kalite.hesapla"), T("hasta"), T("muayene"), T("lab"), T("radyoloji"))),
+        new("bilgi_islem_personel", "Bilgi İşlem Personeli",
+            "Kullanıcı açma/parola sıfırlama, cihaz bakımı, günlük destek; rol-şube-ayar tanımı ve veri aktarımı Bilgi İşlem Sorumlusunda.",
+            Hepsi,
+            // `kullanici.portal` YOK: disariya kapi acmak (dis hekim / kurum /
+            //   hasta hesabi) ayri bir karardir - 819'da da oyle ayrildi.
+            K(Y("kullanici"), A("kullanici.parola-sifirla"), T("rol"), T("sube"), T("ayar"),
+              T("referans"), T("entegrasyon"), Y("cihaz"), A("cihaz.isle"), T("kod_liste"),
+              T("numara_sablonu"), Y("bildirim"), T("bildirim_sablon"), T("islem_log"))),
+        // BIRIM AMIRI (738 onay omurgasi): izin/avans/masraf zincirinin ILK
+        //   imzasi "Birim Âmiri" basamagi, satinalma talebininki "Birim
+        //   Sorumlusu". Ikisinin de yetkisi HICBIR sablonda yoktu; sahibi
+        //   yalniz sistem yoneticisiydi ve talepler ilk basamakta bekliyordu.
+        //
+        //   Kimin amir oldugu ROLDEN degil KISIDEN gelir
+        //   (`taraf_personel.yonetici_taraf_id`, sahip_turu 3): rol yalnizca
+        //   "imzalayabilir" der, kimin talebini imzalayacagini kadro agaci
+        //   soyler. Bu yuzden rol genis dagitilsa bile herkes herkesin
+        //   talebini goremez.
+        new("birim_amiri", "Birim Âmiri / Departman Sorumlusu",
+            "Ekibinin izin, avans ve masraf taleplerinin ilk imzası; birim satınalma talebi onayı.",
+            Hepsi,
+            K(T("personel"), T("ik.izin"), T("ik.avans"), T("ik.masraf"), T("ik.tatil"),
+              A("ik.izin_onay_amir"), A("ik.avans_onay_amir"), A("ik.masraf_onay_amir"),
+              Y("satinalma.talep"), A("satinalma.onay_birim"), T("satinalma"),
+              T("satinalma.butce"))),
+        new("acil_hekimi", "Acil Hekimi",
+            "Acil başvuru, triyaj, takip panosu, çıkış ve sevk kararı; muayene, istem ve reçete.",
+            ["hastane"],
+            // TRIYAJ DUSURME ayri aksiyon: yesil alana kaydirmak klinik karar
+            //   ve iz birakmali - hekimde durur, kayit kabulde degil.
+            K([.. HekimTemel, H("acil"), Y("acil.basvuru"), Y("acil.triyaj"), T("acil.pano"),
+               A("acil.cikis"), A("acil.sevk"), A("acil.triyaj_dusur"), T("acil.yatak"),
+               T("yatan")])),
     ];
 
     public static void StandartRolUclariniEkle(this IEndpointRouteBuilder yol)
