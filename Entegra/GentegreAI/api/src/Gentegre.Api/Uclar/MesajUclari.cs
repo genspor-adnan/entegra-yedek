@@ -115,6 +115,15 @@ public static class MesajUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("mesaj", Islem.Ekle);
 
+            // PORTAL ROLU SERBEST SOHBET ACAMAZ (806): "istedigin kisiyle
+            //   sohbet ac" demek, kurum ici personel listesini portala acmak
+            //   demekti. Portal kullanicisinin sohbeti bir ISIN uzerinde
+            //   dogar (telerad istek sohbeti) ve uyelerini SUNUCU belirler.
+            if (baglam.PortalTuru > 0)
+                throw GentegreHatasi.Yasak(
+                    "Portal kullanicisi serbest sohbet acamaz; yazisma isin "
+                    + "kendi ekranindan baslatilir.");
+
             var uyeler = (istek.Uyeler ?? []).Where(u => u > 0).Distinct().ToList();
             if (uyeler.Count == 0)
                 throw GentegreHatasi.IsKurali("En az bir kişi seçin.");

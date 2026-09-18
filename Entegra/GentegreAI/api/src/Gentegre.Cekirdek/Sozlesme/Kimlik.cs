@@ -76,6 +76,14 @@ public sealed class KullaniciOzeti
     /// Onaylayanlar"). Bos ise kisinin tek rolu var.
     /// </summary>
     public string EkRolAdlari { get; set; } = "";
+    /// <summary>
+    /// PORTAL TURU (806): 0 ic kullanici · 1 dis doktor · 2 dis kurum ·
+    /// 3 hasta. Arayuz KURAL YAZMAZ ama portal kullanicisina ANLAMSIZ
+    /// dugmeyi gostermemek icin bilmesi gerekir - "serbest sohbet ac"
+    /// dugmesi sunucuda reddediliyordu, her zaman hata veren dugme
+    /// gostermek kullaniciya yalan soylemektir.
+    /// </summary>
+    public short PortalTuru { get; set; }
     public int Dil { get; set; }
     /// <summary>
     /// ILK GIRIS PAROLA ZORUNLULUGU (674): varsayilan parola (personel kart

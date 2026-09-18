@@ -75,6 +75,9 @@ public static class KimlikUclari
                     Ad = kullanici.Ad,
                     RolId = kullanici.RolId,
                     RolAdi = kullanici.RolAdi,
+                    // PORTAL TURU (806): arayuz kural yazmaz, yalniz portal
+                    //   kullanicisina anlamsiz dugmeyi gostermez.
+                    PortalTuru = baglam.PortalTuru,
                     Dil = kullanici.Dil,
                     // Zorunlu parola degisimi (674): /ben de tasir.
                     ParolaDegismeli = kullanici.ParolaDegismeli,

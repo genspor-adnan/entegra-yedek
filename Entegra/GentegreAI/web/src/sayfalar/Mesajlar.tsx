@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { guvenli, mesaj as bilgiMesaji } from '../bilesenler/mesaj';
@@ -78,7 +79,11 @@ const renk = (ad: string) =>
 export function Mesajlar() {
   const { kullanici } = useOturum();
   const benId = kullanici?.id ?? 0;
+  // Portal rolu (dis kurum / dis doktor / hasta): oturum yanitindaki rol
+  //   adindan degil, SUNUCUNUN verdigi portal turunden anlasilir.
+  const portalMi = (kullanici?.portalTuru ?? 0) > 0;
 
+  const [sorgu] = useSearchParams();
   const [filtre, setFiltre] = useState('tumu');
   const [ara, setAra] = useState('');
   const [sohbetler, setSohbetler] = useState<Sohbet[]>([]);
@@ -134,6 +139,19 @@ export function Mesajlar() {
 
   useEffect(() => { void guvenli(listeYukle) }, [listeYukle]);
 
+  // DERIN BAG (806): `/mesajlar?sohbet=12` - bir isin ekranindan gelen
+  //   kullanici dogru sohbette acilir. Teleradyoloji istegindeki "Yazisma"
+  //   dugmesi sohbeti sunucuda acip buraya gonderiyor; listeden elle
+  //   bulmasini beklemek, yeni acilmis bos bir sohbette anlamsiz olurdu.
+  //   BIR KEZ: kullanici baska sohbete gecerse adres cubugu onu geri
+  //   zorlamasin.
+  const derinBagUygulandi = useRef(false);
+  useEffect(() => {
+    if (derinBagUygulandi.current) return;
+    const istenen = Number(sorgu.get('sohbet')) || 0;
+    if (istenen > 0) { setSecili(istenen); derinBagUygulandi.current = true }
+  }, [sorgu]);
+
   useEffect(() => {
     if (secili === null) { setMesajlar([]); setBilgi(null); return }
     void guvenli(async () => {
@@ -187,8 +205,14 @@ export function Mesajlar() {
 
       {/* Araç çubuğu - mockup'taki üst şerit. */}
       <div className="msj-arac">
-        <button className="d bir" onClick={() => setYeniAcik('kisi')}>💬 Yeni Sohbet</button>
-        <button className="d" onClick={() => setYeniAcik('grup')}>👥 Yeni Grup</button>
+        {/* PORTAL KULLANICISI SERBEST SOHBET ACAMAZ (806): sunucu zaten
+            reddediyor, ama her zaman hata veren dugme gostermek kullaniciya
+            yalan soylemektir. Portalda yazisma isin kendi ekranindan
+            (telerad istegi) baslar. */}
+        {!portalMi && <>
+          <button className="d bir" onClick={() => setYeniAcik('kisi')}>💬 Yeni Sohbet</button>
+          <button className="d" onClick={() => setYeniAcik('grup')}>👥 Yeni Grup</button>
+        </>}
         <button className="d" disabled title="Sıradaki iş">📎 Kayıt İliştir</button>
         <button className="d" disabled title="Sıradaki iş">✅ Görev Oluştur</button>
         <span className="msj-durum">
@@ -238,7 +262,7 @@ export function Mesajlar() {
               <div key={s.id} className={`msj-satir${s.id === secili ? ' on' : ''}`}
                    onClick={() => setSecili(s.id)}>
                 <div className="msj-av" style={{ background: renk(s.baslik) }}>
-                  {s.tip === 2 ? '👥' : basHarf(s.baslik)}
+                  {s.tip === 2 ? '👥' : s.tip === 3 ? '🗂' : basHarf(s.baslik)}
                 </div>
                 <div className="msj-satir-ic">
                   <div className="msj-satir-ust">
@@ -265,19 +289,23 @@ export function Mesajlar() {
         <div className="msj-orta">
           {seciliSohbet === null ? (
             <div className="not" style={{ padding: 24 }}>
-              Soldan bir sohbet seçin ya da <b>Yeni Sohbet</b> açın.
+              Soldan bir sohbet seçin{portalMi ? '.' : ''}{!portalMi && <> ya da <b>Yeni Sohbet</b> açın.</>}
             </div>
           ) : (
             <>
               <div className="msj-ust">
                 <div className="msj-av" style={{ background: renk(seciliSohbet.baslik) }}>
-                  {seciliSohbet.tip === 2 ? '👥' : basHarf(seciliSohbet.baslik)}
+                  {seciliSohbet.tip === 2 ? '👥' : seciliSohbet.tip === 3 ? '🗂' : basHarf(seciliSohbet.baslik)}
                 </div>
                 <div style={{ minWidth: 0 }}>
                   <div className="nm">{seciliSohbet.baslik}</div>
                   <div className="du sonuk">
                     {seciliSohbet.tip === 2
                       ? `${seciliSohbet.uyeSayisi} üye`
+                      // IS SOHBETI (806): bir KAYDIN uzerinde acilir - "kisi
+                      //   sohbeti" demek hangi ise ait oldugunu gizlerdi.
+                      : seciliSohbet.tip === 3
+                      ? `İş sohbeti · ${seciliSohbet.uyeSayisi} katılımcı`
                       : [String(bilgi?.kunye?.gorev ?? ''),
                          String(bilgi?.kunye?.departman ?? ''),
                          String(bilgi?.kunye?.sube ?? '')]
@@ -448,12 +476,14 @@ export function Mesajlar() {
                 <div className="msj-kunye-av" title="Künyeyi aç / kapat"
                      style={{ background: renk(seciliSohbet.baslik) }}
                      onClick={() => setKunyeAcik(a => !a)}>
-                  {seciliSohbet.tip === 2 ? '👥' : basHarf(seciliSohbet.baslik)}
+                  {seciliSohbet.tip === 2 ? '👥' : seciliSohbet.tip === 3 ? '🗂' : basHarf(seciliSohbet.baslik)}
                 </div>
                 <div className="nm">{seciliSohbet.baslik}</div>
                 <div className="mt sonuk">
                   {seciliSohbet.tip === 2
                     ? `Grup · ${seciliSohbet.uyeSayisi} katılımcı`
+                    : seciliSohbet.tip === 3
+                    ? `İş sohbeti · ${seciliSohbet.uyeSayisi} katılımcı`
                     : [String(bilgi?.kunye?.gorev ?? ''), String(bilgi?.kunye?.departman ?? '')]
                         .filter(Boolean).join(' · ') || 'Kişi sohbeti'}
                 </div>

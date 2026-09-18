@@ -186,17 +186,38 @@ public sealed class DisKurumPortalTestleri(VeritabaniOlgusu olgu)
         if (!_olgu.Baglandi(nameof(Kurum_ICI_ekranlar_roldEN_kalkti))) return;
         var veri = _olgu.Gerekli();
 
-        // Gorev/mesaj/dokuman/pano kurum ici ekranlardir; verileri liste-kart
+        // Gorev/dokuman/pano kurum ici ekranlardir; verileri liste-kart
         //   disindaki uclardan da geliyor ve portal kapsami oralara henuz
         //   baglanmadi - yetkiyi birakmak "bos ama acik kapi" olurdu.
+        //
+        // MESAJ 806'DA LISTEDEN CIKTI: kapsami baglandi. Sohbet listesi
+        //   `v_mesaj_sohbet.kullanici_id` ile suzuluyor, her uc `mesaj_uye`
+        //   kontrolunden geciyor ve portal rolu SERBEST SOHBET ACAMIYOR -
+        //   yazisma yalnizca bir isin (telerad istegi) uzerinde doguyor,
+        //   uyelerini sunucu belirliyor.
         var sayi = await veri.TekDegerAsync<long>(
             "select count(*) from public.rol r "
             + "  join public.rol_yetki ry on ry.rol_id = r.id "
             + "  join public.yetki y on y.id = ry.yetki_id "
             + " where r.kod = 'dis_istem_kurumu' "
-            + "   and y.kod in ('gorev','mesaj','dokuman','dokum','panel','ai')",
+            + "   and y.kod in ('gorev','dokuman','dokum','panel','ai')",
             [], CancellationToken.None);
         Assert.Equal(0, sayi);
+
+        // MESAJ VAR AMA DAR: yalniz gor + ekle. Baskasinin mesajini
+        //   duzenlemek ya da sohbeti arsivlemek portalin isi degil.
+        var mesaj = await veri.ListeAsync(
+            "select ry.gor, ry.ekle, ry.degistir, ry.sil from public.rol r "
+            + "  join public.rol_yetki ry on ry.rol_id = r.id "
+            + "  join public.yetki y on y.id = ry.yetki_id "
+            + " where r.kod = 'dis_istem_kurumu' and y.kod = 'mesaj'",
+            [], o => (Gor: o.GetInt16(0), Ekle: o.GetInt16(1),
+                      Degistir: o.GetInt16(2), Sil: o.GetInt16(3)),
+            CancellationToken.None);
+        Assert.Single(mesaj);
+        Assert.Equal((short)1, mesaj[0].Gor);
+        Assert.Equal((short)0, mesaj[0].Degistir);
+        Assert.Equal((short)0, mesaj[0].Sil);
     }
 
     [Fact]

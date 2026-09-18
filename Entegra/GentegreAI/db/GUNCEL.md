@@ -424,7 +424,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (241 ad, 59 tanesi birden cok dosyada)
+## Gorunumler (241 ad, 60 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -583,7 +583,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_medula_fatura_lookup` | `707_medula.sql` | — |
 | `v_medula_kuyruk` | `707_medula.sql` | — |
 | `v_medula_takip` | `707_medula.sql` | — |
-| `v_mesaj_sohbet` | `342_mesajlasma.sql` | — |
+| `v_mesaj_sohbet` | `806_istek_sohbeti.sql` | 342_mesajlasma.sql |
 | `v_muayene_sablon_alan_lookup` | `409_muayene_v1.sql` | — |
 | `v_muayene_sablon_lookup` | `411_muayene_sablon_makro.sql` | 409_muayene_v1.sql |
 | `v_numara_hasta_belge` | `636_hasta_belge_numara_gorunumu.sql` | — |

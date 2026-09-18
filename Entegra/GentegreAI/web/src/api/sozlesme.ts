@@ -130,6 +130,13 @@ export interface KullaniciOzeti {
   rolId: number; rolAdi: string;
   dil: number;
   /**
+   * PORTAL TURU (806): 0 ic kullanici · 1 dis doktor · 2 dis kurum · 3 hasta.
+   * Arayuz KURAL YAZMAZ - kapsam sunucuda; bu alan yalnizca portal
+   * kullanicisina ANLAMSIZ dugmeyi gostermemek icin ("serbest sohbet ac"
+   * sunucuda reddediliyor, her zaman hata veren dugme yalan soylemektir).
+   */
+  portalTuru?: number;
+  /**
    * ZORUNLU PAROLA DEGISIMI (674): varsayilan parolayla (personel kart id'si)
    * giren kisi once kendi parolasini belirler. /ben de tasir - yalniz giris
    * yanitinda olsaydi sayfayi yenileyen kullanici zorunlulugu atlardi.

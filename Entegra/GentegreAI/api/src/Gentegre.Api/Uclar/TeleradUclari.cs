@@ -30,6 +30,8 @@ public static partial class TeleradUclari
         // DÖNEM FATURASI (803) ayrı dosyada: bu dosya panonun sorgularıyla
         //   zaten uzun; fatura hattı kendi kurallarını taşıyor.
         FaturaUclariniEkle(grup);
+        // IS SOHBETI (806): istek uzerinde kurum <-> radyolog yazismasi.
+        SohbetUclariniEkle(grup);
 
         grup.MapGet("/pano", async (
             DateTime? gun, BaglamCozucu cozucu, VeriKaynagi veri, HttpContext ctx,

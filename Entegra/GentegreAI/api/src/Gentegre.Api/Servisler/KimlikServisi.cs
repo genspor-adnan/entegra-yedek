@@ -141,7 +141,8 @@ public sealed class KimlikServisi
                 await AcikModullerAsync(subeId, iptal),
                 await HekimRoluAsync(subeId, iptal),
                 await KurumTipiAsync(subeId, iptal),
-                await IskontoEsigiAsync(iptal))
+                await IskontoEsigiAsync(iptal),
+                await _kullanicilar.PortalTuruAsync(kullanici.TarafId, iptal))
         };
     }
 
@@ -350,7 +351,8 @@ public sealed class KimlikServisi
                 await AcikModullerAsync(subeId, iptal),
                 await HekimRoluAsync(subeId, iptal),
                 await KurumTipiAsync(subeId, iptal),
-                await IskontoEsigiAsync(iptal))
+                await IskontoEsigiAsync(iptal),
+                await _kullanicilar.PortalTuruAsync(kullanici.TarafId, iptal))
         };
     }
 
@@ -413,8 +415,11 @@ public sealed class KimlikServisi
         IReadOnlyList<SubeOzeti> subeler, int? subeId, int urunModu,
         IReadOnlyList<string> moduller, int hekimRolu,
         (string Kod, string Ad) kurumTipi = default,
-        decimal iskontoEsigi = 0m) => new()
+        decimal iskontoEsigi = 0m, short portalTuru = 0) => new()
     {
+        // PORTAL TURU (806): giris yanitinda da tasinir - sayfa yenilenmeden
+        //   once ekran portal kullanicisina anlamsiz dugmeyi gostermesin.
+        PortalTuru = portalTuru,
         Id = kullanici.TarafId,
         Kod = kullanici.Kod,
         Ad = kullanici.Ad,

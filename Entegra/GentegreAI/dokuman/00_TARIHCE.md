@@ -14644,3 +14644,55 @@ açılan istek `durum = 1`, `ucret = 0`, kurum sunucudan; durum değiştirme
 denemesi okunur bir 403 ile reddedildi. Deneme hesabı ve satırları silindi.
 
 xUnit 349/349, vitest 677/677.
+
+## 18.09.2026 — İstek üzerinde yazışma (806)
+
+Kullanıcı: *"mesajlaşmayla devam et"*. Tasarım notu (797) bunu baştan
+söylemişti: *"ayrı tablo yerine `mesaj_sohbet.kaynak_tur/kaynak_id` de
+yeterli"* — **`telerad_mesaj` diye bir tablo yazılmadı.**
+
+**Neden ayrı tablo değil:** mesajlaşma modülü (341/342) okunmamış sayacını,
+üyeliği, yanıtlamayı, ek dosyayı, kayıt iliştirmeyi ve arşivi zaten çözüyor.
+Teleradyolojiye özel ikinci bir yazışma altyapısı, bu özelliklerin ikincisini
+yazmak (ve birini unutmak) demekti.
+
+**Yeni olan tek şey:** sohbetin bir KAYDA ait olabilmesi —
+`mesaj_sohbet.kaynak_tur/kaynak_id` + kısmi benzersiz indeks. **Aynı iş için
+tek sohbet:** ikincisi açılsaydı yazışma iki listeye bölünür ve "yazdım ama
+görmedi" durumu doğardı (kişi sohbetindeki kuralın aynısı). Kişi/grup
+sohbetleri kaynaksız açılmaya devam ediyor (kısmi indeks).
+
+**Tip 3 = iş sohbeti.** Başlığı kaydın kendisinden gelir (`v_mesaj_sohbet`):
+iki kişilik bir iş sohbetinde karşı tarafın adını başlık yapmak hangi işe ait
+olduğunu gizlerdi. Ekranda "İş sohbeti · N katılımcı" ve 🗂 simgesi.
+
+**Sohbeti sunucu açar, üyelerini de sunucu belirler:** gönderen kurumun portal
+kullanıcısı + isteğin atanan radyoloğu + açan kişi. Atama sonradan değişirse
+yeni radyolog bir sonraki açılışta eklenir, **eski üye çıkarılmaz** - yazışma
+geçmişi sahipsiz kalmasın. Çalışma listesindeki "💬 Yazışma" düğmesi sohbeti
+açıp `/mesajlar?sohbet=<id>` derin bağına gidiyor.
+
+**Portal rolü serbest sohbet AÇAMAZ:** "istediğin kişiyle sohbet aç" demek,
+kurum içi personel listesini portala açmak olurdu. Portal kullanıcısının
+sohbeti bir işin üzerinde doğar. Ekranda "Yeni Sohbet / Yeni Grup" düğmeleri
+portal kullanıcısına **gösterilmiyor** — 805'teki dersin aynısı: her zaman
+hata veren düğme kullanıcıya yalan söyler. Bunun için oturum yanıtına
+`portalTuru` eklendi; arayüz kural yazmıyor, yalnız anlamsız düğmeyi gizliyor.
+
+**795'in kilidi güncellendi:** `mesaj` yetkisi o gün BİLEREK kaldırılmıştı
+(kapsam kuralı yoktu). Şimdi kapsam **üyelik**: sohbet listesi
+`v_mesaj_sohbet.kullanici_id` ile süzülüyor, her uç `mesaj_uye`
+kontrolünden geçiyor. Dış kurum rolüne gör+ekle verildi; değiştir/sil YOK -
+başkasının mesajını düzenlemek ya da sohbeti arşivlemek portalın işi değil.
+Görev/doküman/pano hâlâ kilitli.
+
+Tarayıcıda uçtan uca: iç kullanıcı istek üzerinden yazışmayı açtı ("Merhaba,
+görüntüler tam geldi mi?"), portal kullanıcısı aynı sohbette yanıtladı ("Evet,
+tüm seriler gönderildi") — sohbet `tip 3 · kaynak telerad-istek · 2 üye`.
+Deneme hesabı, sohbeti ve mesajları silindi.
+
+**Test dersi (yine):** sohbet testleri "en eski isteği" ödünç alıyordu ve
+tarayıcıda açılmış gerçek sohbetle benzersizlik kısıtında çakıştı. Testler
+artık kendi kurumunu ve isteğini açıyor.
+
+xUnit 354/354, vitest 677/677.

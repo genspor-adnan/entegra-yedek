@@ -1071,6 +1071,15 @@ public static class AksiyonKatalogu
                 new("telerad.teslim",   "📦 Teslim Et", "telerad",
                     AksiyonYetkisi: "telerad.teslim", KayitGerekir: true, Sira: 50,
                     Bicim: "onay", Ipucu: "Onaylı raporu gönderen kuruma teslim eder"),
+                // YAZIŞMA (806): gönderen kurum ile radyolog arasındaki
+                //   mesajlaşma. Sohbeti sunucu açar ve üyelerini o belirler;
+                //   düğme MESAJ yetkisine bağlı - yazışma mesajlaşma
+                //   modülünün işidir, teleradyolojinin ikinci bir sohbet
+                //   altyapısı yoktur.
+                new("telerad.mesaj",    "💬 Yazışma", "telerad",
+                    KaynakKodu: "mesaj", Islem: Islem.Ekle,
+                    KayitGerekir: true, Sira: 55,
+                    Ipucu: "Bu isteğin kurum ↔ radyolog yazışmasını açar"),
                 new("telerad.iptal",    "✖ İsteği İptal Et", "telerad",
                     Hedef: "sagtus,palet", AksiyonYetkisi: "telerad.akis",
                     KayitGerekir: true, Sira: 60, Bicim: "ret"),

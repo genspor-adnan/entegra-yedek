@@ -117,6 +117,15 @@ export const mesajUclari = {
     istek<T>(`/api/telerad/fatura-onizleme?kurumId=${kurumId}`
              + `&baslangic=${baslangic}&bitis=${bitis}`),
 
+  /**
+   * ISTEK YAZISMASI (806): istegin sohbetini acar ya da var olani dondurur.
+   * Uyeleri SUNUCU belirler (gonderen kurum + atanan radyolog) - portal
+   * kullanicisi serbest sohbet acamaz.
+   */
+  teleradSohbet: (istekId: number) =>
+    gonder<{ sohbetId: number; istekNo: string }>(
+      `/api/telerad/istek/${istekId}/sohbet`, {}),
+
   /** DONEM FATURASI: donemin onayli isleri TEK satis faturasina girer. */
   teleradFatura: (kurumId: number, baslangic: string, bitis: string) =>
     gonder<{ belgeId: number; satir: number; istek: number; tutar: number }>(

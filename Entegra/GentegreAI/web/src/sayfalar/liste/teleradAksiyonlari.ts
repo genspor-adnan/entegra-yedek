@@ -49,6 +49,18 @@ export async function teleradAksiyonu(
     return true;
   }
 
+  // YAZISMA (806): istegin sohbetini acar ve Mesajlar ekranina gecer.
+  //   Sohbeti ve uyelerini SUNUCU belirler - istemci kimi ekleyecegini
+  //   bilmez (portal kullanicisi kurum ici personel listesini gormemeli).
+  if (kod === 'telerad.mesaj') {
+    if (!satir) return true;
+    await guvenli(async () => {
+      const sonuc = await api.teleradSohbet(Number(satir.id));
+      b.git(`/mesajlar?sohbet=${sonuc.sohbetId}`);
+    });
+    return true;
+  }
+
   // OTOMATIK DAGIT (801): siradaki atanmamis isler nobet cizelgesi ve atama
   //   kurallarina gore paylastirilir. KAYIT SECIMI ISTEMEZ - isi tek tek
   //   sectirmek "gece listeye bakan kimse yok" sorununu cozmezdi.
