@@ -179,6 +179,9 @@ const KATALOG_ADI = new Set([
   // Katalog kategorileri ("Diş İşlemi", "Ameliyat ve Girişimler") de ad
   //   niteligindedir - stok/hizmet agacinin ust dugumleri.
   'kategori', 'kategoriAdi', 'kategoriAd',
+  // SUBE ADI ve OLCU BIRIMI (855). Sube adi faturada ticari unvanin parcasi -
+  //   ceviri YALNIZ ekran icindir, sunucu adi Turkce tutar.
+  'sube', 'subeAdi', 'subeAd', 'birim', 'birimAdi', 'anaBirim',
 ]);
 
 /**

@@ -110,6 +110,14 @@ export function c(metin: string | undefined | null, kapsam: Kapsam = 'etiket'): 
       const govde = bul(kodlu[2], 'kod');
       if (govde) return `${kodlu[1]} - ${govde}`;
     }
+    // KATEGORI YOLU (855): stok/hizmet listesi kategoriyi "Tıbbi Malzeme >
+    //   Ortez / Protez" seklinde ust dalla birlikte gonderiyor. Butun yol
+    //   sozlukte anahtar degil - parcalara ayrilip her dugum ayri cevrilir.
+    if (m.includes(' > ')) {
+      const parca = m.split(' > ');
+      const cevrili = parca.map(x => bul(x.trim(), 'kod'));
+      if (cevrili.some(x => x)) return parca.map((x, i) => cevrili[i] ?? x.trim()).join(' > ');
+    }
   }
 
   const ikon = IKON.exec(m);

@@ -171,7 +171,9 @@ export function Kabuk() {
                   ? <img src={subeLogo} alt="" />
                   : <span className="sube-harf">{aktifSube.ad.trim().charAt(0).toLocaleUpperCase('tr')}</span>}
               </span>
-              {aktifSube.ad}{cokSube && <span className="sube-ok">▾</span>}
+              {/* Sube adi EKRANDA cevrilir (855); faturaya giden ad sunucuda
+                  Turkce kalir. */}
+              {c(aktifSube.ad, 'kod')}{cokSube && <span className="sube-ok">▾</span>}
             </div>
             {subeMenusu && (
               <span className="dil-menu sube-menu">
@@ -179,7 +181,7 @@ export function Kabuk() {
                   <button key={s.id} type="button"
                           className={`dil-oge${s.id === kullanici?.subeId ? ' on' : ''}`}
                           onClick={() => { setSubeMenusu(false); if (s.id !== kullanici?.subeId) void subeDegistir(s.id) }}>
-                    {s.ad}{s.yazma ? '' : <span className="sonuk"> ({c('salt okuma')})</span>}
+                    {c(s.ad, 'kod')}{s.yazma ? '' : <span className="sonuk"> ({c('salt okuma')})</span>}
                   </button>
                 ))}
               </span>
