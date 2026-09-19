@@ -52,6 +52,7 @@ export async function ceviriYukle(dil: number): Promise<void> {
   if (!dil) {
     sozluk = {};
     yukluDil = 0;
+    ilacDizin = null;
     dinleyiciler.forEach(f => f());
     return;
   }
@@ -64,11 +65,13 @@ export async function ceviriYukle(dil: number): Promise<void> {
     const d = await y.json() as { sozluk: Sozluk };
     sozluk = d.sozluk ?? {};
     yukluDil = dil;
+    ilacDizin = null;
   } catch {
     // Sözlük inmezse uygulama Türkçe çalışır; dil yüzünden ekran açılmamazlık
     //   etmesin.
     sozluk = {};
     yukluDil = dil;
+    ilacDizin = null;
   }
   dinleyiciler.forEach(f => f());
 }
@@ -135,6 +138,92 @@ export function c(metin: string | undefined | null, kapsam: Kapsam = 'etiket'): 
 
 /** Menü kısayolu - `c(x, 'menu')` yerine. */
 export const cm = (metin: string | undefined | null) => c(metin, 'menu');
+
+
+/* ==========================================================================
+ * İLAÇ ADI (856)
+ *
+ * İlaç adı TİTCK ruhsat adıdır: <MARKA> <doz> <FARMASÖTİK FORM>, <adet>.
+ * MARKA VE DOZ ÇEVRİLMEZ - "RIPAZOL"u çevirmek ekranda olmayan bir ilaç
+ * gösterir. Çevrilebilen tek kısım form/ambalaj sözcükleridir, bu yüzden
+ * sözlükte tam ad değil ifadeler var (kapsam `ilac`) ve ad parçalanıp EN
+ * UZUN eşleşen ifade çevrilir; tanınmayan sözcük AYNEN kalır.
+ *
+ * ANAHTAR KATLANMIŞTIR: veride aynı sözcük FİLM/FILM, ÇÖZELTİ/COZELTI gibi
+ * birkaç yazımla geçiyor - arama metni de küçük harfe indirilip Türkçe
+ * harfleri ASCII'ye katlanarak aranır.
+ * ========================================================================== */
+const KATLAMA: Record<string, string> = {
+  'ı': 'i', 'İ': 'i', 'I': 'i', 'ş': 's', 'Ş': 's', 'ç': 'c', 'Ç': 'c',
+  'ö': 'o', 'Ö': 'o', 'ü': 'u', 'Ü': 'u', 'ğ': 'g', 'Ğ': 'g',
+};
+function katla(s: string): string {
+  return s.replace(/[ıİIşŞçÇöÖüÜğĞ]/g, h => KATLAMA[h]).toLowerCase();
+}
+
+let ilacDizin: Map<string, string> | null = null;
+let ilacEnUzun = 1;
+function ilacSozlugu(): Map<string, string> {
+  if (!ilacDizin) {
+    ilacDizin = new Map();
+    ilacEnUzun = 1;
+    for (const [k, v] of Object.entries(sozluk.ilac ?? {})) {
+      ilacDizin.set(katla(k), v);
+      ilacEnUzun = Math.max(ilacEnUzun, k.split(' ').length);
+    }
+  }
+  return ilacDizin;
+}
+
+/** Kaynak parçanın büyük/küçük harf düzenini çeviriye taşır. */
+function harfDuzeni(kaynak: string, ceviri: string): string {
+  if (kaynak === kaynak.toUpperCase() && kaynak !== kaynak.toLowerCase())
+    return ceviri.toUpperCase();
+  if (kaynak[0] === kaynak[0]?.toUpperCase())
+    return ceviri[0].toUpperCase() + ceviri.slice(1);
+  return ceviri;
+}
+
+/**
+ * İlaç adı / etken madde çevirisi. Türkçede veya sözlük inmemişse metnin
+ * kendisi döner.
+ */
+export function ilacAdi(metin: string | undefined | null): string {
+  const m = metin ?? '';
+  if (!m || !yukluDil) return m;
+  const soz = ilacSozlugu();
+  if (!soz.size) return m;
+
+  // ETKEN MADDE: tam ad karşılığı varsa (INN) doğrudan kullanılır.
+  const tam = soz.get(katla(m.trim()));
+  if (tam) return harfDuzeni(m.trim(), tam);
+
+  // İLAÇ ADI: boşlukla ayrılmış sözcükler üzerinde en uzun eşleşme.
+  // Virgül/eğik çizgi/parantez de AYRAÇ: "TABLET," sözlükte aranırsa bulunmaz.
+  const parca = m.split(/(\s+|[,/()])/);
+  const cikti: string[] = [];
+  let i = 0;
+  while (i < parca.length) {
+    if (!parca[i].trim()) { cikti.push(parca[i]); i += 1; continue }
+    let eslesti = false;
+    const enFazla = Math.min(ilacEnUzun, Math.ceil((parca.length - i) / 2));
+    for (let n = enFazla; n >= 1; n -= 1) {
+      const dilim = parca.slice(i, i + 2 * n - 1);
+      // Aradaki ayraç TEK BOŞLUK olmalı: virgül/parantez ifadeyi böler.
+      if (dilim.some((x, j) => j % 2 === 1 && x !== ' ')) continue;
+      const ifade = dilim.join('');
+      const kar = soz.get(katla(ifade));
+      if (kar) {
+        cikti.push(harfDuzeni(ifade, kar));
+        i += 2 * n - 1;
+        eslesti = true;
+        break;
+      }
+    }
+    if (!eslesti) { cikti.push(parca[i]); i += 1 }
+  }
+  return cikti.join('');
+}
 
 /** Sözlükte karşılığı bulunamayan metinler (geliştirme yardımcısı). */
 export function eksikCeviriler(): string[] {

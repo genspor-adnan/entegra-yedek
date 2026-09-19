@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import type { IcmalYaniti } from '../../api/uclar/yatan';
 import { paraYaz, tarihYaz } from '../bicim';
-import { c } from '../../dil/ceviri';
+import { c, ilacAdi } from '../../dil/ceviri';
 
 /**
  * YATAN HASTA HİZMET İCMALİ — mockup
@@ -127,7 +127,7 @@ export function YatanIcmal({ yenile }: { yenile?: number }) {
                 <tr key={i.ad}>
                   <td>{i.ilk ? tarihYaz(i.ilk) : '—'}
                       {i.son && i.son !== i.ilk && ` – ${tarihYaz(i.son)}`}</td>
-                  <td>{i.ad}</td>
+                  <td>{ilacAdi(i.ad)}</td>
                   <td className="sonuk">{i.sut || '—'}</td>
                   <td className="sag">{i.adet}</td>
                   <td className="sag">{i.birim ? paraYaz(i.birim) : '—'}</td>

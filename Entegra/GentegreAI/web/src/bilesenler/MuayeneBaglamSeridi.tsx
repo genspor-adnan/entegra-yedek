@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
-import { c } from '../dil/ceviri';
+import { c, ilacAdi } from '../dil/ceviri';
 
 /**
  * MUAYENE BAĞLAM ŞERİDİ (461) — mockup `Ekranlar/Muayene/muayene_karti.html`
@@ -178,8 +178,8 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
             : (
               <>
                 {ilac.slice(0, 4).map((x, i) => (
-                  <span key={i} className="kb-ilac" title={metin(x.etkenMadde)}>
-                    {metin(x.ilacAd)}
+                  <span key={i} className="kb-ilac" title={ilacAdi(metin(x.etkenMadde))}>
+                    {ilacAdi(metin(x.ilacAd))}
                     {metin(x.doz) ? <span className="sonuk"> {metin(x.doz)}</span> : null}
                   </span>
                 ))}

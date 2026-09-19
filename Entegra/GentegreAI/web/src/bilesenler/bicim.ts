@@ -1,6 +1,6 @@
 import type { KolonMeta } from '../api/sozlesme';
 import { paraSimgesi, subeAyari } from './subeAyari';
-import { aktifDil, c, yerelKod } from '../dil/ceviri';
+import { aktifDil, c, ilacAdi, yerelKod } from '../dil/ceviri';
 
 /**
  * TEK BICIM KAYNAGI: tutar / miktar bicimleri butun ekranlarda ayni olmali.
@@ -194,8 +194,19 @@ const KATALOG_KAYNAK = new Set([
   'ftr-olcek', 'goz-tetkik', 'goz-islem-protokol', 'rad-protokol',
 ]);
 
+/**
+ * İLAÇ ADI / ETKEN MADDE (856): marka adı çevrilmez, ad içindeki farmasötik
+ * form sözcükleri çevrilir - bu yüzden sözlük değil `ilacAdi()` motoru.
+ */
+const ILAC_ADI = new Set(['ilac', 'ilacAd', 'ilacAdi', 'etkenMadde']);
+const ILAC_KAYNAK = new Set(['ilac']);
+
 export function bicimle(deger: unknown, kolon: KolonMeta, kaynak?: string): string {
   if (deger === null || deger === undefined) return '';
+  if (typeof deger === 'string' && deger !== ''
+      && (ILAC_ADI.has(kolon.ad)
+          || (kolon.ad === 'ad' && kaynak !== undefined && ILAC_KAYNAK.has(kaynak))))
+    return ilacAdi(deger);
   // Katalog adini once cevir: 'kod' kapsaminda karsiligi yoksa metin aynen kalir.
   if (typeof deger === 'string' && deger !== ''
       && (KATALOG_ADI.has(kolon.ad)
