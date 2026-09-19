@@ -796,6 +796,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
           <div className="gridwrap">
             <div className="gridkaydir">
               <GridTablo
+                kaynak={kaynak}
                 agacAlani={agacAlani}
                 agacDegistir={agacDegistir}
                 bosEk={bosEk}

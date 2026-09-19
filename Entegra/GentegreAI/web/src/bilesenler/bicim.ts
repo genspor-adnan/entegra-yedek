@@ -172,12 +172,31 @@ const KATALOG_ADI = new Set([
   'rol', 'rolAdi', 'anaRol', 'departman', 'departmanAdi', 'departmanAd',
   'bolum', 'bolumAdi', 'gorev', 'gorevAdi', 'gorevAd', 'birim', 'birimAdi',
   'klinik', 'servis', 'unvan',
+  // HIZMET / TETKIK ADLARI (854): modul hizmetleri ve lab tetkikleri
+  //   sozlukte; SUT katalogunun cevrilmemis adlari oldugu gibi kalir.
+  'hizmet', 'hizmetAdi', 'hizmetAd', 'tetkik', 'tetkikAdi', 'tetkikAd',
+  'islem', 'islemAdi', 'panel', 'panelAdi',
+  // Katalog kategorileri ("Diş İşlemi", "Ameliyat ve Girişimler") de ad
+  //   niteligindedir - stok/hizmet agacinin ust dugumleri.
+  'kategori', 'kategoriAdi', 'kategoriAd',
 ]);
 
-export function bicimle(deger: unknown, kolon: KolonMeta): string {
+/**
+ * ADI KATALOG OLAN KAYNAKLAR (854): bu listelerde `ad` kolonu bir katalog
+ * adidir (hizmet, tetkik, rol, bolum, gorev). Hasta/cari/stok listelerinde
+ * `ad` KISI ya da URUN adidir - onlar bu kumede YOK.
+ */
+const KATALOG_KAYNAK = new Set([
+  'hizmet', 'lab-tetkik', 'lab-panel', 'rol', 'departman', 'gorev',
+  'ftr-olcek', 'goz-tetkik', 'goz-islem-protokol', 'rad-protokol',
+]);
+
+export function bicimle(deger: unknown, kolon: KolonMeta, kaynak?: string): string {
   if (deger === null || deger === undefined) return '';
   // Katalog adini once cevir: 'kod' kapsaminda karsiligi yoksa metin aynen kalir.
-  if (KATALOG_ADI.has(kolon.ad) && typeof deger === 'string' && deger !== '')
+  if (typeof deger === 'string' && deger !== ''
+      && (KATALOG_ADI.has(kolon.ad)
+          || (kolon.ad === 'ad' && kaynak !== undefined && KATALOG_KAYNAK.has(kaynak))))
     return c(deger, 'kod');
   // Telefon HER LISTEDE ayni bicimde (genel kural) - kolon tipi metin oldugu
   //   icin switch'e girmeden once yakalanir.

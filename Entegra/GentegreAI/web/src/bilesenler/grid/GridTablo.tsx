@@ -163,12 +163,14 @@ export function GridTablo(p: GridTabloProps) {
                       {satir.__acik ? '−' : '+'}
                     </button>
                   ) : <span className="agac-bosluk" />}
-                  {agacAdi(satir[k.ad])}
+                  {/* AGAC HUCRESI de katalog adi tasiyabilir (854): hizmet
+                      agacinda grup ve hizmet adlari sozlukten gecer. */}
+                  {bicimle(agacAdi(satir[k.ad]), k, p.kaynak)}
                 </span>
               ) : (
                 ikonHucre(satir[k.ad], k) ?? yuzdeRozeti(satir[k.ad], k)
                   ?? rozetHucre(satir[k.ad], k)
-                  ?? durumRozeti(satir[k.ad], k) ?? bicimle(satir[k.ad], k)
+                  ?? durumRozeti(satir[k.ad], k) ?? bicimle(satir[k.ad], k, p.kaynak)
               )}
             </td>
             );
@@ -181,7 +183,7 @@ export function GridTablo(p: GridTabloProps) {
               const t = ozet.toplamlar?.[k.ad];
               return (
                 <td key={k.ad} className={`hiza-${k.hizalama}`}>
-                  {t !== undefined && t !== null ? bicimle(t, k)
+                  {t !== undefined && t !== null ? bicimle(t, k, p.kaynak)
                     : ki === 0 ? `${grupDeger} toplamı` : ''}
                 </td>
               );
@@ -210,7 +212,7 @@ export function GridTablo(p: GridTabloProps) {
           const t = gorunenToplamlar.find(([ad]) => ad === k.ad);
           return (
             <td key={k.ad} className={`hiza-${k.hizalama}`}>
-              {t ? bicimle(t[1], k)
+              {t ? bicimle(t[1], k, p.kaynak)
                  : (i === 0 ? (grupKolonu ? c('GENEL TOPLAM') : c('Toplam')) : '')}
             </td>
           );
@@ -223,6 +225,8 @@ export function GridTablo(p: GridTabloProps) {
 }
 
 export interface GridTabloProps {
+  /** Liste kaynagi (854): `ad` kolonunun katalog adi olup olmadigini belirler. */
+  kaynak?: string;
   /** Bos listede "Kayıt yok"un altina eklenecek aciklama/dugme. */
   bosEk?: React.ReactNode;
   kolonlar: KolonMeta[];
