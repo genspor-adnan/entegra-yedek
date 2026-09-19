@@ -855,7 +855,7 @@ public static class MuayeneUclari
                 await islem.CommitAsync(iptal);
                 hedefId = await lab.IstemAcAsync(m.BelgeId.Value, satirlar,
                     (short)(istek.Aciliyet ?? 1), istek.Aciklama ?? "", m.OnTani,
-                    baglam, iptal);
+                    baglam, iptal, akilci: istek.Akilci);
                 hedefTablo = "lab_istem";
 
                 var bagId = await veri.TekDegerAsync<int>("""
@@ -1112,7 +1112,9 @@ public static class MuayeneUclari
     /// Görüntülemede <c>HizmetId</c> zorunlu - radyoloji istemi hizmetsiz açılamaz.
     /// </summary>
     public sealed record IstemIstegi(int Tur, int? HizmetId, int? Aciliyet, string? Aciklama,
-                                     int[]? TetkikIdler, int[]? PanelIdler);
+                                     int[]? TetkikIdler, int[]? PanelIdler,
+                                     /// <summary>Akılcı istem kararları (873).</summary>
+                                     Servisler.LabServisi.AkilciKarar[]? Akilci = null);
 
     /// <summary>İstek gövdesi: belge verilmezse hekimin SIRADAKİ hastası çağrılır.</summary>
     public sealed record CagirIstegi(int? BelgeId, int? HekimId);

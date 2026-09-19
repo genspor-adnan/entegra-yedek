@@ -1372,6 +1372,50 @@ gösterilir; Esc kapatır, `role="dialog"` + `aria-live`.
 
 ---
 
+## 9.18 Akılcı test istemi (873)
+
+Sağlık Bakanlığı "Akılcı Test İstemi Uygulamaları — İş Kuralı Kılavuzu" (EK-2)
+beş kuralı HBYS'ye zorunlu kılar. Kural **sunucuda** (`lab_akilci_kural` +
+`fn_lab_akilci_kontrol`), istemci yalnız hekimin kararını taşır.
+
+```http
+POST /api/lab/akilci-kontrol            // { hastaId, hekimId?, tetkikIdler[] } → uyarılar + SKRS gerekçe seçenekleri
+POST /api/lab/istem                     // + akilci?: [{ tetkikId, kural, gerekceKod, aciklama? }]
+POST /api/muayene/{id}/istem            // + akilci?: aynı yapı
+POST /api/lab/akilci-karar              // { hastaId, hekimId?, kararlar[] } — hekim "Hayır" dedi (§4.6), iz düşer
+POST /api/lab/istem/{id}/reflektif      // { tetkikIdler[], aciklama? } — lab uzmanı (lab.onay), satır kaynak_turu 2
+```
+
+| Kural | Kaynak | Seviye | Nasıl |
+|---|---|---|---|
+| **Branş** (§3) | xlsx branş listesi → SKRS klinik kodları (`brans_kodlari`); hekim branşı `taraf.departman → departman.kod` | uyarı | Kısıt dışı hekim **klinik gerekçe** (`lab.akilci_klinik_gerekce`, 4 kod) seçerse devam; hekim yoksa (banko) denetlenmez |
+| **Tekrar süresi** (§4) | SKRS `AKILCI TEST İSTEM LİSTESİ` `ISTEMSURESI` (gün) | uyarı | Aynı hastanın aynı tetkikte onaylı son sonucu ya da açık istemi süre içindeyse; gövde **son 2 sonucu** taşır; hekim **gerekçe** (`lab.akilci_gerekce`, 5 kod) seçerse devam, "Hayır" → `akilci-karar` ile iptal kaydı |
+| **Basamak** (§5) | xlsx tesis kısıtı (`basamak` 2 / 3 / 0); şube basamağı `sube.basamak` (varsayılan **2**, 0 = denetlenmez) | engel | Yalnız 3. basamak testi 2. basamak şubede: sevk mesajı, istem açılmaz |
+| **Kapalı test** | xlsx "kapsam dışı / isteme kapalı" | engel | — |
+| **Refleks** (§6) | `lab_refleks_kural` (kurum tanımlar: kaynak tetkik, koşul `> >= < <= yuksek dusuk anormal pozitif`, eşik, hedef) | otomatik | `POST /api/lab/sonuc` sonrası koşul tutarsa hedef tetkik aynı isteme, aynı numuneye eklenir (`kaynak_turu 1`), mesaj "Refleks test eklendi" |
+| **Reflektif** (§7) | lab uzmanı | elle | Satır `kaynak_turu 2`, açıklama "Laboratuvar Uzmanı Reflektif İstemi", tüp planı üretilir |
+
+**Hata sözleşmesi (422 `IS_KURALI`):**
+
+- `engel.kod = "AKILCI_ENGEL"`, `engel.tetkikler[] { tetkikId, ad, kural, mesaj }` — aşılmaz.
+- `engel.kod = "AKILCI_UYARI"`, `engel.uyarilar[] { tetkikId, ad, kural, mesaj, sureGun, sonTarih, kalanGun, sonuclar[], hekimBrans, sureNotu }`,
+  `engel.gerekceler[]`, `engel.klinikGerekceler[]` — istemci hekime sorar, `akilci[]` ile yeniden gönderir.
+- Uydurma gerekçe kodu `400 DOGRULAMA` (`alanlar[].alan = "akilci"`).
+
+Her karar (`devam` / `iptal` / `refleks` / `reflektif`) `lab_akilci_gerekce`'ye
+yazılır; Bakanlık analizine giden liste `Laboratuvar › Akılcı İstem
+Kararları`. Kural kataloğu `Laboratuvar › Ayarlar › Akılcı İstem Kuralları`
+(2.265 kural: xlsx 2.224 + yalnız SKRS'de 41; kurum aktif/pasif, branş, süre
+düzeltir), refleks kuralları `Refleks Test Kuralları`. Başvuru ücretinden
+otomatik açılan istem (banko) SESSİZ çalışır: engelli tetkik atlanır, uyarılar
+"otomatik" notuyla devam kaydına düşer.
+
+Lab istem KARTINDAN (GenForm) satır eklenirken sunucu denetimi yoktur
+(kart kaydı `KartUclari` yolundan gider); kural yalnız `POST /api/lab/istem`
+ve muayene istemi yollarında zorunludur.
+
+---
+
 ## 10. Sürümleme
 
 - Yol tabanlı sürüm yok; sözleşme **geriye uyumlu** genişletilir (yeni alan eklenir, alan silinmez).

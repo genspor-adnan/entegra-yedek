@@ -24,7 +24,12 @@ public static partial class LabUclari
     /// </param>
     public sealed record IstemIstegi(int BelgeId, LabServisi.IstemSatiriIstegi[]? Satirlar,
                                      short? Oncelik, string? KlinikBilgi, string? TaniIcd,
-                                     int? HastaId = null, int? DisKurumId = null);
+                                     int? HastaId = null, int? DisKurumId = null,
+                                     /// <summary>Akılcı istem kararları (873): uyarı alan tetkik için gerekçe kodu.</summary>
+                                     LabServisi.AkilciKarar[]? Akilci = null);
+    public sealed record AkilciKontrolIstegi(int HastaId, int? HekimId, int[] TetkikIdler);
+    public sealed record AkilciKararIstegi(int HastaId, int? HekimId, LabServisi.AkilciKarar[] Kararlar);
+    public sealed record ReflektifIstegi(int[] TetkikIdler, string? Aciklama);
 
     public sealed record NumuneDurumIstegi(short Durum, short? Kalite, short? RetNeden,
                                            string? Aciklama);
@@ -349,13 +354,60 @@ public static partial class LabUclari
             var id = await servis.IstemAcAsync(
                 istek.BelgeId, istek.Satirlar ?? [], istek.Oncelik ?? 1,
                 istek.KlinikBilgi ?? "", istek.TaniIcd ?? "", baglam, iptal,
-                istek.HastaId, istek.DisKurumId);
+                istek.HastaId, istek.DisKurumId, akilci: istek.Akilci);
 
             var ozet = await IstemOzetAsync(veri, id, iptal);
             return Results.Ok(new { id, ozet.IstemNo, ozet.Barkodlar, ozet.TetkikSayisi,
                                     mesaj = $"İstem açıldı: {ozet.IstemNo} · "
                                           + $"{ozet.TetkikSayisi} tetkik · "
                                           + $"{ozet.Barkodlar.Count} tüp",
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
+        // ------------------------------------------ AKILCI TEST İSTEMİ (873) --
+        // POST /api/lab/akilci-kontrol - istem GÖNDERİLMEDEN önce uyarılar: branş,
+        //   tekrar süresi (son 2 sonuç), basamak, kapalı test + SKRS gerekçe
+        //   seçenekleri. Kararı hekim verir; istem ucu aynı kontrolü yeniden
+        //   yapar (istemci kararı taşır, kuralı değil).
+        grup.MapPost("/akilci-kontrol", async (
+            AkilciKontrolIstegi istek, BaglamCozucu cozucu, LabServisi servis, VeriKaynagi veri,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("lab", Islem.Gor);
+            await using var baglanti = await veri.AcAsync(iptal);
+            var s = await servis.AkilciKontrolAsync(baglanti, null, istek.HastaId,
+                                                    istek.HekimId ?? baglam.KullaniciId, baglam.SubeId ?? 0,
+                                                    istek.TetkikIdler ?? [], iptal);
+            return Results.Ok(new { s.Uyarilar, s.Gerekceler, s.KlinikGerekceler, s.Basamak,
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/lab/akilci-karar - hekim uyarıya "Hayır" dedi: istem açılmaz,
+        //   vazgeçme kaydı düşer (kılavuz §4.6).
+        grup.MapPost("/akilci-karar", async (
+            AkilciKararIstegi istek, BaglamCozucu cozucu, LabServisi servis,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("lab", Islem.Gor);
+            await servis.AkilciVazgecAsync(istek.HastaId, istek.HekimId, istek.Kararlar ?? [], baglam, iptal);
+            return Results.Ok(new { tamam = true, izlemeNo = baglam.IzlemeNo });
+        });
+
+        // POST /api/lab/istem/{id}/reflektif - LAB UZMANI sonuç sonrası ek tetkik
+        //   ister (§7); satır kaynak_turu 2, numune planı ardından üretilir.
+        grup.MapPost("/istem/{id:int}/reflektif", async (
+            int id, ReflektifIstegi istek, BaglamCozucu cozucu, LabServisi servis,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("lab.onay", Islem.Gor);
+            var eklenen = await servis.ReflektifEkleAsync(id, istek.TetkikIdler ?? [], istek.Aciklama ?? "", baglam, iptal);
+            var barkodlar = eklenen.Count > 0 ? await servis.NumunePlaniAsync(id, baglam, iptal) : [];
+            return Results.Ok(new { eklenen, barkodlar,
+                                    mesaj = eklenen.Count == 0 ? "Seçilen tetkikler istemde zaten var."
+                                          : $"Reflektif istem: {string.Join(", ", eklenen)}" + (barkodlar.Count > 0 ? $" · {barkodlar.Count} yeni tüp" : ""),
                                     izlemeNo = baglam.IzlemeNo });
         });
 

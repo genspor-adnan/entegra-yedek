@@ -34,9 +34,30 @@ export const labUclari = {
   labIstemAc: (govde: { belgeId?: number;
                         hastaId?: number; disKurumId?: number;
                         satirlar: { tetkikId?: number; panelId?: number }[];
-                        oncelik?: number; klinikBilgi?: string; taniIcd?: string }) =>
+                        oncelik?: number; klinikBilgi?: string; taniIcd?: string;
+                        /** Akılcı istem kararları (873): uyarı alan tetkik için gerekçe kodu. */
+                        akilci?: { tetkikId: number; kural: string; gerekceKod: number; aciklama?: string }[] }) =>
     gonder<{ id: number; istemNo: string; barkodlar: string[];
              tetkikSayisi: number; mesaj: string }>('/api/lab/istem', govde),
+
+  // ------------------------------------------------ AKILCI TEST İSTEMİ (873) --
+  /** İstem göndermeden önce uyarılar (branş / tekrar süresi / basamak / kapalı) + SKRS gerekçe seçenekleri. */
+  labAkilciKontrol: (govde: { hastaId: number; hekimId?: number; tetkikIdler: number[] }) =>
+    gonder<{ uyarilar: { tetkikId: number; ad: string; kural: string; seviye: string; mesaj: string;
+                         sureGun: number; sonTarih?: string | null; kalanGun?: number | null;
+                         sonuclar?: { tarih: string; deger: string; birim: string; bayrak: string; durum: string }[] | null;
+                         hekimBrans: string; sureNotu: string }[];
+             gerekceler: { kod: number; ad: string }[]; klinikGerekceler: { kod: number; ad: string }[];
+             basamak: number }>('/api/lab/akilci-kontrol', govde),
+
+  /** Hekim uyarıya "Hayır" dedi: istem açılmaz, vazgeçme kaydı düşer (§4.6). */
+  labAkilciKarar: (govde: { hastaId: number; hekimId?: number;
+                            kararlar: { tetkikId: number; kural: string; gerekceKod: number; aciklama?: string }[] }) =>
+    gonder<{ tamam: boolean }>('/api/lab/akilci-karar', govde),
+
+  /** Lab uzmanı reflektif istemi (§7): mevcut isteme tetkik ekler, tüp planı üretir. */
+  labReflektifEkle: (istemId: number, govde: { tetkikIdler: number[]; aciklama?: string }) =>
+    gonder<{ eklenen: string[]; barkodlar: string[]; mesaj: string }>(`/api/lab/istem/${istemId}/reflektif`, govde),
 
   /** Kartla acilan istemin barkodlarini uretir (uc yolunda plan zaten calisir). */
   labNumunePlani: (istemId: number) =>

@@ -380,6 +380,7 @@ public static partial class KaynakKatalogu
         //   cihaz test eslemesi.
         Ekle(LabIstem());
         Ekle(LabTetkik());
+        Ekle(LabAkilciKural()); Ekle(LabRefleksKural()); Ekle(LabAkilciGerekce());   // akılcı test istemi (873)
         Ekle(LabPanel());
         Ekle(LabNumune());
         Ekle(LabSonuc());

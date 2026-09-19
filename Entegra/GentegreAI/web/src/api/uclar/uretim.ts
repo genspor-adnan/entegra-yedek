@@ -187,7 +187,9 @@ export const uretimUclari = {
   muayeneIstemAc: (muayeneId: number, istek: { tur: number; hizmetId?: number;
                                                aciliyet?: number; aciklama?: string;
                                                tetkikIdler?: number[];
-                                               panelIdler?: number[] }) =>
+                                               panelIdler?: number[];
+                                               /** Akılcı istem kararları (873). */
+                                               akilci?: { tetkikId: number; kural: string; gerekceKod: number; aciklama?: string }[] }) =>
     gonder<{ istemId: number; hedefTablo: string; hedefId: number | null; mesaj: string }>(
       `/api/muayene/${muayeneId}/istem`, istek),
 

@@ -1,5 +1,6 @@
 import { api } from '../../api/istemci';
 import { guvenli, mesaj, metinSor, onay, secimSor } from '../../bilesenler/mesaj';
+import { akilciEngelKodu, akilciUyariAkisi, type AkilciKarar } from './akilciIstem';
 import type { ListeSatiri } from '../../api/sozlesme';
 
 /**
@@ -223,13 +224,39 @@ export async function muayeneAksiyonu(
         const secim = await secimSor('Hangi tetkik / panel istensin?', secenekler);
         if (!secim) return;
 
-        const y = await api.muayeneIstemAc(id, {
+        // AKILCI TEST İSTEMİ (873): sunucu gerekçesiz uyarıda 422 AKILCI_UYARI
+        //   döner; hekime sorulur (gerekçe / vazgeç) ve kararla yeniden
+        //   gönderilir. Panelden açılan tetkik uyarı alırsa sunucu tetkik
+        //   kimliğiyle söyler; vazgeçilen tetkik panelden düşmez, panel
+        //   yerine kalan tetkikler tek tek gönderilir.
+        const istek = {
           tur: 1, aciliyet: 1,
-          tetkikIdler: secim.startsWith('T') ? [Number(secim.slice(1))] : [],
-          panelIdler: secim.startsWith('P') ? [Number(secim.slice(1))] : [],
-        });
-        mesaj(y.mesaj);
-        b.tazele();
+          tetkikIdler: secim.startsWith('T') ? [Number(secim.slice(1))] : [] as number[],
+          panelIdler: secim.startsWith('P') ? [Number(secim.slice(1))] : [] as number[],
+          akilci: [] as AkilciKarar[],
+        };
+        const hastaId = Number(satir?.tarafId ?? satir?.hastaId ?? 0) || undefined;
+        for (let deneme = 0; deneme < 4; deneme++) {
+          try {
+            const y = await api.muayeneIstemAc(id, istek);
+            mesaj(y.mesaj);
+            b.tazele();
+            return;
+          } catch (h) {
+            if (!akilciEngelKodu(h)) throw h;
+            const karar = await akilciUyariAkisi(h, hastaId);
+            if (!karar) return;
+            istek.akilci = [...istek.akilci, ...karar.akilci];
+            if (karar.cikar.length > 0) {
+              if (istek.panelIdler.length > 0) {
+                mesaj('Panelin bir tetkiğinden vazgeçildi; paneli tek tek tetkik olarak isteyin.');
+                return;
+              }
+              istek.tetkikIdler = istek.tetkikIdler.filter(t => !karar.cikar.includes(t));
+              if (istek.tetkikIdler.length === 0) { mesaj('İstemde tetkik kalmadı; istem açılmadı.'); return }
+            }
+          }
+        }
         return;
       }
 

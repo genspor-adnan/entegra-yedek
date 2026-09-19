@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (452 ad, 124 tanesi birden cok dosyada)
+## Fonksiyonlar (454 ad, 124 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -214,6 +214,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kullanici_yetki_surumu` | `665_cok_rollu_kullanici.sql` | — |
 | `fn_kullanici_yetkileri` | `665_cok_rollu_kullanici.sql` | 020_sema_kimlik.sql, 068_taraf_rol_id_kolonlari.sql, 661_basvuru_fiyat_iskonto_yetkisi.sql |
 | `fn_kullanici_yetkili` | `792_sorumlu_kendi_tavani.sql` | — |
+| `fn_kurum_basamak` | `873_akilci_test_istemi.sql` | — |
 | `fn_kurum_entegrasyon_durumu` | `491_kurum_entegrasyon_durumu.sql` | — |
 | `fn_kurum_kampanya` | `274_belge_kampanya.sql` | 272_kampanya_fiyat.sql |
 | `fn_kurum_kategori_uygula` | `527_profil_kategori.sql` | — |
@@ -224,6 +225,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kurum_tipi_rol_portal_atla` | `829_portal_rolleri_profil_haritasindan_muaf.sql` | — |
 | `fn_kurum_tipi_rol_uygula` | `829_portal_rolleri_profil_haritasindan_muaf.sql` | 786_kurum_tipi_rol.sql |
 | `fn_lab_acmg_sinif` | `439_lab_genetik.sql` | — |
+| `fn_lab_akilci_kontrol` | `873_akilci_test_istemi.sql` | — |
 | `fn_lab_antibiyogram_bildirim` | `437_lab_kombinasyon_ajani.sql` | 436_lab_mikrobiyoloji.sql |
 | `fn_lab_antibiyogram_paneli` | `509_mikro_organizma_besiyeri.sql` | — |
 | `fn_lab_barkod_kontrol` | `433_lab_v1.sql` | — |

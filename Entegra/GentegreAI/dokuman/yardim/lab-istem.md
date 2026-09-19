@@ -53,6 +53,16 @@ Satır seçilince altta o istemin tetkikleri, referans aralığı ve bayrağı b
 - `lab.dis-gonder` **🏍️ Dış Lab'a Gönder**, `lab.saklama` **🧊 Saklama Yeri** (ikinci sıra).
 - **🖨️ Yazdır**.
 
+## Akılcı test istemi kuralları
+Bakanlığın Akılcı Test İstemi kılavuzu istem sırasında sistemce uygulanır (Laboratuvar › Ayarlar › Akılcı İstem Kuralları):
+- **Branş kısıtı:** test branşınıza doğrudan açık değilse uyarı çıkar; "klinik gerekçe" seçerek isteyebilir ya da yetkili branştan konsültasyon isteyebilirsiniz.
+- **Tekrar süresi:** hastada aynı testin süresi dolmamış bir sonucu ya da açık istemi varsa "… tarihinde yapılmış bir sonucu bulunmaktadır, tekrar istemek istediğinizden emin misiniz?" sorusu son 2 sonuçla gelir. Gerekçe (klinik uyumsuzluk, tedavinin takibi, replasman takibi, yeni hastalık) seçerseniz istem açılır; "Hayır" derseniz test istemden çıkar. İki karar da kayda geçer (Laboratuvar › Akılcı İstem Kararları).
+- **Basamak kısıtı:** yalnız 3. basamakta çalışılan test 2. basamak şubede istenemez; sistem sevk mesajı verir. Şubenin basamağı şube kartında "Sağlık Tesisi Basamağı" alanındadır (varsayılan 2).
+- **Kapalı test:** listede kapsam dışı test istenemez.
+- **Refleks test:** sonuç eşiği aşınca (örneğin TSH yüksek) tanımlı ikincil test aynı isteme otomatik eklenir (Laboratuvar › Ayarlar › Refleks Test Kuralları).
+- **Reflektif istem:** laboratuvar uzmanı istem listesinde "Reflektif tetkik ekle" ile sonuç sonrası ek test ister; kayıt "Laboratuvar Uzmanı Reflektif İstemi" olarak düşer.
+Hata kodları: `AKILCI_ENGEL` (aşılmaz), `AKILCI_UYARI` (gerekçeyle geçilir).
+
 ## Adım adım
 1. Hekimseniz muayene kartında **İstem & Sonuçlar › 🔬 İstem Aç**; "Laboratuvar"ı seçip tetkik ya da paneli işaretleyin.
 2. Bankodan açıyorsanız **Laboratuvar › İstemler › ＋ Yeni**; hastayı seçin, kaynak / öncelik / klinik bilgiyi girin.
@@ -92,6 +102,8 @@ Satır seçilince altta o istemin tetkikleri, referans aralığı ve bayrağı b
 - Aynı hastanın ikinci tüpünü listede ad arayarak kabul etmeyin; barkod okutun.
 
 ## Örnek sorular
+- Tekrar aralığı dolmadan test istersem ne olur?
+- Akılcı test istemi uyarısında hangi gerekçeyi seçmeliyim?
 - Laboratuvar istemi nasıl açılır?
 - Tüp etiketini nereden basarım?
 - İstemdeki tetkikleri toplu nasıl kabul ederim?

@@ -430,6 +430,7 @@ public static partial class KartKatalogu
         Ekle(IsMerkeziKarti());
         // LAB v1 (433/434): tetkik katalogu (+referans), panel, cihaz eslemesi.
         Ekle(LabTetkikKarti());
+        Ekle(LabAkilciKuralKarti()); Ekle(LabRefleksKuralKarti());   // akılcı test istemi (873)
         Ekle(LabPanelKarti());
         Ekle(LabCihazEslemeKarti());
         Ekle(EnabizKodEslemeKarti());

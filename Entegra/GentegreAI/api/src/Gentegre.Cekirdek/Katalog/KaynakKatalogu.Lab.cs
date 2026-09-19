@@ -421,4 +421,90 @@ public static partial class KaynakKatalogu
             new("cihazId", "e.cihaz_id", "sayi", "Cihaz Id", Varsayilan: false),
             new("tetkikId", "e.tetkik_id", "sayi", "Tetkik Id", Varsayilan: false),
         });
+
+    /// <summary>
+    /// AKILCI TEST İSTEM KURALLARI (873): Bakanlık listesi + SKRS süresi. Kurum
+    /// düzeltebilir (aktif/pasif, branş, süre); kaynak sürümü kolonda görünür.
+    /// </summary>
+    private static KaynakTanimi LabAkilciKural() => new(
+        Ad: "lab-akilci-kural",
+        YetkiKodu: "lab.tetkik",
+        Kaynak: "public.lab_akilci_kural k left join public.hizmet h on h.id = k.hizmet_id",
+        SubeKolonu: null,
+        VarsayilanSirala: "k.sut_kodu asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",        "k.id",        "sayi",  "Id", Varsayilan: false),
+            new("sutKodu",   "k.sut_kodu",  "metin", "SUT Kodu", Genislik: 90),
+            new("ad",        "k.ad",        "metin", "Test", Genislik: 260),
+            new("hizmetVar", "case when k.hizmet_id is null then 0 else 1 end", "mantik", "Katalogda", Hizalama: "orta", Genislik: 80, Filtrelenebilir: false),
+            new("sureGun",   "k.sure_gun",  "sayi",  "Tekrar (gün)", Hizalama: "sag", Genislik: 90),
+            new("sureNotu",  "k.sure_notu", "metin", "Süre Notu", Genislik: 200, Varsayilan: false),
+            new("tumBranslar", "k.tum_branslar", "mantik", "Tüm Branşlar", Hizalama: "orta", Genislik: 90),
+            new("bransAdlari",
+                "coalesce((select string_agg(d.ad, ', ' order by d.ad) from public.departman d where d.kod = any(string_to_array(k.brans_kodlari, ','))), '')",
+                "metin", "Yetkili Branşlar", Genislik: 320, Siralanabilir: false),
+            new("basamakAdi", "case k.basamak when 3 then '3. basamak' when 2 then '2. ve 3.' else 'kapsam dışı' end",
+                "metin", "Basamak", Hizalama: "orta", Bicim: "rozet", Genislik: 100, Filtrelenebilir: false),
+            new("basamak",   "k.basamak",   "sayi",  "Basamak Kodu", Varsayilan: false),
+            new("refleks",   "k.refleks",   "mantik", "Refleks", Hizalama: "orta", Genislik: 70),
+            new("kapali",    "k.kapali",    "mantik", "Kapalı", Hizalama: "orta", Genislik: 70),
+            new("aktif",     "k.aktif",     "mantik", "Aktif", Hizalama: "orta", Genislik: 60),
+            new("aciklama",  "k.aciklama",  "metin", "Not", Genislik: 260, Varsayilan: false),
+            new("kaynakSurum", "k.kaynak_surum", "metin", "Kaynak", Genislik: 150, Varsayilan: false),
+        });
+
+    /// <summary>REFLEKS TEST KURALLARI (873 §6): kurum laboratuvarı tanımlar.</summary>
+    private static KaynakTanimi LabRefleksKural() => new(
+        Ad: "lab-refleks-kural",
+        YetkiKodu: "lab.tetkik",
+        Kaynak: "public.lab_refleks_kural k join public.lab_tetkik t on t.id = k.tetkik_id join public.lab_tetkik h on h.id = k.hedef_tetkik_id",
+        SubeKolonu: null,
+        VarsayilanSirala: "t.kod asc, k.id asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",       "k.id",     "sayi",  "Id", Varsayilan: false),
+            new("tetkik",   "t.kod || ' · ' || t.ad", "metin", "Kaynak Tetkik", Genislik: 220),
+            new("kosul",    "k.kosul",  "metin", "Koşul", Hizalama: "orta", Genislik: 80),
+            new("esik",     "k.esik",   "sayi",  "Eşik", Hizalama: "sag", Genislik: 90),
+            new("hedef",    "h.kod || ' · ' || h.ad", "metin", "Eklenecek Tetkik", Genislik: 220),
+            new("aciklama", "k.aciklama", "metin", "Açıklama", Genislik: 240),
+            new("aktif",    "k.aktif",  "mantik", "Aktif", Hizalama: "orta", Genislik: 60),
+        });
+
+    /// <summary>AKILCI İSTEM KARARLARI (873): hekim gerekçeleri / vazgeçmeler / refleks-reflektif izi (Bakanlık analizi).</summary>
+    private static KaynakTanimi LabAkilciGerekce() => new(
+        Ad: "lab-akilci-gerekce",
+        YetkiKodu: "lab",
+        Kaynak: "public.lab_akilci_gerekce g "
+              + "left join public.hizmet h on h.id = g.hizmet_id "
+              + "left join public.taraf p on p.id = g.hekim_id "
+              + "left join public.taraf ha on ha.id = g.hasta_id "
+              + "left join public.lab_istem i on i.id = g.istem_id",
+        SubeKolonu: "g.sube_id",
+        // PORTAL: dış hekim yalnız kendi kararlarını, dış kurum kendi isteminin
+        //   kararlarını, hasta kendi kayıtlarını görür (Bakanlık izi kurum içidir).
+        PortalKosullari: PortalKapsam.Kur(
+            disDoktor: "g.hekim_id = {kullanici}",
+            disKurum:  "i.dis_kurum_id = {kullanici}",
+            hasta:     "g.hasta_id = {kullanici}"),
+        VarsayilanSirala: "g.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",        "g.id",       "sayi",  "Id", Varsayilan: false),
+            new("tarih",     "g.ekleme_tarihi", "tarih", "Tarih", Genislik: 130),
+            new("hasta",     "coalesce(ha.unvan, '')", "metin", "Hasta", Genislik: 200),
+            new("hekim",     "coalesce(p.unvan, '')", "metin", "Hekim", Genislik: 180),
+            new("test",      "coalesce(h.ad, '')", "metin", "Test", Genislik: 220),
+            new("kuralTuru", "g.kural_turu", "metin", "Kural", Hizalama: "orta", Bicim: "rozet", Genislik: 90),
+            new("karar",     "g.karar",    "metin", "Karar", Hizalama: "orta", Bicim: "rozet", Genislik: 80),
+            new("gerekce",
+                "coalesce((select d.ad from public.kod_deger d join public.kod_liste l on l.id = d.liste_id "
+                + " where l.kod = case when g.kural_turu = 'brans' then 'lab.akilci_klinik_gerekce' else 'lab.akilci_gerekce' end "
+                + "   and d.deger = g.gerekce_kod and d.dil = 0), '')",
+                "metin", "Gerekçe", Genislik: 260, Siralanabilir: false),
+            new("aciklama",  "g.aciklama", "metin", "Açıklama", Genislik: 240),
+            new("istemNo",   "coalesce(i.istem_no, '')", "metin", "İstem No", Genislik: 110),
+            new("sonSonucTarihi", "g.son_sonuc_tarihi", "tarih", "Önceki Sonuç", Genislik: 130, Varsayilan: false),
+        });
 }

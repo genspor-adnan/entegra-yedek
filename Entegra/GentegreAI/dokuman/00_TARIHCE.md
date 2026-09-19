@@ -16204,3 +16204,99 @@ model çağrısı canlı anahtarla denenmedi (sahte sağlayıcı); gömme/vektö
 yok; İngilizce/Almanca belge yok (Türkçe belge her dile döner, model dile
 göre yazar); `YapayZeka.tsx` sohbet ekranındaki "Model: tanımlı değil"
 etiketi eski.
+
+## 872 — Hizmet kartına resmî LOINC
+
+**Karar (19.09.2026):** kullanıcı Bakanlığın "Test Ölçüm Birimleri Versiyon-3
+Listesi"ni (`Ekranlar/Lab/…xlsx`, 1.739 SUT lab kodu → LOINC + birim) getirdi:
+*"xlsx ten loinc ve birimleri hizmete yükle"*. 530'da resmî eşleme
+bulunamadığı için LOINC metin benzerliğiyle tahmin ediliyordu ve hizmete hiç
+yazılmamıştı (`hizmet.loinc` 0 dolu).
+
+- 872 yalnız BOŞ `hizmet.loinc`'i SUT koduna (`hizmet.kod`) göre doldurur:
+  1.734 hizmet. Kurumun yazdığı değer ezilmez.
+- **Ölçüm birimi hizmete YAZILMADI.** İlk denemede `hizmet.olcum_birimi`
+  kolonu açılmıştı; kullanıcı *"tetkiklerde zaten bu birimler yok muydu …
+  tekrar oldu"* dedi - birim tetkik kartının (`lab_tetkik.birim`) işi.
+  Kolon ve katalog alanı geri alındı; liste yalnız hizmetine bağlı olup
+  birimi/LOINC'i boş tetkiği doldurur (yazım normalize: umol→µmol, ug→µg,
+  creatinine→kreatinin, Saat→saat, mOsmol→mOsm).
+- Raporlanan: listede olup katalogda olmayan 5 SUT kodu (L102300, L103960,
+  L105280, L105420, L105590) — hizmet uydurulmadı; 1 LOINC `skrs_loinc`
+  sözlüğünde yok (resmî listeden geldiği için yine yazıldı).
+- Karşılaştırmada tetkik ↔ Bakanlık farkları görüldü (CRP mg/L vs mg/dL;
+  INR/ÜRE/GLU farklı ama geçerli LOINC) - tetkikteki değer korundu, karar
+  kurumun.
+- Tuzak: psql otomatik-commit'te `create temp table … on commit drop` ilk
+  ifadeden sonra düşüyor; sonda elle `drop`.
+
+## 873 — Akılcı test istemi (Bakanlık EK-2 iş kuralı kılavuzu)
+
+**Karar (19.09.2026):** kullanıcı `Ekranlar/Lab/EK2_Akılcı test istemi.pdf`
+(6 sayfa iş kuralı) + `Akılcı Test İstem Listesi.xlsx` (2.224 satır) getirdi:
+*"akılcı test istem kurallarını projeye ekle"*. Önce SKRS'ye bakıldı (canlı,
+hesap tanımlıydı): `AKILCI TEST İSTEM LİSTESİ` (2.162: SUT + süre gün; branş
+ve basamak YOK), `AKILCI TEST İSTEM GEREKÇESİ` (5), `AKILCI TEST İSTEM
+KLİNİK GEREKÇESİ` (4), `TEST ÖLÇÜM BİRİMİ` (95), `KLİNİKLER` (165 aktif).
+Mevcut `skrs-liste` ucu bu listeleri 0 döndürüyordu (parser KODU/ADI bekler,
+bunlar SUTKODU/ISTEMSURESI taşır); ham çekim (`skrs-ham`) ile ambara alındı.
+
+**Ne yapıldı**
+
+- `lab_akilci_kural` (2.265): süre SKRS'den, branş/basamak/not xlsx'ten.
+  Xlsx branş yazımı bozuk (HEMOTOLOJI, ROMOTOLOJI, "ALERJI&İMMÜNOLOJI",
+  U+0307 birleşik nokta) — 165 jeton elle takma adla SKRS klinik koduna
+  çevrildi (`departman.kod` aynı sistem); "denetimli serbestlik" ve not
+  artıkları branş değil, `brans_ham`'da durur. Serbest süre metni
+  (`Pozitifse istenemez`, `Ömür boyu 1 kez`, `Ayaktan 24 saat / Yatan yok`)
+  `sure_notu` + `bayraklar`; motor yalnız gün sayar, bayrak uyarı metnine
+  girer. SKRS'de olup xlsx'te olmayan 41 kod herkese açık (yalnız süre).
+  14 SUT kodu hizmet kataloğunda yok (`hizmet_id` null; SUT koduyla da
+  eşleşir).
+- Kod listeleri `lab.akilci_gerekce`, `lab.akilci_klinik_gerekce`,
+  `lab.olcum_birimi` (SKRS GUID'li, 609 kalıbı).
+- `fn_lab_akilci_kontrol(hasta, hekim, şube, tetkik[])`: kapalı/basamak =
+  **engel**, branş/süre = **uyarı** (son 2 sonuç jsonb). Süre sayımı onaylı
+  sonuç + sonuçlanmamış açık istemi de sayar ("zaten istendi").
+- **Basamak şubede** (kullanıcı: *"şubeye basamak mı eklesek"*, *"default
+  basamak 2 olsun"*): `sube.basamak smallint default 2`, `fn_kurum_basamak`
+  buradan; `kurum_profil.basamak` metni bilgi amaçlı kaldı. Şube kartına
+  "Sağlık Tesisi Basamağı" alanı (0 = denetlenmez).
+- `LabServisi.Akilci.cs`: `IstemAcAsync` tekil tetkik listesi çıkınca
+  kontrol; etkileşimli istemde gerekçesiz uyarı **422 AKILCI_UYARI**
+  (gövde: uyarılar + gerekçe seçenekleri), engel **422 AKILCI_ENGEL**;
+  kararla gelince SKRS kodu doğrulanır ve `lab_akilci_gerekce`'ye
+  `devam` yazılır. Başvuru ücretinden açılan banko istemi SESSİZ (engelli
+  tetkik atlanır, iptal kaydı; uyarılar "otomatik" devam). `AkilciVazgecAsync`
+  hekimin "Hayır"ını kaydeder (§4.6). Refleks: `SonucYazAsync` commit öncesi
+  `lab_refleks_kural` değerlendirilir, hedef tetkik aynı isteme + numuneye
+  `kaynak_turu 1` ile eklenir. Reflektif: `ReflektifEkleAsync` (lab.onay),
+  `kaynak_turu 2`, tüp planı ardından.
+- Uçlar: `POST /api/lab/akilci-kontrol`, `/akilci-karar`,
+  `/istem/{id}/reflektif`; `IstemIstegi.Akilci` (lab + muayene).
+- Ekranlar: `Laboratuvar › Ayarlar › Akılcı İstem Kuralları` (kart: süre,
+  branş kodları, basamak, refleks, kapalı, aktif), `Refleks Test Kuralları`
+  (kart), `Laboratuvar › Akılcı İstem Kararları` (salt okunur günlük);
+  lab istem listesine `🔁 Reflektif tetkik ekle` (lab.onay); 871 kataloğuna
+  3 ekran.
+- Web: `liste/akilciIstem.ts` — `AKILCI_UYARI`'da her tetkik için soru
+  (son sonuçlar + SKRS gerekçe listesi + "Hayır"), kararla yeniden gönderim;
+  muayene istem aksiyonu bu döngüyü kullanır. Panel istemi vazgeçmede
+  bölünmez ("paneli tek tek isteyin").
+- Yardım: `HataAciklamalari` AKILCI_ENGEL / AKILCI_UYARI; `dokuman/yardim/
+  lab-istem.md`'ye akılcı bölümü; sözleşme §9.18.
+
+**Tuzaklar**
+
+- `departman.kod` benzersiz: test dünyası bölüm eklemez, 157/151'i kullanır.
+- `taraf.sube_id`, `hizmet.sube_id` FK — test insert'lerinde şube 1.
+- psql otomatik-commit: `create temp table … on commit drop` ilk ifadede düşer.
+- `create table … branslar varchar[]` kart/liste kataloğuna oturmuyor (metin
+  alanı dizi taşımaz) → `brans_kodlari` virgüllü metin, `string_to_array`.
+
+**Yapılmayan / insan doğrulaması:** lab istem KARTINDAN (GenForm) eklenen
+satırda sunucu denetimi yok (kart yolu `KartUclari`); refleks kuralı seed'i
+yok (kurum tanımlar, TSH→sT4 örneği kılavuzda); xlsx'teki koşullu süreler
+("Pozitifse 90 gün", "Nefrolojide yok diğer branşta 90") gün sayısına
+indirgendi, metin notta; e-Nabız/MEDULA'ya gerekçe kodu bildirimi paket
+şemasına eklenmedi (USS alanı henüz yok).

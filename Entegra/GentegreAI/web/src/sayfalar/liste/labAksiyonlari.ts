@@ -1,6 +1,6 @@
 import { api } from '../../api/istemci';
 import { type AksiyonBaglami } from './aksiyonOrtak';
-import { guvenli, listeSor, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
+import { guvenli, listeSor, mesaj, metinSor, onay, secimSor } from '../../bilesenler/mesaj';
 import type { ListeSatiri } from '../../api/sozlesme';
 
 /**
@@ -76,6 +76,25 @@ export async function labAksiyonu(
 
   // SONUC GIRISI: pencere acilir, yazma ve kural motoru orada.
   if (kod === 'lab.sonuc-gir') { b.sonucGir?.(id); return true }
+
+  // REFLEKTİF İSTEM (873 §7): lab uzmanı sonuç sonrası ek tetkik ister. Kayıt
+  //   "Laboratuvar Uzmanı Reflektif İstemi" olarak sunucuda düşer, tüp planı
+  //   ardından üretilir; hekim müdahalesi yok.
+  if (kod === 'lab.reflektif') {
+    if (!id) { mesaj('Önce bir istem seçin.'); return true }
+    await guvenli(async () => {
+      const tetkikler = await api.liste('lab-tetkik', { sayfa: 1, boyut: 200 });
+      const secim = await secimSor('Reflektif olarak eklenecek tetkik?',
+        tetkikler.satirlar.map(r => ({ kod: String(r.id), ad: `${String(r.kod ?? '')} · ${String(r.ad ?? '')}` })));
+      if (!secim) return;
+      const aciklama = await metinSor('Reflektif istem gerekçesi (klinik bulgu / önceki sonuç)', '', 'Gerekçe');
+      if (aciklama === null) return;
+      const y = await api.labReflektifEkle(id, { tetkikIdler: [Number(secim)], aciklama });
+      mesaj(y.mesaj);
+      b.tazele();
+    });
+    return true;
+  }
 
   switch (kod) {
     // ------------------------------------------------------------ istem ---

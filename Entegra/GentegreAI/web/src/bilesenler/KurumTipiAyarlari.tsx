@@ -504,9 +504,10 @@ export function KurumTipiAyarlari() {
                    onChange={e => degistir({ altTip: e.target.value })} />
           </div>
           <div className="fld">
-            <label>Basamak</label>
+            <label>Basamak (açıklama)</label>
             <input className="inp" value={profil?.basamak ?? ''} maxLength={60}
                    placeholder="örn. 2. basamak özel"
+                   title="Bilgi metni. Akılcı test istemi basamak kısıtı ŞUBE KARTINDAKİ 'Sağlık Tesisi Basamağı' alanından okunur (873)."
                    onChange={e => degistir({ basamak: e.target.value })} />
           </div>
           <div className="fld">

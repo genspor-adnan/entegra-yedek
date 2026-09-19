@@ -16,7 +16,7 @@ namespace Gentegre.Api.Servisler;
 /// <para><b>Onaylı sonuç güncellenmez.</b> Düzeltme, eski satırı iptal edip
 /// yeni satır açar; rapor "düzeltilmiş" damgası taşır.</para>
 /// </summary>
-public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
+public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
 {
     private readonly VeriKaynagi _veri = veri;
     private readonly ILogger<LabServisi> _gunluk = gunluk;
@@ -98,7 +98,9 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
                                         short oncelik, string klinikBilgi, string taniIcd,
                                         IstekBaglami baglam, CancellationToken iptal,
                                         int? hastaId = null, int? disKurumId = null,
-                                        short? kaynakKodu = null)
+                                        short? kaynakKodu = null,
+                                        IReadOnlyList<AkilciKarar>? akilci = null,
+                                        bool akilciSessiz = false)
     {
         if (satirlar.Count == 0)
             throw GentegreHatasi.IsKurali("En az bir tetkik ya da panel seçilmeli.");
@@ -190,6 +192,25 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
         if (tekil.Count == 0)
             throw GentegreHatasi.IsKurali("Seçilen panelde tetkik yok.");
 
+        // AKILCI TEST İSTEMİ (873): kapalı/basamak = engel, branş/süre = gerekçeli
+        //   uyarı. Etkileşimli istemde gerekçesiz uyarı 422 döner (istemci
+        //   diyalog çizer, kararla yeniden gönderir); banko/başvuru isteminde
+        //   sessiz: engelli tetkik atlanır, karar kaydı düşer.
+        var (atlanan, akilciKayitlar) = await AkilciUygulaAsync(
+            baglanti, islem, b, tekil.Select(t => t.TetkikId).ToList(), akilci, akilciSessiz, iptal);
+        if (atlanan.Count > 0)
+        {
+            tekil = tekil.Where(t => !atlanan.Contains(t.TetkikId)).ToList();
+            if (tekil.Count == 0)
+            {
+                // Hepsi engelli: istem açılmaz ama kararlar kalsın (Bakanlık izi).
+                await AkilciKararlariYazAsync(baglanti, islem, null, null, b, akilciKayitlar, baglam, iptal);
+                await islem.CommitAsync(iptal);
+                throw GentegreHatasi.IsKurali("Seçilen tetkiklerin tamamı akılcı istem kuralıyla engelli; istem açılmadı.",
+                                              new { kod = EngelKodu });
+            }
+        }
+
         // NUMUNE PLANI: tüp tipine göre grupla, her grup için bir barkod.
         var tupler = await baglanti.ListeAsync($"""
             select id, coalesce(nullif(tup_tipi, 0), 1) as tup, numune_tipi, kod, ad
@@ -216,18 +237,23 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
         }
 
         var sira = 0;
+        var satirIdler = new Dictionary<int, int>();
         foreach (var t in tekil)
         {
             var bilgi = tupler.First(x => x.Id == t.TetkikId);
-            await baglanti.CalistirAsync("""
+            satirIdler[t.TetkikId] = await baglanti.TekDegerAsync<int>("""
                 insert into public.lab_istem_satir
                        (istem_id, tetkik_id, panel_id, numune_id, stok_id, kod, ad,
                         durum, sira, ekleyen)
                 values (@p0, @p1, @p2, @p3, null, @p4, @p5, 1, @p6, @p7)
+                returning id
                 """, islem,
                 [istemId, t.TetkikId, t.PanelId, numuneler[bilgi.Tup], bilgi.Kod,
                  bilgi.Ad, (short)(++sira * 10), baglam.KullaniciId], iptal);
         }
+
+        if (akilciKayitlar.Count > 0)
+            await AkilciKararlariYazAsync(baglanti, islem, istemId, satirIdler, b, akilciKayitlar, baglam, iptal);
 
         await islem.CommitAsync(iptal);
         return istemId;
@@ -312,7 +338,7 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
             //   hekim istemedi. "Muayene istemi" (1) yalnız hekimin muayene
             //   sırasında açtığı istemdir (`MuayeneUclari`).
             return await IstemAcAsync(belgeId, acilacak, 1, "", "", baglam, iptal,
-                                      kaynakKodu: 3);
+                                      kaynakKodu: 3, akilciSessiz: true);
         }
         catch (Exception h)
         {
@@ -738,6 +764,11 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
              IsaretKodu(bayrak, panik),
              cihazId, baglam.KullaniciId], iptal);
 
+        // REFLEKS TEST (873 §6): sonuç eşiği aşınca ikincil tetkik aynı isteme
+        //   ve numuneye eklenir; hekim müdahalesi yok, kayıt lab_akilci_gerekce.
+        var refleks = await RefleksUygulaAsync(baglanti, islem, s.IstemId, s.TetkikId, s.NumuneId,
+                                               s.HastaId, s.SubeId, sayisal, bayrak, baglam, iptal);
+
         await IstemDurumTazeleAsync(baglanti, islem, s.IstemId, iptal);
         await islem.CommitAsync(iptal);
 
@@ -755,6 +786,7 @@ public sealed class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gunluk)
                     ? $"Sonuç girildi ({bayrak}) - KALİTE KONTROL RET durumunda "
                       + "olduğu için otomatik onaylanmadı."
                     : $"Sonuç girildi ({bayrak}).";
+        if (refleks.Count > 0) mesaj += $" Refleks test eklendi: {string.Join(", ", refleks)}.";
         return new SonucSonucu(sonucId, bayrak, panik, deltaUyari, mesaj);
     }
 

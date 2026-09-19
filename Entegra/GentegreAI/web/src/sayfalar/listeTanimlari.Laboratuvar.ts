@@ -121,6 +121,55 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ic: '🧬', yetkiKodu: 'lab.tetkik',
   },
   {
+    // AKILCI TEST İSTEM KURALLARI (873): Bakanlık listesi + SKRS süresi; kurum düzeltir.
+    kaynak: 'lab-akilci-kural', rota: 'lab-akilci-kural', baslik: 'Akılcı İstem Kuralları',
+    yol: 'Laboratuvar › Ayarlar › Akılcı İstem Kuralları',
+    kartYolu: '/lab-akilci-kural', kartBaslik: 'Akılcı istem kuralı',
+    aksiyonEkrani: 'lab-akilci-kural-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Süre kısıtlı', filtre: { alan: 'sureGun', op: 'buyuk', deger: 0 } },
+      { ad: 'Branş kısıtlı', filtre: { alan: 'tumBranslar', op: 'esit', deger: 0 } },
+      { ad: 'Yalnız 3. basamak', filtre: { alan: 'basamak', op: 'esit', deger: 3 } },
+      { ad: 'Refleks', filtre: { alan: 'refleks', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Akılcı İstem Kuralları', menuSira: 202,
+    ic: '📏', yetkiKodu: 'lab.tetkik',
+  },
+  {
+    // REFLEKS TEST KURALLARI (873 §6): eşik aşılınca ikincil tetkik otomatik eklenir.
+    kaynak: 'lab-refleks-kural', rota: 'lab-refleks-kural', baslik: 'Refleks Test Kuralları',
+    yol: 'Laboratuvar › Ayarlar › Refleks Test Kuralları',
+    kartYolu: '/lab-refleks-kural', kartBaslik: 'Refleks kuralı',
+    aksiyonEkrani: 'lab-refleks-kural-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Refleks Test Kuralları', menuSira: 203,
+    ic: '🔁', yetkiKodu: 'lab.tetkik',
+  },
+  {
+    // AKILCI İSTEM KARARLARI (873): hekim gerekçeleri / vazgeçmeler / refleks-reflektif izi.
+    kaynak: 'lab-akilci-gerekce', rota: 'lab-akilci-gerekce', baslik: 'Akılcı İstem Kararları',
+    yol: 'Laboratuvar › Akılcı İstem Kararları',
+    aksiyonEkrani: 'lab-akilci-gerekce-liste',
+    tarihAlani: 'tarih',
+    cipler: [
+      { ad: 'Gerekçeli devam', filtre: { alan: 'karar', op: 'esit', deger: 'devam' } },
+      { ad: 'Vazgeçme', filtre: { alan: 'karar', op: 'esit', deger: 'iptal' } },
+      { ad: 'Refleks', filtre: { alan: 'kuralTuru', op: 'esit', deger: 'refleks' } },
+      { ad: 'Reflektif', filtre: { alan: 'kuralTuru', op: 'esit', deger: 'reflektif' } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Akılcı İstem Kararları', menuSira: 35,
+    ic: '📋', yetkiKodu: 'lab',
+  },
+  {
     // KULTUR CALISMA LISTESI (436) - mikrobiyolojinin gunluk ekrani.
     //   Varsayilan cip "Okuma Zamani Geldi": 24 saatlik plakayi 3. gunde
     //   okumak negatif raporu guvenilmez yapar, gecikme once gorunmeli.

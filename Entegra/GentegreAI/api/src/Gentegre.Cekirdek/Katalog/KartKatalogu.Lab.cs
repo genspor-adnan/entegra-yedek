@@ -359,4 +359,51 @@ public static partial class KartKatalogu
             new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
                 Baslik: "Açıklama", Grup: "Çevrim"),
         });
+
+    /// <summary>AKILCI TEST İSTEM KURALI kartı (873). SUT kodu ve hizmet bağı kurulumdan gelir; kurum süre/branş/basamak/aktif düzeltir.</summary>
+    private static KartTanimi LabAkilciKuralKarti() => new(
+        Ad: "lab-akilci-kural",
+        YetkiKodu: "lab.tetkik",
+        Tablo: "public.lab_akilci_kural",
+        LogTabloId: 1351,
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["sureGun"] = 0, ["tumBranslar"] = (short)1, ["basamak"] = (short)2, ["aktif"] = (short)1, ["kaynakSurum"] = "kurum" },
+        Alanlar: new KartAlani[]
+        {
+            new("id",          "id",           "sayi",  Yazilabilir: false),
+            new("sutKodu",     "sut_kodu",     "metin", Zorunlu: true, EnFazlaUzunluk: 20, Baslik: "SUT Kodu", Grup: "Kural"),
+            new("ad",          "ad",           "metin", EnFazlaUzunluk: 200, Baslik: "Test", Grup: "Kural"),
+            new("hizmetId",    "hizmet_id",    "kod",   KodTablosu: "public.v_hizmet_lookup", Baslik: "Hizmet (katalog)", Grup: "Kural"),
+            new("aktif",       "aktif",        "mantik", Baslik: "Aktif", Grup: "Kural"),
+            new("sureGun",     "sure_gun",     "sayi",  Baslik: "Tekrar aralığı (gün, 0 = yok)", Grup: "Süre"),
+            new("sureNotu",    "sure_notu",    "metin", EnFazlaUzunluk: 300, Baslik: "Süre notu (Bakanlık metni)", Grup: "Süre"),
+            new("bayraklar",   "bayraklar",    "metin", EnFazlaUzunluk: 120, Baslik: "Bayraklar", Grup: "Süre", Yazilabilir: false),
+            new("tumBranslar", "tum_branslar", "mantik", Baslik: "Tüm branşlar isteyebilir", Grup: "Branş"),
+            new("bransKodlari","brans_kodlari","metin", EnFazlaUzunluk: 400, Baslik: "Yetkili branş kodları (SKRS klinik, virgülle)", Grup: "Branş"),
+            new("bransHam",    "brans_ham",    "metin", EnFazlaUzunluk: 600, Baslik: "Bakanlık listesindeki branş metni", Grup: "Branş", Yazilabilir: false),
+            new("refleks",     "refleks",      "mantik", Baslik: "Refleks test (lab uzmanı ister)", Grup: "Branş"),
+            new("basamak",     "basamak",      "kod",   SabitKodlar: new Dictionary<string, string> { ["0"] = "Kapsam dışı", ["2"] = "2. ve 3. basamak", ["3"] = "Yalnız 3. basamak" }, Baslik: "Basamak", Grup: "Tesis"),
+            new("kapali",      "kapali",       "mantik", Baslik: "İsteme kapalı", Grup: "Tesis"),
+            new("aciklama",    "aciklama",     "metin", EnFazlaUzunluk: 600, Baslik: "Not", Grup: "Tesis"),
+            new("kaynakSurum", "kaynak_surum", "metin", EnFazlaUzunluk: 40, Baslik: "Kaynak sürümü", Grup: "Tesis", Yazilabilir: false),
+        });
+
+    /// <summary>REFLEKS TEST KURALI kartı (873 §6).</summary>
+    private static KartTanimi LabRefleksKuralKarti() => new(
+        Ad: "lab-refleks-kural",
+        YetkiKodu: "lab.tetkik",
+        Tablo: "public.lab_refleks_kural",
+        LogTabloId: 1352,
+        SubeKolonu: "sube_id",
+        YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["kosul"] = ">", ["aktif"] = (short)1 },
+        Alanlar: new KartAlani[]
+        {
+            new("id",            "id",              "sayi",  Yazilabilir: false),
+            new("tetkikId",      "tetkik_id",       "kod",   Zorunlu: true, KodTablosu: "public.v_lab_tetkik_lookup", Baslik: "Kaynak tetkik", Grup: "Kural"),
+            new("kosul",         "kosul",           "kod",   Zorunlu: true, SabitKodlar: new Dictionary<string, string> { [">"] = "> eşik", [">="] = ">= eşik", ["<"] = "< eşik", ["<="] = "<= eşik", ["yuksek"] = "Yüksek bayrak (H)", ["dusuk"] = "Düşük bayrak (L)", ["anormal"] = "Anormal (H/L)", ["pozitif"] = "Pozitif" }, Baslik: "Koşul", Grup: "Kural"),
+            new("esik",          "esik",            "ondalik", Baslik: "Eşik değer", Grup: "Kural"),
+            new("hedefTetkikId", "hedef_tetkik_id", "kod",   Zorunlu: true, KodTablosu: "public.v_lab_tetkik_lookup", Baslik: "Eklenecek tetkik", Grup: "Kural"),
+            new("aciklama",      "aciklama",        "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama (rehber / dayanak)", Grup: "Kural"),
+            new("aktif",         "aktif",           "mantik", Baslik: "Aktif", Grup: "Kural"),
+        });
 }

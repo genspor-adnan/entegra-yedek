@@ -1624,6 +1624,10 @@ public static class AksiyonKatalogu
             ["lab-istem-liste"] =
             [
                 .. Crud("lab-istem", "lab-istem", "lab"),
+                // REFLEKTİF İSTEM (873 §7): lab uzmanı sonuç sonrası ek tetkik ister.
+                new("lab.reflektif", "🔁 Reflektif tetkik ekle", "lab", Hedef: "araccubugu2,sagtus,palet",
+                    AksiyonYetkisi: "lab.onay", KayitGerekir: true, Sira: 45, UrunModu: 2,
+                    Ipucu: "Laboratuvar uzmanı: sonuç sonrası ek tetkik (kayıt 'Laboratuvar Uzmanı Reflektif İstemi')."),
                 // DIS NUMUNE ICIN AYRI DUGME YOK (kullanici: "dis numune
                 //   kabul butona gerek kalmadi, yeni istem den girebiliyoruz").
                 //   Istem kartinin kaynak varsayilani "Dis kurum"; gonderen
@@ -1857,6 +1861,13 @@ public static class AksiyonKatalogu
                 Crud("lab-antibiyotik", "lab-antibiyotik", "lab.mikro"),
 
             ["lab-tetkik-liste"] = Crud("lab-tetkik", "lab-tetkik", "lab.tetkik"),
+            // AKILCI TEST İSTEMİ (873): kural kataloğu, refleks kuralları; karar günlüğü salt okunur.
+            ["lab-akilci-kural-liste"] = Crud("lab-akilci-kural", "lab-akilci-kural", "lab.tetkik"),
+            ["lab-refleks-kural-liste"] = Crud("lab-refleks-kural", "lab-refleks-kural", "lab.tetkik"),
+            ["lab-akilci-gerekce-liste"] =
+            [
+                new("genel.yazdir", "🖨️ Yazdır", "lab", Hedef: "araccubugu2,palet", Sira: 90, UrunModu: 2),
+            ],
             ["lab-panel-liste"] = Crud("lab-panel", "lab-panel", "lab.tetkik"),
             // BILDIRIM SABLONLARI (399): kart vardi ama ekran ARAC CUBUGU
             //   tanimli degildi - kullanici kayit ekleyemiyor, bunu "yetkim

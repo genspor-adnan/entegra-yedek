@@ -166,6 +166,11 @@ public static partial class KartKatalogu
                 Baslik: "Telefon Ülke Kodu", Grup: "Kimlik", AltGrup: "Yerel Ayarlar"),
             new("zamanDilimi","zaman_dilimi","kod", SabitKodlar: ZamanDilimleri,
                 Baslik: "Saat Dilimi", Grup: "Kimlik", AltGrup: "Yerel Ayarlar"),
+            // TESİS BASAMAĞI (873): akılcı test istemi basamak kısıtı buradan okunur.
+            //   Varsayılan 2; 0 = denetlenmez.
+            new("basamak",    "basamak",    "kod", SabitKodlar: new Dictionary<string, string>
+                { ["0"] = "Denetlenmez", ["1"] = "1. basamak", ["2"] = "2. basamak", ["3"] = "3. basamak" },
+                Baslik: "Sağlık Tesisi Basamağı", Grup: "Kimlik", AltGrup: "Yerel Ayarlar"),
             new("paraBirimi", "para_birimi","kod", SabitKodlar: ParaBirimleri,
                 Baslik: "Para Birimi", Grup: "Kimlik", AltGrup: "Yerel Ayarlar"),
             new("postaKodu",  "posta_kodu", "metin", EnFazlaUzunluk: 10,
