@@ -92,6 +92,7 @@ public static class RolYetkiUclari
                 kullaniciVar = d.KullaniciVar, rolId = d.RolId, rolAdi = d.RolAdi,
                 roller = d.Roller.Select(r => new { id = r.Id, ad = r.Ad }),
                 ekRolIdleri = d.EkRolIdleri,
+                personel = d.Personel,
             });
         });
 
@@ -110,6 +111,7 @@ public static class RolYetkiUclari
                 kullaniciVar = d.KullaniciVar, rolId = d.RolId, rolAdi = d.RolAdi,
                 roller = d.Roller.Select(r => new { id = r.Id, ad = r.Ad }),
                 ekRolIdleri = d.EkRolIdleri,
+                personel = d.Personel,
             });
         });
 
@@ -125,6 +127,7 @@ public static class RolYetkiUclari
                 kullaniciVar = d.KullaniciVar, rolId = d.RolId, rolAdi = d.RolAdi,
                 roller = d.Roller.Select(r => new { id = r.Id, ad = r.Ad }),
                 ekRolIdleri = d.EkRolIdleri,
+                personel = d.Personel,
             });
         });
 

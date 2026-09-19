@@ -14,6 +14,12 @@ export interface KartRolBilgisi {
   roller: { id: number; ad: string }[];
   /** EK roller (665) - ana rol (`rolId`) bu listede DEGILDIR. */
   ekRolIdleri: number[];
+  /**
+   * Hesap bir PERSONELE ait (843): ana rol combosu KAPALI cizilir - rol
+   * degisikligi kadro hareketinden, yururluk tarihiyle yapilir. Yan roller
+   * etkilenmez (kadro defterinde yoklar).
+   */
+  personel?: boolean;
 }
 
 /** Rol > Kullanicilar sekmesi satiri. */

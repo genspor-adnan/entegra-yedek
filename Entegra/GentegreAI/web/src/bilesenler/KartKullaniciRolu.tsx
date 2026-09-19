@@ -25,6 +25,9 @@ import { hataMetni } from '../api/sozlesme';
  * degisiklik sonrasi ayni karta bakan butun ornekler tazelenir.
  */
 const dinleyiciler = new Set<(kartId: number) => void>();
+
+/** Personelde ana rolun neden kapali oldugunu soyleyen tek metin. */
+const KADRO_IPUCU = "Ana rol Kadro Geçmişi'nden, yürürlük tarihiyle değişir";
 const rolDegisti = (kartId: number) => dinleyiciler.forEach(d => d(kartId));
 
 export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi }: {
@@ -91,8 +94,13 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi }: {
   // Yetkisi olmayan kullanici rol bolumunu hic gormesin (GET 403 -> sessiz).
   if (hata && !bilgi) return null;
 
+  // ANA ROL PERSONELDE KILITLI (843, kullanici: "kart tarafini da kilitle"):
+  //   rol kadro defterinin bir parcasi - karttan tarihsiz degistirmek terfi
+  //   gecmisini bozardi. Sunucu da ayni istegi reddediyor.
+  const rolKilitli = Boolean(bilgi?.personel);
   const anaCombo = !bilgi?.kullaniciVar ? null : (
-    <select value={bilgi.rolId} disabled={saltOkunur || islemde}
+    <select value={bilgi.rolId} disabled={saltOkunur || islemde || rolKilitli}
+            title={rolKilitli ? KADRO_IPUCU : undefined}
             onChange={e => void degistir(Number(e.target.value))}>
       {bilgi.roller.map(r => <option key={r.id} value={r.id}>{r.ad}</option>)}
     </select>
@@ -114,6 +122,7 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi }: {
               kilitli sistem rolu). */}
           <span className="etiket zorunlu-isaret">Ana Rol</span>
           {anaCombo}
+          {rolKilitli && <span className="ipucu">{KADRO_IPUCU}</span>}
         </label>
         <label className="alan tip-kod">
           <span className="etiket">Yan Rol</span>
@@ -175,6 +184,7 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi }: {
              <label className="alan tip-kod">
                <span className="etiket">Ana rol</span>
                {anaCombo}
+               {rolKilitli && <span className="ipucu">{KADRO_IPUCU}</span>}
              </label>
 
              <div className="alan">

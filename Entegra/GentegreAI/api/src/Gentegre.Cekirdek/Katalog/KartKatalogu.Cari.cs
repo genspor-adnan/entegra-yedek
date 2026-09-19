@@ -326,6 +326,10 @@ public static partial class KartKatalogu
                     KodTablosu: "public.v_departman_lookup"),
                 new("gorevId", "gorev_id", "kod", Baslik: "Görev",
                     KodTablosu: "public.v_gorev_lookup", BagliAlan: "departmanId"),
+                // ANA ROL (843): gorevin YETKI karsiligi. Kullanici kartinda
+                //   personel icin kilitli - tek degistirme yeri burasi.
+                new("rolId", "rol_id", "kod", Baslik: "Ana Rol",
+                    KodTablosu: "public.v_rol_lookup"),
                 // Serbest metin unvan: katalog disi kadro unvani icin durur.
                 new("gorev", "gorev", "metin", EnFazlaUzunluk: 100, Baslik: "Unvan (serbest)"),
                 new("yoneticiTarafId", "yonetici_taraf_id", "kod", Baslik: "Yönetici",

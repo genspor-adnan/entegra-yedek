@@ -491,7 +491,8 @@ public static class KartUclari
             // KILITLI ALAN (840): karar EKRANDA verilir - alan metasi kayittan
             //   bagimsiz cekiliyor (`/alanlar`), "yeni mi" bilgisi orada yok.
             alan.YalnizYeniKayitta,
-            alan.Ipucu);
+            alan.Ipucu,
+            alan.KilitKosulAlani);
 
 
     /// <summary>

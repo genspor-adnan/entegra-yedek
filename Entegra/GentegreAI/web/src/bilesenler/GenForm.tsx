@@ -805,9 +805,30 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
       setAramaAlani(null);
     }, [alanDegistir]);
 
+  // KOSULLU KILIT (843): `kilitKosulAlani` tasiyan alan, kosul alaninin degeri
+  //   DOLU oldugunda salt okunur cizilir. `yalnizYeniKayitta` kart genelinde
+  //   kilitler; bu ise KAYDA bakar - ayni kullanici kartinda personelin Ana
+  //   Rolu kilitli, portal hesabininki serbesttir. Kilit GRUPLARDAN ONCE
+  //   uygulanmali: alan nesneleri `alanGruplari`den geliyor, sonradan meta
+  //   kopyalamak cizime ulasmaz. Sunucu ayni kurali yazmada dogrular
+  //   (KartDeposu.GuncelleAsync, RolKullaniciDeposu.KartRolDegistirAsync).
+  const kosulluMeta = useMemo(() => {
+    if (!meta || !meta.alanlar.some(a => a.kilitKosulAlani)) return meta;
+    return {
+      ...meta,
+      alanlar: meta.alanlar.map(a => {
+        if (!a.kilitKosulAlani) return a;
+        const d = deger[a.kilitKosulAlani];
+        const kilitli = d !== undefined && d !== null && d !== false
+                     && d !== '' && d !== 0 && d !== '0';
+        return kilitli ? { ...a, yazilabilir: false } : a;
+      }),
+    };
+  }, [meta, deger]);
+
   const gruplar = useMemo(
-    () => alanGruplari(meta, { doviz, yerelParada, gizliAlanlar }),
-    [meta, doviz, yerelParada, gizliAlanlar]);
+    () => alanGruplari(kosulluMeta, { doviz, yerelParada, gizliAlanlar }),
+    [kosulluMeta, doviz, yerelParada, gizliAlanlar]);
 
 
   /**
@@ -1131,7 +1152,7 @@ Yine de yeni hasta kaydı eklensin mi?`);
   // Alan cizimi ayri dosyada (kartAlanCizim): govde uzunlugu okunabilirligi
   //   bozuyordu. Cagri bicimi degismedi - renderAlan/renderAlanListesi.
   const { altGruplaVar, renderAlanListesi } = alanCizici({
-    kaynak, salt, meta, deger, setDeger, alanDegistir, alanHatalari, setAlanHatalari,
+    kaynak, salt, meta: kosulluMeta, deger, setDeger, alanDegistir, alanHatalari, setAlanHatalari,
     doviz, yerelTutar, kurNotu, bagliTarafAdi, setBagliTarafAdi,
     secilenAdlar,
     aramaAc: (alanAdi, kaynakAdi, uygula) =>

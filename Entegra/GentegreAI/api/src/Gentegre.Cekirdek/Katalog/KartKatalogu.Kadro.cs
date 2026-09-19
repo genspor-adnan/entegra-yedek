@@ -45,6 +45,11 @@ public static partial class KartKatalogu
                 KodTablosu: "public.v_gorev_agac_lookup", Agac: true),
             new("departmanId", "departman_id", "kod", Baslik: "Bölüm", Grup: "Pozisyon",
                 KodTablosu: "public.v_departman_agac_lookup", Agac: true),
+            // ANA ROL (843): pozisyonun YETKI tarafi. Hareket kaydedilince
+            //   `taraf_kullanici.rol_id`e yazilir - rol degisikligi de artik
+            //   yururluk tarihiyle defterde durur.
+            new("rolId", "rol_id", "kod", Baslik: "Ana Rol", Grup: "Pozisyon",
+                KodTablosu: "public.v_rol_lookup"),
             new("yoneticiTarafId", "yonetici_taraf_id", "kod", Baslik: "Yönetici",
                 Grup: "Pozisyon", KodTablosu: "public.v_personel_lookup"),
             new("subeId", "sube_id", "kod", Baslik: "Şube", Grup: "Pozisyon",

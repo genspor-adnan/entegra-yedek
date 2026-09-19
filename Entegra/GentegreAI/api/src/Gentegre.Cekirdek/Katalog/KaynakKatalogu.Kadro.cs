@@ -54,6 +54,8 @@ public static partial class KaynakKatalogu
             new("gorev", "case when coalesce(v.gorev, '') <> '' then v.gorev "
                        + "else coalesce(v.gorev_adi, '') end",
                 "metin", "Görev / unvan", Genislik: 180, Filtrelenebilir: false),
+            new("rolAdi", "v.rol_adi", "metin", "Ana Rol", Genislik: 150,
+                Bicim: "rozet", Filtrelenebilir: false),
             new("departmanAdi", "v.departman_adi", "metin", "Bölüm", Genislik: 150,
                 Filtrelenebilir: false),
             new("yoneticiAd", "v.yonetici_ad", "metin", "Yönetici", Genislik: 160,

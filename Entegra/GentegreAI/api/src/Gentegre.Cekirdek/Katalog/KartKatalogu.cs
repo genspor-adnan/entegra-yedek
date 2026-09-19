@@ -19,6 +19,15 @@ public sealed record KartAlani(
     bool YalnizYeniKayitta = false,
     /// <summary>Kilitli/ozel alanin yaninda gosterilecek kisa aciklama.</summary>
     string? Ipucu = null,
+    /// <summary>
+    /// KOSULLU KILIT (843): alan yalnizca BELLI kayitlarda kilitlenir. Deger,
+    /// ayni kartta okunan baska bir alanin adidir; o alan doluysa/1 ise bu
+    /// alan salt okunur olur. Ana Rol boyledir: PERSONEL hesabinda rol kadro
+    /// hareketinden degisir, portal ve sistem hesabinda serbesttir -
+    /// <see cref="YalnizYeniKayitta"/> gibi kart geneli bir kilit ikisini
+    /// ayiramazdi.
+    /// </summary>
+    string? KilitKosulAlani = null,
     bool Zorunlu = false,
     int? EnFazlaUzunluk = null,
     string? KodListesi = null,     // kod_liste.kod - kodAd sozlugu bundan cozulur

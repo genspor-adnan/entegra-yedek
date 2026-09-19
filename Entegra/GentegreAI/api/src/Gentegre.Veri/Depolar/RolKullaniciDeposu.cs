@@ -314,7 +314,7 @@ public sealed class RolKullaniciDeposu
     /// </summary>
     public async Task<(bool KullaniciVar, int RolId, string RolAdi,
                        IReadOnlyList<(int Id, string Ad)> Roller,
-                       IReadOnlyList<int> EkRolIdleri)>
+                       IReadOnlyList<int> EkRolIdleri, bool Personel)>
         KartRolOkuAsync(int kartId, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
@@ -335,14 +335,20 @@ public sealed class RolKullaniciDeposu
         await using (var o = await k.ExecuteReaderAsync(iptal))
             while (await o.ReadAsync(iptal)) ekRoller.Add(o.GetInt32(0));
 
+        // PERSONEL MI (843): personelin ana rolu KADRO HAREKETINDEN degisir -
+        //   yururluk tarihiyle. Ekran comboyu bu bayrakla kapatir, uc de
+        //   yazmayi reddeder; yan (ek) roller serbest kalir.
         await using var komut = baglanti.Komut(
-            "select k.rol_id, coalesce(r.ad, '') " +
+            "select k.rol_id, coalesce(r.ad, ''), " +
+            "       case when exists (select 1 from public.taraf_personel p " +
+            "                          where p.id = k.id) then 1 else 0 end " +
             "  from public.taraf_kullanici k " +
             "  left join public.rol r on r.id = k.rol_id " +
             " where k.id = @p0", null, kartId);
         await using var oku = await komut.ExecuteReaderAsync(iptal);
-        if (!await oku.ReadAsync(iptal)) return (false, 0, "", roller, ekRoller);
-        return (true, oku.GetInt32(0), oku.GetString(1), roller, ekRoller);
+        if (!await oku.ReadAsync(iptal)) return (false, 0, "", roller, ekRoller, false);
+        return (true, oku.GetInt32(0), oku.GetString(1), roller, ekRoller,
+                oku.GetInt32(2) == 1);
     }
 
     /// <summary>
@@ -352,7 +358,23 @@ public sealed class RolKullaniciDeposu
     /// </summary>
     public async Task KartRolDegistirAsync(int kartId, int rolId, YazmaBaglami baglam,
         CancellationToken iptal = default)
-        => await AtaAsync(rolId, kartId, baglam, iptal, anaYap: true);
+    {
+        // KADRO KILIDI (843): personelin ana rolu yururluk tarihi olmadan
+        //   degismez - kart comboyu zaten kapatiyor, burasi dogrudan gelen
+        //   istegi de reddeder.
+        await using (var baglanti = await _veri.AcAsync(iptal))
+        {
+            var personel = await baglanti.TekDegerAsync<int>(
+                "select 1 from public.taraf_personel where id = @p0", null,
+                new object?[] { kartId }, iptal);
+            if (personel == 1)
+                throw GentegreHatasi.Dogrulama(
+                    "Personelin ana rolu karttan degistirilemez.",
+                    new AlanHatasi("rolId", "Ana rol, Kadro Geçmişi'nden yürürlük "
+                                          + "tarihiyle değiştirilir."));
+        }
+        await AtaAsync(rolId, kartId, baglam, iptal, anaYap: true);
+    }
 
     /// <summary>
     /// Kartın EK rollerini topluca yazar (665): listede olmayanlar silinir,
