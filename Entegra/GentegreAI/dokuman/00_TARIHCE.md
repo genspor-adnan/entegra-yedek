@@ -15568,3 +15568,19 @@ Mali taraf **salt okuma**: harcamayı görür, fiş kesmez. İmza tarafında ida
 kadronun âmiri (izin/avans/masraf) ve satınalma birim onayı var (4 imza).
 
 Kuruldu: 54 yetki. Tanımlı rol 77. Ağaçta üst yönetimin altında.
+
+## Acil Tıp Teknisyeni (ATT) ve Şoför
+
+Kullanıcı: *"Acil Tıp Teknisyeni (ATT) ve Şoför ekle"*.
+
+**ATT** (20 yetki, `acil` modülüne bağlı): acil kabul ve triyaj kaydı, vital,
+numune, ambulans sarfı. `acil.triyaj_dusur`, `acil.cikis` ve `acil.sevk`
+**bilerek yok** - üçü de klinik karar, Acil Hekimi'nde. Ağaçta acil hekiminin
+altında.
+
+**Şoför** (10 yetki): nakil görevi, araç zimmeti, yazışma. Klinik veri yok -
+şoföre hasta adı/tanısı açmanın karşılığı yok; görev kaydı zaten nereye/ne
+zaman bilgisini taşıyor. Rol dar görünüyor çünkü **sistemde ayrı bir
+araç/sefer ekranı henüz yok**; öyle bir ekran açılırsa yetkisi buraya girer.
+
+Tanımlı rol 79.

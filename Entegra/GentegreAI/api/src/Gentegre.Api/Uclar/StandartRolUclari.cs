@@ -187,6 +187,7 @@ public static class StandartRolUclari
         //   Diyetisyen, psikolog, sosyal hizmet, tibbi sekreter, hasta
         //   haklari, sterilizasyon, biyomedikal ve nobetci mudur MODULSUZ -
         //   her kurulumda anlamlilar.
+        ["att"] = "acil",
         ["anestezi_uzmani"] = "ameliyathane", ["anestezi_teknisyen"] = "ameliyathane",
         ["ameliyathane_hemsire"] = "ameliyathane",
         ["yogun_bakim_hemsire"] = "yatan_hasta",
@@ -633,6 +634,26 @@ public static class StandartRolUclari
               // Kalemi FATURAYA cevirmek (kesinlestirme/iptal) muhasebenin
               //   imzasi - burada yalniz hazirlanir.
               A("belge.donustur"))),
+        // ATT ve SOFOR (kullanici: "Acil Tıp Teknisyeni (ATT) ve Şoför ekle").
+        new("att", "Acil Tıp Teknisyeni (ATT)",
+            "Acil kabul ve triyaj kaydı, vital ölçüm, numune ve ambulans sarfı. "
+            + "Triyaj DÜŞÜRME ve çıkış/sevk kararı hekimde.",
+            ["hastane", "tip_merkezi"],
+            // `acil.triyaj_dusur`, `acil.cikis`, `acil.sevk` BILEREK YOK:
+            //   ucu de klinik karardir (acil_hekimi rolunde).
+            K(T("hasta"), Y("acil.basvuru"), Y("acil.triyaj"), T("acil"), T("acil.pano"),
+              T("acil.yatak"), Y("muayene"), Y("lab.numune"), T("lab"), Y("onam"),
+              T("yatan"), T("katalog"), Y("stok"))),
+        new("sofor", "Şoför",
+            "Nakil görevleri, araç zimmeti ve yazışma. Hasta dosyası ve klinik ekran YOK.",
+            Hepsi,
+            // KLINIK VERI YOK: sofore hasta adi/tanisi acmanin karsiligi yok -
+            //   gorev kaydi zaten nereye/ne zaman bilgisini tasiyor.
+            //   `Ortak` seti (gorev, mesaj, dokuman, pano) isin cogunu goruyor;
+            //   buraya yalniz ARAC tarafi eklenir. Rol dar gorunuyor cunku
+            //   sistemde ayri bir "arac/sefer" ekrani HENUZ YOK - oyle bir
+            //   ekran acilirsa yetkisi buraya girer.
+            K(T("demirbas"), Y("demirbas.zimmet"), T("demirbas.bakim"))),
         // ---- KADRO BOSLUKLARI (kullanici: "eksik 14 rolü de ekle").
         //      Kadro agaci mockup'inda (Ekranlar/Ayarlar/rol_agaci.html)
         //      "ekrani ve yetkisi var, rolu yok" diye isaretlenen kadrolar.
