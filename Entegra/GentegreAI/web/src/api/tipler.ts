@@ -11,7 +11,8 @@ export interface KullaniciSubeSatiri {
 /** Personel/kisi kartinda kullanici rolu bolumu. */
 export interface KartRolBilgisi {
   kullaniciVar: boolean; rolId: number; rolAdi: string;
-  roller: { id: number; ad: string }[];
+  /** `ustId`: kadro ağacındaki üst rol (847) - combo girintiyi ondan kurar. */
+  roller: { id: number; ad: string; ustId?: number | null }[];
   /** EK roller (665) - ana rol (`rolId`) bu listede DEGILDIR. */
   ekRolIdleri: number[];
   /**

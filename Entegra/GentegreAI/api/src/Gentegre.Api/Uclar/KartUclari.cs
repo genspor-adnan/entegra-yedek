@@ -361,16 +361,24 @@ public static class KartUclari
             //   cozuluyordu. Model markaya kod_liste uzerinden bagli
             //   (`kod_deger.ust_deger`) - ayni harita oradan da kurulur, yoksa
             //   combo suzulmez ve her markanin modelleri bir arada gorunur.
+            // SECENEK BASLIKLARI (848): `Gruplu` alanlarin grup haritasi.
+            var grupGorevleri = tumAlanlar
+                .Where(a => a.Gruplu && a.KodTablosu is not null)
+                .Select(a => a.KodTablosu!).Distinct()
+                .ToDictionary(t => t, t => depo.KodTablosuGrupAsync(t, iptal));
             var listeUstGorevleri = tumAlanlar
                 .Where(a => a.BagliAlan is not null && a.KodListesi is not null)
                 .Select(a => a.KodListesi!).Distinct()
                 .ToDictionary(l => l, l => depo.KodListesiUstAsync(l, iptal));
             await Task.WhenAll(tabloGorevleri.Values.Concat(listeGorevleri.Values)
-                .Concat(ustGorevleri.Values).Concat(listeUstGorevleri.Values));
+                .Concat(ustGorevleri.Values).Concat(listeUstGorevleri.Values)
+                .Concat(grupGorevleri.Values));
             var tabloSecenekleri = tabloGorevleri.ToDictionary(kv => kv.Key, kv => kv.Value.Result);
             var listeSecenekleri = listeGorevleri.ToDictionary(kv => kv.Key, kv => kv.Value.Result);
             var ustHaritalari = ustGorevleri.ToDictionary(kv => kv.Key, kv => kv.Value.Result);
             var listeUstHaritalari = listeUstGorevleri
+                .ToDictionary(kv => kv.Key, kv => kv.Value.Result);
+            var grupHaritalari = grupGorevleri
                 .ToDictionary(kv => kv.Key, kv => kv.Value.Result);
 
             // ENTEGRASYON KOD LISTESI URUN MODUNA GORE (342): ERP kurulumunda
@@ -393,7 +401,10 @@ public static class KartUclari
                 (a.BagliAlan is not null || a.Agac || a.UstBilgisi) && a.KodTablosu is { } bt
                     && ustHaritalari.TryGetValue(bt, out var ust) ? ust
                 : a.BagliAlan is not null && a.KodListesi is { } bl
-                    && listeUstHaritalari.TryGetValue(bl, out var lust) ? lust : null);
+                    && listeUstHaritalari.TryGetValue(bl, out var lust) ? lust : null,
+                // SECENEK BASLIKLARI (848): yonetici combosu bolume gore toplanir.
+                a.Gruplu && a.KodTablosu is { } gt
+                    && grupHaritalari.TryGetValue(gt, out var grup) ? grup : null);
 
             // Yerel para birimi kartla birlikte gider: arayuz "TL disi mi" karari
             //   icin ayri bir istek yapmasin (kur kutusu bu karara gore acilir).
@@ -462,7 +473,8 @@ public static class KartUclari
     /// </summary>
     private static KartAlanMeta Meta(KartAlani alan, KartTanimi tanim, IstekBaglami baglam,
         IReadOnlyDictionary<string, string>? kodTablosuSecenekleri = null,
-        IReadOnlyDictionary<string, string>? ustHaritasi = null)
+        IReadOnlyDictionary<string, string>? ustHaritasi = null,
+        IReadOnlyDictionary<string, string>? grupHaritasi = null)
         => new(
             alan.Ad,
             alan.Etiket,
@@ -479,6 +491,7 @@ public static class KartUclari
             alan.AramaKaynagi,
             ustHaritasi,
             alan.Agac,
+            grupHaritasi,
             alan.KodListesi,
             // BICIM KURALI SUNUCUDAN COZULMUS GIDER (679): katalogda "tckn"
             //   yazan alan, kurum profili "serbest" ise ekrana kuralsiz,

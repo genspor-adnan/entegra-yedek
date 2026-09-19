@@ -315,6 +315,11 @@ public sealed partial class KartDeposu
             // GOREV AGACI (570/571): ust_id GERCEK ust gorevi tasir;
             //   v_gorev_lookup ise departmani gosterir - iki ayri soru.
             "public.v_gorev_agac_lookup",
+            // ROL AGACI (847): kadro duzenini `rol.ust_rol_id` tasir; portal
+            //   rolleri disaridadir (personelin kadrosunda yerleri yok).
+            "public.v_rol_agac_lookup",
+            // PERSONEL BOLUME GORE GRUPLU (848): yonetici combosu.
+            "public.v_personel_grup_lookup",
             // Randevu verilebilir personel (252) - randevu kartindaki hekim.
             "public.v_hekim_lookup",
             // Kampanya (268) - kurum sozlesmesinde secilir.
@@ -598,6 +603,20 @@ public sealed partial class KartDeposu
     /// Gorunumun <c>ust_id</c> kolonu vardir; arayuz seceneklerini buna gore suzer.
     /// Ust'u bos olan satir hic donmez - suzulemeyecegi icin listede de yeri yok.
     /// </summary>
+    /// <summary>
+    /// SECENEK BASLIKLARI (848): `grup` kolonu olan lookup gorunumlerinde
+    /// secenek id -> baslik. Arayuz combonun secenklerini bu baslik altinda
+    /// (`optgroup`) toplar; baslik secilemez cunku secenek degil.
+    /// </summary>
+    public async Task<Dictionary<string, string>> KodTablosuGrupAsync(
+        string tablo, CancellationToken iptal = default)
+        => (await _veri.ListeAsync(
+                $"select id, grup from {KodTablosuDogrula(tablo)} " +
+                " where aktif = 1 and coalesce(grup, '') <> ''",
+                null,
+                r => (Id: r.GetValue(0)?.ToString() ?? "", Grup: r.GetString(1)), iptal))
+            .ToDictionary(x => x.Id, x => x.Grup, StringComparer.Ordinal);
+
     public async Task<Dictionary<string, string>> KodTablosuUstAsync(
         string tablo, CancellationToken iptal = default)
         => (await _veri.ListeAsync(

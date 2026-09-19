@@ -1,4 +1,6 @@
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
+import { agacSecenekleri } from './agacSecenek';
+import { grupluSecenekler } from './grupluSecenek';
 import { Modal } from './Modal';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
@@ -368,12 +370,21 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
    * ust haritasi yoksa kodlar oldugu gibi doner.
    */
   const alanKodlari = (a: { ad: string; kodlar?: Record<string, string> | null;
-                            kodUst?: Record<string, string> | null }) => {
+                            kodUst?: Record<string, string> | null;
+                            agac?: boolean }) => {
     const ust = ustSuzgec?.[a.ad];
     const kodlar = a.kodlar ?? {};
-    if (!ust || !a.kodUst) return Object.entries(kodlar);
-    return Object.entries(kodlar)
-      .filter(([k]) => a.kodUst?.[k] === undefined || a.kodUst[k] === ust);
+    const suzulmus: Record<string, string> = !ust || !a.kodUst
+      ? kodlar
+      : Object.fromEntries(Object.entries(kodlar)
+          .filter(([k]) => a.kodUst?.[k] === undefined || a.kodUst[k] === ust));
+    // AGAC ALANI DETAY GRIDINDE DE GIRINTILI (847, kullanici: "kadro
+    //   geçmişindeki ana rol combosu da ağaç şeklinde olsun"): kart cizici
+    //   `agacSecenekleri`yi kullaniyordu, detay gridi kullanmiyordu - ayni
+    //   alan iki yerde iki turlu goruniyordu.
+    if (a.agac) return agacSecenekleri(suzulmus, a.kodUst)
+                         .map(o => [o.kod, o.etiket] as [string, string]);
+    return Object.entries(suzulmus);
   };
 
   const sayfaBoyu = meta.sayfaBoyu ?? 0;
@@ -1433,7 +1444,10 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                       onChange={e => hucreDegis(i, a.ad, e.target.value)}
                     >
                       <option value="">—</option>
-                      {alanKodlari(a).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                      {a.kodGrup
+                        ? grupluSecenekler(alanKodlari(a), a.kodGrup)
+                        : alanKodlari(a).map(([k, v]) =>
+                            <option key={k} value={k}>{v}</option>)}
                     </select>
                   ) : a.tip === 'zaman' ? (
                     // Zaman alani (randevu baslangici) ham "2026-09-01T10:00:00"

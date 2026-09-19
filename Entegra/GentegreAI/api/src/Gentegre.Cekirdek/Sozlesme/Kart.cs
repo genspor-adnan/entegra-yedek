@@ -76,6 +76,11 @@ public sealed record KartAlanMeta(
     /// </summary>
     bool Agac = false,
     /// <summary>
+    /// Secenek -> BASLIK (848): dolu ise combo `optgroup` ile cizilir.
+    /// Yonetici listesi bolume gore toplanir; baslik secilemez.
+    /// </summary>
+    IReadOnlyDictionary<string, string>? KodGrup = null,
+    /// <summary>
     /// SECENEK KAYNAGI kod_liste ise LISTENIN KODU (544, ör. "stok.model").
     /// Kart alanin etiketini tiklanabilir yapip listeyi oradan yonetir -
     /// markanin modelleri baska hicbir ekrandan girilemiyordu.

@@ -28,6 +28,37 @@ const dinleyiciler = new Set<(kartId: number) => void>();
 
 /** Personelde ana rolun neden kapali oldugunu soyleyen tek metin. */
 const KADRO_IPUCU = "Ana rol Kadro Geçmişi'nden, yürürlük tarihiyle değişir";
+
+/**
+ * KADRO AGACI SECENEKLERI (847, kullanici: "kartta ana rol ve kadro
+ * geçmişindeki ana rol comboları ağaç şeklinde olsun"). Hiyerarsi
+ * `rol.ust_rol_id`de; combo girintiyi derinlikten uretir. Ustu listede
+ * OLMAYAN rol (pasif ust, portal rolu) kok sayilir - yoksa dal asili kalir
+ * ve rol comboda hic gorunmezdi.
+ */
+function rolAgaci(roller: { id: number; ad: string; ustId?: number | null }[]) {
+  const varlar = new Set(roller.map(r => r.id));
+  const cocuk = new Map<number, typeof roller>();
+  const kokler: typeof roller = [];
+  roller.forEach(r => {
+    const ust = r.ustId && varlar.has(r.ustId) ? r.ustId : null;
+    if (ust) cocuk.set(ust, [...(cocuk.get(ust) ?? []), r]);
+    else kokler.push(r);
+  });
+  const sirala = (l: typeof roller) => l.sort((a, b) => a.ad.localeCompare(b.ad, 'tr'));
+  sirala(kokler); cocuk.forEach(sirala);
+
+  const sonuc: { id: number; etiket: string }[] = [];
+  const gez = (r: typeof roller[number], derinlik: number) => {
+    sonuc.push({
+      id: r.id,
+      etiket: `${'  '.repeat(derinlik)}${derinlik > 0 ? '└ ' : ''}${r.ad}`,
+    });
+    (cocuk.get(r.id) ?? []).forEach(c => gez(c, derinlik + 1));
+  };
+  kokler.forEach(r => gez(r, 0));
+  return sonuc;
+}
 const rolDegisti = (kartId: number) => dinleyiciler.forEach(d => d(kartId));
 
 export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi, yeniKayit }: {
@@ -109,7 +140,8 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi, yeniKayit
     <select value={bilgi.rolId} disabled={saltOkunur || islemde || rolKilitli}
             title={rolKilitli ? KADRO_IPUCU : undefined}
             onChange={e => void degistir(Number(e.target.value))}>
-      {bilgi.roller.map(r => <option key={r.id} value={r.id}>{r.ad}</option>)}
+      {rolAgaci(bilgi.roller).map(r =>
+        <option key={r.id} value={r.id}>{r.etiket}</option>)}
     </select>
   );
 
@@ -121,7 +153,8 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi, yeniKayit
         <select value={yeniKayit.secili || ''} disabled={saltOkunur}
                 onChange={e => yeniKayit.onSec(Number(e.target.value))}>
           <option value="">— seçiniz —</option>
-          {(bilgi?.roller ?? []).map(r => <option key={r.id} value={r.id}>{r.ad}</option>)}
+          {rolAgaci(bilgi?.roller ?? []).map(r =>
+            <option key={r.id} value={r.id}>{r.etiket}</option>)}
         </select>
       </label>
     );

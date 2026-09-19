@@ -49,9 +49,12 @@ public static partial class KartKatalogu
             //   `taraf_kullanici.rol_id`e yazilir - rol degisikligi de artik
             //   yururluk tarihiyle defterde durur.
             new("rolId", "rol_id", "kod", Baslik: "Ana Rol", Grup: "Pozisyon",
-                KodTablosu: "public.v_rol_lookup"),
+                KodTablosu: "public.v_rol_agac_lookup", Agac: true),
+            // YONETICI BOLUME GORE GRUPLU (848, kullanici): 100+ personel
+            //   duz listede araniyordu.
             new("yoneticiTarafId", "yonetici_taraf_id", "kod", Baslik: "Yönetici",
-                Grup: "Pozisyon", KodTablosu: "public.v_personel_lookup"),
+                Grup: "Pozisyon", KodTablosu: "public.v_personel_grup_lookup",
+                Gruplu: true),
             new("subeId", "sube_id", "kod", Baslik: "Şube", Grup: "Pozisyon",
                 KodTablosu: "public.v_sube_lookup"),
             new("unvan", "unvan", "metin", EnFazlaUzunluk: 120, Baslik: "Kadro unvanı",

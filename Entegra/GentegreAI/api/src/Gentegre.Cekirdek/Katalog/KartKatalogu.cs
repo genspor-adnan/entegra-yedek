@@ -41,6 +41,13 @@ public sealed record KartAlani(
     //   veri yine tek id'dir. Gorunumun/tablonun `ust_id` kolonu olmali -
     //   `BagliAlan` ile ayni haritadan beslenir.
     bool Agac = false,
+    /// <summary>
+    /// SECIM KAYNAGI BASLIKLI (848): gorunum `grup` kolonu tasir ve arayuz
+    /// secenekleri o baslik altinda (`optgroup`) cizer. Yonetici combosu
+    /// boyledir - personel BOLUME gore toplanir. Agactan farki: baslik AYRI
+    /// bir varliktir (bolum), listede secilemez.
+    /// </summary>
+    bool Gruplu = false,
     // UST BILGISI (587): secenek -> ust haritasi metaya konur ama secenekler
     //   SUNUCUDA suzulmez. Suzen deger AYNI SATIRDA olmadiginda gerekir:
     //   anlasmali kurum kartinda sozlesme satirinin fiyat listesi, kartin

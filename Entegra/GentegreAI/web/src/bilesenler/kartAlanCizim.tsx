@@ -2,6 +2,7 @@ import { TelefonGirdi } from './TelefonGirdi';
 import { c } from '../dil/ceviri';
 import { telefonAlaniMi, epostaGecerliMi, bicimHatasi } from './alanBicim';
 import { agacSecenekleri } from './agacSecenek';
+import { grupluSecenekler } from './grupluSecenek';
 import type { KartAlanMeta, KartMetaYaniti, DovizMetasi } from '../api/sozlesme';
 
 /** Kart alanlarinda tutulan deger tipleri. */
@@ -269,7 +270,10 @@ export function alanCizici(b: AlanCizimBaglami) {
                   : '—'}
               </option>
             )}
-            {secenekler.map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            {/* GRUPLU (848): bolum basliklari altinda toplanir. */}
+            {a.kodGrup
+              ? grupluSecenekler(secenekler, a.kodGrup)
+              : secenekler.map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         );
       })() : telefonAlaniMi(a.ad) ? (

@@ -313,17 +313,22 @@ public sealed class RolKullaniciDeposu
     /// hesabı yoksa KullaniciVar=false döner - ekran "hesabı yok" der.
     /// </summary>
     public async Task<(bool KullaniciVar, int RolId, string RolAdi,
-                       IReadOnlyList<(int Id, string Ad)> Roller,
+                       IReadOnlyList<(int Id, string Ad, int? UstId)> Roller,
                        IReadOnlyList<int> EkRolIdleri, bool Personel)>
         KartRolOkuAsync(int kartId, CancellationToken iptal = default)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
 
-        var roller = new List<(int, string)>();
+        // UST ROL DE OKUNUR (847): ekran comboyu KADRO AGACI olarak cizer -
+        //   70+ rolu duz alfabetik listede aramak zordu. Hiyerarsi GORUNUM,
+        //   yetki degil (bkz. 847 basligi).
+        var roller = new List<(int, string, int?)>();
         await using (var k = baglanti.Komut(
-            "select id, ad from public.rol where aktif = 1 order by ad", null))
+            "select id, ad, ust_rol_id from public.rol where aktif = 1 order by ad", null))
         await using (var o = await k.ExecuteReaderAsync(iptal))
-            while (await o.ReadAsync(iptal)) roller.Add((o.GetInt32(0), o.GetString(1)));
+            while (await o.ReadAsync(iptal))
+                roller.Add((o.GetInt32(0), o.GetString(1),
+                            o.IsDBNull(2) ? null : o.GetInt32(2)));
 
         var ekRoller = new List<int>();
         await using (var k = baglanti.Komut("""

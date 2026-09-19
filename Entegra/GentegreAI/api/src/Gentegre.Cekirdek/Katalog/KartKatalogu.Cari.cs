@@ -329,11 +329,11 @@ public static partial class KartKatalogu
                 // ANA ROL (843): gorevin YETKI karsiligi. Kullanici kartinda
                 //   personel icin kilitli - tek degistirme yeri burasi.
                 new("rolId", "rol_id", "kod", Baslik: "Ana Rol",
-                    KodTablosu: "public.v_rol_lookup"),
+                    KodTablosu: "public.v_rol_agac_lookup", Agac: true),
                 // Serbest metin unvan: katalog disi kadro unvani icin durur.
                 new("gorev", "gorev", "metin", EnFazlaUzunluk: 100, Baslik: "Unvan (serbest)"),
                 new("yoneticiTarafId", "yonetici_taraf_id", "kod", Baslik: "Yönetici",
-                    KodTablosu: "public.v_personel_lookup"),
+                    KodTablosu: "public.v_personel_grup_lookup", Gruplu: true),
                 // SURELI HAREKET: vekalet/aski bitince onceki pozisyon geri gelir.
                 new("bitis", "bitis", "tarih", Baslik: "Bitiş (süreli ise)"),
                 new("gerekce", "gerekce", "metin", EnFazlaUzunluk: 300, Baslik: "Gerekçe"),
@@ -440,7 +440,7 @@ public static partial class KartKatalogu
                 // ik_karti.html mockup uyum turu (054): SGK Sicil No/Meslek Kodu/Yonetici.
                 new("sgkSicilNo",         "sgk_sicil_no",        "metin", EnFazlaUzunluk: 30, Baslik: "SGK Sicil No"),
                 new("meslekKodu",         "meslek_kodu",         "kod",   KodTablosu: "public.v_skrs_meslek_lookup", Baslik: "Meslek Kodu"),
-                new("yoneticiId",         "yonetici_taraf_id",   "kod",   KodTablosu: "public.v_personel_lookup", Baslik: "Yönetici")
+                new("yoneticiId",         "yonetici_taraf_id",   "kod",   KodTablosu: "public.v_personel_grup_lookup", Gruplu: true, Baslik: "Yönetici")
             }, Baslik: "Özlük"),
             // ik_karti.html mockup "İzinler" sekmesi (IZIN 1:N) - GERCEK COKLU-SATIR grid,
             //   generic GenDetayTablo (satir ekle/sil) yeterli, ozel bilesen gerekmiyor.

@@ -485,6 +485,12 @@ export interface KartAlanMeta {
   ipucu?: string | null;
   /** Bagli alanda secenek id -> ust id (sube id -> banka id). */
   kodUst?: Record<string, string> | null;
+  /**
+   * SECENEK BASLIGI (848): secenek id -> baslik. Dolu ise combo `optgroup`
+   * ile cizilir - yonetici listesi bolume gore toplanir. Baslik AYRI bir
+   * varliktir, secilemez (agactan farki budur).
+   */
+  kodGrup?: Record<string, string> | null;
   /** Secenekler kod_liste'den geliyorsa listenin kodu (544, "stok.model") -
       kartta etiket tiklanınca o liste duzenlenir. */
   kodListesi?: string | null;

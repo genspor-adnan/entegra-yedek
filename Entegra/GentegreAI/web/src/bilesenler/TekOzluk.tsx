@@ -1,5 +1,6 @@
 import type { DetayDurumu, Satir } from './GenDetayTablo';
 import type { KartDetayMeta } from '../api/sozlesme';
+import { grupluSecenekler } from './grupluSecenek';
 
 interface Props {
   meta: KartDetayMeta;
@@ -54,7 +55,13 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk, isBilgiEk }
               <select value={String(satir.yoneticiId ?? '')} disabled={saltOkunur}
                 onChange={e => degis({ yoneticiId: e.target.value })}>
                 <option value="">—</option>
-                {yoneticiAlan?.kodlar && Object.entries(yoneticiAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                {/* BOLUME GORE GRUPLU (848, kullanici: "Yönetici combosunu
+                    da bölüme göre ağaç şeklinde yap"): 100+ personel duz
+                    listede araniyordu. Baslik `optgroup` - bolum secilemez. */}
+                {yoneticiAlan?.kodlar && (yoneticiAlan.kodGrup
+                  ? grupluSecenekler(Object.entries(yoneticiAlan.kodlar), yoneticiAlan.kodGrup)
+                  : Object.entries(yoneticiAlan.kodlar).map(([k, v]) =>
+                      <option key={k} value={k}>{v}</option>))}
               </select>
             </label>
           </div>
