@@ -158,7 +158,9 @@ const KATLAMA: Record<string, string> = {
   'ö': 'o', 'Ö': 'o', 'ü': 'u', 'Ü': 'u', 'ğ': 'g', 'Ğ': 'g',
 };
 function katla(s: string): string {
-  return s.replace(/[ıİIşŞçÇöÖüÜğĞ]/g, h => KATLAMA[h]).toLowerCase();
+  // U+0307 birleşen nokta: veride "i̇nfliximab" gibi kayıtlar var, 'İ' küçük
+  //   harfe inerken ayrı nokta bırakıyor - anahtarla eşleşsin diye atılır.
+  return s.replace(/[ıİIşŞçÇöÖüÜğĞ]/g, h => KATLAMA[h]).replace(/̇/g, '').toLowerCase();
 }
 
 let ilacDizin: Map<string, string> | null = null;
@@ -199,8 +201,9 @@ export function ilacAdi(metin: string | undefined | null): string {
   if (tam) return harfDuzeni(m.trim(), tam);
 
   // İLAÇ ADI: boşlukla ayrılmış sözcükler üzerinde en uzun eşleşme.
-  // Virgül/eğik çizgi/parantez de AYRAÇ: "TABLET," sözlükte aranırsa bulunmaz.
-  const parca = m.split(/(\s+|[,/()])/);
+  // AYRAÇLAR: "TABLET," sözlükte aranırsa bulunmaz; etken madde listesinde
+  //   bileşenler `+` ile de ayrılıyor ("telmisartan+hidroklorotiyazid").
+  const parca = m.split(/(\s+|[,/()+;:.&])/);
   const cikti: string[] = [];
   let i = 0;
   while (i < parca.length) {

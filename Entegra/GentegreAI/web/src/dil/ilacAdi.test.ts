@@ -15,6 +15,11 @@ const SOZLUK = {
     'flakon': 'vial',
     'iceren': 'containing',
     'parasetamol': 'paracetamol',
+    'hidroklorotiyazid': 'hydrochlorothiazide',
+    'telmisartan': 'telmisartan',
+    'sodyum': 'sodium',
+    'asetat': 'acetate',
+    'trihidrat': 'trihydrate',
   },
 };
 
@@ -41,6 +46,15 @@ describe('ilacAdi', () => {
 
   it('etken maddeyi tam ad olarak çevirir', () => {
     expect(ilacAdi('Parasetamol')).toBe('Paracetamol');
+  });
+
+  it('bileşen ayracı + ile de böler', () => {
+    expect(ilacAdi('telmisartan+hidroklorotiyazid'))
+      .toBe('telmisartan+hydrochlorothiazide');
+  });
+
+  it('tuz/hidrat sözcüklerini sözcük sözcük çözer', () => {
+    expect(ilacAdi('sodyum asetat trihidrat')).toBe('sodium acetate trihydrate');
   });
 
   it('sözlükte olmayanı aynen bırakır', () => {
