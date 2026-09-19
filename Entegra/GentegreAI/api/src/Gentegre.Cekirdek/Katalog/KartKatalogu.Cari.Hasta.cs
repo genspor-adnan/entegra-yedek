@@ -239,21 +239,12 @@ public static partial class KartKatalogu
             //   rol; aktif/pasif o kisinin GECICI hali. Yetki rolde durur, ek
             //   roller ayri bolumde (665) - kart alani degil, kendi
             //   ekranciginda (KartKullaniciRolu).
-            // ANA ROL PERSONELDE KILITLI (843, kullanici: "kart tarafini da
-            //   kilitle"): kadro defteri rolu de tasiyor; karttan tarihsiz
-            //   degistirmek terfi gecmisini sessizce bozardi. Kilit YALNIZ
-            //   personel hesabinda - portal ve sistem hesaplarinin kadrosu yok,
-            //   onlarin rolu buradan degisir.
-            new("rolId", "rol_id", "kod", KodTablosu: "public.rol", Zorunlu: true,
-                Baslik: "Ana Rol", Grup: "Genel",
-                KilitKosulAlani: "personelMi",
-                Ipucu: "Personelin ana rolü Kadro Geçmişi'nden değişir"),
-            // Kilit kosulu: hesap bir PERSONELE mi ait. Gizli + salt okunur -
-            //   formda cizilmez, yalniz kilidi besler.
-            new("personelMi",
-                "(select case when exists (select 1 from public.taraf_personel tp "
-                + "where tp.id = taraf_kullanici.id) then 1 else 0 end)",
-                "mantik", Yazilabilir: false, Gizli: true),
+            // ANA ROL KART ALANI DEGIL (843, kullanici: "kart alanini kaldir
+            //   tek kutuya indir"): rol ve yan roller tek yerden, KullaniciRolu
+            //   kutusundan yonetilir - ayni bilgi iki kutuda dururken hangisinin
+            //   yazdigi belirsizdi (kart alani `rol_id`i dogrudan, kutu ise eski
+            //   ana rolu EK role dusuren ucu kullaniyordu). Personelde o kutu da
+            //   kilitli: rol kadro hareketinden degisir.
             new("aktif", "aktif", "kod", SabitKodlar: DurumKodlari,
                 Baslik: "Durum", Grup: "Genel"),
             new("eposta", "eposta", "metin", EnFazlaUzunluk: 120,

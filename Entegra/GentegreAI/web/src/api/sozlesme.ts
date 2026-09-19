@@ -483,12 +483,6 @@ export interface KartAlanMeta {
   yalnizYeniKayitta?: boolean;
   /** Kilitli alanin yaninda gosterilen kisa aciklama. */
   ipucu?: string | null;
-  /**
-   * KOSULLU KILIT (843): adi verilen DIGER alanin degeri doluysa bu alan salt
-   * okunur cizilir. Ana Rol boyledir - personel hesabinda kadro defterinden
-   * degisir, portal/sistem hesabinda serbest.
-   */
-  kilitKosulAlani?: string | null;
   /** Bagli alanda secenek id -> ust id (sube id -> banka id). */
   kodUst?: Record<string, string> | null;
   /** Secenekler kod_liste'den geliyorsa listenin kodu (544, "stok.model") -

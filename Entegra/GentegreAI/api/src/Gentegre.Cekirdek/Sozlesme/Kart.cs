@@ -96,13 +96,7 @@ public sealed record KartAlanMeta(
     /// </summary>
     bool YalnizYeniKayitta = false,
     /// <summary>Kilitli alanin yaninda gosterilen kisa aciklama.</summary>
-    string? Ipucu = null,
-    /// <summary>
-    /// KOSULLU KILIT (843): bu alan, adi verilen DIGER alanin degeri doluysa
-    /// salt okunur cizilir. Karar ekranda verilir (meta kayittan bagimsiz
-    /// cekiliyor), sunucu ayni kurali yazmada tekrar dogrular.
-    /// </summary>
-    string? KilitKosulAlani = null);
+    string? Ipucu = null);
 
 /// <summary>
 /// Sayfali detayin sunucu tarafi suzgeci (526): arama metni, kategori dali ve

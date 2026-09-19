@@ -199,26 +199,6 @@ public sealed partial class KartDeposu
         var oncesi = await OkuAsync(baglanti, islem, tanim, id, okunabilirAlanlar, null, iptal)
                      ?? throw GentegreHatasi.Bulunamadi();
 
-        // KOSULLU KILIT (843): "kilit kosulu" alani dolu olan KAYITTA bu alan
-        //   salt okunur. Ekran zaten kutuyu kapatiyor; kural burada da var
-        //   cunku istek dogrudan API'ye gelebilir.
-        foreach (var ad in degerler.Keys.ToList())
-        {
-            if (tanim.Alan(ad)?.KilitKosulAlani is not { } kosulAlani) continue;
-            if (!oncesi.Kart.TryGetValue(kosulAlani, out var kosul)) continue;
-            var kilitli = kosul switch
-            {
-                null => false,
-                bool b => b,
-                string m => m.Length > 0 && m != "0",
-                _ => Convert.ToInt64(kosul, CultureInfo.InvariantCulture) != 0,
-            };
-            if (kilitli)
-                throw GentegreHatasi.Dogrulama($"{ad} alani bu kayitta degistirilemez.",
-                    new AlanHatasi(ad, tanim.Alan(ad)?.Ipucu
-                        ?? "Bu alan bu kayit icin salt okunur."));
-        }
-
         // Tutar/kur/para birimi degistiyse yerel karsilik yeniden hesaplanir.
         //   Kismi guncellemede (yalniz "tutar" geldiginde) eksik degerler mevcut
         //   kayittan tamamlanir - yoksa kur 0 sayilip yerel tutar sifirlanirdi.
