@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İzlenebilirlik · Geri Çağırma — Mockup (GenoTIP AI · Diş · Sterilizasyon)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .btn.mini{padding:2px 7px;font-size:10.5px;display:inline-flex}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg td code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)} .hdr.k5{grid-template-columns:repeat(5,1fr)} .hdr.k6{grid-template-columns:repeat(6,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.err{border-color:#c0392b;background:#fff6f5}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .kart.kir .d{color:var(--kirmizi)} .kart.ok .d{color:var(--ok)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)} .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)} .bar.k i{background:linear-gradient(#e06a5e,#c0392b)}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:300px 1fr 320px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .sonuc{margin:10px 12px;border:1px solid #bfe3cb;background:#eef9f1;border-radius:4px;padding:8px 10px;font-size:11.5px}
+  .sonuc.kir{border-color:#f3c4bf;background:#fdf1ef}
+  .sonuc.sari{border-color:#f2ddbf;background:#fdf8ec}
+  .sonuc b{color:var(--navy)}
+  .xml{font-family:Consolas,monospace;font-size:10.5px;background:#1f2d3a;color:#d7e3f2;padding:8px 10px;border-radius:3px;white-space:pre;overflow:auto;margin:0 12px 10px;line-height:1.5}
+  .adim{display:flex;gap:0;padding:8px 12px;flex-wrap:wrap}
+  .adim span{padding:5px 12px;border:1px solid var(--line);background:#fff;font-size:11px;color:var(--muted);position:relative}
+  .adim span+span{border-left:none}
+  .adim span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .adim span.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .icerik{padding:12px 16px;line-height:1.6}
+  .icerik h2{font-size:14px;color:var(--navy);margin:16px 0 6px;border-bottom:1px solid var(--line2);padding-bottom:3px}
+  .icerik h3{font-size:12.5px;color:#2c4a6b;margin:12px 0 4px}
+  .icerik p{margin:4px 0}
+  .icerik table{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:11.5px}
+  .icerik th,.icerik td{border:1px solid var(--line2);padding:4px 7px;text-align:left;vertical-align:top}
+  .icerik th{background:#f4f7fb;color:#3a5573;white-space:nowrap}
+  .icerik code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .kutu{border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;padding:8px 10px;margin:8px 0}
+  .yatay{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:6px 12px}
+</style>
+</head>
+<body>
+
+<style>
+  .akis{display:flex;gap:0;padding:10px 12px;flex-wrap:wrap}
+  .akis .ad{border:1px solid var(--line);background:#fff;padding:8px 12px;min-width:150px;font-size:11px;flex:1}
+  .akis .ad+.ad{border-left:none}
+  .akis .ad b{display:block;color:var(--navy);margin-bottom:2px}
+  .akis .ad.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff} .akis .ad.on b{color:#fff}
+  .frm{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 10px;padding:8px 12px}
+  .frm .al{display:flex;flex-direction:column;gap:2px;font-size:11px}
+  .frm .al .lb{color:var(--muted);font-size:10.5px}
+  .frm .al.g2{grid-column:span 2} .frm .al.g4{grid-column:span 4}
+  .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px} .kart .b{font-size:10.5px;color:var(--muted)}
+  .kart.kir .d{color:#c0392b} .kart.ok .d{color:#2e7d46} .kart.sari .d{color:#8a6218}
+  .dg td.w{white-space:normal}
+  /* cihaz kartları */
+  .cih{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px 12px}
+  .cih .c{border:1px solid var(--line2);border-radius:6px;background:#fff;padding:10px;font-size:11px;position:relative}
+  .cih .c .ad2{font-weight:bold;color:var(--navy);font-size:12.5px}
+  .cih .c .tip{color:var(--muted)}
+  .cih .c .du{position:absolute;right:10px;top:10px;border-radius:10px;padding:1px 9px;color:#fff;font-weight:bold;font-size:10.5px}
+  .cih .c .du.cal{background:#2f6db3} .cih .c .du.haz{background:#3f9a5e} .cih .c .du.bek{background:#8a8f99} .cih .c .du.bak{background:#c0392b} .cih .c .du.kur{background:#d9a12b;color:#1f2d3a}
+  .cih .c .prog{font-family:Consolas,monospace;font-size:13px;color:#1f2d3a;margin:6px 0 2px}
+  .cih .c .faz{display:flex;gap:2px;margin:6px 0}
+  .cih .c .faz i{flex:1;height:8px;background:#e7edf4;border-radius:2px} .cih .c .faz i.ok{background:#3f9a5e} .cih .c .faz i.on{background:#2f6db3}
+  .cih .c .alt2{display:flex;justify-content:space-between;color:var(--muted);font-size:10.5px}
+  .cih .c.kir{border-color:#f3c4bf;background:#fff8f7}
+  /* durum zinciri (set/paket yaşam döngüsü) */
+  .zin{display:flex;gap:0;padding:8px 12px;flex-wrap:wrap}
+  .zin span{padding:4px 10px;border:1px solid var(--line);background:#fff;font-size:10.5px;color:var(--muted)}
+  .zin span+span{border-left:none}
+  .zin span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .zin span.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  /* parametre grafiği */
+  .graf{position:relative;height:170px;margin:8px 12px;border:1px solid var(--line2);border-radius:4px;background:#fff;overflow:hidden}
+  .graf .eks{position:absolute;left:0;right:0;bottom:22px;border-top:1px dashed #cdd6e0}
+  .graf .plato{position:absolute;left:0;right:0;border-top:1px dashed #c0392b}
+  .graf .plato b{position:absolute;right:6px;top:-14px;font-size:10px;color:#c0392b;font-weight:normal}
+  .graf .fz{position:absolute;bottom:22px;font-size:10px;color:var(--muted);border-left:1px dotted #cdd6e0;padding-left:3px;height:100%}
+  .graf svg{position:absolute;left:0;top:0;width:100%;height:100%}
+  .graf .lg{position:absolute;right:8px;top:6px;font-size:10.5px;background:#fff;border:1px solid var(--line2);border-radius:3px;padding:2px 6px}
+  .graf .lg i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:4px}
+  /* indikatör kutuları */
+  .ind{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:8px 12px}
+  .ind .i{border:1px solid var(--line2);border-radius:5px;background:#fff;padding:10px;font-size:11px}
+  .ind .i b{display:block;color:var(--navy);margin-bottom:4px}
+  .ind .i .son{font-size:14px;font-weight:bold;margin:4px 0}
+  .ind .i.ok{border-color:#bfe3cb;background:#f4fbf6} .ind .i.ok .son{color:#2e7d46}
+  .ind .i.bek{border-color:#f2ddbf;background:#fdf8ec} .ind .i.bek .son{color:#8a6218}
+  .ind .i.kir{border-color:#f3c4bf;background:#fdf1ef} .ind .i.kir .son{color:#b3261e}
+  .ind .i .strip{display:flex;gap:2px;margin:4px 0}
+  .ind .i .strip i{flex:1;height:10px;border-radius:2px;background:#d9a12b} .ind .i .strip i.d{background:#4a2b1f}
+  /* etiket */
+  .etk{width:280px;border:1px dashed #8a8f99;border-radius:4px;background:#fff;padding:8px 10px;font-size:11px;margin:8px 12px;font-family:"Segoe UI",Tahoma,sans-serif}
+  .etk .bar2{font-family:"Libre Barcode 128",Consolas,monospace;letter-spacing:1px;font-size:10px;background:repeating-linear-gradient(90deg,#000 0 2px,#fff 2px 4px,#000 4px 5px,#fff 5px 8px);height:34px;margin:4px 0}
+  .etk .kod{font-family:Consolas,monospace;font-size:11.5px;text-align:center;letter-spacing:1px}
+  .etk table{width:100%;border-collapse:collapse} .etk td{padding:1px 0;font-size:10.5px} .etk td:first-child{color:var(--muted);width:42%}
+  .etk .skt{font-weight:bold;color:#b3261e}
+  /* izlenebilirlik zinciri */
+  .iz{display:grid;grid-template-columns:repeat(5,1fr);gap:0;padding:10px 12px;align-items:stretch}
+  .iz .n{border:1px solid var(--line);background:#fff;padding:8px 10px;font-size:11px;position:relative}
+  .iz .n+.n{border-left:none}
+  .iz .n b{display:block;color:var(--navy);margin-bottom:3px}
+  .iz .n.on{background:#eef4fc;border-color:#2f6db3}
+  .iz .n .ok2{position:absolute;right:-9px;top:40%;font-size:14px;color:#2f6db3;z-index:1}
+  .chk{list-style:none;margin:0;padding:6px 12px;font-size:11.5px}
+  .chk li{padding:4px 0;border-bottom:1px solid #eef2f6;display:flex;gap:8px;align-items:center}
+  .chk li .k{display:inline-block;width:14px;height:14px;border:1px solid var(--line);border-radius:3px;background:#fff;text-align:center;line-height:12px;font-size:10px}
+  .chk li .k.ok{background:#3f9a5e;border-color:#3f9a5e;color:#fff}
+  .chk li .k.no{background:#c0392b;border-color:#c0392b;color:#fff}
+  .takvim{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:8px 12px}
+  .takvim .g{border:1px solid var(--line2);border-radius:3px;min-height:58px;padding:4px 6px;font-size:10.5px;background:#fff}
+  .takvim .g .gn{color:var(--muted);font-weight:bold} .takvim .g .t{display:block;border-radius:3px;padding:1px 4px;margin-top:2px}
+  .takvim .g .t.ok{background:#e2f3e8;color:#2e7d46} .takvim .g .t.bek{background:#fdf6e3;color:#8a6218} .takvim .g .t.kir{background:#fbe9e7;color:#b3261e} .takvim .g .t.pl{background:#eef4fc;color:#2f6db3}
+  .takvim .g.bugun{border-color:#2f6db3;box-shadow:inset 0 0 0 1px #2f6db3}
+  .sayac{font-family:Consolas,monospace;font-size:22px;font-weight:bold;color:var(--navy)}
+  .kutu2{margin:8px 12px;border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;padding:8px 10px;font-size:11.5px}
+  .kutu2.kir{border-color:#f3c4bf;background:#fdf1ef} .kutu2.sari{border-color:#f2ddbf;background:#fdf8ec}
+  .kutu2 b{color:var(--navy)}
+</style>
+<div class="toolbar" style="background:#fff;border-bottom:1px solid var(--line2)"><span class="sonuk">Sterilizasyon ekranları:</span><span class="chip" data-git="dis_steril_sureci.html">📘 Süreç</span><span class="chip" data-git="dis_steril_panosu.html">🧪 Sterilizasyon Panosu</span><span class="chip" data-git="dis_steril_dongu_karti.html">♨️ Döngü Kartı</span><span class="chip" data-git="dis_steril_set_paket.html">🧰 Setler · Paketler</span><span class="chip on" data-git="dis_steril_izlenebilirlik.html">🔍 İzlenebilirlik · Geri Çağırma</span><span class="chip" data-git="dis_steril_cihaz_ayarlar.html">⚙️ Cihazlar · Testler · Ayarlar</span><span class="sp"></span><span class="chip" data-git="dis_sureci.html">🦷 Diş süreci</span><span class="chip" data-git="dis_gunluk_akis.html">📅 Günlük akış</span></div>
+<div class="win">
+  <div class="title">🔍 İzlenebilirlik · Geri Çağırma · Kayıt Defteri <span class="sp">Paket ↔ döngü ↔ hasta/seans · SKS-ADSH kayıtları</span></div>
+  <div class="arama"><div class="kutu">🔍 Paket barkodu · set · döngü no · hasta adı / dosya no · tarih</div><span class="btn primary">Sorgula</span><span class="btn">📷 Barkod okut</span><span class="sepv"></span><span class="chip on">Paket</span><span class="chip">Hasta</span><span class="chip">Döngü</span><span class="chip">Hekim / ünite</span></div>
+  <div class="kutu2"><b>P-260918-1282-04</b> · Endo seti E-01 · sterilize 18.09.2026 17:48 (Otoklav-1 #1.282) · kullanıldı 19.09 09:40 Ünite 2 · Zeynep Özdemir · Dt. Elif Şahin</div>
+  <div class="iz">
+    <div class="n"><b>1 · Kirli toplama</b>18.09 15:05 · Ünite 3<br>Seans: Kanal 1/3 · Hasta: Murat K.<br>Okutan: Asist. Merve<span class="ok2">▶</span></div>
+    <div class="n"><b>2 · Yıkama</b>18.09 15:40 · Termal yıkayıcı<br>Program Vario TD · A0 3.080 ✓<br>Sayım 11/11 ✓ Ayşe T.<span class="ok2">▶</span></div>
+    <div class="n"><b>3 · Paketleme</b>18.09 17:05 · kağıt-plastik<br>Sınıf 4 şerit · etiket<br>Ayşe T.<span class="ok2">▶</span></div>
+    <div class="n on"><b>4 · Sterilizasyon</b>18.09 17:20–17:48 · Otoklav-1 #1.282<br>134°C 4:01 dk · BD ✓ Helix ✓ sınıf 5 ✓<br>Serbest: Selin K. 17:52<span class="ok2">▶</span></div>
+    <div class="n"><b>5 · Kullanım</b>19.09 09:40 · Ünite 2<br>Zeynep Özdemir · Kanal 2/3<br>Dt. Elif Şahin · okutan Asist. Merve</div>
+  </div>
+<div class="sekmeler"><div class="sekme on">Paket geçmişi</div><div class="sekme">Hasta bazlı sorgu</div><div class="sekme">Geri çağırma (recall)</div><div class="sekme">Sterilizasyon kayıt defteri</div><div class="sekme">Raporlar</div></div><div class="pnl"><div class="dg"><table><thead><tr><th>Zaman</th><th>Olay</th><th>Kim / nerede</th><th>Ayrıntı</th></tr></thead><tbody><tr><td class="w">18.09 15:05</td><td class="w">Kirli okutuldu</td><td class="w">Asist. Merve · Ünite 3</td><td class="w">Seans #5531 Murat K. · kapalı kapta ünitedeye</td></tr><tr><td class="w">18.09 15:40</td><td class="w">Yıkama başladı</td><td class="w">Ayşe T. · Termal yıkayıcı</td><td class="w">Vario TD · yük 3 set</td></tr><tr><td class="w">18.09 16:38</td><td class="w">Yıkama bitti · sayım</td><td class="w">Ayşe T.</td><td class="w">11/11 ✓ · 2 tek kullanımlık eğe atıldı</td></tr><tr><td class="w">18.09 17:05</td><td class="w">Paketlendi</td><td class="w">Ayşe T.</td><td class="w">Kağıt-plastik · sınıf 4 · etiket P-260918-1282-04</td></tr><tr><td class="w">18.09 17:20</td><td class="w">Döngüye yüklendi</td><td class="w">Selin K. · Otoklav-1</td><td class="w">#1.282 · 11 paket</td></tr><tr><td class="w">18.09 17:48</td><td class="w">Döngü bitti</td><td class="w">cihaz</td><td class="w">134,4°C · 4:01 dk · hata yok</td></tr><tr><td class="w">18.09 17:52</td><td class="w">Serbest bırakıldı</td><td class="w">Selin K.</td><td class="w">BD ✓ Helix ✓ sınıf 5 ✓ · raf B-1 · SKT 18.03.2027</td></tr><tr><td class="w">19.09 09:40</td><td class="w">Kullanıldı</td><td class="w">Asist. Merve · Ünite 2</td><td class="w">Zeynep Özdemir · seans #5544 · Dt. Elif Şahin · şerit koyu ✓ · paket bütün ✓</td></tr></tbody></table></div></div><div class="pnl" hidden><div class="hdr k4"><div class="fld"><label>Hasta</label><div class="inp big">Zeynep Özdemir · H-000012</div></div><div class="fld"><label>Tarih aralığı</label><div class="inp">01.09.2026 – 19.09.2026</div></div><div class="fld"><label>Hekim</label><div class="inp combo">Tümü</div></div><div class="fld"><label>Sonuç</label><div class="inp ro">3 seans · 7 paket</div></div></div><div class="dg"><table><thead><tr><th>Seans</th><th>Tarih</th><th>Hekim</th><th>Ünite</th><th>Paket</th><th>İçerik</th><th>Döngü</th><th>Döngü durumu</th><th>Bio</th></tr></thead><tbody><tr><td class="w">#5544 Kanal 2/3</td><td class="w">19.09 09:40</td><td class="w">Dt. Elif Şahin</td><td class="w">Ünite 2</td><td class="w">P-260918-1282-04</td><td class="w">Endo seti E-01</td><td class="w">#1.282</td><td class="w"><span class="rz ok">serbest</span></td><td class="w">n/a</td></tr><tr><td class="w">#5544 Kanal 2/3</td><td class="w">19.09 09:40</td><td class="w">Dt. Elif Şahin</td><td class="w">Ünite 2</td><td class="w">P-260918-1282-10</td><td class="w">Angldurva A-09</td><td class="w">#1.282</td><td class="w"><span class="rz ok">serbest</span></td><td class="w">n/a</td></tr><tr><td class="w">#5498 Kanal 1/3</td><td class="w">12.09 14:10</td><td class="w">Dt. Elif Şahin</td><td class="w">Ünite 2</td><td class="w">P-260912-1251-02</td><td class="w">Endo seti E-05</td><td class="w">#1.251</td><td class="w"><span class="rz ok">serbest</span></td><td class="w">negatif</td></tr><tr><td class="w">#5498 Kanal 1/3</td><td class="w">12.09 14:10</td><td class="w">Dt. Elif Şahin</td><td class="w">Ünite 2</td><td class="w">P-260912-1251-08</td><td class="w">Muayene seti M-04</td><td class="w">#1.251</td><td class="w"><span class="rz ok">serbest</span></td><td class="w">negatif</td></tr><tr><td class="w">#5410 Muayene</td><td class="w">02.09 11:00</td><td class="w">Dt. Mustafa Çelik</td><td class="w">Ünite 1</td><td class="w">P-260901-1198-03</td><td class="w">Muayene seti M-08</td><td class="w">#1.198</td><td class="w"><span class="rz ok">serbest</span></td><td class="w">n/a</td></tr></tbody></table></div><div class="kutu2">Hasta kartındaki "Sterilizasyon" sekmesi aynı listeyi gösterir (KVKK: yalnız kendi seansları; hekim yetkisi).</div></div><div class="pnl" hidden><div class="kutu2 kir"><b>GERİ ÇAĞIRMA SENARYOSU · Biyolojik indikatör POZİTİF</b> — Otoklav-2 döngü #868 (17.09 14:20) · okuma 18.09 14:25 · Selin K. Etkilenen: aynı cihazda son negatif biyolojik testten (10.09 #851) bu yana <b>17 döngü · 96 paket</b>; bunlardan <b>41 paket 33 hastada kullanıldı</b>, 55 paket depoda/karantinada.</div>
+<div class="adim"><span class="ok">1 · Pozitif sonuç girildi</span><span class="ok">2 · Etkilenen döngüler bulundu</span><span class="on">3 · Depodaki paketler bloke</span><span>4 · Kullanılan paketler → hasta listesi</span><span>5 · Bildirim / hekim değerlendirmesi</span><span>6 · Cihaz kullanım dışı · tekrar test</span><span>7 · DÖF & kapanış</span></div>
+<div class="ozet"><div class="kart "><div class="b">Etkilenen döngü</div><div class="d">17</div></div><div class="kart sari"><div class="b">Depoda bloke</div><div class="d">55 paket</div></div><div class="kart kir"><div class="b">Kullanılmış</div><div class="d">41 paket · 33 hasta</div></div><div class="kart "><div class="b">Hekim değerlendirmesi</div><div class="d">12 / 33</div></div><div class="kart kir"><div class="b">Cihaz</div><div class="d">Otoklav-2 KULLANIM DIŞI</div></div></div>
+<div class="yatay"><span class="btn danger">⛔ Depodaki 55 paketi bloke et</span><span class="btn">📋 Hasta listesini hekimlere gönder</span><span class="btn">📨 Hasta bilgilendirme (şablon · hekim onayı sonrası)</span><span class="btn">📝 DÖF aç</span><span class="btn">🧪 Otoklav-2 tekrar biyolojik test</span></div>
+<div class="dg"><table><thead><tr><th>Hasta</th><th>Seans</th><th>Tarih</th><th>Hekim</th><th>Paket</th><th>Risk sınıfı</th><th>Hekim değerlendirmesi</th><th>Bildirim</th></tr></thead><tbody><tr><td class="w">Ali Aydın</td><td class="w">Çekim</td><td class="w">17.09 15:10</td><td class="w">Dt. Mustafa Ç.</td><td class="w">C-02 cerrahi</td><td class="w"><span class="rz kir">kritik (cerrahi)</span></td><td class="w">bekliyor</td><td class="w">—</td></tr><tr><td class="w">Hatice Öztürk</td><td class="w">Detertraj</td><td class="w">17.09 16:00</td><td class="w">Dt. Elif Ş.</td><td class="w">P-01 periodontal</td><td class="w"><span class="rz sari">yarı kritik</span></td><td class="w">değerlendirildi · takip önerildi</td><td class="w">SMS gönderildi 18.09</td></tr><tr><td class="w">Mehmet Demir</td><td class="w">Dolgu</td><td class="w">18.09 09:30</td><td class="w">Dt. Elif Ş.</td><td class="w">M-05 muayene</td><td class="w"><span class="rz sari">yarı kritik</span></td><td class="w">değerlendirildi · risk düşük</td><td class="w">—</td></tr><tr><td class="w">…</td><td class="w">30 hasta daha</td><td class="w"></td><td class="w"></td><td class="w"></td><td class="w"></td><td class="w"></td><td class="w"></td></tr></tbody></table></div></div><div class="pnl" hidden><div class="yatay"><span class="chip on">Eylül 2026</span><span class="chip">Otoklav-1</span><span class="chip on">Otoklav-2</span><span class="chip">Yıkayıcı</span><span class="sp"></span><span class="btn mini">PDF (SKS formatı)</span><span class="btn mini">Excel</span><span class="btn mini">🖨 Yazdır</span></div><div class="dg"><table><thead><tr><th>Tarih</th><th>Cihaz</th><th>Döngü no</th><th>Program</th><th>Başl.</th><th>Bitiş</th><th>Yük (paket)</th><th>Bowie-Dick</th><th>Helix</th><th>Kimyasal (S5)</th><th>Biyolojik</th><th>Sonuç</th><th>Operatör</th><th>Onaylayan</th></tr></thead><tbody><tr><td class="w">19.09</td><td class="w">Otoklav-2</td><td class="w">871</td><td class="w">BD test</td><td class="w">07:40</td><td class="w">07:52</td><td class="w">test</td><td class="w">geçti</td><td class="w">geçti</td><td class="w">—</td><td class="w">—</td><td class="w">test</td><td class="w">Ayşe T.</td><td class="w">—</td></tr><tr><td class="w">19.09</td><td class="w">Otoklav-1</td><td class="w">1.283</td><td class="w">BD test</td><td class="w">08:05</td><td class="w">08:31</td><td class="w">test</td><td class="w"><span class="rz kir">girilmedi</span></td><td class="w">geçti</td><td class="w">—</td><td class="w">—</td><td class="w">test</td><td class="w">Selin K.</td><td class="w">—</td></tr><tr><td class="w">19.09</td><td class="w">Otoklav-2</td><td class="w">872</td><td class="w">121°C/20</td><td class="w">09:10</td><td class="w">09:41</td><td class="w">6</td><td class="w">—</td><td class="w">—</td><td class="w">geçti</td><td class="w">—</td><td class="w">serbest</td><td class="w">Ayşe T.</td><td class="w">Selin K.</td></tr><tr><td class="w">19.09</td><td class="w">Otoklav-1</td><td class="w">1.284</td><td class="w">134°C/4</td><td class="w">09:58</td><td class="w">—</td><td class="w">9</td><td class="w">—</td><td class="w">—</td><td class="w">bekliyor</td><td class="w">—</td><td class="w">çalışıyor</td><td class="w">Selin K.</td><td class="w">—</td></tr><tr><td class="w">18.09</td><td class="w">Otoklav-1</td><td class="w">1.282</td><td class="w">134°C/4</td><td class="w">17:20</td><td class="w">17:48</td><td class="w">11</td><td class="w">—</td><td class="w">—</td><td class="w">geçti</td><td class="w">—</td><td class="w">serbest</td><td class="w">Selin K.</td><td class="w">Selin K.</td></tr><tr><td class="w">18.09</td><td class="w">Otoklav-1</td><td class="w">1.281</td><td class="w">134°C/4 implant</td><td class="w">15:02</td><td class="w">15:31</td><td class="w">12</td><td class="w">—</td><td class="w">—</td><td class="w">geçti</td><td class="w">inkübasyonda</td><td class="w">karantina</td><td class="w">Selin K.</td><td class="w">—</td></tr><tr><td class="w">18.09</td><td class="w">Otoklav-1</td><td class="w">1.280</td><td class="w">134°C/4</td><td class="w">13:15</td><td class="w">13:42</td><td class="w">8</td><td class="w">—</td><td class="w">—</td><td class="w"><span class="rz kir">KALDI</span></td><td class="w">—</td><td class="w">başarısız</td><td class="w">Ayşe T.</td><td class="w">Selin K.</td></tr></tbody></table></div><div class="kutu2">Defter satırı döngü serbest bırakılınca <b>kendiliğinden</b> oluşur; elle satır eklenemez, düzeltme yalnız not + ISLEMLOG ile.</div></div><div class="pnl" hidden><div class="ozet"><div class="kart "><div class="b">Döngü / ay</div><div class="d">142 <small>· başarısız 3 (%2,1)</small></div></div><div class="kart ok"><div class="b">Test uyumu</div><div class="d">BD %96 · Helix %96 · Bio 4/4</div></div><div class="kart "><div class="b">Paket / ay</div><div class="d">1.210 <small>· kullanılan 1.088</small></div></div><div class="kart sari"><div class="b">Raf ömrü dolan</div><div class="d">9 <small>· yeniden işlendi</small></div></div><div class="kart "><div class="b">Set kaybı / eksik</div><div class="d">4 alet</div></div><div class="kart kir"><div class="b">Geri çağırma</div><div class="d">1 <small>· 33 hasta · kapandı</small></div></div></div><div class="dg"><table><thead><tr><th>Rapor</th><th>Açıklama</th><th>Dönem</th><th></th></tr></thead><tbody><tr><td class="w">Sterilizasyon kayıt defteri</td><td class="w">SKS-ADSH formatında döngü/indikatör/onay listesi</td><td class="w">aylık</td><td class="w"><span class="btn mini">PDF</span></td></tr><tr><td class="w">İndikatör test uyumu</td><td class="w">Günlük BD / Helix, haftalık biyolojik yapıldı mı (takvime göre)</td><td class="w">aylık</td><td class="w"><span class="btn mini">PDF</span></td></tr><tr><td class="w">Hasta bazlı sterilizasyon dökümü</td><td class="w">Bir hastada kullanılan tüm paketler + döngü kanıtı (şikayet / dava dosyası)</td><td class="w">isteğe bağlı</td><td class="w"><span class="btn mini">PDF</span></td></tr><tr><td class="w">Cihaz kullanım & bakım</td><td class="w">Döngü sayısı, arıza, bakım/validasyon tarihleri</td><td class="w">aylık</td><td class="w"><span class="btn mini">Excel</span></td></tr><tr><td class="w">Set döngü sayacı</td><td class="w">Bilenme / yenileme eşiğine yaklaşan setler</td><td class="w">haftalık</td><td class="w"><span class="btn mini">Excel</span></td></tr></tbody></table></div></div>
+  <div class="statusbar"><span>Sorgu: 1 paket · 8 olay</span><span class="sp">İzlenebilirlik kaynağı: steril_paket_kullanim + steril_dongu + ISLEMLOG</span></div>
+</div>
+<div class="not"><b>Not:</b> Seans ekranında (dis_seans_kaydi) "Kullanılan paketler" kutusu: barkod okut → hasta-seans-hekim bağlanır; okutmadan seans kapatılırsa uyarı (kurum ayarı: engel / uyarı / serbest). Geri çağırmada hasta bildirimi hekim onayı olmadan gitmez.</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi. Ic ice sekmeler desteklenir.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===scope.closest('.pnl');});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+// Ic toolbar dugmeleri: data-git="dosya.html" olanlar diger mockup'a gecer.
+document.querySelectorAll('[data-git]').forEach(function(b){ b.style.cursor='pointer'; b.addEventListener('click',function(){ location.href=b.dataset.git; }); });
+</script>
+</body>
+</html>

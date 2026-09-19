@@ -138,6 +138,7 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.OnayMotoru>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.OnayBildirimi>();
 kurucu.Services.AddSingleton<LogDeposu>();
 kurucu.Services.AddScoped<KimlikServisi>();
+kurucu.Services.AddScoped<ParolaSifirlamaServisi>();
 kurucu.Services.AddScoped<BaglamCozucu>();
 kurucu.Services.AddSingleton<JwtUretici>();
 kurucu.Services.AddSingleton<YetkiCozucu>();
@@ -242,6 +243,7 @@ uygulama.MapGet("/api/saglik", async (VeriKaynagi veri, CancellationToken iptal)
 uygulama.KimlikUclariniEkle();
 uygulama.ListeUclariniEkle();
 uygulama.KartUclariniEkle();
+uygulama.HastaUclariniEkle();
 uygulama.KisiUclariniEkle();
 uygulama.StokDurumUclariniEkle();
 // Randevu Ayarlari > Bolumler (251): bolum/hekim bazli randevu duzeni.
@@ -321,6 +323,7 @@ uygulama.FormUclariniEkle();
 uygulama.IsgUclariniEkle();
 // ÇAĞRI MERKEZİ (839): operatör panosu, arayan tanıma, geri arama, kampanya, süpervizör, santral webhook'u.
 uygulama.CagriUclariniEkle();
+uygulama.SterilUclariniEkle();
 // MEDULA (707): mustehaklik, hasta kabul, hizmet kaydi, e-recete/e-rapor, fatura & donem, kuyruk.
 uygulama.MedulaUclariniEkle();
 

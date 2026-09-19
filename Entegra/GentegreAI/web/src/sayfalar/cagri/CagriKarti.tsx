@@ -5,7 +5,7 @@ import { hataMetni } from '../../api/sozlesme';
 import type { CagriKart as Kart } from '../../api/uclar/cagri';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
-import { sureYaz } from './CagriOperator';
+import { Al, sureYaz } from './ortak';
 
 /**
  * ÇAĞRI KARTI `/cagri/:id` (Çağrı Merkezi 839) — mockup
@@ -135,7 +135,6 @@ export function CagriKarti() {
   );
 }
 
-function Al({ lb, v }: { lb: string; v: React.ReactNode }) { return <div className="al"><span className="lb">{lb}</span><span className="inp ro">{v}</span></div> }
 function Perde({ baslik, kapat, children }: { baslik: React.ReactNode; kapat: () => void; children: React.ReactNode }) {
   return (
     <div className="kaperde" onClick={kapat}>

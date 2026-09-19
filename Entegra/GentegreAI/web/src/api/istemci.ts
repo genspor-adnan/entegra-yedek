@@ -21,6 +21,8 @@ import { ftrUclari } from './uclar/ftr';
 import { formUclari } from './uclar/form';
 import { isgUclari } from './uclar/isg';
 import { cagriUclari } from './uclar/cagri';
+import { sterilUclari } from './uclar/steril';
+import { hastaUclari } from './uclar/hasta';
 import { medulaUclari } from './uclar/medula';
 import { yapayZekaUclari } from './uclar/yapayZeka';
 import { mesajUclari } from './uclar/mesaj';
@@ -69,6 +71,8 @@ export const api = {
   ...formUclari,
   ...isgUclari,
   ...cagriUclari,
+  ...sterilUclari,
+  ...hastaUclari,
   ...medulaUclari,
   ...yapayZekaUclari,
   ...mesajUclari,

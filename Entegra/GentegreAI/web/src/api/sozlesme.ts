@@ -118,7 +118,7 @@ export function hataAyristir(h: unknown): HataCozumu {
   // Silme/degistirme engeli: "hangi tabloda kac kayit" bilgisi mesaja eklenir,
   //   kullanici neyi temizleyecegini bilsin.
   // Kullaniciya TABLO ADI degil, Turkce karsiligi gosterilir (sunucu cozer).
-  const engel = h.hata.engel
+  const engel = h.hata.engel && typeof h.hata.engel.adet === 'number'
     ? ` (${h.hata.engel.ad || h.hata.engel.tablo}: ${h.hata.engel.adet} kayıt)` : '';
   // IS_KURALI mesaji ZATEN kullaniciya yazilmis Turkce bir cumledir ("... 
   //   silinemez, ... yapabilirsiniz") - basina teknik kod eklemek okumayi

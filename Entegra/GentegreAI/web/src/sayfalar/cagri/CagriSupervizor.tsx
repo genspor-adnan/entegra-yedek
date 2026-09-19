@@ -5,7 +5,7 @@ import { hataMetni } from '../../api/sozlesme';
 import type { Supervizor } from '../../api/uclar/cagri';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, secimSor } from '../../bilesenler/mesaj';
-import { sureYaz } from './CagriOperator';
+import { sureYaz } from './ortak';
 
 /**
  * SÜPERVİZÖR PANOSU `/cagri-supervizor` (Çağrı Merkezi 839) — mockup

@@ -237,6 +237,7 @@ public static partial class KaynakKatalogu
         Ekle(FormSablon()); Ekle(FormIstek()); Ekle(FormKural());   // form motoru (740)
         Ekle(IsgFirma()); Ekle(IsgCalisan()); Ekle(IsgMuayene()); Ekle(IsgZiyaret()); Ekle(IsgOlay());   // isg (741)
         Ekle(Cagri()); Ekle(CagriKonu()); Ekle(CagriKuyruk()); Ekle(CagriAgent()); Ekle(CagriKampanya()); Ekle(CagriKampanyaKisi()); Ekle(CagriKalite());   // çağrı merkezi (839)
+        Ekle(SterilDongu()); Ekle(SterilPaket()); Ekle(SterilBirim()); Ekle(SterilSet()); Ekle(SterilCihaz()); Ekle(SterilProgram()); Ekle(SterilKullanim()); Ekle(SterilBakim()); Ekle(SterilGeriCagirma());   // sterilizasyon (868)
         Ekle(Kampanya());
         Ekle(Kategori());
         Ekle(RadyolojiIstem());

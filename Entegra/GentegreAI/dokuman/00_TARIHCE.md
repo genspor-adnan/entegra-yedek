@@ -15632,6 +15632,96 @@ listesinde mi.
 Tarayıcıda: 8 bölüm, 74 rol, tablo sayısı 0. xUnit 488/488, vitest 696/696.
 
 
+## Parolamı unuttum (843) + giriş telefon / e-posta ile — 19.09.2026
+
+Kullanıcı: *"parolamı unuttum seçeneği ekle login e"*, *"login telefon no ve
+mail adresi de geçerli olmalı"*. Giriş zaten `KullaniciDeposu.EsnekBulAsync`
+ile kod / sicil / cep telefonu (biçimden bağımsız) / e-posta / TCKN / ad soyad
+kabul ediyordu; ekrandaki etiket "Kullanıcı adı, telefon ya da e-posta" yapıldı.
+
+**Parolamı unuttum:** `db/843_parola_sifirlama.sql` (tablo `parola_sifirlama`:
+bcrypt kod, kanal, hedef, bitiş, deneme; şablonlar `kimlik.parola_sifirlama`
+SMS / `.eposta`). `ParolaSifirlamaServisi`: 1. adım
+`POST /api/kimlik/parola-unuttum {kod}` → hesabın cep telefonuna (yoksa
+e-postasına) 6 haneli kod (bildirim kuyruğu, kaynak_tur 43); hesap yoksa /
+iletişim yoksa aynı genel cevap (kullanıcı adı sızmaz, ayrıntı giriş günlüğünde).
+2. adım `POST /api/kimlik/parola-unuttum/dogrula {kod, dogrulamaKodu,
+yeniParola}` → parola yazılır, açık oturumlar kapanır, yetki önbelleği
+temizlenir. Kural: 10 dk, 5 yanlış deneme, 15 dk'da 3 istek; parola kuralı
+`guvenlik.parola_min_uzunluk`. Web `Giris.tsx`: "Parolamı unuttum" düğmesi,
+iki adımlı form (maskeli hedef "05•• ••• •• 05"), "Kodu yeniden iste".
+Test: dr7905 hesabına sahte cep 0500 999 79 05 yazıldı. Docker-only.
+
+## Sterilizasyon modülü (868) — 19.09.2026
+
+Kullanıcı: *"diş kliniğinde sterilizasyon için mockuplar hazırla"* → *"sterilizasyon
+sistemini mockuplara uygun şekilde projeye ekle"*. Mockuplar `Ekranlar/Dis Klinigi/
+dis_steril_*.html` (6 ekran, sekmeler tıklanınca açılır).
+
+**Akış:** KİRLİ TOPLAMA (seans bitince set kirli) → YIKAMA / DEZENFEKSİYON → SAYIM
+(eksik alet → görev) & PAKETLEME (döner alet yağlanmadan paketlenemez) → DÖNGÜ
+(otoklav + program; Bowie-Dick yoksa kurum kuralı uyari / onay notu / engel) →
+PARAMETRE (tepe °C, plato, basınç) → İNDİKATÖR (Bowie-Dick, Helix, sınıf 5,
+biyolojik 24 s inkübasyon) → SERBEST BIRAKMA (kontrol listesi: parametre eşiği,
+sınıf 5, günün BD'si; biyolojik bekliyorsa karantina; kaldıysa başarısız) →
+ETİKET (barkod `P-yyMMdd-cihaz-sayaç-nn`, SKT = paket türü / set raf ömrü) →
+STERİL DEPO → KULLANIM (seansta paket barkodu → hasta / seans / hekim; karantina
+paketi uyarılı, implant kiti yasak; kullanılan paket kapanır, birim kirliye
+döner) → İZLENEBİLİRLİK (paket zinciri, hasta bazlı) → GERİ ÇAĞIRMA (biyolojik
+pozitif → son negatif biyolojikten bu yana aynı cihazın döngüleri; depodakiler
+bloke, cihaz kullanım dışı, kullanılan paketlerin hastaları + risk sınıfı; hekim
+onayı sonrası SMS `steril.geri_cagirma`; kapat) → KAYIT DEFTERİ (SKS; serbest
+bırakılınca kendiliğinden).
+
+**Kavramlar:** SET = tanım + alet listesi (`steril_set`, `steril_set_alet`);
+BİRİM = barkodlu fiziksel set / döner alet (`steril_birim`, durum makinesi 1 kirli
+… 7 steril depoda, 8 kullanımda, 9 arızalı, 10 yeniden işle); PAKET = bir
+döngüde sterilize edilmiş birim (`steril_paket`); olaylar `steril_olay`.
+
+**DB (`db/868_sterilizasyon.sql`, yalnız docker):** kod listeleri `steril.*`;
+`steril_cihaz`, `steril_program`, `steril_set(+alet)`, `steril_birim`,
+`steril_dongu`, `steril_dongu_indikator`, `steril_paket`, `steril_paket_kullanim`,
+`steril_bakim`, `steril_olay`, `steril_geri_cagirma`; fonksiyonlar
+`fn_steril_paket_kullanilabilir` (1 steril · 2 karantina · 0 yasak),
+`fn_steril_bd_bugun`, `fn_steril_geri_cagirma_dongular`; görünümler `v_steril_*`
++ lookup'lar; yetkiler `steril.*` (tur 0); modül `steril` (diş / hastane / tıp
+merkezi / poliklinik varsayılan açık); kurallar `referans steril.kurallar`
+(JSON); şablon `steril.geri_cagirma`; tohum: 5 cihaz, 6 program, 6 set (45
+alet), 23 birim.
+
+**API `SterilUclari.cs` + `.Islem.cs` (`/api/steril`):** `pano`, `kurallar`
+(GET/POST), `ayar` (test takvimi, uyum), `dongu/baslat|{id}/bitir|indikator|
+serbest|iptal|{id}`, `birim/olay` (kirli · yikama · sayim · paketle · yaglama ·
+ariza · depo · not), `paket/okut` (zorla ile karantina), `paket/{barkod}`,
+`izleme?tarafId=`, `geri-cagirma` (+`{id}`, `kapat`, `bildir`), `kayit-defteri?ay=`.
+Kataloglar `KaynakKatalogu.Steril.cs` (9 liste), `KartKatalogu.Steril.cs` (cihaz +
+bakım detayı, program, set + alet detayı, birim, bakım; log 1340-1349), aksiyonlar
+`steril.*`, rol `steril_sorumlu` (Yardımcı sağlık ve teknik), lookup whitelist.
+
+**Web:** `listeTanimlari.Steril.ts` (grup "Sterilizasyon", bölge Yatan & Cerrahi;
+menü tavanı 30 → 31), `sayfalar/steril/`: `SterilPano` (KPI, uyarılar, barkod
+kutusu: paket → kullanım / birim → kirli, cihaz kartları, yeni döngü yükleme +
+BD onay notu, sekmeler), `SterilDonguKarti` (`/steril-dongu/:id` modal: yük,
+indikatörler, parametreler, serbest bırakma kontrol listesi, etiket önizleme,
+günlük), `SterilIzlenebilirlik` (paket zinciri, hasta bazlı, geri çağırma
+panosu, kayıt defteri), `SterilAyarlar` (cihaz / program / test takvimi / bakım /
+kurallar / yetki); `sterilAksiyonlari.ts`; CSS `st-*`; istemci `api/uclar/steril.ts`.
+`hataAyristir`: `engel` yalnız sayaç (`adet`) taşıyorsa mesaja eklenir - kod taşıyan
+engel (`BD_ONAY`, `KARANTINA`, `SERBEST_EKSIK`) ekranda onay sorusuna dönüşür.
+
+**Tuzaklar:** paket barkodu cihaz + sayaç ile benzersiz (iki otoklav aynı sayaçta
+çakışıyordu); "kirli" olayı `son_kullanim`'ı her zaman damgalar (yağlama kuralı
+`son_yaglama < son_kullanim`); hiç biyolojik yapılmamış kurulumda engel değil uyarı;
+özel uçların JSON'u web seçenekleriyle (camelCase) serileştirilmeli (`Kurallar`
+sınıfı PascalCase dönüyordu).
+
+Testler: xUnit `SterilTestleri` (kullanılabilirlik, BD bugün, geri çağırma
+kapsamı) 3/3; vitest 704/704; duman betiği tüm akış (hazırlama → döngü → serbest →
+okut → izleme → BD test → biyolojik pozitif → geri çağırma → kapat) OK; Playwright
+11 sayfa + modal, konsol temiz. Kalan: otoklav veri sürücüleri (USB/RS-232/ağ),
+ZPL etiket yazıcı, diş seans ekranında "kullanılan paketler" kutusu + seans
+kapatma kuralı, indikatör stok kartları, dökümler, bulut göçü.
+
 ## Hekim kısıtı: çalışma listesinde yalnız kendi hastaları — 19.09.2026
 
 Kullanıcı: *"uzman dahiliye doktor olarak girdiğimde bana gelen 2 hastayı

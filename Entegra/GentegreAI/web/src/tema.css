@@ -5598,3 +5598,45 @@ textarea.fm-giris { resize: vertical }
 .cg-gecikmis td { background: var(--hatazem) }
 .cg-ivr { font-size: 11.5px; padding: 4px 0 8px }
 .cg-ivr .hd { display: inline-block; border: 1px solid var(--cizgi); background: var(--yuz2); color: var(--vurgu); border-radius: 3px; padding: 0 6px; margin-left: 6px; font-size: 10.5px }
+
+/* ============================================ STERİLİZASYON (868) `st-` ==== */
+.st-rz { display: inline-block; border-radius: 9px; padding: 1px 8px; font-size: 10.5px; border: 1px solid var(--cizgi); background: var(--yuz2); color: var(--yazi); white-space: nowrap }
+.st-rz.ok { background: var(--okzem, #e2f3e8); color: var(--ok); border-color: #bfe3cb } .st-rz.kir { background: var(--hatazem, #fbe9e7); color: var(--hata); border-color: #f3c4bf }
+.st-rz.sari { background: var(--uyarizem, #fdf6e3); color: var(--uyari); border-color: #f2ddbf } .st-rz.mavi { background: var(--vurgu-zem, #eef4fc); color: var(--vurgu); border-color: #cfe0f5 }
+.st-ok { color: var(--ok) } .st-kir { color: var(--hata) } .st-sari { color: var(--uyari) }
+.st-okut { display: flex; align-items: center; gap: 8px; margin: 0 20px; padding: 6px 10px; border: 1px solid var(--cizgi); border-radius: 6px; background: var(--yuz) }
+.st-okut .inp { flex: 1 }
+.st-cihazlar { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; padding: 0 20px }
+.st-cihazlar .c { border: 1px solid var(--cizgi); border-radius: 6px; background: var(--yuz); padding: 10px; font-size: 11px; position: relative; cursor: pointer }
+.st-cihazlar .c.kir { border-color: #f3c4bf; background: var(--hatazem, #fff8f7) }
+.st-cihazlar .c .ad2 { font-weight: 700; color: var(--yazi2); font-size: 12.5px } .st-cihazlar .c .tip { color: var(--soluk) }
+.st-cihazlar .c .du { position: absolute; right: 10px; top: 10px; border-radius: 10px; padding: 1px 9px; color: #fff; font-weight: 700; font-size: 10.5px }
+.st-cihazlar .c .du.cal { background: #2f6db3 } .st-cihazlar .c .du.haz { background: #3f9a5e } .st-cihazlar .c .du.bak { background: #c0392b } .st-cihazlar .c .du.pas { background: #8a8f99 }
+.st-cihazlar .c .prog { font-family: Consolas, monospace; font-size: 12.5px; margin: 6px 0 2px }
+.st-cihazlar .c .alt2 { display: flex; justify-content: space-between; gap: 6px; color: var(--soluk); font-size: 10.5px; margin-top: 3px; align-items: center }
+.st-cipler { display: flex; flex-wrap: wrap; gap: 4px } .st-cipler .chip { cursor: pointer }
+.st-zin { display: flex; flex-wrap: wrap; margin-bottom: 8px } .st-zin span { padding: 4px 10px; border: 1px solid var(--cizgi); background: var(--yuz); font-size: 10.5px; color: var(--soluk) } .st-zin span + span { border-left: none }
+.st-adim { display: flex; flex-wrap: wrap; margin: 6px 0 } .st-adim span { padding: 5px 12px; border: 1px solid var(--cizgi); background: var(--yuz); font-size: 11px; color: var(--soluk) } .st-adim span + span { border-left: none }
+.st-adim span.on { background: var(--vurgu); color: #fff; border-color: var(--vurgu); font-weight: 700 } .st-adim span.ok { background: var(--okzem, #e2f3e8); color: var(--ok); border-color: #bfe3cb }
+.st-ind { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin: 6px 0 }
+.st-ind .i { border: 1px solid var(--cizgi); border-radius: 5px; background: var(--yuz); padding: 10px; font-size: 11px } .st-ind .i b { display: block; color: var(--yazi2) } .st-ind .i .son { margin: 4px 0; font-size: 12px }
+.st-ind .i.ok { border-color: #bfe3cb; background: var(--okzem, #f4fbf6) } .st-ind .i.bek { border-color: #f2ddbf; background: var(--uyarizem, #fdf8ec) } .st-ind .i.kir { border-color: #f3c4bf; background: var(--hatazem, #fdf1ef) }
+.st-chk { list-style: none; margin: 0 0 8px; padding: 0; font-size: 11.5px } .st-chk li { padding: 4px 0; border-bottom: 1px solid var(--cizgi2); display: flex; gap: 8px; align-items: center }
+.st-chk li .k { display: inline-block; width: 16px; height: 16px; border: 1px solid var(--cizgi); border-radius: 3px; background: var(--yuz); text-align: center; line-height: 14px; font-size: 10px }
+.st-chk li .k.ok { background: #3f9a5e; border-color: #3f9a5e; color: #fff } .st-chk li .k.no { background: #c0392b; border-color: #c0392b; color: #fff }
+.st-uyari { list-style: none; margin: 0; padding: 0; font-size: 11.5px } .st-uyari li { padding: 5px 0; border-bottom: 1px solid var(--cizgi2); display: flex; gap: 8px; align-items: center; flex-wrap: wrap }
+.st-uyari li .k { display: inline-block; width: 16px; height: 16px; border-radius: 3px; text-align: center; line-height: 16px; font-size: 10px; font-weight: 700; color: #fff; background: #8a8f99 }
+.st-uyari li.kir .k { background: #c0392b } .st-uyari li.sari .k { background: #d9a12b } .st-uyari li.ok .k { background: #3f9a5e }
+.st-etkler { display: flex; flex-wrap: wrap; gap: 10px }
+.st-etk { width: 280px; border: 1px dashed #8a8f99; border-radius: 4px; background: #fff; color: #1f2d3a; padding: 8px 10px; font-size: 11px }
+.st-etk .bas { font-weight: 700; color: #14315a } .st-etk .bar { height: 34px; margin: 4px 0; background: repeating-linear-gradient(90deg, #000 0 2px, #fff 2px 4px, #000 4px 5px, #fff 5px 8px) }
+.st-etk .kod { font-family: Consolas, monospace; font-size: 11.5px; text-align: center; letter-spacing: 1px }
+.st-etk table { width: 100%; border-collapse: collapse } .st-etk td { padding: 1px 0; font-size: 10.5px } .st-etk td:first-child { color: #6b7a8b; width: 42% } .st-etk .skt { font-weight: 700; color: #b3261e }
+.st-etk .alt { font-size: 9.5px; color: #6b7a8b; margin-top: 4px }
+.st-iz { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin: 8px 0 }
+.st-iz .n { border: 1px solid var(--cizgi); background: var(--yuz); padding: 8px 10px; font-size: 11px } .st-iz .n + .n { border-left: none } .st-iz .n b { display: block; color: var(--yazi2); margin-bottom: 3px } .st-iz .n.on { background: var(--vurgu-zem, #eef4fc); border-color: var(--vurgu) }
+.st-takvim { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 4px; margin-bottom: 10px }
+.st-takvim .g { border: 1px solid var(--cizgi2); border-radius: 3px; min-height: 58px; padding: 4px 6px; font-size: 10.5px; background: var(--yuz) } .st-takvim .g.bugun { border-color: var(--vurgu); box-shadow: inset 0 0 0 1px var(--vurgu) }
+.st-takvim .g .gn { color: var(--soluk); font-weight: 700 } .st-takvim .g .t { display: block; border-radius: 3px; padding: 1px 4px; margin-top: 2px }
+.st-takvim .g .t.ok { background: var(--okzem, #e2f3e8); color: var(--ok) } .st-takvim .g .t.bek { background: var(--uyarizem, #fdf6e3); color: var(--uyari) } .st-takvim .g .t.kir { background: var(--hatazem, #fbe9e7); color: var(--hata) } .st-takvim .g .t.pl { background: var(--vurgu-zem, #eef4fc); color: var(--vurgu) }
+.fm-tablo tr.tik { cursor: pointer } .fm-tablo tr.sel td { background: var(--vurgu-zem, #d7e7fb) }

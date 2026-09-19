@@ -35,6 +35,9 @@ public sealed partial class SorguUretici
     private readonly short _portalTuru;
     private readonly int _portalKullanici;
 
+    /// <summary>Planlı hekim kullanıcı: kaynağın hekim kolonu (KaynakKatalogu.HekimKolonu) bu id'ye eşitlenir.</summary>
+    public int? HekimId { get; init; }
+
     private string Ekle(object? deger)
     {
         _par.Add(deger);
@@ -210,6 +213,10 @@ public sealed partial class SorguUretici
             else if (_kaynak.SubeKolonu is { } sk)
                 parcalar.Add($"{sk} = {Ekle(sid)}");
         }
+
+        // HEKIM KISITI: hekim yalniz kendine gelen hastalari gorur (KaynakKatalogu.HekimKisiti).
+        if (HekimId is { } hekim && KaynakKatalogu.HekimKolonu(_kaynak.Ad) is { } hk)
+            parcalar.Add($"{hk} = {Ekle(hekim)}");
 
         // Kayit kapsami (eski YETKIALANI): satir varsa yalniz o kayitlar gorunur.
         if (kapsamTarafIdleri is { Count: > 0 } && _kaynak.KapsamKolonu is { } kk)

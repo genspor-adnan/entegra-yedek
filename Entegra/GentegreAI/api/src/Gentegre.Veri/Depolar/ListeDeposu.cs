@@ -16,7 +16,7 @@ public sealed class ListeDeposu
     public async Task<ListeYaniti> SorgulaAsync(KaynakTanimi kaynak, ListeIstegi istek,
         IReadOnlyList<KolonTanimi> kolonlar, int? subeId, IReadOnlyList<int>? kapsam,
         string izlemeNo, int? kullaniciId, CancellationToken iptal = default,
-        short portalTuru = 0)
+        short portalTuru = 0, int? hekimId = null)
     {
         var kronometre = Stopwatch.StartNew();
 
@@ -24,8 +24,8 @@ public sealed class ListeDeposu
         //   AYNI kosulu tasir - biri unutulursa sayfa "3 kayit" der, gride
         //   baskasinin kaydini cizer.
         SorguUretici Uretici() => portalTuru > 0
-            ? new SorguUretici(kaynak, portalTuru, kullaniciId ?? 0)
-            : new SorguUretici(kaynak);
+            ? new SorguUretici(kaynak, portalTuru, kullaniciId ?? 0) { HekimId = hekimId }
+            : new SorguUretici(kaynak) { HekimId = hekimId };
 
         var satirUretici = Uretici();
         var satirSorgu = satirUretici.Satirlar(istek, kolonlar, subeId, kapsam, kullaniciId);

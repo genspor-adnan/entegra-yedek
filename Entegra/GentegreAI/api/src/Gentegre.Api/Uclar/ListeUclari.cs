@@ -16,7 +16,7 @@ public static class ListeUclari
         // POST /api/liste/{kaynak}
         grup.MapPost("/{kaynak}", async (
             string kaynak, ListeIstegi istek, BaglamCozucu cozucu, ListeDeposu depo,
-            KurumProfilDeposu profil, HttpContext ctx, CancellationToken iptal) =>
+            KurumProfilDeposu profil, VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
         {
             var tanim = KaynakBul(kaynak);
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -31,6 +31,13 @@ public static class ListeUclari
                     await profil.UrunModuAsync(baglam.SubeId ?? 0, iptal));
             if (kolonlar.Count == 0) throw GentegreHatasi.Yasak("Bu listede gorebileceginiz kolon yok.");
 
+            // HEKIM KISITI: planli hekim yalniz kendine gelen hastalari gorur; banko /
+            //   yonetici tum listeyi. Kural kaynak haritasinda (KaynakKatalogu.HekimKisiti).
+            int? hekimId = null;
+            if (KaynakKatalogu.HekimKolonu(tanim.Ad) is not null
+                && await veri.TekDegerAsync<int>("select public.fn_hekim_planli(@p0)", [baglam.KullaniciId], iptal) == 1)
+                hekimId = baglam.KullaniciId;
+
             var yanit = await depo.SorgulaAsync(tanim, istek ?? new ListeIstegi(), kolonlar,
                 baglam.SubeId, baglam.Kapsam, baglam.IzlemeNo,
                 // KAPSAM KIMLIGI (819): kurum portalinda hesap kisinin ama
@@ -38,7 +45,7 @@ public static class ListeUclari
                 baglam.PortalKimlik, iptal,
                 // PORTAL KAPSAMI (794): dis doktor/dis kurum/hasta yalniz kendi
                 //   kayitlarini gorur; kural kaynak katalogunda.
-                baglam.PortalTuru);
+                baglam.PortalTuru, hekimId);
 
             return Results.Ok(yanit);
         });

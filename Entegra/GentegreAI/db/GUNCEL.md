@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (440 ad, 121 tanesi birden cok dosyada)
+## Fonksiyonlar (451 ad, 124 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -270,6 +270,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_para_tr` | `769_para_bicimi_tr.sql` | — |
 | `fn_parola_ata` | `068_taraf_rol_id_kolonlari.sql` | 020_sema_kimlik.sql |
 | `fn_parola_dogru` | `020_sema_kimlik.sql` | — |
+| `fn_personel_kadro` | `840_personel_hareket.sql` | — |
+| `fn_personel_kadro_gunluk` | `840_personel_hareket.sql` | — |
+| `fn_personel_kadro_uygula` | `843_kadro_ana_rol.sql` | 840_personel_hareket.sql, 841_kadro_bolum_gorev_senkron.sql |
 | `fn_plan_gerceklestir` | `085_fn_kasa_f3.sql` | — |
 | `fn_portal_rol_karisim_koru` | `794_portal_kapsami.sql` | — |
 | `fn_prim_belge_turu` | `332_prim_zamani.sql` | 324_prim_semasi.sql, 330_prim_tahsilat_turu_durum.sql, 331_kurum_tahakkuk_prim.sql |
@@ -319,6 +322,9 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_skrs_kod` | `618_fn_skrs_kod_tek_imza.sql` | 503_skrs_kod_dikisi.sql, 610_skrs_cozucu.sql |
 | `fn_sls_carpan_manuel` | `539_turetilmis_liste_sokuldu.sql` | 209_taban_fiyat_izi.sql, 212_yazim_gecis_kurali.sql, 213_fiyat_elle_degisim.sql, 214_yazim_olusma_import.sql |
 | `fn_slug` | `021_goc_kimlik.sql` | — |
+| `fn_steril_bd_bugun` | `868_sterilizasyon.sql` | — |
+| `fn_steril_geri_cagirma_dongular` | `868_sterilizasyon.sql` | — |
+| `fn_steril_paket_kullanilabilir` | `868_sterilizasyon.sql` | — |
 | `fn_stok_kart_fiyat` | `128_fn_stok_kart_fiyat.sql` | — |
 | `fn_stok_kopyala` | `127_stok_kopyala_fiyat.sql` | 126_fn_stok_kopyala.sql |
 | `fn_stok_kullanilmayan_pasife` | `552_stok_ilac_kisa_ad_kullanim.sql` | — |
@@ -406,6 +412,11 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_muayene_rapor_hasta` | `462_muayene_rapor.sql` | — |
 | `tg_muayene_vital_bki` | `463_vital_bki.sql` | — |
 | `tg_onay_adim_tek_imza` | `784_onay_tek_imza_ve_iskonto_rolu.sql` | — |
+| `tg_personel_giris_cikis_iz` | `843_kadro_ana_rol.sql` | 841_kadro_bolum_gorev_senkron.sql, 842_kadro_bolum_gorev_dolgu.sql |
+| `tg_personel_hareket_uygula` | `840_personel_hareket.sql` | — |
+| `tg_personel_kadro_iz` | `840_personel_hareket.sql` | — |
+| `tg_personel_kadro_iz_taraf` | `841_kadro_bolum_gorev_senkron.sql` | — |
+| `tg_personel_rol_iz` | `845_yeni_personel_ana_rol.sql` | 843_kadro_ana_rol.sql |
 | `tg_portal_davet_tekil` | `822_portal_daveti.sql` | — |
 | `tg_prim_belge_tur` | `332_prim_zamani.sql` | 330_prim_tahsilat_turu_durum.sql |
 | `tg_prim_dagitim` | `324_prim_semasi.sql` | — |
@@ -449,7 +460,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (258 ad, 60 tanesi birden cok dosyada)
+## Gorunumler (274 ad, 61 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -644,6 +655,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_onay_vekalet` | `746_onay_bildirim_vekalet.sql` | — |
 | `v_personel_avans` | `755_avans_kaynak_tur_duzeltmesi.sql` | 753_avans_modulu.sql |
 | `v_personel_belge_talep` | `765_personel_belge_talebi.sql` | — |
+| `v_personel_grup_lookup` | `848_personel_bolum_gruplu_lookup.sql` | — |
+| `v_personel_hareket` | `843_kadro_ana_rol.sql` | 840_personel_hareket.sql |
 | `v_personel_izin` | `743_izin_modulu.sql` | — |
 | `v_personel_izin_bakiye` | `743_izin_modulu.sql` | — |
 | `v_personel_lookup` | `054_personel_ozluk_mockup_uyum.sql` | — |
@@ -670,6 +683,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_randevu_bolum_lookup` | `718_hekim_calisma_plani.sql` | 251_departman.sql, 254_departman_kod.sql, 256_departman_durum.sql |
 | `v_randevu_tetkik_sure` | `317_randevu_tetkik_uyum.sql` | — |
 | `v_resmi_tatil` | `751_dini_bayram_ve_yerel_tatil.sql` | 749_resmi_tatil.sql, 750_tatil_duzeltmeleri.sql |
+| `v_rol_agac_lookup` | `847_rol_agac_lookup.sql` | — |
 | `v_rol_lookup` | `425_dokuman_erisim.sql` | — |
 | `v_satinalma_kabul` | `736_kabul_its_bildirim.sql` | 733_mal_kabul_satir.sql, 734_kabul_karekod.sql |
 | `v_satinalma_talep_onay` | `739_onay_gelen_kutusu.sql` | — |
@@ -688,6 +702,19 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_skrs_meslek_lookup` | `615_skrs_lookup_gorunumleri.sql` | — |
 | `v_skrs_sapma` | `503_skrs_kod_dikisi.sql` | — |
 | `v_skrs_ulke_lookup` | `615_skrs_lookup_gorunumleri.sql` | — |
+| `v_steril_bakim` | `868_sterilizasyon.sql` | — |
+| `v_steril_birim` | `868_sterilizasyon.sql` | — |
+| `v_steril_birim_lookup` | `868_sterilizasyon.sql` | — |
+| `v_steril_cihaz` | `868_sterilizasyon.sql` | — |
+| `v_steril_cihaz_lookup` | `868_sterilizasyon.sql` | — |
+| `v_steril_dongu` | `868_sterilizasyon.sql` | — |
+| `v_steril_geri_cagirma` | `868_sterilizasyon.sql` | — |
+| `v_steril_paket` | `868_sterilizasyon.sql` | — |
+| `v_steril_paket_kullanim` | `868_sterilizasyon.sql` | — |
+| `v_steril_program` | `868_sterilizasyon.sql` | — |
+| `v_steril_program_lookup` | `868_sterilizasyon.sql` | — |
+| `v_steril_set` | `868_sterilizasyon.sql` | — |
+| `v_steril_set_lookup` | `868_sterilizasyon.sql` | — |
 | `v_stok_kategori_lookup` | `544_stok_kategori_marka_model.sql` | — |
 | `v_stok_kullanilabilir` | `142_siparis_rezervasyon.sql` | — |
 | `v_stok_lookup` | `121_firsat.sql` | — |

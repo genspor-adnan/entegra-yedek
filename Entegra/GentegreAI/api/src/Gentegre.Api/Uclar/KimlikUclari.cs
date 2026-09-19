@@ -140,6 +140,25 @@ public static class KimlikUclari
             return Results.Ok(new { mesaj = "Parolanız tanımlandı, giriş yapabilirsiniz." });
         }).AllowAnonymous();
 
+        // PAROLAMI UNUTTUM (843, anonim): kayıtlı cep / e-postaya tek kullanımlık kod,
+        //   kodla yeni parola. Hesap yoksa da aynı genel cevap (bkz. ParolaSifirlamaServisi).
+        grup.MapPost("/parola-unuttum", async (
+            ParolaUnuttumIstegi istek, Servisler.ParolaSifirlamaServisi servis, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var s = await servis.KodGonderAsync(istek.Kod, Ip(ctx), ctx.Request.Headers.UserAgent.ToString(), iptal);
+            return Results.Ok(new { s.Gonderildi, s.Kanal, s.Hedef, s.Dakika, mesaj = Servisler.ParolaSifirlamaServisi.GenelMesaj });
+        }).AllowAnonymous();
+
+        grup.MapPost("/parola-unuttum/dogrula", async (
+            ParolaUnuttumDogrulaIstegi istek, Servisler.ParolaSifirlamaServisi servis, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            await servis.DogrulaAsync(istek.Kod, istek.DogrulamaKodu, istek.YeniParola, Ip(ctx),
+                ctx.Request.Headers.UserAgent.ToString(), iptal);
+            return Results.Ok(new { mesaj = "Parolanız değiştirildi, yeni parolanızla giriş yapabilirsiniz." });
+        }).AllowAnonymous();
+
         // PERSONEL HESAPLARI (674): hesabi olmayana hesap acar, parolasiz
         //   hesaba varsayilan parolayi (kart id) yazar. Listeye elle girilmis
         //   ya da gocle gelmis personel bu ucla girise acilir - kart ekranindan

@@ -5,6 +5,7 @@ import { hataMetni } from '../../api/sozlesme';
 import type { ArayanYaniti, CagriPano as Pano, CagriSatiri, KapatIstegi } from '../../api/uclar/cagri';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, metinSor, secimSor } from '../../bilesenler/mesaj';
+import { Al, SONUCLAR, saat, sureYaz } from './ortak';
 
 /**
  * OPERATÖR PANOSU `/cagri-pano` (Çağrı Merkezi 839) — mockup
@@ -14,15 +15,9 @@ import { guvenli, mesaj, metinSor, secimSor } from '../../bilesenler/mesaj';
  * çağrı kaydı (konu ağacı, sonuç, not, geri arama). 5 sn'de bir yenilenir;
  * santral olayı gelince (webhook) çağrı kuyrukta / aktifte belirir.
  */
-export const SONUCLAR: { kod: number; ad: string }[] = [
-  { kod: 1, ad: 'Çözüldü' }, { kod: 7, ad: 'Randevu verildi' }, { kod: 6, ad: 'Bilgi verildi' }, { kod: 2, ad: 'Geri aranacak' },
-  { kod: 3, ad: 'Görev açıldı' }, { kod: 5, ad: 'Yönlendirildi' }, { kod: 4, ad: 'Ulaşılamadı' }, { kod: 8, ad: 'Vazgeçti' },
-];
 const AGENT_DURUM: Record<number, { ad: string; sinif: string }> = {
   1: { ad: 'Hazır', sinif: 'hazir' }, 2: { ad: 'Çağrıda', sinif: 'mesgul' }, 3: { ad: 'İşlem sonrası', sinif: 'islem' }, 4: { ad: 'Mola', sinif: 'mola' }, 5: { ad: 'Çıkış', sinif: 'cikis' },
 };
-export const sureYaz = (sn: number) => `${Math.floor(sn / 60)}:${String(Math.max(0, sn) % 60).padStart(2, '0')}`;
-const saat = (d?: string | null) => d ? new Date(d).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '';
 const KANAL_IK: Record<number, string> = { 1: '📞', 2: '💬', 3: '📱', 4: '🌐', 5: '✉️' };
 type Sekme = 'hizli' | 'ozet' | 'gecmis' | 'betik';
 
@@ -207,7 +202,7 @@ export function CagriOperator() {
             )}
           </> : (
             <div className="fm-bolum sonuk">Kuyruktan bir çağrı seçin, bugünkü çağrılardan "kayıt bekleyen" bir kaydı açın ya da 📞 Ara ile giden çağrı başlatın.
-              {yetki('cagri.ayar') && <> Santral bağlı değilse: <a href="#" onClick={e => { e.preventDefault(); git('/cagri-santral') }}>Ayarlar › Santral</a>.</>}</div>
+              {yetki('cagri.ayar') && <>Santral bağlı değilse:<a href="#" onClick={e => { e.preventDefault(); git('/cagri-santral') }}>Ayarlar › Santral</a>.</>}</div>
           )}
         </div>
         <div>
@@ -250,8 +245,4 @@ export function CagriOperator() {
       <div className="fm-doldur-arac sonuk" style={{ fontSize: 11 }}>Kuyruk toplam {p.ozet.bekleyen} · bugün {p.ozet.gunCevaplanan} cevaplanan · SLA {p.ozet.gunCevaplanan ? Math.round(100 * p.ozet.gunSla / p.ozet.gunCevaplanan) : 0}% · 5 sn'de bir yenilenir</div>
     </div>
   );
-}
-
-function Al({ lb, v }: { lb: string; v: React.ReactNode }) {
-  return <div className="al"><span className="lb">{lb}</span><span className="inp ro">{v}</span></div>;
 }

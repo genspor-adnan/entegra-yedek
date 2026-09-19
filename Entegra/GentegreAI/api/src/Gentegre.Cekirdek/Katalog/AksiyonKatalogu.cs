@@ -647,6 +647,48 @@ public static class AksiyonKatalogu
             ["cagri-konu-liste"] = Crud("cagri-konu", "cagri", "cagri.ayar", ekleAdi: "＋ Konu", silHedef: null, yazdir: false),
             ["cagri-kuyruk-liste"] = Crud("cagri-kuyruk", "cagri", "cagri.ayar", ekleAdi: "＋ Kuyruk", silHedef: null, yazdir: false),
             ["cagri-agent-liste"] = Crud("cagri-agent", "cagri", "cagri.ayar", ekleAdi: "＋ Agent", silHedef: null, yazdir: false),
+            // STERİLİZASYON (868): döngü kartı / izleme; paket izleme / okutma; birim hazırlama adımları; tanım CRUD.
+            ["steril-dongu-liste"] =
+            [
+                new("steril.dongu-kart", "♨️ Döngü kartı", "steril", Kisayol: "Enter", KaynakKodu: "steril.dongu", Islem: Islem.Gor, KayitGerekir: true, Sira: 10, UrunModu: 2),
+                new("steril.dongu-yeni", "＋ Yeni döngü (pano)", "steril", Kisayol: "Ctrl+N", KaynakKodu: "steril.dongu", Islem: Islem.Ekle, Sira: 11, UrunModu: 2),
+                new("steril.izle-dongu", "🔍 Paketleri izle", "steril", Hedef: "sagtus,palet", KaynakKodu: "steril.izleme", Islem: Islem.Gor, KayitGerekir: true, Sira: 20, UrunModu: 2),
+                Yazdir(),
+            ],
+            ["steril-paket-liste"] =
+            [
+                new("steril.izle", "🔍 İzlenebilirlik", "steril", Kisayol: "Enter", KaynakKodu: "steril.izleme", Islem: Islem.Gor, KayitGerekir: true, Sira: 10, UrunModu: 2),
+                new("steril.okut", "📷 Kullanım kaydı (okut)", "steril", KaynakKodu: "steril.kullanim", Islem: Islem.Ekle, KayitGerekir: true, Sira: 20, UrunModu: 2),
+                new("steril.dongu-kart", "♨️ Döngü kartı", "steril", Hedef: "sagtus,palet", KaynakKodu: "steril.dongu", Islem: Islem.Gor, KayitGerekir: true, Sira: 30, UrunModu: 2),
+                Yazdir(),
+            ],
+            ["steril-birim-liste"] =
+            [
+                .. Crud("steril-birim", "steril", "steril.birim", ekleAdi: "＋ Birim (set / döner alet)", silHedef: null, yazdir: false),
+                new("steril.birim-kirli", "🧺 Kirli toplandı", "steril", Hedef: "sagtus,palet", KaynakKodu: "steril.birim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40, UrunModu: 2),
+                new("steril.birim-yikama", "🧼 Yıkamaya al", "steril", Hedef: "sagtus,palet", KaynakKodu: "steril.birim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 41, UrunModu: 2),
+                new("steril.birim-sayim", "🔢 Sayım", "steril", Hedef: "sagtus,palet", KaynakKodu: "steril.birim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 42, UrunModu: 2),
+                new("steril.birim-paketle", "📦 Paketle", "steril", Hedef: "sagtus,palet", KaynakKodu: "steril.birim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 43, UrunModu: 2),
+                new("steril.birim-yaglama", "🛢 Yağlandı", "steril", Hedef: "sagtus,palet", KaynakKodu: "steril.birim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 44, UrunModu: 2),
+                new("steril.birim-ariza", "🔧 Arıza / bakım", "steril", Hedef: "sagtus,palet", KaynakKodu: "steril.birim", Islem: Islem.Degistir, KayitGerekir: true, Sira: 45, UrunModu: 2),
+                new("steril.izle", "🔍 İzlenebilirlik", "steril", Hedef: "sagtus,palet", KaynakKodu: "steril.izleme", Islem: Islem.Gor, KayitGerekir: true, Sira: 50, UrunModu: 2),
+            ],
+            ["steril-set-liste"] = Crud("steril-set", "steril", "steril.birim", ekleAdi: "＋ Set tanımı", silHedef: null, yazdir: false),
+            ["steril-cihaz-liste"] = Crud("steril-cihaz", "steril", "steril.ayar", ekleAdi: "＋ Cihaz", silHedef: null, yazdir: false),
+            ["steril-program-liste"] = Crud("steril-program", "steril", "steril.ayar", ekleAdi: "＋ Program", silHedef: null, yazdir: false),
+            ["steril-bakim-liste"] = Crud("steril-bakim", "steril", "steril.ayar", ekleAdi: "＋ Bakım kaydı", silHedef: null, yazdir: false),
+            ["steril-kullanim-liste"] =
+            [
+                new("steril.izle", "🔍 İzlenebilirlik", "steril", Kisayol: "Enter", KaynakKodu: "steril.izleme", Islem: Islem.Gor, KayitGerekir: true, Sira: 10, UrunModu: 2),
+                new("steril.hasta-ac", "👤 Hasta kartı", "steril", Hedef: "sagtus,palet", KaynakKodu: "hasta", Islem: Islem.Gor, KayitGerekir: true, Sira: 20, UrunModu: 2),
+                Yazdir(),
+            ],
+            ["steril-geri-cagirma-liste"] =
+            [
+                new("steril.geri-cagirma-ac", "🚨 Geri çağırma panosu", "steril", Kisayol: "Enter", KaynakKodu: "steril.izleme", Islem: Islem.Gor, KayitGerekir: true, Sira: 10, UrunModu: 2),
+                new("steril.geri-cagirma-kapat", "✔ Kapat", "steril", Hedef: "sagtus,palet", KaynakKodu: "steril.izleme", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20, UrunModu: 2),
+                Yazdir(),
+            ],
             ["ftr-degerlendirme-liste"] = Crud("ftr-degerlendirme", "ftr", "ftr.degerlendirme", ekleAdi: "＋ Değerlendirme", silHedef: null,
                                                silIpucu: "Programı olan değerlendirme silinmez"),
             ["ftr-program-liste"] =

@@ -347,6 +347,7 @@ public static partial class KartKatalogu
         Ekle(FormSablonKarti()); Ekle(FormKuralKarti());   // form motoru (740)
         Ekle(IsgFirmaKarti()); Ekle(IsgCalisanKarti()); Ekle(IsgMuayeneKarti()); Ekle(IsgZiyaretKarti()); Ekle(IsgOlayKarti());   // isg (741)
         Ekle(CagriKarti()); Ekle(CagriKonuKarti()); Ekle(CagriKuyrukKarti()); Ekle(CagriAgentKarti()); Ekle(CagriKampanyaKarti()); Ekle(CagriKaliteKarti());   // çağrı merkezi (839)
+        Ekle(SterilCihazKarti()); Ekle(SterilProgramKarti()); Ekle(SterilSetKarti()); Ekle(SterilBirimKarti()); Ekle(SterilBakimKarti());   // sterilizasyon (868)
         Ekle(MedulaKesintiKarti());
         Ekle(MedulaDonemKarti());
         Ekle(MedulaFaturaKarti());

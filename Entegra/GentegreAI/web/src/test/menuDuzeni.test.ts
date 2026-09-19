@@ -50,7 +50,7 @@ describe('menü düzeni', () => {
     //   ayrıdır: biyomedikal teknisyeni ile saha servisi aynı kişiler değil ve
     //   çağrı/SLA/sözleşme yalnız dış işte var. ERP kurulumunda da çıkar.
     // ÇAĞRI MERKEZİ (839) 14. HBYS grubu: hasta akışının ilk teması, randevunun önünde.
-    expect(GRUPLAR.length).toBeLessThanOrEqual(30);
+    expect(GRUPLAR.length).toBeLessThanOrEqual(31);
   });
 
   it('her grubun sonunda Dökümler var', () => {

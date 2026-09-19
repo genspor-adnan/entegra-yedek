@@ -5,6 +5,7 @@ import { hataMetni } from '../../api/sozlesme';
 import type { GeriAramaYaniti, KampanyaKisiSatiri, KampanyaSatiri } from '../../api/uclar/cagri';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, metinSor, onay, secimSor } from '../../bilesenler/mesaj';
+import { Al } from './ortak';
 
 /**
  * GİDEN ARAMA · KAMPANYA `/cagri-giden` (Çağrı Merkezi 839) — mockup
@@ -152,5 +153,3 @@ export function CagriGiden() {
     </div>
   );
 }
-
-function Al({ lb, v }: { lb: string; v: React.ReactNode }) { return <div className="al"><span className="lb">{lb}</span><span className="inp ro">{v}</span></div> }

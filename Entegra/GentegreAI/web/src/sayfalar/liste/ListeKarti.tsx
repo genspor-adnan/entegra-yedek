@@ -411,6 +411,8 @@ export function ListeKarti({
         yeniSecilenAdlar={sorgu.get('hastaAd') ? { hastaId: sorgu.get('hastaAd')! } : undefined}
         onBasvuruAc={onBasvuruAc}
         onKapat={() => git(sorgu.get('geri') ?? tanim.kartYolu!)}
+        // Hasta: kimlik no kayıtlıysa yeni kart yerine MEVCUT kart açılır (geri yolu korunur).
+        onMevcutKayit={mevcutId => { setYenile(t => t + 1); git(`${tanim.kartYolu}/${mevcutId}${sorgu.get('geri') ? `?geri=${encodeURIComponent(sorgu.get('geri')!)}` : ''}`, { replace: true }) }}
         onKaydedildi={yeniId => {
           setYenile(t => t + 1);
           // `geri` varsa (seanstan lab is emri) yeni kartta kalmaz, onKapat

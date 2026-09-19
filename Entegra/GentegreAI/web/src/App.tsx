@@ -58,6 +58,10 @@ import { CagriKarti } from './sayfalar/cagri/CagriKarti';
 import { CagriGiden } from './sayfalar/cagri/CagriGiden';
 import { CagriSupervizor } from './sayfalar/cagri/CagriSupervizor';
 import { CagriSantral } from './sayfalar/cagri/CagriSantral';
+import { SterilPano } from './sayfalar/steril/SterilPano';
+import { SterilDonguKarti } from './sayfalar/steril/SterilDonguKarti';
+import { SterilIzlenebilirlik } from './sayfalar/steril/SterilIzlenebilirlik';
+import { SterilAyarlar } from './sayfalar/steril/SterilAyarlar';
 import { MedulaHastaKabul } from './sayfalar/medula/MedulaHastaKabul';
 import { MedulaHizmetKayit } from './sayfalar/medula/MedulaHizmetKayit';
 import { MedulaFaturaDonem } from './sayfalar/medula/MedulaFaturaDonem';
@@ -308,6 +312,16 @@ function Yollar() {
           <Route path="/cagri/:id" element={<>
             <Liste tanim={LISTELER.find(l => l.kaynak === 'cagri' && l.rota === 'cagri')!} />
             <CagriKarti />
+          </>} />
+        )}
+        {/* STERİLİZASYON (868): pano / izlenebilirlik / ayar tam sayfa; döngü kartı liste üstünde modal. */}
+        {yetki('steril.pano') && <Route path="/steril-pano" element={<SterilPano />} />}
+        {yetki('steril.izleme') && <Route path="/steril-izleme" element={<SterilIzlenebilirlik />} />}
+        {yetki('steril.ayar') && <Route path="/steril-ayar" element={<SterilAyarlar />} />}
+        {yetki('steril.dongu') && (
+          <Route path="/steril-dongu/:id" element={<>
+            <Liste tanim={LISTELER.find(l => l.kaynak === 'steril-dongu' && l.rota === 'steril-dongu')!} />
+            <SterilDonguKarti />
           </>} />
         )}
         {yetki('form.sablon') && <Route path="/form-editor/:id" element={<FormSablonEditor />} />}

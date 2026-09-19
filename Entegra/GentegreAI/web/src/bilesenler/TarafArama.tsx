@@ -388,6 +388,8 @@ export function TarafArama({ acik, kaynaklar = ['cari', 'kisi'], yeniKaynak, ekF
         cariyeBaglaGizli
         onKapat={() => { setKartAcik(null); void ara(arama) }}
         onKaydedildi={id => { void kartKaydedildi(kaynak, yeniMi, id) }}
+        // Kimlik no kayıtlı hastaya aitse yeni kart yerine o hasta SEÇİLİR.
+        onMevcutKayit={id => { void kartKaydedildi(kaynak, true, id) }}
       />
     );
   }

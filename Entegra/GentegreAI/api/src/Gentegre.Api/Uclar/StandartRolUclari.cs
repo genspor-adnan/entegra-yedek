@@ -204,6 +204,7 @@ public static class StandartRolUclari
         ["diyetisyen"]           = new("Yardımcı sağlık ve teknik", null, 110),
         ["psikolog"]             = new("Yardımcı sağlık ve teknik", null, 120),
         ["sosyal_hizmet"]        = new("Yardımcı sağlık ve teknik", null, 130),
+        ["steril_sorumlu"]       = new("Yardımcı sağlık ve teknik", null, 135),
         // ------------------------------------------------ hasta hizmetleri ----
         ["kayit_kabul_sorumlu"]  = new("Hasta hizmetleri", null, 10),
         ["kayit_kabul"]          = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 20),
@@ -293,6 +294,7 @@ public static class StandartRolUclari
         ["isyeri_hekimi"] = "isg", ["isg_uzmani"] = "isg", ["dsp"] = "isg",
         ["osgb_sekreter"] = "isg", ["firma_yetkilisi"] = "isg",
         ["cagri_operator"] = "cagri", ["cagri_supervizor"] = "cagri",
+        ["steril_sorumlu"] = "steril",
         // ERP rolleri de kendi modullerine bagli (795): stok modulu kapaliysa
         //   depo sorumlusu onerilmez.
         ["erp_satis"] = "erp_satis", ["erp_alis"] = "satinalma",
@@ -574,6 +576,8 @@ public static class StandartRolUclari
             K(Y("cagri"), Y("cagri.pano"), Y("cagri.kayit"), Y("cagri.giden"), T("cagri.kampanya"), Y("randevu"), Y("hasta"), T("kurum"), Y("gorev"), T("belge"), T("cari"), Y("form.gonder"))),
         new("cagri_supervizor", "Çağrı Merkezi Süpervizörü", "Kuyruk ve agent izleme, SLA, kampanya yönetimi, kalite değerlendirme, santral/IVR/konu ayarları.", ["hastane", "tip_merkezi", "dis", "osgb", "muayenehane"],
             K(H("cagri"), H("cagri.pano"), H("cagri.kayit"), H("cagri.giden"), H("cagri.kampanya"), H("cagri.supervizor"), H("cagri.kalite"), H("cagri.ayar"), Y("randevu"), Y("hasta"), T("kurum"), Y("gorev"), T("belge"), T("cari"), Y("form.gonder"))),
+        new("steril_sorumlu", "Sterilizasyon Sorumlusu", "Yıkama / sayım / paketleme, döngü açma ve serbest bırakma, indikatör kaydı, geri çağırma, cihaz bakım kayıtları.", ["dis", "hastane", "tip_merkezi", "poliklinik", "muayenehane"],
+            K(H("steril"), H("steril.pano"), H("steril.dongu"), H("steril.birim"), H("steril.kullanim"), H("steril.izleme"), Y("steril.ayar"), T("hasta"), Y("gorev"), T("belge"))),
         // ---- işyeri hekimliği (741): OSGB ya da hastane/tıp merkezi İSG birimi.
         new("isyeri_hekimi", "İşyeri Hekimi", "Ek-2 muayene, kanaat, ziyaret, olay, periyodik takvim; firma ve çalışan tanımı.", ["osgb", "tip_merkezi", "hastane"],
             K(Y("isg"), Y("isg.pano"), Y("isg.firma"), Y("isg.calisan"), Y("isg.muayene"), Y("isg.takvim"), Y("isg.ziyaret"), Y("isg.olay"), Y("isg.asi"),

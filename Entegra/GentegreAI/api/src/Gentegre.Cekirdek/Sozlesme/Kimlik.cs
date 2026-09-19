@@ -37,6 +37,20 @@ public sealed class IlkParolaIstegi
     public string YeniParola { get; set; } = "";
 }
 
+/// <summary>Parolamı unuttum (843) - 1. adım: kayıtlı telefona / e-postaya kod.</summary>
+public sealed class ParolaUnuttumIstegi
+{
+    public string Kod { get; set; } = "";
+}
+
+/// <summary>Parolamı unuttum - 2. adım: kod + yeni parola.</summary>
+public sealed class ParolaUnuttumDogrulaIstegi
+{
+    public string Kod { get; set; } = "";
+    public string DogrulamaKodu { get; set; } = "";
+    public string YeniParola { get; set; } = "";
+}
+
 public sealed class DilDegistirIstegi
 {
     public int Dil { get; set; }

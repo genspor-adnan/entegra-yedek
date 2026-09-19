@@ -83,6 +83,7 @@ import { ftrAksiyonu } from './liste/ftrAksiyonlari';
 import { formAksiyonu } from './liste/formAksiyonlari';
 import { isgAksiyonu } from './liste/isgAksiyonlari';
 import { cagriAksiyonu } from './liste/cagriAksiyonlari';
+import { sterilAksiyonu } from './liste/sterilAksiyonlari';
 import { medulaAksiyonu } from './liste/medulaAksiyonlari';
 import { aiBaglamAyarla } from '../bilesenler/aiBaglam';
 import { DokumanKlasorPaneli, type KlasorSecimi } from '../bilesenler/DokumanKlasorPaneli';
@@ -689,6 +690,13 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
 
       // ISG (741): firma panosu, calisan karti, Ek-2 ac, form gonder, olay, SGK.
       if (await isgAksiyonu(kod, satir, {
+        tazele: () => { setYenile(t => t + 1); setKartTazele(t => t + 1) },
+        git: yol => git(yol),
+        geri: `${window.location.pathname.replace(new RegExp('^' + import.meta.env.BASE_URL.replace(/\/$/, '')), '')}${window.location.search}`,
+      })) return;
+
+      // STERILIZASYON (868): dongu karti, izleme, okutma, birim hazirlama adimlari, geri cagirma.
+      if (await sterilAksiyonu(kod, satir, {
         tazele: () => { setYenile(t => t + 1); setKartTazele(t => t + 1) },
         git: yol => git(yol),
         geri: `${window.location.pathname.replace(new RegExp('^' + import.meta.env.BASE_URL.replace(/\/$/, '')), '')}${window.location.search}`,
