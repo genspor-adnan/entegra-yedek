@@ -18,6 +18,7 @@ export async function sterilAksiyonu(kod: string, satir: ListeSatiri | null | un
   if (!id) { mesaj('Önce bir satır seçin.'); return true }
 
   if (kod === 'steril.dongu-kart') { b.git(`/steril-dongu/${Number(satir?.donguId ?? 0) || id}${geri}`); return true }
+  if (kod === 'steril.dongu-duzenle') { b.git(`/steril-dongu-kart/${id}${geri}`); return true }
   if (kod === 'steril.izle-dongu') { b.git(`/steril-paket?donguId=${id}`); return true }
   if (kod === 'steril.izle') {
     const barkod = String(satir?.paketBarkod ?? satir?.barkod ?? '');

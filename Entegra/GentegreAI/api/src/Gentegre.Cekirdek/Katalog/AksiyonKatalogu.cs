@@ -623,6 +623,7 @@ public static class AksiyonKatalogu
                 new("cagri.duzenle", "✎ Düzenle", "cagri", KaynakKodu: "cagri.kayit", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20, UrunModu: 2),
                 new("cagri.geri-arama-tamam", "✔ Geri arama yapıldı", "cagri", Hedef: "sagtus,palet", KaynakKodu: "cagri.giden", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30, UrunModu: 2),
                 new("cagri.kisi-ac", "👤 Kişi kartı", "cagri", Hedef: "araccubugu2,sagtus,palet", KaynakKodu: "cagri.kayit", Islem: Islem.Gor, KayitGerekir: true, Sira: 40, UrunModu: 2),
+                new("cagri.sil", "🗑 Sil", "cagri", Kisayol: "Del", KaynakKodu: "cagri.kayit", Islem: Islem.Sil, KayitGerekir: true, Sira: 50, UrunModu: 2),
                 Yazdir(),
             ],
             ["cagri-kampanya-liste"] =
@@ -641,7 +642,8 @@ public static class AksiyonKatalogu
             ],
             ["cagri-kalite-liste"] =
             [
-                new("cagri.kart", "📞 Çağrı kartı", "cagri", Kisayol: "Enter", KaynakKodu: "cagri.kalite", Islem: Islem.Gor, KayitGerekir: true, Sira: 10, UrunModu: 2),
+                .. Crud("cagri-kalite", "cagri", "cagri.kalite", ekleAdi: "＋ Değerlendirme", silHedef: null, yazdir: false),
+                new("cagri.kart", "📞 Çağrı kartı", "cagri", Hedef: "araccubugu2,sagtus,palet", KaynakKodu: "cagri.kalite", Islem: Islem.Gor, KayitGerekir: true, Sira: 40, UrunModu: 2),
                 Yazdir(),
             ],
             ["cagri-konu-liste"] = Crud("cagri-konu", "cagri", "cagri.ayar", ekleAdi: "＋ Konu", silHedef: null, yazdir: false),
@@ -652,7 +654,9 @@ public static class AksiyonKatalogu
             [
                 new("steril.dongu-kart", "♨️ Döngü kartı", "steril", Kisayol: "Enter", KaynakKodu: "steril.dongu", Islem: Islem.Gor, KayitGerekir: true, Sira: 10, UrunModu: 2),
                 new("steril.dongu-yeni", "＋ Yeni döngü (pano)", "steril", Kisayol: "Ctrl+N", KaynakKodu: "steril.dongu", Islem: Islem.Ekle, Sira: 11, UrunModu: 2),
-                new("steril.izle-dongu", "🔍 Paketleri izle", "steril", Hedef: "sagtus,palet", KaynakKodu: "steril.izleme", Islem: Islem.Gor, KayitGerekir: true, Sira: 20, UrunModu: 2),
+                new("steril.dongu-duzenle", "✎ Düzenle (parametre / not)", "steril", KaynakKodu: "steril.dongu", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20, UrunModu: 2),
+                new("steril-dongu.sil", "🗑 Sil", "steril", Kisayol: "Del", KaynakKodu: "steril.dongu", Islem: Islem.Sil, KayitGerekir: true, Sira: 30, UrunModu: 2, Ipucu: "Paketi olan döngü silinemez; iptal edin."),
+                new("steril.izle-dongu", "🔍 Paketleri izle", "steril", Hedef: "sagtus,palet", KaynakKodu: "steril.izleme", Islem: Islem.Gor, KayitGerekir: true, Sira: 40, UrunModu: 2),
                 Yazdir(),
             ],
             ["steril-paket-liste"] =

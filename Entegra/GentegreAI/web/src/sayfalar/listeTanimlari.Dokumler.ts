@@ -60,8 +60,6 @@ export const DOKUM_LISTELERI = [
   dokumOgesi('İşyeri Hekimliği'),
   // Çağrı Merkezi (839): cevaplama / SLA / kaçan, agent performansı, konu dağılımı, kampanya sonucu.
   dokumOgesi('Çağrı Merkezi'),
-  // Sterilizasyon (868): döngü / indikatör uyumu, paket kullanımı, geri çağırma.
-  dokumOgesi('Sterilizasyon'),
   // Medula (707): kabul / red oranı, fatura-kesinti, hata kodu dağılımı.
   dokumOgesi('Medula'),
   // Ameliyathane (715): masa kullanımı, plan-gerçek sapması, iptal nedeni,

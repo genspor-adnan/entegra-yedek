@@ -77,6 +77,7 @@ export const CAGRI_LISTELERI: ListeGirdisi[] = [
   {
     kaynak: 'cagri-kalite', rota: 'cagri-kalite', aksiyonEkrani: 'cagri-kalite-liste', baslik: 'Kalite Değerlendirmeleri',
     yol: 'Çağrı Merkezi › Kalite',
+    kartYolu: '/cagri-kalite', kartBaslik: 'Kalite değerlendirmesi',
     urunModu: 2, modul: 'cagri',
     menuGrup: 'Çağrı Merkezi', menuAd: 'Kalite Değerlendirmeleri', ic: '⭐', yetkiKodu: 'cagri.kalite', menuSira: 60,
   },

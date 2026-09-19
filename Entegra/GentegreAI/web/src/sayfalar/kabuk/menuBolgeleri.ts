@@ -34,7 +34,7 @@ export const BOLGE_HBYS: MenuBolgesi[] = [
   // İŞYERİ HEKİMLİĞİ (741) beşinci klinik dal: OSGB kurum tipinde tek klinik.
   { ad: 'Klinikler',        renk: '#3f9a5e', gruplar: ['Muayene', 'Göz', 'Diş', 'FTR', 'İşyeri Hekimliği'] },
   { ad: 'Tanı & Tetkik',    renk: '#6a3fb5', gruplar: ['Laboratuvar', 'Radyoloji'] },
-  { ad: 'Yatan & Cerrahi',  renk: '#c0392b', gruplar: ['Yatan Hasta', 'Ameliyathane', 'Sterilizasyon'] },
+  { ad: 'Yatan & Cerrahi',  renk: '#c0392b', gruplar: ['Yatan Hasta', 'Ameliyathane'] },
   // MEDULA (707) klinik akışın ardında, para önünde.
   { ad: 'Ödeyen & Fatura',  renk: '#d9a12b', gruplar: ['Medula', 'Kurumlar & Sigorta', 'e-Nabız'] },
   // PARA HEMEN ARKASINDA (kullanıcı): hastanın işi bitince sıra tahsilata gelir.

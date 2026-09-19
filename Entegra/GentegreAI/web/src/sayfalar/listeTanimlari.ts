@@ -167,7 +167,6 @@ export const MENU_GRUP_MODUL: Record<string, string> = {
   'İşyeri Hekimliği': 'isg',
   // ÇAĞRI MERKEZİ (839): santral / WhatsApp / kampanya - modül kapalıysa grup çizilmez.
   'Çağrı Merkezi': 'cagri',
-  'Sterilizasyon': 'steril',
   // AMELIYATHANE (715) / ACIL (716): kendi modulleri - ameliyathanesi ya da
   //   acili olmayan kurumda menu grubu hic cizilmesin. Bagli olmasalardi
   //   hicbir kuruluma kapatilamazlardi ve poliklinige olmayan bir yetenek

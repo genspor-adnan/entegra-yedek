@@ -165,4 +165,50 @@ public static partial class KartKatalogu
             new("belgeNo",      "belge_no",      "metin", EnFazlaUzunluk: 40, Baslik: "Belge / sertifika no", Grup: "Bakım"),
             new("aciklama",     "aciklama",      "metin", EnFazlaUzunluk: 300, Baslik: "Açıklama", Grup: "Bakım"),
         });
+
+    /// <summary>
+    /// GENERİC DÖNGÜ KARTI (menüde gizli, /steril-dongu-kart): parametre / not / indikatör
+    /// düzeltmesi ve silme. Yeni döngü buradan AÇILMAZ (pano yükleme akışı); durum, sayaç
+    /// ve zamanlar salt okunur. Paketi olan döngü silinemez (kayıt defteri).
+    /// </summary>
+    private static KartTanimi SterilDonguKarti() => new(
+        Ad: "steril-dongu",
+        YetkiKodu: "steril.dongu",
+        Tablo: "public.steril_dongu",
+        LogTabloId: LogSterilDongu,
+        SubeKolonu: "sube_id",
+        SilmeEngelleri: new SilmeEngeli[] { new("public.steril_paket", "dongu_id", "Döngünün paketi var; silinemez (kayıt defteri). Gerekirse iptal edin.") },
+        YeniKayitVarsayilanlari: new Dictionary<string, object?> { ["durum"] = (short)2, ["baslama"] = "@simdi", ["sayacNo"] = 0 },
+        Alanlar: new KartAlani[]
+        {
+            new("id",           "id",            "sayi",  Yazilabilir: false),
+            new("cihazId",      "cihaz_id",      "kod",   Zorunlu: true, KodTablosu: "public.v_steril_cihaz_lookup", Baslik: "Cihaz", Grup: "Döngü"),
+            new("sayacNo",      "sayac_no",      "sayi",  Baslik: "Sayaç no", Grup: "Döngü"),
+            new("programId",    "program_id",    "kod",   KodTablosu: "public.v_steril_program_lookup", Baslik: "Program", Grup: "Döngü"),
+            new("baslama",      "baslama",       "zaman", Yazilabilir: false, Baslik: "Başlangıç", Grup: "Döngü"),
+            new("bitis",        "bitis",         "zaman", Yazilabilir: false, Baslik: "Bitiş", Grup: "Döngü"),
+            new("durum",        "durum",         "kod",   KodListesi: "steril.dongu_durum", Yazilabilir: false, Baslik: "Durum", Grup: "Döngü"),
+            new("operatorId",   "operator_id",   "kod",   KodTablosu: "public.v_kullanici_lookup", Baslik: "Operatör", Grup: "Döngü"),
+            new("tepeSicaklik", "tepe_sicaklik", "sayi",  Baslik: "Tepe sıcaklık (°C)", Grup: "Parametre"),
+            new("platoDk",      "plato_dk",      "sayi",  Baslik: "Plato (dk)", Grup: "Parametre"),
+            new("tepeBasinc",   "tepe_basinc",   "sayi",  Baslik: "Tepe basınç (bar)", Grup: "Parametre"),
+            new("kurutmaDk",    "kurutma_dk",    "sayi",  Baslik: "Kurutma (dk)", Grup: "Parametre"),
+            new("hataKodu",     "hata_kodu",     "metin", EnFazlaUzunluk: 40, Baslik: "Cihaz hata kodu", Grup: "Parametre"),
+            new("bdOnayNotu",   "bd_onay_notu",  "metin", EnFazlaUzunluk: 300, Baslik: "Bowie-Dick onay notu", Grup: "Not"),
+            new("kararNotu",    "karar_notu",    "metin", EnFazlaUzunluk: 400, Baslik: "Karar notu", Grup: "Not"),
+            new("onaylayanId",  "onaylayan_id",  "kod",   KodTablosu: "public.v_kullanici_lookup", Yazilabilir: false, Baslik: "Onaylayan", Grup: "Not"),
+            new("onayZamani",   "onay_zamani",   "zaman", Yazilabilir: false, Baslik: "Onay zamanı", Grup: "Not"),
+        },
+        Detaylar: new DetayTanimi[]
+        {
+            new("indikatorler", "public.steril_dongu_indikator", "dongu_id", new KartAlani[]
+            {
+                new("id",     "id",     "sayi",  Yazilabilir: false),
+                new("tur",    "tur",    "kod",   Zorunlu: true, KodListesi: "steril.indikator_tur", Baslik: "İndikatör"),
+                new("lot",    "lot",    "metin", EnFazlaUzunluk: 40, Baslik: "Lot"),
+                new("konum",  "konum",  "metin", EnFazlaUzunluk: 60, Baslik: "Konum"),
+                new("sonuc",  "sonuc",  "kod",   KodListesi: "steril.indikator_sonuc", Baslik: "Sonuç"),
+                new("notu",   "notu",   "metin", EnFazlaUzunluk: 200, Baslik: "Not"),
+            }, Sirala: "tur, id", Baslik: "İndikatörler", LogTabloId: LogSterilDongu, SubeKolonu: null),
+        });
 }

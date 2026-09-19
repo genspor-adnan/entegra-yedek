@@ -15632,7 +15632,7 @@ listesinde mi.
 Tarayıcıda: 8 bölüm, 74 rol, tablo sayısı 0. xUnit 488/488, vitest 696/696.
 
 
-## Parolamı unuttum (843) + giriş telefon / e-posta ile — 19.09.2026
+## Parolamı unuttum (870, önce 843) + giriş telefon / e-posta ile — 19.09.2026
 
 Kullanıcı: *"parolamı unuttum seçeneği ekle login e"*, *"login telefon no ve
 mail adresi de geçerli olmalı"*. Giriş zaten `KullaniciDeposu.EsnekBulAsync`
@@ -15651,6 +15651,24 @@ temizlenir. Kural: 10 dk, 5 yanlış deneme, 15 dk'da 3 istek; parola kuralı
 `guvenlik.parola_min_uzunluk`. Web `Giris.tsx`: "Parolamı unuttum" düğmesi,
 iki adımlı form (maskeli hedef "05•• ••• •• 05"), "Kodu yeniden iste".
 Test: dr7905 hesabına sahte cep 0500 999 79 05 yazıldı. Docker-only.
+
+## Menü ve CRUD düzeltmeleri — 19.09.2026
+
+- Sterilizasyon menüde ayrı grup değil: **Diş › Sterilizasyon** alt grubu (70-76),
+  ayar listeleri Diş › Ayarlar (95-99); modül `steril` ayrı (kullanıcı: "diş altında
+  sterilizasyon yok"). Menü tavanı 30'a döndü.
+- "Kartı olan listede ekle / düzenle / sil deseni": Döngüler listesine generic
+  `steril-dongu` kartı (gizli rota `/steril-dongu-kart`; parametre / not / indikatör
+  düzeltme) + `steril-dongu.sil` (paketi olan döngü silinemez - SilmeEngeli); Çağrı
+  Kayıtları'na `cagri.sil`; Kalite Değerlendirmeleri'ne kart yolu + Crud.
+
+## Hastane tipinde Diş / Göz / FTR varsayılan açık (869) — 19.09.2026
+
+Kullanıcı: *"kliniklerde diş göz ftr yok"*. Hastane tipinde bu üç modül
+`kurum_tipi_modul.varsayilan = 2` (opsiyonel) olduğundan menünün Klinikler
+bölgesinde görünmüyordu. `db/869`: hastane için varsayılan 1; anahtarı olmayan
+hastane profillerine `moduller` içine açık yazılır (açıkça kapatılmışa dokunulmaz).
+Docker-only.
 
 ## Sterilizasyon modülü (868) — 19.09.2026
 
