@@ -400,7 +400,9 @@ public static class StandartRolUclari
             K(Y("radyoloji"), Y("radyoloji-istem"), Y("cihaz"), A("cihaz.isle"), A("rad.teslim"), T("hasta"), T("randevu"))),
         // TELERADYOLOJI HEKIMI (797 ile genisledi): calisma listesi + atama +
         //   raporlama. Kurum/sozlesme ekranlari IDARI - onda yok.
-        new("teleradyoloji_hekim", "Teleradyoloji Hekimi (dış)", "Teleradyoloji çalışma listesi, rapor yazma ve onay; kayıt/kabul görmez.", ["goruntuleme", "goruntuleme_lab"],
+        // AD "Teleradyoloji Doktoru (dış)" (kullanici) - KOD
+        //   `teleradyoloji_hekim` KALIR; 790/833/835/837 ile ayni yol.
+        new("teleradyoloji_hekim", "Teleradyoloji Doktoru (dış)", "Teleradyoloji çalışma listesi, rapor yazma ve onay; kayıt/kabul görmez.", ["goruntuleme", "goruntuleme_lab"],
             K(T("radyoloji"), T("radyoloji-istem"), A("rad.rapor_yaz"), A("rad.rapor_onayla"),
               Y("teleradyoloji"), A("telerad.ata"), A("telerad.teslim"))),
         // ---- laboratuvar

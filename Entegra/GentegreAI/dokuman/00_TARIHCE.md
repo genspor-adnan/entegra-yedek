@@ -15590,3 +15590,9 @@ Tanımlı rol 79.
 Kullanıcı: *"Göz Hekimi rename Göz Doktoru"*. Kod `goz_hekimi` değişmedi -
 790, 833 ve 835 ile aynı yol; göç yalnız eski varsayılan addaki satırı
 günceller. Şablon ve kadro ağacı mockup'ı da tazelendi.
+
+## 838 — "Teleradyoloji Hekimi (dış)" → "Teleradyoloji Doktoru (dış)"
+
+Kod `teleradyoloji_hekim` değişmedi (790/833/835/837 ile aynı yol).
+**"(dış)" eki kaldı:** bu rol kurum dışından okuyan radyoloğu anlatıyor,
+ayrımın kendisi bilgi. Şablon ve mockup tazelendi.
