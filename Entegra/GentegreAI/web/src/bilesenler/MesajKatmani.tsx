@@ -4,6 +4,7 @@ import { mesajDinleyiciAta, type MesajIstegi, type ParaSecimi } from './mesaj';
 import { para as paraBicim, tutarOku } from './bicim';
 import { urunAdi } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
+import { c } from '../dil/ceviri';
 
 /**
  * "Gentegre AI Mesajı" penceresi - uygulamanin TEK mesaj/onay ekrani.
@@ -147,7 +148,7 @@ export function MesajKatmani() {
               henuz cevaplanmadi, kutu kapaniyor. */}
           {istek.onayMi && (
             <button type="button" className="d kapat-dugmesi"
-                    onClick={() => kapat(false)}>Kapat</button>
+                    onClick={() => kapat(false)}>{c('Kapat')}</button>
           )}
           <button type="button"
                   className={`d ${istek.tehlike ? 'teh' : 'bir'}`}
@@ -189,7 +190,7 @@ export function MesajKatmani() {
                        onKeyDown={e => { if (e.key === 'Enter') kapat(true) }} />
                 {/* PARA BIRIMI TUTARIN SAGINDA (kullanici): dovizli kasada
                     "100" ne demek belirsizdi - birim yaninda okunmali. */}
-                <select className="birim" title="Para birimi" value={pDoviz}
+                <select className="birim" title={c('Para birimi')} value={pDoviz}
                         onChange={e => { setPDoviz(e.target.value); setPHata('') }}>
                   {kodlar.map(k => <option key={k} value={k}>{k}</option>)}
                   {!kodlar.includes(pDoviz) && <option value={pDoviz}>{pDoviz}</option>}

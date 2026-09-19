@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { altAgac as altAgacHesapla } from './kategoriAgaci';
 import { api } from '../api/istemci';
 import { guvenli } from './mesaj';
+import { c } from '../dil/ceviri';
 
 /**
  * KATEGORİ SÜZGECİ (kullanıcı: "hizmet listesinde Aktif/Pasif/Tümü'nün sağına
@@ -105,7 +106,7 @@ export function KategoriSuzgeci({ tur, deger, onDegis, sinirla, baslik }: {
 
   return (
     <select className="kat-suzgec" value={deger === null ? '' : String(deger)}
-            title="Kategoriye göre süz (alt kategoriler dâhil)"
+            title={c('Kategoriye göre süz (alt kategoriler dâhil)')}
             onChange={e => {
               const v = e.target.value;
               if (v === '') { onDegis(null, [], ''); return }

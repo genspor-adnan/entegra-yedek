@@ -50,6 +50,7 @@ import {
 } from './belgeKartiKurallari';
 import { BelgeKartiModallari } from '../bilesenler/belge/BelgeKartiModallari';
 import { BasvuruAsamaSeridi } from '../bilesenler/belge/BasvuruAsamaSeridi';
+import { c } from '../dil/ceviri';
 
 interface Props {
   /** Verilirse MEVCUT belge acilir (salt gorunum). Duzenleme F7'de gelecek. */
@@ -1192,8 +1193,8 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
   if (!ekleyebilir)
     return (
       <Modal baslik="Belge" onKapat={() => void kapat()}
-             alt={<button className="d kapat-dugmesi" onClick={() => void kapat()}>Kapat</button>}>
-        <div className="hata-kutusu">Belge ekleme yetkiniz yok.</div>
+             alt={<button className="d kapat-dugmesi" onClick={() => void kapat()}>{c('Kapat')}</button>}>
+        <div className="hata-kutusu">{c('Belge ekleme yetkiniz yok.')}</div>
       </Modal>
     );
 
@@ -1242,11 +1243,11 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
       <>
         {hata && <div className="hata-kutusu">{hata}</div>}
 
-        {aciliyor && <div className="yukleniyor">Belge açılıyor…</div>}
+        {aciliyor && <div className="yukleniyor">{c('Belge açılıyor…')}</div>}
 
         {sonuc && !mevcutBelge && (
         <div className="bilgi-kutusu">
-          <b>Belge kaydedildi.</b>{' '}
+          <b>{c('Belge kaydedildi.')}</b>{' '}
           No: <b>{String(sonuc.belge.belgeNo || '(taslak — numara verilmedi)')}</b> ·
           Genel toplam: <b>{para.format(Number(sonuc.belge.genelToplam))}</b> ·
           <a href="#" onClick={e => { e.preventDefault(); void kapat() }}> listede gör</a>
@@ -1545,7 +1546,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
         {/* ============================================= IMZA / TESLIM ==== */}
         {aktifSekme === 'imza' && (
           <div className="kagrup">
-            <h6>İmza / Teslim Alan</h6>
+            <h6>{c('İmza / Teslim Alan')}</h6>
             <div className="not">
               Teslim alan kişi, TC, görev, teslim zamanı, nüsha sayısı ve teslim notu
               alanları henüz şemada yok — e-İrsaliye teslim onayı akışıyla gelecek.
@@ -1626,7 +1627,7 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
             <h6>Yorum / Medya</h6>
             {kayitliId > 0
               ? <DokumanGalerisi kartAdi="belge" kaynakId={kayitliId} saltOkunur={false} />
-              : <div className="not">Belge kaydedilince ek ve yorum eklenebilir.</div>}
+              : <div className="not">{c('Belge kaydedilince ek ve yorum eklenebilir.')}</div>}
           </div>
         )}
 

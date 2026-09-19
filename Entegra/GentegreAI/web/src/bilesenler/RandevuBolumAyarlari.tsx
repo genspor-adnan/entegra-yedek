@@ -3,6 +3,7 @@ import { api } from '../api/istemci';
 import {
   type RandevuAyarSatiri, type RandevuBolumDugumu, hataMetni,
 } from '../api/sozlesme';
+import { c } from '../dil/ceviri';
 
 /**
  * RANDEVU AYARLARI > BÖLÜMLER (251, kullanıcı: "solda departmandan randevu
@@ -136,7 +137,7 @@ export function RandevuBolumAyarlari({ genel }: {
         {/* --------------------------------------------------- SOL: agac --- */}
         <div className="kagrup" style={{ flex: '0 0 320px', minWidth: 0 }}>
           <div className="numaralama-bas bitisik">
-            <h6>Bölümler ve Hekimler</h6>
+            <h6>{c('Bölümler ve Hekimler')}</h6>
             <button type="button" className="d" onClick={() => void bolumEkleAc()}>＋ Bölüm</button>
           </div>
 
@@ -151,7 +152,7 @@ export function RandevuBolumAyarlari({ genel }: {
                 {departmanlar.map(d => <option key={d.id} value={d.id}>{d.ad}</option>)}
               </select>
               <button type="button" className="d" style={{ marginLeft: 6 }}
-                      onClick={() => setBolumEkle(false)}>Kapat</button>
+                      onClick={() => setBolumEkle(false)}>{c('Kapat')}</button>
             </div>
           )}
 
@@ -168,7 +169,7 @@ export function RandevuBolumAyarlari({ genel }: {
                   <b>{d.ad}</b>
                   <span className="sag">
                     <button type="button" className="d mini"
-                            title="Bölüm listesinden çıkar"
+                            title={c('Bölüm listesinden çıkar')}
                             onClick={e => { e.stopPropagation(); void bolumdenCikar(d.departmanId) }}>
                       ✕
                     </button>
@@ -194,7 +195,7 @@ export function RandevuBolumAyarlari({ genel }: {
         {/* --------------------------------------------------- SAG: form --- */}
         <div className="kagrup" style={{ flex: 1, minWidth: 0 }}>
           {!form ? (
-            <div style={{ padding: 16, opacity: .7 }}>Soldan bir bölüm ya da hekim seçin.</div>
+            <div style={{ padding: 16, opacity: .7 }}>{c('Soldan bir bölüm ya da hekim seçin.')}</div>
           ) : (
             <>
               <div className="numaralama-bas bitisik">
@@ -207,39 +208,39 @@ export function RandevuBolumAyarlari({ genel }: {
 
               <div className="alan-izgara tek-sutun ayar-formu">
                 <label className="alan">
-                  <span className="etiket">Başlama saati</span>
+                  <span className="etiket">{c('Başlama saati')}</span>
                   <input value={form.baslangicSaat} placeholder={genel.baslangicSaat}
                          onChange={e => degis('baslangicSaat', e.target.value)} />
                 </label>
                 <label className="alan">
-                  <span className="etiket">Bitiş saati</span>
+                  <span className="etiket">{c('Bitiş saati')}</span>
                   <input value={form.bitisSaat} placeholder={genel.bitisSaat}
                          onChange={e => degis('bitisSaat', e.target.value)} />
                 </label>
                 <label className="alan">
-                  <span className="etiket">Öğle arası başlaması</span>
+                  <span className="etiket">{c('Öğle arası başlaması')}</span>
                   <input value={form.ogleBaslangic} placeholder={genel.ogleBaslangic || '—'}
                          onChange={e => degis('ogleBaslangic', e.target.value)} />
                 </label>
                 <label className="alan">
-                  <span className="etiket">Öğle arası bitişi</span>
+                  <span className="etiket">{c('Öğle arası bitişi')}</span>
                   <input value={form.ogleBitis} placeholder={genel.ogleBitis || '—'}
                          onChange={e => degis('ogleBitis', e.target.value)} />
                 </label>
                 <label className="alan">
-                  <span className="etiket">Randevu aralığı (dk)</span>
+                  <span className="etiket">{c('Randevu aralığı (dk)')}</span>
                   <input className="hiza-sag" value={form.slotDk ?? ''} placeholder={genel.slotDk}
                          onChange={e => degis('slotDk', e.target.value ? Number(e.target.value) : null)} />
                 </label>
                 <label className="alan">
-                  <span className="etiket">Varsayılan süre (dk)</span>
+                  <span className="etiket">{c('Varsayılan süre (dk)')}</span>
                   <input className="hiza-sag" value={form.varsayilanSure ?? ''}
                          placeholder={genel.varsayilanSure}
                          onChange={e => degis('varsayilanSure',
                                               e.target.value ? Number(e.target.value) : null)} />
                 </label>
                 <label className="alan">
-                  <span className="etiket">Çalışma günleri</span>
+                  <span className="etiket">{c('Çalışma günleri')}</span>
                   <span style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                     {GUNLER.map(g => (
                       <button key={g.deger} type="button"
@@ -249,7 +250,7 @@ export function RandevuBolumAyarlari({ genel }: {
                   </span>
                 </label>
                 <label className="alan">
-                  <span className="etiket">Randevuya açık</span>
+                  <span className="etiket">{c('Randevuya açık')}</span>
                   <input type="checkbox" checked={form.aktif === 1}
                          onChange={e => degis('aktif', e.target.checked ? 1 : 0)} />
                 </label>

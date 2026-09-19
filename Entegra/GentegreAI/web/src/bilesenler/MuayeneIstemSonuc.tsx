@@ -4,6 +4,7 @@ import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { guvenli, mesaj } from './mesaj';
 import { tarihSaat } from './bicim';
+import { c } from '../dil/ceviri';
 
 /**
  * MUAYENE › İSTEM & SONUÇLAR (443).
@@ -107,9 +108,9 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
         <table className="detay-tablo">
           <thead>
             <tr>
-              <th>Tür</th><th>Tetkik / İşlem</th><th className="hiza-orta">Aciliyet</th>
-              <th>Nerede</th><th className="hiza-orta">İstem</th>
-              <th className="hiza-orta">Numune / Çekim</th>
+              <th>Tür</th><th>{c('Tetkik / İşlem')}</th><th className="hiza-orta">{c('Aciliyet')}</th>
+              <th>{c('Nerede')}</th><th className="hiza-orta">İstem</th>
+              <th className="hiza-orta">{c('Numune / Çekim')}</th>
               <th>Sonuç</th><th className="hiza-orta">Durum</th>
             </tr>
           </thead>
@@ -153,7 +154,7 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
               const sonuc = String(r.sonuc ?? '').trim();
               return (
                 <tr key={`R${String(r.id)}`}>
-                  <td>Görüntüleme</td>
+                  <td>{c('Görüntüleme')}</td>
                   <td>{String(r.tetkik ?? '')}</td>
                   <td className="hiza-orta sonuk">—</td>
                   <td>Radyoloji</td>
@@ -197,9 +198,7 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
               <span style={{ marginLeft: 'auto' }} />
               {/* SONUÇ RAPORU: hastaya verilen belge - aynı istemin sayısal,
                   kültür ve genetik sonuçları tek kâğıtta. */}
-              <button className="d" onClick={() => git(`/lab/rapor/${istemId}`)}>
-                🖨 Sonuç Raporu
-              </button>
+              <button className="d" onClick={() => git(`/lab/rapor/${istemId}`)}>{c('🖨 Sonuç Raporu')}</button>
               {bagId > 0 && (gorulen
                 ? <span className="rozet olumlu">Görüldü · {gorulen}</span>
                 : <button className="d bir" onClick={() => void gordu(bagId)}>
@@ -212,7 +211,7 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
                 <thead>
                   <tr>
                     <th>Tetkik</th><th>Sonuç</th><th>Birim</th><th>Referans</th>
-                    <th>Değ.</th><th>Onay</th>
+                    <th>{c('Değ.')}</th><th>Onay</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -245,7 +244,7 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
                         <td className={bayrak === 'LL' || bayrak === 'HH' ? 'vurgu' : ''}>
                           {BAYRAK[bayrak] ?? ''}
                           {Number(s.deltaUyari ?? 0) === 1 && (
-                            <span className="not" title="Önceki sonuçtan belirgin sapma">
+                            <span className="not" title={c('Önceki sonuçtan belirgin sapma')}>
                               {' '}Δ
                             </span>
                           )}
@@ -296,7 +295,7 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
 
       {veri.radyoloji.length > 0 && (
         <div className="kagrup">
-          <h6>Görüntüleme</h6>
+          <h6>{c('Görüntüleme')}</h6>
           <table className="detay-tablo">
             <thead>
               <tr><th>Tetkik</th><th>Çekim</th><th>Rapor</th><th>Sonuç</th><th /></tr>
@@ -314,7 +313,7 @@ export function MuayeneIstemSonuc({ muayeneId }: { muayeneId: number }) {
                     <td>{String(r.sonuc ?? '').slice(0, 160) || '—'}</td>
                     <td>
                       {bagId > 0 && (r.hekimGordu
-                        ? <span className="rozet olumlu">Görüldü</span>
+                        ? <span className="rozet olumlu">{c('Görüldü')}</span>
                         : <button className="d" onClick={() => void gordu(bagId)}>
                             👁 Gördüm
                           </button>)}

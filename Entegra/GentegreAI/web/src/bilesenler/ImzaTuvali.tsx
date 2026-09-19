@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { c as cev } from '../dil/ceviri';
 
 /**
  * İMZA TUVALİ (778) — parmakla çizilen müşteri imzası.
@@ -49,7 +50,7 @@ export function ImzaTuvali({ deger, onDegisti, salt }: {
   if (salt) {
     return deger
       ? <img className="imza-gorsel" src={deger} alt="Müşteri imzası" />
-      : <div className="imza-yok">İmza görseli yok</div>;
+      : <div className="imza-yok">{cev('İmza görseli yok')}</div>;
   }
 
   const nokta = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -98,7 +99,7 @@ export function ImzaTuvali({ deger, onDegisti, salt }: {
       <canvas ref={tuval} className="imza-tuval"
               onPointerDown={bas} onPointerMove={ciz}
               onPointerUp={birak} onPointerCancel={birak} onPointerLeave={birak} />
-      {bos && <span className="imza-ipucu">Buraya imzalayın</span>}
+      {bos && <span className="imza-ipucu">{cev('Buraya imzalayın')}</span>}
       <button type="button" className="d mini imza-temizle" onClick={temizle}>
         Temizle
       </button>

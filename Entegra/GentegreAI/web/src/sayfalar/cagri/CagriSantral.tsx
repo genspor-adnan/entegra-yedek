@@ -5,6 +5,7 @@ import { hataMetni } from '../../api/sozlesme';
 import type { CalismaSaati, IvrDali, SantralYaniti } from '../../api/uclar/cagri';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
+import { c as cev } from '../../dil/ceviri';
 
 /**
  * SANTRAL · IVR · KANALLAR `/cagri-santral` (Çağrı Merkezi 839) — mockup
@@ -79,12 +80,12 @@ export function CagriSantral() {
             <In k="kimlik" lb="Kimlik (client id / AMI user)" />
             <div className="al"><span className="lb">Gizli anahtar {a.gizliVar ? '(kayıtlı)' : ''}</span><input className="inp" type="password" value={gizli} placeholder={a.gizliVar ? '••••••••' : ''} onChange={e => setGizli(e.target.value)} disabled={!duzenleyebilir} /></div>
             <In k="kayitKaynak" lb="Ses kaydı kaynağı (URL kökü)" ph="https://pbx…/recordings" />
-            <div className="al g4"><span className="lb">Webhook (santral bu adrese olay gönderir)</span><span className="inp ro" style={{ fontFamily: 'Consolas, monospace', fontSize: 11 }}>{webhook}</span></div>
-            <div className="al g2"><span className="lb">Webhook anahtarı</span><span className="inp ro" style={{ fontFamily: 'Consolas, monospace' }}>{a.webhookAnahtar} {duzenleyebilir && <button className="d mini" style={{ marginLeft: 'auto' }} onClick={() => void anahtarYenile()}>↻ Yenile</button>}</span></div>
-            <div className="al g2"><span className="lb">Olay gövdesi (JSON)</span><span className="inp ro" style={{ fontFamily: 'Consolas, monospace', fontSize: 11 }}>{'{"olay":"ringing|answered|hold|unhold|transfer|hangup|voicemail","ref":"…","arayan":"05…","aranan":"…","kuyruk":"Q-801","dahili":"201","sureSn":0,"kayitUrl":"","hedef":""}'}</span></div>
+            <div className="al g4"><span className="lb">{cev('Webhook (santral bu adrese olay gönderir)')}</span><span className="inp ro" style={{ fontFamily: 'Consolas, monospace', fontSize: 11 }}>{webhook}</span></div>
+            <div className="al g2"><span className="lb">{cev('Webhook anahtarı')}</span><span className="inp ro" style={{ fontFamily: 'Consolas, monospace' }}>{a.webhookAnahtar} {duzenleyebilir && <button className="d mini" style={{ marginLeft: 'auto' }} onClick={() => void anahtarYenile()}>↻ Yenile</button>}</span></div>
+            <div className="al g2"><span className="lb">{cev('Olay gövdesi (JSON)')}</span><span className="inp ro" style={{ fontFamily: 'Consolas, monospace', fontSize: 11 }}>{'{"olay":"ringing|answered|hold|unhold|transfer|hangup|voicemail","ref":"…","arayan":"05…","aranan":"…","kuyruk":"Q-801","dahili":"201","sureSn":0,"kayitUrl":"","hedef":""}'}</span></div>
           </div>
-          <h3 className="fm-bolum-bas" style={{ marginTop: 8 }}>Dahili ↔ kullanıcı eşleşmesi <span className="sp" /><button className="d mini" onClick={() => git('/cagri-agent')}>✎ Agentlar</button></h3>
-          <table className="fm-tablo"><thead><tr><th>Dahili</th><th>Kullanıcı</th><th>Kuyruklar</th><th>Softphone</th><th>Durum</th><th>Aktif</th></tr></thead>
+          <h3 className="fm-bolum-bas" style={{ marginTop: 8 }}>{cev('Dahili ↔ kullanıcı eşleşmesi')}<span className="sp" /><button className="d mini" onClick={() => git('/cagri-agent')}>✎ Agentlar</button></h3>
+          <table className="fm-tablo"><thead><tr><th>{cev('Dahili')}</th><th>Kullanıcı</th><th>Kuyruklar</th><th>{cev('Softphone')}</th><th>Durum</th><th>Aktif</th></tr></thead>
             <tbody>{y.agentlar.map(x => <tr key={x.id} onDoubleClick={() => git(`/cagri-agent/${x.id}?geri=%2Fcagri-santral`)}><td>{x.dahili || <span className="cg-sari">boş</span>}</td><td>{x.agent_adi}</td><td>{x.kuyruk_adlari || '—'}</td><td>{x.softphone_adi}</td><td>{x.durum_adi}</td><td>{x.aktif_adi}</td></tr>)}
               {!y.agentlar.length && <tr><td colSpan={6} className="sonuk">Agent yok — kullanıcı operatör panosunu açınca otomatik satır oluşur; dahili buradan yazılır.</td></tr>}</tbody></table>
           <div className="sonuk" style={{ fontSize: 11, marginTop: 6 }}>Sağlayıcılar: 3CX (webhook + MakeCall), Asterisk/FreePBX (AMI/ARI, ChanSpy), bulut santral (webhook), WebRTC (sonraki adım). Bağlantı sınama şimdilik yapılandırma doğrulamasıdır; sürücü eklenince gerçek ağ çağrısı yapar.</div>
@@ -92,8 +93,8 @@ export function CagriSantral() {
       )}
       {sekme === 'ivr' && (
         <section className="fm-bolum">
-          <div className="cg-ivr"><b>📞 Gelen arama</b> → <span className="hd">{Number(f.kvkkAnons) ? 'KVKK anonsu: "Görüşmeniz kalite amacıyla kaydedilmektedir"' : 'KVKK anonsu kapalı'}</span> → <span className="hd">Çalışma saati kontrolü</span></div>
-          <table className="fm-tablo"><thead><tr><th style={{ width: 60 }}>Tuş</th><th>Menü metni</th><th>Kuyruk</th><th>Hedef (nöbetçi dahili / self-servis)</th><th>Anons</th><th /></tr></thead>
+          <div className="cg-ivr"><b>📞 Gelen arama</b> → <span className="hd">{Number(f.kvkkAnons) ? 'KVKK anonsu: "Görüşmeniz kalite amacıyla kaydedilmektedir"' : 'KVKK anonsu kapalı'}</span> → <span className="hd">{cev('Çalışma saati kontrolü')}</span></div>
+          <table className="fm-tablo"><thead><tr><th style={{ width: 60 }}>{cev('Tuş')}</th><th>{cev('Menü metni')}</th><th>Kuyruk</th><th>{cev('Hedef (nöbetçi dahili / self-servis)')}</th><th>{cev('Anons')}</th><th /></tr></thead>
             <tbody>{ivr.map((d, i) => <tr key={i}>
               <td><input className="inp" style={{ width: 50 }} value={d.tus} onChange={e => setIvr(x => x.map((r, j) => j === i ? { ...r, tus: e.target.value } : r))} disabled={!duzenleyebilir} /></td>
               <td><input className="inp" value={d.ad} onChange={e => setIvr(x => x.map((r, j) => j === i ? { ...r, ad: e.target.value } : r))} disabled={!duzenleyebilir} /></td>
@@ -103,14 +104,14 @@ export function CagriSantral() {
               <td>{duzenleyebilir && <button className="d mini" onClick={() => setIvr(x => x.filter((_, j) => j !== i))}>🗑</button>}</td></tr>)}</tbody></table>
           <div className="fm-doldur-arac">{duzenleyebilir && <button className="d" onClick={() => setIvr(x => [...x, { tus: '', ad: '', kuyruk: '' }])}>➕ Dal ekle</button>}
             <span className="sonuk">Self-servis "sonuc": TC son 4 + doğum yılı ile sonuç hazır anonsu ve WhatsApp bağlantısı (sürücü ile). Arayan tanınırsa randevu onay/değiştir dalı santral tarafında sunulur.</span></div>
-          <div className="isg-frm" style={{ marginTop: 8 }}><div className="al g4"><span className="lb">Mesai dışı mesajı</span><textarea className="inp" rows={2} value={String(f.mesaiDisiMesaj ?? '')} onChange={e => g('mesaiDisiMesaj', e.target.value)} disabled={!duzenleyebilir} /></div></div>
+          <div className="isg-frm" style={{ marginTop: 8 }}><div className="al g4"><span className="lb">{cev('Mesai dışı mesajı')}</span><textarea className="inp" rows={2} value={String(f.mesaiDisiMesaj ?? '')} onChange={e => g('mesaiDisiMesaj', e.target.value)} disabled={!duzenleyebilir} /></div></div>
         </section>
       )}
       {sekme === 'kuyruk' && (
         <section className="fm-bolum">
           <div className="fm-doldur-arac"><button className="d" onClick={() => git('/cagri-kuyruk')}>✎ Kuyruklar & SLA</button><button className="d" onClick={() => git('/cagri-agent')}>✎ Agentlar</button><button className="d" onClick={() => git('/cagri-konu')}>✎ Konu ağacı</button>
             <span className="sp sonuk">Agent durumları: hazır · çağrıda · işlem sonrası (otomatik {String(f.islemSonrasiSn ?? 45)} sn) · mola (sebep zorunlu) · çıkış</span></div>
-          <table className="fm-tablo"><thead><tr><th>Kuyruk</th><th>Santral kodu</th><th>Kanal</th><th>Beceri</th><th className="fm-sag">Agent</th><th>SLA</th><th className="fm-sag">Max bekleme</th><th>Taşma</th><th>Durum</th></tr></thead>
+          <table className="fm-tablo"><thead><tr><th>Kuyruk</th><th>{cev('Santral kodu')}</th><th>Kanal</th><th>{cev('Beceri')}</th><th className="fm-sag">Agent</th><th>SLA</th><th className="fm-sag">{cev('Max bekleme')}</th><th>{cev('Taşma')}</th><th>Durum</th></tr></thead>
             <tbody>{y.kuyruklar.map(q => <tr key={q.id} onDoubleClick={() => git(`/cagri-kuyruk/${q.id}?geri=%2Fcagri-santral`)}><td><b>{q.ad}</b></td><td>{q.santral_kodu || '—'}</td><td>{q.kanal_adi}</td><td>{q.beceri}</td><td className="fm-sag">{q.agent_sayisi}</td><td>{q.sla_sn} sn · %{q.sla_hedef}</td><td className="fm-sag">{q.max_bekleme_sn ? `${q.max_bekleme_sn} sn` : '—'}</td><td>{q.tasma_adi || '—'}</td><td>{q.aktif_adi}</td></tr>)}</tbody></table>
         </section>
       )}
@@ -118,7 +119,7 @@ export function CagriSantral() {
         <section className="fm-bolum">
           <table className="fm-tablo"><thead><tr><th>Gün</th><th>Başlangıç</th><th>Bitiş</th><th /></tr></thead>
             <tbody>{calisma.map((c, i) => <tr key={i}>
-              <td><input className="inp" value={c.gun} placeholder="Pzt-Cum / Cmt / Pazar" onChange={e => setCalisma(x => x.map((r, j) => j === i ? { ...r, gun: e.target.value } : r))} disabled={!duzenleyebilir} /></td>
+              <td><input className="inp" value={c.gun} placeholder={cev('Pzt-Cum / Cmt / Pazar')} onChange={e => setCalisma(x => x.map((r, j) => j === i ? { ...r, gun: e.target.value } : r))} disabled={!duzenleyebilir} /></td>
               <td><input className="inp" type="time" value={c.bas} onChange={e => setCalisma(x => x.map((r, j) => j === i ? { ...r, bas: e.target.value } : r))} disabled={!duzenleyebilir} /></td>
               <td><input className="inp" type="time" value={c.bit} onChange={e => setCalisma(x => x.map((r, j) => j === i ? { ...r, bit: e.target.value } : r))} disabled={!duzenleyebilir} /></td>
               <td>{duzenleyebilir && <button className="d mini" onClick={() => setCalisma(x => x.filter((_, j) => j !== i))}>🗑</button>}</td></tr>)}</tbody></table>
@@ -131,8 +132,8 @@ export function CagriSantral() {
           <div className="isg-frm">
             <In k="whatsappNo" lb="WhatsApp Business numarası (Meta Cloud API)" ph="+90 850 …" />
             <div className="al"><span className="lb">WhatsApp token {a.whatsappTokenVar ? '(kayıtlı)' : ''}</span><input className="inp" type="password" value={waToken} placeholder={a.whatsappTokenVar ? '••••••••' : ''} onChange={e => setWaToken(e.target.value)} disabled={!duzenleyebilir} /></div>
-            <div className="al g2"><span className="lb">WhatsApp webhook</span><span className="inp ro" style={{ fontFamily: 'Consolas, monospace', fontSize: 11 }}>{webhook.replace(String(f.saglayici || 'santral'), 'wa')}</span></div>
-            <div className="al g4"><span className="lb">Bot ilk yanıtı (sohbet kuyruğu)</span><input className="inp" value={String(f.botIlkYanit ?? '')} onChange={e => g('botIlkYanit', e.target.value)} disabled={!duzenleyebilir} /></div>
+            <div className="al g2"><span className="lb">{cev('WhatsApp webhook')}</span><span className="inp ro" style={{ fontFamily: 'Consolas, monospace', fontSize: 11 }}>{webhook.replace(String(f.saglayici || 'santral'), 'wa')}</span></div>
+            <div className="al g4"><span className="lb">{cev('Bot ilk yanıtı (sohbet kuyruğu)')}</span><input className="inp" value={String(f.botIlkYanit ?? '')} onChange={e => g('botIlkYanit', e.target.value)} disabled={!duzenleyebilir} /></div>
             <In k="epostaAdres" lb="E-posta kutusu (IMAP → Genel kuyruğu)" ph="info@kurum.com" g4 />
           </div>
           <div className="sonuk" style={{ fontSize: 11 }}>SMS: mevcut bildirim sağlayıcısı (Ayarlar › Bildirim). WhatsApp 24 saat penceresi dışında yalnız Meta onaylı şablon gider; bot iki adımda çözemezse sohbet Genel kuyruğuna devredilir.</div>
@@ -141,13 +142,13 @@ export function CagriSantral() {
       {sekme === 'kvkk' && (
         <section className="fm-bolum">
           <div className="isg-frm">
-            <div className="al"><span className="lb">KVKK anonsu (IVR başı)</span><select className="inp" value={Number(f.kvkkAnons ?? 1)} onChange={e => g('kvkkAnons', Number(e.target.value))} disabled={!duzenleyebilir}><option value={1}>Zorunlu (açık)</option><option value={0}>Kapalı</option></select></div>
+            <div className="al"><span className="lb">{cev('KVKK anonsu (IVR başı)')}</span><select className="inp" value={Number(f.kvkkAnons ?? 1)} onChange={e => g('kvkkAnons', Number(e.target.value))} disabled={!duzenleyebilir}><option value={1}>{cev('Zorunlu (açık)')}</option><option value={0}>{cev('Kapalı')}</option></select></div>
             <In k="kayitSaklamaAy" lb="Ses kaydı saklama (ay)" tip="number" />
             <In k="islemSonrasiSn" lb="İşlem sonrası süre (sn)" tip="number" />
-            <div className="al"><span className="lb">Erişim</span><span className="inp ro">Süpervizör · Kalite · agent kendi çağrısı</span></div>
-            <div className="al g2"><span className="lb">Arama izni</span><span className="inp ro">İletişim izni olmayan kişi kampanyaya girmez (taraf kartı)</span></div>
-            <div className="al g2"><span className="lb">Silme talebi</span><span className="inp ro">Kişi kartı › KVKK › ses kayıtlarını sil (log'lu)</span></div>
-            <div className="al g4"><span className="lb">Yetkiler</span><span className="inp ro">cagri.pano · cagri.kayit · cagri.giden · cagri.kampanya · cagri.supervizor · cagri.kalite · cagri.ayar</span></div>
+            <div className="al"><span className="lb">{cev('Erişim')}</span><span className="inp ro">{cev('Süpervizör · Kalite · agent kendi çağrısı')}</span></div>
+            <div className="al g2"><span className="lb">{cev('Arama izni')}</span><span className="inp ro">İletişim izni olmayan kişi kampanyaya girmez (taraf kartı)</span></div>
+            <div className="al g2"><span className="lb">{cev('Silme talebi')}</span><span className="inp ro">Kişi kartı › KVKK › ses kayıtlarını sil (log'lu)</span></div>
+            <div className="al g4"><span className="lb">{cev('Yetkiler')}</span><span className="inp ro">cagri.pano · cagri.kayit · cagri.giden · cagri.kampanya · cagri.supervizor · cagri.kalite · cagri.ayar</span></div>
           </div>
         </section>
       )}

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { c as cev } from '../dil/ceviri';
 
 /**
  * ROL SÜZGECİ — KADRO AĞACI GÖRÜNÜMÜ (846, kullanıcı: "personel listesinde
@@ -72,9 +73,9 @@ export function RolSuzgeci({ roller, bolumler, deger, onDegis }: {
 
   return (
     <select className="kat-suzgec" value={deger}
-            title="Kullanıcı rolüne göre süz (kadro ağacı)"
+            title={cev('Kullanıcı rolüne göre süz (kadro ağacı)')}
             onChange={e => onDegis(e.target.value ? Number(e.target.value) : '')}>
-      <option value="">Tüm Roller</option>
+      <option value="">{cev('Tüm Roller')}</option>
       {gruplar.map(g => (
         <optgroup key={g.bolum} label={g.bolum}>
           {g.secenekler.map(s => <option key={s.id} value={s.id}>{s.etiket}</option>)}

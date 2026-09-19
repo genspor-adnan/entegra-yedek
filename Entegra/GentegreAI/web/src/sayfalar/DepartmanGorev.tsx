@@ -5,6 +5,7 @@ import { GenForm } from '../bilesenler/GenForm';
 import { api } from '../api/istemci';
 import { type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { onay } from '../bilesenler/mesaj';
+import { c } from '../dil/ceviri';
 
 /**
  * DEPARTMAN / GÖREV ekranı (255, kullanıcı: "Departman listesi ekranını 2'ye
@@ -67,7 +68,7 @@ export function DepartmanGorev() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Bölüm / Görev</h1>
-          <span className="yol">Yönetim › Bölüm / Görev</span>
+          <span className="yol">{c('Yönetim › Bölüm / Görev')}</span>
         </div>
       </div>
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import type { UtsMesaji, UtsSorguYaniti } from '../api/istemci';
 import { YerelGrid } from '../bilesenler/grid/YerelGrid';
+import { c } from '../dil/ceviri';
 
 /**
  * ÜTS ÜRÜN SORGU (223) - UNO/LNO/SNO ile ÜTS'den canlı tekil ürün sorgusu.
@@ -87,7 +88,7 @@ export function UtsSorgu() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>ÜTS Ürün Sorgu</h1>
-          <span className="yol">Stok › ÜTS Ürün Sorgu</span>
+          <span className="yol">{c('Stok › ÜTS Ürün Sorgu')}</span>
         </div>
       </div>
 
@@ -112,7 +113,7 @@ export function UtsSorgu() {
           <button type="button" className={`cip${gorunum === 'liste' ? ' on' : ''}`}
                   onClick={() => setGorunum('liste')}>☰ Liste</button>
           <button type="button" className={`cip${gorunum === 'kart' ? ' on' : ''}`}
-                  onClick={() => setGorunum('kart')}>🗂 Kart</button>
+                  onClick={() => setGorunum('kart')}>{c('🗂 Kart')}</button>
           {/* Sayac ciplerin SAGINDA (kullanici). */}
           {kayitlar.length > 0 && (
             <span style={{ alignSelf: 'center', fontSize: 12 }}>
@@ -123,7 +124,7 @@ export function UtsSorgu() {
         </div>
 
         <div className="kagrup">
-          <h6>Sorgu</h6>
+          <h6>{c('Sorgu')}</h6>
           {/* Izgara degil FLEX: editler dar (%35 kisik) ve SOLA yanasik
               (kullanici) - izgara kolonlari genise dagitiyordu. */}
           <form id="uts-sorgu-form" onSubmit={sorgula}
@@ -132,19 +133,19 @@ export function UtsSorgu() {
             <label className="alan" style={{ display: 'flex', gap: 8,
                                              alignItems: 'center' }}>
               <span className="etiket zorunlu-isaret"
-                    style={{ whiteSpace: 'nowrap' }}>Ürün No (UNO)</span>
+                    style={{ whiteSpace: 'nowrap' }}>{c('Ürün No (UNO)')}</span>
               <input value={uno} maxLength={23} autoFocus style={{ width: 170 }}
                      onChange={e => setUno(e.target.value)} />
             </label>
             <label className="alan" style={{ display: 'flex', gap: 8,
                                              alignItems: 'center' }}>
-              <span className="etiket" style={{ whiteSpace: 'nowrap' }}>Lot No (LNO)</span>
+              <span className="etiket" style={{ whiteSpace: 'nowrap' }}>{c('Lot No (LNO)')}</span>
               <input value={lotNo} maxLength={20} style={{ width: 140 }}
                      onChange={e => setLotNo(e.target.value)} />
             </label>
             <label className="alan" style={{ display: 'flex', gap: 8,
                                              alignItems: 'center' }}>
-              <span className="etiket" style={{ whiteSpace: 'nowrap' }}>Seri No (SNO)</span>
+              <span className="etiket" style={{ whiteSpace: 'nowrap' }}>{c('Seri No (SNO)')}</span>
               <input value={seriNo} maxLength={20} style={{ width: 140 }}
                      onChange={e => setSeriNo(e.target.value)} />
             </label>
@@ -154,7 +155,7 @@ export function UtsSorgu() {
                 {sorguluyor ? 'Sorgulanıyor…' : '🔍 ÜTS’de Sorgula'}
               </button>
               <button type="button" className="d" disabled={sorguluyor}
-                      title="Deneysel ayrıntılı tekil ürün servisi"
+                      title={c('Deneysel ayrıntılı tekil ürün servisi')}
                       onClick={() => void ayrintili()}>
                 Ayrıntılı
               </button>

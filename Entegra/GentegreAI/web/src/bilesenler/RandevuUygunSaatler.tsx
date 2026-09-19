@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
 import { type RandevuBolumDugumu, hataMetni } from '../api/sozlesme';
+import { c } from '../dil/ceviri';
 
 /**
  * UYGUN SAATLER ŞERİDİ (Ekranlar/randevu_karti.html): seçili hekim ve tarih
@@ -145,7 +146,7 @@ export function RandevuUygunSaatler({ hekimId, hekimAdi, bolum, tarih, sureDk, s
   if (!hekimId) {
     return (
       <div className="kagrup" style={{ marginTop: 12 }}>
-        <div className="numaralama-bas bitisik"><h6>Uygun Saatler</h6></div>
+        <div className="numaralama-bas bitisik"><h6>{c('Uygun Saatler')}</h6></div>
         <div style={{ padding: '8px 12px', fontSize: 11.5, opacity: .7 }}>
           Hekim seçilince o günün uygun saatleri listelenir.
         </div>

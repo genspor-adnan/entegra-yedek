@@ -16,6 +16,7 @@ import { useKiymetBilgisi, usePlanGerceklestirme,
          type CariSecimi, type HesapSecimi } from './kasa/useKiymetBilgisi';
 import { TahsilatDagitimi, type DagitimSecimi } from '../bilesenler/TahsilatDagitimi';
 import { mesaj , metinSor } from '../bilesenler/mesaj';
+import { c as cev } from '../dil/ceviri';
 
 
 const LOOKUP_HESAP = [
@@ -376,7 +377,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   }
 
   if (!ekleyebilir && kayitId === null)
-    return <div className="sahne"><div className="hata-kutusu">Kasa işlemi ekleme yetkiniz yok.</div></div>;
+    return <div className="sahne"><div className="hata-kutusu">{cev('Kasa işlemi ekleme yetkiniz yok.')}</div></div>;
 
   const anaEtiket = grup === 'odeme' ? 'Ödenen Hesap'
                   : grup === 'virman' || grup === 'doviz' ? 'Kaynak Hesap'
@@ -386,7 +387,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
   const dugmeler = (
           <>
             {modalMi
-              ? <button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>
+              ? <button className="d kapat-dugmesi" onClick={onKapat}>{cev('✖ Kapat')}</button>
               : <button className="d" onClick={() => git(planMi ? '/plan-vade' : '/kasa-islem')}>
                   Listeye Dön
                 </button>}
@@ -408,9 +409,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                   </button>
             )}
             {kayitId !== null && durum === 0 && (
-              <button className="d bir" disabled={calisiyor} onClick={() => void kesinlestir()}>
-                Kesinleştir
-              </button>
+              <button className="d bir" disabled={calisiyor} onClick={() => void kesinlestir()}>{cev('Kesinleştir')}</button>
             )}
             {durum === 2 && (
               <button className="d teh" disabled={calisiyor} onClick={() => void iptalEt()}>
@@ -490,7 +489,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                       dovizi gelir, gerekirse degistirilir (cek/senette hesap
                       yok - kiymet dovizli olabilir). */}
                   <select className="birim" value={anaDoviz} disabled={kilitli}
-                          title="İşlemin para birimi"
+                          title={cev('İşlemin para birimi')}
                           onChange={e => setDoviz(e.target.value)}>
                     {DOVIZ_KODLARI.map(k => <option key={k} value={k}>{k}</option>)}
                     {!DOVIZ_KODLARI.includes(anaDoviz as typeof DOVIZ_KODLARI[number]) && (
@@ -517,9 +516,9 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                         cari hesaba hangi birimde islenecegi (139) - secenekler
                         islem dovizi ve yerel para. */}
                     <span className="ikili">
-                      <span className="alan-notu hiza-sag">Ekstre dövizi</span>
+                      <span className="alan-notu hiza-sag">{cev('Ekstre dövizi')}</span>
                       <select className="birim-alti" value={ekstreDovizi} disabled={kilitli}
-                              title="Cari hesaba hangi para biriminde işlenecek"
+                              title={cev('Cari hesaba hangi para biriminde işlenecek')}
                               onChange={e => setEkstreDovizi(e.target.value)}>
                         {[...new Set([anaDoviz, YEREL_PARA_VARSAYILAN])].map(k => (
                           <option key={k} value={k}>{k}</option>
@@ -570,7 +569,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
               )}
 
               <label className="alan">
-                <span className="etiket">İşlem Tarihi</span>
+                <span className="etiket">{cev('İşlem Tarihi')}</span>
                 {/* ILERI TARIH YASAK (kullanici): para el degistirmeden tahsilat
                     yazilamaz. `max` tarayicida engeller, sunucu da ayrica
                     dogrular (KasaDeposu.IleriTarihKontrol). */}
@@ -618,14 +617,14 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                            onChange={e => kiymet.setSeriNo(e.target.value)} />
                   </label>
                   <label className="alan">
-                    <span className="etiket">Keşideci</span>
+                    <span className="etiket">{cev('Keşideci')}</span>
                     <input value={kiymet.kesideci} maxLength={150} disabled={kilitli}
                            placeholder={cari?.unvan ?? ''}
                            onChange={e => kiymet.setKesideci(e.target.value)} />
                   </label>
                   {!senetMi && (
                     <label className="alan">
-                      <span className="etiket">Banka / Şube</span>
+                      <span className="etiket">{cev('Banka / Şube')}</span>
                       <span className="ikili">
                         <input value={kiymet.banka} maxLength={60} disabled={kilitli}
                                placeholder="Banka" onChange={e => kiymet.setBanka(e.target.value)} />
@@ -641,11 +640,11 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
           {/* Baslik izgarasindan biraz ARALIKLI (kullanici): iki blok bitisik
               olunca tek uzun form gibi gorunuyordu. */}
           <div className="kagrup" style={{ marginTop: 14 }}>
-            <h6>Bilgiler</h6>
+            <h6>{cev('Bilgiler')}</h6>
             <div className="alan-izgara">
               {planMi && (
                 <label className="alan">
-                  <span className="etiket">Vade *</span>
+                  <span className="etiket">{cev('Vade *')}</span>
                   <input type="date" value={planTarihi} disabled={kilitli || durum === 1}
                          onChange={e => setPlanTarihi(e.target.value)} />
                   {alanHatalari.planTarihi && <span className="alan-hata">{alanHatalari.planTarihi}</span>}
@@ -666,7 +665,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                     {alanHatalari.karsiTutar && <span className="alan-hata">{alanHatalari.karsiTutar}</span>}
                   </label>
                   <label className="alan">
-                    <span className="etiket">Efektif Kur (önizleme)</span>
+                    <span className="etiket">{cev('Efektif Kur (önizleme)')}</span>
                     <input className="hiza-sag onizleme"
                            value={caprazKur ? caprazKur.toFixed(6) : ''} readOnly />
                   </label>
@@ -676,7 +675,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
               {secili?.kalemTuru !== 0 && (
                 <>
                   <label className="alan">
-                    <span className="etiket">Masraf Tutarı</span>
+                    <span className="etiket">{cev('Masraf Tutarı')}</span>
                     <input className="hiza-sag" value={masrafTutar} disabled={kilitli}
                            placeholder="0,00"
                            onChange={e => setMasrafTutar(e.target.value)} />
@@ -734,7 +733,7 @@ export function KasaIslemKarti({ acilis, kayitIdProp, onKapat, onKaydedildi }: {
                   } : null)}
                 />
                 <label className="alan">
-                  <span className="etiket">Tutar (boş = kalanın tamamı)</span>
+                  <span className="etiket">{cev('Tutar (boş = kalanın tamamı)')}</span>
                   <input className="hiza-sag" value={gercek.tutar}
                          onChange={e => gercek.setTutar(e.target.value)} />
                 </label>

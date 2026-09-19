@@ -9,6 +9,7 @@ import {
 } from '../../sayfalar/belgeKarti/dagilimKovalari';
 import { SAF_SGK_ROTA } from '../../sayfalar/belgeKartiKurallari';
 import type { BelgeYaniti, IskontoTalebi } from '../../api/sozlesme';
+import { c } from '../../dil/ceviri';
 
 /**
  * KALEMLER SEKMESI - satir gridi (izlemli kalemlerde lot master-detail) ve
@@ -298,12 +299,12 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         {/* BASVURUDA tarih en solda (kullanici): islem tarihi kalemin kimligi. */}
         {tarihSolda && <th className="hiza-orta" style={{ width: 111 }}>Tarih</th>}
         <th style={{ width: 94 }}>Kod</th>
-        <th>Stok / Hizmet</th>
+        <th>{c('Stok / Hizmet')}</th>
         {aciklamaVar && <th style={{ width: 200 }}>Açıklama</th>}
         {/* TESLIM TARIHI (140) miktarin SOLUNDA, yalniz sipariste: satirin
             termini - "ne kadar"dan once "ne zaman" okunuyor. */}
         {bilgi.siparis && !tarihSolda && (
-          <th className="hiza-orta" style={{ width: 92 }}>Teslim Tarihi</th>
+          <th className="hiza-orta" style={{ width: 92 }}>{c('Teslim Tarihi')}</th>
         )}
         {/* Miktar / iskonto / KDV DAR (kullanici): ikisi de en fazla birkac
             hane; genis birakinca stok adi sikisiyordu. */}
@@ -313,7 +314,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         <th className="hiza-sag" style={{ width: 52 }}>Miktar</th>
         {/* Kisa basliklar (kullanici): iki kolon da dar - "İskonto %" tam
             sigmiyordu, KDV kolonu da gereginden genisti. */}
-        {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 52 }}>İsk.%</th>}
+        {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 52 }}>{c('İsk.%')}</th>}
         {bilgi.kalem === 'tam' && <th className="hiza-sag" style={{ width: 52 }}>KDV %</th>}
         {/* Transferde FIYAT YOK: mal satilmiyor, depo degistiriyor. */}
         {/* Basvuruda deger KDV DAHILDIR ama baslikta yazmiyor (kullanici):
@@ -342,7 +343,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         {!safSgk && kurumPayiKolonu && (
           <th className="hiza-sag" style={{ width: 110 }}>{kurumPayiBasligi}</th>
         )}
-        {paylasim?.acik && <th className="hiza-sag" style={{ width: 110 }}>Hasta Payı</th>}
+        {paylasim?.acik && <th className="hiza-sag" style={{ width: 110 }}>{c('Hasta Payı')}</th>}
         {/* Doviz kolonlari: satir kendi dovizinde girildiyse ya da rapor dovizi
             secildiyse cizilir; hepsi yerel ve rapor yoksa GIZLI. */}
         {bilgi.kalem !== 'miktar' && dovizKolon && (
@@ -677,10 +678,10 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                             <span className="ipucu"> · önizleme</span>)}
                         </th>
                         <th className="hiza-sag">Tutar</th>
-                        <th className="hiza-sag">Kapatılan</th>
+                        <th className="hiza-sag">{c('Kapatılan')}</th>
                         <th className="hiza-sag">Tahsil</th>
                         <th className="hiza-sag">Kalan</th>
-                        <th>Provizyon / Not</th>
+                        <th>{c('Provizyon / Not')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -709,9 +710,9 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                     </tbody>
                     <tfoot>
                       <tr>
-                        <td>Ciro</td>
+                        <td>{c('Ciro')}</td>
                         <td className="hiza-sag">{para.format(ciro)}</td>
-                        <td colSpan={2} className="sonuk">Hastadan tahsil edilecek</td>
+                        <td colSpan={2} className="sonuk">{c('Hastadan tahsil edilecek')}</td>
                         <td className="hiza-sag">{para.format(Math.max(hastadan, 0))}</td>
                         <td className="sonuk">
                           {d.elle === 1 ? 'elle sabitlendi' : ''}
@@ -732,9 +733,9 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
                 <table className="lot-tablo">
                   <thead>
                     <tr>
-                      <th>Lot No</th>
+                      <th>{c('Lot No')}</th>
                       <th>Seri No</th>
-                      <th>Ürt. Tarihi</th>
+                      <th>{c('Ürt. Tarihi')}</th>
                       <th>SKT</th>
                       <th className="hiza-sag">Miktar</th>
                     </tr>
@@ -797,7 +798,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
   <div className="kagrup belge-doviz">
     <div className="alan-izgara tek-sutun">
       <label className="alan">
-        <span className="etiket">Rapor Dövizi</span>
+        <span className="etiket">{c('Rapor Dövizi')}</span>
         <div className="ikili">
           <select value={doviz.raporDovizi} disabled={kilitli}
                   onChange={e => doviz.setRaporDovizi(e.target.value)}>
@@ -830,7 +831,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         bölünerek gösterilir.
         {/* Siparis cari hesabi ETKILEMEZ - "cari hesaba islenir" cumlesi orada
             yaniltici olurdu. */}
-        {!bilgi.siparis && <> Cari hesaba <b>{doviz.ekstreDovizi}</b> işlenir.</>}
+        {!bilgi.siparis && <>{c('Cari hesaba')}<b>{doviz.ekstreDovizi}</b> işlenir.</>}
       </div>
     )}
   </div>
@@ -984,7 +985,7 @@ export function KalemSekmesi(p: KalemSekmesiProps) {
         ) : (
         <>
         <tr>
-          <td>Ara Toplam</td><td className="hiza-sag">{para.format(onizleme.matrah)}</td>
+          <td>{c('Ara Toplam')}</td><td className="hiza-sag">{para.format(onizleme.matrah)}</td>
           {raporDovizli && <td className="hiza-sag sonuk">{para.format(dovizeCevir(onizleme.matrah))}</td>}
         </tr>
         <tr>

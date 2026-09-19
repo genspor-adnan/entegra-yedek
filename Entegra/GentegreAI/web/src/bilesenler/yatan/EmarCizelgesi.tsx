@@ -3,11 +3,12 @@ import { api } from '../../api/istemci';
 import type { EmarDoz, EmarOrder, EmarYaniti } from '../../api/uclar/yatan';
 import { guvenli, mesaj } from '../mesaj';
 import { DozUygulamaModali } from './DozUygulamaModali';
+import { c } from '../../dil/ceviri';
 
 /**
  * eMAR ÇİZELGESİ — mockup `Ekranlar/Yatan/order_ilac_uygulama.html`.
  *
- * <b>Satır order, sütun saat.</b> İlaç takibi "verildi mi" sorusudur ve bu soru
+ * <b>{c('Satır order, sütun saat.')}</b> İlaç takibi "verildi mi" sorusudur ve bu soru
  * ancak SAATLE birlikte sorulur: düz liste "günde üç kez verilecek" der,
  * "16:00 atlandı"yı söylemez. Altındaki grid doz kuyruğunu (servis geneli)
  * gösterir; çizelge ise TEK HASTANIN günüdür — ikisi aynı veriyi iki ayrı
@@ -110,7 +111,7 @@ export function EmarCizelgesi({ yenile, onDegisti }: {
             {o.atlanan > 0 && <span className="uy"><b>{o.atlanan}</b> atlanan</span>}
             {/* BARKODSUZ UYGULAMA görünür kalır: engellenmiyor ama sayılıyor. */}
             {o.barkodsuz > 0 && (
-              <span className="uy" title="Barkod okutulmadan kaydedilen doz">
+              <span className="uy" title={c('Barkod okutulmadan kaydedilen doz')}>
                 <b>{o.barkodsuz}</b> elle doğrulanmış
               </span>
             )}
@@ -133,9 +134,9 @@ export function EmarCizelgesi({ yenile, onDegisti }: {
             <thead>
               <tr>
                 <th style={{ width: 300 }}>Order</th>
-                <th style={{ width: 120 }}>Doz / yol</th>
+                <th style={{ width: 120 }}>{c('Doz / yol')}</th>
                 {saatler.map(s => <th key={s} className="saat">{s}</th>)}
-                <th style={{ width: 140 }}>Son uygulayan</th>
+                <th style={{ width: 140 }}>{c('Son uygulayan')}</th>
               </tr>
             </thead>
             <tbody>
@@ -154,7 +155,7 @@ export function EmarCizelgesi({ yenile, onDegisti }: {
                           {' '}
                           <span className="rozet hata">sözel · imza bekliyor</span>
                           <button className="d kucuk" style={{ marginLeft: 4 }}
-                                  onClick={() => void imzala(od.id)}>✍ İmzala</button>
+                                  onClick={() => void imzala(od.id)}>{c('✍ İmzala')}</button>
                         </>
                       )}
                       {od.durum !== 1 && <> <span className="rozet pas">kapandı</span></>}
@@ -188,7 +189,7 @@ export function EmarCizelgesi({ yenile, onDegisti }: {
       )}
 
       <div className="not">
-        <b>Satır order, sütun saat.</b> Uygulama satırları order kaydedilirken
+        <b>{c('Satır order, sütun saat.')}</b> Uygulama satırları order kaydedilirken
         <b> önceden üretilir</b> — plan görünmeden takip olmaz, sonradan üretilen satır
         atlanmış dozu gizler. Hücreye tıklayınca uygulama penceresi açılır.
       </div>

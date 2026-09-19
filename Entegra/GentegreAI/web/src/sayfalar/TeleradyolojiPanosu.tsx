@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
+import { c } from '../dil/ceviri';
 
 /**
  * TELERADYOLOJİ PANOSU (801) — mockup
@@ -115,7 +116,7 @@ export function TeleradyolojiPanosu() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Teleradyoloji Panosu</h1>
-          <span className="yol">Radyoloji › Teleradyoloji › Pano</span>
+          <span className="yol">{c('Radyoloji › Teleradyoloji › Pano')}</span>
         </div>
         <div className="basarac">
           <input type="date" value={gun} onChange={e => setGun(e.target.value)} />
@@ -133,7 +134,7 @@ export function TeleradyolojiPanosu() {
             <button key={k.anahtar} type="button"
                     className={`pano-kutu${k.vurgu ? ` ${k.vurgu}` : ''}`}
                     onClick={() => git(`/teleradyoloji${k.cip ? `?cip=${encodeURIComponent(k.cip)}` : ''}`)}
-                    title="Çalışma listesini aç">
+                    title={c('Çalışma listesini aç')}>
               <span className="ik">{k.ik}</span>
               <span className="s">{k.deger}</span>
               <span className="e">
@@ -152,30 +153,29 @@ export function TeleradyolojiPanosu() {
         <div className="pano-satir">
           {/* ------------------------------------------------- ay özeti ---- */}
           <div className="kagrup">
-            <h6>Son 30 Gün <span className="sonuk">SLA ve süreler</span></h6>
+            <h6>{c('Son 30 Gün')}<span className="sonuk">{c('SLA ve süreler')}</span></h6>
             <table className="detay-tablo">
               <tbody>
                 <tr>
-                  <td>SLA uyumu</td>
+                  <td>{c('SLA uyumu')}</td>
                   <td className="hiza-sag">
                     <b>{yuzde(ay?.slaUyan ?? 0, ay?.sozluOnaylanan ?? 0)}</b>
                     <span className="sonuk"> · {ay?.slaUyan ?? 0}/{ay?.sozluOnaylanan ?? 0}</span>
                   </td>
                 </tr>
-                <tr><td>Ortalama rapor süresi</td>
+                <tr><td>{c('Ortalama rapor süresi')}</td>
                     <td className="hiza-sag">{sure(ay?.ortRaporDk ?? 0)}</td></tr>
-                <tr><td>Ortalama <b>acil</b> rapor süresi</td>
+                <tr><td>{c('Ortalama')}<b>acil</b> rapor süresi</td>
                     <td className="hiza-sag">{sure(ay?.ortAcilDk ?? 0)}</td></tr>
-                <tr><td>Ortalama okuma süresi</td>
+                <tr><td>{c('Ortalama okuma süresi')}</td>
                     <td className="hiza-sag">{sure(ay?.ortOkumaDk ?? 0)}</td></tr>
-                <tr><td>İstek / onaylanan</td>
+                <tr><td>{c('İstek / onaylanan')}</td>
                     <td className="hiza-sag">{ay?.istek ?? 0} / {ay?.onaylanan ?? 0}</td></tr>
-                <tr><td>Tetkik ücreti toplamı</td>
+                <tr><td>{c('Tetkik ücreti toplamı')}</td>
                     <td className="hiza-sag">{para(Number(ay?.ucretToplam ?? 0))} ₺</td></tr>
               </tbody>
             </table>
-            <div className="pano-not">
-              SLA uyumu <b>sözü olan</b> işler üzerinden: sözleşmesi olmayan isteğe
+            <div className="pano-not">{c('SLA uyumu')}<b>sözü olan</b> işler üzerinden: sözleşmesi olmayan isteğe
               (SLA 0) "uyduk" demek uydurma olurdu. Rapor süresi <b>görüntünün
               geldiği andan</b> onaya, okuma süresi okumaya başlandığı andan.
               Ücret toplamı dönem faturası değildir.
@@ -184,7 +184,7 @@ export function TeleradyolojiPanosu() {
 
           {/* --------------------------------------------- saatlik yığılma -- */}
           <div className="kagrup">
-            <h6>Saatlik Geliş / Onay <span className="sonuk">{veri?.tarih}</span></h6>
+            <h6>{c('Saatlik Geliş / Onay')}<span className="sonuk">{veri?.tarih}</span></h6>
             <div className="pano-ic">
               <div className="telerad-saat">
                 {(veri?.saatler ?? []).map(x => (
@@ -206,13 +206,13 @@ export function TeleradyolojiPanosu() {
         <div className="pano-satir">
           {/* --------------------------------------------- kurum kırılımı -- */}
           <div className="kagrup">
-            <h6>Kuruma Göre <span className="sonuk">son 30 gün</span></h6>
+            <h6>{c('Kuruma Göre')}<span className="sonuk">son 30 gün</span></h6>
             <table className="detay-tablo">
               <thead>
                 <tr>
                   <th>Kurum</th><th className="hiza-sag">İstek</th>
                   <th className="hiza-sag">Bekleyen</th><th className="hiza-sag">SLA</th>
-                  <th className="hiza-sag">Ort. rapor</th><th className="hiza-sag">Ücret</th>
+                  <th className="hiza-sag">{c('Ort. rapor')}</th><th className="hiza-sag">Ücret</th>
                 </tr>
               </thead>
               <tbody>
@@ -227,7 +227,7 @@ export function TeleradyolojiPanosu() {
                   </tr>
                 ))}
                 {(veri?.kurumlar ?? []).length === 0 && !yukleniyor && (
-                  <tr><td className="bos" colSpan={6}>Son 30 günde istek yok.</td></tr>
+                  <tr><td className="bos" colSpan={6}>{c('Son 30 günde istek yok.')}</td></tr>
                 )}
               </tbody>
             </table>
@@ -235,12 +235,12 @@ export function TeleradyolojiPanosu() {
 
           {/* -------------------------------------------- modalite dağılımı */}
           <div className="kagrup">
-            <h6>Modalite Dağılımı <span className="sonuk">son 30 gün</span></h6>
+            <h6>{c('Modalite Dağılımı')}<span className="sonuk">son 30 gün</span></h6>
             <table className="detay-tablo">
               <thead>
                 <tr>
-                  <th>Modalite</th><th>Dağılım</th>
-                  <th className="hiza-sag">Adet</th><th className="hiza-sag">Ort. rapor</th>
+                  <th>Modalite</th><th>{c('Dağılım')}</th>
+                  <th className="hiza-sag">Adet</th><th className="hiza-sag">{c('Ort. rapor')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -259,7 +259,7 @@ export function TeleradyolojiPanosu() {
                   );
                 })}
                 {(veri?.modalite ?? []).length === 0 && !yukleniyor && (
-                  <tr><td className="bos" colSpan={4}>Son 30 günde istek yok.</td></tr>
+                  <tr><td className="bos" colSpan={4}>{c('Son 30 günde istek yok.')}</td></tr>
                 )}
               </tbody>
             </table>
@@ -269,13 +269,13 @@ export function TeleradyolojiPanosu() {
         <div className="pano-satir">
           {/* ---------------------------------------------- radyolog yükü -- */}
           <div className="kagrup">
-            <h6>Radyolog Yükü <span className="sonuk">bende / bugün onaylanan</span></h6>
+            <h6>{c('Radyolog Yükü')}<span className="sonuk">bende / bugün onaylanan</span></h6>
             <table className="detay-tablo">
               <thead>
                 <tr>
-                  <th>Radyolog</th><th className="hiza-sag">Bende</th>
-                  <th className="hiza-sag">Bugün onaylanan</th>
-                  <th className="hiza-sag">SLA kaçan</th><th className="hiza-sag">Ort. rapor</th>
+                  <th>Radyolog</th><th className="hiza-sag">{c('Bende')}</th>
+                  <th className="hiza-sag">{c('Bugün onaylanan')}</th>
+                  <th className="hiza-sag">{c('SLA kaçan')}</th><th className="hiza-sag">{c('Ort. rapor')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -291,12 +291,12 @@ export function TeleradyolojiPanosu() {
                   </tr>
                 ))}
                 {(veri?.radyologlar ?? []).length === 0 && !yukleniyor && (
-                  <tr><td className="bos" colSpan={5}>Atanmış iş yok.</td></tr>
+                  <tr><td className="bos" colSpan={5}>{c('Atanmış iş yok.')}</td></tr>
                 )}
               </tbody>
             </table>
             <div className="pano-not">
-              <b>Vardiya</b> ve <b>hakediş</b> sütunları yok: nöbet çizelgesi ve Prim bağı
+              <b>{c('Vardiya')}</b> ve <b>hakediş</b> sütunları yok: nöbet çizelgesi ve Prim bağı
               henüz yazılmadı. Uydurma sayı göstermek yerine sütun hiç açılmadı.
             </div>
           </div>

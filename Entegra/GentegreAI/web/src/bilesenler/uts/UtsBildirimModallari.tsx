@@ -4,6 +4,7 @@ import { GenLookup } from '../GenLookup';
 import { api } from '../../api/istemci';
 import type { UtsMesaji } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
+import { c } from '../../dil/ceviri';
 
 /**
  * ÜTS ELLE BİLDİRİM FORMLARI (225, Faz 2) - belge köprüsünden gelmeyen tekil
@@ -55,23 +56,23 @@ function UrunAlanlari(p: {
         onSec={x => { if (x?.urunNo) p.setUno(String(x.urunNo)) }}
       />
       <label className="alan">
-        <span className="etiket zorunlu-isaret">Ürün No (UNO)</span>
+        <span className="etiket zorunlu-isaret">{c('Ürün No (UNO)')}</span>
         <input value={p.uno} maxLength={23} disabled={p.kilitli}
                onChange={e => p.setUno(e.target.value)} />
       </label>
       <label className="alan">
-        <span className="etiket">Seri No (SNO — tekil takip)</span>
+        <span className="etiket">{c('Seri No (SNO — tekil takip)')}</span>
         <input value={p.seriNo} maxLength={20} disabled={p.kilitli}
                onChange={e => p.setSeriNo(e.target.value)} />
       </label>
       <label className="alan">
-        <span className="etiket">Lot No (LNO — lot takip)</span>
+        <span className="etiket">{c('Lot No (LNO — lot takip)')}</span>
         <input value={p.lotNo} maxLength={20} disabled={p.kilitli}
                onChange={e => p.setLotNo(e.target.value)} />
       </label>
       {!tekil && (
         <label className="alan">
-          <span className="etiket">Adet (lot takipte zorunlu)</span>
+          <span className="etiket">{c('Adet (lot takipte zorunlu)')}</span>
           <input className="hiza-sag" value={p.adet} disabled={p.kilitli}
                  onChange={e => p.setAdet(e.target.value)} />
         </label>
@@ -126,14 +127,14 @@ export function UtsKullanimModali({ onKapat, onTamam }: {
           {gonderiyor ? 'Gönderiliyor…' : '🧑‍⚕️ ÜTS’ye Bildir'}
         </button>
         <button className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
-                onClick={onKapat}>Kapat</button>
+                onClick={onKapat}>{c('Kapat')}</button>
       </>}>
       <div className="alan-izgara tek-sutun" style={{ padding: 10 }}>
         <UrunAlanlari uno={uno} setUno={setUno} seriNo={seriNo} setSeriNo={setSeriNo}
                       lotNo={lotNo} setLotNo={setLotNo} adet={adet} setAdet={setAdet}
                       kilitli={gonderiyor} />
         <label className="alan">
-          <span className="etiket zorunlu-isaret">Kullanım Tarihi (GIT)</span>
+          <span className="etiket zorunlu-isaret">{c('Kullanım Tarihi (GIT)')}</span>
           <input type="date" value={git} disabled={gonderiyor}
                  onChange={e => setGit(e.target.value)} />
         </label>
@@ -145,12 +146,12 @@ export function UtsKullanimModali({ onKapat, onTamam }: {
                  onChange={e => setHastaTckn(e.target.value)} />
         </label>
         <label className="alan">
-          <span className="etiket">Hasta Adı</span>
+          <span className="etiket">{c('Hasta Adı')}</span>
           <input value={hastaAdi} maxLength={60} disabled={gonderiyor}
                  onChange={e => setHastaAdi(e.target.value)} />
         </label>
         <label className="alan">
-          <span className="etiket">Hasta Soyadı</span>
+          <span className="etiket">{c('Hasta Soyadı')}</span>
           <input value={hastaSoyadi} maxLength={60} disabled={gonderiyor}
                  onChange={e => setHastaSoyadi(e.target.value)} />
         </label>

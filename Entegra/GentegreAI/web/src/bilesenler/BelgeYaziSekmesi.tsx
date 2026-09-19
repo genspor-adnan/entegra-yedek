@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { GenGrid } from './GenGrid';
 import { GenForm } from './GenForm';
+import { c } from '../dil/ceviri';
 
 /**
  * BELGE YAZILARI (768) — Genel Ayarlar › Belge Yazıları.
@@ -47,7 +48,7 @@ export function BelgeYaziSekmesi() {
     <>
       <div className="kagrup">
         <div className="numaralama-bas">
-          <h6>Belge Yazısı Şablonları</h6>
+          <h6>{c('Belge Yazısı Şablonları')}</h6>
           <button className="d bir mini" onClick={() => setKart('yeni')}>＋ Yeni</button>
         </div>
         <GenGrid
@@ -69,7 +70,7 @@ export function BelgeYaziSekmesi() {
       </div>
 
       <div className="kagrup">
-        <h6>Yer Tutucular</h6>
+        <h6>{c('Yer Tutucular')}</h6>
         <div className="dk-havuz">
           {YER_TUTUCULAR.map(([k, aciklama]) => (
             <span key={k} className="dk-cip" title={aciklama}>{`{${k}}`}</span>
@@ -78,7 +79,7 @@ export function BelgeYaziSekmesi() {
         <div className="not" style={{ marginTop: 6 }}>
           Değeri boş kalan yer tutucu <b>eksik</b> sayılır ve belge o haliyle
           hazırlanamaz. <b>{'{maas}'}</b> bordrodan gelmez — bordro modülü
-          henüz yok; tutarı İK talebin <b>Maaş Tutarı</b> alanına girer.
+          henüz yok; tutarı İK talebin <b>{c('Maaş Tutarı')}</b> alanına girer.
         </div>
       </div>
 

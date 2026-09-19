@@ -3,6 +3,7 @@ import {
   GORUNURLUK_ETIKET, KURAL_ETIKET, degerSayisi, listeyeCevir, operatorler, tanimCumlesi,
   yapraklar, yapraklariYaz,
 } from './ortak';
+import { c } from '../../dil/ceviri';
 
 /**
  * TASARLA (mockup "Tasarla" sekmesi): koşullar (alan / operatör / değer /
@@ -82,12 +83,12 @@ export function Tasarla({ tanim, setTanim, kolonlar, kaynakAdi, ad, setAd, acikl
         <div className="kagrup">
           <h6>Kimlik</h6>
           <div className="dk-kimlik">
-            <label>Döküm adı<input value={ad} onChange={e => setAd(e.target.value)} placeholder="ör. Kurum bazlı hekim cirosu" /></label>
+            <label>{c('Döküm adı')}<input value={ad} onChange={e => setAd(e.target.value)} placeholder="ör. Kurum bazlı hekim cirosu" /></label>
             <label>Açıklama<input value={aciklama} onChange={e => setAciklama(e.target.value)} /></label>
             <label>Çıktı biçimi
               <select value={tanim.cikti} onChange={e => setTanim({ ...tanim, cikti: e.target.value as 'liste' | 'ozet' })}>
-                <option value="liste">Liste (satırlar, gruplu ara toplam)</option>
-                <option value="ozet">İstatistik (boyut × ölçü, çapraz tablo)</option>
+                <option value="liste">{c('Liste (satırlar, gruplu ara toplam)')}</option>
+                <option value="ozet">{c('İstatistik (boyut × ölçü, çapraz tablo)')}</option>
               </select>
             </label>
             <label>Görünürlük
@@ -101,13 +102,13 @@ export function Tasarla({ tanim, setTanim, kolonlar, kaynakAdi, ad, setAd, acikl
         </div>
 
         <div className="kagrup">
-          <h6>Koşullar <span className="sonuk">hepsi sağlanmalı (VE)</span>
+          <h6>{c('Koşullar')}<span className="sonuk">hepsi sağlanmalı (VE)</span>
             <button className="d sag" onClick={kosulEkle}>＋ Koşul ekle</button>
           </h6>
           <table className="detay-tablo dk-kosullar">
             <thead><tr>
-              <th style={{ width: 30 }}></th><th style={{ width: 190 }}>Alan</th><th style={{ width: 150 }}>Operatör</th>
-              <th>Değer</th><th style={{ width: 230 }}>Çalıştırırken sor</th><th style={{ width: 34 }}></th>
+              <th style={{ width: 30 }}></th><th style={{ width: 190 }}>Alan</th><th style={{ width: 150 }}>{c('Operatör')}</th>
+              <th>Değer</th><th style={{ width: 230 }}>{c('Çalıştırırken sor')}</th><th style={{ width: 34 }}></th>
             </tr></thead>
             <tbody>
               {kosullar.map((k, i) => {
@@ -156,11 +157,11 @@ export function Tasarla({ tanim, setTanim, kolonlar, kaynakAdi, ad, setAd, acikl
                         ) : <span className="sonuk">sabit</span>}
                       </label>
                     </td>
-                    <td className="orta"><button className="d mini" title="Koşulu sil" onClick={() => kosulSil(i)}>✕</button></td>
+                    <td className="orta"><button className="d mini" title={c('Koşulu sil')} onClick={() => kosulSil(i)}>✕</button></td>
                   </tr>
                 );
               })}
-              {kosullar.length === 0 && <tr><td colSpan={6} className="bos">Koşul yok — tüm kayıtlar gelir.</td></tr>}
+              {kosullar.length === 0 && <tr><td colSpan={6} className="bos">{c('Koşul yok — tüm kayıtlar gelir.')}</td></tr>}
             </tbody>
           </table>
           <div className="pano-not">
@@ -172,7 +173,7 @@ export function Tasarla({ tanim, setTanim, kolonlar, kaynakAdi, ad, setAd, acikl
         {tanim.cikti === 'liste' && (
           <div className="dk-ikili">
             <div className="kagrup">
-              <h6>Kolonlar <span className="sonuk">sıra · Σ toplam</span></h6>
+              <h6>{c('Kolonlar')}<span className="sonuk">sıra · Σ toplam</span></h6>
               <div className="dk-kolonlar">
                 {secili.map((ad, i) => {
                   const k = kolonlar.find(x => x.ad === ad);
@@ -183,7 +184,7 @@ export function Tasarla({ tanim, setTanim, kolonlar, kaynakAdi, ad, setAd, acikl
                       <button className="d mini" onClick={() => kolonKaydir(i, 1)} disabled={i === secili.length - 1}>▼</button>
                       <span className="ad">{k?.baslik ?? ad}{grupIdx >= 0 && <span className="rozet mor">grup {grupIdx + 1}</span>}</span>
                       {k?.olculebilir && (
-                        <label className="dk-onay" title="Toplam al">
+                        <label className="dk-onay" title={c('Toplam al')}>
                           <input type="checkbox" checked={(tanim.toplam ?? []).includes(ad)} onChange={() => toplamDegistir(ad)} />Σ
                         </label>
                       )}
@@ -191,17 +192,17 @@ export function Tasarla({ tanim, setTanim, kolonlar, kaynakAdi, ad, setAd, acikl
                     </div>
                   );
                 })}
-                {secili.length === 0 && <div className="bos">Kolon seçilmedi — tüm görünür kolonlar gelir.</div>}
+                {secili.length === 0 && <div className="bos">{c('Kolon seçilmedi — tüm görünür kolonlar gelir.')}</div>}
               </div>
               <div className="dk-havuz">
-                <span className="sonuk">Eklenebilir:</span>
+                <span className="sonuk">{c('Eklenebilir:')}</span>
                 {eklenebilir.map(k => (
                   <button key={k.ad} className="dk-cip" onClick={() => kolonEkle(k.ad)}>{k.baslik}</button>
                 ))}
               </div>
             </div>
             <div className="kagrup">
-              <h6>Gruplama · Sıralama</h6>
+              <h6>{c('Gruplama · Sıralama')}</h6>
               <div className="dk-kimlik">
                 {[0, 1].map(i => (
                   <label key={i}>Grup {i + 1}
@@ -220,7 +221,7 @@ export function Tasarla({ tanim, setTanim, kolonlar, kaynakAdi, ad, setAd, acikl
                 <label>Yön
                   <select value={tanim.sirala?.[0]?.yon ?? 'desc'} disabled={!tanim.sirala?.[0]}
                           onChange={e => siraDegistir(tanim.sirala?.[0]?.alan ?? '', e.target.value as 'asc' | 'desc')}>
-                    <option value="asc">Artan ↑</option><option value="desc">Azalan ↓</option>
+                    <option value="asc">{c('Artan ↑')}</option><option value="desc">{c('Azalan ↓')}</option>
                   </select>
                 </label>
               </div>
@@ -235,15 +236,15 @@ export function Tasarla({ tanim, setTanim, kolonlar, kaynakAdi, ad, setAd, acikl
 
       <div className="dk-yan">
         <div className="kagrup">
-          <h6>Tanım Özeti <span className="sonuk">okunabilir cümle</span></h6>
+          <h6>{c('Tanım Özeti')}<span className="sonuk">okunabilir cümle</span></h6>
           <div className="dk-cumle">📄 {tanimCumlesi(tanim, kolonlar, kaynakAdi)}</div>
         </div>
         <div className="kagrup">
-          <h6>Altyapı</h6>
+          <h6>{c('Altyapı')}</h6>
           <div className="dk-sat"><span>Kaynak</span><span className="rozet mavi">liste motoru · {tanim.kaynak}</span></div>
-          <div className="dk-sat"><span>Koşul → süzgeç</span><span className="rozet gri">filtre JSON</span></div>
-          <div className="dk-sat"><span>Şube · alan yetkisi</span><span className="rozet ok">sunucuda</span></div>
-          <div className="dk-sat"><span>Saklama</span><span className="rozet gri">dokum_tanimi (jsonb)</span></div>
+          <div className="dk-sat"><span>{c('Koşul → süzgeç')}</span><span className="rozet gri">filtre JSON</span></div>
+          <div className="dk-sat"><span>{c('Şube · alan yetkisi')}</span><span className="rozet ok">sunucuda</span></div>
+          <div className="dk-sat"><span>{c('Saklama')}</span><span className="rozet gri">dokum_tanimi (jsonb)</span></div>
           <div className="pano-not">
             Döküm, liste ekranlarının süzgeç/sıralama sözleşmesini <b>aynen</b> kullanır. Kolon ve
             alanlar beyaz listeden gelir; metin hiçbir yerde SQL'e ulaşmaz.

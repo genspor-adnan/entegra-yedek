@@ -11,6 +11,7 @@ import { Modal } from './GenForm';
 import { DONUSUM_PAY_SECENEKLERI }
   from '../sayfalar/belgeKarti/dagilimKovalari';
 import { para, say4, bugunIso, sayiOku as sayi } from './bicim';
+import { c } from '../dil/ceviri';
 
 
 /**
@@ -274,7 +275,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
                   onClick={() => void donustur()}>
             {calisiyor ? 'Dönüştürülüyor…' : sonuc ? '⇢ Kalanı Dönüştür' : '⇢ Dönüştür'}
           </button>
-          <button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>{c('Kapat')}</button>
         </>
       }
     >
@@ -315,7 +316,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
             <h6>Hedef</h6>
             <div className="alan-izgara">
               <label className="alan">
-                <span className="etiket">Hedef Belge</span>
+                <span className="etiket">{c('Hedef Belge')}</span>
                 {/* Hedef listeden secildiyse KILITLI - karar orada verildi. */}
                 <select value={hedefTur} disabled={hedefKilitli}
                         title={hedefKilitli ? 'Hedef listede seçildi' : undefined}
@@ -328,13 +329,13 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
                   faturalanir - hedef belgenin carisi hasta degildir. */}
               {paylasimVar && (
                 <label className="alan">
-                  <span className="etiket">Dönüştürülecek Pay</span>
+                  <span className="etiket">{c('Dönüştürülecek Pay')}</span>
                   {/* INCE KOVALAR (470): sunucu bu kodlarla calisir - kaba
                       "kurum payi" (2) SGK kovasi demek ve anlasmali kurum
                       basvurusunda "SGK payı zaten kapatılmış" hatasi
                       veriyordu. */}
                   <select value={pay} onChange={e => setPay(Number(e.target.value))}>
-                    <option value={0}>Tümü (paylaşımsız)</option>
+                    <option value={0}>{c('Tümü (paylaşımsız)')}</option>
                     {DONUSUM_PAY_SECENEKLERI.map(k =>
                       <option key={k.kod} value={k.kod}>{k.ad}</option>)}
                   </select>
@@ -345,10 +346,10 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
                   tarafinda (fis/fatura/tahakkuk); miktar yerine tutar girilir. */}
               {tutarModOlur && (
                 <label className="alan">
-                  <span className="etiket">Dönüşüm Ölçüsü</span>
+                  <span className="etiket">{c('Dönüşüm Ölçüsü')}</span>
                   <select value={tutarMod ? 1 : 0} onChange={e => tutarModuDegistir(e.target.value === '1')}>
-                    <option value={0}>Miktar (adet)</option>
-                    <option value={1}>Tutar (tahsil edilen kadar)</option>
+                    <option value={0}>{c('Miktar (adet)')}</option>
+                    <option value={1}>{c('Tutar (tahsil edilen kadar)')}</option>
                   </select>
                 </label>
               )}
@@ -356,19 +357,19 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
                 <label className="alan onay-kutusu">
                   <input type="checkbox" checked={kalaniTahakkuk}
                          onChange={e => setKalaniTahakkuk(e.target.checked)} />
-                  <span>Kalanı satış tahakkukuna çevir</span>
+                  <span>{c('Kalanı satış tahakkukuna çevir')}</span>
                 </label>
               )}
               {/* Alis faturasinda numara TEDARIKCININ - sayac uretmez, sorulur. */}
               {disNumarali && (
                 <label className="alan">
-                  <span className="etiket zorunlu-isaret">Tedarikçi Fatura No</span>
+                  <span className="etiket zorunlu-isaret">{c('Tedarikçi Fatura No')}</span>
                   <input value={belgeNo} maxLength={20} placeholder="örn. ABC2026000001234"
                          onChange={e => setBelgeNo(e.target.value)} />
                 </label>
               )}
               <label className="alan">
-                <span className="etiket">Belge Tarihi</span>
+                <span className="etiket">{c('Belge Tarihi')}</span>
                 <input type="date" value={tarih} onChange={e => setTarih(e.target.value)} />
               </label>
               {/* TASLAK kutusu KALKTI (kullanici): donusumden cikan belge de
@@ -377,15 +378,15 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
           </div>
 
           <div className="kagrup">
-            <h6>Dönüştürülecek Satırlar</h6>
+            <h6>{c('Dönüştürülecek Satırlar')}</h6>
             {yukleniyor ? <div className="yukleniyor">Yükleniyor…</div> : (
               <table className="detay-tablo">
                 <thead>
                   <tr>
                     <th style={{ width: 34 }} />
-                    <th>Stok / Açıklama</th>
+                    <th>{c('Stok / Açıklama')}</th>
                     <th className="hiza-sag" style={{ width: 90 }}>Miktar</th>
-                    <th className="hiza-sag" style={{ width: 90 }}>Dönüşen</th>
+                    <th className="hiza-sag" style={{ width: 90 }}>{c('Dönüşen')}</th>
                     <th className="hiza-sag" style={{ width: 90 }}>Kalan</th>
                     <th className="hiza-sag" style={{ width: 120 }}>{tutarMod ? 'Bu Belgeye (₺ KDV dahil)' : 'Bu Belgeye'}</th>
                     <th className="hiza-sag" style={{ width: 110 }}>{tutarMod ? 'Tahsil / Kalan (KDV dahil)' : 'Birim Fiyat'}</th>
@@ -446,7 +447,7 @@ export function BelgeDonusumModali({ belgeId, belgeTur, varsayilanHedef, hedefKi
                     </tr>
                   ))}
                   {satirlar.length === 0 && (
-                    <tr><td colSpan={7} className="bos">Dönüştürülecek açık satır yok.</td></tr>
+                    <tr><td colSpan={7} className="bos">{c('Dönüştürülecek açık satır yok.')}</td></tr>
                   )}
                 </tbody>
                 <tfoot>

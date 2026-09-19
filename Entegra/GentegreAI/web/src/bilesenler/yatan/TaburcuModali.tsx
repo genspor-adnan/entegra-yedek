@@ -8,6 +8,7 @@ import { Modal } from '../Modal';
 import { TarafArama } from '../TarafArama';
 import { mesaj } from '../mesaj';
 import { paraYaz } from '../bicim';
+import { c } from '../../dil/ceviri';
 
 /**
  * TABURCU VE EPİKRİZ — mockup `Ekranlar/Yatan/taburcu_epikriz.html`.
@@ -203,29 +204,29 @@ export function TaburcuModali({ yatisId, onKapat, onTamam }: {
              alt={
                <>
                  <button className="d onay" disabled={kaydediyor || acikEngeller.length > 0}
-                         onClick={() => void taburcuEt()}>✔ Taburcu Et</button>
+                         onClick={() => void taburcuEt()}>{c('✔ Taburcu Et')}</button>
                  {/* PLANLAMA AYRI: hekim sabah karar verir, çıkış öğleden sonra
                      olur. Arada yatak dolu ama panoda "bugün boşalacak" görünür. */}
                  <button className="d" disabled={kaydediyor}
-                         onClick={() => void planla()}>📅 Taburcu Planla</button>
+                         onClick={() => void planla()}>{c('📅 Taburcu Planla')}</button>
                  {sekme !== 'kontrol' && sekme !== 'mali' && (
                    <button className="d" disabled={kaydediyor}
                            onClick={() => void epikrizKaydet()}>💾 Epikrizi Kaydet</button>
                  )}
-                 <button className="d" onClick={onKapat}>✖ Kapat</button>
+                 <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
                </>
              }>
         {hata && <div className="hata-kutusu">{hata}</div>}
 
         <div className="alan-izgara">
           <label className="alan">
-            <span className="etiket zorunlu-isaret">Çıkış şekli</span>
+            <span className="etiket zorunlu-isaret">{c('Çıkış şekli')}</span>
             <select value={cikisSekli} onChange={e => setCikisSekli(Number(e.target.value))}>
               {sekiller.map(s => <option key={s.deger} value={s.deger}>{s.ad}</option>)}
             </select>
           </label>
           <label className="alan">
-            <span className="etiket">Çıkış tanısı (ICD)</span>
+            <span className="etiket">{c('Çıkış tanısı (ICD)')}</span>
             <input value={taniKodu} onChange={e => setTaniKodu(e.target.value)} />
           </label>
         </div>
@@ -276,10 +277,10 @@ export function TaburcuModali({ yatisId, onKapat, onTamam }: {
             {tetkikEngeli && (
               <div className="alan-izgara" style={{ marginTop: 8 }}>
                 <label className="alan">
-                  <span className="etiket zorunlu-isaret">Sonucu takip edecek hekim</span>
+                  <span className="etiket zorunlu-isaret">{c('Sonucu takip edecek hekim')}</span>
                   <span className="deger-serit">
                     <input readOnly style={{ flex: 1, minWidth: 0 }} value={takipHekimAd}
-                           placeholder="Seçilmedi" onClick={() => setHekimArama(true)} />
+                           placeholder={c('Seçilmedi')} onClick={() => setHekimArama(true)} />
                     <button className="d" onClick={() => setHekimArama(true)}>🔍</button>
                   </span>
                 </label>
@@ -287,7 +288,7 @@ export function TaburcuModali({ yatisId, onKapat, onTamam }: {
             )}
 
             <div className="not">
-              <b>Sonucu takip edecek hekim seçilmeden</b> sonuç bekleyen tetkikli hasta
+              <b>{c('Sonucu takip edecek hekim seçilmeden')}</b> sonuç bekleyen tetkikli hasta
               taburcu edilemez: hasta çıkınca bekleyen sonuç çalışma listesinden de düşer
               ve sahipsiz kalan sonuç, bulunmamış sonuçtur. Taburcuda açık order'lar
               kapanır, bekleyen dozlar "atlandı · Taburcu" olarak <b>silinmeden</b> kapanır
@@ -300,26 +301,25 @@ export function TaburcuModali({ yatisId, onKapat, onTamam }: {
         {sekme === 'epikriz' && (
           <>
             <div className="epikriz-alanlar">
-              <label><span>Şikâyet ve hikâye</span>
+              <label><span>{c('Şikâyet ve hikâye')}</span>
                 <textarea rows={3} value={sikayet}
                           onChange={e => setSikayet(e.target.value)} /></label>
-              <label><span>Öykü / özgeçmiş</span>
+              <label><span>{c('Öykü / özgeçmiş')}</span>
                 <textarea rows={2} value={hikaye}
                           onChange={e => setHikaye(e.target.value)} /></label>
-              <label><span>Fizik muayene bulguları</span>
+              <label><span>{c('Fizik muayene bulguları')}</span>
                 <textarea rows={3} value={bulgular}
                           onChange={e => setBulgular(e.target.value)} /></label>
               <label>
-                <span>Tetkikler
-                  <i className="taslak-rozet">order'lardan derlendi · hekim düzenleyebilir</i>
+                <span>{c('Tetkikler')}<i className="taslak-rozet">order'lardan derlendi · hekim düzenleyebilir</i>
                 </span>
                 <textarea rows={4} value={tetkikOzet}
                           onChange={e => setTetkikOzet(e.target.value)} />
               </label>
-              <label><span>Tedavi ve klinik seyir</span>
+              <label><span>{c('Tedavi ve klinik seyir')}</span>
                 <textarea rows={4} value={tedavi}
                           onChange={e => setTedavi(e.target.value)} /></label>
-              <label><span>Çıkış durumu</span>
+              <label><span>{c('Çıkış durumu')}</span>
                 <textarea rows={2} value={seyir}
                           onChange={e => setSeyir(e.target.value)} /></label>
             </div>
@@ -333,7 +333,7 @@ export function TaburcuModali({ yatisId, onKapat, onTamam }: {
               </span>
             </div>
             <div className="not">
-              <b>Epikriz yatış boyunca birikir</b>, çıkış saatinde sıfırdan yazılmaz: altı
+              <b>{c('Epikriz yatış boyunca birikir')}</b>, çıkış saatinde sıfırdan yazılmaz: altı
               günlük seyri son anda hatırlamak, epikrizi "yatırıldı, tedavi edildi, taburcu
               edildi" cümlesine indirger. Tetkik özeti <b>derlenmiş bir taslaktır</b> —
               hekim düzenlemeden epikrize girmiş sayılmaz.
@@ -347,7 +347,7 @@ export function TaburcuModali({ yatisId, onKapat, onTamam }: {
             <table className="izlem-tablo">
               <thead>
                 <tr><th>İlaç</th><th>Doz</th><th>Yol</th><th>Süre</th>
-                    <th>Kullanım notu</th><th>Kaynak</th><th /></tr>
+                    <th>{c('Kullanım notu')}</th><th>Kaynak</th><th /></tr>
               </thead>
               <tbody>
                 {ilaclar.length === 0 && (
@@ -396,12 +396,12 @@ export function TaburcuModali({ yatisId, onKapat, onTamam }: {
 
             <div className="alan-izgara" style={{ marginTop: 8 }}>
               <label className="alan">
-                <span className="etiket">Kontrol tarihi</span>
+                <span className="etiket">{c('Kontrol tarihi')}</span>
                 <input type="date" value={kontrolTarihi}
                        onChange={e => setKontrolTarihi(e.target.value)} />
               </label>
               <label className="alan" style={{ gridColumn: '1 / -1' }}>
-                <span className="etiket">Öneriler</span>
+                <span className="etiket">{c('Öneriler')}</span>
                 <input value={oneriler} onChange={e => setOneriler(e.target.value)}
                        placeholder="örn. bol sıvı, ateş tekrarında acile başvuru" />
               </label>
@@ -410,7 +410,7 @@ export function TaburcuModali({ yatisId, onKapat, onTamam }: {
             <div className="not">
               Çıkış reçetesi <b>evde kullandığı ilaçlarla birlikte</b> çıkar: yalnız yeni
               yazılanları göstermek, hastanın kendi ilacını kesip kesmeyeceğini belirsiz
-              bırakır. <b>Kontrol randevusu taburcuyla birlikte açılır</b> — "on gün sonra
+              bırakır. <b>{c('Kontrol randevusu taburcuyla birlikte açılır')}</b> — "on gün sonra
               gelin" denip randevu verilmeyen hastanın yarısı gelmez.
             </div>
           </>
@@ -424,16 +424,16 @@ export function TaburcuModali({ yatisId, onKapat, onTamam }: {
                 <div className="kagrup">
                   <h6>Toplam <span>hizmet icmalinden</span></h6>
                   <div className="ic">
-                    <div className="sat"><span>Hizmet toplamı</span>
+                    <div className="sat"><span>{c('Hizmet toplamı')}</span>
                       <b>{paraYaz(t.hizmet)}</b></div>
-                    <div className="sat"><span>Kurum payı</span>
+                    <div className="sat"><span>{c('Kurum payı')}</span>
                       <b>{paraYaz(t.kurum)}
                         <span className="sonuk"> {t.kurumVar
                           ? (t.provizyonVar ? '· provizyonlu' : '· provizyon yok')
                           : '· ödeyen kurum yok'}</span></b></div>
-                    <div className="sat"><span>Hasta payı</span>
+                    <div className="sat"><span>{c('Hasta payı')}</span>
                       <b>{paraYaz(t.hasta)}</b></div>
-                    <div className="sat"><span>Faturalanmamış</span>
+                    <div className="sat"><span>{c('Faturalanmamış')}</span>
                       <b>{paraYaz(t.faturalanmamis)}
                         {t.faturalanmamis > 0 && (
                           <span className="rozet sari"> faturaya alınmalı</span>
@@ -441,19 +441,19 @@ export function TaburcuModali({ yatisId, onKapat, onTamam }: {
                   </div>
                 </div>
                 <div className="kagrup">
-                  <h6>Kapanış adımları</h6>
+                  <h6>{c('Kapanış adımları')}</h6>
                   <div className="ic">
                     <div className="sat"><span>Yatak</span>
                       <b>{o?.yatak || '—'} → <span className="rozet sari">temizlik bekliyor</span></b></div>
-                    <div className="sat"><span>Açık order'lar</span>
+                    <div className="sat"><span>{c('Açık order\'lar')}</span>
                       <b>taburcuda kapanır · bekleyen dozlar "atlandı"</b></div>
-                    <div className="sat"><span>Provizyon</span>
+                    <div className="sat"><span>{c('Provizyon')}</span>
                       <b>{t.provizyonVar ? 'çıkış bildirimiyle kapanır' : 'alınmamış'}</b></div>
-                    <div className="sat"><span>Yatak ücreti</span>
+                    <div className="sat"><span>{c('Yatak ücreti')}</span>
                       <b>gün sonu işinde birikir · taburcuda toplu hesaplanmaz</b></div>
                   </div>
                   <div className="not">
-                    <b>Yatak ücreti gün sonu işinde birikir</b>, taburcuda toplu
+                    <b>{c('Yatak ücreti gün sonu işinde birikir')}</b>, taburcuda toplu
                     hesaplanmaz: on günlük yatışta fatura son gün üretilseydi ara
                     provizyon, iskonto ve paket kontrolü hep geç kalırdı. Taburcu yalnız
                     <b> kapanıştır</b>.
@@ -461,7 +461,7 @@ export function TaburcuModali({ yatisId, onKapat, onTamam }: {
                 </div>
               </>
             ) : (
-              <div className="sonuk" style={{ padding: 10 }}>İcmal okunamadı.</div>
+              <div className="sonuk" style={{ padding: 10 }}>{c('İcmal okunamadı.')}</div>
             )}
           </>
         )}

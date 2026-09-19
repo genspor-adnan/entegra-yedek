@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
 import { guvenli } from './mesaj';
+import { c } from '../dil/ceviri';
 
 /**
  * BÖLÜM SÜZGECİ (kullanıcı: "personel listesinde aktif/pasif/durum sağına
@@ -96,14 +97,14 @@ export function BolumSuzgeci({ deger, onDegis, izinliIdler }: {
 
   return (
     <select className="kat-suzgec" value={deger === null ? '' : String(deger)}
-            title="Bölüme göre süz (alt birimler dâhil)"
+            title={c('Bölüme göre süz (alt birimler dâhil)')}
             onChange={e => {
               const v = e.target.value;
               if (v === '') { onDegis(null, []); return }
               const id = Number(v);
               onDegis(id, altAgac(id));
             }}>
-      <option value="">Tüm Bölümler</option>
+      <option value="">{c('Tüm Bölümler')}</option>
       {secenekler.map(s => <option key={s.id} value={s.id}>{s.etiket}</option>)}
     </select>
   );

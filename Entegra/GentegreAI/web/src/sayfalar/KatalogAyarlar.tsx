@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { guvenli, mesaj } from '../bilesenler/mesaj';
 import { tarihSaat } from '../bilesenler/bicim';
+import { c } from '../dil/ceviri';
 
 interface KatalogDurumu {
   kod: string;
@@ -96,10 +97,10 @@ export function KatalogAyarlar() {
         </h6>
         <div className="not">
           {aciklama}
-          <br /><b>Sütunlar:</b> <code>{sutunlar}</code> — ayraç <code>;</code>,
+          <br /><b>{c('Sütunlar:')}</b> <code>{sutunlar}</code> — ayraç <code>;</code>,
           sekme ya da <code>,</code> olabilir; başlık satırı varsa atlanır.
           <br />
-          <b>Son güncelleme:</b>{' '}
+          <b>{c('Son güncelleme:')}</b>{' '}
           {d?.sonCalisma ? tarihSaat(d.sonCalisma) : 'hiç çalışmadı'}
           {d?.sonuc ? ` — ${d.sonuc}` : ''}
         </div>
@@ -114,7 +115,7 @@ export function KatalogAyarlar() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Klinik Kataloglar</h1>
-          <span className="yol">Yönetim › Ortak Platform › Klinik Kataloglar</span>
+          <span className="yol">{c('Yönetim › Ortak Platform › Klinik Kataloglar')}</span>
         </div>
       </div>
 
@@ -133,7 +134,7 @@ export function KatalogAyarlar() {
             ilacDosya, 'ilac')}
 
       <div className="not" style={{ margin: 12 }}>
-        <b>Yükleme birleştirir, silmez:</b> var olan kod güncellenir, olmayan
+        <b>{c('Yükleme birleştirir, silmez:')}</b> var olan kod güncellenir, olmayan
         eklenir. Dosyada bulunmayan kod <b>pasife çekilmez</b> — eksik bir dosya
         yüzünden binlerce tanının kaybolması, ertesi gün “tanı bulunamıyor”
         olarak geri gelirdi.

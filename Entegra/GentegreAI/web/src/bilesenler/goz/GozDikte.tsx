@@ -5,6 +5,7 @@ import type { DikteSozlugu } from '../../api/uclar/goz';
 import { Modal } from '../Modal';
 import { mesaj, metinSor } from '../mesaj';
 import { dikteAyristir, duzelt, guvenliMi } from './dikteMotoru';
+import { c as cev } from '../../dil/ceviri';
 
 /**
  * DİKTE (705) — mockup `Ekranlar/Goz/goz_dikte.html`.
@@ -401,7 +402,7 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
            alt={
              <>
                {dinliyor
-                 ? <button className="d sil" onClick={dur}>⏹ Durdur</button>
+                 ? <button className="d sil" onClick={dur}>{cev('⏹ Durdur')}</button>
                  : <button className="d" onClick={basla}
                            disabled={!guvenli.current || !destekli.current}
                            title={guvenli.current ? '' : 'https ya da localhost gerekir'}>
@@ -410,7 +411,7 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
                <button className="d onay" disabled={yaziyor || !metin.trim()}
                        onClick={() => void yaz()}>✔ Onayla ve alana yaz</button>
                <button className="d kapat-dugmesi"
-                       onClick={() => { dur(); onKapat() }}>✖ Kapat</button>
+                       onClick={() => { dur(); onKapat() }}>{cev('✖ Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}
@@ -478,8 +479,8 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
         )}
         <select value={dil} disabled={dinliyor} title="tanıma dili (teşhis için)"
                 onChange={e => setDil(e.target.value)}>
-          <option value="tr-TR">Türkçe</option>
-          <option value="en-US">English (deneme)</option>
+          <option value="tr-TR">{cev('Türkçe')}</option>
+          <option value="en-US">{cev('English (deneme)')}</option>
         </select>
         <span className="sonuk">
           Hedef: <b>{hedefAdi(hedef)}</b>
@@ -495,7 +496,7 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
 
       <div className="dikte-duzen">
         <div className="dikte-sol">
-          <div className="pb">Hedef alan</div>
+          <div className="pb">{cev('Hedef alan')}</div>
           {(sozluk?.hedefler ?? []).map(h => (
             <button key={h.kod} type="button"
                     className={`dikte-alan${hedef === h.kod ? ' secili' : ''}`}
@@ -505,7 +506,7 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
             </button>
           ))}
 
-          <div className="pb">Dikteye kapalı</div>
+          <div className="pb">{cev('Dikteye kapalı')}</div>
           {(sozluk?.kapali ?? []).map(k => (
             <div key={k.ad} className="dikte-alan kilit">🔒 {k.ad}
               <span className="sp">{k.neden}</span></div>
@@ -518,9 +519,9 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
         </div>
 
         <div className="dikte-orta">
-          <div className="pb">Canlı transkript <span className="sp">ham</span></div>
+          <div className="pb">{cev('Canlı transkript')}<span className="sp">ham</span></div>
           <div className="dikte-transkript">
-            {ham || <span className="sonuk">Mikrofonu açıp konuşun ya da metni elle yazın.</span>}
+            {ham || <span className="sonuk">{cev('Mikrofonu açıp konuşun ya da metni elle yazın.')}</span>}
             {gecici && <span className="gecici"> {gecici}</span>}
             {dinliyor && <span className="imlec" />}
           </div>
@@ -528,7 +529,7 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
           <div className="pb">Düzeltilmiş metin
             <span className="sp">terim sözlüğü · noktalama uygulandı</span></div>
           <textarea className="dikte-metin" rows={5} value={metin}
-                    placeholder="Onaylanacak metin burada."
+                    placeholder={cev('Onaylanacak metin burada.')}
                     onChange={e => setMetin(e.target.value)} />
 
           <div className="dikte-arac">
@@ -536,8 +537,8 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
               <span className="etiket">Göz</span>
               <select value={goz} disabled={!gozGerekir}
                       onChange={e => setGoz(Number(e.target.value))}>
-                <option value={1}>OD · Sağ</option>
-                <option value={2}>OS · Sol</option>
+                <option value={1}>{cev('OD · Sağ')}</option>
+                <option value={2}>{cev('OS · Sol')}</option>
               </select>
             </label>
             <span className="sonuk">
@@ -546,11 +547,11 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
             <button className="d" onClick={() => { setMetin(''); setHam('') }}>🗑 Temizle</button>
           </div>
 
-          <div className="pb">Oturum dökümü</div>
+          <div className="pb">{cev('Oturum dökümü')}</div>
           <div className="dikte-dokum">
             <table>
               <thead><tr><th>Saat</th><th>Hedef</th><th>Metin</th>
-                <th className="orta">Güven</th><th className="orta">Durum</th></tr></thead>
+                <th className="orta">{cev('Güven')}</th><th className="orta">Durum</th></tr></thead>
               <tbody>
                 {dokum.map((d, i) => (
                   <tr key={i}>
@@ -564,7 +565,7 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
                   </tr>
                 ))}
                 {dokum.length === 0 && (
-                  <tr><td colSpan={5} className="sonuk">Henüz bir şey yazılmadı.</td></tr>
+                  <tr><td colSpan={5} className="sonuk">{cev('Henüz bir şey yazılmadı.')}</td></tr>
                 )}
               </tbody>
             </table>
@@ -572,7 +573,7 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
         </div>
 
         <div className="dikte-sag">
-          <div className="pb">Sesli komutlar</div>
+          <div className="pb">{cev('Sesli komutlar')}</div>
           {(sozluk?.komutlar ?? []).map(k => (
             <div key={k.id} className="dikte-komut">
               <b>"{k.soylenen}"</b>
@@ -580,7 +581,7 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
             </div>
           ))}
 
-          <div className="pb">Sık cümleler</div>
+          <div className="pb">{cev('Sık cümleler')}</div>
           {(sozluk?.cumleler ?? []).map(c => (
             <button key={c.id} type="button" className="dikte-cumle"
                     onClick={() => setMetin(m => duzelt(m ? `${m} ${c.yazilan}` : c.yazilan))}>
@@ -588,7 +589,7 @@ export function GozDikte({ gozMuayeneId, onKapat, onTamam }: {
             </button>
           ))}
 
-          <div className="pb">Terim sözlüğü <span className="sp">kurum + kişisel</span></div>
+          <div className="pb">{cev('Terim sözlüğü')}<span className="sp">kurum + kişisel</span></div>
           {(sozluk?.terimler ?? []).slice(0, 12).map(t => (
             <div key={t.id} className="dikte-komut">
               "{t.soylenen}" → <b>{t.yazilan}</b>

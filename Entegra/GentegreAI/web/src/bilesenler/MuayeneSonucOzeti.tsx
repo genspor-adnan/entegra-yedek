@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
+import { c } from '../dil/ceviri';
 
 /**
  * MUAYENE › BUGÜNKÜ SONUÇLAR (461) — mockup `muayene_karti.html` sağ
@@ -78,8 +79,8 @@ export function MuayeneSonucOzeti({ muayeneId }: { muayeneId: number }) {
       ) : (
         <table className="detay-tablo">
           <thead>
-            <tr><th>Tetkik</th><th className="sag">Sonuç</th><th>Ref.</th>
-              <th className="orta">Bayrak</th></tr>
+            <tr><th>Tetkik</th><th className="sag">Sonuç</th><th>{c('Ref.')}</th>
+              <th className="orta">{c('Bayrak')}</th></tr>
           </thead>
           <tbody>
             {sirali.slice(0, 12).map((s, i) => {

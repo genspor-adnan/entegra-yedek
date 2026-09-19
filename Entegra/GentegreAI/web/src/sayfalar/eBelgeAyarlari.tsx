@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { type ListeSatiri } from '../api/sozlesme';
+import { c } from '../dil/ceviri';
 
 /**
  * e-BELGE AYARLARI (Yönetim › Ayarlar › Satış Belgeleri › e-Belge).
@@ -44,11 +45,11 @@ export function EBelgeAyarlari() {
     <>
       {!anaSalter && (
         <div className="bilgi-kutusu" style={{ marginTop: 8 }}>
-          <b>e-Belge kapalı.</b> Hiçbir şubede <b>e-Fatura Mükellefi</b> işaretli
+          <b>e-Belge kapalı.</b>{c('Hiçbir şubede')}<b>{c('e-Fatura Mükellefi')}</b> işaretli
           değil; belge GİB'e gönderilmez ve fatura/irsaliye numarası her zaman
           <b> Belge No</b> şablonundan verilir. Açmak için
-          <b> Yönetim › Firma / Şubeler</b> → şubeyi açın →
-          <b> e-Belge › Genel</b> sekmesinde <b>e-Fatura Mükellefi</b> kutusunu
+          <b>{c('Yönetim › Firma / Şubeler')}</b> → şubeyi açın →
+          <b> e-Belge › Genel</b> sekmesinde <b>{c('e-Fatura Mükellefi')}</b> kutusunu
           işaretleyin.
         </div>
       )}
@@ -59,18 +60,18 @@ export function EBelgeAyarlari() {
               geneli tek hesap tutulsaydi cok mukellefli kurulum imkansizdi.
               Ana salter burada kaliyor: e-Belge'yi tumden acip kapatir. */}
           <div className="kagrup">
-            <h6>Mükellef Hesabı</h6>
+            <h6>{c('Mükellef Hesabı')}</h6>
             <div className="not">
               Entegratör, kullanıcı/şifre, test ortamı ve mükellefiyet bilgileri
               artık <b>şube kaydında</b> tutuluyor:
-              <b> Yönetim › Firma / Şubeler</b> → şubeyi açın →
+              <b>{c('Yönetim › Firma / Şubeler')}</b> → şubeyi açın →
               <b> e-Belge</b> sekmesi. Böylece ayrı VKN’li şube kendi entegratör
               hesabıyla, merkezin kimliğini kullanan şube merkezin hesabıyla gönderir.
             </div>
             {mukellefOzet.length > 0 && (
               <table className="grid" style={{ marginTop: 8 }}>
                 <thead>
-                  <tr><th>Şube</th><th>Ünvan</th><th>VKN</th><th>Entegratör</th>
+                  <tr><th>Şube</th><th>Ünvan</th><th>{c('VKN')}</th><th>{c('Entegratör')}</th>
                       <th style={{ textAlign: 'center' }}>e-Fatura Mük.</th>
                       <th style={{ textAlign: 'center' }}>Ortam</th></tr>
                 </thead>
@@ -103,10 +104,10 @@ export function EBelgeAyarlari() {
       <div className="not">
         Entegratör hesabı, seri kuralları, XSLT şablonları ve tür ayarları
         (e-Fatura · e-Arşiv · e-İrsaliye · e-SMM) artık
-        <b> Yönetim › Firma / Şubeler</b> → şubeyi açın →
+        <b>{c('Yönetim › Firma / Şubeler')}</b> → şubeyi açın →
         <b> e-Belge</b> sekmesinde. Burada yalnızca <b>ana şalter</b> kaldı:
         kapalıyken hiçbir belge GİB'e gitmez.
-        <b> Alan Eşleştirme</b> tablosu henüz taşınmadı.
+        <b>{c('Alan Eşleştirme')}</b> tablosu henüz taşınmadı.
       </div>
     </>
   );

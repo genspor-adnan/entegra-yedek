@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { tarihSaat } from './bicim';
+import { c } from '../dil/ceviri';
 
 /**
  * e-NABIZ PAKET KARTI (454) — kuyruk satırının altında açılan detay.
@@ -55,7 +56,7 @@ export function EnabizPaketPaneli({ paketId }: { paketId: number }) {
   }, [paketId]);
 
   if (hata) return <div className="hata-kutusu">{hata}</div>;
-  if (!paket) return <div className="kagrup"><div className="bos">Paket okunuyor…</div></div>;
+  if (!paket) return <div className="kagrup"><div className="bos">{c('Paket okunuyor…')}</div></div>;
 
   const durum = sayi(paket.durum);
   const eksikSayisi = alanlar.filter(a => sayi(a.gecerli) === 0).length;
@@ -76,7 +77,7 @@ export function EnabizPaketPaneli({ paketId }: { paketId: number }) {
         <table className="detay-tablo">
           <thead><tr>
             <th style={{ width: 34 }} />
-            <th>USS Alanı</th><th>Değer</th><th>Kaynak</th><th>SKRS Listesi</th>
+            <th>{c('USS Alanı')}</th><th>Değer</th><th>Kaynak</th><th>SKRS Listesi</th>
           </tr></thead>
           <tbody>
             {alanlar.map((a, i) => {
@@ -96,7 +97,7 @@ export function EnabizPaketPaneli({ paketId }: { paketId: number }) {
               );
             })}
             {alanlar.length === 0 && (
-              <tr><td colSpan={5} className="bos">Paket alanı yok.</td></tr>
+              <tr><td colSpan={5} className="bos">{c('Paket alanı yok.')}</td></tr>
             )}
           </tbody>
         </table>
@@ -104,7 +105,7 @@ export function EnabizPaketPaneli({ paketId }: { paketId: number }) {
         {eksikSayisi > 0 && (
           <div className="not">
             {eksikSayisi} alan eksik. Düzeltme KAYNAKTA yapılır (hasta kartı,
-            başvuru, muayene); sonra araç çubuğundan <b>Yeniden Üret</b>.
+            başvuru, muayene); sonra araç çubuğundan <b>{c('Yeniden Üret')}</b>.
           </div>
         )}
       </div>
@@ -116,7 +117,7 @@ export function EnabizPaketPaneli({ paketId }: { paketId: number }) {
 
         <table className="detay-tablo">
           <thead><tr>
-            <th>Zaman</th><th className="orta">Sonuç</th><th>USS Yanıtı</th>
+            <th>Zaman</th><th className="orta">Sonuç</th><th>{c('USS Yanıtı')}</th>
             <th className="sag">Süre</th>
           </tr></thead>
           <tbody>
@@ -133,7 +134,7 @@ export function EnabizPaketPaneli({ paketId }: { paketId: number }) {
               </tr>
             ))}
             {denemeler.length === 0 && (
-              <tr><td colSpan={4} className="bos">Henüz gönderim denemesi yok.</td></tr>
+              <tr><td colSpan={4} className="bos">{c('Henüz gönderim denemesi yok.')}</td></tr>
             )}
           </tbody>
         </table>

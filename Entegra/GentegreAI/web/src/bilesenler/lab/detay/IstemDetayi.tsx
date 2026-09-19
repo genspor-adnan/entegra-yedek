@@ -6,6 +6,7 @@ import {
   bayrakSinifi, referansMetni, tup,
 } from '../../labKodlari';
 import { dizi, metin, kodEki, TupRozeti, tatMetni } from './ortak';
+import { c } from '../../../dil/ceviri';
 
 /** Panelde cizilen sunucu kaydi - alanlar kaynaga gore degisir. */
 type Kayit = Record<string, unknown>;
@@ -151,7 +152,7 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
                                 </span>
                               : '—'}
                             {Number(s.deltaUyari ?? 0) === 1 && (
-                              <span className="not" title="Önceki sonuçtan belirgin sapma"> Δ</span>
+                              <span className="not" title={c('Önceki sonuçtan belirgin sapma')}> Δ</span>
                             )}
                           </td>
                           <td className="orta not">
@@ -174,7 +175,7 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
                                 : '—'}
                             {Number(s.tekrarNo ?? 0) > 0 && (
                               <span className="rozet uyari" style={{ marginLeft: 4 }}
-                                    title="Düzeltilmiş sonuç">
+                                    title={c('Düzeltilmiş sonuç')}>
                                 {Number(s.tekrarNo)}. düzeltme
                               </span>
                             )}
@@ -221,16 +222,16 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
                   <th>Bölüm</th><th>Tetkik</th>
                   {sonucGorunumu ? (
                     <>
-                      <th>Tüp / Barkod</th>
+                      <th>{c('Tüp / Barkod')}</th>
                       <th className="sag">Sonuç</th><th>Birim</th><th>Referans</th>
-                      <th className="orta">Bayrak</th><th className="orta">Ölçüm</th>
+                      <th className="orta">{c('Bayrak')}</th><th className="orta">Ölçüm</th>
                       <th className="orta">Giriş</th>
                     </>
                   ) : (
                     <>
                       <th>Numune</th><th>Tüp</th><th className="orta">Barkod</th>
-                      <th className="orta">Alındı</th><th className="orta">Kabul</th>
-                      <th className="orta">Hedef TAT</th><th className="orta">Cihaz</th>
+                      <th className="orta">{c('Alındı')}</th><th className="orta">{c('Kabul')}</th>
+                      <th className="orta">{c('Hedef TAT')}</th><th className="orta">Cihaz</th>
                     </>
                   )}
                   <th className="orta">Durum</th>
@@ -272,7 +273,7 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
                   </Fragment>
                 ))}
                 {satirlar.length === 0 && (
-                  <tr><td colSpan={10} className="not">Bu istemde tetkik yok.</td></tr>
+                  <tr><td colSpan={10} className="not">{c('Bu istemde tetkik yok.')}</td></tr>
                 )}
               </tbody>
             </table>
@@ -304,9 +305,9 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
               {metin(veri.kimlik) && <span className="rozet mavi">{metin(veri.kimlik)}</span>}
             </div>
             <div className="alt">
-              {metin(veri.dosyaNo) && <span>Dosya <b>{metin(veri.dosyaNo)}</b></span>}
+              {metin(veri.dosyaNo) && <span>{c('Dosya')}<b>{metin(veri.dosyaNo)}</b></span>}
               {metin(veri.protokol) && <span>Protokol <b>{metin(veri.protokol)}</b></span>}
-              {metin(veri.kanGrubu) && <span>Kan grubu <b>{metin(veri.kanGrubu)}</b></span>}
+              {metin(veri.kanGrubu) && <span>{c('Kan grubu')}<b>{metin(veri.kanGrubu)}</b></span>}
             </div>
           </div>
           {/* UYARI BANDI: numune alımını ya da sonucun yorumunu değiştiren
@@ -324,7 +325,7 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
           )}
           <div className="lab-alanlar">
             <div className="fld" style={{ gridColumn: '1 / -1' }}>
-              <label>Klinik bilgi / tanı</label>
+              <label>{c('Klinik bilgi / tanı')}</label>
               <div className="deger">
                 {metin(veri.klinik) || '—'}
                 {metin(veri.tani) ? ` · ${metin(veri.tani)}` : ''}
@@ -334,7 +335,7 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
                 koşul sağlanmadıysa sonuç yorumlanamaz, bankonun kan almadan
                 ÖNCE görmesi gerekir. */}
             <div className="fld" style={{ gridColumn: '1 / -1' }}>
-              <label>Açlık / hazırlık</label>
+              <label>{c('Açlık / hazırlık')}</label>
               <div className="deger">
                 {metin(veri.hazirlik) || <span className="not">özel hazırlık gerekmiyor</span>}
               </div>
@@ -353,35 +354,35 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
               </div>
             </div>
             <div className="fld">
-              <label>İstem zamanı</label>
+              <label>{c('İstem zamanı')}</label>
               <div className="deger">{veri.tarih ? tarihSaat(veri.tarih) : '—'}</div>
             </div>
             {/* ALAN + YER birlikte (mockup "Hemşire N. Koç · Kan alma 2"):
                 numunenin nerede alındığı kalite tartışmasının ilk sorusu. */}
             <div className="fld">
-              <label>Numune alan</label>
+              <label>{c('Numune alan')}</label>
               <div className="deger">
                 {alan || <span className="not">—</span>}
                 {alimYeri && <span className="not">· {alimYeri}</span>}
               </div>
             </div>
             <div className="fld">
-              <label>Alım zamanı</label>
+              <label>{c('Alım zamanı')}</label>
               <div className="deger">{alimZamani ? tarihSaat(alimZamani) : '—'}</div>
             </div>
             {/* KALİTE sonucun güvenilirlik kaydıdır: hemolizli tüpten çıkan
                 potasyum, laboratuvarın değil numunenin sonucudur. */}
             <div className="fld">
-              <label>Numune kalitesi</label>
+              <label>{c('Numune kalitesi')}</label>
               <div className="deger">
                 {kalite ? (kalite === 1
-                            ? <span className="rozet olumlu">Uygun</span>
+                            ? <span className="rozet olumlu">{c('Uygun')}</span>
                             : <span className="rozet uyari">{KALITE[kalite] ?? ''}</span>)
                         : <span className="not">—</span>}
               </div>
             </div>
             <div className="fld">
-              <label>Saklama</label>
+              <label>{c('Saklama')}</label>
               <div className="deger">
                 {saklama || <span className="not">—</span>}
               </div>
@@ -390,7 +391,7 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
                 kırmızı - hemolizli tüpten çıkan potasyum numunenin sonucudur,
                 laboratuvarın değil. */}
             <div className="fld" style={{ gridColumn: '1 / -1' }}>
-              <label>Serum indeksi</label>
+              <label>{c('Serum indeksi')}</label>
               <div className="deger">
                 {indeksVar ? (
                   <span className="lab-sir">
@@ -450,9 +451,7 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
         {/* ETİKETLER: mockup'taki tüp kutucukları. Tüp rengi metinden önce
             gelir - teknisyen rafta rengi arar. */}
         <div className="kagrup">
-          <h6>
-            Etiketler
-            <span className="sp">{numuneler.length} numune</span>
+          <h6>{c('Etiketler')}<span className="sp">{numuneler.length} numune</span>
             {/* Mockup'ta bu kutunun altında "Etiketleri Bas" duruyor: tüp
                 planı burada görünüyor, etiket de buradan basılmalı. */}
             <button className="d"
@@ -480,7 +479,7 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
                   </span>
                   <span>
                     {n.ret
-                      ? <span className="rozet hata">Ret</span>
+                      ? <span className="rozet hata">{c('Ret')}</span>
                       : <span className="rozet gri">
                           {NUMUNE_DURUM[Number(n.durum ?? 1)] ?? ''}
                         </span>}
@@ -508,7 +507,7 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
             açtırmak, kararı geciktirirdi. */}
         {oncekiler.length > 0 && (
           <div className="kagrup">
-            <h6>Son laboratuvar<span className="sp">aynı hasta</span></h6>
+            <h6>{c('Son laboratuvar')}<span className="sp">aynı hasta</span></h6>
             <div className="ic sonuk lab-onceki">
               {oncekiler.map((o, i) => {
                 const bayrak = metin(o.bayrak);
@@ -535,7 +534,7 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
           <h6>Kurallar</h6>
           <div className="ic sonuk">
             Aynı numune tipi/tüp tek barkodda birleşir. Acil istemde etiket
-            kırmızı, cihazda STAT önceliklidir. <b>TAT kabul anında başlar.</b>{' '}
+            kırmızı, cihazda STAT önceliklidir. <b>{c('TAT kabul anında başlar.')}</b>{' '}
             Ret'te isteyen hekime bildirim gider ve tetkikler “tekrar numune”
             durumuna düşer. Dış istemde numune kurye ile gelir (sıcaklık kaydı).
           </div>

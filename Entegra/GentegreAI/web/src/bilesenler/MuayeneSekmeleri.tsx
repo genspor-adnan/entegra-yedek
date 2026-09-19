@@ -5,6 +5,7 @@ import { hataMetni } from '../api/sozlesme';
 import { KaynakArama } from './KaynakArama';
 import { guvenli, mesaj, onay } from './mesaj';
 import { tarihSaat, para } from './bicim';
+import { c } from '../dil/ceviri';
 
 /**
  * MUAYENE KARTININ EK SEKMELERİ (mockup `muayene_karti.html`):
@@ -157,12 +158,12 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tanilar, tazele }:
           </h6>
           <div className="recete-baslik">
             <div className="rb-kutu">
-              <div className="rb-etiket">Reçete türü</div>
-              <div className="rb-deger">Normal</div>
+              <div className="rb-etiket">{c('Reçete türü')}</div>
+              <div className="rb-deger">{c('Normal')}</div>
             </div>
             <div className="rb-kutu">
-              <div className="rb-etiket">Provizyon</div>
-              <div className="rb-deger sonuk">Medula kapısı açık değil</div>
+              <div className="rb-etiket">{c('Provizyon')}</div>
+              <div className="rb-deger sonuk">{c('Medula kapısı açık değil')}</div>
             </div>
             <div className="rb-kutu">
               <div className="rb-etiket">Tanı</div>
@@ -176,7 +177,7 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tanilar, tazele }:
           <table className="detay-tablo">
             <thead>
               <tr>
-                <th>İlaç (barkod)</th><th>Doz</th><th>Periyot</th>
+                <th>{c('İlaç (barkod)')}</th><th>Doz</th><th>Periyot</th>
                 <th>Kullanım</th><th className="hiza-orta">Süre</th>
                 <th className="hiza-sag">Kutu</th><th>Not</th>
               </tr>
@@ -220,11 +221,11 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tanilar, tazele }:
             {/* MOCKUP BASLIK IZGARASI: tur · provizyon · tani · aciklama */}
             <div className="recete-baslik">
               <div className="rb-kutu">
-                <div className="rb-etiket">Reçete türü</div>
+                <div className="rb-etiket">{c('Reçete türü')}</div>
                 <div className="rb-deger">{RECETE_TUR[sayi(r.tur)] ?? '—'}</div>
               </div>
               <div className="rb-kutu">
-                <div className="rb-etiket">Provizyon</div>
+                <div className="rb-etiket">{c('Provizyon')}</div>
                 <div className="rb-deger sonuk">
                   {metin(r.medulaSonuc) || 'Medula kapısı açık değil'}
                 </div>
@@ -244,14 +245,14 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tanilar, tazele }:
             <table className="detay-tablo">
               <thead>
                 <tr>
-                  <th>İlaç (barkod)</th><th>Doz</th><th>Periyot</th>
+                  <th>{c('İlaç (barkod)')}</th><th>Doz</th><th>Periyot</th>
                   <th>Kullanım</th><th className="hiza-orta">Süre</th>
                   <th className="hiza-sag">Kutu</th><th>Not</th><th />
                 </tr>
               </thead>
               <tbody>
                 {satirlar.length === 0 && (
-                  <tr><td colSpan={8} className="bos">İlaç yok</td></tr>
+                  <tr><td colSpan={8} className="bos">{c('İlaç yok')}</td></tr>
                 )}
                 {satirlar.map((s, i) => (
                   <tr key={i}>
@@ -268,7 +269,7 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tanilar, tazele }:
                     <td>
                       {metin(s.aciklama)}
                       {metin(s.uyari) && (
-                        <span className="rozet hata" title="Uyarı gerekçesiyle geçildi">
+                        <span className="rozet hata" title={c('Uyarı gerekçesiyle geçildi')}>
                           {metin(s.uyari).slice(0, 40)}
                         </span>
                       )}
@@ -276,7 +277,7 @@ export function MuayeneReceteSekmesi({ veri, hata, muayeneId, tanilar, tazele }:
                     <td className="hiza-orta">
                       {/* IMZALI RECETEDEN ILAC CIKARILMAZ (kural uçta). */}
                       {durum === 1 && (
-                        <button type="button" className="d teh ikon-dugme" title="İlacı çıkar"
+                        <button type="button" className="d teh ikon-dugme" title={c('İlacı çıkar')}
                                 onClick={() => void guvenli(async () => {
                                   const y = await api.receteIlacSil(id, sayi(s.id));
                                   mesaj(y.mesaj);
@@ -329,7 +330,7 @@ export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik }:
              konsultasyon muayenesinde durur. */
           <table className="detay-tablo">
             <thead>
-              <tr><th>Branş / Hekim</th><th>Soru</th>
+              <tr><th>{c('Branş / Hekim')}</th><th>Soru</th>
                   <th className="hiza-orta">İstem</th><th>Yanıt</th>
                   <th className="hiza-orta">Durum</th><th /></tr>
             </thead>
@@ -346,7 +347,7 @@ export function MuayeneKonsultasyonSekmesi({ veri, hata, icerik }:
                     <td>
                       {yanit ? yanit.slice(0, 120) : <span className="sonuk">bekliyor</span>}
                       {metin(k.anaTani) && (
-                        <span className="rozet olumlu" title="Konsültasyon tanısı">
+                        <span className="rozet olumlu" title={c('Konsültasyon tanısı')}>
                           {metin(k.anaTani)}
                         </span>
                       )}
@@ -475,7 +476,7 @@ export function MuayeneGecmisSekmesi({ veri, hata, muayeneId, tazele }:
               <span className="not">{veri?.gecmis.length ?? 0} kayıt</span>
             </h6>
             {veri && veri.gecmis.length === 0 ? (
-              <p className="not ic">Bu hastanın başka muayenesi yok.</p>
+              <p className="not ic">{c('Bu hastanın başka muayenesi yok.')}</p>
             ) : (
               <table className="detay-tablo">
                 <thead>
@@ -492,10 +493,10 @@ export function MuayeneGecmisSekmesi({ veri, hata, muayeneId, tazele }:
                       <td>{metin(g.tanilar) || <span className="sonuk">—</span>}</td>
                       <td>{metin(g.ozet) || <span className="sonuk">—</span>}</td>
                       <td className="hiza-orta" style={{ whiteSpace: 'nowrap' }}>
-                        <button type="button" className="d ikon-dugme" title="Muayeneyi aç"
+                        <button type="button" className="d ikon-dugme" title={c('Muayeneyi aç')}
                                 onClick={() => git(`/muayene/${sayi(g.id)}`)}>📂</button>
                         <button type="button" className="d ikon-dugme"
-                                title="Anamnez ve tanıları bu muayeneye kopyala"
+                                title={c('Anamnez ve tanıları bu muayeneye kopyala')}
                                 onClick={() => void kopyala(sayi(g.id))}>↺</button>
                       </td>
                     </tr>

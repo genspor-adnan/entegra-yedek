@@ -1,6 +1,7 @@
 import type { IskontoTalebi } from '../../api/sozlesme';
 import { para, tarihSaat } from '../../bilesenler/bicim';
 import { DURUM_ROZET, dakikaFarki, indirim, sure } from './ortak';
+import { c } from '../../dil/ceviri';
 
 /**
  * TALEP DETAYI — kalem kırılımı, gerekçe ve KARAR paneli.
@@ -52,7 +53,7 @@ export function TalepDetayi({ talep, tavan, kararOran, setKararOran,
                   <th>Hizmet</th>
                   <th className="hiza-sag" style={{ width: 110 }}>Tutar</th>
                   <th className="hiza-sag" style={{ width: 90 }}>İstenen</th>
-                  <th className="hiza-sag" style={{ width: 110 }}>İnd. tutar</th>
+                  <th className="hiza-sag" style={{ width: 110 }}>{c('İnd. tutar')}</th>
                   <th className="hiza-sag" style={{ width: 110 }}>Net</th>
                 </tr>
               </thead>
@@ -86,7 +87,7 @@ export function TalepDetayi({ talep, tavan, kararOran, setKararOran,
           </div>
 
           <div className="kagrup">
-            <h6>Talep Gerekçesi <span className="sonuk">banko beyanı</span></h6>
+            <h6>{c('Talep Gerekçesi')}<span className="sonuk">banko beyanı</span></h6>
             <div className="isk-gerekce">“{talep.gerekce || '—'}”</div>
           </div>
         </div>
@@ -94,13 +95,13 @@ export function TalepDetayi({ talep, tavan, kararOran, setKararOran,
         {/* ---------------------------------------------- karar paneli */}
         <div className="isk-karar">
           <div className="kagrup">
-            <h6>Yetki Durumu</h6>
+            <h6>{c('Yetki Durumu')}</h6>
             <div className="isk-sat"><span>İsteyen</span><b>{talep.isteyen}</b></div>
             <div className="isk-sat teh">
               <span>Talep</span>
               <b>%{talep.oran} · {para.format(indirim(talep))}</b>
             </div>
-            <div className="isk-sat"><span>Sizin limitiniz</span><b>%{tavan}</b></div>
+            <div className="isk-sat"><span>{c('Sizin limitiniz')}</span><b>%{tavan}</b></div>
             <div className={`isk-sat ${yeterli ? 'ok' : 'teh'}`}>
               <span>Karar</span>
               <b>{yeterli ? 'Yetkiniz yeterli' : 'Yetkiniz yetmiyor — üst role gider'}</b>
@@ -119,12 +120,12 @@ export function TalepDetayi({ talep, tavan, kararOran, setKararOran,
             ) : (
               <div className="alan-izgara">
                 <label className="alan">
-                  <span>Onaylanan oran (%)</span>
+                  <span>{c('Onaylanan oran (%)')}</span>
                   <input className="hiza-sag" value={kararOran}
                          onChange={e => setKararOran(e.target.value)} />
                 </label>
                 <label className="alan gen">
-                  <span>Karar notu</span>
+                  <span>{c('Karar notu')}</span>
                   <textarea rows={3} value={kararNot}
                             onChange={e => setKararNot(e.target.value)} />
                 </label>
@@ -142,12 +143,12 @@ export function TalepDetayi({ talep, tavan, kararOran, setKararOran,
                     ✔ Onayla (%{talep.oran})
                   </button>
                   <button type="button" className="d bir" disabled={calisiyor}
-                          title="Talebi düşürerek onaylar"
+                          title={c('Talebi düşürerek onaylar')}
                           onClick={() => onKarar('kismi')}>
                     ✂ Kısmi Onayla
                   </button>
                   <button type="button" className="d teh" disabled={calisiyor}
-                          onClick={() => onKarar('ret')}>✖ Reddet</button>
+                          onClick={() => onKarar('ret')}>{c('✖ Reddet')}</button>
                 </div>
                 <div className="pano-not">
                   Kısmi onay talebi <b>düşürerek</b> onaylar: banko %{talep.oran}

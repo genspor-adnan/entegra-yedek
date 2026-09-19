@@ -6,6 +6,7 @@ import type { FormAlan, FormAlanTipi, FormBolum, FormCevap, FormImzaTanimi, Form
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import { FormCizici, SAHIP_ADI } from '../../bilesenler/form/FormCizici';
+import { c as cev } from '../../dil/ceviri';
 
 /**
  * ŞABLON EDİTÖRÜ `/form-editor/:id` (form motoru 740) — mockup
@@ -100,7 +101,7 @@ export function FormSablonEditor() {
       </div></div>
       <div className="fm-editor">
         <div className="fm-ed-agac">
-          <div className="sonuk" style={{ fontSize: 10.5, padding: '0 8px 4px' }}>BÖLÜMLER · sahip</div>
+          <div className="sonuk" style={{ fontSize: 10.5, padding: '0 8px 4px' }}>{cev('BÖLÜMLER · sahip')}</div>
           {t.bolumler.map((b, bi) => (
             <div key={b.kod}>
               <div className={`fm-ed-bolum${sec?.b === bi && sec.a === undefined ? ' sec' : ''}`} onClick={() => setSec({ b: bi })}>
@@ -113,16 +114,16 @@ export function FormSablonEditor() {
               ))}
             </div>
           ))}
-          {!t.bolumler.length && <div className="sonuk" style={{ padding: 8 }}>Bölüm yok — "＋ Bölüm".</div>}
+          {!t.bolumler.length && <div className="sonuk" style={{ padding: 8 }}>{cev('Bölüm yok — "＋ Bölüm".')}</div>}
         </div>
         <div className="fm-ed-tuval">
           <FormCizici bolumler={t.bolumler} cevap={test} onChange={(k, v) => setTest(c => ({ ...c, [k]: v }))} parametreler={{ 'hasta.ad': 'Örnek Hasta', 'kurum.ad': 'Kurum', tarih: new Date().toLocaleDateString('tr-TR') }} sahipRozeti tanim={t} />
-          {t.imzalar?.length ? <div className="fm-bolum"><h3 className="fm-bolum-bas">İmzalar</h3><div className="sonuk">{t.imzalar.map(i => `${SAHIP_ADI[i.rol] ?? i.rol} (${i.yontem.map(y => IMZA_YONTEM[y]).join('/')}${i.zorunlu ? ', zorunlu' : ''}${i.asama ? `, aşama ${i.asama}` : ''})`).join(' · ')}</div></div> : null}
+          {t.imzalar?.length ? <div className="fm-bolum"><h3 className="fm-bolum-bas">{cev('İmzalar')}</h3><div className="sonuk">{t.imzalar.map(i => `${SAHIP_ADI[i.rol] ?? i.rol} (${i.yontem.map(y => IMZA_YONTEM[y]).join('/')}${i.zorunlu ? ', zorunlu' : ''}${i.asama ? `, aşama ${i.asama}` : ''})`).join(' · ')}</div></div> : null}
         </div>
         <div className="fm-ed-oze">
           <div className="ka-sekmeler" style={{ padding: '0 0 6px' }}>
             <div className={`ka-sekme${sekme === 'ozellik' ? ' on' : ''}`} onClick={() => setSekme('ozellik')}>{alan ? 'Alan' : bolum ? 'Bölüm' : 'Seçim yok'}</div>
-            <div className={`ka-sekme${sekme === 'sablon' ? ' on' : ''}`} onClick={() => setSekme('sablon')}>Şablon (hesap · imza)</div>
+            <div className={`ka-sekme${sekme === 'sablon' ? ' on' : ''}`} onClick={() => setSekme('sablon')}>{cev('Şablon (hesap · imza)')}</div>
           </div>
           {sekme === 'ozellik' && alan && sec && (
             <>
@@ -136,7 +137,7 @@ export function FormSablonEditor() {
               {alan.tip === 'skor' && <Oz lb="Satırlar (JSON: [{kod, etiket, secenek:[{ad, puan}]}])"><textarea className="fm-giris" rows={8} defaultValue={JSON.stringify(alan.satirlar ?? [], null, 1)} disabled={!yazar}
                 onBlur={e => { try { alanDegis('satirlar', JSON.parse(e.target.value)) } catch { mesaj('Satır JSON hatalı.') } }} /></Oz>}
               {alan.tip !== 'metinblok' && <label className="fm-onay"><input type="checkbox" checked={!!alan.zorunlu} disabled={!yazar} onChange={e => alanDegis('zorunlu', e.target.checked)} /><span>Zorunlu</span></label>}
-              {alan.tip === 'evethayir' && <label className="fm-onay"><input type="checkbox" checked={!!alan.aciklamaEvetse} disabled={!yazar} onChange={e => alanDegis('aciklamaEvetse', e.target.checked)} /><span>Evet ise açıklama iste</span></label>}
+              {alan.tip === 'evethayir' && <label className="fm-onay"><input type="checkbox" checked={!!alan.aciklamaEvetse} disabled={!yazar} onChange={e => alanDegis('aciklamaEvetse', e.target.checked)} /><span>{cev('Evet ise açıklama iste')}</span></label>}
               <Oz lb="Koşul: alan kodu = değer (boş = her zaman)"><div className="fm-ikili">
                 <input className="fm-giris" placeholder="alan" value={alan.kosul?.alan ?? ''} disabled={!yazar} onChange={e => alanDegis('kosul', e.target.value ? { alan: e.target.value, deger: alan.kosul?.deger ?? true } : undefined)} />
                 <input className="fm-giris" placeholder="değer (Evet için boş)" value={alan.kosul?.deger === true ? '' : String(alan.kosul?.deger ?? '')} disabled={!yazar || !alan.kosul} onChange={e => alanDegis('kosul', { alan: alan.kosul!.alan, deger: e.target.value || true })} />
@@ -158,7 +159,7 @@ export function FormSablonEditor() {
             <>
               <Oz lb="Hesap (JSON: {kaynak?, ortalama?, esikler:[{min,max,ad,renk,gorev}]})"><textarea className="fm-giris" rows={8} defaultValue={JSON.stringify(t.hesap ?? {}, null, 1)} disabled={!yazar}
                 onBlur={e => { try { const h = JSON.parse(e.target.value); guncelle(x => { if (Object.keys(h).length) x.hesap = h; else delete x.hesap; return x }) } catch { mesaj('Hesap JSON hatalı.') } }} /></Oz>
-              <div className="fm-etiket">İmzalar</div>
+              <div className="fm-etiket">{cev('İmzalar')}</div>
               {(t.imzalar ?? []).map((im, i) => (
                 <div key={i} className="fm-imza-satir">
                   <select className="fm-giris" value={im.rol} disabled={!yazar} onChange={e => guncelle(x => { x.imzalar![i].rol = e.target.value; return x })}>{[...SAHIPLER, 'tanik', 'vasi'].map(r => <option key={r} value={r}>{SAHIP_ADI[r] ?? r}</option>)}</select>

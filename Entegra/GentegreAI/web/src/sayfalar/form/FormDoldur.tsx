@@ -7,6 +7,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { FormCizici, SAHIP_ADI, skorHesapla, zorunluEksikler } from '../../bilesenler/form/FormCizici';
 import { ImzaKanvas } from '../../bilesenler/form/ImzaKanvas';
+import { c as cev } from '../../dil/ceviri';
 
 /**
  * FORM DOLDURMA (iç ekran / tablet) `/form-doldur/:id` — mockuplar
@@ -112,13 +113,13 @@ export function FormDoldur() {
         <button className="d" onClick={() => window.print()}>🖨 Yazdır</button>
         <span className="sp" />
         {beyanVar && <span className="rozet ok">📱 Hasta beyanı var</span>}
-        {i.aktarim_zamani && <span className="rozet mor">Aktarıldı</span>}
+        {i.aktarim_zamani && <span className="rozet mor">{cev('Aktarıldı')}</span>}
         {hesap.skor !== null && <span className={`rozet ${hesap.esik?.renk === 'kir' ? 'hata' : hesap.esik?.renk === 'sari' ? 'uyari' : 'ok'}`}>Skor {hesap.skor}{hesap.esik ? ` · ${hesap.esik.ad}` : ''}</span>}
       </div>
       <FormCizici bolumler={bolumler} cevap={cevap} onChange={degistir} salt={salt} parametreler={k.parametreler} sahipRozeti tanim={k.tanim} />
       {imzaTanimlari.length > 0 && (
         <section className="fm-bolum">
-          <h3 className="fm-bolum-bas">İmzalar</h3>
+          <h3 className="fm-bolum-bas">{cev('İmzalar')}</h3>
           <div className="fm-imzalar">
             {imzaTanimlari.map(t => {
               const var_ = imzalar.find(x => x.rol === t.rol);
@@ -131,7 +132,7 @@ export function FormDoldur() {
                   </div>
                   {hastaRol ? (
                     var_?.veri || (yazar && asamaUygun) ? <ImzaKanvas deger={var_?.veri} salt={!yazar || !asamaUygun || (var_?.yontem === 5)} etiket={t.rol === 'hasta' ? i.hasta_adi : undefined} onChange={png => hastaImza(t.rol, png)} />
-                      : var_ ? <span className="sonuk">{var_.yontem === 5 ? 'Beyan onayı (bağlantıdan)' : var_.yontem === 2 ? 'SMS OTP' : 'imzalı'}</span> : <span className="sonuk">Tablette imzalanır</span>
+                      : var_ ? <span className="sonuk">{var_.yontem === 5 ? 'Beyan onayı (bağlantıdan)' : var_.yontem === 2 ? 'SMS OTP' : 'imzalı'}</span> : <span className="sonuk">{cev('Tablette imzalanır')}</span>
                   ) : (
                     var_ ? null : yazar && asamaUygun ? <button className="d" onClick={() => imzala(t.rol)}>✍️ İmzala ({kullanici?.ad})</button> : <span className="sonuk">bekliyor</span>
                   )}
@@ -151,7 +152,7 @@ function Perde({ baslik, kapat, children }: { baslik: React.ReactNode; kapat: ()
   return (
     <div className="kaperde" onClick={kapat}>
       <div className="kawin tam" onClick={e => e.stopPropagation()}>
-        <div className="kabas">{baslik}<button className="kabas-dugme" onClick={kapat} title="Kapat">✖</button></div>
+        <div className="kabas">{baslik}<button className="kabas-dugme" onClick={kapat} title={cev('Kapat')}>✖</button></div>
         <div className="kagov fm-kagov">{children}</div>
       </div>
     </div>

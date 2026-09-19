@@ -1,5 +1,6 @@
 import { Modal } from '../Modal';
 import type { UtsBelgeBildirimYaniti } from '../../api/istemci';
+import { c } from '../../dil/ceviri';
 
 /**
  * ÜTS BELGE KÖPRÜSÜ SONUCU (226) - belgeden toplu bildirim satır satır
@@ -15,7 +16,7 @@ export function UtsBelgeSonucModali({ sonuc, onKapat }: {
     <Modal baslik={`ÜTS Bildirimi — ${sonuc.belgeNo}`} onKapat={onKapat}
       alt={
         <button className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
-                onClick={onKapat}>Kapat</button>
+                onClick={onKapat}>{c('Kapat')}</button>
       }>
       <div style={{ padding: 10 }}>
         <div className="bilgi-kutusu">

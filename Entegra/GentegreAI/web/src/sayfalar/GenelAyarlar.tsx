@@ -9,6 +9,7 @@ import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
 import { guvenli, mesaj, metinSor, onay } from '../bilesenler/mesaj';
 import { useOturum } from '../kimlik/OturumBaglami';
+import { c } from '../dil/ceviri';
 
 const SEKMELER = [
   // Guvenlik 2. sirada, Entegrasyon onun SAGINDA (kullanici).
@@ -146,7 +147,7 @@ export function GenelAyarlar() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Genel Ayarlar</h1>
-          <span className="yol">Yönetim › Ayarlar › Genel</span>
+          <span className="yol">{c('Yönetim › Ayarlar › Genel')}</span>
         </div>
       </div>
 
@@ -190,14 +191,14 @@ export function GenelAyarlar() {
             </div>
 
             <div className="kagrup">
-              <h6>Belge Girişi</h6>
+              <h6>{c('Belge Girişi')}</h6>
               <div className="alan-izgara tek-sutun ayar-formu">
                 {alan('belge.geri_gun_siniri', 'Belgeler geriye dönük kaç güne kadar girilebilir')}
               </div>
             </div>
 
             <div className="kagrup">
-              <h6>Listeler</h6>
+              <h6>{c('Listeler')}</h6>
               <div className="alan-izgara tek-sutun ayar-formu">
                 {alan('liste.sayfa_boyu', 'Sayfa boyu (bir sayfadaki kayıt sayısı)')}
               </div>
@@ -211,7 +212,7 @@ export function GenelAyarlar() {
                 kullanır (0 / 50.000 / 250.000) ve o varsayılanın gerekçesi
                 kuralın yanında durur (db/729). */}
             <div className="kagrup">
-              <h6>Satınalma</h6>
+              <h6>{c('Satınalma')}</h6>
               <div className="alan-izgara tek-sutun ayar-formu">
                 {alan('satinalma.esik_satinalma',
                       'Satınalma birimi onayı için alt tutar (boş = her talepte)')}
@@ -231,7 +232,7 @@ export function GenelAyarlar() {
                 habersiz başlatmak olurdu. Açılınca saatlik iş çalışır ve depo
                 başına TEK taslak talep açar (onaya insan gönderir). */}
             <div className="kagrup">
-              <h6>Kritik Stok → Satınalma Talebi</h6>
+              <h6>{c('Kritik Stok → Satınalma Talebi')}</h6>
               <div className="alan-izgara tek-sutun ayar-formu">
                 {alan('satinalma.kritik_stok_aktif',
                       'Asgari stoğun altına düşen kalemler için otomatik talep açılsın',
@@ -295,8 +296,8 @@ export function GenelAyarlar() {
             />
             <div className="not">
               Şifre değeri listede gösterilmez — yalnız “dolu mu” işareti; gerçek
-              değer kartı açan yetkili kullanıcıya gider. <b>Şube boş = Tümü</b>
-              (kurum geneli hesap). <b>Baz Şube</b> dolu ise o şubenin işlemleri
+              değer kartı açan yetkili kullanıcıya gider. <b>{c('Şube boş = Tümü')}</b>
+              (kurum geneli hesap). <b>{c('Baz Şube')}</b> dolu ise o şubenin işlemleri
               baz alınan şubenin hesabıyla gider. Hesap çözümü: şubenin kendi
               satırı → baz şube → kurum geneli → (yalnız ÜTS) varsayılan şube.
             </div>
@@ -318,13 +319,13 @@ export function GenelAyarlar() {
                   <>
                     {icerik}
                     <div className="uyari-kutusu" style={{ margin: '10px 12px' }}>
-                      <b>Test ve canlı AYRI SATIRDIR.</b> Kurum canlıya geçerken test
+                      <b>{c('Test ve canlı AYRI SATIRDIR.')}</b> Kurum canlıya geçerken test
                       hesabını silmez — test satırının “Aktif” kutusunu kaldırır, canlı
                       satırınkini işaretler. Aynı entegrasyon + şube + ortam üçlüsünden
                       ikinci satır açılamaz.
                     </div>
                     <div className="not" style={{ margin: '0 12px 12px' }}>
-                      <b>Hesap çözümü:</b> şubenin kendi satırı → baz alınan şubenin
+                      <b>{c('Hesap çözümü:')}</b> şubenin kendi satırı → baz alınan şubenin
                       satırı → kurum geneli satır (şube boş) → varsayılan şube
                       (yalnız ÜTS). e-Fatura'da varsayılan şubeye düşülmez: “merkezin
                       kimliğiyle gönder” kararı şube kartında verilir.
@@ -347,7 +348,7 @@ export function GenelAyarlar() {
             </div>
 
             <div className="kagrup">
-              <h6>Parola ve Kilit</h6>
+              <h6>{c('Parola ve Kilit')}</h6>
               <div className="alan-izgara ayar-formu">
                 {alan('guvenlik.parola_min_uzunluk', 'En az parola uzunluğu')}
                 {alan('guvenlik.hatali_giris_siniri', 'Kaç hatalı girişten sonra kilitlensin')}

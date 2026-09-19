@@ -4,6 +4,7 @@ import { ayarOnbellegiTemizle } from '../api/ayarlar';
 import { type AyarSatiri, hataMetni } from '../api/sozlesme';
 import { YardimIkonu } from './YardimIkonu';
 import { KodListesiModali } from './KodListesiModali';
+import { c } from '../dil/ceviri';
 
 /**
  * Ayar ekranlarinin ortak kancasi: /api/ayar'i yukler, tek alan yazar, hata ve
@@ -134,7 +135,7 @@ export function AyarAlani({ anahtar, etiket, tip = 'sayi', secenekler, listeKod,
           jenerik modaldan yonetilir. */}
       {listeKod ? (
         <span className="etiket" role="button" tabIndex={0}
-              title="Liste içeriğini düzenle" style={{ cursor: 'pointer' }}
+              title={c('Liste içeriğini düzenle')} style={{ cursor: 'pointer' }}
               onClick={e => { e.preventDefault(); setListeModal(true) }}>
           {etiket} ✎
         </span>

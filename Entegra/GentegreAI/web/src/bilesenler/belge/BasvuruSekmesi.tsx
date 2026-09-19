@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { TarafSecici } from '../TarafArama';
 import { KodSecim, MetinAlani } from './basvuru/alanlar';
 import { dagilimRotasi } from '../../sayfalar/belgeKartiKurallari';
+import { c } from '../../dil/ceviri';
 
 /**
  * BASVURU / PROVIZYON / ONCEKI BASVURULAR sekmeleri (298).
@@ -234,7 +235,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
 
   return (
     <div className="kagrup">
-      <h6>Başvuru Bilgileri</h6>
+      <h6>{c('Başvuru Bilgileri')}</h6>
       {/* PROTOKOL NO BURADA YOK (kullanici): kartin BASLIK seridinde zaten
           "Protokol No" hucresi var - ayni salt okunur numarayi iki yerde
           gostermek sekmede bos yer harciyordu. */}
@@ -328,7 +329,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
                      onTemizle={() => onPersonelSec?.(0, '')} />
         )}
         <label className="alan">
-          <span className="etiket zorunlu-isaret">Başvuru Tarihi / Saati</span>
+          <span className="etiket zorunlu-isaret">{c('Başvuru Tarihi / Saati')}</span>
           <input type="datetime-local" value={tarih} disabled={kilitli}
                  max={tarihEnGec} min={tarihEnErken}
                  onChange={e => setTarih(e.target.value)} />
@@ -384,7 +385,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
             oradan gelir; yoksa sunucu kayda izin vermez. */}
         {(altKurumlar?.length ?? 0) > 0 && (
           <label className="alan">
-            <span className="etiket zorunlu-isaret">Devredilen Kurum</span>
+            <span className="etiket zorunlu-isaret">{c('Devredilen Kurum')}</span>
             <select value={bilgi.altKurum ?? ''} disabled={kilitli}
                     onChange={e => degistir({
                       altKurum: e.target.value ? Number(e.target.value) : null })}>
@@ -419,24 +420,24 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
             çizilebiliyordu. */}
         {sgkOdeyen && (
           <label className="alan onay-alan">
-            <span className="etiket">Emekli</span>
+            <span className="etiket">{c('Emekli')}</span>
             <span className="onay-satir">
               <input type="checkbox" disabled={kilitli}
                      checked={Number(bilgi.emekli ?? 0) === 1}
                      onChange={e => degistir({ emekli: e.target.checked ? 1 : 0 })} />
-              <span>Emekli - SGK katılım payı alınmaz</span>
+              <span>{c('Emekli - SGK katılım payı alınmaz')}</span>
             </span>
           </label>
         )}
 
         {[202, 203].includes(Number(bilgi.altKurum ?? 0)) && (
           <label className="alan onay-alan">
-            <span className="etiket">SGK Katkısı</span>
+            <span className="etiket">{c('SGK Katkısı')}</span>
             <span className="onay-satir">
               <input type="checkbox" disabled={kilitli}
                      checked={Number(bilgi.sgkKullan ?? 1) === 1}
                      onChange={e => degistir({ sgkKullan: e.target.checked ? 1 : 0 })} />
-              <span>SGK katkısı kullanılsın</span>
+              <span>{c('SGK katkısı kullanılsın')}</span>
             </span>
           </label>
         )}
@@ -500,7 +501,7 @@ export function BasvuruSekmesi({ bilgi, degistir, kilitli, randevuBilgi,
             kendi aciklama alanina yazilir - ayri bir kolon acmaya gerek yok,
             alan bugune kadar basvuru kartinda hic kullanilmiyordu. */}
         <label className="alan genis-4">
-          <span className="etiket">Başvuru Notu</span>
+          <span className="etiket">{c('Başvuru Notu')}</span>
           <textarea rows={2} value={aciklama ?? ''} disabled={kilitli}
                     placeholder="örn. Tansiyon takibi; son tetkik sonuçları ile geldi."
                     onChange={e => setAciklama?.(e.target.value)} />

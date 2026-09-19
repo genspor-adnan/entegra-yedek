@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import type { KullaniciOzeti } from '../api/uclar/ayar';
+import { c } from '../dil/ceviri';
 
 /**
  * KULLANICILAR ÜST ŞERİDİ (mockup `Ekranlar/Ayarlar/kullanicilar.html` `.ozet`).
@@ -73,7 +74,7 @@ export function KullaniciOzetSeridi({ yenile, onCip }: {
         );
         return k.cip !== undefined && onCip ? (
           <button type="button" className="k" key={k.anahtar}
-                  title="Listeyi bu süzgeçle aç"
+                  title={c('Listeyi bu süzgeçle aç')}
                   onClick={() => onCip(k.cip as number)}>
             {govde}
           </button>

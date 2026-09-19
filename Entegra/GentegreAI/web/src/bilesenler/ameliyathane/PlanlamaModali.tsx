@@ -3,6 +3,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import { mesaj } from '../mesaj';
+import { c } from '../../dil/ceviri';
 
 /**
  * TALEBİ AMELİYATA PLANLA (715/719).
@@ -108,20 +109,20 @@ export function PlanlamaModali({ talepId, talepNo, hastaAdi, islem, tahminiSure,
                  {kaydediyor ? '⏳ Planlanıyor…'
                    : zorlama ? '⚠ Yine de Planla' : '📅 Planla'}
                </button>
-               <button className="d" onClick={onKapat}>✖ Kapat</button>
+               <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}
 
       <div className="kagrup">
-        <h6>Vaka</h6>
+        <h6>{c('Vaka')}</h6>
         <div className="alan-izgara tek-sutun">
           <label className="alan">
             <span className="etiket">Hasta</span>
             <input readOnly value={hastaAdi ?? ''} />
           </label>
           <label className="alan">
-            <span className="etiket">Planlanan İşlem</span>
+            <span className="etiket">{c('Planlanan İşlem')}</span>
             <input readOnly value={islem ?? ''} />
           </label>
           {eksikler && (
@@ -134,7 +135,7 @@ export function PlanlamaModali({ talepId, talepNo, hastaAdi, islem, tahminiSure,
       </div>
 
       <div className="kagrup">
-        <h6>Plan</h6>
+        <h6>{c('Plan')}</h6>
         <div className="alan-izgara tek-sutun">
           <label className="alan">
             <span className="etiket zorunlu-isaret">Salon</span>
@@ -164,18 +165,18 @@ export function PlanlamaModali({ talepId, talepNo, hastaAdi, islem, tahminiSure,
             </span>
           </label>
           <label className="alan">
-            <span className="etiket">Plan Dışı</span>
+            <span className="etiket">{c('Plan Dışı')}</span>
             <label className="secim-satiri">
               <input type="checkbox" checked={planDisi}
                      onChange={e => setPlanDisi(e.target.checked)} />
-              <span>Plan dışı (acil eklenen) vaka</span>
+              <span>{c('Plan dışı (acil eklenen) vaka')}</span>
             </label>
           </label>
           {zorlama && (
             <label className="alan">
               <span className="etiket zorunlu-isaret">Gerekçe</span>
               <input value={gerekce} maxLength={200}
-                     placeholder="Neden bu koşulda planlanıyor?"
+                     placeholder={c('Neden bu koşulda planlanıyor?')}
                      onChange={e => setGerekce(e.target.value)} />
             </label>
           )}

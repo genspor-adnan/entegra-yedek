@@ -5,6 +5,7 @@ import { Modal } from '../Modal';
 import { TarafArama } from '../TarafArama';
 import { mesaj } from '../mesaj';
 import { para } from '../bicim';
+import { c } from '../../dil/ceviri';
 
 /**
  * KALEM PRİM ROLLERİ (324).
@@ -99,7 +100,7 @@ export function KalemRolModali({ belgeSatirId, kalemAdi, onKapat, onTamam }: {
                  {kaydediyor ? '⏳ Kaydediliyor…' : '💾 Rolleri Kaydet'}
                </button>
                <button className="d" onClick={ekle}>＋ Satır</button>
-               <button className="d" onClick={onKapat}>✖ Kapat</button>
+               <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}
@@ -109,7 +110,7 @@ export function KalemRolModali({ belgeSatirId, kalemAdi, onKapat, onTamam }: {
         <table className="detay-tablo">
           <thead>
             <tr><th style={{ width: 150 }}>Rol</th><th>Kişi</th>
-                <th className="hiza-sag" style={{ width: 110 }}>Pay %</th>
+                <th className="hiza-sag" style={{ width: 110 }}>{c('Pay %')}</th>
                 <th style={{ width: 36 }} /></tr>
           </thead>
           <tbody>
@@ -149,13 +150,13 @@ export function KalemRolModali({ belgeSatirId, kalemAdi, onKapat, onTamam }: {
 
       {primler.length > 0 && (
         <div className="kagrup">
-          <h6>Bu Kalemden Doğan Primler</h6>
+          <h6>{c('Bu Kalemden Doğan Primler')}</h6>
           <table className="detay-tablo">
             <thead>
               <tr><th>Kişi</th><th>Rol</th><th>Tarih</th>
-                  <th className="hiza-sag">Taban (matrah)</th>
-                  <th className="hiza-sag">Oran</th>
-                  <th className="hiza-sag">Prim</th><th>Durum</th></tr>
+                  <th className="hiza-sag">{c('Taban (matrah)')}</th>
+                  <th className="hiza-sag">{c('Oran')}</th>
+                  <th className="hiza-sag">{c('Prim')}</th><th>Durum</th></tr>
             </thead>
             <tbody>
               {primler.map(p => (
@@ -180,7 +181,7 @@ export function KalemRolModali({ belgeSatirId, kalemAdi, onKapat, onTamam }: {
             </tbody>
           </table>
           <div className="not">
-            <b>Onaylı</b> ve <b>ödenmiş</b> satırlar kilitlidir - rol değişse de
+            <b>{c('Onaylı')}</b> ve <b>ödenmiş</b> satırlar kilitlidir - rol değişse de
             yeniden hesaplanmaz; fark sonraki döneme düzeltme olarak girer.
             Kalem hâlâ başvuru / sipariş ise prim <b>hiç doğmaz</b>; satış
             tahakkuku, fişi ya da faturasına dönüşünce kendiliğinden üretilir.

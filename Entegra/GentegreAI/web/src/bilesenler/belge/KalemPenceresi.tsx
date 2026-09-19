@@ -20,6 +20,7 @@ import { KalemOnizlemesi } from './kalem/KalemOnizlemesi';
 import { IzlemPenceresi } from './IzlemPenceresi';
 import { SAF_SGK_ROTA, iskontoEkranLimiti } from '../../sayfalar/belgeKartiKurallari';
 import { useOturum } from '../../kimlik/OturumBaglami';
+import { c } from '../../dil/ceviri';
 
 export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparisMi,
                          basvuruMu, ustSerit, tarifeTipi = 0, rota = 0,
@@ -286,7 +287,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
       alt={
         <>
           <button className="d onay" onClick={kaydet}>💾 Tamam (Enter)</button>
-          <button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>{c('✖ Kapat')}</button>
         </>
       }
     >
@@ -340,9 +341,9 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                     OK IKONLARI (mockup): yukari/asagi, klavyedeki ArrowUp /
                     ArrowDown ile ayni sey. "+ −" isaretleri sayiya EKLENEN bir
                     deger gibi okunuyordu. */}
-                <button type="button" className="mini" title="Artır (↑)"
+                <button type="button" className="mini" title={c('Artır (↑)')}
                         onClick={() => degis('adet', adetKaydir(r.adet, +1))}>▲</button>
-                <button type="button" className="mini" title="Azalt (↓)"
+                <button type="button" className="mini" title={c('Azalt (↓)')}
                         onClick={() => degis('adet', adetKaydir(r.adet, -1))}>▼</button>
                 {/* AMBALAJ BIRIMI (143): stogun tanimli birimleri. Secilen birim
                     yalnizca GIRIS bicimidir - stok her zaman ANA BIRIMDE hareket
@@ -353,7 +354,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                     kutu SALT GORUNUMDUR. */}
                 {birimler.length > 1 ? (
                   <select className="birim" value={String(r.birim ?? 0)}
-                          title="Giriş birimi"
+                          title={c('Giriş birimi')}
                           onChange={e => {
                             const b = birimler.find(x => String(x.birim) === e.target.value);
                             degis('birim', Number(e.target.value));
@@ -365,7 +366,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                   </select>
                 ) : (
                   <input className="birim" readOnly tabIndex={-1}
-                         title="Giriş birimi"
+                         title={c('Giriş birimi')}
                          value={birimler[0]?.ad || anaBirimAdi || 'Adet'} />
                 )}
               </span>
@@ -487,7 +488,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                 )}
                 {dovizli && (
                   <input className="hiza-sag kur" value={r.kur} onKeyDown={tus}
-                         title="Günlük kur — değiştirilebilir"
+                         title={c('Günlük kur — değiştirilebilir')}
                          onChange={e => { kurElle.current = true; degis('kur', e.target.value) }} />
                 )}
               </span>
@@ -503,7 +504,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                 bedel gercekten ekrandan gelebilir. */}
             {sgkKilitli && !transferMi && (
               <label className="alan">
-                <span className="etiket">SUT Bedeli</span>
+                <span className="etiket">{c('SUT Bedeli')}</span>
                 <span className="ikili">
                   <input className="hiza-sag" readOnly tabIndex={-1}
                          value={kdvDahil ? brutMetni : r.birimFiyat}
@@ -531,7 +532,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                 kutuda gostermek olurdu. TSS/HUV'da eski yerinde kalir. */}
             {katkiVar && !sgkKilitli && !transferMi && (
               <label className="alan">
-                <span className="etiket">Hasta Katkısı</span>
+                <span className="etiket">{c('Hasta Katkısı')}</span>
                 <span className="ikili">
                   <input className="hiza-sag" onKeyDown={tus}
                          value={kdvDahil ? katkiMetni : String(r.katkiTutar ?? '')}
@@ -564,7 +565,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
 
             {!transferMi && dovizli && (
               <label className="alan">
-                <span className="etiket">Yerel Para</span>
+                <span className="etiket">{c('Yerel Para')}</span>
                 <span className="ikili">
                   <input className="hiza-sag onizleme" value={para.format(fiyat)} readOnly />
                   <input className="birim" value={yerelPara} readOnly tabIndex={-1} />
@@ -578,7 +579,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                 fiyattir ve satirda birlikte yasar. */}
             {sutKutusu && !transferMi && (
               <label className="alan">
-                <span className="etiket">SGK (SUT) Bedeli</span>
+                <span className="etiket">{c('SGK (SUT) Bedeli')}</span>
                 <span className="ikili">
                   {/* Ana fiyat kutusuyla ayni desen: DAHIL modunda kullanicinin
                       yazdigi BRUT metin ayri tutulur, satira MATRAH yazilir -
@@ -681,8 +682,8 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
                                        birimFiyatKdvli: yeniDahil
                                          ? yazili : moduCevir(yazili, x.kdv, true) }));
                         }}>
-                  <option value="0">Hariç</option>
-                  <option value="1">Dahil</option>
+                  <option value="0">{c('Hariç')}</option>
+                  <option value="1">{c('Dahil')}</option>
                 </select>
               </span>
             </label>
@@ -714,7 +715,7 @@ export function KalemPenceresi({ satir, transferMi, vergisiz, yerelPara, siparis
 
             <label className="alan">
               <span className="etiket">Açıklama</span>
-              <input value={r.aciklama} onKeyDown={tus} placeholder="Satır açıklaması"
+              <input value={r.aciklama} onKeyDown={tus} placeholder={c('Satır açıklaması')}
                      onChange={e => degis('aciklama', e.target.value)} />
             </label>
 

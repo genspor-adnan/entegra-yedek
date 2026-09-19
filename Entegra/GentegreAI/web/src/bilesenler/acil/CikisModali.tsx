@@ -3,6 +3,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import { mesaj } from '../mesaj';
+import { c as cev } from '../../dil/ceviri';
 
 /**
  * ACİL ÇIKIŞ KARARI (716).
@@ -112,7 +113,7 @@ export function CikisModali({ basvuruId, protokolNo, hastaAdi, onKapat, onTamam 
                        onClick={() => void kaydet()}>
                  {kaydediyor ? '⏳ Kaydediliyor…' : '🚪 Çıkışı Kaydet'}
                </button>
-               <button className="d" onClick={onKapat}>✖ Kapat</button>
+               <button className="d" onClick={onKapat}>{cev('✖ Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}
@@ -153,14 +154,14 @@ export function CikisModali({ basvuruId, protokolNo, hastaAdi, onKapat, onTamam 
         <h6>Çıkış Tanısı (ICD-10)</h6>
         <div className="alan-izgara tek-sutun">
           <label className="alan">
-            <span className="etiket zorunlu-isaret">Seçilen</span>
+            <span className="etiket zorunlu-isaret">{cev('Seçilen')}</span>
             <input readOnly value={taniKod ? `${taniKod} · ${taniAd}` : ''}
-                   placeholder="Aşağıdan arayıp seçin" />
+                   placeholder={cev('Aşağıdan arayıp seçin')} />
           </label>
           <label className="alan">
             <span className="etiket">Ara</span>
             <span className="ikili">
-              <input value={taniArama} placeholder="Kod ya da tanı adı"
+              <input value={taniArama} placeholder={cev('Kod ya da tanı adı')}
                      onChange={e => setTaniArama(e.target.value)}
                      onKeyDown={e => { if (e.key === 'Enter') void taniAra() }} />
               <button className="d" onClick={() => void taniAra()}>🔍 Ara</button>

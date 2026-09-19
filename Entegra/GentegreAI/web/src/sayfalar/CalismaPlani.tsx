@@ -4,6 +4,7 @@ import { api } from '../api/istemci';
 import { hataMetni, type CalismaBlok, type CalismaPlaniYaniti } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { tarihYaz } from '../bilesenler/bicim';
+import { c } from '../dil/ceviri';
 
 /**
  * HEKİM ÇALIŞMA PLANI (711) — mockup `Ekranlar/Muayene/hekim_calisma_plani.html`.
@@ -80,23 +81,23 @@ export function CalismaPlani() {
 
   return (
     <>
-      <div className="sayfabas"><div className="basrow"><h1>Çalışma Planları</h1><span className="yol">Randevu › Çalışma Planları</span>
+      <div className="sayfabas"><div className="basrow"><h1>Çalışma Planları</h1><span className="yol">{c('Randevu › Çalışma Planları')}</span>
         <div className="sag" style={{ display: 'flex', gap: 6 }}>
           {yazar && <button className="d bir" onClick={() => git('/calisma-sablon/yeni')}>＋ Şablon</button>}
           {yazar && <button className="d" onClick={() => git('/calisma-istisna/yeni')}>🏖 İzin / İstisna</button>}
-          <button className="d" onClick={() => git('/calisma-sablon')}>📋 Şablonlar</button>
-          <button className="d" onClick={() => git('/calisma-istisna')}>İstisnalar</button>
-          <button className="d" onClick={() => git('/randevu')}>📅 Takvim</button>
+          <button className="d" onClick={() => git('/calisma-sablon')}>{c('📋 Şablonlar')}</button>
+          <button className="d" onClick={() => git('/calisma-istisna')}>{c('İstisnalar')}</button>
+          <button className="d" onClick={() => git('/randevu')}>{c('📅 Takvim')}</button>
         </div></div></div>
       <div className="cp-sayfa">
         <div className="cp-arac">
           <button className="d" onClick={() => setBas(b => { const d = new Date(b); d.setDate(d.getDate() - 7); return d })}>‹ Önceki</button>
-          <button className="d" onClick={() => setBas(haftaBasi(new Date()))}>Bu hafta</button>
-          <button className="d" onClick={() => setBas(b => { const d = new Date(b); d.setDate(d.getDate() + 7); return d })}>Sonraki ›</button>
+          <button className="d" onClick={() => setBas(haftaBasi(new Date()))}>{c('Bu hafta')}</button>
+          <button className="d" onClick={() => setBas(b => { const d = new Date(b); d.setDate(d.getDate() + 7); return d })}>{c('Sonraki ›')}</button>
           <b>{tarihYaz(iso(gunler[0]))} – {tarihYaz(iso(gunler[6]))}</b>
           <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 6, flexWrap: 'wrap' }}>
-            <select value={sube ?? ''} onChange={e => setSube(e.target.value ? Number(e.target.value) : null)}><option value="">Şube: Tümü</option>{veri?.subeler.map(s => <option key={s.id} value={s.id}>{s.ad}</option>)}</select>
-            <select value={departmanId ?? ''} onChange={e => setDepartmanId(e.target.value ? Number(e.target.value) : null)}><option value="">Bölüm: Tümü</option>{veri?.bolumler.map(b => <option key={b.id} value={b.id}>{b.ad}{b.randevusuz ? ' (randevusuz)' : ''}</option>)}</select>
+            <select value={sube ?? ''} onChange={e => setSube(e.target.value ? Number(e.target.value) : null)}><option value="">{c('Şube: Tümü')}</option>{veri?.subeler.map(s => <option key={s.id} value={s.id}>{s.ad}</option>)}</select>
+            <select value={departmanId ?? ''} onChange={e => setDepartmanId(e.target.value ? Number(e.target.value) : null)}><option value="">{c('Bölüm: Tümü')}</option>{veri?.bolumler.map(b => <option key={b.id} value={b.id}>{b.ad}{b.randevusuz ? ' (randevusuz)' : ''}</option>)}</select>
             <select value={hekimId ?? ''} onChange={e => setHekimId(e.target.value ? Number(e.target.value) : null)}><option value="">Hekim: Tümü</option>{veri?.hekimler.map(h => <option key={h.id} value={h.id}>{h.ad}</option>)}</select>
             {([['hekim', 'Hekim × bölüm'], ['bolum', 'Bölüm toplu'], ['bugun', 'Bugün çalışanlar']] as [Gorunum, string][]).map(([k, ad]) => <span key={k} className={`cip${gorunum === k ? ' on' : ''}`} onClick={() => setGorunum(k)}>{ad}</span>)}
           </span>
@@ -127,7 +128,7 @@ export function CalismaPlani() {
                     //   kullanıcı kartı açmadan bilmeli.
                     : secili.kaynak === 4 ? `İK izni · ${secili.aciklama || 'izin'} (İzinler ekranından yönetilir)`
                     : `kapalı · ${ISTISNA[secili.istisnaTur ?? 0]}`}</div>
-                  {!KAPALI(secili.kaynak) && <div><span className="sonuk">Slot / kanal</span> · {secili.slotDk} dk · {secili.kanallar} · {secili.randevu} randevu</div>}
+                  {!KAPALI(secili.kaynak) && <div><span className="sonuk">{c('Slot / kanal')}</span> · {secili.slotDk} dk · {secili.kanallar} · {secili.randevu} randevu</div>}
                   {secili.aciklama && <div className="sonuk">{secili.aciklama}</div>}
                   <div style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap' }}>
                     {secili.sablonId && <button className="d" onClick={() => git(`/calisma-sablon/${secili.sablonId}?geri=%2Fcalisma-plani`)}>📋 Şablonu aç</button>}
@@ -146,15 +147,15 @@ export function CalismaPlani() {
 
         {gorunum === 'bugun' && (
           <div className="ds-grp">
-            <div className="ds-gb">Bugün çalışan bölüm / hekim <span className="ds-sp sonuk">{bugun ? tarihYaz(String(bugun.gun).slice(0, 10)) : ''} · kayıt kabul bu listeyi görür</span></div>
+            <div className="ds-gb">{c('Bugün çalışan bölüm / hekim')}<span className="ds-sp sonuk">{bugun ? tarihYaz(String(bugun.gun).slice(0, 10)) : ''} · kayıt kabul bu listeyi görür</span></div>
             <div className="ds-dg"><table>
-              <thead><tr><th>Bölüm</th><th>Hekim</th><th>Saatler</th><th>Şu an</th><th className="orta">Randevu</th><th className="orta">Gelen</th><th className="orta">Kanal</th></tr></thead>
+              <thead><tr><th>Bölüm</th><th>Hekim</th><th>{c('Saatler')}</th><th>{c('Şu an')}</th><th className="orta">Randevu</th><th className="orta">{c('Gelen')}</th><th className="orta">Kanal</th></tr></thead>
               <tbody>
                 {(bugun?.satirlar ?? []).map((s, i) => <tr key={i}><td>{s.departman}</td><td>{s.hekim}</td><td>{s.saatler}</td>
                   <td>{s.simdi ? <span className="rozet ok">muayenede</span> : <span className="rozet gri">saat dışı</span>}{s.kaynak === 2 ? <span className="rozet uyari" style={{ marginLeft: 4 }}>istisna</span> : null}</td>
                   <td className="orta">{s.randevu}</td><td className="orta">{s.gelen}</td><td className="orta">{s.kanallar}</td></tr>)}
                 {(bugun?.randevusuz ?? []).map(d => <tr key={'r' + d.id} className="soluk"><td>{d.ad}</td><td>—</td><td>—</td><td><span className="rozet mavi">randevusuz kabul</span></td><td className="orta">—</td><td className="orta">—</td><td className="orta">—</td></tr>)}
-                {bugun && bugun.satirlar.length === 0 && bugun.randevusuz.length === 0 && <tr><td colSpan={7} className="sonuk">Bugün planlı hekim yok.</td></tr>}
+                {bugun && bugun.satirlar.length === 0 && bugun.randevusuz.length === 0 && <tr><td colSpan={7} className="sonuk">{c('Bugün planlı hekim yok.')}</td></tr>}
               </tbody>
             </table></div>
           </div>

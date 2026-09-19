@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { Modal } from './Modal';
+import { c } from '../dil/ceviri';
 
 /**
  * KAYNAK ARAMA PENCERESİ — bir liste kaynağında (ICD, ilaç, tetkik…) arayıp
@@ -105,12 +106,12 @@ export function KaynakArama({ kaynak, baslik, kodAlani = 'kod', adAlani = 'ad',
 
   return (
     <Modal baslik={baslik} dar enUst onKapat={onKapat}
-           alt={<button type="button" className="d" onClick={onKapat}>Kapat</button>}>
+           alt={<button type="button" className="d" onClick={onKapat}>{c('Kapat')}</button>}>
       <div className="kaynak-arama">
         <div className="kaynak-arama-arac">
           <span className="ara-kutu">
             <span>🔍</span>
-            <input type="search" ref={kutu} value={metin} placeholder="Kod ya da ad…"
+            <input type="search" ref={kutu} value={metin} placeholder={c('Kod ya da ad…')}
                    onChange={e => { setMetin(e.target.value); setKip('') }} />
           </span>
           <button type="button" className={`d${kip === 'sik' ? ' bir' : ''}`}

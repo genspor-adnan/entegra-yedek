@@ -4,6 +4,7 @@ import { StokAramaPenceresi } from './StokAramaPenceresi';
 import type { DetayDurumu, Satir } from './GenDetayTablo';
 import type { KartDetayMeta, ListeSatiri } from '../api/sozlesme';
 import { para } from './bicim';
+import { c } from '../dil/ceviri';
 
 
 
@@ -90,7 +91,7 @@ export function PaketSekmesi({ meta, durum, saltOkunur, onDegis }: {
           satir secilince, sil en az bir satir secilince calisir. */}
       {!saltOkunur && (
         <div className="detay-arac">
-          <button className="d ikon-dugme" title="Stok Ekle"
+          <button className="d ikon-dugme" title={c('Stok Ekle')}
                   onClick={() => setArama(true)}>＋</button>
           <button className="d ikon-dugme" title="Düzenle" disabled={secili.length !== 1}
                   onClick={() => setSatirDuzen({ dizin: secili[0], satir: durum.guncel[secili[0]] })}>✎</button>
@@ -116,7 +117,7 @@ export function PaketSekmesi({ meta, durum, saltOkunur, onDegis }: {
             <th style={{ width: 90 }} className="hiza-orta">Birim</th>
             <th style={{ width: 90 }} className="hiza-sag">Adet</th>
             <th style={{ width: 110 }} className="hiza-sag">Birim Fiyat</th>
-            <th style={{ width: 70 }} className="hiza-orta">Döviz</th>
+            <th style={{ width: 70 }} className="hiza-orta">{c('Döviz')}</th>
           </tr>
         </thead>
         <tbody>
@@ -194,7 +195,7 @@ function PaketSatirPenceresi({ satir, birimler, dovizler, onKaydet, onKapat }: {
         <>
           <button className="d ana" disabled={!gecerli}
                   onClick={() => onKaydet(taslak)}>Tamam</button>
-          <button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>{c('✖ Kapat')}</button>
         </>
       }
     >
@@ -219,7 +220,7 @@ function PaketSatirPenceresi({ satir, birimler, dovizler, onKaydet, onKapat }: {
                      onChange={e => degis('birimFiyat', e.target.value)} />
             </label>
             <label className="alan tip-kod">
-              <span className="etiket">Döviz</span>
+              <span className="etiket">{c('Döviz')}</span>
               <select value={String(taslak.dovizCinsi ?? 'TL')}
                       onChange={e => degis('dovizCinsi', e.target.value)}>
                 {Object.entries(dovizler).map(([k, v]) => <option key={k} value={k}>{v}</option>)}

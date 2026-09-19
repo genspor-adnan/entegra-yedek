@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
+import { c as cev } from '../dil/ceviri';
 
 /**
  * RADYOLOJİ PANOSU (320) — mockup Ekranlar/radyoloji_panosu.html.
@@ -88,7 +89,7 @@ export function RadyolojiPanosu() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Radyoloji Panosu</h1>
-          <span className="yol">Radyoloji › Pano</span>
+          <span className="yol">{cev('Radyoloji › Pano')}</span>
         </div>
         <div className="basarac">
           <input type="date" value={gun} onChange={e => setGun(e.target.value)} />
@@ -105,7 +106,7 @@ export function RadyolojiPanosu() {
           {kutular.map(k => (
             <button key={k.anahtar} type="button"
                     className={`pano-kutu${k.vurgu ? ` ${k.vurgu}` : ''}`}
-                    onClick={() => git(k.yol)} title="Listeyi aç">
+                    onClick={() => git(k.yol)} title={cev('Listeyi aç')}>
               <span className="ik">{k.ik}</span>
               <span className="s">{k.deger}</span>
               <span className="e">{k.etiket}</span>
@@ -116,7 +117,7 @@ export function RadyolojiPanosu() {
         <div className="pano-satir">
           {/* ------------------------------------------------ cihaz doluluk */}
           <div className="kagrup">
-            <h6>Cihaz Doluluğu <span className="sonuk">mesai saatleri üzerinden</span></h6>
+            <h6>{cev('Cihaz Doluluğu')}<span className="sonuk">mesai saatleri üzerinden</span></h6>
             <div className="pano-ic">
               {(veri?.cihazlar ?? []).map(c => {
                 // Payda: mesai eksi kapatma. Walk-in cihazda mesai hesabi
@@ -146,7 +147,7 @@ export function RadyolojiPanosu() {
                 );
               })}
               {(veri?.cihazlar ?? []).length === 0 && (
-                <div className="bos">Tanımlı cihaz yok.</div>
+                <div className="bos">{cev('Tanımlı cihaz yok.')}</div>
               )}
               <div className="pano-not">
                 Taralı bölüm <b>bakım/tatil kapatması</b>; o aralık randevuya kapalıdır
@@ -157,16 +158,16 @@ export function RadyolojiPanosu() {
 
           {/* ------------------------------------------- dikkat gerektiren */}
           <div className="kagrup">
-            <h6>Dikkat Gerektirenler</h6>
+            <h6>{cev('Dikkat Gerektirenler')}</h6>
             <div className="pano-ic">
               {(veri?.uyarilar ?? []).map((u, i) => (
                 <button key={i} type="button" className={`pano-uyari ${u.tip}`}
-                        onClick={() => git(u.yol)} title="İlgili listeyi aç">
+                        onClick={() => git(u.yol)} title={cev('İlgili listeyi aç')}>
                   <span>{u.ik}</span><span>{u.metin}</span>
                 </button>
               ))}
               {(veri?.uyarilar ?? []).length === 0 && !yukleniyor && (
-                <div className="bos">Bekleyen bir şey yok — her şey yolunda.</div>
+                <div className="bos">{cev('Bekleyen bir şey yok — her şey yolunda.')}</div>
               )}
             </div>
           </div>
@@ -175,13 +176,13 @@ export function RadyolojiPanosu() {
         <div className="pano-satir">
           {/* ---------------------------------------------- modalite dagilim */}
           <div className="kagrup">
-            <h6>Modalite Dağılımı <span className="sonuk">son 30 gün</span></h6>
+            <h6>{cev('Modalite Dağılımı')}<span className="sonuk">son 30 gün</span></h6>
             <table className="detay-tablo">
               <thead>
                 <tr>
-                  <th>Modalite</th><th>Dağılım</th>
+                  <th>Modalite</th><th>{cev('Dağılım')}</th>
                   <th className="hiza-sag">Bugün</th><th className="hiza-sag">30 gün</th>
-                  <th className="hiza-sag">Raporsuz</th><th className="hiza-sag">Ort. rapor</th>
+                  <th className="hiza-sag">{cev('Raporsuz')}</th><th className="hiza-sag">{cev('Ort. rapor')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -202,7 +203,7 @@ export function RadyolojiPanosu() {
                   );
                 })}
                 {(veri?.modalite ?? []).length === 0 && (
-                  <tr><td className="bos" colSpan={6}>Son 30 günde çekim yok.</td></tr>
+                  <tr><td className="bos" colSpan={6}>{cev('Son 30 günde çekim yok.')}</td></tr>
                 )}
               </tbody>
             </table>
@@ -210,12 +211,12 @@ export function RadyolojiPanosu() {
 
           {/* ------------------------------------------------ radyolog yuku */}
           <div className="kagrup">
-            <h6>Radyolog Yükü <span className="sonuk">açık rapor / bugün onaylanan</span></h6>
+            <h6>{cev('Radyolog Yükü')}<span className="sonuk">açık rapor / bugün onaylanan</span></h6>
             <table className="detay-tablo">
               <thead>
                 <tr>
                   <th>Radyolog</th><th className="hiza-sag">Açık</th>
-                  <th className="hiza-sag">Onaylanan</th><th className="hiza-sag">Ort. onay</th>
+                  <th className="hiza-sag">{cev('Onaylanan')}</th><th className="hiza-sag">{cev('Ort. onay')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -228,12 +229,12 @@ export function RadyolojiPanosu() {
                   </tr>
                 ))}
                 {(veri?.radyologlar ?? []).length === 0 && (
-                  <tr><td className="bos" colSpan={4}>Açık ya da bugün onaylanmış rapor yok.</td></tr>
+                  <tr><td className="bos" colSpan={4}>{cev('Açık ya da bugün onaylanmış rapor yok.')}</td></tr>
                 )}
               </tbody>
             </table>
             <div className="pano-not">
-              Asistan raporları onaya düşer: <b>Onaylanan</b> sütunu uzman onayını sayar.
+              Asistan raporları onaya düşer: <b>{cev('Onaylanan')}</b> sütunu uzman onayını sayar.
             </div>
           </div>
         </div>

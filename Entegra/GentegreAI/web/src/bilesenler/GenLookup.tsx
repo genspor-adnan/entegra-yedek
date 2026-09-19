@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { type Kosul, type ListeSatiri, hataMetni } from '../api/sozlesme';
+import { c } from '../dil/ceviri';
 
 interface Props {
   /** Liste kaynagi: 'cari', 'stok' ... */
@@ -106,7 +107,7 @@ export function GenLookup({
         <input
           readOnly
           value={deger ?? ''}
-          placeholder="Seciniz…"
+          placeholder={c('Seciniz…')}
           disabled={saltOkunur}
           onMouseDown={e => { if (!saltOkunur) { e.preventDefault(); setAcik(true) } }}
           onKeyDown={e => { if (!saltOkunur && (e.key === 'Enter' || e.key === 'F4')) { e.preventDefault(); setAcik(true) } }}
@@ -115,7 +116,7 @@ export function GenLookup({
           <button type="button" className="mini" title="Temizle" onClick={() => onSec(null)}>×</button>
         )}
         {!saltOkunur && (
-          <button type="button" className="mini" title="Ara (F4)" onClick={() => setAcik(true)}>…</button>
+          <button type="button" className="mini" title={c('Ara (F4)')} onClick={() => setAcik(true)}>…</button>
         )}
       </div>
 
@@ -136,7 +137,7 @@ export function GenLookup({
               </button>
               <span style={{ flex: 1 }} />
               <button type="button" className="d kapat-dugmesi"
-                      onClick={() => setAcik(false)}>Kapat</button>
+                      onClick={() => setAcik(false)}>{c('Kapat')}</button>
             </div>
 
             <div className="cipler" style={{ margin: 0 }}>
@@ -144,7 +145,7 @@ export function GenLookup({
                 <span>🔍</span>
                 <input type="search"
                   ref={kutu}
-                  placeholder="Ara…"
+                  placeholder={c('Ara…')}
                   defaultValue=""
                   onChange={e => yaz(e.target.value)}
                 />
@@ -179,11 +180,11 @@ export function GenLookup({
                     </tr>
                   ))}
                   {!yukleniyor && satirlar.length === 0 && (
-                    <tr><td colSpan={alanlar.length + 1} className="bos">Kayıt yok</td></tr>
+                    <tr><td colSpan={alanlar.length + 1} className="bos">{c('Kayıt yok')}</td></tr>
                   )}
                 </tbody>
               </table>
-              {yukleniyor && <div className="yukleniyor">Aranıyor…</div>}
+              {yukleniyor && <div className="yukleniyor">{c('Aranıyor…')}</div>}
             </div>
 
             <div className="lookup-alt">

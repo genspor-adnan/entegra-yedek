@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../api/istemci';
+import { c as cev } from '../dil/ceviri';
 
 /**
  * RANDEVU KARTINDA TETKİK-CİHAZ UYUMU (317).
@@ -89,15 +90,15 @@ export function RandevuTetkikUyum({ hizmetId, cihazId, sureDk, onSure }: {
     <div className={uyumsuz ? 'hata-kutusu' : 'bilgi-kutusu'} style={{ marginTop: 8 }}>
       {uyumsuz ? (
         <>
-          <b>Tetkik ile cihaz uyuşmuyor.</b> Tetkik <b>{bilgi.modaliteAdi}</b>,
+          <b>{cev('Tetkik ile cihaz uyuşmuyor.')}</b> Tetkik <b>{bilgi.modaliteAdi}</b>,
           seçili cihaz <b>{cihaz?.ad}</b>. Kayıt bu haliyle reddedilir - cihazı
           değiştirin.
         </>
       ) : (
         <>
-          {bilgi.modaliteAdi && <>Tetkik modalitesi: <b>{bilgi.modaliteAdi}</b>. </>}
+          {bilgi.modaliteAdi && <>{cev('Tetkik modalitesi:')}<b>{bilgi.modaliteAdi}</b>. </>}
           {bilgi.protokolSure > 0
-            && <>Çekim protokolü süresi <b>{bilgi.protokolSure} dk</b>. </>}
+            && <>{cev('Çekim protokolü süresi')}<b>{bilgi.protokolSure} dk</b>. </>}
           {bilgi.hazirlikMetni && <>Hazırlık: {bilgi.hazirlikMetni}</>}
         </>
       )}

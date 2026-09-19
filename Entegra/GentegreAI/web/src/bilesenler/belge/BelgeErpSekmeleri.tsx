@@ -1,6 +1,7 @@
 import { TasiyiciSekmesi, EBelgeSekmesi, FaturalamaSekmesi }
   from './BelgeSekmeleri';
 import type { useSevkiyatBilgisi } from '../../sayfalar/belgeKarti/useSevkiyatBilgisi';
+import { c } from '../../dil/ceviri';
 
 /**
  * ERP BELGESİNE ÖZGÜ SEKMELER: Taşıyıcı · e-Belge · Faturalama · İmza.
@@ -37,7 +38,7 @@ export function BelgeErpSekmeleri({ aktifSekme, kilitli, sevkiyat, belge,
   if (aktifSekme === 'imza') {
     return (
       <div className="kagrup">
-        <h6>İmza / Teslim Alan</h6>
+        <h6>{c('İmza / Teslim Alan')}</h6>
         <div className="not">
           Teslim alan kişi, TC, görev, teslim zamanı, nüsha sayısı ve teslim notu
           alanları henüz şemada yok — e-İrsaliye teslim onayı akışıyla gelecek.

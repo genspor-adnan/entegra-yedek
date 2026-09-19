@@ -13,6 +13,7 @@ import type { SatirDurumu } from '../../sayfalar/belgeSatir';
 import type { Secim } from '../../sayfalar/belgeKaydet';
 import type { BelgeYaniti } from '../../api/sozlesme';
 import type { BelgeTuruBilgisi } from '../../sayfalar/belgeTuru';
+import { c } from '../../dil/ceviri';
 
 /**
  * BELGE KARTI BASLIGI - TEK 4 SUTUNLU izgara (kullanici). Once satis
@@ -120,7 +121,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
         <select value={fisTipi} disabled={baslikKilitli}
                 autoFocus={!kilitli && !fisTipi}
                 onChange={e => setFisTipi(Number(e.target.value))}>
-          <option value={0}>Seçiniz…</option>
+          <option value={0}>{c('Seçiniz…')}</option>
           {(fisCikisMi ? CIKIS_FIS_TIPLERI : GIRIS_FIS_TIPLERI)
             .map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
         </select>
@@ -173,7 +174,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
                  readOnly />
           {/* Revize, NUMARASI OLAN teklife yazilir (kullanici): numara yokken
               revize kavrami yok - kaydedilince edit acilir. */}
-          <input value={teklif.revizeNo} maxLength={20} placeholder="Revize"
+          <input value={teklif.revizeNo} maxLength={20} placeholder={c('Revize')}
                  style={{ flex: '0 0 76px' }}
                  disabled={kilitli || !String(sonuc?.belge.belgeNo ?? '')}
                  onChange={e => teklif.setRevizeNo(e.target.value)} />
@@ -192,7 +193,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
     {/* --- 3b) TEKLIF DURUMU (218) - tarih sagina (kullanici). */}
     {teklifMi && (
       <label className="alan">
-        <span className="etiket">Durumu</span>
+        <span className="etiket">{c('Durumu')}</span>
         <select value={teklif.durum} disabled={kilitli}
                 onChange={e => teklif.setDurum(e.target.value)}>
           {Object.entries(TEKLIF_DURUMLARI).map(([k, v]) =>
@@ -214,7 +215,7 @@ export function BelgeBaslik(p: BelgeBaslikProps) {
           {konsinyeMi ? 'e-İrsaliye (konsinye)' : irsaliyeMi ? 'e-İrsaliye' : 'e-Fatura'}
         </span>
         {Number(sonuc?.belge.efaturaDurum ?? 0) > 0
-          ? <span className="rozet olumlu">✓ Gönderildi</span>
+          ? <span className="rozet olumlu">{c('✓ Gönderildi')}</span>
           : <span className="rozet">gönderilmedi</span>}
       </span>
     </label>
@@ -507,7 +508,7 @@ function KodListeAlani({ etiket, listeKod, deger, onDeger, kilitli, yazilabilir 
   return (
     <label className="alan">
       <span className="etiket" role="button" tabIndex={0}
-            title="Liste içeriğini düzenle" style={{ cursor: 'pointer' }}
+            title={c('Liste içeriğini düzenle')} style={{ cursor: 'pointer' }}
             onClick={e => { e.preventDefault(); setModal(true) }}>
         {etiket} ✎
       </span>
@@ -526,7 +527,7 @@ function KodListeAlani({ etiket, listeKod, deger, onDeger, kilitli, yazilabilir 
       ) : (
         <select value={deger} disabled={kilitli}
                 onChange={e => onDeger(e.target.value)}>
-          <option value="">Seçiniz…</option>
+          <option value="">{c('Seçiniz…')}</option>
           {/* Kayitli deger listeden silinmisse yine gorunsun. */}
           {deger && !secenekler.includes(deger) && <option value={deger}>{deger}</option>}
           {secenekler.map(a => <option key={a} value={a}>{a}</option>)}

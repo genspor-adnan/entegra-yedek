@@ -8,6 +8,7 @@ import { guvenli, onay } from '../../bilesenler/mesaj';
 import { gunNokta, para } from '../../bilesenler/bicim';
 import { medulaSonucMetni } from '../liste/medulaAksiyonlari';
 import { Adimlar, Gunluk, Rozet, Sonuc } from './medulaOrtak';
+import { c } from '../../dil/ceviri';
 
 /**
  * MEDULA — HİZMET KAYDI — mockup `Ekranlar/Medula/medula_hizmet_kayit.html`.
@@ -67,7 +68,7 @@ export function MedulaHizmetKayit() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>🧾 Medula — Hizmet Kaydı — {v.hasta}</h1>
-          <span className="yol">Medula › Hizmet Kaydı</span>
+          <span className="yol">{c('Medula › Hizmet Kaydı')}</span>
           <span className="rozet mavi">{t.belgeNo}</span>
           {t.takipNo ? <span className="rozet ok">takip {t.takipNo}</span> : <Rozet d={t.sgkDurum} sozluk={MEDULA_TAKIP_DURUM} />}
         </div>
@@ -75,9 +76,9 @@ export function MedulaHizmetKayit() {
           <button className="d bir" onClick={() => void gonder()} disabled={!t.takipNo || !yetki('medula.hizmet')}>📤 Tümünü Gönder (tanı + işlem)</button>
           <button className="d" onClick={() => void gonder(secili)} disabled={!secili.length}>📤 Seçilileri gönder ({secili.length})</button>
           <button className="d" onClick={() => setSekme('karsilastir')}>⚖ Karşılaştır</button>
-          <button className="d" onClick={() => void cikis()} disabled={!t.takipNo || !!t.cikisZaman}>🚪 Hasta Çıkışı</button>
-          <button className="d onay" onClick={() => void fatura()} disabled={!t.cikisZaman || !!t.medulaFaturaNo || !yetki('medula.fatura')}>🧮 Fatura Kaydet</button>
-          <button className="d" onClick={() => git(`/medula-kabul/${belgeId}`)}>🪪 Provizyon</button>
+          <button className="d" onClick={() => void cikis()} disabled={!t.takipNo || !!t.cikisZaman}>{c('🚪 Hasta Çıkışı')}</button>
+          <button className="d onay" onClick={() => void fatura()} disabled={!t.cikisZaman || !!t.medulaFaturaNo || !yetki('medula.fatura')}>{c('🧮 Fatura Kaydet')}</button>
+          <button className="d" onClick={() => git(`/medula-kabul/${belgeId}`)}>{c('🪪 Provizyon')}</button>
           <button className="d" onClick={() => void yukle()} title="Yenile">⟳</button>
         </div>
       </div>
@@ -85,14 +86,14 @@ export function MedulaHizmetKayit() {
         <Adimlar aktif={adim} adimlar={['Hak sahipliği', `Takip ${t.takipNo || '—'}`, 'Hizmet kaydı', 'Hasta çıkışı', 'Fatura']} />
         <div className="md-ozet">
           <div><span>Tanı</span><b>{v.tanilar.length}</b><i>{v.tanilar.filter(x => x.durum === 2).length} kabul</i></div>
-          <div className="ok"><span>İşlem kaydı</span><b>{kabul.length} / {v.satirlar.length}</b><i>kabul</i></div>
-          <div className={hatali.length ? 'kir' : ''}><span>Hatalı</span><b>{hatali.length}</b><i>{hatali[0]?.sonucKod ?? ''}</i></div>
-          <div><span>Tetkik / radyoloji</span><b>{v.satirlar.filter(s => s.tetkik).length}</b></div>
-          <div><span>Yerel tutar</span><b>{para.format(yerelToplam)}</b></div>
-          <div className={medulaToplam !== yerelToplam && kabul.length === v.satirlar.length ? 'kir' : ''}><span>Medula tutarı</span><b>{para.format(medulaToplam)}</b><i>fark {para.format(yerelToplam - medulaToplam)}</i></div>
+          <div className="ok"><span>{c('İşlem kaydı')}</span><b>{kabul.length} / {v.satirlar.length}</b><i>kabul</i></div>
+          <div className={hatali.length ? 'kir' : ''}><span>{c('Hatalı')}</span><b>{hatali.length}</b><i>{hatali[0]?.sonucKod ?? ''}</i></div>
+          <div><span>{c('Tetkik / radyoloji')}</span><b>{v.satirlar.filter(s => s.tetkik).length}</b></div>
+          <div><span>{c('Yerel tutar')}</span><b>{para.format(yerelToplam)}</b></div>
+          <div className={medulaToplam !== yerelToplam && kabul.length === v.satirlar.length ? 'kir' : ''}><span>{c('Medula tutarı')}</span><b>{para.format(medulaToplam)}</b><i>fark {para.format(yerelToplam - medulaToplam)}</i></div>
         </div>
         {sonuc && <Sonuc tur={sonuc.tur}>{sonuc.metin}</Sonuc>}
-        {!t.takipNo && <Sonuc tur="sari">Takip yok: önce <a href="#" onClick={e => { e.preventDefault(); git(`/medula-kabul/${belgeId}`) }}>provizyon alın</a>.</Sonuc>}
+        {!t.takipNo && <Sonuc tur="sari">{c('Takip yok: önce')}<a href="#" onClick={e => { e.preventDefault(); git(`/medula-kabul/${belgeId}`) }}>provizyon alın</a>.</Sonuc>}
 
         <div className="ka-sekmeler">
           {([['tani', `Tanılar (${v.tanilar.length})`], ['islem', `İşlemler (SUT) (${v.satirlar.length})`], ['karsilastir', 'Karşılaştırma'], ['gunluk', 'Günlük']] as [Sekme, string][])
@@ -100,9 +101,9 @@ export function MedulaHizmetKayit() {
         </div>
 
         {sekme === 'tani' && (
-          <div className="md-grp"><div className="md-gb">Tanılar <span className="md-sp sonuk">muayene.tani → medula_tani · ana tanı tek</span></div>
+          <div className="md-grp"><div className="md-gb">{c('Tanılar')}<span className="md-sp sonuk">muayene.tani → medula_tani · ana tanı tek</span></div>
             <div className="md-dg"><table>
-              <thead><tr><th className="orta">Ana</th><th>ICD-10</th><th>Tanı</th><th className="orta">Diş</th><th className="orta">Medula</th><th>Sonuç</th></tr></thead>
+              <thead><tr><th className="orta">{c('Ana')}</th><th>ICD-10</th><th>Tanı</th><th className="orta">Diş</th><th className="orta">{c('Medula')}</th><th>Sonuç</th></tr></thead>
               <tbody>
                 {v.tanilar.map(x => (
                   <tr key={x.id}><td className="orta">{x.tur === 1 ? '●' : ''}</td><td>{x.icdKod}</td><td>{x.ad}</td><td className="orta">{x.disNo ?? '—'}</td>
@@ -118,7 +119,7 @@ export function MedulaHizmetKayit() {
           <div className="md-grp">
             <div className="md-dg"><table>
               <thead><tr><th className="orta"><input type="checkbox" checked={secili.length > 0 && secili.length === v.satirlar.filter(s => s.durum !== 2).length} onChange={e => setSecili(e.target.checked ? v.satirlar.filter(s => s.durum !== 2 && s.durum !== 5).map(s => s.satirId) : [])} /></th>
-                <th>SUT</th><th>İşlem</th><th className="orta">Diş</th><th className="orta">Adet</th><th>Tarih</th><th className="sag">Yerel</th><th className="sag">Medula</th><th className="orta">Sıra</th><th className="orta">Durum</th><th>Sonuç</th><th /></tr></thead>
+                <th>{c('SUT')}</th><th>İşlem</th><th className="orta">Diş</th><th className="orta">Adet</th><th>Tarih</th><th className="sag">{c('Yerel')}</th><th className="sag">{c('Medula')}</th><th className="orta">Sıra</th><th className="orta">Durum</th><th>Sonuç</th><th /></tr></thead>
               <tbody>
                 {v.satirlar.map(s => (
                   <tr key={s.satirId} className={s.durum === 3 ? 'md-hata' : ''}>
@@ -132,11 +133,11 @@ export function MedulaHizmetKayit() {
                     <td className="md-satir-arac">
                       {s.durum === 3 && <button className="d" onClick={() => void gonder([s.satirId])}>↻</button>}
                       {s.medulaId && (s.durum === 2 || s.durum === 3) && <button className="d" onClick={() => void iptal(s.medulaId!)}>✖</button>}
-                      {s.medulaId && s.durum === 3 && <button className="d" title="Hastaya ücretli bırak" onClick={() => void yerel(s.medulaId!)}>💳</button>}
+                      {s.medulaId && s.durum === 3 && <button className="d" title={c('Hastaya ücretli bırak')} onClick={() => void yerel(s.medulaId!)}>💳</button>}
                     </td>
                   </tr>
                 ))}
-                {v.satirlar.length === 0 && <tr><td colSpan={12} className="sonuk">Başvuruda hizmet satırı yok.</td></tr>}
+                {v.satirlar.length === 0 && <tr><td colSpan={12} className="sonuk">{c('Başvuruda hizmet satırı yok.')}</td></tr>}
                 <tr className="grup"><td colSpan={6}>TOPLAM · {v.satirlar.length} satır</td><td className="sag">{para.format(yerelToplam)}</td><td className="sag">{para.format(medulaToplam)}</td><td colSpan={4} /></tr>
               </tbody>
             </table></div>
@@ -145,14 +146,14 @@ export function MedulaHizmetKayit() {
         )}
 
         {sekme === 'karsilastir' && (
-          <div className="md-grp"><div className="md-gb">Yerel ↔ Medula <span className="md-sp sonuk">fark eşiği aşılırsa fatura döneme alınmaz</span></div>
+          <div className="md-grp"><div className="md-gb">{c('Yerel ↔ Medula')}<span className="md-sp sonuk">fark eşiği aşılırsa fatura döneme alınmaz</span></div>
             <div className="md-dg"><table>
-              <thead><tr><th>SUT</th><th>İşlem</th><th className="sag">Yerel</th><th className="sag">Medula</th><th className="sag">Fark</th><th className="orta">Durum</th></tr></thead>
+              <thead><tr><th>{c('SUT')}</th><th>İşlem</th><th className="sag">{c('Yerel')}</th><th className="sag">{c('Medula')}</th><th className="sag">Fark</th><th className="orta">Durum</th></tr></thead>
               <tbody>
                 {v.satirlar.map(s => { const m = s.durum === 2 ? (s.medulaTutar ?? 0) : 0; return (
                   <tr key={s.satirId}><td>{s.sutKodu}</td><td>{s.islem}</td><td className="sag">{para.format(s.yerelTutar)}</td><td className="sag">{s.durum === 2 ? para.format(m) : '—'}</td>
                     <td className={`sag${s.yerelTutar - m !== 0 ? ' md-kir' : ''}`}>{para.format(s.yerelTutar - m)}</td>
-                    <td className="orta">{s.durum === 2 ? (s.yerelTutar === m ? <span className="rozet ok">Eşit</span> : <span className="rozet uyari">Fark</span>) : <span className="rozet uyari">Yalnız yerelde</span>}</td></tr>
+                    <td className="orta">{s.durum === 2 ? (s.yerelTutar === m ? <span className="rozet ok">{c('Eşit')}</span> : <span className="rozet uyari">Fark</span>) : <span className="rozet uyari">{c('Yalnız yerelde')}</span>}</td></tr>
                 ); })}
                 <tr className="grup"><td colSpan={2}>TOPLAM</td><td className="sag">{para.format(yerelToplam)}</td><td className="sag">{para.format(medulaToplam)}</td><td className="sag">{para.format(yerelToplam - medulaToplam)}</td><td /></tr>
               </tbody>
@@ -162,8 +163,8 @@ export function MedulaHizmetKayit() {
 
         {sekme === 'gunluk' && (
           <>
-            <div className="md-grp"><div className="md-gb">Bu başvurunun Medula günlüğü</div><Gunluk satirlar={v.gunluk} govdeAc={govdeAc} /></div>
-            {govde && <div className="md-grp"><div className="md-gb">İstek / yanıt <span className="md-sp"><button className="d" onClick={() => setGovde(null)}>Kapat</button></span></div><pre className="md-xml">{govde.istek}{'\n---\n'}{govde.yanit}</pre></div>}
+            <div className="md-grp"><div className="md-gb">{c('Bu başvurunun Medula günlüğü')}</div><Gunluk satirlar={v.gunluk} govdeAc={govdeAc} /></div>
+            {govde && <div className="md-grp"><div className="md-gb">{c('İstek / yanıt')}<span className="md-sp"><button className="d" onClick={() => setGovde(null)}>{c('Kapat')}</button></span></div><pre className="md-xml">{govde.istek}{'\n---\n'}{govde.yanit}</pre></div>}
           </>
         )}
       </div>

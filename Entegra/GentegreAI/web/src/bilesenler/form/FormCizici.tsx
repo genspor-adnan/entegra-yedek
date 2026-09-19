@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { FormAlan, FormBolum, FormCevap, FormTanimi } from '../../api/uclar/form';
+import { c as cev } from '../../dil/ceviri';
 
 /**
  * FORM ÇİZİCİ (form motoru 740): jsonb tanımı ekrana çizer, değerleri
@@ -184,7 +185,7 @@ function Alan({ a, cevap, salt, parametreler, onChange }: {
         </div>, true);
     }
     case 'imza':
-      return sar(<div className="sonuk">İmza alanı — formun sonundaki imza bloğundan.</div>);
+      return sar(<div className="sonuk">{cev('İmza alanı — formun sonundaki imza bloğundan.')}</div>);
     default:
       return sar(<input className="fm-giris" value={(v as string) ?? ''} disabled={salt} onChange={e => onChange(a.kod, e.target.value)} />);
   }

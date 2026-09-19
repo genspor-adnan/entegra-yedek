@@ -5,6 +5,7 @@ import { hataMetni, type ListeSatiri } from '../../api/sozlesme';
 import { GenGrid } from '../GenGrid';
 import { Modal } from '../Modal';
 import { dosyaIndirUrl } from '../indir';
+import { c } from '../../dil/ceviri';
 
 /**
  * XSLT SABLONLARI — belge GIB'e XML gider, insanin gordugu goruntu bu sablon
@@ -106,7 +107,7 @@ export function XsltSablonlari() {
     <>
       <div className="kagrup">
         <div className="numaralama-bas bitisik">
-          <h6>XSLT Şablonları</h6>
+          <h6>{c('XSLT Şablonları')}</h6>
           <span className="baslik-eylem">
             {/* Dosya secici gizli: "＋" ona basar, secilen DOSYANIN ADI forma
                 ad olarak dolar. */}
@@ -115,7 +116,7 @@ export function XsltSablonlari() {
                      dosyaSecildi(e.target.files?.[0]);
                      e.target.value = '';        // ayni dosya tekrar secilebilsin
                    }} />
-            <button className="d bir ikon-dugme" title="Klasörden şablon seç"
+            <button className="d bir ikon-dugme" title={c('Klasörden şablon seç')}
                     onClick={() => dosyaGirdisi.current?.click()}>＋</button>
             <button className="d ikon-dugme" disabled={!secili}
                     title={secili ? 'Seçili şablonun bilgilerini düzenle' : 'Önce satır seçin'}
@@ -153,7 +154,7 @@ export function XsltSablonlari() {
           dar
           onKapat={() => setForm(null)}
           alt={<>
-            <button className="d kapat-dugmesi" onClick={() => setForm(null)}>Kapat</button>
+            <button className="d kapat-dugmesi" onClick={() => setForm(null)}>{c('Kapat')}</button>
             <button className="d bir" disabled={!form.ad.trim()}
                     onClick={() => { void kaydet() }}>Kaydet</button>
           </>}
@@ -168,7 +169,7 @@ export function XsltSablonlari() {
                 </span>
               </label>
               <label className="alan">
-                <span className="etiket">e-Belge Türü</span>
+                <span className="etiket">{c('e-Belge Türü')}</span>
                 <span className="ikili">
                   <select value={form.tur}
                           onChange={e => setForm({ ...form, tur: Number(e.target.value) })}>
@@ -184,15 +185,15 @@ export function XsltSablonlari() {
                 <span className="ikili">
                   <select value={form.yon}
                           onChange={e => setForm({ ...form, yon: Number(e.target.value) })}>
-                    <option value={2}>Giden</option>
-                    <option value={1}>Gelen</option>
+                    <option value={2}>{c('Giden')}</option>
+                    <option value={1}>{c('Gelen')}</option>
                   </select>
                 </span>
               </label>
               <label className="alan ayar-onay">
                 <input type="checkbox" checked={form.varsayilan}
                        onChange={e => setForm({ ...form, varsayilan: e.target.checked })} />
-                <span className="etiket">Bu tür ve yön için varsayılan olsun</span>
+                <span className="etiket">{c('Bu tür ve yön için varsayılan olsun')}</span>
               </label>
             </div>
           </div>

@@ -4,6 +4,7 @@ import type { FaturaDurumu } from '../../api/uclar/ameliyathane';
 import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import { paraYaz } from '../bicim';
+import { c } from '../../dil/ceviri';
 
 /**
  * AMELİYAT → FATURA ve SARF → STOK (720).
@@ -126,7 +127,7 @@ export function FaturaStokModali({ ameliyatId, ameliyatNo, onKapat, onTamam }: {
                      : `🏷 ÜTS Bildir (${o?.utsBekleyen})`}
                  </button>
                )}
-               <button className="d" onClick={onKapat}>✖ Kapat</button>
+               <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}
@@ -144,10 +145,10 @@ export function FaturaStokModali({ ameliyatId, ameliyatNo, onKapat, onTamam }: {
       )}
 
       <div className="kagrup">
-        <h6>İşlemler → hasta başvurusu</h6>
+        <h6>{c('İşlemler → hasta başvurusu')}</h6>
         <div className="ds-dg"><table>
           <thead><tr>
-            <th>İşlem</th><th style={{ width: 110 }}>SUT</th>
+            <th>İşlem</th><th style={{ width: 110 }}>{c('SUT')}</th>
             <th style={{ width: 110 }} className="sag">Fiyat</th>
             <th style={{ width: 130 }} className="orta">Durum</th>
           </tr></thead>
@@ -163,7 +164,7 @@ export function FaturaStokModali({ ameliyatId, ameliyatNo, onKapat, onTamam }: {
               </tr>
             ))}
             {veri && veri.islemler.length === 0 && (
-              <tr><td colSpan={4} className="sonuk">İşlem satırı yok.</td></tr>)}
+              <tr><td colSpan={4} className="sonuk">{c('İşlem satırı yok.')}</td></tr>)}
           </tbody>
         </table></div>
       </div>
@@ -203,23 +204,23 @@ export function FaturaStokModali({ ameliyatId, ameliyatNo, onKapat, onTamam }: {
               </tr>
             ))}
             {veri && veri.sarflar.length === 0 && (
-              <tr><td colSpan={5} className="sonuk">Malzeme satırı yok.</td></tr>)}
+              <tr><td colSpan={5} className="sonuk">{c('Malzeme satırı yok.')}</td></tr>)}
           </tbody>
         </table></div>
         <div className="alan-izgara tek-sutun">
           <label className="alan">
-            <span className="etiket">Faturaya</span>
+            <span className="etiket">{c('Faturaya')}</span>
             <label className="secim-satiri">
               <input type="checkbox" checked={malzemeDahil}
                      onChange={e => setMalzemeDahil(e.target.checked)} />
-              <span>Malzeme ücret satırları da aktarılsın</span>
+              <span>{c('Malzeme ücret satırları da aktarılsın')}</span>
             </label>
           </label>
         </div>
       </div>
 
       <div className="not">
-        <b>İki ayrı defter.</b> Ücret <b>hasta başvurusuna</b> (tür 19) yazılır; başvuru
+        <b>{c('İki ayrı defter.')}</b> Ücret <b>hasta başvurusuna</b> (tür 19) yazılır; başvuru
         stoğa dokunmaz, gerçek muhasebe hareketi faturaya dönüşünce oluşur. Malzeme
         ise <b>stok çıkış fişiyle</b> (tür 4) düşer. Faturaya yansıyan malzeme de
         düşer — çift sayım değil: iki kayıt iki ayrı deftere gidiyor.

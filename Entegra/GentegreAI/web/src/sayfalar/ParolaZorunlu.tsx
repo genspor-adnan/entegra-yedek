@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { api } from '../api/istemci';
 import { hataMetni, urunAdi } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
+import { c } from '../dil/ceviri';
 
 /**
  * ZORUNLU PAROLA DEĞİŞİMİ (674) — kullanıcı: "ilk giriş şifreleri default
@@ -47,7 +48,7 @@ export function ParolaZorunlu() {
           <img src={`${import.meta.env.BASE_URL}gentegre-sembol.svg`} alt="" />
           <h1>{urunAdi(kullanici?.urunModu)}</h1>
         </div>
-        <p className="alt-baslik">İlk giriş — parolanızı değiştirin</p>
+        <p className="alt-baslik">{c('İlk giriş — parolanızı değiştirin')}</p>
         <div className="bilgi-kutusu">
           <b>{kullanici?.ad}</b> · kullanıcı adı <b>{kullanici?.kod}</b>
           <div>
@@ -60,9 +61,7 @@ export function ParolaZorunlu() {
           <input type="password" value={eski} autoFocus autoComplete="current-password"
                  onChange={e => setEski(e.target.value)} />
         </label>
-        <label>
-          Yeni parola
-          <input type="password" value={yeni1} autoComplete="new-password"
+        <label>{c('Yeni parola')}<input type="password" value={yeni1} autoComplete="new-password"
                  onChange={e => setYeni1(e.target.value)} />
         </label>
         <label>

@@ -6,6 +6,7 @@ import { Modal } from '../Modal';
 import { TarafArama } from '../TarafArama';
 import { mesaj } from '../mesaj';
 import { YatakSecimi } from './YatakSecimi';
+import { c } from '../../dil/ceviri';
 
 /**
  * YATIŞ KABUL — mockup `Ekranlar/Yatan/yatis_kabul.html`.
@@ -143,7 +144,7 @@ export function YatisKabulModali({ hastaId: ilkHastaId, hastaAdi: ilkHastaAdi,
                  <span style={{ flex: 1 }} />
                  {adim < 3 ? (
                    <button className="d onay" disabled={!ileriOlur}
-                           onClick={() => setAdim(a => a + 1)}>İleri ›</button>
+                           onClick={() => setAdim(a => a + 1)}>{c('İleri ›')}</button>
                  ) : (
                    <button className="d onay" disabled={kaydediyor || !yatak}
                            onClick={() => void kaydet()}>✔ Yatışı Aç</button>
@@ -167,7 +168,7 @@ export function YatisKabulModali({ hastaId: ilkHastaId, hastaAdi: ilkHastaAdi,
             <label className="alan">
               <span className="etiket zorunlu-isaret">Hasta</span>
               <span className="deger-serit">
-                <input readOnly style={{ flex: 1, minWidth: 0 }} value={hastaAdi} placeholder="Hasta seçilmedi"
+                <input readOnly style={{ flex: 1, minWidth: 0 }} value={hastaAdi} placeholder={c('Hasta seçilmedi')}
                        onClick={() => setHastaArama(true)} />
                 <button className="d" onClick={() => setHastaArama(true)}>🔍 Ara</button>
               </span>
@@ -184,47 +185,47 @@ export function YatisKabulModali({ hastaId: ilkHastaId, hastaAdi: ilkHastaAdi,
           <>
             <div className="alan-izgara">
               <label className="alan">
-                <span className="etiket">Yatış türü</span>
+                <span className="etiket">{c('Yatış türü')}</span>
                 <select value={yatisTuru} onChange={e => setYatisTuru(Number(e.target.value))}>
                   {turler.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
                 </select>
               </label>
               <label className="alan">
-                <span className="etiket">Geliş şekli</span>
+                <span className="etiket">{c('Geliş şekli')}</span>
                 <select value={gelisSekli} onChange={e => setGelisSekli(Number(e.target.value))}>
                   {gelisler.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
                 </select>
               </label>
               <label className="alan">
-                <span className="etiket">Sorumlu hekim</span>
+                <span className="etiket">{c('Sorumlu hekim')}</span>
                 <span className="deger-serit">
-                  <input readOnly style={{ flex: 1, minWidth: 0 }} value={hekimAdi} placeholder="Seçilmedi"
+                  <input readOnly style={{ flex: 1, minWidth: 0 }} value={hekimAdi} placeholder={c('Seçilmedi')}
                          onClick={() => setHekimArama(true)} />
                   <button className="d" onClick={() => setHekimArama(true)}>🔍</button>
                 </span>
               </label>
               <label className="alan">
-                <span className="etiket">Yatış tanısı (ICD)</span>
+                <span className="etiket">{c('Yatış tanısı (ICD)')}</span>
                 <input value={taniKodu} placeholder="örn. J18.9"
                        onChange={e => setTaniKodu(e.target.value)} />
               </label>
               <label className="alan">
-                <span className="etiket">Tahmini çıkış</span>
+                <span className="etiket">{c('Tahmini çıkış')}</span>
                 <input type="date" value={tahminiCikis}
                        onChange={e => setTahminiCikis(e.target.value)} />
               </label>
               <label className="alan">
-                <span className="etiket">Klinik / servis</span>
+                <span className="etiket">{c('Klinik / servis')}</span>
                 <input readOnly style={{ flex: 1, minWidth: 0 }} value={yatak?.klinik || '— yatakla gelir'} />
               </label>
             </div>
             <div className="not" style={{ marginTop: 6 }}>
-              <b>Klinik yataktan gelir:</b> yatak odaya, oda servise bağlı. Ayrı
+              <b>{c('Klinik yataktan gelir:')}</b> yatak odaya, oda servise bağlı. Ayrı
               seçilseydi hasta "Dahiliye"de görünürken Ortopedi yatağında yatabilirdi.
               Tahmini çıkış boş bırakılırsa yatak, hasta çıkana kadar dolu sayılır —
               panodaki "bugün boşalacak" sayısı bu alandan doğar.
             </div>
-            <h4 style={{ margin: '10px 0 4px' }}>Yatak seçimi</h4>
+            <h4 style={{ margin: '10px 0 4px' }}>{c('Yatak seçimi')}</h4>
             {hastaId && (
               <YatakSecimi hastaId={hastaId} seciliId={yatak?.id ?? null}
                            onSec={y => setYatak(y)} />
@@ -238,28 +239,28 @@ export function YatisKabulModali({ hastaId: ilkHastaId, hastaAdi: ilkHastaAdi,
               <label className="alan">
                 <span className="etiket">Ödeyen kurum</span>
                 <span className="deger-serit">
-                  <input readOnly style={{ flex: 1, minWidth: 0 }} value={kurumAdi} placeholder="Ücretli / kendi ödemeli"
+                  <input readOnly style={{ flex: 1, minWidth: 0 }} value={kurumAdi} placeholder={c('Ücretli / kendi ödemeli')}
                          onClick={() => setKurumArama(true)} />
                   <button className="d" onClick={() => setKurumArama(true)}>🔍</button>
                 </span>
               </label>
               <label className="alan">
-                <span className="etiket">Provizyon / takip no</span>
+                <span className="etiket">{c('Provizyon / takip no')}</span>
                 <input value={provizyon} onChange={e => setProvizyon(e.target.value)} />
               </label>
               <label className="alan">
                 <span className="etiket">Refakatçi</span>
-                <input value={refakatci} placeholder="Ad Soyad (yakınlık)"
+                <input value={refakatci} placeholder={c('Ad Soyad (yakınlık)')}
                        onChange={e => setRefakatci(e.target.value)} />
               </label>
               <label className="alan">
-                <span className="etiket">Refakatçi TCKN</span>
+                <span className="etiket">{c('Refakatçi TCKN')}</span>
                 <input value={refakatciTckn} maxLength={11}
                        onChange={e => setRefakatciTckn(e.target.value)} />
               </label>
             </div>
             <div className="not" style={{ marginTop: 6 }}>
-              <b>Provizyon alınamazsa yatış engellenmez.</b> Acil vakada hastayı kapıda
+              <b>{c('Provizyon alınamazsa yatış engellenmez.')}</b> Acil vakada hastayı kapıda
               bekletmek, mali riskten büyük bir risktir; provizyonsuz yatış listede
               rozetle taşınır ve fatura kapanmadan çözülür.
             </div>
@@ -275,24 +276,24 @@ export function YatisKabulModali({ hastaId: ilkHastaId, hastaAdi: ilkHastaAdi,
                 <div className="sat"><span>Yatak</span>
                   <b>{yatak ? `${yatak.oda} / ${yatak.yatak}` : '—'}
                      {yatak?.ucretHizmet && <span className="sonuk"> · {yatak.ucretHizmet}</span>}</b></div>
-                <div className="sat"><span>Klinik / hekim</span>
+                <div className="sat"><span>{c('Klinik / hekim')}</span>
                   <b>{[yatak?.klinik, hekimAdi].filter(Boolean).join(' · ') || '—'}</b></div>
                 <div className="sat"><span>Ödeyen</span>
                   <b>{kurumAdi || 'Kendi ödemeli'}
                      {kurumAdi && !provizyon && <span className="rozet sari"> provizyon yok</span>}</b></div>
-                <div className="sat"><span>Dosya no</span>
+                <div className="sat"><span>{c('Dosya no')}</span>
                   <b className="sonuk">kaydederken üretilir (Y-yyyy-nnnn)</b></div>
               </div>
             </div>
             <div className="kagrup" style={{ marginTop: 8 }}>
-              <h6>Kaydedince olacaklar</h6>
+              <h6>{c('Kaydedince olacaklar')}</h6>
               <div className="ic">
                 <div className="sat"><span>Yatak</span>
                   <b>→ <span className="rozet mavi">rezerve</span>
                      <span className="sonuk"> hasta yatağına çıkınca "dolu"</span></b></div>
-                <div className="sat"><span>Yatak hareketi</span>
+                <div className="sat"><span>{c('Yatak hareketi')}</span>
                   <b>ilk satır açılır — yatak ücreti bu tablodan hesaplanır</b></div>
-                <div className="sat"><span>Yatış durumu</span><b>Yatış kabul</b></div>
+                <div className="sat"><span>{c('Yatış durumu')}</span><b>{c('Yatış kabul')}</b></div>
               </div>
               <div className="not">
                 Kabul yatağı <b>rezerve</b> eder, dolu yapmaz: hasta henüz yatağında

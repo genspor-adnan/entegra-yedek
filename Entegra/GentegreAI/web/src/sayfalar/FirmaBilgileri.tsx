@@ -7,6 +7,7 @@ import { GenForm } from '../bilesenler/GenForm';
 import { SeriKurallari } from '../bilesenler/ebelge/SeriKurallari';
 import { XsltSablonlari } from '../bilesenler/ebelge/XsltSablonlari';
 import { TurAyarlari, type EBelgeTuru } from '../bilesenler/ebelge/TurAyarlari';
+import { c } from '../dil/ceviri';
 
 // Depolar SAYFADA DEGIL, subenin KARTINDA (kullanici): depo subeye ait, hangi
 //   subenin deposu oldugu ancak kartin icinde belli oluyor.
@@ -143,7 +144,7 @@ export function FirmaBilgileri() {
       <div className="sayfabas" style={{ marginBottom: 10 }}>
         <div className="basrow">
           <h1>Firma / Şubeler</h1>
-          <span className="yol">Yönetim › Firma / Şubeler</span>
+          <span className="yol">{c('Yönetim › Firma / Şubeler')}</span>
         </div>
       </div>
 
@@ -155,7 +156,7 @@ export function FirmaBilgileri() {
           <div className="numaralama-bas bitisik">
             <h6>Şube Tanımları</h6>
             {/* Ekle / Duzenle / Sil IKON olarak ustte (kullanici). */}
-            <button className="d bir" title="Yeni Şube"
+            <button className="d bir" title={c('Yeni Şube')}
                     onClick={() => setKart('yeni')}>＋</button>
             <button className="d" title="Düzenle" disabled={seciliSube === null}
                     onClick={() => seciliSube !== null && setKart(seciliSube)}>✎</button>
@@ -176,9 +177,9 @@ export function FirmaBilgileri() {
             <thead>
               <tr>
                 <th style={{ width: 34 }}></th>
-                <th>Kod</th><th>Şube Adı</th><th>Ünvan</th>
-                <th>İlçe / İl</th><th>Telefon</th>
-                <th style={{ textAlign: 'center' }}>Vars.</th>
+                <th>Kod</th><th>{c('Şube Adı')}</th><th>Ünvan</th>
+                <th>{c('İlçe / İl')}</th><th>Telefon</th>
+                <th style={{ textAlign: 'center' }}>{c('Vars.')}</th>
                 <th style={{ textAlign: 'center' }}>e-Belge</th>
                 <th style={{ textAlign: 'center' }}>Durum</th>
               </tr>
@@ -217,7 +218,7 @@ export function FirmaBilgileri() {
             </tbody>
           </table>
           <div className="not">
-            Satıra tıklayınca seçilir, çift tıklayınca kart açılır. <b>Baz Alınacak Şube</b> seçiliyse şubenin faturası o şubenin ünvanı ve VKN’siyle, kendi adresiyle gider.
+            Satıra tıklayınca seçilir, çift tıklayınca kart açılır. <b>{c('Baz Alınacak Şube')}</b> seçiliyse şubenin faturası o şubenin ünvanı ve VKN’siyle, kendi adresiyle gider.
           </div>
         </div>
       )}

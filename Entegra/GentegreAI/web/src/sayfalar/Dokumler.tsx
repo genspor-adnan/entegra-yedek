@@ -12,6 +12,7 @@ import { Onizleme } from './dokum/Onizleme';
 import { BaskiOnizleme } from './dokum/BaskiOnizleme';
 import { ozetMi } from './dokum/SonucTablosu';
 import { bosTanim, kuralAraligi, parametreAlanlari } from './dokum/ortak';
+import { c } from '../dil/ceviri';
 
 /**
  * DÖKÜMLER & İSTATİSTİK (686) — mockup Ekranlar/Ayarlar/dokum_tasarimcisi.html
@@ -193,16 +194,16 @@ export function Dokumler() {
     <>
       <div className="sayfabas">
         <div className="basrow">
-          <h1>Dökümler &amp; İstatistik</h1>
-          <span className="yol">Yönetim › Dökümler</span>
+          <h1>{c('Dökümler &amp; İstatistik')}</h1>
+          <span className="yol">{c('Yönetim › Dökümler')}</span>
           {id > 0 && <span className="rozet mavi">{ad} · v{surum}</span>}
           {kirli && <span className="rozet uyari">kaydedilmedi</span>}
         </div>
         <div className="basarac">
           {yazabilir && <button className="d bir" onClick={yeni}>＋ Yeni Döküm</button>}
           {yazabilir && <button className="d onay" onClick={() => void kaydet()} disabled={!kirli && id > 0}>💾 Kaydet</button>}
-          <button className="d" onClick={() => { setSekme('onizle'); void calistir(1); }} disabled={!tanim.kaynak || calisiyor}>▶ Çalıştır</button>
-          <span className="sonuk" style={{ marginLeft: 8 }}>Kaynak:</span>
+          <button className="d" onClick={() => { setSekme('onizle'); void calistir(1); }} disabled={!tanim.kaynak || calisiyor}>{c('▶ Çalıştır')}</button>
+          <span className="sonuk" style={{ marginLeft: 8 }}>{c('Kaynak:')}</span>
           <select value={tanim.kaynak} onChange={e => kaynakDegistir(e.target.value)} disabled={!katalog}>
             {!tanim.kaynak && <option value="">—</option>}
             {(katalog?.kaynaklar ?? []).map(k => <option key={k.ad} value={k.ad}>{k.baslik}</option>)}

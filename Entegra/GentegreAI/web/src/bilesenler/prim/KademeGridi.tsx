@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
+import { c } from '../../dil/ceviri';
 
 interface Kademe { adetAlt: string; adetUst: string; deger: string }
 
@@ -66,7 +67,7 @@ export function KademeGridi({ planSatirId }: { planSatirId: number | null }) {
       <h6>
         Kademeler
         <span className="baslik-eylem">
-          <button type="button" className="d bir ikon-dugme" title="Kademe ekle"
+          <button type="button" className="d bir ikon-dugme" title={c('Kademe ekle')}
                   onClick={() => setSatirlar(l => [...l, { adetAlt: '', adetUst: '', deger: '' }])}>
             ＋
           </button>
@@ -90,8 +91,8 @@ export function KademeGridi({ planSatirId }: { planSatirId: number | null }) {
       <table className="detay-tablo">
         <thead>
           <tr>
-            <th style={{ width: '30%' }}>Adet (en az)</th>
-            <th style={{ width: '30%' }}>Adet (en çok)</th>
+            <th style={{ width: '30%' }}>{c('Adet (en az)')}</th>
+            <th style={{ width: '30%' }}>{c('Adet (en çok)')}</th>
             <th style={{ width: '30%' }}>Değer</th>
             <th style={{ width: '10%' }} />
           </tr>
@@ -107,7 +108,7 @@ export function KademeGridi({ planSatirId }: { planSatirId: number | null }) {
               <td><input inputMode="decimal" value={k.deger}
                          onChange={e => degis(i, 'deger', e.target.value)} /></td>
               <td className="hiza-orta">
-                <button type="button" className="d teh ikon-dugme" title="Kademeyi sil"
+                <button type="button" className="d teh ikon-dugme" title={c('Kademeyi sil')}
                         onClick={() => setSatirlar(l => l.filter((_, j) => j !== i))}>✖</button>
               </td>
             </tr>

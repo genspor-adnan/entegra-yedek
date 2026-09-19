@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { hataMetni, type ListeSatiri } from '../api/sozlesme';
 import { para, para4 } from './bicim';
+import { c } from '../dil/ceviri';
 
 /**
  * HIZMET KARTI > Fiyatlar sekmesi ALT BLOGU (kullanici): kalemin gectigi
@@ -29,17 +30,17 @@ export function HizmetListeFiyatlari({ hizmetId }: { hizmetId: number }) {
   }, [hizmetId]);
 
   if (hata) return <div className="hata-kutusu" style={{ marginTop: 12 }}>{hata}</div>;
-  if (!satirlar) return <div className="not" style={{ marginTop: 12 }}>Liste fiyatları yükleniyor…</div>;
+  if (!satirlar) return <div className="not" style={{ marginTop: 12 }}>{c('Liste fiyatları yükleniyor…')}</div>;
   if (satirlar.length === 0)
-    return <div className="not" style={{ marginTop: 12 }}>Bu hizmet hiçbir fiyat listesinde yer almıyor.</div>;
+    return <div className="not" style={{ marginTop: 12 }}>{c('Bu hizmet hiçbir fiyat listesinde yer almıyor.')}</div>;
 
   // Cerceve/baslik YOK (kullanici): sekmede yalniz grid durur.
   return (
     <div style={{ marginTop: 12 }}>
       <table className="detay-tablo">
         <thead>
-          <tr><th>Liste</th><th style={{ textAlign: 'right' }}>Fiyat</th><th>Döviz</th>
-              <th>KDV</th><th>Yazım</th><th style={{ textAlign: 'right' }}>Çarpan</th><th>Durum</th></tr>
+          <tr><th>Liste</th><th style={{ textAlign: 'right' }}>Fiyat</th><th>{c('Döviz')}</th>
+              <th>KDV</th><th>{c('Yazım')}</th><th style={{ textAlign: 'right' }}>Çarpan</th><th>Durum</th></tr>
         </thead>
         <tbody>
           {satirlar.map((s, i) => (

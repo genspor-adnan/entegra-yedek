@@ -1,4 +1,5 @@
 import { FATURA_TIPLERI } from '../../sayfalar/belgeSabitleri';
+import { c } from '../../dil/ceviri';
 
 /**
  * BELGE KARTI ARAC CUBUGU - Kaydet / Sil ve ture ozel eylemler (siparisten
@@ -85,7 +86,7 @@ export function BelgeAracCubugu({
         </button>}
   {/* Basvuruda IPTAL en SONDA (mockup) - dugme grubunun sonunda durur. */}
   {!basvuruMu && (
-    <button className="d teh" disabled title="Belge iptali henüz bağlanmadı (F7).">
+    <button className="d teh" disabled title={c('Belge iptali henüz bağlanmadı (F7).')}>
       🗑 Sil
     </button>
   )}
@@ -101,7 +102,7 @@ export function BelgeAracCubugu({
     <>
       {/* "Provizyon Al" arac cubugundan KALKTI (kullanici): Provizyon
           sekmesinde her odeyicinin kendi grup basliginda duruyor. */}
-      <button className="d" disabled title="Protokol fişi yazdırma henüz bağlanmadı.">
+      <button className="d" disabled title={c('Protokol fişi yazdırma henüz bağlanmadı.')}>
         🖨️ Protokol Fişi
       </button>
 
@@ -112,7 +113,7 @@ export function BelgeAracCubugu({
               onClick={() => hastaKartiAc?.()}>
         👤 Hasta Kartını Aç
       </button>
-      <button className="d" disabled title="Randevudan başvuru açma henüz bağlanmadı.">
+      <button className="d" disabled title={c('Randevudan başvuru açma henüz bağlanmadı.')}>
         📅 Randevudan Getir
       </button>
       {/* RADYOLOJI ISTEMI (304): coklu tetkik secer, her biri ayri accession
@@ -142,7 +143,7 @@ export function BelgeAracCubugu({
 
       <span className="ayrac" />
 
-      <button className="d teh" disabled title="Başvuru iptali henüz bağlanmadı (F7).">
+      <button className="d teh" disabled title={c('Başvuru iptali henüz bağlanmadı (F7).')}>
         ✕ Başvuruyu İptal Et
       </button>
     </>
@@ -176,7 +177,7 @@ export function BelgeAracCubugu({
         🧾 Belge Kes
       </button>
       {!basvuruMu &&
-        <button className="d" disabled title="Üretim emri henüz bağlanmadı.">🏭 Üretime Aktar</button>}
+        <button className="d" disabled title={c('Üretim emri henüz bağlanmadı.')}>🏭 Üretime Aktar</button>}
       <span className="ayrac" />
       {/* ON ODEME dugmesi kalkti (kullanici): avans/on odeme artik siparisin
           kendi Tahsilat sekmesinden giriliyor - fatura kartiyla ayni yer,
@@ -191,7 +192,7 @@ export function BelgeAracCubugu({
                 onClick={() => setTerminAcik(true)}>
           📅 Termin Güncelle
         </button>}
-      <button className="d" disabled title="Yazdırma henüz bağlanmadı.">🖨️ Yazdır</button>
+      <button className="d" disabled title={c('Yazdırma henüz bağlanmadı.')}>🖨️ Yazdır</button>
     </>
   )}
 
@@ -212,7 +213,7 @@ export function BelgeAracCubugu({
               onClick={() => setDonusum(alisMi ? 11 : 15)}>
         🧾 Belge Kes
       </button>
-      <button className="d" disabled title="Sevk fişi yazdırma henüz bağlanmadı.">
+      <button className="d" disabled title={c('Sevk fişi yazdırma henüz bağlanmadı.')}>
         🖨️ Sevk Fişi Yazdır
       </button>
       <span className="ayrac" />
@@ -239,7 +240,7 @@ export function BelgeAracCubugu({
           tahsilat kendi SEKMESINDEN aciliyor (Nakit / Banka / POS / Çek /
           Senet dugmeleriyle, arac aracina gore), iade ise faturanin TIPI -
           sagdaki "Fatura Tipi" listesinden secilir. */}
-      <button className="d" disabled title="Yazdırma henüz bağlanmadı.">🖨️ Yazdır</button>
+      <button className="d" disabled title={c('Yazdırma henüz bağlanmadı.')}>🖨️ Yazdır</button>
     </>
   )}
 
@@ -253,7 +254,7 @@ export function BelgeAracCubugu({
       `zorla = true` demek olur ve kaydedilmemis degisiklik uyarisi HIC
       cikmadan kart kapanirdi (kullanici: "değişiklik yaptım kapat deyince
       uyarı gelmedi"). */}
-  <button className="d kapat-dugmesi" onClick={() => kapat()}>✖ Kapat</button>
+  <button className="d kapat-dugmesi" onClick={() => kapat()}>{c('✖ Kapat')}</button>
 
   {/* FATURA TIPI (130) burada, DUGMELERIN SAGINDA (kullanici): basliktan
       alindi - irsaliyedeki IADE kutusuyla ayni yeri kullanir. Faturanin cinsi
@@ -289,9 +290,7 @@ export function BelgeAracCubugu({
   {iadeKutusu && (
     <label className="satir-ici" title="İade: mal geri gelir - stok girer, cari alacaklanır.">
       <input type="checkbox" checked={iade} disabled={kilitli}
-             onChange={e => setIade(e.target.checked)} />
-      İade
-    </label>
+             onChange={e => setIade(e.target.checked)} />{c('İade')}</label>
   )}
 </>
   );

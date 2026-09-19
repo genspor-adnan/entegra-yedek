@@ -7,6 +7,7 @@ import { tarihSaat } from './bicim';
 import { cihazAdi } from './cihazAdi';
 import { KartKullaniciRolu } from './KartKullaniciRolu';
 import { KartKullaniciSubeleri } from './KartKullaniciSubeleri';
+import { c } from '../dil/ceviri';
 
 /**
  * KULLANICILAR EKRANI › GRİDİN ALTINDAKİ SEKMELER
@@ -96,11 +97,11 @@ export function KullaniciAltPanel({ kullaniciId, saltOkunur }: {
 
         {sekme === 'Açık Oturumlar' && (
           <table className="grid">
-            <thead><tr><th>Cihaz</th><th>IP</th><th>Şube</th><th>Son kullanım</th></tr></thead>
+            <thead><tr><th>Cihaz</th><th>{c('IP')}</th><th>Şube</th><th>{c('Son kullanım')}</th></tr></thead>
             <tbody>
               {!oturumlar && <tr><td colSpan={4}>Yükleniyor…</td></tr>}
               {oturumlar?.length === 0 && (
-                <tr><td colSpan={4} className="bos">Açık oturum yok.</td></tr>
+                <tr><td colSpan={4} className="bos">{c('Açık oturum yok.')}</td></tr>
               )}
               {oturumlar?.map(o => (
                 <tr key={o.id}>
@@ -116,7 +117,7 @@ export function KullaniciAltPanel({ kullaniciId, saltOkunur }: {
 
         {sekme === 'Giriş Hareketleri' && (
           <table className="grid">
-            <thead><tr><th>Zaman</th><th>Sonuç</th><th>IP</th></tr></thead>
+            <thead><tr><th>Zaman</th><th>Sonuç</th><th>{c('IP')}</th></tr></thead>
             <tbody>
               {!gecmis && <tr><td colSpan={3}>Yükleniyor…</td></tr>}
               {gecmis?.length === 0 && <tr><td colSpan={3} className="bos">Kayıt yok.</td></tr>}
@@ -137,11 +138,11 @@ export function KullaniciAltPanel({ kullaniciId, saltOkunur }: {
 
         {sekme === 'İşlem Günlüğü' && (
           <table className="grid">
-            <thead><tr><th>Zaman</th><th>İşlem</th><th>Yapan</th><th>IP</th></tr></thead>
+            <thead><tr><th>Zaman</th><th>İşlem</th><th>Yapan</th><th>{c('IP')}</th></tr></thead>
             <tbody>
               {!gunluk && <tr><td colSpan={4}>Yükleniyor…</td></tr>}
               {gunluk?.length === 0 && (
-                <tr><td colSpan={4} className="bos">Bu hesaba yapılmış işlem yok.</td></tr>
+                <tr><td colSpan={4} className="bos">{c('Bu hesaba yapılmış işlem yok.')}</td></tr>
               )}
               {gunluk?.map((g, i) => (
                 <tr key={i}>

@@ -4,6 +4,7 @@ import { TelefonGirdi } from './TelefonGirdi';
 import { telefonAlaniMi } from './alanBicim';
 import type { DetayDurumu, Satir } from './GenDetayTablo';
 import type { KartAlanMeta, KartDetayMeta } from '../api/sozlesme';
+import { c } from '../dil/ceviri';
 
 interface Props {
   meta: KartDetayMeta;
@@ -115,7 +116,7 @@ export function TekKayit({ meta, durum, saltOkunur, onDegis, baslik, not, grupla
           <input readOnly value={String(deger ?? '') === '' ? ''
                                  : (secilenAdlar?.[a.ad]
                                     ?? a.kodlar?.[String(deger ?? '')] ?? '')}
-                 placeholder="Seçiniz…"
+                 placeholder={c('Seçiniz…')}
                  disabled={saltOkunur || !a.yazilabilir}
                  onClick={() => !saltOkunur && a.yazilabilir && ara(a)} />
           <button type="button" className="d mini" title="Ara"

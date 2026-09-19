@@ -1,6 +1,7 @@
 import type { DokumKolonMeta, DokumTanimi, ListeYaniti, OzetYaniti } from '../../api/sozlesme';
 import { KURAL_ETIKET, kuralAraligi, parametreAlanlari } from './ortak';
 import { CubukGrafik, ListeSonucu, OzetGostergeler, OzetSonucu, ozetMi } from './SonucTablosu';
+import { c } from '../../dil/ceviri';
 
 /**
  * ÖNİZLEME (mockup "Önizleme" sekmesi): parametre şeridi + Çalıştır + sonuç.
@@ -64,7 +65,7 @@ export function Onizleme({ tanim, kolonlar, parametreler, setParametreler, yanit
 
       {!yanit && (
         <div className="kagrup"><div className="bos">
-          {alanlar.length ? 'Parametreleri girip ' : ''}<b>Çalıştır</b>'a basın — sonuç burada, aynı veri Baskı sekmesinde kâğıda çizilir.
+          {alanlar.length ? 'Parametreleri girip ' : ''}<b>{c('Çalıştır')}</b>'a basın — sonuç burada, aynı veri Baskı sekmesinde kâğıda çizilir.
         </div></div>
       )}
 
@@ -85,7 +86,7 @@ export function Onizleme({ tanim, kolonlar, parametreler, setParametreler, yanit
           </div>
           {ozetMi(yanit) && (tanim.boyut?.satir.length ?? 0) > 0 && (
             <div className="kagrup">
-              <h6>Satır boyutuna göre <span className="sonuk">ilk ölçü · en büyük 12</span></h6>
+              <h6>{c('Satır boyutuna göre')}<span className="sonuk">ilk ölçü · en büyük 12</span></h6>
               <CubukGrafik yanit={yanit} tanim={tanim} kolonlar={kolonlar} />
             </div>
           )}

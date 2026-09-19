@@ -1,4 +1,5 @@
 /**
+import { c } from '../dil/ceviri';
  * KULLANICI AYARLARI penceresinin saf kuralları (React'siz, test edilebilir):
  * şifre gücü, avatar baş harfleri, "N gün önce".
  *

@@ -6,6 +6,7 @@ import { useOturum } from '../kimlik/OturumBaglami';
 import { hataMetni, type KurumProfil, type KurumProfilYaniti, type ProfilRolu }
   from '../api/sozlesme';
 import { mesaj, onay } from './mesaj';
+import { c } from '../dil/ceviri';
 
 /**
  * Kurum tipi kartlarinin ikonu ve bir cumlelik tanimi - mockup'tan; ad ve sira
@@ -290,11 +291,11 @@ export function KurumTipiAyarlari() {
         {d.kisi > 0 && <span className="rz kisi">{d.kisi} kişi</span>}
         {d.kilitli && <span className="rz">kilitli</span>}
         {!d.kurulu && <span className="rz yeni">kurulacak</span>}
-        {!d.tipUygun && <span className="rz" title="Bu kurum tipinde önerilmez">başka tip</span>}
+        {!d.tipUygun && <span className="rz" title={c('Bu kurum tipinde önerilmez')}>başka tip</span>}
         {d.kurulu && (d.aktif
           ? <span className="rz ok">aktif</span>
           : <span className="rz pas">pasif</span>)}
-        {d.sablon && d.varsayilan && <span className="rz" title="Bu tipe önerilir">✔ şablon</span>}
+        {d.sablon && d.varsayilan && <span className="rz" title={c('Bu tipe önerilir')}>✔ şablon</span>}
         {d.modulKapali && <span className="rz" title={`Modül kapalı: ${d.modul}`}>⊘ modül</span>}
       </label>
       {d.alt.length > 0 && <ul className="kt-dal">{d.alt.map(rolDugumu)}</ul>}
@@ -414,7 +415,7 @@ export function KurumTipiAyarlari() {
             o sube kendi profiline sahip olur; ilk acilista degerler kurum
             genelinden devralinmis gorunur. */}
         <span className="sp" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <label htmlFor="kt-sube">Şube:</label>
+          <label htmlFor="kt-sube">{c('Şube:')}</label>
           <select id="kt-sube" value={subeId}
                   onChange={e => setSubeId(Number(e.target.value))}>
             {(kullanici?.subeler ?? []).map(s => (
@@ -479,16 +480,16 @@ export function KurumTipiAyarlari() {
 
         <div className="hdr k4">
           <div className="fld">
-            <label className="req">Ürün modu</label>
+            <label className="req">{c('Ürün modu')}</label>
             <select className="inp" value={profil?.urunModu ?? 2}
                     onChange={e => degistir({ urunModu: Number(e.target.value) })}>
-              <option value={2}>HBYS (GenoTIP AI)</option>
-              <option value={1}>ERP (Gentegre AI)</option>
-              <option value={3}>İkisi (tıp merkezi + ticari)</option>
+              <option value={2}>{c('HBYS (GenoTIP AI)')}</option>
+              <option value={1}>{c('ERP (Gentegre AI)')}</option>
+              <option value={3}>{c('İkisi (tıp merkezi + ticari)')}</option>
             </select>
           </div>
           <div className="fld">
-            <label className="req">Kurum tipi</label>
+            <label className="req">{c('Kurum tipi')}</label>
             <select className="inp" value={profil?.kurumTipi ?? ''}
                     onChange={e => tipSec(e.target.value)}>
               {(veri?.tipler ?? []).map(t => (
@@ -497,7 +498,7 @@ export function KurumTipiAyarlari() {
             </select>
           </div>
           <div className="fld">
-            <label>Alt tip / branş</label>
+            <label>{c('Alt tip / branş')}</label>
             <input className="inp" value={profil?.altTip ?? ''} maxLength={60}
                    placeholder="örn. Dahiliye"
                    onChange={e => degistir({ altTip: e.target.value })} />
@@ -509,21 +510,21 @@ export function KurumTipiAyarlari() {
                    onChange={e => degistir({ basamak: e.target.value })} />
           </div>
           <div className="fld">
-            <label>Tesis kodu (ÇKYS)</label>
+            <label>{c('Tesis kodu (ÇKYS)')}</label>
             <input className="inp" value={profil?.tesisKodu ?? ''} maxLength={20}
                    placeholder="11xxxxxx"
                    onChange={e => degistir({ tesisKodu: e.target.value })} />
           </div>
           <div className="fld">
-            <label>Şube yapısı</label>
+            <label>{c('Şube yapısı')}</label>
             <select className="inp" value={profil?.subeYapisi ?? 1}
                     onChange={e => degistir({ subeYapisi: Number(e.target.value) })}>
-              <option value={1}>Tek şube</option>
-              <option value={2}>Çok şube (her şube kendi tesis kodu)</option>
+              <option value={1}>{c('Tek şube')}</option>
+              <option value={2}>{c('Çok şube (her şube kendi tesis kodu)')}</option>
             </select>
           </div>
           <div className="fld">
-            <label>Hekim sayısı / ünite</label>
+            <label>{c('Hekim sayısı / ünite')}</label>
             <div className="ikili-sayi">
               <input className="inp" type="number" min={0} value={profil?.hekimSayisi ?? 1}
                      onChange={e => degistir({ hekimSayisi: Number(e.target.value) })} />
@@ -532,13 +533,13 @@ export function KurumTipiAyarlari() {
             </div>
           </div>
           <div className="fld">
-            <label>Dil / para birimi</label>
+            <label>{c('Dil / para birimi')}</label>
             <div className="ikili-sayi">
               <select className="inp" value={profil?.dil ?? 'tr'}
                       onChange={e => degistir({ dil: e.target.value })}>
-                <option value="tr">Türkçe</option>
-                <option value="en">English</option>
-                <option value="de">Deutsch</option>
+                <option value="tr">{c('Türkçe')}</option>
+                <option value="en">{c('English')}</option>
+                <option value="de">{c('Deutsch')}</option>
               </select>
               <select className="inp" value={profil?.paraBirimi ?? 'TL'}
                       onChange={e => degistir({ paraBirimi: e.target.value })}>
@@ -554,18 +555,18 @@ export function KurumTipiAyarlari() {
               gercek numarayi reddedip kaydi imkansiz kilardi, topluca
               kapatmak ise Turkiye'de yanlis TCKN'yi sessizce gecirirdi. */}
           <div className="fld">
-            <label>Kimlik no biçimi</label>
+            <label>{c('Kimlik no biçimi')}</label>
             <select className="inp" value={profil?.kimlikBicimi ?? 'otomatik'}
                     onChange={e => degistir({ kimlikBicimi: e.target.value })}>
-              <option value="otomatik">Otomatik — şubenin ülkesine göre</option>
-              <option value="tc">T.C. Kimlik No (11 hane + kontrol hanesi)</option>
-              <option value="serbest">Serbest — biçim kontrolü yok</option>
-              <option value="desen">Özel desen (düzenli ifade)</option>
+              <option value="otomatik">{c('Otomatik — şubenin ülkesine göre')}</option>
+              <option value="tc">{c('T.C. Kimlik No (11 hane + kontrol hanesi)')}</option>
+              <option value="serbest">{c('Serbest — biçim kontrolü yok')}</option>
+              <option value="desen">{c('Özel desen (düzenli ifade)')}</option>
             </select>
           </div>
           {profil?.kimlikBicimi === 'desen' && (
             <div className="fld">
-              <label>Desen / açıklama</label>
+              <label>{c('Desen / açıklama')}</label>
               <div className="ikili-sayi">
                 <input className="inp" placeholder="^[A-Z0-9]{6,12}$"
                        value={profil?.kimlikDeseni ?? ''}
@@ -582,15 +583,15 @@ export function KurumTipiAyarlari() {
         <div className="grp" style={{ margin: '10px' }}>
           <div className="gb">Bu tipin varsayılan paketi — {tipAdi(profil?.kurumTipi)}</div>
           <div className="ic">
-            <b>Açık:</b>{' '}
+            <b>{c('Açık:')}</b>{' '}
             {(veri?.moduller ?? []).filter(m => tipVarsayilani(m.kod) === 1)
               .map(m => m.ad).join(' · ') || '—'}
             <br />
-            <b>Opsiyonel:</b>{' '}
+            <b>{c('Opsiyonel:')}</b>{' '}
             {(veri?.moduller ?? []).filter(m => tipVarsayilani(m.kod) === 2)
               .map(m => m.ad).join(' · ') || '—'}
             <br />
-            <b>Kapalı:</b>{' '}
+            <b>{c('Kapalı:')}</b>{' '}
             {(veri?.moduller ?? []).filter(m => tipVarsayilani(m.kod) === 0)
               .map(m => m.ad).join(' · ') || '—'}
           </div>
@@ -605,7 +606,7 @@ export function KurumTipiAyarlari() {
           <table>
             <thead>
               <tr>
-                <th>Kurum tipi</th>
+                <th>{c('Kurum tipi')}</th>
                 {(veri?.moduller ?? []).map(m => (
                   <th key={m.kod} className="orta" style={{ fontSize: '10px' }}>{m.ad}</th>
                 ))}
@@ -657,7 +658,7 @@ export function KurumTipiAyarlari() {
           <div className="ic sonuk">
             Rozet tipin varsayılanını gösterir; kutucuk bu kurulumun seçimidir.
             Varsayılandan ayrılan modüller <b>özel</b> işaretiyle durur.
-            <b> Kaydet &amp; Uygula</b> ile yazılır.
+            <b>{c('Kaydet &amp; Uygula')}</b> ile yazılır.
           </div>
         </div>
 
@@ -668,7 +669,7 @@ export function KurumTipiAyarlari() {
             (kullanici: "ikisi de pasif olsun veya aktif") - yayilimi DB
             tetigi yapar. Elle kapatilan kayit geri acilmaz. */}
         <div className="grp">
-          <div className="hdr k4">Hizmet / Stok Kategorileri</div>
+          <div className="hdr k4">{c('Hizmet / Stok Kategorileri')}</div>
           <div className="ic sonuk">
             Kurumun hangi işleri yaptığı. Kapatılan kategorinin
             <b> altındaki hizmet ve stoklar da pasif</b> olur; yeniden açınca
@@ -725,7 +726,7 @@ export function KurumTipiAyarlari() {
                 ))}
               {/* TİPE UYMAYANLAR: 785'teki süzgeç duruyor, kapatılabiliyor. */}
               <button type="button" className={`d${tumTipler ? ' bir' : ''}`}
-                      title="Bu kurum tipinde önerilmeyen rolleri de göster"
+                      title={c('Bu kurum tipinde önerilmeyen rolleri de göster')}
                       onClick={() => setTumTipler(v => !v)}>
                 {tumTipler ? '✔ ' : ''}Diğer tiplerin rolleri
               </button>
@@ -737,19 +738,19 @@ export function KurumTipiAyarlari() {
               <button className="d" type="button" disabled={rolMesgul}
                       title="Kurulu şablon rollerinin yetkilerini şablonun haline geri çeker"
                       onClick={() => void sablonaHizala()}>🧩 Yetkileri şablona hizala</button>
-              <button className="d" type="button" onClick={() => git('/rol')}>Roller ekranı</button>
+              <button className="d" type="button" onClick={() => git('/rol')}>{c('Roller ekranı')}</button>
             </span>
           </div>
           <div className="ic sonuk">
             İşaretli roller bu profilde <b>geçerlidir</b>; işaretsizler <b>pasife</b> alınır
-            (silinmez, kullanıcıları kalır). <b>Kurulacak</b> yazan satır henüz kurulmamış
+            (silinmez, kullanıcıları kalır). <b>{c('Kurulacak')}</b> yazan satır henüz kurulmamış
             şablon rolüdür: işaretleyip <b>Kaydet</b> derseniz kurulur ve bu profilin roller
             listesine girer. Ağaç kadro düzenini gösterir — <b>yetki hiyerarşik değildir</b>,
             üstteki rolün yetkisi alttakini kapsamaz.
             {rolYazili ? '' : ' Henüz işaretlenmedi: şu an şablonun önerisi geçerli.'}
           </div>
           {tumRol.length === 0
-            ? <div className="ic sonuk">Kurum tipi seçilince roller listelenir.</div>
+            ? <div className="ic sonuk">{c('Kurum tipi seçilince roller listelenir.')}</div>
             : (
               <div className="ic kt-agac">
                 {rolAgaci.map(b => (
@@ -763,7 +764,7 @@ export function KurumTipiAyarlari() {
                   </div>
                 ))}
                 {rolAgaci.length === 0 && (
-                  <div className="sonuk">Süzgece uyan rol yok.</div>
+                  <div className="sonuk">{c('Süzgece uyan rol yok.')}</div>
                 )}
               </div>
             )}
@@ -771,17 +772,17 @@ export function KurumTipiAyarlari() {
       </div>
       <div className="pnl" hidden={aktif !== 3}>
           <div className="hdr k4">
-            <div className="fld"><label>Başvuru modeli</label><div className="inp combo">Tek başvuru = tek muayene <span className="sonuk">· tıp merkezi: başvuru altında çoklu hizmet · hastane: yatış</span></div></div>
-            <div className="fld"><label>Ödeyen kurumlar</label><div className="inp">☑ Özel (kendi) · ☑ SGK · ☑ Özel sigorta (ÖSS) · ☐ Kurum sözleşmeleri · ☐ Yabancı/sağlık turizmi</div></div>
-            <div className="fld"><label>SGK faturalama</label><div className="inp combo">Dönem icmali (289) <span className="sonuk">· vaka bazlı</span></div></div>
-            <div className="fld"><label>Provizyon</label><div className="inp combo">Medula otomatik <span className="sonuk">· elle · yok</span></div></div>
+            <div className="fld"><label>{c('Başvuru modeli')}</label><div className="inp combo">{c('Tek başvuru = tek muayene')}<span className="sonuk">· tıp merkezi: başvuru altında çoklu hizmet · hastane: yatış</span></div></div>
+            <div className="fld"><label>{c('Ödeyen kurumlar')}</label><div className="inp">☑ Özel (kendi) · ☑ SGK · ☑ Özel sigorta (ÖSS) · ☐ Kurum sözleşmeleri · ☐ Yabancı/sağlık turizmi</div></div>
+            <div className="fld"><label>{c('SGK faturalama')}</label><div className="inp combo">{c('Dönem icmali (289)')}<span className="sonuk">· vaka bazlı</span></div></div>
+            <div className="fld"><label>{c('Provizyon')}</label><div className="inp combo">{c('Medula otomatik')}<span className="sonuk">· elle · yok</span></div></div>
             <div className="fld"><label>Fiyat listesi</label><div className="inp combo">Özel 2026 (varsayılan) · SUT (SGK) · kurum sözleşmesi</div></div>
-            <div className="fld"><label>Ücretlendirme anı</label><div className="inp combo">Muayene açılınca (muayene ücreti) + işlem anında <span className="sonuk">· diş: seans; lab/rad: istem</span></div></div>
-            <div className="fld"><label>Ön ödeme</label><div className="inp combo">İsteğe bağlı <span className="sonuk">· zorunlu (teletıp/özel)</span></div></div>
-            <div className="fld"><label>Belge üretimi</label><div className="inp combo">Tahsil edilen kadar fiş, kalanı tahakkuk (352) <span className="sonuk">· her işlem fatura · dönem faturası</span></div></div>
+            <div className="fld"><label>{c('Ücretlendirme anı')}</label><div className="inp combo">Muayene açılınca (muayene ücreti) + işlem anında <span className="sonuk">· diş: seans; lab/rad: istem</span></div></div>
+            <div className="fld"><label>{c('Ön ödeme')}</label><div className="inp combo">{c('İsteğe bağlı')}<span className="sonuk">· zorunlu (teletıp/özel)</span></div></div>
+            <div className="fld"><label>{c('Belge üretimi')}</label><div className="inp combo">{c('Tahsil edilen kadar fiş, kalanı tahakkuk (352)')}<span className="sonuk">· her işlem fatura · dönem faturası</span></div></div>
             <div className="fld"><label>e-Belge</label><div className="inp combo">e-Arşiv (hasta) · e-Fatura (kurum) · entegratör: İzibiz</div></div>
-            <div className="fld"><label>Numara şablonları</label><div className="inp">Protokol: {'{'}yıl{'}'}/{'{'}sıra{'}'} · Hasta no: H{'{'}sıra:6{'}'} · Plan: TP-{'{'}yıl{'}'}/{'{'}sıra{'}'}</div></div>
-            <div className="fld"><label>Hasta kimlik doğrulama</label><div className="inp combo">KPS (opsiyonel) · kimlik no zorunlu · yabancı: pasaport</div></div>
+            <div className="fld"><label>{c('Numara şablonları')}</label><div className="inp">Protokol: {'{'}yıl{'}'}/{'{'}sıra{'}'} · Hasta no: H{'{'}sıra:6{'}'} · Plan: TP-{'{'}yıl{'}'}/{'{'}sıra{'}'}</div></div>
+            <div className="fld"><label>{c('Hasta kimlik doğrulama')}</label><div className="inp combo">KPS (opsiyonel) · kimlik no zorunlu · yabancı: pasaport</div></div>
             <div className="fld"><label>KVKK</label><div className="inp">☑ Hasta kayıtları özel nitelikli · ☑ erişim günlüğü · saklama: 10 yıl (sağlık) · 15 yıl (personel sağlık)</div></div>
           </div>
         </div>
@@ -789,26 +790,26 @@ export function KurumTipiAyarlari() {
       <div className="pnl" hidden={aktif !== 4}>
           <div className="ikiPanel">
             <div className="hdr" style={{gridTemplateColumns: '1fr 1fr'}}>
-              <div className="fld"><label>Muayene şablonu</label><div className="inp combo">Dahiliye genel <span className="sonuk">· dal: göz OD/OS, FTR skala, diş odontogram</span></div></div>
-              <div className="fld"><label>Tamamlama kuralı</label><div className="inp">☑ Ana tanı · ☑ Şikâyet · ☐ Vital · ☑ Karar</div></div>
+              <div className="fld"><label>{c('Muayene şablonu')}</label><div className="inp combo">{c('Dahiliye genel')}<span className="sonuk">· dal: göz OD/OS, FTR skala, diş odontogram</span></div></div>
+              <div className="fld"><label>{c('Tamamlama kuralı')}</label><div className="inp">☑ Ana tanı · ☑ Şikâyet · ☐ Vital · ☑ Karar</div></div>
               <div className="fld"><label>Randevu</label><div className="inp">Slot 20 dk · hekim takvimi · ☐ ünit · ☐ cihaz · ☐ online</div></div>
-              <div className="fld"><label>Sıra / çağırma</label><div className="inp combo">Kapalı <span className="sonuk">· sıra ekranı / anons</span></div></div>
-              <div className="fld"><label>Onam türleri</label><div className="inp">Genel tedavi · KVKK · (dal: işlem onamları)</div></div>
-              <div className="fld"><label>Reçete</label><div className="inp">Medula e-reçete · alerji/etkileşim kontrolü ☑</div></div>
-              <div className="fld"><label>Rapor türleri</label><div className="inp">İstirahat · ilaç · durum bildirir · ☐ sağlık kurulu</div></div>
-              <div className="fld"><label>Kronik takip</label><div className="inp">☑ DM · ☑ HT · ☐ glokom · ☐ DR · ☐ periodontal</div></div>
+              <div className="fld"><label>{c('Sıra / çağırma')}</label><div className="inp combo">{c('Kapalı')}<span className="sonuk">· sıra ekranı / anons</span></div></div>
+              <div className="fld"><label>{c('Onam türleri')}</label><div className="inp">{c('Genel tedavi · KVKK · (dal: işlem onamları)')}</div></div>
+              <div className="fld"><label>{c('Reçete')}</label><div className="inp">{c('Medula e-reçete · alerji/etkileşim kontrolü ☑')}</div></div>
+              <div className="fld"><label>{c('Rapor türleri')}</label><div className="inp">İstirahat · ilaç · durum bildirir · ☐ sağlık kurulu</div></div>
+              <div className="fld"><label>{c('Kronik takip')}</label><div className="inp">☑ DM · ☑ HT · ☐ glokom · ☐ DR · ☐ periodontal</div></div>
             </div>
-            <div className="grp" style={{margin: '10px'}}><div className="gb">Tip bazlı klinik varsayılanlar</div>
-              <div className="dg"><table><thead><tr><th>Tip</th><th>Muayene</th><th>Kaynak</th><th>Özel kural</th></tr></thead>
+            <div className="grp" style={{margin: '10px'}}><div className="gb">{c('Tip bazlı klinik varsayılanlar')}</div>
+              <div className="dg"><table><thead><tr><th>Tip</th><th>Muayene</th><th>Kaynak</th><th>{c('Özel kural')}</th></tr></thead>
                 <tbody>
-                  <tr><td>Muayenehane</td><td>branş şablonu</td><td>hekim takvimi</td><td>tek başvuru = tek muayene</td></tr>
-                  <tr><td>Göz</td><td>OD/OS ölçüm tabloları</td><td>ünite akışı: ön tetkik → hekim → görüntüleme</td><td>GİB panik, dilatasyon zamanlayıcı, IOL/UTS</td></tr>
+                  <tr><td>{c('Muayenehane')}</td><td>branş şablonu</td><td>hekim takvimi</td><td>tek başvuru = tek muayene</td></tr>
+                  <tr><td>Göz</td><td>{c('OD/OS ölçüm tabloları')}</td><td>ünite akışı: ön tetkik → hekim → görüntüleme</td><td>{c('GİB panik, dilatasyon zamanlayıcı, IOL/UTS')}</td></tr>
                   <tr><td>FTR</td><td>skala/ölçek (VAS, ROM, Barthel)</td><td>uygulama ünitleri + fizyoterapist</td><td>kür (seans paketi), SUT seans limiti, hekim onaylı program</td></tr>
-                  <tr><td>Görüntüleme</td><td>—</td><td>cihaz + tekniker + radyolog</td><td>SLA, kritik bulgu, teleradyoloji, çekim süresi maliyeti</td></tr>
+                  <tr><td>{c('Görüntüleme')}</td><td>—</td><td>cihaz + tekniker + radyolog</td><td>SLA, kritik bulgu, teleradyoloji, çekim süresi maliyeti</td></tr>
                   <tr><td>Laboratuvar</td><td>—</td><td>cihaz + bölüm</td><td>panik, oto-onay, KK, Akılcı Lab formları</td></tr>
                   <tr><td>Diş</td><td>odontogram + periodontal</td><td>ünit + hekim</td><td>tedavi planı/proforma, seans ücretlendirme, lab iş emri</td></tr>
-                  <tr><td>Tıp merkezi</td><td>branş şablonları</td><td>poliklinik + lab + rad</td><td>çoklu hizmet başvurusu, kurum sözleşmeleri, teletıp</td></tr>
-                  <tr><td>Hastane</td><td>+ yatan hasta, ameliyat</td><td>servis/yatak/ameliyathane</td><td>yatış/çıkış (106), eczane, acil, yoğun bakım</td></tr>
+                  <tr><td>{c('Tıp merkezi')}</td><td>branş şablonları</td><td>poliklinik + lab + rad</td><td>çoklu hizmet başvurusu, kurum sözleşmeleri, teletıp</td></tr>
+                  <tr><td>{c('Hastane')}</td><td>+ yatan hasta, ameliyat</td><td>servis/yatak/ameliyathane</td><td>yatış/çıkış (106), eczane, acil, yoğun bakım</td></tr>
                 </tbody></table></div></div>
           </div>
         </div>
@@ -821,8 +822,8 @@ export function KurumTipiAyarlari() {
               (fn_kurum_entegrasyon_durumu). Ilgisiz entegrasyon (ERP'de SKRS,
               stok kapaliyken ÜTS) hic listelenmez. */}
           <div className="dg"><table><thead><tr>
-              <th>Entegrasyon</th><th>Bu kurulumda</th><th>Hesap</th>
-              <th className="orta">Durum</th><th>Son sonuç</th><th>Aksiyon</th></tr></thead>
+              <th>{c('Entegrasyon')}</th><th>{c('Bu kurulumda')}</th><th>Hesap</th>
+              <th className="orta">Durum</th><th>{c('Son sonuç')}</th><th>{c('Aksiyon')}</th></tr></thead>
             <tbody>
               {entegrasyonlar.map(e => (
                 <tr key={e.kod}>
@@ -858,10 +859,10 @@ export function KurumTipiAyarlari() {
               )}
             </tbody></table></div>
           <div className="ic sonuk">
-            Hesaplar <b>Yönetim › Modül Ayarları › Genel</b> ekranındaki{' '}
+            Hesaplar <b>{c('Yönetim › Modül Ayarları › Genel')}</b> ekranındaki{' '}
             <code>entegrasyon_hesap</code> kayıtlarıdır; şube hesabı varsa o,
             yoksa kurum geneli okunur. Zorunlu olup hesabı olmayanlar{' '}
-            <b>Özet &amp; Kurulum</b> listesinde de bekleyen adım olarak görünür.
+            <b>{c('Özet &amp; Kurulum')}</b> listesinde de bekleyen adım olarak görünür.
             PACS/DICOM, lab cihaz ara katmanı, sanal POS, e-İmza, KPS ve WebRTC
             için hesap tanımı henüz yok — bağlandıklarında bu listeye eklenecek.
           </div>
@@ -869,22 +870,22 @@ export function KurumTipiAyarlari() {
 
       <div className="pnl" hidden={aktif !== 6}>
           <div className="ikiPanel">
-            <div className="grp" style={{margin: '10px'}}><div className="gb">Birimler / kaynaklar <span className="sp">tipe göre: oda · ünit · cihaz · servis/yatak</span></div>
-              <div className="dg"><table><thead><tr><th>Kaynak</th><th>Tür</th><th>Bağlı</th><th className="orta">Randevu</th><th className="orta">Aktif</th></tr></thead>
+            <div className="grp" style={{margin: '10px'}}><div className="gb">{c('Birimler / kaynaklar')}<span className="sp">tipe göre: oda · ünit · cihaz · servis/yatak</span></div>
+              <div className="dg"><table><thead><tr><th>Kaynak</th><th>Tür</th><th>{c('Bağlı')}</th><th className="orta">Randevu</th><th className="orta">Aktif</th></tr></thead>
                 <tbody>
-                  <tr><td>Muayene Odası 1</td><td>oda</td><td>Dr. A. Koç · Dahiliye</td><td className="orta">✔</td><td className="orta">✔</td></tr>
-                  <tr className="sonuk"><td>Ünit 1–4</td><td>ünit</td><td>diş kliniğinde</td><td className="orta">—</td><td className="orta">gizli</td></tr>
+                  <tr><td>{c('Muayene Odası 1')}</td><td>oda</td><td>Dr. A. Koç · Dahiliye</td><td className="orta">✔</td><td className="orta">✔</td></tr>
+                  <tr className="sonuk"><td>{c('Ünit 1–4')}</td><td>ünit</td><td>diş kliniğinde</td><td className="orta">—</td><td className="orta">gizli</td></tr>
                   <tr className="sonuk"><td>MR-1, BT-1 …</td><td>cihaz</td><td>görüntüleme merkezinde</td><td className="orta">—</td><td className="orta">gizli</td></tr>
-                  <tr className="sonuk"><td>Servis A · 12 yatak</td><td>servis/yatak</td><td>hastanede</td><td className="orta">—</td><td className="orta">gizli</td></tr>
+                  <tr className="sonuk"><td>{c('Servis A · 12 yatak')}</td><td>servis/yatak</td><td>hastanede</td><td className="orta">—</td><td className="orta">gizli</td></tr>
                 </tbody></table></div>
               <div style={{padding: '6px 10px'}}><div className="btn">＋ Kaynak</div></div></div>
             <div className="hdr" style={{gridTemplateColumns: '1fr 1fr'}}>
-              <div className="fld"><label>Departmanlar / poliklinikler</label><div className="inp">Dahiliye (SKRS 1000) <span className="sonuk">· tıp merkezinde çoklu</span></div></div>
-              <div className="fld"><label>Hekimler</label><div className="inp">Dr. A. Koç · tescil ✔ · ÇKYS ✔</div></div>
-              <div className="fld"><label>Personel rolleri</label><div className="inp">Hekim · sekreter · (hemşire) <span className="sonuk">· tekniker, hijyenist, radyolog, fizyoterapist tipe göre</span></div></div>
-              <div className="fld"><label>Depolar</label><div className="inp">Sarf deposu <span className="sonuk">· ünit deposu, eczane, hammadde (ERP)</span></div></div>
-              <div className="fld"><label>Kasalar / banka</label><div className="inp">TL Kasası · POS hesabı · Banka</div></div>
-              <div className="fld"><label>Çalışma saatleri</label><div className="inp">Hafta içi 09:00–18:00 · Cmt 09:00–13:00</div></div>
+              <div className="fld"><label>{c('Departmanlar / poliklinikler')}</label><div className="inp">Dahiliye (SKRS 1000) <span className="sonuk">· tıp merkezinde çoklu</span></div></div>
+              <div className="fld"><label>{c('Hekimler')}</label><div className="inp">Dr. A. Koç · tescil ✔ · ÇKYS ✔</div></div>
+              <div className="fld"><label>{c('Personel rolleri')}</label><div className="inp">{c('Hekim · sekreter · (hemşire)')}<span className="sonuk">· tekniker, hijyenist, radyolog, fizyoterapist tipe göre</span></div></div>
+              <div className="fld"><label>Depolar</label><div className="inp">{c('Sarf deposu')}<span className="sonuk">· ünit deposu, eczane, hammadde (ERP)</span></div></div>
+              <div className="fld"><label>{c('Kasalar / banka')}</label><div className="inp">{c('TL Kasası · POS hesabı · Banka')}</div></div>
+              <div className="fld"><label>{c('Çalışma saatleri')}</label><div className="inp">{c('Hafta içi 09:00–18:00 · Cmt 09:00–13:00')}</div></div>
             </div>
           </div>
         </div>
@@ -897,18 +898,18 @@ export function KurumTipiAyarlari() {
               her adimin sarti bir sayim/varlik sorgusu, ekran yalniz cizer.
               Urun modu ve kapali modul disi adimlar hic gelmez. */}
           <div className="ozet">
-            <div className="kart"><div className="b">Profil</div>
+            <div className="kart"><div className="b">{c('Profil')}</div>
               <div className="d">{tipAdi(profil?.kurumTipi) || '—'}</div></div>
-            <div className="kart"><div className="b">Açık modül</div>
+            <div className="kart"><div className="b">{c('Açık modül')}</div>
               <div className="d">{acikModulSayisi}{' '}
                 <small>· {opsiyonelModulSayisi} opsiyonel</small></div></div>
-            <div className="kart"><div className="b">Kurulum adımı</div>
+            <div className="kart"><div className="b">{c('Kurulum adımı')}</div>
               <div className="d">{tamamAdim}/{kurulum.length}{' '}
                 <small>· {bekleyenAdim} bekliyor</small></div></div>
           </div>
           <div className="dg"><table><thead><tr>
-              <th className="orta">#</th><th>Kurulum adımı</th><th>Durum</th>
-              <th className="orta">Sonuç</th><th>Aksiyon</th></tr></thead>
+              <th className="orta">#</th><th>{c('Kurulum adımı')}</th><th>Durum</th>
+              <th className="orta">Sonuç</th><th>{c('Aksiyon')}</th></tr></thead>
             <tbody>
               {kurulum.map(a => (
                 <tr key={a.kod}>
@@ -944,7 +945,7 @@ export function KurumTipiAyarlari() {
             {/* Adimlar baska ekranda tamamlaniyor - donunce listeyi tazele. */}
             <div className="btn" onClick={() => void yukle()}>🔄 Adımları yenile</div>
           </div>
-          <div className="ic sonuk">Kaydet → <code>kurum_profil</code> + <code>kurum_modul</code> güncellenir; menü (listeTanimlari <code>urunModu/kurumTipi</code> süzmesi), yetki şablonları, kart sekmeleri (KartKatalogu <code>kurumTipi</code>), varsayılan ayarlar (ayar tablosu) tek işlemle uygulanır; değişiklik <code>islem_log</code>'a.</div>
+          <div className="ic sonuk">{c('Kaydet →')}<code>kurum_profil</code> + <code>kurum_modul</code> güncellenir; menü (listeTanimlari <code>urunModu/kurumTipi</code> süzmesi), yetki şablonları, kart sekmeleri (KartKatalogu <code>kurumTipi</code>), varsayılan ayarlar (ayar tablosu) tek işlemle uygulanır; değişiklik <code>islem_log</code>'a.</div>
         </div>
     </div>
   );

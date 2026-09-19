@@ -1,4 +1,5 @@
 import type { IzlemVital } from '../../api/uclar/yatan';
+import { c } from '../../dil/ceviri';
 
 /**
  * VİTAL EĞRİSİ — mockup `Ekranlar/Yatan/hemsire_izlem.html` (`.grafik`).
@@ -33,7 +34,7 @@ const SERILER: Seri[] = [
 export function VitalEgrisi({ vitaller }: { vitaller: IzlemVital[] }) {
   const n = vitaller.length;
   if (n === 0) {
-    return <div className="sonuk" style={{ padding: 14 }}>Bu pencerede ölçüm yok.</div>;
+    return <div className="sonuk" style={{ padding: 14 }}>{c('Bu pencerede ölçüm yok.')}</div>;
   }
 
   const x = (i: number) => G + (n === 1 ? (GEN - 2 * G) / 2 : (i * (GEN - 2 * G)) / (n - 1));

@@ -37,12 +37,12 @@ export function GridTablo(p: GridTabloProps) {
           className="grid-cb"
           checked={hepsiSecili}
           onChange={() => secimiUygula(hepsiSecili ? new Set() : new Set(sayfaIdleri()))}
-          title="Bu sayfadaki tumunu sec"
+          title={c('Bu sayfadaki tumunu sec')}
         />
         <button
           type="button"
           className={`grid-noktalar${gridMenuKonum ? ' on' : ''}`}
-          title="Grid menusu"
+          title={c('Grid menusu')}
           onClick={e => {
             e.stopPropagation();
             const r = e.currentTarget.getBoundingClientRect();

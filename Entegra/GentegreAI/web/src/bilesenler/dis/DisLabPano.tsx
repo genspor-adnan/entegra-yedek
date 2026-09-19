@@ -6,7 +6,7 @@ import type { DisLabPano as Pano, DisLabPanoKarti as Kart } from '../../api/ucla
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, metinSor, onay } from '../mesaj';
 import { para, tarihSaat, tarihYaz } from '../bicim';
-import { c } from '../../dil/ceviri';
+import { c as cev } from '../../dil/ceviri';
 
 /**
  * LAB İŞ EMİRLERİ KANBAN (711) — mockup `Ekranlar/Dis Klinigi/dis_lab_kanban.html`.
@@ -142,7 +142,7 @@ export function DisLabPano({ yenile }: { yenile?: number }) {
   );
 
   if (hata) return <div className="hata-kutusu" style={{ margin: 10 }}>{hata}</div>;
-  if (!pano) return <div className="sonuk" style={{ padding: 12 }}>{c('Yükleniyor…')}</div>;
+  if (!pano) return <div className="sonuk" style={{ padding: 12 }}>{cev('Yükleniyor…')}</div>;
 
   const kolonListe = (kol: typeof KOLONLAR[number], k: Kart[]) => k.filter(x => kol.asamalar.includes(x.asama) && !(kol.k === 'labda' && x.asama === 3));
   const kuryeGidecek = tumu.filter(x => x.asama === 1);
@@ -155,13 +155,13 @@ export function DisLabPano({ yenile }: { yenile?: number }) {
         {([['acik', `Açık işler (${sayilar.acik})`], ['geciken', `Gecikenler (${sayilar.geciken})`], ['hafta', `Bu hafta beklenen (${sayilar.hafta})`], ['bugun', `Bugün gelen (${sayilar.bugun})`], ['teslim', `Teslim · 30 gün (${sayilar.teslim})`]] as [Suzgec, string][])
           .map(([k, ad]) => <span key={k} className={`cip${suzgec === k ? ' on' : ''}`} onClick={() => setSuzgec(k)}>{ad}</span>)}
         <span className="ds-sp">
-          <select value={labId ?? ''} onChange={e => setLabId(e.target.value ? Number(e.target.value) : null)}><option value="">{c('Lab: Tümü')}</option>{pano.lablar.map(l => <option key={l.id} value={l.id}>{l.ad}</option>)}</select>
-          <select value={hekimId ?? ''} onChange={e => setHekimId(e.target.value ? Number(e.target.value) : null)}><option value="">{c('Hekim: Tümü')}</option>{pano.hekimler.map(h => <option key={h.id} value={h.id}>{h.ad}</option>)}</select>
+          <select value={labId ?? ''} onChange={e => setLabId(e.target.value ? Number(e.target.value) : null)}><option value="">{cev('Lab: Tümü')}</option>{pano.lablar.map(l => <option key={l.id} value={l.id}>{l.ad}</option>)}</select>
+          <select value={hekimId ?? ''} onChange={e => setHekimId(e.target.value ? Number(e.target.value) : null)}><option value="">{cev('Hekim: Tümü')}</option>{pano.hekimler.map(h => <option key={h.id} value={h.id}>{h.ad}</option>)}</select>
           {([['kanban', '🗂 Kanban'], ['lab', '🏭 Laba göre'], ['kurye', '📤 Kurye günü']] as [Gorunum, string][]).map(([k, ad]) => <span key={k} className={`cip${gorunum === k ? ' on' : ''}`} onClick={() => setGorunum(k)}>{ad}</span>)}
-          <button className="d" onClick={() => void yukle()} title={c('Yenile')}>⟳</button>
+          <button className="d" onClick={() => void yukle()} title={cev('Yenile')}>⟳</button>
         </span>
       </div>
-      <div className="ds-kb-lej"><span><i style={{ background: 'var(--hata)' }} />{c('Gecikti')}</span><span><i style={{ background: '#d9a12b' }} />2 gün içinde / randevusuz</span><span>{c('SLA çubuğu: gönderim → beklenen')}</span><span className="ds-sp">Kart tıkla → sağda ayrıntı · çift tık → kart · sürükle → aşama değişir</span></div>
+      <div className="ds-kb-lej"><span><i style={{ background: 'var(--hata)' }} />{cev('Gecikti')}</span><span><i style={{ background: '#d9a12b' }} />2 gün içinde / randevusuz</span><span>{cev('SLA çubuğu: gönderim → beklenen')}</span><span className="ds-sp">Kart tıkla → sağda ayrıntı · çift tık → kart · sürükle → aşama değişir</span></div>
 
       {gorunum === 'kanban' && (
         <div className="ds-kb-ikili">
@@ -171,17 +171,17 @@ export function DisLabPano({ yenile }: { yenile?: number }) {
               <div className="ds-grp"><div className="ds-gb">🧪 {sec.isemriNo} <span className={`rozet ${ASAMA[sec.asama]?.[1]}`}>{ASAMA[sec.asama]?.[0]}</span><span className="ds-sp sonuk">{sec.lab}{sec.gonderim && sec.beklenen ? ` · gün ${Math.max(0, gun(sec.gonderim) != null ? -(gun(sec.gonderim)!) : 0)} / ${sec.slaGun}` : ''}</span></div>
                 <div className="ds-hdr" style={{ padding: '4px 10px 8px', gridTemplateColumns: '1fr 1fr' }}>
                   <div><label>Hasta</label><div className="ds-inp">{sec.hasta}</div></div>
-                  <div><label>{c('Plan satırı')}</label><div className="ds-inp">{sec.planNo ? `${sec.planNo} · #${sec.planSira} · ${sec.islem}` : <span className="sonuk">plan dışı</span>}</div></div>
-                  <div><label>{c('Diş / iş')}</label><div className="ds-inp">{sec.disNolar || '—'} · {TUR[sec.isTuru] ?? ''}</div></div>
-                  <div><label>{c('Renk · ölçü')}</label><div className="ds-inp">{[sec.renk, OLCU[sec.olcuTipi]].filter(Boolean).join(' · ') || '—'}</div></div>
+                  <div><label>{cev('Plan satırı')}</label><div className="ds-inp">{sec.planNo ? `${sec.planNo} · #${sec.planSira} · ${sec.islem}` : <span className="sonuk">plan dışı</span>}</div></div>
+                  <div><label>{cev('Diş / iş')}</label><div className="ds-inp">{sec.disNolar || '—'} · {TUR[sec.isTuru] ?? ''}</div></div>
+                  <div><label>{cev('Renk · ölçü')}</label><div className="ds-inp">{[sec.renk, OLCU[sec.olcuTipi]].filter(Boolean).join(' · ') || '—'}</div></div>
                   <div><label>Hekim</label><div className="ds-inp">{sec.hekim || '—'}</div></div>
-                  <div><label>{c('Gönderim → beklenen')}</label><div className="ds-inp">{sec.gonderim ? tarihYaz(sec.gonderim) : '—'} → {sec.beklenen ? tarihYaz(sec.beklenen) : '—'} (SLA {sec.slaGun} gün)</div></div>
-                  <div><label>{c('Lab / hasta fiyatı')}</label><div className="ds-inp">{para.format(sec.labFiyat)} / {para.format(sec.hastaFiyat)}</div></div>
-                  <div><label>{c('Prova / teslim randevusu')}</label><div className="ds-inp">{sec.randevu ? tarihSaat(sec.randevu) : <span className="rozet uyari">yok</span>}</div></div>
+                  <div><label>{cev('Gönderim → beklenen')}</label><div className="ds-inp">{sec.gonderim ? tarihYaz(sec.gonderim) : '—'} → {sec.beklenen ? tarihYaz(sec.beklenen) : '—'} (SLA {sec.slaGun} gün)</div></div>
+                  <div><label>{cev('Lab / hasta fiyatı')}</label><div className="ds-inp">{para.format(sec.labFiyat)} / {para.format(sec.hastaFiyat)}</div></div>
+                  <div><label>{cev('Prova / teslim randevusu')}</label><div className="ds-inp">{sec.randevu ? tarihSaat(sec.randevu) : <span className="rozet uyari">yok</span>}</div></div>
                 </div>
-                {sec.ekIstek && <div className="ds-ic"><label className="sonuk">{c('Ek istek')}</label><div className="ds-inp" style={{ whiteSpace: 'normal' }}>{sec.ekIstek}</div></div>}
+                {sec.ekIstek && <div className="ds-ic"><label className="sonuk">{cev('Ek istek')}</label><div className="ds-inp" style={{ whiteSpace: 'normal' }}>{sec.ekIstek}</div></div>}
               </div>
-              <div className="ds-grp"><div className="ds-gb">{c('Aşama geçişi')}<span className="ds-sp sonuk">tek tık · log 1134</span></div>
+              <div className="ds-grp"><div className="ds-gb">{cev('Aşama geçişi')}<span className="ds-sp sonuk">tek tık · log 1134</span></div>
                 <div className="ds-kb-asamalar">
                   {sec.asama === 1 && <button className="d bir" disabled={!yazar} onClick={() => void asamaYap(sec, 2)}>📤 Gönderildi (kurye / portal)</button>}
                   {(sec.asama === 2 || sec.asama === 4) && <button className="d" disabled={!yazar} onClick={() => void asamaYap(sec, 3)}>🎨 Tasarım onayına al (lab görsel yolladı)</button>}
@@ -193,15 +193,15 @@ export function DisLabPano({ yenile }: { yenile?: number }) {
                   {sec.asama === 7 && <button className="d" disabled={!yazar} onClick={() => void asamaYap(sec, 4)}>🏭 Düzeltme labda (üretim)</button>}
                   {(sec.asama === 5 || sec.asama === 6) && <button className="d onay" disabled={!yazar} onClick={() => void asamaYap(sec, 8)}>✔ Teslim et</button>}
                   {sec.asama < 8 && <button className="d" onClick={() => git(`/randevu/yeni?hastaId=${sec.hastaId}&geri=${geriParam}`)}>🗓 Prova / teslim randevusu ver</button>}
-                  {sec.asama < 8 && sec.asama !== 9 && <button className="d" disabled={!yazar} onClick={async () => { if (await onay(`${sec.isemriNo} iptal edilsin mi?`)) await asamaYap(sec, 9) }}>{c('✖ İptal')}</button>}
+                  {sec.asama < 8 && sec.asama !== 9 && <button className="d" disabled={!yazar} onClick={async () => { if (await onay(`${sec.isemriNo} iptal edilsin mi?`)) await asamaYap(sec, 9) }}>{cev('✖ İptal')}</button>}
                   <button className="d" onClick={() => git(`/dis-lab-isemri/${sec.id}?geri=${geriParam}`)}>📄 İş emri kartı</button>
                   {sec.planSatirId && <button className="d" onClick={() => git(`/dis-hasta/${sec.hastaId}`, { state: { geri: konum.pathname } })}>🦷 Hasta kartı</button>}
                 </div>
               </div>
-              <div className="ds-grp"><div className="ds-gb">{c('Aşama geçmişi')}</div>
+              <div className="ds-grp"><div className="ds-gb">{cev('Aşama geçmişi')}</div>
                 <ul className="ds-kb-liste">
                   {gecmis.map((g, i) => <li key={i}>{tarihSaat(g.zaman)} · <b>{ASAMA[g.asama]?.[0] ?? g.asama}</b>{g.kullanici ? ` · ${g.kullanici}` : ''}{g.not_ ? <span className="sonuk"> · {g.not_}</span> : ''}</li>)}
-                  {gecmis.length === 0 && <li className="sonuk">{c('Kayıt yok (iş emri açıldı).')}</li>}
+                  {gecmis.length === 0 && <li className="sonuk">{cev('Kayıt yok (iş emri açıldı).')}</li>}
                 </ul>
               </div>
             </>) : <div className="ds-ic sonuk">Bir kart seçin: ayrıntı, aşama geçişleri ve geçmiş burada.</div>}
@@ -225,13 +225,13 @@ export function DisLabPano({ yenile }: { yenile?: number }) {
           <div className="ds-sol">
             <div className="ds-grp ds-grp-ic"><div className="ds-gb">📤 Gidecek (ölçü alındı → laba) <span className="ds-sp sonuk">{tarihYaz(pano.bugun)}</span></div>
               <div className="ds-dg"><table>
-                <thead><tr><th className="orta"><input type="checkbox" checked={kuryeGidecek.length > 0 && kuryeGidecek.every(x => seciliKurye.has(x.id))} onChange={e => setSeciliKurye(e.target.checked ? new Set(kuryeGidecek.map(x => x.id)) : new Set())} /></th><th>{c('İş emri')}</th><th>Hasta</th><th className="orta">Diş</th><th>{c('İş · malzeme · renk')}</th><th>{c('Lab')}</th><th>{c('Ölçü')}</th><th>{c('Beklenen (SLA)')}</th></tr></thead>
+                <thead><tr><th className="orta"><input type="checkbox" checked={kuryeGidecek.length > 0 && kuryeGidecek.every(x => seciliKurye.has(x.id))} onChange={e => setSeciliKurye(e.target.checked ? new Set(kuryeGidecek.map(x => x.id)) : new Set())} /></th><th>{cev('İş emri')}</th><th>Hasta</th><th className="orta">Diş</th><th>{cev('İş · malzeme · renk')}</th><th>{cev('Lab')}</th><th>{cev('Ölçü')}</th><th>{cev('Beklenen (SLA)')}</th></tr></thead>
                 <tbody>
                   {kuryeGidecek.map(k => <tr key={k.id} className={seciliKurye.has(k.id) ? 'sel' : ''}>
                     <td className="orta"><input type="checkbox" checked={seciliKurye.has(k.id)} onChange={e => setSeciliKurye(s => { const n = new Set(s); if (e.target.checked) n.add(k.id); else n.delete(k.id); return n })} /></td>
                     <td>{k.isemriNo}</td><td>{k.hasta}</td><td className="orta">{k.disNolar || '—'}</td><td>{[TUR[k.isTuru], k.malzeme, k.renk].filter(Boolean).join(' · ')}</td><td>{k.lab}</td>
                     <td>{OLCU[k.olcuTipi] ?? '—'}</td><td>{tarihYaz(new Date(Date.now() + k.slaGun * 86400000).toISOString())} ({k.slaGun} gün)</td></tr>)}
-                  {kuryeGidecek.length === 0 && <tr><td colSpan={8} className="sonuk">{c('Ölçü bekleyen iş emri yok.')}</td></tr>}
+                  {kuryeGidecek.length === 0 && <tr><td colSpan={8} className="sonuk">{cev('Ölçü bekleyen iş emri yok.')}</td></tr>}
                 </tbody>
               </table></div>
               <div className="ds-arac">{yazar && <button className="d bir" onClick={() => void kuryeGonder()}>📤 Seçilenleri "Gönderildi" yap ({seciliKurye.size})</button>}<span className="ds-sp sonuk">gönderim = bugün · beklenen = bugün + lab SLA · lab formu: kart › Yazdır</span></div>
@@ -240,18 +240,18 @@ export function DisLabPano({ yenile }: { yenile?: number }) {
           <div className="ds-sag">
             <div className="ds-grp"><div className="ds-gb">📥 Gelen (labdan) · kalite kontrol</div>
               <div className="ds-dg"><table>
-                <thead><tr><th>{c('İş emri')}</th><th>Hasta</th><th className="orta">Diş</th><th>{c('Lab')}</th><th className="orta">KK</th><th>{c('Prova randevusu')}</th><th /></tr></thead>
+                <thead><tr><th>{cev('İş emri')}</th><th>Hasta</th><th className="orta">Diş</th><th>{cev('Lab')}</th><th className="orta">KK</th><th>{cev('Prova randevusu')}</th><th /></tr></thead>
                 <tbody>
                   {kuryeGelen.map(k => <tr key={k.id}><td>{k.isemriNo}</td><td>{k.hasta}</td><td className="orta">{k.disNolar || '—'}</td><td>{k.lab}</td>
                     <td className="orta">{k.kaliteKontrol === 1 ? <span className="rozet ok">✔</span> : <span className="rozet uyari">bekliyor</span>}</td>
                     <td>{k.randevu ? tarihSaat(k.randevu) : <span className="rozet hata">yok</span>}</td>
                     <td><button className="d" onClick={() => { setSecili(k.id); setGorunum('kanban') }}>Aç</button></td></tr>)}
-                  {kuryeGelen.length === 0 && <tr><td colSpan={7} className="sonuk">{c('Gelen iş yok.')}</td></tr>}
+                  {kuryeGelen.length === 0 && <tr><td colSpan={7} className="sonuk">{cev('Gelen iş yok.')}</td></tr>}
                 </tbody>
               </table></div>
               <div className="ds-ic sonuk">Kalite kontrol iş emri kartında (renk / oturma / kontak / okluzyon); ✖ ise "Geri gönderildi" + neden. Prova randevusu verilmeden kart "Geldi"de kalır.</div>
             </div>
-            <div className="ds-grp"><div className="ds-gb">{c('Kurye / portal')}</div>
+            <div className="ds-grp"><div className="ds-gb">{cev('Kurye / portal')}</div>
               <div className="ds-ic">{pano.lablar.map(l => <div key={l.id}><b>{l.ad}</b>: SLA {l.slaGun} gün{l.kuryeGunleri ? ` · kurye ${l.kuryeGunleri}` : ' · kurye günü tanımsız'}</div>)}</div>
             </div>
           </div>

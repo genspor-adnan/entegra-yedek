@@ -71,6 +71,7 @@ import { IskontoOnaylari } from './sayfalar/IskontoOnaylari';
 import { calismaOku } from './bilesenler/calismaTercihi';
 import { Dokumler } from './sayfalar/Dokumler';
 import { useOtomatikTamamlamaKapali } from './bilesenler/otomatikTamamlama';
+import { c } from './dil/ceviri';
 
 function Yollar() {
   const { kullanici, yukleniyor, yetki } = useOturum();
@@ -85,7 +86,7 @@ function Yollar() {
   if (konum.pathname.startsWith('/davet/'))
     return <Routes><Route path="/davet/:jeton" element={<PortalDavet />} /></Routes>;
 
-  if (yukleniyor) return <div className="tam-ekran-bilgi">Yukleniyor…</div>;
+  if (yukleniyor) return <div className="tam-ekran-bilgi">{c('Yukleniyor…')}</div>;
   if (!kullanici) return <Giris />;
   // ZORUNLU PAROLA DEGISIMI (667): varsayilan parolayla (kart id) giren kisi
   //   once kendi parolasini belirler - bayrak dusene kadar HICBIR rota

@@ -5,6 +5,7 @@ import { AntetLogo } from '../bilesenler/AntetLogo';
 import { hataMetni } from '../api/sozlesme';
 import { tarihSaat, gunNokta, yasMetni } from '../bilesenler/bicim';
 import { BOLUM, ZIGOSITE } from '../bilesenler/labKodlari';
+import { c } from '../dil/ceviri';
 
 /**
  * LABORATUVAR SONUÇ RAPORU (mockuplar: Ekranlar/Lab/lab_sonuc_formu_*.html).
@@ -118,7 +119,7 @@ export function LabRaporCikti() {
                 title="Yazdırma penceresinde “PDF olarak kaydet” seçin.">
           📄 PDF
         </button>
-        <button className="d" disabled title="Hasta portalı henüz yok.">
+        <button className="d" disabled title={c('Hasta portalı henüz yok.')}>
           🔗 Hasta Portalı Bağlantısı
         </button>
         <span style={{ marginLeft: 'auto' }} />
@@ -127,7 +128,7 @@ export function LabRaporCikti() {
             Tüm sonuçlar onaylanmadı — bu çıktı TASLAKTIR
           </span>
         )}
-        <button className="d" onClick={() => git(-1)}>✖ Kapat</button>
+        <button className="d" onClick={() => git(-1)}>{c('✖ Kapat')}</button>
       </div>
 
       <div className="cikti-sayfa">
@@ -159,10 +160,10 @@ export function LabRaporCikti() {
         <div className="kimlik">
           <div><span className="et">Hasta</span>
                <span className="dg">{String(i.hastaAdi ?? '—')}</span></div>
-          <div><span className="et">Hasta No</span>
+          <div><span className="et">{c('Hasta No')}</span>
                <span className="dg">{String(i.hastaNo ?? '—')}</span></div>
           <div>
-            <span className="et">Doğum T. / Yaş</span>
+            <span className="et">{c('Doğum T. / Yaş')}</span>
             <span className="dg">
               {[gunNokta(i.dogumTarihi), yasMetni(i.dogumTarihi), CINSIYET[Number(i.cinsiyet ?? 0)]]
                 .filter(Boolean).join(' · ') || '—'}
@@ -174,15 +175,15 @@ export function LabRaporCikti() {
                <span className="dg">{String(i.isteyenHekim ?? '') || '—'}</span></div>
           <div><span className="et">Ödeyen</span>
                <span className="dg">{String(i.odeyenKurum ?? '') || 'Hasta kendi öder'}</span></div>
-          <div><span className="et">Numune Alım</span>
+          <div><span className="et">{c('Numune Alım')}</span>
                <span className="dg">{i.numuneAlim ? tarihSaat(i.numuneAlim) : '—'}</span></div>
           {/* TAT KABULDE BAŞLAR: raporda ikisi de görünür, gecikmenin
               laboratuvardan mı numune naklinden mi geldiği ayrılabilsin. */}
-          <div><span className="et">Lab Kabul</span>
+          <div><span className="et">{c('Lab Kabul')}</span>
                <span className="dg">{i.numuneKabul ? tarihSaat(i.numuneKabul) : '—'}</span></div>
-          <div><span className="et">İstem Tarihi</span>
+          <div><span className="et">{c('İstem Tarihi')}</span>
                <span className="dg">{i.istemTarihi ? tarihSaat(i.istemTarihi) : '—'}</span></div>
-          <div><span className="et">Rapor Tarihi</span>
+          <div><span className="et">{c('Rapor Tarihi')}</span>
                <span className="dg">{i.sonucTarihi ? tarihSaat(i.sonucTarihi) : '—'}</span></div>
         </div>
 
@@ -310,16 +311,16 @@ export function LabRaporCikti() {
               <h3>{String(kul.ad ?? 'Kültür')} — Sonuç</h3>
               <table className="cikti-tablo">
                 <tbody>
-                  <tr><td className="et">Numune / Ön işlem</td>
+                  <tr><td className="et">{c('Numune / Ön işlem')}</td>
                       <td>{[String(kul.barkod ?? ''), String(kul.numuneKalite ?? '')]
                             .filter(Boolean).join(' · ') || '—'}</td></tr>
-                  <tr><td className="et">Direkt bakı</td>
+                  <tr><td className="et">{c('Direkt bakı')}</td>
                       <td>{String(kul.gramSonuc ?? '') || String(kul.direktBaki ?? '') || '—'}</td></tr>
-                  <tr><td className="et">Besiyeri / ekim</td>
+                  <tr><td className="et">{c('Besiyeri / ekim')}</td>
                       <td>{[String(kul.besiyeri ?? ''),
                             kul.ekimZamani ? tarihSaat(kul.ekimZamani) : '']
                             .filter(Boolean).join(' · ') || '—'}</td></tr>
-                  <tr><td className="et">Üreme</td>
+                  <tr><td className="et">{c('Üreme')}</td>
                       <td><b>{String(kul.ozet ?? '')}</b></td></tr>
                 </tbody>
               </table>
@@ -339,9 +340,7 @@ export function LabRaporCikti() {
                         ? ` — ${sayiMetni(u.koloniSayisi, 0)} ${String(u.koloniBirim ?? '')}`
                         : ''}
                       {Number(u.bildirimiZorunlu ?? 0) === 1 && (
-                        <span className="rozet uyari" style={{ marginLeft: 6 }}>
-                          Bildirimi zorunlu etken
-                        </span>
+                        <span className="rozet uyari" style={{ marginLeft: 6 }}>{c('Bildirimi zorunlu etken')}</span>
                       )}
                     </div>
                     <div className="not">
@@ -356,8 +355,8 @@ export function LabRaporCikti() {
                         <table className="cikti-tablo" style={{ marginTop: 6 }}>
                           <thead>
                             <tr>
-                              <th>Antibiyotik</th><th>MIC (µg/mL)</th>
-                              <th>Zon (mm)</th><th>Yorum</th><th>Not</th>
+                              <th>{c('Antibiyotik')}</th><th>MIC (µg/mL)</th>
+                              <th>{c('Zon (mm)')}</th><th>{c('Yorum')}</th><th>Not</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -404,7 +403,7 @@ export function LabRaporCikti() {
               )}
               {String(kul.uzmanYorum ?? '').trim() !== '' && (
                 <p style={{ marginTop: 8 }}>
-                  <b>Uzman yorumu:</b> {String(kul.uzmanYorum)}
+                  <b>{c('Uzman yorumu:')}</b> {String(kul.uzmanYorum)}
                 </p>
               )}
               {Number(kul.ekkBildirim ?? 0) === 1 && (
@@ -426,7 +425,7 @@ export function LabRaporCikti() {
 
               <table className="cikti-tablo">
                 <tbody>
-                  <tr><td className="et">Test / kapsam</td>
+                  <tr><td className="et">{c('Test / kapsam')}</td>
                       <td>{[String(v.panel ?? ''), GEN_YONTEM[Number(v.yontem ?? 1)],
                             String(v.referansGenom ?? '')].filter(Boolean).join(' · ')}</td></tr>
                   {/* ONAM RAPORDA GÖRÜNÜR: tesadüfi bulgu tercihi neyin
@@ -453,9 +452,9 @@ export function LabRaporCikti() {
                   <table className="cikti-tablo">
                     <thead>
                       <tr>
-                        <th>Gen</th><th>Transkript · HGVS c.</th><th>HGVS p.</th>
-                        <th>Zigosite</th><th>Kalıtım</th><th>gnomAD AF</th>
-                        <th>ClinVar</th><th>ACMG kanıtları</th><th>Sınıf</th>
+                        <th>Gen</th><th>{c('Transkript · HGVS c.')}</th><th>{c('HGVS p.')}</th>
+                        <th>{c('Zigosite')}</th><th>{c('Kalıtım')}</th><th>{c('gnomAD AF')}</th>
+                        <th>{c('ClinVar')}</th><th>{c('ACMG kanıtları')}</th><th>Sınıf</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -498,15 +497,15 @@ export function LabRaporCikti() {
               )}
 
               {String(v.uzmanYorum ?? '').trim() !== '' && (
-                <p style={{ marginTop: 8 }}><b>Yorum:</b> {String(v.uzmanYorum)}</p>
+                <p style={{ marginTop: 8 }}><b>{c('Yorum:')}</b> {String(v.uzmanYorum)}</p>
               )}
               {String(v.oneriler ?? '').trim() !== '' && (
-                <p style={{ marginTop: 6 }}><b>Öneriler:</b> {String(v.oneriler)}</p>
+                <p style={{ marginTop: 6 }}><b>{c('Öneriler:')}</b> {String(v.oneriler)}</p>
               )}
 
               {/* YÖNTEM ve KALİTE raporun zorunlu parçası: kapsanamayan
                   bölgede "varyant yok" demek, bakılamayanı temiz saymaktır. */}
-              <div className="alt-baslik" style={{ marginTop: 10 }}>Yöntem ve kalite</div>
+              <div className="alt-baslik" style={{ marginTop: 10 }}>{c('Yöntem ve kalite')}</div>
               <p className="not">
                 DNA izolasyonu{v.izolasyonTarihi ? ` (${gunNokta(v.izolasyonTarihi)})` : ''}
                 {v.dnaKonsantrasyon
@@ -525,10 +524,10 @@ export function LabRaporCikti() {
                 {String(v.pipeline ?? '').trim() !== '' ? ` · ${v.pipeline}` : ''}
               </p>
               {String(v.sinirliliklar ?? '').trim() !== '' && (
-                <p className="not"><b>Sınırlılıklar:</b> {String(v.sinirliliklar)}</p>
+                <p className="not"><b>{c('Sınırlılıklar:')}</b> {String(v.sinirliliklar)}</p>
               )}
               {String(v.genListesi ?? '').trim() !== '' && (
-                <p className="not"><b>Gen listesi:</b> {String(v.genListesi)}</p>
+                <p className="not"><b>{c('Gen listesi:')}</b> {String(v.genListesi)}</p>
               )}
               {Number(v.veriSaklamaYil ?? 0) > 0 && (
                 <p className="not">

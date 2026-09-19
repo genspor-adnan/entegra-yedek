@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AyarSekmeSeridi } from '../bilesenler/AyarSekmeSeridi';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
+import { c } from '../dil/ceviri';
 
 const SEKMELER = [
   { anahtar: 'genel', baslik: 'Genel' },
@@ -25,7 +26,7 @@ export function KasaAyarlar() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Kasa Ayarları</h1>
-          <span className="yol">Yönetim › Ayarlar › Kasa</span>
+          <span className="yol">{c('Yönetim › Ayarlar › Kasa')}</span>
         </div>
       </div>
 

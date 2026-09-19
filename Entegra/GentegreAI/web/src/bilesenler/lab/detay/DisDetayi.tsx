@@ -2,6 +2,7 @@ import { tarihSaat } from '../../bicim';
 import {
   sayi, } from '../../labKodlari';
 import { dizi, metin, kodEki } from './ortak';
+import { c } from '../../../dil/ceviri';
 
 /** Panelde cizilen sunucu kaydi - alanlar kaynaga gore degisir. */
 type Kayit = Record<string, unknown>;
@@ -29,7 +30,7 @@ export function DisDetayi({ veri }: { veri: Kayit }) {
             <thead>
               <tr>
                 <th>Hasta</th><th>Tetkik</th><th className="orta">Barkod</th>
-                <th className="sag">Sonuç</th><th className="orta">Sonuç zamanı</th>
+                <th className="sag">Sonuç</th><th className="orta">{c('Sonuç zamanı')}</th>
                 <th className="orta">Durum</th>
               </tr>
             </thead>
@@ -57,7 +58,7 @@ export function DisDetayi({ veri }: { veri: Kayit }) {
                 </tr>
               ))}
               {satirlar.length === 0 && (
-                <tr><td colSpan={6} className="not">Gönderim satırı yok.</td></tr>
+                <tr><td colSpan={6} className="not">{c('Gönderim satırı yok.')}</td></tr>
               )}
             </tbody>
           </table>
@@ -70,10 +71,10 @@ export function DisDetayi({ veri }: { veri: Kayit }) {
       </div>
 
       <div className="kagrup">
-        <h6>Kurye / soğuk zincir</h6>
+        <h6>{c('Kurye / soğuk zincir')}</h6>
         <div className="lab-alanlar">
           <div className="fld" style={{ gridColumn: '1 / -1' }}>
-            <label>Dış laboratuvar</label>
+            <label>{c('Dış laboratuvar')}</label>
             <div className="deger buyuk">{metin(g.disLab) || '—'}</div>
           </div>
           <div className="fld">
@@ -89,11 +90,11 @@ export function DisDetayi({ veri }: { veri: Kayit }) {
           {/* SOĞUK ZİNCİR: -20 °C isteyen numune oda sıcaklığında gittiyse
               sonuç geçersizdir; kayıt sonradan sorulur. */}
           <div className="fld">
-            <label>Taşıma koşulu</label>
+            <label>{c('Taşıma koşulu')}</label>
             <div className="deger">{TASIMA[Number(g.tasimaKosulu ?? 2)] ?? '—'}</div>
           </div>
           <div className="fld">
-            <label>Sıcaklık / kap</label>
+            <label>{c('Sıcaklık / kap')}</label>
             <div className="deger">
               {g.sicaklik ? `${sayi(g.sicaklik, 1)} °C` : '—'} · {String(g.kapSayisi ?? 1)} kap
             </div>
@@ -112,11 +113,11 @@ export function DisDetayi({ veri }: { veri: Kayit }) {
             </div>
           </div>
           <div className="fld">
-            <label>Dış kabul no</label>
+            <label>{c('Dış kabul no')}</label>
             <div className="deger">{metin(g.disKabulNo) || '—'}</div>
           </div>
           <div className="fld">
-            <label>Alış faturası</label>
+            <label>{c('Alış faturası')}</label>
             <div className="deger">{metin(g.faturaNo) || 'eşleştirilmedi'}</div>
           </div>
         </div>

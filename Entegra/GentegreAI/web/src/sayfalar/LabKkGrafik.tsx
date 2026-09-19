@@ -4,6 +4,7 @@ import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { tarihSaat } from '../bilesenler/bicim';
 import { sayi } from '../bilesenler/labKodlari';
+import { c } from '../dil/ceviri';
 
 /**
  * KALİTE KONTROL — LEVEY-JENNINGS (442, mockup Ekranlar/Lab/lab_kalite_kontrol.html).
@@ -95,7 +96,7 @@ export function LabKkGrafik() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Kalite Kontrol — {String(t.kod ?? '')} {String(t.ad ?? '')}</h1>
-          <span className="yol">Laboratuvar › Kalite Kontrol › Levey-Jennings</span>
+          <span className="yol">{c('Laboratuvar › Kalite Kontrol › Levey-Jennings')}</span>
         </div>
         <div className="basarac">
           {[15, 30, 60, 90].map(g => (
@@ -109,7 +110,7 @@ export function LabKkGrafik() {
           <span className={`rozet ${gecerli ? 'olumlu' : 'hata'}`}>
             {gecerli ? 'KK geçerli — oto-onay açık' : 'KK RET — oto-onay kapalı'}
           </span>
-          <button className="d" onClick={() => git(-1)}>✖ Kapat</button>
+          <button className="d" onClick={() => git(-1)}>{c('✖ Kapat')}</button>
         </div>
       </div>
 
@@ -124,13 +125,13 @@ export function LabKkGrafik() {
               </div>
             </div>
             <div className="fld">
-              <label>Kontrol materyali</label>
+              <label>{c('Kontrol materyali')}</label>
               <div className="deger">
                 {son ? `${String(son.materyal ?? '')} · lot ${String(son.lot ?? '')}` : '—'}
               </div>
             </div>
             <div className="fld">
-              <label>Hedef ± SD</label>
+              <label>{c('Hedef ± SD')}</label>
               <div className="deger">
                 {son ? `${sayi(son.hedef, 3)} ± ${sayi(son.sd, 3)}` : '—'}
                 {String(t.birim ?? '') ? ` ${String(t.birim)}` : ''}
@@ -148,12 +149,10 @@ export function LabKkGrafik() {
         <div className="lab-ikili">
           {/* --------------------------------------------- grafik */}
           <div className="kagrup">
-            <h6>
-              Levey-Jennings
-              <span className="sp">yeşil ±1SD · sarı ±2SD · kırmızı ±3SD</span>
+            <h6>{c('Levey-Jennings')}<span className="sp">yeşil ±1SD · sarı ±2SD · kırmızı ±3SD</span>
             </h6>
             {seri.length === 0 ? (
-              <div className="bos">Bu dönemde kontrol ölçümü yok.</div>
+              <div className="bos">{c('Bu dönemde kontrol ölçümü yok.')}</div>
             ) : (
               <div style={{ padding: 10 }}>
                 <svg viewBox={`0 0 ${G} ${Y}`} className="lj-grafik" role="img"
@@ -216,15 +215,15 @@ export function LabKkGrafik() {
           {/* --------------------------------------------- ölçümler */}
           <div>
             <div className="kagrup">
-              <h6>KK ölçümleri <span className="sp">yeniden eskiye</span></h6>
+              <h6>{c('KK ölçümleri')}<span className="sp">yeniden eskiye</span></h6>
               <div className="detay-kaydir">
                 <table className="detay-tablo">
                   <thead>
                     <tr>
-                      <th className="orta">Tarih</th><th className="orta">Sev.</th>
+                      <th className="orta">Tarih</th><th className="orta">{c('Sev.')}</th>
                       <th className="sag">Sonuç</th><th className="sag">Z</th>
                       <th className="orta">Kural</th><th className="orta">Kaynak</th>
-                      <th className="orta">Onay</th><th>Düzeltici faaliyet</th>
+                      <th className="orta">Onay</th><th>{c('Düzeltici faaliyet')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -266,7 +265,7 @@ export function LabKkGrafik() {
                       </tr>
                     ))}
                     {seri.length === 0 && (
-                      <tr><td colSpan={8} className="not">Ölçüm yok.</td></tr>
+                      <tr><td colSpan={8} className="not">{c('Ölçüm yok.')}</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -274,7 +273,7 @@ export function LabKkGrafik() {
             </div>
 
             <div className="kagrup">
-              <h6>Cihaz olayları <span className="sp">aynı dönem</span></h6>
+              <h6>{c('Cihaz olayları')}<span className="sp">aynı dönem</span></h6>
               <table className="detay-tablo">
                 <thead>
                   <tr>

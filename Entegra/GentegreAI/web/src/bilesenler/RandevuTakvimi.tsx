@@ -1,6 +1,7 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api/istemci';
 import { type ListeSatiri, hataMetni } from '../api/sozlesme';
+import { c as cev } from '../dil/ceviri';
 
 /**
  * RANDEVU TAKVİMİ (243) - günlük ve haftalık görünüm (kullanıcı isteği).
@@ -318,11 +319,11 @@ export function RandevuTakvimi({ ayarlar, onYeni, onAc, onAralik, yenile,
     //   Sık dugmeleri) yapisip onlari kirpiyordu (kullanici).
     <div className="kagrup" style={{ marginTop: 16 }}>
       <div className="numaralama-bas bitisik">
-        <h6>Takvim</h6>
+        <h6>{cev('Takvim')}</h6>
         <button type="button" className={`cip${gorunum === 'gun' ? ' on' : ''}`}
                 onClick={() => setGorunum('gun')}>Günlük</button>
         <button type="button" className={`cip${gorunum === 'hafta' ? ' on' : ''}`}
-                onClick={() => setGorunum('hafta')}>Haftalık</button>
+                onClick={() => setGorunum('hafta')}>{cev('Haftalık')}</button>
         {/* Hekim gorunumu: secili GUN icin sutunlar hekimlerdir (kullanici). */}
         <button type="button" className={`cip${gorunum === 'hekim' ? ' on' : ''}`}
                 onClick={() => setGorunum('hekim')}>Hekim</button>

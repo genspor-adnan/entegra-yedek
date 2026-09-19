@@ -3,6 +3,7 @@ import { api } from '../api/istemci';
 import type { RolKullanicisi } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { Modal } from './Modal';
+import { c } from '../dil/ceviri';
 
 /**
  * Rol kartı Genel sekmesindeki "Kullanıcılar" gridi (kullanıcı: "kullanıcıları
@@ -88,11 +89,11 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
       <div className="numaralama-bas bitisik">
         <h6>Kullanıcılar {uyeler && <span style={{ opacity: .6 }}>({uyeler.length})</span>}</h6>
         {/* Ekle / Duzenle / Sil IKON olarak ustte - sube gridiyle ayni desen. */}
-        <button className="d bir" title="Role kullanıcı ekle" disabled={saltOkunur || islemde}
+        <button className="d bir" title={c('Role kullanıcı ekle')} disabled={saltOkunur || islemde}
                 onClick={() => setEkleAcik(true)}>＋</button>
-        <button className="d" title="Kullanıcı kartını yeni sekmede aç" disabled={secili === null}
+        <button className="d" title={c('Kullanıcı kartını yeni sekmede aç')} disabled={secili === null}
                 onClick={() => secili !== null && kartiAc(secili)}>✎</button>
-        <button className="d" title="Rolden çıkar (kullanıcı silinmez)"
+        <button className="d" title={c('Rolden çıkar (kullanıcı silinmez)')}
                 disabled={saltOkunur || islemde || secili === null}
                 onClick={() => void cikar()}>🗑</button>
       </div>
@@ -104,7 +105,7 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
         <thead>
           <tr>
             <th style={{ width: 34 }}></th>
-            <th>Kullanıcı</th><th>Rolü</th><th>Bölüm</th><th>Görev</th><th>Telefon</th>
+            <th>Kullanıcı</th><th>{c('Rolü')}</th><th>Bölüm</th><th>Görev</th><th>Telefon</th>
             <th>E-posta</th><th>Şube</th>
             <th style={{ textAlign: 'center' }}>Durum</th>
             <th>Son Giriş</th>
@@ -113,7 +114,7 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
         <tbody>
           {!uyeler && <tr><td colSpan={10}>Yükleniyor…</td></tr>}
           {uyeler?.length === 0 && (
-            <tr><td colSpan={10} className="bos">Bu rolde kullanıcı yok.</td></tr>
+            <tr><td colSpan={10} className="bos">{c('Bu rolde kullanıcı yok.')}</td></tr>
           )}
           {uyeler?.map(k => (
             /* Tek tik SATIRI ISARETLER, cift tik kullanici kartini acar. */
@@ -158,14 +159,14 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
               {islemde ? 'Ekleniyor…' : `Ekle${adaySecim.size > 0 ? ` (${adaySecim.size})` : ''}`}
             </button>
             <button className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
-                    onClick={() => { setEkleAcik(false); setAdaySecim(new Set()) }}>Kapat</button>
+                    onClick={() => { setEkleAcik(false); setAdaySecim(new Set()) }}>{c('Kapat')}</button>
           </>}>
           <div style={{ padding: 10 }}>
             {/* Listelerdeki oval arama kutusu. */}
             <div className="ara-kutu alt-bosluk">
               <span>🔍</span>
               <input type="search" autoFocus value={arama}
-                     placeholder="Kullanıcı ara (ad, kod, e-posta)…"
+                     placeholder={c('Kullanıcı ara (ad, kod, e-posta)…')}
                      onChange={e => setArama(e.target.value)} />
             </div>
             <div style={{ maxHeight: 320, overflowY: 'auto' }}>
@@ -174,7 +175,7 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
                   <tr>
                     <th style={{ width: 34 }}></th>
                     <th>Kullanıcı</th><th>Bölüm</th><th>Görev</th>
-                    <th>Şu anki rolü</th>
+                    <th>{c('Şu anki rolü')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -193,7 +194,7 @@ export function RolKullanicilari({ rolId, saltOkunur }: {
                     </tr>
                   ))}
                   {adaylar.length === 0 && (
-                    <tr><td colSpan={5} className="bos">Eklenebilecek kullanıcı bulunamadı.</td></tr>
+                    <tr><td colSpan={5} className="bos">{c('Eklenebilecek kullanıcı bulunamadı.')}</td></tr>
                   )}
                 </tbody>
               </table>

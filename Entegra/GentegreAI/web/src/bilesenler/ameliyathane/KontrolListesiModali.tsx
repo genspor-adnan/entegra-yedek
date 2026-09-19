@@ -4,6 +4,7 @@ import type { AmeliyatKontrolSatiri } from '../../api/uclar/ameliyathane';
 import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import { mesaj } from '../mesaj';
+import { c } from '../../dil/ceviri';
 
 /**
  * GÜVENLİ CERRAHİ KONTROL LİSTESİ (DSÖ · 715).
@@ -77,7 +78,7 @@ export function KontrolListesiModali({ ameliyatId, ameliyatNo, onKapat, onTamam 
                        onClick={() => void kaydet()}>
                  {kaydediyor ? '⏳ Kaydediliyor…' : '💾 Kaydet'}
                </button>
-               <button className="d" onClick={onKapat}>✖ Kapat</button>
+               <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}

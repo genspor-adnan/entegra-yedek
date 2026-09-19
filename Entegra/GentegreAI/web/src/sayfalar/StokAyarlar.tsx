@@ -6,6 +6,7 @@ import { type ListeSatiri, hataMetni } from '../api/sozlesme';
 import { GenGrid } from '../bilesenler/GenGrid';
 import { GenForm } from '../bilesenler/GenForm';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
+import { c } from '../dil/ceviri';
 
 const SEKMELER = [
   { anahtar: 'genel', baslik: 'Genel' },
@@ -53,7 +54,7 @@ export function StokAyarlar() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Stok Ayarları</h1>
-          <span className="yol">Yönetim › Ayarlar › Stok Ayarları</span>
+          <span className="yol">{c('Yönetim › Ayarlar › Stok Ayarları')}</span>
         </div>
       </div>
 

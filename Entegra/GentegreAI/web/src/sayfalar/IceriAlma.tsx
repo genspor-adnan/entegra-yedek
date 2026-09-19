@@ -7,6 +7,7 @@ import { mesaj as bilgiMesaji, onay as onaySor } from '../bilesenler/mesaj';
 import type {
   IceriAlmaHedefi, CozumSonucu, OnizlemeSonucu, YuklemeKaydi, EslemeKurali,
 } from '../api/uclar/iceriAlma';
+import { c as cev } from '../dil/ceviri';
 
 const SEKMELER = [
   { anahtar: 'sihirbaz', baslik: 'Sihirbaz' },
@@ -197,7 +198,7 @@ export function IceriAlma() {
   const adim1 = (
     <>
       <div className="kagrup">
-        <h6>Kaynak Dosya</h6>
+        <h6>{cev('Kaynak Dosya')}</h6>
         <div style={{ padding: 12 }}>
           <input ref={girdi} type="file" accept=".xlsx"
                  style={{ display: 'none' }}
@@ -207,9 +208,7 @@ export function IceriAlma() {
                             || (seciliHedef?.listeGerekli === true && listeId === '')}
                   title={seciliHedef?.listeGerekli && listeId === ''
                          ? 'Önce fiyat listesini seçin' : undefined}
-                  onClick={() => girdi.current?.click()}>
-            📄 Dosya Seç…
-          </button>
+                  onClick={() => girdi.current?.click()}>{cev('📄 Dosya Seç…')}</button>
           <span className="not kucuk" style={{ marginLeft: 10 }}>
             .xlsx · en çok 10 MB. İlk satır başlık kabul edilir, yalnız ilk sayfa okunur.
           </span>
@@ -220,7 +219,7 @@ export function IceriAlma() {
         <h6>Hedef</h6>
         <div className="alan-izgara" style={{ margin: 10 }}>
           <label className="alan">
-            <span className="etiket">Ne aktarılıyor</span>
+            <span className="etiket">{cev('Ne aktarılıyor')}</span>
             <select value={hedef} disabled={!!cozum}
                     onChange={e => { setHedef(e.target.value); sifirla() }}>
               {hedefler.map(h => (
@@ -229,17 +228,17 @@ export function IceriAlma() {
             </select>
           </label>
           <label className="alan">
-            <span className="etiket">Çakışma kuralı</span>
+            <span className="etiket">{cev('Çakışma kuralı')}</span>
             <input readOnly value={seciliHedef
               ? `${seciliHedef.anahtarlar.join(' / ')} eşleşirse GÜNCELLE, yoksa EKLE`
               : ''} />
           </label>
           <label className="alan">
-            <span className="etiket">Sayı biçimi</span>
+            <span className="etiket">{cev('Sayı biçimi')}</span>
             <select value={sayiBicimi}
                     onChange={e => setSayiBicimi(e.target.value as 'tr' | 'en')}>
-              <option value="tr">Türkçe (1.234,56)</option>
-              <option value="en">İngilizce (1,234.56)</option>
+              <option value="tr">{cev('Türkçe (1.234,56)')}</option>
+              <option value="en">{cev('İngilizce (1,234.56)')}</option>
             </select>
           </label>
           {/* FIYAT LISTESI HEDEFI: satirlar HANGI listeye yazilacak (548).
@@ -285,13 +284,13 @@ export function IceriAlma() {
           Başlıklar ve ilk satırların içeriği okundu; öneriler <b>kabul edilmeden hiçbir şey
           yazılmaz</b>. Güven yüzdesi önerinin nereden geldiğini gösterir: %100 kayıtlı
           kuraldan, %90+ bilinen başlık adından, %70 benzerlikten.
-          {cozum.kural && <> Bu dosya <b>"{cozum.kural.ad}"</b> kuralıyla tanındı.</>}
+          {cozum.kural && <>{cev('Bu dosya')}<b>"{cozum.kural.ad}"</b> kuralıyla tanındı.</>}
         </div>
         <table className="grid" style={{ margin: 10, width: 'calc(100% - 20px)' }}>
           <thead>
             <tr>
-              <th>Excel kolonu</th><th>Gentegre alanı</th>
-              <th style={{ width: 90 }}>Güven</th><th>Örnek değer</th>
+              <th>{cev('Excel kolonu')}</th><th>{cev('Gentegre alanı')}</th>
+              <th style={{ width: 90 }}>{cev('Güven')}</th><th>{cev('Örnek değer')}</th>
             </tr>
           </thead>
           <tbody>
@@ -325,7 +324,7 @@ export function IceriAlma() {
         </table>
       </div>
       <div className="not" style={{ margin: '0 0 12px' }}>
-        <b>Eşleme saklanabilir.</b> "Eşlemeyi Sakla" dediğinizde aynı başlık düzenindeki
+        <b>{cev('Eşleme saklanabilir.')}</b> "Eşlemeyi Sakla" dediğinizde aynı başlık düzenindeki
         dosya bir dahaki sefere bu eşlemeyle açılır (Eşleme Kuralları sekmesi).
       </div>
     </>
@@ -349,7 +348,7 @@ export function IceriAlma() {
       </div>
 
       <div className="not">
-        <b>Kural: yazma yok, önce göster.</b> Bu adıma kadar veritabanına hiçbir şey
+        <b>{cev('Kural: yazma yok, önce göster.')}</b> Bu adıma kadar veritabanına hiçbir şey
         yazılmadı. Aktarım tek işlemde çalışır; sorunlu satırlar yazılmaz ve sonuç
         raporunda satır numarasıyla kalır.
       </div>
@@ -357,7 +356,7 @@ export function IceriAlma() {
       <table className="grid" style={{ marginTop: 10 }}>
         <thead>
           <tr>
-            <th style={{ width: 60 }}>Satır</th><th>Özet</th><th>Anahtar</th>
+            <th style={{ width: 60 }}>Satır</th><th>Özet</th><th>{cev('Anahtar')}</th>
             <th style={{ width: 110 }}>Durum</th><th>Not</th>
           </tr>
         </thead>
@@ -369,14 +368,14 @@ export function IceriAlma() {
               <td className="sonuk">{s.anahtar}</td>
               <td>
                 {s.durum === 'yeni' ? <span className="rozet ok">Yeni</span>
-                 : s.durum === 'degisecek' ? <span className="rozet uyari">Değişecek</span>
-                 : <span className="rozet hata">Sorunlu</span>}
+                 : s.durum === 'degisecek' ? <span className="rozet uyari">{cev('Değişecek')}</span>
+                 : <span className="rozet hata">{cev('Sorunlu')}</span>}
               </td>
               <td className="sonuk">{s.not || '—'}</td>
             </tr>
           ))}
           {onizlemeSatirlari.length === 0 && (
-            <tr><td colSpan={5} className="sonuk">Bu süzgeçte satır yok.</td></tr>
+            <tr><td colSpan={5} className="sonuk">{cev('Bu süzgeçte satır yok.')}</td></tr>
           )}
         </tbody>
       </table>
@@ -393,18 +392,18 @@ export function IceriAlma() {
       <h6>Özet — Yükleme #{sonuc.yuklemeNo}</h6>
       <table className="grid" style={{ margin: 10, width: 'calc(100% - 20px)' }}>
         <tbody>
-          <tr><td style={{ width: 240 }}>Eklenen</td><td><b>{sonuc.eklenen.toLocaleString('tr')}</b></td>
+          <tr><td style={{ width: 240 }}>{cev('Eklenen')}</td><td><b>{sonuc.eklenen.toLocaleString('tr')}</b></td>
               <td className="sonuk">yeni kart</td></tr>
-          <tr><td>Güncellenen</td><td><b>{sonuc.guncellenen.toLocaleString('tr')}</b></td>
+          <tr><td>{cev('Güncellenen')}</td><td><b>{sonuc.guncellenen.toLocaleString('tr')}</b></td>
               <td className="sonuk">anahtar eşleşti</td></tr>
-          <tr><td>Atlanan</td><td><b>{sonuc.atlanan.toLocaleString('tr')}</b></td>
+          <tr><td>{cev('Atlanan')}</td><td><b>{sonuc.atlanan.toLocaleString('tr')}</b></td>
               <td className="sonuk">sorunlu satır</td></tr>
-          <tr><td>Toplam satır</td><td><b>{sonuc.toplam.toLocaleString('tr')}</b></td>
+          <tr><td>{cev('Toplam satır')}</td><td><b>{sonuc.toplam.toLocaleString('tr')}</b></td>
               <td className="sonuk">{dosya?.name}</td></tr>
         </tbody>
       </table>
       <div className="not" style={{ margin: '0 10px 10px' }}>
-        <b>İzi kalır.</b> Yükleme kaydı Geçmiş Yüklemeler'de durur; yazılan her kart
+        <b>{cev('İzi kalır.')}</b> Yükleme kaydı Geçmiş Yüklemeler'de durur; yazılan her kart
         işlem günlüğüne <b>#{sonuc.yuklemeNo}</b> yükleme numarasıyla işlendi.
         Geri alma bu sürümde yok — yanlış aktarımı kartlardan düzeltmek gerekir.
       </div>
@@ -416,8 +415,8 @@ export function IceriAlma() {
     <>
       <div className="sayfabas">
         <div className="basrow">
-          <h1>Excel'den İçeri Alma</h1>
-          <span className="yol">Yönetim › Veri Aktarımı › İçeri Alma Sihirbazı</span>
+          <h1>{cev('Excel\'den İçeri Alma')}</h1>
+          <span className="yol">{cev('Yönetim › Veri Aktarımı › İçeri Alma Sihirbazı')}</span>
         </div>
       </div>
 
@@ -459,7 +458,7 @@ export function IceriAlma() {
               )}
               {adim === 4 && (
                 <button className="d bir" style={{ marginLeft: 'auto' }}
-                        onClick={sifirla}>Yeni Aktarım</button>
+                        onClick={sifirla}>{cev('Yeni Aktarım')}</button>
               )}
             </div>
           </div>
@@ -474,8 +473,8 @@ export function IceriAlma() {
           </div>
           <table className="grid" style={{ marginTop: 10 }}>
             <thead>
-              <tr><th>Şablon</th><th style={{ width: 90 }}>Alan</th><th>Zorunlu alanlar</th>
-                  <th>Çakışma anahtarı</th><th style={{ width: 140 }} /></tr>
+              <tr><th>Şablon</th><th style={{ width: 90 }}>Alan</th><th>{cev('Zorunlu alanlar')}</th>
+                  <th>{cev('Çakışma anahtarı')}</th><th style={{ width: 140 }} /></tr>
             </thead>
             <tbody>
               {hedefler.map(h => (
@@ -496,7 +495,7 @@ export function IceriAlma() {
             </tbody>
           </table>
           <div className="not" style={{ marginTop: 10 }}>
-            <b>Fiyat listesi satırı</b> alınırken hedef listeyi sihirbazın ilk adımında
+            <b>{cev('Fiyat listesi satırı')}</b> alınırken hedef listeyi sihirbazın ilk adımında
             seçersiniz; kalem <b>kod</b> ile eşleşir (tek "Kod" sütunu verilirse önce
             stokta, yoksa hizmette aranır). <b>Fatura</b> dosyasında her satır bir
             kalemdir: aynı belge numarasını taşıyan satırlar tek faturaya toplanır,
@@ -510,9 +509,9 @@ export function IceriAlma() {
         <div style={{ padding: 12 }}>
           <table className="grid">
             <thead>
-              <tr><th>Yükleme</th><th>Tarih</th><th>Kullanıcı</th><th>Hedef</th><th>Dosya</th>
-                  <th className="hiza-sag">Eklenen</th><th className="hiza-sag">Güncellenen</th>
-                  <th className="hiza-sag">Atlanan</th><th>Durum</th></tr>
+              <tr><th>{cev('Yükleme')}</th><th>Tarih</th><th>Kullanıcı</th><th>Hedef</th><th>{cev('Dosya')}</th>
+                  <th className="hiza-sag">{cev('Eklenen')}</th><th className="hiza-sag">{cev('Güncellenen')}</th>
+                  <th className="hiza-sag">{cev('Atlanan')}</th><th>Durum</th></tr>
             </thead>
             <tbody>
               {gecmis.map(y => (
@@ -533,7 +532,7 @@ export function IceriAlma() {
                 </tr>
               ))}
               {gecmis.length === 0 && (
-                <tr><td colSpan={9} className="sonuk">Henüz yükleme yok.</td></tr>
+                <tr><td colSpan={9} className="sonuk">{cev('Henüz yükleme yok.')}</td></tr>
               )}
             </tbody>
           </table>
@@ -549,8 +548,8 @@ export function IceriAlma() {
           </div>
           <table className="grid" style={{ marginTop: 10 }}>
             <thead>
-              <tr><th>Kural</th><th>Hedef</th><th>Başlıklar</th>
-                  <th className="hiza-sag">Alan</th><th>Son kullanım</th><th style={{ width: 80 }} /></tr>
+              <tr><th>Kural</th><th>Hedef</th><th>{cev('Başlıklar')}</th>
+                  <th className="hiza-sag">Alan</th><th>{cev('Son kullanım')}</th><th style={{ width: 80 }} /></tr>
             </thead>
             <tbody>
               {kurallar.map(k => (
@@ -574,7 +573,7 @@ export function IceriAlma() {
                 </tr>
               ))}
               {kurallar.length === 0 && (
-                <tr><td colSpan={6} className="sonuk">Kayıtlı kural yok.</td></tr>
+                <tr><td colSpan={6} className="sonuk">{cev('Kayıtlı kural yok.')}</td></tr>
               )}
             </tbody>
           </table>

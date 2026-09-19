@@ -4,6 +4,7 @@ import { api } from '../../api/istemci';
 import { hataMetni, type ListeSatiri } from '../../api/sozlesme';
 import { GenGrid } from '../GenGrid';
 import { GenForm } from '../GenForm';
+import { c } from '../../dil/ceviri';
 
 /**
  * e-BELGE SERI KURALLARI — Delphi "Seri Bilgileri" gridinin karsiligi
@@ -39,10 +40,10 @@ export function SeriKurallari() {
         {/* Ikonlar basligin HEMEN saginda (kullanici) - saga yaslanmis halde
             baslikla arasindaki bosluk ikisini ayri iki ogeye cevirmisti. */}
         <div className="numaralama-bas bitisik">
-          <h6>Seri Kuralları</h6>
+          <h6>{c('Seri Kuralları')}</h6>
           {/* Duzenle ve Sil satir secimi ister; secim yokken pasif, sebebi title'da. */}
           <span className="baslik-eylem">
-            <button className="d bir ikon-dugme" title="Yeni seri kuralı"
+            <button className="d bir ikon-dugme" title={c('Yeni seri kuralı')}
                     onClick={() => setKart('yeni')}>＋</button>
             <button className="d ikon-dugme" disabled={!secili}
                     title={secili ? 'Seçili kuralı düzenle' : 'Önce satır seçin'}

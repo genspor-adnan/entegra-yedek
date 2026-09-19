@@ -1,5 +1,6 @@
 import { para } from '../../bilesenler/bicim';
 import type { GerekceSatiri, IsteyenSatiri } from './ortak';
+import { c } from '../../dil/ceviri';
 
 /** Red oranı bu eşiği aşan isteyen için uyarı çıkar. */
 const RED_ESIGI = 25;
@@ -27,9 +28,9 @@ export function GecmisAnaliz({ gerekceler, isteyenler, gun }: {
             <tr>
               <th>Gerekçe</th>
               <th className="hiza-sag" style={{ width: 90 }}>Adet</th>
-              <th className="hiza-sag" style={{ width: 130 }}>Verilen tutar</th>
-              <th className="hiza-sag" style={{ width: 100 }}>Ort. oran</th>
-              <th className="hiza-sag" style={{ width: 100 }}>Red oranı</th>
+              <th className="hiza-sag" style={{ width: 130 }}>{c('Verilen tutar')}</th>
+              <th className="hiza-sag" style={{ width: 100 }}>{c('Ort. oran')}</th>
+              <th className="hiza-sag" style={{ width: 100 }}>{c('Red oranı')}</th>
             </tr>
           </thead>
           <tbody>
@@ -45,7 +46,7 @@ export function GecmisAnaliz({ gerekceler, isteyenler, gun }: {
               </tr>
             ))}
             {gerekceler.length === 0 && (
-              <tr><td colSpan={5} className="bos">Bu aralıkta karar yok.</td></tr>
+              <tr><td colSpan={5} className="bos">{c('Bu aralıkta karar yok.')}</td></tr>
             )}
           </tbody>
         </table>
@@ -65,8 +66,8 @@ export function GecmisAnaliz({ gerekceler, isteyenler, gun }: {
               <th className="hiza-sag" style={{ width: 90 }}>Talep</th>
               <th className="hiza-sag" style={{ width: 90 }}>Onay</th>
               <th className="hiza-sag" style={{ width: 90 }}>Kısmi</th>
-              <th className="hiza-sag" style={{ width: 90 }}>Red</th>
-              <th className="hiza-sag" style={{ width: 130 }}>Verilen tutar</th>
+              <th className="hiza-sag" style={{ width: 90 }}>{c('Red')}</th>
+              <th className="hiza-sag" style={{ width: 130 }}>{c('Verilen tutar')}</th>
               <th style={{ width: 240 }}>Değerlendirme</th>
             </tr>
           </thead>
@@ -86,13 +87,13 @@ export function GecmisAnaliz({ gerekceler, isteyenler, gun }: {
                       ? <span className="rozet hata">
                           Red oranı %{redOran.toFixed(0)} — limit/eğitim gözden geçirilmeli
                         </span>
-                      : <span className="rozet ok">Olağan</span>}
+                      : <span className="rozet ok">{c('Olağan')}</span>}
                   </td>
                 </tr>
               );
             })}
             {isteyenler.length === 0 && (
-              <tr><td colSpan={7} className="bos">Bu aralıkta talep yok.</td></tr>
+              <tr><td colSpan={7} className="bos">{c('Bu aralıkta talep yok.')}</td></tr>
             )}
           </tbody>
         </table>

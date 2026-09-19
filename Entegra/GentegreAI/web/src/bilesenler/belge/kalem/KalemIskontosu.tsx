@@ -4,6 +4,7 @@ import { type FiyatGirdisi, fiyattanOran, oranKirp as oranKirpCoz }
   from '../../../sayfalar/belgeKarti/kalemFiyat';
 import { type KalemDurumu, type SagMod, sagKutuGorunumu }
   from '../../../sayfalar/belgeKarti/kalemDurumu';
+import { c } from '../../../dil/ceviri';
 
 /** İskonto combosunun hazır oranları: %5'ten %50'ye beşer beşer (kullanıcı). */
 const ISKONTO_ORANLARI = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
@@ -130,7 +131,7 @@ export function KalemIskontosu({ d, iskontoTutari, iskontoTavani, kdvDahil,
           <option value="">%0</option>
           {ISKONTO_ORANLARI.filter(o => o <= iskontoTavani)
             .map(o => <option key={o} value={String(o)}>%{o}</option>)}
-          <option value="ozel">Özel İskonto…</option>
+          <option value="ozel">{c('Özel İskonto…')}</option>
           {/* "Birim Fiyat…" -> "Fiyat Gir…" (kullanıcı): combo bir EYLEM
               listesi - öteki seçenekler oran veriyor, bu seçenek kutuyu fiyat
               girişine çeviriyor. Alan adını tekrarlamak ne yapacağını

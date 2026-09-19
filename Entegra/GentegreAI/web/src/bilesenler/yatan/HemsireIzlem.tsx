@@ -4,6 +4,7 @@ import type { IzlemYaniti } from '../../api/uclar/yatan';
 import { guvenli, mesaj, metinSor } from '../mesaj';
 import { tarihSaat } from '../bicim';
 import { VitalEgrisi } from './VitalEgrisi';
+import { c } from '../../dil/ceviri';
 
 /**
  * HEMŞİRE İZLEM — mockup `Ekranlar/Yatan/hemsire_izlem.html`.
@@ -173,9 +174,7 @@ export function HemsireIzlem({ yenile, onDegisti }: {
               erken uyarı <b>{son.erkenUyari ?? '—'}</b>
             </span>
             {son.erkenUyari != null && son.erkenUyari >= 5 && !son.bildirimZamani && (
-              <button className="d ret" onClick={() => void bildir(son.id)}>
-                🔔 Hekime Bildirildi
-              </button>
+              <button className="d ret" onClick={() => void bildir(son.id)}>{c('🔔 Hekime Bildirildi')}</button>
             )}
           </div>
         )}
@@ -184,14 +183,14 @@ export function HemsireIzlem({ yenile, onDegisti }: {
       {/* HIZLI ÖLÇÜM GİRİŞİ: boş alan yazılmaz - ölçülmeyen parametre sıfır
           değildir ve skora da katılmaz (699). */}
       <div className="izlem-giris">
-        <label>Sistolik<input value={ta1} onChange={e => setTa1(e.target.value)} /></label>
-        <label>Diyastolik<input value={ta2} onChange={e => setTa2(e.target.value)} /></label>
+        <label>{c('Sistolik')}<input value={ta1} onChange={e => setTa1(e.target.value)} /></label>
+        <label>{c('Diyastolik')}<input value={ta2} onChange={e => setTa2(e.target.value)} /></label>
         <label>Nabız<input value={nabiz} onChange={e => setNabiz(e.target.value)} /></label>
-        <label>Ateş °C<input value={ates} onChange={e => setAtes(e.target.value)} /></label>
-        <label>SpO₂ %<input value={spo2} onChange={e => setSpo2(e.target.value)} /></label>
+        <label>{c('Ateş °C')}<input value={ates} onChange={e => setAtes(e.target.value)} /></label>
+        <label>{c('SpO₂ %')}<input value={spo2} onChange={e => setSpo2(e.target.value)} /></label>
         <label>Solunum<input value={solunum} onChange={e => setSolunum(e.target.value)} /></label>
-        <label>Ağrı 0-10<input value={agri} onChange={e => setAgri(e.target.value)} /></label>
-        <label>GKS<input value={gks} onChange={e => setGks(e.target.value)} /></label>
+        <label>{c('Ağrı 0-10')}<input value={agri} onChange={e => setAgri(e.target.value)} /></label>
+        <label>{c('GKS')}<input value={gks} onChange={e => setGks(e.target.value)} /></label>
         <button className="d onay" disabled={kaydediyor} onClick={() => void kaydet()}>
           ✔ Ölçümü Kaydet
         </button>
@@ -215,8 +214,8 @@ export function HemsireIzlem({ yenile, onDegisti }: {
             <VitalEgrisi vitaller={veri.vitaller} />
             <table className="izlem-tablo">
               <thead>
-                <tr><th>Zaman</th><th>TA</th><th>Nabız</th><th>Ateş</th><th>SpO₂</th>
-                    <th>Solunum</th><th>Ağrı</th><th>Erken uyarı</th><th>Ölçen</th></tr>
+                <tr><th>Zaman</th><th>TA</th><th>Nabız</th><th>{c('Ateş')}</th><th>{c('SpO₂')}</th>
+                    <th>Solunum</th><th>{c('Ağrı')}</th><th>{c('Erken uyarı')}</th><th>{c('Ölçen')}</th></tr>
               </thead>
               <tbody>
                 {[...veri.vitaller].reverse().map(v => (
@@ -249,8 +248,8 @@ export function HemsireIzlem({ yenile, onDegisti }: {
         {sekme === 'sivi' && veri && d && (
           <>
             <div className="izlem-skor">
-              <div className="k"><span>ALDIĞI (24 sa)</span><b>{Math.round(d.aldi)} mL</b></div>
-              <div className="k"><span>ÇIKARDIĞI (24 sa)</span><b>{Math.round(d.cikardi)} mL</b></div>
+              <div className="k"><span>{c('ALDIĞI (24 sa)')}</span><b>{Math.round(d.aldi)} mL</b></div>
+              <div className="k"><span>{c('ÇIKARDIĞI (24 sa)')}</span><b>{Math.round(d.cikardi)} mL</b></div>
               <div className={`k ${Math.abs(d.fark) > 500 ? 'uy' : ''}`}>
                 <span>DENGE</span>
                 <b>{d.fark > 0 ? '+' : ''}{Math.round(d.fark)} mL</b>
@@ -268,7 +267,7 @@ export function HemsireIzlem({ yenile, onDegisti }: {
               <thead><tr><th>Zaman</th><th>Yön</th><th>Tür</th><th>Miktar</th><th>Kaydeden</th></tr></thead>
               <tbody>
                 {veri.sivilar.length === 0 && (
-                  <tr><td colSpan={5} className="sonuk">Bu pencerede sıvı kaydı yok.</td></tr>
+                  <tr><td colSpan={5} className="sonuk">{c('Bu pencerede sıvı kaydı yok.')}</td></tr>
                 )}
                 {veri.sivilar.map(s => (
                   <tr key={s.id}>
@@ -293,8 +292,8 @@ export function HemsireIzlem({ yenile, onDegisti }: {
         {sekme === 'risk' && veri && (
           <>
             <table className="izlem-tablo">
-              <thead><tr><th>Tarih</th><th>Ölçek</th><th>Puan</th><th>Risk</th>
-                         <th>Alınan önlem</th><th>Değerlendiren</th></tr></thead>
+              <thead><tr><th>Tarih</th><th>Ölçek</th><th>{c('Puan')}</th><th>{c('Risk')}</th>
+                         <th>{c('Alınan önlem')}</th><th>Değerlendiren</th></tr></thead>
               <tbody>
                 {veri.riskler.length === 0 && (
                   <tr><td colSpan={6} className="sonuk">
@@ -337,7 +336,7 @@ export function HemsireIzlem({ yenile, onDegisti }: {
                          <th style={{ width: 160 }}>Kaydeden</th></tr></thead>
               <tbody>
                 {veri.gozlemler.length === 0 && (
-                  <tr><td colSpan={3} className="sonuk">Gözlem notu yok.</td></tr>
+                  <tr><td colSpan={3} className="sonuk">{c('Gözlem notu yok.')}</td></tr>
                 )}
                 {veri.gozlemler.map(g => (
                   <tr key={g.id}>

@@ -4,6 +4,7 @@ import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { guvenli } from '../bilesenler/mesaj';
 import { Kalinla } from '../bilesenler/kalinMetin';
+import { c } from '../dil/ceviri';
 
 /**
  * YAPAY ZEKA (341/343) — İletişim & AI › Yapay Zeka.
@@ -168,14 +169,14 @@ export function YapayZeka() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Yapay Zeka</h1>
-          <span className="yol">İletişim &amp; AI › Yapay Zeka</span>
+          <span className="yol">{c('İletişim &amp; AI › Yapay Zeka')}</span>
         </div>
       </div>
 
       <div className="msj-arac">
         <button className="d bir" onClick={() => void guvenli(async () => {
           const y = await api.aiSohbetAc(); await listeYukle(); setSecili(y.id);
-        })}>✨ Yeni Sohbet</button>
+        })}>{c('✨ Yeni Sohbet')}</button>
         {/* Mockup ust cubugu: bolumler AYRI PENCERE degil, sag panelde kutu -
             ayni bilgiyi iki yerde tutmamak icin dugme oraya kaydiriyor. */}
         <button className="d" onClick={() => kaydir(fonkRef)}>🧩 İzinli Fonksiyonlar</button>
@@ -192,8 +193,8 @@ export function YapayZeka() {
         {/* ------------------------------------------- SOL: geçmiş + komutlar */}
         <div className="msj-sol">
           <div className="kagrup" style={{ margin: 8 }}>
-            <h6>Son sohbetler</h6>
-            {sohbetler.length === 0 && <div className="not">Sohbet yok.</div>}
+            <h6>{c('Son sohbetler')}</h6>
+            {sohbetler.length === 0 && <div className="not">{c('Sohbet yok.')}</div>}
             {sohbetler.map(s => (
               <div key={Number(s.id)}
                    className={`msj-satir${Number(s.id) === secili ? ' on' : ''}`}
@@ -209,7 +210,7 @@ export function YapayZeka() {
           </div>
 
           <div className="kagrup" style={{ margin: 8 }}>
-            <h6>Hazır komutlar</h6>
+            <h6>{c('Hazır komutlar')}</h6>
             {araclar.map(a => (
               <button key={a.kod} className="ai-komut" title={a.aciklama}
                       disabled={calisiyor}
@@ -221,7 +222,7 @@ export function YapayZeka() {
               </button>
             ))}
             {araclar.length === 0 && (
-              <div className="not">Yetkili olduğunuz fonksiyon yok.</div>
+              <div className="not">{c('Yetkili olduğunuz fonksiyon yok.')}</div>
             )}
           </div>
         </div>
@@ -247,7 +248,7 @@ export function YapayZeka() {
                     <b>{m.rol === 1 ? (kullanici?.ad ?? 'Ben') : '✨ Gentegre Yapay Zeka'}</b>
                     <span className="sonuk">· {saat(m.tarih)}</span>
                     {log && (
-                      <span className="ai-cip" title="İzinli fonksiyon çağrısı">
+                      <span className="ai-cip" title={c('İzinli fonksiyon çağrısı')}>
                         🧩 {String(log.aracKod)} · {Number(log.sureMs)} ms ·{' '}
                         {Number(log.kayitSayisi)} kayıt
                       </span>
@@ -311,7 +312,7 @@ export function YapayZeka() {
                             await api.aiTaslak(t.id, true);
                             if (secili !== null) await sohbetYukle(secili);
                             await listeYukle();
-                          })}>✖ İptal</button>
+                          })}>{c('✖ İptal')}</button>
                         </div>
                       )}
                       {t.durum === 2 && t.hedefId && (
@@ -341,25 +342,25 @@ export function YapayZeka() {
                           📊 Excel'e aktar
                         </span>
                       )}
-                      <span className="rz bag" title="Aynı fonksiyonu yeniden çalıştır"
+                      <span className="rz bag" title={c('Aynı fonksiyonu yeniden çalıştır')}
                             onClick={() => void sor(String(log.aracKod))}>↻ Yeniden üret</span>
                     </div>
                   )}
 
                   {m.rol === 2 && (
                     <div className="ai-alt">
-                      <span className={m.geriBildirim === 1 ? 'on' : ''} title="Yararlı"
+                      <span className={m.geriBildirim === 1 ? 'on' : ''} title={c('Yararlı')}
                             onClick={() => void guvenli(async () => {
                               await api.aiGeriBildirim(m.id, m.geriBildirim === 1 ? 0 : 1);
                               if (secili !== null) await sohbetYukle(secili);
                             })}>👍</span>
-                      <span className={m.geriBildirim === 2 ? 'on' : ''} title="Yararsız"
+                      <span className={m.geriBildirim === 2 ? 'on' : ''} title={c('Yararsız')}
                             onClick={() => void guvenli(async () => {
                               await api.aiGeriBildirim(m.id, m.geriBildirim === 2 ? 0 : 2);
                               if (secili !== null) await sohbetYukle(secili);
                             })}>👎</span>
                       <span title="Kopyala"
-                            onClick={() => void navigator.clipboard?.writeText(m.metin)}>⧉ Kopyala</span>
+                            onClick={() => void navigator.clipboard?.writeText(m.metin)}>{c('⧉ Kopyala')}</span>
                       {m.token > 0 && <span className="sonuk">{m.token} token</span>}
                     </div>
                   )}
@@ -377,7 +378,7 @@ export function YapayZeka() {
           <div className="msj-yazma">
             {/* Mockup yazma serici: fonksiyon sec · ekran baglami · (pasifler) */}
             <div className="msj-atac">
-              <span title="Fonksiyon seç" onClick={() => setFonksiyonMenu(a => !a)}>🧩</span>
+              <span title={c('Fonksiyon seç')} onClick={() => setFonksiyonMenu(a => !a)}>🧩</span>
               {fonksiyonMenu && (
                 <div className="msj-atac-menu" onMouseLeave={() => setFonksiyonMenu(false)}>
                   {araclar.map(a => (
@@ -388,14 +389,14 @@ export function YapayZeka() {
                         : undefined);
                     }}>{KOMUT_IKON[a.kod] ?? '🧩'} {a.ad}</div>
                   ))}
-                  {araclar.length === 0 && <div className="pasif">Yetkili fonksiyon yok</div>}
+                  {araclar.length === 0 && <div className="pasif">{c('Yetkili fonksiyon yok')}</div>}
                 </div>
               )}
             </div>
             <span className={`ai-baglam${baglamEkli ? ' on' : ''}`}
                   title="Ekran bağlamını (ekran · kullanıcı · şube) soruya ekle"
-                  onClick={() => setBaglamEkli(b => !b)}>📎 Bağlam</span>
-            <input placeholder="Sor: “bu ay tahsilatı geciken cariler kim?”" value={soru}
+                  onClick={() => setBaglamEkli(b => !b)}>{c('📎 Bağlam')}</span>
+            <input placeholder={c('Sor: “bu ay tahsilatı geciken cariler kim?”')} value={soru}
                    disabled={calisiyor}
                    onChange={e => setSoru(e.target.value)}
                    onKeyDown={e => { if (e.key === 'Enter') void sor() }} />
@@ -406,44 +407,43 @@ export function YapayZeka() {
           <div className="not ai-kural">
             Yazan işlem yapılmaz — asistan yalnız <b>taslak</b> üretir, onayı sen
             verirsin. Veri doğrudan okunmaz: her çağrı <b>izinli fonksiyon</b>
-            üzerinden ve senin yetkinle çalışır, çağrının izi <b>AI log</b>'a düşer.
+            üzerinden ve senin yetkinle çalışır, çağrının izi <b>{c('AI log')}</b>'a düşer.
           </div>
         </div>
 
         {/* -------------------------------------------------- SAĞ: bağlam/log */}
         <div className="msj-sag">
           <div className="kagrup">
-            <h6>Bağlam</h6>
-            <div className="msj-kv"><span>Açık ekran</span><b>Yapay Zeka</b></div>
+            <h6>{c('Bağlam')}</h6>
+            <div className="msj-kv"><span>{c('Açık ekran')}</span><b>Yapay Zeka</b></div>
             <div className="msj-kv"><span>Kullanıcı</span><b>{kullanici?.ad ?? ''}</b></div>
             <div className="msj-kv"><span>Şube</span><b>{kullanici?.subeler?.find(x => x.id === kullanici?.subeId)?.ad ?? ''}</b></div>
             <div className="msj-kv"><span>Model</span><b>tanımlı değil</b></div>
           </div>
 
           <div className="kagrup" ref={fonkRef}>
-            <h6>İzinli fonksiyonlar</h6>
+            <h6>{c('İzinli fonksiyonlar')}</h6>
             {araclar.map(a => (
               <div key={a.kod} className="msj-kv">
                 <span>{a.ad}</span>
                 <b>{a.yazar === 1 ? 'taslak üretir' : 'okuma'}</b>
               </div>
             ))}
-            <div className="not">
-              Kayıt güncelleme / silme <b>kapalı</b> — hiçbir rolde açılmıyor.
+            <div className="not">{c('Kayıt güncelleme / silme')}<b>kapalı</b> — hiçbir rolde açılmıyor.
             </div>
           </div>
 
           <div className="kagrup" ref={guvenlikRef}>
-            <h6>Güvenlik kuralları</h6>
+            <h6>{c('Güvenlik kuralları')}</h6>
             <div className="msj-kv"><span>Okuma</span><b>izinli fonksiyon + yetki</b></div>
-            <div className="msj-kv"><span>Kayıt oluşturma</span><b>yalnız onaylı taslak</b></div>
-            <div className="msj-kv"><span>Kayıt güncelleme / silme</span><b>kapalı</b></div>
-            <div className="msj-kv"><span>Denetim</span><b>her çağrı AI log'a</b></div>
+            <div className="msj-kv"><span>{c('Kayıt oluşturma')}</span><b>yalnız onaylı taslak</b></div>
+            <div className="msj-kv"><span>{c('Kayıt güncelleme / silme')}</span><b>kapalı</b></div>
+            <div className="msj-kv"><span>{c('Denetim')}</span><b>her çağrı AI log'a</b></div>
           </div>
 
           <div className="kagrup" ref={kullanimRef}>
-            <h6>Kullanım / maliyet</h6>
-            <div className="msj-kv"><span>Bu sohbet</span><b>{sayac.token} token</b></div>
+            <h6>{c('Kullanım / maliyet')}</h6>
+            <div className="msj-kv"><span>{c('Bu sohbet')}</span><b>{sayac.token} token</b></div>
             <div className="msj-kv"><span>Model</span><b>tanımlı değil</b></div>
             <div className="not">
               Model bağlanınca token ve tahmini maliyet buradan izlenecek;
@@ -452,17 +452,17 @@ export function YapayZeka() {
           </div>
 
           <div className="kagrup">
-            <h6>Bu sohbette</h6>
-            <div className="msj-kv"><span>Fonksiyon çağrısı</span><b>{sayac.fonksiyon}</b></div>
-            <div className="msj-kv"><span>Okunan kayıt</span><b>{sayac.kayit}</b></div>
-            <div className="msj-kv"><span>Üretilen taslak</span><b>{sayac.taslak}</b></div>
-            <div className="msj-kv"><span>Onaylanan</span><b>{sayac.onayli}</b></div>
-            <div className="msj-kv"><span>Token</span><b>{sayac.token}</b></div>
+            <h6>{c('Bu sohbette')}</h6>
+            <div className="msj-kv"><span>{c('Fonksiyon çağrısı')}</span><b>{sayac.fonksiyon}</b></div>
+            <div className="msj-kv"><span>{c('Okunan kayıt')}</span><b>{sayac.kayit}</b></div>
+            <div className="msj-kv"><span>{c('Üretilen taslak')}</span><b>{sayac.taslak}</b></div>
+            <div className="msj-kv"><span>{c('Onaylanan')}</span><b>{sayac.onayli}</b></div>
+            <div className="msj-kv"><span>{c('Token')}</span><b>{sayac.token}</b></div>
           </div>
 
           <div className="kagrup" ref={logRef}>
-            <h6>AI log (son)</h6>
-            {gunluk.length === 0 && <div className="not">Henüz çağrı yok.</div>}
+            <h6>{c('AI log (son)')}</h6>
+            {gunluk.length === 0 && <div className="not">{c('Henüz çağrı yok.')}</div>}
             {gunluk.map(l => (
               <div key={Number(l.id)} className="msj-kv">
                 <span>{saat(String(l.tarih))}</span>

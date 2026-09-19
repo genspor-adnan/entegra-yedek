@@ -101,10 +101,10 @@ export function alanCizici(b: AlanCizimBaglami) {
             readOnly
             disabled
             value={bagliTarafAdi ?? (a.kodlar && a.kodlar[String(deger[a.ad] ?? '')]) ?? ''}
-            placeholder="Bağlanmadı"
+            placeholder={c('Bağlanmadı')}
           />
           {!salt && deger[a.ad] && (
-            <button type="button" className="mini" title="Boşalt"
+            <button type="button" className="mini" title={c('Boşalt')}
               onClick={() => { setDeger(d => ({ ...d, [a.ad]: '' })); setBagliTarafAdi(null) }}>
               ×
             </button>
@@ -361,7 +361,7 @@ export function alanCizici(b: AlanCizimBaglami) {
         {/* Etiket kod_liste alanlarinda TIKLANABILIR (544): listeyi duzenler.
             Ayar ekranlarinda (AyarAlani, BelgeBaslik) ayni desen. */}
         {listeDuzenle && a.kodListesi && !salt && a.yazilabilir ? (
-          <span className="etiket etiket-liste" title="Listeyi düzenle"
+          <span className="etiket etiket-liste" title={c('Listeyi düzenle')}
                 onClick={e => { e.preventDefault(); listeDuzenle(a) }}>
             {c(a.baslik)}{a.zorunlu && <b className="zorunlu"> *</b>}
           </span>

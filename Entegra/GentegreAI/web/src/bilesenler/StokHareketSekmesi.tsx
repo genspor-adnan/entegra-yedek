@@ -5,6 +5,7 @@ import { type StokHareketYaniti, hataMetni } from '../api/sozlesme';
 import { say4, gunMetni, bugunIso } from './bicim';
 import { csvMetni, CSV_TIPI } from './csv';
 import { dosyaIndir } from './indir';
+import { c } from '../dil/ceviri';
 
 
 /** Belge türünden liste/kart yolu - hareket satırına çift tıklayınca oraya gidilir. */
@@ -72,7 +73,7 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
       {hata && <div className="hata-kutusu">{hata}</div>}
 
       <div className="kagrup">
-        <h6>Son Stok Hareketleri</h6>
+        <h6>{c('Son Stok Hareketleri')}</h6>
 
         <div className="hareket-serit">
           <label className="satir-ici">
@@ -99,7 +100,7 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
                 <th style={{ width: 90 }}>Tarih</th>
                 <th style={{ width: 200 }}>Belge</th>
                 <th style={{ width: 70 }}>Tür</th>
-                <th>Depo / Cari</th>
+                <th>{c('Depo / Cari')}</th>
                 <th className="hiza-sag" style={{ width: 85 }}>Giriş</th>
                 <th className="hiza-sag" style={{ width: 85 }}>Çıkış</th>
                 <th className="hiza-sag" style={{ width: 90 }}>Kalan</th>
@@ -107,14 +108,14 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
             </thead>
             <tbody>
               <tr className="devir-satiri">
-                <td colSpan={6}><i>Devir (aralıktan önce)</i></td>
+                <td colSpan={6}><i>{c('Devir (aralıktan önce)')}</i></td>
                 <td className="hiza-sag"><b>{say4.format(Number(veri?.devir ?? 0))}</b></td>
               </tr>
               {(veri?.satirlar ?? []).map((s, i) => (
                 // Cift tik: hareketi ureten belgeyi ac (ekstre satirlarindaki kural).
                 <tr key={`${s.belgeId}:${i}`}
                     onDoubleClick={() => { const y = BELGE_YOLU[s.belgeTur]; if (y) git(`${y}/${s.belgeId}`) }}
-                    title="Çift tıkla: belgeyi aç">
+                    title={c('Çift tıkla: belgeyi aç')}>
                   <td>{gunMetni(s.tarih)}</td>
                   <td>{s.belgeTurAdi} <b>{s.belgeNo}</b></td>
                   <td>
@@ -130,7 +131,7 @@ export function StokHareketSekmesi({ stokId }: { stokId: number }) {
                 </tr>
               ))}
               {(veri?.satirlar ?? []).length === 0 && (
-                <tr><td colSpan={7} className="bos">Bu aralıkta hareket yok.</td></tr>
+                <tr><td colSpan={7} className="bos">{c('Bu aralıkta hareket yok.')}</td></tr>
               )}
             </tbody>
             <tfoot>

@@ -8,6 +8,7 @@ import { tarihYaz } from '../bilesenler/bicim';
 import { ameliyathaneAksiyonu } from './liste/ameliyathaneAksiyonlari';
 import { useAmeliyatAcilModallari } from './liste/useAmeliyatAcilModallari';
 import { AmeliyatAcilModallari } from './liste/AmeliyatAcilModallari';
+import { c } from '../dil/ceviri';
 
 /**
  * AMELİYATHANE — ODA × SAAT ÇİZELGESİ (715/719).
@@ -124,7 +125,7 @@ export function AmeliyatCizelge() {
   return (
     <>
       <div className="sayfabas"><div className="basrow">
-        <h1>Masa Çizelgesi</h1><span className="yol">Ameliyathane › Masa Çizelgesi</span>
+        <h1>Masa Çizelgesi</h1><span className="yol">{c('Ameliyathane › Masa Çizelgesi')}</span>
         <div className="sag" style={{ display: 'flex', gap: 6 }}>
           <button className="d" onClick={() => git('/ameliyat')}>📋 Ameliyat Planı</button>
           <button className="d" onClick={() => git('/ameliyat-talep')}>
@@ -137,14 +138,14 @@ export function AmeliyatCizelge() {
         <div className="cp-arac">
           <button className="d" onClick={() => setGun(g => { const d = new Date(g); d.setDate(d.getDate() - 1); return d })}>‹ Önceki gün</button>
           <button className="d" onClick={() => setGun(new Date())}>Bugün</button>
-          <button className="d" onClick={() => setGun(g => { const d = new Date(g); d.setDate(d.getDate() + 1); return d })}>Sonraki gün ›</button>
+          <button className="d" onClick={() => setGun(g => { const d = new Date(g); d.setDate(d.getDate() + 1); return d })}>{c('Sonraki gün ›')}</button>
           <b>{tarihYaz(iso(gun))}</b>
           <input type="date" value={iso(gun)} onChange={e => e.target.value && setGun(new Date(e.target.value + 'T00:00:00'))} />
           <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 6, flexWrap: 'wrap' }}>
             <input value={ara} placeholder="🔍 Hasta, hekim ya da işlem…" style={{ width: 220 }}
                    onChange={e => setAra(e.target.value)} />
             <select value={salonId ?? ''} onChange={e => setSalonId(e.target.value ? Number(e.target.value) : null)}>
-              <option value="">Salon: Tümü</option>
+              <option value="">{c('Salon: Tümü')}</option>
               {veri?.salonlar.map(s => <option key={s.id} value={s.id}>{s.kod} · {s.ad}</option>)}
             </select>
             <button className="d" onClick={() => setYenile(t => t + 1)}>⟳ Tazele</button>
@@ -155,11 +156,11 @@ export function AmeliyatCizelge() {
           <div className="cz-ozet">
             <div className="kutu"><b>Planlanan</b><span>{o.planlanan}</span></div>
             <div className="kutu ok"><b>Tamamlanan</b><span>{o.tamamlanan}</span></div>
-            <div className="kutu"><b>Süren</b><span>{o.suren}</span></div>
-            <div className="kutu sari"><b>Gecikmeli</b><span>{o.gecikmeli}<small>geç başlayan (15 dk+)</small></span></div>
-            <div className="kutu"><b>Plan dışı</b><span>{o.planDisi}<small>acil eklenen</small></span></div>
-            <div className="kutu kir"><b>Bekleyen talep</b><span>{o.bekleyenTalep}<small>planlanmamış</small></span></div>
-            <div className="kutu"><b>Masa kullanımı</b><span>%{o.kullanimYuzde}<small>pencereye göre</small></span></div>
+            <div className="kutu"><b>{c('Süren')}</b><span>{o.suren}</span></div>
+            <div className="kutu sari"><b>{c('Gecikmeli')}</b><span>{o.gecikmeli}<small>geç başlayan (15 dk+)</small></span></div>
+            <div className="kutu"><b>{c('Plan dışı')}</b><span>{o.planDisi}<small>acil eklenen</small></span></div>
+            <div className="kutu kir"><b>{c('Bekleyen talep')}</b><span>{o.bekleyenTalep}<small>planlanmamış</small></span></div>
+            <div className="kutu"><b>{c('Masa kullanımı')}</b><span>%{o.kullanimYuzde}<small>pencereye göre</small></span></div>
           </div>
         )}
 
@@ -168,7 +169,7 @@ export function AmeliyatCizelge() {
         <div className="cz-ikili">
           <div className="cz-tablo">
             <div className="cz-bas">
-              <div className="cz-basoda">Masa / Salon</div>
+              <div className="cz-basoda">{c('Masa / Salon')}</div>
               <div className="cz-serit">
                 {saatler.map((s, i) => (
                   <div key={i} className="cz-saat" style={{ left: `${i / saatler.length * 100}%`, width: `${100 / saatler.length}%` }}>
@@ -230,9 +231,9 @@ export function AmeliyatCizelge() {
                 <div><span className="sonuk">Cerrah</span> · {secili.cerrahAd || '—'}</div>
                 <div><span className="sonuk">Durum</span> · {DURUM_AD[secili.durum] ?? secili.durum}
                   {secili.planDisi === 1 && <span className="rozet mavi" style={{ marginLeft: 4 }}>plan dışı</span>}</div>
-                <div><span className="sonuk">Plan</span> · {saatYaz(secili.planBaslangic)}
+                <div><span className="sonuk">{c('Plan')}</span> · {saatYaz(secili.planBaslangic)}
                   {secili.planSureDk ? ` · ${secili.planSureDk} dk` : ''}</div>
-                <div><span className="sonuk">Gerçek</span> · {saatYaz(secili.salonaAlma)}
+                <div><span className="sonuk">{c('Gerçek')}</span> · {saatYaz(secili.salonaAlma)}
                   {secili.salonaAlma
                     ? (secili.salondanCikis ?? secili.bitisZamani)
                         ? `–${saatYaz(secili.salondanCikis ?? secili.bitisZamani)}`
@@ -244,7 +245,7 @@ export function AmeliyatCizelge() {
                 {/* CERRAHİ SÜRE MASA SÜRESİNDEN AYRI: biri cerrahın işi, öteki
                     masanın işgali - aynı sayıya indirgenirse ikisi de kaybolur. */}
                 {secili.kesiZamani && (
-                  <div><span className="sonuk">Cerrahi</span> · {saatYaz(secili.kesiZamani)}'den
+                  <div><span className="sonuk">{c('Cerrahi')}</span> · {saatYaz(secili.kesiZamani)}'den
                     {' '}{Math.round(dk(secili.kesiZamani, secili.bitisZamani ?? new Date().toISOString()))} dk</div>)}
                 {secili.timeoutEksik > 0 && secili.durum < 2 && (
                   <div className="rozet hata">Time-out eksik: {secili.timeoutEksik} zorunlu madde</div>)}
@@ -252,14 +253,14 @@ export function AmeliyatCizelge() {
                   <div className="sonuk">İptal: {secili.iptalNeden}</div>)}
 
                 <div style={{ display: 'flex', gap: 4, marginTop: 8, flexWrap: 'wrap' }}>
-                  <button className="d" onClick={() => git(`/ameliyat/${secili.id}?geri=%2Fameliyat-cizelge`)}>✎ Kart</button>
-                  <button className="d" onClick={() => void aksiyon('ameliyat.kontrol', secili)}>☑ Kontrol Listesi</button>
-                  <button className="d" onClick={() => void aksiyon('ameliyat.fatura', secili)}>🧾 Fatura & Stok</button>
+                  <button className="d" onClick={() => git(`/ameliyat/${secili.id}?geri=%2Fameliyat-cizelge`)}>{c('✎ Kart')}</button>
+                  <button className="d" onClick={() => void aksiyon('ameliyat.kontrol', secili)}>{c('☑ Kontrol Listesi')}</button>
+                  <button className="d" onClick={() => void aksiyon('ameliyat.fatura', secili)}>{c('🧾 Fatura & Stok')}</button>
                   {yazar && secili.durum < 4 && <>
-                    {!secili.salonaAlma && <button className="d" onClick={() => void aksiyon('ameliyat.salona-al', secili)}>🚪 Salona Alındı</button>}
-                    {secili.salonaAlma && !secili.kesiZamani && <button className="d bir" onClick={() => void aksiyon('ameliyat.kesi', secili)}>🔪 Kesi</button>}
-                    {secili.kesiZamani && !secili.bitisZamani && <button className="d onay" onClick={() => void aksiyon('ameliyat.bitis', secili)}>✅ Bitti</button>}
-                    {secili.bitisZamani && !secili.salondanCikis && <button className="d" onClick={() => void aksiyon('ameliyat.cikis', secili)}>🚪 Salondan Çıktı</button>}
+                    {!secili.salonaAlma && <button className="d" onClick={() => void aksiyon('ameliyat.salona-al', secili)}>{c('🚪 Salona Alındı')}</button>}
+                    {secili.salonaAlma && !secili.kesiZamani && <button className="d bir" onClick={() => void aksiyon('ameliyat.kesi', secili)}>{c('🔪 Kesi')}</button>}
+                    {secili.kesiZamani && !secili.bitisZamani && <button className="d onay" onClick={() => void aksiyon('ameliyat.bitis', secili)}>{c('✅ Bitti')}</button>}
+                    {secili.bitisZamani && !secili.salondanCikis && <button className="d" onClick={() => void aksiyon('ameliyat.cikis', secili)}>{c('🚪 Salondan Çıktı')}</button>}
                   </>}
                 </div>
               </div>
@@ -274,12 +275,12 @@ export function AmeliyatCizelge() {
             <div className="ds-gb">Okuma</div>
             <div className="ds-ic">
               <div className="cz-lej">
-                <span><i className="bekliyor" />Bekliyor</span>
+                <span><i className="bekliyor" />{c('Bekliyor')}</span>
                 <span><i className="hazirlik" />Hazırlık</span>
                 <span><i className="suruyor" />Sürüyor</span>
-                <span><i className="kapanis" />Kapanışta</span>
-                <span><i className="bitti" />Bitti</span>
-                <span><i className="iptal" />İptal</span>
+                <span><i className="kapanis" />{c('Kapanışta')}</span>
+                <span><i className="bitti" />{c('Bitti')}</span>
+                <span><i className="iptal" />{c('İptal')}</span>
                 <span><i className="gec" />15 dk+ geç başladı</span>
               </div>
               <div className="sonuk" style={{ marginTop: 6 }}>

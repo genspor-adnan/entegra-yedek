@@ -886,14 +886,14 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         onCipSecildi={i => { setCipIndeks(i); setEkstre(null) }}
         cipSonu={
           <>
-            <button className="on" disabled title="Ekstre gösteriliyor">
+            <button className="on" disabled title={c('Ekstre gösteriliyor')}>
               📄 {ekstre.ad}
             </button>
             {/* EKSTREDEN CIKIS (kullanici): ad dugmesi pasif oldugu icin
                 ekstreyi kapatmanin tek yolu bir cipe basmakti - filtreyi de
                 degistiriyordu. Bu dugme YALNIZ ekstreyi kapatir, secili cip
                 oldugu gibi kalir. */}
-            <button className="kapat" title="Ekstreyi kapat"
+            <button className="kapat" title={c('Ekstreyi kapat')}
                     onClick={() => setEkstre(null)}>×</button>
           </>
         }
@@ -997,7 +997,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         //   secim iki yerde durursa hangisinin gecerli oldugu belirsizlesir.
         <>
           <button className={kategoriPaneli ? 'on' : ''}
-                  title="Kategori ağacını aç / kapat"
+                  title={c('Kategori ağacını aç / kapat')}
                   onClick={() => setKategoriPaneli(a => !a)}>
             🌳 Kategoriler
           </button>
@@ -1016,18 +1016,18 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
           <select value={randevuEkran.bolum} title="Bölüm"
                   onChange={e => { randevuEkran.setBolum(e.target.value ? Number(e.target.value) : '');
                                    randevuEkran.setHekim('') }}>
-            <option value="">Tüm Bölümler</option>
+            <option value="">{c('Tüm Bölümler')}</option>
             {randevuEkran.agac.map(d => (
               <option key={d.departmanId} value={d.departmanId}>{d.ad}</option>
             ))}
           </select>
           <select value={randevuEkran.hekim} title="Hekim"
                   onChange={e => randevuEkran.setHekim(e.target.value ? Number(e.target.value) : '')}>
-            <option value="">Tüm Hekimler</option>
+            <option value="">{c('Tüm Hekimler')}</option>
             {randevuEkran.hekimSecenekleri.map(h => <option key={h.id} value={h.id}>{h.ad}</option>)}
           </select>
           {(randevuEkran.bolum !== '' || randevuEkran.hekim !== '') && (
-            <button type="button" className="kapat" title="Bölüm/hekim filtresini kaldır"
+            <button type="button" className="kapat" title={c('Bölüm/hekim filtresini kaldır')}
                     onClick={() => { randevuEkran.setBolum(''); randevuEkran.setHekim('') }}>×</button>
           )}
         </>
@@ -1344,7 +1344,7 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
         baslik={`e-Belge Mesaj Geçmişi — ${eBelgeMesajlari.belgeNo}`}
         onKapat={() => setEBelgeMesajlari(null)}
         alt={<button className="d kapat-dugmesi"
-                     onClick={() => setEBelgeMesajlari(null)}>Kapat</button>}
+                     onClick={() => setEBelgeMesajlari(null)}>{c('Kapat')}</button>}
       >
         <div className="kagrup">
           {eBelgeMesajlari.satirlar.length === 0 ? (

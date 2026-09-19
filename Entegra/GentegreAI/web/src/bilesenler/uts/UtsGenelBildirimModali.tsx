@@ -4,6 +4,7 @@ import { api } from '../../api/istemci';
 import type { UtsMesaji } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { GenLookup } from '../GenLookup';
+import { c } from '../../dil/ceviri';
 
 /**
  * ÜTS ÜRETİM / İTHALAT / KAYIP-HEK / İMHA bildirimleri (229) - dördü aynı
@@ -98,7 +99,7 @@ export function UtsGenelBildirimModali({ tur, onKapat, onTamam }: {
           {gonderiyor ? 'Gönderiliyor…' : 'ÜTS’ye Bildir'}
         </button>
         <button className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
-                onClick={onKapat}>Kapat</button>
+                onClick={onKapat}>{c('Kapat')}</button>
       </>}>
       <div className="alan-izgara tek-sutun" style={{ padding: 10 }}>
         {/* Ürün bloğu: stok araması UNO'yu doldurur. */}
@@ -114,23 +115,23 @@ export function UtsGenelBildirimModali({ tur, onKapat, onTamam }: {
           onSec={x => { if (x?.urunNo) setUno(String(x.urunNo)) }}
         />
         <label className="alan">
-          <span className="etiket zorunlu-isaret">Ürün No (UNO)</span>
+          <span className="etiket zorunlu-isaret">{c('Ürün No (UNO)')}</span>
           <input value={uno} maxLength={23} disabled={gonderiyor}
                  onChange={e => setUno(e.target.value)} />
         </label>
         <label className="alan">
-          <span className="etiket">Seri No (SNO — tekil takip)</span>
+          <span className="etiket">{c('Seri No (SNO — tekil takip)')}</span>
           <input value={seriNo} maxLength={20} disabled={gonderiyor}
                  onChange={e => setSeriNo(e.target.value)} />
         </label>
         <label className="alan">
-          <span className="etiket">Lot No (LNO — lot takip)</span>
+          <span className="etiket">{c('Lot No (LNO — lot takip)')}</span>
           <input value={lotNo} maxLength={20} disabled={gonderiyor}
                  onChange={e => setLotNo(e.target.value)} />
         </label>
         {!tekil && (
           <label className="alan">
-            <span className="etiket">Adet (lot takipte zorunlu)</span>
+            <span className="etiket">{c('Adet (lot takipte zorunlu)')}</span>
             <input className="hiza-sag" value={adet} disabled={gonderiyor}
                    onChange={e => setAdet(e.target.value)} />
           </label>
@@ -139,12 +140,12 @@ export function UtsGenelBildirimModali({ tur, onKapat, onTamam }: {
         {(tur === 'uretim' || tur === 'ithalat') && (
           <>
             <label className="alan">
-              <span className="etiket zorunlu-isaret">Üretim Tarihi (ÜRT)</span>
+              <span className="etiket zorunlu-isaret">{c('Üretim Tarihi (ÜRT)')}</span>
               <input type="date" value={urt} disabled={gonderiyor}
                      onChange={e => setUrt(e.target.value)} />
             </label>
             <label className="alan">
-              <span className="etiket">Son Kullanma (SKT)</span>
+              <span className="etiket">{c('Son Kullanma (SKT)')}</span>
               <input type="date" value={skt} disabled={gonderiyor}
                      onChange={e => setSkt(e.target.value)} />
             </label>
@@ -154,19 +155,19 @@ export function UtsGenelBildirimModali({ tur, onKapat, onTamam }: {
         {tur === 'ithalat' && (
           <>
             <label className="alan">
-              <span className="etiket zorunlu-isaret">İthal Edildiği Ülke (IEU)</span>
+              <span className="etiket zorunlu-isaret">{c('İthal Edildiği Ülke (IEU)')}</span>
               <input value={ithalUlke} maxLength={3} disabled={gonderiyor}
-                     placeholder="ÜTS ülke kodu (örn. 276 Almanya)"
+                     placeholder={c('ÜTS ülke kodu (örn. 276 Almanya)')}
                      onChange={e => setIthalUlke(e.target.value)} />
             </label>
             <label className="alan">
-              <span className="etiket zorunlu-isaret">Menşei Ülke (MEU)</span>
+              <span className="etiket zorunlu-isaret">{c('Menşei Ülke (MEU)')}</span>
               <input value={menseiUlke} maxLength={3} disabled={gonderiyor}
-                     placeholder="Türkiye 792"
+                     placeholder={c('Türkiye 792')}
                      onChange={e => setMenseiUlke(e.target.value)} />
             </label>
             <label className="alan">
-              <span className="etiket">Gümrük Beyanname No</span>
+              <span className="etiket">{c('Gümrük Beyanname No')}</span>
               <input value={gumrukBeyanname} maxLength={16} disabled={gonderiyor}
                      onChange={e => setGumrukBeyanname(e.target.value)} />
             </label>
@@ -175,7 +176,7 @@ export function UtsGenelBildirimModali({ tur, onKapat, onTamam }: {
 
         {tur === 'hek' && (
           <label className="alan">
-            <span className="etiket zorunlu-isaret">Türü</span>
+            <span className="etiket zorunlu-isaret">{c('Türü')}</span>
             <select value={hekTuru} disabled={gonderiyor}
                     onChange={e => setHekTuru(e.target.value)}>
               {HEK_TURLERI.map(([k, a]) => <option key={k} value={k}>{a}</option>)}
@@ -193,7 +194,7 @@ export function UtsGenelBildirimModali({ tur, onKapat, onTamam }: {
               </select>
             </label>
             <label className="alan">
-              <span className="etiket zorunlu-isaret">İmha/Bertaraf Belge No</span>
+              <span className="etiket zorunlu-isaret">{c('İmha/Bertaraf Belge No')}</span>
               <input value={belgeNo} maxLength={50} disabled={gonderiyor}
                      onChange={e => setBelgeNo(e.target.value)} />
             </label>
@@ -203,7 +204,7 @@ export function UtsGenelBildirimModali({ tur, onKapat, onTamam }: {
         {((tur === 'hek' && hekTuru === 'DIGER')
           || (tur === 'imha' && gerekce === 'DIGER')) && (
           <label className="alan">
-            <span className="etiket zorunlu-isaret">Diğer Açıklaması</span>
+            <span className="etiket zorunlu-isaret">{c('Diğer Açıklaması')}</span>
             <input value={digerAciklama} maxLength={50} disabled={gonderiyor}
                    onChange={e => setDigerAciklama(e.target.value)} />
           </label>

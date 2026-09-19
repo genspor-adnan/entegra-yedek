@@ -5,6 +5,7 @@ import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { code128Desen } from '../bilesenler/barkod128';
 import { NUMUNE, TUP } from '../bilesenler/labKodlari';
+import { c as cev } from '../dil/ceviri';
 
 /**
  * TÜP BARKOD ETİKETİ (444, mockup: Ekranlar/Lab/lab_istem_numune_kabul.html).
@@ -103,7 +104,7 @@ export function LabEtiket() {
     <div className="etiket-sayfa">
       <div className="cikti-arac">
         <button className="d bir" onClick={() => window.print()}>🏷 Etiketleri Bas</button>
-        <span className="not">Kopya:</span>
+        <span className="not">{cev('Kopya:')}</span>
         {[1, 2, 3].map(n => (
           <button key={n} className={`d${n === kopya ? ' bir' : ''}`}
                   onClick={() => setKopya(n)}>{n}×</button>
@@ -112,7 +113,7 @@ export function LabEtiket() {
           {veri.etiketler.length} tüp · {basilacak.length} etiket
         </span>
         <span style={{ marginLeft: 'auto' }} />
-        <button className="d" onClick={() => git(-1)}>✖ Kapat</button>
+        <button className="d" onClick={() => git(-1)}>{cev('✖ Kapat')}</button>
       </div>
 
       {/* HASTA HAZIRLIĞI etikete basılmaz (yer yok) ama bankoda görünür:

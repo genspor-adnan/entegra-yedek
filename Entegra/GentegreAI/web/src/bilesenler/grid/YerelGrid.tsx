@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { GridMenu, type MenuOgesi } from './GridMenu';
 import { dosyaIndirUrl } from '../indir';
+import { c as cev } from '../../dil/ceviri';
 
 /**
  * YEREL GRID: elde hazır bir kayıt dizisini GenGrid diliyle gösterir -
@@ -94,7 +95,7 @@ export function YerelGrid({ kayitlar, kolonOncelik = [], adSozlugu = {},
                       stopPropagation SART: tik window'a kabarirsa GridMenu'nun
                       "disari tiklandi" dinleyicisi menuyu ANINDA kapatiyordu. */}
                   {i === 0 && (
-                    <button type="button" title="Grid menüsü"
+                    <button type="button" title={cev('Grid menüsü')}
                             style={{ padding: '0 6px', marginRight: 6,
                                      border: 'none', background: 'transparent',
                                      cursor: 'pointer', fontWeight: 700,

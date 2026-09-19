@@ -2,6 +2,7 @@ import { tarihSaat } from '../../bicim';
 import {
   ZIGOSITE, sayi, } from '../../labKodlari';
 import { dizi, metin } from './ortak';
+import { c } from '../../../dil/ceviri';
 
 /** Panelde cizilen sunucu kaydi - alanlar kaynaga gore degisir. */
 type Kayit = Record<string, unknown>;
@@ -32,17 +33,17 @@ export function GenetikDetayi({ veri }: { veri: Kayit }) {
       <div className="kagrup">
         <h6>
           🧬 Varyantlar
-          <span className="sp">ACMG/AMP 2015 · sınıf sunucuda türetilir</span>
+          <span className="sp">{c('ACMG/AMP 2015 · sınıf sunucuda türetilir')}</span>
         </h6>
         <div className="detay-kaydir">
           <table className="detay-tablo">
             <thead>
               <tr>
-                <th>Gen</th><th>Transkript · HGVS c.</th><th>HGVS p.</th>
-                <th className="orta">Zigosite</th><th className="orta">Kalıtım</th>
-                <th className="sag">Derinlik / VAF</th><th className="sag">gnomAD AF</th>
-                <th>ClinVar</th><th>ACMG kriterleri</th>
-                <th className="orta">Sınıf</th><th className="orta">Doğrulama</th>
+                <th>Gen</th><th>{c('Transkript · HGVS c.')}</th><th>{c('HGVS p.')}</th>
+                <th className="orta">{c('Zigosite')}</th><th className="orta">{c('Kalıtım')}</th>
+                <th className="sag">{c('Derinlik / VAF')}</th><th className="sag">{c('gnomAD AF')}</th>
+                <th>{c('ClinVar')}</th><th>{c('ACMG kriterleri')}</th>
+                <th className="orta">Sınıf</th><th className="orta">{c('Doğrulama')}</th>
                 <th className="orta">Rapor</th>
               </tr>
             </thead>
@@ -75,7 +76,7 @@ export function GenetikDetayi({ veri }: { veri: Kayit }) {
                     <span className={sinif(x.sinif)}>
                       {SINIF[Number(x.sinif ?? 0)] ?? '—'}
                     </span>
-                    {x.sinifElle ? <span className="not" title="Uzman değiştirdi"> ✎</span>
+                    {x.sinifElle ? <span className="not" title={c('Uzman değiştirdi')}> ✎</span>
                                  : null}
                   </td>
                   <td className="orta not">
@@ -89,7 +90,7 @@ export function GenetikDetayi({ veri }: { veri: Kayit }) {
                 </tr>
               ))}
               {varyantlar.length === 0 && (
-                <tr><td colSpan={12} className="not">Varyant kaydedilmedi.</td></tr>
+                <tr><td colSpan={12} className="not">{c('Varyant kaydedilmedi.')}</td></tr>
               )}
             </tbody>
           </table>
@@ -98,10 +99,10 @@ export function GenetikDetayi({ veri }: { veri: Kayit }) {
 
       <div className="lab-ikili">
       <div className="kagrup">
-        <h6>Vaka</h6>
+        <h6>{c('Vaka')}</h6>
         <div className="lab-alanlar">
           <div className="fld">
-            <label>Vaka no</label>
+            <label>{c('Vaka no')}</label>
             <div className="deger buyuk">{metin(v.vakaNo) || '—'}</div>
           </div>
           <div className="fld">
@@ -121,19 +122,19 @@ export function GenetikDetayi({ veri }: { veri: Kayit }) {
             </div>
           </div>
           <div className="fld">
-            <label>Tesadüfi bulgu</label>
+            <label>{c('Tesadüfi bulgu')}</label>
             <div className="deger">
               {Number(v.tesadufiBulgu ?? 0) === 1 ? 'bildirilsin' : 'bildirilmesin'}
             </div>
           </div>
           <div className="fld">
-            <label>DNA (ng/µL · A260/280)</label>
+            <label>{c('DNA (ng/µL · A260/280)')}</label>
             <div className="deger">
               {sayi(v.dnaKonsantrasyon, 1)} · {sayi(v.dnaSaflik, 2)}
             </div>
           </div>
           <div className="fld">
-            <label>Run</label>
+            <label>{c('Run')}</label>
             <div className="deger">{metin(v.run) || '—'}</div>
           </div>
         </div>
@@ -145,23 +146,23 @@ export function GenetikDetayi({ veri }: { veri: Kayit }) {
           kapsama, kontaminasyon ya da cinsiyet uyumsuzluğu varyantı
           şüpheli yapar. */}
       <div className="kagrup">
-        <h6>Run / kalite <span className="sp">{metin(v.run) || 'run atanmadı'}</span></h6>
+        <h6>{c('Run / kalite')}<span className="sp">{metin(v.run) || 'run atanmadı'}</span></h6>
         <div className="lab-alanlar">
           <div className="fld">
-            <label>Kapsama / ort. derinlik</label>
+            <label>{c('Kapsama / ort. derinlik')}</label>
             <div className="deger">
               {v.kapsamaYuzde ? `%${sayi(v.kapsamaYuzde, 1)}` : '—'}
               {v.ortDerinlik ? ` · ${sayi(v.ortDerinlik, 0)}×` : ''}
             </div>
           </div>
           <div className="fld">
-            <label>Kontaminasyon</label>
+            <label>{c('Kontaminasyon')}</label>
             <div className="deger">
               {v.kontaminasyon ? `%${sayi(v.kontaminasyon, 2)}` : '—'}
             </div>
           </div>
           <div className="fld">
-            <label>Cinsiyet doğrulama</label>
+            <label>{c('Cinsiyet doğrulama')}</label>
             <div className="deger">
               {Number(v.cinsiyetDogrulama ?? 0) === 1
                 ? <span className="rozet olumlu">uyumlu</span>
@@ -171,17 +172,17 @@ export function GenetikDetayi({ veri }: { veri: Kayit }) {
             </div>
           </div>
           <div className="fld">
-            <label>Pipeline / referans</label>
+            <label>{c('Pipeline / referans')}</label>
             <div className="deger">
               {[metin(v.pipeline), metin(v.referansGenom)].filter(Boolean).join(' · ') || '—'}
             </div>
           </div>
         </div>
         {metin(v.oneriler) && (
-          <div className="ic"><b>Öneriler:</b> {metin(v.oneriler)}</div>
+          <div className="ic"><b>{c('Öneriler:')}</b> {metin(v.oneriler)}</div>
         )}
         {metin(v.sinirliliklar) && (
-          <div className="ic sonuk"><b>Sınırlılıklar:</b> {metin(v.sinirliliklar)}</div>
+          <div className="ic sonuk"><b>{c('Sınırlılıklar:')}</b> {metin(v.sinirliliklar)}</div>
         )}
       </div>
       </div>

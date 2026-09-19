@@ -2,6 +2,7 @@ import { tarihSaat } from '../../bicim';
 import {
   sayi, sirSinifi, } from '../../labKodlari';
 import { dizi, metin, kodEki } from './ortak';
+import { c } from '../../../dil/ceviri';
 
 /** Panelde cizilen sunucu kaydi - alanlar kaynaga gore degisir. */
 type Kayit = Record<string, unknown>;
@@ -27,9 +28,7 @@ export function KulturDetayi({ veri }: { veri: Kayit }) {
   return (
     <div className="lab-ikili">
       <div className="kagrup">
-        <h6>
-          💊 Antibiyogram
-          <span className="sp">
+        <h6>{c('💊 Antibiyogram')}<span className="sp">
             {metin(antibiyogram[0]?.standart) || 'EUCAST'}
             {metin(antibiyogram[0]?.standartSurum)
               ? ` ${metin(antibiyogram[0]?.standartSurum)}` : ''} · MIC
@@ -39,9 +38,9 @@ export function KulturDetayi({ veri }: { veri: Kayit }) {
           <table className="detay-tablo">
             <thead>
               <tr>
-                <th>Antibiyotik</th><th className="sag">MIC (µg/mL)</th>
-                <th className="orta">Zon</th><th className="orta">Yorum</th>
-                <th className="orta">Kaynak</th><th className="orta">Raporlanır</th>
+                <th>{c('Antibiyotik')}</th><th className="sag">MIC (µg/mL)</th>
+                <th className="orta">{c('Zon')}</th><th className="orta">{c('Yorum')}</th>
+                <th className="orta">Kaynak</th><th className="orta">{c('Raporlanır')}</th>
               </tr>
             </thead>
             <tbody>
@@ -68,12 +67,12 @@ export function KulturDetayi({ veri }: { veri: Kayit }) {
                       işaretli - "niye yazmıyor" sorusu ekranda cevaplanır. */}
                   <td className="orta">
                     {a.bildir ? <span className="rozet olumlu">Evet</span>
-                              : <span className="rozet gri">Kademeli</span>}
+                              : <span className="rozet gri">{c('Kademeli')}</span>}
                   </td>
                 </tr>
               ))}
               {antibiyogram.length === 0 && (
-                <tr><td colSpan={6} className="not">Antibiyogram girilmedi.</td></tr>
+                <tr><td colSpan={6} className="not">{c('Antibiyogram girilmedi.')}</td></tr>
               )}
             </tbody>
           </table>
@@ -93,7 +92,7 @@ export function KulturDetayi({ veri }: { veri: Kayit }) {
             <thead>
               <tr>
                 <th className="orta">Saat</th><th className="orta">Zaman</th>
-                <th className="orta">Üreme</th><th>Bulgu</th><th>Sonraki adım</th>
+                <th className="orta">{c('Üreme')}</th><th>Bulgu</th><th>{c('Sonraki adım')}</th>
               </tr>
             </thead>
             <tbody>
@@ -112,7 +111,7 @@ export function KulturDetayi({ veri }: { veri: Kayit }) {
                 </tr>
               ))}
               {okumalar.length === 0 && (
-                <tr><td colSpan={5} className="not">Okuma kaydı yok.</td></tr>
+                <tr><td colSpan={5} className="not">{c('Okuma kaydı yok.')}</td></tr>
               )}
             </tbody>
           </table>
@@ -123,8 +122,8 @@ export function KulturDetayi({ veri }: { veri: Kayit }) {
           <table className="detay-tablo">
             <thead>
               <tr>
-                <th className="orta">No</th><th>Organizma</th>
-                <th className="sag">Koloni</th><th className="orta">Yöntem</th>
+                <th className="orta">{c('No')}</th><th>{c('Organizma')}</th>
+                <th className="sag">{c('Koloni')}</th><th className="orta">Yöntem</th>
               </tr>
             </thead>
             <tbody>
@@ -155,7 +154,7 @@ export function KulturDetayi({ veri }: { veri: Kayit }) {
                 </tr>
               ))}
               {izolatlar.length === 0 && (
-                <tr><td colSpan={4} className="not">Üreme yok / izolat kaydedilmedi.</td></tr>
+                <tr><td colSpan={4} className="not">{c('Üreme yok / izolat kaydedilmedi.')}</td></tr>
               )}
             </tbody>
           </table>

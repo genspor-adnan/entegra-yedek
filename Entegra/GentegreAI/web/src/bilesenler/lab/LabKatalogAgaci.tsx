@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
+import { c } from '../../dil/ceviri';
 
 /**
  * TETKİK KATALOĞU SOL PANELİ (492) - "Bölüm / Çalışma Grubu" + "Paneller".
@@ -61,7 +62,7 @@ export function LabKatalogAgaci({ secim, onSecim }: {
   return (
     <div className="lab-detay lab-katalog-agac">
       <div className="kagrup">
-        <h6>Bölüm / Çalışma Grubu</h6>
+        <h6>{c('Bölüm / Çalışma Grubu')}</h6>
         <ul className="agac-liste">
           <li className={tumuSecili ? 'sec' : ''}
               onClick={() => onSecim(BOS_SECIM)}>
@@ -76,7 +77,7 @@ export function LabKatalogAgaci({ secim, onSecim }: {
               <span className="sp">{b.adet}</span>
             </li>
           ))}
-          {bolumler.length === 0 && <li className="sonuk">Tetkik yok</li>}
+          {bolumler.length === 0 && <li className="sonuk">{c('Tetkik yok')}</li>}
         </ul>
       </div>
 
@@ -97,7 +98,7 @@ export function LabKatalogAgaci({ secim, onSecim }: {
               <span className="sp">{(p.tetkikIdleri ?? []).length} tetkik</span>
             </li>
           ))}
-          {paneller.length === 0 && <li className="sonuk">Panel tanımlı değil</li>}
+          {paneller.length === 0 && <li className="sonuk">{c('Panel tanımlı değil')}</li>}
         </ul>
       </div>
     </div>

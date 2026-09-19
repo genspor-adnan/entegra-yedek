@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { tarihSaat } from './bicim';
+import { c } from '../dil/ceviri';
 
 /**
  * TESLİM DENEME GEÇMİŞİ (814) — kuyruk satırının altında açılan panel.
@@ -43,7 +44,7 @@ export function TeleradTeslimIzi({ teslimId }: { teslimId: number }) {
 
   if (hata) return <div className="hata-kutusu">{hata}</div>;
   if (satirlar.length === 0)
-    return <div className="not kucuk">Bu teslim için henüz deneme yapılmadı.</div>;
+    return <div className="not kucuk">{c('Bu teslim için henüz deneme yapılmadı.')}</div>;
 
   return (
     <div className="telerad-iz">
@@ -82,11 +83,11 @@ export function TeleradTeslimIzi({ teslimId }: { teslimId: number }) {
         if (!s) return null;
         return (
           <div className="telerad-iz-govde">
-            <h5>Gönderilen ORU</h5>
+            <h5>{c('Gönderilen ORU')}</h5>
             {/* SEGMENT SONU \r: ekranda alt alta görünsün diye satıra bölünür -
                 gönderilen metnin kendisi değişmez. */}
             <pre>{String(s.istekGovde ?? '').split('\r').join('\n')}</pre>
-            <h5>Alınan ACK</h5>
+            <h5>{c('Alınan ACK')}</h5>
             <pre>{String(s.yanitGovde ?? '').split('\r').join('\n') || '—'}</pre>
           </div>
         );

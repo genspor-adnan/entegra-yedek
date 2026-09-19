@@ -5,6 +5,7 @@ import { hataMetni } from '../../api/sozlesme';
 import type { FormKutuphaneSatiri } from '../../api/uclar/form';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
+import { c } from '../../dil/ceviri';
 
 /**
  * FORM KÜTÜPHANESİ `/form-kutuphane` (form motoru 740) — mockup
@@ -49,15 +50,15 @@ export function FormKutuphane() {
 
   return (
     <div className="fm-sayfa">
-      <div className="sayfabas"><div className="basrow"><h1>📚 Form Kütüphanesi (Bakanlık / SKS)</h1><span className="yol">Yönetim › Formlar › Kütüphane</span>
-        <div className="sag"><button className="d" onClick={() => git('/form-sablon')}>Şablonlar</button></div></div></div>
+      <div className="sayfabas"><div className="basrow"><h1>📚 Form Kütüphanesi (Bakanlık / SKS)</h1><span className="yol">{c('Yönetim › Formlar › Kütüphane')}</span>
+        <div className="sag"><button className="d" onClick={() => git('/form-sablon')}>{c('Şablonlar')}</button></div></div></div>
       <div className="fm-doldur-arac">
         {yetki('form.sablon') && <>
           <button className="d bir" onClick={() => void kur([...secili])}>📦 Seçilenleri kur ({secili.size})</button>
-          <button className="d" onClick={() => void kur(gorunen.filter(x => x.kuruluId == null).map(x => x.kod))}>Kurum tipine göre hepsini kur</button>
+          <button className="d" onClick={() => void kur(gorunen.filter(x => x.kuruluId == null).map(x => x.kod))}>{c('Kurum tipine göre hepsini kur')}</button>
           <button className="d" onClick={() => void kur(gorunen.filter(x => x.kuruluId != null && (x.kuruluSurum ?? 0) < x.surum).map(x => x.kod))}>🔄 Sürüm güncelle ({sayac(x => x.kuruluId != null && (x.kuruluSurum ?? 0) < x.surum)})</button>
         </>}
-        <span className="sonuk">Kaynak:</span>
+        <span className="sonuk">{c('Kaynak:')}</span>
         <button className={`d${!kaynak ? ' bir' : ''}`} onClick={() => setKaynak('')}>Tümü</button>
         {kaynaklar.map(k => <button key={k} className={`d${kaynak === k ? ' bir' : ''}`} onClick={() => setKaynak(k)}>{k}</button>)}
         <label className="fm-onay" style={{ margin: 0 }}><input type="checkbox" checked={yalnizTip} onChange={e => setYalnizTip(e.target.checked)} /><span>Kurum tipi: {(KURUM[kurumTipi] ?? kurumTipi) || "—"}</span></label>
@@ -65,18 +66,18 @@ export function FormKutuphane() {
         <input className="fm-giris" style={{ width: 200 }} placeholder="🔍 form ara" value={ara} onChange={e => setAra(e.target.value)} />
       </div>
       <div className="fm-kpis">
-        <div className="fm-kpi"><div className="b">Kütüphanede</div><div className="d">{liste.length}</div></div>
-        <div className="fm-kpi"><div className="b">Bu kurum tipinde</div><div className="d">{liste.filter(uygun).length}</div></div>
-        <div className="fm-kpi"><div className="b">Kurulu</div><div className="d ok">{sayac(x => x.kuruluId != null)}</div></div>
-        <div className="fm-kpi"><div className="b">Kurulabilir</div><div className="d">{sayac(x => x.kuruluId == null)}</div></div>
-        <div className="fm-kpi"><div className="b">Yeni sürüm</div><div className={`d${sayac(x => x.kuruluId != null && (x.kuruluSurum ?? 0) < x.surum) ? ' sari' : ''}`}>{sayac(x => x.kuruluId != null && (x.kuruluSurum ?? 0) < x.surum)}</div></div>
+        <div className="fm-kpi"><div className="b">{c('Kütüphanede')}</div><div className="d">{liste.length}</div></div>
+        <div className="fm-kpi"><div className="b">{c('Bu kurum tipinde')}</div><div className="d">{liste.filter(uygun).length}</div></div>
+        <div className="fm-kpi"><div className="b">{c('Kurulu')}</div><div className="d ok">{sayac(x => x.kuruluId != null)}</div></div>
+        <div className="fm-kpi"><div className="b">{c('Kurulabilir')}</div><div className="d">{sayac(x => x.kuruluId == null)}</div></div>
+        <div className="fm-kpi"><div className="b">{c('Yeni sürüm')}</div><div className={`d${sayac(x => x.kuruluId != null && (x.kuruluSurum ?? 0) < x.surum) ? ' sari' : ''}`}>{sayac(x => x.kuruluId != null && (x.kuruluSurum ?? 0) < x.surum)}</div></div>
       </div>
       {hata && <div className="hata-kutusu">{hata}</div>}
       {[...gruplar.entries()].map(([grup, satirlar]) => (
         <section key={grup} className="fm-bolum">
           <h3 className="fm-bolum-bas">{grup}</h3>
           <table className="fm-tablo">
-            <thead><tr><th></th><th>Kod</th><th>Form</th><th>Aile</th><th>Kurum tipi</th><th>Kanal</th><th>Sürüm</th><th>Durum</th><th>Not</th><th></th></tr></thead>
+            <thead><tr><th></th><th>Kod</th><th>{c('Form')}</th><th>{c('Aile')}</th><th>{c('Kurum tipi')}</th><th>Kanal</th><th>Sürüm</th><th>Durum</th><th>Not</th><th></th></tr></thead>
             <tbody>
               {satirlar.map(x => {
                 const kurulu = x.kuruluId != null; const guncel = kurulu && (x.kuruluSurum ?? 0) < x.surum;
@@ -89,7 +90,7 @@ export function FormKutuphane() {
                     <td>{x.kurumTipleri ? x.kurumTipleri.split(',').map(k => <span key={k} className="fm-kt">{KURUM[k.trim()] ?? k}</span>) : <span className="sonuk">hepsi</span>}</td>
                     <td>{['', 'İç ekran', 'Tablet', 'SMS', 'E-posta'][x.kanal] ?? ''}{x.tekrarSaat ? ` · ${x.tekrarSaat} s tekrar` : ''}{x.asamali ? ' · aşamalı' : ''}</td>
                     <td className="fm-sag">v{x.surum}</td>
-                    <td>{guncel ? <span className="rozet uyari">Yeni sürüm var (kurulu v{x.kuruluSurum})</span> : kurulu ? <span className="rozet ok">Kurulu v{x.kuruluSurum}{x.kuruluDurum === 2 ? ' (pasif)' : ''}</span> : <span className="rozet mor">Kurulabilir</span>}</td>
+                    <td>{guncel ? <span className="rozet uyari">Yeni sürüm var (kurulu v{x.kuruluSurum})</span> : kurulu ? <span className="rozet ok">Kurulu v{x.kuruluSurum}{x.kuruluDurum === 2 ? ' (pasif)' : ''}</span> : <span className="rozet mor">{c('Kurulabilir')}</span>}</td>
                     <td className="fm-not">{x.aciklama}</td>
                     <td className="fm-sag">
                       {yetki('form.sablon') && (!kurulu || guncel) && <button className="d mini" onClick={() => void kur([x.kod])}>{kurulu ? 'Güncelle' : 'Kur'}</button>}

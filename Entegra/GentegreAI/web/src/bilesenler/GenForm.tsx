@@ -531,7 +531,7 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
               onClick={() => dogrula('tumu')}>
         Tüm listeye uygula
       </button>
-      <button type="button" className="d kapat-dugmesi" onClick={kapat}>Kapat</button>
+      <button type="button" className="d kapat-dugmesi" onClick={kapat}>{c('Kapat')}</button>
     </>
     );
   };
@@ -1137,15 +1137,15 @@ Yine de yeni hasta kaydı eklensin mi?`);
   if (yukleniyor)
     return (
       <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)}
-        ekSinif={kaynak === 'randevu' ? 'kart-orta' : undefined} alt={<button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
-        <div className="yukleniyor-satir">Yukleniyor…</div>
+        ekSinif={kaynak === 'randevu' ? 'kart-orta' : undefined} alt={<button className="d kapat-dugmesi" onClick={onKapat}>{c('Kapat')}</button>} onKapat={onKapat}>
+        <div className="yukleniyor-satir">{c('Yukleniyor…')}</div>
       </Modal>
     );
 
   if (!meta)
     return (
       <Modal baslik={baslik ?? kaynak} dar={TEK_SUTUN_KARTLAR.has(kaynak)}
-        ekSinif={kaynak === 'randevu' ? 'kart-orta' : undefined} alt={<button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>} onKapat={onKapat}>
+        ekSinif={kaynak === 'randevu' ? 'kart-orta' : undefined} alt={<button className="d kapat-dugmesi" onClick={onKapat}>{c('Kapat')}</button>} onKapat={onKapat}>
         <div className="hata-kutusu">{hata}</div>
       </Modal>
     );
@@ -1413,7 +1413,7 @@ Yine de yeni hasta kaydı eklensin mi?`);
               yazma yolu bu. Ambardan okur (520), servise gitmez. */}
           {!yeniMi && kaynak === 'fiyat-listesi' && Number(deger.tarifeTipi) === 3 && (
             <button type="button" className="d" disabled={skrsCalisiyor}
-                    title="SUT fiyatlarını SKRS ambarından tazele"
+                    title={c('SUT fiyatlarını SKRS ambarından tazele')}
                     onClick={() => { void skrsGuncelle() }}>
               {skrsCalisiyor ? '⏳ Güncelleniyor…' : '⭳ SKRS’den Güncelle'}
             </button>
@@ -1429,18 +1429,16 @@ Yine de yeni hasta kaydı eklensin mi?`);
           {kaynak === 'hasta' && !yeniMi && (
             <>
               <button className="d" type="button"
-                      title="Kimlik bilgilerini MERNİS'ten günceller"
+                      title={c('Kimlik bilgilerini MERNİS\'ten günceller')}
                       onClick={() => setHata('MERNİS servisi henüz bağlı değil.')}>
                 MERNİS'ten getir
               </button>
               <button className="d" type="button"
-                      title="SGK provizyon / müstehaklık sorgusu"
+                      title={c('SGK provizyon / müstehaklık sorgusu')}
                       onClick={() => setHata('Provizyon/müstehaklık servisi henüz bağlı değil.')}>
                 Provizyon/Müstehaklık Sorgula
               </button>
-              <button className="d yesil" type="button" onClick={() => basvuruAc()}>
-                ＋ Yeni Başvuru
-              </button>
+              <button className="d yesil" type="button" onClick={() => basvuruAc()}>{c('＋ Yeni Başvuru')}</button>
             </>
           )}
           {/* Kisi'ye ozel: "Bagli Cari" alani artik salt-okunur gorunum (asagida renderGirdi),
@@ -1462,8 +1460,8 @@ Yine de yeni hasta kaydı eklensin mi?`);
               <select value={String(deger.yon ?? 1)} disabled={salt}
                       style={{ width: 150, height: 28, fontSize: 13 }}
                       onChange={e => setDeger(d => ({ ...d, yon: Number(e.target.value) }))}>
-                <option value={1}>Alınan</option>
-                <option value={2}>Verilen</option>
+                <option value={1}>{c('Alınan')}</option>
+                <option value={2}>{c('Verilen')}</option>
               </select>
             </label>
           )}
@@ -1487,9 +1485,9 @@ Yine de yeni hasta kaydı eklensin mi?`);
               <button className="d" disabled={Number(deger.durum) === 2}
                       onClick={() => alanDegistir('durum', '2')}>✔ Geldi İşaretle</button>
               <button className="d" disabled={Number(deger.durum) === 3}
-                      onClick={() => alanDegistir('durum', '3')}>✖ Gelmedi</button>
+                      onClick={() => alanDegistir('durum', '3')}>{c('✖ Gelmedi')}</button>
               <button className="d" disabled={Number(deger.durum) === 4}
-                      onClick={() => alanDegistir('durum', '4')}>⊘ İptal</button>
+                      onClick={() => alanDegistir('durum', '4')}>{c('⊘ İptal')}</button>
             </>
           )}
           {/* DOKUMAN KART ARAC CUBUGU (419, mockup dokuman_karti.html).
@@ -1514,7 +1512,7 @@ Yine de yeni hasta kaydı eklensin mi?`);
                 //   tamamlanir (uzantisiz dosya acilamiyor).
                 dosyaIndirUrl(url, dokumanDosyaAdi(String(deger.ad ?? ''),
                                                    String(deger.contentType ?? '')), true);
-              })}>⬇ İndir</button>
+              })}>{c('⬇ İndir')}</button>
 
               {/* ONAYA GONDERILEN SURUMDUR, dokuman degil: taslak surum yoksa
                   gonderilecek bir sey de yok. */}
@@ -1530,7 +1528,7 @@ Yine de yeni hasta kaydı eklensin mi?`);
                   }
                   const y = await api.dokumanOnayaGonder(Number(taslak.id));
                   bilgiMesaji(y.mesaj);
-                })}>✔ Onaya Gönder</button>
+                })}>{c('✔ Onaya Gönder')}</button>
               )}
 
               {/* PAYLASIM LINKI (424): sureli ve sayacli. Ozel nitelikli
@@ -1543,7 +1541,7 @@ Yine de yeni hasta kaydı eklensin mi?`);
                 try { await navigator.clipboard.writeText(adres) } catch { /* yoksay */ }
                 bilgiMesaji(`Paylaşım linki üretildi (30 gün):\n\n${adres}\n\n`
                           + 'Adres panoya kopyalandı.');
-              })}>🔗 Paylaş</button>
+              })}>{c('🔗 Paylaş')}</button>
 
               <button className="d" onClick={() => void guvenli(async () => {
                 const d = await api.dokumanDepo();
@@ -1564,7 +1562,7 @@ Yine de yeni hasta kaydı eklensin mi?`);
               <button className="d" onClick={() => void guvenli(async () => {
                 const y = await api.entegrasyonSina(Number(id));
                 bilgiMesaji(y.mesaj);
-              })}>🔌 Bağlantıyı Sına</button>
+              })}>{c('🔌 Bağlantıyı Sına')}</button>
               {/* SKRS senkronu YALNIZ HBYS kurulumunda (345): ERP'de eski bir
                   SKRS satiri duruyor olsa da dugme gosterilmez. */}
               {String(deger.kod ?? '') === 'SKRS' && kullanici?.urunModu === 2 && (
@@ -1573,11 +1571,11 @@ Yine de yeni hasta kaydı eklensin mi?`);
                                      + 'listeler güncellenecek. Devam edilsin mi?')) return;
                   const y = await api.skrsListeSenkron(Number(id));
                   bilgiMesaji(y.mesaj);
-                })}>⟳ SKRS Listelerini Güncelle</button>
+                })}>{c('⟳ SKRS Listelerini Güncelle')}</button>
               )}
             </>
           )}
-          <button className="d kapat-dugmesi" onClick={kapatIstendi}>Kapat</button>
+          <button className="d kapat-dugmesi" onClick={kapatIstendi}>{c('Kapat')}</button>
           {/* Cari'ye ozel: Musteri/Tedarikci rolleri hizlı erisim icin arac cubuguna,
               Kaydet/Sil ile ayni satira, saga yanasik olarak da tasindi (Roller sekmesindeki
               alanlarla AYNI deger - ikisi de senkron, tekrar degil). */}
@@ -1614,15 +1612,15 @@ Yine de yeni hasta kaydı eklensin mi?`);
 
       {cakisma && (
         <div className="cakisma-kutusu">
-          <b>Bu kaydi baska bir kullanici degistirdi.</b>
+          <b>{c('Bu kaydi baska bir kullanici degistirdi.')}</b>
           {cakisma.alanlar.length > 0 && <div>Cakisan alanlar: {cakisma.alanlar.join(', ')}</div>}
           <div className="cakisma-arac">
-            <button className="d" onClick={() => { setCakisma(null); void yukle() }}>Güncel Hâli Al (Değişikliklerim Gider)</button>
+            <button className="d" onClick={() => { setCakisma(null); void yukle() }}>{c('Güncel Hâli Al (Değişikliklerim Gider)')}</button>
             <button className="d" onClick={() => {
               // Sunucudaki guncel surumu alip kendi degisikliklerimi UZERINE yaz
               setSurum(String(cakisma.guncel.surum ?? ''));
               setCakisma(null);
-            }}>Benim Değişikliklerimi Uygula</button>
+            }}>{c('Benim Değişikliklerimi Uygula')}</button>
           </div>
         </div>
       )}
@@ -1991,7 +1989,7 @@ Yine de yeni hasta kaydı eklensin mi?`);
                  () => setTopluKatki(false))}>
           <div className="toplu-kutu">
             <label className="alan tip-para">
-              <span className="etiket">Fiyatın Oranını Girin</span>
+              <span className="etiket">{c('Fiyatın Oranını Girin')}</span>
               <input autoFocus inputMode="decimal" value={topluKatkiOran}
                      onChange={e => setTopluKatkiOran(e.target.value)} />
             </label>
@@ -2022,8 +2020,8 @@ Yine de yeni hasta kaydı eklensin mi?`);
               <span className="etiket">İşlem</span>
               <select value={fiyatYonu}
                       onChange={e => setFiyatYonu(e.target.value as 'artir' | 'azalt')}>
-                <option value="artir">Artır</option>
-                <option value="azalt">Azalt</option>
+                <option value="artir">{c('Artır')}</option>
+                <option value="azalt">{c('Azalt')}</option>
               </select>
             </label>
             <label className="alan tip-para">
@@ -2074,11 +2072,11 @@ Yine de yeni hasta kaydı eklensin mi?`);
         <div className="mesaj-perde" onMouseDown={e => e.stopPropagation()}>
           <div className="mesaj-kutu">
             <h3>{`${urunAdi(kullanici?.urunModu)} Mesajı`}</h3>
-            <p>Kaydedilmemiş değişiklikler var.</p>
+            <p>{c('Kaydedilmemiş değişiklikler var.')}</p>
             <div className="mesaj-dugme">
               <button className="d bir" disabled={kaydediyor} onClick={() => { setKapatmaUyarisi(false); void kaydet(); }}>Kaydet</button>
-              <button className="d" onClick={() => { setKapatmaUyarisi(false); onKapat?.(); }}>İptal</button>
-              <button className="d" onClick={() => setKapatmaUyarisi(false)}>Geri Dön</button>
+              <button className="d" onClick={() => { setKapatmaUyarisi(false); onKapat?.(); }}>{c('İptal')}</button>
+              <button className="d" onClick={() => setKapatmaUyarisi(false)}>{c('Geri Dön')}</button>
             </div>
           </div>
         </div>

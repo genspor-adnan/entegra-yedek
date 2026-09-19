@@ -4,6 +4,7 @@ import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import { mesaj } from '../mesaj';
 import { para } from '../bicim';
+import { c } from '../../dil/ceviri';
 
 /**
  * HAKEDİŞ DÖNEMİ KAPATMA (324).
@@ -95,7 +96,7 @@ export function DonemKapatModali({ tarafId, kisi, onKapat, onTamam }: {
                        onClick={() => void kapat()}>
                  {calisiyor ? '⏳ Kapatılıyor…' : '🔒 Dönemi Kapat'}
                </button>
-               <button className="d" onClick={onKapat}>✖ Kapat</button>
+               <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}
@@ -125,10 +126,10 @@ export function DonemKapatModali({ tarafId, kisi, onKapat, onTamam }: {
         <table className="detay-tablo">
           <thead>
             <tr><th style={{ width: 32 }} /><th>Kişi</th>
-                <th className="hiza-sag">Kapatılabilir satır</th>
-                <th className="hiza-sag">Kapatılabilir tutar</th>
-                <th className="hiza-sag">Kapanmış</th>
-                <th>Tarih aralığı</th></tr>
+                <th className="hiza-sag">{c('Kapatılabilir satır')}</th>
+                <th className="hiza-sag">{c('Kapatılabilir tutar')}</th>
+                <th className="hiza-sag">{c('Kapanmış')}</th>
+                <th>{c('Tarih aralığı')}</th></tr>
           </thead>
           <tbody>
             {acik.map(r => (
@@ -148,7 +149,7 @@ export function DonemKapatModali({ tarafId, kisi, onKapat, onTamam }: {
               </tr>
             ))}
             {acik.length === 0 && (
-              <tr><td colSpan={6} className="bos">Açık hakediş satırı yok.</td></tr>
+              <tr><td colSpan={6} className="bos">{c('Açık hakediş satırı yok.')}</td></tr>
             )}
           </tbody>
         </table>

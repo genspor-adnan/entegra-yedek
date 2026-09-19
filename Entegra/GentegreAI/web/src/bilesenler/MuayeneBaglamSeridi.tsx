@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
+import { c } from '../dil/ceviri';
 
 /**
  * MUAYENE BAĞLAM ŞERİDİ (461) — mockup `Ekranlar/Muayene/muayene_karti.html`
@@ -123,7 +124,7 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
           {/* ROZET DEGIL DUZ METIN (kullanici): ad satirinda ikinci bir
               cerceve gorsel gurultuydu. */}
           {(cinsiyet || yas) && (
-            <span className="sonuk" title="Cinsiyet · yaş">
+            <span className="sonuk" title={c('Cinsiyet · yaş')}>
               {/* Cinsiyet SIMGESI + harf (kullanici: "Ali Er ♂E 48y"): simge
                   bir bakista, harf de yazidan okunanla ayni olsun. */}
               {cinsiyet === 'E' ? '♂' : cinsiyet === 'K' ? '♀' : ''}
@@ -143,7 +144,7 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
       </div>
 
       <div className="kb-hucre">
-        <div className="kb-bas">Alerji / Kronik</div>
+        <div className="kb-bas">{c('Alerji / Kronik')}</div>
         <div className="kb-kutu">
         <div className="kb-ic">
           {/* ALERJİ YOKSA DA YAZILIR: boş kutu "bakılmadı" ile "yok"u
@@ -169,7 +170,7 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
       </div>
 
       <div className="kb-hucre">
-        <div className="kb-bas">Aktif ilaçlar</div>
+        <div className="kb-bas">{c('Aktif ilaçlar')}</div>
         <div className="kb-kutu">
         <div className="kb-ic">
           {ilac.length === 0
@@ -211,7 +212,7 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
           {bekleyen > 0 && (
             <span className="rozet uyari">{bekleyen} sonuç bekliyor</span>
           )}
-          {anaTani ? <span className="rozet olumlu" title="Ana tanı">{anaTani}</span> : null}
+          {anaTani ? <span className="rozet olumlu" title={c('Ana tanı')}>{anaTani}</span> : null}
           {!tur && !bolum && !hekim && bekleyen === 0 && !anaTani
             && <span className="sonuk">—</span>}
         </div>
@@ -223,7 +224,7 @@ export function MuayeneBaglamSeridi({ muayeneId, onBugun }:
               {/* Sure ROZET (kullanici): bandaki olculerle ayni gorunum. */}
               {gecen ? <span className="rozet gri">{gecen}</span> : null}
             </>
-          ) : <span>Muayeneye alınmadı</span>}
+          ) : <span>{c('Muayeneye alınmadı')}</span>}
           {/* Muayene turu (Yuz yuze / Online) SURENIN SAGINDA (kullanici):
               ust satir bolum ve hekime kaliyor. */}
           {tur ? <span className="rozet gri">{tur}</span> : null}

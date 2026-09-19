@@ -5,6 +5,7 @@ import { hataMetni } from '../../api/sozlesme';
 import type { ZiyaretDetayi } from '../../api/uclar/servis';
 import { guvenli, mesaj } from '../../bilesenler/mesaj';
 import { ImzaTuvali } from '../../bilesenler/ImzaTuvali';
+import { c } from '../../dil/ceviri';
 
 /**
  * ZİYARET KARTI — TEKNİSYENİN TELEFONU (776).
@@ -199,9 +200,9 @@ export function ZiyaretMobil() {
           </div>
         )}
         <div className="zm-zaman">
-          <span>Varış <b>{saat(z.varis)}</b></span>
-          <span>Ayrılış <b>{saat(z.ayrilis)}</b></span>
-          {z.arac && <span>Araç <b>{z.arac}</b></span>}
+          <span>{c('Varış')}<b>{saat(z.varis)}</b></span>
+          <span>{c('Ayrılış')}<b>{saat(z.ayrilis)}</b></span>
+          {z.arac && <span>{c('Araç')}<b>{z.arac}</b></span>}
         </div>
       </div>
 
@@ -214,9 +215,9 @@ export function ZiyaretMobil() {
 
       <div className="zm-kart">
         <label className="zm-alan">
-          <span>Yapılan iş</span>
+          <span>{c('Yapılan iş')}</span>
           <textarea rows={4} value={yapilan} readOnly={kapali}
-                    placeholder="Ne yapıldı, ne değişti…"
+                    placeholder={c('Ne yapıldı, ne değişti…')}
                     onChange={e => setYapilan(e.target.value)} />
         </label>
 
@@ -237,26 +238,26 @@ export function ZiyaretMobil() {
 
         {sonuc !== 1 && (
           <label className="zm-alan">
-            <span>Neden çözülemedi</span>
+            <span>{c('Neden çözülemedi')}</span>
             <input value={sonucMetni} readOnly={kapali}
-                   placeholder="Parça yok, erişilemedi…"
+                   placeholder={c('Parça yok, erişilemedi…')}
                    onChange={e => setSonucMetni(e.target.value)} />
           </label>
         )}
 
         <div className="zm-ucer">
           <label className="zm-alan">
-            <span>Yol (km)</span>
+            <span>{c('Yol (km)')}</span>
             <input inputMode="decimal" value={yolKm} readOnly={kapali}
                    onChange={e => setYolKm(e.target.value)} />
           </label>
           <label className="zm-alan">
-            <span>İşçilik (sa)</span>
+            <span>{c('İşçilik (sa)')}</span>
             <input inputMode="decimal" value={iscilikSaat} readOnly={kapali}
                    onChange={e => setIscilikSaat(e.target.value)} />
           </label>
           <label className="zm-alan">
-            <span>Tutar (₺)</span>
+            <span>{c('Tutar (₺)')}</span>
             <input inputMode="decimal" value={tutar} readOnly={kapali}
                    onChange={e => setTutar(e.target.value)} />
           </label>
@@ -270,7 +271,7 @@ export function ZiyaretMobil() {
       </div>
 
       <div className="zm-kart">
-        <div className="zm-baslik">Kullanılan parça</div>
+        <div className="zm-baslik">{c('Kullanılan parça')}</div>
         {z.parcalar.map(p => (
           <div key={p.id} className="zm-parca">
             <div>
@@ -286,7 +287,7 @@ export function ZiyaretMobil() {
           </div>
         ))}
         {z.parcalar.length === 0 && (
-          <div className="zm-bosluk">Bu ziyarette parça kullanılmadı.</div>
+          <div className="zm-bosluk">{c('Bu ziyarette parça kullanılmadı.')}</div>
         )}
 
         {!kapali && !parcaAcik && (
@@ -301,9 +302,9 @@ export function ZiyaretMobil() {
                 satır yasak - sonradan kimsenin ne olduğunu bilemediği bir
                 maliyet olurdu. */}
             <label className="zm-alan">
-              <span>Stokta ara</span>
+              <span>{c('Stokta ara')}</span>
               <div className="zm-ara">
-                <input value={parcaAra} placeholder="Parça adı ya da kodu…"
+                <input value={parcaAra} placeholder={c('Parça adı ya da kodu…')}
                        onChange={e => setParcaAra(e.target.value)} />
                 <button type="button" className="d" onClick={stokAra}>Ara</button>
               </div>
@@ -324,8 +325,8 @@ export function ZiyaretMobil() {
               </button>
             ))}
             <label className="zm-alan">
-              <span>Parça adı</span>
-              <input value={parcaAd} placeholder="Katalogda yoksa elle yazın"
+              <span>{c('Parça adı')}</span>
+              <input value={parcaAd} placeholder={c('Katalogda yoksa elle yazın')}
                      onChange={e => { setParcaAd(e.target.value); setParcaStokId(null) }} />
             </label>
             <div className="zm-ucer">
@@ -335,7 +336,7 @@ export function ZiyaretMobil() {
                        onChange={e => setParcaMiktar(e.target.value)} />
               </label>
               <label className="zm-alan">
-                <span>Birim fiyat</span>
+                <span>{c('Birim fiyat')}</span>
                 <input inputMode="decimal" value={parcaFiyat}
                        onChange={e => setParcaFiyat(e.target.value)} />
               </label>
@@ -359,31 +360,31 @@ export function ZiyaretMobil() {
       </div>
 
       <div className="zm-kart">
-        <div className="zm-baslik">Müşteri imzası</div>
+        <div className="zm-baslik">{c('Müşteri imzası')}</div>
         {/* İMZASIZ ZİYARET KAPANMAZ: yerinde yapılan işin tek kanıtı müşterinin
             onayıdır. Alınamıyorsa gerekçe yazılır - kural esner, iz kalır. */}
         <div className="zm-secim">
           <button type="button" disabled={kapali}
                   className={`zm-sec${imza ? ' on' : ''}`}
-                  onClick={() => setImza(true)}>Alındı</button>
+                  onClick={() => setImza(true)}>{c('Alındı')}</button>
           <button type="button" disabled={kapali}
                   className={`zm-sec${!imza ? ' on' : ''}`}
-                  onClick={() => setImza(false)}>Alınamadı</button>
+                  onClick={() => setImza(false)}>{c('Alınamadı')}</button>
         </div>
         {imza && (
           // ÇİZİLEN İMZA: bayrak "alındı" der, görsel KİMİN imzaladığını
           //   gösterir - onay kutusu, sonradan çıkan "gelmediler" tartışmasında
           //   delil değildir.
           <div className="zm-alan">
-            <span>Müşteri buraya imzalasın</span>
+            <span>{c('Müşteri buraya imzalasın')}</span>
             <ImzaTuvali salt={kapali} deger={imzaUrl} onDegisti={setImzaBlob} />
           </div>
         )}
         {!imza && (
           <label className="zm-alan">
-            <span>Gerekçe (zorunlu)</span>
+            <span>{c('Gerekçe (zorunlu)')}</span>
             <input value={imzaNotu} readOnly={kapali}
-                   placeholder="Yetkili yoktu, imzadan kaçındı…"
+                   placeholder={c('Yetkili yoktu, imzadan kaçındı…')}
                    onChange={e => setImzaNotu(e.target.value)} />
           </label>
         )}
@@ -393,9 +394,7 @@ export function ZiyaretMobil() {
         // TEK KAYDET DÜĞMESİ, EKRANIN ALTINDA SABİT: yarım dolmuş form,
         //   akşam ofiste hatırlanarak tamamlanan kayıt demektir.
         <div className="zm-alt">
-          <button className="d bir zm-kaydet" onClick={kapat}>
-            ✓ Ziyareti Kapat
-          </button>
+          <button className="d bir zm-kaydet" onClick={kapat}>{c('✓ Ziyareti Kapat')}</button>
         </div>
       )}
     </div>

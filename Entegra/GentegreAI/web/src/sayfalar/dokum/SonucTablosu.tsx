@@ -6,6 +6,7 @@ import {
   boyutDegerMetni, boyutEtiketi, delta, deltaMetni, kiyasAnahtari, listeyiGrupla,
   olcuBicimle, pivotla, toplanabilirMi,
 } from './ortak';
+import { c } from '../../dil/ceviri';
 
 /**
  * DÖKÜM SONUCU (686): liste çıktısını gruplu/ara toplamlı tablo, özet
@@ -82,7 +83,7 @@ export function ListeSonucu({ yanit, tanim, kolonlar, baski, gizli }: {
           );
         })}
         {satirlar.length === 0 && (
-          <tr><td colSpan={secili.length || 1} className="bos">Koşullara uyan kayıt yok.</td></tr>
+          <tr><td colSpan={secili.length || 1} className="bos">{c('Koşullara uyan kayıt yok.')}</td></tr>
         )}
         {yanit.toplamlar && toplam.length > 0 && (
           <tr className="toplam">
@@ -177,7 +178,7 @@ export function OzetSonucu({ yanit, tanim, kolonlar, baski }: {
           );
         })}
         {pivot.satirlar.length === 0 && (
-          <tr><td colSpan={satirBoyut.length + olculer.length + 1} className="bos">Koşullara uyan kayıt yok.</td></tr>
+          <tr><td colSpan={satirBoyut.length + olculer.length + 1} className="bos">{c('Koşullara uyan kayıt yok.')}</td></tr>
         )}
         {pivot.satirlar.length > 0 && ilk && (
           <tr className="toplam">

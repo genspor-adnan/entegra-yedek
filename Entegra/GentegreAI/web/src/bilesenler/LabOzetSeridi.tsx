@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { tarihSaat } from './bicim';
+import { c as cev } from '../dil/ceviri';
 
 /**
  * SONUÇ ONAY ÜST ŞERİDİ (446, mockup Ekranlar/Lab/lab_biyokimya_sonuc_onay.html
@@ -87,7 +88,7 @@ export function LabOzetSeridi({ yenile, onCip }: {
         );
         return tiklanir ? (
           <button type="button" className="lab-ozet-kutu" key={k.anahtar}
-                  title="Listeyi bu süzgeçle aç"
+                  title={cev('Listeyi bu süzgeçle aç')}
                   onClick={() => onCip?.(k.cip as number)}>
             {govde}
           </button>
@@ -100,7 +101,7 @@ export function LabOzetSeridi({ yenile, onCip }: {
           rozetin başlığında - "yeşil ama dört saattir susuyor" hâli
           ancak böyle görülür. */}
       <div className="lab-ozet-kutu bilgi">
-        <span className="b">Cihaz durumu</span>
+        <span className="b">{cev('Cihaz durumu')}</span>
         <span className="d cihazlar">
           {veri.cihazlar.length === 0
             ? <small>lab cihazı tanımlı değil</small>

@@ -5,6 +5,7 @@ import { hataMetni } from '../../api/sozlesme';
 import type { IsgFirmaSatiri, IsgTakvim as Takvim } from '../../api/uclar/isg';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, onay, secimSor } from '../../bilesenler/mesaj';
+import { c as cev } from '../../dil/ceviri';
 
 /**
  * PERİYODİK MUAYENE TAKVİMİ `/isg-takvim` (İSG 741) — mockup
@@ -43,20 +44,20 @@ export function IsgTakvim() {
   return (
     <div className="fm-sayfa">
       <div className="sayfabas"><div className="basrow"><h1>📅 Periyodik Muayene Takvimi</h1><span className="yol">İşyeri Hekimliği › Periyodik Takvim{t ? ` · vadesi geçen ${t.gecen}` : ''}</span>
-        <div className="sag"><button className="d" onClick={() => git('/isg-pano')}>🏭 Firma panosu</button></div></div></div>
+        <div className="sag"><button className="d" onClick={() => git('/isg-pano')}>{cev('🏭 Firma panosu')}</button></div></div></div>
       <div className="fm-doldur-arac">
-        <span className="sonuk">Firma:</span>
+        <span className="sonuk">{cev('Firma:')}</span>
         <select className="fm-giris" value={firmaId} onChange={e => setFirmaId(Number(e.target.value))}><option value={0}>Tümü</option>{firmalar.map(f => <option key={f.id} value={f.id}>{f.firma_adi}</option>)}</select>
-        <span className="sonuk">Dönem:</span>
-        <button className={`d${tur === 'gecen' ? ' bir' : ''}`} onClick={() => setTur(tur === 'gecen' ? '' : 'gecen')}>Vadesi geçen</button>
+        <span className="sonuk">{cev('Dönem:')}</span>
+        <button className={`d${tur === 'gecen' ? ' bir' : ''}`} onClick={() => setTur(tur === 'gecen' ? '' : 'gecen')}>{cev('Vadesi geçen')}</button>
         {[30, 90, 365].map(g => <button key={g} className={`d${!tur && gun === g ? ' bir' : ''}`} onClick={() => { setTur(''); setGun(g) }}>{g === 365 ? 'Yıl' : `${g} gün`}</button>)}
-        <button className={`d${tur === 'giris' ? ' bir' : ''}`} onClick={() => setTur(tur === 'giris' ? '' : 'giris')}>İşe giriş bekleyen</button>
+        <button className={`d${tur === 'giris' ? ' bir' : ''}`} onClick={() => setTur(tur === 'giris' ? '' : 'giris')}>{cev('İşe giriş bekleyen')}</button>
         <span className="sp" />
         {yetki('isg.muayene', 'ekle') && <button className="d bir" onClick={() => void toplu()}>📱 Seçilenlere Ek-2 aç + SMS ({secili.size})</button>}
       </div>
       {t && (
         <div className="isg-aylar">
-          <div className={`isg-ay${tur === 'gecen' ? ' on' : ''}`} onClick={() => setTur('gecen')}><b>Vadesi geçen</b><div className="sy k">{t.gecen}</div></div>
+          <div className={`isg-ay${tur === 'gecen' ? ' on' : ''}`} onClick={() => setTur('gecen')}><b>{cev('Vadesi geçen')}</b><div className="sy k">{t.gecen}</div></div>
           {t.aylar.map(a => <div key={a.ay} className="isg-ay"><b>{new Date(a.ay + '-01').toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' })}</b><div className="sy">{a.sayi}</div></div>)}
         </div>
       )}
@@ -65,7 +66,7 @@ export function IsgTakvim() {
         <table className="fm-tablo">
           <thead><tr>
             <th><input type="checkbox" checked={!!t?.satirlar.length && secili.size === t.satirlar.length} onChange={e => setSecili(e.target.checked ? new Set(t?.satirlar.map(x => x.id)) : new Set())} /></th>
-            <th>Çalışan</th><th>Firma</th><th>Bölüm / görev</th><th>Tehlike</th><th>Son muayene</th><th>Vade</th><th>Kalan</th><th>Tetkik paketi</th><th>Açık</th><th>Durum</th><th></th>
+            <th>Çalışan</th><th>Firma</th><th>{cev('Bölüm / görev')}</th><th>{cev('Tehlike')}</th><th>{cev('Son muayene')}</th><th>Vade</th><th>Kalan</th><th>{cev('Tetkik paketi')}</th><th>Açık</th><th>Durum</th><th></th>
           </tr></thead>
           <tbody>
             {t?.satirlar.map(c => (
@@ -77,11 +78,11 @@ export function IsgTakvim() {
                 <td>{c.kalan_gun < 0 ? <span className="rozet hata">{c.kalan_gun} gün</span> : <span className={c.kalan_gun <= 7 ? 'isg-kir' : ''}>{c.kalan_gun} gün</span>}</td>
                 <td className="fm-not">{c.tetkik_paketi}</td>
                 <td>{c.acik_muayene ? <span className="rozet mor">Açık</span> : '—'}</td>
-                <td>{c.acik_muayene ? <span className="rozet mor">Form gönderildi</span> : c.kalan_gun < 0 ? <span className="rozet hata">Vadesi geçti</span> : c.muayene_sayisi === 0 ? <span className="rozet mor">İşe giriş bekliyor</span> : <span className="rozet uyari">Bekliyor</span>}</td>
-                <td className="fm-sag"><button className="d mini" onClick={() => git(`/isg-calisan/${c.id}?geri=%2Fisg-takvim`)}>Kart</button></td>
+                <td>{c.acik_muayene ? <span className="rozet mor">{cev('Form gönderildi')}</span> : c.kalan_gun < 0 ? <span className="rozet hata">{cev('Vadesi geçti')}</span> : c.muayene_sayisi === 0 ? <span className="rozet mor">{cev('İşe giriş bekliyor')}</span> : <span className="rozet uyari">{cev('Bekliyor')}</span>}</td>
+                <td className="fm-sag"><button className="d mini" onClick={() => git(`/isg-calisan/${c.id}?geri=%2Fisg-takvim`)}>{cev('Kart')}</button></td>
               </tr>
             ))}
-            {t && !t.satirlar.length && <tr><td colSpan={12} className="sonuk">Bu dönemde vadesi gelen çalışan yok.</td></tr>}
+            {t && !t.satirlar.length && <tr><td colSpan={12} className="sonuk">{cev('Bu dönemde vadesi gelen çalışan yok.')}</td></tr>}
           </tbody>
         </table>
       </section>

@@ -1,6 +1,7 @@
 import { BolumSuzgeci } from '../../bilesenler/BolumSuzgeci';
 import { RolSuzgeci } from '../../bilesenler/RolSuzgeci';
 import type { PersonelSuzgeci } from './usePersonelSuzgeci';
+import { c } from '../../dil/ceviri';
 
 /**
  * PERSONEL SERIDI (kullanici): ciplerin SAGINDA bolum agac combosu + rol
@@ -23,7 +24,7 @@ export function PersonelSeridi(
                     deger={s.rol} onDegis={s.setRol} />
       )}
       {(s.bolum !== null || s.rol !== '') && (
-        <button type="button" className="kapat" title="Bölüm/rol filtresini kaldır"
+        <button type="button" className="kapat" title={c('Bölüm/rol filtresini kaldır')}
                 onClick={() => { s.setBolum(null); s.setRol('') }}>×</button>
       )}
     </>

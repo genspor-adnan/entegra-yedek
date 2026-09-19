@@ -1,4 +1,5 @@
 import { KurumTipiAyarlari } from '../bilesenler/KurumTipiAyarlari';
+import { c } from '../dil/ceviri';
 
 /**
  * KURUM PROFILI (Yonetim › Kurum Profili).
@@ -18,7 +19,7 @@ export function KurumProfili() {
       <div className="sayfabas" style={{ marginBottom: 10 }}>
         <div className="basrow">
           <h1>Kurum Profili</h1>
-          <span className="yol">Yönetim › Kurum Profili</span>
+          <span className="yol">{c('Yönetim › Kurum Profili')}</span>
         </div>
       </div>
       <KurumTipiAyarlari />

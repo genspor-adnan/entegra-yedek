@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import type { YatakSecenegi } from '../../api/uclar/yatan';
+import { c } from '../../dil/ceviri';
 
 /**
  * YATAK SEÇİMİ — mockup `Ekranlar/Yatan/yatis_kabul.html` ve
@@ -55,9 +56,9 @@ export function YatakSecimi({ hastaId, departmanId, seciliId, haricYatakId, onSe
   useEffect(() => { void yukle() }, [yukle]);
 
   if (hata) return <div className="hata-kutusu">{hata}</div>;
-  if (!yataklar) return <div className="sonuk" style={{ padding: 8 }}>Yataklar yükleniyor…</div>;
+  if (!yataklar) return <div className="sonuk" style={{ padding: 8 }}>{c('Yataklar yükleniyor…')}</div>;
   if (yataklar.length === 0)
-    return <div className="sonuk" style={{ padding: 8 }}>Tanımlı yatak yok.</div>;
+    return <div className="sonuk" style={{ padding: 8 }}>{c('Tanımlı yatak yok.')}</div>;
 
   const uygunSayi = yataklar.filter(y => y.uygun && y.id !== haricYatakId).length;
 

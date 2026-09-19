@@ -3,7 +3,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import { mesaj } from '../mesaj';
-import { c } from '../../dil/ceviri';
+import { c as cev } from '../../dil/ceviri';
 
 /**
  * İSTEME RANDEVU VERME (316).
@@ -92,7 +92,7 @@ export function RandevuModali({ istemId, accessionNo, tetkikAdi, modalite, sureD
                <button className="d onay" disabled={kaydediyor} onClick={() => void kaydet()}>
                  {kaydediyor ? '⏳ Veriliyor…' : '📅 Randevuyu Ver'}
                </button>
-               <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
+               <button className="d" onClick={onKapat}>{cev('✖ Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}

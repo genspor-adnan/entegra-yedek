@@ -3,6 +3,7 @@ import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { para } from './bicim';
 import { mesaj } from './mesaj';
+import { c } from '../dil/ceviri';
 
 /**
  * TAHSİLAT DAĞITIMI (321) — ödeme hangi belge SATIRINA gitti?
@@ -143,8 +144,8 @@ export function TahsilatDagitimi({ belgeId, kasaIslemId, tutar, onDegisti }: {
   return (
     <div className="kagrup">
       <div className="numaralama-bas bitisik">
-        <h6>Tahsilat Dağıtımı</h6>
-        <button type="button" className="d" onClick={otomatik}>⇄ Otomatik Dağıt</button>
+        <h6>{c('Tahsilat Dağıtımı')}</h6>
+        <button type="button" className="d" onClick={otomatik}>{c('⇄ Otomatik Dağıt')}</button>
         <button type="button" className="d" onClick={() => setDeger({})}>Temizle</button>
         {kasaIslemId ? (
           <button type="button" className="d bir" disabled={kaydediyor}
@@ -164,7 +165,7 @@ export function TahsilatDagitimi({ belgeId, kasaIslemId, tutar, onDegisti }: {
       {yukleniyor && <div className="bos">Yükleniyor…</div>}
 
       {!yukleniyor && satirlar.length === 0 && (
-        <div className="not">Belgede dağıtılacak satır yok.</div>
+        <div className="not">{c('Belgede dağıtılacak satır yok.')}</div>
       )}
 
       {satirlar.length > 0 && (
@@ -172,12 +173,12 @@ export function TahsilatDagitimi({ belgeId, kasaIslemId, tutar, onDegisti }: {
           <thead>
             <tr>
               <th>Kalem</th>
-              <th className="hiza-sag">Hasta payı<div className="sonuk">KDV dahil</div></th>
+              <th className="hiza-sag">{c('Hasta payı')}<div className="sonuk">{c('KDV dahil')}</div></th>
               <th className="hiza-sag">Kalan</th>
-              <th className="hiza-sag">Bu tahsilat</th>
-              <th className="hiza-sag">Kurum payı<div className="sonuk">KDV dahil</div></th>
+              <th className="hiza-sag">{c('Bu tahsilat')}</th>
+              <th className="hiza-sag">{c('Kurum payı')}<div className="sonuk">{c('KDV dahil')}</div></th>
               <th className="hiza-sag">Kalan</th>
-              <th className="hiza-sag">Bu tahsilat</th>
+              <th className="hiza-sag">{c('Bu tahsilat')}</th>
             </tr>
           </thead>
           <tbody>
@@ -210,8 +211,8 @@ export function TahsilatDagitimi({ belgeId, kasaIslemId, tutar, onDegisti }: {
         Dağıtım <b>prim hakedişini</b> besler: prim, tetkik yapıldığında değil
         parası <b>tahsil edildikçe</b> doğar. Dağıtılmayan tutar <b>avans</b> olarak
         kalır - sonraki tahsilatta ya da başka bir kalemde kullanılabilir.
-        <br />Buradaki tutarlar <b>KDV dahildir</b> (hastanın fiilen ödediği tutar);
-        prim tabanı ise <b>KDV hariç matrahtır</b> - KDV kurumun geliri değildir.
+        <br />{c('Buradaki tutarlar')}<b>{c('KDV dahildir')}</b> (hastanın fiilen ödediği tutar);
+        prim tabanı ise <b>{c('KDV hariç matrahtır')}</b> - KDV kurumun geliri değildir.
       </div>
     </div>
   );

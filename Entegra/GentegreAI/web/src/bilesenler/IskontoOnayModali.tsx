@@ -3,6 +3,7 @@ import { Modal } from './Modal';
 import { para, tarihSaat, paraYaz } from './bicim';
 import { hataMetni, type IskontoTalebi } from '../api/sozlesme';
 import { api } from '../api/istemci';
+import { c as cev } from '../dil/ceviri';
 
 /** Cinsiyet ikonu + ilk harfi (663): 1 erkek · 2 kadın · 0 bilinmiyor. */
 function cinsiyetRozeti(kod: number) {
@@ -64,11 +65,11 @@ export function IskontoOnayModali({ talep, tavan, onKapat, onSonuc }: {
            alt={
              <>
                <button type="button" className="d" disabled={calisiyor}
-                       onClick={onKapat}>Kapat</button>
+                       onClick={onKapat}>{cev('Kapat')}</button>
                <button type="button" className="d teh" disabled={calisiyor}
-                       onClick={() => void karar(false)}>✖ Reddet</button>
+                       onClick={() => void karar(false)}>{cev('✖ Reddet')}</button>
                <button type="button" className="d bir" disabled={calisiyor}
-                       onClick={() => void karar(true)}>✔ Onayla</button>
+                       onClick={() => void karar(true)}>{cev('✔ Onayla')}</button>
              </>
            }>
       <div className="isk-onay">
@@ -91,7 +92,7 @@ export function IskontoOnayModali({ talep, tavan, onKapat, onSonuc }: {
         {/* ÜCRETLER yan yana, virgülle - kalem listesi bir tablo kadar yer
             kaplamasın; karar için "neler var ve toplam ne" yeter. */}
         <div className="isk-kutu">
-          <div className="isk-baslik">Ücretler</div>
+          <div className="isk-baslik">{cev('Ücretler')}</div>
           <div className="isk-kalemler">
             {talep.kalemler.length === 0
               ? <span className="sonuk">{talep.satirSayisi} satır</span>
@@ -110,20 +111,20 @@ export function IskontoOnayModali({ talep, tavan, onKapat, onSonuc }: {
         {/* TALEP: ne isteniyor, neden, kim istedi. */}
         <div className="isk-kutu">
           <div className="isk-baslik">Talep</div>
-          <div className="isk-satir"><span>İstenen iskonto</span>
+          <div className="isk-satir"><span>{cev('İstenen iskonto')}</span>
             <b>%{talep.oran}</b></div>
           <div className="isk-satir"><span>Gerekçe</span>
             <b>{talep.gerekce}</b></div>
-          <div className="isk-satir"><span>Banko görevlisi</span>
+          <div className="isk-satir"><span>{cev('Banko görevlisi')}</span>
             <b>{talep.isteyen}</b></div>
-          <div className="isk-satir"><span>İstek zamanı</span>
+          <div className="isk-satir"><span>{cev('İstek zamanı')}</span>
             <b>{tarihSaat(talep.istekTs)}</b></div>
         </div>
 
         {/* KARAR: kısmi onay birinci sınıf - kutu istenen oranla açılır. */}
         <div className="alan-izgara tek-sutun ayar-formu para-sor">
           <label className="alan">
-            <span className="etiket zorunlu-isaret">Onaylanan oran</span>
+            <span className="etiket zorunlu-isaret">{cev('Onaylanan oran')}</span>
             <span className="ikili">
               <input className="hiza-sag genis-deger" value={oran} autoFocus
                      onChange={e => { setOran(e.target.value); setHata(null) }} />
@@ -135,8 +136,8 @@ export function IskontoOnayModali({ talep, tavan, onKapat, onSonuc }: {
             </span>
           </label>
           <label className="alan">
-            <span className="etiket">Karar notu</span>
-            <input value={not} placeholder="Onayda isteğe bağlı, RETTE zorunlu"
+            <span className="etiket">{cev('Karar notu')}</span>
+            <input value={not} placeholder={cev('Onayda isteğe bağlı, RETTE zorunlu')}
                    onChange={e => { setNot(e.target.value); setHata(null) }} />
           </label>
         </div>

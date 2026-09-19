@@ -1,6 +1,7 @@
 import type { IskontoTalebi } from '../../api/sozlesme';
 import { para, tarihSaat } from '../../bilesenler/bicim';
 import { ACIL_DAKIKA, DURUM_ROZET, dakikaFarki, indirim, sure, verilenIndirim } from './ortak';
+import { c } from '../../dil/ceviri';
 
 /**
  * TALEP TABLOSU - hem BEKLEYEN kuyruk hem SONUÇLANANLAR için.
@@ -28,7 +29,7 @@ export function KuyrukTablosu({ liste, gecmisMi, seciliId, yukleniyor,
           <th style={{ width: 118 }}>Saat</th>
           <th style={{ width: 160 }}>Hasta</th>
           <th style={{ width: 104 }}>Protokol</th>
-          <th>Talep edilen indirim</th>
+          <th>{c('Talep edilen indirim')}</th>
           <th style={{ width: 150 }}>Gerekçe</th>
           <th className="hiza-sag" style={{ width: 100 }}>Tutar</th>
           <th className="hiza-sag" style={{ width: 96 }}>İndirim</th>

@@ -5,6 +5,7 @@ import type { EmarDoz, EmarOrder } from '../../api/uclar/yatan';
 import { Modal } from '../Modal';
 import { mesaj } from '../mesaj';
 import { tarihSaat } from '../bicim';
+import { c } from '../../dil/ceviri';
 
 /**
  * İLAÇ UYGULAMA — mockup `Ekranlar/Yatan/order_ilac_uygulama.html`
@@ -110,7 +111,7 @@ export function DozUygulamaModali({ doz, order, hasta, acilisAtlaModu,
                          onClick={() => void atla()}>⤫ Atlandı Olarak Kaydet</button>
                ) : (
                  <button className="d onay" disabled={kaydediyor}
-                         onClick={() => void uygula()}>✔ Uygulandı</button>
+                         onClick={() => void uygula()}>{c('✔ Uygulandı')}</button>
                )}
                <button className="d" onClick={() => setAtlaModu(a => !a)}>
                  {atlaModu ? '← Uygulama' : '⤫ Atlandı (sebep gir)'}
@@ -122,7 +123,7 @@ export function DozUygulamaModali({ doz, order, hasta, acilisAtlaModu,
 
       {gecikti && !atlaModu && (
         <div className="uyari-kutusu">
-          <b>Bu doz gecikti.</b> Planlanan {tarihSaat(doz.planlanan)}. Gecikme sebebi
+          <b>{c('Bu doz gecikti.')}</b> Planlanan {tarihSaat(doz.planlanan)}. Gecikme sebebi
           uygulama kaydına yazılır — "neden geç verildi" sorusunun cevabı sonradan
           hatırlanmaz.
         </div>
@@ -133,7 +134,7 @@ export function DozUygulamaModali({ doz, order, hasta, acilisAtlaModu,
         <div className="ic">
           <div className="sat"><span>Hasta</span><b>{hasta}</b></div>
           <div className="sat"><span>İlaç</span><b>{order.ad}</b></div>
-          <div className="sat"><span>Doz / yol</span>
+          <div className="sat"><span>{c('Doz / yol')}</span>
             <b>{order.doz ?? '—'} {order.birim} {order.yolAd && `· ${order.yolAd}`}</b></div>
           <div className="sat"><span>Planlanan</span><b>{tarihSaat(doz.planlanan)}</b></div>
         </div>
@@ -143,22 +144,22 @@ export function DozUygulamaModali({ doz, order, hasta, acilisAtlaModu,
         <>
           <div className="alan-izgara">
             <label className="alan">
-              <span className="etiket">Bileklik barkodu</span>
-              <input value={bileklik} placeholder="Hasta bilekliğini okutun"
+              <span className="etiket">{c('Bileklik barkodu')}</span>
+              <input value={bileklik} placeholder={c('Hasta bilekliğini okutun')}
                      onChange={e => setBileklik(e.target.value)} />
             </label>
             <label className="alan">
-              <span className="etiket">İlaç karekodu</span>
-              <input value={barkod} placeholder="Kutu karekodunu okutun"
+              <span className="etiket">{c('İlaç karekodu')}</span>
+              <input value={barkod} placeholder={c('Kutu karekodunu okutun')}
                      onChange={e => setBarkod(e.target.value)} />
             </label>
             <label className="alan">
-              <span className="etiket">Uygulanan miktar</span>
+              <span className="etiket">{c('Uygulanan miktar')}</span>
               <input value={miktar} onChange={e => setMiktar(e.target.value)} />
             </label>
             {gecikti && (
               <label className="alan">
-                <span className="etiket zorunlu-isaret">Gecikme sebebi</span>
+                <span className="etiket zorunlu-isaret">{c('Gecikme sebebi')}</span>
                 <input list="gecikme-sebep" value={gecikme}
                        onChange={e => setGecikme(e.target.value)} />
                 <datalist id="gecikme-sebep">
@@ -168,11 +169,11 @@ export function DozUygulamaModali({ doz, order, hasta, acilisAtlaModu,
             )}
           </div>
           <div className="not">
-            <b>Barkod okutulmadan da kaydedilir</b> (acil durum) ama kayıt
+            <b>{c('Barkod okutulmadan da kaydedilir')}</b> (acil durum) ama kayıt
             <b> "elle doğrulandı"</b> işaretlenir: ikisini aynı göstermek, beş doğru
             kontrolünü kâğıt üstünde bırakmak olurdu.
             {(!barkodOkundu || !bileklikOkundu) && (
-              <> Şu an <b>elle doğrulama</b> ile kaydedilecek.</>
+              <>{c('Şu an')}<b>elle doğrulama</b> ile kaydedilecek.</>
             )}
           </div>
         </>
@@ -182,7 +183,7 @@ export function DozUygulamaModali({ doz, order, hasta, acilisAtlaModu,
         <>
           <div className="alan-izgara tek-sutun">
             <label className="alan">
-              <span className="etiket zorunlu-isaret">Atlama sebebi</span>
+              <span className="etiket zorunlu-isaret">{c('Atlama sebebi')}</span>
               <input list="atlama-sebep" value={atlama}
                      onChange={e => setAtlama(e.target.value)} />
               <datalist id="atlama-sebep">
@@ -191,7 +192,7 @@ export function DozUygulamaModali({ doz, order, hasta, acilisAtlaModu,
             </label>
           </div>
           <div className="not">
-            <b>Atlanan doz silinmez</b>, sebebiyle kapanır: silinen satır "verilmedi mi,
+            <b>{c('Atlanan doz silinmez')}</b>, sebebiyle kapanır: silinen satır "verilmedi mi,
             hiç planlanmadı mı" sorusunu cevapsız bırakır. <b>"Hasta reddetti"</b> ayrı
             bir durumdur — hemşirenin atlamasıyla aynı şey değildir.
           </div>

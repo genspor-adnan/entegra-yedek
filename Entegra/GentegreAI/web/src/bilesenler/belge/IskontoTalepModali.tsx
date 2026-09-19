@@ -4,6 +4,7 @@ import { para, hamSayi, paraYaz } from '../bicim';
 import { ISKONTO_GEREKCELERI } from '../../sayfalar/belgeSabitleri';
 import { satirTutari, type SatirDurumu } from '../../sayfalar/belgeSatir';
 import { bruta } from '../../sayfalar/belgeKarti/kdvModu';
+import { c } from '../../dil/ceviri';
 
 /** Pencerenin kalem satiri - ekranda gosterilen ve hesaplanan her sey. */
 export interface IskontoKalemSatiri {
@@ -140,11 +141,11 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
                <button type="button" className="d bir" disabled={calisiyor || !onayGerek}
                        title={onayGerek ? 'Yetkilinin onayına gönderir'
                                         : 'Limit içinde - onaya gerek yok'}
-                       onClick={() => void gonder(true)}>⬆ Onaya Gönder</button>
+                       onClick={() => void gonder(true)}>{c('⬆ Onaya Gönder')}</button>
                {/* KAPAT SAGA YANASIK: eylem dugmeleriyle arasi acilir ki
                    yanlislikla tiklanmasin. */}
                <button type="button" className="d" style={{ marginLeft: 'auto' }}
-                       disabled={calisiyor} onClick={onKapat}>Kapat</button>
+                       disabled={calisiyor} onClick={onKapat}>{c('Kapat')}</button>
              </>
            }>
       <div className="isk-talep">
@@ -176,7 +177,7 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
                 <th className="check"></th>
                 <th>Hizmet</th>
                 <th className="hiza-sag" style={{ width: 110 }}>Tutar</th>
-                <th className="hiza-sag" style={{ width: 70 }}>Oran %</th>
+                <th className="hiza-sag" style={{ width: 70 }}>{c('Oran %')}</th>
                 <th className="hiza-sag" style={{ width: 90 }}>İskonto</th>
                 <th className="hiza-sag" style={{ width: 110 }}>Net</th>
                 <th style={{ width: 170 }}>Not</th>
@@ -229,8 +230,7 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
             </tbody>
           </table>
           <div className="isk-ozet">
-            <span className="sonuk">
-              İndirilebilir <b>{paraYaz(indirilebilir)}</b>
+            <span className="sonuk">{c('İndirilebilir')}<b>{paraYaz(indirilebilir)}</b>
               {kilitli > 0 && <> · kilitli <b>{paraYaz(kilitli)}</b></>}
             </span>
             <span>
@@ -258,7 +258,7 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
             </label>
             <label className="alan">
               <span className="etiket">Açıklama</span>
-              <input value={aciklama} placeholder="Yetkili bunu okuyacak"
+              <input value={aciklama} placeholder={c('Yetkili bunu okuyacak')}
                      onChange={e => setAciklama(e.target.value)} />
             </label>
           </div>
@@ -267,9 +267,9 @@ export function IskontoTalepModali({ satirlar, tavan, hasta, onKapat, onSonuc }:
         {/* YETKI: hem oran hem sonuc gorunur - gorevli hangi dugmenin
             calisacagini tahmin etmesin. */}
         <div className="kagrup">
-          <h6>Yetkiniz</h6>
-          <div className="isk-sat"><span>Oran limitiniz</span><b>%{tavan}</b></div>
-          <div className="isk-sat"><span>İstenen oran</span><b>%{oranSayi || 0}</b></div>
+          <h6>{c('Yetkiniz')}</h6>
+          <div className="isk-sat"><span>{c('Oran limitiniz')}</span><b>%{tavan}</b></div>
+          <div className="isk-sat"><span>{c('İstenen oran')}</span><b>%{oranSayi || 0}</b></div>
           <div className={`isk-sat ${onayGerek ? 'teh' : 'ok'}`}>
             <span>Sonuç</span>
             <b>{!(oranSayi > 0) ? 'Oran girin'

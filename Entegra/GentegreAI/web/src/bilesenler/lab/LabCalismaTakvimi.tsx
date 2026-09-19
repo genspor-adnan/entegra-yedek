@@ -2,6 +2,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { yerelAnMetni } from '../bicim';
+import { c } from '../../dil/ceviri';
 
 /**
  * ÇALIŞMA TAKVİMİ ve SONUÇ ÖNİZLEMESİ (487).
@@ -163,17 +164,17 @@ export function LabCalismaTakvimi({ deger }: { deger: CalismaDuzeni }) {
         </h6>
         <div className="lab-ozet">
           <div className="lab-ozet-kutu bilgi">
-            <div className="b">Şimdi istenirse</div>
+            <div className="b">{c('Şimdi istenirse')}</div>
             <div className="d">{zamanMetni(o.simdi)}</div>
             <div className="sonuk">{farkMetni(o.simdiKabul, o.simdi)}</div>
           </div>
           <div className="lab-ozet-kutu bilgi">
-            <div className="b">Kabul son saatinden sonra</div>
+            <div className="b">{c('Kabul son saatinden sonra')}</div>
             <div className="d">{zamanMetni(o.kacirilan)}</div>
             <div className="sonuk">bir sonraki seriye kalır</div>
           </div>
           <div className="lab-ozet-kutu bilgi">
-            <div className="b">Acil istenirse</div>
+            <div className="b">{c('Acil istenirse')}</div>
             <div className="d">{zamanMetni(o.acil)}</div>
             <div className="sonuk">
               {acilBeklemez ? 'düzen beklenmez' : 'düzeni bekler'}
@@ -185,7 +186,7 @@ export function LabCalismaTakvimi({ deger }: { deger: CalismaDuzeni }) {
           takvimdeki ilk uygun çalışma → çalışma + TAT. Kabul son saatini bir dakika
           geçen numune bir sonraki seriye kalır; hastaya söylenen saat de o an değişir.
           {o.simdi === null && (
-            <> <b>Tanım eksik:</b> seri düzeninde gün ve saat verilmeden sonuç
+            <> <b>{c('Tanım eksik:')}</b> seri düzeninde gün ve saat verilmeden sonuç
             zamanı hesaplanamaz.</>
           )}
         </div>

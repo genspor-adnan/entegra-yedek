@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
+import { c } from '../../dil/ceviri';
 
 /**
  * SEÇİLİ TETKİK paneli (492) - Tetkik Kataloğu listesinin sağında.
@@ -74,7 +75,7 @@ export function LabTetkikOzeti({ id }: { id: number | null }) {
   if (!id)
     return (
       <div className="lab-detay">
-        <div className="kagrup"><h6>Seçili Tetkik</h6>
+        <div className="kagrup"><h6>{c('Seçili Tetkik')}</h6>
           <div className="sonuk" style={{ padding: 12 }}>
             Ayrıntı için listeden bir tetkik seçin.
           </div>
@@ -102,7 +103,7 @@ export function LabTetkikOzeti({ id }: { id: number | null }) {
   return (
     <div className="lab-detay">
       <div className="kagrup">
-        <h6>Seçili Tetkik</h6>
+        <h6>{c('Seçili Tetkik')}</h6>
         <div style={{ padding: '8px 10px' }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--vurgu)' }}>
             {metin(t.ad)}
@@ -115,9 +116,9 @@ export function LabTetkikOzeti({ id }: { id: number | null }) {
               <div className="deger">
                 {[metin(t.loinc), metin(t.skrsKod)].filter(Boolean).join(' · ') || '—'}
               </div></div>
-            <div className="fld"><label>Ölçülebilir aralık</label>
+            <div className="fld"><label>{c('Ölçülebilir aralık')}</label>
               <div className="deger">{aralik(t.olculebilirAlt, t.olculebilirUst)}</div></div>
-            <div className="fld"><label>Panik değer</label>
+            <div className="fld"><label>{c('Panik değer')}</label>
               <div className="deger">{panik()}</div></div>
             <div className="fld"><label>Yöntem</label>
               <div className="deger">{metin(t.yontem) || '—'}</div></div>
@@ -126,8 +127,7 @@ export function LabTetkikOzeti({ id }: { id: number | null }) {
       </div>
 
       <div className="kagrup">
-        <h6>Referans Aralıkları
-          <span className="sp">{veri.referanslar.length} kural</span>
+        <h6>{c('Referans Aralıkları')}<span className="sp">{veri.referanslar.length} kural</span>
         </h6>
         <table className="detay-tablo">
           <tbody>
@@ -156,12 +156,12 @@ export function LabTetkikOzeti({ id }: { id: number | null }) {
         </h6>
         <div className="lab-ozet" style={{ padding: 8 }}>
           <div className="lab-ozet-kutu bilgi">
-            <div className="b">Normal</div>
+            <div className="b">{c('Normal')}</div>
             <div className="d">{zamanMetni(t.sonucZamani)}</div>
             <div className="sonuk">TAT {tatMetni(t.hedefTatDk)}</div>
           </div>
           <div className="lab-ozet-kutu bilgi">
-            <div className="b">Acil TAT</div>
+            <div className="b">{c('Acil TAT')}</div>
             <div className="d">{tatMetni(t.acilTatDk)}</div>
             <div className="sonuk">acil istemde hedef</div>
           </div>
@@ -169,14 +169,14 @@ export function LabTetkikOzeti({ id }: { id: number | null }) {
       </div>
 
       <div className="kagrup">
-        <h6>Nerede Kullanılıyor</h6>
+        <h6>{c('Nerede Kullanılıyor')}</h6>
         <table className="detay-tablo">
           <tbody>
             {veri.paneller.map(p => (
               <tr key={p.id}><td>📦 {p.ad}</td></tr>
             ))}
             {veri.paneller.length === 0 && (
-              <tr><td className="sonuk">Hiçbir panelde yok</td></tr>
+              <tr><td className="sonuk">{c('Hiçbir panelde yok')}</td></tr>
             )}
             <tr><td className="sonuk">
               Son 30 günde <b>{veri.istemAdedi.toLocaleString('tr-TR')}</b> istem

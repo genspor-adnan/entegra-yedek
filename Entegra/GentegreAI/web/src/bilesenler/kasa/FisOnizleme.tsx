@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { FisOzeti } from '../../api/sozlesme';
 import { para } from '../bicim';
+import { c } from '../../dil/ceviri';
 
 
 const FIS_TURU: Record<number, string> = {
@@ -25,9 +26,7 @@ export function FisOnizleme({ fis }: { fis: FisOzeti }) {
     <div className="kagrup">
       <h6 style={{ cursor: 'pointer' }} onClick={() => setAcik(a => !a)}
           title={acik ? 'Fiş satırlarını gizle' : 'Fiş satırlarını göster'}>
-        <span className="sonuk" style={{ marginRight: 4 }}>{acik ? '▾' : '▸'}</span>
-        Muhasebe Fişi
-        <span className="rozet">{FIS_TURU[fis.tur] ?? fis.tur}</span>
+        <span className="sonuk" style={{ marginRight: 4 }}>{acik ? '▾' : '▸'}</span>{c('Muhasebe Fişi')}<span className="rozet">{FIS_TURU[fis.tur] ?? fis.tur}</span>
         {fis.fisNo && <span className="rozet bir">{fis.fisNo}</span>}
         {fis.durum !== 1 && <span className="rozet uyari">{FIS_DURUM[fis.durum] ?? fis.durum}</span>}
         <span className={dengeli ? 'rozet olumlu' : 'rozet uyari'}>
@@ -40,10 +39,10 @@ export function FisOnizleme({ fis }: { fis: FisOzeti }) {
         <thead>
           <tr>
             <th style={{ width: 90 }}>Hesap</th>
-            <th>Hesap Adı</th>
+            <th>{c('Hesap Adı')}</th>
             <th className="hiza-sag" style={{ width: 130 }}>Borç</th>
             <th className="hiza-sag" style={{ width: 130 }}>Alacak</th>
-            <th style={{ width: 120 }}>Döviz</th>
+            <th style={{ width: 120 }}>{c('Döviz')}</th>
           </tr>
         </thead>
         <tbody>

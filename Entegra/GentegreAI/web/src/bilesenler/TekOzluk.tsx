@@ -106,7 +106,7 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk, isBilgiEk }
         </div>
       </div>
       <div className="kagrup">
-        <h6>SGK / Giriş-Çıkış</h6>
+        <h6>{c('SGK / Giriş-Çıkış')}</h6>
         <div className="alan-izgara tek-sutun">
           <div className="adres-satir">
             {/* GIRIS/CIKIS KILITLI (840/841): ilk kayitta girilir, sonra

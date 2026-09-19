@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
+import { c } from '../dil/ceviri';
 
 /**
  * Randevu kartının ALT ÖZET ŞERİDİ (Ekranlar/randevu_karti.html: "Hasta No ·
@@ -58,13 +59,13 @@ export function RandevuOzetSeridi({ hastaId, hariçId, olusturan }: {
 
   return (
     <div className="randevu-ozet">
-      <span>Hasta No: <b>{hasta?.kod || '—'}</b></span>
-      <span>Son Randevu: <b>{son || 'yok'}</b></span>
-      <span>Açık Bakiye: <b>
+      <span>{c('Hasta No:')}<b>{hasta?.kod || '—'}</b></span>
+      <span>{c('Son Randevu:')}<b>{son || 'yok'}</b></span>
+      <span>{c('Açık Bakiye:')}<b>
         {(hasta?.bakiye ?? 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺
       </b></span>
       {olusturan && (
-        <span>Oluşturma: <b>{olusturan.slice(0, 10).split('-').reverse().join('.')}</b></span>
+        <span>{c('Oluşturma:')}<b>{olusturan.slice(0, 10).split('-').reverse().join('.')}</b></span>
       )}
     </div>
   );

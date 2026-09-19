@@ -3,6 +3,7 @@ import { tarihSaat } from '../../bilesenler/bicim';
 import { KURAL_ETIKET, bosBaski, parametreAlanlari, tanimCumlesi, yonOnerisi } from './ortak';
 import { CubukGrafik, ListeSonucu, OzetGostergeler, OzetSonucu, ozetMi } from './SonucTablosu';
 import { AntetLogo } from '../../bilesenler/AntetLogo';
+import { c } from '../../dil/ceviri';
 
 /**
  * BASKI ÖNİZLEME (mockup Ekranlar/Ayarlar/dokum_baski_onizleme.html).
@@ -42,11 +43,11 @@ export function BaskiOnizleme({ tanim, setTanim, kolonlar, kaynakAdi, ad, yanit,
       <div className="dk-baski-ayar">
         <div className="kagrup">
           <h6>Sayfa</h6>
-          <div className="dk-sat"><span>Kâğıt</span><span>A4</span></div>
+          <div className="dk-sat"><span>{c('Kâğıt')}</span><span>A4</span></div>
           <div className="dk-sat"><span>Yön</span>
             <span>
-              <label className="dk-onay"><input type="radio" checked={b.yon === 'dikey'} onChange={() => yaz({ yon: 'dikey' })} />Dikey</label>
-              <label className="dk-onay"><input type="radio" checked={b.yon === 'yatay'} onChange={() => yaz({ yon: 'yatay' })} />Yatay</label>
+              <label className="dk-onay"><input type="radio" checked={b.yon === 'dikey'} onChange={() => yaz({ yon: 'dikey' })} />{c('Dikey')}</label>
+              <label className="dk-onay"><input type="radio" checked={b.yon === 'yatay'} onChange={() => yaz({ yon: 'yatay' })} />{c('Yatay')}</label>
             </span>
           </div>
           {oneri !== b.yon && (
@@ -55,7 +56,7 @@ export function BaskiOnizleme({ tanim, setTanim, kolonlar, kaynakAdi, ad, yanit,
           )}
         </div>
         <div className="kagrup">
-          <h6>Başlık &amp; Altbilgi</h6>
+          <h6>{c('Başlık &amp; Altbilgi')}</h6>
           {([
             ['kurumBasligi', 'Kurum başlığı (ad · adres)'],
             ['parametreKutusu', 'Döküm adı + parametre kutusu'],
@@ -65,7 +66,7 @@ export function BaskiOnizleme({ tanim, setTanim, kolonlar, kaynakAdi, ad, yanit,
           ] as const).map(([k, ad]) => (
             <label key={k} className="dk-sat dk-onay"><input type="checkbox" checked={b[k]} onChange={e => yaz({ [k]: e.target.checked })} />{ad}</label>
           ))}
-          <label className="dk-sat"><span>Dipnot</span><input value={b.dipnot} onChange={e => yaz({ dipnot: e.target.value })} /></label>
+          <label className="dk-sat"><span>{c('Dipnot')}</span><input value={b.dipnot} onChange={e => yaz({ dipnot: e.target.value })} /></label>
         </div>
         <div className="kagrup">
           <h6>İçerik</h6>
@@ -76,13 +77,13 @@ export function BaskiOnizleme({ tanim, setTanim, kolonlar, kaynakAdi, ad, yanit,
           ] as const).map(([k, ad]) => (
             <label key={k} className="dk-sat dk-onay"><input type="checkbox" checked={b[k]} onChange={e => yaz({ [k]: e.target.checked })} />{ad}</label>
           ))}
-          <label className="dk-sat"><span>Satır tavanı</span>
+          <label className="dk-sat"><span>{c('Satır tavanı')}</span>
             <input type="number" min={100} max={5000} step={100} value={b.satirTavani}
                    onChange={e => yaz({ satirTavani: Math.max(100, Math.min(5000, Number(e.target.value) || 2000)) })} />
           </label>
           {tanim.cikti === 'liste' && (
             <div className="dk-havuz">
-              <span className="sonuk">Kolon gizle/göster:</span>
+              <span className="sonuk">{c('Kolon gizle/göster:')}</span>
               {secili.map(k => (
                 <button key={k} className={`dk-cip${gizli.includes(k) ? '' : ' on'}`}
                         onClick={() => yaz({ gizliKolonlar: gizli.includes(k) ? gizli.filter(x => x !== k) : [...gizli, k] })}>
@@ -93,7 +94,7 @@ export function BaskiOnizleme({ tanim, setTanim, kolonlar, kaynakAdi, ad, yanit,
           )}
         </div>
         <div className="kagrup">
-          <h6>Basım</h6>
+          <h6>{c('Basım')}</h6>
           <div className="dk-sat" style={{ gap: 6, justifyContent: 'flex-start' }}>
             <button className="d bir" onClick={() => window.print()} disabled={!yanit}>🖨 Yazdır</button>
             <button className="d" onClick={() => window.print()} disabled={!yanit}
@@ -107,7 +108,7 @@ export function BaskiOnizleme({ tanim, setTanim, kolonlar, kaynakAdi, ad, yanit,
               </button>
             </div>
           )}
-          <div className="pano-not">Baskı ayarı <b>dökümle kaydedilir</b> (Kaydet düğmesi). Yazdırma tarayıcınındır; ayrı PDF sunucusu yok.</div>
+          <div className="pano-not">{c('Baskı ayarı')}<b>dökümle kaydedilir</b> (Kaydet düğmesi). Yazdırma tarayıcınındır; ayrı PDF sunucusu yok.</div>
         </div>
       </div>
 
@@ -142,15 +143,14 @@ export function BaskiOnizleme({ tanim, setTanim, kolonlar, kaynakAdi, ad, yanit,
             ? <OzetSonucu yanit={yanit} tanim={tanim} kolonlar={kolonlar} baski />
             : <ListeSonucu yanit={yanit} tanim={tanim} kolonlar={kolonlar} baski gizli={gizli} />)}
           {yanit && ozetMi(yanit) && b.capraz && (tanim.boyut?.satir.length ?? 0) > 0 && (
-            <div className="dk-bolum-bas">Satır boyutuna göre
-              <CubukGrafik yanit={yanit} tanim={tanim} kolonlar={kolonlar} enCok={10} />
+            <div className="dk-bolum-bas">{c('Satır boyutuna göre')}<CubukGrafik yanit={yanit} tanim={tanim} kolonlar={kolonlar} enCok={10} />
             </div>
           )}
           {b.imza && (
             <div className="dk-imzalar">
               <div><b>Hazırlayan</b>{kullaniciAdi} · {gunTr(simdi.toISOString().slice(0, 10))}</div>
-              <div><b>Kontrol</b></div>
-              <div><b>Onaylayan</b></div>
+              <div><b>{c('Kontrol')}</b></div>
+              <div><b>{c('Onaylayan')}</b></div>
             </div>
           )}
           {b.dipnot && <div className="dk-dipnot">{b.dipnot}</div>}

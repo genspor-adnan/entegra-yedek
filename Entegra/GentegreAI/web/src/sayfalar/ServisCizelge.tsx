@@ -4,6 +4,7 @@ import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import type { ServisCizelgesi, CizelgeZiyareti } from '../api/uclar/servis';
 import { guvenli, mesaj } from '../bilesenler/mesaj';
+import { c as cev } from '../dil/ceviri';
 
 /**
  * TEKNİSYEN ÇİZELGESİ (775) — mockup `Ekranlar/TeknikServis/teknik_servis_saha.html`
@@ -85,7 +86,7 @@ export function ServisCizelge() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Teknisyen Çizelgesi</h1>
-          <span className="yol">Teknik Servis › Çizelge</span>
+          <span className="yol">{cev('Teknik Servis › Çizelge')}</span>
         </div>
       </div>
 
@@ -93,7 +94,7 @@ export function ServisCizelge() {
         <div className="cp-arac">
           <button className="d" onClick={() => gunDegis(-1)}>‹ Önceki gün</button>
           <input type="date" value={tarih} onChange={e => setTarih(e.target.value)} />
-          <button className="d" onClick={() => gunDegis(1)}>Sonraki gün ›</button>
+          <button className="d" onClick={() => gunDegis(1)}>{cev('Sonraki gün ›')}</button>
           <button className="d" onClick={() => setTarih(new Date().toISOString().slice(0, 10))}>
             Bugün
           </button>
@@ -105,16 +106,16 @@ export function ServisCizelge() {
 
         {o && (
           <div className="cz-ozet">
-            <div className="kutu"><b>Teknisyen</b><span>{o.teknisyen}</span></div>
+            <div className="kutu"><b>{cev('Teknisyen')}</b><span>{o.teknisyen}</span></div>
             <div className="kutu"><b>Ziyaret</b><span>{o.ziyaret}</span></div>
-            <div className="kutu"><b>Süren</b><span>{o.suren}</span></div>
-            <div className="kutu ok"><b>Çözüldü</b><span>{o.cozuldu}</span></div>
+            <div className="kutu"><b>{cev('Süren')}</b><span>{o.suren}</span></div>
+            <div className="kutu ok"><b>{cev('Çözüldü')}</b><span>{o.cozuldu}</span></div>
             {/* ÇÖZÜLEMEYEN = İKİNCİ GİDİŞ: ücretsiz yol demektir, günün asıl
                 verimlilik kaybı burada görünür. */}
-            <div className="kutu sari"><b>Çözülemedi</b>
+            <div className="kutu sari"><b>{cev('Çözülemedi')}</b>
               <span>{o.cozulemedi}<small>ikinci gidiş gerekiyor</small></span></div>
-            <div className="kutu kir"><b>Atanmamış çağrı</b>
-              <span>{o.atanmamis}<small>SLA işliyor</small></span></div>
+            <div className="kutu kir"><b>{cev('Atanmamış çağrı')}</b>
+              <span>{o.atanmamis}<small>{cev('SLA işliyor')}</small></span></div>
             <div className="kutu"><b>Yol</b><span>{o.yolKm}<small>km</small></span></div>
           </div>
         )}
@@ -123,7 +124,7 @@ export function ServisCizelge() {
 
         <div className="cz-tablo">
           <div className="cz-bas">
-            <div className="cz-basoda">Teknisyen</div>
+            <div className="cz-basoda">{cev('Teknisyen')}</div>
             <div className="cz-serit">
               {saatler.map((s, i) => (
                 <div key={s} className="cz-saat"
@@ -179,7 +180,7 @@ export function ServisCizelge() {
               görünmez; ayrı bir satırda toplanır ki kaybolmasın. */}
           {(veri?.ziyaretler ?? []).some(z => !z.teknisyenId) && (
             <div className="cz-satir">
-              <div className="cz-oda"><b>Teknisyensiz</b>
+              <div className="cz-oda"><b>{cev('Teknisyensiz')}</b>
                 <span>ziyaret açılmış, kimseye atanmamış</span></div>
               <div className="cz-serit">
                 {(veri?.ziyaretler ?? []).filter(z => !z.teknisyenId).map(z => {
@@ -198,7 +199,7 @@ export function ServisCizelge() {
           {(veri?.teknisyenler ?? []).length === 0 && (
             <div className="bos" style={{ padding: 18 }}>
               Servis yetkisi olan kullanıcı yok. Çizelgeye satır açılabilmesi için
-              bir rolde <b>Teknik Servis</b> yetkisi tanımlı olmalı.
+              bir rolde <b>{cev('Teknik Servis')}</b> yetkisi tanımlı olmalı.
             </div>
           )}
         </div>
@@ -208,7 +209,7 @@ export function ServisCizelge() {
           işliyor. Boş kapasiteyi gören kişi buradan iş emri açar. */}
       {(veri?.atanmamis ?? []).length > 0 && (
         <div className="kagrup">
-          <h6>Atanmamış Çağrılar <span className="sonuk">— SLA saati işliyor</span></h6>
+          <h6>{cev('Atanmamış Çağrılar')}<span className="sonuk">— SLA saati işliyor</span></h6>
           <table className="detay-tablo">
             <thead>
               <tr><th>Çağrı</th><th>Müşteri</th><th>Cihaz</th><th>Bölge</th>
@@ -225,9 +226,7 @@ export function ServisCizelge() {
                     {c.slaKalanDk ?? '—'}
                   </td>
                   <td className="sag">
-                    <button className="d mini" onClick={() => ata(c.id)}>
-                      İş Emri Aç
-                    </button>
+                    <button className="d mini" onClick={() => ata(c.id)}>{cev('İş Emri Aç')}</button>
                   </td>
                 </tr>
               ))}
@@ -255,7 +254,7 @@ export function ServisCizelge() {
               <button className="d" onClick={() => git('/servis-is-emri')}>
                 🗂️ İş emri listesi
               </button>
-              <button className="d" onClick={() => setSecili(null)}>Kapat</button>
+              <button className="d" onClick={() => setSecili(null)}>{cev('Kapat')}</button>
             </div>
           </div>
         </div>

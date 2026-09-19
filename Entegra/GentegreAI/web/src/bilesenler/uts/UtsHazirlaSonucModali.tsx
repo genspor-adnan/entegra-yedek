@@ -1,6 +1,7 @@
 import { Modal } from '../Modal';
 import { YerelGrid } from '../grid/YerelGrid';
 import type { UtsHazirlaYaniti } from '../../api/istemci';
+import { c } from '../../dil/ceviri';
 
 /**
  * VERME HAZIRLA raporu (kullanıcı): kaç satır bekleyene alındı + hangileri
@@ -25,7 +26,7 @@ export function UtsHazirlaSonucModali({ sonuc, onKapat }: {
   return (
     <Modal baslik="ÜTS Verme Bildirimi — Hazırlama Sonucu" onKapat={onKapat}
       alt={<button className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
-                   onClick={onKapat}>Kapat</button>}>
+                   onClick={onKapat}>{c('Kapat')}</button>}>
       <div style={{ padding: 10 }}>
         <div className={sonuc.olusan > 0 ? 'bilgi-kutusu' : 'hata-kutusu'}>
           {sonuc.mesaj}

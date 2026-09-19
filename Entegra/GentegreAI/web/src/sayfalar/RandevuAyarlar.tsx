@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AyarSekmeSeridi } from '../bilesenler/AyarSekmeSeridi';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
 import { RandevuBolumAyarlari } from '../bilesenler/RandevuBolumAyarlari';
+import { c } from '../dil/ceviri';
 
 const SEKMELER = [
   { anahtar: 'genel', baslik: 'Genel' },
@@ -29,7 +30,7 @@ export function RandevuAyarlar() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Randevu Ayarları</h1>
-          <span className="yol">Kayıt Kabul › Randevu Ayarları</span>
+          <span className="yol">{c('Kayıt Kabul › Randevu Ayarları')}</span>
         </div>
       </div>
 
@@ -56,7 +57,7 @@ export function RandevuAyarlar() {
         yukleniyor ? <div className="yukleniyor">Yükleniyor…</div> : (
           <>
             <div className="kagrup">
-              <h6>Çalışma Saatleri</h6>
+              <h6>{c('Çalışma Saatleri')}</h6>
               <div className="alan-izgara tek-sutun ayar-formu">
                 <AyarAlani anahtar="randevu.baslangic_saat" etiket="Takvim başlama saati"
                            tip="metin" ayarlar={ayarlar} onYaz={yaz} />
@@ -74,7 +75,7 @@ export function RandevuAyarlar() {
             </div>
 
             <div className="kagrup">
-              <h6>Randevu Aralığı</h6>
+              <h6>{c('Randevu Aralığı')}</h6>
               <div className="alan-izgara tek-sutun ayar-formu">
                 <AyarAlani anahtar="randevu.slot_dk" etiket="Takvim aralığı (dakika)"
                            tip="sayi" ayarlar={ayarlar} onYaz={yaz} />

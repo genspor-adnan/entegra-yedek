@@ -1,6 +1,7 @@
 import { para } from '../../bicim';
 import type { KalemDurumu } from '../../../sayfalar/belgeKarti/kalemDurumu';
 import type { SatirDurumu } from '../../../sayfalar/belgeSatir';
+import { c } from '../../../dil/ceviri';
 
 /**
  * KALEM ÖNİZLEMESİ — girilen alanlardan HESAPLANAN sonuçlar.
@@ -64,12 +65,12 @@ export function KalemOnizlemesi({ d, transferMi, yerelPara, izlemler,
           dönüldüğünde dağıtımın yapıldığı görünsün. */}
       {d.izlemGerekli && izlemler.length > 0 && (
         <label className="alan">
-          <span className="etiket">Lot / Seri</span>
+          <span className="etiket">{c('Lot / Seri')}</span>
           <input className="onizleme" readOnly
                  value={izlemler.map(z => `${z.lotNo || z.seriNo} (${z.miktar})`)
                    .join(', ')}
                  onClick={onIzlemAc}
-                 title="Değiştirmek için tıklayın" />
+                 title={c('Değiştirmek için tıklayın')} />
         </label>
       )}
     </>

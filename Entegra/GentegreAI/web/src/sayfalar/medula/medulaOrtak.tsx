@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { MEDULA_KUYRUK_DURUM, type MedulaKuyrukSatiri } from '../../api/uclar/medula';
 import { tarihSaat } from '../../bilesenler/bicim';
+import { c } from '../../dil/ceviri';
 
 /** Medula sayfalarının ortak parçaları: rozet, günlük tablosu, adım şeridi. */
 export function Rozet({ d, sozluk }: { d: number | null | undefined; sozluk: Record<number, [string, string]> }) {
@@ -25,7 +26,7 @@ export function Gunluk({ satirlar, govdeAc, tekrar }: {
 }) {
   return (
     <div className="md-dg"><table>
-      <thead><tr><th>Zaman</th><th>Servis</th><th>İşlem</th><th>Kaynak</th><th>Hasta</th><th className="orta">Durum</th><th>Kod</th><th>Mesaj</th><th className="orta">Deneme</th><th className="sag">Süre</th><th>Kullanıcı</th><th /></tr></thead>
+      <thead><tr><th>Zaman</th><th>Servis</th><th>İşlem</th><th>Kaynak</th><th>Hasta</th><th className="orta">Durum</th><th>Kod</th><th>{c('Mesaj')}</th><th className="orta">Deneme</th><th className="sag">Süre</th><th>Kullanıcı</th><th /></tr></thead>
       <tbody>
         {satirlar.map(s => (
           <tr key={s.id}>
@@ -36,12 +37,12 @@ export function Gunluk({ satirlar, govdeAc, tekrar }: {
             <td className="orta">{s.deneme}{s.sonrakiDeneme && s.durum === 1 ? <span className="sonuk"> · {tarihSaat(s.sonrakiDeneme)}</span> : ''}</td>
             <td className="sag">{s.sureMs ? `${(s.sureMs / 1000).toFixed(1)} sn` : ''}</td><td>{s.kullanici}</td>
             <td className="md-satir-arac">
-              {govdeAc && <button className="d" onClick={() => govdeAc(s.id)}>İstek / yanıt</button>}
+              {govdeAc && <button className="d" onClick={() => govdeAc(s.id)}>{c('İstek / yanıt')}</button>}
               {tekrar && (s.durum === 1 || s.durum === 4 || s.durum === 5) && <button className="d" onClick={() => tekrar(s.id)}>↻</button>}
             </td>
           </tr>
         ))}
-        {satirlar.length === 0 && <tr><td colSpan={12} className="sonuk">Çağrı yok.</td></tr>}
+        {satirlar.length === 0 && <tr><td colSpan={12} className="sonuk">{c('Çağrı yok.')}</td></tr>}
       </tbody>
     </table></div>
   );

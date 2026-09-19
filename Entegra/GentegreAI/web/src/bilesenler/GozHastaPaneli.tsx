@@ -3,6 +3,7 @@ import { api } from '../api/istemci';
 import type { GozHastaOzeti } from '../api/uclar/goz';
 import { hataMetni } from '../api/sozlesme';
 import { tarihYaz } from './bicim';
+import { c } from '../dil/ceviri';
 
 /**
  * GÖZ HASTA ÖZETİ — seçili hastanın ayrıntısı (mockup
@@ -105,10 +106,10 @@ export function GozHastaPaneli({ hastaId }: { hastaId: number }) {
         {veri && sekme === 'OD / OS' && (
           <div className="odos">
             <div className="h">Parametre</div>
-            <div className="h od">OD · Sağ</div>
-            <div className="h os">OS · Sol</div>
+            <div className="h od">{c('OD · Sağ')}</div>
+            <div className="h os">{c('OS · Sol')}</div>
 
-            <div className="l">Son BCVA</div>
+            <div className="l">{c('Son BCVA')}</div>
             {[od, os].map((o, i) => (
               <div className="v" key={i}>
                 <b>{o?.bcva != null ? Number(o.bcva).toFixed(2) : '—'}</b>
@@ -117,12 +118,12 @@ export function GozHastaPaneli({ hastaId }: { hastaId: number }) {
               </div>
             ))}
 
-            <div className="l">Son refraksiyon</div>
+            <div className="l">{c('Son refraksiyon')}</div>
             {[od, os].map((o, i) => (
               <div className="v" key={i}>{refYaz(o?.sph, o?.cyl, o?.aks)}</div>
             ))}
 
-            <div className="l">GİB / hedef</div>
+            <div className="l">{c('GİB / hedef')}</div>
             {[od, os].map((o, i) => (
               <div className="v" key={i}>
                 {/* Bayrak ölçümde hesaplanır (>21 yüksek, >30 panik): panik
@@ -141,14 +142,14 @@ export function GozHastaPaneli({ hastaId }: { hastaId: number }) {
               </div>
             ))}
 
-            <div className="l">Pakimetri (CCT)</div>
+            <div className="l">{c('Pakimetri (CCT)')}</div>
             {[od, os].map((o, i) => (
               <div className="v" key={i}>
                 {o?.cct != null ? <>{o.cct} <span className="sonuk">µm</span></> : '—'}
               </div>
             ))}
 
-            <div className="l">C/D oranı (dikey)</div>
+            <div className="l">{c('C/D oranı (dikey)')}</div>
             {[od, os].map((o, i) => (
               <div className="v" key={i}>
                 {o?.cdDikey == null ? '—'
@@ -158,7 +159,7 @@ export function GozHastaPaneli({ hastaId }: { hastaId: number }) {
               </div>
             ))}
 
-            <div className="l">RNFL ort. (OCT)</div>
+            <div className="l">{c('RNFL ort. (OCT)')}</div>
             {[od, os].map((o, i) => {
               const f = rnflFark(o);
               return (
@@ -179,7 +180,7 @@ export function GozHastaPaneli({ hastaId }: { hastaId: number }) {
               );
             })}
 
-            <div className="l">DR / AMD evresi</div>
+            <div className="l">{c('DR / AMD evresi')}</div>
             {[od, os].map((o, i) => (
               <div className="v" key={i}>
                 {o?.drEvre != null && <span className="rozet">{DR_EVRE[o.drEvre]}</span>}
@@ -193,12 +194,12 @@ export function GozHastaPaneli({ hastaId }: { hastaId: number }) {
         {/* ------------------------------------------------------ takip --- */}
         {veri && sekme === 'Takip' && (
           <table className="grid">
-            <thead><tr><th>Hastalık</th><th className="orta">Göz</th><th>Evre</th>
-              <th className="sag">Hedef GİB</th><th>Sonraki Kontrol</th>
-              <th className="orta">Progresyon</th></tr></thead>
+            <thead><tr><th>{c('Hastalık')}</th><th className="orta">Göz</th><th>{c('Evre')}</th>
+              <th className="sag">{c('Hedef GİB')}</th><th>{c('Sonraki Kontrol')}</th>
+              <th className="orta">{c('Progresyon')}</th></tr></thead>
             <tbody>
               {veri.takipler.length === 0 && (
-                <tr><td colSpan={6} className="bos">Açık takip planı yok.</td></tr>
+                <tr><td colSpan={6} className="bos">{c('Açık takip planı yok.')}</td></tr>
               )}
               {veri.takipler.map(t => (
                 <tr key={t.id}>
@@ -229,10 +230,10 @@ export function GozHastaPaneli({ hastaId }: { hastaId: number }) {
         {/* -------------------------------------------------- ziyaretler --- */}
         {veri && sekme === 'Ziyaretler' && (
           <table className="grid">
-            <thead><tr><th>Tarih</th><th>Tür</th><th>Hekim</th><th className="orta">Dilate</th></tr></thead>
+            <thead><tr><th>Tarih</th><th>Tür</th><th>Hekim</th><th className="orta">{c('Dilate')}</th></tr></thead>
             <tbody>
               {veri.ziyaretler.length === 0 && (
-                <tr><td colSpan={4} className="bos">Göz muayenesi yok.</td></tr>
+                <tr><td colSpan={4} className="bos">{c('Göz muayenesi yok.')}</td></tr>
               )}
               {veri.ziyaretler.map(z => (
                 <tr key={z.id}>
@@ -253,7 +254,7 @@ export function GozHastaPaneli({ hastaId }: { hastaId: number }) {
               <th>Detay</th><th className="orta">Durum</th></tr></thead>
             <tbody>
               {veri.islemler.length === 0 && (
-                <tr><td colSpan={5} className="bos">İşlem kaydı yok.</td></tr>
+                <tr><td colSpan={5} className="bos">{c('İşlem kaydı yok.')}</td></tr>
               )}
               {veri.islemler.map(i => (
                 <tr key={i.id}>
@@ -286,7 +287,7 @@ export function GozHastaPaneli({ hastaId }: { hastaId: number }) {
               <th>OD</th><th>OS</th></tr></thead>
             <tbody>
               {veri.receteler.length === 0 && (
-                <tr><td colSpan={5} className="bos">Gözlük reçetesi yok.</td></tr>
+                <tr><td colSpan={5} className="bos">{c('Gözlük reçetesi yok.')}</td></tr>
               )}
               {veri.receteler.map(r => (
                 <tr key={r.id}>

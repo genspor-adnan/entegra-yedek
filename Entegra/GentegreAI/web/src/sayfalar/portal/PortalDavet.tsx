@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
+import { c } from '../../dil/ceviri';
 
 /**
  * PORTAL DAVET SAYFASI (822) — hastanın telefonunda, OTURUMSUZ.
@@ -66,7 +67,7 @@ export function PortalDavet() {
     return (
       <div className="davet-sayfa">
         <div className="davet-kart">
-          <h1>Bağlantı geçersiz</h1>
+          <h1>{c('Bağlantı geçersiz')}</h1>
           <p className="sonuk">
             Bu davet bağlantısı kullanılmış ya da süresi dolmuş olabilir.
             Kurumunuzdan yeni bir davet isteyin.
@@ -79,9 +80,9 @@ export function PortalDavet() {
     return (
       <div className="davet-sayfa">
         <div className="davet-kart">
-          <h1>Hesabınız açıldı</h1>
-          <p>Kullanıcı kodunuz: <b>{bitti.kod}</b></p>
-          <p className="sonuk">Belirlediğiniz parolayla giriş yapabilirsiniz.</p>
+          <h1>{c('Hesabınız açıldı')}</h1>
+          <p>{c('Kullanıcı kodunuz:')}<b>{bitti.kod}</b></p>
+          <p className="sonuk">{c('Belirlediğiniz parolayla giriş yapabilirsiniz.')}</p>
           <button type="button" className="d bir davet-dugme" onClick={() => git('/')}>
             Giriş ekranına git
           </button>
@@ -92,24 +93,24 @@ export function PortalDavet() {
   return (
     <div className="davet-sayfa">
       <form className="davet-kart" onSubmit={gonder}>
-        <h1>Hasta Portalı</h1>
+        <h1>{c('Hasta Portalı')}</h1>
         {kisi && <p className="sonuk">Sayın {kisi}, hesabınızı burada açabilirsiniz.</p>}
 
         <label className="alan">
-          <span className="etiket">TCKN son 4 hane</span>
+          <span className="etiket">{c('TCKN son 4 hane')}</span>
           {/* inputMode=numeric: telefonda sayı tuş takımı açılsın. */}
           <input value={son4} onChange={e => setSon4(e.target.value.replace(/\D/g, ''))}
                  inputMode="numeric" maxLength={4} autoComplete="off" />
         </label>
 
         <label className="alan">
-          <span className="etiket">Yeni parola</span>
+          <span className="etiket">{c('Yeni parola')}</span>
           <input type="password" value={parola1} onChange={e => setParola1(e.target.value)}
                  autoComplete="new-password" />
         </label>
 
         <label className="alan">
-          <span className="etiket">Parola (tekrar)</span>
+          <span className="etiket">{c('Parola (tekrar)')}</span>
           <input type="password" value={parola2} onChange={e => setParola2(e.target.value)}
                  autoComplete="new-password" />
         </label>

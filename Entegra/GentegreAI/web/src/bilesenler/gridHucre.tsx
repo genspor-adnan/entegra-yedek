@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import type { KolonMeta } from '../api/sozlesme';
 import { sayi } from './bicim';
+import { c } from '../dil/ceviri';
 
 /**
  * GRID HUCRE YARDIMCILARI - durum rozeti, JSON/log govdesi cozumleme,
@@ -312,7 +313,7 @@ const degisimAyir = (deger: unknown): { onceki?: string; sonraki?: string; duz: 
 
 export function LogTablosu({ deger }: { deger: unknown }) {
   const veri = jsonCoz(deger);
-  if (veri === null) return <div className="grid-bilgi">İçerik yok.</div>;
+  if (veri === null) return <div className="grid-bilgi">{c('İçerik yok.')}</div>;
   if (typeof veri !== 'object') return <div className="grid-bilgi">{icerikMetni(veri)}</div>;
 
   const satirlar: { bolum: string; alan: string; onceki?: string; sonraki?: string; deger: string }[] = [];

@@ -4,6 +4,7 @@ import { api } from '../api/istemci';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { guvenli, mesaj as bilgiMesaji } from '../bilesenler/mesaj';
 import { Modal } from '../bilesenler/Modal';
+import { c as cev } from '../dil/ceviri';
 
 /**
  * MESAJLAR (341/342) — İletişim & AI › Mesajlar.
@@ -199,7 +200,7 @@ export function Mesajlar() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Mesajlar</h1>
-          <span className="yol">İletişim &amp; AI › Mesajlar</span>
+          <span className="yol">{cev('İletişim &amp; AI › Mesajlar')}</span>
         </div>
       </div>
 
@@ -210,11 +211,11 @@ export function Mesajlar() {
             yalan soylemektir. Portalda yazisma isin kendi ekranindan
             (telerad istegi) baslar. */}
         {!portalMi && <>
-          <button className="d bir" onClick={() => setYeniAcik('kisi')}>💬 Yeni Sohbet</button>
+          <button className="d bir" onClick={() => setYeniAcik('kisi')}>{cev('💬 Yeni Sohbet')}</button>
           <button className="d" onClick={() => setYeniAcik('grup')}>👥 Yeni Grup</button>
         </>}
-        <button className="d" disabled title="Sıradaki iş">📎 Kayıt İliştir</button>
-        <button className="d" disabled title="Sıradaki iş">✅ Görev Oluştur</button>
+        <button className="d" disabled title={cev('Sıradaki iş')}>📎 Kayıt İliştir</button>
+        <button className="d" disabled title={cev('Sıradaki iş')}>✅ Görev Oluştur</button>
         <span className="msj-durum">
           Okunmamış: <b>{ozet.okunmamisMesaj} mesaj / {ozet.okunmamisSohbet} sohbet</b>
           {' · '}Bugün: <b>{ozet.bugunMesaj} mesaj</b> · {ozet.bugunEk} ek ·{' '}
@@ -236,12 +237,12 @@ export function Mesajlar() {
               <div className="sonuk">{kullanici?.rolAdi ?? ''}</div>
             </div>
             <div className="msj-ikonlar">
-              <span title="Yeni sohbet" onClick={() => setYeniAcik('kisi')}>💬</span>
-              <span title="Yeni grup" onClick={() => setYeniAcik('grup')}>👥</span>
+              <span title={cev('Yeni sohbet')} onClick={() => setYeniAcik('kisi')}>💬</span>
+              <span title={cev('Yeni grup')} onClick={() => setYeniAcik('grup')}>👥</span>
             </div>
           </div>
           <div className="msj-ara">
-            <input placeholder="Sohbet / kişi ara…" value={ara}
+            <input placeholder={cev('Sohbet / kişi ara…')} value={ara}
                    onChange={e => setAra(e.target.value)} />
           </div>
           <div className="msj-cipler">
@@ -257,7 +258,7 @@ export function Mesajlar() {
           </div>
 
           <div className="msj-liste">
-            {sohbetler.length === 0 && <div className="not">Sohbet yok.</div>}
+            {sohbetler.length === 0 && <div className="not">{cev('Sohbet yok.')}</div>}
             {sohbetler.map(s => (
               <div key={s.id} className={`msj-satir${s.id === secili ? ' on' : ''}`}
                    onClick={() => setSecili(s.id)}>
@@ -277,7 +278,7 @@ export function Mesajlar() {
                       {s.sonGonderenId === benId && s.sonMetin ? 'Siz: ' : ''}{s.sonMetin}
                     </span>
                     {s.okunmamis > 0 && <span className="msj-sayac">{s.okunmamis}</span>}
-                    {s.sessiz === 1 && <span className="sonuk" title="Bildirim kapalı">🔕</span>}
+                    {s.sessiz === 1 && <span className="sonuk" title={cev('Bildirim kapalı')}>🔕</span>}
                   </div>
                 </div>
               </div>
@@ -289,7 +290,7 @@ export function Mesajlar() {
         <div className="msj-orta">
           {seciliSohbet === null ? (
             <div className="not" style={{ padding: 24 }}>
-              Soldan bir sohbet seçin{portalMi ? '.' : ''}{!portalMi && <> ya da <b>Yeni Sohbet</b> açın.</>}
+              Soldan bir sohbet seçin{portalMi ? '.' : ''}{!portalMi && <> ya da <b>{cev('Yeni Sohbet')}</b> açın.</>}
             </div>
           ) : (
             <>
@@ -317,32 +318,32 @@ export function Mesajlar() {
                       bildirim · bilgi. Ekler/sabitler sag paneldeki ilgili
                       kutuya kaydirir - ayri pencere acmak ayni bilgiyi iki
                       yerde tutmak olurdu. */}
-                  <span className={akisAra !== null ? 'on' : ''} title="Sohbette ara"
+                  <span className={akisAra !== null ? 'on' : ''} title={cev('Sohbette ara')}
                         onClick={() => setAkisAra(a => (a === null ? '' : null))}>🔎</span>
-                  <span title="Ekli dosyalar" onClick={() => {
+                  <span title={cev('Ekli dosyalar')} onClick={() => {
                     setSagAcik(true);
                     window.setTimeout(() => ekRef.current?.scrollIntoView({ block: 'nearest' }), 0);
                   }}>📎</span>
-                  <span title="Sabitlenen mesajlar" onClick={() => {
+                  <span title={cev('Sabitlenen mesajlar')} onClick={() => {
                     setSagAcik(true);
                     window.setTimeout(() => sabitRef.current?.scrollIntoView({ block: 'nearest' }), 0);
                   }}>📌</span>
-                  <span className={sagAcik ? 'on' : ''} title="Sohbet bilgisi"
+                  <span className={sagAcik ? 'on' : ''} title={cev('Sohbet bilgisi')}
                         onClick={() => setSagAcik(a => !a)}>ℹ</span>
                   <span className={seciliSohbet.favori ? 'on' : ''} title="Favori"
                         onClick={() => void bayrak(seciliSohbet, 'favori')}>★</span>
-                  <span className={seciliSohbet.sabit ? 'on' : ''} title="Sabitle"
+                  <span className={seciliSohbet.sabit ? 'on' : ''} title={cev('Sabitle')}
                         onClick={() => void bayrak(seciliSohbet, 'sabit')}>📌</span>
-                  <span className={seciliSohbet.sessiz ? 'on' : ''} title="Bildirimi kapat"
+                  <span className={seciliSohbet.sessiz ? 'on' : ''} title={cev('Bildirimi kapat')}
                         onClick={() => void bayrak(seciliSohbet, 'sessiz')}>🔕</span>
-                  <span className={seciliSohbet.arsiv ? 'on' : ''} title="Arşivle"
+                  <span className={seciliSohbet.arsiv ? 'on' : ''} title={cev('Arşivle')}
                         onClick={() => void bayrak(seciliSohbet, 'arsiv')}>🗄</span>
                 </div>
               </div>
 
               {akisAra !== null && (
                 <div className="msj-akisara">
-                  <input autoFocus placeholder="Bu sohbette ara…" value={akisAra}
+                  <input autoFocus placeholder={cev('Bu sohbette ara…')} value={akisAra}
                          onChange={e => setAkisAra(e.target.value)} />
                   <span className="sonuk">{gorunenMesajlar.length} sonuç</span>
                   <span className="x" onClick={() => setAkisAra(null)}>✕</span>
@@ -371,10 +372,10 @@ export function Mesajlar() {
                       </div>
                     )}
                     <div className="metin">
-                      {m.durum === 2 ? <i className="sonuk">Bu mesaj silindi.</i> : m.metin}
+                      {m.durum === 2 ? <i className="sonuk">{cev('Bu mesaj silindi.')}</i> : m.metin}
                     </div>
                     <div className="alt">
-                      {m.sabit === 1 && <span title="Sabitlenmiş">📌</span>}
+                      {m.sabit === 1 && <span title={cev('Sabitlenmiş')}>📌</span>}
                       <span>{saat(m.tarih)}</span>
                       {m.gonderenId === benId && (
                         <span className={m.okumayan === 0 ? 'tik ok' : 'tik'}
@@ -428,21 +429,21 @@ export function Mesajlar() {
                     KAYIT ILISTIRME; otekiler dokuman deposu / gorev baglaninca
                     acilacak, simdiden gorunup yaniltmasin diye pasif. */}
                 <div className="msj-atac">
-                  <span title="İliştir" onClick={() => setAtacAcik(a => !a)}>📎</span>
+                  <span title={cev('İliştir')} onClick={() => setAtacAcik(a => !a)}>📎</span>
                   {atacAcik && (
                     <div className="msj-atac-menu" onMouseLeave={() => setAtacAcik(false)}>
                       <div onClick={() => { setAtacAcik(false); setKayitAcik(true) }}>
                         📑 Gentegre Kaydı İliştir…
                       </div>
-                      <div className="pasif" title="Sıradaki iş">📄 Dosya / Görsel</div>
-                      <div className="pasif" title="Sıradaki iş">✅ Görev Oluştur…</div>
-                      <div className="pasif" title="Sıradaki iş">🖐 Onay İsteği Gönder…</div>
-                      <div className="pasif" title="Sıradaki iş">📊 Rapor / Döküm Paylaş…</div>
+                      <div className="pasif" title={cev('Sıradaki iş')}>📄 Dosya / Görsel</div>
+                      <div className="pasif" title={cev('Sıradaki iş')}>✅ Görev Oluştur…</div>
+                      <div className="pasif" title={cev('Sıradaki iş')}>🖐 Onay İsteği Gönder…</div>
+                      <div className="pasif" title={cev('Sıradaki iş')}>📊 Rapor / Döküm Paylaş…</div>
                     </div>
                   )}
                 </div>
                 <div className="msj-atac">
-                  <span title="Emoji" onClick={() => setEmojiAcik(a => !a)}>🙂</span>
+                  <span title={cev('Emoji')} onClick={() => setEmojiAcik(a => !a)}>🙂</span>
                   {emojiAcik && (
                     <div className="msj-atac-menu msj-emoji" onMouseLeave={() => setEmojiAcik(false)}>
                       {['🙂', '👍', '🙏', '✅', '❗', '📌', '🎉', '😅', '🤝', '📎', '⏱', '❤️']
@@ -454,10 +455,10 @@ export function Mesajlar() {
                     </div>
                   )}
                 </div>
-                <input placeholder="Mesaj yaz…" value={metin}
+                <input placeholder={cev('Mesaj yaz…')} value={metin}
                        onChange={e => setMetin(e.target.value)}
                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void gonder() } }} />
-                <button className="d bir" onClick={() => void gonder()}>➤ Gönder</button>
+                <button className="d bir" onClick={() => void gonder()}>{cev('➤ Gönder')}</button>
               </div>
             </>
           )}
@@ -466,14 +467,14 @@ export function Mesajlar() {
         {/* ------------------------------------------- SAĞ: sohbet bilgisi */}
         <div className="msj-sag" hidden={!sagAcik}>
           {seciliSohbet === null ? (
-            <div className="not">Sohbet seçilmedi.</div>
+            <div className="not">{cev('Sohbet seçilmedi.')}</div>
           ) : (
             <>
               {/* SOHBET BİLGİSİ - mockup düzeni: büyük avatar + ad + ünvan,
                   altında künye satırları. AVATARA TIKLAYINCA künye kapanır
                   (kullanıcı): dar ekranda ekler/kayıtlar yukarı gelsin. */}
               <div className="msj-kunye">
-                <div className="msj-kunye-av" title="Künyeyi aç / kapat"
+                <div className="msj-kunye-av" title={cev('Künyeyi aç / kapat')}
                      style={{ background: renk(seciliSohbet.baslik) }}
                      onClick={() => setKunyeAcik(a => !a)}>
                   {seciliSohbet.tip === 2 ? '👥' : seciliSohbet.tip === 3 ? '🗂' : basHarf(seciliSohbet.baslik)}
@@ -502,7 +503,7 @@ export function Mesajlar() {
 
               {kunyeAcik && bilgi?.kunye && (
                 <div className="kagrup">
-                  <h6>Künye</h6>
+                  <h6>{cev('Künye')}</h6>
                   <div className="msj-kv"><span>Telefon</span><b>{String(bilgi.kunye.telefon || '—')}</b></div>
                   <div className="msj-kv"><span>Cep</span><b>{String(bilgi.kunye.cep || '—')}</b></div>
                   <div className="msj-kv"><span>E-posta</span><b>{String(bilgi.kunye.eposta || '—')}</b></div>
@@ -544,7 +545,7 @@ export function Mesajlar() {
               <div className="kagrup" ref={sabitRef}>
                 <h6>📌 Sabitlenen mesajlar ({bilgi?.sabitler.length ?? 0})</h6>
                 {(bilgi?.sabitler ?? []).length === 0
-                  ? <div className="not">Sabitlenmiş mesaj yok.</div>
+                  ? <div className="not">{cev('Sabitlenmiş mesaj yok.')}</div>
                   : (bilgi?.sabitler ?? []).map((m, i) => (
                     <div key={i} className="not">
                       <b>{String(m.gonderen ?? '')}</b>: {String(m.metin ?? '')}
@@ -555,7 +556,7 @@ export function Mesajlar() {
               <div className="kagrup" ref={ekRef}>
                 <h6>📎 Ekli dosyalar ({bilgi?.ekler.length ?? 0})</h6>
                 {(bilgi?.ekler ?? []).length === 0
-                  ? <div className="not">Ek yok.</div>
+                  ? <div className="not">{cev('Ek yok.')}</div>
                   : (bilgi?.ekler ?? []).map((e, i) => (
                     <div key={i} className="msj-uye">
                       <span className="ad">📎 {String(e.ad ?? '')}</span>
@@ -567,7 +568,7 @@ export function Mesajlar() {
               <div className="kagrup">
                 <h6>🔗 İliştirilen kayıtlar ({bilgi?.kayitlar.length ?? 0})</h6>
                 {(bilgi?.kayitlar ?? []).length === 0
-                  ? <div className="not">İliştirilmiş kayıt yok.</div>
+                  ? <div className="not">{cev('İliştirilmiş kayıt yok.')}</div>
                   : (bilgi?.kayitlar ?? []).map((k, i) => (
                     <div key={i} className="msj-uye">
                       {/* "Karti Ac": kart kopyalanmaz, ilgili ekran calisir -
@@ -580,7 +581,7 @@ export function Mesajlar() {
                   ))}
               </div>
               <div className="kagrup">
-                <h6>🔔 Bildirim</h6>
+                <h6>{cev('🔔 Bildirim')}</h6>
                 <div className="msj-kv">
                   <span>Durum</span>
                   <b>
@@ -689,7 +690,7 @@ function YeniSohbet({ tip, onKapat, onAcildi }: {
             });
             await onAcildi(y.id);
           })}>Aç</button>
-          <button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>{cev('Kapat')}</button>
         </>
       }>
       {tip === 'grup' && (
@@ -700,14 +701,14 @@ function YeniSohbet({ tip, onKapat, onAcildi }: {
           </label>
         </div>
       )}
-      <input placeholder="Kişi ara…" value={ara} onChange={e => setAra(e.target.value)}
+      <input placeholder={cev('Kişi ara…')} value={ara} onChange={e => setAra(e.target.value)}
              style={{ width: '100%', marginBottom: 8 }} />
       <div className="msj-secim">
         {kisiler.map(k => (
           <div key={k.id} className={`msj-satir${secili.includes(k.id) ? ' on' : ''}`}
                onClick={() => sec(k.id)}
                onDoubleClick={() => void ac(k.id)}
-               title="Çift tıkla: seç ve aç">
+               title={cev('Çift tıkla: seç ve aç')}>
             <div className="msj-av" style={{ background: renk(k.ad) }}>{basHarf(k.ad)}</div>
             <div className="msj-satir-ic">
               <div className="ad">{k.ad}</div>
@@ -715,7 +716,7 @@ function YeniSohbet({ tip, onKapat, onAcildi }: {
             </div>
           </div>
         ))}
-        {kisiler.length === 0 && <div className="not">Kullanıcı bulunamadı.</div>}
+        {kisiler.length === 0 && <div className="not">{cev('Kullanıcı bulunamadı.')}</div>}
       </div>
     </Modal>
   );
@@ -750,8 +751,8 @@ function KayitIlistir({ onKapat, onIlistir }: {
             const id = Number(kayitId);
             if (!id) { bilgiMesaji('Kayıt numarası girin.'); return }
             void onIlistir(modul, id, ozet.trim());
-          }}>İliştir</button>
-          <button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>
+          }}>{cev('İliştir')}</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>{cev('Kapat')}</button>
         </>
       }>
       <div className="alan-izgara tek-sutun">
@@ -760,8 +761,7 @@ function KayitIlistir({ onKapat, onIlistir }: {
             {MODULLER.map(m => <option key={m.kod} value={m.kod}>{m.ad}</option>)}
           </select>
         </label>
-        <label>Kayıt no
-          <input value={kayitId} onChange={e => setKayitId(e.target.value)}
+        <label>{cev('Kayıt no')}<input value={kayitId} onChange={e => setKayitId(e.target.value)}
                  placeholder="ör. 114325" />
         </label>
         <label>Özet (sohbette görünecek)

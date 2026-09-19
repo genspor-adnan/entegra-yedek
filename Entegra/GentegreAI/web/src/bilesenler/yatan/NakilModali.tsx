@@ -6,6 +6,7 @@ import { Modal } from '../Modal';
 import { TarafArama } from '../TarafArama';
 import { mesaj } from '../mesaj';
 import { YatakSecimi } from './YatakSecimi';
+import { c } from '../../dil/ceviri';
 
 /**
  * NAKİL / YATAK DEĞİŞİMİ — mockup `Ekranlar/Yatan/nakil_yatak_degisim.html`.
@@ -88,17 +89,17 @@ export function NakilModali({ yatisId, onKapat, onTamam }: {
                <>
                  <button className="d onay" disabled={kaydediyor || !yatak}
                          onClick={() => void kaydet()}>✔ Nakli Uygula</button>
-                 <button className="d" onClick={onKapat}>✖ Kapat</button>
+                 <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
                </>
              }>
         {hata && <div className="hata-kutusu">{hata}</div>}
 
         <div className="kagrup">
-          <h6>Nakil <span>mevcut → hedef</span></h6>
+          <h6>{c('Nakil')}<span>mevcut → hedef</span></h6>
           <div className="ic">
-            <div className="sat"><span>Mevcut yatak</span>
+            <div className="sat"><span>{c('Mevcut yatak')}</span>
               <b>{o?.yatak || '—'}<span className="sonuk"> · {o?.klinik || '—'}</span></b></div>
-            <div className="sat"><span>Hedef yatak</span>
+            <div className="sat"><span>{c('Hedef yatak')}</span>
               <b>{yatak ? `${yatak.oda} / ${yatak.yatak}` : '— seçilmedi'}
                  {yatak?.ucretHizmet && <span className="sonuk"> · {yatak.ucretHizmet}</span>}</b></div>
             {klinikDegisiyor && (
@@ -111,15 +112,13 @@ export function NakilModali({ yatisId, onKapat, onTamam }: {
 
         <div className="alan-izgara" style={{ marginTop: 8 }}>
           <label className="alan">
-            <span className="etiket">Nakil sebebi</span>
+            <span className="etiket">{c('Nakil sebebi')}</span>
             <select value={neden} onChange={e => setNeden(Number(e.target.value))}>
               {nedenler.map(n => <option key={n.deger} value={n.deger}>{n.ad}</option>)}
             </select>
           </label>
           <label className="alan">
-            <span className={`etiket${klinikDegisiyor ? ' zorunlu-isaret' : ''}`}>
-              Sorumlu hekim
-            </span>
+            <span className={`etiket${klinikDegisiyor ? ' zorunlu-isaret' : ''}`}>{c('Sorumlu hekim')}</span>
             <span className="deger-serit">
               <input readOnly style={{ flex: 1, minWidth: 0 }} value={hekimAdi} placeholder={o?.hekim || 'Değişmiyor'}
                      onClick={() => setHekimArama(true)} />
@@ -133,7 +132,7 @@ export function NakilModali({ yatisId, onKapat, onTamam }: {
           </label>
         </div>
 
-        <h4 style={{ margin: '10px 0 4px' }}>Hedef yatak seçimi</h4>
+        <h4 style={{ margin: '10px 0 4px' }}>{c('Hedef yatak seçimi')}</h4>
         {o && (
           // HASTA ID ÖZETTEN gelir: uygunluk hastanın cinsiyetine bağlı ve
           //   hastanın MEVCUT yatağı listede seçilemez olmalı.
@@ -141,8 +140,7 @@ export function NakilModali({ yatisId, onKapat, onTamam }: {
                        haricYatakId={o.yatakId} onSec={y => setYatak(y)} />
         )}
 
-        <div className="not" style={{ marginTop: 8 }}>
-          Nakil <b>yeni bir yatış değildir</b>: aynı yatışın yatağı değişir. Açık
+        <div className="not" style={{ marginTop: 8 }}>{c('Nakil')}<b>yeni bir yatış değildir</b>: aynı yatışın yatağı değişir. Açık
           order'lar, izlem, sıvı takibi ve gün sayısı kesintisiz sürer. Eski yatak
           <b> temizlik bekliyor</b> durumuna düşer, yeni yatak dolu olur; yatak
           ücreti hareket saatinden itibaren yeni tarifeyle işler.

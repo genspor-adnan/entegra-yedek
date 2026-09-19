@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
+import { c } from '../dil/ceviri';
 
 /**
  * e-NABIZ VERİ KALİTESİ / UYUM PANOSU (454) —
@@ -119,9 +120,9 @@ export function EnabizPanosu() {
           <h6>Paket türüne göre ({veri?.donem ?? ay})</h6>
           <table className="detay-tablo">
             <thead><tr>
-              <th>Paket</th><th className="orta">USS</th><th className="sag">Üretilen</th>
-              <th className="sag">Gönderildi</th><th className="sag">Hatalı</th>
-              <th className="sag">Eksik</th><th className="sag">Oran</th>
+              <th>{c('Paket')}</th><th className="orta">{c('USS')}</th><th className="sag">{c('Üretilen')}</th>
+              <th className="sag">{c('Gönderildi')}</th><th className="sag">{c('Hatalı')}</th>
+              <th className="sag">Eksik</th><th className="sag">{c('Oran')}</th>
             </tr></thead>
             <tbody>
               {(veri?.turler ?? []).map(t => (
@@ -138,7 +139,7 @@ export function EnabizPanosu() {
                 </tr>
               ))}
               {(veri?.turler ?? []).length === 0 && !yukleniyor && (
-                <tr><td colSpan={7} className="bos">Bu dönemde paket üretilmemiş.</td></tr>
+                <tr><td colSpan={7} className="bos">{c('Bu dönemde paket üretilmemiş.')}</td></tr>
               )}
             </tbody>
           </table>
@@ -147,7 +148,7 @@ export function EnabizPanosu() {
         {/* EN SIK HATA: kök neden burada görünür - aynı hata yüz paketi
             düşürüyorsa düzeltilecek tek yer vardır. */}
         <div className="kagrup">
-          <h6>En sık hata (son 30 gün)</h6>
+          <h6>{c('En sık hata (son 30 gün)')}</h6>
           <table className="detay-tablo">
             <thead><tr>
               <th>Hata</th><th>Sınıf</th><th className="sag">Adet</th>
@@ -161,7 +162,7 @@ export function EnabizPanosu() {
                 </tr>
               ))}
               {(veri?.hatalar ?? []).length === 0 && !yukleniyor && (
-                <tr><td colSpan={3} className="bos">Hatalı paket yok.</td></tr>
+                <tr><td colSpan={3} className="bos">{c('Hatalı paket yok.')}</td></tr>
               )}
             </tbody>
           </table>
@@ -171,10 +172,10 @@ export function EnabizPanosu() {
       <div className="pano-satir">
         {/* ALAN BAZINDA EKSİK: "neyi düzeltirsem kaç paket kurtulur". */}
         <div className="kagrup">
-          <h6>Eksik alanlar</h6>
+          <h6>{c('Eksik alanlar')}</h6>
           <table className="detay-tablo">
             <thead><tr>
-              <th>USS Alanı</th><th>Kaynak</th><th className="sag">Paket</th>
+              <th>{c('USS Alanı')}</th><th>Kaynak</th><th className="sag">{c('Paket')}</th>
             </tr></thead>
             <tbody>
               {(veri?.eksikAlanlar ?? []).map(a => (
@@ -185,17 +186,17 @@ export function EnabizPanosu() {
                 </tr>
               ))}
               {(veri?.eksikAlanlar ?? []).length === 0 && !yukleniyor && (
-                <tr><td colSpan={3} className="bos">Eksik alan yok.</td></tr>
+                <tr><td colSpan={3} className="bos">{c('Eksik alan yok.')}</td></tr>
               )}
             </tbody>
           </table>
         </div>
 
         <div className="kagrup">
-          <h6>Eksik alanlı paketi olan hekimler</h6>
+          <h6>{c('Eksik alanlı paketi olan hekimler')}</h6>
           <table className="detay-tablo">
             <thead><tr>
-              <th>Hekim</th><th className="sag">Paket</th><th className="sag">Eksik</th>
+              <th>Hekim</th><th className="sag">{c('Paket')}</th><th className="sag">Eksik</th>
               <th className="sag">Gönderilen</th>
             </tr></thead>
             <tbody>
@@ -208,7 +209,7 @@ export function EnabizPanosu() {
                 </tr>
               ))}
               {(veri?.hekimler ?? []).length === 0 && !yukleniyor && (
-                <tr><td colSpan={4} className="bos">Eksik alanlı paket yok.</td></tr>
+                <tr><td colSpan={4} className="bos">{c('Eksik alanlı paket yok.')}</td></tr>
               )}
             </tbody>
           </table>
@@ -218,7 +219,7 @@ export function EnabizPanosu() {
       {/* GÜNLÜK SERİ: kesinti günleri buradan görünür (hepsi bir günde hatalıysa
           sorun kurumda değil serviste olabilir). */}
       <div className="kagrup">
-        <h6>Son 14 gün</h6>
+        <h6>{c('Son 14 gün')}</h6>
         <div className="pano-seri">
           {(veri?.gunluk ?? []).map(g => (
             <div key={g.gun} className="sutun"

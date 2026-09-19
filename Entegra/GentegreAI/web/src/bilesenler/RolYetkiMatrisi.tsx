@@ -5,6 +5,7 @@ import { hataMetni } from '../api/sozlesme';
 import { LISTELER } from '../sayfalar/listeTanimlari';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { ekKaydetKaydol } from './kartEkKaydet';
+import { c as cev } from '../dil/ceviri';
 
 type Sutun = 'gor' | 'ekle' | 'degistir' | 'sil';
 const SUTUNLAR: { ad: Sutun; baslik: string }[] = [
@@ -390,7 +391,7 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
         <div className="ara-kutu dar">
           <span>🔍</span>
           <input type="search"
-            placeholder="Yetki ara…" value={arama}
+            placeholder={cev('Yetki ara…')} value={arama}
             onChange={e => setArama(e.target.value)} />
         </div>
         <button type="button" className="d" onClick={() => setKapali(new Set())}>
@@ -411,15 +412,13 @@ export function RolYetkiMatrisi({ rolId, saltOkunur }: { rolId: number; saltOkun
             {/* SINIR (661): sayisal deger alan yetkiler icin - ornegin
                 "Başvuruda iskonto" tavani. Otekilerde hucre bos kalir. */}
             <th style={{ textAlign: 'center', width: 90 }}
-                title="Sayısal sınır - yalnız değer alan yetkilerde (ör. iskonto tavanı %)">
-              Sınır
-            </th>
+                title="Sayısal sınır - yalnız değer alan yetkilerde (ör. iskonto tavanı %)">{cev('Sınır')}</th>
           </tr>
         </thead>
         <tbody>
           {yukleniyor && <tr><td colSpan={5}>Yükleniyor…</td></tr>}
           {!yukleniyor && satirlar?.length === 0 && (
-            <tr><td colSpan={5} className="bos">Tanımlı yetki yok.</td></tr>
+            <tr><td colSpan={5} className="bos">{cev('Tanımlı yetki yok.')}</td></tr>
           )}
           {agac.flatMap(k => cizDugum(k, 0))}
         </tbody>

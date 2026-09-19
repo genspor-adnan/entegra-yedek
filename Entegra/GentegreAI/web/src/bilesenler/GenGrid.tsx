@@ -634,14 +634,14 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
             </button>
             <button
               className={`ikon-liste ${aramaGorunumu === 'son' ? 'on' : ''}`}
-              title="Son Aranan"
+              title={cev('Son Aranan')}
               onClick={() => { setAramaGorunumu('son'); setSayfa(1) }}
             >
               🕓
             </button>
             <button
               className={`ikon-liste ${aramaGorunumu === 'sik' ? 'on' : ''}`}
-              title="Sık Aranan"
+              title={cev('Sık Aranan')}
               onClick={() => { setAramaGorunumu('sik'); setSayfa(1) }}
             >
               ⭐
@@ -711,14 +711,14 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
               <>
                 <span className="durumseg-ayrac" />
                 <select className="kat-suzgec" value={tarihOn}
-                        title="Tarih aralığı"
+                        title={cev('Tarih aralığı')}
                         onChange={e => {
                           const v = e.target.value as TarihOnAyar | '';
                           setTarihOn(v);
                           const a = v === '' ? { bas: '', bit: '' } : tarihAraligi(v);
                           setTarihBas(a.bas); setTarihBit(a.bit); setSayfa(1);
                         }}>
-                  <option value="">Tüm tarihler</option>
+                  <option value="">{cev('Tüm tarihler')}</option>
                   {TARIH_ON_AYARLAR.map(t => (
                     <option key={t.deger} value={t.deger}>{t.ad}</option>
                   ))}
@@ -729,13 +729,13 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
               <>
                 <span className="durumseg-ayrac" />
                 <span className="tarih-araligi">
-                  <input type="date" value={tarihBas} title="Başlama tarihi"
+                  <input type="date" value={tarihBas} title={cev('Başlama tarihi')}
                          onChange={e => { setTarihBas(e.target.value); setSayfa(1) }} />
                   <span className="ayrac-metin">–</span>
-                  <input type="date" value={tarihBit} title="Bitiş tarihi"
+                  <input type="date" value={tarihBit} title={cev('Bitiş tarihi')}
                          onChange={e => { setTarihBit(e.target.value); setSayfa(1) }} />
                   {(tarihBas || tarihBit) && (
-                    <button type="button" className="kapat" title="Tarih filtresini kaldır"
+                    <button type="button" className="kapat" title={cev('Tarih filtresini kaldır')}
                             onClick={() => { setTarihBas(''); setTarihBit(''); setSayfa(1) }}>×</button>
                   )}
                 </span>
@@ -762,7 +762,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                     ))}
                   </select>
                   {kodSuzgecDeger !== '' && (
-                    <button type="button" className="kapat" title="Filtreyi kaldır"
+                    <button type="button" className="kapat" title={cev('Filtreyi kaldır')}
                             onClick={() => { setKodSuzgecDeger(''); setSayfa(1) }}>×</button>
                   )}
                 </>
@@ -819,15 +819,15 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                 aksiyonEkrani={aksiyonEkrani}
               />
             </div>
-            {yukleniyor && <div className="yukleniyor">Yukleniyor…</div>}
+            {yukleniyor && <div className="yukleniyor">{cev('Yukleniyor…')}</div>}
           </div>
 
           <div className="altbilgi">
             <span>{cev('Kayıt')}: <b>{toplamKayit.toLocaleString('tr-TR')}</b>{sureMs > 0 && ` · ${sureMs} ms`}</span>
             {secili.size > 0 ? (
-              <span>Secili: <b>{secili.size}</b></span>
+              <span>{cev('Secili:')}<b>{secili.size}</b></span>
             ) : seciliSatir && (
-              <span>Secili: <b>{String(seciliSatir.unvan ?? seciliSatir.ad ?? seciliSatir.belgeNo ?? seciliSatir.id)}</b></span>
+              <span>{cev('Secili:')}<b>{String(seciliSatir.unvan ?? seciliSatir.ad ?? seciliSatir.belgeNo ?? seciliSatir.id)}</b></span>
             )}
             <span className="sag">
               <button className="d" disabled={sayfa <= 1} onClick={() => setSayfa(s => s - 1)}>‹ Önceki</button>
@@ -870,7 +870,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
       {icerikAlani && icerikAcikSatir && (
         <Modal
           baslik={icerikBaslik ?? 'İçerik'}
-          alt={<button className="d kapat-dugmesi" onClick={() => setIcerikAcikSatir(null)}>Kapat</button>}
+          alt={<button className="d kapat-dugmesi" onClick={() => setIcerikAcikSatir(null)}>{cev('Kapat')}</button>}
           onKapat={() => setIcerikAcikSatir(null)}
         >
           <div style={{ padding: 12 }}>

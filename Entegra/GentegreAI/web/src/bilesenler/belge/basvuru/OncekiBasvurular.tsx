@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../../../api/istemci';
 import { hataMetni } from '../../../api/sozlesme';
 import { para, tarihSaat } from '../../bicim';
+import { c } from '../../../dil/ceviri';
 
 // ================================================== ONCEKI BASVURULAR ====
 export function OncekiBasvurular({ tarafId, haricBelgeId, baslik, onAc, onYeni }: {
@@ -40,7 +41,7 @@ export function OncekiBasvurular({ tarafId, haricBelgeId, baslik, onAc, onYeni }
     return () => { iptal = true };
   }, [tarafId, haricBelgeId]);
 
-  if (!tarafId) return <div className="not">Önce hasta seçin.</div>;
+  if (!tarafId) return <div className="not">{c('Önce hasta seçin.')}</div>;
 
   return (
     <div className="kagrup">
@@ -49,7 +50,7 @@ export function OncekiBasvurular({ tarafId, haricBelgeId, baslik, onAc, onYeni }
         {satirlar.length > 0 && <span className="b">{satirlar.length}</span>}
         {onYeni && (
           <button type="button" className="d bir" style={{ marginLeft: 'auto' }}
-                  onClick={onYeni}>＋ Yeni Başvuru</button>
+                  onClick={onYeni}>{c('＋ Yeni Başvuru')}</button>
         )}
       </h6>
       {hata && <div className="hata-kutusu">{hata}</div>}
@@ -59,10 +60,10 @@ export function OncekiBasvurular({ tarafId, haricBelgeId, baslik, onAc, onYeni }
             <th style={{ width: 130 }}>Protokol</th>
             <th style={{ width: 140 }}>Tarih</th>
             <th>Bölüm</th>
-            <th>Hekim / Personel</th>
+            <th>{c('Hekim / Personel')}</th>
             <th>Ödeyen Kurum</th>
             <th className="hiza-sag" style={{ width: 120 }}>Tutar</th>
-            <th style={{ width: 110 }}>Kapanma</th>
+            <th style={{ width: 110 }}>{c('Kapanma')}</th>
           </tr>
         </thead>
         <tbody>
@@ -83,7 +84,7 @@ export function OncekiBasvurular({ tarafId, haricBelgeId, baslik, onAc, onYeni }
             </tr>
           ))}
           {!yukleniyor && satirlar.length === 0 && (
-            <tr><td colSpan={7} className="bos">Bu hastanın başka başvurusu yok.</td></tr>
+            <tr><td colSpan={7} className="bos">{c('Bu hastanın başka başvurusu yok.')}</td></tr>
           )}
         </tbody>
       </table>

@@ -6,6 +6,7 @@ import type { GozCizimIsareti, GozCizimKarsilastirma, GozCizimYaniti } from '../
 import { Modal } from '../Modal';
 import { mesaj, onay } from '../mesaj';
 import { SemaZemini } from './gozSemaZemini';
+import { c as cev } from '../../dil/ceviri';
 
 /**
  * GÖZ ŞEMASI (705) — mockup `Ekranlar/Goz/goz_semasi.html`.
@@ -286,7 +287,7 @@ export function GozSemasi({ gozMuayeneId, onKapat, onTamam }: {
                  ⇄ Öncekiyle karşılaştır
                </button>
                <button className="d" onClick={yazdir}>🖨 Yazdır / rapora ekle</button>
-               <button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>
+               <button className="d kapat-dugmesi" onClick={onKapat}>{cev('✖ Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}
@@ -308,7 +309,7 @@ export function GozSemasi({ gozMuayeneId, onKapat, onTamam }: {
 
       <div className="sema-duzen">
         <div className="sema-palet">
-          <div className="pb">Damgalar</div>
+          <div className="pb">{cev('Damgalar')}</div>
           {damgalar.map(d => (
             <button key={d.tur} type="button"
                     className={`sema-damga${damga === d.tur && arac === 'damga' ? ' secili' : ''}`}
@@ -317,7 +318,7 @@ export function GozSemasi({ gozMuayeneId, onKapat, onTamam }: {
               {d.ad}
             </button>
           ))}
-          <div className="pb">Araç</div>
+          <div className="pb">{cev('Araç')}</div>
           <button type="button" className={`sema-damga${arac === 'ciz' ? ' secili' : ''}`}
                   onClick={() => setArac('ciz')}>
             <span className="sim">✎</span> Serbest çiz
@@ -349,7 +350,7 @@ export function GozSemasi({ gozMuayeneId, onKapat, onTamam }: {
         </div>
 
         <div className="sema-yan">
-          <div className="pb">İşaretler</div>
+          <div className="pb">{cev('İşaretler')}</div>
           {[1, 2].flatMap(goz => liste(goz).map((i, sira) => {
             const d = yanit?.damgalar.find(x => x.tur === i.tur);
             return (
@@ -366,7 +367,7 @@ export function GozSemasi({ gozMuayeneId, onKapat, onTamam }: {
             );
           }))}
           {liste(1).length + liste(2).length === 0 && (
-            <div className="sema-bos">Şemaya tıklayarak işaret koyun.</div>
+            <div className="sema-bos">{cev('Şemaya tıklayarak işaret koyun.')}</div>
           )}
 
           {karsilastir && onceki?.oncekiId ? (
@@ -401,9 +402,9 @@ export function GozSemasi({ gozMuayeneId, onKapat, onTamam }: {
             </>
           ) : null}
 
-          <div className="pb">Çizimden üretilen metin <span className="sp">öneri</span></div>
+          <div className="pb">{cev('Çizimden üretilen metin')}<span className="sp">öneri</span></div>
           <textarea className="sema-metin" rows={4} value={metin}
-                    placeholder="Çizimi kaydedin; cümle sunucuda üretilir."
+                    placeholder={cev('Çizimi kaydedin; cümle sunucuda üretilir.')}
                     onChange={e => setMetin(e.target.value)} />
           <div className="sema-yaz">
             <select value={hedef} onChange={e => setHedef(e.target.value)}>
@@ -419,7 +420,7 @@ export function GozSemasi({ gozMuayeneId, onKapat, onTamam }: {
             (görme, basınç, C/D) hiçbir koşulda yazılmaz.
           </div>
 
-          <div className="pb">Sürümler</div>
+          <div className="pb">{cev('Sürümler')}</div>
           {(yanit?.gecmis ?? []).map(g => (
             <div key={g.id} className="sema-satir">
               v{g.surum} <span className={g.goz === 1 ? 'od' : 'os'}>

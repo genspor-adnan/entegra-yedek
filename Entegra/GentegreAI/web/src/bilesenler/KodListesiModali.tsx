@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Modal } from './Modal';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
+import { c } from '../dil/ceviri';
 
 /** Taslak satiri: deger=null -> henuz sunucuda olmayan YENI kayit. */
 interface TaslakSatir { deger: number | null; ad: string; sira: number; aktif: number }
@@ -105,14 +106,14 @@ export function KodListesiModali({ kod, baslik, ustDeger, onKapat }: {
           {kaydediyor ? 'Kaydediliyor…' : '💾 Kaydet'}
         </button>
         <button className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
-                onClick={onKapat} disabled={kaydediyor}>✕ Kapat</button>
+                onClick={onKapat} disabled={kaydediyor}>{c('✕ Kapat')}</button>
       </>}
     >
       <div className="kagrup">
         {hata && <div className="hata-kutusu" style={{ marginBottom: 8 }}>{hata}</div>}
 
         <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-          <input placeholder="Yeni değer…" value={yeniAd} style={{ flex: 1 }}
+          <input placeholder={c('Yeni değer…')} value={yeniAd} style={{ flex: 1 }}
                  onChange={e => setYeniAd(e.target.value)}
                  onKeyDown={e => { if (e.key === 'Enter') ekle() }} />
           <button className="d" onClick={ekle} disabled={!yeniAd.trim()}>＋ Ekle</button>
@@ -148,7 +149,7 @@ export function KodListesiModali({ kod, baslik, ustDeger, onKapat }: {
                            xi === i ? { ...x, aktif: e.target.checked ? 1 : 0 } : x))} />
                 </td>
                 <td className="hiza-orta">
-                  <button type="button" className="d ikon-dugme" title="Değiştir"
+                  <button type="button" className="d ikon-dugme" title={c('Değiştir')}
                           onClick={() => { setDuzenlenen(i); setTaslakAd(s.ad) }}>✎</button>
                   <button type="button" className="d teh ikon-dugme" title="Sil"
                           onClick={() => sil(i)}>🗑</button>
@@ -156,7 +157,7 @@ export function KodListesiModali({ kod, baslik, ustDeger, onKapat }: {
               </tr>
             ))}
             {satirlar.length === 0 && (
-              <tr><td colSpan={4} className="bos">Değer yok</td></tr>
+              <tr><td colSpan={4} className="bos">{c('Değer yok')}</td></tr>
             )}
           </tbody>
         </table>

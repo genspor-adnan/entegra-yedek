@@ -4,6 +4,7 @@ import { type BelgeYaniti, hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import type { SatirDurumu } from '../../sayfalar/belgeSatir';
 import { hamSayi , tarihSaat } from '../bicim';
+import { c } from '../../dil/ceviri';
 
 /**
  * TERMIN GUNCELLEME (140) - siparis satirlarinin teslim tarihi.
@@ -63,7 +64,7 @@ export function TerminModali({ belgeId, satirlar, onKapat, onTamam }: {
             {calisiyor ? 'Kaydediliyor…' : '📅 Terminleri Kaydet'}
           </button>
           <span className="ayrac" />
-          <button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>{c('✖ Kapat')}</button>
         </>
       }
     >
@@ -73,7 +74,7 @@ export function TerminModali({ belgeId, satirlar, onKapat, onTamam }: {
         <div className="kagrup">
           <div className="alan-izgara" style={{ margin: 10 }}>
             <label className="alan">
-              <span className="etiket">Hepsine Uygula</span>
+              <span className="etiket">{c('Hepsine Uygula')}</span>
               {/* 368: kolon SAATLI - toplu uygulamada da saat girilebilir. */}
               <input type="datetime-local" value={toplu}
                      onChange={e => hepsineUygula(e.target.value)} />
@@ -88,10 +89,10 @@ export function TerminModali({ belgeId, satirlar, onKapat, onTamam }: {
             <thead>
               <tr>
                 <th style={{ width: 110 }}>Kod</th>
-                <th>Stok / Hizmet</th>
+                <th>{c('Stok / Hizmet')}</th>
                 <th className="hiza-sag" style={{ width: 80 }}>Miktar</th>
-                <th className="hiza-orta" style={{ width: 96 }}>Mevcut</th>
-                <th className="hiza-orta" style={{ width: 150 }}>Yeni Teslim Tarihi</th>
+                <th className="hiza-orta" style={{ width: 96 }}>{c('Mevcut')}</th>
+                <th className="hiza-orta" style={{ width: 150 }}>{c('Yeni Teslim Tarihi')}</th>
               </tr>
             </thead>
             <tbody>

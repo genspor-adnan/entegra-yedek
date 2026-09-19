@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
+import { c } from '../dil/ceviri';
 
 /**
  * DOKÜMAN KLASÖR PANELİ (419) — liste ekranının sol tarafı.
@@ -86,7 +87,7 @@ export function DokumanKlasorPaneli({ secim, onSecim, yenile }: {
 
       {klasorler.length > 0 && (
         <>
-          <div className="klasor-baslik">Kurumsal</div>
+          <div className="klasor-baslik">{c('Kurumsal')}</div>
           {klasorler.map(k => satir(
             { tur: 'klasor', id: k.id, ad: k.ad }, '📁', k.sayi,
             // Yol derinligi girintiyi verir: ayri bir agac yapisi kurmadan

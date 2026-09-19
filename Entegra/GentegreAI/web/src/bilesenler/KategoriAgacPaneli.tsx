@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { altAgac as altAgacHesapla } from './kategoriAgaci';
 import { api } from '../api/istemci';
 import { guvenli } from './mesaj';
+import { c } from '../dil/ceviri';
 
 /**
  * KATEGORİ AĞACI PANELİ (kullanıcı: "hizmet listesi de kategori ağacına bağlı
@@ -99,7 +100,7 @@ export function KategoriAgacPaneli({ tur, secili, onSec, sayacAlani }: {
         )}
       </div>
       <div className="kat-panel-agac">
-        {kokler.length === 0 && <div className="not">Kategori yok.</div>}
+        {kokler.length === 0 && <div className="not">{c('Kategori yok.')}</div>}
         {kokler.map(k => dal(k, 0))}
       </div>
     </div>

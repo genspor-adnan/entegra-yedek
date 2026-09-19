@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { guvenli, mesaj, onay } from '../bilesenler/mesaj';
+import { c } from '../dil/ceviri';
 
 /**
  * TELERADYOLOJİ DÖNEM FATURASI (803) — mockup
@@ -107,7 +108,7 @@ export function TeleradFatura() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Teleradyoloji Dönem Faturası</h1>
-          <span className="yol">Radyoloji › Teleradyoloji › Dönem Faturası</span>
+          <span className="yol">{c('Radyoloji › Teleradyoloji › Dönem Faturası')}</span>
         </div>
         <div className="basarac">
           <select value={kurumId} onChange={e => setKurumId(Number(e.target.value))}>
@@ -174,7 +175,7 @@ export function TeleradFatura() {
               </table>
               <div className="pano-not">
                 Ücret istek açılırken sözleşme tarifesinden kopyalanmıştı; burada yalnız
-                toplanıyor. <b>SLA cezası satır iskontosudur</b> — yalnız süresi kaçan
+                toplanıyor. <b>{c('SLA cezası satır iskontosudur')}</b> — yalnız süresi kaçan
                 işlere uygulanır. Fatura tutarını belge hattı hesaplar.
               </div>
             </div>
@@ -184,7 +185,7 @@ export function TeleradFatura() {
                 <span className="sonuk">düzeltilmeden fatura eksik kalır</span></h6>
               <table className="detay-tablo">
                 <thead>
-                  <tr><th>İstek</th><th className="hiza-sag">Ücret</th><th>Sebep</th></tr>
+                  <tr><th>İstek</th><th className="hiza-sag">Ücret</th><th>{c('Sebep')}</th></tr>
                 </thead>
                 <tbody>
                   {ozet.eksikler.map(e => (

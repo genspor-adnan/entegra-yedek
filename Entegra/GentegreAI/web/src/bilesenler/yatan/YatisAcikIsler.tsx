@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import type { YatisOzeti } from '../../api/uclar/yatan';
 import { tarihYaz } from '../bicim';
+import { c } from '../../dil/ceviri';
 
 /**
  * AÇIK İŞLER + RİSK DEĞERLENDİRMELERİ — yatış kartının Genel sekmesi
@@ -53,10 +54,10 @@ export function YatisAcikIsler({ yatisId }: { yatisId: number }) {
   return (
     <div className="altpanel-iki yatis-acik" style={{ marginTop: 10 }}>
       <div className="kagrup">
-        <h6>Açık işler <span>taburcu bunları bekler</span></h6>
+        <h6>{c('Açık işler')}<span>taburcu bunları bekler</span></h6>
         <div className="ic">
           {acik.length === 0 && (
-            <div className="sat"><span>Açık iş yok</span>
+            <div className="sat"><span>{c('Açık iş yok')}</span>
               <b><span className="rozet ok">taburcuya hazır</span></b></div>
           )}
           {isler.map(i => i.sayi > 0 && (
@@ -77,10 +78,10 @@ export function YatisAcikIsler({ yatisId }: { yatisId: number }) {
       </div>
 
       <div className="kagrup">
-        <h6>Risk değerlendirmeleri <span>24 saatte bir yenilenir</span></h6>
+        <h6>{c('Risk değerlendirmeleri')}<span>24 saatte bir yenilenir</span></h6>
         <div className="ic">
           {veri.riskler.length === 0 && (
-            <div className="sat"><span>Değerlendirme yok</span>
+            <div className="sat"><span>{c('Değerlendirme yok')}</span>
               <b><span className="rozet sari">yatışta doldurulmalı</span></b></div>
           )}
           {veri.riskler.map(r => {

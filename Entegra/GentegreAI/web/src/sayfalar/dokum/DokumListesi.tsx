@@ -1,6 +1,7 @@
 import type { DokumKaydi, DokumKaynakMeta } from '../../api/sozlesme';
 import { tarihSaat } from '../../bilesenler/bicim';
 import { GORUNURLUK_ETIKET, degerMetni, yapraklar } from './ortak';
+import { c } from '../../dil/ceviri';
 
 /**
  * DÖKÜMLERİM (mockup "Dökümlerim" sekmesi): benim + rolümle paylaşılan + kurum
@@ -19,8 +20,8 @@ export function DokumListesi({ liste, kaynaklar, seciliId, yukleniyor, onSec, on
       </h6>
       <table className="detay-tablo secilebilir dk-liste">
         <thead><tr>
-          <th>Döküm</th><th>Kaynak</th><th>Koşullar</th><th>Çıktı</th>
-          <th>Paylaşım</th><th>Son çalıştırma</th><th>Sahibi</th><th style={{ width: 150 }}></th>
+          <th>{c('Döküm')}</th><th>Kaynak</th><th>{c('Koşullar')}</th><th>{c('Çıktı')}</th>
+          <th>{c('Paylaşım')}</th><th>{c('Son çalıştırma')}</th><th>{c('Sahibi')}</th><th style={{ width: 150 }}></th>
         </tr></thead>
         <tbody>
           {liste.map(d => {
@@ -64,7 +65,7 @@ export function DokumListesi({ liste, kaynaklar, seciliId, yukleniyor, onSec, on
       </table>
       <div className="pano-not">
         <b>?</b> işaretli koşul <b>parametredir</b>: değeri kaydedilmez, döküm her çalıştırıldığında
-        sorulur. Bir kez tasarla, her ay farklı tarih aralığıyla çalıştır. <b>Standart</b> dökümler
+        sorulur. Bir kez tasarla, her ay farklı tarih aralığıyla çalıştır. <b>{c('Standart')}</b> dökümler
         kurum profiline (ürün modu · açık modüller) göre gelir; değiştirilmez, kopyalanır.
       </div>
     </div>

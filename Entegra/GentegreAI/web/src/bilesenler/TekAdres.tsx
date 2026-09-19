@@ -1,6 +1,7 @@
 import type { DetayDurumu, Satir } from './GenDetayTablo';
 import type { KartDetayMeta } from '../api/sozlesme';
 import { useYerler, VARSAYILAN_ULKE, VARSAYILAN_UYRUK } from './yerlerHook';
+import { c } from '../dil/ceviri';
 
 interface Props {
   meta: KartDetayMeta;
@@ -127,7 +128,7 @@ export function TekAdres({
         {!ulkeGizli && (
         <div className="adres-satir">
           <label className="alan tip-kod">
-            <span className="etiket">Ülke</span>
+            <span className="etiket">{c('Ülke')}</span>
             <select value={String(satir.ulke ?? VARSAYILAN_ULKE)} disabled={saltOkunur}
               onChange={e => degis({ ulke: e.target.value })}>
               {(yerler?.ulkeler ?? []).map(y => <option key={y.id} value={y.ad}>{y.ad}</option>)}

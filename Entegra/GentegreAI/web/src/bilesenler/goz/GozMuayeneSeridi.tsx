@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import type { GozMuayeneSeridiYaniti } from '../../api/uclar/goz';
 import { tarihSaat } from '../bicim';
+import { c } from '../../dil/ceviri';
 
 /**
  * GÖZ MUAYENE KARTI ÜST ŞERİDİ — mockup
@@ -54,13 +55,13 @@ export function GozMuayeneSeridi({ gozMuayeneId, yenile }: {
     <>
       <div className="goz-kimlik">
         <div className="ad">{k.hasta}</div>
-        <div className="kv"><span>Yaş / cinsiyet</span>
+        <div className="kv"><span>{c('Yaş / cinsiyet')}</span>
           <b>{k.yas ?? '—'}{k.cinsiyet ? ` / ${CINSIYET[k.cinsiyet] ?? ''}` : ''}</b></div>
         <div className="kv"><span>Protokol</span>
           <b>{k.protokol || k.hastaNo || '—'}</b></div>
         <div className="kv"><span>Tarih</span>
           <b>{tarihSaat(k.tarih)}</b></div>
-        <div className="kv"><span>Hekim / bölüm</span>
+        <div className="kv"><span>{c('Hekim / bölüm')}</span>
           <b>{[k.hekim, k.bolum].filter(Boolean).join(' · ') || '—'}</b></div>
         {k.oda && <div className="kv"><span>Oda</span><b>{k.oda}</b></div>}
         <div className="sag">
@@ -83,12 +84,12 @@ export function GozMuayeneSeridi({ gozMuayeneId, yenile }: {
           <b>{k.sikayet || <i className="bos-deger">girilmemiş</i>}</b>
         </div>
         <div className="alan">
-          <span>Sistemik / ilaç</span>
+          <span>{c('Sistemik / ilaç')}</span>
           <b>{[k.ozgecmis, k.sistem].filter(Boolean).join(' · ')
               || <i className="bos-deger">—</i>}</b>
         </div>
         <div className="alan">
-          <span>Ön tetkik (tekniker · cihaz)</span>
+          <span>{c('Ön tetkik (tekniker · cihaz)')}</span>
           <b>
             {veri.onTetkik.length === 0
               ? <i className="bos-deger">cihazdan ölçüm gelmedi</i>
@@ -100,7 +101,7 @@ export function GozMuayeneSeridi({ gozMuayeneId, yenile }: {
           </b>
         </div>
         <div className="alan">
-          <span>Aile / risk</span>
+          <span>{c('Aile / risk')}</span>
           <b>{k.soygecmis || <i className="bos-deger">—</i>}</b>
         </div>
       </div>

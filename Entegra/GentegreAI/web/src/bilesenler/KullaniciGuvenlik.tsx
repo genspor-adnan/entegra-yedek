@@ -5,6 +5,7 @@ import { hataMetni } from '../api/sozlesme';
 import { guvenli, mesaj, onay } from './mesaj';
 import { tarihSaat } from './bicim';
 import { cihazAdi } from './cihazAdi';
+import { c } from '../dil/ceviri';
 
 /**
  * KULLANICI KARTI › GÜVENLİK — yöneticinin başkasının hesabında yapabilecekleri.
@@ -70,16 +71,10 @@ export function KullaniciGuvenlik({ kullaniciId, saltOkunur }: {
       <h6>Güvenlik <span>yönetici işlemleri · hepsi işlem günlüğüne yazılır</span></h6>
 
       <div className="ka-dugmeler" style={{ justifyContent: 'flex-start', gap: 8, padding: 10 }}>
-        <button className="d" disabled={saltOkunur || islemde} onClick={() => void parolaSifirla()}>
-          🔑 Parola Sıfırla
-        </button>
+        <button className="d" disabled={saltOkunur || islemde} onClick={() => void parolaSifirla()}>{c('🔑 Parola Sıfırla')}</button>
         <button className="d" disabled={saltOkunur || islemde}
-                onClick={() => void guvenli(() => calistir(() => api.kullaniciKilitCoz(kullaniciId)))}>
-          🔓 Kilidi Çöz
-        </button>
-        <button className="d" disabled={saltOkunur || islemde} onClick={() => void oturumKapat()}>
-          ⎋ Oturumları Kapat
-        </button>
+                onClick={() => void guvenli(() => calistir(() => api.kullaniciKilitCoz(kullaniciId)))}>{c('🔓 Kilidi Çöz')}</button>
+        <button className="d" disabled={saltOkunur || islemde} onClick={() => void oturumKapat()}>{c('⎋ Oturumları Kapat')}</button>
       </div>
       <div className="kanot">
         Parola burada <b>yazılmaz</b>: sıfırlama hesabı parolasız duruma alır, kişi ilk
@@ -90,11 +85,11 @@ export function KullaniciGuvenlik({ kullaniciId, saltOkunur }: {
       <h6 style={{ marginTop: 4 }}>Açık Oturumlar
         <span>{oturumlar ? `${oturumlar.length} cihaz` : ''}</span></h6>
       <table className="grid">
-        <thead><tr><th>Cihaz</th><th>IP</th><th>Şube</th><th>Son kullanım</th></tr></thead>
+        <thead><tr><th>Cihaz</th><th>{c('IP')}</th><th>Şube</th><th>{c('Son kullanım')}</th></tr></thead>
         <tbody>
           {!oturumlar && <tr><td colSpan={4}>Yükleniyor…</td></tr>}
           {oturumlar?.length === 0 && (
-            <tr><td colSpan={4} className="bos">Açık oturum yok.</td></tr>
+            <tr><td colSpan={4} className="bos">{c('Açık oturum yok.')}</td></tr>
           )}
           {oturumlar?.map(o => (
             <tr key={o.id}>
@@ -107,9 +102,9 @@ export function KullaniciGuvenlik({ kullaniciId, saltOkunur }: {
         </tbody>
       </table>
 
-      <h6 style={{ marginTop: 4 }}>Son Giriş Hareketleri</h6>
+      <h6 style={{ marginTop: 4 }}>{c('Son Giriş Hareketleri')}</h6>
       <table className="grid">
-        <thead><tr><th>Zaman</th><th>Sonuç</th><th>IP</th></tr></thead>
+        <thead><tr><th>Zaman</th><th>Sonuç</th><th>{c('IP')}</th></tr></thead>
         <tbody>
           {!gecmis && <tr><td colSpan={3}>Yükleniyor…</td></tr>}
           {gecmis?.length === 0 && <tr><td colSpan={3} className="bos">Kayıt yok.</td></tr>}

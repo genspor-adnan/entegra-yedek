@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import type { YatisOzeti } from '../../api/uclar/yatan';
 import { tarihSaat, tarihYaz } from '../bicim';
+import { c } from '../../dil/ceviri';
 
 /**
  * YATIŞ KARTI ÜST ŞERİDİ — mockup `Ekranlar/Yatan/yatis_karti.html`
@@ -51,7 +52,7 @@ export function YatisSeridi({ yatisId }: { yatisId: number }) {
     <>
       <div className="yatis-kimlik">
         <div className="ad">{o.hasta}</div>
-        <div className="kv"><span>Yaş / cinsiyet</span>
+        <div className="kv"><span>{c('Yaş / cinsiyet')}</span>
           <b>{o.yas != null ? o.yas : '—'}
              {o.cinsiyet === 1 ? ' / Erkek' : o.cinsiyet === 2 ? ' / Kadın' : ''}</b></div>
         <div className="kv"><span>Yatak</span>
@@ -61,7 +62,7 @@ export function YatisSeridi({ yatisId }: { yatisId: number }) {
         {/* GÜN SAYISI: uzayan yatış hem klinik hem mali bir sinyal
             (provizyon dönemi, enfeksiyon riski, yatak devri). */}
         <div className="kv"><span>Gün</span><b>{o.gun}</b></div>
-        <div className="kv"><span>Klinik / hekim</span>
+        <div className="kv"><span>{c('Klinik / hekim')}</span>
           <b>{[o.klinik, o.hekim].filter(Boolean).join(' · ') || '—'}</b></div>
         <div className="kv"><span>Ödeyen</span>
           <b>{o.odeyen || '—'}

@@ -5,6 +5,7 @@ import { hataMetni } from '../../api/sozlesme';
 import type { HastaFormlari as Veri } from '../../api/uclar/form';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, listeSor, mesaj, onay } from '../../bilesenler/mesaj';
+import { c } from '../../dil/ceviri';
 
 /**
  * HASTA FORMLARI `/hasta-formlar/:hastaId` (form motoru 740) — mockup
@@ -84,21 +85,21 @@ export function HastaFormlari() {
           <button className="d" onClick={() => void tablet()}>🖥 Tablete ver</button>
         </>}
         <span className="sp" />
-        <span className="sonuk">Göster:</span>
+        <span className="sonuk">{c('Göster:')}</span>
         {(['hepsi', 'bekleyen', 'tamam'] as const).map(s => <button key={s} className={`d${suzgec === s ? ' bir' : ''}`} onClick={() => setSuzgec(s)}>{s === 'hepsi' ? 'Tümü' : s === 'bekleyen' ? 'Bekleyen' : 'Tamamlanan'}</button>)}
       </div>
       <div className="fm-kpis">
-        <div className="fm-kpi"><div className="b">Form</div><div className="d">{v.istekler.length}</div></div>
+        <div className="fm-kpi"><div className="b">{c('Form')}</div><div className="d">{v.istekler.length}</div></div>
         <div className="fm-kpi"><div className="b">Tamamlanan</div><div className="d ok">{v.istekler.filter(i => i.durum === 4).length}</div></div>
         <div className="fm-kpi"><div className="b">Bekleyen</div><div className={`d${v.istekler.some(i => i.durum < 4) ? ' sari' : ''}`}>{v.istekler.filter(i => i.durum < 4).length}</div></div>
-        <div className="fm-kpi"><div className="b">İmza eksik onam</div><div className={`d${eksikImza ? ' kir' : ''}`}>{eksikImza}</div></div>
+        <div className="fm-kpi"><div className="b">{c('İmza eksik onam')}</div><div className={`d${eksikImza ? ' kir' : ''}`}>{eksikImza}</div></div>
       </div>
       {liste.length === 0 && <div className="sonuk" style={{ padding: 12 }}>Kayıt yok.</div>}
       {[...gruplar.entries()].map(([grup, satirlar]) => (
         <section key={grup} className="fm-bolum">
           <h3 className="fm-bolum-bas">{grup}</h3>
           <table className="fm-tablo">
-            <thead><tr><th>Form</th><th>Aile</th><th>Kanal</th><th>Tarih</th><th>Dolduran</th><th>Skor / sonuç</th><th>İmza</th><th>Durum</th><th></th></tr></thead>
+            <thead><tr><th>{c('Form')}</th><th>{c('Aile')}</th><th>Kanal</th><th>Tarih</th><th>{c('Dolduran')}</th><th>{c('Skor / sonuç')}</th><th>İmza</th><th>Durum</th><th></th></tr></thead>
             <tbody>
               {satirlar.map(i => (
                 <tr key={i.id}>
@@ -112,8 +113,8 @@ export function HastaFormlari() {
                   <td><span className={`rozet ${DURUM[i.durum] ?? 'mor'}`}>{i.durum_adi}{i.suresi_gecti ? ' (süresi geçti)' : ''}</span></td>
                   <td className="fm-sag">
                     <button className="d mini" onClick={() => git(`/form-doldur/${i.id}?geri=${encodeURIComponent(buradanGeri)}`)}>{i.durum === 4 ? 'Aç' : 'Doldur'}</button>
-                    {yetki('form.gonder') && i.durum < 4 && (i.kanal === 3 || i.kanal === 4) && <button className="d mini" onClick={() => void guvenli(async () => { await api.formHatirlat(i.id); mesaj('Hatırlatma kuyruğa alındı.') })}>Hatırlat</button>}
-                    {yetki('form.gonder') && (i.durum === 5 || i.durum === 6) && <button className="d mini" onClick={() => void guvenli(async () => { await api.formYeniden(i.id); mesaj('Yeni bağlantı gönderildi.'); await yukle() })}>Yeniden gönder</button>}
+                    {yetki('form.gonder') && i.durum < 4 && (i.kanal === 3 || i.kanal === 4) && <button className="d mini" onClick={() => void guvenli(async () => { await api.formHatirlat(i.id); mesaj('Hatırlatma kuyruğa alındı.') })}>{c('Hatırlat')}</button>}
+                    {yetki('form.gonder') && (i.durum === 5 || i.durum === 6) && <button className="d mini" onClick={() => void guvenli(async () => { await api.formYeniden(i.id); mesaj('Yeni bağlantı gönderildi.'); await yukle() })}>{c('Yeniden gönder')}</button>}
                   </td>
                 </tr>
               ))}
@@ -129,7 +130,7 @@ function Perde({ baslik, kapat, children }: { baslik: React.ReactNode; kapat: ()
   return (
     <div className="kaperde" onClick={kapat}>
       <div className="kawin tam" onClick={e => e.stopPropagation()}>
-        <div className="kabas">{baslik}<button className="kabas-dugme" onClick={kapat} title="Kapat">✖</button></div>
+        <div className="kabas">{baslik}<button className="kabas-dugme" onClick={kapat} title={c('Kapat')}>✖</button></div>
         <div className="kagov fm-kagov">{children}</div>
       </div>
     </div>

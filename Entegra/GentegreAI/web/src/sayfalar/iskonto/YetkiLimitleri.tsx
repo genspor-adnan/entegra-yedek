@@ -1,5 +1,6 @@
 import type { IskontoLimiti } from '../../api/sozlesme';
 import { ISTISNALAR } from './ortak';
+import { c } from '../../dil/ceviri';
 
 /**
  * YETKİ LİMİTLERİ — "bu talep neden bana düştü" sorusunun cevabı.
@@ -25,7 +26,7 @@ export function YetkiLimitleri({ limitler, rolId }: {
           <thead>
             <tr>
               <th>Rol</th>
-              <th className="hiza-sag" style={{ width: 120 }}>Oran tavanı</th>
+              <th className="hiza-sag" style={{ width: 120 }}>{c('Oran tavanı')}</th>
               <th className="hiza-sag" style={{ width: 120 }}>Kişi</th>
               <th>Not</th>
             </tr>
@@ -64,11 +65,11 @@ export function YetkiLimitleri({ limitler, rolId }: {
       </div>
 
       <div className="kagrup">
-        <h6>Kural İstisnaları <span className="sonuk">yetkiden bağımsız</span></h6>
+        <h6>{c('Kural İstisnaları')}<span className="sonuk">yetkiden bağımsız</span></h6>
         <table className="detay-tablo">
           <thead>
             <tr><th style={{ width: 220 }}>Kural</th>
-                <th style={{ width: 190 }}>Etki</th><th>Neden</th></tr>
+                <th style={{ width: 190 }}>{c('Etki')}</th><th>Neden</th></tr>
           </thead>
           <tbody>
             {ISTISNALAR.map(k => (

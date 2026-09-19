@@ -2,6 +2,7 @@ import { Fragment, useCallback, useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { type StokDurumYaniti, type StokLotSatiri, hataMetni } from '../api/sozlesme';
 import { say4, gunMetni, sayiOkuNull as sayiCoz } from './bicim';
+import { c } from '../dil/ceviri';
 
 
 /** "2027-06-30T00:00:00" -> "30.06.2027"; bos ise tire. */
@@ -16,9 +17,9 @@ function lotTablosu(satirlar: StokLotSatiri[]) {
     <table className="lot-tablo">
       <thead>
         <tr>
-          <th>Lot No</th>
+          <th>{c('Lot No')}</th>
           <th>Seri No</th>
-          <th>Ürt. Tarihi</th>
+          <th>{c('Ürt. Tarihi')}</th>
           <th>SKT</th>
           <th className="hiza-sag">Kalan</th>
         </tr>
@@ -133,22 +134,22 @@ export function StokDurumSekmesi({ stokId, duzenlenebilir }: {
 
       <div className="kpi-serit">
         <div className="kpi">
-          <div className="k">Toplam Stok</div>
+          <div className="k">{c('Toplam Stok')}</div>
           <div className="v">{say4.format(Number(o?.toplam ?? 0))}{birim}</div>
           <div className="s">{o?.depoSayisi ?? 0} depoda</div>
         </div>
         <div className="kpi">
-          <div className="k">Rezerve</div>
+          <div className="k">{c('Rezerve')}</div>
           <div className="v uyari">{say4.format(Number(o?.rezerve ?? 0))}{birim}</div>
           <div className="s">açık siparişler</div>
         </div>
         <div className="kpi">
-          <div className="k">Kullanılabilir</div>
+          <div className="k">{c('Kullanılabilir')}</div>
           <div className="v olumlu">{say4.format(Number(o?.kullanilabilir ?? 0))}{birim}</div>
           <div className="s">satışa hazır</div>
         </div>
         <div className="kpi">
-          <div className="k">Yoldaki (Sipariş)</div>
+          <div className="k">{c('Yoldaki (Sipariş)')}</div>
           <div className="v">{say4.format(Number(o?.yolda ?? 0))}{birim}</div>
           <div className="s">açık alış siparişleri</div>
         </div>
@@ -162,11 +163,11 @@ export function StokDurumSekmesi({ stokId, duzenlenebilir }: {
             <tr>
               <th>Depo</th>
               <th className="hiza-sag" style={{ width: 90 }}>Miktar</th>
-              <th className="hiza-sag" style={{ width: 90 }}>Rezerve</th>
-              <th className="hiza-sag" style={{ width: 100 }}>Kullanılab.</th>
-              <th className="hiza-sag" style={{ width: 90 }}>Yolda</th>
-              <th className="hiza-sag" style={{ width: 80 }}>Min</th>
-              <th className="hiza-sag" style={{ width: 80 }}>Max</th>
+              <th className="hiza-sag" style={{ width: 90 }}>{c('Rezerve')}</th>
+              <th className="hiza-sag" style={{ width: 100 }}>{c('Kullanılab.')}</th>
+              <th className="hiza-sag" style={{ width: 90 }}>{c('Yolda')}</th>
+              <th className="hiza-sag" style={{ width: 80 }}>{c('Min')}</th>
+              <th className="hiza-sag" style={{ width: 80 }}>{c('Max')}</th>
               <th className="hiza-orta" style={{ width: 90 }}>Durum</th>
             </tr>
           </thead>
@@ -217,7 +218,7 @@ export function StokDurumSekmesi({ stokId, duzenlenebilir }: {
               </Fragment>
             )})}
             {(veri?.satirlar ?? []).length === 0 && (
-              <tr><td colSpan={8} className="bos">Bu stokun hiçbir depoda hareketi yok.</td></tr>
+              <tr><td colSpan={8} className="bos">{c('Bu stokun hiçbir depoda hareketi yok.')}</td></tr>
             )}
             {/* Deposu bilinmeyen lotlar: gocmus hareketlerin kaynak verisinde
                 depo yok (115). Gizlemek yerine ayri satirda gosterilir - mal
@@ -252,7 +253,7 @@ export function StokDurumSekmesi({ stokId, duzenlenebilir }: {
           stoklarda). Lotlar belge kaydıyla oluşur; burada düzenlenmez.
           Miktarlar <b>salt-okunur</b>: belge kaydında güncellenir. Min/Max seviye depo
           bazlı tanımlanır; boş bırakılırsa stok kartındaki Minimum Stok geçerlidir.
-          <b> Kullanılabilir</b> = Miktar − Rezerve; kritik uyarısı bu değere bakar.
+          <b>{c('Kullanılabilir')}</b> = Miktar − Rezerve; kritik uyarısı bu değere bakar.
         </div>
       </div>
     </>

@@ -4,6 +4,7 @@ import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { useAiBaglam } from './aiBaglam';
 import { Kalinla } from './kalinMetin';
+import { c } from '../dil/ceviri';
 
 /**
  * AI REHBER PANELİ (447) — sağ altta duran yol gösterici.
@@ -112,8 +113,8 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
   if (!acik) {
     return (
       <button className="rehber-dugme" onClick={() => setAcik(true)}
-              title="AI Rehber — ne nerede, nasıl yapılır?">
-        💡 <span>AI Rehber</span>
+              title={c('AI Rehber — ne nerede, nasıl yapılır?')}>
+        💡 <span>{c('AI Rehber')}</span>
       </button>
     );
   }
@@ -123,9 +124,9 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
   return (
     <div className="rehber-panel" role="dialog" aria-label="AI Rehber">
       <div className="rehber-bas">
-        <b>💡 AI Rehber</b>
+        <b>{c('💡 AI Rehber')}</b>
         <span className="rehber-not">yol gösterir, kayıt değiştirmez</span>
-        <button className="d" onClick={() => setAcik(false)} title="Kapat">✖</button>
+        <button className="d" onClick={() => setAcik(false)} title={c('Kapat')}>✖</button>
       </div>
 
       <div className="rehber-govde">
@@ -133,12 +134,12 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
             Asistan bunlari DUZELTMEZ; isaret eder. */}
         {oneriler.length > 0 && (
           <div className="rehber-oneriler">
-            <div className="rehber-not">Bu kayıtta</div>
+            <div className="rehber-not">{c('Bu kayıtta')}</div>
             {oneriler.map(o => (
               <div key={o.kod} className={`rehber-oneri s${o.seviye}`}>
                 <div className="bas">
                   <b>{o.seviye === 3 ? '⛔' : o.seviye === 2 ? '⚠' : 'ℹ'} {o.baslik}</b>
-                  <button className="d" title="Bunu bir daha gösterme"
+                  <button className="d" title={c('Bunu bir daha gösterme')}
                           onClick={() => void oneriGizle(o.kod)}>✖</button>
                 </div>
                 <div className="ac">{o.aciklama}</div>
@@ -157,7 +158,7 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
 
         {!yanit && !yukleniyor && !hata && (
           <div className="rehber-ornek">
-            <div className="rehber-not">Ne yapmak istediğinizi yazın:</div>
+            <div className="rehber-not">{c('Ne yapmak istediğinizi yazın:')}</div>
             {ORNEKLER.map(o => (
               <button key={o} className="rehber-ornek-dugme"
                       onClick={() => { setSoru(o); void sor(o) }}>{o}</button>
@@ -165,7 +166,7 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
           </div>
         )}
 
-        {yukleniyor && <div className="rehber-not">Bakıyorum…</div>}
+        {yukleniyor && <div className="rehber-not">{c('Bakıyorum…')}</div>}
         {hata && <div className="hata-kutusu">{hata}</div>}
 
         {yanit && (
@@ -197,7 +198,7 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
 
             {yanit.onerilenEkranlar.length > 0 && (
               <div className="rehber-ekranlar">
-                <div className="rehber-not">İlgili ekranlar</div>
+                <div className="rehber-not">{c('İlgili ekranlar')}</div>
                 {yanit.onerilenEkranlar.map(e => (
                   <button key={e.rota} className="d"
                           onClick={() => { git(e.rota); setAcik(false) }}
@@ -243,8 +244,8 @@ export function AiRehberPaneli({ urunModu }: { urunModu?: number }) {
       <form className="rehber-sorgu"
             onSubmit={e => { e.preventDefault(); void sor(soru) }}>
         <input ref={kutu} value={soru} onChange={e => setSoru(e.target.value)}
-               placeholder="Nasıl yapılır diye sorun…" maxLength={300} />
-        <button className="d bir" type="submit" disabled={yukleniyor}>Sor</button>
+               placeholder={c('Nasıl yapılır diye sorun…')} maxLength={300} />
+        <button className="d bir" type="submit" disabled={yukleniyor}>{c('Sor')}</button>
       </form>
     </div>
   );

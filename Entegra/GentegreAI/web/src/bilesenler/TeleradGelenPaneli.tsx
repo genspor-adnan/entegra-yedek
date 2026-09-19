@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { tarihSaat } from './bicim';
+import { c } from '../dil/ceviri';
 
 /**
  * GELEN RAPOR PANELİ (817) — liste satırının altında ham mesaj ve özet.
@@ -58,7 +59,7 @@ export function TeleradGelenPaneli({ gelenId }: { gelenId: number }) {
 
       <div className="telerad-iz-govde">
         <div>
-          <h5>Gelen ORU</h5>
+          <h5>{c('Gelen ORU')}</h5>
           {/* Segment sonu \r: ekranda alt alta görünsün diye satıra bölünür -
               saklanan metnin kendisi değişmez. */}
           <pre>{String(k.ham ?? '').split('\r').join('\n')}</pre>

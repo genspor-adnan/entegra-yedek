@@ -10,7 +10,7 @@ import {
   DIS_SIRASI, DURUM_ADLARI, Odontogram, SUT_SIRASI, disAdi, disGorunumleri,
   durumSinifi, type DisSecim,
 } from '../../bilesenler/dis/Odontogram';
-import { c } from '../../dil/ceviri';
+import { c as cev } from '../../dil/ceviri';
 
 /**
  * DİŞ HASTA KARTI — mockup `Ekranlar/Dis Klinigi/dis_hasta_karti_v5.html`.
@@ -208,14 +208,14 @@ export function DisHastaKarti() {
   const Perde = ({ children }: { children: ReactNode }) => (
     <div className="kaperde" onClick={kapat}>
       <div className="kawin tam" onClick={e => e.stopPropagation()}>
-        <div className="kabas">🦷 Diş Hasta Kartı<span className="kapt">{c('Esc ile kapanır')}</span>
+        <div className="kabas">🦷 Diş Hasta Kartı<span className="kapt">{cev('Esc ile kapanır')}</span>
           <button className="kabas-dugme" onClick={kapat} title="Kapat">✖</button></div>
         <div className="kagov">{children}</div>
       </div>
     </div>
   );
   if (hata) return <Perde><div className="hata-kutusu">{hata}</div></Perde>;
-  if (!kart) return <Perde><span className="sonuk">{c('Yükleniyor…')}</span></Perde>;
+  if (!kart) return <Perde><span className="sonuk">{cev('Yükleniyor…')}</span></Perde>;
 
   const h = kart.hasta, plan = kart.plan;
   const seciliG = secili ? gorunumler[secili.disNo] : undefined;
@@ -228,30 +228,30 @@ export function DisHastaKarti() {
       <div className="kawin tam" onClick={e => e.stopPropagation()}>
         <div className="kabas">
           <span>🦷 {h.unvan}{h.yas != null ? ` · ${h.yas}` : ''}</span>
-          <span className="ds-kabas-yol">{c('Diş › Hasta Kartı')}</span>
+          <span className="ds-kabas-yol">{cev('Diş › Hasta Kartı')}</span>
           {plan && <span className={`rozet ${PLAN_DURUM[plan.durum]?.[1] ?? 'gri'}`}>{plan.planNo} · {PLAN_DURUM[plan.durum]?.[0]}</span>}
           {bakiye > 0 && <span className="rozet hata">bakiye {para.format(bakiye)}</span>}
           {yukleniyor && <span className="ds-kabas-yol">yenileniyor…</span>}
-          <span className="kapt">{c('Esc ile kapanır')}</span>
+          <span className="kapt">{cev('Esc ile kapanır')}</span>
           <button className="kabas-dugme" onClick={kapat} title="Kapat">✖</button>
         </div>
         <div className="kagov ds-kagov">
         <div className="ds-arac ds-kart-arac">
-          {yetki('dis.seans') && <button className="d bir" onClick={() => void seansAc()}>{c('🪑 Muayene / Seans Aç')}</button>}
+          {yetki('dis.seans') && <button className="d bir" onClick={() => void seansAc()}>{cev('🪑 Muayene / Seans Aç')}</button>}
           {planYazar && plan?.durum === 1 && <button className="d" onClick={() => void planSun()}>📤 Proforma / Sun</button>}
-          {planYazar && plan && (plan.durum === 1 || plan.durum === 2) && <button className="d onay" onClick={() => void planOnayla()}>{c('✍ Hasta Onayı')}</button>}
+          {planYazar && plan && (plan.durum === 1 || plan.durum === 2) && <button className="d onay" onClick={() => void planOnayla()}>{cev('✍ Hasta Onayı')}</button>}
           {plan && <button className="d" onClick={() => git(`/dis-plan/${plan.id}`, { state: { geri: konum.pathname, ustGeri: geri } })}>📋 Plan Kartı</button>}
           {plan?.odemePlaniId
-            ? <button className="d" onClick={() => git(`/dis-odeme-plani/${plan.odemePlaniId}?geri=${geriParam}`)}>{c('💳 Ödeme Planı')}</button>
+            ? <button className="d" onClick={() => git(`/dis-odeme-plani/${plan.odemePlaniId}?geri=${geriParam}`)}>{cev('💳 Ödeme Planı')}</button>
             // Odeme plani YOKSA yeni kart acilir (kullanici): plan ve toplam on dolu,
             //   kaydet/kapat odontograma doner - liste ekranina dusurmek isi yarim birakiyordu.
-            : plan && yetki('dis.odeme') && <button className="d" onClick={() => git(`/dis-odeme-plani/yeni?planId=${plan.id}&toplam=${plan.net}&geri=${geriParam}`)}>{c('💳 Ödeme Planı')}</button>}
+            : plan && yetki('dis.odeme') && <button className="d" onClick={() => git(`/dis-odeme-plani/yeni?planId=${plan.id}&toplam=${plan.net}&geri=${geriParam}`)}>{cev('💳 Ödeme Planı')}</button>}
           {/* Lab isi YOKSA yeni is emri karti acilir (kullanici): hasta on dolu,
               kaydet/kapat odontograma doner. Varsa hastanin lab listesi. */}
           <button className="d" onClick={() => git(`/dis-lab-isemri/yeni?hastaId=${hastaId}&hastaAd=${encodeURIComponent(kart?.hasta.unvan ?? '')}&geri=${geriParam}`)}>🧪 Lab İş Emri</button>
           <button className="d" onClick={() => git(`/hasta/${hastaId}?geri=${geriParam}`)}>↗ Genel Hasta Kartı</button>
-          <button className="d" onClick={() => void yukle()} title={c('Yenile')}>⟳</button>
-          <button className="d ds-sp" onClick={kapat}>{c('✖ Kapat')}</button>
+          <button className="d" onClick={() => void yukle()} title={cev('Yenile')}>⟳</button>
+          <button className="d ds-sp" onClick={kapat}>{cev('✖ Kapat')}</button>
         </div>
 
       <div className="ds-sahne">
@@ -262,10 +262,10 @@ export function DisHastaKarti() {
               surekli ilac (mavi) - Tibbi Ozet kaynaklari. Genel muayene
               kullanilmayan kurulumda giris buradan: "+" dugmeleri hasta on dolu
               kayit karti acar, kapatinca odontograma doner. */}
-          <div><label>{c('Tıbbi uyarılar')}</label><div className="ds-inp">
-            {h.alerji && h.alerji.split(', ').map(a => <span key={'a' + a} className="rozet hata" title={c('Alerji')}>{a}</span>)}
-            {h.kronik && h.kronik.split(', ').map(a => <span key={'k' + a} className="rozet uyari" title={c('Kronik tanı')}>{a}</span>)}
-            {h.ilac && h.ilac.split(', ').map(a => <span key={'i' + a} className="rozet mavi" title={c('Sürekli ilaç')}>💊 {a}</span>)}
+          <div><label>{cev('Tıbbi uyarılar')}</label><div className="ds-inp">
+            {h.alerji && h.alerji.split(', ').map(a => <span key={'a' + a} className="rozet hata" title={cev('Alerji')}>{a}</span>)}
+            {h.kronik && h.kronik.split(', ').map(a => <span key={'k' + a} className="rozet uyari" title={cev('Kronik tanı')}>{a}</span>)}
+            {h.ilac && h.ilac.split(', ').map(a => <span key={'i' + a} className="rozet mavi" title={cev('Sürekli ilaç')}>💊 {a}</span>)}
             {!h.alerji && !h.kronik && !h.ilac && <span className="sonuk">uyarı yok</span>}
             {yetki('muayene') && <span className="ds-uyari-ekle">
               {([['hasta-alerji', 'alerji'], ['hasta-kronik', 'kronik'], ['hasta-ilac', 'ilaç']] as [string, string][]).map(([k, ad]) =>
@@ -275,11 +275,11 @@ export function DisHastaKarti() {
           </div></div>
           {/* DENTAL ANAMNEZ (kullanici: "nereden girilecek"): dis_muayene icin ayri
               kart yok - burada ✎ ile duzenlenir (son dis muayene satiri, yoksa acilir). */}
-          <div><label>{c('Dental anamnez')}</label><div className="ds-inp">{h.dentalAnamnez || <span className="sonuk">—</span>}
+          <div><label>{cev('Dental anamnez')}</label><div className="ds-inp">{h.dentalAnamnez || <span className="sonuk">—</span>}
             {kart.disMuayene?.bruksizm && <span className="rozet uyari">bruksizm</span>}
             {kart.disMuayene?.sigara && <span className="rozet uyari">sigara</span>}
             {kart.disMuayene?.hijyenDurum && <span className="rozet gri">hijyen: {kart.disMuayene.hijyenDurum}</span>}
-            {yetki('dis.hasta') && <span className="ds-uyari-ekle"><button className="d mini" title={c('Dental anamnezi düzenle')}
+            {yetki('dis.hasta') && <span className="ds-uyari-ekle"><button className="d mini" title={cev('Dental anamnezi düzenle')}
               onClick={() => { setAnamnez({ dentalAnamnez: h.dentalAnamnez, bruksizm: !!kart.disMuayene?.bruksizm, sigara: !!kart.disMuayene?.sigara, hijyenDurum: kart.disMuayene?.hijyenDurum ?? '', tmeBulgu: kart.disMuayene?.tmeBulgu ?? '' }); setAnamnezAcik(a => !a) }}>✎</button></span>}
           </div>
           {anamnezAcik && (
@@ -291,14 +291,14 @@ export function DisHastaKarti() {
                 <label className="sonuk">hijyen <input value={anamnez.hijyenDurum} placeholder="iyi / orta / kötü" style={{ width: 90 }} onChange={e => setAnamnez(a => ({ ...a, hijyenDurum: e.target.value }))} /></label>
                 <label className="sonuk">TME <input value={anamnez.tmeBulgu} placeholder="klik / ağrı / —" style={{ width: 110 }} onChange={e => setAnamnez(a => ({ ...a, tmeBulgu: e.target.value }))} /></label>
                 <span className="ds-sp">
-                  <button className="d onay" onClick={() => void anamnezKaydet()}>{c('💾 Kaydet')}</button>
-                  <button className="d" onClick={() => setAnamnezAcik(false)}>{c('Vazgeç')}</button>
+                  <button className="d onay" onClick={() => void anamnezKaydet()}>{cev('💾 Kaydet')}</button>
+                  <button className="d" onClick={() => setAnamnezAcik(false)}>{cev('Vazgeç')}</button>
                 </span>
               </div>
             </div>
           )}
           </div>
-          <div><label>{c('Son ziyaret / hekim')}</label><div className="ds-inp">
+          <div><label>{cev('Son ziyaret / hekim')}</label><div className="ds-inp">
             {h.sonMuayene ? `${gunNokta(h.sonMuayene)}${h.sonHekim ? ' · ' + h.sonHekim : ''}` : <span className="sonuk">muayene yok</span>}
             {h.seansSayisi > 0 && <span className="sonuk"> · {h.seansSayisi} seans</span>}
           </div></div>
@@ -319,12 +319,12 @@ export function DisHastaKarti() {
                   <span className={gorunum === 'tablo' ? 'on' : ''} onClick={() => setGorunum('tablo')}>☰ Diş tablosu</span>
                 </span>
                 <span className="ds-sep" />
-                <span className={`cip${!sut ? ' on' : ''}`} onClick={() => setSut(false)}>{c('Daimi dişler')}</span>
-                <span className={`cip${sut ? ' on' : ''}`} onClick={() => setSut(true)}>{c('Süt dişleri')}</span>
+                <span className={`cip${!sut ? ' on' : ''}`} onClick={() => setSut(false)}>{cev('Daimi dişler')}</span>
+                <span className={`cip${sut ? ' on' : ''}`} onClick={() => setSut(true)}>{cev('Süt dişleri')}</span>
                 <span className="ds-sep" />
-                <span className={`cip${katmanlar.mevcut ? ' on' : ''}`} onClick={() => setKatmanlar(k => ({ ...k, mevcut: !k.mevcut }))}>{c('Mevcut durum')}</span>
+                <span className={`cip${katmanlar.mevcut ? ' on' : ''}`} onClick={() => setKatmanlar(k => ({ ...k, mevcut: !k.mevcut }))}>{cev('Mevcut durum')}</span>
                 <span className={`cip${katmanlar.plan ? ' on' : ''}`} onClick={() => setKatmanlar(k => ({ ...k, plan: !k.plan }))}>Planlanan</span>
-                <span className={`cip${katmanlar.tamam ? ' on' : ''}`} onClick={() => setKatmanlar(k => ({ ...k, tamam: !k.tamam }))}>{c('Tamamlanan')}</span>
+                <span className={`cip${katmanlar.tamam ? ' on' : ''}`} onClick={() => setKatmanlar(k => ({ ...k, tamam: !k.tamam }))}>{cev('Tamamlanan')}</span>
                 <span className="ds-sep" />
                 <span className={`cip${sadeceSorunlu ? ' on' : ''}`} onClick={() => setSadeceSorunlu(s => !s)}>⚠ Yalnız sorunlu dişler</span>
                 <span className="ds-sp sonuk">Dişe/yüzeye tıkla → plan satırları o dişe süzülür. Kesikli kırmızı = planlanan, yeşil = tamamlanan.</span>
@@ -334,20 +334,20 @@ export function DisHastaKarti() {
                 <>
                   <Odontogram satirlar={kart.odontogram} secili={secili} onSec={sec} katmanlar={katmanlar} dentisyon={sut ? 2 : 1} />
                   <div className="ds-lej">
-                    <span><i style={{ background: 'rgba(96,54,30,.78)' }} />{c('Çürük')}</span>
-                    <span><i style={{ background: '#9aa7b5' }} />{c('Amalgam')}</span>
-                    <span><i style={{ background: 'rgba(110,160,220,.55)' }} />{c('Kompozit')}</span>
-                    <span><i style={{ background: '#d9a12b' }} />{c('Kron / köprü')}</span>
+                    <span><i style={{ background: 'rgba(96,54,30,.78)' }} />{cev('Çürük')}</span>
+                    <span><i style={{ background: '#9aa7b5' }} />{cev('Amalgam')}</span>
+                    <span><i style={{ background: 'rgba(110,160,220,.55)' }} />{cev('Kompozit')}</span>
+                    <span><i style={{ background: '#d9a12b' }} />{cev('Kron / köprü')}</span>
                     <span><i style={{ background: '#fff', borderColor: '#b3261e', borderWidth: 2 }} /> Kanal</span>
-                    <span><i style={{ background: '#8c96a0' }} />{c('İmplant')}</span>
-                    <span><i style={{ background: '#fff', border: '1px dashed #c7ced6' }} />{c('Eksik')}</span>
+                    <span><i style={{ background: '#8c96a0' }} />{cev('İmplant')}</span>
+                    <span><i style={{ background: '#fff', border: '1px dashed #c7ced6' }} />{cev('Eksik')}</span>
                     <span><i style={{ border: '1.5px dashed #b3261e' }} /> Planlanan</span>
-                    <span><i style={{ border: '1.5px solid #2e7d46' }} />{c('Tamamlanan')}</span>
+                    <span><i style={{ border: '1.5px solid #2e7d46' }} />{cev('Tamamlanan')}</span>
                   </div>
                 </>
               ) : (
                 <div className="ds-dg"><table>
-                  <thead><tr><th className="orta">Diş</th><th>Ad</th><th>{c('Mevcut durum')}</th><th>Planlanan</th><th>{c('Tamamlanan')}</th><th className="orta">{c('Son bulgu')}</th><th className="orta">{c('Perio (cep max)')}</th></tr></thead>
+                  <thead><tr><th className="orta">Diş</th><th>Ad</th><th>{cev('Mevcut durum')}</th><th>Planlanan</th><th>{cev('Tamamlanan')}</th><th className="orta">{cev('Son bulgu')}</th><th className="orta">{cev('Perio (cep max)')}</th></tr></thead>
                   <tbody>
                     {sira.filter(no => !sadeceSorunlu || gorunumler[no]).map(no => {
                       const g = gorunumler[no];
@@ -379,13 +379,13 @@ export function DisHastaKarti() {
                   <span className="ds-sp">
                     <span className={`cip${planSuzgec === 'secili' ? ' on' : ''}`} onClick={() => setPlanSuzgec('secili')}>▸ seçili diş üstte</span>
                     <span className={`cip${planSuzgec === 'tumu' ? ' on' : ''}`} onClick={() => setPlanSuzgec('tumu')}>Tümü</span>
-                    <span className={`cip${planSuzgec === 'yapilan' ? ' on' : ''}`} onClick={() => setPlanSuzgec('yapilan')}>{c('Yapılanlar')}</span>
-                    <span className={`cip${planSuzgec === 'bekleyen' ? ' on' : ''}`} onClick={() => setPlanSuzgec('bekleyen')}>{c('Bekleyenler')}</span>
+                    <span className={`cip${planSuzgec === 'yapilan' ? ' on' : ''}`} onClick={() => setPlanSuzgec('yapilan')}>{cev('Yapılanlar')}</span>
+                    <span className={`cip${planSuzgec === 'bekleyen' ? ' on' : ''}`} onClick={() => setPlanSuzgec('bekleyen')}>{cev('Bekleyenler')}</span>
                     {plan?.oncekiPlanNo && <span className="sonuk"> · önceki plan {plan.oncekiPlanNo} (tamamlandı)</span>}
                   </span>
                 </div>
                 <div className="ds-dg"><table className="ds-plan">
-                  <thead><tr><th className="orta">#</th><th className="orta">Diş</th><th>İşlem</th><th className="orta">{c('Yüzey')}</th><th className="orta">Seans</th><th className="sag">Ücret</th><th className="sag">{c('İnd.')}</th><th className="sag">Net</th><th className="orta">Tarih</th><th className="orta">Durum</th><th /></tr></thead>
+                  <thead><tr><th className="orta">#</th><th className="orta">Diş</th><th>İşlem</th><th className="orta">{cev('Yüzey')}</th><th className="orta">Seans</th><th className="sag">Ücret</th><th className="sag">{cev('İnd.')}</th><th className="sag">Net</th><th className="orta">Tarih</th><th className="orta">Durum</th><th /></tr></thead>
                   <tbody>
                     {satirlarSirali.map(s => {
                       const secMi = secili?.disNo === s.disNo && s.disNo > 0;
@@ -403,7 +403,7 @@ export function DisHastaKarti() {
                           <td className="orta">{s.tamamlanma ? gunNokta(s.tamamlanma) : s.randevu ? tarihSaat(s.randevu) : s.ilkSeans ? gunNokta(s.ilkSeans) : '—'}</td>
                           <td className="orta"><span className={`rozet ${SATIR_DURUM[s.durum]?.[1] ?? 'gri'}`}>{SATIR_DURUM[s.durum]?.[0]}</span></td>
                           <td className="orta ds-satir-arac">
-                            {planYazar && s.durum < 3 && <button className="d" onClick={e => { e.stopPropagation(); void yapildi(s) }}>{c('✔ Yapıldı')}</button>}
+                            {planYazar && s.durum < 3 && <button className="d" onClick={e => { e.stopPropagation(); void yapildi(s) }}>{cev('✔ Yapıldı')}</button>}
                             {planYazar && s.durum < 3 && <button className="d" title="İptal" onClick={e => { e.stopPropagation(); void satirIptal(s) }}>✕</button>}
                           </td>
                         </tr>
@@ -413,7 +413,7 @@ export function DisHastaKarti() {
                       <tr className="grup"><td colSpan={5}>TOPLAM · {satirlar.filter(s => s.durum !== 4).length} işlem</td>
                         <td className="sag">{para.format(plan?.toplam ?? 0)}</td><td className="sag">−{para.format(plan?.indirim ?? 0)}</td><td className="sag">{para.format(plan?.net ?? 0)}</td><td colSpan={3} /></tr>
                     )}
-                    {satirlar.length === 0 && <tr><td colSpan={11} className="sonuk">{c('Plan satırı yok.')}</td></tr>}
+                    {satirlar.length === 0 && <tr><td colSpan={11} className="sonuk">{cev('Plan satırı yok.')}</td></tr>}
                   </tbody>
                 </table></div>
 
@@ -432,13 +432,13 @@ export function DisHastaKarti() {
                   <div className="ds-islem-ara">
                     <div className="ds-arac">
                       <b>{secili ? `Diş ${secili.disNo}${secili.yz.length < 5 ? ' · ' + secili.yz.join('') : ''}` : 'Genel işlem'}</b>
-                      <input autoFocus placeholder={c('İşlem ara (ad / kod)…')} value={islemAra.q} onChange={e => void islemAraYap(e.target.value)} style={{ minWidth: 260 }} />
-                      <label className="sonuk">{c('İnd.')}<input value={islemAra.iskonto} onChange={e => setIslemAra(a => ({ ...a, iskonto: e.target.value }))} style={{ width: 70 }} /></label>
+                      <input autoFocus placeholder={cev('İşlem ara (ad / kod)…')} value={islemAra.q} onChange={e => void islemAraYap(e.target.value)} style={{ minWidth: 260 }} />
+                      <label className="sonuk">{cev('İnd.')}<input value={islemAra.iskonto} onChange={e => setIslemAra(a => ({ ...a, iskonto: e.target.value }))} style={{ width: 70 }} /></label>
                       <label className="sonuk">Seans <input value={islemAra.seans} placeholder="hizmetten" onChange={e => setIslemAra(a => ({ ...a, seans: e.target.value }))} style={{ width: 70 }} /></label>
                       <button className="d" onClick={() => setIslemAra(a => ({ ...a, acik: false }))}>Kapat</button>
                     </div>
                     <div className="ds-dg" style={{ maxHeight: 220, overflowY: 'auto' }}><table>
-                      <thead><tr><th>Kod</th><th>İşlem</th><th className="sag">Fiyat</th><th className="orta">Seans</th><th className="orta">{c('Lab')}</th><th /></tr></thead>
+                      <thead><tr><th>Kod</th><th>İşlem</th><th className="sag">Fiyat</th><th className="orta">Seans</th><th className="orta">{cev('Lab')}</th><th /></tr></thead>
                       <tbody>
                         {islemAra.sonuc.map(x => (
                           <tr key={x.id}>
@@ -446,7 +446,7 @@ export function DisHastaKarti() {
                             <td className="sag">{para.format(x.fiyat)}</td>
                             <td className="orta">{x.standartSeans}</td>
                             <td className="orta">{x.labGerekir ? 'lab' : ''}</td>
-                            <td><button className="d onay" onClick={() => void planSatirEkle(x, !secili)}>{c('Ekle')}</button></td>
+                            <td><button className="d onay" onClick={() => void planSatirEkle(x, !secili)}>{cev('Ekle')}</button></td>
                           </tr>
                         ))}
                         {islemAra.sonuc.length === 0 && <tr><td colSpan={6} className="sonuk">Diş işlemi bulunamadı - hizmet kartında "Diş işlemi" işareti gerekir.</td></tr>}
@@ -461,10 +461,10 @@ export function DisHastaKarti() {
             {/* ----------------------------------------------- sağ panel */}
             <div className="ds-sag">
               <div className="ds-grp">
-                <div className="ds-gb">{c('Seçili diş:')}<b>{secili ? `${secili.disNo} · ${disAdi(secili.disNo)}` : '—'}</b>
+                <div className="ds-gb">{cev('Seçili diş:')}<b>{secili ? `${secili.disNo} · ${disAdi(secili.disNo)}` : '—'}</b>
                   <span className="ds-sp sonuk">{secili && secili.yz.length < 5 ? `yüzey: ${secili.yz.join(', ')}` : secili ? 'tüm diş' : 'şemadan seçin'}</span></div>
                 <div className="ds-dg"><table>
-                  <thead><tr><th>Durum</th><th className="orta">{c('Yüzey')}</th><th className="orta">Tarih</th><th>Kaynak</th><th /></tr></thead>
+                  <thead><tr><th>Durum</th><th className="orta">{cev('Yüzey')}</th><th className="orta">Tarih</th><th>Kaynak</th><th /></tr></thead>
                   <tbody>
                     {(seciliG?.bulgular ?? []).map(b => (
                       <tr key={b.id}>
@@ -472,7 +472,7 @@ export function DisHastaKarti() {
                         <td className="orta">{b.yuzeyler || 'tüm'}</td>
                         <td className="orta">{gunNokta(b.tarih)}</td>
                         <td className="sonuk">{['', 'Muayene', 'RVG/pano', 'Hasta beyanı', 'Dış kayıt', 'Seans'][b.kaynak] ?? ''}{b.notMetin ? ' · ' + b.notMetin : ''}</td>
-                        <td>{bulguYazar && <button className="d" title={c('Pasifleştir')} onClick={() => void bulguSil(b.id)}>✕</button>}</td>
+                        <td>{bulguYazar && <button className="d" title={cev('Pasifleştir')} onClick={() => void bulguSil(b.id)}>✕</button>}</td>
                       </tr>
                     ))}
                     {satirlar.filter(s => secili && s.disNo === secili.disNo && s.durum !== 4).map(s => (
@@ -484,14 +484,14 @@ export function DisHastaKarti() {
                       </tr>
                     ))}
                     {secili && !seciliG?.bulgular.length && !satirlar.some(s => s.disNo === secili.disNo && s.durum !== 4)
-                      && <tr><td colSpan={5} className="sonuk">{c('Kayıt yok - sağlam.')}</td></tr>}
+                      && <tr><td colSpan={5} className="sonuk">{cev('Kayıt yok - sağlam.')}</td></tr>}
                   </tbody>
                 </table></div>
               </div>
 
               {bulguYazar && (
                 <div className="ds-grp">
-                  <div className="ds-gb">{c('Hızlı bulgu')}<span className="ds-sp sonuk">seçili yüzeye uygular</span></div>
+                  <div className="ds-gb">{cev('Hızlı bulgu')}<span className="ds-sp sonuk">seçili yüzeye uygular</span></div>
                   <div className="ds-palet">
                     {HIZLI_BULGU.map(b => <span key={b.kod} className="cip" onClick={() => void bulguYaz(b.kod, b.tumDis)}>{b.ik} {b.ad}</span>)}
                   </div>
@@ -499,7 +499,7 @@ export function DisHastaKarti() {
               )}
 
               <div className="ds-grp">
-                <div className="ds-gb">{c('Ağız özeti')}</div>
+                <div className="ds-gb">{cev('Ağız özeti')}</div>
                 <div className="ds-ic">
                   <div><b>Mevcut diş: {ozet.mevcut}</b> · eksik: {ozet.eksik.join(', ') || '—'} · dolgu: {ozet.dolgu.join(', ') || '—'} · kron: {ozet.kron.join(', ') || '—'} · kanal: {ozet.kanal.join(', ') || '—'} · implant: {ozet.implant.join(', ') || '—'} · çürük: {ozet.curuk.join(', ') || '—'}</div>
                   <div style={{ marginTop: 4 }}><b>DMFT: {ozet.dmft.d + ozet.dmft.m + ozet.dmft.f}</b> (D {ozet.dmft.d} · M {ozet.dmft.m} · F {ozet.dmft.f})
@@ -515,20 +515,20 @@ export function DisHastaKarti() {
                   dibine kayıyor, hekim rakamları görmek için kaydırıyordu. */}
               {plan && (
                 <div className="ds-plan-alt">
-                  <div className="ds-gb ds-gb-duz">{c('Plan &amp; ücret özeti')}<span className="ds-sp sonuk">{plan.proformaNo || plan.planNo}{plan.gecerlilikBitis ? ` · geçerlilik ${gunNokta(plan.gecerlilikBitis)}` : ''}</span></div>
+                  <div className="ds-gb ds-gb-duz">{cev('Plan &amp; ücret özeti')}<span className="ds-sp sonuk">{plan.proformaNo || plan.planNo}{plan.gecerlilikBitis ? ` · geçerlilik ${gunNokta(plan.gecerlilikBitis)}` : ''}</span></div>
                   <div className="ds-ozet6">
                     <div><span>Toplam</span><b>{para.format(plan.toplam)}</b></div>
-                    <div><span>{c('İndirim')}</span><b>−{para.format(plan.indirim)}</b></div>
+                    <div><span>{cev('İndirim')}</span><b>−{para.format(plan.indirim)}</b></div>
                     <div><span>Net</span><b>{para.format(plan.net)}</b></div>
                     <div><span>Yapılan</span><b>{para.format(plan.yapilan)}</b></div>
                     <div><span>Tahsil</span><b>{para.format(plan.tahsil)}</b></div>
-                    <div><span>{c('Bakiye (yapılan−tahsil)')}</span><b className={bakiye > 0 ? 'ds-kir' : ''}>{para.format(bakiye)}</b></div>
+                    <div><span>{cev('Bakiye (yapılan−tahsil)')}</span><b className={bakiye > 0 ? 'ds-kir' : ''}>{para.format(bakiye)}</b></div>
                   </div>
                   <div className="ds-bar"><i style={{ width: `${ilerleme}%` }} /></div>
                   <div className="sonuk" style={{ padding: '4px 10px 8px' }}>
                     İlerleme {plan.yapilanSayisi} / {plan.satirSayisi} işlem
                     {(() => { const n = satirlar.find(s => s.durum === 1 || s.durum === 2); return n ? ` · sonraki: ${n.disNo ? n.disNo + ' ' : ''}${n.islem}${n.randevu ? ' (' + tarihSaat(n.randevu) + ')' : ''}` : '' })()}
-                    {plan.odemePlaniId ? <> · <a href="#" onClick={e => { e.preventDefault(); git(`/dis-odeme-plani/${plan.odemePlaniId}`) }}>{c('💳 Ödeme planı')}</a></> : ''}
+                    {plan.odemePlaniId ? <> · <a href="#" onClick={e => { e.preventDefault(); git(`/dis-odeme-plani/${plan.odemePlaniId}`) }}>{cev('💳 Ödeme planı')}</a></> : ''}
                   </div>
                 </div>
               )}
@@ -543,13 +543,13 @@ export function DisHastaKarti() {
             {kart.perio ? (
               <>
                 <div className="ds-ozet6" style={{ gridTemplateColumns: 'repeat(5,1fr)' }}>
-                  <div><span>{c('Plak indeksi')}</span><b>{kart.perio.plakIndeksi != null ? `%${kart.perio.plakIndeksi}` : '—'}</b></div>
-                  <div><span>{c('Kanama (BOP)')}</span><b>{kart.perio.bopOran != null ? `%${kart.perio.bopOran}` : '—'}</b></div>
-                  <div><span>{c('Cep ≥ 5 mm')}</span><b className={kart.perio.cep5Sayisi > 0 ? 'ds-kir' : ''}>{kart.perio.cep5Sayisi}</b></div>
-                  <div><span>{c('Ortalama CAL')}</span><b>{kart.perio.ortCal != null ? `${kart.perio.ortCal} mm` : '—'}</b></div>
-                  <div><span>{c('Evre / derece')}</span><b>{kart.perio.evre ? `${kart.perio.evre}${kart.perio.derece}` : '—'}</b></div>
+                  <div><span>{cev('Plak indeksi')}</span><b>{kart.perio.plakIndeksi != null ? `%${kart.perio.plakIndeksi}` : '—'}</b></div>
+                  <div><span>{cev('Kanama (BOP)')}</span><b>{kart.perio.bopOran != null ? `%${kart.perio.bopOran}` : '—'}</b></div>
+                  <div><span>{cev('Cep ≥ 5 mm')}</span><b className={kart.perio.cep5Sayisi > 0 ? 'ds-kir' : ''}>{kart.perio.cep5Sayisi}</b></div>
+                  <div><span>{cev('Ortalama CAL')}</span><b>{kart.perio.ortCal != null ? `${kart.perio.ortCal} mm` : '—'}</b></div>
+                  <div><span>{cev('Evre / derece')}</span><b>{kart.perio.evre ? `${kart.perio.evre}${kart.perio.derece}` : '—'}</b></div>
                 </div>
-                <div className="ds-dg"><table><thead><tr><th className="orta">Diş</th><th className="orta">{c('En derin cep')}</th></tr></thead>
+                <div className="ds-dg"><table><thead><tr><th className="orta">Diş</th><th className="orta">{cev('En derin cep')}</th></tr></thead>
                   <tbody>{kart.perioCep.map(c => <tr key={c.disNo}><td className="orta">{c.disNo}</td><td className={`orta${c.cep >= 5 ? ' ds-kir' : ''}`}>{c.cep} mm</td></tr>)}</tbody></table></div>
               </>
             ) : <div className="ds-ic sonuk">6 nokta cep ölçümü ekranı sonraki sürümde; kayıt <code>dis_periodontal</code> / <code>dis_periodontal_olcum</code> tablolarına yazılır.</div>}
@@ -559,7 +559,7 @@ export function DisHastaKarti() {
         {/* ============================================ GEÇMİŞ */}
         {sekme === 'gecmis' && (
           <div className="ds-grp" style={{ margin: 10 }}>
-            <div className="ds-gb">{c('Tedavi geçmişi')}<span className="ds-sp sonuk">seans işlemleri, en yeni üstte</span></div>
+            <div className="ds-gb">{cev('Tedavi geçmişi')}<span className="ds-sp sonuk">seans işlemleri, en yeni üstte</span></div>
             <div className="ds-dg"><table>
               <thead><tr><th className="orta">Tarih</th><th>Hekim</th><th className="orta">Diş</th><th>İşlem</th><th className="orta">Seans</th><th className="sag">Ücret</th><th className="orta">Plan</th><th className="orta">Durum</th></tr></thead>
               <tbody>
@@ -573,7 +573,7 @@ export function DisHastaKarti() {
                     <td className="orta"><span className={`rozet ${g.tamamlandi ? 'ok' : 'mavi'}`}>{g.tamamlandi ? 'Yapıldı' : 'Sürüyor'}</span></td>
                   </tr>
                 ))}
-                {kart.gecmis.length === 0 && <tr><td colSpan={8} className="sonuk">{c('Seans kaydı yok.')}</td></tr>}
+                {kart.gecmis.length === 0 && <tr><td colSpan={8} className="sonuk">{cev('Seans kaydı yok.')}</td></tr>}
               </tbody>
             </table></div>
           </div>
@@ -582,9 +582,9 @@ export function DisHastaKarti() {
         {/* ============================================ LAB */}
         {sekme === 'lab' && (
           <div className="ds-grp" style={{ margin: 10 }}>
-            <div className="ds-gb">{c('Protez / lab işleri')}<span className="ds-sp"><button className="d" onClick={() => git(`/dis-lab-isemri?hastaId=${hastaId}`)}>🧪 İş emirleri</button></span></div>
+            <div className="ds-gb">{cev('Protez / lab işleri')}<span className="ds-sp"><button className="d" onClick={() => git(`/dis-lab-isemri?hastaId=${hastaId}`)}>🧪 İş emirleri</button></span></div>
             <div className="ds-dg"><table>
-              <thead><tr><th>{c('İş emri')}</th><th>Laboratuvar</th><th className="orta">Diş</th><th>İş</th><th>{c('Malzeme / renk')}</th><th className="orta">Gönderim</th><th className="orta">{c('Beklenen')}</th><th className="orta">Aşama</th><th className="sag">{c('Lab maliyeti')}</th></tr></thead>
+              <thead><tr><th>{cev('İş emri')}</th><th>Laboratuvar</th><th className="orta">Diş</th><th>İş</th><th>{cev('Malzeme / renk')}</th><th className="orta">Gönderim</th><th className="orta">{cev('Beklenen')}</th><th className="orta">Aşama</th><th className="sag">{cev('Lab maliyeti')}</th></tr></thead>
               <tbody>
                 {kart.labIsleri.map(l => (
                   <tr key={l.id} onDoubleClick={() => git(`/dis-lab-isemri/${l.id}`)}>
@@ -596,7 +596,7 @@ export function DisHastaKarti() {
                     <td className="sag">{para.format(l.labFiyat)}</td>
                   </tr>
                 ))}
-                {kart.labIsleri.length === 0 && <tr><td colSpan={9} className="sonuk">{c('Lab işi yok.')}</td></tr>}
+                {kart.labIsleri.length === 0 && <tr><td colSpan={9} className="sonuk">{cev('Lab işi yok.')}</td></tr>}
               </tbody>
             </table></div>
           </div>

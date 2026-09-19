@@ -5,11 +5,11 @@ import { menuSatirlariKur } from '../kabuk/menuAgaci';
 import { LISTELER } from '../Liste';
 import { KullaniciAyarlari } from '../../bilesenler/KullaniciAyarlari';
 import { useKullaniciAyari } from '../kabuk/useMenuTercihleri';
-import { c } from '../../dil/ceviri';
 import { TEMA_IKON, temaOku, temaSonraki, temaUygula, type Tema }
   from '../../bilesenler/tema';
 import { aktifBolum, portalBolumleri, PORTAL_ADI, type PortalTuru } from './portalMenu';
 import { PortalBaslikSaglayici } from './portalBaslik';
+import { c } from '../../dil/ceviri';
 
 /**
  * PORTAL KABUĞU V2 (796/818) — dış hekim, dış kurum ve hasta portalları.

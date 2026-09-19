@@ -6,6 +6,7 @@ import {
   type IzlemSatiri, bosIzlem, izlemKurali, tariheEkle, RAF_BIRIM,
 } from '../../sayfalar/belgeSatir';
 import { bugunIso, hamSayi as sayi } from '../bicim';
+import { c } from '../../dil/ceviri';
 
 /**
  * IZLEM (LOT / SERI) PENCERESI — giris belgelerinde izlemli stok icin.
@@ -180,19 +181,19 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
           <button className="d onay" onClick={kaydet}>💾 Tamam</button>
           {/* Cikista lot ACILMAZ: stokta olmayan lottan mal cikamaz. */}
           {!cikis && <button className="d" onClick={satirEkle}>＋ Lot Ekle</button>}
-          <button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>{c('✖ Kapat')}</button>
         </>
       }
     >
       <>
         {hata && <div className="hata-kutusu">{hata}</div>}
-        {yukleniyor && <div className="yukleniyor">Lotlar yükleniyor…</div>}
+        {yukleniyor && <div className="yukleniyor">{c('Lotlar yükleniyor…')}</div>}
 
         {/* RAF OMRU kartta tanimli degil: burada sorulur, karta yazilir.
             Lot girisini birakip stok kartina gitmeye gerek kalmasin. */}
         {rafSoruluyor && (
           <div className="bilgi-kutusu">
-            <b>Bu stokta raf ömrü tanımlı değil.</b> Girilirse üretim tarihinden SKT
+            <b>{c('Bu stokta raf ömrü tanımlı değil.')}</b> Girilirse üretim tarihinden SKT
             (ya da SKT'den üretim tarihi) otomatik hesaplanır ve stok kartına yazılır.
             <div className="ikili" style={{ marginTop: 6, maxWidth: 320 }}>
               <input className="hiza-sag" placeholder="Süre" value={rafTaslak.sure}
@@ -200,11 +201,11 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
               <select value={rafTaslak.birim}
                       onChange={e => setRafTaslak(t => ({ ...t, birim: e.target.value }))}>
                 <option value="1">Gün</option>
-                <option value="2">Ay</option>
+                <option value="2">{c('Ay')}</option>
                 <option value="3">Yıl</option>
               </select>
               <button type="button" className="d bir" onClick={() => void rafKaydet()}>Kaydet</button>
-              <button type="button" className="d" onClick={() => setRafSoruluyor(false)}>Şimdilik Geç</button>
+              <button type="button" className="d" onClick={() => setRafSoruluyor(false)}>{c('Şimdilik Geç')}</button>
             </div>
           </div>
         )}
@@ -226,7 +227,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
                     stoktan gelir, kullanici doldurmaz. */}
                 <th>Lot No{!cikis && kural.lot && <b className="zorunlu"> *</b>}</th>
                 <th>Seri No{!cikis && kural.seri && <b className="zorunlu"> *</b>}</th>
-                <th>Ürt. Tarihi</th>
+                <th>{c('Ürt. Tarihi')}</th>
                 <th>SKT{!cikis && kural.skt && <b className="zorunlu"> *</b>}</th>
                 {/* Giriste DURUM (girişte 0), cikista o lottan KALAN gosterilir. */}
                 <th>{cikis ? 'Kalan' : 'Durum'}</th>
@@ -263,7 +264,7 @@ export function IzlemPenceresi({ stokAdi, stokId, depoId, izleme, miktar, satirl
                           <button type="button" className="mini" title="Seçimi kaldır"
                                   onClick={() => degis(i, 'miktar', '')}>×</button>))
                       : (
-                        <button type="button" className="mini" title="Satırı sil"
+                        <button type="button" className="mini" title={c('Satırı sil')}
                                 onClick={() => satirSil(i)}>×</button>)}
                   </td>
                 </tr>

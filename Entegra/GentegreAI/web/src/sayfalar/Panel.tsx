@@ -4,16 +4,18 @@ import { api } from '../api/istemci';
 import { type PanelYaniti, hataMetni } from '../api/sozlesme';
 import { useOturum } from '../kimlik/OturumBaglami';
 import { para, paraYaz } from '../bilesenler/bicim';
+import { c } from '../dil/ceviri';
 
 const sayi = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 });
 
 /** Gunun saatine gore selam - mockup'taki "İyi çalışmalar, <ad>" seridi. */
 function selam(): string {
   const s = new Date().getHours();
-  if (s < 6)  return 'İyi geceler';
-  if (s < 12) return 'Günaydın';
-  if (s < 18) return 'İyi çalışmalar';
-  return 'İyi akşamlar';
+  // Selam DILE GORE (851): sabit metin, `c()` sozlukten cevirir.
+  if (s < 6)  return c('İyi geceler');
+  if (s < 12) return c('Günaydın');
+  if (s < 18) return c('İyi çalışmalar');
+  return c('İyi akşamlar');
 }
 
 /** Kutuya tiklayinca gidilecek liste; yolu olmayan kutu tiklanmaz. */
@@ -73,7 +75,7 @@ export function Panel() {
               { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             {/* Hangi profilin panelini gorduguu basligin yaninda: ayni kurulumda
                 sube degistirince panel de degisiyor (508). */}
-            {veri?.profil?.baslik && <> · <b>{veri.profil.baslik}</b> paneli</>}
+            {veri?.profil?.baslik && <> · <b>{c(veri.profil.baslik)}</b> {c('paneli')}</>}
           </span>
         </div>
       </div>
@@ -94,7 +96,7 @@ export function Panel() {
                     <button key={k.kod} type="button" className="kpi panel-kpi"
                             onClick={() => k.rota && git(k.rota)}
                             title={k.rota ? 'Listeyi aç' : undefined}>
-                      <div className="k">{k.baslik}</div>
+                      <div className="k">{c(k.baslik)}</div>
                       <div className={`v ${k.vurgu}`}>
                         {k.bicim === 'para' ? `${paraYaz(Number(k.deger))}`
                                             : sayi.format(Number(k.deger))}
@@ -108,7 +110,7 @@ export function Panel() {
                     <div className="kagrup" key={b.kod}>
                       <h6>
                         {BLOK_IKON[b.kod] && <span className="blok-ikon">{BLOK_IKON[b.kod]}</span>}
-                        {b.baslik}{b.ipucu && <span className="sonuk"> · {b.ipucu}</span>}
+                        {c(b.baslik)}{b.ipucu && <span className="sonuk"> · {c(b.ipucu)}</span>}
                       </h6>
                       <table className="detay-tablo">
                         <thead><tr>{b.kolonlar.map((k, i) => (
@@ -146,7 +148,7 @@ export function Panel() {
                 <button key={k.anahtar} type="button" className="kpi panel-kpi"
                         onClick={() => k.yol && git(k.yol)}
                         title={k.yol ? 'Listeyi aç' : undefined}>
-                  <div className="k">{k.baslik}</div>
+                  <div className="k">{c(k.baslik)}</div>
                   <div className={`v ${k.vurgu}`}>{kutuDeger(Number(k.deger), k.birim)}</div>
                   <div className="s">{k.alt}</div>
                 </button>
@@ -156,12 +158,12 @@ export function Panel() {
             <div className="panel-sutunlar">
               {/* Gorevler ve takvim EN BASTA: gun buradan planlanir. */}
               <div className="kagrup">
-                <h6>Görevlerim / Hatırlatmalar</h6>
+                <h6>{c('Görevlerim / Hatırlatmalar')}</h6>
                 <table className="detay-tablo">
                   <tbody>
                     {(veri?.gorevler ?? []).map(s => (
                       <tr key={`g${s.id}`} onDoubleClick={() => git(s.yol)}
-                          title="Çift tıkla: görev listesini aç">
+                          title={c('Çift tıkla: görev listesini aç')}>
                         <td>{s.ana}</td>
                         <td className="sonuk">{s.yan}</td>
                         <td className="hiza-orta">
@@ -173,14 +175,14 @@ export function Panel() {
                       </tr>
                     ))}
                     {(veri?.gorevler ?? []).length === 0 && (
-                      <tr><td className="bos">Bekleyen görev yok.</td></tr>
+                      <tr><td className="bos">{c('Bekleyen görev yok.')}</td></tr>
                     )}
                   </tbody>
                 </table>
               </div>
 
               <div className="kagrup">
-                <h6>Yaklaşan Takvim <span className="sonuk">(14 gün)</span></h6>
+                <h6>{c('Yaklaşan Takvim')}<span className="sonuk">(14 gün)</span></h6>
                 <table className="detay-tablo">
                   <tbody>
                     {(veri?.takvim ?? []).map(s => (
@@ -191,26 +193,26 @@ export function Panel() {
                       </tr>
                     ))}
                     {(veri?.takvim ?? []).length === 0 && (
-                      <tr><td className="bos">Önümüzdeki iki haftada kayıt yok.</td></tr>
+                      <tr><td className="bos">{c('Önümüzdeki iki haftada kayıt yok.')}</td></tr>
                     )}
                   </tbody>
                 </table>
               </div>
 
               <div className="kagrup">
-                <h6>Son Belgeler</h6>
+                <h6>{c('Son Belgeler')}</h6>
                 <table className="detay-tablo">
                   <tbody>
                     {(veri?.sonBelgeler ?? []).map(s => (
                       <tr key={`b${s.id}`} onDoubleClick={() => git(s.yol)}
-                          title="Çift tıkla: listeyi aç">
+                          title={c('Çift tıkla: listeyi aç')}>
                         <td>{s.ana}</td>
                         <td className="sonuk">{s.yan}</td>
                         <td className="hiza-sag">{s.deger}</td>
                       </tr>
                     ))}
                     {(veri?.sonBelgeler ?? []).length === 0 && (
-                      <tr><td className="bos">Henüz belge yok.</td></tr>
+                      <tr><td className="bos">{c('Henüz belge yok.')}</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -228,14 +230,14 @@ export function Panel() {
                       </tr>
                     ))}
                     {(veri?.kritikStok ?? []).length === 0 && (
-                      <tr><td className="bos">Minimum seviyenin altında stok yok.</td></tr>
+                      <tr><td className="bos">{c('Minimum seviyenin altında stok yok.')}</td></tr>
                     )}
                   </tbody>
                 </table>
               </div>
 
               <div className="kagrup">
-                <h6>En Büyük Cari Bakiyeler</h6>
+                <h6>{c('En Büyük Cari Bakiyeler')}</h6>
                 <table className="detay-tablo">
                   <tbody>
                     {(veri?.buyukBakiyeler ?? []).map(s => (
@@ -248,7 +250,7 @@ export function Panel() {
                       </tr>
                     ))}
                     {(veri?.buyukBakiyeler ?? []).length === 0 && (
-                      <tr><td className="bos">Bakiyeli cari yok.</td></tr>
+                      <tr><td className="bos">{c('Bakiyeli cari yok.')}</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -256,7 +258,7 @@ export function Panel() {
             </div>
 
             <div className="kagrup">
-              <h6>Hızlı Erişim</h6>
+              <h6>{c('Hızlı Erişim')}</h6>
               <div className="gridtb" style={{ padding: 10, flexWrap: 'wrap' }}>
                 {HIZLI_ERISIM.map(h => (
                   <button key={h.yol} type="button" className="d" onClick={() => git(h.yol)}>

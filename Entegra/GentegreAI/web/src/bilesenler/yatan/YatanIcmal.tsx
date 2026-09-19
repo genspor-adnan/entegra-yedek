@@ -2,12 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import type { IcmalYaniti } from '../../api/uclar/yatan';
 import { paraYaz, tarihYaz } from '../bicim';
+import { c } from '../../dil/ceviri';
 
 /**
  * YATAN HASTA HİZMET İCMALİ — mockup
  * `Ekranlar/Yatan/yatan_hizmet_fatura.html`.
  *
- * <b>Satırlar elle girilmez, düşer:</b> yatak ücreti gün sonu tahakkukundan,
+ * <b>{c('Satırlar elle girilmez, düşer:')}</b> yatak ücreti gün sonu tahakkukundan,
  * ilaç kalemi uygulama kaydından (barkodla), tetkik ve görüntüleme order'dan.
  * Elle giriş açık bırakılsaydı aynı kalem hem otomatik hem elle iki kez
  * faturalanırdı — yatan hastada en sık görülen fatura hatası budur.
@@ -85,7 +86,7 @@ export function YatanIcmal({ yenile }: { yenile?: number }) {
           <table className="izlem-tablo icmal-tablo">
             <thead>
               <tr>
-                <th>Tarih</th><th>Hizmet / malzeme</th><th>SUT</th>
+                <th>Tarih</th><th>{c('Hizmet / malzeme')}</th><th>{c('SUT')}</th>
                 <th className="sag">Adet</th><th className="sag">Birim</th>
                 <th className="sag">Tutar</th><th>Kaynak</th><th>Durum</th>
               </tr>
@@ -109,8 +110,8 @@ export function YatanIcmal({ yenile }: { yenile?: number }) {
                   <td className="sonuk">gün sonu</td>
                   <td>
                     {y.faturasiz > 0
-                      ? <span className="rozet sari">Faturalanmadı</span>
-                      : <span className="rozet ok">Faturalandı</span>}
+                      ? <span className="rozet sari">{c('Faturalanmadı')}</span>
+                      : <span className="rozet ok">{c('Faturalandı')}</span>}
                     {/* REFAKAT KAPSAM DIŞI: hastaya "oda farkı" diye anlatılan
                         kalem burada görünmeli. */}
                     {y.kaynak === 2 && <span className="rozet"> kapsam dışı</span>}
@@ -120,7 +121,7 @@ export function YatanIcmal({ yenile }: { yenile?: number }) {
 
               <tr className="grup"><td colSpan={8}>İLAÇ VE UYGULAMA</td></tr>
               {veri.ilac.length === 0 && (
-                <tr><td colSpan={8} className="sonuk">Uygulanmış doz yok.</td></tr>
+                <tr><td colSpan={8} className="sonuk">{c('Uygulanmış doz yok.')}</td></tr>
               )}
               {veri.ilac.map(i => (
                 <tr key={i.ad}>
@@ -138,14 +139,14 @@ export function YatanIcmal({ yenile }: { yenile?: number }) {
                     {i.barkodsuz > 0 && ` · ${i.barkodsuz} elle`}
                   </td>
                   <td>{i.hizmetId
-                    ? <span className="rozet sari">Faturalanmadı</span>
-                    : <span className="rozet">Hizmet kartı yok</span>}</td>
+                    ? <span className="rozet sari">{c('Faturalanmadı')}</span>
+                    : <span className="rozet">{c('Hizmet kartı yok')}</span>}</td>
                 </tr>
               ))}
 
               <tr className="grup"><td colSpan={8}>TETKİK · GÖRÜNTÜLEME · KONSÜLTASYON</td></tr>
               {veri.tetkik.length === 0 && (
-                <tr><td colSpan={8} className="sonuk">Order yok.</td></tr>
+                <tr><td colSpan={8} className="sonuk">{c('Order yok.')}</td></tr>
               )}
               {veri.tetkik.map((k, i) => (
                 <tr key={`${k.ad}-${i}`}>
@@ -157,8 +158,8 @@ export function YatanIcmal({ yenile }: { yenile?: number }) {
                   <td className="sag">{k.birim ? paraYaz(k.birim) : '—'}</td>
                   <td className="sonuk">{ORDER_TUR[k.tur] ?? 'order'}</td>
                   <td>{k.durum === 1
-                    ? <span className="rozet sari">Sonuç bekliyor</span>
-                    : <span className="rozet ok">Tamamlandı</span>}</td>
+                    ? <span className="rozet sari">{c('Sonuç bekliyor')}</span>
+                    : <span className="rozet ok">{c('Tamamlandı')}</span>}</td>
                 </tr>
               ))}
             </tbody>
@@ -183,7 +184,7 @@ export function YatanIcmal({ yenile }: { yenile?: number }) {
           )}
 
           <div className="not">
-            <b>Satırlar elle girilmez, düşer:</b> yatak ücreti gün sonu tahakkukundan,
+            <b>{c('Satırlar elle girilmez, düşer:')}</b> yatak ücreti gün sonu tahakkukundan,
             ilaç kalemi uygulama kaydından, tetkik order'dan. <b>Kurum/hasta ayrımının
             kesin cevabı Medula provizyonundan gelir</b> — burada yalnız kapsam dışı
             olduğu kesin olan (refakat, ödeyen kurumu olmayan yatış) hasta payına

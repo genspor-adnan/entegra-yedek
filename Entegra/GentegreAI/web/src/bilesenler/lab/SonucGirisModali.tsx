@@ -4,6 +4,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { mesaj } from '../mesaj';
 import { BAYRAK_OK, bayrakSinifi, referansMetni } from '../labKodlari';
+import { c } from '../../dil/ceviri';
 
 
 /**
@@ -192,7 +193,7 @@ export function SonucGirisModali({ istemId, onKapat, onKaydedildi }: {
       alt={
         <>
           {hata && <span className="alan-hata">{hata}</span>}
-          <button className="d" onClick={onKapat}>Kapat</button>
+          <button className="d" onClick={onKapat}>{c('Kapat')}</button>
           <button className="d bir" disabled={kaydediyor || yukleniyor}
                   onClick={() => void kaydet()}>
             {kaydediyor ? 'Kaydediliyor…' : '💾 Kaydet'}
@@ -208,9 +209,9 @@ export function SonucGirisModali({ istemId, onKapat, onKaydedildi }: {
                 <tr>
                   <th>Kod</th><th>Tetkik</th>
                   <th className="sag">Değer</th><th>Birim</th><th>Referans</th>
-                  <th className="orta">Bayrak</th>
+                  <th className="orta">{c('Bayrak')}</th>
                   <th>Giriş</th>
-                  <th>Düzeltme nedeni</th>
+                  <th>{c('Düzeltme nedeni')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -287,7 +288,7 @@ export function SonucGirisModali({ istemId, onKapat, onKaydedildi }: {
                   </tr>
                 ))}
                 {satirlar.length === 0 && (
-                  <tr><td colSpan={8} className="not">Bu istemde tetkik yok.</td></tr>
+                  <tr><td colSpan={8} className="not">{c('Bu istemde tetkik yok.')}</td></tr>
                 )}
               </tbody>
             </table>
@@ -301,8 +302,8 @@ export function SonucGirisModali({ istemId, onKapat, onKaydedildi }: {
           değer yazmak <b>düzeltmedir</b>: nedeni zorunludur, eski sonuç
           iptal edilir ve yenisi otomatik onaylanmaz.
           <br />
-          <b>Enter</b> / <b>↓</b> bir alt tetkiğe geçer, <b>↑</b> bir üste,
-          <b>Ctrl+Enter</b> hepsini kaydeder.
+          <b>{c('Enter')}</b> / <b>↓</b> bir alt tetkiğe geçer, <b>↑</b> bir üste,
+          <b>{c('Ctrl+Enter')}</b> hepsini kaydeder.
         </div>
       </div>
     </Modal>

@@ -12,6 +12,7 @@ import { GecmisAnaliz } from './iskonto/GecmisAnaliz';
 import {
   gerekceAnalizi, isteyenAnalizi, kuyrugaDiz, ozetCikar, sure,
 } from './iskonto/ortak';
+import { c } from '../dil/ceviri';
 
 /**
  * İSKONTO ONAY EKRANI (674) — mockup Ekranlar/Kayıt Kabul/iskonto_onay.html.
@@ -139,15 +140,15 @@ export function IskontoOnaylari() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>İskonto Onayı</h1>
-          <span className="yol">Kayıt Kabul › İskonto Onayı</span>
+          <span className="yol">{c('Kayıt Kabul › İskonto Onayı')}</span>
         </div>
         <div className="basarac">
           <select value={gun} onChange={e => setGun(Number(e.target.value))}
-                  title="Sonuçlananlar ve analiz aralığı">
+                  title={c('Sonuçlananlar ve analiz aralığı')}>
             <option value={1}>Bugün</option>
-            <option value={7}>Son 7 gün</option>
-            <option value={30}>Son 30 gün</option>
-            <option value={90}>Son 90 gün</option>
+            <option value={7}>{c('Son 7 gün')}</option>
+            <option value={30}>{c('Son 30 gün')}</option>
+            <option value={90}>{c('Son 90 gün')}</option>
           </select>
           <button className="d" onClick={() => void yukle()} title="Yenile">⟳</button>
           {yukleniyor && <span className="sonuk">Yükleniyor…</span>}

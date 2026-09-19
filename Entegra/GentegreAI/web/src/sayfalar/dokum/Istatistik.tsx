@@ -1,5 +1,6 @@
 import type { DokumKolonMeta, DokumOlcu, DokumTanimi } from '../../api/sozlesme';
 import { FN_ETIKET, KESME_ETIKET, KIYAS_ETIKET, boyutEtiketi, olcuEtiketi } from './ortak';
+import { c } from '../../dil/ceviri';
 
 /**
  * İSTATİSTİK (mockup "İstatistik" sekmesi): satır boyutları (1-3), sütun
@@ -44,7 +45,7 @@ export function Istatistik({ tanim, setTanim, kolonlar, fnler, kesmeler }: {
     const kol = kolonlar.find(k => k.ad === alan);
     if (kol?.tip !== 'tarih') return null;
     return (
-      <select value={kesme} onChange={e => onKesme(e.target.value)} title="Tarih kesmesi">
+      <select value={kesme} onChange={e => onKesme(e.target.value)} title={c('Tarih kesmesi')}>
         {['', ...kesmeler].map(k => <option key={k} value={k}>{KESME_ETIKET[k] ?? k}</option>)}
       </select>
     );
@@ -54,7 +55,7 @@ export function Istatistik({ tanim, setTanim, kolonlar, fnler, kesmeler }: {
     <div className="dk-tasarla">
       <div>
         <div className="kagrup">
-          <h6>Boyutlar <span className="sonuk">satır × sütun</span></h6>
+          <h6>{c('Boyutlar')}<span className="sonuk">satır × sütun</span></h6>
           <div className="dk-kimlik">
             {[0, 1, 2].map(i => (
               <label key={i}>Satır boyutu {i + 1}
@@ -68,7 +69,7 @@ export function Istatistik({ tanim, setTanim, kolonlar, fnler, kesmeler }: {
                 </span>
               </label>
             ))}
-            <label>Sütun boyutu <span className="sonuk">(çapraz tablo)</span>
+            <label>{c('Sütun boyutu')}<span className="sonuk">(çapraz tablo)</span>
               <span className="dk-ikiz">
                 <select value={(boyut.sutun ?? '').split(':')[0]} onChange={e => boyutYaz(boyut.satir, e.target.value ? `${e.target.value}${kolonlar.find(k => k.ad === e.target.value)?.tip === 'tarih' ? ':ay' : ''}` : null)}>
                   <option value="">—</option>
@@ -82,7 +83,7 @@ export function Istatistik({ tanim, setTanim, kolonlar, fnler, kesmeler }: {
                 {Object.entries(KIYAS_ETIKET).map(([k, ad]) => <option key={k} value={k}>{ad}</option>)}
               </select>
             </label>
-            <label>Gizlilik eşiği <span className="sonuk">(adet &lt; n gruplar düşer)</span>
+            <label>{c('Gizlilik eşiği')}<span className="sonuk">(adet &lt; n gruplar düşer)</span>
               <input type="number" min={0} max={1000} value={tanim.esik}
                      onChange={e => setTanim({ ...tanim, esik: Math.max(0, Number(e.target.value) || 0) })} />
             </label>
@@ -95,13 +96,13 @@ export function Istatistik({ tanim, setTanim, kolonlar, fnler, kesmeler }: {
         </div>
 
         <div className="kagrup">
-          <h6>Ölçüler <span className="sonuk">her hücrede hesaplanan · ilk ölçü çapraz tablonun hücresidir</span>
+          <h6>{c('Ölçüler')}<span className="sonuk">her hücrede hesaplanan · ilk ölçü çapraz tablonun hücresidir</span>
             <button className="d sag" onClick={olcuEkle}>＋ Ölçü ekle</button>
           </h6>
           <table className="detay-tablo dk-kosullar">
             <thead><tr>
-              <th style={{ width: 30 }}></th><th style={{ width: 150 }}>Fonksiyon</th><th style={{ width: 200 }}>Alan</th>
-              <th style={{ width: 200 }}>Bölen (oran)</th><th>Başlık</th><th style={{ width: 34 }}></th>
+              <th style={{ width: 30 }}></th><th style={{ width: 150 }}>{c('Fonksiyon')}</th><th style={{ width: 200 }}>Alan</th>
+              <th style={{ width: 200 }}>{c('Bölen (oran)')}</th><th>{c('Başlık')}</th><th style={{ width: 34 }}></th>
             </tr></thead>
             <tbody>
               {olcu.map((o, i) => (
@@ -133,7 +134,7 @@ export function Istatistik({ tanim, setTanim, kolonlar, fnler, kesmeler }: {
                   <td className="orta"><button className="d mini" onClick={() => olcuYaz(olcu.filter((_, j) => j !== i))}>✕</button></td>
                 </tr>
               ))}
-              {olcu.length === 0 && <tr><td colSpan={6} className="bos">Ölçü yok — en az bir ölçü seçin.</td></tr>}
+              {olcu.length === 0 && <tr><td colSpan={6} className="bos">{c('Ölçü yok — en az bir ölçü seçin.')}</td></tr>}
             </tbody>
           </table>
           <div className="pano-not">
@@ -148,14 +149,14 @@ export function Istatistik({ tanim, setTanim, kolonlar, fnler, kesmeler }: {
         <div className="kagrup">
           <h6>Özet</h6>
           <div className="dk-sat"><span>Satır</span><span>{boyut.satir.map(b => boyutEtiketi(b, kolonlar)).join(' › ') || '—'}</span></div>
-          <div className="dk-sat"><span>Sütun</span><span>{boyut.sutun ? boyutEtiketi(boyut.sutun, kolonlar) : '—'}</span></div>
+          <div className="dk-sat"><span>{c('Sütun')}</span><span>{boyut.sutun ? boyutEtiketi(boyut.sutun, kolonlar) : '—'}</span></div>
           <div className="dk-sat"><span>Ölçü</span><span>{olcu.map(o => olcuEtiketi(o, kolonlar)).join(' · ') || '—'}</span></div>
-          <div className="dk-sat"><span>Kıyas</span><span>{KIYAS_ETIKET[tanim.kiyas]}</span></div>
+          <div className="dk-sat"><span>{c('Kıyas')}</span><span>{KIYAS_ETIKET[tanim.kiyas]}</span></div>
           <div className="dk-sat"><span>Eşik</span><span>{tanim.esik > 0 ? `< ${tanim.esik} gizli` : 'kapalı'}</span></div>
         </div>
         <div className="kagrup">
-          <h6>Gizlilik</h6>
-          <div className="dk-sat"><span>Hasta kimliği</span><span className="rozet hata">istatistikte yok</span></div>
+          <h6>{c('Gizlilik')}</h6>
+          <div className="dk-sat"><span>{c('Hasta kimliği')}</span><span className="rozet hata">istatistikte yok</span></div>
           <div className="pano-not">
             İstatistik <b>toplam</b> gösterir, kişi göstermez; hücreye çift tık kayıt listesine iner
             (kayıt yetkisi olana). Eşik altı gruplar sunucuda hiç dönmez.

@@ -6,6 +6,7 @@ import { hataMetni } from '../api/sozlesme';
 import { tarihSaat, gunNokta, yasMetni } from '../bilesenler/bicim';
 import { SemaZemini } from '../bilesenler/goz/gozSemaZemini';
 import type { GozCizimCiktisi } from '../api/uclar/goz';
+import { c } from '../dil/ceviri';
 
 /**
  * GÖZ ŞEMASI ÇIKTISI (705) — mockup `Ekranlar/Goz/goz_semasi.html`
@@ -62,7 +63,7 @@ export function GozSemaCikti() {
             {k.telefon ? <div className="sonuk">Tel: {String(k.telefon)}</div> : null}
           </div>
           <div className="sag">
-            <b>Göz Muayenesi — Şema</b>
+            <b>{c('Göz Muayenesi — Şema')}</b>
             <div className="sonuk">Protokol: {String(m.protokol ?? '')}</div>
             <div className="sonuk">
               Tarih: {m.muayeneTarihi ? tarihSaat(String(m.muayeneTarihi)) : ''}
@@ -74,11 +75,11 @@ export function GozSemaCikti() {
           <tbody>
             <tr>
               <th>Hasta</th><td>{String(m.hasta ?? '')}</td>
-              <th>Hasta No</th><td>{String(m.hastaNo ?? '')}</td>
+              <th>{c('Hasta No')}</th><td>{String(m.hastaNo ?? '')}</td>
             </tr>
             <tr>
-              <th>T.C. Kimlik</th><td>{String(m.hastaTc ?? '')}</td>
-              <th>Doğum / Yaş</th>
+              <th>{c('T.C. Kimlik')}</th><td>{String(m.hastaTc ?? '')}</td>
+              <th>{c('Doğum / Yaş')}</th>
               <td>
                 {m.dogumTarihi ? gunNokta(String(m.dogumTarihi)) : '—'}
                 {m.dogumTarihi ? ` · ${yasMetni(String(m.dogumTarihi))}` : ''}
@@ -87,7 +88,7 @@ export function GozSemaCikti() {
             </tr>
             <tr>
               <th>Hekim</th><td>{String(m.hekim ?? '')}</td>
-              <th>Dilatasyon</th>
+              <th>{c('Dilatasyon')}</th>
               <td>
                 {Number(m.dilate) === 1
                   ? `Yapıldı${m.dilatasyonIlac ? ` · ${String(m.dilatasyonIlac)}` : ''}`
@@ -98,7 +99,7 @@ export function GozSemaCikti() {
         </table>
 
         {veri.semalar.length === 0 && (
-          <div className="cikti-bos">Bu muayenede çizim yok.</div>
+          <div className="cikti-bos">{c('Bu muayenede çizim yok.')}</div>
         )}
 
         {/* ŞEMA TÜRÜ BAŞINA BİR BLOK, içinde iki göz: kâğıtta da hekim
@@ -148,7 +149,7 @@ export function GozSemaCikti() {
                   Kâğıda basılan belgenin okunur kalması buna bağlı. */}
               <table className="cikti-isaret">
                 <thead>
-                  <tr><th>Göz</th><th>İşaret</th><th>Saat</th><th>Boyut (DD)</th><th>Not</th></tr>
+                  <tr><th>Göz</th><th>{c('İşaret')}</th><th>Saat</th><th>{c('Boyut (DD)')}</th><th>Not</th></tr>
                 </thead>
                 <tbody>
                   {veri.isaretler.filter(i => i.semaTuru === tur).map((i, sira) => (
@@ -161,7 +162,7 @@ export function GozSemaCikti() {
                     </tr>
                   ))}
                   {veri.isaretler.filter(i => i.semaTuru === tur).length === 0 && (
-                    <tr><td colSpan={5} className="sonuk">İşaret yok.</td></tr>
+                    <tr><td colSpan={5} className="sonuk">{c('İşaret yok.')}</td></tr>
                   )}
                 </tbody>
               </table>
@@ -180,7 +181,7 @@ export function GozSemaCikti() {
           <div>
             <div className="cizgi" />
             {String(m.hekim ?? '')}
-            <div className="sonuk">Çizimi yapan hekim</div>
+            <div className="sonuk">{c('Çizimi yapan hekim')}</div>
           </div>
           <div className="sonuk sag">
             Çizim bir ölçüm kaydı değildir; görme, göz içi basıncı ve

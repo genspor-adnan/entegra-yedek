@@ -6,6 +6,7 @@ import { type Kosul, type ListeSatiri, URUN_GENOTIP, hataMetni } from '../api/so
 import { para } from './bicim';
 import { aramaSirala } from './aramaSirasi';
 import { useOturum } from '../kimlik/OturumBaglami';
+import { c } from '../dil/ceviri';
 
 
 /** Satir turu: yalniz ikon gosterilir, adi baslikta (title) kalir. */
@@ -436,7 +437,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
               ＋ 1 Adet Ekle (Enter)
             </button>
             <button className="d" disabled={!satirlar[secili]}
-                    title="Miktar ve fiyat penceresini açar"
+                    title={c('Miktar ve fiyat penceresini açar')}
                     onClick={() => satirlar[secili] && void sec(satirlar[secili], false)}>
               🔢 Miktar Ekle (Shift+Enter)
             </button>
@@ -446,7 +447,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
               </span>
             )}
           </span>
-          <button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>{c('✖ Kapat')}</button>
         </>
       }
     >
@@ -470,15 +471,15 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
               />
             </div>
 
-            {yukleniyor && <span className="arama-bekliyor">Aranıyor…</span>}
+            {yukleniyor && <span className="arama-bekliyor">{c('Aranıyor…')}</span>}
 
             <div className="durumseg">
               <button className={`ikon-liste ${aramaGorunumu === 'tum' ? 'on' : ''}`}
                       title="Tüm Liste" onClick={() => setAramaGorunumu('tum')}>☰</button>
               <button className={`ikon-liste ${aramaGorunumu === 'son' ? 'on' : ''}`}
-                      title="Son Aranan" onClick={() => setAramaGorunumu('son')}>🕓</button>
+                      title={c('Son Aranan')} onClick={() => setAramaGorunumu('son')}>🕓</button>
               <button className={`ikon-liste ${aramaGorunumu === 'sik' ? 'on' : ''}`}
-                      title="Sık Aranan" onClick={() => setAramaGorunumu('sik')}>⭐</button>
+                      title={c('Sık Aranan')} onClick={() => setAramaGorunumu('sik')}>⭐</button>
             </div>
 
             {/* KATEGORI AGACI - Sık Aranan'ın SAĞINDA (kullanici). Aranan
@@ -511,17 +512,17 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
                     Katkı fiyatı da göster"): hicbir satirda katki yoksa
                     kolon HIC cizilmez - ozel tarifede bos yer kaplardi. */}
                 {katkiKolonu && (
-                  <th className="hiza-sag" style={{ width: 80 }}>Katkı</th>
+                  <th className="hiza-sag" style={{ width: 80 }}>{c('Katkı')}</th>
                 )}
                 {sutKolonu && (
-                  <th className="hiza-sag" style={{ width: 80 }}>SUT</th>
+                  <th className="hiza-sag" style={{ width: 80 }}>{c('SUT')}</th>
                 )}
-                <th style={{ width: 60 }} className="hiza-orta">Döviz</th>
+                <th style={{ width: 60 }} className="hiza-orta">{c('Döviz')}</th>
                 {/* KDV IZLEMENIN SOLUNDA (kullanici): KDV fiyatin devami -
                     ikisi yan yana okunur; izleme (karekod/seri) ayri bir
                     konudur, sona duser. */}
                 <th className="hiza-sag" style={{ width: 40 }}>KDV</th>
-                <th style={{ width: 55 }} className="hiza-orta">İzleme</th>
+                <th style={{ width: 55 }} className="hiza-orta">{c('İzleme')}</th>
               </tr>
             </thead>
             <tbody>
@@ -551,14 +552,14 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
                     {r.fiyat ? para.format(Number(r.fiyat)) : <span className="sonuk">—</span>}
                   </td>
                   {katkiKolonu && (
-                    <td className="hiza-sag" title="Hastanın ödeyeceği katkı">
+                    <td className="hiza-sag" title={c('Hastanın ödeyeceği katkı')}>
                       {Number(r.katki ?? 0) > 0
                         ? para.format(Number(r.katki))
                         : <span className="sonuk">—</span>}
                     </td>
                   )}
                   {sutKolonu && (
-                    <td className="hiza-sag" title="SGK'nın ödediği SUT bedeli">
+                    <td className="hiza-sag" title={c('SGK\'nın ödediği SUT bedeli')}>
                       {Number(r.sgkFiyat ?? 0) > 0
                         ? para.format(Number(r.sgkFiyat))
                         : <span className="sonuk">—</span>}
@@ -575,7 +576,7 @@ export function StokAramaPenceresi({ etkin, onSec, onKapat, yalnizStok, yalnizHi
                 </tr>
               ))}
               {!yukleniyor && satirlar.length === 0 && (
-                <tr><td colSpan={10} className="bos">Kayıt yok</td></tr>
+                <tr><td colSpan={10} className="bos">{c('Kayıt yok')}</td></tr>
               )}
             </tbody>
           </table>

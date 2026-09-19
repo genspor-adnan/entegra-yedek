@@ -215,7 +215,7 @@ const adliBlok = (
         {kaynak === 'sube' && aktif.baslik === 'Mali'
          && deger.merkezMaliKullan && deger.ustSubeId ? (
           <div className="kagrup">
-            <h6>Mali Ayarlar</h6>
+            <h6>{c('Mali Ayarlar')}</h6>
             <div className="not" style={{ padding: 10 }}>
               Bu şube <b>merkezin mali ayarlarını</b> kullanıyor: dönem, muhasebe
               entegrasyonu, amortisman ve vergi/yuvarlama ayarları merkezden okunur.
@@ -540,7 +540,7 @@ const logoKase = kaynak === 'sube' && aktif.baslik === 'Logo & Kaşe' ? (() => {
   if (yeniMi) {
     return (
       <div className="kagrup">
-        <h6>Logo / Kaşe / İmza</h6>
+        <h6>{c('Logo / Kaşe / İmza')}</h6>
         <div className="not" style={{ padding: 10 }}>
           Şube kaydedildikten sonra buradan logo, kaşe ve imza yüklenebilir.
         </div>
@@ -550,7 +550,7 @@ const logoKase = kaynak === 'sube' && aktif.baslik === 'Logo & Kaşe' ? (() => {
   if (deger.merkezGorselKullan && !merkezMi) {
     return (
       <div className="kagrup">
-        <h6>Logo / Kaşe / İmza</h6>
+        <h6>{c('Logo / Kaşe / İmza')}</h6>
         <div className="not" style={{ padding: 10 }}>
           Bu şube <b>merkezin logo, kaşe ve imzasını</b> kullanıyor; belgelerde
           merkezin görselleri basılır. Şubeye özel görsel yüklemek için
@@ -561,11 +561,11 @@ const logoKase = kaynak === 'sube' && aktif.baslik === 'Logo & Kaşe' ? (() => {
   }
   return (
     <div className="kagrup">
-      <h6>Logo / Kaşe / İmza</h6>
+      <h6>{c('Logo / Kaşe / İmza')}</h6>
       <div style={{ padding: 10 }}>
         <div className="not" style={{ marginBottom: 8 }}>
-          Yüklerken <b>türünü</b> seçin: <b>Logo</b> · <b>Kaşe</b> · <b>İmza</b> ·
-          <b> Antet</b>. Belgede her türün <b>varsayılan</b> işaretlisi kullanılır.
+          Yüklerken <b>türünü</b> seçin: <b>{c('Logo')}</b> · <b>{c('Kaşe')}</b> · <b>İmza</b> ·
+          <b>{c('Antet')}</b>. Belgede her türün <b>varsayılan</b> işaretlisi kullanılır.
           Önerilen logo: PNG, saydam zemin, en az 480×160 px.
         </div>
         <DokumanGalerisi kartAdi="sube" kaynakId={id as number} saltOkunur={salt} />
@@ -675,7 +675,7 @@ return (
             <div className="not" style={{ padding: 10 }}>
               Bu şube <b>baz alınan şubenin depolarını</b> kullanıyor; kendi
               deposu tutulmaz. Kendi depolarını tanımlamak için yukarıdaki
-              comboyu <b>Kendisi</b> yapın.
+              comboyu <b>{c('Kendisi')}</b> yapın.
             </div>
           </div>
           </>
@@ -727,7 +727,7 @@ return (
     {kaynak === 'cari' && aktif.baslik === 'Genel' && yeniMi && (
       <div className="kasira">
         <div className="kagrup">
-          <h6>İlgili Kişiler</h6>
+          <h6>{c('İlgili Kişiler')}</h6>
           <div className="not" style={{ padding: 10 }}>
             Kişiler kart kaydedildikten sonra eklenir.
           </div>

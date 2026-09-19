@@ -5,6 +5,7 @@ import { tarihSaat } from '../../bicim';
 import { KodSecim, MetinAlani, ZamanAlani, MUSTEHAKLIK } from './alanlar';
 import type { BasvuruBilgi } from '../BasvuruSekmesi';
 import type { KurumSozlesmesi } from '../../../sayfalar/belgeKarti/useKurumSecenekleri';
+import { c } from '../../../dil/ceviri';
 
 export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
                                   kurumTuru, belgeId, tarafId, hekimId,
@@ -220,19 +221,19 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
                       onDeger={v => degistir({ sgkGecerlilik: v })} />
 
           <label className="alan">
-            <span className="etiket">Karşılama %</span>
+            <span className="etiket">{c('Karşılama %')}</span>
             <input className="hiza-sag" value={String(bilgi.sgkKarsilama ?? "")}
                    disabled={kilitli}
                    onChange={e => degistir({ sgkKarsilama: e.target.value })} />
           </label>
           <label className="alan">
-            <span className="etiket">Onaylanan Tutar</span>
+            <span className="etiket">{c('Onaylanan Tutar')}</span>
             <input className="hiza-sag" value={String(bilgi.sgkTutar ?? "")}
                    disabled={kilitli}
                    onChange={e => degistir({ sgkTutar: e.target.value })} />
           </label>
           <label className="alan">
-            <span className="etiket">Müstehaklık</span>
+            <span className="etiket">{c('Müstehaklık')}</span>
             <span className="deger-serit">
               <span className={`rozet ${m.sinif}`}>{m.ad}</span>
               {bilgi.sgkMustehaklikZaman && (
@@ -242,7 +243,7 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
           </label>
 
           <label className="alan">
-            <span className="etiket">Sevkli mi?</span>
+            <span className="etiket">{c('Sevkli mi?')}</span>
             <select value={Number(bilgi.sgkSevkli ?? 0)} disabled={kilitli}
                     onChange={e => degistir({ sgkSevkli: Number(e.target.value) })}>
               <option value={0}>Hayır</option>
@@ -326,7 +327,7 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
         <div className="alan-izgara dort-sutun">
           {/* Sirket belgenin odeyen kurumundan FARKLI olabilir. */}
           <label className="alan">
-            <span className="etiket">Sigorta Şirketi</span>
+            <span className="etiket">{c('Sigorta Şirketi')}</span>
             <select value={bilgi.ossKurumId ?? ""} disabled={kilitli}
                     onChange={e => degistir({
                       ossKurumId: e.target.value ? Number(e.target.value) : null })}>
@@ -356,14 +357,14 @@ export function ProvizyonSekmesi({ bilgi, degistir, kilitli, kurumAdi, kurumlar,
                       onDeger={v => degistir({ ossGecerlilik: v })} />
 
           <label className="alan">
-            <span className="etiket">Karşılama %</span>
+            <span className="etiket">{c('Karşılama %')}</span>
             <input className="hiza-sag" value={String(bilgi.ossKarsilama ?? "")}
                    disabled={kilitli}
                    onChange={e => degistir({ ossKarsilama: e.target.value })} />
           </label>
 
           <label className="alan">
-            <span className="etiket">Onaylanan Tutar</span>
+            <span className="etiket">{c('Onaylanan Tutar')}</span>
             <input className="hiza-sag" value={String(bilgi.ossTutar ?? "")}
                    disabled={kilitli}
                    onChange={e => degistir({ ossTutar: e.target.value })} />

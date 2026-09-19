@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { GenForm } from '../bilesenler/GenForm';
 import { api } from '../api/istemci';
 import { guvenli, onay } from '../bilesenler/mesaj';
+import { c } from '../dil/ceviri';
 
 /**
  * KATEGORİLER (345/346, kullanıcı: "kategorileri 2 gride böl - solda stok,
@@ -153,7 +154,7 @@ export function Kategoriler() {
           </div>
         </div>
         <div className="kat-agac">
-          {kokler.length === 0 && <div className="not">Kategori yok.</div>}
+          {kokler.length === 0 && <div className="not">{c('Kategori yok.')}</div>}
           {kokler.map(k => dalCiz(taraf, k, 0))}
         </div>
       </div>
@@ -165,7 +166,7 @@ export function Kategoriler() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Kategoriler</h1>
-          <span className="yol">Yönetim › Kategoriler</span>
+          <span className="yol">{c('Yönetim › Kategoriler')}</span>
         </div>
       </div>
 

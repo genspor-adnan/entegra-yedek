@@ -1,3 +1,4 @@
+import { c } from '../../dil/ceviri';
 /**
  * TarafArama ile doldurulan baslik alani (cari, satis temsilcisi...).
  *
@@ -17,7 +18,7 @@ export function TarafAlani({ etiket, deger, kilitli, ipucu, zorunlu, hata, onAc 
     <label className="alan">
       <span className={`etiket${zorunlu ? ' zorunlu-isaret' : ''}`}>{etiket}</span>
       <span className="lookup-kutu">
-        <input readOnly value={deger ?? ''} placeholder="Seçiniz…" disabled={kilitli}
+        <input readOnly value={deger ?? ''} placeholder={c('Seçiniz…')} disabled={kilitli}
                onMouseDown={e => { if (!kilitli) { e.preventDefault(); onAc() } }} />
         {!kilitli && (
           <button type="button" className="mini" title={ipucu} onClick={onAc}>…</button>

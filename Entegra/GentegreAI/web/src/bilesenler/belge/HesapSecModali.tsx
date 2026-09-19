@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../../api/istemci';
 import { type ListeSatiri, hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
+import { c } from '../../dil/ceviri';
 
 /**
  * KASA / BANKA / POS HESABI SECIMI (kullanici: "banka ise modal arama ile
@@ -79,13 +80,13 @@ export function HesapSecModali({ tur, baslik, doviz, onSec, onKapat }: {
 
   return (
     <Modal baslik={baslik} dar onKapat={onKapat}
-           alt={<button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>}>
+           alt={<button className="d kapat-dugmesi" onClick={onKapat}>{c('✖ Kapat')}</button>}>
       <>
         {hata && <div className="hata-kutusu">{hata}</div>}
         <div className="kagrup">
           <div className="cipler" style={{ margin: 10 }}>
             <input ref={kutu} value={arama} onChange={e => yaz(e.target.value)}
-                   onKeyDown={tus} placeholder="Kod / ad ara…"
+                   onKeyDown={tus} placeholder={c('Kod / ad ara…')}
                    style={{ width: '100%' }} />
           </div>
 
@@ -94,7 +95,7 @@ export function HesapSecModali({ tur, baslik, doviz, onSec, onKapat }: {
               <tr>
                 <th style={{ width: 150 }}>Kod</th>
                 <th>Hesap</th>
-                <th className="hiza-orta" style={{ width: 70 }}>Döviz</th>
+                <th className="hiza-orta" style={{ width: 70 }}>{c('Döviz')}</th>
               </tr>
             </thead>
             <tbody>

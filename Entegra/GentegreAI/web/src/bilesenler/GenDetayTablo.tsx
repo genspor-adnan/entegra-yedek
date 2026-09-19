@@ -17,6 +17,7 @@ import type { DetayFarki, KartAlanMeta, KartDetayMeta } from '../api/sozlesme';
 import { useYerler, VARSAYILAN_ULKE } from './yerlerHook';
 import { TelefonGirdi } from './TelefonGirdi';
 import { telefonAlaniMi, telefonGecerliMi } from './alanBicim';
+import { c } from '../dil/ceviri';
 
 export type Satir = Record<string, unknown> & { id?: number };
 
@@ -346,7 +347,7 @@ function UrunAramaKutusu({ deger, yerTutucu, kilitli, saltOkunur, onAc }: {
              placeholder={yerTutucu}
              disabled={kilitli}
              onClick={() => !saltOkunur && onAc()} />
-      <button type="button" className="d mini" title="Ürün ara"
+      <button type="button" className="d mini" title={c('Ürün ara')}
               disabled={kilitli}
               onClick={onAc}>…</button>
     </span>
@@ -975,7 +976,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                 // Listedeki "Bu listede ara" kutusuyla AYNI oval gorunum.
                 <span className="ara-kutu satir-arasi">
                   <span>🔍</span>
-                  <input type="search" value={arama} placeholder="Satırlarda ara…"
+                  <input type="search" value={arama} placeholder={c('Satırlarda ara…')}
                          onChange={e => {
                            setArama(e.target.value); setSecililer(new Set());
                            // SUNUCU SUZGECI (526): her tusa istek atmamak icin
@@ -993,7 +994,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
               )}
               {ekSuzgec?.cizim}
               {satirlarGrid && (
-                <button type="button" className="d ikon-dugme" title="Grid menüsü"
+                <button type="button" className="d ikon-dugme" title={c('Grid menüsü')}
                         style={{ marginLeft: 6 }}
                         onClick={e => {
                           e.stopPropagation();
@@ -1040,7 +1041,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                 {/* TUMUNU ISARETLE (534): GORUNEN satirlar - sayfa/suzgec
                     disindaki satiri sessizce secmek, "sil"i beklenmedik bir
                     toplu isleme cevirirdi. */}
-                <input type="checkbox" title="Görünen satırların tümünü seç"
+                <input type="checkbox" title={c('Görünen satırların tümünü seç')}
                        checked={gorunurler.length > 0
                                 && gorunurler.every(g => secililer.has(g.i))}
                        onChange={e => setSecililer(e.target.checked
@@ -1056,7 +1057,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                 <th style={{ width: '6%' }}>Kod</th>
                 {/* HUV KODU yalniz TTB/HUV tarifesinde gelir: oteki tarifelerde
                     alan gizli oldugu icin `huvKolonu` false olur. */}
-                {huvKolonu && <th style={{ width: '7%' }}>HUV Kodu</th>}
+                {huvKolonu && <th style={{ width: '7%' }}>{c('HUV Kodu')}</th>}
                 {/* ADI: eskiden genisligi YOKTU - otomatik yerlesimde artan
                     alanin tamamini o yutuyordu (~%28) ve fiyat/katki kolonlari
                     sikisiyordu. Kullanici: "adı kısmı genişliği %40 azalt".
@@ -1310,7 +1311,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                       value={String(satir.tarih ?? '')}
                       maxLength={10}
                       inputMode="numeric"
-                      placeholder="YYYY veya GG.AA.YYYY"
+                      placeholder={c('YYYY veya GG.AA.YYYY')}
                       disabled={saltOkunur || !a.yazilabilir}
                       onChange={e => hucreDegis(i, a.ad, tarihYilTemizle(e.target.value))}
                     />
@@ -1528,7 +1529,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
               <span className="detay-sayfa-no">{sayfaNo} / {sonSayfa}</span>
               <button type="button" className="dugme kucuk"
                       disabled={sayfaNo >= sonSayfa || sayfaYukleniyor}
-                      onClick={() => onSayfa?.(sayfaNo + 1)}>Sonraki ›</button>
+                      onClick={() => onSayfa?.(sayfaNo + 1)}>{c('Sonraki ›')}</button>
             </span>
           )}
         </div>
@@ -1549,7 +1550,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
           onKapat={() => setModalSatir(null)}
           alt={<>
             <button type="button" className="d kapat-dugmesi"
-                    onClick={() => setModalSatir(null)}>Kapat</button>
+                    onClick={() => setModalSatir(null)}>{c('Kapat')}</button>
             <button type="button" className="d bir" onClick={modalKaydet}>Tamam</button>
           </>}
         >

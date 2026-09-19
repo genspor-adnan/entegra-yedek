@@ -9,6 +9,7 @@ import { TarafSecici } from '../../bilesenler/TarafArama';
 import { gunNokta, para, tarihSaat } from '../../bilesenler/bicim';
 import { medulaSonucMetni } from '../liste/medulaAksiyonlari';
 import { Adimlar, Gunluk, Rozet, Sonuc } from './medulaOrtak';
+import { c } from '../../dil/ceviri';
 
 /**
  * MEDULA — HASTA KABUL / PROVİZYON — mockup `Ekranlar/Medula/medula_hasta_kabul.html`.
@@ -101,7 +102,7 @@ export function MedulaHastaKabul() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>🪪 Medula — Hasta Kabul / Provizyon</h1>
-          <span className="yol">Medula › Hasta Kabul</span>
+          <span className="yol">{c('Medula › Hasta Kabul')}</span>
           {h && <span className="rozet mavi">{h.unvan}{h.tckn ? ` · ${h.tckn}` : ''}</span>}
           {secTakip && <Rozet d={secTakip.sgkDurum} sozluk={MEDULA_TAKIP_DURUM} />}
         </div>
@@ -109,7 +110,7 @@ export function MedulaHastaKabul() {
           <button className="d bir" onClick={() => void mustehaklik()}>🔎 Hak Sahipliği Sorgula</button>
           <button className="d onay" onClick={() => void hastaKabul()} disabled={!belgeId}>✔ Provizyon Al</button>
           <button className="d" onClick={() => void iptal()} disabled={!secTakip || secTakip.sgkDurum !== 1}>✖ Kabulü İptal Et</button>
-          <button className="d" onClick={() => void cikis()} disabled={!secTakip || secTakip.sgkDurum !== 1 || !!secTakip.cikisZaman}>🚪 Hasta Çıkışı</button>
+          <button className="d" onClick={() => void cikis()} disabled={!secTakip || secTakip.sgkDurum !== 1 || !!secTakip.cikisZaman}>{c('🚪 Hasta Çıkışı')}</button>
           {belgeId > 0 && yetki('medula.hizmet') && <button className="d" onClick={() => git(`/medula-hizmet/${belgeId}`)}>🧾 Hizmet Kaydına Geç</button>}
           <button className="d" onClick={() => git('/medula-takip')}>📋 Takipler</button>
         </div>
@@ -122,14 +123,14 @@ export function MedulaHastaKabul() {
             <TarafSecici etiket="" deger={hastaAdi} kaynaklar={['hasta']} bosMetin="TCKN / ad ile hasta seçin…"
               onSec={s => { setHastaId(s.id); setHastaAdi(s.unvan); setBelgeId(0); setSonuc(null); void yukle(s.id); }} onTemizle={() => { setHastaId(0); setHastaAdi(''); setOzet(null); }} />
           </div>
-          <div><label>Müstehaklık</label><div className="md-inp">
+          <div><label>{c('Müstehaklık')}</label><div className="md-inp">
             {sonMust ? <><Rozet d={sonMust.mustehaklik === 1 ? 1 : 2} sozluk={{ 1: ['Müstehak', 'ok'], 2: ['Müstehak değil', 'hata'] }} /> {sonMust.sigortaTuru} · {sonMust.mustehaklikZaman ? tarihSaat(sonMust.mustehaklikZaman) : ''}</>
               : <span className="sonuk">sorgulanmadı</span>}
           </div></div>
           <div><label>Başvuru</label><div className="md-inp">
             {secTakip ? `${secTakip.belgeNo} · ${gunNokta(secTakip.belgeTarihi)} · ${secTakip.hekim || '—'}` : <span className="sonuk">seçilmedi · Takip Ara'dan seçin</span>}
           </div></div>
-          <div><label>Takip no</label><div className="md-inp">
+          <div><label>{c('Takip no')}</label><div className="md-inp">
             {secTakip?.takipNo ? <><b>{secTakip.takipNo}</b> · geçerlilik {secTakip.gecerlilik ? gunNokta(secTakip.gecerlilik) : '—'}{secTakip.cikisZaman ? ' · çıkış verildi' : ''}</>
               : <span className="sonuk">{secTakip?.redNedeni || 'provizyon alınmadı'}</span>}
           </div></div>
@@ -143,18 +144,18 @@ export function MedulaHastaKabul() {
 
         {sekme === 'hak' && (
           <div className="md-iki">
-            <div className="md-grp"><div className="md-gb">Sorgu (mustehaklikSorgu)</div>
+            <div className="md-grp"><div className="md-gb">{c('Sorgu (mustehaklikSorgu)')}</div>
               <div className="md-hdr k2">
-                <div><label>TC Kimlik No</label><div className="md-inp">{h?.tckn || <span className="sonuk">hasta kartında TCKN yok</span>}</div></div>
-                <div><label>Provizyon tipi</label><select value={provTipi} onChange={e => setProvTipi(Number(e.target.value))}>{PROV_TIPI.map(([k, a]) => <option key={k} value={k}>{a}</option>)}</select></div>
-                <div><label>Kayıtlı kurum</label><div className="md-inp">{h?.kurumAdi ? `${h.kurumAdi} (${['', 'özel', 'ÖSS', 'SGK', 'kurum'][h.kurumTur ?? 0]})` : <span className="sonuk">yok → ücretli</span>}</div></div>
-                <div><label>Son sorgu</label><div className="md-inp">{sonMust?.mustehaklikZaman ? tarihSaat(sonMust.mustehaklikZaman) : '—'}</div></div>
+                <div><label>{c('TC Kimlik No')}</label><div className="md-inp">{h?.tckn || <span className="sonuk">hasta kartında TCKN yok</span>}</div></div>
+                <div><label>{c('Provizyon tipi')}</label><select value={provTipi} onChange={e => setProvTipi(Number(e.target.value))}>{PROV_TIPI.map(([k, a]) => <option key={k} value={k}>{a}</option>)}</select></div>
+                <div><label>{c('Kayıtlı kurum')}</label><div className="md-inp">{h?.kurumAdi ? `${h.kurumAdi} (${['', 'özel', 'ÖSS', 'SGK', 'kurum'][h.kurumTur ?? 0]})` : <span className="sonuk">yok → ücretli</span>}</div></div>
+                <div><label>{c('Son sorgu')}</label><div className="md-inp">{sonMust?.mustehaklikZaman ? tarihSaat(sonMust.mustehaklikZaman) : '—'}</div></div>
               </div>
               <div className="md-arac"><button className="d bir" onClick={() => void mustehaklik()}>🔎 Sorgula</button><span className="sonuk">Simülasyon: müstehak = hastanın aktif SGK kurum kaydı (Hasta kartı › Kurumlar).</span></div>
             </div>
-            <div className="md-grp"><div className="md-gb">Bu hastanın takipleri</div>
+            <div className="md-grp"><div className="md-gb">{c('Bu hastanın takipleri')}</div>
               <div className="md-dg"><table>
-                <thead><tr><th>Başvuru</th><th>Tarih</th><th>Takip no</th><th>Hekim</th><th className="orta">Durum</th><th className="orta">Kabul/hata</th><th className="sag">Tutar</th><th /></tr></thead>
+                <thead><tr><th>Başvuru</th><th>Tarih</th><th>{c('Takip no')}</th><th>Hekim</th><th className="orta">Durum</th><th className="orta">{c('Kabul/hata')}</th><th className="sag">Tutar</th><th /></tr></thead>
                 <tbody>
                   {(ozet?.takipler ?? []).map(t => (
                     <tr key={t.belgeId} className={t.belgeId === belgeId ? 'sel' : ''} onClick={() => { setBelgeId(t.belgeId); setSekme('kabul'); }}>
@@ -173,14 +174,14 @@ export function MedulaHastaKabul() {
 
         {sekme === 'kabul' && (
           <div className="md-iki">
-            <div className="md-grp"><div className="md-gb">Hasta kabul bilgileri (hastaKabul)</div>
+            <div className="md-grp"><div className="md-gb">{c('Hasta kabul bilgileri (hastaKabul)')}</div>
               <div className="md-hdr k2">
-                <div><label>Takip tipi</label><select value={takipTipi} onChange={e => setTakipTipi(Number(e.target.value))}>{TAKIP_TIPI.map(([k, a]) => <option key={k} value={k}>{a}</option>)}</select></div>
-                <div><label>Provizyon tipi</label><select value={provTipi} onChange={e => setProvTipi(Number(e.target.value))}>{PROV_TIPI.map(([k, a]) => <option key={k} value={k}>{a}</option>)}</select></div>
-                <div><label>Branş / bölüm</label><div className="md-inp">{secTakip?.bolum || <span className="sonuk">başvurudan</span>}</div></div>
-                <div><label>Hekim (tescil)</label><div className="md-inp">{secTakip?.hekim || <span className="sonuk">başvurudan</span>}</div></div>
-                <div><label>Sevkli mi</label><select value={sevkli ? 1 : 0} onChange={e => setSevkli(e.target.value === '1')}><option value={0}>Hayır</option><option value={1}>Evet</option></select></div>
-                <div><label>Sevk eden kurum</label><input value={sevkKurum} onChange={e => setSevkKurum(e.target.value)} disabled={!sevkli} /></div>
+                <div><label>{c('Takip tipi')}</label><select value={takipTipi} onChange={e => setTakipTipi(Number(e.target.value))}>{TAKIP_TIPI.map(([k, a]) => <option key={k} value={k}>{a}</option>)}</select></div>
+                <div><label>{c('Provizyon tipi')}</label><select value={provTipi} onChange={e => setProvTipi(Number(e.target.value))}>{PROV_TIPI.map(([k, a]) => <option key={k} value={k}>{a}</option>)}</select></div>
+                <div><label>{c('Branş / bölüm')}</label><div className="md-inp">{secTakip?.bolum || <span className="sonuk">başvurudan</span>}</div></div>
+                <div><label>{c('Hekim (tescil)')}</label><div className="md-inp">{secTakip?.hekim || <span className="sonuk">başvurudan</span>}</div></div>
+                <div><label>{c('Sevkli mi')}</label><select value={sevkli ? 1 : 0} onChange={e => setSevkli(e.target.value === '1')}><option value={0}>Hayır</option><option value={1}>Evet</option></select></div>
+                <div><label>{c('Sevk eden kurum')}</label><input value={sevkKurum} onChange={e => setSevkKurum(e.target.value)} disabled={!sevkli} /></div>
               </div>
               <div className="md-arac">
                 <button className="d onay" onClick={() => void hastaKabul()} disabled={!belgeId}>✔ Provizyon Al</button>
@@ -190,19 +191,19 @@ export function MedulaHastaKabul() {
             <div className="md-grp"><div className="md-gb">Kurallar</div>
               <ul className="md-liste">
                 <li><span className="rozet gri">1006</span> Aynı gün aynı branşta açık takip → var olanı bağla</li>
-                <li><span className="rozet gri">1013</span> Müstehak değil → ücretli / ÖSS</li>
-                <li><span className="rozet gri">1020</span> Hekim tescil no eksik → Personel kartı</li>
-                <li><span className="rozet gri">2001</span> Kapı erişilemiyor → kuyruk, otomatik tekrar</li>
+                <li><span className="rozet gri">1013</span>{c('Müstehak değil → ücretli / ÖSS')}</li>
+                <li><span className="rozet gri">1020</span>{c('Hekim tescil no eksik → Personel kartı')}</li>
+                <li><span className="rozet gri">2001</span>{c('Kapı erişilemiyor → kuyruk, otomatik tekrar')}</li>
               </ul>
             </div>
           </div>
         )}
 
         {sekme === 'ara' && (
-          <div className="md-grp"><div className="md-gb">Takip ara (takipAra)</div>
-            <div className="md-arac"><input placeholder="Hasta / takip no / başvuru no…" value={ara} onChange={e => setAra(e.target.value)} style={{ minWidth: 280 }} onKeyDown={e => { if (e.key === 'Enter') void takipAra() }} /><button className="d bir" onClick={() => void takipAra()}>🔎 Ara</button></div>
+          <div className="md-grp"><div className="md-gb">{c('Takip ara (takipAra)')}</div>
+            <div className="md-arac"><input placeholder={c('Hasta / takip no / başvuru no…')} value={ara} onChange={e => setAra(e.target.value)} style={{ minWidth: 280 }} onKeyDown={e => { if (e.key === 'Enter') void takipAra() }} /><button className="d bir" onClick={() => void takipAra()}>🔎 Ara</button></div>
             <div className="md-dg"><table>
-              <thead><tr><th>Takip no</th><th>Hasta</th><th>Başvuru</th><th>Tarih</th><th>Hekim</th><th className="orta">Durum</th><th className="orta">İşlem</th><th className="sag">Tutar</th><th>Fatura</th><th /></tr></thead>
+              <thead><tr><th>{c('Takip no')}</th><th>Hasta</th><th>Başvuru</th><th>Tarih</th><th>Hekim</th><th className="orta">Durum</th><th className="orta">İşlem</th><th className="sag">Tutar</th><th>Fatura</th><th /></tr></thead>
               <tbody>
                 {araSonuc.map(r => (
                   <tr key={r.takip.belgeId}>
@@ -220,8 +221,8 @@ export function MedulaHastaKabul() {
 
         {sekme === 'gunluk' && (
           <>
-            <div className="md-grp"><div className="md-gb">Bu hastanın Medula günlüğü</div><Gunluk satirlar={gunluk} govdeAc={govdeAc} /></div>
-            {govde && <div className="md-grp"><div className="md-gb">İstek / yanıt <span className="md-sp"><button className="d" onClick={() => setGovde(null)}>Kapat</button></span></div>
+            <div className="md-grp"><div className="md-gb">{c('Bu hastanın Medula günlüğü')}</div><Gunluk satirlar={gunluk} govdeAc={govdeAc} /></div>
+            {govde && <div className="md-grp"><div className="md-gb">{c('İstek / yanıt')}<span className="md-sp"><button className="d" onClick={() => setGovde(null)}>{c('Kapat')}</button></span></div>
               <pre className="md-xml">{govde.istek}{'\n---\n'}{govde.yanit}</pre></div>}
           </>
         )}

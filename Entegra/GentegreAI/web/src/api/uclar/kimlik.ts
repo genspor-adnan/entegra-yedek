@@ -29,6 +29,15 @@ export const kimlikUclari = {
    */
   marka: () => istek<{ urunModu: number }>('/api/kimlik/marka'),
 
+  /** Parolamı unuttum (843) - 1. adım: kayıtlı telefona / e-postaya kod. Hesap yoksa da genel cevap. */
+  parolaUnuttum: (kod: string) =>
+    gonder<{ gonderildi: boolean; kanal: 'sms' | 'eposta' | ''; hedef: string; dakika: number; mesaj: string }>(
+      '/api/kimlik/parola-unuttum', { kod }),
+
+  /** Parolamı unuttum - 2. adım: kod + yeni parola. */
+  parolaUnuttumDogrula: (kod: string, dogrulamaKodu: string, yeniParola: string) =>
+    gonder<{ mesaj: string }>('/api/kimlik/parola-unuttum/dogrula', { kod, dogrulamaKodu, yeniParola }),
+
   /** Ilk giris: otomatik acilan hesabin parolasini kisi kendisi tanimlar. */
   ilkParola: (kod: string, tcknSon4: string, yeniParola: string) =>
     gonder<{ mesaj: string }>('/api/kimlik/ilk-parola', { kod, tcknSon4, yeniParola }),

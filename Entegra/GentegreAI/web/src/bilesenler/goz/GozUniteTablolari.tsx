@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import type { GozUniteOzeti } from '../../api/uclar/goz';
+import { c } from '../../dil/ceviri';
 
 /**
  * ODA / CİHAZ DOLULUĞU ve HEKİM YÜKÜ — mockup
@@ -46,15 +47,15 @@ export function GozUniteTablolari({ yenile }: { yenile?: number }) {
   return (
     <div className="unite-tablolar">
       <div className="kagrup">
-        <h6>Oda ve cihaz doluluğu <span>darboğaz burada görünür</span></h6>
+        <h6>{c('Oda ve cihaz doluluğu')}<span>darboğaz burada görünür</span></h6>
         <table className="izlem-tablo">
           <thead>
-            <tr><th>Kaynak</th><th>Kim</th><th>İş</th>
+            <tr><th>Kaynak</th><th>{c('Kim')}</th><th>İş</th>
                 <th className="sag">Süre</th><th className="sag">Sıra</th></tr>
           </thead>
           <tbody>
             {veri.odalar.length === 0 && (
-              <tr><td colSpan={5} className="sonuk">Oda/cihaz ataması yapılmamış.</td></tr>
+              <tr><td colSpan={5} className="sonuk">{c('Oda/cihaz ataması yapılmamış.')}</td></tr>
             )}
             {veri.odalar.map(o => (
               <tr key={o.oda}>
@@ -83,11 +84,11 @@ export function GozUniteTablolari({ yenile }: { yenile?: number }) {
       </div>
 
       <div className="kagrup">
-        <h6>Hekim ve tekniker yükü <span>bugün</span></h6>
+        <h6>{c('Hekim ve tekniker yükü')}<span>bugün</span></h6>
         <table className="izlem-tablo">
           <thead>
             <tr><th>Kişi</th><th className="sag">Tamam</th><th className="sag">Bekleyen</th>
-                <th className="sag">Ort. süre</th><th className="sag">En uzun</th></tr>
+                <th className="sag">{c('Ort. süre')}</th><th className="sag">{c('En uzun')}</th></tr>
           </thead>
           <tbody>
             {veri.hekimler.length === 0 && (
@@ -115,7 +116,7 @@ export function GozUniteTablolari({ yenile }: { yenile?: number }) {
           </tbody>
         </table>
         <div className="not">
-          <b>Tekniker de bu tabloda:</b> ön tetkik ünitenin girişidir ve tıkanırsa hekim
+          <b>{c('Tekniker de bu tabloda:')}</b> ön tetkik ünitenin girişidir ve tıkanırsa hekim
           odası boş kalır. Yalnız hekim sayılsaydı panonun söylediği "hekimler yavaş"
           olurdu — oysa sıra girişte.
         </div>

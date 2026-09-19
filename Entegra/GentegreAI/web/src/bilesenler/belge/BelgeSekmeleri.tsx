@@ -5,6 +5,7 @@ import type { BelgeYaniti } from '../../api/sozlesme';
 import type { SevkiyatBilgisi }
   from '../../sayfalar/belgeKarti/useSevkiyatBilgisi';
 import { para } from '../bicim';
+import { c } from '../../dil/ceviri';
 
 /**
  * BELGE KARTI SEKMELERI - Tasiyici / e-Belge / Faturalama.
@@ -28,7 +29,7 @@ export function TasiyiciSekmesi({ kilitli, sevkiyat, belge }: {
   } = sevkiyat;
   return (
   <div className="kagrup">
-    <h6>Taşıyıcı Bilgileri</h6>
+    <h6>{c('Taşıyıcı Bilgileri')}</h6>
     <div className="alan-izgara uc-sutun">
       <TarafSecici
         etiket="Taşıyıcı Ünvan"
@@ -49,31 +50,31 @@ export function TasiyiciSekmesi({ kilitli, sevkiyat, belge }: {
         onTemizle={() => setTeslimEden(null)}
       />
       <label className="alan">
-        <span className="etiket">Teslim Şekli</span>
+        <span className="etiket">{c('Teslim Şekli')}</span>
         <select value={teslimSekli} disabled={kilitli}
                 onChange={e => setTeslimSekli(Number(e.target.value))}>
           {TESLIM_SEKLI.map(t => <option key={t.deger} value={t.deger}>{t.ad}</option>)}
         </select>
       </label>
       <label className="alan genis-2">
-        <span className="etiket">Sevk Adresi</span>
+        <span className="etiket">{c('Sevk Adresi')}</span>
         <input value={[belge?.tarafAdres, belge?.tarafIlce, belge?.tarafIl]
                         .filter(Boolean).join(' / ')} readOnly
                placeholder="Cari seçilince kartındaki varsayılan adres gelir" />
       </label>
       <label className="alan">
-        <span className="etiket">Sevk Zamanı</span>
+        <span className="etiket">{c('Sevk Zamanı')}</span>
         <input type="datetime-local" value={sevkTarihi} disabled={kilitli}
                onChange={e => setSevkTarihi(e.target.value)} />
       </label>
       <label className="alan">
-        <span className="etiket">Araç Plakası</span>
+        <span className="etiket">{c('Araç Plakası')}</span>
         <input value={aracPlaka} maxLength={20} disabled={kilitli}
                placeholder="07 ABC 145"
                onChange={e => setAracPlaka(e.target.value.toUpperCase())} />
       </label>
       <label className="alan">
-        <span className="etiket">Şoför Adı</span>
+        <span className="etiket">{c('Şoför Adı')}</span>
         <input value={soforAd} maxLength={60} disabled={kilitli}
                onChange={e => setSoforAd(e.target.value)} />
       </label>
@@ -115,11 +116,11 @@ export function EBelgeSekmesi({
         sagda. Uc sutuna yayilinca sira okunmuyordu. */}
     <div className="alan-izgara tek-sutun">
       <label className="alan">
-        <span className="etiket">Belge Tipi</span>
+        <span className="etiket">{c('Belge Tipi')}</span>
         <input value={eBelgeTipi(tur, senaryo)} readOnly />
       </label>
       <label className="alan">
-        <span className="etiket">Alias (URN)</span>
+        <span className="etiket">{c('Alias (URN)')}</span>
         <input value={String(belge?.gondericiAlias ?? '') || '—'} readOnly />
       </label>
 
@@ -136,8 +137,8 @@ export function EBelgeSekmesi({
         <span className="etiket">Durum</span>
         <span className="deger-serit">
           {Number(belge?.efaturaDurum ?? 0) > 0
-            ? <span className="rozet ok">Gönderildi</span>
-            : <span className="rozet gri">Kâğıt / gönderilmedi</span>}
+            ? <span className="rozet ok">{c('Gönderildi')}</span>
+            : <span className="rozet gri">{c('Kâğıt / gönderilmedi')}</span>}
           {belge?.gibDurumAciklama
             ? <span className="sonuk">{String(belge.gibDurumAciklama)}</span>
             : null}
@@ -145,18 +146,18 @@ export function EBelgeSekmesi({
       </label>
 
       <label className="alan">
-        <span className="etiket">ETTN / Zarf No</span>
+        <span className="etiket">{c('ETTN / Zarf No')}</span>
         <input readOnly value={
           [String(belge?.ettn ?? ''), String(belge?.zarfId ?? 0) !== '0'
             ? String(belge?.zarfId) : '']
             .filter(Boolean).join(' / ') || '—'} />
       </label>
       <label className="alan">
-        <span className="etiket">XSLT Tasarımı</span>
+        <span className="etiket">{c('XSLT Tasarımı')}</span>
         {/* Tasarim listesi (DOKUMLER) henuz baglanmadi - combo GORUNUR
             ama tek secenekli ve pasif; sahte secenek uretmiyoruz. */}
-        <select disabled title="Tasarım listesi henüz bağlanmadı">
-          <option>Genel Fatura Tasarımı</option>
+        <select disabled title={c('Tasarım listesi henüz bağlanmadı')}>
+          <option>{c('Genel Fatura Tasarımı')}</option>
         </select>
       </label>
 
@@ -173,10 +174,10 @@ export function EBelgeSekmesi({
     {/* Mockup'taki dugme seridi. Gonderim/sorgulama UCLARI HENUZ YOK -
         dugmeler gorunur ama pasif (yalanci calisma yerine durust durum). */}
     <div className="katoolbar" style={{ margin: 10 }}>
-      <button className="d" disabled title="Gönderim ucu henüz bağlanmadı">📤 Yeniden Gönder</button>
-      <button className="d" disabled title="Önizleme henüz bağlanmadı">👁 Önizle (PDF)</button>
-      <button className="d" disabled title="XML indirme henüz bağlanmadı">⬇ XML İndir</button>
-      <button className="d" disabled title="GİB durum sorgulama henüz bağlanmadı">📋 Durum Sorgula</button>
+      <button className="d" disabled title={c('Gönderim ucu henüz bağlanmadı')}>📤 Yeniden Gönder</button>
+      <button className="d" disabled title={c('Önizleme henüz bağlanmadı')}>👁 Önizle (PDF)</button>
+      <button className="d" disabled title={c('XML indirme henüz bağlanmadı')}>⬇ XML İndir</button>
+      <button className="d" disabled title={c('GİB durum sorgulama henüz bağlanmadı')}>{c('📋 Durum Sorgula')}</button>
     </div>
 
     <div className="not">
@@ -299,16 +300,14 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
         <button type="button" className="d bir" disabled={donusumKapali}
                 title={donusumKapali
                   ? 'Yalnız KABUL durumundaki teklif siparişe dönüştürülebilir.' : undefined}
-                onClick={() => setDonusum(0)}>
-          📋 Siparişe Dönüştür
-        </button>
+                onClick={() => setDonusum(0)}>{c('📋 Siparişe Dönüştür')}</button>
       )}
 
       {/* DONUSUM OLCUSU (kullanici): varsayilan ADET - satirin kalan miktari
           cevrilir. TUTAR olcusunde fis/faturada TAHSIL EDILEN kadar,
           tahakkukta kalanin tamami cevrilir (352). */}
       {kayitliId > 0 && !teklifMi && (
-        <span className="seg olcu" title="Hızlı dönüşümün ölçüsü">
+        <span className="seg olcu" title={c('Hızlı dönüşümün ölçüsü')}>
           <span className={`s${olcu === 'adet' ? ' on' : ''}`}
                 onClick={() => setOlcu?.('adet')}>Adet</span>
           <span className={`s${olcu === 'tutar' ? ' on' : ''}`}
@@ -334,7 +333,7 @@ export function FaturalamaSekmesi({ donusumler, kayitliId, setDonusum, teklifMi,
         <tr>
           <th className="check">
             <input type="checkbox" checked={hepsi} disabled={!idler.length}
-                   title="Tümünü seç"
+                   title={c('Tümünü seç')}
                    onChange={() => setSecili(hepsi ? [] : idler)} />
           </th>
           <th style={{ width: 160 }}>Belge No</th>

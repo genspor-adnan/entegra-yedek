@@ -3,6 +3,7 @@ import type { AvansDurumu } from '../avansDurumu';
 import { mesaj, paraSor } from '../mesaj';
 import { para, tarihSaat, paraYaz } from '../bicim';
 import type { BelgeYaniti } from '../../api/sozlesme';
+import { c } from '../../dil/ceviri';
 
 /**
  * TAHSILAT SEKMESI - belgeye bagli kasa islemleri ve kalan bakiye.
@@ -305,7 +306,7 @@ return (
           Cek ve senet AYRI SECENEK: ikisi ayri kasa islem turu (23/24
           tahsilat, 33/34 odeme) ve portfoyde ayri izlenir. */}
       <span className="dugme-menu">
-        <button className="d" title="Diğer tahsilat araçları"
+        <button className="d" title={c('Diğer tahsilat araçları')}
                 onClick={e => { e.stopPropagation(); setAracMenu(v => !v) }}>⋯</button>
         {aracMenu && (
           <div className="dugme-menu-liste">
@@ -359,9 +360,7 @@ return (
                   title={hastaId
                     ? 'Hastadan avans al (bu belgeye bağlanmaz)'
                     : 'Önce hasta seçin.'}
-                  onClick={e => { e.stopPropagation(); setAvansMenu(v => !v) }}>
-            💰 Avans Al
-          </button>
+                  onClick={e => { e.stopPropagation(); setAvansMenu(v => !v) }}>{c('💰 Avans Al')}</button>
           {avansMenu && (
             <div className="dugme-menu-liste">
               <button type="button" className="mi"
@@ -387,7 +386,7 @@ return (
           et" demek, hangi makbuzun geri verildiğini kaydetmemek olurdu. */}
       {avansIadeAc && avansVar && (
         <span className="dugme-menu">
-          <button className="d" title="Kalan avansı hastaya geri öde"
+          <button className="d" title={c('Kalan avansı hastaya geri öde')}
                   onClick={e => { e.stopPropagation(); setAvansIadeMenu(v => !v) }}>
             ↩ Avans İade
           </button>
@@ -413,7 +412,7 @@ return (
           Secimden sonra tutar penceresi acilir; tutar EKSI islenir. */}
       {iadeAc && (
         <span className="dugme-menu">
-          <button className="d" title="Seçilen araçla iade / iptal satırı ekler"
+          <button className="d" title={c('Seçilen araçla iade / iptal satırı ekler')}
                   disabled={!kayitliId}
                   onClick={e => { e.stopPropagation(); setIadeMenu(v => !v) }}>
             ↩ İade / İptal
@@ -497,20 +496,20 @@ return (
         <tr>
           <th className="check">
             <input type="checkbox" checked={hepsi} disabled={!idler.length}
-                   title="Tümünü seç"
+                   title={c('Tümünü seç')}
                    onChange={() => setSecili(hepsi ? [] : idler)} />
           </th>
           <th style={{ width: 140 }}>Tarih / Saat</th>
           <th style={{ width: 120 }}>Makbuz No</th>
           <th style={{ width: 180 }}>Tür</th>
-          <th>Kasa / Banka</th>
+          <th>{c('Kasa / Banka')}</th>
           {/* DOVIZ SUTUNU yalniz dovizli tahsilat varsa (kullanici: "döviz
               tahsilat olursa tutar soluna alınan döviz de gelsin"): "Tutar"
               kolonu YEREL KARSILIKTIR, hastanin verdigi 100 USD orada hic
               gorunmuyordu. Yerel parada bu sutun bos yer harcar - cizilmez. */}
           {dovizliTahsilatVar && (
             <th className="hiza-sag" style={{ width: 120 }}
-                title="Alınan döviz tutarı ve para birimi">Alınan Döviz</th>
+                title={c('Alınan döviz tutarı ve para birimi')}>{c('Alınan Döviz')}</th>
           )}
           <th className="hiza-sag" style={{ width: 130 }}
               title={`Yerel karşılık (${yerelPara})`}>Tutar</th>

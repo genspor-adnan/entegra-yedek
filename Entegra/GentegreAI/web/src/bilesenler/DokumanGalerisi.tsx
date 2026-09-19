@@ -4,6 +4,7 @@ import { api } from '../api/istemci';
 import { type DokumanSatiri, hataMetni } from '../api/sozlesme';
 import { tarihYaz } from './bicim';
 import { dosyaIndirUrl } from './indir';
+import { c } from '../dil/ceviri';
 
 const boyutYaz = (b: number) => b < 1024 ? `${b} B` : b < 1024 * 1024 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`;
 
@@ -55,7 +56,7 @@ function ResimBandi({ resimler, resimUrlleri }: { resimler: DokumanSatiri[]; res
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: resimUrlleri[s.id] ? 'pointer' : 'default',
             }}
-            title="Büyük açmak için tıklayın"
+            title={c('Büyük açmak için tıklayın')}
             onClick={() => resimUrlleri[s.id] && window.open(resimUrlleri[s.id], '_blank')}
           >
             {resimUrlleri[s.id]
@@ -266,7 +267,7 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
           <>
             <input ref={girdiRef} type="file" style={{ display: 'none' }} onChange={e => void dosyaSecildi(e)}
               accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,.doc,.docx,.xls,.xlsx,text/plain" />
-            <button type="button" className="d bir" title="Dosya Ekle" disabled={yukleniyor} onClick={() => girdiRef.current?.click()}>
+            <button type="button" className="d bir" title={c('Dosya Ekle')} disabled={yukleniyor} onClick={() => girdiRef.current?.click()}>
               {yukleniyor ? '…' : '＋'}
             </button>
             <button type="button" className="d teh" title="Sil" disabled={secili.size === 0} onClick={() => void seciliSil()}>🗑️</button>
@@ -277,14 +278,14 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
             🖼️
           </button>
         )}
-        <button type="button" className="d" title="Gör" disabled={!seciliSatir} onClick={() => seciliSatir && void gor(seciliSatir)}>👁️</button>
+        <button type="button" className="d" title={c('Gör')} disabled={!seciliSatir} onClick={() => seciliSatir && void gor(seciliSatir)}>👁️</button>
         {!saltOkunur && (
           <button type="button" className="d" title="Düzenle" disabled={!seciliSatir} onClick={() => seciliSatir && void duzenle(seciliSatir)}>✏️</button>
         )}
-        <button type="button" className="d" title="İndir" disabled={!seciliSatir} onClick={() => seciliSatir && void indir(seciliSatir)}>⬇️</button>
-        <button type="button" className="d" title="Paylaş" disabled={!seciliSatir} onClick={() => seciliSatir && void paylas(seciliSatir)}>🔗</button>
+        <button type="button" className="d" title={c('İndir')} disabled={!seciliSatir} onClick={() => seciliSatir && void indir(seciliSatir)}>⬇️</button>
+        <button type="button" className="d" title={c('Paylaş')} disabled={!seciliSatir} onClick={() => seciliSatir && void paylas(seciliSatir)}>🔗</button>
         {!saltOkunur && seciliResimMi && (
-          <button type="button" className="d" title="Varsayılan Yap" onClick={() => void varsayilanYap()}>⭐</button>
+          <button type="button" className="d" title={c('Varsayılan Yap')} onClick={() => void varsayilanYap()}>⭐</button>
         )}
       </h6>
       {hata && <div className="alan-hata" style={{ margin: '0 10px' }}>{hata}</div>}
@@ -294,7 +295,7 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
         <>
           <div className="perde" style={{ zIndex: 420 }} onClick={() => setDuzenlenen(null)} />
           <form className="lookup-pencere" style={{ zIndex: 421, width: 'min(440px, 92vw)' }} onSubmit={e => void duzenlemeKaydet(e)}>
-            <strong>Doküman Düzenle</strong>
+            <strong>{c('Doküman Düzenle')}</strong>
             <label className="alan">
               <span className="etiket">Belge Türü</span>
               <input
@@ -320,7 +321,7 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
             <div className="lookup-alt">
               <span></span>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button type="button" onClick={() => setDuzenlenen(null)}>İptal</button>
+                <button type="button" onClick={() => setDuzenlenen(null)}>{c('İptal')}</button>
                 <button type="submit" disabled={!duzenlenen.ad.trim()}>Kaydet</button>
               </div>
             </div>
@@ -338,7 +339,7 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
               <th style={{ width: 150 }}>Belge Türü</th>
               <th>Ad</th>
               <th style={{ width: 42, textAlign: 'center' }}>Tipi</th>
-              <th style={{ width: 90 }}>Boyut</th>
+              <th style={{ width: 90 }}>{c('Boyut')}</th>
               <th style={{ width: 90 }}>Tarih</th>
             </tr>
           </thead>
@@ -360,7 +361,7 @@ export function DokumanGalerisi({ kartAdi, kaynakId, saltOkunur }: {
         </table>
       )}
 
-      {satirlar?.length === 0 && <div className="bos" style={{ padding: 10 }}>Henüz dosya yok.</div>}
+      {satirlar?.length === 0 && <div className="bos" style={{ padding: 10 }}>{c('Henüz dosya yok.')}</div>}
     </div>
   );
 }

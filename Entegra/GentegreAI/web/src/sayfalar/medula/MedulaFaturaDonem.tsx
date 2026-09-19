@@ -8,6 +8,7 @@ import { guvenli, mesaj, metinSor, onay } from '../../bilesenler/mesaj';
 import { gunNokta, para, tarihSaat } from '../../bilesenler/bicim';
 import { medulaSonucMetni } from '../liste/medulaAksiyonlari';
 import { Rozet, Sonuc } from './medulaOrtak';
+import { c } from '../../dil/ceviri';
 
 /**
  * MEDULA — FATURA & DÖNEM — mockup `Ekranlar/Medula/medula_fatura_donem.html`.
@@ -83,7 +84,7 @@ export function MedulaFaturaDonem() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>🧮 Medula — Fatura &amp; Dönem</h1>
-          <span className="yol">Medula › Fatura &amp; Dönem</span>
+          <span className="yol">{c('Medula › Fatura &amp; Dönem')}</span>
           {d && <Rozet d={d.durum} sozluk={MEDULA_DONEM_DURUM} />}
         </div>
         <div className="basarac">
@@ -99,10 +100,10 @@ export function MedulaFaturaDonem() {
       <div className="sahne md-sahne">
         <div className="md-ozet">
           <div><span>{AYLAR[ay - 1]} {yil} · takip</span><b>{o?.takip ?? 0}</b><i>{o?.cikissiz ?? 0} çıkışsız</i></div>
-          <div className="ok"><span>Medula'ya kaydedilen</span><b>{o?.faturali ?? 0}</b><i>{o?.takip ? Math.round(100 * (o.faturali / o.takip)) : 0}%</i></div>
-          <div className={o?.faturaBekleyen ? 'kir' : ''}><span>Fatura bekleyen</span><b>{o?.faturaBekleyen ?? 0}</b><i>hizmet eksik {o?.hizmetEksik ?? 0} · hata {o?.hatali ?? 0}</i></div>
-          <div><span>Dönem tutarı (Medula)</span><b>{para.format(o?.medulaTutar ?? 0)}</b></div>
-          <div className={o?.farkli ? 'kir' : ''}><span>Yerel tutar</span><b>{para.format(o?.yerelTutar ?? 0)}</b><i>fark {o?.farkli ?? 0} takip · eşik {v?.esik ?? 0}</i></div>
+          <div className="ok"><span>{c('Medula\'ya kaydedilen')}</span><b>{o?.faturali ?? 0}</b><i>{o?.takip ? Math.round(100 * (o.faturali / o.takip)) : 0}%</i></div>
+          <div className={o?.faturaBekleyen ? 'kir' : ''}><span>{c('Fatura bekleyen')}</span><b>{o?.faturaBekleyen ?? 0}</b><i>hizmet eksik {o?.hizmetEksik ?? 0} · hata {o?.hatali ?? 0}</i></div>
+          <div><span>{c('Dönem tutarı (Medula)')}</span><b>{para.format(o?.medulaTutar ?? 0)}</b></div>
+          <div className={o?.farkli ? 'kir' : ''}><span>{c('Yerel tutar')}</span><b>{para.format(o?.yerelTutar ?? 0)}</b><i>fark {o?.farkli ?? 0} takip · eşik {v?.esik ?? 0}</i></div>
           <div><span>Dönem</span><b><Rozet d={d?.durum ?? 1} sozluk={MEDULA_DONEM_DURUM} /></b><i>uyarı: ayın {v?.uyariGun}'i</i></div>
         </div>
         {sonuc && <Sonuc tur={sonuc.tur}>{sonuc.metin}</Sonuc>}
@@ -119,7 +120,7 @@ export function MedulaFaturaDonem() {
                 .map(([k, ad]) => <span key={k} className={`cip${suzgec === k ? ' on' : ''}`} onClick={() => setSuzgec(k)}>{ad}</span>)}
             </div>
             <div className="md-dg"><table>
-              <thead><tr><th>Takip no</th><th>Hasta</th><th>Başvuru</th><th>Tarih</th><th>Hekim</th><th className="orta">Çıkış</th><th className="orta">İşlem</th><th className="sag">Yerel</th><th className="sag">Medula</th><th className="sag">Katılım</th><th>Fatura no</th><th className="orta">Durum</th><th /></tr></thead>
+              <thead><tr><th>{c('Takip no')}</th><th>Hasta</th><th>Başvuru</th><th>Tarih</th><th>Hekim</th><th className="orta">Çıkış</th><th className="orta">İşlem</th><th className="sag">{c('Yerel')}</th><th className="sag">{c('Medula')}</th><th className="sag">{c('Katılım')}</th><th>{c('Fatura no')}</th><th className="orta">Durum</th><th /></tr></thead>
               <tbody>
                 {takipler.map(t => {
                   const fark = t.medulaTutar != null ? t.yerelTutar - t.medulaTutar : 0;
@@ -130,7 +131,7 @@ export function MedulaFaturaDonem() {
                       <td className="sag">{para.format(t.yerelTutar)}</td><td className="sag">{t.medulaTutar != null ? para.format(t.medulaTutar) : '—'}</td>
                       <td className="sag">{t.katilim != null ? para.format(t.katilim) : '—'}</td><td>{t.faturaNo || '—'}</td>
                       <td className="orta">{t.faturaId ? <>{fark !== 0 && (t.faturaDurum ?? 0) >= 2 ? <span className="rozet uyari">Fark {para.format(fark)}</span> : <Rozet d={t.faturaDurum} sozluk={MEDULA_FATURA_DURUM} />}</>
-                        : !t.cikis ? <span className="rozet gri">Çıkış yok</span> : t.kabulIslem === 0 ? <span className="rozet hata">Hizmet kaydı yok</span> : <span className="rozet uyari">Fatura bekliyor</span>}</td>
+                        : !t.cikis ? <span className="rozet gri">{c('Çıkış yok')}</span> : t.kabulIslem === 0 ? <span className="rozet hata">{c('Hizmet kaydı yok')}</span> : <span className="rozet uyari">{c('Fatura bekliyor')}</span>}</td>
                       <td className="md-satir-arac">
                         {!t.faturaId && t.cikis && t.kabulIslem > 0 && <button className="d" onClick={() => void faturaKaydet(t.belgeId)}>🧾 Kaydet</button>}
                         {t.kabulIslem === 0 && <button className="d" onClick={() => git(`/medula-hizmet/${t.belgeId}`)}>🧾 Hizmet</button>}
@@ -140,7 +141,7 @@ export function MedulaFaturaDonem() {
                     </tr>
                   );
                 })}
-                {takipler.length === 0 && <tr><td colSpan={13} className="sonuk">Bu dönemde takip yok.</td></tr>}
+                {takipler.length === 0 && <tr><td colSpan={13} className="sonuk">{c('Bu dönemde takip yok.')}</td></tr>}
                 <tr className="grup"><td colSpan={7}>{AYLAR[ay - 1]} {yil} · {takipler.length} takip</td><td className="sag">{para.format(takipler.reduce((a, t) => a + t.yerelTutar, 0))}</td><td className="sag">{para.format(takipler.reduce((a, t) => a + (t.medulaTutar ?? 0), 0))}</td><td colSpan={4} /></tr>
               </tbody>
             </table></div>
@@ -149,23 +150,23 @@ export function MedulaFaturaDonem() {
 
         {sekme === 'donem' && (
           <div className="md-iki">
-            <div className="md-grp"><div className="md-gb">Dönem sonlandırma (donemSonlandir) <span className="md-sp sonuk">geri alınamaz · yetki medula.donem</span></div>
+            <div className="md-grp"><div className="md-gb">{c('Dönem sonlandırma (donemSonlandir)')}<span className="md-sp sonuk">geri alınamaz · yetki medula.donem</span></div>
               <div className="md-hdr k2">
                 <div><label>Dönem</label><div className="md-inp">{yil} / {String(ay).padStart(2, '0')}</div></div>
-                <div><label>Kaydedilen fatura</label><div className="md-inp">{o?.faturali ?? 0} · {para.format(o?.medulaTutar ?? 0)}</div></div>
-                <div><label>Faturasız takip</label><div className={`md-inp${o?.faturaBekleyen ? ' err' : ''}`}>{o?.faturaBekleyen ?? 0} · sonlandırınca dönem dışı kalır</div></div>
+                <div><label>{c('Kaydedilen fatura')}</label><div className="md-inp">{o?.faturali ?? 0} · {para.format(o?.medulaTutar ?? 0)}</div></div>
+                <div><label>{c('Faturasız takip')}</label><div className={`md-inp${o?.faturaBekleyen ? ' err' : ''}`}>{o?.faturaBekleyen ?? 0} · sonlandırınca dönem dışı kalır</div></div>
                 <div><label>Durum</label><div className="md-inp"><Rozet d={d?.durum ?? 1} sozluk={MEDULA_DONEM_DURUM} />{d?.icmalNo ? ` · icmal ${d.icmalNo}` : ''}</div></div>
               </div>
               <ul className="md-liste">
                 {engeller.map(e => <li key={e}><span className="rozet hata">✖</span> {e}</li>)}
-                {engeller.length === 0 && <li><span className="rozet ok">✔</span> Engel yok</li>}
-                {v?.donemler.find(x => x.yil === (ay === 1 ? yil - 1 : yil) && x.ay === (ay === 1 ? 12 : ay - 1)) ? <li><span className="rozet ok">✔</span> Önceki dönem kaydı var</li> : <li><span className="rozet gri">—</span> Önceki dönem kaydı yok</li>}
+                {engeller.length === 0 && <li><span className="rozet ok">✔</span>{c('Engel yok')}</li>}
+                {v?.donemler.find(x => x.yil === (ay === 1 ? yil - 1 : yil) && x.ay === (ay === 1 ? 12 : ay - 1)) ? <li><span className="rozet ok">✔</span>{c('Önceki dönem kaydı var')}</li> : <li><span className="rozet gri">—</span>{c('Önceki dönem kaydı yok')}</li>}
               </ul>
               <div className="md-arac"><button className="d onay" onClick={() => void sonlandir()} disabled={!sonlandirilabilir}>🔒 Dönemi Sonlandır</button><span className="sonuk">engeller kalkınca aktif</span></div>
             </div>
-            <div className="md-grp"><div className="md-gb">Dönemler</div>
+            <div className="md-grp"><div className="md-gb">{c('Dönemler')}</div>
               <div className="md-dg"><table>
-                <thead><tr><th>Dönem</th><th className="orta">Fatura</th><th className="sag">Tutar</th><th className="sag">Kesinti</th><th>Sonlandırma</th><th>İcmal</th><th className="orta">Durum</th></tr></thead>
+                <thead><tr><th>Dönem</th><th className="orta">Fatura</th><th className="sag">Tutar</th><th className="sag">Kesinti</th><th>{c('Sonlandırma')}</th><th>{c('İcmal')}</th><th className="orta">Durum</th></tr></thead>
                 <tbody>
                   {(v?.donemler ?? []).map(x => (
                     <tr key={x.id} className={x.yil === yil && x.ay === ay ? 'sel' : ''} onClick={() => { setYil(x.yil); setAy(x.ay); }}>
@@ -173,7 +174,7 @@ export function MedulaFaturaDonem() {
                       <td>{x.sonlandirma ? tarihSaat(x.sonlandirma) : '—'}</td><td>{x.icmalNo || '—'}</td><td className="orta"><Rozet d={x.durum} sozluk={MEDULA_DONEM_DURUM} /></td>
                     </tr>
                   ))}
-                  {(v?.donemler ?? []).length === 0 && <tr><td colSpan={7} className="sonuk">Dönem kaydı yok - ilk fatura kaydıyla açılır.</td></tr>}
+                  {(v?.donemler ?? []).length === 0 && <tr><td colSpan={7} className="sonuk">{c('Dönem kaydı yok - ilk fatura kaydıyla açılır.')}</td></tr>}
                 </tbody>
               </table></div>
               <div className="md-ic sonuk">Sonlandırma → icmal → satış tahakkuku (SGK carisi) → e-Fatura → ödeme takibi. Dönem kapanınca fatura satırı değişmez; düzeltme ek dönem ya da itirazla.</div>
@@ -182,9 +183,9 @@ export function MedulaFaturaDonem() {
         )}
 
         {sekme === 'kesinti' && (
-          <div className="md-grp"><div className="md-gb">Kesinti / itiraz</div>
+          <div className="md-grp"><div className="md-gb">{c('Kesinti / itiraz')}</div>
             <div className="md-dg"><table>
-              <thead><tr><th>Fatura no</th><th>Hasta</th><th>Takip</th><th>Dönem</th><th>SUT</th><th>Kod</th><th>Açıklama</th><th className="sag">Kesinti</th><th className="orta">İtiraz</th><th className="sag">İade</th><th /></tr></thead>
+              <thead><tr><th>{c('Fatura no')}</th><th>Hasta</th><th>Takip</th><th>Dönem</th><th>{c('SUT')}</th><th>Kod</th><th>Açıklama</th><th className="sag">Kesinti</th><th className="orta">{c('İtiraz')}</th><th className="sag">{c('İade')}</th><th /></tr></thead>
               <tbody>
                 {(v?.kesintiler ?? []).map(k => (
                   <tr key={k.id}>
@@ -193,8 +194,8 @@ export function MedulaFaturaDonem() {
                     <td className="orta"><Rozet d={k.itirazDurum} sozluk={{ 0: ['Edilmedi', 'gri'], 1: ['Bekliyor', 'mavi'], 2: ['Kabul · iade', 'ok'], 3: ['Red', 'hata'] }} /></td>
                     <td className="sag">{para.format(k.iadeTutar)}</td>
                     <td className="md-satir-arac">
-                      {k.itirazDurum === 0 && <button className="d" onClick={() => void itiraz(k.id)}>📝 İtiraz</button>}
-                      {k.itirazDurum === 1 && <><button className="d" onClick={() => void itirazSonuc(k.id, true)}>✔ Kabul</button><button className="d" onClick={() => void itirazSonuc(k.id, false)}>✖ Red</button></>}
+                      {k.itirazDurum === 0 && <button className="d" onClick={() => void itiraz(k.id)}>{c('📝 İtiraz')}</button>}
+                      {k.itirazDurum === 1 && <><button className="d" onClick={() => void itirazSonuc(k.id, true)}>{c('✔ Kabul')}</button><button className="d" onClick={() => void itirazSonuc(k.id, false)}>{c('✖ Red')}</button></>}
                     </td>
                   </tr>
                 ))}
@@ -205,9 +206,9 @@ export function MedulaFaturaDonem() {
         )}
 
         {sekme === 'odeme' && (
-          <div className="md-grp"><div className="md-gb">Ödeme takibi</div>
+          <div className="md-grp"><div className="md-gb">{c('Ödeme takibi')}</div>
             <div className="md-dg"><table>
-              <thead><tr><th>Dönem</th><th className="sag">Fatura tutarı</th><th className="sag">Kesinti</th><th className="sag">Net</th><th className="sag">Ödenen</th><th>Ödeme tarihi</th><th className="sag">Kalan</th><th className="orta">Durum</th></tr></thead>
+              <thead><tr><th>Dönem</th><th className="sag">{c('Fatura tutarı')}</th><th className="sag">Kesinti</th><th className="sag">Net</th><th className="sag">Ödenen</th><th>{c('Ödeme tarihi')}</th><th className="sag">Kalan</th><th className="orta">Durum</th></tr></thead>
               <tbody>
                 {(v?.donemler ?? []).map(x => (
                   <tr key={x.id}><td>{x.yil}/{String(x.ay).padStart(2, '0')}</td><td className="sag">{para.format(x.toplam)}</td><td className="sag">{para.format(x.kesinti)}</td><td className="sag">{para.format(x.toplam - x.kesinti)}</td>

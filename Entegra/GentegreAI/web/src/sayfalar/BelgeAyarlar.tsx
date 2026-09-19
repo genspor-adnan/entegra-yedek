@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AyarSekmeSeridi } from '../bilesenler/AyarSekmeSeridi';
 import { AyarAlani, useAyarlar } from '../bilesenler/AyarAlani';
 import { EBelgeAyarlari } from './eBelgeAyarlari';
+import { c } from '../dil/ceviri';
 
 /**
  * SATIS / ALIS BELGE AYARLARI (Yönetim › Ayarlar › Satış|Alış Belgeleri).
@@ -48,7 +49,7 @@ export function BelgeAyarlar({ yon }: { yon: 'satis' | 'alis' }) {
 
         {yukleniyor ? <div className="yukleniyor">Yükleniyor…</div> : aktif === 'genel' ? (
           <div className="kagrup">
-            <h6>Belge Girişi</h6>
+            <h6>{c('Belge Girişi')}</h6>
             <div className="alan-izgara tek-sutun ayar-formu">
               {alan(`belge.${yon}.vade_gun`, 'Varsayılan vade (gün)', { tip: 'sayi' })}
               {alan(`belge.${yon}.varsayilan_seri`, 'Varsayılan seri', { tip: 'metin' })}

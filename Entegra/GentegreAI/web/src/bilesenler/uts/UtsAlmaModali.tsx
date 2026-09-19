@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Modal } from '../Modal';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
+import { c } from '../../dil/ceviri';
 
 /**
  * ÜTS ALMA BİLDİRİMİ (223) - askıdaki envanter satırından: VBI hazırdır,
@@ -47,7 +48,7 @@ export function UtsAlmaModali({ envanterId, urunNo, kurumUnvan, askiAdet, seriNo
           {gonderiyor ? 'Gönderiliyor…' : '📥 ÜTS’ye Bildir'}
         </button>
         <button className="d kapat-dugmesi" style={{ marginLeft: 'auto' }}
-                onClick={onKapat}>Kapat</button>
+                onClick={onKapat}>{c('Kapat')}</button>
       </>}>
       <div className="alan-izgara tek-sutun" style={{ padding: 10 }}>
         <div>
@@ -56,7 +57,7 @@ export function UtsAlmaModali({ envanterId, urunNo, kurumUnvan, askiAdet, seriNo
         </div>
         {!tekil && (
           <label className="alan">
-            <span className="etiket">Alınacak Adet</span>
+            <span className="etiket">{c('Alınacak Adet')}</span>
             <input className="hiza-sag" value={adet} disabled={gonderiyor}
                    onChange={e => setAdet(e.target.value)} />
           </label>

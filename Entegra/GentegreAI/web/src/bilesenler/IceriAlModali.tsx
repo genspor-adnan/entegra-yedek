@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Modal } from './Modal';
 import { ApiHatasi, hataMetni } from '../api/sozlesme';
 import { dosyaIndirUrl } from './indir';
+import { c } from '../dil/ceviri';
 
 /**
  * EXCEL'DEN ICERI ALMA MODALI - jenerik govde (207).
@@ -68,7 +69,7 @@ export function IceriAlModali({ baslik, sablonIndir, yukle, onKapat, onAlindi }:
   return (
     <Modal baslik={`Excel'den İçeri Al — ${baslik}`} onKapat={onKapat}
       alt={<>
-        <button className="d kapat-dugmesi" onClick={onKapat}>Kapat</button>
+        <button className="d kapat-dugmesi" onClick={onKapat}>{c('Kapat')}</button>
         <button className="d bir" disabled={!dosya || calisiyor}
                 onClick={() => { void gonder() }}>
           {calisiyor ? 'Alınıyor…' : 'İçeri Al'}
@@ -76,11 +77,10 @@ export function IceriAlModali({ baslik, sablonIndir, yukle, onKapat, onAlindi }:
       </>}
     >
       <div className="kagrup">
-        <div className="not" style={{ marginBottom: 10 }}>
-          Sütunlar: <b>Stok Kodu</b> ya da <b>Hizmet Kodu</b> (tam biri; tek <b>Kod</b> sütunu
+        <div className="not" style={{ marginBottom: 10 }}>{c('Sütunlar:')}<b>Stok Kodu</b> ya da <b>{c('Hizmet Kodu')}</b> (tam biri; tek <b>Kod</b> sütunu
           da kabul edilir) · <b>Fiyat</b> · Döviz · KDV (Dahil/Hariç) · Birim · Durum.
           Eşleşen kalem <b>güncellenir</b>, yeni kalem eklenir; içeri alınan satırlar
-          <b> İmport</b> işaretlenir ve "Listeyi Üret" onları ezmez.
+          <b>{c('İmport')}</b> işaretlenir ve "Listeyi Üret" onları ezmez.
         </div>
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
@@ -95,7 +95,7 @@ export function IceriAlModali({ baslik, sablonIndir, yukle, onKapat, onAlindi }:
                  e.target.value = '';
                }} />
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button className="d" onClick={() => girdi.current?.click()}>Dosya Seç…</button>
+          <button className="d" onClick={() => girdi.current?.click()}>{c('Dosya Seç…')}</button>
           <span className={dosya ? '' : 'not'}>{dosya ? dosya.name : 'dosya seçilmedi'}</span>
         </div>
 
@@ -105,7 +105,7 @@ export function IceriAlModali({ baslik, sablonIndir, yukle, onKapat, onAlindi }:
         {satirHatalari.length > 0 && (
           <div style={{ marginTop: 8, maxHeight: 260, overflow: 'auto' }}>
             <table className="kasat-tablo" style={{ width: '100%', fontSize: 12 }}>
-              <thead><tr><th>Satır</th><th>Alan</th><th>Sorun</th></tr></thead>
+              <thead><tr><th>Satır</th><th>Alan</th><th>{c('Sorun')}</th></tr></thead>
               <tbody>
                 {satirHatalari.map((s, i) => (
                   <tr key={i}>

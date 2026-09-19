@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { paraYaz } from '../bilesenler/bicim';
+import { c } from '../dil/ceviri';
 
 /** Para bicimi + simge: `para` bir Intl bicimlendiricisidir. */
 const tl = (v: unknown) => `${paraYaz(Number(v ?? 0))}`;
@@ -99,7 +100,7 @@ export function Hakedisim() {
       <div className="sayfabas">
         <div className="basrow">
           <h1>Hakedişlerim</h1>
-          <span className="yol">Muayene › Hakedişlerim</span>
+          <span className="yol">{c('Muayene › Hakedişlerim')}</span>
         </div>
         <div className="basarac">
           <input type="month" value={ay} onChange={e => setAy(e.target.value)} />
@@ -127,17 +128,17 @@ export function Hakedisim() {
           <div className={`pano-kutu${(o?.bekleyen ?? 0) > 0 ? ' uy' : ''}`}>
             <span className="ik">⏳</span>
             <span className="s">{tl(o?.bekleyen ?? 0)}</span>
-            <span className="e">Tahsilat bekleyen</span>
+            <span className="e">{c('Tahsilat bekleyen')}</span>
           </div>
           <div className="pano-kutu">
             <span className="ik">📊</span>
             <span className="s">{tl(ortalama)}</span>
-            <span className="e">Ortalama işlem primi</span>
+            <span className="e">{c('Ortalama işlem primi')}</span>
           </div>
           <div className="pano-kutu">
             <span className="ik">🧾</span>
             <span className="s">{tl(o?.taban ?? 0)}</span>
-            <span className="e">Üretilen ciro (taban)</span>
+            <span className="e">{c('Üretilen ciro (taban)')}</span>
           </div>
         </div>
 
@@ -163,7 +164,7 @@ export function Hakedisim() {
                 <thead><tr>
                   <th>Tarih</th><th>Hasta</th><th>Belge</th><th>İşlem</th>
                   <th className="orta">Kaynak</th><th className="orta">Pay</th>
-                  <th className="sag">Taban</th><th className="orta">Oran</th>
+                  <th className="sag">{c('Taban')}</th><th className="orta">{c('Oran')}</th>
                   <th className="sag">Hakediş</th><th className="orta">Durum</th>
                 </tr></thead>
                 <tbody>
@@ -183,7 +184,7 @@ export function Hakedisim() {
           <div style={{ minWidth: 280, maxWidth: 320 }}>
             {/* KIRILIM: hangi iş ne kadar getirdi. */}
             <div className="kagrup">
-              <h6>Dönem özeti</h6>
+              <h6>{c('Dönem özeti')}</h6>
               <table className="detay-tablo">
                 <tbody>
                   {(veri?.kirilim ?? []).map(k => (
@@ -204,7 +205,7 @@ export function Hakedisim() {
 
             {/* ÖDEME GEÇMİŞİ: kapanmış dönemler - "geçen ay ne aldım". */}
             <div className="kagrup">
-              <h6>Ödeme geçmişi</h6>
+              <h6>{c('Ödeme geçmişi')}</h6>
               <table className="detay-tablo">
                 <thead><tr>
                   <th>Dönem</th><th className="sag">Tutar</th><th className="orta">Durum</th>
@@ -223,7 +224,7 @@ export function Hakedisim() {
                     </tr>
                   ))}
                   {(veri?.gecmis ?? []).length === 0 && !yukleniyor && (
-                    <tr><td colSpan={3} className="bos">Kapanmış dönem yok.</td></tr>
+                    <tr><td colSpan={3} className="bos">{c('Kapanmış dönem yok.')}</td></tr>
                   )}
                 </tbody>
               </table>

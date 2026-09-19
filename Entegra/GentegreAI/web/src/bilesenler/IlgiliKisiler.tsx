@@ -4,6 +4,7 @@ import { telefonBicimle } from './bicim';
 import type { KisiKaydi } from '../api/sozlesme';
 import { TarafArama } from './TarafArama';
 import { GenForm } from './GenForm';
+import { c } from '../dil/ceviri';
 
 /**
  * Cari kartı Genel sekmesi > İlgili Kişiler (mockup: cari_karti.html). Sade salt-okunur
@@ -143,7 +144,7 @@ export function IlgiliKisiler({ tarafId, saltOkunur }: { tarafId: number; saltOk
                   onChange={e => void durumDegis(k, e.target.value === 'aktif')}
                 >
                   <option value="aktif">Aktif</option>
-                  <option value="ayrildi">Ayrıldı</option>
+                  <option value="ayrildi">{c('Ayrıldı')}</option>
                 </select>
               </td>
             </tr>

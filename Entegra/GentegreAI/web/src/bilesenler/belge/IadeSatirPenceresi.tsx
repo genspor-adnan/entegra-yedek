@@ -4,6 +4,7 @@ import { hamSayi as sayi } from '../bicim';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { para } from '../bicim';
+import { c } from '../../dil/ceviri';
 
 /** Iade edilebilir bir gecmis fatura satiri (v_iade_edilebilir_satir). */
 export interface IadeSatiri {
@@ -121,7 +122,7 @@ export function IadeSatirPenceresi({ tarafId, tarafUnvan, belgeId, turler, onSec
           </button>
           <span className="ayrac" />
           <span className="kapt">Toplam: {para.format(toplam)}</span>
-          <button className="d kapat-dugmesi" onClick={onKapat}>✖ Kapat</button>
+          <button className="d kapat-dugmesi" onClick={onKapat}>{c('✖ Kapat')}</button>
         </>
       }
     >
@@ -133,7 +134,7 @@ export function IadeSatirPenceresi({ tarafId, tarafUnvan, belgeId, turler, onSec
               <span>🔍</span>
               <input
                 autoFocus
-                placeholder="Stok / belge no ara…"
+                placeholder={c('Stok / belge no ara…')}
                 value={arama}
                 onChange={e => yaz(e.target.value)}
               />
@@ -150,12 +151,12 @@ export function IadeSatirPenceresi({ tarafId, tarafUnvan, belgeId, turler, onSec
                 <th style={{ width: 150 }}>Belge</th>
                 <th style={{ width: 90 }}>Tarih</th>
                 <th style={{ width: 110 }}>Kod</th>
-                <th>Stok / Hizmet</th>
+                <th>{c('Stok / Hizmet')}</th>
                 <th className="hiza-sag" style={{ width: 70 }}>Miktar</th>
-                <th className="hiza-sag" style={{ width: 70 }}>İade</th>
+                <th className="hiza-sag" style={{ width: 70 }}>{c('İade')}</th>
                 <th className="hiza-sag" style={{ width: 70 }}>Kalan</th>
-                <th className="hiza-sag" style={{ width: 90 }}>Br. Fiyat</th>
-                <th className="hiza-sag" style={{ width: 90 }}>İade Miktarı</th>
+                <th className="hiza-sag" style={{ width: 90 }}>{c('Br. Fiyat')}</th>
+                <th className="hiza-sag" style={{ width: 90 }}>{c('İade Miktarı')}</th>
               </tr>
             </thead>
             <tbody>

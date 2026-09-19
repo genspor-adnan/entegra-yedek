@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { formAcik, type AcikOturum, type AcikOzet, type FormCevap, type FormImza } from '../../api/uclar/form';
 import { FormCizici, skorHesapla, zorunluEksikler } from '../../bilesenler/form/FormCizici';
 import { ImzaKanvas } from '../../bilesenler/form/ImzaKanvas';
+import { c as cev } from '../../dil/ceviri';
 
 /**
  * AÇIK FORM SAYFASI `/f/{kod}` (form motoru 740) — hastanın / çalışanın
@@ -82,9 +83,9 @@ export function FormAcik() {
 
   const kurum = ot?.kurum ?? ozet?.kurum ?? '';
 
-  if (hata && !ot) return <Kabuk kurum={kurum}><div className="fm-kutu"><b>Bağlantı açılamadı</b><p>{hata}</p></div></Kabuk>;
+  if (hata && !ot) return <Kabuk kurum={kurum}><div className="fm-kutu"><b>{cev('Bağlantı açılamadı')}</b><p>{hata}</p></div></Kabuk>;
   if (!ozet) return <Kabuk kurum={kurum}><div className="fm-kutu sonuk">Yükleniyor…</div></Kabuk>;
-  if (!ozet.gecerli) return <Kabuk kurum={kurum}><div className="fm-kutu"><b>Bu bağlantı kullanılamıyor</b><p>{ozet.neden}</p></div></Kabuk>;
+  if (!ozet.gecerli) return <Kabuk kurum={kurum}><div className="fm-kutu"><b>{cev('Bu bağlantı kullanılamıyor')}</b><p>{ozet.neden}</p></div></Kabuk>;
 
   if (bitti) return (
     <Kabuk kurum={kurum} alt="Bu bağlantı artık kullanılamaz.">
@@ -100,21 +101,21 @@ export function FormAcik() {
     <Kabuk kurum={kurum}>
       <div className="fm-kutu">
         <b>{ozet.form}</b>
-        <p>Sayın <strong>{ozet.hasta}</strong>, {ozet.kurum} sizden bu formu doldurmanızı istiyor. Birkaç dakika sürer; kaldığınız yerden devam edebilirsiniz.</p>
+        <p>{cev('Sayın')}<strong>{ozet.hasta}</strong>, {ozet.kurum} sizden bu formu doldurmanızı istiyor. Birkaç dakika sürer; kaldığınız yerden devam edebilirsiniz.</p>
       </div>
       <div className="fm-kutu">
-        <b>Kimlik doğrulama</b>
+        <b>{cev('Kimlik doğrulama')}</b>
         <div className="sonuk" style={{ fontSize: 12 }}>Bilgilerin size ait olduğundan emin olmak için:</div>
-        <label className="fm-etiket">TC kimlik numaranızın son 4 hanesi</label>
+        <label className="fm-etiket">{cev('TC kimlik numaranızın son 4 hanesi')}</label>
         <input className="fm-giris fm-buyuk-giris" inputMode="numeric" maxLength={4} value={son4} onChange={e => setSon4(e.target.value.replace(/\D/g, ''))} />
-        <label className="fm-etiket">Doğum yılınız</label>
+        <label className="fm-etiket">{cev('Doğum yılınız')}</label>
         <input className="fm-giris fm-buyuk-giris" inputMode="numeric" maxLength={4} value={yil} onChange={e => setYil(e.target.value.replace(/\D/g, ''))} />
         <label className={`fm-onay${riza ? ' on' : ''}`}>
           <input type="checkbox" checked={riza} onChange={e => setRiza(e.target.checked)} />
           <span>Sağlık verilerimin {ozet.kurum} tarafından sağlık hizmeti / sağlık gözetimi amacıyla işlenmesine açık rıza veriyorum.</span>
         </label>
         {hata && <div className="hata-kutusu">{hata}</div>}
-        <button type="button" className="fm-dbtn" disabled={son4.length !== 4 || !riza} onClick={() => void dogrula()}>Devam et →</button>
+        <button type="button" className="fm-dbtn" disabled={son4.length !== 4 || !riza} onClick={() => void dogrula()}>{cev('Devam et →')}</button>
         <div className="sonuk" style={{ textAlign: 'center', fontSize: 11, marginTop: 6 }}>Kalan deneme: {ozet.kalanDeneme}</div>
       </div>
     </Kabuk>
@@ -136,7 +137,7 @@ export function FormAcik() {
           {mesajM && <div className="hata-kutusu">{mesajM}</div>}
           <div className="fm-dbtn-sira">
             {adim > 0 && <button type="button" className="fm-dbtn gri" onClick={() => { setAdim(a => a - 1); window.scrollTo(0, 0) }}>← Geri</button>}
-            <button type="button" className="fm-dbtn" onClick={ileri}>Devam et →</button>
+            <button type="button" className="fm-dbtn" onClick={ileri}>{cev('Devam et →')}</button>
           </div>
           <div className="sonuk" style={{ textAlign: 'center', fontSize: 11, marginTop: 6 }}>Taslak otomatik kaydedilir · {b.ad} ({adim + 1}/{bolumler.length + 1})</div>
         </>
@@ -164,9 +165,9 @@ export function FormAcik() {
           {mesajM && <div className="hata-kutusu">{mesajM}</div>}
           <div className="fm-dbtn-sira">
             <button type="button" className="fm-dbtn gri" onClick={() => setAdim(a => a - 1)}>← Geri</button>
-            <button type="button" className="fm-dbtn" disabled={kaydediliyor} onClick={() => void gonder()}>Gönder ✓</button>
+            <button type="button" className="fm-dbtn" disabled={kaydediliyor} onClick={() => void gonder()}>{cev('Gönder ✓')}</button>
           </div>
-          <div style={{ textAlign: 'center', marginTop: 10 }}><button type="button" className="fm-baglanti" onClick={() => void reddet()}>Formu doldurmak istemiyorum</button></div>
+          <div style={{ textAlign: 'center', marginTop: 10 }}><button type="button" className="fm-baglanti" onClick={() => void reddet()}>{cev('Formu doldurmak istemiyorum')}</button></div>
         </>
       )}
     </Kabuk>

@@ -3,6 +3,7 @@ import { api } from '../api/istemci';
 import type { KullaniciSubeSatiri } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { ekKaydetKaydol } from './kartEkKaydet';
+import { c } from '../dil/ceviri';
 
 /**
  * Personel kartında "Yetkili Şubeler" (kullanıcı: "fotoğrafın altına yetkili
@@ -61,7 +62,7 @@ export function KartKullaniciSubeleri({ kartId, saltOkunur, zorunluSubeId }: {
   return (
     <div className="kagrup" style={{ marginTop: 12 }}>
       <div className="numaralama-bas bitisik">
-        <h6>Yetkili Şubeler</h6>
+        <h6>{c('Yetkili Şubeler')}</h6>
         {degisti && (
           <span style={{ fontSize: 11, color: 'var(--soluk)' }}>
             Kaydet ile yazılır
@@ -75,7 +76,7 @@ export function KartKullaniciSubeleri({ kartId, saltOkunur, zorunluSubeId }: {
           <tr>
             <th style={{ width: 34 }}></th>
             <th>Şube</th>
-            <th style={{ textAlign: 'center', width: 60 }} title="Kapalıysa şube salt okunur">Yazma</th>
+            <th style={{ textAlign: 'center', width: 60 }} title={c('Kapalıysa şube salt okunur')}>{c('Yazma')}</th>
           </tr>
         </thead>
         <tbody>

@@ -5,6 +5,7 @@ import { hataMetni } from '../api/sozlesme';
 import type { BelgeYazisi as Yazi } from '../api/uclar/izin';
 import { guvenli, mesaj } from '../bilesenler/mesaj';
 import { AntetLogo } from '../bilesenler/AntetLogo';
+import { c } from '../dil/ceviri';
 
 /**
  * BELGE TALEBİ YAZISI (768) — personelin İK'dan istediği resmî yazının
@@ -85,7 +86,7 @@ export function BelgeYazisi() {
           satırı ancak yazdırıldıktan sonra fark edilirdi. */}
       {y.eksik.length > 0 && (
         <div className="yazi-eksik">
-          <b>Eksik bilgi:</b> {y.eksik.join(', ')}. Bu haliyle “Hazırlandı”
+          <b>{c('Eksik bilgi:')}</b> {y.eksik.join(', ')}. Bu haliyle “Hazırlandı”
           denemez — personel kartındaki boş alanları doldurun; maaş bilgisi
           talebin kendi alanlarındadır (Maaş Tutarı / Maaş Türü).
         </div>
@@ -113,7 +114,7 @@ export function BelgeYazisi() {
           ? <div className="cikti-blok">
               <input className="yazi-baslik-girdi" value={taslak.baslik}
                      onChange={e => setTaslak({ ...taslak, baslik: e.target.value })}
-                     placeholder="Yazı başlığı" />
+                     placeholder={c('Yazı başlığı')} />
               {/* DÜZ METİN: biçim ekranın işi, şablonun değil - gövdede HTML
                   yok (doküman deposu da HTML'i bilerek kabul etmiyor). */}
               <textarea className="yazi-govde-girdi" rows={22} value={taslak.govde}
