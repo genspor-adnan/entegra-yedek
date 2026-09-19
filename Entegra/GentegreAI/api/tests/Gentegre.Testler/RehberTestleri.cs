@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Yetki;
 
@@ -62,7 +62,8 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
 
         var y = await servis.CevaplaAsync(
             new RehberServisi.Istek("Yeni hasta kaydı nasıl açılır?", null, "/panel", null),
-            Baglam("personel", "belge"), CancellationToken.None);
+            // 871: /hasta ekranının yetkisi istemciyle aynı ('hasta'); konu yetkisi 'personel'.
+            Baglam("personel", "hasta", "belge"), CancellationToken.None);
 
         Assert.Equal("hasta-kayit", y.KonuKod);
         Assert.Equal(1, y.KaynakTuru);
@@ -236,13 +237,21 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
             return;
         var servis = new RehberServisi(_olgu.Gerekli());
 
-        // Kullanıcı o ekranı göremiyorsa ekran yardımı verilmez; soru genel
-        //   rehber yoluna düşer (uydurma "bu ekranda şunlar var" olmaz).
+        // Kullanıcı o ekranı göremiyorsa ekranın içeriği ANLATILMAZ (871):
+        //   "yetki gerekiyor" denir - "bulunamadı"dan ayrı bir cevaptır ve
+        //   uydurma "bu ekranda şunlar var" olmaz. Düğme, adım, aksiyon yok.
         var y = await servis.CevaplaAsync(
             new RehberServisi.Istek("bu ekranda ne yapabilirim", null, "/lab-sonuc", null),
             Baglam("stok"), CancellationToken.None);
 
-        Assert.NotEqual(3, y.KaynakTuru);
+        Assert.Equal("ekran:yetkisiz", y.KonuKod);
+        Assert.Contains("yetki", y.Cevap, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(y.Adimlar);
+        Assert.Empty(y.OnerilenAksiyonlar);
+        Assert.Empty(y.OnerilenEkranlar);
+        Assert.NotNull(y.Ekran);
+        Assert.True(y.Ekran!.Bulundu);
+        Assert.False(y.Ekran.Yetkili);
     }
 
     [Fact]

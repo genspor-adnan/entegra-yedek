@@ -10,6 +10,23 @@ using Gentegre.Veri.Depolar;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
+// KOMUT SATIRI: `--yardim-dizin` yardım belgelerini okur, dizin durumunu yazar ve çıkar
+//   (871). Yayın öncesi belge doğrulaması: ön-maddesi bozuk / id'si çakışan belge
+//   burada görünür; sunucu ayağa kalkmaz.
+if (args.Contains("--yardim-dizin"))
+{
+    var kok = Directory.GetCurrentDirectory();
+    using var fabrika = LoggerFactory.Create(b => b.AddSimpleConsole());
+    var dizin = new Gentegre.Api.Servisler.Yardim.YardimDizini(
+        Gentegre.Api.Servisler.Yardim.YardimDizini.KlasorBul(null, kok),
+        fabrika.CreateLogger<Gentegre.Api.Servisler.Yardim.YardimDizini>());
+    var d = dizin.DurumAl();
+    Console.WriteLine($"Yardım dizini {d.Surum}: {d.BelgeSayisi} belge, {d.ParcaSayisi} parça ({d.Klasor})");
+    foreach (var b in d.Belgeler) Console.WriteLine("  " + b);
+    foreach (var h in d.Hatalar) Console.WriteLine("  HATA: " + h);
+    Environment.Exit(d.Hatalar.Count == 0 ? 0 : 2);
+}
+
 var kurucu = WebApplication.CreateBuilder(args);
 
 // Turkce siralama/bicimlendirme - InvariantGlobalization kapali (Directory.Build.props).
@@ -114,6 +131,12 @@ kurucu.Services.AddSingleton<Gentegre.Api.Servisler.IModelSaglayici,
                              Gentegre.Api.Servisler.AnthropicSaglayici>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.RehberModeli>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.RehberServisi>();
+// YARDIM DİZİNİ (871): dokuman/yardim/*.md belgeleri bellekte dizinlenir (tek örnek);
+//   Ai:YardimKlasoru ile klasör verilebilir. Belge yoksa asistan katalogla çalışır.
+kurucu.Services.AddSingleton(s => new Gentegre.Api.Servisler.Yardim.YardimDizini(
+    Gentegre.Api.Servisler.Yardim.YardimDizini.KlasorBul(
+        kurucu.Configuration["Ai:YardimKlasoru"], kurucu.Environment.ContentRootPath),
+    s.GetRequiredService<ILogger<Gentegre.Api.Servisler.Yardim.YardimDizini>>()));
 // AI KONTROLLU ONERI (449): kayittaki eksikleri isaret eder, yazmaz.
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.OneriServisi>();
 kurucu.Services.AddHostedService<Gentegre.Api.Servisler.CihazDinleyici>();

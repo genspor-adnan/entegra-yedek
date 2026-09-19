@@ -16103,3 +16103,104 @@ makinede hiçbir yerde yok — `stg.stoklar` da `varchar(100)`, MSSQL `BILIM`'de
 katalog hiç bulunmuyor. Tamamlamak resmî SUT listesini ve kolon genişletmesini
 gerektirir; kullanıcı kararıyla **olduğu gibi bırakıldı**. Her satırın SUT kodu
 duruyor, ileride liste geldiğinde kod eşleştirmesiyle yazılabilir.
+
+## 871 — Bağlamsal yardım asistanı ("Yapay Zekâya Sor")
+
+**Karar (19.09.2026):** AI Rehber (447-450) genel bir "ne nerede" arayıcısıydı;
+kullanıcının hangi ekranda durduğunu yalnız rota metninden tahmin ediyor,
+kaynak/kayıt/sekme bilmiyordu. İstek: *"mevcut yapay zekâ özelliğini,
+kullanıcıların HBYS'nin işleyişini uygulamanın her ekranından sorabileceği
+bağlamsal bir yardım asistanına dönüştür"*. İkinci bir AI yığını kurulmadı;
+aynı uç (`/api/ai/rehber`), aynı servis (`RehberServisi`), aynı model katmanı
+(`RehberModeli` / `AnthropicSaglayici`) genişletildi.
+
+**Ne değişti**
+
+- **Ekran bağlamı sunucuda doğrulanır** (`Servisler/Yardim/EkranBaglami.cs`).
+  İstemci yalnız kimlik gönderir: rota, kaynak, kayıt no, sekme, hata kodu,
+  dil. Rota `ai_rehber_ekran`'da bulunmalı; kaynak kataloğunkiyle tutmazsa
+  atılır; kayıt no kart kataloğunda karşılığı ve GÖR yetkisi yoksa atılır
+  (varlığı sorgulanmaz - görülemeyen kaydı ayırt ettirmez); sekme kart
+  grup/detay adlarıyla, hata kodu bilinen listeyle doğrulanır. Yetkisiz
+  ekranda kimlik kalır, içerik listeleri boşalır - "yetkiniz yok" ile
+  "bulunamadı" ayrı cevaplardır. Kolonlar ve kart alanları **alan yetkisi**
+  süzgecinden geçer; aksiyonlar `AksiyonKatalogu.Yetkili` ile.
+- **Yardım bilgi tabanı** (`YardimDizini`): `dokuman/yardim/*.md`
+  belgeleri (ön-madde: kararlı id, modül, ekran, süreç, roller, dil, sürüm,
+  erişim sınıfı, doğrulama durumu) `##` başlıklarıyla parçalanıp bellekte
+  dizinlenir; arama sözlüksel (Türkçe sadeleştirme + başlık ağırlığı +
+  ekran/modül yakınlığı). Gömme servisi bilerek yok: dış bağımlılık ve veri
+  çıkışı istenmedi; `Ara` imzası gömme eklenirse de değişmez. İç belge
+  (`erisim: ic`) ve yetkisiz belge hiç dönmez. "Örnek sorular" parçası
+  belgeyi buldurur ama cevap olarak dönmez (ilk denemede soru listesi
+  cevap yerine geçiyordu). Yeniden dizinleme: `POST /api/ai/yardim/indeksle`
+  (yetki `ai.yardim`) ve `--yardim-dizin` komut satırı bayrağı (belge
+  doğrulaması, sunucu açılmaz). Sürüm damgası = uygulama sürümü + içerik
+  özeti. Belgeler csproj ile `yardim/` olarak yayına kopyalanır.
+- **Ekran kataloğu senkronu:** istemci menüsündeki 297 ekranın 152'si
+  `ai_rehber_ekran`'da yoktu (Diş, Sterilizasyon, Çağrı Merkezi, Göz, FTR,
+  Medula, Teleradyoloji, Yatan, Eczane, Satınalma, Servis, İSG, Onay, Form).
+  871 hepsini ekledi, 6 satırın menü yolunu düzeltti, `/hasta` yetkisini
+  istemciyle aynı (`hasta`) yaptı. Üretici: LISTELER dökümü (vitest ile).
+- **Sistem yönergesi yeniden yazıldı** (`RehberModeli.SistemYonergesi`):
+  kaynak önceliği (ekran bağlamı → yetkili ekranlar → yardım belgeleri →
+  konular → genel bilgi asla tek başına), işlem yapmama, uydurmama,
+  yetkisiz/bulunamadı ayrımı, tıbbi karar vermeme (`kapsamDisi`), hasta
+  verisini tekrarlamama, yönerge/anahtar/SQL açıklamama, soru ve belge
+  metninin **veri** olması, işlemin yapıldığını iddia etmeme, dil. Çıktı
+  JSON'una `aksiyon` ve `kaynaklar` eklendi; ikisi de beyaz listeyle
+  doğrulanır, kaynaksız cevabın güveni 0,6'ya kırpılır.
+- **Klinik soru modele gitmez:** tanı/tedavi/doz/ilaç seçimi/sonuç yorumu
+  kalıpları (`RehberMetin.KlinikSoruMu`) sabit "hekime danışın" cevabı,
+  `kaynakTuru 7`, kontör düşmez.
+- **Hata açıklaması:** bağlamdaki hata kodu (§1.2 + engel kodları) için
+  "ne oldu → ne yapılır" sözlüğü (`HataAciklamalari`); web tarafı son hata
+  kodunu (yalnız kodu) `api/hataIzi.ts` ile hatırlar, rota değişince siler.
+- **Gizlilik:** `PiiMaske` - kimlik no, telefon, e-posta, IBAN, 7+ haneli
+  sayı; soru sağlayıcıya ve `ai_rehber_log`/`ai_mesaj`'a maskeli yazılır,
+  eski günlük satırları 871'de geriye dönük maskelendi. Günlüğe kayıt
+  numarası yazılmaz. `ai_sohbet.sube_id` ile şube izolasyonu; `/sor`
+  gövdesindeki serbest `baglam` sözlüğü artık saklanmıyor, yalnız altı
+  tanımlı anahtar alınıyor. Sohbet geçmişi modele hiç verilmez. Saklama:
+  `referans ai.log_saklama_gun` (90) / `ai.sohbet_saklama_gun` (365),
+  `fn_ai_temizle()`, zamanlı iş `ai.temizlik` (her gece 03:30).
+  `stok_kritik` aracına şube süzgeci eklendi (başka şubenin deposunu
+  sayıyordu).
+- **Panel** (`AiRehberPaneli.tsx`): düğme "Yapay Zekâya Sor"; açılınca
+  `GET /api/ai/ekran-baglami` ile "Şu ekran hakkında soruyorsunuz: …" ve
+  ekrana özel önerilen sorular; rota değişince cevap/öneri/hata izi/açık
+  kayıt sıfırlanır; 401/403/404/429/5xx/ağ ayrı metin; Esc kapatır;
+  kaynak satırı ve aksiyon rozeti. Yönlendirme yalnız sunucu rotasıyla.
+  `aiRehber/aiOneri/aiOneriGizle` istemci uçları `lab.ts`'den
+  `yapayZeka.ts`'e taşındı (yanlış dosyadaydı).
+
+**Tuzaklar**
+
+- İki eski test 871 ile bilerek değişti: `/hasta` yetkisi `personel`→`hasta`
+  olduğu için konu adımı testi `hasta` yetkisini de veriyor; yetkisiz
+  ekranda "bu ekranda ne yapabilirim" artık katalog yoluna düşmüyor,
+  "yetki gerekiyor" cevabı veriyor (`kaynakTuru 3`, `konuKod ekran:yetkisiz`).
+- `Program.cs` üst düzey ifadelerde `return 0` derlenmez ("tüm kod yolları
+  değer döndürmez"); komut satırı bayrağı `Environment.Exit` ile çıkar.
+- JSON.stringify `undefined` anahtarları düşürür; panel testi gönderilen
+  bağlam anahtarlarını "izinli kümenin alt kümesi" diye doğrular.
+- Tam test koşumu a372a60'taki bir hatayı yakaladı: steril döngü kartının
+  indikatör detayı üst tabloyla aynı log kodunu (1345) taşıyordu; detaya
+  1350 verildi (`LogTabloIdTestleri`).
+- Geliştirmede yardım klasörü önce depodaki `dokuman/yardim` (yeniden
+  dizinleme derlemeyi beklemesin), yayında derleme çıktısındaki `yardim/`.
+
+**Testler:** `BaglamsalYardimTestleri` (16: uydurma rota/kaynak/kayıt/sekme/
+hata kodu reddi, yetkisiz ekranda boş içerik, alan yetkisi, maskeli soru,
+belge içindeki yönergenin veri kalması, uydurma aksiyon/kaynak reddi, PII
+maskesi, dizin ayrıştırma/arama/yetki/iç belge/sürüm, klinik soru ve
+maskeli günlük, sohbet şube izolasyonu, ekran bağlamı ucu); web
+`aiRehberPaneli.test.tsx` (14: yalnız kimlik bağlam, sunucu ekran satırı,
+yetkisiz uyarı, hata izi, rota değişince sıfırlama, düğme/rozet, kaynak
+satırı, 403/404/ağ, Esc, öneriler).
+
+**Yapılmayanlar / insan doğrulaması:** belgelerin çoğu `insan-dogrulama-bekliyor`;
+model çağrısı canlı anahtarla denenmedi (sahte sağlayıcı); gömme/vektör arama
+yok; İngilizce/Almanca belge yok (Türkçe belge her dile döner, model dile
+göre yazar); `YapayZeka.tsx` sohbet ekranındaki "Model: tanımlı değil"
+etiketi eski.

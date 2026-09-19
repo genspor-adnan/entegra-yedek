@@ -8,6 +8,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- YARDIM BELGELERİ (871): dokuman/yardim/*.md çıktıya yardim/ olarak kopyalanır;
+         YardimDizini çalışma anında oradan okur (yayında da gelsin). -->
+    <Content Include="..\..\..\dokuman\yardim\*.md" Link="yardim\%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Gentegre.Cekirdek\Gentegre.Cekirdek.csproj" />
     <ProjectReference Include="..\Gentegre.Veri\Gentegre.Veri.csproj" />
   </ItemGroup>

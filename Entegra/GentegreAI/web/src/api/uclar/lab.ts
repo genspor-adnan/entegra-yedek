@@ -47,29 +47,10 @@ export const labUclari = {
    * AI REHBER (447): "ne nerede, nasil yapilir". Sunucu katalog + yetki ile
    * cevaplar; panel yalniz cizer - istemcide is kurali yok.
    */
-  aiRehber: (govde: { kullaniciMesaji: string; aktifMod?: number;
-                      aktifSayfa?: string; seciliKaynak?: string }) =>
-    gonder<Record<string, unknown>>('/api/ai/rehber', govde),
-
   /** Sonuc onay ekraninin ust serit sayaclari (446, mockup ".ozet"). */
   labOzet: () =>
     istek<{ sayaclar: Record<string, number>;
             cihazlar: Record<string, unknown>[] }>('/api/lab/ozet'),
-
-  /**
-   * AI KONTROLLU ONERI (449): acik kaydin eksikleri. Kurallar sunucuda;
-   * panel yalniz cizer - istemcide is kurali yok.
-   */
-  aiOneri: (kaynak: string, kayitId: number) =>
-    gonder<{ kaynak: string; kayitId: number; engel: number; uyari: number;
-             bilgi: number;
-             oneriler: { kod: string; seviye: number; baslik: string;
-                         aciklama: string; alan: string; ekran: string;
-                         rota?: string }[] }>('/api/ai/oneri', { kaynak, kayitId }),
-
-  /** "Bunu bir daha gosterme": kural silinmez, bu kullanici icin susar. */
-  aiOneriGizle: (kod: string, gizle: boolean) =>
-    gonder<{ mesaj: string }>('/api/ai/oneri/gizle', { kod, gizle }),
 
   /**
    * e-NABIZ PAKET KARTI (454): paketin USS alanlari ve gonderim denemeleri.

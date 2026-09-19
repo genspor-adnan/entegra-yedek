@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (451 ad, 124 tanesi birden cok dosyada)
+## Fonksiyonlar (452 ad, 124 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -12,6 +12,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_acil_protokol_no_uret` | `719_ameliyathane_acil_akis.sql` | — |
 | `fn_acil_triyaj_iz` | `716_acil_servis.sql` | — |
 | `fn_ad_soyad_ayir` | `166_ebelge_json.sql` | — |
+| `fn_ai_temizle` | `871_baglamsal_yardim.sql` | — |
 | `fn_ameliyat_no_uret` | `719_ameliyathane_acil_akis.sql` | — |
 | `fn_ameliyat_not_imza_kilidi` | `719_ameliyathane_acil_akis.sql` | — |
 | `fn_ameliyat_salon_cakisma` | `719_ameliyathane_acil_akis.sql` | — |

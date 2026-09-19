@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using Gentegre.Api.AraKatman;
+using Gentegre.Api.Servisler.Yardim;
 using Gentegre.Cekirdek.Katalog;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
@@ -10,37 +11,57 @@ using Npgsql;
 namespace Gentegre.Api.Servisler;
 
 /// <summary>
-/// AI REHBER (447) — "ne nerede, nasıl yapılır" sorularını cevaplar.
+/// AI REHBER / BAĞLAMSAL YARDIM (447 · 871) — "ne nerede, nasıl yapılır" ve
+/// "bu ekranda ne yapabilirim" sorularını cevaplar.
 ///
 /// <b>Asistan operatör değil REHBERDİR.</b> Bu servis hiçbir iş verisine
-/// yazmaz; yalnız katalog okur ve metin üretir. Kayıt açma, değiştirme,
-/// silme, onaylama yoktur - kullanıcıyı doğru ekrana ve doğru sıraya
-/// yönlendirir.
+/// yazmaz; yalnız katalog ve yardım belgesi okur, metin üretir. Kayıt açma,
+/// değiştirme, silme, onaylama yoktur - kullanıcıyı doğru ekrana ve doğru
+/// sıraya yönlendirir.
 ///
-/// <b>Bağlam serbest metin DB erişimi DEĞİL, güvenli metadata:</b> ekran
-/// kataloğu (`ai_rehber_ekran`), konu kataloğu (`ai_rehber_konu`), aksiyon
-/// kataloğu ve kullanıcının çözülmüş yetkileri. Model bağlanacaksa da aynı
-/// bağlamı görecek - hasta/cari verisi rehber katmanına hiç girmez.
+/// <b>Bağlam serbest metin DB erişimi DEĞİL, sunucunun doğruladığı metadata:</b>
+/// istemcinin gönderdiği ekran ipucu (rota, kaynak, kayıt no, sekme, hata
+/// kodu, dil) <see cref="EkranBaglamiCozucu"/> ile ekran kataloğu, kaynak /
+/// kart / aksiyon katalogları ve kullanıcının çözülmüş yetkileriyle
+/// doğrulanır; uymayan parça atılır. Kayıt İÇERİĞİ hiçbir katmana girmez.
+///
+/// <b>Kaynak önceliği:</b> doğrulanmış ekran bağlamı → yetkili ekran listesi →
+/// yardım belgeleri (<see cref="YardimDizini"/>) → rehber konuları → model.
+/// Model yalnız katalogun cevaplayamadığı yerde ve yalnız bu kaynaklarla
+/// çalışır; tıbbi karar sorusu modele hiç gitmez.
 ///
 /// <b>Yetki sunucuda:</b> öneri listesi kullanıcının GÖREBİLECEĞİ ekranlara
 /// süzülür. Yetkisi olmayan bir işlem sorulduğunda adımlar verilmez; "şu
-/// yetki gerekiyor" denir - görmeye yetkili olmadığı işlemi tarif etmek,
-/// yetkiyi delmenin yolunu anlatmaktır.
+/// yetki gerekiyor" denir. "Yetki yok" ile "bulunamadı" ayrı cevaplardır.
 ///
-/// <b>Kontör:</b> katalogdan üretilen cevap ücretsizdir (dış maliyet yok).
-/// Dil modeli bağlandığında çağrı başına `ai_kontor.cagri_ucreti` düşülür;
-/// bakiye yoksa asistan kapanmaz, katalog cevabı vermeye devam eder.
+/// <b>Gizlilik:</b> soru günlüğe ve sağlayıcıya <see cref="PiiMaske"/>'den
+/// geçerek gider; sohbet geçmişi modele hiç verilmez (her soru bağımsızdır -
+/// eski izinle görülen bir şey yeni soruya taşınamaz).
+///
+/// <b>Kontör:</b> katalog/belge cevabı ücretsizdir. Model çağrısı başına
+/// `ai_kontor.cagri_ucreti` düşülür; bakiye yoksa asistan kapanmaz.
 /// </summary>
-public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
+public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
+                                  YardimDizini? dizin = null)
 {
-    /// <summary>Panelden gelen istek. `aktifSayfa` bağlamsal yardım içindir.</summary>
+    /// <summary>
+    /// Panelden gelen istek. `baglam` (871) sunucuda doğrulanan ekran ipucu;
+    /// `aktifSayfa` eski istemciler için geriye uyumlu rota ipucudur.
+    /// </summary>
     public sealed record Istek(string KullaniciMesaji, short? AktifMod, string? AktifSayfa,
-                               string? SeciliKaynak);
+                               string? SeciliKaynak, IstemciBaglami? Baglam = null);
 
     public sealed record EkranOnerisi(string Kaynak, string Ad, string Rota, string Yol,
                                       string MenuGrup);
     public sealed record AksiyonOnerisi(string Kod, string Ad, string Ekran);
-    public sealed record Adim(int No, string Metin, string? Ekran, string? Rota);
+    public sealed record Adim(int No, string Metin, string? Ekran, string? Rota,
+                              string? Aksiyon = null);
+    /// <summary>Cevabın dayandığı yardım belgesi parçası (panel "kaynak" satırı).</summary>
+    public sealed record KaynakAtfi(string Id, string Baslik, string Belge);
+    /// <summary>Doğrulanmış ekran bağlamının panele dönen özeti - içerik yok.</summary>
+    public sealed record EkranOzeti(bool Bulundu, bool Yetkili, string Kaynak, string Rota,
+                                    string Baslik, string Yol, string? Sekme, bool KayitVar,
+                                    string? HataKodu);
 
     public sealed record Yanit(
         string Cevap,
@@ -51,17 +72,56 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
         string? EksikBilgiSorusu,
         IReadOnlyList<string> Uyarilar,
         string KonuKod,
-        /// <summary>1 katalog · 2 ekran · 3 bağlamsal · 5 model destekli · 0 yok.</summary>
+        /// <summary>1 katalog · 2 ekran · 3 bağlamsal · 5 model · 6 rol · 7 kapsam dışı · 8 yardım belgesi · 0 yok.</summary>
         short KaynakTuru,
         decimal KontorBakiye,
-        /// <summary>Cevabı dil modeli mi yazdı? (katalog cevabı ücretsizdir)</summary>
         bool ModelKullanildi = false,
-        string Model = "");
+        string Model = "",
+        EkranOzeti? Ekran = null,
+        IReadOnlyList<KaynakAtfi>? Kaynaklar = null,
+        string Dil = "tr");
 
+    public const short KaynakKatalog = 1, KaynakEkran = 2, KaynakBaglamsal = 3,
+                       KaynakModel = 5, KaynakRol = 6, KaynakKapsamDisi = 7, KaynakBelge = 8;
 
+    /// <summary>
+    /// EKRAN BAĞLAMI UCU (871): panel açılınca / rota değişince çağrılır -
+    /// "şu ekran hakkında soruyorsunuz" satırı ve önerilen sorular. Cevap
+    /// üretmez, kontör harcamaz, günlüğe yazmaz.
+    /// </summary>
+    public async Task<(EkranOzeti Ekran, IReadOnlyList<string> OnerilenSorular,
+                       IReadOnlyList<AksiyonOnerisi> Aksiyonlar)>
+        EkranBaglamiAsync(IstemciBaglami istemci, IstekBaglami baglam, CancellationToken iptal)
+    {
+        await using var baglanti = await veri.AcAsync(iptal);
+        var urunModu = await UrunModuAsync(baglanti, baglam, iptal);
+        var ekran = await EkranBaglamiCozucu.CozAsync(baglanti, istemci, baglam, urunModu, iptal);
+        var sorular = new List<string>();
+        if (ekran is { Bulundu: true, Yetkili: true })
+        {
+            sorular.Add("Bu ekranda ne yapabilirim?");
+            if (dizin is not null)
+                sorular.AddRange(dizin.OnerilenSorular(ekran, baglam, urunModu, ekran.Dil, 4));
+            if (ekran.KayitId is > 0 && ekran.Alanlar.Count > 0) sorular.Add("Bu kartta hangi alanlar zorunlu?");
+            if (ekran.HataKodu is { Length: > 0 }) sorular.Insert(0, "Bu hata ne demek?");
+        }
+        else if (ekran.Bulundu) sorular.Add("Bu ekran için hangi yetki gerekiyor?");
+        else sorular.Add("Yeni hasta kaydı nasıl açılır?");
+        sorular.Add("Rolüm ne yapabilir?");
+        return (Ozet(ekran), sorular.Distinct().Take(6).ToList(),
+                ekran.Aksiyonlar.Select(a => new AksiyonOnerisi(a.Kod, a.Ad, a.Ekran)).ToList());
+    }
 
+    private static EkranOzeti Ozet(DogrulanmisBaglam e) =>
+        new(e.Bulundu, e.Yetkili, e.Kaynak, e.Rota, e.Baslik, e.Yol, e.Sekme, e.KayitId is > 0,
+            e.HataKodu);
 
-
+    private static async Task<short> UrunModuAsync(NpgsqlConnection baglanti, IstekBaglami baglam,
+                                                   CancellationToken iptal) =>
+        // ÜRÜN MODU sunucudan: istemcinin gönderdiği `aktifMod` yalnız ipucu.
+        //   Mod ŞUBENİN PROFİLİNDEN gelir (489).
+        (short)await baglanti.TekDegerAsync<short>(
+            "select public.fn_urun_modu(@p0)", null, [baglam.SubeId ?? 0], iptal);
 
     public async Task<Yanit> CevaplaAsync(Istek istek, IstekBaglami baglam,
                                           CancellationToken iptal)
@@ -74,40 +134,88 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
 
         var kelimeler = RehberMetin.Kelimeler(soru);
         await using var baglanti = await veri.AcAsync(iptal);
+        var urunModu = await UrunModuAsync(baglanti, baglam, iptal);
 
-        // ÜRÜN MODU sunucudan: istemcinin gönderdiği `aktifMod` yalnız ipucu.
-        //   HBYS ekranını ERP kurulumunda önermek, olmayan menüyü tarif etmek
-        //   olurdu.
-        //   Mod SUBENIN PROFILINDEN gelir (489).
-        var urunModu = (short)await baglanti.TekDegerAsync<short>(
-            "select public.fn_urun_modu(@p0)", null, [baglam.SubeId ?? 0], iptal);
+        // EKRAN BAĞLAMI (871): istemcinin ipucu sunucuda doğrulanır. Eski
+        //   istemci yalnız aktifSayfa gönderir; o da aynı yoldan geçer.
+        var istemciBaglami = istek.Baglam ?? new IstemciBaglami(Rota: istek.AktifSayfa);
+        var ekran = await EkranBaglamiCozucu.CozAsync(baglanti, istemciBaglami, baglam, urunModu, iptal);
+        var dil = ekran.Dil;
+        var enjeksiyon = RehberMetin.EnjeksiyonMu(soru);
 
         var uyarilar = new List<string>();
         var kontorBakiye = await baglanti.TekDegerAsync<decimal>(
             "select bakiye from public.ai_kontor where id = 1", null, [], iptal);
 
+        // ------------------------------------------------- klinik kapsam dışı
+        // Tanı / tedavi / doz / sonuç yorumu sorusu MODELE HİÇ GİTMEZ: asistan
+        //   HBYS'nin işleyişini anlatır, tıbbi karar vermez. Sabit cevap,
+        //   günlükte kaynak 7.
+        if (RehberMetin.KlinikSoruMu(soru))
+        {
+            await LogAsync(baglanti, baglam, soru, KaynakKapsamDisi, "klinik", 1m, istek, ekran,
+                           kronometre, iptal, enjeksiyon: enjeksiyon);
+            return new Yanit(
+                "Bu asistan HBYS'nin işleyişini anlatır; tanı, tedavi, ilaç seçimi, doz ya da "
+                + "sonuç yorumu gibi tıbbi konularda yardımcı olamam - bunlar için hekime "
+                + "danışın. Ekranın nasıl kullanıldığını (istem açma, sonuç görüntüleme, "
+                + "reçete kaydı) sorabilirsiniz.",
+                [], [], [], 1m, null, uyarilar, "klinik", KaynakKapsamDisi, kontorBakiye,
+                Ekran: Ozet(ekran), Dil: dil);
+        }
+
+        // ---------------------------------------------------- hata açıklaması
+        // Ekranda görülen hata kodu bağlamda ve soru "bu ne demek" ise cevap
+        //   sabit açıklamadır (kod → ne oldu → ne yapılır); model gerekmez.
+        if (ekran.HataKodu is { Length: > 0 } hk && RehberMetin.HataSorusuMu(soru)
+            && HataAciklamalari.Bul(hk) is { } aciklama)
+        {
+            await LogAsync(baglanti, baglam, soru, KaynakBaglamsal, "hata:" + hk, 0.9m, istek, ekran,
+                           kronometre, iptal, enjeksiyon: enjeksiyon);
+            var adimlar = new List<Adim>
+            {
+                new(1, aciklama.Ne, null, null),
+                new(2, aciklama.NeYapilir, null, null),
+            };
+            if (hk == HataKodu.Yasak)
+                adimlar.Add(new Adim(3, "Bu asistan yetkiniz olmayan işlemin adımlarını anlatmaz; yetkiyi yöneticiniz verir.", null, null));
+            return new Yanit($"**{aciklama.Kod} — {aciklama.Baslik}**"
+                             + (ekran.Bulundu ? $" ({ekran.Yol} ekranında)" : ""),
+                             adimlar, [], [], 0.9m, null, uyarilar, "hata:" + hk, KaynakBaglamsal,
+                             kontorBakiye, Ekran: Ozet(ekran), Dil: dil);
+        }
+
+        // "Bu hata ne demek" ama bağlamda hata kodu yok: uydurma açıklama yerine
+        //   ne gerektiğini söyle (ekran hatayı gösterdiyse kod izde olurdu).
+        if (ekran.HataKodu is null && RehberMetin.HataSorusuMu(soru)
+            && RehberMetin.Sadelestir(soru) is var sadeHata
+            && (sadeHata.Contains("bu hata", StringComparison.Ordinal)
+                || sadeHata.Contains("su hata", StringComparison.Ordinal)
+                || sadeHata.Contains("hata ne demek", StringComparison.Ordinal)))
+        {
+            await LogAsync(baglanti, baglam, soru, KaynakBaglamsal, "hata:yok", 0.6m, istek, ekran,
+                           kronometre, iptal, enjeksiyon: enjeksiyon);
+            return new Yanit(
+                "Bu ekranda az önce gösterilmiş bir hata kodu görmedim; o yüzden hangi hatayı "
+                + "sorduğunuzu bilemiyorum. Hata kutusundaki kodu ya da mesajı olduğu gibi yazarsanız "
+                + "(örneğin \"YASAK\" ya da \"iş kuralı: ...\") ne anlama geldiğini ve ne yapılacağını anlatırım.",
+                [], [], [], 0.6m, "Hatanın kodu ya da mesajı neydi?", uyarilar, "hata:yok",
+                KaynakBaglamsal, kontorBakiye, Ekran: Ozet(ekran), Dil: dil);
+        }
+
         // ------------------------------------------------------ rol sorusu
-        // "Kayıt Kabul rolü ne yapabilir?" — cevabı katalogda değil ROL
-        //   TANIMINDA. Bağlamsal yardımdan ÖNCE bakılır: soru hem "ne
-        //   yapabilirim" kalıbını hem rol adını taşıyorsa, kullanıcı
-        //   durduğu ekranı değil rolü soruyordur.
         if (RehberMetin.RolSorusuMu(soru))
         {
-            var rolYaniti = await RolYanitiAsync(baglanti, soru, urunModu, baglam,
-                                                 uyarilar, kontorBakiye, istek,
-                                                 kronometre, iptal);
-            if (rolYaniti is not null) return rolYaniti;
+            var rolYaniti = await RolYanitiAsync(baglanti, soru, urunModu, baglam, uyarilar,
+                                                 kontorBakiye, istek, ekran, kronometre, iptal);
+            if (rolYaniti is not null) return rolYaniti with { Ekran = Ozet(ekran), Dil = dil };
         }
 
         // ------------------------------------------------- bağlamsal yardım
-        // "Bu ekranda ne yapabilirim?" sorusunun cevabı DURDUĞUNUZ ekrana
-        //   bağlıdır: ekranın kendisi, yetkili düğmeleri ve o ekranla ilgili
-        //   rehber konuları. Katalog araması bunu bilemez.
-        if (RehberMetin.BaglamsalMi(soru) && !string.IsNullOrWhiteSpace(istek.AktifSayfa))
+        if (RehberMetin.BaglamsalMi(soru) && ekran.Bulundu)
         {
-            var yardim = await BaglamsalYardimAsync(baglanti, istek, soru, urunModu,
-                                                    baglam, uyarilar, kontorBakiye,
-                                                    kronometre, iptal);
+            var yardim = await BaglamsalYardimAsync(baglanti, istek, soru, urunModu, baglam,
+                                                    ekran, uyarilar, kontorBakiye, kronometre, iptal);
             if (yardim is not null) return yardim;
         }
 
@@ -117,18 +225,12 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
                 select k.kod, k.baslik, k.urun_modu as "urunModu", k.modul,
                        k.ekran_kaynak as "ekranKaynak", k.yetki_kodu as "yetkiKodu",
                        k.adimlar, k.uyarilar,
-                       -- KELIME SINIRI: 'kart' aramasi 'hasta karti'na da
-                       --   vurmali ama 'stok' arayan 'hasta'ya vurmamali;
-                       --   bu yuzden anahtarin BASINDA/ICINDE kelime baslangici
-                       --   aranir (bosluk + w).
                        (select count(*) from unnest(@p1::text[]) w
                          where ' ' || public.fn_ara_metin(k.anahtar || ' ' || k.baslik)
                                like '% ' || w || '%') as vurus,
                        similarity(public.fn_ara_metin(k.anahtar),
                                   public.fn_ara_metin(@p0)) as benzerlik
                   from public.ai_rehber_konu k
-                 -- ERP cekirdegi (fatura, stok, kasa) HBYS kurulumunda da
-                 --   vardir; yalniz HBYS-OZEL konu (2) ERP'de gizlenir.
                  where k.durum = 0 and (k.urun_modu <> 2 or @p2 in (2, 3))
                  order by vurus desc, benzerlik desc, k.sira
                  limit 4
@@ -137,28 +239,37 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
         var enIyi = konular.FirstOrDefault();
         var vurus = enIyi is null ? 0 : Convert.ToInt32(enIyi["vurus"]);
         var benzerlik = enIyi is null ? 0f : Convert.ToSingle(enIyi["benzerlik"]);
-
-        // GÜVEN: kaç anahtar kelime tuttu + metin benzerliği. Tek kelime tutan
-        //   bir eşleşmeyi "kesin cevap" gibi sunmak, kullanıcıyı yanlış ekrana
-        //   göndermekten daha kötüdür - orada bir de kendine güvenir.
         var oran = kelimeler.Length == 0 ? 0m : (decimal)vurus / kelimeler.Length;
         var guven = Math.Round(Math.Min(1m, oran * 0.7m + (decimal)benzerlik * 1.5m), 2);
 
         if (enIyi is not null && vurus >= 1 && guven >= 0.30m)
-            return await KonuYanitiAsync(baglanti, enIyi, konular, soru, guven, urunModu,
-                                         baglam, uyarilar, kontorBakiye, kronometre, iptal);
+        {
+            var k = await KonuYanitiAsync(baglanti, enIyi, konular, soru, guven, urunModu, baglam,
+                                          uyarilar, kontorBakiye, istek, ekran, kronometre, iptal);
+            return k with { Ekran = Ozet(ekran), Dil = dil };
+        }
+
+        // ------------------------------------------------- yardım belgeleri
+        var vuruslar = dizin?.Ara(soru, ekran, baglam, urunModu, dil, 4) ?? [];
 
         // --------------------------------------------------------- model
-        // Katalog konuyu bulamadı. MODEL BURADA DEVREYE GİRER: doğru cevabı
-        //   katalogdan üretemediğimiz yerde, kullanıcının kendi cümlesine
-        //   uyan yol tarifini yazsın. Bağlam yine katalogdur - model yalnız
-        //   ANLATIR, ekran uyduramaz (beyaz liste doğrulaması).
-        var modelEkranlari = await EkranAraAsync(baglanti, soru, kelimeler, urunModu,
-                                                 baglam, 12, iptal);
+        var modelEkranlari = await EkranAraAsync(baglanti, soru, kelimeler, urunModu, baglam, 12, iptal);
+        if (ekran is { Bulundu: true, Yetkili: true } && modelEkranlari.All(e => e.Rota != ekran.Rota))
+            modelEkranlari.Insert(0, new EkranOnerisi(ekran.Kaynak, ekran.Baslik, ekran.Rota,
+                                                      ekran.Yol, ekran.MenuGrup));
         var modelYaniti = await ModelDeneAsync(baglanti, istek, soru, urunModu, konular,
-                                               modelEkranlari, baglam, uyarilar,
-                                               kronometre, iptal);
+                                               modelEkranlari, vuruslar, ekran, enjeksiyon, baglam,
+                                               uyarilar, kronometre, iptal);
         if (modelYaniti is not null) return modelYaniti;
+
+        // ------------------------------------ yardım belgesi (modelsiz cevap)
+        if (vuruslar.Count > 0 && vuruslar[0].Puan >= 3)
+        {
+            var belgeYaniti = await BelgeYanitiAsync(baglanti, vuruslar, soru, urunModu, baglam,
+                                                     uyarilar, kontorBakiye, istek, ekran,
+                                                     kronometre, iptal, enjeksiyon);
+            return belgeYaniti;
+        }
 
         // ------------------------------------------------- ekran eşleşmesi
         var ekranlar = modelEkranlari.Count > 0 ? modelEkranlari.Take(6).ToList()
@@ -170,40 +281,46 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
                       + $"büyük olasılıkla **{e.Yol}** ekranında; oradan başlayın. "
                       + "Ne yapmak istediğinizi bir cümleyle daha açarsanız adımları "
                       + "sırayla verebilirim.";
-            await LogAsync(baglanti, baglam, soru, 2, "", 0.35m, istek, kronometre, iptal);
-            return new Yanit(cevap, [], ekranlar,
-                             Aksiyonlar(null, e.Kaynak, baglam), 0.35m,
+            await LogAsync(baglanti, baglam, soru, KaynakEkran, "", 0.35m, istek, ekran, kronometre,
+                           iptal, enjeksiyon: enjeksiyon);
+            return new Yanit(cevap, [], ekranlar, Aksiyonlar(null, e.Kaynak, baglam), 0.35m,
                              "Hangi işlemi yapmak istiyorsunuz: kayıt açma, listeleme "
                              + "yoksa belge gönderme?",
-                             uyarilar, "", 2, kontorBakiye);
+                             uyarilar, "", KaynakEkran, kontorBakiye, Ekran: Ozet(ekran), Dil: dil);
         }
 
         // --------------------------------------------------- cevap yok
-        await LogAsync(baglanti, baglam, soru, 0, "", 0m, istek, kronometre, iptal);
+        await LogAsync(baglanti, baglam, soru, 0, "", 0m, istek, ekran, kronometre, iptal,
+                       enjeksiyon: enjeksiyon);
+        var ekranNotu = !ekran.Bulundu && istemciBaglami.Rota is { Length: > 1 }
+            ? " Bulunduğunuz ekranı tanıyamadım; bu ekran için yardım belgesi henüz yazılmamış olabilir."
+            : "";
         return new Yanit(
-            "Bu soruya bakabileceğim bir rehber konusu bulamadım. Sorunuzu işin adıyla "
-            + "yazarsanız (örneğin \"hasta kaydı\", \"satış faturası\", \"numune kabul\") "
-            + "adımları çıkarabilirim.",
+            "Bu soruya dayanak olacak bir rehber konusu ya da yardım belgesi bulamadım; "
+            + "uydurmak yerine söyleyeyim: elimdeki bilgi yetmiyor." + ekranNotu
+            + " Sorunuzu işin adıyla yazarsanız (örneğin \"hasta kaydı\", \"satış faturası\", "
+            + "\"numune kabul\") adımları çıkarabilirim.",
             [], [], [], 0m,
             "Hangi modülde çalışıyorsunuz: hasta/randevu (HBYS) mu, fatura/stok (ERP) mü?",
-            uyarilar, "", 0, kontorBakiye);
+            uyarilar, "", 0, kontorBakiye, Ekran: Ozet(ekran), Dil: dil);
     }
 
     // ---------------------------------------------------------------- model --
     /// <summary>
-    /// Katalog cevaplayamadığında modeli dener. Üç kapı sırayla: <b>model
-    /// hazır mı</b> (anahtar + ayar), <b>kontör var mı</b> (kurumsal açma,
-    /// bakiye, günlük tavan), <b>çıktı geçerli mi</b> (beyaz liste). Herhangi
-    /// biri tutmazsa <c>null</c> döner ve katalog akışı devam eder - asistan
-    /// susmaz, yalnız üslubu sadeleşir.
+    /// Katalog cevaplayamadığında modeli dener. Kapılar sırayla: model hazır
+    /// mı, kontör var mı, çıktı geçerli mi (beyaz liste / aksiyon / kaynak
+    /// atfı). Herhangi biri tutmazsa <c>null</c> döner ve katalog akışı devam
+    /// eder. Modele giden bağlam: doğrulanmış ekran + yetkili ekranlar +
+    /// yardım parçaları + konu özetleri; soru maskeden geçer.
     /// </summary>
     private async Task<Yanit?> ModelDeneAsync(
         NpgsqlConnection baglanti, Istek istek, string soru, short urunModu,
         List<IDictionary<string, object?>> konular, List<EkranOnerisi> ekranlar,
-        IstekBaglami baglam, List<string> uyarilar, Stopwatch kronometre,
-        CancellationToken iptal)
+        IReadOnlyList<YardimDizini.Vurus> vuruslar, DogrulanmisBaglam ekran, bool enjeksiyon,
+        IstekBaglami baglam, List<string> uyarilar, Stopwatch kronometre, CancellationToken iptal)
     {
-        if (model is null || !model.Hazir || ekranlar.Count == 0) return null;
+        if (model is null || !model.Hazir) return null;
+        if (ekranlar.Count == 0 && vuruslar.Count == 0) return null;   // dayanak yok
 
         var (izin, ucret, sebep) = await KontorDurumAsync(baglanti, iptal);
         if (!izin)
@@ -212,9 +329,6 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
             return null;
         }
 
-        // MODELE GİDEN BAĞLAM: yalnız güvenli metadata. Ekranlar zaten yetki
-        //   süzgecinden geçti; konu başlıkları katalogdan. Hasta/cari/belge
-        //   verisi bu katmana hiç girmez.
         var konuOzetleri = konular
             .Where(k => YetkiVar(k["yetkiKodu"]?.ToString(), baglam))
             .Take(3)
@@ -222,36 +336,63 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
                 k["baslik"]?.ToString() ?? "", AdimOzeti(k["adimlar"]?.ToString())))
             .ToList();
 
+        var kaynaklar = vuruslar
+            .Select((v, i) => new RehberModeli.Kaynak("K" + (i + 1), v.Parca.Id,
+                                                     v.Belge.Baslik + " › " + v.Parca.Baslik,
+                                                     v.Parca.Metin))
+            .ToList();
+
         var cikti = await model.DeneAsync(new RehberModeli.Girdi(
             soru, urunModu, istek.AktifSayfa,
             ekranlar.Select(e => new RehberModeli.Ekran(e.Kaynak, e.Rota, e.Yol)).ToList(),
-            konuOzetleri), iptal);
+            konuOzetleri, ekran, kaynaklar, ekran.Dil, enjeksiyon), iptal);
         if (cikti is null) return null;
+
+        var jeton = cikti.GirisJeton + cikti.CikisJeton;
+        var atiflar = cikti.Kaynaklar
+            .Select(kim => kaynaklar.First(k => k.Kimlik == kim))
+            .Select(k => new KaynakAtfi(k.BelgeId, k.Baslik, k.BelgeId.Split('#')[0]))
+            .ToList();
+
+        if (cikti.KapsamDisi)
+        {
+            var logK = await LogAsync(baglanti, baglam, soru, KaynakKapsamDisi, "model:kapsam-disi",
+                                      cikti.Guven, istek, ekran, kronometre, iptal, cikti.Model,
+                                      cikti.GirisJeton, cikti.CikisJeton, ucret, enjeksiyon: enjeksiyon);
+            await KontorDusAsync(baglanti, baglam, ucret, jeton, logK, cikti.Model, iptal);
+            return new Yanit(
+                "Bu konu asistanın kapsamı dışında (tıbbi karar ya da sistem dışı bir istek). "
+                + "Ekranın nasıl kullanıldığını sorabilirsiniz.",
+                [], [], [], 1m, null, uyarilar, "kapsam-disi", KaynakKapsamDisi,
+                await BakiyeAsync(baglanti, iptal), true, cikti.Model, Ozet(ekran), [], ekran.Dil);
+        }
 
         var adimlar = cikti.Adimlar
             .Select((a, i) => new Adim(i + 1, a.Metin,
                                        ekranlar.FirstOrDefault(e => e.Rota == a.Ekran)?.Kaynak,
-                                       a.Ekran))
+                                       a.Ekran, a.Aksiyon))
             .ToList();
 
-        // Kullanılan ekranlar önerilere; model ekran vermediyse aramanın ilk üçü.
         var oneriler = adimlar.Where(a => a.Rota is not null)
             .Select(a => ekranlar.First(e => e.Rota == a.Rota))
             .DistinctBy(e => e.Rota).ToList();
         if (oneriler.Count == 0) oneriler = ekranlar.Take(3).ToList();
 
-        var jeton = cikti.GirisJeton + cikti.CikisJeton;
-        var logId = await LogAsync(baglanti, baglam, soru, 5, "model", cikti.Guven, istek,
-                                   kronometre, iptal, cikti.Model, cikti.GirisJeton,
-                                   cikti.CikisJeton, ucret);
-        // KONTÖR ÇAĞRI BAŞARILI OLUNCA DÜŞÜLÜR: ödemediğimiz bir çağrı için
-        //   müşteriden kontör almak savunulamaz.
+        var logId = await LogAsync(baglanti, baglam, soru, KaynakModel, "model", cikti.Guven, istek,
+                                   ekran, kronometre, iptal, cikti.Model, cikti.GirisJeton,
+                                   cikti.CikisJeton, ucret,
+                                   string.Join(",", atiflar.Select(a => a.Id)), enjeksiyon);
+        // KONTÖR ÇAĞRI BAŞARILI OLUNCA DÜŞÜLÜR.
         await KontorDusAsync(baglanti, baglam, ucret, jeton, logId, cikti.Model, iptal);
 
+        var aksiyonKaynagi = ekran is { Bulundu: true, Yetkili: true } ? ekran.Kaynak
+                             : oneriler.FirstOrDefault()?.Kaynak ?? "";
+        var aksiyonEkrani = ekran is { Bulundu: true, Yetkili: true } ? ekran.AksiyonEkrani : null;
         return new Yanit(cikti.Cevap, adimlar, oneriler,
-                         Aksiyonlar(null, oneriler.FirstOrDefault()?.Kaynak ?? "", baglam),
-                         cikti.Guven, cikti.EksikBilgiSorusu, uyarilar, "model", 5,
-                         await BakiyeAsync(baglanti, iptal), true, cikti.Model);
+                         Aksiyonlar(aksiyonEkrani, aksiyonKaynagi, baglam),
+                         cikti.Guven, cikti.EksikBilgiSorusu, uyarilar, "model", KaynakModel,
+                         await BakiyeAsync(baglanti, iptal), true, cikti.Model, Ozet(ekran),
+                         atiflar, ekran.Dil);
     }
 
     /// <summary>Konu adımlarını modele tek satır özet olarak verir.</summary>
@@ -270,12 +411,44 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
         catch (JsonException) { return ""; }
     }
 
+    // ------------------------------------------------- yardım belgesi ----
     /// <summary>
-    /// Model çağrısı yapılabilir mi? Üç kapı: kurum modeli kapatmış olabilir,
-    /// bakiye yetmeyebilir, günlük tavan dolmuş olabilir. Kapı kapalıysa
-    /// kullanıcıya SEBEP söylenir - sessizce sade cevap vermek "asistan
-    /// bozuldu" diye algılanır.
+    /// Model yokken yardım belgesinden doğrudan cevap: en iyi parçanın metni
+    /// (kırpılmış), belgenin ekranı yetkiliyse düğmesi, atıf satırı. Belge
+    /// kurumun onaylı metnidir; ücretsiz ve denetlenebilir.
     /// </summary>
+    private async Task<Yanit> BelgeYanitiAsync(
+        NpgsqlConnection baglanti, IReadOnlyList<YardimDizini.Vurus> vuruslar, string soru,
+        short urunModu, IstekBaglami baglam, List<string> uyarilar, decimal kontorBakiye,
+        Istek istek, DogrulanmisBaglam ekran, Stopwatch kronometre, CancellationToken iptal,
+        bool enjeksiyon)
+    {
+        var v = vuruslar[0];
+        var metin = v.Parca.Metin.Length > 900 ? v.Parca.Metin[..900] + "…" : v.Parca.Metin;
+        var oneriler = new List<EkranOnerisi>();
+        var kaynakKodu = v.Belge.Ekran.Length > 0 ? v.Belge.Ekran : v.Belge.Rota;
+        if (kaynakKodu.Length > 0)
+        {
+            var bilgi = await EkranBilgisiAsync(baglanti, kaynakKodu, urunModu, baglam, iptal);
+            if (bilgi is not null) oneriler.Add(bilgi);
+        }
+        var atiflar = vuruslar.Take(2)
+            .Select(x => new KaynakAtfi(x.Parca.Id, x.Belge.Baslik + " › " + x.Parca.Baslik, x.Belge.Id))
+            .ToList();
+        var guven = Math.Min(0.85m, 0.4m + v.Puan * 0.08m);
+        if (v.Belge.Dogrulama != "kod-incelemesi")
+            uyarilar.Add("Bu yardım belgesi henüz insan doğrulamasından geçmedi; ekranda görünenle çelişirse ekran doğrudur.");
+
+        await LogAsync(baglanti, baglam, soru, KaynakBelge, "belge:" + v.Belge.Id, guven, istek, ekran,
+                       kronometre, iptal, kaynaklar: string.Join(",", atiflar.Select(a => a.Id)),
+                       enjeksiyon: enjeksiyon);
+        return new Yanit($"**{v.Belge.Baslik} › {v.Parca.Baslik}**\n\n{metin}", [], oneriler,
+                         Aksiyonlar(null, oneriler.FirstOrDefault()?.Kaynak ?? "", baglam), guven,
+                         null, uyarilar, "belge:" + v.Belge.Id, KaynakBelge, kontorBakiye,
+                         Ekran: Ozet(ekran), Kaynaklar: atiflar, Dil: ekran.Dil);
+    }
+
+    // ------------------------------------------------------------- kontör --
     private static async Task<(bool Izin, decimal Ucret, string Sebep)> KontorDurumAsync(
         NpgsqlConnection baglanti, CancellationToken iptal)
     {
@@ -294,8 +467,8 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
         var bakiye = Convert.ToDecimal(satir["bakiye"]);
         if (bakiye < ucret)
             return (false, ucret,
-                    "AI kontörü bitti; cevaplar şimdilik katalogdan üretiliyor "
-                    + "(Yönetim › Yapay Zeka › Kontör).");
+                    "AI kontörü bitti; cevaplar şimdilik katalog ve yardım belgelerinden üretiliyor "
+                    + "(kontör yüklemesi yönetici işi).");
 
         var sinir = Convert.ToInt32(satir["sinir"]);
         if (sinir > 0 && Convert.ToInt64(satir["bugun"]) >= sinir)
@@ -310,7 +483,6 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
         await baglanti.TekDegerAsync<decimal>(
             "select bakiye from public.ai_kontor where id = 1", null, [], iptal);
 
-    /// <summary>Kontörü düşer ve hareketi yazar (tur 2 = harcama).</summary>
     private static async Task KontorDusAsync(
         NpgsqlConnection baglanti, IstekBaglami baglam, decimal ucret, int jeton,
         long? logId, string modelAdi, CancellationToken iptal)
@@ -333,37 +505,19 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
 
     // -------------------------------------------------------- rol tanımı ---
     /// <summary>
-    /// "Şu rol ne yapabilir?" sorusunu ROL TANIMINDAN cevaplar: açabildiği
-    /// ekranlar, kayıt açıp değiştirebildikleri, salt okuduğu yerler, işlem
-    /// yetkileri ve sayısal sınırlar (ör. iskonto tavanı).
-    ///
-    /// <b>Neden katalog değil de rol:</b> "banko ne yapabilir" sorusunun
-    /// cevabı kurumun kendi yetki dağılımıdır; rehber konusu bunu bilemez,
-    /// genel bir ekran tarifi verir ve kullanıcı yanıltılır.
-    ///
-    /// <b>Yetki:</b> kendi rolünü herkes sorabilir - kendi yetkisi zaten her
-    /// ekranda görünür. BAŞKA bir rolün dökümü `rol` yetkisi ister: kurumun
-    /// yetki haritası, "kimin neye erişebildiği" bilgisidir.
-    ///
-    /// <b>Düğmeler kullanıcının kendi yetkisine göre çizilir:</b> anlatılan rol
-    /// on ekran açabiliyor olabilir; soran kişiye yalnız KENDİ girebildikleri
-    /// düğme olarak verilir - açılmayacak ekranın düğmesi hatadan başka bir
-    /// şey üretmez.
+    /// "Şu rol ne yapabilir?" sorusunu ROL TANIMINDAN cevaplar. Kendi rolünü
+    /// herkes sorabilir; BAŞKA bir rolün dökümü `rol` yetkisi ister.
+    /// Düğmeler soran kişinin kendi yetkisine göre çizilir.
     /// </summary>
     private async Task<Yanit?> RolYanitiAsync(
         NpgsqlConnection baglanti, string soru, short urunModu, IstekBaglami baglam,
-        List<string> uyarilar, decimal kontorBakiye, Istek istek, Stopwatch kronometre,
-        CancellationToken iptal)
+        List<string> uyarilar, decimal kontorBakiye, Istek istek, DogrulanmisBaglam ekran,
+        Stopwatch kronometre, CancellationToken iptal)
     {
         var kelimeler = RehberMetin.RolAramaKelimeleri(soru);
-        // "Rolüm" ancak oturumun bir rolü VARSA kendi rolüdür; rolsüz
-        //   kullanıcıda bu dal arama kelimesi olmadan her rolü eşit puanla
-        //   getirir ve rastgele bir rolü anlatırdı.
         var kendi = RehberMetin.KendiRoluMu(soru) && baglam.RolId > 0;
         if (kelimeler.Length == 0 && !kendi) return null;
 
-        // Rol adı/kodu üzerinde kelime araması; "benim rolüm" doğrudan
-        //   oturumun rolüdür (ad yazılmamıştır).
         var adaylar = await baglanti.ListeAsync("""
             select r.id, r.kod, r.ad, r.amac, r.aktif, r.sistem,
                    (select count(*) from public.taraf_kullanici k
@@ -381,22 +535,21 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
 
         var rol = adaylar.FirstOrDefault();
         if (rol is null) return null;
-        if (!kendi && Convert.ToInt32(rol["vurus"]) < 1) return null;   // rol adı geçmiyor
+        if (!kendi && Convert.ToInt32(rol["vurus"]) < 1) return null;
 
         var rolId = Convert.ToInt32(rol["id"]);
         var rolAd = rol["ad"]?.ToString() ?? "";
 
-        // YETKİ KAPISI: başka rolün dökümü kurumun yetki haritasıdır.
         if (rolId != baglam.RolId && !baglam.Yetkiler.Var("rol", Islem.Gor))
         {
-            await LogAsync(baglanti, baglam, soru, 6, "rol:yetkisiz", 0.5m, istek,
+            await LogAsync(baglanti, baglam, soru, KaynakRol, "rol:yetkisiz", 0.5m, istek, ekran,
                            kronometre, iptal);
             return new Yanit(
                 $"**{rolAd}** rolünün yetki dökümünü paylaşamıyorum: başka bir rolün "
                 + "neye erişebildiği kurumun yetki haritasıdır ve bunun için `rol` "
                 + "yetkisi gerekiyor. Kendi rolünüzü sorabilirsiniz: "
                 + "\"rolüm ne yapabilir\".",
-                [], [], [], 0.5m, null, uyarilar, "rol", 6, kontorBakiye);
+                [], [], [], 0.5m, null, uyarilar, "rol", KaynakRol, kontorBakiye);
         }
 
         var satirlar = await baglanti.ListeAsync("""
@@ -407,8 +560,6 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
              where ry.rol_id = @p0 and y.aktif = 1
                and (y.urun_modu <> 2 or @p1 in (2, 3))
                and (ry.gor = 1 or ry.ekle = 1 or ry.degistir = 1 or ry.sil = 1)
-             -- Liste KIRPILIYOR (ilk 12 + "…"), o yüzden sıra anlamlı: rolün
-             --   yazabildiği ekran onun asıl işidir, başta dursun.
              order by y.tur, (ry.ekle + ry.degistir) desc, y.grup, y.sira, y.ad
             """, null, [rolId, urunModu], OkuyucuGenisletmeleri.Sozluk, iptal);
 
@@ -427,12 +578,12 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
 
         if (satirlar.Count == 0)
         {
-            await LogAsync(baglanti, baglam, soru, 6, "rol:" + rol["kod"], 0.8m, istek,
+            await LogAsync(baglanti, baglam, soru, KaynakRol, "rol:" + rol["kod"], 0.8m, istek, ekran,
                            kronometre, iptal);
             return new Yanit(
                 baslik + " Bu rolde tanımlı hiçbir yetki yok: rolü taşıyan kullanıcı "
                 + "hiçbir ekranı açamaz.",
-                [], [], [], 0.8m, null, uyarilar, "rol:" + rol["kod"], 6, kontorBakiye);
+                [], [], [], 0.8m, null, uyarilar, "rol:" + rol["kod"], KaynakRol, kontorBakiye);
         }
 
         static bool Bayrak(IDictionary<string, object?> s, string alan) =>
@@ -446,14 +597,9 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
                                         && !Bayrak(s, "degistir") && !Bayrak(s, "sil"))
                                .Select(Ad).ToList();
         var silebildigi = ekranlar.Where(s => Bayrak(s, "sil")).Select(Ad).ToList();
-        // DEĞER TAŞIYAN yetki bir işlem değil SINIRDIR ("Başvuruda iskonto (en
-        //   çok %)"); iki listede birden görünürse kullanıcı onu ayrı bir
-        //   düğme sanır.
         var islemler = satirlar.Where(s => Convert.ToInt16(s["tur"]) == 1
                                         && Convert.ToInt16(s["degerAlir"]) == 0)
                                .Select(Ad).ToList();
-        // SINIR: yetkinin DEĞERİ bir tavandır (661 - iskonto gibi). Rolün ne
-        //   yapabildiğini anlatırken en çok merak edilen satır budur.
         var sinirlar = satirlar
             .Where(s => Convert.ToInt16(s["degerAlir"]) == 1
                      && (s["deger"]?.ToString() ?? "").Trim() is { Length: > 0 } d
@@ -480,7 +626,6 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
             adimlar.Add(new Adim(adimlar.Count + 1,
                                  "Sınırlar — " + string.Join(" · ", sinirlar), null, null));
 
-        // Düğmeler: rolün ekranlarından SORAN KİŞİNİN de girebildikleri.
         var oneriler = (await baglanti.ListeAsync("""
             select e.kaynak, e.baslik, e.rota, e.yol, e.menu_grup as "menuGrup",
                    e.yetki_kodu as "yetkiKodu"
@@ -489,9 +634,6 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
               join public.rol_yetki ry on ry.yetki_id = y.id and ry.rol_id = @p0
              where e.durum = 0 and e.menu_gizli = 0 and ry.gor = 1
                and (e.urun_modu <> 2 or @p1 in (2, 3))
-             -- ROLÜN ÇALIŞMA EKRANI ÖNCE: yazma yetkisi olduğu ekran o rolün
-             --   asıl işidir. Alfabetik sıra "Alış Faturaları"nı banko rolünün
-             --   ilk düğmesi yapıyordu - salt okunur bir ekran, rolün işi değil.
              order by (ry.ekle + ry.degistir) desc, y.sira, e.baslik
              limit 30
             """, null, [rolId, urunModu], OkuyucuGenisletmeleri.Sozluk, iptal))
@@ -504,71 +646,62 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
             .Take(5)
             .ToList();
 
-        // BAŞKA ROL DE UYDU: "hekim" sorusu "Diş Hekimi"ne de vurur. Yanlış
-        //   rolü anlatıp susmak yerine alternatifi söylemek gerekir.
         var ikinci = adaylar.Skip(1)
             .Where(a => Convert.ToInt32(a["vurus"]) >= Convert.ToInt32(rol["vurus"]))
             .Select(a => a["ad"]?.ToString() ?? "").ToList();
 
-        await LogAsync(baglanti, baglam, soru, 6, "rol:" + rol["kod"], 0.85m, istek,
+        await LogAsync(baglanti, baglam, soru, KaynakRol, "rol:" + rol["kod"], 0.85m, istek, ekran,
                        kronometre, iptal);
         return new Yanit(
             baslik, adimlar, oneriler, [], 0.85m,
             ikinci.Count > 0
                 ? "Şunu mu kastettiniz: " + string.Join(" / ", ikinci) + "?"
                 : null,
-            uyarilar, "rol:" + rol["kod"], 6, kontorBakiye);
+            uyarilar, "rol:" + rol["kod"], KaynakRol, kontorBakiye);
     }
 
     // -------------------------------------------------- bağlamsal yardım ---
     /// <summary>
     /// Aktif ekranın kendisini anlatır: ne işe yarar, hangi düğmeler açık
-    /// (yetkiliyse) ve o ekranla ilgili rehber konuları. Alan sorusuysa
-    /// kolon metadata'sından cevaplar.
-    ///
-    /// <b>Kolonlar da yetkiye tabidir</b>: alan yetkisi kapalı bir kolonu
-    /// "şu alan şunu gösterir" diye anlatmak, görmediği veriyi tarif etmektir.
+    /// (yetkiliyse), sekmeleri, o ekranla ilgili rehber konuları ve yardım
+    /// belgeleri. Alan sorusuysa kolon/alan metadata'sından cevaplar.
+    /// Ekran bulunmuş ama YETKİSİZSE içerik anlatılmaz; "yetki gerekiyor"
+    /// denir - bulunamayan ekrandan ayrı bir cevaptır.
     /// </summary>
     private async Task<Yanit?> BaglamsalYardimAsync(
         NpgsqlConnection baglanti, Istek istek, string soru, short urunModu,
-        IstekBaglami baglam, List<string> uyarilar, decimal kontorBakiye,
-        Stopwatch kronometre, CancellationToken iptal)
+        IstekBaglami baglam, DogrulanmisBaglam ekran, List<string> uyarilar,
+        decimal kontorBakiye, Stopwatch kronometre, CancellationToken iptal)
     {
-        var rota = (istek.AktifSayfa ?? "").Trim();
-        if (rota.Length == 0) return null;
-        // "/hasta/5057" -> "/hasta": kart rotası da o listenin ekranıdır.
-        var kok = "/" + rota.TrimStart('/').Split('/')[0];
+        if (!ekran.Bulundu) return null;
+        var kaynak = ekran.Kaynak;
+        var ad = ekran.Baslik;
+        var yol = ekran.Yol;
 
-        var ekran = await baglanti.TekAsync("""
-            select e.kaynak, e.baslik, e.rota, e.yol, e.menu_grup as "menuGrup",
-                   e.yetki_kodu as "yetkiKodu", e.modul, e.aciklama,
-                   e.aksiyon_ekrani as "aksiyonEkrani"
-              from public.ai_rehber_ekran e
-             where (e.rota = @p0 or e.rota = @p1) and e.durum = 0
-             order by case when e.rota = @p0 then 0 else 1 end, e.id
-             limit 1
-            """, null, [rota, kok], OkuyucuGenisletmeleri.Sozluk, iptal);
-        if (ekran is null) return null;
-
-        var kaynak = ekran["kaynak"]?.ToString() ?? "";
-        var yetkiKodu = ekran["yetkiKodu"]?.ToString() ?? "";
-        var ad = ekran["baslik"]?.ToString() ?? "";
-        var yol = ekran["yol"]?.ToString() ?? "";
-        if (!YetkiVar(yetkiKodu, baglam)) return null;   // oraya zaten giremezdi
-
-                var alanSorusu = RehberMetin.AlanSorusuMu(soru);
+        if (!ekran.Yetkili)
+        {
+            await LogAsync(baglanti, baglam, soru, KaynakBaglamsal, "ekran:yetkisiz", 0.8m, istek,
+                           ekran, kronometre, iptal);
+            return new Yanit(
+                $"**{yol}** ekranı için sizde görüntüleme yetkisi görünmüyor"
+                + (ekran.YetkiKodu.Length > 0 ? $" (gereken yetki: `{ekran.YetkiKodu}`)" : "")
+                + ". Bu ekranın içeriğini ve işlemlerini anlatamam; yetkiyi yöneticiniz "
+                + "(Yönetim › Roller) verebilir.",
+                [], [], [], 0.8m, null, uyarilar, "ekran:yetkisiz", KaynakBaglamsal, kontorBakiye,
+                Ekran: Ozet(ekran), Dil: ekran.Dil);
+        }
 
         // ------------------------------------------------------ alan sorusu
-        if (alanSorusu)
+        if (RehberMetin.AlanSorusuMu(soru))
         {
-            var kolon = KolonBul(kaynak, soru, baglam);
+            var kolon = KolonBul(kaynak, soru, baglam) ?? AlanBul(ekran, soru);
             if (kolon is not null)
             {
                 var (kAd, kBaslik, kTip, kFiltre) = kolon.Value;
                 var tipMetni = kTip switch
                 {
-                    "para" => "para tutarı", "sayi" => "sayı", "tarih" => "tarih",
-                    "kod" => "kod listesinden gelen değer",
+                    "para" => "para tutarı", "sayi" => "sayı", "ondalik" => "sayı", "tarih" => "tarih",
+                    "zaman" => "tarih-saat", "kod" => "kod listesinden gelen değer",
                     "mantik" => "evet/hayır", _ => "metin",
                 };
                 var yardim = await baglanti.TekDegerAsync<string>("""
@@ -576,56 +709,69 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
                      where anahtar = @p0 or anahtar = @p1 limit 1
                     """, null, [kaynak + "." + kAd, "ayar." + kaynak + "." + kAd], iptal);
 
-                await LogAsync(baglanti, baglam, soru, 3, "alan:" + kAd, 0.8m, istek,
-                               kronometre, iptal);
+                await LogAsync(baglanti, baglam, soru, KaynakBaglamsal, "alan:" + kAd, 0.8m, istek,
+                               ekran, kronometre, iptal);
                 var metin = "**" + kBaslik + "** — " + ad + " ekranında bir " + tipMetni
                           + " alanı" + (kFiltre ? "; süzgeçte kullanılabilir." : ".");
                 if (!string.IsNullOrWhiteSpace(yardim)) metin += " " + yardim;
-                return new Yanit(metin, [], [], [], 0.8m, null, uyarilar, "", 3,
-                                 kontorBakiye);
+                return new Yanit(metin, [], [], [], 0.8m, null, uyarilar, "", KaynakBaglamsal,
+                                 kontorBakiye, Ekran: Ozet(ekran), Dil: ekran.Dil);
             }
         }
 
         // -------------------------------------------- "bu ekranda ne yapılır"
-        var aksiyonlar = Aksiyonlar(ekran["aksiyonEkrani"]?.ToString(), kaynak, baglam);
+        var aksiyonlar = ekran.Aksiyonlar
+            .Take(6).Select(a => new AksiyonOnerisi(a.Kod, a.Ad, a.Ekran)).ToList();
         var konular = await baglanti.ListeAsync("""
             select k.kod, k.baslik
               from public.ai_rehber_konu k
              where k.durum = 0 and (k.urun_modu <> 2 or @p1 in (2, 3))
                and (k.ekran_kaynak = @p0 or k.ekran_kaynak = @p2)
              order by k.sira limit 4
-            """, null, [kaynak, urunModu, rota], OkuyucuGenisletmeleri.Sozluk, iptal);
+            """, null, [kaynak, urunModu, ekran.Rota], OkuyucuGenisletmeleri.Sozluk, iptal);
 
         var adimlar = new List<Adim>();
         var no = 0;
         foreach (var k in konular)
         {
             no++;
-            // Konu adı ile sorulunca adımlar zaten geliyor; burada YOL GÖSTERİR.
             adimlar.Add(new Adim(no, (k["baslik"]?.ToString() ?? "")
                                      + " — adımları görmek için bunu sorun.", null, null));
         }
 
-        var aciklama = ekran["aciklama"]?.ToString() ?? "";
-        var cevap = "**" + yol + "** ekranındasınız."
-                  + (aciklama.Length > 0 ? " " + aciklama : "")
+        var atiflar = new List<KaynakAtfi>();
+        var belgeler = dizin?.Belgeler.Where(b => YardimDizini.EkranUyar(b, ekran)
+                                                 && (b.Yetki.Length == 0 || baglam.Yetkiler.Var(b.Yetki, Islem.Gor)))
+                                       .Take(2).ToList() ?? [];
+        foreach (var b in belgeler)
+        {
+            no++;
+            var amac = b.Parcalar.FirstOrDefault(p => RehberMetin.Sadelestir(p.Baslik).StartsWith("amac", StringComparison.Ordinal));
+            var ozet = b.Ozet.Length > 0 ? b.Ozet
+                     : amac is null ? "" : (amac.Metin.Length > 240 ? amac.Metin[..240] + "…" : amac.Metin);
+            adimlar.Add(new Adim(no, $"Yardım belgesi: {b.Baslik}" + (ozet.Length > 0 ? " — " + ozet : ""), null, null));
+            atiflar.Add(new KaynakAtfi(b.Id, b.Baslik, b.Id));
+        }
+
+        var cevap = "**" + yol + "** ekranındasınız"
+                  + (ekran.Sekme is { Length: > 0 } ? $" (sekme: {ekran.Sekme})" : "") + "."
+                  + (ekran.Sekmeler.Count > 0 && ekran.KayitId is > 0
+                     ? " Kartın sekmeleri: " + string.Join(" · ", ekran.Sekmeler) + "."
+                     : "")
                   + (aksiyonlar.Count > 0
-                     ? " Burada açık olan işlemler: "
+                     ? " Burada size açık olan işlemler: "
                        + string.Join(" · ", aksiyonlar.Select(a => a.Ad)) + "."
                      : " Bu ekranda size açık bir işlem düğmesi görünmüyor.");
 
-        await LogAsync(baglanti, baglam, soru, 3, "ekran:" + kaynak, 0.8m, istek,
-                       kronometre, iptal);
+        await LogAsync(baglanti, baglam, soru, KaynakBaglamsal, "ekran:" + kaynak, 0.8m, istek, ekran,
+                       kronometre, iptal, kaynaklar: string.Join(",", atiflar.Select(a => a.Id)));
         return new Yanit(cevap, adimlar,
-                         [new EkranOnerisi(kaynak, ad, ekran["rota"]?.ToString() ?? "",
-                                           yol, ekran["menuGrup"]?.ToString() ?? "")],
-                         aksiyonlar, 0.8m, null, uyarilar, "", 3, kontorBakiye);
+                         [new EkranOnerisi(kaynak, ad, ekran.Rota, yol, ekran.MenuGrup)],
+                         aksiyonlar, 0.8m, null, uyarilar, "", KaynakBaglamsal, kontorBakiye,
+                         Ekran: Ozet(ekran), Kaynaklar: atiflar, Dil: ekran.Dil);
     }
 
-    /// <summary>
-    /// Sorudaki kelimelere en çok uyan KOLONU bulur. Alan yetkisi kapalıysa
-    /// kolon yok sayılır - görünmeyen alanı tarif etmek de bir sızıntıdır.
-    /// </summary>
+    /// <summary>Sorudaki kelimelere en çok uyan KOLONU bulur (alan yetkisi kapalıysa yok sayılır).</summary>
     private static (string Ad, string Baslik, string Tip, bool Filtre)? KolonBul(
         string kaynak, string soru, IstekBaglami baglam)
     {
@@ -638,8 +784,6 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
         var enPuan = 0;
         foreach (var k in tanim.Kolonlar)
         {
-            // ALAN YETKİSİ kapalı kolon hiç aranmaz: görmediği alanı tarif
-            //   etmek de bir sızıntıdır.
             if (!baglam.Yetkiler.AlanOkunur(kaynak, k.YetkiAlani ?? k.Ad)) continue;
             var puan = RehberMetin.KolonPuani(k.Baslik, k.Ad, kelimeler);
             if (puan <= enPuan) continue;
@@ -649,33 +793,49 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
         return enPuan > 0 ? enIyi : null;
     }
 
+    /// <summary>Kart ALANLARI arasında arar (bağlam zaten alan yetkisinden geçmiş).</summary>
+    private static (string Ad, string Baslik, string Tip, bool Filtre)? AlanBul(
+        DogrulanmisBaglam ekran, string soru)
+    {
+        var kelimeler = RehberMetin.AlanAramaKelimeleri(soru);
+        if (kelimeler.Length == 0) return null;
+        (string Ad, string Baslik, string Tip, bool Filtre)? enIyi = null;
+        var enPuan = 0;
+        foreach (var a in ekran.Alanlar)
+        {
+            var puan = RehberMetin.KolonPuani(a.Baslik, a.Ad, kelimeler);
+            if (puan <= enPuan) continue;
+            enPuan = puan;
+            enIyi = (a.Ad, a.Baslik + (a.Zorunlu ? " (zorunlu)" : ""), a.Tip, false);
+        }
+        return enPuan > 0 ? enIyi : null;
+    }
+
     // ------------------------------------------------------------- konu ----
     private async Task<Yanit> KonuYanitiAsync(
         NpgsqlConnection baglanti, IDictionary<string, object?> konu,
         List<IDictionary<string, object?>> hepsi, string soru, decimal guven,
         short urunModu, IstekBaglami baglam, List<string> uyarilar,
-        decimal kontorBakiye, Stopwatch kronometre, CancellationToken iptal)
+        decimal kontorBakiye, Istek istek, DogrulanmisBaglam ekran, Stopwatch kronometre,
+        CancellationToken iptal)
     {
         var kod = konu["kod"]?.ToString() ?? "";
         var baslik = konu["baslik"]?.ToString() ?? "";
         var yetkiKodu = konu["yetkiKodu"]?.ToString() ?? "";
         var modul = konu["modul"]?.ToString() ?? "";
 
-        // YETKİ: yetkisi olmayana adım verilmez. "Şuraya git, şu düğmeye bas"
-        //   demek, göremediği işlemi tarif etmektir.
         if (yetkiKodu != "" && !baglam.Yetkiler.Var(yetkiKodu, Islem.Gor))
         {
-            await LogAsync(baglanti, baglam, soru, 1, kod, guven, null, kronometre, iptal);
+            await LogAsync(baglanti, baglam, soru, KaynakKatalog, kod, guven, istek, ekran, kronometre, iptal);
             var yonetim = await EkranAraAsync(baglanti, "roller yetki", ["yetki", "rol"],
                                               urunModu, baglam, 2, iptal);
             return new Yanit(
                 $"**{baslik}** için sizde yetki görünmüyor (gereken yetki: `{yetkiKodu}`). "
                 + "Adımları paylaşamıyorum; yöneticinizden bu yetkiyi istemeniz gerekiyor.",
                 [], yonetim, [], guven, null,
-                [$"Gereken yetki: {yetkiKodu}"], kod, 1, kontorBakiye);
+                [$"Gereken yetki: {yetkiKodu}"], kod, KaynakKatalog, kontorBakiye);
         }
 
-        // MODÜL: kapalı modülün ekranı menüde hiç yoktur.
         if (modul != "")
         {
             var acik = await baglanti.TekDegerAsync<bool>(
@@ -686,7 +846,6 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
                            + "ekran menüde çıkmayabilir (Yönetim › Modül Ayarları).");
         }
 
-        // Adımlar + her adımın ekranı (yetki süzgecinden geçmiş rota).
         var adimlar = new List<Adim>();
         var ekranKodlari = new List<string>();
         if (konu["adimlar"] is string ham && ham.Length > 0)
@@ -697,18 +856,16 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
             {
                 no++;
                 var metin = oge.TryGetProperty("metin", out var mv) ? mv.GetString() ?? "" : "";
-                var ekran = oge.TryGetProperty("ekran", out var ev) ? ev.GetString() : null;
+                var ekranKodu = oge.TryGetProperty("ekran", out var ev) ? ev.GetString() : null;
                 string? rota = null;
-                if (!string.IsNullOrEmpty(ekran))
+                if (!string.IsNullOrEmpty(ekranKodu))
                 {
-                    var bilgi = await EkranBilgisiAsync(baglanti, ekran!, urunModu, baglam, iptal);
-                    // Yetkisi yoksa adım kalır ama DÜĞME çizilmez: iş akışını
-                    //   anlatmak başka, göremediği ekrana yollamak başka.
-                    if (bilgi is not null) { rota = bilgi.Rota; ekranKodlari.Add(ekran!); }
+                    var bilgi = await EkranBilgisiAsync(baglanti, ekranKodu!, urunModu, baglam, iptal);
+                    if (bilgi is not null) { rota = bilgi.Rota; ekranKodlari.Add(ekranKodu!); }
                 }
                 adimlar.Add(new Adim(oge.TryGetProperty("no", out var nv) && nv.TryGetInt32(out var n)
                                          ? n : no,
-                                     metin, ekran, rota));
+                                     metin, ekranKodu, rota));
             }
         }
 
@@ -726,10 +883,6 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
                 oneriler.Add(bilgi);
         }
 
-        // Yakın diğer konular: "bunu mu demek istediniz" yerine ekran önerisi.
-        // ADIMLAR ÖNCE, ÇEKİNCE SONRA. Eski metin düşük güvende yalnız
-        //   "sanırım şunu soruyorsunuz?" diyordu; adımlar altta dursa da
-        //   kullanıcı bunu "cevap vermedi, ekran önerdi" diye okuyordu.
         var cevap = $"**{baslik}** — {adimlar.Count} adım:";
         if (guven < 0.45m)
             cevap += " (tam emin değilim; başka bir şey kastettiyseniz sorunuzu açın)";
@@ -740,12 +893,12 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
             + "   and durum = 0 order by menu_gizli, id limit 1",
             null, [anaEkran], iptal);
 
-        await LogAsync(baglanti, baglam, soru, 1, kod, guven, null, kronometre, iptal);
+        await LogAsync(baglanti, baglam, soru, KaynakKatalog, kod, guven, istek, ekran, kronometre, iptal);
         return new Yanit(cevap, adimlar, oneriler,
                          Aksiyonlar(anaAksiyon, anaEkran, baglam), guven,
                          guven < 0.45m ? "Aradığınız bu değilse hangi ekranda "
                                        + "çalıştığınızı yazın." : null,
-                         uyarilar, kod, 1, kontorBakiye);
+                         uyarilar, kod, KaynakKatalog, kontorBakiye);
     }
 
     // ------------------------------------------------------------ ekranlar --
@@ -789,9 +942,6 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
             select e.kaynak, e.baslik, e.rota, e.yol, e.menu_grup as "menuGrup",
                    e.yetki_kodu as "yetkiKodu"
               from public.ai_rehber_ekran e
-             -- Ekran kodu ROTA da olabilir: ayni kaynagi (belge) on dort
-             --   ekran paylasiyor; konu "/belge" (Satis Faturalari) diyerek
-             --   dogru olani secer, "belge" derse ilk gorunen ekran gelir.
              where (e.rota = @p0 or e.rota = '/' || @p0 or e.kaynak = @p0)
                and e.durum = 0
                and (e.urun_modu <> 2 or @p1 in (2, 3))
@@ -807,15 +957,7 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
     private static bool YetkiVar(string? yetkiKodu, IstekBaglami baglam) =>
         string.IsNullOrEmpty(yetkiKodu) || baglam.Yetkiler.Var(yetkiKodu, Islem.Gor);
 
-    /// <summary>
-    /// Ekranın araç çubuğundaki, kullanıcının YETKİLİ olduğu aksiyonlar.
-    ///
-    /// Aksiyon ekranının adı katalogda saklanır (`aksiyon_ekrani`); yoksa
-    /// `&lt;kaynak&gt;-liste` kalıbına düşülür. Kalıp her ekranda tutmuyor:
-    /// Radyoloji Çalışma Listesi'nin kaynağı `radyoloji-istem`, aksiyon
-    /// ekranı `radyoloji-liste` - tahminle o ekranda hiçbir düğme
-    /// sayılamıyordu ve asistan "size açık işlem yok" diyordu.
-    /// </summary>
+    /// <summary>Ekranın araç çubuğundaki, kullanıcının YETKİLİ olduğu aksiyonlar.</summary>
     private static IReadOnlyList<AksiyonOnerisi> Aksiyonlar(
         string? aksiyonEkrani, string kaynak, IstekBaglami baglam)
     {
@@ -833,26 +975,38 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null)
     }
 
     // ---------------------------------------------------------------- log --
+    /// <summary>
+    /// Soru günlüğü. SORU MASKELİ yazılır (kimlik no, telefon, e-posta,
+    /// IBAN, uzun numara) - günlük bir hasta listesine dönmesin. Ekran
+    /// bağlamından yalnız kaynak kodu ve sekme adı yazılır; kayıt numarası
+    /// yazılmaz.
+    /// </summary>
     private static async Task<long?> LogAsync(
         NpgsqlConnection baglanti, IstekBaglami baglam, string soru, short kaynak,
-        string konuKod, decimal guven, Istek? istek, Stopwatch kronometre,
-        CancellationToken iptal, string model = "", int girisJeton = 0,
-        int cikisJeton = 0, decimal kontor = 0m)
+        string konuKod, decimal guven, Istek? istek, DogrulanmisBaglam? ekran,
+        Stopwatch kronometre, CancellationToken iptal, string model = "", int girisJeton = 0,
+        int cikisJeton = 0, decimal kontor = 0m, string kaynaklar = "", bool enjeksiyon = false)
     {
-        // Cevapsız soru = eksik rehber konusu. Günlük olmadan "asistan işe
-        //   yaramıyor" geri bildirimi ölçülemez. Model cevabında jeton da
-        //   yazılır: kontör fiyatı ancak gerçek tüketimle ölçülür.
+        var maskeli = PiiMaske.Uygula(soru);
+        var maskelendi = maskeli != soru;
+        var kaynakNotu = kaynaklar;
+        if (enjeksiyon) kaynakNotu = (kaynakNotu.Length > 0 ? kaynakNotu + "," : "") + "!enjeksiyon";
+        if (kaynakNotu.Length > 400) kaynakNotu = kaynakNotu[..400];
         var satir = await baglanti.TekAsync("""
             insert into public.ai_rehber_log
                    (kullanici_id, sube_id, soru, kaynak, konu_kod, guven,
                     aktif_mod, aktif_sayfa, sure_ms, model, giris_jeton, cikis_jeton,
-                    kontor)
-            values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12)
+                    kontor, ekran_kaynak, sekme, dil, kaynaklar, pii_maske)
+            values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12,
+                    @p13, @p14, @p15, @p16, @p17)
             returning id
             """, null,
-            [baglam.KullaniciId, baglam.SubeId, soru, kaynak, konuKod, guven,
-             (short)(istek?.AktifMod ?? 0), istek?.AktifSayfa ?? "",
-             (int)kronometre.ElapsedMilliseconds, model, girisJeton, cikisJeton, kontor],
+            [baglam.KullaniciId, baglam.SubeId, maskeli, kaynak, konuKod, guven,
+             (short)(istek?.AktifMod ?? 0),
+             (ekran?.Rota is { Length: > 0 } r ? r : istek?.AktifSayfa ?? "") is var sayfa && sayfa.Length > 120 ? sayfa[..120] : sayfa,
+             (int)kronometre.ElapsedMilliseconds, model, girisJeton, cikisJeton, kontor,
+             ekran?.Kaynak ?? "", ekran?.Sekme ?? "", ekran?.Dil ?? "tr", kaynakNotu,
+             (short)(maskelendi ? 1 : 0)],
             OkuyucuGenisletmeleri.Sozluk, iptal);
         return satir is null ? null : Convert.ToInt64(satir["id"]);
     }

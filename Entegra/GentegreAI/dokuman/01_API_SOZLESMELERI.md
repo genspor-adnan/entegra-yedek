@@ -1041,7 +1041,7 @@ nasıl yapılır" sorusunu cevaplar. Kayıt açmaz, değiştirmez, silmez,
 onaylamaz; hiçbir iş tablosuna yazmaz.
 
 ```http
-POST /api/ai/rehber   // { kullaniciMesaji, aktifMod?, aktifSayfa?, seciliKaynak? }
+POST /api/ai/rehber   // { kullaniciMesaji, aktifMod?, aktifSayfa?, seciliKaynak?, baglam? (871, bkz. §9.17) }
 ```
 
 Yanıt:
@@ -1055,7 +1055,7 @@ Yanıt:
 | `guvenSkoru` | 0–1; panelde açıkça yazılır |
 | `eksikBilgiSorusu` | Emin olunmadığında sorulacak tek soru |
 | `uyarilar[]` | Ön koşul, yetki ve kapalı modül notları |
-| `konuKod`, `kaynakTuru` | 1 katalog konusu · 2 ekran eşleşmesi · 3 bağlamsal · 5 model · **6 rol tanımı** · 0 eşleşme yok |
+| `konuKod`, `kaynakTuru` | 1 katalog konusu · 2 ekran eşleşmesi · 3 bağlamsal · 5 model · **6 rol tanımı** · 7 kapsam dışı (klinik, 871) · 8 yardım belgesi (871) · 0 eşleşme yok |
 | `kontorBakiye` | Kontör bakiyesi (katalog cevabı ücretsizdir) |
 
 **Bağlam serbest metin DB erişimi DEĞİL.** Model bağlansa da göreceği bağlam
@@ -1261,6 +1261,114 @@ Yetki: hepsi `entegrasyon` (pano ve kart GÖR, işlemler DEĞİŞTİR).
 Rehber kataloğu ve "e-Nabız süreci" konusu `db/454` ile güncellenir.
 
 ---
+
+---
+
+## 9.17 Bağlamsal yardım asistanı (871)
+
+AI Rehber (447-450), kullanıcının **bulunduğu ekranı sunucuda doğrulayan**
+bağlamsal yardım asistanına dönüştü. Sözleşme geriye uyumlu: `aktifSayfa`
+gönderen eski istemci aynı uçtan aynı alanları alır; yeni alanlar eklendi.
+
+```http
+POST /api/ai/rehber            // { kullaniciMesaji, aktifMod?, aktifSayfa?, seciliKaynak?, baglam? }
+GET  /api/ai/ekran-baglami     // ?rota&kaynak&kayitId&sekme&hataKodu&dil  → doğrulanmış ekran + önerilen sorular
+GET  /api/ai/yardim/dizin      // yardım dizini durumu (sürüm, belge/parça sayısı; hatalar yalnız ai.yardim yetkisine)
+POST /api/ai/yardim/indeksle   // belgeleri yeniden okur (yetki: ai.yardim Değiştir)
+```
+
+### İstemcinin gönderdiği bağlam — yalnız kimlik
+
+`baglam` nesnesi altı alandan ibarettir; başka anahtar **yok sayılır**:
+
+| Alan | Ne | Sunucuda nasıl doğrulanır |
+|---|---|---|
+| `rota` | `/hasta/5057` | Yalnız `[a-z0-9-_/]`, 120 karakter; kök `ai_rehber_ekran.rota` ile eşleşmeli, yoksa bağlam boş |
+| `kaynak` | Liste kaynak kodu | Kataloğun kaynağıyla tutmazsa **atılır**, kataloğunki kullanılır |
+| `kayitId` | Açık kaydın numarası | Kart kataloğunda karşılığı ve kullanıcıda GÖR yetkisi yoksa atılır; **varlığı sorgulanmaz** (görülemeyen kaydı ayırt ettirmez) |
+| `sekme` | Kart grubu / detay adı | Kart kataloğundaki grup/detay adlarıyla eşleşmeli |
+| `hataKodu` | §1.2 kodu ya da engel kodu (`BD_ONAY`, `KARANTINA`, `SERBEST_EKSIK`) | Bilinen listede değilse atılır |
+| `dil` | `tr` · `en` · `de` | Başkası `tr` |
+
+İstemci **DOM, satır verisi, hasta adı, kimlik no, tanı** göndermez;
+gönderse de sunucu okumaz. Yetkisi olmayan ekranda kimlik (yol/başlık)
+kalır - "bu ekrana yetkiniz yok" denebilsin - ama alan, kolon, sekme,
+aksiyon listeleri ve kayıt numarası **boşaltılır**.
+
+Sunucu bağlama şunları ekler (istemci gönderemez): ürün modu (şube
+profilinden), aktif şube, görünür kolonlar ve kart alanları (**alan yetkisi**
+süzgecinden geçmiş, `AlanOkunur`), kart sekmeleri, yetkili aksiyonlar
+(`AksiyonKatalogu.Yetkili`), hata kodunun açıklaması.
+
+### Yanıta eklenen alanlar
+
+| Alan | Ne |
+|---|---|
+| `ekran` | `{ bulundu, yetkili, kaynak, rota, baslik, yol, sekme?, kayitVar, hataKodu? }` — panelin "Şu ekran hakkında soruyorsunuz" satırı; içerik yok |
+| `kaynaklar[]` | `{ id, baslik, belge }` — cevabın dayandığı yardım belgesi parçaları (`hasta-arama-kayit#adim-adim`) |
+| `adimlar[].aksiyon` | Adımın işaret ettiği **yetkili** aksiyon kodu (panel düğme adını rozet olarak çizer) |
+| `modelKullanildi`, `model`, `dil` | Cevabı model mi yazdı; hangi model; cevap dili |
+| `kaynakTuru` | eskilere ek: **7 kapsam dışı (klinik soru)** · **8 yardım belgesi** |
+
+### Kaynak önceliği ve akış
+
+1. **Klinik soru** (tanı, tedavi, doz, ilaç seçimi, sonuç yorumu kalıpları) → sabit
+   "hekime danışın" cevabı, `kaynakTuru 7`; **modele hiç gitmez**, kontör düşmez.
+2. **Hata açıklaması**: bağlamda hata kodu var ve soru "bu hata ne demek" ise
+   kod → ne oldu → ne yapılır (sabit sözlük, `HataAciklamalari`). Kod yoksa
+   uydurmaz; "kodu yazın" der.
+3. **Rol sorusu** (789), 4. **bağlamsal ekran yardımı** (yetkili / yetkisiz
+   ayrı), 5. **rehber konusu** (447), 6. **model** (yalnız katalog boş kaldıysa;
+   bağlam = doğrulanmış ekran + yetkili ekranlar + yardım parçaları `[K1]..` +
+   konu özetleri), 7. **yardım belgesi** doğrudan (model yoksa; `kaynakTuru 8`),
+   8. ekran eşleşmesi, 9. "bilgi yetmiyor" (uydurma yok).
+
+### Yardım bilgi tabanı
+
+`dokuman/yardim/*.md` — ürünle yayınlanır (`yardim/` klasörü, csproj kopyalar),
+bellekte dizinlenir. Ön-madde: `id` (kararlı), `baslik`, `modul`, `ekran`
+(kaynak kodu), `rota`, `surec`, `roller`, `dil`, `surum`, `urun_modu`, `yetki`,
+`erisim` (`kullanici` · `yonetici` · `ic` — iç belge asistana hiç verilmez),
+`ozet`, `guncelleme`, `dogrulama` (`kod-incelemesi` · `insan-dogrulama-bekliyor`).
+Gövde `##` başlıklarıyla parçalanır; "Örnek sorular" maddeleri panelin
+önerilen sorularıdır. Arama sözlükseldir (gömme yok: dış bağımlılık ve veri
+çıkışı istenmedi). Dizin sürümü = uygulama sürümü + içerik özeti (aynı belge
+kümesi aynı damga). Yeniden dizinleme: `POST /api/ai/yardim/indeksle` ya da
+`dotnet run --project src/Gentegre.Api -- --yardim-dizin` (yalnız doğrular,
+sunucuyu açmaz). Belge içeriğinde SQL, tablo adı, anahtar, sistem yönergesi
+ve yetkisiz alan bulunmaz; kod davranışı kullanıcı diline çevrilir.
+
+### Model ve gizlilik
+
+Sistem yönergesi sabit C# metnidir (`RehberModeli.SistemYonergesi`);
+kullanıcı sorusu ve belge parçaları `<<< >>>` ayraçları içinde **veri** olarak
+verilir. Çıktıdaki `ekran` beyaz listede, `aksiyon` yetkili aksiyon
+listesinde, `kaynaklar` verilen kimliklerde olmak zorunda; uymayan atılır.
+Kaynağa dayanmayan cevabın güveni 0,6'yı aşamaz. `kapsamDisi=true` dönerse
+sabit cevap verilir.
+
+Soru metni sağlayıcıya ve günlüğe **`PiiMaske`**'den geçerek gider: kimlik
+no (11 hane), telefon, e-posta, IBAN ve 7+ haneli her sayı dizisi yer
+tutucuyla değiştirilir (`[kimlik-no]`, `[telefon]`, `[e-posta]`, `[IBAN]`,
+`[numara]`). `ai_rehber_log` yeni kolonlar: `ekran_kaynak`, `sekme`, `dil`,
+`kaynaklar`, `pii_maske`; kayıt numarası günlüğe yazılmaz. Sohbet
+(`ai_sohbet`) artık `sube_id` taşır; sohbet yalnız sahibi ve açıldığı şubede
+okunur, `/sor` gövdesindeki `baglam` sözlüğünden yalnız tanımlı altı anahtar
+alınır. Sohbet geçmişi modele **hiç** verilmez - her soru bağımsızdır, eski
+izinle görülen şey yeni soruya taşınamaz.
+
+Saklama: `referans` `ai.log_saklama_gun` (90), `ai.sohbet_saklama_gun` (365);
+zamanlı iş `ai.temizlik` her gece `fn_ai_temizle()` çağırır.
+`ai.saglayici_veri_saklama` bilgi amaçlıdır (sağlayıcı sözleşmesi).
+
+### Panel (web)
+
+"Yapay Zekâya Sor" düğmesi her ekranda; açılınca `GET /api/ai/ekran-baglami`
+ile "Şu ekran hakkında soruyorsunuz: …" satırı ve ekrana özel önerilen sorular
+gelir. Rota değişince cevap, öneriler, son hata izi ve açık kayıt bağlamı
+sıfırlanır. Yönlendirme yalnız sunucunun döndürdüğü `rota` ile; model
+metnindeki adres çalıştırılmaz. 401/403/404/429/5xx/ağ hataları ayrı metinle
+gösterilir; Esc kapatır, `role="dialog"` + `aria-live`.
 
 ---
 

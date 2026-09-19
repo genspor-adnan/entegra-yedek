@@ -104,7 +104,10 @@ export function YapayZeka() {
   const kaydir = (r: React.RefObject<HTMLDivElement | null>) =>
     r.current?.scrollIntoView({ block: 'nearest' });
 
+  // MODEL ETİKETİ (871): "tanımlı değil" sabiti eskimişti; sunucu anahtar varsa modeli söyler.
+  const [modelAdi, setModelAdi] = useState('tanımlı değil');
   const listeYukle = useCallback(async () => {
+    try { const d = await api.aiYardimDizin(); setModelAdi(d.modelHazir ? d.model : 'tanımlı değil') } catch { /* etiket */ }
     const y = await api.aiSohbetler();
     setSohbetler(y.sohbetler ?? []);
     setAraclar(y.araclar ?? []);
@@ -184,7 +187,7 @@ export function YapayZeka() {
         <button className="d" onClick={() => kaydir(guvenlikRef)}>🛡 Güvenlik Kuralları</button>
         <button className="d" onClick={() => kaydir(logRef)}>📜 AI Log</button>
         <span className="msj-durum">
-          Model: <b>tanımlı değil</b> · Yetki: <b>{kullanici?.ad ?? ''}</b>
+          Model: <b>{modelAdi}</b> · Yetki: <b>{kullanici?.ad ?? ''}</b>
           {bekleyen > 0 && <> · Onay bekleyen taslak: <b>{bekleyen}</b></>}
         </span>
       </div>
@@ -418,7 +421,7 @@ export function YapayZeka() {
             <div className="msj-kv"><span>{c('Açık ekran')}</span><b>Yapay Zeka</b></div>
             <div className="msj-kv"><span>Kullanıcı</span><b>{kullanici?.ad ?? ''}</b></div>
             <div className="msj-kv"><span>Şube</span><b>{kullanici?.subeler?.find(x => x.id === kullanici?.subeId)?.ad ?? ''}</b></div>
-            <div className="msj-kv"><span>Model</span><b>tanımlı değil</b></div>
+            <div className="msj-kv"><span>Model</span><b>{modelAdi}</b></div>
           </div>
 
           <div className="kagrup" ref={fonkRef}>
@@ -444,7 +447,7 @@ export function YapayZeka() {
           <div className="kagrup" ref={kullanimRef}>
             <h6>{c('Kullanım / maliyet')}</h6>
             <div className="msj-kv"><span>{c('Bu sohbet')}</span><b>{sayac.token} token</b></div>
-            <div className="msj-kv"><span>Model</span><b>tanımlı değil</b></div>
+            <div className="msj-kv"><span>Model</span><b>{modelAdi}</b></div>
             <div className="not">
               Model bağlanınca token ve tahmini maliyet buradan izlenecek;
               çağrı sayısı ve okunan kayıt şimdiden sayılıyor.

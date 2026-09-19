@@ -3072,6 +3072,19 @@ input.skt-gecmis {
 }
 .rehber-bas .d { margin-left: auto; height: 22px; padding: 0 8px }
 .rehber-not { font-size: 11px; color: var(--soluk) }
+/* ŞU EKRAN HAKKINDA (871): sunucunun doğruladığı ekran bağlamı. */
+.rehber-baglam {
+  padding: 6px 10px; font-size: 11.5px; line-height: 1.45;
+  background: var(--yuz2); border-bottom: 1px solid var(--cizgi2); color: var(--yazi2);
+}
+.rehber-baglam-uyari { color: var(--uyari); font-weight: 600 }
+.rehber-baglam-hata { color: var(--hata, #b3261e) }
+.rehber-kaynak { margin-bottom: 8px; line-height: 1.5 }
+.rehber-aksiyon-rozet {
+  display: inline-block; margin-left: 6px; padding: 0 6px; font-size: 11px; line-height: 18px;
+  border: 1px dashed var(--dugkenar); border-radius: var(--r); color: var(--yazi2);
+}
+.rehber-hata-yetki { border-left: 3px solid var(--uyari) }
 .rehber-govde { padding: 10px; overflow: auto; flex: 1; font-size: 12px }
 .rehber-cevap { margin: 0 0 8px; line-height: 1.55 }
 

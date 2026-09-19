@@ -2,6 +2,7 @@ import {
   ApiHatasi,
   type GirisYaniti, type HataGovdesi,
   } from './sozlesme';
+import { hataIziKaydet } from './hataIzi';
 
 /**
  * TEK ISTEK NOKTASI: token, `X-Sube-Id`, 401'de otomatik yenileme.
@@ -98,6 +99,8 @@ async function ham(yol: string, secenek: RequestInit, jsonGovde: boolean,
     } catch {
       govde = { kod: 'SUNUCU', mesaj: `Sunucuya ulasilamadi (${yanit.status}).`, izlemeNo: '' };
     }
+    // SON HATA İZİ (871): yalnız kod - asistan "bu hata ne demek" diye açıklar.
+    hataIziKaydet(govde.kod, (govde.engel as { kod?: string } | undefined)?.kod);
     throw new ApiHatasi(yanit.status, govde);
   }
   return yanit;

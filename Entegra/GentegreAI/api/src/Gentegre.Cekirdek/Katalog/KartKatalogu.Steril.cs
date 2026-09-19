@@ -18,6 +18,7 @@ public static partial class KartKatalogu
     private const int LogSterilKullanim  = 1347;
     private const int LogSterilBakim     = 1348;
     private const int LogSterilGeriCagirma = 1349;
+    private const int LogSterilDonguIndikator = 1350;   // döngü detayı (denetim izi ayrı tablo)
 
     private static readonly Dictionary<string, string> SterilAktifKodlari = new() { ["1"] = "Aktif", ["0"] = "Pasif" };
     private static readonly Dictionary<string, string> SterilCihazDurum = new() { ["1"] = "Aktif", ["2"] = "Bakım gerekli", ["0"] = "Pasif" };
@@ -209,6 +210,6 @@ public static partial class KartKatalogu
                 new("konum",  "konum",  "metin", EnFazlaUzunluk: 60, Baslik: "Konum"),
                 new("sonuc",  "sonuc",  "kod",   KodListesi: "steril.indikator_sonuc", Baslik: "Sonuç"),
                 new("notu",   "notu",   "metin", EnFazlaUzunluk: 200, Baslik: "Not"),
-            }, Sirala: "tur, id", Baslik: "İndikatörler", LogTabloId: LogSterilDongu, SubeKolonu: null),
+            }, Sirala: "tur, id", Baslik: "İndikatörler", LogTabloId: LogSterilDonguIndikator, SubeKolonu: null),
         });
 }

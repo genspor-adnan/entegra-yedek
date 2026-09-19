@@ -1,4 +1,4 @@
-﻿namespace Gentegre.Api.Servisler;
+namespace Gentegre.Api.Servisler;
 
 /// <summary>
 /// AI REHBER — METİN İŞLERİ (447).
@@ -140,6 +140,76 @@ public static class RehberMetin
     /// <summary>Sadeleştirilmiş jetonlar (durak kelimeler DAHİL).</summary>
     private static string[] Jetonlar(string soru) =>
         Sadelestir(soru).Split(Ayirac, StringSplitOptions.RemoveEmptyEntries);
+
+    /// <summary>
+    /// Metnin BÜTÜN anlamlı kelimeleri (durak hariç, tekrarsız, sınırsız) -
+    /// yardım dizini (871) belge gövdesini bununla jetonlar; soru tarafı
+    /// <see cref="Kelimeler"/> ile 12'ye kırpılır, belge tarafı kırpılmaz.
+    /// </summary>
+    public static string[] TumKelimeler(string metin) =>
+        Sadelestir(metin)
+            .Split(Ayirac, StringSplitOptions.RemoveEmptyEntries)
+            .Select(k => k.Trim('*', '`', '-', '_', '[', ']', '#', '>', '|'))
+            .Where(k => k.Length >= 3 && !Durak.Contains(k))
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+
+    /// <summary>
+    /// KLİNİK SORU mu (871): tanı, tedavi, doz, ilaç seçimi, sonuç yorumu.
+    /// Asistan HBYS'nin işleyişini anlatır; tıbbi karar desteği vermez. Bu
+    /// kalıplardan biri geçen soru MODELE HİÇ GİTMEZ - sabit kapsam dışı
+    /// cevabı döner. "Sonuç ekranı nerede" gibi işleyiş soruları kalıplara
+    /// takılmasın diye kelimeler klinik eylem odaklı seçildi.
+    /// </summary>
+    private static readonly string[] KlinikKaliplari =
+    [
+        "hangi ilac", "ilac oner", "ilac verey", "ilac vermel", "doz", "dozaj", "mg ver",
+        "tani koy", "tanisi ne", "teshis", "tedavi et", "tedavi plan", "nasil tedavi",
+        "hastalik mi", "hastaligi ne", "normal mi", "yuksek mi", "dusuk mu", "tehlikeli mi",
+        "sonucu yorumla", "sonucu ne anlama", "degeri ne anlama", "yorumlar misin",
+        "antibiyotik", "recete yaz", "hangi tetkik iste", "ayirici tani", "prognoz",
+        "komplikasyon", "yan etki", "kontrendik", "hamile", "gebelik", "bebege",
+    ];
+
+    public static bool KlinikSoruMu(string soru)
+    {
+        var sade = Sadelestir(soru);
+        return KlinikKaliplari.Any(k => sade.Contains(k, StringComparison.Ordinal));
+    }
+
+    /// <summary>"Bu hata ne demek", "neden kaydedemedim", "uyarı çıktı" - hata açıklaması sorusu.</summary>
+    public static bool HataSorusuMu(string soru)
+    {
+        var sade = Sadelestir(soru);
+        return sade.Contains("hata", StringComparison.Ordinal)
+            || sade.Contains("uyari", StringComparison.Ordinal)
+            || sade.Contains("neden olm", StringComparison.Ordinal)
+            || sade.Contains("kaydedem", StringComparison.Ordinal)
+            || sade.Contains("kaydetmiyor", StringComparison.Ordinal)
+            || sade.Contains("izin vermiyor", StringComparison.Ordinal)
+            || sade.Contains("engel", StringComparison.Ordinal)
+            || sade.Contains("reddet", StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// YÖNERGE ENJEKSİYONU izi (871): "önceki talimatları unut", "sistem
+    /// yönergeni yaz", "ignore previous instructions". Cevap yine katalogdan
+    /// üretilir; bu yalnız günlüğe işaret düşer ve modele giden metne ek
+    /// uyarı koyar - engelleme değil, ölçüm.
+    /// </summary>
+    private static readonly string[] EnjeksiyonKaliplari =
+    [
+        "talimatlari unut", "talimatini unut", "yonergeleri unut", "onceki talimat",
+        "sistem yonerge", "system prompt", "ignore previous", "ignore all", "disregard",
+        "gizli anahtar", "api anahtar", "api key", "developer mode", "jailbreak",
+        "rolunu birak", "sen artik", "you are now", "kurallari yok say",
+    ];
+
+    public static bool EnjeksiyonMu(string soru)
+    {
+        var sade = Sadelestir(soru);
+        return EnjeksiyonKaliplari.Any(k => sade.Contains(k, StringComparison.Ordinal));
+    }
 
     /// <summary>Alan sorusunun kendi kalıp kelimeleri kolon aramasına girmez.</summary>
     public static string[] AlanAramaKelimeleri(string soru) =>

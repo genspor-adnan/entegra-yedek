@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler;
+using Gentegre.Api.Servisler.Yardim;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -59,8 +60,64 @@ public static class AiUclari
                 yanit.Cevap, yanit.Adimlar, yanit.OnerilenEkranlar,
                 yanit.OnerilenAksiyonlar, yanit.GuvenSkoru, yanit.EksikBilgiSorusu,
                 yanit.Uyarilar, yanit.KonuKod, yanit.KaynakTuru, yanit.KontorBakiye,
+                yanit.ModelKullanildi, yanit.Model,
+                // BAĞLAMSAL YARDIM (871): doğrulanmış ekran özeti + yardım belgesi atıfları.
+                yanit.Ekran, kaynaklar = yanit.Kaynaklar ?? [], yanit.Dil,
                 izlemeNo = baglam.IzlemeNo,
             });
+        });
+
+        // GET /api/ai/ekran-baglami - panel açılınca / rota değişince (871).
+        //   İstemcinin ipucu (rota, kaynak, kayıt no, sekme, hata kodu, dil)
+        //   sunucuda doğrulanır; dönen şey "şu ekran hakkında soruyorsunuz"
+        //   satırı, önerilen sorular ve yetkili düğme adlarıdır. Kayıt
+        //   içeriği okunmaz, kontör harcanmaz, günlüğe yazılmaz.
+        grup.MapGet("/ekran-baglami", async (
+            string? rota, string? kaynak, long? kayitId, string? sekme, string? hataKodu,
+            string? dil, RehberServisi rehber, BaglamCozucu cozucu, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("ai.rehber", Islem.Gor);
+            var (ekran, sorular, aksiyonlar) = await rehber.EkranBaglamiAsync(
+                new IstemciBaglami(rota, kaynak, kayitId, sekme, hataKodu, dil), baglam, iptal);
+            return Results.Ok(new { ekran, onerilenSorular = sorular, aksiyonlar,
+                                    izlemeNo = baglam.IzlemeNo });
+        });
+
+        // ------------------------------------------------ yardım dizini ---
+        // GET  /api/ai/yardim/dizin    - dizin durumu (sürüm, belge/parça sayısı, hatalar).
+        // POST /api/ai/yardim/indeksle - belgeleri sıfırdan okur (ai.yardim yetkisi).
+        //   Dizin bellek içi: yeniden başlatma da yeniler; bu uç sunucuyu
+        //   durdurmadan yeni belgeyi almak içindir.
+        grup.MapGet("/yardim/dizin", async (
+            YardimDizini dizin, RehberModeli model, BaglamCozucu cozucu, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("ai.rehber", Islem.Gor);
+            var d = dizin.DurumAl();
+            // Belge listesi ve hatalar yönetim bilgisi; sıradan kullanıcı yalnız sayıları görür.
+            var yonetici = baglam.Yetkiler.Var("ai.yardim", Islem.Gor);
+            return Results.Ok(new
+            {
+                d.Surum, d.OlusturmaZamani, d.BelgeSayisi, d.ParcaSayisi,
+                // Model bağlı mı (anahtar + ayar): sohbet ekranının "Model" etiketi buradan.
+                modelHazir = model.Hazir, model = model.Hazir ? model.Ad : "",
+                klasor = yonetici ? d.Klasor : "",
+                hatalar = yonetici ? d.Hatalar : [],
+                belgeler = yonetici ? d.Belgeler : [],
+            });
+        });
+
+        grup.MapPost("/yardim/indeksle", async (
+            YardimDizini dizin, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("ai.yardim", Islem.Degistir);
+            var d = dizin.YenidenIndeksle();
+            return Results.Ok(new { d.Surum, d.BelgeSayisi, d.ParcaSayisi, d.Hatalar,
+                                    izlemeNo = baglam.IzlemeNo });
         });
 
         // ----------------------------------------------- kontrollu oneri --
@@ -111,9 +168,12 @@ public static class AiUclari
                 select s.id, s.baslik, s.son_tarih as "sonTarih", s.token_toplam as "token",
                        (select count(*) from public.ai_mesaj m where m.sohbet_id = s.id)::int as "mesajSayisi"
                   from public.ai_sohbet s
+                 -- ŞUBE İZOLASYONU (871): sohbet açıldığı şubede görünür; eski
+                 --   (şubesiz) satırlar yalnız sahibine, her şubede.
                  where s.kullanici_id = @p0 and s.durum = 1
+                   and (s.sube_id is null or s.sube_id = @p1)
                  order by s.son_tarih desc limit 30
-                """, null, [baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, null, [baglam.KullaniciId, baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // Araç kataloğu: kullanıcının YETKİSİ OLANLAR (mockup "İzinli
             //   Fonksiyonlar"). Yetkisiz fonksiyonu listede göstermek,
@@ -145,8 +205,8 @@ public static class AiUclari
 
             await using var baglanti = await veri.AcAsync(iptal);
             var yeni = await baglanti.TekAsync("""
-                insert into public.ai_sohbet (kullanici_id) values (@p0) returning id
-                """, null, [baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
+                insert into public.ai_sohbet (kullanici_id, sube_id) values (@p0, @p1) returning id
+                """, null, [baglam.KullaniciId, baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             return Results.Ok(new { id = Convert.ToInt32(yeni!["id"]) });
         });
@@ -162,8 +222,10 @@ public static class AiUclari
             await using var baglanti = await veri.AcAsync(iptal);
             var sohbet = await baglanti.TekAsync("""
                 select s.id, s.baslik, s.baglam, s.model, s.token_toplam as "token"
-                  from public.ai_sohbet s where s.id = @p0 and s.kullanici_id = @p1
-                """, null, [sohbetId, baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal)
+                  from public.ai_sohbet s
+                 where s.id = @p0 and s.kullanici_id = @p1
+                   and (s.sube_id is null or s.sube_id = @p2)
+                """, null, [sohbetId, baglam.KullaniciId, baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal)
                 ?? throw GentegreHatasi.Bulunamadi("Sohbet bulunamadı.");
 
             var mesajlar = await baglanti.ListeAsync("""
@@ -213,19 +275,26 @@ public static class AiUclari
 
             await using var baglanti = await veri.AcAsync(iptal);
             var sahip = await baglanti.TekAsync(
-                "select 1 from public.ai_sohbet where id = @p0 and kullanici_id = @p1",
-                null, [sohbetId, baglam.KullaniciId], OkuyucuGenisletmeleri.Sozluk, iptal);
+                "select 1 from public.ai_sohbet where id = @p0 and kullanici_id = @p1"
+                + " and (sube_id is null or sube_id = @p2)",
+                null, [sohbetId, baglam.KullaniciId, baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
             if (sahip is null) throw GentegreHatasi.Bulunamadi("Sohbet bulunamadı.");
 
             var soru = (istek.Metin ?? "").Trim();
             if (soru.Length == 0 && string.IsNullOrWhiteSpace(istek.Arac))
                 throw GentegreHatasi.IsKurali("Soru boş olamaz.");
 
-            // Kullanıcı mesajı + ilk soruda sohbet başlığı (mockup sol liste).
+            // İSTEMCİ BAĞLAMI DARALTILIR (871): serbest sözlük yerine yalnız
+            //   tanımlı anahtarlar (rota, kaynak, kayitId, sekme, hataKodu, dil)
+            //   alınır; sohbete de yalnız bu daraltılmış hali yazılır. Eskiden
+            //   istemcinin gönderdiği her şey jsonb olarak saklanıyordu.
+            var istemciBaglami = IstemciBaglamiOku(istek.Baglam);
+
+            // Kullanıcı mesajı MASKELİ saklanır: sohbet metni hasta listesine dönmesin.
             var kMesaj = await baglanti.TekAsync("""
                 insert into public.ai_mesaj (sohbet_id, rol, metin) values (@p0, 1, @p1)
                 returning id
-                """, null, [sohbetId, soru], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, null, [sohbetId, PiiMaske.Uygula(soru)], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             await baglanti.CalistirAsync("""
                 update public.ai_sohbet
@@ -235,8 +304,9 @@ public static class AiUclari
                        baglam = case when @p2::jsonb is null then baglam else @p2::jsonb end
                  where id = @p0
                 """, null,
-                [sohbetId, soru,
-                 istek.Baglam is null ? null : JsonSerializer.Serialize(istek.Baglam)], iptal);
+                [sohbetId, PiiMaske.Uygula(soru),
+                 istemciBaglami is null ? null : JsonSerializer.Serialize(istemciBaglami,
+                     new JsonSerializerOptions(JsonSerializerDefaults.Web))], iptal);
 
             // ---------------------------------------------- fonksiyon çağrısı
             if (!string.IsNullOrWhiteSpace(istek.Arac))
@@ -293,9 +363,7 @@ public static class AiUclari
             // Rehber cevabı: adımlar + yetkili ekranlar. Yetki süzgeci
             //   rehberin içinde; burada yalnız METNE çevriliyor.
             var rehberYanit = await rehber.CevaplaAsync(
-                new RehberServisi.Istek(soru, null, istek.Baglam is not null
-                    && istek.Baglam.TryGetValue("rota", out var r) ? r?.ToString() : null,
-                    null),
+                new RehberServisi.Istek(soru, null, istemciBaglami?.Rota, null, istemciBaglami),
                 baglam, iptal);
 
             var kalem = new StringBuilder(rehberYanit.Cevap);
@@ -308,6 +376,9 @@ public static class AiUclari
                              rehberYanit.OnerilenEkranlar.Select(e => e.Yol)));
             foreach (var u in rehberYanit.Uyarilar)
                 kalem.AppendLine().AppendLine().Append("⚠ ").Append(u);
+            if (rehberYanit.Kaynaklar is { Count: > 0 } atif)
+                kalem.AppendLine().AppendLine().Append("Kaynak: ")
+                     .Append(string.Join(" · ", atif.Select(a => a.Baslik)));
             if (rehberYanit.EksikBilgiSorusu is { Length: > 0 } ek)
                 kalem.AppendLine().AppendLine().Append(ek);
 
@@ -418,6 +489,22 @@ public static class AiUclari
     private readonly record struct TaslakCiktisi(short Tip, string Baslik, string Icerik);
 
     /// <summary>
+    /// Sohbet ucunun serbest `baglam` sözlüğünden YALNIZ tanımlı anahtarlar
+    /// (871). Bilinmeyen anahtar (ekran metni, satır verisi, DOM) atılır -
+    /// doğrulama zaten RehberServisi'nde; burası sızıntıyı kapıda keser.
+    /// </summary>
+    internal static IstemciBaglami? IstemciBaglamiOku(Dictionary<string, object?>? sozluk)
+    {
+        if (sozluk is null || sozluk.Count == 0) return null;
+        string? Metin(string ad) => sozluk.TryGetValue(ad, out var v) && v is not null
+            ? v.ToString() is { Length: > 0 and <= 120 } m ? m : null : null;
+        long? Sayi(string ad) => sozluk.TryGetValue(ad, out var v) && v is not null
+            && long.TryParse(v.ToString(), out var n) && n > 0 ? n : null;
+        return new IstemciBaglami(Metin("rota"), Metin("kaynak"), Sayi("kayitId"), Metin("sekme"),
+                                  Metin("hataKodu"), Metin("dil"));
+    }
+
+    /// <summary>
     /// İZİNLİ FONKSİYON GÖVDELERİ (343). Model buraya erişmez - uçlar çağırır,
     /// SQL burada durur ve her sorgu kullanıcının şubesiyle sınırlıdır.
     /// </summary>
@@ -468,11 +555,14 @@ public static class AiUclari
                            round(sum(d.min_stok), 2) as "minStok"
                       from public.stok_durum d
                       join public.stok s on s.id = d.stok_id
+                      join public.depo dp on dp.id = d.depo_id
                      where coalesce(d.min_stok, 0) > 0
+                       -- ŞUBE (871): asistan başka şubenin deposunu saymaz.
+                       and dp.sube_id = any(public.fn_sube_depo_subeleri(@p0))
                      group by s.id, s.kod, s.ad
                     having sum(d.kalan) < sum(d.min_stok)
                      order by (sum(d.min_stok) - sum(d.kalan)) desc limit 20
-                    """, null, [], OkuyucuGenisletmeleri.Sozluk, iptal);
+                    """, null, [baglam.SubeId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
                 return (satirlar.Count == 0
                         ? "Minimum seviyenin altına düşen ürün yok."
