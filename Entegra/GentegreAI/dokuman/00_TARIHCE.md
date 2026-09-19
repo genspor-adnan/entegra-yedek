@@ -15551,3 +15551,20 @@ zimmet. Sorumludan iki farkı var:
 
 Kuruldu (20 yetki), kadro ağacında Teknik Servis Sorumlusu'nun altına bağlandı.
 Tanımlı rol 76.
+
+## Hastane Müdürü
+
+Kullanıcı: *"Hastane Müdürü ekle"*.
+
+**Başhekimin yatayı:** tıbbi hizmet başhekimde, idari ve destek hizmetler
+burada - personel, satınalma, depo, demirbaş, teknik, otelcilik ve bütçe
+takibi. İkisi de mesul müdüre bağlı.
+
+**Hasta dosyası yok.** Müdür hasta adını, tanısını ve sonucunu görmez; işi
+yatak/doluluk sayıları ve kaynaklardır. O sayıları döküm ve pano ekranları
+veriyor - kişiye inen ekran açmak, idari kadroya tıbbi kayıt açmak olurdu.
+
+Mali taraf **salt okuma**: harcamayı görür, fiş kesmez. İmza tarafında idari
+kadronun âmiri (izin/avans/masraf) ve satınalma birim onayı var (4 imza).
+
+Kuruldu: 54 yetki. Tanımlı rol 77. Ağaçta üst yönetimin altında.

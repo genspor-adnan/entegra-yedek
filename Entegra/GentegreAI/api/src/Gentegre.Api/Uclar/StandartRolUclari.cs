@@ -253,6 +253,39 @@ public static class StandartRolUclari
         //      Ucu de BIRIM AMIRIDIR: izin/avans/masraf zincirinin ilk imzasi
         //      (738, sahip_turu 3 - kimin talebini imzalayacagini kadro agaci
         //      soyler, rol yalnizca "imzalayabilir" der).
+        // HASTANE MUDURU (kullanici: "Hastane Müdürü ekle"): baShekimin
+        //   YATAYI - tibbi hizmet baShekimde, IDARI ve DESTEK hizmetler
+        //   burada (personel, satinalma, depo, teknik, otelcilik, butce
+        //   takibi). Ikisi de mesul mudure baglidir.
+        //
+        //   HASTA DOSYASI YOK: mudur hasta adini, tanisini, sonucunu gormez -
+        //   isi yatak/doluluk sayilari ve kaynaklardir. Sayilari `dokum` ve
+        //   pano ekranlari veriyor; kisiye inen ekran acmak, idari kadroya
+        //   tibbi kayit acmak olurdu.
+        new("hastane_muduru", "Hastane Müdürü",
+            "İdari ve destek hizmetler: personel, satınalma, depo, demirbaş, teknik ve otelcilik; "
+            + "bütçe takibi ve idari kadronun izin imzası. Hasta dosyası görmez.",
+            ["tip_merkezi", "hastane"],
+            K(Y("personel"), T("rol"), T("islem_log"),
+              // İK: idari kadronun amiri.
+              Y("ik.izin"), Y("ik.avans"), Y("ik.masraf"), T("ik.izin_hak"), T("ik.tatil"),
+              A("ik.izin_onay_amir"), A("ik.avans_onay_amir"), A("ik.masraf_onay_amir"),
+              // Tedarik ve kaynak.
+              Y("satinalma"), Y("satinalma.talep"), T("satinalma.teklif"),
+              T("satinalma.siparis"), T("satinalma.kabul"), T("satinalma.butce"),
+              T("satinalma.sozlesme"), A("satinalma.onay_birim"),
+              Y("stok"), Y("depo"), T("uts"),
+              Y("demirbas"), T("demirbas.envanter"), T("demirbas.kalibrasyon"),
+              Y("demirbas.isemri"), T("demirbas.ariza"), T("demirbas.bakim"),
+              Y("demirbas.zimmet"), T("servis"), T("cihaz"),
+              // Mali taraf SALT OKUMA: harcamayi gorur, fisi kesmez.
+              T("belge"), T("belge_satir"), T("kasa_islem"), T("mali_hareket"),
+              T("cari"), T("kurum"), T("hizmet"), T("fiyat_listesi"), T("masraf"),
+              T("masraf_merkezi"),
+              // Kalite ve dokuman: idari sureclerin sahibi.
+              T("klinik_kalite"), T("klinik_kalite.donem"), Y("dokuman.onayla"),
+              // Yatak ve doluluk SAYILARI - hasta kaydi degil.
+              T("yatan.yatak"), T("acil.yatak"), T("ameliyathane.salon"))),
         new("bashekim", "Başhekim",
             "Tıbbi hizmetin tamamı: hekim kadrosu ve çalışma planı, poliklinik/yatan/ameliyathane akışı, klinik kalite hedefi, prim onayı ve ekibinin izin imzası.",
             ["tip_merkezi", "hastane"],
