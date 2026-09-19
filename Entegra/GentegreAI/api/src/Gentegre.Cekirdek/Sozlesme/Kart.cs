@@ -86,7 +86,17 @@ public sealed record KartAlanMeta(
     /// kullanici kaydetmeyi beklemesin. Sunucu kuralin sahibi olmaya devam
     /// eder - ekranin kontrolu kolaylik, gecerlilik degil.
     /// </summary>
-    string? Dogrulama = null);
+    string? Dogrulama = null,
+    /// <summary>
+    /// YALNIZ YENI KAYITTA YAZILABILIR (840): ilk kayitta girilir, mevcut
+    /// kayitta KILITLI gorunur (deger okunur, kutu kapalidir). Personelin
+    /// bolum/gorev/ise giris bilgileri boyledir - degisikligi kadro hareketi
+    /// yururluk tarihiyle yazar. Karar EKRANDA verilir cunku alan metasi
+    /// kayittan bagimsiz cekiliyor (`/alanlar`).
+    /// </summary>
+    bool YalnizYeniKayitta = false,
+    /// <summary>Kilitli alanin yaninda gosterilen kisa aciklama.</summary>
+    string? Ipucu = null);
 
 /// <summary>
 /// Sayfali detayin sunucu tarafi suzgeci (526): arama metni, kategori dali ve

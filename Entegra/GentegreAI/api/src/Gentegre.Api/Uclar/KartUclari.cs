@@ -119,7 +119,7 @@ public static class KartUclari
 
         // ------------------------------------------------------------ ekle ----
         grup.MapPost("/{kaynak}", async (
-            string kaynak, KartYazmaIstegi istek, BaglamCozucu cozucu, KartDeposu depo, KullaniciAramaDeposu arama,
+            string kaynak, KartYazmaIstegi istek, BaglamCozucu cozucu, KartDeposu depo, KullaniciAramaDeposu arama, VeriKaynagi veri,
             KullaniciDeposu kullanicilar, Servisler.RandevuHatirlatmasi hatirlatma,
             Servisler.PanikDegerBildirimi panik, Servisler.DisKurumBasvurusu disKurum,
             HttpContext ctx, CancellationToken iptal) =>
@@ -131,6 +131,8 @@ public static class KartUclari
             var uyarilar = new List<string>();
             var degerler = Degerler(tanim, istek.Kart, baglam, yeni: true);
             await EntegrasyonModKuraliAsync(tanim, degerler, depo, iptal);
+            // HASTA (kullanıcı kuralı): aynı kimlik numaralı hasta varsa yeni kayıt açılmaz.
+            await HastaUclari.KimlikMukerrerKuraliAsync(tanim, degerler, veri, null, iptal);
             var yeniId = await depo.EkleAsync(tanim, degerler, istek.Detaylar,
                 baglam.Yazma, iptal);
 
@@ -193,7 +195,7 @@ public static class KartUclari
 
         // -------------------------------------------------------- guncelle ----
         grup.MapPut("/{kaynak}/{id:long}", async (
-            string kaynak, long id, KartYazmaIstegi istek, BaglamCozucu cozucu, KartDeposu depo,
+            string kaynak, long id, KartYazmaIstegi istek, BaglamCozucu cozucu, KartDeposu depo, VeriKaynagi veri,
             Servisler.RandevuHatirlatmasi hatirlatma, Servisler.PanikDegerBildirimi panik,
             Servisler.DisKurumBasvurusu disKurum,
             HttpContext ctx, CancellationToken iptal) =>
@@ -209,6 +211,7 @@ public static class KartUclari
             var uyarilar = new List<string>();
             var (okunabilir, _) = Alanlar(tanim, baglam, await depo.UrunModuAsync(baglam.SubeId ?? 0, iptal));
             var degerler = Degerler(tanim, istek.Kart, baglam, yeni: false);
+            await HastaUclari.KimlikMukerrerKuraliAsync(tanim, degerler, veri, id, iptal);
 
             await depo.GuncelleAsync(tanim, id, istek.Surum!, degerler, istek.Detaylar,
                 okunabilir, baglam.Yazma, iptal);
@@ -484,7 +487,11 @@ public static class KartUclari
             //   etmesine (ya da tersine) yol acardi.
             alan.Dogrulama == KimlikDogrulama.TcknTuru
                 ? baglam.KimlikKurali.IstemciKurali
-                : alan.Dogrulama);
+                : alan.Dogrulama,
+            // KILITLI ALAN (840): karar EKRANDA verilir - alan metasi kayittan
+            //   bagimsiz cekiliyor (`/alanlar`), "yeni mi" bilgisi orada yok.
+            alan.YalnizYeniKayitta,
+            alan.Ipucu);
 
 
     /// <summary>
@@ -561,6 +568,16 @@ public static class KartUclari
             if (!alan.Yazilabilir)
                 throw GentegreHatasi.Dogrulama($"{ad} alani degistirilemez.",
                     new AlanHatasi(ad, "Salt okunur alan."));
+
+            // KILITLI ALAN (840): ilk kayitta girilir, sonra yalniz kendi
+            //   defterinden degisir (personel bolum/gorev -> kadro hareketi).
+            //   Sessizce yok saymak, kullanicinin yazdigini kaydettik
+            //   sanmasina yol acardi.
+            if (alan.YalnizYeniKayitta && !yeni)
+                throw GentegreHatasi.Dogrulama(
+                    $"{ad} alani karttan degistirilemez.",
+                    new AlanHatasi(ad, "Bu bilgi Kadro Geçmişi'nden, yürürlük "
+                                     + "tarihiyle değiştirilir."));
 
             if (!baglam.Yetkiler.AlanYazilir(tanim.Ad, alan.Ad))
                 throw GentegreHatasi.Yasak($"{ad} alanini degistirme yetkiniz yok.");

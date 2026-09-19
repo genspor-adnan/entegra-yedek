@@ -101,14 +101,23 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk, isBilgiEk }
         <h6>SGK / Giriş-Çıkış</h6>
         <div className="alan-izgara tek-sutun">
           <div className="adres-satir">
+            {/* GIRIS/CIKIS KILITLI (840/841): ilk kayitta girilir, sonra
+                kadro hareketinden (tur 1 / tur 9) degisir - kidem ve izin
+                hakki bu tarihten hesaplandigi icin tarihsiz duzeltme izin
+                bakiyesini de bozardi. Alan metasi `yalnizYeniKayitta`
+                tasiyor; GenForm mevcut kayitta `yazilabilir`i kapatiyor. */}
             <label className="alan tip-tarih">
               <span className="etiket zorunlu-isaret">İşe Giriş</span>
-              <input type="date" value={String(satir.iseGirisTarihi ?? '').slice(0, 10)} disabled={saltOkunur}
+              <input type="date" value={String(satir.iseGirisTarihi ?? '').slice(0, 10)}
+                disabled={saltOkunur || alan('iseGirisTarihi')?.yazilabilir === false}
+                title={alan('iseGirisTarihi')?.ipucu ?? undefined}
                 onChange={e => degis({ iseGirisTarihi: e.target.value })} />
             </label>
             <label className="alan tip-tarih">
               <span className="etiket">İşten Çıkış</span>
-              <input type="date" value={String(satir.istenCikisTarihi ?? '').slice(0, 10)} disabled={saltOkunur}
+              <input type="date" value={String(satir.istenCikisTarihi ?? '').slice(0, 10)}
+                disabled={saltOkunur || alan('istenCikisTarihi')?.yazilabilir === false}
+                title={alan('istenCikisTarihi')?.ipucu ?? undefined}
                 onChange={e => degis({ istenCikisTarihi: e.target.value })} />
             </label>
           </div>

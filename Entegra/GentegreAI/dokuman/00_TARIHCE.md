@@ -15632,6 +15632,19 @@ listesinde mi.
 Tarayıcıda: 8 bölüm, 74 rol, tablo sayısı 0. xUnit 488/488, vitest 696/696.
 
 
+## Hekim kısıtı: çalışma listesinde yalnız kendi hastaları — 19.09.2026
+
+Kullanıcı: *"uzman dahiliye doktor olarak girdiğimde bana gelen 2 hastayı
+göreyim"*. Çalışma Listesi (`hekim-listesi`) ve Muayeneler (`muayene`) listesi
+hekim kullanıcı için otomatik süzülür: kullanıcı planlı hekimse
+(`fn_hekim_planli(kullanıcı id) = 1`) WHERE'e `bb.personel_id = id` /
+`m.personel_id = id` eklenir; banko / yönetici / başhekim tüm listeyi görür.
+Kural haritası `KaynakKatalogu.HekimKisiti.cs` (`HekimKolonu(kaynak)`),
+uygulama `SorguUretici.HekimId` + `ListeDeposu.SorgulaAsync(hekimId)`,
+karar `ListeUclari` (tek `fn_hekim_planli` sorgusu, yalnız haritadaki
+kaynaklarda). Test verisi: 20 hasta + 10 bölüme 2'şer başvuru (docker,
+"Test başvurusu (üretilen veri)" açıklamalı); dahiliye hekimi `dr7905`.
+
 ## Hasta kaydında mükerrer kontrolü — 19.09.2026
 
 Kullanıcı: *"yeni hasta eklerken kimlik no aynı ise eklenmez diğer kayıt
@@ -15788,3 +15801,37 @@ türetilen satırı "elle girildi" yapmak izi bozardı.
 
 Tarayıcıda doğrulandı: sekme başlığı satır sayacıyla ("Kadro Geçmişi 5"),
 5 hareket sıralı, ileri tarihli terfi en üstte.
+
+## 841 — Kadro hareketi: bölüm/görev senkronu, kartta kilitli alanlar
+
+Kullanıcı: *"hareketlere bölüm / görev eklesek.. personel kartından işe
+giriş/çıkış, bölüm, görev bilgilerini çıkarsak mı"* → karar: **alanlar kartta
+kalır, salt okunur olur.**
+
+**840'ta yarım kalan bağ.** `personel_hareket`te `departman_id`/`gorev_id`
+vardı ama kartta görünen Bölüm/Görev `taraf` tablosunda duruyor; uygula
+fonksiyonu yalnız `taraf_personel` alanlarını yazıyordu. Hareket girip bölüm
+değiştirilince kart eski bölümde kalıyordu; karttan değişince de deftere satır
+düşmüyordu (iz tetiği `taraf_personel`i dinliyordu). İki yön de bağlandı -
+`taraf` tetiği yalnız PERSONEL satırında çalışır, yoksa her hasta kaydı kadro
+hareketi üretirdi.
+
+**İşe giriş/çıkış defterden:** `ise_giris_tarihi` = tür 1 hareketin yürürlüğü,
+`isten_cikis_tarihi` = tür 9. Kıdem ve izin hakkı bu tarihten hesaplandığı için
+tarihsiz düzeltme izin bakiyesini de bozardı. Yeni personelde tarih kartta
+girilir ve deftere "işe giriş" olarak düşer.
+
+**Çerçeve: `YalnizYeniKayitta`** (yeni alan bayrağı). İlk kayıtta yazılabilir,
+mevcut kayıtta salt okunur. Karar **ekranda** verilir çünkü alan metası
+kayıttan bağımsız çekiliyor (`/alanlar`); sunucu da aynı kuralı uygular ve
+güncellemede alan gelirse "Kadro Geçmişi'nden, yürürlük tarihiyle değiştirilir"
+hatası döner - sessizce yok saymak, kullanıcının yazdığını kaydettik
+sanmasına yol açardı.
+
+Neden tamamen kaldırmadık: `taraf.departman`/`gorev_id` **25 yerde** okunuyor,
+kart günlük bakış yüzeyi ve yeni personelde bir yerden girilmeli.
+
+Tarayıcıda: Bölüm KİLİTLİ · Görev KİLİTLİ · İşe Giriş/Çıkış KİLİTLİ (ipucu
+balonuyla) · Sicil No, Çalışma Şekli açık. Yeni kayıtta Bölüm açık.
+
+xUnit 491/491, vitest 696/696.

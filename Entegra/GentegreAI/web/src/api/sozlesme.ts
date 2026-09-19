@@ -475,6 +475,14 @@ export interface KartAlanMeta {
   /** Doluysa alan combo degil JENERIK ARAMA EKRANI ile secilir (260):
       'hasta' -> kisi/hasta aramasi, 'hizmet' -> stok/hizmet aramasi. */
   aramaKaynagi?: string | null;
+  /**
+   * YALNIZ YENI KAYITTA YAZILABILIR (840): ilk kayitta girilir, mevcut
+   * kayitta KILITLI cizilir. Karar ekranda verilir cunku meta kayittan
+   * bagimsiz cekiliyor (`/alanlar`).
+   */
+  yalnizYeniKayitta?: boolean;
+  /** Kilitli alanin yaninda gosterilen kisa aciklama. */
+  ipucu?: string | null;
   /** Bagli alanda secenek id -> ust id (sube id -> banka id). */
   kodUst?: Record<string, string> | null;
   /** Secenekler kod_liste'den geliyorsa listenin kodu (544, "stok.model") -

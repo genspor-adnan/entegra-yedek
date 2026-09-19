@@ -94,6 +94,9 @@ interface Props {
       "Kimlik" sekmesine duser - kimlik alani cok olan kartlarda serit sismesin. */
   seritAlanlari?: string[];
   onKaydedildi?(id: number): void;
+  /** Hasta kartı: kimlik numarası kayıtlı bir hastaya aitse kaydetmek yerine O kart açılır.
+      Verilmezse onKaydedildi(mevcutId) + onKapat ile aynı yola düşer. */
+  onMevcutKayit?(id: number): void;
   /** Mockup'ta olup backend'i henuz olmayan sekmeler (or. "UTS Bilgileri") - "yakinda" gosterilir. */
   yerTutucuSekmeler?: string[];
   /** "Genel" sekmesinde alt-bolum kutularinin YANINA mockup'taki gibi bos "Resim" kutusu ekler. */
@@ -234,7 +237,7 @@ export interface EkSekmeBaglami {
  */
 const TARAF_ARAMA_KAYNAKLARI = ['kurum', 'dis-hekim', 'personel', 'kisi'];
 
-export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, onKaydedildi, yerTutucuSekmeler,
+export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlari, seritSarmalayici, sekmeSarmalayici, detayGrupta, detayIzgara, detaySecenekleri, gizliDetaylar, ekSekmeler, sekmeSirasi, tazeleAnahtari, onKaydedildi, onMevcutKayit, yerTutucuSekmeler,
                           ustBaglam, altBilgi, ekAraclar, baslikEk,
                           resimYerTutucu, cariyeBaglaGizli, yeniKayitVarsayilanlari, yeniSecilenAdlar,
                           gizliAlanlar, gizliSekmeler, zorunluAlanlar }: Props) {
@@ -589,13 +592,27 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
         ? { ...ham, alanlar: ham.alanlar.map(a =>
             zorunluAlanlar.includes(a.ad) ? { ...a, zorunlu: true } : a) }
         : ham;
+      // KILITLI ALAN (840): `yalnizYeniKayitta` alanlar ILK kayitta girilir,
+      //   sonra salt okunur cizilir - degisiklik kendi defterinden (kadro
+      //   hareketi) yururluk tarihiyle yapilir. Sunucu da ayni kurali
+      //   uyguluyor; buradaki kapatma kullaniciyi bosuna yazmaktan korur.
+      const kilitli: KartMetaYaniti = yeniMi ? zorunlulu : {
+        ...zorunlulu,
+        alanlar: zorunlulu.alanlar.map(a =>
+          a.yalnizYeniKayitta ? { ...a, yazilabilir: false } : a),
+        detaylar: zorunlulu.detaylar?.map(d => ({
+          ...d,
+          alanlar: d.alanlar.map(a =>
+            a.yalnizYeniKayitta ? { ...a, yazilabilir: false } : a),
+        })),
+      };
       // RANDEVU alanlari YALNIZ HBYS modunda (252, kullanici): ERP kurulumunda
       //   personelin "randevu verilebilir" olmasi ve randevu duzeni anlamsiz -
       //   kart hic gostermez. Urun modu 2 = HBYS (referans genel.urun_modu).
-      let m: KartMetaYaniti = kullanici?.urunModu === 2 ? zorunlulu : {
-        ...zorunlulu,
-        alanlar: zorunlulu.alanlar.filter(a => a.ad !== 'randevuVerilebilir'),
-        detaylar: zorunlulu.detaylar.filter(d => d.ad !== 'randevuAyar'),
+      let m: KartMetaYaniti = kullanici?.urunModu === 2 ? kilitli : {
+        ...kilitli,
+        alanlar: kilitli.alanlar.filter(a => a.ad !== 'randevuVerilebilir'),
+        detaylar: kilitli.detaylar.filter(d => d.ad !== 'randevuAyar'),
       };
       setMeta(m);
       setYetki(m.yetki);
@@ -1002,6 +1019,37 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
 İstem yine de "${Number(deger.durum) === 5 ? 'Onaylandı' : 'Sonuçlandı'}"`
           + ' olarak kaydedilsin mi?');
         if (!devam) return;
+      }
+    }
+
+    // HASTA MÜKERRER (kullanıcı kuralı): "kimlik no aynı ise eklenmez, diğer
+    //   kayıt getirilir; telefon aynı ise uyarı verilir, istenirse devam edilir".
+    //   Kimlik eşleşmesi sunucuda da engellenir (kart ucu); burada kullanıcıya
+    //   mevcut kartı açmak için önden bakılır. Telefon yalnız uyarıdır - aile
+    //   bireyleri aynı numarayı paylaşır.
+    if (kaynak === 'hasta' || kaynak === 'hasta-aday') {
+      const vkno = String(deger.vkno ?? '').trim();
+      const cepTel = String(deger.cepTel ?? '').trim();
+      if (vkno !== '' || (yeniMi && cepTel !== '')) {
+        try {
+          const m = await api.hastaMukerrer({ vkno, cepTel: yeniMi ? cepTel : '', haric: yeniMi ? undefined : Number(id) });
+          if (m.kimlik) {
+            bilgiMesaji(`Bu kimlik numarası ile kayıtlı hasta var: ${m.kimlik.ad} (dosya ${m.kimlik.kod || '-'}). Yeni kayıt açılmadı; mevcut kart getiriliyor.`);
+            if (onMevcutKayit) onMevcutKayit(m.kimlik.id);
+            else { onKaydedildi?.(m.kimlik.id); onKapat?.(); }
+            return;
+          }
+          if (m.telefon.length > 0) {
+            const adlar = m.telefon.map(k => `${k.ad}${k.kod ? ` (dosya ${k.kod})` : ''}`).join(', ');
+            const devam = await onaySor(`Aynı telefon numarasıyla kayıtlı hasta var: ${adlar}.
+
+Yine de yeni hasta kaydı eklensin mi?`);
+            if (!devam) return;
+          }
+        } catch (h) {
+          // Kontrol ucu ulaşılamazsa kayıt engellenmez; kimlik kuralını sunucu yine uygular.
+          console.warn('hasta mükerrer kontrolü yapılamadı', h);
+        }
       }
     }
 

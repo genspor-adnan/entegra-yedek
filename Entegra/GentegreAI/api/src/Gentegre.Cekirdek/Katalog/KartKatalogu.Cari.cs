@@ -256,7 +256,15 @@ public static partial class KartKatalogu
             new("soyad",     "soyad",      "metin", Zorunlu: true, EnFazlaUzunluk: 60, Baslik: "Soyad", Grup: "Kimlik"),
             // Departman kod listesi degil TABLO (251): bolum/hekim iliskisi de
             //   buradan kuruluyor - randevu bolumu bir departmandir.
-            new("departman", "departman",  "kod",   Zorunlu: true, KodTablosu: "public.v_departman_lookup", Baslik: "Bölüm", Grup: "Kimlik"),
+            // BOLUM ve GOREV KILITLI (840, kullanici: "personel kartından işe
+            //   giriş/çıkış, bölüm, görev bilgilerini çıkarsak mı"): ilk
+            //   kayitta girilir, sonra yalniz KADRO HAREKETI degistirir -
+            //   kartta tarihsiz duzeltmek gecmisi sessizce bozardi.
+            //   Alan GORUNMEYE DEVAM EDER: "bu kisi hangi bolumde" gunluk
+            //   sorudur ve kart onun yeri; ustelik 25 ekran bu kolonlari
+            //   okuyor.
+            new("departman", "departman",  "kod",   Zorunlu: true, KodTablosu: "public.v_departman_lookup", Baslik: "Bölüm", Grup: "Kimlik",
+                YalnizYeniKayitta: true, Ipucu: "Kadro Geçmişi'nden değişir"),
             // RANDEVU VERILEBILIR (252, kullanici: "randevu verilen bolumle
             //   randevu verilen personel bulusmus olur") - departman tarafinda
             //   da ayni bayrak var (251); ikisi kesisince "hekim" cikar.
@@ -277,7 +285,8 @@ public static partial class KartKatalogu
             //   gelecek ve secilecek").
             new("gorevId",   "gorev_id",   "kod",   Zorunlu: true,
                 KodTablosu: "public.v_gorev_lookup", BagliAlan: "departman",
-                Baslik: "Görev"),
+                Baslik: "Görev",
+                YalnizYeniKayitta: true, Ipucu: "Kadro Geçmişi'nden değişir"),
             new("vkno",      "vkno",       "metin", Zorunlu: true, EnFazlaUzunluk: 20, Baslik: "Kimlik No"),
             // ik_karti.html mockup'ta İletişim AYRI SEKME (Genel'e gomulu AltGrup DEGIL) -
             //   Grup:"İletişim" bu yuzden AltGrup degil.
@@ -392,8 +401,14 @@ public static partial class KartKatalogu
                 //   secenekti (Erkek/Kadin); SKRS'de dort - "belirtilmedi"
                 //   ve "belirsiz" de gecerli kayit degerleri.
                 new("cinsiyet",           "cinsiyet",            "kod",   KodListesi: "hasta.cinsiyet", Baslik: "Cinsiyet"),
-                new("iseGirisTarihi",     "ise_giris_tarihi",    "tarih", Zorunlu: true, Baslik: "İşe Giriş Tarihi"),
-                new("istenCikisTarihi",   "isten_cikis_tarihi",  "tarih", Baslik: "İşten Çıkış Tarihi"),
+                // GIRIS/CIKIS TARIHI KILITLI (840): ikisi de kadro
+                //   hareketinin yururlugudur (tur 1 giris, tur 9 cikis).
+                //   Kidem ve izin hakki bu tarihten hesaplandigi icin
+                //   tarihsiz duzeltme izin bakiyesini de bozardi.
+                new("iseGirisTarihi",     "ise_giris_tarihi",    "tarih", Zorunlu: true, Baslik: "İşe Giriş Tarihi",
+                    YalnizYeniKayitta: true, Ipucu: "Kadro Geçmişi'nden değişir"),
+                new("istenCikisTarihi",   "isten_cikis_tarihi",  "tarih", Baslik: "İşten Çıkış Tarihi",
+                    YalnizYeniKayitta: true, Ipucu: "Kadro Geçmişi'nden (İşten çıkış)"),
                 new("calismaSekli",       "calisma_sekli",       "kod",   SabitKodlar: CalismaSekliKodlari, Baslik: "Çalışma Şekli"),
                 // Uyruk artik SKRS ULKE KODLARI'ndan secilir (614/615): alan
                 //   metin degil kod, degeri MERNIS kodudur ve e-Nabiz'a

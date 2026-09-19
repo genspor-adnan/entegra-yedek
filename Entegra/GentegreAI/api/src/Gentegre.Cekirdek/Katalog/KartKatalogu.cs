@@ -9,6 +9,16 @@ public sealed record KartAlani(
     string Kolon,                  // db kolonu: "fatura_unvan"
     string Tip,                    // metin | sayi | ondalik | para | tarih | zaman | kod | mantik
     bool Yazilabilir = true,
+    /// <summary>
+    /// YALNIZ YENI KAYITTA YAZILABILIR (840): ilk kayitta girilir, sonra
+    /// KILITLENIR. Personelin bolum/gorev/ise giris bilgileri boyledir -
+    /// degisikligi kadro hareketi (yururluk tarihiyle) yazar; kartta tarihsiz
+    /// duzeltmek gecmisi sessizce bozardi. Alan gorunmeye devam eder: "bu kisi
+    /// hangi bolumde" sorusu gunluk ve kart onun yeri.
+    /// </summary>
+    bool YalnizYeniKayitta = false,
+    /// <summary>Kilitli/ozel alanin yaninda gosterilecek kisa aciklama.</summary>
+    string? Ipucu = null,
     bool Zorunlu = false,
     int? EnFazlaUzunluk = null,
     string? KodListesi = null,     // kod_liste.kod - kodAd sozlugu bundan cozulur
