@@ -15772,3 +15772,19 @@ Onay zinciri yok (kullanıcı kararı): hareket girildiği an geçerli.
 
 Test `LogTabloIdTestleri` kart için seçtiğim 940'ın radyoloji isteminde
 kullanıldığını yakaladı - 1325'e alındı. xUnit 491/491, vitest 696/696.
+
+## Personel kartına "Kadro Geçmişi" sekmesi
+
+Kullanıcı: *"personel kartına kadro geçmişi sekmesini de ekle"*.
+
+Kart detayı (`personel_hareket`, `taraf_id` bağı): yürürlük · hareket · görev
+/ unvan · yönetici · bitiş · gerekçe · kaynak. En yeni üstte. Satır eklenince
+DB tetiği özlük alanlarını yazıyor - kartla defter aynı gerçeği söylüyor.
+
+**Kolon seti dar tutuldu:** bölüm, sözleşme, karar numarası gibi alanlar ayrı
+ekranda (İK & Prim › Kadro Hareketleri). Kartta günlük soru "ne zaman ne
+oldu"; on kolonluk bir grid onu gizlerdi. `kaynak` salt okunur - karttan
+türetilen satırı "elle girildi" yapmak izi bozardı.
+
+Tarayıcıda doğrulandı: sekme başlığı satır sayacıyla ("Kadro Geçmişi 5"),
+5 hareket sıralı, ileri tarihli terfi en üstte.

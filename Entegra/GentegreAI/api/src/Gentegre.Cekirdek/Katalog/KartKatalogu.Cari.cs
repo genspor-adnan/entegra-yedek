@@ -294,6 +294,33 @@ public static partial class KartKatalogu
         },
         Detaylar: new[]
         {
+            // KADRO GECMISI (840, kullanici: "personel kartına kadro geçmişi
+            //   sekmesini de ekle"): kisinin pozisyon defteri. Her satir o
+            //   tarihte gecerli TAM pozisyon; kart (taraf_personel) buradan
+            //   TURETILIR - satir eklenince DB tetigi ozluk alanlarini yazar.
+            //
+            //   SILME/EKLEME ACIK ama kolon seti DAR: bolum, sozlesme, karar
+            //   numarasi gibi alanlar ayri ekranda (Ik & Prim > Kadro
+            //   Hareketleri). Kartta gunluk soru "ne zaman ne oldu" -
+            //   on kolonluk grid onu gizlerdi.
+            new DetayTanimi("kadro", "public.personel_hareket", "taraf_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("yururluk", "yururluk", "tarih", Zorunlu: true, Baslik: "Yürürlük"),
+                new("tur", "tur", "kod", Zorunlu: true, Baslik: "Hareket",
+                    SabitKodlar: KaynakKatalogu.KadroTurKodlari),
+                new("gorev", "gorev", "metin", EnFazlaUzunluk: 100, Baslik: "Görev / unvan"),
+                new("yoneticiTarafId", "yonetici_taraf_id", "kod", Baslik: "Yönetici",
+                    KodTablosu: "public.v_personel_lookup"),
+                // SURELI HAREKET: vekalet/aski bitince onceki pozisyon geri gelir.
+                new("bitis", "bitis", "tarih", Baslik: "Bitiş (süreli ise)"),
+                new("gerekce", "gerekce", "metin", EnFazlaUzunluk: 300, Baslik: "Gerekçe"),
+                // KAYNAK OKUNUR: karttan turetilen satiri "elle girildi"
+                //   yapmak izi bozardi.
+                new("kaynak", "kaynak", "kod", Yazilabilir: false, Baslik: "Kaynak",
+                    SabitKodlar: KaynakKatalogu.KadroKaynakKodlari),
+            }, Sirala: "yururluk desc, id desc", Baslik: "Kadro Geçmişi",
+               LogTabloId: 1325),
             // PRIM ROLLERI (361): kisi hangi rolde prim alabilir. Bir kisi hem
             //   isteyen hem yapan hem uygulayan olabilir - o yuzden GRID, tek
             //   secim degil.
