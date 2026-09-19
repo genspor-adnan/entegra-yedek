@@ -30,6 +30,12 @@ interface Props {
   sube?: string;
   onSubeDegis?(v: string): void;
   vknoGizli?: boolean;
+  /**
+   * Kimlik No'nun SAGINDAKI alan (846, kullanici: "başlıktaki Sicil No
+   * alanını Kimlik No alanı sağına taşı"): personelde Sicil No. Serit dar,
+   * iki numara yan yana okunur - kart kimligi tek satirda.
+   */
+  vknoSagEk?: ReactNode;
   kimlikSutunGenisligi?: string;
   /** Yeni kayıtta henüz yok; kart kaydedilmeden dosya yüklenemez. */
   kaynakId?: number;
@@ -43,7 +49,7 @@ export function PersonelKimlikOzet({
   kartAdi = 'personel', vknoAlan, vkno, onVknoDegis,
   ozlukMeta, ozlukDurum, saltOkunur, onOzlukDegis, egitimler, fotoSolEk, isBilgiEk, ozetGizli,
   subeAlan, sube, onSubeDegis,
-  vknoGizli, kimlikSutunGenisligi, kaynakId, fotoSolEkOnce = false,
+  vknoGizli, kimlikSutunGenisligi, kaynakId, fotoSolEkOnce = false, vknoSagEk,
 }: Props) {
   const yerler = useYerler(true);
   const [resimUrl, setResimUrl] = useState<string | null>(null);
@@ -126,9 +132,9 @@ export function PersonelKimlikOzet({
                 gizli - geriye bos bir `.adres-satir` kaliyor ve grid'in satir
                 araligi kadar (8px) fazladan bosluk uretiyordu. Bos ama
                 gorunmez bir satir, hizalamayi bozan en sinsi seydir. */}
-            {/* Satir yalniz TC No icin cizilir (845: Rol buradan kalkti) -
-                bos ama gorunmez satir grid araligini bozuyordu. */}
-            {!vknoGizli && (
+            {/* Satir: TC No + (personelde) Sicil No - 846. Bos ama gorunmez
+                satir grid araligini bozuyordu, o yuzden kosullu. */}
+            {(!vknoGizli || vknoSagEk) && (
               <div className="adres-satir">
                 {!vknoGizli && (
                   <label className="alan tip-metin">
@@ -138,9 +144,8 @@ export function PersonelKimlikOzet({
                   </label>
                 )}
                 {/* ROL BURADAN KALKTI (845, kullanici: "hem rol hem ana rol
-                    olmasin"): ayni bilgi Is Bilgileri kutusunda "Ana Rol"
-                    olarak duruyordu - iki kutu ayni degeri gosterince
-                    hangisinin yazdigi belirsizdi. Tek yer: Is Bilgileri. */}
+                    olmasin") - yerine SICIL NO geldi (846). */}
+                {vknoSagEk}
               </div>
             )}
             <div className="adres-satir">

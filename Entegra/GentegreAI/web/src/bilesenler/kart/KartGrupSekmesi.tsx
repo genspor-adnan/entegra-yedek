@@ -313,6 +313,9 @@ const adliBlok = (
           const hastaIletisimAlanlari = kaynak === 'hasta'
             ? (gruplar.find(([ad]) => ad === 'İletişim')?.[1] ?? [])
             : [];
+          // SICIL NO KIMLIK NO'NUN SAGINDA (846, kullanici: "başlıktaki Sicil
+          //   No alanını Kimlik No alanı sağına taşı") - `vknoSagEk` slotu.
+          //   Jenerik cizici verilir ki zorunluluk/hata gosterimi degismesin.
           return (
             <PersonelKimlikOzet
               subeAlan={meta.alanlar.find(a => a.ad === 'subeId')}
@@ -322,6 +325,9 @@ const adliBlok = (
               vknoAlan={vknoAlan}
               vkno={String(deger.vkno ?? '')}
               onVknoDegis={v => setDeger(d => ({ ...d, vkno: v }))}
+              vknoSagEk={kaynak === 'personel'
+                ? renderAlanListesi((meta.alanlar ?? []).filter(a => a.ad === 'kod'))
+                : undefined}
               gorevAlan={gorevAlan}
               gorev={String(deger.gorevId ?? '')}
               onGorevDegis={v => setDeger(d => ({ ...d, gorevId: v }))}
