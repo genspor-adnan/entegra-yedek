@@ -1,4 +1,11 @@
--- 843: PAROLAMI UNUTTUM (kullanıcı: "parolamı unuttum seçeneği ekle login e").
+-- 870: PAROLAMI UNUTTUM (kullanıcı: "parolamı unuttum seçeneği ekle login e").
+--
+-- NUMARA DEGISTI (843 -> 870): 843 ayni anda iki dosyada kullanilmisti.
+-- (869 hedeflenmisti, o sirada baska bir calisma 869u aldi.)
+-- Tasinan bu dosya oldu; digeri (843_kadro_ana_rol.sql) 845 ve 847nin
+-- kullandigi kolonu/fonksiyonu olusturuyor, numarasi buyuse kur.ps1
+-- sirali uygulamada onlardan SONRA calisir ve kurulum kirilirdi.
+-- Bu dosya bagimsiz: tek tablo + indeks, sonraki dosya atif yapmiyor.
 --
 -- Akış (oturumsuz, /api/kimlik/parola-unuttum):
 --   1. kullanıcı kodu → hesabın kayıtlı cep telefonuna (yoksa e-postasına)
