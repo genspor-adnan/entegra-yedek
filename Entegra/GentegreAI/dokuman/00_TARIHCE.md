@@ -15514,3 +15514,27 @@ göç kurulu rollerden temizledi (1 satır).
 Kadro ağacı mockup'ı yeni verilerle tazelendi: **kadro boşluğu kalmadı**.
 
 xUnit 485/485.
+
+## 835/836 — "Doktor" → "Uzman Doktor", yeni "Pratisyen Doktor"
+
+Kullanıcı: *"Doktor yerine Uzman Doktor olsun bir de Pratisyen Doktor ekle"*.
+
+Kod `hekim` **değişmedi** (şablon eşlemeleri, prim rolleri ve 50 atanmış hesap
+koda bakıyor) - 790 ve 833 ile aynı yol.
+
+**Uzman ile pratisyenin farkı yatan hastadır:** uzman yatış order'ı yazar ve
+imzalar, ameliyathane çizelgesini görür; pratisyen poliklinik ve acil
+muayenesi yapar, order yazmaz. Poliklinik işinde ikisi aynı - yetkiyi orada
+bölmek yapay olurdu.
+
+**836** iki şeyi düzeltti: (1) şablona eklenen yatan yetkileri kurulu role
+inmediği için 831 deseniyle eklendi (6 yetki); (2) `hekim` rolü hastane
+profilinde `gecerli = 0` işaretli ve pasifti - **oysa 50 kullanıcısı var**.
+Kişisi olan rol pasif bırakılmaz; düzeltme yalnız bu koşulla sınırlı, kişisi
+olmayan rollerin işareti kurumun kararı olduğu için dokunulmadı.
+
+Not: pasiflik erişimi engellemiyordu (`fn_kullanici_rolleri` `rol.aktif`e
+bakmıyor) - etkilediği yer rol listeleri ve yeni hesap açma ekranıydı.
+
+Tanımlı rol 75. Mockup tazelendi; "dikkat" listesinde artık yalnız 20
+"Rol Atanmamış" hesap kaldı.

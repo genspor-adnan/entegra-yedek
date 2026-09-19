@@ -217,7 +217,23 @@ public static class StandartRolUclari
             K(H("randevu"), T("randevu.plan"), Y("hasta"), H("aday"), Y("firsat"),
               T("kurum"), T("hizmet"), Y("bildirim"), Y("bildirim_sablon"),
               T("muayene"), T("islem_log"))),
-        new("hekim", "Doktor", "Muayene, tanı, istem, reçete ve rapor; kendi hakedişi.", ["muayenehane", "tip_merkezi", "hastane"], K(HekimTemel)),
+        // AD "Uzman Doktor" (kullanici: "Doktor yerine Uzman Doktor olsun") -
+        //   KOD `hekim` KALIR: basamaklar, sablon eslemeleri ve 50 atanmis
+        //   hesap koda bakiyor (790'daki "Hekim -> Doktor" degisikliginin
+        //   ayni yolu).
+        //
+        //   UZMAN ile PRATISYEN farki YATAN HASTADIR: uzman yatis order'i
+        //   yazar ve imzalar, ameliyathane cizelgesini gorur. Poliklinik
+        //   isinde ikisi ayni - yetkiyi orada bolmek yapay olurdu.
+        new("hekim", "Uzman Doktor",
+            "Muayene, tanı, istem, reçete ve rapor; yatan hasta order'ı; kendi hakedişi.",
+            ["muayenehane", "tip_merkezi", "hastane"],
+            K([.. HekimTemel, Y("yatan"), Y("yatan.izlem"), Y("yatan.order"),
+               A("yatan.order.imza"), T("ameliyathane"), T("ameliyathane.plan")])),
+        new("pratisyen_doktor", "Pratisyen Doktor",
+            "Poliklinik ve acil muayenesi, tanı, istem ve reçete; yatan hasta order'ı yazmaz.",
+            ["muayenehane", "tip_merkezi", "hastane"],
+            K([.. HekimTemel, T("acil"), T("acil.pano"), T("yatan")])),
         new("hemsire", "Hemşire", "Vital, enjeksiyon, pansuman, numune; muayene kaydına yardım.", ["tip_merkezi", "hastane", "dal_ftr"],
             K(T("hasta"), Y("muayene"), T("randevu"), Y("lab.numune"), T("lab"), Y("onam"), T("katalog"), T("belge"))),
         // ---- TIBBI YONETIM (kullanici: "Başhemşire ve Başhekim ve Başhekim
