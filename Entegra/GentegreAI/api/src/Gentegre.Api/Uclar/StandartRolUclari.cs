@@ -130,7 +130,7 @@ public static class StandartRolUclari
     [
         T("%"), new("ayar", false), new("rol", false), new("kullanici", false),
         new("sube", false), new("referans", false), new("entegrasyon", false),
-        new("dokuman.ozel_nitelikli", false),
+        new("dokuman.ozel_nitelikli", false), new("portal.%", false),
         T("belge.iskonto_onay_ust"), Y("iskonto_onay"),
         // ZINCIRIN SON IMZASI (738): `T("%")` aksiyonlari KAPSAMAZ (aksiyon
         //   acikca istenir) - bu yuzden her onay basamagi tek tek yazilir.
@@ -183,6 +183,13 @@ public static class StandartRolUclari
         // Eczaci ve teknisyen eczane modulune bagli; acil hekimi acile.
         ["eczaci"] = "eczane", ["eczane_teknisyen"] = "eczane",
         ["acil_hekimi"] = "acil",
+        // Kadro bosluklari (yeni): ameliyathane ve yatan modulune bagli olanlar.
+        //   Diyetisyen, psikolog, sosyal hizmet, tibbi sekreter, hasta
+        //   haklari, sterilizasyon, biyomedikal ve nobetci mudur MODULSUZ -
+        //   her kurulumda anlamlilar.
+        ["anestezi_uzmani"] = "ameliyathane", ["anestezi_teknisyen"] = "ameliyathane",
+        ["ameliyathane_hemsire"] = "ameliyathane",
+        ["yogun_bakim_hemsire"] = "yatan_hasta",
         // Kalite gorevlisi, bilgi islem personeli ve birim amiri MODULSUZ:
         //   kalite/kullanici yonetimi/onay zinciri her kurulumda var.
     };
@@ -295,7 +302,7 @@ public static class StandartRolUclari
         new("vezne", "Vezne", "Tahsilat, makbuz, fatura kapatma.", ["tip_merkezi", "hastane"],
             K(Y("kasa_islem"), Y("mali_hareket"), T("hesap"), Y("kasa_kapatma"), A("kasa.kapat"), A("kasa.makbuz-yazdir"), A("kasa.kesinlestir"), T("belge"), T("hasta"), T("cari"))),
         new("rapor_goruntuleyici", "Yönetim Görüntüleyici", "Kurum sahibi / mesul müdür: salt okuma dökümler ve günlük.", Hepsi,
-            K(T("%"), new("ayar", false), new("rol", false), new("kullanici", false), new("sube", false), new("referans", false), new("entegrasyon", false), new("dokuman.ozel_nitelikli", false))),
+            K(T("%"), new("ayar", false), new("rol", false), new("kullanici", false), new("sube", false), new("referans", false), new("entegrasyon", false), new("dokuman.ozel_nitelikli", false), new("portal.%", false))),
         new("kalite", "Kalite Sorumlusu", "Hepsi kalite göstergeleri, dönem hesabı, doküman onayı; klinik ekranlar salt okuma.", Hepsi,
             K(H("klinik_kalite"), H("klinik_kalite.%"), A("klinik_kalite.%"), Y("dokuman.onayla"),
               // KUYRUGU GORMEK KARAR VERMEK DEGIL: `dokuman.onayla`
@@ -517,6 +524,145 @@ public static class StandartRolUclari
             K(Y("kullanici"), A("kullanici.parola-sifirla"), T("rol"), T("sube"), T("ayar"),
               T("referans"), T("entegrasyon"), Y("cihaz"), A("cihaz.isle"), T("kod_liste"),
               T("numara_sablonu"), Y("bildirim"), T("bildirim_sablon"), T("islem_log"))),
+        // SEKRETERLIK (kullanici: "Sekreter ve Doktor Sekreteri ve Yönetici
+        //   Sekreteri ekle"). Uc ayri is, uc ayri KAPSAM:
+        //     Sekreter          : kurumun genel yazismasi - HASTA VERISI YOK
+        //     Doktor Sekreteri  : bir hekimin hastasi - randevu ve dosya
+        //     Yonetici Sekreteri: ust yonetimin gundemi - klinik ekran YOK
+        //   `tibbi_sekreter` (arsiv) bunlardan ayri durur: onun isi dosyanin
+        //   kendisi, bunlarinki akis.
+        new("sekreter", "Sekreter",
+            "Kurum yazışması, telefon, randevu takvimi ve evrak; hasta dosyası ve tıbbi ekran yok.",
+            Hepsi,
+            // HASTA YETKISI YOK: santral/idari sekreterin hasta kaydina
+            //   ihtiyaci yok; randevu takvimini kisi adiyla gorur.
+            K(T("randevu"), T("randevu.plan"), Y("dokuman"), T("belge"), T("cari"),
+              T("taraf"), T("personel"))),
+        new("doktor_sekreteri", "Doktor Sekreteri",
+            "Hekimin randevu takvimi, hasta kaydı ve dosya hazırlığı; muayene ve rapor İÇERİĞİNE dokunmaz.",
+            ["muayenehane", "tip_merkezi", "hastane", "dal_goz", "dal_ftr", "dis"],
+            // MUAYENE SALT OKUMA: sekreter dosyayi hazirlar, hekim yazar.
+            //   Rapor/recete yetkisi (medula.recete, rad.istem_ac) BILEREK yok.
+            K(Y("hasta"), Y("randevu"), T("randevu.plan"), T("muayene"), T("belge"),
+              Y("belge_satir"), T("lab.sonuc"), T("radyoloji"), Y("onam"),
+              T("hizmet"), T("kurum"), T("katalog"))),
+        new("yonetici_sekreteri", "Yönetici Sekreteri",
+            "Üst yönetimin gündemi: görev, yazışma, doküman ve toplantı takibi. Klinik ve mali ekran yok.",
+            Hepsi,
+            // YONETIMIN SEKRETERI YONETIMIN YETKISINI ALMAZ: imza ve rapor
+            //   ekranlari mudurun kendisinde kalir - burada yalniz gundem.
+            K(Y("dokuman"), T("dokum"), T("personel"), T("cari"), T("taraf"))),
+        // MEDIKAL MUHASEBE (kullanici: "Medikal Muhasebe Personeli"):
+        //   faturalamadan ONCEKI halka - yapilan isin dosyaya dogru kalem
+        //   olarak gecmesi (SUT/SGK kodlamasi, eksik kalem, kesinti itirazi).
+        //   `muhasebe` rolunden farki: KASA-BANKA-MUHASEBE FISI YOK. Hastanin
+        //   dosyasini ve yapilan islemi gorur, parayi saymaz.
+        new("medikal_muhasebe", "Medikal Muhasebe Personeli",
+            "Hasta dosyasının kalem kontrolü ve SUT/SGK kodlaması, eksik hizmet takibi, "
+            + "Medula hizmet kaydı ve fatura hazırlığı; kasa ve muhasebe fişi yok.",
+            ["tip_merkezi", "hastane", "dal_goz", "dal_ftr", "dis", "goruntuleme",
+             "goruntuleme_lab", "lab"],
+            K(Y("belge"), Y("belge_satir"), T("hizmet"), T("fiyat_listesi"), T("kurum"),
+              T("hasta"), T("muayene"), T("yatan"), T("ameliyathane"), T("lab.sonuc"),
+              T("radyoloji"), T("katalog"),
+              Y("medula.hizmet"), Y("medula.fatura"), T("medula"), T("medula.provizyon"),
+              T("sigorta"), T("islem_log"),
+              // Kalemi FATURAYA cevirmek (kesinlestirme/iptal) muhasebenin
+              //   imzasi - burada yalniz hazirlanir.
+              A("belge.donustur"))),
+        // ---- KADRO BOSLUKLARI (kullanici: "eksik 14 rolü de ekle").
+        //      Kadro agaci mockup'inda (Ekranlar/Ayarlar/rol_agaci.html)
+        //      "ekrani ve yetkisi var, rolu yok" diye isaretlenen kadrolar.
+        //      Hepsi MEVCUT yetkilerden kuruldu - yeni yetki kodu uretilmedi;
+        //      olmayan bir ekran icin rol acmak, bos menu vaat etmek olurdu.
+        new("anestezi_uzmani", "Anestezi Uzmanı",
+            "Ameliyat öncesi değerlendirme, anestezi planı ve ameliyat notu; yoğun bakım order'ı.",
+            ["tip_merkezi", "hastane"],
+            K([.. HekimTemel, Y("ameliyathane"), Y("ameliyathane.plan"),
+               T("ameliyathane.salon"), A("ameliyathane.baslat"),
+               A("ameliyathane.not_imzala"), Y("yatan"), Y("yatan.order"),
+               A("yatan.order.imza"), T("acil")])),
+        new("anestezi_teknisyen", "Anestezi Teknisyeni",
+            "Salon hazırlığı, cihaz ve sarf takibi; anestezi kaydına yardım. Not imzalamaz.",
+            ["tip_merkezi", "hastane"],
+            K(T("hasta"), Y("ameliyathane"), T("ameliyathane.plan"), T("ameliyathane.salon"),
+              A("ameliyathane.stok_dus"), Y("stok"), T("depo"), T("cihaz"), T("yatan"))),
+        new("ameliyathane_hemsire", "Ameliyathane Hemşiresi",
+            "Salon çizelgesi, ameliyat sarfı ve sterilizasyon; hasta teslim ve onam.",
+            ["tip_merkezi", "hastane"],
+            K(T("hasta"), Y("ameliyathane"), Y("ameliyathane.plan"), Y("ameliyathane.salon"),
+              T("ameliyathane.talep"), A("ameliyathane.stok_dus"), Y("onam"),
+              Y("stok"), T("depo"), T("uts"), T("yatan"), T("katalog"))),
+        new("yogun_bakim_hemsire", "Yoğun Bakım Hemşiresi",
+            "Yoğun bakım izlemi, order uygulama, numune ve hemşire gözlemi.",
+            ["hastane"],
+            K(Y("yatan"), Y("yatan.izlem"), Y("yatan.order"), T("yatan.yatak"),
+              T("hasta"), T("muayene"), Y("lab.numune"), T("lab"), T("lab.sonuc"),
+              Y("onam"), T("katalog"))),
+        new("enfeksiyon_hemsire", "Enfeksiyon Kontrol Hemşiresi",
+            "Enfeksiyon sürveyansı: kültür-antibiyogram takibi, gösterge ve olgu kaydı; tedaviye karışmaz.",
+            ["tip_merkezi", "hastane"],
+            K(T("hasta"), T("muayene"), T("yatan"), T("lab"), T("lab.sonuc"),
+              T("lab.mikro"), T("lab.kultur"),
+              // Surveyans verisi kalite gostergesine islenir; DONEMI
+              //   KESINLESTIRME kalite sorumlusunda kalir.
+              Y("klinik_kalite"), Y("klinik_kalite.olgu"), T("klinik_kalite.donem"))),
+        new("ebe", "Ebe",
+            "Gebe izlemi, doğum öncesi/sonrası bakım, numune ve aşı; muayene kaydına yardım.",
+            ["tip_merkezi", "hastane"],
+            K(T("hasta"), Y("muayene"), Y("randevu"), Y("lab.numune"), T("lab"),
+              T("lab.sonuc"), Y("onam"), T("yatan"), Y("yatan.izlem"), T("katalog"))),
+        new("sterilizasyon", "Sterilizasyon (MSÜ) Sorumlusu",
+            "Set hazırlama, sterilizasyon döngüsü ve sarf; cihaz bakım takibi.",
+            ["tip_merkezi", "hastane"],
+            K(Y("stok"), Y("depo"), T("uts"), T("ameliyathane"), T("ameliyathane.plan"),
+              T("cihaz"), Y("demirbas.bakim"), T("demirbas"))),
+        new("biyomedikal", "Biyomedikal Teknisyeni",
+            "Cihaz envanteri, kalibrasyon takvimi, arıza ve iş emri; kullanım dışı/hurda önerisi.",
+            ["tip_merkezi", "hastane"],
+            // TEKNIK IMZA (demirbas.onarim_onay_teknik) BURADA DEGIL: onarim
+            //   talebinin teknik basamagi Teknik Servis Sorumlusundadir -
+            //   isi yapan kisi kendi talebini imzalamasin (783 gerekcesi).
+            K(H("demirbas"), H("demirbas.envanter"), H("demirbas.kalibrasyon"),
+              Y("demirbas.isemri"), Y("demirbas.ariza"), Y("demirbas.bakim"),
+              Y("demirbas.zimmet"), T("demirbas.hurda"), T("demirbas.kullanim_disi"),
+              Y("cihaz"), A("cihaz.isle"), T("stok"), T("depo"))),
+        new("diyetisyen", "Diyetisyen",
+            "Beslenme değerlendirmesi ve diyet planı; yatan hasta izlemine not.",
+            ["tip_merkezi", "hastane"],
+            K(T("hasta"), Y("muayene"), Y("randevu"), T("yatan"), Y("yatan.izlem"),
+              T("lab.sonuc"), T("katalog"))),
+        new("psikolog", "Psikolog",
+            "Görüşme kaydı, test ve değerlendirme; kendi hastasının dosyası.",
+            ["tip_merkezi", "hastane"],
+            K(T("hasta"), Y("muayene"), Y("randevu"), Y("onam"), T("katalog"),
+              Y("form.doldur"), T("form"))),
+        new("sosyal_hizmet", "Sosyal Hizmet Uzmanı",
+            "Sosyal inceleme, refakat ve ödeme güçlüğü başvuruları; tıbbi karar vermez.",
+            ["tip_merkezi", "hastane"],
+            K(T("hasta"), T("muayene"), T("yatan"), T("belge"), T("kurum"),
+              Y("form.doldur"), T("form"))),
+        new("tibbi_sekreter", "Tıbbi Sekreter / Arşiv",
+            "Hasta dosyası, randevu ve yazışma; dosya arşivi ve doküman düzeni.",
+            ["tip_merkezi", "hastane", "muayenehane"],
+            K(Y("hasta"), Y("randevu"), T("muayene"), T("belge"), T("lab.sonuc"),
+              T("radyoloji"), T("islem_log"))),
+        new("hasta_haklari", "Hasta Hakları Birimi",
+            "Başvuru ve şikâyet kaydı, süreç takibi ve geri bildirim; klinik karara karışmaz.",
+            ["tip_merkezi", "hastane"],
+            K(T("hasta"), T("muayene"), T("yatan"), T("belge"),
+              Y("form.doldur"), Y("form.gonder"), T("form"),
+              Y("klinik_kalite.olgu"), T("klinik_kalite"))),
+        new("nobetci_mudur", "Nöbetçi Müdür",
+            "Mesai dışı durum görünürlüğü: doluluk, acil, yatan ve kasa özeti. İMZA YETKİSİ YOK.",
+            ["tip_merkezi", "hastane"],
+            // SALT OKUMA (rapor_goruntuleyici deseni): nobetci mudur gece
+            //   "ne oluyor" sorusunu cevaplar. Imza vermek, zincirin
+            //   basamaklarini mesai disinda ikinci bir kisiye acardi -
+            //   gerekirse ust yonetim aranir.
+            K(T("%"), new("ayar", false), new("rol", false), new("kullanici", false),
+              new("sube", false), new("referans", false), new("entegrasyon", false),
+              new("dokuman.ozel_nitelikli", false), new("portal.%", false))),
         // BIRIM AMIRI (738 onay omurgasi): izin/avans/masraf zincirinin ILK
         //   imzasi "Birim Âmiri" basamagi, satinalma talebininki "Birim
         //   Sorumlusu". Ikisinin de yetkisi HICBIR sablonda yoktu; sahibi

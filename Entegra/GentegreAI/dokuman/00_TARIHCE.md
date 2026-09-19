@@ -15477,3 +15477,40 @@ Kod `dsp` **değişmedi**: şablon eşlemesi, modül haritası ve atanmış hesa
 koda bakıyor (790'daki "Hekim → Doktor" değişikliğinin aynısı). Göç yalnız
 eski varsayılan addaki satırı günceller - kurumun kendi değiştirdiği adı
 ezmez. Şablon ve kadro ağacı mockup'ı da yeni adla tazelendi.
+
+## 18 yeni rol: kadro boşlukları + medikal muhasebe + sekreterlik (834)
+
+Kullanıcı sırayla: *"eksik 14 rolü de ekle"*, *"Medikal Muhasebe Personeli"*,
+*"Sekreter ve Doktor Sekreteri ve Yönetici Sekreteri ekle"*.
+
+**Kadro ağacı mockup'ının işaretlediği 14 boşluk** şablona eklendi: Anestezi
+Uzmanı · Anestezi Teknisyeni · Ameliyathane Hemşiresi · Yoğun Bakım Hemşiresi ·
+Enfeksiyon Kontrol Hemşiresi · Ebe · Sterilizasyon (MSÜ) · Biyomedikal
+Teknisyeni · Diyetisyen · Psikolog · Sosyal Hizmet Uzmanı · Tıbbi Sekreter /
+Arşiv · Hasta Hakları Birimi · Nöbetçi Müdür. Hepsi **mevcut** yetkilerden
+kuruldu - olmayan bir ekran için rol açmak boş menü vaat etmek olurdu.
+
+Sınır kararları: Biyomedikal Teknisyeni onarımın **teknik imzasını almaz**
+(işi yapan kendi talebini imzalamasın); Enfeksiyon Kontrol Hemşiresi
+gösterge yazar ama dönemi kesinleştirmez; Nöbetçi Müdür salt okumadır -
+mesai dışında zincire ikinci bir imza açmak yerine üst yönetim aranır.
+
+**Medikal Muhasebe Personeli:** faturalamadan önceki halka - kalem kontrolü,
+SUT/SGK kodlaması, Medula hizmet kaydı. `muhasebe` rolünden farkı kasa-banka-
+muhasebe fişinin olmaması.
+
+**Sekreterlik üç ayrı kapsam:** Sekreter (idari yazışma, **hasta verisi yok**),
+Doktor Sekreteri (hekimin randevu ve dosya hazırlığı; muayene/rapor içeriğine
+dokunmaz), Yönetici Sekreteri (gündem ve yazışma; klinik ve mali ekran yok).
+
+**834 — portal yetkisi iç rolden düşer.** Test, Nöbetçi Müdür'ün `T("%")`
+deseniyle `portal.mali`yi de aldığını yakaladı: kurum içi bir rol dış kurum
+portalının mali ekranını açabilir hale gelmişti. Aynı desen `ust_yonetim` ve
+`rapor_goruntuleyici`de de var; görünmemesinin tek sebebi `portal.mali`nin
+824'te eklenmiş olmasıydı. Şablonlarda `new("portal.%", false)` ile dışlandı,
+göç kurulu rollerden temizledi (1 satır).
+
+18 rolün tamamı Kurum Profili › Roller'den kuruldu (tanımlı rol 56 → 74).
+Kadro ağacı mockup'ı yeni verilerle tazelendi: **kadro boşluğu kalmadı**.
+
+xUnit 485/485.
