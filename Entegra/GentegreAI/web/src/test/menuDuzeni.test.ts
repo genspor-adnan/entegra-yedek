@@ -33,7 +33,7 @@ describe('menü düzeni', () => {
       expect(GRUPLAR, `"${eski}" grubu menüden kalkmıştı`).not.toContain(eski);
   });
 
-  it('grup sayısı tavanı aşmıyor (HBYS 13 · ERP 10 + ortak)', () => {
+  it('grup sayısı tavanı aşmıyor (HBYS 14 · ERP 10 + ortak)', () => {
     // 19: Doküman kendi grubuna geri döndü (kullanıcı) + Göz (691) ve
     //   Yatan Hasta (695) modülleri eklendi.
     // 20: Diş (706) modülü eklendi. 21: Medula (707).
@@ -49,7 +49,8 @@ describe('menü düzeni', () => {
     //   kendi cihazını izler. İkisi aynı iş emri tablosunu paylaşır ama menüde
     //   ayrıdır: biyomedikal teknisyeni ile saha servisi aynı kişiler değil ve
     //   çağrı/SLA/sözleşme yalnız dış işte var. ERP kurulumunda da çıkar.
-    expect(GRUPLAR.length).toBeLessThanOrEqual(29);
+    // ÇAĞRI MERKEZİ (839) 14. HBYS grubu: hasta akışının ilk teması, randevunun önünde.
+    expect(GRUPLAR.length).toBeLessThanOrEqual(30);
   });
 
   it('her grubun sonunda Dökümler var', () => {

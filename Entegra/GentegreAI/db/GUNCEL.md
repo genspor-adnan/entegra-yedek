@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (438 ad, 121 tanesi birden cok dosyada)
+## Fonksiyonlar (440 ad, 121 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -54,6 +54,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_belge_varsayilan_liste` | `601_sgk_tarife_sut_listesi.sql` | 205_belge_fiyat_listesi.sql, 278_odeyen_kurum_varsayilan_liste.sql, 292_varsayilan_liste_kampanya.sql, 302_kurum_sozlesme_fiyat_listesi.sql, 468_kurum_sozlesme_1n.sql, 588_kurum_tarifesi_coklu_sozlesme.sql |
 | `fn_belge_yon` | `205_belge_fiyat_listesi.sql` | — |
 | `fn_bolum_planli` | `718_hekim_calisma_plani.sql` | — |
+| `fn_cagri_arayan_bul` | `839_cagri_merkezi.sql` | — |
+| `fn_cagri_tel_anahtar` | `839_cagri_merkezi.sql` | — |
 | `fn_cari_fiyat_listesi` | `204_cari_fiyat_listesi.sql` | — |
 | `fn_ceviri` | `194_ceviri.sql` | — |
 | `fn_ceviri_sozluk` | `194_ceviri.sql` | — |
@@ -447,7 +449,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (247 ad, 60 tanesi birden cok dosyada)
+## Gorunumler (258 ad, 60 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -473,6 +475,17 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_belge_tahsilat` | `782_avans_tahsilat_turu.sql` | 781_belge_tahsilat_avans_kullanimi.sql |
 | `v_belge_yazi_sablonu` | `768_belge_talep_yazisi.sql` | — |
 | `v_butce_durum` | `724_satinalma.sql` | — |
+| `v_cagri` | `839_cagri_merkezi.sql` | — |
+| `v_cagri_agent` | `839_cagri_merkezi.sql` | — |
+| `v_cagri_altkonu_lookup` | `839_cagri_merkezi.sql` | — |
+| `v_cagri_kalite` | `839_cagri_merkezi.sql` | — |
+| `v_cagri_kampanya` | `839_cagri_merkezi.sql` | — |
+| `v_cagri_kampanya_kisi` | `839_cagri_merkezi.sql` | — |
+| `v_cagri_kampanya_lookup` | `839_cagri_merkezi.sql` | — |
+| `v_cagri_konu` | `839_cagri_merkezi.sql` | — |
+| `v_cagri_konu_lookup` | `839_cagri_merkezi.sql` | — |
+| `v_cagri_kuyruk` | `839_cagri_merkezi.sql` | — |
+| `v_cagri_kuyruk_lookup` | `839_cagri_merkezi.sql` | — |
 | `v_cari_ekstre` | `111_ekstre_doviz_gruplu.sql` | 077_v_ekstre.sql, 097_ekstre_kaynak_kayit.sql |
 | `v_cari_lookup` | `122_aday_musteri.sql` | 037_kisi_karti.sql |
 | `v_cek_senet_portfoy` | `072_cek_senet.sql` | — |

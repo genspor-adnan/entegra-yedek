@@ -608,6 +608,39 @@ public static class AksiyonKatalogu
                 new("isg.olay-sgk", "🏛 SGK'ya bildirildi", "isg", KaynakKodu: "isg.olay", Islem: Islem.Degistir, KayitGerekir: true, Sira: 40, UrunModu: 2),
                 new("isg.olay-kapat", "✔ Kapat", "isg", Hedef: "sagtus,palet", KaynakKodu: "isg.olay", Islem: Islem.Degistir, KayitGerekir: true, Sira: 41, UrunModu: 2),
             ],
+            // ÇAĞRI MERKEZİ (839): çağrı kayıtları (kart özel sayfa), kampanya (üret / çalıştır /
+            //   durdur), kişi sonucu, kalite; ayar listeleri konu / kuyruk / agent düz CRUD.
+            ["cagri-liste"] =
+            [
+                new("cagri.kart", "📞 Çağrı kartı", "cagri", Kisayol: "Enter", KaynakKodu: "cagri.kayit", Islem: Islem.Gor, KayitGerekir: true, Sira: 10, UrunModu: 2),
+                new("cagri.yeni-kayit", "＋ Elle çağrı kaydı", "cagri", Kisayol: "Ctrl+N", KaynakKodu: "cagri.kayit", Islem: Islem.Ekle, Sira: 11, UrunModu: 2),
+                new("cagri.duzenle", "✎ Düzenle", "cagri", KaynakKodu: "cagri.kayit", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20, UrunModu: 2),
+                new("cagri.geri-arama-tamam", "✔ Geri arama yapıldı", "cagri", Hedef: "sagtus,palet", KaynakKodu: "cagri.giden", Islem: Islem.Degistir, KayitGerekir: true, Sira: 30, UrunModu: 2),
+                new("cagri.kisi-ac", "👤 Kişi kartı", "cagri", Hedef: "araccubugu2,sagtus,palet", KaynakKodu: "cagri.kayit", Islem: Islem.Gor, KayitGerekir: true, Sira: 40, UrunModu: 2),
+                Yazdir(),
+            ],
+            ["cagri-kampanya-liste"] =
+            [
+                .. Crud("cagri-kampanya", "cagri", "cagri.kampanya", ekleAdi: "＋ Kampanya", silHedef: null, yazdir: false),
+                new("cagri.kampanya-kart", "📣 Kampanya panosu", "cagri", KaynakKodu: "cagri.kampanya", Islem: Islem.Gor, KayitGerekir: true, Sira: 40, UrunModu: 2),
+                new("cagri.kampanya-uret", "🔄 Listeyi üret", "cagri", KaynakKodu: "cagri.kampanya", Islem: Islem.Degistir, KayitGerekir: true, Sira: 41, UrunModu: 2),
+                new("cagri.kampanya-calistir", "▶ Çalıştır (mesaj gönder)", "cagri", KaynakKodu: "cagri.kampanya", Islem: Islem.Degistir, KayitGerekir: true, Sira: 42, UrunModu: 2),
+                new("cagri.kampanya-durdur", "⏸ Durdur", "cagri", Hedef: "sagtus,palet", KaynakKodu: "cagri.kampanya", Islem: Islem.Degistir, KayitGerekir: true, Sira: 43, UrunModu: 2),
+            ],
+            ["cagri-kampanya-kisi-liste"] =
+            [
+                new("cagri.kisi-ara", "📞 Ara (çağrı aç)", "cagri", Kisayol: "Enter", KaynakKodu: "cagri.giden", Islem: Islem.Degistir, KayitGerekir: true, Sira: 10, UrunModu: 2),
+                new("cagri.kisi-sonuc", "✔ Sonuç yaz", "cagri", KaynakKodu: "cagri.giden", Islem: Islem.Degistir, KayitGerekir: true, Sira: 20, UrunModu: 2),
+                Yazdir(),
+            ],
+            ["cagri-kalite-liste"] =
+            [
+                new("cagri.kart", "📞 Çağrı kartı", "cagri", Kisayol: "Enter", KaynakKodu: "cagri.kalite", Islem: Islem.Gor, KayitGerekir: true, Sira: 10, UrunModu: 2),
+                Yazdir(),
+            ],
+            ["cagri-konu-liste"] = Crud("cagri-konu", "cagri", "cagri.ayar", ekleAdi: "＋ Konu", silHedef: null, yazdir: false),
+            ["cagri-kuyruk-liste"] = Crud("cagri-kuyruk", "cagri", "cagri.ayar", ekleAdi: "＋ Kuyruk", silHedef: null, yazdir: false),
+            ["cagri-agent-liste"] = Crud("cagri-agent", "cagri", "cagri.ayar", ekleAdi: "＋ Agent", silHedef: null, yazdir: false),
             ["ftr-degerlendirme-liste"] = Crud("ftr-degerlendirme", "ftr", "ftr.degerlendirme", ekleAdi: "＋ Değerlendirme", silHedef: null,
                                                silIpucu: "Programı olan değerlendirme silinmez"),
             ["ftr-program-liste"] =

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Çağrı Merkezi — Süreç — Mockup (GenoTIP AI · Çağrı Merkezi)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1400px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:4px;padding:6px 8px;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:default;display:flex;gap:5px;align-items:center;white-space:nowrap}
+  .btn.primary{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .btn.ok{border-color:#3f9a5e;background:linear-gradient(#5cb87a,#3f9a5e);color:#fff;font-weight:bold}
+  .btn.danger{border-color:#c0392b;background:linear-gradient(#e06a5e,#c0392b);color:#fff}
+  .btn.pas{opacity:.45}
+  .btn.mini{padding:2px 7px;font-size:10.5px;display:inline-flex}
+  .sepv{width:1px;height:20px;background:var(--line);margin:0 4px}
+  .sp{margin-left:auto}
+  .arama{display:flex;gap:8px;align-items:center;padding:7px 10px;background:#f7fafc;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+  .arama .kutu{flex:1;min-width:240px;border:1px solid var(--line);border-radius:3px;background:#fff;height:26px;display:flex;align-items:center;padding:0 8px;color:var(--muted);gap:6px}
+  .chip{border:1px solid var(--line);border-radius:12px;padding:3px 12px;font-size:11px;background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:linear-gradient(#4d8fd6,#2f6db3);border-color:#2f6db3;color:#fff;font-weight:bold}
+  .dg{border-top:1px solid var(--line2);overflow-x:auto;background:#fff}
+  .dg table{border-collapse:collapse;width:100%}
+  .dg th{background:linear-gradient(#f4f7fb,#e7eef6);border-bottom:1px solid var(--line);border-right:1px solid var(--line2);text-align:left;padding:6px 8px;font-size:11px;color:#3a5573;font-weight:bold;white-space:nowrap}
+  .dg td{border-bottom:1px solid var(--line2);border-right:1px solid #eef2f6;padding:5px 8px;font-size:11.5px;white-space:nowrap}
+  .dg tr.sel td{background:var(--sel)}
+  .dg tr.grup td{background:#f7f9fc;font-weight:bold;color:#2c4a6b}
+  .dg td code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .sag{text-align:right} .orta{text-align:center} .sonuk{color:var(--muted)}
+  .rz{display:inline-block;border-radius:9px;padding:1px 8px;font-size:10.5px;border:1px solid var(--line);background:#f4f6f9;color:#4d5d6e;white-space:nowrap}
+  .rz.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .rz.pas{background:#eceff2;color:#6b7a8b}
+  .rz.mavi{background:#eef4fc;color:#2f6db3;border-color:#cfe0f5}
+  .rz.sari{background:#fdf6e3;color:#8a6218;border-color:#f2ddbf}
+  .rz.kir{background:#fbe9e7;color:#b3261e;border-color:#f3c4bf}
+  .rz.mor{background:#f1ecfa;color:#6a3fb5;border-color:#ddd0f2}
+  .statusbar{display:flex;gap:14px;padding:5px 12px;background:var(--head);border-top:1px solid var(--line);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .not{max-width:1400px;margin:10px auto;color:#6b7a8b;font-size:11px;line-height:1.65}
+  .not b{color:var(--ink)}
+  .not code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+  .not ul{margin:6px 0 0 18px;padding:0}
+  .hdr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;padding:10px 12px;background:#fbfcfe;border-bottom:1px solid var(--line2)}
+  .hdr.k4{grid-template-columns:repeat(4,1fr)} .hdr.k5{grid-template-columns:repeat(5,1fr)} .hdr.k6{grid-template-columns:repeat(6,1fr)}
+  .fld label{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+  .fld label.req::after{content:" *";color:#c0392b}
+  .inp{border:1px solid var(--line);border-radius:3px;background:#fff;min-height:24px;padding:3px 7px;font-size:11.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .inp.big{font-weight:bold;font-size:12.5px}
+  .inp.combo::after{content:"▾";margin-left:auto;color:var(--muted)}
+  .inp.ro{background:#f4f6f9;color:#4d5d6e}
+  .inp.err{border-color:#c0392b;background:#fff6f5}
+  .sekmeler{display:flex;gap:2px;padding:6px 10px 0;background:var(--head);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sekme{border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;padding:5px 12px;font-size:11.5px;background:#e7edf4;color:#4d5d6e}
+  .sekme.on{background:#fff;color:var(--navy);font-weight:bold;position:relative;top:1px}
+  .grp{border:1px solid var(--line2);border-radius:4px;margin:10px 12px;overflow:hidden}
+  .grp .gb{background:linear-gradient(#f4f7fb,#e7eef6);padding:5px 10px;font-size:11px;font-weight:bold;color:#2c4a6b;display:flex;align-items:center;gap:8px}
+  .grp .gb .sp{margin-left:auto;font-weight:normal;color:var(--muted)}
+  .ic{padding:8px 10px}
+  .ozet{display:flex;gap:10px;padding:8px 12px;flex-wrap:wrap}
+  .kart{flex:1;min-width:150px;border:1px solid var(--line2);border-radius:4px;padding:8px 10px;background:#fbfcfe}
+  .kart .b{font-size:10.5px;color:var(--muted)} .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px}
+  .kart .d small{font-size:10.5px;font-weight:normal;color:var(--muted)}
+  .kart.kir .d{color:var(--kirmizi)} .kart.ok .d{color:var(--ok)}
+  .bar{height:8px;background:#e7edf4;border-radius:4px;overflow:hidden;min-width:70px}
+  .bar i{display:block;height:100%;background:linear-gradient(#5cb87a,#3f9a5e)}
+  .bar.s i{background:linear-gradient(#f0c05a,#d9a12b)} .bar.m i{background:linear-gradient(#4d8fd6,#2f6db3)} .bar.k i{background:linear-gradient(#e06a5e,#c0392b)}
+  .ikiPanel{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .ikiPanel>div:first-child{border-right:1px solid var(--line2)}
+  .ucPanel{display:grid;grid-template-columns:300px 1fr 320px}
+  .ucPanel>div{border-right:1px solid var(--line2)} .ucPanel>div:last-child{border-right:none}
+  .liste{list-style:none;margin:0;padding:0}
+  .liste li{padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11.5px;display:flex;gap:6px;align-items:center}
+  .liste li.sel{background:var(--sel)}
+  .liste li .sp{color:var(--muted);font-size:10.5px}
+  .sonuc{margin:10px 12px;border:1px solid #bfe3cb;background:#eef9f1;border-radius:4px;padding:8px 10px;font-size:11.5px}
+  .sonuc.kir{border-color:#f3c4bf;background:#fdf1ef}
+  .sonuc.sari{border-color:#f2ddbf;background:#fdf8ec}
+  .sonuc b{color:var(--navy)}
+  .xml{font-family:Consolas,monospace;font-size:10.5px;background:#1f2d3a;color:#d7e3f2;padding:8px 10px;border-radius:3px;white-space:pre;overflow:auto;margin:0 12px 10px;line-height:1.5}
+  .adim{display:flex;gap:0;padding:8px 12px;flex-wrap:wrap}
+  .adim span{padding:5px 12px;border:1px solid var(--line);background:#fff;font-size:11px;color:var(--muted);position:relative}
+  .adim span+span{border-left:none}
+  .adim span.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;border-color:#2f6db3;font-weight:bold}
+  .adim span.ok{background:#e2f3e8;color:#2e7d46;border-color:#bfe3cb}
+  .icerik{padding:12px 16px;line-height:1.6}
+  .icerik h2{font-size:14px;color:var(--navy);margin:16px 0 6px;border-bottom:1px solid var(--line2);padding-bottom:3px}
+  .icerik h3{font-size:12.5px;color:#2c4a6b;margin:12px 0 4px}
+  .icerik p{margin:4px 0}
+  .icerik table{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:11.5px}
+  .icerik th,.icerik td{border:1px solid var(--line2);padding:4px 7px;text-align:left;vertical-align:top}
+  .icerik th{background:#f4f7fb;color:#3a5573;white-space:nowrap}
+  .icerik code{background:#f2f6fa;border:1px solid var(--line2);border-radius:3px;padding:0 4px;font-size:10.5px}
+  .kutu{border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;padding:8px 10px;margin:8px 0}
+  .yatay{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:6px 12px}
+</style>
+</head>
+<body>
+
+<style>
+  .akis{display:flex;gap:0;padding:10px 12px;flex-wrap:wrap}
+  .akis .ad{border:1px solid var(--line);background:#fff;padding:8px 12px;min-width:150px;font-size:11px;flex:1}
+  .akis .ad+.ad{border-left:none}
+  .akis .ad b{display:block;color:var(--navy);margin-bottom:2px}
+  .akis .ad.on{background:linear-gradient(#4d8fd6,#2f6db3);color:#fff} .akis .ad.on b{color:#fff}
+  .frm{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 10px;padding:8px 12px}
+  .frm .al{display:flex;flex-direction:column;gap:2px;font-size:11px}
+  .frm .al .lb{color:var(--muted);font-size:10.5px}
+  .frm .al.g2{grid-column:span 2} .frm .al.g4{grid-column:span 4}
+  .kart .d{font-size:16px;font-weight:bold;color:var(--navy);margin-top:2px} .kart .b{font-size:10.5px;color:var(--muted)}
+  .kart.kir .d{color:#c0392b} .kart.ok .d{color:#2e7d46} .kart.sari .d{color:#8a6218}
+  .dg td.w{white-space:normal}
+  /* softphone */
+  .soft{display:flex;align-items:center;gap:8px;padding:6px 12px;background:#1f2d3a;color:#d7e3f2;font-size:11.5px}
+  .soft .dur{border-radius:12px;padding:3px 12px;font-weight:bold;color:#fff}
+  .soft .dur.hazir{background:#3f9a5e} .soft .dur.mesgul{background:#c0392b} .soft .dur.mola{background:#d9a12b;color:#1f2d3a}
+  .soft .no{font-family:Consolas,monospace;font-size:14px;font-weight:bold;color:#fff;letter-spacing:.5px}
+  .soft .sure{font-family:Consolas,monospace;font-size:13px;color:#9fd4ff}
+  .soft .tb{border:1px solid #4a5b6e;background:#2b3d50;color:#fff;border-radius:3px;padding:4px 10px;font-size:11px;white-space:nowrap}
+  .soft .tb.kir{background:#c0392b;border-color:#c0392b} .soft .tb.ok{background:#3f9a5e;border-color:#3f9a5e}
+  .soft .sp{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .gelen{border:2px solid #2f6db3;border-radius:6px;margin:10px 12px;background:#eef4fc;padding:10px 12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 14px;font-size:11.5px;position:relative}
+  .gelen .ari{grid-column:span 3;display:flex;align-items:center;gap:10px}
+  .gelen .ari .no{font-size:18px;font-weight:bold;color:var(--navy);font-family:Consolas,monospace}
+  .gelen .ari .kim{font-size:14px;font-weight:bold;color:#1f2d3a}
+  .gelen .oz{display:flex;flex-direction:column} .gelen .oz .lb{font-size:10.5px;color:var(--muted)}
+  .gelen .oz b{color:var(--navy)}
+  .hizli{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px 12px}
+  .hizli .h{border:1px solid var(--line);border-radius:5px;background:#fff;padding:10px;font-size:11px;text-align:center}
+  .hizli .h .ik{font-size:22px} .hizli .h b{display:block;color:var(--navy);margin:4px 0 2px}
+  .hizli .h.on{border-color:#2f6db3;background:#eef4fc}
+  .ucPanel{grid-template-columns:270px 1fr 330px}
+  .kuy{list-style:none;margin:0;padding:0}
+  .kuy li{display:grid;grid-template-columns:22px 1fr auto;gap:6px;padding:6px 10px;border-bottom:1px solid var(--line2);font-size:11px;align-items:center}
+  .kuy li .bek{font-family:Consolas,monospace;color:#c0392b;font-weight:bold}
+  .kuy li.sel{background:var(--sel)}
+  .konu{display:flex;flex-wrap:wrap;gap:4px;padding:6px 10px}
+  .konu .k{border:1px solid var(--line);border-radius:3px;padding:3px 8px;font-size:11px;background:#fff}
+  .konu .k.on{background:#2f6db3;border-color:#2f6db3;color:#fff;font-weight:bold}
+  .betik{margin:8px 10px;border:1px solid #f2ddbf;background:#fdf8ec;border-radius:4px;padding:8px 10px;font-size:11.5px;line-height:1.6}
+  .betik b{color:#8a6218}
+  .zc{display:flex;flex-direction:column;gap:0;padding:8px 12px;font-size:11px}
+  .zc .z{display:grid;grid-template-columns:70px 22px 1fr;gap:8px;align-items:start;padding:5px 0;border-left:2px solid var(--line2);margin-left:78px;position:relative}
+  .zc .z .t{position:absolute;left:-78px;color:var(--muted);font-family:Consolas,monospace}
+  .zc .z .ik{position:absolute;left:-11px;top:4px;width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid #2f6db3;font-size:10px;text-align:center;line-height:14px}
+  .zc .z .ic2{grid-column:3}
+  .trk{margin:8px 12px;border:1px solid var(--line2);border-radius:4px;background:#fff;font-size:11.5px}
+  .trk .sat{display:grid;grid-template-columns:70px 90px 1fr;gap:8px;padding:5px 10px;border-bottom:1px solid #eef2f6}
+  .trk .sat .kim{font-weight:bold;color:#2c4a6b} .trk .sat .kim.op{color:#2f6db3}
+  .trk .sat .t{color:var(--muted);font-family:Consolas,monospace}
+  .aiozet{margin:8px 12px;border:1px solid #cfe0f5;background:#eef4fc;border-radius:4px;padding:8px 10px;font-size:11.5px}
+  .aiozet b{color:var(--navy)}
+  .aj{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:8px 12px}
+  .aj .a{border:1px solid var(--line2);border-radius:5px;background:#fff;padding:8px;font-size:11px;text-align:center}
+  .aj .a .ad2{font-weight:bold;color:var(--navy)} .aj .a .du{margin:4px 0;font-weight:bold;border-radius:10px;padding:1px 8px;display:inline-block;color:#fff}
+  .aj .a .du.h{background:#3f9a5e} .aj .a .du.m{background:#c0392b} .aj .a .du.mo{background:#d9a12b} .aj .a .du.s{background:#2f6db3} .aj .a .du.c{background:#8a8f99}
+  .aj .a .sr2{font-family:Consolas,monospace;color:var(--muted)}
+  .grafik{display:flex;align-items:flex-end;gap:4px;height:120px;padding:8px 12px;border-bottom:1px solid var(--line2)}
+  .grafik i{flex:1;background:linear-gradient(#4d8fd6,#2f6db3);border-radius:2px 2px 0 0;position:relative}
+  .grafik i.k{background:linear-gradient(#e06a5e,#c0392b)}
+  .grafik i span{position:absolute;bottom:-16px;left:0;right:0;text-align:center;font-size:9.5px;color:var(--muted)}
+  .ivr{padding:8px 12px;font-size:11.5px}
+  .ivr ul{list-style:none;margin:0;padding-left:18px;border-left:1px dashed var(--line)}
+  .ivr li{padding:3px 0} .ivr .tus{display:inline-block;min-width:20px;text-align:center;border:1px solid var(--line);border-radius:3px;background:#f4f6f9;font-weight:bold;margin-right:6px;font-family:Consolas,monospace}
+  .ivr .hd{display:inline-block;border:1px solid #cfe0f5;background:#eef4fc;color:#2f6db3;border-radius:3px;padding:0 6px;margin-left:6px;font-size:10.5px}
+  .wa{max-width:360px;margin:10px auto;font-size:12px}
+  .wa .bal{background:#dcf8c6;border-radius:12px 12px 3px 12px;padding:8px 12px;margin:4px 0 4px 40px;color:#1f2a36}
+  .wa .bal.gelen2{background:#fff;border:1px solid var(--line2);border-radius:12px 12px 12px 3px;margin:4px 40px 4px 0}
+  .wa .kim{font-size:10.5px;color:var(--muted);margin:0 8px}
+  .yildiz{color:#d9a12b;letter-spacing:1px}
+  .sla{display:inline-block;border-radius:3px;padding:1px 7px;font-size:10.5px;font-weight:bold;color:#fff}
+  .sla.ok{background:#3f9a5e} .sla.uy{background:#d9a12b} .sla.gec{background:#c0392b}
+</style>
+<div class="toolbar" style="background:#fff;border-bottom:1px solid var(--line2)"><span class="sonuk">Çağrı Merkezi ekranları:</span><span class="chip on" data-git="cagri_sureci.html">📘 Süreç</span><span class="chip" data-git="cagri_operator_panosu.html">🎧 Operatör Panosu</span><span class="chip" data-git="cagri_kayit_karti.html">📞 Çağrı Kartı</span><span class="chip" data-git="cagri_giden_kampanya.html">📤 Giden Arama · Kampanya</span><span class="chip" data-git="cagri_supervizor.html">📊 Süpervizör Panosu</span><span class="chip" data-git="cagri_santral_ayarlar.html">⚙️ Santral · IVR · Ayarlar</span></div>
+<div class="win">
+  <div class="title">📘 Çağrı Merkezi — Süreç <span class="sp">Hastane · Tıp Merkezi · Diş · OSGB · ERP müşteri hizmetleri · GenoTIP AI</span></div>
+  <div class="akis">
+    <div class="ad"><b>1 · Kanal &amp; Santral</b>Telefon (SIP/3CX/Asterisk/bulut santral) · WhatsApp · SMS · web formu · e-posta · portal mesajı</div>
+    <div class="ad"><b>2 · Arayan Tanıma</b>CallerID → hasta / cari / çalışan eşleşmesi · ekran açılışı (screen-pop) · son 3 etkileşim</div>
+    <div class="ad on"><b>3 · Çağrı Kaydı</b>Konu ağacı (randevu · sonuç · şikayet · bilgi · tahsilat · servis) · not · sonuç</div>
+    <div class="ad"><b>4 · İşlem</b>Randevu ver/değiştir · sonuç bildir · sipariş/servis aç · şikayet (DÖF) · ödeme linki</div>
+    <div class="ad"><b>5 · Takip</b>Geri arama · görev · SLA · kampanya (hatırlatma, anket, tahsilat) · WhatsApp şablonu</div>
+    <div class="ad"><b>6 · Kalite &amp; Rapor</b>Ses kaydı · AI transkript/özet · değerlendirme formu · KPI · konu dağılımı</div>
+  </div>
+<div class="sekmeler"><div class="sekme on">Roller &amp; Ekranlar</div><div class="sekme">Kanallar &amp; Santral</div><div class="sekme">Konu Ağacı &amp; SLA</div><div class="sekme">Veri Modeli</div><div class="sekme">Mevcut ↔ Yeni</div><div class="sekme">Kalanlar</div></div><div class="pnl"><div class="dg"><table><thead><tr><th>Adım</th><th>Rol</th><th>Ekran</th><th>Ne yapar</th><th>Kural</th></tr></thead><tbody><tr><td class="w">Gelen çağrı</td><td class="w">Operatör (agent)</td><td class="w">Çağrı Merkezi › Operatör Panosu</td><td class="w">Softphone durumu (hazır/meşgul/mola), gelen çağrıda arayan kartı otomatik açılır; hızlı işlemler tek tık</td><td class="w">Arayan numara birden çok kayıtla eşleşirse seçim listesi; eşleşme yoksa "yeni kişi" (taraf, hasta değil)</td></tr><tr><td class="w">Çağrı kaydı</td><td class="w">Operatör</td><td class="w">Çağrı Merkezi › Çağrı Kartı</td><td class="w">Konu/alt konu, ilgili hasta/cari, not, sonuç (çözüldü / geri aranacak / görev açıldı), ses kaydı bağlantısı</td><td class="w">Her çağrı kayıt; kapatmadan konu zorunlu; sonuç "geri aranacak" ise tarih/saat zorunlu</td></tr><tr><td class="w">İşlem</td><td class="w">Operatör</td><td class="w">Randevu · Hasta kartı · Sipariş · Servis · Kalite (DÖF)</td><td class="w">Çağrı kartından ilgili modülün kartı açılır; oluşan kayıt çağrıya bağlanır (ilgili kayıtlar)</td><td class="w">Bağlantı `cagri_ilgili` (kaynak tür + id); randevu SMS/WhatsApp onayı otomatik</td></tr><tr><td class="w">Giden arama</td><td class="w">Operatör · Otomatik</td><td class="w">Çağrı Merkezi › Giden Arama · Kampanya</td><td class="w">Geri arama listesi, kampanya (randevu hatırlatma, sonuç hazır, memnuniyet anketi, tahsilat), tıkla-ara</td><td class="w">Kampanya kaynağı = liste sorgusu (yarınki randevular, 7 gündür alınmayan sonuç, vadesi geçen borç); kişi başı günde 1 arama</td></tr><tr><td class="w">İzleme</td><td class="w">Süpervizör</td><td class="w">Çağrı Merkezi › Süpervizör Panosu</td><td class="w">Canlı kuyruk, agent durumları, SLA (20 sn içinde cevap), kaçan çağrı, gün grafiği, dinle/fısılda</td><td class="w">SLA hedefi kuyruk başına; kaçan çağrı otomatik geri arama listesine düşer</td></tr><tr><td class="w">Kalite</td><td class="w">Kalite sorumlusu</td><td class="w">Çağrı Kartı › Kalite · Dökümler</td><td class="w">Ses kaydı dinleme, AI transkript + özet, değerlendirme formu (form motoru), puan</td><td class="w">Örnekleme: agent başına haftada N çağrı; puan &lt; eşik → eğitim görevi</td></tr><tr><td class="w">Ayar</td><td class="w">Yönetici</td><td class="w">Ayarlar › Çağrı Merkezi</td><td class="w">Santral bağlantısı, IVR menüsü, kuyruk/beceri, çalışma saatleri, konu ağacı, mesaj şablonları</td><td class="w">Santral sağlayıcı bağımsız: olaylar webhook/AMI ile `cagri_olay`a; softphone WebRTC ya da masaüstü telefon</td></tr></tbody></table></div></div><div class="pnl" hidden>
+<div class="grp"><div class="gb">Kanallar</div><div class="dg"><table><thead><tr><th>Kanal</th><th>Gelen</th><th>Giden</th><th>Tanıma</th><th>Not</th></tr></thead><tbody><tr><td class="w">Telefon (santral)</td><td class="w">IVR → kuyruk → agent (screen-pop)</td><td class="w">Tıkla-ara (click-to-call), kampanya otomatik arama</td><td class="w">CallerID → taraf.telefon</td><td class="w">3CX / Asterisk (AMI+ARI) / bulut SIP (Netgsm, Bulutfon, Verimor) / WebRTC softphone</td></tr><tr><td class="w">WhatsApp Business</td><td class="w">Mesaj → sohbet kuyruğu (aynı agent panosu)</td><td class="w">Şablon mesaj (randevu onayı, sonuç hazır, ödeme linki)</td><td class="w">Numara → taraf.telefon</td><td class="w">Meta Cloud API; 24 saat penceresi dışında yalnız onaylı şablon</td></tr><tr><td class="w">SMS</td><td class="w">Gelen SMS → çağrı kaydı (kısa kod)</td><td class="w">Toplu / tekil (mevcut bildirim şablonları)</td><td class="w">Numara</td><td class="w">Mevcut `bildirim` altyapısı</td></tr><tr><td class="w">Web formu / Portal</td><td class="w">Randevu talebi, bilgi isteği → kuyruk</td><td class="w">-</td><td class="w">TCKN / e-posta</td><td class="w">Hasta portalı mesajları aynı kuyruğa</td></tr><tr><td class="w">E-posta</td><td class="w">info@ → kuyruk (IMAP)</td><td class="w">Yanıt (SMTP)</td><td class="w">e-posta → taraf</td><td class="w">Ek dosyalar çağrı kartına</td></tr></tbody></table></div></div>
+<div class="grp"><div class="gb">Santral olay akışı (sağlayıcı bağımsız)</div><div class="ic" style="font-size:11.5px;line-height:1.7">
+  <code>ringing</code> (arayan, aranan, kuyruk) → <code>answered</code> (agent, kanal id) → <code>hold / unhold / transfer</code> → <code>hangup</code> (süre, sebep, kayıt dosyası URL).<br>
+  Her olay <code>cagri_olay</code> tablosuna yazılır; <code>cagri</code> başlığı ilk <code>ringing</code>'de açılır, <code>hangup</code>'ta süre/sonuç dolar. Agent panosu SSE ile canlı güncellenir (mevcut `bildirim` kanalı gibi).
+</div></div></div><div class="pnl" hidden>
+<div class="grp"><div class="gb">Konu ağacı (örnek · Ayarlar'dan düzenlenir)</div><div class="dg"><table><thead><tr><th>Konu</th><th>Alt konu</th><th>Hızlı işlem</th><th>SLA</th><th>Sonuç seçenekleri</th></tr></thead><tbody><tr><td class="w">Randevu</td><td class="w">Yeni · Değiştir · İptal · Sıra sorma</td><td class="w">Randevu takvimi (hekim/bölüm)</td><td class="w">Çağrıda çözüm</td><td class="w">Randevu verildi · İptal edildi · Uygun saat yok → geri arama</td></tr><tr><td class="w">Sonuç / Rapor</td><td class="w">Tahlil sonucu · Radyoloji raporu · e-Nabız</td><td class="w">Sonuç durumu göster (hazır/bekliyor)</td><td class="w">Çağrıda çözüm</td><td class="w">Bilgi verildi · Sonuç hazır değil → hazır olunca WhatsApp</td></tr><tr><td class="w">Bilgi</td><td class="w">Adres/yol · Çalışma saatleri · Fiyat · Anlaşmalı kurum</td><td class="w">Bilgi kartları (betik)</td><td class="w">Çağrıda çözüm</td><td class="w">Bilgi verildi</td></tr><tr><td class="w">Şikayet / Öneri</td><td class="w">Bekleme · Personel · Fatura · Temizlik</td><td class="w">DÖF aç (Kalite)</td><td class="w">48 saat dönüş</td><td class="w">DÖF açıldı · Çözüldü · Yönetime iletildi</td></tr><tr><td class="w">Tahsilat</td><td class="w">Borç sorma · Ödeme linki · Taksit</td><td class="w">Cari ekstre · ödeme linki SMS</td><td class="w">24 saat</td><td class="w">Ödeme alındı · Söz alındı (tarih) · Ulaşılamadı</td></tr><tr><td class="w">Servis / Sipariş (ERP)</td><td class="w">Arıza · Sipariş durumu · İade</td><td class="w">Servis kaydı · Sipariş kartı</td><td class="w">4 saat (arıza)</td><td class="w">Servis açıldı · Bilgi verildi · Teklif gönderildi</td></tr></tbody></table></div></div></div><div class="pnl" hidden>
+<div class="grp"><div class="gb">Tablolar (PG · db/7xx_cagri_merkezi.sql)</div><div class="dg"><table><thead><tr><th>Tablo</th><th>Alanlar (özet)</th><th>Not</th></tr></thead><tbody><tr><td class="w"><code>cagri</code></td><td class="w">id, kanal (1 tel 2 wa 3 sms 4 web 5 eposta), yon (1 gelen 2 giden), arayan_no, taraf_id, hasta_id, kuyruk_id, agent_id, baslama, cevap, bitis, bekleme_sn, sure_sn, konu_id, alt_konu_id, sonuc, not, kayit_url, durum, kampanya_id, sube_id</td><td class="w">Başlık; taraf/hasta boş olabilir (tanınmayan arayan)</td></tr><tr><td class="w"><code>cagri_olay</code></td><td class="w">cagri_id, tur (ringing/answered/hold/transfer/hangup/note), zaman, agent_id, veri jsonb</td><td class="w">Santral olay günlüğü; zaman çizelgesi</td></tr><tr><td class="w"><code>cagri_ilgili</code></td><td class="w">cagri_id, kaynak_tur (randevu/gorev/dof/siparis/servis/form_istek), kaynak_id</td><td class="w">Çağrıdan açılan kayıtlar</td></tr><tr><td class="w"><code>cagri_konu</code></td><td class="w">id, ust_id, ad, sla_dk, hizli_islem, aktif</td><td class="w">Konu ağacı (Ayarlar)</td></tr><tr><td class="w"><code>cagri_kuyruk</code></td><td class="w">id, ad, santral_kodu, beceri jsonb, sla_sn, calisma_saati jsonb, mola_mesaji</td><td class="w">Kuyruk/beceri; IVR hedefi</td></tr><tr><td class="w"><code>cagri_agent</code></td><td class="w">kullanici_id, dahili, durum (hazir/mesgul/mola/cikis), durum_zaman, kuyruklar[]</td><td class="w">Anlık durum; süpervizör panosu</td></tr><tr><td class="w"><code>cagri_kampanya</code></td><td class="w">id, ad, tur (hatirlatma/sonuc/anket/tahsilat/serbest), kaynak_sorgu, sablon_id, baslama, bitis, durum</td><td class="w">Giden arama listesi üreticisi</td></tr><tr><td class="w"><code>cagri_kampanya_kisi</code></td><td class="w">kampanya_id, taraf_id, telefon, durum (bekliyor/arandi/ulasilamadi/tamam), deneme, son_deneme, cagri_id, sonuc jsonb</td><td class="w">Kişi başı takip</td></tr><tr><td class="w"><code>cagri_kalite</code></td><td class="w">cagri_id, degerlendiren, form_istek_id, puan, ozet_ai, transkript</td><td class="w">Form motoru (740) değerlendirme şablonu</td></tr></tbody></table></div></div>
+<div class="grp"><div class="gb">Kaynak bağları</div><div class="ic" style="font-size:11.5px;line-height:1.7">
+  Hasta = <code>taraf</code> (hasta rolü) · telefon eşleşmesi <code>taraf.telefon / taraf_iletisim</code> · randevu <code>randevu</code> · şikayet <code>kalite_dof</code> · görev/geri arama <code>gorev</code> · anket/değerlendirme <code>form_istek</code> (form motoru) · SMS/WhatsApp <code>bildirim</code> + şablonlar · yetkiler <code>cagri.*</code> · modül <code>cagri</code> (kurum_profil.moduller).
+</div></div></div><div class="pnl" hidden><div class="dg"><table><thead><tr><th>Konu</th><th>Mevcut (Delphi)</th><th>Yeni (GenoTIP AI)</th></tr></thead><tbody><tr><td class="w">Çağrı kaydı</td><td class="w">Yok; aktiviteler (CRM) elle</td><td class="w">Santral olaylı otomatik kayıt, arayan tanıma, konu ağacı</td></tr><tr><td class="w">Softphone</td><td class="w">Yok</td><td class="w">WebRTC (tarayıcıda) ya da masaüstü telefonla eşleşen dahili; durum yönetimi</td></tr><tr><td class="w">Geri arama / kampanya</td><td class="w">Aktivite hatırlatma</td><td class="w">Liste sorgusundan kampanya, tıkla-ara, sonuç takibi, WhatsApp şablonu</td></tr><tr><td class="w">Süpervizör</td><td class="w">Yok</td><td class="w">Canlı kuyruk/agent/SLA panosu, dinle-fısılda (santral destekliyorsa)</td></tr><tr><td class="w">Kalite</td><td class="w">Yok</td><td class="w">Ses kaydı + AI transkript/özet + değerlendirme formu (form motoru)</td></tr></tbody></table></div></div><div class="pnl" hidden>
+<ul class="liste">
+  <li>🔌 Santral sağlayıcı sürücüleri: 3CX (HTTP API + webhook), Asterisk (AMI/ARI), Netgsm/Bulutfon (webhook) — ilk pilot tek sağlayıcı</li>
+  <li>🎙️ WebRTC softphone (SIP.js) — pilotta masaüstü telefon + ekran açılışı yeterli</li>
+  <li>🤖 AI transkript/özet (mevcut model anahtarı + kontör), duygu/konu önerisi</li>
+  <li>💬 WhatsApp Cloud API onayı (şablon başvurusu), 24 saat penceresi kuralı</li>
+  <li>📊 Dökümler: agent performansı, konu dağılımı, kaçan çağrı, kampanya sonuç raporu</li>
+  <li>🔐 KVKK: ses kaydı bildirimi (IVR anonsu), saklama süresi, silme talebi</li>
+</ul></div>
+</div>
+<div class="not"><b>Bu mockup:</b> Çağrı Merkezi modülünün uçtan uca akışı. Sekmeler tıklanınca açılır. Diğer ekranlar üstteki çiplerden.</div>
+
+<script>
+// Sekmeler: .sekmeler icindeki .sekme tiklaninca ayni kapsamdaki .pnl panelleri degisir.
+// Eslesme: data-s anahtari, yoksa sira numarasi. Ic ice sekmeler desteklenir.
+document.querySelectorAll('.sekmeler').forEach(function(bar){
+  var tabs=[].slice.call(bar.querySelectorAll('.sekme'));
+  var scope=bar.parentElement;
+  var pnls=[].slice.call(scope.querySelectorAll('.pnl')).filter(function(p){return p.parentElement.closest('.pnl')===scope.closest('.pnl');});
+  function key(el,i){return el.dataset.s||String(i);}
+  function goster(k){pnls.forEach(function(p,j){p.hidden=(key(p,j)!==k);});}
+  tabs.forEach(function(t,i){
+    t.style.cursor='pointer';
+    t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('on');});t.classList.add('on');goster(key(t,i));});
+  });
+  var on=tabs.findIndex(function(t){return t.classList.contains('on');}); if(on<0) on=0;
+  if(pnls.length) goster(key(tabs[on],on));
+});
+// Ic toolbar dugmeleri: data-git="dosya.html" olanlar diger mockup'a gecer.
+document.querySelectorAll('[data-git]').forEach(function(b){ b.style.cursor='pointer'; b.addEventListener('click',function(){ location.href=b.dataset.git; }); });
+</script>
+</body>
+</html>

@@ -15630,3 +15630,72 @@ haritada mı (yoksa düğüm sessizce kök olur), döngü var mı, her bölüm s
 listesinde mi.
 
 Tarayıcıda: 8 bölüm, 74 rol, tablo sayısı 0. xUnit 488/488, vitest 696/696.
+
+
+## Çağrı Merkezi modülü (839) — 19.09.2026
+
+Kullanıcı: *"Çağrı Merkezi için mockuplar hazırla ve sekmeler açılır olsun"* →
+*"Çağrı Merkezi sistemini mockuplara uygun şekilde projeye ekle"*. Mockuplar
+`Ekranlar/CagriMerkezi/*.html` (6 ekran, sekmeler tıklanınca açılır).
+
+**Akış:** kanal (santral telefon / WhatsApp / SMS / web / e-posta) → arayan
+tanıma (`fn_cagri_arayan_bul`: numara rakama indirgenir, son 10 hane
+`taraf.cep_tel/telefon` ile eşlenir) → çağrı kaydı (konu ağacı, sonuç, not) →
+işlem (randevu, ödeme linki, şikayet = görev tur 1, geri arama = görev tur 2 +
+`cagri.geri_arama`) → giden arama / kampanya → süpervizör → kalite.
+
+**DB (`db/839_cagri_merkezi.sql`, yalnız docker):** `cagri_konu`, `cagri_kuyruk`,
+`cagri_agent`, `cagri`, `cagri_olay`, `cagri_ilgili`, `cagri_kampanya`,
+`cagri_kampanya_kisi`, `cagri_kalite`, `cagri_santral` (şube başına: sağlayıcı,
+webhook anahtarı, IVR ve çalışma saati JSON metni); görünümler `v_cagri*`
+(SLA `sla_icinde` kuyruk eşiğine göre; `v_cagri_kampanya_kisi.aranacak` mesaj
+bekleme / deneme kuralı); kod listeleri `cagri.*`; yetkiler `cagri.*` (tur 0);
+modül `cagri` (hastane / tıp merkezi / diş / OSGB varsayılan açık, ERP dahil
+diğerlerinde seçilebilir); bildirim şablonları `cagri.randevu_hatirlatma`,
+`sonuc_hazir`, `odeme_linki`, `anket`, `geri_arama`, `yol_tarifi`; tohum: 5
+kuyruk, 6 konu + 21 alt konu, santral satırı.
+
+**API `CagriUclari.cs` (`/api/cagri`):** `pano` (agent durumu, kuyruk, bugünkü
+çağrılar, aktif çağrı; işlem sonrası süresi dolan agent kendiliğinden hazır),
+`agent/durum`, `arayan` (adaylar + kişi özeti: son ziyaret, yaklaşan randevu,
+bekleyen/hazır sonuç, `v_cari_ekstre` bakiyesi, açık görev), `baslat` (tıkla-ara
+/ elle kayıt; kampanya kişisine bağlanır), `{id}/ustlen|kapat|ilgili|not|mesaj`,
+`{id}` kart, `{id}/kalite`, `{id}/ozet` (**kural tabanlı özet; model bağlı
+değil**), `geri-arama` (söz + kaçan + kampanya adımı tek liste), `kampanya/{id}/
+uret|calistir|durdur` (kaynaklar: yarınki randevu, 7 günlük lab sonucu, son 3
+gün gelen randevu = anket, `v_cari_ekstre` bakiye eşiği, İSG periyodik, serbest),
+`kampanya-kisi/{id}/sonuc` (iptal → randevu 4), `supervizor`, `santral`
+(+`sina` = yapılandırma doğrulaması, `anahtar-yenile`). **Anonim webhook
+`/api/acik/cagri/olay/{saglayici}?anahtar=`**: ringing / answered / hold /
+unhold / transfer / hangup / voicemail; `dis_ref` ile idempotent; hangup'ta
+konu yoksa durum 4 "kayıt bekliyor", cevapsızsa 6 "kaçan" (geri arama listesine
+düşer). Santral sürücüsü (3CX HTTP API / Asterisk AMI) **yok**: olaylar
+webhook'tan gelir, tıkla-ara çağrıyı kayıt olarak açar.
+
+Kataloglar: `KaynakKatalogu.Cagri.cs` (cagri, konu, kuyruk, agent, kampanya,
+kampanya-kisi, kalite), `KartKatalogu.Cagri.cs` (log 1330-1338; konu kartında
+alt konular, kampanyada kişiler detayı), aksiyonlar `cagri.*`, roller
+`cagri_operator` / `cagri_supervizor` (Hasta hizmetleri kadrosu).
+
+**Web:** `listeTanimlari.Cagri.ts` (grup "Çağrı Merkezi", bölge **Hasta
+Akışı**'nın başında; menü tavanı 29 → 30), `sayfalar/cagri/`: `CagriOperator`
+(softphone çubuğu, kuyruk, arayan kartı, hızlı işlemler, kayıt paneli; 5 sn
+yenileme), `CagriKarti` (`/cagri/:id` modal: ilgili kayıtlar, zaman çizelgesi,
+ses kaydı & özet, kalite ölçütleri, kişi geçmişi), `CagriGiden` (geri arama
+listesi, kampanyalar, kampanya kartı, şablonlar), `CagriSupervizor`,
+`CagriSantral`; `cagriAksiyonlari.ts`; CSS `cg-*`; API istemcisi
+`api/uclar/cagri.ts`.
+
+**Tuzaklar:** `gorev.id/taraf_id bigint` (`TekDegerAsync<long>`), `gorev.kategori`
+smallint (metin yazılmaz), `gorev.termin` timestamptz → istemcinin yerel saati
+`SpecifyKind(Local).ToUniversalTime()`; `cagri.geri_arama` timestamp (tz yok)
+→ Unspecified. `coalesce(@pN, kolon)` desenli UPDATE'te null parametreye
+`::text/::int` cast şart (42P08). **Dev DB'de bildirim işçisi canlı SMS
+sağlayıcısına bağlı:** duman testinde ödeme linki mesajı gerçek bir hasta
+numarasına gitti (bildirim #1107) - testlerde sahte numara kullanılır.
+
+Testler: xUnit `CagriTestleri` (arayan tanıma biçimden bağımsız, SLA, kampanya
+aranacak kuralı) 3/3; katalog bütünlük 13/13; vitest 696/696; Playwright: 13
+sayfa, tüm sekmeler, konsol temiz. Kalan: santral sürücüleri (3CX / Asterisk /
+bulut), WebRTC softphone, WhatsApp Cloud API alımı, gerçek AI transkript/özet,
+dinle/fısılda, KVKK silme ucu, dökümler.

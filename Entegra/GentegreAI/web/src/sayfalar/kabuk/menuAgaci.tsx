@@ -161,6 +161,7 @@ export const GRUP_IKON: Record<string, string> = {
   'Diş': '🦷',
   'FTR': '🏃',
   'İşyeri Hekimliği': '👷',
+  'Çağrı Merkezi': '🎧',
   // MEDULA'YA KENDI IKONU (kullanici): 🏛️ hem burada hem "Kurumlar &
   //   Sigorta"da duruyordu - iki farkli menu grubu ayni simgeyle cizilince
   //   goz once ikona takiliyor ve yanlis gruba tikliyordu. 🏛️ KURUM kartini

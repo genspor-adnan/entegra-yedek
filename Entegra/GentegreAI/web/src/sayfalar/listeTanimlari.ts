@@ -39,6 +39,7 @@ import { DIS_LISTELERI } from './listeTanimlari.Dis';
 import { FTR_LISTELERI } from './listeTanimlari.Ftr';
 import { FORM_LISTELERI } from './listeTanimlari.Form';
 import { ISG_LISTELERI } from './listeTanimlari.Isg';
+import { CAGRI_LISTELERI } from './listeTanimlari.Cagri';
 import { MEDULA_LISTELERI } from './listeTanimlari.Medula';
 import { KLINIK_KALITE_LISTELERI } from './listeTanimlari.KlinikKalite';
 import { AMELIYATHANE_LISTELERI } from './listeTanimlari.Ameliyathane';
@@ -110,6 +111,7 @@ export const LISTELER: ListeGirdisi[] = [
   ...FTR_LISTELERI,
   ...FORM_LISTELERI,
   ...ISG_LISTELERI,
+  ...CAGRI_LISTELERI,
   ...MEDULA_LISTELERI,
   ...KLINIK_KALITE_LISTELERI,
   ...AMELIYATHANE_LISTELERI,
@@ -158,6 +160,8 @@ export const MENU_GRUP_MODUL: Record<string, string> = {
   'FTR':           'ftr',
   // ISG (741): isyeri hekimligi - OSGB / hastane / tip merkezi.
   'İşyeri Hekimliği': 'isg',
+  // ÇAĞRI MERKEZİ (839): santral / WhatsApp / kampanya - modül kapalıysa grup çizilmez.
+  'Çağrı Merkezi': 'cagri',
   // AMELIYATHANE (715) / ACIL (716): kendi modulleri - ameliyathanesi ya da
   //   acili olmayan kurumda menu grubu hic cizilmesin. Bagli olmasalardi
   //   hicbir kuruluma kapatilamazlardi ve poliklinige olmayan bir yetenek

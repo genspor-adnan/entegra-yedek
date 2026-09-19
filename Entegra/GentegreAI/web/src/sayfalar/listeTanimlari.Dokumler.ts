@@ -58,6 +58,8 @@ export const DOKUM_LISTELERI = [
   dokumOgesi('FTR'),
   // ISG (741): periyodik uyum, kanaat dagilimi, kaza sikligi, ISG-KATIP sure.
   dokumOgesi('İşyeri Hekimliği'),
+  // Çağrı Merkezi (839): cevaplama / SLA / kaçan, agent performansı, konu dağılımı, kampanya sonucu.
+  dokumOgesi('Çağrı Merkezi'),
   // Medula (707): kabul / red oranı, fatura-kesinti, hata kodu dağılımı.
   dokumOgesi('Medula'),
   // Ameliyathane (715): masa kullanımı, plan-gerçek sapması, iptal nedeni,

@@ -319,6 +319,8 @@ uygulama.CalismaPlaniUclariniEkle();
 uygulama.FtrUclariniEkle();
 uygulama.FormUclariniEkle();
 uygulama.IsgUclariniEkle();
+// ÇAĞRI MERKEZİ (839): operatör panosu, arayan tanıma, geri arama, kampanya, süpervizör, santral webhook'u.
+uygulama.CagriUclariniEkle();
 // MEDULA (707): mustehaklik, hasta kabul, hizmet kaydi, e-recete/e-rapor, fatura & donem, kuyruk.
 uygulama.MedulaUclariniEkle();
 

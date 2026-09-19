@@ -53,6 +53,11 @@ import { FormSablonEditor } from './sayfalar/form/FormSablonEditor';
 import { IsgPano } from './sayfalar/isg/IsgPano';
 import { IsgCalisanKarti } from './sayfalar/isg/IsgCalisanKarti';
 import { IsgTakvim } from './sayfalar/isg/IsgTakvim';
+import { CagriOperator } from './sayfalar/cagri/CagriOperator';
+import { CagriKarti } from './sayfalar/cagri/CagriKarti';
+import { CagriGiden } from './sayfalar/cagri/CagriGiden';
+import { CagriSupervizor } from './sayfalar/cagri/CagriSupervizor';
+import { CagriSantral } from './sayfalar/cagri/CagriSantral';
 import { MedulaHastaKabul } from './sayfalar/medula/MedulaHastaKabul';
 import { MedulaHizmetKayit } from './sayfalar/medula/MedulaHizmetKayit';
 import { MedulaFaturaDonem } from './sayfalar/medula/MedulaFaturaDonem';
@@ -291,6 +296,17 @@ function Yollar() {
           <Route path="/isg-calisan/:id" element={<>
             <Liste tanim={LISTELER.find(l => l.kaynak === 'isg-calisan' && l.rota === 'isg-calisan')!} />
             <IsgCalisanKarti />
+          </>} />
+        )}
+        {/* ÇAĞRI MERKEZİ (839): operatör / giden / süpervizör / santral tam sayfa; çağrı kartı liste üstünde modal. */}
+        {yetki('cagri.pano') && <Route path="/cagri-pano" element={<CagriOperator />} />}
+        {yetki('cagri.giden') && <Route path="/cagri-giden" element={<CagriGiden />} />}
+        {yetki('cagri.supervizor') && <Route path="/cagri-supervizor" element={<CagriSupervizor />} />}
+        {yetki('cagri.ayar') && <Route path="/cagri-santral" element={<CagriSantral />} />}
+        {yetki('cagri.kayit') && (
+          <Route path="/cagri/:id" element={<>
+            <Liste tanim={LISTELER.find(l => l.kaynak === 'cagri' && l.rota === 'cagri')!} />
+            <CagriKarti />
           </>} />
         )}
         {yetki('form.sablon') && <Route path="/form-editor/:id" element={<FormSablonEditor />} />}

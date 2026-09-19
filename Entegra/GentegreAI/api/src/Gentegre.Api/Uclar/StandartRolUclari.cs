@@ -211,6 +211,8 @@ public static class StandartRolUclari
         ["yatis_ofisi"]          = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 40),
         ["tedavi_danismani"]     = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 50),
         ["osgb_sekreter"]        = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 60),
+        ["cagri_supervizor"]     = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 62),
+        ["cagri_operator"]       = new("Hasta hizmetleri", "cagri_supervizor", 64),
         ["tibbi_sekreter"]       = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 70),
         ["doktor_sekreteri"]     = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 80),
         ["hasta_haklari"]        = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 90),
@@ -290,6 +292,7 @@ public static class StandartRolUclari
         ["yatan_hemsire"] = "yatan_hasta", ["yatis_ofisi"] = "yatan_hasta",
         ["isyeri_hekimi"] = "isg", ["isg_uzmani"] = "isg", ["dsp"] = "isg",
         ["osgb_sekreter"] = "isg", ["firma_yetkilisi"] = "isg",
+        ["cagri_operator"] = "cagri", ["cagri_supervizor"] = "cagri",
         // ERP rolleri de kendi modullerine bagli (795): stok modulu kapaliysa
         //   depo sorumlusu onerilmez.
         ["erp_satis"] = "erp_satis", ["erp_alis"] = "satinalma",
@@ -564,6 +567,13 @@ public static class StandartRolUclari
             K(Y("yatan"), T("hasta"), T("muayene"), T("katalog"), Y("lab.numune"), T("lab"), Y("onam"))),
         new("yatis_ofisi", "Yatış / Taburcu Ofisi", "Yatış, oda-yatak, taburcu ve tahakkuk.", ["hastane"],
             K(Y("yatan"), Y("hasta"), Y("belge"), Y("belge_satir"), Y("randevu"), T("kurum"), Y("medula.provizyon"), T("medula"))),
+        // ---- çağrı merkezi (839): operatör (agent) ve süpervizör. Operatör randevu verir,
+        //   hasta özetini görür (sonuç değeri okumaz), görev/şikayet açar; süpervizör kuyruk /
+        //   agent / kalite / ayar.
+        new("cagri_operator", "Çağrı Merkezi Operatörü", "Gelen/giden çağrı kaydı, arayan tanıma, randevu, geri arama, kampanya araması.", ["hastane", "tip_merkezi", "dis", "osgb", "muayenehane"],
+            K(Y("cagri"), Y("cagri.pano"), Y("cagri.kayit"), Y("cagri.giden"), T("cagri.kampanya"), Y("randevu"), Y("hasta"), T("kurum"), Y("gorev"), T("belge"), T("cari"), Y("form.gonder"))),
+        new("cagri_supervizor", "Çağrı Merkezi Süpervizörü", "Kuyruk ve agent izleme, SLA, kampanya yönetimi, kalite değerlendirme, santral/IVR/konu ayarları.", ["hastane", "tip_merkezi", "dis", "osgb", "muayenehane"],
+            K(H("cagri"), H("cagri.pano"), H("cagri.kayit"), H("cagri.giden"), H("cagri.kampanya"), H("cagri.supervizor"), H("cagri.kalite"), H("cagri.ayar"), Y("randevu"), Y("hasta"), T("kurum"), Y("gorev"), T("belge"), T("cari"), Y("form.gonder"))),
         // ---- işyeri hekimliği (741): OSGB ya da hastane/tıp merkezi İSG birimi.
         new("isyeri_hekimi", "İşyeri Hekimi", "Ek-2 muayene, kanaat, ziyaret, olay, periyodik takvim; firma ve çalışan tanımı.", ["osgb", "tip_merkezi", "hastane"],
             K(Y("isg"), Y("isg.pano"), Y("isg.firma"), Y("isg.calisan"), Y("isg.muayene"), Y("isg.takvim"), Y("isg.ziyaret"), Y("isg.olay"), Y("isg.asi"),

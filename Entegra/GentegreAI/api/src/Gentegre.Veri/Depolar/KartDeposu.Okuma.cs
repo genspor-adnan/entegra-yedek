@@ -305,7 +305,9 @@ public sealed partial class KartDeposu
             // Departman/bolum (251): personel kartinda tum departmanlar, randevu
             //   kartinda yalniz randevu verilebilen bolumler.
             "public.v_departman_lookup", "public.v_randevu_bolum_lookup", "public.v_sube_lookup",
-            "public.v_form_sablon_lookup", "public.v_isg_firma_lookup", "public.v_isg_isveren_lookup", "public.v_isg_bolum_lookup", "public.v_isg_calisan_lookup", "public.v_ftr_hizmet_lookup", "public.v_ftr_unite_lookup", "public.v_ftr_kabin_lookup", "public.v_ftr_degerlendirme_lookup", "public.v_ftr_program_lookup",
+            "public.v_form_sablon_lookup", "public.v_isg_firma_lookup", "public.v_isg_isveren_lookup", "public.v_isg_bolum_lookup", "public.v_isg_calisan_lookup",
+            // ÇAĞRI MERKEZİ (839): konu / alt konu (ust_id konuya bağlı), kuyruk, kampanya.
+            "public.v_cagri_konu_lookup", "public.v_cagri_altkonu_lookup", "public.v_cagri_kuyruk_lookup", "public.v_cagri_kampanya_lookup", "public.v_ftr_hizmet_lookup", "public.v_ftr_unite_lookup", "public.v_ftr_kabin_lookup", "public.v_ftr_degerlendirme_lookup", "public.v_ftr_program_lookup",
             // BOLUM AGACI (577): ust_id tasiyan gorunum - duz lookup agac cizemez.
             "public.v_departman_agac_lookup",
             // Personel gorevi (255) - departmana bagli combo.

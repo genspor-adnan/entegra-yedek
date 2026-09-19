@@ -28,7 +28,8 @@ export interface MenuBolgesi {
 }
 
 export const BOLGE_HBYS: MenuBolgesi[] = [
-  { ad: 'Hasta Akışı',      renk: '#2f6db3', gruplar: ['Randevu', 'Kayıt Kabul', 'Acil'] },
+  // ÇAĞRI MERKEZİ (839) hasta akışının başında: randevu ve kayıt kabulün önündeki ilk temas.
+  { ad: 'Hasta Akışı',      renk: '#2f6db3', gruplar: ['Çağrı Merkezi', 'Randevu', 'Kayıt Kabul', 'Acil'] },
   // GÖZ MUAYENEDEN SONRA (kullanıcı): günlük iş hacmi en yüksek dallardan biri.
   // İŞYERİ HEKİMLİĞİ (741) beşinci klinik dal: OSGB kurum tipinde tek klinik.
   { ad: 'Klinikler',        renk: '#3f9a5e', gruplar: ['Muayene', 'Göz', 'Diş', 'FTR', 'İşyeri Hekimliği'] },
