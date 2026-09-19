@@ -53,7 +53,9 @@ function rolAgaci(roller: { id: number; ad: string; ustId?: number | null }[]) {
   const gez = (r: typeof roller[number], derinlik: number) => {
     sonuc.push({
       id: r.id,
-      etiket: `${'  '.repeat(derinlik)}${derinlik > 0 ? '└ ' : ''}${r.ad}`,
+      // ROL ADI SOZLUKTEN (853): kurulumla gelen standart adlarin Ingilizcesi
+      //   var; kurumun kendi actigi rol Turkce kalir (yedek metin).
+      etiket: `${'  '.repeat(derinlik)}${derinlik > 0 ? '└ ' : ''}${cev(r.ad, 'kod')}`,
     });
     (cocuk.get(r.id) ?? []).forEach(c => gez(c, derinlik + 1));
   };

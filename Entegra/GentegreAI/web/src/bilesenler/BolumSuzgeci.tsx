@@ -105,7 +105,10 @@ export function BolumSuzgeci({ deger, onDegis, izinliIdler }: {
               onDegis(id, altAgac(id));
             }}>
       <option value="">{c('Tüm Bölümler')}</option>
-      {secenekler.map(s => <option key={s.id} value={s.id}>{s.etiket}</option>)}
+      {/* Bolum adlari katalog adidir (853) - girinti korunarak cevrilir. */}
+      {secenekler.map(s => <option key={s.id} value={s.id}>
+        {s.etiket.replace(/^([\s └]*)(.*)$/, (_, o, g) => o + c(g, 'kod'))}
+      </option>)}
     </select>
   );
 }

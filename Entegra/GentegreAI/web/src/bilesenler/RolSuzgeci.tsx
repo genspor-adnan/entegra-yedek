@@ -22,6 +22,16 @@ export type SuzgecRolu = {
   sira: number;
 };
 
+/**
+ * GIRINTIYI KORUYARAK CEVIR (853): etiket "   └ Başhekim Yardımcısı" gibi
+ * girintili gelir; sozluk anahtari SADE addir, bu yuzden onek ayrilip
+ * govde cevrilir ve onek geri konur.
+ */
+function cevirGirintili(etiket: string): string {
+  const e = /^([\s └]*)(.*)$/.exec(etiket);
+  return e ? e[1] + cev(e[2], 'kod') : etiket;
+}
+
 /** Bölüm içinde ağaç sırası: kökler sıra/ad, altları hemen ardından girintili. */
 function bolumAgaci(roller: SuzgecRolu[]) {
   const kodlar = new Set(roller.map(r => r.kod));
@@ -77,8 +87,8 @@ export function RolSuzgeci({ roller, bolumler, deger, onDegis }: {
             onChange={e => onDegis(e.target.value ? Number(e.target.value) : '')}>
       <option value="">{cev('Tüm Roller')}</option>
       {gruplar.map(g => (
-        <optgroup key={g.bolum} label={g.bolum}>
-          {g.secenekler.map(s => <option key={s.id} value={s.id}>{s.etiket}</option>)}
+        <optgroup key={g.bolum} label={cev(g.bolum, 'kod')}>
+          {g.secenekler.map(s => <option key={s.id} value={s.id}>{cevirGirintili(s.etiket)}</option>)}
         </optgroup>
       ))}
     </select>

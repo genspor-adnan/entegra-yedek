@@ -1,6 +1,6 @@
 import type { KolonMeta } from '../api/sozlesme';
 import { paraSimgesi, subeAyari } from './subeAyari';
-import { aktifDil, yerelKod } from '../dil/ceviri';
+import { aktifDil, c, yerelKod } from '../dil/ceviri';
 
 /**
  * TEK BICIM KAYNAGI: tutar / miktar bicimleri butun ekranlarda ayni olmali.
@@ -162,8 +162,23 @@ export function telefonBicimle(ham: unknown): string {
 const telefonKolonu = (kolon: KolonMeta) =>
   kolon.bicim === 'telefon' || /telefon|ceptel|gsm|faks/i.test(kolon.ad);
 
+/**
+ * KATALOG ADI TASIYAN KOLONLAR (853): rol / bolum / gorev adlari kurulumla
+ * gelen STANDART adlardir ve sozlukte karsiligi vardir. Hasta/cari adi gibi
+ * SERBEST metinler bu listede YOKTUR - onlari cevirmeye kalkmak kisi adini
+ * bozardi. Liste dar tutulur; yeni kolon eklemek bilincli bir karardir.
+ */
+const KATALOG_ADI = new Set([
+  'rol', 'rolAdi', 'anaRol', 'departman', 'departmanAdi', 'departmanAd',
+  'bolum', 'bolumAdi', 'gorev', 'gorevAdi', 'gorevAd', 'birim', 'birimAdi',
+  'klinik', 'servis', 'unvan',
+]);
+
 export function bicimle(deger: unknown, kolon: KolonMeta): string {
   if (deger === null || deger === undefined) return '';
+  // Katalog adini once cevir: 'kod' kapsaminda karsiligi yoksa metin aynen kalir.
+  if (KATALOG_ADI.has(kolon.ad) && typeof deger === 'string' && deger !== '')
+    return c(deger, 'kod');
   // Telefon HER LISTEDE ayni bicimde (genel kural) - kolon tipi metin oldugu
   //   icin switch'e girmeden once yakalanir.
   if (telefonKolonu(kolon)) return telefonBicimle(deger);

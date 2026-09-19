@@ -101,6 +101,17 @@ export function c(metin: string | undefined | null, kapsam: Kapsam = 'etiket'): 
   const birebir = bul(m, kapsam);
   if (birebir) return birebir;
 
+  // KOD ONEKLI KATALOG ADI (853): bolum secim listesi adi "106 - Aile
+  //   Hekimliği" gibi SKRS koduyla birlikte gonderiyor. Sozluk anahtari sade
+  //   ad oldugu icin onek ayrilip govde cevrilir, kod oldugu gibi kalir.
+  if (kapsam === 'kod') {
+    const kodlu = /^(\S{1,12})\s+-\s+(.+)$/.exec(m);
+    if (kodlu) {
+      const govde = bul(kodlu[2], 'kod');
+      if (govde) return `${kodlu[1]} - ${govde}`;
+    }
+  }
+
   const ikon = IKON.exec(m);
   if (ikon) {
     const govde = m.slice(ikon[0].length);
