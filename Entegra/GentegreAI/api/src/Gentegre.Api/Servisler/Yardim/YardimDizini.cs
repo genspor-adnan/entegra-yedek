@@ -262,6 +262,7 @@ public sealed class YardimDizini
                     else if (p.Jetonlar.Any(x => x.StartsWith(j, StringComparison.Ordinal))) puan += 1;
                 }
                 if (OrnekParcasiMi(p)) { ornekBonus = Math.Max(ornekBonus, puan); continue; }
+                if (MetaParcasiMi(p)) continue;   // "Kaynaklar", "Doğrulama durumu": belge künyesi, cevap değil
                 puanlar.Add((p, puan));
             }
             foreach (var (p, ham) in puanlar)
@@ -288,6 +289,12 @@ public sealed class YardimDizini
                        .SelectMany(b => b.OrnekSorular)
                        .Distinct(StringComparer.Ordinal)
                        .Take(azami).ToList();
+    }
+
+    private static bool MetaParcasiMi(Parca p)
+    {
+        var b = RehberMetin.Sadelestir(p.Baslik);
+        return b.StartsWith("kaynaklar", StringComparison.Ordinal) || b.StartsWith("dogrulama", StringComparison.Ordinal);
     }
 
     private static bool OrnekParcasiMi(Parca p)

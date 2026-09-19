@@ -1055,7 +1055,7 @@ Yanıt:
 | `guvenSkoru` | 0–1; panelde açıkça yazılır |
 | `eksikBilgiSorusu` | Emin olunmadığında sorulacak tek soru |
 | `uyarilar[]` | Ön koşul, yetki ve kapalı modül notları |
-| `konuKod`, `kaynakTuru` | 1 katalog konusu · 2 ekran eşleşmesi · 3 bağlamsal · 5 model · **6 rol tanımı** · 7 kapsam dışı (klinik, 871) · 8 yardım belgesi (871) · 0 eşleşme yok |
+| `konuKod`, `kaynakTuru` | 1 katalog konusu · 2 ekran eşleşmesi · 3 bağlamsal · 5 model · **6 rol tanımı** · 7 kapsam dışı (klinik, 871) · 8 yardım belgesi (871) · 9 akılcı istem kuralı (873, `lab_akilci_kural`'dan test bazlı cevap) · 0 eşleşme yok |
 | `kontorBakiye` | Kontör bakiyesi (katalog cevabı ücretsizdir) |
 
 **Bağlam serbest metin DB erişimi DEĞİL.** Model bağlansa da göreceği bağlam

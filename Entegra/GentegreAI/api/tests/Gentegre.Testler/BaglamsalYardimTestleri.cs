@@ -331,6 +331,29 @@ public class BaglamsalYardimTestleri : IClassFixture<VeritabaniOlgusu>
     }
 
     [Fact]
+    public async Task Akilci_kural_sorusu_KATALOGDAN_cevaplanir_yetkisiz_kullaniciya_verilmez()
+    {
+        if (!_olgu.Baglandi(nameof(Akilci_kural_sorusu_KATALOGDAN_cevaplanir_yetkisiz_kullaniciya_verilmez))) return;
+        var servis = new RehberServisi(_olgu.Gerekli());
+        Assert.True(RehberMetin.AkilciSoruMu("CRP tekrar süresi kaç gün?"));
+        Assert.Equal(["crp"], RehberMetin.AkilciAramaKelimeleri("CRP tekrar süresi kaç gün?"));
+
+        var y = await servis.CevaplaAsync(
+            new RehberServisi.Istek("CRP tekrar süresi kaç gün?", null, "/muayene", null),
+            Baglam(null, "lab", "muayene"), CancellationToken.None);
+        Assert.Equal(RehberServisi.KaynakKural, y.KaynakTuru);
+        Assert.Contains("CRP", y.Cevap);
+        Assert.Contains(y.Adimlar, a => a.Metin.Contains("Tekrar aralığı", StringComparison.Ordinal));
+        Assert.Contains(y.Kaynaklar!, k => k.Belge == "akilci-test-istemi");
+
+        // `lab` yetkisi olmayana kural kataloğu anlatılmaz (başka yola düşer).
+        var yok = await servis.CevaplaAsync(
+            new RehberServisi.Istek("CRP tekrar süresi kaç gün?", null, "/muayene", null),
+            Baglam(null, "stok"), CancellationToken.None);
+        Assert.NotEqual(RehberServisi.KaynakKural, yok.KaynakTuru);
+    }
+
+    [Fact]
     public async Task Sohbet_BASKA_SUBEDEN_ve_BASKA_KULLANICIDAN_gorunmez()
     {
         if (!_olgu.Baglandi(nameof(Sohbet_BASKA_SUBEDEN_ve_BASKA_KULLANICIDAN_gorunmez))) return;

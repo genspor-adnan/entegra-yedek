@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text.Json;
 using Gentegre.Api.AraKatman;
 using Gentegre.Api.Servisler.Yardim;
@@ -82,7 +82,8 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
         string Dil = "tr");
 
     public const short KaynakKatalog = 1, KaynakEkran = 2, KaynakBaglamsal = 3,
-                       KaynakModel = 5, KaynakRol = 6, KaynakKapsamDisi = 7, KaynakBelge = 8;
+                       KaynakModel = 5, KaynakRol = 6, KaynakKapsamDisi = 7, KaynakBelge = 8,
+                       KaynakKural = 9;
 
     /// <summary>
     /// EKRAN BAĞLAMI UCU (871): panel açılınca / rota değişince çağrılır -
@@ -217,6 +218,27 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
             var yardim = await BaglamsalYardimAsync(baglanti, istek, soru, urunModu, baglam,
                                                     ekran, uyarilar, kontorBakiye, kronometre, iptal);
             if (yardim is not null) return yardim;
+        }
+
+        // --------------------------------------------- akılcı istem kuralı
+        // "CRP tekrar süresi kaç gün", "TSH'yi hangi branşlar isteyebilir":
+        //   cevap KURAL KATALOĞUNDAN (lab_akilci_kural, 873) - hasta verisi
+        //   değil kurum kuralı; `lab` yetkisi ister (kural kataloğunun ekranı).
+        if (RehberMetin.AkilciSoruMu(soru) && baglam.Yetkiler.Var("lab", Islem.Gor))
+        {
+            var kuralYaniti = await AkilciKuralYanitiAsync(baglanti, soru, urunModu, baglam, uyarilar,
+                                                           kontorBakiye, istek, ekran, kronometre, iptal);
+            if (kuralYaniti is not null) return kuralYaniti;
+
+            // Test adı yok ("uyarı neden çıktı", "reflektif istemi kim yapar"): genel
+            //   rehber konusu (lab-istem) düşük güvenle kapıyordu; akılcı yardım
+            //   belgesi varsa o cevaplar.
+            var akilciBelge = dizin?.Ara(soru, null, baglam, urunModu, dil, 3) ?? [];   // ekran bonusu yok: konu belgesi kazansın
+            if (akilciBelge.Count > 0
+                && (akilciBelge[0].Belge.Id == "akilci-test-istemi"
+                    || RehberMetin.Sadelestir(akilciBelge[0].Parca.Baslik).Contains("akilci", StringComparison.Ordinal)))
+                return await BelgeYanitiAsync(baglanti, akilciBelge, soru, urunModu, baglam, uyarilar,
+                                              kontorBakiye, istek, ekran, kronometre, iptal, enjeksiyon);
         }
 
         // ---------------------------------------------------------- konular
@@ -409,6 +431,88 @@ public sealed class RehberServisi(VeriKaynagi veri, RehberModeli? model = null,
             return string.Join(" → ", metinler);
         }
         catch (JsonException) { return ""; }
+    }
+
+    // ------------------------------------------- akılcı istem kuralı ----
+    /// <summary>
+    /// Test adına göre kuralı bulur ve kullanıcı diliyle anlatır: tekrar
+    /// aralığı, yetkili branşlar, basamak, refleks/kapalı, Bakanlık notu.
+    /// Test adı geçmiyorsa null (yardım belgesi genel soruyu cevaplar).
+    /// </summary>
+    private async Task<Yanit?> AkilciKuralYanitiAsync(
+        NpgsqlConnection baglanti, string soru, short urunModu, IstekBaglami baglam,
+        List<string> uyarilar, decimal kontorBakiye, Istek istek, DogrulanmisBaglam ekran,
+        Stopwatch kronometre, CancellationToken iptal)
+    {
+        var kelimeler = RehberMetin.AkilciAramaKelimeleri(soru);
+        if (kelimeler.Length == 0) return null;
+
+        var kurallar = await baglanti.ListeAsync("""
+            select k.sut_kodu, k.ad, k.sure_gun, k.sure_notu, k.tum_branslar, k.basamak, k.refleks, k.kapali,
+                   k.aciklama, k.bayraklar,
+                   coalesce((select string_agg(d.ad, ', ' order by d.ad) from public.departman d
+                              where d.kod = any(string_to_array(k.brans_kodlari, ','))), '') as branslar,
+                   (select count(*) from unnest(@p0::text[]) w
+                     where ' ' || public.fn_ara_metin(k.ad || ' ' || k.sut_kodu || ' ' || coalesce(t.kod, ''))
+                           like '% ' || w || '%') as vurus,
+                   (select count(*) from unnest(@p0::text[]) w
+                     where public.fn_ara_metin(coalesce(t.kod, '')) = w
+                        or public.fn_ara_metin(k.ad) = w) as tam
+              from public.lab_akilci_kural k
+              left join public.lab_tetkik t on t.hizmet_id = k.hizmet_id and t.durum = 0
+             where k.aktif = 1
+             order by tam desc, vurus desc, length(k.ad)
+             limit 3
+            """, null, [kelimeler], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+        var k = kurallar.FirstOrDefault();
+        if (k is null || Convert.ToInt32(k["vurus"]) < 1) return null;
+
+        var ad = k["ad"]?.ToString() ?? "";
+        var sut = k["sut_kodu"]?.ToString() ?? "";
+        var sureGun = Convert.ToInt32(k["sure_gun"]);
+        var tum = Convert.ToInt16(k["tum_branslar"]) == 1;
+        var basamak = Convert.ToInt16(k["basamak"]);
+        var branslar = k["branslar"]?.ToString() ?? "";
+        var adimlar = new List<Adim>();
+        var no = 0;
+        adimlar.Add(new Adim(++no, sureGun > 0
+            ? $"Tekrar aralığı: {sureGun} gün. Bu süre dolmadan aynı hastaya yeniden istenirse hekime son sonuçlarla uyarı çıkar; gerekçe seçilerek geçilebilir."
+            : "Tekrar süresi kısıtı yok.", null, null));
+        if (k["sure_notu"]?.ToString() is { Length: > 0 } sn)
+            adimlar.Add(new Adim(++no, "Bakanlık süre notu: " + sn, null, null));
+        adimlar.Add(new Adim(++no, tum
+            ? "Branş kısıtı yok: tüm branşlar isteyebilir."
+            : branslar.Length > 0
+                ? $"Yetkili branşlar: {branslar}. Başka branş klinik gerekçe seçerek isteyebilir ya da konsültasyon ister."
+                : "Branş listesi çözülemedi; kural kartındaki Bakanlık branş metnine bakın.", null, null));
+        adimlar.Add(new Adim(++no, basamak switch
+        {
+            3 => "Basamak: yalnız 3. basamak sağlık tesisinde istenebilir; 2. basamakta istem engellenir ve sevk önerilir.",
+            2 => "Basamak: 2. ve 3. basamakta istenebilir.",
+            _ => "Basamak kısıtı kapsam dışı.",
+        }, null, null));
+        if (Convert.ToInt16(k["refleks"]) == 1)
+            adimlar.Add(new Adim(++no, "Refleks test: kültürde üreme / eşik durumunda laboratuvar uzmanı ister.", null, null));
+        if (Convert.ToInt16(k["kapali"]) == 1)
+            adimlar.Add(new Adim(++no, "Bu test Akılcı Test İstem listesinde İSTEME KAPALI (kapsam dışı).", null, null));
+        if (k["aciklama"]?.ToString() is { Length: > 0 } notu)
+            adimlar.Add(new Adim(++no, "Not: " + notu, null, null));
+
+        var oneriler = new List<EkranOnerisi>();
+        var kuralEkrani = await EkranBilgisiAsync(baglanti, "lab-akilci-kural", urunModu, baglam, iptal);
+        if (kuralEkrani is not null) oneriler.Add(kuralEkrani);
+        var ikinci = kurallar.Skip(1).Where(x => Convert.ToInt32(x["vurus"]) >= Convert.ToInt32(k["vurus"]))
+                             .Select(x => x["ad"]?.ToString() ?? "").ToList();
+
+        var atiflar = new List<KaynakAtfi> { new("akilci-test-istemi", "Akılcı test istemi kuralları", "akilci-test-istemi") };
+        await LogAsync(baglanti, baglam, soru, KaynakKural, "kural:" + sut, 0.85m, istek, ekran, kronometre, iptal,
+                       kaynaklar: "akilci-test-istemi");
+        return new Yanit($"**{ad}** (SUT {sut}) — Bakanlık Akılcı Test İstem kuralı:", adimlar, oneriler,
+                         Aksiyonlar(null, "", baglam), 0.85m,
+                         ikinci.Count > 0 ? "Şunu mu kastettiniz: " + string.Join(" / ", ikinci) + "?" : null,
+                         uyarilar, "kural:" + sut, KaynakKural, kontorBakiye, Ekran: Ozet(ekran),
+                         Kaynaklar: atiflar, Dil: ekran.Dil);
     }
 
     // ------------------------------------------------- yardım belgesi ----

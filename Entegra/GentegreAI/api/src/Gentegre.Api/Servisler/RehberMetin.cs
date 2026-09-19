@@ -211,6 +211,35 @@ public static class RehberMetin
         return EnjeksiyonKaliplari.Any(k => sade.Contains(k, StringComparison.Ordinal));
     }
 
+    /// <summary>
+    /// AKILCI TEST İSTEMİ KURAL SORUSU (873): "CRP tekrar süresi kaç gün", "hangi
+    /// branşlar TSH isteyebilir", "bu test 3. basamak mı". Cevap kural
+    /// KATALOĞUNDAN (lab_akilci_kural) gelir - hasta verisi değil, kurum kuralı.
+    /// </summary>
+    private static readonly string[] AkilciKaliplari =
+    [
+        "tekrar aralig", "tekrar sure", "kac gun", "kac gunde", "gunde bir", "istem sure", "istem periyod",
+        "hangi brans", "brans kisit", "isteyebil", "istenebil", "basamak", "akilci", "refleks", "reflektif",
+        "kapsam disi", "isteme kapali", "gerekce", "akilci",
+    ];
+
+    public static bool AkilciSoruMu(string soru)
+    {
+        var sade = Sadelestir(soru);
+        return AkilciKaliplari.Any(k => sade.Contains(k, StringComparison.Ordinal));
+    }
+
+    /// <summary>Kural sorusundan TEST ADI kelimeleri: kalıp ve genel kelimeler atılır.</summary>
+    public static string[] AkilciAramaKelimeleri(string soru) =>
+        Kelimeler(soru)
+            .Where(k => k is not ("tekrar" or "araligi" or "aralik" or "suresi" or "sure" or "kac" or "gun" or "gunde"
+                                  or "hangi" or "brans" or "branslar" or "branslari" or "isteyebilir" or "istenebilir"
+                                  or "istenir" or "istem" or "istemi" or "istemek" or "basamak" or "basamakta"
+                                  or "akilci" or "kural" or "kurali" or "test" or "testi" or "tetkik" or "tetkigi"
+                                  or "icin" or "kisiti" or "kisit" or "refleks" or "reflektif" or "periyodu"
+                                  or "bir" or "kez" or "sonra" or "once" or "gerekli" or "gerekir"))
+            .ToArray();
+
     /// <summary>Alan sorusunun kendi kalıp kelimeleri kolon aramasına girmez.</summary>
     public static string[] AlanAramaKelimeleri(string soru) =>
         Kelimeler(soru).Where(k => k is not ("alan" or "kolon" or "demek" or "isaret"))

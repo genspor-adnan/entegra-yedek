@@ -1240,7 +1240,7 @@ insert into t873 values
 ('L107140','Total heksozaminidaz (A+B) (Doku)',365,'','','129,168,118,139,157,132',0,0,0,3,'','ÇOCUK NÖROLOJI; NÖROLOJI; ÇOCUK ENDOKRIN; ENDOKRINOLOJI; METABOLIZMA; İÇ HASTALIKLARI; ÇOCUK SAĞLIĞI VE HASTALIKLARI'),
 ('L107150','Total heksozaminidaz (A+B) (Lökosit)',365,'','','129,168,118,139,157,132',0,0,0,3,'','ÇOCUK NÖROLOJI; NÖROLOJI; ÇOCUK ENDOKRIN; ENDOKRINOLOJI; METABOLIZMA; İÇ HASTALIKLARI; ÇOCUK SAĞLIĞI VE HASTALIKLARI'),
 ('L107160','Total testosteron',90,'','','196,118,139,161,157,132',0,0,0,2,'','ÜROLOJI; ÇOCUK ENDOKRINOLOJI; ENDOKRINOLOJI; KADIN DOĞUM; İÇ HASTALIKLARI; ÇOCUK SAĞLIĞI VE HASTALIKLARI'),
-('L107170','Transferrin',90,'Yalnızca Yatan Hastalar','yatan_serbest,yalniz_yatan','157,132',0,0,0,2,'','İÇ HASTALIKLARI; ÇOCUK SAĞLIĞI VE HASTALIKLARI'),
+('L107170','Transferrin',90,'Yalnızca Yatan Hastalar','yalniz_yatan,yatan_serbest','157,132',0,0,0,2,'','İÇ HASTALIKLARI; ÇOCUK SAĞLIĞI VE HASTALIKLARI'),
 ('L107180','Transferrin-karbohidrat eksik (Serum/Plazma)',180,'','','181001,157,144,181,168',0,0,0,3,'','AMATEM/ÇEMATEM; İÇ HASTALIKLARI; GASTROENTEROLOJİ; PSİKİYATRİ; NÖROLOJİ'),
 ('L107190','Transferrin-asialo karbohidrat eksik/Total transferrin (Serum/Plazma)',180,'','','181001,157,144,181,168',0,0,0,3,'','AMATEM/ÇEMATEM; İÇ HASTALIKLARI; GASTROENTEROLOJİ; PSİKİYATRİ; NÖROLOJİ'),
 ('L107200','Transferrin-monosialo karbohidrat eksik/Total transferrin (Serum/Plazma)',180,'','','181001,157,144,181,168',0,0,0,3,'','AMATEM/ÇEMATEM; İÇ HASTALIKLARI; GASTROENTEROLOJİ; PSİKİYATRİ; NÖROLOJİ'),
@@ -2667,6 +2667,10 @@ values
 ('lab-akilci-gerekce','/lab-akilci-gerekce','Akılcı İstem Kararları','Laboratuvar › Akılcı İstem Kararları','Laboratuvar','Akılcı İstem Kararları','lab',2,'lab','',0,'Akılcı İstem Kararları gerekce vazgecme refleks reflektif bakanlik analizi','lab-akilci-gerekce-liste')
 on conflict (rota) do update set baslik = excluded.baslik, yol = excluded.yol, menu_grup = excluded.menu_grup,
   menu_ad = excluded.menu_ad, yetki_kodu = excluded.yetki_kodu, anahtar = excluded.anahtar, aksiyon_ekrani = excluded.aksiyon_ekrani;
+
+-- Rehber konusu "hasta-kayit" hâlâ 'personel' yetkisi istiyordu; hasta ekranı 871'den beri
+--   'hasta' yetkisiyle açılıyor - hekim "yeni hasta kaydı nasıl açılır" sorusuna "yetkiniz yok" alıyordu.
+update public.ai_rehber_konu set yetki_kodu = 'hasta' where kod = 'hasta-kayit' and yetki_kodu = 'personel';
 
 do $$
 declare v_kural integer; v_hizmetsiz integer; v_branssiz integer;

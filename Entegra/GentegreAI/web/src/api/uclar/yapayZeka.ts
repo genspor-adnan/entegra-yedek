@@ -24,7 +24,7 @@ export interface AiRehberYaniti {
   onerilenAksiyonlar: { kod: string; ad: string; ekran: string }[];
   guvenSkoru: number; eksikBilgiSorusu?: string | null; uyarilar: string[];
   konuKod: string;
-  /** 1 katalog · 2 ekran · 3 bağlamsal · 5 model · 6 rol · 7 kapsam dışı · 8 yardım belgesi · 0 yok */
+  /** 1 katalog · 2 ekran · 3 bağlamsal · 5 model · 6 rol · 7 kapsam dışı · 8 yardım belgesi · 9 akılcı istem kuralı · 0 yok */
   kaynakTuru: number; kontorBakiye: number;
   modelKullanildi?: boolean; model?: string;
   ekran?: AiEkranOzeti | null;

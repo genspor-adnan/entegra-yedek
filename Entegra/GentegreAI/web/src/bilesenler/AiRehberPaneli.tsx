@@ -44,7 +44,7 @@ const GENEL_SORULAR = [
 
 const KAYNAK_ETIKETI: Record<number, string> = {
   0: 'eşleşme yok', 1: 'rehber kataloğu', 2: 'ekran eşleşmesi', 3: 'bu ekranın yardımı',
-  5: 'yapay zeka', 6: 'rol tanımı', 7: 'kapsam dışı', 8: 'yardım belgesi',
+  5: 'yapay zeka', 6: 'rol tanımı', 7: 'kapsam dışı', 8: 'yardım belgesi', 9: 'akılcı istem kuralı',
 };
 
 /**

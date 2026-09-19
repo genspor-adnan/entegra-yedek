@@ -62,7 +62,7 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
 
         var y = await servis.CevaplaAsync(
             new RehberServisi.Istek("Yeni hasta kaydı nasıl açılır?", null, "/panel", null),
-            // 871: /hasta ekranının yetkisi istemciyle aynı ('hasta'); konu yetkisi 'personel'.
+            // 871/873: /hasta ekranı ve hasta-kayit konusu 'hasta' yetkisiyle.
             Baglam("personel", "hasta", "belge"), CancellationToken.None);
 
         Assert.Equal("hasta-kayit", y.KonuKod);
@@ -87,7 +87,7 @@ public class RehberTestleri : IClassFixture<VeritabaniOlgusu>
 
         Assert.Equal("hasta-kayit", y.KonuKod);
         Assert.Empty(y.Adimlar);
-        Assert.Contains(y.Uyarilar, u => u.Contains("personel"));
+        Assert.Contains(y.Uyarilar, u => u.Contains("hasta"));   // 873: konu yetkisi 'hasta' (ekranla aynı)
         Assert.Contains("yetki", y.Cevap, StringComparison.OrdinalIgnoreCase);
     }
 

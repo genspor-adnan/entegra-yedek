@@ -16300,3 +16300,15 @@ yok (kurum tanımlar, TSH→sT4 örneği kılavuzda); xlsx'teki koşullu sürele
 ("Pozitifse 90 gün", "Nefrolojide yok diğer branşta 90") gün sayısına
 indirgendi, metin notta; e-Nabız/MEDULA'ya gerekçe kodu bildirimi paket
 şemasına eklenmedi (USS alanı henüz yok).
+
+### Ek — asistan akılcı istem kurallarını cevaplar
+
+Kullanıcı: *"bu akılcı sistemi yapay zekaya da yükle sorumuz olursa cevaplasın"*.
+İki katman: (1) yardım belgesi `dokuman/yardim/akilci-test-istemi.md` (kurallar,
+ekranlar, gerekçeler, hata kodları, örnek sorular) - dizine alındı; (2) test bazlı
+soru ("CRP tekrar süresi kaç gün", "TSH'yi hangi branşlar isteyebilir")
+`RehberServisi.AkilciKuralYanitiAsync`: `RehberMetin.AkilciSoruMu` kalıbı +
+test adı/tetkik kodu araması `lab_akilci_kural` üstünde, cevap tekrar aralığı /
+yetkili branşlar / basamak / refleks / kapalı / Bakanlık notu, `kaynakTuru 9`,
+`lab` yetkisi ister (kural kataloğunun ekranıyla aynı). Hasta verisi yok - kurum
+kuralı anlatılır. Test `BaglamsalYardimTestleri.Akilci_kural_sorusu_…`.
