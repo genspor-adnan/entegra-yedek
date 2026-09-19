@@ -15925,3 +15925,154 @@ Tarayıcıda: Bölüm KİLİTLİ · Görev KİLİTLİ · İşe Giriş/Çıkış 
 balonuyla) · Sicil No, Çalışma Şekli açık. Yeni kayıtta Bölüm açık.
 
 xUnit 491/491, vitest 696/696.
+
+## 842-848 — Kadro defterinin tamamlanması ve personel kimlik kontrolleri
+
+Kullanıcı sırasıyla: *"kadro geçmişine bölüm ve görev gelmemiş"*, *"hareketler e
+görevden sonra ya ana rol ü de al"*, *"kart tarafını da kilitle"*, *"kart alanını
+kaldır tek kutuya indir"*, *"yeni pers kart açtım ana rol yoktu ekleyemedim..
+oysa zorunlu alan olmalı"*, *"personelde de sicilno ve kimlikno kontrolü yap"*,
+*"mail adresi ve telefon kontrolü de"*, *"roller combosu da ağaç şeklinde olsun"*.
+
+| DB | Ne |
+|---|---|
+| `842` | `tg_personel_giris_cikis_iz` v2 `taraf.departman`/`gorev_id` okur; 98 satır geçmişe dönük dolduruldu (`personel_hareket_yedek_842`) |
+| `843` | `personel_hareket.rol_id`; `v_personel_hareket` yeniden kuruldu (`rol_adi`); `fn_personel_kadro_uygula` v3 `taraf_kullanici.rol_id` yazar; `tg_personel_rol_iz`; 113 satır dolduruldu |
+| `844` | `hekim.unvan`a "Uzm.Dt." (Op.Dr. duruyor, Opr.Dr. diye ikinci kez eklenmedi) |
+| `845` | Tetik `taraf_kullanici` INSERT'inde de çalışır; yer tutucu rol (`atanmamis`) ilk atama sayılır. `tg_op` WHEN'de kullanılamadığı için iki ayrı tetik |
+| `846` | `taraf` üzerinde kısmi benzersiz indeksler (personel=1): sicil no, kimlik no, e-posta (küçük harf), cep (son 10 hane). Uygulamadan önce mükerrer taraması, varsa durur |
+| `847` | `rol.ust_rol_id` şablondan dolduruldu (44 bağ) + `v_rol_agac_lookup` (portal rolleri hariç) |
+| `848` | `v_personel_grup_lookup` — yönetici combosu bölüme göre gruplu |
+
+**Öğrenilenler.** Telefonun ham hâliyle karşılaştırılması mükerrer kaçırıyordu
+(`0500…` 11, `+90 500…` 12 hane) → indeks **son 10 haneye** kuruldu. Yeni
+personel kartı hesabı zaten "Rol Atanmamış" ile açtığı için 843'ün rol kilidi
+yeni kaydı da bloke ediyordu → kilit yalnız **gerçek rol** taşıyan hesaplara
+daraltıldı. Kart tarafında tek "Ana Rol" kutusu kaldı; yan rol combosu ve
+Kadro Geçmişi'ndeki ikinci etiket kaldırıldı.
+
+## 849-855 — HBYS İngilizce: ekranlar, kod değerleri, katalog adları
+
+Kullanıcı: *"HBYS modülünü İngilizceye hazırla"* ve devamındaki *"diş, FTR,
+radyoloji"*, *"kalan ERP ekranları"*, *"kod değerleri"*, *"rol, departman ve
+görev adları"*, *"hizmet ve tetkik adları"*, *"şube ve stok adları"*.
+
+**Var olan sistem kullanıldı.** Başta ayrı bir i18n modülü yazmaya başladım;
+194'teki DB tabanlı sözlüğü (`ceviri`, `fn_ceviri_sozluk`, `/api/ceviri/{dil}`,
+`c()` / `cm()`) fark edince yenisini sildim ve onu genişlettim. Bedeli: anahtar
+Türkçe metnin kendisi kalıyor ve dil `taraf_kullanici.dil`de duruyor — brief'teki
+"anahtar Türkçe olmasın" ve "localStorage" maddeleri bilerek karşılanmadı.
+
+| DB | Satır | Kapsam |
+|---|---|---|
+| `849` | 760 | HBYS ekranları (617 etiket, 136 menü, 5 hata **kodu**) |
+| `850` | 597 | Diş, FTR, radyoloji |
+| `851` | 3.393 | Kalan ERP |
+| `852` | 1.498 | Kod değerleri (yeni `kod` kapsamı, yoksa `etiket`e düşer) |
+| `853` | 350 | Rol / departman / görev adları |
+| `854` | 441 | Hizmet ve tetkik adları |
+| `855` | 85 | Şube (2), kategori (60), ölçü birimi (23) |
+
+Yeni kapsamlar: **`hata`** (anahtar = hata kodu, sunucu cümlesi değişince çeviri
+kopmasın) ve **`kod`**. `bicim.ts` tarih/sayı/yüzde biçimini locale'e bağlar;
+para kuralları (yuvarlama, ondalık) değişmedi. Katalog adları kolon adından
+(`rol`, `hizmetAdi`, `kategori`…) ya da **kaynak** adından (`hizmet`,
+`lab-tetkik`…) tanınır — bunun için `kaynak` prop'u `GenGrid` → `GridTablo` →
+`bicimle()` zincirine geçirildi. Kategori **yolu** ("Tıbbi Malzeme > Ortez /
+Protez") sözlükte anahtar olmadığı için parçalanıp her düğüm ayrı çevriliyor.
+
+**Çevrilmeyenler bilinçli:** ~7.400 SUT hizmet adı, 3.479 SUT/ÜTS stok adı,
+resmî kısaltmalar (SUT, SKRS, MEDULA, ICD, DICOM, LOINC), kan grupları. Çeviri
+yalnız gösterimdir: MEDULA ve e-Belge çıktısı Türkçe kalır.
+
+## 856-857 — İlaç adları ve etken maddeler İngilizce
+
+Kullanıcı: *"ilaç adlarını da çevir"*, *"kalan etken maddeleri de çevir"*.
+
+İlaç adı `<MARKA> <doz> <FARMASÖTİK FORM>` kalıbında; marka TİTCK ruhsat adıdır,
+çevrilirse ekranda **olmayan bir ilaç** görünür. 22.949 tekil adı sözlüğe koymak
+da her istemciye indirilirdi. Çözüm: sözlükte **ifadeler** var, istemcide
+`ilacAdi()` motoru adı parçalayıp en uzun eşleşeni çeviriyor, tanımadığını aynen
+bırakıyor.
+
+- `856` — 504 satır: 165 form/ambalaj ifadesi + 339 etken madde (INN).
+- `857` — 1.156 satır: tuz/hidrat sözcükleri (sözcük sözcük çözülür, bileşik
+  adlar için ayrı satır gerekmez) + kalan etken madde gövdeleri.
+
+Anahtar biçimi diğer kapsamlardan **farklı**: küçük harf + Türkçe harfler
+ASCII'ye katlanmış. Veride aynı sözcük FİLM/FILM, ÇÖZELTİ/COZELTI diye 3-4
+yazımla geçiyor; tek katlanmış anahtar hepsini yakalıyor. Söz dizimi bozulan
+kalıplar bileşik anahtar ("X içeren flakon" → "vial containing X").
+
+Motorda iki tuzak: ayraçlara `+ ; : . &` eklenmeden
+`telmisartan+hidroklorotiyazid` tek parça kalıyordu; katlama U+0307 birleşen
+noktayı atmadan `i̇nfliximab` eşleşmiyordu.
+
+## 858-864 — `ilac.etken_madde` veri onarımı
+
+İlk kez veri değişti (öncekiler yalnız sözlük ekliyordu). Her dosyanın kendi
+yedek tablosu var, güncelleme **tam metin + id** eşleştirir, ikinci çalıştırma
+0 satır günceller.
+
+| DB | Satır | Ne |
+|---|---|---|
+| `858` | 267 | Yazım: bitişik yazım (32 kalıp) + açık harf hatası (doğrusu aynı tabloda var) |
+| `859` | 13 | Etken madde yerine **marka/üretici**: novaljin→metamizol sodyum, roche→tretinoin, baso4→baryum sülfat, sumitrin→fenotrin, trinitrinin→gliseril trinitrat, pantoprolin→pantoprazol sodyum |
+| `860` | 84 | **ATC sınıf adı** yazan 336 satırın katalog içi kanıtla onarılanı |
+| `861` | 135 | Aynı kusur, **KÜB**'den: BALANCE/CAPD, MULTIBIC, Ringer, TYLOL/GRIBEX, KABIVEN/SMOF, FRESELAMIN, lipidler, GELOFUSINE… |
+| `862` | 86 | Kalan aileler tek tek araştırıldı: LIBENTA, TRACUTIL, immünoglobulinler, BRONCHO-VAXOM, TANTUM/PERİMEX, KETOSTERİL, FUNGOID, 15 soğuk algınlığı ürünü… |
+| `863` | 50 + 14 | Sözlük boşlukları (onarımların getirdiği Türkçe sözcükler, noktasız ı ile yazılmış Roma rakamları) + Türkçe yazılmış sınıf metni |
+| `864` | 6 | Son bozuk kayıtlar: "Bı Vitamini"→B1, "fructus agnı castı"→agni casti, "ıvr-190"→IVR-190, POLİSERA antivenom tanımı |
+
+**Kural: yalnız ispatlanabilir olan onarıldı.** Doğrusu ya aynı tabloda başka
+satırlarda var, ya ATC kodunun 5. düzeyi tek maddeyi gösteriyor, ya da bileşim
+ürün adında yazıyor ve ATC sınıfıyla tutarlı. Dokunulmayanlar: veride zaten
+İngilizce yazılmış kayıtlar (hata değil), Türkçe ek almış biçimler
+(`polisakkarit`/`polisakkariti` — ilk denemede bunları "düzeltip" dil bilgisini
+bozmuştum, kural kaldırıldı), doğrusu veriden çıkarılamayan 35 satır
+(BIOPERITONAL, RENDIALIZAT, DORFAN…) — kullanıcı isteğiyle bırakıldı.
+
+Sonuç: İngilizce görünümde Türkçe harf kalan etken madde satırı **0 / 22.958**.
+
+## 865-867 — Ürün / hizmet / stok adlarında yazım taraması
+
+Kullanıcı: *"ürün adlarını da tara"*, *"hizmet ve tetkik adlarında da"*,
+*"stok adlarında da"*.
+
+| DB | Tarandı | Onarıldı |
+|---|---|---|
+| `865` | 23.002 ilaç adı | 200 (26 yapışık + 18 yazım kalıbı) |
+| `866` | 10.123 hizmet + 64 lab tetkiki | 15 (10 kalıp) |
+| `867` | 4.292 stok adı | 13 (7 kalıp) |
+
+**İki yöntem.** İlaç adlarında 856/857 sözlüğü kullanıldı: sözlükte olmayan bir
+sözcük **iki katalog sözcüğüne** bölünebiliyorsa yapışık. Hizmet ve stokta
+sözlük işe yaramıyor (anatomi/girişim sözcükleri yok) → **kataloğun kendi
+sözvarlığı** çıkarıldı, nadir sözcükler sık sözcüklerle karşılaştırıldı.
+
+**Yol boyunca çıkan üç tuzak:**
+
+1. `FLATON ENTERIK DRAJE` taramada "FLAKON" sanıldı — FLATON bir **marka**.
+   Kural: **ilk sözcüğe hiç dokunulmaz** (AMINOSTERIL, ÇİNKOVİT, TORIA da
+   böyle korundu).
+2. `IVENJEKSİYONLUK` → `İV ENJEKSİYONLUK` oluyordu (Türkçe büyük harf i→İ).
+   Yapışık açma **metin değiştirme değil boşluk ekleme** ile yapılıyor; kaynak
+   karakterler aynen kalıyor. ASCII yazılmış adlarda düzeltme de ASCII kalır.
+3. Dosyayı yeniden üretirken **yedek CTE'si düştü**, 200 satır bir ara yedeksiz
+   güncellendi. Fark edilip adlar yedekten geri alındı; artık yedek **dosyadaki
+   listenin kendisinden** yazılıyor, kısmen uygulanmış veritabanında da doğru
+   eski değeri tutuyor.
+
+Hata sayılmayanlar: geçerli yazım varyantları (pediatrik/pediyatrik,
+pomad/pomat, supozituar/supozituvar), tescilli adlardaki eski yazım
+(GELOFUSINE ENFÜZYON), SUT'un kendi yazımı (`SİFİNKTEROTOM` 12 ardışık satırda,
+"Ekstended Akciğer Rezeksiyonları"), organizma adları (Anaplasma, Toxoplasma,
+"Castillo Moraks Apareyi").
+
+**Kapatılmayan bulgu — stok adlarında kesme.** `stok.ad` `varchar(100)` ve SUT
+Ek-3/C metni tam 100. karakterde kesilmiş: **743 satır**. "İMPLAN", "ZIRCONI",
+"DEZARTİKÜLASYO" gibi sözcükler yazım hatası değil, kesme sonucu. Tam metin bu
+makinede hiçbir yerde yok — `stg.stoklar` da `varchar(100)`, MSSQL `BILIM`'de bu
+katalog hiç bulunmuyor. Tamamlamak resmî SUT listesini ve kolon genişletmesini
+gerektirir; kullanıcı kararıyla **olduğu gibi bırakıldı**. Her satırın SUT kodu
+duruyor, ileride liste geldiğinde kod eşleştirmesiyle yazılabilir.
