@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kadro Ağacı — Roller ve Eksikler (Gentegre AI · Ayarlar)</title>
+<style>
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --line:#cdd6e0; --line2:#e3e9f0;
+    --ink:#1f2d3a; --muted:#6b7a8b; --navy:#14315a; --accent:#2f6db3;
+    --sel:#d7e7fb; --head:#f3f6fa; --btnfrom:#fbfcfe; --btnto:#e7edf4;
+    --ok:#2e7d46; --uyari:#8a6218; --kirmizi:#b3261e; --mor:#5b4b9a;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;font-size:12px;padding:14px}
+  .win{max-width:1500px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;box-shadow:0 6px 22px rgba(20,40,70,.14);overflow:hidden}
+  .title{background:linear-gradient(#2b5c95,#1c4374);color:#fff;padding:7px 12px;
+    display:flex;align-items:center;gap:8px;font-weight:bold;font-size:13px}
+  .title .sp{margin-left:auto;font-weight:normal;opacity:.85;font-size:11px}
+  .toolbar{display:flex;gap:6px;padding:6px 8px;background:var(--head);
+    border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:linear-gradient(var(--btnfrom),var(--btnto));
+    border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:pointer;display:flex;gap:5px;align-items:center}
+  .btn.on{border-color:#2f6db3;background:linear-gradient(#4d8fd6,#2f6db3);color:#fff;font-weight:bold}
+  .sp{margin-left:auto}
+  .govde{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:0;align-items:start}
+  @media (max-width:1100px){ .govde{grid-template-columns:1fr} }
+
+  /* ------------------------------------------------------------ ağaç ---- */
+  .agac{padding:10px 12px 18px;overflow-x:auto}
+  .dal{margin:0;padding:0 0 0 18px;list-style:none;position:relative}
+  .dal > li{position:relative;padding:2px 0 2px 16px}
+  /* Bağlantı çizgileri: kadro ağacı kâğıt üstünde de böyle çizilir. */
+  .dal > li::before{content:"";position:absolute;left:0;top:0;bottom:0;border-left:1px solid var(--line)}
+  .dal > li:last-child::before{bottom:calc(100% - 13px)}
+  .dal > li::after{content:"";position:absolute;left:0;top:13px;width:12px;border-top:1px solid var(--line)}
+  .kok{padding-left:0}
+  .kok > li::before,.kok > li::after{display:none}
+
+  .bolum{display:flex;align-items:center;gap:7px;margin:10px 0 2px;font-weight:bold;
+    color:var(--navy);font-size:12.5px;border-bottom:1px solid var(--line2);padding-bottom:3px}
+  .bolum .ac{color:var(--muted);font-weight:normal;font-size:11px}
+
+  .rol{display:inline-flex;align-items:center;gap:7px;padding:3px 9px;border:1px solid var(--line);
+    border-radius:14px;background:#fff;white-space:nowrap}
+  .rol.pasif{opacity:.55;border-style:dashed}
+  .rol.yok{border-style:dashed;border-color:#c8a64a;background:#fffdf3;color:#7a5f14}
+  .rol.portal{border-color:#8f7fd0;background:#f6f4ff}
+  .rol.sistem{border-color:#9aa6b2;background:#f4f6f8}
+  .rol .ad{font-weight:bold}
+  .rol .kod{color:var(--muted);font-size:10.5px}
+  .rz{border:1px solid var(--line);border-radius:9px;padding:0 6px;font-size:10px;background:#f7fafc;color:var(--muted)}
+  .rz.kisi{background:#eaf3ea;border-color:#b9d9bf;color:var(--ok)}
+  .rz.bos{background:#fdf6e8;border-color:#e3cc93;color:var(--uyari)}
+  .rz.imza{background:#eef2ff;border-color:#b9c2ea;color:#3b4aa0}
+  .rz.pasif{background:#fbeceb;border-color:#e6b5b1;color:var(--kirmizi)}
+
+  /* ------------------------------------------------------- yan panel ---- */
+  .yan{border-left:1px solid var(--line);background:#fafcfe;min-height:520px}
+  .yan h3{margin:0;padding:8px 12px;background:linear-gradient(#f4f7fb,#e7eef6);
+    border-bottom:1px solid var(--line);font-size:12px;color:#3a5573}
+  .kutu{padding:9px 12px;border-bottom:1px solid var(--line2)}
+  .kutu h4{margin:0 0 6px;font-size:11.5px;color:var(--navy);display:flex;gap:6px;align-items:center}
+  .kutu p{margin:0 0 6px;color:var(--muted);line-height:1.45}
+  .liste{margin:0;padding-left:16px;line-height:1.65}
+  .liste li{margin:0}
+  .liste .not{color:var(--muted)}
+  .sayac{display:flex;gap:8px;flex-wrap:wrap;padding:9px 12px;border-bottom:1px solid var(--line2)}
+  .kart{flex:1;min-width:88px;border:1px solid var(--line2);border-radius:4px;background:#fff;padding:6px 8px}
+  .kart .s{font-size:18px;font-weight:bold;color:var(--navy);line-height:1.1}
+  .kart .e{font-size:10.5px;color:var(--muted)}
+  .aciklama{padding:8px 12px;color:var(--muted);border-bottom:1px solid var(--line2);line-height:1.5}
+  .lejant{display:flex;gap:10px;flex-wrap:wrap;padding:7px 12px;background:#f7fafc;
+    border-bottom:1px solid var(--line2);color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="title">🌳 Kadro Ağacı — Roller, İmzalar ve Eksikler
+    <span class="sp">Mockup · Yönetim › Roller (ağaç görünümü) · veri: dev kurulumu (hastane profili)</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn on" data-suz="hepsi">Tümü</div>
+    <div class="btn" data-suz="kisi">Kişisi olanlar</div>
+    <div class="btn" data-suz="bos">Kişisi olmayanlar</div>
+    <div class="btn" data-suz="imza">İmza yetkisi olanlar</div>
+    <div class="btn" data-suz="eksik">Kadroda olmayanlar</div>
+    <span class="sp"></span>
+    <div class="btn" id="dugmeAc">Tümünü aç</div>
+  </div>
+
+  <div class="lejant">
+    <span><span class="rz kisi">3</span> atanmış kişi</span>
+    <span><span class="rz">21</span> yetki sayısı</span>
+    <span><span class="rz imza">✍ 3</span> onay/imza yetkisi</span>
+    <span><span class="rz pasif">pasif</span> bu profilde geçerli değil</span>
+    <span><span class="rol yok" style="padding:1px 8px">kesik çerçeve</span> = rol HENÜZ YOK (öneri)</span>
+  </div>
+
+  <div class="govde">
+    <div class="agac" id="agac"></div>
+
+    <div class="yan">
+      <h3>Eksik ne kaldı</h3>
+      <div class="sayac" id="sayaclar"></div>
+
+      <div class="kutu">
+        <h4>1 · Kadroda karşılığı olmayan roller</h4>
+        <p>Ekranı ve yetkisi <b>var</b>, rolü <b>yok</b>. Bugün bu işi yapan kişiye ya
+           geniş bir rol veriliyor ya da iş sistem yöneticisinde kalıyor.</p>
+        <ul class="liste" id="eksikRol"></ul>
+      </div>
+
+      <div class="kutu">
+        <h4>2 · Rolü olup kişisi olmayanlar</h4>
+        <p>Kurulu ama kimseye atanmamış. Kurulum bitmemiş demek değil - kadro
+           büyüdükçe atanır; burada yalnız <b>görünür</b> olsun diye duruyor.</p>
+        <ul class="liste" id="bosRol"></ul>
+      </div>
+
+      <div class="kutu">
+        <h4>3 · Dikkat</h4>
+        <ul class="liste" id="dikkat"></ul>
+      </div>
+
+      <div class="kutu">
+        <h4>4 · İmza zinciri</h4>
+        <p>Talep onayı basamağın <b>yetkisini taşıyan role</b> düşer (738). Aşağıdaki
+           her basamağın en az bir sahibi olmalı; yoksa talep orada bekler.</p>
+        <ul class="liste" id="imzaZinciri"></ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------- veri ----
+// Dev kurulumundan (hastane profili) alınmış GERÇEK roller: kişi ve yetki
+// sayıları uydurma değil - mockup'ın işi "eksik ne kaldı"yı göstermek.
+const ROLLER = [{"kod":"acil_hekimi","ad":"Acil Hekimi","pt":0,"aktif":1,"yetki":38,"kisi":1,"imza":[]},{"kod":"bashekim","ad":"Başhekim","pt":0,"aktif":1,"yetki":59,"kisi":1,"imza":["dokuman.onay","ik.avans_onay_amir","ik.izin_onay_amir","ik.masraf_onay_amir","prim.onayla"]},{"kod":"bashekim_yardimcisi","ad":"Başhekim Yardımcısı","pt":0,"aktif":1,"yetki":51,"kisi":0,"imza":["ik.avans_onay_amir","ik.izin_onay_amir","ik.masraf_onay_amir"]},{"kod":"bashemsire","ad":"Başhemşire","pt":0,"aktif":1,"yetki":37,"kisi":0,"imza":["ik.avans_onay_amir","ik.izin_onay_amir","ik.masraf_onay_amir"]},{"kod":"bilgi_islem_personel","ad":"Bilgi İşlem Personeli","pt":0,"aktif":1,"yetki":21,"kisi":0,"imza":[]},{"kod":"bilgi_islem","ad":"Bilgi İşlem Sorumlusu","pt":0,"aktif":1,"yetki":31,"kisi":0,"imza":[]},{"kod":"birim_amiri","ad":"Birim Âmiri / Departman Sorumlusu","pt":0,"aktif":1,"yetki":19,"kisi":1,"imza":["ik.avans_onay_amir","ik.izin_onay_amir","ik.masraf_onay_amir","satinalma.onay_birim"]},{"kod":"cagri_ajani","ad":"Çağrı Merkezi Ajanı","pt":0,"aktif":1,"yetki":16,"kisi":0,"imza":[]},{"kod":"cagri_sorumlu","ad":"Çağrı Merkezi Sorumlusu","pt":0,"aktif":1,"yetki":18,"kisi":0,"imza":[]},{"kod":"dis_doktor","ad":"Dış Doktor (portal)","pt":1,"aktif":1,"yetki":6,"kisi":24,"imza":[]},{"kod":"dis_istem_kurumu","ad":"Dış Kurum · Klinik (portal)","pt":2,"aktif":1,"yetki":7,"kisi":2,"imza":[]},{"kod":"dis_kurum_yonetici","ad":"Dış Kurum · Yönetici (portal)","pt":2,"aktif":1,"yetki":3,"kisi":1,"imza":[]},{"kod":"dsp","ad":"Diğer Sağlık Personeli (DSP)","pt":0,"aktif":0,"yetki":22,"kisi":0,"imza":[]},{"kod":"dis_asistan","ad":"Diş Asistanı","pt":0,"aktif":0,"yetki":16,"kisi":0,"imza":[]},{"kod":"dis_hekimi","ad":"Diş Hekimi","pt":0,"aktif":0,"yetki":40,"kisi":0,"imza":["dis.plan.onayla"]},{"kod":"hekim","ad":"Doktor","pt":0,"aktif":0,"yetki":29,"kisi":50,"imza":[]},{"kod":"eczaci","ad":"Eczacı","pt":0,"aktif":1,"yetki":25,"kisi":0,"imza":["eczane.imha_onay","eczane.onay"]},{"kod":"eczane_depo","ad":"Eczane / Depo","pt":0,"aktif":0,"yetki":16,"kisi":0,"imza":[]},{"kod":"eczane_teknisyen","ad":"Eczane Teknisyeni","pt":0,"aktif":1,"yetki":17,"kisi":0,"imza":[]},{"kod":"firma_yetkilisi","ad":"Firma Yetkilisi (portal)","pt":2,"aktif":1,"yetki":4,"kisi":0,"imza":[]},{"kod":"fizyoterapist","ad":"Fizyoterapist","pt":0,"aktif":0,"yetki":13,"kisi":0,"imza":[]},{"kod":"ftr_uzmani","ad":"FTR Uzmanı","pt":0,"aktif":0,"yetki":29,"kisi":0,"imza":[]},{"kod":"goz_hekimi","ad":"Göz Hekimi","pt":0,"aktif":0,"yetki":40,"kisi":0,"imza":[]},{"kod":"goz_teknisyen","ad":"Göz Teknisyeni","pt":0,"aktif":0,"yetki":15,"kisi":0,"imza":[]},{"kod":"hasta_portali","ad":"Hasta (portal)","pt":3,"aktif":1,"yetki":6,"kisi":2,"imza":[]},{"kod":"hemsire","ad":"Hemşire","pt":0,"aktif":0,"yetki":15,"kisi":0,"imza":[]},{"kod":"ik_personel","ad":"İK Personeli","pt":0,"aktif":1,"yetki":14,"kisi":0,"imza":[]},{"kod":"erp_ik","ad":"İK Sorumlusu","pt":0,"aktif":1,"yetki":20,"kisi":0,"imza":["ik.avans_onay_ik","ik.belge_talep_onay","ik.izin_onay_ik"]},{"kod":"isg_uzmani","ad":"İSG Uzmanı","pt":0,"aktif":0,"yetki":14,"kisi":0,"imza":[]},{"kod":"isyeri_hekimi","ad":"İşyeri Hekimi","pt":0,"aktif":0,"yetki":31,"kisi":0,"imza":[]},{"kod":"kalite_gorevli","ad":"Kalite Görevlisi","pt":0,"aktif":1,"yetki":15,"kisi":0,"imza":[]},{"kod":"kalite","ad":"Kalite Sorumlusu","pt":0,"aktif":1,"yetki":22,"kisi":0,"imza":["dokuman.onay"]},{"kod":"kayit_kabul","ad":"Kayıt Kabul / Banko","pt":0,"aktif":1,"yetki":31,"kisi":1,"imza":[]},{"kod":"kayit_kabul_sorumlu","ad":"Kayıt Kabul Sorumlusu (Banko Şefi)","pt":0,"aktif":1,"yetki":35,"kisi":1,"imza":["belge.iskonto_onay_birim"]},{"kod":"dis_lab_sorumlu","ad":"Lab Sorumlusu (Protez)","pt":0,"aktif":0,"yetki":13,"kisi":0,"imza":[]},{"kod":"lab_teknisyen","ad":"Lab Teknisyeni","pt":0,"aktif":0,"yetki":18,"kisi":0,"imza":[]},{"kod":"lab_uzmani","ad":"Lab Uzmanı","pt":0,"aktif":0,"yetki":24,"kisi":0,"imza":["lab.kk.onay","lab.onay"]},{"kod":"muhasebe_sorumlu","ad":"Mali İşler Müdürü","pt":0,"aktif":1,"yetki":70,"kisi":0,"imza":["belge.iskonto_onay_mali","demirbas.onarim_onay_mali","ik.avans_onay_mali","ik.masraf_onay_mali","prim.onayla","satinalma.odeme_onay"]},{"kod":"medula_sorumlu","ad":"Medula Sorumlusu","pt":0,"aktif":1,"yetki":18,"kisi":0,"imza":[]},{"kod":"muhasebe","ad":"Muhasebe / Finans","pt":0,"aktif":1,"yetki":65,"kisi":1,"imza":["prim.onayla"]},{"kod":"numune_kabul","ad":"Numune Kabul","pt":0,"aktif":0,"yetki":14,"kisi":0,"imza":[]},{"kod":"optometrist","ad":"Optometrist / Refraksiyonist","pt":0,"aktif":0,"yetki":14,"kisi":0,"imza":[]},{"kod":"osgb_sekreter","ad":"OSGB Sekreteri","pt":0,"aktif":0,"yetki":19,"kisi":0,"imza":[]},{"kod":"radyolog","ad":"Radyolog","pt":0,"aktif":1,"yetki":25,"kisi":0,"imza":["rad.rapor_onayla"]},{"kod":"rad_teknisyen","ad":"Radyoloji Teknisyeni","pt":0,"aktif":1,"yetki":14,"kisi":0,"imza":[]},{"kod":"atanmamis","ad":"Rol Atanmamış","pt":0,"aktif":1,"yetki":2,"kisi":20,"imza":[]},{"kod":"erp_alis","ad":"Satınalma Sorumlusu","pt":0,"aktif":1,"yetki":24,"kisi":0,"imza":["satinalma.onay_satinalma"]},{"kod":"tedavi_danismani","ad":"Tedavi Danışmanı","pt":0,"aktif":0,"yetki":17,"kisi":0,"imza":["dis.plan.onayla"]},{"kod":"erp_servis","ad":"Teknik Servis Sorumlusu","pt":0,"aktif":1,"yetki":18,"kisi":0,"imza":["demirbas.onarim_onay_teknik"]},{"kod":"teleradyoloji_hekim","ad":"Teleradyoloji Hekimi (dış)","pt":0,"aktif":0,"yetki":19,"kisi":0,"imza":["rad.rapor_onayla"]},{"kod":"ust_yonetim","ad":"Üst Yönetim (Mesul Müdür / Genel Müdür)","pt":0,"aktif":1,"yetki":174,"kisi":0,"imza":["belge.iskonto_onay_ust","demirbas.onarim_onay_ust","dokuman.onay","ik.avans_onay_ust","ik.izin_onay_ust","ik.masraf_onay_ust","satinalma.onay_ust"]},{"kod":"vezne","ad":"Vezne","pt":0,"aktif":1,"yetki":17,"kisi":0,"imza":[]},{"kod":"yatan_hemsire","ad":"Yatan Hasta Hemşiresi","pt":0,"aktif":0,"yetki":14,"kisi":0,"imza":[]},{"kod":"yatis_ofisi","ad":"Yatış / Taburcu Ofisi","pt":0,"aktif":0,"yetki":15,"kisi":0,"imza":[]},{"kod":"yonetici","ad":"Yonetici","pt":0,"aktif":1,"yetki":274,"kisi":3,"imza":["demirbas.onarim_onay_mali","demirbas.onarim_onay_teknik","demirbas.onarim_onay_ust","dis.plan.onayla","dokuman.onay","eczane.imha_onay","eczane.onay","ik.avans_onay_amir","ik.avans_onay_ik","ik.avans_onay_mali","ik.avans_onay_ust","ik.belge_talep_onay","ik.izin_onay_amir","ik.izin_onay_ik","ik.izin_onay_ust","ik.masraf_onay_amir","ik.masraf_onay_mali","ik.masraf_onay_ust","lab.kk.onay","lab.onay","prim.onayla","rad.rapor_onayla","satinalma.odeme_onay","satinalma.onay_birim","satinalma.onay_satinalma","satinalma.onay_ust","uretim.onayla"]},{"kod":"rapor_goruntuleyici","ad":"Yönetim Görüntüleyici","pt":0,"aktif":1,"yetki":167,"kisi":0,"imza":[]}];
+
+// Kadro ağacı: kim kimin altında çalışır. Rol kataloğunda böyle bir alan YOK
+// (yetki düzdür); bu ağaç ekranın önerdiği KADRO düzeni - kimin kimin
+// talebini imzalayacağını `taraf_personel.yonetici_taraf_id` söyler.
+const AGAC = [
+  { bolum: 'Yönetim', ac: 'kurumun tamamı', dugumler: [
+    { kod:'ust_yonetim', alt:[
+      { kod:'rapor_goruntuleyici' },
+      { kod:'birim_amiri', not:'yatay rol: her birimin başı' },
+    ]},
+  ]},
+  { bolum: 'Tıbbi hizmetler', ac: 'başhekimlik', dugumler: [
+    { kod:'bashekim', alt:[
+      { kod:'bashekim_yardimcisi', alt:[
+        { kod:'hekim' }, { kod:'acil_hekimi' }, { kod:'dis_hekimi' },
+        { kod:'goz_hekimi' }, { kod:'ftr_uzmani' }, { kod:'radyolog' },
+        { kod:'lab_uzmani' }, { kod:'isyeri_hekimi' },
+        { yok:'Anestezi Uzmanı', not:'ameliyathane modülü açık, rol yok' },
+      ]},
+      { kod:'teleradyoloji_hekim', not:'dış hekim - kurum dışından okur' },
+      { kod:'medula_sorumlu' },
+    ]},
+  ]},
+  { bolum: 'Hemşirelik', ac: 'başhemşirelik', dugumler: [
+    { kod:'bashemsire', alt:[
+      { kod:'hemsire' }, { kod:'yatan_hemsire' }, { kod:'dis_asistan' },
+      { kod:'dsp', not:'İSG: diğer sağlık personeli' },
+      { yok:'Ameliyathane Hemşiresi', not:'ameliyathane ekranları var' },
+      { yok:'Yoğun Bakım Hemşiresi' },
+      { yok:'Enfeksiyon Kontrol Hemşiresi', not:'kalite göstergeleriyle çalışır' },
+      { yok:'Ebe' },
+      { yok:'Sterilizasyon (MSÜ) Sorumlusu' },
+    ]},
+  ]},
+  { bolum: 'Yardımcı sağlık ve teknik', ac: 'tetkik/tedavi üniteleri', dugumler: [
+    { kod:'rad_teknisyen' }, { kod:'lab_teknisyen' }, { kod:'numune_kabul' },
+    { kod:'goz_teknisyen' }, { kod:'optometrist' }, { kod:'fizyoterapist' },
+    { kod:'dis_lab_sorumlu' }, { kod:'isg_uzmani' },
+    { yok:'Anestezi Teknisyeni' },
+    { yok:'Biyomedikal Teknisyeni', not:'demirbaş envanter/kalibrasyon/iş emri yetkileri VAR, rol yok' },
+    { yok:'Diyetisyen' }, { yok:'Psikolog' }, { yok:'Sosyal Hizmet Uzmanı' },
+  ]},
+  { bolum: 'Hasta hizmetleri', ac: 'banko, çağrı, yatış', dugumler: [
+    { kod:'kayit_kabul_sorumlu', alt:[
+      { kod:'kayit_kabul' }, { kod:'vezne' }, { kod:'yatis_ofisi' },
+      { kod:'tedavi_danismani' }, { kod:'osgb_sekreter' },
+      { yok:'Tıbbi Sekreter / Arşiv' },
+      { yok:'Hasta Hakları Birimi' },
+    ]},
+    { kod:'cagri_sorumlu', alt:[ { kod:'cagri_ajani' } ]},
+  ]},
+  { bolum: 'Mali işler', ac: 'muhasebe ve tahsilat', dugumler: [
+    { kod:'muhasebe_sorumlu', alt:[ { kod:'muhasebe' } ]},
+  ]},
+  { bolum: 'İdari ve destek', ac: 'İK, kalite, bilgi işlem, tedarik', dugumler: [
+    { kod:'erp_ik', alt:[ { kod:'ik_personel' } ]},
+    { kod:'kalite', alt:[ { kod:'kalite_gorevli' } ]},
+    { kod:'bilgi_islem', alt:[ { kod:'bilgi_islem_personel' } ]},
+    { kod:'eczaci', alt:[ { kod:'eczane_teknisyen' }, { kod:'eczane_depo' } ]},
+    { kod:'erp_alis' }, { kod:'erp_depo' }, { kod:'erp_servis' },
+    { kod:'erp_satis' }, { kod:'erp_uretim' },
+    { yok:'Nöbetçi Müdür', not:'mesai dışı yetki devri' },
+  ]},
+  { bolum: 'Portal (kurum dışı)', ac: 'kapsamı kendi kaydıyla sınırlı', dugumler: [
+    { kod:'dis_doktor' }, { kod:'dis_istem_kurumu' }, { kod:'dis_kurum_yonetici' },
+    { kod:'firma_yetkilisi' }, { kod:'hasta_portali' },
+  ]},
+  { bolum: 'Sistem', ac: 'kadro değil', dugumler: [
+    { kod:'yonetici' }, { kod:'atanmamis' },
+  ]},
+];
+
+// İmza zinciri: basamak -> beklenen sahip rolü.
+const ZINCIR = [
+  ['İzin · âmir',            'ik.izin_onay_amir'],
+  ['İzin · İK',              'ik.izin_onay_ik'],
+  ['İzin · üst yönetim',     'ik.izin_onay_ust'],
+  ['Avans · âmir',           'ik.avans_onay_amir'],
+  ['Avans · İK',             'ik.avans_onay_ik'],
+  ['Avans · mali işler',     'ik.avans_onay_mali'],
+  ['Avans · üst yönetim',    'ik.avans_onay_ust'],
+  ['Masraf · âmir',          'ik.masraf_onay_amir'],
+  ['Masraf · mali işler',    'ik.masraf_onay_mali'],
+  ['Masraf · üst yönetim',   'ik.masraf_onay_ust'],
+  ['Belge talebi · İK',      'ik.belge_talep_onay'],
+  ['Satınalma · birim',      'satinalma.onay_birim'],
+  ['Satınalma · satınalma',  'satinalma.onay_satinalma'],
+  ['Satınalma · üst yönetim','satinalma.onay_ust'],
+  ['Ödeme onayı · mali',     'satinalma.odeme_onay'],
+  ['Onarım · teknik müdür',  'demirbas.onarim_onay_teknik'],
+  ['Onarım · mali işler',    'demirbas.onarim_onay_mali'],
+  ['Onarım · üst yönetim',   'demirbas.onarim_onay_ust'],
+  ['İskonto · birim',        'belge.iskonto_onay_birim'],
+  ['İskonto · mali işler',   'belge.iskonto_onay_mali'],
+  ['İskonto · üst yönetim',  'belge.iskonto_onay_ust'],
+  ['Doküman onayı',          'dokuman.onay'],
+];
+
+const bul = k => ROLLER.find(r => r.kod === k);
+let suzgec = 'hepsi';
+
+function rolKutusu(d) {
+  if (d.yok) {
+    return `<span class="rol yok" title="${d.not || 'Önerilen rol - katalogda yok'}">
+      <span class="ad">${d.yok}</span><span class="rz bos">rol yok</span></span>
+      ${d.not ? `<span class="rz">${d.not}</span>` : ''}`;
+  }
+  const r = bul(d.kod);
+  // ŞABLONU VAR AMA KURULMAMIŞ: `Kurum Profili > Roller`de "kurulacak"
+  //   satırı olarak duruyor - "katalogda yok" demek yanıltırdı.
+  if (!r) return `<span class="rol yok" title="Şablonu var, bu kurulumda kurulmamış">
+    <span class="ad">${d.kod}</span><span class="rz bos">kurulmadı</span></span>`;
+  const sinif = r.pt > 0 ? 'portal' : (r.kod === 'yonetici' || r.kod === 'atanmamis' ? 'sistem' : '');
+  const imza = (r.imza || []).length;
+  return `<span class="rol ${sinif} ${r.aktif ? '' : 'pasif'}" title="${r.kod}">
+      <span class="ad">${r.ad}</span>
+      <span class="kod">${r.kod}</span>
+      <span class="rz">${r.yetki} yetki</span>
+      ${r.kisi > 0 ? `<span class="rz kisi">${r.kisi} kişi</span>`
+                   : `<span class="rz bos">kişi yok</span>`}
+      ${imza ? `<span class="rz imza" title="${(r.imza||[]).join('\n')}">✍ ${imza}</span>` : ''}
+      ${r.aktif ? '' : '<span class="rz pasif">pasif</span>'}
+      ${r.pt > 0 ? '<span class="rz">portal</span>' : ''}
+    </span>${d.not ? ` <span class="rz">${d.not}</span>` : ''}`;
+}
+
+function gecer(d) {
+  if (suzgec === 'hepsi') return true;
+  if (d.yok) return suzgec === 'eksik';
+  const r = bul(d.kod); if (!r) return false;
+  if (suzgec === 'kisi') return r.kisi > 0;
+  if (suzgec === 'bos')  return r.kisi === 0;
+  if (suzgec === 'imza') return (r.imza || []).length > 0;
+  return false;
+}
+
+// Alt dalı geçen bir düğüm, kendisi süzgeci geçmese de çizilir: ağacın
+//   bağlamı kaybolmasın (üstü görünmeyen bir alt rol yanıltır).
+function dugum(d) {
+  const altlar = (d.alt || []).map(dugum).filter(Boolean);
+  if (!gecer(d) && altlar.length === 0) return '';
+  return `<li>${rolKutusu(d)}${altlar.length
+    ? `<ul class="dal">${altlar.join('')}</ul>` : ''}</li>`;
+}
+
+function ciz() {
+  document.getElementById('agac').innerHTML = AGAC.map(b => {
+    const ic = b.dugumler.map(dugum).filter(Boolean);
+    if (!ic.length) return '';
+    return `<div class="bolum">${b.bolum}<span class="ac">· ${b.ac}</span></div>
+            <ul class="dal kok">${ic.join('')}</ul>`;
+  }).join('');
+}
+
+function panel() {
+  const kadroda = new Set();
+  const gez = d => { if (d.kod) kadroda.add(d.kod); (d.alt || []).forEach(gez) };
+  AGAC.forEach(b => b.dugumler.forEach(gez));
+
+  const eksik = [];
+  const gez2 = d => { if (d.yok) eksik.push(d); (d.alt || []).forEach(gez2) };
+  AGAC.forEach(b => b.dugumler.forEach(gez2));
+
+  const bos = ROLLER.filter(r => r.kisi === 0 && r.kod !== 'atanmamis');
+  const pasifAmaKisili = ROLLER.filter(r => !r.aktif && r.kisi > 0);
+  const agactaYok = ROLLER.filter(r => !kadroda.has(r.kod));
+
+  document.getElementById('sayaclar').innerHTML = `
+    <div class="kart"><div class="s">${ROLLER.length}</div><div class="e">tanımlı rol</div></div>
+    <div class="kart"><div class="s">${ROLLER.filter(r => r.kisi > 0).length}</div><div class="e">kişisi olan</div></div>
+    <div class="kart"><div class="s">${eksik.length}</div><div class="e">önerilen yeni rol</div></div>
+    <div class="kart"><div class="s">${ROLLER.filter(r => (r.imza||[]).length).length}</div><div class="e">imza taşıyan</div></div>`;
+
+  document.getElementById('eksikRol').innerHTML = eksik.map(e =>
+    `<li><b>${e.yok}</b>${e.not ? ` <span class="not">— ${e.not}</span>` : ''}</li>`).join('');
+
+  document.getElementById('bosRol').innerHTML =
+    `<li>${bos.length} rol kimseye atanmamış${bos.length ? ':' : '.'}
+      <span class="not">${bos.slice(0, 14).map(r => r.ad).join(' · ')}${bos.length > 14 ? ' …' : ''}</span></li>`;
+
+  const dikkat = [];
+  if (pasifAmaKisili.length) dikkat.push(
+    `<li><b>Pasif rolde kullanıcı var:</b> ${pasifAmaKisili.map(r => `${r.ad} (${r.kisi} kişi)`).join(', ')}.
+     <span class="not">Rol bu profilde "geçerli değil" işaretli ama kişiler hâlâ yetkilerini alıyor -
+     pasiflik bugün yalnız listeleri ve yeni hesap açmayı etkiliyor.</span></li>`);
+  const atanmamis = bul('atanmamis');
+  if (atanmamis && atanmamis.kisi) dikkat.push(
+    `<li><b>Rol Atanmamış:</b> ${atanmamis.kisi} hesap.
+     <span class="not">Giriş yapabilirler ama hiçbir ekran göremezler.</span></li>`);
+  if (agactaYok.length) dikkat.push(
+    `<li><b>Ağaçta yeri olmayan rol:</b> ${agactaYok.map(r => r.ad).join(', ')}.
+     <span class="not">Kadroda nereye bağlanacağı kararlaşmamış.</span></li>`);
+  document.getElementById('dikkat').innerHTML = dikkat.join('') || '<li>Yok.</li>';
+
+  document.getElementById('imzaZinciri').innerHTML = ZINCIR.map(([ad, kod]) => {
+    const sahip = ROLLER.filter(r => (r.imza || []).includes(kod) && r.kod !== 'yonetici');
+    return `<li>${ad} — ${sahip.length
+      ? `<span class="not">${sahip.map(r => r.ad).join(', ')}</span>`
+      : '<b style="color:#b3261e">sahibi yok</b>'}</li>`;
+  }).join('');
+}
+
+document.querySelectorAll('[data-suz]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-suz]').forEach(x => x.classList.remove('on'));
+  b.classList.add('on'); suzgec = b.dataset.suz; ciz();
+}));
+document.getElementById('dugmeAc').addEventListener('click', () => {
+  document.querySelectorAll('[data-suz]').forEach(x => x.classList.remove('on'));
+  document.querySelector('[data-suz="hepsi"]').classList.add('on');
+  suzgec = 'hepsi'; ciz();
+});
+
+ciz(); panel();
+</script>
+</body>
+</html>
