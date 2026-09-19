@@ -28,6 +28,12 @@ export interface KartKimlikSeridiOzellikleri {
   /** Kayit YENI mi - seritte dogum/cinsiyet girisi yalniz o zaman acilir. */
   yeniMi: boolean;
   unvanOneki: ReturnType<typeof useUnvanOneki>;
+  /**
+   * Seritte GOREVIN SAGINDA cizilecek Ana Rol kutusu (847, kullanici:
+   * "başlıkta görev sağına Ana Rol'ü taşı"). Rol `taraf_kullanici`da durur,
+   * kart alani degil - bu yuzden hazir bilesen olarak disaridan gelir.
+   */
+  anaRolEk?: ReactNode;
 }
 
 /**
@@ -40,7 +46,7 @@ export interface KartKimlikSeridiOzellikleri {
  */
 export function KartKimlikSeridi({
   kaynak, deger, meta, salt, detaylar, setDetaylar, kimlikAlanlari, renderAlanListesi,
-  seritSarmalayici, personelGibiKart, dogumYasMetni, yeniMi, unvanOneki,
+  seritSarmalayici, personelGibiKart, dogumYasMetni, yeniMi, unvanOneki, anaRolEk,
 }: KartKimlikSeridiOzellikleri) {
         const kimlikSeridi = (
         <div className="kaid">
@@ -116,8 +122,12 @@ export function KartKimlikSeridi({
               {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'durum'))}
             </div>
           ) : personelGibiKart ? (
+            /* PERSONELDE 6 SUTUN (847): Ünvan YARIM (kisa deger - "Prof.Dr."
+               tam sutunda bos yer birakiyordu), sonuna Ana Rol eklendi. */
             <div className="alan-izgara"
-                 style={{ gridTemplateColumns: 'repeat(5, minmax(0, 1fr))' }}>
+                 style={{ gridTemplateColumns: kaynak === 'personel'
+                   ? '0.5fr repeat(5, minmax(0, 1fr))'
+                   : 'repeat(5, minmax(0, 1fr))' }}>
               {/* HASTADA "Dosya No" EDITI HIC YOK (kullanici): numara
                   OTOMATIK verilir - yeni kayitta da sorulmaz. Kayitli kartta
                   numara basliktan okunur; duzenlenecek bir alan degil,
@@ -148,6 +158,9 @@ export function KartKimlikSeridi({
                   degistirdi; Rol combosu Kimlik Bilgileri kutusunda). */}
               {kaynak !== 'hasta' && renderAlanListesi(
                 (meta?.alanlar ?? []).filter(a => a.ad === 'gorevId'))}
+              {/* ANA ROL GOREVIN SAGINDA (847, kullanici) - Is Bilgileri
+                  kutusundan buraya tasindi; gorev ile rol birlikte okunur. */}
+              {anaRolEk}
               {/* DURUM: personelde seritte YOK (baslikta rozet), HASTADA VAR ve
                   TC No'nun SAGINDA (kullanici) - hasta durumu dort degerli
                   (Aktif/Pasif/Aday/Vefat), rozet tek basina yetmiyor. */}

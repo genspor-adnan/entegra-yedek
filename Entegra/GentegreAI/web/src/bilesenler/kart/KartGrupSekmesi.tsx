@@ -34,7 +34,7 @@ const NOTLAR_TAM_GENISLIK = new Set(['cari', 'kurum']);
 
 export function KartGrupSekmesi(p: KartGrupSekmesiProps) {
   const {
-    aktif, kaynak, id, yeniMi, meta, salt, personelGibiKart, deger, setDeger, yeniAnaRol,
+    aktif, kaynak, id, yeniMi, meta, salt, personelGibiKart, deger, setDeger,
     detaylar, setDetaylar, alanHatalari, gizliSekmeler, resimYerTutucu, gruplar, altGruplaVar, renderAlanListesi,
     aramaAc, secilenAdlar,
   } = p;
@@ -341,18 +341,11 @@ const adliBlok = (
                 //   bölümünde alta Ana Rol (zorunlu) ve Yan Rol combo ekle").
                 //   Rol `taraf_kullanici` kaydinda durur - kart kaydetmeye bagli
                 //   degil, secim aninda uygulanir (KartKullaniciRolu).
-                //   YENI KAYITTA (845): hesap henuz yok - secim kartta
-                //   bekler, Kaydet'ten sonra uygulanir ve kadro defterinin
-                //   ilk satirina islenir.
-                const roller = kaynak !== 'personel' ? null
-                  : yeniMi
-                  ? (yeniAnaRol
-                      ? <KartKullaniciRolu kartId={0} saltOkunur={salt}
-                                           yeniKayit={yeniAnaRol} />
-                      : null)
-                  : id
-                  ? <KartKullaniciRolu isBilgi kartId={id as number} saltOkunur={salt} />
-                  : null;
+                //   ANA ROL ARTIK SERITTE (847, kullanici: "başlıkta görev
+                //   sağına Ana Rol'ü taşı") - gorevle yan yana duruyor.
+                //   Burada tekrar cizilmez; iki kutu ayni degeri gosterince
+                //   hangisinin yazdigi belirsizdi (845 ayni sebep).
+                const roller = null;
                 // RANDEVU VERILEBILIR (252): hekim mi - is bilgisi oldugu icin
                 //   İş Bilgileri kutusunda (kullanici), kimlik seridinde degil.
                 const a = meta.alanlar.find(x => x.ad === 'randevuVerilebilir');
@@ -807,6 +800,4 @@ export interface KartGrupSekmesiProps {
   /** Jenerik arama modalini acar (305): 1:1 uzanti formundaki kurum secimi. */
   aramaAc?(alan: string, kaynak: string, uygula?: (deger: string) => void): void;
   secilenAdlar?: Record<string, string>;
-  /** Yeni personel kartinda Ana Rol secimi (845) - kayit sonrasi uygulanir. */
-  yeniAnaRol?: { secili: number; onSec(rolId: number): void };
 }

@@ -168,7 +168,7 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi, yeniKayit
     if (!anaCombo || !bilgi) return null;
     return (
       <label className="alan tip-kod">
-        <span className="etiket zorunlu-isaret">Rol</span>
+        <span className="etiket zorunlu-isaret">Ana Rol</span>
         {anaCombo}
         {bilgi.ekRolIdleri.length > 0 && (
           <span className="rozet" title={ekRolAdlari(bilgi)}>

@@ -44,8 +44,6 @@ export interface KartGrupSarmalayiciOzellikleri {
                                  alanSirasi?: string[]; not?: ReactNode }>;
   sekmeSarmalayici?(baslik: string, icerik: ReactNode, deger: Record<string, Deger>,
                     izgaraCiz?: (detayAd: string) => ReactNode): ReactNode;
-  /** Yeni personel kartinda Ana Rol secimi (845) - kayit sonrasi uygulanir. */
-  yeniAnaRol?: { secili: number; onSec(rolId: number): void };
 }
 
 /**
@@ -63,7 +61,6 @@ export function KartGrupSarmalayici({
   deger, setDeger, alanDegistir, detaylar, setDetaylar, alanHatalari,
   gizliSekmeler, resimYerTutucu, gruplar, altGruplaVar, renderAlanListesi,
   setAramaAlani, secilenAdlar, detayGrupta, detayIzgara, sekmeSarmalayici,
-  yeniAnaRol,
 }: KartGrupSarmalayiciOzellikleri) {
         const govde = (
         <KartGrupSekmesi
@@ -75,7 +72,7 @@ export function KartGrupSarmalayici({
           resimYerTutucu={resimYerTutucu} gruplar={gruplar}
           altGruplaVar={altGruplaVar} renderAlanListesi={renderAlanListesi}
           aramaAc={(alan, kaynak, uygula) => setAramaAlani({ alan, kaynak, uygula })}
-          secilenAdlar={secilenAdlar} yeniAnaRol={yeniAnaRol}
+          secilenAdlar={secilenAdlar}
         />
         );
         const tam = kaynak === 'randevu' ? (

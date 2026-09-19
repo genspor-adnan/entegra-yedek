@@ -36,6 +36,7 @@ import { GozMuayeneSeridi } from './goz/GozMuayeneSeridi';
 import { KontrolListesi } from './radyoloji/KontrolListesi';
 export { Modal };
 import { RolYetkiMatrisi } from './RolYetkiMatrisi';
+import { KartKullaniciRolu } from './KartKullaniciRolu';
 import { ekKaydetleriCalistir, ekKaydetTemizle } from './kartEkKaydet';
 import { DokumanGalerisi } from './DokumanGalerisi';
 import { StokDurumSekmesi } from './StokDurumSekmesi';
@@ -1268,6 +1269,13 @@ Yine de yeni hasta kaydı eklensin mi?`);
             seritSarmalayici={seritSarmalayici}
             personelGibiKart={personelGibiKart} dogumYasMetni={dogumYasMetni}
             unvanOneki={unvanOneki}
+            anaRolEk={kaynak !== 'personel' ? undefined
+              : yeniMi
+              ? <KartKullaniciRolu kartId={0} saltOkunur={salt}
+                                   yeniKayit={{ secili: yeniAnaRol, onSec: setYeniAnaRol }} />
+              : id
+              ? <KartKullaniciRolu sade kartId={id as number} saltOkunur={salt} />
+              : undefined}
           />
         )}
         {/* RADYOLOJI ISTEMI (310): akis seridi + ozet KIMLIK SERIDININ ALTINDA,
@@ -1621,8 +1629,6 @@ Yine de yeni hasta kaydı eklensin mi?`);
 
       {aktif?.tur === 'grup' && meta && (
         <KartGrupSarmalayici
-          yeniAnaRol={kaynak === 'personel' && yeniMi
-            ? { secili: yeniAnaRol, onSec: setYeniAnaRol } : undefined}
           aktif={aktif} kaynak={kaynak} id={id} yeniMi={yeniMi} meta={meta}
           salt={salt} personelGibiKart={personelGibiKart}
           deger={deger} setDeger={setDeger} alanDegistir={alanDegistir}

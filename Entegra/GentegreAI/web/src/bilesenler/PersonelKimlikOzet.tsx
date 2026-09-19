@@ -42,6 +42,15 @@ interface Props {
 }
 
 /**
+ * KISA KUTU GENISLIGI (847, kullanici: "kan grubu combo genişliği cinsiyet
+ * kadar yap" + "doğum tarihi de aynı genişliğe"): dogum tarihi, cinsiyet ve
+ * kan grubu SABIT genislikte degerler ("gg.aa.yyyy", "Kadın", "A Rh+") -
+ * satiri paylastiklari alana gore esnemeleri ucunu de farkli boyda
+ * gosteriyordu (kan grubu tek basina kalinca 296px'e yayilyordu).
+ */
+const KISA_KUTU = 118;
+
+/**
  * Personel/Hasta kartı Genel sekmesi kimlik özeti. TCKN/Görev taraf alanlarından,
  * diğer kimlik alanları 1:1 detay kaydından gelir.
  */
@@ -139,7 +148,8 @@ export function PersonelKimlikOzet({
                 {!vknoGizli && (
                   <label className="alan tip-metin">
                     <span className="etiket">{vknoAlan.baslik}{vknoAlan.zorunlu && ' *'}</span>
-                    <input value={vkno} maxLength={vknoAlan.enFazlaUzunluk ?? undefined} disabled={saltOkunur}
+                    <input value={vkno} style={{ width: KISA_KUTU }}
+                      maxLength={vknoAlan.enFazlaUzunluk ?? undefined} disabled={saltOkunur}
                       onChange={e => onVknoDegis(e.target.value)} />
                   </label>
                 )}
@@ -159,7 +169,7 @@ export function PersonelKimlikOzet({
                     genislikte (gg.aa.yyyy). YAS BURADA GOSTERILMEZ
                     (kullanici) - kimlik seridindeki "Doğum Tarihi / Yaş"
                     hucresinde zaten var, iki yerde tekrarlaniyordu. */}
-                <input type="date" style={{ width: 118 }}
+                <input type="date" style={{ width: KISA_KUTU }}
                   value={String(satir.dogumTarihi ?? '').slice(0, 10)} disabled={saltOkunur}
                   onChange={e => ozlukDegis({ dogumTarihi: e.target.value })} />
               </label>
@@ -176,7 +186,8 @@ export function PersonelKimlikOzet({
                 <span className="etiket">
                   Cinsiyet{cinsiyetAlan?.zorunlu && ' *'}
                 </span>
-                <select value={String(satir.cinsiyet ?? '')} disabled={saltOkunur}
+                <select style={{ width: KISA_KUTU }}
+                  value={String(satir.cinsiyet ?? '')} disabled={saltOkunur}
                   onChange={e => ozlukDegis({ cinsiyet: e.target.value })}>
                   <option value="">-</option>
                   {cinsiyetAlan?.kodlar && Object.entries(cinsiyetAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
@@ -206,7 +217,8 @@ export function PersonelKimlikOzet({
               )}
               <label className="alan tip-kod">
                 <span className="etiket">Kan Grubu</span>
-                <select value={String(satir.kanGrubu ?? '')} disabled={saltOkunur}
+                <select style={{ width: KISA_KUTU }}
+                  value={String(satir.kanGrubu ?? '')} disabled={saltOkunur}
                   onChange={e => ozlukDegis({ kanGrubu: e.target.value })}>
                   <option value="">-</option>
                   {kanGrubuAlan?.kodlar && Object.entries(kanGrubuAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
