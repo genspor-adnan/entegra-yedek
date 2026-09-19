@@ -489,6 +489,8 @@ public static partial class KaynakKatalogu
         // Satinalma (724)
         // ONAY GELEN KUTUSU (738): tum modullerin bekleyen onaylari.
         Ekle(OnayKutusu());
+        // KADRO HAREKETLERI (840): personelin pozisyon gecmisi.
+        Ekle(PersonelHareketKaynagi());
         Ekle(PersonelIzinKaynagi());
         Ekle(IzinBakiyeKaynagi());
         Ekle(PersonelAvansKaynagi());

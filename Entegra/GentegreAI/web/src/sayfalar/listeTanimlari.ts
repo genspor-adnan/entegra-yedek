@@ -57,6 +57,7 @@ import { SERVIS_LISTELERI } from './listeTanimlari.Servis';
 import { DOKUM_LISTELERI } from './listeTanimlari.Dokumler';
 import { YONETIM_LISTELERI } from './listeTanimlari.Yonetim';
 import { PORTAL_LISTELERI } from './listeTanimlari.Portal';
+import { KADRO_LISTELERI } from './listeTanimlari.Kadro';
 
 export const DONUSUM_MENUSU: Record<string, { kod: string; ad: string }[]> = {
   'belge.donustur': [
@@ -127,6 +128,8 @@ export const LISTELER: ListeGirdisi[] = [
   ...IZIN_LISTELERI,
   ...SERVIS_LISTELERI,
   ...YONETIM_LISTELERI,
+  // KADRO HAREKETLERI (840): personelin pozisyon gecmisi.
+  ...KADRO_LISTELERI,
   // PORTAL MALI (824): yalniz dis kurum YONETICI rolunde acilir (portal.mali).
   ...PORTAL_LISTELERI,
   // Grup basina "📊 Dökümler" baglantisi (plan kural 2): her grubun sonunda

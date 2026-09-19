@@ -102,6 +102,12 @@ public static class AksiyonKatalogu
                     Ipucu: "Aktif personelden hesabı olmayanlara hesap açar"),
             ],
             ["personel-liste"] = Crud("personel", "personel", "personel"),
+            // KADRO HAREKETI (840): pozisyon gecmisi defteri. Silme VAR ama
+            //   dar: yanlis girilen hareket duzeltilebilmeli - defterin
+            //   kendisi denetim izi degil, `islem_log` o isi yapiyor.
+            ["personel-hareket-liste"] =
+                Crud("personel-hareket", "personel-hareket", "ik.kadro",
+                     ekleAdi: "＋ Hareket", yazdir: true),
             ["hasta-liste"] =
             [
                 .. Crud("hasta", "hasta", "hasta"),

@@ -15632,6 +15632,25 @@ listesinde mi.
 Tarayıcıda: 8 bölüm, 74 rol, tablo sayısı 0. xUnit 488/488, vitest 696/696.
 
 
+## Hasta kaydında mükerrer kontrolü — 19.09.2026
+
+Kullanıcı: *"yeni hasta eklerken kimlik no aynı ise eklenmez diğer kayıt
+getirilir.. telefon aynı ise uyarı verilir istenirse devam edilip eklenebilir"*.
+
+- **API** `HastaUclari.cs`: `GET /api/hasta/mukerrer?vkno=&cepTel=&haric=` →
+  `{kimlik: {id, ad, kod, dogumTarihi} | null, telefon: [...]}` (yalnız
+  `taraf.hasta = 1`; telefon son 10 hane, cep + sabit hat, en çok 5 kayıt).
+  `KimlikMukerrerKuraliAsync` kart ucunda (POST + PUT, `hasta` / `hasta-aday`)
+  sert engel: aynı kimlikli başka hasta varsa `DOGRULAMA` + `vkno` alan hatası
+  ("Kayıtlı: AD (#id)"). Telefon sunucuda engellenmez (aile bireyleri aynı
+  numarayı paylaşır).
+- **Web** `GenForm.kaydet`: hasta kartında kaydetmeden önce uca bakar. Kimlik
+  eşleşirse bilgi mesajı + `onMevcutKayit(id)` (yeni prop): liste kartında
+  mevcut kart açılır (`ListeKarti`, `geri` korunur), hasta arama penceresinde
+  o hasta seçilir (`TarafArama`). Telefon eşleşirse `onay` sorusu; Kapat =
+  kayıt yok, Tamam = kaydeder. Düzenlemede yalnız kimlik (kendi id hariç).
+  Uç ulaşılamazsa kayıt engellenmez (sunucu kuralı yine çalışır).
+
 ## Çağrı Merkezi modülü (839) — 19.09.2026
 
 Kullanıcı: *"Çağrı Merkezi için mockuplar hazırla ve sekmeler açılır olsun"* →
@@ -15677,6 +15696,17 @@ kampanya-kisi, kalite), `KartKatalogu.Cagri.cs` (log 1330-1338; konu kartında
 alt konular, kampanyada kişiler detayı), aksiyonlar `cagri.*`, roller
 `cagri_operator` / `cagri_supervizor` (Hasta hizmetleri kadrosu).
 
+Refaktor (aynı gün): `CagriUclari` beş partial dosya - `.Akis` (pano, arayan,
+çağrı akışı, kart, kalite, `KuralOzeti`), `.Giden` (geri arama, kampanya,
+`KampanyaKaynakSql`), `.Supervizor` (canlı pano, santral ayarı), `.Webhook`
+(anonim olay; çalma/cevap kaydı tek `SantralCagriAcAsync`), ana dosyada
+sabitler (`TarafAdi`/`TarafTel` SQL parçaları, agent durum sabitleri,
+bildirim kaynak türleri) ve yardımcılar (`JsonTekAsync`/`JsonListeAsync`,
+`Kirp`, `AgentDurumAsync`, `KuyrukBulAsync`/`AgentBulAsync`,
+`SantralSaglaAsync`). Web: `sayfalar/cagri/ortak.tsx` (`Al`, `SONUCLAR`,
+`sureYaz`, `saat`) - sayfalardaki kopyalar kaldırıldı. Davranış değişmedi;
+duman betiği + Playwright + xUnit yeniden geçti.
+
 **Web:** `listeTanimlari.Cagri.ts` (grup "Çağrı Merkezi", bölge **Hasta
 Akışı**'nın başında; menü tavanı 29 → 30), `sayfalar/cagri/`: `CagriOperator`
 (softphone çubuğu, kuyruk, arayan kartı, hızlı işlemler, kayıt paneli; 5 sn
@@ -15699,3 +15729,46 @@ aranacak kuralı) 3/3; katalog bütünlük 13/13; vitest 696/696; Playwright: 13
 sayfa, tüm sekmeler, konsol temiz. Kalan: santral sürücüleri (3CX / Asterisk /
 bulut), WebRTC softphone, WhatsApp Cloud API alımı, gerçek AI transkript/özet,
 dinle/fısılda, KVKK silme ucu, dökümler.
+
+## 840 — Kadro hareketi: personelin pozisyon geçmişi
+
+Kullanıcı: *"personelin pozisyon değişikliklerini kronolojik olarak nasıl
+takip ederiz"* → *"yap.. onay zincirine gerek yok"*.
+
+**Neden gerekti:** `taraf_personel` tek satır - görev, yönetici, şube, çalışma
+şekli yalnız bugünkü hâli tutuyordu; değiştirince eskisi kayboluyordu.
+`islem_log` alan-alan iz bırakıyor ama o **denetim izi**: yürürlük tarihi yok
+(20 Aralık'ta girilen "1 Ocak'tan itibaren şef" 20 Aralık görünür), o günkü
+tam pozisyon fotoğrafı yok, karar/belge bağı yok.
+
+**Fotoğraf, delta değil.** `personel_hareket` her satırda o tarihte geçerli
+pozisyonun tamamını tutar (görev, görev katalogu, bölüm, yönetici, şube,
+çalışma şekli, sözleşme, unvan + karar/belge/gerekçe). "1 Mart'ta ne idi" tek
+satırdan okunur.
+
+**Tek yazan hareket:** `taraf_personel` defterden türetilir
+(`fn_personel_kadro_uygula`). Kart elle düzenlenirse de hareket üretilir
+(`tg_personel_kadro_iz`, `kaynak = 2`) - iki kaynak çelişmesin. Aynı gün
+ikinci düzenleme yeni satır açmaz, o günkü türetilmiş satırı günceller.
+
+**İleri tarihli hareket serbest:** bugünden girilir, yürürlük gününe kadar
+kartta görünmez; `fn_personel_kadro_gunluk()` gün başında uygular.
+`fn_personel_kadro(taraf, tarih)` herhangi bir tarihteki pozisyonu döndürür.
+
+**Süreli hareket** (vekâlet, ücretsiz izin) `bitis` ile: süresi dolunca önceki
+pozisyon yeniden geçerli olur.
+
+Ekran: **İK & Prim › Kadro Hareketleri** (yetki `ik.kadro`; sistem yöneticisi,
+İK Sorumlusu ve İK Personeli'ne verildi). Çipler: Geçerli · İleri tarihli ·
+Terfi · Şube nakli · Tümü. Satır rengi: ileri tarihli **sarı** (yürürlüğe
+girmemiş terfi gözden kaçmasın), geçerli yeşil.
+
+**Geçmiş dolgusu yalnız işe giriş:** elimizdeki kesin tek tarih
+`ise_giris_tarihi`. Sonrası `islem_log`'dan tahmin edilebilirdi ama orada
+yürürlük tarihi yok - tahmini geçmişi gerçekmiş gibi yazmak defteri işe
+yaramaz kılardı.
+
+Onay zinciri yok (kullanıcı kararı): hareket girildiği an geçerli.
+
+Test `LogTabloIdTestleri` kart için seçtiğim 940'ın radyoloji isteminde
+kullanıldığını yakaladı - 1325'e alındı. xUnit 491/491, vitest 696/696.

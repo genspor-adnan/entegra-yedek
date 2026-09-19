@@ -277,6 +277,7 @@ public static partial class KartKatalogu
         // Satinalma (724). SIPARIS/FATURA KARTI YOK: onlar `belge` (tur 9/11).
         Ekle(SatinalmaButce());
         // IZIN (743): talep ve yillik izin hakki.
+        Ekle(PersonelHareket());
         Ekle(PersonelIzin());
         Ekle(PersonelIzinHak());
         // AVANS (753): talep, odeme ve mahsup plani.
