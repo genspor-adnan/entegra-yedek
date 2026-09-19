@@ -16312,3 +16312,25 @@ test adı/tetkik kodu araması `lab_akilci_kural` üstünde, cevap tekrar aralı
 yetkili branşlar / basamak / refleks / kapalı / Bakanlık notu, `kaynakTuru 9`,
 `lab` yetkisi ister (kural kataloğunun ekranıyla aynı). Hasta verisi yok - kurum
 kuralı anlatılır. Test `BaglamsalYardimTestleri.Akilci_kural_sorusu_…`.
+
+### Ek — 19.09.2026 test turu (sterilizasyon · çağrı merkezi · akılcı istem)
+
+Kullanıcı: *"sterilizasyon da test et, test bilgilerini silme"*, *"çağrı merkezi
+test yaptın mı"*. Bu turdan sonra **akış testlerinin ürettiği veri docker
+veritabanında bilerek bırakıldı** (ekranlardan incelenebilsin diye); daha
+önce `steril_smoke` başlangıçta sıfırlıyordu, o adım atlandı.
+
+| Modül | Otomatik | Akış (API) | Kalan veri |
+|---|---|---|---|
+| Sterilizasyon (868) | `SterilTestleri` 3/3 | hazırlama → BD onaylı döngü → indikatör → serbest/etiket → okutma → BD test → karantina → bio pozitif → geri çağırma → kayıt defteri → kurallar: hepsi geçti | döngü #51 serbest, #52 BD test, #53 başarısız; 6 paket (4 kullanıldı); geri çağırma #2 kapalı; 69 olay |
+| Çağrı merkezi (839) | `CagriTestleri` 3/3 | giden çağrı → not → ödeme linki SMS → kapat (görev #26) → özet/kalite → geri arama → 4 kampanya türü → süpervizör → santral ayar/sına/webhook → agent çıkış: 37 adım geçti | çağrı #131, görev #26, 8 kampanya / 26 kişi |
+| Akılcı istem (873) | `AkilciIstemTestleri` 5/5, `akilciIstem.test.ts` 5/5, rehber 50/50 | dr7905: 2. CRP istemi 422 uyarı → gerekçe ile açıldı, vazgeçme kaydı; panelden "CRP tekrar süresi kaç gün?" (Playwright) | istem L-000012/13, 2 karar kaydı |
+
+Kural: akış testleri YALNIZ sahte numara kullanır (0500 999 xx xx / 0500 998
+xx xx) — dev bildirim işçisi gerçek SMS gönderir. Çağrı betiğindeki bir webhook
+numarası (0500 111…) bu kalıba çevrildi. Tarayıcıda denenmeyen: muayene
+listesinden istem açıp hekim uyarı diyaloğunu elle görmek (mantığı birim
+testte).
+
+Push: Claude oturumu `git push` yapamıyor (araç izni); kullanıcı elle atar
+(`git -C C:\Users\HP\Entegra push origin pg-migration`).
