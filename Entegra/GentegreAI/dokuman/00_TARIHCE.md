@@ -15538,3 +15538,16 @@ bakmıyor) - etkilediği yer rol listeleri ve yeni hesap açma ekranıydı.
 
 Tanımlı rol 75. Mockup tazelendi; "dikkat" listesinde artık yalnız 20
 "Rol Atanmamış" hesap kaldı.
+
+## Teknik Servis Görevlisi
+
+Kullanıcı: *"Teknik Servis Sorumlusu altında Teknik Servis Görevlisi ekle"*.
+
+İşi **yapan** kişi: iş emri, arıza kaydı, bakım uygulaması, cihaz geçmişi ve
+zimmet. Sorumludan iki farkı var:
+- `servis.sozlesme` **yok** - müşteri/kurum sözleşmesi ticari karardır,
+- `demirbas.onarim_onay_teknik` **yok** - işi yapan kendi talebini
+  imzalamasın (783 gerekçesi; Biyomedikal Teknisyeni'nde de aynı sınır).
+
+Kuruldu (20 yetki), kadro ağacında Teknik Servis Sorumlusu'nun altına bağlandı.
+Tanımlı rol 76.

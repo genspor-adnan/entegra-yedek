@@ -488,6 +488,20 @@ public static class StandartRolUclari
               // TEKNIK MUDUR BASAMAGI (738): onarim talebinin ilk imzasi ve
               //   kapsam disi is icin son soz.
               A("demirbas.onarim_onay_teknik"))),
+        // TEKNIK SERVIS GOREVLISI (kullanici: "Teknik Servis Sorumlusu
+        //   altında Teknik Servis Görevlisi ekle"): isi YAPAN kisi.
+        //   Sorumludan farki SOZLESME ve IMZA:
+        //     · `servis.sozlesme` yok - musteri/kurum sozlesmesi ticari karar,
+        //     · `demirbas.onarim_onay_teknik` yok - isi yapan kisi kendi
+        //       talebini imzalamasin (783 gerekcesi; biyomedikal rolunde de
+        //       ayni sinir var).
+        new("erp_servis_gorevli", "Teknik Servis Görevlisi",
+            "İş emri, arıza kaydı ve bakım uygulaması; cihaz geçmişi ve sarf. Sözleşme ve onarım imzası yok.",
+            ["erp", "tip_merkezi", "hastane"],
+            K(Y("servis"), T("servis.cihaz"), T("servis.sozlesme"),
+              Y("demirbas.isemri"), Y("demirbas.ariza"), Y("demirbas.bakim"),
+              T("demirbas"), T("demirbas.envanter"), Y("demirbas.zimmet"),
+              T("cari"), T("stok"), T("depo"), T("cihaz"))),
         new("erp_ik", "İK Sorumlusu",
             "Personel kartı, izin, avans, masraf ve belge talepleri; prim hesabı.",
             ["erp", "tip_merkezi", "hastane"],
