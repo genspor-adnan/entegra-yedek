@@ -47,7 +47,10 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     // Serit suzgecleri (kullanici: "aktif/pasif/durum saginda Bolum agac combo
     //   ve Rol combo"): ikisi de cip ve arama ile AND'lenir.
     bolumSuzgeci: true, rolSuzgeci: true,
-    menuGrup: 'İK & Prim', menuAd: 'Personel Listesi', ic: '🧑‍🤝‍🧑', yetkiKodu: 'personel', menuSira: 10,
+    // PERSONEL İZİNLERDEN ÖNCE (kullanıcı: "menüde personel ve izinler yer
+    //   değiştir"): ikisi de sıra 10 iken diziye önce giren İzinler üste
+    //   düşüyordu - kadro listesi İK menüsünün ilk maddesi olmalı.
+    menuGrup: 'İK & Prim', menuAd: 'Personel Listesi', ic: '🧑‍🤝‍🧑', yetkiKodu: 'personel', menuSira: 5,
   },
   // PRIM (kullanici): ana menude kendi basina grup degil, IK'nin ALTINDA
   //   ve Personel Listesi'nden SONRA. menuSira 20/30/40 personelin 10'unun
