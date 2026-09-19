@@ -15468,3 +15468,12 @@ talep/salon · klinik gösterge · personel · hakediş · prim planı · onay k
 **açık**; kasa ve muhasebe fişi **kapalı**.
 
 xUnit 485/485.
+
+## 833 — "Diğer Sağlık Personeli (DSP)" → "Sağlık Personeli"
+
+Kullanıcı: *"Diğer Sağlık Personeli (DSP) (dsp) rename Sağlık Personeli"*.
+
+Kod `dsp` **değişmedi**: şablon eşlemesi, modül haritası ve atanmış hesaplar
+koda bakıyor (790'daki "Hekim → Doktor" değişikliğinin aynısı). Göç yalnız
+eski varsayılan addaki satırı günceller - kurumun kendi değiştirdiği adı
+ezmez. Şablon ve kadro ağacı mockup'ı da yeni adla tazelendi.

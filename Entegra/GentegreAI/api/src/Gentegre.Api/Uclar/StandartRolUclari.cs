@@ -390,7 +390,11 @@ public static class StandartRolUclari
               Y("muayene"), T("hasta"), Y("randevu"), Y("lab"), T("lab.sonuc"), Y("radyoloji-istem"), T("radyoloji"), T("kurum"), Y("onam"))),
         new("isg_uzmani", "İSG Uzmanı", "Ziyaret tutanağı, olay/kaza kaydı, öneri defteri; sağlık verisi görmez.", ["osgb", "tip_merkezi", "hastane"],
             K(T("isg"), T("isg.pano"), T("isg.firma"), T("isg.calisan"), Y("isg.ziyaret"), Y("isg.olay"), T("kurum"))),
-        new("dsp", "Diğer Sağlık Personeli (DSP)", "Çalışan kaydı, aşı, tetkik takibi, periyodik takvim, form gönderimi; kanaat yazmaz.", ["osgb", "tip_merkezi", "hastane"],
+        // AD "Sağlık Personeli" (kullanici: "Diğer Sağlık Personeli (DSP)
+        //   rename Sağlık Personeli") - KOD `dsp` KALIR: sablon eslemesi,
+        //   modul haritasi ve kurulu roller koda bakiyor (790'daki
+        //   "Hekim -> Doktor" deseninin ayni).
+        new("dsp", "Sağlık Personeli", "Çalışan kaydı, aşı, tetkik takibi, periyodik takvim, form gönderimi; kanaat yazmaz.", ["osgb", "tip_merkezi", "hastane"],
             K(T("isg"), T("isg.pano"), T("isg.firma"), Y("isg.calisan"), T("isg.muayene"), Y("isg.takvim"), Y("isg.asi"), T("isg.olay"),
               Y("form.istek"), Y("form.gonder"), Y("form.doldur"), Y("hasta"), Y("randevu"), Y("lab"), T("kurum"))),
         new("osgb_sekreter", "OSGB Sekreteri", "Firma ve çalışan kaydı, sözleşme dakikası, randevu, form gönderimi; muayene içeriği görmez.", ["osgb"],
