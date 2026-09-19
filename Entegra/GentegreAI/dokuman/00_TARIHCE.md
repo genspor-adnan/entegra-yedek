@@ -15652,6 +15652,15 @@ temizlenir. Kural: 10 dk, 5 yanlış deneme, 15 dk'da 3 istek; parola kuralı
 iki adımlı form (maskeli hedef "05•• ••• •• 05"), "Kodu yeniden iste".
 Test: dr7905 hesabına sahte cep 0500 999 79 05 yazıldı. Docker-only.
 
+## Diş seans kartına "kullanılan paketler" kutusu — 19.09.2026
+
+`DisSeansKarti` › Malzeme & sarf sekmesi: "Sterilizasyon · kullanılan paketler"
+(barkod okut → `POST /api/steril/paket/okut` hasta / başvuru belgesi / hekim / ünite ile;
+karantina paketinde onay + `zorla`; liste `GET /api/steril/izleme?belgeId=`, başvurusuz
+seansta hastanın bugünkü kullanımları). Seans bitirme: `steril.kurallar.seansOkutma`
+uyari → onay sorusu, engel → kapatılamaz, serbest → sessiz. Modül / yetki yoksa kutu boş,
+seans akışı etkilenmez.
+
 ## Menü ve CRUD düzeltmeleri — 19.09.2026
 
 - Sterilizasyon menüde ayrı grup değil: **Diş › Sterilizasyon** alt grubu (70-76),

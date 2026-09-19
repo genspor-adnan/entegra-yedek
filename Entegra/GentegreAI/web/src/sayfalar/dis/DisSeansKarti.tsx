@@ -3,6 +3,8 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import type { DisIslemSecenegi, DisSeansKarti as Kart } from '../../api/uclar/dis';
+import type { SterilKullanim } from '../../api/uclar/steril';
+import { ApiHatasi } from '../../api/sozlesme';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { TarafSecici } from '../../bilesenler/TarafArama';
@@ -48,6 +50,11 @@ export function DisSeansKarti() {
   const [hizmetAra, setHizmetAra] = useState<{ acik: boolean; q: string; sonuc: DisIslemSecenegi[]; disNo: string; yz: string }>({ acik: false, q: '', sonuc: [], disNo: '', yz: '' });
   const [tik, setTik] = useState(0);
   const [yeniHasta, setYeniHasta] = useState<{ id: number; ad: string } | null>(null);
+  // STERİLİZASYON (868): seansta kullanılan paketler - barkod okutulunca hasta / başvuru /
+  //   hekim / ünite bağlanır, paket kapanır, set kirliye düşer. Liste başvuru belgesine
+  //   (belgeId) bağlıdır; başvurusuz seansta hastanın bugünkü kullanımları gösterilir.
+  const [paketler, setPaketler] = useState<SterilKullanim[]>([]);
+  const [paketBarkod, setPaketBarkod] = useState('');
 
   const yukle = useCallback(async () => {
     if (!id) return;
@@ -60,6 +67,27 @@ export function DisSeansKarti() {
     } catch (h) { setHata(hataMetni(h)) }
   }, [id]);
   useEffect(() => { void yukle() }, [yukle]);
+  const paketleriYukle = useCallback(async () => {
+    const sn = kart?.seans; if (!sn) return;
+    try {
+      const bugun = new Date().toISOString().slice(0, 10);
+      const y = sn.belgeId ? await api.sterilIzleme({ belgeId: sn.belgeId }) : await api.sterilIzleme({ tarafId: sn.hastaId, bas: bugun, bit: bugun });
+      setPaketler(y.satirlar);
+    } catch { setPaketler([]) /* steril modülü / yetkisi yoksa kutu boş kalır */ }
+  }, [kart?.seans]);
+  useEffect(() => { void paketleriYukle() }, [paketleriYukle]);
+  const paketOkut = async (zorla = false) => {
+    const sn = kart?.seans; const kod = paketBarkod.trim(); if (!sn || !kod) return;
+    await guvenli(async () => {
+      try {
+        const y = await api.sterilOkut({ barkod: kod, tarafId: sn.hastaId, belgeId: sn.belgeId, hekimId: sn.hekimId, unite: sn.unit, zorla });
+        mesaj(y.mesaj); setPaketBarkod(''); await paketleriYukle();
+      } catch (h) {
+        if (!zorla && h instanceof ApiHatasi && (h.hata.engel as { kod?: string } | undefined)?.kod === 'KARANTINA' && await onay('Paket karantinada (biyolojik sonuç bekleniyor). Yine de kullanılsın mı?')) await paketOkut(true);
+        else throw h;
+      }
+    });
+  };
   useEffect(() => { const t = setInterval(() => setTik(x => x + 1), 1000); return () => clearInterval(t) }, []);
 
   const s = kart?.seans;
@@ -88,6 +116,13 @@ export function DisSeansKarti() {
     if (!kart) return;
     const tamam = kart.islemler.filter(i => i.tamamlandi).length, suren = kart.islemler.filter(i => !i.tamamlandi && i.planSatirId).length;
     if (!await onay(`Seans bitirilsin mi? ${tamam} işlem yapıldı olur (ücret + odontogram), ${suren} plan satırı bir seans ilerler.`)) return;
+    // STERİL PAKET OKUTMA KURALI (kurum ayarı steril.kurallar.seansOkutma): uyari / engel / serbest.
+    if (paketler.length === 0) {
+      let kural = 'serbest';
+      try { kural = (await api.sterilKurallar()).seansOkutma ?? 'serbest' } catch { /* modül yok */ }
+      if (kural === 'engel') { mesaj('Bu seansta steril paket okutulmadı; kurum kuralı seansı kapatmayı engelliyor (Malzeme & sarf › Kullanılan paketler).'); return }
+      if (kural === 'uyari' && !await onay('Bu seansta steril paket okutulmadı. Yine de seans bitirilsin mi?')) return;
+    }
     await guvenli(async () => {
       const y = await api.disSeansBitir(id);
       mesaj(`Seans bitti · ${y.yapilan} tamamlandı · ${y.ilerleyen} ilerledi${y.ucret ? ` · ücret ${para.format(y.ucret)}` : ''}${y.uyari ? ` — ${y.uyari}` : ''}`);
@@ -273,7 +308,21 @@ export function DisSeansKarti() {
 
       {sekme === 'sarf' && (
         <div className="ds-grp" style={{ margin: 10 }}>
-          <div className="ds-gb">{c('Malzeme & sarf')}<span className="ds-sp sonuk">işlem seti (hizmet_sarf_seti) otomatik düşüm sonraki sürümde</span></div>
+          <div className="ds-gb">{c('🧪 Sterilizasyon · kullanılan paketler')}<span className="ds-sp sonuk">{paketler.length} paket · barkod okutunca hasta / başvuru / hekim / ünite bağlanır</span></div>
+          {yazar && (
+            <div className="ds-hdr" style={{ padding: '8px 10px', gridTemplateColumns: '1fr auto' }}>
+              <div><label>Paket barkodu (P-…) ya da set barkodu</label><input className="inp" value={paketBarkod} onChange={e => setPaketBarkod(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); void paketOkut() } }} placeholder="📷 okut" autoComplete="off" /></div>
+              <div><label>&nbsp;</label><button className="d bir" onClick={() => void paketOkut()}>Okut</button></div>
+            </div>
+          )}
+          <div className="ds-dg"><table>
+            <thead><tr><th>Saat</th><th>Paket</th><th>İçerik</th><th>Döngü</th><th>Okutan</th><th className="orta">Bio</th></tr></thead>
+            <tbody>
+              {paketler.map(x => <tr key={x.id}><td>{tarihSaat(x.zaman)}</td><td>{x.paket_barkod}</td><td>{x.birim_adi}</td><td>{x.cihaz_adi} #{x.dongu_no}</td><td>{x.okutan_adi}</td><td className="orta">{x.bio_sonuc === 2 ? <span className="ds-kir">POZİTİF</span> : x.bio_sonuc === 3 ? 'bekliyor' : x.bio_sonuc === 1 ? 'negatif' : '—'}</td></tr>)}
+              {paketler.length === 0 && <tr><td colSpan={6} className="sonuk">{c('Bu seansta paket okutulmadı.')}</td></tr>}
+            </tbody>
+          </table></div>
+          <div className="ds-gb" style={{ marginTop: 10 }}>{c('Malzeme & sarf')}<span className="ds-sp sonuk">işlem seti (hizmet_sarf_seti) otomatik düşüm sonraki sürümde</span></div>
           <div className="ds-dg"><table>
             <thead><tr><th>Malzeme</th><th className="sag">Miktar</th><th>Birim</th><th className="orta">Kaynak</th><th className="sag">Maliyet</th></tr></thead>
             <tbody>
