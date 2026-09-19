@@ -15433,3 +15433,38 @@ görünmezler; yetkileri de düşürüldü.
 Portal menüsüne kurum türü için iki etiket: **Firmam**, **Çalışanlarım**.
 
 xUnit 485/485 (2 yeni kapsam testi), vitest 696/696.
+
+## 831/832 — Onay basamak yetkileri kurulu rollere + tıbbi yönetim rolleri
+
+**831:** Şablonlara dağıtılan onay yetkileri kurulu rollere inmiyordu (şablon
+var olan rolü ezmez; "Yetkileri şablona hizala" ise elle verilmiş yetkileri
+siliyor). Bu göç yalnız **eksik onay yetkisini ekler** - hiçbir şey silmez,
+rol yoksa atlar, varsa dokunmaz. 14 yetki eklendi. Sonunda **sahipsiz basamak
+kaldıysa uyarı basar** - sessiz bırakmak, talebin neden beklediğini
+gizlerdi.
+
+İki basamak sahipsiz çıktı ve sebebi şablon süzgeciydi:
+- `satinalma.onay_satinalma`: `satinalma` modülü matriste **yalnız hastanede**
+  açık ama Satınalma Sorumlusu rolü yalnız `erp` tipinde öneriliyordu - yani
+  modülün açık olduğu tek kurumda rol hiç listelenmiyordu. Tipler
+  `erp + tip_merkezi + hastane` oldu (modül kapısı zaten koruyor).
+- `demirbas.onarim_onay_teknik`: `servis` modülü `kurum_tipi_modul`
+  matrisinde **hiç tanımlı değil**, bu yüzden Teknik Servis Sorumlusu her
+  kurulumda listeden düşüyordu. Şablon modülsüz bırakıldı; ekranları zaten
+  `servis`/`demirbas` yetkileri koruyor.
+
+**Üç yeni rol** (kullanıcı: *"Başhemşire ve Başhekim ve Başhekim Yardımcısı
+ekle rol olarak"*): Başhekim (tıbbi hizmetin tamamı + hekim kadrosu + kalite
+hedefi + prim onayı + doküman onayı), Başhekim Yardımcısı (aynı ekranlar,
+kurum çapında imza yok), Başhemşire (hemşire kadrosu, yatan/ameliyathane
+hemşirelik akışı, sarf). Üçü de **birim âmiri** basamağını taşır.
+
+**832:** Roller kurulduktan sonra tarayıcıda denendi, "Ameliyat Talepleri"
+açılmadı - şablonda `ameliyathane.talep`/`salon` yoktu. Şablon düzeltildi,
+kurulu rollere eksik 7 yetki 831 deseniyle eklendi.
+
+Tarayıcı doğrulaması (Başhekim hesabı): muayene · yatan · ameliyat · ameliyat
+talep/salon · klinik gösterge · personel · hakediş · prim planı · onay kutusu
+**açık**; kasa ve muhasebe fişi **kapalı**.
+
+xUnit 485/485.

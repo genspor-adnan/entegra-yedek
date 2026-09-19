@@ -173,7 +173,12 @@ public static class StandartRolUclari
         // ERP rolleri de kendi modullerine bagli (795): stok modulu kapaliysa
         //   depo sorumlusu onerilmez.
         ["erp_satis"] = "erp_satis", ["erp_alis"] = "satinalma",
-        ["erp_depo"] = "stok", ["erp_uretim"] = "uretim", ["erp_servis"] = "servis",
+        ["erp_depo"] = "stok", ["erp_uretim"] = "uretim",
+        // `erp_servis` MODULSUZ (831): `servis` modulu `kurum_tipi_modul`
+        //   matrisinde HIC tanimli degil - hicbir tipte "acik" sayilmadigi
+        //   icin rol her kurulumda listeden dusuyordu ve demirbas onariminin
+        //   teknik imzasi sahipsiz kaliyordu. Ekranlar zaten `servis` /
+        //   `demirbas` yetkileriyle korunuyor.
         ["erp_ik"] = "ik", ["ik_personel"] = "ik",
         // Eczaci ve teknisyen eczane modulune bagli; acil hekimi acile.
         ["eczaci"] = "eczane", ["eczane_teknisyen"] = "eczane",
@@ -208,6 +213,78 @@ public static class StandartRolUclari
         new("hekim", "Doktor", "Muayene, tanı, istem, reçete ve rapor; kendi hakedişi.", ["muayenehane", "tip_merkezi", "hastane"], K(HekimTemel)),
         new("hemsire", "Hemşire", "Vital, enjeksiyon, pansuman, numune; muayene kaydına yardım.", ["tip_merkezi", "hastane", "dal_ftr"],
             K(T("hasta"), Y("muayene"), T("randevu"), Y("lab.numune"), T("lab"), Y("onam"), T("katalog"), T("belge"))),
+        // ---- TIBBI YONETIM (kullanici: "Başhemşire ve Başhekim ve Başhekim
+        //      Yardımcısı ekle rol olarak").
+        //
+        //      UCU DE HEKIM/HEMSIRENIN ISINI YAPMAYA DEVAM EDER, USTUNE
+        //      KADRO VE AKIS YONETIMI ALIR. Ayrimi "kimin isini imzaliyor"
+        //      belirliyor:
+        //        Bashekim            : tibbi hizmetin tamami + hekim kadrosu
+        //                              + klinik kalite hedefi + prim onayi
+        //        Bashekim Yardimcisi : ayni ekranlar, KURUM CAPINDA IMZA YOK
+        //                              (prim onayi ve kalite kesinlestirme
+        //                              bashekimde kalir)
+        //        Bashemsire          : hemsire kadrosu, calisma plani, yatan
+        //                              ve ameliyathane hemsirelik akisi
+        //
+        //      Ucu de BIRIM AMIRIDIR: izin/avans/masraf zincirinin ilk imzasi
+        //      (738, sahip_turu 3 - kimin talebini imzalayacagini kadro agaci
+        //      soyler, rol yalnizca "imzalayabilir" der).
+        new("bashekim", "Başhekim",
+            "Tıbbi hizmetin tamamı: hekim kadrosu ve çalışma planı, poliklinik/yatan/ameliyathane akışı, klinik kalite hedefi, prim onayı ve ekibinin izin imzası.",
+            ["tip_merkezi", "hastane"],
+            K([.. HekimTemel,
+               // Kadro ve plan: kimin hangi gun calistigi baShekimin isi.
+               // Bölüm/Görev ekranı da `personel` yetkisiyle açılır (ayrı kod yok).
+               Y("personel"), Y("randevu.plan"),
+               // Klinik akisin tamami - yatan, ameliyathane, acil.
+               Y("yatan"), A("yatan.kabul"), A("yatan.taburcu"), A("yatan.nakil"),
+               A("yatan.order.imza"), Y("ameliyathane"), Y("ameliyathane.plan"),
+               Y("ameliyathane.talep"), T("ameliyathane.salon"),
+               A("ameliyathane.not_imzala"), A("ameliyathane.iptal"),
+               T("acil"), T("acil.pano"),
+               // Kalite: hedefi belirleyen ve donemi kesinlestiren imza.
+               H("klinik_kalite"), H("klinik_kalite.%"), A("klinik_kalite.%"),
+               // Hakedis: hekim primini onaylayan tibbi imza.
+               T("prim"), A("prim.onayla"),
+               // Birim amiri basamagi.
+               T("ik.izin"), T("ik.avans"), T("ik.masraf"),
+               A("ik.izin_onay_amir"), A("ik.avans_onay_amir"), A("ik.masraf_onay_amir"),
+               T("dokuman.onayla"), A("dokuman.onay")])),
+        new("bashekim_yardimcisi", "Başhekim Yardımcısı",
+            "Başhekimin ekranları; kurum çapında imza yok - prim onayı ve kalite dönemini kesinleştirme başhekimde kalır.",
+            ["tip_merkezi", "hastane"],
+            K([.. HekimTemel,
+               // Bölüm/Görev ekranı da `personel` yetkisiyle açılır (ayrı kod yok).
+               Y("personel"), Y("randevu.plan"),
+               Y("yatan"), A("yatan.kabul"), A("yatan.taburcu"), A("yatan.nakil"),
+               A("yatan.order.imza"), Y("ameliyathane"), Y("ameliyathane.plan"),
+               Y("ameliyathane.talep"), T("ameliyathane.salon"),
+               T("acil"), T("acil.pano"),
+               // KALITE: veriyi gorur ve hesaplatir; HEDEF ve KESINLESTIRME
+               //   bashekimin imzasi (ayni gerekce Kalite Gorevlisi'nde de var).
+               Y("klinik_kalite"), Y("klinik_kalite.olgu"), T("klinik_kalite.donem"),
+               A("klinik_kalite.hesapla"),
+               T("prim.kendi"),
+               T("ik.izin"), T("ik.avans"), T("ik.masraf"),
+               A("ik.izin_onay_amir"), A("ik.avans_onay_amir"), A("ik.masraf_onay_amir")])),
+        new("bashemsire", "Başhemşire",
+            "Hemşire kadrosu ve çalışma planı, yatan hasta ve ameliyathane hemşirelik akışı, sarf ve sterilizasyon; ekibinin izin imzası.",
+            ["tip_merkezi", "hastane"],
+            K(T("hasta"), Y("muayene"), T("randevu"), Y("randevu.plan"),
+              Y("lab.numune"), T("lab"), T("lab.sonuc"), Y("onam"), T("katalog"), T("belge"),
+              // Yatan ve ameliyathane: hemsirelik akisinin kendisi.
+              Y("yatan"), Y("yatan.izlem"), Y("yatan.order"), T("yatan.yatak"),
+              Y("ameliyathane"), Y("ameliyathane.plan"), Y("ameliyathane.salon"),
+              T("ameliyathane.talep"), A("ameliyathane.stok_dus"),
+              // Kadro: hemsire kadrosu ve nobet plani.
+              Y("personel"),
+              // Sarf ve sterilizasyon deposu.
+              Y("stok"), T("depo"), T("uts"),
+              T("klinik_kalite.olgu"),
+              // Birim amiri basamagi.
+              T("ik.izin"), T("ik.avans"), T("ik.masraf"),
+              A("ik.izin_onay_amir"), A("ik.avans_onay_amir"), A("ik.masraf_onay_amir"))),
         new("muhasebe", "Muhasebe / Finans", "Fatura, kasa-banka, dönem sonlandırma, kesinti ve itiraz.", Hepsi, K(MuhasebeTemel)),
         new("muhasebe_sorumlu", "Mali İşler Müdürü",
             "Muhasebenin tüm işleri + iskonto talebinin mali imzası.", Hepsi,
@@ -349,9 +426,15 @@ public static class StandartRolUclari
               H("e_belge"), A("belge.kesinlestir"), A("belge.donustur"), A("ebelge.%"),
               T("stok"), T("hizmet"), T("fiyat_listesi"), T("depo"), T("kasa_islem"),
               T("mali_hareket"), A("basvuru.iskonto"))),
+        // TIPLER GENISLETILDI (831): `satinalma` modulu matriste YALNIZ
+        //   hastanede acik; rol ise yalniz "erp" tipinde oneriliyordu - yani
+        //   modulun acik oldugu tek kurumda Satinalma Sorumlusu hic
+        //   listelenmiyordu ve `satinalma.onay_satinalma` basamagi sahipsiz
+        //   kaliyordu. Modul kapisi (`SablonModul`) zaten koruyor: modulu
+        //   kapali kurumda rol yine cikmaz.
         new("erp_alis", "Satınalma Sorumlusu",
             "Talep, teklif, sipariş, mal kabul ve tedarikçi faturası; bütçe ve sözleşme takibi.",
-            ["erp"],
+            ["erp", "tip_merkezi", "hastane"],
             K(Y("satinalma"), Y("satinalma.talep"), Y("satinalma.teklif"), Y("satinalma.siparis"),
               Y("satinalma.kabul"), Y("satinalma.fatura"), Y("satinalma.tedarikci"),
               T("satinalma.butce"), Y("satinalma.sozlesme"),
@@ -369,8 +452,9 @@ public static class StandartRolUclari
             ["erp"],
             K(Y("uretim"), Y("stok"), Y("depo"), T("belge"), T("hizmet"), T("demirbas"))),
         new("erp_servis", "Teknik Servis Sorumlusu",
-            "Servis kaydı, cihaz ve sözleşme takibi; müşteri ve stok görür.",
-            ["erp"],
+            "Servis kaydı, cihaz ve sözleşme takibi; müşteri ve stok görür. "
+            + "Demirbaş onarımının teknik imzası bu roldedir.",
+            ["erp", "tip_merkezi", "hastane"],
             K(Y("servis"), Y("servis.cihaz"), Y("servis.sozlesme"), Y("demirbas"),
               Y("demirbas.isemri"), Y("demirbas.ariza"), Y("demirbas.bakim"),
               T("cari"), T("stok"), T("belge"),
