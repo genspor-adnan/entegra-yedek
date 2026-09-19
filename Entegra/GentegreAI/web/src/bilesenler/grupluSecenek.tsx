@@ -11,6 +11,7 @@
  * uydurma bir başlık altında kaybolmasın.
  */
 import { Fragment } from 'react';
+import { c } from '../dil/ceviri';
 
 export function grupluSecenekler(
   secenekler: [string, string][],
@@ -26,10 +27,11 @@ export function grupluSecenekler(
   const basliklar = [...gruplu.keys()].sort((a, b) => a.localeCompare(b, 'tr'));
   return (
     <>
-      {grupsuz.map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+      {grupsuz.map(([k, v]) => <option key={k} value={k}>{c(v, 'kod')}</option>)}
       {basliklar.map(b => (
-        <optgroup key={b} label={b}>
-          {(gruplu.get(b) ?? []).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+        <optgroup key={b} label={c(b, 'kod')}>
+          {(gruplu.get(b) ?? []).map(([k, v]) =>
+            <option key={k} value={k}>{c(v, 'kod')}</option>)}
         </optgroup>
       ))}
       <Fragment />

@@ -273,7 +273,8 @@ export function alanCizici(b: AlanCizimBaglami) {
             {/* GRUPLU (848): bolum basliklari altinda toplanir. */}
             {a.kodGrup
               ? grupluSecenekler(secenekler, a.kodGrup)
-              : secenekler.map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+              : secenekler.map(([k, v]) =>
+                  <option key={k} value={k}>{c(v, 'kod')}</option>)}
           </select>
         );
       })() : telefonAlaniMi(a.ad) ? (

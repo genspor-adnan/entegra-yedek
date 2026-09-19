@@ -18,7 +18,7 @@
  *            gibi kodun kendisidir - sunucu cümlesini değiştirince çeviri
  *            kopmasın.
  */
-export type Kapsam = 'menu' | 'etiket' | 'hata';
+export type Kapsam = 'menu' | 'etiket' | 'hata' | 'kod';
 
 type Sozluk = Record<string, Record<string, string>>;
 
@@ -76,6 +76,10 @@ export async function ceviriYukle(dil: number): Promise<void> {
 /** Sözlükte birebir arama (ikon/kısayol soyulmuş metin için). */
 function bul(m: string, kapsam: Kapsam): string | undefined {
   if (kapsam === 'hata') return sozluk.hata?.[m];
+  // KOD DEGERI (852): "Beklemede", "İşe giriş" gibi durum/tur adlari. Kendi
+  //   kapsami var cunku ayni Turkce kelime etikette baska anlama gelebilir;
+  //   karsiligi yoksa etikete duser - cogu deger orada zaten var.
+  if (kapsam === 'kod') return sozluk.kod?.[m] ?? sozluk.etiket?.[m];
   return sozluk[kapsam]?.[m]
     // Menü adı etiket sözlüğünde de olabilir (ör. "Kasa" hem grup hem etiket).
     ?? sozluk[kapsam === 'menu' ? 'etiket' : 'menu']?.[m];

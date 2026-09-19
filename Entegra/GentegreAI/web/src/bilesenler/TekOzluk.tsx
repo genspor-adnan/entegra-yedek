@@ -62,7 +62,7 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk, isBilgiEk }
                 {yoneticiAlan?.kodlar && (yoneticiAlan.kodGrup
                   ? grupluSecenekler(Object.entries(yoneticiAlan.kodlar), yoneticiAlan.kodGrup)
                   : Object.entries(yoneticiAlan.kodlar).map(([k, v]) =>
-                      <option key={k} value={k}>{v}</option>))}
+                      <option key={k} value={k}>{c(v, 'kod')}</option>))}
               </select>
             </label>
           </div>
@@ -72,7 +72,7 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk, isBilgiEk }
               <select value={String(satir.calismaSekli ?? '')} disabled={saltOkunur}
                 onChange={e => degis({ calismaSekli: e.target.value })}>
                 <option value="">—</option>
-                {calismaSekliAlan?.kodlar && Object.entries(calismaSekliAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                {calismaSekliAlan?.kodlar && Object.entries(calismaSekliAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{c(v, 'kod')}</option>)}
               </select>
             </label>
             <label className="alan tip-kod">
@@ -80,7 +80,7 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk, isBilgiEk }
               <select value={String(satir.vardiyaTuru ?? '')} disabled={saltOkunur}
                 onChange={e => degis({ vardiyaTuru: e.target.value })}>
                 <option value="">—</option>
-                {vardiyaTuruAlan?.kodlar && Object.entries(vardiyaTuruAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                {vardiyaTuruAlan?.kodlar && Object.entries(vardiyaTuruAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{c(v, 'kod')}</option>)}
               </select>
             </label>
           </div>
@@ -90,7 +90,7 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk, isBilgiEk }
               <select value={String(satir.sozlesmeTuru ?? '')} disabled={saltOkunur}
                 onChange={e => degis({ sozlesmeTuru: e.target.value })}>
                 <option value="">—</option>
-                {sozlesmeTuruAlan?.kodlar && Object.entries(sozlesmeTuruAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                {sozlesmeTuruAlan?.kodlar && Object.entries(sozlesmeTuruAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{c(v, 'kod')}</option>)}
               </select>
             </label>
             <label className="alan tip-kod">
@@ -98,7 +98,7 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk, isBilgiEk }
               <select value={String(satir.denemeSuresi ?? '')} disabled={saltOkunur}
                 onChange={e => degis({ denemeSuresi: e.target.value })}>
                 <option value="">—</option>
-                {denemeSuresiAlan?.kodlar && Object.entries(denemeSuresiAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                {denemeSuresiAlan?.kodlar && Object.entries(denemeSuresiAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{c(v, 'kod')}</option>)}
               </select>
             </label>
           </div>

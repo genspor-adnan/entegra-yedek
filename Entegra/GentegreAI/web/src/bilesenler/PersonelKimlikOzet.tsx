@@ -191,7 +191,7 @@ export function PersonelKimlikOzet({
                   value={String(satir.cinsiyet ?? '')} disabled={saltOkunur}
                   onChange={e => ozlukDegis({ cinsiyet: e.target.value })}>
                   <option value="">-</option>
-                  {cinsiyetAlan?.kodlar && Object.entries(cinsiyetAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                  {cinsiyetAlan?.kodlar && Object.entries(cinsiyetAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{c(v, 'kod')}</option>)}
                 </select>
               </label>
               {medeniHalAlan && (
@@ -200,7 +200,7 @@ export function PersonelKimlikOzet({
                   <select value={String(satir.medeniHal ?? '')} disabled={saltOkunur}
                     onChange={e => ozlukDegis({ medeniHal: e.target.value })}>
                     <option value="">-</option>
-                    {medeniHalAlan.kodlar && Object.entries(medeniHalAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                    {medeniHalAlan.kodlar && Object.entries(medeniHalAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{c(v, 'kod')}</option>)}
                   </select>
                 </label>
               )}
@@ -212,7 +212,7 @@ export function PersonelKimlikOzet({
                   <select value={String(satir.meslek ?? '')} disabled={saltOkunur}
                     onChange={e => ozlukDegis({ meslek: e.target.value })}>
                     <option value="">-</option>
-                    {meslekAlan.kodlar && Object.entries(meslekAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                    {meslekAlan.kodlar && Object.entries(meslekAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{c(v, 'kod')}</option>)}
                   </select>
                 </label>
               )}
@@ -222,7 +222,7 @@ export function PersonelKimlikOzet({
                   value={String(satir.kanGrubu ?? '')} disabled={saltOkunur}
                   onChange={e => ozlukDegis({ kanGrubu: e.target.value })}>
                   <option value="">-</option>
-                  {kanGrubuAlan?.kodlar && Object.entries(kanGrubuAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                  {kanGrubuAlan?.kodlar && Object.entries(kanGrubuAlan.kodlar).map(([k, v]) => <option key={k} value={k}>{c(v, 'kod')}</option>)}
                 </select>
               </label>
             </div>
@@ -283,7 +283,7 @@ export function PersonelKimlikOzet({
                       onChange={e => ozlukDegis({ yabanciHastaTuru: e.target.value })}>
                       <option value="">-</option>
                       {yabanciTurAlan.kodlar && Object.entries(yabanciTurAlan.kodlar)
-                        .map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                        .map(([k, v]) => <option key={k} value={k}>{c(v, 'kod')}</option>)}
                     </select>
                   </label>
                 )}
@@ -326,7 +326,7 @@ export function PersonelKimlikOzet({
                                 onChange={e => onSubeDegis(e.target.value)}>
                           <option value="">-</option>
                           {subeAlan.kodlar && Object.entries(subeAlan.kodlar)
-                            .map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                            .map(([k, v]) => <option key={k} value={k}>{c(v, 'kod')}</option>)}
                         </select>
                       </label>
                     ) : undefined} />

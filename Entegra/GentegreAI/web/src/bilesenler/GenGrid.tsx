@@ -758,7 +758,7 @@ export function GenGrid({ kaynak, baslik, yol, geriYolu, onGeri, sabitFiltre, to
                           onChange={e => { setKodSuzgecDeger(e.target.value); setSayfa(1) }}>
                     <option value="">{kodSuzgeci.etiket}</option>
                     {Object.entries(kodlar).map(([k, v]) => (
-                      <option key={k} value={k}>{v}</option>
+                      <option key={k} value={k}>{cev(v, 'kod')}</option>
                     ))}
                   </select>
                   {kodSuzgecDeger !== '' && (

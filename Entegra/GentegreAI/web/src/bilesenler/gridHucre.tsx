@@ -34,7 +34,9 @@ export function durumRozeti(deger: unknown, kolon: KolonMeta) {
     : null;
   if (aktifMi === null) return null;
   return (
-    <span className={`rozet ${aktifMi ? 'ok' : 'hata'}`}>{aktifMi ? 'Aktif' : 'Pasif'}</span>
+    <span className={`rozet ${aktifMi ? 'ok' : 'hata'}`}>
+      {c(aktifMi ? 'Aktif' : 'Pasif', 'kod')}
+    </span>
   );
 }
 
@@ -272,7 +274,10 @@ export function rozetHucre(deger: unknown, kolon: KolonMeta) {
   //   istendigi halde duz metinden ayirt edilemiyordu (kullanici).
   const sinif = ROZET_SINIFI[metin]
     ?? ROZET_DESENI.find(d => d.desen.test(metin))?.sinif ?? 'gri';
-  return <span className={`rozet ${sinif}`}>{metin}</span>;
+  // ROZET METNI DILE GORE (852): "Beklemede" / "Tamamlandı" gibi durum
+  //   adlari kod degeridir - RENK Turkce metinden cozulur (sozluk anahtari
+  //   da o), yalniz GOSTERIM cevrilir.
+  return <span className={`rozet ${sinif}`}>{c(metin, 'kod')}</span>;
 }
 
 /** "İçerik" penceresi (ör. islem-log > bilgi) - JSON ise okunakli bicimde, degilse duz metin. */

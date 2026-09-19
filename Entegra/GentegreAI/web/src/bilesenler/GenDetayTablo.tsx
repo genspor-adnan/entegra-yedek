@@ -1448,7 +1448,7 @@ export function GenDetayTablo({ meta, durum, saltOkunur, hatalar, onDegis, ikonl
                       {a.kodGrup
                         ? grupluSecenekler(alanKodlari(a), a.kodGrup)
                         : alanKodlari(a).map(([k, v]) =>
-                            <option key={k} value={k}>{v}</option>)}
+                            <option key={k} value={k}>{c(v, 'kod')}</option>)}
                     </select>
                   ) : a.tip === 'zaman' ? (
                     // Zaman alani (randevu baslangici) ham "2026-09-01T10:00:00"
