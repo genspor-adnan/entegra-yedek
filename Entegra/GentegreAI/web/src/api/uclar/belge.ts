@@ -16,9 +16,21 @@ export const belgeUclari = {
     istek<KurumProfilYaniti>(`/api/kurum-profil${sube === undefined ? '' : `?sube=${sube}`}`),
   /** Profili yazar - verilmeyen alanlar mevcut degerini korur. */
   /** Standart roller (712): kurum tipinin şablonları ve kurulum. */
-  standartRoller: (kurumTipi?: string) =>
-    istek<{ kurumTipi: string; roller: { kod: string; ad: string; amac: string; mevcut: boolean; rolId?: number | null; aktif?: boolean | null; yetkiSayisi: number; ekran: number; aksiyon: number }[] }>(
-      `/api/kurum-profil/standart-roller${kurumTipi ? `?kurumTipi=${encodeURIComponent(kurumTipi)}` : ''}`),
+  /**
+   * `tumTipler` (agac gorunumu): tipe uymayan sablonlar da listelenir ve
+   * `tipUygun: false` ile isaretlenir - gizlemeyi EKRAN secer.
+   */
+  standartRoller: (kurumTipi?: string, tumTipler?: boolean) =>
+    istek<{ kurumTipi: string; bolumler: string[];
+            roller: { kod: string; ad: string; amac: string; mevcut: boolean;
+                      rolId?: number | null; aktif?: boolean | null;
+                      modul?: string | null; modulKapali: boolean; tipUygun: boolean;
+                      bolum: string; ust?: string | null; sira: number;
+                      yetkiSayisi: number; ekran: number; aksiyon: number }[] }>(
+      `/api/kurum-profil/standart-roller?${new URLSearchParams({
+        ...(kurumTipi ? { kurumTipi } : {}),
+        ...(tumTipler ? { tumTipler: 'true' } : {}),
+      })}`),
   standartRolleriKur: (g: { kurumTipi?: string; kodlar?: string[]; guncelle?: boolean }) =>
     gonder<{ kurumTipi: string; kuruldu: string[]; guncellendi: string[]; atlandi: string[] }>('/api/kurum-profil/standart-roller', g),
   /**
@@ -27,7 +39,7 @@ export const belgeUclari = {
    * yuzden burada sablon suzgeci UYGULANMAZ.
    */
   profilRolleri: (kurumTipi?: string) =>
-    istek<{ kurumTipi: string; yazili: boolean; roller: ProfilRolu[] }>(
+    istek<{ kurumTipi: string; yazili: boolean; bolumler: string[]; roller: ProfilRolu[] }>(
       `/api/kurum-profil/standart-roller/profil-rolleri${
         kurumTipi ? `?kurumTipi=${encodeURIComponent(kurumTipi)}` : ''}`),
   /** Profili yazar - verilmeyen alanlar mevcut degerini korur. `roller` +

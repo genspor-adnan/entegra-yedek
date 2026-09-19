@@ -139,6 +139,126 @@ public static class StandartRolUclari
     ];
 
     /// <summary>
+    /// KADRO AĞACI (kullanıcı: *"Kurum Profili'nde rol seçim gridini de bu
+    /// ağaç şekline çevir ve buradaki tüm roller olsun"*).
+    ///
+    /// <para>Rol kataloğunda hiyerarşi alanı YOK - yetki düzdür ve öyle
+    /// kalmalı: "üstünün yetkisi altını kapsar" kuralı, bir rolü değiştirince
+    /// altındakileri sessizce değiştirirdi. Buradaki ağaç <b>yalnız
+    /// GÖRÜNÜM</b>: kadro düzenini anlatır, yetkiye karışmaz. Kimin kimin
+    /// talebini imzalayacağını `taraf_personel.yonetici_taraf_id` söyler
+    /// (738, sahip_turu 3).</para>
+    ///
+    /// <para>Tek kaynak SUNUCUDADIR: ekran da, `Ekranlar/Ayarlar/rol_agaci.html`
+    /// mockup'ı da bu listeyi okur. Haritada adı geçmeyen rol (kurumun kendi
+    /// açtığı) "Diğer" bölümüne düşer - gizlenmez.</para>
+    /// </summary>
+    private sealed record KadroYeri(string Bolum, string? Ust, int Sira);
+
+    private static readonly Dictionary<string, KadroYeri> SablonKadro = new(StringComparer.Ordinal)
+    {
+        // -------------------------------------------------------- yönetim ----
+        ["ust_yonetim"]          = new("Yönetim", null, 10),
+        ["yonetici_sekreteri"]   = new("Yönetim", "ust_yonetim", 20),
+        ["hastane_muduru"]       = new("Yönetim", "ust_yonetim", 30),
+        ["rapor_goruntuleyici"]  = new("Yönetim", "ust_yonetim", 40),
+        ["birim_amiri"]          = new("Yönetim", "ust_yonetim", 50),
+        // ------------------------------------------------- tıbbi hizmetler ----
+        ["bashekim"]             = new("Tıbbi hizmetler", null, 10),
+        ["bashekim_yardimcisi"]  = new("Tıbbi hizmetler", "bashekim", 20),
+        ["hekim"]                = new("Tıbbi hizmetler", "bashekim_yardimcisi", 30),
+        ["pratisyen_doktor"]     = new("Tıbbi hizmetler", "bashekim_yardimcisi", 40),
+        ["acil_hekimi"]          = new("Tıbbi hizmetler", "bashekim_yardimcisi", 50),
+        ["att"]                  = new("Tıbbi hizmetler", "acil_hekimi", 55),
+        ["dis_hekimi"]           = new("Tıbbi hizmetler", "bashekim_yardimcisi", 60),
+        ["goz_hekimi"]           = new("Tıbbi hizmetler", "bashekim_yardimcisi", 70),
+        ["ftr_uzmani"]           = new("Tıbbi hizmetler", "bashekim_yardimcisi", 80),
+        ["radyolog"]             = new("Tıbbi hizmetler", "bashekim_yardimcisi", 90),
+        ["lab_uzmani"]           = new("Tıbbi hizmetler", "bashekim_yardimcisi", 100),
+        ["isyeri_hekimi"]        = new("Tıbbi hizmetler", "bashekim_yardimcisi", 110),
+        ["anestezi_uzmani"]      = new("Tıbbi hizmetler", "bashekim_yardimcisi", 120),
+        ["teleradyoloji_hekim"]  = new("Tıbbi hizmetler", "bashekim", 130),
+        ["medula_sorumlu"]       = new("Tıbbi hizmetler", "bashekim", 140),
+        // ----------------------------------------------------- hemşirelik ----
+        ["bashemsire"]           = new("Hemşirelik", null, 10),
+        ["hemsire"]              = new("Hemşirelik", "bashemsire", 20),
+        ["yatan_hemsire"]        = new("Hemşirelik", "bashemsire", 30),
+        ["ameliyathane_hemsire"] = new("Hemşirelik", "bashemsire", 40),
+        ["yogun_bakim_hemsire"]  = new("Hemşirelik", "bashemsire", 50),
+        ["enfeksiyon_hemsire"]   = new("Hemşirelik", "bashemsire", 60),
+        ["ebe"]                  = new("Hemşirelik", "bashemsire", 70),
+        ["dis_asistan"]          = new("Hemşirelik", "bashemsire", 80),
+        ["dsp"]                  = new("Hemşirelik", "bashemsire", 90),
+        ["sterilizasyon"]        = new("Hemşirelik", "bashemsire", 100),
+        // ------------------------------------- yardımcı sağlık ve teknik ----
+        ["rad_teknisyen"]        = new("Yardımcı sağlık ve teknik", null, 10),
+        ["lab_teknisyen"]        = new("Yardımcı sağlık ve teknik", null, 20),
+        ["numune_kabul"]         = new("Yardımcı sağlık ve teknik", null, 30),
+        ["goz_teknisyen"]        = new("Yardımcı sağlık ve teknik", null, 40),
+        ["optometrist"]          = new("Yardımcı sağlık ve teknik", null, 50),
+        ["fizyoterapist"]        = new("Yardımcı sağlık ve teknik", null, 60),
+        ["dis_lab_sorumlu"]      = new("Yardımcı sağlık ve teknik", null, 70),
+        ["isg_uzmani"]           = new("Yardımcı sağlık ve teknik", null, 80),
+        ["anestezi_teknisyen"]   = new("Yardımcı sağlık ve teknik", null, 90),
+        ["biyomedikal"]          = new("Yardımcı sağlık ve teknik", null, 100),
+        ["diyetisyen"]           = new("Yardımcı sağlık ve teknik", null, 110),
+        ["psikolog"]             = new("Yardımcı sağlık ve teknik", null, 120),
+        ["sosyal_hizmet"]        = new("Yardımcı sağlık ve teknik", null, 130),
+        // ------------------------------------------------ hasta hizmetleri ----
+        ["kayit_kabul_sorumlu"]  = new("Hasta hizmetleri", null, 10),
+        ["kayit_kabul"]          = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 20),
+        ["vezne"]                = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 30),
+        ["yatis_ofisi"]          = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 40),
+        ["tedavi_danismani"]     = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 50),
+        ["osgb_sekreter"]        = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 60),
+        ["tibbi_sekreter"]       = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 70),
+        ["doktor_sekreteri"]     = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 80),
+        ["hasta_haklari"]        = new("Hasta hizmetleri", "kayit_kabul_sorumlu", 90),
+        ["cagri_sorumlu"]        = new("Hasta hizmetleri", null, 100),
+        ["cagri_ajani"]          = new("Hasta hizmetleri", "cagri_sorumlu", 110),
+        ["sekreter"]             = new("Hasta hizmetleri", null, 120),
+        // ----------------------------------------------------- mali işler ----
+        ["muhasebe_sorumlu"]     = new("Mali işler", null, 10),
+        ["muhasebe"]             = new("Mali işler", "muhasebe_sorumlu", 20),
+        ["medikal_muhasebe"]     = new("Mali işler", "muhasebe_sorumlu", 30),
+        // ------------------------------------------------ idari ve destek ----
+        ["erp_ik"]               = new("İdari ve destek", null, 10),
+        ["ik_personel"]          = new("İdari ve destek", "erp_ik", 20),
+        ["kalite"]               = new("İdari ve destek", null, 30),
+        ["kalite_gorevli"]       = new("İdari ve destek", "kalite", 40),
+        ["bilgi_islem"]          = new("İdari ve destek", null, 50),
+        ["bilgi_islem_personel"] = new("İdari ve destek", "bilgi_islem", 60),
+        ["eczaci"]               = new("İdari ve destek", null, 70),
+        ["eczane_teknisyen"]     = new("İdari ve destek", "eczaci", 80),
+        ["eczane_depo"]          = new("İdari ve destek", "eczaci", 90),
+        ["erp_alis"]             = new("İdari ve destek", null, 100),
+        ["erp_depo"]             = new("İdari ve destek", null, 110),
+        ["erp_servis"]           = new("İdari ve destek", null, 120),
+        ["erp_servis_gorevli"]   = new("İdari ve destek", "erp_servis", 130),
+        ["erp_satis"]            = new("İdari ve destek", null, 140),
+        ["erp_uretim"]           = new("İdari ve destek", null, 150),
+        ["nobetci_mudur"]        = new("İdari ve destek", null, 160),
+        ["sofor"]                = new("İdari ve destek", null, 170),
+        // ---------------------------------------------------------- portal ----
+        ["dis_doktor"]           = new("Portal (kurum dışı)", null, 10),
+        ["dis_istem_kurumu"]     = new("Portal (kurum dışı)", null, 20),
+        ["dis_kurum_yonetici"]   = new("Portal (kurum dışı)", null, 30),
+        ["firma_yetkilisi"]      = new("Portal (kurum dışı)", null, 40),
+        ["hasta_portali"]        = new("Portal (kurum dışı)", null, 50),
+        // ---------------------------------------------------------- sistem ----
+        ["yonetici"]             = new("Sistem", null, 10),
+        ["atanmamis"]            = new("Sistem", null, 20),
+    };
+
+    /// <summary>Bölümlerin ekrandaki sırası; listede olmayan bölüm sona düşer.</summary>
+    public static readonly string[] KadroBolumleri =
+    [
+        "Yönetim", "Tıbbi hizmetler", "Hemşirelik", "Yardımcı sağlık ve teknik",
+        "Hasta hizmetleri", "Mali işler", "İdari ve destek", "Portal (kurum dışı)",
+        "Sistem",
+    ];
+
+    /// <summary>
     /// ŞABLON -> KURUM MODÜLÜ (785, kullanici: "bir de kurum profiline gore
     /// gelebilsin"). Kurum tipi "hangi is kolu" sorusunu, modul "bu kurulumda
     /// acik mi" sorusunu cevaplar: tip merkezi olup dis modulu kapali olan
@@ -783,7 +903,8 @@ public static class StandartRolUclari
         var grup = yol.MapGroup("/api/kurum-profil/standart-roller").WithTags("KurumProfil").RequireAuthorization();
 
         // Önizleme: tipin şablonları + hangileri zaten var.
-        grup.MapGet("/", async (string? kurumTipi, bool? tumModuller, VeriKaynagi veri,
+        grup.MapGet("/", async (string? kurumTipi, bool? tumModuller, bool? tumTipler,
+                                VeriKaynagi veri,
                                 BaglamCozucu cozucu, KurumProfilDeposu profil,
                                 HttpContext ctx, CancellationToken iptal) =>
         {
@@ -806,19 +927,30 @@ public static class StandartRolUclari
             //   dis kurum, hasta) gocle geliyor ve kurum tipi haritasindan da
             //   muaf - onlari "kurulacak kadro" gibi gostermek, kapatilabilir
             //   sanilmalarina yol acardi.
+            // TUM TIPLER (kullanici: "buradaki tüm roller olsun"): agac
+            //   gorunumu kadronun TAMAMINI gosterir; tipe uymayan rol
+            //   `tipUygun = false` ile isaretlenir, gizlenmez. Suzgeci ekran
+            //   yapar - "lab merkezinde dis hekimi gorunmesin" (785) kurali
+            //   VARSAYILAN olarak duruyor, yalniz artik kapatilabiliyor.
             var liste = Sablonlar
-                .Where(s => s.PortalTuru == 0
-                            && (s.Tipler.Contains(tip) || s.Tipler.Contains(TUM)))
+                .Where(s => s.PortalTuru == 0)
                 .Select(s =>
             {
                 var m = mevcut.FirstOrDefault(x => x.kod == s.Kod);
                 var esle = Eslestir(s, yetkiler);
                 var modul = SablonModul.GetValueOrDefault(s.Kod);
+                var kadro = SablonKadro.GetValueOrDefault(s.Kod);
                 return new { s.Kod, s.Ad, s.Amac, mevcut = m is not null, rolId = m?.id, aktif = m?.aktif,
                              modul, modulKapali = modul is not null && !acikModuller.Contains(modul),
+                             tipUygun = s.Tipler.Contains(tip) || s.Tipler.Contains(TUM),
+                             bolum = kadro?.Bolum ?? "", ust = kadro?.Ust, sira = kadro?.Sira ?? 9000,
                              yetkiSayisi = esle.Count, ekran = esle.Count(x => x.tur == 0), aksiyon = esle.Count(x => x.tur == 1) };
-            }).Where(r => tumModuller == true || !r.modulKapali).ToList();
-            return Results.Ok(new { kurumTipi = tip, roller = liste });
+            })
+            .Where(r => (tumTipler == true || r.tipUygun)
+                        && (tumModuller == true || !r.modulKapali))
+            .ToList();
+            return Results.Ok(new { kurumTipi = tip, roller = liste,
+                                    bolumler = KadroBolumleri });
         });
 
         // Kur: seçilen şablonlar (boşsa tipin hepsi). Var olan rol atlanır;
@@ -936,9 +1068,13 @@ public static class StandartRolUclari
                     || ((s.Tipler.Contains(tip) || s.Tipler.Contains(TUM))
                         && (modul is null || acikModuller.Contains(modul)));
                 var kayit = harita.FirstOrDefault(h => h.kod == r.kod);
+                var kadro = SablonKadro.GetValueOrDefault(r.kod);
                 return new
                 {
                     r.id, r.kod, r.ad, r.amac, r.aktif, r.sistem, r.kisi,
+                    // KADRO YERI (ağaç görünümü): haritada olmayan rol - kurumun
+                    //   kendi açtığı - "Diğer" bölümüne düşer, gizlenmez.
+                    bolum = kadro?.Bolum ?? "", ust = kadro?.Ust, sira = kadro?.Sira ?? 9000,
                     sablon = s is not null, modul,
                     modulKapali = modul is not null && !acikModuller.Contains(modul),
                     varsayilan,
@@ -951,6 +1087,7 @@ public static class StandartRolUclari
             }).ToList();
 
             return Results.Ok(new { kurumTipi = tip, roller = liste,
+                                    bolumler = KadroBolumleri,
                                     yazili = harita.Count > 0 });
         });
     }

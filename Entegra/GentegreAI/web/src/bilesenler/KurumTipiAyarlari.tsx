@@ -138,9 +138,18 @@ export function KurumTipiAyarlari() {
    * olup kurulmamis olanlari once KURAR, sonra gecerlilik haritasini yazar.
    */
   const [rolSuzgec, setRolSuzgec] = useState<'tumu' | 'gecerli' | 'sablon'>('tumu');
-  /** Bu tipin kurulmamis sablon rolleri - tabloya "kurulacak" olarak girer. */
+  /**
+   * TIPE UYMAYANLAR DA GORUNSUN (kullanici: "buradaki tüm roller olsun").
+   * Varsayilan KAPALI: 785'teki "lab merkezinde dis hekimi gorunmesin"
+   * kurali duruyor - artik kapatilabiliyor, kaldirilmis degil.
+   */
+  const [tumTipler, setTumTipler] = useState(false);
+  /** Bu tipin kurulmamis sablon rolleri - agaca "kurulacak" olarak girer. */
   const [kurulacakRol, setKurulacakRol] = useState<
-    { kod: string; ad: string; amac: string; ekran: number; aksiyon: number }[]>([]);
+    { kod: string; ad: string; amac: string; ekran: number; aksiyon: number;
+      bolum: string; ust?: string | null; sira: number; tipUygun: boolean }[]>([]);
+  /** Bolum sirasi sunucudan (`KadroBolumleri`). */
+  const [rolBolumleri, setRolBolumleri] = useState<string[]>([]);
   const [rolMesgul, setRolMesgul] = useState(false);
 
   /**
@@ -163,10 +172,12 @@ export function KurumTipiAyarlari() {
     const y = await api.profilRolleri(tip);
     setProfilRol(y.roller);
     setRolYazili(y.yazili);
-    const t = await api.standartRoller(tip);
+    setRolBolumleri(y.bolumler ?? []);
+    const t = await api.standartRoller(tip, true);
     const eksik = t.roller.filter(r => !r.mevcut);
     setKurulacakRol(eksik.map(r => ({
-      kod: r.kod, ad: r.ad, amac: r.amac, ekran: r.ekran, aksiyon: r.aksiyon })));
+      kod: r.kod, ad: r.ad, amac: r.amac, ekran: r.ekran, aksiyon: r.aksiyon,
+      bolum: r.bolum, ust: r.ust, sira: r.sira, tipUygun: r.tipUygun })));
     if (!secimiKoru)
       setRolGecerli(new Set(y.roller.filter(r => r.gecerli || r.kilitli).map(r => r.kod)));
   };
@@ -201,16 +212,94 @@ export function KurumTipiAyarlari() {
    * "bu tipe onerilir" demektir.
    */
   const tumRol = [
-    ...profilRol.map(r => ({ ...r, kurulu: true })),
+    ...profilRol.map(r => ({ ...r, kurulu: true, tipUygun: true })),
     ...kurulacakRol.map(r => ({
       id: 0, kod: r.kod, ad: r.ad, amac: r.amac,
       aktif: false, sistem: false, kisi: 0,
       sablon: true, modul: null as string | null, modulKapali: false,
-      varsayilan: true, gecerli: false, yazili: false, kilitli: false,
-      kurulu: false,
+      varsayilan: r.tipUygun, gecerli: false, yazili: false, kilitli: false,
+      bolum: r.bolum, ust: r.ust, sira: r.sira,
+      kurulu: false, tipUygun: r.tipUygun,
     })),
-  ];
+  ].filter(r => tumTipler || r.kurulu || r.tipUygun);
   const kurulacakSecili = kurulacakRol.filter(r => rolGecerli.has(r.kod)).length;
+
+  /**
+   * AGAC: bolum -> kok roller -> altlar. Hiyerarsi SUNUCUDAN (`SablonKadro`);
+   * haritada yeri olmayan rol "Diger" bolumune, kok olarak duser - gizlenmez.
+   *
+   * Suzgece uymayan bir dugum, ALTI uyuyorsa yine cizilir: ustu gorunmeyen
+   * bir alt rol nerede calistigini soylemez.
+   */
+  type RolDugum = (typeof tumRol)[number] & { alt: RolDugum[] };
+  const rolSuzgecinden = (r: (typeof tumRol)[number]) =>
+    rolSuzgec === 'tumu' ? true
+      : rolSuzgec === 'gecerli' ? rolGecerli.has(r.kod)
+      : r.varsayilan;
+
+  const rolAgaci = (() => {
+    const kok = new Map<string, RolDugum[]>();
+    const dugumler = new Map<string, RolDugum>();
+    for (const r of tumRol) dugumler.set(r.kod, { ...r, alt: [] });
+    for (const d of dugumler.values()) {
+      const ust = d.ust ? dugumler.get(d.ust) : undefined;
+      if (ust) { ust.alt.push(d); continue }
+      const bolum = d.bolum || 'Diğer';
+      kok.set(bolum, [...(kok.get(bolum) ?? []), d]);
+    }
+    const sirala = (l: RolDugum[]): RolDugum[] =>
+      [...l].sort((x, y) => (x.sira ?? 9000) - (y.sira ?? 9000)
+                            || x.ad.localeCompare(y.ad, 'tr'))
+        .map(d => ({ ...d, alt: sirala(d.alt) }));
+    // Suzgec: kendisi VEYA bir alti geciyorsa kalir.
+    const suz = (l: RolDugum[]): RolDugum[] => l
+      .map(d => ({ ...d, alt: suz(d.alt) }))
+      .filter(d => rolSuzgecinden(d) || d.alt.length > 0);
+
+    const sirali = [...(rolBolumleri.length ? rolBolumleri : [...kok.keys()]), 'Diğer'];
+    const sonuc: { bolum: string; ogeler: RolDugum[] }[] = [];
+    for (const bolum of sirali) {
+      if (sonuc.some(x => x.bolum === bolum)) continue;
+      const ogeler = suz(sirala(kok.get(bolum) ?? []));
+      if (ogeler.length) sonuc.push({ bolum, ogeler });
+    }
+    // Sunucunun bolum listesinde olmayan bolumler (yeni eklenmis) sona.
+    for (const [bolum, l] of kok)
+      if (!sonuc.some(x => x.bolum === bolum)) {
+        const ogeler = suz(sirala(l));
+        if (ogeler.length) sonuc.push({ bolum, ogeler });
+      }
+    return sonuc;
+  })();
+
+  /** Bolumdeki TOPLAM rol (alt dallar dahil). */
+  const rolSay = (l: RolDugum[]): number =>
+    l.reduce((n, d) => n + 1 + rolSay(d.alt), 0);
+
+  /** Tek dugum: kutucuk + rozetler + altlar. */
+  const rolDugumu = (d: RolDugum): React.ReactNode => (
+    <li key={d.kod}>
+      <label className={`kt-rol${rolGecerli.has(d.kod) ? ' on' : ''}`
+                        + `${d.kurulu ? '' : ' yeni'}${d.tipUygun ? '' : ' disi'}`}>
+        <input type="checkbox" checked={rolGecerli.has(d.kod)} disabled={d.kilitli}
+               onChange={() => rolCevir(d.kod, d.kilitli)}
+               title={d.kilitli ? 'Bu rol pasife alınamaz' : ''} />
+        <span className="ad">{d.ad}</span>
+        <span className="kod">{d.kod}</span>
+        {d.amac && <span className="amac" title={d.amac}>{d.amac}</span>}
+        {d.kisi > 0 && <span className="rz kisi">{d.kisi} kişi</span>}
+        {d.kilitli && <span className="rz">kilitli</span>}
+        {!d.kurulu && <span className="rz yeni">kurulacak</span>}
+        {!d.tipUygun && <span className="rz" title="Bu kurum tipinde önerilmez">başka tip</span>}
+        {d.kurulu && (d.aktif
+          ? <span className="rz ok">aktif</span>
+          : <span className="rz pas">pasif</span>)}
+        {d.sablon && d.varsayilan && <span className="rz" title="Bu tipe önerilir">✔ şablon</span>}
+        {d.modulKapali && <span className="rz" title={`Modül kapalı: ${d.modul}`}>⊘ modül</span>}
+      </label>
+      {d.alt.length > 0 && <ul className="kt-dal">{d.alt.map(rolDugumu)}</ul>}
+    </li>
+  );
 
   const sablonaHizala = async () => {
     const kodlar = profilRol.filter(r => r.sablon).map(r => r.kod);
@@ -616,12 +705,13 @@ export function KurumTipiAyarlari() {
       </div>
 
       <div className="pnl" hidden={aktif !== 2}>
-        {/* TEK TABLO (kullanici: "2 rol griditini teke düşür.. böyle karışıklık
-            oluyor"): kurulu roller + bu tipin kurulmamış şablonları aynı
-            listede. Kutucuk TEK soruyu sorar - "bu profilde geçerli mi";
-            işaretli olup kurulmamış olanı Kaydet kurar. */}
+        {/* KADRO AĞACI (kullanıcı: "rol seçim gridini de bu ağaç şekline
+            çevir ve buradaki tüm roller olsun"). Mockup:
+            Ekranlar/Ayarlar/rol_agaci.html. Tablo satırları hangi rolün
+            kimin altında olduğunu göstermiyordu; kadro düzeni ancak ağaçta
+            okunuyor. Kutucuk ve Kaydet davranışı DEĞİŞMEDİ. */}
         <div className="grp" style={{ margin: '10px' }}>
-          <div className="gb">Roller — {tipAdi(profil?.kurumTipi) || '—'}
+          <div className="gb">Kadro ağacı — {tipAdi(profil?.kurumTipi) || '—'}
             <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 6, alignItems: 'center' }}>
               <span className="sonuk" style={{ fontSize: 11 }}>
                 {rolGecerli.size}/{tumRol.length} seçili
@@ -633,12 +723,17 @@ export function KurumTipiAyarlari() {
                           className={`d${rolSuzgec === k ? ' bir' : ''}`}
                           onClick={() => setRolSuzgec(k)}>{ad}</button>
                 ))}
+              {/* TİPE UYMAYANLAR: 785'teki süzgeç duruyor, kapatılabiliyor. */}
+              <button type="button" className={`d${tumTipler ? ' bir' : ''}`}
+                      title="Bu kurum tipinde önerilmeyen rolleri de göster"
+                      onClick={() => setTumTipler(v => !v)}>
+                {tumTipler ? '✔ ' : ''}Diğer tiplerin rolleri
+              </button>
               <button className="d" type="button"
                       onClick={() => setRolGecerli(new Set(tumRol
                         .filter(r => r.varsayilan || r.kilitli).map(r => r.kod)))}>
                 ↺ Şablon önerisi
               </button>
-              {/* Yetki hizalama AYRI: elle verilen yetkileri siler, Kaydet'e binmez. */}
               <button className="d" type="button" disabled={rolMesgul}
                       title="Kurulu şablon rollerinin yetkilerini şablonun haline geri çeker"
                       onClick={() => void sablonaHizala()}>🧩 Yetkileri şablona hizala</button>
@@ -647,56 +742,33 @@ export function KurumTipiAyarlari() {
           </div>
           <div className="ic sonuk">
             İşaretli roller bu profilde <b>geçerlidir</b>; işaretsizler <b>pasife</b> alınır
-            (silinmez, kullanıcıları kalır). <b>Kurulacak</b> yazan satır bu kurum tipinin
-            henüz kurulmamış şablon rolüdür: işaretleyip <b>Kaydet</b> derseniz kurulur ve
-            bu profilin roller listesine girer.
+            (silinmez, kullanıcıları kalır). <b>Kurulacak</b> yazan satır henüz kurulmamış
+            şablon rolüdür: işaretleyip <b>Kaydet</b> derseniz kurulur ve bu profilin roller
+            listesine girer. Ağaç kadro düzenini gösterir — <b>yetki hiyerarşik değildir</b>,
+            üstteki rolün yetkisi alttakini kapsamaz.
             {rolYazili ? '' : ' Henüz işaretlenmedi: şu an şablonun önerisi geçerli.'}
           </div>
           {tumRol.length === 0
             ? <div className="ic sonuk">Kurum tipi seçilince roller listelenir.</div>
             : (
-              <div className="ic">
-                <div className="dg"><table>
-                  <thead><tr>
-                    <th className="orta">Geçerli</th><th>Rol</th><th>Amaç</th>
-                    <th className="orta">Kullanıcı</th><th className="orta">Şablon</th><th>Durum</th>
-                  </tr></thead>
-                  <tbody>
-                    {tumRol
-                      .filter(r => rolSuzgec === 'tumu'
-                                || (rolSuzgec === 'gecerli' && rolGecerli.has(r.kod))
-                                || (rolSuzgec === 'sablon' && r.varsayilan))
-                      .map(r => (
-                      <tr key={r.kod} className={rolGecerli.has(r.kod) ? '' : 'sonuk'}>
-                        <td className="orta">
-                          <input type="checkbox" checked={rolGecerli.has(r.kod)}
-                                 disabled={r.kilitli} onChange={() => rolCevir(r.kod, r.kilitli)}
-                                 title={r.kilitli ? 'Bu rol pasife alınamaz' : ''} />
-                        </td>
-                        <td><b>{r.ad}</b> <span className="sonuk">({r.kod})</span>
-                          {r.kilitli && <span className="rz" title="Kurum kendi sistemine girebilsin diye her zaman açık"> kilitli</span>}</td>
-                        <td>{r.amac}</td>
-                        <td className="orta">{r.kurulu ? (r.kisi || '') : ''}</td>
-                        <td className="orta" title={r.modul ? `Modül: ${r.modul}` : ''}>
-                          {r.sablon ? (r.varsayilan ? '✔' : (r.modulKapali ? '⊘' : '–')) : ''}
-                        </td>
-                        <td>{!r.kurulu
-                          ? <span className="rz mavi">kurulacak</span>
-                          : (r.aktif ? <span className="rz ok">aktif</span>
-                                     : <span className="rz">pasif</span>)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table></div>
-                <div className="ic sonuk" style={{ paddingLeft: 0 }}>
-                  Şablon sütunu: ✔ bu tipe önerilir · ⊘ modülü bu kurulumda kapalı ·
-                  – başka tipin rolü · boş = kurumun kendi rolü.
-                </div>
+              <div className="ic kt-agac">
+                {rolAgaci.map(b => (
+                  <div key={b.bolum} className="kt-bolum">
+                    <div className="kt-bolum-ad">{b.bolum}
+                      {/* ALT DALLAR DA SAYILIR: "1 rol" yazan bir bölümün
+                          altında on satır durması sayacı yalancı yapardı. */}
+                      <span className="sonuk">· {rolSay(b.ogeler)} rol</span>
+                    </div>
+                    <ul className="kt-dal kt-kok">{b.ogeler.map(o => rolDugumu(o))}</ul>
+                  </div>
+                ))}
+                {rolAgaci.length === 0 && (
+                  <div className="sonuk">Süzgece uyan rol yok.</div>
+                )}
               </div>
             )}
         </div>
       </div>
-
       <div className="pnl" hidden={aktif !== 3}>
           <div className="hdr k4">
             <div className="fld"><label>Başvuru modeli</label><div className="inp combo">Tek başvuru = tek muayene <span className="sonuk">· tıp merkezi: başvuru altında çoklu hizmet · hastane: yatış</span></div></div>

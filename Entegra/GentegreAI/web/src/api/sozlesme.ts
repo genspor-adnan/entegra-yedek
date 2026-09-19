@@ -939,6 +939,12 @@ export interface ProfilRolu {
   aktif: boolean; sistem: boolean; kisi: number;
   sablon: boolean; modul?: string | null; modulKapali: boolean;
   varsayilan: boolean; gecerli: boolean; yazili: boolean; kilitli: boolean;
+  /**
+   * KADRO YERI (agac gorunumu): bolum adi, ust rolun kodu ve sira. Sunucudan
+   * gelir (`SablonKadro`) - hiyerarsi YETKI degil GORUNUM; haritada olmayan
+   * rol "Diger" bolumune duser.
+   */
+  bolum: string; ust?: string | null; sira: number;
 }
 
 export interface KurumTipiModul { kurumTipi: string; modul: string; varsayilan: number }

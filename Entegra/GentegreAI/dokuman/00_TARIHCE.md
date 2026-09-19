@@ -15596,3 +15596,37 @@ günceller. Şablon ve kadro ağacı mockup'ı da tazelendi.
 Kod `teleradyoloji_hekim` değişmedi (790/833/835/837 ile aynı yol).
 **"(dış)" eki kaldı:** bu rol kurum dışından okuyan radyoloğu anlatıyor,
 ayrımın kendisi bilgi. Şablon ve mockup tazelendi.
+
+## Kurum Profili › Roller: grid → kadro ağacı
+
+Kullanıcı: *"Kurum Profili'nde rol seçim gridini de bu ağaç şekline çevir ve
+buradaki tüm roller olsun"*.
+
+Tablo satırları hangi rolün kimin altında olduğunu göstermiyordu; kadro düzeni
+ancak ağaçta okunuyor. Kutucuk ve **Kaydet davranışı değişmedi** - işaretli
+roller geçerli, işaretli-kurulmamış olanlar Kaydet'te kurulur.
+
+**Hiyerarşi sunucuda, tek kaynak:** `SablonKadro` (rol kodu → bölüm, üst rol,
+sıra) + `KadroBolumleri`. `profil-rolleri` ve `standart-roller` uçları bu
+bilgiyi döndürüyor; `Ekranlar/Ayarlar/rol_agaci.html` mockup'ı da aynı düzeni
+gösteriyor. Haritada yeri olmayan rol - kurumun kendi açtığı - **"Diğer"
+bölümüne kök olarak düşer, gizlenmez.**
+
+**Ağaç yetki değildir:** rol kataloğu düz kalıyor; "üstün yetkisi altını
+kapsar" deseydik bir rolü değiştirmek altındakileri sessizce değiştirirdi.
+Ekranda da yazıyor.
+
+**"Tüm roller":** `standart-roller` artık `tumTipler` ile tipe uymayan
+şablonları da döndürüyor ve `tipUygun` ile işaretliyor. 785'teki "lab
+merkezinde diş hekimi görünmesin" kuralı **varsayılan olarak duruyor**;
+"Diğer tiplerin rolleri" düğmesiyle açılıyor.
+
+Süzgeçten geçmeyen bir düğüm, altı geçiyorsa yine çizilir - üstü görünmeyen
+alt rol nerede çalıştığını söylemez. Bölüm başlığındaki sayaç alt dalları da
+sayar.
+
+Yeni test `KadroAgaciTestleri`: haritadaki her rol gerçekten var mı, üst kodu
+haritada mı (yoksa düğüm sessizce kök olur), döngü var mı, her bölüm sıra
+listesinde mi.
+
+Tarayıcıda: 8 bölüm, 74 rol, tablo sayısı 0. xUnit 488/488, vitest 696/696.
