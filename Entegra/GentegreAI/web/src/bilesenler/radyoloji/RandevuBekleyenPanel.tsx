@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
+import { c } from '../../dil/ceviri';
 
 /**
  * RANDEVU BEKLEYEN İSTEMLER PANELİ (316).
@@ -96,13 +97,13 @@ export function RandevuBekleyenPanel({ secili, onSecim, onRandevuModali, yenile 
   return (
     <div className="bekleyen-panel">
       <div className="bekleyen-bas">
-        <b>Randevu Bekleyen</b>
+        <b>{c('Randevu Bekleyen')}</b>
         <span className="bekleyen-sayi">{suzulmus.length}</span>
-        <button type="button" className="d" title="Listeyi tazele"
+        <button type="button" className="d" title={c('Listeyi tazele')}
                 onClick={() => void yukle()}>⟳</button>
       </div>
 
-      <input className="bekleyen-ara" value={ara} placeholder="Hasta / tetkik ara…"
+      <input className="bekleyen-ara" value={ara} placeholder={c('Hasta / tetkik ara…')}
              onChange={e => setAra(e.target.value)} />
 
       {modaliteler.length > 1 && (
@@ -119,9 +120,9 @@ export function RandevuBekleyenPanel({ secili, onSecim, onRandevuModali, yenile 
       {hata && <div className="hata-kutusu">{hata}</div>}
 
       <div className="bekleyen-liste">
-        {yukleniyor && satirlar.length === 0 && <div className="bekleyen-bos">Yükleniyor…</div>}
+        {yukleniyor && satirlar.length === 0 && <div className="bekleyen-bos">{c('Yükleniyor…')}</div>}
         {!yukleniyor && suzulmus.length === 0 && (
-          <div className="bekleyen-bos">Randevu bekleyen istem yok.</div>
+          <div className="bekleyen-bos">{c('Randevu bekleyen istem yok.')}</div>
         )}
         {suzulmus.map(r => (
           <div key={r.id}
@@ -141,7 +142,7 @@ export function RandevuBekleyenPanel({ secili, onSecim, onRandevuModali, yenile 
             <div className="bekleyen-satir1">
               <b>{r.hasta || '(hasta yok)'}</b>
               {r.oncelik >= 2 && <span className="rozet acil">ACİL</span>}
-              <button type="button" className="bekleyen-takvim" title="Tarih/saat seçerek randevu ver"
+              <button type="button" className="bekleyen-takvim" title={c('Tarih/saat seçerek randevu ver')}
                       onClick={e => { e.stopPropagation(); onRandevuModali(r) }}>📅</button>
             </div>
             <div className="bekleyen-satir2">{r.tetkik}</div>

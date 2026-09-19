@@ -3,6 +3,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import { mesaj } from '../mesaj';
+import { c } from '../../dil/ceviri';
 
 /**
  * SARF / KONTRAST DÜŞÜMÜ (320) — mockup Ekranlar/radyoloji_sarf_kontrast.html.
@@ -163,11 +164,11 @@ export function SarfOnayModali({ istemId, accessionNo, tetkikAdi, onKapat, onTam
           <span className="sonuk"> · depo: {depo.ad || '—'}</span>
         </h6>
 
-        {yukleniyor && <div className="bos">Yükleniyor…</div>}
+        {yukleniyor && <div className="bos">{c('Yükleniyor…')}</div>}
         {!yukleniyor && satirlar.length === 0 && (
           <div className="not">
             Bu tetkikin çekim protokolünde <b>malzeme listesi tanımlı değil</b>.
-            Çekim Protokolleri ekranından tetkikin <b>Malzeme / Sarf</b> sekmesine
+            Çekim Protokolleri ekranından tetkikin <b>{c('Malzeme / Sarf')}</b> sekmesine
             kontrast, enjektör, film gibi kalemleri ekleyin.
           </div>
         )}
@@ -179,9 +180,9 @@ export function SarfOnayModali({ istemId, accessionNo, tetkikAdi, onKapat, onTam
                 <th style={{ width: 28 }} />
                 <th>Stok</th>
                 <th className="hiza-sag">Protokol</th>
-                <th className="hiza-sag">Kullanılan</th>
+                <th className="hiza-sag">{c('Kullanılan')}</th>
                 <th>Birim</th>
-                <th>Lot / SKT</th>
+                <th>{c('Lot / SKT')}</th>
                 <th className="hiza-sag">Kalan</th>
               </tr>
             </thead>

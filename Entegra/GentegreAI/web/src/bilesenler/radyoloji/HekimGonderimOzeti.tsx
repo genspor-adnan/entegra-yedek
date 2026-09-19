@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import { paraYaz } from '../bicim';
+import { c } from '../../dil/ceviri';
 
 /**
  * DIS HEKIM GONDERIM OZETI (305) - hekim kartinin "Gönderim Geçmişi"
@@ -47,12 +48,12 @@ export function HekimGonderimOzeti({ hekimId }: { hekimId: number }) {
     <div className="kagrup hekim-ozet">
       <h6>Özet</h6>
       <div className="ozet-kutular">
-        <div className="k"><b>{ozet.toplam}</b><span>Toplam tetkik</span></div>
-        <div className="k"><b>{ozet.buAy}</b><span>Bu ay</span></div>
-        <div className="k"><b>{ozet.raporlanan}</b><span>Raporlanan</span></div>
+        <div className="k"><b>{ozet.toplam}</b><span>{c('Toplam tetkik')}</span></div>
+        <div className="k"><b>{ozet.buAy}</b><span>{c('Bu ay')}</span></div>
+        <div className="k"><b>{ozet.raporlanan}</b><span>{c('Raporlanan')}</span></div>
         <div className="k"><b>{ozet.bekleyen}</b><span>Bekleyen</span></div>
-        <div className="k"><b>{paraYaz(Number(ozet.tutar ?? 0))}</b><span>Toplam tutar</span></div>
-        <div className="k"><b>{gun(ozet.sonGonderim)}</b><span>Son gönderim</span></div>
+        <div className="k"><b>{paraYaz(Number(ozet.tutar ?? 0))}</b><span>{c('Toplam tutar')}</span></div>
+        <div className="k"><b>{gun(ozet.sonGonderim)}</b><span>{c('Son gönderim')}</span></div>
       </div>
 
       {dagilim.length > 0 && (

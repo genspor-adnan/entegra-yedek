@@ -4,6 +4,7 @@ import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { guvenli, mesaj, onay } from '../bilesenler/mesaj';
 import { Modal } from '../bilesenler/Modal';
+import { c } from '../dil/ceviri';
 
 
 /**
@@ -220,9 +221,9 @@ export function RadyolojiRapor() {
     mesaj('Ek rapor (addendum) açıldı; orijinal rapor değişmeden kalır.');
   });
 
-  if (yukleniyor) return <div className="yukleniyor">Yükleniyor…</div>;
+  if (yukleniyor) return <div className="yukleniyor">{c('Yükleniyor…')}</div>;
   if (hata) return <div className="hata-kutusu">{hata}</div>;
-  if (!istem) return <div className="hata-kutusu">İstem bulunamadı.</div>;
+  if (!istem) return <div className="hata-kutusu">{c('İstem bulunamadı.')}</div>;
 
   const kilitli = Number(rapor?.kilit ?? 0) === 1;
   const durum = RAPOR_DURUM[Number(rapor?.durum ?? 1)] ?? RAPOR_DURUM[1];
@@ -234,11 +235,9 @@ export function RadyolojiRapor() {
   return (
     <div className="sayfa rad-rapor">
       <div className="sayfa-bas">
-        <h2>Radyoloji Raporu <span className="sonuk">{String(istem.accessionNo ?? '')}</span></h2>
+        <h2>{c('Radyoloji Raporu')}<span className="sonuk">{String(istem.accessionNo ?? '')}</span></h2>
         <div className="sayfa-eylem">
-          <button className="d bir" disabled={kilitli} onClick={() => void kaydet()}>
-            💾 Taslak Kaydet
-          </button>
+          <button className="d bir" disabled={kilitli} onClick={() => void kaydet()}>{c('💾 Taslak Kaydet')}</button>
           <button className="d" disabled={kilitli}
                   onClick={() => void durumaGecir('on-rapor')}>➜ Uzmana Gönder</button>
           <button className="d basari" disabled={kilitli}
@@ -286,8 +285,8 @@ export function RadyolojiRapor() {
       <div className="rad-govde">
         {/* --------------------------------------------------- SOL: geçmiş --- */}
         <div className="rad-yan">
-          <h5>Önceki Tetkikler</h5>
-          {gecmis.length === 0 && <div className="sonuk kucuk">Önceki tetkik yok.</div>}
+          <h5>{c('Önceki Tetkikler')}</h5>
+          {gecmis.length === 0 && <div className="sonuk kucuk">{c('Önceki tetkik yok.')}</div>}
           {gecmis.map(g => (
             <div className="rad-kart" key={g.id}>
               <b>{g.tetkikAdi}</b>
@@ -300,22 +299,22 @@ export function RadyolojiRapor() {
 
           <h5>İstem Bilgisi</h5>
           <div className="rad-kart">
-            <div><b>Ön tanı:</b> {String(istem.onTani ?? '—')}</div>
-            <div><b>Klinik:</b> {String(istem.klinikBilgi ?? '—')}</div>
-            <div><b>İsteyen:</b> {String(istem.isteyen ?? '—')}</div>
-            <div><b>Ödeyen:</b> {String(istem.odeyenKurum ?? '—')}</div>
+            <div><b>{c('Ön tanı:')}</b> {String(istem.onTani ?? '—')}</div>
+            <div><b>{c('Klinik:')}</b> {String(istem.klinikBilgi ?? '—')}</div>
+            <div><b>{c('İsteyen:')}</b> {String(istem.isteyen ?? '—')}</div>
+            <div><b>{c('Ödeyen:')}</b> {String(istem.odeyenKurum ?? '—')}</div>
           </div>
 
-          <h5>Seri / Görüntü</h5>
+          <h5>{c('Seri / Görüntü')}</h5>
           <div className="rad-kart">
             <b>{Number(istem.seriSayisi ?? 0)} seri · {Number(istem.goruntuSayisi ?? 0)} görüntü</b>
             {istem.studyUid ? <div className="sonuk kucuk">{String(istem.studyUid)}</div>
-                            : <div className="sonuk kucuk">PACS eşleşmesi yok.</div>}
+                            : <div className="sonuk kucuk">{c('PACS eşleşmesi yok.')}</div>}
           </div>
 
           {kritikler.length > 0 && (
             <>
-              <h5>Kritik Bulgu Bildirimleri</h5>
+              <h5>{c('Kritik Bulgu Bildirimleri')}</h5>
               {kritikler.map((k, i) => (
                 <div className="rad-kart teh" key={i}>
                   <b>{k.bulgu}</b>
@@ -364,8 +363,8 @@ export function RadyolojiRapor() {
             ))}
           </select>
 
-          <h5 style={{ marginTop: 12 }}>Makrolar</h5>
-          {makrolar.length === 0 && <div className="sonuk kucuk">Bu şablonda makro yok.</div>}
+          <h5 style={{ marginTop: 12 }}>{c('Makrolar')}</h5>
+          {makrolar.length === 0 && <div className="sonuk kucuk">{c('Bu şablonda makro yok.')}</div>}
           {makrolar.map(m => (
             <button type="button" className="rad-makro" key={m.kisayol} disabled={kilitli}
                     title={m.metin} onClick={() => makroEkle(m)}>
@@ -376,7 +375,7 @@ export function RadyolojiRapor() {
 
           {skorlar.length > 0 && (
             <>
-              <h5 style={{ marginTop: 12 }}>Yapılandırılmış Alanlar</h5>
+              <h5 style={{ marginTop: 12 }}>{c('Yapılandırılmış Alanlar')}</h5>
               {skorlar.map(s => (
                 <label className="alan" key={s.alanKod}>
                   <span className="etiket">{s.alanAd}{s.zorunlu === 1 ? ' *' : ''}</span>
@@ -397,9 +396,9 @@ export function RadyolojiRapor() {
 
           {bakanlikProfili && (
             <>
-              <h5 style={{ marginTop: 12 }}>Bakanlık Değerlendirmesi</h5>
+              <h5 style={{ marginTop: 12 }}>{c('Bakanlık Değerlendirmesi')}</h5>
               <label className="alan">
-                <span className="etiket">İstem Nedeni</span>
+                <span className="etiket">{c('İstem Nedeni')}</span>
                 <select value={nedeniPuan} disabled={kilitli}
                         onChange={e => setNedeniPuan(Number(e.target.value))}>
                   {ISTEM_NEDENI_PUAN.map((ad, i) => (
@@ -408,7 +407,7 @@ export function RadyolojiRapor() {
                 </select>
               </label>
               <label className="alan">
-                <span className="etiket">Çekim Kalitesi</span>
+                <span className="etiket">{c('Çekim Kalitesi')}</span>
                 <select value={kalitePuan} disabled={kilitli}
                         onChange={e => setKalitePuan(Number(e.target.value))}>
                   {CEKIM_KALITE_PUAN.map((ad, i) => (
@@ -418,7 +417,7 @@ export function RadyolojiRapor() {
               </label>
               <div className="not kucuk">
                 Bakanlık Teleradyoloji mesajında (OBX-13) gider. <b>Bulgular en az
-                50 karakter</b> ve <b>Sonuç ve Öneriler</b> dolu olmadan rapor
+                50 karakter</b> ve <b>{c('Sonuç ve Öneriler')}</b> dolu olmadan rapor
                 onaylanamaz.
               </div>
             </>
@@ -428,7 +427,7 @@ export function RadyolojiRapor() {
           <label className="alan yatay">
             <input type="checkbox" checked={kritik} disabled={kilitli}
                    onChange={e => setKritik(e.target.checked)} />
-            <span>Bu tetkikte kritik bulgu var</span>
+            <span>{c('Bu tetkikte kritik bulgu var')}</span>
           </label>
           <div className="uyari-kutusu kucuk">
             İşaretliyse <b>bildirim kaydı olmadan rapor onaylanamaz</b>: kime, hangi yolla ve
@@ -437,12 +436,12 @@ export function RadyolojiRapor() {
 
           {/* KONSULTASYON (304): supheli olguda ikinci gorus. Rapor kilitli
               olsa da istenebilir - gorus geldiginde addendum yazilir. */}
-          <h5 style={{ marginTop: 12 }}>Konsültasyon</h5>
+          <h5 style={{ marginTop: 12 }}>{c('Konsültasyon')}</h5>
           <button className="d mini" onClick={() => setKonsModal(true)}>
             ＋ İkinci Görüş İste
           </button>
           {konsultasyonlar.length === 0 && (
-            <div className="not kucuk">İstenmiş konsültasyon yok.</div>
+            <div className="not kucuk">{c('İstenmiş konsültasyon yok.')}</div>
           )}
           {konsultasyonlar.map(k => (
             <div className="kons-satir" key={String(k.id)}>
@@ -508,7 +507,7 @@ export function RadyolojiRapor() {
                </>}>
           <div className="alan-izgara tek-sutun">
             <label className="alan">
-              <span className="etiket zorunlu-isaret">Görüş</span>
+              <span className="etiket zorunlu-isaret">{c('Görüş')}</span>
               <textarea rows={4} value={gorusYaz.gorus}
                         onChange={e => setGorusYaz(g => (g ? { ...g, gorus: e.target.value } : g))} />
             </label>
@@ -530,7 +529,7 @@ export function RadyolojiRapor() {
             <label className="alan"><span className="etiket">Bulgu</span>
               <input value={kritikForm.bulgu}
                      onChange={e => setKritikForm(f => ({ ...f, bulgu: e.target.value }))} /></label>
-            <label className="alan"><span className="etiket">Bildirilen kişi</span>
+            <label className="alan"><span className="etiket">{c('Bildirilen kişi')}</span>
               <input value={kritikForm.bildirilenAd}
                      onChange={e => setKritikForm(f => ({ ...f, bildirilenAd: e.target.value }))} /></label>
             <label className="alan"><span className="etiket">Yol</span>
@@ -539,7 +538,7 @@ export function RadyolojiRapor() {
                 {Object.entries(KRITIK_YOL).map(([k, v]) =>
                   <option key={k} value={k}>{v}</option>)}
               </select></label>
-            <label className="alan"><span className="etiket">Geri bildirim</span>
+            <label className="alan"><span className="etiket">{c('Geri bildirim')}</span>
               <input value={kritikForm.geriBildirim}
                      onChange={e => setKritikForm(f => ({ ...f, geriBildirim: e.target.value }))} /></label>
           </div>

@@ -3,6 +3,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import { mesaj } from '../mesaj';
+import { c } from '../../dil/ceviri';
 
 /**
  * SONUC TESLIMI (304). Film / CD / basili rapor kime verildi.
@@ -71,13 +72,13 @@ export function TeslimModali({ istemId, accessionNo, cdIstendi, onKapat, onTamam
              <>
                <button className="d onay" disabled={kaydediyor}
                        onClick={() => void kaydet()}>✔ Teslim Et</button>
-               <button className="d" onClick={onKapat}>✖ Kapat</button>
+               <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}
       <div className="alan-izgara tek-sutun">
         <label className="alan">
-          <span className="etiket zorunlu-isaret">Teslim edilen</span>
+          <span className="etiket zorunlu-isaret">{c('Teslim edilen')}</span>
           <span className="deger-serit" style={{ flexWrap: 'wrap', gap: 12 }}>
             {KALEMLER.map(k => (
               <label key={k.anahtar} className="satir-ici">
@@ -104,7 +105,7 @@ export function TeslimModali({ istemId, accessionNo, cdIstendi, onKapat, onTamam
           <span className="deger-serit">
             <input type="checkbox" checked={kimlik}
                    onChange={e => setKimlik(e.target.checked)} />
-            <span>Kimlik doğrulandı</span>
+            <span>{c('Kimlik doğrulandı')}</span>
           </span>
         </label>
         <label className="alan">

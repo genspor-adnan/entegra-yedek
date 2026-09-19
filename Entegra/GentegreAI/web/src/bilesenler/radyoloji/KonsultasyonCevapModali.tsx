@@ -3,6 +3,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import { mesaj } from '../mesaj';
+import { c } from '../../dil/ceviri';
 
 /**
  * KONSÜLTASYON CEVABI (318).
@@ -49,7 +50,7 @@ export function KonsultasyonCevapModali({ istemId, konsultasyonId, accessionNo,
                <button className="d onay" disabled={kaydediyor} onClick={() => void kaydet()}>
                  {kaydediyor ? '⏳ Kaydediliyor…' : '✔ Cevabı Kaydet'}
                </button>
-               <button className="d" onClick={onKapat}>✖ Kapat</button>
+               <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}
@@ -58,18 +59,18 @@ export function KonsultasyonCevapModali({ istemId, konsultasyonId, accessionNo,
         <h6>{hasta ?? ''}{tetkik ? ` · ${tetkik}` : ''}</h6>
         {soru && (
           <div className="not" style={{ margin: '0 10px 8px' }}>
-            <b>Sorulan:</b> {soru}
+            <b>{c('Sorulan:')}</b> {soru}
           </div>
         )}
         <div className="alan-izgara tek-sutun">
           <label className="alan">
-            <span className="etiket zorunlu-isaret">Görüş</span>
+            <span className="etiket zorunlu-isaret">{c('Görüş')}</span>
             <textarea rows={6} value={gorus}
                       onChange={e => setGorus(e.target.value)} />
           </label>
         </div>
         <div className="not">
-          Cevap kaydedilince konsültasyon <b>Cevaplandı</b>'ya döner ve rapora
+          Cevap kaydedilince konsültasyon <b>{c('Cevaplandı')}</b>'ya döner ve rapora
           iliştirilir.
         </div>
       </div>

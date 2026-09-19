@@ -6,6 +6,7 @@ import type { DisAkisSatiri, DisGunlukAkis as Akis } from '../../api/uclar/dis';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, metinSor } from '../../bilesenler/mesaj';
 import { bugunIso, gunNokta, para } from '../../bilesenler/bicim';
+import { c } from '../../dil/ceviri';
 
 /**
  * DİŞ KLİNİĞİ GÜNLÜK AKIŞ — mockup `Ekranlar/Dis Klinigi/dis_gunluk_akis.html`.
@@ -132,18 +133,18 @@ export function DisGunlukAkis() {
     <>
       <div className="sayfabas">
         <div className="basrow">
-          <h1>🦷 Diş Kliniği — Günlük Akış</h1>
-          <span className="yol">Diş › Günlük Akış</span>
+          <h1>{c('🦷 Diş Kliniği — Günlük Akış')}</h1>
+          <span className="yol">{c('Diş › Günlük Akış')}</span>
           <span className="sonuk">{gunNokta(gun)} · {unitler.length} ünit</span>
         </div>
         <div className="basarac">
           <input type="date" value={gun} onChange={e => setGun(e.target.value)} />
-          <button className="d" onClick={() => setGun(bugunIso())}>Bugün</button>
-          {yetki('dis.seans') && <button className="d bir" onClick={() => { const s = (veri?.satirlar ?? []).find(x => x.id === secili); if (!s) { mesaj('Çizelgeden bir hasta seçin.'); return } void seansAc(s) }}>🪑 Muayene / Seans Aç</button>}
-          <button className="d" onClick={() => { const s = (veri?.satirlar ?? []).find(x => x.id === secili); if (!s) { mesaj('Önce bir hasta seçin.'); return } git(`/dis-hasta/${s.hastaId}`, { state: { geri: '/dis-akis' } }) }}>👤 Hasta Kartı</button>
+          <button className="d" onClick={() => setGun(bugunIso())}>{c('Bugün')}</button>
+          {yetki('dis.seans') && <button className="d bir" onClick={() => { const s = (veri?.satirlar ?? []).find(x => x.id === secili); if (!s) { mesaj('Çizelgeden bir hasta seçin.'); return } void seansAc(s) }}>{c('🪑 Muayene / Seans Aç')}</button>}
+          <button className="d" onClick={() => { const s = (veri?.satirlar ?? []).find(x => x.id === secili); if (!s) { mesaj('Önce bir hasta seçin.'); return } git(`/dis-hasta/${s.hastaId}`, { state: { geri: '/dis-akis' } }) }}>{c('👤 Hasta Kartı')}</button>
           {yetki('randevu') && <button className="d" onClick={() => git('/randevu/yeni')}>📅 Randevu Ver</button>}
           {yetki('dis.lab') && <button className="d" onClick={() => git('/dis-lab-isemri')}>🧪 Lab Teslimleri{o?.labBekleyen ? ` (${o.labBekleyen})` : ''}</button>}
-          <button className="d" onClick={() => void yukle()} title="Yenile">⟳</button>
+          <button className="d" onClick={() => void yukle()} title={c('Yenile')}>⟳</button>
         </div>
       </div>
 
@@ -151,7 +152,7 @@ export function DisGunlukAkis() {
         {hata && <div className="hata-kutusu">{hata}</div>}
 
         <div className="ds-arac">
-          <input placeholder="Hasta ara…" value={ara} onChange={e => setAra(e.target.value)} style={{ minWidth: 220 }} />
+          <input placeholder={c('Hasta ara…')} value={ara} onChange={e => setAra(e.target.value)} style={{ minWidth: 220 }} />
           {([['bugun', `Bugün (${sayac.bugun})`], ['bekleyen', `Bekleyen (${sayac.bekleyen})`], ['unitte', `Ünitte (${sayac.unitte})`],
              ['tamamlanan', `Tamamlanan (${sayac.tamamlanan})`], ['gelmedi', `Gelmedi (${sayac.gelmedi})`]] as [typeof suzgec, string][])
             .map(([k, ad]) => <span key={k} className={`cip${suzgec === k ? ' on' : ''}`} onClick={() => setSuzgec(k)}>{ad}</span>)}
@@ -159,11 +160,11 @@ export function DisGunlukAkis() {
 
         <div className="ds-ozet6" style={{ padding: '8px 0' }}>
           <div><span>Randevu</span><b>{o?.randevu ?? 0}</b><i>{o?.randevusuz ?? 0} randevusuz</i></div>
-          <div><span>Ünit doluluk</span><b>%{veri?.doluluk ?? 0}</b><i>{o?.unitSayisi ?? 0} ünit · 9 saat</i></div>
-          <div><span>Ort. seans</span><b>{o?.ortSeansDk ?? 0} dk</b><i>{o?.tamamlanan ?? 0} tamamlanan</i></div>
-          <div><span>Bugün ciro</span><b>{para.format(o?.ciro ?? 0)}</b><i>seans ücretleri</i></div>
-          <div><span>Lab teslim bekleyen</span><b>{o?.labBekleyen ?? 0}</b><i className={o?.labGecikti ? 'ds-kir' : ''}>{o?.labGecikti ?? 0} gecikti</i></div>
-          <div><span>Plan onayı bekleyen</span><b>{o?.onayBekleyen ?? 0}</b><i>proforma</i></div>
+          <div><span>{c('Ünit doluluk')}</span><b>%{veri?.doluluk ?? 0}</b><i>{o?.unitSayisi ?? 0} ünit · 9 saat</i></div>
+          <div><span>{c('Ort. seans')}</span><b>{o?.ortSeansDk ?? 0} dk</b><i>{o?.tamamlanan ?? 0} tamamlanan</i></div>
+          <div><span>{c('Bugün ciro')}</span><b>{para.format(o?.ciro ?? 0)}</b><i>seans ücretleri</i></div>
+          <div><span>{c('Lab teslim bekleyen')}</span><b>{o?.labBekleyen ?? 0}</b><i className={o?.labGecikti ? 'ds-kir' : ''}>{o?.labGecikti ?? 0} gecikti</i></div>
+          <div><span>{c('Plan onayı bekleyen')}</span><b>{o?.onayBekleyen ?? 0}</b><i>proforma</i></div>
         </div>
 
         {/* ------------------------------------------------- çizelge */}
@@ -182,15 +183,15 @@ export function DisGunlukAkis() {
             ))}
           </div>
         ) : (
-          <div className="bilgi-kutusu">Ünit tanımlı değil - <a href="#" onClick={e => { e.preventDefault(); git('/dis-unit') }}>Diş › Ayarlar › Ünitler</a>'den koltukları tanımlayın. Randevular aşağıdaki listede.</div>
+          <div className="bilgi-kutusu">{c('Ünit tanımlı değil -')}<a href="#" onClick={e => { e.preventDefault(); git('/dis-unit') }}>{c('Diş › Ayarlar › Ünitler')}</a>'den koltukları tanımlayın. Randevular aşağıdaki listede.</div>
         )}
         {unitsiz.length > 0 && unitler.length > 0 && (
-          <div className="ds-arac"><span className="sonuk">Ünitsiz randevular:</span>{unitsiz.map(satirKutusu)}</div>
+          <div className="ds-arac"><span className="sonuk">{c('Ünitsiz randevular:')}</span>{unitsiz.map(satirKutusu)}</div>
         )}
 
         {/* ------------------------------------------------- liste */}
         <div className="ds-dg" style={{ marginTop: 10 }}><table>
-          <thead><tr><th className="orta">Saat</th><th>Hasta</th><th className="orta">Yaş</th><th>Hekim / Ünit</th><th>Planlı işlem</th><th className="orta">Plan satırı</th><th>Uyarı</th><th className="orta">Plan durumu</th><th className="sag">Bakiye</th><th className="orta">Durum</th></tr></thead>
+          <thead><tr><th className="orta">Saat</th><th>Hasta</th><th className="orta">Yaş</th><th>{c('Hekim / Ünit')}</th><th>{c('Planlı işlem')}</th><th className="orta">{c('Plan satırı')}</th><th>Uyarı</th><th className="orta">{c('Plan durumu')}</th><th className="sag">Bakiye</th><th className="orta">Durum</th></tr></thead>
           <tbody>
             {satirlar.map(s => (
               <tr key={s.id} className={secili === s.id ? 'sel' : ''} onClick={() => setSecili(s.id)} onDoubleClick={() => git(`/dis-hasta/${s.hastaId}`, { state: { geri: '/dis-akis' } })}>
@@ -201,7 +202,7 @@ export function DisGunlukAkis() {
                 <td>{s.disNo ? `${s.disNo} ` : ''}{s.planliIslem}{s.seansSayisi ? ` · ${s.yapilanSeans}/${s.seansSayisi} seans` : ''}</td>
                 <td className="orta">{s.planNo ? <code>{s.planNo} / {s.planSira}</code> : <span className="rozet gri">plan yok</span>}</td>
                 <td>{s.alerji && s.alerji.split(', ').map(a => <span key={a} className="rozet hata">{a}</span>)}
-                    {s.labAsama != null && s.labAsama >= 5 && s.labAsama < 8 && <span className="rozet ok">Lab işi geldi</span>}</td>
+                    {s.labAsama != null && s.labAsama >= 5 && s.labAsama < 8 && <span className="rozet ok">{c('Lab işi geldi')}</span>}</td>
                 <td className="orta">{s.planDurum ? <span className="rozet mavi">{PD[s.planDurum]} · {s.planYapilan}/{s.planToplamSatir}</span> : '—'}</td>
                 <td className={`sag${s.bakiye > 0 ? ' ds-kir' : ''}`}>{para.format(s.bakiye)}</td>
                 <td className="orta">
@@ -209,8 +210,8 @@ export function DisGunlukAkis() {
                     {s.seansDurum === 1 ? 'Ünitte' : s.seansDurum === 2 ? 'Tamamlandı' : RD[s.randevuDurum]?.[0]}
                   </span>
                   {s.randevuDurum === 3 && yetki('randevu') && <button className="d" style={{ marginLeft: 4 }} onClick={e => { e.stopPropagation(); void yenidenPlanla(s) }}>▶ Yeniden planla</button>}
-                  {s.randevuDurum === 1 && !s.seansId && yetki('dis.seans') && <button className="d" style={{ marginLeft: 4 }} onClick={e => { e.stopPropagation(); void seansAc(s) }}>🪑 Seans</button>}
-                  {s.seansId && s.seansDurum === 1 && <button className="d" style={{ marginLeft: 4 }} onClick={e => { e.stopPropagation(); git(`/dis-seans/${s.seansId}`, { state: { geri: '/dis-akis' } }) }}>Seans kartı</button>}
+                  {s.randevuDurum === 1 && !s.seansId && yetki('dis.seans') && <button className="d" style={{ marginLeft: 4 }} onClick={e => { e.stopPropagation(); void seansAc(s) }}>{c('🪑 Seans')}</button>}
+                  {s.seansId && s.seansDurum === 1 && <button className="d" style={{ marginLeft: 4 }} onClick={e => { e.stopPropagation(); git(`/dis-seans/${s.seansId}`, { state: { geri: '/dis-akis' } }) }}>{c('Seans kartı')}</button>}
                 </td>
               </tr>
             ))}

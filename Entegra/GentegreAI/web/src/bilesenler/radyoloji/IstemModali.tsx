@@ -9,6 +9,7 @@ import { TarafArama } from '../TarafArama';
 import { mesaj } from '../mesaj';
 import { para, paraYaz } from '../bicim';
 import { KasaIslemKarti } from '../../sayfalar/KasaIslemKarti';
+import { c } from '../../dil/ceviri';
 
 /**
  * RADYOLOJI ISTEM ACMA (304).
@@ -268,7 +269,7 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                      💵 Tahsilat Al ve Kabul Et
                    </button>
                  )}
-                 <button className="d" onClick={onKapat}>✖ Kapat</button>
+                 <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
                </>
              )
            }>
@@ -277,7 +278,7 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
       <div className="istem-duzen">
         {/* --- SOL: tetkik agaci --- */}
         <div className="kagrup istem-agac">
-          <h6>Tetkik Seçimi</h6>
+          <h6>{c('Tetkik Seçimi')}</h6>
           <div className="kagov">
             <input value={ara} placeholder="🔍 Tetkik ara (kod / ad)…"
                    onChange={e => setAra(e.target.value)} />
@@ -307,12 +308,12 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
             <table className="detay-tablo">
               <thead>
                 <tr><th>Kod</th><th>Tetkik</th><th>Öncelik</th><th>Kontrast</th>
-                    <th className="sag">Liste</th><th className="sag">İndirim</th>
+                    <th className="sag">Liste</th><th className="sag">{c('İndirim')}</th>
                     <th className="sag">Tutar</th><th /></tr>
               </thead>
               <tbody>
                 {secili.length === 0 && (
-                  <tr><td colSpan={8} className="bos">Soldaki listeden tetkik seçin.</td></tr>
+                  <tr><td colSpan={8} className="bos">{c('Soldaki listeden tetkik seçin.')}</td></tr>
                 )}
                 {secili.map(s => (
                   <tr key={s.tetkik.id}>
@@ -351,7 +352,7 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                         ? para.format(fiyatlar[s.tetkik.id].tutar) : '—'}
                     </b></td>
                     <td>
-                      <button className="d mini teh" title="Listeden çıkar"
+                      <button className="d mini teh" title={c('Listeden çıkar')}
                               onClick={() => cikar(s.tetkik.id)}>✕</button>
                     </td>
                   </tr>
@@ -393,16 +394,16 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                   {/* genis-2: arama kutusu + iki dugme dort-sutunluk dar hucreye
                       sigmiyor, secili ad "Öz…" diye kirpiliyordu. */}
                   <label className="alan genis-2">
-                    <span className="etiket">İsteyen Hekim (dış)</span>
+                    <span className="etiket">{c('İsteyen Hekim (dış)')}</span>
                     <span className="ikili">
                       <input value={isteyen.disHekimSecim} readOnly
-                             placeholder="Kayıtlı hekim seç…"
+                             placeholder={c('Kayıtlı hekim seç…')}
                              onClick={() => isteyen.setHekimArama(true)} />
                       <button type="button" className="d mini"
-                              title="Dış hekim ara"
+                              title={c('Dış hekim ara')}
                               onClick={() => isteyen.setHekimArama(true)}>…</button>
                       {isteyen.disHekimId != null && (
-                        <button type="button" className="d mini" title="Seçimi kaldır"
+                        <button type="button" className="d mini" title={c('Seçimi kaldır')}
                                 onClick={isteyen.hekimBirak}>
                           ✕
                         </button>
@@ -413,7 +414,7 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                       gelen, kaydedilmeye degmeyen hekim icin. */}
                   {!isteyen.disHekimId && (
                     <label className="alan">
-                      <span className="etiket">Hekim Adı (kayıtsız)</span>
+                      <span className="etiket">{c('Hekim Adı (kayıtsız)')}</span>
                       <input value={isteyen.disHekimAd} placeholder="örn. Op. Dr. Kerem ATALAY"
                              onChange={e => isteyen.setDisHekimAd(e.target.value)} />
                     </label>
@@ -426,12 +427,12 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                     <span className="etiket">İsteyen Kurum</span>
                     <span className="ikili">
                       <input value={isteyen.istekKurumAd} readOnly
-                             placeholder="Kurum seç…"
+                             placeholder={c('Kurum seç…')}
                              onClick={() => isteyen.setKurumArama(true)} />
-                      <button type="button" className="d mini" title="Kurum ara"
+                      <button type="button" className="d mini" title={c('Kurum ara')}
                               onClick={() => isteyen.setKurumArama(true)}>…</button>
                       {isteyen.istekKurumId != null && (
-                        <button type="button" className="d mini" title="Seçimi kaldır"
+                        <button type="button" className="d mini" title={c('Seçimi kaldır')}
                                 onClick={isteyen.kurumBirak}>
                           ✕
                         </button>
@@ -455,7 +456,7 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                 </label>
               )}
               <label className="alan">
-                <span className="etiket">Ön Tanı (ICD-10)</span>
+                <span className="etiket">{c('Ön Tanı (ICD-10)')}</span>
                 <input value={onTani} maxLength={20} placeholder="örn. M51.1"
                        onChange={e => setOnTani(e.target.value)} />
               </label>
@@ -476,7 +477,7 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
               </label>
 
               <label className="alan genis-4">
-                <span className="etiket zorunlu-isaret">Klinik Bilgi / İstem Gerekçesi</span>
+                <span className="etiket zorunlu-isaret">{c('Klinik Bilgi / İstem Gerekçesi')}</span>
                 <textarea rows={3} value={klinikBilgi}
                           placeholder="örn. 3 aydır süren bel ağrısı, sağ bacağa yayılım. Konservatif tedaviye yanıtsız."
                           onChange={e => setKlinikBilgi(e.target.value)} />
@@ -498,7 +499,7 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                 Ic istemde de anlamli (hazirlik/CD), o yuzden kabul moduna
                 baglanmadi - MWL/SMS entegrasyonu gelene kadar niyet kaydi. */}
             <div className="kagrup kabul-sonrasi">
-              <h6>Kabul Sonrası</h6>
+              <h6>{c('Kabul Sonrası')}</h6>
               <div className="secenekler">
                 <label className="onay">
                   <input type="checkbox" checked={mwl}
@@ -546,17 +547,17 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                 belirler, kalan tutar hastadan tahsil edilir. */}
             {kabulMu && (
               <div className="kagrup kabul-odeme">
-                <h6>Ödeme / Kabul</h6>
+                <h6>{c('Ödeme / Kabul')}</h6>
                 <div className="alan-izgara dort-sutun">
                   <label className="alan genis-2">
                     <span className="etiket">Ödeyen Kurum</span>
                     <span className="ikili">
-                      <input value={odeyenKurumAd} readOnly placeholder="Hasta kendi öder…"
+                      <input value={odeyenKurumAd} readOnly placeholder={c('Hasta kendi öder…')}
                              onClick={() => setOdeyenArama(true)} />
-                      <button type="button" className="d mini" title="Kurum ara"
+                      <button type="button" className="d mini" title={c('Kurum ara')}
                               onClick={() => setOdeyenArama(true)}>…</button>
                       {odeyenKurumId != null && (
-                        <button type="button" className="d mini" title="Seçimi kaldır"
+                        <button type="button" className="d mini" title={c('Seçimi kaldır')}
                                 onClick={() => { setOdeyenKurumId(null); setOdeyenKurumAd('') }}>
                           ✕
                         </button>
@@ -573,15 +574,15 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                     <span className="deger-serit">
                       <input type="checkbox" checked={basvuruAc}
                              onChange={e => setBasvuruAc(e.target.checked)} />
-                      <span>Başvuru aç ve ücretlendir</span>
+                      <span>{c('Başvuru aç ve ücretlendir')}</span>
                     </span>
                   </label>
                 </div>
 
                 <div className="kabul-tutar">
-                  <div className="tut"><span>Liste tutarı</span>
+                  <div className="tut"><span>{c('Liste tutarı')}</span>
                     <span>{paraYaz(toplam.liste)}</span></div>
-                  <div className="tut"><span>İndirim</span>
+                  <div className="tut"><span>{c('İndirim')}</span>
                     <span className="ind">−{paraYaz(toplam.indirim)}</span></div>
                   <div className="tut"><span>KDV</span>
                     <span>{paraYaz(toplam.kdv)}</span></div>
@@ -593,12 +594,12 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                     kurum/hasta payi sozlesmeye gore orada hesaplanir (289). */}
                 {sonuc && (
                   <div className="kabul-sonuc">
-                    <span>Protokol: <b>{sonuc.belgeNo || '—'}</b></span>
-                    <span>Genel toplam: <b>{paraYaz(sonuc.genelToplam)}</b></span>
-                    <span>Kurumdan: <b>{paraYaz(
+                    <span>{c('Protokol:')}<b>{sonuc.belgeNo || '—'}</b></span>
+                    <span>{c('Genel toplam:')}<b>{paraYaz(sonuc.genelToplam)}</b></span>
+                    <span>{c('Kurumdan:')}<b>{paraYaz(
                       Math.round((sonuc.genelToplam - hastaTahsil) * 100) / 100)}</b></span>
                     {/* KDV DAHIL: kasada tahsil edilecek olan bu tutardir. */}
-                    <span>Hastadan: <b>{paraYaz(hastaTahsil)}</b>
+                    <span>{c('Hastadan:')}<b>{paraYaz(hastaTahsil)}</b>
                       {hastaTahsil <= 0 && ' · kurum tamamını karşılıyor'}</span>
                   </div>
                 )}
@@ -608,7 +609,7 @@ export function IstemModali({ acik, hastaId, hastaAdi, belgeId, disIstem,
                   <div className="kabul-kagit">
                     📎 {kagitDurum || `İstem kâğıdı: ${kagit?.name}`}
                     {kagit && !kagitDurum && (
-                      <button type="button" className="d mini" title="Kaldır"
+                      <button type="button" className="d mini" title={c('Kaldır')}
                               onClick={() => setKagit(null)}>✕</button>
                     )}
                   </div>

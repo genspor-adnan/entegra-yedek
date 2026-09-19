@@ -3,6 +3,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import { mesaj } from '../mesaj';
+import { c } from '../../dil/ceviri';
 
 /**
  * KRİTİK BULGU BİLDİRİMİ (318).
@@ -74,7 +75,7 @@ export function KritikBildirimModali({ istemId, accessionNo, hasta, tetkik, bulg
                        title={teyit ? 'Bildirimi kaydet ve takibi kapat'
                                     : 'Kapatmak için teyit alınmış olmalı'}
                        onClick={() => void kaydet(true)}>✔ Kaydet ve Kapat</button>
-               <button className="d" onClick={onKapat}>✖ Kapat</button>
+               <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}
@@ -88,19 +89,19 @@ export function KritikBildirimModali({ istemId, accessionNo, hasta, tetkik, bulg
                       onChange={e => setMetin(e.target.value)} />
           </label>
           <label className="alan">
-            <span className="etiket zorunlu-isaret">Bildirilen kişi</span>
+            <span className="etiket zorunlu-isaret">{c('Bildirilen kişi')}</span>
             <input value={kime} maxLength={120} placeholder="ör. Acil Servis · Dr. M. Şen"
                    onChange={e => setKime(e.target.value)} />
           </label>
           <label className="alan">
-            <span className="etiket">Bildirim yolu</span>
+            <span className="etiket">{c('Bildirim yolu')}</span>
             <select value={yol} onChange={e => setYol(Number(e.target.value))}>
               {YOLLAR.map(y => <option key={y.deger} value={y.deger}>{y.ad}</option>)}
             </select>
           </label>
           <label className="alan onay-satiri">
             <input type="checkbox" checked={teyit} onChange={e => setTeyit(e.target.checked)} />
-            <span>Karşı taraf bulguyu aldığını <b>teyit etti</b></span>
+            <span>{c('Karşı taraf bulguyu aldığını')}<b>teyit etti</b></span>
           </label>
           <label className="alan">
             <span className="etiket">Not</span>

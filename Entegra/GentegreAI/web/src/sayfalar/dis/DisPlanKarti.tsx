@@ -7,6 +7,7 @@ import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
 import { TarafSecici } from '../../bilesenler/TarafArama';
 import { para, tarihSaat, tarihYaz } from '../../bilesenler/bicim';
+import { c } from '../../dil/ceviri';
 
 /**
  * TEDAVİ PLANI KARTI (710) — mockup `Ekranlar/Dis Klinigi/dis_tedavi_plani_karti.html`.
@@ -188,7 +189,7 @@ export function DisPlanKarti() {
   const Perde = ({ children, baslik }: { children: ReactNode; baslik: ReactNode }) => (
     <div className="kaperde" onClick={kapat}>
       <div className="kawin tam" onClick={e => e.stopPropagation()}>
-        <div className="kabas">{baslik}<span className="kapt">Esc ile kapanır</span><button className="kabas-dugme" onClick={kapat} title="Kapat">✖</button></div>
+        <div className="kabas">{baslik}<span className="kapt">{c('Esc ile kapanır')}</span><button className="kabas-dugme" onClick={kapat} title="Kapat">✖</button></div>
         <div className="kagov ds-kagov">{children}</div>
       </div>
     </div>
@@ -203,8 +204,8 @@ export function DisPlanKarti() {
       <div className="ds-ic sonuk">Boş taslak açılır; satırlar bu karttan ("＋ İşlem") ya da hasta kartındaki odontogramdan eklenir. Fiyat listesi hastanın kurum sözleşmesinden, yoksa varsayılandan gelir.</div>
     </Perde>
   );
-  if (hata) return <Perde baslik={<span>📋 Tedavi Planı</span>}><div className="hata-kutusu">{hata}</div></Perde>;
-  if (!v || !p) return <Perde baslik={<span>📋 Tedavi Planı</span>}><span className="sonuk">Yükleniyor…</span></Perde>;
+  if (hata) return <Perde baslik={<span>{c('📋 Tedavi Planı')}</span>}><div className="hata-kutusu">{hata}</div></Perde>;
+  if (!v || !p) return <Perde baslik={<span>{c('📋 Tedavi Planı')}</span>}><span className="sonuk">{c('Yükleniyor…')}</span></Perde>;
 
   const oz = v.ozet;
   const bakiye = oz.yapilan - oz.tahsil;
@@ -248,22 +249,22 @@ export function DisPlanKarti() {
       <span className={`rozet ${durumRozet[1]}`}>{durumRozet[0]}</span>
     </>}>
       <div className="ds-arac ds-kart-arac">
-        {yazar && <button className="d bir" disabled={!kirli} onClick={() => void kaydet()}>💾 Kaydet</button>}
+        {yazar && <button className="d bir" disabled={!kirli} onClick={() => void kaydet()}>{c('💾 Kaydet')}</button>}
         {yazar && p.durum === 1 && <button className="d" onClick={() => void sun()}>📤 Hastaya Sun (proforma)</button>}
-        {yazar && (p.durum === 1 || p.durum === 2) && <button className="d onay" onClick={() => void onayla()}>✍ Hasta Onayı</button>}
+        {yazar && (p.durum === 1 || p.durum === 2) && <button className="d onay" onClick={() => void onayla()}>{c('✍ Hasta Onayı')}</button>}
         {yazar && !p.anaPlanId && <button className="d" onClick={() => void alternatif()}>🔁 Alternatif Plan</button>}
         <span className="ds-sep" />
         {yazar && yetki('dis.seans') && <button className="d" title={sec ? `Seçili satırla (${sec.islem}) seans aç` : 'Bu plana seans aç'} onClick={() => void seansAc()}>🪑 Seans Aç{sec ? ` (#${sec.sira})` : ''}</button>}
         {oz.odemePlaniId
-          ? <button className="d" onClick={() => git(`/dis-odeme-plani/${oz.odemePlaniId}?geri=${geriParam}`)}>💳 Ödeme Planı</button>
+          ? <button className="d" onClick={() => git(`/dis-odeme-plani/${oz.odemePlaniId}?geri=${geriParam}`)}>{c('💳 Ödeme Planı')}</button>
           : yazar && yetki('dis.odeme') && <button className="d" onClick={() => setSekme('odeme')}>💳 Ödeme Planı Üret</button>}
         {yazar && <button className="d" title={sec?.labGerekir ? `Seçili satır için (${sec.disNo}) lab iş emri` : 'Bu hasta adına lab iş emri'} onClick={() => labIsemriAc(sec?.labGerekir ? sec : null)}>🧪 Lab İş Emri{sec?.labGerekir && !sec.labIsemriId ? ` (${sec.disNo})` : ''}</button>}
         <button className="d" onClick={() => { setSekme('proforma'); setTimeout(() => window.print(), 50) }}>🖨 Proforma</button>
         <span className="ds-sep" />
         <button className="d" onClick={() => git(`/dis-hasta/${p.hastaId}`, { state: { geri: geriBurasi, ustGeri: geri } })}>🦷 Hasta Kartı (odontogram)</button>
         {yazar && <button className="d teh" onClick={() => void iptal()}>✖ Planı İptal Et</button>}
-        <button className="d" onClick={() => void yukle()} title="Yenile">⟳</button>
-        <button className="d ds-sp" onClick={kapat}>✖ Kapat</button>
+        <button className="d" onClick={() => void yukle()} title={c('Yenile')}>⟳</button>
+        <button className="d ds-sp" onClick={kapat}>{c('✖ Kapat')}</button>
       </div>
 
       <div className="ds-adim">
@@ -272,37 +273,37 @@ export function DisPlanKarti() {
       </div>
 
       <div className="ds-hdr ds-hdr5" style={{ padding: '4px 10px 8px' }}>
-        <div><label>Hasta *</label><div className="ds-inp big">{p.hasta}{p.tckn ? <span className="sonuk">· {p.tckn}</span> : null}{p.alerji && p.alerji.split(', ').map(a => <span key={a} className="rozet hata">{a}</span>)}</div></div>
-        <div><label>Hekim *</label>
+        <div><label>{c('Hasta *')}</label><div className="ds-inp big">{p.hasta}{p.tckn ? <span className="sonuk">· {p.tckn}</span> : null}{p.alerji && p.alerji.split(', ').map(a => <span key={a} className="rozet hata">{a}</span>)}</div></div>
+        <div><label>{c('Hekim *')}</label>
           <select value={taslak.hekimId ?? ''} disabled={!yazar} onChange={e => ayarla('hekimId', e.target.value)} style={{ width: '100%' }}>
             <option value="">— seçiniz —</option>{v.secenekler.hekimler.map(h => <option key={h.id} value={h.id}>{h.ad}</option>)}
           </select></div>
         <div><label>Muayene</label><div className="ds-inp">{p.muayeneId ? <a href={`/muayene/${p.muayeneId}`} onClick={e => { e.preventDefault(); git(`/muayene/${p.muayeneId}?geri=${geriParam}`) }}>#{p.muayeneId} · {p.muayeneTarih ? tarihYaz(p.muayeneTarih) : ''}</a> : <span className="sonuk">—</span>}</div></div>
-        <div><label>Varyant</label><div className="ds-inp">{p.varyant} — {p.anaPlanId ? `alternatif (ana ${p.anaPlanNo})` : 'ana plan'}{v.varyantlar.length > 0 && <span className="rozet mavi" style={{ cursor: 'pointer' }} onClick={() => setSekme('varyant')}>{v.varyantlar.map(x => x.varyant).join(', ')} var (karşılaştır)</span>}</div></div>
+        <div><label>{c('Varyant')}</label><div className="ds-inp">{p.varyant} — {p.anaPlanId ? `alternatif (ana ${p.anaPlanNo})` : 'ana plan'}{v.varyantlar.length > 0 && <span className="rozet mavi" style={{ cursor: 'pointer' }} onClick={() => setSekme('varyant')}>{v.varyantlar.map(x => x.varyant).join(', ')} var (karşılaştır)</span>}</div></div>
         <div><label>Durum</label><div className="ds-inp"><span className={`rozet ${durumRozet[1]}`}>{durumRozet[0]}{p.durum === 4 ? ` · ${oz.yapilanSayisi}/${oz.satirSayisi}` : ''}</span></div></div>
-        <div><label>Fiyat listesi</label>
+        <div><label>{c('Fiyat listesi')}</label>
           <select value={taslak.fiyatListesiId ?? ''} disabled={!yazar || p.durum >= 3} title={p.durum >= 3 ? 'Onaylı planda fiyat listesi değişmez' : ''} onChange={e => ayarla('fiyatListesiId', e.target.value)} style={{ width: '100%' }}>
             <option value="">— varsayılan —</option>{v.secenekler.fiyatListeleri.map(h => <option key={h.id} value={h.id}>{h.ad}</option>)}
           </select></div>
-        <div><label>Ödeyen kurum</label>
+        <div><label>{c('Ödeyen kurum')}</label>
           <select value={taslak.odeyenKurumId ?? ''} disabled={!yazar} onChange={e => ayarla('odeyenKurumId', e.target.value)} style={{ width: '100%' }}>
             <option value="">— (hasta öder)</option>{v.secenekler.kurumlar.map(h => <option key={h.id} value={h.id}>{h.ad}</option>)}
           </select></div>
         <div><label>Geçerlilik</label><div className="ds-inp" style={{ padding: 0, border: 'none', background: 'transparent' }}>
           <input type="date" value={taslak.gecerlilikBitis ?? ''} disabled={!yazar} onChange={e => ayarla('gecerlilikBitis', e.target.value)} />
           {gunKaldi != null && p.durum <= 2 && <span className={`rozet ${gunKaldi < 0 ? 'hata' : gunKaldi <= 7 ? 'uyari' : 'gri'}`}>{gunKaldi < 0 ? `${-gunKaldi} gün geçti` : `${gunKaldi} gün kaldı`}</span>}</div></div>
-        <div><label>Ödeme seçeneği</label><input style={{ width: '100%' }} value={taslak.odemeSecenegi ?? ''} disabled={!yazar} placeholder="Peşinat 4.000 + 3 taksit" onChange={e => ayarla('odemeSecenegi', e.target.value)} /></div>
-        <div><label>Önceki plan</label><div className="ds-inp">{p.oncekiPlan || <span className="sonuk">—</span>}</div></div>
+        <div><label>{c('Ödeme seçeneği')}</label><input style={{ width: '100%' }} value={taslak.odemeSecenegi ?? ''} disabled={!yazar} placeholder="Peşinat 4.000 + 3 taksit" onChange={e => ayarla('odemeSecenegi', e.target.value)} /></div>
+        <div><label>{c('Önceki plan')}</label><div className="ds-inp">{p.oncekiPlan || <span className="sonuk">—</span>}</div></div>
       </div>
 
       <div className="ds-ozet6" style={{ gridTemplateColumns: 'repeat(7, 1fr)' }}>
         <div><span>Toplam</span><b>{para.format(p.toplam)}</b></div>
-        <div><span>İndirim</span><b>−{para.format(p.indirim)}</b><i>{p.toplam ? `%${Math.round(p.indirim / p.toplam * 100)}` : ''}</i></div>
+        <div><span>{c('İndirim')}</span><b>−{para.format(p.indirim)}</b><i>{p.toplam ? `%${Math.round(p.indirim / p.toplam * 100)}` : ''}</i></div>
         <div><span>Net</span><b>{para.format(p.net)}</b></div>
         <div><span>Yapılan</span><b className="ds-ok">{para.format(oz.yapilan)}</b><i>{oz.yapilanSayisi} işlem</i><div className="ds-bar" style={{ margin: '3px 0 0' }}><i style={{ width: `${p.net ? Math.min(100, oz.yapilan / p.net * 100) : 0}%`, background: 'var(--ok)' }} /></div></div>
         <div><span>Tahsil</span><b>{para.format(oz.tahsil)}</b><i>{odemePlani ? (odemePlani.pesinat > oz.tahsil ? 'peşinat kısmi' : 'plana göre') : 'ödeme planı yok'}</i></div>
-        <div><span>Bakiye (yapılan − tahsil)</span><b className={bakiye > 0 ? 'ds-kir' : ''}>{para.format(bakiye)}</b></div>
-        <div><span>Lab</span><b>{oz.labSayisi}</b><i>{oz.labdaSayisi} labda · {oz.labBekleyen} açılmadı</i></div>
+        <div><span>{c('Bakiye (yapılan − tahsil)')}</span><b className={bakiye > 0 ? 'ds-kir' : ''}>{para.format(bakiye)}</b></div>
+        <div><span>{c('Lab')}</span><b>{oz.labSayisi}</b><i>{oz.labdaSayisi} labda · {oz.labBekleyen} açılmadı</i></div>
       </div>
 
       <div className="ka-sekmeler">
@@ -322,24 +323,24 @@ export function DisPlanKarti() {
           </div>
           {islemAra.acik && (
             <div className="ds-islem-ara">
-              <div className="ds-arac"><b>Plan satırı ekle</b>
-                <input autoFocus placeholder="İşlem ara (SUT / kod / ad)…" value={islemAra.q} onChange={e => void islemAraYap(e.target.value)} style={{ minWidth: 240 }} />
+              <div className="ds-arac"><b>{c('Plan satırı ekle')}</b>
+                <input autoFocus placeholder={c('İşlem ara (SUT / kod / ad)…')} value={islemAra.q} onChange={e => void islemAraYap(e.target.value)} style={{ minWidth: 240 }} />
                 <label className="sonuk">Diş <input value={islemAra.disNo} onChange={e => setIslemAra(a => ({ ...a, disNo: e.target.value }))} style={{ width: 46 }} /></label>
-                <label className="sonuk">Yüzey <input value={islemAra.yz} onChange={e => setIslemAra(a => ({ ...a, yz: e.target.value }))} style={{ width: 56 }} placeholder="MOD" /></label>
-                <label className="sonuk">Faz <input value={islemAra.faz} onChange={e => setIslemAra(a => ({ ...a, faz: e.target.value }))} style={{ width: 36 }} /></label>
-                <label className="sonuk">İnd. <input value={islemAra.iskonto} onChange={e => setIslemAra(a => ({ ...a, iskonto: e.target.value }))} style={{ width: 60 }} /></label>
+                <label className="sonuk">{c('Yüzey')}<input value={islemAra.yz} onChange={e => setIslemAra(a => ({ ...a, yz: e.target.value }))} style={{ width: 56 }} placeholder="MOD" /></label>
+                <label className="sonuk">{c('Faz')}<input value={islemAra.faz} onChange={e => setIslemAra(a => ({ ...a, faz: e.target.value }))} style={{ width: 36 }} /></label>
+                <label className="sonuk">{c('İnd.')}<input value={islemAra.iskonto} onChange={e => setIslemAra(a => ({ ...a, iskonto: e.target.value }))} style={{ width: 60 }} /></label>
                 <label className="sonuk">Seans <input value={islemAra.seans} onChange={e => setIslemAra(a => ({ ...a, seans: e.target.value }))} style={{ width: 36 }} placeholder="std" /></label>
                 <button className="d" onClick={() => setIslemAra(a => ({ ...a, acik: false }))}>Kapat</button></div>
               <div className="ds-dg" style={{ maxHeight: 220, overflowY: 'auto' }}><table>
-                <thead><tr><th>Kod</th><th>İşlem</th><th className="orta">Seans</th><th className="orta">Lab</th><th className="sag">Fiyat</th><th /></tr></thead>
+                <thead><tr><th>Kod</th><th>İşlem</th><th className="orta">Seans</th><th className="orta">{c('Lab')}</th><th className="sag">Fiyat</th><th /></tr></thead>
                 <tbody>{islemAra.sonuc.map(x => <tr key={x.id}><td className="sonuk">{x.kod}</td><td>{x.ad}</td><td className="orta">{x.standartSeans}</td><td className="orta">{x.labGerekir ? '🧪' : ''}</td><td className="sag">{para.format(x.fiyat)}</td>
-                  <td><button className="d onay" onClick={() => void satirEkle(x)}>Ekle</button></td></tr>)}
-                  {islemAra.sonuc.length === 0 && <tr><td colSpan={6} className="sonuk">Sonuç yok.</td></tr>}</tbody>
+                  <td><button className="d onay" onClick={() => void satirEkle(x)}>{c('Ekle')}</button></td></tr>)}
+                  {islemAra.sonuc.length === 0 && <tr><td colSpan={6} className="sonuk">{c('Sonuç yok.')}</td></tr>}</tbody>
               </table></div>
             </div>
           )}
           <div className="ds-dg"><table className="ds-plan">
-            <thead><tr><th className="orta">#</th><th className="orta">Diş</th><th className="orta">Yüzey</th><th>İşlem (SUT / kod)</th><th>Hekim</th><th className="orta">Seans</th><th className="sag">Liste</th><th className="sag">İnd.</th><th className="sag">Net</th><th>Ücretlendirme</th><th className="orta">Lab</th><th className="orta">Onam</th><th className="orta">Randevu</th><th>Durum</th><th /></tr></thead>
+            <thead><tr><th className="orta">#</th><th className="orta">Diş</th><th className="orta">{c('Yüzey')}</th><th>{c('İşlem (SUT / kod)')}</th><th>Hekim</th><th className="orta">Seans</th><th className="sag">Liste</th><th className="sag">{c('İnd.')}</th><th className="sag">Net</th><th>{c('Ücretlendirme')}</th><th className="orta">{c('Lab')}</th><th className="orta">{c('Onam')}</th><th className="orta">Randevu</th><th>Durum</th><th /></tr></thead>
             <tbody>
               {fazlar.map(([faz, liste]) => (<>
                 <tr key={`f${faz}`} className="grup"><td colSpan={15}>Faz {faz}{faz === 1 ? ' — Acil / ağrı giderme' : faz === 2 ? ' — Restoratif' : faz === 3 ? ' — Protetik' : ''} · {liste.length} satır</td></tr>
@@ -363,8 +364,8 @@ export function DisPlanKarti() {
                       <td className="orta">{rnd ? tarihSaat(rnd.baslangic) : s.randevu ? tarihSaat(s.randevu) : '—'}</td>
                       <td><span className={`rozet ${SATIR[s.durum]?.[1] ?? 'gri'}`}>{SATIR[s.durum]?.[0] ?? s.durum}{s.durum === 3 && s.tamamlanma ? ` · ${tarihYaz(s.tamamlanma)}` : ''}</span></td>
                       <td className="ds-satir-arac">
-                        {yazar && s.durum < 3 && <button className="d" onClick={e => { e.stopPropagation(); void yapildi(s) }}>✔ Yapıldı</button>}
-                        {yazar && s.labGerekir && !s.labIsemriId && s.durum < 3 && <button className="d" title="Lab iş emri aç" onClick={e => { e.stopPropagation(); labIsemriAc(s) }}>🧪</button>}
+                        {yazar && s.durum < 3 && <button className="d" onClick={e => { e.stopPropagation(); void yapildi(s) }}>{c('✔ Yapıldı')}</button>}
+                        {yazar && s.labGerekir && !s.labIsemriId && s.durum < 3 && <button className="d" title={c('Lab iş emri aç')} onClick={e => { e.stopPropagation(); labIsemriAc(s) }}>🧪</button>}
                         {yazar && s.durum < 3 && <button className="d" title="İptal" onClick={e => { e.stopPropagation(); void satirIptal(s) }}>✖</button>}
                       </td>
                     </tr>
@@ -375,7 +376,7 @@ export function DisPlanKarti() {
               {v.satirlar.length > 0 && <tr className="grup"><td colSpan={6}>TOPLAM · {v.satirlar.filter(s => s.durum !== 4).length} işlem · {fazlar.length} faz</td><td className="sag">{para.format(p.toplam)}</td><td className="sag">−{para.format(p.indirim)}</td><td className="sag">{para.format(p.net)}</td><td colSpan={6} /></tr>}
             </tbody>
           </table></div>
-          <div className="ds-ic sonuk">{p.durum >= 3 ? <b>Onaylı planda satır fiyatı değişmez.</b> : <b>Taslak: fiyat listesi değişince satırlar yeniden fiyatlanmaz; satırı silip ekleyin.</b>} Silinen satır iptal olur, satır yok olmaz. Fazlar klinik önceliktir. Ücret satırda değil seans / "yapıldı" anında doğar (başvuru satırı).</div>
+          <div className="ds-ic sonuk">{p.durum >= 3 ? <b>{c('Onaylı planda satır fiyatı değişmez.')}</b> : <b>Taslak: fiyat listesi değişince satırlar yeniden fiyatlanmaz; satırı silip ekleyin.</b>} Silinen satır iptal olur, satır yok olmaz. Fazlar klinik önceliktir. Ücret satırda değil seans / "yapıldı" anında doğar (başvuru satırı).</div>
         </div>
       )}
 
@@ -383,9 +384,9 @@ export function DisPlanKarti() {
         <div className="ds-odo-alan" style={{ gridTemplateColumns: 'minmax(0,1fr) 340px' }}>
           <div className="ds-sol">
             <div className="ds-grp ds-grp-ic">
-              <div className="ds-gb">Seanslar <span className="ds-sp sonuk">plan satırı → seans · süre hizmet kartından</span></div>
+              <div className="ds-gb">{c('Seanslar')}<span className="ds-sp sonuk">plan satırı → seans · süre hizmet kartından</span></div>
               <div className="ds-dg"><table>
-                <thead><tr><th className="orta">Seans</th><th>Tarih</th><th>Ünit / hekim</th><th className="orta">Süre</th><th>Plan satırları</th><th>Durum</th><th /></tr></thead>
+                <thead><tr><th className="orta">Seans</th><th>Tarih</th><th>{c('Ünit / hekim')}</th><th className="orta">Süre</th><th>{c('Plan satırları')}</th><th>Durum</th><th /></tr></thead>
                 <tbody>
                   {v.seanslar.map((x, n) => <tr key={x.id}>
                     <td className="orta">{n + 1}</td><td>{tarihSaat(x.baslangic)}</td><td>{[x.unit, x.hekim].filter(Boolean).join(' · ') || '—'}</td>
@@ -394,25 +395,25 @@ export function DisPlanKarti() {
                     <td><button className="d" onClick={() => git(`/dis-seans/${x.id}`, { state: { geri: geriBurasi, ustGeri: geri } })}>Aç</button></td></tr>)}
                   {v.randevular.map(r => { const s = v.satirlar.find(z => z.id === r.planSatirId); return <tr key={`r${r.id}`} className="soluk">
                     <td className="orta">—</td><td>{tarihSaat(r.baslangic)}</td><td>{[r.unit, r.hekim].filter(Boolean).join(' · ') || '—'}</td><td className="orta">{r.sureDk} dk</td>
-                    <td>#{s?.sira} {s?.islem}</td><td><span className="rozet mavi">Randevulu</span></td>
+                    <td>#{s?.sira} {s?.islem}</td><td><span className="rozet mavi">{c('Randevulu')}</span></td>
                     <td><button className="d" onClick={() => git(`/randevu/${r.id}?geri=${geriParam}`)}>Randevu</button></td></tr> })}
                   {v.seanslar.length === 0 && v.randevular.length === 0 && <tr><td colSpan={7} className="sonuk">Seans yok. "🪑 Seans Aç" ile başlayın ya da Günlük Akış'tan randevuyla açın.</td></tr>}
                 </tbody>
               </table></div>
               {yazar && yetki('dis.seans') && <div className="ds-arac"><button className="d bir" onClick={() => void seansAc()}>🪑 Seans aç{sec ? ` (#${sec.sira} ${sec.islem})` : ''}</button>
                 <button className="d" onClick={() => git(`/randevu/yeni?hastaId=${p.hastaId}&geri=${geriParam}`)}>🗓 Randevu ver</button>
-                <span className="ds-sp sonuk">Randevu = ünit + hekim + süre; <code>randevu.plan_satir_id</code>. Lab kısıtı: prova randevusu iş emrinin beklenen tarihinden önce verilmez.</span></div>}
+                <span className="ds-sp sonuk">{c('Randevu = ünit + hekim + süre;')}<code>randevu.plan_satir_id</code>. Lab kısıtı: prova randevusu iş emrinin beklenen tarihinden önce verilmez.</span></div>}
             </div>
           </div>
           <div className="ds-sag">
-            <div className="ds-grp"><div className="ds-gb">Kalan iş</div>
+            <div className="ds-grp"><div className="ds-gb">{c('Kalan iş')}</div>
               <div className="ds-ic">
                 {v.satirlar.filter(s => s.durum === 1 || s.durum === 2 || s.durum === 5).map(s => <div key={s.id}><span className="sonuk">#{s.sira}</span> {s.disNo || ''} {s.islem} · {s.seansSayisi - s.yapilanSeans} seans{s.labGerekir && !s.labIsemriId ? <span className="rozet uyari" style={{ marginLeft: 4 }}>lab iş emri açılmadı</span> : ''}</div>)}
-                {v.satirlar.filter(s => s.durum === 1 || s.durum === 2 || s.durum === 5).length === 0 && <span className="sonuk">Bekleyen satır yok.</span>}
-                <div style={{ marginTop: 6 }}><b>Toplam kalan:</b> {v.satirlar.filter(s => s.durum < 3 || s.durum === 5).reduce((a, s) => a + Math.max(0, s.seansSayisi - s.yapilanSeans), 0)} seans</div>
+                {v.satirlar.filter(s => s.durum === 1 || s.durum === 2 || s.durum === 5).length === 0 && <span className="sonuk">{c('Bekleyen satır yok.')}</span>}
+                <div style={{ marginTop: 6 }}><b>{c('Toplam kalan:')}</b> {v.satirlar.filter(s => s.durum < 3 || s.durum === 5).reduce((a, s) => a + Math.max(0, s.seansSayisi - s.yapilanSeans), 0)} seans</div>
               </div>
             </div>
-            <div className="ds-grp"><div className="ds-gb">Seans önerisi</div>
+            <div className="ds-grp"><div className="ds-gb">{c('Seans önerisi')}</div>
               <div className="ds-ic sonuk">Kural: aynı diş ardışık seanslarda, kanal → kron ölçüsü aynı seansa, kompozitler tek seansta, lab işleri beklenen tarihe göre. Otomatik öneri ve "kalan seansları randevuya dönüştür" sonraki sürümde; şimdilik Randevu ekranından.</div>
             </div>
           </div>
@@ -422,24 +423,24 @@ export function DisPlanKarti() {
       {sekme === 'proforma' && (
         <div className="ds-odo-alan" style={{ gridTemplateColumns: '1fr 1fr' }}>
           <div className="ds-sol">
-            <div className="ds-grp ds-grp-ic"><div className="ds-gb">Proforma</div>
+            <div className="ds-grp ds-grp-ic"><div className="ds-gb">{c('Proforma')}</div>
               <div className="ds-hdr" style={{ padding: '4px 10px 8px', gridTemplateColumns: '1fr 1fr' }}>
-                <div><label>Proforma no</label><div className="ds-inp">{p.proformaNo || <span className="sonuk">sunulunca üretilir</span>}</div></div>
-                <div><label>Sunum / onay</label><div className="ds-inp">{p.durum >= 2 ? `sunuldu · ${p.proformaNo}` : '—'}{p.hastaOnayZamani ? ` · onay ${tarihSaat(p.hastaOnayZamani)}` : ''}</div></div>
+                <div><label>{c('Proforma no')}</label><div className="ds-inp">{p.proformaNo || <span className="sonuk">sunulunca üretilir</span>}</div></div>
+                <div><label>{c('Sunum / onay')}</label><div className="ds-inp">{p.durum >= 2 ? `sunuldu · ${p.proformaNo}` : '—'}{p.hastaOnayZamani ? ` · onay ${tarihSaat(p.hastaOnayZamani)}` : ''}</div></div>
                 <div><label>Geçerlilik</label><input type="date" value={taslak.gecerlilikBitis ?? ''} disabled={!yazar} onChange={e => ayarla('gecerlilikBitis', e.target.value)} /></div>
-                <div><label>Toplam / indirim / net</label><div className="ds-inp">{para.format(p.toplam)} · −{para.format(p.indirim)} · <b>{para.format(p.net)}</b></div></div>
-                <div><label>Ödeme seçeneği</label><input style={{ width: '100%' }} value={taslak.odemeSecenegi ?? ''} disabled={!yazar} onChange={e => ayarla('odemeSecenegi', e.target.value)} /></div>
-                <div><label>Taksit sayısı</label><input type="number" min={1} max={36} style={{ width: '100%' }} value={taslak.taksitSayisi ?? ''} disabled={!yazar} onChange={e => ayarla('taksitSayisi', e.target.value)} /></div>
-                <div style={{ gridColumn: '1 / 3' }}><label>Açıklama (proformada görünür)</label><textarea rows={2} style={{ width: '100%' }} value={taslak.aciklama ?? ''} disabled={!yazar} onChange={e => ayarla('aciklama', e.target.value)} /></div>
-                <div style={{ gridColumn: '1 / 3' }}><label>Alternatif plan</label><div className="ds-inp">{v.varyantlar.length ? v.varyantlar.map(x => `${x.varyant}: ${para.format(x.net)} (${DURUM[x.durum]?.[0]})`).join(' · ') : <span className="sonuk">yok</span>}</div></div>
+                <div><label>{c('Toplam / indirim / net')}</label><div className="ds-inp">{para.format(p.toplam)} · −{para.format(p.indirim)} · <b>{para.format(p.net)}</b></div></div>
+                <div><label>{c('Ödeme seçeneği')}</label><input style={{ width: '100%' }} value={taslak.odemeSecenegi ?? ''} disabled={!yazar} onChange={e => ayarla('odemeSecenegi', e.target.value)} /></div>
+                <div><label>{c('Taksit sayısı')}</label><input type="number" min={1} max={36} style={{ width: '100%' }} value={taslak.taksitSayisi ?? ''} disabled={!yazar} onChange={e => ayarla('taksitSayisi', e.target.value)} /></div>
+                <div style={{ gridColumn: '1 / 3' }}><label>{c('Açıklama (proformada görünür)')}</label><textarea rows={2} style={{ width: '100%' }} value={taslak.aciklama ?? ''} disabled={!yazar} onChange={e => ayarla('aciklama', e.target.value)} /></div>
+                <div style={{ gridColumn: '1 / 3' }}><label>{c('Alternatif plan')}</label><div className="ds-inp">{v.varyantlar.length ? v.varyantlar.map(x => `${x.varyant}: ${para.format(x.net)} (${DURUM[x.durum]?.[0]})`).join(' · ') : <span className="sonuk">yok</span>}</div></div>
               </div>
-              {yazar && <div className="ds-arac"><button className="d onay" disabled={!kirli} onClick={() => void kaydet()}>💾 Kaydet</button></div>}
+              {yazar && <div className="ds-arac"><button className="d onay" disabled={!kirli} onClick={() => void kaydet()}>{c('💾 Kaydet')}</button></div>}
             </div>
-            <div className="ds-grp ds-grp-ic"><div className="ds-gb">Hasta onayı</div>
+            <div className="ds-grp ds-grp-ic"><div className="ds-gb">{c('Hasta onayı')}</div>
               <div className="ds-hdr" style={{ padding: '4px 10px 8px', gridTemplateColumns: '1fr 1fr' }}>
-                <div><label>Onay</label><div className="ds-inp">{p.hastaOnayZamani ? <><span className="rozet ok">Onaylandı</span> {tarihSaat(p.hastaOnayZamani)}</> : <span className="rozet gri">Onay yok</span>}</div></div>
+                <div><label>Onay</label><div className="ds-inp">{p.hastaOnayZamani ? <><span className="rozet ok">{c('Onaylandı')}</span> {tarihSaat(p.hastaOnayZamani)}</> : <span className="rozet gri">{c('Onay yok')}</span>}</div></div>
                 <div><label>Yöntem</label><div className="ds-inp">{p.onayYontemi || <span className="sonuk">—</span>}</div></div>
-                <div><label>Onam</label><div className="ds-inp">{p.hastaOnayZamani ? `${v.satirlar.filter(s => s.durum !== 4).length} satır hasta onaylı` : <span className="sonuk">onayla birlikte işaretlenir</span>}</div></div>
+                <div><label>{c('Onam')}</label><div className="ds-inp">{p.hastaOnayZamani ? `${v.satirlar.filter(s => s.durum !== 4).length} satır hasta onaylı` : <span className="sonuk">onayla birlikte işaretlenir</span>}</div></div>
                 <div><label>Belge</label><div className="ds-inp"><span className="sonuk">proforma PDF (döküman) — 🖨 ile</span></div></div>
               </div>
               <div className="ds-arac">
@@ -451,7 +452,7 @@ export function DisPlanKarti() {
             </div>
           </div>
           <div className="ds-sag">
-            <div className="ds-grp"><div className="ds-gb">Proforma önizleme</div>
+            <div className="ds-grp"><div className="ds-gb">{c('Proforma önizleme')}</div>
               <pre className="ds-proforma">{proformaMetni()}</pre>
             </div>
           </div>
@@ -461,13 +462,13 @@ export function DisPlanKarti() {
       {sekme === 'odeme' && (
         <div className="ds-odo-alan" style={{ gridTemplateColumns: 'minmax(0,1fr) 360px' }}>
           <div className="ds-sol">
-            <div className="ds-grp ds-grp-ic"><div className="ds-gb">Ödeme planı <span className="ds-sp sonuk">dis_odeme_plani · taksitler kasa plan kayıtları</span></div>
+            <div className="ds-grp ds-grp-ic"><div className="ds-gb">{c('Ödeme planı')}<span className="ds-sp sonuk">dis_odeme_plani · taksitler kasa plan kayıtları</span></div>
               {odemePlani ? (<>
                 <div className="ds-hdr" style={{ padding: '4px 10px 8px', gridTemplateColumns: 'repeat(3,1fr)' }}>
-                  <div><label>Toplam (net)</label><div className="ds-inp">{para.format(odemePlani.toplam)}</div></div>
-                  <div><label>Peşinat</label><div className="ds-inp">{para.format(odemePlani.pesinat)}</div></div>
+                  <div><label>{c('Toplam (net)')}</label><div className="ds-inp">{para.format(odemePlani.toplam)}</div></div>
+                  <div><label>{c('Peşinat')}</label><div className="ds-inp">{para.format(odemePlani.pesinat)}</div></div>
                   <div><label>Taksit</label><div className="ds-inp">{odemePlani.taksitSayisi} × {para.format(odemePlani.taksitTutar)}</div></div>
-                  <div><label>İlk vade</label><div className="ds-inp">{odemePlani.ilkVade ? tarihYaz(odemePlani.ilkVade) : '—'}</div></div>
+                  <div><label>{c('İlk vade')}</label><div className="ds-inp">{odemePlani.ilkVade ? tarihYaz(odemePlani.ilkVade) : '—'}</div></div>
                   <div><label>Yöntem</label><div className="ds-inp">{['', 'Nakit', 'POS taksit', 'Havale', 'Kredi'][odemePlani.odemeYontemi] ?? odemePlani.odemeYontemi}</div></div>
                   <div><label>Durum</label><div className="ds-inp"><span className={`rozet ${odemePlani.durum === 2 ? 'ok' : 'uyari'}`}>{odemePlani.durum === 2 ? 'Tamamlandı' : oz.tahsil > 0 ? 'Açık · kısmi' : 'Açık'}</span></div></div>
                 </div>
@@ -488,11 +489,11 @@ export function DisPlanKarti() {
               </>) : (<>
                 <div className="ds-hdr" style={{ padding: '4px 10px 8px', gridTemplateColumns: 'repeat(4,1fr)' }}>
                   <div><label>Net</label><div className="ds-inp">{para.format(p.net)}</div></div>
-                  <div><label>Peşinat</label><input style={{ width: '100%' }} value={odemeForm.pesinat} disabled={!yazar} placeholder="0" onChange={e => setOdemeForm(f => ({ ...f, pesinat: e.target.value }))} /></div>
-                  <div><label>Taksit sayısı</label><input type="number" min={1} max={36} style={{ width: '100%' }} value={odemeForm.taksit} disabled={!yazar} onChange={e => setOdemeForm(f => ({ ...f, taksit: e.target.value }))} /></div>
-                  <div><label>İlk vade</label><input type="date" style={{ width: '100%' }} value={odemeForm.ilkVade} disabled={!yazar} onChange={e => setOdemeForm(f => ({ ...f, ilkVade: e.target.value }))} /></div>
-                  <div><label>Yöntem</label><select value={odemeForm.yontem} disabled={!yazar} onChange={e => setOdemeForm(f => ({ ...f, yontem: e.target.value }))} style={{ width: '100%' }}><option value="1">Nakit</option><option value="2">POS taksit</option><option value="3">Havale</option><option value="4">Kredi</option></select></div>
-                  <div style={{ gridColumn: '2 / 5' }}><label>Önizleme</label><div className="ds-inp">{(() => { const pes = Number(odemeForm.pesinat.replace(',', '.')) || 0, t = Math.max(1, Number(odemeForm.taksit) || 1); return pes > p.net ? <span className="ds-kir">peşinat neti aşıyor</span> : `${pes ? `peşinat ${para.format(pes)} + ` : ''}${t} × ${para.format((p.net - pes) / t)}` })()}</div></div>
+                  <div><label>{c('Peşinat')}</label><input style={{ width: '100%' }} value={odemeForm.pesinat} disabled={!yazar} placeholder="0" onChange={e => setOdemeForm(f => ({ ...f, pesinat: e.target.value }))} /></div>
+                  <div><label>{c('Taksit sayısı')}</label><input type="number" min={1} max={36} style={{ width: '100%' }} value={odemeForm.taksit} disabled={!yazar} onChange={e => setOdemeForm(f => ({ ...f, taksit: e.target.value }))} /></div>
+                  <div><label>{c('İlk vade')}</label><input type="date" style={{ width: '100%' }} value={odemeForm.ilkVade} disabled={!yazar} onChange={e => setOdemeForm(f => ({ ...f, ilkVade: e.target.value }))} /></div>
+                  <div><label>Yöntem</label><select value={odemeForm.yontem} disabled={!yazar} onChange={e => setOdemeForm(f => ({ ...f, yontem: e.target.value }))} style={{ width: '100%' }}><option value="1">{c('Nakit')}</option><option value="2">{c('POS taksit')}</option><option value="3">{c('Havale')}</option><option value="4">{c('Kredi')}</option></select></div>
+                  <div style={{ gridColumn: '2 / 5' }}><label>{c('Önizleme')}</label><div className="ds-inp">{(() => { const pes = Number(odemeForm.pesinat.replace(',', '.')) || 0, t = Math.max(1, Number(odemeForm.taksit) || 1); return pes > p.net ? <span className="ds-kir">peşinat neti aşıyor</span> : `${pes ? `peşinat ${para.format(pes)} + ` : ''}${t} × ${para.format((p.net - pes) / t)}` })()}</div></div>
                 </div>
                 <div className="ds-arac">
                   {yazar && yetki('dis.odeme') ? <button className="d bir" disabled={p.durum < 2} title={p.durum < 2 ? 'Önce plan sunulmalı / onaylanmalı' : ''} onClick={() => void odemePlaniUret()}>💳 Ödeme planı üret</button> : <span className="sonuk">ödeme planı yetkisi yok</span>}
@@ -502,9 +503,9 @@ export function DisPlanKarti() {
             </div>
           </div>
           <div className="ds-sag">
-            <div className="ds-grp"><div className="ds-gb">Ücret akışı</div>
+            <div className="ds-grp"><div className="ds-gb">{c('Ücret akışı')}</div>
               <div className="ds-ic">
-                <p><b>Yapılan işlem</b> {para.format(oz.yapilan)} ({oz.yapilanSayisi} satır) → başvuru satırları (tür 19).</p>
+                <p><b>{c('Yapılan işlem')}</b> {para.format(oz.yapilan)} ({oz.yapilanSayisi} satır) → başvuru satırları (tür 19).</p>
                 <p><b>Tahsil</b> {para.format(oz.tahsil)} → önce yapılan işlemlere dağıtılır; fazlası <b>avans</b> olarak durur (yapılmamış işin parası borç değildir).</p>
                 <p><b>Bakiye</b> = yapılan − tahsil = <b className={bakiye > 0 ? 'ds-kir' : ''}>{para.format(bakiye)}</b>.{labGerekenAcik.length || oz.labSayisi ? ' Kron teslimi bakiye sıfırlanmadan yapılmaz (ayar: uyarı/engel).' : ''}</p>
                 <p className="sonuk">Plan iptalinde yapılan işlemler faturalanır, kalan avans iade edilir.</p>
@@ -516,9 +517,9 @@ export function DisPlanKarti() {
 
       {sekme === 'lab' && (
         <div className="ds-grp ds-grp-ic">
-          <div className="ds-gb">Lab işleri <span className="ds-sp sonuk">dis_lab_isemri · plan_satir_id</span></div>
+          <div className="ds-gb">{c('Lab işleri')}<span className="ds-sp sonuk">dis_lab_isemri · plan_satir_id</span></div>
           <div className="ds-dg"><table>
-            <thead><tr><th>İş emri</th><th className="orta">Plan satırı</th><th>Laboratuvar</th><th className="orta">Diş</th><th>İş · malzeme · renk</th><th>Gönderim</th><th>Beklenen</th><th>Aşama</th><th>Prova / teslim randevusu</th><th className="sag">Lab maliyeti</th><th /></tr></thead>
+            <thead><tr><th>{c('İş emri')}</th><th className="orta">{c('Plan satırı')}</th><th>Laboratuvar</th><th className="orta">Diş</th><th>{c('İş · malzeme · renk')}</th><th>Gönderim</th><th>{c('Beklenen')}</th><th>Aşama</th><th>{c('Prova / teslim randevusu')}</th><th className="sag">{c('Lab maliyeti')}</th><th /></tr></thead>
             <tbody>
               {v.labIsleri.map(l => { const s = v.satirlar.find(z => z.id === l.planSatirId); const gec = l.beklenen && l.asama < 5 && new Date(l.beklenen).getTime() < Date.now(); return <tr key={l.id}>
                 <td><b>{l.isemriNo}</b></td><td className="orta">#{l.planSira}{s ? ` · ${s.islem}` : ''}</td><td>{l.lab || '—'}</td><td className="orta">{l.disNolar || s?.disNo || '—'}</td>
@@ -529,25 +530,25 @@ export function DisPlanKarti() {
                 <td><button className="d" onClick={() => git(`/dis-lab-isemri/${l.id}?geri=${geriParam}`)}>Aç</button></td></tr> })}
               {labGerekenAcik.map(s => <tr key={`a${s.id}`} className="soluk">
                 <td>—</td><td className="orta">#{s.sira} · {s.islem}</td><td className="sonuk">varsayılan</td><td className="orta">{s.disNo || s.disNolar || '—'}</td><td className="sonuk">—</td><td>—</td><td>—</td>
-                <td><span className="rozet gri">İş emri açılmadı</span></td><td>—</td><td className="sag">—</td>
+                <td><span className="rozet gri">{c('İş emri açılmadı')}</span></td><td>—</td><td className="sag">—</td>
                 <td>{yazar && <button className="d onay" onClick={() => labIsemriAc(s)}>🧪 İş emri aç</button>}</td></tr>)}
-              {v.labIsleri.length === 0 && labGerekenAcik.length === 0 && <tr><td colSpan={11} className="sonuk">Lab gerektiren satır yok.</td></tr>}
-              {v.labIsleri.length > 0 && <tr className="grup"><td colSpan={9}>Lab maliyeti (hakedişten düşer)</td><td className="sag">{para.format(labMaliyet)}</td><td /></tr>}
+              {v.labIsleri.length === 0 && labGerekenAcik.length === 0 && <tr><td colSpan={11} className="sonuk">{c('Lab gerektiren satır yok.')}</td></tr>}
+              {v.labIsleri.length > 0 && <tr className="grup"><td colSpan={9}>{c('Lab maliyeti (hakedişten düşer)')}</td><td className="sag">{para.format(labMaliyet)}</td><td /></tr>}
             </tbody>
           </table></div>
-          <div className="ds-ic sonuk">Lab gerektiren satır (hizmet kartı <code>lab_gerekir</code>) iş emri açılmadan "yapıldı" olamaz; teslim aşamasıyla satır ücretlenir (ücretlendirme kuralı: tamamlanınca).</div>
+          <div className="ds-ic sonuk">{c('Lab gerektiren satır (hizmet kartı')}<code>lab_gerekir</code>) iş emri açılmadan "yapıldı" olamaz; teslim aşamasıyla satır ücretlenir (ücretlendirme kuralı: tamamlanınca).</div>
         </div>
       )}
 
       {sekme === 'varyant' && (
         <div className="ds-grp ds-grp-ic">
-          <div className="ds-gb">Alternatif planlar <span className="ds-sp sonuk">{p.anaPlanId ? `ana plan ${p.anaPlanNo}` : `ana plan ${p.planNo}`} · karşılaştırmalı proforma</span></div>
+          <div className="ds-gb">{c('Alternatif planlar')}<span className="ds-sp sonuk">{p.anaPlanId ? `ana plan ${p.anaPlanNo}` : `ana plan ${p.planNo}`} · karşılaştırmalı proforma</span></div>
           {v.varyantlar.length === 0 ? (
             <div className="ds-ic sonuk">Alternatif yok. Araç çubuğundaki "🔁 Alternatif Plan" satırları kopyalayıp yeni varyant açar; hastaya ikisi karşılaştırmalı sunulur, seçilen sürer.</div>
           ) : (<>
             <div className="ds-dg"><table>
               <thead><tr><th className="orta">Diş</th><th>{p.varyant} — {p.anaPlanId ? 'bu (alternatif)' : 'ana plan'}</th><th className="sag">{p.varyant} net</th>
-                {v.varyantlar.map(x => <><th key={`h${x.id}`}>{x.varyant} — {x.planNo}</th><th key={`n${x.id}`} className="sag">{x.varyant} net</th></>)}<th className="sag">Fark</th></tr></thead>
+                {v.varyantlar.map(x => <><th key={`h${x.id}`}>{x.varyant} — {x.planNo}</th><th key={`n${x.id}`} className="sag">{x.varyant} net</th></>)}<th className="sag">{c('Fark')}</th></tr></thead>
               <tbody>
                 {disKarsilastirma.map(([disNo, r]) => { const a = (r[p.id] ?? []).reduce((t, s) => t + s.net, 0); const b0 = v.varyantlar[0] ? (r[v.varyantlar[0].id] ?? []).reduce((t, s) => t + s.net, 0) : a; return <tr key={disNo}>
                   <td className="orta">{disNo || 'genel'}</td><td>{(r[p.id] ?? []).map(s => s.islem).join(' + ') || <span className="sonuk">—</span>}</td><td className="sag">{para.format(a)}</td>
@@ -564,7 +565,7 @@ export function DisPlanKarti() {
                 {yazar && !p.anaPlanId && x.durum <= 2 && p.durum <= 2 && <button className="d" onClick={() => void anaYap(x.id, x.planNo)}>🔁 {x.varyant}'yi ana plan yap</button>}
               </span>)}
               <button className="d" onClick={() => window.print()}>🖨 Karşılaştırmalı proforma</button>
-              <span className="ds-sp sonuk">Varyant ayrı plan kaydıdır (<code>varyant</code>, <code>ana_plan_id</code>); onaylanan sürer, öteki "iptal (seçilmedi)".</span>
+              <span className="ds-sp sonuk">{c('Varyant ayrı plan kaydıdır (')}<code>varyant</code>, <code>ana_plan_id</code>); onaylanan sürer, öteki "iptal (seçilmedi)".</span>
             </div>
           </>)}
         </div>
@@ -572,12 +573,12 @@ export function DisPlanKarti() {
 
       {sekme === 'gunluk' && (
         <div className="ds-grp ds-grp-ic">
-          <div className="ds-gb">Günlük <span className="ds-sp sonuk">ISLEMLOG 1130 plan · 1131 satır · 1138 ödeme planı</span></div>
+          <div className="ds-gb">{c('Günlük')}<span className="ds-sp sonuk">ISLEMLOG 1130 plan · 1131 satır · 1138 ödeme planı</span></div>
           <div className="ds-dg"><table>
-            <thead><tr><th>Zaman</th><th>Kullanıcı</th><th>İşlem</th><th>Kayıt</th><th>Bilgi</th></tr></thead>
+            <thead><tr><th>Zaman</th><th>Kullanıcı</th><th>İşlem</th><th>Kayıt</th><th>{c('Bilgi')}</th></tr></thead>
             <tbody>
               {v.gunluk.map((g, i) => <tr key={i}><td>{tarihSaat(g.tarih)}</td><td>{g.kullanici || '—'}</td><td>{LOG_TIP[g.islemTipi] ?? g.islemTipi}</td><td>{LOG_TABLO[g.tabloId] ?? g.tabloId} #{g.kayitId}</td><td style={{ whiteSpace: 'normal', maxWidth: 520 }} className="sonuk">{g.bilgi.replace(/[{}"]/g, '').slice(0, 300)}</td></tr>)}
-              {v.gunluk.length === 0 && <tr><td colSpan={5} className="sonuk">Kayıt yok.</td></tr>}
+              {v.gunluk.length === 0 && <tr><td colSpan={5} className="sonuk">{c('Kayıt yok.')}</td></tr>}
             </tbody>
           </table></div>
           <div className="ds-ic sonuk">Plan sürümleri (ek proforma) henüz ayrı kayıt değil: fiyat değişikliği ve satır ekleme günlükte izlenir.</div>

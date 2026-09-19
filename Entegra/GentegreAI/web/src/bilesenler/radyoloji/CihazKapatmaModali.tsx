@@ -3,6 +3,7 @@ import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { Modal } from '../Modal';
 import { mesaj } from '../mesaj';
+import { c } from '../../dil/ceviri';
 
 /**
  * CİHAZ KAPATMA (318) - bakım / arıza / tatil.
@@ -63,13 +64,13 @@ export function CihazKapatmaModali({ cihazId, cihazAdi, baslangic, bitis,
                <button className="d onay" disabled={kaydediyor} onClick={() => void kaydet()}>
                  {kaydediyor ? '⏳ Kaydediliyor…' : '🔒 Kapatmayı Kaydet'}
                </button>
-               <button className="d" onClick={onKapat}>✖ Kapat</button>
+               <button className="d" onClick={onKapat}>{c('✖ Kapat')}</button>
              </>
            }>
       {hata && <div className="hata-kutusu">{hata}</div>}
 
       <div className="kagrup">
-        <h6>Kapatma</h6>
+        <h6>{c('Kapatma')}</h6>
         <div className="alan-izgara tek-sutun">
           <label className="alan">
             <span className="etiket zorunlu-isaret">Neden</span>

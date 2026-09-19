@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
 import { mesaj } from '../mesaj';
+import { c } from '../../dil/ceviri';
 
 /**
  * CEKIM ONCESI KONTROL LISTESI (310) - mockup radyoloji_istem_karti.html.
@@ -68,15 +69,15 @@ export function KontrolListesi({ istemId, saltOkunur }: {
 
   return (
     <div className="kagrup rad-kontrol">
-      <h6>Çekim Öncesi Kontrol Listesi</h6>
+      <h6>{c('Çekim Öncesi Kontrol Listesi')}</h6>
       {hata && <div className="hata-kutusu">{hata}</div>}
 
       <table className="detay-tablo">
         <thead>
           <tr>
-            <th style={{ width: '46%' }}>Soru</th>
+            <th style={{ width: '46%' }}>{c('Soru')}</th>
             <th style={{ width: 150 }}>Yanıt</th>
-            <th>Kaydeden</th>
+            <th>{c('Kaydeden')}</th>
           </tr>
         </thead>
         <tbody>
@@ -95,7 +96,7 @@ export function KontrolListesi({ istemId, saltOkunur }: {
                     <option value="">—</option>
                     <option value="Evet">Evet</option>
                     <option value="Hayır">Hayır</option>
-                    <option value="Bilinmiyor">Bilinmiyor</option>
+                    <option value="Bilinmiyor">{c('Bilinmiyor')}</option>
                   </select>
                 ) : (
                   <input value={s.yanit} maxLength={120} disabled={saltOkunur}

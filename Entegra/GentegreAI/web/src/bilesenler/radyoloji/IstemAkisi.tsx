@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
+import { c } from '../../dil/ceviri';
 
 /**
  * ISTEM AKIS SERIDI + OZET (310) - mockup radyoloji_istem_karti.html.
@@ -71,13 +72,13 @@ export function IstemAkisi({ istemId }: { istemId: number }) {
         ))}
       </div>
       <div className="akis-ozet">
-        <span>İstem No: <b>{akis.accessionNo}</b></span>
+        <span>{c('İstem No:')}<b>{akis.accessionNo}</b></span>
         <span>Bekleme (istem→çekim):{' '}
           <b>{akis.beklemeDk == null ? '—' : `${akis.beklemeDk} dk`}</b></span>
-        <span>Rapor: <b>{RAPOR_DURUM[akis.raporDurum] ?? '—'}</b>
+        <span>{c('Rapor:')}<b>{RAPOR_DURUM[akis.raporDurum] ?? '—'}</b>
           {akis.raporNo ? ` · ${akis.raporNo}` : ''}
           {akis.raporYazan ? ` · ${akis.raporYazan}` : ''}</span>
-        <span>Oluşturan: <b>{akis.olusturan || '—'}</b>
+        <span>{c('Oluşturan:')}<b>{akis.olusturan || '—'}</b>
           {akis.istemZamani ? ` · ${zaman(akis.istemZamani)}` : ''}</span>
       </div>
     </div>
