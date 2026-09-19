@@ -15584,3 +15584,9 @@ zaman bilgisini taşıyor. Rol dar görünüyor çünkü **sistemde ayrı bir
 araç/sefer ekranı henüz yok**; öyle bir ekran açılırsa yetkisi buraya girer.
 
 Tanımlı rol 79.
+
+## 837 — "Göz Hekimi" → "Göz Doktoru"
+
+Kullanıcı: *"Göz Hekimi rename Göz Doktoru"*. Kod `goz_hekimi` değişmedi -
+790, 833 ve 835 ile aynı yol; göç yalnız eski varsayılan addaki satırı
+günceller. Şablon ve kadro ağacı mockup'ı da tazelendi.

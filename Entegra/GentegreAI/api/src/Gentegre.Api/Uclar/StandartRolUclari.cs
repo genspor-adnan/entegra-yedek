@@ -378,7 +378,9 @@ public static class StandartRolUclari
         new("dis_lab_sorumlu", "Lab Sorumlusu (Protez)", "Lab iş emirleri, kurye, aşama takibi, lab faturası eşleme.", ["dis"],
             K(H("dis.lab"), T("dis"), T("dis.unit"), T("dis.hasta"), T("hasta"), T("cari"))),
         // ---- göz
-        new("goz_hekimi", "Göz Hekimi", "Göz muayenesi, görüntüleme değerlendirme, işlem, reçete, takip.", ["dal_goz", "tip_merkezi", "hastane"],
+        // AD "Göz Doktoru" (kullanici) - KOD `goz_hekimi` KALIR; 790/833/835
+        //   ile ayni yol.
+        new("goz_hekimi", "Göz Doktoru", "Göz muayenesi, görüntüleme değerlendirme, işlem, reçete, takip.", ["dal_goz", "tip_merkezi", "hastane"],
             K([.. HekimTemel, H("goz"), H("goz.%"), A("goz.goruntuleme.degerlendir"), A("goz.islem.uygula")])),
         new("optometrist", "Optometrist / Refraksiyonist", "Ön tetkik, ölçüm, gözlük-lens reçetesi hazırlığı.", ["dal_goz"],
             K(Y("goz.on_tetkik"), Y("goz.recete"), Y("goz.goruntuleme"), T("goz"), T("goz.muayene"), T("hasta"), T("randevu"))),
