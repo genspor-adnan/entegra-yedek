@@ -255,6 +255,11 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
    * liste, rapor ciktisi) unvaniyla gorunur.
    */
   const unvanOneki = useUnvanOneki(kaynak);
+  // YENI PERSONELIN ANA ROLU (845, kullanici: "yeni pers kart actim ana rol
+  //   yoktu ekleyemedim.. zorunlu alan olmali.. kaydedince o da harekete
+  //   gecmeli"): rol `taraf_kullanici`da durur ve o kayit kart yazilmadan
+  //   YOKTUR - secim burada bekletilir, Kaydet'ten sonra uygulanir.
+  const [yeniAnaRol, setYeniAnaRol] = useState(0);
 
   const [meta, setMeta] = useState<KartMetaYaniti | null>(null);
   /**
@@ -1057,6 +1062,15 @@ Yine de yeni hasta kaydı eklensin mi?`);
       }
     }
 
+    // ANA ROL ZORUNLU (845): hesapsiz personel hicbir ekrana giremez ve
+    //   kadro defterinin ilk satiri rolsuz kalirdi.
+    if (kaynak === 'personel' && yeniMi && !yeniAnaRol) {
+      setHata('Ana Rol seçilmeden personel kaydedilemez.');
+      const hedef = sekmeBul('gorevId');
+      if (hedef) setAktifSekme(hedef);
+      return;
+    }
+
     setKaydediyor(true);
     setHata(null);
     setAlanHatalari({});
@@ -1073,6 +1087,12 @@ Yine de yeni hasta kaydı eklensin mi?`);
       const yanit = yeniMi
         ? await api.kartEkle(kaynak, govde)
         : await api.kartGuncelle(kaynak, id as number, govde);
+
+      // YENI PERSONELIN ANA ROLU (845): kart yazildi, artik id var - rol
+      //   simdi atanir. Hesabi olmayan personelde `AtaAsync` hesabi da acar
+      //   ve DB tetigi rolu kadro defterinin ilk satirina isler.
+      if (kaynak === 'personel' && yeniMi && yeniAnaRol)
+        await api.kartRolDegistir(Number(yanit.kart.id), yeniAnaRol);
 
       // Kartin AYRI uca yazan bolumleri (personel > yetkili subeler) tek
       //   Kaydet'e baglidir: kart yazildiktan sonra kuyruk calisir.
@@ -1601,6 +1621,8 @@ Yine de yeni hasta kaydı eklensin mi?`);
 
       {aktif?.tur === 'grup' && meta && (
         <KartGrupSarmalayici
+          yeniAnaRol={kaynak === 'personel' && yeniMi
+            ? { secili: yeniAnaRol, onSec: setYeniAnaRol } : undefined}
           aktif={aktif} kaynak={kaynak} id={id} yeniMi={yeniMi} meta={meta}
           salt={salt} personelGibiKart={personelGibiKart}
           deger={deger} setDeger={setDeger} alanDegistir={alanDegistir}

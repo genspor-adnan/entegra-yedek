@@ -359,15 +359,25 @@ public sealed class RolKullaniciDeposu
     public async Task KartRolDegistirAsync(int kartId, int rolId, YazmaBaglami baglam,
         CancellationToken iptal = default)
     {
-        // KADRO KILIDI (843): personelin ana rolu yururluk tarihi olmadan
-        //   degismez - kart comboyu zaten kapatiyor, burasi dogrudan gelen
+        // KADRO KILIDI (843/845): personelin ana rolu yururluk tarihi olmadan
+        //   DEGISMEZ - ama ILK atama serbesttir. Yeni personel kaydedilirken
+        //   hesabi henuz yoktur; o ilk rol kadro defterinin ilk satirina
+        //   islenir (tg_personel_rol_iz, INSERT dali). Kilit yalniz hesabi
+        //   OLAN personelde: kart comboyu kapatir, burasi dogrudan gelen
         //   istegi de reddeder.
         await using (var baglanti = await _veri.AcAsync(iptal))
         {
-            var personel = await baglanti.TekDegerAsync<int>(
-                "select 1 from public.taraf_personel where id = @p0", null,
-                new object?[] { kartId }, iptal);
-            if (personel == 1)
+            // Yeni personel kaydi hesabi "Rol Atanmamis" YER TUTUCUSU ile
+            //   aciyor - o hesabin rolu henuz verilmemistir, kilit onu
+            //   kapsamaz. Kilit gercek bir rol tasiyan personelde baslar.
+            var kilitli = await baglanti.TekDegerAsync<int>("""
+                select 1 from public.taraf_personel p
+                  join public.taraf_kullanici k on k.id = p.id
+                 where p.id = @p0
+                   and k.rol_id <> coalesce((select id from public.rol
+                                              where kod = 'atanmamis'), 0)
+                """, null, new object?[] { kartId }, iptal);
+            if (kilitli == 1)
                 throw GentegreHatasi.Dogrulama(
                     "Personelin ana rolu karttan degistirilemez.",
                     new AlanHatasi("rolId", "Ana rol, Kadro Geçmişi'nden yürürlük "

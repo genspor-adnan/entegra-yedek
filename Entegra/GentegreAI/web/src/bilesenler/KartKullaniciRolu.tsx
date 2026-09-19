@@ -30,9 +30,16 @@ const dinleyiciler = new Set<(kartId: number) => void>();
 const KADRO_IPUCU = "Ana rol Kadro Geçmişi'nden, yürürlük tarihiyle değişir";
 const rolDegisti = (kartId: number) => dinleyiciler.forEach(d => d(kartId));
 
-export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi }: {
+export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi, yeniKayit }: {
   kartId: number;
   saltOkunur: boolean;
+  /**
+   * YENI PERSONEL (845, kullanici: "yeni pers kart actim ana rol yoktu
+   * ekleyemedim.. zorunlu alan olmali"): kayit henuz yok, hesap da yok -
+   * secim KARTIN state'inde tutulur ve Kaydet'ten SONRA uygulanir. Bu modda
+   * bilesen sunucuya yazmaz, yalniz rol listesini gosterir (`kartId` 0).
+   */
+  yeniKayit?: { secili: number; onSec(rolId: number): void };
   /** Kimlik seridinde tek alan olarak cizilir (kutu/baslik yok). */
   sade?: boolean;
   /**
@@ -105,6 +112,20 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi }: {
       {bilgi.roller.map(r => <option key={r.id} value={r.id}>{r.ad}</option>)}
     </select>
   );
+
+  // YENI KAYIT: hesap yok, secim kartta bekler (845).
+  if (yeniKayit) {
+    return (
+      <label className="alan tip-kod">
+        <span className="etiket zorunlu-isaret">Ana Rol</span>
+        <select value={yeniKayit.secili || ''} disabled={saltOkunur}
+                onChange={e => yeniKayit.onSec(Number(e.target.value))}>
+          <option value="">— seçiniz —</option>
+          {(bilgi?.roller ?? []).map(r => <option key={r.id} value={r.id}>{r.ad}</option>)}
+        </select>
+      </label>
+    );
+  }
 
   // IS BILGILERI modu: iki combo yan yana (kutu/baslik yok - kutunun icindeyiz).
   if (isBilgi) {

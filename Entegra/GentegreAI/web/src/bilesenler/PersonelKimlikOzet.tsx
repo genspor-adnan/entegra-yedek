@@ -5,7 +5,6 @@ import { useYerler, VARSAYILAN_UYRUK } from './yerlerHook';
 import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { TekOzluk } from './TekOzluk';
-import { KartKullaniciRolu } from './KartKullaniciRolu';
 import { KartKullaniciSubeleri } from './KartKullaniciSubeleri';
 
 interface Props {
@@ -127,7 +126,9 @@ export function PersonelKimlikOzet({
                 gizli - geriye bos bir `.adres-satir` kaliyor ve grid'in satir
                 araligi kadar (8px) fazladan bosluk uretiyordu. Bos ama
                 gorunmez bir satir, hizalamayi bozan en sinsi seydir. */}
-            {(!vknoGizli || (!ozetGizli && kaynakId)) && (
+            {/* Satir yalniz TC No icin cizilir (845: Rol buradan kalkti) -
+                bos ama gorunmez satir grid araligini bozuyordu. */}
+            {!vknoGizli && (
               <div className="adres-satir">
                 {!vknoGizli && (
                   <label className="alan tip-metin">
@@ -136,11 +137,10 @@ export function PersonelKimlikOzet({
                       onChange={e => onVknoDegis(e.target.value)} />
                   </label>
                 )}
-                {/* ROL burada (kullanici: gorev ile yer degistirdi) - gorev
-                    kimlik seridinde. Kullanici hesabi yoksa alan cizilmez. */}
-                {!ozetGizli && kaynakId && (
-                  <KartKullaniciRolu sade kartId={kaynakId} saltOkunur={saltOkunur} />
-                )}
+                {/* ROL BURADAN KALKTI (845, kullanici: "hem rol hem ana rol
+                    olmasin"): ayni bilgi Is Bilgileri kutusunda "Ana Rol"
+                    olarak duruyordu - iki kutu ayni degeri gosterince
+                    hangisinin yazdigi belirsizdi. Tek yer: Is Bilgileri. */}
               </div>
             )}
             <div className="adres-satir">
