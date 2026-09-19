@@ -79,7 +79,19 @@ public static class VeriHatasi
         ["ux_fiyat_listesi_ad_donem"] =
             "Bu adda ve aynı başlama/bitiş tarihli bir fiyat listesi zaten var; "
             + "adı ya da dönemi değiştirin.",
-        ["ux_fiyat_listesi_ad"] = "Bu adda bir fiyat listesi zaten var."
+        ["ux_fiyat_listesi_ad"] = "Bu adda bir fiyat listesi zaten var.",
+        // PERSONEL KIMLIK BENZERSIZLIGI (846, kullanici: "personelde de
+        //   sicilno ve kimlikno kontrolu yap aynisi tekrar girilemez" +
+        //   "mail adresi ve telefon kontrolu de"). Kisit YALNIZ personelde:
+        //   hastada ayni telefon aile bireylerinde paylasilabiliyor.
+        ["ux_taraf_personel_kod"] =
+            "Bu sicil numarası başka bir personelde kayıtlı.",
+        ["ux_taraf_personel_vkno"] =
+            "Bu kimlik numarası başka bir personelde kayıtlı.",
+        ["ux_taraf_personel_eposta"] =
+            "Bu e-posta adresi başka bir personelde kayıtlı.",
+        ["ux_taraf_personel_cep"] =
+            "Bu cep telefonu başka bir personelde kayıtlı."
     };
 
     /// <summary>

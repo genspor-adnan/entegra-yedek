@@ -1,4 +1,5 @@
 import { BolumSuzgeci } from '../../bilesenler/BolumSuzgeci';
+import { RolSuzgeci } from '../../bilesenler/RolSuzgeci';
 import type { PersonelSuzgeci } from './usePersonelSuzgeci';
 
 /**
@@ -18,12 +19,8 @@ export function PersonelSeridi(
         />
       )}
       {s.rolSuzgeciVar && (
-        <select className="kat-suzgec" value={s.rol}
-                title="Kullanıcı rolüne göre süz"
-                onChange={e => s.setRol(e.target.value ? Number(e.target.value) : '')}>
-          <option value="">Tüm Roller</option>
-          {s.roller.map(r => <option key={r.id} value={r.id}>{r.ad}</option>)}
-        </select>
+        <RolSuzgeci roller={s.roller} bolumler={s.rolBolumleri}
+                    deger={s.rol} onDegis={s.setRol} />
       )}
       {(s.bolum !== null || s.rol !== '') && (
         <button type="button" className="kapat" title="Bölüm/rol filtresini kaldır"
