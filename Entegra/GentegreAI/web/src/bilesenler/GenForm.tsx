@@ -671,7 +671,11 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
           const d = k.kart[a.ad];
           gelen[a.ad] = a.tip === 'mantik' ? Number(d) === 1 : (d === null || d === undefined ? '' : String(d));
         });
-        if (kaynak === 'dis-hekim') unvanOneki.setHam(String(k.kart.unvan ?? '').trim());
+        // UNVAN ONEKI (844): personelde de ad/soyadin onunde saklanir -
+        //   "Uzm.Dr. Ali Yildirim". Ham unvan hook'a verilir, hook bilinen
+        //   onegi ayirip comboya koyar.
+        if (kaynak === 'dis-hekim' || kaynak === 'personel')
+          unvanOneki.setHam(String(k.kart.unvan ?? '').trim());
         // SECILI kodun adi listede yoksa EKLE: kod tablolari yalniz AKTIF
         //   satirlari gonderir; kayitta pasiflesmis bir deger (or. pasif
         //   personel temsilci olarak duruyorsa) comboda bos gorunur ve kayit

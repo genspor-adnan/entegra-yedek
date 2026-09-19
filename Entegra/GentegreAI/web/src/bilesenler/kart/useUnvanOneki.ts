@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/istemci';
 
+/** Unvan onegi kullanan kartlar (843/844): dis hekim ve PERSONEL. */
+const ONEKLI_KARTLAR = new Set(['dis-hekim', 'personel']);
+
 /**
- * HEKIM UNVAN ONEKI (dis hekim karti): "Op.Dr." gibi onek AYRI bir combo'dan
- * secilir, kaydederken ad/soyadin onune eklenir. Boylece hekim her yerde
+ * HEKIM UNVAN ONEKI (dis hekim ve personel karti): "Op.Dr." gibi onek AYRI
+ * bir combo'dan secilir, kaydederken ad/soyadin onune eklenir. Boylece hekim her yerde
  * (arama, liste, rapor ciktisi) unvaniyla gorunur.
  *
  * Onek ayristirmasi AYRI bir etkide yapilir: kod listesi ASENKRON geliyor,
@@ -16,12 +19,12 @@ export function useUnvanOneki(kaynak: string) {
   const [ham, setHam] = useState('');
 
   useEffect(() => {
-    if (kaynak !== 'dis-hekim' || !ham || secenekler.length === 0) return;
+    if (!ONEKLI_KARTLAR.has(kaynak) || !ham || secenekler.length === 0) return;
     setOnek(secenekler.find(o => ham.startsWith(o + ' ')) ?? '');
   }, [kaynak, ham, secenekler]);
 
   useEffect(() => {
-    if (kaynak !== 'dis-hekim') return;
+    if (!ONEKLI_KARTLAR.has(kaynak)) return;
     let iptal = false;
     void (async () => {
       try {

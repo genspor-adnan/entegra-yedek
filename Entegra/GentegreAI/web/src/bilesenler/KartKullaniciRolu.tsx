@@ -113,6 +113,10 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi }: {
       return <div className="not">Bu personelin kullanıcı hesabı yok - rol
         ataması Yönetim › Kullanıcılar'dan hesap açılınca yapılır.</div>;
     }
+    // YAN ROL COMBOSU KALKTI (844, kullanici: "yan rol comboyu kaldır"):
+    //   Is Bilgileri kutusunda tek soru "bu kisinin rolu ne". Yan roller
+    //   Yonetim > Kullanicilar kartindaki "Ek roller" listesinden verilir -
+    //   mevcut yan roller burada yalnizca ROZET olarak okunur.
     const ekler = bilgi.roller.filter(r => bilgi.ekRolIdleri.includes(r.id));
     return (
       <>
@@ -122,33 +126,15 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi }: {
               kilitli sistem rolu). */}
           <span className="etiket zorunlu-isaret">Ana Rol</span>
           {anaCombo}
-          {rolKilitli && <span className="ipucu">{KADRO_IPUCU}</span>}
         </label>
-        <label className="alan tip-kod">
-          <span className="etiket">Yan Rol</span>
-          <select value="" disabled={saltOkunur || islemde}
-                  onChange={e => { const v = Number(e.target.value);
-                                   if (v) void ekDegistir(v, true) }}>
-            <option value="">+ Yan rol ekle…</option>
-            {bilgi.roller
-              .filter(r => r.id !== bilgi.rolId && !bilgi.ekRolIdleri.includes(r.id))
-              .map(r => <option key={r.id} value={r.id}>{r.ad}</option>)}
-          </select>
-          {ekler.length > 0 && (
+        {ekler.length > 0 && (
+          <label className="alan tip-kod">
+            <span className="etiket">Yan Roller</span>
             <span className="secim-rozetleri">
-              {ekler.map(r => (
-                <span key={r.id} className="rozet mavi">
-                  {r.ad}
-                  {!saltOkunur && (
-                    <button type="button" className="rozet-sil" title="Yan rolü kaldır"
-                            disabled={islemde}
-                            onClick={() => void ekDegistir(r.id, false)}>✕</button>
-                  )}
-                </span>
-              ))}
+              {ekler.map(r => <span key={r.id} className="rozet mavi">{r.ad}</span>)}
             </span>
-          )}
-        </label>
+          </label>
+        )}
         {hata && <div className="alan-hata">{hata}</div>}
         {mesaj && <div className="bilgi-kutusu">{mesaj}</div>}
       </>
@@ -184,7 +170,6 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi }: {
              <label className="alan tip-kod">
                <span className="etiket">Ana rol</span>
                {anaCombo}
-               {rolKilitli && <span className="ipucu">{KADRO_IPUCU}</span>}
              </label>
 
              <div className="alan">

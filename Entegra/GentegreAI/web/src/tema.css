@@ -830,6 +830,10 @@ tr.panel-basligi .d.mini {
 .alan textarea:disabled { background: var(--yuz2); color: var(--soluk) }
 .alan input:focus, .alan select:focus, .inp:focus { outline: 2px solid var(--mor2); border-color: var(--dugkenar) }
 .alan input:disabled, .alan select:disabled, .inp:disabled { background: var(--yuz2); color: var(--soluk) }
+/* Kimlik seridinde TEK SUTUNU paylasan iki kisa alan (844: Sicil No + Ünvan). */
+.serit-ikili { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; min-width: 0 }
+.serit-ikili > .alan { min-width: 0 }
+
 /* Mockup .ikili: deger + birim TEK etiket altinda yan yana (or. Raf Ömrü: sayi + Gün/Ay/Yıl). */
 .alan .ikili { grid-column: 2; display: flex; gap: 5px; min-width: 0 }
 .alan .ikili input { flex: 1; min-width: 0 }
@@ -1131,6 +1135,9 @@ input.skt-gecmis {
   background: linear-gradient(#4d8fd6, #2f6db3); color: #fff; font-weight: 700; font-size: 13px;
 }
 .giris-kart button:disabled { opacity: .6; cursor: default }
+/* "Şifremi Unuttum": düğme değil metin bağlantısı (giriş kartı). */
+.giris-kart .giris-baglanti { align-self: flex-end; margin-top: 2px; font-size: 11px; color: var(--vurgu); text-decoration: none; cursor: pointer }
+.giris-kart .giris-baglanti:hover { text-decoration: underline }
 
 .tam-ekran-bilgi { display: grid; place-items: center; min-height: 100vh; color: var(--soluk) }
 .yukleniyor-satir { padding: 24px; text-align: center; color: var(--soluk) }

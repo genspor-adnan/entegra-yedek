@@ -122,9 +122,29 @@ export function KartKimlikSeridi({
                   OTOMATIK verilir - yeni kayitta da sorulmaz. Kayitli kartta
                   numara basliktan okunur; duzenlenecek bir alan degil,
                   seritte yer kapliyordu. */}
+              {/* PERSONELDE SICIL NO HUCRESI IKIYE BOLUNUR (844, kullanici:
+                  "sicil no editini 2'ye böl sağına Ünvan combo ekle"): ikisi de
+                  kisa deger, yan yana tek sutuna sigiyor ve seritteki alan
+                  sayisi artmiyor. Onek ad/soyadin ONUNE yazilir (kartGovdesi) -
+                  hekim listede, aramada ve ciktida unvaniyla gorunsun. */}
+              {kaynak === 'personel' && (
+                <div className="serit-ikili">
+                  {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'kod'))}
+                  <label className="alan tip-kod">
+                    <span className="etiket">Ünvan</span>
+                    <select value={unvanOneki.onek} disabled={salt}
+                            onChange={e => unvanOneki.setOnek(e.target.value)}>
+                      <option value="">—</option>
+                      {unvanOneki.secenekler.map(o =>
+                        <option key={o} value={o}>{o}</option>)}
+                    </select>
+                  </label>
+                </div>
+              )}
               {renderAlanListesi(kimlikAlanlari.filter(a =>
                 ['kod', 'ad', 'soyad', 'departman'].includes(a.ad)
-                && !(kaynak === 'hasta' && a.ad === 'kod')))}
+                && !(kaynak === 'hasta' && a.ad === 'kod')
+                && !(kaynak === 'personel' && a.ad === 'kod')))}
               {/* GOREV seritte YALNIZ PERSONELDE (kullanici: "hasta kartında en
                   üstte görev kaldır"): hastanin gorevi yoktur - alan katalogda
                   zaten GIZLI, buraya ACIKCA cizildigi icin o gizlemeyi
