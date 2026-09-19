@@ -48,7 +48,12 @@ public static partial class KaynakKatalogu
                 Bicim: "rozet", Filtrelenebilir: false),
             new("tur", "v.tur", "kod", "Tür Kodu", Kodlar: KadroTurKodlari,
                 Varsayilan: false),
-            new("gorev", "v.gorev", "metin", "Görev / unvan", Genislik: 180),
+            // GOREV: serbest metin kolonu neredeyse hep bos (katalog gorevi
+            //   `gorev_id`de) - hucre bos gorunuyordu. Once serbest metin,
+            //   yoksa katalog adi (842).
+            new("gorev", "case when coalesce(v.gorev, '') <> '' then v.gorev "
+                       + "else coalesce(v.gorev_adi, '') end",
+                "metin", "Görev / unvan", Genislik: 180, Filtrelenebilir: false),
             new("departmanAdi", "v.departman_adi", "metin", "Bölüm", Genislik: 150,
                 Filtrelenebilir: false),
             new("yoneticiAd", "v.yonetici_ad", "metin", "Yönetici", Genislik: 160,

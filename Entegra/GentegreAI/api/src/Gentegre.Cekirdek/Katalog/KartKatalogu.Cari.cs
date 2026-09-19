@@ -318,7 +318,16 @@ public static partial class KartKatalogu
                 new("yururluk", "yururluk", "tarih", Zorunlu: true, Baslik: "Yürürlük"),
                 new("tur", "tur", "kod", Zorunlu: true, Baslik: "Hareket",
                     SabitKodlar: KaynakKatalogu.KadroTurKodlari),
-                new("gorev", "gorev", "metin", EnFazlaUzunluk: 100, Baslik: "Görev / unvan"),
+                // BOLUM + GOREV (842, kullanici: "kadro gecmisine bolum ve gorev
+                //   gelmemis"): kartta kilitli olan iki alan BURADAN degisir -
+                //   defterde gorunmemeleri sekmeyi iseyaramaz kiliyordu.
+                //   Gorev departmana bagli (kartla ayni kural).
+                new("departmanId", "departman_id", "kod", Baslik: "Bölüm",
+                    KodTablosu: "public.v_departman_lookup"),
+                new("gorevId", "gorev_id", "kod", Baslik: "Görev",
+                    KodTablosu: "public.v_gorev_lookup", BagliAlan: "departmanId"),
+                // Serbest metin unvan: katalog disi kadro unvani icin durur.
+                new("gorev", "gorev", "metin", EnFazlaUzunluk: 100, Baslik: "Unvan (serbest)"),
                 new("yoneticiTarafId", "yonetici_taraf_id", "kod", Baslik: "Yönetici",
                     KodTablosu: "public.v_personel_lookup"),
                 // SURELI HAREKET: vekalet/aski bitince onceki pozisyon geri gelir.
