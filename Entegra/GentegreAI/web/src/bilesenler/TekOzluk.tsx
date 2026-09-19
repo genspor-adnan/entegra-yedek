@@ -1,6 +1,7 @@
 import type { DetayDurumu, Satir } from './GenDetayTablo';
 import type { KartDetayMeta } from '../api/sozlesme';
 import { grupluSecenekler } from './grupluSecenek';
+import { c } from '../dil/ceviri';
 
 interface Props {
   meta: KartDetayMeta;
@@ -51,7 +52,7 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk, isBilgiEk }
           <div className="adres-satir">
             {subeEk}
             <label className="alan tip-kod">
-              <span className="etiket">Yönetici</span>
+              <span className="etiket">{c('Yönetici')}</span>
               <select value={String(satir.yoneticiId ?? '')} disabled={saltOkunur}
                 onChange={e => degis({ yoneticiId: e.target.value })}>
                 <option value="">—</option>
@@ -67,7 +68,7 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk, isBilgiEk }
           </div>
           <div className="adres-satir">
             <label className="alan tip-kod">
-              <span className="etiket">Çalışma Şekli</span>
+              <span className="etiket">{c('Çalışma Şekli')}</span>
               <select value={String(satir.calismaSekli ?? '')} disabled={saltOkunur}
                 onChange={e => degis({ calismaSekli: e.target.value })}>
                 <option value="">—</option>
@@ -75,7 +76,7 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk, isBilgiEk }
               </select>
             </label>
             <label className="alan tip-kod">
-              <span className="etiket">Vardiya Türü</span>
+              <span className="etiket">{c('Vardiya Türü')}</span>
               <select value={String(satir.vardiyaTuru ?? '')} disabled={saltOkunur}
                 onChange={e => degis({ vardiyaTuru: e.target.value })}>
                 <option value="">—</option>
@@ -85,7 +86,7 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk, isBilgiEk }
           </div>
           <div className="adres-satir">
             <label className="alan tip-kod">
-              <span className="etiket">Sözleşme Türü</span>
+              <span className="etiket">{c('Sözleşme Türü')}</span>
               <select value={String(satir.sozlesmeTuru ?? '')} disabled={saltOkunur}
                 onChange={e => degis({ sozlesmeTuru: e.target.value })}>
                 <option value="">—</option>
@@ -93,7 +94,7 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk, isBilgiEk }
               </select>
             </label>
             <label className="alan tip-kod">
-              <span className="etiket">Deneme Süresi</span>
+              <span className="etiket">{c('Deneme Süresi')}</span>
               <select value={String(satir.denemeSuresi ?? '')} disabled={saltOkunur}
                 onChange={e => degis({ denemeSuresi: e.target.value })}>
                 <option value="">—</option>
@@ -114,14 +115,14 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk, isBilgiEk }
                 bakiyesini de bozardi. Alan metasi `yalnizYeniKayitta`
                 tasiyor; GenForm mevcut kayitta `yazilabilir`i kapatiyor. */}
             <label className="alan tip-tarih">
-              <span className="etiket zorunlu-isaret">İşe Giriş</span>
+              <span className="etiket zorunlu-isaret">{c('İşe Giriş')}</span>
               <input type="date" value={String(satir.iseGirisTarihi ?? '').slice(0, 10)}
                 disabled={saltOkunur || alan('iseGirisTarihi')?.yazilabilir === false}
                 title={alan('iseGirisTarihi')?.ipucu ?? undefined}
                 onChange={e => degis({ iseGirisTarihi: e.target.value })} />
             </label>
             <label className="alan tip-tarih">
-              <span className="etiket">İşten Çıkış</span>
+              <span className="etiket">{c('İşten Çıkış')}</span>
               <input type="date" value={String(satir.istenCikisTarihi ?? '').slice(0, 10)}
                 disabled={saltOkunur || alan('istenCikisTarihi')?.yazilabilir === false}
                 title={alan('istenCikisTarihi')?.ipucu ?? undefined}
@@ -130,18 +131,18 @@ export function TekOzluk({ meta, durum, saltOkunur, onDegis, subeEk, isBilgiEk }
           </div>
           <div className="adres-satir">
             <label className="alan tip-metin">
-              <span className="etiket">SGK Sicil No</span>
+              <span className="etiket">{c('SGK Sicil No')}</span>
               <input value={String(satir.sgkSicilNo ?? '')} disabled={saltOkunur}
                 onChange={e => degis({ sgkSicilNo: e.target.value })} />
             </label>
             <label className="alan tip-tarih">
-              <span className="etiket">SGK Başlama</span>
+              <span className="etiket">{c('SGK Başlama')}</span>
               <input type="date" value={String(satir.sgkBaslamaTarihi ?? '').slice(0, 10)} disabled={saltOkunur}
                 onChange={e => degis({ sgkBaslamaTarihi: e.target.value })} />
             </label>
           </div>
           <label className="alan tip-metin">
-            <span className="etiket">Meslek Kodu</span>
+            <span className="etiket">{c('Meslek Kodu')}</span>
             <input value={String(satir.meslekKodu ?? '')} disabled={saltOkunur}
               onChange={e => degis({ meslekKodu: e.target.value })} />
           </label>

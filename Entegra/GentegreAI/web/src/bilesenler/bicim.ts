@@ -1,5 +1,6 @@
 import type { KolonMeta } from '../api/sozlesme';
 import { paraSimgesi, subeAyari } from './subeAyari';
+import { aktifDil, yerelKod } from '../dil/ceviri';
 
 /**
  * TEK BICIM KAYNAGI: tutar / miktar bicimleri butun ekranlarda ayni olmali.
@@ -9,10 +10,34 @@ import { paraSimgesi, subeAyari } from './subeAyari';
  * Onceden her dosya kendi Intl.NumberFormat'ini kuruyordu (8 kopya); biri
  * degistiginde otekiler geride kaliyordu.
  */
-export const para = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+/**
+ * BİÇİM YERELE GÖRE (849): ayraçlar dilden okunur - `1.234,56` Türkçede,
+ * `1,234.56` İngilizcede doğrudur. İŞ KURALI DEĞİŞMEZ: hane sayıları
+ * (para 2, kur 4) ve tutarın kendisi aynı kalır, yalnız gösterim değişir.
+ *
+ * Biçimleyiciler yerel başına bir kez kurulur (Intl nesnesi pahalıdır) ve
+ * dil değişince yeni yerelle yeniden kurulur.
+ */
+type BicimKurucu = () => Intl.NumberFormat;
+function yerele(kur: (y: string) => Intl.NumberFormat): BicimKurucu {
+  const onbellek = new Map<string, Intl.NumberFormat>();
+  return () => {
+    const y = yerelKod();
+    let b = onbellek.get(y);
+    if (!b) { b = kur(y); onbellek.set(y, b) }
+    return b;
+  };
+}
+const paraB = yerele(y => new Intl.NumberFormat(y, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+const para4B = yerele(y => new Intl.NumberFormat(y, { minimumFractionDigits: 2, maximumFractionDigits: 4 }));
+const say4B = yerele(y => new Intl.NumberFormat(y, { maximumFractionDigits: 4 }));
+const sayiB = yerele(y => new Intl.NumberFormat(y));
+
+/** Eski çağrı biçimi korunur (`para.format(x)`): 120 yerde kullanılıyor. */
+export const para = { format: (d: number) => paraB().format(d) };
 /** Kur / carpan kolonlari - dort hane (7,0092'nin 7,01 gorunmemesi icin). */
-export const para4 = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
-export const say4 = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 4 });
+export const para4 = { format: (d: number) => para4B().format(d) };
+export const say4 = { format: (d: number) => say4B().format(d) };
 
 /**
  * TUTAR + PARA BIRIMI SIMGESI (666). Simge AKTIF SUBEDEN gelir: Berlin
@@ -24,7 +49,7 @@ export const say4 = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 4 })
 export function paraYaz(deger: number | null | undefined): string {
   return `${para.format(Number(deger ?? 0))} ${paraSimgesi()}`;
 }
-export const sayi = new Intl.NumberFormat('tr-TR');
+export const sayi = { format: (d: number) => sayiB().format(d) };
 
 /**
  * ONDALIKLI SAYI KOLONU: kolonun `bicim` deseni ("#,##0.00000") kaç hane
@@ -49,10 +74,18 @@ export function bicimHanesi(bicim: string | null | undefined): number {
   const n = bicim?.split('.')[1]?.length ?? 0;
   return Number.isFinite(n) ? n : 0;
 }
-const tarih = new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-const tarihSaatBicim = new Intl.DateTimeFormat('tr-TR', {
-  day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
-});
+const tarihB = new Map<string, Intl.DateTimeFormat>();
+function tarihBicimi(saatli = false): Intl.DateTimeFormat {
+  const y = yerelKod() + (saatli ? '|s' : '');
+  let b = tarihB.get(y);
+  if (!b) {
+    b = new Intl.DateTimeFormat(yerelKod(), saatli
+      ? { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }
+      : { day: '2-digit', month: '2-digit', year: 'numeric' });
+    tarihB.set(y, b);
+  }
+  return b;
+}
 
 function tarihParcala(deger: string): { gun: string; ay: string; yil: string; saat?: string; dakika?: string } | null {
   const eslesme = deger.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/);
@@ -66,12 +99,24 @@ function tarihParcala(deger: string): { gun: string; ay: string; yil: string; sa
   };
 }
 
+/**
+ * TARİH SIRASI DİLE GÖRE (849): Türkçede `gg.aa.yyyy`, İngilizcede
+ * `aa/gg/yyyy`. Metin olarak gelen tarih (`2026-09-01`) SAAT DİLİMİ
+ * ÇEVİRMEDEN yazılır - `new Date("2026-09-01")` UTC sayıp yerel saate
+ * çevirince tarih bir gün kayabiliyordu; bu yüzden parçalar elle dizilir.
+ */
+function parcaDiz(p: { gun: string; ay: string; yil: string }): string {
+  return aktifDil() === 0 ? `${p.gun}.${p.ay}.${p.yil}`
+       : aktifDil() === 2 ? `${p.gun}.${p.ay}.${p.yil}`
+       : `${p.ay}/${p.gun}/${p.yil}`;
+}
+
 export function tarihYaz(deger: string): string {
   const parca = tarihParcala(deger);
-  if (parca) return `${parca.gun}.${parca.ay}.${parca.yil}`;
+  if (parca) return parcaDiz(parca);
 
   const t = new Date(deger);
-  return Number.isNaN(t.getTime()) ? deger : tarih.format(t);
+  return Number.isNaN(t.getTime()) ? deger : tarihBicimi().format(t);
 }
 
 /**
@@ -137,7 +182,10 @@ export function bicimle(deger: unknown, kolon: KolonMeta): string {
       // Yuzde kolonu (basvuru tamamlanmasi): deger 0-100 tam sayi gelir,
       //   ekranda "%" ile okunur. Bolme/carpma YOK - sunucu zaten yuzde
       //   gonderiyor, burada ikinci bir hesap iki kaynak demek olurdu.
-      if (kolon.bicim === 'yuzde') return `%${sayi.format(s)}`;
+      // YÜZDE İŞARETİNİN YERİ DİLE GÖRE (849): Türkçede önde (%50),
+      //   İngilizcede arkada (50%).
+      if (kolon.bicim === 'yuzde')
+        return aktifDil() === 0 ? `%${sayi.format(s)}` : `${sayi.format(s)}%`;
       const hane = bicimHanesi(kolon.bicim);
       return hane > 0 ? ondalikSayi(s, hane) : sayi.format(s);
     }
@@ -153,7 +201,7 @@ export function bicimle(deger: unknown, kolon: KolonMeta): string {
       const saatli = kolon.tip === 'zaman' || !!kolon.bicim?.includes('HH');
       const parca = tarihParcala(metin);
       if (parca) {
-        const sadeceTarih = `${parca.gun}.${parca.ay}.${parca.yil}`;
+        const sadeceTarih = parcaDiz(parca);
         return saatli && parca.saat
           ? `${sadeceTarih} ${parca.saat}:${parca.dakika ?? '00'}`
           : sadeceTarih;
@@ -161,7 +209,7 @@ export function bicimle(deger: unknown, kolon: KolonMeta): string {
 
       const t = new Date(metin);
       if (Number.isNaN(t.getTime())) return String(deger);
-      return saatli ? tarihSaatBicim.format(t) : tarih.format(t);
+      return tarihBicimi(saatli).format(t);
     }
     case 'mantik':
       return Number(deger) === 1 ? '✓' : '';

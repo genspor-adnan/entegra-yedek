@@ -6,6 +6,7 @@ import { api } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
 import { TekOzluk } from './TekOzluk';
 import { KartKullaniciSubeleri } from './KartKullaniciSubeleri';
+import { c } from '../dil/ceviri';
 
 interface Props {
   kartAdi?: string;
@@ -163,7 +164,7 @@ export function PersonelKimlikOzet({
                 {/* ZORUNLULUK KATALOGTAN (480): etiketin yildizi elle
                     yazilirsa katalog degistiginde ekran yalan soyler. */}
                 <span className="etiket">
-                  Doğum Tarihi{alan('dogumTarihi')?.zorunlu && ' *'}
+                  {c('Doğum Tarihi')}{alan('dogumTarihi')?.zorunlu && ' *'}
                 </span>
                 {/* Tarih kutusu biraz DAR (kullanici): icerigi sabit
                     genislikte (gg.aa.yyyy). YAS BURADA GOSTERILMEZ
@@ -174,7 +175,7 @@ export function PersonelKimlikOzet({
                   onChange={e => ozlukDegis({ dogumTarihi: e.target.value })} />
               </label>
               <label className="alan tip-metin">
-                <span className="etiket">Doğum Yeri</span>
+                <span className="etiket">{c('Doğum Yeri')}</span>
                 <input value={String(satir.dogumYeri ?? '')} disabled={saltOkunur}
                   onChange={e => ozlukDegis({ dogumYeri: e.target.value })} />
               </label>
@@ -184,7 +185,7 @@ export function PersonelKimlikOzet({
             <div className="adres-satir">
               <label className="alan tip-kod">
                 <span className="etiket">
-                  Cinsiyet{cinsiyetAlan?.zorunlu && ' *'}
+                  {c('Cinsiyet')}{cinsiyetAlan?.zorunlu && ' *'}
                 </span>
                 <select style={{ width: KISA_KUTU }}
                   value={String(satir.cinsiyet ?? '')} disabled={saltOkunur}
@@ -195,7 +196,7 @@ export function PersonelKimlikOzet({
               </label>
               {medeniHalAlan && (
                 <label className="alan tip-kod">
-                  <span className="etiket">Medeni Hal</span>
+                  <span className="etiket">{c('Medeni Hal')}</span>
                   <select value={String(satir.medeniHal ?? '')} disabled={saltOkunur}
                     onChange={e => ozlukDegis({ medeniHal: e.target.value })}>
                     <option value="">-</option>
@@ -207,7 +208,7 @@ export function PersonelKimlikOzet({
             <div className="adres-satir">
               {meslekAlan && (
                 <label className="alan tip-kod">
-                  <span className="etiket">Meslek</span>
+                  <span className="etiket">{c('Meslek')}</span>
                   <select value={String(satir.meslek ?? '')} disabled={saltOkunur}
                     onChange={e => ozlukDegis({ meslek: e.target.value })}>
                     <option value="">-</option>
@@ -216,7 +217,7 @@ export function PersonelKimlikOzet({
                 </label>
               )}
               <label className="alan tip-kod">
-                <span className="etiket">Kan Grubu</span>
+                <span className="etiket">{c('Kan Grubu')}</span>
                 <select style={{ width: KISA_KUTU }}
                   value={String(satir.kanGrubu ?? '')} disabled={saltOkunur}
                   onChange={e => ozlukDegis({ kanGrubu: e.target.value })}>
@@ -266,7 +267,7 @@ export function PersonelKimlikOzet({
                     cizilirse ayni alani iki kutu farkli degerle yazar. */}
                 {kartAdi !== 'hasta' && (
                   <label className="alan tip-kod" style={{ flex: '0 1 50%' }}>
-                    <span className="etiket">Uyruk</span>
+                    <span className="etiket">{c('Uyruk')}</span>
                     {/* Değer SKRS MERNİS kodu (614/617) - ülke adı değil. */}
                     <select value={String(satir.uyruk ?? VARSAYILAN_UYRUK)} disabled={saltOkunur}
                       onChange={e => ozlukDegis({ uyruk: e.target.value })}>

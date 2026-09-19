@@ -4,6 +4,7 @@ import type { Deger } from '../kartAlanCizim';
 import { type DetayDurumu, bosDetay } from '../GenDetayTablo';
 import { TekKayit } from '../TekKayit';
 import type { useUnvanOneki } from './useUnvanOneki';
+import { c } from '../../dil/ceviri';
 
 /** Dokuman seridinde TEK HUCREDE toplanan gecerlilik alanlari (mockup). */
 const GECERLILIK_ALANLARI = ['gecerliBas', 'gecerliBit'];
@@ -107,7 +108,7 @@ export function KartKimlikSeridi({
             <div className="alan-izgara"
                  style={{ gridTemplateColumns: '0.5fr 1fr 1fr 0.5fr 1fr 1fr 0.5fr' }}>
               <label className="alan tip-kod">
-                <span className="etiket">Ünvan</span>
+                <span className="etiket">{c('Ünvan')}</span>
                 <select value={unvanOneki.onek} disabled={salt}
                         onChange={e => unvanOneki.setOnek(e.target.value)}>
                   <option value="">—</option>
@@ -138,7 +139,7 @@ export function KartKimlikSeridi({
                   Kimlik No'nun sagina, Kimlik Bilgileri kutusuna tasindi. */}
               {kaynak === 'personel' && (
                 <label className="alan tip-kod">
-                  <span className="etiket">Ünvan</span>
+                  <span className="etiket">{c('Ünvan')}</span>
                   <select value={unvanOneki.onek} disabled={salt}
                           onChange={e => unvanOneki.setOnek(e.target.value)}>
                     <option value="">—</option>
@@ -188,7 +189,7 @@ export function KartKimlikSeridi({
                   Bilgileri kutusundadir. */}
               {kaynak === 'hasta' && !yeniMi && (
                 <label className="alan tip-metin">
-                  <span className="etiket">Doğum Tarihi / Yaş</span>
+                  <span className="etiket">{c('Doğum Tarihi / Yaş')}</span>
                   <input readOnly tabIndex={-1} value={dogumYasMetni}
                          title="Doğum bilgileri Kimlik Bilgileri kutusundan girilir" />
                 </label>
@@ -216,7 +217,7 @@ export function KartKimlikSeridi({
                   <div className="alan serit-uclu">
                     <label className="alan tip-tarih">
                       <span className="etiket">
-                        Doğum{alan('dogumTarihi')?.zorunlu && ' *'}
+                        {c('Doğum')}{alan('dogumTarihi')?.zorunlu && ' *'}
                       </span>
                       <input type="date" disabled={salt}
                              value={String(satir.dogumTarihi ?? '').slice(0, 10)}
@@ -224,7 +225,7 @@ export function KartKimlikSeridi({
                     </label>
                     <label className="alan tip-kod">
                       <span className="etiket">
-                        Cinsiyet{cinsiyetAlan?.zorunlu && ' *'}
+                        {c('Cinsiyet')}{cinsiyetAlan?.zorunlu && ' *'}
                       </span>
                       <select value={String(satir.cinsiyet ?? '')} disabled={salt}
                               onChange={e => ozlukYaz({ cinsiyet: e.target.value })}>
@@ -259,7 +260,7 @@ export function KartKimlikSeridi({
               {renderAlanListesi(kimlikAlanlari.slice(
                 0, kimlikAlanlari.findIndex(a => GECERLILIK_ALANLARI.includes(a.ad))))}
               <label className="alan tip-metin gecerlilik-hucre">
-                <span className="etiket">Geçerlilik</span>
+                <span className="etiket">{c('Geçerlilik')}</span>
                 <span className="gecerlilik-kutu">
                   {renderAlanListesi(kimlikAlanlari.filter(a => a.ad === 'gecerliBas'))}
                   <span className="ayrac">—</span>

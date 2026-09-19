@@ -1,3 +1,4 @@
+import { c } from '../dil/ceviri';
 // Sunucu sozlesmesinin (dokuman/01_API_SOZLESMELERI.md) TypeScript karsiligi.
 // Alan adlari sunucudakiyle BIREBIR ayni tutulur - cevrim katmani yok.
 
@@ -44,9 +45,25 @@ export class ApiHatasi extends Error {
  * gosterilir (kullaniciya donuk, Turkce), yoksa hatanin kendisi yazilir -
  * "[object Object]" cikmasin. `kodlu` hata kodunu one ekler (BELGE_KURALI: ...).
  */
+/**
+ * HATA METNİ DİLE GÖRE (849): makine sözleşmesi (`hata.kod`) DEĞİŞMEZ;
+ * kullanıcıya gösterilen cümle koda göre sözlükten çözülür. Sözlükte
+ * karşılığı olmayan kodda sunucunun kendi cümlesi kalır - iş kuralı (422)
+ * ve doğrulama (400) hataları kurala özgü sebebi taşır, o sebep
+ * KAYBOLMAMALI ("Bu cariye ait fatura var, silinemez").
+ *
+ * Kapsam `hata`, anahtar KODUN KENDİSİ - Türkçe cümle değil: sunucu
+ * cümlesini değiştirdiğinde çeviri sessizce kopmasın.
+ */
+function hataCumlesi(h: ApiHatasi): string {
+  const kodlu = c(h.hata.kod, 'hata');
+  return kodlu === h.hata.kod ? h.message : kodlu;
+}
+
 export function hataMetni(h: unknown, kodlu = false): string {
   if (h instanceof ApiHatasi) {
-    const metin = kodlu ? `${h.hata.kod}: ${h.message}` : h.message;
+    const cumle = hataCumlesi(h);
+    const metin = kodlu ? `${h.hata.kod}: ${cumle}` : cumle;
     // IZLEME NUMARASI BEKLENMEYEN HATADA GOSTERILIR: sunucu "izleme
     //   numarasini bildirin" diyor ama numara ekranda hic gorunmuyordu -
     //   kullanicinin bildirebilecegi bir sey yoktu. Is kurali / dogrulama

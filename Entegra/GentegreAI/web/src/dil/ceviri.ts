@@ -10,7 +10,15 @@
  * çeviriler `eksikCeviriler()` ile toplanıp sözlüğe eklenebilir.
  */
 
-export type Kapsam = 'menu' | 'etiket';
+/**
+ * Kapsam: aynı kelimenin bağlama göre farklı karşılığı olabilir.
+ *   menu   - sol menü / ekran adları
+ *   etiket - kart, kolon, buton etiketleri
+ *   hata   - API hata KODLARI (849): anahtar Türkçe cümle değil, `YASAK`
+ *            gibi kodun kendisidir - sunucu cümlesini değiştirince çeviri
+ *            kopmasın.
+ */
+export type Kapsam = 'menu' | 'etiket' | 'hata';
 
 type Sozluk = Record<string, Record<string, string>>;
 
@@ -19,6 +27,15 @@ let yukluDil = -1;
 /** Çevirisi bulunamayan metinler - sözlüğü tamamlamak için. */
 const eksikler = new Set<string>();
 const dinleyiciler = new Set<() => void>();
+
+/**
+ * AKTİF DİL ve BCP-47 KARŞILIĞI (849). Biçimlendirme (tarih/sayı/para) dile
+ * göre değişmeli: `1.234,56` Türkçede doğru, İngilizcede `1,234.56`.
+ * `taraf_kullanici.dil`: 0 Türkçe · 1 English · 2 Deutsch.
+ */
+const YEREL: Record<number, string> = { 0: 'tr-TR', 1: 'en-US', 2: 'de-DE' };
+export function aktifDil(): number { return yukluDil < 0 ? 0 : yukluDil }
+export function yerelKod(): string { return YEREL[aktifDil()] ?? 'tr-TR' }
 
 /** Sözlük değişince yeniden çizilmesi gereken bileşenler için. */
 export function ceviriDinle(f: () => void): () => void {
@@ -58,6 +75,7 @@ export async function ceviriYukle(dil: number): Promise<void> {
 
 /** Sözlükte birebir arama (ikon/kısayol soyulmuş metin için). */
 function bul(m: string, kapsam: Kapsam): string | undefined {
+  if (kapsam === 'hata') return sozluk.hata?.[m];
   return sozluk[kapsam]?.[m]
     // Menü adı etiket sözlüğünde de olabilir (ör. "Kasa" hem grup hem etiket).
     ?? sozluk[kapsam === 'menu' ? 'etiket' : 'menu']?.[m];

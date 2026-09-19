@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/istemci';
 import type { KartRolBilgisi } from '../api/istemci';
 import { hataMetni } from '../api/sozlesme';
+import { c } from '../dil/ceviri';
 
 /**
  * Personel/kişi kartında KULLANICI ROLLERİ (kullanıcı: "personel kartında rolü
@@ -149,7 +150,7 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi, yeniKayit
   if (yeniKayit) {
     return (
       <label className="alan tip-kod">
-        <span className="etiket zorunlu-isaret">Ana Rol</span>
+        <span className="etiket zorunlu-isaret">{c('Ana Rol')}</span>
         <select value={yeniKayit.secili || ''} disabled={saltOkunur}
                 onChange={e => yeniKayit.onSec(Number(e.target.value))}>
           <option value="">— seçiniz —</option>
@@ -178,12 +179,12 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi, yeniKayit
           {/* ZORUNLU: kullanici hesabinin rolsuz kalmasi mumkun degil -
               "Rol Atanmamış" da bir roldur ve listede gelir (786'dan beri
               kilitli sistem rolu). */}
-          <span className="etiket zorunlu-isaret">Ana Rol</span>
+          <span className="etiket zorunlu-isaret">{c('Ana Rol')}</span>
           {anaCombo}
         </label>
         {ekler.length > 0 && (
           <label className="alan tip-kod">
-            <span className="etiket">Yan Roller</span>
+            <span className="etiket">{c('Yan Roller')}</span>
             <span className="secim-rozetleri">
               {ekler.map(r => <span key={r.id} className="rozet mavi">{r.ad}</span>)}
             </span>
@@ -201,7 +202,7 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi, yeniKayit
     if (!anaCombo || !bilgi) return null;
     return (
       <label className="alan tip-kod">
-        <span className="etiket zorunlu-isaret">Ana Rol</span>
+        <span className="etiket zorunlu-isaret">{c('Ana Rol')}</span>
         {anaCombo}
         {bilgi.ekRolIdleri.length > 0 && (
           <span className="rozet" title={ekRolAdlari(bilgi)}>
@@ -222,12 +223,12 @@ export function KartKullaniciRolu({ kartId, saltOkunur, sade, isBilgi, yeniKayit
          ) : (
            <>
              <label className="alan tip-kod">
-               <span className="etiket">Ana rol</span>
+               <span className="etiket">{c('Ana rol')}</span>
                {anaCombo}
              </label>
 
              <div className="alan">
-               <span className="etiket">Ek roller</span>
+               <span className="etiket">{c('Ek roller')}</span>
                <div className="secim-listesi">
                  {bilgi.roller.filter(r => r.id !== bilgi.rolId).map(r => (
                    <label key={r.id} className="secim-satiri">
