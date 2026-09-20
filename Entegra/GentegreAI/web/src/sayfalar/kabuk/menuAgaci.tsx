@@ -195,7 +195,7 @@ export const GRUP_IKON: Record<string, string> = {
   'Eczane':  '@eczane',
   //   DEMIRBAS: sabit kiymet - sandalye, zimmet/demirbas sayiminin klasik
   //   simgesi. Cihaz simgeleri (🩻/🔌) Radyoloji ve ÜTS'de kullaniliyor.
-  'Sabit Varlıklar': '🏛️',
+  'Sabit Varlıklar': '🗄️',
   //   TEKNIK SERVIS: anahtar. 🧰 (alet cantasi) de dusunuldu ama servis
   //   ONARIMDIR, kutu degil; 🔧 tek isle bagdasiyor.
   'Teknik Servis': '🔧',
