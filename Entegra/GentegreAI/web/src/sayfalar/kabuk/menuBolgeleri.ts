@@ -47,7 +47,7 @@ export const BOLGE_HBYS: MenuBolgesi[] = [
   // TEKNIK SERVIS DEMIRBASIN YANINDA (773): ikisi de cihaz onarir -
   //   biri kurumun cihazini (biyomedikal), oteki musterininkini.
   { ad: 'Tedarik & Teknik', renk: '#8a6d3b',
-    gruplar: ['Eczane', 'Satınalma', 'Stok & Hizmet', 'Demirbaş',
+    gruplar: ['Eczane', 'Satınalma', 'Stok & Hizmet', 'Sabit Varlıklar',
               'Teknik Servis'] },
   // Kalite Yönetim grubunun alt grubudur (KlinikKalite); Doküman kendi grubu
   //   (kullanıcı: "kurum dokümanı günlük iş, ayar değil").

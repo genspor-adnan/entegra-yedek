@@ -59,7 +59,7 @@ describe('menü düzeni', () => {
                                     .map(l => l.menuGrup));
     // e-Nabız (kuyruk) ve Yönetim (tasarımcının kendisi) dışarıda.
     for (const g of GRUPLAR) {
-      if (g === 'e-Nabız' || g === 'Yönetim' || g === 'Demirbaş') continue;
+      if (g === 'e-Nabız' || g === 'Yönetim' || g === 'Sabit Varlıklar') continue;
       expect(dokumlu.has(g), `"${g}" grubunda Dökümler yok`).toBe(true);
     }
   });

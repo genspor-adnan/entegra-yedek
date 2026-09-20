@@ -64,7 +64,7 @@ export interface MenuOgesi {
  */
 export const GRUP_SIRA_ERP = [
   'Cari & CRM', 'Satış', 'Alış', 'Stok & Hizmet', 'Üretim',
-  'Finans', 'Muhasebe', 'İK & Prim', 'Doküman', 'Demirbaş',
+  'Finans', 'Muhasebe', 'İK & Prim', 'Doküman', 'Sabit Varlıklar',
 ];
 
 export type MenuSatiri =
@@ -195,7 +195,7 @@ export const GRUP_IKON: Record<string, string> = {
   'Eczane':  '@eczane',
   //   DEMIRBAS: sabit kiymet - sandalye, zimmet/demirbas sayiminin klasik
   //   simgesi. Cihaz simgeleri (🩻/🔌) Radyoloji ve ÜTS'de kullaniliyor.
-  'Demirbaş': '🪑',
+  'Sabit Varlıklar': '🏛️',
   //   TEKNIK SERVIS: anahtar. 🧰 (alet cantasi) de dusunuldu ama servis
   //   ONARIMDIR, kutu degil; 🔧 tek isle bagdasiyor.
   'Teknik Servis': '🔧',

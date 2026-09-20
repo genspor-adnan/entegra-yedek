@@ -42,7 +42,7 @@ export const BIYOMEDIKAL_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Demirbaş', menuAd: 'Cihaz Envanteri', ic: '🩺',
+    menuGrup: 'Sabit Varlıklar', menuAd: 'Cihaz Envanteri', ic: '🩺',
     yetkiKodu: 'demirbas.envanter', menuSira: 20,
   },
   {
@@ -64,7 +64,7 @@ export const BIYOMEDIKAL_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Demirbaş', menuAd: 'Kalibrasyon', ic: '📐',
+    menuGrup: 'Sabit Varlıklar', menuAd: 'Kalibrasyon', ic: '📐',
     yetkiKodu: 'demirbas.kalibrasyon', menuSira: 30,
   },
   {
@@ -84,7 +84,7 @@ export const BIYOMEDIKAL_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Demirbaş', menuAd: 'İş Emirleri', ic: '🛠',
+    menuGrup: 'Sabit Varlıklar', menuAd: 'İş Emirleri', ic: '🛠',
     yetkiKodu: 'demirbas.isemri', menuSira: 40,
   },
 ];

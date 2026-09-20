@@ -120,7 +120,7 @@ export const YONETIM_LISTELERI: ListeGirdisi[] = [
     kaynak: 'demirbas', baslik: 'Demirbaş', yol: 'Demirbaş',
     kartYolu: '/demirbas', aksiyonEkrani: 'demirbas-liste', cipler: DURUM_CIPLERI,
     yerTutucuSekmeler: ['Zimmet Geçmişi', 'Bakım / Servis', 'Amortisman'],
-    menuAd: 'Demirbaş', ic: '🖥️', yetkiKodu: 'demirbas',
+    menuGrup: 'Sabit Varlıklar', menuSira: 10, menuAd: 'Demirbaş', ic: '🖥️', yetkiKodu: 'demirbas',
   },
   {
     // DOKUMAN ANA MENU GRUBU (kullanici: "dokuman menusu kaybolmus, demirbastan
