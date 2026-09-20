@@ -15,6 +15,7 @@ import { MenuIkon, grupla, GRUP_IKON, GRUP_IKON_CEV, ALTGRUP_IKON,
          type MenuOgesi, type MenuSatiri } from './menuAgaci';
 import { BOLGE_HBYS, GRUP_SIRA_HBYS, grupBolgesi,
          type MenuBolgesi } from './menuBolgeleri';
+import { SURUM_ETIKET } from '../../surum';
 import type { useMenuTercihleri } from './useMenuTercihleri';
 
 export interface YanMenuProps {
@@ -249,6 +250,12 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
                 <span>{kurumProfilAdi}</span>
               </div>
             )}
+            {/* UYGULAMA SÜRÜMÜ (kullanıcı: "versiyon no ver ve görünür olsun"). */}
+            <div className="mi" style={{ cursor: 'default', opacity: 0.7 }}
+                 title={cm('Uygulama sürümü')}>
+              <span className="ic">🏷️</span>
+              <span>{SURUM_ETIKET}</span>
+            </div>
           </div>
   );
 }
