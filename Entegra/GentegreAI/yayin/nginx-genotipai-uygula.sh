@@ -37,20 +37,17 @@ site, parca = sys.argv[1], sys.argv[2]
 s = io.open(site, encoding="utf-8").read()
 p = io.open(parca, encoding="utf-8").read()
 
-# 1) ESKI tek-HBYS /genotipai/ bloklari (profil ALT yollari DEGIL) kaldirilir.
-#    Profil bloklari '/genotipai/<ad>/' icerir; eskiler tam '/genotipai/'dir.
-s = re.sub(r"\n[ \t]*location \^~ /genotipai/api/ \{.*?\n[ \t]*\}\n", "\n", s, flags=re.S)
-s = re.sub(r"\n[ \t]*location \^~ /genotipai/ \{.*?\n[ \t]*\}\n", "\n", s, flags=re.S)
+# TUM /genotipai... location bloklari KALDIRILIR (bare + profil + api + =),
+#   sonra guncel parca TEK SEFER eklenir. Boylece yeni profil eklemek /
+#   degistirmek icin tekrar calistirmak yeter - eski bloklar duplike olmaz.
+#   Bu location bloklarinda ic-ice { } yok, [^}]* yeterli.
+n = len(re.findall(r"location[^\n{]*genotipai", s))
+s = re.sub(r"\n[ \t]*location[^\n{]*genotipai[^\n{]*\{[^{}]*\}\n", "\n", s)
 s = re.sub(r"\n[ \t]*location = /genotipai \{[^}]*\}\n", "\n", s)
-s = re.sub(r"\n[ \t]*location = /genotipai/ \{.*?\n[ \t]*\}\n", "\n", s, flags=re.S)
 
-# 2) Profil bloklari zaten ekliyse dokunma.
-if "location ^~ /genotipai/hastane/" in s:
-    print("profil bloklari zaten ekli - eskiler temizlendi")
-else:
-    i = s.rstrip().rfind("}")           # server{} son kapanisi
-    s = s[:i] + "\n" + p + "\n" + s[i:]
-    print("profil bloklari eklendi")
+i = s.rstrip().rfind("}")               # server{} son kapanisi
+s = s[:i] + "\n" + p + "\n" + s[i:]
+print(f"eski {n} genotipai bloku temizlendi, guncel parca eklendi")
 
 io.open(site, "w", encoding="utf-8").write(s)
 PY

@@ -46,9 +46,10 @@ const MATRIS_ISARET: Record<number, { sinif: string; im: string }> = {
  * alindi; mockup'in CSS'i `.kt-kok` altina kapsullendi (kurum tipi kartlari,
  * modul matrisi ve rozetler uygulamanin genel temasindan bagimsiz durur).
  *
- * SIMDILIK GORUNUM: secimler ve kutucuklar henuz `kurum_profil` tablosuna
- * baglanmadi - kurulum sihirbazinin ekran karsiligi. Baglama sirasinda bu
- * bilesenin ic sekme duzeni degismeyecek.
+ * KAYDEDER: "Modüller" sekmesindeki aç/kapa kutucukları `profil.moduller`'i
+ * günceller, "Kaydet & Uygula" ise `api.kurumProfilYaz` (PUT /kurum-profil)
+ * ile kurum_profil.moduller'e YAZAR ve aktif şubenin menüsünü hemen tazeler
+ * (359/364). Yani profil başına menü buradan ayarlanır - koda gömmeye gerek yok.
  */
 // ROLLER KENDI SEKMESINDE (789, kullanici: "modüllerin sağına Roller diye
 //   sekme aç ve rolleri oraya taşı"): profil sekmesi tip kartlari + modul

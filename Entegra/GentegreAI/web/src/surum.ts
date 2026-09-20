@@ -1,9 +1,11 @@
 /**
  * UYGULAMA SÜRÜMÜ (tek doğruluk kaynağı).
  *
- * Sol menü "Oturum" bölümünde görünür. Yeni yayında burayı ve
- * package.json'ı birlikte güncelle.
+ * Biçim: YIL(2).AY.GÜN.BUILD  (ör. 26.09.20.1519)
+ *   - tarih sürümün İÇİNDE; ayrıca sağda tarih GÖSTERİLMEZ.
+ *   - BUILD = git commit sayısı (her yayında artar).
+ *
+ * Sol menü "Oturum" bölümünde görünür. Yeni yayında güncelle.
  */
-export const SURUM = '1.0.0';
-export const SURUM_TARIH = '20.09.2026';
-export const SURUM_ETIKET = `v${SURUM} · ${SURUM_TARIH}`;
+export const SURUM = '26.09.20.1519';
+export const SURUM_ETIKET = SURUM;

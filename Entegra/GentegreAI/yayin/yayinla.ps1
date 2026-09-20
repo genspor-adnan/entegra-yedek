@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 #  GentegreAI — tek komutla yayin (yerelde calisir)
 #
 #  IKI KURULUM, IKI VERITABANI (kullanici karari):
@@ -32,7 +32,7 @@ param(
     # 'profiller' = /genotipai altindaki tum kurum-tipi profilleri (hastane,
     #   tip merkezi, dis, lab, osgb, dal goz, dal ftr - her biri kendi DB'si).
     [ValidateSet('hepsi','hbys','erp','profiller',
-                 'hastane','tipmerkezi','dis','lab','osgb','goz','ftr')]
+                 'hastane','tipmerkezi','dis','lab','osgb','goz','ftr','goruntuleme')]
     [string]$Kurulum = 'hepsi',
     [ValidateSet('hepsi','web','api')] [string]$Yalniz = 'hepsi',
     [switch]$TemelAl,
@@ -73,6 +73,7 @@ $PROFILLER = @(
     @{ Ad='osgb';       Etiket='Profil: OSGB';         Tip='osgb' }
     @{ Ad='goz';        Etiket='Profil: Goz (dal)';    Tip='dal_goz' }
     @{ Ad='ftr';        Etiket='Profil: FTR (dal)';    Tip='dal_ftr' }
+    @{ Ad='goruntuleme'; Etiket='Profil: Goruntuleme Mrk'; Tip='goruntuleme' }
 )
 $port = 5190
 foreach ($p in $PROFILLER) {
