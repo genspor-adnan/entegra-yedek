@@ -185,6 +185,9 @@ export const MENU_GRUP_MODUL: Record<string, string> = {
   //   suzuluyor - ERP demirbas ekrani hicbir kurulumda kapatilamamali.
   'Eczane':        'eczane',
   'Satınalma':     'satinalma',
+  // SABIT VARLIKLAR (demirbas): hastanede varsayilan acik, digerlerinde opsiyon
+  //   (kurum_tipi_modul, db/910). ERP demirbas ekrani erp=1 ile korunur.
+  'Sabit Varlıklar': 'demirbas',
   // Kasa + Banka = FINANS (menu yeniden duzeni): iki grup tek modulun
   //   (kasa) altindaydi zaten, birlesince esleme de tek satira dustu.
   'Finans':        'kasa',
