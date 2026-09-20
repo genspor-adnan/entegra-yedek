@@ -84,7 +84,7 @@ export const BIYOMEDIKAL_LISTELERI: ListeGirdisi[] = [
       { ad: 'Tümü' },
     ],
     urunModu: 2,
-    menuGrup: 'Sabit Varlıklar', menuAd: 'İş Emirleri', ic: '🛠',
+    menuGrup: 'Sabit Varlıklar', menuAd: 'Bakım / Arıza', ic: '🛠',
     yetkiKodu: 'demirbas.isemri', menuSira: 40,
   },
 ];
