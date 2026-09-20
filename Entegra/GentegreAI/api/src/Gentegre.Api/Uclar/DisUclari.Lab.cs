@@ -1,8 +1,9 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
+using Npgsql;
 
 namespace Gentegre.Api.Uclar;
 
@@ -18,6 +19,9 @@ namespace Gentegre.Api.Uclar;
 public static partial class DisUclari
 {
     public sealed record LabAsamaIstegi(int? Asama, string? Not);
+
+    /// <summary>Barkot okutma isteği (874): etiketten okunan gövde + istenen aşama.</summary>
+    public sealed record LabBarkodIstegi(string Barkod, int? Asama, string? Not);
 
     private static readonly Dictionary<short, short> SonrakiAsama = new()
     {
@@ -99,41 +103,154 @@ public static partial class DisUclari
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("dis.lab", Islem.Degistir);
             await using var baglanti = await veri.AcAsync(iptal);
-            var i = await baglanti.TekAsync("""
-                select i.asama, i.hasta_id, i.isemri_no, l.sla_gun from public.dis_lab_isemri i
-                  join public.dis_lab l on l.id = i.lab_id where i.id = @p0
-                """, null, [id], o => new { asama = o.GetInt16(0), hastaId = o.GetInt32(1),
-                                            no = o.GetString(2), sla = o.GetInt16(3) }, iptal)
-                ?? throw GentegreHatasi.Bulunamadi("İş emri bulunamadı.");
-            if (i.asama is 8 or 9) throw GentegreHatasi.IsKurali("Teslim edilmiş / iptal iş emrinin aşaması değişmez.");
-
-            short yeni = istek?.Asama is int a ? (short)a
-                : SonrakiAsama.TryGetValue(i.asama, out var n) ? n
-                : throw GentegreHatasi.IsKurali("Bu aşamadan sonrası tanımsız.");
-            if (yeni is < 1 or > 9) throw GentegreHatasi.Dogrulama("Aşama 1-9 arası olmalı.");
-            if (yeni == 7 && i.asama < 5) throw GentegreHatasi.IsKurali("Gelmemiş iş geri gönderilmez.");
-
-            await using var islem = await baglanti.BeginTransactionAsync(iptal);
-            await baglanti.CalistirAsync("""
-                update public.dis_lab_isemri
-                   set asama = @p1,
-                       gonderim_tarihi = case when @p1 = 2 and gonderim_tarihi is null then current_date else gonderim_tarihi end,
-                       beklenen_tarih  = case when @p1 = 2 and beklenen_tarih is null then current_date + @p3 else beklenen_tarih end,
-                       teslim_tarihi   = case when @p1 = 8 then current_date else teslim_tarihi end,
-                       degistiren = @p2, degistirme_tarihi = now()
-                 where id = @p0
-                """, islem, [id, yeni, baglam.KullaniciId, (int)i.sla], iptal);
-            await baglanti.CalistirAsync("""
-                insert into public.dis_lab_isemri_asama (isemri_id, asama, kullanici_id, not_metin, sube_id, ekleyen)
-                values (@p0, @p1, @p2, @p3, @p4, @p2)
-                """, islem, [id, yeni, baglam.KullaniciId, istek?.Not ?? "", baglam.SubeId ?? 0], iptal);
-            // Teslim: bağlı plan satırının lab bekleyişi biter (satır yapıldı
-            //   işareti hekimin - simantasyon seansında).
-            await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloLabIsemri, id, baglam.KullaniciId,
-                baglam.SubeId, baglam.Ip, new { isemri = i.no, asama = $"{i.asama} -> {yeni}" },
-                tarafId: i.hastaId, iptal: iptal);
-            await islem.CommitAsync(iptal);
-            return Results.Ok(new { asama = yeni });
+            var yeniAsama = await AsamaIlerletAsync(baglanti, log, baglam, id, istek?.Asama,
+                istek?.Not, kaynak: 1, iptal);
+            return Results.Ok(new { asama = yeniAsama });
         });
+
+        // --------------------------------------------------- barkot okutma ----
+        // BARKOT OKUTMA (874, KTS denetim maddesi D1). Etiket ölçü kabıyla
+        //   laboratuvara gider; iş geri geldiğinde listede aranmaz, okutulur.
+        //   Aşama satırı `kaynak = 2` ile yazılır - denetimde "barkotla takip
+        //   ediliyor" iddiasının kanıtı bu ayrımdır.
+        grup.MapPost("/lab-barkod/okut", async (
+            LabBarkodIstegi istek, VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu,
+            HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("dis.lab", Islem.Degistir);
+            if (string.IsNullOrWhiteSpace(istek.Barkod))
+                throw GentegreHatasi.Dogrulama("Barkot boş olamaz.");
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var id = await baglanti.TekDegerAsync<int?>(
+                "select public.fn_dis_isemri_barkod_coz(@p0)", null, [istek.Barkod.Trim()], iptal)
+                ?? throw GentegreHatasi.Bulunamadi($"Barkot tanınmadı: {istek.Barkod.Trim()}");
+
+            var yeniAsama = await AsamaIlerletAsync(baglanti, log, baglam, id, istek.Asama,
+                istek.Not, kaynak: 2, iptal);
+
+            // Okutan ekranda hangi işi ilerlettiğini görmeli: aynı yanıtta
+            //   hasta ve iş bilgisi döner - yanlış etiketi okutmak sessiz kalmasın.
+            var kart = await baglanti.TekAsync("""
+                select i.id, i.isemri_no, t.unvan, i.dis_nolar, l.ad, i.asama
+                  from public.dis_lab_isemri i
+                  join public.taraf t on t.id = i.hasta_id
+                  join public.dis_lab l on l.id = i.lab_id
+                 where i.id = @p0
+                """, null, [id], o => new
+            {
+                id = o.GetInt32(0), isemriNo = o.GetString(1), hasta = o.GetString(2),
+                disNolar = o.GetString(3), lab = o.GetString(4), asama = (int)o.GetInt16(5),
+            }, iptal);
+            return Results.Ok(new { asama = yeniAsama, isemri = kart });
+        });
+
+        // ------------------------------------------------------- etiket ----
+        // Etiket içeriği tek görünümden (`v_dis_lab_isemri_etiket`) gelir;
+        //   basım ayrıca sayılır (kaç kez basıldığı kalite kaydıdır).
+        grup.MapGet("/lab-isemri/{id:int}/etiket", async (
+            int id, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("dis.lab", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var e = await b.TekAsync("""
+                select id, isemri_no, hasta_id, hasta_adi, dogum_tarihi, hekim_adi, lab_adi,
+                       is_turu_adi, dis_nolar, malzeme, renk, olcu_tipi_adi, ek_istek,
+                       gonderim_tarihi, beklenen_tarih, asama, asama_adi, etiket_basim
+                  from public.v_dis_lab_isemri_etiket where id = @p0
+                """, null, [id], o => new
+            {
+                id = o.GetInt32(0), isemriNo = o.GetString(1), hastaId = o.GetInt32(2),
+                hasta = o.GetString(3),
+                dogumTarihi = o.IsDBNull(4) ? (DateTime?)null : o.GetDateTime(4),
+                hekim = o.GetString(5), lab = o.GetString(6), isTuru = o.GetString(7),
+                disNolar = o.GetString(8), malzeme = o.GetString(9), renk = o.GetString(10),
+                olcuTipi = o.GetString(11), ekIstek = o.GetString(12),
+                gonderim = o.IsDBNull(13) ? (DateTime?)null : o.GetDateTime(13),
+                beklenen = o.IsDBNull(14) ? (DateTime?)null : o.GetDateTime(14),
+                asama = (int)o.GetInt16(15), asamaAdi = o.GetString(16),
+                etiketBasim = (int)o.GetInt16(17),
+            }, iptal)
+                ?? throw GentegreHatasi.Bulunamadi("İş emri bulunamadı.");
+            var kurum = await EtiketKurumuAsync(b, baglam.SubeId, iptal);
+            return Results.Ok(new { etiket = e, kurum });
+        });
+
+        // Basım kaydı: iş emrini DEĞİŞTİRMİŞ saymaz (degistiren'e dokunulmaz),
+        //   basmak bir iş kararı değil - yalnız sayaç ve zaman damgası.
+        grup.MapPost("/lab-isemri/{id:int}/etiket-basildi", async (
+            int id, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("dis.lab", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var sayi = await b.TekDegerAsync<int>("""
+                update public.dis_lab_isemri
+                   set etiket_basim = etiket_basim + 1, son_etiket_tarihi = now()
+                 where id = @p0 returning etiket_basim
+                """, null, [id], iptal);
+            return Results.Ok(new { etiketBasim = sayi });
+        });
+    }
+
+    /// <summary>Kurum anteti - etikette klinik adı (antet görünümü, 772).</summary>
+    private static async Task<object?> EtiketKurumuAsync(
+        NpgsqlConnection b, int? subeId, CancellationToken iptal)
+        => await b.TekAsync("""
+            select coalesce(unvan, ''), coalesce(adres, ''), coalesce(telefon, '')
+              from public.v_sube_antet
+             where (cast(@p0 as integer) is null or @p0 = 0 or sube_id = @p0)
+             order by sube_id limit 1
+            """, null, [subeId], o => new { unvan = o.GetString(0), adres = o.GetString(1),
+                                            telefon = o.GetString(2) }, iptal);
+
+    /// <summary>
+    /// AŞAMA İLERLETME - ekrandan ve barkottan tek yol (874).
+    /// <para><paramref name="kaynak"/>: 1 ekran · 2 barkot okutma. Kural
+    /// (teslim edilmiş iş değişmez, gelmemiş iş geri gönderilmez, tarih
+    /// damgaları) iki yolda da aynıdır; ayrım yalnız kaydın kaynağıdır.</para>
+    /// </summary>
+    private static async Task<short> AsamaIlerletAsync(
+        NpgsqlConnection baglanti, LogDeposu log, IstekBaglami baglam, int id,
+        int? istenen, string? not, short kaynak, CancellationToken iptal)
+    {
+        var i = await baglanti.TekAsync("""
+            select i.asama, i.hasta_id, i.isemri_no, l.sla_gun from public.dis_lab_isemri i
+              join public.dis_lab l on l.id = i.lab_id where i.id = @p0
+            """, null, [id], o => new { asama = o.GetInt16(0), hastaId = o.GetInt32(1),
+                                        no = o.GetString(2), sla = o.GetInt16(3) }, iptal)
+            ?? throw GentegreHatasi.Bulunamadi("İş emri bulunamadı.");
+        if (i.asama is 8 or 9) throw GentegreHatasi.IsKurali("Teslim edilmiş / iptal iş emrinin aşaması değişmez.");
+
+        short yeni = istenen is int a ? (short)a
+            : SonrakiAsama.TryGetValue(i.asama, out var n) ? n
+            : throw GentegreHatasi.IsKurali("Bu aşamadan sonrası tanımsız.");
+        if (yeni is < 1 or > 9) throw GentegreHatasi.Dogrulama("Aşama 1-9 arası olmalı.");
+        if (yeni == 7 && i.asama < 5) throw GentegreHatasi.IsKurali("Gelmemiş iş geri gönderilmez.");
+
+        await using var islem = await baglanti.BeginTransactionAsync(iptal);
+        await baglanti.CalistirAsync("""
+            update public.dis_lab_isemri
+               set asama = @p1,
+                   gonderim_tarihi = case when @p1 = 2 and gonderim_tarihi is null then current_date else gonderim_tarihi end,
+                   beklenen_tarih  = case when @p1 = 2 and beklenen_tarih is null then current_date + @p3 else beklenen_tarih end,
+                   teslim_tarihi   = case when @p1 = 8 then current_date else teslim_tarihi end,
+                   degistiren = @p2, degistirme_tarihi = now()
+             where id = @p0
+            """, islem, [id, yeni, baglam.KullaniciId, (int)i.sla], iptal);
+        await baglanti.CalistirAsync("""
+            insert into public.dis_lab_isemri_asama (isemri_id, asama, kullanici_id, not_metin, sube_id, ekleyen, kaynak)
+            values (@p0, @p1, @p2, @p3, @p4, @p2, @p5)
+            """, islem, [id, yeni, baglam.KullaniciId, not ?? "", baglam.SubeId ?? 0, kaynak], iptal);
+        // Teslim: bağlı plan satırının lab bekleyişi biter (satır yapıldı
+        //   işareti hekimin - simantasyon seansında).
+        await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloLabIsemri, id, baglam.KullaniciId,
+            baglam.SubeId, baglam.Ip, new { isemri = i.no, asama = $"{i.asama} -> {yeni}",
+                                            kaynak = kaynak == 2 ? "barkot" : "ekran" },
+            tarafId: i.hastaId, iptal: iptal);
+        await islem.CommitAsync(iptal);
+        return yeni;
     }
 }

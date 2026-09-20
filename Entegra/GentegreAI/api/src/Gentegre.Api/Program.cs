@@ -69,6 +69,10 @@ kurucu.Services.AddScoped<Gentegre.Api.Servisler.IlacKartFiyat>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizPaketUretici>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizTetikleyici>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizGonderimi>();
+kurucu.Services.AddSingleton<Gentegre.Api.Servisler.EnabizPortalIstemcisi>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizMesajServisi>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizErisimServisi>();
+kurucu.Services.AddScoped<Gentegre.Api.Servisler.EnabizGunSonuServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Servisler.ItsServisi>();
 kurucu.Services.AddScoped<Gentegre.Api.Uclar.ItsServisiKisayol>();
 kurucu.Services.AddHttpClient("katalog");
@@ -264,6 +268,9 @@ uygulama.MapGet("/api/saglik", async (VeriKaynagi veri, CancellationToken iptal)
 }).AllowAnonymous().WithTags("Saglik");
 
 uygulama.KimlikUclariniEkle();
+uygulama.EnabizMesajUclariniEkle();
+uygulama.BzbhUclariniEkle();
+uygulama.EnabizGunSonuUclariniEkle();
 uygulama.ListeUclariniEkle();
 uygulama.KartUclariniEkle();
 uygulama.HastaUclariniEkle();
@@ -347,6 +354,12 @@ uygulama.IsgUclariniEkle();
 // ÇAĞRI MERKEZİ (839): operatör panosu, arayan tanıma, geri arama, kampanya, süpervizör, santral webhook'u.
 uygulama.CagriUclariniEkle();
 uygulama.SterilUclariniEkle();
+// ASI MODULU (898, KTS H10): uygulama kaydi + USS 207 paketi.
+uygulama.AsiUclariniEkle();
+// BEBEK/COCUK IZLEM (899, KTS H10): izlem kaydi + persentil + USS 209.
+uygulama.CocukIzlemUclariniEkle();
+// GEBELIK DOSYASI + GEBE IZLEM (900, KTS H10): USS 221.
+uygulama.GebeIzlemUclariniEkle();
 // MEDULA (707): mustehaklik, hasta kabul, hizmet kaydi, e-recete/e-rapor, fatura & donem, kuyruk.
 uygulama.MedulaUclariniEkle();
 

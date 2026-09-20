@@ -1,4 +1,4 @@
-import { istek, gonder } from '../cekirdek';
+import { istek, gonder, dosyaYukle, dosyaIndir } from '../cekirdek';
 
 /** Laboratuvar: cihaz, istem, numune, dis lab, kalite kontrol, genetik, mikrobiyoloji. */
 export const labUclari = {
@@ -237,6 +237,24 @@ export const labUclari = {
     istek<{ satirlar: Record<string, unknown>[] }>(
       `/api/lab/cihaz/${cihazId}/calisma-listesi/${encodeURIComponent(barkod)}`),
 
+  /**
+   * ONAYLARKEN GECMIS VE TEKRARLAR (886, KTS L9): ayni hastanin ayni
+   * tetkikteki ONAYLI onceki sonuclari + bu istemdeki tekrar calismalari +
+   * sonucun kendi delta bilgisi.
+   */
+  labSonucGecmis: (satirId: number, adet?: number) =>
+    istek<LabSonucGecmisVerisi>(
+      `/api/lab/satir/${satirId}/gecmis${adet ? `?adet=${adet}` : ''}`),
+
+  /**
+   * NUMUNE RET KRITERLERI (879, KTS L6): tanim tablosundan. Ret penceresi ve
+   * kabul kalite listesi ayni satirlardan kurulur.
+   */
+  labRetNedenleri: () =>
+    istek<{ nedenler: { kod: number; ad: string; aciklama: string;
+                        kabuldeSecilebilir: boolean; hastaBilgilendir: boolean }[] }>(
+      '/api/lab/ret-nedenleri'),
+
   /** Cozumlenmis cihaz mesajini lab sonucuna aktarir. */
   labCihazMesajIsle: (mesajId: number) =>
     gonder<{ yazilan: number; atlanan: number; mesaj: string }>(
@@ -466,6 +484,86 @@ export const labUclari = {
                                          direncNotu?: string; anlamli?: boolean }) =>
     gonder<{ uremeId: number; mesaj: string }>(`/api/lab/kultur/${id}/izolat`, govde),
 
+  /**
+   * Bu organizmada SORULACAK antibiyotikler (887).
+   *
+   * Dogal (intrinsik) direncli ajanlar cikarilmis, organizmaya ozel panel
+   * tanimliysa yalniz o panel gelir. `disarida`, kisitlanan ajani ve
+   * sebebini soyler - gizlenen kisit, denetimde kisit sayilmaz.
+   */
+  labIzolatPaneli: (uremeId: number) =>
+    istek<{ satirlar: { id: number; kod: string; ad: string; basamak: number;
+                        yalnizUriner: boolean }[];
+            disarida: { ad: string; sebep: string }[] }>(
+      `/api/lab/izolat/${uremeId}/panel`),
+
+  // ------------------------------------------- grafik tipli sonuc (892)
+  //  Cihazdan gelen egri (elektroforez, kromatogram, jel) ya da elle
+  //  yuklenen tarama. Goruntu dokuman deposunda, sayisal seri jsonb.
+  labGrafikler: (satirId: number) =>
+    istek<{ satirlar: LabGrafigi[] }>(`/api/lab/satir/${satirId}/grafik`),
+
+  labGrafikYukle: (satirId: number, dosya: File, tur: number, baslik: string) => {
+    const form = new FormData();
+    form.append('dosya', dosya);
+    form.append('tur', String(tur));
+    form.append('baslik', baslik);
+    return dosyaYukle<{ grafikId: number; mesaj: string }>(
+      `/api/lab/satir/${satirId}/grafik`, form);
+  },
+
+  labGrafikDuzenle: (id: number, govde: {
+      tur?: number; baslik?: string; raporda?: boolean; sira?: number; aciklama?: string }) =>
+    gonder<{ mesaj: string }>(`/api/lab/grafik/${id}`, govde, 'PUT'),
+
+  labGrafikSil: (id: number) =>
+    gonder<{ mesaj: string }>(`/api/lab/grafik/${id}`, {}, 'DELETE'),
+
+  /** Grafik görüntüsü: <img src=…> Authorization taşıyamaz, blob URL üretilir. */
+  labGrafikUrl: (dokumanId: number) => dosyaIndir(`/api/dokuman-icerik/${dokumanId}`),
+
+  // ------------------------------------------------ test tekrari (891)
+  //  Tekrar ELEKTRONIK istenir: gerekce kod listesinden, tur "ayni tupten"
+  //  ya da "yeni numune". Talebi SISTEM kapatir (ayni satira yeni sonuc
+  //  yazilinca); elle kapatma yok, yoksa calisilmadan kapanan talep olurdu.
+  labTekrarIste: (satirId: number, govde: {
+      tur: number; gerekceKod: number; gerekce?: string; sonucId?: number }) =>
+    gonder<{ tekrarId: number; arsivYeri: string | null; mesaj: string }>(
+      `/api/lab/satir/${satirId}/tekrar`, govde),
+
+  labTekrarIptal: (id: number, neden: string) =>
+    gonder<{ mesaj: string }>(`/api/lab/tekrar/${id}/iptal`, { neden }),
+
+  labTekrarBekleyen: () =>
+    istek<{ satirlar: Record<string, unknown>[] }>('/api/lab/tekrar/bekleyen'),
+
+  // ---------------------------------------------------- numune arsivi (890)
+  //  Tupun FIZIKSEL yeri (unite / raf / kutu / goz) ve saklama suresi.
+  //  Kurallar (dolu goz, izgara disi, "zaten arsivde") SUNUCUDA - istemci
+  //  yalnizca cizer ve hatayi gosterir.
+  labArsivKutular: () =>
+    istek<{ kutular: ArsivKutusu[] }>('/api/lab/arsiv/kutular'),
+
+  labArsivKutu: (id: number) =>
+    istek<{ kutu: ArsivKutusu; gozler: ArsivGozu[] }>(`/api/lab/arsiv/kutu/${id}`),
+
+  labArsivBul: (barkod: string) =>
+    istek<{ numune: Record<string, unknown>; kayitlar: ArsivKaydi[] }>(
+      `/api/lab/arsiv/bul/${encodeURIComponent(barkod)}`),
+
+  labArsivKoy: (govde: { barkod?: string; numuneId?: number; konumId: number; goz: string }) =>
+    gonder<{ arsivId: number; numuneId: number; mesaj: string }>('/api/lab/arsiv/koy', govde),
+
+  labArsivCikar: (govde: { barkod?: string; numuneId?: number; neden: number; not?: string }) =>
+    gonder<{ numuneId: number; mesaj: string }>('/api/lab/arsiv/cikar', govde),
+
+  labArsivImhaBekleyen: () =>
+    istek<{ satirlar: ArsivKaydi[] }>('/api/lab/arsiv/imha-bekleyen'),
+
+  labArsivImha: (numuneIdler: number[], not?: string) =>
+    gonder<{ sayi: number; hatalar: string[]; mesaj: string }>(
+      '/api/lab/arsiv/imha', { numuneIdler, not }),
+
   /** Kademeli bildirimi SUNUCU hesaplar; yanit kac satirin raporlanacagini soyler. */
   labAntibiyogram: (uremeId: number, govde: {
       standart?: string; standartSurum?: string;
@@ -486,4 +584,56 @@ export const labUclari = {
   labKulturIptal: (id: number, neden: string) =>
     gonder<{ mesaj: string }>(`/api/lab/kultur/${id}/iptal`, { neden }),
 
+};
+
+/** Onceki sonuc / tekrar satiri (886). */
+export interface LabGecmisSatiri {
+  kaynak: 'gecmis' | 'tekrar';
+  sonucId: number; istemId: number; istemNo: string;
+  tarih: string; deger: string; birim: string;
+  bayrak: string; panik: boolean; tekrarNo: number; cihaz: string;
+  /** 1 girildi · 2 teknik onay · 3 onayli · 4 iptal · 5 duzeltildi. */
+  onayDurum: number;
+}
+
+export interface LabSonucGecmisVerisi {
+  gecmis: LabGecmisSatiri[];
+  tekrarlar: LabGecmisSatiri[];
+  delta: {
+    oncekiDeger: number | null; yuzde: number | null; uyari: boolean;
+    kuralYuzde: number; kuralGun: number;
+    deger: string; birim: string; bayrak: string; panik: boolean;
+  } | null;
+}
+
+/** Arşiv kutusu ve doluluğu (890). */
+export type ArsivKutusu = {
+  konumId: number; kod: string; ad: string; yol: string;
+  sicaklik: number | null; satir: number; sutun: number;
+  gozSayisi: number; dolu: number; bos: number;
+};
+
+/** Kutudaki dolu göz. */
+export type ArsivGozu = {
+  goz: string; numuneId: number; barkod: string; hasta: string | null;
+  istemNo: string; girisZamani: string; imhaHedef: string | null;
+  kalanGun: number | null;
+};
+
+/** Numunenin arşiv kaydı - çıkmış/imha edilmiş olanlar da döner. */
+export type ArsivKaydi = {
+  id?: number; numuneId?: number; barkod?: string; hasta?: string | null;
+  istemNo?: string; konumId?: number; konum?: string; goz?: string;
+  sicaklik?: number | null; girisZamani?: string; saklamaGun?: number | null;
+  imhaHedef?: string | null; kalanGun?: number | null; durum?: number;
+  cikisZamani?: string | null; cikisNeden?: number | null; notMetni?: string;
+};
+
+/** Grafik tipli sonuç (892 - KTS L10). */
+export type LabGrafigi = {
+  id: number; tur: number; baslik: string;
+  dokumanId: number | null; contentType: string | null; boyut: number | null;
+  seriVar: boolean; seri: string | null;
+  birimX: string; birimY: string; kaynak: number; cihaz: string;
+  raporda: number; sira: number; aciklama: string; eklemeTarihi: string;
 };

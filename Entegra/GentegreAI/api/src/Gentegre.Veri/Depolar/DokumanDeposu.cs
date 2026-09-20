@@ -41,9 +41,14 @@ public sealed class DokumanDeposu
         //   gostermez - gorsel o bosluğu kapatir. kaynak_id ZIYARET
         //   kimligidir: is emrine baglamak, hangi gidiste imzalandigini
         //   kaybetmek olurdu.
+        //   "lab-sonuc" (892, KTS L10): GRAFIK TIPLI SONUC - elektroforez
+        //   egrisi, kromatogram, jel goruntusu. Cihaz bunlari OBX-2 = ED
+        //   olarak gonderiyor; sonucun yanindaki sayi tek basina bulgunun
+        //   tamami degil. kaynak_id ISTEM SATIRI kimligidir (sonuc duzeltilip
+        //   yeni satir acilsa da egri tetkige bagli kalir).
         new(StringComparer.Ordinal)
             { "taraf", "stok", "ebelge-xslt", "sube", "radyoloji-istem", "klasor",
-              "muayene", "masraf-beyan", "servis-ziyaret" };
+              "muayene", "masraf-beyan", "servis-ziyaret", "lab-sonuc" };
 
     /// <summary>
     /// KABUL EDILEN ICERIK TIPLERI.

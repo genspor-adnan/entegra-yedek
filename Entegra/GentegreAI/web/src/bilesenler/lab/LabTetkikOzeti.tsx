@@ -136,7 +136,17 @@ export function LabTetkikOzeti({ id }: { id: number | null }) {
                 <td style={{ width: 110 }}>
                   <b>{metin(r.metin) || aralik(r.alt, r.ust)}</b>
                 </td>
-                <td className="sonuk">{metin(r.kime)}</td>
+                <td className="sonuk">
+                  {metin(r.kime)}
+                  {/* CİHAZ/YÖNTEM (888): aynı tetkikte iki farklı aralık
+                      görünce "hangisi geçerli" sorusu doğar; cevabı satırın
+                      kendisi vermeli. Cihazı boş olan satır tüm cihazlar
+                      içindir ve cihaza özel satır onu ezer. */}
+                  {metin(r.cihaz) && <span className="rozet gri" style={{ marginLeft: 6 }}>
+                    {metin(r.cihaz)}
+                  </span>}
+                  {metin(r.yontem) && <span className="not"> · {metin(r.yontem)}</span>}
+                </td>
               </tr>
             ))}
             {veri.referanslar.length === 0 && (

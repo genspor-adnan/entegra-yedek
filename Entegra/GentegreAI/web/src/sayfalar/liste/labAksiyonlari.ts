@@ -19,27 +19,62 @@ export type LabBaglam = AksiyonBaglami & {
   sonucGir?(istemId: number): void;
 };
 
-/** Ret nedenleri = numune KALİTE kod uzayı (db/433, 434'te belgelendi). */
-const RET_NEDENLERI: Record<string, string> = {
-  '2': 'Hemolizli', '3': 'Lipemik', '4': 'İkterik', '5': 'Yetersiz miktar',
-  '6': 'Pıhtılı', '7': 'Yanlış tüp', '8': 'Etiketsiz', '9': 'Diğer',
-};
-
 /**
- * KABULDE KALITE listesi = 1 Uygun + ret kod uzayi (9 Diger haric;
- * "diger" bir kabul gerekcesi degil). Kabul edilen ama kusurlu tup
- * (hafif lipemik) isaretlenir - sonuc yorumlanirken rapora duser.
+ * RET KRİTERLERİ SUNUCUDAN (879, KTS maddesi L6).
+ *
+ * Eskiden sekiz kod burada sabitti; laboratuvar kendi kabul/ret ölçütlerini
+ * (kalite el kitabındakileri) giremiyordu. Artık `lab_ret_nedeni` tanımı
+ * okunuyor: ret penceresinin seçenekleri de, kabuldeki "kalite" listesi de
+ * aynı satırlardan çıkıyor - iki listeyi ayrı tutmak, kurum yeni kriter
+ * eklediğinde birinde görünüp ötekinde görünmemesi demekti.
+ *
+ * TEK SEFER OKUNUR: liste kurulum verisidir, her düğmede yeniden istemek
+ * bankoyu yavaşlatırdı. Sunucu hatası halinde 433'ün kod uzayına düşülür -
+ * numune kabul, tanım okunamadı diye durmamalı.
  */
-const KALITELER: { kod: string; ad: string }[] = [
-  { kod: '1', ad: '1 - Uygun' },
-  ...Object.entries(RET_NEDENLERI)
-    .filter(([k]) => k !== '9')
-    .map(([kod, ad]) => ({ kod, ad: `${kod} - ${ad}` })),
+interface RetKriteri {
+  kod: number; ad: string; kabuldeSecilebilir: boolean; hastaBilgilendir: boolean;
+}
+
+const YEDEK_KRITERLER: RetKriteri[] = [
+  { kod: 1, ad: 'Uygun', kabuldeSecilebilir: true, hastaBilgilendir: false },
+  { kod: 2, ad: 'Hemolizli', kabuldeSecilebilir: true, hastaBilgilendir: true },
+  { kod: 3, ad: 'Lipemik', kabuldeSecilebilir: true, hastaBilgilendir: true },
+  { kod: 4, ad: 'İkterik', kabuldeSecilebilir: true, hastaBilgilendir: false },
+  { kod: 5, ad: 'Yetersiz miktar', kabuldeSecilebilir: true, hastaBilgilendir: true },
+  { kod: 6, ad: 'Pıhtılı', kabuldeSecilebilir: true, hastaBilgilendir: true },
+  { kod: 7, ad: 'Yanlış tüp', kabuldeSecilebilir: true, hastaBilgilendir: true },
+  { kod: 8, ad: 'Etiketsiz', kabuldeSecilebilir: false, hastaBilgilendir: false },
+  { kod: 9, ad: 'Diğer', kabuldeSecilebilir: false, hastaBilgilendir: false },
 ];
 
-/** Ret penceresinin combo secenekleri - varsayilan 2 Hemolizli. */
-const RET_SECENEKLERI = Object.entries(RET_NEDENLERI)
-  .map(([kod, ad]) => ({ kod, ad: `${kod} - ${ad}` }));
+let kriterler: RetKriteri[] | null = null;
+
+async function kriterleriAl(): Promise<RetKriteri[]> {
+  if (kriterler) return kriterler;
+  try {
+    const y = await api.labRetNedenleri();
+    kriterler = y.nedenler.length > 0 ? y.nedenler : YEDEK_KRITERLER;
+  } catch {
+    kriterler = YEDEK_KRITERLER;
+  }
+  return kriterler;
+}
+
+const secenek = (k: RetKriteri) => ({ kod: String(k.kod), ad: `${k.kod} - ${k.ad}` });
+
+/** Ret penceresi: kod 1 ("Uygun") bir ret nedeni değildir, listede olmaz. */
+const retSecenekleri = (l: RetKriteri[]) => l.filter(k => k.kod !== 1).map(secenek);
+
+/**
+ * KABULDE KALITE listesi: "Uygun" + kabulde de seçilebilen kriterler.
+ * Kabul edilen ama kusurlu tüp (hafif lipemik) işaretlenir - sonuç
+ * yorumlanırken rapora düşer.
+ */
+const kaliteSecenekleri = (l: RetKriteri[]) =>
+  l.filter(k => k.kod === 1 || k.kabuldeSecilebilir).map(secenek);
+
+const kriterAdi = (l: RetKriteri[], kod: number) => l.find(k => k.kod === kod)?.ad ?? '';
 
 export async function labAksiyonu(
   kod: string,
@@ -124,7 +159,8 @@ export async function labAksiyonu(
       // Kod listesi METINDE degil COMBODA (kullanici: "kabul/ret
       //   butonlarinda mesajda girisler combo olsun, 1 default gelsin").
       //   Kabul edilen tupun olagan hali "Uygun" - Enter'la gecilir.
-      const k = await listeSor('Numune kalitesi:', KALITELER, '1', 'Kalite');
+      const kl = await kriterleriAl();
+      const k = await listeSor('Numune kalitesi:', kaliteSecenekleri(kl), '1', 'Kalite');
       if (k === null) return true;
       const kalite = Number(k) || undefined;
       await guvenli(async () => {
@@ -136,17 +172,18 @@ export async function labAksiyonu(
     }
 
     case 'lab.istem-ret': {
-      const n = await listeSor('Ret nedeni:', RET_SECENEKLERI, '2', 'Ret Nedeni');
+      const kl2 = await kriterleriAl();
+      const n = await listeSor('Ret nedeni:', retSecenekleri(kl2), '2', 'Ret Nedeni');
       if (n === null) return true;
       const retNeden = Number(n);
-      if (!RET_NEDENLERI[String(retNeden)]) {
+      if (!kriterAdi(kl2, retNeden)) {
         mesaj('Geçerli bir ret nedeni seçin.');
         return true;
       }
       const aciklama = await metinSor('Açıklama (isteğe bağlı):', '', 'Numune Reddi');
       if (aciklama === null) return true;
       if (!await onay(`İstemin TÜM tüpleri REDDEDİLECEK `
-                    + `(${RET_NEDENLERI[String(retNeden)]}).\n\n`
+                    + `(${kriterAdi(kl2, retNeden)}).\n\n`
                     + 'Tetkikler "tekrar numune bekliyor" durumuna geçer.')) return true;
       await guvenli(async () => {
         mesaj((await api.labIstemNumuneDurum(id, 0, { retNeden, aciklama })).mesaj);
@@ -190,7 +227,8 @@ export async function labAksiyonu(
       // Kod listesi METINDE degil COMBODA (kullanici: "kabul/ret
       //   butonlarinda mesajda girisler combo olsun, 1 default gelsin").
       //   Kabul edilen tupun olagan hali "Uygun" - Enter'la gecilir.
-      const k = await listeSor('Numune kalitesi:', KALITELER, '1', 'Kalite');
+      const kl = await kriterleriAl();
+      const k = await listeSor('Numune kalitesi:', kaliteSecenekleri(kl), '1', 'Kalite');
       if (k === null) return true;
       const kalite = Number(k) || undefined;
       await guvenli(async () => {
@@ -202,16 +240,17 @@ export async function labAksiyonu(
     }
 
     case 'lab.numune-ret': {
-      const n = await listeSor('Ret nedeni:', RET_SECENEKLERI, '2', 'Ret Nedeni');
+      const kl2 = await kriterleriAl();
+      const n = await listeSor('Ret nedeni:', retSecenekleri(kl2), '2', 'Ret Nedeni');
       if (n === null) return true;
       const retNeden = Number(n);
-      if (!RET_NEDENLERI[String(retNeden)]) {
+      if (!kriterAdi(kl2, retNeden)) {
         mesaj('Geçerli bir ret nedeni seçin.');
         return true;
       }
       const aciklama = await metinSor('Açıklama (isteğe bağlı):', '', 'Numune Reddi');
       if (aciklama === null) return true;
-      if (!await onay(`Numune REDDEDİLECEK (${RET_NEDENLERI[String(retNeden)]}).\n\n`
+      if (!await onay(`Numune REDDEDİLECEK (${kriterAdi(kl2, retNeden)}).\n\n`
                     + 'Tetkikler "tekrar numune bekliyor" durumuna geçer.')) return true;
       await guvenli(async () => {
         mesaj((await api.labNumuneDurum(id, 0, { retNeden, aciklama })).mesaj);
@@ -260,6 +299,76 @@ export async function labAksiyonu(
       await guvenli(async () => {
         const y = await api.labSonucDuzelt(id, deger.trim(), neden.trim());
         mesaj(`${y.mesaj} Yeni değerlendirme: ${y.bayrak}`);
+        b.tazele();
+      });
+      return true;
+    }
+
+    // TEST TEKRARI (891, KTS L8): gerekçe ZORUNLU ve kod listesinden -
+    //   "neden tekrar ettik" sayılabilir bir kalite göstergesidir, serbest
+    //   metin sayılamaz. Tür ayrımı laboratuvar için iş ayrımıdır: aynı
+    //   tüpten tekrar çalışma ile yeni numune alınması başka işlerdir.
+    case 'lab.tekrar-iste': {
+      const satirId = Number(satir?.satirId ?? satir?.istemSatirId ?? 0);
+      if (!satirId) { mesaj('İstem satırı bulunamadı.'); return true }
+
+      const tur = await secimSor('Tekrar türü:', [
+        { kod: '1', ad: 'Aynı numuneden tekrar çalış' },
+        { kod: '2', ad: 'Yeni numune alınsın' },
+      ]);
+      if (!tur) return true;
+
+      // GEREKÇE KOD LİSTESİNDEN (891): kurum listeyi Ayarlar'dan
+      //   genişletebilsin diye sabit dizi değil, sunucudan okunur.
+      const liste = await api.kodListe('lab.tekrar_gerekce');
+      const gerekce = await listeSor('Tekrar gerekçesi:',
+        (liste.degerler ?? []).filter(d => d.aktif === 1)
+          .map(d => ({ kod: String(d.deger), ad: d.ad })), '', 'Test Tekrarı');
+      if (!gerekce) return true;
+
+      const not = await metinSor('Açıklama (isteğe bağlı):', '', 'Test Tekrarı');
+      if (not === null) return true;
+
+      await guvenli(async () => {
+        const y = await api.labTekrarIste(satirId, {
+          tur: Number(tur), gerekceKod: Number(gerekce), gerekce: not.trim(),
+          sonucId: id || undefined,
+        });
+        mesaj(y.mesaj);
+        b.tazele();
+      });
+      return true;
+    }
+
+    case 'lab.tekrar-iptal': {
+      const neden = await metinSor('İptal nedeni (zorunlu):', '', 'Tekrar Talebi');
+      if (neden === null || neden.trim() === '') {
+        mesaj('İptal nedeni zorunlu.');
+        return true;
+      }
+      await guvenli(async () => {
+        const y = await api.labTekrarIptal(id, neden.trim());
+        mesaj(y.mesaj);
+        b.tazele();
+      });
+      return true;
+    }
+
+    // OKUMA-GERİ TEYİDİ (894, KTS L2): panik kaydı "aradım" ile değil,
+    //   karşı tarafın değeri TEKRAR ETMESİYLE kapanır. Teyidi alan kişi
+    //   yazılır - denetimde sorulan budur.
+    case 'lab.panik-teyit': {
+      const bildirimId = Number(satir?.bildirimId ?? 0);
+      if (!bildirimId) {
+        mesaj('Bu panik değer için bildirim kaydı yok - önce bildirim yapın.');
+        return true;
+      }
+      const kim = await metinSor('Değeri tekrar eden kişi (ad soyad):', '',
+                                 'Okuma-Geri Teyidi');
+      if (kim === null || kim.trim() === '') return true;
+      await guvenli(async () => {
+        const y = await api.labPanikTeyit(bildirimId, kim.trim());
+        mesaj(y.mesaj);
         b.tazele();
       });
       return true;

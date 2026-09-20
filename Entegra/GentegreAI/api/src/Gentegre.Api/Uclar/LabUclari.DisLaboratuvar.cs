@@ -184,13 +184,16 @@ public static partial class LabUclari
 
         // POST /api/lab/cihaz-mesaj/{id}/isle - çözümlenmiş mesajı sonuca yaz.
         grup.MapPost("/cihaz-mesaj/{id:long}/isle", async (
-            long id, BaglamCozucu cozucu, LabServisi servis, HttpContext ctx,
-            CancellationToken iptal) =>
+            long id, BaglamCozucu cozucu, LabServisi servis,
+            // GRAFİK TİPLİ SONUÇ (892, KTS L10): gömülü eğri/görüntü doküman
+            //   deposuna yazılır - ikinci bir blob deposu açmak yerine.
+            Gentegre.Veri.Depolar.DokumanDeposu dokumanlar,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("lab.sonuc", Islem.Ekle);
 
-            var s = await servis.CihazMesajIsleAsync(id, baglam, iptal);
+            var s = await servis.CihazMesajIsleAsync(id, baglam, iptal, dokumanlar);
             return Results.Ok(new { id, s.Yazilan, s.Atlanan, s.Mesaj,
                                     izlemeNo = baglam.IzlemeNo });
         });

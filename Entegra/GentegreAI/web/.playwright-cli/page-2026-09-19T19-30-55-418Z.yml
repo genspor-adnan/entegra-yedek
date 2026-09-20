@@ -1,0 +1,413 @@
+- generic [ref=f6e1]:
+  - generic [ref=f6e4]:
+    - banner [ref=f6e5]:
+      - button "☰" [expanded] [ref=f6e6] [cursor=pointer]
+      - link [ref=f6e7] [cursor=pointer]:
+        - img "Gentegre" [ref=f6e9]
+        - text: GenoTIP AI
+      - button "🔍 Ara ya da komut yaz… Ctrl K" [ref=f6e10] [cursor=pointer]:
+        - generic [ref=f6e11]: 🔍
+        - generic [ref=f6e12]: Ara ya da komut yaz…
+        - generic [ref=f6e13]: Ctrl K
+      - button "Merkez ▾" [ref=f6e15] [cursor=pointer]:
+        - text: Merkez
+        - generic [ref=f6e17]: ▾
+      - generic [ref=f6e18]:
+        - button "🖥️" [ref=f6e19] [cursor=pointer]
+        - link "💬" [ref=f6e20] [cursor=pointer]:
+          - /url: /mesajlar
+        - link "✨" [ref=f6e21] [cursor=pointer]:
+          - /url: /yapay-zeka
+        - button "🔔 3" [ref=f6e23] [cursor=pointer]:
+          - text: 🔔
+          - generic [ref=f6e24]: "3"
+        - button "Dil — Türkçe" [ref=f6e26] [cursor=pointer]
+        - button "?" [ref=f6e32] [cursor=pointer]
+        - button "Oturumu kapat" [ref=f6e34] [cursor=pointer]
+        - button "SY" [ref=f6e38] [cursor=pointer]
+    - generic [ref=f6e39]:
+      - complementary [ref=f6e40]:
+        - generic [ref=f6e41]:
+          - link "🏠 Ana Sayfa" [ref=f6e42] [cursor=pointer]:
+            - /url: /panel
+            - generic [ref=f6e43]: 🏠
+            - generic [ref=f6e44]: Ana Sayfa
+          - 'generic "Çalışma alanı: gün boyu kullandığınız bölgeler; diğerleri gizlenir" [ref=f6e45]':
+            - generic [ref=f6e46]: 🧭
+            - combobox "🧭" [ref=f6e47]:
+              - option "Tümü"
+              - option "Banko"
+              - option "Hekim"
+              - option "Hemşire"
+              - option "Lab / Görüntüleme"
+              - option "Muhasebe"
+              - option "Eczane / Tedarik" [selected]
+          - generic [ref=f6e48]:
+            - button "⭐ Favori ▾" [ref=f6e49] [cursor=pointer]:
+              - generic [ref=f6e50]: ⭐
+              - generic [ref=f6e51]: Favori
+              - generic [ref=f6e52]: ▾
+            - link "📅 Randevular ★" [ref=f6e53] [cursor=pointer]:
+              - /url: /randevu
+              - generic [ref=f6e54]: 📅
+              - generic [ref=f6e55]: Randevular
+              - button "★" [ref=f6e56]
+            - link "🪑 Günlük Akış ★" [ref=f6e57] [cursor=pointer]:
+              - /url: /dis-akis
+              - generic [ref=f6e58]: 🪑
+              - generic [ref=f6e59]: Günlük Akış
+              - button "★" [ref=f6e60]
+          - generic [ref=f6e61]:
+            - button "Klinikler ▾" [ref=f6e62] [cursor=pointer]:
+              - generic [ref=f6e64]: Klinikler
+              - generic [ref=f6e65]: ▾
+            - button "🩺 Muayene ▸" [ref=f6e67] [cursor=pointer]:
+              - generic [ref=f6e68]: 🩺
+              - generic [ref=f6e69]: Muayene
+              - generic [ref=f6e70]: ▸
+            - button "👁️ Göz ▸" [ref=f6e72] [cursor=pointer]:
+              - generic [ref=f6e73]: 👁️
+              - generic [ref=f6e74]: Göz
+              - generic [ref=f6e75]: ▸
+            - generic [ref=f6e76]:
+              - button "🦷 Diş ▾" [ref=f6e77] [cursor=pointer]:
+                - generic [ref=f6e78]: 🦷
+                - generic [ref=f6e79]: Diş
+                - generic [ref=f6e80]: ▾
+              - link "🪑 Günlük Akış ★" [ref=f6e81] [cursor=pointer]:
+                - /url: /dis-akis
+                - generic [ref=f6e82]: 🪑
+                - generic [ref=f6e83]: Günlük Akış
+                - button "★" [ref=f6e84]
+              - link "🦷 Hastalar (Odontogram) ☆" [ref=f6e85] [cursor=pointer]:
+                - /url: /dis-hasta
+                - generic [ref=f6e86]: 🦷
+                - generic [ref=f6e87]: Hastalar (Odontogram)
+                - button "☆" [ref=f6e88]
+              - link "📋 Tedavi Planları ☆" [ref=f6e89] [cursor=pointer]:
+                - /url: /dis-plan
+                - generic [ref=f6e90]: 📋
+                - generic [ref=f6e91]: Tedavi Planları
+                - button "☆" [ref=f6e92]
+              - link "⏱️ Seanslar ☆" [ref=f6e93] [cursor=pointer]:
+                - /url: /dis-seans
+                - generic [ref=f6e94]: ⏱️
+                - generic [ref=f6e95]: Seanslar
+                - button "☆" [ref=f6e96]
+              - link "🧪 Lab İş Emirleri ☆" [ref=f6e97] [cursor=pointer]:
+                - /url: /dis-lab-isemri
+                - generic [ref=f6e98]: 🧪
+                - generic [ref=f6e99]: Lab İş Emirleri
+                - button "☆" [ref=f6e100]
+              - link "💳 Ödeme Planları ☆" [ref=f6e101] [cursor=pointer]:
+                - /url: /dis-odeme-plani
+                - generic [ref=f6e102]: 💳
+                - generic [ref=f6e103]: Ödeme Planları
+                - button "☆" [ref=f6e104]
+              - button "⚙️ Sterilizasyon ▸" [ref=f6e106] [cursor=pointer]:
+                - generic [ref=f6e107]: ⚙️
+                - generic [ref=f6e108]: Sterilizasyon
+                - generic [ref=f6e109]: ▸
+              - link "📊 Dökümler ☆" [ref=f6e110] [cursor=pointer]:
+                - /url: /dokumler?grup=Di%C5%9F
+                - generic [ref=f6e111]: 📊
+                - generic [ref=f6e112]: Dökümler
+                - button "☆" [ref=f6e113]
+              - generic [ref=f6e114]:
+                - button "⚙️ Ayarlar ▾" [ref=f6e115] [cursor=pointer]:
+                  - generic [ref=f6e116]: ⚙️
+                  - generic [ref=f6e117]: Ayarlar
+                  - generic [ref=f6e118]: ▾
+                - link "🪑 Ünitler ☆" [ref=f6e119] [cursor=pointer]:
+                  - /url: /dis-unit
+                  - generic [ref=f6e120]: 🪑
+                  - generic [ref=f6e121]: Ünitler
+                  - button "☆" [ref=f6e122]
+                - link "🏭 Laboratuvarlar ☆" [ref=f6e123] [cursor=pointer]:
+                  - /url: /dis-lab
+                  - generic [ref=f6e124]: 🏭
+                  - generic [ref=f6e125]: Laboratuvarlar
+                  - button "☆" [ref=f6e126]
+                - link "📋 Set tanımları (içerik) ☆" [ref=f6e127] [cursor=pointer]:
+                  - /url: /steril-set
+                  - generic [ref=f6e128]: 📋
+                  - generic [ref=f6e129]: Set tanımları (içerik)
+                  - button "☆" [ref=f6e130]
+                - link "⚙️ Cihazlar ☆" [ref=f6e131] [cursor=pointer]:
+                  - /url: /steril-cihaz
+                  - generic [ref=f6e132]: ⚙️
+                  - generic [ref=f6e133]: Cihazlar
+                  - button "☆" [ref=f6e134]
+                - link "🌡 Programlar ☆" [ref=f6e135] [cursor=pointer]:
+                  - /url: /steril-program
+                  - generic [ref=f6e136]: 🌡
+                  - generic [ref=f6e137]: Programlar
+                  - button "☆" [ref=f6e138]
+                - link "🔧 Bakım · Validasyon ☆" [ref=f6e139] [cursor=pointer]:
+                  - /url: /steril-bakim
+                  - generic [ref=f6e140]: 🔧
+                  - generic [ref=f6e141]: Bakım · Validasyon
+                  - button "☆" [ref=f6e142]
+                - link "📅 Test takvimi · Kurallar ☆" [ref=f6e143] [cursor=pointer]:
+                  - /url: /steril-ayar
+                  - generic [ref=f6e144]: 📅
+                  - generic [ref=f6e145]: Test takvimi · Kurallar
+                  - button "☆" [ref=f6e146]
+            - button "🏃 FTR ▸" [ref=f6e148] [cursor=pointer]:
+              - generic [ref=f6e149]: 🏃
+              - generic [ref=f6e150]: FTR
+              - generic [ref=f6e151]: ▸
+            - button "👷 İşyeri Hekimliği ▸" [ref=f6e153] [cursor=pointer]:
+              - generic [ref=f6e154]: 👷
+              - generic [ref=f6e155]: İşyeri Hekimliği
+              - generic [ref=f6e156]: ▸
+          - button "Yatan & Cerrahi ▸" [ref=f6e158] [cursor=pointer]:
+            - generic [ref=f6e160]: Yatan & Cerrahi
+            - generic [ref=f6e161]: ▸
+          - button "Tedarik & Teknik ▸" [ref=f6e163] [cursor=pointer]:
+            - generic [ref=f6e165]: Tedarik & Teknik
+            - generic [ref=f6e166]: ▸
+          - button "Diğer bölgeler (5) ▸" [ref=f6e167] [cursor=pointer]:
+            - generic [ref=f6e169]: Diğer bölgeler (5)
+            - generic [ref=f6e170]: ▸
+          - generic [ref=f6e171]: Oturum
+          - generic [ref=f6e172]:
+            - generic [ref=f6e173]: 🏢
+            - generic [ref=f6e174]: Merkez
+          - generic [ref=f6e175]:
+            - generic [ref=f6e176]: 👤
+            - generic [ref=f6e177]: admin
+            - generic [ref=f6e178]: Yonetici
+          - generic "Bu şubenin kurum profili" [ref=f6e179]:
+            - generic [ref=f6e180]: 🪪
+            - generic [ref=f6e181]: Hastane
+      - main [ref=f6e182]:
+        - generic [ref=f6e184]:
+          - generic [ref=f6e186]:
+            - heading "Lab İş Emirleri" [level=1] [ref=f6e187]
+            - generic [ref=f6e188]: Diş › Protez Laboratuvarı
+            - generic [ref=f6e190]:
+              - button "＋ İş Emri" [ref=f6e192] [cursor=pointer]
+              - button "✎ Düzenle" [disabled] [ref=f6e195]
+              - button "🗑 Sil" [disabled] [ref=f6e198]
+              - button "➡ Aşamayı İlerlet" [disabled] [ref=f6e201]
+              - button "🖨️ Yazdır ▾" [ref=f6e204] [cursor=pointer]
+          - generic [ref=f6e206]:
+            - generic [ref=f6e207]:
+              - generic [ref=f6e208]: 🔍
+              - searchbox "Bu listede ara…" [ref=f6e209]
+            - button "🗂 Kanban" [ref=f6e210] [cursor=pointer]
+            - button "▤ Liste" [ref=f6e211] [cursor=pointer]
+            - button "▦ Grup" [ref=f6e212] [cursor=pointer]
+            - button "📊 Analiz" [ref=f6e213] [cursor=pointer]
+          - generic [ref=f6e214]:
+            - generic [ref=f6e215]:
+              - button "☰" [ref=f6e216] [cursor=pointer]
+              - button "🕓" [ref=f6e217] [cursor=pointer]
+              - button "⭐" [ref=f6e218] [cursor=pointer]
+              - button "Ölçü bekliyor" [ref=f6e220] [cursor=pointer]
+              - button "Labda" [ref=f6e221] [cursor=pointer]
+              - button "Geldi · prova" [ref=f6e222] [cursor=pointer]
+              - button "Gecikti" [ref=f6e223] [cursor=pointer]
+              - button "Teslim edildi" [ref=f6e224] [cursor=pointer]
+              - button "Tümü" [ref=f6e225] [cursor=pointer]
+              - generic [ref=f6e227]:
+                - textbox "Başlama tarihi" [ref=f6e228]
+                - generic [ref=f6e229]: –
+                - textbox "Bitiş tarihi" [ref=f6e230]
+            - generic [ref=f6e294]:
+              - generic [ref=f6e295]:
+                - textbox "🔍 iş emri no · hasta · diş · lab…" [ref=f6e296]
+                - textbox "Etiketi okutun; iş emri bulunur ve aşaması bir adım ilerler." [ref=f6e297]:
+                  - /placeholder: 🏷 barkot okut → aşama ilerlet
+                - generic [ref=f6e298]: Açık işler (2)
+                - generic [ref=f6e299]: Gecikenler (0)
+                - generic [ref=f6e300]: Bu hafta beklenen (1)
+                - generic [ref=f6e301]: Bugün gelen (0)
+                - generic [ref=f6e302]: Teslim · 30 gün (0)
+                - generic [ref=f6e303]:
+                  - combobox [ref=f6e304]:
+                    - 'option "Lab: Tümü" [selected]'
+                    - option "Test Diş Laboratuvarı"
+                  - combobox [ref=f6e305]:
+                    - 'option "Hekim: Tümü" [selected]'
+                    - option "Arda Bulut"
+                    - option "Dr. Ahmet Yılmaz"
+                    - option "Dr. Ali Yıldırım"
+                    - option "Dr. Aslı Demir"
+                    - option "Dr. Ayşe Kaya"
+                    - option "Dr. Barış Güneş"
+                    - option "Dr. Berk Kurt"
+                    - option "Dr. Burak Kılıç"
+                    - option "Dr. Buse Kurt"
+                    - option "Dr. Cem Çetin"
+                    - option "Dr. Ceren Çelik"
+                    - option "Dr. Deniz Kara"
+                    - option "Dr. Derya Kılıç"
+                    - option "Dr. Dilek Polat"
+                    - option "Dr. Ece Korkmaz"
+                    - option "Dr. Elif Şahin"
+                    - option "Dr. Emre Arslan"
+                    - option "Dr. Erdem Kara"
+                    - option "Dr. Esra Aydın"
+                    - option "Dr. Fatma Öztürk"
+                    - option "Dr. Gamze Aslan"
+                    - option "Dr. Hakan Öztürk"
+                    - option "Dr. Hasan Aydın"
+                    - option "Dr. İrem Çetin"
+                    - option "Dr. Kaan Özdemir"
+                    - option "Dr. Kemal Korkmaz"
+                    - option "Dr. Kerem Koç"
+                    - option "Dr. Mehmet Demir"
+                    - option "Dr. Melis Yıldırım"
+                    - option "Dr. Merve Özdemir"
+                    - option "Dr. Murat Şahin"
+                    - option "Dr. Mustafa Çelik"
+                    - option "Dr. Nazlı Bulut"
+                    - option "Dr. Nihan Güneş"
+                    - option "Dr. Okan Aslan"
+                    - option "Dr. Onur Polat"
+                    - option "Dr. Pınar Şimşek"
+                    - option "Dr. Seda Doğan"
+                    - option "Dr. Selin Özkan"
+                    - option "Dr. Serkan Özkan"
+                    - option "Dr. Sibel Yılmaz"
+                    - option "Dr. Sinan Doğan"
+                    - option "Dr. Şule Erdoğan"
+                    - option "Dr. Tolga Erdoğan"
+                    - option "Dr. Tuğba Arslan"
+                    - option "Dr. Uğur Yıldız"
+                    - option "Dr. Umut Şimşek"
+                    - option "Dr. Volkan Kaya"
+                    - option "Dr. Yasemin Koç"
+                    - option "Dr. Zeynep Yıldız"
+                  - generic [ref=f6e306]: 🗂 Kanban
+                  - generic [ref=f6e307]: 🏭 Laba göre
+                  - generic [ref=f6e308]: 📤 Kurye günü
+                  - button "⟳" [ref=f6e309] [cursor=pointer]
+              - generic [ref=f6e310]:
+                - generic [ref=f6e311]: Gecikti
+                - generic [ref=f6e313]: 2 gün içinde / randevusuz
+                - generic [ref=f6e315]: "SLA çubuğu: gönderim → beklenen"
+                - generic [ref=f6e316]: Kart tıkla → sağda ayrıntı · çift tık → kart · sürükle → aşama değişir
+              - generic [ref=f6e317]:
+                - generic [ref=f6e318]:
+                  - generic [ref=f6e383]:
+                    - generic [ref=f6e384]:
+                      - text: 1 · Ölçü bekliyor
+                      - generic [ref=f6e385]: klinikte
+                      - generic [ref=f6e386]: "0"
+                    - generic [ref=f6e387]: ölçü alındı → "Gönderildi"ye sürükle · kurye listesine düşer
+                  - generic [ref=f6e390]:
+                    - text: 2 · Gönderildi / Labda
+                    - generic [ref=f6e391]: üretim
+                    - generic [ref=f6e392]: "0"
+                  - generic [ref=f6e394]:
+                    - generic [ref=f6e395]:
+                      - text: 3 · Tasarım onayı
+                      - generic [ref=f6e396]: hekim onaylar
+                      - generic [ref=f6e397]: "1"
+                    - generic [ref=f6e398]:
+                      - generic [ref=f6e399]:
+                        - generic [ref=f6e400]:
+                          - text: 🧪 LB-2026/0003
+                          - generic [ref=f6e401]: onay?
+                        - generic [ref=f6e402]:
+                          - text: CEMRE YILMAZ
+                          - generic [ref=f6e403]: · diş 14
+                        - generic [ref=f6e404]:
+                          - text: Kron
+                          - generic [ref=f6e405]: · Zirkonyum Kron (Her Bir Üye)
+                        - generic [ref=f6e406]:
+                          - generic [ref=f6e407]: Test Diş Laboratuvarı
+                          - generic [ref=f6e408]: —
+                        - generic [ref=f6e409]: ⏳ bekl. 23.09.2026 · 5 gün
+                      - generic [ref=f6e413]: ✔ onay → Üretim (labda) · ✖ ret → Geri gönderildi + not
+                  - generic [ref=f6e414]:
+                    - generic [ref=f6e415]:
+                      - text: 4 · Geldi · prova
+                      - generic [ref=f6e416]: klinikte
+                      - generic [ref=f6e417]: "1"
+                    - generic [ref=f6e419]:
+                      - generic [ref=f6e420]:
+                        - text: 🧪 LB-2026/0001
+                        - generic [ref=f6e421]: Geldi
+                      - generic [ref=f6e422]:
+                        - text: CEMRE YILMAZ
+                        - generic [ref=f6e423]: · diş 16
+                      - generic [ref=f6e424]: Diğer · Zirkonyum
+                      - generic [ref=f6e425]:
+                        - generic [ref=f6e426]: Test Diş Laboratuvarı
+                        - generic [ref=f6e427]: —
+                        - generic [ref=f6e428]: ⚠ randevu ver
+                      - generic [ref=f6e429]: ⏳ bekl. 23.09.2026
+                  - generic [ref=f6e433]:
+                    - generic [ref=f6e434]:
+                      - text: 5 · Geri gönderildi
+                      - generic [ref=f6e435]: düzeltme
+                      - generic [ref=f6e436]: "0"
+                    - generic [ref=f6e437]: Geri gönderim nedeni zorunlu · lab performansına işler
+                  - generic [ref=f6e439]:
+                    - generic [ref=f6e440]:
+                      - text: 6 · Teslim edildi
+                      - generic [ref=f6e441]: son 30 gün · ücretlenir
+                      - generic [ref=f6e442]: "0"
+                    - generic [ref=f6e443]: Teslim = plan satırı "yapıldı" (hekim, simantasyon seansı) + ücret · lab maliyeti hakedişten düşer
+                - generic [ref=f6e381]:
+                  - generic [ref=f6e382]:
+                    - generic [ref=f6e445]:
+                      - text: 🧪 LB-2026/0003
+                      - generic [ref=f6e446]: Tasarım onayı
+                      - generic [ref=f6e447]: Test Diş Laboratuvarı · gün 2 / 7
+                    - generic [ref=f6e448]:
+                      - generic [ref=f6e449]:
+                        - generic [ref=f6e450]: Hasta
+                        - generic [ref=f6e451]: CEMRE YILMAZ
+                      - generic [ref=f6e452]:
+                        - generic [ref=f6e453]: Plan satırı
+                        - generic [ref=f6e454]: "TP-2026/0004 · #1 · Zirkonyum Kron (Her Bir Üye)"
+                      - generic [ref=f6e455]:
+                        - generic [ref=f6e456]: Diş / iş
+                        - generic [ref=f6e457]: 14 · Kron
+                      - generic [ref=f6e458]:
+                        - generic [ref=f6e459]: Renk · ölçü
+                        - generic [ref=f6e460]: Geleneksel
+                      - generic [ref=f6e461]:
+                        - generic [ref=f6e462]: Hekim
+                        - generic [ref=f6e463]: —
+                      - generic [ref=f6e464]:
+                        - generic [ref=f6e465]: Gönderim → beklenen
+                        - generic [ref=f6e466]: 16.09.2026 → 23.09.2026 (SLA 7 gün)
+                      - generic [ref=f6e467]:
+                        - generic [ref=f6e468]: Lab / hasta fiyatı
+                        - generic [ref=f6e469]: 0,00 / 0,00
+                      - generic [ref=f6e470]:
+                        - generic [ref=f6e471]: Prova / teslim randevusu
+                        - generic [ref=f6e472]: yok
+                  - generic [ref=f6e474]:
+                    - generic [ref=f6e475]:
+                      - text: Aşama geçişi
+                      - generic [ref=f6e476]: tek tık · log 1134
+                    - generic [ref=f6e477]:
+                      - button "✔ Tasarım onay → Üretim" [ref=f6e478] [cursor=pointer]
+                      - button "✖ Tasarım ret → Geri gönder (not)" [ref=f6e479] [cursor=pointer]
+                      - button "📥 Geldi · kalite kontrol" [ref=f6e480] [cursor=pointer]
+                      - button "🗓 Prova / teslim randevusu ver" [ref=f6e481] [cursor=pointer]
+                      - button "✖ İptal" [ref=f6e482] [cursor=pointer]
+                      - button "🏷 Barkot etiketi" [ref=f6e483] [cursor=pointer]
+                      - button "📄 İş emri kartı" [ref=f6e484] [cursor=pointer]
+                      - button "🦷 Hasta kartı" [ref=f6e485] [cursor=pointer]
+                  - generic [ref=f6e486]:
+                    - generic [ref=f6e487]: Aşama geçmişi
+                    - list [ref=f6e488]:
+                      - listitem [ref=f6e489]: 19.09.2026 22:30 · Tasarım onayı · Sistem Yoneticisi
+                      - listitem [ref=f6e490]: 16.09.2026 13:52 · Gönderildi · Sistem Yoneticisi
+    - button "Yapay Zekâya Sor — bu ekranda nasıl yapılır?" [ref=f6e292] [cursor=pointer]:
+      - text: 💡
+      - generic [ref=f6e293]: Yapay Zekâya Sor
+  - generic [ref=f6e492]:
+    - generic [ref=f6e493]:
+      - generic [ref=f6e494]: GenoTIP AI Mesajı
+      - generic [ref=f6e495]: Esc ile kapanır
+    - button "Kapat" [active] [ref=f6e497] [cursor=pointer]
+    - generic [ref=f6e498]: LB-2026/0003 · CEMRE YILMAZ → Tasarım onayı

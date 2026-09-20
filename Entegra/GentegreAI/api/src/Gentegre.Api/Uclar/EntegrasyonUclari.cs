@@ -318,6 +318,72 @@ public static class EntegrasyonUclari
             });
         });
 
+        // -------------------------------------- SKRS: GUID'i olan listeler ----
+        // POST /api/entegrasyon/{id}/skrs-kod-listeleri
+        //
+        // `kod_liste.skrs_liste` DOLU olan her yerel listeyi GUID'iyle ceker.
+        //   `skrs-senkron` sabit bir ad->liste eslemesi kullaniyor; yeni
+        //   modullerin listeleri (asi, cocuk/gebe izlem, gebelik sonucu -
+        //   898..902) GUID'lerini zaten sema dosyalarinda tasiyor, katalogda
+        //   Turkce adla aramaya gerek yok. Yeni bir liste eklendiginde bu uc
+        //   kendiliginden onu da ceker - kod degismez.
+        //
+        // TEK LISTENIN HATASI OTEKILERI DURDURMAZ (senkronun kurali ayni):
+        //   SKRS bazi listelerde 500 donuyor; gelen yazilir, gelmeyeni rapor
+        //   soyler.
+        grup.MapPost("/{id:int}/skrs-kod-listeleri", async (
+            int id, string? kod, BaglamCozucu cozucu, VeriKaynagi veri,
+            IHttpClientFactory istemciler, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("entegrasyon", Islem.Degistir);
+
+            await using var baglanti = await veri.AcAsync(iptal);
+            var hesap = await HesapOkuAsync(baglanti, id, iptal);
+            if (!string.Equals(hesap.Kod, "SKRS", StringComparison.OrdinalIgnoreCase))
+                throw GentegreHatasi.IsKurali("Bu işlem yalnız SKRS hesabında çalışır.");
+
+            var listeler = await baglanti.ListeAsync("""
+                select kod, ad, skrs_liste from public.kod_liste
+                 where coalesce(nullif(trim(skrs_liste), ''), '') <> ''
+                   and (@p0::text is null or kod = @p0)
+                 order by kod
+                """, null, [kod],
+                o => (Kod: o.GetString(0), Ad: o.GetString(1), Guid: o.GetString(2)), iptal);
+
+            var toplam = 0;
+            var raporlar = new List<string>();
+            foreach (var l in listeler)
+            {
+                List<(string Kod, string Ad, string? Ust)> degerler;
+                try
+                {
+                    degerler = await SkrsListesiCekAsync(hesap, l.Guid, istemciler, iptal);
+                }
+                catch (Exception h)
+                {
+                    raporlar.Add($"{l.Kod}: {Kisalt(h.Message, 60)}");
+                    continue;
+                }
+                if (degerler.Count == 0)
+                {
+                    raporlar.Add($"{l.Kod}: boş döndü");
+                    continue;
+                }
+
+                var yazilan = await ListeYazAsync(baglanti, l.Kod, degerler,
+                                                  baglam.KullaniciId, iptal);
+                toplam += yazilan;
+                raporlar.Add($"{l.Kod}: {yazilan}");
+            }
+
+            var ozet = $"{listeler.Count} liste, {toplam} değer yazıldı.";
+            await SonucYazAsync(baglanti, id, ozet, iptal);
+
+            return Results.Ok(new { liste = listeler.Count, toplam, raporlar,
+                                    mesaj = ozet, izlemeNo = baglam.IzlemeNo });
+        });
+
         // ------------------------------------------------- SKRS liste senkron
         grup.MapPost("/{id:int}/skrs-senkron", async (
             int id, BaglamCozucu cozucu, VeriKaynagi veri, IHttpClientFactory istemciler,
@@ -571,8 +637,8 @@ public static class EntegrasyonUclari
 
         foreach (var x in liste.EnumerateArray())
         {
-            var ad = x.TryGetProperty("adi", out var a) ? a.GetString() ?? "" : "";
-            var kod = x.TryGetProperty("kodu", out var k) ? k.GetString() ?? "" : "";
+            var ad = Metin(x, "adi") ?? "";
+            var kod = Metin(x, "kodu") ?? "";
             if (ad != "" && kod != "") sonuc[Anahtar(ad)] = kod;
         }
         return sonuc;
@@ -774,7 +840,12 @@ public static class EntegrasyonUclari
     /// <summary>JSON nesnesinden ilk dolu alani okur (alan adlari surume gore degisir).</summary>
     private static string? Metin(JsonElement nesne, params string[] adlar)
     {
-        foreach (var ad in adlar)
+        // SKRS ALAN ADI TUTARSIZ: cogu liste "ADI"/"KODU" (buyuk), bazilari
+        //   (or. KRITIK DKH TARAMA SONUCU) "adi"/"kodu" (kucuk) donuyor.
+        //   TryGetProperty tam eslesme ister; verilen adin buyuk ve kucuk
+        //   halini de deneriz - yoksa kucuk harfli liste sessizce bos gelir.
+        foreach (var temel in adlar)
+        foreach (var ad in new[] { temel, temel.ToUpperInvariant(), temel.ToLowerInvariant() })
             if (nesne.TryGetProperty(ad, out var d))
             {
                 var v = d.ValueKind switch

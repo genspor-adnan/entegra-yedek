@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Gentegre.Veri;
@@ -39,6 +39,26 @@ public sealed partial class EnabizPaketUretici
     public const short KaynakRecete = 3;
     /// <summary>105 Laboratuvar Sonuc paketinin kaynagi: `lab_istem.id`.</summary>
     public const short KaynakLabIstem = 4;
+    /// <summary>411 Doktor Mesaji paketinin kaynagi: `enabiz_mesaj.id` (881).</summary>
+    public const short KaynakHastaMesaji = 5;
+    /// <summary>214 BZBH paketinin kaynagi: `bzbh_bildirim.id` (882).</summary>
+    public const short KaynakBzbh = 6;
+    /// <summary>409 Radyoloji Sonuc paketinin kaynagi: `radyoloji_rapor.id` (883).</summary>
+    public const short KaynakRadyolojiRapor = 7;
+    /// <summary>407 Gun Sonu paketinin kaynagi: `enabiz_gun_sonu.id` (884).</summary>
+    public const short KaynakGunSonu = 8;
+    /// <summary>408 Ay Sonu paketinin kaynagi: `enabiz_ay_sonu.id` (885).</summary>
+    public const short KaynakAySonu = 9;
+    /// <summary>207 Asi paketinin kaynagi: `asi_uygulama.id` (898, KTS H10).</summary>
+    public const short KaynakAsiUygulama = 10;
+    /// <summary>209 Bebek/Cocuk Izlem paketinin kaynagi: `cocuk_izlem.id` (899).</summary>
+    public const short KaynakCocukIzlem = 11;
+    /// <summary>221 Gebe Izlem paketinin kaynagi: `gebe_izlem.id` (900).</summary>
+    public const short KaynakGebeIzlem = 12;
+    /// <summary>223 Gebelik Bildirim paketinin kaynagi: `gebelik.id` (901).</summary>
+    public const short KaynakGebelik = 13;
+    /// <summary>224 Gebelik Sonucu paketinin kaynagi: `gebelik_sonuc.id` (902).</summary>
+    public const short KaynakGebelikSonuc = 14;
 
     public sealed record Sonuc(long PaketId, string PaketNo, short Durum, int AlanSayisi,
                                IReadOnlyList<string> Eksikler);
@@ -134,6 +154,16 @@ public sealed partial class EnabizPaketUretici
                      && (silmeMi || a.Kaynak != "belge_basvuru.sys_takip_no"))
             .Select(a => $"{a.Alan}={a.Deger}|{a.SkrsKod}"));
         var kaynakTur = LabKaynakli(paketKodu) ? KaynakLabIstem
+                      : MesajKaynakli(paketKodu) ? KaynakHastaMesaji
+                      : BzbhKaynakli(paketKodu) ? KaynakBzbh
+                      : RadyolojiKaynakli(paketKodu) ? KaynakRadyolojiRapor
+                      : GunSonuKaynakli(paketKodu) ? KaynakGunSonu
+                      : AySonuKaynakli(paketKodu) ? KaynakAySonu
+                      : AsiKaynakli(paketKodu) ? KaynakAsiUygulama
+                      : CocukIzlemKaynakli(paketKodu) ? KaynakCocukIzlem
+                      : GebeIzlemKaynakli(paketKodu) ? KaynakGebeIzlem
+                      : GebelikKaynakli(paketKodu) ? KaynakGebelik
+                      : GebelikSonucKaynakli(paketKodu) ? KaynakGebelikSonuc
                       : MuayeneKaynakli(paketKodu) ? KaynakMuayene
                       : KaynakBasvuru;
 
@@ -258,8 +288,54 @@ public sealed partial class EnabizPaketUretici
     /// hiç üretilmiyordu: bağlam başvuru sanılıp muayene id'siyle belge
     /// aranıyor, bulunamayınca paket sessizce atlanıyordu.
     /// </summary>
+    /// <summary>
+    /// 411 DOKTOR MESAJI mesaj satirindan uretilir (881): kaynagi
+    /// `enabiz_mesaj.id`, basvuru ya da muayene degil.
+    /// </summary>
+    private static bool MesajKaynakli(string paketKodu)
+        => paketKodu is "HASTA_MESAJI";
+
+    /// <summary>214 BZBH paketi bildirim satirindan uretilir (882).</summary>
+    private static bool BzbhKaynakli(string paketKodu)
+        => paketKodu is "BZBH_BILDIRIM";
+
+    /// <summary>409 Radyoloji Sonuc paketi ONAYLANMIS RAPORDAN uretilir (883).</summary>
+    private static bool RadyolojiKaynakli(string paketKodu)
+        => paketKodu is "RADYOLOJI_SONUC";
+
+    /// <summary>
+    /// 407 Gun Sonu TESISE aittir, hastaya degil (884): kaynagi gunluk ozet
+    /// kaydi, hasta/takip numarasi yok.
+    /// </summary>
+    private static bool GunSonuKaynakli(string paketKodu)
+        => paketKodu is "GUN_SONU";
+
+    /// <summary>408 Ay Sonu da tesise aittir (885): kaynagi aylik ozet kaydi.</summary>
+    private static bool AySonuKaynakli(string paketKodu)
+        => paketKodu is "AY_SONU";
+
+    /// <summary>207 Asi paketi UYGULAMA KAYDINDAN uretilir (898, KTS H10).</summary>
+    private static bool AsiKaynakli(string paketKodu)
+        => paketKodu is "ASI";
+
+    /// <summary>209 Bebek/Cocuk Izlem paketi IZLEM KAYDINDAN uretilir (899).</summary>
+    private static bool CocukIzlemKaynakli(string paketKodu)
+        => paketKodu is "COCUK_IZLEM";
+
+    /// <summary>221 Gebe Izlem paketi IZLEM KAYDINDAN uretilir (900).</summary>
+    private static bool GebeIzlemKaynakli(string paketKodu)
+        => paketKodu is "GEBE_IZLEM";
+
+    /// <summary>223 Gebelik Bildirim paketi GEBELIK DOSYASINDAN uretilir (901).</summary>
+    private static bool GebelikKaynakli(string paketKodu)
+        => paketKodu is "GEBELIK_BILDIRIM";
+
+    /// <summary>224 Gebelik Sonucu paketi SONUC KAYDINDAN uretilir (902).</summary>
+    private static bool GebelikSonucKaynakli(string paketKodu)
+        => paketKodu is "GEBELIK_SONUCU";
+
     private static bool MuayeneKaynakli(string paketKodu)
-        => paketKodu is "MUAYENE" or "HASTA_CIKIS";
+        => paketKodu is "MUAYENE" or "KONSULTASYON" or "HASTA_CIKIS";
 
     /// <summary>
     /// USS'de bir kaydi SILEN paket (301 hasta kabul · 302 hizmet). Icerigi
@@ -279,7 +355,96 @@ public sealed partial class EnabizPaketUretici
 
     private static async Task<PaketBaglami?> BaglamAlAsync(NpgsqlConnection baglanti,
         NpgsqlTransaction islem, string paketKodu, int kaynakId, CancellationToken iptal)
-        => LabKaynakli(paketKodu)
+        => AySonuKaynakli(paketKodu)
+            // AY SONU: hasta/hekim yok. Olay zamani AYIN SON GUNU - paketin
+            //   hangi doneme ait oldugu tek belirleyici.
+            ? await baglanti.TekAsync("""
+                select null::integer, null::integer, null::integer, a.sube_id,
+                       ((make_date(a.yil, a.ay, 1) + interval '1 month - 1 day')
+                        + time '23:59')::timestamptz
+                  from public.enabiz_ay_sonu a where a.id = @p0
+                """, islem, [kaynakId], Oku, iptal)
+        : GunSonuKaynakli(paketKodu)
+            // GUN SONU: hasta yok, hekim yok. Olay zamani GUNUN SONU -
+            //   paketin hangi gune ait oldugu tek belirleyici.
+            ? await baglanti.TekAsync("""
+                select null::integer, null::integer, null::integer, g.sube_id,
+                       (g.tarih + time '23:59')::timestamptz
+                  from public.enabiz_gun_sonu g where g.id = @p0
+                """, islem, [kaynakId], Oku, iptal)
+        : GebelikSonucKaynakli(paketKodu)
+            // GEBELIK SONUCU: olay zamani SONLANMA anidir. Basvuru sonucun
+            //   kendindeyse ondan, yoksa gebeligin izlemlerinden - dogum
+            //   baska bir basvuruda kayda gecmis olabilir.
+            ? await baglanti.TekAsync("""
+                select coalesce(s.belge_id,
+                         (select max(i.belge_id) from public.gebe_izlem i
+                           where i.gebelik_id = s.gebelik_id)),
+                       s.taraf_id, null::integer, s.sube_id, s.sonlanma_tarihi
+                  from public.gebelik_sonuc s where s.id = @p0
+                """, islem, [kaynakId], Oku, iptal)
+        : GebelikKaynakli(paketKodu)
+            // GEBELIK BILDIRIMI: dosyanin kendi basvurusu yok; basvuru ve
+            //   olay zamani ILK IZLEMDEN gelir - bildirim gebeligin ilk
+            //   temasinda yapilir.
+            ? await baglanti.TekAsync("""
+                select (select max(i.belge_id) from public.gebe_izlem i
+                         where i.gebelik_id = g.id),
+                       g.taraf_id, null::integer, g.sube_id,
+                       coalesce((select min(i.izlem_tarihi) from public.gebe_izlem i
+                                  where i.gebelik_id = g.id), g.ekleme_tarihi)
+                  from public.gebelik g where g.id = @p0
+                """, islem, [kaynakId], Oku, iptal)
+        : GebeIzlemKaynakli(paketKodu)
+            // GEBE IZLEM: olay zamani izlem tarihi. Hekim alani BOS -
+            //   izlemi yapan ebe/hekim ayri tutulmuyor; paket de istemiyor.
+            ? await baglanti.TekAsync("""
+                select i.belge_id, i.taraf_id, null::integer, i.sube_id,
+                       coalesce(i.izlem_tarihi, i.ekleme_tarihi)
+                  from public.gebe_izlem i where i.id = @p0
+                """, islem, [kaynakId], Oku, iptal)
+        : CocukIzlemKaynakli(paketKodu)
+            // COCUK IZLEM: olay zamani IZLEM tarihidir - kayit sonradan
+            //   girilse bile izlemin yapildigi gun gecerlidir.
+            ? await baglanti.TekAsync("""
+                select i.belge_id, i.taraf_id, null::integer, i.sube_id,
+                       coalesce(i.izlem_tarihi, i.ekleme_tarihi)
+                  from public.cocuk_izlem i where i.id = @p0
+                """, islem, [kaynakId], Oku, iptal)
+        : AsiKaynakli(paketKodu)
+            // ASI: olay zamani UYGULAMA anidir - kayit sonradan girilse bile
+            //   asinin yapildigi an gecerlidir (sure siniri oradan isler).
+            ? await baglanti.TekAsync("""
+                select u.belge_id, u.taraf_id, u.uygulayan_id, u.sube_id,
+                       coalesce(u.uygulama_zamani, u.ekleme_tarihi)
+                  from public.asi_uygulama u where u.id = @p0
+                """, islem, [kaynakId], Oku, iptal)
+        : RadyolojiKaynakli(paketKodu)
+            // OLAY ZAMANI RAPOR ONAYI: sure siniri onaydan isler, istemin
+            //   acildigi andan degil - rapor gunler sonra yazilabilir.
+            ? await baglanti.TekAsync("""
+                select i.belge_id, i.hasta_id, r.onaylayan_id, i.sube_id,
+                       coalesce(r.onay_tarihi, r.yazma_tarihi, now())
+                  from public.radyoloji_rapor r
+                  join public.radyoloji_istem i on i.id = r.istem_id
+                 where r.id = @p0
+                """, islem, [kaynakId], Oku, iptal)
+        : BzbhKaynakli(paketKodu)
+            // OLAY ZAMANI TANI ZAMANI: bildirim suresi (Grup A'da 24 saat)
+            //   tanidan itibaren isliyor, bildirimin yazildigi andan degil.
+            ? await baglanti.TekAsync("""
+                select b.belge_id, b.hasta_id, b.hekim_id, b.sube_id,
+                       coalesce(b.tani_zamani, b.ekleme_tarihi)
+                  from public.bzbh_bildirim b where b.id = @p0
+                """, islem, [kaynakId], Oku, iptal)
+        : MesajKaynakli(paketKodu)
+            // OLAY ZAMANI MESAJIN YAZILDIGI AN, gonderildigi an degil: paket
+            //   gec uretilse bile hekimin mesaji ne zaman yazdigi dogru kalsin.
+            ? await baglanti.TekAsync("""
+                select m.belge_id, m.hasta_id, m.hekim_id, m.sube_id, m.ekleme_tarihi
+                  from public.enabiz_mesaj m where m.id = @p0
+                """, islem, [kaynakId], Oku, iptal)
+        : LabKaynakli(paketKodu)
             ? await baglanti.TekAsync("""
                 -- OLAY ZAMANI NUMUNE ALIMI: sure siniri ondan isliyor
                 --   (rehber: numune alindiktan sonra 10 dakika). Sonuc

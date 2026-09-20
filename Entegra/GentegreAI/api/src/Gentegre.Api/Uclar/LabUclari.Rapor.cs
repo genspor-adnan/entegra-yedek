@@ -75,6 +75,10 @@ public static partial class LabUclari
                        ls.referans_metin as "referansMetin", ls.panik,
                        ls.delta_onceki as "deltaOnceki", ls.delta_yuzde as "deltaYuzde",
                        ls.delta_uyari as "deltaUyari", ls.yorum, ls.tekrar_no as "tekrarNo",
+                       -- KARAR SINIRI (896, KTS L15): referans aralığından ayrı
+                       --   bilgi; sonuca donduğu için eski rapor kendi eşiğiyle
+                       --   basılır.
+                       ls.karar_notu as "kararNotu",
                        ls.olcum_zamani as "olcumZamani", ls.onay_zamani as "onayZamani",
                        coalesce(t.yontem, '') as yontem, coalesce(c.ad, '') as "cihazAdi",
                        coalesce(o.unvan, '') as "onaylayan", t.bolum,
@@ -92,8 +96,13 @@ public static partial class LabUclari
                   left join public.cihaz c on c.id = ls.cihaz_id
                   left join public.taraf o on o.id = ls.onay_id
                  where s.istem_id = @p0 and s.durum <> 0 and t.tur in (1, 2, 3)
+                   -- TEST SEVIYESINDE YETKI (889, KTS L7): kisitli tetkik
+                   --   izinsiz role BASILMAZ. Kac tanesinin gizlendigi
+                   --   asagida ayrica doner - sessizce eksik rapor, yanlis
+                   --   rapordur.
+                   and public.fn_lab_tetkik_izin(s.tetkik_id, @p1, 'gor')
                  order by t.bolum, s.sira, t.kod
-                """, null, [istemId], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, null, [istemId, baglam.RolId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // KÜLTÜR: rapor bölümü izolat + antibiyogram. Antibiyogramda
             //   YALNIZ bildir = 1 satırlar - kademeli bildirim kararı burada
@@ -117,8 +126,9 @@ public static partial class LabUclari
                   left join public.lab_numune n on n.id = k.numune_id
                   left join public.taraf o on o.id = k.onay_id
                  where k.istem_id = @p0 and k.durum <> 0
+                   and public.fn_lab_tetkik_izin(k.tetkik_id, @p1, 'gor')
                  order by k.id
-                """, null, [istemId], OkuyucuGenisletmeleri.Sozluk, iptal);
+                """, null, [istemId, baglam.RolId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var izolatlar = await baglanti.ListeAsync("""
                 select u.id, u.kultur_id as "kulturId", u.izolat_no as "izolatNo",
@@ -143,8 +153,15 @@ public static partial class LabUclari
                   join public.lab_antibiyotik a on a.id = g.antibiyotik_id
                   join public.lab_kultur_ureme u on u.id = g.ureme_id
                   join public.lab_kultur k on k.id = u.kultur_id
+                  -- BASAMAK SIRASI ORGANIZMAYA GORE (887): organizmaya ozel
+                  --   panel genel basamagi ezdigi icin rapor da o siraya
+                  --   uymali - ekranda 3. basamak olan ajan raporun basinda
+                  --   cikmamali.
+                  left join public.lab_organizma_panel op
+                         on op.organizma_id = u.organizma_id
+                        and op.antibiyotik_id = a.id
                  where k.istem_id = @p0 and g.bildir = 1
-                 order by g.ureme_id, a.basamak, a.ad
+                 order by g.ureme_id, coalesce(op.basamak, a.basamak), a.ad
                 """, null, [istemId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             // GENETİK: vaka başlığı, yöntem/kalite ve RAPORLANAN varyantlar.
@@ -212,8 +229,35 @@ public static partial class LabUclari
                            (select id from public.sube where varsayilan = 1 limit 1))
                 """, null, [istemId], OkuyucuGenisletmeleri.Sozluk, iptal);
 
+            // GRAFİK TİPLİ SONUÇLAR (892, KTS L10): raporda gösterilmesi
+            //   işaretlenmiş eğriler. Ham kalibrasyon eğrisi laboratuvarın iç
+            //   kaydıdır ve `raporda = 0` ile dışarıda bırakılabilir.
+            //   YETKİ SÜZGECİ BURADA DA (889): grafik sonucun parçasıdır.
+            var grafikler = await baglanti.ListeAsync("""
+                select g.id, g.satir_id as "satirId", g.kod, g.tetkik, g.tur,
+                       g.baslik, g.dokuman_id as "dokumanId",
+                       g.content_type as "contentType",
+                       g.seri::text as seri, g.birim_x as "birimX", g.birim_y as "birimY",
+                       g.cihaz, g.sira
+                  from public.v_lab_sonuc_grafik g
+                  join public.lab_istem_satir s on s.id = g.satir_id
+                 where g.istem_id = @p0 and g.raporda = 1 and s.durum <> 0
+                   and public.fn_lab_tetkik_izin(s.tetkik_id, @p1, 'gor')
+                 order by g.sira, g.id
+                """, null, [istemId, baglam.RolId], OkuyucuGenisletmeleri.Sozluk, iptal);
+
+            // GIZLENEN TETKIK SAYISI (889): rapor eksik basiliyorsa bunu
+            //   SOYLEMEK zorunda - hekim, gormedigi bir satirin hic
+            //   istenmedigini sanmamali.
+            var gizlenen = await baglanti.TekDegerAsync<int>("""
+                select count(*)::int from public.lab_istem_satir s
+                 where s.istem_id = @p0 and s.durum <> 0
+                   and not public.fn_lab_tetkik_izin(s.tetkik_id, @p1, 'gor')
+                """, null, [istemId, baglam.RolId], iptal);
+
             return Results.Ok(new { istem, sonuclar, kulturler, izolatlar, antibiyogram,
-                                    vakalar, varyantlar, kurum, izlemeNo = baglam.IzlemeNo });
+                                    vakalar, varyantlar, kurum, gizlenen, grafikler,
+                                    izlemeNo = baglam.IzlemeNo });
         });
     }
 }

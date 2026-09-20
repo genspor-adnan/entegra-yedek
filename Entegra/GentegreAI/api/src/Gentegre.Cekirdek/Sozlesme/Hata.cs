@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Sozlesme;
+﻿namespace Gentegre.Cekirdek.Sozlesme;
 
 /// <summary>API sozlesmesi §1.2 - tum hatalar ayni govdeyi doner.</summary>
 public static class HataKodu
@@ -82,8 +82,14 @@ public class GentegreHatasi : Exception
         "Bu hesabın parolası henüz tanımlanmamış - lütfen parolanızı belirleyin.")
         => new(HataKodu.IlkParola, mesaj);
 
-    public static GentegreHatasi Yasak(string mesaj = "Bu islem icin yetkiniz yok.")
-        => new(HataKodu.Yasak, mesaj);
+    /// <summary>
+    /// 403. <paramref name="engel"/> ISTEMCININ AYIRT ETMESI ICIN: yasak
+    /// hepsi ayni degildir - test seviyesinde yetki kisiti (889) hangi
+    /// tetkiklerin kapali oldugunu tasir, ekran onlari isaretleyebilsin.
+    /// </summary>
+    public static GentegreHatasi Yasak(string mesaj = "Bu islem icin yetkiniz yok.",
+                                       object? engel = null)
+        => new(HataKodu.Yasak, mesaj, engel: engel);
 
     public static GentegreHatasi Bulunamadi(string mesaj = "Kayit bulunamadi.")
         => new(HataKodu.Bulunamadi, mesaj);

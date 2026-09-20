@@ -133,7 +133,8 @@ describe('LabDetayPaneli', () => {
         { id: 11, kod: 'AMP', ad: 'Ampisilin', mic: 32, micIsaret: '≥',
           yorum: 'R', kaynak: 1, bildir: true },
         { id: 12, kod: 'GEN', ad: 'Gentamisin', mic: 1, micIsaret: '',
-          yorum: 'S', kaynak: 1, bildir: false },
+          yorum: 'S', kaynak: 1, bildir: false,
+          kisitNeden: '1. basamakta duyarlı seçenek var' },
       ],
     });
 
@@ -144,8 +145,10 @@ describe('LabDetayPaneli', () => {
     expect(screen.getByText('Escherichia coli')).toBeTruthy();
     expect(screen.getByText('MRSA')).toBeTruthy();
     expect(screen.getAllByText('MALDI-TOF').length).toBeGreaterThan(0);
-    // Raporlanmayan ajan "Kademeli" olarak işaretli.
-    expect(screen.getByText('Kademeli')).toBeTruthy();
+    // Raporlanmayan ajan "Kısıtlı" işaretli VE gerekçesi yazılı (887):
+    //   hangi kuralın gizlediğini görmeden uzman karar veremez.
+    expect(screen.getByText('Kısıtlı')).toBeTruthy();
+    expect(screen.getByText('1. basamakta duyarlı seçenek var')).toBeTruthy();
   });
 
   it('genetik panelinde ONAM eksikse kırmızı yazar', async () => {

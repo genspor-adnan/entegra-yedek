@@ -43,6 +43,16 @@ export const ENABIZ_LISTELERI: ListeGirdisi[] = [
     yetkiKodu: 'entegrasyon', menuSira: 10,
   },
   {
+    // GUN SONU VE GONDERIM ORANI (884, KTS H13/D24): "gun sonu gonderiliyor
+    //   mu" ve "oran %95-103 araliginda mi" tek ekranda - denetimde ikisi
+    //   pes pese soruluyor.
+    kaynak: 'enabiz-gun-sonu', rota: 'enabiz-gun-sonu', ozelSayfa: true,
+    baslik: 'Gün Sonu ve Gönderim Oranı', yol: 'e-Nabız › Gün Sonu',
+    urunModu: 2, modul: 'enabiz',
+    menuGrup: 'e-Nabız', menuAd: 'Gün Sonu / Oran', ic: '📅',
+    yetkiKodu: 'enabiz.gun_sonu', menuSira: 12,
+  },
+  {
     // KOD ESLEME (454): yerel tanim -> SKRS kodu. Esleme yoksa paket
     //   "eksik alan" ile kuyrukta bekler; USS bilmedigi kodu reddeder.
     kaynak: 'enabiz-kod-esleme', rota: 'enabiz-kod-esleme',

@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { EnabizButonu } from '../../bilesenler/EnabizButonu';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api/istemci';
 import { hataMetni } from '../../api/sozlesme';
-import type { DisHastaKarti as Kart, DisIslemSecenegi, DisPlanSatiri } from '../../api/uclar/dis';
+import type { DisHastaKarti as Kart, DisPlanSatiri } from '../../api/uclar/dis';
 import { useOturum } from '../../kimlik/OturumBaglami';
 import { guvenli, mesaj, onay } from '../../bilesenler/mesaj';
-import { gunNokta, para, tarihSaat } from '../../bilesenler/bicim';
+import { gunNokta, para, tarihSaat, tarihYaz } from '../../bilesenler/bicim';
 import {
   DIS_SIRASI, DURUM_ADLARI, Odontogram, SUT_SIRASI, disAdi, disGorunumleri,
   durumSinifi, type DisSecim,
 } from '../../bilesenler/dis/Odontogram';
+import { DisIconFormu } from '../../bilesenler/dis/DisIconFormu';
+import { EnabizMesajModali } from '../../bilesenler/EnabizMesajModali';
+import { StokAramaPenceresi } from '../../bilesenler/StokAramaPenceresi';
 import { c as cev } from '../../dil/ceviri';
 
 /**
@@ -53,13 +57,16 @@ const HIZLI_BULGU: { kod: number; ad: string; ik: string; tumDis?: boolean }[] =
 const rozetSinifi = (k: number) => durumSinifi(k) === 'curuk' ? 'uyari' : durumSinifi(k) === 'eksik' ? 'gri'
   : durumSinifi(k) === 'kanal' ? 'mor' : durumSinifi(k) === 'implant' ? 'ok' : k === 0 ? 'ok' : 'mavi';
 
-type Sekme = 'odo' | 'perio' | 'gecmis' | 'lab';
+type Sekme = 'odo' | 'perio' | 'gecmis' | 'lab' | 'icon';
+
+/** SVG ipucunda satir sonu. */
+const SATIR_SONU = String.fromCharCode(10);
 
 export function DisHastaKarti() {
   const { hastaId: param } = useParams();
   const hastaId = Number(param ?? 0);
   const git = useNavigate();
-  const { yetki } = useOturum();
+  const { yetki, aksiyonVar } = useOturum();
   const konum = useLocation();
   // KAPAT: geldigi yere (gunluk akis state.geri verir), yoksa hasta listesine.
   // GERI ZINCIRI: plan karti -> hasta karti -> Kapat, plan kartina doner; plan
@@ -83,12 +90,21 @@ export function DisHastaKarti() {
   const [sekme, setSekme] = useState<Sekme>('odo');
   const [gorunum, setGorunum] = useState<'sema' | 'tablo'>('sema');
   const [katmanlar, setKatmanlar] = useState({ mevcut: true, plan: true, tamam: true });
+  const [vurgu, setVurgu] = useState<number | null>(null);
+  const [enabizMesajAcik, setEnabizMesajAcik] = useState(false);
   const [sadeceSorunlu, setSadeceSorunlu] = useState(false);
   const [planSuzgec, setPlanSuzgec] = useState<'secili' | 'tumu' | 'yapilan' | 'bekleyen'>('secili');
   const [anamnezAcik, setAnamnezAcik] = useState(false);
   const [anamnez, setAnamnez] = useState({ dentalAnamnez: '', bruksizm: false, sigara: false, hijyenDurum: '', tmeBulgu: '' });
-  const [islemAra, setIslemAra] = useState<{ acik: boolean; q: string; sonuc: DisIslemSecenegi[]; iskonto: string; seans: string }>(
-    { acik: false, q: '', sonuc: [], iskonto: '0', seans: '' });
+  // İŞLEM SEÇİMİ JENERİK HİZMET PENCERESİNDEN (19.09.2026, kullanıcı: "seçili dişe
+  //   işlem ekle butona basınca hizmet ekleme jenerik ekranımızla ekleyelim").
+  //   Kendi arama tablomuz vardı; aynı işi yapan iki arama ekranı, hizmet
+  //   kataloğuna eklenen her yeniliğin (sık kullanılanlar, kısa ad önceliği,
+  //   kategori süzgeci) diş tarafında eksik kalması demekti.
+  //   `genel` = diş seçmeden ağız geneli işlem.
+  const [islemSecim, setIslemSecim] = useState<
+    { acik: boolean; genel: boolean; eklenen?: { sayi: number; son: string } }>(
+    { acik: false, genel: false });
   const [sut, setSut] = useState(false);
   const planYazar = yetki('dis.plan');
   const bulguYazar = yetki('dis.hasta');
@@ -105,6 +121,35 @@ export function DisHastaKarti() {
   useEffect(() => { void yukle() }, [yukle]);
 
   const gorunumler = useMemo(() => disGorunumleri(kart?.odontogram ?? []), [kart]);
+
+  // DİŞ BAZINDA İŞLEM GEÇMİŞİ (874, KTS denetim maddesi D8: "diş resminin
+  //   üzerine gelindiğinde o dişe yapılmış işlemler görülebiliyor mu?").
+  //   Kaynak zaten kartla gelen seans işlemleri - ayrı istek açılmaz. Ağız
+  //   geneli işlemler (disNo = 0) HER dişin ipucuna girmez: "diş temizliği"
+  //   otuz dişin geçmişini doldurup gerçek işlemi görünmez yapardı.
+  const disGecmisi = useMemo(() => {
+    const harita = new Map<number, { tarih: string; islem: string; hekim: string;
+                                     yuzeyler: string; tamamlandi: boolean }[]>();
+    for (const g of kart?.gecmis ?? []) {
+      if (!g.disNo) continue;
+      const dizi = harita.get(g.disNo) ?? [];
+      dizi.push({ tarih: g.tarih, islem: g.islem, hekim: g.hekim,
+                  yuzeyler: g.yuzeyler, tamamlandi: g.tamamlandi });
+      harita.set(g.disNo, dizi);
+    }
+    return harita;
+  }, [kart]);
+
+  // İpucu metni: en yeni beş işlem. Fazlası SVG ipucunda okunmaz olur;
+  //   tamamı zaten "Tedavi Geçmişi" sekmesinde.
+  const gecmisMetni = useCallback((disNo: number) => {
+    const dizi = disGecmisi.get(disNo);
+    if (!dizi?.length) return '';
+    return dizi.slice(0, 5)
+      .map(x => `${tarihYaz(x.tarih)} · ${x.islem}${x.yuzeyler ? ` (${x.yuzeyler})` : ''}`
+                + `${x.tamamlandi ? '' : ' · sürüyor'}`)
+      .join(SATIR_SONU) + (dizi.length > 5 ? `${SATIR_SONU}… +${dizi.length - 5}` : '');
+  }, [disGecmisi]);
   const satirlar = kart?.satirlar ?? [];
   const satirlarSirali = useMemo(() => {
     let s = satirlar;
@@ -148,14 +193,13 @@ export function DisHastaKarti() {
     if (!await onay('Bulgu pasifleştirilsin mi? Geçmişte kalır, şemadan düşer.')) return;
     await guvenli(async () => { await api.disBulguSil(id); await yukle(); });
   };
-  const islemAraYap = async (q: string) => {
-    setIslemAra(a => ({ ...a, q }));
-    try {
-      const y = await api.disIslemAra(q, kart?.fiyatListesi);
-      setIslemAra(a => ({ ...a, sonuc: y.satirlar }));
-    } catch { /* sessiz */ }
-  };
-  const planSatirEkle = async (h: DisIslemSecenegi, genel = false) => {
+  /**
+   * Plan satırı ekler. FİYAT VE SEANS SAYISI SUNUCUDAN: hizmet kartı ve
+   * fiyat listesi neyse o (`/hasta/{id}/plan-satir` yalnız `hizmetId`
+   * ister). İndirim plan kartından verilir - seçim penceresinde indirim
+   * sormak, hekimi hizmeti seçerken pazarlık ekranına sokuyordu.
+   */
+  const planSatirEkle = async (hizmetId: number, hizmetAdi: string, genel = false) => {
     const disNo = genel ? 0 : (secili?.disNo ?? 0);
     if (!genel && !disNo) { mesaj('Önce şemada bir diş seçin ya da "Genel işlem" kullanın.'); return }
     await guvenli(async () => {
@@ -163,12 +207,12 @@ export function DisHastaKarti() {
         // Kapanmış plana satır eklenmez: planId boş gider, sunucu yeni taslak açar.
         planId: kart?.plan && kart.plan.durum <= 4 ? kart.plan.id : null, disNo,
         yuzeyler: genel ? '' : (secili?.yz.length === 5 ? '' : secili?.yz.join('')),
-        hizmetId: h.id,
-        iskonto: Number(islemAra.iskonto.replace(',', '.')) || 0,
-        seansSayisi: Number(islemAra.seans) || undefined,
+        hizmetId,
       });
-      setIslemAra({ acik: false, q: '', sonuc: [], iskonto: '0', seans: '' });
-      mesaj(y.planNo ? `Yeni plan açıldı: ${y.planNo}` : 'Plan satırı eklendi.');
+      // PENCERE AÇIK KALIR (arama penceresinin kendi kuralı): hekim aynı dişe
+      //   ya da ağza birkaç işlem üst üste ekler. Eklendiği buradan görünsün.
+      setIslemSecim(o => ({ ...o, eklenen: { sayi: (o.eklenen?.sayi ?? 0) + 1, son: hizmetAdi } }));
+      if (y.planNo) mesaj(`Yeni plan açıldı: ${y.planNo}`);
       await yukle();
     });
   };
@@ -236,6 +280,10 @@ export function DisHastaKarti() {
           <button className="kabas-dugme" onClick={kapat} title="Kapat">✖</button>
         </div>
         <div className="kagov ds-kagov">
+        {enabizMesajAcik && (
+          <EnabizMesajModali hastaId={hastaId} hastaAdi={h.unvan}
+                             onKapat={() => setEnabizMesajAcik(false)} />
+        )}
         <div className="ds-arac ds-kart-arac">
           {yetki('dis.seans') && <button className="d bir" onClick={() => void seansAc()}>{cev('🪑 Muayene / Seans Aç')}</button>}
           {planYazar && plan?.durum === 1 && <button className="d" onClick={() => void planSun()}>📤 Proforma / Sun</button>}
@@ -249,6 +297,17 @@ export function DisHastaKarti() {
           {/* Lab isi YOKSA yeni is emri karti acilir (kullanici): hasta on dolu,
               kaydet/kapat odontograma doner. Varsa hastanin lab listesi. */}
           <button className="d" onClick={() => git(`/dis-lab-isemri/yeni?hastaId=${hastaId}&hastaAd=${encodeURIComponent(kart?.hasta.unvan ?? '')}&geri=${geriParam}`)}>🧪 Lab İş Emri</button>
+          {/* e-NABIZ MESAJI (877, KTS maddesi D14 - HBYS'deki H7'nin diş
+              karşılığı): hekim, hastanın e-Nabız profiline düz metin
+              bilgilendirme yazar. */}
+          {aksiyonVar('enabiz.mesaj') && (
+            <button className="d" onClick={() => setEnabizMesajAcik(true)}>💬 e-Nabız Mesajı</button>
+          )}
+          {/* e-NABIZ KAYITLARI (878, KTS D15 / H8): Bakanlıktan geçici anahtar
+              alınır ve paylaşım ekranı YENİ SEKMEDE açılır - hekim orada
+              e-Devlet ile girer, hasta verisini gizlemişse SMS onayı ister.
+              Görünüm ve ipucu ortak bileşende; yetki kontrolü de orada. */}
+          <EnabizButonu tur="erisim" hastaId={hastaId} />
           <button className="d" onClick={() => git(`/hasta/${hastaId}?geri=${geriParam}`)}>↗ Genel Hasta Kartı</button>
           <button className="d" onClick={() => void yukle()} title={cev('Yenile')}>⟳</button>
           <button className="d ds-sp" onClick={kapat}>{cev('✖ Kapat')}</button>
@@ -305,7 +364,8 @@ export function DisHastaKarti() {
         </div>
 
         <div className="ka-sekmeler">
-          {([['odo', '🦷 Odontogram & Tedavi Planı'], ['perio', 'Periodontal Kayıt'], ['gecmis', 'Tedavi Geçmişi'], ['lab', 'Protez / Lab']] as [Sekme, string][])
+          {([['odo', '🦷 Odontogram & Tedavi Planı'], ['perio', 'Periodontal Kayıt'], ['gecmis', 'Tedavi Geçmişi'], ['lab', 'Protez / Lab'],
+             ...(yetki('dis.icon') ? [['icon', '📐 Ortodonti (ICON)'] as [Sekme, string]] : [])] as [Sekme, string][])
             .map(([k, ad]) => <div key={k} className={`ka-sekme${sekme === k ? ' on' : ''}`} onClick={() => setSekme(k)}>{ad}</div>)}
         </div>
 
@@ -332,7 +392,28 @@ export function DisHastaKarti() {
 
               {gorunum === 'sema' ? (
                 <>
-                  <Odontogram satirlar={kart.odontogram} secili={secili} onSec={sec} katmanlar={katmanlar} dentisyon={sut ? 2 : 1} />
+                  <Odontogram satirlar={kart.odontogram} secili={secili} onSec={sec} katmanlar={katmanlar}
+                              dentisyon={sut ? 2 : 1} gecmisMetni={gecmisMetni} onVurgu={setVurgu} />
+                  {/* D8 ŞERİDİ: fare hangi dişteyse o dişin işlemleri burada
+                      yazılır - SVG ipucu yazıcıda ve dokunmatikte yoktur. */}
+                  <div className="ds-dis-gecmis">
+                    {vurgu ? (
+                      <>
+                        <b>{cev('Diş')} {vurgu}</b>
+                        <span className="sonuk"> · {disAdi(vurgu)}</span>
+                        {(disGecmisi.get(vurgu) ?? []).length === 0
+                          ? <span className="sonuk"> · {cev('bu dişe yapılmış işlem yok')}</span>
+                          : (disGecmisi.get(vurgu) ?? []).slice(0, 6).map((x, i) => (
+                              <span key={i} className="ds-dg-oge">
+                                {tarihYaz(x.tarih)} · {x.islem}
+                                {x.yuzeyler ? ` (${x.yuzeyler})` : ''}
+                                {x.hekim ? ` · ${x.hekim}` : ''}
+                                {x.tamamlandi ? '' : ' · sürüyor'}
+                              </span>
+                            ))}
+                      </>
+                    ) : <span className="sonuk">{cev('Dişin üzerine gelin: o dişe yapılmış işlemler burada listelenir.')}</span>}
+                  </div>
                   <div className="ds-lej">
                     <span><i style={{ background: 'rgba(96,54,30,.78)' }} />{cev('Çürük')}</span>
                     <span><i style={{ background: '#9aa7b5' }} />{cev('Amalgam')}</span>
@@ -419,40 +500,37 @@ export function DisHastaKarti() {
 
                 {planYazar && (
                   <div className="ds-arac" style={{ borderTop: '1px solid var(--cizgi2)' }}>
-                    <button className="d bir" onClick={() => { if (!secili) { mesaj('Önce şemada bir diş seçin.'); return } setIslemAra(a => ({ ...a, acik: true })); void islemAraYap('') }}>
+                    <button className="d bir" onClick={() => { if (!secili) { mesaj('Önce şemada bir diş seçin.'); return } setIslemSecim({ acik: true, genel: false, eklenen: undefined }) }}>
                       ＋ Seçili dişe işlem ekle{secili ? ` (${secili.disNo}${secili.yz.length < 5 ? ' ' + secili.yz.join('') : ''})` : ''}
                     </button>
-                    <button className="d" onClick={() => { setSecili(null); setIslemAra(a => ({ ...a, acik: true })); void islemAraYap('') }}>＋ Genel işlem</button>
+                    <button className="d" onClick={() => { setSecili(null); setIslemSecim({ acik: true, genel: true, eklenen: undefined }) }}>＋ Genel işlem</button>
                     {plan && <button className="d" onClick={() => window.print()}>🖨 Hasta imzalı plan</button>}
                     <span className="ds-sp sonuk">Plan satırı = başvuru satırı adayı; "Yapıldı" işaretlenince başvuruya düşer. Tahsilat kasa modülüyle.</span>
                   </div>
                 )}
 
-                {islemAra.acik && (
-                  <div className="ds-islem-ara">
-                    <div className="ds-arac">
-                      <b>{secili ? `Diş ${secili.disNo}${secili.yz.length < 5 ? ' · ' + secili.yz.join('') : ''}` : 'Genel işlem'}</b>
-                      <input autoFocus placeholder={cev('İşlem ara (ad / kod)…')} value={islemAra.q} onChange={e => void islemAraYap(e.target.value)} style={{ minWidth: 260 }} />
-                      <label className="sonuk">{cev('İnd.')}<input value={islemAra.iskonto} onChange={e => setIslemAra(a => ({ ...a, iskonto: e.target.value }))} style={{ width: 70 }} /></label>
-                      <label className="sonuk">Seans <input value={islemAra.seans} placeholder="hizmetten" onChange={e => setIslemAra(a => ({ ...a, seans: e.target.value }))} style={{ width: 70 }} /></label>
-                      <button className="d" onClick={() => setIslemAra(a => ({ ...a, acik: false }))}>Kapat</button>
-                    </div>
-                    <div className="ds-dg" style={{ maxHeight: 220, overflowY: 'auto' }}><table>
-                      <thead><tr><th>Kod</th><th>İşlem</th><th className="sag">Fiyat</th><th className="orta">Seans</th><th className="orta">{cev('Lab')}</th><th /></tr></thead>
-                      <tbody>
-                        {islemAra.sonuc.map(x => (
-                          <tr key={x.id}>
-                            <td className="sonuk">{x.kod}</td><td>{x.ad}</td>
-                            <td className="sag">{para.format(x.fiyat)}</td>
-                            <td className="orta">{x.standartSeans}</td>
-                            <td className="orta">{x.labGerekir ? 'lab' : ''}</td>
-                            <td><button className="d onay" onClick={() => void planSatirEkle(x, !secili)}>{cev('Ekle')}</button></td>
-                          </tr>
-                        ))}
-                        {islemAra.sonuc.length === 0 && <tr><td colSpan={6} className="sonuk">Diş işlemi bulunamadı - hizmet kartında "Diş işlemi" işareti gerekir.</td></tr>}
-                      </tbody>
-                    </table></div>
-                  </div>
+                {/* BAŞVURUDA ÜCRET EKLEMEDEKİ PENCERENİN AYNISI (kullanıcı,
+                    19.09.2026): stok/hizmet arama penceresi. Diş kartının kendi
+                    arama tablosu vardı; aynı işi yapan iki ekran, o pencereye
+                    eklenen her yeniliğin (kullanım puanı, kısa ad önceliği,
+                    kategori süzgeci, fiyat listesi kolonu) diş tarafında eksik
+                    kalması demekti.
+                    `yalnizHizmet`: plan satırı bir HİZMETTİR, stok değil.
+                    `hizmetEkFiltre`: süzgeç olmadan bütün SUT kataloğu açılır ve
+                    seçilenin çoğu diş işlemi değildir (lab isteminin `labVarMi`
+                    süzgeciyle aynı gerekçe).
+                    Pencere seçimde KAPANMAZ: hekim ard arda işlem ekler. */}
+                {islemSecim.acik && (
+                  <StokAramaPenceresi
+                    etkin
+                    yalnizHizmet
+                    hizmetEkFiltre={{ alan: 'disIslem', op: 'esit', deger: 1 }}
+                    fiyatListesiId={kart.fiyatListesi}
+                    eklenen={islemSecim.eklenen}
+                    onKapat={() => setIslemSecim({ acik: false, genel: false, eklenen: undefined })}
+                    onSec={satir => void planSatirEkle(Number(satir.id),
+                                                       String(satir.ad ?? ''), islemSecim.genel)}
+                  />
                 )}
 
               </div>
@@ -537,6 +615,9 @@ export function DisHastaKarti() {
         )}
 
         {/* ============================================ PERİODONTAL */}
+        {/* ORTODONTİ ICON (875, KTS D9): skor formu + yazdirilabilir rapor. */}
+        {sekme === 'icon' && <DisIconFormu hastaId={hastaId} hastaAdi={h.unvan} />}
+
         {sekme === 'perio' && (
           <div className="ds-grp" style={{ margin: 10 }}>
             <div className="ds-gb">Periodontal kayıt {kart.perio ? <span className="sonuk">· son kayıt {gunNokta(kart.perio.tarih)}</span> : <span className="sonuk">· kayıt yok</span>}</div>

@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri;
 using Npgsql;
@@ -137,24 +137,24 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
         //   yazilirsa yazilsin ayni sayaci kullandiriyor. Yanitta donen
         //   numara kayittan okunur (`IstemOzetAsync`).
 
+        // DIŞ KURUM INSERT'TE YAZILIR, sonradan UPDATE ile DEĞİL. 637'nin
+        //   `ck_lab_istem_dis_kurum` kısıtı "kaynak 4 ise gönderen kurum dolu"
+        //   diyor ve ERTELENEBİLİR DEĞİL: kurumu bir sonraki cümlede yazmak,
+        //   INSERT'in daha o anda kısıtı ihlal etmesi demekti - dış kurum
+        //   istemi açan uç 23514 ile düşüyordu. Kısıt sonradan eklenmiş ve
+        //   bu yolu kırmış; kısıt doğru, yazım sırası yanlıştı.
         var istemId = await baglanti.TekDegerAsync<int>("""
             insert into public.lab_istem
                    (belge_id, taraf_id, sube_id, istem_no, istem_tarihi, bolum,
-                    personel_id, durum, oncelik, kaynak, klinik_bilgi, tani_icd, ekleyen)
-            values (@p0, @p1, @p2, '', now(), 1, @p3, 1, @p4, @p8, @p5, @p6, @p7)
+                    personel_id, durum, oncelik, kaynak, klinik_bilgi, tani_icd,
+                    ekleyen, dis_kurum_id)
+            values (@p0, @p1, @p2, '', now(), 1, @p3, 1, @p4, @p8, @p5, @p6, @p7, @p9)
             returning id
             """, islem,
             [belgeId is > 0 ? belgeId : null, b.HastaId, b.SubeId,
              b.HekimId == 0 ? null : b.HekimId,
-             oncelik, klinikBilgi, taniIcd, baglam.KullaniciId, kaynak], iptal);
-
-        // DIS KURUM AYRI YAZILIR: kolonu insert listesine koymak, basvurulu
-        //   istemde de null tasimak demekti - tek satirlik update okumayi
-        //   kolaylastiriyor ve "yalniz dis istemde dolu" kurali goz onunde.
-        if (disMi)
-            await baglanti.CalistirAsync(
-                "update public.lab_istem set dis_kurum_id = @p1 where id = @p0",
-                islem, [istemId, disKurumId!.Value], iptal);
+             oncelik, klinikBilgi, taniIcd, baglam.KullaniciId, kaynak,
+             disMi ? disKurumId!.Value : (int?)null], iptal);
 
         // Panel -> tetkik acilimi. Ayni tetkik iki panelden gelirse BIR KEZ
         //   istenir: hastadan iki kez para alinmasi ve iki kez calisilmasi
@@ -191,6 +191,20 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
         var tekil = tetkikler.GroupBy(x => x.TetkikId).Select(g => g.First()).ToList();
         if (tekil.Count == 0)
             throw GentegreHatasi.IsKurali("Seçilen panelde tetkik yok.");
+
+        // TEST SEVİYESİNDE YETKİ (889, KTS L7): rolün isteyemediği tetkik
+        //   ayıklanır. Akılcı kuralından ÖNCE: yetkisiz tetkikin akılcı
+        //   gerekçesini sormak, sorulmaması gereken bir soruyu sormaktır.
+        var yetkisiz = await TestYetkisiUygulaAsync(
+            baglanti, islem, tekil.Select(t => t.TetkikId).ToList(), baglam, akilciSessiz, iptal);
+        if (yetkisiz.Count > 0)
+        {
+            tekil = tekil.Where(t => !yetkisiz.Contains(t.TetkikId)).ToList();
+            if (tekil.Count == 0)
+                throw GentegreHatasi.Yasak(
+                    "Seçilen tetkiklerin tamamı yetki kısıtlı; istem açılmadı.",
+                    new { kod = TestYetkiKodu });
+        }
 
         // AKILCI TEST İSTEMİ (873): kapalı/basamak = engel, branş/süre = gerekçeli
         //   uyarı. Etkileşimli istemde gerekçesiz uyarı 422 döner (istemci
@@ -493,7 +507,20 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
                     update public.lab_istem_satir set durum = 6
                      where numune_id = @p0 and durum in (1, 2)
                     """, islem, [numuneId], iptal);
-                mesaj = $"{n.Barkod} reddedildi - yeniden numune gerekiyor.";
+
+                // HASTAYA e-NABIZ MESAJI (879, KTS maddesi H1 / D16).
+                //   AYNI ISLEMDE yazilir: ret ile bilgilendirme ya birlikte
+                //   olur ya hic - reddedilmis ama hastanin haberi olmayan
+                //   numune, denetimin tam da sordugu bosluktur.
+                //
+                //   HANGI NEDENDE MESAJ GIDECEGI KRITERIN KENDI AYARINDA
+                //   (`lab_ret_nedeni.hasta_bilgilendir`): "etiketsiz tup"
+                //   kurumun kendi hatasidir, hastayi gereksiz endiselendirir.
+                //   Mesaj kuyruga girer; gonderimi 877'nin zamanli isi yapar.
+                var mesajId = await RetMesajiYazAsync(baglanti, islem, numuneId, retNeden,
+                                                      n.IstemId, baglam, iptal);
+                mesaj = $"{n.Barkod} reddedildi - yeniden numune gerekiyor."
+                      + (mesajId is null ? "" : " Hastaya e-Nabız bilgilendirmesi kuyruğa alındı.");
                 break;
 
             default:
@@ -574,7 +601,8 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
         var s = await baglanti.TekAsync("""
             select s.id, s.istem_id, s.tetkik_id, s.numune_id, i.taraf_id, i.sube_id,
                    t.birim, t.ondalik, t.panik_alt, t.panik_ust, t.delta_yuzde,
-                   t.delta_gun, t.oto_onay, t.tur
+                   t.delta_gun, t.oto_onay, t.tur,
+                   coalesce(s.cihaz_id, t.varsayilan_cihaz_id) as cihaz_id
               from public.lab_istem_satir s
               join public.lab_istem i on i.id = s.istem_id
               join public.lab_tetkik t on t.id = s.tetkik_id
@@ -587,15 +615,39 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
                        PanikAlt = o.IsDBNull(8) ? (decimal?)null : o.GetDecimal(8),
                        PanikUst = o.IsDBNull(9) ? (decimal?)null : o.GetDecimal(9),
                        DeltaYuzde = o.GetDecimal(10), DeltaGun = o.GetInt32(11),
-                       OtoOnay = o.GetInt16(12), Tur = o.GetInt16(13) }, iptal)
+                       OtoOnay = o.GetInt16(12), Tur = o.GetInt16(13),
+                       CihazId = o.IsDBNull(14) ? (int?)null : o.GetInt32(14) }, iptal)
             ?? throw GentegreHatasi.Bulunamadi("İstem satırı bulunamadı.");
 
-        // Referans aralığı hastanın yaş/cinsiyetine göre.
+        // TEST SEVİYESİNDE YETKİ (889): göremeyen yazamaz.
+        await SatirTestYetkisiIsteAsync(baglanti, islem, istek.IstemSatirId, baglam, iptal);
+
+        // SONUÇ DOĞRULAMA (893, KTS L1): boş ya da anlamsız sonuç YAZILMAZ.
+        //   Sayısal tetkike metin, fizyolojik olarak imkânsız değer ve boş
+        //   sonuç engeldir; ölçüm aralığı dışı UYARIDIR - sonucu düşürmek
+        //   veriyi kaybettirir, ama otomatik onaylanmamalı.
+        var dogrulama = await baglanti.TekAsync("""
+            select durum, mesaj from public.fn_lab_sonuc_dogrula(@p0, @p1)
+            """, islem, [s.TetkikId, istek.Deger ?? ""],
+            o => new { Durum = o.GetInt16(0), Mesaj = o.GetString(1) }, iptal);
+
+        if (dogrulama is { Durum: 2 })
+            throw GentegreHatasi.IsKurali(dogrulama.Mesaj,
+                new { kod = SonucDogrulamaKodu });
+
+        var dogrulamaUyarisi = dogrulama is { Durum: 1 } ? dogrulama.Mesaj : "";
+
+        // REFERANS ARALIĞI hastanın yaş/cinsiyetine VE ÖLÇÜMÜN YAPILDIĞI
+        //   CİHAZA göre (888). Aynı tetkikin aralığı yönteme bağlıdır;
+        //   iki cihazlı laboratuvarda tek aralık kullanmak bir cihazın
+        //   sonuçlarını sistematik olarak yanlış bayraklar. Sonucu getiren
+        //   cihaz bilinmiyorsa satırın/tetkikin cihazına düşülür, o da
+        //   yoksa genel aralık kullanılır.
         var r = await baglanti.TekAsync("""
             select alt, ust, metin, panik_alt, panik_ust
-              from public.fn_lab_referans(@p0, @p1, current_date)
+              from public.fn_lab_referans(@p0, @p1, current_date, @p2)
              where tetkik_id is not null
-            """, islem, [s.TetkikId, s.HastaId],
+            """, islem, [s.TetkikId, s.HastaId, cihazId ?? s.CihazId],
             o => new { Alt = o.IsDBNull(0) ? (decimal?)null : o.GetDecimal(0),
                        Ust = o.IsDBNull(1) ? (decimal?)null : o.GetDecimal(1),
                        Metin = o.GetString(2),
@@ -635,6 +687,15 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
             }
         }
 
+        // KARAR SINIRI (896, KTS L15): referans aralığından AYRI bilgi -
+        //   "referans aralığında ama hedefin üstünde" ancak ikisi birden
+        //   söylenince anlaşılır. Bayrağı EZMEZ; sonuca DONAR, çünkü
+        //   kılavuz sonradan değişse bile eski rapor kendi eşiğiyle
+        //   okunmalı (888 referansında verdiğimiz kararın aynısı).
+        var kararNotu = await baglanti.TekDegerAsync<string>("""
+            select public.fn_lab_karar_notu(@p0, @p1, @p2)
+            """, islem, [s.TetkikId, s.HastaId, sayisal], iptal) ?? "";
+
         var panik = bayrak is "LL" or "HH";
 
         // SERUM İNDEKSİ (444): hemolizli numunede potasyum YALANCI YÜKSEK
@@ -661,8 +722,20 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
         // Oto-onay: kural motoru TEMİZ dediyse. DÜZELTMEDE kapalıdır -
         //   daha önce onaylanmış bir sonucu değiştiren satırın ikinci bir göz
         //   görmeden yayınlanması, düzeltmenin kendisini denetimsiz bırakırdı.
+        // ÇİFT ONAY ZORUNLUYSA OTO-ONAY YOK (895, KTS L4): oto-onay tek
+        //   aşamalı yayındır; iki seviyeli onay kuralını sessizce delerdi.
+        var ciftOnayZorunlu = await baglanti.TekDegerAsync<bool>("""
+            select zorunlu from public.v_lab_cift_onay where tetkik_id = @p0
+            """, islem, [s.TetkikId], iptal);
+
         var otoOnay = otoOnaySerbest && s.OtoOnay == 1 && bayrak == "N"
-                      && !panik && !deltaUyari && kkGecerli && indeksDurum == 0;
+                      && !ciftOnayZorunlu
+                      && !panik && !deltaUyari && kkGecerli && indeksDurum == 0
+                      // DOĞRULAMA UYARISI OTO-ONAYI KAPATIR (893): ölçüm
+                      //   aralığı dışındaki bir değeri kimse görmeden
+                      //   yayınlamak, "anlamsız sonuç gönderilemez"
+                      //   kuralını delerdi.
+                      && dogrulamaUyarisi.Length == 0;
 
         // ÖNCEKİ AKTİF SONUÇ: aynı satıra ikinci kez yazmak iki CANLI sonuç
         //   bırakıyordu (aynı tetkikte 30 ve 130 yan yana durdu; ekran son
@@ -700,7 +773,7 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
                     bayrak, referans_alt, referans_ust, referans_metin, panik,
                     delta_onceki, delta_yuzde, delta_uyari, dilusyon, yorum,
                     durum, oto_onay, onay_id, onay_zamani, sube_id, ekleyen,
-                    indeks_durum, indeks_uyari)
+                    indeks_durum, indeks_uyari, karar_notu)
             values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, now(),
                     @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19,
                     -- İNDEKS RET eşiği: sonuç "tekrar bekliyor" (5) durumunda
@@ -709,7 +782,7 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
                          when @p20 = 1 then 3 else 1 end, @p20,
                     case when @p20 = 1 then @p21 else null end,
                     case when @p20 = 1 then now() else null end, @p22, @p21,
-                    @p23, @p24)
+                    @p23, @p24, @p25)
             returning id
             """, islem,
             [s.Id, s.NumuneId, s.TetkikId, sayisal, istek.Deger,
@@ -717,9 +790,13 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
              hamDeger ?? istek.Deger, hamBirim ?? "", cihazId, cihazMesajId,
              bayrak, r?.Alt, r?.Ust,
              r?.Metin ?? "", (short)(panik ? 1 : 0), oncekiDeger, deltaYuzde,
-             (short)(deltaUyari ? 1 : 0), istek.Dilusyon, istek.Yorum ?? "",
+             (short)(deltaUyari ? 1 : 0), istek.Dilusyon,
+             // UYARI SONUCUN YORUMUNA DA DÜŞER (893): onaylayan uzman
+             //   değere neden bakması gerektiğini satırın yanında görmeli.
+             string.Join(" · ", new[] { istek.Yorum ?? "", dogrulamaUyarisi }
+                                .Where(x => x.Length > 0)),
              (short)(otoOnay ? 1 : 0), baglam.KullaniciId, s.SubeId,
-             indeksDurum, indeksUyari], iptal);
+             indeksDurum, indeksUyari, kararNotu], iptal);
 
         // Satır durumu: oto-onayda 5 (onaylı), indeks RET'inde 6 (tekrar
         //   numune bekliyor), diğerinde 3 (sonuçlandı, onay bekliyor).
@@ -769,6 +846,13 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
         var refleks = await RefleksUygulaAsync(baglanti, islem, s.IstemId, s.TetkikId, s.NumuneId,
                                                s.HastaId, s.SubeId, sayisal, bayrak, baglam, iptal);
 
+        // TEKRAR TALEBİNİ KAPAT (891, KTS L8): bu satıra açık bir tekrar
+        //   talebi varsa yeni sonuç onun cevabıdır. Elle kapatmaya bırakmak,
+        //   çalışılmış ama kuyrukta duran talepler biriktirirdi.
+        var tekrarKarsilandi = await baglanti.TekDegerAsync<int?>(
+            "select public.fn_lab_tekrar_karsila(@p0, @p1, @p2)", islem,
+            [s.Id, sonucId, baglam.KullaniciId], iptal) is not null;
+
         await IstemDurumTazeleAsync(baglanti, islem, s.IstemId, iptal);
         await islem.CommitAsync(iptal);
 
@@ -787,6 +871,12 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
                       + "olduğu için otomatik onaylanmadı."
                     : $"Sonuç girildi ({bayrak}).";
         if (refleks.Count > 0) mesaj += $" Refleks test eklendi: {string.Join(", ", refleks)}.";
+        // KARAR SINIRI MESAJDA DA SÖYLENİR: sonucu giren kişi, değerin
+        //   referans aralığında olsa bile hedefin dışında olduğunu görmeli.
+        if (kararNotu.Length > 0) mesaj += $" {kararNotu}.";
+        if (dogrulamaUyarisi.Length > 0)
+            mesaj += $" DOĞRULAMA UYARISI: {dogrulamaUyarisi} Otomatik onaylanmadı.";
+        if (tekrarKarsilandi) mesaj += " Tekrar talebi karşılandı.";
         return new SonucSonucu(sonucId, bayrak, panik, deltaUyari, mesaj);
     }
 
@@ -799,9 +889,45 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
     /// istem basina uretilir (632) ve ucun ayni sorguyu ikinci kez yazmasi
     /// gerekmesin.
     /// </param>
+    /// <summary>İstemcinin ayırt edebilmesi için (893): doğrulama engeli.</summary>
+    public const string SonucDogrulamaKodu = "SONUC_DOGRULAMA";
+
+    /// <summary>İki seviyeli onay engeli (895): eksik teknik onay / dört göz.</summary>
+    public const string CiftOnayKodu = "CIFT_ONAY";
+
     public async Task<(string Mesaj, int IstemId)> OnaylaAsync(
         long sonucId, short asama, IstekBaglami baglam, CancellationToken iptal)
     {
+        // BOŞ SONUÇ ONAYLANAMAZ (893, KTS L1): onay, sonucu kurumun
+        //   sahiplenmesidir - sahiplenilecek bir değer yoksa onay da olmaz.
+        //   Sonuç yazarken denetleniyor ama eski/geçmiş satırlar ve dış
+        //   yollar için kapı burada da kapalı.
+        var bos = await _veri.TekDegerAsync<bool>("""
+            select coalesce(nullif(trim(r.deger_metin), ''), '') = ''
+                   and r.deger_sayisal is null
+              from public.lab_sonuc r where r.id = @p0
+            """, [sonucId], iptal);
+        if (bos)
+            throw GentegreHatasi.IsKurali(
+                "Boş sonuç onaylanamaz - değeri girin ya da sonucu iptal edin.",
+                new { kod = SonucDogrulamaKodu });
+
+        // TEST SEVİYESİNDE YETKİ (889): kısıtlı tetkiki yalnız izinli rol
+        //   onaylar - onay, sonucu kurumun sahiplenmesidir.
+        await SonucTestYetkisiIsteAsync(sonucId, baglam, "onayla", iptal);
+
+        // İKİ SEVİYELİ ONAY (895, KTS L4): teknik onay zorunluysa uzman
+        //   onayı onu bekler; dört göz kuralı açıksa teknik onayı veren
+        //   kişi aynı sonucu yayınlayamaz. İkisi de AYAR - kapalıyken
+        //   bugünkü davranış birebir sürer.
+        var onayKural = await _veri.TekAsync("""
+            select durum, mesaj from public.fn_lab_onay_kontrol(@p0, @p1, @p2)
+            """, [sonucId, asama, baglam.KullaniciId],
+            o => new { Durum = o.GetInt16(0), Mesaj = o.GetString(1) }, iptal);
+
+        if (onayKural is { Durum: 2 })
+            throw GentegreHatasi.IsKurali(onayKural.Mesaj, new { kod = CiftOnayKodu });
+
         var alan = asama == 1 ? "teknik_onay" : "onay";
         var yeniDurum = asama == 1 ? 2 : 3;
 
@@ -842,6 +968,9 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
     public async Task<SonucSonucu> DuzeltAsync(long sonucId, string yeniDeger,
         string neden, IstekBaglami baglam, CancellationToken iptal)
     {
+        // Düzeltme de sonucu değiştirmektir (889).
+        await SonucTestYetkisiIsteAsync(sonucId, baglam, "gor", iptal);
+
         if (string.IsNullOrWhiteSpace(neden))
             throw GentegreHatasi.Dogrulama("Düzeltme nedeni zorunlu.",
                 [new("neden", "Onaylı sonucun neden değiştiğini yazın.")]);
@@ -926,8 +1055,14 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
     /// <para><b>Eşleşmeyen test SESSİZCE atılmaz</b>; sayısı ve kodları mesaj
     /// hatasına yazılır, yoksa sonuç kaybolmuş görünürdü.</para>
     /// </summary>
+    /// <param name="dokumanlar">
+    /// GRAFİK TİPLİ SONUÇ (892) için doküman deposu. Boş geçilebilir -
+    /// grafiksiz akışlar (testler, eski çağrılar) depo istemek zorunda
+    /// kalmasın; o durumda eğri kaydedilmez, sayısal sonuç yine yazılır.
+    /// </param>
     public async Task<CihazIslemSonucu> CihazMesajIsleAsync(long mesajId,
-        IstekBaglami baglam, CancellationToken iptal)
+        IstekBaglami baglam, CancellationToken iptal,
+        Veri.Depolar.DokumanDeposu? dokumanlar = null)
     {
         var m = await _veri.TekAsync("""
             select m.id, m.cihaz_id, m.ornek_no, m.istem_no, m.durum, m.kalem_sayisi
@@ -957,14 +1092,18 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
         }
 
         var kalemler = await _veri.ListeAsync("""
-            select sira, test_kodu, deger, sayisal, birim
+            select sira, test_kodu, deger, sayisal, birim, deger_tipi,
+                   (gomulu is not null or seri is not null) as grafik
               from public.cihaz_mesaj_kalem where mesaj_id = @p0 order by sira, id
             """, [mesajId],
             o => new { Sira = o.GetInt32(0), Kod = o.GetString(1), Deger = o.GetString(2),
                        Sayisal = o.IsDBNull(3) ? (decimal?)null : o.GetDecimal(3),
-                       Birim = o.GetString(4) }, iptal);
+                       Birim = o.GetString(4), DegerTipi = o.GetString(5),
+                       // GRAFİK TİPLİ SONUÇ (892, KTS L10): gömülü görüntü ya
+                       //   da sayı dizisi taşıyan kalem.
+                       Grafik = o.GetBoolean(6) }, iptal);
 
-        int yazilan = 0;
+        int yazilan = 0, grafik = 0;
         var eslesmeyen = new List<string>();
 
         // SERUM İNDEKSLERİ (444) ÖNCE: cihaz bunları normal sonuç gibi
@@ -1022,9 +1161,21 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
                 ? (sy * e.Carpan + e.Ofset).ToString(System.Globalization.CultureInfo.InvariantCulture)
                 : k.Deger;
 
-            await SonucYazAsync(new SonucIstegi(satirId.Value, deger, k.Birim, null, null),
-                                m.CihazId, mesajId, baglam, iptal, k.Deger, k.Birim);
+            var yazim = await SonucYazAsync(
+                new SonucIstegi(satirId.Value, deger, k.Birim, null, null),
+                m.CihazId, mesajId, baglam, iptal, k.Deger, k.Birim);
             yazilan++;
+
+            // GRAFİK TİPLİ SONUÇ (892, KTS L10): eğri/görüntü sonucun EKİDİR,
+            //   sonuç yazıldıktan sonra bağlanır. Kalem grafik taşımıyorsa
+            //   (çoğu kalem taşımaz) hiçbir şey yapılmaz.
+            if (k.Grafik && dokumanlar is not null)
+            {
+                var g = await CihazGrafigiBaglaAsync(dokumanlar, mesajId, k.Sira,
+                            satirId.Value, yazim.SonucId, m.CihazId,
+                            k.Kod, baglam, iptal);
+                if (g > 0) grafik++;
+            }
         }
 
         var hata = eslesmeyen.Count == 0 ? ""
@@ -1039,9 +1190,14 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
             ? $" Serum indeksleri numuneye yazıldı ({string.Join(", ", indeksler)})."
             : "";
 
+        // GRAFİK SAYISI MESAJDA SÖYLENİR (892): eğri sessizce eklenirse
+        //   teknisyen onun geldiğini bilmez, raporda görünce şaşırır.
+        var grafikNot = grafik > 0 ? $" {grafik} grafik sonuç eklendi." : "";
+
         return new CihazIslemSonucu(yazilan, eslesmeyen.Count,
             (yazilan == 0 ? $"Sonuç yazılamadı. {hata}"
-                          : $"{yazilan} sonuç yazıldı. {hata}").Trim() + indeksNot);
+                          : $"{yazilan} sonuç yazıldı. {hata}").Trim()
+            + indeksNot + grafikNot);
     }
 
     private async Task MesajHataAsync(long mesajId, string hata, CancellationToken iptal)
@@ -1118,4 +1274,60 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
                     or (k.toplam > 0 and k.sonuclu = k.toplam
                         and i.sonuc_tarihi is null))
             """, islem, [istemId], iptal);
+
+    /// <summary>
+    /// RET → HASTAYA e-NABIZ MESAJI (879, KTS H1 / D16).
+    ///
+    /// <para>Üç kapı var ve üçü de kapalıysa sessizce geçilir - ret işleminin
+    /// kendisi bilgilendirme yüzünden DÜŞMEZ:</para>
+    /// <list type="number">
+    /// <item>Kurum ayarı <c>lab.ret_enabiz_bildir</c>,</item>
+    /// <item>ret nedeninin <c>hasta_bilgilendir</c> bayrağı,</item>
+    /// <item>hastanın kimlik numarasının kayıtlı olması (e-Nabız profili
+    /// kimlik numarasıyla bulunur).</item>
+    /// </list>
+    ///
+    /// <para>Mesajı YAZAN hekim, istemi açan hekimdir: e-Nabız'da mesajın
+    /// göndereni kurum değil hekimdir ve numuneyi reddeden teknisyenin
+    /// hekim kimliği yoktur.</para>
+    /// </summary>
+    private static async Task<long?> RetMesajiYazAsync(
+        NpgsqlConnection baglanti, NpgsqlTransaction islem, int numuneId, short? retNeden,
+        int istemId, IstekBaglami baglam, CancellationToken iptal)
+    {
+        if (retNeden is null) return null;
+
+        var bilgi = await baglanti.TekAsync("""
+            select coalesce((select deger from public.referans
+                              where anahtar = 'lab.ret_enabiz_bildir'), '1') as kurum_ayari,
+                   coalesce(r.hasta_bilgilendir, 0) as neden_bayragi,
+                   coalesce(nullif(r.mesaj_sablonu, ''),
+                            (select deger from public.referans
+                              where anahtar = 'lab.ret_mesaj_sablonu'), '') as sablon,
+                   i.taraf_id, i.personel_id, i.belge_id, i.sube_id,
+                   coalesce((select t.vkno from public.taraf t where t.id = i.taraf_id), '') as kimlik
+              from public.lab_istem i
+              left join public.lab_ret_nedeni r on r.kod = @p1
+             where i.id = @p0
+            """, islem, [istemId, retNeden],
+            o => new
+            {
+                KurumAyari = o.GetString(0), NedenBayragi = o.GetInt32(1), Sablon = o.GetString(2),
+                HastaId = o.IsDBNull(3) ? (int?)null : o.GetInt32(3),
+                HekimId = o.IsDBNull(4) ? (int?)null : o.GetInt32(4),
+                BelgeId = o.IsDBNull(5) ? (int?)null : o.GetInt32(5),
+                SubeId = o.GetInt32(6), Kimlik = o.GetString(7),
+            }, iptal);
+
+        if (bilgi is null || bilgi.KurumAyari is not ("1" or "true" or "True")) return null;
+        if (bilgi.NedenBayragi != 1) return null;
+        if (bilgi.HastaId is not int hastaId) return null;
+        if (bilgi.Kimlik.Trim().Length == 0 || bilgi.Sablon.Trim().Length == 0) return null;
+
+        return await EnabizMesajServisi.KuyrugaAlAsync(
+            baglanti, islem, hastaId, bilgi.HekimId, bilgi.Sablon,
+            kaynak: 2, kaynakId: numuneId, belgeId: bilgi.BelgeId,
+            subeId: bilgi.SubeId != 0 ? bilgi.SubeId : baglam.SubeId ?? 0,
+            kullaniciId: baglam.KullaniciId, iptal: iptal);
+    }
 }

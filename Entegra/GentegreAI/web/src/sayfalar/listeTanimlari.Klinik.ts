@@ -10,6 +10,110 @@ import { DURUM_CIPLERI, type ListeGirdisi } from './listeTanimlari.Ortak';
  */
 export const KLINIK_LISTELERI: ListeGirdisi[] = [
   {
+    // AŞI UYGULAMALARI (898, KTS H10 / USS 207): hasta bazlı kayıt.
+    //   Uygulama HASTA KARTINDAN yapılır (doz numarasını sunucu hesaplıyor);
+    //   bu liste kayıtların dökümü ve e-Nabız durumu için.
+    kaynak: 'asi-uygulama', rota: 'asi-uygulama', baslik: 'Aşı Uygulamaları',
+    yol: 'Muayene › Aşı Uygulamaları',
+    tarihAlani: 'uygulamaZamani',
+    cipler: [
+      { ad: 'Uygulanan', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'İptal', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'asi',
+    // YENİ MENÜ GRUBU AÇILMADI: grup tavanı dolu (30) ve aşı zaten
+    //   poliklinikte uygulanıyor - "Muayene" grubunun içinde duruyor.
+    menuGrup: 'Muayene', menuAd: 'Aşı Uygulamaları', menuSira: 40,
+    ic: '\u{1F489}', yetkiKodu: 'asi',
+  },
+  {
+    // GEBELİK DOSYALARI (900, KTS H10): izlem buna bağlanır; aynı hastada
+    //   aynı anda tek açık dosya olur.
+    kaynak: 'gebelik', rota: 'gebelik', baslik: 'Gebelik Dosyaları',
+    yol: 'Muayene › Gebelik Dosyaları',
+    cipler: [
+      { ad: 'Devam eden', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Riskli', filtre: { alan: 'riskDurumu', op: 'esit', deger: 1 } },
+      { ad: 'Sonuçlanan', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'gebe',
+    menuGrup: 'Muayene', menuAd: 'Gebelik Dosyaları', menuSira: 47,
+    ic: '\u{1F930}', yetkiKodu: 'gebe.dosya',
+  },
+  {
+    // GEBE İZLEMLERİ (900 / USS 221): kilo KİLOGRAM - 209'daki gram
+    //   çevrimi burada yok.
+    kaynak: 'gebe-izlem', rota: 'gebe-izlem', baslik: 'Gebe İzlemleri',
+    yol: 'Muayene › Gebe İzlemleri',
+    tarihAlani: 'izlemTarihi',
+    cipler: [
+      { ad: 'Geçerli', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Riskli', filtre: { alan: 'riskSayisi', op: 'buyuk', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'gebe',
+    menuGrup: 'Muayene', menuAd: 'Gebe İzlemleri', menuSira: 48,
+    ic: '\u{1FAC4}', yetkiKodu: 'gebe.izlem',
+  },
+  {
+    // GEBELİK SONUÇLARI (902 / USS 224): doğum, düşük ya da tıbbi tahliye.
+    //   Kayıt dosyayı kapatır ve paketi doğurur.
+    kaynak: 'gebelik-sonuc', rota: 'gebelik-sonuc', baslik: 'Gebelik Sonuçları',
+    yol: 'Muayene › Gebelik Sonuçları',
+    tarihAlani: 'sonlanmaTarihi',
+    cipler: [
+      { ad: 'Geçerli', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'gebe',
+    menuGrup: 'Muayene', menuAd: 'Gebelik Sonuçları', menuSira: 49,
+    ic: '\u{1F476}‍⚕️', yetkiKodu: 'gebe.sonuc',
+  },
+  {
+    // ÇOCUK İZLEMLERİ (899, KTS H10 / USS 209): persentil kolonları eğri
+    //   verisi yüklüyse dolu gelir - boş persentil "hesaplanamadı" demektir.
+    kaynak: 'cocuk-izlem', rota: 'cocuk-izlem', baslik: 'Çocuk İzlemleri',
+    yol: 'Muayene › Çocuk İzlemleri',
+    tarihAlani: 'izlemTarihi',
+    cipler: [
+      { ad: 'Geçerli', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'İptal', filtre: { alan: 'durum', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'cocuk',
+    menuGrup: 'Muayene', menuAd: 'Çocuk İzlemleri', menuSira: 45,
+    ic: '\u{1F476}', yetkiKodu: 'cocuk.izlem',
+  },
+  {
+    // BÜYÜME EĞRİSİ (LMS) VERİSİ: WHO/Bakanlık tabloları buraya yüklenir.
+    //   Tablo boşken persentil hesaplanmaz - uydurulmuş eğri, sağlıklı
+    //   çocuğu "geri kalmış" gösterebilirdi.
+    kaynak: 'cocuk-buyume-lms', rota: 'cocuk-buyume-lms',
+    baslik: 'Büyüme Eğrisi (LMS)',
+    yol: 'Muayene › Ayarlar › Büyüme Eğrisi',
+    urunModu: 2, modul: 'cocuk',
+    menuGrup: 'Muayene', menuAltGrup: 'Ayarlar', menuAd: 'Büyüme Eğrisi (LMS)',
+    menuSira: 82,
+    ic: '\u{1F4C8}', yetkiKodu: 'cocuk.buyume_lms',
+  },
+  {
+    // AŞI KATALOĞU: SKRS kodu olmayan aşı e-Nabız'a gönderilemez; liste
+    //   kodu kolon olarak gösteriyor ki eksik fark edilsin.
+    kaynak: 'asi', rota: 'asi', baslik: 'Aşı Kataloğu',
+    yol: 'Muayene › Ayarlar › Aşı Kataloğu',
+    kartYolu: '/asi', kartBaslik: 'Aşı',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'asi',
+    menuGrup: 'Muayene', menuAltGrup: 'Ayarlar', menuAd: 'Aşı Kataloğu',
+    menuSira: 80,
+    ic: '\u{1F48A}', yetkiKodu: 'asi.katalog',
+  },
+  {
     kaynak: 'mesajlar', rota: 'mesajlar', baslik: 'Mesajlar',
     yol: 'İletişim & AI › Mesajlar', ozelSayfa: true, menuAd: 'Mesajlar', menuGizli: true, ic: '💬',
     yetkiKodu: 'mesaj',
@@ -456,6 +560,32 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     urunModu: 2, modul: 'muayene',
     menuSira: 90, menuGrup: 'Muayene', menuAltGrup: 'Ayarlar',
     menuAd: 'Muayene Şablonları', ic: '📋', yetkiKodu: 'muayene',
+  },
+  {
+    // BZBH BILDIRIM PANOSU (882, KTS H5): ozel sayfa - bekleyen vaka
+    //   bildirimleri, vaka tipi/belirti tarihi girisi ve 214 gonderimi.
+    kaynak: 'bzbh', ozelSayfa: true, baslik: 'BZBH Bildirimleri',
+    yol: 'Muayene \u203a BZBH Bildirimleri',
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Muayene', menuAd: 'BZBH Bildirimleri', ic: '\ud83e\udda0',
+    yetkiKodu: 'bzbh', menuSira: 45,
+  },
+  {
+    // BZBH HASTALIK LISTESI (882): ICD onekiyle eslesen bildirimi zorunlu
+    //   hastaliklar. Tohum liste teblige gore dogrulanmayi bekler.
+    kaynak: 'bzbh-hastalik', rota: 'bzbh-hastalik', baslik: 'BZBH Hastalık Listesi',
+    yol: 'Muayene \u203a Muayene Ayarları \u203a BZBH Hastalık Listesi',
+    kartYolu: '/bzbh-hastalik', kartBaslik: 'BZBH hastalığı',
+    aksiyonEkrani: 'cari-liste',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Grup A', filtre: { alan: 'grup', op: 'esit', deger: 1 } },
+      { ad: 'Doğrulanmamış', filtre: { alan: 'dogrulandi', op: 'esit', deger: 0 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'muayene',
+    menuGrup: 'Muayene', menuAltGrup: 'Ayarlar', menuAd: 'BZBH Hastalık Listesi',
+    ic: '\ud83e\uddec', yetkiKodu: 'bzbh.hastalik', menuSira: 95,
   },
   {
     // METIN MAKROLARI (411) - kisayoldan hazir metin. Sablon ALAN tanimlar,

@@ -190,6 +190,12 @@ public static partial class LabUclari
                 ("yontem",          "t.yontem"),
                 ("olculebilirAlt",  "t.olculebilir_alt"),
                 ("olculebilirUst",  "t.olculebilir_ust"),
+                // SONUÇ DOĞRULAMA (893, KTS L1): tetkik özetinde hangi
+                //   sınırların tanımlı olduğu görünsün - "neden reddedildi"
+                //   sorusu tetkik kartına gitmeden cevaplanabilmeli.
+                ("mantikAlt",       "t.mantik_alt"),
+                ("mantikUst",       "t.mantik_ust"),
+                ("degerDeseni",     "t.deger_deseni"),
                 ("panikAlt",        "t.panik_alt"),
                 ("panikUst",        "t.panik_ust"),
                 ("hedefTatDk",      "t.hedef_tat_dk"),
@@ -218,10 +224,15 @@ public static partial class LabUclari
             var referanslar = await veri.ListeAsync("""
                 select r.alt, r.ust, r.metin,
                        public.fn_lab_referans_kime(r.cinsiyet, r.yas_alt_gun,
-                                                   r.yas_ust_gun, r.gebelik) as kime
+                                                   r.yas_ust_gun, r.gebelik) as kime,
+                       -- CIHAZ/YONTEM (888): tetkik panelinde hangi araligin
+                       --   hangi cihaza ait oldugu gorunmeli - "iki farkli
+                       --   aralik" bilgisi kendi basina yanilticidir.
+                       coalesce(c.ad, '') as cihaz, r.yontem
                   from public.lab_tetkik_referans r
+                  left join public.cihaz c on c.id = r.cihaz_id
                  where r.tetkik_id = @p0
-                 order by r.sira, r.yas_alt_gun
+                 order by (r.cihaz_id is not null), r.sira, r.yas_alt_gun
                 """, [id], OkuyucuGenisletmeleri.Sozluk, iptal);
 
             var paneller = await veri.ListeAsync("""
@@ -545,7 +556,11 @@ public static partial class LabUclari
                        --   tam idrar 21 satir uretiyor - ekran onlari tek
                        --   baslik altinda toplasin diye adi da tasinir.
                        coalesce(s.panel_id, 0) as panel_id,
-                       coalesce(lp.ad, '') as panel_ad
+                       coalesce(lp.ad, '') as panel_ad,
+                       -- KARAR SINIRI NOTU (896, KTS L15) EN SONA: okuyucu
+                       --   POZİSYONEL, araya kolon koymak sonraki bütün
+                       --   indeksleri kaydırırdı.
+                       coalesce(ls.karar_notu, '') as karar_notu
                   from public.lab_istem_satir s
                   join public.lab_istem i on i.id = s.istem_id
                   left join public.lab_numune n on n.id = s.numune_id
@@ -560,14 +575,23 @@ public static partial class LabUclari
                   -- SONUCU GIREN kisi: `ls` lateral'inden SONRA baglanir,
                   --   once yazilirsa "ls does not exist" verir.
                   left join public.v_kullanici_lookup gk on gk.id = ls.ekleyen
-                  -- Referans HASTAYA gore secilir (yas/cinsiyet bandi);
-                  --   642 hemogram ve tam idrar icin cocuk bantlarini da
-                  --   tasiyor, fn EN DAR araligi doner.
+                  -- Referans HASTAYA ve CIHAZA gore secilir (yas/cinsiyet
+                  --   bandi + olcum yontemi, 888); 642 hemogram ve tam idrar
+                  --   icin cocuk bantlarini da tasiyor, fn cihaza ozel satir
+                  --   varsa onu, yoksa EN DAR araligi doner. Cihaz sirasi:
+                  --   sonucun olculdugu cihaz > satirin cihazi > tetkikin
+                  --   varsayilani - hangi cihazda olculduyse onun araligi.
                   left join lateral public.fn_lab_referans(
-                        s.tetkik_id, i.taraf_id, current_date) ref on true
+                        s.tetkik_id, i.taraf_id, current_date,
+                        coalesce(ls.cihaz_id, s.cihaz_id, t.varsayilan_cihaz_id)
+                        ) ref on true
                  where s.istem_id = @p0 and s.durum <> 0
+                   -- TEST SEVIYESINDE YETKI (889, KTS L7): kisitli tetkikin
+                   --   satiri izinsiz role HIC donmez. Yanittan sonradan
+                   --   silmek, satir sayisini ve toplamlari bozardi.
+                   and public.fn_lab_tetkik_izin(s.tetkik_id, @p1, 'gor')
                  order by s.sira, s.id
-                """, [id],
+                """, [id, baglam.RolId],
                 o => new {
                     SatirId = o.GetInt32(0), Kod = o.GetString(1), Ad = o.GetString(2),
                     Durum = o.GetInt16(3),
@@ -596,7 +620,8 @@ public static partial class LabUclari
                     Cihaz = o.GetString(25),
                     GirisTuru = o.GetString(26), Giren = o.GetString(27),
                     DuzeltmeNeden = o.GetString(28), TekrarNo = o.GetInt16(29),
-                    PanelId = o.GetInt32(30), PanelAd = o.GetString(31) }, iptal);
+                    PanelId = o.GetInt32(30), PanelAd = o.GetString(31),
+                    KararNotu = o.GetString(32) }, iptal);
 
             // NUMUNEYI ALAN ve KALITE mockup'ta sag panelde: "Hemsire N. Koc ·
             //   Kan alma 2", "Uygun / hemoliz…". Kabul edilmis tup icin bu iki
@@ -754,6 +779,92 @@ public static partial class LabUclari
                 mesaj = $"{barkodlar.Count} tüp barkodu üretildi: "
                       + string.Join(", ", barkodlar),
                 izlemeNo = baglam.IzlemeNo });
+        });
+
+        // -------------------------------------------- sonuc gecmisi (886) ---
+        // ONAYLARKEN ESKI SONUCLAR VE TEKRARLAR (KTS maddesi L9).
+        //   Motor zaten vardi: sonuc yazilirken delta hesaplaniyor ve onceki
+        //   deger satira yaziliyor. Eksik olan ERISIMDI - onaylayan uzman
+        //   "bu hastanin bu tetkiki daha once kacti" sorusunu baska ekrana
+        //   gidip arayarak cevapliyordu.
+        //
+        //   UC SEY BIR ARADA: gecmis (ayni hastanin BASKA istemlerindeki
+        //   ONAYLI sonuclari), tekrarlar (ayni istemdeki oteki calismalar)
+        //   ve bu sonucun kendi delta bilgisi.
+        grup.MapGet("/satir/{id:int}/gecmis", async (
+            int id, int? adet, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("lab.sonuc", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+
+            var satirlar = await b.ListeAsync("""
+                select kaynak, sonuc_id, istem_id, istem_no, tarih, deger, birim,
+                       bayrak, panik, tekrar_no, cihaz, onay_durum
+                  from public.fn_lab_sonuc_gecmis(@p0, @p1)
+                """, null, [id, adet ?? 10], o => new
+            {
+                kaynak = o.GetString(0), sonucId = o.GetInt64(1), istemId = o.GetInt32(2),
+                istemNo = o.GetString(3), tarih = o.GetDateTime(4),
+                deger = o.IsDBNull(5) ? "" : o.GetString(5), birim = o.GetString(6),
+                bayrak = o.GetString(7), panik = o.GetInt16(8) == 1,
+                tekrarNo = (int)o.GetInt16(9), cihaz = o.GetString(10),
+                onayDurum = (int)o.GetInt16(11),
+            }, iptal);
+
+            // DELTA: sonucun KENDI satirinda duruyor (433 yazarken hesapladi).
+            var delta = await b.TekAsync("""
+                select r.delta_onceki, r.delta_yuzde, r.delta_uyari,
+                       coalesce(t.delta_yuzde, 0), coalesce(t.delta_gun, 0),
+                       coalesce(nullif(r.deger_metin, ''),
+                                trim(to_char(r.deger_sayisal, 'FM999999990.999999')), ''),
+                       r.birim, r.bayrak, r.panik
+                  from public.lab_sonuc r
+                  left join public.lab_tetkik t on t.id = r.tetkik_id
+                 where r.istem_satir_id = @p0
+                 order by r.tekrar_no desc, r.id desc limit 1
+                """, null, [id], o => new
+            {
+                oncekiDeger = o.IsDBNull(0) ? (decimal?)null : o.GetDecimal(0),
+                yuzde = o.IsDBNull(1) ? (decimal?)null : o.GetDecimal(1),
+                uyari = o.GetInt16(2) == 1,
+                kuralYuzde = o.GetDecimal(3), kuralGun = o.GetInt32(4),
+                deger = o.IsDBNull(5) ? "" : o.GetString(5), birim = o.GetString(6),
+                bayrak = o.GetString(7), panik = o.GetInt16(8) == 1,
+            }, iptal);
+
+            return Results.Ok(new
+            {
+                gecmis = satirlar.Where(x => x.kaynak == "gecmis"),
+                tekrarlar = satirlar.Where(x => x.kaynak == "tekrar"),
+                delta,
+            });
+        });
+
+        // ------------------------------------------------- ret kriterleri ---
+        // RET NEDENLERİ ARTIK TANIMDAN GELİYOR (879, KTS maddesi L6).
+        //   Eskiden sekiz sabit kod hem sunucuda hem ekranda ayrı ayrı
+        //   yazılıydı; laboratuvar kendi kabul/ret ölçütlerini giremiyordu.
+        //   Ekran bu listeyi okur: ret penceresinin seçenekleri de, numune
+        //   kabulündeki "kalite" listesi de aynı satırlardan çıkar.
+        grup.MapGet("/ret-nedenleri", async (
+            VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("lab.numune", Islem.Gor);
+            await using var b = await veri.AcAsync(iptal);
+            var liste = await b.ListeAsync("""
+                select kod, ad, aciklama, kabulde_secilebilir, hasta_bilgilendir
+                  from public.v_lab_ret_nedeni
+                 where aktif = 1
+                 order by sira, kod
+                """, null, [], o => new
+            {
+                kod = (int)o.GetInt16(0), ad = o.GetString(1), aciklama = o.GetString(2),
+                kabuldeSecilebilir = o.GetInt16(3) == 1, hastaBilgilendir = o.GetInt16(4) == 1,
+            }, iptal);
+            return Results.Ok(new { nedenler = liste });
         });
 
         // ----------------------------------------------------------- numune ---
@@ -938,6 +1049,9 @@ public static partial class LabUclari
         KaliteKontrolEkle(grup);
         OzetVeSonuclarEkle(grup);
         DisLaboratuvarEkle(grup);
+        ArsivEkle(grup);
+        TekrarEkle(grup);
+        GrafikEkle(grup);
     }
 
 

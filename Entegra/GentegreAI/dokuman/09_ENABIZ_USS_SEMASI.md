@@ -325,3 +325,41 @@ gömülü sabitten değil.
   akışı doğrulandı; işi açmak kullanıcı kararı.
 - `entegrasyon_hesap.test_mi` şu an **1** (test ortamı). Canlı gönderim için
   0 olmalı.
+
+
+## Paket listesi ve şemaları nereden okunur (19.09.2026)
+
+`rehber.enabiz.gov.tr` sol menüsünde **118 aktif paketin numaralı listesi**,
+her paketin kendi sayfasında da **tam şeması** duruyor: alan kodu, nesne tipi
+(VeriSeti / Grup / Öge), zorunluluk, tekrar, tip ve SKRS `codeSystemGuid`.
+
+Sayfa JavaScript ile çiziliyor - düz `WebFetch` menüyü görüyor ama paket
+sayfasını açamıyor. Tarayıcı otomasyonuyla menüdeki bağlantıya tıklayıp
+tablolar okunuyor.
+
+Bizi ilgilendiren numaralar (KTS denetim maddeleriyle):
+
+| Paket | Ad | Madde | Durum |
+|---|---|---|---|
+| 101 · 102 · 103 · 105 · 106 · 301 · 302 | çekirdek | — | kurulu |
+| **252** | Konsültasyon Kayıt | H2 · D20 | **880'de açıldı** |
+| **203** | Ağız ve Diş Sağlığı Veri Seti | D18 | numara yazıldı, SKRS eşlemesi bekliyor |
+| **411** | Doktor Mesajı Paketi | H7 · D14 | hastaya mesaj USS PAKETİ olarak gider - 877'nin taşıması buna çevrilmeli |
+| **214** | Bulaşıcı Hastalık Bildirim | H5 (BZBH) | yapılmadı |
+| **207 · 209 · 221 · 223 · 224** | aşı ve izlem setleri | H10 | yapılmadı |
+| **409** | Radyoloji Sonuç Kayıt | H10 · D19 | yapılmadı |
+| **268** | Hekim Puan Bilgisi | H15 · D21 | yapılmadı |
+| **407 · 408** | Gün Sonu / Ay Sonu | H13 · D24 | yapılmadı |
+| **201** | Patoloji Kayıt | (HBYS patoloji) | yapılmadı |
+
+**411 Doktor Mesajı şeması** (877'yi çevirirken kullanılacak):
+`HASTA_TAKIP_BILGISI/SYSTakipNo` (zorunlu) +
+`DOKTOR_MESAJI_VERI_SETI` → `HASTA_MESAJLARI_TURU` (SKRS
+`db954393-57be-4a56-872c-58619e2779f3`, zorunlu), `MESAJ_DETAYI` (zorunlu),
+`MESAJ_TARIHI` (datetime, zorunlu).
+
+**203 ADSM şeması**: `AGIZ_DIS_SAGLISI` → `DIS_MUDAHALE_BILGISI` (zorunlu,
+tekrarlı: MUDAHALE `c3eb10bb-27b9-6344-e043-14031b0a5679`, başlama/bitiş
+zamanı, TEDAVI_EDILEN_DISIN_KODU `d5743829-cf07-4dda-bfb5-69439599628a`,
+ISLEM_REFERANS_NUMARASI) + `MEVCUT_DIS_BILGISI` (MEVCUT_DIS_DURUMU
+`633f6442-19f4-419c-a7c9-9b2e0bd16a00`, MEVCUT_DIS_KODU).

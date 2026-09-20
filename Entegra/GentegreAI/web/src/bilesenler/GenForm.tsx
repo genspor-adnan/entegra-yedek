@@ -5,7 +5,7 @@ import { dokumanDosyaAdi, dosyaIndirUrl } from './indir';
 import { useOturum } from '../kimlik/OturumBaglami';
 import {
   ApiHatasi, hataAyristir, urunAdi,
-  type KartMetaYaniti, type KartYetkisi, hataMetni } from '../api/sozlesme';
+  type KartMetaYaniti, type KartYetkisi, hataMetni, silmeEngeliMi } from '../api/sozlesme';
 import { GenDetayTablo, type DetayDurumu, type Satir, bosDetay, detayFarki }
   from './GenDetayTablo';
 import { Modal } from './Modal';
@@ -1126,7 +1126,7 @@ Yine de yeni hasta kaydı eklensin mi?`);
       onKapat?.();
     } catch (h) {
       if (h instanceof ApiHatasi) {
-        setHata(h.hata.engel
+        setHata(silmeEngeliMi(h.hata.engel)
           ? `${h.message} (${h.hata.engel.ad || h.hata.engel.tablo}: `
             + `${h.hata.engel.adet} kayıt)`
           : `${h.hata.kod}: ${h.message}`);

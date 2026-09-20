@@ -11,6 +11,15 @@ export type HataKodu =
 
 export interface AlanHatasi { alan: string; mesaj: string }
 
+/** Silme/degistirme engeli: bagli kayit sayisi. */
+export interface SilmeEngeli { tablo: string; adet: number; ad?: string }
+/** Is kurali engeli (873 akilci istem): kod + kurala ozgu alanlar. */
+export interface KuralEngeli { kod: string; [ek: string]: unknown }
+
+/** Engel silme engeli mi - mesaja "(tablo: n kayit)" eki bundan cikar. */
+export const silmeEngeliMi = (e: SilmeEngeli | KuralEngeli | undefined): e is SilmeEngeli =>
+  !!e && typeof (e as SilmeEngeli).adet === 'number';
+
 export interface HataGovdesi {
   kod: HataKodu;
   mesaj: string;
@@ -18,7 +27,15 @@ export interface HataGovdesi {
   alanlar?: AlanHatasi[];
   cakisanAlanlar?: string[];
   guncelDeger?: Record<string, unknown>;
-  engel?: { tablo: string; adet: number; ad?: string };
+  /**
+   * ENGEL IKI SEKILLIDIR (873'te ikincisi geldi):
+   *  - SILME ENGELI: "hangi tabloda kac kayit" (`tablo` + `adet`).
+   *  - KURAL ENGELI: akilci test istemi gibi is kurallari, kendi kodu ve
+   *    kurala ozgu alanlariyla (`kod` + serbest alanlar).
+   * Tek sekil varsayilinca 873'un gonderdigi govde tipe uymuyordu ve
+   * `npm run build` kiriliyordu - dogrusu sozlesmenin iki sekli de anlatmasi.
+   */
+  engel?: SilmeEngeli | KuralEngeli;
   /** Excel iceri alma (207): satir numarali dogrulama hatalari. */
   satirHatalari?: { satirNo: number; alan: string; mesaj: string }[];
   toplamHata?: number;
@@ -118,7 +135,7 @@ export function hataAyristir(h: unknown): HataCozumu {
   // Silme/degistirme engeli: "hangi tabloda kac kayit" bilgisi mesaja eklenir,
   //   kullanici neyi temizleyecegini bilsin.
   // Kullaniciya TABLO ADI degil, Turkce karsiligi gosterilir (sunucu cozer).
-  const engel = h.hata.engel && typeof h.hata.engel.adet === 'number'
+  const engel = silmeEngeliMi(h.hata.engel)
     ? ` (${h.hata.engel.ad || h.hata.engel.tablo}: ${h.hata.engel.adet} kayıt)` : '';
   // IS_KURALI mesaji ZATEN kullaniciya yazilmis Turkce bir cumledir ("... 
   //   silinemez, ... yapabilirsiniz") - basina teknik kod eklemek okumayi

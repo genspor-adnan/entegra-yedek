@@ -1917,6 +1917,36 @@ public static class AksiyonKatalogu
                 Yazdir(),
             ],
 
+            // PANIK DEGERLER (894, KTS L2): liste ACIK panikleri gosterir;
+            //   kayit "bildirildi" ile DEGIL okuma-geri TEYIDI ile kapanir -
+            //   telefonun acilmasi, karsi tarafin degeri tekrar etmesi
+            //   demek degildir.
+            ["lab-panik-liste"] =
+            [
+                new("lab.panik-bildir", "☎ Panik Bildirimi", "lab-panik",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.sonuc", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 10),
+                new("lab.panik-teyit", "✔ Okuma-Geri Teyidi", "lab-panik",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.sonuc", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 20),
+                Yazdir(),
+            ],
+
+            // TEKRAR TALEPLERI (891, KTS L8): kuyruk yalniz IPTAL edilir -
+            //   "karsilandi" durumunu SISTEM yazar (ayni satira yeni sonuc
+            //   girilince). Elle kapatma dugmesi, calisilmadan kapatilmis
+            //   talepler uretirdi.
+            ["lab-tekrar-liste"] =
+            [
+                new("lab.tekrar-iptal", "✖ Talebi İptal Et", "lab-tekrar",
+                    Hedef: "araccubugu,sagtus,palet",
+                    KaynakKodu: "lab.tekrar", Islem: Islem.Degistir, KayitGerekir: true,
+                    Sira: 10),
+                Yazdir(),
+            ],
+
             // SONUC ONAY KUYRUGU: iki asama ayri dugme (teknik / uzman).
             //   Onayli sonuc GUNCELLENMEZ - "Duzelt" eski satiri iptal edip
             //   yenisini acar, bu yuzden ayri dugme.
@@ -1936,6 +1966,13 @@ public static class AksiyonKatalogu
                     Hedef: "araccubugu,sagtus,palet",
                     KaynakKodu: "lab.sonuc", Islem: Islem.Degistir, KayitGerekir: true,
                     Sira: 40),
+                // TEST TEKRARI (891, KTS L8): uzman/klinisyen laboratuvara
+                //   elektronik olarak tekrar isteyebilsin. Ayrı aksiyon
+                //   yetkisi - sonucu GÖREBİLEN herkesin laboratuvara iş
+                //   açması doğru değil.
+                new("lab.tekrar-iste", "🔁 Tekrar İste", "lab-sonuc",
+                    Hedef: "araccubugu,sagtus,palet",
+                    AksiyonYetkisi: "lab.tekrar.iste", KayitGerekir: true, Sira: 45),
                 Yazdir(),
             ],
 

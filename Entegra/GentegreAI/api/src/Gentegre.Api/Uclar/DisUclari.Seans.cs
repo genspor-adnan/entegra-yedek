@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -118,7 +118,8 @@ public static partial class DisUclari
         });
 
         grup.MapPost("/seans/{id:int}/bitir", async (
-            int id, VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu, HttpContext ctx,
+            int id, VeriKaynagi veri, LogDeposu log, BaglamCozucu cozucu,
+            Gentegre.Api.Servisler.EnabizTetikleyici enabiz, HttpContext ctx,
             CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
@@ -219,6 +220,13 @@ public static partial class DisUclari
             await log.YazAsync(baglanti, islem, LogIslemi.Degistir, LogTabloSeans, id, baglam.KullaniciId,
                 baglam.SubeId, baglam.Ip, new { bitti = true, yapilan, ilerleyen, ucret }, tarafId: seans.hastaId, iptal: iptal);
             await islem.CommitAsync(iptal);
+
+            // ADSM AGIZ VE DIS SAGLIGI PAKETI (876, KTS D18) - COMMIT'TEN
+            //   SONRA: paket seansin kesinlesmis halini okur, ve uretim
+            //   sessizdir (e-Nabiz ikincil is; paket dogmasa da seans kapanir).
+            //   Paket turu bugun kapali, bu cagri satir acmaz.
+            await enabiz.DisSeansiBittiAsync(id, baglam.KullaniciId, iptal);
+
             return Results.Ok(new { yapilan, ilerleyen, ucret, uyari = uyarilar.Count == 0 ? null : string.Join(" ", uyarilar) });
         });
     }

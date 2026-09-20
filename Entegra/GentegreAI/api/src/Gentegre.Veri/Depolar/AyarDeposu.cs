@@ -76,6 +76,15 @@ public sealed class AyarDeposu
         // PANIK DEGER (399): bildirim acik mi ve nobet numarasi. Esik katalogu
         //   Faz 2'de; tetik bugun satirin "Panik" isareti.
         "lab.panik_bildirim_acik", "lab.panik_ek_numara",
+        // PANIK SURE TAKIBI (894, KTS L2): kac dakika icinde bildirilmeli ve
+        //   kac dakika sonra ust sorumluya yukseltilmeli. SKS "tanimli sure"
+        //   der, sayiyi kurum yazar.
+        "lab.panik_bildirim_dk", "lab.panik_yukseltme_dk",
+        // IKI SEVIYELI ONAY (895, KTS L4): uzman onayi teknik onayi bekler mi
+        //   ve teknik onayi veren ayni sonucu yayinlayabilir mi (dort goz).
+        //   Ikisi de KAPALI gelir - kurulu laboratuvarin akisi bir
+        //   guncellemeyle durmasin; kurum acar.
+        "lab.cift_onay_zorunlu", "lab.onay_ayni_kisi",
         // KAYIT KABUL (355): basvuruda POS tahsilati alininca ne olacak -
         //   0 aksiyon yok, 1 otomatik satis fisi kesilsin, 2 kullaniciya sorulsun.
         "basvuru.pos_aksiyon",
@@ -153,6 +162,11 @@ public sealed class AyarDeposu
     private static readonly Dictionary<string, int> Varsayilan = new()
     {
         ["genel.urun_modu"] = 1,
+        // 894/895 (KTS L2 / L4): panik sureleri ve iki seviyeli onay.
+        ["lab.panik_bildirim_dk"] = 30,
+        ["lab.panik_yukseltme_dk"] = 60,
+        ["lab.cift_onay_zorunlu"] = 0,
+        ["lab.onay_ayni_kisi"] = 1,
         ["belge.geri_gun_siniri"] = 7,
         // Tahsilat/odeme kac gun sonra kilitlensin (149): 0 kapali, -1 sinirsiz.
         ["kasa.duzenleme_gun"] = 7,

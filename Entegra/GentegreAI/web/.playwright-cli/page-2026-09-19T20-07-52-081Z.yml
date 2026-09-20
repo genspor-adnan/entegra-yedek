@@ -1,0 +1,277 @@
+- generic [ref=f6e17]:
+  - banner [ref=f6e18]:
+    - button "☰" [expanded] [ref=f6e19] [cursor=pointer]
+    - link [ref=f6e20] [cursor=pointer]:
+      - img "Gentegre" [ref=f6e22]
+      - text: GenoTIP AI
+    - button "🔍 Ara ya da komut yaz… Ctrl K" [ref=f6e23] [cursor=pointer]:
+      - generic [ref=f6e24]: 🔍
+      - generic [ref=f6e25]: Ara ya da komut yaz…
+      - generic [ref=f6e26]: Ctrl K
+    - button "Merkez ▾" [ref=f6e28] [cursor=pointer]:
+      - text: Merkez
+      - generic [ref=f6e30]: ▾
+    - generic [ref=f6e31]:
+      - button "🖥️" [ref=f6e32] [cursor=pointer]
+      - link "💬" [ref=f6e33] [cursor=pointer]:
+        - /url: /mesajlar
+      - link "✨" [ref=f6e34] [cursor=pointer]:
+        - /url: /yapay-zeka
+      - button "🔔 3" [ref=f6e36] [cursor=pointer]:
+        - text: 🔔
+        - generic [ref=f6e37]: "3"
+      - button "Dil — Türkçe" [ref=f6e39] [cursor=pointer]
+      - button "?" [ref=f6e45] [cursor=pointer]
+      - button "Oturumu kapat" [ref=f6e47] [cursor=pointer]
+      - button "SY" [ref=f6e51] [cursor=pointer]
+  - generic [ref=f6e52]:
+    - complementary [ref=f6e53]:
+      - generic [ref=f6e54]:
+        - link "🏠 Ana Sayfa" [ref=f6e55] [cursor=pointer]:
+          - /url: /panel
+          - generic [ref=f6e56]: 🏠
+          - generic [ref=f6e57]: Ana Sayfa
+        - 'generic "Çalışma alanı: gün boyu kullandığınız bölgeler; diğerleri gizlenir" [ref=f6e58]':
+          - generic [ref=f6e59]: 🧭
+          - combobox "🧭" [ref=f6e60]:
+            - option "Tümü"
+            - option "Banko"
+            - option "Hekim"
+            - option "Hemşire"
+            - option "Lab / Görüntüleme"
+            - option "Muhasebe"
+            - option "Eczane / Tedarik" [selected]
+        - generic [ref=f6e61]:
+          - button "⭐ Favori ▾" [ref=f6e62] [cursor=pointer]:
+            - generic [ref=f6e63]: ⭐
+            - generic [ref=f6e64]: Favori
+            - generic [ref=f6e65]: ▾
+          - link "📅 Randevular ★" [ref=f6e66] [cursor=pointer]:
+            - /url: /randevu
+            - generic [ref=f6e67]: 📅
+            - generic [ref=f6e68]: Randevular
+            - button "★" [ref=f6e69]
+          - link "🪑 Günlük Akış ★" [ref=f6e70] [cursor=pointer]:
+            - /url: /dis-akis
+            - generic [ref=f6e71]: 🪑
+            - generic [ref=f6e72]: Günlük Akış
+            - button "★" [ref=f6e73]
+        - generic [ref=f6e74]:
+          - button "Yatan & Cerrahi ▾" [ref=f6e75] [cursor=pointer]:
+            - generic [ref=f6e77]: Yatan & Cerrahi
+            - generic [ref=f6e78]: ▾
+          - button "🛏️ Yatan Hasta ▸" [ref=f6e80] [cursor=pointer]:
+            - generic [ref=f6e81]: 🛏️
+            - generic [ref=f6e82]: Yatan Hasta
+            - generic [ref=f6e83]: ▸
+          - button "Ameliyathane ▸" [ref=f6e85] [cursor=pointer]:
+            - generic [ref=f6e92]: Ameliyathane
+            - generic [ref=f6e93]: ▸
+        - button "Tedarik & Teknik ▸" [ref=f6e95] [cursor=pointer]:
+          - generic [ref=f6e97]: Tedarik & Teknik
+          - generic [ref=f6e98]: ▸
+        - button "Diğer bölgeler (6) ▸" [ref=f6e99] [cursor=pointer]:
+          - generic [ref=f6e101]: Diğer bölgeler (6)
+          - generic [ref=f6e102]: ▸
+        - generic [ref=f6e103]: Oturum
+        - generic [ref=f6e104]:
+          - generic [ref=f6e105]: 🏢
+          - generic [ref=f6e106]: Merkez
+        - generic [ref=f6e107]:
+          - generic [ref=f6e108]: 👤
+          - generic [ref=f6e109]: admin
+          - generic [ref=f6e110]: Yonetici
+        - generic "Bu şubenin kurum profili" [ref=f6e111]:
+          - generic [ref=f6e112]: 🪪
+          - generic [ref=f6e113]: Hastane
+    - main [ref=f6e114]:
+      - generic [ref=f6e116]:
+        - heading "İyi akşamlar, Sistem Yoneticisi" [level=1] [ref=f6e117]
+        - generic [ref=f6e118]: 19 Eylül 2026 Cumartesi · Klinik paneli
+      - generic [ref=f6e119]:
+        - generic [ref=f6e120]:
+          - button "Bugünkü randevu 0 geldi 0 · gelmedi 0" [ref=f6e121] [cursor=pointer]:
+            - generic [ref=f6e122]: Bugünkü randevu
+            - generic [ref=f6e123]: "0"
+            - generic [ref=f6e124]: geldi 0 · gelmedi 0
+          - button "Açık başvuru 54 bugün 25" [ref=f6e125] [cursor=pointer]:
+            - generic [ref=f6e126]: Açık başvuru
+            - generic [ref=f6e127]: "54"
+            - generic [ref=f6e128]: bugün 25
+          - button "Sonuç bekleyen 87 lab 85 · radyoloji 2" [ref=f6e129] [cursor=pointer]:
+            - generic [ref=f6e130]: Sonuç bekleyen
+            - generic [ref=f6e131]: "87"
+            - generic [ref=f6e132]: lab 85 · radyoloji 2
+          - button "Bugün tahsilat 0,00 ₺ nakit 0 · pos 0 · havale 0" [ref=f6e133] [cursor=pointer]:
+            - generic [ref=f6e134]: Bugün tahsilat
+            - generic [ref=f6e135]: 0,00 ₺
+            - generic [ref=f6e136]: nakit 0 · pos 0 · havale 0
+          - button "Açık tahsilat 16.764,76 ₺ 15 başvuru" [ref=f6e137] [cursor=pointer]:
+            - generic [ref=f6e138]: Açık tahsilat
+            - generic [ref=f6e139]: 16.764,76 ₺
+            - generic [ref=f6e140]: 15 başvuru
+          - button "Açık belge 41.776,32 ₺ 24 başvuru" [ref=f6e141] [cursor=pointer]:
+            - generic [ref=f6e142]: Açık belge
+            - generic [ref=f6e143]: 41.776,32 ₺
+            - generic [ref=f6e144]: 24 başvuru
+        - generic [ref=f6e145]:
+          - generic [ref=f6e146]:
+            - heading "🏢 Kurum & sözleşme · açık tahakkuk" [level=6] [ref=f6e147]:
+              - generic [ref=f6e148]: 🏢
+              - text: Kurum & sözleşme
+              - generic [ref=f6e149]: · açık tahakkuk
+            - table [ref=f6e150]:
+              - rowgroup [ref=f6e151]:
+                - row [ref=f6e152]:
+                  - columnheader "Kurum" [ref=f6e153]
+                  - columnheader "Tip" [ref=f6e154]
+                  - columnheader "Başvuru" [ref=f6e155]
+                  - columnheader "Açık" [ref=f6e156]
+              - rowgroup [ref=f6e157]:
+                - row [ref=f6e158]:
+                  - cell "TEST_DAGILIM_AKIS HASTA" [ref=f6e159]
+                  - cell "—" [ref=f6e160]
+                  - cell "3" [ref=f6e161]
+                  - cell "2.400,00" [ref=f6e162]
+                - row [ref=f6e163]:
+                  - cell "Özel Yaşam Sigorta A.Ş." [ref=f6e164]
+                  - cell "ÖSS" [ref=f6e165]
+                  - cell "3" [ref=f6e166]
+                  - cell "2.000,00" [ref=f6e167]
+                - row [ref=f6e168]:
+                  - cell "E2E Hasta 1" [ref=f6e169]
+                  - cell "—" [ref=f6e170]
+                  - cell "1" [ref=f6e171]
+                  - cell "831,15" [ref=f6e172]
+                - row [ref=f6e173]:
+                  - cell "Sosyal Güvenlik Kurumu" [ref=f6e174]
+                  - cell "SGK" [ref=f6e175]
+                  - cell "5" [ref=f6e176]
+                  - cell "317,73" [ref=f6e177]
+          - generic [ref=f6e178]:
+            - heading "🩺 Poliklinik akışı · bugün" [level=6] [ref=f6e179]:
+              - generic [ref=f6e180]: 🩺
+              - text: Poliklinik akışı
+              - generic [ref=f6e181]: · bugün
+            - table [ref=f6e182]:
+              - rowgroup [ref=f6e183]:
+                - row [ref=f6e184]:
+                  - columnheader "Bölüm" [ref=f6e185]
+                  - columnheader "Randevu" [ref=f6e186]
+                  - columnheader "Bekleyen" [ref=f6e187]
+              - rowgroup [ref=f6e188]:
+                - row [ref=f6e189]:
+                  - cell "Kayıt yok." [ref=f6e190]
+          - generic [ref=f6e191]:
+            - heading "🧪 Yardımcı birimler · kuyruk" [level=6] [ref=f6e192]:
+              - generic [ref=f6e193]: 🧪
+              - text: Yardımcı birimler
+              - generic [ref=f6e194]: · kuyruk
+            - table [ref=f6e195]:
+              - rowgroup [ref=f6e196]:
+                - row [ref=f6e197]:
+                  - columnheader "Birim" [ref=f6e198]
+                  - columnheader "Bekleyen" [ref=f6e199]
+                  - columnheader "Bugün biten" [ref=f6e200]
+              - rowgroup [ref=f6e201]:
+                - row [ref=f6e202]:
+                  - cell "Laboratuvar" [ref=f6e203]
+                  - cell "85" [ref=f6e204]
+                  - cell "0" [ref=f6e205]
+                - row [ref=f6e206]:
+                  - cell "Radyoloji" [ref=f6e207]
+                  - cell "2" [ref=f6e208]
+                  - cell "0" [ref=f6e209]
+                - row [ref=f6e210]:
+                  - cell "Mikrobiyoloji / kültür" [ref=f6e211]
+                  - cell "0" [ref=f6e212]
+                  - cell "0" [ref=f6e213]
+          - generic [ref=f6e214]:
+            - heading "📤 e-Nabız / bildirim · son 24 saat" [level=6] [ref=f6e215]:
+              - generic [ref=f6e216]: 📤
+              - text: e-Nabız / bildirim
+              - generic [ref=f6e217]: · son 24 saat
+            - table [ref=f6e218]:
+              - rowgroup [ref=f6e219]:
+                - row [ref=f6e220]:
+                  - columnheader "Paket" [ref=f6e221]
+                  - columnheader "Üretilen" [ref=f6e222]
+                  - columnheader "Gönderilen" [ref=f6e223]
+              - rowgroup [ref=f6e224]:
+                - row [ref=f6e225]:
+                  - cell "Kayıt yok." [ref=f6e226]
+          - generic [ref=f6e227]:
+            - heading "👨‍⚕️ Hekim üretimi · bugün" [level=6] [ref=f6e228]:
+              - generic [ref=f6e229]: 👨‍⚕️
+              - text: Hekim üretimi
+              - generic [ref=f6e230]: · bugün
+            - table [ref=f6e231]:
+              - rowgroup [ref=f6e232]:
+                - row [ref=f6e233]:
+                  - columnheader "Hekim" [ref=f6e234]
+                  - columnheader "Hasta" [ref=f6e235]
+                  - columnheader "Ciro" [ref=f6e236]
+              - rowgroup [ref=f6e237]:
+                - row [ref=f6e238]:
+                  - cell "Dr. Aslı Demir" [ref=f6e239]
+                  - cell "2" [ref=f6e240]
+                  - cell "0,00" [ref=f6e241]
+                - row [ref=f6e242]:
+                  - cell "Dr. Barış Güneş" [ref=f6e243]
+                  - cell "2" [ref=f6e244]
+                  - cell "0,00" [ref=f6e245]
+                - row [ref=f6e246]:
+                  - cell "Dr. Buse Kurt" [ref=f6e247]
+                  - cell "2" [ref=f6e248]
+                  - cell "0,00" [ref=f6e249]
+                - row [ref=f6e250]:
+                  - cell "Dr. Ceren Çelik" [ref=f6e251]
+                  - cell "2" [ref=f6e252]
+                  - cell "0,00" [ref=f6e253]
+                - row [ref=f6e254]:
+                  - cell "Dr. Ece Korkmaz" [ref=f6e255]
+                  - cell "2" [ref=f6e256]
+                  - cell "0,00" [ref=f6e257]
+                - row [ref=f6e258]:
+                  - cell "Dr. Esra Aydın" [ref=f6e259]
+                  - cell "2" [ref=f6e260]
+                  - cell "0,00" [ref=f6e261]
+                - row [ref=f6e262]:
+                  - cell "Dr. Fatma Öztürk" [ref=f6e263]
+                  - cell "2" [ref=f6e264]
+                  - cell "0,00" [ref=f6e265]
+                - row [ref=f6e266]:
+                  - cell "Dr. Merve Özdemir" [ref=f6e267]
+                  - cell "2" [ref=f6e268]
+                  - cell "0,00" [ref=f6e269]
+          - generic [ref=f6e270]:
+            - heading "⚠️ Dikkat gerektiren · iş listesi" [level=6] [ref=f6e271]:
+              - generic [ref=f6e272]: ⚠️
+              - text: Dikkat gerektiren
+              - generic [ref=f6e273]: · iş listesi
+            - table [ref=f6e274]:
+              - rowgroup [ref=f6e275]:
+                - row [ref=f6e276]:
+                  - columnheader "Konu" [ref=f6e277]
+                  - columnheader "Adet" [ref=f6e278]
+                  - columnheader "Etki" [ref=f6e279]
+              - rowgroup [ref=f6e280]:
+                - row [ref=f6e281]:
+                  - cell "Provizyon alınmamış başvuru" [ref=f6e282]
+                  - cell "23" [ref=f6e283]
+                  - cell "Tahakkuk edilemez" [ref=f6e284]
+                - row [ref=f6e285]:
+                  - cell "Onaylanmamış tetkik sonucu" [ref=f6e286]
+                  - cell "8" [ref=f6e287]
+                  - cell "Hasta bekliyor" [ref=f6e288]
+                - row [ref=f6e289]:
+                  - cell "Faturası kesilmemiş kurum icmali" [ref=f6e290]
+                  - cell "0" [ref=f6e291]
+                  - cell "Dönem kapanmaz" [ref=f6e292]
+                - row [ref=f6e293]:
+                  - cell "e-Nabız hatalı paket" [ref=f6e294]
+                  - cell "0" [ref=f6e295]
+                  - cell "Bildirim eksik" [ref=f6e296]
+  - button "Yapay Zekâya Sor — bu ekranda nasıl yapılır?" [ref=f6e297] [cursor=pointer]:
+    - text: 💡
+    - generic [ref=f6e298]: Yapay Zekâya Sor

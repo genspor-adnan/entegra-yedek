@@ -121,10 +121,21 @@ export async function mikroAksiyonu(
           })));
       if (!izolatSecim) return true;
 
-      const antibiyotikler = await api.liste('lab-antibiyotik', { sayfa: 1, boyut: 100 });
-      const abSecim = await secimSor('Antibiyotik:', antibiyotikler.satirlar.map(r => ({
-        kod: String(r.id), ad: `${String(r.kod ?? '')} · ${String(r.ad ?? '')}`,
-      })));
+      // ANTIBIYOTIK LISTESI ORGANIZMAYA GORE (887): dogal (intrinsik)
+      //   direncli ajan hic sorulmaz - sorulursa "R" olarak rapora girer ve
+      //   klinisyene o ilacin denenebilir oldugunu dusundurur. Organizmaya
+      //   ozel panel tanimliysa yalniz o panel gelir; yoksa sunucu genel
+      //   kataloga duser.
+      const panel = await api.labIzolatPaneli(Number(izolatSecim));
+      const disarida = panel.disarida ?? [];
+      const abSecim = await secimSor(
+        disarida.length === 0
+          ? 'Antibiyotik:'
+          : `Antibiyotik: (kısıtlı: ${disarida.map(d => d.ad).join(', ')})`,
+        panel.satirlar.map(r => ({
+          kod: String(r.id),
+          ad: `${r.kod} · ${r.ad}${r.basamak > 1 ? ` · ${r.basamak}. basamak` : ''}`,
+        })));
       if (!abSecim) return true;
 
       const micMetni = await metinSor('MIC (örn. ≥32 · ≤0,25) — disk için boş bırakın:',

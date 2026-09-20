@@ -28,6 +28,11 @@ import { yapayZekaUclari } from './uclar/yapayZeka';
 import { mesajUclari } from './uclar/mesaj';
 import { ayarUclari } from './uclar/ayar';
 import { klinikKaliteUclari } from './uclar/klinikKalite';
+import { enabizUclari } from './uclar/enabiz';
+import { bzbhUclari } from './uclar/bzbh';
+import { asiUclari } from './uclar/asi';
+import { cocukIzlemUclari } from './uclar/cocukIzlem';
+import { gebelikUclari } from './uclar/gebelik';
 import { ameliyathaneUclari } from './uclar/ameliyathane';
 import { acilUclari } from './uclar/acil';
 import { akisTedarikUclari } from './uclar/akisTedarik';
@@ -49,6 +54,14 @@ export type {
 export const api = {
   ...kimlikUclari,
   ...klinikKaliteUclari,
+  ...enabizUclari,
+  ...bzbhUclari,
+  // ASI MODULU (898, KTS H10): uygulama kaydi + USS 207.
+  ...asiUclari,
+  // BEBEK/COCUK IZLEM (899, KTS H10): izlem + persentil + USS 209.
+  ...cocukIzlemUclari,
+  // GEBELIK DOSYASI + GEBE IZLEM (900, KTS H10): USS 221.
+  ...gebelikUclari,
   ...ameliyathaneUclari,
   ...acilUclari,
   ...akisTedarikUclari,

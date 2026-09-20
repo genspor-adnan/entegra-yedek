@@ -431,6 +431,10 @@ public static partial class KartKatalogu
         // LAB v1 (433/434): tetkik katalogu (+referans), panel, cihaz eslemesi.
         Ekle(LabTetkikKarti());
         Ekle(LabAkilciKuralKarti()); Ekle(LabRefleksKuralKarti());   // akılcı test istemi (873)
+        Ekle(LabRetNedeniKarti());                                   // numune ret kriterleri (879)
+        Ekle(LabArsivKonumKarti()); Ekle(LabSaklamaPolitikaKarti());  // numune arşivi (890)
+        Ekle(AsiKarti());                                            // aşı kataloğu (898)
+        Ekle(BzbhHastalikKarti());                                   // BZBH hastalik listesi (882)
         Ekle(LabPanelKarti());
         Ekle(LabCihazEslemeKarti());
         Ekle(EnabizKodEslemeKarti());

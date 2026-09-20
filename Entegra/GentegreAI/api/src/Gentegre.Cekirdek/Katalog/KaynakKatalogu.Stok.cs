@@ -389,6 +389,12 @@ public static partial class KaynakKatalogu
                 + "                    where p.hizmet_id = h.id and p.durum = 0) "
                 + "      then 1 else 0 end",
                                      "sayi",  "Lab",        Varsayilan: false),
+            // DIS ISLEMI MI (19.09.2026, kod isi - goc yok): `labVarMi` ile ayni
+            //   gerekce - dis tedavi
+            //   plani satiri JENERIK HIZMET penceresinden seciliyor; suzgec
+            //   olmadan butun SUT katalogu aciliyor ve secilen hizmetin cogu
+            //   dis islemi DEGIL. Kolon gizli, yalniz suzmek icin.
+            new("disIslem", "coalesce(h.dis_islem, 0)", "sayi", "Diş", Varsayilan: false),
             new("kod",     "h.kod",      "metin", "Kod"),
             // KISA AD (549, kullanici: "ad'in soluna Kisa Ad ekle, aramada
             //   oncelik ona olsun"): katalog SKRS'den kuruldugu icin `ad`

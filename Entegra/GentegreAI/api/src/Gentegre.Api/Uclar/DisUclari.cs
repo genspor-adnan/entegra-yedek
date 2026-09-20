@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
 using Gentegre.Veri.Depolar;
@@ -47,6 +47,7 @@ public static partial class DisUclari
         PlanKartUclariniEkle(grup);
         DisMuayeneUclariniEkle(grup);
         LabUclariniEkle(grup);
+        IconUclariniEkle(grup);
     }
 
     // ================================================================ hasta kartı ==

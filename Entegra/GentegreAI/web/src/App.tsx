@@ -40,6 +40,10 @@ import { ServisCizelge } from './sayfalar/ServisCizelge';
 import { ZiyaretMobil } from './sayfalar/servis/ZiyaretMobil';
 import { DisHastaKarti } from './sayfalar/dis/DisHastaKarti';
 import { DisGunlukAkis } from './sayfalar/dis/DisGunlukAkis';
+import { DisLabEtiket } from './sayfalar/dis/DisLabEtiket';
+import { BzbhPanosu } from './sayfalar/BzbhPanosu';
+import { EnabizGunSonu } from './sayfalar/EnabizGunSonu';
+import { LabArsiv } from './sayfalar/LabArsiv';
 import { DisSeansKarti } from './sayfalar/dis/DisSeansKarti';
 import { DisPlanKarti } from './sayfalar/dis/DisPlanKarti';
 import { FtrProgramKarti } from './sayfalar/ftr/FtrProgramKarti';
@@ -247,6 +251,16 @@ function Yollar() {
           </>} />
         )}
         {yetki('dis') && <Route path="/dis-akis" element={<DisGunlukAkis />} />}
+        {/* Protez is emri barkot etiketi (874, KTS D1): yazdirma sayfasi -
+            arac cubugu ve menu basilmaz, sayfada yalniz etiket kalir. */}
+        {yetki('dis.lab') && <Route path="/dis-lab/etiket" element={<DisLabEtiket />} />}
+        {/* BZBH bildirim panosu (882, KTS H5): enfeksiyon kontrol biriminin
+            gunluk ekrani - bekleyen ve geciken vaka bildirimleri. */}
+        {yetki('bzbh') && <Route path="/bzbh" element={<BzbhPanosu />} />}
+        {/* Gun sonu ve gonderim orani (884, KTS H13). */}
+        {yetki('enabiz.gun_sonu') && <Route path="/enabiz-gun-sonu" element={<EnabizGunSonu />} />}
+        {/* NUMUNE ARŞİVİ (890, KTS L13): ızgara üzerinden yerleştirme/çıkarma. */}
+        {yetki('lab.arsiv') && <Route path="/lab-arsiv" element={<LabArsiv />} />}
         {/* Seans karti (708): yapilan islemler listesi - generic detay tablosu
             "plan satirindan ekle" ve "bu seansta tamamlandi" kuralini tasiyamiyordu. */}
         {yetki('dis.seans') && (

@@ -412,6 +412,10 @@ public sealed partial class KartDeposu
             "public.v_entegrasyon_hesap_lookup",
             // Cihaz ara katmani (432).
             "public.v_cihaz_lookup",
+            // NUMUNE ARSIVI (890, KTS L13): konum agaci secicisi - ad olarak
+            //   TAM YOL doner ("Dondurucu A / Raf 2 / Kutu 7"), cunku "Kutu 7"
+            //   hangi dolabin 7'si oldugunu belirsiz birakirdi.
+            "public.v_lab_arsiv_konum_lookup",
             // ISTEM KARTI (479): tetkigin baglanacagi tup - istem basina suzulur.
             "public.v_lab_numune_lookup",
             // KURUM SOZLESMESI ve ALT KURUM (468): basvuru ve kurum karti.

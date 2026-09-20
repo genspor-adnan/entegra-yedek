@@ -1,0 +1,12 @@
+- generic [ref=f6e4]:
+  - heading "GenoTIP AI" [level=1] [ref=f6e6]
+  - paragraph [ref=f6e7]: Kullanici adi ve parola
+  - generic [ref=f6e8]:
+    - text: Kimlik No/Telefon/E-Posta
+    - textbox "Kimlik No/Telefon/E-Posta" [active] [ref=f6e9]: admin
+  - generic [ref=f6e10]:
+    - text: Parola
+    - textbox "Parola" [ref=f6e11]
+  - button "Giris" [ref=f6e12] [cursor=pointer]
+  - link "Şifremi Unuttum" [ref=f6e13] [cursor=pointer]:
+    - /url: "#"

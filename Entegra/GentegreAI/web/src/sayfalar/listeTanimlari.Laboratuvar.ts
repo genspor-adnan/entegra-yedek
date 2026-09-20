@@ -121,6 +121,124 @@ export const LAB_LISTELERI: ListeGirdisi[] = [
     ic: '🧬', yetkiKodu: 'lab.tetkik',
   },
   {
+    // PANİK DEĞERLER (894, KTS L2): açık panikler, en uzun bekleyen üstte.
+    //   Panoda yalnız SAYI vardı; "hangisi, kaç dakikadır" görünmüyordu.
+    //   Kayıt bildirimle değil OKUMA-GERİ teyidiyle kapanır.
+    kaynak: 'lab-panik', rota: 'lab-panik', baslik: 'Panik Değerler',
+    yol: 'Laboratuvar › Panik Değerler',
+    aksiyonEkrani: 'lab-panik-liste',
+    tarihAlani: 'olcumZamani',
+    cipler: [
+      { ad: 'Bildirilmedi', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Teyit bekliyor', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'Yükseltilen', filtre: { alan: 'yukseltme', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Panik Değerler', menuSira: 30,
+    ic: '\u{1F6A8}', yetkiKodu: 'lab.panik',
+  },
+  {
+    // TEKRAR TALEPLERİ (891, KTS L8): "bu tetkiki tekrar çalışın" talebi
+    //   artık elektronik. Kuyruk yalnız İPTAL edilir - "karşılandı"yı
+    //   sistem yazar (aynı satıra yeni sonuç girilince); elle kapatma
+    //   düğmesi, çalışılmadan kapatılmış talepler üretirdi.
+    kaynak: 'lab-tekrar', rota: 'lab-tekrar', baslik: 'Tekrar Talepleri',
+    yol: 'Laboratuvar › Tekrar Talepleri',
+    aksiyonEkrani: 'lab-tekrar-liste',
+    tarihAlani: 'istekZamani',
+    cipler: [
+      { ad: 'Bekleyen', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Yeni numune', filtre: { alan: 'tur', op: 'esit', deger: 2 } },
+      { ad: 'Karşılanan', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'İptal', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Tekrar Talepleri', menuSira: 35,
+    ic: '\u{1F501}', yetkiKodu: 'lab.tekrar',
+  },
+  {
+    // NUMUNE ARŞİVİ (890, KTS L13): "tüp nerede" ve "ne zamana kadar
+    //   duracak". Özel sayfa, çünkü iş ızgara üzerinden yapılıyor -
+    //   kutunun gözlerini satır/sütun olarak görmeden tüp yerleştirilemez;
+    //   jenerik liste bunu çizemez.
+    kaynak: 'lab-arsiv-pano', rota: 'lab-arsiv', ozelSayfa: true,
+    baslik: 'Numune Arşivi', yol: 'Laboratuvar › Numune Arşivi',
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Numune Arşivi', menuSira: 40,
+    ic: '\u{1F9CA}', yetkiKodu: 'lab.arsiv',
+  },
+  {
+    // ARŞİV KAYITLARI (890): arşivdekiler + ÇIKMIŞ/İMHA edilmişler. Pano
+    //   "şu an nerede" der; bu liste "hangi tüp ne zaman çıkarıldı, kim
+    //   imha etti" sorusunun - denetimde sorulanın - cevabıdır.
+    kaynak: 'lab-arsiv', rota: 'lab-arsiv-kayit', baslik: 'Arşiv Kayıtları',
+    yol: 'Laboratuvar › Arşiv Kayıtları',
+    tarihAlani: 'girisZamani',
+    cipler: [
+      { ad: 'Arşivde', filtre: { alan: 'durum', op: 'esit', deger: 1 } },
+      { ad: 'Süresi dolan', filtre: { alan: 'kalanGun', op: 'kucukEsit', deger: 0 } },
+      { ad: 'Çıkarılan', filtre: { alan: 'durum', op: 'esit', deger: 2 } },
+      { ad: 'İmha edilen', filtre: { alan: 'durum', op: 'esit', deger: 3 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAd: 'Arşiv Kayıtları', menuSira: 41,
+    ic: '\u{1F4E6}', yetkiKodu: 'lab.arsiv',
+  },
+  {
+    // ARŞİV KONUMLARI (890): ünite > raf > kutu. Izgara (satır × sütun)
+    //   yalnız kutuda anlamlı - kart bunu söylüyor, veritabanı da tutuyor.
+    kaynak: 'lab-arsiv-konum', rota: 'lab-arsiv-konum', baslik: 'Arşiv Konumları',
+    yol: 'Laboratuvar › Ayarlar › Arşiv Konumları',
+    kartYolu: '/lab-arsiv-konum', kartBaslik: 'Arşiv konumu',
+    cipler: [
+      { ad: 'Kutular', filtre: { alan: 'tur', op: 'esit', deger: 3 } },
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Arşiv Konumları',
+    menuSira: 204,
+    ic: '\u{1F5C4}', yetkiKodu: 'lab.arsiv_konum',
+  },
+  {
+    // SAKLAMA SÜRELERİ (890): imha hedefi buradan hesaplanır. Politika
+    //   yoksa süre yazılmaz - uydurulmuş bir tarih, saklanması gereken
+    //   numuneyi erken imha ettirirdi.
+    kaynak: 'lab-saklama-politika', rota: 'lab-saklama-politika',
+    baslik: 'Numune Saklama Süreleri',
+    yol: 'Laboratuvar › Ayarlar › Saklama Süreleri',
+    kartYolu: '/lab-saklama-politika', kartBaslik: 'Saklama süresi',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Saklama Süreleri',
+    menuSira: 205,
+    ic: '⏳', yetkiKodu: 'lab.saklama_politika',
+  },
+  {
+    // NUMUNE RET KRİTERLERİ (879, KTS L6): laboratuvar kendi kabul/ret
+    //   ölçütlerini tanımlar. Kod uzayı 433 ile aynı - geçmiş numunelerin
+    //   ret nedeni bu satırlara bağlı, kod değiştirilmez.
+    kaynak: 'lab-ret-nedeni', rota: 'lab-ret-nedeni', baslik: 'Numune Ret Kriterleri',
+    yol: 'Laboratuvar › Ayarlar › Numune Ret Kriterleri',
+    kartYolu: '/lab-ret-nedeni', kartBaslik: 'Ret kriteri',
+    cipler: [
+      { ad: 'Aktif', filtre: { alan: 'aktif', op: 'esit', deger: 1 } },
+      { ad: 'Hastaya mesaj', filtre: { alan: 'hastaBilgilendir', op: 'esit', deger: 1 } },
+      { ad: 'Kabulde de seçilir', filtre: { alan: 'kabuldeSecilebilir', op: 'esit', deger: 1 } },
+      { ad: 'Tümü' },
+    ],
+    urunModu: 2, modul: 'lab',
+    menuGrup: 'Laboratuvar', menuAltGrup: 'Ayarlar', menuAd: 'Numune Ret Kriterleri',
+    menuSira: 203,
+    ic: '\u26D4', yetkiKodu: 'lab.ret_nedeni',
+  },
+  {
     // AKILCI TEST İSTEM KURALLARI (873): Bakanlık listesi + SKRS süresi; kurum düzeltir.
     kaynak: 'lab-akilci-kural', rota: 'lab-akilci-kural', baslik: 'Akılcı İstem Kuralları',
     yol: 'Laboratuvar › Ayarlar › Akılcı İstem Kuralları',

@@ -12,6 +12,13 @@ import {
   MuayeneUcretSekmesi, MuayeneGecmisSekmesi,
 } from '../../bilesenler/MuayeneSekmeleri';
 import { DokumanGalerisi } from '../../bilesenler/DokumanGalerisi';
+import { AsiUygulaModali } from '../../bilesenler/AsiUygulaModali';
+import { CocukIzlemModali } from '../../bilesenler/CocukIzlemModali';
+import { GebeIzlemModali } from '../../bilesenler/GebeIzlemModali';
+import { EnabizButonu } from '../../bilesenler/EnabizButonu';
+import { useOturum } from '../../kimlik/OturumBaglami';
+import { EnabizMesajModali } from '../../bilesenler/EnabizMesajModali';
+import { useState } from 'react';
 import type { ListeSatiri } from '../../api/sozlesme';
 import type { ListeTanimi } from '../listeTanimlari';
 import type { KartOzellestirme } from './kartOzellestirme';
@@ -67,9 +74,36 @@ export function ListeKarti({
   kartTazele, setKartTazele, sorgu, git, setYenile, setOdaklaSonEklenen,
   onBasvuruAc,
 }: ListeKartiOzellikleri) {
+  // KANCALAR ERKEN CIKISTAN ONCE: `kartId === null` dalinda da ayni sirada
+  //   calismalari gerekir (React kanca kurali).
+  const [enabizMesaj, setEnabizMesaj] = useState<
+    { hastaId: number; hastaAdi: string; belgeId: number | null } | null>(null);
+  // AŞI PENCERESİ (898): hasta kartından açılır.
+  const [asiHasta, setAsiHasta] = useState<{ id: number; ad: string } | null>(null);
+  const [izlemHasta, setIzlemHasta] = useState<{ id: number; ad: string } | null>(null);
+  const [gebeHasta, setGebeHasta] = useState<{ id: number; ad: string } | null>(null);
+  const { aksiyonVar } = useOturum();
+
   if (kartId === null || !tanim.kartYolu || tanim.ozelKart) return null;
 
   return (
+    <>
+      {gebeHasta && (
+        <GebeIzlemModali hastaId={gebeHasta.id} hastaAdi={gebeHasta.ad}
+                         onKapat={() => setGebeHasta(null)} />
+      )}
+      {izlemHasta && (
+        <CocukIzlemModali hastaId={izlemHasta.id} cocukAdi={izlemHasta.ad}
+                          onKapat={() => setIzlemHasta(null)} />
+      )}
+      {asiHasta && (
+        <AsiUygulaModali hastaId={asiHasta.id} hastaAdi={asiHasta.ad}
+                         onKapat={() => setAsiHasta(null)} />
+      )}
+      {enabizMesaj && (
+        <EnabizMesajModali hastaId={enabizMesaj.hastaId} hastaAdi={enabizMesaj.hastaAdi}
+                           belgeId={enabizMesaj.belgeId} onKapat={() => setEnabizMesaj(null)} />
+      )}
       <GenForm
         kaynak={tanim.kaynak}
         id={kartId}
@@ -312,7 +346,52 @@ export function ListeKarti({
         //   eylemlerini burada gosterir. DUGMELER LISTE AKSIYON KODLARINI
         //   cagirir - kural ve yetki tek yerde kalir; ayni kod hem sag tus
         //   menusunden hem karttan gecer.
-        ekAraclar={kartId !== 'yeni'
+        // e-NABIZ DÜĞMESİ HASTA KARTINDA DA (KTS H8): denetim "yer"i ayrıca
+        //   soruyor - düğme yalnız muayenede olursa, hastayı kartından açan
+        //   hekim aynı işlemi bulamıyor. Hasta kartında mesaj/erişim ikisi
+        //   de aynı bileşenle, aynı yerde.
+        ekAraclar={kartId !== 'yeni' && tanim.kaynak === 'hasta'
+          ? (d) => {
+              const hid = Number(kartId);
+              return (
+                <>
+                  {/* AŞI UYGULAMA (898, KTS H10): doz numarasını sunucu
+                      hesaplıyor, ekran yalnız aşıyı ve lotu soruyor. */}
+                  {/* GEBE İZLEMİ (900, KTS H10): önce dosya, sonra izlem;
+                      hafta sunucudan gelir. */}
+                  {aksiyonVar('gebe.izlem') && (
+                    <button type="button" className="d"
+                            onClick={() => setGebeHasta({
+                              id: hid, ad: String(d.unvan ?? d.ad ?? '') })}>
+                      🤰 Gebe İzlemi
+                    </button>
+                  )}
+                  {/* ÇOCUK İZLEMİ (899, KTS H10): izlem sırasını sunucu
+                      söylüyor, persentil ölçümle birlikte görünüyor. */}
+                  {aksiyonVar('cocuk.izlem') && (
+                    <button type="button" className="d"
+                            onClick={() => setIzlemHasta({
+                              id: hid, ad: String(d.unvan ?? d.ad ?? '') })}>
+                      👶 Çocuk İzlemi
+                    </button>
+                  )}
+                  {aksiyonVar('asi') && (
+                    <button type="button" className="d"
+                            onClick={() => setAsiHasta({
+                              id: hid, ad: String(d.unvan ?? d.ad ?? '') })}>
+                      💉 Aşı Uygula
+                    </button>
+                  )}
+                  <EnabizButonu tur="erisim" hastaId={hid} />
+                  <EnabizButonu tur="mesaj" hastaId={hid}
+                                onMesaj={() => setEnabizMesaj({
+                                  hastaId: hid,
+                                  hastaAdi: String(d.unvan ?? d.ad ?? ''),
+                                  belgeId: null })} />
+                </>
+              );
+            }
+          : kartId !== 'yeni'
                    && (tanim.kaynak === 'muayene' || tanim.kaynak === 'goz-muayene')
           ? (d) => {
               const satir = {
@@ -331,6 +410,22 @@ export function ListeKarti({
                   {dugme('muayene.al', '▶ Muayeneye Al')}
                   {dugme('muayene.istem', '🧪 İstem Aç')}
                   {dugme('muayene.sablon', '📋 Şablon Uygula')}
+                  {/* e-NABIZ MESAJI (877, KTS H7): hekim ekranından hastanın
+                      e-Nabız profiline düz metin bilgilendirme. Aksiyon
+                      kataloğuna girmiyor - liste satırında değil, KART
+                      bağlamında anlamlı (hangi hasta, hangi başvuru). */}
+                  {/* e-NABIZ DÜĞMELERİ (KTS H8): görünüm, konum ve ipucu
+                      TEK BİLEŞENDE (`EnabizButonu`) - denetim "standarda
+                      uygun mu" diye sorduğunda cevap iki ekranda aynı
+                      olmalı. Erişim akışı (878) ve mesaj penceresi (877)
+                      değişmedi, yalnız düğme ortaklaştı. */}
+                  <EnabizButonu key="enabiz.erisim" tur="erisim"
+                                hastaId={satir.hastaId} muayeneId={satir.muayeneId || null} />
+                  <EnabizButonu key="enabiz.mesaj" tur="mesaj" hastaId={satir.hastaId}
+                                belgeId={Number(d.belgeId ?? 0) || null}
+                                onMesaj={() => setEnabizMesaj({
+                                  hastaId: satir.hastaId, hastaAdi: satir.hastaAdi,
+                                  belgeId: Number(d.belgeId ?? 0) || null })} />
                   {dugme('muayene.tamamla', '✓ Tamamla')}
                 </>
               ) : (
@@ -427,5 +522,6 @@ export function ListeKarti({
           }
         }}
       />
+    </>
   );
 }

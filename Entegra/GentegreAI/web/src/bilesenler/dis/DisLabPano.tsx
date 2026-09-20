@@ -42,6 +42,7 @@ export function DisLabPano({ yenile }: { yenile?: number }) {
   const [suzgec, setSuzgec] = useState<Suzgec>('acik');
   const [gorunum, setGorunum] = useState<Gorunum>('kanban');
   const [ara, setAra] = useState('');
+  const [barkod, setBarkod] = useState('');
   const [secili, setSecili] = useState<number | null>(null);
   const [gecmis, setGecmis] = useState<{ asama: number; zaman: string; kullanici: string; not_: string }[]>([]);
   const [surukle, setSurukle] = useState<number | null>(null);
@@ -77,6 +78,23 @@ export function DisLabPano({ yenile }: { yenile?: number }) {
   };
 
   // ---- aşama geçişi
+  // BARKOT OKUTMA (874, KTS D1): etiket okutulunca is emri bulunur ve
+  //   asamasi BIR ADIM ilerler (hedef secilmez - okutan kisi zaten isi elinde
+  //   tutuyor). Okuyucu Enter ile biter; kutu her okutmadan sonra temizlenir
+  //   ki arka arkaya gelen isler tek tek okutulabilsin.
+  const barkodOkut = async () => {
+    const b = barkod.trim();
+    if (!b) return;
+    await guvenli(async () => {
+      const y = await api.disLabBarkodOkut({ barkod: b });
+      setBarkod('');
+      const ad = ASAMA[y.asama]?.[0] ?? String(y.asama);
+      mesaj(y.isemri ? `${y.isemri.isemriNo} · ${y.isemri.hasta} → ${ad}` : `Aşama: ${ad}`);
+      if (y.isemri) setSecili(y.isemri.id);
+      await yukle();
+    });
+  };
+
   const asamaYap = async (k: Kart, asama: number, notIste = false) => {
     if (!yazar) return;
     if (k.asama === asama) return;
@@ -152,6 +170,11 @@ export function DisLabPano({ yenile }: { yenile?: number }) {
     <div className="ds-kb-sayfa">
       <div className="ds-arac">
         <input placeholder="🔍 iş emri no · hasta · diş · lab…" value={ara} onChange={e => setAra(e.target.value)} style={{ minWidth: 220 }} />
+        {yazar && <input placeholder="🏷 barkot okut → aşama ilerlet" value={barkod}
+                         onChange={e => setBarkod(e.target.value)}
+                         onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); void barkodOkut() } }}
+                         title={cev('Etiketi okutun; iş emri bulunur ve aşaması bir adım ilerler.')}
+                         style={{ minWidth: 200 }} />}
         {([['acik', `Açık işler (${sayilar.acik})`], ['geciken', `Gecikenler (${sayilar.geciken})`], ['hafta', `Bu hafta beklenen (${sayilar.hafta})`], ['bugun', `Bugün gelen (${sayilar.bugun})`], ['teslim', `Teslim · 30 gün (${sayilar.teslim})`]] as [Suzgec, string][])
           .map(([k, ad]) => <span key={k} className={`cip${suzgec === k ? ' on' : ''}`} onClick={() => setSuzgec(k)}>{ad}</span>)}
         <span className="ds-sp">
@@ -194,6 +217,8 @@ export function DisLabPano({ yenile }: { yenile?: number }) {
                   {(sec.asama === 5 || sec.asama === 6) && <button className="d onay" disabled={!yazar} onClick={() => void asamaYap(sec, 8)}>✔ Teslim et</button>}
                   {sec.asama < 8 && <button className="d" onClick={() => git(`/randevu/yeni?hastaId=${sec.hastaId}&geri=${geriParam}`)}>🗓 Prova / teslim randevusu ver</button>}
                   {sec.asama < 8 && sec.asama !== 9 && <button className="d" disabled={!yazar} onClick={async () => { if (await onay(`${sec.isemriNo} iptal edilsin mi?`)) await asamaYap(sec, 9) }}>{cev('✖ İptal')}</button>}
+                  <button className="d" onClick={() => git(`/dis-lab/etiket?isemri=${sec.id}&geri=${geriParam}`)}
+                          title={cev('Ölçü kabına yapıştırılan barkot etiketi')}>🏷 Barkot etiketi</button>
                   <button className="d" onClick={() => git(`/dis-lab-isemri/${sec.id}?geri=${geriParam}`)}>📄 İş emri kartı</button>
                   {sec.planSatirId && <button className="d" onClick={() => git(`/dis-hasta/${sec.hastaId}`, { state: { geri: konum.pathname } })}>🦷 Hasta kartı</button>}
                 </div>

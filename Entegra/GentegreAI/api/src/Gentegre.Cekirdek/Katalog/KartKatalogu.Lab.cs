@@ -60,6 +60,17 @@ public static partial class KartKatalogu
     private static readonly Dictionary<string, string> LabKayitDurumKodlari = new()
         { ["0"] = "Aktif", ["1"] = "Pasif" };
 
+    // KARAR SINIRI YÖNÜ (896): eşiğin hangi tarafı "hedef".
+    private static readonly Dictionary<string, string> LabKararYonKodlari = new()
+        { ["1"] = "Bu değerin ALTINDA olmalı", ["2"] = "Bu değerin ÜSTÜNDE olmalı" };
+
+    private static readonly Dictionary<string, string> LabCiftOnayKodlari = new()
+        { ["0"] = "Kurum ayarını izle", ["1"] = "Teknik onay zorunlu",
+          ["2"] = "Muaf (tek aşama)" };
+
+    private static readonly Dictionary<string, string> LabArsivKonumTuru = new()
+        { ["1"] = "Ünite (dolap / derin dondurucu)", ["2"] = "Raf", ["3"] = "Kutu" };
+
     private static readonly Dictionary<string, string> LabCinsiyetKodlari = new()
         { ["0"] = "Farketmez", ["1"] = "Erkek", ["2"] = "Kadın" };
 
@@ -138,6 +149,22 @@ public static partial class KartKatalogu
                 Baslik: "Ölçülebilir Alt Sınır", Grup: "Genel", AltGrup: "Sonuç ve Birim"),
             new("olculebilirUst", "olculebilir_ust", "sayi",
                 Baslik: "Ölçülebilir Üst Sınır", Grup: "Genel", AltGrup: "Sonuç ve Birim"),
+            // SONUÇ DOĞRULAMA (893, KTS L1). ÜÇ SINIR KARIŞTIRILMAMALI:
+            //   panik = gerçek ama hayati değer (bildirilir), ölçülebilir =
+            //   cihazın aralığı (dışı UYARI), mantık = fizyolojik olarak
+            //   imkânsız (ENGEL - bu bir ölçüm değil, yazım hatasıdır).
+            new("mantikAlt", "mantik_alt", "sayi",
+                Baslik: "İmkânsız Alt Sınır (engel)", Grup: "Genel",
+                AltGrup: "Sonuç ve Birim"),
+            new("mantikUst", "mantik_ust", "sayi",
+                Baslik: "İmkânsız Üst Sınır (engel)", Grup: "Genel",
+                AltGrup: "Sonuç ve Birim"),
+            // Metin/seçenek tetkiklerde kabul edilen değerler; boş = serbest.
+            new("degerDeseni", "deger_deseni", "metin", EnFazlaUzunluk: 200,
+                Baslik: "Kabul Edilen Değerler (^(Negatif|Pozitif)$)", Grup: "Genel",
+                AltGrup: "Sonuç ve Birim"),
+            new("bosSonucEngel", "bos_sonuc_engel", "mantik",
+                Baslik: "Boş sonuç girilemesin", Grup: "Genel", AltGrup: "Sonuç ve Birim"),
             new("loinc", "loinc", "metin", EnFazlaUzunluk: 12,
                 Baslik: "LOINC", Grup: "Genel", AltGrup: "Tanım"),
             new("skrsTetkikKod", "skrs_tetkik_kod", "metin", EnFazlaUzunluk: 20,
@@ -159,6 +186,12 @@ public static partial class KartKatalogu
                 Baslik: "Delta Geçerlilik (gün)", Grup: "Genel", AltGrup: "Süre ve Onay"),
             new("otoOnay", "oto_onay", "mantik",
                 Baslik: "Oto Onay (temiz sonuçta)", Grup: "Genel", AltGrup: "Süre ve Onay"),
+            // İKİ SEVİYELİ ONAY (895, KTS L4): kurum ayarı genel kuraldır,
+            //   tetkik onu ezebilir - kan grubu/patoloji ile idrar pH aynı
+            //   özeni gerektirmiyor. Zorunluysa OTO-ONAY DA DEVRE DIŞI
+            //   kalır: oto-onay tek aşamalı yayındır.
+            new("ciftOnay", "cift_onay", "kod", SabitKodlar: LabCiftOnayKodlari,
+                Baslik: "İki Seviyeli Onay", Grup: "Genel", AltGrup: "Süre ve Onay"),
             new("varsayilanCihazId", "varsayilan_cihaz_id", "kod",
                 KodTablosu: "public.v_cihaz_lookup",
                 Baslik: "Varsayılan Cihaz", Grup: "Genel", AltGrup: "Süre ve Onay"),
@@ -222,8 +255,69 @@ public static partial class KartKatalogu
                 new("panikUst", "panik_ust", "sayi", Baslik: "Panik Üst"),
                 new("kaynak", "kaynak", "metin", EnFazlaUzunluk: 100, Baslik: "Kaynak"),
                 new("gecerliBas", "gecerli_bas", "tarih", Baslik: "Geçerlilik"),
+                // CİHAZ / YÖNTEM (888, KTS L3): aynı tetkikin aralığı ölçüm
+                //   yöntemine göre değişir. BOŞ = tüm cihazlar; dolu satır
+                //   genel satırı ezer, çünkü yöntem farkı yaş bandından daha
+                //   belirleyicidir. İki cihazlı laboratuvar tek aralık
+                //   kullanırsa bir cihazın sonuçları sistematik yanlış
+                //   bayraklanır.
+                new("cihazId", "cihaz_id", "kod", KodTablosu: "public.v_cihaz_lookup",
+                    Baslik: "Cihaz (boş = tümü)"),
+                new("yontem", "yontem", "metin", EnFazlaUzunluk: 60,
+                    Baslik: "Yöntem / Kit"),
             }, SubeKolonu: null, Sirala: "cinsiyet, yas_alt_gun, id",
                Baslik: "Referans Aralıkları", LogTabloId: 1011),
+
+            // KLİNİK KARAR SINIRLARI (896, KTS L15).
+            //   REFERANS ARALIĞI DEĞİLDİR: referans sağlıklı popülasyonun
+            //   dağılımı, karar sınırı kılavuzun eşiğidir. LDL 115 mg/dL
+            //   referans aralığında "normal" görünür ama hedefin üstündedir;
+            //   ikisi ayrı satırlarda tanımlanır ve rapor ikisini de yazar.
+            new("kararSinirlari", "public.lab_karar_siniri", "tetkik_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 80,
+                    Baslik: "Sınır Adı"),
+                new("yon", "yon", "kod", Zorunlu: true, SabitKodlar: LabKararYonKodlari,
+                    Baslik: "Yön"),
+                new("deger", "deger", "sayi", Zorunlu: true, Baslik: "Eşik"),
+                new("cinsiyet", "cinsiyet", "kod", SabitKodlar: LabCinsiyetKodlari,
+                    Baslik: "Cinsiyet"),
+                new("yasAltGun", "yas_alt_gun", "sayi", Baslik: "Yaş Alt (gün)"),
+                new("yasUstGun", "yas_ust_gun", "sayi", Baslik: "Yaş Üst (gün)"),
+                new("dayanak", "dayanak", "metin", EnFazlaUzunluk: 120,
+                    Baslik: "Dayanak (kılavuz)"),
+                new("mesaj", "mesaj", "metin", EnFazlaUzunluk: 200,
+                    Baslik: "Özel Metin (boşsa üretilir)"),
+                new("sira", "sira", "sayi", Baslik: "Sıra"),
+                new("aktif", "aktif", "mantik", Baslik: "Aktif"),
+            }, SubeKolonu: null, Sirala: "sira, id",
+               Baslik: "Klinik Karar Sınırları", LogTabloId: 1033),
+
+            // TEST SEVİYESİNDE YETKİ KISITI (889, KTS L7).
+            //   Yetki modül seviyesindeydi: `lab.sonuc` yetkisi olan herkes
+            //   HER tetkiki isteyip görebiliyordu. HIV, adli toksikoloji,
+            //   genetik gibi testlerde sonucu görmesi gereken kişi ile
+            //   laboratuvarın tamamını gören kişi aynı değildir.
+            //
+            //   SATIR YOKSA TETKİK HERKESE AÇIK. Bir satır eklendiği anda
+            //   tetkik KAPANIR ve yalnız listelenen roller kalır - "kısıt
+            //   tanımlanana kadar her şey kapalı" kurulu sistemi durdururdu.
+            //   Üç işlem ayrı: bir rol testi isteyebilir ama sonucunu
+            //   göremeyebilir (isteyen hekim ile yorumlayan uzman ayrı).
+            new("kisitlar", "public.lab_tetkik_kisit", "tetkik_id", new KartAlani[]
+            {
+                new("id", "id", "sayi", Yazilabilir: false),
+                new("rolId", "rol_id", "kod", Zorunlu: true,
+                    KodTablosu: "public.v_rol_lookup", Baslik: "Rol"),
+                new("iste", "iste", "mantik", Baslik: "İsteyebilir"),
+                new("gor", "gor", "mantik", Baslik: "Sonucu Görebilir"),
+                new("onayla", "onayla", "mantik", Baslik: "Onaylayabilir"),
+                new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
+                    Baslik: "Açıklama"),
+                new("aktif", "aktif", "mantik", Baslik: "Aktif"),
+            }, SubeKolonu: null, Sirala: "rol_id, id",
+               Baslik: "Yetki Kısıtları", LogTabloId: 1032),
 
             // KÜLTÜR TETKİĞİNİN VARSAYILAN BESİYERİ SETİ (436): ekim
             //   açılırken buradan kopyalanır. Kopyalanır çünkü katalog
@@ -386,6 +480,196 @@ public static partial class KartKatalogu
             new("kapali",      "kapali",       "mantik", Baslik: "İsteme kapalı", Grup: "Tesis"),
             new("aciklama",    "aciklama",     "metin", EnFazlaUzunluk: 600, Baslik: "Not", Grup: "Tesis"),
             new("kaynakSurum", "kaynak_surum", "metin", EnFazlaUzunluk: 40, Baslik: "Kaynak sürümü", Grup: "Tesis", Yazilabilir: false),
+        });
+
+    /// <summary>
+    /// BZBH HASTALIK kartı (882). ICD öneki benzersiz: aynı önek iki kez
+    /// tanımlanırsa hangi kuralın geçerli olduğu belirsizleşirdi.
+    /// </summary>
+    private static KartTanimi BzbhHastalikKarti() => new(
+        Ad: "bzbh-hastalik",
+        YetkiKodu: "bzbh.hastalik",
+        Tablo: "public.bzbh_hastalik",
+        LogTabloId: 1354,
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["grup"] = (short)1, ["sureSaat"] = (short)24, ["dogrulandi"] = (short)1,
+            ["aktif"] = (short)1,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id",        "id",        "sayi",  Yazilabilir: false),
+            new("ad",        "ad",        "metin", Zorunlu: true, EnFazlaUzunluk: 120,
+                Baslik: "Hastalık", Grup: "Tanım"),
+            new("icdOnek",   "icd_onek",  "metin", Zorunlu: true, EnFazlaUzunluk: 10,
+                Baslik: "ICD-10 öneki (A15 → tüm alt kodlar)", Grup: "Tanım"),
+            new("grup",      "grup",      "kod",
+                SabitKodlar: new Dictionary<string, string>
+                {
+                    ["1"] = "Grup A - ivedi bildirim", ["2"] = "Grup B",
+                    ["3"] = "Grup C", ["4"] = "Grup D - laboratuvar bildirimi",
+                },
+                Baslik: "Bildirim grubu", Grup: "Tanım"),
+            new("sureSaat",  "sure_saat", "sayi",  Baslik: "Bildirim süresi (saat)", Grup: "Tanım"),
+            new("dogrulandi","dogrulandi","mantik",
+                Baslik: "Bakanlık tebliğine göre doğrulandı", Grup: "Tanım"),
+            new("aktif",     "aktif",     "mantik", Baslik: "Aktif", Grup: "Tanım"),
+            new("aciklama",  "aciklama",  "metin", EnFazlaUzunluk: 300,
+                Baslik: "Açıklama", Grup: "Tanım"),
+        });
+
+    /// <summary>
+    /// NUMUNE RET KRİTERİ kartı (879, KTS L6): laboratuvar kendi kabul/ret
+    /// ölçütlerini tanımlar. KOD DEĞİŞTİRİLEBİLİR DEĞİL - geçmiş numunelerin
+    /// ret sebebi o koda bağlı; kodu değiştirmek eski kayıtların anlamını
+    /// sessizce değiştirirdi.
+    /// </summary>
+    private static KartTanimi LabRetNedeniKarti() => new(
+        Ad: "lab-ret-nedeni",
+        YetkiKodu: "lab.ret_nedeni",
+        Tablo: "public.lab_ret_nedeni",
+        LogTabloId: 1353,
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["kabuldeSecilebilir"] = (short)0, ["hastaBilgilendir"] = (short)0,
+            ["aktif"] = (short)1, ["sira"] = 0,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id",       "id",       "sayi",  Yazilabilir: false),
+            new("kod",      "kod",      "sayi",  Zorunlu: true, Baslik: "Kod", Grup: "Kriter"),
+            new("ad",       "ad",       "metin", Zorunlu: true, EnFazlaUzunluk: 80,
+                Baslik: "Ret kriteri", Grup: "Kriter"),
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300,
+                Baslik: "Açıklama", Grup: "Kriter"),
+            new("sira",     "sira",     "sayi",  Baslik: "Sıra", Grup: "Kriter"),
+            new("aktif",    "aktif",    "mantik", Baslik: "Aktif", Grup: "Kriter"),
+            new("kabuldeSecilebilir", "kabulde_secilebilir", "mantik",
+                Baslik: "Numune kabul edilirken de seçilebilir", Grup: "Davranış"),
+            new("hastaBilgilendir", "hasta_bilgilendir", "mantik",
+                Baslik: "Bu nedenle reddedilince hastaya e-Nabız mesajı yaz", Grup: "Davranış"),
+            new("mesajSablonu", "mesaj_sablonu", "metin", EnFazlaUzunluk: 300,
+                Baslik: "Mesaj metni (boşsa genel metin kullanılır)", Grup: "Davranış"),
+        });
+
+    /// <summary>
+    /// ARŞİV KONUMU kartı (890, KTS L13): ünite > raf > kutu.
+    ///
+    /// Izgara (satır × sütun) YALNIZ KUTUDA anlamlı - `ck_lab_arsiv_konum_izgara`
+    /// bunu veritabanında da tutuyor: gözü olmayan "kutu" tanımlanamaz, çünkü
+    /// içine tüp yerleştirilemez.
+    /// </summary>
+    private static KartTanimi LabArsivKonumKarti() => new(
+        Ad: "lab-arsiv-konum",
+        YetkiKodu: "lab.arsiv_konum",
+        Tablo: "public.lab_arsiv_konum",
+        LogTabloId: 1355,
+        SubeKolonu: "sube_id",
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["tur"] = (short)3, ["satir"] = 9, ["sutun"] = 9, ["aktif"] = (short)1,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id",  "id",  "sayi", Yazilabilir: false),
+            new("kod", "kod", "metin", Zorunlu: true, EnFazlaUzunluk: 20,
+                Baslik: "Kod", Grup: "Konum"),
+            new("ad",  "ad",  "metin", Zorunlu: true, EnFazlaUzunluk: 80,
+                Baslik: "Ad", Grup: "Konum"),
+            new("tur", "tur", "kod", Zorunlu: true, SabitKodlar: LabArsivKonumTuru,
+                Baslik: "Tür", Grup: "Konum"),
+            new("ustId", "ust_id", "kod", KodTablosu: "public.v_lab_arsiv_konum_lookup",
+                Baslik: "Bağlı olduğu konum", Grup: "Konum"),
+            new("sicaklik", "sicaklik", "sayi", Baslik: "Hedef sıcaklık (°C)",
+                Grup: "Konum"),
+            new("satir", "satir", "sayi", Baslik: "Izgara satır sayısı (kutu)",
+                Grup: "Izgara"),
+            new("sutun", "sutun", "sayi", Baslik: "Izgara sütun sayısı (kutu)",
+                Grup: "Izgara"),
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
+                Baslik: "Açıklama", Grup: "Konum"),
+            new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Konum"),
+        });
+
+    /// <summary>
+    /// SAKLAMA SÜRESİ kartı (890): tetkike özel kural genel kuralı ezer.
+    ///
+    /// Süre boş bırakılamaz ama POLİTİKA HİÇ TANIMLANMAYABİLİR - o zaman
+    /// numuneye imha hedefi yazılmaz. Uydurulmuş bir süre, saklanması gereken
+    /// numuneyi erken imha ettirirdi.
+    /// </summary>
+    private static KartTanimi LabSaklamaPolitikaKarti() => new(
+        Ad: "lab-saklama-politika",
+        YetkiKodu: "lab.saklama_politika",
+        Tablo: "public.lab_saklama_politika",
+        LogTabloId: 1356,
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["gun"] = 7, ["aktif"] = (short)1,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("tetkikId", "tetkik_id", "kod", KodTablosu: "public.v_lab_tetkik_lookup",
+                Baslik: "Tetkik (boş = tümü)", Grup: "Kapsam"),
+            new("numuneTipi", "numune_tipi", "sayi",
+                Baslik: "Numune tipi (boş = tümü)", Grup: "Kapsam"),
+            new("gun", "gun", "sayi", Zorunlu: true, Baslik: "Saklama süresi (gün)",
+                Grup: "Süre"),
+            new("sicaklik", "sicaklik", "sayi", Baslik: "Saklama sıcaklığı (°C)",
+                Grup: "Süre"),
+            new("dayanak", "dayanak", "metin", EnFazlaUzunluk: 120,
+                Baslik: "Dayanak (SKS/ISO maddesi, kurum kararı)", Grup: "Süre"),
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 200,
+                Baslik: "Açıklama", Grup: "Süre"),
+            new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Süre"),
+        });
+
+    /// <summary>
+    /// AŞI KARTI (898, KTS H10): katalog tanımı.
+    ///
+    /// <b>SKRS kodu olmadan aşı e-Nabız'a gönderilemez</b> - alan zorunlu
+    /// değil (kurum önce kendi listesini kurar), ama uygulama ekranı ve
+    /// `v_asi_skrs_eksik` görünümü eksiği söyler. Kodu uydurmak, Bakanlığın
+    /// listesiyle uyuşmayan ikinci bir liste üretirdi.
+    /// </summary>
+    private static KartTanimi AsiKarti() => new(
+        Ad: "asi",
+        YetkiKodu: "asi.katalog",
+        Tablo: "public.asi",
+        LogTabloId: 1357,
+        SubeKolonu: null,
+        YeniKayitVarsayilanlari: new Dictionary<string, object?>
+        {
+            ["dozSayisi"] = 1, ["aktif"] = (short)1, ["sira"] = 0,
+        },
+        Alanlar: new KartAlani[]
+        {
+            new("id", "id", "sayi", Yazilabilir: false),
+            new("kod", "kod", "metin", Zorunlu: true, EnFazlaUzunluk: 20,
+                Baslik: "Kod", Grup: "Tanım"),
+            new("ad", "ad", "metin", Zorunlu: true, EnFazlaUzunluk: 160,
+                Baslik: "Aşı Adı", Grup: "Tanım"),
+            new("skrsKod", "skrs_kod", "metin", EnFazlaUzunluk: 20,
+                Baslik: "SKRS Kodu (e-Nabız için zorunlu)", Grup: "Tanım"),
+            // 0 = tek doz ya da şemasız (seyahat aşısı, kuduz profilaksisi
+            //   kendi akışında yürür).
+            new("dozSayisi", "doz_sayisi", "sayi",
+                Baslik: "Şemadaki Doz Sayısı (0 = şemasız)", Grup: "Tanım"),
+            new("uygulamaSekli", "uygulama_sekli", "sayi",
+                Baslik: "Varsayılan Uygulama Şekli (SKRS)", Grup: "Uygulama"),
+            new("uygulamaYeri", "uygulama_yeri", "sayi",
+                Baslik: "Varsayılan Uygulama Yeri (SKRS)", Grup: "Uygulama"),
+            new("stokId", "stok_id", "kod", KodTablosu: "public.v_stok_lookup",
+                AramaKaynagi: "stok", Baslik: "Stok Kartı (lot/karekod)",
+                Grup: "Uygulama"),
+            new("aciklama", "aciklama", "metin", EnFazlaUzunluk: 300,
+                Baslik: "Açıklama", Grup: "Tanım"),
+            new("sira", "sira", "sayi", Baslik: "Sıra", Grup: "Tanım"),
+            new("aktif", "aktif", "mantik", Baslik: "Aktif", Grup: "Tanım"),
         });
 
     /// <summary>REFLEKS TEST KURALI kartı (873 §6).</summary>

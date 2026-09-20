@@ -77,6 +77,11 @@ export function LabRaporCikti() {
   const [veri, setVeri] = useState<{
     istem: Satir; sonuclar: Satir[]; kulturler: Satir[]; izolatlar: Satir[];
     antibiyogram: Satir[]; vakalar: Satir[]; varyantlar: Satir[]; kurum: Satir | null;
+    // TEST SEVİYESİNDE YETKİ (889): yetkim olmadığı için basılmayan satır sayısı.
+    gizlenen?: number;
+    // GRAFİK TİPLİ SONUÇ (892, KTS L10): raporda gösterilmesi işaretlenmiş
+    //   eğriler (elektroforez, kromatogram, jel).
+    grafikler?: Satir[];
   } | null>(null);
   const [hata, setHata] = useState<string | null>(null);
 
@@ -249,6 +254,16 @@ export function LabRaporCikti() {
                         {/* Bayrak yoksa "referans tanımlı değil" yazılır:
                             boş hücre "normal" gibi okunurdu. */}
                         {BAYRAK[bayrak] ?? (ref ? '—' : 'Referans tanımlı değil')}
+                        {/* KARAR SINIRI (896, KTS L15): referans aralığında
+                            olan bir değer bile hedefin dışında olabilir -
+                            LDL 115 mg/dL "normal" görünür ama hedefin
+                            üstündedir. Bayrağın YANINDA yazılır, yerine
+                            değil. */}
+                        {String(s.kararNotu ?? '').trim() !== '' && (
+                          <div className="not karar-siniri">
+                            ⚑ {String(s.kararNotu)}
+                          </div>
+                        )}
                         {Number(s.deltaUyari ?? 0) === 1 && (
                           <div className="not">
                             Delta uyarısı · önceki {sayiMetni(s.deltaOnceki)}
@@ -541,6 +556,42 @@ export function LabRaporCikti() {
           );
         })}
 
+        {/* GRAFİK TİPLİ SONUÇLAR (892, KTS L10): protein elektroforezinde
+            asıl bulgu eğrinin BİÇİMİDİR; sayıyı basıp eğriyi basmamak,
+            raporu eksik bırakırdı. Yalnız "raporda" işaretli olanlar gelir -
+            ham kalibrasyon eğrisi laboratuvarın iç kaydıdır. */}
+        {(veri.grafikler ?? []).length > 0 && (
+          <div className="blok">
+            <div className="blok-baslik">{c('Grafik Sonuçlar')}</div>
+            {(veri.grafikler ?? []).map((g, n) => (
+              <div key={n} style={{ marginTop: 8 }}>
+                <div className="alt-baslik">
+                  {String(g.tetkik ?? '')}
+                  {String(g.baslik ?? '').trim() !== '' ? ` — ${String(g.baslik)}` : ''}
+                  {String(g.cihaz ?? '').trim() !== ''
+                    ? <span className="not"> · {String(g.cihaz)}</span> : null}
+                </div>
+                {g.dokumanId
+                  ? <RaporGrafigi dokumanId={Number(g.dokumanId)}
+                                  contentType={String(g.contentType ?? '')} />
+                  : <RaporSerisi seri={String(g.seri ?? '')} />}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* YETKİ KISITI (889, KTS L7): rapor eksik basılıyorsa bunu SÖYLEMEK
+            zorunda - hekim, görmediği bir satırın hiç istenmediğini
+            sanmamalı. Hangi tetkik olduğu yazılmaz: adı da kısıtın
+            konusudur. */}
+        {Number(veri.gizlenen ?? 0) > 0 && (
+          <p className="not" style={{ marginTop: 8 }}>
+            Bu raporda <b>{String(veri.gizlenen)}</b> tetkik yetki kısıtı nedeniyle
+            gösterilmiyor; görmeye yetkili kullanıcıdan ya da laboratuvardan
+            isteyin.
+          </p>
+        )}
+
         {/* --- İMZA --- */}
         <div className="imza">
           <div className="imzak">
@@ -574,5 +625,52 @@ export function LabRaporCikti() {
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * RAPORDAKİ GÖRÜNTÜ (892). Doküman içeriği Authorization ister; <img src>
+ * başlık taşıyamadığı için blob URL üretilir ve bileşen sökülünce geri
+ * verilir. Görüntü açılamazsa rapor DÜŞMEZ - eksik eğri, basılamayan
+ * rapordan iyidir.
+ */
+function RaporGrafigi({ dokumanId, contentType }: { dokumanId: number; contentType: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let adres = '';
+    void (async () => {
+      try { adres = await api.labGrafikUrl(dokumanId); setUrl(adres) } catch { /* yok say */ }
+    })();
+    return () => { if (adres) URL.revokeObjectURL(adres) };
+  }, [dokumanId]);
+
+  if (!contentType.startsWith('image/')) {
+    return <div className="not">{c('Grafik ekte:')} {contentType}</div>;
+  }
+  return url
+    ? <img src={url} alt="grafik" style={{ maxWidth: '100%', display: 'block' }} />
+    : <div className="not">{c('Grafik yükleniyor…')}</div>;
+}
+
+/** RAPORDAKİ SERİ (892): noktalar rapora da ÇİZİLİR, resme çevrilmez. */
+function RaporSerisi({ seri }: { seri: string }) {
+  let y: number[] = [];
+  try {
+    const o = JSON.parse(seri) as { y?: number[] };
+    y = Array.isArray(o.y) ? o.y.map(Number).filter(v => !Number.isNaN(v)) : [];
+  } catch { y = [] }
+  if (y.length === 0) return <div className="not">{c('Eğri verisi okunamadı.')}</div>;
+
+  const enAz = Math.min(...y), enCok = Math.max(...y), ara = enCok - enAz || 1;
+  const d = y.map((v, i) =>
+    `${i === 0 ? 'M' : 'L'}${((i / (y.length - 1 || 1)) * 100).toFixed(2)},`
+    + `${(100 - ((v - enAz) / ara) * 100).toFixed(2)}`).join(' ');
+
+  return (
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none"
+         style={{ width: '100%', height: 140 }}>
+      <path d={d} fill="none" stroke="#333" strokeWidth="0.6"
+            vectorEffect="non-scaling-stroke" />
+    </svg>
   );
 }

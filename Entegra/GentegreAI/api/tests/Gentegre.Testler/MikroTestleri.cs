@@ -1,4 +1,4 @@
-using Gentegre.Veri;
+﻿using Gentegre.Veri;
 
 namespace Gentegre.Testler;
 
@@ -293,5 +293,114 @@ public class MikroTestleri : IClassFixture<VeritabaniOlgusu>
                 "select public.fn_lab_kultur_ozet(@p0)", [kulturId]));
         }
         finally { await TemizleAsync(veri, hastaId, istemId, kulturId); }
+    }
+
+    /// <summary>Kod ile antibiyotik id'si - organizma kurallari icin.</summary>
+    private static Task<int> AntibiyotikAsync(VeriKaynagi veri, string kod) =>
+        veri.TekDegerAsync<int>(
+            "select id from public.lab_antibiyotik where upper(kod) = @p0", [kod]);
+
+    private static Task<int> OrganizmaAsync(VeriKaynagi veri) =>
+        veri.TekDegerAsync<int>(
+            "select id from public.lab_organizma where kod = 'ECOLI'", null);
+
+    /// <summary>Satirin bildirim durumu + KISIT GEREKCESI (887).</summary>
+    private static async Task<Dictionary<string, (bool Bildir, string Neden)>>
+        GerekceAsync(VeriKaynagi veri, int uremeId)
+    {
+        await veri.CalistirAsync("select public.fn_lab_antibiyogram_bildirim(@p0)",
+                                 [uremeId]);
+        var satirlar = await veri.ListeAsync("""
+            select a.kod, g.bildir, g.kisit_neden from public.lab_antibiyogram g
+              join public.lab_antibiyotik a on a.id = g.antibiyotik_id
+             where g.ureme_id = @p0
+            """, [uremeId],
+            o => (Kod: o.GetString(0), Bildir: o.GetInt16(1) == 1, Neden: o.GetString(2)));
+        return satirlar.ToDictionary(x => x.Kod, x => (x.Bildir, x.Neden),
+                                     StringComparer.Ordinal);
+    }
+
+    [Fact]
+    public async Task Dogal_direncli_ajan_BASKA_SECENEK_YOKKEN_BILE_raporlanmaz()
+    {
+        if (!_olgu.Baglandi(nameof(Dogal_direncli_ajan_BASKA_SECENEK_YOKKEN_BILE_raporlanmaz)))
+            return;
+        var veri = _olgu.Gerekli();
+
+        // DOGAL (INTRINSIK) DIRENC kademeli bildirimin USTUNDEDIR: rapordaki
+        //   "R" bile klinisyene o ilacin denenebilir oldugunu dusundurur, ve
+        //   ajan hic etkili olmayacagi icin "baska secenek yok" gerekcesi de
+        //   onu acmamalidir - olmayan bir tedaviyi onermek olurdu.
+        //   509 bu kurali TANIMLIYORDU ama hicbir yer okumuyordu (887).
+        var (hastaId, istemId, _, _, kulturId, uremeId) = await KurAsync(veri, 4);
+        var organizmaId = await OrganizmaAsync(veri);
+        var ampId = await AntibiyotikAsync(veri, "AMP");
+        try
+        {
+            await veri.CalistirAsync("""
+                insert into public.lab_organizma_direnc (organizma_id, antibiyotik_id, sebep)
+                values (@p0, @p1, 'Test - dogal direnc')
+                on conflict (organizma_id, antibiyotik_id) do nothing
+                """, [organizmaId, ampId]);
+
+            // TEK duyarli ajan dogal direncli olan: kademeli mantik onu
+            //   "son secenek" diye acmaya calisirdi.
+            await AntibiyogramAsync(veri, uremeId, ("AMP", "S"), ("MEM", "S"));
+            var b = await GerekceAsync(veri, uremeId);
+
+            Assert.False(b["AMP"].Bildir);
+            Assert.Equal("Test - dogal direnc", b["AMP"].Neden);
+            // Dogal direncli ajan "secenek" sayilmadigi icin karbapenem ACILIR.
+            Assert.True(b["MEM"].Bildir);
+            Assert.Equal("", b["MEM"].Neden);
+        }
+        finally
+        {
+            await veri.CalistirAsync("""
+                delete from public.lab_organizma_direnc
+                 where organizma_id = @p0 and antibiyotik_id = @p1
+                """, [organizmaId, ampId]);
+            await TemizleAsync(veri, hastaId, istemId, kulturId);
+        }
+    }
+
+    [Fact]
+    public async Task Organizmaya_ozel_panel_GENEL_BASAMAGI_ezer()
+    {
+        if (!_olgu.Baglandi(nameof(Organizmaya_ozel_panel_GENEL_BASAMAGI_ezer))) return;
+        var veri = _olgu.Gerekli();
+
+        // Laboratuvar "bu organizmada bu ajani ust basamaga al" diyebilmeli
+        //   (509 lab_organizma_panel). Kural tanimliydi ama bildirim motoru
+        //   genel lab_antibiyotik.basamak ile karar veriyordu (887).
+        var (hastaId, istemId, _, _, kulturId, uremeId) = await KurAsync(veri, 4);
+        var organizmaId = await OrganizmaAsync(veri);
+        var amcId = await AntibiyotikAsync(veri, "AMC");
+        try
+        {
+            await veri.CalistirAsync("""
+                insert into public.lab_organizma_panel (organizma_id, antibiyotik_id,
+                                                        basamak, sira)
+                values (@p0, @p1, 3, 50)
+                on conflict (organizma_id, antibiyotik_id) do update set basamak = 3
+                """, [organizmaId, amcId]);
+
+            // AMC genel katalogda 1. basamak; panel onu 3. basamaga alir.
+            //   NIT (1. basamak) duyarli oldugu icin AMC artik GIZLENIR.
+            await AntibiyogramAsync(veri, uremeId, ("AMC", "S"), ("NIT", "S"));
+            var b = await GerekceAsync(veri, uremeId);
+
+            Assert.True(b["NIT"].Bildir);
+            Assert.False(b["AMC"].Bildir);
+            Assert.Equal("Alt basamakta duyarlı seçenek var", b["AMC"].Neden);
+        }
+        finally
+        {
+            await veri.CalistirAsync("""
+                delete from public.lab_organizma_panel
+                 where organizma_id = @p0 and antibiyotik_id = @p1
+                """, [organizmaId, amcId]);
+            await TemizleAsync(veri, hastaId, istemId, kulturId);
+        }
     }
 }

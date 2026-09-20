@@ -1,4 +1,6 @@
 import { Fragment, useState } from 'react';
+import { LabSonucGecmisi } from '../LabSonucGecmisi';
+import { LabGrafikleri } from '../LabGrafikleri';
 import { useNavigate } from 'react-router-dom';
 import { tarihSaat } from '../../bicim';
 import {
@@ -32,6 +34,10 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
    * acmasin.
    */
   const [acikPaneller, setAcikPaneller] = useState<Set<number>>(new Set());
+  // GECMIS PENCERESI (886, KTS L9): hangi satirin gecmisi aciliyor.
+  const [gecmis, setGecmis] = useState<{ satirId: number; ad: string } | null>(null);
+  // GRAFİK PENCERESİ (892, KTS L10): elektroforez eğrisi, kromatogram, jel.
+  const [grafik, setGrafik] = useState<{ satirId: number; ad: string } | null>(null);
   const panelAc = (id: number) => setAcikPaneller(o => {
     const y = new Set(o);
     if (y.has(id)) y.delete(id); else y.add(id);
@@ -158,6 +164,40 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
                           <td className="orta not">
                             {s.olcumZamani ? tarihSaat(s.olcumZamani) : '—'}
                           </td>
+                          {/* GEÇMİŞ VE TEKRARLAR (886, KTS L9): onaylayan
+                              uzman "bu tetkik daha önce kaçtı" sorusunu
+                              satırın yanından sorabilmeli - daha önce başka
+                              ekrana gidip aramak gerekiyordu. Düğme yalnız
+                              SONUÇLANMIŞ satırda: sonucu olmayan tetkikte
+                              karşılaştıracak bir şey yok. */}
+                          {/* KARAR SINIRI İPUCU (896): sembol satırda,
+                              gerekçe ipucunda - grid dar, ama bilgi
+                              kaybolmamalı. */}
+                          <td className="orta">
+                            {metin(s.kararNotu) && (
+                              <span className="rozet uyari" title={metin(s.kararNotu)}>⚑</span>
+                            )}
+                            {metin(s.deger) ? (
+                              <button type="button" className="d mini"
+                                      title={c('Önceki sonuçlar ve tekrarlar')}
+                                      onClick={() => setGecmis({
+                                        satirId: Number(s.satirId),
+                                        ad: metin(s.ad) })}>
+                                📈
+                              </button>
+                            ) : ''}
+                            {/* GRAFİK TİPLİ SONUÇ (892, KTS L10): eğri her
+                                satırda olmayabilir ama düğme SONUÇTAN
+                                BAĞIMSIZ durur - jel görüntüsü bazen sonuç
+                                girilmeden önce gelir. */}
+                            <button type="button" className="d mini"
+                                    title={c('Grafik sonuçlar (eğri, kromatogram, jel)')}
+                                    onClick={() => setGrafik({
+                                      satirId: Number(s.satirId),
+                                      ad: metin(s.ad) })}>
+                              〰️
+                            </button>
+                          </td>
                           {/* GIRISIN KAYNAGI (kullanici: "sonucu elle
                               degistirdigim / girdigim bilgisi nerede"):
                               cihazdan mi elle mi, kim girdi, kacinci
@@ -225,6 +265,7 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
                       <th>{c('Tüp / Barkod')}</th>
                       <th className="sag">Sonuç</th><th>Birim</th><th>Referans</th>
                       <th className="orta">{c('Bayrak')}</th><th className="orta">Ölçüm</th>
+                      <th className="orta" title={c('Önceki sonuçlar ve tekrarlar')}>📈</th>
                       <th className="orta">Giriş</th>
                     </>
                   ) : (
@@ -542,9 +583,22 @@ export function IstemDetayi({ veri, secili, kaynak, kisim }: {
       </div>
   );
 
-  if (kisim === 'ana') return sol;
-  if (kisim === 'yan') return sag;
-  return <div className="lab-ana-yan">{sol}{sag}</div>;
+  // GEÇMİŞ PENCERESİ (886, KTS L9): satırdaki 📈 düğmesi açar. Bileşen üç
+  //   ayrı kısım olarak çizilebildiği için pencere HER dönüşe eklenir -
+  //   yalnız birleşik görünüme koymak, "ana" kısmında düğmeyi işlevsiz
+  //   bırakırdı.
+  const pencere = (
+    <>
+      {gecmis && <LabSonucGecmisi satirId={gecmis.satirId} baslik={gecmis.ad}
+                                  onKapat={() => setGecmis(null)} />}
+      {grafik && <LabGrafikleri satirId={grafik.satirId} baslik={grafik.ad}
+                                onKapat={() => setGrafik(null)} />}
+    </>
+  );
+
+  if (kisim === 'ana') return <>{sol}{pencere}</>;
+  if (kisim === 'yan') return <>{sag}{pencere}</>;
+  return <div className="lab-ana-yan">{sol}{sag}{pencere}</div>;
 }
 
 /* ---------------------------------------------------------------- kültür --

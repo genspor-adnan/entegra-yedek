@@ -63,11 +63,21 @@ export function KulturDetayi({ veri }: { veri: Kayit }) {
                     {Number(a.kaynak ?? 1) === 2 ? 'disk (manuel)'
                       : Number(a.kaynak ?? 1) === 3 ? 'uzman' : 'cihaz'}
                   </td>
-                  {/* KADEMELİ BİLDİRİM: raporda görünmeyen ajan burada da
-                      işaretli - "niye yazmıyor" sorusu ekranda cevaplanır. */}
+                  {/* KISITLAMA GEREKÇESİ (887): raporda görünmeyen ajanın
+                      YANINDA hangi kuralın gizlediği yazar. "Kademeli" demek
+                      yetmiyordu - uzman, doğal direnç mi, numune uygunluğu mu,
+                      üst basamak mı olduğunu görmeden karar veremez; denetimde
+                      de kısıtlamanın gerekçesi gösterilebilmeli. */}
                   <td className="orta">
-                    {a.bildir ? <span className="rozet olumlu">Evet</span>
-                              : <span className="rozet gri">{c('Kademeli')}</span>}
+                    {a.bildir ? <span className="rozet olumlu">Evet</span> : (
+                      <>
+                        <span className="rozet gri" title={metin(a.kisitNeden)}>
+                          {c('Kısıtlı')}
+                        </span>
+                        {metin(a.kisitNeden) &&
+                          <div className="not">{metin(a.kisitNeden)}</div>}
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}

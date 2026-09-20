@@ -1,4 +1,4 @@
-namespace Gentegre.Cekirdek.Cihaz;
+﻿namespace Gentegre.Cekirdek.Cihaz;
 
 /// <summary>
 /// HL7 v2 SÜRÜCÜSÜ (432) — sonuç mesajı (ORU^R01 / OUL^R22) çözümleyici.
@@ -108,18 +108,81 @@ public sealed class Hl7Surucu : ICihazSurucu
         var kod = kimlik.Length > 0 ? kimlik[0].Trim() : "";
         var ad = kimlik.Length > 1 ? kimlik[1].Trim() : "";
         var deger = Alan(s, 5).Trim();
+        // OBX-2 DEĞER TİPİ (892, KTS L10): NM/ST sayısal-metin, ED gömülü
+        //   veri (elektroforez eğrisi PNG olarak), NA sayı dizisi.
+        var tip = Alan(s, 2).Trim().ToUpperInvariant();
+
+        byte[]? gomulu = null;
+        var gomuluTip = "";
+        IReadOnlyList<decimal>? seri = null;
+
+        if (tip == "ED")
+        {
+            (gomulu, gomuluTip) = EdCoz(deger, bilesen);
+            // HAM BASE64 DEĞER ALANINDA TUTULMAZ: varchar(200)'e sığmaz ve
+            //   ekranda okunacak bir şey değildir - yerine ne geldiği yazılır.
+            deger = gomulu is null ? "" : $"[{gomuluTip}, {gomulu.Length} bayt]";
+        }
+        else if (tip == "NA")
+        {
+            seri = [.. deger.Split(bilesen, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(x => CihazCevrim.Sayi(x))
+                            .Where(x => x is not null).Select(x => x!.Value)];
+            deger = $"[{seri.Count} nokta]";
+        }
 
         return new CihazKalemi(
             Sira: sira,
             TestKodu: kod,
             TestAdi: ad.Length > 0 ? ad : kod,
             Deger: deger,
-            Sayisal: CihazCevrim.Sayi(deger),
+            // ED/NA'da sayısal değer YOKTUR: "[12 nokta]" metnini sayıya
+            //   çevirmeye çalışmak yanlış bir sonuç üretirdi.
+            Sayisal: tip is "ED" or "NA" ? null : CihazCevrim.Sayi(deger),
             Birim: Ilk(Alan(s, 6)),
             Referans: Alan(s, 7).Trim(),
             Isaret: Alan(s, 8).Trim(),
             Durum: Alan(s, 11).Trim(),
-            OlcumZamani: CihazCevrim.Zaman(Alan(s, 14)));
+            OlcumZamani: CihazCevrim.Zaman(Alan(s, 14)),
+            DegerTipi: tip,
+            Gomulu: gomulu,
+            GomuluTip: gomuluTip,
+            Seri: seri);
+    }
+
+    /// <summary>
+    /// OBX-5 ED ALANI: <c>kaynak^tip^altTip^kodlama^veri</c>
+    /// (örnek <c>^image^PNG^Base64^iVBORw0K…</c>).
+    ///
+    /// <para>Yalnız Base64 çözülür; "A" (ASCII) gibi kodlamalar metin
+    /// sonuçtur, gömülü veri değildir. Bozuk base64'te İSTİSNA ATILMAZ -
+    /// tek bir kalem yüzünden bütün mesajın düşmesi, gelen sonuçları da
+    /// kaybettirirdi; kalem metin olarak kalır.</para>
+    /// </summary>
+    private static (byte[]? Veri, string Tip) EdCoz(string alan, char bilesen)
+    {
+        var p = alan.Split(bilesen);
+        if (p.Length < 5) return (null, "");
+
+        var tip = p[1].Trim().ToLowerInvariant();      // image / application
+        var alt = p[2].Trim().ToLowerInvariant();      // PNG / JPEG / PDF
+        var kodlama = p[3].Trim().ToUpperInvariant();
+        if (kodlama != "BASE64") return (null, "");
+
+        try
+        {
+            var veri = Convert.FromBase64String(p[4].Trim());
+            var mime = (tip, alt) switch
+            {
+                ("image", "png") => "image/png",
+                ("image", "jpeg") or ("image", "jpg") => "image/jpeg",
+                ("application", "pdf") => "application/pdf",
+                _ when tip.Length > 0 && alt.Length > 0 => $"{tip}/{alt}",
+                _ => "application/octet-stream",
+            };
+            return (veri, mime);
+        }
+        catch (FormatException) { return (null, ""); }
     }
 
     private static CihazMesaji Bos(string hata)

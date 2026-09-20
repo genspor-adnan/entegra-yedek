@@ -200,4 +200,50 @@ export const disUclari = {
   disLabAsamalar: (id: number) => istek<{ asamalar: { asama: number; zaman: string; kullanici: string; not_: string }[] }>(`/api/dis/lab-isemri/${id}/asamalar`),
   disLabAsama: (id: number, g: { asama?: number; not?: string } = {}) =>
     gonder<{ asama: number }>(`/api/dis/lab-isemri/${id}/asama`, g),
+  /** Barkot okutma (874): etiketten okunan gövde ile aşama ilerletir. */
+  disLabBarkodOkut: (g: { barkod: string; asama?: number; not?: string }) =>
+    gonder<{ asama: number; isemri: { id: number; isemriNo: string; hasta: string; disNolar: string; lab: string; asama: number } | null }>(
+      '/api/dis/lab-barkod/okut', g),
+  /** Protez iş emri barkot etiketi (874). */
+  disLabEtiket: (id: number) =>
+    istek<{ etiket: DisLabEtiketi; kurum: { unvan: string; adres: string; telefon: string } | null }>(
+      `/api/dis/lab-isemri/${id}/etiket`),
+  disLabEtiketBasildi: (id: number) =>
+    gonder<{ etiketBasim: number }>(`/api/dis/lab-isemri/${id}/etiket-basildi`, {}),
+
+  // --------------------------------------------- ortodonti ICON (875) ----
+  disIconListe: (hastaId: number) => istek<{ skorlar: DisIconSkoru[] }>(`/api/dis/hasta/${hastaId}/icon`),
+  disIconTek: (id: number) =>
+    istek<{ skor: DisIconSkoru; kurum: { unvan: string; adres: string; telefon: string } | null }>(`/api/dis/icon/${id}`),
+  /** Canli onizleme: agirliklar SUNUCUDA (fn_dis_icon_toplam) - istemcide tekrarlanmaz. */
+  disIconHesapla: (g: { estetik: number; ustArk: number; capraz: number; dikey: number; bukkal: number }) =>
+    istek<{ toplam: number; tedaviGerekir: boolean; karmasiklik: number | null; karmasiklikAdi: string }>(
+      `/api/dis/icon/hesapla?estetik=${g.estetik}&ustArk=${g.ustArk}&capraz=${g.capraz}&dikey=${g.dikey}&bukkal=${g.bukkal}`),
+  disIconKaydet: (g: {
+    id?: number | null; hastaId: number; tarih?: string; olcumTuru?: number;
+    estetik: number; ustArk: number; capraz: number; dikey: number; bukkal: number;
+    hekimId?: number | null; muayeneId?: number | null; oncesiId?: number | null; not?: string;
+  }) => gonder<{ id: number; skor: DisIconSkoru }>('/api/dis/icon', g),
+  disIconSil: (id: number) => istek<void>(`/api/dis/icon/${id}`, { method: 'DELETE' }),
 };
+
+/** ICON skoru - `v_dis_icon_skor` (875). Turetilmis alanlar sunucudan gelir. */
+export interface DisIconSkoru {
+  id: number; hastaId: number; hasta: string; hekimId: number | null; hekim: string;
+  tarih: string; olcumTuru: number; olcumTuruAdi: string;
+  estetik: number; ustArk: number; capraz: number; dikey: number; bukkal: number;
+  toplam: number; tedaviGerekir: boolean;
+  karmasiklik: number | null; karmasiklikAdi: string;
+  oncesiId: number | null; oncesiToplam: number | null;
+  iyilesme: number | null; iyilesmeAdi: string;
+  not_: string; muayeneId: number | null;
+}
+
+/** Etiket içeriği - `v_dis_lab_isemri_etiket` (874). */
+export interface DisLabEtiketi {
+  id: number; isemriNo: string; hastaId: number; hasta: string;
+  dogumTarihi: string | null; hekim: string; lab: string; isTuru: string;
+  disNolar: string; malzeme: string; renk: string; olcuTipi: string; ekIstek: string;
+  gonderim: string | null; beklenen: string | null;
+  asama: number; asamaAdi: string; etiketBasim: number;
+}

@@ -223,10 +223,42 @@ public static class MuayeneUclari
             //   uretim simdi yapilir, yoksa kapi acildiginda gecmis veri
             //   kaybolurdu. Paket uretimi muayeneyi TAMAMLAMAYI DUSURMEZ:
             //   e-Nabiz bir bildirim yoludur, klinik kaydin sarti degil.
+            // BZBH TASLAGI (882, KTS H5): tanilar bildirimi zorunlu bulasici
+            //   hastalik listesiyle eslesiyorsa BEKLEYEN bildirim satiri acilir.
+            //   Paket burada URETILMEZ - 214'un iki zorunlu alani (vaka tipi,
+            //   belirti baslangici) tanidan cikarilamaz, hekim bildirim
+            //   kartinda girer. Sessizdir: taslak acilamazsa muayene
+            //   tamamlanmasi dusmez.
+            int bzbhTaslak = 0;
+            try
+            {
+                bzbhTaslak = await BzbhUclari.TaslakAcAsync(baglanti, id, baglam.KullaniciId, iptal);
+            }
+            catch (Exception h)
+            {
+                ctx.RequestServices.GetRequiredService<ILoggerFactory>()
+                   .CreateLogger("bzbh").LogError(h, "BZBH taslagi acilamadi (muayene {Id})", id);
+            }
+
             var paketler = new List<object>();
             try
             {
-                foreach (var kod in new[] { "MUAYENE", "HASTA_CIKIS" })
+                // KONSULTASYON MUAYENESI ISE 252 DE URETILIR (880, KTS H2).
+                //   Konsultasyon bizde ust muayeneye bagli bir MUAYENE
+                //   satiridir; tamamlandiginda soru + yanit + tani dolmus
+                //   olur - paketin gonderilebilir hali tam o andir.
+                //   Konsultasyon muayenesi HASTA_CIKIS uretmez: hasta cikisi
+                //   ASIL muayenenin isidir, konsultasyon ayri bir basvuru
+                //   degildir; iki cikis bildirimi gondermek hastanin ayni
+                //   basvurusunu iki kez kapatmak olurdu.
+                var konsMu = await baglanti.TekDegerAsync<int>(
+                    "select count(*)::int from public.muayene "
+                    + " where id = @p0 and ust_muayene_id is not null",
+                    null, [id], iptal) > 0;
+                var kodlar = konsMu
+                    ? new[] { "MUAYENE", "KONSULTASYON" }
+                    : new[] { "MUAYENE", "HASTA_CIKIS" };
+                foreach (var kod in kodlar)
                 {
                     var s = await enabiz.UretAsync(kod, id, baglam.KullaniciId, iptal);
                     if (s is not null)
@@ -257,8 +289,14 @@ public static class MuayeneUclari
                 uyarilar.Add("Hasta kaydi (101) henuz e-Nabiz'a gonderilmemis - "
                            + "muayene ve cikis paketleri takip numarasi gelene kadar "
                            + "kuyrukta bekler.");
+            // BZBH: taslak acildiysa hekim BILSIN. Bildirimi o gondermeyebilir
+            //   (enfeksiyon kontrol birimi gonderir) ama tanisinin bildirimi
+            //   zorunlu bir hastalik oldugunu ogrenmeli.
+            if (bzbhTaslak > 0)
+                uyarilar.Add($"{bzbhTaslak} tani bildirimi zorunlu bulasici hastalik listesinde - "
+                           + "BZBH bildirimi acildi, vaka tipi ve belirti tarihi girilmeli.");
             var uyari = uyarilar.Count > 0 ? string.Join(" ", uyarilar) : null;
-            return Results.Ok(new { id, m.BelgeId, uyari, paketler,
+            return Results.Ok(new { id, m.BelgeId, uyari, paketler, bzbhTaslak,
                                     mesaj = "Muayene tamamlandi.",
                                     izlemeNo = baglam.IzlemeNo });
         });

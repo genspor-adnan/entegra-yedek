@@ -1,4 +1,4 @@
-using Gentegre.Api.AraKatman;
+﻿using Gentegre.Api.AraKatman;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
@@ -24,7 +24,8 @@ public static partial class RadyolojiUclari
         //   (durum 3 + kilit). Onay ön koşulları veritabanında (284).
         grup.MapPost("/rapor/{id:int}/durum", async (
             int id, string hedef, BaglamCozucu cozucu, VeriKaynagi veri,
-            LogDeposu log, HttpContext ctx, CancellationToken iptal) =>
+            LogDeposu log, Gentegre.Api.Servisler.EnabizPaketUretici enabiz,
+            HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             var onayMi = string.Equals(hedef, "onay", StringComparison.OrdinalIgnoreCase);
@@ -75,7 +76,28 @@ public static partial class RadyolojiUclari
                 iptal: iptal);
 
             await islem.CommitAsync(iptal);
-            return Results.Ok(new { tamam = true });
+
+            // e-NABIZ 409 RADYOLOJI SONUC (883, KTS H10/D19): paket ONAY
+            //   sonrasi uretilir - onaylanmamis rapor hastanin dosyasina
+            //   girmez, e-Nabiz'a hic girmemeli. Uretim SESSIZDIR: e-Nabiz
+            //   ikincil is, raporun onayi onun basarisina bagli degil.
+            object? paket = null;
+            if (onayMi)
+            {
+                try
+                {
+                    var s = await enabiz.UretAsync("RADYOLOJI_SONUC", id, baglam.KullaniciId, iptal);
+                    if (s is not null) paket = new { s.PaketNo, s.Durum, s.Eksikler };
+                }
+                catch (Exception h)
+                {
+                    ctx.RequestServices.GetRequiredService<ILoggerFactory>()
+                       .CreateLogger("enabiz").LogError(h,
+                           "e-Nabiz radyoloji sonuc paketi uretilemedi (rapor {Id})", id);
+                }
+            }
+
+            return Results.Ok(new { tamam = true, paket });
         });
 
         // -------------------------------------------------------- addendum ----

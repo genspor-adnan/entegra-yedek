@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { DisOdontogramSatiri } from '../../api/uclar/dis';
+import { c as cev } from '../../dil/ceviri';
 
 /**
  * DOĞAL GÖRÜNÜMLÜ ODONTOGRAM — mockup `Ekranlar/Dis Klinigi/dis_hasta_karti_v5.html`.
@@ -152,9 +153,22 @@ interface Props {
   katmanlar?: { mevcut: boolean; plan: boolean; tamam: boolean };
   /** 1 daimi · 2 süt. Karma (3) daimi sırayı çizer. */
   dentisyon?: number;
+  /**
+   * DİŞE GELİNCE O DİŞE YAPILMIŞ İŞLEMLER (874, KTS denetim maddesi D8).
+   * Şema geçmişi kendi sormaz - hasta kartı zaten tek soruda getiriyor;
+   * burada yalnız metne çevrilir. Dönen metin hem SVG `title` ipucudur hem
+   * de <c>onVurgu</c> ile şerit panele düşer.
+   */
+  gecmisMetni?: (disNo: number) => string;
+  /** Fare dişe girince/çıkınca: şema altındaki şerit bunu gösterir. */
+  onVurgu?: (disNo: number | null) => void;
 }
 
-export function Odontogram({ satirlar, secili, onSec, katmanlar, dentisyon = 1 }: Props) {
+/** SVG ipucunda satir sonu - kaynakta gorunur kacis dizisi kullanilmaz. */
+const NL = String.fromCharCode(10);
+
+export function Odontogram({ satirlar, secili, onSec, katmanlar, dentisyon = 1,
+                             gecmisMetni, onVurgu }: Props) {
   const g = useMemo(() => disGorunumleri(satirlar), [satirlar]);
   const k = katmanlar ?? { mevcut: true, plan: true, tamam: true };
   const sut = dentisyon === 2;
@@ -174,8 +188,14 @@ export function Odontogram({ satirlar, secili, onSec, katmanlar, dentisyon = 1 }
     const sec = secili?.disNo === no;
     const L = rh * 0.9;
     const tumu = ['M', 'D', ad, 'V', 'L'];
+    // İPUCU: diş numarası + o dişe yapılmış işlemler. Yüzey çokgeninin kendi
+    //   `title`'ı da aynı metni taşır - yüzeyin üstünde dururken ipucu
+    //   kaybolmamalı (SVG'de en içteki title kazanır).
+    const gecmis = gecmisMetni?.(no) ?? '';
+    const ipucu = (yz?: string) => `${cev('Diş')} ${no}${yz ? ' · ' + yz : ''}${gecmis ? NL + gecmis : ''}`;
     return (
-      <g key={no}>
+      <g key={no} onMouseEnter={() => onVurgu?.(no)} onMouseLeave={() => onVurgu?.(null)}>
+        <title>{ipucu()}</title>
         <g transform={`translate(${x} ${y})${ustMu ? '' : ' scale(1 -1)'}`} className={d.eksik && k.mevcut ? 'eksik' : ''}>
           {d.implant && k.mevcut ? (
             <>
@@ -200,7 +220,7 @@ export function Odontogram({ satirlar, secili, onSec, katmanlar, dentisyon = 1 }
               <polygon key={y} points={z[y].map(p => p.join(',')).join(' ')}
                        className={`yz${durum ? ' ' + durum : ''}${sec && secili?.yz.includes(kod) ? ' sec' : ''}`}
                        onClick={() => onSec({ disNo: no, yz: [kod] })}>
-                <title>{no} {kod}</title>
+                <title>{ipucu(kod)}</title>
               </polygon>
             );
           })}

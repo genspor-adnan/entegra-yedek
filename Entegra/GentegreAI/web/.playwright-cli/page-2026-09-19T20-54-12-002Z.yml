@@ -1,0 +1,784 @@
+- generic [active] [ref=e1]:
+  - text:   
+  - generic [ref=e2]:
+    - generic:
+      - generic [ref=e3]:
+        - link [ref=e4] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e6]:
+            - strong [ref=e7]: e-Nabız
+            - text: Rehber
+        - text: 
+      - heading " e-Nabız İşleyiş" [level=3] [ref=e8]:
+        - generic [ref=e9]: 
+        - text: e-Nabız İşleyiş
+      - link " Bilgi" [ref=e10] [cursor=pointer]:
+        - /url: "#"
+        - generic [ref=e11]: 
+        - text: Bilgi
+  - generic [ref=e12]:
+    - generic [ref=e14]:
+      - generic [ref=e16]:
+        - textbox "Adı ve Sistem Kodu ile arayınız..." [ref=e17]
+        - link [ref=e19] [cursor=pointer]:
+          - /url: javascript:;
+      - list [ref=e22]:
+        - listitem [ref=e23]:
+          - link " Duyurular" [ref=e24] [cursor=pointer]:
+            - /url: javascript:void(0);
+            - generic [ref=e25]: 
+            - generic [ref=e26]: Duyurular
+        - listitem [ref=e27]:
+          - link " e-Nabız İşleyiş" [ref=e28] [cursor=pointer]:
+            - /url: javascript:void(0);
+            - generic [ref=e29]: 
+            - text: e-Nabız İşleyiş
+        - listitem [ref=e30]:
+          - link " Sonuç Kodları" [ref=e31] [cursor=pointer]:
+            - /url: javascript:void(0);
+            - generic [ref=e32]: 
+            - text: Sonuç Kodları
+        - listitem [ref=e33]:
+          - link " S.S.S" [ref=e34] [cursor=pointer]:
+            - /url: javascript:void(0);
+            - generic [ref=e35]: 
+            - text: S.S.S
+        - listitem [ref=e36]:
+          - link "101 Hasta Kayıt" [ref=e37] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e38]: "101"
+            - generic [ref=e39]: Hasta Kayıt
+        - listitem [ref=e40]:
+          - link "102 Hizmet/Ilaç/Malzeme Bilgisi Kayıt" [ref=e41] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e42]: "102"
+            - generic [ref=e43]: Hizmet/Ilaç/Malzeme Bilgisi Kayıt
+        - listitem [ref=e44]:
+          - link "103 Muayene Bilgisi Kayıt" [ref=e45] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e46]: "103"
+            - generic [ref=e47]: Muayene Bilgisi Kayıt
+        - listitem [ref=e48]:
+          - link "104 Fatura Bilgisi Kayit" [ref=e49] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e50]: "104"
+            - generic [ref=e51]: Fatura Bilgisi Kayit
+        - listitem [ref=e52]:
+          - link "105 Laboratuvar Sonuç Kayıt" [ref=e53] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e54]: "105"
+            - generic [ref=e55]: Laboratuvar Sonuç Kayıt
+        - listitem [ref=e56]:
+          - link "106 Çıkış Bilgisi Kayıt" [ref=e57] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e58]: "106"
+            - generic [ref=e59]: Çıkış Bilgisi Kayıt
+        - listitem [ref=e60]:
+          - link "108 TeleTıp Sonuç Kayıt" [ref=e61] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e62]: "108"
+            - generic [ref=e63]: TeleTıp Sonuç Kayıt
+        - listitem [ref=e64]:
+          - link "109 Yatan Hasta Epikriz Kayıt" [ref=e65] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e66]: "109"
+            - generic [ref=e67]: Yatan Hasta Epikriz Kayıt
+        - listitem [ref=e68]:
+          - link "110 Anjiyografi Rapor Kayıt" [ref=e69] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e70]: "110"
+            - generic [ref=e71]: Anjiyografi Rapor Kayıt
+        - listitem [ref=e72]:
+          - link "111 Girişimsel Kardiyoloji Rapor Kayıt" [ref=e73] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e74]: "111"
+            - generic [ref=e75]: Girişimsel Kardiyoloji Rapor Kayıt
+        - listitem [ref=e76]:
+          - link "112 Rapor Kayıt" [ref=e77] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e78]: "112"
+            - generic [ref=e79]: Rapor Kayıt
+        - listitem [ref=e80]:
+          - link "200 Veri Paketi Silme" [ref=e81] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e82]: "200"
+            - generic [ref=e83]: Veri Paketi Silme
+        - listitem [ref=e84]:
+          - link "201 Patoloji Kayıt" [ref=e85] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e86]: "201"
+            - generic [ref=e87]: Patoloji Kayıt
+        - listitem [ref=e88]:
+          - link "202 15 - 49 Yas Kadin Izlem Veri Seti" [ref=e89] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e90]: "202"
+            - generic [ref=e91]: 15 - 49 Yas Kadin Izlem Veri Seti
+        - listitem [ref=e92]:
+          - link "203 Agiz ve Dis Sagligi Veri Seti" [ref=e93] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e94]: "203"
+            - generic [ref=e95]: Agiz ve Dis Sagligi Veri Seti
+        - listitem [ref=e96]:
+          - link "205 Asi Erteleme / Iptal Veri Seti" [ref=e97] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e98]: "205"
+            - generic [ref=e99]: Asi Erteleme / Iptal Veri Seti
+        - listitem [ref=e100]:
+          - link "206 Asi Sonrasi Istenmeyen Etki Veri Seti" [ref=e101] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e102]: "206"
+            - generic [ref=e103]: Asi Sonrasi Istenmeyen Etki Veri Seti
+        - listitem [ref=e104]:
+          - link "207 Asi Veri Seti" [ref=e105] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e106]: "207"
+            - generic [ref=e107]: Asi Veri Seti
+        - listitem [ref=e108]:
+          - link "208 Askerlik Olur Raporu Veri Seti" [ref=e109] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e110]: "208"
+            - generic [ref=e111]: Askerlik Olur Raporu Veri Seti
+        - listitem [ref=e112]:
+          - link "209 Bebek / Cocuk Izlem Veri Seti" [ref=e113] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e114]: "209"
+            - generic [ref=e115]: Bebek / Cocuk Izlem Veri Seti
+        - listitem [ref=e116]:
+          - link "212 Bebek / Cocuk Psikososyal Izlem Veri Seti" [ref=e117] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e118]: "212"
+            - generic [ref=e119]: Bebek / Cocuk Psikososyal Izlem Veri Seti
+        - listitem [ref=e120]:
+          - link "214 Bulasici Hastalik Bildirim Veri Seti" [ref=e121] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e122]: "214"
+            - generic [ref=e123]: Bulasici Hastalik Bildirim Veri Seti
+        - listitem [ref=e124]:
+          - link "215 Diyabet Veri Seti" [ref=e125] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e126]: "215"
+            - generic [ref=e127]: Diyabet Veri Seti
+        - listitem [ref=e128]:
+          - link "216 Diyaliz Hastasi Bildirim Veri Seti" [ref=e129] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e130]: "216"
+            - generic [ref=e131]: Diyaliz Hastasi Bildirim Veri Seti
+        - listitem [ref=e132]:
+          - link "217 Diyaliz Hastasi Izlem Veri Seti" [ref=e133] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e134]: "217"
+            - generic [ref=e135]: Diyaliz Hastasi Izlem Veri Seti
+        - listitem [ref=e136]:
+          - link "219 Evde Saglik Hizmeti Ilk Izlem Veri Seti" [ref=e137] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e138]: "219"
+            - generic [ref=e139]: Evde Saglik Hizmeti Ilk Izlem Veri Seti
+        - listitem [ref=e140]:
+          - link "220 Evde Saglik Hizmeti Izlem Veri Seti" [ref=e141] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e142]: "220"
+            - generic [ref=e143]: Evde Saglik Hizmeti Izlem Veri Seti
+        - listitem [ref=e144]:
+          - link "221 Gebe Izlem Veri Seti" [ref=e145] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e146]: "221"
+            - generic [ref=e147]: Gebe Izlem Veri Seti
+        - listitem [ref=e148]:
+          - link "222 Gebe Psikososyal Izlem Veri Seti" [ref=e149] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e150]: "222"
+            - generic [ref=e151]: Gebe Psikososyal Izlem Veri Seti
+        - listitem [ref=e152]:
+          - link "223 Gebelik Bildirim Veri Seti" [ref=e153] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e154]: "223"
+            - generic [ref=e155]: Gebelik Bildirim Veri Seti
+        - listitem [ref=e156]:
+          - link "224 Gebelik Sonucu Veri Seti" [ref=e157] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e158]: "224"
+            - generic [ref=e159]: Gebelik Sonucu Veri Seti
+        - listitem [ref=e160]:
+          - link "225 Okul Çağı Çocuk Gençlik Sağlığı Izlem Veri Seti" [ref=e161] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e162]: "225"
+            - generic [ref=e163]: Okul Çağı Çocuk Gençlik Sağlığı Izlem Veri Seti
+        - listitem [ref=e164]:
+          - link "226 Gözlük Reçete Bilgileri" [ref=e165] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e166]: "226"
+            - generic [ref=e167]: Gözlük Reçete Bilgileri
+        - listitem [ref=e168]:
+          - link "227 Geleneksel ve Tamamlayıcı Tıp Uygulamaları Veri Seti" [ref=e169] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e170]: "227"
+            - generic [ref=e171]: Geleneksel ve Tamamlayıcı Tıp Uygulamaları Veri Seti
+        - listitem [ref=e172]:
+          - link "228 Geleneksel ve Tamamlayıcı Tıp Aile Hekimliği" [ref=e173] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e174]: "228"
+            - generic [ref=e175]: Geleneksel ve Tamamlayıcı Tıp Aile Hekimliği
+        - listitem [ref=e176]:
+          - link "229 Intihar Girisimi ve Kriz Izlem Veri Seti" [ref=e177] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e178]: "229"
+            - generic [ref=e179]: Intihar Girisimi ve Kriz Izlem Veri Seti
+        - listitem [ref=e180]:
+          - link "230 Intihar Girisimi ve Kriz Tespit Veri Seti" [ref=e181] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e182]: "230"
+            - generic [ref=e183]: Intihar Girisimi ve Kriz Tespit Veri Seti
+        - listitem [ref=e184]:
+          - link "231 Kadina Yonelik Siddet Veri Seti" [ref=e185] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e186]: "231"
+            - generic [ref=e187]: Kadina Yonelik Siddet Veri Seti
+        - listitem [ref=e188]:
+          - link "236 Kuduz Profilaksi Izlem Veri Seti" [ref=e189] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e190]: "236"
+            - generic [ref=e191]: Kuduz Profilaksi Izlem Veri Seti
+        - listitem [ref=e192]:
+          - link "237 Kuduz Riskli Temas Bildirim Veri Seti" [ref=e193] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e194]: "237"
+            - generic [ref=e195]: Kuduz Riskli Temas Bildirim Veri Seti
+        - listitem [ref=e196]:
+          - link "238 Lohusa Izlem Veri Seti" [ref=e197] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e198]: "238"
+            - generic [ref=e199]: Lohusa Izlem Veri Seti
+        - listitem [ref=e200]:
+          - link "240 Obezite Izlem Veri Seti" [ref=e201] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e202]: "240"
+            - generic [ref=e203]: Obezite Izlem Veri Seti
+        - listitem [ref=e204]:
+          - link "242 Enfeksiyon Etkeni Bildirim Veri Seti" [ref=e205] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e206]: "242"
+            - generic [ref=e207]: Enfeksiyon Etkeni Bildirim Veri Seti
+        - listitem [ref=e208]:
+          - link "243 ÖZELLİKLİ İZLEM VERİ SETİ" [ref=e209] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e210]: "243"
+            - generic [ref=e211]: ÖZELLİKLİ İZLEM VERİ SETİ
+        - listitem [ref=e212]:
+          - link "244 Ozellikli Izlem Veri Seti (Hastane)" [ref=e213] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e214]: "244"
+            - generic [ref=e215]: Ozellikli Izlem Veri Seti (Hastane)
+        - listitem [ref=e216]:
+          - link "245 COVID Vaka Takip Kayıt" [ref=e217] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e218]: "245"
+            - generic [ref=e219]: COVID Vaka Takip Kayıt
+        - listitem [ref=e220]:
+          - link "246 Pandemi Aşı Veri Seti" [ref=e221] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e222]: "246"
+            - generic [ref=e223]: Pandemi Aşı Veri Seti
+        - listitem [ref=e224]:
+          - link "247 Toplum Tabanli Kanser Tarama Veri Seti" [ref=e225] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e226]: "247"
+            - generic [ref=e227]: Toplum Tabanli Kanser Tarama Veri Seti
+        - listitem [ref=e228]:
+          - link "248 Tütün Kullanimi Veri Seti" [ref=e229] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e230]: "248"
+            - generic [ref=e231]: Tütün Kullanimi Veri Seti
+        - listitem [ref=e232]:
+          - link "251 Pandemi Asi Sonrasi Istenmeyen Etki" [ref=e233] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e234]: "251"
+            - generic [ref=e235]: Pandemi Asi Sonrasi Istenmeyen Etki
+        - listitem [ref=e236]:
+          - link "252 Konsültasyon Kayit" [ref=e237] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e238]: "252"
+            - generic [ref=e239]: Konsültasyon Kayit
+        - listitem [ref=e240]:
+          - link "253 Rapor Kayıt" [ref=e241] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e242]: "253"
+            - generic [ref=e243]: Rapor Kayıt
+        - listitem [ref=e244]:
+          - link "254 Acil Sağlık Bilgileri (ASOS)" [ref=e245] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e246]: "254"
+            - generic [ref=e247]: Acil Sağlık Bilgileri (ASOS)
+        - listitem [ref=e248]:
+          - link "255 Ntp Tarama" [ref=e249] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e250]: "255"
+            - generic [ref=e251]: Ntp Tarama
+        - listitem [ref=e252]:
+          - link "257 Çocuk Diyabet Bildirim" [ref=e253] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e254]: "257"
+            - generic [ref=e255]: Çocuk Diyabet Bildirim
+        - listitem [ref=e256]:
+          - link "258 Çocuk Diyabet İzlem" [ref=e257] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e258]: "258"
+            - generic [ref=e259]: Çocuk Diyabet İzlem
+        - listitem [ref=e260]:
+          - link "259 Kronik Hastalık Tarama (TEST)" [ref=e261] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e262]: "259"
+            - generic [ref=e263]: Kronik Hastalık Tarama (TEST)
+        - listitem [ref=e264]:
+          - link "260 Nöbetci Personel Bilgisi Kayıt" [ref=e265] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e266]: "260"
+            - generic [ref=e267]: Nöbetci Personel Bilgisi Kayıt
+        - listitem [ref=e268]:
+          - link "261 Olay Afet Bilgisi" [ref=e269] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e270]: "261"
+            - generic [ref=e271]: Olay Afet Bilgisi
+        - listitem [ref=e272]:
+          - link "262 Hasta Nakil Bilgileri" [ref=e273] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e274]: "262"
+            - generic [ref=e275]: Hasta Nakil Bilgileri
+        - listitem [ref=e276]:
+          - link "264 Hemoglobinopati Tarama Veri Seti" [ref=e277] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e278]: "264"
+            - generic [ref=e279]: Hemoglobinopati Tarama Veri Seti
+        - listitem [ref=e280]:
+          - link "265 Hasta Özlük Bilgileri" [ref=e281] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e282]: "265"
+            - generic [ref=e283]: Hasta Özlük Bilgileri
+        - listitem [ref=e284]:
+          - link "266 Vatandaş Kayıt" [ref=e285] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e286]: "266"
+            - generic [ref=e287]: Vatandaş Kayıt
+        - listitem [ref=e288]:
+          - link "267 Yenidoğan Kayıt" [ref=e289] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e290]: "267"
+            - generic [ref=e291]: Yenidoğan Kayıt
+        - listitem [ref=e292]:
+          - link "268 Hekim Puan Bilgisi" [ref=e293] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e294]: "268"
+            - generic [ref=e295]: Hekim Puan Bilgisi
+        - listitem [ref=e296]:
+          - link "269 Mesleki Maruziyet" [ref=e297] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e298]: "269"
+            - generic [ref=e299]: Mesleki Maruziyet
+        - listitem [ref=e300]:
+          - link "270 Madde Bagimliligi Bildirim Veri Seti" [ref=e301] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e302]: "270"
+            - generic [ref=e303]: Madde Bagimliligi Bildirim Veri Seti
+        - listitem [ref=e304]:
+          - link "271 Malnütrisyon Veri Seti" [ref=e305] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e306]: "271"
+            - generic [ref=e307]: Malnütrisyon Veri Seti
+        - listitem [ref=e308]:
+          - link "272 Kan Transfüzyonu Veri Seti" [ref=e309] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e310]: "272"
+            - generic [ref=e311]: Kan Transfüzyonu Veri Seti
+        - listitem [ref=e312]:
+          - link "273 SMA Tarama" [ref=e313] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e314]: "273"
+            - generic [ref=e315]: SMA Tarama
+        - listitem [ref=e316]:
+          - link "274 TAVI Kayıt Veri Seti" [ref=e317] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e318]: "274"
+            - generic [ref=e319]: TAVI Kayıt Veri Seti
+        - listitem [ref=e320]:
+          - link "275 TAVI Girişim ve Işlem Sonu Veri Seti" [ref=e321] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e322]: "275"
+            - generic [ref=e323]: TAVI Girişim ve Işlem Sonu Veri Seti
+        - listitem [ref=e324]:
+          - link "276 Yoğun Bakım Değerlendirme Genel Bilgiler" [ref=e325] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e326]: "276"
+            - generic [ref=e327]: Yoğun Bakım Değerlendirme Genel Bilgiler
+        - listitem [ref=e328]:
+          - link "277 Yoğun Bakım Değerlendirme Izlem ve Skorlama Veri Paketi" [ref=e329] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e330]: "277"
+            - generic [ref=e331]: Yoğun Bakım Değerlendirme Izlem ve Skorlama Veri Paketi
+        - listitem [ref=e332]:
+          - link "278 Yoğun Bakım Değerlendirme Cihaz Ölçüm Bilgileri" [ref=e333] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e334]: "278"
+            - generic [ref=e335]: Yoğun Bakım Değerlendirme Cihaz Ölçüm Bilgileri
+        - listitem [ref=e336]:
+          - link "280 Evde Sağlık Izlem Veri Seti" [ref=e337] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e338]: "280"
+            - generic [ref=e339]: Evde Sağlık Izlem Veri Seti
+        - listitem [ref=e340]:
+          - link "281 Evde Sağlık Ilk Izlem Veri Seti" [ref=e341] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e342]: "281"
+            - generic [ref=e343]: Evde Sağlık Ilk Izlem Veri Seti
+        - listitem [ref=e344]:
+          - link "282 Özel Muayenehane Sevk Veri Paketi" [ref=e345] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e346]: "282"
+            - generic [ref=e347]: Özel Muayenehane Sevk Veri Paketi
+        - listitem [ref=e348]:
+          - link "283 Tıbbi Atık Veri Seti" [ref=e349] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e350]: "283"
+            - generic [ref=e351]: Tıbbi Atık Veri Seti
+        - listitem [ref=e352]:
+          - link "285 Hastane Istem Veri Paketi" [ref=e353] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e354]: "285"
+            - generic [ref=e355]: Hastane Istem Veri Paketi
+        - listitem [ref=e356]:
+          - link "286 Sağlık Meslek Hizmet Birimi Talep" [ref=e357] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e358]: "286"
+            - generic [ref=e359]: Sağlık Meslek Hizmet Birimi Talep
+        - listitem [ref=e360]:
+          - link "287 Otizm Tarama Veri Seti" [ref=e361] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e362]: "287"
+            - generic [ref=e363]: Otizm Tarama Veri Seti
+        - listitem [ref=e364]:
+          - link "288 Trafik Kazası Yaralı Skorlama" [ref=e365] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e366]: "288"
+            - generic [ref=e367]: Trafik Kazası Yaralı Skorlama
+        - listitem [ref=e368]:
+          - link "289 MHRS Takipli Hasta" [ref=e369] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e370]: "289"
+            - generic [ref=e371]: MHRS Takipli Hasta
+        - listitem [ref=e372]:
+          - link "290 Elektronik Sevk Veri Paketi" [ref=e373] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e374]: "290"
+            - generic [ref=e375]: Elektronik Sevk Veri Paketi
+        - listitem [ref=e376]:
+          - link "301 Hasta Kayıt Silme" [ref=e377] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e378]: "301"
+            - generic [ref=e379]: Hasta Kayıt Silme
+        - listitem [ref=e380]:
+          - link "302 Hizmet Silme" [ref=e381] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e382]: "302"
+            - generic [ref=e383]: Hizmet Silme
+        - listitem [ref=e384]:
+          - link "303 Izlem Silme" [ref=e385] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e386]: "303"
+            - generic [ref=e387]: Izlem Silme
+        - listitem [ref=e388]:
+          - link "304 Hasta Nakil Iptal" [ref=e389] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e390]: "304"
+            - generic [ref=e391]: Hasta Nakil Iptal
+        - listitem [ref=e392]:
+          - link "305 Melis Istem Iptal" [ref=e393] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e394]: "305"
+            - generic [ref=e395]: Melis Istem Iptal
+        - listitem [ref=e396]:
+          - link "306 Hekim Puan Silme" [ref=e397] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e398]: "306"
+            - generic [ref=e399]: Hekim Puan Silme
+        - listitem [ref=e400]:
+          - link "402 SYS Takip No Sorgulama" [ref=e401] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e402]: "402"
+            - generic [ref=e403]: SYS Takip No Sorgulama
+        - listitem [ref=e404]:
+          - link "404 Hastane Referans Numarası Sorgulama" [ref=e405] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e406]: "404"
+            - generic [ref=e407]: Hastane Referans Numarası Sorgulama
+        - listitem [ref=e408]:
+          - link "405 Günlük Veri Sorgulama" [ref=e409] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e410]: "405"
+            - generic [ref=e411]: Günlük Veri Sorgulama
+        - listitem [ref=e412]:
+          - link "407 Gün Sonu Veri Seti" [ref=e413] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e414]: "407"
+            - generic [ref=e415]: Gün Sonu Veri Seti
+        - listitem [ref=e416]:
+          - link "408 Ay Sonu Veri Seti" [ref=e417] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e418]: "408"
+            - generic [ref=e419]: Ay Sonu Veri Seti
+        - listitem [ref=e420]:
+          - link "409 Radyoloji Sonuç Kayıt Paketi" [ref=e421] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e422]: "409"
+            - generic [ref=e423]: Radyoloji Sonuç Kayıt Paketi
+        - listitem [ref=e424]:
+          - link "411 Doktor Mesajı Paketi" [ref=e425] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e426]: "411"
+            - generic [ref=e427]: Doktor Mesajı Paketi
+        - listitem [ref=e428]:
+          - link "412 Yoğun Bakım Değerlendirme Monitör Veri Seti" [ref=e429] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e430]: "412"
+            - generic [ref=e431]: Yoğun Bakım Değerlendirme Monitör Veri Seti
+        - listitem [ref=e432]:
+          - link "413 Hekim Mesajlasma Veri Seti" [ref=e433] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e434]: "413"
+            - generic [ref=e435]: Hekim Mesajlasma Veri Seti
+        - listitem [ref=e436]:
+          - link "500 Yoğun Bakım Değerlendirme Veri Seti" [ref=e437] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e438]: "500"
+            - generic [ref=e439]: Yoğun Bakım Değerlendirme Veri Seti
+        - listitem [ref=e440]:
+          - link "501 Erişkin Yoğun Bakım Skoru" [ref=e441] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e442]: "501"
+            - generic [ref=e443]: Erişkin Yoğun Bakım Skoru
+        - listitem [ref=e444]:
+          - link "502 Yoğun Bakım Izlem Veri Seti" [ref=e445] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e446]: "502"
+            - generic [ref=e447]: Yoğun Bakım Izlem Veri Seti
+        - listitem [ref=e448]:
+          - link "503 HPV Kontrol Sorgula" [ref=e449] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e450]: "503"
+            - generic [ref=e451]: HPV Kontrol Sorgula
+        - listitem [ref=e452]:
+          - link "504 HPV Numune Bildir" [ref=e453] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e454]: "504"
+            - generic [ref=e455]: HPV Numune Bildir
+        - listitem [ref=e456]:
+          - link "505 HPV Numune İptal" [ref=e457] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e458]: "505"
+            - generic [ref=e459]: HPV Numune İptal
+        - listitem [ref=e460]:
+          - link "506 HPV Numune Barkod Güncelle" [ref=e461] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e462]: "506"
+            - generic [ref=e463]: HPV Numune Barkod Güncelle
+        - listitem [ref=e464]:
+          - link "507 Mamografi Bildirim" [ref=e465] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e466]: "507"
+            - generic [ref=e467]: Mamografi Bildirim
+        - listitem [ref=e468]:
+          - link "508 Mamografi İptal" [ref=e469] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e470]: "508"
+            - generic [ref=e471]: Mamografi İptal
+        - listitem [ref=e472]:
+          - link "509 Mamografi Sonuç" [ref=e473] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e474]: "509"
+            - generic [ref=e475]: Mamografi Sonuç
+        - listitem [ref=e476]:
+          - link "510 HPV Numune Sonuç Sorgula" [ref=e477] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e478]: "510"
+            - generic [ref=e479]: HPV Numune Sonuç Sorgula
+        - listitem [ref=e480]:
+          - link "511 HPV Numune Barkod Sorgulama" [ref=e481] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e482]: "511"
+            - generic [ref=e483]: HPV Numune Barkod Sorgulama
+        - listitem [ref=e484]:
+          - link "512 ASAL Yoklama Durumu Sorgula" [ref=e485] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e486]: "512"
+            - generic [ref=e487]: ASAL Yoklama Durumu Sorgula
+        - listitem [ref=e488]:
+          - link "514 Sağlık Tesisi Bilgileri" [ref=e489] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e490]: "514"
+            - generic [ref=e491]: Sağlık Tesisi Bilgileri
+        - listitem [ref=e492]:
+          - link "515 Isitme Tarama Veri Paketi" [ref=e493] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e494]: "515"
+            - generic [ref=e495]: Isitme Tarama Veri Paketi
+        - listitem [ref=e496]:
+          - link "516 Melis Istem Veri Paketi" [ref=e497] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e498]: "516"
+            - generic [ref=e499]: Melis Istem Veri Paketi
+        - listitem [ref=e500]:
+          - link "518 HPV Tarama Sonucu" [ref=e501] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e502]: "518"
+            - generic [ref=e503]: HPV Tarama Sonucu
+        - listitem [ref=e504]:
+          - link "519 Diş Aile Hekimliği Veri Seti" [ref=e505] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e506]: "519"
+            - generic [ref=e507]: Diş Aile Hekimliği Veri Seti
+        - listitem [ref=e508]:
+          - link "520 Malzeme Kesinleştirme Veri Seti" [ref=e509] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e510]: "520"
+            - generic [ref=e511]: Malzeme Kesinleştirme Veri Seti
+        - listitem [ref=e512]:
+          - link "600 Hastalık Takibi Veri Seti" [ref=e513] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e514]: "600"
+            - generic [ref=e515]: Hastalık Takibi Veri Seti
+        - listitem [ref=e516]:
+          - link "601 HYP Fiziksel Bulgular" [ref=e517] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e518]: "601"
+            - generic [ref=e519]: HYP Fiziksel Bulgular
+        - listitem [ref=e520]:
+          - link "621 UTS Malzeme Bilgileri" [ref=e521] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e522]: "621"
+            - generic [ref=e523]: UTS Malzeme Bilgileri
+        - listitem [ref=e524]:
+          - link "653 Uzaktan Sağlık Bilgi Sistemi Veri Seti" [ref=e525] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e526]: "653"
+            - generic [ref=e527]: Uzaktan Sağlık Bilgi Sistemi Veri Seti
+        - listitem [ref=e528]:
+          - link "700 SGK ISLEM BILDIR" [ref=e529] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e530]: "700"
+            - generic [ref=e531]: SGK ISLEM BILDIR
+        - listitem [ref=e532]:
+          - link "701 USHAS Takip Bildir" [ref=e533] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e534]: "701"
+            - generic [ref=e535]: USHAS Takip Bildir
+        - listitem [ref=e536]:
+          - link "900 Dönem Sonlandırma" [ref=e537] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e538]: "900"
+            - generic [ref=e539]: Dönem Sonlandırma
+        - listitem [ref=e540]:
+          - link "901 Yatak Bilgisi Kayıt" [ref=e541] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e542]: "901"
+            - generic [ref=e543]: Yatak Bilgisi Kayıt
+        - listitem [ref=e544]:
+          - link "902 Sosyal Yardım Bildirimi" [ref=e545] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e546]: "902"
+            - generic [ref=e547]: Sosyal Yardım Bildirimi
+        - listitem [ref=e548]:
+          - link "903 Sağlık Yardım Bildirimi" [ref=e549] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e550]: "903"
+            - generic [ref=e551]: Sağlık Yardım Bildirimi
+        - listitem [ref=e552]:
+          - link "904 Evde Sağlık Hizmet Emri" [ref=e553] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e554]: "904"
+            - generic [ref=e555]: Evde Sağlık Hizmet Emri
+        - listitem [ref=e556]:
+          - link "905 Ek Ödeme Kayıt" [ref=e557] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e558]: "905"
+            - generic [ref=e559]: Ek Ödeme Kayıt
+        - listitem [ref=e560]:
+          - link "906 Misafir Anne Talepleri" [ref=e561] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e562]: "906"
+            - generic [ref=e563]: Misafir Anne Talepleri
+        - listitem [ref=e564]:
+          - link "907 Hekim Puan Ek Ödeme Kayıt" [ref=e565] [cursor=pointer]:
+            - /url: javascript:;
+            - generic [ref=e566]: "907"
+            - generic [ref=e567]: Hekim Puan Ek Ödeme Kayıt
+    - generic [ref=e570]:
+      - text:       
+      - list [ref=e573]:
+        - listitem [ref=e574]:
+          - link " TANIM" [ref=e575] [cursor=pointer]:
+            - /url: "#TANIM"
+            - generic [ref=e576]: 
+            - generic [ref=e577]: TANIM
+        - listitem [ref=e579]:
+          - link " ENTEGRASYONLAR" [ref=e580] [cursor=pointer]:
+            - /url: "#ENTEGRASYONLAR"
+            - generic [ref=e581]: 
+            - generic [ref=e582]: ENTEGRASYONLAR
+        - listitem [ref=e583]:
+          - link " SİSTEMLER" [ref=e584] [cursor=pointer]:
+            - /url: "#SISTEMLER"
+            - generic [ref=e585]: 
+            - generic [ref=e586]: SİSTEMLER
+        - listitem [ref=e587]:
+          - link " PAYDAŞLAR" [ref=e588] [cursor=pointer]:
+            - /url: "#PAYDASLAR"
+            - generic [ref=e589]: 
+            - generic [ref=e590]: PAYDAŞLAR
+        - listitem [ref=e591]:
+          - link " BİLGİLENDİRME" [ref=e592] [cursor=pointer]:
+            - /url: "#BILGILENDIRME"
+            - generic [ref=e593]: 
+            - generic [ref=e594]: BİLGİLENDİRME
+      - generic [ref=e595]:
+        - text: 
+        - generic [ref=e598]:
+          - generic [ref=e599]:
+            - heading "E-NABIZ'IN GENEL TANIMI" [level=2] [ref=e600]
+            - paragraph [ref=e601]:
+              - generic [ref=e602]: Sağlık Bakanlığı tarafından hizmete alınan, Türkiye’de sağlık hizmeti veren tüm kurumlarda yapılan işlemleri ortak bir veritabanı altında toplayan ve verilerin ilgili kurumlarla paylaşılmasını sağlayan sistemdir.
+            - paragraph
+            - paragraph [ref=e603]: Sağlık hizmeti veren kurumlar, belirlenen standartlar çerçevesinde ilgili metodları kullanarak xml yapıda veri seti (paket) oluşturarak e-Nabız’a göndermektedir.
+            - paragraph [ref=e604]: e-Nabız kapsamında 6 farklı kategoride 118 adet aktif veri paketi bulunmaktadır. Aktif paket sayısı değişiklik göstermektedir.
+            - paragraph [ref=e605]:
+              - generic [ref=e606]: Temel Paketler
+              - generic [ref=e607]: (Hasta bazlı bilgileri göndermek için tasarlanan Hasta Kayıt, Hizmet Kayıt, Muayene Bilgisi Kayıt, Lab Sonuç Kayıt, Çıkış Kayıt ve Fatura Bilgisi Kayıt...)
+            - paragraph [ref=e608]:
+              - generic [ref=e609]: İkincil Paketler
+              - generic [ref=e610]: (Performansa tabi paketler ve hastanelerin düzenli aralıklarla gönderdikleri paketlerden oluşmaktadır.)
+            - paragraph [ref=e611]
+            - paragraph [ref=e613]:
+              - generic [ref=e614]: e-Nabız’da yapılan İşlem Paketleri
+              - generic [ref=e615]: (Veri Silme Paketleri)
+            - paragraph [ref=e616]
+            - paragraph [ref=e618]:
+              - generic [ref=e619]: Sorgulama Paketleri
+              - generic [ref=e620]: Veri sorgulaması yapılan paketlerdir.
+            - paragraph [ref=e621]
+            - paragraph [ref=e623]:
+              - generic [ref=e624]: e-Nabız’a kaydedilen paketler
+              - generic [ref=e625]: e-Nabız’a kaydı yapılan ancak ilgili kurumların takip ettiği paketlerdir.
+            - paragraph [ref=e626]
+            - paragraph [ref=e629]:
+              - generic [ref=e630]: e-Nabız’a kaydedilmeyen paketler
+              - text: e-Nabız’a gönderilen ancak kaydı yapılmayan ilgili kurumların takip ettiği paketlerdir.
+            - paragraph [ref=e631]
+            - paragraph [ref=e632]
+            - paragraph [ref=e633]:
+              - generic [ref=e634]: .
+            - paragraph [ref=e635]
+            - paragraph [ref=e639]:
+              - generic [ref=e640]:
+                - text: "Önemli Not: E-Nabız' a gönderilen paketler için"
+                - link "https://sys.sagliknet.saglik.gov.tr/SYS/SYSWS.svc" [ref=e641] [cursor=pointer]:
+                  - /url: https://sys.sagliknet.saglik.gov.tr/SYS/SYSWS.svc
+                - text: adresi kullanılabilir.
+          - text:          
+      - text: ;
+    - text: 

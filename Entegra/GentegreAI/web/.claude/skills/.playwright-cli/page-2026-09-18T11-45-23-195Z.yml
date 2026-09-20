@@ -1,0 +1,324 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - button "☰" [expanded] [ref=e5] [cursor=pointer]
+    - link [ref=e6] [cursor=pointer]:
+      - img "Gentegre" [ref=e8]
+      - text: GenoTIP AI
+    - button "🔍 Ara ya da komut yaz… Ctrl K" [ref=e9] [cursor=pointer]:
+      - generic [ref=e10]: 🔍
+      - generic [ref=e11]: Ara ya da komut yaz…
+      - generic [ref=e12]: Ctrl K
+    - button "Merkez ▾" [ref=e14] [cursor=pointer]:
+      - text: Merkez
+      - generic [ref=e16]: ▾
+    - generic [ref=e17]:
+      - button "🖥️" [ref=e18] [cursor=pointer]
+      - link "💬" [ref=e19] [cursor=pointer]:
+        - /url: /mesajlar
+      - link "✨" [ref=e20] [cursor=pointer]:
+        - /url: /yapay-zeka
+      - button "🔔 3" [ref=e22] [cursor=pointer]:
+        - text: 🔔
+        - generic [ref=e23]: "3"
+      - button "Dil — Türkçe" [ref=e25] [cursor=pointer]
+      - button "?" [ref=e31] [cursor=pointer]
+      - button "Oturumu kapat" [ref=e33] [cursor=pointer]
+      - button "SY" [ref=e37] [cursor=pointer]
+  - generic [ref=e38]:
+    - complementary [ref=e39]:
+      - generic [ref=e40]:
+        - link "🏠 Ana Sayfa" [ref=e41] [cursor=pointer]:
+          - /url: /panel
+          - generic [ref=e42]: 🏠
+          - generic [ref=e43]: Ana Sayfa
+        - 'generic "Çalışma alanı: gün boyu kullandığınız bölgeler; diğerleri gizlenir" [ref=e44]':
+          - generic [ref=e45]: 🧭
+          - combobox "🧭" [ref=e46]:
+            - option "Tümü" [selected]
+            - option "Banko"
+            - option "Hekim"
+            - option "Hemşire"
+            - option "Lab / Görüntüleme"
+            - option "Muhasebe"
+            - option "Eczane / Tedarik"
+        - generic [ref=e47]:
+          - button "⭐ Favori ▾" [ref=e48] [cursor=pointer]:
+            - generic [ref=e49]: ⭐
+            - generic [ref=e50]: Favori
+            - generic [ref=e51]: ▾
+          - link "📅 Randevular ★" [ref=e52] [cursor=pointer]:
+            - /url: /randevu
+            - generic [ref=e53]: 📅
+            - generic [ref=e54]: Randevular
+            - button "★" [ref=e55]
+        - generic [ref=e56]:
+          - button "🕓 En Son ▾" [ref=e57] [cursor=pointer]:
+            - generic [ref=e58]: 🕓
+            - generic [ref=e59]: En Son
+            - generic [ref=e60]: ▾
+          - link "🏥 Kurum Profili ☆" [ref=e61] [cursor=pointer]:
+            - /url: /kurum-profili
+            - generic [ref=e62]: 🏥
+            - generic [ref=e63]: Kurum Profili
+            - button "☆" [ref=e64]
+          - link "🛡️ Roller ☆" [ref=e65] [cursor=pointer]:
+            - /url: /rol
+            - generic [ref=e66]: 🛡️
+            - generic [ref=e67]: Roller
+            - button "☆" [ref=e68]
+          - link "🧑‍🤝‍🧑 Personel Listesi ☆" [ref=e69] [cursor=pointer]:
+            - /url: /personel
+            - generic [ref=e70]: 🧑‍🤝‍🧑
+            - generic [ref=e71]: Personel Listesi
+            - button "☆" [ref=e72]
+          - link "👤 Kullanıcılar ☆" [ref=e73] [cursor=pointer]:
+            - /url: /kullanici
+            - generic [ref=e74]: 👤
+            - generic [ref=e75]: Kullanıcılar
+            - button "☆" [ref=e76]
+          - link "📐 Klinik Kalite Göstergeleri ☆" [ref=e77] [cursor=pointer]:
+            - /url: /klinik-gosterge
+            - generic [ref=e78]: 📐
+            - generic [ref=e79]: Klinik Kalite Göstergeleri
+            - button "☆" [ref=e80]
+          - link "🔤 Klinik Kalite Kod Havuzu ☆" [ref=e81] [cursor=pointer]:
+            - /url: /klinik-gosterge-kod
+            - generic [ref=e82]: 🔤
+            - generic [ref=e83]: Klinik Kalite Kod Havuzu
+            - button "☆" [ref=e84]
+          - link "🧭 Onay Akışları ☆" [ref=e85] [cursor=pointer]:
+            - /url: /onay-akis
+            - generic [ref=e86]: 🧭
+            - generic [ref=e87]: Onay Akışları
+            - button "☆" [ref=e88]
+          - link "🤝 Onay Vekâleti ☆" [ref=e89] [cursor=pointer]:
+            - /url: /onay-vekalet
+            - generic [ref=e90]: 🤝
+            - generic [ref=e91]: Onay Vekâleti
+            - button "☆" [ref=e92]
+          - link "✍️ Onayımdakiler ☆" [ref=e93] [cursor=pointer]:
+            - /url: /onay-kutusu
+            - generic [ref=e94]: ✍️
+            - generic [ref=e95]: Onayımdakiler
+            - button "☆" [ref=e96]
+        - button "Hasta Akışı ▸" [ref=e98] [cursor=pointer]:
+          - generic [ref=e100]: Hasta Akışı
+          - generic [ref=e101]: ▸
+        - button "Klinikler ▸" [ref=e103] [cursor=pointer]:
+          - generic [ref=e105]: Klinikler
+          - generic [ref=e106]: ▸
+        - button "Tanı & Tetkik ▸" [ref=e108] [cursor=pointer]:
+          - generic [ref=e110]: Tanı & Tetkik
+          - generic [ref=e111]: ▸
+        - button "Yatan & Cerrahi ▸" [ref=e113] [cursor=pointer]:
+          - generic [ref=e115]: Yatan & Cerrahi
+          - generic [ref=e116]: ▸
+        - generic [ref=e117]:
+          - button "Ödeyen & Fatura ▾" [ref=e118] [cursor=pointer]:
+            - generic [ref=e120]: Ödeyen & Fatura
+            - generic [ref=e121]: ▾
+          - button "🛡️ Medula ▸" [ref=e123] [cursor=pointer]:
+            - generic [ref=e124]: 🛡️
+            - generic [ref=e125]: Medula
+            - generic [ref=e126]: ▸
+          - generic [ref=e127]:
+            - button "🏛️ Kurumlar & Sigorta ▾" [ref=e128] [cursor=pointer]:
+              - generic [ref=e129]: 🏛️
+              - generic [ref=e130]: Kurumlar & Sigorta
+              - generic [ref=e131]: ▾
+            - link "🏛️ Anlaşmalı Kurumlar ☆" [ref=e132] [cursor=pointer]:
+              - /url: /kurum
+              - generic [ref=e133]: 🏛️
+              - generic [ref=e134]: Anlaşmalı Kurumlar
+              - button "☆" [ref=e135]
+            - link "🧾 Kurum İcmalleri ☆" [ref=e136] [cursor=pointer]:
+              - /url: /kurum-icmal
+              - generic [ref=e137]: 🧾
+              - generic [ref=e138]: Kurum İcmalleri
+              - button "☆" [ref=e139]
+            - link "🔌 Kurum Hesapları ☆" [ref=e140] [cursor=pointer]:
+              - /url: /sigorta-hesap
+              - generic [ref=e141]: 🔌
+              - generic [ref=e142]: Kurum Hesapları
+              - button "☆" [ref=e143]
+            - link "🧾 İstek Günlüğü ☆" [ref=e144] [cursor=pointer]:
+              - /url: /sigorta-istek-log
+              - generic [ref=e145]: 🧾
+              - generic [ref=e146]: İstek Günlüğü
+              - button "☆" [ref=e147]
+            - link "🩺 Dış Doktorlar ☆" [ref=e148] [cursor=pointer]:
+              - /url: /dis-hekim
+              - generic [ref=e149]: 🩺
+              - generic [ref=e150]: Dış Doktorlar
+              - button "☆" [ref=e151]
+            - link "🧾 Faturalar ☆" [ref=e152] [cursor=pointer]:
+              - /url: /fatura
+              - generic [ref=e153]: 🧾
+              - generic [ref=e154]: Faturalar
+              - button "☆" [ref=e155]
+            - link "📊 Dökümler ☆" [ref=e156] [cursor=pointer]:
+              - /url: /dokumler?grup=Kurumlar%20%26%20Sigorta
+              - generic [ref=e157]: 📊
+              - generic [ref=e158]: Dökümler
+              - button "☆" [ref=e159]
+            - button "⚙️ Ayarlar ▸" [ref=e161] [cursor=pointer]:
+              - generic [ref=e162]: ⚙️
+              - generic [ref=e163]: Ayarlar
+              - generic [ref=e164]: ▸
+          - button "💓 e-Nabız ▸" [ref=e166] [cursor=pointer]:
+            - generic [ref=e167]: 💓
+            - generic [ref=e168]: e-Nabız
+            - generic [ref=e169]: ▸
+        - button "Finans ▸" [ref=e171] [cursor=pointer]:
+          - generic [ref=e173]: Finans
+          - generic [ref=e174]: ▸
+        - button "Tedarik & Teknik ▸" [ref=e176] [cursor=pointer]:
+          - generic [ref=e178]: Tedarik & Teknik
+          - generic [ref=e179]: ▸
+        - button "Yönetim ▸" [ref=e181] [cursor=pointer]:
+          - generic [ref=e183]: Yönetim
+          - generic [ref=e184]: ▸
+        - generic [ref=e185]: Oturum
+        - generic [ref=e186]:
+          - generic [ref=e187]: 🏢
+          - generic [ref=e188]: Merkez
+        - generic [ref=e189]:
+          - generic [ref=e190]: 👤
+          - generic [ref=e191]: admin
+          - generic [ref=e192]: Yonetici
+        - generic "Bu şubenin kurum profili" [ref=e193]:
+          - generic [ref=e194]: 🪪
+          - generic [ref=e195]: Hastane
+    - main [ref=e196]:
+      - generic [ref=e198]:
+        - heading "Kurum Profili" [level=1] [ref=e199]
+        - generic [ref=e200]: Yönetim › Kurum Profili
+      - generic [ref=e201]:
+        - generic [ref=e202]:
+          - generic [ref=e203]: 💾 Kaydet & Uygula
+          - generic [ref=e204]: ↩ Kaydedilmişe Dön
+          - generic [ref=e205]:
+            - generic [ref=e206]: "Şube:"
+            - combobox "Şube:" [ref=e207]:
+              - option "Merkez" [selected]
+              - option "Ankara Sube"
+            - generic [ref=e208]: bu şubenin kendi profili
+          - generic [ref=e209]: 📖 Kurulum Rehberi
+        - generic [ref=e210]:
+          - generic [ref=e211]: 1 · Profil
+          - generic [ref=e212]: 2 · Modüller
+          - generic [ref=e213]: 3 · Roller
+          - generic [ref=e214]: 4 · Kayıt & Ücretlendirme
+          - generic [ref=e215]: 5 · Klinik Ayarlar
+          - generic [ref=e216]: 6 · Entegrasyonlar
+          - generic [ref=e217]: 7 · Kaynaklar (birim/ünit/cihaz)
+          - generic [ref=e218]: 8 · Özet & Kurulum
+        - generic [ref=e219]:
+          - generic [ref=e220]: Kurum tipi menüyü, varsayılan modülleri, kayıt/ücretlendirme kurallarını ve klinik şablonları belirler. Sonradan değiştirilebilir; kapanan modülün verisi silinmez, menüden kalkar.
+          - generic [ref=e221]:
+            - generic [ref=e222] [cursor=pointer]:
+              - generic [ref=e223]: 🩺
+              - generic [ref=e224]: Muayenehane
+              - generic [ref=e225]: Tek hekim · muayene · reçete · randevu · basit tahsilat
+            - generic [ref=e226] [cursor=pointer]:
+              - generic [ref=e227]: 👁
+              - generic [ref=e228]: Dal Merkezi (Göz)
+              - generic [ref=e229]: Göz muayene (OD/OS) · görüntüleme cihazları · gözlük/lens · enjeksiyon · ameliyathane
+            - generic [ref=e230] [cursor=pointer]:
+              - generic [ref=e231]: 🦵
+              - generic [ref=e232]: Dal Merkezi (FTR)
+              - generic [ref=e233]: FTR muayene · seans programı (kür) · uygulama ünitleri · ölçek/skala takibi
+            - generic [ref=e234] [cursor=pointer]:
+              - generic [ref=e235]: 🩻
+              - generic [ref=e236]: Görüntüleme Merkezi
+              - generic [ref=e237]: Radyoloji istem/rapor · PACS · teleradyoloji · maliyet (cihaz)
+            - generic [ref=e238] [cursor=pointer]:
+              - generic [ref=e239]: 🧪
+              - generic [ref=e240]: Laboratuvar
+              - generic [ref=e241]: LIS · cihaz entegrasyonu · biyokimya/mikro/genetik · sonuç formları · dış kurum
+            - generic [ref=e242] [cursor=pointer]:
+              - generic [ref=e243]: 🩻🧪
+              - generic [ref=e244]: Görüntüleme + Lab
+              - generic [ref=e245]: Radyoloji + LIS birlikte · dış kurum portalı · ortak kabul
+            - generic [ref=e246] [cursor=pointer]:
+              - generic [ref=e247]: 🦷
+              - generic [ref=e248]: Diş Kliniği
+              - generic [ref=e249]: Odontogram · tedavi planı/proforma · ünit çizelgesi · protez lab · taksit
+            - generic [ref=e250] [cursor=pointer]:
+              - generic [ref=e251]: 🏥
+              - generic [ref=e252]: Tıp Merkezi
+              - generic [ref=e253]: Poliklinikler · muayene · lab + radyoloji · teletıp · e-Nabız tam · kurum sözleşmeleri
+            - generic [ref=e254] [cursor=pointer]:
+              - generic [ref=e255]: 🏨
+              - generic [ref=e256]: Hastane
+              - generic [ref=e257]: + yatan hasta · ameliyathane · eczane/depo · acil · yoğun bakım · HBYS tam (sonraki faz)
+              - generic [ref=e258]: Seçili
+            - generic [ref=e259] [cursor=pointer]:
+              - generic [ref=e260]: 👷
+              - generic [ref=e261]: OSGB / İşyeri Sağlık Birimi
+              - generic [ref=e262]: "İşyeri hekimliği: firma · çalışan · Ek-2 (SMS) · periyodik takvim · ziyaret · iş kazası · İSG-KATİP süre"
+          - generic [ref=e263]:
+            - generic [ref=e264]:
+              - generic [ref=e265]: Ürün modu *
+              - combobox [ref=e266]:
+                - option "HBYS (GenoTIP AI)" [selected]
+                - option "ERP (Gentegre AI)"
+                - option "İkisi (tıp merkezi + ticari)"
+            - generic [ref=e267]:
+              - generic [ref=e268]: Kurum tipi *
+              - combobox [ref=e269]:
+                - option "Muayenehane"
+                - option "Dal Merkezi (Göz)"
+                - option "Dal Merkezi (FTR)"
+                - option "Görüntüleme Merkezi"
+                - option "Laboratuvar"
+                - option "Görüntüleme + Lab"
+                - option "Diş Kliniği"
+                - option "Tıp Merkezi"
+                - option "Hastane" [selected]
+                - option "ERP (üretim/ticaret)"
+                - option "OSGB / İşyeri Sağlık Birimi"
+            - generic [ref=e270]:
+              - generic [ref=e271]: Alt tip / branş
+              - textbox "örn. Dahiliye" [ref=e272]
+            - generic [ref=e273]:
+              - generic [ref=e274]: Basamak
+              - textbox "örn. 2. basamak özel" [ref=e275]
+            - generic [ref=e276]:
+              - generic [ref=e277]: Tesis kodu (ÇKYS)
+              - textbox "11xxxxxx" [ref=e278]
+            - generic [ref=e279]:
+              - generic [ref=e280]: Şube yapısı
+              - combobox [ref=e281]:
+                - option "Tek şube" [selected]
+                - option "Çok şube (her şube kendi tesis kodu)"
+            - generic [ref=e282]:
+              - generic [ref=e283]: Hekim sayısı / ünite
+              - generic [ref=e284]:
+                - spinbutton [ref=e285]: "1"
+                - spinbutton [ref=e286]: "1"
+            - generic [ref=e287]:
+              - generic [ref=e288]: Dil / para birimi
+              - generic [ref=e289]:
+                - combobox [ref=e290]:
+                  - option "Türkçe" [selected]
+                  - option "English"
+                  - option "Deutsch"
+                - combobox [ref=e291]:
+                  - option "TL" [selected]
+                  - option "USD"
+                  - option "EUR"
+            - generic [ref=e292]:
+              - generic [ref=e293]: Kimlik no biçimi
+              - combobox [ref=e294]:
+                - option "Otomatik — şubenin ülkesine göre" [selected]
+                - option "T.C. Kimlik No (11 hane + kontrol hanesi)"
+                - option "Serbest — biçim kontrolü yok"
+                - option "Özel desen (düzenli ifade)"
+          - generic [ref=e295]:
+            - generic [ref=e296]: Bu tipin varsayılan paketi — Hastane
+            - generic [ref=e297]: "Açık: Randevu · Kayıt Kabul · Muayene · Radyoloji · Lab · Teletıp · e-Nabız · Yatan Hasta · Prim · Stok/UTS · Kasa/Banka · Muhasebe · Doküman · Mesaj/AI · İşyeri Hekimliği · Ameliyathane · Acil Servis · Eczane · Satınalma · Formlar · İnsan KaynaklarıOpsiyonel: Göz · FTR · Diş · TeleradyolojiKapalı: Üretim · Satış/Alış (ERP) · Teknik Servis"
+        - text: ▾ ▾ ▾ ▾ ▾ ▾ ▾ ▾ ▾ ▾ ▾
+  - button "💡 AI Rehber" [ref=e298] [cursor=pointer]:
+    - text: 💡
+    - generic [ref=e299]: AI Rehber

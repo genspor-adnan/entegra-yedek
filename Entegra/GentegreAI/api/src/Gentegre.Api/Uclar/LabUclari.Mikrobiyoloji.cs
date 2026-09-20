@@ -118,7 +118,7 @@ public static partial class LabUclari
             var antibiyogram = await veri.ListeAsync("""
                 select g.id, g.ureme_id, a.kod, a.ad, a.basamak, g.mic, g.mic_isaret,
                        g.zon_mm, g.yorum, g.kaynak, g.standart, g.standart_surum,
-                       g.bildir, g.aciklama, g.degistirme_neden
+                       g.bildir, g.aciklama, g.degistirme_neden, g.kisit_neden
                   from public.lab_antibiyogram g
                   join public.lab_antibiyotik a on a.id = g.antibiyotik_id
                   join public.lab_kultur_ureme u on u.id = g.ureme_id
@@ -134,7 +134,12 @@ public static partial class LabUclari
                            Yorum = o.GetString(8), Kaynak = o.GetInt16(9),
                            Standart = o.GetString(10), StandartSurum = o.GetString(11),
                            Bildir = o.GetInt16(12) == 1, Aciklama = o.GetString(13),
-                           DegistirmeNeden = o.GetString(14) }, iptal);
+                           DegistirmeNeden = o.GetString(14),
+                           // KISIT GEREKCESI (887): satir neden raporlanmiyor.
+                           //   "Kademeli" demek yetmez - uzman, dogal direnc mi,
+                           //   numune uygunlugu mu, ust basamak mi oldugunu
+                           //   gormeden karar veremez.
+                           KisitNeden = o.GetString(15) }, iptal);
 
             return Results.Ok(new { kultur = k, besiyeriler, okumalar, izolatlar,
                                     antibiyogram, izlemeNo = baglam.IzlemeNo });
@@ -174,6 +179,46 @@ public static partial class LabUclari
             var uremeId = await kultur.IzolatAsync(id, istek, baglam, iptal);
             return Results.Ok(new { uremeId, mesaj = "İzolat kaydedildi.",
                                     izlemeNo = baglam.IzlemeNo });
+        });
+
+        // GET /api/lab/izolat/{id}/panel - BU ORGANIZMADA SORULACAK AJANLAR (887).
+        //   509 iki kurali tanimliyordu ama hicbir yer okumuyordu: dogal
+        //   (intrinsik) direnc ve organizmaya ozel panel. Antibiyogram girisi
+        //   tum katalogu listeliyor, boylece dogal direncli ajan bile
+        //   sorulabiliyordu - kisitlama tanimli ama isletilmiyordu.
+        //   fn_lab_antibiyogram_paneli dogal direnclileri CIKARIR, organizmaya
+        //   ozel panel varsa YALNIZ onu verir, yoksa genel kataloga duser.
+        grup.MapGet("/izolat/{id:int}/panel", async (
+            int id, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx,
+            CancellationToken iptal) =>
+        {
+            var baglam = await cozucu.CozAsync(ctx, iptal);
+            baglam.YetkiIste("lab.kultur", Islem.Gor);
+
+            var satirlar = await veri.ListeAsync("""
+                select p.antibiyotik_id, p.kod, p.ad, p.basamak, p.yalniz_uriner
+                  from public.lab_kultur_ureme u
+                  cross join lateral public.fn_lab_antibiyogram_paneli(u.organizma_id) p
+                 where u.id = @p0
+                 order by p.sira, p.basamak, p.ad
+                """, [id],
+                o => new { Id = o.GetInt32(0), Kod = o.GetString(1), Ad = o.GetString(2),
+                           Basamak = o.GetInt16(3), YalnizUriner = o.GetInt16(4) == 1 },
+                iptal);
+
+            // KISITLANAN AJANLAR AYRICA DONER: ekran "bunlar neden sorulmuyor"
+            //   diyebilsin - gizli kisit, denetimde kisit sayilmaz.
+            var disarida = await veri.ListeAsync("""
+                select a.ad, coalesce(nullif(d.sebep, ''), 'Doğal (intrinsik) direnç')
+                  from public.lab_kultur_ureme u
+                  join public.lab_organizma_direnc d on d.organizma_id = u.organizma_id
+                  join public.lab_antibiyotik a on a.id = d.antibiyotik_id
+                 where u.id = @p0
+                 order by a.ad
+                """, [id],
+                o => new { Ad = o.GetString(0), Sebep = o.GetString(1) }, iptal);
+
+            return Results.Ok(new { satirlar, disarida, izlemeNo = baglam.IzlemeNo });
         });
 
         grup.MapPost("/izolat/{id:int}/antibiyogram", async (

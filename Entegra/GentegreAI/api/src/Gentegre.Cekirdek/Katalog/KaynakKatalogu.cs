@@ -381,6 +381,15 @@ public static partial class KaynakKatalogu
         Ekle(LabIstem());
         Ekle(LabTetkik());
         Ekle(LabAkilciKural()); Ekle(LabRefleksKural()); Ekle(LabAkilciGerekce());   // akılcı test istemi (873)
+        Ekle(LabRetNedeni());                                        // numune ret kriterleri (879)
+        Ekle(LabArsiv()); Ekle(LabArsivKonum()); Ekle(LabSaklamaPolitika());  // numune arşivi (890)
+        Ekle(LabTekrar());                                           // test tekrar talepleri (891)
+        Ekle(LabPanik());                                            // panik değer takibi (894)
+        Ekle(AsiKatalogu()); Ekle(AsiUygulama());                    // aşı modülü (898, KTS H10)
+        Ekle(CocukIzlem()); Ekle(CocukBuyumeLms());                  // çocuk izlem (899, KTS H10)
+        Ekle(Gebelik()); Ekle(GebeIzlem());                          // gebelik & izlem (900, KTS H10)
+        Ekle(GebelikSonuc());                                        // gebelik sonucu (902, USS 224)
+        Ekle(BzbhHastalik());                                        // BZBH hastalik listesi (882)
         Ekle(LabPanel());
         Ekle(LabNumune());
         Ekle(LabSonuc());

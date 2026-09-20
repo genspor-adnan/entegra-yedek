@@ -38,6 +38,15 @@ public sealed partial class SorguUretici
     /// <summary>Planlı hekim kullanıcı: kaynağın hekim kolonu (KaynakKatalogu.HekimKolonu) bu id'ye eşitlenir.</summary>
     public int? HekimId { get; init; }
 
+    /// <summary>
+    /// TEST SEVİYESİNDE YETKİ KISITI (889): kullanıcının rolü. Kaynağın
+    /// tetkik kolonu varsa (KaynakKatalogu.TetkikKisitKolonu) satırlar
+    /// <c>fn_lab_tetkik_izin(..., 'gor')</c> ile süzülür. Kısıtı olmayan
+    /// tetkik herkese açık olduğu için kural tanımlanana kadar liste
+    /// değişmez.
+    /// </summary>
+    public int? RolId { get; init; }
+
     private string Ekle(object? deger)
     {
         _par.Add(deger);
@@ -217,6 +226,12 @@ public sealed partial class SorguUretici
         // HEKIM KISITI: hekim yalniz kendine gelen hastalari gorur (KaynakKatalogu.HekimKisiti).
         if (HekimId is { } hekim && KaynakKatalogu.HekimKolonu(_kaynak.Ad) is { } hk)
             parcalar.Add($"{hk} = {Ekle(hekim)}");
+
+        // TEST SEVIYESINDE YETKI KISITI (889): kisitlanmis tetkikin sonucunu
+        //   yalniz izinli roller gorur. Yetkisiz satir HIC donmez - yanittan
+        //   sonradan silinseydi sayim ve toplamlar yine onu sayardi.
+        if (RolId is { } rol && KaynakKatalogu.TetkikKisitKolonu(_kaynak.Ad) is { } tk)
+            parcalar.Add($"public.fn_lab_tetkik_izin({tk}, {Ekle(rol)}, 'gor')");
 
         // Kayit kapsami (eski YETKIALANI): satir varsa yalniz o kayitlar gorunur.
         if (kapsamTarafIdleri is { Count: > 0 } && _kaynak.KapsamKolonu is { } kk)

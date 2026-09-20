@@ -1,0 +1,34 @@
+SMS Tanımları;
+KullaniciAdi     : 202307032200
+Parola             : 2023gen.
+BayiKodu         : 397
+SmsBaslik        : GENYAZILIM
+
+Adres; 
+xml post şeklinde olacak.
+http://sms.ayyildiz.net/SendSmsMulti.aspx
+
+İleri tarihli SMS gönderimler için;
+SDate : ddmmyyyyhhnn formatında olacak.
+EDate: ddmmyyyyhhnn formatında olacak.
+Anlık gönderimde ikisinin de tagı olsun ama değeri boş olacak. Örnekteki gibi;
+Tek seferde çoklu sms için <Messages> grubu içindeki  <Message> çoklanabilir.
+
+<?xml version="1.0" encoding="UTF-8"?>
+<MainmsgBody>
+  <UserName>KullaniciAdi</UserName>
+  <PassWord>Parola</PassWord>
+  <CompanyCode>BayiKodu</CompanyCode>
+  <Type>12</Type>
+  <Developer></Developer>
+  <Version>xVer.2016.0</Version>
+  <Originator><![CDATA[SmsBaslik]]></Originator>
+  <Messages>
+    <Message>
+      <Mesgbody><![CDATA[Sistem test mesajıdır. Türkçe karakterler yazılabilir]]></Mesgbody>
+      <Number>905xxxxxxxxx</Number>
+      <SDate></SDate>
+      <EDate></EDate>
+    </Message>
+  </Messages>
+</MainmsgBody>

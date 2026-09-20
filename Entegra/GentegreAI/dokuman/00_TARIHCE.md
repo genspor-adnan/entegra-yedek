@@ -16334,3 +16334,1414 @@ testte).
 
 Push: Claude oturumu `git push` yapamıyor (araç izni); kullanıcı elle atar
 (`git -C C:\Users\HP\Entegra push origin pg-migration`).
+
+---
+
+## 19.09.2026 (akşam) — KTS denetim listesi + diş maddeleri (874-876)
+
+Kullanıcı `Ekranlar/Dis Klinigi/` altına üç **Kayıt Tescil Sistemi Denetim Sonuç
+Raporu** ekledi (HBYS · DHBS · LBYS, denetim tarihi 26.08.2025, **önceki ürüne**
+yapılmış). HBYS **başarısız**; DHBS ve LBYS hiç denetlenmemiş - soru listeleri
+bir sonraki denetimin gündemi.
+
+**Denetim önceki ürüne yapıldığı için liste bir kusur listesi değil, gereksinim
+listesidir.** 63 madde tek tek Gentegre AI karşılığıyla eşlendi (kod ve göç
+okunarak): 11 var · 23 kısmi · 29 yok → `dokuman/16_KTS_DENETIM_IS_LISTESI.md`,
+özeti `12_KALAN_ISLER.md` § 6. Öncelik sırası bağımlılığa göre kuruldu; ilk
+sırada **H7 e-Nabız hasta mesajı** var, çünkü tek başına dört maddeyi açıyor
+(H1 · D14 · D16 · D17).
+
+Bu turda sıranın **9. kalemi (diş maddeleri)** yapıldı.
+
+### D1 — protez iş emri barkotlama (874)
+
+**Yeni numara üretilmedi.** İş emrinin zaten benzersiz `isemri_no`'su var
+(LB-yyyy/nnnn); barkot onu makinenin okuyacağı biçimde basmaktır. İkinci sayaç,
+laboratuvara giden kâğıtta bir numara sistemde başka numara bırakırdı.
+
+- `fn_dis_isemri_barkod_coz` toleranslı çözer (noktalama ve büyük/küçük harf
+  farkı yok sayılır - okuyucular '/' yerine boşluk yazabiliyor).
+- `v_dis_lab_isemri_etiket` + `/dis-lab/etiket` sayfası: Code 128 (mevcut
+  `barkod128.ts`), 70×40 mm etiket (tüp etiketi 50×25'e diş numarası, malzeme ve
+  renk sığmıyordu), basım sayacı.
+- Kanban'da **okutma kutusu**: okutulan iş bir aşama ilerler. Aşama satırı
+  `kaynak = 2` (barkot) ile yazılır - denetimde "barkotla takip ediliyor"
+  iddiasının kanıtı bu ayrımdır. Aşama ilerletme artık tek yol
+  (`AsamaIlerletAsync`), ekran ve barkot aynı kuralı paylaşır.
+
+### D7 · D8 — diş şeması (874)
+
+D7 (mevcut/planlanan/tamamlanan karşılaştırması) listeye yanlışlıkla "kısmi"
+yazılmıştı: 706'dan beri katman çipleri ve ayrı çizim var, iş çıkmadı.
+
+D8 **yapıldı**: dişin üstüne gelince o dişe yapılmış işlemler görünüyor - SVG
+ipucunda son beş işlem, ayrıca şemanın altında sabit yükseklikli şerit
+(dokunmatikte ve baskıda ipucu yoktur; şerit yüksekliği sabit ki fare dişten
+dişe gezerken şema zıplamasın). Veri hasta kartıyla zaten geliyordu, ek istek
+açılmadı.
+
+### D9 — ortodonti ICON skoru (875)
+
+`dis_icon_skor`: beş bileşen (estetik IOTN-AC 1-10 ×7 · üst ark 0-4 ×5 · çapraz
+0/1 ×5 · dikey 0-4 ×4 · bukkal 0-4 ×3). **Ağırlıklar ve eşikler şemada durur:**
+toplam `fn_dis_icon_toplam` ile üretilmiş kolon, karmaşıklık ve iyileşme birer
+fonksiyon, ekrandaki canlı önizleme de aynı fonksiyonu çağırıyor - para
+hesabındaki ders (tek hesap, tek yer) burada da geçerli. Sınırlar CHECK
+kısıtında: ekranın doğrulamasına güvenmek, API'den gelen 12'lik estetik puanını
+skoru sessizce şişirerek kabul etmek olurdu.
+
+Üç soruya cevap verir: ihtiyaç (>43), karmaşıklık (5 bant), sonuç (tedavi
+sonrası ölçüm önceki ölçüme bağlanır; iyileşme `önce − 4 × sonra`). Bağ
+verilmezse hastanın son "tedavi öncesi" ölçümü kendiliğinden bağlanır.
+
+Ekran: hasta kartında **📐 Ortodonti (ICON)** sekmesi - puan düğme şeridi
+(sayıyı yazmak yerine seçmek), canlı toplam/karmaşıklık, liste ve yazdırılabilir
+rapor. Yetki `dis.icon` ayrı (ortodontist olmayan hekime kapatılabilmeli).
+
+**Kurulumda doğrulanacak:** ağırlıklar, 43 eşiği ve bantlar indeksin yayımlanmış
+tanımındandır; klinik sorumlu bir kez onaylamalı.
+
+### D18 — ADSM Ağız ve Diş Sağlığı paketi (876) — bilerek yarım
+
+105'teki durumun aynısı: rehber paketin **adını** veriyor, USS numarasını ve
+eleman adlarını vermiyor (102/103/106'nın şeması da kılavuzdan değil, servisin
+hata mesajlarından çıkmıştı). Bu yüzden paket **kapalı** kuruldu
+(`aktif = 0`, `uss_paket_kodu = '000'`) - `UretAsync` kapalı türde satır açmaz.
+
+Hazır olan: içerik görünümü `v_dis_agiz_dis_paket` (başvuru başına yapılan diş
+işlemleri + mevcut odontogram + DMFT), üretici dalı (şimdilik yalnız
+SYSTakipNo) ve seans bitişi tetiği (`DisSeansiBittiAsync`). Açmak için numara
+rehberden yazılır, `aktif = 1` yapılır, USS'nin saydığı eksik eleman adları
+üretici dalına eklenir.
+
+### Doğrulama
+
+Göçler docker `gentegre-pg18`'e uygulandı; API ve web derlendi. Tarayıcıda
+(Playwright/Edge) uçtan uca denendi:
+
+| Ne | Sonuç |
+|---|---|
+| ICON formu | 5·2·1·2·2 → canlı **64 · "Tedavi ihtiyacı var" · "Zor"**; kaydedildi (kayıt #3), `islem_log` 1142 satırı yazıldı. SQL tarafı ayrıca sınır değerlerle sınandı (28/29/51/78 → kolay/hafif/orta/çok zor; iyileşme 1/2/4/5) |
+| Diş geçmişi şeridi | Diş 16'ya gelince "16.09.2026 · Amalgam Dolgu, Bir Yüzlü (MO)" - ipucu ve şerit aynı metni verdi (test satırı sonra silindi) |
+| Protez etiketi | LB-2026/0003 için Code 128 etiket, 2 kopya, hasta/diş/iş/lab bilgisi |
+| Barkot okutma | "lb-2026 0003" (küçük harf, '/' yerine boşluk) okutuldu → aşama 2→3, satır `kaynak = 2`. Test sonrası aşama 2'ye geri alındı |
+
+**Dev veritabanında kalan:** ICON kaydı #3 (hasta 5277) - ekrandan incelensin
+diye bilerek bırakıldı. Diğer test verileri geri alındı.
+
+**Not (bu turda çıkan, ilgisiz):** `web/src/test/akilciIstem.test.ts` 873'ten
+beri üç tip hatası veriyor (`kod` alanı `{ tablo, adet, ad? }` tipinde yok) ve
+`npm run build` bu yüzden kırık. Bu turun değişikliklerinden bağımsız.
+
+## 19.09.2026 (gece) — e-Nabız hasta mesajı (877) + diş işlem seçimi jenerik pencereye
+
+### H7 / D14 — hekimden hastanın e-Nabız profiline düz metin mesaj
+
+Denetim sırasının 1. kalemi: tek başına dört maddeyi açıyor (H1 · D14 · D16 · D17).
+
+**Kuyruklu yazıldı.** Uç yalnız KAYDEDER (`enabiz_mesaj`, durum 0), gönderimi
+zamanlı iş `enabiz.mesaj` (15 dk) yapar. Hekim Bakanlık servisi yavaşken ekran
+başında beklemesin, servis cevap vermezse mesaj kaybolmasın.
+
+**Neden `bildirim` kuyruğu değil:** `bildirim` kurumun kendi SMS/e-posta kanalı -
+alıcısı telefon, göndereni kurum. Buradaki mesajın alıcısı hastanın e-Nabız
+profili, göndereni HEKİM. Yanıt kodu, hekim kimliği ve tetikleyen olay bu kayda
+ait; iki farklı işi tek tabloda birleştirmek olurdu.
+
+**Otomatik mesajlar aynı tabloya düşecek** (`kaynak`: 1 elle · 2 numune reddi ·
+3 randevu/işlem iptali · 4 sonuç bilgilendirme). H1/D16/D17 için kalan tek şey
+olay yerinden `EnabizMesajServisi.KuyrugaAlAsync` çağırmak.
+
+**KAPI KAPALI KURULDU ve bu bilinçli.** Resmî kılavuz (SBYS Entegrasyon
+Kılavuzu, 05.04.2017) kapsamında "hastalara bilgilendirme mesajlarının
+gönderilmesi" yazıyor ama TEK metot tanımlıyor: `DoktorEHRErisimi`. Mesaj
+metodunun adı ve alanları yok. Uydurulmuş bir ad her turda gerçek bir hata
+kaydı üretirdi; onun yerine:
+
+- `entegrasyon_hesap` satırı `ENABIZ_HBYS` **pasif** (adres kılavuzdan sabit),
+- metot adı `referans.enabiz.mesaj_metot` - **boş**,
+- kapı kapalıyken kuyruk satırı HATA'ya düşmez: sebep `son_hata`'ya yazılır,
+  satır bekler. Kapı açılınca elle temizlik gerekmesin.
+
+Gönderici, kılavuzdaki `DoktorEHRErisimi` örneğinin zarfını birebir kullanıyor
+(WS-Security UsernameToken + PasswordText, `tempuri.org` metot elemanı,
+`NabizHBYS` veri sözleşmesi alanları). Metot adı öğrenildiğinde değişecek tek
+yer `GovdeUret` ve o ayar satırı.
+
+**Ekran:** muayene kartı araç çubuğu ve diş hasta kartında "💬 e-Nabız Mesajı".
+Modal: 500 karakter metin, üç hazır metin, hastanın mesaj geçmişi, kuyruktan
+vazgeçme. **Kapı kapalıysa ekran bunu söylüyor** - hekimin "gönderdim"
+sanması, hastaya ulaşmayan bir bilgilendirme bırakırdı. Düğme `aksiyonVar`
+ile kontrol ediliyor (`enabiz.mesaj` AKSİYON yetkisi, tur 1; `yetki()` yalnız
+KAYNAK yetkilerine bakar - 438'deki ders).
+
+**Doğrulama** (dev, uçtan uca):
+
+| Senaryo | Sonuç |
+|---|---|
+| Kimliksiz hekimle mesaj | 422 "Gönderen hekimin kimlik numarası kayıtlı değil" (admin kartında vkno yok) |
+| Mesaj yaz | kuyruğa alındı (durum 0), `islem_log` 1143 satırı |
+| Kapı kapalı kuyruk turu | "0 gönderildi, 1 kuyrukta", satır durumu değişmedi, sebep `son_hata`'da |
+| Ulaşılamayan adres | deneme 1, satır kuyrukta, hata metni kaydedildi (azami 8 denemeden sonra durum 2) |
+| Sahte SOAP ucu (başarılı yanıt) | durum 1, `yanit_kod = OK`, `ServisMesaji` kaydedildi; giden zarf doğrulandı (Username/Password, `tem:HastayaMesajGonder`, `nab:HASTA_KIMLIK_NUMARASI` / `HEKIM_KIMLIK_NUMARASI` / `KURUM_KODU` / `MESAJ`) |
+
+Deneme sonrası hesap ve ayar **kapalı duruma geri alındı**; mesaj kaydı (id 1)
+ekrandan görülebilsin diye bırakıldı.
+
+**H6 için de şartname çıktı** (aynı kılavuz): `DoktorEHRErisimi` → `AccessKey` →
+`HastaBilgisiKontrol.aspx?keyH=` adresini tarayıcıda açmak. 877'nin hesabı ve
+SOAP iskeleti hazır olduğu için H6 artık küçük bir iş.
+
+### Diş: "seçili dişe işlem ekle" jenerik hizmet penceresine bağlandı
+
+Kullanıcı: *"diş hasta kartında seçili dişe işlem ekle butona basınca hizmet
+ekleme jenerik ekranımızla ekleyelim"*.
+
+Diş kartının kendi arama tablosu vardı (`/api/dis/islemler` + satır içi liste).
+Aynı işi yapan iki arama ekranı, hizmet kataloğuna eklenen her yeniliğin (sık
+kullanılanlar, kısa ad önceliği, kategori süzgeci, yetki) diş tarafında eksik
+kalması demekti. Artık `KaynakArama kaynak="hizmet"` açılıyor.
+
+`hizmet` kaynağına gizli `disIslem` kolonu eklendi (`labVarMi` ile aynı
+gerekçe): süzgeç olmadan bütün SUT kataloğu açılıyor ve seçilenin çoğu diş
+işlemi değil. İndirim ve seans kutuları seçim penceresinden kalktı - fiyat ve
+seans zaten sunucudan (hizmet kartı + fiyat listesi) geliyor, indirim plan
+kartının işi; hekimi hizmet seçerken pazarlık ekranına sokmak doğru değildi.
+
+Tarayıcıda denendi: pencere "Genel diş işlemi ara" başlığıyla açıldı, yalnız
+diş işlemleri listelendi, seçilen hizmet plan satırı olarak eklendi (fiyat
+3.753,50 sunucudan). Test satırı sonra silindi.
+
+## 19.09.2026 (gece, devam) — e-Nabız hekim erişimi (878) + diş işlem seçimi düzeltmesi
+
+### H6 / D15 — hekimin hastanın e-Nabız kayıtlarına erişimi
+
+Bu maddenin şartnamesi 877 turunda bulunan kılavuzda TAM tanımlı, o yüzden
+kapısı da yok: `DoktorEHRErisimi` çağrılır, dönen `AccessKey` paylaşım
+adresinin sonuna eklenir, adres tarayıcıda açılır. Hekim orada e-Devlet ile
+girer; hasta verisini gizlemişse aynı ekran SMS onayı ister.
+
+**Ortak SOAP istemcisi çıkarıldı** (`EnabizPortalIstemcisi`): mesaj (877) ve
+erişim (878) aynı uca, aynı kimlikle gidiyor. Ayrı yazılsaydı Bakanlık kimlik
+doğrulamayı değiştirdiğinde iki yerin biri sessizce eski kalırdı. Mesaj servisi
+de bu istemciye taşındı (kendi zarf/hesap kodu silindi).
+
+**Anahtar saklanmaz.** `AccessKey` geçici bir erişim kimliğidir; veritabanına
+yazmak, veritabanını okuyan herkese o hastanın kayıtlarına açılan bir kapı
+bırakmaktı. Kayda yalnız ilk 8 karakteri girer - Bakanlık tarafındaki kayıtla
+eşleştirmeye yeter, kapıyı açmaya yetmez.
+
+**Her deneme kayda geçer** (başarısız olan da): `enabiz_erisim` + ISLEMLOG
+(1144). Sebep denetimden önce KVKK - "hangi hekim, hangi hastanın kayıtlarına,
+ne zaman erişmek istedi" sorusunun cevabı kurumda durmalı. Kayıt servis
+çağrısından ÖNCE açılır (sonuç 0 = istendi): çağrı patlasa bile iz kalsın.
+
+**Ekranda sekme istekten ÖNCE açılır:** tarayıcılar yalnız kullanıcı
+tıklamasının hemen ardından gelen `window.open`'a izin veriyor; `await` sonrası
+açılan pencere engelleniyordu ve hekim "bir şey olmadı" diyordu. Adres gelince
+aynı sekmeye yazılıyor, hata gelirse sekme kapatılıyor.
+
+Doğrulama (dev): hesap pasifken anlaşılır hata; sahte `DoktorEHRErisimi` ucuyla
+`AccessKey` alındı, adres kılavuzdaki biçimde üretildi, kayıt `sonuc = 1` +
+`anahtar_onek = 417f131c`; giden zarf kılavuzdaki örnekle birebir
+(`KURUM_KODU` / `HEKIM_KIMLIK_NUMARASI` / `HASTA_KIMLIK_NUMARASI`); ulaşılamayan
+uçta `sonuc = 3` ve hata metni kaydedildi. Tarayıcıda kimliksiz hekimle
+denendiğinde boş sekme kapandı ve hata görüldü. Hesap deneme sonrası kapatıldı.
+
+### Diş: işlem seçimi DOĞRU pencereye bağlandı
+
+Kullanıcı düzeltti: *"başvuruda ücret ekleme de açılan hizmet stok arama
+ekranını kastetmiştim"*. İlk denemede `KaynakArama` (ICD/ilaç tipi tek satır
+seçtiren pencere) bağlanmıştı; doğrusu `StokAramaPenceresi`.
+
+Fark önemli: bu pencere kullanım puanına göre sıralıyor, kategori ağacı,
+fiyat listesi kolonu, "1 Adet Ekle (Enter)" ve **seçimden sonra kapanmama**
+davranışı onda. Diş planına da bu davranış uyuyor - hekim aynı ağza birkaç
+işlemi üst üste ekliyor. `yalnizHizmet` + `hizmetEkFiltre: disIslem = 1` ile
+açılıyor, eklenen kalem sayacı pencerenin başlığında görünüyor.
+
+## 19.09.2026 (gece, devam) — numune ret kriterleri + ret → e-Nabız mesajı (879)
+
+Denetim sırasının 3. kalemi: **L6** (ret kriterleri tanımlanabiliyor mu) ve
+**H1 / D16** (numune reddinde hastaya e-Nabız mesajı).
+
+**Önce bir düzeltme:** iş listesinde "lab'da hiç ret kavramı yok" yazmıştım,
+yanlıştı. Ret AKIŞI 433'ten beri var - numune reddedilir, tetkikler "tekrar
+numune bekliyor"a düşer, hareket kaydı yazılır. Eksik olan iki şey vardı ve
+denetimin sorduğu da tam olarak onlardı: nedenlerin TANIMLANABİLİR olmaması ve
+hastanın haberdar edilmemesi.
+
+### L6 — ret kriterleri artık tanım
+
+Sekiz ret nedeni koda gömülüydü: bir kopyası `labAksiyonlari.ts`'te, bir
+kopyası `labKodlari.ts`'te, bir de şema yorumunda. Laboratuvar kendi kalite el
+kitabındaki ölçütleri (taşıma sıcaklığı, süre aşımı, etiket-hasta uyuşmazlığı…)
+giremiyordu.
+
+`lab_ret_nedeni` tablosu geldi; **kod uzayı 433 ile aynı tutuldu** - geçmiş
+numunelerin `ret_neden` / `kalite` değerleri o kodlara bağlı, yeniden
+numaralandırmak eski kayıtların anlamını sessizce değiştirirdi. 15 satırla
+tohumlandı: 433'ün dokuz kodu + altı standart preanalitik kriter.
+
+Her kriterin iki bayrağı var, iki ayrı soruya cevap veriyor:
+`kabulde_secilebilir` (numuneyi reddettirmeden kalite notu olarak seçilebilir
+mi - "hafif lipemik ama çalışıldı") ve `hasta_bilgilendir` (bu nedenle
+reddedilince hastaya mesaj gitsin mi). Ekranlar artık tek kaynaktan besleniyor:
+ret penceresinin seçenekleri de, kabuldeki kalite listesi de aynı satırlardan.
+Tanım ekranı: **Laboratuvar › Ayarlar › Numune Ret Kriterleri**.
+
+### H1 / D16 — ret hastanın e-Nabız profiline düşüyor
+
+Ret ile bilgilendirme **aynı işlemde**: ya birlikte olur ya hiç. Reddedilmiş
+ama hastanın haberi olmayan numune, denetimin tam da sorduğu boşluktu.
+
+Üç kapı var ve üçü de kapalıysa ret işlemi bilgilendirme yüzünden DÜŞMEZ:
+kurum ayarı (`lab.ret_enabiz_bildir`), kriterin `hasta_bilgilendir` bayrağı,
+hastanın kimlik numarası. Varsayılanlar özenle seçildi: "etiketsiz tüp" ya da
+"etiket-hasta uyuşmazlığı" kurumun kendi hatasıdır, hastaya mesaj atmak onu
+gereksiz endişelendirir - o kriterlerde bayrak 0.
+
+Mesajı **istemi açan hekim** yazar: e-Nabız'da gönderen kurum değil hekimdir
+ve numuneyi reddeden teknisyenin hekim kimliği yoktur. Metin kriterin kendi
+şablonundan gelir ("12 saat açlık sonrası yeniden numune veriniz" gibi); şablon
+boşsa genel metin (`lab.ret_mesaj_sablonu`). Mesaj 877'nin kuyruğuna girer.
+
+### Doğrulama (dev, uçtan uca)
+
+| Senaryo | Sonuç |
+|---|---|
+| `GET /lab/ret-nedenleri` | 15 kriter, kabulde/mesaj bayraklarıyla |
+| Hemolizli ret | numune durum 0 + satır durum 6 + **mesaj kuyrukta** (`kaynak = 2`, kaynakId = numune, hekim = istemi açan) |
+| Etiketsiz ret | ret var, **mesaj yok** (kriter bayrağı 0) |
+| Kurum ayarı 0 iken hemolizli ret | ret var, **mesaj yok** |
+| Tanım ekranı | liste 15 satır, kart açılıyor (kod alanı zorunlu) |
+
+Dev'de **6709 numaralı numunenin reddi ve mesajı ekrandan incelensin diye
+bırakıldı**; öteki iki deneme reddi geri alındı.
+
+## 19.09.2026 (gece, devam) — USS paket listesi bulundu + 252 Konsültasyon (880)
+
+### Önce keşif: paket numaraları kılavuzda değil, REHBER SİTESİNDE
+
+876 ve 877'de "rehber paketin adını veriyor, numarasını vermiyor" diye iki
+paketi kapalı kurmuştuk. Bu doğru değilmiş: `rehber.enabiz.gov.tr` menüsünde
+**118 paketin numaralı listesi** duruyor ve her paketin kendi şema sayfası var
+(alan adları, zorunluluk, tekrar, SKRS `codeSystemGuid`'leri ile). Sayfa
+JavaScript ile çizildiği için `WebFetch` menüyü görüyor ama paket sayfasını
+açamıyor; tarayıcı otomasyonuyla (Playwright) tıklayıp okundu.
+
+Bu turda üç paketin şeması alındı: **252 Konsültasyon**, **203 Ağız ve Diş
+Sağlığı**, **411 Doktor Mesajı**. Önemli sonuç: **hastaya mesaj bir USS
+PAKETİDİR** (411), NabizHBYS.svc üzerinde ayrı bir SOAP metodu değil - 877'nin
+gönderim yolu buna göre değiştirilmeli (kuyruk, ekran ve kayıt tarafı aynen
+kalır, değişecek olan taşıma).
+
+### H2 / D20 — 252 Konsültasyon Kayıt paketi
+
+Eski denetimde **"Hatalı"** bulunan beş maddeden biriydi.
+
+Şema: `KONSULTASYON_BILGISI` (tekrarlı) altında işlem referansı, başlama/bitiş
+zamanı, talebi yapan ve cevap veren hekim kimlikleri; `TANI_BILGISI` (SKRS
+tanı türü + ICD10, guid'ler 103'tekiyle birebir aynı); **zorunlu**
+`KONSULTASYON_NOTU_BILGISI` grubu (başlık + açıklama) ve `SYSTakipNo`.
+
+Kaynak, konsültasyon muayenesinin kendisi: bizde konsültasyon ayrı bir tablo
+değil, `ust_muayene_id` ile bağlı bir MUAYENE satırıdır (465) - soru isteyenin
+cümlesi, yanıt cevaplayanın kararı aynı satırda. Notlar iki satır olarak
+gidiyor: "Konsültasyon isteği" (soru) ve "Konsültasyon yanıtı" (karar); yanıt
+boşsa o grup hiç açılmıyor ("açılan grubun içi tam olmalı" kuralı).
+
+**Konsültasyon muayenesi 106 (çıkış) ÜRETMEZ:** hasta çıkışı asıl muayenenin
+işidir, konsültasyon ayrı bir başvuru değildir; iki çıkış bildirimi göndermek
+aynı başvuruyu iki kez kapatmak olurdu. Tamamlama ucu artık konsültasyonda
+`MUAYENE + KONSULTASYON`, normal muayenede `MUAYENE + HASTA_CIKIS` üretiyor.
+
+Doğrulama: dev'de konsültasyon muayenesi kuruldu (soru + yanıt + tanı),
+tamamlandı → `EN-002921` paketi **12 alanla, eksik alan olmadan** üretildi;
+alan yolları rehberdeki şemayla birebir. Kayıt ve paketler ekrandan incelensin
+diye bırakıldı, deneme takip numarası geri alındı.
+
+Ayrıca 876'daki ADSM paketinin numarası **203** olarak yazıldı; paket hâlâ
+kapalı - elemanları SKRS diş kod listelerine (müdahale, diş kodu, mevcut diş
+durumu) eşleme istiyor ve yanlış kodla gönderilen paket hastanın dosyasına
+yanlış müdahale yazardı.
+
+## 19.09.2026 (gece, devam) — hasta mesajı 411 paketine çevrildi (881)
+
+877'de mesajı `NabizHBYS.svc` üzerinde ayrı bir SOAP metoduyla göndermeyi
+tasarlamış, "metot adı kılavuzda yok" diye kapıyı kapalı bırakmıştık. Rehberin
+paket listesi bulununca doğrusu ortaya çıktı: **hastaya mesaj bir USS
+PAKETİDİR** — 411 Doktor Mesajı. Yani 101/102/103 ile aynı kuyruktan, aynı
+`SYSSendMessage` çağrısıyla gidiyor; ayrı hesap, ayrı metot adı, ayrı kapı
+gerekmiyor.
+
+**Değişen yalnız taşıma.** Kuyruk tablosu, ekran, yetki, otomatik mesaj
+tetikleri (numune reddi 879) ve "kuyrukta bekler, gönderimi arka plan yapar"
+davranışı aynen kaldı. `EnabizMesajServisi` artık SOAP çağırmıyor, **paket
+üretiyor**; gönderim tek yerde (`enabiz.gonder`) - iki ayrı gönderici, USS
+oturumunu ve hata yorumlamasını iki kez yazmak demekti.
+
+**Mesaj türü artık uydurma değil.** SKRS'nin "HASTA MESAJLARI" listesi
+servisten çekilip doğrulandı: 1 Randevu iptali · 2 Numune reddi · 3 Laboratuvar
+panik değer · 4 Doktorun mesajı · 5 Protez randevusu iptali. 877'de kendi
+tanımladığımız `kaynak` kodları bu listeye eşlendi (`fn_enabiz_mesaj_turu`).
+Numune reddi mesajı Bakanlığın kendi "NUMUNE REDDI" türüyle gidiyor - listede
+panik değer ve protez randevu iptali de var, ikisi de ileride bağlanacak
+(L2 panik bildirimi zaten var, D17 protez randevusu da).
+
+**Yol boyunca çıkan kusur — erken üretilen paket saplanıyor.** İlk sürüm takip
+numarası gelmeden de paket üretiyordu; paket "eksik alan" durumunda açılıyor,
+ama `SYSTakipNo` içerik parmak izine GİRMEDİĞİ için (101'in kendi kuralı)
+numara sonradan geldiğinde "aynı içerik → aynı paket" koruması aynı eksik
+paketi geri döndürüyordu. Yani mesaj sonsuza kadar numarasız kalıyordu.
+102 ve 105'teki kural buraya da alındı: **takip numarası yoksa paket hiç
+üretilmez**, mesaj kuyrukta bekler ve sebebi ekranda görünür.
+
+Doğrulama (dev):
+
+| Senaryo | Sonuç |
+|---|---|
+| Takip numarası yokken kuyruk turu | paket üretilmedi, mesaj kuyrukta, sebep: "takip numarası henüz gelmedi" |
+| Takip numarası gelince | `EN-002934` paketi üretildi, mesaj "Gönderildi", 4/4 zorunlu alan dolu |
+| Elle yazılan mesaj | tür "Doktorun mesajı" (SKRS kod 4), paket `EN-002932` |
+| Numune reddinden doğan mesaj (879) | tür **"Numune reddi" (SKRS kod 2)**, metin ret kriterinin şablonundan |
+
+877'nin `enabiz.mesaj_metot` ayarı artık kullanılmıyor; satır silinmedi, açıklaması
+"KULLANILMIYOR (881)" olarak güncellendi. `ENABIZ_HBYS` hesabı duruyor - onu
+H6 (hekim erişimi) kullanıyor.
+
+## 19.09.2026 (gece, devam) — BZBH bildirim akışı ve 214 paketi (882)
+
+Eski denetimin "Hatalı" beşlisinden bir diğeri: *"Bildirimi Zorunlu Bulaşıcı
+Hastalık (BZBH) iş akışı doğru işliyor mu?"* — bizde akış hiç yoktu.
+
+### Akış: tanı → taslak → bildirim → paket
+
+Muayene tamamlanırken tanılar BZBH listesiyle eşleştiriliyor; eşleşen her tanı
+için **bekleyen** bir bildirim satırı açılıyor ve hekime uyarı düşüyor
+("1 tanı bildirimi zorunlu bulaşıcı hastalık listesinde"). Bildirim, vaka tipi
+ve klinik belirti başlangıcı girilince **214 Bulaşıcı Hastalık Bildirim**
+paketine dönüşüyor.
+
+**Taslak kendiliğinden açılır ama kendiliğinden gönderilmez.** 214'ün iki
+zorunlu alanı (VAKA_TIPI ve KLINIK_BELIRTILERIN_BASLADIGI_TARIH) tanıdan
+çıkarılamaz - şüpheli mi kesin mi olduğunu, belirtilerin ne zaman başladığını
+hekim söyler. Otomatik gönderim "kesin vaka" diye bildirilen şüpheli vakalar
+üretirdi; bildirimi hiç açmamak ise denetimin bulduğu boşluktu. Ortası: kayıt
+açılır, ekranda bekler, **süresi işler**.
+
+**Vazgeçmek de bir karardır:** "tanı yanlıştı, bildirim gerekmiyor" gerekçesiz
+kapatılamıyor - denetimde "neden bildirilmedi" sorulur.
+
+### Hastalık listesi kurumun
+
+Bakanlığın BZBH tebliği (Grup A-D) zaman zaman değişiyor; listeyi koda gömmek
+her değişiklikte yeni sürüm demekti. `bzbh_hastalik` **ICD önekiyle** eşleşiyor
+(bir "A15" satırı bütün tüberküloz alt kodlarını yakalar; en uzun önek kazanır,
+"A15.0" ayrı kural olabilir). Tohum liste **34 çekirdek Grup A hastalığı** ve
+hepsi `dogrulandi = 0` ile geliyor - listenin tebliğin tamamı olduğu iddia
+edilmiyor, enfeksiyon kontrol komitesi ekrandan gözden geçirip işaretliyor.
+
+### 214 paketi
+
+Şema rehberden okundu. Kimlik grubu açılıyor (kimlik no, ad, soyad, doğum
+tarihi, cinsiyet - SKRS kodlu); **ad/soyad `taraf.unvan`dan bölünüyor** çünkü
+hasta kartında ayrı kolonlar yok (bilinçli karar). **Adres grupları
+(MERNIS_ADRESI / BEYAN_ADRESI) açılmıyor:** il/ilçe SKRS kod sistemleriyle
+kodlu ve bizim adres kayıtlarımızda o kodlar henüz yok - yarım grup göndermek
+hatalı adres bildirmek olurdu.
+
+### Doğrulama (dev, uçtan uca)
+
+| Senaryo | Sonuç |
+|---|---|
+| ICD eşleşmesi | `A15.0` → Tüberküloz · `B15.9` → Akut viral hepatit A · `J06.9` → eşleşme yok |
+| Muayene tamamlandı (tanı A15) | 1 bekleyen bildirim açıldı, hekime uyarı düştü |
+| Eksik alanla "Bildir" | 400: vaka tipi, belirti tarihi ve takip numarası tek tek sayıldı |
+| Vaka tipi + belirti tarihi ile | **EN-002947** paketi, **12 alan**, eksik yok (VAKA_TIPI kod 3 "Kesin vaka", TANI_TURU 1, cinsiyet 1) |
+| Pano | bekleyen/bildirilen/geciken sayaçları, Grup A rozeti, paket numarası |
+| Hastalık listesi ekranı | 34 kayıt, kart açılıyor |
+
+Dev'de tüberküloz bildirimi ve paketi ekrandan incelensin diye bırakıldı.
+
+**Not:** bir test turunda 516 testin biri kırmızı geldi; testler API sunucusuyla
+aynı anda başlatıldığı için veritabanı çakışması. Yalnız başına iki kez
+koşuldu, ikisinde de 516/516 yeşil.
+
+## 19.09.2026 (gece, devam) — 409 Radyoloji Sonuç paketi (883)
+
+H10'un altı paketinden **kaynak verisi olan tek paketi** yazıldı: 409 Radyoloji
+Sonuç Kayıt (D19 ile aynı madde).
+
+**Tetik rapor ONAYINDA.** Onaylanmamış rapor hastanın dosyasına da girmez,
+e-Nabız'a hiç girmemeli - 105'teki (lab sonucu) kuralın aynısı. Paket üretimi
+sessiz: e-Nabız ikincil iş, raporun onayı onun başarısına bağlı değil.
+
+**Rapor bölümleri sonuç grubuna dönüşüyor.** Bizde rapor "Teknik / Bulgular /
+Sonuç ve Öneriler" bölümlerinden oluşuyor (809 Bakanlık profili), 409'un
+`RAPOR_SONUC_BILGISI` grubu da başlık + açıklama çiftleri istiyor: bire bir
+eşleşiyor. Metni tek parçaya yapıştırmak bölümlerin adını kaybetmek olurdu.
+**Yazdırılmayan bölüm gönderilmiyor** (`yazdir = 0`) - rapor içindeki iç notlar
+hastanın dosyasına düşmemeli.
+
+`ISLEM_REFERANS_NUMARASI` şemanın kendi notuna uyuyor: "102'de gönderdiğiniz
+referansı gönderin" - biz 102'de `belge_satir.id` gönderiyoruz, 409'da da
+istemin belge satırı gidiyor. LOINC `hizmet.loinc`'ten (872) ve SKRS radyoloji
+LOINC guid'iyle kodlu; LOINC'i olmayan radyoloji hizmetleri için
+`v_radyoloji_loinc_eksik` görünümü eklendi - Bakanlık veri kalitesi ölçümünde
+LOINC'siz sonuç "eksik" sayılıyor, kurum hangi hizmetlerin eksik olduğunu
+görebilsin.
+
+Doğrulama: dev'de rapor 112 onaylandı → **EN-002978**, 10 alan, eksik yok;
+üç rapor bölümü `RAPOR_SONUC_BILGISI[1..3]` olarak çıktı. Deneme için istemi
+geçici olarak takip numaralı bir başvuruya bağlamıştım, **bağ geri alındı**.
+
+### H10'un kalan beşi yazılmadı - sebebi kayda geçti
+
+Aşı (207), Gebe İzlem (221), Gebelik Bildirim (223), Gebelik Sonucu (224) ve
+Bebek/Çocuk İzlem (209) paketleri **bizde hiç tutulmayan veriyi** istiyor:
+sistemde aşı kaydı (ISG taraması dışında), gebelik dosyası, doğum kaydı ve
+bebek izlemi yok. Bunlar paket işi değil **modül** işi; ayrıntılı gereksinim
+tablosu `16_KTS_DENETIM_IS_LISTESI.md` § 7.1'e yazıldı. Öneri iki modül:
+*gebelik & doğum dosyası* (223·221·224) ve *aşı + bebek/çocuk izlemi*
+(207·209). Paketleri bağlamak, modüller çıktıktan sonra bu turdaki
+252/411/214/409 deseniyle birkaç saatlik iş.
+
+## 20.09.2026 — 407 Gün Sonu Veri Seti + gönderim oranı ekranı (884)
+
+Denetimin H13 / D24 maddeleri: *"gün sonu gönderimi yapılıyor mu"* ve
+*"e-Nabız ve gün sonu veri gönderim oranı %95-103 aralığında mı"*.
+
+**Gün sonu ne işe yarıyor:** kurum o gün ürettiği işin SAYILARINI gönderiyor,
+Bakanlık bunu kendisine ULAŞAN paketlerle karşılaştırıyor. İki sayı tutmuyorsa
+gönderim eksik demek - denetimde sorulan oran bu.
+
+### Ölçüt listesi seçili, tam değil (bilinçli)
+
+SKRS'nin gün sonu listesinde **61 ölçüt** var: anjiyo alt kırılımları, protez,
+onkoloji göstergeleri, diş işlem türleri… Hepsini "0 gönder" diye doldurmak,
+yapmadığımız işi sıfırla bildirmekti - Bakanlık tarafında bu, veri gönderen ama
+iş yapmayan tesis görüntüsü üretir. Bu yüzden ölçütler **tanım tablosunda**
+(`enabiz_gun_sonu_olcut`) ve kurum kendi yaptığı işin ölçütlerini açıyor. Tohum
+liste, HBYS verisinden **doğrudan sayılabilen on ölçüt**: başvuru, tanılı
+başvuru, yatış, ayaktan, taburcu, normal/acil/diş muayene, röntgen, USG.
+
+**Sayım SQL'de, tanımda değil.** Ölçüt satırı bir `hesap_kodu` taşıyor, sayımı
+`fn_enabiz_gun_sonu_sayilar` yapıyor (CASE dalları). Tanım tablosuna serbest SQL
+koymak, ekrandan veritabanına sorgu yazdırmak olurdu.
+
+### 407 paketi
+
+Bu paket **hastaya değil TESİSE ait**: şemada `HASTA_TAKIP_BILGISI` yok,
+kimliği `KAYIT_YERI` (tesis SKRS kodu) + tarih. Üreticide ilk kez
+hasta/takip numarası olmayan bir kaynak türü açıldı (`KaynakGunSonu`).
+**Sıfır sayılar da gönderiliyor:** "o gün hiç yatış olmadı" bilgisi, satırın
+hiç olmamasından farklı - Bakanlık eksik gönderimle sıfır işi ayırt edebilmeli.
+
+Zamanlı iş `enabiz.gun_sonu` gece 01:00'de **dünü** hesaplıyor; gün bitmeden
+hesaplamak akşam açılan başvuruları saymamak demekti. Aynı gün yeniden
+hesaplanabiliyor (geç girilen kayıtlar): satırlar güncelleniyor, ikinci kayıt
+açılmıyor.
+
+### Gönderim oranı ekranı
+
+`v_enabiz_gonderim_orani`: gün ve paket türü bazında üretilen / gönderilen /
+bekleyen / hatalı + oran. Ekran (**e-Nabız › Gün Sonu / Oran**) üstte genel
+oranı Bakanlık aralığıyla (%95-103) karşılaştırıyor, aralık dışı günü kırmızı
+gösteriyor; solda gün sonu kayıtları (tıklayınca ölçüt kırılımı), sağda oran
+tablosu.
+
+Doğrulama: 16.09 hesaplandı → 10 ölçüt, **EN-002989** paketi 22 alanla üretildi
+(KAYIT_YERI 500154 SKRS kodlu, on ölçüt tekrarlı grup). Ekranda dev'in gerçek
+oranı **%28.6** çıktı - beklenen, çünkü dev'de paketlerin çoğu hiç
+gönderilmedi (`enabiz.gonder` işi kapalı). Denetimde bakılacak sayı tam da bu.
+
+**Kalan:** oranın Bakanlık tarafındaki sayıyla karşılaştırılması ve KDS ekranı
+uyumu; ikisi de USS'den veri ÇEKMEYİ gerektiriyor (sorgulama paketleri 402/405)
+ve ayrı bir iş.
+
+**Not:** bu turda `listeTanimlari.Enabiz.ts` bir yazma hatasıyla (Python'da
+emoji kaçış dizisi) sıfır bayta düştü; `git checkout` ile geri alındı ve
+değişiklik yeniden uygulandı. Kayıp yok.
+
+## 20.09.2026 — 408 Ay Sonu Veri Seti (885)
+
+407'nin eşi: aynı ölçütler, ama **klinik (branş) kırılımıyla** ve aylık.
+
+**Şema iki seviyeli tekrar istiyor:** `KLINIK_KODU_KALITE_BILGISI[k]` grubunun
+altında `KLINIK_KALITE_BILGISI[o]`. Üreticide indeksler AYNI satırdan türetildi
+(`dense_rank` ile klinik, `row_number` ile ölçüt); klinik indeksini ayrı
+saymak, ikinci kliniğin ölçütlerini birincinin altına yazardı.
+
+**Ölçüt listesi 407 ile ORTAK** (`enabiz_gun_sonu_olcut`): kurum bir ölçütü
+kapattığında hem günlük hem aylık özetten düşsün. İki ayrı liste tutmak,
+birinde açık ötekinde kapalı ölçütler bırakırdı.
+
+**Klinik kodu `departman.kod`'tan** (619/622 ile yazılan SKRS klinik kodları).
+Kodu olmayan bölümün işi pakete GİRMEZ - kodsuz gönderim USS'de "geçersiz
+klinik" ile döner. Eksikliğin sessiz kalmaması için `v_enabiz_klinik_kodsuz`
+görünümü ve ekranda uyarı rozeti var: "n bölümün SKRS klinik kodu yok, işleri
+ay sonu paketine girmiyor".
+
+**Branş boyutu olmayan ölçüt aylıkta gönderilmiyor:** radyoloji istemi bizde
+bölüme bağlı değil; o ölçütler 407'de tesis toplamı olarak gidiyor, 408'de
+uydurma bir branşa yazılmıyor.
+
+**Sıfır satır yazılmıyor** (407'den farklı): "o branş o ay hiç iş yapmadı"
+satırı, 100 bölümlü bir hastanede paketi binlerce sıfırla şişirirdi. Günlükte
+sıfır anlamlıydı (tesis çalıştı ama yatış olmadı), aylık branş kırılımında
+değil.
+
+Zamanlı iş `enabiz.ay_sonu` **ayın 2'si 02:00**'de önceki ayı hesaplıyor -
+ayın 1'inde çalıştırmak, son gün gece girilen kayıtları kaçırma riskiydi.
+
+Doğrulama: 09.2026 hesaplandı → 12 klinik / 28 satır, **EN-003000** paketi
+**71 alanla** üretildi; iki seviyeli tekrar doğru çıktı
+(`KLINIK_KODU_KALITE_BILGISI[1]/KLINIK_KALITE_BILGISI[1..3]`…). Ekranda
+gün sonu panosunun altına "Ay sonu (408) — klinik kırılımlı" bölümü eklendi;
+satıra tıklayınca klinik × ölçüt dökümü açılıyor.
+
+## 20.09.2026 — onaylarken geçmiş sonuçlar ve tekrarlar (886)
+
+KTS maddesi L9: *"Onaylama yaparken eski sonuçlar ve tekrarlara sistem
+üzerinden kolayca erişilebiliyor mu?"*
+
+**Motor zaten vardı, erişim yoktu.** 433 sonucu yazarken delta kontrolü
+yapıyor ve önceki değeri, yüzde farkını, uyarı bayrağını sonucun satırına
+yazıyor (`lab_sonuc.delta_onceki / delta_yuzde / delta_uyari`);
+`lab_tetkik.delta_yuzde` ve `delta_gun` kuralları da yerindeydi. Eksik olan,
+onaylayan uzmanın "bu hastanın bu tetkiki daha önce kaçtı" sorusunu satırın
+yanından soramamasıydı - başka ekrana gidip aramak gerekiyordu.
+
+`fn_lab_sonuc_gecmis` üç şeyi bir arada veriyor:
+
+1. **Geçmiş** - aynı hastanın aynı tetkikteki **onaylı** sonuçları, başka
+   istemlerden, en yeniden eskiye. Onaysız sonuç geçmiş sayılmıyor: uzmanın
+   kararını dayandıracağı değer, kurumun sahiplendiği değerdir.
+2. **Tekrarlar** - aynı istemdeki aynı tetkikin öteki çalışmaları
+   (`tekrar_no`), **onaysız olanlar dahil**: tekrarın amacı zaten "hangisi
+   doğru" sorusunu uzmanın önüne koymak.
+3. **Delta** - sonucun kendi satırındaki karşılaştırma. Tetkikte delta kuralı
+   tanımlı değilse ekran bunu ayrıca söylüyor: "uyarı yok" ile "kural yok"
+   farklı şeyler.
+
+Hasta eşleşmesi `lab_istem.taraf_id` üzerinden - sonuç satırı hastayı
+taşımıyor. İstemden okumak, hastanın **başka başvurularındaki** sonuçlarını da
+getiriyor; istenen de bu (bir önceki yatıştaki kreatinini görmek).
+
+Ekran: istem detayındaki sonuç satırına 📈 düğmesi eklendi (yalnız sonuçlanmış
+satırda - sonucu olmayan tetkikte karşılaştıracak bir şey yok). Bileşen üç ayrı
+kısım olarak çizilebildiği için pencere her dönüşe eklendi; yalnız birleşik
+görünüme koymak "ana" kısmında düğmeyi işlevsiz bırakırdı.
+
+Doğrulama: dev'de aynı hastaya ikinci bir HGB istemi + onaylı sonuç kuruldu →
+fonksiyon `gecmis` satırını döndürdü (11.2 g/dL, bayrak L, 20 gün önce);
+deneme verisi sonra silindi. Web tsc temiz, 715/715; API 516/516.
+
+**Not:** bu tur sırasında sistem belleği kritik seviyeye inince Claude Code
+arka plandaki web (5173) ve API (5180) sunucularını durdurdu; kodla ilgisi yok,
+tarayıcı doğrulaması bu yüzden yapılmadı - ekran değişikliği tip denetimi ve
+birim testleriyle sınandı.
+
+## 20.09.2026 — antibiyogram kısıtlaması: organizma kuralları artık işliyor (887)
+
+KTS maddesi L5: *"Bakteriyoloji sonuçlarında antibiyogram kısıtlaması
+yapılabiliyor mu?"*
+
+**İş listesindeki ilk değerlendirmem yanlıştı** ("kısıtlama yok"). Kısıtlamanın
+büyük kısmı vardı: 436/437 kademeli (basamaklı) bildirimi kuruyor — 1. basamak
+her zaman, 2. basamak 1'de duyarlı seçenek yoksa, 3. basamak ikisinde de yoksa;
+üriner-özel ajan idrar dışı numunede raporlanmaz; kombinasyon ajanı "seçenek
+var" saymaz; uzmanın elle verdiği karar ezilmez. Rapor yalnız `bildir = 1`
+yazıyor ve altına kademeli bildirim notunu basıyor.
+
+Asıl boşluk başka yerdeydi ve daha ciddiydi:
+
+1. **509'un organizma kuralları hiçbir yerde işlemiyordu.** `lab_organizma_direnc`
+   (doğal/intrinsik direnç) ve `lab_organizma_panel` (organizmaya özel panel)
+   kartlardan giriliyor, `fn_lab_antibiyogram_paneli` içinde okunuyor — ama o
+   fonksiyonu ne API ne ekran çağırıyordu. Yani laboratuvar "E. coli'de bu ajan
+   doğal dirençli, sorma" dediğinde kural yazılıyor, hiçbir şey değişmiyordu.
+   Doğal direnç en kritiği: rapordaki "R" bile klinisyene o ilacın denenebilir
+   olduğunu düşündürür, ajan hiç yazılmamalıdır.
+2. **Gizleme gerekçesi görünmüyordu.** Ekran "Kademeli" rozetini gösteriyordu;
+   uzman, ajanın üst basamak olduğu için mi, numune uygunluğu yüzünden mi yoksa
+   doğal direnç sebebiyle mi gizlendiğini bilmeden karar veriyordu. Denetimde de
+   "kısıtlama var" demek yetmez, hangi kuralın kısıtladığı gösterilebilmeli.
+
+**Yeni kural tablosu açılmadı.** İlk taslakta üçüncü bir "kısıt kuralı" tablosu
+yazmıştım; 509'un iki tablosu bu işi zaten karşılıyor, ikinci bir tanım yeri iki
+kuralın sessizce ayrışması demekti. Taslak iptal edildi.
+
+887 ne yapıyor:
+
+* `fn_lab_antibiyogram_bildirim` kural sırası artık **uzman kararı > doğal
+  direnç > numune uygunluğu > basamak**. Doğal dirençli ajan, üst basamakta hiç
+  seçenek kalmasa bile açılmaz (olmayan tedaviyi önermek olurdu) ve "seçenek
+  var" sayımına da girmez — girseydi hastaya gerçekte açık olan tek ajan
+  gizlenirdi. Basamak, organizmaya özel panel varsa ondan okunur.
+* `lab_antibiyogram.kisit_neden` — satırın neden raporlanmadığı ("Doğal
+  (intrinsik) direnç" ya da kuralın kendi sebebi, "Yalnız idrar kültüründe
+  raporlanır", "1. basamakta duyarlı seçenek var", "Uzman kararı").
+* Kültür ekranında rozet "Kısıtlı" oldu ve altında gerekçe yazıyor.
+* Antibiyogram girişi artık tam katalog yerine `GET /api/lab/izolat/{id}/panel`
+  ile **organizma panelini** soruyor; doğal dirençli ajan listede hiç çıkmıyor,
+  kısıtlanan ajanlar sebebiyle birlikte başlıkta yazıyor — gizli kısıt, denetimde
+  kısıt sayılmaz.
+* Rapor sıralaması da organizmaya özel basamağı kullanıyor.
+
+Doğrulama: `MikroTestleri`'ne iki test eklendi — doğal dirençli ajan başka
+seçenek yokken bile raporlanmıyor (ve karbapenem onun yerine açılıyor),
+organizmaya özel panel genel basamağı ezip gerekçeyi yazıyor. API 518/518
+(0 `[ATLANDI]`), web 715/715, tsc temiz. Testler kendi verisini kurup siliyor;
+dev veritabanında kalıcı kural bırakılmadı.
+
+## 20.09.2026 — referans aralığına cihaz/yöntem boyutu (888)
+
+KTS maddesi L3: *"Yaş, cinsiyet, cihaz vb. kriterlere göre referans aralığı
+tanımlanabiliyor mu?"*
+
+Yaş bandı (gün cinsinden, yenidoğan/çocuk bantları dahil), cinsiyet, gebelik
+alanı, geçerlilik başlangıcı, panik sınırları ve "cinsiyet bilinmiyor" dalı
+642/644'te zaten vardı. Eksik olan **cihaz** boyutuydu — 642 kendi notunda
+"cihaz/kit doğrulaması gerekir" diyordu ama tabloda o sütun yoktu.
+
+**Neden önemli:** TSH, ferritin, D vitamini gibi immünoassay testlerinde aralık
+üreticinin kitine bağlıdır. İki cihazlı bir laboratuvar tek aralık kullanırsa
+bir cihazın sonuçları sistematik olarak yanlış bayraklanır: normal değer
+"yüksek", yüksek değer "normal" görünür. Akredite laboratuvar kendi cihazının
+aralığını zaten doğrular; sistem bunu tutamıyorsa doğrulama kâğıtta kalır.
+
+888 ne yapıyor:
+
+* `lab_tetkik_referans` + `cihaz_id` (boş = tüm cihazlar) ve `yontem` (kit/yöntem
+  adı, raporda ve kartta görünür; seçimi cihaz yapar).
+* `fn_lab_referans` 4. parametre olarak cihazı alıyor. **Cihaza özel satır genel
+  satırı ezer** — yaş bandı daha geniş olsa bile: yöntem farkı, bant
+  darlığından daha belirleyicidir. Cihaz verilmezse ya da o cihaza tanım yoksa
+  genel aralık döner, yani tanım yokken davranış bire bir eskisi gibidir.
+  "Cinsiyet bilinmiyor" birleşim dalı da cihaz süzgecini uyguluyor; başka
+  cihazın aralığını birleşime katmak hiçbir cihazda geçerli olmayan bir aralık
+  üretirdi.
+* Eski 3 parametreli imzalar **düşürüldü** (yenisinde varsayılan var). İkisi
+  birlikte kalsaydı PG 3 argümanlı çağrıyı "function is not unique" diye
+  reddederdi.
+* Sonuç yazılırken cihaz sırası: sonucu getiren cihaz > satırın cihazı >
+  tetkikin varsayılanı. Aralık `lab_sonuc.referans_alt/ust/metin` alanlarına
+  donuyor, yani tanım sonradan değişse bile eski rapor kendi aralığıyla kalır.
+* Tetkik kartında "Cihaz (boş = tümü)" ve "Yöntem / Kit" alanları; tetkik
+  özetinde referans satırının yanında cihaz rozeti — aynı tetkikte iki farklı
+  aralık görünce "hangisi geçerli" sorusunun cevabı satırın kendisinde.
+
+Doğrulama: yeni `ReferansCihazTestleri` — cihaza özel aralık genel aralığı
+eziyor, cihaz bilinmiyorken ve başka cihazda genel aralık dönüyor; sonuç
+yazımında 110 mg/dL değeri cihazın aralığında (80-120) **N**, genel aralıkta
+(70-100) "H" olurdu — satıra 80/120 donuyor. API 520/520 (0 `[ATLANDI]`),
+web 715/715, tsc temiz. Test kendi tetkik/cihazını kurup siliyor.
+
+## 20.09.2026 — test seviyesinde yetki kısıtlaması (889)
+
+KTS maddesi L7: *"Test seviyesinde yetki kısıtlaması yapılabiliyor mu?"*
+
+Yetki modül seviyesindeydi: `lab.sonuc` yetkisi olan herkes HER tetkiki
+isteyebiliyor, görebiliyor ve onaylayabiliyordu. HIV, adli toksikoloji,
+genetik, evlilik öncesi tarama gibi testlerde bu yetmez — sonucu görmesi
+gereken kişi ile laboratuvarın tamamını gören kişi aynı değildir.
+
+**Model:** `lab_tetkik_kisit` = tetkik × rol × işlem (**iste · gör · onayla**).
+Üç işlem ayrı, çünkü bir rol testi isteyebilir ama sonucunu göremeyebilir
+(isteyen hekim ile yorumlayan uzman ayrı kişilerdir).
+
+**Beyaz liste, ama yalnız kısıtlanmış tetkikte.** Bir tetkikte aktif kısıt
+satırı yoksa tetkik herkese açıktır — yani kural tanımlanana kadar hiçbir
+ekran değişmez. Tersi ("kısıt tanımlanana kadar her şey kapalı") kurulu bir
+sistemi ilk güncellemede durdururdu. Satır eklendiği anda tetkik kapanır ve
+yalnız listelenen roller kalır.
+
+**Karar tek yerde:** `fn_lab_tetkik_izin`. Hem SQL süzgeçleri hem uygulama
+kodu aynı fonksiyonu sorar; iki yerde ayrı yazılsaydı ekran ile rapor sessizce
+ayrışırdı. Tanınmayan işlem adı KAPALI sayılır — yazım hatası yüzünden kısıtın
+açık kalması, hata vermesinden kötüdür.
+
+Uygulandığı yerler (hepsi sunucuda):
+
+* **İstem açma** — yetkisiz tetkik 403 (`kod: TEST_YETKI`, hangi tetkikler
+  olduğu yanıtta). Başvuru ücretinden açılan *sessiz* istemde ise yetkisiz
+  tetkik atlanır; orada hata fırlatmak hasta kaydını düşürürdü. Akılcı
+  kuralından önce çalışır: yetkisiz tetkikin akılcı gerekçesini sormak,
+  sorulmaması gereken bir soruyu sormaktır.
+* **Sonuç girişi ve düzeltme** — göremeyen yazamaz; yarım yetki,
+  yetkisizlikten kötüdür.
+* **Onay** — onay, sonucu kurumun sahiplenmesidir.
+* **Listeler** (`lab-sonuc`, `lab-kultur`) — `SorguUretici` WHERE'ine süzgeç
+  girer, satır hiç dönmez. Yanıttan sonradan silmek sayım ve toplamları
+  bozardı. Kural ayrı haritada (`KaynakKatalogu.TetkikKisiti`), hekim kısıtı
+  deseninin aynısı.
+* **İstem detayı ve rapor** — rapor eksik basılıyorsa **kaç tetkikin
+  gizlendiği** yazılır; hangi tetkik olduğu yazılmaz (adı da kısıtın
+  konusudur). Sessizce eksik rapor, yanlış rapordur.
+
+Tanım ekranı: tetkik kartında **Yetki Kısıtları** sekmesi (rol + üç bayrak +
+açıklama). Kısıtı tanımlamak ayrı yetki (`lab.tetkik_kisit`) — tetkik
+kataloğunu düzenleyebilen herkes kısıtı kaldırabilseydi kısıt kendini
+koruyamazdı. `v_lab_tetkik_kisitli` denetimde "hangi testler kısıtlı"
+sorusunun tek cevabı.
+
+`GentegreHatasi.Yasak` artık isteğe bağlı `engel` nesnesi taşıyor: yasak hepsi
+aynı değildir, ekran hangi tetkiklerin kapalı olduğunu işaretleyebilsin.
+
+**Yolda çıkan gerçek hata — dış kurum istemi açılamıyordu.** `IstemAcAsync`
+dış kurumu INSERT'ten SONRA ayrı bir UPDATE ile yazıyordu; 637'nin
+`ck_lab_istem_dis_kurum` kısıtı ("kaynak 4 ise gönderen kurum dolu")
+ertelenebilir olmadığı için INSERT daha o anda 23514 ile düşüyordu. Kısıt
+doğru, yazım sırası yanlıştı: kurum artık INSERT'te yazılıyor. Kısıt 637'de
+eklenirken bu yol kırılmış ve testi olmadığı için fark edilmemiş.
+
+Doğrulama: yeni `TestYetkisiTestleri` — kısıtsız tetkik herkese açık (ve
+tanınmayan işlem kapalı), tek satır tetkiki herkese kapatıyor, işlem bayrakları
+birbirinden bağımsız, pasif satır kısıt saymıyor, yetkisiz rol istem açamıyor
+ama izinli rol aynı isteği açabiliyor (dış kurum yolu böylece de doğrulandı).
+API 523/523 (0 `[ATLANDI]`), web 715/715, tsc temiz.
+
+## 20.09.2026 — numune arşivi: konum, saklama süresi, imha (890)
+
+KTS maddesi L13: *"Offline ve yazılımsal numune arşivleme yapılabiliyor mu?"*
+
+Önceden `lab_numune.saklama_yeri` serbest metindi ve bir ekrandan istemin
+bütün tüplerine aynı metin yazılıyordu; `imha_tarihi` kolonu hiç
+kullanılmıyordu. "Buzdolabı 2" yazısı, 600 tüplük bir dondurucuda tekrar
+çalışma ya da itiraz geldiğinde tüpü bulmaya yetmiyor.
+
+Denetimin sorduğu iki şey: **offline arşiv** = fiziksel yer (ünite / raf /
+kutu / göz) ve **yazılımsal arşiv** = kaydın kendisi (kim koydu, ne kadar
+duracak, kim niçin çıkardı, imha edildi mi).
+
+Tasarım kararları:
+
+* **Konum ağacı tek tabloda** (`lab_arsiv_konum`, `ust_id`): ünite, raf ve
+  kutu aynı yapıdadır; üç ayrı tablo aynı sorguyu üç kez yazdırırdı. **Göz
+  ayrı kayıt değil** — kutunun satır × sütun ızgarası yeterli; 81 gözlü kutu
+  için 81 satır açmak boş yere veri üretirdi. Kutunun ızgarası olmak zorunda
+  (`ck_lab_arsiv_konum_izgara`): gözü olmayan "kutu"ya tüp yerleştirilemez.
+* **Bir gözde bir tüp, bir tüp bir yerde** — ikisi de kısmi benzersiz index,
+  yalnız "arşivde" kayıtları için. Çıkmış/imha edilmiş kayıt TARİHTİR,
+  silinmez: "arşivde değil" ile "3 ay önce imha edildi" farklı iki cevaptır.
+* **Saklama süresi politikadan** (`lab_saklama_politika`): tetkike özel kural
+  genel kuralı ezer, numunenin testlerinden **en uzun** süre geçerlidir (bir
+  tüp, üzerindeki en uzun saklanması gereken teste göre saklanır). Politika
+  yoksa süre ve imha hedefi **yazılmaz** — uydurulmuş bir tarih, gerçekten
+  saklanması gereken numuneyi erken imha ettirirdi.
+* **Zincire 433'ün kendi kodlarıyla yazar**: 6 saklamaya · 2 taşındı · 8 imha.
+  Yeni olay kodu uydurulmadı, zincir tek yerden okunmaya devam ediyor.
+* **İmhayı sistem yapmaz.** Süresi dolanlar listelenir; kaydı kapatan
+  kullanıcıdır ve bu ayrı yetki ister (`lab.arsiv.imha`). Otomatik kapatmak,
+  hâlâ dolapta duran tüpü "imha edildi" göstermek olurdu — denetimde en kötü
+  kayıt, gerçeği yanlış anlatan kayıttır.
+
+Ekran **Laboratuvar › Numune Arşivi**: üstte barkod şeridi (okut → bul /
+yerleştir), solda kutular ve doluluk, ortada ızgara (dolu göz koyu, süresi
+dolan kırmızı), ikinci sekmede süresi dolanlar ve toplu imha. Kutu dökümü
+yazdırılabiliyor — kâğıt dolabın kapağına asılır, ağ yokken de tüp bulunur
+(offline arşivin kelimenin tam anlamıyla karşılığı). Tanımlar: **Arşiv
+Konumları** ve **Saklama Süreleri** ekranları; arşiv kayıtları ayrı liste
+(çıkmış ve imha edilmiş tüpler dahil).
+
+Kurulumda örnek konum/politika **gelmiyor**: hangi dolabın hangi rafı olduğu
+ve tüpün kaç gün saklanacağı kurumun kararıdır; tohum satır, yanlış bir imha
+takvimi üretirdi.
+
+Doğrulama: yeni `NumuneArsiviTestleri` — aynı göze ikinci tüp, aynı tüp iki
+yerde, ızgara dışı göz ve "kutu olmayan konum" reddediliyor; çıkarma zincire
+6→2 olarak düşüyor ve göz boşalıyor; tetkike özel politika genel politikayı
+eziyor, imha hedefi doğru hesaplanıyor, süresi dolan tüp imha listesine
+düşüyor ve kayıt kapatılınca listeden çıkıyor. Ayrıca `v_lab_arsiv_konum_lookup`
+kod tablosu beyaz listeye eklendi — eklenmeseydi kart hiç açılmayacaktı
+(mevcut beyaz liste testi yakaladı). API 526/526 (0 `[ATLANDI]`), web 715/715,
+tsc temiz.
+
+## 20.09.2026 — test tekrarının elektronik olarak istenmesi (891)
+
+KTS maddesi L8: *"Test tekrarı elektronik olarak istenebiliyor mu?"*
+
+Tekrar **çalışıldığında** iz zaten kalıyordu: `lab_sonuc.tekrar_no`, düzeltme
+yolu (eski satır iptal + yenisi) ve numune reddi / serum indeksi retinde
+satırın "tekrar numune bekliyor" (6) durumuna alınması. Eksik olan **talebin
+kendisiydi** — uzman ya da klinisyen "bu tetkiki tekrar çalışın" diyemiyordu;
+iş telefonla söyleniyor, laboratuvarda kuyruğa düşmüyor, gerekçesi kayıtta
+durmuyor, karşılanıp karşılanmadığı görünmüyordu.
+
+Tasarım kararları:
+
+* **İki tür ayrıdır.** "Aynı tüpten tekrar çalış" ile "yeni numune alınsın"
+  laboratuvar için bambaşka iki iştir: birincisinde tüp aranır (gerekirse
+  arşivden çıkarılır, 890), ikincisinde hastadan yeniden kan alınır. Satırın
+  durumu da buna göre değişir: tür 2 → "tekrar numune bekliyor" (6, numune
+  kabul ekranı bunu zaten gösteriyor), tür 1 → "çalışılıyor" (2).
+* **Onaylı sonuç iptal edilmez.** Tekrar istemek verilmiş sonucu geçersiz
+  kılmaz; sonucu burada iptal etmek, hekimin elindeki raporu sessizce
+  boşaltırdı. Yeni sonuç gelince karşılaştırma/düzeltme yapılır.
+* **Aynı satırda tek açık talep** (kısmi benzersiz index): ikinci talep,
+  laboratuvara aynı işi iki kez yaptırırdı.
+* **Gerekçe zorunlu ve kod listesinden** (`lab.tekrar_gerekce`, 8 değerle
+  tohumlandı: delta uyarısı, panik teyidi, cihaz hatası, numune kalitesi,
+  klinikle uyumsuz, hekim talebi, İKK ihlali, diğer). "Neden tekrar ettik"
+  sayılabilir bir kalite göstergesidir; serbest metin sayılamaz.
+* **Talebi sistem kapatır.** Aynı satıra yeni sonuç yazılınca
+  (`SonucYazAsync` → `fn_lab_tekrar_karsila`) talep "karşılandı" olur ve
+  karşılayan sonuç kaydedilir; mesajda da söylenir. Elle kapatmaya bırakmak,
+  çalışılmış ama kuyrukta duran talepler biriktirirdi. **İptal** ise elle ve
+  gerekçeli - istenen iş yapılmıyorsa nedeni kayıtta durmalı; iptalde satır
+  eski durumuna döner (sonucu varsa onaylı/sonuçlandı, yoksa bekliyor).
+
+Ekranlar: sonuç onay kuyruğunda **🔁 Tekrar İste** (tür → gerekçe → açıklama;
+ayrı aksiyon yetkisi `lab.tekrar.iste`, çünkü sonucu görebilen herkesin
+laboratuvara iş açması doğru değil) ve **Laboratuvar › Tekrar Talepleri**
+listesi (bekleyen / yeni numune / karşılanan / iptal çipleri; yalnız iptal
+düğmesi var). Talep satırında tüpün **arşiv yeri** de görünüyor (890) — aynı
+numuneden tekrar çalışmada teknisyenin ilk işi tüpü bulmaktır.
+
+Doğrulama: yeni `TekrarIstegiTestleri` — ikinci açık talep reddediliyor,
+gerekçesiz talep reddediliyor, tür satır durumunu doğru belirliyor; yeni sonuç
+yazılınca talep kendiliğinden kapanıyor ve karşılayan sonuç kaydediliyor,
+kapandıktan sonra yeniden talep açılabiliyor; iptal gerekçe istiyor ve satırı
+eski hâline döndürüyor. API 529/529 (0 `[ATLANDI]`), web 715/715, tsc temiz.
+
+## 20.09.2026 — grafik tipli sonuç: cihazdan alma ve raporda gösterme (892)
+
+KTS maddesi L10: *"Cihazlardan grafik tipli sonuç alınabiliyor ve raporda
+gösterilebiliyor mu?"*
+
+ORU/ASTM çözümleyici OBX kalemlerini yalnız sayısal ya da metin olarak
+alıyordu. Elektroforez eğrisi, kromatogram, jel görüntüsü hiç alınmıyordu;
+alınsa saklanacak yer de yoktu. Oysa protein elektroforezinde asıl bulgu
+eğrinin **biçimidir** - sayıyı alıp eğriyi atmak, sonucun yarısını
+kaybetmektir.
+
+**İki ayrı grafik biçimi de destekleniyor:**
+
+* **Gömülü görüntü** (OBX-2 = `ED`): `kaynak^tip^altTip^kodlama^veri`
+  alanındaki base64 çözülüp **doküman deposuna** yazılıyor - hash ile
+  tekilleştirme, erişim günlüğü ve paylaşım orada zaten var; ikinci bir blob
+  deposu açmak aynı işi iki yerde yapmak olurdu. Ham base64 `cihaz_mesaj_kalem.deger`
+  alanında TUTULMUYOR (varchar(200)'e sığmaz, okunacak bir şey de değil);
+  yerine "[image/png, 1024 bayt]" yazılıyor.
+* **Sayı dizisi** (OBX-2 = `NA`): noktalar `jsonb` olarak duruyor. Görüntüye
+  çevirip saklamak ölçeği ve veriyi sonsuza kadar dondurmak olurdu; ekran ve
+  rapor seriyi kendisi çiziyor (SVG).
+
+`lab_sonuc_grafik` tablosu: tür (elektroforez · kromatogram · jel · kalibrasyon
+eğrisi · reaksiyon eğrisi · diğer), başlık, doküman ya da seri (**ikisinden
+biri zorunlu**, `ck_lab_grafik_icerik`), kaynak (cihaz / elle) ve **raporda**
+bayrağı. Rapor kararı ayrıdır: ham kalibrasyon eğrisi laboratuvarın iç
+kaydıdır, protein elektroforezi ise raporun ayrılmaz parçası. Varsayılan
+"basılır" - cihazın gönderdiği bulguyu gizlemek, göstermekten daha büyük
+karardır.
+
+**Tür cihazdan gelmiyor:** HL7 eğrinin ne olduğunu söylemiyor, kayıt "diğer"
+olarak açılıyor ve uzman ekrandan düzeltiyor. Uydurma bir tür raporda yanlış
+başlık üretirdi.
+
+**Bozuk base64 mesajı düşürmüyor:** tek kalem yüzünden bütün mesajın
+reddedilmesi, gelen sayısal sonuçları da kaybettirirdi - kalem metne düşer,
+mesaj işlenmeye devam eder. "A" (ASCII) gibi kodlamalar gömülü veri sayılmaz.
+
+Ekranlar: istem detayındaki **〰️** düğmesi grafik penceresini açıyor
+(görüntü, seri çizimi, tür seçimi, "raporda göster" onayı, kaldırma);
+bağlantısız cihazın kâğıt çıktısı **elle yüklenebiliyor** (`lab.grafik.yukle`
+aksiyon yetkisi) - birçok elektroforez cihazı çıktıyı yalnız kâğıda basar,
+taranmazsa eğri hasta dosyasında hiç olmaz. Rapor çıktısında "Grafik
+Sonuçlar" bölümü; görüntü açılamazsa rapor düşmüyor (eksik eğri,
+basılamayan rapordan iyidir). Test seviyesinde yetki (889) grafiklere de
+uygulanıyor - grafik sonucun parçasıdır.
+
+Doğrulama: yeni `GrafikSonucTestleri` — gömülü PNG ve sayı dizisi doğru
+çözümleniyor (ham base64 değer alanına sızmıyor, ED/NA'da sayısal değer
+üretilmiyor), bozuk base64 mesajı düşürmüyor, Base64 olmayan kodlama gömülü
+sayılmıyor; boş grafik kaydı veritabanınca reddediliyor ve rapor süzgeci
+yalnız `raporda = 1` olanları getiriyor. API 533/533 (0 `[ATLANDI]`), web
+715/715, tsc temiz.
+
+## 20.09.2026 — boş / anlamsız sonuç engeli (893)
+
+KTS maddesi L1: *"Sonuçlar boş ya da anlamsız olarak gönderilebiliyor mu?"* —
+gönderilememeli.
+
+Zorunlu alan denetimi ve panik sınırları vardı; `lab_tetkik.olculebilir_alt/ust`
+kolonları **da** vardı ama hiçbir yerde okunmuyordu (887 ve 892'deki aynı
+desen: tanım var, işleten yok). Sonuç olarak sayısal bir tetkike "iyi"
+yazılabiliyor, hemoglobin 500 g/dL girilebiliyor, boş değerle satır
+sonuçlandırılabiliyordu.
+
+**Üç sınır ayrıldı — karıştırılmamalı:**
+
+* **Panik**: gerçek ama hayati değer. Sonuç yazılır, hekime bildirilir (vardı).
+* **Ölçülebilir aralık**: cihazın/yöntemin ölçebildiği aralık. Dışı **uyarı**,
+  engel değil — gerçekten o değer okunmuş olabilir ve sonucu düşürmek veriyi
+  kaybettirir. Cihaz zaten `<0.01` / `>1000` diye işaretli gönderir; **işaretli
+  değer uyarı üretmez**, çünkü bu "aralık dışında" demenin cihazca yoludur.
+* **Mantık sınırı**: fizyolojik olarak imkânsız değer (negatif hemoglobin,
+  500 g/dL). Bu bir ölçüm değil, yazım hatasıdır — **engel**.
+
+Karar tek yerde (`fn_lab_sonuc_dogrula`): 0 tamam · 1 uyarı · 2 engel. Hem
+sonuç yazarken hem onaylarken oradan sorulur; iki yerde ayrı yazılsaydı
+ekranın kabul ettiğini onay reddederdi. Engelde 422 (`kod:
+SONUC_DOGRULAMA`), uyarıda sonuç yazılır ama **otomatik onaylanmaz** ve uyarı
+sonucun yorumuna düşer — onaylayan uzman değere neden bakması gerektiğini
+satırın yanında görmeli. **Boş sonuç onaylanamaz**: onay, sonucu kurumun
+sahiplenmesidir; sahiplenilecek bir değer yoksa onay da olmaz.
+
+Metin/seçenek tetkiklerde `deger_deseni` (POSIX düzenli ifade) kabul edilen
+değerleri belirler. **Mesajda regex gösterilmez**: kullanıcıya
+"^(Negatif|Pozitif)$" demek ne yazacağını söylememektir — basit seçenek deseni
+okunur listeye çevrilir ("Negatif, Pozitif"), karmaşık desende genel cümle
+kalır.
+
+**Sınırlar tohumlanmadı.** Hangi değerin imkânsız olduğu yönteme ve kuruma
+bağlıdır; uydurulmuş bir sınır gerçek bir sonucu reddettirir. Kurum tetkik
+kartından yazar (yeni alanlar: imkânsız alt/üst sınır, kabul edilen değerler,
+"boş sonuç girilemesin"); yazmadıysa yalnız boş-sonuç engeli çalışır.
+`v_lab_tetkik_dogrulama` denetimde "hangi testte sınır tanımlı" sorusunun
+cevabı.
+
+Yolda bir PostgreSQL tuzağı: fonksiyon gövdesi `$$` ile sarılıyken içindeki
+regex'in `\$$` dizisi dolar-tırnağı **erken kapatıyor** ve fonksiyon yarım
+kalıyordu (psql "invalid command \^" diyordu). Gövde `$fn$` etiketiyle
+sarıldı, desende `[$]` kullanıldı.
+
+Doğrulama: yeni `SonucDogrulamaTestleri` — boş, metin, 500 ve -3 reddediliyor
+ve hiçbiri yazılmıyor; 23 g/dL (aralık dışı ama mümkün) yazılıyor ama
+oto-onaylanmıyor ve uyarı yoruma düşüyor; ">22" uyarı üretmiyor; metin
+tetkikte tanımsız değer reddedilirken mesajda regex değil değer listesi
+görünüyor. API 536/536 (0 `[ATLANDI]`), web 715/715, tsc temiz.
+
+## 20.09.2026 — panik değer: süre takibi, hekim bildirimi, yükseltme (894)
+
+KTS maddesi L2: *"Panik değerler hekime bildiriliyor mu?"* İş listesinde "var,
+iş yok" yazıyordu; bakınca yarısının eksik olduğu görüldü.
+
+**Vardı:** `lab_sonuc.panik` bayrağı, `lab_panik_bildirim` kaydı (kim, kime,
+kanal, okuma-geri teyidi), onay ekranında uyarı, panoda "açık panik" sayacı.
+Yani bildirim **yapıldığında** iz kalıyordu.
+
+**Eksikti — denetimin asıl sorduğu:** bildirim **yapılmazsa** ne oluyor?
+Panik değerin ne kadar süredir beklediği hiçbir yerde ölçülmüyordu;
+`lab_panik_bildirim.yukseltme` kolonu vardı ama hiçbir yerde yazılmıyor ya da
+okunmuyordu (887, 892, 893'teki aynı desen: tanım var, işleten yok); hekim
+kendiliğinden haberdar edilmiyordu — teknisyen fark ederse telefon ediyordu.
+Panik değer fark edilmesini bekleyemez.
+
+894 ne getiriyor:
+
+* **`v_lab_panik_acik`** — açık panikler, geçen dakika ve durum (1 hiç
+  bildirilmedi · 2 bildirildi, teyit bekliyor). **Süre ölçümü ölçümden
+  başlar**, onaydan değil: "sonuç henüz onaylanmadı" bildirimi geciktirmenin
+  gerekçesi olamaz. **Teyit alınan panik listeden düşer**, kaydı tarihte
+  kalır.
+* **`fn_lab_panik_tara()`** + saat başı çalışan **`lab.panik`** zamanlı işi:
+  `lab.panik_bildirim_dk` (30) geçmişse hekime bildirim, `lab.panik_yukseltme_dk`
+  (60) geçmişse kayıt **yükseltilir**; bildirim kaydı hiç yoksa "süresinde
+  bildirilmedi" kaydı açılır — yükseltmenin kendisi de bir olaydır, izi
+  kalmalı. Aynı sonuç için aynı aşamada ikinci kayıt atılmaz (iş saat başı
+  çalışıyor).
+* **Kanal push (3), SMS değil.** Panik bildirimi telefonla ve okuma-geri
+  teyidiyle yapılır; SMS ne teyit alır ne de hasta adını dışarı taşımalıdır.
+  Push sağlayıcısı tanımlı değilse kayıt kuyrukta bekler ve ekranda görünür.
+* **Ekran:** Laboratuvar › **Panik Değerler**, en uzun bekleyen üstte;
+  çipler bildirilmedi / teyit bekliyor / yükseltilen. Aksiyonlar: panik
+  bildirimi ve **okuma-geri teyidi** (değeri tekrar eden kişi yazılır).
+
+**Bildirim insan işidir, sistem yerine geçmez:** otomatik bildirim hekimi
+uyarır, ama panik kaydı ancak okuma-geri teyidiyle kapanır. Kuyruğa mesaj
+atmayı "bildirildi" saymak denetimde de klinikte de yanlış olurdu.
+
+Doğrulama: yeni `PanikTakipTestleri` — 90 dakikadır bildirilmemiş panik
+listede doğru süreyle görünüyor, tarama hekime push bildirimi üretiyor (en
+yüksek öncelik) ve kaydı yükseltiyor, ikinci tur aynı bildirimi tekrar
+üretmiyor; bildirim yapılmış ama teyit alınmamış kayıt hâlâ açık, teyit
+gelince listeden düşüyor ve tarama artık bildirim üretmiyor. Test yazarken
+çıkan bir tuzak: `taraf` tablosunun ilk satırı id = 0 "Tanımsız Cari"dir;
+istemde `personel_id` 0 kalınca bildirim üretilmiyor (kurallı davranış,
+testin hatasıydı). API 538/538 (0 `[ATLANDI]`), web 715/715, tsc temiz.
+
+## 20.09.2026 — iki seviyeli onay gerçekten iki seviye (895)
+
+KTS maddesi L4: *"En az 2 seviye onay (teknik + klinik) uygulanıyor mu?"* İş
+listesinde "var, iş yok" yazıyordu; L2'deki gibi bakınca eksik çıktı.
+
+**Vardı:** iki aşama (`asama 1` teknik → durum 2, `asama 2` uzman → durum 3),
+yetkileri ayrı (`lab.sonuc` / `lab.onay`).
+
+**Üç delik:**
+
+1. **Teknik onay atlanabiliyordu.** Uzman doğrudan ikinci aşamayı
+   yapabiliyordu; `durum < 3` olması yetiyordu. "İki seviye" dediğimiz şey,
+   ikincisinin birincisini beklemesiyle iki seviye olur.
+2. **Aynı kişi iki aşamayı da verebiliyordu** - dört göz kuralı yoktu.
+3. **Oto-onay ikisini birden atlıyordu** (`durum = 3`); çift onay zorunlu
+   olsaydı kuralı sessizce delerdi.
+
+895: `fn_lab_onay_kontrol` tek karar noktası (uygulama kodu ve ileride
+eklenecek toplu onay yolları aynı fonksiyonu sorar). Uzman onayında teknik
+onay yoksa 422 (`kod: CIFT_ONAY`); dört göz açıkken teknik onayı veren kişi
+aynı sonucu yayınlayamaz; çift onaya tabi tetkikte oto-onay hiç çalışmaz.
+
+**Kurallar AYAR, varsayılan KAPALI.** `lab.cift_onay_zorunlu` ve
+`lab.onay_ayni_kisi` ayarlar beyaz listesinde; kapalıyken bugünkü davranış
+birebir sürer - kurulu bir laboratuvarın akışını bir güncellemeyle durdurmak,
+denetimden çok daha büyük bir zarar olurdu. **Tetkik kurum ayarını ezer**
+(`lab_tetkik.cift_onay`: 0 izle · 1 zorunlu · 2 muaf): kan grubu, patoloji ve
+genetikte çift onay şart, idrar pH'ında gereksiz. `v_lab_cift_onay` hangi
+testin hangi kurala tabi olduğunu tek yerde gösterir.
+
+Doğrulama: yeni `CiftOnayTestleri` — zorunlu tetkikte teknik onaysız yayın
+reddediliyor, teknik onay verilince geçiyor; dört göz açıkken aynı kullanıcı
+ikinci onayı veremiyor ama başka kullanıcı verebiliyor (test ayarı sonunda
+eski hâline döndürüyor); çift onaya tabi tetkikte oto-onay kapalı, muaf
+tetkikte açık kalıyor. Test yazarken hatırlatıcı bir ayrıntı: referans aralığı
+tanımlı değilken bayrak "N" çıkmadığı için oto-onay zaten çalışmıyor -
+düzeneğe referans eklendi ki ölçülen fark gerçekten çift onay kuralı olsun.
+API 541/541 (0 `[ATLANDI]`), web 715/715, tsc temiz.
+
+## 20.09.2026 — klinik karar sınırı ve sembolü (896)
+
+KTS maddesi L15: *"Karar sınırının altında/üstünde olduğunu gösteren sembol
+var mı?"* İş listesinde "var, rapor çıktısında doğrulanmalı" yazıyordu.
+
+**Sembol vardı:** `fn_lab_bayrak` referans aralığına göre L / H / LL / HH
+üretiyor; rapor bunları "↓ Düşük", "↑↑ Panik yüksek" diye basıyor, ekranda
+renkli rozet çiziliyor. Bu kısım doğrulandı, dokunulmadı.
+
+**Kavram yoktu.** Karar sınırı (clinical decision limit) referans aralığı
+değildir:
+
+* Referans aralığı **sağlıklı popülasyonun dağılımıdır** — "bu değer olağan
+  mı".
+* Karar sınırı **kılavuzun eşiğidir** — "bu değerde ne yapmak gerekir": LDL
+  hedefi < 100 mg/dL, HbA1c ≥ %6,5 diyabet, D vitamini > 30 ng/mL yeterli
+  düzey, eGFR < 60 evre 3.
+
+İkisi aynı testte farklı cevap verir: LDL 115 mg/dL referans aralığında
+"normal" görünür ama hedefin üstündedir. Bugüne kadar rapor yalnız "N"
+yazıyordu.
+
+896 ne getiriyor:
+
+* `lab_karar_siniri` — tetkik × **yön** (bu değerin altında olmalı / üstünde
+  olmalı) × eşik × yaş/cinsiyet bandı × **dayanak** (hangi kılavuz) × özel
+  metin.
+* `fn_lab_karar_notu` — hastanın yaş/cinsiyetine uyan sınırları değerlendirir
+  ve **yalnız dışında kalınanları** yazar ("Hedefin üstünde: Hedef LDL < 100
+  (ESC/EAS 2019)"). Hepsi hedefteyse boş döner; "hedefte" bilgisini her
+  satıra yazmak raporu gürültüye boğardı.
+* Not **sonuca donar** (`lab_sonuc.karar_notu`): kılavuz sonradan değişse
+  bile eski rapor kendi eşiğiyle okunur — referans aralığında (888) verdiğimiz
+  kararın aynısı.
+* **Bayrağı ezmez.** "Referans aralığında ama hedefin üstünde" ancak ikisi
+  birden söylenince anlaşılır; bayrağı değiştirmek panik/anormal sayımlarını
+  da bozardı. Rapor ve ekranda ayrı sembol: **⚑**.
+* Tanım tetkik kartındaki **Klinik Karar Sınırları** sekmesinde; ayrı yetki
+  (`lab.karar_siniri`), `v_lab_karar_siniri` denetim dökümü.
+* **Sınır tohumlanmadı**: hangi kılavuzun hangi eşiği kullanılacağı kurumun
+  kararıdır (ATP III mü, ESC 2019 mu); uydurulmuş eşik hekime yanlış hedef
+  gösterirdi.
+
+Yolda bir ayrıntı: istem detayı sorgusunun okuyucusu **pozisyonel**; yeni
+kolonu araya koymak sonraki bütün indeksleri kaydırıyordu - `karar_notu` en
+sona alındı.
+
+Doğrulama: yeni `KararSiniriTestleri` — referans aralığındaki 115 mg/dL için
+bayrak "N" kalıyor ama karar notu doluyor ve mesajda görünüyor; hedefteki
+değer not üretmiyor; kılavuz eşiği değişince ESKİ sonucun notu aynen kalıyor,
+yeni sonuç yeni eşiği alıyor; yön 2 (üstünde olmalı) sınırında altında kalmak
+uyarı üretiyor. API 544/544 (0 `[ATLANDI]`), web 715/715, tsc temiz.
+
+## 20.09.2026 — e-Nabız butonu Bakanlık standardına çekildi (KTS H8)
+
+KTS maddesi H8: *"e-Nabız butonu Bakanlık standardına uygun mu (resim, yer,
+hint)?"* İş listesinde "küçük iş ama denetimde ayrı madde" yazıyordu.
+
+**Sorun ortaklık eksikliğiydi:** düğme iki ekranda ayrı ayrı yazılmıştı —
+muayene/istem kartında `🔓 e-Nabız Kayıtları`, diş hasta kartında aynı işi
+yapan başka bir düğme; ipucu (hint) hiçbirinde yok, pop-up açma mantığı iki
+yerde kopyalanmış, yetki kontrolü iki yerde tekrarlanmıştı. Aynı düğmenin iki
+görünümü, denetimde "standarda uygun mu" sorusunu cevapsız bırakır.
+
+`web/src/bilesenler/EnabizButonu.tsx` tek kaynak oldu:
+
+* **Resim:** e-Nabız markası Bakanlığındır, çizip taklit etmeyiz. Kurum resmî
+  görseli `public/enabiz-logo.png` olarak koyarsa düğme onu gösterir; dosya
+  yoksa (ve yüklenemezse) metin işaretine düşer — hiçbir durumda kırık resim
+  görünmez. Emoji kullanılmadı: Windows'ta boy/renk tutarsızlığı yapıyor
+  (bayrak emojisinde yaşanan sorunun aynısı).
+* **Yer:** muayene kartı, **hasta kartı** (yeni — düğme yalnız muayenede
+  olursa hastayı kartından açan hekim aynı işlemi bulamıyordu) ve diş hasta
+  kartı; üçünde de aynı araç çubuğu konumunda.
+* **Hint:** ne olacağını ve e-Devlet/SMS onayını söyleyen `title` — erişim ve
+  mesaj için ayrı metinler, tek yerde.
+
+Davranış kuralları da tek yerde toplandı: yetkisiz kullanıcıda düğme **hiç
+çizilmez** (tıklanınca "yetkiniz yok" demek, olmayan bir kapıyı göstermektir),
+sekme **istekten önce** açılır (tarayıcı yalnız tıklamanın hemen ardından gelen
+`window.open`'a izin veriyor; `await` sonrası açılan pencere engelleniyordu ve
+hekim "bir şey olmadı" diyordu), hata gelince açılan boş sekme kapatılır.
+
+Erişim akışı (878) ve mesaj penceresi (877/881) değişmedi — yalnız düğme
+ortaklaştı; ölü kod (diş kartındaki kopya fonksiyon ve artık kullanılmayan
+importlar) temizlendi.
+
+Doğrulama: yeni `enabizButonu.test.tsx` — ipucu ve etiket, yetkisiz/hastasız
+bağlamda çizilmeme, sekmenin istekten önce açılıp adresin sonradan yazılması,
+hatada sekmenin kapanması, mesaj düğmesinin istek atmayıp ekranın penceresini
+açması. Web 721/721 (73 dosya), tsc temiz. API'de değişiklik yok.
+
+## 20.09.2026 — aşı modülü ve USS 207 (898, KTS H10)
+
+H10 altı USS paketi istiyor. 409 Radyoloji Sonuç 883'te yazılabilmişti çünkü
+kaynağı vardı; kalan beşinin ortak sorunu **paket değil kaynak veriydi**.
+Bu tur birincisi kapandı: **aşı**.
+
+Bizde hasta bazlı aşı kaydı hiç yoktu (`isg_asi` yalnız işyeri hekimliğinin
+tarama listesi). Şema **rehber.enabiz.gov.tr → 207 → YAPI** sekmesinden
+okundu; 13 öge ve altı SKRS listesinin guid'i oradan birebir alındı —
+uydurulmadı.
+
+Modül:
+
+* `asi` kataloğu: kod, ad, **SKRS kodu**, şemadaki doz sayısı (0 = şemasız),
+  varsayılan uygulama şekli/yeri, stok kartı (lot ve karekod oradan).
+* `asi_uygulama`: hasta, başvuru, doz, lot, barkod, uygulama şekli/yeri,
+  işlem türü, özel durum, uygulayan, bilgi alınan kişi, sorgu numarası.
+  **Aynı hastaya aynı aşının aynı dozu bir kez** (kısmi benzersiz index);
+  **uygulanmış aşı silinmez**, gerekçesiyle iptal edilir — aşı geri
+  alınamayan bir işlemdir, yanlış kaydın da izi kalmalı.
+* Hasta kartında **💉 Aşı Uygula** penceresi: aşı seçimi, lot/karekod ve aşı
+  geçmişi. **Doz numarasını sunucu hesaplıyor** (son uygulanan + 1); elle
+  yazılan doz, USS'de yanlış şema demektir — 3 dozluk aşının 2. dozu 1. doz
+  diye gidince Bakanlık tarafındaki takvim kayar. Şeması tamamlanmış aşı
+  listede hiç çıkmaz.
+* **207 paketi** uygulama kaydedilince doğar; `EnabizTetikleyici.AsiUygulandi`
+  105/102 ile aynı kuralı izliyor: **SYSTakipNo yoksa üretmez, bekler**
+  (877'de öğrenilen ders). Zorunlu ögeler takip no, izlem yeri, aşı ve doz;
+  ötekiler **doluysa** gider — boş öge göndermek, veri yokken veri varmış
+  gibi göstermek olurdu.
+* **SKRS kodu olmayan aşı gönderilmez** ve bu iki yerde söylenir: uygulama
+  yanıtında ve `v_asi_skrs_eksik` görünümünde. Kod listelerinin kendisi
+  tohumlanmadı — yalnız guid'leri tanımlandı; aşı adlarını elle yazmak,
+  Bakanlığın listesiyle bir gün uyuşmayan ikinci bir liste üretirdi
+  (`skrs-ham` ile çekilecek).
+
+Menüde **yeni grup açılmadı**: grup tavanı (30) dolu ve aşı zaten
+poliklinikte uygulanıyor — "Muayene" grubunun içinde duruyor. (Önce "Aşı &
+İzlem" diye ayrı grup denendi; menü düzeni testi tavanı ve grup ikonu
+kuralını hatırlattı.)
+
+Doğrulama: yeni `AsiPaketiTestleri` — mükerrer doz reddi, iptalin kaydı
+silmemesi ve iptal sonrası aynı dozun yeniden yazılabilmesi; paketin
+rehberdeki alan adlarıyla üretilmesi (zorunlu ögeler, `yyyyMMddHHmm`
+biçimi, boş barkodun alan açmaması, "aynı içerik → aynı paket"); SKRS kodu
+silinince ASI ögesinin eksik raporlanması. **Test kendi takip numaralı
+başvurusunu kuruyor** — önce "var olanı bul" deniyordu ve dev veritabanında
+takip numaralı başvuru olmadığı için iki test sessizce boş geçiyordu; yeşil
+ama hiçbir şey doğrulamayan test, olmayan testten kötüdür. API 547/547
+(0 `[ATLANDI]`), web 721/721, tsc temiz.
+
+**Kalan:** 221 Gebe İzlem · 223 Gebelik Bildirim · 224 Gebelik Sonucu (bir
+"gebelik & doğum dosyası" modülü) ve 209 Bebek/Çocuk İzlem (izlem formu +
+persentil). İkisi de kendi ekranıyla planlanmalı; paketleri bu turdaki
+desenle bağlamak sonrası birkaç saatlik iş.
+
+## 20.09.2026 — bebek/çocuk izlem modülü ve USS 209 (899, KTS H10)
+
+H10'un ikinci parçası. Aşıda (898) olduğu gibi eksik olan paket değil kaynak
+veriydi: çocuk izlemi hiç tutulmuyordu. Şema **rehber.enabiz.gov.tr → 209 →
+YAPI**'dan okundu; 17 öge ve dokuz SKRS listesinin guid'i oradan birebir.
+
+* `cocuk_izlem`: kaçıncı izlem (SKRS), izlem tarihi, boy/kilo/baş çevresi,
+  doğum ağırlığı, hemoglobin/hematokrit, beslenme durumu, D vitamini ve demir
+  desteği, GKD · görme · kritik DKH taramaları (ve yapılmama nedeni), NTP
+  takibi, öneri. **Aynı çocuğa aynı sıra numarası bir kez**; iptal edilen
+  kayıt sayılmaz (hatalı kayıt düzeltilebilmeli), kayıt silinmez.
+* **Birim tuzağı:** pakette **kilo GRAM**, boy ve baş çevresi santimetre.
+  Ekran kilogram tutuyor, çevrim **tek yerde** (paket sorgusu) - iki yerde
+  çevirmek, bir gün birinin unutulması demekti.
+* **Persentil:** `fn_cocuk_persentil` standart LMS yöntemiyle hesaplıyor
+  (z = ((X/M)^L − 1)/(L·S), L=0 ise ln(X/M)/S) ve Φ(z) için Abramowitz &
+  Stegun erf yaklaşımını kullanıyor — PostgreSQL'de hazır normal dağılım
+  yok. **Eğri verisi uydurulmadı:** `cocuk_buyume_lms` boş kurulur; tablo
+  boşken persentil NULL döner ve ekran "eğri verisi yüklü değil" der. Boş
+  bir hücre "ölçüm kötü" diye okunabilir, uydurulmuş bir eğri ise sağlıklı
+  çocuğu "geri kalmış" gösterebilirdi. Doğrulama gerçek bir WHO satırıyla
+  yapıldı (erkek, 12 ay, kilo: L=-0,16 M=9,6479 S=0,1108): medyan tam %50,
+  8 kg → ~%4, 11,5 kg → ~%94.
+* **209 paketi** izlem kaydedilince doğuyor; 898'deki kuralın aynısı -
+  başvuruya bağlı değilse üretilmez, SYSTakipNo yoksa bekler.
+* Hasta kartında **👶 Çocuk İzlemi** penceresi: ölçüm girişi, izlem geçmişi
+  ve persentiller. **İzlem sırasını sunucu söylüyor** (son + 1); elle sayılan
+  sıra USS'de yanlış izlem demektir.
+
+Yolda bir düzeltme: SKRS kod listeleri henüz çekilmediği için `d.ad` NULL
+geliyor ve paket ögesinin **değeri boş** kalıyordu (zorunlu öge "eksik"
+görünüyordu). Artık liste boşsa değer de ham koda düşüyor — 207'deki aynı
+15 öge de düzeltildi.
+
+Doğrulama: yeni `CocukIzlemTestleri` — persentil formülü (medyan tam 50,
+uçlar makul aralıkta, sıfır/negatif ölçümde hesap yok), eğri yokken NULL,
+paketin rehberdeki alanlarla üretilmesi ve **kilonun grama çevrilmesi**
+(9,648 kg → 9648), girilmeyen ölçümün alan açmaması, aynı izlem sırasının
+iki kez yazılamaması ve yaş ayının izlem tarihinden hesaplanması. API
+550/550 (0 `[ATLANDI]`), web 721/721, tsc temiz.
+
+**Kalan H10 paketleri:** 221 Gebe İzlem · 223 Gebelik Bildirim · 224 Gebelik
+Sonucu — üçü tek bir "gebelik & doğum dosyası" modülüne bağlı.
+
+## 20.09.2026 — gebelik dosyası, gebe izlemi ve USS 221 (900, KTS H10)
+
+H10'un üçüncü parçası. Şema **rehber.enabiz.gov.tr → 221 → YAPI**'dan
+okundu; alan adları ve beş yeni SKRS listesinin guid'i oradan birebir.
+
+**221 gebelik haftasını istemiyor** - izlem paketi yalnız izlemin kendisini
+taşıyor; son adet tarihi ve beklenen doğum 223 Gebelik Bildirim'in işi. Buna
+rağmen **gebelik dosyası burada açıldı**: "kaçıncı izlem" ancak bir gebelik
+içinde anlamlıdır, dosyasız izlem iki ayrı gebeliğin kayıtlarını
+karıştırırdı.
+
+* `gebelik`: SAT ya da beklenen doğum (**biri zorunlu**, veritabanı kısıtı
+  da bunu tutuyor), gebelik numarası, risk durumu, durum. **Aynı hastada
+  aynı anda tek açık dosya** (kısmi benzersiz index); yenisi için öncekinin
+  sonuçlanması gerekir. `fn_gebelik_hafta` SAT'tan, SAT yoksa beklenen
+  doğumdan geriye (280 gün / Naegele) hesaplıyor; ikisi de yoksa NULL -
+  uydurma hafta izlem takvimini yanlış kurardı.
+* `gebe_izlem`: kaçıncı izlem, boy/kilo, tansiyon, fetüs kalp sesi,
+  hemoglobin, idrarda protein, gestasyonel diyabet taraması, demir ve D
+  vitamini desteği (ikisi de pakette **zorunlu**), konjenital anomali, öneri.
+  Risk faktörleri ayrı tabloda (`gebe_izlem_risk`), pakette **tekrarlı grup**
+  olarak `[1]`, `[2]` … gidiyor.
+* **Birim:** 221'de KILO **kilogram**; 209'daki gram çevrimi burada YOK.
+  İkisini aynı sanıp çevirmek gebeyi 68.500 kg gösterirdi - test bunu
+  ayrıca tutuyor.
+* **221 paketi** izlem kaydedilince doğuyor (898/899 ile aynı kural:
+  başvuruya bağlı değilse üretilmez, SYSTakipNo yoksa bekler).
+* Hasta kartında **🤰 Gebe İzlemi** penceresi: açık dosya yoksa önce dosya
+  açtırıyor, sonra izlem alıyor; **hafta ve izlem sırası sunucudan** geliyor
+  (iki yerde hesaplanan sayı bir gün ayrışır). Dosya kapanışı da buradan.
+
+**224'ün yeri hazır ama paketi bağlanmadı**: dosya "sonuçlandı"ya geçiyor,
+fakat doğum şekli ve bebek bilgileri henüz kayıt altında değil - olmayan
+veriden paket üretmek yerine kapanış mesajı bunu açıkça söylüyor. 223 ise
+dosyanın kendisinden türetilebilir (kısa iş).
+
+Doğrulama: yeni `GebeIzlemTestleri` — hafta hesabı (SAT'tan 20, beklenen
+doğumdan 20, ikisi yoksa NULL), aynı hastada ikinci açık dosyanın
+reddedilmesi ve dosya kapanınca yenisinin açılabilmesi, paketin rehberdeki
+alanlarla üretilmesi, **kilonun çevrilmemesi** (68,50 → "68.5"), risk
+faktörlerinin `[1]`/`[2]` olarak gitmesi ve girilmeyen ölçümün alan
+açmaması. API 553/553 (0 `[ATLANDI]`), web 721/721, tsc temiz.
+
+## 20.09.2026 — USS 223 Gebelik Bildirim (901, KTS H10)
+
+Şema rehberden okundu ve **kısa çıktı**: SYSTakipNo, `BIR_ONCEKI_DOGUM_DURUMU`
+(SKRS, zorunlu) ve `SON_ADET_TARIHI` (zorunlu). Yani paket, 900'de açtığımız
+gebelik dosyasının iki alanından ibaret.
+
+* Dosyaya **yalnız bir kolon** eklendi (`gebelik.onceki_dogum`) - ayrı bir
+  "bildirim" tablosu açmak aynı gebeliği iki yerde tutmak olurdu. Görünüme
+  `bildirime_hazir` bayrağı geldi: SAT **ve** önceki doğum durumu doluysa
+  paket gönderilebilir.
+* **Bildirim ilk izlemle üretiliyor**, dosya açılışında değil: gebelik
+  dosyasının kendi başvurusu yok, SYSTakipNo izlemden geliyor. Sonraki
+  izlemlerde "aynı içerik → aynı paket" kuralı yeni satır açmıyor.
+* **Eksik alanla paket üretilmiyor.** SAT'ı olmayan (yalnız beklenen doğumla
+  açılmış) ya da önceki doğum durumu girilmemiş dosya bildirim göndermiyor;
+  tahmini bir tarih göndermek Bakanlık tarafındaki izlem takvimini
+  kaydırırdı. Ekran bunu rozetle söylüyor - sessizce göndermemek, kurumun
+  "gönderdim" sanmasına yol açardı.
+
+Yolda yine PostgreSQL'in görünüm kuralı: yeni kolon araya girince
+`create or replace view` "cannot change name of view column" dedi (881'deki
+aynı tuzak) - görünüm önce düşürülüp yeniden oluşturuldu.
+
+Doğrulama: `GebeIzlemTestleri`'ne dördüncü test — önceki doğum durumu
+yokken dosya "bildirime hazır" değil, girilince hazır oluyor; paket
+`BIR_ONCEKI_DOGUM_DURUMU` ve `SON_ADET_TARIHI` (yyyyMMddHHmm) ile üretiliyor
+ve takip numarasını izlemden alıyor. API 554/554 (0 `[ATLANDI]`), web
+721/721, tsc temiz.
+
+**H10'da kalan tek paket: 224 Gebelik Sonucu** - doğum şekli ve bebek
+bilgilerini tutan bir doğum kaydı gerekiyor; gebelik dosyasının kapanışı
+onun yeri (yer hazır, veri yok).
+
+## 20.09.2026 — USS 224 Gebelik Sonucu (902) — H10 tamamlandı
+
+H10'un son paketi. Şema rehberden okundu; altı yeni SKRS listesi guid'iyle.
+
+**Gebelik sonucu yalnız doğum değildir**: düşük ve tıbbi tahliye de bir
+sonuçtur ve bildirilir. Bu yüzden kayıt "doğum kaydı" değil `gebelik_sonuc`
+olarak tutuluyor - doğum yöntemi, bebek sayıları ve sezaryen endikasyonu
+doğumla sonuçlanan gebeliklerde doluyor, ötekilerde **pakete hiç girmiyor**
+(düşükle sonuçlanan gebeliğe doğum yöntemi yazmak veri uydurmak olurdu).
+
+* Zorunlu ikili: **sonlanma tarihi** ve **gebelik sonucu** (SKRS). Ötekiler
+  doluysa gidiyor.
+* **Kayıt dosyayı KAPATIYOR** (`fn_gebelik_sonucla`) ve 224 paketini
+  doğuruyor. 900'de dosya elle "sonuçlandı"ya çekiliyor ama paket
+  gönderilemiyordu (veri yoktu); iki adımı ayrı bırakmak, kapanmış ama
+  bildirilmemiş gebelikler üretirdi. `v_gebelik_sonucsuz` bunları yine de
+  sayıyor - eski kapanışlar için.
+* **Bir gebeliğin tek geçerli sonucu olur** (kısmi benzersiz index).
+* Takip numarası: sonucun kendi başvurusundan, yoksa gebeliğin
+  izlemlerinden - doğum başka bir başvuruda kayda geçmiş olabilir.
+* Ekran: gebelik penceresindeki "Dosyayı sonuçlandır" düğmesi artık
+  **"Gebeliği sonuçlandır"** ve sonuç kaydı alıyor; pencerede sonuç listesi
+  var. Ayrı liste ekranı: **Muayene › Gebelik Sonuçları**.
+
+Doğrulama: `GebeIzlemTestleri`'ne beşinci test — sonuç kaydı dosyayı
+kapatıyor, ikinci sonuç açılamıyor, paket zorunlu ögelerle ve doğru tarih
+biçimiyle üretiliyor, girilmeyen alan (sezaryen endikasyonu) pakete girmiyor,
+sonucu olan dosya "sonuçsuz kapalı" listesinden düşüyor. API 555/555
+(0 `[ATLANDI]`), web 721/721, tsc temiz.
+
+**H10 kapandı.** Altı paketin altısı da bağlı: 409 · 207 · 209 · 221 · 223 ·
+224. ("Doğum Bildirim" rehberde ayrı bir paket olarak yok; doğum bilgisi 224
+ile gidiyor.) Geriye SKRS kod listelerinin `skrs-ham` ile çekilmesi kalıyor -
+paketler liste boşken ham değerle çalışıyor ve eksik alan raporunda görünüyor.
+
+---
+
+## 20.09.2026 — SKRS kod listeleri çekildi (H10 paketleri ad/kod ile gidiyor)
+
+H10'un altı paketi liste boşken **ham değerle** çalışıyordu (kod yerine tablo
+sütununun kendisi gidiyordu, eksik-alan raporunda görünüyordu). SKRS'nin resmî
+kod listeleri çekilip `kod_deger`'e yazıldı; paketler artık SKRS **adını**
+`deger`'e, SKRS **kodunu** `skrs_kod`'a koyuyor.
+
+### Yapılanlar
+
+* **Uygulama ucu:** `POST /entegrasyon/{id}/skrs-kod-listeleri` — `skrs_liste`
+  (GUID) dolu tüm `kod_liste` kayıtlarını SKRS `GetSkrsObject` ile sayfa sayfa
+  çeker, `kod_deger`'e `on conflict (liste_id, deger, dil)` upsert eder.
+  Kimlik entegrasyon kaydından (SKRS `KullaniciAdi`/`Sifre`/`UygulamaKodu`
+  başlıkları) — yeni parola sorulmuyor.
+* **Alan-adı tuzağı düzeltildi:** SKRS bazı listeleri `ADI`/`KODU` (büyük),
+  bazılarını (ör. *Kritik DKH Tarama Sonucu*) `adi`/`kodu` (küçük) döndürüyor.
+  `Metin()` yardımcısı artık ada **büyük/küçük duyarsız** bakıyor; katalog
+  okuyucusu da öyle. Aksi halde bu listeler sessizce boş kalıyordu.
+* **Tek seferlik veri yükü (dev docker `gentegre-pg18`):** 20 liste,
+  ~6.400 değer; boş kalan liste yok. İki liste (`cocuk.dkh`, `cocuk.dkh_yapilmama`)
+  SKRS tarafında aralıklı HTTP 500 verdi, yeniden denemeyle geldi. *Bu bir
+  numaralı göç dosyası değil, kod_deger'e veri yükü — yalnız docker'a
+  uygulandı, buluta değil.*
+
+### Paket üreticisinin deseni
+
+SKRS-kodlu her öge: `deger = coalesce(nullif(d.ad,''), i.kolon::text)`,
+`skrs_kod = coalesce(nullif(d.skrs_kod,''), i.kolon::text)` — liste boşsa ham
+değere düşüyor (geriye dönük güvenli). Düz ögeler (tarih, kilo, tansiyon)
+eskisi gibi yalnız `deger` taşıyor.
+
+### Doğrulama
+
+`CocukIzlemTestleri` (209) ve `GebeIzlemTestleri` (221) listeler dolunca
+kırılmıştı — `deger` artık ada eşit, kod `skrs_kod`'da. Testlerin harita
+sorgusu `coalesce(nullif(skrs_kod,''), deger)`'e çevrildi: SKRS-kodlu ögeler
+koda, düz ögeler değere bakıyor. API **555/555** (0 `[ATLANDI]`), web
+**721/721**, tsc temiz.

@@ -107,11 +107,62 @@ public static class ZamanliIsler
             return s.aciklama;
         },
 
+        // PANİK DEĞER TAKİBİ (894, KTS L2): süresinde bildirilmemiş panik
+        //   değerleri hekime bildirir ve üst sorumluya yükseltir. SAAT BAŞI -
+        //   panik dakikalarla ölçülür, günlük iş anlamsız olurdu.
+        //
+        //   İŞ BİLDİRİMİN KENDİSİ DEĞİL, BİLDİRİLMEMENİN TAKİBİDİR: panik
+        //   bildirimi telefonla ve okuma-geri teyidiyle yapılır; burada
+        //   üretilen kayıt yalnızca "kimse aramamış" demektir.
+        ["lab.panik"] = async (servisler, iptal) =>
+        {
+            var veri = servisler.GetRequiredService<Gentegre.Veri.VeriKaynagi>();
+            var s = await veri.TekAsync("""
+                select uyarilan, yukseltilen from public.fn_lab_panik_tara()
+                """, null,
+                o => new { Uyari = o.GetInt32(0), Yukselt = o.GetInt32(1) }, iptal);
+
+            var acik = await veri.TekDegerAsync<int>(
+                "select count(*)::int from public.v_lab_panik_acik", null, iptal);
+
+            return $"{acik} açık panik · {s?.Uyari ?? 0} hekim uyarısı · "
+                 + $"{s?.Yukselt ?? 0} yükseltme.";
+        },
+
         ["enabiz.gonder"] = async (servisler, iptal) =>
         {
             var gonderim = servisler.GetRequiredService<EnabizGonderimi>();
             var s = await gonderim.CalistirAsync(50, null, null, iptal);
             return s.Aciklama;
+        },
+
+        // HASTA MESAJI KUYRUGU (877, KTS H7): mesaj hekimin gozu onunde
+        //   yazilir, gonderimi burada olur. Kapi kapaliyken (servis metodu
+        //   tanimsiz) is calisir ve "0 gonderildi, n kuyrukta" der - kuyrugun
+        //   buyudugu gorunur kalsin.
+        ["enabiz.mesaj"] = async (servisler, iptal) =>
+        {
+            var mesaj = servisler.GetRequiredService<EnabizMesajServisi>();
+            var s = await mesaj.CalistirAsync(50, null, iptal);
+            return s.Aciklama;
+        },
+
+        // GUN SONU OZETI (884, KTS H13): DUNUN sayilari + 407 paketi.
+        //   Gece 01:00 - gun bitmeden hesaplamak, aksam acilan basvurulari
+        //   saymamak demekti.
+        ["enabiz.gun_sonu"] = async (servisler, iptal) =>
+        {
+            var gunSonu = servisler.GetRequiredService<EnabizGunSonuServisi>();
+            return await gunSonu.DunuHesaplaAsync(iptal);
+        },
+
+        // AY SONU OZETI (885): ONCEKI ayin klinik kirilimli ozeti + 408.
+        //   Ayin 2'sinde - ayin 1'inde calistirmak, son gun gece girilen
+        //   kayitlari kacirma riskiydi.
+        ["enabiz.ay_sonu"] = async (servisler, iptal) =>
+        {
+            var gunSonu = servisler.GetRequiredService<EnabizGunSonuServisi>();
+            return await gunSonu.OncekiAyiHesaplaAsync(iptal);
         },
 
         // KULLANILMAYAN HIZMETLERI PASIFE AL (550/551). Kurulumdan itibaren

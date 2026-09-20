@@ -127,3 +127,19 @@ bağlanma · önce HL7 v2 ORU/MLLP · kod kurulum bilgileri netleşince).
   **yapıldı** (803) · ~~**kurum portalı istek ekranı**~~ **yapıldı** (804/805) ·
   ~~**istek üzerinde yazışma**~~ **yapıldı** (806) · ~~**radyolog hakedişi
   bağı**~~ **yapıldı** (807/808 - dış radyolog da Raporlayan payı alır).
+
+---
+
+## 6. KTS denetimi (Bakanlık) — gereksinim listesi
+
+Üç Kayıt Tescil Sistemi denetim raporu (HBYS · DHBS · LBYS, denetim tarihi
+26.08.2025, **önceki ürüne** yapıldı) madde madde iş listesine çevrildi:
+**`16_KTS_DENETIM_IS_LISTESI.md`**. HBYS raporu **başarısız**; DHBS ve LBYS
+hiç denetlenmedi, yani soru listeleri bir sonraki denetimin gündemidir.
+
+63 maddenin Gentegre AI karşılığı 19.09.2026'da kod okunarak çıkarıldı:
+**11 var · 23 kısmi · 29 yok**. Kaynak PDF'ler `Ekranlar/Dis Klinigi/`.
+
+Sıradaki: **9. kalem — diş maddeleri** (D1 protez barkotlama · D7/D8 diş şeması
+karşılaştırma ve diş bazlı işlem geçmişi · D9 ortodonti ICON skoru · D18 ADSM
+ağız-diş sağlığı e-Nabız paketi). Ayrıntı ve bağımlılıklar 16'da.

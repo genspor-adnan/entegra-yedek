@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace Gentegre.Cekirdek.Cihaz;
 
@@ -39,7 +39,18 @@ public sealed record CihazKalemi(
     string Isaret,
     string Durum,
     DateTime? OlcumZamani,
-    string Aciklama = "");
+    string Aciklama = "",
+    // GRAFİK TİPLİ SONUÇ (892, KTS L10). HL7 OBX-2 değer tipi:
+    //   NM sayısal · ST metin · ED gömülü veri (PNG/PDF) · NA sayı dizisi.
+    //   Eski sürücüler bunu doldurmaz; boş = "sayısal/metin" varsayılır.
+    string DegerTipi = "",
+    // ED: çözülmüş ikili içerik ve MIME tipi. Değer alanına (varchar 200)
+    //   sığmadığı için ayrı taşınır.
+    byte[]? Gomulu = null,
+    string GomuluTip = "",
+    // NA: sayı dizisi. Görüntüye çevirip saklamak veriyi kaybetmek olurdu -
+    //   ekran ve rapor seriyi kendisi çizer.
+    IReadOnlyList<decimal>? Seri = null);
 
 /// <summary>
 /// Bir cihaz protokolünün çözümleyicisi. Uygulama yalnız

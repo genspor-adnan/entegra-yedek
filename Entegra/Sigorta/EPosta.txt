@@ -1,0 +1,5 @@
+E-Posta Hesap Bilgileri;
+noreply@genyazilim.com
+Nr2020**
+Smtp: srvm08.trwww.com
+Port: 587

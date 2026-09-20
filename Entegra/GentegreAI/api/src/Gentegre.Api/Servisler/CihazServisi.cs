@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Gentegre.Cekirdek.Cihaz;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Veri;
@@ -106,11 +106,16 @@ public sealed class CihazServisi(VeriKaynagi veri, IEnumerable<ICihazSurucu> sur
             await _veri.CalistirAsync("""
                 insert into public.cihaz_mesaj_kalem
                        (mesaj_id, sira, test_kodu, test_adi, deger, sayisal, birim,
-                        referans, isaret, durum, olcum_zamani, aciklama)
-                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11)
+                        referans, isaret, durum, olcum_zamani, aciklama,
+                        -- GRAFİK TİPLİ SONUÇ (892, KTS L10): gömülü görüntü ve
+                        --   sayı dizisi `deger` alanına (varchar 200) sığmaz.
+                        deger_tipi, gomulu, gomulu_tip, seri)
+                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11,
+                        @p12, @p13, @p14, @p15::jsonb)
                 """,
                 [mesajId, k.Sira, k.TestKodu, k.TestAdi, k.Deger, k.Sayisal, k.Birim,
-                 k.Referans, k.Isaret, k.Durum, k.OlcumZamani, k.Aciklama], iptal);
+                 k.Referans, k.Isaret, k.Durum, k.OlcumZamani, k.Aciklama,
+                 k.DegerTipi, k.Gomulu, k.GomuluTip, SeriJson(k.Seri)], iptal);
 
         await _veri.CalistirAsync("""
             update public.cihaz set son_mesaj = now(), son_hata = @p1,
@@ -153,11 +158,16 @@ public sealed class CihazServisi(VeriKaynagi veri, IEnumerable<ICihazSurucu> sur
             await _veri.CalistirAsync("""
                 insert into public.cihaz_mesaj_kalem
                        (mesaj_id, sira, test_kodu, test_adi, deger, sayisal, birim,
-                        referans, isaret, durum, olcum_zamani, aciklama)
-                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11)
+                        referans, isaret, durum, olcum_zamani, aciklama,
+                        -- GRAFİK TİPLİ SONUÇ (892, KTS L10): gömülü görüntü ve
+                        --   sayı dizisi `deger` alanına (varchar 200) sığmaz.
+                        deger_tipi, gomulu, gomulu_tip, seri)
+                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11,
+                        @p12, @p13, @p14, @p15::jsonb)
                 """,
                 [mesajId, k.Sira, k.TestKodu, k.TestAdi, k.Deger, k.Sayisal, k.Birim,
-                 k.Referans, k.Isaret, k.Durum, k.OlcumZamani, k.Aciklama], iptal);
+                 k.Referans, k.Isaret, k.Durum, k.OlcumZamani, k.Aciklama,
+                 k.DegerTipi, k.Gomulu, k.GomuluTip, SeriJson(k.Seri)], iptal);
 
         await _veri.CalistirAsync("""
             update public.cihaz_mesaj
@@ -250,4 +260,15 @@ public sealed class CihazServisi(VeriKaynagi veri, IEnumerable<ICihazSurucu> sur
             update public.cihaz set son_hata = @p1, degistirme_tarihi = now()
              where id = @p0
             """, [cihazId, hata.Length > 300 ? hata[..300] : hata], iptal);
+
+    /// <summary>
+    /// SAYI DİZİSİ JSON'a (892): <c>{"y":[…]}</c>. Boş seri NULL döner -
+    /// "seri var ama boş" ile "seri yok" farklı şeylerdir; kısıt
+    /// (`ck_lab_grafik_icerik`) da bunu bekliyor.
+    /// </summary>
+    private static string? SeriJson(IReadOnlyList<decimal>? seri)
+        => seri is not { Count: > 0 } ? null
+           : "{\"y\":[" + string.Join(",",
+                 seri.Select(x => x.ToString(System.Globalization.CultureInfo.InvariantCulture)))
+             + "]}";
 }

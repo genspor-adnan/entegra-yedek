@@ -4,7 +4,7 @@
 bir nesne birden cok dosyada tanimlanmissa **en yuksek numarali dosya**
 yururluktedir - degistirmeniz gereken yer odur.
 
-## Fonksiyonlar (454 ad, 124 tanesi birden cok dosyada)
+## Fonksiyonlar (478 ad, 124 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -55,12 +55,14 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_belge_varsayilan_liste` | `601_sgk_tarife_sut_listesi.sql` | 205_belge_fiyat_listesi.sql, 278_odeyen_kurum_varsayilan_liste.sql, 292_varsayilan_liste_kampanya.sql, 302_kurum_sozlesme_fiyat_listesi.sql, 468_kurum_sozlesme_1n.sql, 588_kurum_tarifesi_coklu_sozlesme.sql |
 | `fn_belge_yon` | `205_belge_fiyat_listesi.sql` | — |
 | `fn_bolum_planli` | `718_hekim_calisma_plani.sql` | — |
+| `fn_bzbh_hastalik` | `882_bzbh_bildirim.sql` | — |
 | `fn_cagri_arayan_bul` | `839_cagri_merkezi.sql` | — |
 | `fn_cagri_tel_anahtar` | `839_cagri_merkezi.sql` | — |
 | `fn_cari_fiyat_listesi` | `204_cari_fiyat_listesi.sql` | — |
 | `fn_ceviri` | `194_ceviri.sql` | — |
 | `fn_ceviri_sozluk` | `194_ceviri.sql` | — |
 | `fn_cihaz_siradakiler` | `432_cihaz_ara_katman.sql` | — |
+| `fn_cocuk_persentil` | `899_cocuk_izlem.sql` | — |
 | `fn_dagilim_coz` | `603_ek_katki_kaldirildi.sql` | 594_dagilim_coz_ve_onizleme.sql, 595_katki_yalniz_tss_sgk.sql, 602_sut_bedeli_iskontosuz.sql |
 | `fn_dagilim_onizle` | `594_dagilim_coz_ve_onizleme.sql` | — |
 | `fn_dagilim_pay_grubu` | `470_belge_satir_dagilim.sql` | — |
@@ -74,6 +76,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_depo_kural_kontrol` | `093_depo_kurallar.sql` | — |
 | `fn_depo_varsayilan_tek` | `090_depo_varsayilan.sql` | — |
 | `fn_dis_hekim_kurumu` | `827_lab_istem_kurumu.sql` | — |
+| `fn_dis_icon_iyilesme` | `875_dis_ortodonti_icon.sql` | — |
+| `fn_dis_icon_karmasiklik` | `875_dis_ortodonti_icon.sql` | — |
+| `fn_dis_icon_toplam` | `875_dis_ortodonti_icon.sql` | — |
+| `fn_dis_isemri_barkod_coz` | `874_dis_protez_barkot.sql` | — |
 | `fn_dis_no_uret` | `706_dis_modulu.sql` | — |
 | `fn_dis_plan_toplam_tazele` | `706_dis_modulu.sql` | — |
 | `fn_dokuman_kategori_alt_yol` | `431_dokuman_kategori.sql` | — |
@@ -115,7 +121,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_ebelge_xslt_bul` | `160_xslt_dokumana_tasindi.sql` | 159_ebelge_xslt.sql |
 | `fn_eczane_hazirlama_no_uret` | `731_tedarik_numaralari.sql` | — |
 | `fn_eczane_imha_no_uret` | `731_tedarik_numaralari.sql` | — |
+| `fn_enabiz_ay_sonu_sayilar` | `885_enabiz_ay_sonu.sql` | — |
 | `fn_enabiz_basvuru_referans` | `812_bakanlik_kurum_enabiz_accession.sql` | — |
+| `fn_enabiz_gun_sonu_sayilar` | `884_enabiz_gun_sonu.sql` | — |
+| `fn_enabiz_mesaj_turu` | `881_enabiz_hasta_mesaji_411.sql` | — |
 | `fn_enabiz_siradakiler` | `428_kuyruk_takili_satir.sql` | 415_enabiz_cekirdek.sql |
 | `fn_entegrasyon_hesap_id` | `338_entegrasyon_baz_sube.sql` | — |
 | `fn_erken_uyari` | `699_erken_uyari_skoru.sql` | — |
@@ -142,6 +151,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_fiyat_yuvarla` | `202_fn_fiyat_listesi.sql` | — |
 | `fn_fiyat_zam` | `518_fiyat_listesi_tarife_tipi.sql` | — |
 | `fn_ftr_no_uret` | `719_ftr_modulu.sql` | — |
+| `fn_gebelik_hafta` | `900_gebelik_izlem.sql` | — |
+| `fn_gebelik_sonucla` | `902_gebelik_sonucu.sql` | — |
 | `fn_gelen_belge_kaydet` | `187_gelen_belge.sql` | — |
 | `fn_gelen_belge_yanit_yaz` | `187_gelen_belge.sql` | — |
 | `fn_gelen_durum_adi` | `187_gelen_belge.sql` | — |
@@ -226,8 +237,12 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_kurum_tipi_rol_uygula` | `829_portal_rolleri_profil_haritasindan_muaf.sql` | 786_kurum_tipi_rol.sql |
 | `fn_lab_acmg_sinif` | `439_lab_genetik.sql` | — |
 | `fn_lab_akilci_kontrol` | `873_akilci_test_istemi.sql` | — |
-| `fn_lab_antibiyogram_bildirim` | `437_lab_kombinasyon_ajani.sql` | 436_lab_mikrobiyoloji.sql |
+| `fn_lab_antibiyogram_bildirim` | `887_lab_antibiyogram_kisit.sql` | 436_lab_mikrobiyoloji.sql, 437_lab_kombinasyon_ajani.sql |
 | `fn_lab_antibiyogram_paneli` | `509_mikro_organizma_besiyeri.sql` | — |
+| `fn_lab_arsiv_cikar` | `890_lab_numune_arsiv.sql` | — |
+| `fn_lab_arsiv_koy` | `890_lab_numune_arsiv.sql` | — |
+| `fn_lab_arsiv_saklama_gun` | `890_lab_numune_arsiv.sql` | — |
+| `fn_lab_arsiv_yol` | `890_lab_numune_arsiv.sql` | — |
 | `fn_lab_barkod_kontrol` | `433_lab_v1.sql` | — |
 | `fn_lab_barkod_uret` | `433_lab_v1.sql` | — |
 | `fn_lab_bayrak` | `434_lab_cihaz_esleme.sql` | 433_lab_v1.sql |
@@ -240,18 +255,27 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `fn_lab_indeks_etki` | `444_lab_serum_indeksi.sql` | — |
 | `fn_lab_istem_no_uret` | `634_hasta_belge_numaralari.sql` | 633_lab_istem_no_ayari.sql |
 | `fn_lab_istem_sonuc_zamani` | `486_lab_tetkik_calisma_zamani.sql` | — |
+| `fn_lab_karar_notu` | `896_lab_karar_siniri.sql` | — |
 | `fn_lab_kk_gecerli` | `442_lab_kalite_kontrol.sql` | — |
 | `fn_lab_kk_hedef` | `442_lab_kalite_kontrol.sql` | — |
 | `fn_lab_kk_kumulatif` | `442_lab_kalite_kontrol.sql` | — |
 | `fn_lab_kultur_ozet` | `771_kultur_ozeti_para_bicimi.sql` | 436_lab_mikrobiyoloji.sql |
 | `fn_lab_loinc_esle` | `530_lab_loinc_eslesme.sql` | — |
 | `fn_lab_loinc_numune_uyar` | `530_lab_loinc_eslesme.sql` | — |
-| `fn_lab_referans` | `644_lab_referans_cinsiyetsiz.sql` | 433_lab_v1.sql, 434_lab_cihaz_esleme.sql |
+| `fn_lab_onay_kontrol` | `895_lab_cift_onay.sql` | — |
+| `fn_lab_panik_tara` | `894_lab_panik_takip.sql` | — |
+| `fn_lab_referans` | `888_lab_referans_cihaz.sql` | 433_lab_v1.sql, 434_lab_cihaz_esleme.sql, 644_lab_referans_cinsiyetsiz.sql |
 | `fn_lab_referans_kime` | `488_lab_yas_metni.sql` | — |
-| `fn_lab_referans_metin` | `644_lab_referans_cinsiyetsiz.sql` | 643_lab_satir_katalog_dolgusu.sql |
+| `fn_lab_referans_metin` | `888_lab_referans_cihaz.sql` | 643_lab_satir_katalog_dolgusu.sql, 644_lab_referans_cinsiyetsiz.sql |
 | `fn_lab_rol_tazele` | `828_lab_gonderen_primi.sql` | — |
 | `fn_lab_sayi_metni` | `644_lab_referans_cinsiyetsiz.sql` | — |
+| `fn_lab_sonuc_dogrula` | `893_lab_sonuc_dogrulama.sql` | — |
+| `fn_lab_sonuc_gecmis` | `886_lab_sonuc_gecmisi.sql` | — |
+| `fn_lab_tekrar_iptal` | `891_lab_tekrar_istegi.sql` | — |
+| `fn_lab_tekrar_iste` | `891_lab_tekrar_istegi.sql` | — |
+| `fn_lab_tekrar_karsila` | `891_lab_tekrar_istegi.sql` | — |
 | `fn_lab_tetkik_bolum` | `529_lab_tetkik_katalogu_skrs.sql` | — |
+| `fn_lab_tetkik_izin` | `889_lab_tetkik_yetki.sql` | — |
 | `fn_lab_tetkik_numune` | `529_lab_tetkik_katalogu_skrs.sql` | — |
 | `fn_lab_tetkik_sonuc_zamani` | `487_lab_calisma_takvimi.sql` | 486_lab_tetkik_calisma_zamani.sql |
 | `fn_lab_westgard` | `442_lab_kalite_kontrol.sql` | — |
@@ -463,7 +487,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `tg_yatis_izlem_skor` | `699_erken_uyari_skoru.sql` | — |
 | `tg_yatis_order_doz` | `698_order_doz_uretimi.sql` | — |
 
-## Gorunumler (274 ad, 61 tanesi birden cok dosyada)
+## Gorunumler (302 ad, 63 tanesi birden cok dosyada)
 
 | Nesne | Yururlukteki dosya | Onceki tanimlar |
 |---|---|---|
@@ -478,6 +502,8 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_acil_yatak_lookup` | `716_acil_servis.sql` | — |
 | `v_alt_kurum_lookup` | `468_kurum_sozlesme_1n.sql` | — |
 | `v_ameliyat_salon_lookup` | `715_ameliyathane.sql` | — |
+| `v_asi_skrs_eksik` | `898_asi_modulu.sql` | — |
+| `v_asi_uygulama` | `898_asi_modulu.sql` | — |
 | `v_banka_lookup` | `109_banka.sql` | — |
 | `v_banka_sube_lookup` | `110_banka_sube_bagli_ve_kur.sql` | 109_banka.sql |
 | `v_basvuru_hekim` | `718_hekim_calisma_plani.sql` | 578_basvuru_hekim_kaynagi.sql, 583_basvuru_hekim_arama.sql |
@@ -489,6 +515,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_belge_tahsilat` | `782_avans_tahsilat_turu.sql` | 781_belge_tahsilat_avans_kullanimi.sql |
 | `v_belge_yazi_sablonu` | `768_belge_talep_yazisi.sql` | — |
 | `v_butce_durum` | `724_satinalma.sql` | — |
+| `v_bzbh_bildirim` | `882_bzbh_bildirim.sql` | — |
 | `v_cagri` | `839_cagri_merkezi.sql` | — |
 | `v_cagri_agent` | `839_cagri_merkezi.sql` | — |
 | `v_cagri_altkonu_lookup` | `839_cagri_merkezi.sql` | — |
@@ -504,16 +531,20 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_cari_lookup` | `122_aday_musteri.sql` | 037_kisi_karti.sql |
 | `v_cek_senet_portfoy` | `072_cek_senet.sql` | — |
 | `v_cihaz_lookup` | `432_cihaz_ara_katman.sql` | — |
+| `v_cocuk_izlem` | `899_cocuk_izlem.sql` | — |
 | `v_demirbas_durum` | `728_demirbas_kalibrasyon_tabi.sql` | 723_demirbas_kalibrasyon.sql |
 | `v_demirbas_is_emri_onay` | `752_onarim_onayi.sql` | — |
 | `v_departman_agac_lookup` | `577_dis_hekim_bolum_brans.sql` | — |
 | `v_departman_lookup` | `256_departman_durum.sql` | 251_departman.sql, 254_departman_kod.sql |
 | `v_depo_lookup` | `093_depo_kurallar.sql` | 088_belge_irsaliye_alanlari.sql |
+| `v_dis_agiz_dis_paket` | `876_dis_enabiz_agiz_dis.sql` | — |
 | `v_dis_gunluk_akis` | `706_dis_modulu.sql` | — |
 | `v_dis_hasta` | `706_dis_modulu.sql` | — |
 | `v_dis_hekim_lookup` | `309_dis_hekim_kurum_taraf_bag.sql` | 305_dis_hekim.sql, 308_dis_hekim_kurum_ad_kaldir.sql |
+| `v_dis_icon_skor` | `875_dis_ortodonti_icon.sql` | — |
 | `v_dis_islem_lookup` | `706_dis_modulu.sql` | — |
 | `v_dis_lab_isemri` | `706_dis_modulu.sql` | — |
+| `v_dis_lab_isemri_etiket` | `874_dis_protez_barkot.sql` | — |
 | `v_dis_lab_lookup` | `706_dis_modulu.sql` | — |
 | `v_dis_plan_lookup` | `706_dis_modulu.sql` | — |
 | `v_dis_seans` | `706_dis_modulu.sql` | — |
@@ -532,6 +563,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_ebelge_turu_lookup` | `156_ebelge_seri.sql` | — |
 | `v_ebelge_yon_lookup` | `159_ebelge_xslt.sql` | — |
 | `v_eczane_miad` | `722_eczane.sql` | — |
+| `v_enabiz_erisim` | `878_enabiz_hekim_erisimi.sql` | — |
+| `v_enabiz_gonderim_orani` | `884_enabiz_gun_sonu.sql` | — |
+| `v_enabiz_klinik_kodsuz` | `885_enabiz_ay_sonu.sql` | — |
+| `v_enabiz_mesaj` | `881_enabiz_hasta_mesaji_411.sql` | 877_enabiz_hasta_mesaji.sql |
 | `v_entegrasyon_hesap_lookup` | `430_sigorta_v1.sql` | — |
 | `v_entegrasyon_kod_lookup` | `337_entegrasyon_uts_ebelge.sql` | 336_entegrasyon_hesap.sql |
 | `v_firsat_asama_gecmis` | `121_firsat.sql` | — |
@@ -556,6 +591,10 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_ftr_seans` | `719_ftr_modulu.sql` | — |
 | `v_ftr_unite` | `719_ftr_modulu.sql` | — |
 | `v_ftr_unite_lookup` | `719_ftr_modulu.sql` | — |
+| `v_gebe_izlem` | `900_gebelik_izlem.sql` | — |
+| `v_gebelik` | `901_gebelik_bildirim.sql` | 900_gebelik_izlem.sql |
+| `v_gebelik_sonuc` | `902_gebelik_sonucu.sql` | — |
+| `v_gebelik_sonucsuz` | `902_gebelik_sonucu.sql` | — |
 | `v_gorev_agac_lookup` | `571_gorev_agac_lookup.sql` | — |
 | `v_gorev_lookup` | `255_personel_gorev.sql` | — |
 | `v_goz_cihaz_lookup` | `693_goz_lookup.sql` | — |
@@ -610,19 +649,31 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_kurum_lookup` | `478_pay_kolonlari_dusur.sql` | 249_kurum_sozlesme.sql, 250_kategori_lookup.sql |
 | `v_kurum_sozlesme_lookup` | `468_kurum_sozlesme_1n.sql` | — |
 | `v_lab_antibiyotik_lookup` | `436_lab_mikrobiyoloji.sql` | — |
+| `v_lab_arsiv` | `890_lab_numune_arsiv.sql` | — |
+| `v_lab_arsiv_imha_bekleyen` | `890_lab_numune_arsiv.sql` | — |
+| `v_lab_arsiv_konum_lookup` | `890_lab_numune_arsiv.sql` | — |
+| `v_lab_arsiv_kutu` | `890_lab_numune_arsiv.sql` | — |
 | `v_lab_besiyeri_lookup` | `436_lab_mikrobiyoloji.sql` | — |
+| `v_lab_cift_onay` | `895_lab_cift_onay.sql` | — |
 | `v_lab_cihaz_esleme` | `434_lab_cihaz_esleme.sql` | — |
 | `v_lab_dis_geciken` | `445_lab_dis_gonderim.sql` | — |
 | `v_lab_dis_lab_lookup` | `445_lab_dis_gonderim.sql` | — |
 | `v_lab_gen_lookup` | `439_lab_genetik.sql` | — |
 | `v_lab_genetik_panel_lookup` | `439_lab_genetik.sql` | — |
 | `v_lab_genetik_run_lookup` | `439_lab_genetik.sql` | — |
+| `v_lab_karar_siniri` | `896_lab_karar_siniri.sql` | — |
 | `v_lab_kk_lj` | `442_lab_kalite_kontrol.sql` | — |
 | `v_lab_kk_lot_lookup` | `442_lab_kalite_kontrol.sql` | — |
 | `v_lab_loinc_oneri` | `530_lab_loinc_eslesme.sql` | — |
 | `v_lab_numune_lookup` | `479_lab_numune_lookup.sql` | — |
 | `v_lab_organizma_lookup` | `436_lab_mikrobiyoloji.sql` | — |
 | `v_lab_panel_lookup` | `433_lab_v1.sql` | — |
+| `v_lab_panik_acik` | `894_lab_panik_takip.sql` | — |
+| `v_lab_ret_nedeni` | `879_lab_ret_kriterleri.sql` | — |
+| `v_lab_sonuc_grafik` | `892_lab_grafik_sonuc.sql` | — |
+| `v_lab_tekrar_istegi` | `891_lab_tekrar_istegi.sql` | — |
+| `v_lab_tetkik_dogrulama` | `893_lab_sonuc_dogrulama.sql` | — |
+| `v_lab_tetkik_kisitli` | `889_lab_tetkik_yetki.sql` | — |
 | `v_lab_tetkik_lookup` | `433_lab_v1.sql` | — |
 | `v_lab_varyant_yeniden` | `439_lab_genetik.sql` | — |
 | `v_mali_hareket_ek` | `392_iptal_ters_kayit_ekstre.sql` | 077_v_ekstre.sql |
@@ -679,6 +730,7 @@ yururluktedir - degistirmeniz gereken yer odur.
 | `v_rad_tetkik_lookup` | `286_radyoloji_lookup.sql` | — |
 | `v_radyoloji_cihaz_lookup` | `316_randevu_cihaz_kaynagi.sql` | — |
 | `v_radyoloji_kritik_takip` | `318_radyoloji_takip_listeleri.sql` | — |
+| `v_radyoloji_loinc_eksik` | `883_enabiz_radyoloji_sonuc.sql` | — |
 | `v_radyoloji_protokol_malzeme` | `320_radyoloji_sarf.sql` | — |
 | `v_radyoloji_teslim_takip` | `318_radyoloji_takip_listeleri.sql` | — |
 | `v_radyoloji_tetkik` | `304_radyoloji_istem_acma.sql` | — |

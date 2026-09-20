@@ -454,6 +454,487 @@ public static partial class KaynakKatalogu
             new("kaynakSurum", "k.kaynak_surum", "metin", "Kaynak", Genislik: 150, Varsayilan: false),
         });
 
+    /// <summary>
+    /// BZBH HASTALIK LİSTESİ (882, KTS maddesi H5): bildirimi zorunlu
+    /// bulaşıcı hastalıklar. ICD önekiyle eşleşir; tohum liste Bakanlık
+    /// tebliğine göre doğrulanmayı bekler (<c>dogrulandi</c>).
+    /// </summary>
+    private static KaynakTanimi BzbhHastalik() => new(
+        Ad: "bzbh-hastalik",
+        YetkiKodu: "bzbh.hastalik",
+        Kaynak: "public.bzbh_hastalik h",
+        SubeKolonu: null,
+        VarsayilanSirala: "h.icd_onek asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",        "h.id",        "sayi",  "Id", Varsayilan: false),
+            new("icdOnek",   "h.icd_onek",  "metin", "ICD Öneki", Genislik: 90),
+            new("ad",        "h.ad",        "metin", "Hastalık", Genislik: 240),
+            new("grup",      "h.grup",      "sayi",  "Grup", Hizalama: "orta", Genislik: 60),
+            new("grupAdi",
+                "case h.grup when 1 then 'Grup A - ivedi' when 2 then 'Grup B' "
+                + "when 3 then 'Grup C' when 4 then 'Grup D' else '' end",
+                "metin", "Bildirim Grubu", Hizalama: "orta", Bicim: "rozet", Genislik: 130,
+                Filtrelenebilir: false),
+            new("sureSaat",  "h.sure_saat", "sayi",  "Süre (saat)", Hizalama: "sag", Genislik: 90),
+            new("dogrulandi","h.dogrulandi","mantik", "Tebliğe göre doğrulandı",
+                Hizalama: "orta", Genislik: 140),
+            new("aciklama",  "h.aciklama",  "metin", "Açıklama", Genislik: 300, Varsayilan: false),
+            new("aktif",     "h.aktif",     "mantik", "Aktif", Hizalama: "orta", Genislik: 60),
+        });
+
+    /// <summary>
+    /// NUMUNE RET KRİTERLERİ (879, KTS maddesi L6). Kod uzayı 433 ile aynı -
+    /// geçmiş numunelerin `ret_neden` / `kalite` değerleri bu satırlara bağlı.
+    /// </summary>
+    private static KaynakTanimi LabRetNedeni() => new(
+        Ad: "lab-ret-nedeni",
+        YetkiKodu: "lab.ret_nedeni",
+        Kaynak: "public.lab_ret_nedeni r",
+        SubeKolonu: null,
+        VarsayilanSirala: "r.sira asc, r.kod asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",       "r.id",       "sayi",  "Id", Varsayilan: false),
+            new("kod",      "r.kod",      "sayi",  "Kod", Hizalama: "orta", Genislik: 70),
+            new("ad",       "r.ad",       "metin", "Ret Kriteri", Genislik: 220),
+            new("aciklama", "r.aciklama", "metin", "Açıklama", Genislik: 320),
+            new("kabuldeSecilebilir", "r.kabulde_secilebilir", "mantik",
+                "Kabulde de seçilir", Hizalama: "orta", Genislik: 110),
+            new("hastaBilgilendir", "r.hasta_bilgilendir", "mantik",
+                "Hastaya e-Nabız mesajı", Hizalama: "orta", Genislik: 130),
+            new("mesajSablonu", "r.mesaj_sablonu", "metin", "Mesaj Metni",
+                Genislik: 320, Varsayilan: false),
+            new("sira",     "r.sira",     "sayi",  "Sıra", Hizalama: "sag", Genislik: 60,
+                Varsayilan: false),
+            new("aktif",    "r.aktif",    "mantik", "Aktif", Hizalama: "orta", Genislik: 60),
+        });
+
+    // ARŞİV KOD UZAYLARI (890) - SQL'deki kodların TEK okunur karşılığı.
+    private static readonly Dictionary<string, string> LabArsivDurumlari = new()
+        { ["1"] = "Arşivde", ["2"] = "Çıkarıldı", ["3"] = "İmha edildi" };
+
+    private static readonly Dictionary<string, string> LabArsivCikisNedenleri = new()
+        { ["1"] = "Tekrar çalışma", ["2"] = "Dış laboratuvara",
+          ["3"] = "İmha", ["4"] = "Devir / iade" };
+
+    // GEBELİK DOSYASI DURUMU (900): kapanan dosya 224'ün yeridir.
+    private static readonly Dictionary<string, string> GebelikDurumlari = new()
+        { ["1"] = "Devam ediyor", ["2"] = "Sonuçlandı", ["0"] = "İptal" };
+
+    // ÇOCUK İZLEM KOD UZAYLARI (899).
+    private static readonly Dictionary<string, string> CocukIzlemDurumlari = new()
+        { ["1"] = "Geçerli", ["0"] = "İptal" };
+
+    private static readonly Dictionary<string, string> CocukCinsiyetKodlari = new()
+        { ["1"] = "Erkek", ["2"] = "Kız" };
+
+    private static readonly Dictionary<string, string> CocukOlcutKodlari = new()
+        { ["1"] = "Kilo (kg)", ["2"] = "Boy (cm)", ["3"] = "Baş çevresi (cm)" };
+
+    // AŞI KAYIT DURUMU (898): uygulanmış aşı SİLİNMEZ, iptal edilir.
+    private static readonly Dictionary<string, string> AsiDurumlari = new()
+        { ["1"] = "Uygulandı", ["0"] = "İptal" };
+
+    // PANİK DURUMU (894): teyit alınmamış olanlar listelenir.
+    private static readonly Dictionary<string, string> LabPanikDurumlari = new()
+        { ["1"] = "Bildirilmedi", ["2"] = "Teyit bekliyor", ["3"] = "Teyit alındı" };
+
+    // TEKRAR TALEBİ KOD UZAYI (891).
+    private static readonly Dictionary<string, string> LabTekrarTurleri = new()
+        { ["1"] = "Aynı numuneden tekrar", ["2"] = "Yeni numune" };
+
+    private static readonly Dictionary<string, string> LabTekrarDurumlari = new()
+        { ["1"] = "Bekliyor", ["2"] = "Karşılandı", ["3"] = "İptal" };
+
+    private static readonly Dictionary<string, string> LabArsivKonumTurleri = new()
+        { ["1"] = "Ünite", ["2"] = "Raf", ["3"] = "Kutu" };
+
+    /// <summary>
+    /// NUMUNE ARŞİVİ (890, KTS L13) — arşivdeki/çıkmış tüpler.
+    ///
+    /// Görünüm `v_lab_arsiv`: konum yolu ("Derin dondurucu A / Raf 2 /
+    /// Kutu 7"), göz ve kalan gün orada hesaplanıyor; listede yeniden
+    /// hesaplamak, ekran ile imha listesinin ayrışması demekti.
+    /// </summary>
+    private static KaynakTanimi LabArsiv() => new(
+        Ad: "lab-arsiv",
+        YetkiKodu: "lab.arsiv",
+        Kaynak: "public.v_lab_arsiv a",
+        SubeKolonu: "a.sube_id",
+        VarsayilanSirala: "a.giris_zamani desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",        "a.id",        "sayi",  "Id", Varsayilan: false),
+            new("barkod",    "a.barkod",    "metin", "Barkod", Hizalama: "orta", Genislik: 130),
+            new("hasta",     "a.hasta",     "metin", "Hasta", Genislik: 220),
+            new("istemNo",   "a.istem_no",  "metin", "İstem No", Hizalama: "orta", Genislik: 120),
+            new("konum",     "a.konum",     "metin", "Konum", Genislik: 260),
+            new("goz",       "a.goz",       "metin", "Göz", Hizalama: "orta", Genislik: 60),
+            new("sicaklik",  "a.sicaklik",  "sayi",  "°C", Hizalama: "sag", Genislik: 60),
+            new("girisZamani", "a.giris_zamani", "tarihsaat", "Arşive Giriş", Genislik: 150),
+            new("saklamaGun", "a.saklama_gun", "sayi", "Saklama (gün)", Hizalama: "sag",
+                Genislik: 110, Varsayilan: false),
+            new("imhaHedef", "a.imha_hedef", "tarih", "İmha Hedefi", Hizalama: "orta",
+                Genislik: 110),
+            // KALAN GÜN EKSİYSE SÜRE DOLMUŞ: listede sıralanabilir olmalı,
+            //   imha listesi de aynı sayıya bakıyor.
+            new("kalanGun",  "a.kalan_gun", "sayi", "Kalan Gün", Hizalama: "sag", Genislik: 90),
+            new("durum",     "a.durum",     "kod",  "Durum", Hizalama: "orta", Genislik: 100,
+                Kodlar: LabArsivDurumlari),
+            new("cikisZamani", "a.cikis_zamani", "tarihsaat", "Çıkış", Genislik: 150,
+                Varsayilan: false),
+            new("cikisNeden", "a.cikis_neden", "kod", "Çıkış Nedeni", Hizalama: "orta",
+                Genislik: 140, Kodlar: LabArsivCikisNedenleri, Varsayilan: false),
+            new("notMetni",  "a.not_metni", "metin", "Not", Genislik: 220, Varsayilan: false),
+        });
+
+    /// <summary>
+    /// TEKRAR TALEPLERİ (891, KTS L8) — laboratuvarın tekrar kuyruğu.
+    ///
+    /// Görünüm `v_lab_tekrar_istegi`: gerekçe ADI kod listesinden, tüpün
+    /// arşiv yeri 890'dan geliyor - "aynı numuneden tekrar" talebinde
+    /// teknisyenin ilk işi tüpü bulmaktır.
+    /// </summary>
+    private static KaynakTanimi LabTekrar() => new(
+        Ad: "lab-tekrar",
+        YetkiKodu: "lab.tekrar",
+        Kaynak: "public.v_lab_tekrar_istegi t",
+        SubeKolonu: "t.sube_id",
+        VarsayilanSirala: "t.istek_zamani desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",       "t.id",       "sayi",  "Id", Varsayilan: false),
+            new("satirId",  "t.satir_id", "sayi",  "Satır", Varsayilan: false),
+            new("istemNo",  "t.istem_no", "metin", "İstem No", Hizalama: "orta", Genislik: 120),
+            new("barkod",   "coalesce(t.barkod, '')", "metin", "Barkod",
+                Hizalama: "orta", Genislik: 130),
+            new("hasta",    "t.hasta",    "metin", "Hasta", Genislik: 200),
+            new("tetkik",   "t.kod || ' · ' || t.tetkik", "metin", "Tetkik", Genislik: 220),
+            new("tur",      "t.tur",      "kod",   "Tür", Hizalama: "orta", Genislik: 150,
+                Kodlar: LabTekrarTurleri),
+            new("gerekceAdi", "t.gerekce_adi", "metin", "Gerekçe", Genislik: 220),
+            new("gerekce",  "t.gerekce",  "metin", "Açıklama", Genislik: 240, Varsayilan: false),
+            new("isteyen",  "t.isteyen",  "metin", "İsteyen", Genislik: 160),
+            new("istekZamani", "t.istek_zamani", "tarihsaat", "İstek", Genislik: 150),
+            new("arsivYeri", "coalesce(t.arsiv_yeri, '')", "metin", "Tüp Arşivde",
+                Genislik: 240),
+            new("durum",    "t.durum",    "kod",   "Durum", Hizalama: "orta", Genislik: 110,
+                Kodlar: LabTekrarDurumlari),
+            new("kapanmaZamani", "t.kapanma_zamani", "tarihsaat", "Kapanış",
+                Genislik: 150, Varsayilan: false),
+            new("iptalNeden", "t.iptal_neden", "metin", "İptal Nedeni", Genislik: 220,
+                Varsayilan: false),
+        });
+
+    /// <summary>
+    /// PANİK DEĞERLER (894, KTS L2) — açık panikler ve bekleme süresi.
+    ///
+    /// Panik değer "bildirildi" ile kapanmaz; <b>okuma-geri teyidi</b> ile
+    /// kapanır (kim, ne zaman). Liste bu yüzden teyitsiz kayıtları gösterir -
+    /// teyit alınan panik tarihe düşer.
+    /// </summary>
+    private static KaynakTanimi LabPanik() => new(
+        Ad: "lab-panik",
+        YetkiKodu: "lab.panik",
+        Kaynak: "public.v_lab_panik_acik p",
+        SubeKolonu: "p.sube_id",
+        // EN UZUN BEKLEYEN ÖNCE: sıralama, listenin kendisinin uyarısıdır.
+        VarsayilanSirala: "p.gecen_dk desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",        "p.sonuc_id",  "sayi",  "Id", Varsayilan: false),
+            new("satirId",   "p.satir_id",  "sayi",  "Satır", Varsayilan: false),
+            new("istemNo",   "p.istem_no",  "metin", "İstem No", Hizalama: "orta",
+                Genislik: 120),
+            new("hasta",     "p.hasta",     "metin", "Hasta", Genislik: 200),
+            new("tetkik",    "p.kod || ' · ' || p.tetkik", "metin", "Tetkik", Genislik: 200),
+            new("deger",     "p.deger",     "metin", "Değer", Hizalama: "sag", Genislik: 90),
+            new("birim",     "p.birim",     "metin", "Birim", Genislik: 70),
+            new("bayrak",    "p.bayrak",    "metin", "Bayrak", Hizalama: "orta",
+                Genislik: 70),
+            new("olcumZamani", "p.olcum_zamani", "tarihsaat", "Ölçüm", Genislik: 150),
+            new("gecenDk",   "p.gecen_dk",  "sayi",  "Bekleyen (dk)", Hizalama: "sag",
+                Genislik: 110),
+            new("hekim",     "p.hekim",     "metin", "İstem Hekimi", Genislik: 180),
+            new("durum",     "p.durum",     "kod",   "Durum", Hizalama: "orta",
+                Genislik: 150, Kodlar: LabPanikDurumlari),
+            // TEYİT AKSİYONU BİLDİRİM KAYDINI İSTER: teyit, sonuca değil
+            //   YAPILAN BİLDİRİME iliştirilir - hangi aramanın teyit
+            //   edildiği belli olmalı.
+            new("bildirimId", "p.bildirim_id", "sayi", "Bildirim Kaydı",
+                Varsayilan: false),
+            new("bildirimZamani", "p.bildirim_zamani", "tarihsaat", "Bildirim",
+                Genislik: 150, Varsayilan: false),
+            new("bildirilenAd", "p.bildirilen_ad", "metin", "Bildirilen Kişi",
+                Genislik: 180, Varsayilan: false),
+            new("yukseltme", "p.yukseltme", "mantik", "Yükseltildi", Hizalama: "orta",
+                Genislik: 90),
+        });
+
+    /// <summary>
+    /// BEBEK / ÇOCUK İZLEMLERİ (899, KTS H10 / USS 209).
+    ///
+    /// Persentil kolonları eğri verisi (`cocuk_buyume_lms`) yüklüyse dolu
+    /// gelir; boşsa "hesaplanamadı" demektir, "sıfırıncı persentil" değil.
+    /// </summary>
+    private static KaynakTanimi CocukIzlem() => new(
+        Ad: "cocuk-izlem",
+        YetkiKodu: "cocuk.izlem",
+        Kaynak: "public.v_cocuk_izlem i",
+        SubeKolonu: "i.sube_id",
+        VarsayilanSirala: "i.izlem_tarihi desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",      "i.id",      "sayi",  "Id", Varsayilan: false),
+            new("tarafId", "i.taraf_id", "sayi", "Hasta Id", Varsayilan: false),
+            new("cocuk",   "i.cocuk",   "metin", "Çocuk", Genislik: 220),
+            new("kacinciIzlem", "i.kacinci_izlem", "sayi", "İzlem", Hizalama: "sag",
+                Genislik: 70),
+            new("izlemTarihi", "i.izlem_tarihi", "tarihsaat", "Tarih", Genislik: 150),
+            new("yasAy",   "i.yas_ay",  "sayi",  "Yaş (ay)", Hizalama: "sag", Genislik: 80),
+            new("boyCm",   "i.boy_cm",  "sayi",  "Boy (cm)", Hizalama: "sag", Genislik: 90),
+            new("kiloKg",  "i.kilo_kg", "sayi",  "Kilo (kg)", Hizalama: "sag", Genislik: 90),
+            new("basCevresiCm", "i.bas_cevresi_cm", "sayi", "Baş Ç. (cm)",
+                Hizalama: "sag", Genislik: 100, Varsayilan: false),
+            new("kiloPersentil", "i.kilo_persentil", "sayi", "Kilo %", Hizalama: "sag",
+                Genislik: 80),
+            new("boyPersentil", "i.boy_persentil", "sayi", "Boy %", Hizalama: "sag",
+                Genislik: 80),
+            new("basPersentil", "i.bas_persentil", "sayi", "Baş %", Hizalama: "sag",
+                Genislik: 80, Varsayilan: false),
+            new("hemoglobin", "i.hemoglobin", "sayi", "Hb", Hizalama: "sag",
+                Genislik: 70, Varsayilan: false),
+            new("enabizDurum", "i.enabiz_durum", "sayi", "e-Nabız", Hizalama: "orta",
+                Genislik: 80, Varsayilan: false),
+            new("durum",   "i.durum",   "kod",   "Durum", Hizalama: "orta", Genislik: 90,
+                Kodlar: CocukIzlemDurumlari),
+            new("oneri",   "i.oneri",   "metin", "Öneri", Genislik: 260, Varsayilan: false),
+        });
+
+    /// <summary>BÜYÜME EĞRİSİ LMS VERİSİ (899): WHO/Bakanlık tabloları.</summary>
+    private static KaynakTanimi CocukBuyumeLms() => new(
+        Ad: "cocuk-buyume-lms",
+        YetkiKodu: "cocuk.buyume_lms",
+        Kaynak: "public.cocuk_buyume_lms b",
+        SubeKolonu: null,
+        VarsayilanSirala: "b.kaynak, b.cinsiyet, b.olcut, b.ay",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",     "b.id",     "sayi",  "Id", Varsayilan: false),
+            new("kaynak", "b.kaynak", "metin", "Kaynak", Hizalama: "orta", Genislik: 90),
+            new("cinsiyet", "b.cinsiyet", "kod", "Cinsiyet", Hizalama: "orta",
+                Genislik: 90, Kodlar: CocukCinsiyetKodlari),
+            new("olcut",  "b.olcut",  "kod",   "Ölçüt", Hizalama: "orta", Genislik: 110,
+                Kodlar: CocukOlcutKodlari),
+            new("ay",     "b.ay",     "sayi",  "Ay", Hizalama: "sag", Genislik: 60),
+            new("l",      "b.l",      "sayi",  "L", Hizalama: "sag", Genislik: 90),
+            new("m",      "b.m",      "sayi",  "M", Hizalama: "sag", Genislik: 90),
+            new("s",      "b.s",      "sayi",  "S", Hizalama: "sag", Genislik: 90),
+        });
+
+    /// <summary>GEBELİK DOSYALARI (900, KTS H10).</summary>
+    private static KaynakTanimi Gebelik() => new(
+        Ad: "gebelik",
+        YetkiKodu: "gebe.dosya",
+        Kaynak: "public.v_gebelik g",
+        SubeKolonu: "g.sube_id",
+        VarsayilanSirala: "g.durum asc, g.id desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",      "g.id",      "sayi",  "Id", Varsayilan: false),
+            new("tarafId", "g.taraf_id", "sayi", "Hasta Id", Varsayilan: false),
+            new("gebe",    "g.gebe",    "metin", "Gebe", Genislik: 220),
+            new("gebelikNo", "g.gebelik_no", "sayi", "Gebelik", Hizalama: "sag",
+                Genislik: 80),
+            new("sat",     "g.sat",     "tarih", "Son Adet", Hizalama: "orta",
+                Genislik: 110),
+            new("tahminiDogum", "g.tahmini_dogum", "tarih", "Tahmini Doğum",
+                Hizalama: "orta", Genislik: 120),
+            new("hafta",   "g.hafta",   "sayi",  "Hafta", Hizalama: "sag", Genislik: 70),
+            new("izlemSayisi", "g.izlem_sayisi", "sayi", "İzlem", Hizalama: "sag",
+                Genislik: 70),
+            new("riskDurumu", "g.risk_durumu", "mantik", "Riskli", Hizalama: "orta",
+                Genislik: 70),
+            new("durum",   "g.durum",   "kod",   "Durum", Hizalama: "orta", Genislik: 110,
+                Kodlar: GebelikDurumlari),
+            new("sonucTarihi", "g.sonuc_tarihi", "tarih", "Sonuç", Hizalama: "orta",
+                Genislik: 110, Varsayilan: false),
+            new("aciklama", "g.aciklama", "metin", "Açıklama", Genislik: 240,
+                Varsayilan: false),
+        });
+
+    /// <summary>GEBELİK SONUÇLARI (902, USS 224).</summary>
+    private static KaynakTanimi GebelikSonuc() => new(
+        Ad: "gebelik-sonuc",
+        YetkiKodu: "gebe.sonuc",
+        Kaynak: "public.v_gebelik_sonuc s",
+        SubeKolonu: "s.sube_id",
+        VarsayilanSirala: "s.sonlanma_tarihi desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",      "s.id",      "sayi",  "Id", Varsayilan: false),
+            new("gebelikId", "s.gebelik_id", "sayi", "Dosya", Varsayilan: false),
+            new("gebe",    "s.gebe",    "metin", "Gebe", Genislik: 220),
+            new("gebelikNo", "s.gebelik_no", "sayi", "Gebelik", Hizalama: "sag",
+                Genislik: 80, Varsayilan: false),
+            new("sonlanmaTarihi", "s.sonlanma_tarihi", "tarihsaat", "Sonlanma",
+                Genislik: 150),
+            new("sonlanmaHaftasi", "s.sonlanma_haftasi", "sayi", "Hafta",
+                Hizalama: "sag", Genislik: 70),
+            new("sonuc",   "s.sonuc",   "sayi",  "Sonuç (SKRS)", Hizalama: "orta",
+                Genislik: 110),
+            new("dogumYontemi", "s.dogum_yontemi", "sayi", "Yöntem", Hizalama: "orta",
+                Genislik: 90),
+            new("canliBebek", "s.canli_bebek", "sayi", "Canlı", Hizalama: "sag",
+                Genislik: 70),
+            new("oluBebek", "s.olu_bebek", "sayi", "Ölü", Hizalama: "sag", Genislik: 70),
+            new("izlemSayisi", "s.izlem_sayisi", "sayi", "İzlem", Hizalama: "sag",
+                Genislik: 70, Varsayilan: false),
+            new("enabizDurum", "s.enabiz_durum", "sayi", "e-Nabız", Hizalama: "orta",
+                Genislik: 80, Varsayilan: false),
+            new("durum",   "s.durum",   "kod",   "Durum", Hizalama: "orta", Genislik: 90,
+                Kodlar: CocukIzlemDurumlari),
+            new("aciklama", "s.aciklama", "metin", "Açıklama", Genislik: 240,
+                Varsayilan: false),
+        });
+
+    /// <summary>GEBE İZLEMLERİ (900, USS 221).</summary>
+    private static KaynakTanimi GebeIzlem() => new(
+        Ad: "gebe-izlem",
+        YetkiKodu: "gebe.izlem",
+        Kaynak: "public.v_gebe_izlem i",
+        SubeKolonu: "i.sube_id",
+        VarsayilanSirala: "i.izlem_tarihi desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",      "i.id",      "sayi",  "Id", Varsayilan: false),
+            new("gebelikId", "i.gebelik_id", "sayi", "Dosya", Varsayilan: false),
+            new("gebe",    "i.gebe",    "metin", "Gebe", Genislik: 220),
+            new("kacinciIzlem", "i.kacinci_izlem", "sayi", "İzlem", Hizalama: "sag",
+                Genislik: 70),
+            new("hafta",   "i.hafta",   "sayi",  "Hafta", Hizalama: "sag", Genislik: 70),
+            new("izlemTarihi", "i.izlem_tarihi", "tarihsaat", "Tarih", Genislik: 150),
+            new("kiloKg",  "i.kilo_kg", "sayi",  "Kilo (kg)", Hizalama: "sag", Genislik: 90),
+            // TANSİYON TEK KOLONDA: 120/80 iki hücrede okunmaz.
+            new("tansiyon",
+                "case when i.sistolik is null and i.diastolik is null then ''"
+                + " else coalesce(i.sistolik::text, '?') || '/' "
+                + "      || coalesce(i.diastolik::text, '?') end",
+                "metin", "TA", Hizalama: "orta", Genislik: 80),
+            new("fetusKalpSesi", "i.fetus_kalp_sesi", "sayi", "FKS", Hizalama: "sag",
+                Genislik: 70),
+            new("hemoglobin", "i.hemoglobin", "sayi", "Hb", Hizalama: "sag", Genislik: 70),
+            new("riskSayisi", "i.risk_sayisi", "sayi", "Risk", Hizalama: "sag",
+                Genislik: 70),
+            new("enabizDurum", "i.enabiz_durum", "sayi", "e-Nabız", Hizalama: "orta",
+                Genislik: 80, Varsayilan: false),
+            new("durum",   "i.durum",   "kod",   "Durum", Hizalama: "orta", Genislik: 90,
+                Kodlar: CocukIzlemDurumlari),
+            new("oneri",   "i.oneri",   "metin", "Öneri", Genislik: 240, Varsayilan: false),
+        });
+
+    /// <summary>AŞI KATALOĞU (898, KTS H10): SKRS kodlu aşı tanımları.</summary>
+    private static KaynakTanimi AsiKatalogu() => new(
+        Ad: "asi",
+        YetkiKodu: "asi.katalog",
+        Kaynak: "public.asi a left join public.stok s on s.id = a.stok_id",
+        SubeKolonu: null,
+        VarsayilanSirala: "a.sira asc, a.ad asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",   "a.id",   "sayi",  "Id", Varsayilan: false),
+            new("kod",  "a.kod",  "metin", "Kod", Hizalama: "orta", Genislik: 90),
+            new("ad",   "a.ad",   "metin", "Aşı", Genislik: 240),
+            // SKRS KODU OLMAYAN AŞI e-NABIZ'A GİDEMEZ: kolon listede görünür
+            //   olmalı ki eksik kalan fark edilsin.
+            new("skrsKod", "a.skrs_kod", "metin", "SKRS Kodu", Hizalama: "orta",
+                Genislik: 110),
+            new("dozSayisi", "a.doz_sayisi", "sayi", "Şema (doz)", Hizalama: "sag",
+                Genislik: 90),
+            new("stok", "coalesce(s.ad, '')", "metin", "Stok Kartı", Genislik: 200),
+            new("aciklama", "a.aciklama", "metin", "Açıklama", Genislik: 240,
+                Varsayilan: false),
+            new("aktif", "a.aktif", "mantik", "Aktif", Hizalama: "orta", Genislik: 60),
+        });
+
+    /// <summary>AŞI UYGULAMALARI (898): hasta bazlı kayıt - USS 207'nin kaynağı.</summary>
+    private static KaynakTanimi AsiUygulama() => new(
+        Ad: "asi-uygulama",
+        YetkiKodu: "asi",
+        Kaynak: "public.v_asi_uygulama u",
+        SubeKolonu: "u.sube_id",
+        VarsayilanSirala: "u.uygulama_zamani desc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",      "u.id",      "sayi",  "Id", Varsayilan: false),
+            new("tarafId", "u.taraf_id", "sayi", "Hasta Id", Varsayilan: false),
+            new("hasta",   "u.hasta",   "metin", "Hasta", Genislik: 220),
+            new("kimlikNo", "coalesce(u.kimlik_no, '')", "metin", "Kimlik No",
+                Hizalama: "orta", Genislik: 110),
+            new("asi",     "u.asi_kod || ' · ' || u.asi", "metin", "Aşı", Genislik: 240),
+            new("dozNo",   "u.doz_no",  "sayi",  "Doz", Hizalama: "sag", Genislik: 60),
+            new("kalanDoz", "u.kalan_doz", "sayi", "Kalan Doz", Hizalama: "sag",
+                Genislik: 90, Varsayilan: false),
+            new("lot",     "u.lot",     "metin", "Lot", Hizalama: "orta", Genislik: 110),
+            new("barkod",  "u.barkod",  "metin", "Barkod", Hizalama: "orta", Genislik: 150,
+                Varsayilan: false),
+            new("uygulamaZamani", "u.uygulama_zamani", "tarihsaat", "Uygulama",
+                Genislik: 150),
+            new("uygulayan", "u.uygulayan", "metin", "Uygulayan", Genislik: 180),
+            new("skrsKod", "u.skrs_kod", "metin", "SKRS", Hizalama: "orta", Genislik: 90,
+                Varsayilan: false),
+            new("enabizDurum", "u.enabiz_durum", "sayi", "e-Nabız", Hizalama: "orta",
+                Genislik: 80, Varsayilan: false),
+            new("durum",   "u.durum",   "kod",   "Durum", Hizalama: "orta", Genislik: 90,
+                Kodlar: AsiDurumlari),
+            new("iptalNeden", "u.iptal_neden", "metin", "İptal Nedeni", Genislik: 220,
+                Varsayilan: false),
+        });
+
+    /// <summary>ARŞİV KONUMLARI (890): ünite > raf > kutu.</summary>
+    private static KaynakTanimi LabArsivKonum() => new(
+        Ad: "lab-arsiv-konum",
+        YetkiKodu: "lab.arsiv_konum",
+        Kaynak: "public.lab_arsiv_konum k",
+        SubeKolonu: "k.sube_id",
+        VarsayilanSirala: "k.kod asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",       "k.id",   "sayi",  "Id", Varsayilan: false),
+            new("kod",      "k.kod",  "metin", "Kod", Hizalama: "orta", Genislik: 100),
+            new("ad",       "k.ad",   "metin", "Ad", Genislik: 200),
+            new("yol",      "public.fn_lab_arsiv_yol(k.id)", "metin", "Yol", Genislik: 280),
+            new("tur",      "k.tur",  "kod",   "Tür", Hizalama: "orta", Genislik: 100,
+                Kodlar: LabArsivKonumTurleri),
+            new("sicaklik", "k.sicaklik", "sayi", "Hedef °C", Hizalama: "sag", Genislik: 80),
+            new("satir",    "k.satir", "sayi", "Satır", Hizalama: "sag", Genislik: 60),
+            new("sutun",    "k.sutun", "sayi", "Sütun", Hizalama: "sag", Genislik: 60),
+            new("aciklama", "k.aciklama", "metin", "Açıklama", Genislik: 240, Varsayilan: false),
+            new("aktif",    "k.aktif", "mantik", "Aktif", Hizalama: "orta", Genislik: 60),
+        });
+
+    /// <summary>SAKLAMA SÜRELERİ (890): tetkike özel kural genel kuralı ezer.</summary>
+    private static KaynakTanimi LabSaklamaPolitika() => new(
+        Ad: "lab-saklama-politika",
+        YetkiKodu: "lab.saklama_politika",
+        Kaynak: "public.lab_saklama_politika p left join public.lab_tetkik t on t.id = p.tetkik_id",
+        SubeKolonu: null,
+        VarsayilanSirala: "p.id asc",
+        Kolonlar: new KolonTanimi[]
+        {
+            new("id",       "p.id",  "sayi",  "Id", Varsayilan: false),
+            new("tetkik",   "coalesce(t.kod || ' · ' || t.ad, 'Tüm tetkikler')", "metin",
+                "Tetkik", Genislik: 240),
+            new("numuneTipi", "p.numune_tipi", "sayi", "Numune Tipi", Hizalama: "orta",
+                Genislik: 100),
+            new("gun",      "p.gun", "sayi", "Saklama (gün)", Hizalama: "sag", Genislik: 110),
+            new("sicaklik", "p.sicaklik", "sayi", "°C", Hizalama: "sag", Genislik: 60),
+            new("dayanak",  "p.dayanak", "metin", "Dayanak", Genislik: 220),
+            new("aciklama", "p.aciklama", "metin", "Açıklama", Genislik: 240, Varsayilan: false),
+            new("aktif",    "p.aktif", "mantik", "Aktif", Hizalama: "orta", Genislik: 60),
+        });
+
     /// <summary>REFLEKS TEST KURALLARI (873 §6): kurum laboratuvarı tanımlar.</summary>
     private static KaynakTanimi LabRefleksKural() => new(
         Ad: "lab-refleks-kural",
