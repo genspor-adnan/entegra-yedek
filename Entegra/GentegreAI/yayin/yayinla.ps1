@@ -29,7 +29,11 @@
 # ============================================================================
 param(
     [string]$Sunucu  = 'gentegre@46.36.201.170',
-    [ValidateSet('hepsi','hbys','erp')] [string]$Kurulum = 'hepsi',
+    # 'profiller' = /genotipai altindaki tum kurum-tipi profilleri (hastane,
+    #   tip merkezi, dis, lab, osgb, dal goz, dal ftr - her biri kendi DB'si).
+    [ValidateSet('hepsi','hbys','erp','profiller',
+                 'hastane','tipmerkezi','dis','lab','osgb','goz','ftr')]
+    [string]$Kurulum = 'hepsi',
     [ValidateSet('hepsi','web','api')] [string]$Yalniz = 'hepsi',
     [switch]$TemelAl,
     # Sunucudaki DB parolasi appsettings.Production.json'a yazilir. Yerel
@@ -56,8 +60,35 @@ $KURULUMLAR = @(
         Db = 'gentegre_erp'; Kap = 'gentegre-api-erp'; Port = 5181
     }
 )
-$secilen = if ($Kurulum -eq 'hepsi') { $KURULUMLAR }
-           else { $KURULUMLAR | Where-Object { $_.Ad -eq $Kurulum } }
+
+# ---- /genotipai altindaki KURUM-TIPI PROFILLERI (izole ayri-DB, ayri konteyner)
+#   Her profil: kendi DB (gentegre_ai_<ad>), kendi konteyner + port, /genotipai/<ad>/.
+#   DB'ler ayrica kuruldu (dev tohumundan restore + kurum_tipi ayarli); goc_gecmisi
+#   dolu oldugu icin deploy'daki DB gocu adimi hicbir sey calistirmaz.
+$PROFILLER = @(
+    @{ Ad='hastane';    Etiket='Profil: Hastane';      Tip='hastane' }
+    @{ Ad='tipmerkezi'; Etiket='Profil: Tip Merkezi';  Tip='tip_merkezi' }
+    @{ Ad='dis';        Etiket='Profil: Agiz-Dis';     Tip='dis' }
+    @{ Ad='lab';        Etiket='Profil: Laboratuvar';  Tip='lab' }
+    @{ Ad='osgb';       Etiket='Profil: OSGB';         Tip='osgb' }
+    @{ Ad='goz';        Etiket='Profil: Goz (dal)';    Tip='dal_goz' }
+    @{ Ad='ftr';        Etiket='Profil: FTR (dal)';    Tip='dal_ftr' }
+)
+$port = 5190
+foreach ($p in $PROFILLER) {
+    $KURULUMLAR += [ordered]@{
+        Ad = $p.Ad; Etiket = $p.Etiket;
+        Yol = "/genotipai/$($p.Ad)/"; Kok = "gentegre-ai-$($p.Ad)";
+        Db = "gentegre_ai_$($p.Ad)"; Kap = "gentegre-api-$($p.Ad)"; Port = $port
+    }
+    $port++
+}
+$profilAdlari = $PROFILLER.Ad
+
+$secilen =
+    if ($Kurulum -eq 'hepsi')     { $KURULUMLAR }
+    elseif ($Kurulum -eq 'profiller') { $KURULUMLAR | Where-Object { $profilAdlari -contains $_.Ad } }
+    else { $KURULUMLAR | Where-Object { $_.Ad -eq $Kurulum } }
 
 function Adim($m) { Write-Host "`n=== $m" -ForegroundColor Cyan }
 function Bilgi($m) { Write-Host "  $m" }

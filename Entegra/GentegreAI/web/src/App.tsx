@@ -208,6 +208,9 @@ function Yollar() {
             gruplu dokum. Yetki `prim.kendi`; butun kisileri goren ekran
             Prim modulunde ve `prim` yetkisinde. */}
         {yetki('prim.kendi') && <Route path="/hakedisim" element={<Hakedisim />} />}
+        {/* PRIM SATIRLARI: ayni self-scoped hakedisim endpoint/sayfasi, menude
+            Hakedislerim'in ustunde ayri giris (kullanici). */}
+        {yetki('prim.kendi') && <Route path="/prim-satirlari" element={<Hakedisim />} />}
 
         {/* ISKONTO ONAY EKRANI (666): zilin buyugu - kuyruk, karar, limit,
             analiz. 'belge' gor yetkisi yeter; KARAR yetkisi ayri (aksiyon

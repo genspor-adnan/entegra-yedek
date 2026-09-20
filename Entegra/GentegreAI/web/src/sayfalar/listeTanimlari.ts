@@ -165,6 +165,10 @@ export const MENU_GRUP_MODUL: Record<string, string> = {
   'FTR':           'ftr',
   // ISG (741): isyeri hekimligi - OSGB / hastane / tip merkezi.
   'İşyeri Hekimliği': 'isg',
+  // MEDULA (707, kullanıcı: "standart olmasın"): SGK'ya fatura kesen kurumlar -
+  //   dal merkezleri, tıp merkezi, hastane. OSGB / muayenehane / ERP'de kapalı
+  //   (kurum_tipi_modul, db/904). Karşılığı yoktu, her yerde çiziliyordu.
+  'Medula':        'medula',
   // ÇAĞRI MERKEZİ (839): santral / WhatsApp / kampanya - modül kapalıysa grup çizilmez.
   'Çağrı Merkezi': 'cagri',
   // AMELIYATHANE (715) / ACIL (716): kendi modulleri - ameliyathanesi ya da

@@ -200,6 +200,8 @@ export interface KullaniciOzeti {
    */
   kurumTipi?: string;
   kurumTipiAdi?: string;
+  /** MENÜ TİPİ (905): 1 bölgeli (Hasta Akışı/Klinikler başlıkları), 0 düz. Profilden. */
+  menuBolgeli?: number;
   /**
    * AKTIF SUBEDE basvuruda sorulan hekim rolu (361/364): 1 "Gönderen"
    * (lab/goruntuleme subesi - dis doktor), 4 "Yapan" (digerleri - personel).

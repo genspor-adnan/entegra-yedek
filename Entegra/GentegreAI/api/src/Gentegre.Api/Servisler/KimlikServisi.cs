@@ -395,8 +395,8 @@ public sealed class KimlikServisi
             ? d : 0m;
     }
 
-    /// <summary>Aktif subenin kurum tipi (786) - tek okuyucu depoda.</summary>
-    private async Task<(string Kod, string Ad)> KurumTipiAsync(int? subeId,
+    /// <summary>Aktif subenin kurum tipi (786) + menu tipi (905) - tek okuyucu depoda.</summary>
+    private async Task<(string Kod, string Ad, short MenuBolgeli)> KurumTipiAsync(int? subeId,
         CancellationToken iptal)
     {
         await using var baglanti = await _veri.AcAsync(iptal);
@@ -415,7 +415,7 @@ public sealed class KimlikServisi
     private static KullaniciOzeti KullaniciOzetiKur(KullaniciKaydi kullanici,
         IReadOnlyList<SubeOzeti> subeler, int? subeId, int urunModu,
         IReadOnlyList<string> moduller, int hekimRolu,
-        (string Kod, string Ad) kurumTipi = default,
+        (string Kod, string Ad, short MenuBolgeli) kurumTipi = default,
         decimal iskontoEsigi = 0m, short portalTuru = 0) => new()
     {
         // PORTAL TURU (806): giris yanitinda da tasinir - sayfa yenilenmeden
@@ -441,6 +441,7 @@ public sealed class KimlikServisi
         HekimRolu = hekimRolu,
         KurumTipi = kurumTipi.Kod ?? "",
         KurumTipiAdi = kurumTipi.Ad ?? "",
+        MenuBolgeli = kurumTipi.MenuBolgeli,
         IskontoOnayEsigi = iskontoEsigi
     };
 

@@ -13,7 +13,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { c, cm } from '../../dil/ceviri';
 import { MenuIkon, grupla, GRUP_IKON, GRUP_IKON_CEV, ALTGRUP_IKON,
          type MenuOgesi, type MenuSatiri } from './menuAgaci';
-import { BOLGE_HBYS, GRUP_SIRA_HBYS, grupBolgesi, CALISMA_ALANLARI, calismaAlaniBul, rolCalismaAlani,
+import { BOLGE_HBYS, GRUP_SIRA_HBYS, grupBolgesi,
          type MenuBolgesi } from './menuBolgeleri';
 import type { useMenuTercihleri } from './useMenuTercihleri';
 
@@ -33,7 +33,7 @@ export interface YanMenuProps {
 export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSubeAd,
                           kullaniciKod, rolAdi, kurumProfilAdi }: YanMenuProps) {
   const konum = useLocation();
-  const { favoriler, favoriToggle, calismaAlani, calismaAlaniSec } = tercih;
+  const { favoriler, favoriToggle } = tercih;
 
   /** "liste" rozetinin yerine yildiz: bos = ekle, dolu = cikar. */
   const yildiz = (yol: string) => (
@@ -70,15 +70,11 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
     : [];
   const bolgeAktifMi = (b: MenuBolgesi) =>
     satirlar.some(s => satirBolgesi(s)?.ad === b.ad && satirAktifMi(s));
-  // CALISMA ALANI: tercih yoksa rolden. Alan disindaki bolgeler cizilmez;
-  //   "Diger bolgeler" satiri oturum boyunca acar. Aktif rota alan disindaysa
-  //   (favoriden / URL'den gelindi) o bolge yine gorunur - kullanici nerede
-  //   oldugunu gorsun.
-  const alan = calismaAlaniBul(calismaAlani ?? rolCalismaAlani(rolAdi));
-  const [digerBolgeler, setDigerBolgeler] = useState(false);
-  const alanDisi = (b: MenuBolgesi) => alan.bolgeler.length > 0 && !alan.bolgeler.includes(b.ad);
-  const bolgeler = tumBolgeler.filter(x => !alanDisi(x.b) || digerBolgeler || bolgeAktifMi(x.b));
-  const gizliBolgeSayisi = tumBolgeler.length - bolgeler.length;
+  // TUM BOLGELER GORUNUR (kullanici): calisma-alanina gore bolge gizleme ve
+  //   "Diger bolgeler" satiri kaldirildi - hicbir profilde cikmasin. Bolge
+  //   modu zaten yalniz hastane/tip merkezinde acik (Kabuk: bolgeliMenu);
+  //   orada da tum bolgeler alt alta, accordion ile tek acik durur.
+  const bolgeler = tumBolgeler;
   // Ayni rota iki bolgede olabilir (Medula Kabul: Kayit Kabul + Medula) - kullanici
   //   secmediyse ILK aktif bolge acilir; bolge icine her tiklama (grup ya da oge)
   //   o bolgeyi sabitler, geldigi yer acik kalir.
@@ -169,18 +165,6 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
               </NavLink>
             )}
 
-            {/* CALISMA ALANI (menu V2): bolgeli menude Ana Sayfa'nin altinda. */}
-            {bolgeliMenu && (
-              <label className="mi mn-alan"
-                     title={c('Çalışma alanı: gün boyu kullandığınız bölgeler; diğerleri gizlenir')}>
-                <span className="ic">🧭</span>
-                <select value={alan.kod}
-                        onChange={e => { calismaAlaniSec(e.target.value); setAcikBolge(null); setDigerBolgeler(false) }}>
-                  {CALISMA_ALANLARI.map(a => <option key={a.kod} value={a.kod}>{cm(a.ad)}</option>)}
-                </select>
-              </label>
-            )}
-
             {/* FAVORI grubu Ana Sayfa'nin ALTINDA (kullanici): yildizlanan ogeler bu
                 menunun altinda; diger gruplar gibi acilir-kapanir, varsayilan
                 ACIK. Bos ise hic cizilmez. */}
@@ -244,14 +228,6 @@ export function YanMenu({ satirlar, bolgeliMenu, tercih, panelYetkisi, aktifSube
                 {bolgeAcikMi(b) && alt.map(s => s.tur === 'grup' ? grupCiz(s) : duzCiz(s.m))}
               </div>
             ))}
-            {bolgeliMenu && alan.bolgeler.length > 0 && (gizliBolgeSayisi > 0 || digerBolgeler) && (
-              <button type="button" className="mn-bolge mn-diger" onClick={() => setDigerBolgeler(d => !d)}>
-                <i style={{ background: 'var(--soluk)' }} />
-                <span>{digerBolgeler ? c('Diğer bölgeleri gizle') : `${c('Diğer bölgeler')} (${gizliBolgeSayisi})`}</span>
-                <span className="rz">{digerBolgeler ? '▴' : '▸'}</span>
-              </button>
-            )}
-
             <div className="bolum">{cm('Oturum')}</div>
             <div className="mi" style={{ cursor: 'default' }}>
               <span className="ic">🏢</span>

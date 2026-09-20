@@ -27,6 +27,12 @@ export function Kabuk() {
   //   grup/alt-grup, urune gore grup sirasi - hepsi saf fonksiyonda.
   const satirlar = menuSatirlariKur(LISTELER, yetki, kullanici?.urunModu, kullanici?.moduller);
 
+  // BOLGE (V2) BASLIKLARI PROFILDEN (905, kullanici: "menü tipini profillere
+  //   kaydet"): "Hasta Akisi"/"Klinikler" gibi bolge basliklari cok bransli
+  //   kurum menusudur. Karar artik kodda degil kurum profilinde (menuBolgeli;
+  //   NULL ise sunucu kurum tipine gore cozer - hastane/tip_merkezi bolgeli).
+  const bolgeliMenu = kullanici?.urunModu === 2 && kullanici?.menuBolgeli === 1;
+
   /**
    * FAVORILER (kullanici): alt menu ogelerinin sagindaki yildiz ☆ tiklaninca
    * oge menunun EN USTUNDEKI "Favoriler" bolumune de girer; asil yerinde ★
@@ -266,7 +272,7 @@ export function Kabuk() {
 
       <div className="govde">
         <aside className="yan">
-          <YanMenu satirlar={satirlar} bolgeliMenu={kullanici?.urunModu === 2} tercih={tercih}
+          <YanMenu satirlar={satirlar} bolgeliMenu={bolgeliMenu} tercih={tercih}
                    panelYetkisi={yetki('panel')} aktifSubeAd={aktifSube?.ad}
                    kullaniciKod={kullanici?.kod} rolAdi={kullanici?.rolAdi}
                    kurumProfilAdi={kullanici?.kurumTipiAdi} />

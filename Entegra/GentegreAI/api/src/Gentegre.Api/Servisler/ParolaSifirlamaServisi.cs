@@ -52,9 +52,13 @@ public sealed class ParolaSifirlamaServisi(
         if (sonIstek >= EnCokIstek15Dk)
             throw GentegreHatasi.IsKurali("Kısa sürede çok fazla istek yapıldı. 15 dakika sonra yeniden deneyin.");
 
-        // İletişim: önce hesabın kendi alanları, yoksa kişi kartı.
+        // İletişim (kullanıcı: "cep telefonu esas al"): parola sıfırlama SMS'i
+        //   KİŞİ KARTINDAKİ cep telefonunu ESAS alır - o kişinin kayıtlı asıl
+        //   mobili odur; hesabın "Hesabım" alanı boş ya da yer-tutucu (0500…)
+        //   olabilir ve kod yanlış numaraya giderdi. Kişi kartı boşsa hesabın
+        //   kendi alanına düşer. E-posta yine önce hesabın kendi adresi.
         var iletisim = await b.TekAsync("""
-            select coalesce(nullif(k.cep_tel, ''), t.cep_tel, ''), coalesce(nullif(k.eposta, ''), t.eposta, ''),
+            select coalesce(nullif(t.cep_tel, ''), nullif(k.cep_tel, ''), ''), coalesce(nullif(k.eposta, ''), t.eposta, ''),
                    coalesce(nullif(trim(coalesce(t.ad,'')||' '||coalesce(t.soyad,'')),''), t.unvan, '')
               from public.taraf_kullanici k join public.taraf t on t.id = k.id where k.id = @p0
             """, null, [kullanici.TarafId], o => new { tel = o.GetString(0), eposta = o.GetString(1), ad = o.GetString(2) }, iptal);

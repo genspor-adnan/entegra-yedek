@@ -95,6 +95,8 @@ public static class KimlikUclari
                     //   oturumu giris yanitindan degil buradan kuruluyor.
                     KurumTipi = (await kurum.KurumTipiAsync(baglam.SubeId ?? 0, iptal)).Kod,
                     KurumTipiAdi = (await kurum.KurumTipiAsync(baglam.SubeId ?? 0, iptal)).Ad,
+                    // MENU TIPI (905): sol menu bolge modunu bundan okur.
+                    MenuBolgeli = (await kurum.KurumTipiAsync(baglam.SubeId ?? 0, iptal)).MenuBolgeli,
                     // ISKONTO ONAY ESIGI (783): ekran limiti tavanla BIRLIKTE
                     //   bunu da gozetir - esik ustu iskonto onayli talepten
                     //   gelmek zorunda (kural sunucuda tetikle korunuyor).

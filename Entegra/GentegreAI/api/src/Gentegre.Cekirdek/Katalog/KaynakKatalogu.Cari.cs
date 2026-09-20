@@ -762,6 +762,10 @@ public static partial class KaynakKatalogu
             //   altinda "Personel" olarak goruluyordu. Iki ayri istir:
             //   hastayi kayit kabul gorevlisi gorur, personel kartini IK.
             YetkiKodu = "hasta",
+            // SON GIRILEN BASTA (kullanici): cari base'i unvana gore alfabetik
+            //   sIralar; hasta listesinde ise yeni kayIt eden gorevli en son
+            //   actIgI hastayI ustte gormeli - kimlik sIrasI (id) = kayIt sIrasI.
+            VarsayilanSirala = "t.id desc",
             SabitKosul = "t.grup = 101",
             // PORTAL (794): hasta KENDI kartini; dis doktor/dis kurum yalniz
             //   KENDI gonderdigi hastayi gorur - hasta listesi portal

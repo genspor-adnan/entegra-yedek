@@ -140,6 +140,12 @@ public sealed class KullaniciOzeti
     /// </summary>
     public string KurumTipi { get; set; } = "";
     public string KurumTipiAdi { get; set; } = "";
+    /// <summary>
+    /// MENÜ TİPİ (905): 1 bölgeli (Hasta Akışı/Klinikler başlıkları), 0 düz.
+    /// Profilden çözülür (kurum_profil.menu_bolgeli; NULL ise kurum tipine göre).
+    /// Sol menü bölge modunu bundan okur - kural kodda değil profilde.
+    /// </summary>
+    public short MenuBolgeli { get; set; }
 
     /// <summary>
     /// AKTIF SUBEDE basvuruda sorulan hekim rolu (361/364): lab/goruntuleme

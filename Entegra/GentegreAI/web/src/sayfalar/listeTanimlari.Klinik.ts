@@ -485,6 +485,18 @@ export const KLINIK_LISTELERI: ListeGirdisi[] = [
     yetkiKodu: 'prim.kendi',
   },
   {
+    // PRIM SATIRLARI (kullanici: "hakedislerim menusunden ONCE prim satirlari
+    //   menusu, sadece giren doktorun primleri"): AYNI self-scoped endpoint
+    //   (/api/prim/hakedisim - taraf_id oturumdan) ve AYNI sayfa; yalnizca
+    //   menude Hakedislerim'in ustunde (menuSira 38 < 40) ayri giris. Baskasinin
+    //   primi gorunmez cunku sunucu suzgeci oturumun kisisidir.
+    kaynak: 'prim-satirlari', rota: 'prim-satirlari', ozelSayfa: true,
+    baslik: 'Prim Satırları', yol: 'Muayene › Prim Satırları',
+    urunModu: 2, modul: 'muayene',
+    menuSira: 38, menuGrup: 'Muayene', menuAd: 'Prim Satırları', ic: '📄',
+    yetkiKodu: 'prim.kendi',
+  },
+  {
     // TIBBI OZET (420) - hasta basina tek satir: alerji / kronik / ilac.
     //   Muayene kartinin ust seridi ve bu ekran AYNI kaynagi okur; iki ayri
     //   sorgu, iki farkli "aktif ilac" tanimi uretirdi.
