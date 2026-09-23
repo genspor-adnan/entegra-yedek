@@ -37,6 +37,7 @@ import { LabRaporCikti } from './sayfalar/LabRaporCikti';
 import { GozSemaCikti } from './sayfalar/GozSemaCikti';
 import { BelgeYazisi } from './sayfalar/BelgeYazisi';
 import { ServisCizelge } from './sayfalar/ServisCizelge';
+import { ArizaBildir } from './sayfalar/ariza/ArizaBildir';
 import { ZiyaretMobil } from './sayfalar/servis/ZiyaretMobil';
 import { DisHastaKarti } from './sayfalar/dis/DisHastaKarti';
 import { DisGunlukAkis } from './sayfalar/dis/DisGunlukAkis';
@@ -242,6 +243,9 @@ function Yollar() {
             "kimde bos kapasite var" sorusu zaman ekseninde gorulur. */}
         {yetki('servis') && (
           <Route path="/servis-cizelge" element={<ServisCizelge />} />
+        )}
+        {yetki('ariza.talep') && (
+          <Route path="/ariza-bildir" element={<ArizaBildir />} />
         )}
         {/* DIS (706): hasta karti (odontogram + plan) ve gunluk akis ozel
             sayfalardir - generic liste/kart odontogrami cizemez. */}

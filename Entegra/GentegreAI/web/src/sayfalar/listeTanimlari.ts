@@ -55,6 +55,7 @@ import { SATINALMA_LISTELERI } from './listeTanimlari.Satinalma';
 import { ONAY_LISTELERI } from './listeTanimlari.Onay';
 import { IZIN_LISTELERI } from './listeTanimlari.Izin';
 import { SERVIS_LISTELERI } from './listeTanimlari.Servis';
+import { ARIZA_LISTELERI } from './listeTanimlari.Ariza';
 import { DOKUM_LISTELERI } from './listeTanimlari.Dokumler';
 import { YONETIM_LISTELERI } from './listeTanimlari.Yonetim';
 import { PORTAL_LISTELERI } from './listeTanimlari.Portal';
@@ -129,6 +130,7 @@ export const LISTELER: ListeGirdisi[] = [
   ...ONAY_LISTELERI,
   ...IZIN_LISTELERI,
   ...SERVIS_LISTELERI,
+  ...ARIZA_LISTELERI,
   ...YONETIM_LISTELERI,
   // KADRO HAREKETLERI (840): personelin pozisyon gecmisi.
   ...KADRO_LISTELERI,

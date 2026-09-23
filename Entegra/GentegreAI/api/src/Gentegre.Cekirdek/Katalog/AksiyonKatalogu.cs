@@ -2443,6 +2443,23 @@ public static class AksiyonKatalogu
 
             ["taraf-cihaz-liste"] = [.. Crud("taraf-cihaz", "servis", "servis.cihaz")],
 
+            //  ARIZA / TALEP (hizmet masası, 911): EKİP LİSTESİ. Serbest CRUD
+            //  YOK - talep self-servis açılır (ayrı ekran), ekip yalnız AKIŞI
+            //  yürütür: devral → çöz → kapat, gerekirse başka personele ata.
+            //  Hepsi `ariza` yetkisiyle (ekip); açış yetkisi ayrı (`ariza.talep`).
+            ["ariza-talep-liste"] =
+                [new("ariza.devral", "🙋 Devral", "ariza",
+                     KaynakKodu: "ariza", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 10, Bicim: "bir",
+                     Ipucu: "Sorumlusu ben olurum, durum İşlemde"),
+                 new("ariza.coz", "✓ Çöz", "ariza",
+                     KaynakKodu: "ariza", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 20, Bicim: "onay",
+                     Ipucu: "Çözüm notu zorunlu"),
+                 new("ariza.kapat", "🔒 Kapat", "ariza",
+                     KaynakKodu: "ariza", Islem: Islem.Degistir,
+                     KayitGerekir: true, Sira: 25)],
+
             ["servis-sozlesme-liste"] =
                 [.. Crud("servis-sozlesme", "servis", "servis.sozlesme")],
 

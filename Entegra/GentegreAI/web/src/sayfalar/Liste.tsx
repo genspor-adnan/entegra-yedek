@@ -39,6 +39,7 @@ import { tedarikAksiyonu } from './liste/tedarikAksiyonlari';
 import { onayAksiyonu } from './liste/onayAksiyonlari';
 import { izinAksiyonu } from './liste/izinAksiyonlari';
 import { servisAksiyonu } from './liste/servisAksiyonlari';
+import { arizaAksiyonu } from './liste/arizaAksiyonlari';
 import { useAmeliyatAcilModallari } from './liste/useAmeliyatAcilModallari';
 import { AmeliyatAcilModallari } from './liste/AmeliyatAcilModallari';
 import { ilacAksiyonu } from './liste/ilacAksiyonlari';
@@ -580,6 +581,12 @@ export function Liste({ tanim }: { tanim: ListeTanimi }) {
       if (await servisAksiyonu(kod, satir, {
         tazele: () => setYenile(t => t + 1),
         git: yol => git(yol),
+      })) return;
+
+      // ARIZA / TALEP (911): ekip akışı devral -> çöz -> kapat. Guard'lar
+      //   uçta; ekran yalnız düğmeyi bağlar.
+      if (await arizaAksiyonu(kod, satir, {
+        tazele: () => setYenile(t => t + 1),
       })) return;
 
       // ONAY GELEN KUTUSU (738/739): karar KUTUDAN verilir - kullanıcıyı
