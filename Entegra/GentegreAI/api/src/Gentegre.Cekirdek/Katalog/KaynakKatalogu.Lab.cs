@@ -199,6 +199,9 @@ public static partial class KaynakKatalogu
               + "  join public.lab_istem i on i.id = n.istem_id "
               + "  join public.taraf h on h.id = n.hasta_id",
         SubeKolonu: "n.sube_id",
+        // BANKO KAPISI (912): poliklinik muayene isteğinin numunesi banko
+        //   ücretlendirmesi beklerken (serbest=0) kabul kuyruğunda GÖRÜNMEZ.
+        SabitKosul: "i.serbest = 1",
         // PORTAL (795): dis kurum kendi gonderdigi istemin NUMUNE durumunu
         //   gorur ("kan alindi mi, laba ulasti mi"); hasta kendi numunesini.
         PortalKosullari: PortalKapsam.Kur(

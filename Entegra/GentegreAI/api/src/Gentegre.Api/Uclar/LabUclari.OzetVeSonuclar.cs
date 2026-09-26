@@ -69,7 +69,7 @@ public static partial class LabUclari
                   -- TAT AŞIMI: hedef bitişi geçmiş, hâlâ onaylanmamış istem.
                   (select count(*) from public.lab_istem i
                     where i.hedef_bitis is not null and i.hedef_bitis < now()
-                      and i.durum between 1 and 4
+                      and i.durum between 1 and 4 and i.serbest = 1
                       and (@p0::int is null or i.sube_id = @p0))       as "tatAsimi",
                   -- TEKRAR NUMUNE: serum indeksi ya da dış lab reddi yüzünden
                   --   hastadan yeniden numune bekleyen tetkik.

@@ -43,7 +43,7 @@ public static partial class RadyolojiUclari
                       and coalesce(r.durum, 1) <> 4
                       and (@p1::int is null or r.sube_id = @p1))          as "randevu",
                   (select count(*) from public.radyoloji_istem i
-                    where i.durum = 1
+                    where i.durum = 1 and i.serbest = 1
                       and (@p1::int is null or i.sube_id = @p1))          as "cekimBekleyen",
                   (select count(*) from public.radyoloji_istem i
                     where i.durum in (2, 3, 4)

@@ -143,12 +143,19 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
         //   INSERT'in daha o anda kısıtı ihlal etmesi demekti - dış kurum
         //   istemi açan uç 23514 ile düşüyordu. Kısıt sonradan eklenmiş ve
         //   bu yolu kırmış; kısıt doğru, yazım sırası yanlıştı.
+        // SERBEST (912): poliklinik başvurusunda MUAYENE isteği (kaynak 1)
+        //   banko ücretlendirmesi bekler (serbest=0) → numune kabul ekranında
+        //   banko serbest bırakana kadar görünmez. Banko(3)/dış(4)/checkup(5)/
+        //   teletıp(2) kaynak, acil öncelik ve acil/yatan başvuru bypass eder.
         var istemId = await baglanti.TekDegerAsync<int>("""
             insert into public.lab_istem
                    (belge_id, taraf_id, sube_id, istem_no, istem_tarihi, bolum,
                     personel_id, durum, oncelik, kaynak, klinik_bilgi, tani_icd,
-                    ekleyen, dis_kurum_id)
-            values (@p0, @p1, @p2, '', now(), 1, @p3, 1, @p4, @p8, @p5, @p6, @p7, @p9)
+                    ekleyen, dis_kurum_id, serbest)
+            values (@p0, @p1, @p2, '', now(), 1, @p3, 1, @p4, @p8, @p5, @p6, @p7, @p9,
+                    public.fn_istem_serbest(@p2::smallint,
+                        (select basvuru_turu from public.belge_basvuru where id = @p0)::smallint,
+                        @p4::smallint, @p8::smallint))
             returning id
             """, islem,
             [belgeId is > 0 ? belgeId : null, b.HastaId, b.SubeId,

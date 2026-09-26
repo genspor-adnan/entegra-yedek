@@ -50,6 +50,7 @@ import {
 } from './belgeKartiKurallari';
 import { BelgeKartiModallari } from '../bilesenler/belge/BelgeKartiModallari';
 import { BasvuruAsamaSeridi } from '../bilesenler/belge/BasvuruAsamaSeridi';
+import { BankoSerbestBar } from '../bilesenler/belge/BankoSerbestBar';
 import { c } from '../dil/ceviri';
 
 interface Props {
@@ -1301,6 +1302,13 @@ export function BelgeKarti({ id: belgeId, tur: acilisTuru, tarafId: onDolguTaraf
               : Number(basvuruBilgi.ossDurum ?? 0)}
             kapanmaDurum={Number(sonuc?.belge.kapanmaDurum ?? 0)}
           />
+        )}
+
+        {/* BANKO KAPISI (912): poliklinikte hekimin açtığı lab/radyoloji
+            isteği "ücretlendirme bekliyor" durumundadır - banko buradan
+            serbest bırakınca çalışma listelerine düşer. Bekleyen yoksa çizilmez. */}
+        {basvuruMu && kayitliId > 0 && (
+          <BankoSerbestBar belgeId={kayitliId} yenileAnahtari={satirlar.length} />
         )}
 
         <BelgeBaslik

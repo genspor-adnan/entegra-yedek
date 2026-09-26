@@ -130,6 +130,11 @@ public static partial class KaynakKatalogu
                 "left join public.radyoloji_rapor r on r.istem_id = i.id and r.ust_rapor_id is null " +
                 "left join public.taraf  ry on ry.id = coalesce(r.onaylayan_id, r.yazan_id)",
         SubeKolonu: "i.sube_id",
+        // BANKO KAPISI (912): poliklinik muayene isteği banko ücretlendirmesi
+        //   beklerken (serbest=0) çekim listesinde GÖRÜNMEZ. Banko serbest
+        //   bırakınca (POST /api/basvuru/{id}/istem-serbest) düşer. Acil/yatan/
+        //   dış/banko kaynaklı istemler zaten serbest=1 gelir.
+        SabitKosul: "i.serbest = 1",
         // ACİL en üstte, sonra en eski bekleyen: liste açılınca "önce neye
         //   bakmalıyım" sorusu sıralamayla cevaplanır.
         // PORTAL (796): radyolojide bag DOGRUDAN istemin uzerinde -

@@ -354,6 +354,7 @@ uygulama.IsgUclariniEkle();
 // ÇAĞRI MERKEZİ (839): operatör panosu, arayan tanıma, geri arama, kampanya, süpervizör, santral webhook'u.
 uygulama.CagriUclariniEkle();
 uygulama.ArizaUclariniEkle();   // arıza / talep hizmet masası (911)
+uygulama.BasvuruIstemUclariniEkle();   // başvuru → istem banko kapısı (912)
 uygulama.SterilUclariniEkle();
 // ASI MODULU (898, KTS H10): uygulama kaydi + USS 207 paketi.
 uygulama.AsiUclariniEkle();

@@ -379,10 +379,13 @@ public static partial class RadyolojiUclari
                              istek_hekim_id, istek_kurum_id, dis_hekim_ad, on_tani, klinik_bilgi,
                              kontrast, ekleyen,
                              mwl_istendi, sms_istendi, hazirlik_verildi, cd_istendi,
-                             randevu_id, accession_no)
+                             randevu_id, serbest, accession_no)
+                        -- serbest=1 (912): KAYIT-KABUL/BANKO yolu; istem burada
+                        --   zaten ücretlendirme akışıyla açılıyor, çekim listesini
+                        --   beklemez. Banko kapısı yalnız MUAYENE isteğine (doktor) uygulanır.
                         values (@p0, @p1, @p2, @p3, @p4, 1, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12,
                                 coalesce(@p13, 1), coalesce(@p14, 1),
-                                coalesce(@p15, 1), coalesce(@p16, 0), @p17,
+                                coalesce(@p15, 1), coalesce(@p16, 0), @p17, 1,
                                 -- ACCESSION NO AYARDAN (634): tur 903 sablonu
                                 --   varsa numara verilir, yoksa BOS kalir
                                 --   (bugunku davranis). DICOM/MWL tarafinda

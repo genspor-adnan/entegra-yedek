@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İş Emri Kartı — Bakım & Arıza — Mockup (GenoTIP AI · Demirbaş)</title>
+<link rel="stylesheet" href="../_ortak/ekran.css">
+<style>
+  /* SEKMELER AÇIK: bu kart tasarım gözden geçirmesi içindir - her sekmenin
+     içeriği aynı anda görünür. .pnl[hidden] UA kuralını (display:none) yazar,
+     ekran.js panelleri gizlese de hepsi açık kalır. */
+  .pnl[hidden]{display:block !important}
+  .sekmeler{position:sticky;top:0;z-index:5}
+  /* PANEL BAŞLIĞI: ayrı sınıf yoktu; sekme adı panelin üstünde tekrar eder ki
+     uzun tek sayfada hangi sekmede olduğun kaybolmasın. */
+  .pnl-bas{display:flex;align-items:center;gap:8px;margin:18px 0 8px;
+    padding:6px 10px;border-left:4px solid #2b6cb0;background:#eef4fb;
+    font-weight:700;font-size:13px;color:#1a365d;border-radius:0 4px 4px 0}
+  .pnl-bas .sy{margin-left:auto}
+  .pnl:first-of-type .pnl-bas{margin-top:6px}
+</style>
+</head>
+<body>
+
+<div class="win">
+  <div class="title">
+    <span>🛠 İş Emri — IE-2609-084 · DB-00844 Ventilatör</span>
+    <span class="sp">Hamilton C1 · YBÜ Yatak 4 · Tür: <b>Arıza</b> · Bildiren: Hemş. G. Yurt · 15.09.2026 02:40 · KRİTİK</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="btn" data-git="demirbas_panosu.html">◀ Pano</div>
+    <div class="btn primary">✓ İş Emrini Kapat</div>
+    <div class="btn">▶ Müdahaleye Başla</div>
+    <div class="btn">🚚 Dış Servise Gönder</div>
+    <div class="sepv"></div>
+    <div class="btn">🔄 Yedek Cihaz Ata</div>
+    <div class="btn">🧾 Parça Talebi</div>
+    <div class="btn" data-git="demirbas_cihaz_karti.html">🗂️ Cihaz Kartı</div>
+    <div class="sp"></div>
+    <div class="btn pas">🖨️ İş Emri Formu</div>
+  </div>
+
+  <div class="ozet">
+    <div class="kart"><div class="b">Tür</div><div class="d" style="font-size:13px">Arıza / İş Emri</div></div>
+    <div class="kart kir"><div class="b">Öncelik</div><div class="d" style="font-size:13px">Kritik</div></div>
+    <div class="kart kir"><div class="b">Duruş</div><div class="d">31 <small>saat</small></div></div>
+    <div class="kart"><div class="b">Yanıt süresi</div><div class="d">22 <small>dk</small></div></div>
+    <div class="kart ok"><div class="b">Yedek atandı</div><div class="d" style="font-size:12px">DB-00849</div></div>
+    <div class="kart sari"><div class="b">Durum</div><div class="d" style="font-size:12px">Dış servis yolda</div></div>
+    <div class="kart"><div class="b">Kapsam</div><div class="d" style="font-size:12px">Sözleşme · parça hariç</div></div>
+  </div>
+
+  <div class="sekmeler">
+    <div class="sekme on" data-s="genel">Genel</div>
+    <div class="sekme on" data-s="mudahale">İş Adımları<span class="sy">5</span></div>
+    <div class="sekme on" data-s="durus">Duruş & Etki</div>
+    <div class="sekme on" data-s="parca">Parça & Maliyet<span class="sy">3</span></div>
+    <div class="sekme on" data-s="servis">Dış Servis</div>
+    <div class="sekme on" data-s="kontrol">Kapanış Kontrolü<span class="sy">7</span></div>
+    <div class="sekme on" data-s="gecmis">Cihaz Geçmişi<span class="sy">8</span></div>
+  </div>
+
+  <!-- ============================================================== GENEL ===== -->
+  <div class="pnl" data-s="genel">
+    <div class="pnl-bas">📋 Genel</div>
+    <div class="dg">
+      <table>
+        <thead><tr><th style="width:170px">Alan</th><th>Değer</th></tr></thead>
+        <tbody>
+          <tr><td class="sonuk">İş emri no</td><td><code>IE-2609-084</code> · açılış 15.09.2026 02:40</td></tr>
+          <tr><td class="sonuk">Tür</td><td><span class="rz kir">Arıza</span> — periyodik bakımdan doğmadı, saha bildirdi</td></tr>
+          <tr><td class="sonuk">Cihaz</td><td><b>DB-00844</b> · Ventilatör · Hamilton C1 · S/N HC1-77219</td></tr>
+          <tr><td class="sonuk">Yer</td><td>YBÜ · Yatak 4 <span class="sonuk">(öncelik cihazın yerine göre — YBÜ = kritik)</span></td></tr>
+          <tr><td class="sonuk">Bildiren</td><td>Hemş. G. Yurt (nöbet) · dahili 4412</td></tr>
+          <tr><td class="sonuk">Bildirilen arıza</td>
+            <td><b>"Oksijen karışım hatası alarmı, FiO₂ ayarı tutmuyor"</b> — hasta başka ventilatöre alındı</td></tr>
+          <tr><td class="sonuk">Hasta etkilendi mi</td>
+            <td><span class="rz sari">Evet — cihaz değiştirildi</span>, olumsuz sonuç yok ·
+              olay bildirimi <code>OB-2026/311</code> açıldı</td></tr>
+          <tr><td class="sonuk">Sorumlu</td><td>Biyomedikal Tekn. E. Kaya · devralındı 15.09 09:15</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Bakım ve arıza aynı kart:</b> tür alanı ayırır. Periyodik bakım plandan,
+        arıza sahadan doğar; ikisi de "cihazda yapılan iş"tir, aynı geçmişe yazılır.</span>
+    </div>
+  </div>
+
+  <!-- ========================================================= İŞ ADIMLARI ===== -->
+  <div class="pnl" data-s="mudahale">
+    <div class="pnl-bas">🔧 İş Adımları<span class="sy">5 kayıt</span></div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:140px" class="orta">Zaman</th>
+          <th style="width:190px">Kim</th>
+          <th>İşlem</th>
+          <th style="width:110px" class="orta">Geçen süre</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="orta">15.09 02:40</td><td>Hemş. G. Yurt</td>
+            <td>Arıza bildirildi (nöbet) · <b>kritik</b> işaretlendi</td>
+            <td class="orta">—</td></tr>
+          <tr class="tik"><td class="orta">15.09 03:02</td><td>Biyomedikal Nöbetçi · S. Ateş</td>
+            <td>Yerinde bakıldı · <b>yedek cihaz DB-00849 atandı</b>, hasta aktarıldı</td>
+            <td class="orta"><span class="rz ok">22 dk</span></td></tr>
+          <tr class="tik"><td class="orta">15.09 09:15</td><td>Biyomedikal Tekn. E. Kaya</td>
+            <td>O₂ hücresi değiştirildi, test edildi — <b>alarm devam ediyor</b></td>
+            <td class="orta">6,5 sa</td></tr>
+          <tr class="tik"><td class="orta">15.09 11:40</td><td>Biyomedikal Tekn. E. Kaya</td>
+            <td>Hamilton yetkili servise çağrı açıldı · çağrı no <code>HM-2026/8841</code></td>
+            <td class="orta">9 sa</td></tr>
+          <tr class="tik"><td class="orta">16.09 09:50</td><td>Hamilton Teknik</td>
+            <td>Servis mühendisi yolda, tahmini varış 13:00</td>
+            <td class="orta"><span class="rz kir">31 sa</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Yanıt (22 dk) ile onarım (31 sa) ayrı ölçülür:</b> ilki biyomedikalin,
+        ikincisi çoğu zaman tedarikçinin performansıdır.</span>
+    </div>
+  </div>
+
+  <!-- ========================================================= DURUŞ & ETKİ ===== -->
+  <div class="pnl" data-s="durus">
+    <div class="pnl-bas">⏱ Duruş & Etki</div>
+    <div class="ozet">
+      <div class="kart kir"><div class="b">Toplam duruş</div><div class="d">31 <small>saat</small></div></div>
+      <div class="kart"><div class="b">Yedekli süre</div><div class="d">30,6 <small>saat</small></div></div>
+      <div class="kart sari"><div class="b">Yedeksiz süre</div><div class="d">22 <small>dk</small></div></div>
+      <div class="kart"><div class="b">Bu cihaz MTBF</div><div class="d">142 <small>gün</small></div></div>
+      <div class="kart"><div class="b">Cihaz türü MTTR</div><div class="d">16 <small>saat</small></div></div>
+    </div>
+    <div class="dg">
+      <table>
+        <thead><tr><th style="width:230px">Etki</th><th style="width:150px" class="orta">Ölçüm</th><th>Açıklama</th></tr></thead>
+        <tbody>
+          <tr class="tik sel"><td><b>Hasta etkisi</b></td>
+            <td class="orta"><span class="rz sari">Cihaz değişti</span></td>
+            <td>Hasta 22 dk içinde yedek ventilatöre alındı · klinik olumsuz sonuç yok</td></tr>
+          <tr class="tik"><td><b>Birim kapasitesi</b></td>
+            <td class="orta"><span class="rz ok">Etkilenmedi</span></td>
+            <td>YBÜ'de 18 ventilatörden 15'i hazır — asgari 14</td></tr>
+          <tr class="tik"><td><b>Yedek havuzu</b></td>
+            <td class="orta"><span class="rz sari">2 → 1</span></td>
+            <td>Bir yedek ventilatör kullanıma girdi; ikinci arıza riski yükseldi</td></tr>
+          <tr class="tik"><td><b>Yenileme sinyali</b></td>
+            <td class="orta"><span class="rz">%12</span></td>
+            <td>Son 12 ay onarım / defter değeri — eşik %40, henüz altında</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Duruşun ikiye ayrılması önemli:</b> yedekli 30,6 saat hizmeti aksatmadı,
+        yedeksiz 22 dakika ise gerçek risktir.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================= PARÇA & MALİYET ===== -->
+  <div class="pnl" data-s="parca">
+    <div class="pnl-bas">🧾 Parça & Maliyet<span class="sy">3 satır</span></div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th>Parça / kalem</th><th style="width:120px">Parça no</th>
+          <th style="width:80px" class="orta">Adet</th>
+          <th style="width:120px" class="orta">Birim ₺</th>
+          <th style="width:120px" class="orta">Tutar ₺</th>
+          <th style="width:130px" class="orta">Kapsam</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik"><td>O₂ hücresi</td><td><code>OC-2200</code></td><td class="orta">1</td>
+            <td class="orta">4.200</td><td class="orta">4.200</td>
+            <td class="orta"><span class="rz ok">Sözleşme</span></td></tr>
+          <tr class="tik sel"><td>O₂/hava karışım bloğu</td><td><code>160140</code></td><td class="orta">1</td>
+            <td class="orta">74.000</td><td class="orta">74.000</td>
+            <td class="orta"><span class="rz sari">Ücretli — parça hariç</span></td></tr>
+          <tr class="tik"><td>İşçilik (dış servis)</td><td class="sonuk">—</td><td class="orta">3 sa</td>
+            <td class="orta">0</td><td class="orta">0</td>
+            <td class="orta"><span class="rz ok">Sözleşme</span></td></tr>
+          <tr><td colspan="4" style="text-align:right"><b>Kuruma fatura edilecek</b></td>
+            <td class="orta"><b>74.000</b></td>
+            <td class="orta"><span class="rz sari">Onay bekliyor</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>50.000 ₺ üstü satın alma onayı gerekir:</b> karışım bloğu teklifi onaya sunuldu,
+        onaysız parça sipariş edilmez.</span>
+    </div>
+  </div>
+
+  <!-- ========================================================= DIŞ SERVİS ===== -->
+  <div class="pnl" data-s="servis">
+    <div class="pnl-bas">🚚 Dış Servis</div>
+    <div class="dg">
+      <table>
+        <thead><tr><th style="width:190px">Alan</th><th>Değer</th></tr></thead>
+        <tbody>
+          <tr><td class="sonuk">Firma</td><td><b>Hamilton Medical Türkiye</b> · yetkili servis</td></tr>
+          <tr><td class="sonuk">Çağrı no</td><td><code>HM-2026/8841</code> · 15.09.2026 11:40</td></tr>
+          <tr><td class="sonuk">Sözleşme</td>
+            <td>Bakım sözleşmesi geçerli 30.11.2026 · <span class="rz mavi">parça hariç</span></td></tr>
+          <tr><td class="sonuk">Taahhüt edilen yanıt</td>
+            <td>Kritik arızada <b>24 saat</b> — <span class="rz kir">aşıldı (31 sa)</span></td></tr>
+          <tr><td class="sonuk">Cihaz nerede</td>
+            <td>Hastanede · yerinde müdahale bekleniyor
+              <span class="sonuk">(atölyeye gönderilirse ayrı sevk tutanağı)</span></td></tr>
+          <tr><td class="sonuk">Firma performansı</td>
+            <td>Son 12 ayda 6 çağrı · ortalama yanıt <b>19 saat</b> · 1 taahhüt aşımı
+              <span class="rz sari">bu çağrı</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Taahhüt aşımı kayda geçer:</b> firma performansı sözleşme yenilemesinin girdisidir,
+        şikâyet değil ölçüdür.</span>
+    </div>
+  </div>
+
+  <!-- ====================================================== KAPANIŞ KONTROLÜ ===== -->
+  <div class="pnl" data-s="kontrol">
+    <div class="pnl-bas">✅ Kapanış Kontrolü<span class="sy">3 / 7</span></div>
+    <ul class="kontrol">
+      <li class="ok"><span class="kutu">✓</span>
+        <span>İç ekip müdahalesi denendi ve belgelendi (sözleşme gereği)</span>
+        <span class="imza">Tekn. E. Kaya · 15.09 09:15</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Çağrı açıldı, firma çağrı numarası kaydedildi</span>
+        <span class="imza">15.09 11:40</span></li>
+      <li class="ok"><span class="kutu">✓</span>
+        <span>Taahhüt süresi aşıldı — firmaya yazılı bildirim yapıldı</span>
+        <span class="imza">16.09 09:00</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Parça teklifi alındı ve satın alma onayına sunuldu</span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Onarım yapıldı, <b>servis raporu</b> alındı ve cihaz kartına eklendi</span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Bakım sonrası <b>kalibrasyon ve güvenlik testi</b> yapıldı</span>
+        <span class="imza">—</span></li>
+      <li class="bos"><span class="kutu"></span>
+        <span>Cihaz birime teslim edildi, yedek havuza döndü</span>
+        <span class="imza">—</span></li>
+    </ul>
+    <div class="statusbar">
+      <span><b>İş emri bu liste bitmeden kapanmaz:</b> onarılan cihaz kalibrasyon ve
+        güvenlik testi geçmeden birime dönmez.</span>
+    </div>
+  </div>
+
+  <!-- ======================================================= CİHAZ GEÇMİŞİ ===== -->
+  <div class="pnl" data-s="gecmis">
+    <div class="pnl-bas">🕘 Cihaz Geçmişi<span class="sy">son 8</span></div>
+    <div class="dg">
+      <table>
+        <thead><tr>
+          <th style="width:110px">İş Emri</th><th style="width:110px">Tarih</th>
+          <th style="width:90px" class="orta">Tür</th><th>Yapılan</th>
+          <th style="width:110px" class="orta">Duruş</th><th style="width:110px" class="orta">Durum</th>
+        </tr></thead>
+        <tbody>
+          <tr class="tik sel"><td class="nw"><code>IE-2609-084</code></td><td>15.09.2026</td>
+            <td class="orta"><span class="rz kir">Arıza</span></td>
+            <td>Karışım bloğu — dış servis</td><td class="orta"><span class="rz kir">31 sa</span></td>
+            <td class="orta"><span class="rz sari">Açık</span></td></tr>
+          <tr class="tik"><td class="nw"><code>IE-2603-052</code></td><td>02.03.2026</td>
+            <td class="orta"><span class="rz mavi">Bakım</span></td>
+            <td>6 aylık periyodik bakım · O₂ hücresi değişti</td><td class="orta">2 sa</td>
+            <td class="orta"><span class="rz ok">Kapandı</span></td></tr>
+          <tr class="tik"><td class="nw"><code>IE-2512-198</code></td><td>18.12.2025</td>
+            <td class="orta"><span class="rz">Kalib.</span></td>
+            <td>Yıllık kalibrasyon + güvenlik testi</td><td class="orta">3 sa</td>
+            <td class="orta"><span class="rz ok">Kapandı</span></td></tr>
+          <tr class="tik"><td class="nw"><code>IE-2509-071</code></td><td>09.09.2025</td>
+            <td class="orta"><span class="rz mavi">Bakım</span></td>
+            <td>6 aylık periyodik bakım</td><td class="orta">1,5 sa</td>
+            <td class="orta"><span class="rz ok">Kapandı</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="statusbar">
+      <span><b>Bakım · arıza · kalibrasyon tek geçmişte:</b> "bu cihaz ne sıklıkla bozuluyor"
+        ve "yenilenmeli mi" soruları tek listeden yanıtlanır.</span>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Bu ekran:</b> "İş Emirleri (Bakım &amp; Arıza)" listesinin KARTI. Bakım ve arıza aynı
+  kartta, <b>tür</b> alanı ayırır. Tasarım gözden geçirmesi için tüm sekmeler
+  <b>açık</b> gösterilir; üründe sekme çubuğundan tek panel açılır.
+  <br><b>Süreç:</b> Birim arıza bildirir → öncelik <b>cihazın yerine göre</b> belirlenir →
+  yaşam destek cihazında önce <b>yedek atanır</b> → iç ekip müdahalesi denenir ve belgelenir →
+  gerekiyorsa yetkili servise çağrı açılır → onarım sonrası <b>kalibrasyon ve güvenlik testi</b>
+  yapılmadan cihaz birime dönmez. Yanıt ve onarım süresi ayrı ölçülür; taahhüt aşımı firma
+  performansına yazılır. Hastanın etkilendiği arıza ayrıca <b>olay bildirimi</b> açar.
+</div>
+
+<script src="../_ortak/ekran.js"></script>
+</body>
+</html>
