@@ -560,7 +560,7 @@ export function KurumTipiAyarlari() {
             <label>{c('Kimlik no biçimi')}</label>
             <select className="inp" value={profil?.kimlikBicimi ?? 'otomatik'}
                     onChange={e => degistir({ kimlikBicimi: e.target.value })}>
-              <option value="otomatik">{c('Otomatik — şubenin ülkesine göre')}</option>
+              <option value="otomatik">{c('Doğrulama yok (varsayılan)')}</option>
               <option value="tc">{c('T.C. Kimlik No (11 hane + kontrol hanesi)')}</option>
               <option value="serbest">{c('Serbest — biçim kontrolü yok')}</option>
               <option value="desen">{c('Özel desen (düzenli ifade)')}</option>

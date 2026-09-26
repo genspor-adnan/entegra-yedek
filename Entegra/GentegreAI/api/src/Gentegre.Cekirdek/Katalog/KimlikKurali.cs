@@ -22,8 +22,9 @@ public sealed record KimlikKurali(string Bicim, string Desen = "", string Acikla
     public const string Serbest = "serbest";
     public const string Desenli = "desen";
 
-    /// <summary>Ayar okunamadığında kullanılan kural: KONTROL AÇIK kalır.</summary>
-    public static readonly KimlikKurali Varsayilan = new(Tc);
+    /// <summary>Varsayılan kural: DOĞRULAMA YOK (serbest) - kullanıcı kararı
+    /// "default doğrulama olmasın". Kurum profilinden T.C. seçilirse açılır.</summary>
+    public static readonly KimlikKurali Varsayilan = new(Serbest);
 
     /// <summary>
     /// İstemciye gidecek kural adı - kart alanının `Dogrulama` değeri bununla
