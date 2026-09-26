@@ -8,84 +8,107 @@ using Npgsql;
 namespace Gentegre.Api.Uclar;
 
 /// <summary>
-/// HASTA KAYDI — mükerrer kontrolü. Kullanıcı: "yeni hasta eklerken kimlik no
-/// aynı ise eklenmez, diğer kayıt getirilir; telefon aynı ise uyarı verilir,
-/// istenirse devam edilip eklenebilir."
+/// TARAF (hasta / personel) MÜKERRER KONTROLÜ. Kullanıcı kuralı:
+///   * KİMLİK NO = ENGEL: aynı kimlik no ile AKTİF kayıt varsa yeni kayıt
+///     AÇILMAZ; kullanıcıya "mevcut karta geçilsin mi" sorulur. Diğer kayıt
+///     PASİF ise aynı kimlik no ile yeni kayıt eklenebilir.
+///   * TELEFON = UYARI · E-POSTA = UYARI: aynı olan aktif kayıt varsa uyarılır;
+///     kullanıcı "evet" derse aynı telefon/e-posta ile kayıt eklenebilir
+///     (aile bireyleri aynı numarayı/adresi paylaşır).
 ///
-///   GET /api/hasta/mukerrer?vkno=&amp;cepTel=&amp;haric=   kimlik eşleşmesi (tek kayıt) +
-///                                                  telefon eşleşmeleri (en çok 5)
+///   GET /api/hasta/mukerrer?rol=hasta|personel&amp;vkno=&amp;cepTel=&amp;eposta=&amp;haric=
 ///
-/// İki kural iki yerde:
-///  - KİMLİK = ENGEL: ekran kaydetmeden önce sorar ve mevcut kartı açar; ekran
-///    atlasa bile kart ucu (<see cref="KimlikMukerrerKuraliAsync"/>) kaydı reddeder.
-///  - TELEFON = UYARI: yalnız ekranda sorulur (aile bireyleri aynı numarayı
-///    paylaşır; sunucu engellemez).
-///
-/// Eşleşme yalnız hasta kayıtlarında (taraf.hasta = 1); cari/personel aynı
-/// kimliği taşıyabilir, hasta kartı onları açamaz. Telefon son 10 hane ile
-/// karşılaştırılır (0 / +90 öneki fark yaratmaz), cep ve sabit hattın ikisine bakar.
+/// Kimlik engeli sunucuda da uygulanır (<see cref="KimlikMukerrerKuraliAsync"/>):
+/// ekran atlasa bile kart ucu aynı kimlikli AKTİF kaydı reddeder. Eşleşme rol
+/// içinde kalır (hasta hastayla, personel personelle); cari/hasta/personel aynı
+/// kimliği taşıyabilir. Telefon/e-posta son 10 hane / küçük harf ile karşılaştırılır.
 /// </summary>
 public static class HastaUclari
 {
-    /// <summary>Kimlik / telefon mükerrer kontrolü yapılan kartlar.</summary>
-    private static readonly HashSet<string> HastaKartlari = ["hasta", "hasta-aday"];
+    // Kart adı -> taraf rol kolonu (mükerrer bu rol içinde aranır).
+    private static string? RolKolonu(string kartAd) => kartAd switch
+    {
+        "hasta" or "hasta-aday" => "hasta",
+        "personel" or "dis-hekim" => "personel",
+        _ => null,
+    };
+    private static string? RolAdi(string rolKolonu) => rolKolonu switch
+    {
+        "hasta" => "hasta", "personel" => "personel", _ => null,
+    };
 
     public sealed record MukerrerKayit(int Id, string Ad, string Kod, DateTime? DogumTarihi);
-    public sealed record MukerrerYaniti(MukerrerKayit? Kimlik, IReadOnlyList<MukerrerKayit> Telefon);
+    public sealed record MukerrerYaniti(MukerrerKayit? Kimlik, IReadOnlyList<MukerrerKayit> Telefon,
+                                        IReadOnlyList<MukerrerKayit> Eposta);
 
-    private const string KayitSecimi = """
+    // AKTİF kayıtlar (durum = 1): pasif kayıt ne engeller ne uyarır.
+    private static string KayitSecimi(string rolKol) => $"""
         select t.id, coalesce(nullif(trim(coalesce(t.ad,'')||' '||coalesce(t.soyad,'')),''), t.unvan, ''), coalesce(t.kod, ''), h.dogum_tarihi
           from public.taraf t left join public.taraf_hasta h on h.id = t.id
-         where t.hasta = 1 and (@p1::int is null or t.id <> @p1)
+         where t.{rolKol} = 1 and coalesce(t.durum, 0) = 1 and (@p1::int is null or t.id <> @p1)
         """;
 
     public static void HastaUclariniEkle(this IEndpointRouteBuilder yol)
     {
         var grup = yol.MapGroup("/api/hasta").WithTags("Hasta").RequireAuthorization();
 
-        grup.MapGet("/mukerrer", async (string? vkno, string? cepTel, int? haric, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
+        grup.MapGet("/mukerrer", async (string? rol, string? vkno, string? cepTel, string? eposta,
+            int? haric, VeriKaynagi veri, BaglamCozucu cozucu, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
-            baglam.YetkiIste("hasta", Islem.Gor);
+            var rolKol = (rol == "personel") ? "personel" : "hasta";
+            baglam.YetkiIste(rolKol == "personel" ? "personel" : "hasta", Islem.Gor);
             await using var b = await veri.AcAsync(iptal);
-            var kimlik = await KimlikBulAsync(b, vkno, haric, iptal);
-            var telefon = await TelefonBulAsync(b, cepTel, haric, iptal);
-            return Results.Ok(new MukerrerYaniti(kimlik, telefon));
+            var kimlik = await KimlikBulAsync(b, rolKol, vkno, haric, iptal);
+            var telefon = await TelefonBulAsync(b, rolKol, cepTel, haric, iptal);
+            var epostaL = await EpostaBulAsync(b, rolKol, eposta, haric, iptal);
+            return Results.Ok(new MukerrerYaniti(kimlik, telefon, epostaL));
         });
     }
 
     /// <summary>
-    /// Kart ucu (ekle / güncelle) için sert kural: aynı kimlik numaralı başka bir
-    /// hasta varsa kayıt yazılmaz; hata kimlik alanını işaretler ve mevcut kaydı söyler.
+    /// Kart ucu (ekle / güncelle) SERT KURALI: aynı kimlik numaralı başka bir
+    /// AKTİF hasta/personel varsa kayıt yazılmaz. Pasif kayıt engellemez.
     /// </summary>
     public static async Task KimlikMukerrerKuraliAsync(KartTanimi tanim, IDictionary<string, object?> degerler, VeriKaynagi veri, long? haricId, CancellationToken iptal)
     {
-        if (!HastaKartlari.Contains(tanim.Ad)) return;
+        var rolKol = RolKolonu(tanim.Ad);
+        if (rolKol is null) return;
         if (!degerler.TryGetValue("vkno", out var v) || string.IsNullOrWhiteSpace(v?.ToString())) return;
         await using var b = await veri.AcAsync(iptal);
-        var mevcut = await KimlikBulAsync(b, v!.ToString(), haricId is null ? null : (int)haricId, iptal);
+        var mevcut = await KimlikBulAsync(b, rolKol, v!.ToString(), haricId is null ? null : (int)haricId, iptal);
         if (mevcut is null) return;
+        var ad = RolAdi(rolKol) == "personel" ? "personel" : "hasta";
         throw GentegreHatasi.Dogrulama(
-            $"Bu kimlik numarası ile kayıtlı hasta var: {mevcut.Ad} (dosya {mevcut.Kod}, #{mevcut.Id}). Yeni kayıt açılmaz, o kart kullanılır.",
+            $"Bu kimlik numarası ile kayıtlı AKTİF {ad} var: {mevcut.Ad} (dosya {mevcut.Kod}, #{mevcut.Id}). "
+            + "Yeni kayıt açılmaz - mevcut karta geçin. (Diğer kayıt pasifse aynı kimlikle eklenebilir.)",
             new AlanHatasi("vkno", $"Kayıtlı: {mevcut.Ad} (#{mevcut.Id})"));
     }
 
-    private static async Task<MukerrerKayit?> KimlikBulAsync(NpgsqlConnection b, string? vkno, int? haric, CancellationToken iptal)
+    private static async Task<MukerrerKayit?> KimlikBulAsync(NpgsqlConnection b, string rolKol, string? vkno, int? haric, CancellationToken iptal)
     {
         var kimlik = (vkno ?? "").Trim();
         if (kimlik == "") return null;
-        return await b.TekAsync(KayitSecimi + " and t.vkno = @p0 order by t.id limit 1", null, [kimlik, haric], Oku, iptal);
+        return await b.TekAsync(KayitSecimi(rolKol) + " and t.vkno = @p0 order by t.id limit 1", null, [kimlik, haric], Oku, iptal);
     }
 
-    private static async Task<IReadOnlyList<MukerrerKayit>> TelefonBulAsync(NpgsqlConnection b, string? tel, int? haric, CancellationToken iptal)
+    private static async Task<IReadOnlyList<MukerrerKayit>> TelefonBulAsync(NpgsqlConnection b, string rolKol, string? tel, int? haric, CancellationToken iptal)
     {
         var anahtar = TelAnahtar(tel);
         if (anahtar.Length < 7) return [];
-        return await b.ListeAsync(KayitSecimi + """
+        return await b.ListeAsync(KayitSecimi(rolKol) + """
              and (right(regexp_replace(coalesce(t.cep_tel, ''), '\D', '', 'g'), 10) = @p0
                or right(regexp_replace(coalesce(t.telefon, ''), '\D', '', 'g'), 10) = @p0)
             order by t.id limit 5
             """, null, [anahtar, haric], Oku, iptal);
+    }
+
+    private static async Task<IReadOnlyList<MukerrerKayit>> EpostaBulAsync(NpgsqlConnection b, string rolKol, string? eposta, int? haric, CancellationToken iptal)
+    {
+        var e = (eposta ?? "").Trim().ToLowerInvariant();
+        if (e.Length < 5 || !e.Contains('@')) return [];
+        return await b.ListeAsync(KayitSecimi(rolKol) + " and lower(trim(coalesce(t.eposta, ''))) = @p0 order by t.id limit 5",
+            null, [e, haric], Oku, iptal);
     }
 
     private static MukerrerKayit Oku(NpgsqlDataReader o)

@@ -1037,28 +1037,47 @@ export function GenForm({ kaynak, id, baslik, onKapat, onBasvuruAc, seritAlanlar
     //   Kimlik eşleşmesi sunucuda da engellenir (kart ucu); burada kullanıcıya
     //   mevcut kartı açmak için önden bakılır. Telefon yalnız uyarıdır - aile
     //   bireyleri aynı numarayı paylaşır.
-    if (kaynak === 'hasta' || kaynak === 'hasta-aday') {
+    // MÜKERRER KONTROLÜ (kullanıcı kuralı, hasta + personel):
+    //   * KİMLİK aynı + AKTİF → yeni kayıt AÇILMAZ; "mevcut karta geçilsin mi"
+    //     sorulur (pasif kayıt engellemez, sunucu da böyle uygular).
+    //   * TELEFON / E-POSTA aynı → UYARI; "evet" derse aynı bilgiyle eklenir.
+    const mukRol: 'hasta' | 'personel' | null =
+      (kaynak === 'hasta' || kaynak === 'hasta-aday') ? 'hasta'
+      : (kaynak === 'personel' || kaynak === 'dis-hekim') ? 'personel' : null;
+    if (mukRol) {
+      const kisiAd = mukRol === 'personel' ? 'personel' : 'hasta';
       const vkno = String(deger.vkno ?? '').trim();
       const cepTel = String(deger.cepTel ?? '').trim();
-      if (vkno !== '' || (yeniMi && cepTel !== '')) {
+      const eposta = String(deger.eposta ?? '').trim();
+      if (vkno !== '' || (yeniMi && (cepTel !== '' || eposta !== ''))) {
         try {
-          const m = await api.hastaMukerrer({ vkno, cepTel: yeniMi ? cepTel : '', haric: yeniMi ? undefined : Number(id) });
+          const m = await api.tarafMukerrer({
+            rol: mukRol, vkno, cepTel: yeniMi ? cepTel : '', eposta: yeniMi ? eposta : '',
+            haric: yeniMi ? undefined : Number(id),
+          });
           if (m.kimlik) {
-            bilgiMesaji(`Bu kimlik numarası ile kayıtlı hasta var: ${m.kimlik.ad} (dosya ${m.kimlik.kod || '-'}). Yeni kayıt açılmadı; mevcut kart getiriliyor.`);
-            if (onMevcutKayit) onMevcutKayit(m.kimlik.id);
-            else { onKaydedildi?.(m.kimlik.id); onKapat?.(); }
-            return;
-          }
-          if (m.telefon.length > 0) {
-            const adlar = m.telefon.map(k => `${k.ad}${k.kod ? ` (dosya ${k.kod})` : ''}`).join(', ');
-            const devam = await onaySor(`Aynı telefon numarasıyla kayıtlı hasta var: ${adlar}.
+            const gec = await onaySor(
+              `Bu kimlik numarası ile kayıtlı AKTİF ${kisiAd} var: ${m.kimlik.ad}${m.kimlik.kod ? ` (dosya ${m.kimlik.kod})` : ''}.
 
-Yine de yeni hasta kaydı eklensin mi?`);
+Aynı kimlik no ile yeni kayıt açılamaz. Mevcut karta geçilsin mi?`);
+            if (gec) {
+              if (onMevcutKayit) onMevcutKayit(m.kimlik.id);
+              else { onKaydedildi?.(m.kimlik.id); onKapat?.(); }
+            }
+            return;   // aktif kimlik engeli: her hâlde kaydetme
+          }
+          const uyari: string[] = [];
+          if (m.telefon.length > 0) uyari.push(`telefon (${m.telefon.map(k => k.ad).join(', ')})`);
+          if (m.eposta.length > 0) uyari.push(`e-posta (${m.eposta.map(k => k.ad).join(', ')})`);
+          if (uyari.length > 0) {
+            const devam = await onaySor(`Aynı ${uyari.join(' ve ')} ile kayıtlı ${kisiAd} var.
+
+Yine de yeni kayıt eklensin mi?`);
             if (!devam) return;
           }
         } catch (h) {
           // Kontrol ucu ulaşılamazsa kayıt engellenmez; kimlik kuralını sunucu yine uygular.
-          console.warn('hasta mükerrer kontrolü yapılamadı', h);
+          console.warn('mükerrer kontrolü yapılamadı', h);
         }
       }
     }

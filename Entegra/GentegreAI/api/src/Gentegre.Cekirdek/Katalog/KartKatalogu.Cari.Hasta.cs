@@ -28,9 +28,9 @@ public static partial class KartKatalogu
             "vkno" => a with { Baslik = "Kimlik No", Grup = "Kimlik", AltGrup = null,
                                EnFazlaUzunluk = 11,
                                Dogrulama = KimlikDogrulama.TcknTuru },
-            // Hastada zorunluluklar GEVSEK: gorev/e-posta personel alanlaridir,
-            //   hasta kaydi acilirken istenmez (kayit kabul hizli olmali).
-            "cepTel" => a with { Baslik = "Telefon", Zorunlu = false },
+            // Hastada TELEFON ZORUNLU (kullanıcı: SMS/geri arama için) - e-posta
+            //   ise değil (görev/e-posta personel alanı, hastada istenmez).
+            "cepTel" => a with { Baslik = "Telefon", Zorunlu = true },
             "eposta" => a with { Zorunlu = false },
             "gorevId" => a with { Zorunlu = false, Gizli = true },
             "subeId" => a with { Baslik = "Şube" },
