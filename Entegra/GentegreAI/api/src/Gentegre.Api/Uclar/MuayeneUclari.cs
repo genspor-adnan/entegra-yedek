@@ -865,7 +865,7 @@ public static class MuayeneUclari
                     values (@p0, @p1, @p2, @p3, @p9, 1, @p4, @p5, @p6, @p7, @p7,
                             public.fn_istem_serbest(
                                 (select basvuru_turu from public.belge_basvuru where id = @p1)::smallint,
-                                @p4::smallint, @p1),
+                                @p4::smallint, 1::smallint),
                             public.fn_numara_kimlik_uret(903, @p0, 'radyoloji_istem',
                                                          'accession_no', current_date))
                     returning id

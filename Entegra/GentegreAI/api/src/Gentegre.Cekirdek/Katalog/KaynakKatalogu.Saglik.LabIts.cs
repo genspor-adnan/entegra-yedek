@@ -83,6 +83,11 @@ public static partial class KaynakKatalogu
               + "  left join public.v_personel_lookup p on p.id = i.personel_id "
               + "  left join public.taraf dk on dk.id = i.dis_kurum_id",
         SubeKolonu: "i.sube_id",
+        // BANKO KAPISI (918): hekimin muayenede açtığı MUAYENE istemi banko
+        //   ücretlendirene kadar (serbest=0) çalışma listesinde GÖRÜNMEZ -
+        //   başvuruya eklenip serbest bırakılınca düşer. Dış/banko istemleri
+        //   ücretiyle açıldığı için zaten serbest=1.
+        SabitKosul: "i.serbest = 1",
         // PORTAL (794): dis doktor kendi GONDERDIGI hastanin istemini, dis
         //   kurum KENDI gonderdigi istemi, hasta KENDI istemini gorur.
         PortalKosullari: PortalKapsam.Kur(

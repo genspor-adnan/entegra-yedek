@@ -393,7 +393,7 @@ public static partial class RadyolojiUclari
                                 coalesce(@p15, 1), coalesce(@p16, 0), @p17,
                                 public.fn_istem_serbest(
                                     (select basvuru_turu from public.belge_basvuru where id = @p1)::smallint,
-                                    @p5::smallint, @p1),
+                                    @p5::smallint, 3::smallint),
                                 -- ACCESSION NO AYARDAN (634): tur 903 sablonu
                                 --   varsa numara verilir, yoksa BOS kalir
                                 --   (bugunku davranis). DICOM/MWL tarafinda
