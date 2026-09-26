@@ -117,8 +117,13 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
         //   olabilir. Kaynak kabul kararını değiştiriyor (banko numunesi
         //   hemen alınır, muayene istemi hekimin yazdığı sıraya girer), o
         //   yüzden doğru yazılmalı.
+        // DIŞ KURUM (912/913): kaynak = 4 GÖNDEREN KURUMDAN belli olur, belgeye
+        //   bağlı olsun olmasın. Artık dış kabul de BAŞVURU üzerinden açılıyor
+        //   (belgeId dolu gelir) - kaynağı `belgeId yok` ile anlamak yanlış
+        //   olurdu; dış kurumlu istem başvurulu da olsa "dış kurum"dur.
         var disMi = belgeId is not > 0;
-        short kaynak = disMi ? (short)4 : (kaynakKodu ?? 1);
+        var disKurumlu = disKurumId is > 0;
+        short kaynak = disKurumlu ? (short)4 : (kaynakKodu ?? 1);
 
         var b = disMi
             ? await DisKaynakAsync(baglanti, islem, hastaId, disKurumId, baglam, iptal)
@@ -161,7 +166,7 @@ public sealed partial class LabServisi(VeriKaynagi veri, ILogger<LabServisi> gun
             [belgeId is > 0 ? belgeId : null, b.HastaId, b.SubeId,
              b.HekimId == 0 ? null : b.HekimId,
              oncelik, klinikBilgi, taniIcd, baglam.KullaniciId, kaynak,
-             disMi ? disKurumId!.Value : (int?)null], iptal);
+             disKurumlu ? disKurumId : (int?)null], iptal);
 
         // Panel -> tetkik acilimi. Ayni tetkik iki panelden gelirse BIR KEZ
         //   istenir: hastadan iki kez para alinmasi ve iki kez calisilmasi

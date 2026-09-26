@@ -3,7 +3,9 @@ using Gentegre.Api.Servisler;
 using Gentegre.Cekirdek.Sozlesme;
 using Gentegre.Cekirdek.Yetki;
 using Gentegre.Veri;
+using Gentegre.Veri.Depolar;
 using Npgsql;
+using System.Text.Json;
 
 namespace Gentegre.Api.Uclar;
 
@@ -357,13 +359,63 @@ public static partial class LabUclari
         //   gönderen kuruma kesilir.
         grup.MapPost("/istem", async (
             IstemIstegi istek, BaglamCozucu cozucu, LabServisi servis,
-            VeriKaynagi veri, HttpContext ctx, CancellationToken iptal) =>
+            VeriKaynagi veri, BelgeDeposu belgeDepo, HttpContext ctx, CancellationToken iptal) =>
         {
             var baglam = await cozucu.CozAsync(ctx, iptal);
             baglam.YetkiIste("lab", Islem.Ekle);
 
+            // DIŞ KURUM KABULÜ DE BAŞVURU ÜZERİNDEN (913, kullanıcı): numune
+            //   dışarıdan gelir ama HBYS'de her kabul bir başvurudur - böylece
+            //   ücretlendirme (ödeyen = gönderen kurum) ve izlem başvuruda
+            //   toplanır. Başvuru türü 5 (Laboratuvar / Görüntüleme): hasta
+            //   fiziken gelmedi, poliklinik değil. Radyoloji dış kabulü zaten
+            //   böyle açıyor - lab da aynı hizaya geliyor.
+            var belgeId = istek.BelgeId;
+            if (belgeId is not > 0 && istek.DisKurumId is int dk && dk > 0)
+            {
+                if (istek.HastaId is not > 0)
+                    throw GentegreHatasi.Dogrulama("Numunenin hastası seçilmeli.",
+                        [new("hastaId", "Hasta seçin; kayıtlı değilse önce hasta kartı açın.")]);
+
+                await using var b0 = await veri.AcAsync(iptal);
+                var hasta = await b0.TekAsync("""
+                    select coalesce(unvan, '') as unvan, coalesce(vkno, '') as vkno,
+                           coalesce(vd, '') as vd
+                      from public.taraf where id = @p0
+                    """, null, [istek.HastaId], OkuyucuGenisletmeleri.Sozluk, iptal)
+                    ?? throw GentegreHatasi.Bulunamadi("Hasta bulunamadı.");
+
+                // Fiyat listesi + kampanya belgenin KİMLİĞİ (274/302): ödeyen
+                //   dış kurumun anlaşması varsa oradan, yoksa hastanınki.
+                var listeId = await b0.TekDegerAsync<int?>(
+                    "select public.fn_belge_varsayilan_liste(19, @p0, current_date, @p1)",
+                    null, [istek.HastaId, dk], iptal);
+                var kampanyaId = await b0.TekDegerAsync<int?>(
+                    "select public.fn_taraf_kampanya(coalesce(@p1, @p0), current_date)",
+                    null, [istek.HastaId, dk], iptal);
+
+                var basvuru = new Dictionary<string, object?>(StringComparer.Ordinal)
+                {
+                    ["tur"] = 19, ["tipi"] = 30, ["tarafId"] = istek.HastaId,
+                    ["tarafUnvan"] = hasta["unvan"], ["tarafVkno"] = hasta["vkno"],
+                    ["tarafVd"] = hasta["vd"], ["belgeTarihi"] = DateTime.Now,
+                    ["belgeDovizi"] = "TL", ["dovizKuru"] = 1m,
+                    ["fiyatListesiId"] = listeId, ["kampanyaId"] = kampanyaId,
+                    // Başvuru türü 5 = Laboratuvar / Görüntüleme; ödeyen = gönderen kurum.
+                    ["basvuruTuru"] = (short)5, ["odeyenKurumId"] = dk,
+                    ["aciklama"] = "Dış kurum numune kabul",
+                };
+                var (yeniBelgeId, _) = await belgeDepo.KaydetAsync(
+                    basvuru, new List<Dictionary<string, JsonElement>>(),
+                    new BelgeSecenekleri { Taslak = false, StokKontrolu = false },
+                    new YazmaBaglami(baglam.KullaniciId, baglam.SubeId, baglam.Ip), iptal);
+                belgeId = yeniBelgeId;
+            }
+
+            // disKurumId İSTEMDE de yazılır (kaynak=4) - başvurulu da olsa dış
+            //   kurum numunesidir; fatura ödeyen kuruma, kaynak "dış" kalır.
             var id = await servis.IstemAcAsync(
-                istek.BelgeId, istek.Satirlar ?? [], istek.Oncelik ?? 1,
+                belgeId, istek.Satirlar ?? [], istek.Oncelik ?? 1,
                 istek.KlinikBilgi ?? "", istek.TaniIcd ?? "", baglam, iptal,
                 istek.HastaId, istek.DisKurumId, akilci: istek.Akilci);
 
